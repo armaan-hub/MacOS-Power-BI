@@ -14,7 +14,11 @@ Popup {
     readonly property var menuItems: {
         if (menuType === "commonSources")
             return [
+                { label: "Excel Workbook", icon: "excel", action: "source.excel", enabled: true },
                 { label: "Power BI semantic models", icon: "databaseMultiple", action: "source.semanticModels" },
+                { label: "OneLake catalog", icon: "databaseLink", action: "source.oneLakeCatalog" },
+                { label: "SQL Server", icon: "database", action: "source.sqlServer" },
+                { label: "Dataverse", icon: "table", action: "source.dataverse" },
                 { label: "Text/CSV", icon: "csv", action: "source.csv", enabled: true },
                 { label: "Web", icon: "getData", action: "source.web" },
                 { label: "OData feed", icon: "database", action: "source.odata" },
@@ -24,7 +28,9 @@ Popup {
             ]
         if (menuType === "recentSources") {
             if (controller && controller.sourceLoaded)
-                return [{ label: controller.sourceName, icon: "csv", action: "recent.csv", detail: "Text/CSV" }]
+                return [{ label: controller.sourceName, icon: controller.sourceIconName,
+                          action: controller.sourceIconName === "excel" ? "recent.excel" : "recent.csv",
+                          detail: controller.sourceIconName === "excel" ? "Excel Workbook" : "Text/CSV" }]
             return [{ label: "No recent sources", icon: "history", enabled: false,
                       detail: "Your recent data sources will appear here." }]
         }

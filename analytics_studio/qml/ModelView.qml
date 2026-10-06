@@ -97,10 +97,10 @@ Item {
                         radius: 6
                         color: "#f8f9fa"
                         border.color: "#d3d8dc"
-                        Accessible.name: "No CSV source loaded"
+                        Accessible.name: "No data source loaded"
                         Accessible.description: root.appController.sourceWarning !== ""
                                                 ? root.appController.sourceWarning
-                                                : "Import a CSV file to load its table into the model."
+                                                : "Import a CSV file or Excel workbook to load its table into the model."
 
                         RowLayout {
                             id: importPrompt
@@ -109,7 +109,7 @@ Item {
                             spacing: 12
 
                             Icon {
-                                name: "csv"
+                                name: "getData"
                                 color: "#647b8e"
                                 implicitWidth: 22
                                 implicitHeight: 22
@@ -131,7 +131,7 @@ Item {
                                     Layout.fillWidth: true
                                     text: root.appController.sourceWarning !== ""
                                           ? root.appController.sourceWarning
-                                          : "Import a CSV file to load its table and fields."
+                                          : "Import a CSV file or Excel workbook to load its table and fields."
                                     color: "#596a79"
                                     font.pixelSize: 11
                                     wrapMode: Text.Wrap
@@ -139,9 +139,9 @@ Item {
                             }
 
                             Button {
-                                text: "Import CSV"
-                                Accessible.name: "Import CSV into the model"
-                                Accessible.description: "Choose a CSV file to link to this project."
+                                text: "Import data"
+                                Accessible.name: "Import data into the model"
+                                Accessible.description: "Choose a CSV file or Excel workbook to link to this project."
                                 background: Rectangle { radius: 4; color: parent.hovered ? "#edf2f5" : "#f7f9fa"; border.color: "#cfd9df" }
                                 contentItem: Text { text: parent.text; color: "#405765"; font.pixelSize: 10; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter }
                                 onClicked: root.importRequested()
@@ -156,7 +156,7 @@ Item {
                         radius: 6
                         color: "#f8f9fa"
                         border.color: "#d3d8dc"
-                        Accessible.name: "Loaded CSV source summary"
+                        Accessible.name: "Loaded data source summary"
 
                         RowLayout {
                             id: sourceSummary
@@ -164,7 +164,7 @@ Item {
                             anchors.margins: 10
                             spacing: 12
 
-                            Icon { name: "csv"; color: "#647b8e"; implicitWidth: 18; implicitHeight: 18 }
+                            Icon { name: root.appController.sourceIconName; color: "#647b8e"; implicitWidth: 18; implicitHeight: 18 }
                             Text {
                                 Layout.fillWidth: true
                                 text: root.appController.sourceName
@@ -288,8 +288,8 @@ Item {
                                                         ? Number(root.appController.rowCount).toLocaleString(Qt.locale(), 'f', 0) + " rows, "
                                                           + root.appController.columnCount + " columns. Fields are listed below."
                                                         : (root.appController.sourceLoaded
-                                                           ? "Saved table metadata. Loaded CSV details are shown separately."
-                                                           : "Saved table metadata; no CSV source is currently loaded.")
+                                                           ? "Saved table metadata. Loaded data source details are shown separately."
+                                                           : "Saved table metadata; no data source is currently loaded.")
 
                                 ColumnLayout {
                                     anchors.fill: parent

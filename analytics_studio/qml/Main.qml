@@ -29,9 +29,16 @@ ApplicationWindow {
     readonly property var dataHomeGroups: [
         { title: "Data", actions: [
             { label: "Get data", visibleLabel: "Get data", width: 48, iconName: "getData", commandId: "data.openPicker", splitGetData: true, description: "Choose a connector from the full data source picker." },
+            { label: "Excel workbook", visibleLabel: "Excel\nworkbook", width: 50, iconName: "excel", commandId: "data.importExcel", description: "Import a workbook from an Excel file." },
+            { label: "OneLake catalog", visibleLabel: "OneLake\ncatalog", width: 50, iconName: "databaseLink", commandId: "data.oneLakeCatalog", description: "Browse the OneLake catalog." },
+            { label: "SQL Server", visibleLabel: "SQL Server", width: 44, iconName: "database", commandId: "data.sqlServer", description: "Connect to SQL Server." },
+            { label: "Enter data", visibleLabel: "Enter\ndata", width: 38, iconName: "tableAdd", commandId: "data.source.enterData", description: "Enter data manually." },
+            { label: "Dataverse", visibleLabel: "Dataverse", width: 46, iconName: "table", commandId: "data.dataverse", description: "Connect to Dataverse." },
             { label: "Recent sources", visibleLabel: "Recent\nsources", width: 46, iconName: "history", commandId: "data.recentSources", description: "Show a recently loaded data source." },
-            { label: "Refresh", visibleLabel: "Refresh", width: 42, iconName: "refresh", commandId: "data.refresh", description: "Reload the linked CSV file." },
-            { label: "Transform data", visibleLabel: "Transform\ndata", width: 48, iconName: "tableEdit", commandId: "disabled.transform", available: false, description: "Data transformation is not available in this release." }
+        ]},
+        { title: "Queries", actions: [
+            { label: "Transform data", visibleLabel: "Transform\ndata", width: 48, iconName: "tableEdit", commandId: "disabled.transform", available: false, description: "Data transformation is not available in this release." },
+            { label: "Refresh", visibleLabel: "Refresh", width: 42, iconName: "refresh", commandId: "data.refresh", description: "Reload the linked data file." }
         ]},
         { title: "Workspace", actions: [
             { label: "Report view", visibleLabel: "Report\nview", width: 42, iconName: "report", commandId: "view.report", description: "Switch to Report view." },
@@ -60,12 +67,16 @@ ApplicationWindow {
             ]},
             { title: "Data", actions: [
                 { label: "Get data", visibleLabel: "Get data", width: 48, iconName: "getData", commandId: "data.openPicker", splitGetData: true, description: "Choose a connector from the full data source picker." },
+                { label: "Excel workbook", visibleLabel: "Excel\nworkbook", width: 50, iconName: "excel", commandId: "data.importExcel", description: "Import a workbook from an Excel file." },
+                { label: "OneLake catalog", visibleLabel: "OneLake\ncatalog", width: 50, iconName: "databaseLink", commandId: "data.oneLakeCatalog", description: "Browse the OneLake catalog." },
+                { label: "SQL Server", visibleLabel: "SQL Server", width: 44, iconName: "database", commandId: "data.sqlServer", description: "Connect to SQL Server." },
                 { label: "Enter data", visibleLabel: "Enter\ndata", width: 38, iconName: "tableAdd", commandId: "data.source.enterData", description: "Manual table entry is not implemented yet." },
+                { label: "Dataverse", visibleLabel: "Dataverse", width: 46, iconName: "table", commandId: "data.dataverse", description: "Connect to Dataverse." },
                 { label: "Recent sources", visibleLabel: "Recent\nsources", width: 46, iconName: "history", commandId: "data.recentSources", description: "Show a recently loaded data source." }
             ]},
             { title: "Queries", actions: [
                 { label: "Transform data", visibleLabel: "Transform\ndata", width: 42, iconName: "tableEdit", commandId: "disabled.transform", available: false, description: "Data transformation is not available in this release." },
-                { label: "Refresh", visibleLabel: "Refresh", width: 30, iconName: "refresh", commandId: "data.refresh", description: "Reload the linked CSV file." }
+                { label: "Refresh", visibleLabel: "Refresh", width: 30, iconName: "refresh", commandId: "data.refresh", description: "Reload the linked data file." }
             ]},
             { title: "Insert", actions: [
                 { label: "New visual", visibleLabel: "New\nvisual", iconName: "visual", commandId: "report.addMonthly", description: "Add a monthly revenue visual to this page." },
@@ -242,6 +253,11 @@ ApplicationWindow {
         case "project.saveAs": appController.executeCommand("saveProjectAs"); break
         case "data.openPicker": openGetDataPicker(null); break
         case "data.importCsv": clearFieldSearch(); appController.executeCommand("importCsv"); break
+        case "data.importExcel": clearFieldSearch(); appController.executeCommand("importExcel"); break
+        case "data.importFile": clearFieldSearch(); appController.executeCommand("importData"); break
+        case "data.oneLakeCatalog": appController.reportStagedAction("OneLake catalog", "OneLake catalog connections are not implemented yet."); break
+        case "data.sqlServer": appController.reportStagedAction("SQL Server", "SQL Server connections are not implemented yet."); break
+        case "data.dataverse": appController.reportStagedAction("Dataverse", "Dataverse connections are not implemented yet."); break
         case "data.refresh": appController.executeCommand("refreshSource"); break
         case "filter.clear": appController.executeCommand("clearFilters"); break
         case "report.addPage": appController.executeCommand("addPage"); break
@@ -325,6 +341,14 @@ ApplicationWindow {
             })
             return
         }
+        if (action === "source.excel" || action === "recent.excel") {
+            Qt.callLater(function() {
+                appController.connectDataSource("file_excel_workbook")
+                if (focusTarget && focusTarget.visible)
+                    focusTarget.forceActiveFocus()
+            })
+            return
+        }
         appController.reportStagedAction(label,
                 "This menu entry is a UI surface; its workflow is not implemented yet.")
         if (focusTarget)
@@ -337,6 +361,7 @@ ApplicationWindow {
     function accentForIcon(iconName) {
         switch (iconName) {
         case "csv": case "data": case "table": case "refresh": case "getData": case "database": case "databaseMultiple": case "column": case "measure": return "#0078D4"
+        case "excel": return "#217346"
         case "tableAdd": case "model": case "relationship": case "bar": return "#107C71"
         case "line": case "quickMeasure": return "#C65911"
         case "share": return "#0078D4"
@@ -384,7 +409,7 @@ ApplicationWindow {
         if (reportOnly && appController.currentView !== "Report")
             return "Switch to Report view to use this command."
         if (commandId === "data.refresh" && !appController.sourceLoaded)
-            return "Import a CSV before refreshing."
+            return "Import data before refreshing."
         if (commandId === "filter.clear" && !appController.filterActive)
             return "There is no active Region filter to clear."
         return ""
@@ -506,7 +531,7 @@ ApplicationWindow {
             MenuItem { text: "Save"; onTriggered: root.runCommand("project.save") }
             MenuItem { text: "Save As…"; onTriggered: root.runCommand("project.saveAs") }
             MenuSeparator {}
-            MenuItem { text: "Import CSV…"; onTriggered: root.runCommand("data.importCsv") }
+            MenuItem { text: "Import data…"; onTriggered: root.runCommand("data.importFile") }
             MenuSeparator {}
             MenuItem { text: "Quit Analytics Studio"; onTriggered: appController.executeCommand("quit") }
         }
@@ -683,10 +708,10 @@ ApplicationWindow {
                     Accessible.name: "Data source recovery warning"
                 }
                 Button {
-                    text: "Relink CSV"
+                    text: "Relink data source"
                     background: Rectangle { radius: 3; color: parent.hovered ? "#f2ead8" : "#f8f3e9"; border.color: "#e0d2b5" }
                     contentItem: Text { text: parent.text; color: "#705e3c"; font.pixelSize: 9; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter }
-                    onClicked: root.runCommand("data.importCsv")
+                    onClicked: root.runCommand("data.importFile")
                 }
             }
         }
@@ -833,7 +858,7 @@ ApplicationWindow {
                                                     rowSpacing: 0
                                                     Repeater {
                                                         model: [
-                                                            { title: "Import data from CSV", icon: "getData", tint: "#dcefe8", command: "data.importCsv", active: true },
+                                                            { title: "Import data from CSV or Excel", icon: "getData", tint: "#dcefe8", command: "data.importFile", active: true },
                                                             { title: "Paste data into a blank table", icon: "paste", tint: "#faf5df", command: "disabled.enterData", active: false },
                                                             { title: "Use sample data", icon: "database", tint: "#f0f1f2", command: "disabled.sampleData", active: false }
                                                         ]
@@ -847,7 +872,7 @@ ApplicationWindow {
                                                             hoverEnabled: true
                                                             Accessible.name: String(modelData.title)
                                                             Accessible.description: enabled
-                                                                    ? "Open a file picker and import a CSV file."
+                                                                    ? "Open a file picker and import a CSV or Excel workbook."
                                                                     : String(modelData.title) + " is not available in this release."
                                                             ToolTip.visible: hovered && !enabled
                                                             ToolTip.text: String(modelData.title) + " is not available in this release."
@@ -1064,7 +1089,7 @@ ApplicationWindow {
                                     anchors.leftMargin: 10
                                     anchors.rightMargin: 9
                                     Icon { name: "data"; color: "#107c71"; implicitWidth: 16; implicitHeight: 16 }
-                                    Text { Layout.fillWidth: true; text: "CSV fields"; color: "#344553"; font.pixelSize: 11; font.weight: Font.DemiBold }
+                                    Text { Layout.fillWidth: true; text: "Data fields"; color: "#344553"; font.pixelSize: 11; font.weight: Font.DemiBold }
                                 }
                             }
                             Rectangle { Layout.fillWidth: true; height: 1; color: "#dce1e4" }
@@ -1074,7 +1099,7 @@ ApplicationWindow {
                                 Layout.leftMargin: 10
                                 Layout.rightMargin: 10
                                 Layout.topMargin: 8
-                                text: appController.sourceLoaded ? "Linked CSV · " + appController.sourceName : "No linked CSV source"
+                                text: appController.sourceLoaded ? "Linked data · " + appController.sourceName : "No linked data source"
                                 color: appController.sourceLoaded ? "#64798a" : "#78858d"
                                 font.pixelSize: 9
                                 elide: Text.ElideRight
@@ -1088,7 +1113,7 @@ ApplicationWindow {
                                 Layout.bottomMargin: 7
                                 text: appController.sourceLoaded
                                       ? appController.rowCount + " rows · " + appController.columnCount + " source fields"
-                                      : "Browse fields from the linked CSV. Saved table metadata is in Model view."
+                                      : "Browse fields from the linked data file. Saved table metadata is in Model view."
                                 color: "#74818a"
                                 font.pixelSize: 8
                                 wrapMode: Text.Wrap
@@ -1100,7 +1125,7 @@ ApplicationWindow {
                                 Layout.rightMargin: 8
                                 Layout.bottomMargin: 6
                                 text: root.fieldSearchQuery
-                                placeholderText: "Search CSV fields"
+                                placeholderText: "Search fields"
                                 enabled: appController.sourceLoaded
                                 font.pixelSize: 9
                                 color: "#40515e"
@@ -1109,7 +1134,7 @@ ApplicationWindow {
                                         root.fieldSearchQuery = text
                                     appController.setFieldQuery(text)
                                 }
-                                Accessible.name: "Search CSV source fields"
+                                Accessible.name: "Search source fields"
                                 background: Rectangle { radius: 3; color: "#ffffff"; border.color: "#cfd7dd" }
                             }
                             ListView {
@@ -1137,14 +1162,14 @@ ApplicationWindow {
                                         color: "#3f505d"
                                         font.pixelSize: 9
                                         elide: Text.ElideRight
-                                        Accessible.name: String(modelData) + " CSV source field"
+                                        Accessible.name: String(modelData) + " source field"
                                     }
                                 }
                                 Text {
                                     anchors.centerIn: parent
                                     width: parent.width - 20
                                     visible: appController.filteredFields.length === 0
-                                    text: appController.sourceLoaded ? "No matching CSV fields." : "Import a CSV to browse its source fields."
+                                    text: appController.sourceLoaded ? "No matching fields." : "Import a CSV or Excel workbook to browse its source fields."
                                     color: "#76838d"
                                     font.pixelSize: 9
                                     wrapMode: Text.Wrap
@@ -1155,13 +1180,13 @@ ApplicationWindow {
                                     anchors.horizontalCenter: parent.horizontalCenter
                                     anchors.top: parent.verticalCenter
                                     anchors.topMargin: 24
-                                    text: "Import CSV"
-                                    Accessible.name: "Import CSV from Data fields pane"
+                                    text: "Import data"
+                                    Accessible.name: "Import data from Data fields pane"
                                     ToolTip.visible: hovered
-                                    ToolTip.text: "Choose a CSV file to browse its source fields."
+                                    ToolTip.text: "Choose a CSV file or Excel workbook to browse its source fields."
                                     background: Rectangle { radius: 3; color: parent.hovered ? "#e7f1f8" : "#f4f8fb"; border.color: "#cbdde9" }
                                     contentItem: Text { text: parent.text; color: "#315f7d"; font.pixelSize: 9; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter }
-                                    onClicked: root.runCommand("data.importCsv")
+                                    onClicked: root.runCommand("data.importFile")
                                 }
                             }
                         }
@@ -1176,7 +1201,7 @@ ApplicationWindow {
                         Layout.fillWidth: true
                         Layout.fillHeight: true
                         appController: root.studioController
-                        onImportRequested: root.runCommand("data.importCsv")
+                        onImportRequested: root.runCommand("data.importFile")
                     }
                     Rectangle {
                         Layout.preferredWidth: 210
@@ -1198,10 +1223,10 @@ ApplicationWindow {
                                 Layout.margins: 12
                                 spacing: 10
                                 Text { text: "Model"; color: "#3a4c59"; font.pixelSize: 10; font.weight: Font.DemiBold }
-                                Text { Layout.fillWidth: true; text: "CSV source"; color: "#687681"; font.pixelSize: 9 }
+                                Text { Layout.fillWidth: true; text: "Data source"; color: "#687681"; font.pixelSize: 9 }
                                 TextField {
                                     Layout.fillWidth: true
-                                    text: appController.sourceLoaded ? appController.sourceName : "No CSV source"
+                                    text: appController.sourceLoaded ? appController.sourceName : "No data source"
                                     readOnly: true
                                     font.pixelSize: 10
                                     color: "#5a6871"
@@ -1507,15 +1532,15 @@ ApplicationWindow {
                                             model: [
                                                 { type: "bar", name: "Clustered bar chart", icon: "bar", accent: "#107C71", active: true },
                                                 { type: "stackedBar", name: "Stacked bar chart", icon: "stackedBar" },
-                                                { type: "bar100", name: "100% stacked bar chart", icon: "bar100" },
+                                                { type: "bar100", name: "100% stacked bar chart", icon: "barCluster" },
                                                 { type: "column", name: "Clustered column chart", icon: "column", accent: "#0078D4", active: true },
                                                 { type: "stackedColumn", name: "Stacked column chart", icon: "stackedColumn" },
-                                                { type: "column100", name: "100% stacked column chart", icon: "column100" },
+                                                { type: "column100", name: "100% stacked column chart", icon: "columnCluster" },
                                                 { type: "line", name: "Line chart", icon: "line", accent: "#C65911", active: true },
                                                 { type: "area", name: "Area chart", icon: "area" },
-                                                { type: "stackedArea", name: "Stacked area chart", icon: "stackedArea" },
-                                                { type: "lineStackedColumn", name: "Line and stacked column chart", icon: "lineStackedColumn" },
-                                                { type: "lineClusteredColumn", name: "Line and clustered column chart", icon: "lineClusteredColumn" },
+                                                { type: "stackedArea", name: "Stacked area chart", icon: "area" },
+                                                { type: "lineStackedColumn", name: "Line and stacked column chart", icon: "combo" },
+                                                { type: "lineClusteredColumn", name: "Line and clustered column chart", icon: "combo" },
                                                 { type: "ribbon", name: "Ribbon chart", icon: "ribbonChart" },
                                                 { type: "waterfall", name: "Waterfall chart", icon: "waterfall" },
                                                 { type: "funnel", name: "Funnel chart", icon: "funnel" },
@@ -1525,8 +1550,8 @@ ApplicationWindow {
                                                 { type: "treemap", name: "Treemap", icon: "treemap" },
                                                 { type: "map", name: "Map", icon: "map" },
                                                 { type: "filledMap", name: "Filled map", icon: "filledMap" },
-                                                { type: "shapeMap", name: "Shape map", icon: "shapeMap" },
-                                                { type: "arcgisMap", name: "ArcGIS Maps", icon: "arcgisMap" },
+                                                { type: "shapeMap", name: "Shape map", icon: "map" },
+                                                { type: "arcgisMap", name: "ArcGIS Maps", icon: "map" },
                                                 { type: "gauge", name: "Gauge", icon: "gauge" },
                                                 { type: "card", name: "Card", icon: "card" },
                                                 { type: "kpi", name: "KPI", icon: "kpi" },
@@ -1538,11 +1563,11 @@ ApplicationWindow {
                                                 { type: "keyInfluencers", name: "Key influencers", icon: "keyInfluencers" },
                                                 { type: "decomposition", name: "Decomposition tree", icon: "decomposition" },
                                                 { type: "qa", name: "Q&A visual", icon: "qaVisual" },
-                                                { type: "scorecard", name: "Scorecard", icon: "scorecard" },
+                                                { type: "scorecard", name: "Scorecard", icon: "kpi" },
                                                 { type: "removed", name: "", icon: "" },
                                                 { type: "visualFilter", name: "Visual filter", icon: "filter" },
-                                                { type: "quickVisual", name: "Quick visual", icon: "quickVisual" },
-                                                { type: "smartVisual", name: "Smart visual", icon: "smartVisual" },
+                                                { type: "quickVisual", name: "Quick visual", icon: "filter" },
+                                                { type: "smartVisual", name: "Smart visual", icon: "filter" },
                                                 { type: "image", name: "Image", icon: "image" },
                                                 { type: "moreVisuals", name: "More visuals", icon: "apps" }
                                             ]
@@ -1823,7 +1848,7 @@ ApplicationWindow {
                                     Text {
                                         anchors.centerIn: parent
                                         visible: appController.filteredFields.length === 0
-                                        text: appController.sourceLoaded ? "No matching fields" : "Import a CSV to browse its fields."
+                                        text: appController.sourceLoaded ? "No matching fields" : "Import a CSV or Excel workbook to browse its fields."
                                         color: "#76838d"
                                         font.pixelSize: 9
                                         wrapMode: Text.Wrap
@@ -1833,11 +1858,11 @@ ApplicationWindow {
                                         anchors.horizontalCenter: parent.horizontalCenter
                                         anchors.top: parent.verticalCenter
                                         anchors.topMargin: 16
-                                        text: "Import CSV"
-                                        Accessible.name: "Import CSV from Data pane"
+                                        text: "Import data"
+                                        Accessible.name: "Import data from Data pane"
                                         background: Rectangle { radius: 3; color: parent.hovered ? "#e7f1f8" : "#f4f8fb"; border.color: "#cbdde9" }
                                         contentItem: Text { text: parent.text; color: "#315f7d"; font.pixelSize: 9; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter }
-                                        onClicked: root.runCommand("data.importCsv")
+                                        onClicked: root.runCommand("data.importFile")
                                     }
                                 }
                                 ToolButton {

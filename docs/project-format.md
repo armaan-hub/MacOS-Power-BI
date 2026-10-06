@@ -38,14 +38,14 @@ The top-level `format` value is `com.analytics-studio.project`; `format_version`
 - `project_id` and report page `id` values are UUID strings.
 - Timestamps are UTC ISO 8601 strings.
 - `active_view` is `Report`, `Data`, or `Model`.
-- `data_sources` entries contain `id`, `name`, `kind`, and `path`. Version 1 imports CSV files and currently reconnects one CSV source in the UI.
+- `data_sources` entries contain `id`, `name`, `kind`, and `path`. Version 1 imports CSV and Excel workbook (`.xlsx`/`.xlsm`) files and reconnects one file source in the UI.
 - Report pages have unique IDs, names, and a list of visual names. `active_page_id` must identify a page in `pages`.
 - `chart_types` values are `column`, `bar`, or `line`.
 - `model.tables` and `model.relationships` hold metadata. The current UI lists imported tables; relationship editing is not implemented.
 
 ## Linked data paths
 
-CSV files remain external to the `.npa` document. When a source is inside the project file's directory tree, the app stores a relative path from that directory. Otherwise it stores an absolute path. Moving a project with an external source can break that link; when a source is missing, the app opens the project and reports the missing path so the user can restore or re-import the CSV.
+CSV and Excel workbook files remain external to the `.npa` document. When a source is inside the project file's directory tree, the app stores a relative path from that directory. Otherwise it stores an absolute path. Moving a project with an external source can break that link; when a source is missing, the app opens the project and reports the missing path so the user can restore or re-import the file.
 
 ## Save and recovery behavior
 

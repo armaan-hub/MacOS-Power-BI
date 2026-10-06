@@ -3,12 +3,16 @@
 from __future__ import annotations
 
 import csv
+import re
+import zipfile
 from collections import defaultdict
 from copy import deepcopy
+from datetime import datetime, timedelta
 from decimal import Decimal
 from pathlib import Path
 from typing import Any
 from uuid import uuid4
+from xml.etree import ElementTree
 
 from PySide6.QtCore import (
     QAbstractTableModel,
@@ -35,6 +39,89 @@ from analytics_studio.data_sources import DATA_SOURCE_CATALOG
 PREVIEW_ROW_LIMIT = 500
 CHART_TYPES = {"column", "bar", "line"}
 CHART_VISUALS = {"Monthly revenue", "Region revenue"}
+EXCEL_MAIN_NS = "http://schemas.openxmlformats.org/spreadsheetml/2006/main"
+EXCEL_REL_NS = "http://schemas.openxmlformats.org/officeDocument/2006/relationships"
+PACKAGE_REL_NS = "http://schemas.openxmlformats.org/package/2006/relationships"
+SUPPORTED_SOURCE_KINDS = {"csv", "excel"}
+
+
+class AnalyticsExcelStyles:
+    @staticmethod
+    def read(workbook: zipfile.ZipFile, main_ns: str) -> tuple[set[int], set[int]]:
+        if "xl/styles.xml" not in workbook.namelist():
+            return set(), set()
+        root = ElementTree.fromstring(workbook.read("xl/styles.xml"))
+        custom_formats = {
+            int(item.attrib["numFmtId"]): item.attrib.get("formatCode", "")
+            for item in root.findall(f"{main_ns}numFmts/{main_ns}numFmt")
+            if "numFmtId" in item.attrib
+        }
+        cell_xfs = root.find(f"{main_ns}cellXfs")
+        if cell_xfs is None:
+            return set(), set()
+
+        date_styles: set[int] = set()
+        time_styles: set[int] = set()
+        built_in_dates = set(range(14, 23)) | {45, 46, 47}
+        for style_index, style in enumerate(cell_xfs):
+            number_format = int(style.attrib.get("numFmtId", "0"))
+            format_code = custom_formats.get(number_format, "")
+            is_elapsed_time = re.search(r"\[(?:h+|m+|s+)\]", format_code, re.IGNORECASE) is not None
+            normalized = re.sub(r'"[^"]*"|\\.|\[[^]]+\]', "", format_code).casefold()
+            is_date = not is_elapsed_time and (
+                number_format in built_in_dates or any(char in normalized for char in "ymd")
+            )
+            if is_date:
+                date_styles.add(style_index)
+                if number_format in {18, 19, 20, 21, 22, 45, 46, 47} or any(
+                    char in normalized for char in "hs"
+                ):
+                    time_styles.add(style_index)
+        return date_styles, time_styles
+
+
+class AnalyticsExcelCell:
+    @staticmethod
+    def text(
+        cell: ElementTree.Element,
+        shared_strings: list[str],
+        date_styles: set[int],
+        time_styles: set[int],
+        date_1904: bool,
+        main_ns: str,
+    ) -> str:
+        cell_type = cell.attrib.get("t", "")
+        style_index = int(cell.attrib.get("s", "0"))
+        if cell_type == "inlineStr":
+            inline = cell.find(f"{main_ns}is")
+            return "".join(item.text or "" for item in inline.iter(f"{main_ns}t")) if inline is not None else ""
+
+        value = cell.find(f"{main_ns}v")
+        raw = value.text if value is not None and value.text is not None else ""
+        if cell_type == "s":
+            try:
+                return shared_strings[int(raw)]
+            except (ValueError, IndexError):
+                return ""
+        if cell_type == "b":
+            return "TRUE" if raw == "1" else "FALSE"
+        if cell_type in {"str", "e"} or not raw:
+            return raw
+        if style_index in date_styles:
+            try:
+                serial = Decimal(raw)
+                epoch = datetime(1904, 1, 1) if date_1904 else datetime(1899, 12, 30)
+                value_as_date = epoch + timedelta(days=float(serial))
+                if style_index in time_styles:
+                    return value_as_date.isoformat(sep=" ", timespec="seconds")
+                return value_as_date.date().isoformat()
+            except (ArithmeticError, ValueError):
+                return raw
+        try:
+            number = Decimal(raw)
+            return str(number.quantize(Decimal(1))) if number == number.to_integral_value() else format(number.normalize(), "f")
+        except ArithmeticError:
+            return raw
 
 
 class CsvTableModel(QAbstractTableModel):
@@ -182,10 +269,15 @@ class StudioController(QObject):
         if self._source_path:
             return self._source_path.name
         source = next(
-            (item for item in self._project.get("data_sources", []) if item.get("kind") == "csv"),
+            (item for item in self._project.get("data_sources", [])
+             if item.get("kind") in SUPPORTED_SOURCE_KINDS),
             None,
         )
         return str(source.get("name", "")) if source else ""
+
+    @Property(str, notify=stateChanged)
+    def sourceIconName(self) -> str:  # noqa: N802
+        return "excel" if self._source_path and self._source_path.suffix.casefold() in {".xlsx", ".xlsm"} else "csv"
 
     @Property(bool, notify=stateChanged)
     def sourceLoaded(self) -> bool:  # noqa: N802
@@ -283,6 +375,8 @@ class StudioController(QObject):
             "saveProject": self.save_current_project,
             "saveProjectAs": self.save_project_as,
             "importCsv": self.import_csv_dialog,
+            "importExcel": self.import_excel_dialog,
+            "importData": self.import_data_dialog,
             "refreshSource": self.refresh_source,
             "clearFilters": self.clear_filters,
             "addPage": self.add_page,
@@ -309,11 +403,14 @@ class StudioController(QObject):
         if not source["implemented"]:
             self._set_status(f"{source['name']} is cataloged; its connector is not implemented.")
             return False
-        if source_id != "file_text_csv":
-            self._set_status(f"{source['name']} does not have an importer in this release.")
-            return False
-        self.import_csv_dialog()
-        return True
+        if source_id == "file_text_csv":
+            self.import_csv_dialog()
+            return True
+        if source_id == "file_excel_workbook":
+            self.import_excel_dialog()
+            return True
+        self._set_status(f"{source['name']} does not have an importer in this release.")
+        return False
 
     @Slot(str, str)
     def reportStagedAction(self, name: str, reason: str) -> None:  # noqa: N802
@@ -428,25 +525,28 @@ class StudioController(QObject):
         source_warning = ""
         source_notices: list[str] = []
         sources = candidate.get("data_sources", [])
-        csv_source = next((item for item in sources if item.get("kind") == "csv"), None)
-        if csv_source:
-            source_path = Path(csv_source["path"])
+        linked_source = next(
+            (item for item in sources if item.get("kind") in SUPPORTED_SOURCE_KINDS), None
+        )
+        if linked_source:
+            source_path = Path(linked_source["path"])
             if source_path.is_file():
                 try:
-                    headers, rows = self._parse_csv(source_path)
-                    parsed_source = (source_path, csv_source["id"], headers, rows)
-                except (OSError, UnicodeError, csv.Error) as exc:
-                    source_warning = f"Could not read linked CSV {source_path.name}: {exc}"
+                    headers, rows = self._parse_source_file(source_path)
+                    parsed_source = (source_path, linked_source["id"], headers, rows)
+                except (OSError, UnicodeError, csv.Error, ValueError) as exc:
+                    source_warning = f"Could not read linked data file {source_path.name}: {exc}"
                     warnings.append(source_warning)
             else:
-                source_warning = f"Linked CSV is missing: {source_path}"
+                source_warning = f"Linked data file is missing: {source_path}"
                 warnings.append(source_warning)
         if len(sources) > 1:
-            notice = "Only one CSV source is loaded in this release; other source entries remain in the project."
+            notice = "Only one data source is loaded in this release; other entries remain in the project."
             warnings.append(notice)
             source_notices.append(notice)
         unsupported = sorted(
-            {str(item.get("kind", "unknown")) for item in sources if item.get("kind") != "csv"}
+            {str(item.get("kind", "unknown")) for item in sources
+             if item.get("kind") not in SUPPORTED_SOURCE_KINDS}
         )
         if unsupported:
             notice = f"Unsupported source type(s): {', '.join(unsupported)}."
@@ -494,19 +594,52 @@ class StudioController(QObject):
         if path:
             self.import_csv_path(Path(path))
 
+    def import_excel_dialog(self) -> None:
+        path, _ = QFileDialog.getOpenFileName(
+            None, "Import Excel workbook", "",
+            "Excel workbooks (*.xlsx *.xlsm);;All files (*)",
+        )
+        if path:
+            self.import_excel_path(Path(path))
+
+    def import_data_dialog(self) -> None:
+        path, _ = QFileDialog.getOpenFileName(
+            None, "Import data", "",
+            "Data files (*.csv *.xlsx *.xlsm);;CSV files (*.csv);;Excel workbooks (*.xlsx *.xlsm)",
+        )
+        if path:
+            source_path = Path(path)
+            if source_path.suffix.casefold() == ".csv":
+                self.import_csv_path(source_path)
+            else:
+                self.import_excel_path(source_path)
+
     def import_csv_path(self, path: Path) -> bool:
+        return self._import_data_path(path, "csv")
+
+    def import_excel_path(self, path: Path) -> bool:
+        return self._import_data_path(path, "excel")
+
+    def _import_data_path(self, path: Path, source_kind: str) -> bool:
         path = Path(path).expanduser().resolve()
         try:
-            headers, rows = self._parse_csv(path)
-        except (OSError, UnicodeError, csv.Error) as exc:
-            QMessageBox.critical(None, "Could not import CSV", str(exc))
+            if source_kind == "csv":
+                headers, rows = self._parse_csv(path)
+            else:
+                headers, rows = self._parse_excel(path)
+        except (OSError, UnicodeError, csv.Error, ValueError) as exc:
+            file_type = "CSV" if source_kind == "csv" else "Excel workbook"
+            QMessageBox.critical(None, f"Could not import {file_type}", str(exc))
             return False
         existing_sources = list(self._project.get("data_sources", []))
-        prior_csv = next((item for item in existing_sources if item.get("kind") == "csv"), None)
-        source_id = self._source_id or (str(prior_csv["id"]) if prior_csv else str(uuid4()))
+        prior_source = next(
+            (item for item in existing_sources
+             if item.get("kind") in SUPPORTED_SOURCE_KINDS), None
+        )
+        source_id = self._source_id or (str(prior_source["id"]) if prior_source else str(uuid4()))
         self._current_region = None
         self._install_source(path, source_id, headers, rows)
-        source_record = {"id": source_id, "name": path.name, "kind": "csv", "path": str(path)}
+        source_record = {"id": source_id, "name": path.name, "kind": source_kind, "path": str(path)}
         updated_sources = []
         source_replaced = False
         for source in existing_sources:
@@ -541,12 +674,12 @@ class StudioController(QObject):
 
     def refresh_source(self) -> None:
         if self._source_path is None or self._source_id is None:
-            self._set_status("No CSV source to refresh")
+            self._set_status("No data source to refresh")
             return
         try:
-            headers, rows = self._parse_csv(self._source_path)
-        except (OSError, UnicodeError, csv.Error) as exc:
-            self._source_warning = f"Could not read linked CSV {self._source_path.name}: {exc}"
+            headers, rows = self._parse_source_file(self._source_path)
+        except (OSError, UnicodeError, csv.Error, ValueError) as exc:
+            self._source_warning = f"Could not read linked data file {self._source_path.name}: {exc}"
             self.stateChanged.emit()
             QMessageBox.critical(None, "Could not refresh source", str(exc))
             return
@@ -607,7 +740,7 @@ class StudioController(QObject):
             None,
             "Project format",
             "Analytics Studio projects use the versioned, human-readable .npa JSON format. "
-            "CSV files stay linked as external sources. A .bak recovery copy is kept on later saves.",
+            "Imported files stay linked as external sources. A .bak recovery copy is kept on later saves.",
         )
 
     def quit_application(self) -> None:
@@ -668,7 +801,7 @@ class StudioController(QObject):
             source_record = {
                 "id": self._source_id,
                 "name": self._source_path.name,
-                "kind": "csv",
+                "kind": self._source_kind_for_path(self._source_path),
                 "path": source_path_for_save(self._source_path, path),
             }
             source_replaced = False
@@ -746,6 +879,122 @@ class StudioController(QObject):
             headers = list(reader.fieldnames or [])
             rows = list(reader)
         return headers, rows
+
+    @classmethod
+    def _parse_source_file(cls, path: Path) -> tuple[list[str], list[dict[str, str | None]]]:
+        if path.suffix.casefold() == ".csv":
+            return cls._parse_csv(path)
+        return cls._parse_excel(path)
+
+    @staticmethod
+    def _source_kind_for_path(path: Path) -> str:
+        return "csv" if path.suffix.casefold() == ".csv" else "excel"
+
+    @staticmethod
+    def _parse_excel(path: Path) -> tuple[list[str], list[dict[str, str | None]]]:
+        if path.suffix.casefold() not in {".xlsx", ".xlsm"}:
+            raise ValueError("Choose an .xlsx or .xlsm workbook. Legacy .xls files are not supported.")
+
+        try:
+            with zipfile.ZipFile(path) as workbook:
+                main_ns = f"{{{EXCEL_MAIN_NS}}}"
+                relationship_ns = f"{{{EXCEL_REL_NS}}}id"
+                workbook_root = ElementTree.fromstring(workbook.read("xl/workbook.xml"))
+                sheets = workbook_root.findall(f"{main_ns}sheets/{main_ns}sheet")
+                if not sheets:
+                    raise ValueError("The workbook does not contain a worksheet.")
+
+                workbook_rels = ElementTree.fromstring(
+                    workbook.read("xl/_rels/workbook.xml.rels")
+                )
+                targets = {
+                    relationship.attrib.get("Id", ""): relationship.attrib.get("Target", "")
+                    for relationship in workbook_rels.findall(f"{{{PACKAGE_REL_NS}}}Relationship")
+                }
+                target = targets.get(sheets[0].attrib.get(relationship_ns, ""), "")
+                if not target:
+                    raise ValueError("The workbook's first worksheet could not be found.")
+                if target.startswith("/"):
+                    sheet_path = target.lstrip("/")
+                elif target.startswith("xl/"):
+                    sheet_path = target
+                else:
+                    import posixpath
+                    sheet_path = posixpath.normpath(posixpath.join("xl", target))
+
+                shared_strings = []
+                if "xl/sharedStrings.xml" in workbook.namelist():
+                    shared_root = ElementTree.fromstring(workbook.read("xl/sharedStrings.xml"))
+                    shared_strings = [
+                        "".join(node.text or "" for node in item.iter(f"{main_ns}t"))
+                        for item in shared_root.findall(f"{main_ns}si")
+                    ]
+
+                date_styles, time_styles = AnalyticsExcelStyles.read(workbook, main_ns)
+                workbook_properties = workbook_root.find(f"{main_ns}workbookPr")
+                date_1904 = bool(
+                    workbook_properties is not None
+                    and workbook_properties.attrib.get("date1904", "0").casefold() in {"1", "true"}
+                )
+                sheet_root = ElementTree.fromstring(workbook.read(sheet_path))
+                sheet_data = sheet_root.find(f"{main_ns}sheetData")
+                if sheet_data is None:
+                    raise ValueError("The first worksheet is empty.")
+
+                rows_by_number: list[list[str]] = []
+                max_column = 0
+                for row in sheet_data.findall(f"{main_ns}row"):
+                    values: dict[int, str] = {}
+                    next_column = 0
+                    for cell in row.findall(f"{main_ns}c"):
+                        reference = cell.attrib.get("r", "")
+                        match = re.match(r"([A-Z]+)", reference.upper())
+                        if match:
+                            column = 0
+                            for letter in match.group(1):
+                                column = column * 26 + ord(letter) - ord("A") + 1
+                            column -= 1
+                        else:
+                            column = next_column
+                        next_column = column + 1
+                        max_column = max(max_column, column + 1)
+                        values[column] = AnalyticsExcelCell.text(
+                            cell, shared_strings, date_styles, time_styles, date_1904, main_ns
+                        )
+                    rows_by_number.append([values.get(index, "") for index in range(max_column)])
+                rows_by_number = [
+                    row + [""] * (max_column - len(row)) for row in rows_by_number
+                ]
+        except (zipfile.BadZipFile, KeyError, ElementTree.ParseError) as exc:
+            raise ValueError("This is not a readable Excel .xlsx/.xlsm workbook.") from exc
+
+        header_index = next(
+            (index for index, row in enumerate(rows_by_number) if any(value.strip() for value in row)),
+            None,
+        )
+        if header_index is None:
+            raise ValueError("The first worksheet has no data.")
+
+        raw_headers = rows_by_number[header_index]
+        headers = []
+        for index, value in enumerate(raw_headers):
+            name = value.strip() or f"Column {index + 1}"
+            unique_name = name
+            duplicate = 2
+            while unique_name in headers:
+                unique_name = f"{name}_{duplicate}"
+                duplicate += 1
+            headers.append(unique_name)
+
+        data_rows = []
+        for values in rows_by_number[header_index + 1:]:
+            if not any(value.strip() for value in values):
+                continue
+            data_rows.append({
+                header: values[index] if index < len(values) else ""
+                for index, header in enumerate(headers)
+            })
+        return headers, data_rows
 
     def _install_source(
         self,
@@ -839,10 +1088,11 @@ class StudioController(QObject):
         notices = []
         if len(sources) > 1:
             notices.append(
-                "Only one CSV source is loaded in this release; other source entries remain in the project."
+                "Only one data source is loaded in this release; other entries remain in the project."
             )
         unsupported = sorted(
-            {str(item.get("kind", "unknown")) for item in sources if item.get("kind") != "csv"}
+            {str(item.get("kind", "unknown")) for item in sources
+             if item.get("kind") not in SUPPORTED_SOURCE_KINDS}
         )
         if unsupported:
             notices.append(f"Unsupported source type(s): {', '.join(unsupported)}.")

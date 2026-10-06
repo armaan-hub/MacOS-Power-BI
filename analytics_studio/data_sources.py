@@ -10,13 +10,14 @@ SOURCE_CATEGORIES = (
     "File",
     "Database",
     "Power BI",
+    "Microsoft",
     "Online Services",
     "Other",
 )
 
 _CATEGORY_NAMES = {
     "File": (
-        "Text/CSV", "XML", "JSON", "Folder", "PDF", "Parquet",
+        "Excel Workbook", "Text/CSV", "XML", "JSON", "Folder", "PDF", "Parquet",
     ),
     "Database": (
         "Oracle database", "IBM Db2 database", "IBM Informix database (Beta)",
@@ -33,6 +34,7 @@ _CATEGORY_NAMES = {
         "KX kdb Insights Enterprise (beta)", "Kyvos ODBC (beta)",
     ),
     "Power BI": ("Power BI semantic models",),
+    "Microsoft": ("OneLake catalog", "SQL Server", "Dataverse"),
     "Online Services": (
         "Planview OKR (beta)",
         "Planview ProjectPlace", "Quickbase", "SoftOne BI (Beta)", "Planview IdeaPlace",
@@ -66,6 +68,8 @@ _CATEGORY_NAMES = {
 
 def _icon_for(category: str, name: str) -> str:
     normalized = name.casefold()
+    if name == "Excel Workbook":
+        return "excel"
     if name == "Text/CSV":
         return "csv"
     if name == "XML":
@@ -76,6 +80,12 @@ def _icon_for(category: str, name: str) -> str:
         return "pdf"
     if name == "Parquet":
         return "parquet"
+    if name == "OneLake catalog":
+        return "databaseLink"
+    if name == "SQL Server":
+        return "database"
+    if name == "Dataverse":
+        return "table"
     if "folder" in normalized:
         return "folder"
     if "semantic model" in normalized:
@@ -97,7 +107,7 @@ def _entry(category: str, name: str) -> dict[str, object]:
     status = "Preview" if "preview" in name.casefold() else (
         "Beta" if "beta" in name.casefold() else ""
     )
-    implemented = category == "File" and name == "Text/CSV"
+    implemented = category == "File" and name in {"Text/CSV", "Excel Workbook"}
     return {
         "id": f"{category_key}_{name_key}",
         "name": name,

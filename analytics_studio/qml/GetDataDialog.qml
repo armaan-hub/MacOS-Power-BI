@@ -10,7 +10,7 @@ Dialog {
     property string searchText: ""
     property string selectedSourceId: ""
     property string pendingSourceId: ""
-    property var categories: ["All", "File", "Database", "Power BI", "Online Services", "Other"]
+    property var categories: ["All", "File", "Database", "Power BI", "Microsoft", "Online Services", "Other"]
     property var visibleSources: {
         const catalog = controller ? controller.dataSourceCatalog : []
         const query = searchText.trim().toLocaleLowerCase()
@@ -378,8 +378,10 @@ Dialog {
                         visible: Boolean(root.selectedSource())
                         text: root.selectedSource()
                               ? (root.selectedSource().implemented
-                                 ? "Text/CSV is ready. Choose a CSV file to import it into the current project."
-                                 : "This entry helps you find a Power BI data source. Connecting to it is not implemented in Analytics Studio yet.")
+                                 ? (root.selectedSource().iconName === "excel"
+                                    ? "Excel Workbook is ready. Choose an .xlsx or .xlsm file to import its first worksheet; the first non-empty row supplies column names."
+                                    : "Text/CSV is ready. Choose a CSV file to import it into the current project.")
+                                 : "This connector is listed for discovery; connection support is not implemented in Analytics Studio yet.")
                               : "Choose a connector from the list to see its status."
                         color: "#52636f"
                         font.pixelSize: 11
@@ -398,7 +400,7 @@ Dialog {
                     Item { Layout.fillHeight: true }
                     Text {
                         Layout.fillWidth: true
-                        text: "Only Text/CSV has an active importer in this build."
+                        text: "Excel Workbook and Text/CSV have active importers in this build."
                         color: "#788691"
                         font.pixelSize: 9
                         wrapMode: Text.Wrap
@@ -442,7 +444,7 @@ Dialog {
                     implicitHeight: 31
                     enabled: Boolean(root.selectedSource()) && Boolean(root.selectedSource().implemented)
                     Accessible.name: "Connect to selected data source"
-                    Accessible.description: enabled ? "Open the CSV file picker." : "Only Text/CSV is available in this release."
+                    Accessible.description: enabled ? "Open the selected file picker." : "Only Excel Workbook and Text/CSV are available in this release."
                     onClicked: root.requestConnection()
                     background: Rectangle {
                         color: !parent.enabled ? "#e8ebed" : (parent.hovered ? "#006bb3" : "#0078d4")
