@@ -4,11 +4,40 @@ Item {
     id: root
     property string name: "report"
     property color color: "#647382"
+    property bool useGalleryAtlas: false
     implicitWidth: 22
     implicitHeight: 22
     width: implicitWidth
     height: implicitHeight
     Accessible.ignored: true
+
+    readonly property rect galleryAtlasRect: {
+        if (!root.useGalleryAtlas)
+            return Qt.rect(0, 0, 0, 0)
+        if (root.name === "buildVisual")
+            return Qt.rect(107, 207, 48, 48)
+        if (root.name === "formatTab")
+            return Qt.rect(231, 207, 48, 48)
+        if (root.name === "analyticsTab")
+            return Qt.rect(355, 207, 48, 48)
+        const names = [
+            "bar", "column", "stackedBar", "stackedColumn", "bar100", "column100",
+            "line", "area", "stackedArea", "area100", "lineStackedColumn", "lineClusteredColumn",
+            "ribbonChart", "waterfall", "funnel", "scatter", "pie", "donut",
+            "treemap", "worldMap", "filledMap", "shapeMap", "azureMaps", "gauge",
+            "newCard", "kpi", "slicer", "table", "matrix", "rVisual",
+            "pythonVisual", "keyInfluencers", "decomposition", "qaVisual", "scorecard", "paginatedReport",
+            "visualFilter", "quickVisual", "smartVisual", "image", "galleryMore"
+        ]
+        const index = names.indexOf(root.name)
+        if (index < 0)
+            return Qt.rect(0, 0, 0, 0)
+        const centersX = [121, 174, 228, 281, 334, 387]
+        const centersY = [323, 375, 428, 480, 533, 585, 638]
+        return Qt.rect(centersX[index % 6] - 18,
+                       centersY[Math.floor(index / 6)] - 18,
+                       36, 36)
+    }
 
     readonly property string assetName: {
         switch (name) {
@@ -125,6 +154,17 @@ Item {
     readonly property string exactAssetPath: {
         switch (name) {
         case "buildVisual": return "icons/visuals/build_visual.svg"
+        case "bar": return "icons/visuals/clustered_bar.svg"
+        case "column": return "icons/visuals/clustered_column.svg"
+        case "line": return "icons/visuals/line_chart.svg"
+        case "area": return "icons/visuals/area_chart.svg"
+        case "waterfall": return "icons/visuals/waterfall_chart.svg"
+        case "funnel": return "icons/visuals/funnel_chart.svg"
+        case "scatter": return "icons/visuals/scatter_chart.svg"
+        case "pie": return "icons/visuals/pie_chart.svg"
+        case "donut": return "icons/visuals/donut_chart.svg"
+        case "treemap": return "icons/visuals/treemap_chart.svg"
+        case "azureMaps": return "icons/visuals/azure_maps.svg"
         case "area100": return "icons/visuals/area_100.svg"
         case "newCard": return "icons/visuals/new_card.svg"
         case "kpi": return "icons/visuals/kpi.svg"
@@ -188,8 +228,28 @@ Item {
         return 1.0
     }
 
+    Item {
+        anchors.fill: parent
+        clip: true
+        visible: root.galleryAtlasRect.width > 0
+
+        Image {
+            readonly property real atlasScale: root.width / root.galleryAtlasRect.width
+            x: -root.galleryAtlasRect.x * atlasScale
+            y: -root.galleryAtlasRect.y * atlasScale
+            width: 508 * atlasScale
+            height: 1162 * atlasScale
+            source: Qt.resolvedUrl("icons/visuals/gallery_reference.png")
+            sourceSize.width: 508
+            sourceSize.height: 1162
+            fillMode: Image.Stretch
+            smooth: false
+        }
+    }
+
     Image {
         anchors.fill: parent
+        visible: root.galleryAtlasRect.width === 0
         source: Qt.resolvedUrl(root.exactAssetPath.length > 0
                                ? root.exactAssetPath
                                : "icons/fluent/" + root.assetName + "_" + root.tintKey + "_20_regular.svg")

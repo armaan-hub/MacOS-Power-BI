@@ -1305,8 +1305,8 @@ ApplicationWindow {
                 id: reportDock
                 visible: appController.currentView === "Report" && root.inspectorVisible
                 Layout.preferredWidth: visible ? ((root.filtersExpanded ? 145 : 32)
-                                                  + (root.visualizationsVisible ? 173 : 24)
-                                                  + (root.dataPaneExpanded ? 160 : 40)) : 0
+                                                  + (root.visualizationsVisible ? 172 : 24)
+                                                  + (root.dataPaneExpanded ? 160 : 33)) : 0
                 Layout.fillHeight: true
                 color: "#ffffff"
                 border.color: "#d4d9dd"
@@ -1440,7 +1440,7 @@ ApplicationWindow {
                     }
 
                     Item {
-                        Layout.preferredWidth: root.visualizationsVisible ? 173 : 24
+                        Layout.preferredWidth: root.visualizationsVisible ? 172 : 24
                         Layout.fillHeight: true
                         Rectangle {
                             anchors.fill: parent
@@ -1453,9 +1453,10 @@ ApplicationWindow {
                                     visible: root.visualizationsVisible
                                     Layout.fillWidth: true
                                     Layout.preferredHeight: 16
-                                    Layout.leftMargin: 9
-                                    Layout.rightMargin: 8
-                                    Text { Layout.fillWidth: true; text: "Visualizations"; color: "#202020"; font.pixelSize: 11; font.weight: Font.DemiBold }
+                                    Layout.leftMargin: 8
+                                    Layout.rightMargin: 2
+                                    transform: Translate { y: 2 }
+                                    Text { Layout.fillWidth: true; text: "Visualizations"; color: "#202020"; font.pixelSize: 14; font.weight: Font.DemiBold }
                                     ToolButton {
                                         padding: 0
                                         implicitWidth: 24
@@ -1468,39 +1469,41 @@ ApplicationWindow {
                                         contentItem: Icon { name: "collapsePane"; color: "#657784"; implicitWidth: 16; implicitHeight: 16 }
                                     }
                                 }
-                                Rectangle { visible: root.visualizationsVisible; Layout.fillWidth: true; height: 1; color: "#e1e5e8" }
+                                Rectangle { visible: root.visualizationsVisible; Layout.fillWidth: true; Layout.topMargin: -4; height: 1; color: "#e1e5e8" }
                                 ColumnLayout {
                                     visible: root.visualizationsVisible
                                     Layout.fillWidth: true
                                     Layout.fillHeight: false
                                     Layout.alignment: Qt.AlignTop
-                                    Layout.leftMargin: 5
-                                    Layout.rightMargin: 7
+                                    Layout.leftMargin: 4
+                                    Layout.rightMargin: 6.5
                                     Layout.topMargin: 4
                                     Layout.bottomMargin: 4
                                     spacing: 4
                                     Text {
                                         Layout.fillWidth: true
-                                        Layout.leftMargin: 4
+                                        Layout.leftMargin: 3
                                         text: "Build visual"
                                         color: "#354755"
                                         font.pixelSize: 11
                                         font.weight: Font.DemiBold
                                     }
-                                    RowLayout {
+                                    Item {
                                         Layout.fillWidth: true
-                                        Layout.preferredHeight: 42
-                                        spacing: 4
+                                        Layout.preferredHeight: 43
+                                        Layout.topMargin: -6
                                         Repeater {
                                             model: [
                                                 { label: "Build", icon: "buildVisual", active: true },
-                                                { label: "Format", icon: "document", overlay: "paintBrush", active: false },
+                                                { label: "Format", icon: "formatTab", active: false },
                                                 { label: "Analytics", icon: "analyticsTab", active: false }
                                             ]
                                             delegate: Button {
+                                                required property int index
                                                 required property var modelData
-                                                Layout.fillWidth: true
-                                                Layout.fillHeight: true
+                                                width: 40
+                                                height: parent.height
+                                                x: parent.width * (index === 0 ? 0.116 : (index === 1 ? 0.507 : 0.89)) - width / 2
                                                 enabled: Boolean(modelData.active)
                                                 hoverEnabled: true
                                                 padding: 1
@@ -1532,8 +1535,9 @@ ApplicationWindow {
                                                         anchors.centerIn: parent
                                                         name: String(modelData.icon)
                                                         color: modelData.active ? "#0078d4" : "#6f777d"
-                                                        implicitWidth: modelData.active ? 28 : 22
-                                                        implicitHeight: modelData.active ? 28 : 22
+                                                        useGalleryAtlas: true
+                                                        implicitWidth: 24
+                                                        implicitHeight: 24
                                                     }
                                                     Icon {
                                                         anchors.right: parent.right
@@ -1550,11 +1554,11 @@ ApplicationWindow {
                                             }
                                         }
                                     }
-                                    Rectangle { Layout.fillWidth: true; height: 1; color: "#e1e5e8" }
+                                    Rectangle { Layout.fillWidth: true; Layout.topMargin: 1; height: 1; color: "#e1e5e8" }
                                     Item {
                                         id: visualGallery
                                         Layout.fillWidth: true
-                                        Layout.preferredHeight: 186
+                                        Layout.preferredHeight: 187
 
                                         Repeater {
                                             model: [
@@ -1580,7 +1584,7 @@ ApplicationWindow {
                                                 { type: "map", name: "Map", icon: "worldMap", accent: "#107C71" },
                                                 { type: "filledMap", name: "Filled map", icon: "filledMap" },
                                                 { type: "shapeMap", name: "Shape map", icon: "shapeMap" },
-                                                { type: "arcgisMap", name: "ArcGIS Maps", icon: "arcgisMap" },
+                                                { type: "azureMaps", name: "Azure Maps", icon: "azureMaps" },
                                                 { type: "gauge", name: "Gauge", icon: "gauge", accent: "#0078D4" },
                                                 { type: "card", name: "Card (new)", icon: "newCard" },
                                                 { type: "kpi", name: "KPI", icon: "kpi", accent: "#0078D4" },
@@ -1606,10 +1610,12 @@ ApplicationWindow {
                                                 required property int index
                                                 required property var modelData
                                                 property bool typeSelected: Boolean(modelData.active) && appController.selectedChartType === modelData.type
-                                                x: (index % 6) * (visualGallery.width / 6)
-                                                y: Math.floor(index / 6) * (visualGallery.height / 7)
+                                                property real columnNudge: [0.5, 0, 0, -0.5, -1, -1.5][index % 6]
+                                                property real rowHeight: visualGallery.height / 7 - 0.5
+                                                x: (index % 6) * (visualGallery.width / 6) + columnNudge
+                                                y: 1.5 + Math.floor(index / 6) * rowHeight
                                                 width: visualGallery.width / 6
-                                                height: visualGallery.height / 7
+                                                height: rowHeight
                                                 Rectangle {
                                                     anchors.fill: parent
                                                     visible: visualTypeTile.modelData.type === "removed"
@@ -1652,6 +1658,7 @@ ApplicationWindow {
                                                             anchors.centerIn: parent
                                                             name: String(visualTypeTile.modelData.icon || "question")
                                                             color: visualTypeTile.modelData.accent || "#647382"
+                                                            useGalleryAtlas: true
                                                             implicitWidth: 18
                                                             implicitHeight: 18
                                                         }
@@ -1669,16 +1676,16 @@ ApplicationWindow {
                                     Text {
                                         Layout.fillWidth: true
                                         Layout.leftMargin: 7
-                                        Layout.topMargin: 3
+                                        Layout.topMargin: 6
                                         text: "Values"
                                         color: "#202020"
                                         font.pixelSize: 11
-                                        font.weight: Font.DemiBold
+                                        font.weight: Font.Medium
                                     }
                                     Rectangle {
                                         Layout.fillWidth: true
                                         Layout.preferredHeight: 27
-                                        Layout.topMargin: 2
+                                        Layout.topMargin: 1.5
                                         color: "#fafafa"
                                         border.width: 0
                                         Text {
@@ -1708,7 +1715,7 @@ ApplicationWindow {
                                     Text {
                                         Layout.fillWidth: true
                                         Layout.leftMargin: 7
-                                        Layout.topMargin: 7
+                                        Layout.topMargin: 6.5
                                         text: "Drill through"
                                         color: "#202020"
                                         font.pixelSize: 11
@@ -1718,6 +1725,7 @@ ApplicationWindow {
                                         Layout.fillWidth: true
                                         Layout.preferredHeight: 24
                                         Layout.leftMargin: 7
+                                        Layout.rightMargin: 17
                                         Text { Layout.fillWidth: true; text: "Cross-report"; color: "#303030"; font.pixelSize: 10 }
                                         Item {
                                             Layout.preferredWidth: 30
@@ -1754,6 +1762,7 @@ ApplicationWindow {
                                         Layout.fillWidth: true
                                         Layout.preferredHeight: 24
                                         Layout.leftMargin: 7
+                                        Layout.rightMargin: 17
                                         Text { Layout.fillWidth: true; text: "Keep all filters"; color: "#303030"; font.pixelSize: 10 }
                                         Item {
                                             Layout.preferredWidth: 30
@@ -1786,8 +1795,8 @@ ApplicationWindow {
                                     }
                                     Rectangle {
                                         Layout.fillWidth: true
-                                        Layout.preferredHeight: 27
-                                        Layout.topMargin: 0
+                                        Layout.preferredHeight: 23
+                                        Layout.topMargin: 0.5
                                         color: "#fafafa"
                                         border.width: 0
                                         Text {
@@ -1841,7 +1850,7 @@ ApplicationWindow {
                     }
 
                     Item {
-                        Layout.preferredWidth: root.dataPaneExpanded ? 160 : 40
+                        Layout.preferredWidth: root.dataPaneExpanded ? 160 : 33
                         Layout.fillHeight: true
                         Rectangle {
                             anchors.fill: parent
