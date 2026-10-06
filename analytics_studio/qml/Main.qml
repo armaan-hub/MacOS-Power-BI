@@ -1304,9 +1304,9 @@ ApplicationWindow {
             Rectangle {
                 id: reportDock
                 visible: appController.currentView === "Report" && root.inspectorVisible
-                Layout.preferredWidth: visible ? ((root.filtersExpanded ? 145 : 36)
-                                                  + (root.visualizationsVisible ? 250 : 36)
-                                                  + (root.dataPaneExpanded ? 160 : 36)) : 0
+                Layout.preferredWidth: visible ? ((root.filtersExpanded ? 145 : 24)
+                                                  + (root.visualizationsVisible ? 180 : 24)
+                                                  + (root.dataPaneExpanded ? 160 : 18)) : 0
                 Layout.fillHeight: true
                 color: "#ffffff"
                 border.color: "#d4d9dd"
@@ -1314,7 +1314,7 @@ ApplicationWindow {
                     anchors.fill: parent
                     spacing: 0
                     Item {
-                        Layout.preferredWidth: root.filtersExpanded ? 145 : 36
+                        Layout.preferredWidth: root.filtersExpanded ? 145 : 24
                         Layout.fillHeight: true
                         Rectangle {
                             anchors.fill: parent
@@ -1439,11 +1439,11 @@ ApplicationWindow {
                     }
 
                     Item {
-                        Layout.preferredWidth: root.visualizationsVisible ? 250 : 36
+                        Layout.preferredWidth: root.visualizationsVisible ? 180 : 24
                         Layout.fillHeight: true
                         Rectangle {
                             anchors.fill: parent
-                            color: "#ffffff"
+                            color: "#f4f4f4"
                             border.color: "#e0e3e6"
                             ColumnLayout {
                                 anchors.fill: parent
@@ -1451,21 +1451,20 @@ ApplicationWindow {
                                 RowLayout {
                                     visible: root.visualizationsVisible
                                     Layout.fillWidth: true
-                                    Layout.preferredHeight: 48
+                                    Layout.preferredHeight: 32
                                     Layout.leftMargin: 12
                                     Layout.rightMargin: 8
-                                    Icon { name: "visual"; color: "#107C71"; implicitWidth: 20; implicitHeight: 20 }
-                                    Text { Layout.fillWidth: true; text: "Visualizations"; color: "#354755"; font.pixelSize: 14; font.weight: Font.DemiBold }
+                                    Text { Layout.fillWidth: true; text: "Visualizations"; color: "#202020"; font.pixelSize: 11; font.weight: Font.DemiBold }
                                     ToolButton {
                                         padding: 0
-                                        implicitWidth: 34
-                                        implicitHeight: 34
+                                        implicitWidth: 24
+                                        implicitHeight: 24
                                         Accessible.name: "Collapse Visualizations pane"
                                         ToolTip.visible: hovered
                                         ToolTip.text: "Collapse Visualizations pane"
                                         onClicked: root.visualizationsVisible = false
                                         background: Rectangle { color: parent.hovered ? "#f1f4f6" : "transparent" }
-                                        contentItem: Icon { name: "collapsePane"; color: "#657784"; implicitWidth: 22; implicitHeight: 22 }
+                                        contentItem: Icon { name: "collapsePane"; color: "#657784"; implicitWidth: 16; implicitHeight: 16 }
                                     }
                                 }
                                 Rectangle { visible: root.visualizationsVisible; Layout.fillWidth: true; height: 1; color: "#e1e5e8" }
@@ -1476,14 +1475,14 @@ ApplicationWindow {
                                     Layout.alignment: Qt.AlignTop
                                     Layout.leftMargin: 8
                                     Layout.rightMargin: 8
-                                    Layout.topMargin: 8
-                                    Layout.bottomMargin: 8
-                                    spacing: 6
+                                    Layout.topMargin: 4
+                                    Layout.bottomMargin: 4
+                                    spacing: 4
                                     Text {
                                         Layout.fillWidth: true
                                         text: "Build visual"
                                         color: "#354755"
-                                        font.pixelSize: 14
+                                        font.pixelSize: 11
                                         font.weight: Font.DemiBold
                                     }
                                     RowLayout {
@@ -1492,9 +1491,9 @@ ApplicationWindow {
                                         spacing: 4
                                         Repeater {
                                             model: [
-                                                { label: "Build", icon: "visual", active: true },
-                                                { label: "Format", icon: "paintBrush", active: false },
-                                                { label: "Analytics", icon: "dataTrending", active: false }
+                                                { label: "Build", icon: "bar", active: true },
+                                                { label: "Format", icon: "document", overlay: "paintBrush", active: false },
+                                                { label: "Analytics", icon: "document", overlay: "tableEdit", active: false }
                                             ]
                                             delegate: Button {
                                                 required property var modelData
@@ -1507,21 +1506,44 @@ ApplicationWindow {
                                                 Accessible.description: enabled ? "Build visual is available." : String(modelData.label) + " settings are not available in this release."
                                                 ToolTip.visible: hovered && !enabled
                                                 ToolTip.text: String(modelData.label) + " settings are not available in this release."
-                                                background: Rectangle {
-                                                    color: "transparent"
+                                                background: Item {
                                                     Rectangle {
-                                                        anchors.left: parent.left
-                                                        anchors.right: parent.right
+                                                        anchors.centerIn: parent
+                                                        width: 30
+                                                        height: 30
+                                                        radius: 3
+                                                        color: modelData.active ? "#d7d7d7" : "transparent"
+                                                    }
+                                                    Rectangle {
+                                                        visible: modelData.active
+                                                        width: 8
+                                                        height: 8
+                                                        anchors.horizontalCenter: parent.horizontalCenter
                                                         anchors.bottom: parent.bottom
-                                                        height: 2
-                                                        color: modelData.active ? "#107c71" : "transparent"
+                                                        anchors.bottomMargin: -4
+                                                        rotation: 45
+                                                        color: "#d7d7d7"
                                                     }
                                                 }
-                                                contentItem: Icon {
-                                                    name: String(modelData.icon)
-                                                    color: parent.enabled ? "#107c71" : "#9ba5ad"
-                                                    implicitWidth: 22
-                                                    implicitHeight: 22
+                                                contentItem: Item {
+                                                    Icon {
+                                                        anchors.centerIn: parent
+                                                        name: String(modelData.icon)
+                                                        color: modelData.active ? "#0078d4" : "#6f777d"
+                                                        implicitWidth: 22
+                                                        implicitHeight: 22
+                                                    }
+                                                    Icon {
+                                                        anchors.right: parent.right
+                                                        anchors.bottom: parent.bottom
+                                                        anchors.rightMargin: 8
+                                                        anchors.bottomMargin: 5
+                                                        visible: Boolean(modelData.overlay)
+                                                        name: String(modelData.overlay || "")
+                                                        color: "#6f777d"
+                                                        implicitWidth: 14
+                                                        implicitHeight: 14
+                                                    }
                                                 }
                                             }
                                         }
@@ -1530,50 +1552,51 @@ ApplicationWindow {
                                     Item {
                                         id: visualGallery
                                         Layout.fillWidth: true
-                                        Layout.preferredHeight: 286
+                                        Layout.preferredHeight: 190
 
                                         Repeater {
                                             model: [
-                                                { type: "bar", name: "Clustered bar chart", icon: "bar", accent: "#107C71", active: true },
+                                                { type: "bar", name: "Clustered bar chart", icon: "bar", accent: "#0078D4", active: true },
                                                 { type: "stackedBar", name: "Stacked bar chart", icon: "stackedBar" },
-                                                { type: "bar100", name: "100% stacked bar chart", icon: "barCluster" },
+                                                { type: "bar100", name: "100% stacked bar chart", icon: "bar100" },
                                                 { type: "column", name: "Clustered column chart", icon: "column", accent: "#0078D4", active: true },
                                                 { type: "stackedColumn", name: "Stacked column chart", icon: "stackedColumn" },
-                                                { type: "column100", name: "100% stacked column chart", icon: "columnCluster" },
+                                                { type: "column100", name: "100% stacked column chart", icon: "column100" },
                                                 { type: "line", name: "Line chart", icon: "line", accent: "#C65911", active: true },
-                                                { type: "area", name: "Area chart", icon: "area" },
-                                                { type: "stackedArea", name: "Stacked area chart", icon: "area" },
-                                                { type: "lineStackedColumn", name: "Line and stacked column chart", icon: "combo" },
-                                                { type: "lineClusteredColumn", name: "Line and clustered column chart", icon: "combo" },
+                                                { type: "area", name: "Area chart", icon: "area", accent: "#0078D4" },
+                                                { type: "stackedArea", name: "Stacked area chart", icon: "stackedArea" },
+                                                { type: "lineStackedColumn", name: "Line and stacked column chart", icon: "lineStackedColumn" },
+                                                { type: "lineClusteredColumn", name: "Line and clustered column chart", icon: "lineClusteredColumn" },
                                                 { type: "ribbon", name: "Ribbon chart", icon: "ribbonChart" },
-                                                { type: "waterfall", name: "Waterfall chart", icon: "waterfall" },
-                                                { type: "funnel", name: "Funnel chart", icon: "funnel" },
-                                                { type: "scatter", name: "Scatter chart", icon: "scatter" },
-                                                { type: "pie", name: "Pie chart", icon: "pie" },
-                                                { type: "donut", name: "Donut chart", icon: "donut" },
-                                                { type: "treemap", name: "Treemap", icon: "treemap" },
-                                                { type: "map", name: "Map", icon: "map" },
+                                                { type: "waterfall", name: "Waterfall chart", icon: "waterfall", accent: "#0078D4" },
+                                                { type: "funnel", name: "Funnel chart", icon: "funnel", accent: "#0078D4" },
+                                                { type: "scatter", name: "Scatter chart", icon: "scatter", accent: "#0078D4" },
+                                                { type: "pie", name: "Pie chart", icon: "pie", accent: "#0078D4" },
+                                                { type: "donut", name: "Donut chart", icon: "donut", accent: "#0078D4" },
+                                                { type: "treemap", name: "Treemap", icon: "treemap", accent: "#0078D4" },
+                                                { type: "map", name: "Map", icon: "map", accent: "#107C71" },
                                                 { type: "filledMap", name: "Filled map", icon: "filledMap" },
-                                                { type: "shapeMap", name: "Shape map", icon: "map" },
-                                                { type: "arcgisMap", name: "ArcGIS Maps", icon: "map" },
-                                                { type: "gauge", name: "Gauge", icon: "gauge" },
+                                                { type: "shapeMap", name: "Shape map", icon: "shapeMap" },
+                                                { type: "arcgisMap", name: "ArcGIS Maps", icon: "arcgisMap" },
+                                                { type: "gauge", name: "Gauge", icon: "gauge", accent: "#0078D4" },
                                                 { type: "card", name: "Card", icon: "card" },
-                                                { type: "kpi", name: "KPI", icon: "kpi" },
-                                                { type: "slicer", name: "Slicer", icon: "slicer" },
-                                                { type: "table", name: "Table", icon: "table" },
-                                                { type: "matrix", name: "Matrix", icon: "matrix" },
-                                                { type: "rScript", name: "R visual", icon: "script" },
-                                                { type: "pythonScript", name: "Python visual", icon: "script" },
+                                                { type: "kpi", name: "KPI", icon: "kpi", accent: "#0078D4" },
+                                                { type: "slicer", name: "Slicer", icon: "slicer", accent: "#0078D4" },
+                                                { type: "table", name: "Table", icon: "table", accent: "#0078D4" },
+                                                { type: "matrix", name: "Matrix", icon: "matrix", accent: "#0078D4" },
+                                                { type: "rScript", name: "R visual", icon: "script", accent: "#0078D4" },
+                                                { type: "pythonScript", name: "Python visual", icon: "script", accent: "#0078D4" },
                                                 { type: "keyInfluencers", name: "Key influencers", icon: "keyInfluencers" },
                                                 { type: "decomposition", name: "Decomposition tree", icon: "decomposition" },
                                                 { type: "qa", name: "Q&A visual", icon: "qaVisual" },
-                                                { type: "scorecard", name: "Scorecard", icon: "kpi" },
+                                                { type: "scorecard", name: "Scorecard", icon: "scorecard" },
+                                                { type: "removed", name: "", icon: "" },
                                                 { type: "removed", name: "", icon: "" },
                                                 { type: "visualFilter", name: "Visual filter", icon: "filter" },
-                                                { type: "quickVisual", name: "Quick visual", icon: "filter" },
-                                                { type: "smartVisual", name: "Smart visual", icon: "filter" },
+                                                { type: "quickVisual", name: "Quick visual", icon: "quickVisual" },
+                                                { type: "smartVisual", name: "Smart visual", icon: "smartVisual" },
                                                 { type: "image", name: "Image", icon: "image" },
-                                                { type: "moreVisuals", name: "More visuals", icon: "apps" }
+                                                { type: "moreVisuals", name: "More visuals", icon: "galleryMore" }
                                             ]
                                             delegate: Item {
                                                 id: visualTypeTile
@@ -1587,7 +1610,7 @@ ApplicationWindow {
                                                 Rectangle {
                                                     anchors.fill: parent
                                                     visible: visualTypeTile.modelData.type === "removed"
-                                                    color: "#ffffff"
+                                                    color: "#f4f4f4"
                                                     Accessible.ignored: true
                                                 }
                                                 HoverHandler {
@@ -1622,12 +1645,12 @@ ApplicationWindow {
                                                     }
                                                     contentItem: Item {
                                                         Accessible.ignored: true
-                                                        ChartGlyph {
+                                                        Icon {
                                                             anchors.centerIn: parent
-                                                            type: String(visualTypeTile.modelData.type)
+                                                            name: String(visualTypeTile.modelData.icon || "question")
                                                             color: visualTypeTile.modelData.accent || "#647382"
-                                                            implicitWidth: 26
-                                                            implicitHeight: 26
+                                                            implicitWidth: 18
+                                                            implicitHeight: 18
                                                         }
                                                     }
                                                     onClicked: {
@@ -1643,16 +1666,15 @@ ApplicationWindow {
                                     Text {
                                         Layout.fillWidth: true
                                         text: "Values"
-                                        color: "#354755"
-                                        font.pixelSize: 14
+                                        color: "#202020"
+                                        font.pixelSize: 11
                                         font.weight: Font.DemiBold
                                     }
                                     Rectangle {
                                         Layout.fillWidth: true
-                                        Layout.preferredHeight: 34
-                                        color: "#ffffff"
-                                        border.color: "#cfd5d9"
-                                        border.width: 1
+                                        Layout.preferredHeight: 27
+                                        color: "#fafafa"
+                                        border.width: 0
                                         Text {
                                             anchors.fill: parent
                                             anchors.leftMargin: 10
@@ -1660,71 +1682,104 @@ ApplicationWindow {
                                             verticalAlignment: Text.AlignVCenter
                                             text: appController.selectedVisual && appController.sourceLoaded ? "Revenue" : "Add data fields here"
                                             color: appController.selectedVisual && appController.sourceLoaded ? "#425563" : "#78858d"
-                                            font.pixelSize: 12
+                                            font.pixelSize: 10
                                             elide: Text.ElideRight
+                                        }
+                                        Canvas {
+                                            anchors.fill: parent
+                                            onWidthChanged: requestPaint()
+                                            onHeightChanged: requestPaint()
+                                            onPaint: {
+                                                const ctx = getContext("2d")
+                                                ctx.clearRect(0, 0, width, height)
+                                                ctx.strokeStyle = "#bfc3c6"
+                                                ctx.lineWidth = 1
+                                                ctx.setLineDash([3, 3])
+                                                ctx.strokeRect(0.5, 0.5, width - 1, height - 1)
+                                            }
                                         }
                                     }
                                     Text {
                                         Layout.fillWidth: true
-                                        Layout.topMargin: 5
+                                        Layout.topMargin: 4
                                         text: "Drill through"
-                                        color: "#354755"
-                                        font.pixelSize: 14
+                                        color: "#202020"
+                                        font.pixelSize: 11
                                         font.weight: Font.DemiBold
                                     }
                                     RowLayout {
                                         Layout.fillWidth: true
-                                        Layout.preferredHeight: 25
-                                        Text { Layout.fillWidth: true; text: "Cross-report"; color: "#52616b"; font.pixelSize: 12 }
+                                        Layout.preferredHeight: 21
+                                        Text { Layout.fillWidth: true; text: "Cross-report"; color: "#303030"; font.pixelSize: 10 }
                                         Item {
-                                            Layout.preferredWidth: 34
-                                            Layout.preferredHeight: 18
+                                            Layout.preferredWidth: 30
+                                            Layout.preferredHeight: 16
                                             Accessible.name: "Cross-report drill-through; unavailable and off"
                                             Rectangle {
                                                 anchors.fill: parent
-                                                radius: 9
-                                                color: "#c6ccd0"
+                                                radius: 8
+                                                color: "#ffffff"
+                                                border.color: "#aab0b4"
+                                                border.width: 1
                                                 Rectangle {
-                                                    width: 12
-                                                    height: 12
+                                                    width: 10
+                                                    height: 10
                                                     anchors.left: parent.left
-                                                    anchors.leftMargin: 3
+                                                    anchors.leftMargin: 2
                                                     anchors.verticalCenter: parent.verticalCenter
-                                                    radius: 6
-                                                    color: "#ffffff"
+                                                    radius: 5
+                                                    color: "#737b80"
+                                                }
+                                                Text {
+                                                    anchors.right: parent.right
+                                                    anchors.rightMargin: 3
+                                                    anchors.verticalCenter: parent.verticalCenter
+                                                    text: "Off"
+                                                    color: "#50565a"
+                                                    font.pixelSize: 7
+                                                    font.weight: Font.DemiBold
                                                 }
                                             }
                                         }
                                     }
                                     RowLayout {
                                         Layout.fillWidth: true
-                                        Layout.preferredHeight: 25
-                                        Text { Layout.fillWidth: true; text: "Keep all filters"; color: "#52616b"; font.pixelSize: 12 }
+                                        Layout.preferredHeight: 21
+                                        Text { Layout.fillWidth: true; text: "Keep all filters"; color: "#303030"; font.pixelSize: 10 }
                                         Item {
-                                            Layout.preferredWidth: 34
-                                            Layout.preferredHeight: 18
+                                            Layout.preferredWidth: 30
+                                            Layout.preferredHeight: 16
                                             Accessible.name: "Keep all filters; fixed on"
                                             Rectangle {
                                                 anchors.fill: parent
                                                 radius: 9
                                                 color: "#107c71"
                                                 Rectangle {
-                                                    width: 12
-                                                    height: 12
+                                                    width: 10
+                                                    height: 10
                                                     anchors.right: parent.right
-                                                    anchors.rightMargin: 3
+                                                    anchors.rightMargin: 2
                                                     anchors.verticalCenter: parent.verticalCenter
-                                                    radius: 6
+                                                    radius: 5
                                                     color: "#ffffff"
+                                                }
+                                                Text {
+                                                    anchors.left: parent.left
+                                                    anchors.leftMargin: 4
+                                                    anchors.verticalCenter: parent.verticalCenter
+                                                    text: "On"
+                                                    color: "#ffffff"
+                                                    font.pixelSize: 7
+                                                    font.weight: Font.DemiBold
                                                 }
                                             }
                                         }
                                     }
                                     Rectangle {
                                         Layout.fillWidth: true
-                                        Layout.preferredHeight: 32
-                                        color: "#ffffff"
-                                        border.color: "#cfd5d9"
+                                        Layout.preferredHeight: 27
+                                        color: "#fafafa"
+                                        border.width: 0
                                         Text {
                                             anchors.fill: parent
                                             anchors.leftMargin: 8
@@ -1732,8 +1787,21 @@ ApplicationWindow {
                                             verticalAlignment: Text.AlignVCenter
                                             text: "Add drill-through fields here"
                                             color: "#78858d"
-                                            font.pixelSize: 11
+                                            font.pixelSize: 9
                                             elide: Text.ElideRight
+                                        }
+                                        Canvas {
+                                            anchors.fill: parent
+                                            onWidthChanged: requestPaint()
+                                            onHeightChanged: requestPaint()
+                                            onPaint: {
+                                                const ctx = getContext("2d")
+                                                ctx.clearRect(0, 0, width, height)
+                                                ctx.strokeStyle = "#bfc3c6"
+                                                ctx.lineWidth = 1
+                                                ctx.setLineDash([3, 3])
+                                                ctx.strokeRect(0.5, 0.5, width - 1, height - 1)
+                                            }
                                         }
                                     }
                                 }
@@ -1763,7 +1831,7 @@ ApplicationWindow {
                     }
 
                     Item {
-                        Layout.preferredWidth: root.dataPaneExpanded ? 160 : 36
+                        Layout.preferredWidth: root.dataPaneExpanded ? 160 : 18
                         Layout.fillHeight: true
                         Rectangle {
                             anchors.fill: parent

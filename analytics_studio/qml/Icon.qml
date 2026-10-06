@@ -12,7 +12,7 @@ Item {
 
     readonly property string assetName: {
         switch (name) {
-        case "file": case "project": return "document"
+        case "file": case "project": case "document": return "document"
         case "folder": return "folder_open"
         case "semanticModel": return "flowchart"
         case "home": return "home"
@@ -74,6 +74,8 @@ Item {
         case "kpi": case "dataTrending": return "data_trending"
         case "gauge": return "gauge"
         case "slicer": return "filter"
+        case "quickVisual": return "sparkle"
+        case "smartVisual": return "brain_sparkle"
         case "matrix": return "table_multiple"
         case "script": return "code"
         case "keyInfluencers": return "branch"
@@ -122,6 +124,19 @@ Item {
 
     readonly property string exactAssetPath: {
         switch (name) {
+        case "stackedBar": return "icons/visuals/stacked_bar.svg"
+        case "bar100": return "icons/visuals/bar_100.svg"
+        case "stackedColumn": return "icons/visuals/stacked_column.svg"
+        case "column100": return "icons/visuals/column_100.svg"
+        case "stackedArea": return "icons/visuals/stacked_area.svg"
+        case "lineStackedColumn": return "icons/visuals/line_stacked_column.svg"
+        case "lineClusteredColumn": return "icons/visuals/line_clustered_column.svg"
+        case "ribbonChart": return "icons/visuals/ribbon_chart.svg"
+        case "filledMap": return "icons/visuals/filled_map.svg"
+        case "shapeMap": return "icons/visuals/shape_map.svg"
+        case "arcgisMap": return "icons/visuals/arcgis_map.svg"
+        case "scorecard": return "icons/visuals/scorecard.svg"
+        case "galleryMore": return "icons/visuals/more_visuals.svg"
         case "csv": return "icons/get_data_csv.svg"
         case "excel": return "icons/excel_workbook.svg"
         case "excelTile": return "icons/excel_tile.svg"
