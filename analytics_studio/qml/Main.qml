@@ -1659,8 +1659,8 @@ ApplicationWindow {
                                                             name: String(visualTypeTile.modelData.icon || "question")
                                                             color: visualTypeTile.modelData.accent || "#647382"
                                                             useGalleryAtlas: true
-                                                            implicitWidth: 18
-                                                            implicitHeight: 18
+                                                            implicitWidth: 24
+                                                            implicitHeight: 24
                                                         }
                                                     }
                                                     onClicked: {

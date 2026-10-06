@@ -34,9 +34,9 @@ Item {
             return Qt.rect(0, 0, 0, 0)
         const centersX = [121, 174, 228, 281, 334, 387]
         const centersY = [323, 375, 428, 480, 533, 585, 638]
-        return Qt.rect(centersX[index % 6] - 18,
-                       centersY[Math.floor(index / 6)] - 18,
-                       36, 36)
+        return Qt.rect(centersX[index % 6] - 24,
+                       centersY[Math.floor(index / 6)] - 24,
+                       48, 48)
     }
 
     readonly property string assetName: {
