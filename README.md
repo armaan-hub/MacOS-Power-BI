@@ -38,3 +38,5 @@ The Visualizations pane draws each chart glyph from the local vector icon set, a
 The screenshots are offscreen Qt renders, so the native macOS title bar and system menu placement are not represented. The interface is an independent, screenshot-guided shell, not a pixel-identical Power BI clone or a claim of whole-product parity.
 
 Project file behavior is documented in [docs/project-format.md](docs/project-format.md).
+
+See the [functionality implementation roadmap](docs/implementation-roadmap.md) for the planned order from file imports through Home and the remaining ribbon workflows.
