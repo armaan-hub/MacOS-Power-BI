@@ -94,12 +94,6 @@ ApplicationWindow {
             { title: "Share", actions: [
                 { label: "Publish", visibleLabel: "Publish", width: 42, iconName: "share", commandId: "disabled.publish", available: false, description: "Publishing is not available in this release." }
             ]},
-            { title: "AI", actions: [
-                { label: "Prep data for Copilot", visibleLabel: "Prep data for\nCopilot", width: 62, iconName: "aiPrep", commandId: "ai.prepData", available: false, description: "Prepare data for Copilot." }
-            ]},
-            { title: "Copilot", actions: [
-                { label: "Copilot", visibleLabel: "Copilot", width: 44, iconName: "copilot", commandId: "ai.copilot", description: "Open Copilot." }
-            ]}
         ]},
         { groups: [
             { title: "Pages", compact: true, actions: [
@@ -266,8 +260,6 @@ ApplicationWindow {
         case "data.dataverse": appController.reportStagedAction("Dataverse", "Dataverse connections are not implemented yet."); break
         case "data.enterBlank": appController.reportStagedAction("Paste data into a blank table", "Manual table entry is not implemented yet."); break
         case "data.sampleData": appController.reportStagedAction("Use sample data", "Sample data is not available in this release."); break
-        case "ai.prepData": appController.reportStagedAction("Prep data for Copilot", "Copilot data preparation is not implemented yet."); break
-        case "ai.copilot": appController.reportStagedAction("Copilot", "Copilot is not connected to this Analytics Studio project yet."); break
         case "data.refresh": appController.executeCommand("refreshSource"); break
         case "filter.clear": appController.executeCommand("clearFilters"); break
         case "report.addPage": appController.executeCommand("addPage"); break
@@ -1312,9 +1304,9 @@ ApplicationWindow {
             Rectangle {
                 id: reportDock
                 visible: appController.currentView === "Report" && root.inspectorVisible
-                Layout.preferredWidth: visible ? ((root.filtersExpanded ? 145 : 24)
-                                                  + (root.visualizationsVisible ? 160 : 24)
-                                                  + (root.dataPaneExpanded ? 160 : 24)) : 0
+                Layout.preferredWidth: visible ? ((root.filtersExpanded ? 145 : 36)
+                                                  + (root.visualizationsVisible ? 250 : 36)
+                                                  + (root.dataPaneExpanded ? 160 : 36)) : 0
                 Layout.fillHeight: true
                 color: "#ffffff"
                 border.color: "#d4d9dd"
@@ -1322,7 +1314,7 @@ ApplicationWindow {
                     anchors.fill: parent
                     spacing: 0
                     Item {
-                        Layout.preferredWidth: root.filtersExpanded ? 145 : 24
+                        Layout.preferredWidth: root.filtersExpanded ? 145 : 36
                         Layout.fillHeight: true
                         Rectangle {
                             anchors.fill: parent
@@ -1447,7 +1439,7 @@ ApplicationWindow {
                     }
 
                     Item {
-                        Layout.preferredWidth: root.visualizationsVisible ? 160 : 24
+                        Layout.preferredWidth: root.visualizationsVisible ? 250 : 36
                         Layout.fillHeight: true
                         Rectangle {
                             anchors.fill: parent
@@ -1459,21 +1451,21 @@ ApplicationWindow {
                                 RowLayout {
                                     visible: root.visualizationsVisible
                                     Layout.fillWidth: true
-                                    Layout.preferredHeight: 29
-                                    Layout.leftMargin: 7
-                                    Layout.rightMargin: 3
-                                    Icon { name: "visual"; color: "#107C71"; implicitWidth: 14; implicitHeight: 14 }
-                                    Text { Layout.fillWidth: true; text: "Visualizations"; color: "#354755"; font.pixelSize: 9; font.weight: Font.DemiBold }
+                                    Layout.preferredHeight: 48
+                                    Layout.leftMargin: 12
+                                    Layout.rightMargin: 8
+                                    Icon { name: "visual"; color: "#107C71"; implicitWidth: 20; implicitHeight: 20 }
+                                    Text { Layout.fillWidth: true; text: "Visualizations"; color: "#354755"; font.pixelSize: 14; font.weight: Font.DemiBold }
                                     ToolButton {
                                         padding: 0
-                                        implicitWidth: 22
-                                        implicitHeight: 22
+                                        implicitWidth: 34
+                                        implicitHeight: 34
                                         Accessible.name: "Collapse Visualizations pane"
                                         ToolTip.visible: hovered
                                         ToolTip.text: "Collapse Visualizations pane"
                                         onClicked: root.visualizationsVisible = false
                                         background: Rectangle { color: parent.hovered ? "#f1f4f6" : "transparent" }
-                                        contentItem: Icon { name: "collapsePane"; color: "#657784"; implicitWidth: 14; implicitHeight: 14 }
+                                        contentItem: Icon { name: "collapsePane"; color: "#657784"; implicitWidth: 22; implicitHeight: 22 }
                                     }
                                 }
                                 Rectangle { visible: root.visualizationsVisible; Layout.fillWidth: true; height: 1; color: "#e1e5e8" }
@@ -1482,22 +1474,22 @@ ApplicationWindow {
                                     Layout.fillWidth: true
                                     Layout.fillHeight: false
                                     Layout.alignment: Qt.AlignTop
-                                    Layout.leftMargin: 5
-                                    Layout.rightMargin: 5
-                                    Layout.topMargin: 4
-                                    Layout.bottomMargin: 4
-                                    spacing: 3
+                                    Layout.leftMargin: 8
+                                    Layout.rightMargin: 8
+                                    Layout.topMargin: 8
+                                    Layout.bottomMargin: 8
+                                    spacing: 6
                                     Text {
                                         Layout.fillWidth: true
                                         text: "Build visual"
                                         color: "#354755"
-                                        font.pixelSize: 10
+                                        font.pixelSize: 14
                                         font.weight: Font.DemiBold
                                     }
                                     RowLayout {
                                         Layout.fillWidth: true
-                                        Layout.preferredHeight: 26
-                                        spacing: 2
+                                        Layout.preferredHeight: 42
+                                        spacing: 4
                                         Repeater {
                                             model: [
                                                 { label: "Build", icon: "visual", active: true },
@@ -1528,8 +1520,8 @@ ApplicationWindow {
                                                 contentItem: Icon {
                                                     name: String(modelData.icon)
                                                     color: parent.enabled ? "#107c71" : "#9ba5ad"
-                                                    implicitWidth: 16
-                                                    implicitHeight: 16
+                                                    implicitWidth: 22
+                                                    implicitHeight: 22
                                                 }
                                             }
                                         }
@@ -1538,7 +1530,7 @@ ApplicationWindow {
                                     Item {
                                         id: visualGallery
                                         Layout.fillWidth: true
-                                        Layout.preferredHeight: 175
+                                        Layout.preferredHeight: 286
 
                                         Repeater {
                                             model: [
@@ -1630,12 +1622,12 @@ ApplicationWindow {
                                                     }
                                                     contentItem: Item {
                                                         Accessible.ignored: true
-                                                        Icon {
+                                                        ChartGlyph {
                                                             anchors.centerIn: parent
-                                                            name: String(visualTypeTile.modelData.icon || "question")
+                                                            type: String(visualTypeTile.modelData.type)
                                                             color: visualTypeTile.modelData.accent || "#647382"
-                                                            implicitWidth: 19
-                                                            implicitHeight: 19
+                                                            implicitWidth: 26
+                                                            implicitHeight: 26
                                                         }
                                                     }
                                                     onClicked: {
@@ -1652,53 +1644,53 @@ ApplicationWindow {
                                         Layout.fillWidth: true
                                         text: "Values"
                                         color: "#354755"
-                                        font.pixelSize: 9
+                                        font.pixelSize: 14
                                         font.weight: Font.DemiBold
                                     }
                                     Rectangle {
                                         Layout.fillWidth: true
-                                        Layout.preferredHeight: 22
+                                        Layout.preferredHeight: 34
                                         color: "#ffffff"
                                         border.color: "#cfd5d9"
                                         border.width: 1
                                         Text {
                                             anchors.fill: parent
-                                            anchors.leftMargin: 8
-                                            anchors.rightMargin: 4
+                                            anchors.leftMargin: 10
+                                            anchors.rightMargin: 6
                                             verticalAlignment: Text.AlignVCenter
                                             text: appController.selectedVisual && appController.sourceLoaded ? "Revenue" : "Add data fields here"
                                             color: appController.selectedVisual && appController.sourceLoaded ? "#425563" : "#78858d"
-                                            font.pixelSize: 9
+                                            font.pixelSize: 12
                                             elide: Text.ElideRight
                                         }
                                     }
                                     Text {
                                         Layout.fillWidth: true
-                                        Layout.topMargin: 2
+                                        Layout.topMargin: 5
                                         text: "Drill through"
                                         color: "#354755"
-                                        font.pixelSize: 9
+                                        font.pixelSize: 14
                                         font.weight: Font.DemiBold
                                     }
                                     RowLayout {
                                         Layout.fillWidth: true
-                                        Layout.preferredHeight: 17
-                                        Text { Layout.fillWidth: true; text: "Cross-report"; color: "#52616b"; font.pixelSize: 9 }
+                                        Layout.preferredHeight: 25
+                                        Text { Layout.fillWidth: true; text: "Cross-report"; color: "#52616b"; font.pixelSize: 12 }
                                         Item {
-                                            Layout.preferredWidth: 24
-                                            Layout.preferredHeight: 12
+                                            Layout.preferredWidth: 34
+                                            Layout.preferredHeight: 18
                                             Accessible.name: "Cross-report drill-through; unavailable and off"
                                             Rectangle {
                                                 anchors.fill: parent
-                                                radius: 6
+                                                radius: 9
                                                 color: "#c6ccd0"
                                                 Rectangle {
-                                                    width: 8
-                                                    height: 8
+                                                    width: 12
+                                                    height: 12
                                                     anchors.left: parent.left
-                                                    anchors.leftMargin: 2
+                                                    anchors.leftMargin: 3
                                                     anchors.verticalCenter: parent.verticalCenter
-                                                    radius: 4
+                                                    radius: 6
                                                     color: "#ffffff"
                                                 }
                                             }
@@ -1706,23 +1698,23 @@ ApplicationWindow {
                                     }
                                     RowLayout {
                                         Layout.fillWidth: true
-                                        Layout.preferredHeight: 17
-                                        Text { Layout.fillWidth: true; text: "Keep all filters"; color: "#52616b"; font.pixelSize: 9 }
+                                        Layout.preferredHeight: 25
+                                        Text { Layout.fillWidth: true; text: "Keep all filters"; color: "#52616b"; font.pixelSize: 12 }
                                         Item {
-                                            Layout.preferredWidth: 24
-                                            Layout.preferredHeight: 12
+                                            Layout.preferredWidth: 34
+                                            Layout.preferredHeight: 18
                                             Accessible.name: "Keep all filters; fixed on"
                                             Rectangle {
                                                 anchors.fill: parent
-                                                radius: 6
+                                                radius: 9
                                                 color: "#107c71"
                                                 Rectangle {
-                                                    width: 8
-                                                    height: 8
+                                                    width: 12
+                                                    height: 12
                                                     anchors.right: parent.right
-                                                    anchors.rightMargin: 2
+                                                    anchors.rightMargin: 3
                                                     anchors.verticalCenter: parent.verticalCenter
-                                                    radius: 4
+                                                    radius: 6
                                                     color: "#ffffff"
                                                 }
                                             }
@@ -1730,17 +1722,17 @@ ApplicationWindow {
                                     }
                                     Rectangle {
                                         Layout.fillWidth: true
-                                        Layout.preferredHeight: 20
+                                        Layout.preferredHeight: 32
                                         color: "#ffffff"
                                         border.color: "#cfd5d9"
                                         Text {
                                             anchors.fill: parent
-                                            anchors.leftMargin: 6
-                                            anchors.rightMargin: 4
+                                            anchors.leftMargin: 8
+                                            anchors.rightMargin: 6
                                             verticalAlignment: Text.AlignVCenter
                                             text: "Add drill-through fields here"
                                             color: "#78858d"
-                                            font.pixelSize: 8
+                                            font.pixelSize: 11
                                             elide: Text.ElideRight
                                         }
                                     }
@@ -1761,8 +1753,8 @@ ApplicationWindow {
                                         border.color: parent.activeFocus ? "#0078D4" : "#e0e3e6"
                                     }
                                     contentItem: Item {
-                                        Icon { anchors.horizontalCenter: parent.horizontalCenter; anchors.top: parent.top; anchors.topMargin: 9; name: "visual"; color: "#107C71"; implicitWidth: 17; implicitHeight: 17 }
-                                        Text { anchors.centerIn: parent; text: "Visualizations"; rotation: -90; color: "#526573"; font.pixelSize: 9 }
+                                        Icon { anchors.horizontalCenter: parent.horizontalCenter; anchors.top: parent.top; anchors.topMargin: 9; name: "visual"; color: "#107C71"; implicitWidth: 20; implicitHeight: 20 }
+                                        Text { anchors.centerIn: parent; text: "Visualizations"; rotation: -90; color: "#526573"; font.pixelSize: 11 }
                                     }
                                     onClicked: root.visualizationsVisible = true
                                 }
@@ -1771,7 +1763,7 @@ ApplicationWindow {
                     }
 
                     Item {
-                        Layout.preferredWidth: root.dataPaneExpanded ? 160 : 24
+                        Layout.preferredWidth: root.dataPaneExpanded ? 160 : 36
                         Layout.fillHeight: true
                         Rectangle {
                             anchors.fill: parent
