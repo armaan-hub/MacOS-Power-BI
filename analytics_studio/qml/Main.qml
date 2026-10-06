@@ -1304,8 +1304,8 @@ ApplicationWindow {
             Rectangle {
                 id: reportDock
                 visible: appController.currentView === "Report" && root.inspectorVisible
-                Layout.preferredWidth: visible ? ((root.filtersExpanded ? 145 : 32)
-                                                  + (root.visualizationsVisible ? 180 : 24)
+                Layout.preferredWidth: visible ? ((root.filtersExpanded ? 145 : 33)
+                                                  + (root.visualizationsVisible ? 181 : 24)
                                                   + (root.dataPaneExpanded ? 160 : 29)) : 0
                 Layout.fillHeight: true
                 color: "#ffffff"
@@ -1314,7 +1314,7 @@ ApplicationWindow {
                     anchors.fill: parent
                     spacing: 0
                     Item {
-                        Layout.preferredWidth: root.filtersExpanded ? 145 : 32
+                        Layout.preferredWidth: root.filtersExpanded ? 145 : 33
                         Layout.fillHeight: true
                         Rectangle {
                             anchors.fill: parent
@@ -1440,7 +1440,7 @@ ApplicationWindow {
                     }
 
                     Item {
-                        Layout.preferredWidth: root.visualizationsVisible ? 180 : 24
+                        Layout.preferredWidth: root.visualizationsVisible ? 181 : 24
                         Layout.fillHeight: true
                         Rectangle {
                             anchors.fill: parent
@@ -1453,7 +1453,7 @@ ApplicationWindow {
                                     visible: root.visualizationsVisible
                                     Layout.fillWidth: true
                                     Layout.preferredHeight: 16
-                                    Layout.leftMargin: 12
+                                    Layout.leftMargin: 9
                                     Layout.rightMargin: 8
                                     Text { Layout.fillWidth: true; text: "Visualizations"; color: "#202020"; font.pixelSize: 11; font.weight: Font.DemiBold }
                                     ToolButton {
@@ -1474,7 +1474,7 @@ ApplicationWindow {
                                     Layout.fillWidth: true
                                     Layout.fillHeight: false
                                     Layout.alignment: Qt.AlignTop
-                                    Layout.leftMargin: 8
+                                    Layout.leftMargin: 9
                                     Layout.rightMargin: 8
                                     Layout.topMargin: 4
                                     Layout.bottomMargin: 4
@@ -1553,7 +1553,7 @@ ApplicationWindow {
                                     Item {
                                         id: visualGallery
                                         Layout.fillWidth: true
-                                        Layout.preferredHeight: 190
+                                        Layout.preferredHeight: 200
 
                                         Repeater {
                                             model: [
@@ -1674,6 +1674,7 @@ ApplicationWindow {
                                     Rectangle {
                                         Layout.fillWidth: true
                                         Layout.preferredHeight: 27
+                                        Layout.topMargin: 10
                                         color: "#fafafa"
                                         border.width: 0
                                         Text {
@@ -1702,7 +1703,7 @@ ApplicationWindow {
                                     }
                                     Text {
                                         Layout.fillWidth: true
-                                        Layout.topMargin: 4
+                                        Layout.topMargin: 10
                                         text: "Drill through"
                                         color: "#202020"
                                         font.pixelSize: 11
@@ -1710,7 +1711,7 @@ ApplicationWindow {
                                     }
                                     RowLayout {
                                         Layout.fillWidth: true
-                                        Layout.preferredHeight: 21
+                                        Layout.preferredHeight: 24
                                         Text { Layout.fillWidth: true; text: "Cross-report"; color: "#303030"; font.pixelSize: 10 }
                                         Item {
                                             Layout.preferredWidth: 30
@@ -1745,7 +1746,7 @@ ApplicationWindow {
                                     }
                                     RowLayout {
                                         Layout.fillWidth: true
-                                        Layout.preferredHeight: 21
+                                        Layout.preferredHeight: 24
                                         Text { Layout.fillWidth: true; text: "Keep all filters"; color: "#303030"; font.pixelSize: 10 }
                                         Item {
                                             Layout.preferredWidth: 30
@@ -1779,6 +1780,7 @@ ApplicationWindow {
                                     Rectangle {
                                         Layout.fillWidth: true
                                         Layout.preferredHeight: 27
+                                        Layout.topMargin: 2
                                         color: "#fafafa"
                                         border.width: 0
                                         Text {
