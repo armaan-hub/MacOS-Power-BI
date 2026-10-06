@@ -1,6 +1,6 @@
 # Functionality Implementation Roadmap
 
-This is a local data and report workflow roadmap. First finish **Home → Get data → File**; then complete the rest of Home and proceed through the other ribbon tabs. Build and finish one user workflow at a time. It does not promise that every connector or cloud command will become active.
+This is a local data and report workflow roadmap. The bounded **Home → Get data → File** import flow is implemented; finish its lifecycle verification before completing the rest of Home and proceeding through the other ribbon tabs. Build and finish one user workflow at a time. It does not promise that every connector or cloud command will become active.
 
 Keep the established ribbon and Visualizations pane layout while adding behavior. Excel import remains supported. Existing connector entries can remain visible with their current staged/unavailable status; this roadmap does not add service integrations. Copilot and Power Automate are excluded throughout. A control should look available only when its workflow works end to end; apply that rule in the ribbon, menus, picker, and shortcut surfaces.
 
@@ -8,22 +8,22 @@ Keep the established ribbon and Visualizations pane layout while adding behavior
 
 These items already work in the current app:
 
-- Import CSV and Excel `.xlsx`/`.xlsm` files. Excel currently imports the first worksheet without asking which sheet to use.
+- Import CSV, Excel, flat JSON, and regular-record XML through a bounded preview-and-confirm dialog. The project format is now v2 and stores the active source and parser options; v1 projects migrate on load and upgrade on explicit save.
 - Show the loaded source in Data and Model, with a 500-row Data view preview; refresh a linked file; save and reopen `.npa` projects.
 - Use New/Open/Save/Save As, add a report page, switch the supported revenue charts between bar/column/line, and use the core pane and zoom controls.
 
 These visible entries are staged or incomplete:
 
-- JSON, XML, Folder, PDF, and Parquet file import.
+- Folder, PDF, and Parquet file import.
 - Enter data, sample data, and Transform data.
 - Generic visual authoring, text boxes, shapes, buttons, calculations, relationships, and most Optimize actions.
 - Database and online/service connectors. Their presence in a catalog or ribbon does not mean they connect.
 
-The current runtime loads one active table at a time. `.npa` files link to external data paths and store model metadata; they do not embed imported rows. The import code reads the full file into memory, so the 500-row preview limit is not a file-size limit.
+The current runtime loads one active table at a time. `.npa` files link to external data paths and store model metadata; they do not embed imported rows. The Data view displays up to 500 rows; import preview displays up to 100 while reporting full counts. The parser enforces separate input, row, column, cell, and expanded-workbook limits.
 
 ## 2. Define the file import behavior
 
-The **File connector category** under **Home → Get data** is the first implementation milestone. It is separate from **Insert → More visuals → From my files**, which is for visual assets.
+The **File connector category** under **Home → Get data** is the first implementation milestone. Its implementation is in place; the lifecycle gate below remains. It is separate from **Insert → More visuals → From my files**, which is for visual assets.
 
 Use this flow for each supported tabular format:
 
@@ -45,47 +45,49 @@ Do not change the loaded project while a file is being selected, configured, or 
 
 ### Step 2.1 — Make file routing explicit
 
-The current generic picker treats every non-CSV suffix as Excel. Replace that fallback with an explicit extension/type allowlist. Unknown extensions, wrong file contents, and legacy `.xls` must show a clear unsupported-format message; they must never reach the Excel parser.
+**Implemented:** all file entry points use an explicit extension/type allowlist. Unknown extensions, wrong file contents, and legacy `.xls` show an error and never reach the Excel parser.
 
 Keep current support labeled accurately while work proceeds:
 
 | Format | Current state | From Files v1 behavior |
 |---|---|---|
-| Text/CSV | Working | Preview delimiter, encoding, and header choice; preserve quoted separators and newlines; handle BOM, blank/duplicate headers, uneven rows, and empty files predictably. |
-| Excel `.xlsx` / `.xlsm` | Working, first sheet only | Let the user choose one worksheet and its header row. Show a preview before import. Never execute macros. Use stored cached formula values; if a formula has no cached value, import it as blank and explain that Analytics Studio does not recalculate formulas. |
-| JSON | Catalog entry only | Accept a top-level array of flat objects with scalar values. Use a deterministic column order; reject nested objects/arrays with an actionable message. |
-| XML | Catalog entry only | Accept one unambiguous repeated record collection with scalar child fields. Reject mixed or irregular structures clearly. |
+| Text/CSV | Implemented | Preview delimiter, encoding, and header choice; preserve quoted separators and newlines; normalize BOM, blank/duplicate headers, and ragged rows predictably. |
+| Excel `.xlsx` / `.xlsm` | Implemented | Choose one worksheet and its header row. Use cached formula values; formulas are not recalculated and missing cached results import as blank with a notice. |
+| JSON | Implemented | Accept a non-empty top-level array of flat objects with scalar values and deterministic first-seen columns; reject nested values and duplicate object keys. |
+| XML | Implemented | Accept one repeated direct-child record collection with identical ordered scalar child fields; reject mixed, irregular, nested, attributed, or ambiguous structures. |
 | Parquet | Catalog entry only | Defer until reader dependency, packaging, and number/date/null type behavior are decided. |
 | Folder | Catalog entry only | Defer until combine rules, schema mismatch handling, provenance, refresh, and partial failure behavior are defined. |
 | PDF | Catalog entry only | Treat as a separate document/table extraction feature; define page selection, extraction confidence, and OCR scope first. |
 | Legacy `.xls` | Unsupported | Add only after choosing and packaging a parser deliberately. |
 
-JSON and XML support above is planned, not implemented today. Keep them disabled or clearly marked unavailable until their parsers pass the same import gate as CSV and Excel. Do the same for every deferred format and every ribbon/menu shortcut that reaches a staged connector.
+The catalog enables CSV, Excel, JSON, and XML because each now has a parser and the shared preview/confirmation flow. Keep Folder, PDF, Parquet, database, and service connectors visibly unavailable until their complete workflows are implemented.
+
+All four formats are bounded to 10 MiB input files, 100,000 rows, 512 columns, and 500,000 cells; Excel packages also have an 80 MiB total uncompressed limit. These defensive limits are not minimum-Mac performance benchmarks. Larger inputs are rejected rather than silently truncated.
 
 ### Step 2.2 — Build the common preview and commit path
 
-1. Route a selected format to its parser. Keep format-specific options in the file dialog: CSV delimiter/encoding/header settings, Excel worksheet/header settings, and any JSON/XML selection required by their bounded v1 shapes.
-2. Show a bounded preview and accurate row/column counts. Normalize blank or duplicate headers deterministically and use the same null/value rules across parsers.
-3. Validate the complete candidate before replacing the active table. Show useful errors that identify the file and the problem.
-4. If a table is already loaded, include the replacement warning in the final import confirmation. Declining it leaves the loaded project untouched.
-5. On success, update the active source and table once, then refresh the Data view, Model view, fields, and supported report summaries.
+1. **Implemented:** route every supported selected format through one parser. The dialog exposes CSV delimiter/encoding/header settings and Excel worksheet/header settings; JSON/XML use their bounded shapes.
+2. **Implemented:** show a bounded preview and accurate row/column counts; normalize headers; use consistent blank-value rules.
+3. **Implemented:** validate the full candidate and report file-specific parser errors before replacing the active table.
+4. **Implemented:** include the replacement warning in the final Import data action when a table is loaded.
+5. **Implemented:** commit the active source, parser options, model table, Data view, fields, and supported report summaries after confirmation.
 
-V1 has one active tabular table. It does not imply joins or simultaneous loaded tables. Persist an explicit active source identifier so a project with older source metadata reopens the same active file deterministically. For an older project that has multiple supported file sources and no active identifier, default to the first supported file source (matching the current open behavior), then persist the selected ID on save. Keep inactive metadata clearly separate from the active table. Persist parser options such as the selected worksheet and header row so refresh reproduces the same table shape. Keep the existing external-path behavior and handle Save As, missing paths, and re-import clearly.
+V1 still has one active tabular table; it does not imply joins or simultaneous loaded tables. **Implemented:** `.npa` v2 persists an explicit active source and parser options. V1 migration selects the first CSV/Excel source as before, then the next explicit save writes v2. Keep inactive metadata separate from the active table and preserve path behavior for Save As, missing files, and re-import.
 
-Before calling imports ready for general file sizes, measure a practical supported limit on the minimum supported Mac and enforce it. If parsing above that limit blocks the window, move the work off the UI thread and show progress/cancel. Do not silently truncate imported data; 500 rows is only the current on-screen preview cap.
+Before calling imports ready for general file sizes, measure a practical supported limit on the minimum supported Mac. The current caps are defensive and are not that benchmark. If supported inputs block the window, move parsing off the UI thread and show progress/cancel. Do not silently truncate imported data; 500 rows is only the current Data view preview cap.
 
 ### Step 2.3 — Pass the From Files v1 gate
 
 Complete these checks separately for CSV, Excel, JSON, and XML before beginning the Home feature work:
 
-1. Select a representative file, preview the same rows/columns that will be imported, confirm, and see the data in Data and Model.
-2. Cover format edge cases: CSV BOM/quoting/headers/uneven rows; multiple Excel sheets, blank sheets, dates, booleans, and formulas; JSON/XML supported and rejected shapes.
-3. Save the project, close it, reopen it, and confirm the same source and parser options restore. Refresh after the linked file changes and confirm the table updates correctly.
-4. Cover Save As for relative and absolute source paths, missing files, re-import, corrupt/empty files, unknown suffixes, permissions, and size-limit rejection.
-5. Confirm cancellation or any failure leaves the last good source, table, report, and dirty state unchanged.
-6. Check all UI entry points. Only formats with working importers may look enabled; staged entries must explain their unavailable state.
+1. Verify representative files preview the same candidate rows/columns that the confirmation commits; confirm visibility in Data and Model.
+2. Extend edge checks for CSV BOM/quoting/headers/ragged rows; multiple/blank Excel sheets, dates, booleans, and cached/missing formulas; and supported/rejected JSON/XML shapes. Parser unit coverage exists for the bounded shapes; workbook dates/formula edge fixtures remain to verify.
+3. Verify save, close, reopen, refresh, parser-option restoration, and Save As for relative and absolute paths.
+4. Verify missing files, re-import, corrupt/empty files, unknown suffixes, permissions, and size-limit rejection.
+5. Verify cancellation or any failure leaves the last good source, table, report, and dirty state unchanged.
+6. Check every file UI entry point and keep all deferred formats visibly unavailable.
 
-**From Files v1 is done** when all four declared formats pass this lifecycle gate and the deferred formats are visibly unavailable. The format list is deliberately bounded; this does not claim every file-related catalog entry works.
+**Verification status:** 31 automated tests pass, covering CSV/Excel/JSON/XML parser behavior, file-catalog routing, preview, commit and project reopen for all four formats, CSV refresh and failed-refresh preservation, deeply nested JSON error handling on refresh and project open, and v1 project migration. Python compilation and an offscreen Qt Quick startup check also pass. The remaining lifecycle gate includes Save As with relative and absolute links, missing-file recovery, and Excel date/boolean/formula fixtures. The current input limits also need a minimum-Mac performance check. The format list is deliberately bounded; this does not claim every file-related catalog entry works.
 
 ## 3. Complete Home
 
@@ -93,11 +95,11 @@ Implement Home in this order so each step reuses the tested import path.
 
 ### Step 3.1 — Finish Home’s data commands
 
-1. Route **Get data** and the Excel shortcut through the common importer and show the correct format status.
-2. Make **Recent sources** a real recent-file list with deterministic reopen behavior. Keep recent history distinct from the one active table.
+1. **Implemented:** route **Get data**, CSV/Excel shortcuts, and file catalog selection through the common importer with format-specific status.
+2. Make **Recent sources** a real recent-file list with deterministic reopen behavior. It currently exposes the active source and refreshes it using saved options. Keep future recent history distinct from the one active table.
 3. Make **Refresh** dispatch by the active source kind and preserve last-good data when a refresh fails.
 4. Add **Enter data** as an editable, validated grid. Add **Sample data** with a deterministic built-in dataset.
-5. Before enabling Enter/Sample data, define how inline rows and columns are stored in `.npa`. This requires a documented project format change and migration behavior because version 1 stores source paths and table metadata, not rows. Inline sources replace the active table like file imports; Refresh is unavailable for them.
+5. Before enabling Enter/Sample data, define how inline rows and columns are stored in `.npa`. Version 2 stores source paths and table metadata, not imported rows. Inline sources replace the active table like file imports; Refresh is unavailable for them.
 
 ### Step 3.2 — Add data transformation
 

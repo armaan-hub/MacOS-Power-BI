@@ -29,8 +29,8 @@ Popup {
         if (menuType === "recentSources") {
             if (controller && controller.sourceLoaded)
                 return [{ label: controller.sourceName, icon: controller.sourceIconName,
-                          action: controller.sourceIconName === "excel" ? "recent.excel" : "recent.csv",
-                          detail: controller.sourceIconName === "excel" ? "Excel Workbook" : "Text/CSV" }]
+                          action: "recent." + controller.sourceIconName,
+                          detail: ({ csv: "Text/CSV", excel: "Excel Workbook", json: "JSON", xml: "XML" })[controller.sourceIconName] || "File" }]
             return [{ label: "No recent sources", icon: "history", enabled: false,
                       detail: "Your recent data sources will appear here." }]
         }

@@ -107,7 +107,9 @@ def _entry(category: str, name: str) -> dict[str, object]:
     status = "Preview" if "preview" in name.casefold() else (
         "Beta" if "beta" in name.casefold() else ""
     )
-    implemented = category == "File" and name in {"Text/CSV", "Excel Workbook"}
+    implemented = category == "File" and name in {
+        "Text/CSV", "Excel Workbook", "XML", "JSON",
+    }
     return {
         "id": f"{category_key}_{name_key}",
         "name": name,

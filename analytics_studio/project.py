@@ -14,8 +14,9 @@ from uuid import uuid4
 
 
 FORMAT_ID = "com.analytics-studio.project"
-FORMAT_VERSION = 1
+FORMAT_VERSION = 2
 SUPPORTED_VIEWS = {"Report", "Data", "Model"}
+SUPPORTED_FILE_KINDS = {"csv", "excel", "json", "xml"}
 
 
 class ProjectFileError(Exception):
@@ -41,6 +42,7 @@ def new_project(name: str = "Untitled Project") -> dict[str, Any]:
         "created_at": now,
         "modified_at": now,
         "active_view": "Report",
+        "active_source_id": None,
         "data_sources": [],
         "report": {
             "pages": [{
@@ -68,7 +70,11 @@ def validate_project(value: Any) -> dict[str, Any]:
         raise UnsupportedProjectVersion(
             f"This project uses format version {version}; this app supports up to {FORMAT_VERSION}."
         )
-    if version != FORMAT_VERSION:
+    if version == 1:
+        value = _migrate_v1_to_v2(value)
+    elif version == FORMAT_VERSION:
+        value = deepcopy(value)
+    else:
         raise UnsupportedProjectVersion(f"Project format version {version} is not supported.")
 
     for key in ("project_id", "name", "created_at", "modified_at"):
@@ -81,6 +87,7 @@ def validate_project(value: Any) -> dict[str, Any]:
     sources = value.get("data_sources")
     if not isinstance(sources, list):
         raise ProjectFileError("The project data_sources field must be a list.")
+    source_ids: set[str] = set()
     for source in sources:
         if not isinstance(source, dict):
             raise ProjectFileError("Each data source must be a JSON object.")
@@ -89,6 +96,32 @@ def validate_project(value: Any) -> dict[str, Any]:
                 raise ProjectFileError(f"Each data source needs a non-empty {key!r} field.")
         if "\x00" in source["path"]:
             raise ProjectFileError("A data source path contains an invalid character.")
+        if source["id"] in source_ids:
+            raise ProjectFileError(f"Data source ID {source['id']!r} is duplicated.")
+        source_ids.add(source["id"])
+
+    active_source_id = value.get("active_source_id")
+    if active_source_id is not None and (
+        not isinstance(active_source_id, str)
+        or not active_source_id.strip()
+        or not any(source.get("id") == active_source_id for source in sources)
+    ):
+        raise ProjectFileError("The active_source_id must be null or match an existing data source.")
+
+    # Add defaults for early v2 documents that omit options. Validate and canonicalize
+    # persisted settings so refresh and reopen interpret the source consistently.
+    from analytics_studio.file_import import default_options, normalize_options
+
+    for source in sources:
+        if source.get("kind") not in SUPPORTED_FILE_KINDS:
+            continue
+        options = source.get("parser_options", default_options(source["kind"]))
+        try:
+            source["parser_options"] = normalize_options(source["kind"], options)
+        except (TypeError, ValueError) as exc:
+            raise ProjectFileError(
+                f"The parser_options for data source {source['id']!r} are invalid: {exc}"
+            ) from exc
 
     report = value.get("report")
     pages = report.get("pages") if isinstance(report, dict) else None
@@ -138,6 +171,27 @@ def validate_project(value: Any) -> dict[str, Any]:
             raise ProjectFileError("Each model relationship must define string from and to values.")
 
     return deepcopy(value)
+
+
+def _migrate_v1_to_v2(value: dict[str, Any]) -> dict[str, Any]:
+    """Convert v1 in memory, preserving its first CSV/Excel source selection rule."""
+    from analytics_studio.file_import import default_options
+
+    migrated = deepcopy(value)
+    sources = migrated.get("data_sources")
+    if not isinstance(sources, list):
+        sources = []
+    active = next(
+        (source for source in sources
+         if isinstance(source, dict) and source.get("kind") in {"csv", "excel"}),
+        None,
+    )
+    migrated["active_source_id"] = active.get("id") if active else None
+    for source in sources:
+        if isinstance(source, dict) and source.get("kind") in SUPPORTED_FILE_KINDS:
+            source.setdefault("parser_options", default_options(source["kind"]))
+    migrated["format_version"] = 2
+    return migrated
 
 
 def _read_project(path: Path) -> dict[str, Any]:

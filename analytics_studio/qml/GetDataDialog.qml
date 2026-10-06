@@ -376,13 +376,22 @@ Dialog {
                     Text {
                         Layout.fillWidth: true
                         visible: Boolean(root.selectedSource())
-                        text: root.selectedSource()
-                              ? (root.selectedSource().implemented
-                                 ? (root.selectedSource().iconName === "excel"
-                                    ? "Excel Workbook is ready. Choose an .xlsx or .xlsm file to import its first worksheet; the first non-empty row supplies column names."
-                                    : "Text/CSV is ready. Choose a CSV file to import it into the current project.")
-                                 : "This connector is listed for discovery; connection support is not implemented in Analytics Studio yet.")
-                              : "Choose a connector from the list to see its status."
+                        text: {
+                            const source = root.selectedSource()
+                            if (!source)
+                                return "Choose a connector from the list to see its status."
+                            if (!source.implemented)
+                                return "This connector is listed for discovery; connection support is not implemented in Analytics Studio yet."
+                            if (source.iconName === "excel")
+                                return "Excel Workbook is ready. Choose an .xlsx or .xlsm file, select a worksheet and header row, then preview the table before import."
+                            if (source.iconName === "csv")
+                                return "Text/CSV is ready. Choose a CSV file, set delimiter, encoding, and header options, then preview before import."
+                            if (source.iconName === "json")
+                                return "JSON is ready for flat arrays of objects with scalar values. Choose a .json file and preview before import."
+                            if (source.iconName === "xml")
+                                return "XML is ready for one regular collection of records with scalar fields. Choose an .xml file and preview before import."
+                            return "This connector is ready. Choose a file to continue."
+                        }
                         color: "#52636f"
                         font.pixelSize: 11
                         wrapMode: Text.Wrap
@@ -400,7 +409,7 @@ Dialog {
                     Item { Layout.fillHeight: true }
                     Text {
                         Layout.fillWidth: true
-                        text: "Excel Workbook and Text/CSV have active importers in this build."
+                        text: "CSV, Excel, JSON, and XML file importers are available. Folder, PDF, and Parquet remain unavailable."
                         color: "#788691"
                         font.pixelSize: 9
                         wrapMode: Text.Wrap
@@ -444,7 +453,7 @@ Dialog {
                     implicitHeight: 31
                     enabled: Boolean(root.selectedSource()) && Boolean(root.selectedSource().implemented)
                     Accessible.name: "Connect to selected data source"
-                    Accessible.description: enabled ? "Open the selected file picker." : "Only Excel Workbook and Text/CSV are available in this release."
+                    Accessible.description: enabled ? "Open the selected file picker." : "Only supported file types are available in this release."
                     onClicked: root.requestConnection()
                     background: Rectangle {
                         color: !parent.enabled ? "#e8ebed" : (parent.hovered ? "#006bb3" : "#0078d4")

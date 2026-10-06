@@ -3,15 +3,15 @@ import QtQuick.Controls 6.5
 import QtQuick.Layouts 6.5
 
 ApplicationWindow {
-    id: root
+    id: mainWindow
     visible: true
     width: 1740
     height: 1100
     minimumWidth: 1040
     minimumHeight: 680
-    title: appController.windowTitle
+    title: mainWindow.studioController.windowTitle
     color: "#f1f2f3"
-    property var studioController: appController
+    required property var studioController
     property string ribbonTabName: "Home"
     property string lastWorkspaceView: ""
     property bool navigationVisible: true
@@ -221,7 +221,7 @@ ApplicationWindow {
     }
 
     function groupsForRibbonTab(tabDefinition, tabName) {
-        if (appController.currentView === "Data" && tabName === "Home")
+        if (mainWindow.studioController.currentView === "Data" && tabName === "Home")
             return dataHomeGroups
         return tabDefinition.groups || []
     }
@@ -231,40 +231,40 @@ ApplicationWindow {
     }
 
     function navigateToView(viewName) {
-        appController.setCurrentView(viewName)
+        mainWindow.studioController.setCurrentView(viewName)
     }
 
     Connections {
-        target: appController
+        target: mainWindow.studioController
         function onStateChanged() {
-            const viewName = String(appController.currentView)
-            if (root.lastWorkspaceView !== viewName) {
-                root.lastWorkspaceView = viewName
-                root.selectRibbonForView(viewName)
+            const viewName = String(mainWindow.studioController.currentView)
+            if (mainWindow.lastWorkspaceView !== viewName) {
+                mainWindow.lastWorkspaceView = viewName
+                mainWindow.selectRibbonForView(viewName)
             }
         }
     }
 
     function runCommand(commandId) {
         switch (commandId) {
-        case "project.new": clearFieldSearch(); appController.executeCommand("newProject"); break
-        case "project.open": clearFieldSearch(); appController.executeCommand("openProject"); break
-        case "project.save": appController.executeCommand("saveProject"); break
-        case "project.saveAs": appController.executeCommand("saveProjectAs"); break
+        case "project.new": clearFieldSearch(); mainWindow.studioController.executeCommand("newProject"); break
+        case "project.open": clearFieldSearch(); mainWindow.studioController.executeCommand("openProject"); break
+        case "project.save": mainWindow.studioController.executeCommand("saveProject"); break
+        case "project.saveAs": mainWindow.studioController.executeCommand("saveProjectAs"); break
         case "data.openPicker": openGetDataPicker(null); break
-        case "data.importCsv": clearFieldSearch(); appController.executeCommand("importCsv"); break
-        case "data.importExcel": clearFieldSearch(); appController.executeCommand("importExcel"); break
-        case "data.importFile": clearFieldSearch(); appController.executeCommand("importData"); break
-        case "data.oneLakeCatalog": appController.reportStagedAction("OneLake catalog", "OneLake catalog connections are not implemented yet."); break
-        case "data.sqlServer": appController.reportStagedAction("SQL Server", "SQL Server connections are not implemented yet."); break
-        case "data.dataverse": appController.reportStagedAction("Dataverse", "Dataverse connections are not implemented yet."); break
-        case "data.enterBlank": appController.reportStagedAction("Paste data into a blank table", "Manual table entry is not implemented yet."); break
-        case "data.sampleData": appController.reportStagedAction("Use sample data", "Sample data is not available in this release."); break
-        case "data.refresh": appController.executeCommand("refreshSource"); break
-        case "filter.clear": appController.executeCommand("clearFilters"); break
-        case "report.addPage": appController.executeCommand("addPage"); break
-        case "report.addMonthly": appController.executeCommand("addMonthlyChart"); break
-        case "report.addRegion": appController.executeCommand("addRegionChart"); break
+        case "data.importCsv": clearFieldSearch(); mainWindow.studioController.executeCommand("importCsv"); break
+        case "data.importExcel": clearFieldSearch(); mainWindow.studioController.executeCommand("importExcel"); break
+        case "data.importFile": clearFieldSearch(); mainWindow.studioController.executeCommand("importData"); break
+        case "data.oneLakeCatalog": mainWindow.studioController.reportStagedAction("OneLake catalog", "OneLake catalog connections are not implemented yet."); break
+        case "data.sqlServer": mainWindow.studioController.reportStagedAction("SQL Server", "SQL Server connections are not implemented yet."); break
+        case "data.dataverse": mainWindow.studioController.reportStagedAction("Dataverse", "Dataverse connections are not implemented yet."); break
+        case "data.enterBlank": mainWindow.studioController.reportStagedAction("Paste data into a blank table", "Manual table entry is not implemented yet."); break
+        case "data.sampleData": mainWindow.studioController.reportStagedAction("Use sample data", "Sample data is not available in this release."); break
+        case "data.refresh": mainWindow.studioController.executeCommand("refreshSource"); break
+        case "filter.clear": mainWindow.studioController.executeCommand("clearFilters"); break
+        case "report.addPage": mainWindow.studioController.executeCommand("addPage"); break
+        case "report.addMonthly": mainWindow.studioController.executeCommand("addMonthlyChart"); break
+        case "report.addRegion": mainWindow.studioController.executeCommand("addRegionChart"); break
         case "view.report": navigateToView("Report"); break
         case "view.data": navigateToView("Data"); break
         case "view.model": navigateToView("Model"); break
@@ -279,12 +279,12 @@ ApplicationWindow {
             visualizationsVisible = true; inspectorVisible = true; zoomToFit(); break
         case "view.zoomIn": fitZoom = false; reportZoom = Math.min(1.5, reportZoom + 0.1); break
         case "view.zoomOut": fitZoom = false; reportZoom = Math.max(0.15, reportZoom - 0.1); break
-        case "chart.type.column": appController.setChartType("column"); break
-        case "chart.type.bar": appController.setChartType("bar"); break
-        case "chart.type.line": appController.setChartType("line"); break
-        case "help.about": appController.executeCommand("about"); break
-        case "help.shortcuts": appController.executeCommand("shortcuts"); break
-        case "help.projectFormat": appController.executeCommand("projectFormat"); break
+        case "chart.type.column": mainWindow.studioController.setChartType("column"); break
+        case "chart.type.bar": mainWindow.studioController.setChartType("bar"); break
+        case "chart.type.line": mainWindow.studioController.setChartType("line"); break
+        case "help.about": mainWindow.studioController.executeCommand("about"); break
+        case "help.shortcuts": mainWindow.studioController.executeCommand("shortcuts"); break
+        case "help.projectFormat": mainWindow.studioController.executeCommand("projectFormat"); break
         default: break
         }
     }
@@ -316,7 +316,7 @@ ApplicationWindow {
         case "data.openPicker": openGetDataPicker(sourceItem); return
         case "data.recentSources": showRibbonPopup("recentSources", sourceItem, sourceItem); return
         case "data.source.enterData":
-            appController.reportStagedAction("Enter data", "Manual table entry is not implemented.")
+            mainWindow.studioController.reportStagedAction("Enter data", "Manual table entry is not implemented.")
             return
         case "insert.moreVisuals": showRibbonPopup("moreVisuals", sourceItem, sourceItem); return
         case "insert.buttons": showRibbonPopup("buttons", sourceItem, sourceItem); return
@@ -332,26 +332,34 @@ ApplicationWindow {
 
     function handlePopupAction(action, label, focusTarget) {
         if (action === "data.more") {
-            Qt.callLater(function() { root.openGetDataPicker(focusTarget) })
+            Qt.callLater(function() { mainWindow.openGetDataPicker(focusTarget) })
             return
         }
-        if (action === "source.csv" || action === "recent.csv") {
+        if (action.indexOf("recent.") === 0) {
             Qt.callLater(function() {
-                appController.connectDataSource("file_text_csv")
+                mainWindow.studioController.executeCommand("refreshSource")
                 if (focusTarget && focusTarget.visible)
                     focusTarget.forceActiveFocus()
             })
             return
         }
-        if (action === "source.excel" || action === "recent.excel") {
+        if (action === "source.csv") {
             Qt.callLater(function() {
-                appController.connectDataSource("file_excel_workbook")
+                mainWindow.studioController.connectDataSource("file_text_csv")
                 if (focusTarget && focusTarget.visible)
                     focusTarget.forceActiveFocus()
             })
             return
         }
-        appController.reportStagedAction(label,
+        if (action === "source.excel") {
+            Qt.callLater(function() {
+                mainWindow.studioController.connectDataSource("file_excel_workbook")
+                if (focusTarget && focusTarget.visible)
+                    focusTarget.forceActiveFocus()
+            })
+            return
+        }
+        mainWindow.studioController.reportStagedAction(label,
                 "This menu entry is a UI surface; its workflow is not implemented yet.")
         if (focusTarget)
             Qt.callLater(function() {
@@ -395,9 +403,9 @@ ApplicationWindow {
                 || commandId === "view.togglePanes" || commandId === "view.zoomFit"
                 || commandId === "view.zoomIn" || commandId === "view.zoomOut"
                 || commandId === "view.resetLayout"
-        if (reportOnly && appController.currentView !== "Report") return false
-        if (commandId === "data.refresh") return appController.sourceLoaded
-        if (commandId === "filter.clear") return appController.filterActive
+        if (reportOnly && mainWindow.studioController.currentView !== "Report") return false
+        if (commandId === "data.refresh") return mainWindow.studioController.sourceLoaded
+        if (commandId === "filter.clear") return mainWindow.studioController.filterActive
         return true
     }
 
@@ -408,18 +416,18 @@ ApplicationWindow {
                 || commandId === "view.togglePanes" || commandId === "view.zoomFit"
                 || commandId === "view.zoomIn" || commandId === "view.zoomOut"
                 || commandId === "view.resetLayout"
-        if (reportOnly && appController.currentView !== "Report")
+        if (reportOnly && mainWindow.studioController.currentView !== "Report")
             return "Switch to Report view to use this command."
-        if (commandId === "data.refresh" && !appController.sourceLoaded)
+        if (commandId === "data.refresh" && !mainWindow.studioController.sourceLoaded)
             return "Import data before refreshing."
-        if (commandId === "filter.clear" && !appController.filterActive)
+        if (commandId === "filter.clear" && !mainWindow.studioController.filterActive)
             return "There is no active Region filter to clear."
         return ""
     }
 
     function clearFieldSearch() {
         fieldSearchQuery = ""
-        appController.setFieldQuery("")
+        mainWindow.studioController.setFieldQuery("")
     }
 
     function zoomToFit() {
@@ -458,7 +466,7 @@ ApplicationWindow {
                     label: String(modelData.label || "")
                     visibleLabel: String(modelData.visibleLabel || modelData.label || "")
                     iconName: String(modelData.iconName || "report")
-                    iconColor: root.accentForIcon(String(modelData.iconName || "report"))
+                    iconColor: mainWindow.accentForIcon(String(modelData.iconName || "report"))
                     commandWidth: Math.max(ribbonGroup.compact ? 42 : 54, Math.round(Number(modelData.width || 34) * 1.08))
                     iconSize: ribbonGroup.compact ? 25 : 22
                     appearanceAvailable: modelData.appearanceAvailable === true
@@ -466,8 +474,8 @@ ApplicationWindow {
                     splitGetData: modelData.splitGetData === true
                     commandId: String(modelData.commandId || "")
                     description: String(modelData.description || "")
-                    available: modelData.available === false ? false : root.commandAvailable(String(modelData.commandId || ""))
-                    unavailableReason: root.commandUnavailableReason(String(modelData.commandId || ""))
+                    available: modelData.available === false ? false : mainWindow.commandAvailable(String(modelData.commandId || ""))
+                    unavailableReason: mainWindow.commandUnavailableReason(String(modelData.commandId || ""))
                     onTriggered: function(id, sourceItem) { ribbonGroup.invoked(id, sourceItem) }
                     onDropdownTriggered: function(sourceItem) {
                         ribbonGroup.dropdownInvoked(String(modelData.commandId || ""), sourceItem)
@@ -496,25 +504,25 @@ ApplicationWindow {
     GetDataDialog {
         id: getDataDialog
         objectName: "getDataDialog"
-        controller: appController
+        controller: mainWindow.studioController
     }
 
     RibbonPopupMenu {
         id: ribbonPopupMenu
         objectName: "ribbonPopupMenu"
-        controller: appController
+        controller: mainWindow.studioController
         onActionRequested: function(action, label, focusTarget) {
-            root.handlePopupAction(action, label, focusTarget)
+            mainWindow.handlePopupAction(action, label, focusTarget)
         }
     }
 
     ShapePalettePopup {
         id: shapePalette
         objectName: "shapePalette"
-        controller: appController
+        controller: mainWindow.studioController
         onShapeChosen: function(shapeName) {
             const focusTarget = shapePalette.returnFocusItem
-            appController.reportStagedAction(shapeName + " shape",
+            mainWindow.studioController.reportStagedAction(shapeName + " shape",
                     "Shape creation is not implemented yet.")
             if (focusTarget)
                 Qt.callLater(function() {
@@ -527,37 +535,37 @@ ApplicationWindow {
     menuBar: MenuBar {
         Menu {
             title: "File"
-            MenuItem { text: "New Project"; onTriggered: root.runCommand("project.new") }
-            MenuItem { text: "Open Project…"; onTriggered: root.runCommand("project.open") }
+            MenuItem { text: "New Project"; onTriggered: mainWindow.runCommand("project.new") }
+            MenuItem { text: "Open Project…"; onTriggered: mainWindow.runCommand("project.open") }
             MenuSeparator {}
-            MenuItem { text: "Save"; onTriggered: root.runCommand("project.save") }
-            MenuItem { text: "Save As…"; onTriggered: root.runCommand("project.saveAs") }
+            MenuItem { text: "Save"; onTriggered: mainWindow.runCommand("project.save") }
+            MenuItem { text: "Save As…"; onTriggered: mainWindow.runCommand("project.saveAs") }
             MenuSeparator {}
-            MenuItem { text: "Import data…"; onTriggered: root.runCommand("data.importFile") }
+            MenuItem { text: "Import data…"; onTriggered: mainWindow.runCommand("data.importFile") }
             MenuSeparator {}
-            MenuItem { text: "Quit Analytics Studio"; onTriggered: appController.executeCommand("quit") }
+            MenuItem { text: "Quit Analytics Studio"; onTriggered: mainWindow.studioController.executeCommand("quit") }
         }
         Menu {
             title: "View"
-            MenuItem { text: "Report"; onTriggered: root.runCommand("view.report") }
-            MenuItem { text: "Data"; onTriggered: root.runCommand("view.data") }
-            MenuItem { text: "Model"; onTriggered: root.runCommand("view.model") }
+            MenuItem { text: "Report"; onTriggered: mainWindow.runCommand("view.report") }
+            MenuItem { text: "Data"; onTriggered: mainWindow.runCommand("view.data") }
+            MenuItem { text: "Model"; onTriggered: mainWindow.runCommand("view.model") }
             MenuSeparator {}
-            MenuItem { text: "Fit to Page"; onTriggered: root.runCommand("view.zoomFit") }
-            MenuItem { text: "Reset Layout"; onTriggered: root.runCommand("view.resetLayout") }
+            MenuItem { text: "Fit to Page"; onTriggered: mainWindow.runCommand("view.zoomFit") }
+            MenuItem { text: "Reset Layout"; onTriggered: mainWindow.runCommand("view.resetLayout") }
         }
         Menu {
             title: "Help"
-            MenuItem { text: "About Analytics Studio"; onTriggered: root.runCommand("help.about") }
-            MenuItem { text: "Keyboard Shortcuts"; onTriggered: root.runCommand("help.shortcuts") }
-            MenuItem { text: "Project Format"; onTriggered: root.runCommand("help.projectFormat") }
+            MenuItem { text: "About Analytics Studio"; onTriggered: mainWindow.runCommand("help.about") }
+            MenuItem { text: "Keyboard Shortcuts"; onTriggered: mainWindow.runCommand("help.shortcuts") }
+            MenuItem { text: "Project Format"; onTriggered: mainWindow.runCommand("help.projectFormat") }
         }
     }
 
-    Shortcut { sequences: [StandardKey.New]; onActivated: root.runCommand("project.new") }
-    Shortcut { sequences: [StandardKey.Open]; onActivated: root.runCommand("project.open") }
-    Shortcut { sequences: [StandardKey.Save]; onActivated: root.runCommand("project.save") }
-    Shortcut { sequences: [StandardKey.SaveAs]; onActivated: root.runCommand("project.saveAs") }
+    Shortcut { sequences: [StandardKey.New]; onActivated: mainWindow.runCommand("project.new") }
+    Shortcut { sequences: [StandardKey.Open]; onActivated: mainWindow.runCommand("project.open") }
+    Shortcut { sequences: [StandardKey.Save]; onActivated: mainWindow.runCommand("project.save") }
+    Shortcut { sequences: [StandardKey.SaveAs]; onActivated: mainWindow.runCommand("project.saveAs") }
     Shortcut { sequences: [StandardKey.Quit]; onActivated: studioController.executeCommand("quit") }
 
     ColumnLayout {
@@ -577,7 +585,7 @@ ApplicationWindow {
                 anchors.rightMargin: 9
                 spacing: 0
                 Repeater {
-                    model: root.ribbonTabs
+                    model: mainWindow.ribbonTabs
                     delegate: Button {
                         required property int index
                         required property var modelData
@@ -585,7 +593,7 @@ ApplicationWindow {
                         Layout.fillHeight: true
                         text: String(modelData)
                         checkable: true
-                        checked: root.ribbonTabName === String(modelData)
+                        checked: mainWindow.ribbonTabName === String(modelData)
                         padding: 0
                         hoverEnabled: true
                         background: Rectangle { color: "transparent" }
@@ -594,19 +602,19 @@ ApplicationWindow {
                             text: String(modelData)
                             horizontalAlignment: Text.AlignHCenter
                             verticalAlignment: Text.AlignVCenter
-                            color: root.ribbonTabName === String(modelData) ? "#263a49" : "#52616e"
+                            color: mainWindow.ribbonTabName === String(modelData) ? "#263a49" : "#52616e"
                             font.pixelSize: 11
-                            font.weight: root.ribbonTabName === String(modelData) ? Font.DemiBold : Font.Normal
+                            font.weight: mainWindow.ribbonTabName === String(modelData) ? Font.DemiBold : Font.Normal
                         }
                         Rectangle {
-                            visible: root.ribbonTabName === String(modelData)
+                            visible: mainWindow.ribbonTabName === String(modelData)
                             anchors.left: parent.left
                             anchors.right: parent.right
                             anchors.bottom: parent.bottom
                             height: 2
                             color: "#107C71"
                         }
-                        onClicked: root.ribbonTabName = String(modelData)
+                        onClicked: mainWindow.ribbonTabName = String(modelData)
                     }
                 }
                 Item { Layout.fillWidth: true }
@@ -653,14 +661,14 @@ ApplicationWindow {
                 anchors.fill: parent
                 anchors.leftMargin: 5
                 anchors.rightMargin: 5
-                currentIndex: root.ribbonIndexForName(root.ribbonTabName)
+                currentIndex: mainWindow.ribbonIndexForName(mainWindow.ribbonTabName)
                 Repeater {
-                    model: root.ribbonDefinitions
+                    model: mainWindow.ribbonDefinitions
                     delegate: Flickable {
                         required property int index
                         required property var modelData
                         property var tabDefinition: modelData
-                        property string tabName: root.ribbonTabs[index]
+                        property string tabName: mainWindow.ribbonTabs[index]
                         clip: true
                         contentWidth: ribbonRow.implicitWidth
                         contentHeight: height
@@ -671,14 +679,14 @@ ApplicationWindow {
                             height: parent.height
                             spacing: 2
                             Repeater {
-                                model: root.groupsForRibbonTab(tabDefinition, tabName)
+                                model: mainWindow.groupsForRibbonTab(tabDefinition, tabName)
                                 delegate: RibbonGroup {
                                     required property var modelData
                                     caption: String(modelData.title || "")
                                     commands: modelData.actions || []
                                     compact: Boolean(modelData.compact)
-                                    onInvoked: function(id, sourceItem) { root.handleRibbonAction(id, sourceItem) }
-                                    onDropdownInvoked: function(id, sourceItem) { root.handleRibbonDropdown(id, sourceItem) }
+                                    onInvoked: function(id, sourceItem) { mainWindow.handleRibbonAction(id, sourceItem) }
+                                    onDropdownInvoked: function(id, sourceItem) { mainWindow.handleRibbonDropdown(id, sourceItem) }
                                 }
                             }
                         }
@@ -688,7 +696,7 @@ ApplicationWindow {
         }
 
         Rectangle {
-            visible: appController.sourceWarning !== ""
+            visible: mainWindow.studioController.sourceWarning !== ""
             Layout.fillWidth: true
             Layout.preferredHeight: visible ? 29 : 0
             Layout.fillHeight: false
@@ -703,7 +711,7 @@ ApplicationWindow {
                 Icon { name: "about"; color: "#9a7940"; implicitWidth: 16; implicitHeight: 16 }
                 Text {
                     Layout.fillWidth: true
-                    text: appController.sourceWarning
+                    text: mainWindow.studioController.sourceWarning
                     color: "#66583d"
                     font.pixelSize: 10
                     elide: Text.ElideRight
@@ -713,7 +721,7 @@ ApplicationWindow {
                     text: "Relink data source"
                     background: Rectangle { radius: 3; color: parent.hovered ? "#f2ead8" : "#f8f3e9"; border.color: "#e0d2b5" }
                     contentItem: Text { text: parent.text; color: "#705e3c"; font.pixelSize: 9; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter }
-                    onClicked: root.runCommand("data.importFile")
+                    onClicked: mainWindow.runCommand("data.importFile")
                 }
             }
         }
@@ -725,7 +733,7 @@ ApplicationWindow {
             spacing: 0
 
             Rectangle {
-                visible: root.navigationVisible
+                visible: mainWindow.navigationVisible
                 Layout.preferredWidth: visible ? 32 : 0
                 Layout.fillHeight: true
                 color: "#f8f9fa"
@@ -757,9 +765,9 @@ ApplicationWindow {
                             Accessible.description: enabled ? "Switch to " + String(modelData.name) + " view." : "This view is not available in this release."
                             background: Rectangle {
                                 radius: 3
-                                color: modelData.enabled && appController.currentView === modelData.name ? "#e3f0ef" : (parent.hovered ? "#f0f4f6" : "transparent")
+                                color: modelData.enabled && mainWindow.studioController.currentView === modelData.name ? "#e3f0ef" : (parent.hovered ? "#f0f4f6" : "transparent")
                                 Rectangle {
-                                    visible: modelData.enabled && appController.currentView === modelData.name
+                                    visible: modelData.enabled && mainWindow.studioController.currentView === modelData.name
                                     width: 3
                                     anchors.left: parent.left
                                     anchors.top: parent.top
@@ -772,12 +780,12 @@ ApplicationWindow {
                                 Icon {
                                     anchors.centerIn: parent
                                     name: String(modelData.icon)
-                                    color: modelData.enabled ? (appController.currentView === modelData.name ? "#0078D4" : root.accentForIcon(String(modelData.icon))) : "#a8afb5"
+                                    color: modelData.enabled ? (mainWindow.studioController.currentView === modelData.name ? "#0078D4" : mainWindow.accentForIcon(String(modelData.icon))) : "#a8afb5"
                                     width: 18
                                     height: 18
                                 }
                             }
-                            onClicked: root.navigateToView(String(modelData.name))
+                            onClicked: mainWindow.navigateToView(String(modelData.name))
                         }
                     }
                     Item { Layout.fillHeight: true }
@@ -788,8 +796,8 @@ ApplicationWindow {
                 id: viewStack
                 Layout.fillWidth: true
                 Layout.fillHeight: true
-                currentIndex: appController.currentView === "Report" ? 0
-                              : (appController.currentView === "Data" ? 1 : 2)
+                currentIndex: mainWindow.studioController.currentView === "Report" ? 0
+                              : (mainWindow.studioController.currentView === "Data" ? 1 : 2)
                 Rectangle {
                     id: reportWorkspace
                     Layout.fillWidth: true
@@ -801,12 +809,12 @@ ApplicationWindow {
                         anchors.fill: parent
                         clip: true
                         boundsBehavior: Flickable.StopAtBounds
-                        contentWidth: Math.max(width, 1280 * root.reportZoom + 8)
-                        contentHeight: Math.max(height, 720 * root.reportZoom + 48)
+                        contentWidth: Math.max(width, 1280 * mainWindow.reportZoom + 8)
+                        contentHeight: Math.max(height, 720 * mainWindow.reportZoom + 48)
                         ScrollBar.horizontal: ScrollBar { policy: ScrollBar.AsNeeded }
                         ScrollBar.vertical: ScrollBar { policy: ScrollBar.AsNeeded }
-                        onWidthChanged: if (root.fitZoom) Qt.callLater(root.zoomToFit)
-                        onHeightChanged: if (root.fitZoom) Qt.callLater(root.zoomToFit)
+                        onWidthChanged: if (mainWindow.fitZoom) Qt.callLater(mainWindow.zoomToFit)
+                        onHeightChanged: if (mainWindow.fitZoom) Qt.callLater(mainWindow.zoomToFit)
 
                         Item {
                             id: reportPagePositioner
@@ -814,8 +822,8 @@ ApplicationWindow {
                             height: reportViewport.contentHeight
                             Rectangle {
                                 id: reportPage
-                                width: 1280 * root.reportZoom
-                                height: 720 * root.reportZoom
+                                width: 1280 * mainWindow.reportZoom
+                                height: 720 * mainWindow.reportZoom
                                 anchors.centerIn: parent
                                 color: "#ffffff"
                                 border.color: "#d0d4d8"
@@ -825,7 +833,7 @@ ApplicationWindow {
                                     id: reportPageBody
                                     width: 1280
                                     height: 720
-                                    transform: Scale { xScale: root.reportZoom; yScale: root.reportZoom; origin.x: 0; origin.y: 0 }
+                                    transform: Scale { xScale: mainWindow.reportZoom; yScale: mainWindow.reportZoom; origin.x: 0; origin.y: 0 }
 
                                     ColumnLayout {
                                         anchors.fill: parent
@@ -833,7 +841,7 @@ ApplicationWindow {
                                         spacing: 14
                                         Item {
                                             objectName: "reportEmptyState"
-                                            visible: !appController.sourceLoaded
+                                            visible: !mainWindow.studioController.sourceLoaded
                                             Layout.fillWidth: true
                                             Layout.fillHeight: true
                                             ColumnLayout {
@@ -918,7 +926,7 @@ ApplicationWindow {
                                                                     elide: Text.ElideRight
                                                                 }
                                                             }
-                                                            onClicked: root.runCommand(String(modelData.command))
+                                                            onClicked: mainWindow.runCommand(String(modelData.command))
                                                         }
                                                     }
                                                 }
@@ -940,42 +948,42 @@ ApplicationWindow {
                                                         horizontalAlignment: Text.AlignHCenter
                                                         verticalAlignment: Text.AlignVCenter
                                                     }
-                                                    onClicked: root.openGetDataPicker(getDataAnotherSourceButton)
+                                                    onClicked: mainWindow.openGetDataPicker(getDataAnotherSourceButton)
                                                 }
                                             }
                                         }
                                         Text {
-                                            visible: appController.sourceLoaded
+                                            visible: mainWindow.studioController.sourceLoaded
                                             Layout.fillHeight: false
-                                            text: appController.activePageName
+                                            text: mainWindow.studioController.activePageName
                                             color: "#293b49"
                                             font.pixelSize: 23
                                             font.weight: Font.DemiBold
                                         }
                                         Text {
-                                            visible: appController.sourceLoaded
+                                            visible: mainWindow.studioController.sourceLoaded
                                             Layout.fillHeight: false
-                                            text: appController.sourceLoaded
-                                                  ? "Report canvas  ·  " + appController.sourceName
+                                            text: mainWindow.studioController.sourceLoaded
+                                                  ? "Report canvas  ·  " + mainWindow.studioController.sourceName
                                                   : "Report canvas  ·  no data source"
                                             color: "#697987"
                                             font.pixelSize: 11
                                         }
 
                                         RowLayout {
-                                            visible: appController.sourceLoaded && root.hasAnyKpis()
+                                            visible: mainWindow.studioController.sourceLoaded && mainWindow.hasAnyKpis()
                                             Layout.fillWidth: true
                                             Layout.preferredHeight: 88
                                             Layout.fillHeight: false
                                             spacing: 10
                                             Repeater {
-                                                model: root.kpiNames
+                                                model: mainWindow.kpiNames
                                                 delegate: Rectangle {
                                                     required property var modelData
                                                     required property int index
                                                     Layout.fillWidth: true
                                                     Layout.fillHeight: true
-                                                    visible: appController.activePageVisuals.indexOf(String(modelData) + " KPI") >= 0
+                                                    visible: mainWindow.studioController.activePageVisuals.indexOf(String(modelData) + " KPI") >= 0
                                                     radius: 6
                                                     color: "#ffffff"
                                                     border.color: "#d9e0e5"
@@ -984,7 +992,7 @@ ApplicationWindow {
                                                         anchors.left: parent.left
                                                         anchors.top: parent.top
                                                         anchors.bottom: parent.bottom
-                                                        color: root.kpiColors[index % root.kpiColors.length]
+                                                        color: mainWindow.kpiColors[index % mainWindow.kpiColors.length]
                                                     }
                                                     ColumnLayout {
                                                         anchors.fill: parent
@@ -996,7 +1004,7 @@ ApplicationWindow {
                                                         Text { text: String(modelData); color: "#657583"; font.pixelSize: 10 }
                                                         Text {
                                                             Layout.fillWidth: true
-                                                            text: appController.reportKpis[String(modelData)] || "—"
+                                                            text: mainWindow.studioController.reportKpis[String(modelData)] || "—"
                                                             color: "#293e4d"
                                                             font.pixelSize: 19
                                                             font.weight: Font.DemiBold
@@ -1008,44 +1016,44 @@ ApplicationWindow {
                                         }
 
                                         RowLayout {
-                                            visible: appController.sourceLoaded && root.hasAnyCharts()
+                                            visible: mainWindow.studioController.sourceLoaded && mainWindow.hasAnyCharts()
                                             Layout.fillWidth: true
-                                            Layout.fillHeight: appController.sourceLoaded && root.hasAnyCharts()
+                                            Layout.fillHeight: mainWindow.studioController.sourceLoaded && mainWindow.hasAnyCharts()
                                             spacing: 12
                                             ChartCard {
-                                                visible: appController.activePageVisuals.indexOf("Monthly revenue") >= 0
+                                                visible: mainWindow.studioController.activePageVisuals.indexOf("Monthly revenue") >= 0
                                                 Layout.fillWidth: true
                                                 Layout.fillHeight: true
                                                 title: "Monthly revenue"
                                                 visualName: "Monthly revenue"
-                                                chartType: appController.monthlyChartType
+                                                chartType: mainWindow.studioController.monthlyChartType
                                                 seriesColor: "#0078D4"
-                                                series: appController.monthlySeries
-                                                selected: appController.selectedVisual === "Monthly revenue"
+                                                series: mainWindow.studioController.monthlySeries
+                                                selected: mainWindow.studioController.selectedVisual === "Monthly revenue"
                                                 emptyMessage: "No monthly revenue values found in this source."
-                                                onRequestedSelection: function(name) { appController.selectVisual(name) }
+                                                onRequestedSelection: function(name) { mainWindow.studioController.selectVisual(name) }
                                             }
                                             ChartCard {
-                                                visible: appController.activePageVisuals.indexOf("Region revenue") >= 0
+                                                visible: mainWindow.studioController.activePageVisuals.indexOf("Region revenue") >= 0
                                                 Layout.fillWidth: true
                                                 Layout.fillHeight: true
                                                 title: "Region revenue"
                                                 visualName: "Region revenue"
-                                                chartType: appController.regionChartType
+                                                chartType: mainWindow.studioController.regionChartType
                                                 seriesColor: "#107C71"
-                                                series: appController.regionSeries
-                                                selected: appController.selectedVisual === "Region revenue"
+                                                series: mainWindow.studioController.regionSeries
+                                                selected: mainWindow.studioController.selectedVisual === "Region revenue"
                                                 filterOnCategory: true
                                                 emptyMessage: "No region revenue values found in this source."
-                                                onRequestedSelection: function(name) { appController.selectVisual(name) }
-                                                onCategoryRequested: function(label) { appController.setRegionFilter(label) }
+                                                onRequestedSelection: function(name) { mainWindow.studioController.selectVisual(name) }
+                                                onCategoryRequested: function(label) { mainWindow.studioController.setRegionFilter(label) }
                                             }
                                         }
 
                                         Item {
-                                            visible: appController.sourceLoaded && !root.hasAnyCharts() && !root.hasAnyKpis()
+                                            visible: mainWindow.studioController.sourceLoaded && !mainWindow.hasAnyCharts() && !mainWindow.hasAnyKpis()
                                             Layout.fillWidth: true
-                                            Layout.fillHeight: appController.sourceLoaded && !root.hasAnyCharts() && !root.hasAnyKpis()
+                                            Layout.fillHeight: mainWindow.studioController.sourceLoaded && !mainWindow.hasAnyCharts() && !mainWindow.hasAnyKpis()
                                             ColumnLayout {
                                                 anchors.centerIn: parent
                                                 spacing: 7
@@ -1070,7 +1078,7 @@ ApplicationWindow {
                     DataView {
                         Layout.fillWidth: true
                         Layout.fillHeight: true
-                        appController: root.studioController
+                        appController: mainWindow.studioController
                     }
 
                     Rectangle {
@@ -1103,8 +1111,8 @@ ApplicationWindow {
                                 Layout.leftMargin: 10
                                 Layout.rightMargin: 10
                                 Layout.topMargin: 8
-                                text: appController.sourceLoaded ? "Linked data · " + appController.sourceName : "No linked data source"
-                                color: appController.sourceLoaded ? "#64798a" : "#78858d"
+                                text: mainWindow.studioController.sourceLoaded ? "Linked data · " + mainWindow.studioController.sourceName : "No linked data source"
+                                color: mainWindow.studioController.sourceLoaded ? "#64798a" : "#78858d"
                                 font.pixelSize: 9
                                 elide: Text.ElideRight
                                 Accessible.name: text
@@ -1115,8 +1123,8 @@ ApplicationWindow {
                                 Layout.rightMargin: 10
                                 Layout.topMargin: 4
                                 Layout.bottomMargin: 7
-                                text: appController.sourceLoaded
-                                      ? appController.rowCount + " rows · " + appController.columnCount + " source fields"
+                                text: mainWindow.studioController.sourceLoaded
+                                      ? mainWindow.studioController.rowCount + " rows · " + mainWindow.studioController.columnCount + " source fields"
                                       : "Browse fields from the linked data file. Saved table metadata is in Model view."
                                 color: "#74818a"
                                 font.pixelSize: 8
@@ -1128,15 +1136,15 @@ ApplicationWindow {
                                 Layout.leftMargin: 8
                                 Layout.rightMargin: 8
                                 Layout.bottomMargin: 6
-                                text: root.fieldSearchQuery
+                                text: mainWindow.fieldSearchQuery
                                 placeholderText: "Search fields"
-                                enabled: appController.sourceLoaded
+                                enabled: mainWindow.studioController.sourceLoaded
                                 font.pixelSize: 9
                                 color: "#40515e"
                                 onTextChanged: {
-                                    if (root.fieldSearchQuery !== text)
-                                        root.fieldSearchQuery = text
-                                    appController.setFieldQuery(text)
+                                    if (mainWindow.fieldSearchQuery !== text)
+                                        mainWindow.fieldSearchQuery = text
+                                    mainWindow.studioController.setFieldQuery(text)
                                 }
                                 Accessible.name: "Search source fields"
                                 background: Rectangle { radius: 3; color: "#ffffff"; border.color: "#cfd7dd" }
@@ -1145,7 +1153,7 @@ ApplicationWindow {
                                 id: dataFieldsList
                                 Layout.fillWidth: true
                                 Layout.fillHeight: true
-                                model: appController.filteredFields
+                                model: mainWindow.studioController.filteredFields
                                 clip: true
                                 delegate: RowLayout {
                                     required property var modelData
@@ -1172,25 +1180,25 @@ ApplicationWindow {
                                 Text {
                                     anchors.centerIn: parent
                                     width: parent.width - 20
-                                    visible: appController.filteredFields.length === 0
-                                    text: appController.sourceLoaded ? "No matching fields." : "Import a CSV or Excel workbook to browse its source fields."
+                                    visible: mainWindow.studioController.filteredFields.length === 0
+                                    text: mainWindow.studioController.sourceLoaded ? "No matching fields." : "Import a CSV, Excel, JSON, or XML file to browse its source fields."
                                     color: "#76838d"
                                     font.pixelSize: 9
                                     wrapMode: Text.Wrap
                                     horizontalAlignment: Text.AlignHCenter
                                 }
                                 Button {
-                                    visible: !appController.sourceLoaded
+                                    visible: !mainWindow.studioController.sourceLoaded
                                     anchors.horizontalCenter: parent.horizontalCenter
                                     anchors.top: parent.verticalCenter
                                     anchors.topMargin: 24
                                     text: "Import data"
                                     Accessible.name: "Import data from Data fields pane"
                                     ToolTip.visible: hovered
-                                    ToolTip.text: "Choose a CSV file or Excel workbook to browse its source fields."
+                                    ToolTip.text: "Choose a supported CSV, Excel, JSON, or XML file to browse its source fields."
                                     background: Rectangle { radius: 3; color: parent.hovered ? "#e7f1f8" : "#f4f8fb"; border.color: "#cbdde9" }
                                     contentItem: Text { text: parent.text; color: "#315f7d"; font.pixelSize: 9; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter }
-                                    onClicked: root.runCommand("data.importFile")
+                                    onClicked: mainWindow.runCommand("data.importFile")
                                 }
                             }
                         }
@@ -1204,8 +1212,8 @@ ApplicationWindow {
                     ModelView {
                         Layout.fillWidth: true
                         Layout.fillHeight: true
-                        appController: root.studioController
-                        onImportRequested: root.runCommand("data.importFile")
+                        appController: mainWindow.studioController
+                        onImportRequested: mainWindow.runCommand("data.importFile")
                     }
                     Rectangle {
                         Layout.preferredWidth: 210
@@ -1230,16 +1238,16 @@ ApplicationWindow {
                                 Text { Layout.fillWidth: true; text: "Data source"; color: "#687681"; font.pixelSize: 9 }
                                 TextField {
                                     Layout.fillWidth: true
-                                    text: appController.sourceLoaded ? appController.sourceName : "No data source"
+                                    text: mainWindow.studioController.sourceLoaded ? mainWindow.studioController.sourceName : "No data source"
                                     readOnly: true
                                     font.pixelSize: 10
                                     color: "#5a6871"
                                     background: Rectangle { radius: 3; color: "#f7f8f9"; border.color: "#d6dce0" }
                                 }
                                 Text { text: "Tables"; color: "#687681"; font.pixelSize: 9 }
-                                Text { text: String(appController.modelTables.length); color: "#334653"; font.pixelSize: 11 }
+                                Text { text: String(mainWindow.studioController.modelTables.length); color: "#334653"; font.pixelSize: 11 }
                                 Text { text: "Relationships"; color: "#687681"; font.pixelSize: 9 }
-                                Text { text: String(appController.modelRelationships.length); color: "#334653"; font.pixelSize: 11 }
+                                Text { text: String(mainWindow.studioController.modelRelationships.length); color: "#334653"; font.pixelSize: 11 }
                                 Item { Layout.fillHeight: true }
                                 Text { Layout.fillWidth: true; text: "Model changes are read-only in this release."; color: "#7a858d"; font.pixelSize: 9; wrapMode: Text.Wrap }
                             }
@@ -1263,14 +1271,14 @@ ApplicationWindow {
                                     anchors.rightMargin: 10
                                     Icon { name: "data"; color: "#64798a"; implicitWidth: 16; implicitHeight: 16 }
                                     Text { Layout.fillWidth: true; text: "Data"; color: "#344553"; font.pixelSize: 11; font.weight: Font.DemiBold }
-                                    Text { text: String(appController.modelTables.length); color: "#73808a"; font.pixelSize: 9 }
+                                    Text { text: String(mainWindow.studioController.modelTables.length); color: "#73808a"; font.pixelSize: 9 }
                                 }
                             }
                             Rectangle { Layout.fillWidth: true; height: 1; color: "#dce1e4" }
                             ListView {
                                 Layout.fillWidth: true
                                 Layout.fillHeight: true
-                                model: appController.modelTables
+                                model: mainWindow.studioController.modelTables
                                 clip: true
                                 delegate: ColumnLayout {
                                     required property var modelData
@@ -1284,7 +1292,7 @@ ApplicationWindow {
                                         Text { Layout.fillWidth: true; text: String(modelData); color: "#3f505d"; font.pixelSize: 10; elide: Text.ElideRight }
                                     }
                                     Repeater {
-                                        model: appController.sourceLoaded && appController.modelTables.length === 1 ? appController.headers : []
+                                        model: mainWindow.studioController.sourceLoaded && mainWindow.studioController.modelTables.length === 1 ? mainWindow.studioController.headers : []
                                         delegate: RowLayout {
                                             required property var modelData
                                             Layout.fillWidth: true
@@ -1303,10 +1311,10 @@ ApplicationWindow {
 
             Rectangle {
                 id: reportDock
-                visible: appController.currentView === "Report" && root.inspectorVisible
-                Layout.preferredWidth: visible ? ((root.filtersExpanded ? 145 : 32)
-                                                  + (root.visualizationsVisible ? 172 : 24)
-                                                  + (root.dataPaneExpanded ? 160 : 33)) : 0
+                visible: mainWindow.studioController.currentView === "Report" && mainWindow.inspectorVisible
+                Layout.preferredWidth: visible ? ((mainWindow.filtersExpanded ? 145 : 32)
+                                                  + (mainWindow.visualizationsVisible ? 172 : 24)
+                                                  + (mainWindow.dataPaneExpanded ? 160 : 33)) : 0
                 Layout.fillHeight: true
                 color: "#ffffff"
                 border.color: "#d4d9dd"
@@ -1314,24 +1322,24 @@ ApplicationWindow {
                     anchors.fill: parent
                     spacing: 0
                     Item {
-                        Layout.preferredWidth: root.filtersExpanded ? 145 : 32
+                        Layout.preferredWidth: mainWindow.filtersExpanded ? 145 : 32
                         Layout.fillHeight: true
                         Rectangle {
                             anchors.fill: parent
-                            color: root.filtersExpanded ? "#ffffff" : "#f8f9fa"
+                            color: mainWindow.filtersExpanded ? "#ffffff" : "#f8f9fa"
                             border.color: "#e0e3e6"
                             ColumnLayout {
                                 anchors.fill: parent
                                 spacing: 0
                                 RowLayout {
-                                    visible: root.filtersExpanded
+                                    visible: mainWindow.filtersExpanded
                                     Layout.fillWidth: true
                                     Layout.preferredHeight: 29
                                     Layout.leftMargin: 7
                                     Icon { name: "filter"; color: "#61798b"; implicitWidth: 14; implicitHeight: 14 }
                                     Text { Layout.fillWidth: true; text: "Filters"; color: "#354755"; font.pixelSize: 9; font.weight: Font.DemiBold }
                                     ToolButton {
-                                        onClicked: root.filtersExpanded = false
+                                        onClicked: mainWindow.filtersExpanded = false
                                         Accessible.name: "Collapse Filters pane"
                                         ToolTip.visible: hovered
                                         ToolTip.text: "Collapse Filters pane"
@@ -1340,7 +1348,7 @@ ApplicationWindow {
                                     }
                                 }
                                 ColumnLayout {
-                                    visible: root.filtersExpanded
+                                    visible: mainWindow.filtersExpanded
                                     Layout.fillWidth: true
                                     Layout.margins: 10
                                     spacing: 7
@@ -1358,10 +1366,10 @@ ApplicationWindow {
                                             ComboBox {
                                                 id: regionCombo
                                                 Layout.fillWidth: true
-                                                model: appController.regions
-                                                currentIndex: Math.max(0, appController.regions.indexOf(appController.currentRegion))
-                                                enabled: appController.sourceLoaded && appController.regions.length > 1
-                                                onActivated: function(index) { appController.setRegionFilter(String(appController.regions[index])) }
+                                                model: mainWindow.studioController.regions
+                                                currentIndex: Math.max(0, mainWindow.studioController.regions.indexOf(mainWindow.studioController.currentRegion))
+                                                enabled: mainWindow.studioController.sourceLoaded && mainWindow.studioController.regions.length > 1
+                                                onActivated: function(index) { mainWindow.studioController.setRegionFilter(String(mainWindow.studioController.regions[index])) }
                                                 background: Rectangle {
                                                     radius: 3
                                                     color: "#ffffff"
@@ -1393,23 +1401,23 @@ ApplicationWindow {
                                     }
                                     Button {
                                         text: "Clear filters"
-                                        enabled: appController.filterActive
+                                        enabled: mainWindow.studioController.filterActive
                                         background: Rectangle { radius: 3; color: parent.enabled ? "#f3f5f6" : "#f7f8f9"; border.color: "#d7dde1" }
                                         contentItem: Text { text: parent.text; color: parent.enabled ? "#445762" : "#98a1a8"; font.pixelSize: 9; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter }
-                                        onClicked: root.runCommand("filter.clear")
+                                        onClicked: mainWindow.runCommand("filter.clear")
                                     }
                                     Item { Layout.fillHeight: true }
                                     Text { Layout.fillWidth: true; text: "Page filters are not available in this release."; color: "#79858d"; font.pixelSize: 9; wrapMode: Text.Wrap }
                                 }
                                 ToolButton {
-                                    visible: !root.filtersExpanded
+                                    visible: !mainWindow.filtersExpanded
                                     Layout.fillWidth: true
                                     Layout.fillHeight: true
                                     padding: 0
                                     hoverEnabled: true
                                     focusPolicy: Qt.StrongFocus
                                     Accessible.name: "Expand Filters pane"
-                                    Accessible.description: appController.filterActive
+                                    Accessible.description: mainWindow.studioController.filterActive
                                                             ? "Open Region filters. A filter is currently active."
                                                             : "Open the Region filter controls."
                                     ToolTip.visible: hovered
@@ -1423,7 +1431,7 @@ ApplicationWindow {
                                         Icon { anchors.horizontalCenter: parent.horizontalCenter; anchors.top: parent.top; anchors.topMargin: 39; name: "filterRail"; color: "#8A6D1D"; implicitWidth: 16; implicitHeight: 16 }
                                         Text { anchors.horizontalCenter: parent.horizontalCenter; anchors.top: parent.top; anchors.topMargin: 67; text: "Filters"; rotation: -90; color: "#526573"; font.pixelSize: 9 }
                                         Rectangle {
-                                            visible: appController.filterActive
+                                            visible: mainWindow.studioController.filterActive
                                             anchors.horizontalCenter: parent.horizontalCenter
                                             anchors.bottom: parent.bottom
                                             anchors.bottomMargin: 7
@@ -1433,14 +1441,14 @@ ApplicationWindow {
                                             color: "#D9A300"
                                         }
                                     }
-                                    onClicked: root.filtersExpanded = true
+                                    onClicked: mainWindow.filtersExpanded = true
                                 }
                             }
                         }
                     }
 
                     Item {
-                        Layout.preferredWidth: root.visualizationsVisible ? 172 : 24
+                        Layout.preferredWidth: mainWindow.visualizationsVisible ? 172 : 24
                         Layout.fillHeight: true
                         Rectangle {
                             anchors.fill: parent
@@ -1450,7 +1458,7 @@ ApplicationWindow {
                                 anchors.fill: parent
                                 spacing: 0
                                 RowLayout {
-                                    visible: root.visualizationsVisible
+                                    visible: mainWindow.visualizationsVisible
                                     Layout.fillWidth: true
                                     Layout.preferredHeight: 16
                                     Layout.leftMargin: 8
@@ -1464,14 +1472,14 @@ ApplicationWindow {
                                         Accessible.name: "Collapse Visualizations pane"
                                         ToolTip.visible: hovered
                                         ToolTip.text: "Collapse Visualizations pane"
-                                        onClicked: root.visualizationsVisible = false
+                                        onClicked: mainWindow.visualizationsVisible = false
                                         background: Rectangle { color: parent.hovered ? "#f1f4f6" : "transparent" }
                                         contentItem: Icon { name: "collapsePane"; color: "#657784"; implicitWidth: 16; implicitHeight: 16 }
                                     }
                                 }
-                                Rectangle { visible: root.visualizationsVisible; Layout.fillWidth: true; Layout.topMargin: -4; height: 1; color: "#e1e5e8" }
+                                Rectangle { visible: mainWindow.visualizationsVisible; Layout.fillWidth: true; Layout.topMargin: -4; height: 1; color: "#e1e5e8" }
                                 ColumnLayout {
-                                    visible: root.visualizationsVisible
+                                    visible: mainWindow.visualizationsVisible
                                     Layout.fillWidth: true
                                     Layout.fillHeight: false
                                     Layout.alignment: Qt.AlignTop
@@ -1609,7 +1617,7 @@ ApplicationWindow {
                                                 id: visualTypeTile
                                                 required property int index
                                                 required property var modelData
-                                                property bool typeSelected: Boolean(modelData.active) && appController.selectedChartType === modelData.type
+                                                property bool typeSelected: Boolean(modelData.active) && mainWindow.studioController.selectedChartType === modelData.type
                                                 property real columnNudge: [0.5, 0, 0, -0.5, -1, -1.5][index % 6]
                                                 property real rowHeight: visualGallery.height / 7 - 0.5
                                                 x: (index % 6) * (visualGallery.width / 6) + columnNudge
@@ -1628,7 +1636,7 @@ ApplicationWindow {
                                                 }
                                                 ToolTip.visible: visualTypeHover.hovered
                                                 ToolTip.text: Boolean(modelData.active)
-                                                        ? (appController.selectedVisual
+                                                        ? (mainWindow.studioController.selectedVisual
                                                            ? "Set chart type: " + String(modelData.name)
                                                            : "Add a monthly revenue visual as " + String(modelData.name))
                                                         : String(modelData.name) + " is not available in this release."
@@ -1641,7 +1649,7 @@ ApplicationWindow {
                                                     Accessible.name: String(visualTypeTile.modelData.name) + " visual"
                                                     Accessible.description: enabled
                                                             ? (visualTypeTile.typeSelected ? "Selected chart type. " : "")
-                                                              + (appController.selectedVisual
+                                                              + (mainWindow.studioController.selectedVisual
                                                                  ? "Set the selected chart to " + String(visualTypeTile.modelData.name).toLowerCase() + "."
                                                                  : "Add a monthly revenue chart using this chart type.")
                                                         : String(visualTypeTile.modelData.name) + " visuals are not available in this release."
@@ -1664,9 +1672,9 @@ ApplicationWindow {
                                                         }
                                                     }
                                                     onClicked: {
-                                                        if (!appController.selectedVisual)
-                                                            root.runCommand("report.addMonthly")
-                                                        root.runCommand("chart.type." + String(visualTypeTile.modelData.type))
+                                                        if (!mainWindow.studioController.selectedVisual)
+                                                            mainWindow.runCommand("report.addMonthly")
+                                                        mainWindow.runCommand("chart.type." + String(visualTypeTile.modelData.type))
                                                     }
                                                 }
                                             }
@@ -1693,8 +1701,8 @@ ApplicationWindow {
                                             anchors.leftMargin: 10
                                             anchors.rightMargin: 6
                                             verticalAlignment: Text.AlignVCenter
-                                            text: appController.selectedVisual && appController.sourceLoaded ? "Revenue" : "Add data fields here"
-                                            color: appController.selectedVisual && appController.sourceLoaded ? "#425563" : "#78858d"
+                                            text: mainWindow.studioController.selectedVisual && mainWindow.studioController.sourceLoaded ? "Revenue" : "Add data fields here"
+                                            color: mainWindow.studioController.selectedVisual && mainWindow.studioController.sourceLoaded ? "#425563" : "#78858d"
                                             font.pixelSize: 10
                                             elide: Text.ElideRight
                                         }
@@ -1825,7 +1833,7 @@ ApplicationWindow {
                                     }
                                 }
                                 ToolButton {
-                                    visible: !root.visualizationsVisible
+                                    visible: !mainWindow.visualizationsVisible
                                     Layout.fillWidth: true
                                     Layout.fillHeight: true
                                     padding: 0
@@ -1843,24 +1851,24 @@ ApplicationWindow {
                                         Icon { anchors.horizontalCenter: parent.horizontalCenter; anchors.top: parent.top; anchors.topMargin: 9; name: "visual"; color: "#107C71"; implicitWidth: 20; implicitHeight: 20 }
                                         Text { anchors.centerIn: parent; text: "Visualizations"; rotation: -90; color: "#526573"; font.pixelSize: 11 }
                                     }
-                                    onClicked: root.visualizationsVisible = true
+                                    onClicked: mainWindow.visualizationsVisible = true
                                 }
                             }
                         }
                     }
 
                     Item {
-                        Layout.preferredWidth: root.dataPaneExpanded ? 160 : 33
+                        Layout.preferredWidth: mainWindow.dataPaneExpanded ? 160 : 33
                         Layout.fillHeight: true
                         Rectangle {
                             anchors.fill: parent
-                            color: root.dataPaneExpanded ? "#ffffff" : "#f8f9fa"
+                            color: mainWindow.dataPaneExpanded ? "#ffffff" : "#f8f9fa"
                             border.color: "#e0e3e6"
                             ColumnLayout {
                                 anchors.fill: parent
                                 spacing: 0
                                 RowLayout {
-                                    visible: root.dataPaneExpanded
+                                    visible: mainWindow.dataPaneExpanded
                                     Layout.fillWidth: true
                                     Layout.preferredHeight: 29
                                     Layout.leftMargin: 7
@@ -1870,7 +1878,7 @@ ApplicationWindow {
                                         padding: 0
                                         implicitWidth: 22
                                         implicitHeight: 22
-                                        onClicked: root.dataPaneExpanded = false
+                                        onClicked: mainWindow.dataPaneExpanded = false
                                         Accessible.name: "Collapse Data pane"
                                         ToolTip.visible: hovered
                                         ToolTip.text: "Collapse Data pane"
@@ -1879,41 +1887,41 @@ ApplicationWindow {
                                     }
                                 }
                                 TextField {
-                                    visible: root.dataPaneExpanded
+                                    visible: mainWindow.dataPaneExpanded
                                     Layout.fillWidth: true
                                     Layout.preferredHeight: 24
                                     Layout.leftMargin: 7
                                     Layout.rightMargin: 7
-                                    text: root.fieldSearchQuery
+                                    text: mainWindow.fieldSearchQuery
                                     placeholderText: "Search fields"
-                                    enabled: appController.sourceLoaded
+                                    enabled: mainWindow.studioController.sourceLoaded
                                     font.pixelSize: 10
                                     color: "#40515e"
                                     onTextChanged: {
-                                        if (root.fieldSearchQuery !== text)
-                                            root.fieldSearchQuery = text
-                                        appController.setFieldQuery(text)
+                                        if (mainWindow.fieldSearchQuery !== text)
+                                            mainWindow.fieldSearchQuery = text
+                                        mainWindow.studioController.setFieldQuery(text)
                                     }
                                     Accessible.name: "Search data fields"
                                     background: Rectangle { radius: 3; color: "#ffffff"; border.color: "#cfd7dd" }
                                 }
                                 Text {
-                                    visible: root.dataPaneExpanded && appController.sourceLoaded
+                                    visible: mainWindow.dataPaneExpanded && mainWindow.studioController.sourceLoaded
                                     Layout.fillWidth: true
                                     Layout.preferredHeight: 21
                                     Layout.leftMargin: 9
                                     Layout.rightMargin: 7
-                                    text: appController.rowCount + " rows · " + appController.columnCount + " fields"
+                                    text: mainWindow.studioController.rowCount + " rows · " + mainWindow.studioController.columnCount + " fields"
                                     color: "#587488"
                                     font.pixelSize: 8
                                     elide: Text.ElideRight
                                     Accessible.name: text
                                 }
                                 ListView {
-                                    visible: root.dataPaneExpanded
+                                    visible: mainWindow.dataPaneExpanded
                                     Layout.fillWidth: true
                                     Layout.fillHeight: true
-                                    model: appController.filteredFields
+                                    model: mainWindow.studioController.filteredFields
                                     clip: true
                                     delegate: RowLayout {
                                         required property var modelData
@@ -1938,14 +1946,14 @@ ApplicationWindow {
                                     }
                                     Text {
                                         anchors.centerIn: parent
-                                        visible: appController.filteredFields.length === 0
-                                        text: appController.sourceLoaded ? "No matching fields" : "Import a CSV or Excel workbook to browse its fields."
+                                        visible: mainWindow.studioController.filteredFields.length === 0
+                                        text: mainWindow.studioController.sourceLoaded ? "No matching fields" : "Import a CSV, Excel, JSON, or XML file to browse its fields."
                                         color: "#76838d"
                                         font.pixelSize: 9
                                         wrapMode: Text.Wrap
                                     }
                                     Button {
-                                        visible: !appController.sourceLoaded
+                                        visible: !mainWindow.studioController.sourceLoaded
                                         anchors.horizontalCenter: parent.horizontalCenter
                                         anchors.top: parent.verticalCenter
                                         anchors.topMargin: 16
@@ -1953,23 +1961,23 @@ ApplicationWindow {
                                         Accessible.name: "Import data from Data pane"
                                         background: Rectangle { radius: 3; color: parent.hovered ? "#e7f1f8" : "#f4f8fb"; border.color: "#cbdde9" }
                                         contentItem: Text { text: parent.text; color: "#315f7d"; font.pixelSize: 9; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter }
-                                        onClicked: root.runCommand("data.importFile")
+                                        onClicked: mainWindow.runCommand("data.importFile")
                                     }
                                 }
                                 ToolButton {
-                                    visible: !root.dataPaneExpanded
+                                    visible: !mainWindow.dataPaneExpanded
                                     Layout.fillWidth: true
                                     Layout.fillHeight: true
                                     padding: 0
                                     hoverEnabled: true
                                     focusPolicy: Qt.StrongFocus
                                     Accessible.name: "Expand Data pane"
-                                    Accessible.description: appController.sourceLoaded
-                                                            ? String(appController.columnCount) + " fields available. Open searchable field list."
+                                    Accessible.description: mainWindow.studioController.sourceLoaded
+                                                            ? String(mainWindow.studioController.columnCount) + " fields available. Open searchable field list."
                                                             : "No data source loaded. Open the Data pane for import options."
                                     ToolTip.visible: hovered
-                                    ToolTip.text: appController.sourceLoaded
-                                                  ? "Data · " + appController.columnCount + " fields"
+                                    ToolTip.text: mainWindow.studioController.sourceLoaded
+                                                  ? "Data · " + mainWindow.studioController.columnCount + " fields"
                                                   : "Data · no source"
                                     background: Rectangle {
                                         color: parent.activeFocus ? "#e5f1f8" : (parent.hovered ? "#eef3f6" : "#f8f9fa")
@@ -1979,7 +1987,7 @@ ApplicationWindow {
                                         Icon { anchors.horizontalCenter: parent.horizontalCenter; anchors.top: parent.top; anchors.topMargin: 10; name: "collapseLeft"; color: "#657784"; implicitWidth: 16; implicitHeight: 16 }
                                         Text { anchors.horizontalCenter: parent.horizontalCenter; anchors.top: parent.top; anchors.topMargin: 50; text: "Data"; rotation: -90; color: "#526573"; font.pixelSize: 10 }
                                     }
-                                    onClicked: root.dataPaneExpanded = true
+                                    onClicked: mainWindow.dataPaneExpanded = true
                                 }
                             }
                         }
@@ -1995,29 +2003,29 @@ ApplicationWindow {
             Layout.minimumHeight: 31
             Layout.maximumHeight: 31
             spacing: 0
-            Rectangle { Layout.preferredWidth: root.navigationVisible ? 32 : 0; Layout.fillHeight: true; color: "#f8f9fa"; border.color: "#d6dbe0" }
+            Rectangle { Layout.preferredWidth: mainWindow.navigationVisible ? 32 : 0; Layout.fillHeight: true; color: "#f8f9fa"; border.color: "#d6dbe0" }
                                 RowLayout {
-                                    visible: appController.currentView === "Report"
+                                    visible: mainWindow.studioController.currentView === "Report"
                 Layout.fillWidth: true
                 Layout.fillHeight: true
                 spacing: 4
                 Repeater {
-                    model: appController.pages
+                    model: mainWindow.studioController.pages
                     delegate: Button {
                         required property int index
                         required property var modelData
                         Layout.preferredWidth: Math.max(90, pageLabel.implicitWidth + 28)
                         Layout.fillHeight: true
                         text: String(modelData.name)
-                        onClicked: appController.setActivePage(index)
+                        onClicked: mainWindow.studioController.setActivePage(index)
                         background: Rectangle {
                             anchors.top: parent.top
                             anchors.bottom: parent.bottom
                             anchors.topMargin: 5
                             anchors.bottomMargin: 4
                             radius: 4
-                            color: index === appController.activePageIndex ? "#e8eff3" : "transparent"
-                            border.color: index === appController.activePageIndex ? "#cedbe3" : "transparent"
+                            color: index === mainWindow.studioController.activePageIndex ? "#e8eff3" : "transparent"
+                            border.color: index === mainWindow.studioController.activePageIndex ? "#cedbe3" : "transparent"
                         }
                         contentItem: Text {
                             id: pageLabel
@@ -2034,12 +2042,12 @@ ApplicationWindow {
                     Accessible.name: "Add report page"
                     background: Rectangle { radius: 3; color: parent.hovered ? "#edf1f3" : "transparent" }
                     contentItem: Text { text: "+"; color: "#55728a"; font.pixelSize: 15; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter }
-                    onClicked: root.runCommand("report.addPage")
+                    onClicked: mainWindow.runCommand("report.addPage")
                 }
                 Item { Layout.fillWidth: true }
-                Text { text: appController.activePageName; color: "#6d7b86"; font.pixelSize: 9; Layout.rightMargin: 10 }
+                Text { text: mainWindow.studioController.activePageName; color: "#6d7b86"; font.pixelSize: 9; Layout.rightMargin: 10 }
             }
-            Item { visible: appController.currentView !== "Report"; Layout.fillWidth: true }
+            Item { visible: mainWindow.studioController.currentView !== "Report"; Layout.fillWidth: true }
             Rectangle { visible: reportDock.visible; Layout.preferredWidth: reportDock.width; Layout.fillHeight: true; color: "#ffffff"; border.color: "#d4d9dd" }
         }
 
@@ -2058,16 +2066,16 @@ ApplicationWindow {
                 spacing: 8
                 Text {
                     Layout.fillWidth: true
-                    text: appController.statusMessage
+                    text: mainWindow.studioController.statusMessage
                     color: "#687782"
                     font.pixelSize: 9
                     elide: Text.ElideRight
                 }
-                Text { text: appController.currentView + " view"; color: "#78858e"; font.pixelSize: 9 }
+                Text { text: mainWindow.studioController.currentView + " view"; color: "#78858e"; font.pixelSize: 9 }
                 Rectangle { width: 1; Layout.fillHeight: true; color: "#d9dee2" }
                 ToolButton {
                     id: zoomOutButton
-                    visible: appController.currentView === "Report"
+                    visible: mainWindow.studioController.currentView === "Report"
                     text: "−"
                     padding: 0
                     implicitWidth: 20
@@ -2075,16 +2083,16 @@ ApplicationWindow {
                     Accessible.name: "Zoom out"
                     background: Rectangle { radius: 3; color: zoomOutButton.hovered ? "#edf1f3" : "transparent" }
                     contentItem: Text { text: "−"; color: "#526a7b"; font.pixelSize: 14; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter }
-                    onClicked: root.runCommand("view.zoomOut")
+                    onClicked: mainWindow.runCommand("view.zoomOut")
                 }
                 Slider {
                     id: zoomSlider
-                    visible: appController.currentView === "Report"
+                    visible: mainWindow.studioController.currentView === "Report"
                     Layout.preferredWidth: 105
                     from: 0.15
                     to: 1.5
-                    value: root.reportZoom
-                    onMoved: { root.fitZoom = false; root.reportZoom = value }
+                    value: mainWindow.reportZoom
+                    onMoved: { mainWindow.fitZoom = false; mainWindow.reportZoom = value }
                     Accessible.name: "Report zoom"
                     background: Rectangle {
                         x: zoomSlider.leftPadding
@@ -2107,7 +2115,7 @@ ApplicationWindow {
                 }
                 ToolButton {
                     id: zoomInButton
-                    visible: appController.currentView === "Report"
+                    visible: mainWindow.studioController.currentView === "Report"
                     text: "+"
                     padding: 0
                     implicitWidth: 20
@@ -2115,43 +2123,43 @@ ApplicationWindow {
                     Accessible.name: "Zoom in"
                     background: Rectangle { radius: 3; color: zoomInButton.hovered ? "#edf1f3" : "transparent" }
                     contentItem: Text { text: "+"; color: "#526a7b"; font.pixelSize: 14; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter }
-                    onClicked: root.runCommand("view.zoomIn")
+                    onClicked: mainWindow.runCommand("view.zoomIn")
                 }
                 Button {
-                    visible: appController.currentView === "Report"
-                    text: Math.round(root.reportZoom * 100) + "%"
+                    visible: mainWindow.studioController.currentView === "Report"
+                    text: Math.round(mainWindow.reportZoom * 100) + "%"
                     flat: true
                     padding: 2
                     font.pixelSize: 9
                     Accessible.name: "Zoom percentage; activate to fit page"
                     background: Rectangle { color: "transparent" }
                     contentItem: Text { text: parent.text; color: "#62727d"; font.pixelSize: 9; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter }
-                    onClicked: root.runCommand("view.zoomFit")
+                    onClicked: mainWindow.runCommand("view.zoomFit")
                 }
             }
         }
     }
 
     function hasAnyKpis() {
-        const visuals = appController.activePageVisuals
+        const visuals = mainWindow.studioController.activePageVisuals
         for (let i = 0; i < visuals.length; ++i)
             if (String(visuals[i]).indexOf(" KPI") >= 0) return true
         return false
     }
 
     function hasAnyCharts() {
-        const visuals = appController.activePageVisuals
+        const visuals = mainWindow.studioController.activePageVisuals
         return visuals.indexOf("Monthly revenue") >= 0 || visuals.indexOf("Region revenue") >= 0
     }
 
     onClosing: function(close) {
-        if (!appController.confirmClose())
+        if (!mainWindow.studioController.confirmClose())
             close.accepted = false
     }
 
     Component.onCompleted: {
-        root.lastWorkspaceView = String(appController.currentView)
-        root.selectRibbonForView(root.lastWorkspaceView)
-        Qt.callLater(root.zoomToFit)
+        mainWindow.lastWorkspaceView = String(mainWindow.studioController.currentView)
+        mainWindow.selectRibbonForView(mainWindow.lastWorkspaceView)
+        Qt.callLater(mainWindow.zoomToFit)
     }
 }

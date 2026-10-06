@@ -2,22 +2,35 @@
 
 ## Overview
 
-The `.npa` format is a UTF-8 JSON document owned by Analytics Studio. It is deliberately readable and easy to version-control. Version 1 stores project identity, view state, report pages, supported chart types, linked data-source paths, and model metadata. It does not embed imported data.
+The `.npa` format is a UTF-8 JSON document owned by Analytics Studio. It is deliberately readable and easy to version-control. Version 2 stores project identity, view state, report pages, supported chart types, linked data-source paths, the active file source and its parser options, and model metadata. It does not embed imported data.
 
-The top-level `format` value is `com.analytics-studio.project`; `format_version` is the integer `1`.
+The top-level `format` value is `com.analytics-studio.project`; `format_version` is the integer `2`.
 
-## Version 1 shape
+## Version 2 shape
 
 ```json
 {
   "format": "com.analytics-studio.project",
-  "format_version": 1,
+  "format_version": 2,
   "project_id": "UUID",
   "name": "Untitled Project",
   "created_at": "2026-10-05T10:00:00Z",
   "modified_at": "2026-10-05T10:00:00Z",
   "active_view": "Report",
-  "data_sources": [],
+  "active_source_id": "source-uuid",
+  "data_sources": [
+    {
+      "id": "source-uuid",
+      "name": "sales.csv",
+      "kind": "csv",
+      "path": "sales.csv",
+      "parser_options": {
+        "delimiter": ",",
+        "encoding": "utf-8-sig",
+        "has_header": true
+      }
+    }
+  ],
   "report": {
     "pages": [
       {
@@ -38,14 +51,16 @@ The top-level `format` value is `com.analytics-studio.project`; `format_version`
 - `project_id` and report page `id` values are UUID strings.
 - Timestamps are UTC ISO 8601 strings.
 - `active_view` is `Report`, `Data`, or `Model`.
-- `data_sources` entries contain `id`, `name`, `kind`, and `path`. Version 1 imports CSV and Excel workbook (`.xlsx`/`.xlsm`) files and reconnects one file source in the UI.
+- `active_source_id` is null when no file source is selected; otherwise it identifies an entry in `data_sources`. Only its table is loaded in this release. Other source metadata can remain in the project.
+- `data_sources` entries contain `id`, `name`, `kind`, and `path`. The supported file kinds are `csv`, `excel`, `json`, and `xml`; Folder, PDF, and Parquet remain unavailable.
+- `parser_options` stores settings needed to reproduce the active source on refresh. CSV stores `delimiter`, `encoding`, and `has_header`. Excel stores `sheet_name` and one-based `header_row`; null selects the first worksheet and first non-empty header row. JSON and XML use an empty options object.
 - Report pages have unique IDs, names, and a list of visual names. `active_page_id` must identify a page in `pages`.
 - `chart_types` values are `column`, `bar`, or `line`.
 - `model.tables` and `model.relationships` hold metadata. The current UI lists imported tables; relationship editing is not implemented.
 
 ## Linked data paths
 
-CSV and Excel workbook files remain external to the `.npa` document. When a source is inside the project file's directory tree, the app stores a relative path from that directory. Otherwise it stores an absolute path. Moving a project with an external source can break that link; when a source is missing, the app opens the project and reports the missing path so the user can restore or re-import the file.
+CSV, Excel workbook, JSON, and XML files remain external to the `.npa` document. When a source is inside the project file's directory tree, the app stores a relative path from that directory. Otherwise it stores an absolute path. Moving a project with an external source can break that link; when a source is missing, the app opens the project and reports the missing path while retaining the selected source ID and options so the user can restore or re-import the file.
 
 ## Save and recovery behavior
 
@@ -60,4 +75,4 @@ The first save of a new project has no prior file to back up. The backup is crea
 
 ## Versioning rule
 
-Any incompatible schema change must increment `format_version` and add an explicit migration before the new version is accepted. Until that migration exists, the app rejects unsupported versions with a clear message and leaves the project files untouched.
+Version 1 projects migrate in memory to version 2: the active source becomes the first CSV or Excel entry, matching the v1 application behavior, and supported file sources receive default parser options. Opening a project does not rewrite its file; the next explicit save writes v2. Any incompatible schema change must increment `format_version` and add an explicit migration before the new version is accepted. Newer unsupported versions are rejected with a clear message and left untouched.

@@ -7,7 +7,7 @@ from pathlib import Path
 
 from PySide6.QtCore import QTimer, QUrl
 from PySide6.QtGui import QFont, QFontDatabase
-from PySide6.QtQml import QQmlApplicationEngine
+from PySide6.QtQml import QQmlApplicationEngine, QQmlComponent
 from PySide6.QtQuickControls2 import QQuickStyle
 from PySide6.QtWidgets import QApplication
 
@@ -30,10 +30,18 @@ def main() -> int:
 
     controller = StudioController(app)
     engine = QQmlApplicationEngine(app)
-    engine.rootContext().setContextProperty("appController", controller)
     qml_path = Path(__file__).resolve().parent / "qml" / "Main.qml"
-    engine.load(QUrl.fromLocalFile(str(qml_path)))
-    if not engine.rootObjects():
+    component = QQmlComponent(engine)
+    component.loadUrl(QUrl.fromLocalFile(str(qml_path)))
+    if component.isError():
+        for error in component.errors():
+            print(error.toString(), file=sys.stderr)
+        return 1
+
+    window = component.createWithInitialProperties({"studioController": controller})
+    if window is None:
+        for error in component.errors():
+            print(error.toString(), file=sys.stderr)
         print(f"Could not load the Qt Quick interface: {qml_path}", file=sys.stderr)
         return 1
 
@@ -41,7 +49,6 @@ def main() -> int:
         project_path = Path(sys.argv[1])
         QTimer.singleShot(0, lambda: controller.open_project_path(project_path))
     else:
-        window = engine.rootObjects()[0]
         QTimer.singleShot(0, window.requestActivate)
 
     return app.exec()
