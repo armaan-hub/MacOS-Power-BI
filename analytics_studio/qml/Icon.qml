@@ -124,6 +124,7 @@ Item {
 
     readonly property string exactAssetPath: {
         switch (name) {
+        case "buildVisual": return "icons/visuals/build_visual.svg"
         case "stackedBar": return "icons/visuals/stacked_bar.svg"
         case "bar100": return "icons/visuals/bar_100.svg"
         case "stackedColumn": return "icons/visuals/stacked_column.svg"

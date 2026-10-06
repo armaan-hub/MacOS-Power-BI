@@ -1304,9 +1304,9 @@ ApplicationWindow {
             Rectangle {
                 id: reportDock
                 visible: appController.currentView === "Report" && root.inspectorVisible
-                Layout.preferredWidth: visible ? ((root.filtersExpanded ? 145 : 24)
+                Layout.preferredWidth: visible ? ((root.filtersExpanded ? 145 : 32)
                                                   + (root.visualizationsVisible ? 180 : 24)
-                                                  + (root.dataPaneExpanded ? 160 : 18)) : 0
+                                                  + (root.dataPaneExpanded ? 160 : 29)) : 0
                 Layout.fillHeight: true
                 color: "#ffffff"
                 border.color: "#d4d9dd"
@@ -1314,7 +1314,7 @@ ApplicationWindow {
                     anchors.fill: parent
                     spacing: 0
                     Item {
-                        Layout.preferredWidth: root.filtersExpanded ? 145 : 24
+                        Layout.preferredWidth: root.filtersExpanded ? 145 : 32
                         Layout.fillHeight: true
                         Rectangle {
                             anchors.fill: parent
@@ -1419,7 +1419,8 @@ ApplicationWindow {
                                         border.color: parent.activeFocus ? "#0078D4" : "#e0e3e6"
                                     }
                                     contentItem: Item {
-                                        Icon { anchors.horizontalCenter: parent.horizontalCenter; anchors.top: parent.top; anchors.topMargin: 7; name: "filter"; color: "#8A6D1D"; implicitWidth: 15; implicitHeight: 15 }
+                                        Icon { anchors.horizontalCenter: parent.horizontalCenter; anchors.top: parent.top; anchors.topMargin: 10; name: "collapseLeft"; color: "#657784"; implicitWidth: 16; implicitHeight: 16 }
+                                        Icon { anchors.horizontalCenter: parent.horizontalCenter; anchors.top: parent.top; anchors.topMargin: 39; name: "filter"; color: "#8A6D1D"; implicitWidth: 16; implicitHeight: 16 }
                                         Text { anchors.centerIn: parent; text: "Filters"; rotation: -90; color: "#526573"; font.pixelSize: 8 }
                                         Rectangle {
                                             visible: appController.filterActive
@@ -1451,14 +1452,14 @@ ApplicationWindow {
                                 RowLayout {
                                     visible: root.visualizationsVisible
                                     Layout.fillWidth: true
-                                    Layout.preferredHeight: 32
+                                    Layout.preferredHeight: 16
                                     Layout.leftMargin: 12
                                     Layout.rightMargin: 8
                                     Text { Layout.fillWidth: true; text: "Visualizations"; color: "#202020"; font.pixelSize: 11; font.weight: Font.DemiBold }
                                     ToolButton {
                                         padding: 0
                                         implicitWidth: 24
-                                        implicitHeight: 24
+                                        implicitHeight: 16
                                         Accessible.name: "Collapse Visualizations pane"
                                         ToolTip.visible: hovered
                                         ToolTip.text: "Collapse Visualizations pane"
@@ -1491,7 +1492,7 @@ ApplicationWindow {
                                         spacing: 4
                                         Repeater {
                                             model: [
-                                                { label: "Build", icon: "bar", active: true },
+                                                { label: "Build", icon: "buildVisual", active: true },
                                                 { label: "Format", icon: "document", overlay: "paintBrush", active: false },
                                                 { label: "Analytics", icon: "document", overlay: "tableEdit", active: false }
                                             ]
@@ -1530,8 +1531,8 @@ ApplicationWindow {
                                                         anchors.centerIn: parent
                                                         name: String(modelData.icon)
                                                         color: modelData.active ? "#0078d4" : "#6f777d"
-                                                        implicitWidth: 22
-                                                        implicitHeight: 22
+                                                        implicitWidth: modelData.active ? 28 : 22
+                                                        implicitHeight: modelData.active ? 28 : 22
                                                     }
                                                     Icon {
                                                         anchors.right: parent.right
@@ -1556,11 +1557,11 @@ ApplicationWindow {
 
                                         Repeater {
                                             model: [
-                                                { type: "bar", name: "Clustered bar chart", icon: "bar", accent: "#0078D4", active: true },
-                                                { type: "stackedBar", name: "Stacked bar chart", icon: "stackedBar" },
-                                                { type: "bar100", name: "100% stacked bar chart", icon: "bar100" },
+                                                { type: "bar", name: "Clustered bar chart", icon: "bar", accent: "#107C71", active: true },
                                                 { type: "column", name: "Clustered column chart", icon: "column", accent: "#0078D4", active: true },
+                                                { type: "stackedBar", name: "Stacked bar chart", icon: "stackedBar" },
                                                 { type: "stackedColumn", name: "Stacked column chart", icon: "stackedColumn" },
+                                                { type: "bar100", name: "100% stacked bar chart", icon: "bar100" },
                                                 { type: "column100", name: "100% stacked column chart", icon: "column100" },
                                                 { type: "line", name: "Line chart", icon: "line", accent: "#C65911", active: true },
                                                 { type: "area", name: "Area chart", icon: "area", accent: "#0078D4" },
@@ -1831,7 +1832,7 @@ ApplicationWindow {
                     }
 
                     Item {
-                        Layout.preferredWidth: root.dataPaneExpanded ? 160 : 18
+                        Layout.preferredWidth: root.dataPaneExpanded ? 160 : 29
                         Layout.fillHeight: true
                         Rectangle {
                             anchors.fill: parent
@@ -1957,7 +1958,7 @@ ApplicationWindow {
                                         border.color: parent.activeFocus ? "#0078D4" : "#e0e3e6"
                                     }
                                     contentItem: Item {
-                                        Icon { anchors.horizontalCenter: parent.horizontalCenter; anchors.top: parent.top; anchors.topMargin: 7; name: "data"; color: "#0078D4"; implicitWidth: 15; implicitHeight: 15 }
+                                        Icon { anchors.horizontalCenter: parent.horizontalCenter; anchors.top: parent.top; anchors.topMargin: 10; name: "collapseLeft"; color: "#657784"; implicitWidth: 16; implicitHeight: 16 }
                                         Text { anchors.centerIn: parent; text: "Data"; rotation: -90; color: "#526573"; font.pixelSize: 8 }
                                     }
                                     onClicked: root.dataPaneExpanded = true
