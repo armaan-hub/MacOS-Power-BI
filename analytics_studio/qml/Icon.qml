@@ -124,6 +124,12 @@ Item {
         switch (name) {
         case "csv": return "icons/get_data_csv.svg"
         case "excel": return "icons/excel_workbook.svg"
+        case "excelTile": return "icons/excel_tile.svg"
+        case "sqlServer": return "icons/sql_server.svg"
+        case "pasteTable": return "icons/paste_table.svg"
+        case "sampleData": return "icons/sample_data.svg"
+        case "aiPrep": return "icons/ai_prep.svg"
+        case "copilot": return "icons/copilot.svg"
         case "xml": return "icons/get_data_xml.svg"
         case "json": return "icons/get_data_json.svg"
         case "pdf": return "icons/get_data_pdf.svg"

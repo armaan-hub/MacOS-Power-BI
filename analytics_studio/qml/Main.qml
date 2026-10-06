@@ -94,6 +94,12 @@ ApplicationWindow {
             { title: "Share", actions: [
                 { label: "Publish", visibleLabel: "Publish", width: 42, iconName: "share", commandId: "disabled.publish", available: false, description: "Publishing is not available in this release." }
             ]},
+            { title: "AI", actions: [
+                { label: "Prep data for Copilot", visibleLabel: "Prep data for\nCopilot", width: 62, iconName: "aiPrep", commandId: "ai.prepData", available: false, description: "Prepare data for Copilot." }
+            ]},
+            { title: "Copilot", actions: [
+                { label: "Copilot", visibleLabel: "Copilot", width: 44, iconName: "copilot", commandId: "ai.copilot", description: "Open Copilot." }
+            ]}
         ]},
         { groups: [
             { title: "Pages", compact: true, actions: [
@@ -258,6 +264,10 @@ ApplicationWindow {
         case "data.oneLakeCatalog": appController.reportStagedAction("OneLake catalog", "OneLake catalog connections are not implemented yet."); break
         case "data.sqlServer": appController.reportStagedAction("SQL Server", "SQL Server connections are not implemented yet."); break
         case "data.dataverse": appController.reportStagedAction("Dataverse", "Dataverse connections are not implemented yet."); break
+        case "data.enterBlank": appController.reportStagedAction("Paste data into a blank table", "Manual table entry is not implemented yet."); break
+        case "data.sampleData": appController.reportStagedAction("Use sample data", "Sample data is not available in this release."); break
+        case "ai.prepData": appController.reportStagedAction("Prep data for Copilot", "Copilot data preparation is not implemented yet."); break
+        case "ai.copilot": appController.reportStagedAction("Copilot", "Copilot is not connected to this Analytics Studio project yet."); break
         case "data.refresh": appController.executeCommand("refreshSource"); break
         case "filter.clear": appController.executeCommand("clearFilters"); break
         case "report.addPage": appController.executeCommand("addPage"); break
@@ -846,21 +856,23 @@ ApplicationWindow {
                                                 }
                                                 Text {
                                                     Layout.alignment: Qt.AlignHCenter
-                                                    text: "Once loaded, your data will appear in the Data pane."
+                                                    textFormat: Text.RichText
+                                                    text: "Once loaded, your data will appear in the <b>Data pane</b>."
                                                     color: "#39444c"
                                                     font.pixelSize: 18
                                                 }
                                                 GridLayout {
                                                     Layout.alignment: Qt.AlignHCenter
                                                     Layout.topMargin: 8
-                                                    columns: 3
+                                                    columns: 4
                                                     columnSpacing: 14
                                                     rowSpacing: 0
                                                     Repeater {
                                                         model: [
-                                                            { title: "Import data from CSV or Excel", icon: "getData", tint: "#dcefe8", command: "data.importFile", active: true },
-                                                            { title: "Paste data into a blank table", icon: "paste", tint: "#faf5df", command: "disabled.enterData", active: false },
-                                                            { title: "Use sample data", icon: "database", tint: "#f0f1f2", command: "disabled.sampleData", active: false }
+                                                            { title: "Import data from Excel", icon: "excelTile", tint: "#cdebd8", command: "data.importExcel", active: true, description: "Open a workbook picker and import an Excel file." },
+                                                            { title: "Import data from SQL Server", icon: "sqlServer", tint: "#edf5fb", command: "data.sqlServer", active: true, description: "Start a SQL Server connection." },
+                                                            { title: "Paste data into a blank table", icon: "pasteTable", tint: "#fffdf3", command: "data.enterBlank", active: true, description: "Paste data into a new table." },
+                                                            { title: "Use sample data", icon: "sampleData", tint: "#f3f3f3", command: "data.sampleData", active: true, description: "Load a sample data set." }
                                                         ]
                                                         delegate: Button {
                                                             required property var modelData
@@ -872,7 +884,7 @@ ApplicationWindow {
                                                             hoverEnabled: true
                                                             Accessible.name: String(modelData.title)
                                                             Accessible.description: enabled
-                                                                    ? "Open a file picker and import a CSV or Excel workbook."
+                                                                    ? (modelData.description || String(modelData.title))
                                                                     : String(modelData.title) + " is not available in this release."
                                                             ToolTip.visible: hovered && !enabled
                                                             ToolTip.text: String(modelData.title) + " is not available in this release."
@@ -884,7 +896,7 @@ ApplicationWindow {
                                                                     anchors.left: parent.left
                                                                     anchors.right: parent.right
                                                                     anchors.top: parent.top
-                                                                    height: 88
+                                                                    height: 98
                                                                     color: modelData.tint
                                                                     radius: 3
                                                                 }
@@ -893,11 +905,11 @@ ApplicationWindow {
                                                                 Icon {
                                                                     anchors.horizontalCenter: parent.horizontalCenter
                                                                     anchors.top: parent.top
-                                                                    anchors.topMargin: 27
+                                                                    anchors.topMargin: 31
                                                                     name: String(modelData.icon)
                                                                     color: modelData.active ? "#107c71" : "#718191"
-                                                                    width: 26
-                                                                    height: 26
+                                                                    width: 36
+                                                                    height: 36
                                                                 }
                                                                 Text {
                                                                     anchors.left: parent.left
