@@ -1304,9 +1304,9 @@ ApplicationWindow {
             Rectangle {
                 id: reportDock
                 visible: appController.currentView === "Report" && root.inspectorVisible
-                Layout.preferredWidth: visible ? ((root.filtersExpanded ? 145 : 33)
-                                                  + (root.visualizationsVisible ? 181 : 24)
-                                                  + (root.dataPaneExpanded ? 160 : 29)) : 0
+                Layout.preferredWidth: visible ? ((root.filtersExpanded ? 145 : 32)
+                                                  + (root.visualizationsVisible ? 173 : 24)
+                                                  + (root.dataPaneExpanded ? 160 : 40)) : 0
                 Layout.fillHeight: true
                 color: "#ffffff"
                 border.color: "#d4d9dd"
@@ -1314,7 +1314,7 @@ ApplicationWindow {
                     anchors.fill: parent
                     spacing: 0
                     Item {
-                        Layout.preferredWidth: root.filtersExpanded ? 145 : 33
+                        Layout.preferredWidth: root.filtersExpanded ? 145 : 32
                         Layout.fillHeight: true
                         Rectangle {
                             anchors.fill: parent
@@ -1420,8 +1420,8 @@ ApplicationWindow {
                                     }
                                     contentItem: Item {
                                         Icon { anchors.horizontalCenter: parent.horizontalCenter; anchors.top: parent.top; anchors.topMargin: 10; name: "collapseLeft"; color: "#657784"; implicitWidth: 16; implicitHeight: 16 }
-                                        Icon { anchors.horizontalCenter: parent.horizontalCenter; anchors.top: parent.top; anchors.topMargin: 39; name: "filter"; color: "#8A6D1D"; implicitWidth: 16; implicitHeight: 16 }
-                                        Text { anchors.centerIn: parent; text: "Filters"; rotation: -90; color: "#526573"; font.pixelSize: 8 }
+                                        Icon { anchors.horizontalCenter: parent.horizontalCenter; anchors.top: parent.top; anchors.topMargin: 39; name: "filterRail"; color: "#8A6D1D"; implicitWidth: 16; implicitHeight: 16 }
+                                        Text { anchors.horizontalCenter: parent.horizontalCenter; anchors.top: parent.top; anchors.topMargin: 67; text: "Filters"; rotation: -90; color: "#526573"; font.pixelSize: 9 }
                                         Rectangle {
                                             visible: appController.filterActive
                                             anchors.horizontalCenter: parent.horizontalCenter
@@ -1440,7 +1440,7 @@ ApplicationWindow {
                     }
 
                     Item {
-                        Layout.preferredWidth: root.visualizationsVisible ? 181 : 24
+                        Layout.preferredWidth: root.visualizationsVisible ? 173 : 24
                         Layout.fillHeight: true
                         Rectangle {
                             anchors.fill: parent
@@ -1474,13 +1474,14 @@ ApplicationWindow {
                                     Layout.fillWidth: true
                                     Layout.fillHeight: false
                                     Layout.alignment: Qt.AlignTop
-                                    Layout.leftMargin: 9
-                                    Layout.rightMargin: 8
+                                    Layout.leftMargin: 5
+                                    Layout.rightMargin: 7
                                     Layout.topMargin: 4
                                     Layout.bottomMargin: 4
                                     spacing: 4
                                     Text {
                                         Layout.fillWidth: true
+                                        Layout.leftMargin: 4
                                         text: "Build visual"
                                         color: "#354755"
                                         font.pixelSize: 11
@@ -1494,7 +1495,7 @@ ApplicationWindow {
                                             model: [
                                                 { label: "Build", icon: "buildVisual", active: true },
                                                 { label: "Format", icon: "document", overlay: "paintBrush", active: false },
-                                                { label: "Analytics", icon: "document", overlay: "tableEdit", active: false }
+                                                { label: "Analytics", icon: "analyticsTab", active: false }
                                             ]
                                             delegate: Button {
                                                 required property var modelData
@@ -1553,7 +1554,7 @@ ApplicationWindow {
                                     Item {
                                         id: visualGallery
                                         Layout.fillWidth: true
-                                        Layout.preferredHeight: 200
+                                        Layout.preferredHeight: 186
 
                                         Repeater {
                                             model: [
@@ -1566,6 +1567,7 @@ ApplicationWindow {
                                                 { type: "line", name: "Line chart", icon: "line", accent: "#C65911", active: true },
                                                 { type: "area", name: "Area chart", icon: "area", accent: "#0078D4" },
                                                 { type: "stackedArea", name: "Stacked area chart", icon: "stackedArea" },
+                                                { type: "area100", name: "100% stacked area chart", icon: "area100" },
                                                 { type: "lineStackedColumn", name: "Line and stacked column chart", icon: "lineStackedColumn" },
                                                 { type: "lineClusteredColumn", name: "Line and clustered column chart", icon: "lineClusteredColumn" },
                                                 { type: "ribbon", name: "Ribbon chart", icon: "ribbonChart" },
@@ -1575,29 +1577,29 @@ ApplicationWindow {
                                                 { type: "pie", name: "Pie chart", icon: "pie", accent: "#0078D4" },
                                                 { type: "donut", name: "Donut chart", icon: "donut", accent: "#0078D4" },
                                                 { type: "treemap", name: "Treemap", icon: "treemap", accent: "#0078D4" },
-                                                { type: "map", name: "Map", icon: "map", accent: "#107C71" },
+                                                { type: "map", name: "Map", icon: "worldMap", accent: "#107C71" },
                                                 { type: "filledMap", name: "Filled map", icon: "filledMap" },
                                                 { type: "shapeMap", name: "Shape map", icon: "shapeMap" },
                                                 { type: "arcgisMap", name: "ArcGIS Maps", icon: "arcgisMap" },
                                                 { type: "gauge", name: "Gauge", icon: "gauge", accent: "#0078D4" },
-                                                { type: "card", name: "Card", icon: "card" },
+                                                { type: "card", name: "Card (new)", icon: "newCard" },
                                                 { type: "kpi", name: "KPI", icon: "kpi", accent: "#0078D4" },
                                                 { type: "slicer", name: "Slicer", icon: "slicer", accent: "#0078D4" },
                                                 { type: "table", name: "Table", icon: "table", accent: "#0078D4" },
                                                 { type: "matrix", name: "Matrix", icon: "matrix", accent: "#0078D4" },
-                                                { type: "rScript", name: "R visual", icon: "script", accent: "#0078D4" },
-                                                { type: "pythonScript", name: "Python visual", icon: "script", accent: "#0078D4" },
+                                                { type: "rScript", name: "R visual", icon: "rVisual", accent: "#0078D4" },
+                                                { type: "pythonScript", name: "Python visual", icon: "pythonVisual", accent: "#0078D4" },
                                                 { type: "keyInfluencers", name: "Key influencers", icon: "keyInfluencers" },
                                                 { type: "decomposition", name: "Decomposition tree", icon: "decomposition" },
                                                 { type: "qa", name: "Q&A visual", icon: "qaVisual" },
                                                 { type: "scorecard", name: "Scorecard", icon: "scorecard" },
-                                                { type: "removed", name: "", icon: "" },
-                                                { type: "removed", name: "", icon: "" },
-                                                { type: "visualFilter", name: "Visual filter", icon: "filter" },
+                                                { type: "paginated", name: "Paginated report", icon: "paginatedReport" },
+                                                { type: "visualFilter", name: "Visual filter", icon: "visualFilter" },
                                                 { type: "quickVisual", name: "Quick visual", icon: "quickVisual" },
                                                 { type: "smartVisual", name: "Smart visual", icon: "smartVisual" },
                                                 { type: "image", name: "Image", icon: "image" },
-                                                { type: "moreVisuals", name: "More visuals", icon: "galleryMore" }
+                                                { type: "moreVisuals", name: "More visuals", icon: "galleryMore" },
+                                                { type: "removed", name: "", icon: "" }
                                             ]
                                             delegate: Item {
                                                 id: visualTypeTile
@@ -1666,6 +1668,8 @@ ApplicationWindow {
                                     Rectangle { Layout.fillWidth: true; height: 1; color: "#e1e5e8" }
                                     Text {
                                         Layout.fillWidth: true
+                                        Layout.leftMargin: 7
+                                        Layout.topMargin: 3
                                         text: "Values"
                                         color: "#202020"
                                         font.pixelSize: 11
@@ -1674,7 +1678,7 @@ ApplicationWindow {
                                     Rectangle {
                                         Layout.fillWidth: true
                                         Layout.preferredHeight: 27
-                                        Layout.topMargin: 10
+                                        Layout.topMargin: 2
                                         color: "#fafafa"
                                         border.width: 0
                                         Text {
@@ -1703,7 +1707,8 @@ ApplicationWindow {
                                     }
                                     Text {
                                         Layout.fillWidth: true
-                                        Layout.topMargin: 10
+                                        Layout.leftMargin: 7
+                                        Layout.topMargin: 7
                                         text: "Drill through"
                                         color: "#202020"
                                         font.pixelSize: 11
@@ -1712,6 +1717,7 @@ ApplicationWindow {
                                     RowLayout {
                                         Layout.fillWidth: true
                                         Layout.preferredHeight: 24
+                                        Layout.leftMargin: 7
                                         Text { Layout.fillWidth: true; text: "Cross-report"; color: "#303030"; font.pixelSize: 10 }
                                         Item {
                                             Layout.preferredWidth: 30
@@ -1747,6 +1753,7 @@ ApplicationWindow {
                                     RowLayout {
                                         Layout.fillWidth: true
                                         Layout.preferredHeight: 24
+                                        Layout.leftMargin: 7
                                         Text { Layout.fillWidth: true; text: "Keep all filters"; color: "#303030"; font.pixelSize: 10 }
                                         Item {
                                             Layout.preferredWidth: 30
@@ -1780,7 +1787,7 @@ ApplicationWindow {
                                     Rectangle {
                                         Layout.fillWidth: true
                                         Layout.preferredHeight: 27
-                                        Layout.topMargin: 2
+                                        Layout.topMargin: 0
                                         color: "#fafafa"
                                         border.width: 0
                                         Text {
@@ -1834,7 +1841,7 @@ ApplicationWindow {
                     }
 
                     Item {
-                        Layout.preferredWidth: root.dataPaneExpanded ? 160 : 29
+                        Layout.preferredWidth: root.dataPaneExpanded ? 160 : 40
                         Layout.fillHeight: true
                         Rectangle {
                             anchors.fill: parent
@@ -1961,7 +1968,7 @@ ApplicationWindow {
                                     }
                                     contentItem: Item {
                                         Icon { anchors.horizontalCenter: parent.horizontalCenter; anchors.top: parent.top; anchors.topMargin: 10; name: "collapseLeft"; color: "#657784"; implicitWidth: 16; implicitHeight: 16 }
-                                        Text { anchors.centerIn: parent; text: "Data"; rotation: -90; color: "#526573"; font.pixelSize: 8 }
+                                        Text { anchors.horizontalCenter: parent.horizontalCenter; anchors.top: parent.top; anchors.topMargin: 50; text: "Data"; rotation: -90; color: "#526573"; font.pixelSize: 10 }
                                     }
                                     onClicked: root.dataPaneExpanded = true
                                 }
