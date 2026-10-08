@@ -62,10 +62,10 @@ ApplicationWindow {
         ]},
         { groups: [
             { title: "Clipboard", actions: [
-                { label: "Paste", visibleLabel: "Paste", width: 28, iconName: "paste", commandId: "disabled.paste", available: false, description: "Pasting report objects is not available in this release." },
-                { label: "Cut", visibleLabel: "Cut", width: 28, iconName: "cut", commandId: "disabled.cut", available: false, description: "Cutting report objects is not available in this release." },
-                { label: "Copy", visibleLabel: "Copy", width: 28, iconName: "copy", commandId: "disabled.copy", available: false, description: "Copying report objects is not available in this release." },
-                { label: "Format painter", visibleLabel: "Format\npainter", width: 40, iconName: "formatPainter", commandId: "disabled.formatPainter", available: false, description: "Visual formatting is not available in this release." }
+                { label: "Paste", visibleLabel: "Paste", width: 28, iconName: "paste", commandId: "format.paste", description: "Paste a visual from the clipboard." },
+                { label: "Cut", visibleLabel: "Cut", width: 28, iconName: "cut", commandId: "format.cut", description: "Cut the selected visual." },
+                { label: "Copy", visibleLabel: "Copy", width: 28, iconName: "copy", commandId: "format.copy", description: "Copy the selected visual." },
+                { label: "Format painter", visibleLabel: "Format\npainter", width: 40, iconName: "formatPainter", commandId: "format.painter", description: "Copy format of the selected report visual." }
             ]},
             { title: "Data", actions: [
                 { label: "Get data", visibleLabel: "Get data", width: 48, iconName: "getData", commandId: "data.openPicker", splitGetData: true, description: "Choose a connector from the full data source picker." },
@@ -298,6 +298,16 @@ ApplicationWindow {
             visualizationsVisible = true; inspectorVisible = true; zoomToFit(); break
         case "view.zoomIn": fitZoom = false; reportZoom = Math.min(1.5, reportZoom + 0.1); break
         case "view.zoomOut": fitZoom = false; reportZoom = Math.max(0.15, reportZoom - 0.1); break
+        case "format.copy": mainWindow.studioController.copy_selected_visual(); break
+        case "format.cut": mainWindow.studioController.cut_selected_visual(); break
+        case "format.paste": mainWindow.studioController.paste_visual(); break
+        case "format.painter": mainWindow.studioController.copy_format(); break
+        case "arrange.bringToFront": mainWindow.studioController.bring_to_front(); break
+        case "arrange.sendToBack": mainWindow.studioController.send_to_back(); break
+        case "arrange.bringForward": mainWindow.studioController.bring_forward(); break
+        case "arrange.sendBackward": mainWindow.studioController.send_backward(); break
+        case "arrange.group": mainWindow.studioController.group_visuals(); break
+        case "arrange.ungroup": mainWindow.studioController.ungroup_visuals(); break
         case "chart.type.column": mainWindow.studioController.setChartType("column"); break
         case "chart.type.bar": mainWindow.studioController.setChartType("bar"); break
         case "chart.type.line": mainWindow.studioController.setChartType("line"); break
@@ -636,6 +646,22 @@ ApplicationWindow {
             MenuItem { text: "Reset Layout"; onTriggered: mainWindow.runCommand("view.resetLayout") }
         }
         Menu {
+            title: "Format"
+            MenuItem { text: "Copy Visual"; onTriggered: mainWindow.runCommand("format.copy") }
+            MenuItem { text: "Paste Visual"; onTriggered: mainWindow.runCommand("format.paste") }
+            MenuItem { text: "Cut Visual"; onTriggered: mainWindow.runCommand("format.cut") }
+            MenuSeparator {}
+            MenuItem { text: "Format Painter"; onTriggered: mainWindow.runCommand("format.painter") }
+            MenuSeparator {}
+            MenuItem { text: "Bring Forward"; onTriggered: mainWindow.runCommand("arrange.bringForward") }
+            MenuItem { text: "Send Backward"; onTriggered: mainWindow.runCommand("arrange.sendBackward") }
+            MenuItem { text: "Bring to Front"; onTriggered: mainWindow.runCommand("arrange.bringToFront") }
+            MenuItem { text: "Send to Back"; onTriggered: mainWindow.runCommand("arrange.sendToBack") }
+            MenuSeparator {}
+            MenuItem { text: "Group"; onTriggered: mainWindow.runCommand("arrange.group") }
+            MenuItem { text: "Ungroup"; onTriggered: mainWindow.runCommand("arrange.ungroup") }
+        }
+        Menu {
             title: "Help"
             MenuItem { text: "About Analytics Studio"; onTriggered: mainWindow.runCommand("help.about") }
             MenuItem { text: "Keyboard Shortcuts"; onTriggered: mainWindow.runCommand("help.shortcuts") }
@@ -646,6 +672,9 @@ ApplicationWindow {
     Shortcut { sequences: [StandardKey.New]; onActivated: mainWindow.runCommand("project.new") }
     Shortcut { sequences: [StandardKey.Open]; onActivated: mainWindow.runCommand("project.open") }
     Shortcut { sequences: [StandardKey.Save]; onActivated: mainWindow.runCommand("project.save") }
+    Shortcut { sequences: [StandardKey.Copy]; onActivated: mainWindow.runCommand("format.copy") }
+    Shortcut { sequences: [StandardKey.Paste]; onActivated: mainWindow.runCommand("format.paste") }
+    Shortcut { sequences: [StandardKey.Cut]; onActivated: mainWindow.runCommand("format.cut") }
     Shortcut { sequences: [StandardKey.SaveAs]; onActivated: mainWindow.runCommand("project.saveAs") }
     Shortcut { sequences: [StandardKey.Quit]; onActivated: studioController.executeCommand("quit") }
 
@@ -958,6 +987,9 @@ ApplicationWindow {
                                                     series: (modelData.type === "column" || modelData.type === "bar" || modelData.type === "line" || modelData.type === "area") ? mainWindow.studioController.visualSeries(String(modelData.title)) : []
 
                                                     onRequestedSelection: function(visualName) {
+                                                        if (mainWindow.studioController.formatPainterActive) {
+                                                            mainWindow.studioController.apply_format_painter(visualName)
+                                                        }
                                                         mainWindow.studioController.selectVisual(visualName)
                                                     }
                                                 }

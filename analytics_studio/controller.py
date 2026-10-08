@@ -1380,6 +1380,10 @@ class StudioController(QObject):
             })
         return result
 
+    @Property(bool, notify=stateChanged)
+    def formatPainterActive(self) -> bool:  # noqa: N802
+        return self._format_painter_active
+
     @Property(str, notify=statusChanged)
     def statusMessage(self) -> str:  # noqa: N802
         return self._status_message
@@ -5600,6 +5604,9 @@ class StudioController(QObject):
         self._visual_kpis = {}
         self._monthly_visual_series = {}
         self._region_visual_series = {}
+        self._clipboard_visual_config = None
+        self._clipboard_format_config = None
+        self._format_painter_active = False
         self._region_column = _report_field(self._headers, "region") if self.sourceLoaded else None
         if not self.sourceLoaded:
             self._kpis = defaults
@@ -5940,3 +5947,142 @@ class StudioController(QObject):
     def _set_status(self, message: str) -> None:
         self._status_message = message
         self.statusChanged.emit(message)
+
+    # Advanced Authoring Commands
+
+    @Slot()
+    def copy_selected_visual(self) -> None:
+        if not self._selected_visual: return
+        page = self._active_page()
+        visual = next((v for v in page.get("visuals", []) if isinstance(v, dict) and v.get("title") == self._selected_visual), None)
+        if visual:
+            from copy import deepcopy
+            self._clipboard_visual_config = deepcopy(visual)
+            self._set_status(f"Copied visual {self._selected_visual}")
+
+    @Slot()
+    def cut_selected_visual(self) -> None:
+        if not self._selected_visual: return
+        self.copy_selected_visual()
+        for v in self._active_page().get("visuals", []):
+             if isinstance(v, dict) and v.get("title") == self._selected_visual:
+                 self.remove_visual(v.get("id"))
+                 break
+        self._set_status("Cut visual")
+
+    @Slot()
+    def paste_visual(self) -> None:
+        if not self._clipboard_visual_config: return
+        from uuid import uuid4
+        from copy import deepcopy
+        page = self._active_page()
+        visuals = page.setdefault("visuals", [])
+        new_visual = deepcopy(self._clipboard_visual_config)
+        new_visual["id"] = str(uuid4())
+        
+        # Offset coordinates by a small amount to make it visible it was pasted
+        new_visual["x"] = new_visual.get("x", 10) + 20
+        new_visual["y"] = new_visual.get("y", 10) + 20
+        
+        # Deal with duplicate titles
+        base_title = new_visual.get("title", "Visual")
+        title = base_title
+        num = 1
+        while any(isinstance(v, dict) and v.get("title") == title for v in visuals):
+            num += 1
+            title = f"{base_title} ({num})"
+        new_visual["title"] = title
+        
+        visuals.append(new_visual)
+        self._dirty = True
+        self._selected_visual = title
+        self._refresh_report()
+        self.stateChanged.emit()
+        self._set_status("Pasted visual")
+
+    @Slot()
+    def copy_format(self) -> None:
+        if not self._selected_visual: return
+        page = self._active_page()
+        visual = next((v for v in page.get("visuals", []) if isinstance(v, dict) and v.get("title") == self._selected_visual), None)
+        if visual:
+            from copy import deepcopy
+            self._clipboard_format_config = {
+                "color": visual.get("color"),
+                "type": visual.get("type")
+            }
+            self._format_painter_active = True
+            self._set_status("Format Copied - Select another visual to paint")
+
+    @Slot(str)
+    def apply_format_painter(self, visual_title: str) -> None:
+        if not self._format_painter_active or not self._clipboard_format_config: return
+        page = self._active_page()
+        for visual in page.get("visuals", []):
+            if isinstance(visual, dict) and visual.get("title") == visual_title:
+                if self._clipboard_format_config.get("color"):
+                    visual["color"] = self._clipboard_format_config["color"]
+                if self._clipboard_format_config.get("type"):
+                    visual["type"] = self._clipboard_format_config["type"]
+                self._dirty = True
+                self._format_painter_active = False # One time use
+                self._refresh_report()
+                self.stateChanged.emit()
+                self._set_status(f"Format applied to {visual_title}")
+                break
+
+    @Slot()
+    def bring_forward(self) -> None:
+        if not self._selected_visual: return
+        page = self._active_page()
+        visuals = page.setdefault("visuals", [])
+        idx = next((i for i, v in enumerate(visuals) if isinstance(v, dict) and v.get("title") == self._selected_visual), -1)
+        if idx >= 0 and idx < len(visuals) - 1:
+            visuals[idx], visuals[idx + 1] = visuals[idx + 1], visuals[idx]
+            self._dirty = True
+            self.stateChanged.emit()
+
+    @Slot()
+    def send_backward(self) -> None:
+        if not self._selected_visual: return
+        page = self._active_page()
+        visuals = page.setdefault("visuals", [])
+        idx = next((i for i, v in enumerate(visuals) if isinstance(v, dict) and v.get("title") == self._selected_visual), -1)
+        if idx > 0:
+            visuals[idx], visuals[idx - 1] = visuals[idx - 1], visuals[idx]
+            self._dirty = True
+            self.stateChanged.emit()
+
+    @Slot()
+    def bring_to_front(self) -> None:
+        if not self._selected_visual: return
+        page = self._active_page()
+        visuals = page.setdefault("visuals", [])
+        idx = next((i for i, v in enumerate(visuals) if isinstance(v, dict) and v.get("title") == self._selected_visual), -1)
+        if idx >= 0 and idx != len(visuals) - 1:
+            item = visuals.pop(idx)
+            visuals.append(item)
+            self._dirty = True
+            self.stateChanged.emit()
+
+    @Slot()
+    def group_visuals(self) -> None:
+        # Stub for multi-select grouping
+        self._set_status("Grouping requires multi-select (Not implemented in preview)")
+
+    @Slot()
+    def ungroup_visuals(self) -> None:
+        # Stub for multi-select grouping
+        self._set_status("Ungrouping requires groups (Not implemented in preview)")
+
+    @Slot()
+    def send_to_back(self) -> None:
+        if not self._selected_visual: return
+        page = self._active_page()
+        visuals = page.setdefault("visuals", [])
+        idx = next((i for i, v in enumerate(visuals) if isinstance(v, dict) and v.get("title") == self._selected_visual), -1)
+        if idx > 0:
+            item = visuals.pop(idx)
+            visuals.insert(0, item)
+            self._dirty = True
+            self.stateChanged.emit()
