@@ -2492,42 +2492,111 @@ ApplicationWindow {
                                         }
                                     }
                                     Rectangle { Layout.fillWidth: true; height: 1; color: "#e1e5e8" }
-                                    Text {
-                                        Layout.fillWidth: true
-                                        Layout.leftMargin: 7
-                                        Layout.topMargin: 6
-                                        text: "Values"
-                                        color: "#202020"
-                                        font.pixelSize: 11
-                                        font.weight: Font.Medium
-                                    }
-                                    Rectangle {
-                                        Layout.fillWidth: true
-                                        Layout.preferredHeight: 27
-                                        Layout.topMargin: 1.5
-                                        color: "#fafafa"
-                                        border.width: 0
-                                        Text {
-                                            anchors.fill: parent
-                                            anchors.leftMargin: 10
-                                            anchors.rightMargin: 6
-                                            verticalAlignment: Text.AlignVCenter
-                                            text: mainWindow.studioController.selectedVisual && mainWindow.studioController.sourceLoaded ? "Revenue" : "Add data fields here"
-                                            color: mainWindow.studioController.selectedVisual && mainWindow.studioController.sourceLoaded ? "#425563" : "#78858d"
-                                            font.pixelSize: 10
-                                            elide: Text.ElideRight
+                                    Repeater {
+                                        model: mainWindow.studioController.activeVisualWells
+                                        delegate: ColumnLayout {
+                                            required property var modelData
+                                            Layout.fillWidth: true
+                                            spacing: 1.5
+                                            Text {
+                                                text: String(modelData.name)
+                                                color: "#202020"
+                                                font.pixelSize: 11
+                                                font.weight: Font.Medium
+                                                Layout.leftMargin: 7
+                                                Layout.topMargin: 6
+                                            }
+                                            Rectangle {
+                                                Layout.fillWidth: true
+                                                Layout.preferredHeight: Math.max(27, modelData.fields.length * 27)
+                                                color: "#fafafa"
+                                                
+                                                Canvas {
+                                                    anchors.fill: parent
+                                                    onWidthChanged: requestPaint()
+                                                    onHeightChanged: requestPaint()
+                                                    onPaint: {
+                                                        const ctx = getContext("2d")
+                                                        ctx.clearRect(0, 0, width, height)
+                                                        ctx.strokeStyle = "#bfc3c6"
+                                                        ctx.lineWidth = 1
+                                                        ctx.setLineDash([3, 3])
+                                                        ctx.strokeRect(0.5, 0.5, width - 1, height - 1)
+                                                    }
+                                                }
+                                                
+                                                Column {
+                                                    anchors.fill: parent
+                                                    anchors.margins: 1
+                                                    
+                                                    // Placeholder
+                                                    Item {
+                                                        width: parent.width
+                                                        height: 25
+                                                        visible: modelData.fields.length === 0
+                                                        Text {
+                                                            anchors.fill: parent
+                                                            anchors.leftMargin: 9
+                                                            verticalAlignment: Text.AlignVCenter
+                                                            text: "Add data fields here"
+                                                            color: "#78858d"
+                                                            font.pixelSize: 10
+                                                        }
+                                                    }
+                                                    
+                                                    // Actual fields
+                                                    Repeater {
+                                                        model: modelData.fields
+                                                        delegate: Rectangle {
+                                                            required property var modelData
+                                                            width: parent.width
+                                                            height: 25
+                                                            color: "#ffffff"
+                                                            border.color: "#e1e5e8"
+                                                            RowLayout {
+                                                                anchors.fill: parent
+                                                                spacing: 4
+                                                                Item { Layout.preferredWidth: 6; Layout.fillHeight: true }
+                                                                Text {
+                                                                    Layout.fillWidth: true
+                                                                    text: String(modelData)
+                                                                    color: "#202020"
+                                                                    font.pixelSize: 10
+                                                                    elide: Text.ElideRight
+                                                                }
+                                                                ToolButton {
+                                                                    text: "×"
+                                                                    onClicked: mainWindow.studioController.remove_field_from_well(String(parent.parent.parent.modelData.name), String(modelData))
+                                                                    contentItem: Text { text: "×"; color: "#657784"; font.pixelSize: 14; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter }
+                                                                    background: Rectangle { color: parent.hovered ? "#f1f4f6" : "transparent" }
+                                                                }
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                                
+                                                MouseArea {
+                                                    anchors.fill: parent
+                                                    onClicked: function(mouse) {
+                                                        fieldPickerMenu.wellName = String(modelData.name)
+                                                        fieldPickerMenu.popup()
+                                                    }
+                                                }
+                                            }
                                         }
-                                        Canvas {
-                                            anchors.fill: parent
-                                            onWidthChanged: requestPaint()
-                                            onHeightChanged: requestPaint()
-                                            onPaint: {
-                                                const ctx = getContext("2d")
-                                                ctx.clearRect(0, 0, width, height)
-                                                ctx.strokeStyle = "#bfc3c6"
-                                                ctx.lineWidth = 1
-                                                ctx.setLineDash([3, 3])
-                                                ctx.strokeRect(0.5, 0.5, width - 1, height - 1)
+                                    }
+                                    
+                                    Menu {
+                                        id: fieldPickerMenu
+                                        property string wellName: ""
+                                        Repeater {
+                                            model: mainWindow.studioController.filteredFields
+                                            MenuItem {
+                                                required property var modelData
+                                                text: String(modelData)
+                                                onTriggered: {
+                                                    mainWindow.studioController.add_field_to_well(fieldPickerMenu.wellName, String(modelData))
+                                                }
                                             }
                                         }
                                     }
