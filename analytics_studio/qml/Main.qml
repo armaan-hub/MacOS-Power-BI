@@ -952,6 +952,7 @@ ApplicationWindow {
                                                     visualName: String(modelData.title)
                                                     chartType: String(modelData.type)
                                                     selected: mainWindow.studioController.selectedVisual === String(modelData.title)
+                                                    seriesColor: modelData.color ? String(modelData.color) : "#0078D4" 
                                                     emptyMessage: "No data is available yet."
 
                                                     series: (modelData.type === "column" || modelData.type === "bar" || modelData.type === "line" || modelData.type === "area") ? mainWindow.studioController.visualSeries(String(modelData.title)) : []
@@ -2313,11 +2314,12 @@ ApplicationWindow {
                                         Layout.topMargin: -6
                                         Repeater {
                                             model: [
-                                                { label: "Build", icon: "buildVisual", active: true },
-                                                { label: "Format", icon: "formatTab", active: false },
-                                                { label: "Analytics", icon: "analyticsTab", active: false }
+                                                { label: "Build", icon: "buildVisual", active: true, tabId: "build" },
+                                                { label: "Format", icon: "formatTab", active: true, tabId: "format" },
+                                                { label: "Analytics", icon: "analyticsTab", active: false, tabId: "analytics" }
                                             ]
                                             delegate: Button {
+                                                id: buildVisualTabBtn
                                                 required property int index
                                                 required property var modelData
                                                 width: 40
@@ -2330,16 +2332,21 @@ ApplicationWindow {
                                                 Accessible.description: enabled ? "Build visual is available." : String(modelData.label) + " settings are not available in this release."
                                                 ToolTip.visible: hovered && !enabled
                                                 ToolTip.text: String(modelData.label) + " settings are not available in this release."
+                                                onClicked: {
+                                                    if (enabled) {
+                                                        mainWindow.activeVisualTab = String(modelData.tabId)
+                                                    }
+                                                }
                                                 background: Item {
                                                     Rectangle {
                                                         anchors.centerIn: parent
                                                         width: 30
                                                         height: 30
                                                         radius: 3
-                                                        color: modelData.active ? "#d7d7d7" : "transparent"
+                                                        color: mainWindow.activeVisualTab === modelData.tabId ? "#d7d7d7" : (buildVisualTabBtn.hovered && modelData.active ? "#eaeaea" : "transparent")
                                                     }
                                                     Rectangle {
-                                                        visible: modelData.active
+                                                        visible: mainWindow.activeVisualTab === modelData.tabId
                                                         width: 8
                                                         height: 8
                                                         anchors.horizontalCenter: parent.horizontalCenter
@@ -2711,7 +2718,106 @@ ApplicationWindow {
                                             }
                                         }
                                     }
-                                }
+                                    } // End of Build Visual ColumnLayout
+
+                                    ColumnLayout {
+                                        Layout.fillWidth: true
+                                        visible: mainWindow.activeVisualTab === "format"
+                                        
+                                        Rectangle { Layout.fillWidth: true; Layout.topMargin: 1; height: 1; color: "#e1e5e8" }
+                                        
+                                        Item {
+                                            Layout.fillWidth: true
+                                            Layout.preferredHeight: 100
+                                            Text {
+                                                anchors.centerIn: parent
+                                                text: "Format visual properties\n(Select visual)"
+                                                horizontalAlignment: Text.AlignHCenter
+                                                color: "#6e6e6e"
+                                                font.pixelSize: 11
+                                                visible: !mainWindow.studioController.selectedVisual
+                                            }
+                                            ColumnLayout {
+                                                anchors.fill: parent
+                                                visible: Boolean(mainWindow.studioController.selectedVisual)
+                                                spacing: 4
+                                                
+                                                ScrollView {
+                                                    Layout.fillWidth: true
+                                                    Layout.fillHeight: true
+                                                    clip: true
+                                                    
+                                                    ColumnLayout {
+                                                        width: parent.width
+                                                        spacing: 2
+                                                        
+                                                        Repeater {
+                                                            model: mainWindow.studioController.activeVisualPropertyGroups
+                                                            delegate: ColumnLayout {
+                                                                required property var modelData
+                                                                Layout.fillWidth: true
+                                                                spacing: 0
+                                                                
+                                                                // Group Header
+                                                                Rectangle {
+                                                                    Layout.fillWidth: true
+                                                                    Layout.preferredHeight: 28
+                                                                    color: "#f3f2f1"
+                                                                    border.width: 0
+                                                                    RowLayout {
+                                                                        anchors.fill: parent
+                                                                        anchors.leftMargin: 8
+                                                                        Text {
+                                                                            text: String(modelData.name)
+                                                                            font.pixelSize: 11
+                                                                            font.weight: Font.DemiBold
+                                                                            color: "#323130"
+                                                                        }
+                                                                    }
+                                                                }
+                                                                
+                                                                // Properties
+                                                                Repeater {
+                                                                    model: modelData.properties
+                                                                    delegate: Item {
+                                                                        required property var modelData
+                                                                        width: parent.width
+                                                                        height: 32
+                                                                        
+                                                                        Text {
+                                                                            anchors.left: parent.left
+                                                                            anchors.leftMargin: 12
+                                                                            anchors.verticalCenter: parent.verticalCenter
+                                                                            text: String(modelData.label)
+                                                                            font.pixelSize: 10
+                                                                            color: "#605e5c"
+                                                                        }
+                                                                        
+                                                                        TextField {
+                                                                            visible: modelData.type === "string" || modelData.type === "number" || modelData.type === "color"
+                                                                            anchors.right: parent.right
+                                                                            anchors.rightMargin: 8
+                                                                            anchors.verticalCenter: parent.verticalCenter
+                                                                            width: parent.width / 2
+                                                                            height: 24
+                                                                            text: String(modelData.value)
+                                                                            font.pixelSize: 10
+                                                                            onEditingFinished: {
+                                                                                let val = text
+                                                                                if (modelData.type === "number") val = Number(text)
+                                                                                mainWindow.studioController.set_visual_property(String(modelData.key), val)
+                                                                            }
+                                                                        }
+                                                                    }
+                                                                }
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                // End of Visualizations Main ColumnLayout
                                 ToolButton {
                                     visible: !mainWindow.visualizationsVisible
                                     Layout.fillWidth: true

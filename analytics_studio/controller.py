@@ -836,6 +836,36 @@ class StudioController(QObject):
         ]
 
     @Property("QVariantList", notify=stateChanged)
+    def activeVisualPropertyGroups(self) -> list[dict[str, object]]:  # noqa: N802
+        if not self._selected_visual:
+            return []
+        page = self._active_page()
+        if not page:
+            return []
+        visual = next((v for v in page.get("visuals", []) if isinstance(v, dict) and v.get("title") == self._selected_visual), None)
+        if not visual:
+            return []
+            
+        return [
+            {
+                "name": "General",
+                "properties": [
+                    {"key": "title", "label": "Title Text", "type": "string", "value": visual.get("title", "")},
+                    {"key": "x", "label": "X Position", "type": "number", "value": visual.get("x", 10)},
+                    {"key": "y", "label": "Y Position", "type": "number", "value": visual.get("y", 10)},
+                    {"key": "width", "label": "Width", "type": "number", "value": visual.get("width", 300)},
+                    {"key": "height", "label": "Height", "type": "number", "value": visual.get("height", 200)},
+                ]
+            },
+            {
+                "name": "Data Colors",
+                "properties": [
+                    {"key": "color", "label": "Primary Color", "type": "color", "value": visual.get("color", "#0078D4")}
+                ]
+            }
+        ]
+
+    @Property("QVariantList", notify=stateChanged)
     def activeVisualObjects(self) -> list[dict[str, object]]:  # noqa: N802
         pages = self._project["report"]["pages"]
         index = self.activePageIndex
@@ -5023,6 +5053,20 @@ class StudioController(QObject):
                 self._dirty = True
                 self.stateChanged.emit()
                 return
+
+    @Slot(str, "QVariant")
+    def set_visual_property(self, property_key: str, value: object) -> None:
+        if not self._selected_visual: return
+        page = self._project["report"]["pages"][self.activePageIndex]
+        for visual in page.get("visuals", []):
+            if isinstance(visual, dict) and visual.get("title") == self._selected_visual:
+                if property_key == "title" and str(value) != str(visual["title"]):
+                    # Keep selected_visual synced if title changes
+                    self._selected_visual = str(value)
+                visual[property_key] = value
+                self._dirty = True
+                self.stateChanged.emit()
+                break
 
     @Slot(str, int, int)
     def resize_visual(self, visual_id: str, width: int, height: int) -> None:
