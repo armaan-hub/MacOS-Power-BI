@@ -22,7 +22,8 @@ ApplicationWindow {
     property bool fitZoom: true
     property real reportZoom: 0.7
     property string fieldSearchQuery: ""
-    property var kpiNames: ["Revenue", "Cost", "Margin", "Units", "Orders"]
+    property var selectedReportFilterValues: []
+    readonly property var kpiNames: mainWindow.studioController.reportKpiNames
     readonly property var kpiColors: ["#107C71", "#0078D4", "#8764B8", "#D9A300", "#C65911"]
 
     readonly property var ribbonTabs: ["File", "Home", "Insert", "Modeling", "View", "Optimize", "Help"]
@@ -30,15 +31,16 @@ ApplicationWindow {
         { title: "Data", actions: [
             { label: "Get data", visibleLabel: "Get data", width: 48, iconName: "getData", commandId: "data.openPicker", splitGetData: true, description: "Choose a connector from the full data source picker." },
             { label: "Excel workbook", visibleLabel: "Excel\nworkbook", width: 50, iconName: "excel", commandId: "data.importExcel", description: "Import a workbook from an Excel file." },
-            { label: "OneLake catalog", visibleLabel: "OneLake\ncatalog", width: 50, iconName: "databaseLink", commandId: "data.oneLakeCatalog", description: "Browse the OneLake catalog." },
-            { label: "SQL Server", visibleLabel: "SQL Server", width: 44, iconName: "database", commandId: "data.sqlServer", description: "Connect to SQL Server." },
-            { label: "Enter data", visibleLabel: "Enter\ndata", width: 38, iconName: "tableAdd", commandId: "data.source.enterData", description: "Enter data manually." },
-            { label: "Dataverse", visibleLabel: "Dataverse", width: 46, iconName: "table", commandId: "data.dataverse", description: "Connect to Dataverse." },
+            { label: "OneLake catalog", visibleLabel: "OneLake\ncatalog", width: 50, iconName: "databaseLink", commandId: "disabled.oneLake", available: false, description: "OneLake connections require an external service and are not available in this local release." },
+            { label: "SQL Server", visibleLabel: "SQL Server", width: 44, iconName: "database", commandId: "data.sqlServer", description: "Connect to SQL Server over ODBC, preview a table or view, and import it locally." },
+            { label: "Enter data", visibleLabel: "Enter\ndata", width: 38, iconName: "tableAdd", commandId: "data.source.enterData", description: "Create a local table from typed or pasted delimited data." },
+            { label: "Dataverse", visibleLabel: "Dataverse", width: 46, iconName: "table", commandId: "disabled.dataverse", available: false, description: "Dataverse connections require an external service and are not available in this local release." },
             { label: "Recent sources", visibleLabel: "Recent\nsources", width: 46, iconName: "history", commandId: "data.recentSources", description: "Show a recently loaded data source." },
         ]},
         { title: "Queries", actions: [
-            { label: "Transform data", visibleLabel: "Transform\ndata", width: 48, iconName: "tableEdit", commandId: "disabled.transform", available: false, description: "Data transformation is not available in this release." },
-            { label: "Refresh", visibleLabel: "Refresh", width: 42, iconName: "refresh", commandId: "data.refresh", description: "Reload the linked data file." }
+            { label: "Transform data", visibleLabel: "Transform\ndata", width: 48, iconName: "tableEdit", commandId: "data.transform", description: "Preview and apply local steps to the active table." },
+            { label: "Refresh", visibleLabel: "Refresh", width: 42, iconName: "refresh", commandId: "data.refresh", description: "Reload the active linked source and its included dependent queries." },
+            { label: "Refresh all", visibleLabel: "Refresh\nall", width: 46, iconName: "refresh", commandId: "data.refreshAll", description: "Reload every supported linked source and rebuild included saved queries." }
         ]},
         { title: "Workspace", actions: [
             { label: "Report view", visibleLabel: "Report\nview", width: 42, iconName: "report", commandId: "view.report", description: "Switch to Report view." },
@@ -55,7 +57,7 @@ ApplicationWindow {
             ]},
             { title: "Data", actions: [
                 { label: "Get data", visibleLabel: "Get data", width: 48, iconName: "getData", commandId: "data.openPicker", splitGetData: true, description: "Choose a connector from the full data source picker." },
-                { label: "Export project", visibleLabel: "Export", iconName: "share", commandId: "disabled.export", available: false, description: "Export formats other than the project file are not available." }
+                { label: "Export data", visibleLabel: "Export", iconName: "share", commandId: "project.exportData", description: "Export the active table to a CSV file." }
             ]}
         ]},
         { groups: [
@@ -68,15 +70,16 @@ ApplicationWindow {
             { title: "Data", actions: [
                 { label: "Get data", visibleLabel: "Get data", width: 48, iconName: "getData", commandId: "data.openPicker", splitGetData: true, description: "Choose a connector from the full data source picker." },
                 { label: "Excel workbook", visibleLabel: "Excel\nworkbook", width: 50, iconName: "excel", commandId: "data.importExcel", description: "Import a workbook from an Excel file." },
-                { label: "OneLake catalog", visibleLabel: "OneLake\ncatalog", width: 50, iconName: "databaseLink", commandId: "data.oneLakeCatalog", description: "Browse the OneLake catalog." },
-                { label: "SQL Server", visibleLabel: "SQL Server", width: 44, iconName: "database", commandId: "data.sqlServer", description: "Connect to SQL Server." },
-                { label: "Enter data", visibleLabel: "Enter\ndata", width: 38, iconName: "tableAdd", commandId: "data.source.enterData", description: "Manual table entry is not implemented yet." },
-                { label: "Dataverse", visibleLabel: "Dataverse", width: 46, iconName: "table", commandId: "data.dataverse", description: "Connect to Dataverse." },
+                { label: "OneLake catalog", visibleLabel: "OneLake\ncatalog", width: 50, iconName: "databaseLink", commandId: "disabled.oneLake", available: false, description: "OneLake connections require an external service and are not available in this local release." },
+                { label: "SQL Server", visibleLabel: "SQL Server", width: 44, iconName: "database", commandId: "data.sqlServer", description: "Connect to SQL Server over ODBC, preview a table or view, and import it locally." },
+                { label: "Enter data", visibleLabel: "Enter\ndata", width: 38, iconName: "tableAdd", commandId: "data.source.enterData", description: "Create a local table from typed or pasted delimited data." },
+                { label: "Dataverse", visibleLabel: "Dataverse", width: 46, iconName: "table", commandId: "disabled.dataverse", available: false, description: "Dataverse connections require an external service and are not available in this local release." },
                 { label: "Recent sources", visibleLabel: "Recent\nsources", width: 46, iconName: "history", commandId: "data.recentSources", description: "Show a recently loaded data source." }
             ]},
             { title: "Queries", actions: [
-                { label: "Transform data", visibleLabel: "Transform\ndata", width: 42, iconName: "tableEdit", commandId: "disabled.transform", available: false, description: "Data transformation is not available in this release." },
-                { label: "Refresh", visibleLabel: "Refresh", width: 30, iconName: "refresh", commandId: "data.refresh", description: "Reload the linked data file." }
+                { label: "Transform data", visibleLabel: "Transform\ndata", width: 42, iconName: "tableEdit", commandId: "data.transform", description: "Preview and apply local steps to the active table." },
+                { label: "Refresh", visibleLabel: "Refresh", width: 30, iconName: "refresh", commandId: "data.refresh", description: "Reload the active linked source and its included dependent queries." },
+                { label: "Refresh all", visibleLabel: "Refresh\nall", width: 38, iconName: "refresh", commandId: "data.refreshAll", description: "Reload every supported linked source and rebuild included saved queries." }
             ]},
             { title: "Insert", actions: [
                 { label: "New visual", visibleLabel: "New\nvisual", iconName: "visual", commandId: "report.addMonthly", description: "Add a monthly revenue visual to this page." },
@@ -85,8 +88,8 @@ ApplicationWindow {
             ]},
             { title: "Calculations", actions: [
                 { label: "New visual calculation", visibleLabel: "New visual\ncalculation", width: 60, iconName: "dataLine", commandId: "disabled.visualCalculation", available: false, description: "Visual calculations are not available in this release." },
-                { label: "New measure", visibleLabel: "New\nmeasure", width: 40, iconName: "measure", commandId: "disabled.measure", available: false, description: "DAX measures are not available in this release." },
-                { label: "Quick measure", visibleLabel: "Quick\nmeasure", width: 40, iconName: "quickMeasure", commandId: "disabled.quickMeasure", available: false, description: "Quick measures are not available in this release." }
+                { label: "New measure", visibleLabel: "New\nmeasure", width: 40, iconName: "measure", commandId: "data.newMeasure", description: "Create a local DAX measure for the loaded table." },
+                { label: "Quick measure", visibleLabel: "Quick\nmeasure", width: 40, iconName: "quickMeasure", commandId: "data.quickMeasure", description: "Create a sum, average, or count measure for a selected field." }
             ]},
             { title: "Sensitivity", actions: [
                 { label: "Sensitivity", visibleLabel: "Sensitivity", width: 62, iconName: "security", commandId: "disabled.sensitivity", available: false, description: "Sensitivity labels are not available in this release." }
@@ -110,8 +113,8 @@ ApplicationWindow {
             ]},
             { title: "Elements", compact: true, actions: [
                 { label: "Text box", visibleLabel: "Text\nbox", width: 38, appearanceAvailable: true, iconName: "text", commandId: "disabled.textBox", available: false, description: "Report text boxes are not available in this release." },
-                { label: "Buttons", visibleLabel: "Buttons", width: 46, hasDropdown: true, appearanceAvailable: true, iconName: "button", commandId: "insert.buttons", description: "Browse the report button gallery." },
-                { label: "Shapes", visibleLabel: "Shapes", width: 43, hasDropdown: true, appearanceAvailable: true, iconName: "shape", commandId: "insert.shapes", description: "Browse report shapes." },
+                { label: "Buttons", visibleLabel: "Buttons", width: 46, hasDropdown: true, appearanceAvailable: true, iconName: "button", commandId: "insert.buttons", available: false, description: "Report button objects are not available in this release." },
+                { label: "Shapes", visibleLabel: "Shapes", width: 43, hasDropdown: true, appearanceAvailable: true, iconName: "shape", commandId: "insert.shapes", available: false, description: "Report shape objects are not available in this release." },
                 { label: "Image", visibleLabel: "Image", width: 34, appearanceAvailable: true, iconName: "image", commandId: "disabled.image", available: false, description: "Report images are not available in this release." }
             ]},
             { title: "Sparklines", compact: true, actions: [
@@ -124,17 +127,18 @@ ApplicationWindow {
                 { label: "Model view", visibleLabel: "Model\nview", iconName: "model", commandId: "view.model", description: "Switch to Model view." }
             ]},
             { title: "Relationships", actions: [
-                { label: "Manage relationships", visibleLabel: "Manage\nrelationships", width: 72, iconName: "relationship", commandId: "disabled.relationships", available: false, description: "Relationship editing is not available in this release." }
+                { label: "Manage relationships", visibleLabel: "Manage\nrelationships", width: 72, iconName: "relationship", commandId: "model.manageRelationships", description: "Create, edit, or remove relationships between loaded model tables." }
             ]},
             { title: "Calculations", actions: [
                 { label: "New visual calculation", visibleLabel: "New visual\ncalculation", width: 56, iconName: "dataLine", commandId: "disabled.visualCalculation", available: false, description: "Visual calculations are not available in this release." },
-                { label: "New measure", visibleLabel: "New\nmeasure", width: 40, iconName: "measure", commandId: "disabled.measure", available: false, description: "DAX measures are not available in this release." },
-                { label: "Quick measure", visibleLabel: "Quick\nmeasure", width: 40, iconName: "quickMeasure", commandId: "disabled.quickMeasure", available: false, description: "Quick measures are not available in this release." },
-                { label: "New column", visibleLabel: "New\ncolumn", iconName: "column", commandId: "disabled.column", available: false, description: "Calculated columns are not available in this release." },
-                { label: "New table", visibleLabel: "New\ntable", iconName: "tableAdd", commandId: "disabled.newTable", available: false, description: "Calculated tables are not available in this release." }
+                { label: "New measure", visibleLabel: "New\nmeasure", width: 40, iconName: "measure", commandId: "data.newMeasure", description: "Create a local DAX measure for the loaded table." },
+                { label: "Quick measure", visibleLabel: "Quick\nmeasure", width: 40, iconName: "quickMeasure", commandId: "data.quickMeasure", description: "Create a sum, average, or count measure for a selected field." },
+                { label: "New column", visibleLabel: "New\ncolumn", iconName: "column", commandId: "model.newCalculatedColumn", description: "Create, edit, or remove a local DAX calculated column on the active table." },
+                { label: "New table", visibleLabel: "New\ntable", iconName: "tableAdd", commandId: "newCalculatedTable", description: "Create a DISTINCT calculated table from a loaded model column." }
             ]},
             { title: "Calendars", actions: [
-                { label: "Mark as date table", visibleLabel: "Mark as\ndate table", width: 48, iconName: "calendar", commandId: "disabled.dateTable", available: false, description: "Date table configuration is not available in this release." }
+                { label: "New calendar table", visibleLabel: "New calendar\ntable", width: 52, iconName: "calendar", commandId: "model.newCalendarTable", description: "Generate a saved, contiguous calendar table from dates or the model's date columns." },
+                { label: "Mark as date table", visibleLabel: "Mark as\ndate table", width: 48, iconName: "calendar", commandId: "model.markDateTable", description: "Mark or unmark a loaded Date or DateTime column as a date table." }
             ]},
             { title: "Page refresh", actions: [
                 { label: "Change detection", visibleLabel: "Change\ndetection", width: 56, iconName: "refresh", commandId: "disabled.changeDetection", available: false, description: "Change detection is not available in this release." }
@@ -251,16 +255,23 @@ ApplicationWindow {
         case "project.open": clearFieldSearch(); mainWindow.studioController.executeCommand("openProject"); break
         case "project.save": mainWindow.studioController.executeCommand("saveProject"); break
         case "project.saveAs": mainWindow.studioController.executeCommand("saveProjectAs"); break
+        case "project.exportData": mainWindow.studioController.executeCommand("exportData"); break
         case "data.openPicker": openGetDataPicker(null); break
+        case "data.sqlServer": clearFieldSearch(); mainWindow.studioController.connectDataSource("microsoft_sql_server"); break
         case "data.importCsv": clearFieldSearch(); mainWindow.studioController.executeCommand("importCsv"); break
         case "data.importExcel": clearFieldSearch(); mainWindow.studioController.executeCommand("importExcel"); break
         case "data.importFile": clearFieldSearch(); mainWindow.studioController.executeCommand("importData"); break
-        case "data.oneLakeCatalog": mainWindow.studioController.reportStagedAction("OneLake catalog", "OneLake catalog connections are not implemented yet."); break
-        case "data.sqlServer": mainWindow.studioController.reportStagedAction("SQL Server", "SQL Server connections are not implemented yet."); break
-        case "data.dataverse": mainWindow.studioController.reportStagedAction("Dataverse", "Dataverse connections are not implemented yet."); break
-        case "data.enterBlank": mainWindow.studioController.reportStagedAction("Paste data into a blank table", "Manual table entry is not implemented yet."); break
-        case "data.sampleData": mainWindow.studioController.reportStagedAction("Use sample data", "Sample data is not available in this release."); break
+        case "data.enterBlank": mainWindow.studioController.executeCommand("pasteData"); break
+        case "data.sampleData": mainWindow.studioController.executeCommand("sampleData"); break
+        case "data.transform": mainWindow.studioController.executeCommand("transformData"); break
+        case "data.newMeasure": mainWindow.studioController.executeCommand("newMeasure"); break
+        case "data.quickMeasure": mainWindow.studioController.executeCommand("quickMeasure"); break
+        case "model.manageRelationships": mainWindow.studioController.executeCommand("manageRelationships"); break
+        case "model.newCalculatedColumn": mainWindow.studioController.executeCommand("newCalculatedColumn"); break
+        case "model.newCalendarTable": mainWindow.studioController.executeCommand("newCalendarTable"); break
+        case "model.markDateTable": mainWindow.studioController.executeCommand("markDateTable"); break
         case "data.refresh": mainWindow.studioController.executeCommand("refreshSource"); break
+        case "data.refreshAll": mainWindow.studioController.executeCommand("refreshAllSources"); break
         case "filter.clear": mainWindow.studioController.executeCommand("clearFilters"); break
         case "report.addPage": mainWindow.studioController.executeCommand("addPage"); break
         case "report.addMonthly": mainWindow.studioController.executeCommand("addMonthlyChart"); break
@@ -316,7 +327,7 @@ ApplicationWindow {
         case "data.openPicker": openGetDataPicker(sourceItem); return
         case "data.recentSources": showRibbonPopup("recentSources", sourceItem, sourceItem); return
         case "data.source.enterData":
-            mainWindow.studioController.reportStagedAction("Enter data", "Manual table entry is not implemented.")
+            mainWindow.studioController.executeCommand("enterData")
             return
         case "insert.moreVisuals": showRibbonPopup("moreVisuals", sourceItem, sourceItem); return
         case "insert.buttons": showRibbonPopup("buttons", sourceItem, sourceItem); return
@@ -336,8 +347,9 @@ ApplicationWindow {
             return
         }
         if (action.indexOf("recent.") === 0) {
+            const recentIndex = Number(action.substring("recent.".length))
             Qt.callLater(function() {
-                mainWindow.studioController.executeCommand("refreshSource")
+                mainWindow.studioController.openRecentSource(recentIndex)
                 if (focusTarget && focusTarget.visible)
                     focusTarget.forceActiveFocus()
             })
@@ -354,6 +366,16 @@ ApplicationWindow {
         if (action === "source.excel") {
             Qt.callLater(function() {
                 mainWindow.studioController.connectDataSource("file_excel_workbook")
+                if (focusTarget && focusTarget.visible)
+                    focusTarget.forceActiveFocus()
+            })
+            return
+        }
+        if (action === "source.json" || action === "source.xml" || action === "source.parquet") {
+            Qt.callLater(function() {
+                const sourceId = action === "source.json" ? "file_json"
+                               : (action === "source.xml" ? "file_xml" : "file_parquet")
+                mainWindow.studioController.connectDataSource(sourceId)
                 if (focusTarget && focusTarget.visible)
                     focusTarget.forceActiveFocus()
             })
@@ -404,7 +426,14 @@ ApplicationWindow {
                 || commandId === "view.zoomIn" || commandId === "view.zoomOut"
                 || commandId === "view.resetLayout"
         if (reportOnly && mainWindow.studioController.currentView !== "Report") return false
-        if (commandId === "data.refresh") return mainWindow.studioController.sourceLoaded
+        if (commandId === "data.refresh") return mainWindow.studioController.canRefreshSource
+        if (commandId === "data.refreshAll") return mainWindow.studioController.canRefreshAllSources
+        if (commandId === "model.manageRelationships") return mainWindow.studioController.canManageRelationships
+        if (commandId === "model.markDateTable")
+            return mainWindow.studioController.tableCatalog.some(function(table) { return Boolean(table.loaded) })
+        if (commandId === "model.newCalculatedColumn") return mainWindow.studioController.sourceLoaded
+        if (commandId === "data.transform") return mainWindow.studioController.sourceLoaded
+        if (commandId === "project.exportData") return mainWindow.studioController.sourceLoaded
         if (commandId === "filter.clear") return mainWindow.studioController.filterActive
         return true
     }
@@ -418,8 +447,23 @@ ApplicationWindow {
                 || commandId === "view.resetLayout"
         if (reportOnly && mainWindow.studioController.currentView !== "Report")
             return "Switch to Report view to use this command."
-        if (commandId === "data.refresh" && !mainWindow.studioController.sourceLoaded)
-            return "Import data before refreshing."
+        if (commandId === "data.transform" && !mainWindow.studioController.sourceLoaded)
+            return "Load a table before transforming data."
+        if (commandId === "project.exportData" && !mainWindow.studioController.sourceLoaded)
+            return "Load a table before exporting data."
+        if (commandId === "data.refresh" && !mainWindow.studioController.canRefreshSource)
+            return mainWindow.studioController.sourceLoaded
+                    ? "Inline tables have no linked file to refresh."
+                    : "Import data before refreshing."
+        if (commandId === "data.refreshAll" && !mainWindow.studioController.canRefreshAllSources)
+            return "Import or connect at least one linked source before refreshing all."
+        if (commandId === "model.manageRelationships" && !mainWindow.studioController.canManageRelationships)
+            return "Load at least two tables before managing relationships."
+        if (commandId === "model.markDateTable"
+                && !mainWindow.studioController.tableCatalog.some(function(table) { return Boolean(table.loaded) }))
+            return "Load a model table before marking a date table."
+        if (commandId === "model.newCalculatedColumn" && !mainWindow.studioController.sourceLoaded)
+            return "Load a table before creating a calculated column."
         if (commandId === "filter.clear" && !mainWindow.studioController.filterActive)
             return "There is no active Region filter to clear."
         return ""
@@ -870,9 +914,9 @@ ApplicationWindow {
                                                     Repeater {
                                                         model: [
                                                             { title: "Import data from Excel", icon: "excelTile", tint: "#cdebd8", command: "data.importExcel", active: true, description: "Open a workbook picker and import an Excel file." },
-                                                            { title: "Import data from SQL Server", icon: "sqlServer", tint: "#edf5fb", command: "data.sqlServer", active: true, description: "Start a SQL Server connection." },
-                                                            { title: "Paste data into a blank table", icon: "pasteTable", tint: "#fffdf3", command: "data.enterBlank", active: true, description: "Paste data into a new table." },
-                                                            { title: "Use sample data", icon: "sampleData", tint: "#f3f3f3", command: "data.sampleData", active: true, description: "Load a sample data set." }
+                                                            { title: "Import data from SQL Server", icon: "sqlServer", tint: "#edf5fb", command: "data.sqlServer", active: true, description: "Connect with a SQL Server login and import a table or view." },
+                                                            { title: "Paste data into a blank table", icon: "pasteTable", tint: "#fffdf3", command: "data.enterBlank", active: true, description: "Create a table from typed or pasted delimited data." },
+                                                            { title: "Use sample data", icon: "sampleData", tint: "#f3f3f3", command: "data.sampleData", active: true, description: "Load a deterministic sample sales table." }
                                                         ]
                                                         delegate: Button {
                                                             required property var modelData
@@ -885,9 +929,9 @@ ApplicationWindow {
                                                             Accessible.name: String(modelData.title)
                                                             Accessible.description: enabled
                                                                     ? (modelData.description || String(modelData.title))
-                                                                    : String(modelData.title) + " is not available in this release."
+                                                                    : (modelData.description || String(modelData.title) + " is not available in this release.")
                                                             ToolTip.visible: hovered && !enabled
-                                                            ToolTip.text: String(modelData.title) + " is not available in this release."
+                                                            ToolTip.text: modelData.description || String(modelData.title) + " is not available in this release."
                                                             background: Rectangle {
                                                                 radius: 3
                                                                 color: "#ffffff"
@@ -986,7 +1030,12 @@ ApplicationWindow {
                                                     visible: mainWindow.studioController.activePageVisuals.indexOf(String(modelData) + " KPI") >= 0
                                                     radius: 6
                                                     color: "#ffffff"
-                                                    border.color: "#d9e0e5"
+                                                    border.color: mainWindow.studioController.selectedVisual === String(modelData) + " KPI" ? "#0078D4" : "#d9e0e5"
+                                                    border.width: mainWindow.studioController.selectedVisual === String(modelData) + " KPI" ? 2 : 1
+                                                    Accessible.name: String(modelData) + " KPI"
+                                                    TapHandler {
+                                                        onTapped: mainWindow.studioController.selectVisual(String(modelData) + " KPI")
+                                                    }
                                                     Rectangle {
                                                         width: 3
                                                         anchors.left: parent.left
@@ -1004,7 +1053,9 @@ ApplicationWindow {
                                                         Text { text: String(modelData); color: "#657583"; font.pixelSize: 10 }
                                                         Text {
                                                             Layout.fillWidth: true
-                                                            text: mainWindow.studioController.reportKpis[String(modelData)] || "—"
+                                                            text: mainWindow.studioController.visualKpis[String(modelData) + " KPI"]
+                                                                  || mainWindow.studioController.reportKpis[String(modelData)]
+                                                                  || "—"
                                                             color: "#293e4d"
                                                             font.pixelSize: 19
                                                             font.weight: Font.DemiBold
@@ -1028,9 +1079,9 @@ ApplicationWindow {
                                                 visualName: "Monthly revenue"
                                                 chartType: mainWindow.studioController.monthlyChartType
                                                 seriesColor: "#0078D4"
-                                                series: mainWindow.studioController.monthlySeries
+                                                series: mainWindow.studioController.monthlySeriesForVisual("Monthly revenue")
                                                 selected: mainWindow.studioController.selectedVisual === "Monthly revenue"
-                                                emptyMessage: "No monthly revenue values found in this source."
+                                                emptyMessage: mainWindow.studioController.monthlyChartMessage
                                                 onRequestedSelection: function(name) { mainWindow.studioController.selectVisual(name) }
                                             }
                                             ChartCard {
@@ -1041,10 +1092,10 @@ ApplicationWindow {
                                                 visualName: "Region revenue"
                                                 chartType: mainWindow.studioController.regionChartType
                                                 seriesColor: "#107C71"
-                                                series: mainWindow.studioController.regionSeries
+                                                series: mainWindow.studioController.regionSeriesForVisual("Region revenue")
                                                 selected: mainWindow.studioController.selectedVisual === "Region revenue"
                                                 filterOnCategory: true
-                                                emptyMessage: "No region revenue values found in this source."
+                                                emptyMessage: mainWindow.studioController.regionChartMessage
                                                 onRequestedSelection: function(name) { mainWindow.studioController.selectVisual(name) }
                                                 onCategoryRequested: function(label) { mainWindow.studioController.setRegionFilter(label) }
                                             }
@@ -1181,7 +1232,7 @@ ApplicationWindow {
                                     anchors.centerIn: parent
                                     width: parent.width - 20
                                     visible: mainWindow.studioController.filteredFields.length === 0
-                                    text: mainWindow.studioController.sourceLoaded ? "No matching fields." : "Import a CSV, Excel, JSON, or XML file to browse its source fields."
+                                    text: mainWindow.studioController.sourceLoaded ? "No matching fields." : "Import a CSV, Excel, JSON, XML, or Parquet file to browse its source fields."
                                     color: "#76838d"
                                     font.pixelSize: 9
                                     wrapMode: Text.Wrap
@@ -1195,7 +1246,7 @@ ApplicationWindow {
                                     text: "Import data"
                                     Accessible.name: "Import data from Data fields pane"
                                     ToolTip.visible: hovered
-                                    ToolTip.text: "Choose a supported CSV, Excel, JSON, or XML file to browse its source fields."
+                                    ToolTip.text: "Choose a supported CSV, Excel, JSON, XML, or Parquet file to browse its source fields."
                                     background: Rectangle { radius: 3; color: parent.hovered ? "#e7f1f8" : "#f4f8fb"; border.color: "#cbdde9" }
                                     contentItem: Text { text: parent.text; color: "#315f7d"; font.pixelSize: 9; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter }
                                     onClicked: mainWindow.runCommand("data.importFile")
@@ -1292,7 +1343,7 @@ ApplicationWindow {
                                         Text { Layout.fillWidth: true; text: String(modelData); color: "#3f505d"; font.pixelSize: 10; elide: Text.ElideRight }
                                     }
                                     Repeater {
-                                        model: mainWindow.studioController.sourceLoaded && mainWindow.studioController.modelTables.length === 1 ? mainWindow.studioController.headers : []
+                                        model: mainWindow.studioController.sourceLoaded ? mainWindow.studioController.headers : []
                                         delegate: RowLayout {
                                             required property var modelData
                                             Layout.fillWidth: true
@@ -1406,8 +1457,792 @@ ApplicationWindow {
                                         contentItem: Text { text: parent.text; color: parent.enabled ? "#445762" : "#98a1a8"; font.pixelSize: 9; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter }
                                         onClicked: mainWindow.runCommand("filter.clear")
                                     }
+                                    Rectangle {
+                                        Layout.fillWidth: true
+                                        Layout.preferredHeight: 450
+                                        color: "#ffffff"
+                                        border.color: "#d9dfe3"
+                                        ColumnLayout {
+                                            anchors.fill: parent
+                                            anchors.margins: 8
+                                            spacing: 6
+                                            Text {
+                                                text: filterScopeCombo.currentIndex === 0
+                                                      ? "Report filters"
+                                                      : (filterScopeCombo.currentIndex === 1
+                                                         ? "Page filters"
+                                                         : (mainWindow.studioController.selectedVisual.length > 0
+                                                         ? String(mainWindow.studioController.selectedVisual) + " filters"
+                                                         : "Visual filters"))
+                                                color: "#495b68"
+                                                font.pixelSize: 10
+                                                font.weight: Font.DemiBold
+                                            }
+                                            ComboBox {
+                                                id: filterScopeCombo
+                                                Layout.fillWidth: true
+                                                model: ["Report", "Page", "Selected visual"]
+                                                currentIndex: 1
+                                                background: Rectangle { radius: 3; color: "#ffffff"; border.color: filterScopeCombo.activeFocus ? "#718da1" : "#ccd4da" }
+                                                contentItem: Text {
+                                                    leftPadding: 8
+                                                    rightPadding: filterScopeCombo.indicator.width + 6
+                                                    text: filterScopeCombo.displayText
+                                                    color: "#455661"
+                                                    font.pixelSize: 9
+                                                    verticalAlignment: Text.AlignVCenter
+                                                    elide: Text.ElideRight
+                                                }
+                                                delegate: ItemDelegate {
+                                                    width: filterScopeCombo.width
+                                                    text: String(modelData)
+                                                    background: Rectangle { color: highlighted ? "#e9eff3" : "#ffffff" }
+                                                    contentItem: Text { text: String(modelData); color: "#455661"; font.pixelSize: 9; verticalAlignment: Text.AlignVCenter }
+                                                }
+                                            }
+                                            ComboBox {
+                                                id: visualFilterTargetCombo
+                                                visible: filterScopeCombo.currentIndex === 2
+                                                Layout.fillWidth: true
+                                                model: mainWindow.studioController.activePageVisuals
+                                                currentIndex: model.indexOf(mainWindow.studioController.selectedVisual)
+                                                enabled: count > 0
+                                                onActivated: function(index) {
+                                                    mainWindow.studioController.selectVisual(String(model[index]))
+                                                }
+                                                background: Rectangle { radius: 3; color: "#ffffff"; border.color: visualFilterTargetCombo.activeFocus ? "#718da1" : "#ccd4da" }
+                                                contentItem: Text {
+                                                    leftPadding: 8
+                                                    rightPadding: visualFilterTargetCombo.indicator.width + 6
+                                                    text: visualFilterTargetCombo.displayText || "Choose a visual"
+                                                    color: visualFilterTargetCombo.enabled ? "#455661" : "#86919a"
+                                                    font.pixelSize: 9
+                                                    verticalAlignment: Text.AlignVCenter
+                                                    elide: Text.ElideRight
+                                                }
+                                                delegate: ItemDelegate {
+                                                    width: visualFilterTargetCombo.width
+                                                    text: String(modelData)
+                                                    background: Rectangle { color: highlighted ? "#e9eff3" : "#ffffff" }
+                                                    contentItem: Text { text: String(modelData); color: "#455661"; font.pixelSize: 9; verticalAlignment: Text.AlignVCenter }
+                                                }
+                                            }
+                                            Text {
+                                                Layout.fillWidth: true
+                                                text: filterScopeCombo.currentIndex === 0
+                                                      ? "Filter every report page with one or two conditions per field. Conditions follow active relationships."
+                                                      : (filterScopeCombo.currentIndex === 1
+                                                         ? "Filter this page with one or two conditions per field. Conditions follow active relationships."
+                                                         : "Conditions here affect only the chosen visual and follow active relationships.")
+                                                color: "#79858d"
+                                                font.pixelSize: 8
+                                                wrapMode: Text.Wrap
+                                            }
+                                            ScrollView {
+                                                id: pageFilterList
+                                                Layout.fillWidth: true
+                                                Layout.preferredHeight: 56
+                                                clip: true
+                                                    ColumnLayout {
+                                                        width: pageFilterList.availableWidth
+                                                        Repeater {
+                                                        model: filterScopeCombo.currentIndex === 0
+                                                               ? mainWindow.studioController.activeReportFilters
+                                                               : (filterScopeCombo.currentIndex === 1
+                                                                  ? mainWindow.studioController.activePageFilters
+                                                                  : mainWindow.studioController.activeVisualFilters)
+                                                        delegate: RowLayout {
+                                                            required property var modelData
+                                                            Layout.fillWidth: true
+                                                            spacing: 3
+                                                            Text {
+                                                                Layout.fillWidth: true
+                                                                text: String(modelData.tableName) + " · " + String(modelData.column) + " " + String(modelData.displayValue)
+                                                                color: "#536570"
+                                                                font.pixelSize: 8
+                                                                elide: Text.ElideRight
+                                                                ToolTip.visible: filterRowMouse.containsMouse
+                                                                ToolTip.text: String(modelData.tableName) + " · " + String(modelData.column) + " " + String(modelData.displayValue)
+                                                                MouseArea { id: filterRowMouse; anchors.fill: parent; hoverEnabled: true }
+                                                            }
+                                                            ToolButton {
+                                                                Accessible.name: filterScopeCombo.currentIndex === 0
+                                                                                 ? "Remove report filter"
+                                                                                 : (filterScopeCombo.currentIndex === 1
+                                                                                    ? "Remove page filter"
+                                                                                    : "Remove visual filter")
+                                                                onClicked: {
+                                                                    if (filterScopeCombo.currentIndex === 0)
+                                                                        mainWindow.studioController.removeReportFilter(Number(modelData.index))
+                                                                    else if (filterScopeCombo.currentIndex === 1)
+                                                                        mainWindow.studioController.removePageFilter(Number(modelData.index))
+                                                                    else
+                                                                        mainWindow.studioController.removeVisualFilter(Number(modelData.index))
+                                                                }
+                                                                contentItem: Text { text: "×"; color: "#657784"; font.pixelSize: 14; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter }
+                                                                background: Rectangle { color: parent.hovered ? "#f1f4f6" : "transparent" }
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                            Text {
+                                                visible: filterScopeCombo.currentIndex === 0
+                                                         ? mainWindow.studioController.activeReportFilters.length === 0
+                                                         : (filterScopeCombo.currentIndex === 1
+                                                            ? mainWindow.studioController.activePageFilters.length === 0
+                                                            : mainWindow.studioController.activeVisualFilters.length === 0)
+                                                text: filterScopeCombo.currentIndex === 0
+                                                      ? "No report filters set."
+                                                      : (filterScopeCombo.currentIndex === 1
+                                                         ? "No page filters set."
+                                                         : "No filters on this visual.")
+                                                color: "#89949c"
+                                                font.pixelSize: 8
+                                            }
+                                            ComboBox {
+                                                id: pageFilterFieldCombo
+                                                Layout.fillWidth: true
+                                                model: mainWindow.studioController.pageFilterFields
+                                                textRole: "label"
+                                                currentIndex: count > 0 ? 0 : -1
+                                                enabled: count > 0
+                                                onActivated: function(index) {
+                                                    pageFilterValueCombo.currentIndex = pageFilterValueCombo.count > 0 ? 0 : -1
+                                                    if (pageFilterValueCombo.count === 0) pageFilterValueCombo.editText = ""
+                                                    pageFilterOperatorCombo.currentIndex = 0
+                                                    secondFilterOperatorCombo.currentIndex = 0
+                                                    filterLogicCombo.currentIndex = 0
+                                                    secondConditionCheck.checked = false
+                                                    secondFilterValue.text = ""
+                                                    filterValueSearch.text = ""
+                                                    mainWindow.selectedReportFilterValues = []
+                                                    relativeDateDirectionCombo.currentIndex = 0
+                                                    relativeDateCount.value = 1
+                                                    relativeDateUnitCombo.currentIndex = 0
+                                                    relativeDateIncludeToday.checked = true
+                                                }
+                                                background: Rectangle { radius: 3; color: "#ffffff"; border.color: pageFilterFieldCombo.activeFocus ? "#718da1" : "#ccd4da" }
+                                                contentItem: Text {
+                                                    leftPadding: 8
+                                                    rightPadding: pageFilterFieldCombo.indicator.width + 6
+                                                    text: pageFilterFieldCombo.displayText || "Choose a table field"
+                                                    color: pageFilterFieldCombo.enabled ? "#455661" : "#86919a"
+                                                    font.pixelSize: 9
+                                                    verticalAlignment: Text.AlignVCenter
+                                                    elide: Text.ElideRight
+                                                }
+                                                delegate: ItemDelegate {
+                                                    required property string label
+                                                    width: pageFilterFieldCombo.width
+                                                    text: label
+                                                    background: Rectangle { color: highlighted ? "#e9eff3" : "#ffffff" }
+                                                    contentItem: Text { text: label; color: "#455661"; font.pixelSize: 9; verticalAlignment: Text.AlignVCenter; elide: Text.ElideRight }
+                                                }
+                                            }
+                                            ComboBox {
+                                                id: pageFilterOperatorCombo
+                                                Layout.fillWidth: true
+                                                model: {
+                                                    const fields = mainWindow.studioController.pageFilterFields
+                                                    if (pageFilterFieldCombo.currentIndex < 0 || pageFilterFieldCombo.currentIndex >= fields.length) return []
+                                                    const field = fields[pageFilterFieldCombo.currentIndex]
+                                                    if (filterScopeCombo.currentIndex !== 2)
+                                                        return mainWindow.studioController.pageFilterOperators(String(field.columnType))
+                                                    return mainWindow.studioController.visualFilterOperators(
+                                                        String(field.tableId), String(field.column), String(field.columnType),
+                                                        String(mainWindow.studioController.selectedVisual)
+                                                    )
+                                                }
+                                                textRole: "label"
+                                                valueRole: "value"
+                                                currentIndex: count > 0 ? 0 : -1
+                                                enabled: pageFilterFieldCombo.currentIndex >= 0
+                                                onActivated: function(index) {
+                                                    mainWindow.selectedReportFilterValues = []
+                                                    const op = String(currentValue)
+                                                    if (op === "is_any_of" || op === "is_none_of") {
+                                                        pageFilterValueCombo.currentIndex = -1
+                                                        pageFilterValueCombo.editText = ""
+                                                        secondConditionCheck.checked = false
+                                                        filterValueSearch.text = ""
+                                                    } else if (op === "is_blank" || op === "is_not_blank") {
+                                                        pageFilterValueCombo.currentIndex = -1
+                                                        pageFilterValueCombo.editText = ""
+                                                    } else if (op === "relative_date" || op === "relative_time") {
+                                                        pageFilterValueCombo.currentIndex = -1
+                                                        pageFilterValueCombo.editText = ""
+                                                        secondConditionCheck.checked = false
+                                                        relativeDateDirectionCombo.currentIndex = 0
+                                                        relativeDateCount.value = 1
+                                                        relativeDateUnitCombo.currentIndex = 0
+                                                        relativeDateIncludeToday.checked = true
+                                                    } else if (op === "top_n") {
+                                                        pageFilterValueCombo.currentIndex = -1
+                                                        pageFilterValueCombo.editText = ""
+                                                        secondConditionCheck.checked = false
+                                                        topNDirectionCombo.currentIndex = 0
+                                                        topNCount.value = 5
+                                                        topNOrderByCombo.currentIndex = topNOrderByCombo.count > 0 ? 0 : -1
+                                                    }
+                                                }
+                                                background: Rectangle { radius: 3; color: "#ffffff"; border.color: pageFilterOperatorCombo.activeFocus ? "#718da1" : "#ccd4da" }
+                                                contentItem: Text {
+                                                    leftPadding: 8
+                                                    rightPadding: pageFilterOperatorCombo.indicator.width + 6
+                                                    text: pageFilterOperatorCombo.displayText || "Choose a filter condition"
+                                                    color: pageFilterOperatorCombo.enabled ? "#455661" : "#86919a"
+                                                    font.pixelSize: 9
+                                                    verticalAlignment: Text.AlignVCenter
+                                                    elide: Text.ElideRight
+                                                }
+                                                delegate: ItemDelegate {
+                                                    required property string label
+                                                    width: pageFilterOperatorCombo.width
+                                                    text: label
+                                                    background: Rectangle { color: highlighted ? "#e9eff3" : "#ffffff" }
+                                                    contentItem: Text { text: label; color: "#455661"; font.pixelSize: 9; verticalAlignment: Text.AlignVCenter }
+                                                }
+                                            }
+                                            RowLayout {
+                                                visible: String(pageFilterOperatorCombo.currentValue) === "relative_date"
+                                                         || String(pageFilterOperatorCombo.currentValue) === "relative_time"
+                                                Layout.fillWidth: true
+                                                spacing: 4
+                                                ComboBox {
+                                                    id: relativeDateDirectionCombo
+                                                    Layout.preferredWidth: 66
+                                                    model: ["Last", "This", "Next"]
+                                                    currentIndex: 0
+                                                    background: Rectangle { radius: 3; color: "#ffffff"; border.color: relativeDateDirectionCombo.activeFocus ? "#718da1" : "#ccd4da" }
+                                                    contentItem: Text {
+                                                        leftPadding: 6
+                                                        rightPadding: relativeDateDirectionCombo.indicator.width + 4
+                                                        text: relativeDateDirectionCombo.displayText
+                                                        color: "#455661"
+                                                        font.pixelSize: 9
+                                                        verticalAlignment: Text.AlignVCenter
+                                                    }
+                                                    delegate: ItemDelegate {
+                                                        width: relativeDateDirectionCombo.width
+                                                        text: String(modelData)
+                                                        background: Rectangle { color: highlighted ? "#e9eff3" : "#ffffff" }
+                                                        contentItem: Text { text: String(modelData); color: "#455661"; font.pixelSize: 9; verticalAlignment: Text.AlignVCenter }
+                                                    }
+                                                }
+                                                SpinBox {
+                                                    id: relativeDateCount
+                                                    Layout.preferredWidth: 64
+                                                    from: 1
+                                                    to: 1000
+                                                    value: 1
+                                                    editable: true
+                                                    enabled: relativeDateDirectionCombo.currentText !== "This"
+                                                }
+                                                ComboBox {
+                                                    id: relativeDateUnitCombo
+                                                    Layout.fillWidth: true
+                                                    model: String(pageFilterOperatorCombo.currentValue) === "relative_time"
+                                                           ? [
+                                                               { label: "Minutes", value: "minutes" },
+                                                               { label: "Hours", value: "hours" }
+                                                           ]
+                                                           : [
+                                                               { label: "Days", value: "days" },
+                                                               { label: "Weeks", value: "weeks" },
+                                                               { label: "Weeks (Calendar)", value: "calendar_weeks" },
+                                                               { label: "Months", value: "months" },
+                                                               { label: "Months (Calendar)", value: "calendar_months" },
+                                                               { label: "Years", value: "years" },
+                                                               { label: "Years (Calendar)", value: "calendar_years" }
+                                                           ]
+                                                    textRole: "label"
+                                                    valueRole: "value"
+                                                    currentIndex: 0
+                                                    background: Rectangle { radius: 3; color: "#ffffff"; border.color: relativeDateUnitCombo.activeFocus ? "#718da1" : "#ccd4da" }
+                                                    contentItem: Text {
+                                                        leftPadding: 6
+                                                        rightPadding: relativeDateUnitCombo.indicator.width + 4
+                                                        text: relativeDateUnitCombo.displayText
+                                                        color: "#455661"
+                                                        font.pixelSize: 9
+                                                        verticalAlignment: Text.AlignVCenter
+                                                        elide: Text.ElideRight
+                                                    }
+                                                    delegate: ItemDelegate {
+                                                        required property string label
+                                                        width: relativeDateUnitCombo.width
+                                                        text: label
+                                                        background: Rectangle { color: highlighted ? "#e9eff3" : "#ffffff" }
+                                                        contentItem: Text { text: label; color: "#455661"; font.pixelSize: 9; verticalAlignment: Text.AlignVCenter; elide: Text.ElideRight }
+                                                    }
+                                                }
+                                            }
+                                            Text {
+                                                visible: String(pageFilterOperatorCombo.currentValue) === "relative_time"
+                                                Layout.fillWidth: true
+                                                text: "Relative-time windows use UTC; values without a timezone are treated as UTC."
+                                                color: "#79858d"
+                                                font.pixelSize: 8
+                                                wrapMode: Text.Wrap
+                                            }
+                                            RowLayout {
+                                                visible: String(pageFilterOperatorCombo.currentValue) === "top_n"
+                                                Layout.fillWidth: true
+                                                spacing: 4
+                                                ComboBox {
+                                                    id: topNDirectionCombo
+                                                    Layout.preferredWidth: 68
+                                                    model: [
+                                                        { label: "Top", value: "top" },
+                                                        { label: "Bottom", value: "bottom" }
+                                                    ]
+                                                    textRole: "label"
+                                                    valueRole: "value"
+                                                    currentIndex: 0
+                                                    background: Rectangle { radius: 3; color: "#ffffff"; border.color: topNDirectionCombo.activeFocus ? "#718da1" : "#ccd4da" }
+                                                    contentItem: Text {
+                                                        leftPadding: 6
+                                                        rightPadding: topNDirectionCombo.indicator.width + 4
+                                                        text: topNDirectionCombo.displayText
+                                                        color: "#455661"
+                                                        font.pixelSize: 9
+                                                        verticalAlignment: Text.AlignVCenter
+                                                    }
+                                                    delegate: ItemDelegate {
+                                                        required property string label
+                                                        width: topNDirectionCombo.width
+                                                        text: label
+                                                        background: Rectangle { color: highlighted ? "#e9eff3" : "#ffffff" }
+                                                        contentItem: Text { text: label; color: "#455661"; font.pixelSize: 9; verticalAlignment: Text.AlignVCenter }
+                                                    }
+                                                }
+                                                SpinBox {
+                                                    id: topNCount
+                                                    Layout.preferredWidth: 58
+                                                    from: 1
+                                                    to: 1000
+                                                    value: 5
+                                                    editable: true
+                                                }
+                                                ComboBox {
+                                                    id: topNOrderByCombo
+                                                    Layout.fillWidth: true
+                                                    model: mainWindow.studioController.topNOrderByFields
+                                                    textRole: "label"
+                                                    valueRole: "column"
+                                                    currentIndex: count > 0 ? 0 : -1
+                                                    enabled: count > 0
+                                                    background: Rectangle { radius: 3; color: "#ffffff"; border.color: topNOrderByCombo.activeFocus ? "#718da1" : "#ccd4da" }
+                                                    contentItem: Text {
+                                                        leftPadding: 6
+                                                        rightPadding: topNOrderByCombo.indicator.width + 4
+                                                        text: topNOrderByCombo.displayText || "By"
+                                                        color: topNOrderByCombo.enabled ? "#455661" : "#86919a"
+                                                        font.pixelSize: 9
+                                                        verticalAlignment: Text.AlignVCenter
+                                                        elide: Text.ElideRight
+                                                    }
+                                                    delegate: ItemDelegate {
+                                                        required property string label
+                                                        width: topNOrderByCombo.width
+                                                        text: label
+                                                        background: Rectangle { color: highlighted ? "#e9eff3" : "#ffffff" }
+                                                        contentItem: Text { text: label; color: "#455661"; font.pixelSize: 9; verticalAlignment: Text.AlignVCenter; elide: Text.ElideRight }
+                                                    }
+                                                }
+                                            }
+                                            Text {
+                                                visible: String(pageFilterOperatorCombo.currentValue) === "top_n"
+                                                Layout.fillWidth: true
+                                                text: "Top N ranks Region categories by the sum of the selected numeric field."
+                                                color: "#79858d"
+                                                font.pixelSize: 8
+                                                wrapMode: Text.Wrap
+                                            }
+                                            CheckBox {
+                                                id: relativeDateIncludeToday
+                                                visible: String(pageFilterOperatorCombo.currentValue) === "relative_date"
+                                                         && relativeDateDirectionCombo.currentText !== "This"
+                                                         && String(relativeDateUnitCombo.currentValue).indexOf("calendar_") !== 0
+                                                Layout.fillWidth: true
+                                                checked: true
+                                                implicitHeight: 18
+                                                text: "Include today"
+                                                Accessible.name: text
+                                                contentItem: Text {
+                                                    text: relativeDateIncludeToday.text
+                                                    leftPadding: relativeDateIncludeToday.indicator.width + 5
+                                                    color: "#536570"
+                                                    font.pixelSize: 8
+                                                    verticalAlignment: Text.AlignVCenter
+                                                }
+                                            }
+                                            ComboBox {
+                                                id: pageFilterValueCombo
+                                                visible: String(pageFilterOperatorCombo.currentValue) !== "is_any_of"
+                                                         && String(pageFilterOperatorCombo.currentValue) !== "is_none_of"
+                                                         && String(pageFilterOperatorCombo.currentValue) !== "relative_date"
+                                                         && String(pageFilterOperatorCombo.currentValue) !== "relative_time"
+                                                         && String(pageFilterOperatorCombo.currentValue) !== "top_n"
+                                                Layout.fillWidth: true
+                                                editable: true
+                                                model: {
+                                                    const fields = mainWindow.studioController.pageFilterFields
+                                                    if (pageFilterFieldCombo.currentIndex < 0 || pageFilterFieldCombo.currentIndex >= fields.length) return []
+                                                    const field = fields[pageFilterFieldCombo.currentIndex]
+                                                    return mainWindow.studioController.pageFilterValues(String(field.tableId), String(field.column))
+                                                }
+                                                textRole: "label"
+                                                valueRole: "value"
+                                                currentIndex: count > 0 ? 0 : -1
+                                                enabled: pageFilterFieldCombo.currentIndex >= 0
+                                                         && String(pageFilterOperatorCombo.currentValue) !== "is_blank"
+                                                         && String(pageFilterOperatorCombo.currentValue) !== "is_not_blank"
+                                                         && String(pageFilterOperatorCombo.currentValue) !== "relative_date"
+                                                         && String(pageFilterOperatorCombo.currentValue) !== "relative_time"
+                                                         && String(pageFilterOperatorCombo.currentValue) !== "top_n"
+                                                background: Rectangle { radius: 3; color: "#ffffff"; border.color: pageFilterValueCombo.activeFocus ? "#718da1" : "#ccd4da" }
+                                                contentItem: TextInput {
+                                                    leftPadding: 8
+                                                    rightPadding: pageFilterValueCombo.indicator.width + 6
+                                                    text: pageFilterValueCombo.editable ? pageFilterValueCombo.editText : pageFilterValueCombo.displayText
+                                                    color: pageFilterValueCombo.enabled ? "#455661" : "#86919a"
+                                                    font.pixelSize: 9
+                                                    verticalAlignment: TextInput.AlignVCenter
+                                                    readOnly: !pageFilterValueCombo.editable
+                                                    selectByMouse: true
+                                                    onTextEdited: pageFilterValueCombo.editText = text
+                                                }
+                                                delegate: ItemDelegate {
+                                                    required property string label
+                                                    width: pageFilterValueCombo.width
+                                                    text: label
+                                                    background: Rectangle { color: highlighted ? "#e9eff3" : "#ffffff" }
+                                                    contentItem: Text { text: label; color: "#455661"; font.pixelSize: 9; verticalAlignment: Text.AlignVCenter; elide: Text.ElideRight }
+                                                }
+                                            }
+                                            TextField {
+                                                id: filterValueSearch
+                                                visible: String(pageFilterOperatorCombo.currentValue) === "is_any_of"
+                                                         || String(pageFilterOperatorCombo.currentValue) === "is_none_of"
+                                                Layout.fillWidth: true
+                                                placeholderText: "Search values"
+                                                selectByMouse: true
+                                                font.pixelSize: 9
+                                                color: "#455661"
+                                                background: Rectangle { radius: 3; color: "#ffffff"; border.color: filterValueSearch.activeFocus ? "#718da1" : "#ccd4da" }
+                                            }
+                                            ListView {
+                                                id: multiValueChoices
+                                                visible: filterValueSearch.visible
+                                                Layout.fillWidth: true
+                                                Layout.preferredHeight: 68
+                                                clip: true
+                                                model: {
+                                                    const fields = mainWindow.studioController.pageFilterFields
+                                                    if (pageFilterFieldCombo.currentIndex < 0 || pageFilterFieldCombo.currentIndex >= fields.length) return []
+                                                    const field = fields[pageFilterFieldCombo.currentIndex]
+                                                    return mainWindow.studioController.searchPageFilterValues(
+                                                        String(field.tableId), String(field.column), String(filterValueSearch.text)
+                                                    )
+                                                }
+                                                delegate: CheckBox {
+                                                    required property string label
+                                                    required property string value
+                                                    width: multiValueChoices.width
+                                                    height: 20
+                                                    text: label
+                                                    checked: mainWindow.selectedReportFilterValues.indexOf(value) >= 0
+                                                    Accessible.name: label
+                                                    contentItem: Text {
+                                                        text: parent.text
+                                                        leftPadding: parent.indicator.width + 4
+                                                        color: "#536570"
+                                                        font.pixelSize: 8
+                                                        verticalAlignment: Text.AlignVCenter
+                                                        elide: Text.ElideRight
+                                                    }
+                                                    onToggled: {
+                                                        const updated = mainWindow.selectedReportFilterValues.slice()
+                                                        const selectedIndex = updated.indexOf(value)
+                                                        if (checked && selectedIndex < 0)
+                                                            updated.push(value)
+                                                        else if (!checked && selectedIndex >= 0)
+                                                            updated.splice(selectedIndex, 1)
+                                                        mainWindow.selectedReportFilterValues = updated
+                                                    }
+                                                }
+                                            }
+                                            Text {
+                                                visible: multiValueChoices.visible
+                                                Layout.fillWidth: true
+                                                text: mainWindow.selectedReportFilterValues.length + " selected"
+                                                color: "#79858d"
+                                                font.pixelSize: 8
+                                            }
+                                            CheckBox {
+                                                id: secondConditionCheck
+                                                visible: String(pageFilterOperatorCombo.currentValue) !== "is_any_of"
+                                                         && String(pageFilterOperatorCombo.currentValue) !== "is_none_of"
+                                                         && String(pageFilterOperatorCombo.currentValue) !== "relative_date"
+                                                         && String(pageFilterOperatorCombo.currentValue) !== "relative_time"
+                                                         && String(pageFilterOperatorCombo.currentValue) !== "top_n"
+                                                Layout.fillWidth: true
+                                                implicitHeight: 18
+                                                text: "Add a second condition"
+                                                Accessible.name: text
+                                                contentItem: Text {
+                                                    text: secondConditionCheck.text
+                                                    leftPadding: secondConditionCheck.indicator.width + 5
+                                                    color: "#536570"
+                                                    font.pixelSize: 8
+                                                    verticalAlignment: Text.AlignVCenter
+                                                }
+                                            }
+                                            RowLayout {
+                                                visible: secondConditionCheck.checked
+                                                Layout.fillWidth: true
+                                                spacing: 4
+                                                ComboBox {
+                                                    id: filterLogicCombo
+                                                    Layout.preferredWidth: 50
+                                                    model: ["AND", "OR"]
+                                                    currentIndex: 0
+                                                    background: Rectangle { radius: 3; color: "#ffffff"; border.color: filterLogicCombo.activeFocus ? "#718da1" : "#ccd4da" }
+                                                    contentItem: Text {
+                                                        leftPadding: 6
+                                                        rightPadding: filterLogicCombo.indicator.width + 4
+                                                        text: filterLogicCombo.displayText
+                                                        color: "#455661"
+                                                        font.pixelSize: 9
+                                                        verticalAlignment: Text.AlignVCenter
+                                                    }
+                                                    delegate: ItemDelegate {
+                                                        width: filterLogicCombo.width
+                                                        text: String(modelData)
+                                                        background: Rectangle { color: highlighted ? "#e9eff3" : "#ffffff" }
+                                                        contentItem: Text { text: String(modelData); color: "#455661"; font.pixelSize: 9; verticalAlignment: Text.AlignVCenter }
+                                                    }
+                                                }
+                                                ComboBox {
+                                                    id: secondFilterOperatorCombo
+                                                    Layout.fillWidth: true
+                                                    model: {
+                                                        const fields = mainWindow.studioController.pageFilterFields
+                                                        if (pageFilterFieldCombo.currentIndex < 0 || pageFilterFieldCombo.currentIndex >= fields.length) return []
+                                                        return mainWindow.studioController.pageFilterOperators(
+                                                            String(fields[pageFilterFieldCombo.currentIndex].columnType)
+                                                        ).filter(function(item) {
+                                                            return item.value !== "is_any_of"
+                                                                   && item.value !== "is_none_of"
+                                                                   && item.value !== "relative_date"
+                                                                   && item.value !== "relative_time"
+                                                        })
+                                                    }
+                                                    textRole: "label"
+                                                    valueRole: "value"
+                                                    currentIndex: 0
+                                                    onActivated: function(index) {
+                                                        if (String(currentValue) === "is_blank" || String(currentValue) === "is_not_blank")
+                                                            secondFilterValue.text = ""
+                                                    }
+                                                    background: Rectangle { radius: 3; color: "#ffffff"; border.color: secondFilterOperatorCombo.activeFocus ? "#718da1" : "#ccd4da" }
+                                                    contentItem: Text {
+                                                        leftPadding: 8
+                                                        rightPadding: secondFilterOperatorCombo.indicator.width + 6
+                                                        text: secondFilterOperatorCombo.displayText
+                                                        color: "#455661"
+                                                        font.pixelSize: 9
+                                                        verticalAlignment: Text.AlignVCenter
+                                                        elide: Text.ElideRight
+                                                    }
+                                                    delegate: ItemDelegate {
+                                                        required property string label
+                                                        width: secondFilterOperatorCombo.width
+                                                        text: label
+                                                        background: Rectangle { color: highlighted ? "#e9eff3" : "#ffffff" }
+                                                        contentItem: Text { text: label; color: "#455661"; font.pixelSize: 9; verticalAlignment: Text.AlignVCenter; elide: Text.ElideRight }
+                                                    }
+                                                }
+                                            }
+                                            TextField {
+                                                id: secondFilterValue
+                                                visible: secondConditionCheck.checked
+                                                         && String(secondFilterOperatorCombo.currentValue) !== "is_blank"
+                                                         && String(secondFilterOperatorCombo.currentValue) !== "is_not_blank"
+                                                Layout.fillWidth: true
+                                                placeholderText: "Second condition value"
+                                                selectByMouse: true
+                                                font.pixelSize: 9
+                                                color: "#455661"
+                                                background: Rectangle { radius: 3; color: "#ffffff"; border.color: secondFilterValue.activeFocus ? "#718da1" : "#ccd4da" }
+                                            }
+                                            Button {
+                                                Layout.fillWidth: true
+                                                text: filterScopeCombo.currentIndex === 0
+                                                      ? "Add report filter"
+                                                      : (filterScopeCombo.currentIndex === 1
+                                                         ? "Add page filter"
+                                                         : "Add visual filter")
+                                                enabled: {
+                                                    if (pageFilterFieldCombo.currentIndex < 0
+                                                            || (filterScopeCombo.currentIndex === 2 && mainWindow.studioController.selectedVisual.length === 0))
+                                                        return false
+                                                    const valueless = ["is_blank", "is_not_blank"]
+                                                    const multiValueOperators = ["is_any_of", "is_none_of"]
+                                                    const required = ["contains", "does_not_contain", "begins_with", "does_not_begin_with", "ends_with", "does_not_end_with", "greater_than", "greater_than_or_equal", "less_than", "less_than_or_equal"]
+                                                    const firstOperator = String(pageFilterOperatorCombo.currentValue)
+                                                    if (firstOperator === "top_n")
+                                                        return filterScopeCombo.currentIndex === 2
+                                                               && topNOrderByCombo.currentIndex >= 0
+                                                               && topNCount.value >= 1
+                                                    if (firstOperator === "relative_date" || firstOperator === "relative_time")
+                                                        return relativeDateDirectionCombo.currentText === "This"
+                                                               || relativeDateCount.value >= 1
+                                                    if (multiValueOperators.indexOf(firstOperator) >= 0)
+                                                        return !secondConditionCheck.checked && mainWindow.selectedReportFilterValues.length > 0
+                                                    const firstValue = pageFilterValueCombo.currentIndex >= 0 && pageFilterValueCombo.editText === pageFilterValueCombo.currentText
+                                                                      ? String(pageFilterValueCombo.currentValue)
+                                                                      : String(pageFilterValueCombo.editText)
+                                                    if (required.indexOf(firstOperator) >= 0 && firstValue.trim().length === 0)
+                                                        return false
+                                                    if (secondConditionCheck.checked) {
+                                                        const secondOperator = String(secondFilterOperatorCombo.currentValue)
+                                                        if (secondOperator.length === 0)
+                                                            return false
+                                                        if (required.indexOf(secondOperator) >= 0 && secondFilterValue.text.trim().length === 0)
+                                                            return false
+                                                        if (valueless.indexOf(secondOperator) >= 0 && secondFilterValue.text.length > 0)
+                                                            return false
+                                                    }
+                                                    return true
+                                                }
+                                                background: Rectangle { radius: 3; color: parent.enabled ? "#e8f2f0" : "#f7f8f9"; border.color: parent.enabled ? "#c0d9d4" : "#d7dde1" }
+                                                contentItem: Text { text: parent.text; color: parent.enabled ? "#17665d" : "#98a1a8"; font.pixelSize: 9; font.weight: Font.DemiBold; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter }
+                                                onClicked: {
+                                                    const fields = mainWindow.studioController.pageFilterFields
+                                                    const field = fields[pageFilterFieldCombo.currentIndex]
+                                                    const operator = String(pageFilterOperatorCombo.currentValue)
+                                                    if (operator === "relative_date") {
+                                                        const direction = String(relativeDateDirectionCombo.currentText).toLowerCase()
+                                                        const count = direction === "this" ? 1 : Number(relativeDateCount.value)
+                                                        const unit = String(relativeDateUnitCombo.currentValue)
+                                                        const includeToday = relativeDateIncludeToday.checked
+                                                        if (filterScopeCombo.currentIndex === 0) {
+                                                            mainWindow.studioController.addReportRelativeDateFilter(
+                                                                String(field.tableId), String(field.column), direction,
+                                                                count, unit, includeToday
+                                                            )
+                                                        } else if (filterScopeCombo.currentIndex === 1) {
+                                                            mainWindow.studioController.addPageRelativeDateFilter(
+                                                                String(field.tableId), String(field.column), direction,
+                                                                count, unit, includeToday
+                                                            )
+                                                        } else {
+                                                            mainWindow.studioController.addVisualRelativeDateFilter(
+                                                                String(mainWindow.studioController.selectedVisual),
+                                                                String(field.tableId), String(field.column), direction,
+                                                                count, unit, includeToday
+                                                            )
+                                                        }
+                                                        return
+                                                    }
+                                                    if (operator === "relative_time") {
+                                                        const direction = String(relativeDateDirectionCombo.currentText).toLowerCase()
+                                                        const count = direction === "this" ? 1 : Number(relativeDateCount.value)
+                                                        const unit = String(relativeDateUnitCombo.currentValue)
+                                                        if (filterScopeCombo.currentIndex === 0) {
+                                                            mainWindow.studioController.addReportRelativeTimeFilter(
+                                                                String(field.tableId), String(field.column), direction,
+                                                                count, unit
+                                                            )
+                                                        } else if (filterScopeCombo.currentIndex === 1) {
+                                                            mainWindow.studioController.addPageRelativeTimeFilter(
+                                                                String(field.tableId), String(field.column), direction,
+                                                                count, unit
+                                                            )
+                                                        } else {
+                                                            mainWindow.studioController.addVisualRelativeTimeFilter(
+                                                                String(mainWindow.studioController.selectedVisual),
+                                                                String(field.tableId), String(field.column), direction,
+                                                                count, unit
+                                                            )
+                                                        }
+                                                        return
+                                                    }
+                                                    if (operator === "top_n") {
+                                                        mainWindow.studioController.addVisualTopNFilter(
+                                                            String(mainWindow.studioController.selectedVisual),
+                                                            String(field.tableId), String(field.column),
+                                                            String(topNDirectionCombo.currentValue), Number(topNCount.value),
+                                                            String(topNOrderByCombo.currentValue)
+                                                        )
+                                                        return
+                                                    }
+                                                    if (operator === "is_any_of" || operator === "is_none_of") {
+                                                        const valuesJson = JSON.stringify(mainWindow.selectedReportFilterValues)
+                                                        let added = false
+                                                        if (filterScopeCombo.currentIndex === 0) {
+                                                            added = mainWindow.studioController.addReportMultiValueFilter(
+                                                                String(field.tableId), String(field.column), operator, valuesJson
+                                                            )
+                                                        } else if (filterScopeCombo.currentIndex === 1) {
+                                                            added = mainWindow.studioController.addPageMultiValueFilter(
+                                                                String(field.tableId), String(field.column), operator, valuesJson
+                                                            )
+                                                        } else {
+                                                            added = mainWindow.studioController.addVisualMultiValueFilter(
+                                                                String(mainWindow.studioController.selectedVisual),
+                                                                String(field.tableId), String(field.column), operator, valuesJson
+                                                            )
+                                                        }
+                                                        if (added) mainWindow.selectedReportFilterValues = []
+                                                        return
+                                                    }
+                                                    const value = operator === "is_blank" || operator === "is_not_blank"
+                                                                  ? ""
+                                                                  : (pageFilterValueCombo.currentIndex >= 0 && pageFilterValueCombo.editText === pageFilterValueCombo.currentText
+                                                                     ? String(pageFilterValueCombo.currentValue)
+                                                                     : String(pageFilterValueCombo.editText))
+                                                    const secondOperator = secondConditionCheck.checked
+                                                                          ? String(secondFilterOperatorCombo.currentValue)
+                                                                          : ""
+                                                    const secondValue = !secondConditionCheck.checked
+                                                                        || secondOperator === "is_blank" || secondOperator === "is_not_blank"
+                                                                        ? ""
+                                                                        : String(secondFilterValue.text)
+                                                    const logic = String(filterLogicCombo.currentText).toLowerCase()
+                                                    if (filterScopeCombo.currentIndex === 0) {
+                                                        mainWindow.studioController.addReportFilterRule(
+                                                            String(field.tableId), String(field.column), operator, value,
+                                                            secondOperator, secondValue, logic
+                                                        )
+                                                    } else if (filterScopeCombo.currentIndex === 1) {
+                                                        mainWindow.studioController.addPageFilterRule(
+                                                            String(field.tableId), String(field.column), operator, value,
+                                                            secondOperator, secondValue, logic
+                                                        )
+                                                    } else {
+                                                        mainWindow.studioController.addVisualFilterRule(
+                                                            String(mainWindow.studioController.selectedVisual),
+                                                            String(field.tableId), String(field.column), operator, value,
+                                                            secondOperator, secondValue, logic
+                                                        )
+                                                    }
+                                                }
+                                            }
+                                            Text {
+                                                Layout.fillWidth: true
+                                                visible: mainWindow.studioController.filterContextError.length > 0
+                                                text: mainWindow.studioController.filterContextError
+                                                color: "#9b4a35"
+                                                font.pixelSize: 8
+                                                wrapMode: Text.Wrap
+                                            }
+                                        }
+                                    }
                                     Item { Layout.fillHeight: true }
-                                    Text { Layout.fillWidth: true; text: "Page filters are not available in this release."; color: "#79858d"; font.pixelSize: 9; wrapMode: Text.Wrap }
                                 }
                                 ToolButton {
                                     visible: !mainWindow.filtersExpanded
@@ -1418,10 +2253,10 @@ ApplicationWindow {
                                     focusPolicy: Qt.StrongFocus
                                     Accessible.name: "Expand Filters pane"
                                     Accessible.description: mainWindow.studioController.filterActive
-                                                            ? "Open Region filters. A filter is currently active."
-                                                            : "Open the Region filter controls."
+                                                            ? "Open report, page, and visual filters. A filter is currently active."
+                                                            : "Open report, page, and visual filter controls."
                                     ToolTip.visible: hovered
-                                    ToolTip.text: "Filters · Region"
+                                    ToolTip.text: "Report, page, and visual filters"
                                     background: Rectangle {
                                         color: parent.activeFocus ? "#e5f1f8" : (parent.hovered ? "#eef3f6" : "#f8f9fa")
                                         border.color: parent.activeFocus ? "#0078D4" : "#e0e3e6"
@@ -1947,7 +2782,7 @@ ApplicationWindow {
                                     Text {
                                         anchors.centerIn: parent
                                         visible: mainWindow.studioController.filteredFields.length === 0
-                                        text: mainWindow.studioController.sourceLoaded ? "No matching fields" : "Import a CSV, Excel, JSON, or XML file to browse its fields."
+                                        text: mainWindow.studioController.sourceLoaded ? "No matching fields" : "Import a CSV, Excel, JSON, XML, or Parquet file to browse its fields."
                                         color: "#76838d"
                                         font.pixelSize: 9
                                         wrapMode: Text.Wrap

@@ -61,14 +61,18 @@ _FUNCTIONS = {
     "COUNTROWS", "DIVIDE", "ABS", "ROUND", "IF", "AND", "OR", "NOT",
     "SUMX", "AVERAGEX", "TOTALYTD", "TOTALQTD", "TOTALMTD",
     "DATESYTD", "DATESQTD", "DATESMTD", "DATESBETWEEN", "DATESINPERIOD",
-    "PREVIOUSYEAR", "PREVIOUSQUARTER", "PREVIOUSMONTH",
+    "PREVIOUSYEAR", "PREVIOUSQUARTER", "PREVIOUSMONTH", "PREVIOUSDAY",
+    "NEXTYEAR", "NEXTQUARTER", "NEXTMONTH", "NEXTDAY",
+    "PARALLELPERIOD",
     "DATEADD", "SAMEPERIODLASTYEAR", "CALCULATE", "KEEPFILTERS", "FILTER",
     "REMOVEFILTERS", "ALL", "ALLNOBLANKROW", "ALLEXCEPT", "ALLSELECTED",
     "USERELATIONSHIP", "CROSSFILTER",
 }
 _TIME_FILTER_FUNCTIONS = {
     "DATEADD", "SAMEPERIODLASTYEAR", "PREVIOUSYEAR", "PREVIOUSQUARTER",
-    "PREVIOUSMONTH", "DATESYTD", "DATESQTD", "DATESMTD", "DATESBETWEEN",
+    "PREVIOUSMONTH", "PREVIOUSDAY", "NEXTYEAR", "NEXTQUARTER", "NEXTMONTH", "NEXTDAY",
+    "PARALLELPERIOD",
+    "DATESYTD", "DATESQTD", "DATESMTD", "DATESBETWEEN",
     "DATESINPERIOD",
 }
 _CROSSFILTER_DIRECTIONS = {
@@ -253,6 +257,126 @@ def _previousmonth_dates(
         value for value in available_dates
         if previous_month_start <= value <= previous_month_end
     }
+
+
+def _previousday_dates(
+    selected_dates: Iterable[date], available_dates: Iterable[date]
+) -> set[date]:
+    selected = tuple(selected_dates)
+    if not selected:
+        return set()
+    try:
+        target = min(selected) - timedelta(days=1)
+    except OverflowError:
+        return set()
+    return {value for value in available_dates if value == target}
+
+
+def _nextday_dates(
+    selected_dates: Iterable[date], available_dates: Iterable[date]
+) -> set[date]:
+    selected = tuple(selected_dates)
+    if not selected:
+        return set()
+    try:
+        target = max(selected) + timedelta(days=1)
+    except OverflowError:
+        return set()
+    return {value for value in available_dates if value == target}
+
+
+def _nextmonth_dates(
+    selected_dates: Iterable[date], available_dates: Iterable[date]
+) -> set[date]:
+    selected = tuple(selected_dates)
+    if not selected:
+        return set()
+    last_date = max(selected)
+    target_year, target_month = last_date.year, last_date.month + 1
+    if target_month > 12:
+        target_year += 1
+        target_month = 1
+    try:
+        start = date(target_year, target_month, 1)
+        end = date(target_year, target_month, monthrange(target_year, target_month)[1])
+    except ValueError:
+        return set()
+    return {value for value in available_dates if start <= value <= end}
+
+
+def _nextquarter_dates(
+    selected_dates: Iterable[date], available_dates: Iterable[date]
+) -> set[date]:
+    selected = tuple(selected_dates)
+    if not selected:
+        return set()
+    last_date = max(selected)
+    q_start_month = ((last_date.month - 1) // 3) * 3 + 1
+    target_month = q_start_month + 3
+    target_year = last_date.year
+    if target_month > 12:
+        target_year += 1
+        target_month -= 12
+    try:
+        start = date(target_year, target_month, 1)
+        end_month = target_month + 2
+        end = date(target_year, end_month, monthrange(target_year, end_month)[1])
+    except ValueError:
+        return set()
+    return {value for value in available_dates if start <= value <= end}
+
+
+def _nextyear_dates(
+    selected_dates: Iterable[date],
+    available_dates: Iterable[date],
+    year_end: tuple[int, int] = (12, 31),
+) -> set[date]:
+    selected = tuple(selected_dates)
+    if not selected:
+        return set()
+    last_date = max(selected)
+    current_year_start = _year_to_date_start(last_date, year_end)
+    if current_year_start == date.min:
+        return set()
+    try:
+        next_year_start = _year_to_date_start(current_year_start + timedelta(days=366), year_end)
+        next_year_end = _year_to_date_start(next_year_start + timedelta(days=366), year_end) - timedelta(days=1)
+    except (OverflowError, ValueError):
+        return set()
+    return {value for value in available_dates if next_year_start <= value <= next_year_end}
+
+
+def _parallelperiod_dates(
+    selected_dates: Iterable[date], available_dates: Iterable[date], intervals: int, interval: str
+) -> set[date]:
+    selected = tuple(selected_dates)
+    if not selected:
+        return set()
+    unit = interval.upper()
+    try:
+        first_shifted = _dateadd_dates([min(selected)], intervals, unit)
+        last_shifted = _dateadd_dates([max(selected)], intervals, unit)
+        if not first_shifted or not last_shifted:
+            return set()
+        
+        f = min(first_shifted)
+        l = max(last_shifted)
+        if unit == "YEAR":
+            start = _year_to_date_start(f, (12, 31))
+            end = _year_to_date_start(l + timedelta(days=366), (12, 31)) - timedelta(days=1)
+        elif unit == "QUARTER":
+            start = date(f.year, ((f.month - 1) // 3) * 3 + 1, 1)
+            l_start_month = ((l.month - 1) // 3) * 3 + 1
+            l_end_month = l_start_month + 2
+            end = date(l.year, l_end_month, monthrange(l.year, l_end_month)[1])
+        elif unit == "MONTH":
+            start = date(f.year, f.month, 1)
+            end = date(l.year, l.month, monthrange(l.year, l.month)[1])
+        else:
+            return set()
+    except (MeasureError, OverflowError, ValueError):
+        return set()
+    return {value for value in available_dates if start <= value <= end}
 
 
 def _calculate_filter_argument(node: tuple[Any, ...]) -> tuple[tuple[Any, ...], bool]:
@@ -930,7 +1054,7 @@ class _Parser:
                     raise MeasureError(
                         "SAMEPERIODLASTYEAR needs one marked date-column reference."
                     )
-            elif function == "PREVIOUSYEAR":
+            elif function in {"PREVIOUSYEAR", "NEXTYEAR"}:
                 valid_arguments = (
                     len(arguments) == 1 and arguments[0][0] == "reference"
                 ) or (
@@ -940,15 +1064,27 @@ class _Parser:
                 )
                 if not valid_arguments:
                     raise MeasureError(
-                        "PREVIOUSYEAR needs a marked date-column reference and an "
+                        f"{function} needs a marked date-column reference and an "
                         "optional M/D year-end string."
                     )
                 if len(arguments) == 2:
                     _parse_year_end_date(arguments[1][1])
-            elif function in {"PREVIOUSQUARTER", "PREVIOUSMONTH"}:
+            elif function in {"PREVIOUSQUARTER", "PREVIOUSMONTH", "PREVIOUSDAY", "NEXTQUARTER", "NEXTMONTH", "NEXTDAY"}:
                 if len(arguments) != 1 or arguments[0][0] != "reference":
                     raise MeasureError(
                         f"{function} needs one marked date-column reference."
+                    )
+            elif function == "PARALLELPERIOD":
+                valid_interval = (
+                    len(arguments) == 3
+                    and arguments[0][0] == "reference"
+                    and arguments[2][0] == "table"
+                    and str(arguments[2][1]).upper() in {"YEAR", "QUARTER", "MONTH"}
+                )
+                if not valid_interval or arguments[1][0] in {"table", "string", "omitted"}:
+                    raise MeasureError(
+                        "PARALLELPERIOD needs a date-column reference, numeric interval count, "
+                        "and YEAR, QUARTER, or MONTH interval."
                     )
             elif function == "FILTER":
                 _validate_table_filter_call(("call", function, tuple(arguments)))
@@ -3659,6 +3795,82 @@ def evaluate_measures(
                     shifted_dates = _previousmonth_dates(
                         visible_dates, available_dates
                     )
+                elif date_filter_function == "PREVIOUSDAY":
+                    available_dates = [
+                        parsed_date
+                        for row_index, row in enumerate(date_table["rows"], 1)
+                        if (parsed_date := _parse_measure_date(
+                            row.get(actual_date_column), actual_date_column, row_index
+                        )) is not None
+                    ]
+                    shifted_dates = _previousday_dates(
+                        visible_dates, available_dates
+                    )
+                elif date_filter_function == "NEXTDAY":
+                    available_dates = [
+                        parsed_date
+                        for row_index, row in enumerate(date_table["rows"], 1)
+                        if (parsed_date := _parse_measure_date(
+                            row.get(actual_date_column), actual_date_column, row_index
+                        )) is not None
+                    ]
+                    shifted_dates = _nextday_dates(
+                        visible_dates, available_dates
+                    )
+                elif date_filter_function == "NEXTMONTH":
+                    available_dates = [
+                        parsed_date
+                        for row_index, row in enumerate(date_table["rows"], 1)
+                        if (parsed_date := _parse_measure_date(
+                            row.get(actual_date_column), actual_date_column, row_index
+                        )) is not None
+                    ]
+                    shifted_dates = _nextmonth_dates(
+                        visible_dates, available_dates
+                    )
+                elif date_filter_function == "NEXTQUARTER":
+                    available_dates = [
+                        parsed_date
+                        for row_index, row in enumerate(date_table["rows"], 1)
+                        if (parsed_date := _parse_measure_date(
+                            row.get(actual_date_column), actual_date_column, row_index
+                        )) is not None
+                    ]
+                    shifted_dates = _nextquarter_dates(
+                        visible_dates, available_dates
+                    )
+                elif date_filter_function == "NEXTYEAR":
+                    year_end = (
+                        _parse_year_end_date(date_filter_arguments[1][1])
+                        if len(date_filter_arguments) == 2
+                        else (12, 31)
+                    )
+                    available_dates = [
+                        parsed_date
+                        for row_index, row in enumerate(date_table["rows"], 1)
+                        if (parsed_date := _parse_measure_date(
+                            row.get(actual_date_column), actual_date_column, row_index
+                        )) is not None
+                    ]
+                    shifted_dates = _nextyear_dates(
+                        visible_dates, available_dates, year_end
+                    )
+                elif date_filter_function == "PARALLELPERIOD":
+                    interval_value = as_number(evaluate(date_filter_arguments[1]))
+                    if interval_value != interval_value.to_integral_value():
+                        raise MeasureError("PARALLELPERIOD number_of_intervals must be a whole number.")
+                    if abs(interval_value) > Decimal(3_652_059):
+                        raise MeasureError("PARALLELPERIOD number_of_intervals is outside the supported range.")
+                    available_dates = [
+                        parsed_date
+                        for row_index, row in enumerate(date_table["rows"], 1)
+                        if (parsed_date := _parse_measure_date(
+                            row.get(actual_date_column), actual_date_column, row_index
+                        )) is not None
+                    ]
+                    shifted_dates = _parallelperiod_dates(
+                        visible_dates, available_dates, int(interval_value), str(date_filter_arguments[2][1])
+                    )
                 elif date_filter_function == "DATESQTD":
                     shifted_dates = set()
                     if visible_dates:
@@ -3787,18 +3999,15 @@ def evaluate_measures(
             raise MeasureError(
                 "SAMEPERIODLASTYEAR returns a date table; use it as a filter in CALCULATE."
             )
-        if function == "PREVIOUSYEAR":
-            raise MeasureError(
-                "PREVIOUSYEAR returns a date table; use it as a filter in CALCULATE."
-            )
-        if function == "PREVIOUSQUARTER":
-            raise MeasureError(
-                "PREVIOUSQUARTER returns a date table; use it as a filter in CALCULATE."
-            )
-        if function == "PREVIOUSMONTH":
-            raise MeasureError(
-                "PREVIOUSMONTH returns a date table; use it as a filter in CALCULATE."
-            )
+        for tbl_func in {
+            "PREVIOUSYEAR", "PREVIOUSQUARTER", "PREVIOUSMONTH", "PREVIOUSDAY",
+            "NEXTYEAR", "NEXTQUARTER", "NEXTMONTH", "NEXTDAY",
+            "PARALLELPERIOD"
+        }:
+            if function == tbl_func:
+                raise MeasureError(
+                    f"{tbl_func} returns a date table; use it as a filter in CALCULATE."
+                )
         if function == "DATESYTD":
             raise MeasureError("DATESYTD returns a date table; use it as a filter in CALCULATE.")
         if function == "DATESQTD":

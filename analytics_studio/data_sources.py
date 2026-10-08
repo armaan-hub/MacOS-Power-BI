@@ -1,4 +1,4 @@
-"""Presentation-only inventory for the Get Data picker."""
+"""Source inventory and local connector availability for the Get Data picker."""
 
 from __future__ import annotations
 
@@ -20,6 +20,7 @@ _CATEGORY_NAMES = {
         "Excel Workbook", "Text/CSV", "XML", "JSON", "Folder", "PDF", "Parquet",
     ),
     "Database": (
+        "SQLite database",
         "Oracle database", "IBM Db2 database", "IBM Informix database (Beta)",
         "IBM Netezza", "MySQL database", "PostgreSQL database", "Sybase database",
         "Teradata database", "SAP HANA database", "SAP Business Warehouse Application Server",
@@ -107,9 +108,11 @@ def _entry(category: str, name: str) -> dict[str, object]:
     status = "Preview" if "preview" in name.casefold() else (
         "Beta" if "beta" in name.casefold() else ""
     )
-    implemented = category == "File" and name in {
-        "Text/CSV", "Excel Workbook", "XML", "JSON",
-    }
+    implemented = (category == "File" and name in {
+        "Text/CSV", "Excel Workbook", "XML", "JSON", "Folder", "Parquet",
+    }) or (category == "Database" and name == "SQLite database") or (
+        category == "Microsoft" and name == "SQL Server"
+    ) or (category == "Other" and name in {"OData Feed", "Web"})
     return {
         "id": f"{category_key}_{name_key}",
         "name": name,

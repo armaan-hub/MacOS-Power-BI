@@ -1,4 +1,4 @@
-"""Contract tests for v1 linked-source migration to project format v2."""
+"""Contract tests for linked-source project-format migrations."""
 
 from __future__ import annotations
 
@@ -35,11 +35,72 @@ def make_v1_project() -> dict:
 
 
 class ProjectMigrationTests(unittest.TestCase):
+    def test_v63_projects_migrate_to_calculated_table_format(self) -> None:
+        document = new_project("v63 migration")
+        document["format_version"] = 63
+
+        migrated = validate_project(document)
+
+        self.assertEqual(migrated["format_version"], FORMAT_VERSION)
+
+    def test_v64_projects_gain_empty_date_table_metadata(self) -> None:
+        document = new_project("v64 migration")
+        document["format_version"] = 64
+        document["model"]["tables"] = [{
+            "id": "calendar",
+            "source_id": "calendar",
+            "name": "Calendar",
+            "column_types": {"Date": "date"},
+        }]
+
+        migrated = validate_project(document)
+
+        self.assertEqual(migrated["format_version"], FORMAT_VERSION)
+        self.assertIsNone(migrated["model"]["tables"][0]["date_column"])
+
+    def test_v65_projects_migrate_to_calendar_query_format(self) -> None:
+        document = new_project("v65 migration")
+        document["format_version"] = 65
+
+        migrated = validate_project(document)
+
+        self.assertEqual(migrated["format_version"], 66)
+
+    def test_marked_date_column_must_have_a_date_model_type(self) -> None:
+        document = new_project("invalid date-table metadata")
+        document["model"]["tables"] = [{
+            "id": "calendar",
+            "source_id": "calendar",
+            "name": "Calendar",
+            "column_types": {"Date": "text"},
+            "date_column": "Date",
+        }]
+
+        with self.assertRaisesRegex(ProjectFileError, "date or datetime"):
+            validate_project(document)
+
+    def test_v62_projects_gain_empty_calculated_column_lists(self) -> None:
+        document = new_project("v62 migration")
+        document["format_version"] = 62
+        document["model"]["tables"] = [{
+            "id": "orders",
+            "source_id": "orders",
+            "name": "Orders",
+            "column_types": {"Amount": "decimal_number"},
+        }]
+
+        migrated = validate_project(document)
+
+        self.assertEqual(migrated["format_version"], FORMAT_VERSION)
+        self.assertEqual(
+            migrated["model"]["tables"][0]["calculated_columns"], []
+        )
+
     def test_v1_validation_selects_first_v1_supported_source_and_adds_defaults(self) -> None:
         migrated = validate_project(make_v1_project())
 
-        self.assertEqual(FORMAT_VERSION, 2)
-        self.assertEqual(migrated["format_version"], 2)
+        self.assertEqual(FORMAT_VERSION, 66)
+        self.assertEqual(migrated["format_version"], FORMAT_VERSION)
         self.assertEqual(migrated["active_source_id"], "excel")
         self.assertEqual(migrated["data_sources"][2]["parser_options"], {
             "sheet_name": None, "header_row": None,
@@ -61,7 +122,7 @@ class ProjectMigrationTests(unittest.TestCase):
             document, recovered = load_project(path)
 
         self.assertFalse(recovered)
-        self.assertEqual(document["format_version"], 2)
+        self.assertEqual(document["format_version"], FORMAT_VERSION)
         self.assertEqual(document["active_source_id"], "excel")
         self.assertEqual(document["data_sources"][2]["path"], "book.xlsx")
 
@@ -71,7 +132,7 @@ class ProjectMigrationTests(unittest.TestCase):
 
         migrated = validate_project(document)
 
-        self.assertEqual(migrated["format_version"], 2)
+        self.assertEqual(migrated["format_version"], FORMAT_VERSION)
         self.assertIsNone(migrated["active_source_id"])
 
     def test_v2_rejects_an_active_source_id_that_does_not_resolve(self) -> None:
@@ -84,6 +145,7 @@ class ProjectMigrationTests(unittest.TestCase):
 
     def test_v2_rejects_duplicate_data_source_ids(self) -> None:
         document = new_project()
+        document["format_version"] = 2
         document["data_sources"] = [
             {"id": "duplicate", "name": "First", "kind": "csv", "path": "one.csv"},
             {"id": "duplicate", "name": "Second", "kind": "csv", "path": "two.csv"},
@@ -95,6 +157,7 @@ class ProjectMigrationTests(unittest.TestCase):
 
     def test_v2_validation_adds_defaults_without_mutating_input(self) -> None:
         document = new_project()
+        document["format_version"] = 2
         document["data_sources"] = [
             {"id": "csv", "name": "CSV", "kind": "csv", "path": "table.csv"},
         ]

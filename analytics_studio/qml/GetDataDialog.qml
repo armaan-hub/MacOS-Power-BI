@@ -383,13 +383,15 @@ Dialog {
                             if (!source.implemented)
                                 return "This connector is listed for discovery; connection support is not implemented in Analytics Studio yet."
                             if (source.iconName === "excel")
-                                return "Excel Workbook is ready. Choose an .xlsx or .xlsm file, select a worksheet and header row, then preview the table before import."
+                                return "Excel Workbook is ready. Choose an .xls, .xlsx, or .xlsm file, select a worksheet and header row, then preview the table before import."
                             if (source.iconName === "csv")
                                 return "Text/CSV is ready. Choose a CSV file, set delimiter, encoding, and header options, then preview before import."
                             if (source.iconName === "json")
                                 return "JSON is ready for flat arrays of objects with scalar values. Choose a .json file and preview before import."
                             if (source.iconName === "xml")
                                 return "XML is ready for one regular collection of records with scalar fields. Choose an .xml file and preview before import."
+                            if (source.iconName === "folder")
+                                return "Choose a file type, filter folder contents, select a sample file, preview the combined rows, then import or refresh the folder table."
                             return "This connector is ready. Choose a file to continue."
                         }
                         color: "#52636f"
@@ -409,7 +411,7 @@ Dialog {
                     Item { Layout.fillHeight: true }
                     Text {
                         Layout.fillWidth: true
-                        text: "CSV, Excel, JSON, and XML file importers are available. Folder, PDF, and Parquet remain unavailable."
+                        text: "CSV, Excel, JSON, XML, Folder, and Parquet importers are available. PDF remains unavailable."
                         color: "#788691"
                         font.pixelSize: 9
                         wrapMode: Text.Wrap
@@ -453,7 +455,7 @@ Dialog {
                     implicitHeight: 31
                     enabled: Boolean(root.selectedSource()) && Boolean(root.selectedSource().implemented)
                     Accessible.name: "Connect to selected data source"
-                    Accessible.description: enabled ? "Open the selected file picker." : "Only supported file types are available in this release."
+                    Accessible.description: enabled ? "Open the selected local source workflow." : "Choose an implemented local source workflow."
                     onClicked: root.requestConnection()
                     background: Rectangle {
                         color: !parent.enabled ? "#e8ebed" : (parent.hovered ? "#006bb3" : "#0078d4")

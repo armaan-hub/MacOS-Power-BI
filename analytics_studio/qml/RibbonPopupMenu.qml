@@ -15,43 +15,43 @@ Popup {
         if (menuType === "commonSources")
             return [
                 { label: "Excel Workbook", icon: "excel", action: "source.excel", enabled: true },
-                { label: "Power BI semantic models", icon: "databaseMultiple", action: "source.semanticModels" },
-                { label: "OneLake catalog", icon: "databaseLink", action: "source.oneLakeCatalog" },
-                { label: "SQL Server", icon: "database", action: "source.sqlServer" },
-                { label: "Dataverse", icon: "table", action: "source.dataverse" },
                 { label: "Text/CSV", icon: "csv", action: "source.csv", enabled: true },
-                { label: "Web", icon: "getData", action: "source.web" },
-                { label: "OData feed", icon: "database", action: "source.odata" },
-                { label: "Blank query", icon: "script", action: "source.blankQuery" },
+                { label: "JSON file", icon: "json", action: "source.json", enabled: true },
+                { label: "XML file", icon: "xml", action: "source.xml", enabled: true },
+                { label: "Parquet file", icon: "parquet", action: "source.parquet", enabled: true },
                 { divider: true },
                 { label: "More…", icon: "add", action: "data.more" }
             ]
         if (menuType === "recentSources") {
-            if (controller && controller.sourceLoaded)
-                return [{ label: controller.sourceName, icon: controller.sourceIconName,
-                          action: "recent." + controller.sourceIconName,
-                          detail: ({ csv: "Text/CSV", excel: "Excel Workbook", json: "JSON", xml: "XML" })[controller.sourceIconName] || "File" }]
+            if (controller && controller.recentSources && controller.recentSources.length > 0)
+                return controller.recentSources.map(function(source, index) {
+                    return { label: source.name, icon: source.kind, action: "recent." + index,
+                             enabled: Boolean(source.exists),
+                             detail: source.exists
+                                     ? (({ csv: "Text/CSV", excel: "Excel Workbook", json: "JSON", xml: "XML", parquet: "Parquet", folder: "Folder" })[source.kind] || "File")
+                                     : "Source is missing from this location" }
+                })
             return [{ label: "No recent sources", icon: "history", enabled: false,
                       detail: "Your recent data sources will appear here." }]
         }
         if (menuType === "moreVisuals")
             return [
-                { label: "From AppSource", icon: "apps", action: "visuals.appSource", detail: "Browse more visuals" },
-                { label: "From my files", icon: "open", action: "visuals.fromFiles", detail: "Import a visual file" }
+                { label: "From AppSource", icon: "apps", action: "visuals.appSource", enabled: false, detail: "External visual marketplace is not available in this local release." },
+                { label: "From my files", icon: "open", action: "visuals.fromFiles", enabled: false, detail: "Custom visual import is not available in this release." }
             ]
         if (menuType === "buttons")
             return [
-                { label: "Left arrow", icon: "arrow_left", action: "button.leftArrow" },
-                { label: "Right arrow", icon: "arrow_right", action: "button.rightArrow" },
-                { label: "Reset", icon: "reset", action: "button.reset" },
-                { label: "Back", icon: "arrow_left", action: "button.back" },
-                { label: "Information", icon: "about", action: "button.information" },
-                { label: "Help", icon: "help", action: "button.help" },
-                { label: "Bookmark", icon: "bookmark", action: "button.bookmark" },
-                { label: "Blank", icon: "button", action: "button.blank" },
-                { label: "Apply all slicers", icon: "checkmark", action: "button.applySlicers" },
-                { label: "Clear all slicers", icon: "clear", action: "button.clearSlicers" },
-                { label: "Navigator", icon: "navigation", submenu: true }
+                { label: "Left arrow", icon: "arrow_left", action: "button.leftArrow", enabled: false, detail: "Report button objects are not available in this release." },
+                { label: "Right arrow", icon: "arrow_right", action: "button.rightArrow", enabled: false, detail: "Report button objects are not available in this release." },
+                { label: "Reset", icon: "reset", action: "button.reset", enabled: false, detail: "Report button objects are not available in this release." },
+                { label: "Back", icon: "arrow_left", action: "button.back", enabled: false, detail: "Report button objects are not available in this release." },
+                { label: "Information", icon: "about", action: "button.information", enabled: false, detail: "Report button objects are not available in this release." },
+                { label: "Help", icon: "help", action: "button.help", enabled: false, detail: "Report button objects are not available in this release." },
+                { label: "Bookmark", icon: "bookmark", action: "button.bookmark", enabled: false, detail: "Report button objects are not available in this release." },
+                { label: "Blank", icon: "button", action: "button.blank", enabled: false, detail: "Report button objects are not available in this release." },
+                { label: "Apply all slicers", icon: "checkmark", action: "button.applySlicers", enabled: false, detail: "Report slicers are not available in this release." },
+                { label: "Clear all slicers", icon: "clear", action: "button.clearSlicers", enabled: false, detail: "Report slicers are not available in this release." },
+                { label: "Navigator", icon: "navigation", submenu: true, enabled: false, detail: "Report navigators are not available in this release." }
             ]
         return []
     }
@@ -158,8 +158,9 @@ Popup {
                 focusPolicy: Qt.StrongFocus
                 Accessible.name: String(menuRow.modelData.label || "")
                 Accessible.description: menuRow.modelData.submenu ? "Open Navigator submenu" :
-                        (menuRow.modelData.enabled === false ? "Not available in this release." :
-                         (menuRow.modelData.detail || "Opens this menu action."))
+                        (menuRow.modelData.detail ||
+                         (menuRow.modelData.enabled === false ? "Not available in this release." :
+                          "Opens this menu action."))
                 background: Rectangle {
                     color: !menuButton.enabled ? "transparent"
                            : (menuButton.down ? "#e7edf1" : (menuButton.hovered || menuButton.activeFocus ? "#f0f4f6" : "transparent"))

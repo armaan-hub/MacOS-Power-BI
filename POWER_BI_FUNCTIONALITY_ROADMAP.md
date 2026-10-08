@@ -133,8 +133,8 @@ flowchart LR
     F5f3m2d --> F5f3m2e["6.5.6.3.14.2e USERELATIONSHIP<br/>5 focused / 369 full; evaluator + refresh lifecycle passed"]
     F5f3m2e --> F5f3m2f["6.5.6.3.14.2f CROSSFILTER<br/>3 focused / 372 full; direction + refresh lifecycle passed"]
     F5f3m2f --> F5f3m3["6.5.6.3.14.3 Row-to-filter context transition<br/>Measure loop + explicit override passed"]
-    F5f3m3 --> F5f3n["6.5.6.3.15 Same-call Boolean and time-intelligence filter combinations<br/>Active"]
-    F5f3n --> F5f3o["6.5.6.3.16 Other time-intelligence filter expressions<br/>Queued"]
+    F5f3m3 --> F5f3n["6.5.6.3.15 Same-call Boolean and time-intelligence filter combinations<br/>1 test / 376 full; combined evaluator passed"]
+    F5f3n --> F5f3o["6.5.6.3.16 Other time-intelligence filter expressions<br/>Parser and DAX mappings passed"]
     F5f3o --> G["7. Report authoring and visuals<br/>Queued"]
     G --> H["8. Interactions and analytics<br/>Queued"]
     H --> I["9. Service collaboration<br/>Scope decision"]
@@ -203,7 +203,7 @@ flowchart LR
     class F5f3m2e,F5f3m2f done
     class F5f3m3 done
     class F5f3n active
-    class F5f3o planned
+    class F5f3o done
     class G,H,J,K,L planned
     class I decision
 ```

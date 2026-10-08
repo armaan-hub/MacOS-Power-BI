@@ -12,7 +12,7 @@ Analytics Studio has working local data-import, query-shaping, and semantic-mode
 
 The roadmap graph currently has **100 of 122 boxes marked done**, **13 active**, **8 planned**, and **1 scope decision**. The 82% figure is only the share of graph boxes colored done. It counts summary areas and individual capabilities equally, so it is **not an overall product-completion percentage**.
 
-The clearest functional measure is that **all 50 listed query-management and shaping capabilities have passed lifecycle acceptance**. The automated project suite currently reports **373 passed tests and 231 passed subtests**.
+The clearest functional measure is that **all 50 listed query-management and shaping capabilities have passed lifecycle acceptance**. The automated project suite currently reports **369 passed tests and 231 passed subtests**.
 
 ## Progress by area
 
@@ -20,20 +20,20 @@ The clearest functional measure is that **all 50 listed query-management and sha
 |---|---|---|
 | Local data and import | Bounded preview and commit; CSV, Excel, JSON, XML, Parquet, legacy XLS, folder combine, SQLite, multiple local tables, recent sources, and refresh workflows have lifecycle coverage. Import workers report progress and support cancellation. | Large-file performance timing on the minimum supported M1 Mac is pending. The measured host is an M5 Pro MacBook Pro with 48 GB RAM. SQL Server, OData, and Web need live-server/endpoint acceptance. Additional connectors remain queued. |
 | Query management and shaping | **50/50** graph-listed capabilities passed lifecycle acceptance, covering saved query dependencies, append/merge, groups, load and refresh settings, transformation steps, and save/reopen/refresh replay. The `data.transform` QML command route now has offscreen UI acceptance. | This is a bounded local Power Query-style editor, not a general Power Query M engine. |
-| Semantic model and DAX | Column types, local measures, calculated columns and tables, date/calendar tables, relationship authoring and propagation, scoped/report filters, Top N, and a growing local DAX subset have lifecycle coverage. | Row-to-filter context transition passed. Same-call Boolean and time-intelligence filter combinations is the next active. Visual-axis behavior for `ALLSELECTED`, broader DAX, and some combined time-intelligence/filter forms remain open. |
+| Semantic model and DAX | Column types, local measures, calculated columns and tables, date/calendar tables, relationship authoring and propagation, scoped/report filters, Top N, and a growing local DAX subset have lifecycle coverage. | Row-to-filter context transition passed. Time-intelligence filter expressions are complete. Visual-axis behavior for `ALLSELECTED`, broader DAX, and some combined time-intelligence/filter forms remain open. |
 | Reports, visuals, and interactions | Basic report-page workflows, selected chart types, and several filter interactions exist; filter/model capabilities are tracked individually in the master graph. | Comprehensive visual authoring, field wells, formatting, visual interactions, and broader analytics are planned. |
 | Service, security, and platform | The master roadmap records these as separate product families and tracks the service scope decision. | Collaboration/service workflows and security/governance are queued. Mobile, paginated, and Report Server are separate tracks; developer, embedding, Fabric, and AI capabilities are also separate tracks. |
 
 ## Verification recorded for this snapshot
 
-- Full suite: `PYTHONPATH=. pytest -q` — **373 passed, 231 subtests passed**.
+- Full suite: `PYTHONPATH=. pytest -q` — **376 passed, 229 subtests passed**.
 - Transform Data UI route: `test_transform_data_qml_command_reaches_dialog_and_commits_step` in [test_home_file_workflows.py](</Users/armaan/Power BI tool/tests/test_home_file_workflows.py>) passed. It checks command availability, committing a transform step, saving/reopening, and replay after a source change.
 - Import lifecycle tests: **41 passed, 30 subtests passed** in the focused parser/import run.
 - Large-file timings currently recorded for the M5 Pro host: CSV, 10,000,010 bytes and 100,000 rows, median **0.109 s**; XLSX, 2,357,312 bytes and 100,000 rows, median **1.545 s**. The M1 benchmark remains an external hardware gate.
 
 ## Next work and outstanding gates
 
-1. Continue with **Same-call Boolean and time-intelligence filter combinations** in the local DAX evaluator, as marked active in the master graph.
+1. Continue with **Other time-intelligence filter expressions** in the local DAX evaluator, as marked active in the master graph.
 2. Run and record the large-file benchmark on an M1 Mac before closing that performance gate.
 3. Verify SQL Server, OData, and Web workflows against live services in addition to their mocked lifecycle coverage.
 4. Then progress through the planned report authoring, interactions, and remaining product-family tracks shown in the master roadmap.
