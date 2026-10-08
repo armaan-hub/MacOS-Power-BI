@@ -618,16 +618,12 @@ def _validate_literal_positions(node: tuple[Any, ...]) -> None:
                 raise MeasureError(
                     "A table-valued FILTER must be the only CALCULATE filter argument."
                 )
-            if (
-                len(arguments) == 2
-                and arguments[1][0] == "call"
-                and arguments[1][1] in _TIME_FILTER_FUNCTIONS
-            ):
-                _validate_literal_positions(arguments[1])
-                return
             for filter_argument in arguments[1:]:
-                predicate, _keep = _calculate_filter_argument(filter_argument)
-                _calculate_boolean_filter_column(predicate)
+                if filter_argument[0] == "call" and filter_argument[1] in _TIME_FILTER_FUNCTIONS:
+                    _validate_literal_positions(filter_argument)
+                else:
+                    predicate, _keep = _calculate_filter_argument(filter_argument)
+                    _calculate_boolean_filter_column(predicate)
             return
         if function in {"SUMX", "AVERAGEX"}:
             _validate_literal_positions(arguments[1])
@@ -1075,13 +1071,10 @@ class _Parser:
                     argument[0] == "call" and argument[1] in _TIME_FILTER_FUNCTIONS
                     for argument in arguments[1:]
                 )
-                if contains_time_filter and not valid_time_filter:
-                    raise MeasureError(
-                        "Time-intelligence filters cannot be combined with other "
-                        "CALCULATE filters yet."
-                    )
                 if not valid_time_filter and not valid_table_filter:
                     for filter_argument in arguments[1:]:
+                        if filter_argument[0] == "call" and filter_argument[1] in _TIME_FILTER_FUNCTIONS:
+                            continue
                         predicate, _keep = _calculate_filter_argument(filter_argument)
                         _calculate_boolean_filter_column(predicate)
             return ("call", function, tuple(arguments))
@@ -1132,13 +1125,15 @@ def _is_supported_time_filter_calculate(node: Any) -> bool:
         and len(node) == 3
         and node[0] == "call"
         and node[1] == "CALCULATE"
-        and len(node[2]) == 2
-        and node[2][1][0] == "call"
-        and node[2][1][1] in {
-            "DATEADD", "SAMEPERIODLASTYEAR", "PREVIOUSYEAR", "PREVIOUSQUARTER", "PREVIOUSMONTH",
-            "DATESYTD", "DATESQTD", "DATESMTD", "DATESBETWEEN", "DATESINPERIOD",
-        }
+        and len(node[2]) >= 2
     ):
+        return False
+    # Verify that there's at least one time-filter argument
+    has_time_filter = any(
+        arg[0] == "call" and arg[1] in _TIME_FILTER_FUNCTIONS
+        for arg in node[2][1:]
+    )
+    if not has_time_filter:
         return False
     return not _contains_table_call(node[2][0])
 
@@ -2618,6 +2613,7 @@ def evaluate_measures(
     def evaluate_with_boolean_filters(
         expression: tuple[Any, ...],
         filter_arguments: tuple[tuple[Any, ...], ...],
+        extra_date_filters: dict[tuple[str, str], tuple[dict, str, frozenset[int]]] | None = None,
     ) -> Decimal:
         nonlocal rows_by_table_id, context_sequence, current_context
         nonlocal evaluation_contexts_by_id, evaluation_filter_ids
@@ -2627,6 +2623,10 @@ def evaluate_measures(
         targets_by_key: dict[
             tuple[str, str], tuple[dict[str, Any], str]
         ] = {}
+        for key, (target_context, target_column, allowed_rows) in (extra_date_filters or {}).items():
+            filters_by_column.setdefault(key, []).append((allowed_rows, False, False))
+            targets_by_key[key] = (target_context, target_column)
+
         for filter_argument in filter_arguments:
             predicate, keep = _calculate_filter_argument(filter_argument)
             references = list(_iter_reference_nodes(predicate))
@@ -2703,7 +2703,8 @@ def evaluate_measures(
             target_context, actual_column = targets_by_key[key]
             table_id = target_context["id"]
             if not target_context.get("filter_context_complete", False):
-                if table_id in evaluation_filter_ids:
+                is_date_replacement = extra_date_filters is not None and key in extra_date_filters
+                if table_id in evaluation_filter_ids and not is_date_replacement:
                     raise MeasureError(
                         "CALCULATE cannot replace a saved filter because its per-column "
                         "filter context is unavailable."
@@ -3569,198 +3570,214 @@ def evaluate_measures(
                 and arguments[1][1] == "FILTER"
             ):
                 return evaluate_with_table_filter(arguments[0], arguments[1])
-            if not (
-                len(arguments) == 2
-                and arguments[1][0] == "call"
-                and arguments[1][1] in _TIME_FILTER_FUNCTIONS
-            ):
-                return evaluate_with_boolean_filters(
-                    arguments[0], arguments[1:]
-                )
-            date_filter = arguments[1]
-            date_filter_function = date_filter[1]
-            date_filter_arguments = date_filter[2]
-            date_reference = date_filter_arguments[0]
-            date_table, actual_date_column = resolve_table(
-                date_reference[1], date_reference[2]
-            )
-            if (
-                date_table["date_column"].casefold() != actual_date_column.casefold()
-                or str(date_table["column_types"].get(actual_date_column, ""))
-                not in {"date", "datetime"}
-            ):
-                raise MeasureError(
-                    f"{date_filter_function} needs the marked Date or DateTime column of a date table."
-                )
-            visible_dates = [
-                parsed_date
-                for row_index, row in enumerate(
-                    rows_by_table_id[date_table["id"]], 1
-                )
-                if (parsed_date := _parse_measure_date(
-                    row.get(actual_date_column), actual_date_column, row_index
-                )) is not None
+            time_filters = [
+                arg for arg in arguments[1:]
+                if arg[0] == "call" and arg[1] in _TIME_FILTER_FUNCTIONS
             ]
-            if date_filter_function == "DATEADD":
-                interval_value = as_number(evaluate(date_filter_arguments[1]))
-                if interval_value != interval_value.to_integral_value():
-                    raise MeasureError("DATEADD number_of_intervals must be a whole number.")
-                if abs(interval_value) > Decimal(3_652_059):
-                    raise MeasureError("DATEADD number_of_intervals is outside the supported range.")
-                shifted_dates = _dateadd_dates(
-                    visible_dates,
-                    int(interval_value),
-                    str(date_filter_arguments[2][1]),
+            boolean_filters = tuple(
+                arg for arg in arguments[1:]
+                if not (arg[0] == "call" and arg[1] in _TIME_FILTER_FUNCTIONS)
+            )
+            if not time_filters:
+                return evaluate_with_boolean_filters(
+                    arguments[0], boolean_filters
                 )
-            elif date_filter_function == "SAMEPERIODLASTYEAR":
-                shifted_dates = _sameperiodlastyear_dates(visible_dates)
-            elif date_filter_function == "PREVIOUSYEAR":
-                year_end = (
-                    _parse_year_end_date(date_filter_arguments[1][1])
-                    if len(date_filter_arguments) == 2
-                    else (12, 31)
+
+            extra_date_filters = {}
+            for date_filter in time_filters:
+                date_filter_function = date_filter[1]
+                date_filter_arguments = date_filter[2]
+                date_reference = date_filter_arguments[0]
+                date_table, actual_date_column = resolve_table(
+                    date_reference[1], date_reference[2]
                 )
-                available_dates = [
-                    parsed_date
-                    for row_index, row in enumerate(date_table["rows"], 1)
-                    if (parsed_date := _parse_measure_date(
-                        row.get(actual_date_column), actual_date_column, row_index
-                    )) is not None
-                ]
-                shifted_dates = _previousyear_dates(
-                    visible_dates, available_dates, year_end
-                )
-            elif date_filter_function == "PREVIOUSQUARTER":
-                available_dates = [
-                    parsed_date
-                    for row_index, row in enumerate(date_table["rows"], 1)
-                    if (parsed_date := _parse_measure_date(
-                        row.get(actual_date_column), actual_date_column, row_index
-                    )) is not None
-                ]
-                shifted_dates = _previousquarter_dates(
-                    visible_dates, available_dates
-                )
-            elif date_filter_function == "PREVIOUSMONTH":
-                available_dates = [
-                    parsed_date
-                    for row_index, row in enumerate(date_table["rows"], 1)
-                    if (parsed_date := _parse_measure_date(
-                        row.get(actual_date_column), actual_date_column, row_index
-                    )) is not None
-                ]
-                shifted_dates = _previousmonth_dates(
-                    visible_dates, available_dates
-                )
-            elif date_filter_function == "DATESQTD":
-                shifted_dates = set()
-                if visible_dates:
-                    end_date = max(visible_dates)
-                    quarter_start_month = ((end_date.month - 1) // 3) * 3 + 1
-                    start_date = date(end_date.year, quarter_start_month, 1)
-                    shifted_dates = {
-                        parsed_date
-                        for row_index, row in enumerate(date_table["rows"], 1)
-                        if (parsed_date := _parse_measure_date(
-                            row.get(actual_date_column), actual_date_column, row_index
-                        )) is not None and start_date <= parsed_date <= end_date
-                    }
-            elif date_filter_function == "DATESMTD":
-                shifted_dates = set()
-                if visible_dates:
-                    end_date = max(visible_dates)
-                    start_date = date(end_date.year, end_date.month, 1)
-                    shifted_dates = {
-                        parsed_date
-                        for row_index, row in enumerate(date_table["rows"], 1)
-                        if (parsed_date := _parse_measure_date(
-                            row.get(actual_date_column), actual_date_column, row_index
-                        )) is not None and start_date <= parsed_date <= end_date
-                    }
-            elif date_filter_function == "DATESBETWEEN":
-                available_dates = [
-                    parsed_date
-                    for row_index, row in enumerate(date_table["rows"], 1)
-                    if (parsed_date := _parse_measure_date(
-                        row.get(actual_date_column), actual_date_column, row_index
-                    )) is not None
-                ]
-                shifted_dates = set()
-                if available_dates:
-                    start_bound, end_bound = date_filter_arguments[1:]
-                    start_date = (
-                        min(available_dates)
-                        if start_bound[0] == "blank"
-                        else _parse_iso_date_literal(start_bound[1], "DATESBETWEEN")
-                    )
-                    end_date = (
-                        max(available_dates)
-                        if end_bound[0] == "blank"
-                        else _parse_iso_date_literal(end_bound[1], "DATESBETWEEN")
-                    )
-                    if start_date <= end_date:
-                        shifted_dates = {
-                            value for value in available_dates
-                            if start_date <= value <= end_date
-                        }
-            elif date_filter_function == "DATESINPERIOD":
-                start_date = _parse_iso_date_literal(
-                    date_filter_arguments[1][1], "DATESINPERIOD"
-                )
-                interval_value = as_number(evaluate(date_filter_arguments[2]))
-                if interval_value != interval_value.to_integral_value():
+                if (
+                    date_table["date_column"].casefold() != actual_date_column.casefold()
+                    or str(date_table["column_types"].get(actual_date_column, ""))
+                    not in {"date", "datetime"}
+                ):
                     raise MeasureError(
-                        "DATESINPERIOD number_of_intervals must be a whole number."
+                        f"{date_filter_function} needs the marked Date or DateTime column of a date table."
                     )
-                if abs(interval_value) > Decimal(3_652_059):
-                    raise MeasureError(
-                        "DATESINPERIOD number_of_intervals is outside the supported range."
-                    )
-                interval = str(date_filter_arguments[3][1])
-                shifted_boundary = next(iter(_dateadd_dates(
-                    [start_date], int(interval_value), interval
-                )))
-                available_dates = [
+                visible_dates = [
                     parsed_date
-                    for row_index, row in enumerate(date_table["rows"], 1)
+                    for row_index, row in enumerate(
+                        rows_by_table_id[date_table["id"]], 1
+                    )
                     if (parsed_date := _parse_measure_date(
                         row.get(actual_date_column), actual_date_column, row_index
                     )) is not None
                 ]
-                if interval_value < 0:
-                    shifted_dates = {
-                        value for value in available_dates
-                        if shifted_boundary < value <= start_date
-                    }
-                else:
-                    shifted_dates = {
-                        value for value in available_dates
-                        if start_date <= value < shifted_boundary
-                    }
-            else:
-                shifted_dates = set()
-            if date_filter_function == "DATESYTD":
-                if visible_dates:
-                    date_argument = (
+                if date_filter_function == "DATEADD":
+                    interval_value = as_number(evaluate(date_filter_arguments[1]))
+                    if interval_value != interval_value.to_integral_value():
+                        raise MeasureError("DATEADD number_of_intervals must be a whole number.")
+                    if abs(interval_value) > Decimal(3_652_059):
+                        raise MeasureError("DATEADD number_of_intervals is outside the supported range.")
+                    shifted_dates = _dateadd_dates(
+                        visible_dates,
+                        int(interval_value),
+                        str(date_filter_arguments[2][1]),
+                    )
+                elif date_filter_function == "SAMEPERIODLASTYEAR":
+                    shifted_dates = _sameperiodlastyear_dates(visible_dates)
+                elif date_filter_function == "PREVIOUSYEAR":
+                    year_end = (
                         _parse_year_end_date(date_filter_arguments[1][1])
                         if len(date_filter_arguments) == 2
                         else (12, 31)
                     )
-                    end_date = max(visible_dates)
-                    start_date = _year_to_date_start(end_date, date_argument)
-                    shifted_dates = {
+                    available_dates = [
                         parsed_date
-                        for row_index, row in enumerate(
-                            date_table["rows"], 1
-                        )
+                        for row_index, row in enumerate(date_table["rows"], 1)
                         if (parsed_date := _parse_measure_date(
                             row.get(actual_date_column), actual_date_column, row_index
-                        )) is not None and start_date <= parsed_date <= end_date
-                    }
+                        )) is not None
+                    ]
+                    shifted_dates = _previousyear_dates(
+                        visible_dates, available_dates, year_end
+                    )
+                elif date_filter_function == "PREVIOUSQUARTER":
+                    available_dates = [
+                        parsed_date
+                        for row_index, row in enumerate(date_table["rows"], 1)
+                        if (parsed_date := _parse_measure_date(
+                            row.get(actual_date_column), actual_date_column, row_index
+                        )) is not None
+                    ]
+                    shifted_dates = _previousquarter_dates(
+                        visible_dates, available_dates
+                    )
+                elif date_filter_function == "PREVIOUSMONTH":
+                    available_dates = [
+                        parsed_date
+                        for row_index, row in enumerate(date_table["rows"], 1)
+                        if (parsed_date := _parse_measure_date(
+                            row.get(actual_date_column), actual_date_column, row_index
+                        )) is not None
+                    ]
+                    shifted_dates = _previousmonth_dates(
+                        visible_dates, available_dates
+                    )
+                elif date_filter_function == "DATESQTD":
+                    shifted_dates = set()
+                    if visible_dates:
+                        end_date = max(visible_dates)
+                        quarter_start_month = ((end_date.month - 1) // 3) * 3 + 1
+                        start_date = date(end_date.year, quarter_start_month, 1)
+                        shifted_dates = {
+                            parsed_date
+                            for row_index, row in enumerate(date_table["rows"], 1)
+                            if (parsed_date := _parse_measure_date(
+                                row.get(actual_date_column), actual_date_column, row_index
+                            )) is not None and start_date <= parsed_date <= end_date
+                        }
+                elif date_filter_function == "DATESMTD":
+                    shifted_dates = set()
+                    if visible_dates:
+                        end_date = max(visible_dates)
+                        start_date = date(end_date.year, end_date.month, 1)
+                        shifted_dates = {
+                            parsed_date
+                            for row_index, row in enumerate(date_table["rows"], 1)
+                            if (parsed_date := _parse_measure_date(
+                                row.get(actual_date_column), actual_date_column, row_index
+                            )) is not None and start_date <= parsed_date <= end_date
+                        }
+                elif date_filter_function == "DATESBETWEEN":
+                    available_dates = [
+                        parsed_date
+                        for row_index, row in enumerate(date_table["rows"], 1)
+                        if (parsed_date := _parse_measure_date(
+                            row.get(actual_date_column), actual_date_column, row_index
+                        )) is not None
+                    ]
+                    shifted_dates = set()
+                    if available_dates:
+                        start_bound, end_bound = date_filter_arguments[1:]
+                        start_date = (
+                            min(available_dates)
+                            if start_bound[0] == "blank"
+                            else _parse_iso_date_literal(start_bound[1], "DATESBETWEEN")
+                        )
+                        end_date = (
+                            max(available_dates)
+                            if end_bound[0] == "blank"
+                            else _parse_iso_date_literal(end_bound[1], "DATESBETWEEN")
+                        )
+                        if start_date <= end_date:
+                            shifted_dates = {
+                                value for value in available_dates
+                                if start_date <= value <= end_date
+                            }
+                elif date_filter_function == "DATESINPERIOD":
+                    start_date = _parse_iso_date_literal(
+                        date_filter_arguments[1][1], "DATESINPERIOD"
+                    )
+                    interval_value = as_number(evaluate(date_filter_arguments[2]))
+                    if interval_value != interval_value.to_integral_value():
+                        raise MeasureError(
+                            "DATESINPERIOD number_of_intervals must be a whole number."
+                        )
+                    if abs(interval_value) > Decimal(3_652_059):
+                        raise MeasureError(
+                            "DATESINPERIOD number_of_intervals is outside the supported range."
+                        )
+                    interval = str(date_filter_arguments[3][1])
+                    shifted_boundary = next(iter(_dateadd_dates(
+                        [start_date], int(interval_value), interval
+                    )))
+                    available_dates = [
+                        parsed_date
+                        for row_index, row in enumerate(date_table["rows"], 1)
+                        if (parsed_date := _parse_measure_date(
+                            row.get(actual_date_column), actual_date_column, row_index
+                        )) is not None
+                    ]
+                    if interval_value < 0:
+                        shifted_dates = {
+                            value for value in available_dates
+                            if shifted_boundary < value <= start_date
+                        }
+                    else:
+                        shifted_dates = {
+                            value for value in available_dates
+                            if start_date <= value < shifted_boundary
+                        }
                 else:
                     shifted_dates = set()
-            return evaluate_with_date_values(
-                arguments[0], date_table, actual_date_column, shifted_dates
+                if date_filter_function == "DATESYTD":
+                    if visible_dates:
+                        date_argument = (
+                            _parse_year_end_date(date_filter_arguments[1][1])
+                            if len(date_filter_arguments) == 2
+                            else (12, 31)
+                        )
+                        end_date = max(visible_dates)
+                        start_date = _year_to_date_start(end_date, date_argument)
+                        shifted_dates = {
+                            parsed_date
+                            for row_index, row in enumerate(
+                                date_table["rows"], 1
+                            )
+                            if (parsed_date := _parse_measure_date(
+                                row.get(actual_date_column), actual_date_column, row_index
+                            )) is not None and start_date <= parsed_date <= end_date
+                        }
+                    else:
+                        shifted_dates = set()
+                period_indexes = frozenset(
+                    row_index
+                    for row_index, row in enumerate(date_table["rows"])
+                    if (parsed_date := _parse_measure_date(
+                        row.get(actual_date_column), actual_date_column, row_index + 1
+                    )) is not None and parsed_date in shifted_dates
+                )
+                key = (date_table["id"], actual_date_column.casefold())
+                extra_date_filters[key] = (date_table, actual_date_column, period_indexes)
+
+            return evaluate_with_boolean_filters(
+                arguments[0], boolean_filters, extra_date_filters
             )
         if function == "DATEADD":
             raise MeasureError(
