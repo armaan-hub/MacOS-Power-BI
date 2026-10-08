@@ -131,3 +131,8 @@ This log is cumulative. Preserve earlier entries and append a dated increment in
 * **Visual instantiator and chooser:** Converted the static Visualizations gallery in QML to spawn dynamic visuals based on generic selection types. Selecting an active visual updates its type geometry dynamically. 
 * **Draggable grid layout:** Rebuilt the `Main.qml` `ChartCard` repeater using absolute coordinate mapping. Provided a `DragHandler` overlay for canvas dragging, a resize-corner for dimensions, and bound Delete/Backspace keys to active component removal.
 * **Status Change:** 7.1.2 mapped fully to `Passed`. 7.1.3 (Static components) mapped to `Active`.
+
+### 2026-10-08: Static Visual Components (G1.3 Complete)
+* **Static Components Mapping:** Connected the QML 'Elements' Tab Ribbon for Images, Text boxes, and the full multi-category Shape palette system to instantiate into the abstract visual schema.
+* **Component Renderers:** Bound `TextArea`, Vector `ShapeGlyph`, and fallback icon structures to overlay appropriately using absolute layouts on instantiation. Text boxes are selectable and dynamically wrapped into the absolute selection engine bounds.
+* **Status Change:** 7.1.3 mapped fully to `Passed`. Overall Phase G1 is now complete. Next focus proceeds to G2 Field wells.

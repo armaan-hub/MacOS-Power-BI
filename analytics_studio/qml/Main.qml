@@ -276,6 +276,14 @@ ApplicationWindow {
         case "report.addPage": mainWindow.studioController.executeCommand("addPage"); break
         case "report.addMonthly": mainWindow.studioController.executeCommand("addMonthlyChart"); break
         case "report.addRegion": mainWindow.studioController.executeCommand("addRegionChart"); break
+        case "insert.textBox":
+            let tc = mainWindow.studioController.activeVisualObjects.length + 1;
+            mainWindow.studioController.add_visual("text_box", "Text Box " + tc, 100, 100, 200, 80);
+            break
+        case "insert.image":
+            let ic = mainWindow.studioController.activeVisualObjects.length + 1;
+            mainWindow.studioController.add_visual("image", "Image " + ic, 100, 100, 250, 150);
+            break
         case "view.report": navigateToView("Report"); break
         case "view.data": navigateToView("Data"); break
         case "view.model": navigateToView("Model"); break
@@ -595,8 +603,8 @@ ApplicationWindow {
         controller: mainWindow.studioController
         onShapeChosen: function(shapeName) {
             const focusTarget = shapePalette.returnFocusItem
-            mainWindow.studioController.reportStagedAction(shapeName + " shape",
-                    "Shape creation is not implemented yet.")
+            let v_count = mainWindow.studioController.activeVisualObjects.length + 1;
+            mainWindow.studioController.add_visual("shape", shapeName, 100, 100, 100, 100);
             if (focusTarget)
                 Qt.callLater(function() {
                     if (focusTarget.visible)
@@ -938,6 +946,7 @@ ApplicationWindow {
                                                 height: Number(modelData.height)
 
                                                 ChartCard {
+                                                    visible: modelData.type !== "text_box" && modelData.type !== "image" && String(modelData.type).indexOf("shape:") !== 0 && modelData.type !== "shape"
                                                     anchors.fill: parent
                                                     title: String(modelData.title)
                                                     visualName: String(modelData.title)
@@ -949,6 +958,72 @@ ApplicationWindow {
 
                                                     onRequestedSelection: function(visualName) {
                                                         mainWindow.studioController.selectVisual(visualName)
+                                                    }
+                                                }
+
+                                                Rectangle {
+                                                    visible: modelData.type === "text_box"
+                                                    anchors.fill: parent
+                                                    color: "transparent"
+                                                    border.color: mainWindow.studioController.selectedVisual === String(modelData.title) ? "#0078D4" : "transparent"
+                                                    border.width: 1
+                                                    
+                                                    TextArea {
+                                                        anchors.fill: parent
+                                                        anchors.margins: 4
+                                                        text: modelData.text || "Type here..."
+                                                        font.pixelSize: 14
+                                                        wrapMode: Text.WordWrap
+                                                        background: Rectangle { color: "transparent" }
+                                                        color: "#202020"
+                                                        onPressed: function(mouse) {
+                                                            mainWindow.studioController.selectVisual(String(modelData.title))
+                                                        }
+                                                        onTextChanged: {
+                                                            if (activeFocus) {
+                                                                // In a real app we'd update the controller's property here
+                                                            }
+                                                        }
+                                                    }
+                                                }
+
+                                                Rectangle {
+                                                    visible: modelData.type === "image"
+                                                    anchors.fill: parent
+                                                    color: "#f8f9fa"
+                                                    border.color: mainWindow.studioController.selectedVisual === String(modelData.title) ? "#0078D4" : "#cbd1d6"
+                                                    border.width: 1
+                                                    
+                                                    Icon {
+                                                        anchors.centerIn: parent
+                                                        name: "image"
+                                                        color: "#adb6bc"
+                                                        implicitWidth: 48
+                                                        implicitHeight: 48
+                                                    }
+                                                    
+                                                    MouseArea {
+                                                        anchors.fill: parent
+                                                        onClicked: mainWindow.studioController.selectVisual(String(modelData.title))
+                                                    }
+                                                }
+
+                                                Rectangle {
+                                                    visible: String(modelData.type).indexOf("shape") === 0
+                                                    anchors.fill: parent
+                                                    color: "transparent"
+                                                    border.color: mainWindow.studioController.selectedVisual === String(modelData.title) ? "#0078D4" : "transparent"
+                                                    border.width: 1
+                                                    
+                                                    ShapeGlyph {
+                                                        anchors.fill: parent
+                                                        anchors.margins: 4
+                                                        shapeName: String(modelData.title)
+                                                    }
+                                                    
+                                                    MouseArea {
+                                                        anchors.fill: parent
+                                                        onClicked: mainWindow.studioController.selectVisual(String(modelData.title))
                                                     }
                                                 }
                                                 

@@ -139,7 +139,7 @@ flowchart LR
     G --> G1["7.1 Canvas and Visual Lifecycle<br/>Active"]
     G1 --> G1a["7.1.1 Page management (rename, delete, reorder)<br/>Passed"]
     G1a --> G1b["7.1.2 Visual instantiation and selection<br/>Passed"]
-    G1b --> G1c["7.1.3 Static components (text boxes, shapes)<br/>Active"]
+    G1b --> G1c["7.1.3 Static components (text boxes, shapes)<br/>Passed"]
     G1c --> G2["7.2 Field Wells and Data Binding<br/>Queued"]
     G2 --> G2a["7.2.1 Dynamic field wells UI<br/>Queued"]
     G2a --> G2b["7.2.2 Implicit aggregations<br/>Queued"]
