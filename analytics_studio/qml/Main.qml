@@ -113,7 +113,7 @@ ApplicationWindow {
             ]},
             { title: "Elements", compact: true, actions: [
                 { label: "Text box", visibleLabel: "Text\nbox", width: 38, appearanceAvailable: true, iconName: "text", commandId: "disabled.textBox", available: false, description: "Report text boxes are not available in this release." },
-                { label: "Buttons", visibleLabel: "Buttons", width: 46, hasDropdown: true, appearanceAvailable: true, iconName: "button", commandId: "insert.buttons", available: false, description: "Report button objects are not available in this release." },
+                { label: "Buttons", visibleLabel: "Buttons", width: 46, hasDropdown: false, appearanceAvailable: true, iconName: "button", commandId: "insert.buttons", description: "Insert a clickable report button to trigger actions." },
                 { label: "Shapes", visibleLabel: "Shapes", width: 43, hasDropdown: true, appearanceAvailable: true, iconName: "shape", commandId: "insert.shapes", available: false, description: "Report shape objects are not available in this release." },
                 { label: "Image", visibleLabel: "Image", width: 34, appearanceAvailable: true, iconName: "image", commandId: "disabled.image", available: false, description: "Report images are not available in this release." }
             ]},
@@ -158,8 +158,10 @@ ApplicationWindow {
         ]},
         { groups: [
             { title: "Themes", actions: [
-                { label: "Default theme", visibleLabel: "Default\ntheme", iconName: "paintBrush", commandId: "disabled.theme", available: false, description: "Report themes are not available in this release." },
-                { label: "Theme gallery", visibleLabel: "Theme\ngallery", iconName: "visual", commandId: "disabled.themes", available: false, description: "Theme gallery is not available in this release." }
+                { label: "Default theme", visibleLabel: "Default\ntheme", iconName: "paintBrush", commandId: "theme.default", description: "Apply the default Power BI theme." },
+                { label: "Executive theme", visibleLabel: "Executive\ntheme", iconName: "paintBrush", commandId: "theme.executive", description: "Apply a dark blue/grey corporate theme." },
+                { label: "High Contrast", visibleLabel: "High\nContrast", iconName: "paintBrush", commandId: "theme.highContrast", description: "Apply High Contrast theme for accessibility." },
+                { label: "Sunset theme", visibleLabel: "Sunset\ntheme", iconName: "paintBrush", commandId: "theme.sunset", description: "Apply the Sunset warm color theme." }
             ]},
             { title: "Scale to fit", actions: [
                 { label: "Page view", visibleLabel: "Page view", iconName: "fit", commandId: "view.zoomFit", description: "Fit the report page in the available workspace." },
@@ -284,6 +286,10 @@ ApplicationWindow {
             let ic = mainWindow.studioController.activeVisualObjects.length + 1;
             mainWindow.studioController.add_visual("image", "Image " + ic, 100, 100, 250, 150);
             break
+        case "insert.buttons":
+            let bc = mainWindow.studioController.activeVisualObjects.length + 1;
+            mainWindow.studioController.add_visual("button", "Button " + bc, 100, 100, 100, 35);
+            break
         case "view.report": navigateToView("Report"); break
         case "view.data": navigateToView("Data"); break
         case "view.model": navigateToView("Model"); break
@@ -308,13 +314,19 @@ ApplicationWindow {
         case "arrange.sendBackward": mainWindow.studioController.send_backward(); break
         case "arrange.group": mainWindow.studioController.group_visuals(); break
         case "arrange.ungroup": mainWindow.studioController.ungroup_visuals(); break
-        case "chart.type.column": mainWindow.studioController.setChartType("column"); break
-        case "chart.type.bar": mainWindow.studioController.setChartType("bar"); break
-        case "chart.type.line": mainWindow.studioController.setChartType("line"); break
+        case "theme.default": mainWindow.studioController.set_report_theme("Default"); break
+        case "theme.executive": mainWindow.studioController.set_report_theme("Executive"); break
+        case "theme.highContrast": mainWindow.studioController.set_report_theme("High Contrast"); break
+        case "theme.sunset": mainWindow.studioController.set_report_theme("Sunset"); break
+        // Dynamic chart type handler below in default
         case "help.about": mainWindow.studioController.executeCommand("about"); break
         case "help.shortcuts": mainWindow.studioController.executeCommand("shortcuts"); break
         case "help.projectFormat": mainWindow.studioController.executeCommand("projectFormat"); break
-        default: break
+        default:
+            if (commandId.startsWith("chart.type.")) {
+                mainWindow.studioController.set_visual_type(mainWindow.studioController.selectedVisual, commandId.substring(11))
+            }
+            break
         }
     }
 
@@ -348,7 +360,7 @@ ApplicationWindow {
             mainWindow.studioController.executeCommand("enterData")
             return
         case "insert.moreVisuals": showRibbonPopup("moreVisuals", sourceItem, sourceItem); return
-        case "insert.buttons": showRibbonPopup("buttons", sourceItem, sourceItem); return
+        case "insert.buttons": mainWindow.runCommand(commandId); return
         case "insert.shapes": shapePalette.openAt(Overlay.overlay, sourceItem, sourceItem); return
         default: runCommand(commandId); return
         }
@@ -975,7 +987,7 @@ ApplicationWindow {
                                                 height: Number(modelData.height)
 
                                                 ChartCard {
-                                                    visible: modelData.type !== "text_box" && modelData.type !== "image" && String(modelData.type).indexOf("shape:") !== 0 && modelData.type !== "shape"
+                                                    visible: modelData.type !== "button" && modelData.type !== "text_box" && modelData.type !== "image" && String(modelData.type).indexOf("shape:") !== 0 && modelData.type !== "shape"
                                                     anchors.fill: parent
                                                     title: String(modelData.title)
                                                     visualName: String(modelData.title)
@@ -985,6 +997,12 @@ ApplicationWindow {
                                                     emptyMessage: "No data is available yet."
 
                                                     series: (modelData.type === "column" || modelData.type === "bar" || modelData.type === "line" || modelData.type === "area") ? mainWindow.studioController.visualSeries(String(modelData.title)) : []
+
+                                                    filterOnCategory: true
+
+                                                    onCategoryRequested: function(label) {
+                                                        mainWindow.studioController.toggle_cross_filter(String(modelData.title), label)
+                                                    }
 
                                                     onRequestedSelection: function(visualName) {
                                                         if (mainWindow.studioController.formatPainterActive) {
@@ -1042,6 +1060,108 @@ ApplicationWindow {
                                                 }
 
                                                 Rectangle {
+                                                    visible: modelData.type === "slicer"
+                                                    anchors.fill: parent
+                                                    color: "#ffffff"
+                                                    border.color: mainWindow.studioController.selectedVisual === String(modelData.title) ? "#0078D4" : "#e1e5e8"
+                                                    border.width: 1
+                                                    
+                                                    ColumnLayout {
+                                                        anchors.fill: parent
+                                                        anchors.margins: 6
+                                                        spacing: 2
+                                                        Text {
+                                                            Layout.fillWidth: true
+                                                            text: modelData.title
+                                                            font.pixelSize: 11
+                                                            color: "#5e6973"
+                                                        }
+                                                        ScrollView {
+                                                            Layout.fillWidth: true
+                                                            Layout.fillHeight: true
+                                                            clip: true
+                                                            ListView {
+                                                                id: slicerList
+                                                                property string visualTitle: String(modelData.title)
+                                                                model: modelData.type === "slicer" ? mainWindow.studioController.visualSeries(String(modelData.title)) : []
+                                                                property var activeFilters: mainWindow.studioController.selectedCrossFiltersForVisual(String(modelData.title)) || []
+                                                                delegate: Item {
+                                                                    width: slicerList.width
+                                                                    height: 22
+                                                                    RowLayout {
+                                                                        anchors.fill: parent
+                                                                        spacing: 6
+                                                                        Rectangle {
+                                                                            Layout.preferredWidth: 14
+                                                                            Layout.preferredHeight: 14
+                                                                            border.width: 1
+                                                                            border.color: "#333333"
+                                                                            color: slicerList.activeFilters.indexOf(String(modelData.label)) !== -1 ? "#0078D4" : "transparent"
+                                                                        }
+                                                                        Text {
+                                                                            Layout.fillWidth: true
+                                                                            text: String(modelData.label)
+                                                                            font.pixelSize: 11
+                                                                            color: "#333333"
+                                                                        }
+                                                                    }
+                                                                    MouseArea {
+                                                                        anchors.fill: parent
+                                                                        onClicked: {
+                                                                            mainWindow.studioController.selectVisual(String(parent.parent.parent.parent.parent.modelData.title))
+                                                                            mainWindow.studioController.toggle_cross_filter(String(parent.parent.parent.parent.parent.modelData.title), String(modelData.label))
+                                                                        }
+                                                                    }
+                                                                }
+                                                            }
+                                                        }
+                                                    }
+                                                    
+                                                    MouseArea {
+                                                        anchors.fill: parent
+                                                        propagateComposedEvents: true
+                                                        onPressed: function(mouse) {
+                                                            // We cannot swallow click if we want scrollbars/list items to work, 
+                                                            // so let's just select
+                                                            mainWindow.studioController.selectVisual(String(modelData.title))
+                                                            mouse.accepted = false
+                                                        }
+                                                    }
+                                                }
+
+                                                Rectangle {
+                                                    visible: modelData.type === "button"
+                                                    anchors.fill: parent
+                                                    color: mainWindow.studioController.selectedVisual === String(modelData.title) ? "#e5f1f8" : "#f3f2f1"
+                                                    border.color: mainWindow.studioController.selectedVisual === String(modelData.title) ? "#0078D4" : "#cccccc"
+                                                    border.width: 1
+                                                    radius: 4
+
+                                                    Text {
+                                                        anchors.centerIn: parent
+                                                        text: modelData.text || modelData.title
+                                                        font.pixelSize: 12
+                                                        color: "#333333"
+                                                    }
+                                                    
+                                                    MouseArea {
+                                                        anchors.fill: parent
+                                                        onClicked: function(mouse) {
+                                                            mainWindow.studioController.selectVisual(String(modelData.title))
+                                                            // Execute Button Action (Control-click is standard, but here double click or regular click in view mode)
+                                                            if (modelData.actionUrl && mouse.modifiers & Qt.ControlModifier) {
+                                                                Qt.openUrlExternally(modelData.actionUrl)
+                                                            }
+                                                        }
+                                                        onDoubleClicked: {
+                                                            if (modelData.actionUrl) {
+                                                                Qt.openUrlExternally(modelData.actionUrl)
+                                                            }
+                                                        }
+                                                    }
+                                                }
+
+                                                Rectangle {
                                                     visible: String(modelData.type).indexOf("shape") === 0
                                                     anchors.fill: parent
                                                     color: "transparent"
@@ -1057,6 +1177,108 @@ ApplicationWindow {
                                                     MouseArea {
                                                         anchors.fill: parent
                                                         onClicked: mainWindow.studioController.selectVisual(String(modelData.title))
+                                                    }
+                                                }
+
+                                                Rectangle {
+                                                    visible: modelData.type === "slicer"
+                                                    anchors.fill: parent
+                                                    color: "#ffffff"
+                                                    border.color: mainWindow.studioController.selectedVisual === String(modelData.title) ? "#0078D4" : "#e1e5e8"
+                                                    border.width: 1
+                                                    
+                                                    ColumnLayout {
+                                                        anchors.fill: parent
+                                                        anchors.margins: 6
+                                                        spacing: 2
+                                                        Text {
+                                                            Layout.fillWidth: true
+                                                            text: modelData.title
+                                                            font.pixelSize: 11
+                                                            color: "#5e6973"
+                                                        }
+                                                        ScrollView {
+                                                            Layout.fillWidth: true
+                                                            Layout.fillHeight: true
+                                                            clip: true
+                                                            ListView {
+                                                                id: slicerList
+                                                                property string visualTitle: String(modelData.title)
+                                                                model: modelData.type === "slicer" ? mainWindow.studioController.visualSeries(String(modelData.title)) : []
+                                                                property var activeFilters: mainWindow.studioController.selectedCrossFiltersForVisual(String(modelData.title)) || []
+                                                                delegate: Item {
+                                                                    width: slicerList.width
+                                                                    height: 22
+                                                                    RowLayout {
+                                                                        anchors.fill: parent
+                                                                        spacing: 6
+                                                                        Rectangle {
+                                                                            Layout.preferredWidth: 14
+                                                                            Layout.preferredHeight: 14
+                                                                            border.width: 1
+                                                                            border.color: "#333333"
+                                                                            color: slicerList.activeFilters.indexOf(String(modelData.label)) !== -1 ? "#0078D4" : "transparent"
+                                                                        }
+                                                                        Text {
+                                                                            Layout.fillWidth: true
+                                                                            text: String(modelData.label)
+                                                                            font.pixelSize: 11
+                                                                            color: "#333333"
+                                                                        }
+                                                                    }
+                                                                    MouseArea {
+                                                                        anchors.fill: parent
+                                                                        onClicked: {
+                                                                            mainWindow.studioController.selectVisual(String(parent.parent.parent.parent.parent.modelData.title))
+                                                                            mainWindow.studioController.toggle_cross_filter(String(parent.parent.parent.parent.parent.modelData.title), String(modelData.label))
+                                                                        }
+                                                                    }
+                                                                }
+                                                            }
+                                                        }
+                                                    }
+                                                    
+                                                    MouseArea {
+                                                        anchors.fill: parent
+                                                        propagateComposedEvents: true
+                                                        onPressed: function(mouse) {
+                                                            // We cannot swallow click if we want scrollbars/list items to work, 
+                                                            // so let's just select
+                                                            mainWindow.studioController.selectVisual(String(modelData.title))
+                                                            mouse.accepted = false
+                                                        }
+                                                    }
+                                                }
+
+                                                Rectangle {
+                                                    visible: modelData.type === "button"
+                                                    anchors.fill: parent
+                                                    color: mainWindow.studioController.selectedVisual === String(modelData.title) ? "#e5f1f8" : "#f3f2f1"
+                                                    border.color: mainWindow.studioController.selectedVisual === String(modelData.title) ? "#0078D4" : "#cccccc"
+                                                    border.width: 1
+                                                    radius: 4
+
+                                                    Text {
+                                                        anchors.centerIn: parent
+                                                        text: modelData.text || modelData.title
+                                                        font.pixelSize: 12
+                                                        color: "#333333"
+                                                    }
+                                                    
+                                                    MouseArea {
+                                                        anchors.fill: parent
+                                                        onClicked: function(mouse) {
+                                                            mainWindow.studioController.selectVisual(String(modelData.title))
+                                                            // Execute Button Action (Control-click is standard, but here double click or regular click in view mode)
+                                                            if (modelData.actionUrl && mouse.modifiers & Qt.ControlModifier) {
+                                                                Qt.openUrlExternally(modelData.actionUrl)
+                                                            }
+                                                        }
+                                                        onDoubleClicked: {
+                                                            if (modelData.actionUrl) {
+                                                                Qt.openUrlExternally(modelData.actionUrl)
+                                                            }
+                                                        }
                                                     }
                                                 }
                                                 
@@ -2446,7 +2668,7 @@ ApplicationWindow {
                                                 { type: "gauge", name: "Gauge", icon: "gauge", accent: "#0078D4" },
                                                 { type: "card", name: "Card (new)", icon: "newCard" },
                                                 { type: "kpi", name: "KPI", icon: "kpi", accent: "#0078D4" },
-                                                { type: "slicer", name: "Slicer", icon: "slicer", accent: "#0078D4" },
+                                                { type: "slicer", name: "Slicer", icon: "slicer", accent: "#0078D4", active: true },
                                                 { type: "table", name: "Table", icon: "table", accent: "#0078D4" },
                                                 { type: "matrix", name: "Matrix", icon: "matrix", accent: "#0078D4" },
                                                 { type: "rScript", name: "R visual", icon: "rVisual", accent: "#0078D4" },

@@ -152,9 +152,9 @@ flowchart LR
     G4 --> G4a["7.4.1 Z-order and Grouping<br/>Passed"]
     G4a --> G4b["7.4.2 Themes<br/>Passed"]
     G4b --> G4c["7.4.3 Buttons and Actions<br/>Passed"]
-    G4c --> H["8. Interactions and analytics<br/>Queued"]
-    H --> H1["8.1 Highlight and Cross-Filtering<br/>Queued"]
-    H1 --> H1a["8.1.1 Bidirectional filtering mechanisms<br/>Queued"]
+    G4c --> H["8. Interactions and analytics<br/>Active"]
+    H --> H1["8.1 Highlight and Cross-Filtering<br/>Passed"]
+    H1 --> H1a["8.1.1 Bidirectional filtering mechanisms<br/>Passed"]
     H --> K["11. Mobile, paginated, Report Server<br/>Separate tracks"]
     I --> L["12. Developer, embedded, Fabric, AI<br/>Separate tracks"]
 

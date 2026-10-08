@@ -862,8 +862,17 @@ class StudioController(QObject):
                 "properties": [
                     {"key": "color", "label": "Primary Color", "type": "color", "value": visual.get("color", "#0078D4")}
                 ]
-            }
+            },
+            {
+                "name": "Action",
+                "properties": [
+                    {"key": "actionUrl", "label": "Web URL", "type": "string", "value": visual.get("actionUrl", "")},
+                    {"key": "text", "label": "Button Text", "type": "string", "value": visual.get("text", "")},
+                ]
+            } if visual.get("type") == "button" else None
         ]
+
+        return [group for group in groups if group is not None]
 
     @Property("QVariantList", notify=stateChanged)
     def activeVisualObjects(self) -> list[dict[str, object]]:  # noqa: N802
@@ -1379,6 +1388,14 @@ class StudioController(QObject):
                 "error": self._measure_errors.get(name, ""),
             })
         return result
+
+    @Slot(str, result="QVariantList")
+    def selectedCrossFiltersForVisual(self, visual_title: str) -> list[str]:
+        return self._cross_filters.get(visual_title, [])
+
+    @Slot(str, result="QVariantList")
+    def selectedCrossFiltersForVisual(self, visual_title: str) -> list[str]:
+        return self._cross_filters.get(visual_title, [])
 
     @Property(bool, notify=stateChanged)
     def formatPainterActive(self) -> bool:  # noqa: N802
@@ -5604,6 +5621,13 @@ class StudioController(QObject):
         self._visual_kpis = {}
         self._monthly_visual_series = {}
         self._region_visual_series = {}
+        self._report_theme = "Default"
+        self._themes = {
+            "Default": {"primary": "#0078D4", "secondary": "#107C71"},
+            "Executive": {"primary": "#00188F", "secondary": "#252423"},
+            "High Contrast": {"primary": "#FFFF00", "secondary": "#00FFFF"},
+            "Sunset": {"primary": "#D83B01", "secondary": "#FF8C00"}
+        }
         self._clipboard_visual_config = None
         self._clipboard_format_config = None
         self._format_painter_active = False
@@ -5799,6 +5823,25 @@ class StudioController(QObject):
             (visual_rows_by_table, _, _) = self._report_filter_context(visual_name)
             visual_rows = visual_rows_by_table.get(active_table_id, list(self._rows))
 
+        # Apply Cross-Filters
+        for cv_title, cv_labels in self._cross_filters.items():
+            if cv_title == visual_name: continue
+            if not isinstance(cv_labels, list): cv_labels = [cv_labels] # safety fallback
+            cv_visual = next((v for v in page.get("visuals", []) if isinstance(v, dict) and v.get("title") == cv_title), None)
+            if cv_visual:
+                fields = cv_visual.get("fields", {})
+                cv_x_axis = fields.get("Field", []) or fields.get("X-axis", [])
+                cv_x_col = cv_x_axis[0] if cv_x_axis else None
+                if not cv_x_col:
+                    if cv_title == "Monthly revenue":
+                        cv_x_col = _report_date_column(self._headers)
+                        visual_rows = [r for r in visual_rows if any(str(r.get(cv_x_col, "")).startswith(cv) for cv in cv_labels)]
+                        continue
+                    elif cv_title == "Region revenue":
+                        cv_x_col = _report_field(self._headers, "region")
+                if cv_x_col:
+                    visual_rows = [r for r in visual_rows if str(r.get(cv_x_col, "")).strip() in cv_labels]
+
         from collections import defaultdict
         from decimal import Decimal
         aggregated: defaultdict[str, Decimal] = defaultdict(Decimal)
@@ -5959,6 +6002,42 @@ class StudioController(QObject):
             from copy import deepcopy
             self._clipboard_visual_config = deepcopy(visual)
             self._set_status(f"Copied visual {self._selected_visual}")
+
+    @Property(str, notify=stateChanged)
+    def reportTheme(self) -> str:  # noqa: N802
+        return self._report_theme
+
+    @Slot(str)
+    def set_report_theme(self, theme_name: str) -> None:
+        if theme_name not in self._themes: return
+        self._report_theme = theme_name
+        colors = self._themes[theme_name]
+        
+        # Apply theme colors to visualizations
+        for page in self._project["report"]["pages"]:
+            for v in page.get("visuals", []):
+                 # Let's say all charts get primary color
+                 if isinstance(v, dict):
+                     v["color"] = colors["primary"]
+        self._dirty = True
+        self._refresh_report()
+        self.stateChanged.emit()
+        self._set_status(f"Theme applied: {theme_name}")
+
+    @Slot(str, str)
+    def toggle_cross_filter(self, visual_title: str, label: str) -> None:
+        selected_list = self._cross_filters.setdefault(visual_title, [])
+        if label in selected_list:
+            selected_list.remove(label)
+        else:
+            selected_list.append(label)
+            
+        if not selected_list:
+            del self._cross_filters[visual_title]
+            
+        self._dirty = True
+        self._refresh_report()
+        self.stateChanged.emit()
 
     @Slot()
     def cut_selected_visual(self) -> None:
