@@ -545,6 +545,35 @@ ApplicationWindow {
         }
     }
 
+    Shortcut {
+        sequence: StandardKey.Delete
+        onActivated: {
+            let visName = mainWindow.studioController.selectedVisual
+            if (visName && mainWindow.studioController.activeVisualObjects) {
+                for (let i = 0; i < mainWindow.studioController.activeVisualObjects.length; ++i) {
+                    if (mainWindow.studioController.activeVisualObjects[i].title === visName) {
+                        mainWindow.studioController.remove_visual(mainWindow.studioController.activeVisualObjects[i].id)
+                        break
+                    }
+                }
+            }
+        }
+    }
+    Shortcut {
+        sequence: "Backspace"
+        onActivated: {
+            let visName = mainWindow.studioController.selectedVisual
+            if (visName && mainWindow.studioController.activeVisualObjects && !focus) {
+                for (let i = 0; i < mainWindow.studioController.activeVisualObjects.length; ++i) {
+                    if (mainWindow.studioController.activeVisualObjects[i].title === visName) {
+                        mainWindow.studioController.remove_visual(mainWindow.studioController.activeVisualObjects[i].id)
+                        break
+                    }
+                }
+            }
+        }
+    }
+
     GetDataDialog {
         id: getDataDialog
         objectName: "getDataDialog"
@@ -879,238 +908,110 @@ ApplicationWindow {
                                     height: 720
                                     transform: Scale { xScale: mainWindow.reportZoom; yScale: mainWindow.reportZoom; origin.x: 0; origin.y: 0 }
 
-                                    ColumnLayout {
+                                    Item {
                                         anchors.fill: parent
-                                        anchors.margins: 20
-                                        spacing: 14
+
+                                        // Empty state overlay when no visual exists
                                         Item {
                                             objectName: "reportEmptyState"
-                                            visible: !mainWindow.studioController.sourceLoaded
-                                            Layout.fillWidth: true
-                                            Layout.fillHeight: true
+                                            visible: mainWindow.studioController.activeVisualObjects.length === 0
+                                            anchors.fill: parent
                                             ColumnLayout {
                                                 anchors.centerIn: parent
                                                 spacing: 12
                                                 Text {
                                                     Layout.alignment: Qt.AlignHCenter
-                                                    text: "Add data to your report"
+                                                    text: "Choose a visual from Insert to add it to this page."
                                                     color: "#30383e"
-                                                    font.pixelSize: 26
+                                                    font.pixelSize: 22
                                                     font.weight: Font.DemiBold
                                                 }
-                                                Text {
-                                                    Layout.alignment: Qt.AlignHCenter
-                                                    textFormat: Text.RichText
-                                                    text: "Once loaded, your data will appear in the <b>Data pane</b>."
-                                                    color: "#39444c"
-                                                    font.pixelSize: 18
+                                            }
+                                        }
+
+                                        Repeater {
+                                            model: mainWindow.studioController.activeVisualObjects
+                                            delegate: Item {
+                                                x: Number(modelData.x)
+                                                y: Number(modelData.y)
+                                                width: Number(modelData.width)
+                                                height: Number(modelData.height)
+
+                                                ChartCard {
+                                                    anchors.fill: parent
+                                                    title: String(modelData.title)
+                                                    visualName: String(modelData.title)
+                                                    chartType: String(modelData.type)
+                                                    selected: mainWindow.studioController.selectedVisual === String(modelData.title)
+                                                    emptyMessage: "No data is available yet."
+
+                                                    series: modelData.type === "column" ? mainWindow.studioController.monthlySeriesForVisual(String(modelData.title)) : (modelData.type === "bar" ? mainWindow.studioController.regionSeriesForVisual(String(modelData.title)) : [])
+
+                                                    onRequestedSelection: function(visualName) {
+                                                        mainWindow.studioController.selectVisual(visualName)
+                                                    }
                                                 }
-                                                GridLayout {
-                                                    Layout.alignment: Qt.AlignHCenter
-                                                    Layout.topMargin: 8
-                                                    columns: 4
-                                                    columnSpacing: 14
-                                                    rowSpacing: 0
-                                                    Repeater {
-                                                        model: [
-                                                            { title: "Import data from Excel", icon: "excelTile", tint: "#cdebd8", command: "data.importExcel", active: true, description: "Open a workbook picker and import an Excel file." },
-                                                            { title: "Import data from SQL Server", icon: "sqlServer", tint: "#edf5fb", command: "data.sqlServer", active: true, description: "Connect with a SQL Server login and import a table or view." },
-                                                            { title: "Paste data into a blank table", icon: "pasteTable", tint: "#fffdf3", command: "data.enterBlank", active: true, description: "Create a table from typed or pasted delimited data." },
-                                                            { title: "Use sample data", icon: "sampleData", tint: "#f3f3f3", command: "data.sampleData", active: true, description: "Load a deterministic sample sales table." }
-                                                        ]
-                                                        delegate: Button {
-                                                            required property var modelData
-                                                            Layout.preferredWidth: 185
-                                                            Layout.preferredHeight: 140
-                                                            Layout.minimumWidth: 130
-                                                            enabled: Boolean(modelData.active)
-                                                            padding: 0
-                                                            hoverEnabled: true
-                                                            Accessible.name: String(modelData.title)
-                                                            Accessible.description: enabled
-                                                                    ? (modelData.description || String(modelData.title))
-                                                                    : (modelData.description || String(modelData.title) + " is not available in this release.")
-                                                            ToolTip.visible: hovered && !enabled
-                                                            ToolTip.text: modelData.description || String(modelData.title) + " is not available in this release."
-                                                            background: Rectangle {
-                                                                radius: 3
-                                                                color: "#ffffff"
-                                                                border.color: parent.hovered && parent.enabled ? "#9bbdca" : "#d8dcdf"
-                                                                Rectangle {
-                                                                    anchors.left: parent.left
-                                                                    anchors.right: parent.right
-                                                                    anchors.top: parent.top
-                                                                    height: 98
-                                                                    color: modelData.tint
-                                                                    radius: 3
-                                                                }
-                                                            }
-                                                            contentItem: Item {
-                                                                Icon {
-                                                                    anchors.horizontalCenter: parent.horizontalCenter
-                                                                    anchors.top: parent.top
-                                                                    anchors.topMargin: 31
-                                                                    name: String(modelData.icon)
-                                                                    color: modelData.active ? "#107c71" : "#718191"
-                                                                    width: 36
-                                                                    height: 36
-                                                                }
-                                                                Text {
-                                                                    anchors.left: parent.left
-                                                                    anchors.right: parent.right
-                                                                    anchors.bottom: parent.bottom
-                                                                    anchors.leftMargin: 11
-                                                                    anchors.rightMargin: 8
-                                                                    anchors.bottomMargin: 10
-                                                                    text: String(modelData.title)
-                                                                    color: parent.parent.enabled ? "#25323b" : "#65717a"
-                                                                    font.pixelSize: 12
-                                                                    wrapMode: Text.Wrap
-                                                                    maximumLineCount: 2
-                                                                    elide: Text.ElideRight
-                                                                }
-                                                            }
-                                                            onClicked: mainWindow.runCommand(String(modelData.command))
+                                                
+                                                DragHandler {
+                                                    target: parent
+                                                    onActiveChanged: {
+                                                        if (!active) {
+                                                            mainWindow.studioController.move_visual(String(modelData.id), Math.round(parent.x / 10) * 10, Math.round(parent.y / 10) * 10);
                                                         }
                                                     }
                                                 }
-                                                Button {
-                                                    id: getDataAnotherSourceButton
-                                                    Layout.alignment: Qt.AlignHCenter
-                                                    Layout.preferredHeight: 31
-                                                    text: "Get data from another source  →"
-                                                    enabled: true
-                                                    flat: true
-                                                    Accessible.name: "Get data from another source"
-                                                    Accessible.description: "Open the full data source picker."
-                                                    background: Rectangle { color: "transparent" }
-                                                    contentItem: Text {
-                                                        text: parent.text
-                                                        color: "#107c71"
-                                                        font.pixelSize: 15
-                                                        font.weight: Font.DemiBold
-                                                        horizontalAlignment: Text.AlignHCenter
-                                                        verticalAlignment: Text.AlignVCenter
-                                                    }
-                                                    onClicked: mainWindow.openGetDataPicker(getDataAnotherSourceButton)
-                                                }
-                                            }
-                                        }
-                                        Text {
-                                            visible: mainWindow.studioController.sourceLoaded
-                                            Layout.fillHeight: false
-                                            text: mainWindow.studioController.activePageName
-                                            color: "#293b49"
-                                            font.pixelSize: 23
-                                            font.weight: Font.DemiBold
-                                        }
-                                        Text {
-                                            visible: mainWindow.studioController.sourceLoaded
-                                            Layout.fillHeight: false
-                                            text: mainWindow.studioController.sourceLoaded
-                                                  ? "Report canvas  ·  " + mainWindow.studioController.sourceName
-                                                  : "Report canvas  ·  no data source"
-                                            color: "#697987"
-                                            font.pixelSize: 11
-                                        }
-
-                                        RowLayout {
-                                            visible: mainWindow.studioController.sourceLoaded && mainWindow.hasAnyKpis()
-                                            Layout.fillWidth: true
-                                            Layout.preferredHeight: 88
-                                            Layout.fillHeight: false
-                                            spacing: 10
-                                            Repeater {
-                                                model: mainWindow.kpiNames
-                                                delegate: Rectangle {
-                                                    required property var modelData
-                                                    required property int index
-                                                    Layout.fillWidth: true
-                                                    Layout.fillHeight: true
-                                                    visible: mainWindow.studioController.activePageVisuals.indexOf(String(modelData) + " KPI") >= 0
-                                                    radius: 6
-                                                    color: "#ffffff"
-                                                    border.color: mainWindow.studioController.selectedVisual === String(modelData) + " KPI" ? "#0078D4" : "#d9e0e5"
-                                                    border.width: mainWindow.studioController.selectedVisual === String(modelData) + " KPI" ? 2 : 1
-                                                    Accessible.name: String(modelData) + " KPI"
-                                                    TapHandler {
-                                                        onTapped: mainWindow.studioController.selectVisual(String(modelData) + " KPI")
-                                                    }
-                                                    Rectangle {
-                                                        width: 3
-                                                        anchors.left: parent.left
-                                                        anchors.top: parent.top
-                                                        anchors.bottom: parent.bottom
-                                                        color: mainWindow.kpiColors[index % mainWindow.kpiColors.length]
-                                                    }
-                                                    ColumnLayout {
+                                                
+                                                Rectangle {
+                                                    width: 14
+                                                    height: 14
+                                                    anchors.right: parent.right
+                                                    anchors.bottom: parent.bottom
+                                                    color: "transparent"
+                                                    visible: mainWindow.studioController.selectedVisual === String(modelData.title)
+                                                    
+                                                    Canvas {
                                                         anchors.fill: parent
-                                                        anchors.leftMargin: 15
-                                                        anchors.rightMargin: 12
-                                                        anchors.topMargin: 12
-                                                        anchors.bottomMargin: 12
-                                                        spacing: 4
-                                                        Text { text: String(modelData); color: "#657583"; font.pixelSize: 10 }
-                                                        Text {
-                                                            Layout.fillWidth: true
-                                                            text: mainWindow.studioController.visualKpis[String(modelData) + " KPI"]
-                                                                  || mainWindow.studioController.reportKpis[String(modelData)]
-                                                                  || "—"
-                                                            color: "#293e4d"
-                                                            font.pixelSize: 19
-                                                            font.weight: Font.DemiBold
-                                                            elide: Text.ElideRight
+                                                        onPaint: {
+                                                            var ctx = getContext("2d");
+                                                            ctx.strokeStyle = "#8aaebf";
+                                                            ctx.lineWidth = 1;
+                                                            ctx.beginPath();
+                                                            ctx.moveTo(width, 0);
+                                                            ctx.lineTo(0, height);
+                                                            ctx.moveTo(width, 5);
+                                                            ctx.lineTo(5, height);
+                                                            ctx.moveTo(width, 10);
+                                                            ctx.lineTo(10, height);
+                                                            ctx.stroke();
+                                                        }
+                                                    }
+
+                                                    MouseArea {
+                                                        anchors.fill: parent
+                                                        cursorShape: Qt.SizeFDiagCursor
+                                                        property real startX
+                                                        property real startY
+                                                        property real startWidth
+                                                        property real startHeight
+                                                        onPressed: function(mouse) {
+                                                            startX = mouse.x
+                                                            startY = mouse.y
+                                                            startWidth = parent.parent.width
+                                                            startHeight = parent.parent.height
+                                                        }
+                                                        onPositionChanged: function(mouse) {
+                                                            if (pressed) {
+                                                                let newWidth = Math.max(50, startWidth + (mouse.x - startX))
+                                                                let newHeight = Math.max(50, startHeight + (mouse.y - startY))
+                                                                parent.parent.width = newWidth
+                                                                parent.parent.height = newHeight
+                                                            }
+                                                        }
+                                                        onReleased: {
+                                                            mainWindow.studioController.resize_visual(String(modelData.id), Math.round(parent.parent.width / 10) * 10, Math.round(parent.parent.height / 10) * 10);
                                                         }
                                                     }
                                                 }
-                                            }
-                                        }
-
-                                        RowLayout {
-                                            visible: mainWindow.studioController.sourceLoaded && mainWindow.hasAnyCharts()
-                                            Layout.fillWidth: true
-                                            Layout.fillHeight: mainWindow.studioController.sourceLoaded && mainWindow.hasAnyCharts()
-                                            spacing: 12
-                                            ChartCard {
-                                                visible: mainWindow.studioController.activePageVisuals.indexOf("Monthly revenue") >= 0
-                                                Layout.fillWidth: true
-                                                Layout.fillHeight: true
-                                                title: "Monthly revenue"
-                                                visualName: "Monthly revenue"
-                                                chartType: mainWindow.studioController.monthlyChartType
-                                                seriesColor: "#0078D4"
-                                                series: mainWindow.studioController.monthlySeriesForVisual("Monthly revenue")
-                                                selected: mainWindow.studioController.selectedVisual === "Monthly revenue"
-                                                emptyMessage: mainWindow.studioController.monthlyChartMessage
-                                                onRequestedSelection: function(name) { mainWindow.studioController.selectVisual(name) }
-                                            }
-                                            ChartCard {
-                                                visible: mainWindow.studioController.activePageVisuals.indexOf("Region revenue") >= 0
-                                                Layout.fillWidth: true
-                                                Layout.fillHeight: true
-                                                title: "Region revenue"
-                                                visualName: "Region revenue"
-                                                chartType: mainWindow.studioController.regionChartType
-                                                seriesColor: "#107C71"
-                                                series: mainWindow.studioController.regionSeriesForVisual("Region revenue")
-                                                selected: mainWindow.studioController.selectedVisual === "Region revenue"
-                                                filterOnCategory: true
-                                                emptyMessage: mainWindow.studioController.regionChartMessage
-                                                onRequestedSelection: function(name) { mainWindow.studioController.selectVisual(name) }
-                                                onCategoryRequested: function(label) { mainWindow.studioController.setRegionFilter(label) }
-                                            }
-                                        }
-
-                                        Item {
-                                            visible: mainWindow.studioController.sourceLoaded && !mainWindow.hasAnyCharts() && !mainWindow.hasAnyKpis()
-                                            Layout.fillWidth: true
-                                            Layout.fillHeight: mainWindow.studioController.sourceLoaded && !mainWindow.hasAnyCharts() && !mainWindow.hasAnyKpis()
-                                            ColumnLayout {
-                                                anchors.centerIn: parent
-                                                spacing: 7
-                                                Icon { Layout.alignment: Qt.AlignHCenter; name: "visual"; color: "#9aa6af"; implicitWidth: 30; implicitHeight: 30 }
-                                                Text { text: "This page is blank"; color: "#4d5d69"; font.pixelSize: 14; font.weight: Font.DemiBold }
-                                                Text { text: "Choose a visual from Insert to add it to this page."; color: "#78848d"; font.pixelSize: 11 }
                                             }
                                         }
                                     }
