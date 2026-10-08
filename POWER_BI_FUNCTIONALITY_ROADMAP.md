@@ -133,10 +133,26 @@ flowchart LR
     F5f3m2d --> F5f3m2e["6.5.6.3.14.2e USERELATIONSHIP<br/>5 focused / 369 full; evaluator + refresh lifecycle passed"]
     F5f3m2e --> F5f3m2f["6.5.6.3.14.2f CROSSFILTER<br/>3 focused / 372 full; direction + refresh lifecycle passed"]
     F5f3m2f --> F5f3m3["6.5.6.3.14.3 Row-to-filter context transition<br/>Measure loop + explicit override passed"]
-    F5f3m3 --> F5f3n["6.5.6.3.15 Same-call Boolean and time-intelligence filter combinations<br/>1 test / 376 full; combined evaluator passed"]
+    F5f3m3 --> F5f3n["6.5.6.3.15 Same-call Boolean and time-intelligence filter combinations<br/>1 test / 378 full; combined evaluator passed"]
     F5f3n --> F5f3o["6.5.6.3.16 Other time-intelligence filter expressions<br/>Parser and DAX mappings passed"]
-    F5f3o --> G["7. Report authoring and visuals<br/>Queued"]
-    G --> H["8. Interactions and analytics<br/>Queued"]
+    F5f3o --> G["7. Report authoring and visuals"]
+    G --> G1["7.1 Canvas and Visual Lifecycle<br/>Active"]
+    G1 --> G1a["7.1.1 Page management (rename, delete, reorder)<br/>Queued"]
+    G1a --> G1b["7.1.2 Visual instantiation and selection<br/>Queued"]
+    G1b --> G1c["7.1.3 Static components (text boxes, shapes)<br/>Queued"]
+    G1c --> G2["7.2 Field Wells and Data Binding<br/>Queued"]
+    G2 --> G2a["7.2.1 Dynamic field wells UI<br/>Queued"]
+    G2a --> G2b["7.2.2 Implicit aggregations<br/>Queued"]
+    G2b --> G2c["7.2.3 Data update propagation<br/>Queued"]
+    G2c --> G3["7.3 Formatting and Properties<br/>Queued"]
+    G3 --> G3a["7.3.1 General visual properties<br/>Queued"]
+    G3a --> G3b["7.3.2 Data colors, labels, and legends<br/>Queued"]
+    G3b --> G3c["7.3.3 Format Painter and Clipboard<br/>Queued"]
+    G3c --> G4["7.4 Advanced Authoring Commands<br/>Queued"]
+    G4 --> G4a["7.4.1 Z-order and Grouping<br/>Queued"]
+    G4a --> G4b["7.4.2 Themes<br/>Queued"]
+    G4b --> G4c["7.4.3 Buttons and Actions<br/>Queued"]
+    G4c --> H["8. Interactions and analytics<br/>Queued"]
     H --> I["9. Service collaboration<br/>Scope decision"]
     I --> J["10. Security, governance, administration<br/>Queued"]
     H --> K["11. Mobile, paginated, Report Server<br/>Separate tracks"]
@@ -204,7 +220,10 @@ flowchart LR
     class F5f3m3 done
     class F5f3n active
     class F5f3o done
-    class G,H,J,K,L planned
+    class G planned
+    class G1 active
+    class G1a,G1b,G1c,G2,G2a,G2b,G2c,G3,G3a,G3b,G3c,G4,G4a,G4b,G4c planned
+    class H,J,K,L planned
     class I decision
 ```
 

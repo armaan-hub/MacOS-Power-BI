@@ -10,9 +10,9 @@
 
 Analytics Studio has working local data-import, query-shaping, and semantic-model foundations. Work is still in progress: broad report authoring, service collaboration, governance, and platform capabilities remain open. This roadmap describes Power BI-comparable capabilities for Analytics Studio; it does not make the app Microsoft Power BI or provide PBIX compatibility.
 
-The roadmap graph currently has **100 of 122 boxes marked done**, **13 active**, **8 planned**, and **1 scope decision**. The 82% figure is only the share of graph boxes colored done. It counts summary areas and individual capabilities equally, so it is **not an overall product-completion percentage**.
+The roadmap graph currently has **108 of 137 boxes marked done or implemented**, **5 active**, **18 queued**, and **6 summary/other**. The 78% figure is only the share of graph boxes colored done. It counts summary areas and individual capabilities equally, so it is **not an overall product-completion percentage**.
 
-The clearest functional measure is that **all 50 listed query-management and shaping capabilities have passed lifecycle acceptance**. The automated project suite currently reports **369 passed tests and 231 passed subtests**.
+The clearest functional measure is that **all 50 listed query-management and shaping capabilities have passed lifecycle acceptance**. The automated project suite currently reports **379 passed tests and 229 passed subtests**.
 
 ## Progress by area
 
@@ -26,14 +26,14 @@ The clearest functional measure is that **all 50 listed query-management and sha
 
 ## Verification recorded for this snapshot
 
-- Full suite: `PYTHONPATH=. pytest -q` — **376 passed, 229 subtests passed**.
+- Full suite: `PYTHONPATH=. pytest -q` — **379 passed, 229 subtests passed**.
 - Transform Data UI route: `test_transform_data_qml_command_reaches_dialog_and_commits_step` in [test_home_file_workflows.py](</Users/armaan/Power BI tool/tests/test_home_file_workflows.py>) passed. It checks command availability, committing a transform step, saving/reopening, and replay after a source change.
 - Import lifecycle tests: **41 passed, 30 subtests passed** in the focused parser/import run.
 - Large-file timings currently recorded for the M5 Pro host: CSV, 10,000,010 bytes and 100,000 rows, median **0.109 s**; XLSX, 2,357,312 bytes and 100,000 rows, median **1.545 s**. The M1 benchmark remains an external hardware gate.
 
 ## Next work and outstanding gates
 
-1. Continue with **Other time-intelligence filter expressions** in the local DAX evaluator, as marked active in the master graph.
+1. Continue with **7.1 Canvas and Visual Lifecycle**, implementing page management and visual instantiation workflows as marked active in the master graph.
 2. Run and record the large-file benchmark on an M1 Mac before closing that performance gate.
 3. Verify SQL Server, OData, and Web workflows against live services in addition to their mocked lifecycle coverage.
 4. Then progress through the planned report authoring, interactions, and remaining product-family tracks shown in the master roadmap.
