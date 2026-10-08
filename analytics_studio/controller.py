@@ -732,6 +732,7 @@ class StudioController(QObject):
         self._measure_values: dict[str, str] = {}
         self._measure_errors: dict[str, str] = {}
         self._visual_kpis: dict[str, str] = {}
+        self._cross_filters: dict[str, list[str]] = {}
         self._filter_context_error = ""
         relative_filter_now = datetime.now(timezone.utc)
         self._relative_filter_anchor_date = relative_filter_now.date()
@@ -4364,7 +4365,7 @@ class StudioController(QObject):
         if not filter_table_ids:
             rows_by_id = {table_id: list(table["rows"]) for table_id, table in contexts_by_id.items()}
             self._filter_context_error = unavailable_message
-            return rows_by_id, context, filter_table_ids
+            # Do NOT return early entirely! Cross-filters still need to apply.
 
         try:
             rows_by_id = propagate_relationship_filters(
@@ -4381,6 +4382,48 @@ class StudioController(QObject):
                 table_id: explicit_rows.get(table_id, list(table["rows"]))
                 for table_id, table in contexts_by_id.items()
             }
+            
+        # Apply Cross-Filters dynamically
+        if getattr(self, '_cross_filters', None):
+            for cv_title, selected_values in self._cross_filters.items():
+                if cv_title == visual_name: continue
+                
+                cv_visual = next((v for p in self._project.get("report", {}).get("pages", []) for v in p.get("visuals", []) if isinstance(v, dict) and v.get("title") == cv_title), None)
+                if not cv_visual: continue
+                fields = cv_visual.get("fields", {})
+                
+                cat_mapping = fields.get("Category", None)
+                if not cat_mapping or not isinstance(cat_mapping, list) or len(cat_mapping) < 2:
+                    continue
+                
+                table_id, col_name = str(cat_mapping[0]), str(cat_mapping[1])
+                table = self._tables.get(table_id)
+                if not table or "data" not in table: continue
+                df = table["data"]
+                if col_name not in df.columns: continue
+                
+                # Check if rows are indices (ints) or row dicts.
+                # If table is untouched by page/report filters, it's missing from rows_by_id, so pull full index
+                if table_id not in rows_by_id:
+                    current_rows = list(range(len(df)))
+                else:
+                    current_rows = rows_by_id[table_id]
+                
+                # If current_rows are indices list(range()), map from DataFrame context
+                # Otherwise if they are dicts, map from dict natively.
+                subset_rows = []
+                for r in current_rows:
+                    if isinstance(r, dict):
+                        val = r.get(col_name, "")
+                    else:
+                        val = df.at[r, col_name]
+                        
+                    if str(val) in selected_values:
+                        subset_rows.append(r)
+                        
+                rows_by_id[table_id] = subset_rows
+                filter_table_ids.add(table_id) # Need to register it as a cross-filtered table!
+
         return rows_by_id, context, filter_table_ids
 
     def _raw_candidate_for_source(self, source: dict[str, Any]) -> ImportCandidate:
