@@ -33,9 +33,9 @@ The clearest functional measure is that **all 50 listed query-management and sha
 
 ## Next work and outstanding gates
 
-1. Continue with **7.3.3 Format Painter and Clipboard** and **7.4 Advanced Authoring Commands**, unlocking copy-paste, grouping, and z-index ordering for report objects.
+1. Continue with **7.4.2 Themes** and **7.4.3 Buttons and Actions**, focusing on global styling hooks and declarative interactions for the report canvas.
 2. Run and record the large-file benchmark on an M1 Mac before closing that performance gate.
 3. Verify SQL Server, OData, and Web workflows against live services in addition to their mocked lifecycle coverage.
-4. Then progress through the remaining report authoring interactions and UI mechanics.
+4. Then progress into **8. Interactions and analytics**, bringing full cross-filtering functionality.
 
 The color-coded, capability-by-capability state is maintained in the [master roadmap](</Users/armaan/Power BI tool/POWER_BI_FUNCTIONALITY_ROADMAP.md>). Update this snapshot and the [work log](POWER_BI_FUNCTIONALITY_WORK_LOG.md) after each increment.
