@@ -2862,13 +2862,83 @@ ApplicationWindow {
                             color: index === mainWindow.studioController.activePageIndex ? "#e8eff3" : "transparent"
                             border.color: index === mainWindow.studioController.activePageIndex ? "#cedbe3" : "transparent"
                         }
-                        contentItem: Text {
-                            id: pageLabel
-                            text: String(modelData.name)
-                            horizontalAlignment: Text.AlignHCenter
-                            verticalAlignment: Text.AlignVCenter
-                            color: "#506372"
-                            font.pixelSize: 10
+                        contentItem: Item {
+                            implicitWidth: pageLabel.implicitWidth
+                            implicitHeight: pageLabel.implicitHeight
+
+                            Text {
+                                id: pageLabel
+                                anchors.fill: parent
+                                text: String(modelData.name)
+                                horizontalAlignment: Text.AlignHCenter
+                                verticalAlignment: Text.AlignVCenter
+                                color: modelData.hidden ? "#aab5bd" : "#506372"
+                                font.pixelSize: 10
+                                font.italic: modelData.hidden
+                                visible: !pageEditor.visible
+                            }
+                            
+                            TextField {
+                                id: pageEditor
+                                anchors.fill: parent
+                                anchors.margins: -4
+                                visible: false
+                                text: String(modelData.name)
+                                font.pixelSize: 10
+                                background: Rectangle { color: "white"; border.color: "#0078d4" }
+                                onEditingFinished: {
+                                    visible = false;
+                                    mainWindow.studioController.rename_page(String(modelData.id), text);
+                                }
+                                Keys.onEscapePressed: { visible = false; text = String(modelData.name); }
+                            }
+                        }
+
+                        MouseArea {
+                            anchors.fill: parent
+                            acceptedButtons: Qt.RightButton
+                            onClicked: function(mouse) {
+                                pageMenu.popup()
+                            }
+                        }
+
+                        Menu {
+                            id: pageMenu
+                            MenuItem {
+                                text: "Rename"
+                                onTriggered: {
+                                    pageEditor.text = String(modelData.name)
+                                    pageEditor.visible = true
+                                    pageEditor.forceActiveFocus()
+                                    pageEditor.selectAll()
+                                }
+                            }
+                            MenuItem {
+                                text: "Duplicate"
+                                onTriggered: mainWindow.studioController.duplicate_page(String(modelData.id))
+                            }
+                            MenuItem {
+                                text: "Move Left"
+                                visible: index > 0
+                                onTriggered: mainWindow.studioController.reorder_page(String(modelData.id), index - 1)
+                            }
+                            MenuItem {
+                                text: "Move Right"
+                                visible: index < mainWindow.studioController.pages.length - 1
+                                onTriggered: mainWindow.studioController.reorder_page(String(modelData.id), index + 1)
+                            }
+                            MenuItem {
+                                text: modelData.hidden ? "Unhide" : "Hide"
+                                onTriggered: mainWindow.studioController.hide_page(String(modelData.id), !modelData.hidden)
+                            }
+                            MenuSeparator {
+                                visible: mainWindow.studioController.pages.length > 1
+                            }
+                            MenuItem {
+                                text: "Delete"
+                                visible: mainWindow.studioController.pages.length > 1
+                                onTriggered: mainWindow.studioController.delete_page(String(modelData.id))
+                            }
                         }
                     }
                 }

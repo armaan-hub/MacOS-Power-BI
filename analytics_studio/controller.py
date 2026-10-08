@@ -778,7 +778,7 @@ class StudioController(QObject):
     @Property("QVariantList", notify=stateChanged)
     def pages(self) -> list[dict[str, str]]:
         return [
-            {"id": str(page["id"]), "name": str(page["name"])}
+            {"id": str(page["id"]), "name": str(page["name"]), "hidden": bool(page.get("hidden", False))}
             for page in self._project["report"]["pages"]
         ]
 
@@ -803,6 +803,15 @@ class StudioController(QObject):
 
     @Property("QVariantList", notify=stateChanged)
     def activePageVisuals(self) -> list[str]:  # noqa: N802
+        pages = self._project["report"]["pages"]
+        index = self.activePageIndex
+        if not pages:
+            return []
+        visuals = pages[index].get("visuals", [])
+        return [str(v.get("title", "")) if isinstance(v, dict) else str(v) for v in visuals]
+
+    @Property("QVariantList", notify=stateChanged)
+    def activeVisualObjects(self) -> list[dict[str, object]]:  # noqa: N802
         pages = self._project["report"]["pages"]
         index = self.activePageIndex
         return list(pages[index].get("visuals", [])) if pages else []
@@ -3962,8 +3971,12 @@ class StudioController(QObject):
                 if page["id"] == next_project["report"]["active_page_id"]
             )
             visual_name = f"{measure['name']} KPI"
-            if visual_name not in page["visuals"]:
-                page["visuals"].append(visual_name)
+            if not any(isinstance(v, dict) and v.get("title") == visual_name for v in page.get("visuals", [])):
+                from uuid import uuid4
+                page.setdefault("visuals", []).append({
+                    "id": str(uuid4()), "type": "card", "title": visual_name,
+                    "x": 10, "y": 10, "width": 120, "height": 80
+                })
             next_project = validate_project(next_project)
         except (MeasureError, ProjectFileError, StopIteration, TypeError, ValueError) as exc:
             self._set_status(f"Could not create measure: {exc}")
@@ -4868,6 +4881,8 @@ class StudioController(QObject):
                 f"Refreshed {active_source.get('name', 'the active source')}{suffix}"
             )
 
+
+    @Slot()
     def add_page(self) -> None:
         pages = self._project["report"]["pages"]
         page = {
@@ -4876,6 +4891,7 @@ class StudioController(QObject):
             "visuals": [],
             "filters": [],
             "visual_filters": [],
+            "hidden": False,
         }
         pages.append(page)
         self._active_page_id = page["id"]
@@ -4886,13 +4902,176 @@ class StudioController(QObject):
         self.stateChanged.emit()
         self._set_status(f"Added {page['name']}")
 
+    @Slot(str, str)
+    def rename_page(self, page_id: str, new_name: str) -> None:
+        if not new_name.strip():
+            return
+        pages = self._project["report"]["pages"]
+        for page in pages:
+            if page["id"] == page_id:
+                page["name"] = new_name.strip()
+                self._dirty = True
+                self.stateChanged.emit()
+                self._set_status(f"Renamed page to {new_name}")
+                return
+
+    @Slot(str)
+    def delete_page(self, page_id: str) -> None:
+        pages = self._project["report"]["pages"]
+        if len(pages) <= 1:
+            return # Must preserve at least one page
+        
+        index_to_remove = -1
+        for i, page in enumerate(pages):
+            if page["id"] == page_id:
+                index_to_remove = i
+                break
+        
+        if index_to_remove != -1:
+            deleted_name = pages[index_to_remove]["name"]
+            del pages[index_to_remove]
+            if self._active_page_id == page_id:
+                new_idx = max(0, index_to_remove - 1)
+                self._active_page_id = pages[new_idx]["id"]
+                self._project["report"]["active_page_id"] = self._active_page_id
+                self._selected_visual = ""
+            self._dirty = True
+            self._refresh_report()
+            self.stateChanged.emit()
+            self._set_status(f"Deleted {deleted_name}")
+
+    @Slot(str)
+
+    @Slot(str, int, int)
+    def move_visual(self, visual_id: str, x: int, y: int) -> None:
+        page = self._project["report"]["pages"][self.activePageIndex]
+        for visual in page.get("visuals", []):
+            if isinstance(visual, dict) and visual.get("id") == visual_id:
+                visual["x"] = max(0, x)
+                visual["y"] = max(0, y)
+                self._dirty = True
+                self.stateChanged.emit()
+                return
+
+    @Slot(str, int, int)
+    def resize_visual(self, visual_id: str, width: int, height: int) -> None:
+        page = self._project["report"]["pages"][self.activePageIndex]
+        for visual in page.get("visuals", []):
+            if isinstance(visual, dict) and visual.get("id") == visual_id:
+                visual["width"] = max(10, width)
+                visual["height"] = max(10, height)
+                self._dirty = True
+                self.stateChanged.emit()
+                return
+
+    @Slot(str)
+    def remove_visual(self, visual_id: str) -> None:
+        page = self._project["report"]["pages"][self.activePageIndex]
+        visuals = page.get("visuals", [])
+        index_to_remove = -1
+        for i, visual in enumerate(visuals):
+            if isinstance(visual, dict) and visual.get("id") == visual_id:
+                index_to_remove = i
+                break
+        if index_to_remove != -1:
+            name = visuals[index_to_remove].get("title", "")
+            del visuals[index_to_remove]
+            if self._selected_visual == name:
+                self._selected_visual = ""
+            self._dirty = True
+            self.stateChanged.emit()
+            self._set_status(f"Removed visual")
+
+    @Slot(str, str, int, int, int, int)
+    def add_visual(self, v_type: str, title: str, x: int, y: int, width: int, height: int) -> str:
+        from uuid import uuid4
+        page = self._project["report"]["pages"][self.activePageIndex]
+        visuals = page.setdefault("visuals", [])
+        new_id = str(uuid4())
+        visuals.append({
+            "id": new_id,
+            "type": v_type,
+            "title": title,
+            "x": x,
+            "y": y,
+            "width": width,
+            "height": height
+        })
+        self._dirty = True
+        self._selected_visual = title
+        self.stateChanged.emit()
+        self._set_status(f"Added visual {title}")
+        return new_id
+
+    def duplicate_page(self, page_id: str) -> None:
+        pages = self._project["report"]["pages"]
+        source_page = next((p for p in pages if p["id"] == page_id), None)
+        if not source_page:
+            return
+            
+        import copy
+        new_page = copy.deepcopy(source_page)
+        new_page["id"] = str(uuid4())
+        new_page["name"] = source_page["name"] + " (Copy)"
+        
+        # Insert adjacent to the source page
+        original_idx = pages.index(source_page)
+        pages.insert(original_idx + 1, new_page)
+        
+        self._active_page_id = new_page["id"]
+        self._project["report"]["active_page_id"] = new_page["id"]
+        self._selected_visual = ""
+        self._dirty = True
+        self._refresh_report()
+        self.stateChanged.emit()
+        self._set_status(f"Duplicated {source_page['name']}")
+
+    @Slot(str, bool)
+    def hide_page(self, page_id: str, hidden: bool) -> None:
+        pages = self._project["report"]["pages"]
+        for page in pages:
+            if page["id"] == page_id:
+                page["hidden"] = hidden
+                self._dirty = True
+                self.stateChanged.emit()
+                status_str = "Hid" if hidden else "Unhid"
+                self._set_status(f"{status_str} {page['name']}")
+                return
+
+    @Slot(str, int)
+    def reorder_page(self, page_id: str, new_index: int) -> None:
+        pages = self._project["report"]["pages"]
+        current_index = -1
+        for i, page in enumerate(pages):
+            if page["id"] == page_id:
+                current_index = i
+                break
+                
+        if current_index != -1 and 0 <= new_index < len(pages) and current_index != new_index:
+            page = pages.pop(current_index)
+            pages.insert(new_index, page)
+            self._dirty = True
+            self.stateChanged.emit()
+            self._set_status(f"Reordered {page['name']}")
+
+
     def add_chart(self, visual_name: str) -> None:
         if visual_name not in CHART_VISUALS:
             return
         page = self._project["report"]["pages"][self.activePageIndex]
         visuals = page.setdefault("visuals", [])
-        if visual_name not in visuals:
-            visuals.append(visual_name)
+        if not any(isinstance(v, dict) and v.get("title") == visual_name for v in visuals):
+            from uuid import uuid4
+            is_monthly = "Monthly" in visual_name
+            visuals.append({
+                "id": str(uuid4()),
+                "type": "column" if is_monthly else "bar",
+                "title": visual_name,
+                "x": 14 if is_monthly else 358,
+                "y": 108,
+                "width": 330,
+                "height": 248
+            })
             self._dirty = True
         self._selected_visual = visual_name
         self.stateChanged.emit()

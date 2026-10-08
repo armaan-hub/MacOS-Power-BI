@@ -212,7 +212,7 @@ class MeasureTests(unittest.TestCase):
 
         migrated = validate_project(project)
 
-        self.assertEqual(FORMAT_VERSION, 66)
+        self.assertEqual(FORMAT_VERSION, 68)
         self.assertEqual(migrated["format_version"], FORMAT_VERSION)
         self.assertEqual(migrated["model"]["measures"], [])
 

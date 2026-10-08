@@ -64,7 +64,7 @@ class ProjectMigrationTests(unittest.TestCase):
 
         migrated = validate_project(document)
 
-        self.assertEqual(migrated["format_version"], 66)
+        self.assertEqual(migrated["format_version"], 68)
 
     def test_marked_date_column_must_have_a_date_model_type(self) -> None:
         document = new_project("invalid date-table metadata")
@@ -99,7 +99,7 @@ class ProjectMigrationTests(unittest.TestCase):
     def test_v1_validation_selects_first_v1_supported_source_and_adds_defaults(self) -> None:
         migrated = validate_project(make_v1_project())
 
-        self.assertEqual(FORMAT_VERSION, 66)
+        self.assertEqual(FORMAT_VERSION, 68)
         self.assertEqual(migrated["format_version"], FORMAT_VERSION)
         self.assertEqual(migrated["active_source_id"], "excel")
         self.assertEqual(migrated["data_sources"][2]["parser_options"], {

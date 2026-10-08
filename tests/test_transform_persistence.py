@@ -10,7 +10,7 @@ from analytics_studio.project import FORMAT_VERSION, ProjectFileError, new_proje
 
 class TransformPersistenceTests(unittest.TestCase):
     def test_new_project_uses_current_version_and_v3_sources_migrate_with_empty_steps(self) -> None:
-        self.assertEqual(FORMAT_VERSION, 66)
+        self.assertEqual(FORMAT_VERSION, 68)
         document = new_project("Legacy v3")
         document["format_version"] = 3
         document["data_sources"] = [{

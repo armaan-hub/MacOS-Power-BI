@@ -14,7 +14,7 @@ from uuid import uuid4
 
 
 FORMAT_ID = "com.analytics-studio.project"
-FORMAT_VERSION = 66
+FORMAT_VERSION = 68
 SUPPORTED_VIEWS = {"Report", "Data", "Model"}
 SUPPORTED_FILE_KINDS = {"csv", "excel", "json", "xml", "parquet", "sqlite"}
 REPORT_FILTER_OPERATORS = {
@@ -217,7 +217,15 @@ def new_project(name: str = "Untitled Project") -> dict[str, Any]:
             "pages": [{
                 "id": page_id,
                 "name": "Overview",
-                "visuals": ["Revenue KPI", "Cost KPI", "Margin KPI", "Units KPI", "Orders KPI", "Monthly revenue", "Region revenue"],
+                "visuals": [
+                    {"id": str(uuid4()), "type": "card", "title": "Revenue KPI", "x": 14, "y": 14, "width": 120, "height": 80},
+                    {"id": str(uuid4()), "type": "card", "title": "Cost KPI", "x": 148, "y": 14, "width": 120, "height": 80},
+                    {"id": str(uuid4()), "type": "card", "title": "Margin KPI", "x": 282, "y": 14, "width": 120, "height": 80},
+                    {"id": str(uuid4()), "type": "card", "title": "Units KPI", "x": 416, "y": 14, "width": 120, "height": 80},
+                    {"id": str(uuid4()), "type": "card", "title": "Orders KPI", "x": 550, "y": 14, "width": 120, "height": 80},
+                    {"id": str(uuid4()), "type": "column", "title": "Monthly revenue", "x": 14, "y": 108, "width": 330, "height": 248},
+                    {"id": str(uuid4()), "type": "bar", "title": "Region revenue", "x": 358, "y": 108, "width": 330, "height": 248}
+                ],
                 "filters": [],
                 "visual_filters": [],
             }],
@@ -375,6 +383,10 @@ def validate_project(value: Any) -> dict[str, Any]:
             value = _migrate_v64_to_v65(value)
         elif version == 65:
             value = _migrate_v65_to_v66(value)
+        elif version == 66:
+            value = _migrate_v66_to_v67(value)
+        elif version == 67:
+            value = _migrate_v67_to_v68(value)
         else:
             raise UnsupportedProjectVersion(f"Project format version {version} is not supported.")
         version = value.get("format_version")
@@ -833,8 +845,29 @@ def validate_project(value: Any) -> dict[str, Any]:
         if not isinstance(page.get("name"), str) or not page["name"].strip():
             raise ProjectFileError("Each report page needs a non-empty name.")
         visuals = page.get("visuals")
-        if not isinstance(visuals, list) or any(not isinstance(item, str) for item in visuals):
-            raise ProjectFileError("A report page visuals field must be a list of strings.")
+        if not isinstance(visuals, list):
+            raise ProjectFileError("A report page visuals field must be a list.")
+        visual_ids = set()
+        for visual in visuals:
+            if not isinstance(visual, dict):
+                raise ProjectFileError("Each report visual must be a dictionary.")
+            v_id = visual.get("id")
+            if not isinstance(v_id, str) or not v_id:
+                raise ProjectFileError("Report visuals must have unique id strings.")
+            if v_id in visual_ids:
+                raise ProjectFileError("Report visuals must have unique id strings.")
+            visual_ids.add(v_id)
+            if not isinstance(visual.get("title", ""), str):
+                raise ProjectFileError("Report visual title must be a string.")
+            if not isinstance(visual.get("type"), str):
+                raise ProjectFileError("Report visual type must be a string.")
+            for key in ("x", "y", "width", "height"):
+                if key in visual and not isinstance(visual[key], (int, float)):
+                    raise ProjectFileError(f"Report visual '{key}' must be a number.")
+        hidden = page.get("hidden", False)
+        if type(hidden) is not bool:
+            raise ProjectFileError("A report page hidden field must be a boolean.")
+        page["hidden"] = hidden
         _validate_report_filters(page.get("filters"), scope_name="page")
         _validate_report_filters(page.get("visual_filters"), scope_name="visual", visual=True)
     active_page_id = report.get("active_page_id")
@@ -1433,6 +1466,20 @@ def _migrate_v64_to_v65(value: dict[str, Any]) -> dict[str, Any]:
     return migrated
 
 
+def _migrate_v66_to_v67(value: dict[str, Any]) -> dict[str, Any]:
+    """Advance v66 projects to the schema that supports hidden report pages."""
+    migrated = deepcopy(value)
+    report = migrated.get("report")
+    if isinstance(report, dict):
+        pages = report.get("pages")
+        if isinstance(pages, list):
+            for page in pages:
+                if isinstance(page, dict):
+                    page.setdefault("hidden", False)
+    migrated["format_version"] = 67
+    return migrated
+
+
 def _migrate_v65_to_v66(value: dict[str, Any]) -> dict[str, Any]:
     """Enable saved CALENDAR and CALENDARAUTO query definitions."""
     migrated = deepcopy(value)
@@ -1536,3 +1583,34 @@ def resolve_source_path(stored_path: str, project_path: Path) -> Path:
     if not path.is_absolute():
         path = Path(project_path).expanduser().resolve().parent / path
     return path.resolve()
+
+
+def _migrate_v67_to_v68(value: dict[str, Any]) -> dict[str, Any]:
+    """Migrate report page visuals from strings to explicit placement dictionaries."""
+    from uuid import uuid4
+    migrated = deepcopy(value)
+    report = migrated.get("report")
+    if isinstance(report, dict):
+        pages = report.get("pages")
+        if isinstance(pages, list):
+            for page in pages:
+                if isinstance(page, dict):
+                    visuals = page.get("visuals")
+                    if isinstance(visuals, list):
+                        new_visuals = []
+                        x_offset = 14
+                        y_row2 = 108
+                        for index, v in enumerate(visuals):
+                            if isinstance(v, str):
+                                new_visuals.append({
+                                    "id": str(uuid4()),
+                                    "type": "column" if "revenue" in v.lower() else "card",
+                                    "title": v,
+                                    "x": x_offset + (index * 344) % 688,
+                                    "y": y_row2 if "revenue" in v.lower() else 14,
+                                    "width": 330 if "revenue" in v.lower() else 120,
+                                    "height": 248 if "revenue" in v.lower() else 80
+                                })
+                        page["visuals"] = new_visuals
+    migrated["format_version"] = 68
+    return migrated

@@ -92,7 +92,7 @@ class InlineDataHelperTests(unittest.TestCase):
 
 class InlineSourceSchemaTests(unittest.TestCase):
     def test_new_projects_use_current_version_and_accept_pathless_inline_source(self) -> None:
-        self.assertEqual(FORMAT_VERSION, 66)
+        self.assertEqual(FORMAT_VERSION, 68)
         document = inline_project()
 
         validated = validate_project(document)
