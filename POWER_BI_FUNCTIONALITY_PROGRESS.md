@@ -10,7 +10,7 @@
 
 Analytics Studio has working local data-import, query-shaping, and semantic-model foundations. Work is still in progress: broad report authoring, service collaboration, governance, and platform capabilities remain open. This roadmap describes Power BI-comparable capabilities for Analytics Studio; it does not make the app Microsoft Power BI or provide PBIX compatibility.
 
-The roadmap graph currently has **109 of 137 boxes marked done or implemented**, **5 active**, **17 queued**, and **6 summary/other**. The 78% figure is only the share of graph boxes colored done. It counts summary areas and individual capabilities equally, so it is **not an overall product-completion percentage**.
+The roadmap graph currently has **110 of 137 boxes marked done or implemented**, **5 active**, **16 queued**, and **6 summary/other**. The 78% figure is only the share of graph boxes colored done. It counts summary areas and individual capabilities equally, so it is **not an overall product-completion percentage**.
 
 The clearest functional measure is that **all 50 listed query-management and shaping capabilities have passed lifecycle acceptance**. The automated project suite currently reports **381 passed tests and 229 passed subtests**.
 
