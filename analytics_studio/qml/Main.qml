@@ -954,7 +954,7 @@ ApplicationWindow {
                                                     selected: mainWindow.studioController.selectedVisual === String(modelData.title)
                                                     emptyMessage: "No data is available yet."
 
-                                                    series: modelData.type === "column" ? mainWindow.studioController.monthlySeriesForVisual(String(modelData.title)) : (modelData.type === "bar" ? mainWindow.studioController.regionSeriesForVisual(String(modelData.title)) : [])
+                                                    series: (modelData.type === "column" || modelData.type === "bar" || modelData.type === "line" || modelData.type === "area") ? mainWindow.studioController.visualSeries(String(modelData.title)) : []
 
                                                     onRequestedSelection: function(visualName) {
                                                         mainWindow.studioController.selectVisual(visualName)

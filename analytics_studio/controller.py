@@ -811,6 +811,31 @@ class StudioController(QObject):
         return [str(v.get("title", "")) if isinstance(v, dict) else str(v) for v in visuals]
 
     @Property("QVariantList", notify=stateChanged)
+    def activeVisualWells(self) -> list[dict[str, object]]:  # noqa: N802
+        if not self._selected_visual:
+            return []
+        pages = self._project["report"]["pages"]
+        index = self.activePageIndex
+        page = pages[index]
+        visual = next((v for v in page.get("visuals", []) if isinstance(v, dict) and v.get("title") == self._selected_visual), None)
+        if not visual:
+            return []
+            
+        v_type = visual.get("type", "card")
+        if v_type in {"column", "bar", "line", "area"}:
+            wells = ["X-axis", "Y-axis", "Legend", "Tooltips"]
+        elif v_type in {"shape", "text_box", "image"}:
+            return []
+        else:
+            wells = ["Fields", "Tooltips"]
+            
+        assigned_fields = visual.get("fields", {})
+        return [
+            {"name": well, "fields": assigned_fields.get(well, [])}
+            for well in wells
+        ]
+
+    @Property("QVariantList", notify=stateChanged)
     def activeVisualObjects(self) -> list[dict[str, object]]:  # noqa: N802
         pages = self._project["report"]["pages"]
         index = self.activePageIndex
@@ -951,6 +976,11 @@ class StudioController(QObject):
     @Slot(str, result="QVariantList")
     def regionSeriesForVisual(self, visual_name: str) -> list[dict[str, str | float]]:  # noqa: N802
         series = self._region_visual_series.get(visual_name, self._region_series)
+        return [dict(item) for item in series]
+
+    @Slot(str, result="QVariantList")
+    def visualSeries(self, visual_name: str) -> list[dict[str, str | float]]:
+        series = self._generate_dynamic_visual_series(visual_name)
         return [dict(item) for item in series]
 
     @Property(str, notify=stateChanged)
@@ -4953,6 +4983,47 @@ class StudioController(QObject):
                 self.stateChanged.emit()
                 return
 
+
+    @Slot(str, str)
+    def add_field_to_well(self, well_name: str, field_name: str) -> None:
+        if not self._selected_visual: return
+        page = self._project["report"]["pages"][self.activePageIndex]
+        for visual in page.get("visuals", []):
+            if isinstance(visual, dict) and visual.get("title") == self._selected_visual:
+                fields = visual.setdefault("fields", {})
+                well_fields = fields.setdefault(well_name, [])
+                if field_name not in well_fields:
+                    well_fields.append(field_name)
+                    self._dirty = True
+                    self._refresh_report()
+                    self.stateChanged.emit()
+                break
+
+    @Slot(str, str)
+    def remove_field_from_well(self, well_name: str, field_name: str) -> None:
+        if not self._selected_visual: return
+        page = self._project["report"]["pages"][self.activePageIndex]
+        for visual in page.get("visuals", []):
+            if isinstance(visual, dict) and visual.get("title") == self._selected_visual:
+                fields = visual.setdefault("fields", {})
+                well_fields = fields.setdefault(well_name, [])
+                if field_name in well_fields:
+                    well_fields.remove(field_name)
+                    self._dirty = True
+                    self._refresh_report()
+                    self.stateChanged.emit()
+                break
+
+    @Slot(str, str)
+    def set_visual_type(self, title: str, v_type: str) -> None:
+        page = self._project["report"]["pages"][self.activePageIndex]
+        for visual in page.get("visuals", []):
+            if isinstance(visual, dict) and visual.get("title") == title:
+                visual["type"] = v_type
+                self._dirty = True
+                self.stateChanged.emit()
+                return
+
     @Slot(str, int, int)
     def resize_visual(self, visual_id: str, width: int, height: int) -> None:
         page = self._project["report"]["pages"][self.activePageIndex]
@@ -5646,6 +5717,65 @@ class StudioController(QObject):
                     self._visual_kpis[visual_name] = standard_kpis(visual_rows).get(kpi_name, "—")
 
         self._filter_context_error = "; ".join(dict.fromkeys(filter_errors))
+
+    def _generate_dynamic_visual_series(self, visual_name: str) -> list[dict[str, str | float]]:
+        page = self._active_page()
+        if not page:
+            return []
+        visual = next((v for v in page.get("visuals", []) if isinstance(v, dict) and v.get("title") == visual_name), None)
+        if not visual:
+            return []
+            
+        fields = visual.get("fields", {})
+        x_axis = fields.get("X-axis", [])
+        y_axis = fields.get("Y-axis", [])
+        
+        # If no fields are mapped in dynamic wells, fall back to legacy series for initial views
+        if not x_axis and not y_axis:
+            if visual_name == "Monthly revenue":
+                return self._monthly_visual_series.get(visual_name, self._monthly_series)
+            elif visual_name == "Region revenue":
+                return self._region_visual_series.get(visual_name, self._region_series)
+            return []
+            
+        x_col = x_axis[0] if x_axis else None
+        y_col = y_axis[0] if y_axis else None
+        
+        visual_rows = list(self._rows)
+        active_table_id = self._active_source_id
+        visuals_with_filters = {str(item.get("visual_name", "")) for item in page.get("visual_filters", [])}
+        if visual_name in visuals_with_filters:
+            (visual_rows_by_table, _, _) = self._report_filter_context(visual_name)
+            visual_rows = visual_rows_by_table.get(active_table_id, list(self._rows))
+
+        from collections import defaultdict
+        from decimal import Decimal
+        aggregated: defaultdict[str, Decimal] = defaultdict(Decimal)
+        for row in visual_rows:
+            if y_col:
+                val = row.get(y_col, "")
+                if val:
+                    # Strip currency symbols and commas if it's a string, then parse
+                    val_str = str(val).replace("$", "").replace(",", "").strip()
+                    try:
+                        amount = Decimal(val_str)
+                    except Exception:
+                        continue
+                else:
+                    continue
+            else:
+                amount = Decimal(1)
+            
+            key = str(row.get(x_col, "")) if x_col else "(Blank)"
+            if key:
+                aggregated[key] += amount
+
+        if visual.get("type", "bar") == "column":
+            series = [{"label": key, "value": float(value)} for key, value in sorted(aggregated.items())]
+        else:
+            series = [{"label": key, "value": float(value)} for key, value in sorted(aggregated.items(), key=lambda x: x[1], reverse=True)]
+
+        return series
 
     def _refresh_model_view(self) -> None:
         model = self._project.get("model", {})
