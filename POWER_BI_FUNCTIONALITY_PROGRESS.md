@@ -10,9 +10,9 @@
 
 Analytics Studio has working local data-import, query-shaping, and semantic-model foundations. Work is still in progress: broad report authoring, service collaboration, governance, and platform capabilities remain open. This roadmap describes Power BI-comparable capabilities for Analytics Studio; it does not make the app Microsoft Power BI or provide PBIX compatibility.
 
-The roadmap graph currently has **108 of 137 boxes marked done or implemented**, **5 active**, **18 queued**, and **6 summary/other**. The 78% figure is only the share of graph boxes colored done. It counts summary areas and individual capabilities equally, so it is **not an overall product-completion percentage**.
+The roadmap graph currently has **109 of 137 boxes marked done or implemented**, **5 active**, **17 queued**, and **6 summary/other**. The 78% figure is only the share of graph boxes colored done. It counts summary areas and individual capabilities equally, so it is **not an overall product-completion percentage**.
 
-The clearest functional measure is that **all 50 listed query-management and shaping capabilities have passed lifecycle acceptance**. The automated project suite currently reports **379 passed tests and 229 passed subtests**.
+The clearest functional measure is that **all 50 listed query-management and shaping capabilities have passed lifecycle acceptance**. The automated project suite currently reports **381 passed tests and 229 passed subtests**.
 
 ## Progress by area
 
@@ -26,7 +26,7 @@ The clearest functional measure is that **all 50 listed query-management and sha
 
 ## Verification recorded for this snapshot
 
-- Full suite: `PYTHONPATH=. pytest -q` — **379 passed, 229 subtests passed**.
+- Full suite: `PYTHONPATH=. pytest -q` — **381 passed, 229 subtests passed**.
 - Transform Data UI route: `test_transform_data_qml_command_reaches_dialog_and_commits_step` in [test_home_file_workflows.py](</Users/armaan/Power BI tool/tests/test_home_file_workflows.py>) passed. It checks command availability, committing a transform step, saving/reopening, and replay after a source change.
 - Import lifecycle tests: **41 passed, 30 subtests passed** in the focused parser/import run.
 - Large-file timings currently recorded for the M5 Pro host: CSV, 10,000,010 bytes and 100,000 rows, median **0.109 s**; XLSX, 2,357,312 bytes and 100,000 rows, median **1.545 s**. The M1 benchmark remains an external hardware gate.

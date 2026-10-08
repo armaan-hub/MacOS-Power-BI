@@ -122,3 +122,7 @@ After each functionality increment, update all project status documents in the s
 4. Distinguish automated/local or mocked acceptance from live-service and hardware acceptance. Do not count an unverified gate as complete, and do not turn the graph-box count into an overall product percentage.
 
 This log is cumulative. Preserve earlier entries and append a dated increment instead of replacing the history.
+
+### 2026-10-08: Page Management & Visual Lifecycles (G1.1 & G1.2 Backend)
+* **Canvas and Visual Lifecycle Foundation:** Wired QML UI for native page rename, delete, duplicate, hide, and reorder. Migrated internal report project schema to dynamically allocate semantic and geometric visual dictionaries instead of static label lists. Increased format version to v68 representing full visual layout state support.
+* **Status Change:** 7.1.1 mapped fully to `Passed`. 7.1.2 moved to `Active`. Test suite now covers grid and viewport layout configurations.
