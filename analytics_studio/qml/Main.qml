@@ -95,7 +95,7 @@ ApplicationWindow {
                 { label: "Sensitivity", visibleLabel: "Sensitivity", width: 62, iconName: "security", commandId: "disabled.sensitivity", available: false, description: "Sensitivity labels are not available in this release." }
             ]},
             { title: "Share", actions: [
-                { label: "Publish", visibleLabel: "Publish", width: 42, iconName: "share", commandId: "disabled.publish", available: false, description: "Publishing is not available in this release." }
+                { label: "Publish", visibleLabel: "Publish", width: 42, iconName: "share", commandId: "service.publish", description: "Publishing is not available in this release." }
             ]},
         ]},
         { groups: [
@@ -147,11 +147,11 @@ ApplicationWindow {
                 { label: "New parameter", visibleLabel: "New\nparameter", width: 58, iconName: "form", commandId: "disabled.parameter", available: false, description: "Parameters are not available in this release." }
             ]},
             { title: "Security", actions: [
-                { label: "Manage roles", visibleLabel: "Manage\nroles", iconName: "security", commandId: "disabled.roles", available: false, description: "Row-level security is not available in this release." },
-                { label: "View as", visibleLabel: "View as", iconName: "eye", commandId: "disabled.viewAs", available: false, description: "Role preview is not available in this release." }
+                { label: "Manage roles", visibleLabel: "Manage\nroles", width: 48, iconName: "security", commandId: "security.manageRoles", description: "Create and edit security roles for the dataset." },
+                { label: "View as", visibleLabel: "View as", width: 42, iconName: "eye", commandId: "security.viewAs", description: "View the report as a specific security role." }
             ]},
             { title: "Q&A", actions: [
-                { label: "Q&A setup", visibleLabel: "Q&A\nsetup", width: 46, iconName: "question", commandId: "disabled.qa", available: false, description: "Q&A setup is not available in this release." },
+                { label: "Q&A setup", visibleLabel: "Q&A\nsetup", width: 46, iconName: "question", commandId: "ai.qa", available: true, description: "Q&A setup is not available in this release." },
                 { label: "Language", visibleLabel: "Language", width: 58, iconName: "format", commandId: "disabled.language", available: false, description: "Natural language configuration is not available in this release." },
                 { label: "Linguistic schema", visibleLabel: "Linguistic\nschema", width: 58, iconName: "math", commandId: "disabled.linguisticSchema", available: false, description: "Linguistic schema editing is not available in this release." }
             ]}
@@ -165,7 +165,7 @@ ApplicationWindow {
             ]},
             { title: "Scale to fit", actions: [
                 { label: "Page view", visibleLabel: "Page view", iconName: "fit", commandId: "view.zoomFit", description: "Fit the report page in the available workspace." },
-                { label: "Mobile layout", visibleLabel: "Mobile\nlayout", iconName: "phone", commandId: "disabled.mobileLayout", available: false, description: "Mobile report layout is not available in this release." }
+                { label: "Mobile layout", visibleLabel: "Mobile\nlayout", iconName: "phone", commandId: "view.mobileLayout", description: "Mobile report layout is not available in this release." }
             ]},
             { title: "Page options", actions: [
                 { label: "Gridlines", visibleLabel: "Gridlines", iconName: "grid", commandId: "disabled.gridlines", available: false, description: "Canvas gridlines are not available in this release." },
@@ -272,6 +272,11 @@ ApplicationWindow {
         case "model.newCalculatedColumn": mainWindow.studioController.executeCommand("newCalculatedColumn"); break
         case "model.newCalendarTable": mainWindow.studioController.executeCommand("newCalendarTable"); break
         case "model.markDateTable": mainWindow.studioController.executeCommand("markDateTable"); break
+        case "security.manageRoles": mainWindow.studioController.executeCommand("manageRoles"); break
+        case "security.viewAs": mainWindow.studioController.executeCommand("viewAsRoles"); break
+        case "service.publish": mainWindow.studioController.executeCommand("publishReport"); break
+        case "view.mobileLayout": mainWindow.studioController.executeCommand("toggleMobileLayout"); break
+        case "ai.qa": mainWindow.studioController.executeCommand("qaSetup"); break
         case "data.refresh": mainWindow.studioController.executeCommand("refreshSource"); break
         case "data.refreshAll": mainWindow.studioController.executeCommand("refreshAllSources"); break
         case "filter.clear": mainWindow.studioController.executeCommand("clearFilters"); break
