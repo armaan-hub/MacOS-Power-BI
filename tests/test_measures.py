@@ -126,20 +126,28 @@ class MeasureTests(unittest.TestCase):
         self.assertEqual(result["Qualified line total"], Decimal("79.5"))
         self.assertEqual(result["Average sales"], Decimal("9.666666666666666666666666667"))
 
-    def test_iterators_reject_unloaded_tables_text_and_measure_context_transition(self) -> None:
+    def test_iterator_measure_reference_uses_row_context_transition(self) -> None:
+        result = evaluate_measures([
+            {"name": "Base sales", "expression": "SUM([Sales])"},
+            {"name": "Sum of row sales", "expression": "SUMX('Sales data', [Base sales])"},
+        ], self.rows, self.headers, "Sales data")
+
+        self.assertEqual(result["Base sales"], Decimal("29.0"))
+        self.assertEqual(result["Sum of row sales"], Decimal("29.0"))
+
+    def test_iterators_reject_unloaded_tables_and_text(self) -> None:
         for expression, message in (
             ("SUMX(Missing, [Sales])", "not loaded"),
             ("SUMX('Active table', [Note])", "non-numeric"),
-            
         ):
             with self.subTest(expression=expression):
-                measures = [{"name": "Base", "expression": "SUM([Sales])"}]
-                if "[Base]" not in expression:
-                    measures = [{"name": "Invalid", "expression": expression}]
-                else:
-                    measures.append({"name": "Invalid", "expression": expression})
                 with self.assertRaisesRegex(MeasureError, message):
-                    evaluate_measures(measures, self.rows, self.headers, measure_names=["Invalid"])
+                    evaluate_measures(
+                        [{"name": "Invalid", "expression": expression}],
+                        self.rows,
+                        self.headers,
+                        measure_names=["Invalid"],
+                    )
 
     def test_qualified_column_and_formula_assignment_are_supported(self) -> None:
         measure = normalize_measure(

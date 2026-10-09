@@ -205,8 +205,18 @@ Rectangle {
                 const plotTop = 9
                 const plotHeight = Math.max(1, chart.height - 34)
                 if (point.x >= plotLeft && point.x < plotLeft + plotWidth
-                        && point.y >= plotTop && point.y < plotTop + plotHeight)
-                    index = Math.floor((point.y - plotTop) / (plotHeight / values.length))
+                        && point.y >= plotTop && point.y < plotTop + plotHeight) {
+                    const candidate = Math.floor((point.y - plotTop) / (plotHeight / values.length))
+                    let maxValue = 0
+                    for (let i = 0; i < values.length; ++i)
+                        maxValue = Math.max(maxValue, Number(values[i].value) || 0)
+                    maxValue = maxValue || 1
+                    if (candidate >= 0 && candidate < values.length) {
+                        const barWidth = plotWidth * (Number(values[candidate].value) || 0) / maxValue
+                        if (point.x <= plotLeft + barWidth)
+                            index = candidate
+                    }
+                }
             } else {
                 const plotLeft = 38
                 const plotWidth = Math.max(1, chart.width - 46)

@@ -138,6 +138,17 @@ class HomeFileWorkflowTests(unittest.TestCase):
             error.toString() for error in component.errors()
         ))
 
+        unavailable_commands = (
+            "security.manageRoles",
+            "security.viewAs",
+            "service.publish",
+            "view.mobileLayout",
+            "ai.qa",
+        )
+        for command_id in unavailable_commands:
+            self.assertFalse(window.commandAvailable(command_id), command_id)
+            self.assertTrue(window.commandUnavailableReason(command_id), command_id)
+
         controller.setCurrentView("Data")
         self.app.processEvents()
         self.assertFalse(window.commandAvailable("data.transform"))

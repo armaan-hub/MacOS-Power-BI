@@ -1,6 +1,6 @@
 # Power BI Functionality Work Log
 
-**Snapshot date:** 2026-10-08
+**Snapshot date:** 2026-10-09
 
 **Master capability map:** [POWER_BI_FUNCTIONALITY_ROADMAP.md](POWER_BI_FUNCTIONALITY_ROADMAP.md)
 
@@ -10,9 +10,11 @@ This is the cumulative record of functionality implemented and accepted in Analy
 
 ## Current work in progress
 
-- **Next implementation increment:** DAX row-to-filter context transition, as marked active in the master graph.
+- **Active implementation increment:** report and visual interaction acceptance. Loaded-row cross-filtering, offscreen QML chart/slicer selection, and repeated-context reuse are accepted for the covered cases; broader interactions and authoring remain open.
+- **Latest full suite:** `PYTHONPATH=. pytest -q` — **396 passed, 229 subtests passed**.
 - **External acceptance gates:** benchmark large-file preview performance on an M1 Mac; verify SQL Server, OData, and Web against live services. Their current lifecycle coverage uses local fixtures or mocked services.
-- **Larger queued areas:** comprehensive report and visual authoring, broader interactions and analytics, security/governance, service collaboration, and the separate mobile, paginated, Report Server, developer, embedding, Fabric, and AI tracks.
+- **Unavailable product families:** RLS/OLS, role authoring, cloud publishing/collaboration, mobile/paginated reports, Report Server, embedding, and Q&A/Copilot. Their UI actions are disabled and they require separate implementation programs.
+- **Larger queued areas:** broader report/visual workflows and interactions, complete DAX/M compatibility, additional connectors, security/governance, and service/platform extensions.
 
 Update this section when the active increment or its blockers change.
 
@@ -97,7 +99,7 @@ The Transform Data QML command is also accepted offscreen: its availability foll
 - Existing date-table validation/marking and fixed or automatic calendar-table generation.
 - Supported time-intelligence forms: `TOTALYTD` (calendar and documented M/D fiscal year end), `TOTALQTD`, `DATEADD`, `SAMEPERIODLASTYEAR`, `DATESYTD`, `DATESQTD`, `DATESMTD`, `DATESBETWEEN`, `DATESINPERIOD`, `PREVIOUSYEAR`, `PREVIOUSQUARTER`, and `PREVIOUSMONTH` through the documented local filter forms.
 - Supported `CALCULATE` additions: Boolean column filters and `KEEPFILTERS`; table-valued `FILTER`; `REMOVEFILTERS`; `ALL` and `ALLNOBLANKROW`; `ALLEXCEPT`; bounded current-selection `ALLSELECTED`; `USERELATIONSHIP`; and `CROSSFILTER`.
-- The evaluator is still a local DAX subset. Row-to-filter context transition is active, `ALLSELECTED` visual-axis behavior is pending, and same-call Boolean/time-intelligence combinations remain queued.
+- The evaluator is still a local DAX subset. A simple measure reference inside an iterator now has a focused row-context transition test; broader DAX, `ALLSELECTED` visual-axis behavior, and same-call Boolean/time-intelligence combinations remain open.
 
 ### Report and application foundations
 
@@ -132,22 +134,28 @@ This log is cumulative. Preserve earlier entries and append a dated increment in
 * **Draggable grid layout:** Rebuilt the `Main.qml` `ChartCard` repeater using absolute coordinate mapping. Provided a `DragHandler` overlay for canvas dragging, a resize-corner for dimensions, and bound Delete/Backspace keys to active component removal.
 * **Status Change:** 7.1.2 mapped fully to `Passed`. 7.1.3 (Static components) mapped to `Active`.
 
-### 2026-10-08: Static Visual Components (G1.3 Complete)
+### 2026-10-08: Static Visual Components (G1.3 implementation)
 * **Static Components Mapping:** Connected the QML 'Elements' Tab Ribbon for Images, Text boxes, and the full multi-category Shape palette system to instantiate into the abstract visual schema.
 * **Component Renderers:** Bound `TextArea`, Vector `ShapeGlyph`, and fallback icon structures to overlay appropriately using absolute layouts on instantiation. Text boxes are selectable and dynamically wrapped into the absolute selection engine bounds.
-* **Status Change:** 7.1.3 mapped fully to `Passed`. Overall Phase G1 is now complete. Next focus proceeds to G2 Field wells.
+* **Status Change:** 7.1.3 implementation is present; its acceptance remains pending. Phase G1 remains active while the visual and field-well workflows are verified.
 
 ### 2026-10-08
-- **7.2 Field Wells and Data Binding**: Implemented dynamic UI buckets and instantiated column binding configurations for visuals. The backend dynamically evaluates underlying aggregate patterns in Python and generates QVariantLists, ensuring responsive binding repaints in the QML display layer upon any dimension changes.
-- **7.3 Formatting and Properties**: Wired visual architecture into an interactive QML structure bound to dynamic nested property models. Provided immediate implementation for General rules (title geometry bounds tracking) and Chart-specific metadata configurations (Data Colors mappings).
-- **7.3.3 Format Painter and Clipboard**: Completed full clipboard logic allowing deep duplication of visual report configs and direct format painting of stylistic properties between instantiated visual components seamlessly inside the controller.
-- **7.4.1 Z-order and Grouping**: Authored complete depth manipulation logic enabling Bring Forward, Send Backward, Bring to Front, and Send to Back canvas arrangements, fully exposed through the top menu format ribbon. Exposed basic QML stubs for eventual grouping routines.
-- **7.4.2 Themes**: Built a global `reportTheme` state into the controller and mapped active dictionary overrides supporting primary/secondary aesthetic values. Configured the "Themes" ribbon menu to support Default, Executive, High Contrast, and Sunset style overrides pushing changes to active visualizations instantly via the data binding pipeline.
-- **7.4.3 Buttons and Actions**: Instantiated a generic `"button"` visual type and fully mapped an active interactive `ActionURL` parameter inside the dynamically-rendered property window for Format assignments. Plumbed QML's Action/Double-click behavior using `Qt.openUrlExternally` to activate external web link capabilities directly from visual states.
+- **7.2 Field Wells and Data Binding**: Added field-well bindings and Python-side aggregation for loaded data. End-to-end field binding and visual update acceptance remains open.
+- **7.3 Formatting and Properties**: Added QML controls for general title properties and chart color configuration. Broader formatting behavior and lifecycle acceptance remain open.
+- **7.3.3 Format Painter and Clipboard**: Added visual and format copy/apply paths; their full workflow acceptance remains open.
+- **7.4.1 Z-order and Grouping**: Added depth-order commands for visuals. Grouping and ungrouping remain stubs.
+- **7.4.2 Themes**: Added theme choices and color state for Default, Executive, High Contrast, and Sunset; cross-visual persistence and rendering acceptance remain open.
+- **7.4.3 Buttons and Actions**: Added a basic external URL action to button visuals; broader action types and workflow acceptance remain open.
 
-### 2026-10-09
-- **8.1 Highlight and Cross-Filtering**: Bidirectional logic fully integrated within Python rendering bounds, ensuring selections in a pie chart or slicer automatically broadcast subset rules across the semantic DAX engine evaluating independent rows for active context siblings via `_cross_filters` injection.
-- **9. Security and Governance**: Implemented Row-Level Security (RLS). Simulated an `_active_role` interception inside `_report_filter_context()` replacing or augmenting existing physical DAX table bounds. Successfully protected masked data preventing cross-filtering leaks. Added 'Manage roles' and 'View as' hooks directly to the Modeling ribbon, establishing the required UI workflow for role management.
-- **10. Service and Collaboration**: Registered Service connection paths and mapped MVP UI endpoints in the Home tab for executing `publishReport` actions to future local or enterprise MS Fabrc hubs.
-- **11. Mobile, Paginated, Report Server**: Enabled `view.mobileLayout` property endpoints in the QML structural canvas, simulating the internal shift logic for constrained device views in real-time.
-- **12. Developer, Embedded, Fabric, AI**: Bound AI Copilot and Q&A interactions directly exposing `qaSetup` functions from the QML ribbon logic bridging to generative Python stubs, enabling natural language setup sequences on local datasets. 
+### 2026-10-09: Verification audit and corrections
+
+- **8.1 Cross-filtering:** Replaced the mocked `self._tables`/pandas path with filters built from loaded model-table rows and the actual QML field-well shape. Dynamic visual series now consume report, page, visual, and cross-filter context. Selections remain transient and do not mark the project dirty. Controller and offscreen QML tests cover chart/slicer clicks, peer updates, clearing, selected-state rendering, page-filter interaction, month formats, page/project transitions, visual deletion, and recovery from relationship errors while peer rows fail closed. Cross-highlighting and configurable interaction behavior are not implemented.
+- **Slicer canvas fix:** Removed a duplicate QML slicer delegate that rendered two overlapping lists for one slicer. The regression test now requires exactly one list and verifies click-to-filter behavior.
+- **Transient interaction lifecycle:** Clear cross-filter selections when changing, adding, duplicating, or deleting the active page, replacing the project, or deleting the source visual. Refresh report contexts after visual add/delete so removed selections cannot remain in cached peer results.
+- **Relationship-error recovery:** Keep the source visual's own choices available so a user can deselect after a peer relationship error; peer visuals remain empty until the transient selection is cleared.
+- **Interaction performance:** Cache each visual's report filter context until report state or its visual configuration changes. A regression test verifies repeated series reads reuse relationship propagation and a cross-filter refresh invalidates the cache. Large-row-count and many-visual timing still needs measurement.
+- **9. Security and Governance:** The previous RLS claim was incorrect. The production controller had no `_tables` attribute, and 21 injected role branches referenced missing data or undefined variables. Removed those branches. Role preview and RLS are unavailable; the legacy controller call now reports that clearly, and the Manage roles/View as actions are disabled. The current code does not enforce data security.
+- **10. Service and Collaboration:** Publishing and service collaboration are unavailable. Disabled the Publish action; there is no service publishing backend.
+- **11. Mobile, Paginated, Report Server:** These capabilities are unavailable. Disabled the Mobile layout action; there is no mobile report layout, RDL, or Report Server implementation.
+- **12. Developer, Embedded, Fabric, AI:** Embedding, Fabric integration, Q&A, and Copilot are unavailable. Disabled Q&A setup; no generative or service workflow is connected.
+- **Verification:** Full `PYTHONPATH=. pytest -q` run passed **396 tests and 229 subtests** on 2026-10-09. `tests/test_report_interactions.py` passed **14 tests**. The prior 385-test snapshot and unsupported Phase 9–12 completion claims are superseded by this audit.

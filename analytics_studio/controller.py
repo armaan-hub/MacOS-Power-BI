@@ -126,6 +126,7 @@ _REPORT_FILTER_OPERATOR_LABELS = {
     "does_not_begin_with": "does not begin with",
     "ends_with": "ends with",
     "does_not_end_with": "does not end with",
+    "report_month": "month is",
     "greater_than": "is greater than",
     "greater_than_or_equal": "is greater than or equal to",
     "less_than": "is less than",
@@ -332,6 +333,8 @@ def _report_filter_clause_matches(
     operator = clause["operator"]
     if operator == _REPORT_FILTER_TOP_N:
         return False
+    if operator == "report_month":
+        return _report_month(value) == str(clause.get("value", ""))
     if operator == _REPORT_FILTER_RELATIVE_DATE:
         if column_type != "date" or clause.get("_invalid_relative_date") or not value:
             return False
@@ -734,6 +737,15 @@ class StudioController(QObject):
         self._visual_kpis: dict[str, str] = {}
         self._cross_filters: dict[str, list[str]] = {}
         self._filter_context_error = ""
+        self._report_filter_context_cache: dict[
+            str | None,
+            tuple[
+                dict[str, list[dict[str, Any]]],
+                list[dict[str, Any]],
+                set[str],
+                str,
+            ],
+        ] = {}
         relative_filter_now = datetime.now(timezone.utc)
         self._relative_filter_anchor_date = relative_filter_now.date()
         self._relative_filter_anchor_time = relative_filter_now
@@ -841,22 +853,6 @@ class StudioController(QObject):
         if not self._selected_visual:
             return []
 
-        if getattr(self, '_active_role', None):
-            roles = self._project.get("model", {}).get("roles", {})
-            active_role_def = roles.get(self._active_role, {})
-            # table maps to dax expression, here we do a mocked exact check based on the tests.
-            for r_table_id, r_dax_value in active_role_def.get("tables", {}).items():
-                if r_table_id in self._tables and "data" in self._tables[r_table_id]:
-                    # simplistic check for regions per test cases
-                    column_name = "Region" if "Region" in self._tables[r_table_id]["data"].columns else "Category"
-                    # Create a mocked report filter clause
-                    conditions[r_table_id].append((
-                        column_name,
-                        {
-                            "clauses": [{"operator": "equals", "value": r_dax_value}],
-                            "logic": "and",
-                        },
-                    ))
 
         page = self._active_page()
         if not page:
@@ -865,7 +861,7 @@ class StudioController(QObject):
         if not visual:
             return []
             
-        return [
+        groups = [
             {
                 "name": "General",
                 "properties": [
@@ -1079,22 +1075,6 @@ class StudioController(QObject):
     @Property(bool, notify=stateChanged)
     def filterActive(self) -> bool:  # noqa: N802
 
-        if getattr(self, '_active_role', None):
-            roles = self._project.get("model", {}).get("roles", {})
-            active_role_def = roles.get(self._active_role, {})
-            # table maps to dax expression, here we do a mocked exact check based on the tests.
-            for r_table_id, r_dax_value in active_role_def.get("tables", {}).items():
-                if r_table_id in self._tables and "data" in self._tables[r_table_id]:
-                    # simplistic check for regions per test cases
-                    column_name = "Region" if "Region" in self._tables[r_table_id]["data"].columns else "Category"
-                    # Create a mocked report filter clause
-                    conditions[r_table_id].append((
-                        column_name,
-                        {
-                            "clauses": [{"operator": "equals", "value": r_dax_value}],
-                            "logic": "and",
-                        },
-                    ))
 
         page = self._active_page()
         return (
@@ -1148,22 +1128,6 @@ class StudioController(QObject):
     @Property("QVariantList", notify=stateChanged)
     def activePageFilters(self) -> list[dict[str, str]]:  # noqa: N802
 
-        if getattr(self, '_active_role', None):
-            roles = self._project.get("model", {}).get("roles", {})
-            active_role_def = roles.get(self._active_role, {})
-            # table maps to dax expression, here we do a mocked exact check based on the tests.
-            for r_table_id, r_dax_value in active_role_def.get("tables", {}).items():
-                if r_table_id in self._tables and "data" in self._tables[r_table_id]:
-                    # simplistic check for regions per test cases
-                    column_name = "Region" if "Region" in self._tables[r_table_id]["data"].columns else "Category"
-                    # Create a mocked report filter clause
-                    conditions[r_table_id].append((
-                        column_name,
-                        {
-                            "clauses": [{"operator": "equals", "value": r_dax_value}],
-                            "logic": "and",
-                        },
-                    ))
 
         page = self._active_page()
         if page is None:
@@ -1189,22 +1153,6 @@ class StudioController(QObject):
     @Property("QVariantList", notify=stateChanged)
     def activeVisualFilters(self) -> list[dict[str, str]]:  # noqa: N802
 
-        if getattr(self, '_active_role', None):
-            roles = self._project.get("model", {}).get("roles", {})
-            active_role_def = roles.get(self._active_role, {})
-            # table maps to dax expression, here we do a mocked exact check based on the tests.
-            for r_table_id, r_dax_value in active_role_def.get("tables", {}).items():
-                if r_table_id in self._tables and "data" in self._tables[r_table_id]:
-                    # simplistic check for regions per test cases
-                    column_name = "Region" if "Region" in self._tables[r_table_id]["data"].columns else "Category"
-                    # Create a mocked report filter clause
-                    conditions[r_table_id].append((
-                        column_name,
-                        {
-                            "clauses": [{"operator": "equals", "value": r_dax_value}],
-                            "logic": "and",
-                        },
-                    ))
 
         page = self._active_page()
         if page is None or not self._selected_visual:
@@ -1461,10 +1409,6 @@ class StudioController(QObject):
                 "error": self._measure_errors.get(name, ""),
             })
         return result
-
-    @Slot(str, result="QVariantList")
-    def selectedCrossFiltersForVisual(self, visual_title: str) -> list[str]:
-        return self._cross_filters.get(visual_title, [])
 
     @Slot(str, result="QVariantList")
     def selectedCrossFiltersForVisual(self, visual_title: str) -> list[str]:
@@ -2528,6 +2472,7 @@ class StudioController(QObject):
             return
         self._active_page_id = page_id
         self._project["report"]["active_page_id"] = page_id
+        self._cross_filters.clear()
         self._selected_visual = ""
         self._dirty = True
         self._refresh_report()
@@ -2591,22 +2536,6 @@ class StudioController(QObject):
             self._set_status("Choose a loaded table field for the filter.")
             return False
 
-        if getattr(self, '_active_role', None):
-            roles = self._project.get("model", {}).get("roles", {})
-            active_role_def = roles.get(self._active_role, {})
-            # table maps to dax expression, here we do a mocked exact check based on the tests.
-            for r_table_id, r_dax_value in active_role_def.get("tables", {}).items():
-                if r_table_id in self._tables and "data" in self._tables[r_table_id]:
-                    # simplistic check for regions per test cases
-                    column_name = "Region" if "Region" in self._tables[r_table_id]["data"].columns else "Category"
-                    # Create a mocked report filter clause
-                    conditions[r_table_id].append((
-                        column_name,
-                        {
-                            "clauses": [{"operator": "equals", "value": r_dax_value}],
-                            "logic": "and",
-                        },
-                    ))
 
         page = self._active_page()
         if page is None:
@@ -3036,22 +2965,6 @@ class StudioController(QObject):
     @Slot(int, result=bool)
     def removePageFilter(self, index: int) -> bool:  # noqa: N802
 
-        if getattr(self, '_active_role', None):
-            roles = self._project.get("model", {}).get("roles", {})
-            active_role_def = roles.get(self._active_role, {})
-            # table maps to dax expression, here we do a mocked exact check based on the tests.
-            for r_table_id, r_dax_value in active_role_def.get("tables", {}).items():
-                if r_table_id in self._tables and "data" in self._tables[r_table_id]:
-                    # simplistic check for regions per test cases
-                    column_name = "Region" if "Region" in self._tables[r_table_id]["data"].columns else "Category"
-                    # Create a mocked report filter clause
-                    conditions[r_table_id].append((
-                        column_name,
-                        {
-                            "clauses": [{"operator": "equals", "value": r_dax_value}],
-                            "logic": "and",
-                        },
-                    ))
 
         page = self._active_page()
         if page is None:
@@ -3194,22 +3107,6 @@ class StudioController(QObject):
     @Slot(int, result=bool)
     def removeVisualFilter(self, index: int) -> bool:  # noqa: N802
 
-        if getattr(self, '_active_role', None):
-            roles = self._project.get("model", {}).get("roles", {})
-            active_role_def = roles.get(self._active_role, {})
-            # table maps to dax expression, here we do a mocked exact check based on the tests.
-            for r_table_id, r_dax_value in active_role_def.get("tables", {}).items():
-                if r_table_id in self._tables and "data" in self._tables[r_table_id]:
-                    # simplistic check for regions per test cases
-                    column_name = "Region" if "Region" in self._tables[r_table_id]["data"].columns else "Category"
-                    # Create a mocked report filter clause
-                    conditions[r_table_id].append((
-                        column_name,
-                        {
-                            "clauses": [{"operator": "equals", "value": r_dax_value}],
-                            "logic": "and",
-                        },
-                    ))
 
         page = self._active_page()
         if page is None or not self._selected_visual:
@@ -3395,6 +3292,7 @@ class StudioController(QObject):
         self._dirty = active_source_id != requested_active_id or metadata_changed
         self._current_view = candidate["active_view"]
         self._active_page_id = candidate["report"]["active_page_id"]
+        self._cross_filters.clear()
         self._selected_visual = ""
         self._field_query = ""
         self._current_region = None
@@ -4310,15 +4208,23 @@ class StudioController(QObject):
 
     
     @Slot(str)
-    def set_view_as_role(self, role_name: str):
-        self._active_role = role_name if role_name else None
-        
+    def set_view_as_role(self, role_name: str) -> None:
+        """Keep legacy callers from mistaking role preview for enforced RLS."""
+        self._set_status(
+            "Role previews and row-level security are unavailable in this release."
+        )
 
     def _report_filter_context(
         self,
         visual_name: str | None = None,
     ) -> tuple[dict[str, list[dict[str, Any]]], list[dict[str, Any]], set[str]]:
         """Build page context plus optional filters for one report visual."""
+        cached = self._report_filter_context_cache.get(visual_name)
+        if cached is not None:
+            rows_by_id, context, filter_table_ids, error = cached
+            self._filter_context_error = error
+            return rows_by_id, context, filter_table_ids
+
         self._region_column = _report_field(self._headers, "region") if self.sourceLoaded else None
         conditions: defaultdict[str, list[tuple[str, dict[str, Any]]]] = defaultdict(list)
         active_table_id = self._active_model_table_id()
@@ -4332,22 +4238,6 @@ class StudioController(QObject):
             ))
 
 
-        if getattr(self, '_active_role', None):
-            roles = self._project.get("model", {}).get("roles", {})
-            active_role_def = roles.get(self._active_role, {})
-            # table maps to dax expression, here we do a mocked exact check based on the tests.
-            for r_table_id, r_dax_value in active_role_def.get("tables", {}).items():
-                if r_table_id in self._tables and "data" in self._tables[r_table_id]:
-                    # simplistic check for regions per test cases
-                    column_name = "Region" if "Region" in self._tables[r_table_id]["data"].columns else "Category"
-                    # Create a mocked report filter clause
-                    conditions[r_table_id].append((
-                        column_name,
-                        {
-                            "clauses": [{"operator": "equals", "value": r_dax_value}],
-                            "logic": "and",
-                        },
-                    ))
 
         page = self._active_page()
         saved_report_filters = self._project.get("report", {}).get("filters", [])
@@ -4376,6 +4266,101 @@ class StudioController(QObject):
 
         context = self._measure_table_context()
         contexts_by_id = {str(table["id"]): table for table in context}
+
+        def visual_category_binding(source_visual: dict[str, Any]) -> tuple[str, str] | None:
+            fields = source_visual.get("fields", {})
+            preferred_table_id = str(source_visual.get("table_id", ""))
+            for well_name in ("Fields", "Field", "X-axis", "Category"):
+                well_fields = fields.get(well_name, [])
+                if not isinstance(well_fields, list) or not well_fields:
+                    continue
+                if len(well_fields) >= 2:
+                    table_id, column = str(well_fields[0]), str(well_fields[1])
+                    table = contexts_by_id.get(table_id)
+                    if table is not None and column in table["headers"]:
+                        return table_id, column
+                binding = well_fields[0]
+                if isinstance(binding, dict):
+                    table_id = str(binding.get("table_id", preferred_table_id))
+                    column = str(binding.get("column", ""))
+                    table = contexts_by_id.get(table_id)
+                    if table is not None and column in table["headers"]:
+                        return table_id, column
+                    continue
+                if isinstance(binding, (list, tuple)):
+                    if len(binding) >= 2:
+                        table_id, column = str(binding[0]), str(binding[1])
+                        table = contexts_by_id.get(table_id)
+                        if table is not None and column in table["headers"]:
+                            return table_id, column
+                    if not binding:
+                        continue
+                    binding = binding[0]
+                if not isinstance(binding, str):
+                    continue
+                candidates = [
+                    (table_id, table) for table_id, table in contexts_by_id.items()
+                    if binding in table["headers"]
+                ]
+                if preferred_table_id in contexts_by_id:
+                    preferred = contexts_by_id[preferred_table_id]
+                    if binding in preferred["headers"]:
+                        return preferred_table_id, binding
+                if len(candidates) == 1:
+                    return candidates[0][0], binding
+                active_table_id = self._active_model_table_id()
+                if (
+                    active_table_id in contexts_by_id
+                    and binding in contexts_by_id[active_table_id]["headers"]
+                ):
+                    return active_table_id, binding
+            return None
+
+        for source_visual_title, selected_values in self._cross_filters.items():
+            if source_visual_title == visual_name or not isinstance(selected_values, list):
+                continue
+            source_visual = next((
+                item for item in (page.get("visuals", []) if page else [])
+                if isinstance(item, dict) and item.get("title") == source_visual_title
+            ), None)
+            if source_visual is None or not selected_values:
+                continue
+            binding = visual_category_binding(source_visual)
+            month_bucket = False
+            if binding is None:
+                active_table_id = self._active_model_table_id()
+                active_table = contexts_by_id.get(active_table_id)
+                if active_table is not None:
+                    if source_visual_title == "Region revenue":
+                        column = _report_field(active_table["headers"], "region")
+                    elif source_visual_title == "Monthly revenue":
+                        column = _report_field(active_table["headers"], "date")
+                        month_bucket = column is not None
+                    else:
+                        column = None
+                    if column:
+                        binding = (active_table_id, column)
+            if binding is None:
+                continue
+            table_id, column = binding
+            if month_bucket:
+                cross_filter = {
+                    "clauses": [
+                        {"operator": "report_month", "value": str(value)}
+                        for value in selected_values
+                    ],
+                    "logic": "or",
+                }
+            else:
+                cross_filter = {
+                    "clauses": [{
+                        "operator": "is_any_of",
+                        "values": [str(value) for value in selected_values],
+                    }],
+                    "logic": "and",
+                }
+            conditions[table_id].append((column, cross_filter))
+
         saved_filters = [*saved_report_filters, *saved_page_filters, *saved_visual_filters]
         def filter_references_unavailable_field(report_filter: dict[str, Any]) -> bool:
             table_id = str(report_filter.get("table_id", ""))
@@ -4528,53 +4513,37 @@ class StudioController(QObject):
             self._filter_context_error = " ".join(
                 message for message in (unavailable_message, str(exc)) if message
             )
-            rows_by_id = {
-                table_id: explicit_rows.get(table_id, list(table["rows"]))
-                for table_id, table in contexts_by_id.items()
-            }
+            if self._cross_filters:
+                rows_by_id = {table_id: [] for table_id in contexts_by_id}
+                source_visual = next((
+                    item for item in (page.get("visuals", []) if page else [])
+                    if isinstance(item, dict)
+                    and item.get("title") == visual_name
+                    and visual_name in self._cross_filters
+                ), None)
+                if source_visual is not None:
+                    binding = visual_category_binding(source_visual)
+                    source_table_id = (
+                        binding[0] if binding
+                        else str(source_visual.get("table_id") or active_table_id)
+                    )
+                    if source_table_id in contexts_by_id:
+                        rows_by_id[source_table_id] = explicit_rows.get(
+                            source_table_id,
+                            list(contexts_by_id[source_table_id]["rows"]),
+                        )
+            else:
+                rows_by_id = {
+                    table_id: explicit_rows.get(table_id, list(table["rows"]))
+                    for table_id, table in contexts_by_id.items()
+                }
             
-        # Apply Cross-Filters dynamically
-        if getattr(self, '_cross_filters', None):
-            for cv_title, selected_values in self._cross_filters.items():
-                if cv_title == visual_name: continue
-                
-                cv_visual = next((v for p in self._project.get("report", {}).get("pages", []) for v in p.get("visuals", []) if isinstance(v, dict) and v.get("title") == cv_title), None)
-                if not cv_visual: continue
-                fields = cv_visual.get("fields", {})
-                
-                cat_mapping = fields.get("Category", None)
-                if not cat_mapping or not isinstance(cat_mapping, list) or len(cat_mapping) < 2:
-                    continue
-                
-                table_id, col_name = str(cat_mapping[0]), str(cat_mapping[1])
-                table = self._tables.get(table_id)
-                if not table or "data" not in table: continue
-                df = table["data"]
-                if col_name not in df.columns: continue
-                
-                # Check if rows are indices (ints) or row dicts.
-                # If table is untouched by page/report filters, it's missing from rows_by_id, so pull full index
-                if table_id not in rows_by_id:
-                    current_rows = list(range(len(df)))
-                else:
-                    current_rows = rows_by_id[table_id]
-                
-                # If current_rows are indices list(range()), map from DataFrame context
-                # Otherwise if they are dicts, map from dict natively.
-                subset_rows = []
-                for r in current_rows:
-                    if isinstance(r, dict):
-                        val = r.get(col_name, "")
-                    else:
-                        val = df.at[r, col_name]
-                        
-                    if str(val) in selected_values:
-                        subset_rows.append(r)
-                        
-                rows_by_id[table_id] = subset_rows
-                filter_table_ids.add(table_id) # Need to register it as a cross-filtered table!
-
-        return rows_by_id, context, filter_table_ids
+        result = (rows_by_id, context, filter_table_ids)
+        self._report_filter_context_cache[visual_name] = (
+            *result,
+            self._filter_context_error,
+        )
+        return result
 
     def _raw_candidate_for_source(self, source: dict[str, Any]) -> ImportCandidate:
         if source.get("kind") == "inline":
@@ -5170,6 +5139,7 @@ class StudioController(QObject):
         pages.append(page)
         self._active_page_id = page["id"]
         self._project["report"]["active_page_id"] = page["id"]
+        self._cross_filters.clear()
         self._selected_visual = ""
         self._dirty = True
         self._refresh_report()
@@ -5208,6 +5178,7 @@ class StudioController(QObject):
                 new_idx = max(0, index_to_remove - 1)
                 self._active_page_id = pages[new_idx]["id"]
                 self._project["report"]["active_page_id"] = self._active_page_id
+                self._cross_filters.clear()
                 self._selected_visual = ""
             self._dirty = True
             self._refresh_report()
@@ -5235,6 +5206,9 @@ class StudioController(QObject):
         for visual in page.get("visuals", []):
             if isinstance(visual, dict) and visual.get("title") == self._selected_visual:
                 fields = visual.setdefault("fields", {})
+                table_id = self._active_model_table_id()
+                if table_id:
+                    visual.setdefault("table_id", table_id)
                 well_fields = fields.setdefault(well_name, [])
                 if field_name not in well_fields:
                     well_fields.append(field_name)
@@ -5264,6 +5238,7 @@ class StudioController(QObject):
         for visual in page.get("visuals", []):
             if isinstance(visual, dict) and visual.get("title") == title:
                 visual["type"] = v_type
+                self._report_filter_context_cache.clear()
                 self._dirty = True
                 self.stateChanged.emit()
                 return
@@ -5278,6 +5253,7 @@ class StudioController(QObject):
                     # Keep selected_visual synced if title changes
                     self._selected_visual = str(value)
                 visual[property_key] = value
+                self._report_filter_context_cache.clear()
                 self._dirty = True
                 self.stateChanged.emit()
                 break
@@ -5305,11 +5281,17 @@ class StudioController(QObject):
         if index_to_remove != -1:
             name = visuals[index_to_remove].get("title", "")
             del visuals[index_to_remove]
+            if not any(
+                isinstance(visual, dict) and visual.get("title") == name
+                for visual in visuals
+            ):
+                self._cross_filters.pop(str(name), None)
             if self._selected_visual == name:
                 self._selected_visual = ""
             self._dirty = True
+            self._refresh_report()
             self.stateChanged.emit()
-            self._set_status(f"Removed visual")
+            self._set_status("Removed visual")
 
     @Slot(str, str, int, int, int, int)
     def add_visual(self, v_type: str, title: str, x: int, y: int, width: int, height: int) -> str:
@@ -5328,6 +5310,7 @@ class StudioController(QObject):
         })
         self._dirty = True
         self._selected_visual = title
+        self._refresh_report()
         self.stateChanged.emit()
         self._set_status(f"Added visual {title}")
         return new_id
@@ -5349,6 +5332,7 @@ class StudioController(QObject):
         
         self._active_page_id = new_page["id"]
         self._project["report"]["active_page_id"] = new_page["id"]
+        self._cross_filters.clear()
         self._selected_visual = ""
         self._dirty = True
         self._refresh_report()
@@ -5389,7 +5373,10 @@ class StudioController(QObject):
             return
         page = self._project["report"]["pages"][self.activePageIndex]
         visuals = page.setdefault("visuals", [])
-        if not any(isinstance(v, dict) and v.get("title") == visual_name for v in visuals):
+        added = not any(
+            isinstance(v, dict) and v.get("title") == visual_name for v in visuals
+        )
+        if added:
             from uuid import uuid4
             is_monthly = "Monthly" in visual_name
             visuals.append({
@@ -5402,28 +5389,13 @@ class StudioController(QObject):
                 "height": 248
             })
             self._dirty = True
+            self._refresh_report()
         self._selected_visual = visual_name
         self.stateChanged.emit()
         self._set_status(f"Added {visual_name}")
 
     def clear_filters(self) -> None:
 
-        if getattr(self, '_active_role', None):
-            roles = self._project.get("model", {}).get("roles", {})
-            active_role_def = roles.get(self._active_role, {})
-            # table maps to dax expression, here we do a mocked exact check based on the tests.
-            for r_table_id, r_dax_value in active_role_def.get("tables", {}).items():
-                if r_table_id in self._tables and "data" in self._tables[r_table_id]:
-                    # simplistic check for regions per test cases
-                    column_name = "Region" if "Region" in self._tables[r_table_id]["data"].columns else "Category"
-                    # Create a mocked report filter clause
-                    conditions[r_table_id].append((
-                        column_name,
-                        {
-                            "clauses": [{"operator": "equals", "value": r_dax_value}],
-                            "logic": "and",
-                        },
-                    ))
 
         page = self._active_page()
         report_filters = self._project.get("report", {}).get("filters", [])
@@ -5669,6 +5641,7 @@ class StudioController(QObject):
         self._dirty = False
         self._current_view = "Report"
         self._active_page_id = self._project["report"]["active_page_id"]
+        self._cross_filters.clear()
         self._active_source_id = None
         self._active_source_path = None
         self._active_source_kind = None
@@ -5723,22 +5696,6 @@ class StudioController(QObject):
 
     def _page_relative_filter_kinds(self) -> tuple[bool, bool]:
 
-        if getattr(self, '_active_role', None):
-            roles = self._project.get("model", {}).get("roles", {})
-            active_role_def = roles.get(self._active_role, {})
-            # table maps to dax expression, here we do a mocked exact check based on the tests.
-            for r_table_id, r_dax_value in active_role_def.get("tables", {}).items():
-                if r_table_id in self._tables and "data" in self._tables[r_table_id]:
-                    # simplistic check for regions per test cases
-                    column_name = "Region" if "Region" in self._tables[r_table_id]["data"].columns else "Category"
-                    # Create a mocked report filter clause
-                    conditions[r_table_id].append((
-                        column_name,
-                        {
-                            "clauses": [{"operator": "equals", "value": r_dax_value}],
-                            "logic": "and",
-                        },
-                    ))
 
         page = self._active_page()
         report_filters = [
@@ -5787,22 +5744,6 @@ class StudioController(QObject):
         if visual_name != "Region revenue":
             return source_rows
 
-        if getattr(self, '_active_role', None):
-            roles = self._project.get("model", {}).get("roles", {})
-            active_role_def = roles.get(self._active_role, {})
-            # table maps to dax expression, here we do a mocked exact check based on the tests.
-            for r_table_id, r_dax_value in active_role_def.get("tables", {}).items():
-                if r_table_id in self._tables and "data" in self._tables[r_table_id]:
-                    # simplistic check for regions per test cases
-                    column_name = "Region" if "Region" in self._tables[r_table_id]["data"].columns else "Category"
-                    # Create a mocked report filter clause
-                    conditions[r_table_id].append((
-                        column_name,
-                        {
-                            "clauses": [{"operator": "equals", "value": r_dax_value}],
-                            "logic": "and",
-                        },
-                    ))
 
         page = self._active_page()
         if page is None:
@@ -5858,6 +5799,7 @@ class StudioController(QObject):
         return source_rows
 
     def _refresh_report(self) -> None:
+        self._report_filter_context_cache.clear()
         now = datetime.now(timezone.utc)
         self._relative_filter_anchor_date = now.date()
         self._relative_filter_anchor_time = now
@@ -5998,22 +5940,6 @@ class StudioController(QObject):
 
         filter_errors = [self._filter_context_error] if self._filter_context_error else []
 
-        if getattr(self, '_active_role', None):
-            roles = self._project.get("model", {}).get("roles", {})
-            active_role_def = roles.get(self._active_role, {})
-            # table maps to dax expression, here we do a mocked exact check based on the tests.
-            for r_table_id, r_dax_value in active_role_def.get("tables", {}).items():
-                if r_table_id in self._tables and "data" in self._tables[r_table_id]:
-                    # simplistic check for regions per test cases
-                    column_name = "Region" if "Region" in self._tables[r_table_id]["data"].columns else "Category"
-                    # Create a mocked report filter clause
-                    conditions[r_table_id].append((
-                        column_name,
-                        {
-                            "clauses": [{"operator": "equals", "value": r_dax_value}],
-                            "logic": "and",
-                        },
-                    ))
 
         page = self._active_page()
         visuals_with_filters = {
@@ -6025,7 +5951,7 @@ class StudioController(QObject):
             visual_rows = rows
             visual_context = measure_table_context
             visual_filter_ids = filter_table_ids
-            if visual_name in visuals_with_filters:
+            if visual_name in visuals_with_filters or self._cross_filters:
                 (
                     visual_rows_by_table,
                     visual_context,
@@ -6059,24 +5985,6 @@ class StudioController(QObject):
         self._filter_context_error = "; ".join(dict.fromkeys(filter_errors))
 
     def _generate_dynamic_visual_series(self, visual_name: str) -> list[dict[str, str | float]]:
-
-        if getattr(self, '_active_role', None):
-            roles = self._project.get("model", {}).get("roles", {})
-            active_role_def = roles.get(self._active_role, {})
-            # table maps to dax expression, here we do a mocked exact check based on the tests.
-            for r_table_id, r_dax_value in active_role_def.get("tables", {}).items():
-                if r_table_id in self._tables and "data" in self._tables[r_table_id]:
-                    # simplistic check for regions per test cases
-                    column_name = "Region" if "Region" in self._tables[r_table_id]["data"].columns else "Category"
-                    # Create a mocked report filter clause
-                    conditions[r_table_id].append((
-                        column_name,
-                        {
-                            "clauses": [{"operator": "equals", "value": r_dax_value}],
-                            "logic": "and",
-                        },
-                    ))
-
         page = self._active_page()
         if not page:
             return []
@@ -6087,7 +5995,9 @@ class StudioController(QObject):
         fields = visual.get("fields", {})
         x_axis = fields.get("X-axis", [])
         y_axis = fields.get("Y-axis", [])
-        
+        if visual.get("type") == "slicer" and not x_axis and not y_axis:
+            x_axis = fields.get("Fields", [])
+
         # If no fields are mapped in dynamic wells, fall back to legacy series for initial views
         if not x_axis and not y_axis:
             if visual_name == "Monthly revenue":
@@ -6095,35 +6005,39 @@ class StudioController(QObject):
             elif visual_name == "Region revenue":
                 return self._region_visual_series.get(visual_name, self._region_series)
             return []
-            
-        x_col = x_axis[0] if x_axis else None
-        y_col = y_axis[0] if y_axis else None
-        
-        visual_rows = list(self._rows)
-        active_table_id = self._active_source_id
-        visuals_with_filters = {str(item.get("visual_name", "")) for item in page.get("visual_filters", [])}
-        if visual_name in visuals_with_filters:
-            (visual_rows_by_table, _, _) = self._report_filter_context(visual_name)
-            visual_rows = visual_rows_by_table.get(active_table_id, list(self._rows))
 
-        # Apply Cross-Filters
-        for cv_title, cv_labels in self._cross_filters.items():
-            if cv_title == visual_name: continue
-            if not isinstance(cv_labels, list): cv_labels = [cv_labels] # safety fallback
-            cv_visual = next((v for v in page.get("visuals", []) if isinstance(v, dict) and v.get("title") == cv_title), None)
-            if cv_visual:
-                fields = cv_visual.get("fields", {})
-                cv_x_axis = fields.get("Field", []) or fields.get("X-axis", [])
-                cv_x_col = cv_x_axis[0] if cv_x_axis else None
-                if not cv_x_col:
-                    if cv_title == "Monthly revenue":
-                        cv_x_col = _report_date_column(self._headers)
-                        visual_rows = [r for r in visual_rows if any(str(r.get(cv_x_col, "")).startswith(cv) for cv in cv_labels)]
-                        continue
-                    elif cv_title == "Region revenue":
-                        cv_x_col = _report_field(self._headers, "region")
-                if cv_x_col:
-                    visual_rows = [r for r in visual_rows if str(r.get(cv_x_col, "")).strip() in cv_labels]
+        def well_column(bindings: Any) -> str | None:
+            if not isinstance(bindings, list) or not bindings:
+                return None
+            binding = bindings[0]
+            if isinstance(binding, dict):
+                value = binding.get("column")
+            elif isinstance(binding, (list, tuple)):
+                value = binding[1] if len(binding) > 1 else binding[0]
+            else:
+                value = binding
+            return str(value) if value is not None else None
+
+        x_col = well_column(x_axis)
+        y_col = well_column(y_axis)
+        bound_table_id = str(visual.get("table_id") or self._active_model_table_id())
+        visual_rows_by_table, _, _ = self._report_filter_context(visual_name)
+        visual_rows = visual_rows_by_table.get(bound_table_id)
+        if visual_rows is None:
+            return []
+
+        if visual.get("type") == "slicer":
+            if not x_col:
+                return []
+            values = sorted({
+                "" if row.get(x_col) is None else str(row.get(x_col, ""))
+                for row in visual_rows
+            }, key=str.casefold)
+            return [{"label": value, "value": 1.0} for value in values]
+
+        visual_rows = self._apply_visual_top_n_rows(
+            visual_name, visual_rows, bound_table_id
+        )
 
         from collections import defaultdict
         from decimal import Decimal
@@ -6280,22 +6194,6 @@ class StudioController(QObject):
     def copy_selected_visual(self) -> None:
         if not self._selected_visual: return
 
-        if getattr(self, '_active_role', None):
-            roles = self._project.get("model", {}).get("roles", {})
-            active_role_def = roles.get(self._active_role, {})
-            # table maps to dax expression, here we do a mocked exact check based on the tests.
-            for r_table_id, r_dax_value in active_role_def.get("tables", {}).items():
-                if r_table_id in self._tables and "data" in self._tables[r_table_id]:
-                    # simplistic check for regions per test cases
-                    column_name = "Region" if "Region" in self._tables[r_table_id]["data"].columns else "Category"
-                    # Create a mocked report filter clause
-                    conditions[r_table_id].append((
-                        column_name,
-                        {
-                            "clauses": [{"operator": "equals", "value": r_dax_value}],
-                            "logic": "and",
-                        },
-                    ))
 
         page = self._active_page()
         visual = next((v for v in page.get("visuals", []) if isinstance(v, dict) and v.get("title") == self._selected_visual), None)
@@ -6335,8 +6233,7 @@ class StudioController(QObject):
             
         if not selected_list:
             del self._cross_filters[visual_title]
-            
-        self._dirty = True
+
         self._refresh_report()
         self.stateChanged.emit()
 
@@ -6356,22 +6253,6 @@ class StudioController(QObject):
         from uuid import uuid4
         from copy import deepcopy
 
-        if getattr(self, '_active_role', None):
-            roles = self._project.get("model", {}).get("roles", {})
-            active_role_def = roles.get(self._active_role, {})
-            # table maps to dax expression, here we do a mocked exact check based on the tests.
-            for r_table_id, r_dax_value in active_role_def.get("tables", {}).items():
-                if r_table_id in self._tables and "data" in self._tables[r_table_id]:
-                    # simplistic check for regions per test cases
-                    column_name = "Region" if "Region" in self._tables[r_table_id]["data"].columns else "Category"
-                    # Create a mocked report filter clause
-                    conditions[r_table_id].append((
-                        column_name,
-                        {
-                            "clauses": [{"operator": "equals", "value": r_dax_value}],
-                            "logic": "and",
-                        },
-                    ))
 
         page = self._active_page()
         visuals = page.setdefault("visuals", [])
@@ -6402,22 +6283,6 @@ class StudioController(QObject):
     def copy_format(self) -> None:
         if not self._selected_visual: return
 
-        if getattr(self, '_active_role', None):
-            roles = self._project.get("model", {}).get("roles", {})
-            active_role_def = roles.get(self._active_role, {})
-            # table maps to dax expression, here we do a mocked exact check based on the tests.
-            for r_table_id, r_dax_value in active_role_def.get("tables", {}).items():
-                if r_table_id in self._tables and "data" in self._tables[r_table_id]:
-                    # simplistic check for regions per test cases
-                    column_name = "Region" if "Region" in self._tables[r_table_id]["data"].columns else "Category"
-                    # Create a mocked report filter clause
-                    conditions[r_table_id].append((
-                        column_name,
-                        {
-                            "clauses": [{"operator": "equals", "value": r_dax_value}],
-                            "logic": "and",
-                        },
-                    ))
 
         page = self._active_page()
         visual = next((v for v in page.get("visuals", []) if isinstance(v, dict) and v.get("title") == self._selected_visual), None)
@@ -6434,22 +6299,6 @@ class StudioController(QObject):
     def apply_format_painter(self, visual_title: str) -> None:
         if not self._format_painter_active or not self._clipboard_format_config: return
 
-        if getattr(self, '_active_role', None):
-            roles = self._project.get("model", {}).get("roles", {})
-            active_role_def = roles.get(self._active_role, {})
-            # table maps to dax expression, here we do a mocked exact check based on the tests.
-            for r_table_id, r_dax_value in active_role_def.get("tables", {}).items():
-                if r_table_id in self._tables and "data" in self._tables[r_table_id]:
-                    # simplistic check for regions per test cases
-                    column_name = "Region" if "Region" in self._tables[r_table_id]["data"].columns else "Category"
-                    # Create a mocked report filter clause
-                    conditions[r_table_id].append((
-                        column_name,
-                        {
-                            "clauses": [{"operator": "equals", "value": r_dax_value}],
-                            "logic": "and",
-                        },
-                    ))
 
         page = self._active_page()
         for visual in page.get("visuals", []):
@@ -6469,22 +6318,6 @@ class StudioController(QObject):
     def bring_forward(self) -> None:
         if not self._selected_visual: return
 
-        if getattr(self, '_active_role', None):
-            roles = self._project.get("model", {}).get("roles", {})
-            active_role_def = roles.get(self._active_role, {})
-            # table maps to dax expression, here we do a mocked exact check based on the tests.
-            for r_table_id, r_dax_value in active_role_def.get("tables", {}).items():
-                if r_table_id in self._tables and "data" in self._tables[r_table_id]:
-                    # simplistic check for regions per test cases
-                    column_name = "Region" if "Region" in self._tables[r_table_id]["data"].columns else "Category"
-                    # Create a mocked report filter clause
-                    conditions[r_table_id].append((
-                        column_name,
-                        {
-                            "clauses": [{"operator": "equals", "value": r_dax_value}],
-                            "logic": "and",
-                        },
-                    ))
 
         page = self._active_page()
         visuals = page.setdefault("visuals", [])
@@ -6498,22 +6331,6 @@ class StudioController(QObject):
     def send_backward(self) -> None:
         if not self._selected_visual: return
 
-        if getattr(self, '_active_role', None):
-            roles = self._project.get("model", {}).get("roles", {})
-            active_role_def = roles.get(self._active_role, {})
-            # table maps to dax expression, here we do a mocked exact check based on the tests.
-            for r_table_id, r_dax_value in active_role_def.get("tables", {}).items():
-                if r_table_id in self._tables and "data" in self._tables[r_table_id]:
-                    # simplistic check for regions per test cases
-                    column_name = "Region" if "Region" in self._tables[r_table_id]["data"].columns else "Category"
-                    # Create a mocked report filter clause
-                    conditions[r_table_id].append((
-                        column_name,
-                        {
-                            "clauses": [{"operator": "equals", "value": r_dax_value}],
-                            "logic": "and",
-                        },
-                    ))
 
         page = self._active_page()
         visuals = page.setdefault("visuals", [])
@@ -6527,22 +6344,6 @@ class StudioController(QObject):
     def bring_to_front(self) -> None:
         if not self._selected_visual: return
 
-        if getattr(self, '_active_role', None):
-            roles = self._project.get("model", {}).get("roles", {})
-            active_role_def = roles.get(self._active_role, {})
-            # table maps to dax expression, here we do a mocked exact check based on the tests.
-            for r_table_id, r_dax_value in active_role_def.get("tables", {}).items():
-                if r_table_id in self._tables and "data" in self._tables[r_table_id]:
-                    # simplistic check for regions per test cases
-                    column_name = "Region" if "Region" in self._tables[r_table_id]["data"].columns else "Category"
-                    # Create a mocked report filter clause
-                    conditions[r_table_id].append((
-                        column_name,
-                        {
-                            "clauses": [{"operator": "equals", "value": r_dax_value}],
-                            "logic": "and",
-                        },
-                    ))
 
         page = self._active_page()
         visuals = page.setdefault("visuals", [])
@@ -6567,22 +6368,6 @@ class StudioController(QObject):
     def send_to_back(self) -> None:
         if not self._selected_visual: return
 
-        if getattr(self, '_active_role', None):
-            roles = self._project.get("model", {}).get("roles", {})
-            active_role_def = roles.get(self._active_role, {})
-            # table maps to dax expression, here we do a mocked exact check based on the tests.
-            for r_table_id, r_dax_value in active_role_def.get("tables", {}).items():
-                if r_table_id in self._tables and "data" in self._tables[r_table_id]:
-                    # simplistic check for regions per test cases
-                    column_name = "Region" if "Region" in self._tables[r_table_id]["data"].columns else "Category"
-                    # Create a mocked report filter clause
-                    conditions[r_table_id].append((
-                        column_name,
-                        {
-                            "clauses": [{"operator": "equals", "value": r_dax_value}],
-                            "logic": "and",
-                        },
-                    ))
 
         page = self._active_page()
         visuals = page.setdefault("visuals", [])

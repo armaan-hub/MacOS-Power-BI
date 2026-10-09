@@ -95,7 +95,7 @@ ApplicationWindow {
                 { label: "Sensitivity", visibleLabel: "Sensitivity", width: 62, iconName: "security", commandId: "disabled.sensitivity", available: false, description: "Sensitivity labels are not available in this release." }
             ]},
             { title: "Share", actions: [
-                { label: "Publish", visibleLabel: "Publish", width: 42, iconName: "share", commandId: "service.publish", description: "Publishing is not available in this release." }
+                { label: "Publish", visibleLabel: "Publish", width: 42, iconName: "share", commandId: "service.publish", available: false, description: "Publishing requires a service integration that is not available in this release." }
             ]},
         ]},
         { groups: [
@@ -147,11 +147,11 @@ ApplicationWindow {
                 { label: "New parameter", visibleLabel: "New\nparameter", width: 58, iconName: "form", commandId: "disabled.parameter", available: false, description: "Parameters are not available in this release." }
             ]},
             { title: "Security", actions: [
-                { label: "Manage roles", visibleLabel: "Manage\nroles", width: 48, iconName: "security", commandId: "security.manageRoles", description: "Create and edit security roles for the dataset." },
-                { label: "View as", visibleLabel: "View as", width: 42, iconName: "eye", commandId: "security.viewAs", description: "View the report as a specific security role." }
+                { label: "Manage roles", visibleLabel: "Manage\nroles", width: 48, iconName: "security", commandId: "security.manageRoles", available: false, description: "Role authoring and row-level security are not available in this release." },
+                { label: "View as", visibleLabel: "View as", width: 42, iconName: "eye", commandId: "security.viewAs", available: false, description: "Role previews and row-level security are not available in this release." }
             ]},
             { title: "Q&A", actions: [
-                { label: "Q&A setup", visibleLabel: "Q&A\nsetup", width: 46, iconName: "question", commandId: "ai.qa", available: true, description: "Q&A setup is not available in this release." },
+                { label: "Q&A setup", visibleLabel: "Q&A\nsetup", width: 46, iconName: "question", commandId: "ai.qa", available: false, description: "Q&A and natural-language report authoring are not available in this release." },
                 { label: "Language", visibleLabel: "Language", width: 58, iconName: "format", commandId: "disabled.language", available: false, description: "Natural language configuration is not available in this release." },
                 { label: "Linguistic schema", visibleLabel: "Linguistic\nschema", width: 58, iconName: "math", commandId: "disabled.linguisticSchema", available: false, description: "Linguistic schema editing is not available in this release." }
             ]}
@@ -165,7 +165,7 @@ ApplicationWindow {
             ]},
             { title: "Scale to fit", actions: [
                 { label: "Page view", visibleLabel: "Page view", iconName: "fit", commandId: "view.zoomFit", description: "Fit the report page in the available workspace." },
-                { label: "Mobile layout", visibleLabel: "Mobile\nlayout", iconName: "phone", commandId: "view.mobileLayout", description: "Mobile report layout is not available in this release." }
+                { label: "Mobile layout", visibleLabel: "Mobile\nlayout", iconName: "phone", commandId: "view.mobileLayout", available: false, description: "Mobile report layout is not available in this release." }
             ]},
             { title: "Page options", actions: [
                 { label: "Gridlines", visibleLabel: "Gridlines", iconName: "grid", commandId: "disabled.gridlines", available: false, description: "Canvas gridlines are not available in this release." },
@@ -454,6 +454,9 @@ ApplicationWindow {
     }
 
     function commandAvailable(commandId) {
+        if (commandId === "security.manageRoles" || commandId === "security.viewAs"
+                || commandId === "service.publish" || commandId === "view.mobileLayout"
+                || commandId === "ai.qa") return false
         const reportOnly = commandId.startsWith("report.") || commandId.startsWith("chart.type.")
                 || commandId === "filter.clear" || commandId === "view.filters"
                 || commandId === "view.visualizations" || commandId === "view.dataPane"
@@ -474,6 +477,14 @@ ApplicationWindow {
     }
 
     function commandUnavailableReason(commandId) {
+        if (commandId === "security.manageRoles" || commandId === "security.viewAs")
+            return "Role authoring, role previews, and row-level security are not available in this release."
+        if (commandId === "service.publish")
+            return "Publishing requires a service integration that is not available in this release."
+        if (commandId === "view.mobileLayout")
+            return "Mobile report layout is not available in this release."
+        if (commandId === "ai.qa")
+            return "Q&A and natural-language report authoring are not available in this release."
         const reportOnly = commandId.startsWith("report.") || commandId.startsWith("chart.type.")
                 || commandId === "filter.clear" || commandId === "view.filters"
                 || commandId === "view.visualizations" || commandId === "view.dataPane"
@@ -1001,7 +1012,16 @@ ApplicationWindow {
                                                     seriesColor: modelData.color ? String(modelData.color) : "#0078D4" 
                                                     emptyMessage: "No data is available yet."
 
-                                                    series: (modelData.type === "column" || modelData.type === "bar" || modelData.type === "line" || modelData.type === "area") ? mainWindow.studioController.visualSeries(String(modelData.title)) : []
+                                                    series: {
+                                                        const visuals = mainWindow.studioController.activeVisualObjects
+                                                        const visual = visuals.find(function(item) {
+                                                            return String(item.title) === String(modelData.title)
+                                                        })
+                                                        if (!visual || (visual.type !== "column" && visual.type !== "bar"
+                                                                && visual.type !== "line" && visual.type !== "area"))
+                                                            return []
+                                                        return mainWindow.studioController.visualSeries(String(visual.title))
+                                                    }
 
                                                     filterOnCategory: true
 
@@ -1061,76 +1081,6 @@ ApplicationWindow {
                                                     MouseArea {
                                                         anchors.fill: parent
                                                         onClicked: mainWindow.studioController.selectVisual(String(modelData.title))
-                                                    }
-                                                }
-
-                                                Rectangle {
-                                                    visible: modelData.type === "slicer"
-                                                    anchors.fill: parent
-                                                    color: "#ffffff"
-                                                    border.color: mainWindow.studioController.selectedVisual === String(modelData.title) ? "#0078D4" : "#e1e5e8"
-                                                    border.width: 1
-                                                    
-                                                    ColumnLayout {
-                                                        anchors.fill: parent
-                                                        anchors.margins: 6
-                                                        spacing: 2
-                                                        Text {
-                                                            Layout.fillWidth: true
-                                                            text: modelData.title
-                                                            font.pixelSize: 11
-                                                            color: "#5e6973"
-                                                        }
-                                                        ScrollView {
-                                                            Layout.fillWidth: true
-                                                            Layout.fillHeight: true
-                                                            clip: true
-                                                            ListView {
-                                                                id: slicerList2
-                                                                property string visualTitle: String(modelData.title)
-                                                                model: modelData.type === "slicer" ? mainWindow.studioController.visualSeries(String(modelData.title)) : []
-                                                                property var activeFilters: mainWindow.studioController.selectedCrossFiltersForVisual(String(modelData.title)) || []
-                                                                delegate: Item {
-                                                                    width: slicerList.width
-                                                                    height: 22
-                                                                    RowLayout {
-                                                                        anchors.fill: parent
-                                                                        spacing: 6
-                                                                        Rectangle {
-                                                                            Layout.preferredWidth: 14
-                                                                            Layout.preferredHeight: 14
-                                                                            border.width: 1
-                                                                            border.color: "#333333"
-                                                                            color: slicerList.activeFilters.indexOf(String(modelData.label)) !== -1 ? "#0078D4" : "transparent"
-                                                                        }
-                                                                        Text {
-                                                                            Layout.fillWidth: true
-                                                                            text: String(modelData.label)
-                                                                            font.pixelSize: 11
-                                                                            color: "#333333"
-                                                                        }
-                                                                    }
-                                                                    MouseArea {
-                                                                        anchors.fill: parent
-                                                                        onClicked: {
-                                                                            mainWindow.studioController.selectVisual(String(parent.parent.parent.parent.parent.modelData.title))
-                                                                            mainWindow.studioController.toggle_cross_filter(String(parent.parent.parent.parent.parent.modelData.title), String(modelData.label))
-                                                                        }
-                                                                    }
-                                                                }
-                                                            }
-                                                        }
-                                                    }
-                                                    
-                                                    MouseArea {
-                                                        anchors.fill: parent
-                                                        propagateComposedEvents: true
-                                                        onPressed: function(mouse) {
-                                                            // We cannot swallow click if we want scrollbars/list items to work, 
-                                                            // so let's just select
-                                                            mainWindow.studioController.selectVisual(String(modelData.title))
-                                                            mouse.accepted = false
-                                                        }
                                                     }
                                                 }
 
@@ -1209,8 +1159,21 @@ ApplicationWindow {
                                                             ListView {
                                                                 id: slicerList
                                                                 property string visualTitle: String(modelData.title)
-                                                                model: modelData.type === "slicer" ? mainWindow.studioController.visualSeries(String(modelData.title)) : []
-                                                                property var activeFilters: mainWindow.studioController.selectedCrossFiltersForVisual(String(modelData.title)) || []
+                                                                model: {
+                                                                    const visual = mainWindow.studioController.activeVisualObjects.find(function(item) {
+                                                                        return String(item.title) === visualTitle
+                                                                    })
+                                                                    return visual && visual.type === "slicer"
+                                                                        ? mainWindow.studioController.visualSeries(visualTitle) : []
+                                                                }
+                                                                property var activeFilters: {
+                                                                    const visual = mainWindow.studioController.activeVisualObjects.find(function(item) {
+                                                                        return String(item.title) === visualTitle
+                                                                    })
+                                                                    return visual
+                                                                        ? mainWindow.studioController.selectedCrossFiltersForVisual(visualTitle) || []
+                                                                        : []
+                                                                }
                                                                 delegate: Item {
                                                                     width: slicerList.width
                                                                     height: 22
@@ -1234,8 +1197,8 @@ ApplicationWindow {
                                                                     MouseArea {
                                                                         anchors.fill: parent
                                                                         onClicked: {
-                                                                            mainWindow.studioController.selectVisual(String(parent.parent.parent.parent.parent.modelData.title))
-                                                                            mainWindow.studioController.toggle_cross_filter(String(parent.parent.parent.parent.parent.modelData.title), String(modelData.label))
+                                                                            mainWindow.studioController.selectVisual(slicerList.visualTitle)
+                                                                            mainWindow.studioController.toggle_cross_filter(slicerList.visualTitle, String(modelData.label))
                                                                         }
                                                                     }
                                                                 }
