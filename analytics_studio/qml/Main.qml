@@ -1081,7 +1081,7 @@ ApplicationWindow {
                                                             Layout.fillHeight: true
                                                             clip: true
                                                             ListView {
-                                                                id: slicerList
+                                                                id: slicerList2
                                                                 property string visualTitle: String(modelData.title)
                                                                 model: modelData.type === "slicer" ? mainWindow.studioController.visualSeries(String(modelData.title)) : []
                                                                 property var activeFilters: mainWindow.studioController.selectedCrossFiltersForVisual(String(modelData.title)) || []
