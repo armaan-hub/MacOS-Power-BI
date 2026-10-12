@@ -104,6 +104,16 @@ Item {
                     onClicked: root.appController.executeCommand("importData")
                 }
                 Button {
+                    objectName: "transformDataButton"
+                    visible: root.appController.sourceLoaded
+                    text: "Transform data"
+                    Accessible.name: "Open Power Query Editor for the active table"
+                    Accessible.description: "Preview, add, remove, and reorder saved local cleaning steps. The supported custom-column formula syntax is an M-style subset."
+                    background: Rectangle { radius: 4; color: parent.hovered ? "#edf5fb" : "#f7fafc"; border.color: "#c4dcec" }
+                    contentItem: Text { text: parent.text; color: "#0067b8"; font.pixelSize: 10; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter }
+                    onClicked: root.appController.executeCommand("transformData")
+                }
+                Button {
                     visible: (root.appController.tableCatalog || []).filter(function(table) {
                         return Boolean(table.evaluated)
                     }).length >= 2

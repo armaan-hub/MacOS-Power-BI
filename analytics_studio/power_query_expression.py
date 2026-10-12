@@ -44,7 +44,14 @@ _FUNCTION_ARITY: dict[str, tuple[int, int]] = {
 }
 
 
-def compile_expression(expression: Any) -> tuple[Any, ...]:
+def compile_expression(
+    expression: Any,
+    *,
+    allowed_symbols: set[str] | None = None,
+    allow_unknown_symbols: bool = False,
+    function_names: set[str] | None = None,
+    allow_unknown_functions: bool = False,
+) -> tuple[Any, ...]:
     """Parse one expression and reject syntax outside the supported subset."""
     if not isinstance(expression, str) or not expression.strip():
         raise ExpressionError("Enter a custom-column formula.")
@@ -57,7 +64,10 @@ def compile_expression(expression: Any) -> tuple[Any, ...]:
         raise ExpressionError(
             f"A custom-column formula may contain at most {MAX_EXPRESSION_TOKENS} tokens."
         )
-    parser = _Parser(tokens)
+    parser = _Parser(
+        tokens, allowed_symbols or set(), allow_unknown_symbols,
+        function_names or set(), allow_unknown_functions,
+    )
     tree = parser.parse_expression()
     if parser.position != len(tokens):
         token = tokens[parser.position]
@@ -73,7 +83,7 @@ def referenced_columns(expression: tuple[Any, ...]) -> set[str]:
         kind = node[0]
         if kind == "field":
             result.add(node[1])
-        elif kind == "call":
+        elif kind in {"call", "user_call", "unresolved_call"}:
             for child in node[2]:
                 visit(child)
         elif kind == "if":
@@ -93,10 +103,77 @@ def referenced_columns(expression: tuple[Any, ...]) -> set[str]:
     return result
 
 
-def evaluate_expression(expression: tuple[Any, ...], row: dict[str, str]) -> Any:
+def referenced_symbols(expression: tuple[Any, ...]) -> set[str]:
+    """Return parameter names referenced by a parsed formula."""
+    result: set[str] = set()
+
+    def visit(node: tuple[Any, ...]) -> None:
+        kind = node[0]
+        if kind == "symbol":
+            result.add(node[1])
+        elif kind in {"call", "user_call", "unresolved_call"}:
+            for child in node[2]:
+                visit(child)
+        elif kind == "if":
+            visit(node[1])
+            visit(node[2])
+            visit(node[3])
+        elif kind == "unary":
+            visit(node[2])
+        elif kind == "coalesce":
+            visit(node[1])
+            visit(node[2])
+        elif kind == "binary":
+            visit(node[2])
+            visit(node[3])
+
+    visit(expression)
+    return result
+
+
+def referenced_functions(expression: tuple[Any, ...]) -> set[str]:
+    """Return project-defined scalar functions called by a parsed formula."""
+    result: set[str] = set()
+
+    def visit(node: tuple[Any, ...]) -> None:
+        kind = node[0]
+        if kind == "user_call":
+            result.add(node[1])
+            for child in node[2]:
+                visit(child)
+        elif kind == "call":
+            for child in node[2]:
+                visit(child)
+        elif kind == "if":
+            visit(node[1])
+            visit(node[2])
+            visit(node[3])
+        elif kind in {"unary", "symbol"}:
+            if kind == "unary":
+                visit(node[2])
+        elif kind == "coalesce":
+            visit(node[1])
+            visit(node[2])
+        elif kind == "binary":
+            visit(node[2])
+            visit(node[3])
+
+    visit(expression)
+    return result
+
+
+def evaluate_expression(
+    expression: tuple[Any, ...],
+    row: dict[str, str],
+    parameters: dict[str, Any] | None = None,
+    query_functions: dict[str, tuple[dict[str, str], tuple[Any, ...]]] | None = None,
+) -> Any:
     """Evaluate a parsed formula against one normalized-text table row."""
     try:
-        return _evaluate(expression, row)
+        return _evaluate(
+            _bind_parameters(expression, parameters or {}), row,
+            query_functions or {},
+        )
     except ExpressionError:
         raise
     except (ArithmeticError, DecimalException, OverflowError, TypeError, ValueError) as exc:
@@ -120,9 +197,20 @@ def expression_value_to_text(value: Any) -> str:
 
 
 class _Parser:
-    def __init__(self, tokens: list[tuple[str, str, int]]) -> None:
+    def __init__(
+        self,
+        tokens: list[tuple[str, str, int]],
+        allowed_symbols: set[str],
+        allow_unknown_symbols: bool,
+        function_names: set[str],
+        allow_unknown_functions: bool,
+    ) -> None:
         self.tokens = tokens
         self.position = 0
+        self.allowed_symbols = allowed_symbols
+        self.allow_unknown_symbols = allow_unknown_symbols
+        self.function_names = function_names
+        self.allow_unknown_functions = allow_unknown_functions
 
     def parse_expression(self) -> tuple[Any, ...]:
         if self._accept("keyword", "if"):
@@ -215,7 +303,29 @@ class _Parser:
         if self._peek("identifier"):
             token = self._consume()
             function = token[1]
+            if function in self.allowed_symbols:
+                return ("symbol", function)
+            if function in self.function_names:
+                self._expect("operator", "(")
+                argument = self.parse_expression()
+                self._expect("operator", ")")
+                return ("user_call", function, [argument])
+            if (
+                self.allow_unknown_symbols
+                and not (self._peek("operator") and self._current()[1] == "(")
+            ):
+                return ("symbol", function)
             if function not in _FUNCTION_ARITY:
+                if self.allow_unknown_functions:
+                    self._expect("operator", "(")
+                    arguments: list[tuple[Any, ...]] = []
+                    if not self._accept("operator", ")"):
+                        while True:
+                            arguments.append(self.parse_expression())
+                            if self._accept("operator", ")"):
+                                break
+                            self._expect("operator", ",")
+                    return ("unresolved_call", function, arguments)
                 raise ExpressionError(f"Unsupported name or function {function!r}.")
             self._expect("operator", "(")
             arguments: list[tuple[Any, ...]] = []
@@ -344,7 +454,12 @@ def _read_string(expression: str, position: int) -> tuple[tuple[str, str, int], 
     raise ExpressionError(f"Unclosed text literal at position {start + 1}.")
 
 
-def _evaluate(node: tuple[Any, ...], row: dict[str, str]) -> Any:
+def _evaluate(
+    node: tuple[Any, ...],
+    row: dict[str, str],
+    query_functions: dict[str, tuple[dict[str, str], tuple[Any, ...]]] | None = None,
+) -> Any:
+    functions = query_functions or {}
     kind = node[0]
     if kind == "literal":
         return node[1]
@@ -353,13 +468,17 @@ def _evaluate(node: tuple[Any, ...], row: dict[str, str]) -> Any:
         if name not in row:
             raise ExpressionError(f"Column {name!r} does not exist at this step.")
         return None if row[name] == "" else row[name]
+    if kind == "symbol":
+        raise ExpressionError(
+            f"The parameter {node[1]!r} has no value in this expression context."
+        )
     if kind == "if":
-        condition = _evaluate(node[1], row)
+        condition = _evaluate(node[1], row, functions)
         if not isinstance(condition, bool):
             raise ExpressionError("An if condition must evaluate to true or false.")
-        return _evaluate(node[2] if condition else node[3], row)
+        return _evaluate(node[2] if condition else node[3], row, functions)
     if kind == "unary":
-        value = _evaluate(node[2], row)
+        value = _evaluate(node[2], row, functions)
         if node[1] == "not":
             if value is None:
                 return None
@@ -371,17 +490,17 @@ def _evaluate(node: tuple[Any, ...], row: dict[str, str]) -> Any:
         number = _as_number(value)
         return number if node[1] == "+" else -number
     if kind == "coalesce":
-        value = _evaluate(node[1], row)
-        return _evaluate(node[2], row) if value is None else value
+        value = _evaluate(node[1], row, functions)
+        return _evaluate(node[2], row, functions) if value is None else value
     if kind == "binary":
         operator = node[1]
-        left = _evaluate(node[2], row)
+        left = _evaluate(node[2], row, functions)
         if operator == "and":
             if left is False:
                 return False
             if left is not None and not isinstance(left, bool):
                 raise ExpressionError("The and operator requires logical values.")
-            right = _evaluate(node[3], row)
+            right = _evaluate(node[3], row, functions)
             if right is not None and not isinstance(right, bool):
                 raise ExpressionError("The and operator requires logical values.")
             if right is False:
@@ -394,7 +513,7 @@ def _evaluate(node: tuple[Any, ...], row: dict[str, str]) -> Any:
                 return True
             if left is not None and not isinstance(left, bool):
                 raise ExpressionError("The or operator requires logical values.")
-            right = _evaluate(node[3], row)
+            right = _evaluate(node[3], row, functions)
             if right is not None and not isinstance(right, bool):
                 raise ExpressionError("The or operator requires logical values.")
             if right is True:
@@ -402,12 +521,76 @@ def _evaluate(node: tuple[Any, ...], row: dict[str, str]) -> Any:
             if right is None or left is None:
                 return None
             return left or right
-        right = _evaluate(node[3], row)
+        right = _evaluate(node[3], row, functions)
         return _evaluate_binary(operator, left, right)
     if kind == "call":
-        arguments = [_evaluate(argument, row) for argument in node[2]]
+        arguments = [_evaluate(argument, row, functions) for argument in node[2]]
         return _call_function(node[1], arguments)
+    if kind == "unresolved_call":
+        raise ExpressionError(f"Power Query function {node[1]!r} is unavailable.")
+    if kind == "user_call":
+        entry = functions.get(node[1])
+        if entry is None:
+            raise ExpressionError(f"Power Query function {node[1]!r} is unavailable.")
+        definition, body = entry
+        arguments = [_evaluate(argument, row, functions) for argument in node[2]]
+        if len(arguments) != 1:
+            raise ExpressionError(f"Power Query function {node[1]!r} expects one argument.")
+        try:
+            from analytics_studio.query_functions import (
+                QueryFunctionError,
+                coerce_function_argument,
+                validate_function_result,
+            )
+
+            argument = coerce_function_argument(
+                definition["parameter_type"], arguments[0]
+            )
+            bound_body = _bind_parameters(
+                body, {definition["parameter"]: argument}
+            )
+            result = _evaluate(bound_body, {}, {})
+            return validate_function_result(definition["return_type"], result)
+        except QueryFunctionError as exc:
+            raise ExpressionError(str(exc)) from exc
     raise ExpressionError("The formula contains an invalid expression node.")
+
+
+def _bind_parameters(
+    node: tuple[Any, ...], parameters: dict[str, Any]
+) -> tuple[Any, ...]:
+    """Replace M parameter names with validated scalar values before evaluation."""
+    kind = node[0]
+    if kind == "symbol":
+        name = node[1]
+        if name not in parameters:
+            raise ExpressionError(f"The parameter {name!r} has no current value.")
+        return ("literal", parameters[name])
+    if kind == "call":
+        return (kind, node[1], [_bind_parameters(child, parameters) for child in node[2]])
+    if kind == "user_call":
+        return (kind, node[1], [_bind_parameters(child, parameters) for child in node[2]])
+    if kind == "unresolved_call":
+        return (kind, node[1], [_bind_parameters(child, parameters) for child in node[2]])
+    if kind == "if":
+        return (
+            kind,
+            _bind_parameters(node[1], parameters),
+            _bind_parameters(node[2], parameters),
+            _bind_parameters(node[3], parameters),
+        )
+    if kind == "unary":
+        return (kind, node[1], _bind_parameters(node[2], parameters))
+    if kind == "coalesce":
+        return (kind, _bind_parameters(node[1], parameters), _bind_parameters(node[2], parameters))
+    if kind == "binary":
+        return (
+            kind,
+            node[1],
+            _bind_parameters(node[2], parameters),
+            _bind_parameters(node[3], parameters),
+        )
+    return node
 
 
 def _evaluate_binary(operator: str, left: Any, right: Any) -> Any:

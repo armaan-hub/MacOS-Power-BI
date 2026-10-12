@@ -9,6 +9,7 @@ import csv
 from datetime import date, datetime, time, timedelta, timezone
 from decimal import Decimal, DecimalException
 import json
+import math
 import os
 from pathlib import Path
 import tempfile
@@ -25,11 +26,15 @@ from PySide6.QtCore import (
     Signal,
     Slot,
     QTimer,
+    QUrl,
 )
+from PySide6.QtGui import QDesktopServices, QImage
 from PySide6.QtWidgets import QApplication, QDialog, QFileDialog, QInputDialog, QLineEdit, QMessageBox
 
 from analytics_studio.project import (
+    FORMAT_VERSION,
     ProjectFileError,
+    REPORT_THEMES,
     load_project,
     new_project,
     resolve_source_path,
@@ -42,6 +47,8 @@ from analytics_studio.file_import import FileImportError, ImportCandidate, kind_
 from analytics_studio.folder_import import parse_folder
 from analytics_studio.folder_import_dialog import FolderImportDialog
 from analytics_studio.inline_data import sample_candidate, source_from_candidate
+from analytics_studio.query_parameters import parameter_references, parameter_values
+from analytics_studio.query_functions import function_references
 from analytics_studio.date_table_dialog import DateTableDialog
 from analytics_studio.date_tables import DateTableError, validate_date_table_rows
 from analytics_studio.calendar_table_dialog import CalendarTableDialog
@@ -57,6 +64,11 @@ from analytics_studio.local_table_dialogs import (
     MergeQueriesDialog,
     TransformDataDialog,
 )
+from analytics_studio.power_query_m import (
+    PowerQueryMEditorDialog,
+    m_compatibility_issues,
+    m_script_matches_steps,
+)
 from analytics_studio.measure_dialog import MeasureDialog
 from analytics_studio.calculated_column_dialog import CalculatedColumnDialog
 from analytics_studio.measures import (
@@ -66,6 +78,8 @@ from analytics_studio.measures import (
     evaluate_calculated_columns,
     evaluate_measures,
     normalize_measure,
+    rename_table_references,
+    tokenize,
     validate_calculated_columns,
 )
 from analytics_studio.query_engine import QueryError, append_candidates, merge_candidates
@@ -73,6 +87,7 @@ from analytics_studio.recent_sources import RecentSourcesStore
 from analytics_studio.sql_server import SQLServerError, read_sql_server_object
 from analytics_studio.sql_server_credentials import (
     CredentialStoreError,
+    credential_account as sql_server_credential_account,
     delete_password as delete_sql_server_password,
     get_password as get_sql_server_password,
     set_password as set_sql_server_password,
@@ -84,6 +99,7 @@ from analytics_studio.relationship_dialog import RelationshipDialog
 from analytics_studio.relationships import (
     RELATIONSHIP_VERSION,
     RelationshipError,
+    _relationship_value_key,
     normalize_relationships,
     propagate_relationship_filters,
 )
@@ -95,6 +111,7 @@ from analytics_studio.transformations import (
     apply_transformations,
     column_types_after_steps,
     count_conversion_errors,
+    infer_column_types,
     validate_steps,
 )
 
@@ -102,6 +119,219 @@ from analytics_studio.transformations import (
 PREVIEW_ROW_LIMIT = 500
 CHART_TYPES = {"column", "bar", "line"}
 CHART_VISUALS = {"Monthly revenue", "Region revenue"}
+
+
+def _rename_table_references_in_project(
+    project: dict[str, Any], old_name: str, new_name: str
+) -> None:
+    """Preserve DAX and calculated-table bindings when a model table is renamed."""
+    model = project.get("model", {})
+    for measure in model.get("measures", []):
+        measure["expression"] = rename_table_references(
+            measure["expression"], old_name, new_name
+        )
+    for table in model.get("tables", []):
+        for calculated_column in table.get("calculated_columns", []):
+            calculated_column["expression"] = rename_table_references(
+                calculated_column["expression"], old_name, new_name
+            )
+    for source in project.get("data_sources", []):
+        definition = source.get("query_definition", {})
+        if (
+            definition.get("operation") == "calculated_table"
+            and str(definition.get("source_table", "")).casefold() == old_name.casefold()
+        ):
+            definition["source_table"] = new_name
+            definition["expression"] = rename_table_references(
+                definition["expression"], old_name, new_name
+            )
+
+
+def _query_deletion_blockers(
+    project: dict[str, Any],
+    deleted_source_ids: set[str],
+    *,
+    active_source_id: str | None,
+) -> list[str]:
+    """Describe project objects that would be left pointing at deleted tables."""
+    if not deleted_source_ids:
+        return []
+    model = project.get("model", {})
+    sources_by_id = {
+        str(source.get("id", "")): source
+        for source in project.get("data_sources", [])
+    }
+    tables_by_source = {
+        str(table.get("source_id") or table.get("id")): table
+        for table in model.get("tables", [])
+    }
+    deleted_tables = {
+        source_id: tables_by_source.get(source_id)
+        for source_id in deleted_source_ids
+    }
+    table_ids = set(deleted_source_ids)
+    table_names: dict[str, str] = {}
+    table_headers: dict[str, set[str]] = {}
+    for source_id, table in deleted_tables.items():
+        source = sources_by_id.get(source_id, {})
+        if table is not None:
+            table_ids.add(str(table.get("id", "")))
+        table_names[source_id] = str(
+            (table or {}).get("name")
+            or source.get("query_name")
+            or source.get("name")
+            or source_id
+        )
+        table_headers[source_id] = {
+            str(column).casefold()
+            for column in (table or {}).get("column_types", {})
+        }
+
+    blockers: list[str] = []
+    for source in project.get("data_sources", []):
+        source_id = str(source.get("id", ""))
+        if source_id in deleted_source_ids or source.get("kind") != "query":
+            continue
+        dependencies = {
+            str(item)
+            for item in source.get("query_definition", {}).get("source_ids", [])
+        }
+        missing = dependencies & deleted_source_ids
+        if missing:
+            names = ", ".join(table_names.get(item, item) for item in sorted(missing))
+            blockers.append(
+                f"query {source.get('query_name', source.get('name', source_id))!r} depends on {names}"
+            )
+
+    for relationship in model.get("relationships", []):
+        endpoints = {
+            str(relationship.get("from_table_id", "")),
+            str(relationship.get("to_table_id", "")),
+        }
+        legacy_endpoints = {
+            str(relationship.get("from", "")),
+            str(relationship.get("to", "")),
+        }
+        legacy_match = any(
+            endpoint == table_names.get(source_id, "")
+            or endpoint == source_id
+            or endpoint.startswith((
+                table_names.get(source_id, "") + ".",
+                table_names.get(source_id, "") + "[",
+            ))
+            for source_id in deleted_source_ids
+            for endpoint in legacy_endpoints
+        )
+        if endpoints & table_ids or legacy_match:
+            blockers.append("a saved model relationship uses the table")
+            break
+
+    def walk_table_references(value: Any) -> bool:
+        if isinstance(value, dict):
+            for key, child in value.items():
+                if key in {"table_id", "tableId"} and str(child) in table_ids:
+                    return True
+                if walk_table_references(child):
+                    return True
+        elif isinstance(value, list):
+            return any(walk_table_references(item) for item in value)
+        return False
+
+    report = project.get("report", {})
+    if walk_table_references(report):
+        blockers.append("a report filter, sort, or visual binding uses the table")
+
+    # Legacy and current visuals can bind through plain field names. The active
+    # table supplies their implicit binding when a visual has no table_id.
+    if active_source_id in deleted_source_ids:
+        active_headers = table_headers.get(str(active_source_id), set())
+
+        def uses_active_table(binding: Any) -> bool:
+            if isinstance(binding, str):
+                return binding.casefold() in active_headers
+            if isinstance(binding, dict):
+                bound_table_id = binding.get("table_id") or binding.get("tableId")
+                if bound_table_id:
+                    return str(bound_table_id) in table_ids
+                return str(binding.get("column", "")).casefold() in active_headers
+            if isinstance(binding, (list, tuple)):
+                if len(binding) >= 2 and str(binding[0]) in table_ids:
+                    return str(binding[0]) in table_ids
+                return any(uses_active_table(item) for item in binding)
+            return False
+
+        for page in report.get("pages", []):
+            for visual in page.get("visuals", []):
+                if visual.get("table_id"):
+                    continue
+                fields = visual.get("fields", {})
+                if isinstance(fields, dict) and any(
+                    uses_active_table(binding)
+                    for well in fields.values()
+                    if isinstance(well, (list, tuple))
+                    for binding in well
+                ):
+                    blockers.append(
+                        f"visual {visual.get('title', 'Untitled')!r} uses a field from the active table"
+                    )
+                    break
+            if blockers and blockers[-1].startswith("visual "):
+                break
+
+    for source in project.get("data_sources", []):
+        if str(source.get("id", "")) in deleted_source_ids:
+            continue
+        definition = source.get("query_definition", {})
+        source_table = str(definition.get("source_table", "")).casefold()
+        if source_table and any(
+            source_table == name.casefold() for name in table_names.values()
+        ):
+            blockers.append(
+                f"calculated table {source.get('query_name', source.get('name', 'query'))!r} binds to the table name"
+            )
+
+    def dax_references(expression: Any) -> list[tuple[str, str]]:
+        try:
+            return [
+                token.value.split("\0", 1)
+                for token in tokenize(str(expression))
+                if token.kind == "reference"
+            ]
+        except MeasureError:
+            return []
+
+    for measure in model.get("measures", []):
+        references = dax_references(measure.get("expression", ""))
+        for source_id in deleted_source_ids:
+            table_name = table_names[source_id]
+            if any(
+                (table and table.casefold() == table_name.casefold())
+                or (not table and column.casefold() in table_headers[source_id])
+                for table, column in references
+            ):
+                blockers.append(f"measure {measure.get('name', 'Measure')!r} references {table_name!r}")
+                break
+
+    for table in model.get("tables", []):
+        table_source_id = str(table.get("source_id") or table.get("id", ""))
+        if table_source_id in deleted_source_ids:
+            continue
+        for calculated_column in table.get("calculated_columns", []):
+            references = dax_references(calculated_column.get("expression", ""))
+            for source_id in deleted_source_ids:
+                table_name = table_names[source_id]
+                if any(
+                    referenced_table
+                    and referenced_table.casefold() == table_name.casefold()
+                    for referenced_table, _column in references
+                ):
+                    blockers.append(
+                        "calculated column "
+                        f"{calculated_column.get('name', 'Calculated column')!r} "
+                        f"references {table_name!r}"
+                    )
+                    break
+    return list(dict.fromkeys(blockers))
 SUPPORTED_SOURCE_KINDS = {"csv", "excel", "json", "xml", "parquet", "sqlite", "folder", "query", "sql_server", "odata", "web"}
 PATHLESS_SOURCE_KINDS = {"inline", "query", "sql_server", "odata", "web"}
 _REPORT_FIELD_ALIASES = {
@@ -139,6 +369,30 @@ _REPORT_FILTER_MULTI_VALUE = {"is_any_of", "is_none_of"}
 _REPORT_FILTER_RELATIVE_DATE = "relative_date"
 _REPORT_FILTER_RELATIVE_TIME = "relative_time"
 _REPORT_FILTER_TOP_N = "top_n"
+_VISUAL_FIELD_AGGREGATIONS = {
+    "sum": "Sum",
+    "count": "Count",
+    "average": "Average",
+}
+_VISUAL_MEASURE_PREFIX = "__dax_measure__:"
+
+
+def _visual_measure_name(binding: Any) -> str | None:
+    value = str(binding)
+    if not value.startswith(_VISUAL_MEASURE_PREFIX):
+        return None
+    name = value[len(_VISUAL_MEASURE_PREFIX):]
+    return name or None
+
+
+def _visual_measure_binding(name: str) -> str:
+    return f"{_VISUAL_MEASURE_PREFIX}{name}"
+
+
+def _open_external_url(url: QUrl) -> bool:
+    return QDesktopServices.openUrl(url)
+
+
 _REPORT_FILTER_RELATIVE_DATE_UNITS = {
     "days", "weeks", "calendar_weeks", "months", "calendar_months",
     "years", "calendar_years",
@@ -604,25 +858,10 @@ def _require_unique_relationship_values(
 ) -> None:
     seen: set[Any] = set()
     for row in rows:
-        value = "" if row.get(column) is None else str(row.get(column, ""))
-        if column_type in {"whole_number", "decimal_number"} and value != "":
-            try:
-                number = Decimal(value)
-            except DecimalException as exc:
-                raise RelationshipError(
-                    f"{table_name}[{column}] contains a value that is not a valid number."
-                ) from exc
-            if not number.is_finite() or (
-                column_type == "whole_number"
-                and number != number.to_integral_value()
-            ):
-                raise RelationshipError(
-                    f"{table_name}[{column}] contains a value that is not a valid "
-                    f"{column_type.replace('_', ' ')}."
-                )
-            key: Any = ("number", number)
-        else:
-            key = ("value", value)
+        try:
+            key = _relationship_value_key(row.get(column), column_type)
+        except RelationshipError as exc:
+            raise RelationshipError(f"{table_name}[{column}] {exc}") from exc
         if key in seen:
             raise RelationshipError(
                 f"{table_name}[{column}] must contain unique values, including blanks, "
@@ -723,12 +962,18 @@ class StudioController(QObject):
         self._active_source_kind: str | None = None
         self._active_parser_options: dict[str, Any] = {}
         self._loaded_candidates: dict[str, ImportCandidate] = {}
+        self._raw_candidates: dict[str, ImportCandidate] = {}
         self._source_load_errors: dict[str, str] = {}
         self._sql_server_passwords: dict[str, str] = {}
         self._source_warning = ""
         self._field_query = ""
         self._current_region: str | None = None
         self._selected_visual = ""
+        self._selected_visual_ids: list[str] = []
+        self._creating_visual = False
+        self._clipboard_visual_config: dict[str, Any] | None = None
+        self._clipboard_format_config: dict[str, Any] | None = None
+        self._format_painter_active = False
         self._status_message = "Ready · new project"
         self._kpis: dict[str, str] = {}
         self._region_column: str | None = None
@@ -738,7 +983,7 @@ class StudioController(QObject):
         self._cross_filters: dict[str, list[str]] = {}
         self._filter_context_error = ""
         self._report_filter_context_cache: dict[
-            str | None,
+            tuple[str | None, bool],
             tuple[
                 dict[str, list[dict[str, Any]]],
                 list[dict[str, Any]],
@@ -835,7 +1080,27 @@ class StudioController(QObject):
             return []
             
         v_type = visual.get("type", "card")
-        if v_type in {"column", "bar", "line", "area"}:
+        if v_type == "scatter":
+            wells = ["X-axis", "Y-axis", "Legend", "Details", "Tooltips"]
+        elif v_type == "waterfall":
+            wells = ["X-axis", "Y-axis", "Tooltips"]
+        elif v_type == "treemap":
+            wells = ["X-axis", "Y-axis", "Tooltips"]
+        elif v_type == "matrix":
+            wells = ["Rows", "Columns", "Values", "Tooltips"]
+        elif v_type == "lineClusteredColumn":
+            wells = ["X-axis", "Column Y-axis", "Line Y-axis", "Tooltips"]
+        elif v_type == "gauge":
+            wells = ["Value", "Minimum", "Maximum", "Target", "Tooltips"]
+        elif v_type == "kpi":
+            wells = ["Indicator", "Trend axis", "Target goals", "Tooltips"]
+        elif v_type == "map":
+            wells = ["Location", "Latitude", "Longitude", "Size", "Legend", "Tooltips"]
+        elif v_type in {
+            "column", "bar", "stackedBar", "stackedColumn", "bar100", "column100",
+            "stackedArea", "area100",
+            "line", "area", "pie", "donut", "funnel", "ribbon",
+        }:
             wells = ["X-axis", "Y-axis", "Legend", "Tooltips"]
         elif v_type in {"shape", "text_box", "image"}:
             return []
@@ -844,9 +1109,141 @@ class StudioController(QObject):
             
         assigned_fields = visual.get("fields", {})
         return [
-            {"name": well, "fields": assigned_fields.get(well, [])}
+            {
+                "name": well,
+                "fields": assigned_fields.get(well, []),
+                "aggregations": dict(visual.get("field_aggregations", {})),
+            }
             for well in wells
         ]
+
+    @Property("QVariantList", notify=stateChanged)
+    def activeVisualInteractions(self) -> list[dict[str, object]]:  # noqa: N802
+        page = self._active_page()
+        if not page or not self._selected_visual:
+            return []
+        visuals = [item for item in page.get("visuals", []) if isinstance(item, dict)]
+        source = next((item for item in visuals if item.get("title") == self._selected_visual), None)
+        if source is None or source.get("type") == "card":
+            return []
+        result = []
+        for target in visuals:
+            if target is source or not target.get("title"):
+                continue
+            mode = self._visual_interaction_mode(source, target)
+            result.append({
+                "title": str(target["title"]),
+                "mode": mode,
+                "mode_index": {"filter": 0, "highlight": 1, "none": 2}[mode],
+            })
+        return result
+
+    @staticmethod
+    def _visual_persistence_id(visual: dict[str, Any]) -> str:
+        return str(visual.get("id") or visual.get("title") or "")
+
+    def _visual_interaction_mode(
+        self, source: dict[str, Any], target: dict[str, Any]
+    ) -> str:
+        page = self._active_page()
+        source_id = self._visual_persistence_id(source)
+        target_id = self._visual_persistence_id(target)
+        for interaction in (page.get("visual_interactions", []) if page else []):
+            if (
+                interaction.get("source_visual_id") == source_id
+                and interaction.get("target_visual_id") == target_id
+            ):
+                mode = str(interaction.get("mode", "filter"))
+                return mode if mode in {"filter", "highlight", "none"} else "filter"
+        return "filter"
+
+    @Slot(str, str, str)
+    def set_visual_interaction(
+        self, source_title: str, target_title: str, mode: str
+    ) -> None:
+        mode = mode.strip().casefold()
+        page = self._active_page()
+        visuals = [item for item in (page.get("visuals", []) if page else []) if isinstance(item, dict)]
+        source = next((item for item in visuals if item.get("title") == source_title), None)
+        target = next((item for item in visuals if item.get("title") == target_title), None)
+        if source is None or target is None or source is target:
+            self._set_status("Choose two different visuals on this page.")
+            return
+        if source.get("type") == "card":
+            self._set_status("A Card visual has no category selection to send to other visuals.")
+            return
+        if mode not in {"filter", "highlight", "none"}:
+            self._set_status("Visual interactions support Filter, Highlight, or None.")
+            return
+        source_id = self._visual_persistence_id(source)
+        target_id = self._visual_persistence_id(target)
+        interactions = page.setdefault("visual_interactions", [])
+        interaction = next((
+            item for item in interactions
+            if item.get("source_visual_id") == source_id
+            and item.get("target_visual_id") == target_id
+        ), None)
+        if mode == "filter":
+            if interaction is None:
+                return
+            interactions.remove(interaction)
+        elif interaction is not None and interaction.get("mode") == mode:
+            return
+        elif interaction is None:
+            interactions.append({
+                "source_visual_id": source_id,
+                "target_visual_id": target_id,
+                "mode": mode,
+            })
+        else:
+            interaction["mode"] = mode
+        self._dirty = True
+        self._refresh_report()
+        self.stateChanged.emit()
+
+    @Slot(str, str, result=str)
+    def visualFieldAggregation(self, well_name: str, field_name: str) -> str:  # noqa: N802
+        if _visual_measure_name(field_name) is not None:
+            return ""
+        if well_name not in {
+            "Y-axis", "Column Y-axis", "Line Y-axis", "Value", "Minimum",
+            "Maximum", "Target", "Indicator", "Target goals", "Fields", "Values",
+        } or not self._selected_visual:
+            return ""
+        page = self._active_page()
+        visual = next((
+            item for item in (page.get("visuals", []) if page else [])
+            if isinstance(item, dict) and item.get("title") == self._selected_visual
+        ), None)
+        if visual is None or (
+            well_name in {"Y-axis", "Column Y-axis", "Line Y-axis"}
+            and field_name not in visual.get("fields", {}).get(well_name, [])
+        ) or (
+            well_name in {"Value", "Minimum", "Maximum", "Target"}
+            and (
+                visual.get("type") != "gauge"
+                or field_name not in visual.get("fields", {}).get(well_name, [])
+            )
+        ) or (
+            well_name in {"Indicator", "Target goals"}
+            and (
+                visual.get("type") != "kpi"
+                or field_name not in visual.get("fields", {}).get(well_name, [])
+            )
+        ) or (
+            well_name == "Fields" and (
+                visual.get("type") != "card"
+                or field_name not in visual.get("fields", {}).get(well_name, [])
+            )
+        ) or (
+            well_name == "Values" and (
+                visual.get("type") != "matrix"
+                or field_name not in visual.get("fields", {}).get(well_name, [])
+            )
+        ):
+            return ""
+        key = str(visual.get("field_aggregations", {}).get(field_name, "sum")).casefold()
+        return _VISUAL_FIELD_AGGREGATIONS.get(key, "Sum")
 
     @Property("QVariantList", notify=stateChanged)
     def activeVisualPropertyGroups(self) -> list[dict[str, object]]:  # noqa: N802
@@ -875,7 +1272,9 @@ class StudioController(QObject):
             {
                 "name": "Data Colors",
                 "properties": [
-                    {"key": "color", "label": "Primary Color", "type": "color", "value": visual.get("color", "#0078D4")}
+                    {"key": "color", "label": "Primary Color", "type": "color", "value": visual.get("color", "#0078D4")},
+                    {"key": "show_data_labels", "label": "Data Labels", "type": "boolean", "value": visual.get("show_data_labels", False)},
+                    {"key": "show_legend", "label": "Legend", "type": "boolean", "value": visual.get("show_legend", False)},
                 ]
             },
             {
@@ -886,6 +1285,20 @@ class StudioController(QObject):
                 ]
             } if visual.get("type") == "button" else None
         ]
+        if visual.get("type") == "text_box":
+            groups.insert(1, {
+                "name": "Text",
+                "properties": [
+                    {"key": "text", "label": "Text", "type": "string", "value": visual.get("text", "")},
+                ],
+            })
+        if visual.get("type") == "image":
+            groups.insert(1, {
+                "name": "Image",
+                "properties": [
+                    {"key": "image_path", "label": "Image path", "type": "string", "value": visual.get("image_path", "")},
+                ],
+            })
 
         return [group for group in groups if group is not None]
 
@@ -1000,7 +1413,37 @@ class StudioController(QObject):
     @Property("QVariantList", notify=stateChanged)
     def filteredFields(self) -> list[str]:  # noqa: N802
         query = self._field_query.casefold()
-        return [field for field in self._headers if query in field.casefold()]
+        fields = [field for field in self._headers if query in field.casefold()]
+        measures = [
+            _visual_measure_binding(str(item["name"]))
+            for item in self._project.get("model", {}).get("measures", [])
+            if not item.get("is_hidden", False)
+            if query in f"measure {item['name']}".casefold()
+        ]
+        return [*fields, *measures]
+
+    @Property("QVariantList", notify=stateChanged)
+    def activeVisualFieldOptions(self) -> list[str]:  # noqa: N802
+        options = self.filteredFields
+        page = self._active_page()
+        if not self._selected_visual or page is None:
+            return options
+        visual = next((
+            item for item in page.get("visuals", [])
+            if isinstance(item, dict) and item.get("title") == self._selected_visual
+        ), None)
+        if visual is not None and visual.get("type") == "slicer":
+            return [item for item in options if _visual_measure_name(item) is None]
+        return options
+
+    @Slot(str, result=str)
+    def visualFieldLabel(self, binding: str) -> str:  # noqa: N802
+        measure_name = _visual_measure_name(binding)
+        return f"Measure · {measure_name}" if measure_name else binding
+
+    @Slot(str, result=bool)
+    def visualFieldIsMeasure(self, binding: str) -> bool:  # noqa: N802
+        return _visual_measure_name(binding) is not None
 
     @Property("QVariantMap", notify=stateChanged)
     def reportKpis(self) -> dict[str, str]:  # noqa: N802
@@ -1012,7 +1455,12 @@ class StudioController(QObject):
 
     @Property("QVariantList", notify=stateChanged)
     def reportKpiNames(self) -> list[str]:  # noqa: N802
-        return ["Revenue", "Cost", "Margin", "Units", "Orders", *self._measure_values]
+        visible_measures = [
+            str(item["name"])
+            for item in self._project.get("model", {}).get("measures", [])
+            if not item.get("is_hidden", False)
+        ]
+        return ["Revenue", "Cost", "Margin", "Units", "Orders", *visible_measures]
 
     @Property("QVariantList", notify=stateChanged)
     def monthlySeries(self) -> list[dict[str, str | float]]:  # noqa: N802
@@ -1033,9 +1481,731 @@ class StudioController(QObject):
         return [dict(item) for item in series]
 
     @Slot(str, result="QVariantList")
-    def visualSeries(self, visual_name: str) -> list[dict[str, str | float]]:
+    def visualSeries(self, visual_name: str) -> list[dict[str, object]]:
         series = self._generate_dynamic_visual_series(visual_name)
         return [dict(item) for item in series]
+
+    @Slot(str, result="QVariantList")
+    def visualLineSeries(self, visual_name: str) -> list[dict[str, object]]:  # noqa: N802
+        series = self._generate_dynamic_visual_series(
+            visual_name, value_well="Line Y-axis"
+        )
+        return [dict(item) for item in series]
+
+    @Slot(str, result="QVariantList")
+    def visualLineHighlightSeries(self, visual_name: str) -> list[dict[str, object]]:  # noqa: N802
+        if not self.visualHighlightSeries(visual_name):
+            return []
+        series = self._generate_dynamic_visual_series(
+            visual_name, include_highlights=True, value_well="Line Y-axis"
+        )
+        return [dict(item) for item in series]
+
+    @Slot(str, bool, result="QVariantMap")
+    def visualGaugeData(
+        self, visual_name: str, include_highlights: bool = False
+    ) -> dict[str, object]:  # noqa: N802
+        page = self._active_page()
+        visual = next((
+            item for item in (page.get("visuals", []) if page else [])
+            if isinstance(item, dict) and item.get("title") == visual_name
+        ), None)
+        if visual is None or visual.get("type") != "gauge":
+            return {
+                "value": 0.0, "minimum": 0.0, "maximum": 1.0,
+                "target": None, "highlight_value": None, "has_value": False,
+            }
+
+        bound_table_id = str(visual.get("table_id") or self._active_model_table_id())
+        rows_by_table, measure_context, filter_table_ids = self._report_filter_context(
+            visual_name, include_highlights=include_highlights
+        )
+        source_rows = rows_by_table.get(bound_table_id, [])
+        fields = visual.get("fields", {})
+
+        def aggregate_well(well_name: str) -> Decimal | None:
+            bindings = fields.get(well_name, [])
+            if not isinstance(bindings, list) or not bindings:
+                return None
+            binding = bindings[0]
+            if isinstance(binding, dict):
+                column = str(binding.get("column", ""))
+            elif isinstance(binding, (list, tuple)):
+                column = str(binding[1] if len(binding) > 1 else (binding[0] if binding else ""))
+            else:
+                column = str(binding)
+            if not column:
+                return None
+            measure_name = _visual_measure_name(column)
+            if measure_name:
+                try:
+                    return self._measure_value_for_visual_group(
+                        measure_name, measure_context, filter_table_ids, {},
+                        bound_table_id,
+                    )
+                except (MeasureError, KeyError, TypeError, ValueError):
+                    return None
+            aggregation = str(visual.get("field_aggregations", {}).get(column, "sum")).casefold()
+            if aggregation not in _VISUAL_FIELD_AGGREGATIONS:
+                aggregation = "sum"
+            raw_values = [row.get(column) for row in source_rows]
+            if aggregation == "count":
+                count = sum(value is not None and bool(str(value).strip()) for value in raw_values)
+                return Decimal(count) if count else Decimal(0)
+            numbers = [number for value in raw_values if (number := _report_number(value)) is not None]
+            if not numbers:
+                return None
+            total = sum(numbers, Decimal(0))
+            return total / len(numbers) if aggregation == "average" else total
+
+        value = aggregate_well("Value")
+        if value is None:
+            return {
+                "value": 0.0, "minimum": 0.0, "maximum": 1.0,
+                "target": None, "highlight_value": None, "has_value": False,
+            }
+        minimum = aggregate_well("Minimum")
+        maximum = aggregate_well("Maximum")
+        target = aggregate_well("Target")
+        result = {
+            "value": float(value),
+            "minimum": float(minimum) if minimum is not None else 0.0,
+            "maximum": float(maximum) if maximum is not None else float(max(Decimal(1), value)),
+            "target": float(target) if target is not None else None,
+            "has_value": True,
+        }
+        if not include_highlights:
+            highlight = self.visualGaugeHighlightData(visual_name)
+            result["highlight_value"] = highlight.get("value")
+        return result
+
+    @Slot(str, result="QVariantMap")
+    def visualGaugeHighlightData(self, visual_name: str) -> dict[str, object]:  # noqa: N802
+        page = self._active_page()
+        target = next((
+            item for item in (page.get("visuals", []) if page else [])
+            if isinstance(item, dict) and item.get("title") == visual_name
+        ), None)
+        if target is None or target.get("type") != "gauge":
+            return {"has_value": False}
+        has_highlight = any(
+            selected
+            and (source := next((
+                item for item in (page.get("visuals", []) if page else [])
+                if isinstance(item, dict) and item.get("title") == source_title
+            ), None)) is not None
+            and self._visual_interaction_mode(source, target) == "highlight"
+            for source_title, selected in self._cross_filters.items()
+        )
+        if not has_highlight:
+            return {"has_value": False}
+        return self.visualGaugeData(visual_name, True)
+
+    @Slot(str, bool, result="QVariantMap")
+    def visualKpiData(
+        self, visual_name: str, include_highlights: bool = False
+    ) -> dict[str, object]:  # noqa: N802
+        page = self._active_page()
+        visual = next((
+            item for item in (page.get("visuals", []) if page else [])
+            if isinstance(item, dict) and item.get("title") == visual_name
+        ), None)
+        empty = {
+            "field": "", "trend_field": "", "value": 0.0, "target": None,
+            "trend": [], "highlight_value": None, "has_value": False,
+        }
+        if visual is None or visual.get("type") != "kpi":
+            return empty
+
+        def field_name(well_name: str) -> str:
+            bindings = visual.get("fields", {}).get(well_name, [])
+            if not isinstance(bindings, list) or not bindings:
+                return ""
+            binding = bindings[0]
+            if isinstance(binding, dict):
+                return str(binding.get("column", ""))
+            if isinstance(binding, (list, tuple)):
+                return str(binding[1] if len(binding) > 1 else (binding[0] if binding else ""))
+            return str(binding)
+
+        indicator_field = field_name("Indicator")
+        trend_field = field_name("Trend axis")
+        target_field = field_name("Target goals")
+        if not indicator_field or not trend_field:
+            return empty
+
+        values = self._generate_dynamic_visual_series(
+            visual_name, include_highlights=include_highlights
+        )
+        if not values:
+            return empty
+        targets = self._generate_dynamic_visual_series(
+            visual_name,
+            include_highlights=include_highlights,
+            value_well="Target goals",
+        ) if target_field else []
+        targets_by_label = {str(item["label"]): float(item["value"]) for item in targets}
+        trend = [
+            {
+                "label": str(item["label"]),
+                "value": float(item["value"]),
+                "target": targets_by_label.get(str(item["label"])),
+            }
+            for item in values
+        ]
+        latest = trend[-1]
+        result: dict[str, object] = {
+            "field": self.visualFieldLabel(indicator_field),
+            "trend_field": trend_field,
+            "value": latest["value"],
+            "target": latest["target"],
+            "label": latest["label"],
+            "trend": trend,
+            "highlight_value": None,
+            "has_value": True,
+        }
+        if not include_highlights and self.visualHighlightSeries(visual_name):
+            highlighted = self.visualKpiData(visual_name, True)
+            if highlighted.get("has_value"):
+                result["highlight_value"] = highlighted.get("value")
+        return result
+
+    @Slot(str, bool, result="QVariantList")
+    def visualMapData(
+        self, visual_name: str, include_highlights: bool = False
+    ) -> list[dict[str, object]]:  # noqa: N802
+        page = self._active_page()
+        visual = next((
+            item for item in (page.get("visuals", []) if page else [])
+            if isinstance(item, dict) and item.get("title") == visual_name
+        ), None)
+        if visual is None or visual.get("type") != "map":
+            return []
+
+        def field_name(well_name: str) -> str:
+            bindings = visual.get("fields", {}).get(well_name, [])
+            if not isinstance(bindings, list) or not bindings:
+                return ""
+            binding = bindings[0]
+            if isinstance(binding, dict):
+                return str(binding.get("column", ""))
+            if isinstance(binding, (list, tuple)):
+                return str(binding[1] if len(binding) > 1 else (binding[0] if binding else ""))
+            return str(binding)
+
+        latitude_field = field_name("Latitude")
+        longitude_field = field_name("Longitude")
+        if not latitude_field or not longitude_field:
+            return []
+        if include_highlights:
+            has_highlight = any(
+                selected
+                and (source := next((
+                    item for item in (page.get("visuals", []) if page else [])
+                    if isinstance(item, dict) and item.get("title") == source_title
+                ), None)) is not None
+                and self._visual_interaction_mode(source, visual) == "highlight"
+                for source_title, selected in self._cross_filters.items()
+            )
+            if not has_highlight:
+                return []
+
+        bound_table_id = str(visual.get("table_id") or self._active_model_table_id())
+        rows_by_table, _, _ = self._report_filter_context(
+            visual_name, include_highlights=include_highlights
+        )
+        rows = rows_by_table.get(bound_table_id, [])
+        location_field = field_name("Location")
+        size_field = field_name("Size")
+        legend_field = field_name("Legend")
+        points: list[dict[str, object]] = []
+        for row in rows:
+            latitude = _report_number(row.get(latitude_field))
+            longitude = _report_number(row.get(longitude_field))
+            if latitude is None or longitude is None or not -90 <= latitude <= 90 or not -180 <= longitude <= 180:
+                continue
+            location_value = row.get(location_field) if location_field else None
+            label = (
+                str(location_value).strip()
+                if location_value is not None and str(location_value).strip()
+                else f"{float(latitude):.4g}, {float(longitude):.4g}"
+            )
+            size = _report_number(row.get(size_field)) if size_field else None
+            legend_value = row.get(legend_field) if legend_field else None
+            group = (
+                "(Blank)" if legend_field and (legend_value is None or not str(legend_value).strip())
+                else str(legend_value) if legend_field else ""
+            )
+            points.append({
+                "id": f"{label}|{latitude}|{longitude}|{group}",
+                "label": label,
+                "latitude": float(latitude),
+                "longitude": float(longitude),
+                "size": max(0.0, float(size)) if size is not None else 1.0,
+                "group": group,
+            })
+        return points
+
+    @Slot(str, bool, result="QVariantList")
+    def visualScatterData(
+        self, visual_name: str, include_highlights: bool = False
+    ) -> list[dict[str, object]]:  # noqa: N802
+        page = self._active_page()
+        visual = next((
+            item for item in (page.get("visuals", []) if page else [])
+            if isinstance(item, dict) and item.get("title") == visual_name
+        ), None)
+        if visual is None or visual.get("type") != "scatter":
+            return []
+
+        def field_name(well_name: str) -> str:
+            bindings = visual.get("fields", {}).get(well_name, [])
+            if not isinstance(bindings, list) or not bindings:
+                return ""
+            binding = bindings[0]
+            if isinstance(binding, dict):
+                return str(binding.get("column", ""))
+            if isinstance(binding, (list, tuple)):
+                return str(binding[1] if len(binding) > 1 else (binding[0] if binding else ""))
+            return str(binding)
+
+        x_field = field_name("X-axis")
+        y_field = field_name("Y-axis")
+        legend_field = field_name("Legend")
+        details_field = field_name("Details")
+        if not x_field or not y_field:
+            return []
+
+        bound_table_id = str(visual.get("table_id") or self._active_model_table_id())
+        rows_by_table, _, _ = self._report_filter_context(
+            visual_name, include_highlights=include_highlights
+        )
+        rows = rows_by_table.get(bound_table_id, [])
+        points: list[dict[str, object]] = []
+        for row in rows:
+            x_value = _report_number(row.get(x_field))
+            y_value = _report_number(row.get(y_field))
+            if x_value is None or y_value is None:
+                continue
+            legend_value = row.get(legend_field) if legend_field else None
+            group = (
+                "(Blank)" if legend_field and (legend_value is None or not str(legend_value).strip())
+                else (str(legend_value) if legend_field else "Series")
+            )
+            category_value = row.get(details_field) if details_field else (
+                legend_value if legend_field else row.get(x_field)
+            )
+            label = (
+                "(Blank)" if category_value is None or not str(category_value).strip()
+                else str(category_value)
+            )
+            x_number, y_number = float(x_value), float(y_value)
+            points.append({
+                "id": f"{label}|{group}|{x_number}|{y_number}",
+                "label": label,
+                "group": group,
+                "x": x_number,
+                "y": y_number,
+            })
+        return points
+
+    @Slot(str, result="QVariantMap")
+    def visualTableData(self, visual_name: str) -> dict[str, object]:  # noqa: N802
+        page = self._active_page()
+        visual = next((
+            item for item in (page.get("visuals", []) if page else [])
+            if isinstance(item, dict) and item.get("title") == visual_name
+        ), None)
+        if visual is None or visual.get("type") != "table":
+            return {"columns": [], "rows": [], "total_rows": 0}
+
+        fields = visual.get("fields", {}).get("Fields", [])
+        bindings: list[str] = []
+        for binding in fields:
+            if isinstance(binding, dict):
+                field = binding.get("column")
+            elif isinstance(binding, (list, tuple)):
+                field = binding[1] if len(binding) > 1 else (binding[0] if binding else None)
+            else:
+                field = binding
+            if field is not None and str(field) not in bindings:
+                bindings.append(str(field))
+        if not bindings:
+            return {"columns": [], "rows": [], "total_rows": 0}
+
+        bound_table_id = str(visual.get("table_id") or self._active_model_table_id())
+        rows_by_table, measure_context, filter_table_ids = self._report_filter_context(visual_name)
+        source_rows = rows_by_table.get(bound_table_id, [])
+        measure_names = {
+            binding: _visual_measure_name(binding)
+            for binding in bindings
+        }
+        dimension_columns = [
+            binding for binding in bindings if measure_names[binding] is None
+        ]
+        columns = [measure_names[binding] or binding for binding in bindings]
+        model_table = next((
+            item for item in self._table_catalog
+            if str(item.get("id", "")) == bound_table_id
+        ), None)
+        candidate = self._loaded_candidates.get(
+            str(model_table.get("sourceId", ""))
+        ) if model_table else None
+        available_columns = set(candidate.headers) if candidate else set()
+        missing_dimensions = [
+            column for column in dimension_columns
+            if column not in available_columns
+        ]
+        if missing_dimensions:
+            names = ", ".join(repr(column) for column in missing_dimensions)
+            return {
+                "columns": columns,
+                "rows": [],
+                "total_rows": 0,
+                "error": (
+                    f"Table fields {names} are no longer available. "
+                    "Remove or replace the field after refreshing the source."
+                ),
+            }
+        category_column = dimension_columns[0] if dimension_columns else ""
+        highlighted_categories: set[str] = set()
+        has_highlight = any(
+            selected
+            and (source := next((
+                item for item in (page.get("visuals", []) if page else [])
+                if isinstance(item, dict) and item.get("title") == source_title
+            ), None)) is not None
+            and self._visual_interaction_mode(source, visual) == "highlight"
+            for source_title, selected in self._cross_filters.items()
+        )
+        if has_highlight and category_column:
+            highlight_rows, _, _ = self._report_filter_context(
+                visual_name, include_highlights=True
+            )
+            highlighted_categories = {
+                str(row.get(category_column, "") or "")
+                for row in highlight_rows.get(bound_table_id, [])
+            }
+
+        if not any(measure_names.values()):
+            rows = [
+                {
+                    "values": [
+                        "" if row.get(column) is None else str(row.get(column, ""))
+                        for column in bindings
+                    ],
+                    "category": str(row.get(category_column, "") or ""),
+                    "highlighted": str(row.get(category_column, "") or "") in highlighted_categories,
+                }
+                for row in source_rows[:50]
+            ]
+            return {"columns": columns, "rows": rows, "total_rows": len(source_rows)}
+
+        grouped_rows: dict[tuple[str, ...], dict[str, Any]] = {}
+        for row in source_rows:
+            key = tuple(
+                "" if row.get(column) is None else str(row.get(column, ""))
+                for column in dimension_columns
+            )
+            grouped_rows.setdefault(key, row)
+        group_keys = list(grouped_rows)
+        if not dimension_columns:
+            group_keys = [()]  # A measure-only Table shows its total context.
+
+        rows: list[dict[str, object]] = []
+        for key in group_keys[:50]:
+            group_filters = dict(zip(dimension_columns, key, strict=True))
+            row_values: list[str] = []
+            for binding in bindings:
+                measure_name = measure_names[binding]
+                if measure_name is None:
+                    raw_value = grouped_rows[key].get(binding)
+                    row_values.append("" if raw_value is None else str(raw_value))
+                    continue
+                try:
+                    value = self._measure_value_for_visual_group(
+                        measure_name,
+                        measure_context,
+                        filter_table_ids,
+                        group_filters,
+                        bound_table_id,
+                    )
+                except (MeasureError, KeyError, TypeError, ValueError) as exc:
+                    detail = str(exc).strip() or "evaluation failed"
+                    return {
+                        "columns": columns,
+                        "rows": [],
+                        "total_rows": 0,
+                        "error": f"Measure {measure_name!r} could not be evaluated: {detail}",
+                    }
+                row_values.append(
+                    "" if value is None else _format_report_number(value)
+                )
+
+            category = key[0] if key else ""
+            rows.append({
+                "values": row_values,
+                "category": category,
+                "highlighted": category in highlighted_categories,
+            })
+        return {"columns": columns, "rows": rows, "total_rows": len(group_keys)}
+
+    @Slot(str, result="QVariantMap")
+    def visualMatrixData(self, visual_name: str) -> dict[str, object]:  # noqa: N802
+        page = self._active_page()
+        visual = next((
+            item for item in (page.get("visuals", []) if page else [])
+            if isinstance(item, dict) and item.get("title") == visual_name
+        ), None)
+        if visual is None or visual.get("type") != "matrix":
+            return {"columns": [], "rows": [], "total_rows": 0}
+
+        def field_name(well_name: str) -> str:
+            bindings = visual.get("fields", {}).get(well_name, [])
+            if not isinstance(bindings, list) or not bindings:
+                return ""
+            binding = bindings[0]
+            if isinstance(binding, dict):
+                return str(binding.get("column", ""))
+            if isinstance(binding, (list, tuple)):
+                return str(binding[1] if len(binding) > 1 else (binding[0] if binding else ""))
+            return str(binding)
+
+        row_field = field_name("Rows")
+        column_field = field_name("Columns")
+        value_field = field_name("Values")
+        if not row_field or not column_field or not value_field:
+            return {"columns": [], "rows": [], "total_rows": 0}
+
+        bound_table_id = str(visual.get("table_id") or self._active_model_table_id())
+        rows_by_table, measure_context, filter_table_ids = self._report_filter_context(visual_name)
+        source_rows = rows_by_table.get(bound_table_id, [])
+        measure_name = _visual_measure_name(value_field)
+        aggregation = str(visual.get("field_aggregations", {}).get(value_field, "sum")).casefold()
+        if aggregation not in _VISUAL_FIELD_AGGREGATIONS:
+            aggregation = "sum"
+
+        from collections import defaultdict
+        from decimal import Decimal
+
+        grouped: defaultdict[tuple[str, str], Decimal | None] = defaultdict(Decimal)
+        counts: defaultdict[tuple[str, str], int] = defaultdict(int)
+        row_values: set[str] = set()
+        column_values: set[str] = set()
+        raw_values_by_cell: dict[tuple[str, str], tuple[set[str], set[str]]] = {}
+        for row in source_rows:
+            row_key = "(Blank)" if row.get(row_field) is None or not str(row.get(row_field)).strip() else str(row.get(row_field))
+            column_key = "(Blank)" if row.get(column_field) is None or not str(row.get(column_field)).strip() else str(row.get(column_field))
+            key = (row_key, column_key)
+            if measure_name:
+                row_raw_values, column_raw_values = raw_values_by_cell.setdefault(
+                    key, (set(), set())
+                )
+                row_raw_values.add("" if row.get(row_field) is None else str(row.get(row_field)))
+                column_raw_values.add("" if row.get(column_field) is None else str(row.get(column_field)))
+            else:
+                raw_value = row.get(value_field)
+                if aggregation == "count":
+                    if raw_value is None or not str(raw_value).strip():
+                        continue
+                    amount = Decimal(1)
+                else:
+                    amount = _report_number(raw_value)
+                    if amount is None:
+                        continue
+                grouped[key] += amount
+                counts[key] += 1
+            row_values.add(row_key)
+            column_values.add(column_key)
+
+        if measure_name:
+            for key, (row_raw_values, column_raw_values) in raw_values_by_cell.items():
+                try:
+                    grouped[key] = self._measure_value_for_visual_group(
+                        measure_name,
+                        measure_context,
+                        filter_table_ids,
+                        {
+                            row_field: row_raw_values,
+                            column_field: column_raw_values,
+                        },
+                        bound_table_id,
+                    )
+                    counts[key] = 1
+                except (MeasureError, KeyError, TypeError, ValueError):
+                    continue
+
+        if aggregation == "average" and not measure_name:
+            grouped = defaultdict(
+                Decimal,
+                {
+                    key: total / counts[key]
+                    for key, total in grouped.items()
+                    if counts[key]
+                },
+            )
+
+        sorted_rows = sorted(row_values, key=str.casefold)
+        sorted_columns = sorted(column_values, key=str.casefold)
+        columns = [row_field, *sorted_columns]
+        highlighted_categories: set[str] = set()
+        has_highlight = any(
+            selected
+            and (source := next((
+                item for item in (page.get("visuals", []) if page else [])
+                if isinstance(item, dict) and item.get("title") == source_title
+            ), None)) is not None
+            and self._visual_interaction_mode(source, visual) == "highlight"
+            for source_title, selected in self._cross_filters.items()
+        )
+        if has_highlight:
+            highlight_rows, _, _ = self._report_filter_context(
+                visual_name, include_highlights=True
+            )
+            highlighted_categories = {
+                "(Blank)" if row.get(row_field) is None or not str(row.get(row_field)).strip()
+                else str(row.get(row_field))
+                for row in highlight_rows.get(bound_table_id, [])
+            }
+
+        matrix_rows = []
+        for row_key in sorted_rows:
+            values = [row_key]
+            for column_key in sorted_columns:
+                cell_key = (row_key, column_key)
+                if cell_key not in grouped:
+                    values.append("")
+                elif grouped[cell_key] is None:
+                    values.append("")
+                elif not measure_name and aggregation == "count":
+                    values.append(f"{int(grouped[cell_key]):,}")
+                else:
+                    values.append(_format_report_number(grouped[cell_key]))
+            matrix_rows.append({
+                "values": values,
+                "category": row_key,
+                "highlighted": row_key in highlighted_categories,
+            })
+        return {
+            "columns": columns,
+            "rows": matrix_rows,
+            "total_rows": len(matrix_rows),
+        }
+
+    @Slot(str, result="QVariantMap")
+    def visualCardData(self, visual_name: str) -> dict[str, object]:  # noqa: N802
+        page = self._active_page()
+        visual = next((
+            item for item in (page.get("visuals", []) if page else [])
+            if isinstance(item, dict) and item.get("title") == visual_name
+        ), None)
+        if visual is None or visual.get("type") != "card":
+            return {"label": "", "value": "", "aggregation": "", "highlight_value": "", "has_highlights": False}
+
+        fields = visual.get("fields", {}).get("Fields", [])
+        if not fields:
+            return {
+                "label": visual_name[:-4] if visual_name.endswith(" KPI") else "",
+                "value": self._visual_kpis.get(visual_name, "Add a field"),
+                "aggregation": "",
+                "highlight_value": "",
+                "has_highlights": False,
+            }
+        binding = fields[0]
+        if isinstance(binding, dict):
+            field_name = str(binding.get("column", ""))
+        elif isinstance(binding, (list, tuple)):
+            field_name = str(binding[1] if len(binding) > 1 else (binding[0] if binding else ""))
+        else:
+            field_name = str(binding)
+        if not field_name:
+            return {"label": "", "value": "—", "aggregation": "", "highlight_value": "", "has_highlights": False}
+
+        bound_table_id = str(visual.get("table_id") or self._active_model_table_id())
+        rows_by_table, measure_context, filter_table_ids = self._report_filter_context(visual_name)
+        rows = rows_by_table.get(bound_table_id, [])
+        measure_name = _visual_measure_name(field_name)
+        if measure_name:
+            try:
+                value = self._measure_value_for_visual_group(
+                    measure_name, measure_context, filter_table_ids, {}, bound_table_id
+                )
+                formatted = (
+                    _format_report_number(value) if value is not None else "—"
+                )
+            except (MeasureError, KeyError, TypeError, ValueError):
+                formatted = "—"
+            has_highlights = any(
+                selected
+                and (source := next((
+                    item for item in (page.get("visuals", []) if page else [])
+                    if isinstance(item, dict) and item.get("title") == source_title
+                ), None)) is not None
+                and self._visual_interaction_mode(source, visual) == "highlight"
+                for source_title, selected in self._cross_filters.items()
+            )
+            highlight_value = ""
+            if has_highlights:
+                _, highlight_context, highlight_filter_ids = self._report_filter_context(
+                    visual_name, include_highlights=True
+                )
+                try:
+                    highlight_measure_value = self._measure_value_for_visual_group(
+                        measure_name, highlight_context,
+                        highlight_filter_ids, {}, bound_table_id,
+                    )
+                    highlight_value = (
+                        _format_report_number(highlight_measure_value)
+                        if highlight_measure_value is not None else "—"
+                    )
+                except (MeasureError, KeyError, TypeError, ValueError):
+                    highlight_value = "—"
+            return {
+                "label": f"Measure · {measure_name}",
+                "value": formatted,
+                "aggregation": "Measure",
+                "highlight_value": highlight_value,
+                "has_highlights": has_highlights,
+            }
+        aggregation = str(visual.get("field_aggregations", {}).get(field_name, "sum")).casefold()
+        if aggregation not in _VISUAL_FIELD_AGGREGATIONS:
+            aggregation = "sum"
+
+        def aggregate(source_rows: list[dict[str, Any]]) -> str:
+            values = [row.get(field_name) for row in source_rows]
+            if aggregation == "count":
+                count = sum(value is not None and bool(str(value).strip()) for value in values)
+                return f"{count:,}"
+            numbers = [number for value in values if (number := _report_number(value)) is not None]
+            if not numbers:
+                return "—"
+            total = sum(numbers, Decimal(0))
+            if aggregation == "average":
+                total /= len(numbers)
+            return _format_report_number(total)
+
+        has_highlights = any(
+            selected
+            and (source := next((
+                item for item in (page.get("visuals", []) if page else [])
+                if isinstance(item, dict) and item.get("title") == source_title
+            ), None)) is not None
+            and self._visual_interaction_mode(source, visual) == "highlight"
+            for source_title, selected in self._cross_filters.items()
+        )
+        highlight_value = ""
+        if has_highlights:
+            highlighted_rows, _, _ = self._report_filter_context(
+                visual_name, include_highlights=True
+            )
+            highlight_value = aggregate(highlighted_rows.get(bound_table_id, []))
+        return {
+            "label": field_name,
+            "value": aggregate(rows),
+            "aggregation": aggregation.capitalize(),
+            "highlight_value": highlight_value,
+            "has_highlights": has_highlights,
+        }
 
     @Property(str, notify=stateChanged)
     def monthlyChartMessage(self) -> str:  # noqa: N802
@@ -1057,10 +2227,25 @@ class StudioController(QObject):
     def selectedVisual(self) -> str:  # noqa: N802
         return self._selected_visual
 
+    @Property("QVariantList", notify=stateChanged)
+    def selectedVisualIds(self) -> list[str]:  # noqa: N802
+        return list(self._selected_visual_ids)
+
+    @Property(bool, notify=stateChanged)
+    def creatingVisual(self) -> bool:  # noqa: N802
+        return self._creating_visual
+
     @Property(str, notify=stateChanged)
     def selectedChartType(self) -> str:  # noqa: N802
         key = self._chart_key(self._selected_visual)
-        return str(self._project["report"]["chart_types"].get(key, "")) if key else ""
+        if key:
+            return str(self._project["report"]["chart_types"].get(key, ""))
+        page = self._active_page()
+        visual = next((
+            item for item in (page.get("visuals", []) if page else [])
+            if isinstance(item, dict) and item.get("title") == self._selected_visual
+        ), None)
+        return str(visual.get("type", "")) if visual else ""
 
     @Property("QVariantList", notify=stateChanged)
     def regions(self) -> list[str]:
@@ -1317,7 +2502,10 @@ class StudioController(QObject):
             else:
                 existing_steps.append(new_type_step)
             steps = validate_steps(existing_steps)
-            transformed = apply_transformations(raw_candidate, steps)
+            transformed = apply_transformations(
+                raw_candidate, steps,
+                parameters=parameter_values(self._project.get("query_parameters", []), self._project.get("query_functions", [])),
+            )
         except (OSError, ProjectFileError, TypeError, ValueError) as exc:
             self._set_status(f"Could not set {column} to {type_name.replace('_', ' ')}: {exc}")
             return False
@@ -1397,7 +2585,7 @@ class StudioController(QObject):
         )
 
     @Property("QVariantList", notify=stateChanged)
-    def modelMeasures(self) -> list[dict[str, str]]:  # noqa: N802
+    def modelMeasures(self) -> list[dict[str, Any]]:  # noqa: N802
         measures = self._project.get("model", {}).get("measures", [])
         result = []
         for measure in measures:
@@ -1407,12 +2595,35 @@ class StudioController(QObject):
                 "expression": str(measure["expression"]),
                 "value": self._measure_values.get(name, "—"),
                 "error": self._measure_errors.get(name, ""),
+                "description": str(measure.get("description", "")),
+                "display_folder": str(measure.get("display_folder", "")),
+                "is_hidden": bool(measure.get("is_hidden", False)),
             })
         return result
 
     @Slot(str, result="QVariantList")
     def selectedCrossFiltersForVisual(self, visual_title: str) -> list[str]:
         return self._cross_filters.get(visual_title, [])
+
+    @Slot(str, result="QVariantList")
+    def visualHighlightSeries(self, visual_name: str) -> list[dict[str, str | float]]:  # noqa: N802
+        page = self._active_page()
+        target = next((
+            item for item in (page.get("visuals", []) if page else [])
+            if isinstance(item, dict) and item.get("title") == visual_name
+        ), None)
+        if target is None:
+            return []
+        has_highlight = any(
+            selected
+            and (source := next((
+                item for item in (page.get("visuals", []) if page else [])
+                if isinstance(item, dict) and item.get("title") == source_title
+            ), None)) is not None
+            and self._visual_interaction_mode(source, target) == "highlight"
+            for source_title, selected in self._cross_filters.items()
+        )
+        return self._generate_dynamic_visual_series(visual_name, include_highlights=True) if has_highlight else []
 
     @Property(bool, notify=stateChanged)
     def formatPainterActive(self) -> bool:  # noqa: N802
@@ -1437,6 +2648,7 @@ class StudioController(QObject):
             "pasteData": lambda: self.enter_data_dialog(use_clipboard=True),
             "sampleData": self.load_sample_data,
             "transformData": self.transform_data_dialog,
+            "powerQueryM": self.power_query_m_editor_dialog,
             "appendQueries": self.append_queries_dialog,
             "mergeQueries": self.merge_queries_dialog,
             "newCalculatedTable": self.calculated_table_dialog,
@@ -1587,6 +2799,34 @@ class StudioController(QObject):
             )
             relationship["to"] = f"{to_table.get('name', to_id)}[{to_column}]"
         return normalized
+
+    def _validate_loaded_relationship_candidates(
+        self,
+        project: dict[str, Any],
+        candidate_overrides: dict[str, ImportCandidate] | None = None,
+    ) -> None:
+        """Validate relationships against the current or staged loaded rows."""
+        candidates = dict(self._loaded_candidates)
+        candidates.update(candidate_overrides or {})
+        relationship_tables = []
+        for table in project.get("model", {}).get("tables", []):
+            table_id = str(table.get("id", ""))
+            source_id = str(table.get("source_id") or table_id)
+            candidate = candidates.get(source_id)
+            if candidate is None:
+                continue
+            relationship_tables.append({
+                **table,
+                "id": table_id,
+                "headers": list(candidate.headers),
+                "rows": list(candidate.rows),
+            })
+        # Empty filter roots still check loaded endpoint types and one-side keys.
+        propagate_relationship_filters(
+            relationship_tables,
+            project.get("model", {}).get("relationships", []),
+            set(),
+        )
 
     def _model_relationship_label(self, relationship: dict[str, Any]) -> str:
         if relationship.get("relationship_version") != RELATIONSHIP_VERSION:
@@ -1926,20 +3166,24 @@ class StudioController(QObject):
 
         credential_cleanup_failed = False
         if source.get("kind") == "sql_server":
-            credential_ref = str(source.get("connection", {}).get("credential_ref", ""))
+            connection = dict(source.get("connection", {}))
+            credential_ref = str(connection.get("credential_ref", ""))
             still_used = any(
                 item.get("kind") == "sql_server"
                 and item.get("connection", {}).get("credential_ref") == credential_ref
                 for item in self._project.get("data_sources", [])
             )
             if credential_ref and not still_used:
-                self._sql_server_passwords.pop(credential_ref, None)
+                self._sql_server_passwords.pop(
+                    sql_server_credential_account(credential_ref, connection), None
+                )
                 try:
-                    delete_sql_server_password(credential_ref)
+                    delete_sql_server_password(credential_ref, connection)
                 except CredentialStoreError:
                     credential_cleanup_failed = True
 
         self._loaded_candidates.pop(source_id, None)
+        self._raw_candidates.pop(source_id, None)
         self._source_load_errors.pop(source_id, None)
         self._source_load_errors.pop("__active_selection__", None)
         if removing_active:
@@ -2085,7 +3329,7 @@ class StudioController(QObject):
             "id": source_id,
             "name": table_name,
             "source_id": source_id,
-            "column_types": {header: "text" for header in parsed.headers},
+            "column_types": infer_column_types(parsed.headers, parsed.rows),
         }
         tables = list(model.get("tables", []))
         for index, table in enumerate(tables):
@@ -2096,9 +3340,15 @@ class StudioController(QObject):
             tables.append(table_record)
         model["tables"] = tables
         try:
-            source_candidate = apply_transformations(parsed, transform_steps)
+            source_candidate = apply_transformations(
+                parsed, transform_steps,
+                parameters=parameter_values(self._project.get("query_parameters", []), self._project.get("query_functions", [])),
+            )
             base_types = column_types_after_steps(
-                parsed.headers, transform_steps, output_headers=source_candidate.headers
+                parsed.headers,
+                transform_steps,
+                output_headers=source_candidate.headers,
+                initial_types=table_record["column_types"],
             )
             source_table = self._model_table_for_source(next_project, source_id)
             if source_table is not None:
@@ -2136,6 +3386,7 @@ class StudioController(QObject):
         self._source_load_errors.pop(source_id, None)
         self._source_load_errors.pop("__active_selection__", None)
         self._loaded_candidates.update(dependent_candidates)
+        self._raw_candidates[source_id] = parsed
         for updated_id in dependent_candidates:
             self._source_load_errors.pop(updated_id, None)
         self._source_warning = self._compose_source_warning()
@@ -2204,7 +3455,7 @@ class StudioController(QObject):
             "id": source_id,
             "name": table_name,
             "source_id": source_id,
-            "column_types": {header: "text" for header in parsed.headers},
+            "column_types": infer_column_types(parsed.headers, parsed.rows),
         }
         tables = list(model.get("tables", []))
         for index, table in enumerate(tables):
@@ -2215,9 +3466,15 @@ class StudioController(QObject):
             tables.append(table_record)
         model["tables"] = tables
         try:
-            source_candidate = apply_transformations(parsed, transform_steps)
+            source_candidate = apply_transformations(
+                parsed, transform_steps,
+                parameters=parameter_values(self._project.get("query_parameters", []), self._project.get("query_functions", [])),
+            )
             base_types = column_types_after_steps(
-                parsed.headers, transform_steps, output_headers=source_candidate.headers
+                parsed.headers,
+                transform_steps,
+                output_headers=source_candidate.headers,
+                initial_types=table_record["column_types"],
             )
             source_table = self._model_table_for_source(next_project, source_id)
             if source_table is not None:
@@ -2255,6 +3512,7 @@ class StudioController(QObject):
         self._source_load_errors.pop(source_id, None)
         self._source_load_errors.pop("__active_selection__", None)
         self._loaded_candidates.update(dependent_candidates)
+        self._raw_candidates[source_id] = parsed
         for updated_id in dependent_candidates:
             self._source_load_errors.pop(updated_id, None)
         self._source_warning = self._compose_source_warning()
@@ -2343,7 +3601,7 @@ class StudioController(QObject):
             "id": source_id,
             "name": table_name,
             "source_id": source_id,
-            "column_types": {header: "text" for header in parsed.headers},
+            "column_types": infer_column_types(parsed.headers, parsed.rows),
         }
         tables = list(model.get("tables", []))
         table_replaced = False
@@ -2356,9 +3614,15 @@ class StudioController(QObject):
             tables.append(table_record)
         model["tables"] = tables
         try:
-            source_candidate = apply_transformations(parsed, transform_steps)
+            source_candidate = apply_transformations(
+                parsed, transform_steps,
+                parameters=parameter_values(self._project.get("query_parameters", []), self._project.get("query_functions", [])),
+            )
             base_types = column_types_after_steps(
-                parsed.headers, transform_steps, output_headers=source_candidate.headers
+                parsed.headers,
+                transform_steps,
+                output_headers=source_candidate.headers,
+                initial_types=table_record["column_types"],
             )
             source_table = self._model_table_for_source(next_project, source_id)
             if source_table is not None:
@@ -2389,12 +3653,14 @@ class StudioController(QObject):
             return False
 
         try:
-            set_sql_server_password(credential_ref, password)
+            set_sql_server_password(credential_ref, password, connection)
         except CredentialStoreError as exc:
             QMessageBox.critical(None, "Could not save SQL Server credentials", str(exc))
             return False
 
-        self._sql_server_passwords[credential_ref] = password
+        self._sql_server_passwords[
+            sql_server_credential_account(credential_ref, connection)
+        ] = password
         self._project = next_project
         self._active_source_id = source_id
         self._active_source_path = None
@@ -2403,6 +3669,7 @@ class StudioController(QObject):
         self._source_load_errors.pop(source_id, None)
         self._source_load_errors.pop("__active_selection__", None)
         self._loaded_candidates.update(dependent_candidates)
+        self._raw_candidates[source_id] = parsed
         for updated_id in dependent_candidates:
             self._source_load_errors.pop(updated_id, None)
         self._source_warning = self._compose_source_warning()
@@ -2474,17 +3741,52 @@ class StudioController(QObject):
         self._project["report"]["active_page_id"] = page_id
         self._cross_filters.clear()
         self._selected_visual = ""
+        self._selected_visual_ids.clear()
+        self._creating_visual = False
         self._dirty = True
         self._refresh_report()
         self.stateChanged.emit()
 
     @Slot(str)
     def selectVisual(self, visual_name: str) -> None:  # noqa: N802
-        if visual_name not in self.activePageVisuals:
+        page = self._active_page()
+        visual = next((
+            item for item in (page.get("visuals", []) if page else [])
+            if isinstance(item, dict) and item.get("title") == visual_name
+        ), None)
+        if visual is None:
             return
-        if self._selected_visual == visual_name:
+        visual_id = str(visual.get("id", ""))
+        if self._selected_visual == visual_name and self._selected_visual_ids == [visual_id]:
             return
         self._selected_visual = visual_name
+        self._selected_visual_ids = [visual_id]
+        self._creating_visual = False
+        self.stateChanged.emit()
+
+    @Slot(str)
+    def toggleVisualSelection(self, visual_name: str) -> None:  # noqa: N802
+        page = self._active_page()
+        visual = next((
+            item for item in (page.get("visuals", []) if page else [])
+            if isinstance(item, dict) and item.get("title") == visual_name
+        ), None)
+        if visual is None:
+            return
+        self._creating_visual = False
+        visual_id = str(visual.get("id", ""))
+        if visual_id in self._selected_visual_ids:
+            self._selected_visual_ids.remove(visual_id)
+            if self._selected_visual == visual_name:
+                selected = next((
+                    item for item in (page.get("visuals", []) if page else [])
+                    if isinstance(item, dict)
+                    and str(item.get("id", "")) in self._selected_visual_ids
+                ), None)
+                self._selected_visual = str(selected.get("title", "")) if selected else ""
+        else:
+            self._selected_visual_ids.append(visual_id)
+            self._selected_visual = visual_name
         self.stateChanged.emit()
 
     @Slot(str)
@@ -3165,12 +4467,18 @@ class StudioController(QObject):
 
         # Resolve and parse the prospective source before swapping out the live document.
         candidate = deepcopy(candidate)
+        for page in candidate.get("report", {}).get("pages", []):
+            for visual in page.get("visuals", []):
+                image_path = visual.get("image_path") if isinstance(visual, dict) else None
+                if isinstance(image_path, str) and image_path:
+                    visual["image_path"] = str(resolve_source_path(image_path, path))
         for source in candidate.get("data_sources", []):
             if source.get("kind") not in PATHLESS_SOURCE_KINDS:
                 source["path"] = str(resolve_source_path(source["path"], path))
 
         sources = candidate.get("data_sources", [])
         loaded_candidates: dict[str, ImportCandidate] = {}
+        raw_candidates: dict[str, ImportCandidate] = {}
         source_paths: dict[str, Path | None] = {}
         load_errors: dict[str, str] = {}
         warnings: list[str] = []
@@ -3210,17 +4518,29 @@ class StudioController(QObject):
                     )
                 else:
                     raise ValueError(f"Unsupported source type: {kind or 'unknown'}")
+                raw_candidates[source_id] = raw
                 source_steps = source.get("transform_steps", [])
                 if kind in {"odata", "web"} and raw.notices:
                     warnings.extend(
                         f"{source.get('name', source_id)}: {notice}"
                         for notice in raw.notices
                     )
-                query_candidate = apply_transformations(raw, source_steps)
+                query_candidate = apply_transformations(
+                    raw, source_steps,
+                    parameters=parameter_values(candidate.get("query_parameters", []), candidate.get("query_functions", [])),
+                )
+                initial_types = (
+                    self._query_input_column_types(
+                        source, candidate, candidate=raw
+                    )
+                    if kind == "query"
+                    else infer_column_types(raw.headers, raw.rows)
+                )
                 type_map = column_types_after_steps(
                     raw.headers,
                     source_steps,
                     output_headers=query_candidate.headers,
+                    initial_types=initial_types,
                 )
                 loaded_candidates[source_id], calculated_types = self._apply_calculated_columns(
                     source_id, query_candidate, project=candidate,
@@ -3294,6 +4614,11 @@ class StudioController(QObject):
         self._active_page_id = candidate["report"]["active_page_id"]
         self._cross_filters.clear()
         self._selected_visual = ""
+        self._selected_visual_ids.clear()
+        self._creating_visual = False
+        self._clipboard_visual_config = None
+        self._clipboard_format_config = None
+        self._format_painter_active = False
         self._field_query = ""
         self._current_region = None
         self._active_source_id = active_source_id
@@ -3301,6 +4626,7 @@ class StudioController(QObject):
         self._active_source_kind = active_source_kind
         self._active_parser_options = active_parser_options
         self._loaded_candidates = loaded_candidates
+        self._raw_candidates = raw_candidates
         self._source_load_errors = load_errors
         if active_source_id in loaded_candidates:
             self._install_source(
@@ -3353,6 +4679,264 @@ class StudioController(QObject):
         path, _ = QFileDialog.getOpenFileName(None, title, "", filters[expected_kind])
         if path:
             self._import_file_path(Path(path), expected_kind=expected_kind)
+
+    def _new_power_query_folder_candidate(
+        self,
+    ) -> tuple[ImportCandidate, dict[str, Any]] | None:
+        """Preview a local folder combine without committing it."""
+        selected_folder = QFileDialog.getExistingDirectory(
+            None,
+            "New Power Query folder source",
+            "",
+            QFileDialog.Option.ShowDirsOnly,
+        )
+        if not selected_folder:
+            return None
+        folder = Path(selected_folder).expanduser().resolve()
+        if not folder.is_dir():
+            QMessageBox.critical(
+                None, "Folder unavailable", f"Choose an existing folder: {folder}"
+            )
+            return None
+        dialog = FolderImportDialog(folder, replacing=False)
+        if dialog.exec() != QDialog.DialogCode.Accepted or dialog.candidate is None:
+            return None
+        candidate = dialog.candidate
+        source_record = {
+            "id": str(uuid4()),
+            "name": folder.name or str(folder),
+            "query_name": folder.name or "Folder data",
+            "kind": "folder",
+            "path": str(folder),
+            "parser_options": dict(candidate.options),
+            "transform_steps": [],
+        }
+        return candidate, source_record
+
+    def _new_power_query_source_candidate(
+        self,
+    ) -> tuple[ImportCandidate, dict[str, Any]] | None:
+        """Preview a local file for Power Query without committing it."""
+        file_filter = (
+            "Supported data files (*.csv *.xls *.xlsx *.xlsm *.json *.xml *.parquet *.db *.sqlite *.sqlite3);;"
+            "CSV files (*.csv);;Excel workbooks (*.xls *.xlsx *.xlsm);;"
+            "JSON files (*.json);;XML files (*.xml);;Parquet files (*.parquet);;"
+            "SQLite databases (*.db *.sqlite *.sqlite3);;All files (*)"
+        )
+        selected_path, _ = QFileDialog.getOpenFileName(
+            None, "New Power Query source", "", file_filter
+        )
+        if not selected_path:
+            return None
+        path = Path(selected_path).expanduser().resolve()
+        try:
+            source_kind = kind_for_path(path)
+        except ValueError as exc:
+            QMessageBox.critical(None, "Unsupported data file", str(exc))
+            return None
+
+        from analytics_studio.import_preview_dialog import FileImportPreviewDialog
+
+        dialog = FileImportPreviewDialog(path, replacing=False)
+        if dialog.exec() != QDialog.DialogCode.Accepted or dialog.candidate is None:
+            return None
+        candidate = dialog.candidate
+        if candidate.kind != source_kind:
+            QMessageBox.critical(
+                None,
+                "Could not stage source",
+                "The source preview does not match the selected file type.",
+            )
+            return None
+        desired_name = (
+            str(candidate.options.get("table_name", "")).strip()
+            if candidate.kind == "sqlite"
+            else path.stem
+        ) or path.stem or "New Source"
+        source_record = {
+            "id": str(uuid4()),
+            "name": path.name,
+            "query_name": desired_name,
+            "kind": candidate.kind,
+            "path": str(path),
+            "parser_options": dict(candidate.options),
+            "transform_steps": [],
+        }
+        return candidate, source_record
+
+    def _edit_power_query_source_candidate(
+        self,
+        source_record: dict[str, Any],
+    ) -> tuple[ImportCandidate, dict[str, Any]] | None:
+        """Preview new file settings without replacing the saved source record."""
+        source_kind = str(source_record.get("kind", ""))
+        if source_kind == "folder":
+            current_path = self._resolved_source_path(source_record)
+            selected_folder = QFileDialog.getExistingDirectory(
+                None,
+                "Edit Power Query folder settings",
+                str(current_path),
+                QFileDialog.Option.ShowDirsOnly,
+            )
+            if not selected_folder:
+                return None
+            folder = Path(selected_folder).expanduser().resolve()
+            if not folder.is_dir():
+                QMessageBox.critical(
+                    None,
+                    "Could not edit folder settings",
+                    f"Choose an existing folder: {folder}",
+                )
+                return None
+            dialog = FolderImportDialog(
+                folder,
+                replacing=False,
+                initial_options=dict(source_record.get("parser_options", {})),
+                source_editing=True,
+            )
+            if dialog.exec() != QDialog.DialogCode.Accepted or dialog.candidate is None:
+                return None
+            candidate = dialog.candidate
+            if candidate.kind != "folder":
+                QMessageBox.critical(
+                    None,
+                    "Could not edit folder settings",
+                    "The folder preview does not match the existing folder source.",
+                )
+                return None
+            updated_record = deepcopy(source_record)
+            updated_record["path"] = str(folder)
+            updated_record["parser_options"] = dict(candidate.options)
+            return candidate, updated_record
+
+        file_patterns = {
+            "csv": ("CSV files", "*.csv"),
+            "excel": ("Excel workbooks", "*.xls *.xlsx *.xlsm"),
+            "json": ("JSON files", "*.json"),
+            "xml": ("XML files", "*.xml"),
+            "parquet": ("Parquet files", "*.parquet"),
+            "sqlite": ("SQLite databases", "*.db *.sqlite *.sqlite3"),
+        }
+        if source_kind not in file_patterns:
+            QMessageBox.critical(
+                None,
+                "Source settings unavailable",
+                "Edit Source Settings currently supports CSV, Excel, JSON, XML, Parquet, SQLite, and folder roots.",
+            )
+            return None
+        current_path = self._resolved_source_path(source_record)
+        label, pattern = file_patterns[source_kind]
+        selected_path, _ = QFileDialog.getOpenFileName(
+            None,
+            "Edit Power Query source settings",
+            str(current_path.parent),
+            f"{label} ({pattern});;All files (*)",
+        )
+        if not selected_path:
+            return None
+        path = Path(selected_path).expanduser().resolve()
+        try:
+            if kind_for_path(path) != source_kind:
+                raise ValueError(
+                    "Choose a file with the same type as the existing Power Query source."
+                )
+        except (OSError, ValueError) as exc:
+            QMessageBox.critical(None, "Could not edit source settings", str(exc))
+            return None
+
+        from analytics_studio.import_preview_dialog import FileImportPreviewDialog
+
+        dialog = FileImportPreviewDialog(
+            path,
+            replacing=False,
+            initial_options=dict(source_record.get("parser_options", {})),
+            source_editing=True,
+        )
+        if dialog.exec() != QDialog.DialogCode.Accepted or dialog.candidate is None:
+            return None
+        candidate = dialog.candidate
+        if candidate.kind != source_kind:
+            QMessageBox.critical(
+                None,
+                "Could not edit source settings",
+                "The source preview does not match the existing file type.",
+            )
+            return None
+        updated_record = deepcopy(source_record)
+        updated_record["path"] = str(path)
+        updated_record["parser_options"] = dict(candidate.options)
+        return candidate, updated_record
+
+    def _new_power_query_sql_server_candidate(
+        self,
+    ) -> tuple[ImportCandidate, dict[str, Any]] | None:
+        """Preview SQL Server data and keep its password session-local until Apply."""
+        dialog = SQLServerImportDialog()
+        if dialog.exec() != QDialog.DialogCode.Accepted or dialog.candidate is None:
+            return None
+        candidate = dialog.candidate
+        settings = dialog.connection_settings
+        options = dict(candidate.options)
+        credential_ref = str(uuid4())
+        connection = {**settings, "credential_ref": credential_ref}
+        source_name = (
+            f"{settings['database']}.{options['schema']}.{options['table_name']}"
+        )
+        source_record = {
+            "id": str(uuid4()),
+            "name": source_name,
+            "query_name": str(options["table_name"]),
+            "kind": "sql_server",
+            "connection": connection,
+            "parser_options": options,
+            "transform_steps": [],
+            # This field exists only in the editor's in-memory staging state.
+            # _commit_transform_session removes it before project validation.
+            "_staged_password": dialog.password,
+        }
+        return candidate, source_record
+
+    def _new_power_query_odata_candidate(
+        self,
+    ) -> tuple[ImportCandidate, dict[str, Any]] | None:
+        """Preview an anonymous OData entity set for staged session import."""
+        dialog = ODataFeedImportDialog()
+        if dialog.exec() != QDialog.DialogCode.Accepted or dialog.candidate is None:
+            return None
+        candidate = dialog.candidate
+        options = dict(candidate.options)
+        entity_set = str(options.get("entity_set_name", "OData query"))
+        source_record = {
+            "id": str(uuid4()),
+            "name": f"{entity_set} · OData Feed",
+            "query_name": entity_set,
+            "kind": "odata",
+            "connection": {"service_root": dialog.service_root},
+            "parser_options": options,
+            "transform_steps": [],
+        }
+        return candidate, source_record
+
+    def _new_power_query_web_candidate(
+        self,
+    ) -> tuple[ImportCandidate, dict[str, Any]] | None:
+        """Preview an anonymous HTTPS source for staged session import."""
+        dialog = WebImportDialog()
+        if dialog.exec() != QDialog.DialogCode.Accepted or dialog.candidate is None:
+            return None
+        candidate = dialog.candidate
+        options = dict(candidate.options)
+        query_name = _web_table_name(dialog.url, options)
+        source_record = {
+            "id": str(uuid4()),
+            "name": f"{query_name} · Web",
+            "query_name": query_name,
+            "kind": "web",
+            "connection": {"url": dialog.url},
+            "parser_options": options,
+            "transform_steps": [],
+        }
+        return candidate, source_record
 
     def import_folder_dialog(self) -> None:
         folder = QFileDialog.getExistingDirectory(
@@ -3496,7 +5080,7 @@ class StudioController(QObject):
             "id": source_id,
             "name": table_name,
             "source_id": source_id,
-            "column_types": {header: "text" for header in parsed.headers},
+            "column_types": infer_column_types(parsed.headers, parsed.rows),
         }
         table_replaced = False
         for index, table in enumerate(tables):
@@ -3509,9 +5093,15 @@ class StudioController(QObject):
         model["tables"] = tables
 
         try:
-            source_candidate = apply_transformations(parsed, transform_steps)
+            source_candidate = apply_transformations(
+                parsed, transform_steps,
+                parameters=parameter_values(self._project.get("query_parameters", []), self._project.get("query_functions", [])),
+            )
             base_types = column_types_after_steps(
-                parsed.headers, transform_steps, output_headers=source_candidate.headers
+                parsed.headers,
+                transform_steps,
+                output_headers=source_candidate.headers,
+                initial_types=table_record["column_types"],
             )
             source_table = self._model_table_for_source(next_project, source_id)
             if source_table is not None:
@@ -3552,6 +5142,7 @@ class StudioController(QObject):
         self._source_load_errors.pop(source_id, None)
         self._source_load_errors.pop("__active_selection__", None)
         self._loaded_candidates.update(dependent_candidates)
+        self._raw_candidates[source_id] = parsed
         for updated_id in dependent_candidates:
             self._source_load_errors.pop(updated_id, None)
         self._source_warning = self._compose_source_warning()
@@ -3612,7 +5203,7 @@ class StudioController(QObject):
                 "id": source_id,
                 "name": table_name,
                 "source_id": source_id,
-                "column_types": {header: "text" for header in parsed.headers},
+                "column_types": infer_column_types(parsed.headers, parsed.rows),
             }
             tables = list(next_project.get("model", {}).get("tables", []))
             for index, table in enumerate(tables):
@@ -3632,6 +5223,7 @@ class StudioController(QObject):
         self._active_source_path = None
         self._active_source_kind = "inline"
         self._active_parser_options = {}
+        self._raw_candidates[source_id] = parsed
         self._source_load_errors.pop(source_id, None)
         self._source_load_errors.pop("__active_selection__", None)
         self._source_warning = self._compose_source_warning()
@@ -3748,7 +5340,10 @@ class StudioController(QObject):
         ]
         try:
             validated_steps = validate_steps(query_steps)
-            transformed = apply_transformations(candidate, validated_steps)
+            transformed = apply_transformations(
+                candidate, validated_steps,
+                parameters=parameter_values(self._project.get("query_parameters", []), self._project.get("query_functions", [])),
+            )
             source_record = {
                 "id": source_id,
                 "name": table_name,
@@ -3783,6 +5378,7 @@ class StudioController(QObject):
 
         self._project = next_project
         self._loaded_candidates[source_id] = transformed
+        self._raw_candidates[source_id] = candidate
         self._active_source_id = source_id
         self._active_source_path = None
         self._active_source_kind = "query"
@@ -3799,7 +5395,7 @@ class StudioController(QObject):
         self._set_status(f"Created {table_name} · {len(transformed.rows):,} rows")
         return True
 
-    def transform_data_dialog(self) -> bool:
+    def transform_data_dialog(self, *, open_advanced_editor: bool = False) -> bool:
         if not self.sourceLoaded or self._active_source_id is None:
             self._set_status("Load a table before transforming data.")
             return False
@@ -3812,17 +5408,326 @@ class StudioController(QObject):
             self._set_status("The active data source record is unavailable.")
             return False
         try:
-            raw_candidate = self._raw_candidate_for_source(source)
-            steps = validate_steps(source.get("transform_steps", []))
-            dialog = TransformDataDialog(raw_candidate, steps)
-        except (OSError, ValueError) as exc:
+            session_queries = []
+            session_outputs = dict(self._loaded_candidates)
+            session_type_maps: dict[str, dict[str, str]] = {}
+            active_raw_candidate: ImportCandidate | None = None
+            active_steps: list[dict[str, Any]] = []
+            for query_source in self._source_dependency_order(
+                self._project.get("data_sources", [])
+            ):
+                query_id = str(query_source.get("id", ""))
+                if not query_id:
+                    continue
+                session_outputs.pop(query_id, None)
+                query_candidate: ImportCandidate | None = None
+                source_column_types: dict[str, str] = {}
+                query_steps = validate_steps(
+                    query_source.get("transform_steps", [])
+                )
+                try:
+                    frozen_query = (
+                        query_source.get("kind") == "query"
+                        and not self._source_refresh_included(query_source)
+                    )
+                    if frozen_query:
+                        # Keep an excluded saved query on the exact raw snapshot
+                        # used for its last evaluation, even if an upstream file
+                        # has changed since then. Users can still edit its steps.
+                        query_candidate = self._raw_candidates.get(query_id)
+                        if query_candidate is None:
+                            query_candidate = self._query_candidate(
+                                query_source,
+                                self._loaded_candidates,
+                                project=self._project,
+                            )
+                    elif query_source.get("kind") == "query":
+                        query_candidate = self._query_candidate(
+                            query_source, session_outputs, project=self._project
+                        )
+                    else:
+                        query_candidate = self._session_raw_candidate_for_source(query_source)
+                    query_definition = query_source.get("query_definition", {})
+                    if query_definition.get("operation") == "reference":
+                        dependency_ids = query_definition.get("source_ids", [])
+                        if dependency_ids:
+                            dependency_id = str(dependency_ids[0])
+                            source_column_types = dict(
+                                session_type_maps.get(dependency_id, {})
+                            )
+                            if not source_column_types:
+                                source_column_types = self._query_input_column_types(
+                                    query_source, self._project
+                                )
+                    elif query_definition.get("operation") in {"append", "merge"}:
+                        source_column_types = self._query_input_column_types(
+                            query_source,
+                            self._project,
+                            candidate=query_candidate,
+                            dependency_types=session_type_maps,
+                        )
+                        if not source_column_types:
+                            source_column_types = infer_column_types(
+                                query_candidate.headers, query_candidate.rows
+                            )
+                    else:
+                        # Start the session with the same detected types used
+                        # by import, project open, and refresh. Otherwise an
+                        # unrelated edit in Transform Data turns the preview
+                        # type map into all-text and can overwrite the model.
+                        source_column_types = infer_column_types(
+                            query_candidate.headers, query_candidate.rows
+                        )
+                    transformed = apply_transformations(
+                        query_candidate, query_steps,
+                        parameters=parameter_values(self._project.get("query_parameters", []), self._project.get("query_functions", [])),
+                    )
+                    type_map = column_types_after_steps(
+                        query_candidate.headers,
+                        query_steps,
+                        output_headers=transformed.headers,
+                        initial_types=source_column_types,
+                    )
+                    session_type_maps[query_id] = dict(type_map)
+                    if frozen_query:
+                        session_output = self._loaded_candidates[query_id]
+                    else:
+                        session_output, _calculated_types = self._apply_calculated_columns(
+                            query_id,
+                            transformed,
+                            project=self._project,
+                            column_types=type_map,
+                        )
+                except (OSError, QueryError, TransformationError, TypeError, ValueError) as exc:
+                    if query_id == self._active_source_id:
+                        raise
+                    table = self._model_table_for_source(self._project, query_id)
+                    query_name = (
+                        str(table.get("name", ""))
+                        if table is not None
+                        else str(query_source.get(
+                            "query_name", query_source.get("name", "Current Query")
+                        ))
+                    )
+                    query_group = str(query_source.get("query_group", ""))
+                    unavailable = ImportCandidate("query", [], [], {}, [])
+                    session_queries.append({
+                        "id": query_id,
+                        "name": query_name,
+                        "display_name": (
+                            f"{query_group} / {query_name}" if query_group else query_name
+                        ),
+                        "description": str(query_source.get("description", "")),
+                        "query_group": query_group,
+                        "is_saved_query": query_source.get("kind") == "query",
+                        "load_enabled": query_source.get("load_enabled", True),
+                        "include_in_report_refresh": query_source.get(
+                            "include_in_report_refresh", True
+                        ),
+                        "query_definition": deepcopy(
+                            query_source.get("query_definition", {})
+                        ),
+                        "source_record": deepcopy(query_source),
+                        "candidate": unavailable,
+                        "source_candidate": query_candidate,
+                        "source_column_types": {},
+                        "column_types": {},
+                        "steps": query_steps,
+                        "step_metadata": [],
+                        "m_script": query_source.get("m_script"),
+                        "is_unavailable": True,
+                        "preview_error": str(exc),
+                    })
+                    continue
+                session_outputs[query_id] = session_output
+                table = self._model_table_for_source(self._project, query_id)
+                query_name = (
+                    str(table.get("name", ""))
+                    if table is not None
+                    else str(
+                        query_source.get(
+                            "query_name", query_source.get("name", "Current Query")
+                        )
+                    )
+                )
+                query_group = str(query_source.get("query_group", ""))
+                session_queries.append({
+                    "id": query_id,
+                    "name": query_name,
+                    "display_name": f"{query_group} / {query_name}" if query_group else query_name,
+                    "description": str(query_source.get("description", "")),
+                    "query_group": query_group,
+                    "is_saved_query": query_source.get("kind") == "query",
+                    "load_enabled": query_source.get("load_enabled", True),
+                    "include_in_report_refresh": query_source.get(
+                        "include_in_report_refresh", True
+                    ),
+                    "query_definition": deepcopy(query_definition),
+                    "source_record": deepcopy(query_source),
+                    "candidate": query_candidate,
+                    "source_column_types": source_column_types,
+                    "column_types": dict(type_map),
+                    "steps": validate_steps(query_source.get("transform_steps", [])),
+                    "step_metadata": deepcopy(query_source.get("step_metadata", [])),
+                    "m_script": query_source.get("m_script"),
+                })
+                if query_id == self._active_source_id:
+                    active_raw_candidate = query_candidate
+                    active_steps = query_steps
+            if active_raw_candidate is None:
+                raise ValueError("The active query could not be included in the Power Query session.")
+            session_query_ids = {
+                str(query.get("id", "")) for query in session_queries
+            }
+            dialog = TransformDataDialog(
+                active_raw_candidate,
+                active_steps,
+                query_name=self._active_model_table_name(),
+                queries=session_queries,
+                active_query_id=str(self._active_source_id),
+                query_dependents={
+                    str(source_id): [
+                        str(candidate.get("id", ""))
+                        for candidate in self._project.get("data_sources", [])
+                        if candidate.get("kind") == "query"
+                        and str(source_id) in {
+                            str(item)
+                            for item in candidate.get("query_definition", {}).get("source_ids", [])
+                        }
+                    ]
+                    for source_id in (
+                        str(candidate.get("id", ""))
+                        for candidate in self._project.get("data_sources", [])
+                    )
+                },
+                reserved_query_names={
+                    str(name).strip()
+                    for name in [
+                        *(
+                            table.get("name", "")
+                            for table in self._project.get("model", {}).get("tables", [])
+                            if str(table.get("source_id") or table.get("id", ""))
+                            not in session_query_ids
+                        ),
+                        *(
+                            source.get("query_name", source.get("name", ""))
+                            for source in self._project.get("data_sources", [])
+                            if str(source.get("id", "")) not in session_query_ids
+                        ),
+                    ]
+                    if str(name).strip()
+                },
+                query_parameters=self._project.get("query_parameters", []),
+                query_functions=self._project.get("query_functions", []),
+                new_source_candidate=self._new_power_query_source_candidate,
+                edit_source_candidate=self._edit_power_query_source_candidate,
+                new_folder_source_candidate=self._new_power_query_folder_candidate,
+                new_sql_server_source_candidate=self._new_power_query_sql_server_candidate,
+                new_odata_source_candidate=self._new_power_query_odata_candidate,
+                new_web_source_candidate=self._new_power_query_web_candidate,
+                refresh_candidate=self._refresh_transform_query_preview,
+            )
+        except (OSError, QueryError, ValueError) as exc:
             self._set_status(f"Could not open Transform data: {exc}")
             QMessageBox.critical(None, "Could not transform data", str(exc))
+            return False
+        if open_advanced_editor:
+            QTimer.singleShot(0, dialog._open_advanced_editor)
+        if dialog.exec() != QDialog.DialogCode.Accepted:
+            return False
+        accepted_queries = dialog.accepted_queries
+        accepted_parameters = dialog.accepted_parameters
+        accepted_functions = dialog.accepted_functions
+        deleted_query_ids = dialog.deleted_query_ids
+        if accepted_queries is not None and (
+            str(source["id"]) in accepted_queries or deleted_query_ids
+        ):
+            return self._commit_transform_session(
+                accepted_queries,
+                deleted_query_ids=deleted_query_ids,
+                query_parameters=accepted_parameters,
+                query_functions=accepted_functions,
+            )
+        if dialog.candidate is None:
+            return False
+        return self._commit_transform_steps(
+            source["id"], dialog.steps or [], dialog.candidate,
+            previewed_source=active_raw_candidate,
+        )
+
+    @Slot(result=bool)
+    def power_query_m_editor_dialog(self) -> bool:
+        if not self.sourceLoaded or self._active_source_id is None:
+            self._set_status("Load a table before opening the Power Query M editor.")
+            return False
+        source = next(
+            (item for item in self._project["data_sources"]
+             if item.get("id") == self._active_source_id),
+            None,
+        )
+        if source is None:
+            self._set_status("The active data source record is unavailable.")
+            return False
+        if (
+            source.get("kind") == "query"
+            and source.get("query_definition", {}).get("operation") == "append"
+        ):
+            # Append's M source is a Table.Combine over query references. Open
+            # the full query session so Advanced Editor can preview those
+            # staged parents and Close & Apply can commit the result safely.
+            return self.transform_data_dialog(open_advanced_editor=True)
+        try:
+            raw_candidate = self._raw_candidate_for_source(source)
+            steps = validate_steps(source.get("transform_steps", []))
+            source_column_types = (
+                self._query_input_column_types(
+                    source, self._project, candidate=raw_candidate
+                )
+                if source.get("kind") == "query"
+                else {}
+            )
+            if not source_column_types:
+                source_column_types = infer_column_types(
+                    raw_candidate.headers, raw_candidate.rows
+                )
+            current_parameters = parameter_values(
+                self._project.get("query_parameters", []),
+                self._project.get("query_functions", []),
+            )
+            issues = m_compatibility_issues(
+                steps,
+                parameter_names=set(current_parameters),
+                query_functions=self._project.get("query_functions", []),
+                initial_column_types=source_column_types,
+            )
+            if issues:
+                details = "; ".join(
+                    f"Step {issue['step']} ({issue['operation']}): {issue['message']}"
+                    for issue in issues
+                )
+                raise ValueError(
+                    "Advanced Editor cannot represent every current step in its local M subset. "
+                    "Edit the steps in Transform Data first. " + details
+                )
+            dialog = PowerQueryMEditorDialog(
+                raw_candidate,
+                steps,
+                self._active_model_table_name(),
+                initial_script=source.get("m_script"),
+                parameters=current_parameters,
+                query_functions=self._project.get("query_functions", []),
+                source_column_types=source_column_types,
+            )
+        except (OSError, ValueError) as exc:
+            self._set_status(f"Could not open Power Query M editor: {exc}")
+            QMessageBox.critical(None, "Could not open Power Query M editor", str(exc))
             return False
         if dialog.exec() != QDialog.DialogCode.Accepted or dialog.candidate is None:
             return False
         return self._commit_transform_steps(
-            source["id"], dialog.steps or [], dialog.candidate, previewed_source=raw_candidate
+            source["id"], dialog.steps or [], dialog.candidate,
+            previewed_source=raw_candidate,
+            m_script=dialog.script,
         )
 
     @Slot(result=bool)
@@ -3939,6 +5844,64 @@ class StudioController(QObject):
     def new_measure_dialog(self) -> bool:
         return self._measure_dialog(quick=False)
 
+    @Slot(str, result=bool)
+    def editMeasure(self, measure_name: str) -> bool:  # noqa: N802
+        """Open the DAX editor with an existing measure's saved definition."""
+        if not self.sourceLoaded:
+            self._set_status("Import a table before editing a measure.")
+            return False
+        measures = self._project.get("model", {}).get("measures", [])
+        measure = next((
+            item for item in measures
+            if str(item.get("name", "")).casefold() == measure_name.casefold()
+        ), None)
+        if measure is None:
+            self._set_status(f"Measure {measure_name!r} no longer exists.")
+            return False
+        dialog = MeasureDialog(
+            list(self._headers),
+            [str(item["name"]) for item in measures],
+            field_references=self._dax_field_references(),
+            measure_references=[
+                str(item["name"]) for item in measures
+                if str(item["name"]).casefold() != measure_name.casefold()
+            ],
+            preview_callback=lambda name, expression: self._preview_measure_expression(
+                name, expression, editing_name=measure_name
+            ),
+            initial_measure={
+                "name": str(measure["name"]),
+                "expression": str(measure["expression"]),
+                "description": str(measure.get("description", "")),
+                "display_folder": str(measure.get("display_folder", "")),
+                "is_hidden": bool(measure.get("is_hidden", False)),
+            },
+        )
+        if dialog.exec() != QDialog.DialogCode.Accepted or dialog.measure is None:
+            return False
+        return self.update_measure(
+            str(measure["name"]),
+            dialog.measure["name"],
+            dialog.measure["expression"],
+            description=dialog.measure.get("description", ""),
+            display_folder=dialog.measure.get("display_folder", ""),
+            is_hidden=dialog.measure.get("is_hidden", False),
+        )
+
+    @Slot(str, result=bool)
+    def deleteMeasure(self, measure_name: str) -> bool:  # noqa: N802
+        """Confirm removal of a saved measure, then validate dependent formulas."""
+        answer = QMessageBox.question(
+            None,
+            "Delete measure",
+            f"Delete the measure {measure_name!r}?",
+            QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.Cancel,
+            QMessageBox.StandardButton.Cancel,
+        )
+        if answer != QMessageBox.StandardButton.Yes:
+            return False
+        return self.remove_measure(measure_name)
+
     def quick_measure_dialog(self) -> bool:
         return self._measure_dialog(quick=True)
 
@@ -3990,11 +5953,19 @@ class StudioController(QObject):
             next_table["calculated_columns"] = validate_calculated_columns(current)
             raw_candidate = self._raw_candidate_for_source(source)
             query_candidate = apply_transformations(
-                raw_candidate, source.get("transform_steps", [])
+                raw_candidate, source.get("transform_steps", []),
+                parameters=parameter_values(self._project.get("query_parameters", []), self._project.get("query_functions", [])),
+            )
+            persisted_types = next_table.get("column_types", {})
+            initial_types = (
+                dict(persisted_types)
+                if isinstance(persisted_types, dict) and persisted_types
+                else infer_column_types(raw_candidate.headers, raw_candidate.rows)
             )
             base_types = column_types_after_steps(
                 raw_candidate.headers,
                 source.get("transform_steps", []),
+                initial_types=initial_types,
                 output_headers=query_candidate.headers,
             )
             calculated_candidate, calculated_types = self._apply_calculated_columns(
@@ -4038,18 +6009,126 @@ class StudioController(QObject):
                     if any(_report_number(row.get(header, "")) is not None for row in self._rows)
                 ), None)
             ),
+            field_references=self._dax_field_references(),
+            measure_references=[str(item["name"]) for item in measures],
+            preview_callback=self._preview_measure_expression,
         )
         if dialog.exec() != QDialog.DialogCode.Accepted or dialog.measure is None:
             return False
-        return self.create_measure(dialog.measure["name"], dialog.measure["expression"])
+        return self.create_measure(
+            dialog.measure["name"],
+            dialog.measure["expression"],
+            description=dialog.measure.get("description", ""),
+            display_folder=dialog.measure.get("display_folder", ""),
+            is_hidden=dialog.measure.get("is_hidden", False),
+        )
 
-    def create_measure(self, name: str, expression: str) -> bool:
+    def _dax_field_references(self) -> list[tuple[str, str]]:
+        """Return qualified references for fields in loaded model tables."""
+        references: list[tuple[str, str]] = []
+        for table in self._table_catalog:
+            if not (table.get("loaded") and table.get("loadEnabled")):
+                continue
+            table_name = str(table.get("name", ""))
+            if not table_name:
+                continue
+            escaped_table = table_name.replace("'", "''")
+            display_name = str(table.get("displayName", table_name))
+            for raw_column in table.get("headers", []):
+                column = str(raw_column)
+                # The current DAX tokenizer does not yet accept escaped closing
+                # brackets in column identifiers; hide references it cannot bind.
+                if not column or "]" in column or "\n" in column or "\r" in column:
+                    continue
+                references.append((
+                    f"{display_name}[{column}]",
+                    f"'{escaped_table}'[{column}]",
+                ))
+        return references
+
+    def _preview_measure_expression(
+        self,
+        name: str,
+        expression: str,
+        *,
+        editing_name: str | None = None,
+    ) -> str:
+        """Validate and evaluate a draft measure without changing project state."""
+        measure = normalize_measure(name, expression)
+        current = list(self._project.get("model", {}).get("measures", []))
+        if editing_name is None:
+            if any(
+                str(item.get("name", "")).casefold() == measure["name"].casefold()
+                for item in current
+            ):
+                raise MeasureError(f"A measure named {measure['name']!r} already exists.")
+            candidate_measures = [*current, measure]
+            evaluate_names = [measure["name"]]
+        else:
+            existing_index = next((
+                index for index, item in enumerate(current)
+                if str(item.get("name", "")).casefold() == editing_name.casefold()
+            ), None)
+            if existing_index is None:
+                raise MeasureError(f"Measure {editing_name!r} no longer exists.")
+            if any(
+                index != existing_index
+                and str(item.get("name", "")).casefold() == measure["name"].casefold()
+                for index, item in enumerate(current)
+            ):
+                raise MeasureError(f"A measure named {measure['name']!r} already exists.")
+            candidate_measures = list(current)
+            candidate_measures[existing_index] = measure
+            evaluate_names = None
+
+        previous_region_column = self._region_column
+        previous_filter_context_error = self._filter_context_error
+        previous_filter_context_cache = self._report_filter_context_cache
+        # Context construction maintains a report cache and compatibility
+        # properties for normal rendering. A draft preview must leave those
+        # visible controller values exactly as it found them.
+        self._report_filter_context_cache = dict(previous_filter_context_cache)
+        try:
+            filtered_rows, table_context, filter_table_ids = self._report_filter_context()
+            active_table_id = self._active_model_table_id()
+            values = evaluate_measures(
+                candidate_measures,
+                filtered_rows.get(active_table_id, list(self._rows)),
+                self._headers,
+                self._active_model_table_name(),
+                measure_names=evaluate_names,
+                table_context=table_context,
+                relationships=self._project.get("model", {}).get("relationships", []),
+                filter_table_ids=filter_table_ids,
+                active_table_id=active_table_id or None,
+            )
+        finally:
+            self._report_filter_context_cache = previous_filter_context_cache
+            self._region_column = previous_region_column
+            self._filter_context_error = previous_filter_context_error
+        value = values.get(measure["name"])
+        if value is None:
+            return "—"
+        return _format_report_number(value)
+
+    def create_measure(
+        self,
+        name: str,
+        expression: str,
+        *,
+        description: str = "",
+        display_folder: str = "",
+        is_hidden: bool = False,
+    ) -> bool:
         """Validate, evaluate, then transactionally add a local DAX measure."""
         if not self.sourceLoaded:
             self._set_status("Import a table before creating a measure.")
             return False
         try:
-            measure = normalize_measure(name, expression)
+            measure = normalize_measure(
+                name, expression, description=description,
+                display_folder=display_folder, is_hidden=is_hidden,
+            )
             current = list(self._project.get("model", {}).get("measures", []))
             if any(item["name"].casefold() == measure["name"].casefold() for item in current):
                 raise MeasureError(f"A measure named {measure['name']!r} already exists.")
@@ -4072,17 +6151,6 @@ class StudioController(QObject):
             )
             next_project = deepcopy(self._project)
             next_project.setdefault("model", {}).setdefault("measures", []).append(measure)
-            page = next(
-                page for page in next_project["report"]["pages"]
-                if page["id"] == next_project["report"]["active_page_id"]
-            )
-            visual_name = f"{measure['name']} KPI"
-            if not any(isinstance(v, dict) and v.get("title") == visual_name for v in page.get("visuals", [])):
-                from uuid import uuid4
-                page.setdefault("visuals", []).append({
-                    "id": str(uuid4()), "type": "card", "title": visual_name,
-                    "x": 10, "y": 10, "width": 120, "height": 80
-                })
             next_project = validate_project(next_project)
         except (MeasureError, ProjectFileError, StopIteration, TypeError, ValueError) as exc:
             self._set_status(f"Could not create measure: {exc}")
@@ -4094,6 +6162,151 @@ class StudioController(QObject):
         self.stateChanged.emit()
         value = self._measure_values.get(measure["name"], "—")
         self._set_status(f"Created measure {measure['name']} = {value}")
+        return True
+
+    def update_measure(
+        self,
+        existing_name: str,
+        name: str,
+        expression: str,
+        *,
+        description: str | None = None,
+        display_folder: str | None = None,
+        is_hidden: bool | None = None,
+    ) -> bool:
+        """Validate and transactionally replace one saved local DAX measure."""
+        if not self.sourceLoaded:
+            self._set_status("Import a table before editing a measure.")
+            return False
+        try:
+            current = list(self._project.get("model", {}).get("measures", []))
+            index = next((
+                i for i, item in enumerate(current)
+                if str(item["name"]).casefold() == existing_name.casefold()
+            ), None)
+            if index is None:
+                raise MeasureError(f"Measure {existing_name!r} no longer exists.")
+            measure = normalize_measure(
+                name,
+                expression,
+                description=(
+                    current[index].get("description", "")
+                    if description is None else description
+                ),
+                display_folder=(
+                    current[index].get("display_folder", "")
+                    if display_folder is None else display_folder
+                ),
+                is_hidden=(
+                    current[index].get("is_hidden", False)
+                    if is_hidden is None else is_hidden
+                ),
+            )
+            if any(
+                i != index and item["name"].casefold() == measure["name"].casefold()
+                for i, item in enumerate(current)
+            ):
+                raise MeasureError(f"A measure named {measure['name']!r} already exists.")
+            candidate_measures = list(current)
+            candidate_measures[index] = measure
+            filtered_rows_by_table, measure_table_context, filter_table_ids = (
+                self._report_filter_context()
+            )
+            active_table_id = self._active_model_table_id()
+            filtered_rows = filtered_rows_by_table.get(active_table_id, list(self._rows))
+            # Evaluate all measures so a rename cannot silently break dependents.
+            evaluate_measures(
+                candidate_measures,
+                filtered_rows,
+                self._headers,
+                self._active_model_table_name(),
+                table_context=measure_table_context,
+                relationships=self._project.get("model", {}).get("relationships", []),
+                filter_table_ids=filter_table_ids,
+                active_table_id=active_table_id or None,
+            )
+            next_project = deepcopy(self._project)
+            next_project.setdefault("model", {})["measures"] = candidate_measures
+            if measure["name"] != existing_name:
+                old_binding = _visual_measure_binding(existing_name)
+                new_binding = _visual_measure_binding(measure["name"])
+                for page in next_project.get("report", {}).get("pages", []):
+                    for visual in page.get("visuals", []):
+                        fields = visual.get("fields", {})
+                        for well_fields in fields.values():
+                            if not isinstance(well_fields, list):
+                                continue
+                            well_fields[:] = [
+                                new_binding if str(item).casefold() == old_binding.casefold()
+                                else item
+                                for item in well_fields
+                            ]
+                        visual.get("field_aggregations", {}).pop(old_binding, None)
+            next_project = validate_project(next_project)
+        except (MeasureError, ProjectFileError, StopIteration, TypeError, ValueError) as exc:
+            self._set_status(f"Could not update measure: {exc}")
+            return False
+
+        self._project = next_project
+        self._dirty = True
+        self._refresh_report()
+        self.stateChanged.emit()
+        value = self._measure_values.get(measure["name"], "—")
+        self._set_status(f"Updated measure {measure['name']} = {value}")
+        return True
+
+    def remove_measure(self, name: str) -> bool:
+        """Remove one measure only when the remaining model still evaluates."""
+        if not self.sourceLoaded:
+            self._set_status("Import a table before removing a measure.")
+            return False
+        binding = _visual_measure_binding(name).casefold()
+        visual_uses = [
+            str(visual.get("title", "Untitled"))
+            for page in self._project.get("report", {}).get("pages", [])
+            for visual in page.get("visuals", [])
+            for bindings in visual.get("fields", {}).values()
+            if isinstance(bindings, list)
+            and any(str(item).casefold() == binding for item in bindings)
+        ]
+        if visual_uses:
+            self._set_status(
+                f"Remove {name!r} from visual {visual_uses[0]!r} before deleting the measure."
+            )
+            return False
+        try:
+            current = list(self._project.get("model", {}).get("measures", []))
+            retained = [item for item in current if item["name"].casefold() != name.casefold()]
+            if len(retained) == len(current):
+                self._set_status(f"Measure {name!r} no longer exists.")
+                return False
+            filtered_rows_by_table, measure_table_context, filter_table_ids = (
+                self._report_filter_context()
+            )
+            active_table_id = self._active_model_table_id()
+            filtered_rows = filtered_rows_by_table.get(active_table_id, list(self._rows))
+            evaluate_measures(
+                retained,
+                filtered_rows,
+                self._headers,
+                self._active_model_table_name(),
+                table_context=measure_table_context,
+                relationships=self._project.get("model", {}).get("relationships", []),
+                filter_table_ids=filter_table_ids,
+                active_table_id=active_table_id or None,
+            )
+            next_project = deepcopy(self._project)
+            next_project.setdefault("model", {})["measures"] = retained
+            next_project = validate_project(next_project)
+        except (MeasureError, ProjectFileError, StopIteration, TypeError, ValueError) as exc:
+            self._set_status(f"Could not delete measure: {exc}")
+            return False
+
+        self._project = next_project
+        self._dirty = True
+        self._refresh_report()
+        self.stateChanged.emit()
+        self._set_status(f"Deleted measure {name}")
         return True
 
     def _active_model_table_name(self) -> str:
@@ -4120,6 +6333,88 @@ class StudioController(QObject):
             table for table in project.get("model", {}).get("tables", [])
             if table.get("id") == source_id or table.get("source_id") == source_id
         ), None)
+
+    @classmethod
+    def _query_input_column_types(
+        cls,
+        source: dict[str, Any],
+        project: dict[str, Any],
+        *,
+        candidate: ImportCandidate | None = None,
+        dependency_types: dict[str, dict[str, str]] | None = None,
+    ) -> dict[str, str]:
+        """Return inherited or reconciled types before a saved query's steps."""
+        definition = source.get("query_definition", {})
+        dependencies = definition.get("source_ids", [])
+        operation = definition.get("operation")
+        if operation not in {"reference", "append", "merge"}:
+            return {}
+
+        tables_by_source = {
+            str(table.get("source_id") or table.get("id", "")): table
+            for table in project.get("model", {}).get("tables", [])
+        }
+
+        def source_types(source_id: str) -> dict[str, str]:
+            supplied = (dependency_types or {}).get(source_id)
+            table = tables_by_source.get(source_id)
+            calculated = {
+                str(item.get("name", ""))
+                for item in (table or {}).get("calculated_columns", [])
+            }
+            if supplied:
+                return {
+                    str(name): str(value)
+                    for name, value in supplied.items()
+                    if str(name) not in calculated
+                }
+            if table is None:
+                return {}
+            return {
+                str(name): str(value)
+                for name, value in table.get("column_types", {}).items()
+                if str(name) not in calculated
+            }
+
+        if operation == "reference" and len(dependencies) == 1:
+            return source_types(str(dependencies[0]))
+        if len(dependencies) != 2:
+            return {}
+        left_id, right_id = (str(item) for item in dependencies)
+        left_types = source_types(left_id)
+        right_types = source_types(right_id)
+        if operation == "append":
+            headers = (
+                list(candidate.headers)
+                if candidate is not None
+                else list(left_types)
+            )
+            return {
+                header: (
+                    left_types.get(header, "text")
+                    if left_types.get(header, "text") == right_types.get(header, "text")
+                    else "text"
+                )
+                for header in headers
+            }
+        if operation == "merge" and candidate is not None:
+            column_sources = candidate.options.get("column_sources", {})
+            if isinstance(column_sources, dict):
+                result: dict[str, str] = {}
+                for header in candidate.headers:
+                    origin = column_sources.get(header, {})
+                    if not isinstance(origin, dict):
+                        result[header] = "text"
+                    elif origin.get("side") == "right":
+                        result[header] = right_types.get(
+                            str(origin.get("column", "")), "text"
+                        )
+                    else:
+                        result[header] = left_types.get(
+                            str(origin.get("column", "")), "text"
+                        )
+                return result
+        return {}
 
     def _apply_calculated_columns(
         self,
@@ -4217,9 +6512,12 @@ class StudioController(QObject):
     def _report_filter_context(
         self,
         visual_name: str | None = None,
+        *,
+        include_highlights: bool = False,
     ) -> tuple[dict[str, list[dict[str, Any]]], list[dict[str, Any]], set[str]]:
         """Build page context plus optional filters for one report visual."""
-        cached = self._report_filter_context_cache.get(visual_name)
+        cache_key = (visual_name, include_highlights)
+        cached = self._report_filter_context_cache.get(cache_key)
         if cached is not None:
             rows_by_id, context, filter_table_ids, error = cached
             self._filter_context_error = error
@@ -4269,8 +6567,43 @@ class StudioController(QObject):
 
         def visual_category_binding(source_visual: dict[str, Any]) -> tuple[str, str] | None:
             fields = source_visual.get("fields", {})
-            preferred_table_id = str(source_visual.get("table_id", ""))
-            for well_name in ("Fields", "Field", "X-axis", "Category"):
+            preferred_table_id = str(
+                source_visual.get("table_id") or self._active_model_table_id()
+            )
+            if source_visual.get("type") == "table":
+                table = contexts_by_id.get(preferred_table_id)
+                if table is None:
+                    return None
+                table_fields = fields.get("Fields", [])
+                if not isinstance(table_fields, list):
+                    return None
+                for binding in table_fields:
+                    if isinstance(binding, dict):
+                        column = str(binding.get("column", ""))
+                    elif isinstance(binding, (list, tuple)):
+                        if len(binding) >= 2:
+                            table_id, column = str(binding[0]), str(binding[1])
+                            candidate_table = contexts_by_id.get(table_id)
+                            if candidate_table is not None and column in candidate_table["headers"]:
+                                return table_id, column
+                            continue
+                        column = str(binding[0]) if binding else ""
+                    else:
+                        column = str(binding)
+                    if _visual_measure_name(column) is not None:
+                        continue
+                    if column in table["headers"]:
+                        return preferred_table_id, column
+                return None
+            if source_visual.get("type") == "scatter":
+                well_order = ("Details", "Legend", "X-axis")
+            elif source_visual.get("type") == "kpi":
+                well_order = ("Trend axis",)
+            elif source_visual.get("type") == "map":
+                well_order = ("Location",)
+            else:
+                well_order = ("Rows", "Fields", "Field", "X-axis", "Category")
+            for well_name in well_order:
                 well_fields = fields.get(well_name, [])
                 if not isinstance(well_fields, list) or not well_fields:
                     continue
@@ -4325,6 +6658,25 @@ class StudioController(QObject):
             ), None)
             if source_visual is None or not selected_values:
                 continue
+            target_visual = next((
+                item for item in (page.get("visuals", []) if page else [])
+                if isinstance(item, dict) and item.get("title") == visual_name
+            ), None)
+            if target_visual is not None:
+                mode = self._visual_interaction_mode(source_visual, target_visual)
+                if mode == "none" or (mode == "highlight" and not include_highlights):
+                    continue
+            else:
+                target_modes = [
+                    self._visual_interaction_mode(source_visual, target)
+                    for target in (page.get("visuals", []) if page else [])
+                    if isinstance(target, dict) and target is not source_visual
+                ]
+                if include_highlights:
+                    if "highlight" not in target_modes and "filter" not in target_modes:
+                        continue
+                elif "filter" not in target_modes:
+                    continue
             binding = visual_category_binding(source_visual)
             month_bucket = False
             if binding is None:
@@ -4539,7 +6891,7 @@ class StudioController(QObject):
                 }
             
         result = (rows_by_id, context, filter_table_ids)
-        self._report_filter_context_cache[visual_name] = (
+        self._report_filter_context_cache[cache_key] = (
             *result,
             self._filter_context_error,
         )
@@ -4575,14 +6927,356 @@ class StudioController(QObject):
             expected_kind=source.get("kind"),
         )
 
+    def _session_raw_candidate_for_source(
+        self, source: dict[str, Any]
+    ) -> ImportCandidate:
+        """Refresh local sources, while keeping inactive remote connectors cache-only."""
+        source_id = str(source.get("id", ""))
+        if source_id == self._active_source_id or source.get("kind") == "query":
+            return self._raw_candidate_for_source(source)
+        if source.get("kind") in {"sql_server", "odata", "web"}:
+            cached = self._raw_candidates.get(source_id)
+            if cached is not None:
+                return cached
+            raise ValueError(
+                "This connector has no cached source preview. Load or refresh it before editing its query."
+            )
+        # Local paths are inexpensive and side-effect free to read. Refresh their
+        # previews when navigating so edits never apply to an obsolete file snapshot.
+        return self._raw_candidate_for_source(source)
+
+    def _refresh_transform_query_preview(
+        self,
+        target_id: str,
+        session_queries: dict[str, dict[str, Any]] | None = None,
+        session_parameter_values: dict[str, Any] | None = None,
+    ) -> tuple[
+        ImportCandidate,
+        dict[str, str],
+        dict[str, tuple[
+            ImportCandidate,
+            ImportCandidate,
+            dict[str, str],
+            dict[str, str],
+        ]],
+    ]:
+        """Reread a query's dependency sources without committing project changes."""
+        session_queries = session_queries or {}
+        sources = deepcopy(self._project.get("data_sources", []))
+        sources_by_id = {str(source.get("id", "")): source for source in sources}
+        for source_id, query_state in session_queries.items():
+            source = sources_by_id.get(str(source_id))
+            if source is None:
+                if query_state.get("is_new_source"):
+                    staged_source = query_state.get("source_record")
+                    if not isinstance(staged_source, dict):
+                        raise QueryError("The staged local source details are unavailable.")
+                    source = deepcopy(staged_source)
+                    source["transform_steps"] = deepcopy(
+                        query_state.get("steps", [])
+                    )
+                    sources.append(source)
+                    sources_by_id[str(source_id)] = source
+                    continue
+                if not query_state.get("is_new_query"):
+                    continue
+                source = {
+                    "id": str(source_id),
+                    "name": str(query_state.get("name", "")),
+                    "kind": "query",
+                    "query_definition": deepcopy(
+                        query_state.get("query_definition", {})
+                    ),
+                    "transform_steps": deepcopy(query_state.get("steps", [])),
+                    "include_in_report_refresh": query_state.get(
+                        "include_in_report_refresh", True
+                    ),
+                }
+                sources.append(source)
+                sources_by_id[str(source_id)] = source
+                continue
+            if source.get("kind") == "query":
+                source["query_definition"] = deepcopy(
+                    query_state.get("query_definition", source.get("query_definition", {}))
+                )
+                source["transform_steps"] = deepcopy(
+                    query_state.get("steps", source.get("transform_steps", []))
+                )
+                source["include_in_report_refresh"] = query_state.get(
+                    "include_in_report_refresh",
+                    source.get("include_in_report_refresh", True),
+                )
+            elif query_state.get("is_source_settings_changed"):
+                staged_source = query_state.get("source_record")
+                if (
+                    not isinstance(staged_source, dict)
+                    or str(staged_source.get("id", "")) != str(source_id)
+                    or staged_source.get("kind") != source.get("kind")
+                    or source.get("kind") not in {
+                        "csv", "excel", "json", "xml", "parquet", "sqlite", "folder",
+                    }
+                    or not isinstance(staged_source.get("parser_options"), dict)
+                ):
+                    raise QueryError("The staged source settings do not match the existing local source.")
+                source["path"] = str(staged_source.get("path", ""))
+                source["parser_options"] = deepcopy(staged_source["parser_options"])
+        target = sources_by_id.get(str(target_id))
+        if target is None:
+            raise QueryError("The selected source is no longer available.")
+
+        session_functions = getattr(
+            session_parameter_values,
+            "query_functions",
+            self._project.get("query_functions", []),
+        )
+        parameters = parameter_values(
+            self._project.get("query_parameters", []), session_functions
+        )
+        if session_parameter_values is not None:
+            # Keep unsaved typed parameter values while retaining the staged
+            # function registry carried by QueryEvaluationContext.
+            parameters.update(session_parameter_values)
+        if not self._source_refresh_included(target):
+            session_state = session_queries.get(str(target_id), {})
+            candidate = session_state.get("source_candidate")
+            if not isinstance(candidate, ImportCandidate):
+                candidate = self._raw_candidates.get(str(target_id))
+            if candidate is None:
+                candidate = self._query_candidate(
+                    target, self._loaded_candidates, project=self._project
+                )
+            if target.get("query_definition", {}).get("operation") == "reference":
+                source_types = dict(session_state.get("source_column_types", {}))
+                if not source_types:
+                    source_types = self._query_input_column_types(target, self._project)
+            else:
+                source_types = dict(session_state.get("source_column_types", {}))
+                if not source_types:
+                    source_types = infer_column_types(candidate.headers, candidate.rows)
+            return candidate, source_types, {}
+
+        dependency_ids: set[str] = set()
+
+        def include_dependencies(source_id: str) -> None:
+            if source_id in dependency_ids:
+                return
+            source = sources_by_id.get(source_id)
+            if source is None:
+                raise QueryError(f"Query source {source_id!r} is not currently available.")
+            dependency_ids.add(source_id)
+            if (
+                source.get("kind") == "query"
+                and self._source_refresh_included(source)
+            ):
+                for dependency_id in source.get("query_definition", {}).get("source_ids", []):
+                    include_dependencies(str(dependency_id))
+
+        is_root_target = target.get("kind") != "query"
+        if is_root_target:
+            dependency_ids.add(str(target_id))
+            added = True
+            while added:
+                added = False
+                for source in sources:
+                    source_id = str(source.get("id", ""))
+                    if source_id in dependency_ids or source.get("kind") != "query":
+                        continue
+                    parents = {
+                        str(item)
+                        for item in source.get("query_definition", {}).get("source_ids", [])
+                    }
+                    if parents & dependency_ids:
+                        dependency_ids.add(source_id)
+                        added = True
+        else:
+            for dependency_id in target.get("query_definition", {}).get("source_ids", []):
+                include_dependencies(str(dependency_id))
+
+        refreshed_outputs: dict[str, ImportCandidate] = (
+            dict(self._loaded_candidates) if is_root_target else {}
+        )
+        refreshed_types: dict[str, dict[str, str]] = {}
+        refreshed_session_queries: dict[str, tuple[
+            ImportCandidate,
+            ImportCandidate,
+            dict[str, str],
+            dict[str, str],
+        ]] = {}
+        for source in self._source_dependency_order(sources):
+            source_id = str(source.get("id", ""))
+            if source_id not in dependency_ids:
+                continue
+            if source.get("kind") == "query" and not self._source_refresh_included(source):
+                state = session_queries.get(source_id, {})
+                raw_cached = state.get("source_candidate")
+                if not isinstance(raw_cached, ImportCandidate):
+                    raw_cached = self._raw_candidates.get(source_id)
+                cached = self._loaded_candidates.get(source_id)
+                if cached is None:
+                    cached = state.get("preview_candidate")
+                if cached is None:
+                    raise QueryError(
+                        f"Cannot refresh this preview because dependent query "
+                        f"{source.get('name', source_id)!r} is excluded from report refresh "
+                        "and has no cached result."
+                    )
+                refreshed_outputs[source_id] = cached
+                initial_types = dict(state.get("source_column_types", {}))
+                if not initial_types and isinstance(raw_cached, ImportCandidate):
+                    initial_types = infer_column_types(
+                        raw_cached.headers, raw_cached.rows
+                    )
+                steps = validate_steps(
+                    state.get("steps", source.get("transform_steps", []))
+                )
+                if isinstance(raw_cached, ImportCandidate):
+                    preview = apply_transformations(
+                        raw_cached, steps, parameters=parameters
+                    )
+                    result_types = column_types_after_steps(
+                        raw_cached.headers,
+                        steps,
+                        output_headers=preview.headers,
+                        initial_types=initial_types,
+                    )
+                    cached_output, _calculated_types = self._apply_calculated_columns(
+                        source_id,
+                        preview,
+                        project=self._project,
+                        column_types=result_types,
+                    )
+                    # An excluded query keeps its cached source snapshot, but
+                    # explicit session edits (including changed parameter values)
+                    # still need the same transformed result in both the parent
+                    # preview and any dependent query preview.
+                    refreshed_outputs[source_id] = cached_output
+                    refreshed_session_queries[source_id] = (
+                        raw_cached, preview, initial_types, result_types
+                    )
+                else:
+                    refreshed_outputs[source_id] = cached
+                table = self._model_table_for_source(self._project, source_id) or {}
+                calculated = {
+                    str(item.get("name", ""))
+                    for item in table.get("calculated_columns", [])
+                }
+                refreshed_types[source_id] = (
+                    dict(result_types)
+                    if isinstance(raw_cached, ImportCandidate)
+                    else {
+                        str(name): str(type_name)
+                        for name, type_name in table.get("column_types", {}).items()
+                        if name not in calculated
+                    }
+                )
+                continue
+
+            if source.get("kind") == "query":
+                raw = self._query_candidate(
+                    source, refreshed_outputs, project=self._project
+                )
+            else:
+                raw = self._raw_candidate_for_source(source)
+            source_state = session_queries.get(source_id, {})
+            steps = validate_steps(
+                source_state.get("steps", source.get("transform_steps", []))
+            )
+            transformed = apply_transformations(
+                raw, steps, parameters=parameters
+            )
+            definition = source.get("query_definition", {})
+            dependencies = [
+                str(item) for item in definition.get("source_ids", [])
+            ]
+            if definition.get("operation") == "reference" and dependencies:
+                source_types = dict(refreshed_types.get(dependencies[0], {}))
+                if not source_types:
+                    source_types = self._query_input_column_types(
+                        source,
+                        self._project,
+                        candidate=raw,
+                        dependency_types=refreshed_types,
+                    )
+            elif definition.get("operation") in {"append", "merge"}:
+                source_types = self._query_input_column_types(
+                    source,
+                    self._project,
+                    candidate=raw,
+                    dependency_types=refreshed_types,
+                )
+                if not source_types:
+                    source_types = infer_column_types(raw.headers, raw.rows)
+            else:
+                source_types = infer_column_types(raw.headers, raw.rows)
+            type_map = column_types_after_steps(
+                raw.headers,
+                steps,
+                output_headers=transformed.headers,
+                initial_types=source_types,
+            )
+            refreshed_session_queries[source_id] = (
+                raw, transformed, source_types, type_map
+            )
+            output, _calculated_types = self._apply_calculated_columns(
+                source_id,
+                transformed,
+                project=self._project,
+                column_types=type_map,
+            )
+            refreshed_outputs[source_id] = output
+            refreshed_types[source_id] = type_map
+
+        if is_root_target:
+            refreshed_target = refreshed_session_queries.get(str(target_id))
+            if refreshed_target is None:
+                raise QueryError("The edited file source could not be refreshed.")
+            raw_target = refreshed_target[0]
+            source_types = refreshed_target[2]
+        else:
+            raw_target = self._query_candidate(
+                target, refreshed_outputs, project=self._project
+            )
+            definition = target.get("query_definition", {})
+            dependencies = [str(item) for item in definition.get("source_ids", [])]
+            if definition.get("operation") == "reference" and dependencies:
+                source_types = dict(refreshed_types.get(dependencies[0], {}))
+                if not source_types:
+                    source_types = self._query_input_column_types(
+                        target,
+                        self._project,
+                        candidate=raw_target,
+                        dependency_types=refreshed_types,
+                    )
+            elif definition.get("operation") in {"append", "merge"}:
+                source_types = self._query_input_column_types(
+                    target,
+                    self._project,
+                    candidate=raw_target,
+                    dependency_types=refreshed_types,
+                )
+                if not source_types:
+                    source_types = infer_column_types(raw_target.headers, raw_target.rows)
+            else:
+                source_types = infer_column_types(raw_target.headers, raw_target.rows)
+        return raw_target, source_types, refreshed_session_queries
+
     def _sql_server_candidate_for_source(self, source: dict[str, Any]) -> ImportCandidate:
         connection = dict(source.get("connection", {}))
         credential_ref = str(connection.get("credential_ref", ""))
-        password = self._sql_server_passwords.get(credential_ref)
+        credential_account = sql_server_credential_account(
+            credential_ref, connection
+        )
+        staged_password = source.get("_staged_password")
+        password = (
+            str(staged_password)
+            if isinstance(staged_password, str) and staged_password
+            else self._sql_server_passwords.get(credential_account)
+        )
+        is_staged_password = isinstance(staged_password, str) and bool(staged_password)
         prompted = False
         if not password:
             try:
-                password = get_sql_server_password(credential_ref)
+                password = get_sql_server_password(credential_ref, connection)
             except CredentialStoreError as exc:
                 raise SQLServerError(str(exc)) from exc
         if not password:
@@ -4601,13 +7295,34 @@ class StudioController(QObject):
             dict(source.get("parser_options", {})),
             password,
         )
-        if prompted:
+        if prompted and not is_staged_password:
             try:
-                set_sql_server_password(credential_ref, password)
+                set_sql_server_password(credential_ref, password, connection)
             except CredentialStoreError as exc:
                 raise SQLServerError(str(exc)) from exc
-        self._sql_server_passwords[credential_ref] = password
+        if not is_staged_password:
+            self._sql_server_passwords[credential_account] = password
         return candidate
+
+    def _candidate_for_staged_source(
+        self,
+        source: dict[str, Any],
+        *,
+        sql_server_password: str = "",
+    ) -> ImportCandidate:
+        """Re-read a staged connector source without committing credentials."""
+        kind = str(source.get("kind", ""))
+        connection = dict(source.get("connection", {}))
+        options = dict(source.get("parser_options", {}))
+        if kind == "sql_server":
+            if not sql_server_password:
+                raise SQLServerError("A SQL Server password is required before Apply.")
+            return read_sql_server_object(connection, options, sql_server_password)
+        if kind == "odata":
+            return read_odata_entity_set(connection, options)
+        if kind == "web":
+            return read_web_source(connection, options)
+        raise ValueError("The staged source connector is not supported.")
 
     @staticmethod
     def _odata_candidate_for_source(source: dict[str, Any]) -> ImportCandidate:
@@ -4639,6 +7354,28 @@ class StudioController(QObject):
                 f"Query source {exc.args[0]!r} is not currently available."
             ) from exc
         operation = definition.get("operation")
+        if operation == "reference" and len(inputs) == 1:
+            candidate = inputs[0]
+            source_id = str(source_ids[0])
+            table = StudioController._model_table_for_source(project or {}, source_id)
+            calculated_columns = {
+                str(item.get("name", ""))
+                for item in (table or {}).get("calculated_columns", [])
+            }
+            headers = [
+                header for header in candidate.headers
+                if header not in calculated_columns
+            ]
+            return ImportCandidate(
+                kind="query",
+                headers=headers,
+                rows=[
+                    {header: row.get(header, "") for header in headers}
+                    for row in candidate.rows
+                ],
+                options={},
+                notices=[],
+            )
         if operation == "append":
             return append_candidates(inputs)
         if operation == "merge" and len(inputs) == 2:
@@ -4771,11 +7508,20 @@ class StudioController(QObject):
             if not all(item in candidates for item in dependencies):
                 continue
             raw = self._query_candidate(source, candidates, project=project)
-            query_candidate = apply_transformations(raw, source.get("transform_steps", []))
+            query_candidate = apply_transformations(
+                raw, source.get("transform_steps", []),
+                parameters=parameter_values(project.get("query_parameters", []), project.get("query_functions", [])),
+            )
             type_map = column_types_after_steps(
                 raw.headers,
                 source.get("transform_steps", []),
                 output_headers=query_candidate.headers,
+                initial_types=self._query_input_column_types(
+                    source,
+                    project,
+                    candidate=raw,
+                    dependency_types=type_maps,
+                ),
             )
             transformed, calculated_types = self._apply_calculated_columns(
                 source_id, query_candidate, project=project,
@@ -4793,6 +7539,53 @@ class StudioController(QObject):
             return resolve_source_path(stored_path, self._project_path)
         return Path(stored_path).expanduser().resolve()
 
+    def _sqlite_binding_conflict(
+        self,
+        sources: list[dict[str, Any]],
+        affected_source_ids: set[str],
+    ) -> bool:
+        """Check final SQLite bindings changed in this session for duplicates."""
+        if not affected_source_ids:
+            return False
+        seen: dict[tuple[tuple[Any, ...], str], str] = {}
+        for source in sources:
+            if source.get("kind") != "sqlite":
+                continue
+            source_id = str(source.get("id", ""))
+            options = source.get("parser_options", {})
+            if not isinstance(options, dict):
+                continue
+            table_name = str(options.get("table_name", ""))
+            if not table_name.strip():
+                continue
+            try:
+                path = self._resolved_source_path(source)
+                stat = path.stat()
+                path_identity: tuple[Any, ...] = ("file", stat.st_dev, stat.st_ino)
+            except (KeyError, OSError, RuntimeError, TypeError, ValueError):
+                try:
+                    path_identity = ("path", os.path.normcase(str(self._resolved_source_path(source))))
+                except (KeyError, OSError, RuntimeError, TypeError, ValueError):
+                    continue
+            # SQLite folds ASCII identifier letters for object-name matching;
+            # Unicode casefolding would incorrectly merge distinct names such
+            # as "Straße" and "STRASSE".
+            sqlite_name_key = "".join(
+                chr(ord(character) + 32)
+                if "A" <= character <= "Z"
+                else character
+                for character in table_name
+            )
+            key = (path_identity, sqlite_name_key)
+            previous_id = seen.get(key)
+            if previous_id is not None and (
+                source_id in affected_source_ids
+                or previous_id in affected_source_ids
+            ):
+                return True
+            seen.setdefault(key, source_id)
+        return False
+
     def _commit_transform_steps(
         self,
         source_id: str,
@@ -4800,6 +7593,7 @@ class StudioController(QObject):
         transformed: ImportCandidate,
         *,
         previewed_source: ImportCandidate | None = None,
+        m_script: str | None = None,
     ) -> bool:
         try:
             validated_steps = validate_steps(steps)
@@ -4813,22 +7607,51 @@ class StudioController(QObject):
                     "The source changed while Transform data was open. Reopen Transform data to preview the latest rows."
                 )
                 return False
-            confirmed = apply_transformations(raw_candidate, validated_steps)
+            confirmed = apply_transformations(
+                raw_candidate, validated_steps,
+                parameters=parameter_values(self._project.get("query_parameters", []), self._project.get("query_functions", [])),
+            )
             if confirmed != transformed:
                 self._set_status(
                     "The transformation result no longer matches its preview. Reopen Transform data and try again."
                 )
                 return False
+            source_column_types = (
+                self._query_input_column_types(
+                    source, self._project, candidate=raw_candidate
+                )
+                if source.get("kind") == "query"
+                else {}
+            )
+            if not source_column_types:
+                source_column_types = infer_column_types(
+                    raw_candidate.headers, raw_candidate.rows
+                )
             next_project = deepcopy(self._project)
             target = next(
                 item for item in next_project["data_sources"]
                 if item.get("id") == source_id
             )
             target["transform_steps"] = validated_steps
+            table_name = self._active_model_table_name() if source_id == self._active_source_id else str(
+                target.get("query_name", target.get("name", "Table"))
+            )
+            if isinstance(m_script, str) and m_script_matches_steps(
+                m_script, table_name, validated_steps,
+                parameter_names=set(parameter_values(
+                    self._project.get("query_parameters", [])
+                )),
+                query_functions=self._project.get("query_functions", []),
+                initial_column_types=source_column_types,
+            ):
+                target["m_script"] = m_script
+            else:
+                target.pop("m_script", None)
             type_map = column_types_after_steps(
                 raw_candidate.headers,
                 validated_steps,
                 output_headers=confirmed.headers,
+                initial_types=source_column_types,
             )
             calculated_candidate, calculated_types = self._apply_calculated_columns(
                 source_id, confirmed, project=next_project,
@@ -4868,6 +7691,7 @@ class StudioController(QObject):
             return False
 
         self._project = next_project
+        self._raw_candidates[source_id] = raw_candidate
         self._loaded_candidates.update(dependent_candidates)
         for updated_id in dependent_candidates:
             self._source_load_errors.pop(updated_id, None)
@@ -4883,6 +7707,1220 @@ class StudioController(QObject):
         self.stateChanged.emit()
         self._set_status(f"Applied {len(validated_steps)} transformation step(s)")
         return True
+
+    def _commit_transform_session(
+        self,
+        query_results: dict[str, dict[str, Any]],
+        *,
+        deleted_query_ids: set[str] | None = None,
+        query_parameters: list[dict[str, str]] | None = None,
+        query_functions: list[dict[str, str]] | None = None,
+    ) -> bool:
+        """Validate and commit edits from the multi-query Power Query session atomically."""
+        deleted_query_ids = set(deleted_query_ids or set())
+        session_project = deepcopy(self._project)
+        original_parameters = deepcopy(
+            session_project.get("query_parameters", [])
+        )
+        if query_parameters is not None:
+            session_project["query_parameters"] = deepcopy(query_parameters)
+        original_functions = deepcopy(session_project.get("query_functions", []))
+        if query_functions is not None:
+            session_project["query_functions"] = deepcopy(query_functions)
+        parameters_changed = (
+            session_project.get("query_parameters", []) != original_parameters
+        )
+        old_parameters = {
+            item.get("name"): item
+            for item in original_parameters if isinstance(item, dict)
+        }
+        new_parameters = {
+            item.get("name"): item
+            for item in session_project.get("query_parameters", [])
+            if isinstance(item, dict)
+        }
+        changed_parameter_names = {
+            name for name in old_parameters.keys() | new_parameters.keys()
+            if old_parameters.get(name) != new_parameters.get(name)
+        }
+        old_functions = {
+            item.get("name"): item
+            for item in original_functions if isinstance(item, dict)
+        }
+        new_functions = {
+            item.get("name"): item
+            for item in session_project.get("query_functions", [])
+            if isinstance(item, dict)
+        }
+        changed_function_names = {
+            name for name in old_functions.keys() | new_functions.keys()
+            if old_functions.get(name) != new_functions.get(name)
+        }
+        functions_changed = bool(changed_function_names)
+        source_by_id = {
+            str(source.get("id", "")): source
+            for source in session_project.get("data_sources", [])
+        }
+        missing_deletions = deleted_query_ids - source_by_id.keys()
+        if missing_deletions:
+            self._set_status("A query selected for deletion no longer exists in this project.")
+            return False
+        deleted_sql_credentials = [
+            (
+                str(source.get("connection", {}).get("credential_ref", "")),
+                dict(source.get("connection", {})),
+            )
+            for source in self._project.get("data_sources", [])
+            if str(source.get("id", "")) in deleted_query_ids
+            and source.get("kind") == "sql_server"
+        ]
+        if deleted_query_ids & query_results.keys():
+            self._set_status("A query cannot be edited and deleted in the same Power Query session.")
+            return False
+        if deleted_query_ids and len(source_by_id) <= len(deleted_query_ids):
+            self._set_status("At least one query must remain in the project.")
+            return False
+        source_settings_change_ids: set[str] = set()
+        for source_id, result in query_results.items():
+            if result.get("is_source_settings_changed") is not True:
+                continue
+            current_source = source_by_id.get(str(source_id))
+            staged_source = result.get("source_record")
+            candidate = result.get("source_candidate")
+            if (
+                current_source is None
+                or not isinstance(staged_source, dict)
+                or not isinstance(candidate, ImportCandidate)
+                or current_source.get("kind") not in {
+                    "csv", "excel", "json", "xml", "parquet", "sqlite", "folder",
+                }
+                or str(staged_source.get("id", "")) != str(source_id)
+                or staged_source.get("kind") != current_source.get("kind")
+                or candidate.kind != current_source.get("kind")
+                or not isinstance(staged_source.get("parser_options"), dict)
+            ):
+                self._set_status("The staged source settings do not match the existing local source.")
+                return False
+            stable_keys = (set(current_source) | set(staged_source)) - {
+                "path", "parser_options",
+            }
+            if any(
+                current_source.get(key) != staged_source.get(key)
+                for key in stable_keys
+            ):
+                self._set_status("Source settings cannot replace the existing query definition.")
+                return False
+            staged_path = str(staged_source.get("path", "")).strip()
+            try:
+                if not staged_path:
+                    raise ValueError("Choose a valid path for this source.")
+                if current_source.get("kind") == "folder":
+                    if not Path(staged_path).expanduser().resolve().is_dir():
+                        raise ValueError("Choose an existing folder for this source.")
+                elif kind_for_path(Path(staged_path)) != current_source.get("kind"):
+                    raise ValueError("Choose a path with the same file type as the existing source.")
+            except (OSError, ValueError) as exc:
+                self._set_status(f"The staged source path is invalid: {exc}")
+                return False
+            if dict(staged_source["parser_options"]) != dict(candidate.options):
+                self._set_status("The staged parser options do not match the source preview.")
+                return False
+            if current_source.get("kind") == "sqlite":
+                staged_path_resolved = Path(staged_path).expanduser().resolve()
+                staged_table_name = str(candidate.options.get("table_name", ""))
+                for other_id, other_source in source_by_id.items():
+                    if other_id == str(source_id) or other_id in deleted_query_ids:
+                        continue
+                    other_record = other_source
+                    other_result = query_results.get(other_id)
+                    if (
+                        other_result is not None
+                        and other_result.get("is_source_settings_changed") is True
+                        and isinstance(other_result.get("source_record"), dict)
+                    ):
+                        other_record = other_result["source_record"]
+                    if other_record.get("kind") != "sqlite":
+                        continue
+                    other_options = other_record.get("parser_options", {})
+                    if not isinstance(other_options, dict):
+                        continue
+                    other_path = str(other_record.get("path", "")).strip()
+                    if not other_path:
+                        continue
+                    try:
+                        same_path = Path(other_path).expanduser().resolve() == staged_path_resolved
+                    except (OSError, RuntimeError, TypeError, ValueError):
+                        continue
+                    if same_path and str(other_options.get("table_name", "")) == staged_table_name:
+                        self._set_status(
+                            "This SQLite database table is already linked to another source in the project."
+                        )
+                        return False
+            current_source["path"] = str(Path(staged_path).expanduser().resolve())
+            current_source["parser_options"] = deepcopy(staged_source["parser_options"])
+            source_settings_change_ids.add(str(source_id))
+        new_source_ids: set[str] = set()
+        staged_sql_passwords: dict[str, str] = {}
+        reserved_model_names = {
+            str(table.get("name", "")).strip().casefold()
+            for table in session_project.get("model", {}).get("tables", [])
+            if str(table.get("source_id") or table.get("id", ""))
+            not in deleted_query_ids
+            if str(table.get("name", "")).strip()
+        }
+        reserved_model_names.update(
+            str(source.get("query_name", source.get("name", ""))).strip().casefold()
+            for source in session_project.get("data_sources", [])
+            if str(source.get("id", "")) not in deleted_query_ids
+            if str(source.get("query_name", source.get("name", ""))).strip()
+        )
+        for query_id, result in query_results.items():
+            if query_id in source_by_id:
+                if result.get("is_new_query"):
+                    self._set_status("A new query ID conflicts with an existing data source.")
+                    return False
+                continue
+            if not result.get("is_new_query"):
+                self._set_status("A query was removed while the Power Query session was open.")
+                return False
+            query_name = str(result.get("name", "")).strip()
+            is_new_source = result.get("is_new_source") is True
+            is_duplicate = result.get("is_duplicate") is True
+            duplicate_of_id = str(result.get("duplicate_of_id", ""))
+            original_source = source_by_id.get(duplicate_of_id) if is_duplicate else None
+            definition = (
+                deepcopy(original_source.get("query_definition", {}))
+                if original_source is not None
+                else result.get("query_definition")
+            )
+            staged_source_record = result.get("source_record")
+            valid_new_source = False
+            if isinstance(staged_source_record, dict):
+                staged_kind = str(staged_source_record.get("kind", ""))
+                local_source = staged_kind in {
+                    "csv", "excel", "json", "xml", "parquet", "sqlite", "folder"
+                }
+                remote_source = staged_kind in {"sql_server", "odata", "web"}
+                connection = staged_source_record.get("connection", {})
+                required_connection_key = {
+                    "sql_server": "credential_ref",
+                    "odata": "service_root",
+                    "web": "url",
+                }.get(staged_kind)
+                valid_new_source = (
+                    str(staged_source_record.get("id", "")) == query_id
+                    and isinstance(staged_source_record.get("parser_options", {}), dict)
+                    and (
+                        (
+                            local_source
+                            and isinstance(staged_source_record.get("path"), str)
+                            and bool(staged_source_record.get("path", "").strip())
+                        )
+                        or (
+                            remote_source
+                            and isinstance(connection, dict)
+                            and bool(str(connection.get(required_connection_key, "")).strip())
+                        )
+                    )
+                    and (
+                        staged_kind != "sql_server"
+                        or bool(str(staged_source_record.get("_staged_password", "")))
+                    )
+                )
+            if (
+                (not is_new_source and not isinstance(definition, dict))
+                or (
+                    not is_new_source
+                    and not is_duplicate
+                    and isinstance(definition, dict)
+                    and definition.get("operation")
+                    not in {"reference", "append", "merge"}
+                )
+                or (is_new_source and not valid_new_source)
+                or (not is_new_source and is_duplicate and original_source is None)
+                or not query_name
+                or len(query_name) > 120
+                or any(ord(char) < 32 for char in query_name)
+            ):
+                self._set_status("The new query definition or name is invalid.")
+                return False
+            if query_name.casefold() in reserved_model_names:
+                self._set_status(
+                    f"A model table or query named {query_name!r} already exists."
+                )
+                return False
+            reserved_model_names.add(query_name.casefold())
+            if is_new_source:
+                source_record = deepcopy(staged_source_record)
+                source_record["query_name"] = query_name
+                source_record["transform_steps"] = []
+            elif is_duplicate:
+                source_record = deepcopy(original_source)
+                source_record["id"] = query_id
+                source_record["name"] = query_name
+                source_record["query_name"] = query_name
+                source_record["transform_steps"] = deepcopy(result.get("steps", []))
+                source_record["step_metadata"] = deepcopy(
+                    result.get("step_metadata", [])
+                )
+                if source_record.get("kind") == "query":
+                    source_record["query_definition"] = definition
+                    source_record["load_enabled"] = result.get("load_enabled", True)
+                    if result.get("include_in_report_refresh", True):
+                        source_record.pop("include_in_report_refresh", None)
+                    else:
+                        source_record["include_in_report_refresh"] = False
+                else:
+                    source_record.pop("query_definition", None)
+                    source_record.pop("load_enabled", None)
+                    source_record.pop("include_in_report_refresh", None)
+            else:
+                source_record = {
+                    "id": query_id,
+                    "name": query_name,
+                    "query_name": query_name,
+                    "kind": "query",
+                    "query_definition": deepcopy(definition),
+                    "transform_steps": [],
+                    "load_enabled": result.get("load_enabled", True),
+                }
+                if not result.get("include_in_report_refresh", True):
+                    source_record["include_in_report_refresh"] = False
+            staged_password = source_record.pop("_staged_password", None)
+            if isinstance(staged_password, str) and staged_password:
+                if source_record.get("kind") != "sql_server":
+                    self._set_status("Only SQL Server sources can stage connector credentials.")
+                    return False
+                staged_sql_passwords[query_id] = staged_password
+            if result.get("description"):
+                source_record["description"] = str(result["description"])
+            else:
+                source_record.pop("description", None)
+            if result.get("query_group"):
+                source_record["query_group"] = str(result["query_group"])
+            else:
+                source_record.pop("query_group", None)
+            session_project["data_sources"].append(source_record)
+            source_by_id[query_id] = source_record
+            new_source_ids.add(query_id)
+        if deleted_query_ids:
+            blockers = _query_deletion_blockers(
+                session_project,
+                deleted_query_ids,
+                active_source_id=self._active_source_id,
+            )
+            if blockers:
+                details = "; ".join(blockers[:4])
+                if len(blockers) > 4:
+                    details += f"; and {len(blockers) - 4} more dependency/dependencies"
+                self._set_status(
+                    "Cannot delete the selected query while project objects depend on it: "
+                    + details
+                    + ". Remove or rebind those objects first."
+                )
+                return False
+            session_project["data_sources"] = [
+                source for source in session_project.get("data_sources", [])
+                if str(source.get("id", "")) not in deleted_query_ids
+            ]
+            session_project["model"]["tables"] = [
+                table for table in session_project.get("model", {}).get("tables", [])
+                if str(table.get("id", "")) not in deleted_query_ids
+                and str(table.get("source_id", "")) not in deleted_query_ids
+            ]
+            if session_project.get("active_source_id") in deleted_query_ids:
+                surviving = self._source_dependency_order(session_project["data_sources"])
+                next_active = next((
+                    str(item.get("id", ""))
+                    for item in surviving
+                    if str(item.get("id", "")) in self._loaded_candidates
+                    and self._source_load_enabled(item)
+                ), None)
+                if next_active is None:
+                    next_active = next((
+                        str(item.get("id", "")) for item in surviving
+                    ), None)
+                session_project["active_source_id"] = next_active
+        try:
+            session_project = validate_project(session_project)
+        except ProjectFileError as exc:
+            self._set_status(f"Could not validate the Power Query session: {exc}")
+            return False
+        validated_results: dict[str, tuple[dict[str, Any], dict[str, Any], list[dict[str, Any]], ImportCandidate, ImportCandidate]] = {}
+        baseline_outputs = dict(self._loaded_candidates)
+        raw_snapshots: dict[str, ImportCandidate] = {}
+        session_type_maps: dict[str, dict[str, str]] = {}
+        staged_reference_sources = {
+            str(result.get("query_definition", {}).get("source_ids", [""])[0])
+            for result in query_results.values()
+            if result.get("is_new_query")
+            and result.get("query_definition", {}).get("operation") == "reference"
+            and result.get("query_definition", {}).get("source_ids")
+        }
+        source_settings_affected_ids = set(source_settings_change_ids)
+        while True:
+            affected_dependents = {
+                str(source.get("id", ""))
+                for source in session_project.get("data_sources", [])
+                if source.get("kind") == "query"
+                and any(
+                    str(parent_id) in source_settings_affected_ids
+                    for parent_id in source.get("query_definition", {}).get("source_ids", [])
+                )
+            }
+            added_dependents = affected_dependents - source_settings_affected_ids
+            if not added_dependents:
+                break
+            source_settings_affected_ids.update(added_dependents)
+        function_affected_query_ids = {
+            str(query_id)
+            for query_id, result in query_results.items()
+            if function_references(
+                result.get("steps", []), session_project.get("query_functions", [])
+            ) & changed_function_names
+        }
+        # A function edit can change an upstream result even when a saved
+        # Reference Query's own steps are empty. Propagate that invalidation
+        # through reference/append/merge dependencies before validating their
+        # session snapshots.
+        while True:
+            downstream_ids = {
+                str(query_id)
+                for query_id, result in query_results.items()
+                if any(
+                    str(parent_id) in function_affected_query_ids
+                    for parent_id in result.get("query_definition", {}).get(
+                        "source_ids", []
+                    )
+                )
+            }
+            added_ids = downstream_ids - function_affected_query_ids
+            if not added_ids:
+                break
+            function_affected_query_ids.update(added_ids)
+        for source in self._source_dependency_order(session_project.get("data_sources", [])):
+            source_id = str(source.get("id", ""))
+            if source_id not in query_results:
+                continue
+            result = query_results[source_id]
+            if source_id not in source_by_id:
+                self._set_status("A query was removed while the Power Query session was open.")
+                return False
+            try:
+                validated = validate_steps(result.get("steps", []))
+            except (TransformationError, TypeError, ValueError) as exc:
+                self._set_status(f"Could not validate query {source.get('name', source_id)!r}: {exc}")
+                return False
+            try:
+                baseline_outputs.pop(source_id, None)
+                frozen_query = (
+                    source_id not in new_source_ids
+                    and source.get("kind") == "query"
+                    and not self._source_refresh_included(source)
+                )
+                if frozen_query:
+                    raw_candidate = self._raw_candidates.get(source_id)
+                    if raw_candidate is None:
+                        raw_candidate = self._query_candidate(
+                            source, self._loaded_candidates, project=self._project
+                        )
+                elif source.get("kind") == "query":
+                    definition = source.get("query_definition", {})
+                    operation = definition.get("operation")
+                    if (
+                        source_id in new_source_ids
+                        and not result.get("is_duplicate")
+                        and operation in {"append", "merge"}
+                    ):
+                        # A newly staged combine must use the selected parents'
+                        # current session previews, including edits that have
+                        # not yet been saved on those parents. Existing saved
+                        # dependencies keep their normal refresh/cache rules.
+                        combine_inputs = dict(baseline_outputs)
+                        for dependency_id in definition.get("source_ids", []):
+                            dependency_id = str(dependency_id)
+                            dependency_result = query_results.get(dependency_id)
+                            dependency_preview = (
+                                dependency_result.get("candidate")
+                                if dependency_result is not None
+                                else None
+                            )
+                            if isinstance(dependency_preview, ImportCandidate):
+                                combine_inputs[dependency_id] = dependency_preview
+                        raw_candidate = self._query_candidate(
+                            source, combine_inputs, project=session_project
+                        )
+                    else:
+                        raw_candidate = self._query_candidate(
+                            source, baseline_outputs, project=session_project
+                        )
+                elif source_id in new_source_ids and result.get("is_new_source"):
+                    if source.get("kind") in {"sql_server", "odata", "web"}:
+                        if (
+                            result.get("preview_refreshed") is True
+                            and isinstance(
+                                result.get("source_candidate"), ImportCandidate
+                            )
+                        ):
+                            # Apply the remote snapshot explicitly previewed in
+                            # this session. Re-fetching here can invalidate an
+                            # otherwise current preview for a changing endpoint.
+                            raw_candidate = result["source_candidate"]
+                        else:
+                            raw_candidate = self._candidate_for_staged_source(
+                                source,
+                                sql_server_password=staged_sql_passwords.get(
+                                    source_id, ""
+                                ),
+                            )
+                    else:
+                        raw_candidate = self._session_raw_candidate_for_source(source)
+                elif source_id in new_source_ids:
+                    duplicate_of_id = str(result.get("duplicate_of_id", ""))
+                    raw_candidate = raw_snapshots.get(duplicate_of_id)
+                    if raw_candidate is None:
+                        raw_candidate = self._raw_candidates.get(duplicate_of_id)
+                    if raw_candidate is None:
+                        raise QueryError(
+                            f"The source preview for duplicate query {source.get('name', source_id)!r} is unavailable."
+                        )
+                elif (
+                    source.get("kind") in {"sql_server", "odata", "web"}
+                    and result.get("preview_refreshed") is True
+                    and isinstance(result.get("source_candidate"), ImportCandidate)
+                ):
+                    # Explicit Preview refresh captures a remote source snapshot.
+                    # Reuse that snapshot through Apply instead of switching back
+                    # to the inactive-connector cache and rejecting its own preview.
+                    raw_candidate = result["source_candidate"]
+                else:
+                    raw_candidate = self._session_raw_candidate_for_source(source)
+                previewed_source = result.get("source_candidate")
+                previewed_result = result.get("candidate")
+                is_staged_reference_or_duplicate = (
+                    source_id in new_source_ids
+                    and (
+                        source.get("query_definition", {}).get("operation")
+                        == "reference"
+                        or result.get("is_duplicate") is True
+                    )
+                )
+                is_function_dependent_reference = (
+                    source.get("query_definition", {}).get("operation") == "reference"
+                    and any(
+                        str(parent_id) in function_affected_query_ids
+                        for parent_id in source.get("query_definition", {}).get(
+                            "source_ids", []
+                        )
+                    )
+                )
+                if (
+                    is_function_dependent_reference
+                    and isinstance(previewed_source, ImportCandidate)
+                ):
+                    # The session preview already contains staged parent steps
+                    # and function definitions. Reuse it for this saved
+                    # Reference Query so Apply persists the same rows the user
+                    # just reviewed.
+                    raw_candidate = previewed_source
+                can_rebuild_from_staged_dependency = (
+                    is_staged_reference_or_duplicate
+                    or is_function_dependent_reference
+                )
+                if (
+                    raw_candidate != previewed_source
+                    and not can_rebuild_from_staged_dependency
+                ):
+                    self._set_status(
+                        f"The source for {source.get('name', source_id)!r} changed during the Power Query session. Reopen it and preview again."
+                    )
+                    return False
+                transformed = apply_transformations(
+                    raw_candidate, validated,
+                    parameters=parameter_values(session_project.get("query_parameters", []), session_project.get("query_functions", [])),
+                )
+                if (
+                    transformed != previewed_result
+                    and not can_rebuild_from_staged_dependency
+                ):
+                    self._set_status(
+                        f"The preview for {source.get('name', source_id)!r} no longer matches its steps. Reopen it and preview again."
+                    )
+                    return False
+                # Downstream query source candidates in the open session were
+                # built from these saved upstream steps and refreshed root data.
+                definition = source.get("query_definition", {})
+                initial_types: dict[str, str] = {}
+                if definition.get("operation") == "reference":
+                    dependency_ids = definition.get("source_ids", [])
+                    if dependency_ids:
+                        dependency_id = str(dependency_ids[0])
+                        if dependency_id in staged_reference_sources or dependency_id in new_source_ids:
+                            initial_types = dict(session_type_maps.get(dependency_id, {}))
+                        if not initial_types:
+                            initial_types = self._query_input_column_types(
+                                source, session_project
+                            )
+                elif definition.get("operation") in {"append", "merge"}:
+                    initial_types = self._query_input_column_types(
+                        source,
+                        session_project,
+                        candidate=raw_candidate,
+                        dependency_types=session_type_maps,
+                    )
+                    if not initial_types:
+                        initial_types = infer_column_types(
+                            raw_candidate.headers, raw_candidate.rows
+                        )
+                else:
+                    # Keep commit-time validation aligned with the types shown
+                    # in the editor preview for root and combined queries.
+                    initial_types = infer_column_types(
+                        raw_candidate.headers, raw_candidate.rows
+                    )
+                result_types = column_types_after_steps(
+                    raw_candidate.headers,
+                    validated,
+                    output_headers=transformed.headers,
+                    initial_types=initial_types,
+                )
+                if source_id in source_settings_affected_ids:
+                    old_output = self._loaded_candidates.get(source_id)
+                    model_table = self._model_table_for_source(self._project, source_id)
+                    calculated_names = {
+                        str(item.get("name", ""))
+                        for item in (model_table or {}).get("calculated_columns", [])
+                    }
+                    old_type_map = {
+                        str(column): str(column_type)
+                        for column, column_type in (model_table or {}).get(
+                            "column_types", {}
+                        ).items()
+                        if str(column) not in calculated_names
+                    }
+                    old_headers = (
+                        [header for header in old_output.headers if header not in calculated_names]
+                        if old_output is not None else None
+                    )
+                    if (
+                        (old_headers is not None and transformed.headers != old_headers)
+                        or (model_table is not None and result_types != old_type_map)
+                    ):
+                        self._set_status(
+                            "Source settings must preserve existing column names or data types for "
+                            f"{source.get('name', source_id)!r} so model and report references remain valid."
+                        )
+                        return False
+                session_type_maps[source_id] = result_types
+                staged_output, _calculated_types = self._apply_calculated_columns(
+                    source_id,
+                    transformed,
+                    project=session_project,
+                    column_types=result_types,
+                )
+                existing_steps = validate_steps(source.get("transform_steps", []))
+                parameter_affects_query = bool(
+                    parameter_references(
+                        validated,
+                        function_names={
+                            item["name"]
+                            for item in session_project.get("query_functions", [])
+                        },
+                    ) & changed_parameter_names
+                )
+                function_affects_query = bool(
+                    function_references(
+                        validated, session_project.get("query_functions", [])
+                    ) & changed_function_names
+                )
+                if (
+                    frozen_query
+                    and validated == existing_steps
+                    and not parameter_affects_query
+                    and not function_affects_query
+                    and not is_function_dependent_reference
+                ):
+                    # An untouched excluded query remains frozen at its last
+                    # evaluated output, even when an upstream source changed.
+                    baseline_output = self._loaded_candidates[source_id]
+                elif frozen_query:
+                    # A user-edited excluded query replays from its cached raw
+                    # input, but still does not re-read its external source.
+                    baseline_output = staged_output
+                elif source_id in staged_reference_sources or source_id in new_source_ids:
+                    baseline_output = staged_output
+                else:
+                    baseline_steps = existing_steps
+                    baseline_transformed = apply_transformations(
+                        raw_candidate, baseline_steps,
+                        parameters=parameter_values(session_project.get("query_parameters", []), session_project.get("query_functions", [])),
+                    )
+                    baseline_types = column_types_after_steps(
+                        raw_candidate.headers,
+                        baseline_steps,
+                        output_headers=baseline_transformed.headers,
+                        initial_types=initial_types,
+                    )
+                    baseline_output, _baseline_calculated_types = self._apply_calculated_columns(
+                        source_id,
+                        baseline_transformed,
+                        project=session_project,
+                        column_types=baseline_types,
+                    )
+                baseline_outputs[source_id] = baseline_output
+            except (OSError, QueryError, TransformationError, TypeError, ValueError) as exc:
+                self._set_status(f"Could not validate the preview for {source.get('name', source_id)!r}: {exc}")
+                return False
+            validated_results[source_id] = (
+                source, result, validated, raw_candidate, transformed
+            )
+            raw_snapshots[source_id] = raw_candidate
+
+        parameter_change_sources = {
+            source_id
+            for source_id, (_source, _result, steps, _raw, _transformed)
+            in validated_results.items()
+            if parameter_references(
+                steps,
+                function_names={
+                    item["name"]
+                    for item in session_project.get("query_functions", [])
+                },
+            ) & changed_parameter_names
+        }
+        function_change_sources = {
+            source_id
+            for source_id, (source, _result, steps, _raw, _transformed)
+            in validated_results.items()
+            if function_references(
+                steps, session_project.get("query_functions", [])
+            ) & changed_function_names
+        }
+        function_change_sources.update(
+            source_id
+            for source_id in function_affected_query_ids
+            if source_id in validated_results
+            and validated_results[source_id][0].get("query_definition", {}).get(
+                "operation"
+            ) == "reference"
+        )
+
+        dependencies = {
+            str(source.get("id", "")): [
+                str(item) for item in source.get("query_definition", {}).get("source_ids", [])
+            ]
+            for source in session_project.get("data_sources", [])
+            if source.get("kind") == "query"
+        }
+
+        def depends_on(source_id: str, ancestor_id: str) -> bool:
+            pending = list(dependencies.get(source_id, []))
+            visited: set[str] = set()
+            while pending:
+                current = pending.pop()
+                if current == ancestor_id:
+                    return True
+                if current in visited:
+                    continue
+                visited.add(current)
+                pending.extend(dependencies.get(current, []))
+            return False
+
+        try:
+            next_project = deepcopy(session_project)
+            base_candidates: dict[str, ImportCandidate] = {}
+            changes: dict[str, tuple[dict[str, Any], dict[str, Any], list[dict[str, Any]]]] = {}
+            step_change_ids: set[str] = set()
+            metadata_change_ids: set[str] = set()
+            for source_id, (current_source, result, steps, raw_candidate, transformed) in validated_results.items():
+                target = next(
+                    item for item in next_project["data_sources"]
+                    if item.get("id") == source_id
+                )
+                if current_source.get("kind") == "query":
+                    load_enabled = result.get(
+                        "load_enabled", current_source.get("load_enabled", True)
+                    )
+                    refresh_included = result.get(
+                        "include_in_report_refresh",
+                        current_source.get("include_in_report_refresh", True),
+                    )
+                    if not isinstance(load_enabled, bool):
+                        raise ProjectFileError(
+                            f"The load setting for {current_source.get('name', source_id)!r} must be true or false."
+                        )
+                    if not isinstance(refresh_included, bool):
+                        raise ProjectFileError(
+                            f"The refresh setting for {current_source.get('name', source_id)!r} must be true or false."
+                        )
+                    target["load_enabled"] = load_enabled
+                    if load_enabled != self._source_load_enabled(current_source):
+                        metadata_change_ids.add(source_id)
+                    if refresh_included:
+                        target.pop("include_in_report_refresh", None)
+                    else:
+                        target["include_in_report_refresh"] = False
+                    if refresh_included != self._source_refresh_included(current_source):
+                        metadata_change_ids.add(source_id)
+                model_table = self._model_table_for_source(next_project, source_id)
+                old_query_name = (
+                    str(model_table.get("name", ""))
+                    if model_table is not None
+                    else str(current_source.get("query_name", current_source.get("name", "")))
+                )
+                query_name = str(result.get("name", old_query_name)).strip()
+                if (
+                    not query_name
+                    or len(query_name) > 120
+                    or any(ord(char) < 32 for char in query_name)
+                ):
+                    raise ProjectFileError(
+                        "Query names must be 1–120 characters and contain no control characters."
+                    )
+                if model_table is not None and query_name != old_query_name:
+                    model_name_collision = next((
+                        item for item in next_project.get("model", {}).get("tables", [])
+                        if item is not model_table
+                        and str(item.get("name", "")).casefold() == query_name.casefold()
+                    ), None)
+                    unloaded_name_collision = next((
+                        item for item in next_project.get("data_sources", [])
+                        if item.get("id") != source_id
+                        and self._model_table_for_source(
+                            next_project, str(item.get("id", ""))
+                        ) is None
+                        and item.get("kind") == "query"
+                        and str(item.get("query_name", item.get("name", ""))).casefold()
+                        == query_name.casefold()
+                    ), None)
+                    if model_name_collision is not None or unloaded_name_collision is not None:
+                        raise ProjectFileError(
+                            f"A model table named {query_name!r} already exists."
+                        )
+                    if query_name.casefold() != old_query_name.casefold():
+                        _rename_table_references_in_project(
+                            next_project, old_query_name, query_name
+                        )
+                    model_table["name"] = query_name
+                    metadata_change_ids.add(source_id)
+                if target.get("query_name") != query_name:
+                    metadata_change_ids.add(source_id)
+                target["query_name"] = query_name
+                previous_m_script = target.get("m_script")
+                accepted_m_script = result.get("m_script")
+                query_definition = result.get(
+                    "query_definition", current_source.get("query_definition", {})
+                )
+                source_query_names = None
+                if query_definition.get("operation") == "append":
+                    def query_reference_name(parent_id: Any) -> str:
+                        parent_id = str(parent_id)
+                        parent_source = source_by_id.get(parent_id, {})
+                        staged_parent = query_results.get(parent_id, {})
+                        staged_name = str(staged_parent.get("name", "")).strip()
+                        if staged_name:
+                            return staged_name
+                        parent_table = self._model_table_for_source(
+                            session_project, parent_id
+                        )
+                        return str(
+                            (parent_table or {}).get("name")
+                            or parent_source.get("query_name")
+                            or parent_source.get("name", "")
+                        )
+
+                    source_query_names = [
+                        query_reference_name(parent_id)
+                        for parent_id in query_definition.get("source_ids", [])
+                    ]
+                if (
+                    isinstance(accepted_m_script, str)
+                    and m_script_matches_steps(
+                        accepted_m_script, query_name, steps,
+                        parameter_names=set(parameter_values(
+                            session_project.get("query_parameters", [])
+                        )),
+                        query_functions=session_project.get("query_functions", []),
+                        source_query_names=source_query_names,
+                        initial_column_types=result.get(
+                            "source_column_types", {}
+                        ),
+                    )
+                ):
+                    target["m_script"] = accepted_m_script
+                else:
+                    target.pop("m_script", None)
+                if target.get("m_script") != previous_m_script:
+                    metadata_change_ids.add(source_id)
+                description = str(
+                    result.get("description", current_source.get("description", ""))
+                ).strip()
+                if description:
+                    target["description"] = description
+                else:
+                    target.pop("description", None)
+                if description != str(current_source.get("description", "")):
+                    metadata_change_ids.add(source_id)
+                target["transform_steps"] = steps
+                query_group = str(
+                    result.get("query_group", current_source.get("query_group", ""))
+                ).strip()
+                if query_group:
+                    target["query_group"] = query_group
+                else:
+                    target.pop("query_group", None)
+                if query_group != str(current_source.get("query_group", "")):
+                    metadata_change_ids.add(source_id)
+                step_metadata = result.get(
+                    "step_metadata", current_source.get("step_metadata", [])
+                )
+                if step_metadata != current_source.get("step_metadata", []):
+                    metadata_change_ids.add(source_id)
+                target["step_metadata"] = deepcopy(step_metadata)
+                accepted_type_map = result.get("column_types")
+                if (
+                    source_id in new_source_ids
+                    and current_source.get("query_definition", {}).get("operation") == "reference"
+                    and source_id in session_type_maps
+                ):
+                    accepted_type_map = session_type_maps[source_id]
+                type_map = (
+                    dict(accepted_type_map)
+                    if isinstance(accepted_type_map, dict)
+                    else column_types_after_steps(
+                        raw_candidate.headers,
+                        steps,
+                        output_headers=transformed.headers,
+                    )
+                )
+                calculated_candidate, calculated_types = self._apply_calculated_columns(
+                    source_id,
+                    transformed,
+                    project=next_project,
+                    column_types=type_map,
+                )
+                type_map.update(calculated_types)
+                table = self._model_table_for_source(next_project, source_id)
+                if table is not None:
+                    table["column_types"] = type_map
+                else:
+                    next_project.setdefault("model", {}).setdefault("tables", []).append({
+                        "id": source_id,
+                        "source_id": source_id,
+                        "name": str(
+                            target.get("query_name", target.get("name", "Table"))
+                        ),
+                        "column_types": type_map,
+                    })
+                raw_snapshots[source_id] = raw_candidate
+                existing_steps = validate_steps(current_source.get("transform_steps", []))
+                if steps != existing_steps:
+                    step_change_ids.add(source_id)
+                output_changed = calculated_candidate != self._loaded_candidates.get(source_id)
+                is_derived_query = current_source.get("kind") == "query"
+                # A refreshed dependent query is a derived preview, not an
+                # independent staged edit. Rebuild it from the committed
+                # upstream result below; only an explicit query-step edit may
+                # become a query base candidate.
+                if (
+                    source_id in new_source_ids
+                    or source_id in source_settings_change_ids
+                    or steps != existing_steps
+                    or (output_changed and not is_derived_query)
+                    or source_id in parameter_change_sources
+                    or source_id in function_change_sources
+                ):
+                    changes[source_id] = (current_source, result, steps)
+                    base_candidates[source_id] = calculated_candidate
+
+            affected_sqlite_source_ids = set(source_settings_change_ids)
+            affected_sqlite_source_ids.update(
+                source_id
+                for source_id in new_source_ids
+                if source_by_id.get(source_id, {}).get("kind") == "sqlite"
+            )
+            if self._sqlite_binding_conflict(
+                next_project.get("data_sources", []),
+                affected_sqlite_source_ids,
+            ):
+                self._set_status(
+                    "This SQLite database table is already linked to another source in the project."
+                )
+                return False
+
+            eligible_sources = [
+                item for item in self._source_dependency_order(
+                    next_project.get("data_sources", [])
+                )
+                if self._source_load_enabled(item)
+                and (
+                    str(item.get("id", "")) in self._loaded_candidates
+                    or str(item.get("id", "")) in new_source_ids
+                )
+            ]
+            selected_new_source = next(
+                (
+                    source_id for source_id, (_source, result, *_rest)
+                    in validated_results.items()
+                    if source_id in new_source_ids
+                    and result.get("is_active")
+                    and self._source_load_enabled(source_by_id[source_id])
+                ),
+                None,
+            )
+            if selected_new_source is not None:
+                next_project["active_source_id"] = selected_new_source
+            active_source = next((
+                item for item in eligible_sources
+                if str(item.get("id", "")) == str(self._active_source_id or "")
+            ), None)
+            if active_source is None:
+                next_project["active_source_id"] = (
+                    selected_new_source
+                    or (str(eligible_sources[0]["id"]) if eligible_sources else None)
+                )
+
+            if not changes and not deleted_query_ids:
+                # Close & Apply also refreshes the active query preview. Keep the
+                # accepted raw snapshots so switching queries cannot restore stale rows.
+                if metadata_change_ids or parameters_changed or functions_changed:
+                    try:
+                        next_project = validate_project(next_project)
+                    except ProjectFileError as exc:
+                        self._set_status(f"Could not apply Power Query query settings: {exc}")
+                        return False
+                    self._project = next_project
+                    self._raw_candidates.update(raw_snapshots)
+                    self._sync_active_source_after_session_settings()
+                    self._dirty = True
+                    self._refresh_model_view()
+                    self._refresh_report()
+                    self.stateChanged.emit()
+                    if functions_changed and not parameters_changed and not metadata_change_ids:
+                        self._set_status("Updated Power Query functions")
+                    elif functions_changed and parameters_changed and not metadata_change_ids:
+                        self._set_status("Updated Power Query parameters and functions")
+                    elif parameters_changed and not metadata_change_ids:
+                        self._set_status("Updated Power Query parameters")
+                    elif parameters_changed:
+                        self._set_status(
+                            f"Updated Power Query parameters"
+                            f"{' and functions' if functions_changed else ''} and settings for "
+                            f"{len(metadata_change_ids)} quer"
+                            f"{'y' if len(metadata_change_ids) == 1 else 'ies'}"
+                        )
+                    else:
+                        self._set_status(
+                            f"Updated query settings for {len(metadata_change_ids)} quer"
+                            f"{'y' if len(metadata_change_ids) == 1 else 'ies'}"
+                        )
+                else:
+                    self._raw_candidates.update(raw_snapshots)
+                    self._set_status("Power Query previews are current; there are no query changes to apply.")
+                return True
+
+            # A new query's stored conversion steps are part of staging its
+            # typed result against the current parent previews. It has no
+            # previously saved output that can conflict with a parent edit.
+            changed_ids = sorted(step_change_ids - new_source_ids)
+            for index, left_id in enumerate(changed_ids):
+                for right_id in changed_ids[index + 1:]:
+                    if depends_on(left_id, right_id) or depends_on(right_id, left_id):
+                        self._set_status(
+                            "Apply transformations to dependent queries one at a time so each preview uses the latest upstream result."
+                        )
+                        return False
+
+            next_project = validate_project(next_project)
+            dependent_candidates, dependent_types = self._rebuild_query_dependents(
+                next_project, base_candidates
+            )
+            for dependent_id, type_map in dependent_types.items():
+                table = self._model_table_for_source(next_project, dependent_id)
+                if table is not None:
+                    table["column_types"] = type_map
+            next_project = validate_project(next_project)
+            relationship_candidates = dict(base_candidates)
+            relationship_candidates.update(dependent_candidates)
+            self._validate_loaded_relationship_candidates(
+                next_project, relationship_candidates
+            )
+        except (
+            StopIteration,
+            OSError,
+            ProjectFileError,
+            QueryError,
+            TransformationError,
+            TypeError,
+            ValueError,
+        ) as exc:
+            self._set_status(f"Could not apply the Power Query session: {exc}")
+            return False
+
+        credential_updates: dict[str, tuple[str, dict[str, Any]]] = {}
+        for source_id, password in staged_sql_passwords.items():
+            source = source_by_id.get(source_id, {})
+            connection = dict(source.get("connection", {}))
+            credential_ref = str(connection.get("credential_ref", ""))
+            if not credential_ref:
+                self._set_status("The staged SQL Server credential reference is missing.")
+                return False
+            previous = credential_updates.get(credential_ref)
+            if previous is not None and previous[0] != password:
+                self._set_status(
+                    "Staged SQL Server sources cannot reuse one credential reference for different passwords."
+                )
+                return False
+            credential_updates[credential_ref] = (password, connection)
+        existing_credential_refs = {
+            str(source.get("connection", {}).get("credential_ref", ""))
+            for source in self._project.get("data_sources", [])
+            if source.get("kind") == "sql_server"
+        }
+        if existing_credential_refs & credential_updates.keys():
+            self._set_status(
+                "A staged SQL Server source reused an existing credential reference. Reopen the connector and try again."
+            )
+            return False
+
+        attempted_credentials: list[tuple[str, dict[str, Any]]] = []
+        for credential_ref, (password, connection) in credential_updates.items():
+            attempted_credentials.append((credential_ref, connection))
+            try:
+                set_sql_server_password(credential_ref, password, connection)
+            except CredentialStoreError as exc:
+                cleanup_failed = False
+                for attempted_ref, attempted_connection in reversed(
+                    attempted_credentials
+                ):
+                    self._sql_server_passwords.pop(
+                        sql_server_credential_account(
+                            attempted_ref, attempted_connection
+                        ),
+                        None,
+                    )
+                    try:
+                        delete_sql_server_password(
+                            attempted_ref, attempted_connection
+                        )
+                    except CredentialStoreError:
+                        cleanup_failed = True
+                suffix = (
+                    " Some staged Keychain entries could not be removed."
+                    if cleanup_failed else ""
+                )
+                self._set_status(
+                    f"Could not save SQL Server credentials: {exc}.{suffix}"
+                )
+                return False
+        for credential_ref, (password, connection) in credential_updates.items():
+            self._sql_server_passwords[
+                sql_server_credential_account(credential_ref, connection)
+            ] = password
+
+        self._project = next_project
+        credential_cleanup_failed = False
+        remaining_credential_refs = {
+            str(source.get("connection", {}).get("credential_ref", ""))
+            for source in next_project.get("data_sources", [])
+            if source.get("kind") == "sql_server"
+        }
+        for credential_ref, connection in deleted_sql_credentials:
+            if not credential_ref or credential_ref in remaining_credential_refs:
+                continue
+            self._sql_server_passwords.pop(
+                sql_server_credential_account(credential_ref, connection), None
+            )
+            try:
+                delete_sql_server_password(credential_ref, connection)
+            except CredentialStoreError:
+                credential_cleanup_failed = True
+        for deleted_id in deleted_query_ids:
+            self._loaded_candidates.pop(deleted_id, None)
+            self._raw_candidates.pop(deleted_id, None)
+            self._source_load_errors.pop(deleted_id, None)
+        self._raw_candidates.update(raw_snapshots)
+        self._loaded_candidates.update(dependent_candidates)
+        for updated_id in dependent_candidates:
+            self._source_load_errors.pop(updated_id, None)
+        self._sync_active_source_after_session_settings()
+        active_candidate = dependent_candidates.get(str(self._active_source_id or ""))
+        if active_candidate is not None and self._active_source_id:
+            active_source = source_by_id.get(self._active_source_id)
+            active_path = (
+                self._resolved_source_path(active_source)
+                if active_source and active_source.get("kind") not in PATHLESS_SOURCE_KINDS
+                else None
+            )
+            self._install_source(active_path, self._active_source_id, active_candidate)
+        self._source_warning = self._compose_source_warning()
+        self._current_region = None
+        self._dirty = True
+        self._refresh_model_view()
+        self._refresh_report()
+        self.stateChanged.emit()
+        recent_source_errors: list[str] = []
+        for source_id in new_source_ids:
+            source = source_by_id.get(source_id, {})
+            if not source.get("path"):
+                continue
+            try:
+                self._recent_source_store.add(
+                    self._resolved_source_path(source),
+                    str(source.get("kind", "")),
+                    dict(source.get("parser_options", {})),
+                    display_name=str(source.get("name", "")),
+                )
+            except (OSError, TypeError, ValueError) as exc:
+                recent_source_errors.append(str(exc))
+        if deleted_query_ids and changes:
+            self._set_status(
+                f"Applied changes to {len(changes)} quer{'y' if len(changes) == 1 else 'ies'} "
+                f"and deleted {len(deleted_query_ids)} quer{'y' if len(deleted_query_ids) == 1 else 'ies'}"
+            )
+        elif deleted_query_ids:
+            self._set_status(
+                f"Deleted {len(deleted_query_ids)} quer{'y' if len(deleted_query_ids) == 1 else 'ies'}"
+            )
+        else:
+            self._set_status(
+                f"Applied Power Query changes to {len(changes)} quer{'y' if len(changes) == 1 else 'ies'}"
+            )
+        if recent_source_errors:
+            self._set_status(
+                self.statusMessage + "; recent source history could not be saved"
+            )
+        if credential_cleanup_failed:
+            self._set_status(
+                self.statusMessage + "; an unused SQL Server credential remains in Keychain"
+            )
+        return True
+
+    def _sync_active_source_after_session_settings(self) -> None:
+        """Keep the data view on a model-loaded source after query load changes."""
+        active_source_id = self._project.get("active_source_id")
+        if active_source_id == self._active_source_id:
+            return
+        if not active_source_id:
+            self._clear_source(clear_selection=True)
+            return
+        source_id = str(active_source_id)
+        candidate = self._loaded_candidates.get(source_id)
+        source = next(
+            (item for item in self._project.get("data_sources", [])
+             if str(item.get("id", "")) == source_id),
+            None,
+        )
+        if candidate is None or source is None or not self._source_load_enabled(source):
+            self._clear_source(clear_selection=True)
+            return
+        path = (
+            self._resolved_source_path(source)
+            if source.get("kind") not in PATHLESS_SOURCE_KINDS
+            else None
+        )
+        self._install_source(path, source_id, candidate)
+        self._source_warning = self._compose_source_warning()
 
     def _source_id_for_path(
         self,
@@ -5000,6 +9038,7 @@ class StudioController(QObject):
             raw_candidates: dict[str, ImportCandidate] = {}
             query_candidates: dict[str, ImportCandidate] = {}
             calculated_type_maps: dict[str, dict[str, str]] = {}
+            query_type_maps: dict[str, dict[str, str]] = {}
             for source in ordered:
                 source_id = str(source["id"])
                 refreshing_source_id = source_id
@@ -5039,13 +9078,27 @@ class StudioController(QObject):
                     )
                 raw_candidates[source_id] = raw
                 query_candidate = apply_transformations(
-                    raw, source.get("transform_steps", [])
+                    raw, source.get("transform_steps", []),
+                    parameters=parameter_values(self._project.get("query_parameters", []), self._project.get("query_functions", [])),
+                )
+                definition = source.get("query_definition", {})
+                input_types: dict[str, str] = (
+                    self._query_input_column_types(
+                        source,
+                        self._project,
+                        candidate=raw,
+                        dependency_types=query_type_maps,
+                    )
+                    if kind == "query"
+                    else infer_column_types(raw.headers, raw.rows)
                 )
                 base_types = column_types_after_steps(
                     raw.headers,
                     source.get("transform_steps", []),
                     output_headers=query_candidate.headers,
+                    initial_types=input_types,
                 )
+                query_type_maps[source_id] = base_types
                 query_candidates[source_id] = query_candidate
                 refreshed[source_id], calculated_type_maps[source_id] = (
                     self._apply_calculated_columns(
@@ -5057,11 +9110,7 @@ class StudioController(QObject):
             metadata_changed = False
             for source_id, raw in raw_candidates.items():
                 source = sources_by_id[source_id]
-                type_map = column_types_after_steps(
-                    raw.headers,
-                    source.get("transform_steps", []),
-                    output_headers=query_candidates[source_id].headers,
-                )
+                type_map = dict(query_type_maps[source_id])
                 type_map.update(calculated_type_maps.get(source_id, {}))
                 table = next(
                     (item for item in next_project.get("model", {}).get("tables", [])
@@ -5072,6 +9121,7 @@ class StudioController(QObject):
                     table["column_types"] = type_map
                     metadata_changed = True
             next_project = validate_project(next_project)
+            self._validate_loaded_relationship_candidates(next_project, refreshed)
         except (KeyError, OSError, ProjectFileError, TypeError, ValueError) as exc:
             failed_source = sources_by_id.get(refreshing_source_id or "", active_source or {})
             failed_name = str(failed_source.get("name", "the source"))
@@ -5087,6 +9137,7 @@ class StudioController(QObject):
 
         self._project = next_project
         self._loaded_candidates.update(refreshed)
+        self._raw_candidates.update(raw_candidates)
         if metadata_changed:
             self._dirty = True
         for source_id in affected_ids:
@@ -5134,6 +9185,7 @@ class StudioController(QObject):
             "visuals": [],
             "filters": [],
             "visual_filters": [],
+            "visual_interactions": [],
             "hidden": False,
         }
         pages.append(page)
@@ -5141,6 +9193,8 @@ class StudioController(QObject):
         self._project["report"]["active_page_id"] = page["id"]
         self._cross_filters.clear()
         self._selected_visual = ""
+        self._selected_visual_ids.clear()
+        self._creating_visual = False
         self._dirty = True
         self._refresh_report()
         self.stateChanged.emit()
@@ -5180,6 +9234,8 @@ class StudioController(QObject):
                 self._project["report"]["active_page_id"] = self._active_page_id
                 self._cross_filters.clear()
                 self._selected_visual = ""
+                self._selected_visual_ids.clear()
+                self._creating_visual = False
             self._dirty = True
             self._refresh_report()
             self.stateChanged.emit()
@@ -5189,48 +9245,209 @@ class StudioController(QObject):
 
     @Slot(str, int, int)
     def move_visual(self, visual_id: str, x: int, y: int) -> None:
-        page = self._project["report"]["pages"][self.activePageIndex]
-        for visual in page.get("visuals", []):
-            if isinstance(visual, dict) and visual.get("id") == visual_id:
-                visual["x"] = max(0, x)
-                visual["y"] = max(0, y)
-                self._dirty = True
-                self.stateChanged.emit()
-                return
+        page = self._active_page()
+        if page is None:
+            return
+        visuals = page.get("visuals", [])
+        visual = next((
+            item for item in visuals
+            if isinstance(item, dict) and item.get("id") == visual_id
+        ), None)
+        if visual is None:
+            return
+        next_x = max(0, int(x))
+        next_y = max(0, int(y))
+        delta_x = next_x - float(visual.get("x", 0))
+        delta_y = next_y - float(visual.get("y", 0))
+        group_id = visual.get("group_id")
+        for item in visuals:
+            if isinstance(item, dict) and (
+                item is visual or (group_id and item.get("group_id") == group_id)
+            ):
+                item["x"] = max(0.0, float(item.get("x", 0)) + delta_x)
+                item["y"] = max(0.0, float(item.get("y", 0)) + delta_y)
+        self._dirty = True
+        self.stateChanged.emit()
 
 
     @Slot(str, str)
     def add_field_to_well(self, well_name: str, field_name: str) -> None:
-        if not self._selected_visual: return
-        page = self._project["report"]["pages"][self.activePageIndex]
-        for visual in page.get("visuals", []):
-            if isinstance(visual, dict) and visual.get("title") == self._selected_visual:
-                fields = visual.setdefault("fields", {})
-                table_id = self._active_model_table_id()
-                if table_id:
-                    visual.setdefault("table_id", table_id)
-                well_fields = fields.setdefault(well_name, [])
-                if field_name not in well_fields:
-                    well_fields.append(field_name)
-                    self._dirty = True
-                    self._refresh_report()
-                    self.stateChanged.emit()
-                break
+        if not self._selected_visual:
+            return
+        page = self._active_page()
+        visual = next((
+            item for item in (page.get("visuals", []) if page else [])
+            if isinstance(item, dict) and item.get("title") == self._selected_visual
+        ), None)
+        table_id = self._active_model_table_id()
+        if visual is None or well_name not in {
+            str(item["name"]) for item in self.activeVisualWells
+        }:
+            self._set_status("Choose an available field well first.")
+            return
+        measure_name = _visual_measure_name(field_name)
+        is_measure = measure_name is not None
+        if is_measure:
+            actual_measure = next((
+                str(item["name"])
+                for item in self._project.get("model", {}).get("measures", [])
+                if str(item.get("name", "")).casefold() == measure_name.casefold()
+            ), None)
+            if actual_measure is None:
+                self._set_status("That DAX measure is no longer available.")
+                return
+            field_name = _visual_measure_binding(actual_measure)
+            if visual.get("type") == "slicer":
+                self._set_status(
+                    "A Slicer needs a column field so its values can filter the report."
+                )
+                return
+            allowed_measure_wells = {
+                "Y-axis", "Column Y-axis", "Line Y-axis", "Value", "Minimum",
+                "Maximum", "Target", "Indicator", "Target goals", "Fields", "Values",
+            }
+            if well_name not in allowed_measure_wells or visual.get("type") == "scatter":
+                self._set_status(
+                    "Add DAX measures to a visual value well. Category, map, and scatter wells use columns."
+                )
+                return
+        if not table_id or (not is_measure and field_name not in self._headers):
+            self._set_status("Choose a field from the loaded table.")
+            return
+        bound_table_id = str(visual.get("table_id", ""))
+        if bound_table_id and bound_table_id != table_id:
+            self._set_status("This visual is bound to another table. Select that table to add fields.")
+            return
+
+        fields = visual.setdefault("fields", {})
+        well_fields = fields.setdefault(well_name, [])
+        table_field_well = visual.get("type") == "table" and well_name == "Fields"
+        if field_name in well_fields:
+            return
+        if is_measure and well_fields and not table_field_well:
+            self._set_status("This value well uses one DAX measure at a time.")
+            return
+        if (
+            not is_measure
+            and not table_field_well
+            and well_name in {
+                "Y-axis", "Column Y-axis", "Line Y-axis", "Value", "Minimum",
+                "Maximum", "Target", "Indicator", "Target goals", "Fields", "Values",
+            }
+            and any(_visual_measure_name(item) is not None for item in well_fields)
+        ):
+            self._set_status("Remove the DAX measure before adding a column to this value well.")
+            return
+        if visual.get("type") == "card" and well_name == "Fields" and well_fields:
+            self._set_status("A Card visual uses one field. Remove the current field to replace it.")
+            return
+        if visual.get("type") == "matrix" and well_name in {"Rows", "Columns", "Values"} and well_fields:
+            self._set_status("This Matrix visual supports one field in each row, column, and value well.")
+            return
+        if visual.get("type") == "scatter" and well_name in {"X-axis", "Y-axis", "Legend", "Details"} and well_fields:
+            self._set_status("This Scatter chart supports one field in each axis, legend, and details well.")
+            return
+        if visual.get("type") == "lineClusteredColumn" and well_name in {"Column Y-axis", "Line Y-axis"} and well_fields:
+            self._set_status("This Combo chart supports one field in each value well.")
+            return
+        if visual.get("type") == "gauge" and well_name in {"Value", "Minimum", "Maximum", "Target"} and well_fields:
+            self._set_status("This Gauge supports one field in each value well.")
+            return
+        if visual.get("type") == "kpi" and well_name in {"Indicator", "Trend axis", "Target goals"} and well_fields:
+            self._set_status("This KPI supports one field in each indicator, trend, and target well.")
+            return
+        if visual.get("type") == "map" and well_name in {"Location", "Latitude", "Longitude", "Size", "Legend"} and well_fields:
+            self._set_status("This Map supports one field in each location, coordinate, size, and legend well.")
+            return
+
+        visual.setdefault("table_id", table_id)
+        well_fields.append(field_name)
+        if not is_measure and well_name in {
+            "Y-axis", "Column Y-axis", "Line Y-axis", "Value", "Minimum",
+            "Maximum", "Target", "Indicator", "Target goals",
+        } and visual.get("type") != "scatter":
+            visual.setdefault("field_aggregations", {}).setdefault(field_name, "sum")
+        elif not is_measure and visual.get("type") == "card" and well_name == "Fields":
+            has_numeric = any(_report_number(row.get(field_name)) is not None for row in self._rows)
+            visual.setdefault("field_aggregations", {}).setdefault(
+                field_name, "sum" if has_numeric else "count"
+            )
+        elif not is_measure and visual.get("type") == "matrix" and well_name == "Values":
+            has_numeric = any(_report_number(row.get(field_name)) is not None for row in self._rows)
+            visual.setdefault("field_aggregations", {}).setdefault(
+                field_name, "sum" if has_numeric else "count"
+            )
+        self._dirty = True
+        self._refresh_report()
+        self.stateChanged.emit()
 
     @Slot(str, str)
     def remove_field_from_well(self, well_name: str, field_name: str) -> None:
-        if not self._selected_visual: return
-        page = self._project["report"]["pages"][self.activePageIndex]
-        for visual in page.get("visuals", []):
-            if isinstance(visual, dict) and visual.get("title") == self._selected_visual:
-                fields = visual.setdefault("fields", {})
-                well_fields = fields.setdefault(well_name, [])
-                if field_name in well_fields:
-                    well_fields.remove(field_name)
-                    self._dirty = True
-                    self._refresh_report()
-                    self.stateChanged.emit()
-                break
+        if not self._selected_visual:
+            return
+        page = self._active_page()
+        visual = next((
+            item for item in (page.get("visuals", []) if page else [])
+            if isinstance(item, dict) and item.get("title") == self._selected_visual
+        ), None)
+        if visual is None:
+            return
+        well_fields = visual.get("fields", {}).get(well_name, [])
+        if field_name not in well_fields:
+            return
+        well_fields.remove(field_name)
+        if well_name in {
+            "Y-axis", "Column Y-axis", "Line Y-axis", "Value", "Minimum",
+            "Maximum", "Target", "Indicator", "Target goals",
+        } or (
+            well_name == "Fields" and visual.get("type") == "card"
+        ) or (
+            well_name == "Values" and visual.get("type") == "matrix"
+        ):
+            visual.get("field_aggregations", {}).pop(field_name, None)
+        self._dirty = True
+        self._refresh_report()
+        self.stateChanged.emit()
+
+    @Slot(str, str, str)
+    def set_field_aggregation(
+        self, well_name: str, field_name: str, aggregation: str
+    ) -> None:
+        if _visual_measure_name(field_name) is not None:
+            self._set_status("DAX measures are already evaluated values and cannot be re-aggregated.")
+            return
+        key = aggregation.strip().casefold()
+        if key not in _VISUAL_FIELD_AGGREGATIONS:
+            self._set_status("Choose Sum, Count, or Average for this field.")
+            return
+        page = self._active_page()
+        visual = next((
+            item for item in (page.get("visuals", []) if page else [])
+            if isinstance(item, dict) and item.get("title") == self._selected_visual
+        ), None)
+        allowed_well = (
+            well_name in {"Y-axis", "Column Y-axis", "Line Y-axis"}
+            or (
+                well_name in {"Value", "Minimum", "Maximum", "Target"}
+                and visual is not None and visual.get("type") == "gauge"
+            )
+            or (
+                well_name in {"Indicator", "Target goals"}
+                and visual is not None and visual.get("type") == "kpi"
+            )
+            or (well_name == "Fields" and visual is not None and visual.get("type") == "card")
+            or (well_name == "Values" and visual is not None and visual.get("type") == "matrix")
+        )
+        if visual is None or not allowed_well or field_name not in visual.get("fields", {}).get(well_name, []):
+            self._set_status("Choose an assigned field first.")
+            return
+        aggregations = visual.setdefault("field_aggregations", {})
+        if aggregations.get(field_name, "sum") == key:
+            return
+        aggregations[field_name] = key
+        self._dirty = True
+        self._refresh_report()
+        self.stateChanged.emit()
 
     @Slot(str, str)
     def set_visual_type(self, title: str, v_type: str) -> None:
@@ -5243,20 +9460,181 @@ class StudioController(QObject):
                 self.stateChanged.emit()
                 return
 
+    @Slot()
+    def begin_new_visual(self) -> None:
+        self._selected_visual = ""
+        self._selected_visual_ids = []
+        self._creating_visual = True
+        self.stateChanged.emit()
+        self._set_status("Choose a supported visual type to add it to the report.")
+
+    @Slot(str)
+    def add_blank_visual(self, visual_type: str) -> None:
+        labels = {
+            "bar": "Bar chart",
+            "column": "Column chart",
+            "stackedBar": "Stacked bar chart",
+            "stackedColumn": "Stacked column chart",
+            "bar100": "100% stacked bar chart",
+            "column100": "100% stacked column chart",
+            "stackedArea": "Stacked area chart",
+            "area100": "100% stacked area chart",
+            "waterfall": "Waterfall chart",
+            "treemap": "Treemap",
+            "ribbon": "Ribbon chart",
+            "matrix": "Matrix",
+            "scatter": "Scatter chart",
+            "line": "Line chart",
+            "lineClusteredColumn": "Line and clustered column chart",
+            "gauge": "Gauge",
+            "kpi": "KPI",
+            "map": "Map",
+            "area": "Area chart",
+            "pie": "Pie chart",
+            "donut": "Donut chart",
+            "funnel": "Funnel chart",
+            "card": "Card",
+            "table": "Table",
+            "slicer": "Slicer",
+        }
+        base_title = labels.get(visual_type)
+        if base_title is None:
+            self._set_status("Choose a supported visual type.")
+            return
+        page = self._active_page()
+        if page is None:
+            return
+        visuals = page.setdefault("visuals", [])
+        existing_titles = {
+            str(item.get("title", "")) for item in visuals if isinstance(item, dict)
+        }
+        title = base_title
+        suffix = 2
+        while title in existing_titles:
+            title = f"{base_title} {suffix}"
+            suffix += 1
+
+        if visual_type == "slicer":
+            width, height = 260, 300
+        elif visual_type == "card":
+            width, height = 250, 150
+        else:
+            width, height = 330, 248
+        position = None
+        for y in range(14, 720 - height + 1, 20):
+            for x in range(14, 1280 - width + 1, 20):
+                overlaps = False
+                for item in visuals:
+                    if not isinstance(item, dict):
+                        continue
+                    other_x = float(item.get("x", 0))
+                    other_y = float(item.get("y", 0))
+                    other_width = float(item.get("width", 300))
+                    other_height = float(item.get("height", 200))
+                    if (
+                        x < other_x + other_width
+                        and x + width > other_x
+                        and y < other_y + other_height
+                        and y + height > other_y
+                    ):
+                        overlaps = True
+                        break
+                if not overlaps:
+                    position = (x, y)
+                    break
+            if position is not None:
+                break
+        if position is None:
+            position = (14, 14)
+
+        self._creating_visual = False
+        self.add_visual(visual_type, title, *position, width, height)
+
     @Slot(str, "QVariant")
     def set_visual_property(self, property_key: str, value: object) -> None:
-        if not self._selected_visual: return
-        page = self._project["report"]["pages"][self.activePageIndex]
-        for visual in page.get("visuals", []):
-            if isinstance(visual, dict) and visual.get("title") == self._selected_visual:
-                if property_key == "title" and str(value) != str(visual["title"]):
-                    # Keep selected_visual synced if title changes
-                    self._selected_visual = str(value)
-                visual[property_key] = value
-                self._report_filter_context_cache.clear()
-                self._dirty = True
-                self.stateChanged.emit()
-                break
+        if not self._selected_visual:
+            return
+        page = self._active_page()
+        if page is None:
+            return
+        visual = next((
+            item for item in page.get("visuals", [])
+            if isinstance(item, dict) and item.get("title") == self._selected_visual
+        ), None)
+        if visual is None:
+            return
+        if property_key == "title":
+            normalized: object = str(value).strip()
+            if not normalized:
+                self._set_status("A visual needs a title.")
+                return
+            if any(
+                item is not visual and isinstance(item, dict)
+                and item.get("title") == normalized
+                for item in page.get("visuals", [])
+            ):
+                self._set_status("Each visual on a page needs a unique title.")
+                return
+        elif property_key in {"x", "y", "width", "height"}:
+            if isinstance(value, bool):
+                self._set_status("Enter a finite number for the visual position or size.")
+                return
+            try:
+                normalized = float(value)
+            except (TypeError, ValueError):
+                self._set_status("Enter a finite number for the visual position or size.")
+                return
+            if not math.isfinite(normalized):
+                self._set_status("Enter a finite number for the visual position or size.")
+                return
+            normalized = max(10.0 if property_key in {"width", "height"} else 0.0, normalized)
+        elif property_key == "color":
+            normalized = str(value)
+            if (
+                len(normalized) != 7
+                or normalized[0] != "#"
+                or any(character not in "0123456789abcdefABCDEF" for character in normalized[1:])
+            ):
+                self._set_status("Enter a color in #RRGGBB format.")
+                return
+        elif property_key in {"show_data_labels", "show_legend"}:
+            if type(value) is not bool:
+                self._set_status("Choose whether to show this visual element.")
+                return
+            normalized = value
+        elif property_key == "text" and visual.get("type") in {"button", "text_box"}:
+            normalized = str(value)
+        elif property_key == "actionUrl" and visual.get("type") == "button":
+            normalized = str(value)
+        elif property_key == "image_path" and visual.get("type") == "image":
+            image_path = str(value).strip()
+            if image_path:
+                path = Path(image_path).expanduser().resolve()
+                if not path.is_file() or QImage(str(path)).isNull():
+                    self._set_status("Choose a readable image file.")
+                    return
+                normalized = str(path)
+            else:
+                normalized = ""
+        else:
+            self._set_status("This visual property is unavailable.")
+            return
+
+        previous = visual.get(property_key)
+        if previous == normalized:
+            return
+        if property_key == "title":
+            old_title = str(visual.get("title", ""))
+            self._selected_visual = str(normalized)
+            for visual_filter in page.get("visual_filters", []):
+                if visual_filter.get("visual_name") == old_title:
+                    visual_filter["visual_name"] = str(normalized)
+            self._cross_filters.pop(old_title, None)
+        visual[property_key] = normalized
+        self._report_filter_context_cache.clear()
+        self._refresh_report()
+        self._dirty = True
+        self.stateChanged.emit()
 
     @Slot(str, int, int)
     def resize_visual(self, visual_id: str, width: int, height: int) -> None:
@@ -5279,15 +9657,44 @@ class StudioController(QObject):
                 index_to_remove = i
                 break
         if index_to_remove != -1:
-            name = visuals[index_to_remove].get("title", "")
+            removed_visual = visuals[index_to_remove]
+            name = removed_visual.get("title", "")
+            removed_id = self._visual_persistence_id(removed_visual)
             del visuals[index_to_remove]
+            page["visual_interactions"] = [
+                interaction
+                for interaction in page.get("visual_interactions", [])
+                if interaction.get("source_visual_id") != removed_id
+                and interaction.get("target_visual_id") != removed_id
+            ]
             if not any(
                 isinstance(visual, dict) and visual.get("title") == name
                 for visual in visuals
             ):
                 self._cross_filters.pop(str(name), None)
+            self._selected_visual_ids = [
+                selected_id for selected_id in self._selected_visual_ids
+                if selected_id != removed_id
+            ]
             if self._selected_visual == name:
+                selected = next((
+                    visual for visual in visuals
+                    if isinstance(visual, dict)
+                    and str(visual.get("id", "")) in self._selected_visual_ids
+                ), None)
+                self._selected_visual = str(selected.get("title", "")) if selected else ""
+            remaining_group = removed_visual.get("group_id")
+            if remaining_group:
+                members = [
+                    visual for visual in visuals
+                    if isinstance(visual, dict)
+                    and visual.get("group_id") == remaining_group
+                ]
+                if len(members) == 1:
+                    members[0].pop("group_id", None)
+            if not self._selected_visual_ids:
                 self._selected_visual = ""
+                self._creating_visual = False
             self._dirty = True
             self._refresh_report()
             self.stateChanged.emit()
@@ -5306,14 +9713,52 @@ class StudioController(QObject):
             "x": x,
             "y": y,
             "width": width,
-            "height": height
+            "height": height,
+            "show_data_labels": False,
+            "show_legend": False,
         })
         self._dirty = True
         self._selected_visual = title
+        self._selected_visual_ids = [new_id]
+        self._creating_visual = False
         self._refresh_report()
         self.stateChanged.emit()
         self._set_status(f"Added visual {title}")
         return new_id
+
+    @Slot()
+    def insert_image(self) -> None:
+        path_text, _ = QFileDialog.getOpenFileName(
+            None,
+            "Insert image",
+            "",
+            "Images (*.png *.jpg *.jpeg *.bmp *.gif *.webp);;All files (*)",
+        )
+        if not path_text:
+            return
+        image_path = Path(path_text).expanduser().resolve()
+        if not image_path.is_file() or QImage(str(image_path)).isNull():
+            self._set_status("Choose a readable image file.")
+            return
+
+        base_title = image_path.stem or "Image"
+        title = base_title
+        existing_titles = {
+            str(item.get("title", ""))
+            for item in self._active_page().get("visuals", [])
+            if isinstance(item, dict)
+        }
+        suffix = 2
+        while title in existing_titles:
+            title = f"{base_title} {suffix}"
+            suffix += 1
+        visual_id = self.add_visual("image", title, 100, 100, 250, 150)
+        visual = next(
+            item for item in self._active_page().get("visuals", [])
+            if isinstance(item, dict) and item.get("id") == visual_id
+        )
+        visual["image_path"] = str(image_path)
+        self.stateChanged.emit()
 
     def duplicate_page(self, page_id: str) -> None:
         pages = self._project["report"]["pages"]
@@ -5334,6 +9779,8 @@ class StudioController(QObject):
         self._project["report"]["active_page_id"] = new_page["id"]
         self._cross_filters.clear()
         self._selected_visual = ""
+        self._selected_visual_ids.clear()
+        self._creating_visual = False
         self._dirty = True
         self._refresh_report()
         self.stateChanged.emit()
@@ -5390,7 +9837,13 @@ class StudioController(QObject):
             })
             self._dirty = True
             self._refresh_report()
+        selected = next((
+            visual for visual in visuals
+            if isinstance(visual, dict) and visual.get("title") == visual_name
+        ), None)
         self._selected_visual = visual_name
+        self._selected_visual_ids = [str(selected.get("id", ""))] if selected else []
+        self._creating_visual = False
         self.stateChanged.emit()
         self._set_status(f"Added {visual_name}")
 
@@ -5433,7 +9886,7 @@ class StudioController(QObject):
         QMessageBox.information(
             None,
             "Project format",
-            "Analytics Studio projects use the versioned .npa JSON format (currently v55). "
+            f"Analytics Studio projects use the versioned .npa JSON format (currently v{FORMAT_VERSION}). "
             "Imported files stay linked as external sources; SQL Server passwords use a local Keychain reference, OData Feed sources store an anonymous HTTPS service root, and Web sources store their anonymous HTTPS URL; "
             "entered tables, append and merge query definitions, "
             "transform steps, and local measure formulas are saved in the project. A .bak recovery copy is kept on later saves.",
@@ -5543,6 +9996,11 @@ class StudioController(QObject):
             "monthly": self.monthlyChartType,
             "region": self.regionChartType,
         }
+        for page in document["report"].get("pages", []):
+            for visual in page.get("visuals", []):
+                image_path = visual.get("image_path") if isinstance(visual, dict) else None
+                if isinstance(image_path, str) and image_path:
+                    visual["image_path"] = self._source_path_for_save(image_path, path)
 
         active_id = self._active_source_id
         active_path = self._active_source_path
@@ -5647,8 +10105,14 @@ class StudioController(QObject):
         self._active_source_kind = None
         self._active_parser_options = {}
         self._loaded_candidates = {}
+        self._raw_candidates = {}
         self._source_load_errors = {}
         self._selected_visual = ""
+        self._selected_visual_ids.clear()
+        self._creating_visual = False
+        self._clipboard_visual_config = None
+        self._clipboard_format_config = None
+        self._format_painter_active = False
         self._field_query = ""
         self._current_region = None
         self._clear_source(clear_selection=True)
@@ -5810,16 +10274,8 @@ class StudioController(QObject):
         self._visual_kpis = {}
         self._monthly_visual_series = {}
         self._region_visual_series = {}
-        self._report_theme = "Default"
-        self._themes = {
-            "Default": {"primary": "#0078D4", "secondary": "#107C71"},
-            "Executive": {"primary": "#00188F", "secondary": "#252423"},
-            "High Contrast": {"primary": "#FFFF00", "secondary": "#00FFFF"},
-            "Sunset": {"primary": "#D83B01", "secondary": "#FF8C00"}
-        }
-        self._clipboard_visual_config = None
-        self._clipboard_format_config = None
-        self._format_painter_active = False
+        self._report_theme = self._project.get("report", {}).get("theme", "Default")
+        self._themes = REPORT_THEMES
         self._region_column = _report_field(self._headers, "region") if self.sourceLoaded else None
         if not self.sourceLoaded:
             self._kpis = defaults
@@ -5912,7 +10368,7 @@ class StudioController(QObject):
             measure_rows: list[dict[str, Any]],
             table_context: list[dict[str, Any]],
             filter_ids: set[str],
-        ) -> Decimal:
+        ) -> Decimal | None:
             return evaluate_measures(
                 measures,
                 measure_rows,
@@ -5934,7 +10390,9 @@ class StudioController(QObject):
             except MeasureError as exc:
                 self._measure_errors[name] = str(exc)
             else:
-                formatted = _format_report_number(value)
+                formatted = (
+                    _format_report_number(value) if value is not None else "—"
+                )
                 self._measure_values[name] = formatted
                 self._kpis[name] = formatted
 
@@ -5978,13 +10436,177 @@ class StudioController(QObject):
                     except MeasureError:
                         self._visual_kpis[visual_name] = "—"
                     else:
-                        self._visual_kpis[visual_name] = _format_report_number(visual_value)
+                        self._visual_kpis[visual_name] = (
+                            _format_report_number(visual_value)
+                            if visual_value is not None else "—"
+                        )
                 else:
                     self._visual_kpis[visual_name] = standard_kpis(visual_rows).get(kpi_name, "—")
 
         self._filter_context_error = "; ".join(dict.fromkeys(filter_errors))
 
-    def _generate_dynamic_visual_series(self, visual_name: str) -> list[dict[str, str | float]]:
+    def _measure_value_for_visual_group(
+        self,
+        measure_name: str,
+        table_context: list[dict[str, Any]],
+        filter_table_ids: set[str],
+        group_filters: dict[str, str | set[str]],
+        group_table_id: str,
+    ) -> Decimal | None:
+        """Evaluate one saved measure with chart-category filters applied."""
+        contexts: list[dict[str, Any]] = []
+        contexts_by_id: dict[str, dict[str, Any]] = {}
+        for source_context in table_context:
+            context = dict(source_context)
+            context["filter_column_rows"] = {
+                str(column): frozenset(indexes)
+                for column, indexes in source_context.get(
+                    "filter_column_rows", {}
+                ).items()
+            }
+            context["filter_column_blank_allowed"] = dict(
+                source_context.get("filter_column_blank_allowed", {})
+            )
+            contexts.append(context)
+            contexts_by_id[str(context["id"])] = context
+
+        for table_id, context in contexts_by_id.items():
+            if table_id != group_table_id:
+                continue
+            table_filters = {
+                column: value
+                for column, value in group_filters.items()
+                if column in context["headers"]
+            }
+            if not table_filters:
+                continue
+            rows = context["rows"]
+            count = len(rows)
+            column_rows = dict(context.get("filter_column_rows", {}))
+            blank_allowed = dict(context.get("filter_column_blank_allowed", {}))
+            for column, value in table_filters.items():
+                selected_values = value if isinstance(value, set) else {value}
+                matching = frozenset(
+                    index for index, row in enumerate(rows)
+                    if ("" if row.get(column) is None else str(row.get(column)))
+                    in selected_values
+                )
+                existing = column_rows.get(column)
+                column_rows[column] = (
+                    matching if existing is None else matching & existing
+                )
+                blank_allowed[column] = (
+                    "" in selected_values
+                    and blank_allowed.get(column, True)
+                )
+            context["filter_column_rows"] = column_rows
+            context["filter_column_blank_allowed"] = blank_allowed
+            context["filter_context_complete"] = True
+            base_rows = context.get("filter_rows")
+            base_row_ids = None if base_rows is None else {id(row) for row in base_rows}
+            context["filter_rows"] = [
+                row
+                for index, row in enumerate(rows)
+                if (base_row_ids is None or id(row) in base_row_ids)
+                and all(index in indexes for indexes in column_rows.values())
+            ]
+            filter_table_ids = {*filter_table_ids, table_id}
+
+        active_table_id = self._active_model_table_id()
+        active_context = contexts_by_id.get(active_table_id)
+        if active_context is None:
+            raise MeasureError("The active model table is unavailable for this visual.")
+        target_measure = next((
+            str(item["name"])
+            for item in self._project.get("model", {}).get("measures", [])
+            if str(item.get("name", "")).casefold() == measure_name.casefold()
+        ), None)
+        if target_measure is None:
+            raise MeasureError(f"Measure {measure_name!r} no longer exists.")
+        active_rows = active_context.get("filter_rows", active_context["rows"])
+        values = evaluate_measures(
+            self._project.get("model", {}).get("measures", []),
+            list(active_rows),
+            list(active_context["headers"]),
+            self._active_model_table_name(),
+            measure_names=[target_measure],
+            table_context=contexts,
+            relationships=self._project.get("model", {}).get("relationships", []),
+            filter_table_ids=filter_table_ids,
+            active_table_id=active_table_id or None,
+        )
+        return values[target_measure]
+
+    def _measure_visual_series(
+        self,
+        measure_name: str,
+        category_column: str,
+        legend_column: str | None,
+        visual_rows: list[dict[str, Any]],
+        table_context: list[dict[str, Any]],
+        filter_table_ids: set[str],
+        group_table_id: str,
+        *,
+        stacked: bool,
+    ) -> list[dict[str, object]]:
+        if not category_column:
+            return []
+        groups: set[tuple[str, str]] = set()
+        for row in visual_rows:
+            category = "" if row.get(category_column) is None else str(
+                row.get(category_column)
+            )
+            legend = (
+                "" if legend_column and row.get(legend_column) is None
+                else str(row.get(legend_column, "")) if legend_column else ""
+            )
+            groups.add((category, legend))
+        grouped_values: dict[tuple[str, str], Decimal | None] = {}
+        for category, legend in groups:
+            filters = {category_column: category}
+            if stacked and legend_column:
+                filters[legend_column] = legend
+            grouped_values[(category, legend)] = self._measure_value_for_visual_group(
+                measure_name, table_context, set(filter_table_ids), filters,
+                group_table_id,
+            )
+        categories = sorted({category for category, _ in groups}, key=str.casefold)
+        if not stacked or not legend_column:
+            series: list[dict[str, object]] = []
+            for category in categories:
+                value = grouped_values.get((category, ""))
+                if value is not None:
+                    series.append({"label": category, "value": float(value)})
+            return series
+        legends = sorted({legend for _, legend in groups}, key=str.casefold)
+        series = []
+        for category in categories:
+            present = [
+                (legend, value)
+                for legend in legends
+                if (value := grouped_values.get((category, legend))) is not None
+            ]
+            if not present:
+                continue
+            series.append({
+                "label": category,
+                "value": float(sum(
+                    (value for _legend, value in present), Decimal(0)
+                )),
+                "segments": [
+                    {"label": legend, "value": float(value)}
+                    for legend, value in present
+                ],
+            })
+        return series
+
+    def _generate_dynamic_visual_series(
+        self,
+        visual_name: str,
+        *,
+        include_highlights: bool = False,
+        value_well: str | None = None,
+    ) -> list[dict[str, object]]:
         page = self._active_page()
         if not page:
             return []
@@ -5994,7 +10616,17 @@ class StudioController(QObject):
             
         fields = visual.get("fields", {})
         x_axis = fields.get("X-axis", [])
-        y_axis = fields.get("Y-axis", [])
+        if visual.get("type") == "kpi":
+            x_axis = fields.get("Trend axis", [])
+        if value_well is None:
+            value_well = (
+                "Column Y-axis"
+                if visual.get("type") == "lineClusteredColumn"
+                else "Indicator" if visual.get("type") == "kpi" else "Y-axis"
+            )
+        if visual.get("type") == "lineClusteredColumn" and not fields.get(value_well):
+            return []
+        y_axis = fields.get(value_well, [])
         if visual.get("type") == "slicer" and not x_axis and not y_axis:
             x_axis = fields.get("Fields", [])
 
@@ -6020,14 +10652,22 @@ class StudioController(QObject):
 
         x_col = well_column(x_axis)
         y_col = well_column(y_axis)
+        legend_col = well_column(fields.get("Legend", []))
+        aggregation = str(
+            visual.get("field_aggregations", {}).get(y_col, "sum")
+        ).casefold()
+        if aggregation not in _VISUAL_FIELD_AGGREGATIONS:
+            aggregation = "sum"
         bound_table_id = str(visual.get("table_id") or self._active_model_table_id())
-        visual_rows_by_table, _, _ = self._report_filter_context(visual_name)
+        visual_rows_by_table, visual_measure_context, visual_filter_table_ids = self._report_filter_context(
+            visual_name, include_highlights=include_highlights
+        )
         visual_rows = visual_rows_by_table.get(bound_table_id)
         if visual_rows is None:
             return []
 
         if visual.get("type") == "slicer":
-            if not x_col:
+            if not x_col or _visual_measure_name(x_col) is not None:
                 return []
             values = sorted({
                 "" if row.get(x_col) is None else str(row.get(x_col, ""))
@@ -6039,18 +10679,108 @@ class StudioController(QObject):
             visual_name, visual_rows, bound_table_id
         )
 
+        measure_name = _visual_measure_name(y_col)
+        if measure_name:
+            stacked = visual.get("type") in {
+                "stackedBar", "stackedColumn", "bar100", "column100",
+                "stackedArea", "area100", "ribbon",
+            }
+            try:
+                return self._measure_visual_series(
+                    measure_name,
+                    x_col or "",
+                    legend_col,
+                    visual_rows,
+                    visual_measure_context,
+                    visual_filter_table_ids,
+                    bound_table_id,
+                    stacked=stacked,
+                )
+            except (MeasureError, KeyError, TypeError, ValueError):
+                return []
+
+        if visual.get("type") in {
+            "stackedBar", "stackedColumn", "bar100", "column100",
+            "stackedArea", "area100", "ribbon",
+        }:
+            if not x_col or not y_col:
+                return []
+
+            from collections import defaultdict
+            from decimal import Decimal
+
+            grouped: defaultdict[tuple[str, str], Decimal] = defaultdict(Decimal)
+            counts: defaultdict[tuple[str, str], int] = defaultdict(int)
+            for row in visual_rows:
+                raw_value = row.get(y_col)
+                if aggregation == "count":
+                    if raw_value is None or not str(raw_value).strip():
+                        continue
+                    amount = Decimal(1)
+                elif raw_value is not None and str(raw_value).strip():
+                    try:
+                        amount = Decimal(str(raw_value).replace("$", "").replace(",", "").strip())
+                    except Exception:
+                        continue
+                    if not amount.is_finite():
+                        continue
+                else:
+                    continue
+
+                category_value = row.get(x_col)
+                category = "(Blank)" if category_value is None or not str(category_value).strip() else str(category_value)
+                legend_value = row.get(legend_col) if legend_col else y_col
+                segment = "(Blank)" if legend_col and (legend_value is None or not str(legend_value).strip()) else str(legend_value)
+                key = (category, segment)
+                grouped[key] += amount
+                counts[key] += 1
+
+            if aggregation == "average":
+                grouped = defaultdict(
+                    Decimal,
+                    {
+                        key: total / counts[key]
+                        for key, total in grouped.items()
+                        if counts[key]
+                    },
+                )
+
+            categories = sorted({category for category, _ in grouped}, key=str.casefold)
+            segments = sorted({segment for _, segment in grouped}, key=str.casefold)
+            return [
+                {
+                    "label": category,
+                    "value": float(sum((grouped.get((category, segment), Decimal(0)) for segment in segments), Decimal(0))),
+                    "segments": [
+                        {
+                            "label": segment,
+                            "value": float(grouped.get((category, segment), Decimal(0))),
+                        }
+                        for segment in segments
+                    ],
+                }
+                for category in categories
+            ]
+
         from collections import defaultdict
         from decimal import Decimal
         aggregated: defaultdict[str, Decimal] = defaultdict(Decimal)
+        value_counts: defaultdict[str, int] = defaultdict(int)
         for row in visual_rows:
             if y_col:
                 val = row.get(y_col, "")
-                if val:
+                if aggregation == "count":
+                    if val is None or not str(val).strip():
+                        continue
+                    amount = Decimal(1)
+                elif val is not None and str(val).strip():
                     # Strip currency symbols and commas if it's a string, then parse
                     val_str = str(val).replace("$", "").replace(",", "").strip()
                     try:
                         amount = Decimal(val_str)
                     except Exception:
+                        continue
+                    if not amount.is_finite():
                         continue
                 else:
                     continue
@@ -6060,9 +10790,33 @@ class StudioController(QObject):
             key = str(row.get(x_col, "")) if x_col else "(Blank)"
             if key:
                 aggregated[key] += amount
+                value_counts[key] += 1
 
-        if visual.get("type", "bar") == "column":
-            series = [{"label": key, "value": float(value)} for key, value in sorted(aggregated.items())]
+        if aggregation == "average":
+            aggregated = defaultdict(
+                Decimal,
+                {
+                    key: total / value_counts[key]
+                    for key, total in aggregated.items()
+                    if value_counts[key]
+                },
+            )
+
+        if visual.get("type", "bar") in {
+            "column", "area", "line", "lineClusteredColumn", "waterfall", "ribbon", "kpi",
+        }:
+            if visual.get("type") == "kpi":
+                def kpi_sort_key(item: tuple[str, Decimal]) -> tuple[int, Decimal | str]:
+                    try:
+                        numeric = Decimal(item[0])
+                    except (DecimalException, ValueError):
+                        return (1, item[0].casefold())
+                    return (0, numeric) if numeric.is_finite() else (1, item[0].casefold())
+
+                ordered_values = sorted(aggregated.items(), key=kpi_sort_key)
+            else:
+                ordered_values = sorted(aggregated.items())
+            series = [{"label": key, "value": float(value)} for key, value in ordered_values]
         else:
             series = [{"label": key, "value": float(value)} for key, value in sorted(aggregated.items(), key=lambda x: x[1], reverse=True)]
 
@@ -6209,6 +10963,10 @@ class StudioController(QObject):
     @Slot(str)
     def set_report_theme(self, theme_name: str) -> None:
         if theme_name not in self._themes: return
+        report = self._project.get("report", {})
+        if report.get("theme", "Default") == theme_name:
+            return
+        report["theme"] = theme_name
         self._report_theme = theme_name
         colors = self._themes[theme_name]
         
@@ -6222,6 +10980,24 @@ class StudioController(QObject):
         self._refresh_report()
         self.stateChanged.emit()
         self._set_status(f"Theme applied: {theme_name}")
+
+    @Slot(str, result=bool)
+    def open_button_action(self, action_url: str) -> bool:
+        """Open an absolute HTTP(S) button URL through the desktop handler."""
+        target = QUrl(str(action_url).strip())
+        if (
+            not target.isValid()
+            or target.scheme().casefold() not in {"http", "https"}
+            or not target.host()
+        ):
+            self._set_status("Button actions require an absolute HTTP or HTTPS URL.")
+            return False
+        opened = _open_external_url(target)
+        if not opened:
+            self._set_status("Could not open the button URL.")
+            return False
+        self._set_status(f"Opened {target.toString()}")
+        return True
 
     @Slot(str, str)
     def toggle_cross_filter(self, visual_title: str, label: str) -> None:
@@ -6258,6 +11034,7 @@ class StudioController(QObject):
         visuals = page.setdefault("visuals", [])
         new_visual = deepcopy(self._clipboard_visual_config)
         new_visual["id"] = str(uuid4())
+        new_visual.pop("group_id", None)
         
         # Offset coordinates by a small amount to make it visible it was pasted
         new_visual["x"] = new_visual.get("x", 10) + 20
@@ -6275,40 +11052,39 @@ class StudioController(QObject):
         visuals.append(new_visual)
         self._dirty = True
         self._selected_visual = title
+        self._selected_visual_ids = [str(new_visual["id"])]
         self._refresh_report()
         self.stateChanged.emit()
         self._set_status("Pasted visual")
 
     @Slot()
     def copy_format(self) -> None:
-        if not self._selected_visual: return
-
-
+        if not self._selected_visual:
+            return
         page = self._active_page()
         visual = next((v for v in page.get("visuals", []) if isinstance(v, dict) and v.get("title") == self._selected_visual), None)
-        if visual:
-            from copy import deepcopy
-            self._clipboard_format_config = {
-                "color": visual.get("color"),
-                "type": visual.get("type")
-            }
-            self._format_painter_active = True
-            self._set_status("Format Copied - Select another visual to paint")
+        if visual is None:
+            return
+        self._clipboard_format_config = {
+            "color": visual.get("color", "#0078D4"),
+            "show_data_labels": visual.get("show_data_labels", False),
+            "show_legend": visual.get("show_legend", False),
+        }
+        self._format_painter_active = True
+        self.stateChanged.emit()
+        self._set_status("Format copied. Select another visual to apply it.")
 
     @Slot(str)
     def apply_format_painter(self, visual_title: str) -> None:
-        if not self._format_painter_active or not self._clipboard_format_config: return
-
-
+        if not self._format_painter_active or not self._clipboard_format_config:
+            return
         page = self._active_page()
         for visual in page.get("visuals", []):
             if isinstance(visual, dict) and visual.get("title") == visual_title:
-                if self._clipboard_format_config.get("color"):
-                    visual["color"] = self._clipboard_format_config["color"]
-                if self._clipboard_format_config.get("type"):
-                    visual["type"] = self._clipboard_format_config["type"]
+                for key, value in self._clipboard_format_config.items():
+                    visual[key] = value
                 self._dirty = True
-                self._format_painter_active = False # One time use
+                self._format_painter_active = False
                 self._refresh_report()
                 self.stateChanged.emit()
                 self._set_status(f"Format applied to {visual_title}")
@@ -6356,13 +11132,55 @@ class StudioController(QObject):
 
     @Slot()
     def group_visuals(self) -> None:
-        # Stub for multi-select grouping
-        self._set_status("Grouping requires multi-select (Not implemented in preview)")
+        page = self._active_page()
+        if page is None:
+            return
+        visuals = [item for item in page.get("visuals", []) if isinstance(item, dict)]
+        selected = [
+            item for item in visuals
+            if str(item.get("id", "")) in self._selected_visual_ids
+        ]
+        selected_group_ids = {
+            str(item["group_id"]) for item in selected if item.get("group_id")
+        }
+        if selected_group_ids:
+            selected_ids = {str(item.get("id", "")) for item in selected}
+            selected.extend(
+                item for item in visuals
+                if item.get("group_id") in selected_group_ids
+                and str(item.get("id", "")) not in selected_ids
+            )
+        if len(selected) < 2:
+            self._set_status("Select at least two visuals to group.")
+            return
+        group_id = str(uuid4())
+        for visual in selected:
+            visual["group_id"] = group_id
+        self._dirty = True
+        self.stateChanged.emit()
+        self._set_status(f"Grouped {len(selected)} visuals")
 
     @Slot()
     def ungroup_visuals(self) -> None:
-        # Stub for multi-select grouping
-        self._set_status("Ungrouping requires groups (Not implemented in preview)")
+        page = self._active_page()
+        if page is None:
+            return
+        visuals = [item for item in page.get("visuals", []) if isinstance(item, dict)]
+        selected_group_ids = {
+            str(item["group_id"])
+            for item in visuals
+            if str(item.get("id", "")) in self._selected_visual_ids
+            and item.get("group_id")
+        }
+        if not selected_group_ids:
+            self._set_status("Select a grouped visual to ungroup.")
+            return
+        for visual in visuals:
+            if visual.get("group_id") in selected_group_ids:
+                visual.pop("group_id", None)
+        self._dirty = True
+        self.stateChanged.emit()
+        self._set_status("Ungrouped visuals")
 
     @Slot()
     def send_to_back(self) -> None:

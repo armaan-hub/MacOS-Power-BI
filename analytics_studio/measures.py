@@ -2,7 +2,7 @@
 
 Supported expressions use scalar arithmetic, aggregate functions, and the
 numeric functions ABS and ROUND. Measures also support conditionals and the
-SUMX/AVERAGEX iterators. Calculated columns use a bounded row-scoped subset of
+SUMX/AVERAGEX/COUNTX/COUNTAX iterators. Calculated columns use a bounded row-scoped subset of
 numeric and boolean expressions. Measures also support marked-date-table
 calendar- and fiscal-year TOTALYTD, calendar-quarter TOTALQTD, calendar-month TOTALMTD, and
 DATEADD, SAMEPERIODLASTYEAR, DATESYTD, DATESQTD, DATESMTD, DATESBETWEEN,
@@ -15,17 +15,17 @@ qualified-column forms of REMOVEFILTERS, ALL, ALLNOBLANKROW, ALLEXCEPT, and
 ALLSELECTED as
 sole filter modifiers. ALLEXCEPT preserves named same-table column filters
 and clears the other direct filters from that table. ALL table values preserve table rows or distinct column tuples for
-COUNTROWS, SUMX, and AVERAGEX, including one virtual blank parent row for
+COUNTROWS, SUMX, AVERAGEX, COUNTX, and COUNTAX, including one virtual blank parent row for
 unmatched relationship keys. ALLNOBLANKROW table values omit that virtual row
 while retaining physical blank rows and values.
 ALLSELECTED table values retain the currently visible rows or distinct column
 tuples. Its modifier form preserves the saved selection context; visual query
 row/column filters are not modeled by this local report evaluator.
-USERELATIONSHIP accepts saved relationship endpoint columns as one or more
-sole CALCULATE filter modifiers. Selected links are temporary; nested
-calculations restore the prior relationship context.
+USERELATIONSHIP accepts saved relationship endpoint columns as direct
+CALCULATE modifiers alongside supported Boolean and time-intelligence filters.
+Selected links are temporary; nested calculations restore the prior context.
 CROSSFILTER temporarily changes the direction of active saved links in
-CALCULATE, including disabling the link for the calculation.
+CALCULATE, including disabling the link, alongside those same bounded filters.
 The module parses into a tiny AST and never evaluates user text as Python.
 """
 
@@ -41,6 +41,7 @@ from typing import Any, Iterable
 
 from analytics_studio.relationships import (
     RelationshipError,
+    _relationship_value_key,
     propagate_relationship_filters,
     relationship_filter_directions,
     unknown_member_table_ids,
@@ -58,7 +59,8 @@ MAX_TOKENS = 512
 
 _FUNCTIONS = {
     "SUM", "AVERAGE", "MIN", "MAX", "COUNT", "COUNTA", "DISTINCTCOUNT",
-    "COUNTROWS", "DIVIDE", "ABS", "ROUND", "IF", "AND", "OR", "NOT",
+    "DISTINCTCOUNTNOBLANK",
+    "COUNTROWS", "COUNTX", "COUNTAX", "DIVIDE", "ABS", "ROUND", "IF", "AND", "OR", "NOT",
     "SUMX", "AVERAGEX", "TOTALYTD", "TOTALQTD", "TOTALMTD",
     "DATESYTD", "DATESQTD", "DATESMTD", "DATESBETWEEN", "DATESINPERIOD",
     "PREVIOUSYEAR", "PREVIOUSQUARTER", "PREVIOUSMONTH", "PREVIOUSDAY",
@@ -66,8 +68,12 @@ _FUNCTIONS = {
     "PARALLELPERIOD",
     "DATEADD", "SAMEPERIODLASTYEAR", "CALCULATE", "KEEPFILTERS", "FILTER",
     "REMOVEFILTERS", "ALL", "ALLNOBLANKROW", "ALLEXCEPT", "ALLSELECTED",
-    "USERELATIONSHIP", "CROSSFILTER",
+    "USERELATIONSHIP", "CROSSFILTER", "RELATED",
 }
+# These literal/table forms have local parser support outside ``_FUNCTIONS``.
+# Keep them in the editor picker so the visible catalog matches what the local
+# evaluator can recognize.
+DAX_FUNCTION_NAMES = tuple(sorted(_FUNCTIONS | {"BLANK", "DISTINCT", "FALSE", "TRUE"}))
 _TIME_FILTER_FUNCTIONS = {
     "DATEADD", "SAMEPERIODLASTYEAR", "PREVIOUSYEAR", "PREVIOUSQUARTER",
     "PREVIOUSMONTH", "PREVIOUSDAY", "NEXTYEAR", "NEXTQUARTER", "NEXTMONTH", "NEXTDAY",
@@ -122,7 +128,7 @@ def tokenize(expression: str) -> list[Token]:
             column = value.rsplit("[", 1)[1][:-1].strip()
             if not column:
                 raise MeasureError("A column reference cannot be empty.")
-            table = value.split("[", 1)[0].strip().strip("'").replace("''", "'") if kind == "table_ref" else ""
+            table = _qualified_table_name(value) if kind == "table_ref" else ""
             tokens.append(Token("reference", f"{table}\0{column}"))
         elif kind == "number":
             tokens.append(Token(kind, value))
@@ -136,6 +142,72 @@ def tokenize(expression: str) -> list[Token]:
             raise MeasureError(f"A DAX expression can contain at most {MAX_TOKENS} tokens.")
         position = match.end()
     return tokens
+
+
+def _qualified_table_name(value: str) -> str:
+    """Read a quoted or unquoted table name before its column reference."""
+    if value.startswith("'"):
+        position = 1
+        while position < len(value):
+            if value[position] != "'":
+                position += 1
+                continue
+            if position + 1 < len(value) and value[position + 1] == "'":
+                position += 2
+                continue
+            return value[1:position].replace("''", "'")
+        return value[1:].replace("''", "'")
+    return value.split("[", 1)[0].strip()
+
+
+def _qualified_column_start(value: str) -> int:
+    """Return the opening bracket of a column in a qualified reference."""
+    if value.startswith("'"):
+        position = 1
+        while position < len(value):
+            if value[position] != "'":
+                position += 1
+                continue
+            if position + 1 < len(value) and value[position + 1] == "'":
+                position += 2
+                continue
+            opening = value.find("[", position + 1)
+            return opening if opening >= 0 else len(value)
+    opening = value.find("[")
+    return opening if opening >= 0 else len(value)
+
+
+def rename_table_references(expression: str, old_name: str, new_name: str) -> str:
+    """Rename lexical DAX table references without changing quoted string values."""
+    if not isinstance(expression, str):
+        raise MeasureError("A DAX expression must be text.")
+    if not old_name or not new_name or old_name.casefold() == new_name.casefold():
+        return expression
+    output: list[str] = []
+    position = 0
+    while position < len(expression):
+        match = _TOKEN_PATTERN.match(expression, position)
+        if match is None:
+            output.append(expression[position])
+            position += 1
+            continue
+        token = match.group()
+        kind = match.lastgroup
+        if kind in {"table_ref", "table_name"}:
+            bracket_at = _qualified_column_start(token) if kind == "table_ref" else len(token)
+            prefix = token[:bracket_at]
+            table_text = prefix.strip()
+            if table_text.startswith("'") and table_text.endswith("'"):
+                table_name = table_text[1:-1].replace("''", "'")
+            else:
+                table_name = table_text
+            if table_name.casefold() == old_name.casefold():
+                spacing = prefix[len(prefix.rstrip()):]
+                quoted_name = "'" + new_name.replace("'", "''") + "'"
+                token = quoted_name + spacing + token[bracket_at:]
+        output.append(token)
+        position = match.end()
+    return "".join(output)
 
 
 def _parse_year_end_date(value: Any) -> tuple[int, int]:
@@ -517,6 +589,91 @@ def _validate_filter_clear_call(node: tuple[Any, ...], function: str) -> None:
         )
 
 
+def _validate_mixed_filter_clear_calculate(
+    arguments: tuple[tuple[Any, ...], ...],
+) -> bool:
+    """Accept the bounded mixed filter-clear CALCULATE forms."""
+    if len(arguments) <= 2:
+        return False
+    modifiers = [
+        (index, argument)
+        for index, argument in enumerate(arguments[1:], start=1)
+        if argument[0] == "call"
+        and argument[1] in {
+            "REMOVEFILTERS", "ALL", "ALLNOBLANKROW", "ALLEXCEPT", "ALLSELECTED",
+        }
+    ]
+    if len(modifiers) != 1:
+        return False
+
+    modifier_index, modifier = modifiers[0]
+    function = modifier[1]
+    if function not in {
+        "REMOVEFILTERS", "ALL", "ALLNOBLANKROW", "ALLEXCEPT", "ALLSELECTED",
+    }:
+        return False
+    if function == "ALLEXCEPT":
+        _validate_allexcept_call(modifier)
+    else:
+        _validate_filter_clear_call(modifier, function)
+        if function == "ALLNOBLANKROW" and not modifier[2]:
+            raise MeasureError("ALLNOBLANKROW needs a table or column argument.")
+    filter_arguments = tuple(
+        argument
+        for index, argument in enumerate(arguments[1:], start=1)
+        if index != modifier_index
+    )
+    if function == "ALLSELECTED":
+        table_filters = [
+            argument
+            for argument in filter_arguments
+            if argument[0] == "call" and argument[1] == "FILTER"
+        ]
+        if table_filters:
+            if len(filter_arguments) != 1:
+                raise MeasureError(
+                    "A table-valued FILTER must be the only filter argument beside ALLSELECTED."
+                )
+            _validate_table_filter_call(table_filters[0])
+            return True
+        for filter_argument in filter_arguments:
+            if filter_argument[0] == "call" and filter_argument[1] in _TIME_FILTER_FUNCTIONS:
+                _validate_literal_positions(filter_argument)
+                continue
+            if _contains_function_call(filter_argument, "FILTER"):
+                raise MeasureError(
+                    "A table-valued FILTER must be the only filter argument beside ALLSELECTED."
+                )
+            predicate, _keep = _calculate_filter_argument(filter_argument)
+            _calculate_boolean_filter_column(predicate)
+        return True
+    table_filters = [
+        argument
+        for argument in filter_arguments
+        if argument[0] == "call" and argument[1] == "FILTER"
+    ]
+    if table_filters:
+        if len(filter_arguments) != 1:
+            raise MeasureError(
+                "A table-valued FILTER must be the only filter argument beside a filter-clear modifier."
+            )
+        _validate_table_filter_call(table_filters[0])
+        return True
+    for index, filter_argument in enumerate(arguments[1:], start=1):
+        if index == modifier_index:
+            continue
+        if filter_argument[0] == "call" and filter_argument[1] in _TIME_FILTER_FUNCTIONS:
+            _validate_literal_positions(filter_argument)
+            continue
+        if _contains_function_call(filter_argument, "FILTER"):
+            raise MeasureError(
+                "A table-valued FILTER must be the only filter argument beside a filter-clear modifier."
+            )
+        predicate, _keep = _calculate_filter_argument(filter_argument)
+        _calculate_boolean_filter_column(predicate)
+    return True
+
+
 def _validate_allexcept_call(node: tuple[Any, ...]) -> None:
     """Validate the base-table and same-table base-column ALLEXCEPT form."""
     arguments = node[2]
@@ -594,9 +751,15 @@ def _has_supported_all_usage(
         if function in {
             "DATEADD", "SAMEPERIODLASTYEAR", "PREVIOUSYEAR", "PREVIOUSQUARTER",
             "PREVIOUSMONTH", "DATESYTD", "DATESQTD", "DATESMTD",
-            "DATESBETWEEN", "DATESINPERIOD", "FILTER",
+            "DATESBETWEEN", "DATESINPERIOD",
         }:
             return False
+        if function == "FILTER":
+            return (
+                parent_function == "CALCULATE"
+                and argument_index > 0
+                and parent_argument_count > 2
+            )
         if function == "ALLEXCEPT":
             try:
                 _validate_allexcept_call(node)
@@ -606,6 +769,10 @@ def _has_supported_all_usage(
                 parent_function == "CALCULATE"
                 and argument_index == 1
                 and parent_argument_count == 2
+            ) or (
+                parent_function == "CALCULATE"
+                and argument_index > 0
+                and parent_argument_count > 2
             )
         if function in {"ALL", "ALLNOBLANKROW", "ALLSELECTED"}:
             try:
@@ -619,7 +786,12 @@ def _has_supported_all_usage(
                 and argument_index == 1
                 and parent_argument_count == 2
             ) or (
-                parent_function in {"SUMX", "AVERAGEX", "COUNTROWS"}
+                parent_function == "CALCULATE"
+                and function in {"ALL", "ALLNOBLANKROW", "ALLSELECTED"}
+                and argument_index > 0
+                and parent_argument_count > 2
+            ) or (
+                parent_function in {"SUMX", "AVERAGEX", "COUNTX", "COUNTAX", "COUNTROWS"}
                 and argument_index == 0
                 and _is_all_table_value_argument(node)
             )
@@ -660,6 +832,21 @@ def _iter_reference_nodes(node: Any) -> Iterable[tuple[Any, ...]]:
             yield from _iter_reference_nodes(child)
 
 
+def _validate_relationship_modifier_filters(
+    filter_arguments: tuple[tuple[Any, ...], ...],
+) -> None:
+    """Validate Boolean and supported date filters beside a relationship modifier."""
+    for filter_argument in filter_arguments:
+        if (
+            filter_argument[0] == "call"
+            and filter_argument[1] in _TIME_FILTER_FUNCTIONS
+        ):
+            _validate_literal_positions(filter_argument)
+            continue
+        predicate, _keep = _calculate_filter_argument(filter_argument)
+        _calculate_boolean_filter_column(predicate)
+
+
 def _validate_literal_positions(node: tuple[Any, ...]) -> None:
     """Keep literals in time-intelligence syntax or validated CALCULATE filters."""
     kind = node[0]
@@ -682,30 +869,60 @@ def _validate_literal_positions(node: tuple[Any, ...]) -> None:
                 for argument in arguments[1:]
             )
             if contains_userelationship:
-                if not arguments[1:] or any(
-                    argument[0] != "call" or argument[1] != "USERELATIONSHIP"
+                modifiers = tuple(
+                    argument
                     for argument in arguments[1:]
+                    if argument[0] == "call"
+                    and argument[1] == "USERELATIONSHIP"
+                )
+                filter_arguments = tuple(
+                    argument
+                    for argument in arguments[1:]
+                    if not (
+                        argument[0] == "call"
+                        and argument[1] == "USERELATIONSHIP"
+                    )
+                )
+                if not modifiers or any(
+                    _contains_function_call(argument, "USERELATIONSHIP")
+                    for argument in filter_arguments
                 ):
                     raise MeasureError(
-                        "USERELATIONSHIP must be the only kind of CALCULATE filter argument in this local subset."
+                        "USERELATIONSHIP must be a direct CALCULATE filter modifier in this local subset."
                     )
-                for modifier in arguments[1:]:
+                for modifier in modifiers:
                     _validate_userelationship_call(modifier)
+                _validate_relationship_modifier_filters(filter_arguments)
                 return
             contains_crossfilter = any(
                 _contains_function_call(argument, "CROSSFILTER")
                 for argument in arguments[1:]
             )
             if contains_crossfilter:
-                if not arguments[1:] or any(
-                    argument[0] != "call" or argument[1] != "CROSSFILTER"
+                modifiers = tuple(
+                    argument
                     for argument in arguments[1:]
+                    if argument[0] == "call"
+                    and argument[1] == "CROSSFILTER"
+                )
+                filter_arguments = tuple(
+                    argument
+                    for argument in arguments[1:]
+                    if not (
+                        argument[0] == "call"
+                        and argument[1] == "CROSSFILTER"
+                    )
+                )
+                if not modifiers or any(
+                    _contains_function_call(argument, "CROSSFILTER")
+                    for argument in filter_arguments
                 ):
                     raise MeasureError(
-                        "CROSSFILTER must be the only kind of CALCULATE filter argument in this local subset."
+                        "CROSSFILTER must be a direct CALCULATE filter modifier in this local subset."
                     )
-                for modifier in arguments[1:]:
+                for modifier in modifiers:
                     _validate_crossfilter_call(modifier)
+                _validate_relationship_modifier_filters(filter_arguments)
                 return
             valid_filter_clear = (
                 len(arguments) == 2
@@ -721,6 +938,8 @@ def _validate_literal_positions(node: tuple[Any, ...]) -> None:
                 )
             }
             if contained_filter_clear:
+                if _validate_mixed_filter_clear_calculate(arguments):
+                    return
                 if not valid_filter_clear:
                     function = sorted(contained_filter_clear)[0]
                     raise MeasureError(
@@ -752,6 +971,9 @@ def _validate_literal_positions(node: tuple[Any, ...]) -> None:
         if function in {"SUMX", "AVERAGEX"}:
             _validate_literal_positions(arguments[1])
             return
+        if function in {"COUNTX", "COUNTAX"}:
+            _validate_count_iterator_literals(arguments[1])
+            return
         if function == "COUNTROWS":
             return
         if function == "FILTER":
@@ -775,7 +997,7 @@ def _validate_literal_positions(node: tuple[Any, ...]) -> None:
         if function in {"ALL", "ALLNOBLANKROW", "ALLEXCEPT", "ALLSELECTED"}:
             raise MeasureError(
                 f"{function} is supported only as a CALCULATE filter modifier or "
-                "a COUNTROWS/SUMX/AVERAGEX table expression in this local subset."
+                "a COUNTROWS/SUMX/AVERAGEX/COUNTX/COUNTAX table expression in this local subset."
             )
         for index, argument in enumerate(arguments):
             if function == "TOTALYTD" and index == 3 and argument[0] == "string":
@@ -799,6 +1021,48 @@ def _validate_literal_positions(node: tuple[Any, ...]) -> None:
     for child in node[1:]:
         if isinstance(child, tuple) and child:
             _validate_literal_positions(child)
+
+
+def _validate_count_iterator_literals(node: tuple[Any, ...]) -> None:
+    """Allow bounded text conditions and string/blank results in COUNTX/COUNTAX."""
+    if node[0] in {"string", "blank"}:
+        return
+    if node[0] == "call" and node[1] == "IF" and len(node[2]) == 3:
+        _validate_count_iterator_condition(node[2][0])
+        _validate_count_iterator_literals(node[2][1])
+        _validate_count_iterator_literals(node[2][2])
+        return
+    _validate_literal_positions(node)
+
+
+def _validate_count_iterator_condition(node: tuple[Any, ...]) -> None:
+    """Accept the local numeric conditions plus text-column equality checks."""
+    kind = node[0]
+    if kind == "comparison":
+        operator, left, right = node[1:]
+        text_equality = (
+            operator in {"=", "<>"}
+            and (
+                (left[0] == "reference" and right[0] == "string")
+                or (right[0] == "reference" and left[0] == "string")
+            )
+        )
+        if text_equality:
+            return
+        _validate_literal_positions(node)
+        return
+    if kind == "logical":
+        _validate_count_iterator_condition(node[2])
+        _validate_count_iterator_condition(node[3])
+        return
+    if kind == "call" and node[1] in {"AND", "OR"}:
+        for argument in node[2]:
+            _validate_count_iterator_condition(argument)
+        return
+    if kind == "call" and node[1] == "NOT":
+        _validate_count_iterator_condition(node[2][0])
+        return
+    _validate_literal_positions(node)
 
 
 class _Parser:
@@ -919,7 +1183,10 @@ class _Parser:
                         arguments.append(("omitted",))
                         break
             self._expect(")")
-            if function in {"SUM", "AVERAGE", "MIN", "MAX", "COUNT", "COUNTA", "DISTINCTCOUNT"}:
+            if function in {
+                "SUM", "AVERAGE", "MIN", "MAX", "COUNT", "COUNTA",
+                "DISTINCTCOUNT", "DISTINCTCOUNTNOBLANK",
+            }:
                 if len(arguments) != 1 or arguments[0][0] != "reference":
                     raise MeasureError(f"{function} needs one column reference, such as {function}([Amount]).")
             elif function == "COUNTROWS" and (
@@ -943,12 +1210,20 @@ class _Parser:
                 raise MeasureError("NOT needs one logical expression.")
             elif function == "KEEPFILTERS" and len(arguments) != 1:
                 raise MeasureError("KEEPFILTERS needs one filter expression.")
-            elif function in {"SUMX", "AVERAGEX"} and (
+            elif function in {"SUMX", "AVERAGEX", "COUNTX", "COUNTAX"} and (
                 len(arguments) != 2
                 or not _is_all_table_value_argument(arguments[0])
             ):
                 raise MeasureError(
                     f"{function} needs a loaded table or ALL table expression and one scalar expression."
+                )
+            elif function == "RELATED" and (
+                len(arguments) != 1
+                or arguments[0][0] != "reference"
+                or not arguments[0][1]
+            ):
+                raise MeasureError(
+                    "RELATED needs one fully qualified column reference, such as RELATED('Products'[Unit Price])."
                 )
             elif function == "TOTALYTD":
                 date_argument_is_valid = (
@@ -1108,30 +1383,60 @@ class _Parser:
                     for argument in arguments[1:]
                 )
                 if contains_userelationship:
-                    if not arguments[1:] or any(
-                        argument[0] != "call" or argument[1] != "USERELATIONSHIP"
+                    modifiers = tuple(
+                        argument
                         for argument in arguments[1:]
+                        if argument[0] == "call"
+                        and argument[1] == "USERELATIONSHIP"
+                    )
+                    filter_arguments = tuple(
+                        argument
+                        for argument in arguments[1:]
+                        if not (
+                            argument[0] == "call"
+                            and argument[1] == "USERELATIONSHIP"
+                        )
+                    )
+                    if not modifiers or any(
+                        _contains_function_call(argument, "USERELATIONSHIP")
+                        for argument in filter_arguments
                     ):
                         raise MeasureError(
-                            "USERELATIONSHIP must be the only kind of CALCULATE filter argument in this local subset."
+                            "USERELATIONSHIP must be a direct CALCULATE filter modifier in this local subset."
                         )
-                    for modifier in arguments[1:]:
+                    for modifier in modifiers:
                         _validate_userelationship_call(modifier)
+                    _validate_relationship_modifier_filters(filter_arguments)
                     return ("call", function, tuple(arguments))
                 contains_crossfilter = any(
                     _contains_function_call(argument, "CROSSFILTER")
                     for argument in arguments[1:]
                 )
                 if contains_crossfilter:
-                    if not arguments[1:] or any(
-                        argument[0] != "call" or argument[1] != "CROSSFILTER"
+                    modifiers = tuple(
+                        argument
                         for argument in arguments[1:]
+                        if argument[0] == "call"
+                        and argument[1] == "CROSSFILTER"
+                    )
+                    filter_arguments = tuple(
+                        argument
+                        for argument in arguments[1:]
+                        if not (
+                            argument[0] == "call"
+                            and argument[1] == "CROSSFILTER"
+                        )
+                    )
+                    if not modifiers or any(
+                        _contains_function_call(argument, "CROSSFILTER")
+                        for argument in filter_arguments
                     ):
                         raise MeasureError(
-                            "CROSSFILTER must be the only kind of CALCULATE filter argument in this local subset."
+                            "CROSSFILTER must be a direct CALCULATE filter modifier in this local subset."
                         )
-                    for modifier in arguments[1:]:
+                    for modifier in modifiers:
                         _validate_crossfilter_call(modifier)
+                    _validate_relationship_modifier_filters(filter_arguments)
                     return ("call", function, tuple(arguments))
                 valid_time_filter = (
                     len(arguments) == 2
@@ -1178,6 +1483,10 @@ class _Parser:
                         for argument in arguments[1:]
                     )
                 }
+                if contains_filter_clear and _validate_mixed_filter_clear_calculate(
+                    tuple(arguments)
+                ):
+                    return ("call", function, tuple(arguments))
                 if contains_filter_clear and not (
                     valid_removefilters or valid_all or valid_allnoblankrow or valid_allexcept or valid_allselected
                 ):
@@ -1361,6 +1670,13 @@ def normalize_calculated_column(name: Any, expression: Any) -> dict[str, str]:
         raise MeasureError("Enter a DAX expression for the calculated column.")
     clean_expression = expression.strip()
     parsed_expression = parse_expression(clean_expression)
+    if any(
+        _contains_function_call(parsed_expression, function)
+        for function in ("COUNTX", "COUNTAX")
+    ):
+        raise MeasureError(
+            "COUNTX and COUNTAX are supported only in measures in this local subset."
+        )
     if any(
         _contains_function_call(parsed_expression, function)
         for function in ("USERELATIONSHIP", "CROSSFILTER")
@@ -1565,8 +1881,15 @@ def evaluate_calculated_columns(
     return output_headers, output_rows, output_types
 
 
-def normalize_measure(name: Any, expression: Any) -> dict[str, str]:
-    """Validate a persisted measure and return its canonical JSON-safe shape."""
+def normalize_measure(
+    name: Any,
+    expression: Any,
+    *,
+    description: Any = "",
+    display_folder: Any = "",
+    is_hidden: Any = False,
+) -> dict[str, Any]:
+    """Validate a persisted measure and its model metadata."""
     if not isinstance(name, str) or not name.strip():
         raise MeasureError("Enter a measure name.")
     clean_name = name.strip()
@@ -1597,18 +1920,56 @@ def normalize_measure(name: Any, expression: Any) -> dict[str, str]:
         and not _has_supported_all_usage(parsed_expression)
     ):
         raise MeasureError("Table-valued functions are not supported in measure expressions.")
-    return {"name": clean_name, "expression": clean_expression}
+    if (
+        not isinstance(description, str)
+        or len(description) > 4_000
+        or "\x00" in description
+    ):
+        raise MeasureError("A measure description must be at most 4,000 characters and contain no null characters.")
+    if (
+        not isinstance(display_folder, str)
+        or len(display_folder) > 400
+        or any(ord(char) < 32 for char in display_folder)
+    ):
+        raise MeasureError("A measure display folder must be at most 400 characters and contain no control characters.")
+    if type(is_hidden) is not bool:
+        raise MeasureError("A measure is_hidden value must be true or false.")
+    result: dict[str, Any] = {"name": clean_name, "expression": clean_expression}
+    if description.strip():
+        result["description"] = description.strip()
+    if display_folder.strip():
+        result["display_folder"] = display_folder.strip().strip("/\\")
+        if not result["display_folder"]:
+            result.pop("display_folder")
+    if is_hidden:
+        result["is_hidden"] = True
+    return result
 
 
-def validate_measures(value: Any) -> list[dict[str, str]]:
+def validate_measures(value: Any) -> list[dict[str, Any]]:
     if not isinstance(value, list) or len(value) > MAX_MEASURES:
         raise MeasureError(f"A model can contain at most {MAX_MEASURES} measures.")
     result = []
     names: set[str] = set()
+    supported_fields = {
+        "name", "expression", "description", "display_folder", "is_hidden",
+    }
     for index, item in enumerate(value, 1):
-        if not isinstance(item, dict) or set(item) != {"name", "expression"}:
-            raise MeasureError(f"Measure {index} must contain only name and expression fields.")
-        measure = normalize_measure(item["name"], item["expression"])
+        if (
+            not isinstance(item, dict)
+            or not {"name", "expression"}.issubset(item)
+            or set(item) - supported_fields
+        ):
+            raise MeasureError(
+                f"Measure {index} needs name and expression and supports only recognized metadata fields."
+            )
+        measure = normalize_measure(
+            item["name"],
+            item["expression"],
+            description=item.get("description", ""),
+            display_folder=item.get("display_folder", ""),
+            is_hidden=item.get("is_hidden", False),
+        )
         key = measure["name"].casefold()
         if key in names:
             raise MeasureError(f"Measure {measure['name']!r} is duplicated.")
@@ -1743,7 +2104,7 @@ def evaluate_measures(
     relationships: Iterable[dict[str, Any]] = (),
     filter_table_ids: Iterable[str] = (),
     active_table_id: str | None = None,
-) -> dict[str, Decimal]:
+) -> dict[str, Decimal | None]:
     """Evaluate measures over local tables and their active relationship paths."""
     definitions = validate_measures(list(measures))
     by_name = {item["name"].casefold(): item for item in definitions}
@@ -1861,6 +2222,10 @@ def evaluate_measures(
     evaluation_contexts_by_id = contexts_by_id
     evaluation_filter_ids = set(filter_ids)
     relationship_definitions = list(relationships)
+    related_lookup_cache: dict[
+        tuple[str, str, str, str, str],
+        dict[tuple[str, Any], list[dict[str, Any]]],
+    ] = {}
 
     table_names: dict[str, list[dict[str, Any]]] = {}
     for context in contexts_by_id.values():
@@ -1882,7 +2247,7 @@ def evaluate_measures(
         raise MeasureError(f"Could not inspect model relationships: {exc}") from exc
     unknown_member_exclusions: dict[str, set[str] | None] = {}
 
-    value_cache: dict[tuple[str, int], Decimal] = {}
+    value_cache: dict[tuple[str, int], Decimal | None] = {}
     resolving: set[str] = set()
     context_sequence = 0
     current_context = 0
@@ -2299,12 +2664,414 @@ def evaluate_measures(
             return value != 0
         raise MeasureError("This expression needs a logical value.")
 
+    def iterator_reference_type(
+        reference: tuple[Any, ...],
+        row_context: tuple[dict[str, Any], dict[str, Any], int] | None,
+    ) -> str:
+        if row_context is None:
+            return "unknown"
+        iterated_table = row_context[0]
+        reference_table = (
+            resolve_table_context(reference[1])
+            if reference[1]
+            else iterated_table
+        )
+        if reference_table["id"] != iterated_table["id"]:
+            raise MeasureError(
+                "Iterator expressions can reference columns from their iterated table only."
+            )
+        headers_by_key = {
+            str(header).casefold(): str(header)
+            for header in reference_table["headers"]
+        }
+        actual_column = headers_by_key.get(str(reference[2]).casefold())
+        if actual_column is None:
+            raise MeasureError(
+                f"Column {reference[2]!r} does not exist in table {reference_table['name']!r}."
+            )
+        actual_type = reference_table.get("column_types", {}).get(actual_column)
+        return "unknown" if actual_type is None else str(actual_type).casefold()
+
+    def iterator_type_category(type_name: str) -> str:
+        if type_name == "unknown":
+            return "unknown"
+        if type_name in {
+            "whole_number", "decimal_number", "decimal", "fixed_decimal",
+            "currency", "number", "numeric", "int64", "double",
+        }:
+            return "numeric"
+        if type_name == "boolean":
+            return "boolean"
+        if type_name in {"date", "datetime", "time"}:
+            return "date/time"
+        return "text"
+
+    def related_column_details(
+        reference: tuple[Any, ...],
+        row_context: tuple[dict[str, Any], dict[str, Any], int] | None,
+    ) -> tuple[dict[str, Any], str, str, str]:
+        """Resolve the one supported direct many-to-one RELATED lookup."""
+        if row_context is None:
+            raise MeasureError(
+                "RELATED needs row context inside a supported table iterator."
+            )
+        if reference[0] != "reference" or not reference[1]:
+            raise MeasureError(
+                "RELATED needs one fully qualified column reference."
+            )
+
+        iterated_table = row_context[0]
+        target_table = resolve_table_context(str(reference[1]))
+        if iterated_table["id"] == target_table["id"]:
+            raise MeasureError("RELATED must refer to a different related table.")
+
+        candidates: list[tuple[str, str]] = []
+        for relationship in relationship_definitions:
+            if (
+                not isinstance(relationship, dict)
+                or type(relationship.get("relationship_version")) is not int
+                or relationship.get("relationship_version") != 1
+                or not relationship.get("is_active")
+            ):
+                continue
+            from_id = str(relationship.get("from_table_id", ""))
+            to_id = str(relationship.get("to_table_id", ""))
+            cardinality = relationship.get("cardinality")
+            if (
+                cardinality == "many_to_one"
+                and from_id == iterated_table["id"]
+                and to_id == target_table["id"]
+            ):
+                candidates.append((
+                    str(relationship.get("from_column", "")),
+                    str(relationship.get("to_column", "")),
+                ))
+            elif (
+                cardinality == "one_to_many"
+                and to_id == iterated_table["id"]
+                and from_id == target_table["id"]
+            ):
+                candidates.append((
+                    str(relationship.get("to_column", "")),
+                    str(relationship.get("from_column", "")),
+                ))
+        if not candidates:
+            raise MeasureError(
+                f"No direct active many-to-one relationship connects "
+                f"{iterated_table['name']!r} to {target_table['name']!r}."
+            )
+        if len(candidates) != 1:
+            raise MeasureError(
+                f"RELATED has more than one direct relationship from "
+                f"{iterated_table['name']!r} to {target_table['name']!r}."
+            )
+
+        source_column, target_key_column = candidates[0]
+        source_headers = {
+            str(header).casefold(): str(header)
+            for header in iterated_table["headers"]
+        }
+        target_headers = {
+            str(header).casefold(): str(header)
+            for header in target_table["headers"]
+        }
+        source_column = source_headers.get(source_column.casefold(), "")
+        target_key_column = target_headers.get(target_key_column.casefold(), "")
+        target_column = target_headers.get(str(reference[2]).casefold(), "")
+        if not source_column or not target_key_column or not target_column:
+            raise MeasureError(
+                "RELATED refers to a column that is missing from its relationship or target table."
+            )
+        target_type = str(
+            target_table.get("column_types", {}).get(target_column, "unknown")
+        ).casefold()
+        if iterator_type_category(target_type) != "numeric":
+            raise MeasureError(
+                "This RELATED subset supports numeric target columns inside table iterators only."
+            )
+        return target_table, source_column, target_key_column, target_column
+
+    def related_numeric_value(
+        reference: tuple[Any, ...],
+        row_context: tuple[dict[str, Any], dict[str, Any], int] | None,
+    ) -> Decimal | None:
+        target_table, source_column, target_key_column, target_column = (
+            related_column_details(reference, row_context)
+        )
+        assert row_context is not None
+        iterated_table, row, row_index = row_context
+        source_type = str(
+            iterated_table.get("column_types", {}).get(source_column, "text")
+        )
+        target_key_type = str(
+            target_table.get("column_types", {}).get(target_key_column, "text")
+        )
+
+        try:
+            source_key = _relationship_value_key(row.get(source_column), source_type)
+            cache_key = (
+                iterated_table["id"], source_column,
+                target_table["id"], target_key_column, target_column,
+            )
+            lookup = related_lookup_cache.get(cache_key)
+            if lookup is None:
+                lookup = {}
+                for candidate in target_table["rows"]:
+                    key = _relationship_value_key(
+                        candidate.get(target_key_column), target_key_type
+                    )
+                    lookup.setdefault(key, []).append(candidate)
+                related_lookup_cache[cache_key] = lookup
+            matches = lookup.get(source_key, [])
+        except RelationshipError as exc:
+            raise MeasureError(f"Could not evaluate RELATED lookup: {exc}") from exc
+        if len(matches) > 1:
+            raise MeasureError(
+                f"RELATED found multiple rows for {target_table['name']!r} "
+                f"at iterator row {row_index}."
+            )
+        if not matches:
+            return None
+        raw_value = str(matches[0].get(target_column, "") or "").strip()
+        if not raw_value:
+            return None
+        try:
+            number = Decimal(raw_value.replace(",", ""))
+        except (DecimalException, ValueError) as exc:
+            raise MeasureError(
+                f"Related column {target_table['name']}[{target_column}] contains "
+                f"a non-numeric value at iterator row {row_index}."
+            ) from exc
+        if not number.is_finite():
+            raise MeasureError(
+                f"Related column {target_table['name']}[{target_column}] contains "
+                "a non-finite number."
+            )
+        return number
+
+    def iterator_model_reference_category(
+        expression: tuple[Any, ...],
+        row_context: tuple[dict[str, Any], dict[str, Any], int] | None,
+    ) -> str:
+        if expression[0] != "reference":
+            return iterator_expression_category(expression, row_context)
+        if str(expression[2]).casefold() in by_name:
+            return "numeric"
+        model_table = (
+            resolve_table_context(expression[1])
+            if expression[1]
+            else active_context
+        )
+        headers_by_key = {
+            str(header).casefold(): str(header)
+            for header in model_table["headers"]
+        }
+        actual_column = headers_by_key.get(str(expression[2]).casefold())
+        if actual_column is None:
+            raise MeasureError(
+                f"Column {expression[2]!r} does not exist in table {model_table['name']!r}."
+            )
+        column_type = model_table.get("column_types", {}).get(actual_column)
+        category = iterator_type_category(
+            "unknown" if column_type is None else str(column_type).casefold()
+        )
+        return category
+
+    def iterator_expression_category(
+        expression: tuple[Any, ...],
+        row_context: tuple[dict[str, Any], dict[str, Any], int] | None,
+    ) -> str:
+        kind = expression[0]
+        if kind == "number":
+            return "numeric"
+        if kind == "string":
+            return "text"
+        if kind == "boolean":
+            return "boolean"
+        if kind == "blank":
+            return "blank"
+        if kind == "table":
+            return "table"
+        if kind == "reference":
+            if str(expression[2]).casefold() in by_name:
+                return "numeric"
+            return iterator_type_category(iterator_reference_type(expression, row_context))
+        if kind in {"unary", "binary"}:
+            operands = expression[2:] if kind == "binary" else (expression[2],)
+            if any(
+                iterator_expression_category(operand, row_context)
+                not in {"numeric", "blank"}
+                for operand in operands
+            ):
+                raise MeasureError(
+                    "Iterator arithmetic comparisons need numeric operands."
+                )
+            return "numeric"
+        if kind == "logical":
+            operand_categories = (
+                iterator_expression_category(expression[2], row_context),
+                iterator_expression_category(expression[3], row_context),
+            )
+            if any(
+                category not in {"boolean", "blank"}
+                for category in operand_categories
+            ):
+                raise MeasureError(
+                    "Logical iterator conditions need Boolean operands."
+                )
+            return "boolean"
+        if kind == "comparison":
+            iterator_comparison_operand_category(expression, row_context)
+            return "boolean"
+        if kind == "call":
+            function = expression[1]
+            if function == "RELATED":
+                related_column_details(expression[2][0], row_context)
+                return "numeric"
+            if function in {"ALL", "ALLNOBLANKROW", "ALLEXCEPT", "ALLSELECTED"}:
+                return "table"
+            if function == "FILTER" and len(expression[2]) == 2:
+                iterator_expression_category(expression[2][0], row_context)
+                predicate_category = iterator_expression_category(
+                    expression[2][1], row_context
+                )
+                if predicate_category != "boolean":
+                    raise MeasureError(
+                        "Iterator FILTER comparisons need a logical row predicate."
+                    )
+                return "table"
+            if function in {"AND", "OR", "NOT"}:
+                operand_categories = tuple(
+                    iterator_expression_category(argument, row_context)
+                    for argument in expression[2]
+                )
+                if any(
+                    category not in {"boolean", "blank"}
+                    for category in operand_categories
+                ):
+                    raise MeasureError(
+                        "Logical iterator conditions need Boolean operands."
+                    )
+                return "boolean"
+            if function == "IF" and len(expression[2]) == 3:
+                condition_category = iterator_expression_category(
+                    expression[2][0], row_context
+                )
+                if condition_category not in {"boolean", "blank"}:
+                    raise MeasureError(
+                        "Iterator IF conditions need a Boolean expression."
+                    )
+                true_category = iterator_expression_category(expression[2][1], row_context)
+                false_category = iterator_expression_category(expression[2][2], row_context)
+                if true_category == "blank":
+                    return false_category
+                if false_category == "blank" or true_category == false_category:
+                    return true_category
+                raise MeasureError(
+                    "Iterator IF comparison branches need matching local data types."
+                )
+            if function in {
+                "DATESYTD", "DATESQTD", "DATESMTD", "DATESBETWEEN",
+                "DATESINPERIOD", "PREVIOUSYEAR", "PREVIOUSQUARTER",
+                "PREVIOUSMONTH", "PREVIOUSDAY", "NEXTYEAR", "NEXTQUARTER",
+                "NEXTMONTH", "NEXTDAY", "PARALLELPERIOD", "DATEADD",
+                "SAMEPERIODLASTYEAR",
+            }:
+                for argument in expression[2]:
+                    iterator_expression_category(argument, row_context)
+                return "table"
+            if function in {"SUMX", "AVERAGEX", "COUNTX", "COUNTAX"}:
+                iterated_table, iteration_rows = table_argument_value(expression[2][0])
+                validation_row = iteration_rows[0] if iteration_rows else {}
+                result_category = iterator_expression_category(
+                    expression[2][1], (iterated_table, validation_row, 1)
+                )
+                if (
+                    function in {"SUMX", "AVERAGEX"}
+                    and result_category not in {"numeric", "blank"}
+                ):
+                    raise MeasureError(
+                        f"Iterator {function} expression needs a numeric result."
+                    )
+                return "numeric"
+            if function in {
+                "SUM", "AVERAGE", "MIN", "MAX", "COUNT", "COUNTA",
+                "DISTINCTCOUNT", "DISTINCTCOUNTNOBLANK", "COUNTROWS",
+                "DIVIDE", "ABS", "ROUND",
+                "TOTALYTD", "TOTALQTD", "TOTALMTD",
+            }:
+                numeric_argument_indexes: set[int] = set()
+                if function in {"SUM", "AVERAGE", "MIN", "MAX", "COUNT", "ABS"}:
+                    numeric_argument_indexes.add(0)
+                elif function == "DIVIDE":
+                    numeric_argument_indexes.update(range(len(expression[2])))
+                elif function == "ROUND":
+                    numeric_argument_indexes.update({0, 1})
+                elif function in {"TOTALYTD", "TOTALQTD", "TOTALMTD"}:
+                    numeric_argument_indexes.add(0)
+                for argument_index, argument in enumerate(expression[2]):
+                    if argument[0] == "table":
+                        continue
+                    aggregate_column = (
+                        function in {
+                            "SUM", "AVERAGE", "MIN", "MAX", "COUNT",
+                            "COUNTA", "DISTINCTCOUNT", "DISTINCTCOUNTNOBLANK",
+                        }
+                        and argument_index == 0
+                        and argument[0] == "reference"
+                    )
+                    argument_category = (
+                        iterator_model_reference_category(argument, row_context)
+                        if aggregate_column
+                        else iterator_expression_category(argument, row_context)
+                    )
+                    if (
+                        argument_index in numeric_argument_indexes
+                        and argument_category not in {"numeric", "blank"}
+                    ):
+                        raise MeasureError(
+                            f"Iterator {function} argument {argument_index + 1} needs a numeric expression."
+                        )
+                return "numeric"
+        raise MeasureError(
+            "Iterator comparison expression has an unsupported or unverifiable local data type."
+        )
+
+    def iterator_comparison_operand_category(
+        comparison: tuple[Any, ...],
+        row_context: tuple[dict[str, Any], dict[str, Any], int] | None,
+    ) -> str:
+        operator, left_expression, right_expression = comparison[1:]
+        left_category = iterator_expression_category(left_expression, row_context)
+        right_category = iterator_expression_category(right_expression, row_context)
+        if left_category == "date/time" or right_category == "date/time":
+            raise MeasureError(
+                "Date/time comparisons are not supported in COUNTX/COUNTAX conditions."
+            )
+        if left_category in {"blank", "unknown"}:
+            left_category = right_category
+        if right_category in {"blank", "unknown"}:
+            right_category = left_category
+        if left_category in {"blank", "unknown"} or right_category in {"blank", "unknown"}:
+            raise MeasureError(
+                "Iterator comparison operands have unverifiable local data types."
+            )
+        if left_category != right_category:
+            raise MeasureError(
+                "Iterator comparisons need matching local data types."
+            )
+        if operator not in {"=", "<>"} and left_category != "numeric":
+            raise MeasureError(
+                "Relational iterator comparisons require numeric local data types."
+            )
+        return left_category
+
     def evaluate_with_date_values(
         expression: tuple[Any, ...],
         date_table: dict[str, Any],
         date_column: str,
         selected_dates: set[date],
-    ) -> Decimal:
+    ) -> Decimal | None:
         nonlocal rows_by_table_id, context_sequence, current_context
         nonlocal evaluation_contexts_by_id, evaluation_filter_ids
         period_rows = []
@@ -2392,7 +3159,7 @@ def evaluate_measures(
         evaluation_filter_ids = evaluation_filter_ids | {date_table["id"]}
         rows_by_table_id = time_rows_by_table_id
         try:
-            return as_number(evaluate(expression))
+            return evaluate(expression)
         finally:
             rows_by_table_id = previous_rows
             current_context = previous_context
@@ -2750,7 +3517,7 @@ def evaluate_measures(
         expression: tuple[Any, ...],
         filter_arguments: tuple[tuple[Any, ...], ...],
         extra_date_filters: dict[tuple[str, str], tuple[dict, str, frozenset[int]]] | None = None,
-    ) -> Decimal:
+    ) -> Decimal | None:
         nonlocal rows_by_table_id, context_sequence, current_context
         nonlocal evaluation_contexts_by_id, evaluation_filter_ids
         filters_by_column: dict[
@@ -2922,18 +3689,15 @@ def evaluate_measures(
         evaluation_filter_ids = updated_filter_roots
         rows_by_table_id = filtered_rows_by_id
         try:
-            return as_number(evaluate(expression))
+            return evaluate(expression)
         finally:
             rows_by_table_id = previous_rows
             current_context = previous_context
             evaluation_contexts_by_id = previous_contexts
             evaluation_filter_ids = previous_filter_ids
 
-    def evaluate_with_allselected(
-        expression: tuple[Any, ...],
-        modifier: tuple[Any, ...],
-    ) -> Decimal:
-        """Evaluate in the saved selection context when no query-axis context exists."""
+    def validate_allselected_modifier(modifier: tuple[Any, ...]) -> None:
+        """Resolve ALLSELECTED targets in the bounded local model."""
         arguments = modifier[2]
         if arguments and arguments[0][0] == "table":
             resolve_table_context(str(arguments[0][1]))
@@ -2949,15 +3713,33 @@ def evaluate_measures(
                 raise MeasureError(
                     "ALLSELECTED column arguments must resolve to one loaded table."
                 )
+
+    def evaluate_with_allselected(
+        expression: tuple[Any, ...],
+        modifier: tuple[Any, ...],
+        filter_arguments: tuple[tuple[Any, ...], ...] = (),
+    ) -> Decimal | None:
+        """Evaluate in the saved selection context when no query-axis context exists."""
+        validate_allselected_modifier(modifier)
         # The local report evaluator has saved report/page/visual selections and
         # relationship roots, but it does not create DAX query row/column filters.
         # With no such axis context to remove, ALLSELECTED keeps the current context.
-        return as_number(evaluate(expression))
+        if filter_arguments:
+            if (
+                len(filter_arguments) == 1
+                and filter_arguments[0][0] == "call"
+                and filter_arguments[0][1] == "FILTER"
+            ):
+                return evaluate_with_table_filter(expression, filter_arguments[0])
+            return evaluate_with_boolean_filters(expression, filter_arguments)
+        return evaluate(expression)
 
     def evaluate_with_userelationships(
         expression: tuple[Any, ...],
         modifiers: tuple[tuple[Any, ...], ...],
-    ) -> Decimal:
+        filter_arguments: tuple[tuple[Any, ...], ...] = (),
+        extra_date_filters: dict[tuple[str, str], tuple[dict, str, frozenset[int]]] | None = None,
+    ) -> Decimal | None:
         """Evaluate with saved relationship links temporarily selected."""
         nonlocal relationship_definitions, rows_by_table_id
         nonlocal context_sequence, current_context
@@ -3086,7 +3868,11 @@ def evaluate_measures(
         context_sequence += 1
         current_context = context_sequence
         try:
-            return as_number(evaluate(expression))
+            if filter_arguments or extra_date_filters:
+                return evaluate_with_boolean_filters(
+                    expression, filter_arguments, extra_date_filters
+                )
+            return evaluate(expression)
         finally:
             relationship_definitions = previous_relationships
             rows_by_table_id = previous_rows
@@ -3096,7 +3882,9 @@ def evaluate_measures(
     def evaluate_with_crossfilters(
         expression: tuple[Any, ...],
         modifiers: tuple[tuple[Any, ...], ...],
-    ) -> Decimal:
+        filter_arguments: tuple[tuple[Any, ...], ...] = (),
+        extra_date_filters: dict[tuple[str, str], tuple[dict, str, frozenset[int]]] | None = None,
+    ) -> Decimal | None:
         """Evaluate with temporary cross-filter directions on active links."""
         nonlocal relationship_definitions, rows_by_table_id
         nonlocal context_sequence, current_context, unknown_member_ids
@@ -3234,21 +4022,67 @@ def evaluate_measures(
         context_sequence += 1
         current_context = context_sequence
         try:
-            return as_number(evaluate(expression))
+            if filter_arguments or extra_date_filters:
+                return evaluate_with_boolean_filters(
+                    expression, filter_arguments, extra_date_filters
+                )
+            return evaluate(expression)
         finally:
             relationship_definitions = previous_relationships
             rows_by_table_id = previous_rows
             current_context = previous_context
             unknown_member_ids = previous_unknown_members
 
+    def table_filter_matching_indexes(
+        filter_node: tuple[Any, ...],
+    ) -> tuple[str, set[int]]:
+        table_name = str(filter_node[2][0][1])
+        predicate = filter_node[2][1]
+        target_context = resolve_table_context(table_name)
+        table_id = target_context["id"]
+        if "filter_table_rows" in target_context:
+            raise MeasureError(
+                "Nested table-valued FILTER replacement on the same table is not supported yet."
+            )
+        comparisons: dict[int, tuple[str, str, Any, str]] = {}
+        compile_table_filter_predicate(predicate, target_context, comparisons)
+
+        # Capture the FILTER input from the current context before any clear
+        # modifier changes the visible rows.
+        visible_counts = Counter(
+            id(row) for row in rows_by_table_id.get(table_id, [])
+        )
+        matching_indexes: set[int] = set()
+        for row_index, row in enumerate(target_context["rows"]):
+            row_identity = id(row)
+            visible_count = visible_counts.get(row_identity, 0)
+            if visible_count <= 0:
+                continue
+            visible_counts[row_identity] = visible_count - 1
+            if table_filter_predicate_matches(
+                predicate, row, row_index + 1, comparisons
+            ):
+                matching_indexes.add(row_index)
+        return table_id, matching_indexes
+
     def evaluate_with_filter_clear(
         expression: tuple[Any, ...],
         modifier: tuple[Any, ...],
         function: str,
-    ) -> Decimal:
+        filter_arguments: tuple[tuple[Any, ...], ...] = (),
+        extra_date_filters: dict[
+            tuple[str, str], tuple[dict[str, Any], str, frozenset[int]]
+        ] | None = None,
+        table_filter_argument: tuple[Any, ...] | None = None,
+    ) -> Decimal | None:
         nonlocal rows_by_table_id, context_sequence, current_context
         nonlocal evaluation_contexts_by_id, evaluation_filter_ids
         nonlocal unknown_member_exclusions
+        captured_table_filter = (
+            table_filter_matching_indexes(table_filter_argument)
+            if table_filter_argument is not None
+            else None
+        )
         modifier_arguments = modifier[2]
         clear_all = not modifier_arguments
         target_context: dict[str, Any] | None = None
@@ -3355,6 +4189,20 @@ def evaluate_measures(
                 updated.pop("filter_rows", None)
                 updated_filter_roots.discard(updated["id"])
 
+        if captured_table_filter is not None:
+            table_id, matching_indexes = captured_table_filter
+            updated = updated_by_id[table_id]
+            updated["filter_rows"] = [
+                row
+                for row_index, row in enumerate(updated["rows"])
+                if row_index in matching_indexes
+            ]
+            updated["filter_table_rows"] = frozenset(matching_indexes)
+            updated["filter_column_rows"] = {}
+            updated["filter_column_blank_allowed"] = {}
+            updated["filter_context_complete"] = False
+            updated_filter_roots.add(table_id)
+
         try:
             filtered_rows_by_id = propagate_relationship_filters(
                 updated_contexts,
@@ -3417,7 +4265,11 @@ def evaluate_measures(
         evaluation_filter_ids = updated_filter_roots
         rows_by_table_id = filtered_rows_by_id
         try:
-            return as_number(evaluate(expression))
+            if filter_arguments or extra_date_filters is not None:
+                return evaluate_with_boolean_filters(
+                    expression, filter_arguments, extra_date_filters
+                )
+            return evaluate(expression)
         finally:
             rows_by_table_id = previous_rows
             current_context = previous_context
@@ -3428,37 +4280,11 @@ def evaluate_measures(
     def evaluate_with_table_filter(
         expression: tuple[Any, ...],
         filter_node: tuple[Any, ...],
-    ) -> Decimal:
+    ) -> Decimal | None:
         nonlocal rows_by_table_id, context_sequence, current_context
         nonlocal evaluation_contexts_by_id, evaluation_filter_ids
-        table_name = str(filter_node[2][0][1])
-        predicate = filter_node[2][1]
-        target_context = resolve_table_context(table_name)
-        table_id = target_context["id"]
-        if "filter_table_rows" in target_context:
-            raise MeasureError(
-                "Nested table-valued FILTER replacement on the same table is not supported yet."
-            )
-        comparisons: dict[int, tuple[str, str, Any, str]] = {}
-        compile_table_filter_predicate(predicate, target_context, comparisons)
-
-        # Relationship propagation preserves row objects, so identity maps
-        # the visible rows back to original row positions without collapsing
-        # duplicate-valued rows.
-        visible_counts = Counter(
-            id(row) for row in rows_by_table_id.get(table_id, [])
-        )
-        matching_indexes: set[int] = set()
-        for row_index, row in enumerate(target_context["rows"]):
-            row_identity = id(row)
-            visible_count = visible_counts.get(row_identity, 0)
-            if visible_count <= 0:
-                continue
-            visible_counts[row_identity] = visible_count - 1
-            if table_filter_predicate_matches(
-                predicate, row, row_index + 1, comparisons
-            ):
-                matching_indexes.add(row_index)
+        table_id, matching_indexes = table_filter_matching_indexes(filter_node)
+        target_context = evaluation_contexts_by_id[table_id]
 
         updated_contexts = [
             dict(context) for context in evaluation_contexts_by_id.values()
@@ -3497,7 +4323,7 @@ def evaluate_measures(
         evaluation_filter_ids = updated_filter_roots
         rows_by_table_id = filtered_rows_by_id
         try:
-            return as_number(evaluate(expression))
+            return evaluate(expression)
         finally:
             rows_by_table_id = previous_rows
             current_context = previous_context
@@ -3573,15 +4399,26 @@ def evaluate_measures(
     def evaluate(
         node: tuple[Any, ...],
         row_context: tuple[dict[str, Any], dict[str, Any], int] | None = None,
-    ) -> Decimal | bool | None:
+        *,
+        allow_text: bool = False,
+        allow_boolean: bool = False,
+    ) -> Decimal | bool | str | None:
         nonlocal rows_by_table_id, context_sequence, current_context
         kind = node[0]
         if kind == "number":
             return node[1]
+        if kind == "string":
+            if allow_text:
+                return node[1]
+            raise MeasureError("Text values are supported only in COUNTX/COUNTAX row expressions.")
+        if kind == "blank":
+            return None
         if kind == "boolean":
             return node[1]
         if kind == "table":
-            raise MeasureError("A table name is only supported as the first argument to SUMX or AVERAGEX.")
+            raise MeasureError(
+                "A table name is only supported as the first argument to COUNTROWS, SUMX, AVERAGEX, COUNTX, or COUNTAX."
+            )
         if kind == "reference":
             _, table, name = node
             measure_key = name.casefold()
@@ -3594,7 +4431,7 @@ def evaluate_measures(
                 value_table = resolve_table_context(table) if table else iterated_table
                 if value_table["id"] != iterated_table["id"]:
                     raise MeasureError(
-                        "SUMX/AVERAGEX expressions can reference columns from their iterated table only."
+                        "Iterator expressions can reference columns from their iterated table only."
                     )
                 header_by_key = {
                     header.casefold(): header for header in iterated_table["headers"]
@@ -3604,18 +4441,28 @@ def evaluate_measures(
                     raise MeasureError(
                         f"Column {name!r} does not exist in table {iterated_table['name']!r}."
                     )
-                raw_value = str(row.get(actual, "") or "").strip()
-                if not raw_value:
+                raw_value = str(row.get(actual, "") or "")
+                if not raw_value or (not allow_text and not raw_value.strip()):
                     return None
-                if str(iterated_table.get("column_types", {}).get(actual, "text")) == "boolean":
-                    lowered = raw_value.casefold()
+                column_types = iterated_table.get("column_types", {})
+                has_declared_type = actual in column_types
+                column_type = str(column_types.get(actual, "text")).casefold()
+                if column_type == "boolean" or (allow_boolean and not has_declared_type):
+                    lowered = raw_value.strip().casefold()
                     if lowered in {"true", "false"}:
                         return lowered == "true"
                     raise MeasureError(
                         f"Column {actual!r} contains a value that is not True or False at row {row_index}."
                     )
+                if allow_text and str(
+                    iterated_table.get("column_types", {}).get(actual, "text")
+                ).casefold() not in {
+                    "whole_number", "decimal_number", "decimal", "fixed_decimal", "currency",
+                    "number", "numeric", "int64", "double",
+                }:
+                    return raw_value
                 try:
-                    number = Decimal(raw_value.replace(",", ""))
+                    number = Decimal(raw_value.replace(",", "").strip())
                 except (DecimalException, ValueError) as exc:
                     raise MeasureError(
                         f"Column {actual!r} contains a non-numeric value at row {row_index}; convert it to a number first."
@@ -3636,13 +4483,54 @@ def evaluate_measures(
             if right == 0: raise MeasureError("Division by zero; use DIVIDE() to choose an alternate result.")
             return left / right
         if kind == "logical":
-            left = as_boolean(evaluate(node[2], row_context))
+            left = as_boolean(evaluate(
+                node[2], row_context, allow_text=allow_text,
+                allow_boolean=allow_boolean,
+            ))
             if node[1] == "&&":
-                return left and as_boolean(evaluate(node[3], row_context))
-            return left or as_boolean(evaluate(node[3], row_context))
+                return left and as_boolean(
+                    evaluate(
+                        node[3], row_context, allow_text=allow_text,
+                        allow_boolean=allow_boolean,
+                    )
+                )
+            return left or as_boolean(
+                evaluate(
+                    node[3], row_context, allow_text=allow_text,
+                    allow_boolean=allow_boolean,
+                )
+            )
         if kind == "comparison":
-            left = evaluate(node[2], row_context)
-            right = evaluate(node[3], row_context)
+            compare_text = False
+            compare_boolean = False
+            if allow_text:
+                comparison_category = iterator_comparison_operand_category(
+                    node, row_context
+                )
+                compare_text = comparison_category == "text"
+                compare_boolean = comparison_category == "boolean"
+            left = evaluate(
+                node[2], row_context, allow_text=compare_text,
+                allow_boolean=compare_boolean,
+            )
+            right = evaluate(
+                node[3], row_context, allow_text=compare_text,
+                allow_boolean=compare_boolean,
+            )
+            if isinstance(left, str) or isinstance(right, str):
+                if not (left is None or isinstance(left, str)) or not (
+                    right is None or isinstance(right, str)
+                ):
+                    raise MeasureError(
+                        "Text comparisons in COUNTX/COUNTAX conditions need two text values."
+                    )
+                left_text = "" if left is None else left
+                right_text = "" if right is None else right
+                if node[1] == "=": return left_text.casefold() == right_text.casefold()
+                if node[1] == "<>": return left_text.casefold() != right_text.casefold()
+                raise MeasureError(
+                    "Text values in COUNTX/COUNTAX conditions support only = and <>."
+                )
             if isinstance(left, bool) and isinstance(right, bool):
                 if node[1] == "=": return left == right
                 if node[1] == "<>": return left != right
@@ -3655,6 +4543,8 @@ def evaluate_measures(
             if node[1] == ">": return left_number > right_number
             return left_number >= right_number
         _, function, arguments = node
+        if function == "RELATED":
+            return related_numeric_value(arguments[0], row_context)
         if function in {"SUMX", "AVERAGEX"}:
             context, iteration_rows = table_argument_value(arguments[0])
             values: list[Decimal] = []
@@ -3666,25 +4556,137 @@ def evaluate_measures(
                 return Decimal(0)
             total = sum(values, Decimal(0))
             return total if function == "SUMX" else total / Decimal(len(values))
+        if function in {"COUNTX", "COUNTAX"}:
+            context, iteration_rows = table_argument_value(arguments[0])
+            validation_row = iteration_rows[0] if iteration_rows else {}
+            iterator_expression_category(
+                arguments[1], (context, validation_row, 1)
+            )
+            count = 0
+            for row_index, row in enumerate(iteration_rows, 1):
+                result = evaluate(
+                    arguments[1], (context, row, row_index), allow_text=True
+                )
+                if result is None:
+                    continue
+                if function == "COUNTX" and isinstance(result, bool):
+                    continue
+                if isinstance(result, (Decimal, bool, str)):
+                    count += 1
+            return Decimal(count) if count else None
         if function == "CALCULATE":
             if row_context is not None:
                 return evaluate_with_context_transition(node, row_context[0], row_context[1])
             if len(arguments) == 1:
-                return as_number(evaluate(arguments[0]))
-            if arguments[1:] and all(
-                argument[0] == "call" and argument[1] == "USERELATIONSHIP"
+                return evaluate(arguments[0])
+            userelationship_modifiers = tuple(
+                argument
                 for argument in arguments[1:]
-            ):
+                if argument[0] == "call"
+                and argument[1] == "USERELATIONSHIP"
+            )
+            crossfilter_modifiers = tuple(
+                argument
+                for argument in arguments[1:]
+                if argument[0] == "call" and argument[1] == "CROSSFILTER"
+            )
+            if userelationship_modifiers and crossfilter_modifiers:
+                raise MeasureError(
+                    "USERELATIONSHIP and CROSSFILTER cannot be combined in one CALCULATE call in this local subset."
+                )
+            has_time_filter_arguments = any(
+                argument[0] == "call"
+                and argument[1] in _TIME_FILTER_FUNCTIONS
+                for argument in arguments[1:]
+            )
+            if userelationship_modifiers and not has_time_filter_arguments:
+                relationship_filter_arguments = tuple(
+                    argument
+                    for argument in arguments[1:]
+                    if not (
+                        argument[0] == "call"
+                        and argument[1] == "USERELATIONSHIP"
+                    )
+                )
                 return evaluate_with_userelationships(
-                    arguments[0], tuple(arguments[1:])
+                    arguments[0], userelationship_modifiers,
+                    relationship_filter_arguments,
                 )
-            if arguments[1:] and all(
-                argument[0] == "call" and argument[1] == "CROSSFILTER"
-                for argument in arguments[1:]
-            ):
+            if crossfilter_modifiers and not has_time_filter_arguments:
+                crossfilter_filter_arguments = tuple(
+                    argument
+                    for argument in arguments[1:]
+                    if not (
+                        argument[0] == "call"
+                        and argument[1] == "CROSSFILTER"
+                    )
+                )
                 return evaluate_with_crossfilters(
-                    arguments[0], tuple(arguments[1:])
+                    arguments[0], crossfilter_modifiers,
+                    crossfilter_filter_arguments,
                 )
+            mixed_allselected = [
+                (index, argument)
+                for index, argument in enumerate(arguments[1:], start=1)
+                if argument[0] == "call" and argument[1] == "ALLSELECTED"
+            ]
+            if len(arguments) > 2 and len(mixed_allselected) == 1:
+                modifier_index, modifier = mixed_allselected[0]
+                filter_arguments = (
+                    *arguments[1:modifier_index],
+                    *arguments[modifier_index + 1:],
+                )
+                if any(
+                    argument[0] == "call" and argument[1] in _TIME_FILTER_FUNCTIONS
+                    for argument in filter_arguments
+                ):
+                    validate_allselected_modifier(modifier)
+                else:
+                    return evaluate_with_allselected(
+                        arguments[0], modifier, filter_arguments
+                    )
+            mixed_clear_modifiers = [
+                (index, argument)
+                for index, argument in enumerate(arguments[1:], start=1)
+                if argument[0] == "call"
+                and argument[1] in {
+                    "REMOVEFILTERS", "ALL", "ALLNOBLANKROW", "ALLEXCEPT",
+                }
+            ]
+            if len(arguments) > 2 and len(mixed_clear_modifiers) == 1:
+                modifier_index, modifier = mixed_clear_modifiers[0]
+                has_time_filters = any(
+                    argument[0] == "call" and argument[1] in _TIME_FILTER_FUNCTIONS
+                    for argument in arguments[1:]
+                )
+                if not has_time_filters:
+                    filter_arguments = (
+                        *arguments[1:modifier_index],
+                        *arguments[modifier_index + 1:],
+                    )
+                    table_filter_arguments = tuple(
+                        argument
+                        for argument in filter_arguments
+                        if argument[0] == "call" and argument[1] == "FILTER"
+                    )
+                    if table_filter_arguments:
+                        filter_arguments = tuple(
+                            argument
+                            for argument in filter_arguments
+                            if not (
+                                argument[0] == "call"
+                                and argument[1] == "FILTER"
+                            )
+                        )
+                    return evaluate_with_filter_clear(
+                        arguments[0], modifier, modifier[1],
+                        filter_arguments=filter_arguments,
+                        table_filter_argument=(
+                            table_filter_arguments[0]
+                            if table_filter_arguments
+                            else None
+                        ),
+                    )
             if (
                 len(arguments) == 2
                 and arguments[1][0] == "call"
@@ -3710,9 +4712,26 @@ def evaluate_measures(
                 arg for arg in arguments[1:]
                 if arg[0] == "call" and arg[1] in _TIME_FILTER_FUNCTIONS
             ]
+            mixed_filter_clear = (
+                mixed_clear_modifiers[0]
+                if len(arguments) > 2 and len(mixed_clear_modifiers) == 1
+                else None
+            )
             boolean_filters = tuple(
-                arg for arg in arguments[1:]
-                if not (arg[0] == "call" and arg[1] in _TIME_FILTER_FUNCTIONS)
+                arg for index, arg in enumerate(arguments[1:], start=1)
+                if not (
+                    arg[0] == "call" and arg[1] in _TIME_FILTER_FUNCTIONS
+                ) and not (
+                    mixed_filter_clear is not None
+                    and index == mixed_filter_clear[0]
+                ) and not (
+                    len(arguments) > 2
+                    and len(mixed_allselected) == 1
+                    and index == mixed_allselected[0][0]
+                ) and not (
+                    arg[0] == "call"
+                    and arg[1] in {"USERELATIONSHIP", "CROSSFILTER"}
+                )
             )
             if not time_filters:
                 return evaluate_with_boolean_filters(
@@ -3988,6 +5007,22 @@ def evaluate_measures(
                 key = (date_table["id"], actual_date_column.casefold())
                 extra_date_filters[key] = (date_table, actual_date_column, period_indexes)
 
+            if mixed_filter_clear is not None:
+                return evaluate_with_filter_clear(
+                    arguments[0], mixed_filter_clear[1], mixed_filter_clear[1][1],
+                    filter_arguments=boolean_filters,
+                    extra_date_filters=extra_date_filters,
+                )
+            if userelationship_modifiers:
+                return evaluate_with_userelationships(
+                    arguments[0], userelationship_modifiers,
+                    boolean_filters, extra_date_filters,
+                )
+            if crossfilter_modifiers:
+                return evaluate_with_crossfilters(
+                    arguments[0], crossfilter_modifiers,
+                    boolean_filters, extra_date_filters,
+                )
             return evaluate_with_boolean_filters(
                 arguments[0], boolean_filters, extra_date_filters
             )
@@ -4076,17 +5111,46 @@ def evaluate_measures(
             )
         if function == "IF":
             return (
-                evaluate(arguments[1], row_context)
-                if as_boolean(evaluate(arguments[0], row_context))
-                else evaluate(arguments[2], row_context)
+                evaluate(
+                    arguments[1], row_context, allow_text=allow_text,
+                    allow_boolean=allow_boolean,
+                )
+                if as_boolean(evaluate(
+                    arguments[0], row_context, allow_text=allow_text,
+                    allow_boolean=allow_boolean,
+                ))
+                else evaluate(
+                    arguments[2], row_context, allow_text=allow_text,
+                    allow_boolean=allow_boolean,
+                )
             )
         if function in {"AND", "OR"}:
-            left = as_boolean(evaluate(arguments[0], row_context))
+            left = as_boolean(
+                evaluate(
+                    arguments[0], row_context, allow_text=allow_text,
+                    allow_boolean=allow_boolean,
+                )
+            )
             if function == "AND":
-                return left and as_boolean(evaluate(arguments[1], row_context))
-            return left or as_boolean(evaluate(arguments[1], row_context))
+                return left and as_boolean(
+                    evaluate(
+                        arguments[1], row_context, allow_text=allow_text,
+                        allow_boolean=allow_boolean,
+                    )
+                )
+            return left or as_boolean(
+                evaluate(
+                    arguments[1], row_context, allow_text=allow_text,
+                    allow_boolean=allow_boolean,
+                )
+            )
         if function == "NOT":
-            return not as_boolean(evaluate(arguments[0], row_context))
+            return not as_boolean(
+                evaluate(
+                    arguments[0], row_context, allow_text=allow_text,
+                    allow_boolean=allow_boolean,
+                )
+            )
         if function == "COUNTROWS":
             if not arguments:
                 return Decimal(len(rows_by_table_id[active_context["id"]]))
@@ -4114,13 +5178,18 @@ def evaluate_measures(
                 bool(str(row.get(actual, "") or "").strip())
                 for row in rows_by_table_id[context["id"]]
             ))
-        if function == "DISTINCTCOUNT":
+        if function in {"DISTINCTCOUNT", "DISTINCTCOUNTNOBLANK"}:
             context, actual = resolve_table(reference[1], reference[2])
-            return Decimal(len({
-                str(row.get(actual, "") or "")
-                for row in rows_by_table_id[context["id"]]
-                if str(row.get(actual, "") or "").strip()
-            }))
+            rows = rows_by_table_id[context["id"]]
+            if not rows:
+                return None
+            values: set[str] = set()
+            for row in rows:
+                value = row.get(actual)
+                values.add("" if value is None else str(value))
+            if function == "DISTINCTCOUNTNOBLANK":
+                values.discard("")
+            return Decimal(len(values))
         values = numeric_values(reference[2], reference[1])
         if function == "COUNT": return Decimal(len(values))
         if not values:
@@ -4130,7 +5199,7 @@ def evaluate_measures(
         if function == "MIN": return min(values)
         return max(values)
 
-    def resolve(key: str) -> Decimal:
+    def resolve(key: str) -> Decimal | None:
         cache_key = (key, current_context)
         if cache_key in value_cache:
             return value_cache[cache_key]
@@ -4138,12 +5207,15 @@ def evaluate_measures(
             raise MeasureError(f"Measure dependency cycle includes {by_name[key]['name']!r}.")
         resolving.add(key)
         try:
-            value = as_number(evaluate(parsed[key]))
+            result = evaluate(parsed[key])
+            if result is not None and not isinstance(result, Decimal):
+                raise MeasureError("This expression needs a numeric value.")
+            value = result
         except (DecimalException, OverflowError) as exc:
             raise MeasureError(f"Measure {by_name[key]['name']!r} is outside the supported numeric range.") from exc
         finally:
             resolving.remove(key)
-        if not value.is_finite():
+        if value is not None and not value.is_finite():
             raise MeasureError(f"Measure {by_name[key]['name']!r} did not produce a finite number.")
         value_cache[cache_key] = value
         return value

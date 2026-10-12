@@ -19,6 +19,7 @@ ApplicationWindow {
     property bool dataPaneExpanded: false
     property bool visualizationsVisible: true
     property bool inspectorVisible: true
+    property string activeVisualTab: "build"
     property bool fitZoom: true
     property real reportZoom: 0.7
     property string fieldSearchQuery: ""
@@ -39,8 +40,17 @@ ApplicationWindow {
         ]},
         { title: "Queries", actions: [
             { label: "Transform data", visibleLabel: "Transform\ndata", width: 48, iconName: "tableEdit", commandId: "data.transform", description: "Preview and apply local steps to the active table." },
+            { label: "Power Query Advanced Editor (M)", visibleLabel: "Advanced Editor\n(M)", width: 72, iconName: "tableEdit", commandId: "data.powerQueryM", description: "Edit and preview a supported Power Query M script for the active table." },
+            { label: "Append queries", visibleLabel: "Append\nqueries", width: 52, iconName: "tableAdd", commandId: "data.appendQueries", description: "Append two loaded tables with matching ordered columns." },
+            { label: "Merge queries", visibleLabel: "Merge\nqueries", width: 52, iconName: "relationship", commandId: "data.mergeQueries", description: "Join two loaded tables by matching selected columns." },
             { label: "Refresh", visibleLabel: "Refresh", width: 42, iconName: "refresh", commandId: "data.refresh", description: "Reload the active linked source and its included dependent queries." },
             { label: "Refresh all", visibleLabel: "Refresh\nall", width: 46, iconName: "refresh", commandId: "data.refreshAll", description: "Reload every supported linked source and rebuild included saved queries." }
+        ]},
+        { title: "Calculations", actions: [
+            { label: "New DAX measure", visibleLabel: "New DAX\nmeasure", width: 54, iconName: "measure", commandId: "data.newMeasure", description: "Create a local DAX measure for the active table." },
+            { label: "Quick measure", visibleLabel: "Quick\nmeasure", width: 46, iconName: "quickMeasure", commandId: "data.quickMeasure", description: "Create a sum, average, or count measure for a selected field." },
+            { label: "New calculated column", visibleLabel: "New\ncolumn", width: 46, iconName: "column", commandId: "model.newCalculatedColumn", description: "Create a local DAX calculated column on the active table." },
+            { label: "New calculated table", visibleLabel: "New\ntable", width: 46, iconName: "tableAdd", commandId: "model.newCalculatedTable", description: "Create a DISTINCT calculated table from a loaded model column." }
         ]},
         { title: "Workspace", actions: [
             { label: "Report view", visibleLabel: "Report\nview", width: 42, iconName: "report", commandId: "view.report", description: "Switch to Report view." },
@@ -78,17 +88,18 @@ ApplicationWindow {
             ]},
             { title: "Queries", actions: [
                 { label: "Transform data", visibleLabel: "Transform\ndata", width: 42, iconName: "tableEdit", commandId: "data.transform", description: "Preview and apply local steps to the active table." },
+                { label: "Power Query Advanced Editor (M)", visibleLabel: "Advanced Editor\n(M)", width: 66, iconName: "tableEdit", commandId: "data.powerQueryM", description: "Edit and preview a supported Power Query M script for the active table." },
                 { label: "Refresh", visibleLabel: "Refresh", width: 30, iconName: "refresh", commandId: "data.refresh", description: "Reload the active linked source and its included dependent queries." },
                 { label: "Refresh all", visibleLabel: "Refresh\nall", width: 38, iconName: "refresh", commandId: "data.refreshAll", description: "Reload every supported linked source and rebuild included saved queries." }
             ]},
             { title: "Insert", actions: [
-                { label: "New visual", visibleLabel: "New\nvisual", iconName: "visual", commandId: "report.addMonthly", description: "Add a monthly revenue visual to this page." },
-                { label: "Text box", visibleLabel: "Text box", iconName: "text", commandId: "disabled.textBox", available: false, description: "Report text boxes are not available in this release." },
+                { label: "New visual", visibleLabel: "New\nvisual", iconName: "visual", commandId: "insert.newVisual", description: "Choose a supported visual type to add to this page." },
+                { label: "Text box", visibleLabel: "Text box", iconName: "text", commandId: "insert.textBox", description: "Insert an editable report text box." },
                 { label: "More visuals", visibleLabel: "More\nvisuals", width: 40, iconName: "visual", commandId: "insert.moreVisuals", hasDropdown: true, description: "Browse visuals from AppSource or your files." }
             ]},
             { title: "Calculations", actions: [
                 { label: "New visual calculation", visibleLabel: "New visual\ncalculation", width: 60, iconName: "dataLine", commandId: "disabled.visualCalculation", available: false, description: "Visual calculations are not available in this release." },
-                { label: "New measure", visibleLabel: "New\nmeasure", width: 40, iconName: "measure", commandId: "data.newMeasure", description: "Create a local DAX measure for the loaded table." },
+                { label: "New DAX measure", visibleLabel: "New\nmeasure", width: 46, iconName: "measure", commandId: "data.newMeasure", description: "Create a local DAX measure for the loaded table." },
                 { label: "Quick measure", visibleLabel: "Quick\nmeasure", width: 40, iconName: "quickMeasure", commandId: "data.quickMeasure", description: "Create a sum, average, or count measure for a selected field." }
             ]},
             { title: "Sensitivity", actions: [
@@ -103,7 +114,7 @@ ApplicationWindow {
                 { label: "New page", visibleLabel: "New\npage", width: 48, hasDropdown: true, iconName: "page", commandId: "report.addPage", description: "Add a report page." }
             ]},
             { title: "Visuals", compact: true, actions: [
-                { label: "New visual", visibleLabel: "New\nvisual", width: 44, appearanceAvailable: true, iconName: "newVisual", commandId: "disabled.newVisual", available: false, description: "Generic blank-visual creation is not available yet. Use the Home tab for the supported revenue charts." },
+                { label: "New visual", visibleLabel: "New\nvisual", width: 44, appearanceAvailable: true, iconName: "newVisual", commandId: "insert.newVisual", description: "Choose a supported blank visual type." },
                 { label: "More visuals", visibleLabel: "More\nvisuals", width: 46, hasDropdown: true, appearanceAvailable: true, iconName: "moreVisuals", commandId: "insert.moreVisuals", description: "Browse visuals from AppSource or your files." }
             ]},
             { title: "AI visuals", compact: true, actions: [
@@ -112,10 +123,10 @@ ApplicationWindow {
                 { label: "Narrative", visibleLabel: "Narrative", width: 50, appearanceAvailable: true, iconName: "narrative", commandId: "disabled.narrative", available: false, description: "Narrative visuals are not available in this release." }
             ]},
             { title: "Elements", compact: true, actions: [
-                { label: "Text box", visibleLabel: "Text\nbox", width: 38, appearanceAvailable: true, iconName: "text", commandId: "disabled.textBox", available: false, description: "Report text boxes are not available in this release." },
+                { label: "Text box", visibleLabel: "Text\nbox", width: 38, appearanceAvailable: true, iconName: "text", commandId: "insert.textBox", description: "Insert an editable report text box." },
                 { label: "Buttons", visibleLabel: "Buttons", width: 46, hasDropdown: false, appearanceAvailable: true, iconName: "button", commandId: "insert.buttons", description: "Insert a clickable report button to trigger actions." },
-                { label: "Shapes", visibleLabel: "Shapes", width: 43, hasDropdown: true, appearanceAvailable: true, iconName: "shape", commandId: "insert.shapes", available: false, description: "Report shape objects are not available in this release." },
-                { label: "Image", visibleLabel: "Image", width: 34, appearanceAvailable: true, iconName: "image", commandId: "disabled.image", available: false, description: "Report images are not available in this release." }
+                { label: "Shapes", visibleLabel: "Shapes", width: 43, hasDropdown: true, appearanceAvailable: true, iconName: "shape", commandId: "insert.shapes", description: "Insert a report shape." },
+                { label: "Image", visibleLabel: "Image", width: 34, appearanceAvailable: true, iconName: "image", commandId: "insert.image", description: "Insert an image from a local file." }
             ]},
             { title: "Sparklines", compact: true, actions: [
                 { label: "Add a sparkline", visibleLabel: "Add a\nsparkline", width: 52, iconName: "sparkline", commandId: "disabled.sparkline", available: false, description: "Sparklines are not available in this release." }
@@ -131,10 +142,10 @@ ApplicationWindow {
             ]},
             { title: "Calculations", actions: [
                 { label: "New visual calculation", visibleLabel: "New visual\ncalculation", width: 56, iconName: "dataLine", commandId: "disabled.visualCalculation", available: false, description: "Visual calculations are not available in this release." },
-                { label: "New measure", visibleLabel: "New\nmeasure", width: 40, iconName: "measure", commandId: "data.newMeasure", description: "Create a local DAX measure for the loaded table." },
+                { label: "New DAX measure", visibleLabel: "New\nmeasure", width: 46, iconName: "measure", commandId: "data.newMeasure", description: "Create a local DAX measure for the loaded table." },
                 { label: "Quick measure", visibleLabel: "Quick\nmeasure", width: 40, iconName: "quickMeasure", commandId: "data.quickMeasure", description: "Create a sum, average, or count measure for a selected field." },
                 { label: "New column", visibleLabel: "New\ncolumn", iconName: "column", commandId: "model.newCalculatedColumn", description: "Create, edit, or remove a local DAX calculated column on the active table." },
-                { label: "New table", visibleLabel: "New\ntable", iconName: "tableAdd", commandId: "newCalculatedTable", description: "Create a DISTINCT calculated table from a loaded model column." }
+                { label: "New table", visibleLabel: "New\ntable", iconName: "tableAdd", commandId: "model.newCalculatedTable", description: "Create a DISTINCT calculated table from a loaded model column." }
             ]},
             { title: "Calendars", actions: [
                 { label: "New calendar table", visibleLabel: "New calendar\ntable", width: 52, iconName: "calendar", commandId: "model.newCalendarTable", description: "Generate a saved, contiguous calendar table from dates or the model's date columns." },
@@ -144,7 +155,7 @@ ApplicationWindow {
                 { label: "Change detection", visibleLabel: "Change\ndetection", width: 56, iconName: "refresh", commandId: "disabled.changeDetection", available: false, description: "Change detection is not available in this release." }
             ]},
             { title: "Parameters", actions: [
-                { label: "New parameter", visibleLabel: "New\nparameter", width: 58, iconName: "form", commandId: "disabled.parameter", available: false, description: "Parameters are not available in this release." }
+                { label: "Power Query parameters", visibleLabel: "Power Query\nparameters", width: 72, iconName: "form", commandId: "data.transform", description: "Open the Power Query Editor to create, edit, and apply project parameters." }
             ]},
             { title: "Security", actions: [
                 { label: "Manage roles", visibleLabel: "Manage\nroles", width: 48, iconName: "security", commandId: "security.manageRoles", available: false, description: "Role authoring and row-level security are not available in this release." },
@@ -266,10 +277,14 @@ ApplicationWindow {
         case "data.enterBlank": mainWindow.studioController.executeCommand("pasteData"); break
         case "data.sampleData": mainWindow.studioController.executeCommand("sampleData"); break
         case "data.transform": mainWindow.studioController.executeCommand("transformData"); break
+        case "data.powerQueryM": mainWindow.studioController.executeCommand("powerQueryM"); break
+        case "data.appendQueries": mainWindow.studioController.executeCommand("appendQueries"); break
+        case "data.mergeQueries": mainWindow.studioController.executeCommand("mergeQueries"); break
         case "data.newMeasure": mainWindow.studioController.executeCommand("newMeasure"); break
         case "data.quickMeasure": mainWindow.studioController.executeCommand("quickMeasure"); break
         case "model.manageRelationships": mainWindow.studioController.executeCommand("manageRelationships"); break
         case "model.newCalculatedColumn": mainWindow.studioController.executeCommand("newCalculatedColumn"); break
+        case "model.newCalculatedTable": mainWindow.studioController.executeCommand("newCalculatedTable"); break
         case "model.newCalendarTable": mainWindow.studioController.executeCommand("newCalendarTable"); break
         case "model.markDateTable": mainWindow.studioController.executeCommand("markDateTable"); break
         case "security.manageRoles": mainWindow.studioController.executeCommand("manageRoles"); break
@@ -283,13 +298,18 @@ ApplicationWindow {
         case "report.addPage": mainWindow.studioController.executeCommand("addPage"); break
         case "report.addMonthly": mainWindow.studioController.executeCommand("addMonthlyChart"); break
         case "report.addRegion": mainWindow.studioController.executeCommand("addRegionChart"); break
+        case "insert.newVisual":
+            mainWindow.studioController.setCurrentView("Report")
+            mainWindow.visualizationsVisible = true
+            mainWindow.activeVisualTab = "build"
+            mainWindow.studioController.begin_new_visual()
+            break
         case "insert.textBox":
             let tc = mainWindow.studioController.activeVisualObjects.length + 1;
             mainWindow.studioController.add_visual("text_box", "Text Box " + tc, 100, 100, 200, 80);
             break
         case "insert.image":
-            let ic = mainWindow.studioController.activeVisualObjects.length + 1;
-            mainWindow.studioController.add_visual("image", "Image " + ic, 100, 100, 250, 150);
+            mainWindow.studioController.insert_image();
             break
         case "insert.buttons":
             let bc = mainWindow.studioController.activeVisualObjects.length + 1;
@@ -329,7 +349,10 @@ ApplicationWindow {
         case "help.projectFormat": mainWindow.studioController.executeCommand("projectFormat"); break
         default:
             if (commandId.startsWith("chart.type.")) {
-                mainWindow.studioController.set_visual_type(mainWindow.studioController.selectedVisual, commandId.substring(11))
+                if (mainWindow.studioController.creatingVisual || !mainWindow.studioController.selectedVisual)
+                    mainWindow.studioController.add_blank_visual(commandId.substring(11))
+                else
+                    mainWindow.studioController.set_visual_type(mainWindow.studioController.selectedVisual, commandId.substring(11))
             }
             break
         }
@@ -469,8 +492,15 @@ ApplicationWindow {
         if (commandId === "model.manageRelationships") return mainWindow.studioController.canManageRelationships
         if (commandId === "model.markDateTable")
             return mainWindow.studioController.tableCatalog.some(function(table) { return Boolean(table.loaded) })
-        if (commandId === "model.newCalculatedColumn") return mainWindow.studioController.sourceLoaded
-        if (commandId === "data.transform") return mainWindow.studioController.sourceLoaded
+        if (commandId === "data.newMeasure" || commandId === "data.quickMeasure"
+                || commandId === "data.transform" || commandId === "data.powerQueryM"
+                || commandId === "model.newCalculatedColumn"
+                || commandId === "model.newCalculatedTable")
+            return mainWindow.studioController.sourceLoaded
+        if (commandId === "data.appendQueries" || commandId === "data.mergeQueries")
+            return mainWindow.studioController.tableCatalog.filter(function(table) {
+                return Boolean(table.evaluated)
+            }).length >= 2
         if (commandId === "project.exportData") return mainWindow.studioController.sourceLoaded
         if (commandId === "filter.clear") return mainWindow.studioController.filterActive
         return true
@@ -495,6 +525,16 @@ ApplicationWindow {
             return "Switch to Report view to use this command."
         if (commandId === "data.transform" && !mainWindow.studioController.sourceLoaded)
             return "Load a table before transforming data."
+        if ((commandId === "data.powerQueryM" || commandId === "data.newMeasure"
+                || commandId === "data.quickMeasure" || commandId === "model.newCalculatedColumn"
+                || commandId === "model.newCalculatedTable")
+                && !mainWindow.studioController.sourceLoaded)
+            return "Load a table before using this command."
+        if ((commandId === "data.appendQueries" || commandId === "data.mergeQueries")
+                && mainWindow.studioController.tableCatalog.filter(function(table) {
+                    return Boolean(table.evaluated)
+                }).length < 2)
+            return "Load or evaluate at least two tables before using this command."
         if (commandId === "project.exportData" && !mainWindow.studioController.sourceLoaded)
             return "Load a table before exporting data."
         if (commandId === "data.refresh" && !mainWindow.studioController.canRefreshSource)
@@ -508,8 +548,6 @@ ApplicationWindow {
         if (commandId === "model.markDateTable"
                 && !mainWindow.studioController.tableCatalog.some(function(table) { return Boolean(table.loaded) }))
             return "Load a model table before marking a date table."
-        if (commandId === "model.newCalculatedColumn" && !mainWindow.studioController.sourceLoaded)
-            return "Load a table before creating a calculated column."
         if (commandId === "filter.clear" && !mainWindow.studioController.filterActive)
             return "There is no active Region filter to clear."
         return ""
@@ -592,7 +630,7 @@ ApplicationWindow {
     }
 
     Shortcut {
-        sequence: StandardKey.Delete
+        sequences: [StandardKey.Delete]
         onActivated: {
             let visName = mainWindow.studioController.selectedVisual
             if (visName && mainWindow.studioController.activeVisualObjects) {
@@ -609,7 +647,9 @@ ApplicationWindow {
         sequence: "Backspace"
         onActivated: {
             let visName = mainWindow.studioController.selectedVisual
-            if (visName && mainWindow.studioController.activeVisualObjects && !focus) {
+            let focusedItem = mainWindow.activeFocusItem
+            let isEditingText = focusedItem instanceof TextInput || focusedItem instanceof TextEdit
+            if (visName && mainWindow.studioController.activeVisualObjects && !isEditingText) {
                 for (let i = 0; i < mainWindow.studioController.activeVisualObjects.length; ++i) {
                     if (mainWindow.studioController.activeVisualObjects[i].title === visName) {
                         mainWindow.studioController.remove_visual(mainWindow.studioController.activeVisualObjects[i].id)
@@ -885,27 +925,34 @@ ApplicationWindow {
                             { name: "Report", icon: "report", enabled: true },
                             { name: "Data", icon: "data", enabled: true },
                             { name: "Model", icon: "model", enabled: true },
-                            { name: "DAX", icon: "dax", enabled: false },
+                            { name: "DAX", icon: "dax", enabled: true, action: "newMeasure" },
                             { name: "TMDL", icon: "tmdl", enabled: false }
                         ]
                         delegate: Button {
+                            id: workspaceNavigationButton
                             required property var modelData
+                            objectName: "workspaceNavigationButton_" + String(modelData.name)
                             Layout.fillWidth: true
                             Layout.preferredHeight: 32
                             Layout.leftMargin: 3
                             Layout.rightMargin: 3
                             enabled: Boolean(modelData.enabled)
+                                     && (modelData.action !== "newMeasure" || mainWindow.studioController.sourceLoaded)
                             hoverEnabled: true
                             padding: 1
-                            ToolTip.visible: hovered && !enabled
-                            ToolTip.text: String(modelData.name) + " view is not available in this release."
-                            Accessible.name: String(modelData.name) + " view"
-                            Accessible.description: enabled ? "Switch to " + String(modelData.name) + " view." : "This view is not available in this release."
+                            ToolTip.visible: hovered && (!enabled || modelData.action === "newMeasure")
+                            ToolTip.text: modelData.action === "newMeasure"
+                                          ? (enabled ? "Create a local DAX measure." : "Import data before creating a DAX measure.")
+                                          : String(modelData.name) + " view is not available in this release."
+                            Accessible.name: modelData.action === "newMeasure" ? "New DAX measure" : String(modelData.name) + " view"
+                            Accessible.description: modelData.action === "newMeasure"
+                                                    ? (enabled ? "Open the local DAX measure editor." : "Import data before creating a measure.")
+                                                    : (enabled ? "Switch to " + String(modelData.name) + " view." : "This view is not available in this release.")
                             background: Rectangle {
                                 radius: 3
-                                color: modelData.enabled && mainWindow.studioController.currentView === modelData.name ? "#e3f0ef" : (parent.hovered ? "#f0f4f6" : "transparent")
+                                color: modelData.action !== "newMeasure" && modelData.enabled && mainWindow.studioController.currentView === modelData.name ? "#e3f0ef" : (parent.hovered ? "#f0f4f6" : "transparent")
                                 Rectangle {
-                                    visible: modelData.enabled && mainWindow.studioController.currentView === modelData.name
+                                    visible: modelData.action !== "newMeasure" && modelData.enabled && mainWindow.studioController.currentView === modelData.name
                                     width: 3
                                     anchors.left: parent.left
                                     anchors.top: parent.top
@@ -918,12 +965,17 @@ ApplicationWindow {
                                 Icon {
                                     anchors.centerIn: parent
                                     name: String(modelData.icon)
-                                    color: modelData.enabled ? (mainWindow.studioController.currentView === modelData.name ? "#0078D4" : mainWindow.accentForIcon(String(modelData.icon))) : "#a8afb5"
+                                    color: workspaceNavigationButton.enabled ? (modelData.action !== "newMeasure" && mainWindow.studioController.currentView === modelData.name ? "#0078D4" : mainWindow.accentForIcon(String(modelData.icon))) : "#a8afb5"
                                     width: 18
                                     height: 18
                                 }
                             }
-                            onClicked: mainWindow.navigateToView(String(modelData.name))
+                            onClicked: {
+                                if (modelData.action === "newMeasure")
+                                    mainWindow.runCommand("data.newMeasure")
+                                else
+                                    mainWindow.navigateToView(String(modelData.name))
+                            }
                         }
                     }
                     Item { Layout.fillHeight: true }
@@ -1003,13 +1055,27 @@ ApplicationWindow {
                                                 height: Number(modelData.height)
 
                                                 ChartCard {
-                                                    visible: modelData.type !== "button" && modelData.type !== "text_box" && modelData.type !== "image" && String(modelData.type).indexOf("shape:") !== 0 && modelData.type !== "shape"
+                                                    objectName: "chartCard_" + String(modelData.title)
+                                                    visible: modelData.type !== "button" && modelData.type !== "text_box" && modelData.type !== "image" && modelData.type !== "table" && modelData.type !== "matrix" && modelData.type !== "card" && String(modelData.type).indexOf("shape:") !== 0 && modelData.type !== "shape"
                                                     anchors.fill: parent
                                                     title: String(modelData.title)
                                                     visualName: String(modelData.title)
                                                     chartType: String(modelData.type)
-                                                    selected: mainWindow.studioController.selectedVisual === String(modelData.title)
+                                                    selected: mainWindow.studioController.selectedVisualIds.indexOf(String(modelData.id)) !== -1
                                                     seriesColor: modelData.color ? String(modelData.color) : "#0078D4" 
+                                                    showDataLabels: Boolean(modelData.show_data_labels)
+                                                    showLegend: Boolean(modelData.show_legend)
+                                                    seriesLabel: {
+                                                        const fields = modelData.fields || {}
+                                                        const well = modelData.type === "lineClusteredColumn" ? "Column Y-axis" : "Y-axis"
+                                                        const measures = fields[well] || []
+                                                        return measures.length ? mainWindow.studioController.visualFieldLabel(String(measures[0])) : ""
+                                                    }
+                                                    lineSeriesLabel: {
+                                                        const fields = modelData.fields || {}
+                                                        const measures = fields["Line Y-axis"] || []
+                                                        return measures.length ? mainWindow.studioController.visualFieldLabel(String(measures[0])) : "Line"
+                                                    }
                                                     emptyMessage: "No data is available yet."
 
                                                     series: {
@@ -1018,9 +1084,102 @@ ApplicationWindow {
                                                             return String(item.title) === String(modelData.title)
                                                         })
                                                         if (!visual || (visual.type !== "column" && visual.type !== "bar"
-                                                                && visual.type !== "line" && visual.type !== "area"))
+                                                                && visual.type !== "stackedBar" && visual.type !== "stackedColumn"
+                                                                && visual.type !== "bar100" && visual.type !== "column100"
+                                                                && visual.type !== "stackedArea" && visual.type !== "area100"
+                                                                && visual.type !== "waterfall"
+                                                                && visual.type !== "ribbon"
+                                                                && visual.type !== "treemap"
+                                                                && visual.type !== "scatter"
+                                                                && visual.type !== "lineClusteredColumn"
+                                                                && visual.type !== "kpi"
+                                                                && visual.type !== "line" && visual.type !== "area"
+                                                                && visual.type !== "pie" && visual.type !== "donut"
+                                                                && visual.type !== "funnel"))
                                                             return []
                                                         return mainWindow.studioController.visualSeries(String(visual.title))
+                                                    }
+
+                                                    lineSeries: {
+                                                        const visual = mainWindow.studioController.activeVisualObjects.find(function(item) {
+                                                            return String(item.title) === String(modelData.title)
+                                                        })
+                                                        return visual && visual.type === "lineClusteredColumn"
+                                                            ? mainWindow.studioController.visualLineSeries(String(visual.title))
+                                                            : []
+                                                    }
+
+                                                    gaugeData: {
+                                                        const visual = mainWindow.studioController.activeVisualObjects.find(function(item) {
+                                                            return String(item.title) === String(modelData.title)
+                                                        })
+                                                        return visual && visual.type === "gauge"
+                                                            ? mainWindow.studioController.visualGaugeData(String(visual.title), false)
+                                                            : ({})
+                                                    }
+
+                                                    kpiData: {
+                                                        const visual = mainWindow.studioController.activeVisualObjects.find(function(item) {
+                                                            return String(item.title) === String(modelData.title)
+                                                        })
+                                                        return visual && visual.type === "kpi"
+                                                            ? mainWindow.studioController.visualKpiData(String(visual.title), false)
+                                                            : ({})
+                                                    }
+
+                                                    mapPoints: {
+                                                        const visual = mainWindow.studioController.activeVisualObjects.find(function(item) {
+                                                            return String(item.title) === String(modelData.title)
+                                                        })
+                                                        return visual && visual.type === "map"
+                                                            ? mainWindow.studioController.visualMapData(String(visual.title), false)
+                                                            : []
+                                                    }
+
+                                                    highlightMapPoints: {
+                                                        const visual = mainWindow.studioController.activeVisualObjects.find(function(item) {
+                                                            return String(item.title) === String(modelData.title)
+                                                        })
+                                                        return visual && visual.type === "map"
+                                                            ? mainWindow.studioController.visualMapData(String(visual.title), true)
+                                                            : []
+                                                    }
+
+                                                    highlightSeries: {
+                                                        const visuals = mainWindow.studioController.activeVisualObjects
+                                                        const visual = visuals.find(function(item) {
+                                                            return String(item.title) === String(modelData.title)
+                                                        })
+                                                        return visual
+                                                            ? mainWindow.studioController.visualHighlightSeries(String(visual.title))
+                                                            : []
+                                                    }
+
+                                                    highlightLineSeries: {
+                                                        const visual = mainWindow.studioController.activeVisualObjects.find(function(item) {
+                                                            return String(item.title) === String(modelData.title)
+                                                        })
+                                                        return visual && visual.type === "lineClusteredColumn"
+                                                            ? mainWindow.studioController.visualLineHighlightSeries(String(visual.title))
+                                                            : []
+                                                    }
+
+                                                    scatterPoints: {
+                                                        const visual = mainWindow.studioController.activeVisualObjects.find(function(item) {
+                                                            return String(item.title) === String(modelData.title)
+                                                        })
+                                                        return visual && visual.type === "scatter"
+                                                            ? mainWindow.studioController.visualScatterData(String(visual.title), false)
+                                                            : []
+                                                    }
+
+                                                    highlightScatterPoints: {
+                                                        const visual = mainWindow.studioController.activeVisualObjects.find(function(item) {
+                                                            return String(item.title) === String(modelData.title)
+                                                        })
+                                                        return visual && visual.type === "scatter"
+                                                            ? mainWindow.studioController.visualScatterData(String(visual.title), true)
+                                                            : []
                                                     }
 
                                                     filterOnCategory: true
@@ -1035,16 +1194,79 @@ ApplicationWindow {
                                                         }
                                                         mainWindow.studioController.selectVisual(visualName)
                                                     }
+
+                                                    onMultipleSelectionRequested: function(visualName) {
+                                                        mainWindow.studioController.toggleVisualSelection(visualName)
+                                                    }
+                                                }
+
+                                                TableCard {
+                                                    objectName: (modelData.type === "matrix" ? "matrixCard_" : "tableCard_") + String(modelData.title)
+                                                    visible: modelData.type === "table" || modelData.type === "matrix"
+                                                    anchors.fill: parent
+                                                    title: String(modelData.title)
+                                                    visualName: String(modelData.title)
+                                                    tableData: modelData.type === "matrix"
+                                                        ? mainWindow.studioController.visualMatrixData(String(modelData.title))
+                                                        : mainWindow.studioController.visualTableData(String(modelData.title))
+                                                    selected: mainWindow.studioController.selectedVisualIds.indexOf(String(modelData.id)) !== -1
+                                                    activeFilters: {
+                                                        const visuals = mainWindow.studioController.activeVisualObjects
+                                                        const visual = visuals.find(function(item) {
+                                                            return String(item.title) === String(modelData.title)
+                                                        })
+                                                        return visual
+                                                            ? mainWindow.studioController.selectedCrossFiltersForVisual(String(modelData.title)) || []
+                                                            : []
+                                                    }
+                                                    filterOnCategory: true
+
+                                                    onCategoryRequested: function(label) {
+                                                        mainWindow.studioController.toggle_cross_filter(String(modelData.title), label)
+                                                    }
+
+                                                    onRequestedSelection: function(visualName) {
+                                                        if (mainWindow.studioController.formatPainterActive)
+                                                            mainWindow.studioController.apply_format_painter(visualName)
+                                                        mainWindow.studioController.selectVisual(visualName)
+                                                    }
+
+                                                    onMultipleSelectionRequested: function(visualName) {
+                                                        mainWindow.studioController.toggleVisualSelection(visualName)
+                                                    }
+                                                }
+
+                                                CardVisual {
+                                                    objectName: "cardVisual_" + String(modelData.title)
+                                                    visible: modelData.type === "card"
+                                                    anchors.fill: parent
+                                                    title: String(modelData.title)
+                                                    visualName: String(modelData.title)
+                                                    cardData: mainWindow.studioController.visualCardData(String(modelData.title))
+                                                    valueColor: modelData.color ? String(modelData.color) : "#0078D4"
+                                                    selected: mainWindow.studioController.selectedVisualIds.indexOf(String(modelData.id)) !== -1
+
+                                                    onRequestedSelection: function(visualName) {
+                                                        if (mainWindow.studioController.formatPainterActive)
+                                                            mainWindow.studioController.apply_format_painter(visualName)
+                                                        mainWindow.studioController.selectVisual(visualName)
+                                                    }
+
+                                                    onMultipleSelectionRequested: function(visualName) {
+                                                        mainWindow.studioController.toggleVisualSelection(visualName)
+                                                    }
                                                 }
 
                                                 Rectangle {
-                                                    visible: modelData.type === "text_box"
+                                                    objectName: "reportTextBox_" + String(modelData.id)
+                                                    visible: String(modelData.type) === "text_box"
                                                     anchors.fill: parent
                                                     color: "transparent"
-                                                    border.color: mainWindow.studioController.selectedVisual === String(modelData.title) ? "#0078D4" : "transparent"
+                                                    border.color: mainWindow.studioController.selectedVisualIds.indexOf(String(modelData.id)) !== -1 ? "#0078D4" : "transparent"
                                                     border.width: 1
                                                     
                                                     TextArea {
+                                                        objectName: "reportTextInput_" + String(modelData.id)
                                                         anchors.fill: parent
                                                         anchors.margins: 4
                                                         text: modelData.text || "Type here..."
@@ -1053,42 +1275,63 @@ ApplicationWindow {
                                                         background: Rectangle { color: "transparent" }
                                                         color: "#202020"
                                                         onPressed: function(mouse) {
-                                                            mainWindow.studioController.selectVisual(String(modelData.title))
+                                                            if (mouse.modifiers & Qt.ShiftModifier)
+                                                                mainWindow.studioController.toggleVisualSelection(String(modelData.title))
+                                                            else
+                                                                mainWindow.studioController.selectVisual(String(modelData.title))
                                                         }
                                                         onTextChanged: {
-                                                            if (activeFocus) {
-                                                                // In a real app we'd update the controller's property here
-                                                            }
+                                                            if (text !== String(modelData.text || "Type here..."))
+                                                                mainWindow.studioController.set_visual_property("text", text)
                                                         }
                                                     }
                                                 }
 
                                                 Rectangle {
-                                                    visible: modelData.type === "image"
+                                                    objectName: "reportImageContainer_" + String(modelData.id)
+                                                    property bool imageReady: reportImage.status === Image.Ready
+                                                    property bool isImageVisual: String(modelData.type) === "image"
+                                                    visible: isImageVisual
                                                     anchors.fill: parent
                                                     color: "#f8f9fa"
-                                                    border.color: mainWindow.studioController.selectedVisual === String(modelData.title) ? "#0078D4" : "#cbd1d6"
+                                                    border.color: mainWindow.studioController.selectedVisualIds.indexOf(String(modelData.id)) !== -1 ? "#0078D4" : "#cbd1d6"
                                                     border.width: 1
-                                                    
+
+                                                    Image {
+                                                        id: reportImage
+                                                        objectName: "reportImage_" + String(modelData.id)
+                                                        anchors.fill: parent
+                                                        anchors.margins: 2
+                                                        source: modelData.image_path ? encodeURI("file://" + String(modelData.image_path)) : ""
+                                                        fillMode: Image.PreserveAspectFit
+                                                        asynchronous: true
+                                                    }
+
                                                     Icon {
                                                         anchors.centerIn: parent
                                                         name: "image"
                                                         color: "#adb6bc"
                                                         implicitWidth: 48
                                                         implicitHeight: 48
+                                                        visible: !modelData.image_path || reportImage.status === Image.Error
                                                     }
                                                     
                                                     MouseArea {
                                                         anchors.fill: parent
-                                                        onClicked: mainWindow.studioController.selectVisual(String(modelData.title))
+                                                        onClicked: function(mouse) {
+                                                            if (mouse.modifiers & Qt.ShiftModifier)
+                                                                mainWindow.studioController.toggleVisualSelection(String(modelData.title))
+                                                            else
+                                                                mainWindow.studioController.selectVisual(String(modelData.title))
+                                                        }
                                                     }
                                                 }
 
                                                 Rectangle {
-                                                    visible: modelData.type === "button"
+                                                    visible: String(modelData.type) === "button"
                                                     anchors.fill: parent
-                                                    color: mainWindow.studioController.selectedVisual === String(modelData.title) ? "#e5f1f8" : "#f3f2f1"
-                                                    border.color: mainWindow.studioController.selectedVisual === String(modelData.title) ? "#0078D4" : "#cccccc"
+                                                    color: mainWindow.studioController.selectedVisualIds.indexOf(String(modelData.id)) !== -1 ? "#e5f1f8" : "#f3f2f1"
+                                                    border.color: mainWindow.studioController.selectedVisualIds.indexOf(String(modelData.id)) !== -1 ? "#0078D4" : "#cccccc"
                                                     border.width: 1
                                                     radius: 4
 
@@ -1102,25 +1345,31 @@ ApplicationWindow {
                                                     MouseArea {
                                                         anchors.fill: parent
                                                         onClicked: function(mouse) {
+                                                            if (mouse.modifiers & Qt.ShiftModifier) {
+                                                                mainWindow.studioController.toggleVisualSelection(String(modelData.title))
+                                                                return
+                                                            }
                                                             mainWindow.studioController.selectVisual(String(modelData.title))
                                                             // Execute Button Action (Control-click is standard, but here double click or regular click in view mode)
                                                             if (modelData.actionUrl && mouse.modifiers & Qt.ControlModifier) {
-                                                                Qt.openUrlExternally(modelData.actionUrl)
+                                                                mainWindow.studioController.open_button_action(String(modelData.actionUrl))
                                                             }
                                                         }
                                                         onDoubleClicked: {
                                                             if (modelData.actionUrl) {
-                                                                Qt.openUrlExternally(modelData.actionUrl)
+                                                                mainWindow.studioController.open_button_action(String(modelData.actionUrl))
                                                             }
                                                         }
                                                     }
                                                 }
 
                                                 Rectangle {
-                                                    visible: String(modelData.type).indexOf("shape") === 0
+                                                    objectName: "reportShape_" + String(modelData.id)
+                                                    property bool isShapeVisual: String(modelData.type).indexOf("shape") === 0
+                                                    visible: isShapeVisual
                                                     anchors.fill: parent
                                                     color: "transparent"
-                                                    border.color: mainWindow.studioController.selectedVisual === String(modelData.title) ? "#0078D4" : "transparent"
+                                                    border.color: mainWindow.studioController.selectedVisualIds.indexOf(String(modelData.id)) !== -1 ? "#0078D4" : "transparent"
                                                     border.width: 1
                                                     
                                                     ShapeGlyph {
@@ -1131,7 +1380,12 @@ ApplicationWindow {
                                                     
                                                     MouseArea {
                                                         anchors.fill: parent
-                                                        onClicked: mainWindow.studioController.selectVisual(String(modelData.title))
+                                                        onClicked: function(mouse) {
+                                                            if (mouse.modifiers & Qt.ShiftModifier)
+                                                                mainWindow.studioController.toggleVisualSelection(String(modelData.title))
+                                                            else
+                                                                mainWindow.studioController.selectVisual(String(modelData.title))
+                                                        }
                                                     }
                                                 }
 
@@ -1139,7 +1393,7 @@ ApplicationWindow {
                                                     visible: modelData.type === "slicer"
                                                     anchors.fill: parent
                                                     color: "#ffffff"
-                                                    border.color: mainWindow.studioController.selectedVisual === String(modelData.title) ? "#0078D4" : "#e1e5e8"
+                                                    border.color: mainWindow.studioController.selectedVisualIds.indexOf(String(modelData.id)) !== -1 ? "#0078D4" : "#e1e5e8"
                                                     border.width: 1
                                                     
                                                     ColumnLayout {
@@ -1212,44 +1466,15 @@ ApplicationWindow {
                                                         onPressed: function(mouse) {
                                                             // We cannot swallow click if we want scrollbars/list items to work, 
                                                             // so let's just select
-                                                            mainWindow.studioController.selectVisual(String(modelData.title))
+                                                            if (mouse.modifiers & Qt.ShiftModifier)
+                                                                mainWindow.studioController.toggleVisualSelection(String(modelData.title))
+                                                            else
+                                                                mainWindow.studioController.selectVisual(String(modelData.title))
                                                             mouse.accepted = false
                                                         }
                                                     }
                                                 }
 
-                                                Rectangle {
-                                                    visible: modelData.type === "button"
-                                                    anchors.fill: parent
-                                                    color: mainWindow.studioController.selectedVisual === String(modelData.title) ? "#e5f1f8" : "#f3f2f1"
-                                                    border.color: mainWindow.studioController.selectedVisual === String(modelData.title) ? "#0078D4" : "#cccccc"
-                                                    border.width: 1
-                                                    radius: 4
-
-                                                    Text {
-                                                        anchors.centerIn: parent
-                                                        text: modelData.text || modelData.title
-                                                        font.pixelSize: 12
-                                                        color: "#333333"
-                                                    }
-                                                    
-                                                    MouseArea {
-                                                        anchors.fill: parent
-                                                        onClicked: function(mouse) {
-                                                            mainWindow.studioController.selectVisual(String(modelData.title))
-                                                            // Execute Button Action (Control-click is standard, but here double click or regular click in view mode)
-                                                            if (modelData.actionUrl && mouse.modifiers & Qt.ControlModifier) {
-                                                                Qt.openUrlExternally(modelData.actionUrl)
-                                                            }
-                                                        }
-                                                        onDoubleClicked: {
-                                                            if (modelData.actionUrl) {
-                                                                Qt.openUrlExternally(modelData.actionUrl)
-                                                            }
-                                                        }
-                                                    }
-                                                }
-                                                
                                                 DragHandler {
                                                     target: parent
                                                     onActiveChanged: {
@@ -1265,7 +1490,7 @@ ApplicationWindow {
                                                     anchors.right: parent.right
                                                     anchors.bottom: parent.bottom
                                                     color: "transparent"
-                                                    visible: mainWindow.studioController.selectedVisual === String(modelData.title)
+                                                    visible: mainWindow.studioController.selectedVisualIds.indexOf(String(modelData.id)) !== -1
                                                     
                                                     Canvas {
                                                         anchors.fill: parent
@@ -1413,18 +1638,18 @@ ApplicationWindow {
                                     Layout.leftMargin: 8
                                     Layout.rightMargin: 7
                                     Icon {
-                                        name: ["Revenue", "Cost", "Margin", "Units", "Orders"].indexOf(String(modelData)) >= 0 ? "measure" : "column"
-                                        color: ["Revenue", "Cost", "Margin", "Units", "Orders"].indexOf(String(modelData)) >= 0 ? "#0078D4" : "#107C71"
+                                        name: mainWindow.studioController.visualFieldIsMeasure(String(modelData)) || ["Revenue", "Cost", "Margin", "Units", "Orders"].indexOf(String(modelData)) >= 0 ? "measure" : "column"
+                                        color: mainWindow.studioController.visualFieldIsMeasure(String(modelData)) || ["Revenue", "Cost", "Margin", "Units", "Orders"].indexOf(String(modelData)) >= 0 ? "#0078D4" : "#107C71"
                                         implicitWidth: 14
                                         implicitHeight: 14
                                     }
                                     Text {
                                         Layout.fillWidth: true
-                                        text: String(modelData)
+                                        text: mainWindow.studioController.visualFieldLabel(String(modelData))
                                         color: "#3f505d"
                                         font.pixelSize: 9
                                         elide: Text.ElideRight
-                                        Accessible.name: String(modelData) + " source field"
+                                        Accessible.name: mainWindow.studioController.visualFieldLabel(String(modelData)) + " source field"
                                     }
                                 }
                                 Text {
@@ -2544,6 +2769,7 @@ ApplicationWindow {
                                                 id: buildVisualTabBtn
                                                 required property int index
                                                 required property var modelData
+                                                objectName: "visualTab_" + String(modelData.tabId)
                                                 width: 40
                                                 height: parent.height
                                                 x: parent.width * (index === 0 ? 0.116 : (index === 1 ? 0.507 : 0.89)) - width / 2
@@ -2612,33 +2838,33 @@ ApplicationWindow {
                                             model: [
                                                 { type: "bar", name: "Clustered bar chart", icon: "bar", accent: "#107C71", active: true },
                                                 { type: "column", name: "Clustered column chart", icon: "column", accent: "#0078D4", active: true },
-                                                { type: "stackedBar", name: "Stacked bar chart", icon: "stackedBar" },
-                                                { type: "stackedColumn", name: "Stacked column chart", icon: "stackedColumn" },
-                                                { type: "bar100", name: "100% stacked bar chart", icon: "bar100" },
-                                                { type: "column100", name: "100% stacked column chart", icon: "column100" },
+                                                { type: "stackedBar", name: "Stacked bar chart", icon: "stackedBar", accent: "#0078D4", active: true },
+                                                { type: "stackedColumn", name: "Stacked column chart", icon: "stackedColumn", accent: "#0078D4", active: true },
+                                                { type: "bar100", name: "100% stacked bar chart", icon: "bar100", accent: "#0078D4", active: true },
+                                                { type: "column100", name: "100% stacked column chart", icon: "column100", accent: "#0078D4", active: true },
                                                 { type: "line", name: "Line chart", icon: "line", accent: "#C65911", active: true },
-                                                { type: "area", name: "Area chart", icon: "area", accent: "#0078D4" },
-                                                { type: "stackedArea", name: "Stacked area chart", icon: "stackedArea" },
-                                                { type: "area100", name: "100% stacked area chart", icon: "area100" },
+                                                { type: "area", name: "Area chart", icon: "area", accent: "#0078D4", active: true },
+                                                { type: "stackedArea", name: "Stacked area chart", icon: "stackedArea", accent: "#0078D4", active: true },
+                                                { type: "area100", name: "100% stacked area chart", icon: "area100", accent: "#0078D4", active: true },
                                                 { type: "lineStackedColumn", name: "Line and stacked column chart", icon: "lineStackedColumn" },
-                                                { type: "lineClusteredColumn", name: "Line and clustered column chart", icon: "lineClusteredColumn" },
-                                                { type: "ribbon", name: "Ribbon chart", icon: "ribbonChart" },
-                                                { type: "waterfall", name: "Waterfall chart", icon: "waterfall", accent: "#0078D4" },
-                                                { type: "funnel", name: "Funnel chart", icon: "funnel", accent: "#0078D4" },
-                                                { type: "scatter", name: "Scatter chart", icon: "scatter", accent: "#0078D4" },
-                                                { type: "pie", name: "Pie chart", icon: "pie", accent: "#0078D4" },
-                                                { type: "donut", name: "Donut chart", icon: "donut", accent: "#0078D4" },
-                                                { type: "treemap", name: "Treemap", icon: "treemap", accent: "#0078D4" },
-                                                { type: "map", name: "Map", icon: "worldMap", accent: "#107C71" },
+                                                { type: "lineClusteredColumn", name: "Line and clustered column chart", icon: "lineClusteredColumn", accent: "#C65911", active: true },
+                                                { type: "ribbon", name: "Ribbon chart", icon: "ribbonChart", accent: "#0078D4", active: true },
+                                                { type: "waterfall", name: "Waterfall chart", icon: "waterfall", accent: "#0078D4", active: true },
+                                                { type: "funnel", name: "Funnel chart", icon: "funnel", accent: "#0078D4", active: true },
+                                                { type: "scatter", name: "Scatter chart", icon: "scatter", accent: "#0078D4", active: true },
+                                                { type: "pie", name: "Pie chart", icon: "pie", accent: "#0078D4", active: true },
+                                                { type: "donut", name: "Donut chart", icon: "donut", accent: "#0078D4", active: true },
+                                                { type: "treemap", name: "Treemap", icon: "treemap", accent: "#0078D4", active: true },
+                                                { type: "map", name: "Map", icon: "worldMap", accent: "#107C71", active: true },
                                                 { type: "filledMap", name: "Filled map", icon: "filledMap" },
                                                 { type: "shapeMap", name: "Shape map", icon: "shapeMap" },
                                                 { type: "azureMaps", name: "Azure Maps", icon: "azureMaps" },
-                                                { type: "gauge", name: "Gauge", icon: "gauge", accent: "#0078D4" },
-                                                { type: "card", name: "Card (new)", icon: "newCard" },
-                                                { type: "kpi", name: "KPI", icon: "kpi", accent: "#0078D4" },
+                                                { type: "gauge", name: "Gauge", icon: "gauge", accent: "#0078D4", active: true },
+                                                { type: "card", name: "Card (new)", icon: "newCard", active: true },
+                                                { type: "kpi", name: "KPI", icon: "kpi", accent: "#0078D4", active: true },
                                                 { type: "slicer", name: "Slicer", icon: "slicer", accent: "#0078D4", active: true },
-                                                { type: "table", name: "Table", icon: "table", accent: "#0078D4" },
-                                                { type: "matrix", name: "Matrix", icon: "matrix", accent: "#0078D4" },
+                                                { type: "table", name: "Table", icon: "table", accent: "#0078D4", active: true },
+                                                { type: "matrix", name: "Matrix", icon: "matrix", accent: "#0078D4", active: true },
                                                 { type: "rScript", name: "R visual", icon: "rVisual", accent: "#0078D4" },
                                                 { type: "pythonScript", name: "Python visual", icon: "pythonVisual", accent: "#0078D4" },
                                                 { type: "keyInfluencers", name: "Key influencers", icon: "keyInfluencers" },
@@ -2676,9 +2902,9 @@ ApplicationWindow {
                                                 }
                                                 ToolTip.visible: visualTypeHover.hovered
                                                 ToolTip.text: Boolean(modelData.active)
-                                                        ? (mainWindow.studioController.selectedVisual
+                                                        ? (mainWindow.studioController.selectedVisual && !mainWindow.studioController.creatingVisual
                                                            ? "Set chart type: " + String(modelData.name)
-                                                           : "Add a monthly revenue visual as " + String(modelData.name))
+                                                           : "Add a blank " + String(modelData.name).toLowerCase())
                                                         : String(modelData.name) + " is not available in this release."
                                                 Button {
                                                     anchors.fill: parent
@@ -2689,9 +2915,9 @@ ApplicationWindow {
                                                     Accessible.name: String(visualTypeTile.modelData.name) + " visual"
                                                     Accessible.description: enabled
                                                             ? (visualTypeTile.typeSelected ? "Selected chart type. " : "")
-                                                              + (mainWindow.studioController.selectedVisual
+                                                              + (mainWindow.studioController.selectedVisual && !mainWindow.studioController.creatingVisual
                                                                  ? "Set the selected chart to " + String(visualTypeTile.modelData.name).toLowerCase() + "."
-                                                                 : "Add a monthly revenue chart using this chart type.")
+                                                                 : "Add a blank " + String(visualTypeTile.modelData.name).toLowerCase() + ".")
                                                         : String(visualTypeTile.modelData.name) + " visuals are not available in this release."
                                                     background: Rectangle {
                                                         radius: 2
@@ -2712,8 +2938,6 @@ ApplicationWindow {
                                                         }
                                                     }
                                                     onClicked: {
-                                                        if (!mainWindow.studioController.selectedVisual)
-                                                            mainWindow.runCommand("report.addMonthly")
                                                         mainWindow.runCommand("chart.type." + String(visualTypeTile.modelData.type))
                                                     }
                                                 }
@@ -2724,7 +2948,9 @@ ApplicationWindow {
                                     Repeater {
                                         model: mainWindow.studioController.activeVisualWells
                                         delegate: ColumnLayout {
+                                            id: visualWellDelegate
                                             required property var modelData
+                                            property string wellName: String(modelData.name)
                                             Layout.fillWidth: true
                                             spacing: 1.5
                                             Text {
@@ -2737,7 +2963,7 @@ ApplicationWindow {
                                             }
                                             Rectangle {
                                                 Layout.fillWidth: true
-                                                Layout.preferredHeight: Math.max(27, modelData.fields.length * 27)
+                                                Layout.preferredHeight: Math.max(27, modelData.fields.length * 30)
                                                 color: "#fafafa"
                                                 
                                                 Canvas {
@@ -2778,8 +3004,9 @@ ApplicationWindow {
                                                         model: modelData.fields
                                                         delegate: Rectangle {
                                                             required property var modelData
+                                                            property string fieldName: String(modelData)
                                                             width: parent.width
-                                                            height: 25
+                                                            height: 29
                                                             color: "#ffffff"
                                                             border.color: "#e1e5e8"
                                                             RowLayout {
@@ -2788,14 +3015,77 @@ ApplicationWindow {
                                                                 Item { Layout.preferredWidth: 6; Layout.fillHeight: true }
                                                                 Text {
                                                                     Layout.fillWidth: true
-                                                                    text: String(modelData)
+                                                                    text: mainWindow.studioController.visualFieldLabel(fieldName)
                                                                     color: "#202020"
                                                                     font.pixelSize: 10
                                                                     elide: Text.ElideRight
                                                                 }
                                                                 ToolButton {
+                                                                    id: visualAggregationButton
+                                                                    objectName: "visualFieldAggregation"
+                                                                    visible: !mainWindow.studioController.visualFieldIsMeasure(fieldName) && (((visualWellDelegate.wellName === "Y-axis"
+                                                                                && mainWindow.studioController.selectedChartType !== "scatter")
+                                                                            || ((visualWellDelegate.wellName === "Column Y-axis"
+                                                                                 || visualWellDelegate.wellName === "Line Y-axis")
+                                                                                && mainWindow.studioController.selectedChartType === "lineClusteredColumn"))
+                                                                            || (visualWellDelegate.wellName === "Fields"
+                                                                                && mainWindow.studioController.selectedChartType === "card")
+                                                                            || ((visualWellDelegate.wellName === "Value"
+                                                                                 || visualWellDelegate.wellName === "Minimum"
+                                                                                 || visualWellDelegate.wellName === "Maximum"
+                                                                                 || visualWellDelegate.wellName === "Target")
+                                                                                && mainWindow.studioController.selectedChartType === "gauge")
+                                                                            || (visualWellDelegate.wellName === "Values"
+                                                                                && mainWindow.studioController.selectedChartType === "matrix"))
+                                                                    property string aggregationLabel: "Sum"
+                                                                    function refreshAggregationLabel() {
+                                                                        const controller = mainWindow.studioController
+                                                                        const selected = String(controller.selectedVisual)
+                                                                        const visuals = controller.activeVisualObjects
+                                                                        const visual = visuals.find(function(item) {
+                                                                            return String(item.title) === selected
+                                                                        })
+                                                                        const aggregation = String(
+                                                                            visual && visual.field_aggregations
+                                                                                ? visual.field_aggregations[fieldName] || "sum"
+                                                                                : "sum"
+                                                                        )
+                                                                        aggregationLabel = aggregation.charAt(0).toUpperCase() + aggregation.slice(1)
+                                                                    }
+                                                                    text: aggregationLabel
+                                                                    Layout.preferredWidth: visible ? 50 : 0
+                                                                    Layout.preferredHeight: 23
+                                                                    Accessible.name: fieldName + " aggregation: " + text
+                                                                    Component.onCompleted: refreshAggregationLabel()
+                                                                    Connections {
+                                                                        target: mainWindow.studioController
+                                                                        function onStateChanged() {
+                                                                            visualAggregationButton.refreshAggregationLabel()
+                                                                        }
+                                                                    }
+                                                                    onClicked: {
+                                                                        const controller = mainWindow.studioController
+                                                                        const selected = String(controller.selectedVisual)
+                                                                        const visual = controller.activeVisualObjects.find(function(item) {
+                                                                            return String(item.title) === selected
+                                                                        })
+                                                                        const aggregation = String(
+                                                                            visual && visual.field_aggregations
+                                                                                ? visual.field_aggregations[fieldName] || "sum"
+                                                                                : "sum"
+                                                                        )
+                                                                        visualAggregationMenu.visualName = selected
+                                                                        visualAggregationMenu.wellName = visualWellDelegate.wellName
+                                                                        visualAggregationMenu.fieldName = fieldName
+                                                                        visualAggregationMenu.aggregation = aggregation.charAt(0).toUpperCase() + aggregation.slice(1)
+                                                                        visualAggregationMenu.targetButton = visualAggregationButton
+                                                                        visualAggregationMenu.popup()
+                                                                    }
+                                                                }
+                                                                ToolButton {
                                                                     text: "×"
-                                                                    onClicked: mainWindow.studioController.remove_field_from_well(String(parent.parent.parent.modelData.name), String(modelData))
+                                                                    Accessible.name: "Remove " + fieldName + " from " + visualWellDelegate.wellName
+                                                                    onClicked: mainWindow.studioController.remove_field_from_well(visualWellDelegate.wellName, fieldName)
                                                                     contentItem: Text { text: "×"; color: "#657784"; font.pixelSize: 14; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter }
                                                                     background: Rectangle { color: parent.hovered ? "#f1f4f6" : "transparent" }
                                                                 }
@@ -2806,11 +3096,71 @@ ApplicationWindow {
                                                 
                                                 MouseArea {
                                                     anchors.fill: parent
+                                                    z: -1
                                                     onClicked: function(mouse) {
-                                                        fieldPickerMenu.wellName = String(modelData.name)
+                                                        fieldPickerMenu.wellName = visualWellDelegate.wellName
                                                         fieldPickerMenu.popup()
                                                     }
                                                 }
+                                            }
+                                        }
+                                    }
+
+                                    Text {
+                                        visible: mainWindow.studioController.activeVisualInteractions.length > 0
+                                        Layout.fillWidth: true
+                                        Layout.leftMargin: 7
+                                        Layout.topMargin: 7
+                                        text: "Visual interactions"
+                                        color: "#202020"
+                                        font.pixelSize: 11
+                                        font.weight: Font.DemiBold
+                                    }
+                                    Repeater {
+                                        model: mainWindow.studioController.activeVisualInteractions
+                                        delegate: RowLayout {
+                                            required property var modelData
+                                            Layout.fillWidth: true
+                                            Layout.leftMargin: 7
+                                            Layout.rightMargin: 8
+                                            spacing: 6
+                                            Text {
+                                                Layout.fillWidth: true
+                                                text: String(modelData.title)
+                                                color: "#4b5963"
+                                                font.pixelSize: 10
+                                                elide: Text.ElideRight
+                                            }
+                                            ComboBox {
+                                                objectName: "visualInteractionMode"
+                                                Layout.preferredWidth: 108
+                                                Layout.preferredHeight: 25
+                                                model: ["Filter", "Highlight", "None"]
+                                                currentIndex: Number(modelData.mode_index)
+                                                Accessible.name: String(modelData.title) + " interaction mode"
+                                                indicator: Item {
+                                                    implicitWidth: 16
+                                                    implicitHeight: 25
+                                                    x: parent.width - width - 4
+                                                    y: (parent.height - height) / 2
+                                                    Text {
+                                                        anchors.centerIn: parent
+                                                        text: "⌄"
+                                                        color: "#39434a"
+                                                        font.pixelSize: 13
+                                                        font.weight: Font.DemiBold
+                                                    }
+                                                }
+                                                function chooseInteraction(index) {
+                                                    currentIndex = index
+                                                    const mode = String(model[index]).toLowerCase()
+                                                    mainWindow.studioController.set_visual_interaction(
+                                                        String(mainWindow.studioController.selectedVisual),
+                                                        String(modelData.title),
+                                                        mode
+                                                    )
+                                                }
+                                                onActivated: function(index) { chooseInteraction(index) }
                                             }
                                         }
                                     }
@@ -2819,13 +3169,52 @@ ApplicationWindow {
                                         id: fieldPickerMenu
                                         property string wellName: ""
                                         Repeater {
-                                            model: mainWindow.studioController.filteredFields
+                                            model: mainWindow.studioController.activeVisualFieldOptions
                                             MenuItem {
                                                 required property var modelData
-                                                text: String(modelData)
+                                                text: mainWindow.studioController.visualFieldLabel(String(modelData))
                                                 onTriggered: {
                                                     mainWindow.studioController.add_field_to_well(fieldPickerMenu.wellName, String(modelData))
                                                 }
+                                            }
+                                        }
+                                    }
+                                    Menu {
+                                        id: visualAggregationMenu
+                                        objectName: "visualAggregationMenu"
+                                        property string visualName: ""
+                                        property string wellName: ""
+                                        property string fieldName: ""
+                                        property string aggregation: "Sum"
+                                        property var targetButton: null
+                                        MenuItem {
+                                            text: "Sum"
+                                            checkable: true
+                                            checked: visualAggregationMenu.aggregation === "Sum"
+                                            onTriggered: visualAggregationMenu.chooseAggregation("Sum")
+                                        }
+                                        MenuItem {
+                                            text: "Count"
+                                            checkable: true
+                                            checked: visualAggregationMenu.aggregation === "Count"
+                                            onTriggered: visualAggregationMenu.chooseAggregation("Count")
+                                        }
+                                        MenuItem {
+                                            text: "Average"
+                                            checkable: true
+                                            checked: visualAggregationMenu.aggregation === "Average"
+                                            onTriggered: visualAggregationMenu.chooseAggregation("Average")
+                                        }
+                                        function chooseAggregation(value) {
+                                            mainWindow.studioController.set_field_aggregation(
+                                                visualAggregationMenu.wellName,
+                                                visualAggregationMenu.fieldName,
+                                                value
+                                            )
+                                            visualAggregationMenu.aggregation = value
+                                            if (visualAggregationMenu.targetButton) {
+                                                visualAggregationMenu.targetButton.aggregationLabel = value
+                                                visualAggregationMenu.targetButton.text = value
                                             }
                                         }
                                     }
@@ -3016,6 +3405,7 @@ ApplicationWindow {
                                                                         }
                                                                         
                                                                         TextField {
+                                                                            objectName: "visualProperty_" + String(modelData.key)
                                                                             visible: modelData.type === "string" || modelData.type === "number" || modelData.type === "color"
                                                                             anchors.right: parent.right
                                                                             anchors.rightMargin: 8
@@ -3024,11 +3414,28 @@ ApplicationWindow {
                                                                             height: 24
                                                                             text: String(modelData.value)
                                                                             font.pixelSize: 10
-                                                                            onEditingFinished: {
+                                                                            function applyVisualProperty() {
                                                                                 let val = text
                                                                                 if (modelData.type === "number") val = Number(text)
                                                                                 mainWindow.studioController.set_visual_property(String(modelData.key), val)
                                                                             }
+                                                                            onEditingFinished: applyVisualProperty()
+                                                                        }
+
+                                                                        CheckBox {
+                                                                            objectName: "visualPropertyToggle_" + String(modelData.key)
+                                                                            visible: modelData.type === "boolean"
+                                                                            anchors.right: parent.right
+                                                                            anchors.rightMargin: 8
+                                                                            anchors.verticalCenter: parent.verticalCenter
+                                                                            checked: Boolean(modelData.value)
+                                                                            Accessible.name: String(modelData.label)
+                                                                            function applyVisualProperty() {
+                                                                                mainWindow.studioController.set_visual_property(
+                                                                                    String(modelData.key), checked
+                                                                                )
+                                                                            }
+                                                                            onClicked: applyVisualProperty()
                                                                         }
                                                                     }
                                                                 }
@@ -3138,18 +3545,18 @@ ApplicationWindow {
                                         spacing: 5
                                         Layout.leftMargin: 8
                                         Icon {
-                                            name: ["Revenue", "Cost", "Margin", "Units", "Orders"].indexOf(String(modelData)) >= 0 ? "measure" : "column"
-                                            color: ["Revenue", "Cost", "Margin", "Units", "Orders"].indexOf(String(modelData)) >= 0 ? "#0078D4" : "#107C71"
+                                            name: mainWindow.studioController.visualFieldIsMeasure(String(modelData)) || ["Revenue", "Cost", "Margin", "Units", "Orders"].indexOf(String(modelData)) >= 0 ? "measure" : "column"
+                                            color: mainWindow.studioController.visualFieldIsMeasure(String(modelData)) || ["Revenue", "Cost", "Margin", "Units", "Orders"].indexOf(String(modelData)) >= 0 ? "#0078D4" : "#107C71"
                                             implicitWidth: 14
                                             implicitHeight: 14
                                         }
                                         Text {
                                             Layout.fillWidth: true
-                                            text: String(modelData)
+                                            text: mainWindow.studioController.visualFieldLabel(String(modelData))
                                             color: "#3f505d"
                                             font.pixelSize: 9
                                             elide: Text.ElideRight
-                                            Accessible.name: String(modelData) + " field; listed for reference"
+                                            Accessible.name: mainWindow.studioController.visualFieldLabel(String(modelData)) + " field; listed for reference"
                                         }
                                     }
                                     Text {

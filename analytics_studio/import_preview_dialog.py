@@ -220,10 +220,12 @@ class FileImportPreviewDialog(QDialog):
         parent: QWidget | None = None,
         initial_options: dict[str, Any] | None = None,
         existing_sqlite_tables: set[str] | None = None,
+        source_editing: bool = False,
     ) -> None:
         super().__init__(parent)
         self.path = Path(path).expanduser().resolve()
         self.replacing = replacing
+        self.source_editing = bool(source_editing)
         self.initial_options = dict(initial_options or {})
         self.existing_sqlite_tables = set(existing_sqlite_tables or ())
         self._kind: str | None = None
@@ -242,7 +244,9 @@ class FileImportPreviewDialog(QDialog):
         self._next_options_id = 0
         self._source_options_pending = False
 
-        self.setWindowTitle("Import data")
+        self.setWindowTitle(
+            "Edit source settings" if self.source_editing else "Import data"
+        )
         self.setMinimumSize(720, 470)
         self.resize(940, 620)
 
@@ -261,7 +265,9 @@ class FileImportPreviewDialog(QDialog):
         layout.setContentsMargins(18, 16, 18, 14)
         layout.setSpacing(10)
 
-        heading = QLabel("Review source data")
+        heading = QLabel(
+            "Review source settings" if self.source_editing else "Review source data"
+        )
         heading.setStyleSheet("font-size: 19px; font-weight: 600;")
         layout.addWidget(heading)
 
@@ -279,7 +285,7 @@ class FileImportPreviewDialog(QDialog):
             "padding: 8px 10px; color: #6a4d00; background: #fff5d6;"
             "border: 1px solid #e8d391; border-radius: 3px;"
         )
-        self.replacement_label.setVisible(self.replacing)
+        self.replacement_label.setVisible(self.replacing and not self.source_editing)
         layout.addWidget(self.replacement_label)
 
         self.options_group = QGroupBox("Source options")
@@ -340,7 +346,9 @@ class FileImportPreviewDialog(QDialog):
             parent=self,
         )
         self.import_button = self.buttons.button(QDialogButtonBox.StandardButton.Ok)
-        self.import_button.setText("Import data")
+        self.import_button.setText(
+            "Apply settings" if self.source_editing else "Import data"
+        )
         self.import_button.setEnabled(False)
         self.buttons.accepted.connect(self._accept_candidate)
         self.buttons.rejected.connect(self.reject)

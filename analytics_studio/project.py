@@ -5,6 +5,7 @@ from __future__ import annotations
 from copy import deepcopy
 from datetime import datetime, timezone
 import json
+import math
 import os
 from pathlib import Path
 import shutil
@@ -14,7 +15,14 @@ from uuid import uuid4
 
 
 FORMAT_ID = "com.analytics-studio.project"
-FORMAT_VERSION = 68
+FORMAT_VERSION = 78
+MAX_M_SCRIPT_LENGTH = 32_000
+REPORT_THEMES = {
+    "Default": {"primary": "#0078D4", "secondary": "#107C71"},
+    "Executive": {"primary": "#00188F", "secondary": "#252423"},
+    "High Contrast": {"primary": "#FFFF00", "secondary": "#00FFFF"},
+    "Sunset": {"primary": "#D83B01", "secondary": "#FF8C00"},
+}
 SUPPORTED_VIEWS = {"Report", "Data", "Model"}
 SUPPORTED_FILE_KINDS = {"csv", "excel", "json", "xml", "parquet", "sqlite"}
 REPORT_FILTER_OPERATORS = {
@@ -212,22 +220,18 @@ def new_project(name: str = "Untitled Project") -> dict[str, Any]:
         "active_view": "Report",
         "active_source_id": None,
         "data_sources": [],
+        "query_parameters": [],
+        "query_functions": [],
         "report": {
+            "theme": "Default",
             "filters": [],
             "pages": [{
                 "id": page_id,
                 "name": "Overview",
-                "visuals": [
-                    {"id": str(uuid4()), "type": "card", "title": "Revenue KPI", "x": 14, "y": 14, "width": 120, "height": 80},
-                    {"id": str(uuid4()), "type": "card", "title": "Cost KPI", "x": 148, "y": 14, "width": 120, "height": 80},
-                    {"id": str(uuid4()), "type": "card", "title": "Margin KPI", "x": 282, "y": 14, "width": 120, "height": 80},
-                    {"id": str(uuid4()), "type": "card", "title": "Units KPI", "x": 416, "y": 14, "width": 120, "height": 80},
-                    {"id": str(uuid4()), "type": "card", "title": "Orders KPI", "x": 550, "y": 14, "width": 120, "height": 80},
-                    {"id": str(uuid4()), "type": "column", "title": "Monthly revenue", "x": 14, "y": 108, "width": 330, "height": 248},
-                    {"id": str(uuid4()), "type": "bar", "title": "Region revenue", "x": 358, "y": 108, "width": 330, "height": 248}
-                ],
+                "visuals": [],
                 "filters": [],
                 "visual_filters": [],
+                "visual_interactions": [],
             }],
             "active_page_id": page_id,
             "chart_types": {"monthly": "column", "region": "bar"},
@@ -387,6 +391,26 @@ def validate_project(value: Any) -> dict[str, Any]:
             value = _migrate_v66_to_v67(value)
         elif version == 67:
             value = _migrate_v67_to_v68(value)
+        elif version == 68:
+            value = _migrate_v68_to_v69(value)
+        elif version == 69:
+            value = _migrate_v69_to_v70(value)
+        elif version == 70:
+            value = _migrate_v70_to_v71(value)
+        elif version == 71:
+            value = _migrate_v71_to_v72(value)
+        elif version == 72:
+            value = _migrate_v72_to_v73(value)
+        elif version == 73:
+            value = _migrate_v73_to_v74(value)
+        elif version == 74:
+            value = _migrate_v74_to_v75(value)
+        elif version == 75:
+            value = _migrate_v75_to_v76(value)
+        elif version == 76:
+            value = _migrate_v76_to_v77(value)
+        elif version == 77:
+            value = _migrate_v77_to_v78(value)
         else:
             raise UnsupportedProjectVersion(f"Project format version {version} is not supported.")
         version = value.get("format_version")
@@ -403,6 +427,39 @@ def validate_project(value: Any) -> dict[str, Any]:
     sources = value.get("data_sources")
     if not isinstance(sources, list):
         raise ProjectFileError("The project data_sources field must be a list.")
+    from analytics_studio.query_parameters import (
+        QueryParameterError,
+        parameter_references,
+        validate_query_parameters,
+    )
+
+    try:
+        value["query_parameters"] = validate_query_parameters(
+            value.get("query_parameters", [])
+        )
+    except QueryParameterError as exc:
+        raise ProjectFileError(f"The project query parameters are invalid: {exc}") from exc
+    parameter_names = {item["name"] for item in value["query_parameters"]}
+    from analytics_studio.query_functions import (
+        QueryFunctionError,
+        validate_query_functions,
+    )
+
+    try:
+        value["query_functions"] = validate_query_functions(
+            value.get("query_functions", [])
+        )
+    except QueryFunctionError as exc:
+        raise ProjectFileError(f"The project query functions are invalid: {exc}") from exc
+    function_names = {item["name"] for item in value["query_functions"]}
+    parameter_function_collisions = {
+        name.casefold() for name in parameter_names
+    } & {name.casefold() for name in function_names}
+    if parameter_function_collisions:
+        collision = sorted(parameter_function_collisions)[0]
+        raise ProjectFileError(
+            f"Power Query parameter and function names cannot both use {collision!r}."
+        )
     source_ids: set[str] = set()
     for source in sources:
         if not isinstance(source, dict):
@@ -415,6 +472,16 @@ def validate_project(value: Any) -> dict[str, Any]:
         source_ids.add(source["id"])
         if any(key.casefold() in {"password", "pwd", "connection_string"} for key in source):
             raise ProjectFileError("Data source credentials must not be stored in the project file.")
+        if "m_script" in source:
+            m_script = source["m_script"]
+            if (
+                not isinstance(m_script, str)
+                or len(m_script) > MAX_M_SCRIPT_LENGTH
+                or "\x00" in m_script
+            ):
+                raise ProjectFileError(
+                    f"A saved M script must be text of at most {MAX_M_SCRIPT_LENGTH:,} characters with no null characters."
+                )
         if "query_group" in source:
             query_group = source["query_group"]
             if (
@@ -427,6 +494,32 @@ def validate_project(value: Any) -> dict[str, Any]:
                     "A query_group must be a non-empty name of at most 80 characters."
                 )
             source["query_group"] = query_group.strip()
+        if "query_name" in source:
+            query_name = source["query_name"]
+            if (
+                not isinstance(query_name, str)
+                or not query_name.strip()
+                or len(query_name.strip()) > 120
+                or any(ord(char) < 32 for char in query_name)
+            ):
+                raise ProjectFileError(
+                    "A query_name must be a non-empty name of at most 120 characters with no control characters."
+                )
+            source["query_name"] = query_name.strip()
+        if "description" in source:
+            description = source["description"]
+            if (
+                not isinstance(description, str)
+                or len(description) > 4000
+                or "\x00" in description
+            ):
+                raise ProjectFileError(
+                    "A source description must be at most 4,000 characters and contain no null characters."
+                )
+            if description.strip():
+                source["description"] = description.strip()
+            else:
+                source.pop("description", None)
         if source["kind"] == "inline":
             if "path" in source:
                 raise ProjectFileError("An inline data source must not contain a file path.")
@@ -548,7 +641,12 @@ def validate_project(value: Any) -> dict[str, Any]:
         if not isinstance(definition, dict):
             raise ProjectFileError(f"The query_definition for {source['id']!r} is invalid.")
         operation = definition.get("operation")
-        if operation == "append":
+        if operation == "reference":
+            if set(definition) != {"operation", "source_ids"}:
+                raise ProjectFileError(f"The query_definition for {source['id']!r} is invalid.")
+            minimum_dependencies = 1
+            maximum_dependencies = 1
+        elif operation == "append":
             if set(definition) != {"operation", "source_ids"}:
                 raise ProjectFileError(f"The query_definition for {source['id']!r} is invalid.")
             minimum_dependencies = 2
@@ -663,7 +761,12 @@ def validate_project(value: Any) -> dict[str, Any]:
         if missing is not None:
             raise ProjectFileError(f"Query source {missing!r} does not exist in this project.")
         query_dependencies[source["id"]] = list(dependencies)
-        if operation == "append":
+        if operation == "reference":
+            source["query_definition"] = {
+                "operation": "reference",
+                "source_ids": list(dependencies),
+            }
+        elif operation == "append":
             source["query_definition"] = {
                 "operation": "append",
                 "source_ids": list(dependencies),
@@ -733,7 +836,7 @@ def validate_project(value: Any) -> dict[str, Any]:
         query_operation = query_definition.get("operation")
         if query_operation in {"calculated_table", "calendar", "calendar_auto"}:
             return True
-        if query_operation in {"append", "merge"}:
+        if query_operation in {"append", "merge", "reference"}:
             return any(
                 derives_from_generated_date_table(str(dependency), next_visited_ids)
                 for dependency in query_definition.get("source_ids", [])
@@ -755,7 +858,7 @@ def validate_project(value: Any) -> dict[str, Any]:
             query_operation = candidate_source.get("query_definition", {}).get("operation")
             if (
                 candidate_source.get("load_enabled", True) is True
-                and query_operation in {"append", "merge"}
+                and query_operation in {"append", "merge", "reference"}
                 and not derives_from_generated_date_table(candidate_id, set())
             ):
                 auto_dependencies.append(candidate_id)
@@ -818,18 +921,66 @@ def validate_project(value: Any) -> dict[str, Any]:
         SUPPORTED_COLUMN_TYPES,
         TransformationError,
         canonical_column_type,
+        validate_applied_step_metadata,
         validate_steps,
     )
 
     for source in sources:
         try:
             source["transform_steps"] = validate_steps(source.get("transform_steps", []))
+            missing_parameters = (
+                parameter_references(
+                    source["transform_steps"], function_names=function_names
+                ) - parameter_names
+            )
+            if missing_parameters:
+                missing = ", ".join(sorted(missing_parameters))
+                raise TransformationError(
+                    f"The query references missing Power Query parameter(s): {missing}."
+                )
+            from analytics_studio.power_query_expression import (
+                ExpressionError,
+                compile_expression,
+                referenced_functions,
+            )
+            for step in source["transform_steps"]:
+                if step.get("op") != "add_custom_column":
+                    continue
+                try:
+                    formula = compile_expression(
+                        step["expression"],
+                        allowed_symbols=parameter_names,
+                        function_names=function_names,
+                    )
+                except ExpressionError as exc:
+                    raise TransformationError(
+                        f"Custom column formula: {exc}"
+                    ) from exc
+                unresolved = referenced_functions(formula) - function_names
+                if unresolved:
+                    raise TransformationError(
+                        "The query references missing Power Query function(s): "
+                        + ", ".join(sorted(unresolved))
+                        + "."
+                    )
+            step_metadata = validate_applied_step_metadata(
+                source.get("step_metadata", []),
+                len(source["transform_steps"]),
+            )
+            if any(step_metadata):
+                source["step_metadata"] = step_metadata
+            else:
+                source.pop("step_metadata", None)
         except TransformationError as exc:
             raise ProjectFileError(
-                f"The transform_steps for data source {source['id']!r} are invalid: {exc}"
+                f"The transformation metadata for data source {source['id']!r} is invalid: {exc}"
             ) from exc
 
     report = value.get("report")
+    theme = report.get("theme", "Default") if isinstance(report, dict) else None
+    if not isinstance(theme, str) or theme not in REPORT_THEMES:
+        raise ProjectFileError("The report theme must be Default, Executive, High Contrast, or Sunset.")
+    report["theme"] = theme
     pages = report.get("pages") if isinstance(report, dict) else None
     if not isinstance(pages, list) or not pages:
         raise ProjectFileError("A project must contain at least one report page.")
@@ -848,6 +999,7 @@ def validate_project(value: Any) -> dict[str, Any]:
         if not isinstance(visuals, list):
             raise ProjectFileError("A report page visuals field must be a list.")
         visual_ids = set()
+        visual_group_counts: dict[str, int] = {}
         for visual in visuals:
             if not isinstance(visual, dict):
                 raise ProjectFileError("Each report visual must be a dictionary.")
@@ -857,19 +1009,85 @@ def validate_project(value: Any) -> dict[str, Any]:
             if v_id in visual_ids:
                 raise ProjectFileError("Report visuals must have unique id strings.")
             visual_ids.add(v_id)
-            if not isinstance(visual.get("title", ""), str):
-                raise ProjectFileError("Report visual title must be a string.")
+            if not isinstance(visual.get("title", ""), str) or not visual.get("title", "").strip():
+                raise ProjectFileError("Report visual title must be a non-empty string.")
             if not isinstance(visual.get("type"), str):
                 raise ProjectFileError("Report visual type must be a string.")
+            field_aggregations = visual.get("field_aggregations", {})
+            if not isinstance(field_aggregations, dict) or any(
+                not isinstance(field, str)
+                or not field.strip()
+                or not isinstance(aggregation, str)
+                or aggregation not in {"sum", "count", "average"}
+                for field, aggregation in field_aggregations.items()
+            ):
+                raise ProjectFileError(
+                    "Report visual field aggregations must map field names to sum, count, or average."
+                )
             for key in ("x", "y", "width", "height"):
-                if key in visual and not isinstance(visual[key], (int, float)):
-                    raise ProjectFileError(f"Report visual '{key}' must be a number.")
+                if key in visual and (
+                    isinstance(visual[key], bool)
+                    or not isinstance(visual[key], (int, float))
+                    or not math.isfinite(visual[key])
+                    or visual[key] < (10 if key in {"width", "height"} else 0)
+                ):
+                    raise ProjectFileError(
+                        f"Report visual '{key}' must be a finite, non-negative number"
+                        + (" of at least 10." if key in {"width", "height"} else ".")
+                    )
+            color = visual.get("color")
+            if color is not None and (
+                not isinstance(color, str)
+                or len(color) != 7
+                or color[0] != "#"
+                or any(character not in "0123456789abcdefABCDEF" for character in color[1:])
+            ):
+                raise ProjectFileError("Report visual colors must use #RRGGBB hex values.")
+            image_path = visual.get("image_path")
+            if image_path is not None and not isinstance(image_path, str):
+                raise ProjectFileError("Report visual image_path must be a string.")
+            for key in ("show_data_labels", "show_legend"):
+                if key in visual and type(visual[key]) is not bool:
+                    raise ProjectFileError(f"Report visual {key} must be a boolean.")
+            group_id = visual.get("group_id")
+            if group_id is not None:
+                if not isinstance(group_id, str) or not group_id.strip():
+                    raise ProjectFileError("Report visual group_id must be a non-empty string.")
+                visual_group_counts[group_id] = visual_group_counts.get(group_id, 0) + 1
+        if any(count < 2 for count in visual_group_counts.values()):
+            raise ProjectFileError("Each report visual group must contain at least two visuals.")
         hidden = page.get("hidden", False)
         if type(hidden) is not bool:
             raise ProjectFileError("A report page hidden field must be a boolean.")
         page["hidden"] = hidden
         _validate_report_filters(page.get("filters"), scope_name="page")
         _validate_report_filters(page.get("visual_filters"), scope_name="visual", visual=True)
+        interactions = page.get("visual_interactions", [])
+        if not isinstance(interactions, list):
+            raise ProjectFileError("Report visual_interactions must be a list.")
+        interaction_pairs = set()
+        for interaction in interactions:
+            if not isinstance(interaction, dict):
+                raise ProjectFileError("Each report visual interaction must be an object.")
+            source_id = interaction.get("source_visual_id")
+            target_id = interaction.get("target_visual_id")
+            mode = interaction.get("mode")
+            pair = (source_id, target_id)
+            if (
+                not isinstance(source_id, str) or not source_id.strip()
+                or not isinstance(target_id, str) or not target_id.strip()
+                or source_id == target_id
+                or source_id not in visual_ids
+                or target_id not in visual_ids
+                or pair in interaction_pairs
+                or not isinstance(mode, str)
+                or mode not in {"filter", "highlight", "none"}
+            ):
+                raise ProjectFileError(
+                    "Report visual interactions need unique source/target IDs and a filter, highlight, or none mode."
+                )
+            interaction_pairs.add(pair)
+        page["visual_interactions"] = interactions
     active_page_id = report.get("active_page_id")
     if not isinstance(active_page_id, str) or active_page_id not in page_ids:
         raise ProjectFileError("The report active_page_id must match an existing page.")
@@ -1613,4 +1831,138 @@ def _migrate_v67_to_v68(value: dict[str, Any]) -> dict[str, Any]:
                                 })
                         page["visuals"] = new_visuals
     migrated["format_version"] = 68
+    return migrated
+
+
+def _migrate_v68_to_v69(value: dict[str, Any]) -> dict[str, Any]:
+    """Enable saved explicit aggregations for visual measure fields."""
+    migrated = deepcopy(value)
+    migrated["format_version"] = 69
+    return migrated
+
+
+def _migrate_v69_to_v70(value: dict[str, Any]) -> dict[str, Any]:
+    """Add saved source-to-target interaction settings to report pages."""
+    migrated = deepcopy(value)
+    report = migrated.get("report")
+    if isinstance(report, dict):
+        for page in report.get("pages", []):
+            if isinstance(page, dict):
+                page.setdefault("visual_interactions", [])
+    migrated["format_version"] = 70
+    return migrated
+
+
+def _migrate_v70_to_v71(value: dict[str, Any]) -> dict[str, Any]:
+    """Add saved data-label and legend visibility to report visuals."""
+    migrated = deepcopy(value)
+    report = migrated.get("report")
+    if isinstance(report, dict):
+        for page in report.get("pages", []):
+            if not isinstance(page, dict):
+                continue
+            for visual in page.get("visuals", []):
+                if isinstance(visual, dict):
+                    visual.setdefault("show_data_labels", False)
+                    visual.setdefault("show_legend", False)
+    migrated["format_version"] = 71
+    return migrated
+
+
+def _migrate_v71_to_v72(value: dict[str, Any]) -> dict[str, Any]:
+    """Enable optional page-scoped groups for report visuals."""
+    migrated = deepcopy(value)
+    migrated["format_version"] = 72
+    return migrated
+
+
+def _migrate_v72_to_v73(value: dict[str, Any]) -> dict[str, Any]:
+    """Add a saved report-wide theme, defaulting existing projects to Default."""
+    migrated = deepcopy(value)
+    report = migrated.get("report")
+    if isinstance(report, dict):
+        report.setdefault("theme", "Default")
+    migrated["format_version"] = 73
+    return migrated
+
+
+def _migrate_v73_to_v74(value: dict[str, Any]) -> dict[str, Any]:
+    """Remove untouched demo visuals from projects made by the old starter template."""
+    migrated = deepcopy(value)
+    layouts = (
+        ("card", "Revenue KPI", 14, 14, 120, 80),
+        ("card", "Cost KPI", 148, 14, 120, 80),
+        ("card", "Margin KPI", 282, 14, 120, 80),
+        ("card", "Units KPI", 416, 14, 120, 80),
+        ("card", "Orders KPI", 550, 14, 120, 80),
+        ("column", "Monthly revenue", 14, 108, 330, 248),
+        ("bar", "Region revenue", 358, 108, 330, 248),
+    )
+    default_keys = {
+        "id", "type", "title", "x", "y", "width", "height",
+        "show_data_labels", "show_legend",
+    }
+    report = migrated.get("report")
+    if isinstance(report, dict):
+        for page in report.get("pages", []):
+            if not isinstance(page, dict):
+                continue
+            if page.get("visual_interactions") or page.get("visual_filters"):
+                continue
+            visuals = page.get("visuals")
+            if not isinstance(visuals, list):
+                continue
+            matches = []
+            for layout in layouts:
+                match = next((
+                    index for index, visual in enumerate(visuals)
+                    if isinstance(visual, dict)
+                    and visual.get("type") == layout[0]
+                    and visual.get("title") == layout[1]
+                    and tuple(visual.get(key) for key in ("x", "y", "width", "height")) == layout[2:]
+                    and set(visual).issubset(default_keys)
+                    and not visual.get("show_data_labels", False)
+                    and not visual.get("show_legend", False)
+                ), None)
+                if match is None:
+                    matches = []
+                    break
+                matches.append(match)
+            if len(matches) == len(layouts):
+                starter_indexes = set(matches)
+                page["visuals"] = [
+                    visual for index, visual in enumerate(visuals)
+                    if index not in starter_indexes
+                ]
+    migrated["format_version"] = 74
+    return migrated
+
+
+def _migrate_v74_to_v75(value: dict[str, Any]) -> dict[str, Any]:
+    """Allow optional saved Power Query M editor text on data sources."""
+    migrated = deepcopy(value)
+    migrated["format_version"] = 75
+    return migrated
+
+
+def _migrate_v75_to_v76(value: dict[str, Any]) -> dict[str, Any]:
+    """Add a project-level collection for Power Query parameters."""
+    migrated = deepcopy(value)
+    migrated.setdefault("query_parameters", [])
+    migrated["format_version"] = 76
+    return migrated
+
+
+def _migrate_v76_to_v77(value: dict[str, Any]) -> dict[str, Any]:
+    """Allow optional description, display-folder, and hidden measure metadata."""
+    migrated = deepcopy(value)
+    migrated["format_version"] = 77
+    return migrated
+
+
+def _migrate_v77_to_v78(value: dict[str, Any]) -> dict[str, Any]:
+    """Add the project-level Power Query scalar function registry."""
+    migrated = deepcopy(value)
+    migrated.setdefault("query_functions", [])
+    migrated["format_version"] = 78
     return migrated

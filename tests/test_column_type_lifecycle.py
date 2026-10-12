@@ -6,14 +6,16 @@ import os
 from pathlib import Path
 import tempfile
 import unittest
+from unittest.mock import patch
 
 os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
 
 from PySide6.QtCore import QSettings
-from PySide6.QtWidgets import QApplication
+from PySide6.QtWidgets import QApplication, QDialog, QToolButton
 
 from analytics_studio.controller import StudioController
 from analytics_studio.file_import import parse_file
+from analytics_studio.local_table_dialogs import TransformDataDialog
 
 
 class ColumnTypeLifecycleTests(unittest.TestCase):
@@ -143,6 +145,63 @@ class ColumnTypeLifecycleTests(unittest.TestCase):
         })
         self.assertEqual(
             self.table_for(reopened, source_id)["column_types"], model_types
+        )
+
+    def test_transform_session_preserves_detected_types_through_edit_and_reference(self) -> None:
+        controller = self.controller("session-types-settings.ini")
+        self.assertTrue(controller._commit_import(
+            self.source_path, parse_file(self.source_path)
+        ))
+        source_id = controller.activeTableId
+        created: dict[str, str] = {}
+
+        def accept_with_unrelated_edit(dialog: TransformDataDialog) -> QDialog.DialogCode:
+            root_state = dialog._query_states[source_id]
+            self.assertEqual(root_state["source_column_types"]["Revenue"], "decimal_number")
+            self.assertEqual(root_state["column_types"]["Revenue"], "decimal_number")
+
+            dialog.operation_combo.setCurrentIndex(
+                dialog.operation_combo.findData("add_index_column")
+            )
+            dialog.value_edit.setText("Row Index")
+            dialog.index_start_edit.setText("0")
+            dialog.index_increment_edit.setText("1")
+            dialog._add_step()
+            self.assertEqual(
+                dialog._query_states[source_id]["column_types"]["Revenue"],
+                "decimal_number",
+            )
+
+            home_index = next(
+                index for index in range(dialog.ribbon_tabs.count())
+                if dialog.ribbon_tabs.tabText(index) == "Home"
+            )
+            dialog.ribbon_tabs.setCurrentIndex(home_index)
+            reference_button = next(
+                button for button in dialog.ribbon_tabs.currentWidget().findChildren(QToolButton)
+                if button.text() == "Reference\nquery"
+            )
+            reference_button.click()
+            reference_id = dialog._active_query_id
+            reference = dialog._query_states[reference_id]
+            self.assertEqual(
+                reference["source_column_types"]["Revenue"], "decimal_number"
+            )
+            self.assertEqual(reference["column_types"]["Revenue"], "decimal_number")
+            created["id"] = reference_id
+            dialog._accept_candidate()
+            return QDialog.DialogCode.Accepted
+
+        with patch.object(TransformDataDialog, "exec", new=accept_with_unrelated_edit):
+            self.assertTrue(controller.transform_data_dialog(), controller._status_message)
+
+        self.assertEqual(
+            self.table_for(controller, source_id)["column_types"]["Revenue"],
+            "decimal_number",
+        )
+        self.assertEqual(
+            self.table_for(controller, created["id"])["column_types"]["Revenue"],
+            "decimal_number",
         )
 
 

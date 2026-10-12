@@ -159,12 +159,15 @@ implement every Power Query calendar or format rule.
 
 from __future__ import annotations
 
+import math
 import re
 import unicodedata
 from collections import Counter
 from copy import deepcopy
 from datetime import date, datetime, time
-from decimal import MAX_EMAX, MIN_EMIN, Decimal, DecimalException, localcontext
+from decimal import (
+    MAX_EMAX, MIN_EMIN, Decimal, DecimalException, ROUND_HALF_EVEN, localcontext,
+)
 from typing import Any
 
 from babel import Locale
@@ -350,8 +353,32 @@ def validate_steps(steps: Any) -> list[dict[str, Any]]:
                 raise TransformationError(
                     f"Transformation step {index} has missing or unsupported fields."
                 )
+        elif op == "filter_rows":
+            allowed_shapes = (
+                _STEP_FIELDS[op],
+                (_STEP_FIELDS[op] - {"value"}) | {"parameter"},
+            )
+            if set(step) not in allowed_shapes:
+                raise TransformationError(
+                    f"Transformation step {index} has missing or unsupported fields."
+                )
+        elif op == "add_custom_column":
+            if set(step) not in (
+                _STEP_FIELDS[op], _STEP_FIELDS[op] | {"output_type"}
+            ):
+                raise TransformationError(f"Transformation step {index} has missing or unsupported fields.")
         elif set(step) != _STEP_FIELDS[op]:
             raise TransformationError(f"Transformation step {index} has missing or unsupported fields.")
+        if op == "add_custom_column" and "output_type" in step:
+            if not isinstance(step["output_type"], str) or step["output_type"] not in {
+                "text", "whole_number", "decimal_number", "boolean", "date", "datetime"
+            }:
+                raise TransformationError(
+                    f"Transformation step {index} has an unsupported custom-column output type."
+                )
+            if step["output_type"] == "text":
+                step = dict(step)
+                step.pop("output_type")
         if op in {"remove_duplicates", "keep_duplicates"} and "columns" in step:
             columns = step["columns"]
             if not isinstance(columns, list) or not columns or any(
@@ -717,7 +744,11 @@ def validate_steps(steps: Any) -> list[dict[str, Any]]:
                     f"Transformation step {index} needs a formula."
                 )
             try:
-                compile_expression(expression)
+                compile_expression(
+                    expression,
+                    allow_unknown_symbols=True,
+                    allow_unknown_functions=True,
+                )
             except PowerQueryExpressionError as exc:
                 raise TransformationError(
                     f"Custom column formula in step {index}: {exc}"
@@ -822,11 +853,14 @@ def validate_steps(steps: Any) -> list[dict[str, Any]]:
                     f"An advanced filter may contain at most {MAX_FILTER_CLAUSES} clauses."
                 )
             clause_fields = {"column", "operator", "value", "join"}
+            parameter_clause_fields = {"column", "operator", "parameter", "join"}
             validated_clauses: list[dict[str, str]] = []
             for clause_index, clause in enumerate(clauses, 1):
                 if (
                     not isinstance(clause, dict)
-                    or set(clause) != clause_fields
+                    or frozenset(clause) not in {
+                        frozenset(clause_fields), frozenset(parameter_clause_fields),
+                    }
                     or any(not isinstance(value, str) for value in clause.values())
                 ):
                     raise TransformationError(
@@ -835,6 +869,7 @@ def validate_steps(steps: Any) -> list[dict[str, Any]]:
                 column = clause["column"]
                 operator = clause["operator"].strip()
                 join = clause["join"].strip()
+                parameter_name = clause.get("parameter")
                 if not column.strip():
                     raise TransformationError(
                         f"Filter clause {clause_index} in step {index} needs a column."
@@ -845,7 +880,7 @@ def validate_steps(steps: Any) -> list[dict[str, Any]]:
                     )
                 if (
                     operator in FILTER_OPERATORS_WITHOUT_VALUE
-                    and clause["value"]
+                    and ("parameter" in clause or clause["value"])
                 ):
                     raise TransformationError(
                         f"Filter clause {clause_index} in step {index} does not use a comparison value."
@@ -858,12 +893,20 @@ def validate_steps(steps: Any) -> list[dict[str, Any]]:
                     raise TransformationError(
                         f"The first filter clause in step {index} cannot have a join operator."
                     )
-                validated_clauses.append({
+                if parameter_name is not None and not parameter_name.strip():
+                    raise TransformationError(
+                        f"Filter clause {clause_index} in step {index} needs a parameter name."
+                    )
+                validated_clause = {
                     "column": column,
                     "operator": operator,
-                    "value": clause["value"],
                     "join": join,
-                })
+                }
+                if parameter_name is None:
+                    validated_clause["value"] = clause["value"]
+                else:
+                    validated_clause["parameter"] = parameter_name.strip()
+                validated_clauses.append(validated_clause)
             step = {**step, "clauses": validated_clauses}
         elif op == "sort_rows_by_columns":
             sorts = step["sorts"]
@@ -922,9 +965,19 @@ def validate_steps(steps: Any) -> list[dict[str, Any]]:
         elif op == "filter_rows":
             if step["operator"] not in _FILTER_OPERATORS:
                 raise TransformationError(f"Transformation step {index} has an unsupported filter operator.")
+            if "parameter" in step:
+                if (
+                    not isinstance(step["parameter"], str)
+                    or not step["parameter"].strip()
+                    or step["operator"] in FILTER_OPERATORS_WITHOUT_VALUE
+                ):
+                    raise TransformationError(
+                        f"Transformation step {index} needs a comparison parameter for this filter."
+                    )
+                step = {**step, "parameter": step["parameter"].strip()}
             if (
                 step["operator"] in FILTER_OPERATORS_WITHOUT_VALUE
-                and step["value"]
+                and step.get("value")
             ):
                 raise TransformationError(
                     f"Transformation step {index} does not use a comparison value for this filter."
@@ -949,9 +1002,102 @@ def validate_steps(steps: Any) -> list[dict[str, Any]]:
     return validated
 
 
-def apply_transformations(candidate: ImportCandidate, steps: Any) -> ImportCandidate:
+def validate_applied_step_metadata(value: Any, step_count: int) -> list[dict[str, str]]:
+    """Normalize display names/descriptions stored beside an applied-step list."""
+    if not isinstance(value, list):
+        raise TransformationError("Applied-step metadata must be a list.")
+    if (
+        not isinstance(step_count, int)
+        or isinstance(step_count, bool)
+        or step_count < 0
+        or step_count > MAX_TRANSFORMATION_STEPS
+    ):
+        raise TransformationError("Applied-step metadata has an invalid step count.")
+    if len(value) > MAX_TRANSFORMATION_STEPS:
+        raise TransformationError(
+            f"Applied-step metadata may contain at most {MAX_TRANSFORMATION_STEPS} items."
+        )
+
+    normalized: list[dict[str, str]] = []
+    for index in range(step_count):
+        item = value[index] if index < len(value) else {}
+        if not isinstance(item, dict) or set(item) - {"name", "description"}:
+            raise TransformationError(
+                f"Applied-step metadata {index + 1} must contain only name and description."
+            )
+        name = item.get("name", "")
+        description = item.get("description", "")
+        if (
+            not isinstance(name, str)
+            or len(name) > 120
+            or any(ord(char) < 32 for char in name)
+        ):
+            raise TransformationError(
+                f"The name for applied step {index + 1} must be at most 120 characters and contain no control characters."
+            )
+        if (
+            not isinstance(description, str)
+            or len(description) > 4000
+            or "\x00" in description
+        ):
+            raise TransformationError(
+                f"The description for applied step {index + 1} must be at most 4,000 characters and contain no null characters."
+            )
+        clean: dict[str, str] = {}
+        if name.strip():
+            clean["name"] = name.strip()
+        if description.strip():
+            clean["description"] = description.strip()
+        normalized.append(clean)
+    return normalized
+
+
+def apply_transformations(
+    candidate: ImportCandidate,
+    steps: Any,
+    *,
+    parameters: dict[str, Any] | None = None,
+) -> ImportCandidate:
     """Return a transformed copy of ``candidate`` after replaying ``steps``."""
     validated_steps = validate_steps(steps)
+    parameter_values = parameters if parameters is not None else {}
+    from analytics_studio.query_functions import (
+        QueryFunctionError,
+        compile_query_functions,
+    )
+    try:
+        compiled_query_functions = compile_query_functions(
+            getattr(parameter_values, "query_functions", [])
+        )
+    except QueryFunctionError as exc:
+        raise TransformationError(f"Power Query functions: {exc}") from exc
+    resolved_steps: list[dict[str, Any]] = []
+    for step in validated_steps:
+        resolved = dict(step)
+        if step["op"] == "filter_rows" and "parameter" in step:
+            name = step["parameter"]
+            if name not in parameter_values:
+                raise TransformationError(
+                    f"Power Query parameter {name!r} has no current value."
+                )
+            resolved.pop("parameter")
+            resolved["value"] = _parameter_filter_text(parameter_values[name])
+        elif step["op"] == "filter_rows_advanced":
+            clauses = []
+            for clause in step["clauses"]:
+                resolved_clause = dict(clause)
+                if "parameter" in clause:
+                    name = clause["parameter"]
+                    if name not in parameter_values:
+                        raise TransformationError(
+                            f"Power Query parameter {name!r} has no current value."
+                        )
+                    resolved_clause.pop("parameter")
+                    resolved_clause["value"] = _parameter_filter_text(parameter_values[name])
+                clauses.append(resolved_clause)
+            resolved["clauses"] = clauses
+        resolved_steps.append(resolved)
+    validated_steps = validate_steps(resolved_steps)
     _validate_candidate(candidate)
 
     result = ImportCandidate(
@@ -1087,7 +1233,14 @@ def apply_transformations(candidate: ImportCandidate, steps: Any) -> ImportCandi
             _check_candidate_limits(result.headers, result.rows)
             continue
         if op == "add_custom_column":
-            result = _add_custom_column(result, step["name"], step["expression"])
+            result = _add_custom_column(
+                result,
+                step["name"],
+                step["expression"],
+                parameter_values,
+                output_type=step.get("output_type", "text"),
+                query_functions=compiled_query_functions,
+            )
             _check_candidate_limits(result.headers, result.rows)
             continue
         if op == "conditional_column":
@@ -1230,19 +1383,148 @@ def canonical_column_type(type_name: str) -> str:
     return "decimal_number" if type_name == "number" else type_name
 
 
+_IDENTIFIER_HEADER_WORDS = {
+    "account", "code", "customer", "id", "key", "mobile", "no", "phone",
+    "postal", "ref", "reference", "serial", "trn", "voucher", "zip",
+}
+_IDENTIFIER_HEADER_SUFFIXES = ("id", "key", "code", "ref", "reference", "number")
+_LONG_INTEGER_TEXT = re.compile(r"^[+-]?\d{16,}$")
+_LEADING_ZERO_INTEGER = re.compile(r"^[+-]?0\d+$")
+_WHOLE_NUMBER_TEXT = re.compile(r"^[+-]?\d+$")
+
+
+def infer_column_types(
+    headers: list[str],
+    rows: list[dict[str, str]],
+    *,
+    sample_size: int = 200,
+) -> dict[str, str]:
+    """Infer conservative model types from a bounded sample of imported text.
+
+    The first ``sample_size`` rows choose a candidate type. The complete column
+    must also convert cleanly before the type is applied, and identifier-like
+    fields stay text to preserve leading zeroes and large numeric keys.
+    """
+    if not isinstance(sample_size, int) or isinstance(sample_size, bool) or sample_size < 1:
+        raise ValueError("A type-detection sample must contain at least one row.")
+    inferred = {header: "text" for header in headers}
+    sample = rows[:sample_size]
+    for header in headers:
+        sample_values = [str(row.get(header, "")).strip() for row in sample]
+        sample_values = [value for value in sample_values if value]
+        all_values = [str(row.get(header, "")).strip() for row in rows]
+        all_values = [value for value in all_values if value]
+        if not sample_values or _is_identifier_column(header, all_values):
+            continue
+
+        lowered = {value.casefold() for value in sample_values}
+        if lowered <= {"true", "false"}:
+            candidate_type = "boolean"
+        else:
+            candidate_type = _infer_iso_temporal_type(sample_values)
+            if candidate_type == "date" and _infer_iso_temporal_type(all_values) == "datetime":
+                candidate_type = "datetime"
+            if candidate_type is None:
+                numeric_values = [_parse_number_for_inference(value) for value in sample_values]
+                if all(value is not None for value in numeric_values):
+                    whole_numbers = all(
+                        value == value.to_integral_value()
+                        and _WHOLE_NUMBER_TEXT.fullmatch(source) is not None
+                        for value, source in zip(numeric_values, sample_values)
+                    )
+                    all_numeric_values = [_parse_number_for_inference(value) for value in all_values]
+                    if not all(value is not None for value in all_numeric_values):
+                        candidate_type = None
+                    elif whole_numbers and all(
+                        value == value.to_integral_value()
+                        and _WHOLE_NUMBER_TEXT.fullmatch(source) is not None
+                        for value, source in zip(all_numeric_values, all_values)
+                    ):
+                        candidate_type = "whole_number"
+                    else:
+                        candidate_type = "decimal_number"
+        if (
+            candidate_type is not None
+            and count_conversion_errors(all_values, candidate_type) == 0
+        ):
+            inferred[header] = candidate_type
+    return inferred
+
+
+def _is_identifier_column(header: str, values: list[str]) -> bool:
+    words = re.findall(r"[a-z0-9]+", header.casefold())
+    if _IDENTIFIER_HEADER_WORDS.intersection(words):
+        return True
+    compact = "".join(words)
+    if compact.endswith(_IDENTIFIER_HEADER_SUFFIXES):
+        return True
+    return any(
+        _LONG_INTEGER_TEXT.fullmatch(value) or _LEADING_ZERO_INTEGER.fullmatch(value)
+        for value in values
+    )
+
+
+def _infer_iso_temporal_type(values: list[str]) -> str | None:
+    try:
+        for value in values:
+            date.fromisoformat(value)
+        return "date"
+    except ValueError:
+        pass
+    try:
+        parsed = [datetime.fromisoformat(value.replace("Z", "+00:00")) for value in values]
+        if any("T" in value or " " in value for value in values):
+            return "datetime"
+        # Keep a consistently date-only ISO column as a date rather than
+        # inferring midnight datetimes from Python's permissive parser.
+        return "date" if all(value.date().isoformat() == source for value, source in zip(parsed, values)) else "datetime"
+    except ValueError:
+        pass
+    # ``time.fromisoformat`` accepts compact strings such as ``"10"`` as
+    # 10:00. Plain digit-only business values are much more often counts or
+    # amounts, so require the hour/minute separator before considering a time.
+    if any(":" not in value for value in values):
+        return None
+    try:
+        for value in values:
+            time.fromisoformat(value)
+        return "time"
+    except ValueError:
+        return None
+
+
+def _parse_number_for_inference(value: str) -> Decimal | None:
+    try:
+        number = Decimal(value)
+    except (DecimalException, ValueError):
+        return None
+    return number if number.is_finite() else None
+
+
 def column_types_after_steps(
     headers: list[str],
     steps: Any,
     *,
     output_headers: list[str] | None = None,
+    initial_types: dict[str, str] | None = None,
 ) -> dict[str, str]:
     """Return the column types produced by a validated transformation sequence."""
-    types = {header: "text" for header in headers}
-    for step in validate_steps(steps):
+    supplied_types = initial_types or {}
+    types = {
+        header: canonical_column_type(supplied_types.get(header, "text"))
+        for header in headers
+    }
+    validated_steps = validate_steps(steps)
+    header_count: int | None = len(headers)
+    header_names_known = True
+    for step_index, step in enumerate(validated_steps):
         op = step["op"]
         if op in {"promote_headers", "demote_headers", "transpose_table"}:
             # Schema reshaping changes the fields; rebuilt columns default to text.
             types = {}
+            header_names_known = False
+            if op == "transpose_table":
+                header_count = None
         elif op == "rename_column":
             column_type = types.pop(step["column"], "text")
             types[step["new_name"].strip()] = column_type
@@ -1353,10 +1635,70 @@ def column_types_after_steps(
                 for header, column_type in types.items()
                 if header not in {attribute_column, value_column}
             }
+            if (
+                output_headers is not None
+                and step["aggregation"] in {"count_all", "count_non_blank"}
+            ):
+                if header_names_known:
+                    # Data-derived category fields are the new names absent
+                    # from the retained key-column type map.
+                    for header in output_headers:
+                        if header not in types:
+                            types[header] = "whole_number"
+                elif (
+                    header_count is not None
+                    and all(
+                        following["op"] in {
+                            "filter_rows", "filter_rows_advanced", "remove_blank_rows",
+                            "sort_rows", "sort_rows_by_columns", "keep_top_rows",
+                            "keep_bottom_rows", "keep_range_rows", "remove_top_rows",
+                            "remove_bottom_rows", "remove_alternate_rows", "convert_type",
+                            "convert_type_using_locale", "fill_down", "fill_up",
+                            "trim_text", "clean_text", "lowercase_text", "uppercase_text",
+                            "proper_case_text", "reverse_text", "replace_value",
+                            "extract_text_by_delimiter", "extract_text_between_delimiters",
+                            "split_column_to_rows",
+                        }
+                        for following in validated_steps[step_index + 1:]
+                    )
+                ):
+                    # After header promotion the key names are not known here.
+                    # Pivot always appends its data-derived categories after
+                    # its retained key columns, so only that output suffix is
+                    # safe to type.
+                    key_count = max(0, header_count - 2)
+                    for header in output_headers[key_count:]:
+                        types[header] = "whole_number"
         elif op == "add_custom_column":
-            types[step["name"]] = "text"
+            types[step["name"]] = step.get("output_type", "text")
         elif op == "conditional_column":
             types[step["name"]] = "text"
+
+        # Keep a conservative schema width so a Pivot after Promote Headers can
+        # distinguish retained keys from appended data-derived categories.
+        if op == "keep_columns":
+            header_count = len(step["columns"])
+        elif op == "remove_column" and header_count is not None:
+            header_count = max(0, header_count - 1)
+        elif op in {"duplicate_column", "add_index_column", "add_custom_column", "conditional_column"}:
+            if header_count is not None:
+                header_count += 1
+        elif op == "merge_columns" and header_count is not None:
+            header_count += 1 - len(step["columns"])
+        elif op == "split_column" and header_count is not None:
+            header_count += 1
+        elif op == "split_column_by_positions" and header_count is not None:
+            header_count += len(step["positions"]) - 1
+        elif op == "split_column_by_each_delimiter":
+            header_count = None
+        elif op == "group_by":
+            header_count = len(step["columns"]) + len(step["aggregations"])
+        elif op == "unpivot_columns" and header_count is not None:
+            header_count += 2 - len(step["columns"])
+        elif op == "unpivot_other_columns":
+            header_count = len(step["columns"]) + 2
+        elif op == "pivot_column":
+            header_count = None
     if output_headers is not None:
         return {header: types.get(header, "text") for header in output_headers}
     return types
@@ -1938,6 +2280,10 @@ def _add_custom_column(
     candidate: ImportCandidate,
     name: str,
     expression: str,
+    parameters: dict[str, Any] | None = None,
+    *,
+    output_type: str = "text",
+    query_functions: dict[str, tuple[dict[str, str], tuple[Any, ...]]] | None = None,
 ) -> ImportCandidate:
     """Evaluate one bounded M-style formula against each row and append its result."""
     if name in candidate.headers:
@@ -1946,8 +2292,14 @@ def _add_custom_column(
         raise TransformationError(f"Adding a custom column exceeds the {MAX_COLUMNS}-column limit.")
     if len(candidate.rows) * (len(candidate.headers) + 1) > MAX_CELLS:
         raise TransformationError(f"Adding a custom column exceeds the {MAX_CELLS:,}-cell limit.")
+    parameter_values = parameters if parameters is not None else {}
     try:
-        formula = compile_expression(expression)
+        function_map = query_functions or {}
+        formula = compile_expression(
+            expression,
+            allowed_symbols=set(parameter_values),
+            function_names=set(function_map),
+        )
     except PowerQueryExpressionError as exc:
         raise TransformationError(f"Custom column formula: {exc}") from exc
     missing = sorted(referenced_columns(formula) - set(candidate.headers))
@@ -1959,7 +2311,18 @@ def _add_custom_column(
     total_output_bytes = 0
     for row_index, row in enumerate(candidate.rows, 1):
         try:
-            value = evaluate_expression(formula, row)
+            value = evaluate_expression(
+                formula, row, parameter_values, function_map
+            )
+            if output_type != "text":
+                from analytics_studio.query_functions import (
+                    QueryFunctionError,
+                    validate_typed_scalar,
+                )
+                try:
+                    value = validate_typed_scalar(output_type, value)
+                except QueryFunctionError as exc:
+                    raise PowerQueryExpressionError(str(exc)) from exc
             result_text = expression_value_to_text(value)
             total_output_bytes += len(result_text.encode("utf-8"))
             if total_output_bytes > MAX_EXPRESSION_OUTPUT_BYTES:
@@ -1978,6 +2341,17 @@ def _add_custom_column(
         options=candidate.options,
         notices=candidate.notices,
     )
+
+
+def _parameter_filter_text(value: Any) -> str:
+    """Normalize a typed parameter to the table model's comparison text."""
+    if isinstance(value, bool):
+        return "true" if value else "false"
+    if isinstance(value, (date, datetime, time)):
+        return value.isoformat()
+    if isinstance(value, Decimal):
+        return str(value)
+    return str(value)
 
 
 def _aggregate_group(
@@ -2561,6 +2935,22 @@ def _convert_column_using_locale(
             ) from exc
 
 
+def _decimal_number_text(number: Decimal) -> str:
+    double_value = float(number)
+    if not math.isfinite(double_value):
+        raise ValueError
+    if double_value == 0.0:
+        return "-0" if number.is_signed() else "0"
+    return str(number)
+
+
+def _int64_number_text(number: Decimal) -> str:
+    rounded = number.to_integral_value(rounding=ROUND_HALF_EVEN)
+    if rounded < -(1 << 63) or rounded > (1 << 63) - 1:
+        raise ValueError
+    return str(int(rounded))
+
+
 def _convert_value_using_locale(value: str, target_type: str, locale: Locale) -> str:
     if value == "":
         return value
@@ -2571,10 +2961,8 @@ def _convert_value_using_locale(value: str, target_type: str, locale: Locale) ->
         if not number.is_finite():
             raise ValueError
         if target_type == "whole_number":
-            if number != number.to_integral_value():
-                raise ValueError
-            return str(int(number))
-        return str(number)
+            return _int64_number_text(number)
+        return _decimal_number_text(number)
     if target_type == "date":
         stripped = value.strip()
         try:
@@ -2627,12 +3015,9 @@ def _convert_value(value: str, target_type: str, row_index: int, column: str) ->
         return value
     try:
         if target_type == "decimal_number":
-            return str(_parse_number(value))
+            return _decimal_number_text(_parse_number(value))
         if target_type == "whole_number":
-            number = _parse_number(value)
-            if number != number.to_integral_value():
-                raise ValueError
-            return str(int(number))
+            return _int64_number_text(_parse_number(value))
         if target_type == "boolean":
             lowered = value.strip().casefold()
             if lowered not in {"true", "false"}:

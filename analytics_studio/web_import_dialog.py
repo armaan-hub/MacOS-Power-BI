@@ -64,7 +64,7 @@ class WebImportDialog(QDialog):
         self.connection_note = QLabel(
             "Supports anonymous HTTPS GET for CSV, JSON, XML, Excel, Parquet, and static HTML tables. "
             "Credentials, custom headers, POST, and JavaScript-rendered pages are not supported. "
-            "The full URL is saved in the project, so do not include secrets in it."
+            "The full URL is saved in the project; token-like query parameters are rejected."
         )
         self.connection_note.setWordWrap(True)
         self.connection_note.setStyleSheet("color: #526477; padding: 2px 0;")

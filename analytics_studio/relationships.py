@@ -215,7 +215,10 @@ def _relationship_value_key(value: Any, column_type: str) -> tuple[str, Any]:
         ):
             raise RelationshipError("A relationship key contains a value that does not match its model type.")
         return "number", number
-    return "value", text
+    # The local model has no persisted collation setting. Use the common
+    # case-insensitive convention consistently for relationship joins,
+    # one-side uniqueness, unknown-member detection, and RELATED lookups.
+    return "value", text.casefold()
 
 
 def unknown_member_table_ids(

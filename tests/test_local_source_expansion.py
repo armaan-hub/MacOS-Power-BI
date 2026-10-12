@@ -107,6 +107,53 @@ class LocalSourceExpansionTests(unittest.TestCase):
         ])
         dialog.deleteLater()
 
+    def test_folder_dialog_edit_mode_restores_recipe_and_applies_settings(self) -> None:
+        folder = self.root / "monthly"
+        nested = folder / "archive"
+        nested.mkdir(parents=True)
+        (nested / "records.csv").write_text(
+            "Region;Amount\nDubai;25\n", encoding="utf-8"
+        )
+        options = default_folder_options()
+        options.update(
+            recursive=True,
+            name_contains="records",
+            sample_file="archive/records.csv",
+            include_source_name=True,
+        )
+        options["file_options"]["delimiter"] = ";"
+
+        dialog = FolderImportDialog(
+            folder,
+            replacing=True,
+            initial_options=options,
+            source_editing=True,
+        )
+        self.assertEqual(dialog.windowTitle(), "Edit folder source settings")
+        self.assertEqual(dialog.import_button.text(), "Apply settings")
+        self.assertFalse(dialog.replacement_label.isVisible())
+        self.assertTrue(self._wait_until(lambda: len(dialog._files) == 1))
+        self.assertTrue(dialog.recursive_checkbox.isChecked())
+        self.assertEqual(dialog.name_filter.text(), "records")
+        self.assertEqual(dialog.sample_combo.currentData(), "archive/records.csv")
+        self.assertTrue(dialog.source_name_checkbox.isChecked())
+        self.assertEqual(dialog._file_options["delimiter"], ";")
+
+        dialog._preview_combined()
+        self.assertTrue(self._wait_until(lambda: dialog.import_button.isEnabled()))
+        dialog._accept_candidate()
+        candidate = dialog.candidate
+        self.assertIsNotNone(candidate)
+        assert candidate is not None
+        self.assertEqual(candidate.options, options)
+        self.assertEqual(candidate.headers, ["Source.Name", "Region", "Amount"])
+        self.assertEqual(candidate.rows, [{
+            "Source.Name": "archive/records.csv",
+            "Region": "Dubai",
+            "Amount": "25",
+        }])
+        dialog.deleteLater()
+
     def test_folder_parser_reports_progress_and_cancels_cooperatively(self) -> None:
         folder = self.root / "monthly"
         folder.mkdir()

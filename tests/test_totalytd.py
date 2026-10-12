@@ -1707,6 +1707,145 @@ class TotalYtdTests(unittest.TestCase):
         self.assertEqual(reopened.reportKpis["Fiscal YTD"], "157")
         self.assertEqual(reopened._project["model"]["tables"][0]["date_column"], "Date")
 
+    def test_same_calculate_combines_ytd_and_boolean_filters_through_reopen(self) -> None:
+        calendar_path = self.root / "Calendar combined filters.csv"
+        calendar_start = date(2023, 1, 1)
+        calendar_end = date(2024, 12, 31)
+        calendar_lines = ["Date"] + [
+            (calendar_start + timedelta(days=offset)).isoformat()
+            for offset in range((calendar_end - calendar_start).days + 1)
+        ]
+        calendar_path.write_text("\n".join(calendar_lines) + "\n", encoding="utf-8")
+        orders_path = self.root / "Orders combined filters.csv"
+        orders_path.write_text(
+            "OrderDate,Amount,Region\n"
+            "2023-12-31,100,West\n"
+            "2024-01-05,10,East\n"
+            "2024-02-02,20,West\n"
+            "2024-03-30,30,West\n"
+            "2024-03-15,300,East\n"
+            "2024-04-02,40,West\n"
+            "2024-03-15,50,North\n",
+            encoding="utf-8",
+        )
+
+        controller = self.controller("combined-filter-settings.ini")
+        self.assertTrue(controller._commit_import(calendar_path, parse_file(calendar_path)))
+        calendar_id = str(controller.activeTableId)
+        self.assertTrue(controller.setColumnType("Date", "date"), controller.statusMessage)
+        self.mark_calendar(controller)
+        calendar_table = controller._model_table_for_source(controller._project, calendar_id)
+        assert calendar_table is not None
+        calendar_name = str(calendar_table["name"])
+
+        self.assertTrue(controller._commit_import(orders_path, parse_file(orders_path)))
+        orders_id = str(controller.activeTableId)
+        self.assertTrue(controller.setColumnType("OrderDate", "date"), controller.statusMessage)
+        self.assertTrue(controller.setColumnType("Amount", "whole_number"), controller.statusMessage)
+        self.add_date_relationship(controller, calendar_id, orders_id)
+        self.assertTrue(controller.addPageFilterRule(
+            calendar_id, "Date", "equals", "2024-03-30", "", "", "and"
+        ))
+        self.assertTrue(controller.addPageFilterRule(
+            orders_id, "Region", "equals", "East", "", "", "and"
+        ))
+
+        expressions = {
+            "Clear date then West YTD": (
+                f"CALCULATE(SUM([Amount]), REMOVEFILTERS('{calendar_name}'[Date]), "
+                f"DATESYTD('{calendar_name}'[Date]), "
+                "'Orders combined filters'[Region] = \"West\")"
+            ),
+            "Clear date table then West YTD": (
+                f"CALCULATE(SUM([Amount]), REMOVEFILTERS('{calendar_name}'), "
+                f"DATESYTD('{calendar_name}'[Date]), "
+                "'Orders combined filters'[Region] = \"West\")"
+            ),
+            "Clear all then West YTD": (
+                f"CALCULATE(SUM([Amount]), REMOVEFILTERS(), "
+                f"DATESYTD('{calendar_name}'[Date]), "
+                "'Orders combined filters'[Region] = \"West\")"
+            ),
+            "ALL date then West YTD": (
+                f"CALCULATE(SUM([Amount]), ALL('{calendar_name}'[Date]), "
+                f"DATESYTD('{calendar_name}'[Date]), "
+                "'Orders combined filters'[Region] = \"West\")"
+            ),
+            "ALL calendar then West YTD": (
+                f"CALCULATE(SUM([Amount]), ALL('{calendar_name}'), "
+                f"DATESYTD('{calendar_name}'[Date]), "
+                "'Orders combined filters'[Region] = \"West\")"
+            ),
+            "ALL all then West YTD": (
+                f"CALCULATE(SUM([Amount]), ALL(), "
+                f"DATESYTD('{calendar_name}'[Date]), "
+                "'Orders combined filters'[Region] = \"West\")"
+            ),
+            "ALL Region then West YTD": (
+                "CALCULATE(SUM([Amount]), ALL('Orders combined filters'[Region]), "
+                f"DATESYTD('{calendar_name}'[Date]), "
+                "'Orders combined filters'[Region] = \"West\")"
+            ),
+            "West year to date": (
+                f"CALCULATE(SUM([Amount]), DATESYTD('{calendar_name}'[Date]), "
+                "'Orders combined filters'[Region] = \"West\")"
+            ),
+            "ALLSELECTED West year to date": (
+                f"CALCULATE(SUM([Amount]), ALLSELECTED('{calendar_name}'[Date]), "
+                f"DATESYTD('{calendar_name}'[Date]), "
+                "'Orders combined filters'[Region] = \"West\")"
+            ),
+            "West high sales year to date": (
+                f"CALCULATE(SUM([Amount]), DATESYTD('{calendar_name}'[Date]), "
+                "'Orders combined filters'[Region] = \"West\", "
+                "'Orders combined filters'[Amount] >= 30)"
+            ),
+            "Keep East while selecting West": (
+                f"CALCULATE(SUM([Amount]), DATESYTD('{calendar_name}'[Date]), "
+                "KEEPFILTERS('Orders combined filters'[Region] = \"West\"))"
+            ),
+        }
+        for name, expression in expressions.items():
+            self.assertTrue(controller.create_measure(name, expression), controller.statusMessage)
+        self.assertEqual(controller.reportKpis["West year to date"], "50")
+        self.assertEqual(controller.reportKpis["ALLSELECTED West year to date"], "50")
+        self.assertEqual(controller.reportKpis["Clear date then West YTD"], "50")
+        self.assertEqual(controller.reportKpis["Clear date table then West YTD"], "50")
+        self.assertEqual(controller.reportKpis["Clear all then West YTD"], "50")
+        self.assertEqual(controller.reportKpis["ALL date then West YTD"], "50")
+        self.assertEqual(controller.reportKpis["ALL calendar then West YTD"], "50")
+        self.assertEqual(controller.reportKpis["ALL all then West YTD"], "50")
+        self.assertEqual(controller.reportKpis["ALL Region then West YTD"], "50")
+        self.assertEqual(controller.reportKpis["West high sales year to date"], "30")
+        self.assertEqual(controller.reportKpis["Keep East while selecting West"], "0")
+
+        project_path = self.root / "combined-filters.npa"
+        self.assertTrue(controller._save_to(project_path))
+        orders_path.write_text(
+            "OrderDate,Amount,Region\n"
+            "2023-12-31,100,West\n"
+            "2024-01-05,10,East\n"
+            "2024-02-02,25,West\n"
+            "2024-03-30,35,West\n"
+            "2024-03-15,500,East\n"
+            "2024-04-02,40,West\n"
+            "2024-03-15,55,North\n",
+            encoding="utf-8",
+        )
+        reopened = self.controller("combined-filter-reopened.ini")
+        self.assertTrue(reopened.open_project_path(project_path))
+        self.assertEqual(reopened.reportKpis["Clear date then West YTD"], "60")
+        self.assertEqual(reopened.reportKpis["Clear date table then West YTD"], "60")
+        self.assertEqual(reopened.reportKpis["Clear all then West YTD"], "60")
+        self.assertEqual(reopened.reportKpis["ALL date then West YTD"], "60")
+        self.assertEqual(reopened.reportKpis["ALL calendar then West YTD"], "60")
+        self.assertEqual(reopened.reportKpis["ALL all then West YTD"], "60")
+        self.assertEqual(reopened.reportKpis["ALL Region then West YTD"], "60")
+        self.assertEqual(reopened.reportKpis["West year to date"], "60")
+        self.assertEqual(reopened.reportKpis["ALLSELECTED West year to date"], "60")
+        self.assertEqual(reopened.reportKpis["West high sales year to date"], "35")
+        self.assertEqual(reopened.reportKpis["Keep East while selecting West"], "0")
+
     def test_totalqtd_measure_survives_reopen_and_recomputes_from_sources(self) -> None:
         calendar_path = self.root / "Calendar QTD.csv"
         calendar_start = date(2024, 1, 1)
@@ -2408,6 +2547,116 @@ class TotalYtdTests(unittest.TestCase):
         reopened = self.controller("previousmonth-reopened.ini")
         self.assertTrue(reopened.open_project_path(project_path))
         self.assertEqual(reopened.reportKpis["Prior month sales"], "33")
+
+    def test_time_intelligence_with_relationship_modifiers_reopens_and_refreshes(self) -> None:
+        calendar_path = self.root / "Calendar.csv"
+        calendar_path.write_text(
+            "Date\n2024-01-01\n2024-01-02\n2024-01-03\n2024-01-04\n",
+            encoding="utf-8",
+        )
+        sales_path = self.root / "Sales.csv"
+        sales_path.write_text(
+            "OrderDate,ShipDate,Amount\n"
+            "2024-01-01,2024-01-03,10\n"
+            "2024-01-02,2024-01-01,20\n"
+            "2024-01-03,2024-01-02,30\n"
+            "2024-01-04,2024-01-04,40\n",
+            encoding="utf-8",
+        )
+        controller = self.controller("relationship-time-settings.ini")
+        self.assertTrue(controller._commit_import(calendar_path, parse_file(calendar_path)))
+        calendar_id = str(controller.activeTableId)
+        self.assertTrue(controller.setColumnType("Date", "date"), controller.statusMessage)
+        self.mark_calendar(controller)
+
+        calendar_table = controller._model_table_for_source(
+            controller._project, calendar_id
+        )
+        assert calendar_table is not None
+        calendar_name = str(calendar_table["name"])
+
+        self.assertTrue(controller._commit_import(sales_path, parse_file(sales_path)))
+        sales_id = str(controller.activeTableId)
+        for column in ("OrderDate", "ShipDate"):
+            self.assertTrue(controller.setColumnType(column, "date"), controller.statusMessage)
+        self.assertTrue(controller.setColumnType("Amount", "whole_number"), controller.statusMessage)
+        self.add_date_relationship(controller, calendar_id, sales_id)
+        controller._project["model"]["relationships"].append({
+            "relationship_version": 1,
+            "id": "calendar-ship-date",
+            "from": f"{calendar_name}[Date]",
+            "to": "Sales[ShipDate]",
+            "from_table_id": calendar_id,
+            "from_column": "Date",
+            "to_table_id": sales_id,
+            "to_column": "ShipDate",
+            "cardinality": "one_to_many",
+            "cross_filter_direction": "single",
+            "is_active": False,
+        })
+        controller._dirty = True
+        controller._refresh_report()
+        self.assertTrue(controller.addPageFilterRule(
+            calendar_id, "Date", "equals", "2024-01-02", "", "", "and"
+        ), controller.statusMessage)
+
+        ship_ytd = (
+            "CALCULATE(SUM([Amount]), "
+            "USERELATIONSHIP('Sales'[ShipDate], 'Calendar'[Date]), "
+            "DATESYTD('Calendar'[Date]))"
+        )
+        ship_ytd_over_25 = (
+            "CALCULATE(SUM([Amount]), "
+            "USERELATIONSHIP('Sales'[ShipDate], 'Calendar'[Date]), "
+            "DATESYTD('Calendar'[Date]), 'Sales'[Amount] >= 25)"
+        )
+        no_date_link_ytd = (
+            "CALCULATE(SUM([Amount]), "
+            "CROSSFILTER('Calendar'[Date], 'Sales'[OrderDate], None), "
+            "DATESYTD('Calendar'[Date]))"
+        )
+        no_date_link_ytd_over_25 = (
+            "CALCULATE(SUM([Amount]), "
+            "CROSSFILTER('Calendar'[Date], 'Sales'[OrderDate], None), "
+            "DATESYTD('Calendar'[Date]), 'Sales'[Amount] >= 25)"
+        )
+        for name, expression in (
+            ("Ship YTD", ship_ytd),
+            ("Ship YTD over 25", ship_ytd_over_25),
+            ("No date link YTD", no_date_link_ytd),
+            ("No date link YTD over 25", no_date_link_ytd_over_25),
+        ):
+            self.assertTrue(controller.create_measure(name, expression), controller.statusMessage)
+
+        self.assertEqual(controller.reportKpis["Ship YTD"], "50")
+        self.assertEqual(controller.reportKpis["Ship YTD over 25"], "30")
+        self.assertEqual(controller.reportKpis["No date link YTD"], "100")
+        self.assertEqual(controller.reportKpis["No date link YTD over 25"], "70")
+        self.assertEqual(
+            [item["is_active"] for item in controller._project["model"]["relationships"]],
+            [True, False],
+        )
+
+        project_path = self.root / "relationship-time-intelligence.npa"
+        self.assertTrue(controller._save_to(project_path))
+        sales_path.write_text(
+            "OrderDate,ShipDate,Amount\n"
+            "2024-01-01,2024-01-03,12\n"
+            "2024-01-02,2024-01-01,24\n"
+            "2024-01-03,2024-01-02,36\n"
+            "2024-01-04,2024-01-04,48\n",
+            encoding="utf-8",
+        )
+        reopened = self.controller("relationship-time-reopened.ini")
+        self.assertTrue(reopened.open_project_path(project_path))
+        self.assertEqual(reopened.reportKpis["Ship YTD"], "60")
+        self.assertEqual(reopened.reportKpis["Ship YTD over 25"], "36")
+        self.assertEqual(reopened.reportKpis["No date link YTD"], "120")
+        self.assertEqual(reopened.reportKpis["No date link YTD over 25"], "84")
+        self.assertEqual(
+            [item["is_active"] for item in reopened._project["model"]["relationships"]],
+            [True, False],
+        )
 
 
 if __name__ == "__main__":

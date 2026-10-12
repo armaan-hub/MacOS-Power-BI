@@ -8,7 +8,11 @@ import unittest
 from unittest.mock import patch
 
 from analytics_studio.file_import import ImportCandidate
-from analytics_studio.transformations import TransformationError, apply_transformations
+from analytics_studio.transformations import (
+    TransformationError,
+    apply_transformations,
+    infer_column_types,
+)
 
 
 def candidate() -> ImportCandidate:
@@ -26,6 +30,75 @@ def candidate() -> ImportCandidate:
 
 
 class TransformationTests(unittest.TestCase):
+    def test_type_detection_is_conservative_and_preserves_identifier_text(self) -> None:
+        headers = ["Date", "Amount", "Units", "TRN", "Voucher No.", "Active", "Mixed"]
+        rows = [
+            {
+                "Date": "2026-08-01",
+                "Amount": "4500.50",
+                "Units": "75",
+                "TRN": "100233708500003",
+                "Voucher No.": "000123",
+                "Active": "true",
+                "Mixed": "12",
+            },
+            {
+                "Date": "2026-08-02",
+                "Amount": "1150",
+                "Units": "100",
+                "TRN": "100108694000003",
+                "Voucher No.": "000124",
+                "Active": "FALSE",
+                "Mixed": "unknown",
+            },
+        ]
+
+        self.assertEqual(infer_column_types(headers, rows), {
+            "Date": "date",
+            "Amount": "decimal_number",
+            "Units": "whole_number",
+            "TRN": "text",
+            "Voucher No.": "text",
+            "Active": "boolean",
+            "Mixed": "text",
+        })
+
+    def test_type_detection_uses_sample_but_checks_every_row(self) -> None:
+        headers = ["Amount"]
+        rows = [{"Amount": "10"}, {"Amount": "not numeric"}]
+
+        self.assertEqual(
+            infer_column_types(headers, rows, sample_size=1),
+            {"Amount": "text"},
+        )
+
+    def test_type_detection_does_not_infer_integer_amounts_as_time(self) -> None:
+        rows = [
+            {"Amount": "10", "Units": "2", "Time": "10:00:00"},
+            {"Amount": "20", "Units": "3", "Time": "11:30:00"},
+        ]
+
+        self.assertEqual(
+            infer_column_types(["Amount", "Units", "Time"], rows),
+            {
+                "Amount": "whole_number",
+                "Units": "whole_number",
+                "Time": "time",
+            },
+        )
+
+    def test_type_detection_does_not_round_late_fractions_or_strip_late_zeroes(self) -> None:
+        rows = [
+            {"Metric": str(index), "Key": str(10_000 + index)}
+            for index in range(200)
+        ]
+        rows.append({"Metric": "12.5", "Key": "00123"})
+
+        self.assertEqual(
+            infer_column_types(["Metric", "Key"], rows),
+            {"Metric": "decimal_number", "Key": "text"},
+        )
+
     def test_ordered_steps_rename_convert_filter_and_sort(self) -> None:
         source = candidate()
 

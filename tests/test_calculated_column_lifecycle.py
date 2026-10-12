@@ -78,12 +78,19 @@ class CalculatedColumnLifecycleTests(unittest.TestCase):
             self.source_path, parse_file(self.source_path)
         ))
 
+        source_id = controller.activeTableId
+        table = controller._model_table_for_source(controller._project, source_id)
+        self.assertEqual(table["column_types"]["Quantity"], "whole_number")
+        self.assertEqual(table["column_types"]["Unit price"], "decimal_number")
+
         self.assertTrue(self.save_dialog(controller, "Line total", "[Quantity] * [Unit price]"))
         self.assertEqual(controller._headers, ["Quantity", "Unit price", "Line total"])
         self.assertEqual([row["Line total"] for row in controller._rows], ["25.0", "24"])
         model_table = controller._model_table_for_source(
             controller._project, controller.activeTableId
         )
+        self.assertEqual(model_table["column_types"]["Quantity"], "whole_number")
+        self.assertEqual(model_table["column_types"]["Unit price"], "decimal_number")
         self.assertEqual(model_table["column_types"]["Line total"], "decimal_number")
 
         project_path = self.root / "calculated.npa"

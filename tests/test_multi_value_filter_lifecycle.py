@@ -72,6 +72,7 @@ class MultiValueFilterLifecycleTests(unittest.TestCase):
         self.assertEqual(controller.reportKpis["Revenue"], "85")
 
         visual_name = "Revenue KPI"
+        controller.add_visual("card", visual_name, 14, 14, 120, 80)
         controller.selectVisual(visual_name)
         self.assertTrue(controller.addVisualMultiValueFilter(
             visual_name, table_id, "Region", "is_none_of", json.dumps(["North", ""])

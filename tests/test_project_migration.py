@@ -18,8 +18,30 @@ from analytics_studio.project import (
 )
 
 
+def add_legacy_starter_visuals(document: dict) -> dict:
+    """Build the old version-73 starter report for migration fixtures."""
+    layouts = (
+        ("card", "Revenue KPI", 14, 14, 120, 80),
+        ("card", "Cost KPI", 148, 14, 120, 80),
+        ("card", "Margin KPI", 282, 14, 120, 80),
+        ("card", "Units KPI", 416, 14, 120, 80),
+        ("card", "Orders KPI", 550, 14, 120, 80),
+        ("column", "Monthly revenue", 14, 108, 330, 248),
+        ("bar", "Region revenue", 358, 108, 330, 248),
+    )
+    document["report"]["pages"][0]["visuals"] = [
+        {
+            "id": f"starter-{index}", "type": kind, "title": title,
+            "x": x, "y": y, "width": width, "height": height,
+            "show_data_labels": False, "show_legend": False,
+        }
+        for index, (kind, title, x, y, width, height) in enumerate(layouts)
+    ]
+    return document
+
+
 def make_v1_project() -> dict:
-    document = new_project("Migration fixture")
+    document = add_legacy_starter_visuals(new_project("Migration fixture"))
     document["format"] = FORMAT_ID
     document["format_version"] = 1
     document.pop("active_source_id", None)
@@ -43,6 +65,76 @@ class ProjectMigrationTests(unittest.TestCase):
 
         self.assertEqual(migrated["format_version"], FORMAT_VERSION)
 
+    def test_new_projects_start_with_a_blank_report(self) -> None:
+        document = new_project()
+
+        self.assertEqual(document["report"]["pages"][0]["visuals"], [])
+
+    def test_v73_starter_report_visuals_are_migrated_out(self) -> None:
+        document = add_legacy_starter_visuals(new_project("old starter report"))
+        document["format_version"] = 73
+
+        migrated = validate_project(document)
+
+        self.assertEqual(migrated["format_version"], FORMAT_VERSION)
+        self.assertEqual(migrated["report"]["pages"][0]["visuals"], [])
+
+    def test_v74_projects_migrate_to_saved_m_text_schema(self) -> None:
+        document = new_project("v74 migration")
+        document["format_version"] = 74
+
+        migrated = validate_project(document)
+
+        self.assertEqual(migrated["format_version"], FORMAT_VERSION)
+        self.assertEqual(FORMAT_VERSION, 78)
+
+    def test_v76_projects_migrate_and_preserve_measure_metadata(self) -> None:
+        document = new_project("v76 measure metadata")
+        document["format_version"] = 76
+        document["model"]["measures"] = [{
+            "name": "Sales total",
+            "expression": "SUM([Sales])",
+            "description": "Sales after discount",
+            "display_folder": "Finance/Sales",
+            "is_hidden": True,
+        }]
+
+        migrated = validate_project(document)
+
+        self.assertEqual(migrated["format_version"], 78)
+        self.assertEqual(migrated["model"]["measures"], document["model"]["measures"])
+
+    def test_saved_m_text_is_bounded_and_rejects_nulls(self) -> None:
+        document = new_project("M text")
+        document["data_sources"] = [{
+            "id": "local",
+            "name": "Sales",
+            "kind": "inline",
+            "headers": ["Region"],
+            "rows": [{"Region": "East"}],
+            "m_script": 'let\n    Source = #"Sales"\nin\n    Source',
+        }]
+        document["active_source_id"] = "local"
+
+        validated = validate_project(document)
+
+        self.assertEqual(validated["data_sources"][0]["m_script"], document["data_sources"][0]["m_script"])
+        for invalid_script in (None, "\x00", "x" * 32_001):
+            invalid = copy.deepcopy(document)
+            invalid["data_sources"][0]["m_script"] = invalid_script
+            with self.subTest(value_type=type(invalid_script).__name__, length=len(invalid_script or "")):
+                with self.assertRaisesRegex(ProjectFileError, "saved M script"):
+                    validate_project(invalid)
+
+    def test_v73_customized_starter_visuals_are_preserved(self) -> None:
+        document = add_legacy_starter_visuals(new_project("customized starter report"))
+        document["format_version"] = 73
+        document["report"]["pages"][0]["visuals"][0]["fields"] = {"Y-axis": ["Sales"]}
+
+        migrated = validate_project(document)
+
+        self.assertEqual(len(migrated["report"]["pages"][0]["visuals"]), 7)
+
     def test_v64_projects_gain_empty_date_table_metadata(self) -> None:
         document = new_project("v64 migration")
         document["format_version"] = 64
@@ -64,7 +156,133 @@ class ProjectMigrationTests(unittest.TestCase):
 
         migrated = validate_project(document)
 
-        self.assertEqual(migrated["format_version"], 68)
+        self.assertEqual(migrated["format_version"], FORMAT_VERSION)
+
+    def test_v68_projects_migrate_without_changing_visual_bindings(self) -> None:
+        document = add_legacy_starter_visuals(new_project("v68 visual aggregation migration"))
+        document["format_version"] = 68
+        visuals = document["report"]["pages"][0]["visuals"]
+        visuals[0]["fields"] = {"Y-axis": ["Revenue"]}
+
+        migrated = validate_project(document)
+
+        self.assertEqual(migrated["format_version"], FORMAT_VERSION)
+        self.assertEqual(
+            migrated["report"]["pages"][0]["visuals"][0]["fields"],
+            {"Y-axis": ["Revenue"]},
+        )
+        self.assertNotIn(
+            "field_aggregations", migrated["report"]["pages"][0]["visuals"][0]
+        )
+        self.assertFalse(migrated["report"]["pages"][0]["visuals"][0]["show_data_labels"])
+        self.assertFalse(migrated["report"]["pages"][0]["visuals"][0]["show_legend"])
+
+    def test_v70_projects_gain_default_data_label_and_legend_settings(self) -> None:
+        document = add_legacy_starter_visuals(new_project("v70 visual formatting migration"))
+        document["format_version"] = 70
+        visual = document["report"]["pages"][0]["visuals"][0]
+        visual["show_data_labels"] = True
+
+        migrated = validate_project(document)
+
+        migrated_visual = migrated["report"]["pages"][0]["visuals"][0]
+        self.assertEqual(migrated["format_version"], FORMAT_VERSION)
+        self.assertTrue(migrated_visual["show_data_labels"])
+        self.assertFalse(migrated_visual["show_legend"])
+
+    def test_v71_projects_migrate_to_visual_group_format_without_grouping_old_visuals(self) -> None:
+        document = add_legacy_starter_visuals(new_project("v71 visual grouping migration"))
+        document["format_version"] = 71
+        document["report"]["pages"][0]["visuals"][0]["fields"] = {"Y-axis": ["Revenue"]}
+        document["report"]["pages"][0]["visuals"][0].pop("group_id", None)
+
+        migrated = validate_project(document)
+
+        self.assertEqual(migrated["format_version"], FORMAT_VERSION)
+        self.assertNotIn("group_id", migrated["report"]["pages"][0]["visuals"][0])
+
+    def test_v72_projects_receive_the_default_report_theme(self) -> None:
+        document = new_project("v72 theme migration")
+        document["format_version"] = 72
+        document["report"].pop("theme", None)
+
+        migrated = validate_project(document)
+
+        self.assertEqual(migrated["format_version"], FORMAT_VERSION)
+        self.assertEqual(migrated["report"]["theme"], "Default")
+
+    def test_report_theme_is_validated(self) -> None:
+        document = new_project("invalid report theme")
+        document["report"]["theme"] = "Neon"
+
+        with self.assertRaisesRegex(ProjectFileError, "report theme must be"):
+            validate_project(document)
+
+    def test_v69_projects_gain_empty_visual_interaction_settings(self) -> None:
+        document = add_legacy_starter_visuals(new_project("v69 visual interaction migration"))
+        document["format_version"] = 69
+        page = document["report"]["pages"][0]
+        page.pop("visual_interactions", None)
+
+        migrated = validate_project(document)
+
+        self.assertEqual(migrated["format_version"], FORMAT_VERSION)
+        self.assertEqual(migrated["report"]["pages"][0]["visual_interactions"], [])
+
+    def test_visual_interaction_entries_are_validated(self) -> None:
+        document = new_project("invalid visual interaction")
+        document["report"]["pages"][0]["visual_interactions"] = [{
+            "source_visual_id": "source",
+            "target_visual_id": "target",
+            "mode": "emphasize",
+        }]
+
+        with self.assertRaisesRegex(ProjectFileError, "filter, highlight, or none"):
+            validate_project(document)
+
+    def test_visual_format_flags_must_be_booleans(self) -> None:
+        document = add_legacy_starter_visuals(new_project("invalid visual format flags"))
+        document["report"]["pages"][0]["visuals"][0]["show_legend"] = "yes"
+
+        with self.assertRaisesRegex(ProjectFileError, "show_legend must be a boolean"):
+            validate_project(document)
+
+    def test_visual_groups_require_two_visuals_and_non_empty_ids(self) -> None:
+        document = add_legacy_starter_visuals(new_project("valid visual group"))
+        visuals = document["report"]["pages"][0]["visuals"]
+        visuals[0]["group_id"] = "group-1"
+        visuals[1]["group_id"] = "group-1"
+        self.assertEqual(validate_project(document)["report"]["pages"][0]["visuals"][0]["group_id"], "group-1")
+
+        visuals[1].pop("group_id")
+        with self.assertRaisesRegex(ProjectFileError, "at least two visuals"):
+            validate_project(document)
+
+        visuals[1]["group_id"] = "group-1"
+        visuals[0]["group_id"] = " "
+        with self.assertRaisesRegex(ProjectFileError, "group_id must be a non-empty string"):
+            validate_project(document)
+
+    def test_visual_interaction_entries_must_reference_page_visuals(self) -> None:
+        document = add_legacy_starter_visuals(new_project("dangling visual interaction"))
+        target_id = document["report"]["pages"][0]["visuals"][0]["id"]
+        document["report"]["pages"][0]["visual_interactions"] = [{
+            "source_visual_id": "missing-source",
+            "target_visual_id": target_id,
+            "mode": "highlight",
+        }]
+
+        with self.assertRaisesRegex(ProjectFileError, "unique source/target IDs"):
+            validate_project(document)
+
+    def test_visual_aggregation_names_are_validated(self) -> None:
+        document = add_legacy_starter_visuals(new_project("invalid visual aggregation"))
+        document["report"]["pages"][0]["visuals"][0]["field_aggregations"] = {
+            "Revenue": "median",
+        }
+
+        with self.assertRaisesRegex(ProjectFileError, "sum, count, or average"):
+            validate_project(document)
 
     def test_marked_date_column_must_have_a_date_model_type(self) -> None:
         document = new_project("invalid date-table metadata")
@@ -99,7 +317,7 @@ class ProjectMigrationTests(unittest.TestCase):
     def test_v1_validation_selects_first_v1_supported_source_and_adds_defaults(self) -> None:
         migrated = validate_project(make_v1_project())
 
-        self.assertEqual(FORMAT_VERSION, 68)
+        self.assertEqual(FORMAT_VERSION, 78)
         self.assertEqual(migrated["format_version"], FORMAT_VERSION)
         self.assertEqual(migrated["active_source_id"], "excel")
         self.assertEqual(migrated["data_sources"][2]["parser_options"], {

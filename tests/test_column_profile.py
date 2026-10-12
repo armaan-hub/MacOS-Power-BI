@@ -16,6 +16,7 @@ from PySide6.QtWidgets import QApplication
 
 from analytics_studio.controller import StudioController
 from analytics_studio.file_import import parse_file
+from analytics_studio.local_table_dialogs import TransformDataDialog
 
 QQuickStyle.setStyle("Basic")
 
@@ -34,11 +35,14 @@ class ColumnProfileTests(unittest.TestCase):
 
     def test_profile_counts_all_rows_and_ranks_common_values(self) -> None:
         source = self.root / "profile.csv"
-        records = ["Category,Score"]
-        records.extend("A,1" for _ in range(300))
-        records.extend("B,2" for _ in range(200))
-        records.append("C,3")
-        records.extend(",0" for _ in range(3))
+        records = ["Category,Score,Edge,Blank,Ties"]
+        records.extend(
+            f"A,1,{'Solo' if index == 0 else ''},,{'a' if index == 0 else 'A' if index == 1 else ''}"
+            for index in range(300)
+        )
+        records.extend("B,2,,," for _ in range(200))
+        records.append("C,3,,,")
+        records.extend(",0,,," for _ in range(3))
         source.write_text("\n".join(records) + "\n", encoding="utf-8")
 
         settings = QSettings(
@@ -59,6 +63,26 @@ class ColumnProfileTests(unittest.TestCase):
             {"value": "B", "count": 200},
             {"value": "C", "count": 1},
         ])
+
+        edge_profile = controller.profileColumn("Edge")
+        self.assertEqual(edge_profile["distinctCount"], 1)
+        self.assertEqual(edge_profile["uniqueCount"], 1)
+        blank_profile = controller.profileColumn("Blank")
+        self.assertEqual(blank_profile["distinctCount"], 0)
+        self.assertEqual(blank_profile["uniqueCount"], 0)
+        self.assertEqual(controller.profileColumn("Ties")["topValues"], [
+            {"value": "A", "count": 1},
+            {"value": "a", "count": 1},
+        ])
+
+        candidate = controller._loaded_candidates[controller._active_source_id]
+        dialog = TransformDataDialog(candidate)
+        self.assertEqual(dialog.profile_table.item(2, 2).text(), "1")
+        self.assertEqual(dialog.profile_table.item(2, 3).text(), "1")
+        self.assertEqual(dialog.profile_table.item(3, 2).text(), "0")
+        self.assertEqual(dialog.profile_table.item(3, 3).text(), "0")
+        self.assertEqual(dialog.profile_table.item(4, 4).text(), "A (1), a (1)")
+        dialog.deleteLater()
 
         self.assertTrue(controller.setColumnType("Score", "whole_number"))
         score_profile = controller.profileColumn("Score")

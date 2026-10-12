@@ -58,6 +58,9 @@ class VisualFilterLifecycleTests(unittest.TestCase):
     def test_visual_filters_are_isolated_editable_removable_and_persist_on_refresh(self) -> None:
         controller = self.controller("settings.ini")
         self.assertTrue(controller._commit_import(self.sales_path, parse_file(self.sales_path)))
+        controller.add_visual("card", "Revenue KPI", 14, 14, 120, 80)
+        controller.add_chart("Monthly revenue")
+        controller.add_chart("Region revenue")
         table_id = self.table_id(controller, self.sales_path.name)
         self.assertEqual(controller.reportKpis["Revenue"], "35")
 
@@ -183,6 +186,7 @@ class VisualFilterLifecycleTests(unittest.TestCase):
         self.assertTrue(controller.create_measure("Total Amount", "SUM('Orders'[Amount])"))
         self.assertEqual(controller.reportKpis["Total Amount"], "35")
         visual_name = "Total Amount KPI"
+        controller.add_visual("card", visual_name, 14, 14, 120, 80)
         controller.selectVisual(visual_name)
         self.assertTrue(controller.addVisualFilter(visual_name, regions_id, "Region", "East"))
         self.assertEqual(controller.visualKpis[visual_name], "15")

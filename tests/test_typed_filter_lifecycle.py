@@ -141,6 +141,7 @@ class TypedFilterLifecycleTests(unittest.TestCase):
         ))
         self.assertEqual(controller.reportKpis["Revenue"], "20")
         self.assertEqual(len(controller.activePageFilters), 6)
+        controller.add_visual("card", "Revenue KPI", 14, 14, 120, 80)
         controller.selectVisual("Revenue KPI")
         self.assertTrue(controller.addVisualFilterRule(
             "Revenue KPI", table_id, "Amount", "greater_than_or_equal", "20",

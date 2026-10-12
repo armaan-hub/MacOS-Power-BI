@@ -4,6 +4,7 @@ import QtQuick.Layouts 6.5
 
 Item {
     id: root
+    objectName: "modelViewRoot"
     property var appController
     signal importRequested()
 
@@ -61,6 +62,7 @@ Item {
                 }
 
                 Rectangle {
+                    visible: root.appController.sourceLoaded
                     radius: 10
                     color: "#e7f4f1"
                     implicitWidth: readOnlyLabel.implicitWidth + 16
@@ -72,6 +74,18 @@ Item {
                         color: "#107c71"
                         font.pixelSize: 10
                     }
+                }
+                Button {
+                    objectName: "newDaxMeasureButton"
+                    text: "New DAX measure"
+                    enabled: root.appController.sourceLoaded
+                    Accessible.name: "Create a DAX measure"
+                    Accessible.description: enabled
+                            ? "Open the local DAX measure editor. It supports the functions listed in the editor help."
+                            : "Import a table before creating a measure."
+                    ToolTip.visible: hovered && !enabled
+                    ToolTip.text: Accessible.description
+                    onClicked: root.appController.executeCommand("newMeasure")
                 }
             }
 
@@ -159,6 +173,7 @@ Item {
                         }
 
                         Rectangle {
+                            objectName: "daxMeasuresSection"
                             Layout.fillWidth: true
                             visible: root.appController.sourceLoaded || root.measures.length > 0
                             implicitHeight: measuresContent.implicitHeight + 24
@@ -188,11 +203,18 @@ Item {
 
                                 Rectangle { Layout.fillWidth: true; height: 1; color: "#e2e6e9" }
 
-                                Repeater {
+                                ListView {
+                                    objectName: "daxMeasureList"
+                                    Layout.fillWidth: true
+                                    Layout.preferredHeight: contentHeight
+                                    implicitHeight: contentHeight
+                                    interactive: false
+                                    clip: false
                                     model: root.measures
                                     delegate: ColumnLayout {
+                                        objectName: "daxMeasureDelegate"
                                         required property var modelData
-                                        Layout.fillWidth: true
+                                        width: ListView.view.width
                                         spacing: 3
                                         RowLayout {
                                             Layout.fillWidth: true
@@ -205,11 +227,51 @@ Item {
                                                 elide: Text.ElideRight
                                             }
                                             Text {
+                                                visible: Boolean(modelData.is_hidden)
+                                                text: "Hidden"
+                                                color: "#7a4d00"
+                                                font.pixelSize: 9
+                                            }
+                                            Text {
                                                 text: String(modelData.value || "—")
                                                 color: "#107c71"
                                                 font.pixelSize: 11
                                                 font.weight: Font.DemiBold
                                             }
+                                            Button {
+                                                objectName: "editDaxMeasureButton"
+                                                text: "Edit"
+                                                Accessible.name: "Edit DAX measure " + String(modelData.name)
+                                                Accessible.description: "Open the DAX editor with this measure's name and expression."
+                                                Layout.preferredWidth: 48
+                                                Layout.preferredHeight: 24
+                                                onClicked: root.appController.editMeasure(String(modelData.name))
+                                            }
+                                            Button {
+                                                objectName: "deleteDaxMeasureButton"
+                                                text: "Delete"
+                                                Accessible.name: "Delete DAX measure " + String(modelData.name)
+                                                Accessible.description: "Remove this measure after checking dependent formulas."
+                                                Layout.preferredWidth: 56
+                                                Layout.preferredHeight: 24
+                                                onClicked: root.appController.deleteMeasure(String(modelData.name))
+                                            }
+                                        }
+                                        Text {
+                                            visible: String(modelData.display_folder || "").length > 0
+                                            Layout.fillWidth: true
+                                            text: "Folder: " + String(modelData.display_folder || "")
+                                            color: "#526477"
+                                            font.pixelSize: 9
+                                            wrapMode: Text.Wrap
+                                        }
+                                        Text {
+                                            visible: String(modelData.description || "").length > 0
+                                            Layout.fillWidth: true
+                                            text: String(modelData.description || "")
+                                            color: "#526477"
+                                            font.pixelSize: 9
+                                            wrapMode: Text.Wrap
                                         }
                                         Text {
                                             Layout.fillWidth: true
@@ -233,7 +295,7 @@ Item {
                                 Text {
                                     visible: root.measures.length === 0
                                     Layout.fillWidth: true
-                                    text: "No measures yet. Use Modeling → New measure to create one."
+                                    text: "No measures yet. Select New DAX measure to create one."
                                     color: "#596a79"
                                     font.pixelSize: 10
                                     wrapMode: Text.Wrap

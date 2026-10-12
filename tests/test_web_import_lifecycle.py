@@ -100,6 +100,16 @@ class WebImportLifecycleTests(unittest.TestCase):
             validate_web_url("http://data.example.test/metrics.csv")
         with self.assertRaisesRegex(WebImportError, "embedded credentials"):
             validate_web_url("https://user:secret@data.example.test/metrics.csv")
+        self.assertEqual(
+            validate_web_url("https://data.example.test/metrics.csv?region=DXB"),
+            "https://data.example.test/metrics.csv?region=DXB",
+        )
+        for secret_parameter in ("token", "access_token", "api_key", "X-Amz-Signature"):
+            with self.subTest(secret_parameter=secret_parameter):
+                with self.assertRaisesRegex(WebImportError, "token-like query parameters"):
+                    validate_web_url(
+                        f"https://data.example.test/metrics.csv?{secret_parameter}=secret"
+                    )
 
     def test_dialog_discovers_previews_and_accepts_selected_json_table(self) -> None:
         payload = WebPayload(

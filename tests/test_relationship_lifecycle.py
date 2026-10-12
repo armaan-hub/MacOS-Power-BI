@@ -16,6 +16,10 @@ from PySide6.QtWidgets import QApplication, QDialog
 from analytics_studio.controller import StudioController
 from analytics_studio.file_import import parse_file
 from analytics_studio.relationship_dialog import RelationshipDialog
+from analytics_studio.relationships import (
+    RelationshipError,
+    propagate_relationship_filters,
+)
 
 
 class RelationshipLifecycleTests(unittest.TestCase):
@@ -156,6 +160,58 @@ class RelationshipLifecycleTests(unittest.TestCase):
         final = self.controller("final-settings.ini")
         self.assertTrue(final.open_project_path(project_path))
         self.assertEqual(final._project["model"]["relationships"], [])
+
+    def test_text_relationship_keys_casefold_for_filtering_and_one_side_uniqueness(self) -> None:
+        regions = {
+            "id": "regions",
+            "name": "Regions",
+            "headers": ["RegionKey", "Region"],
+            "column_types": {"RegionKey": "text", "Region": "text"},
+            "rows": [
+                {"RegionKey": "A", "Region": "East"},
+                {"RegionKey": "B", "Region": "West"},
+            ],
+            "filter_rows": [{"RegionKey": "A", "Region": "East"}],
+        }
+        orders = {
+            "id": "orders",
+            "name": "Orders",
+            "headers": ["RegionKey", "Amount"],
+            "column_types": {"RegionKey": "text", "Amount": "decimal_number"},
+            "rows": [
+                {"RegionKey": "a", "Amount": "10"},
+                {"RegionKey": "b", "Amount": "20"},
+            ],
+        }
+        relationship = {
+            "relationship_version": 1,
+            "id": "regions-orders",
+            "from_table_id": "regions",
+            "from_column": "RegionKey",
+            "to_table_id": "orders",
+            "to_column": "RegionKey",
+            "cardinality": "one_to_many",
+            "cross_filter_direction": "single",
+            "is_active": True,
+        }
+
+        filtered = propagate_relationship_filters(
+            [regions, orders], [relationship], {"regions"}
+        )
+        self.assertEqual(filtered["orders"], [orders["rows"][0]])
+
+        colliding_dimension = {
+            **regions,
+            "rows": [
+                {"RegionKey": "A", "Region": "East"},
+                {"RegionKey": "a", "Region": "East variant"},
+            ],
+            "filter_rows": [],
+        }
+        with self.assertRaisesRegex(RelationshipError, "no longer has unique values"):
+            propagate_relationship_filters(
+                [colliding_dimension, orders], [relationship], set()
+            )
 
     def test_active_relationship_filters_a_qualified_measure_across_tables(self) -> None:
         controller = self.controller("measure-settings.ini")

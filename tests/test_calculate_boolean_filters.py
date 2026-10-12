@@ -947,6 +947,221 @@ class CalculateBooleanFilterTests(unittest.TestCase):
         self.assertEqual(reopened.reportKpis["Blue sales"], "12")
         self.assertEqual(reopened.reportKpis["Blue sales intersection"], "0")
 
+    def test_removefilters_combines_with_boolean_filters_and_reopens(self) -> None:
+        controller = self.controller("mixed-removefilters-settings.ini")
+        self.load_sales(controller)
+        sales_id = str(controller.activeTableId)
+        self.assertTrue(controller.addPageFilterRule(
+            sales_id, "Color", "equals", "Red", "", "", "and"
+        ))
+        self.assertTrue(controller.addPageFilterRule(
+            sales_id, "Region", "equals", "East", "", "", "and"
+        ))
+        expressions = {
+            "Clear color then West": (
+                "CALCULATE(SUM([Amount]), REMOVEFILTERS('Sales'[Color]), "
+                "'Sales'[Region] = \"West\")"
+            ),
+            "Clear all then West": (
+                "CALCULATE(SUM([Amount]), REMOVEFILTERS(), "
+                "'Sales'[Region] = \"West\")"
+            ),
+            "Clear table then West": (
+                "CALCULATE(SUM([Amount]), REMOVEFILTERS('Sales'), "
+                "'Sales'[Region] = \"West\")"
+            ),
+            "Clear color then high West": (
+                "CALCULATE(SUM([Amount]), REMOVEFILTERS('Sales'[Color]), "
+                "'Sales'[Region] = \"West\", 'Sales'[Amount] >= 40)"
+            ),
+            "Keep East while selecting West": (
+                "CALCULATE(SUM([Amount]), REMOVEFILTERS('Sales'[Color]), "
+                "KEEPFILTERS('Sales'[Region] = \"West\"))"
+            ),
+        }
+        for name, expression in expressions.items():
+            self.assertTrue(controller.create_measure(name, expression), controller.statusMessage)
+        self.assertEqual(controller.reportKpis["Clear color then West"], "120")
+        self.assertEqual(controller.reportKpis["Clear all then West"], "120")
+        self.assertEqual(controller.reportKpis["Clear table then West"], "120")
+        self.assertEqual(controller.reportKpis["Clear color then high West"], "90")
+        self.assertEqual(controller.reportKpis["Keep East while selecting West"], "0")
+
+        project_path = self.root / "mixed-removefilters.npa"
+        self.assertTrue(controller._save_to(project_path))
+        self.sales_path.write_text(
+            "ID,Color,Region,Amount,Active\n"
+            "1,Red,East,21,True\n"
+            "2,Blue,East,12,False\n"
+            "3,Green,East,7,True\n"
+            "4,Blue,West,31,True\n"
+            "5,Green,West,40,False\n"
+            "6,Red,West,50,True\n",
+            encoding="utf-8",
+        )
+        reopened = self.controller("mixed-removefilters-reopened.ini")
+        self.assertTrue(reopened.open_project_path(project_path))
+        self.assertEqual(reopened.reportKpis["Clear color then West"], "121")
+        self.assertEqual(reopened.reportKpis["Clear all then West"], "121")
+        self.assertEqual(reopened.reportKpis["Clear table then West"], "121")
+        self.assertEqual(reopened.reportKpis["Clear color then high West"], "90")
+        self.assertEqual(reopened.reportKpis["Keep East while selecting West"], "0")
+
+    def test_filter_clear_modifier_rejects_additional_table_and_boolean_filters(self) -> None:
+        for expression in (
+            "CALCULATE(SUM([Amount]), REMOVEFILTERS('Sales'[Color]), "
+            "FILTER('Sales', 'Sales'[Amount] > 10), 'Sales'[Region] = \"West\")",
+            "CALCULATE(SUM([Amount]), ALL('Sales'[Color]), "
+            "FILTER('Sales', 'Sales'[Amount] > 10), 'Sales'[Region] = \"West\")",
+        ):
+            with self.subTest(expression=expression):
+                with self.assertRaisesRegex(MeasureError, "only filter argument beside"):
+                    normalize_measure("Mixed filter clear", expression)
+
+    def test_filter_clear_modifier_combines_with_table_filter_and_reopens(self) -> None:
+        controller = self.controller("mixed-filter-clear-table-filter.ini")
+        self.load_sales(controller)
+        sales_id = str(controller.activeTableId)
+        self.assertTrue(controller.addPageFilterRule(
+            sales_id, "Color", "equals", "Red", "", "", "and"
+        ))
+        self.assertTrue(controller.addPageFilterRule(
+            sales_id, "Region", "equals", "East", "", "", "and"
+        ))
+        expressions = {
+            "Clear color then visible rows": (
+                "CALCULATE(SUM([Amount]), REMOVEFILTERS('Sales'[Color]), "
+                "FILTER('Sales', 'Sales'[Amount] >= 20))"
+            ),
+            "Clear table then visible rows": (
+                "CALCULATE(SUM([Amount]), REMOVEFILTERS('Sales'), "
+                "FILTER('Sales', 'Sales'[Amount] >= 20))"
+            ),
+            "Clear all then visible rows": (
+                "CALCULATE(SUM([Amount]), REMOVEFILTERS(), "
+                "FILTER('Sales', 'Sales'[Amount] >= 20))"
+            ),
+            "ALL color then visible rows": (
+                "CALCULATE(SUM([Amount]), ALL('Sales'[Color]), "
+                "FILTER('Sales', 'Sales'[Amount] >= 20))"
+            ),
+            "ALLNOBLANKROW color then visible rows": (
+                "CALCULATE(SUM([Amount]), ALLNOBLANKROW('Sales'[Color]), "
+                "FILTER('Sales', 'Sales'[Amount] >= 20))"
+            ),
+            "ALLEXCEPT then visible rows": (
+                "CALCULATE(SUM([Amount]), ALLEXCEPT('Sales', 'Sales'[Region]), "
+                "FILTER('Sales', 'Sales'[Amount] >= 20))"
+            ),
+            "ALL all then no visible matches": (
+                "CALCULATE(SUM([Amount]), ALL(), "
+                "FILTER('Sales', 'Sales'[Amount] >= 25))"
+            ),
+        }
+        for name, expression in expressions.items():
+            self.assertTrue(controller.create_measure(name, expression), controller.statusMessage)
+        self.assertEqual(controller.reportKpis["Clear color then visible rows"], "20")
+        self.assertEqual(controller.reportKpis["Clear table then visible rows"], "20")
+        self.assertEqual(controller.reportKpis["Clear all then visible rows"], "20")
+        self.assertEqual(controller.reportKpis["ALL color then visible rows"], "20")
+        self.assertEqual(controller.reportKpis["ALLNOBLANKROW color then visible rows"], "20")
+        self.assertEqual(controller.reportKpis["ALLEXCEPT then visible rows"], "20")
+        self.assertEqual(controller.reportKpis["ALL all then no visible matches"], "0")
+
+        project_path = self.root / "mixed-filter-clear-table-filter.npa"
+        self.assertTrue(controller._save_to(project_path))
+        self.sales_path.write_text(
+            "ID,Color,Region,Amount,Active\n"
+            "1,Red,East,21,True\n"
+            "2,Blue,East,12,False\n"
+            "3,Green,East,7,True\n"
+            "4,Blue,West,31,True\n"
+            "5,Green,West,40,False\n"
+            "6,Red,West,50,True\n",
+            encoding="utf-8",
+        )
+        reopened = self.controller("mixed-filter-clear-table-filter-reopened.ini")
+        self.assertTrue(reopened.open_project_path(project_path))
+        self.assertEqual(reopened.reportKpis["Clear color then visible rows"], "21")
+        self.assertEqual(reopened.reportKpis["Clear table then visible rows"], "21")
+        self.assertEqual(reopened.reportKpis["Clear all then visible rows"], "21")
+        self.assertEqual(reopened.reportKpis["ALL color then visible rows"], "21")
+        self.assertEqual(reopened.reportKpis["ALLNOBLANKROW color then visible rows"], "21")
+        self.assertEqual(reopened.reportKpis["ALLEXCEPT then visible rows"], "21")
+        self.assertEqual(reopened.reportKpis["ALL all then no visible matches"], "0")
+
+    def test_all_combines_with_boolean_filters_and_reopens(self) -> None:
+        controller = self.controller("mixed-all-settings.ini")
+        self.load_sales(controller)
+        sales_id = str(controller.activeTableId)
+        self.assertTrue(controller.addPageFilterRule(
+            sales_id, "Color", "equals", "Red", "", "", "and"
+        ))
+        self.assertTrue(controller.addPageFilterRule(
+            sales_id, "Region", "equals", "East", "", "", "and"
+        ))
+        expressions = {
+            "ALL color then West": (
+                "CALCULATE(SUM([Amount]), ALL('Sales'[Color]), "
+                "'Sales'[Region] = \"West\")"
+            ),
+            "ALL table then West": (
+                "CALCULATE(SUM([Amount]), ALL('Sales'), "
+                "'Sales'[Region] = \"West\")"
+            ),
+            "ALL context then West": (
+                "CALCULATE(SUM([Amount]), ALL(), "
+                "'Sales'[Region] = \"West\")"
+            ),
+            "ALLNOBLANKROW color then West": (
+                "CALCULATE(SUM([Amount]), ALLNOBLANKROW('Sales'[Color]), "
+                "'Sales'[Region] = \"West\")"
+            ),
+            "ALLEXCEPT then West": (
+                "CALCULATE(SUM([Amount]), ALLEXCEPT('Sales', 'Sales'[Region]), "
+                "'Sales'[Region] = \"West\")"
+            ),
+            "ALL color then high West": (
+                "CALCULATE(SUM([Amount]), ALL('Sales'[Color]), "
+                "'Sales'[Region] = \"West\", 'Sales'[Amount] >= 40)"
+            ),
+            "ALL color and keep East": (
+                "CALCULATE(SUM([Amount]), ALL('Sales'[Color]), "
+                "KEEPFILTERS('Sales'[Region] = \"West\"))"
+            ),
+        }
+        for name, expression in expressions.items():
+            self.assertTrue(controller.create_measure(name, expression), controller.statusMessage)
+        self.assertEqual(controller.reportKpis["ALL color then West"], "120")
+        self.assertEqual(controller.reportKpis["ALL table then West"], "120")
+        self.assertEqual(controller.reportKpis["ALL context then West"], "120")
+        self.assertEqual(controller.reportKpis["ALLNOBLANKROW color then West"], "120")
+        self.assertEqual(controller.reportKpis["ALLEXCEPT then West"], "120")
+        self.assertEqual(controller.reportKpis["ALL color then high West"], "90")
+        self.assertEqual(controller.reportKpis["ALL color and keep East"], "0")
+
+        project_path = self.root / "mixed-all.npa"
+        self.assertTrue(controller._save_to(project_path))
+        self.sales_path.write_text(
+            "ID,Color,Region,Amount,Active\n"
+            "1,Red,East,21,True\n"
+            "2,Blue,East,12,False\n"
+            "3,Green,East,7,True\n"
+            "4,Blue,West,31,True\n"
+            "5,Green,West,40,False\n"
+            "6,Red,West,50,True\n",
+            encoding="utf-8",
+        )
+        reopened = self.controller("mixed-all-reopened.ini")
+        self.assertTrue(reopened.open_project_path(project_path))
+        self.assertEqual(reopened.reportKpis["ALL color then West"], "121")
+        self.assertEqual(reopened.reportKpis["ALL table then West"], "121")
+        self.assertEqual(reopened.reportKpis["ALL context then West"], "121")
+        self.assertEqual(reopened.reportKpis["ALLNOBLANKROW color then West"], "121")
+        self.assertEqual(reopened.reportKpis["ALLEXCEPT then West"], "121")
+        self.assertEqual(reopened.reportKpis["ALL color then high West"], "90")
+        self.assertEqual(reopened.reportKpis["ALL color and keep East"], "0")
+
     def test_removefilters_clears_columns_tables_and_all_filters(self) -> None:
         rows = [
             {"Color": "Red", "Region": "East", "Amount": "20"},
@@ -1135,7 +1350,6 @@ class CalculateBooleanFilterTests(unittest.TestCase):
 
         for expression in (
             "REMOVEFILTERS()",
-            "CALCULATE(SUM([Amount]), REMOVEFILTERS(), 'Sales'[Color] = \"Blue\")",
             "CALCULATE(SUM([Amount]), REMOVEFILTERS('Sales', 'Sales'[Color]))",
             "CALCULATE(SUM([Amount]), REMOVEFILTERS([Color]))",
             "CALCULATE(SUM([Amount]), REMOVEFILTERS('Sales'[Color], 'Calendar'[Date]))",
@@ -1337,6 +1551,7 @@ class CalculateBooleanFilterTests(unittest.TestCase):
             "CALCULATE(SUM([Amount]), ALL())",
             "CALCULATE(SUM([Amount]), ALL('Sales'))",
             "CALCULATE(SUM([Amount]), ALL('Sales'[Color], 'Sales'[Region]))",
+            "CALCULATE(SUM([Amount]), ALL(), 'Sales'[Color] = \"Blue\")",
         ):
             with self.subTest(expression=expression):
                 normalize_measure("Valid ALL", expression)
@@ -1351,7 +1566,6 @@ class CalculateBooleanFilterTests(unittest.TestCase):
 
         for expression in (
             "ALL()",
-            "CALCULATE(SUM([Amount]), ALL(), 'Sales'[Color] = \"Blue\")",
             "CALCULATE(SUM([Amount]), ALL('Sales', 'Sales'[Color]))",
             "CALCULATE(SUM([Amount]), ALL([Color]))",
             "CALCULATE(SUM([Amount]), ALL('Sales'[Color], 'Calendar'[Date]))",
@@ -1735,6 +1949,27 @@ class CalculateBooleanFilterTests(unittest.TestCase):
                     ),
                 },
                 {
+                    "name": "Allselected then West",
+                    "expression": (
+                        "CALCULATE(SUM([Amount]), ALLSELECTED('Sales'[Color]), "
+                        "'Sales'[Region] = \"West\")"
+                    ),
+                },
+                {
+                    "name": "Allselected then Blue",
+                    "expression": (
+                        "CALCULATE(SUM([Amount]), ALLSELECTED(), "
+                        "'Sales'[Color] = \"Blue\")"
+                    ),
+                },
+                {
+                    "name": "Keep selected East while choosing West",
+                    "expression": (
+                        "CALCULATE(SUM([Amount]), ALLSELECTED(), "
+                        "KEEPFILTERS('Sales'[Region] = \"West\"))"
+                    ),
+                },
+                {
                     "name": "Nested allselected",
                     "expression": (
                         "CALCULATE(CALCULATE(SUM([Amount]), ALLSELECTED()), "
@@ -1766,7 +2001,7 @@ class CalculateBooleanFilterTests(unittest.TestCase):
                         "Amount": "whole_number",
                     },
                     "filter_rows": [sales[0], sales[1]],
-                    "filter_column_rows": {"Color": {0, 1}, "Region": {0, 1}},
+                    "filter_column_rows": {"Color": {0, 1, 2}, "Region": {0, 1, 3}},
                     "filter_context_complete": True,
                 },
             ],
@@ -1792,6 +2027,9 @@ class CalculateBooleanFilterTests(unittest.TestCase):
             "Allselected table": 30,
             "Allselected column": 30,
             "Allselected columns": 30,
+            "Allselected then West": 30,
+            "Allselected then Blue": 20,
+            "Keep selected East while choosing West": 0,
             "Nested allselected": 20,
         })
 
@@ -1844,6 +2082,9 @@ class CalculateBooleanFilterTests(unittest.TestCase):
             "CALCULATE(SUM([Amount]), ALLSELECTED('Sales'))",
             "CALCULATE(SUM([Amount]), ALLSELECTED('Sales'[Color]))",
             "CALCULATE(SUM([Amount]), ALLSELECTED('Sales'[Color], 'Sales'[Region]))",
+            "CALCULATE(SUM([Amount]), ALLSELECTED(), 'Sales'[Color] = \"Blue\")",
+            "CALCULATE(SUM([Amount]), ALLSELECTED(), DATESYTD('Calendar'[Date]))",
+            "CALCULATE(SUM([Amount]), ALLSELECTED(), FILTER('Sales', 'Sales'[Amount] > 10))",
             "COUNTROWS(ALLSELECTED('Sales'))",
             "COUNTROWS(ALLSELECTED('Sales'[Color], 'Sales'[Region]))",
             "SUMX(ALLSELECTED('Sales'), 'Sales'[Amount])",
@@ -1854,7 +2095,6 @@ class CalculateBooleanFilterTests(unittest.TestCase):
         for expression in (
             "ALLSELECTED()",
             "COUNTROWS(ALLSELECTED())",
-            "CALCULATE(SUM([Amount]), ALLSELECTED(), 'Sales'[Color] = \"Blue\")",
             "CALCULATE(SUM([Amount]), ALLSELECTED('Sales', 'Sales'[Color]))",
             "CALCULATE(SUM([Amount]), ALLSELECTED('Sales'[Color], 'Calendar'[Date]))",
             "CALCULATE(SUM([Amount]), ALLSELECTED(1))",
@@ -1978,8 +2218,31 @@ class CalculateBooleanFilterTests(unittest.TestCase):
             "Selected rows",
             "COUNTROWS(ALLSELECTED('Sales'))",
         ), controller.statusMessage)
+        self.assertTrue(controller.create_measure(
+            "Selected West sales",
+            "CALCULATE(SUM([Amount]), ALLSELECTED('Sales'[Color]), "
+            "'Sales'[Region] = \"West\")",
+        ), controller.statusMessage)
+        self.assertTrue(controller.create_measure(
+            "Selected Blue sales",
+            "CALCULATE(SUM([Amount]), ALLSELECTED(), 'Sales'[Color] = \"Blue\")",
+        ), controller.statusMessage)
+        self.assertTrue(controller.create_measure(
+            "Selected high sales",
+            "CALCULATE(SUM([Amount]), ALLSELECTED(), "
+            "FILTER('Sales', 'Sales'[Amount] >= 20))",
+        ), controller.statusMessage)
+        self.assertTrue(controller.create_measure(
+            "Keep selected East while choosing West",
+            "CALCULATE(SUM([Amount]), ALLSELECTED(), "
+            "KEEPFILTERS('Sales'[Region] = \"West\"))",
+        ), controller.statusMessage)
         self.assertEqual(controller.reportKpis["Selected sales"], "20")
         self.assertEqual(controller.reportKpis["Selected rows"], "1")
+        self.assertEqual(controller.reportKpis["Selected West sales"], "50")
+        self.assertEqual(controller.reportKpis["Selected Blue sales"], "10")
+        self.assertEqual(controller.reportKpis["Selected high sales"], "20")
+        self.assertEqual(controller.reportKpis["Keep selected East while choosing West"], "0")
         project_path = self.root / "allselected.npa"
         self.assertTrue(controller._save_to(project_path))
 
@@ -1997,6 +2260,10 @@ class CalculateBooleanFilterTests(unittest.TestCase):
         self.assertTrue(reopened.open_project_path(project_path))
         self.assertEqual(reopened.reportKpis["Selected sales"], "21")
         self.assertEqual(reopened.reportKpis["Selected rows"], "1")
+        self.assertEqual(reopened.reportKpis["Selected West sales"], "50")
+        self.assertEqual(reopened.reportKpis["Selected Blue sales"], "12")
+        self.assertEqual(reopened.reportKpis["Selected high sales"], "21")
+        self.assertEqual(reopened.reportKpis["Keep selected East while choosing West"], "0")
 
     def test_allexcept_preserves_named_columns_and_external_relationship_roots(self) -> None:
         categories = [{"Key": "1"}, {"Key": "2"}]
@@ -2147,6 +2414,7 @@ class CalculateBooleanFilterTests(unittest.TestCase):
         for expression in (
             "CALCULATE(SUM([Amount]), ALLEXCEPT('Sales', 'Sales'[Color]))",
             "CALCULATE(SUM([Amount]), ALLEXCEPT('Sales', 'Sales'[Color], 'Sales'[Region]))",
+            "CALCULATE(SUM([Amount]), ALLEXCEPT('Sales', 'Sales'[Color]), 'Sales'[Region] = \"East\")",
         ):
             with self.subTest(expression=expression):
                 normalize_measure("Valid ALLEXCEPT", expression)
@@ -2158,7 +2426,6 @@ class CalculateBooleanFilterTests(unittest.TestCase):
             "ALLEXCEPT('Sales'[Color], 'Sales'[Region])",
             "CALCULATE(SUM([Amount]), ALLEXCEPT('Sales', [Color]))",
             "CALCULATE(SUM([Amount]), ALLEXCEPT('Sales', 'Calendar'[Date]))",
-            "CALCULATE(SUM([Amount]), ALLEXCEPT('Sales', 'Sales'[Color]), 'Sales'[Region] = \"East\")",
         ):
             with self.subTest(expression=expression):
                 with self.assertRaises(MeasureError):
@@ -2753,6 +3020,22 @@ class CalculateBooleanFilterTests(unittest.TestCase):
                     ),
                 },
                 {
+                    "name": "Ship role with Boolean filter",
+                    "expression": (
+                        "CALCULATE(SUM([Amount]), "
+                        "USERELATIONSHIP('Sales'[ShipDate], 'Calendar'[Date]), "
+                        "'Sales'[Amount] >= 15)"
+                    ),
+                },
+                {
+                    "name": "Ship role with KEEPFILTERS",
+                    "expression": (
+                        "CALCULATE(SUM([Amount]), "
+                        "USERELATIONSHIP('Sales'[ShipDate], 'Calendar'[Date]), "
+                        "KEEPFILTERS('Sales'[Amount] >= 25))"
+                    ),
+                },
+                {
                     "name": "Reverse arguments",
                     "expression": (
                         "CALCULATE(SUM([Amount]), "
@@ -2811,6 +3094,8 @@ class CalculateBooleanFilterTests(unittest.TestCase):
         self.assertEqual(values, {
             "Order role": 40,
             "Ship role": 50,
+            "Ship role with Boolean filter": 50,
+            "Ship role with KEEPFILTERS": 30,
             "Reverse arguments": 50,
             "Nested relationship": 40,
             "Context restored between calls": 90,
@@ -2819,6 +3104,7 @@ class CalculateBooleanFilterTests(unittest.TestCase):
     def test_userelationship_parser_and_existing_relationship_validation(self) -> None:
         for expression in (
             "CALCULATE(SUM([Amount]), USERELATIONSHIP('Sales'[ShipDate], 'Calendar'[Date]))",
+            "CALCULATE(SUM([Amount]), USERELATIONSHIP('Sales'[ShipDate], 'Calendar'[Date]), 'Sales'[Amount] > 0)",
             "CALCULATE(SUM([Amount]), USERELATIONSHIP('Sales'[OrderDate], 'Calendar'[Date]), "
             "USERELATIONSHIP('Sales'[RegionId], 'Region'[Id]))",
         ):
@@ -2829,8 +3115,6 @@ class CalculateBooleanFilterTests(unittest.TestCase):
             "USERELATIONSHIP('Sales'[ShipDate], 'Calendar'[Date])",
             "CALCULATE(SUM([Amount]), USERELATIONSHIP([ShipDate], 'Calendar'[Date]))",
             "CALCULATE(SUM([Amount]), USERELATIONSHIP('Sales'[ShipDate]))",
-            "CALCULATE(SUM([Amount]), USERELATIONSHIP('Sales'[ShipDate], 'Calendar'[Date]), "
-            "'Sales'[Amount] > 0)",
         ):
             with self.subTest(expression=expression):
                 with self.assertRaises(MeasureError):
@@ -3116,7 +3400,14 @@ class CalculateBooleanFilterTests(unittest.TestCase):
             "Ship Sales",
             "CALCULATE(SUM([Amount]), USERELATIONSHIP('Sales'[ShipDate], 'Calendar'[Date]))",
         ), controller.statusMessage)
+        self.assertTrue(controller.create_measure(
+            "Ship Sales above fifteen",
+            "CALCULATE(SUM([Amount]), "
+            "USERELATIONSHIP('Sales'[ShipDate], 'Calendar'[Date]), "
+            "'Sales'[Amount] >= 15)",
+        ), controller.statusMessage)
         self.assertEqual(controller.reportKpis["Ship Sales"], "50")
+        self.assertEqual(controller.reportKpis["Ship Sales above fifteen"], "50")
         project_path = self.root / "userelationship.npa"
         self.assertTrue(controller._save_to(project_path))
 
@@ -3130,6 +3421,7 @@ class CalculateBooleanFilterTests(unittest.TestCase):
         reopened = self.controller("userelationship-reopened.ini")
         self.assertTrue(reopened.open_project_path(project_path))
         self.assertEqual(reopened.reportKpis["Ship Sales"], "55")
+        self.assertEqual(reopened.reportKpis["Ship Sales above fifteen"], "55")
         self.assertEqual(
             [relationship["is_active"] for relationship in reopened._project["model"]["relationships"]],
             [True, False],
@@ -3308,7 +3600,14 @@ class CalculateBooleanFilterTests(unittest.TestCase):
             "Filtered categories",
             "CALCULATE(COUNTROWS('Category'), CROSSFILTER('CrossfilterSales'[CategoryKey], 'Category'[Key], Both))",
         ), controller.statusMessage)
+        self.assertTrue(controller.create_measure(
+            "Filtered categories excluding three",
+            "CALCULATE(COUNTROWS('Category'), "
+            "CROSSFILTER('CrossfilterSales'[CategoryKey], 'Category'[Key], Both), "
+            "'Category'[Key] <> 3)",
+        ), controller.statusMessage)
         self.assertEqual(controller.reportKpis["Filtered categories"], "1")
+        self.assertEqual(controller.reportKpis["Filtered categories excluding three"], "1")
         project_path = self.root / "crossfilter.npa"
         self.assertTrue(controller._save_to(project_path))
 
@@ -3318,6 +3617,7 @@ class CalculateBooleanFilterTests(unittest.TestCase):
         reopened = self.controller("crossfilter-reopened.ini")
         self.assertTrue(reopened.open_project_path(project_path))
         self.assertEqual(reopened.reportKpis["Filtered categories"], "2")
+        self.assertEqual(reopened.reportKpis["Filtered categories excluding three"], "2")
         saved_relationship = reopened._project["model"]["relationships"][0]
         self.assertEqual(saved_relationship["cross_filter_direction"], "single")
 
@@ -3326,11 +3626,16 @@ class CalculateBooleanFilterTests(unittest.TestCase):
             "Valid CROSSFILTER",
             "CALCULATE(SUM([Amount]), CROSSFILTER('Sales'[Key], 'Category'[Key], Both))",
         )
+        normalize_measure(
+            "Valid CROSSFILTER with Boolean filter",
+            "CALCULATE(COUNTROWS('Category'), "
+            "CROSSFILTER('Sales'[Key], 'Category'[Key], Both), "
+            "'Category'[Key] <> 3)",
+        )
         for expression in (
             "CROSSFILTER('Sales'[Key], 'Category'[Key], Both)",
             "CALCULATE(SUM([Amount]), CROSSFILTER([Key], 'Category'[Key], Both))",
             "CALCULATE(SUM([Amount]), CROSSFILTER('Sales'[Key], 'Category'[Key]))",
-            "CALCULATE(SUM([Amount]), CROSSFILTER('Sales'[Key], 'Category'[Key], Both), 'Sales'[Amount] > 0)",
             'CALCULATE(SUM([Amount]), CROSSFILTER(\'Sales\'[Key], \'Category\'[Key], "Both"))',
         ):
             with self.subTest(expression=expression):

@@ -141,11 +141,13 @@ class FolderImportDialog(QDialog):
         *,
         replacing: bool,
         initial_options: dict[str, Any] | None = None,
+        source_editing: bool = False,
         parent: QWidget | None = None,
     ) -> None:
         super().__init__(parent)
         self.folder = Path(folder).expanduser().resolve()
         self.replacing = replacing
+        self.source_editing = source_editing
         self._options = normalize_folder_options(initial_options)
         self._file_options = dict(self._options["file_options"])
         self._candidate: ImportCandidate | None = None
@@ -166,7 +168,12 @@ class FolderImportDialog(QDialog):
         self._file_refresh_timer.setInterval(160)
         self._file_refresh_timer.timeout.connect(self._refresh_file_list)
 
-        self.setWindowTitle("Combine files from folder")
+        title_text = (
+            "Edit folder source settings"
+            if source_editing
+            else "Combine files from folder"
+        )
+        self.setWindowTitle(title_text)
         self.setMinimumSize(760, 520)
         self.resize(980, 650)
 
@@ -174,7 +181,7 @@ class FolderImportDialog(QDialog):
         layout.setContentsMargins(18, 16, 18, 14)
         layout.setSpacing(9)
 
-        title = QLabel("Combine files from folder")
+        title = QLabel(title_text)
         title.setStyleSheet("font-size: 19px; font-weight: 600;")
         layout.addWidget(title)
 
@@ -192,7 +199,7 @@ class FolderImportDialog(QDialog):
             "padding: 8px 10px; color: #6a4d00; background: #fff5d6;"
             "border: 1px solid #e8d391; border-radius: 3px;"
         )
-        self.replacement_label.setVisible(replacing)
+        self.replacement_label.setVisible(replacing and not source_editing)
         layout.addWidget(self.replacement_label)
 
         filters = QGroupBox("Folder selection")
@@ -262,7 +269,11 @@ class FolderImportDialog(QDialog):
         footer.addStretch(1)
         layout.addLayout(footer)
 
-        self.count_label = QLabel("Preview matching files before importing.")
+        self.count_label = QLabel(
+            "Preview matching files before applying settings."
+            if source_editing
+            else "Preview matching files before importing."
+        )
         self.count_label.setStyleSheet("color: #526477;")
         layout.addWidget(self.count_label)
 
@@ -283,7 +294,9 @@ class FolderImportDialog(QDialog):
             parent=self,
         )
         self.import_button = self.buttons.button(QDialogButtonBox.StandardButton.Ok)
-        self.import_button.setText("Import folder")
+        self.import_button.setText(
+            "Apply settings" if source_editing else "Import folder"
+        )
         self.import_button.setEnabled(False)
         self.buttons.accepted.connect(self._accept_candidate)
         self.buttons.rejected.connect(self.reject)
@@ -483,7 +496,10 @@ class FolderImportDialog(QDialog):
             return
         self._file_options = dict(dialog.candidate.options)
         self._clear_candidate()
-        self.notice_label.setText("Sample parsing options saved. Preview the full folder selection before importing.")
+        self.notice_label.setText(
+            "Sample parsing options saved. Preview the full folder selection before "
+            + ("applying settings." if self.source_editing else "importing.")
+        )
         self.notice_label.setVisible(True)
 
     def _toggle_preview(self) -> None:
@@ -602,7 +618,11 @@ class FolderImportDialog(QDialog):
         model = self.table.model()
         if isinstance(model, ImportPreviewTableModel):
             model.set_candidate(None)
-        self.count_label.setText("Preview matching files before importing.")
+        self.count_label.setText(
+            "Preview matching files before applying settings."
+            if self.source_editing
+            else "Preview matching files before importing."
+        )
 
     def _show_error(self, message: str) -> None:
         self.error_label.setText(message)

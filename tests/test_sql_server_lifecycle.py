@@ -26,6 +26,7 @@ from analytics_studio.sql_server import (
     read_sql_server_object,
 )
 from analytics_studio.sql_server_dialog import SQLServerImportDialog
+from analytics_studio.sql_server_credentials import credential_account, get_password
 
 
 CONNECTION = {
@@ -230,7 +231,10 @@ class SQLServerLifecycleTests(unittest.TestCase):
             ))
         source_id = controller.activeTableId
         credential_ref = controller._project["data_sources"][0]["connection"]["credential_ref"]
-        save_password.assert_called_once_with(credential_ref, "secret-value")
+        connection = controller._project["data_sources"][0]["connection"]
+        save_password.assert_called_once_with(
+            credential_ref, "secret-value", connection
+        )
 
         project_path = self.root / "sql-server-project.npa"
         self.assertTrue(controller._save_to(project_path))
@@ -256,6 +260,38 @@ class SQLServerLifecycleTests(unittest.TestCase):
 
         self.assertEqual(reopened._active_source_id, source_id)
         self.assertEqual(reopened._rows, [{"id": "1", "value": "30"}])
+
+    def test_keychain_account_is_bound_to_server_identity(self) -> None:
+        reference = "local-credential-ref"
+        original = {**CONNECTION, "credential_ref": reference}
+        redirected = {**original, "server": "attacker.example.test"}
+        self.assertNotEqual(
+            credential_account(reference, original),
+            credential_account(reference, redirected),
+        )
+        self.assertEqual(
+            credential_account(reference, original),
+            credential_account(reference, dict(original)),
+        )
+
+        class LegacyOnlyKeychain:
+            def __init__(self) -> None:
+                self.lookups = []
+
+            def get_password(self, service: str, account: str) -> str | None:
+                self.lookups.append((service, account))
+                return "legacy-secret" if account == reference else None
+
+        keychain = LegacyOnlyKeychain()
+        with patch(
+            "analytics_studio.sql_server_credentials._macos_keyring",
+            return_value=keychain,
+        ):
+            self.assertIsNone(get_password(reference, redirected))
+        self.assertEqual(
+            keychain.lookups,
+            [("com.analytics-studio.sql-server", credential_account(reference, redirected))],
+        )
 
 
 if __name__ == "__main__":

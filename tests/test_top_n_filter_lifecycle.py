@@ -57,6 +57,7 @@ class TopNFilterLifecycleTests(unittest.TestCase):
             self.source_path, parse_file(self.source_path)
         ))
         table_id = self.table_id(controller)
+        controller.add_chart("Region revenue")
         self.assertTrue(controller.addPageFilter(table_id, "Segment", "Retail"))
         self.assertEqual(controller.reportKpis["Revenue"], "105")
 

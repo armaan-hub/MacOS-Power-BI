@@ -8,10 +8,11 @@ from html.parser import HTMLParser
 import json
 import math
 from pathlib import Path
+import re
 import tempfile
 from typing import Any
 from urllib.error import HTTPError, URLError
-from urllib.parse import urlsplit, urlunsplit
+from urllib.parse import parse_qsl, urlsplit, urlunsplit
 from urllib.request import HTTPRedirectHandler, Request, build_opener, HTTPSHandler
 import ssl
 
@@ -31,6 +32,12 @@ REQUEST_TIMEOUT_SECONDS = 10
 MAX_URL_LENGTH = 2048
 MAX_HTML_TABLES = 200
 MAX_JSON_DEPTH = 12
+_SECRET_QUERY_NAME = re.compile(
+    r"(?:^|[_-])(?:access[_-]?token|api[_-]?key|access[_-]?key|"
+    r"client[_-]?secret|secret|password|passwd|pwd|token|signature|sig|"
+    r"credential|authorization|auth|key)(?:$|[_-])",
+    re.IGNORECASE,
+)
 
 
 class WebImportError(ValueError):
@@ -49,7 +56,7 @@ class WebPayload:
 
 
 def validate_web_url(value: Any) -> str:
-    """Normalize an anonymous HTTPS URL while keeping its query parameters."""
+    """Normalize an anonymous HTTPS URL while rejecting likely URL credentials."""
     if not isinstance(value, str):
         raise WebImportError("Enter an HTTPS web address.")
     value = value.strip()
@@ -66,6 +73,14 @@ def validate_web_url(value: Any) -> str:
     _validate_https_url(parts)
     if parts.fragment:
         raise WebImportError("Remove the fragment after # from the web address.")
+    if any(
+        _SECRET_QUERY_NAME.search(name.replace(".", "_"))
+        for name, _value in parse_qsl(parts.query, keep_blank_values=True)
+    ):
+        raise WebImportError(
+            "Web URLs with token-like query parameters cannot be saved in a project. "
+            "Use an anonymous URL without credentials."
+        )
     return urlunsplit(("https", parts.netloc, parts.path or "/", parts.query, ""))
 
 

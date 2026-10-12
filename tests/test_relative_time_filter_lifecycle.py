@@ -121,6 +121,7 @@ class RelativeTimeFilterLifecycleTests(unittest.TestCase):
             ))
             self.assertEqual(controller.reportKpis["Revenue"], "31")
             visual_name = "Revenue KPI"
+            controller.add_visual("card", visual_name, 14, 14, 120, 80)
             controller.selectVisual(visual_name)
             self.assertTrue(controller.addVisualRelativeTimeFilter(
                 visual_name, table_id, "Timestamp", "this", 8, "minutes"

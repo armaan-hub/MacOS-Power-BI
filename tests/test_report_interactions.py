@@ -488,6 +488,33 @@ def test_slicer_fields_well_supplies_values_and_filters_peer_charts() -> None:
         {"label": "B", "value": 1.0},
     ]
 
+
+def test_slicer_field_picker_and_binding_reject_dax_measures() -> None:
+    app = QApplication.instance() or QApplication(["slicer measure eligibility tests"])
+    controller = _loaded_sales_controller()
+    controller._project["model"].setdefault("measures", []).append({
+        "name": "Sales Total", "expression": "SUM([Amount])",
+    })
+    binding = "__dax_measure__:Sales Total"
+    controller.add_visual("slicer", "Measure slicer", 40, 360, 300, 220)
+    controller.selectVisual("Measure slicer")
+
+    assert binding in controller.filteredFields
+    assert binding not in controller.activeVisualFieldOptions
+    controller.add_field_to_well("Fields", binding)
+    assert "slicer" in controller.statusMessage.casefold()
+    visual = next(
+        item for item in controller.activeVisualObjects
+        if item["title"] == "Measure slicer"
+    )
+    assert visual.get("fields", {}).get("Fields", []) == []
+    assert controller.visualSeries("Measure slicer") == []
+
+    # Older projects can contain this invalid binding, but it must not become
+    # a selectable empty-string category.
+    visual.setdefault("fields", {})["Fields"] = [binding]
+    assert controller.visualSeries("Measure slicer") == []
+
     controller.toggle_cross_filter("Source", "A")
 
     assert controller.visualSeries("Target") == [{"label": "A", "value": 20.0}]

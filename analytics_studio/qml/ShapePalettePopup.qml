@@ -93,12 +93,12 @@ Popup {
                                 Layout.fillWidth: true
                                 Layout.preferredWidth: 70
                                 Layout.preferredHeight: 48
-                                enabled: false
+                                enabled: true
                                 padding: 2
                                 hoverEnabled: true
                                 focusPolicy: Qt.StrongFocus
                                 Accessible.name: String(modelData)
-                                Accessible.description: "Adding shapes to the report is not available in this release."
+                                Accessible.description: "Add this shape to the report."
                                 ToolTip.visible: hovered
                                 ToolTip.text: String(modelData)
                                 background: Rectangle {

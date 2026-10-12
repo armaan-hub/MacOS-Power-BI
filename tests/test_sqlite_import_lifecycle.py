@@ -133,6 +133,32 @@ class SQLiteImportLifecycleTests(unittest.TestCase):
             reopened._loaded_candidates[view_id].rows[0]["doubled"], "50"
         )
 
+    def test_source_settings_preview_can_switch_sqlite_table_or_view(self) -> None:
+        dialog = FileImportPreviewDialog(
+            self.database_path,
+            replacing=False,
+            initial_options={"table_name": "metrics"},
+            source_editing=True,
+        )
+        self.wait_for_preview(dialog)
+        self.assertEqual(dialog.windowTitle(), "Edit source settings")
+        self.assertEqual(dialog.import_button.text(), "Apply settings")
+        self.assertFalse(dialog.replacement_label.isVisible())
+        self.assertEqual(dialog.table_combo.currentData(), "metrics")
+
+        view_index = dialog.table_combo.findData("metrics_view")
+        self.assertGreaterEqual(view_index, 0)
+        dialog.table_combo.setCurrentIndex(view_index)
+        self.wait_for_preview(dialog)
+        self.assertEqual(dialog._preview_candidate.options["table_name"], "metrics_view")
+        self.assertEqual(
+            dialog._preview_candidate.headers,
+            ["id", "amount", "doubled"],
+        )
+        dialog._accept_candidate()
+        self.assertEqual(dialog.candidate.options["table_name"], "metrics_view")
+        dialog.deleteLater()
+
     def test_recent_source_reopens_the_last_selected_sqlite_object(self) -> None:
         controller = self.controller("settings.ini")
         self.import_sqlite_object(controller, "metrics_view")
