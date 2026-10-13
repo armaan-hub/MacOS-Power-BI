@@ -1,6 +1,6 @@
 # Power BI Functionality Work Log
 
-**Snapshot date:** 2026-10-12
+**Snapshot date:** 2026-10-13
 
 **Master capability map:** [POWER_BI_FUNCTIONALITY_ROADMAP.md](POWER_BI_FUNCTIONALITY_ROADMAP.md)
 
@@ -10,15 +10,23 @@ This is the cumulative record of functionality implemented and accepted in Analy
 
 ## Current work in progress
 
-- **Completed prior increment:** Power Query Home stages new local file/folder and SQL Server/OData/Web sources through their existing preview flows. They can feed session queries and commit atomically only on Close & Apply; SQL credentials are staged and connection-bound. Applied Step settings open initialized modal pages through the visible gear, context menu, or double-click.
-- **Latest full verification:** **655 pytest tests and 471 subtests passed**; `python3 -m unittest discover -s tests` passed **600 tests**. The focused local-source/session/Home source-settings group passed **96 tests and 46 subtests**. `compileall` and `git diff --check` passed.
-- **Completed source-edit coverage:** existing CSV, Excel, JSON, XML, Parquet, SQLite, and folder roots can stage a replacement path and parser/combine options in the Power Query session. SQLite also allows choosing a table or view. Source identity, query metadata, and steps persist; included reference/append/merge descendants refresh together. Root/dependent schema and type changes are rejected. Apply checks final SQLite binding uniqueness across edited and new sources using SQLite-compatible ASCII folding while preserving exact stored names, and checks active relationship constraints when both endpoints have loaded candidate data.
-- **Remaining source-edit gaps:** SQL Server, OData, and Web source editing; schema migration; live remote acceptance; and manual macOS UI acceptance.
+- **Current increment:** SQL Server, OData, and Web Edit Source Settings now restore their current connection/navigation choices and stage replacement previews in the Power Query session. Existing source/query identity and applied steps remain stable; SQL password changes use a new connection-bound Keychain reference and wait until Apply to persist. Remote edits use the previewed snapshot and retain the existing schema/type guard. Automated acceptance for this increment is pending.
+- **Latest recorded full verification:** **680 pytest tests and 480 subtests passed**; `python3 -m unittest discover -s tests` passed **619 tests**. These counts predate the current remote source-editing increment.
+- **Completed source-edit coverage:** existing CSV, Excel, JSON, XML, Parquet, SQLite, and folder roots stage path and parser/combine changes. SQLite also allows choosing tables/views. The new SQL Server/OData/Web editing flow is implemented but not yet accepted. Source identity, query metadata, and steps persist; included reference/append/merge descendants refresh together. Root/dependent schema and type changes remain rejected. Apply checks final SQLite binding uniqueness across edited and new sources using SQLite-compatible ASCII folding while preserving exact stored names, and checks active relationship constraints when both endpoints have loaded candidate data.
+- **Remaining source-edit gaps:** remote edit lifecycle acceptance, schema migration, live remote acceptance, and manual macOS UI acceptance.
 - **External acceptance gates:** benchmark large-file preview performance on an M1 Mac; verify SQL Server, OData, and Web against live services. Their current lifecycle coverage uses local fixtures or mocked services.
 - **Unavailable product families:** RLS/OLS, role authoring, cloud publishing/collaboration, mobile/paginated reports, Report Server, embedding, and Q&A/Copilot. Their UI actions are disabled and they require separate implementation programs.
 - **Larger queued areas:** broader report/visual workflows and interactions, complete DAX/M compatibility, additional connectors, security/governance, and service/platform extensions.
 
 Update this section when the active increment or its blockers change.
+
+### 2026-10-13: Edit remote source settings in Power Query
+
+- Added Edit Source Settings to existing SQL Server, OData, and Web root queries. Each dialog restores the saved connection and selected table/entity/data object so users can make targeted changes.
+- Remote source changes retain the existing source ID, query metadata, and transformation steps. Included query descendants refresh from the edited preview, and Apply uses that same remote snapshot. The current schema and type checks still reject replacements that would break model/report references.
+- SQL password changes are staged in memory and assigned a new connection-bound Keychain reference. The old credential is removed only after a successful project commit; project files do not receive the password.
+- **Acceptance status:** implementation is in place; automated lifecycle and manual macOS acceptance have not yet been recorded. Live SQL Server, OData, and Web endpoints remain external gates.
+- **Next:** cover the remote source-edit flows through focused lifecycle acceptance, then address schema-changing replacements and additional local M mappings.
 
 ### 2026-10-12: Edit SQLite source settings
 

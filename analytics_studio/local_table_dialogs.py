@@ -2712,6 +2712,7 @@ class TransformDataDialog(QDialog):
         source = query.get("source_record")
         supported = isinstance(source, dict) and source.get("kind") in {
             "csv", "excel", "json", "xml", "parquet", "sqlite", "folder",
+            "sql_server", "odata", "web",
         }
         enabled = (
             self._edit_source_candidate_callback is not None
@@ -2720,12 +2721,18 @@ class TransformDataDialog(QDialog):
             and not query.get("is_duplicate")
         )
         button.setEnabled(bool(enabled))
+        kind = str(source.get("kind", "")) if isinstance(source, dict) else ""
+        descriptions = {
+            "folder": "Change this folder path or combine recipe.",
+            "sql_server": "Change the SQL Server connection or selected table/view.",
+            "odata": "Change the OData service root or selected entity set.",
+            "web": "Change the Web URL or selected data object.",
+        }
+        description = descriptions.get(kind, "Change this file path or parser options.")
         button.setToolTip(
-            "Change this file's path or parser options. Existing column names and data types must stay the same."
-            if enabled and query.get("source_record", {}).get("kind") != "folder" else
-            "Change this folder path or combine recipe. Existing column names and data types must stay the same."
+            f"{description} Existing column names and data types must stay the same."
             if enabled else
-            "Edit source settings is available for CSV, Excel, JSON, XML, Parquet, SQLite, and folder root queries."
+            "Edit source settings is available for supported local and remote root queries."
         )
 
     def _edit_source_settings(self) -> None:
@@ -2741,9 +2748,10 @@ class TransformDataDialog(QDialog):
             or not isinstance(original_record, dict)
             or original_record.get("kind") not in {
                 "csv", "excel", "json", "xml", "parquet", "sqlite", "folder",
+                "sql_server", "odata", "web",
             }
         ):
-            self._show_error("Select a supported file-backed root query to edit its source settings.")
+            self._show_error("Select a supported root query to edit its source settings.")
             return
         if callback is None:
             self._show_error("Source settings are unavailable in this editor session.")
@@ -2758,16 +2766,37 @@ class TransformDataDialog(QDialog):
             source_record = deepcopy(supplied_record)
             source_id = str(query.get("id", ""))
             source_kind = str(original_record.get("kind", ""))
+            local_kinds = {
+                "csv", "excel", "json", "xml", "parquet", "sqlite", "folder",
+            }
+            remote_connection_keys = {
+                "sql_server": "credential_ref",
+                "odata": "service_root",
+                "web": "url",
+            }
+            connection = source_record.get("connection")
             if (
                 source_record.get("id") != source_id
                 or source_record.get("kind") != source_kind
                 or candidate.kind != source_kind
-                or not str(source_record.get("path", "")).strip()
                 or not isinstance(source_record.get("parser_options"), dict)
+                or (
+                    source_kind in local_kinds
+                    and not str(source_record.get("path", "")).strip()
+                )
+                or (
+                    source_kind in remote_connection_keys
+                    and (
+                        not isinstance(connection, dict)
+                        or not str(
+                            connection.get(remote_connection_keys[source_kind], "")
+                        ).strip()
+                    )
+                )
             ):
-                raise ValueError("The edited path and parser options must keep the same source ID and file type.")
+                raise ValueError("The edited source settings must keep the same source ID and type.")
             stable_keys = (set(original_record) | set(source_record)) - {
-                "path", "parser_options",
+                "path", "parser_options", "connection", "_staged_password",
             }
             if any(original_record.get(key) != source_record.get(key) for key in stable_keys):
                 raise ValueError("Source settings cannot rename or replace the existing query definition.")

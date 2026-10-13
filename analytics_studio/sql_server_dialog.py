@@ -32,9 +32,22 @@ from analytics_studio.sql_server import (
 class SQLServerImportDialog(QDialog):
     """Connect with SQL authentication, select an object, preview, then import."""
 
-    def __init__(self, parent=None) -> None:
+    def __init__(
+        self,
+        parent=None,
+        *,
+        source_editing: bool = False,
+        initial_connection: dict[str, Any] | None = None,
+        initial_options: dict[str, Any] | None = None,
+        initial_password: str = "",
+    ) -> None:
         super().__init__(parent)
-        self.setWindowTitle("Import from SQL Server")
+        self._source_editing = source_editing
+        self._initial_options = dict(initial_options or {})
+        self.setWindowTitle(
+            "Edit SQL Server source settings"
+            if source_editing else "Import from SQL Server"
+        )
         self.setMinimumSize(760, 520)
         self.resize(960, 670)
         self._candidate: ImportCandidate | None = None
@@ -65,9 +78,27 @@ class SQLServerImportDialog(QDialog):
         self.username_edit.setPlaceholderText("SQL Server login")
         self.password_edit = QLineEdit()
         self.password_edit.setEchoMode(QLineEdit.EchoMode.Password)
-        self.password_edit.setPlaceholderText("Password is stored in macOS Keychain after a successful import")
+        self.password_edit.setPlaceholderText(
+            "Enter the SQL Server password"
+            if source_editing else
+            "Password is stored in macOS Keychain after a successful import"
+        )
         self.driver_combo = QComboBox()
         self.driver_combo.addItems(SUPPORTED_DRIVERS)
+        initial_connection = dict(initial_connection or {})
+        self.server_edit.setText(str(initial_connection.get("server", "")))
+        try:
+            self.port_spin.setValue(int(initial_connection.get("port", 1433)))
+        except (TypeError, ValueError):
+            self.port_spin.setValue(1433)
+        self.database_edit.setText(str(initial_connection.get("database", "")))
+        self.username_edit.setText(str(initial_connection.get("username", "")))
+        self.password_edit.setText(initial_password)
+        driver_index = self.driver_combo.findText(
+            str(initial_connection.get("driver", ""))
+        )
+        if driver_index >= 0:
+            self.driver_combo.setCurrentIndex(driver_index)
         form.addRow("Server", self.server_edit)
         form.addRow("Port", self.port_spin)
         form.addRow("Database", self.database_edit)
@@ -109,7 +140,9 @@ class SQLServerImportDialog(QDialog):
         layout.addWidget(self.preview_table, 1)
 
         buttons = QDialogButtonBox(QDialogButtonBox.StandardButton.Cancel)
-        self.import_button = QPushButton("Import data")
+        self.import_button = QPushButton(
+            "Apply settings" if source_editing else "Import data"
+        )
         self.import_button.setEnabled(False)
         buttons.addButton(self.import_button, QDialogButtonBox.ButtonRole.AcceptRole)
         buttons.rejected.connect(self.reject)
@@ -161,6 +194,17 @@ class SQLServerImportDialog(QDialog):
             for item in self._objects:
                 label = f"{item['schema']}.{item['table_name']}  ·  {item['table_type'].title()}"
                 self.object_combo.addItem(label, item)
+            preferred_schema = str(self._initial_options.get("schema", ""))
+            preferred_table = str(self._initial_options.get("table_name", ""))
+            preferred_type = str(self._initial_options.get("object_type", ""))
+            for index, item in enumerate(self._objects):
+                if (
+                    str(item.get("schema", "")) == preferred_schema
+                    and str(item.get("table_name", "")) == preferred_table
+                    and str(item.get("table_type", "")) == preferred_type
+                ):
+                    self.object_combo.setCurrentIndex(index)
+                    break
             self.object_combo.blockSignals(False)
             self.object_combo.setEnabled(bool(self._objects))
             if not self._objects:

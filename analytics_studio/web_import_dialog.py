@@ -34,9 +34,20 @@ from analytics_studio.web_import import (
 class WebImportDialog(QDialog):
     """Import public HTTPS file responses, JSON data, or static HTML tables."""
 
-    def __init__(self, parent=None) -> None:
+    def __init__(
+        self,
+        parent=None,
+        *,
+        source_editing: bool = False,
+        initial_connection: dict[str, Any] | None = None,
+        initial_options: dict[str, Any] | None = None,
+    ) -> None:
         super().__init__(parent)
-        self.setWindowTitle("Import from Web")
+        self._source_editing = source_editing
+        self._initial_options = dict(initial_options or {})
+        self.setWindowTitle(
+            "Edit Web source settings" if source_editing else "Import from Web"
+        )
         self.setMinimumSize(760, 520)
         self.resize(960, 670)
         self._payload = None
@@ -58,6 +69,8 @@ class WebImportDialog(QDialog):
         form.setVerticalSpacing(7)
         self.url_edit = QLineEdit()
         self.url_edit.setPlaceholderText("https://example.com/data.csv")
+        if initial_connection:
+            self.url_edit.setText(str(initial_connection.get("url", "")))
         form.addRow("URL", self.url_edit)
         layout.addLayout(form)
 
@@ -118,7 +131,9 @@ class WebImportDialog(QDialog):
         layout.addWidget(self.preview_table, 1)
 
         buttons = QDialogButtonBox(QDialogButtonBox.StandardButton.Cancel)
-        self.import_button = QPushButton("Import data")
+        self.import_button = QPushButton(
+            "Apply settings" if source_editing else "Import data"
+        )
         self.import_button.setEnabled(False)
         buttons.addButton(self.import_button, QDialogButtonBox.ButtonRole.AcceptRole)
         buttons.rejected.connect(self.reject)
@@ -151,6 +166,12 @@ class WebImportDialog(QDialog):
             self.object_combo.clear()
             for item in self._objects:
                 self.object_combo.addItem(item["label"], item["options"])
+            preferred_index = self._initial_object_index()
+            if preferred_index >= 0:
+                options = self._objects[preferred_index].get("options", {})
+                if isinstance(options, dict) and options.get("resource_type") == "csv":
+                    self._restore_csv_options()
+                self.object_combo.setCurrentIndex(preferred_index)
             self.object_combo.blockSignals(False)
             self.object_combo.setEnabled(bool(self._objects))
             self.status_label.setText(
@@ -231,6 +252,32 @@ class WebImportDialog(QDialog):
                 "has_header": self.header_check.isChecked(),
             })
         return options
+
+    def _initial_object_index(self) -> int:
+        if not self._initial_options:
+            return -1
+        for index, item in enumerate(self._objects):
+            options = item.get("options", {})
+            if not isinstance(options, dict):
+                continue
+            if all(
+                options.get(key) == self._initial_options.get(key)
+                for key in ("resource_type", "table_index", "json_path", "table_name")
+                if key in self._initial_options
+            ):
+                return index
+        return -1
+
+    def _restore_csv_options(self) -> None:
+        options = self._initial_options
+        delimiter_index = self.delimiter_combo.findData(options.get("delimiter"))
+        if delimiter_index >= 0:
+            self.delimiter_combo.setCurrentIndex(delimiter_index)
+        encoding_index = self.encoding_combo.findData(options.get("encoding"))
+        if encoding_index >= 0:
+            self.encoding_combo.setCurrentIndex(encoding_index)
+        if isinstance(options.get("has_header"), bool):
+            self.header_check.setChecked(options["has_header"])
 
     def _invalidate_url(self, *_args: Any) -> None:
         if self._busy:

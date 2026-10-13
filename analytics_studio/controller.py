@@ -4768,8 +4768,82 @@ class StudioController(QObject):
         self,
         source_record: dict[str, Any],
     ) -> tuple[ImportCandidate, dict[str, Any]] | None:
-        """Preview new file settings without replacing the saved source record."""
+        """Preview changed source settings without replacing query identity."""
         source_kind = str(source_record.get("kind", ""))
+        if source_kind == "sql_server":
+            old_connection = dict(source_record.get("connection", {}))
+            old_credential_ref = str(old_connection.get("credential_ref", ""))
+            old_account = sql_server_credential_account(
+                old_credential_ref, old_connection
+            )
+            staged_old_password = source_record.get("_staged_password")
+            old_password = (
+                staged_old_password
+                if isinstance(staged_old_password, str) and staged_old_password
+                else self._sql_server_passwords.get(old_account, "")
+            )
+            if not old_password and old_credential_ref:
+                try:
+                    old_password = get_sql_server_password(
+                        old_credential_ref, old_connection
+                    ) or ""
+                except CredentialStoreError:
+                    # The editor can still accept a replacement password. It
+                    # will be written to Keychain only after Close & Apply.
+                    old_password = ""
+            dialog = SQLServerImportDialog(
+                source_editing=True,
+                initial_connection=old_connection,
+                initial_options=dict(source_record.get("parser_options", {})),
+                initial_password=old_password,
+            )
+            if dialog.exec() != QDialog.DialogCode.Accepted or dialog.candidate is None:
+                return None
+            candidate = dialog.candidate
+            settings = dialog.connection_settings
+            password = dialog.password
+            old_identity = {
+                key: old_connection.get(key)
+                for key in ("server", "port", "database", "username", "driver", "encrypt")
+            }
+            updated_record = deepcopy(source_record)
+            if settings == old_identity and password == old_password:
+                connection = {**settings, "credential_ref": old_credential_ref}
+                if not (isinstance(staged_old_password, str) and staged_old_password):
+                    updated_record.pop("_staged_password", None)
+            else:
+                connection = {**settings, "credential_ref": str(uuid4())}
+                updated_record["_staged_password"] = password
+            updated_record["connection"] = connection
+            updated_record["parser_options"] = dict(candidate.options)
+            return candidate, updated_record
+
+        if source_kind == "odata":
+            dialog = ODataFeedImportDialog(
+                source_editing=True,
+                initial_connection=dict(source_record.get("connection", {})),
+                initial_options=dict(source_record.get("parser_options", {})),
+            )
+            if dialog.exec() != QDialog.DialogCode.Accepted or dialog.candidate is None:
+                return None
+            updated_record = deepcopy(source_record)
+            updated_record["connection"] = {"service_root": dialog.service_root}
+            updated_record["parser_options"] = dict(dialog.candidate.options)
+            return dialog.candidate, updated_record
+
+        if source_kind == "web":
+            dialog = WebImportDialog(
+                source_editing=True,
+                initial_connection=dict(source_record.get("connection", {})),
+                initial_options=dict(source_record.get("parser_options", {})),
+            )
+            if dialog.exec() != QDialog.DialogCode.Accepted or dialog.candidate is None:
+                return None
+            updated_record = deepcopy(source_record)
+            updated_record["connection"] = {"url": dialog.url}
+            updated_record["parser_options"] = dict(dialog.candidate.options)
+            return dialog.candidate, updated_record
+
         if source_kind == "folder":
             current_path = self._resolved_source_path(source_record)
             selected_folder = QFileDialog.getExistingDirectory(
@@ -7014,11 +7088,23 @@ class StudioController(QObject):
                     or staged_source.get("kind") != source.get("kind")
                     or source.get("kind") not in {
                         "csv", "excel", "json", "xml", "parquet", "sqlite", "folder",
+                        "sql_server", "odata", "web",
                     }
                     or not isinstance(staged_source.get("parser_options"), dict)
                 ):
-                    raise QueryError("The staged source settings do not match the existing local source.")
-                source["path"] = str(staged_source.get("path", ""))
+                    raise QueryError("The staged source settings do not match the existing source.")
+                if source.get("kind") in {"sql_server", "odata", "web"}:
+                    connection = staged_source.get("connection")
+                    if not isinstance(connection, dict):
+                        raise QueryError("The staged remote connection settings are invalid.")
+                    source["connection"] = deepcopy(connection)
+                    staged_password = staged_source.get("_staged_password")
+                    if isinstance(staged_password, str) and staged_password:
+                        source["_staged_password"] = staged_password
+                    else:
+                        source.pop("_staged_password", None)
+                else:
+                    source["path"] = str(staged_source.get("path", ""))
                 source["parser_options"] = deepcopy(staged_source["parser_options"])
         target = sources_by_id.get(str(target_id))
         if target is None:
@@ -7781,6 +7867,11 @@ class StudioController(QObject):
             self._set_status("At least one query must remain in the project.")
             return False
         source_settings_change_ids: set[str] = set()
+        staged_sql_passwords: dict[str, str] = {}
+        local_source_kinds = {
+            "csv", "excel", "json", "xml", "parquet", "sqlite", "folder",
+        }
+        remote_source_kinds = {"sql_server", "odata", "web"}
         for source_id, result in query_results.items():
             if result.get("is_source_settings_changed") is not True:
                 continue
@@ -7791,18 +7882,18 @@ class StudioController(QObject):
                 current_source is None
                 or not isinstance(staged_source, dict)
                 or not isinstance(candidate, ImportCandidate)
-                or current_source.get("kind") not in {
-                    "csv", "excel", "json", "xml", "parquet", "sqlite", "folder",
-                }
+                or current_source.get("kind") not in (
+                    local_source_kinds | remote_source_kinds
+                )
                 or str(staged_source.get("id", "")) != str(source_id)
                 or staged_source.get("kind") != current_source.get("kind")
                 or candidate.kind != current_source.get("kind")
                 or not isinstance(staged_source.get("parser_options"), dict)
             ):
-                self._set_status("The staged source settings do not match the existing local source.")
+                self._set_status("The staged source settings do not match the existing source.")
                 return False
             stable_keys = (set(current_source) | set(staged_source)) - {
-                "path", "parser_options",
+                "path", "parser_options", "connection", "_staged_password",
             }
             if any(
                 current_source.get(key) != staged_source.get(key)
@@ -7810,21 +7901,59 @@ class StudioController(QObject):
             ):
                 self._set_status("Source settings cannot replace the existing query definition.")
                 return False
-            staged_path = str(staged_source.get("path", "")).strip()
-            try:
-                if not staged_path:
-                    raise ValueError("Choose a valid path for this source.")
-                if current_source.get("kind") == "folder":
-                    if not Path(staged_path).expanduser().resolve().is_dir():
-                        raise ValueError("Choose an existing folder for this source.")
-                elif kind_for_path(Path(staged_path)) != current_source.get("kind"):
-                    raise ValueError("Choose a path with the same file type as the existing source.")
-            except (OSError, ValueError) as exc:
-                self._set_status(f"The staged source path is invalid: {exc}")
-                return False
             if dict(staged_source["parser_options"]) != dict(candidate.options):
                 self._set_status("The staged parser options do not match the source preview.")
                 return False
+            if current_source.get("kind") in local_source_kinds:
+                staged_path = str(staged_source.get("path", "")).strip()
+                try:
+                    if not staged_path:
+                        raise ValueError("Choose a valid path for this source.")
+                    if current_source.get("kind") == "folder":
+                        if not Path(staged_path).expanduser().resolve().is_dir():
+                            raise ValueError("Choose an existing folder for this source.")
+                    elif kind_for_path(Path(staged_path)) != current_source.get("kind"):
+                        raise ValueError(
+                            "Choose a path with the same file type as the existing source."
+                        )
+                except (OSError, ValueError) as exc:
+                    self._set_status(f"The staged source path is invalid: {exc}")
+                    return False
+            else:
+                staged_connection = staged_source.get("connection")
+                required_key = {
+                    "sql_server": "credential_ref",
+                    "odata": "service_root",
+                    "web": "url",
+                }[str(current_source.get("kind"))]
+                if (
+                    not isinstance(staged_connection, dict)
+                    or not str(staged_connection.get(required_key, "")).strip()
+                ):
+                    self._set_status("The staged remote connection settings are incomplete.")
+                    return False
+                if current_source.get("kind") == "sql_server":
+                    old_connection = dict(current_source.get("connection", {}))
+                    new_credential_ref = str(
+                        staged_connection.get("credential_ref", "")
+                    )
+                    old_credential_ref = str(old_connection.get("credential_ref", ""))
+                    staged_password = staged_source.get("_staged_password")
+                    if (
+                        new_credential_ref != old_credential_ref
+                        and not (isinstance(staged_password, str) and staged_password)
+                    ):
+                        self._set_status(
+                            "A changed SQL Server connection needs a password before Apply."
+                        )
+                        return False
+                    if isinstance(staged_password, str) and staged_password:
+                        staged_sql_passwords[str(source_id)] = staged_password
+                    if old_credential_ref and new_credential_ref != old_credential_ref:
+                        deleted_sql_credentials.append(
+                            (old_credential_ref, old_connection)
+                        )
+                current_source["connection"] = deepcopy(staged_connection)
             if current_source.get("kind") == "sqlite":
                 staged_path_resolved = Path(staged_path).expanduser().resolve()
                 staged_table_name = str(candidate.options.get("table_name", ""))
@@ -7856,11 +7985,11 @@ class StudioController(QObject):
                             "This SQLite database table is already linked to another source in the project."
                         )
                         return False
-            current_source["path"] = str(Path(staged_path).expanduser().resolve())
+            if current_source.get("kind") in local_source_kinds:
+                current_source["path"] = str(Path(staged_path).expanduser().resolve())
             current_source["parser_options"] = deepcopy(staged_source["parser_options"])
             source_settings_change_ids.add(str(source_id))
         new_source_ids: set[str] = set()
-        staged_sql_passwords: dict[str, str] = {}
         reserved_model_names = {
             str(table.get("name", "")).strip().casefold()
             for table in session_project.get("model", {}).get("tables", [])

@@ -25,9 +25,20 @@ from analytics_studio.odata import ODataError, list_odata_entity_sets, read_odat
 class ODataFeedImportDialog(QDialog):
     """Connect anonymously to an HTTPS OData v4 service and select an entity set."""
 
-    def __init__(self, parent=None) -> None:
+    def __init__(
+        self,
+        parent=None,
+        *,
+        source_editing: bool = False,
+        initial_connection: dict[str, Any] | None = None,
+        initial_options: dict[str, Any] | None = None,
+    ) -> None:
         super().__init__(parent)
-        self.setWindowTitle("Import from OData Feed")
+        self._source_editing = source_editing
+        self._initial_options = dict(initial_options or {})
+        self.setWindowTitle(
+            "Edit OData source settings" if source_editing else "Import from OData Feed"
+        )
         self.setMinimumSize(760, 520)
         self.resize(960, 670)
         self._entity_sets: list[dict[str, str]] = []
@@ -48,6 +59,10 @@ class ODataFeedImportDialog(QDialog):
         form.setVerticalSpacing(7)
         self.service_root_edit = QLineEdit()
         self.service_root_edit.setPlaceholderText("https://example.com/odata/")
+        if initial_connection:
+            self.service_root_edit.setText(
+                str(initial_connection.get("service_root", ""))
+            )
         form.addRow("Service root URL", self.service_root_edit)
         layout.addLayout(form)
 
@@ -84,7 +99,9 @@ class ODataFeedImportDialog(QDialog):
         layout.addWidget(self.preview_table, 1)
 
         buttons = QDialogButtonBox(QDialogButtonBox.StandardButton.Cancel)
-        self.import_button = QPushButton("Import data")
+        self.import_button = QPushButton(
+            "Apply settings" if source_editing else "Import data"
+        )
         self.import_button.setEnabled(False)
         buttons.addButton(self.import_button, QDialogButtonBox.ButtonRole.AcceptRole)
         buttons.rejected.connect(self.reject)
@@ -116,6 +133,12 @@ class ODataFeedImportDialog(QDialog):
             self.entity_set_combo.clear()
             for item in self._entity_sets:
                 self.entity_set_combo.addItem(item["entity_set_name"], item)
+            preferred_name = str(self._initial_options.get("entity_set_name", ""))
+            if preferred_name:
+                for index, item in enumerate(self._entity_sets):
+                    if str(item.get("entity_set_name", "")) == preferred_name:
+                        self.entity_set_combo.setCurrentIndex(index)
+                        break
             self.entity_set_combo.blockSignals(False)
             self.entity_set_combo.setEnabled(bool(self._entity_sets))
             if not self._entity_sets:
