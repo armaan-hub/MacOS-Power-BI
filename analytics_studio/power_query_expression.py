@@ -10,6 +10,7 @@ from __future__ import annotations
 from datetime import date, datetime
 from decimal import Decimal, DecimalException, ROUND_HALF_EVEN, localcontext
 import re
+import unicodedata
 from typing import Any
 
 
@@ -29,6 +30,7 @@ _FUNCTION_ARITY: dict[str, tuple[int, int]] = {
     "Text.Upper": (1, 1),
     "Text.Lower": (1, 1),
     "Text.Trim": (1, 1),
+    "Text.Clean": (1, 1),
     "Text.Length": (1, 1),
     "Text.Contains": (2, 2),
     "Text.StartsWith": (2, 2),
@@ -678,6 +680,11 @@ def _call_function(name: str, arguments: list[Any]) -> Any:
             return _case_convert(arguments[0], upper=False)
         if name == "Text.Trim":
             return arguments[0].strip()
+        if name == "Text.Clean":
+            return "".join(
+                character for character in arguments[0]
+                if unicodedata.category(character) != "Cc"
+            )
         if name == "Text.Length":
             return Decimal(len(arguments[0]))
         if name == "Text.Contains":

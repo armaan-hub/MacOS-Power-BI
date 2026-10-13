@@ -1826,9 +1826,7 @@ class TransformDataDialog(QDialog):
         self.index_increment_edit.setMaxLength(20)
         self.custom_expression_edit = QPlainTextEdit()
         self.custom_expression_edit.setObjectName("customColumnExpressionEdit")
-        self.custom_expression_edit.setPlaceholderText(
-            'if [Amount] > 100 then "High" else "Low"'
-        )
+        self.custom_expression_edit.setPlaceholderText('Text.Clean([Name])')
         self.custom_expression_edit.setMaximumHeight(76)
         self.custom_expression_label = QLabel("Custom column formula (M subset)")
         self.custom_expression_edit.setToolTip(

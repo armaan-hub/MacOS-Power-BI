@@ -707,3 +707,10 @@ The editor's local M parser and transform engine remain bounded. Microsoft lists
 ## 2026-10-12 — Append M source round-trip
 
 The Advanced Editor now emits and parses the two parent references of a saved Append query as `Table.Combine`, then builds its source preview from those parents' staged query results. The source references remain tied to the session's Append definition and changed references are rejected with directions to Home → Append Queries. A regression test found that Apply compared model query names such as `north` to imported filenames such as `north.csv`, causing a valid authored script to be discarded. Controller validation now resolves parent names through their model tables. Coverage verifies parser/emitter round-trip, downstream filter preview, changed-source rejection, Apply, M persistence, and project save/reopen; the controller's direct M entry routes saved Append queries through the Power Query session. Focused tests passed **127 tests and 151 subtests**; full pytest passed **680 tests and 480 subtests**; `compileall` and `git diff --check` passed. Independent review and manual macOS acceptance remain separate gates. Query references are currently changed through Append Queries, while the M parser and DAX evaluator remain bounded/partial; this increment does not claim full Power Query or DAX parity.
+
+
+## 2026-10-13 — Add `Text.Clean` to custom-column M formulas
+
+The bounded custom-column expression evaluator now accepts `Text.Clean`. It removes Unicode control-category (`Cc`) characters, matching the local Clean Text step and Microsoft's documented behavior. The M expression type checker preserves its nullable text result, and the formula placeholder now demonstrates the function. This extends the local M subset; it does not add arbitrary M execution.
+
+Automated acceptance for this increment remains pending. No tests were run.

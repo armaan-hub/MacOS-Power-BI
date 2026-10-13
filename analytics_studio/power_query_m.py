@@ -2743,7 +2743,9 @@ def _m_expression_type(
                 return type_error
             if name == "Text.From":
                 return null_type if arguments and arguments[0] is null_type else "text"
-            if name in {"Text.Upper", "Text.Lower", "Text.Trim", "Text.Replace"}:
+            if name in {
+                "Text.Upper", "Text.Lower", "Text.Trim", "Text.Clean", "Text.Replace"
+            }:
                 nullable_positions = {0}
                 if has_known_type_mismatch(arguments, {"text"}, nullable_positions):
                     return type_error
