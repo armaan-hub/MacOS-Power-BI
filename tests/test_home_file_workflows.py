@@ -2011,7 +2011,8 @@ in
             previewed_source=fresh,
         ))
 
-        self.assertEqual(controller._raw_candidates[source_id], fresh)
+        self.assertEqual(controller._raw_candidates[source_id].source_id, source_id)
+        self.assertEqual(controller._raw_candidates[source_id].rows, fresh.rows)
         self.assertEqual(controller._rows, [{"Region": "North"}])
 
     def test_power_query_session_rejects_staged_upstream_and_dependent_edits_atomically(self) -> None:

@@ -267,6 +267,7 @@ Item {
                     valueRole: "value"
                     model: [
                         { label: "Text", value: "text" },
+                        { label: "Any (mixed)", value: "any" },
                         { label: "Whole number", value: "whole_number" },
                         { label: "Decimal number", value: "decimal_number" },
                         { label: "True/False", value: "boolean" },
@@ -276,7 +277,7 @@ Item {
                     ]
                     currentIndex: {
                         const selectedType = root.typeForColumn(typeColumnCombo.currentText)
-                        const typeNames = ["text", "whole_number", "decimal_number", "boolean", "date", "datetime", "time"]
+                        const typeNames = ["text", "any", "whole_number", "decimal_number", "boolean", "date", "datetime", "time"]
                         const found = typeNames.indexOf(selectedType)
                         return found < 0 ? 0 : found
                     }
@@ -285,6 +286,7 @@ Item {
                 Button {
                     text: "Apply type"
                     enabled: typeColumnCombo.currentText !== ""
+                             && typeValueCombo.currentValue !== "any"
                     Accessible.name: "Apply type to selected column"
                     onClicked: root.appController.setColumnType(
                         typeColumnCombo.currentText,
@@ -425,6 +427,7 @@ Item {
                                     const selectedType = root.typeForColumn(String(display))
                                     const labels = {
                                         text: "Text",
+                                        any: "Any (mixed)",
                                         whole_number: "Whole number",
                                         decimal_number: "Decimal number",
                                         boolean: "True/False",

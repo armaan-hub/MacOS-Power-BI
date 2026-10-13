@@ -918,7 +918,7 @@ def validate_project(value: Any) -> dict[str, Any]:
             ) from exc
 
     from analytics_studio.transformations import (
-        SUPPORTED_COLUMN_TYPES,
+        SUPPORTED_MODEL_COLUMN_TYPES,
         TransformationError,
         canonical_column_type,
         validate_applied_step_metadata,
@@ -1120,7 +1120,7 @@ def validate_project(value: Any) -> dict[str, Any]:
             if not isinstance(column, str) or not column.strip() or not isinstance(type_name, str):
                 raise ProjectFileError("Model column types need non-empty column names and type names.")
             canonical_type = canonical_column_type(type_name)
-            if canonical_type not in SUPPORTED_COLUMN_TYPES:
+            if canonical_type not in SUPPORTED_MODEL_COLUMN_TYPES:
                 raise ProjectFileError(f"Unsupported model column type {type_name!r}.")
             normalized_types[column] = canonical_type
         table["column_types"] = normalized_types

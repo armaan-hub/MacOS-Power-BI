@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from collections import defaultdict, deque
 from copy import deepcopy
+from datetime import date, datetime, time
 from decimal import Decimal, DecimalException
 from typing import Any
 
@@ -93,9 +94,13 @@ def propagate_relationship_filters(
             raise RelationshipError("An active relationship refers to a column that is no longer loaded.")
         source_type = str(source_table.get("column_types", {}).get(source_column, "text"))
         target_type = str(target_table.get("column_types", {}).get(target_column, "text"))
-        compatible = source_type == target_type or {source_type, target_type} <= {
+        compatible = (
+            source_type == target_type
+            or "any" in {source_type, target_type}
+            or {source_type, target_type} <= {
             "whole_number", "decimal_number",
-        }
+            }
+        )
         if not compatible:
             raise RelationshipError("An active relationship has incompatible column types.")
         edges_by_source[source_id].append(
@@ -212,6 +217,14 @@ def _relationship_value_key(value: Any, column_type: str) -> tuple[str, Any]:
         return "null", None
     if isinstance(value, str) and value == "":
         return "empty", ""
+    if column_type == "any" and isinstance(value, (int, float, Decimal)) and not isinstance(value, bool):
+        try:
+            number = Decimal(str(value))
+        except DecimalException as exc:
+            raise RelationshipError("A relationship key contains a value that is not numeric.") from exc
+        if not number.is_finite():
+            raise RelationshipError("A relationship key contains a value that is not finite.")
+        return "number", number
     if column_type in {"whole_number", "decimal_number"}:
         if isinstance(value, bool):
             raise RelationshipError("A relationship key contains a value that does not match its model type.")
@@ -232,6 +245,12 @@ def _relationship_value_key(value: Any, column_type: str) -> tuple[str, Any]:
         raise RelationshipError("A relationship key contains a value that does not match its model type.")
     if isinstance(value, bool):
         return "boolean", value
+    if isinstance(value, datetime):
+        return "datetime", value.isoformat()
+    if isinstance(value, date):
+        return "date", value.isoformat()
+    if isinstance(value, time):
+        return "time", value.isoformat()
     # The local model has no persisted collation setting. Use the common
     # case-insensitive convention consistently for relationship joins,
     # one-side uniqueness, unknown-member detection, and RELATED lookups.

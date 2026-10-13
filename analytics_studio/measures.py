@@ -2690,7 +2690,7 @@ def evaluate_measures(
         return "unknown" if actual_type is None else str(actual_type).casefold()
 
     def iterator_type_category(type_name: str) -> str:
-        if type_name == "unknown":
+        if type_name in {"unknown", "any"}:
             return "unknown"
         if type_name in {
             "whole_number", "decimal_number", "decimal", "fixed_decimal",

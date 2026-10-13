@@ -6,7 +6,9 @@ from collections import defaultdict
 from copy import deepcopy
 from typing import Any, Sequence
 
-from analytics_studio.file_import import MAX_CELLS, MAX_COLUMNS, MAX_DATA_ROWS, ImportCandidate
+from analytics_studio.file_import import (
+    MAX_CELLS, MAX_COLUMNS, MAX_DATA_ROWS, ImportCandidate, lineaged_row,
+)
 from analytics_studio.power_query_values import cell_key, is_cell_error
 
 
@@ -136,7 +138,10 @@ def merge_candidates(
         for output_header in output_headers[len(left.headers):]:
             source_column = column_sources[output_header]["column"]
             output[output_header] = right_row.get(source_column) if right_row is not None else None
-        output_rows.append(output)
+        parents = tuple(
+            row for row in (left_row, right_row) if row is not None
+        )
+        output_rows.append(lineaged_row(output, *parents))
 
     for left_index, row in enumerate(left.rows):
         key = _merge_key(row, left_keys)

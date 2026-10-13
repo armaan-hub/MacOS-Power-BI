@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from collections import defaultdict
-from copy import deepcopy
+from copy import copy, deepcopy
 import base64
 import calendar
 import csv
@@ -44,7 +44,13 @@ from analytics_studio.project import (
     validate_project,
 )
 from analytics_studio.data_sources import DATA_SOURCE_CATALOG
-from analytics_studio.file_import import FileImportError, ImportCandidate, kind_for_path, parse_file
+from analytics_studio.file_import import (
+    FileImportError,
+    ImportCandidate,
+    kind_for_path,
+    lineaged_row,
+    parse_file,
+)
 from analytics_studio.folder_import import parse_folder
 from analytics_studio.folder_import_dialog import FolderImportDialog
 from analytics_studio.inline_data import sample_candidate, source_from_candidate
@@ -428,8 +434,43 @@ _REPORT_FILTER_NUMERIC_OPERATORS = {
 }
 
 
+def _candidate_snapshot_matches(
+    left: ImportCandidate, right: ImportCandidate
+) -> bool:
+    """Compare evaluated table content without candidate IDs or row addresses."""
+    if not isinstance(left, ImportCandidate) or not isinstance(right, ImportCandidate):
+        return False
+
+    def cell_snapshot(value: Any) -> tuple[Any, ...]:
+        if is_cell_error(value):
+            return (
+                "error", value.reason, value.message, cell_key(value.value),
+                value.target_type, value.culture, value.row,
+            )
+        return cell_key(value)
+
+    def row_snapshot(candidate: ImportCandidate) -> tuple[Any, ...]:
+        return tuple(
+            tuple(sorted(
+                (str(column), cell_snapshot(value))
+                for column, value in row.items()
+            ))
+            for row in candidate.rows
+        )
+
+    return (
+        left.kind == right.kind
+        and left.headers == right.headers
+        and left.options == right.options
+        and left.notices == right.notices
+        and row_snapshot(left) == row_snapshot(right)
+    )
+
+
 def _report_filter_operators(column_type: str) -> list[str]:
     common = ["equals", "not_equals", "is_any_of", "is_none_of", "is_blank", "is_not_blank"]
+    if column_type == "any":
+        return common
     if column_type == "date":
         return [
             "equals", "not_equals", "is_any_of", "is_none_of", "relative_date",
@@ -757,6 +798,13 @@ def _report_filter_clause_matches(
         return False
     value = None if raw_value is None else cell_to_text(raw_value)
     operator = clause["operator"]
+    if column_type == "any" and operator in {
+        "contains", "does_not_contain", "begins_with", "does_not_begin_with",
+        "ends_with", "does_not_end_with", "greater_than", "greater_than_or_equal",
+        "less_than", "less_than_or_equal", _REPORT_FILTER_RELATIVE_DATE,
+        _REPORT_FILTER_RELATIVE_TIME,
+    }:
+        return False
     if operator == _REPORT_FILTER_TOP_N:
         return False
     if operator == "report_month":
@@ -815,6 +863,8 @@ def _report_filter_clause_matches(
                 )
                 if value.startswith(_REPORT_FILTER_VALUE_TOKEN):
                     is_selected = ("text", value) in token_values or value in legacy_values
+                elif column_type == "any":
+                    is_selected = isinstance(raw_value, str) and raw_value in legacy_values
                 elif column_type in _REPORT_FILTER_NUMERIC_TYPES | _REPORT_FILTER_TEMPORAL_TYPES:
                     try:
                         actual_value = _parse_report_filter_value(value, column_type)
@@ -838,6 +888,9 @@ def _report_filter_clause_matches(
             ) == _report_filter_token_identity(expected_token)
         else:
             matches = raw_value == decoded
+        return matches if operator == "equals" else not matches
+    if column_type == "any" and operator in {"equals", "not_equals"}:
+        matches = isinstance(raw_value, str) and raw_value == expected
         return matches if operator == "equals" else not matches
     if operator == "is_blank":
         return value is None or value == ""
@@ -3122,9 +3175,11 @@ class StudioController(QObject):
                 raise RelationshipError("A relationship column is missing from its loaded table.")
             from_type = str(from_table.get("columnTypes", {}).get(from_column, "text"))
             to_type = str(to_table.get("columnTypes", {}).get(to_column, "text"))
-            compatible_types = from_type == to_type or {from_type, to_type} <= {
-                "whole_number", "decimal_number",
-            }
+            compatible_types = (
+                from_type == to_type
+                or "any" in {from_type, to_type}
+                or {from_type, to_type} <= {"whole_number", "decimal_number"}
+            )
             if not compatible_types:
                 raise RelationshipError(
                     f"Relationship column types must match; {from_type.replace('_', ' ')} "
@@ -3639,6 +3694,7 @@ class StudioController(QObject):
             and source.get("parser_options") == options
         ), None)
         source_id = str(existing_source["id"]) if existing_source else str(uuid4())
+        parsed.set_source_identity(source_id)
         existing_table = next(
             (table for table in self._project.get("model", {}).get("tables", [])
              if table.get("id") == source_id or table.get("source_id") == source_id),
@@ -3765,6 +3821,7 @@ class StudioController(QObject):
             and source.get("parser_options") == options
         ), None)
         source_id = str(existing_source["id"]) if existing_source else str(uuid4())
+        parsed.set_source_identity(source_id)
         existing_table = next(
             (table for table in self._project.get("model", {}).get("tables", [])
              if table.get("id") == source_id or table.get("source_id") == source_id),
@@ -3900,6 +3957,7 @@ class StudioController(QObject):
             if self._sql_server_source_matches(source, identity, options)
         ), None)
         source_id = str(existing_source["id"]) if existing_source else str(uuid4())
+        parsed.set_source_identity(source_id)
         connection_source = existing_source or next((
             source for source in self._project.get("data_sources", [])
             if self._sql_server_connection_matches(source, identity)
@@ -4870,6 +4928,11 @@ class StudioController(QObject):
                     )
                 else:
                     raise ValueError(f"Unsupported source type: {kind or 'unknown'}")
+                if kind != "query":
+                    raw.set_source_identity(
+                        source_id,
+                        preserve_origins=kind == "folder",
+                    )
                 raw_candidates[source_id] = raw
                 source_steps = source.get("transform_steps", [])
                 if kind in {"odata", "web"} and raw.notices:
@@ -5459,6 +5522,7 @@ class StudioController(QObject):
             kind=parsed.kind,
             parser_options=parsed.options,
         ) or str(uuid4())
+        parsed.set_source_identity(source_id, preserve_origins=parsed.kind == "folder")
         existing_source = next(
             (source for source in existing_sources if source.get("id") == source_id),
             None,
@@ -5609,6 +5673,7 @@ class StudioController(QObject):
             self._set_status("The entered table is invalid.")
             return False
         source_id = str(uuid4())
+        parsed.set_source_identity(source_id)
         source_name = str(parsed.options.get("name", "Entered data")).strip() or "Entered data"
         table_name = self._unique_table_name(source_name)
         try:
@@ -5758,6 +5823,8 @@ class StudioController(QObject):
             self._set_status("Enter a valid name for the query.")
             return False
         source_id = str(uuid4())
+        candidate = copy(candidate)
+        candidate.source_id = source_id
         table_name = self._unique_table_name(query_name)
         query_steps = [
             {"op": "convert_type", "column": header, "type": output_types.get(header, "text")}
@@ -7324,31 +7391,39 @@ class StudioController(QObject):
         return result
 
     def _raw_candidate_for_source(self, source: dict[str, Any]) -> ImportCandidate:
+        source_id = str(source.get("id", ""))
         if source.get("kind") == "inline":
             headers = list(source["headers"])
             rows = [
                 {header: row[header] for header in headers}
                 for row in source["rows"]
             ]
-            return ImportCandidate("inline", headers, rows, {"name": source["name"]}, [])
-        if source.get("kind") == "query":
+            candidate = ImportCandidate("inline", headers, rows, {"name": source["name"]}, [])
+        elif source.get("kind") == "query":
             return self._query_candidate(
                 source, self._loaded_candidates, project=self._project
             )
-        if source.get("kind") == "sql_server":
-            return self._sql_server_candidate_for_source(source)
-        if source.get("kind") == "odata":
-            return self._odata_candidate_for_source(source)
-        if source.get("kind") == "web":
-            return self._web_candidate_for_source(source)
-        path = self._resolved_source_path(source)
-        if source.get("kind") == "folder":
-            return parse_folder(path, options=source.get("parser_options", {}))
-        return parse_file(
-            path,
-            options=source.get("parser_options", self._active_parser_options),
-            expected_kind=source.get("kind"),
+        elif source.get("kind") == "sql_server":
+            candidate = self._sql_server_candidate_for_source(source)
+        elif source.get("kind") == "odata":
+            candidate = self._odata_candidate_for_source(source)
+        elif source.get("kind") == "web":
+            candidate = self._web_candidate_for_source(source)
+        else:
+            path = self._resolved_source_path(source)
+            if source.get("kind") == "folder":
+                candidate = parse_folder(path, options=source.get("parser_options", {}))
+            else:
+                candidate = parse_file(
+                    path,
+                    options=source.get("parser_options", self._active_parser_options),
+                    expected_kind=source.get("kind"),
+                )
+        candidate.set_source_identity(
+            source_id,
+            preserve_origins=source.get("kind") == "folder",
         )
+        return candidate
 
     def _session_raw_candidate_for_source(
         self, source: dict[str, Any]
@@ -7752,12 +7827,15 @@ class StudioController(QObject):
         if kind == "sql_server":
             if not sql_server_password:
                 raise SQLServerError("A SQL Server password is required before Apply.")
-            return read_sql_server_object(connection, options, sql_server_password)
-        if kind == "odata":
-            return read_odata_entity_set(connection, options)
-        if kind == "web":
-            return read_web_source(connection, options)
-        raise ValueError("The staged source connector is not supported.")
+            candidate = read_sql_server_object(connection, options, sql_server_password)
+        elif kind == "odata":
+            candidate = read_odata_entity_set(connection, options)
+        elif kind == "web":
+            candidate = read_web_source(connection, options)
+        else:
+            raise ValueError("The staged source connector is not supported.")
+        candidate.set_source_identity(str(source.get("id", "")))
+        return candidate
 
     @staticmethod
     def _odata_candidate_for_source(source: dict[str, Any]) -> ImportCandidate:
@@ -7801,20 +7879,23 @@ class StudioController(QObject):
                 header for header in candidate.headers
                 if header not in calculated_columns
             ]
-            return ImportCandidate(
+            result = ImportCandidate(
                 kind="query",
                 headers=headers,
                 rows=[
-                    {header: row.get(header, "") for header in headers}
+                    lineaged_row(
+                        {header: row.get(header, "") for header in headers}, row
+                    )
                     for row in candidate.rows
                 ],
                 options={},
                 notices=[],
+                source_id=str(source.get("id", "")),
             )
-        if operation == "append":
-            return append_candidates(inputs)
-        if operation == "merge" and len(inputs) == 2:
-            return merge_candidates(
+        elif operation == "append":
+            result = append_candidates(inputs)
+        elif operation == "merge" and len(inputs) == 2:
+            result = merge_candidates(
                 inputs[0],
                 inputs[1],
                 left_keys=definition.get("left_keys", []),
@@ -7822,20 +7903,21 @@ class StudioController(QObject):
                 join_kind=definition.get("join_kind", ""),
                 right_name=definition.get("right_name", "Right"),
             )
-        if operation == "calculated_table" and len(inputs) == 1:
+        elif operation == "calculated_table" and len(inputs) == 1:
             headers, rows = evaluate_calculated_table(
                 definition.get("expression"),
                 inputs[0],
                 definition.get("source_table"),
             )
-            return ImportCandidate(
-                kind="query", headers=headers, rows=rows, options={}, notices=[]
+            result = ImportCandidate(
+                kind="query", headers=headers, rows=rows, options={}, notices=[],
+                source_id=str(source.get("id", "")),
             )
-        if operation == "calendar":
-            return generate_calendar(
+        elif operation == "calendar":
+            result = generate_calendar(
                 definition.get("start_date"), definition.get("end_date")
             )
-        if operation == "calendar_auto":
+        elif operation == "calendar_auto":
             table_by_source = {
                 str(table.get("source_id") or table.get("id")): table
                 for table in (project or {}).get("model", {}).get("tables", [])
@@ -7856,12 +7938,15 @@ class StudioController(QObject):
                             "column": str(column),
                             "type": str(column_type),
                         })
-            return generate_calendar_auto(
+            result = generate_calendar_auto(
                 dict(zip(source_ids, inputs)),
                 date_columns,
                 definition.get("fiscal_year_end_month", 12),
             )
-        raise QueryError(f"Unsupported saved query operation: {operation!r}.")
+        else:
+            raise QueryError(f"Unsupported saved query operation: {operation!r}.")
+        result.source_id = str(source.get("id", "")) or result.source_id
+        return result
 
     @staticmethod
     def _source_load_enabled(source: dict[str, Any]) -> bool:
@@ -8037,7 +8122,9 @@ class StudioController(QObject):
                 if item.get("id") == source_id
             )
             raw_candidate = self._raw_candidate_for_source(source)
-            if previewed_source is not None and raw_candidate != previewed_source:
+            if previewed_source is not None and not _candidate_snapshot_matches(
+                raw_candidate, previewed_source
+            ):
                 self._set_status(
                     "The source changed while Transform data was open. Reopen Transform data to preview the latest rows."
                 )
@@ -8046,7 +8133,7 @@ class StudioController(QObject):
                 raw_candidate, validated_steps,
                 parameters=parameter_values(self._project.get("query_parameters", []), self._project.get("query_functions", [])),
             )
-            if confirmed != transformed:
+            if not _candidate_snapshot_matches(confirmed, transformed):
                 self._set_status(
                     "The transformation result no longer matches its preview. Reopen Transform data and try again."
                 )
@@ -8645,12 +8732,15 @@ class StudioController(QObject):
                             # otherwise current preview for a changing endpoint.
                             raw_candidate = result["source_candidate"]
                         else:
-                            raw_candidate = self._candidate_for_staged_source(
-                                source,
-                                sql_server_password=staged_sql_passwords.get(
-                                    source_id, ""
-                                ),
+                            raw_candidate = deepcopy(
+                                self._candidate_for_staged_source(
+                                    source,
+                                    sql_server_password=staged_sql_passwords.get(
+                                        source_id, ""
+                                    ),
+                                )
                             )
+                            raw_candidate.set_source_identity(source_id)
                     else:
                         raw_candidate = self._session_raw_candidate_for_source(source)
                 elif source_id in new_source_ids:
@@ -8706,7 +8796,7 @@ class StudioController(QObject):
                     or is_function_dependent_reference
                 )
                 if (
-                    raw_candidate != previewed_source
+                    not _candidate_snapshot_matches(raw_candidate, previewed_source)
                     and not can_rebuild_from_staged_dependency
                 ):
                     self._set_status(
@@ -8718,7 +8808,7 @@ class StudioController(QObject):
                     parameters=parameter_values(session_project.get("query_parameters", []), session_project.get("query_functions", [])),
                 )
                 if (
-                    transformed != previewed_result
+                    not _candidate_snapshot_matches(transformed, previewed_result)
                     and not can_rebuild_from_staged_dependency
                 ):
                     self._set_status(
@@ -9553,6 +9643,11 @@ class StudioController(QObject):
                         self._resolved_source_path(source),
                         options=source.get("parser_options", {}),
                         expected_kind=kind,
+                    )
+                if kind != "query":
+                    raw.set_source_identity(
+                        source_id,
+                        preserve_origins=kind == "folder",
                     )
                 raw_candidates[source_id] = raw
                 query_candidate = apply_transformations(

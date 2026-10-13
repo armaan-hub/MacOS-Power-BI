@@ -24,7 +24,12 @@ from analytics_studio.local_table_dialogs import (
     MergeQueriesDialog,
     TransformDataDialog,
 )
-from analytics_studio.power_query_m import PowerQueryMEditorDialog
+from analytics_studio.power_query_m import (
+    PowerQueryMEditorDialog,
+    parse_m_script,
+    steps_to_m_script,
+)
+from analytics_studio.power_query_values import PowerQueryCellError
 from analytics_studio.project import validate_project
 from analytics_studio.sql_server_credentials import CredentialStoreError, credential_account
 from analytics_studio.query_engine import append_candidates, merge_candidates
@@ -125,7 +130,8 @@ class PowerQuerySessionCombineTests(unittest.TestCase):
             root_state = dialog._query_states[root_id]
             self.assertEqual(root_state["source_record"]["id"], root_id)
             self.assertEqual(root_state["source_record"]["kind"], "csv")
-            self.assertEqual(root_state["source_candidate"], candidate)
+            self.assertEqual(root_state["source_candidate"].source_id, root_id)
+            self.assertEqual(root_state["source_candidate"].rows, candidate.rows)
             self.assertEqual(root_state["steps"], steps)
             reference = dialog._query_states[reference_id]
             self.assertEqual(reference["preview_candidate"].rows, [
@@ -153,7 +159,8 @@ class PowerQuerySessionCombineTests(unittest.TestCase):
         self.assertEqual(saved_source["path"], str(new_path.resolve()))
         self.assertEqual(saved_source["parser_options"]["delimiter"], ";")
         self.assertEqual(saved_source["transform_steps"], steps)
-        self.assertEqual(controller._raw_candidates[root_id], candidate)
+        self.assertEqual(controller._raw_candidates[root_id].source_id, root_id)
+        self.assertEqual(controller._raw_candidates[root_id].rows, candidate.rows)
         self.assertEqual(controller._loaded_candidates[root_id].rows, [
             {"Region": "South", "Amount": "15"},
             {"Region": "North", "Amount": "25"},
@@ -492,7 +499,8 @@ class PowerQuerySessionCombineTests(unittest.TestCase):
             button.click()
             staged = dialog._query_states[root_id]
             self.assertEqual(staged["source_record"]["kind"], "sqlite")
-            self.assertEqual(staged["source_candidate"], new_candidate)
+            self.assertEqual(staged["source_candidate"].source_id, root_id)
+            self.assertEqual(staged["source_candidate"].rows, new_candidate.rows)
             self.assertEqual(staged["source_record"]["parser_options"], {
                 "table_name": "SalesView",
             })
@@ -522,7 +530,8 @@ class PowerQuerySessionCombineTests(unittest.TestCase):
         )
         self.assertEqual(saved_source["path"], str(new_path.resolve()))
         self.assertEqual(saved_source["parser_options"]["table_name"], "SalesView")
-        self.assertEqual(controller._raw_candidates[root_id], new_candidate)
+        self.assertEqual(controller._raw_candidates[root_id].source_id, root_id)
+        self.assertEqual(controller._raw_candidates[root_id].rows, new_candidate.rows)
         self.assertEqual(controller._loaded_candidates[root_id].rows, [
             {"Region": "Abu Dhabi", "Amount": "20"},
         ])
@@ -2893,6 +2902,165 @@ class PowerQuerySessionCombineTests(unittest.TestCase):
         self.assertEqual(merged_rows[0]["south.Region"], "South")
         self.assertIsNone(merged_rows[1]["south.Region"])
         self.assertEqual(merged_rows[2]["south.Region"], "South")
+
+    def test_m_errors_keep_project_source_rows_through_save_reopen_and_refresh(self) -> None:
+        controller = self.controller()
+        path = self.root / "lineage.csv"
+        path.write_text(
+            "ID,Amount\nA,8\nB,broken\nC,10\nD,12\n",
+            encoding="utf-8",
+        )
+        self.assertTrue(controller._commit_import(path, parse_file(path)))
+        source_id = controller.activeTableId
+        raw = controller._raw_candidates[source_id]
+        self.assertEqual(raw.source_id, source_id)
+        self.assertEqual(raw.rows[1].source_rows, ((source_id, 2),))
+        steps = [
+            {"op": "filter_rows", "column": "ID", "operator": "not_equals", "value": "A"},
+            {"op": "sort_rows", "column": "ID", "direction": "desc"},
+            {"op": "convert_type", "column": "Amount", "type": "whole_number"},
+            {"op": "add_custom_column", "name": "Next", "expression": "[Amount] + 1"},
+        ]
+        script = steps_to_m_script(steps, "Lineage")
+        parsed_steps = parse_m_script(
+            script,
+            "Lineage",
+            initial_column_types={"ID": "text", "Amount": "text"},
+        )
+        transformed = apply_transformations(raw, parsed_steps)
+        error = transformed.rows[-1]["Amount"]
+        self.assertIsInstance(error, PowerQueryCellError)
+        self.assertEqual(error.row, 3)
+        self.assertEqual(error.source_rows, ((source_id, 2),))
+        self.assertIs(transformed.rows[-1]["Next"], error)
+        self.assertTrue(controller._commit_transform_steps(
+            source_id,
+            parsed_steps,
+            transformed,
+            previewed_source=raw,
+            m_script=script,
+        ), controller.statusMessage)
+
+        remove_error_steps = [
+            *parsed_steps,
+            {"op": "remove_rows_with_errors", "columns": ["Amount"]},
+        ]
+        remove_error_script = steps_to_m_script(remove_error_steps, "Lineage")
+        parsed_remove_steps = parse_m_script(
+            remove_error_script,
+            "Lineage",
+            initial_column_types={"ID": "text", "Amount": "text"},
+        )
+        self.assertEqual(
+            [row["ID"] for row in apply_transformations(raw, parsed_remove_steps).rows],
+            ["D", "C"],
+        )
+
+        project_path = self.root / "lineage.npa"
+        self.assertTrue(controller._save_to(project_path))
+        reopened = self.controller("lineage-reopened.ini")
+        self.assertTrue(reopened.open_project_path(project_path))
+        reopened_error = reopened._loaded_candidates[source_id].rows[-1]["Amount"]
+        self.assertIsInstance(reopened_error, PowerQueryCellError)
+        self.assertEqual(reopened_error.source_rows, ((source_id, 2),))
+        self.assertEqual(reopened_error.row, 3)
+
+        path.write_text(
+            "ID,Amount\nA,8\nB,2\nC,10\nD,12\n",
+            encoding="utf-8",
+        )
+        reopened.refresh_source()
+        refreshed_row = next(
+            row for row in reopened._loaded_candidates[source_id].rows
+            if row["ID"] == "B"
+        )
+        self.assertEqual(refreshed_row["Amount"], 2)
+        self.assertEqual(refreshed_row["Next"], "3")
+        self.assertEqual(refreshed_row.source_rows, ((source_id, 2),))
+
+    def test_mixed_unpivot_any_type_persists_and_replays_from_sqlite(self) -> None:
+        controller = self.controller()
+        path = self.root / "mixed.sqlite"
+        with sqlite3.connect(path) as connection:
+            connection.execute(
+                "CREATE TABLE Mixed (Key TEXT, Amount REAL, Note TEXT)"
+            )
+            connection.executemany(
+                "INSERT INTO Mixed VALUES (?, ?, ?)",
+                [("A", 1.25, "cash"), ("B", None, "")],
+            )
+        raw = parse_file(path, options={"table_name": "Mixed"})
+        self.assertTrue(controller._commit_import(path, raw))
+        source_id = controller.activeTableId
+        raw = controller._raw_candidates[source_id]
+        steps = [{
+            "op": "unpivot_columns",
+            "columns": ["Amount", "Note"],
+            "attribute_name": "Field",
+            "value_name": "Value",
+        }]
+        script = steps_to_m_script(steps, "Mixed Values")
+        types = next(
+            table["column_types"] for table in controller._project["model"]["tables"]
+            if table.get("source_id") == source_id
+        )
+        parsed_steps = parse_m_script(
+            script, "Mixed Values", initial_column_types=types
+        )
+        transformed = apply_transformations(raw, parsed_steps)
+        self.assertTrue(controller._commit_transform_steps(
+            source_id,
+            parsed_steps,
+            transformed,
+            previewed_source=raw,
+            m_script=script,
+        ), controller.statusMessage)
+        table_types = next(
+            table["column_types"] for table in controller._project["model"]["tables"]
+            if table.get("source_id") == source_id
+        )
+        self.assertEqual(table_types["Value"], "any")
+        self.assertEqual([row["Value"] for row in transformed.rows], [1.25, "cash", ""])
+
+        project_path = self.root / "mixed-unpivot.npa"
+        self.assertTrue(controller._save_to(project_path))
+        reopened = self.controller("mixed-reopened.ini")
+        self.assertTrue(reopened.open_project_path(project_path))
+        reopened_types = next(
+            table["column_types"] for table in reopened._project["model"]["tables"]
+            if table.get("source_id") == source_id
+        )
+        self.assertEqual(reopened_types["Value"], "any")
+        self.assertEqual(
+            [row["Value"] for row in reopened._loaded_candidates[source_id].rows],
+            [1.25, "cash", ""],
+        )
+
+    def test_folder_lineage_keeps_file_addresses_when_earlier_file_is_added(self) -> None:
+        controller = self.controller()
+        folder = self.root / "folder-lineage"
+        folder.mkdir()
+        (folder / "z-records.csv").write_text(
+            "ID,Value\nZ,first\n", encoding="utf-8"
+        )
+        candidate = parse_folder(folder)
+        self.assertTrue(controller._commit_import(folder, candidate))
+        source_id = controller.activeTableId
+        original = next(
+            row.source_rows for row in controller._raw_candidates[source_id].rows
+            if row["ID"] == "Z"
+        )
+        self.assertTrue(original[0][0].startswith(source_id + ":"))
+
+        (folder / "a-records.csv").write_text(
+            "ID,Value\nA,earlier\n", encoding="utf-8"
+        )
+        controller.refresh_all_sources()
+        refreshed = next(
+            row.source_rows for row in controller._raw_candidates[source_id].rows
+            if row["ID"] == "Z"
+        )
+        self.assertEqual(refreshed, original)
 
 
 if __name__ == "__main__":

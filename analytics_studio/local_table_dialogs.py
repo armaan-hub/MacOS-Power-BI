@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from collections import Counter
-from copy import deepcopy
+from copy import copy, deepcopy
 from datetime import date, datetime, time
 from decimal import Decimal
 from typing import Any, Callable
@@ -42,7 +42,7 @@ from PySide6.QtWidgets import (
 )
 
 from analytics_studio.dialog_theme import apply_light_dialog_theme
-from analytics_studio.file_import import MAX_DATA_ROWS, ImportCandidate
+from analytics_studio.file_import import MAX_DATA_ROWS, ImportCandidate, lineaged_row
 from analytics_studio.import_preview_dialog import ImportPreviewTableModel
 from analytics_studio.inline_data import parse_pasted_table
 from analytics_studio.power_query_m import (
@@ -96,6 +96,15 @@ from analytics_studio.transformations import (
     validate_applied_step_metadata,
     validate_steps,
 )
+
+
+def _candidate_with_source_id(
+    candidate: ImportCandidate, source_id: str
+) -> ImportCandidate:
+    """Give a query result its saved identity without changing row origins."""
+    result = copy(candidate)
+    result.source_id = source_id
+    return result
 
 
 def _profile_cell_type(value: Any) -> str:
@@ -2786,6 +2795,7 @@ class TransformDataDialog(QDialog):
             candidate, supplied_record = staged
             if not isinstance(candidate, ImportCandidate) or not isinstance(supplied_record, dict):
                 raise ValueError("The source settings preview is incomplete.")
+            candidate = deepcopy(candidate)
             source_record = deepcopy(supplied_record)
             source_id = str(query.get("id", ""))
             source_kind = str(original_record.get("kind", ""))
@@ -2818,6 +2828,10 @@ class TransformDataDialog(QDialog):
                 )
             ):
                 raise ValueError("The edited source settings must keep the same source ID and type.")
+            candidate.set_source_identity(
+                source_id,
+                preserve_origins=source_kind == "folder",
+            )
             stable_keys = (set(original_record) | set(source_record)) - {
                 "path", "parser_options", "connection", "_staged_password",
             }
@@ -3080,6 +3094,11 @@ class TransformDataDialog(QDialog):
                 source_record["path"] = source_path
             else:
                 source_record.pop("path", None)
+            candidate = deepcopy(candidate)
+            candidate.set_source_identity(
+                source_id,
+                preserve_origins=source_kind == "folder",
+            )
             source_types = infer_column_types(candidate.headers, candidate.rows)
             query_id = source_id
             self._query_states[query_id] = {
@@ -3428,6 +3447,7 @@ class TransformDataDialog(QDialog):
                     source_types = self._combined_source_types(
                         operation, source_ids, raw_candidate
                     )
+                raw_candidate = _candidate_with_source_id(raw_candidate, query_id)
                 query["source_candidate"] = raw_candidate
                 query["source_column_types"] = source_types
                 preview = apply_transformations(
@@ -3585,6 +3605,8 @@ class TransformDataDialog(QDialog):
         ):
             self._show_error("Choose two distinct, available queries to combine.")
             return
+        query_id = str(uuid4())
+        candidate = _candidate_with_source_id(candidate, query_id)
         try:
             steps = validate_steps([
                 {"op": "convert_type", "column": header, "type": output_types.get(header, "text")}
@@ -3603,7 +3625,6 @@ class TransformDataDialog(QDialog):
         except (TransformationError, TypeError, ValueError) as exc:
             self._show_error(f"Could not stage the combined query: {exc}")
             return
-        query_id = str(uuid4())
         self._query_states[query_id] = {
             "id": query_id,
             "name": query_name,
@@ -3720,9 +3741,10 @@ class TransformDataDialog(QDialog):
         query_candidate = ImportCandidate(
             kind="query",
             headers=list(self._preview_candidate.headers),
-            rows=[dict(row) for row in self._preview_candidate.rows],
+            rows=[lineaged_row(row, row) for row in self._preview_candidate.rows],
             options={},
             notices=[],
+            source_id=query_id,
         )
         self._query_states[query_id] = {
             "id": query_id,
@@ -3829,6 +3851,9 @@ class TransformDataDialog(QDialog):
                             source_types = self._combined_source_types(
                                 operation, source_ids, raw_candidate
                             )
+                        raw_candidate = _candidate_with_source_id(
+                            raw_candidate, query_id
+                        )
                         query["source_candidate"] = raw_candidate
                         query["source_column_types"] = source_types
                 preview = apply_transformations(
@@ -3933,6 +3958,10 @@ class TransformDataDialog(QDialog):
                             query["source_column_types"] = self._combined_source_types(
                                 operation, source_ids, query["source_candidate"]
                             )
+                if isinstance(query.get("source_candidate"), ImportCandidate):
+                    query["source_candidate"] = _candidate_with_source_id(
+                        query["source_candidate"], query_id
+                    )
                 preview = apply_transformations(
                     query["source_candidate"], query["steps"], parameters=values
                 )

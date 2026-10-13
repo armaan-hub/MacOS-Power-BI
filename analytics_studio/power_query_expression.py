@@ -14,6 +14,8 @@ import re
 import unicodedata
 from typing import Any
 
+from analytics_studio.power_query_values import is_cell_error
+
 
 MAX_EXPRESSION_LENGTH = 2_000
 MAX_EXPRESSION_TOKENS = 512
@@ -483,11 +485,15 @@ def _evaluate(
         )
     if kind == "if":
         condition = _evaluate(node[1], row, functions)
+        if is_cell_error(condition):
+            return condition
         if not isinstance(condition, bool):
             raise ExpressionError("An if condition must evaluate to true or false.")
         return _evaluate(node[2] if condition else node[3], row, functions)
     if kind == "unary":
         value = _evaluate(node[2], row, functions)
+        if is_cell_error(value):
+            return value
         if node[1] == "not":
             if value is None:
                 return None
@@ -500,16 +506,22 @@ def _evaluate(
         return number if node[1] == "+" else -number
     if kind == "coalesce":
         value = _evaluate(node[1], row, functions)
+        if is_cell_error(value):
+            return value
         return _evaluate(node[2], row, functions) if value is None else value
     if kind == "binary":
         operator = node[1]
         left = _evaluate(node[2], row, functions)
+        if is_cell_error(left):
+            return left
         if operator == "and":
             if left is False:
                 return False
             if left is not None and not isinstance(left, bool):
                 raise ExpressionError("The and operator requires logical values.")
             right = _evaluate(node[3], row, functions)
+            if is_cell_error(right):
+                return right
             if right is not None and not isinstance(right, bool):
                 raise ExpressionError("The and operator requires logical values.")
             if right is False:
@@ -523,6 +535,8 @@ def _evaluate(
             if left is not None and not isinstance(left, bool):
                 raise ExpressionError("The or operator requires logical values.")
             right = _evaluate(node[3], row, functions)
+            if is_cell_error(right):
+                return right
             if right is not None and not isinstance(right, bool):
                 raise ExpressionError("The or operator requires logical values.")
             if right is True:
@@ -531,9 +545,14 @@ def _evaluate(
                 return None
             return left or right
         right = _evaluate(node[3], row, functions)
+        if is_cell_error(right):
+            return right
         return _evaluate_binary(operator, left, right)
     if kind == "call":
         arguments = [_evaluate(argument, row, functions) for argument in node[2]]
+        error = next((argument for argument in arguments if is_cell_error(argument)), None)
+        if error is not None:
+            return error
         return _call_function(node[1], arguments)
     if kind == "unresolved_call":
         raise ExpressionError(f"Power Query function {node[1]!r} is unavailable.")
@@ -543,6 +562,9 @@ def _evaluate(
             raise ExpressionError(f"Power Query function {node[1]!r} is unavailable.")
         definition, body = entry
         arguments = [_evaluate(argument, row, functions) for argument in node[2]]
+        error = next((argument for argument in arguments if is_cell_error(argument)), None)
+        if error is not None:
+            return error
         if len(arguments) != 1:
             raise ExpressionError(f"Power Query function {node[1]!r} expects one argument.")
         try:

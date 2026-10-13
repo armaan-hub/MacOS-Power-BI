@@ -8,6 +8,9 @@ from decimal import Decimal
 from typing import Any
 
 
+MAX_SOURCE_LINEAGE_ROWS = 128
+
+
 @dataclass(frozen=True)
 class PowerQueryCellError:
     """A cell-level M error, including the step-input row that produced it."""
@@ -18,6 +21,8 @@ class PowerQueryCellError:
     target_type: str | None = None
     culture: str | None = None
     row: int | None = None
+    source_rows: tuple[tuple[str, int], ...] = ()
+    source_rows_truncated: bool = False
 
     def __str__(self) -> str:
         return f"Error: {self.message}"
@@ -61,6 +66,19 @@ def is_supported_cell_value(value: Any) -> bool:
             and (value.row is None or isinstance(value.row, int) and value.row >= 1)
             and (value.culture is None or isinstance(value.culture, str))
             and (value.target_type is None or isinstance(value.target_type, str))
+            and isinstance(value.source_rows, tuple)
+            and len(value.source_rows) <= MAX_SOURCE_LINEAGE_ROWS
+            and all(
+                isinstance(origin, tuple)
+                and len(origin) == 2
+                and isinstance(origin[0], str)
+                and bool(origin[0])
+                and isinstance(origin[1], int)
+                and not isinstance(origin[1], bool)
+                and origin[1] >= 1
+                for origin in value.source_rows
+            )
+            and isinstance(value.source_rows_truncated, bool)
             and (
                 value.value is None
                 or isinstance(value.value, (str, bool, int, float, Decimal, date, datetime, time))
@@ -75,6 +93,7 @@ def cell_key(value: Any) -> tuple[Any, ...]:
         return (
             "error", value.reason, value.message, cell_to_text(value.value),
             value.target_type, value.culture, value.row,
+            value.source_rows, value.source_rows_truncated,
         )
     if isinstance(value, bool):
         return ("boolean", value)

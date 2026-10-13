@@ -8,11 +8,13 @@ after the user confirms it.
 from __future__ import annotations
 
 import csv
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from datetime import date, datetime, time as datetime_time, timedelta
 from decimal import Decimal
+import hashlib
 import io
 import json
+import math
 import posixpath
 from pathlib import Path
 import re
@@ -24,7 +26,11 @@ import zipfile
 import zlib
 from xml.etree import ElementTree
 
-from analytics_studio.power_query_values import PowerQueryCellError, cell_to_text
+from analytics_studio.power_query_values import (
+    MAX_SOURCE_LINEAGE_ROWS,
+    PowerQueryCellError,
+    cell_to_text,
+)
 
 
 MAX_SOURCE_BYTES = 10 * 1024 * 1024
@@ -79,10 +85,100 @@ class ImportCandidate:
     rows: list[dict[str, Any]]
     options: dict[str, Any]
     notices: list[str]
+    source_id: str | None = None
+
+    def __post_init__(self) -> None:
+        if not self.source_id:
+            locator = next((
+                str(self.options[key]) for key in (
+                    "path", "source_id", "url", "server", "database", "schema",
+                    "table_name", "sheet_name", "name",
+                ) if self.options.get(key)
+            ), None)
+            stable_input = (
+                f"{self.kind}\0{locator}" if locator is not None
+                else repr((self.kind, sorted(self.options.items()), self.headers))
+            )
+            self.source_id = hashlib.sha256(stable_input.encode("utf-8")).hexdigest()[:24]
+        for row_number, row in enumerate(self.rows, 1):
+            if not isinstance(row, LineagedRow):
+                self.rows[row_number - 1] = LineagedRow(
+                    row, source_rows=((self.source_id, row_number),)
+                )
+
+    def set_source_identity(
+        self,
+        source_id: str,
+        *,
+        preserve_origins: bool = False,
+    ) -> None:
+        """Attach the saved source identity to each root row."""
+        self.source_id = source_id
+        for row_number, row in enumerate(self.rows, 1):
+            if not isinstance(row, LineagedRow):
+                row = LineagedRow(row)
+                self.rows[row_number - 1] = row
+            if preserve_origins and row.source_rows:
+                row.source_rows = tuple(
+                    (
+                        origin_id
+                        if origin_id.startswith(f"{source_id}:")
+                        else f"{source_id}:{origin_id}",
+                        origin_row,
+                    )
+                    for origin_id, origin_row in row.source_rows[:MAX_SOURCE_LINEAGE_ROWS]
+                )
+            else:
+                row.source_rows = ((source_id, row_number),)
+                row.source_rows_truncated = False
+            for column, value in list(row.items()):
+                if isinstance(value, PowerQueryCellError):
+                    row[column] = replace(
+                        value,
+                        source_rows=row.source_rows,
+                        source_rows_truncated=row.source_rows_truncated,
+                    )
 
     @property
     def row_count(self) -> int:
         return len(self.rows)
+
+
+class LineagedRow(dict[str, Any]):
+    """A row mapping with bounded, non-column source-row provenance."""
+
+    def __init__(
+        self,
+        values: Mapping[str, Any] | None = None,
+        *,
+        source_rows: tuple[tuple[str, int], ...] = (),
+        source_rows_truncated: bool = False,
+    ) -> None:
+        super().__init__(values or {})
+        self.source_rows = source_rows
+        self.source_rows_truncated = source_rows_truncated
+
+
+def lineaged_row(values: Mapping[str, Any], *parents: Mapping[str, Any]) -> LineagedRow:
+    """Copy output row values and carry a bounded union of parent row origins."""
+    origins: list[tuple[str, int]] = []
+    seen: set[tuple[str, int]] = set()
+    truncated = False
+    for parent in parents:
+        truncated = truncated or bool(getattr(parent, "source_rows_truncated", False))
+        for origin in getattr(parent, "source_rows", ()):
+            if origin in seen:
+                continue
+            seen.add(origin)
+            if len(origins) == MAX_SOURCE_LINEAGE_ROWS:
+                truncated = True
+                break
+            origins.append(origin)
+    return LineagedRow(
+        values,
+        source_rows=tuple(origins),
+        source_rows_truncated=truncated,
+    )
 
 
 def kind_for_path(path: str | Path) -> str:
@@ -247,17 +343,20 @@ def parse_file(
 
     control.report(f"Reading {source_path.name}…")
     control.check_cancelled()
-    if kind == "csv":
-        return _parse_csv(source_path, normalized, control)
-    if kind == "excel":
-        return _parse_excel(source_path, normalized, control)
-    if kind == "json":
-        return _parse_json(source_path, normalized, control)
-    if kind == "parquet":
-        return _parse_parquet(source_path, normalized, control)
-    if kind == "sqlite":
-        return _parse_sqlite(source_path, normalized, control)
-    return _parse_xml(source_path, normalized, control)
+    parser = {
+        "csv": _parse_csv,
+        "excel": _parse_excel,
+        "json": _parse_json,
+        "parquet": _parse_parquet,
+        "sqlite": _parse_sqlite,
+        "xml": _parse_xml,
+    }[kind]
+    candidate = parser(source_path, normalized, control)
+    source_key = hashlib.sha256(
+        f"{kind}\0{source_path.resolve()}\0{json.dumps(normalized, sort_keys=True, default=str)}".encode("utf-8")
+    ).hexdigest()[:24]
+    candidate.set_source_identity(source_key)
+    return candidate
 
 
 def _open_sqlite_readonly(

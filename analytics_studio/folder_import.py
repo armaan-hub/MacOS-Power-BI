@@ -15,6 +15,7 @@ from analytics_studio.file_import import (
     ImportCancelledError,
     ImportCandidate,
     default_options,
+    lineaged_row,
     normalize_options,
     parse_file,
 )
@@ -262,7 +263,7 @@ def parse_folder(
             values = dict(row)
             if normalized["include_source_name"]:
                 values[source_name_header] = relative_name
-            combined_rows.append(values)
+            combined_rows.append(lineaged_row(values, row))
         notices.extend(parsed.notices)
 
     normalized["sample_file"] = sample_name

@@ -181,6 +181,7 @@ from analytics_studio.file_import import (
     MAX_COLUMNS,
     MAX_DATA_ROWS,
     ImportCandidate,
+    lineaged_row,
     normalize_promoted_headers,
 )
 from analytics_studio.power_query_expression import (
@@ -298,7 +299,8 @@ SUPPORTED_COLUMN_TYPES = {
     "datetime",
     "time",
 }
-_CONVERT_TYPES = SUPPORTED_COLUMN_TYPES | {"number"}  # Keep v4/v5 project steps readable.
+SUPPORTED_MODEL_COLUMN_TYPES = SUPPORTED_COLUMN_TYPES | {"any"}
+_CONVERT_TYPES = SUPPORTED_COLUMN_TYPES | {"number", "any"}  # Keep M type-any steps and v4/v5 steps readable.
 _LOCALE_CONVERT_TYPES = {"whole_number", "decimal_number", "date", "datetime", "time"}
 _LOCALE_CLOCK_PATTERN = r"(?<!\S)\d{1,2}:\d{2}(?::\d{2}(?:[.,]\d{1,6})?)?"
 _STEP_FIELDS: dict[str, set[str]] = {
@@ -1156,6 +1158,7 @@ def apply_transformations(
         rows=deepcopy(candidate.rows),
         options=deepcopy(candidate.options),
         notices=deepcopy(candidate.notices),
+        source_id=candidate.source_id,
     )
     for step in validated_steps:
         op = step["op"]
@@ -1752,7 +1755,7 @@ def column_types_after_steps(
             types[step["attribute_name"]] = "text"
             types[step["value_name"]] = (
                 next(iter(unpivoted_types))
-                if len(unpivoted_types) == 1 else "text"
+                if len(unpivoted_types) == 1 else "any"
             )
         elif op == "pivot_column":
             attribute_column = step["attribute_column"]
@@ -1890,7 +1893,7 @@ def _merge_columns(
                 rebuilt[new_name] = merged_value
             if header not in selected:
                 rebuilt[header] = row[header]
-        rows.append(rebuilt)
+        rows.append(lineaged_row(rebuilt, row))
 
     return ImportCandidate(
         kind=candidate.kind,
@@ -1898,6 +1901,7 @@ def _merge_columns(
         rows=rows,
         options=candidate.options,
         notices=candidate.notices,
+        source_id=candidate.source_id,
     )
 
 
@@ -1933,7 +1937,7 @@ def _split_column(candidate: ImportCandidate, column: str, delimiter: str) -> No
                 rebuilt[second_name] = second
             else:
                 rebuilt[header] = row[header]
-        rows.append(rebuilt)
+        rows.append(lineaged_row(rebuilt, row))
     candidate.headers = headers
     candidate.rows = rows
 
@@ -2066,7 +2070,7 @@ def _split_column_by_each_delimiter(
                 rebuilt.update(zip(output_names, parts))
             else:
                 rebuilt[header] = row[header]
-        rows.append(rebuilt)
+        rows.append(lineaged_row(rebuilt, row))
 
     candidate.headers = headers
     candidate.rows = rows
@@ -2107,7 +2111,7 @@ def _split_column_by_positions(
                     rebuilt.update(zip(output_names, parts))
                 else:
                     rebuilt[header] = row[header]
-            rows.append(rebuilt)
+            rows.append(lineaged_row(rebuilt, row))
             continue
         value = cell_to_text(value)
         parts = [
@@ -2121,7 +2125,7 @@ def _split_column_by_positions(
                 rebuilt.update(zip(output_names, parts))
             else:
                 rebuilt[header] = row[header]
-        rows.append(rebuilt)
+        rows.append(lineaged_row(rebuilt, row))
 
     candidate.headers = headers
     candidate.rows = rows
@@ -2150,7 +2154,7 @@ def _split_column_to_rows(
                 f"Splitting into rows exceeds the {MAX_CELLS:,}-cell limit."
             )
         for part in parts:
-            expanded = dict(row)
+            expanded = lineaged_row(row, row)
             expanded[column] = part
             rows.append(expanded)
     candidate.rows = rows
@@ -2201,7 +2205,7 @@ def _group_by(
             result[aggregate["new_name"]] = _aggregate_group(
                 aggregate, members, candidate.headers
             )
-        result_rows.append(result)
+        result_rows.append(lineaged_row(result, *(row for _, row in members)))
 
     return ImportCandidate(
         kind=candidate.kind,
@@ -2209,6 +2213,7 @@ def _group_by(
         rows=result_rows,
         options=candidate.options,
         notices=candidate.notices,
+        source_id=candidate.source_id,
     )
 
 
@@ -2266,13 +2271,14 @@ def _unpivot_columns(
             unpivoted = {header: row[header] for header in retained_headers}
             unpivoted[attribute_name] = column
             unpivoted[value_name] = value
-            result_rows.append(unpivoted)
+            result_rows.append(lineaged_row(unpivoted, row))
     return ImportCandidate(
         kind=candidate.kind,
         headers=result_headers,
         rows=result_rows,
         options=candidate.options,
         notices=candidate.notices,
+        source_id=candidate.source_id,
     )
 
 
@@ -2379,7 +2385,10 @@ def _pivot_column(
                     members,
                     candidate.headers,
                 )
-        result_rows.append(result)
+        result_rows.append(lineaged_row(
+            result,
+            *(row for cells_for_value in cells.values() for _, row in cells_for_value),
+        ))
 
     if key_headers:
         result_rows = _sort_rows(result_rows, key_headers[0], "asc")
@@ -2389,6 +2398,7 @@ def _pivot_column(
         rows=result_rows,
         options=candidate.options,
         notices=candidate.notices,
+        source_id=candidate.source_id,
     )
 
 
@@ -2461,6 +2471,7 @@ def _add_conditional_column(
         rows=candidate.rows,
         options=candidate.options,
         notices=candidate.notices,
+        source_id=candidate.source_id,
     )
 
 
@@ -2559,20 +2570,12 @@ def _add_custom_column(
         )
 
     total_output_bytes = 0
-    referenced = referenced_columns(formula)
     for row_index, row in enumerate(candidate.rows, 1):
-        propagated_error = next(
-            (row[column] for column in referenced if is_cell_error(row[column])),
-            None,
-        )
-        if propagated_error is not None:
-            row[name] = propagated_error
-            continue
         try:
             value = evaluate_expression(
                 formula, row, parameter_values, function_map
             )
-            if output_type != "text":
+            if output_type != "text" and not is_cell_error(value):
                 from analytics_studio.query_functions import (
                     QueryFunctionError,
                     validate_typed_scalar,
@@ -2581,25 +2584,58 @@ def _add_custom_column(
                     value = validate_typed_scalar(output_type, value)
                 except QueryFunctionError as exc:
                     raise PowerQueryExpressionError(str(exc)) from exc
-            result_text = expression_value_to_text(value)
-            total_output_bytes += len(result_text.encode("utf-8"))
-            if total_output_bytes > MAX_EXPRESSION_OUTPUT_BYTES:
-                raise PowerQueryExpressionError(
-                    "The custom-column output exceeds the 80 MiB total limit."
-                )
-            row[name] = (
-                None if value is None else result_text
-            ) if output_type == "text" else value
         except PowerQueryExpressionError as exc:
+            if "exceeds the 80 MiB" in str(exc):
+                raise TransformationError(
+                    f"Custom column {name!r}, row {row_index}: {exc}"
+                ) from exc
+            row[name] = PowerQueryCellError(
+                reason="Expression.Error",
+                message=str(exc) or "The custom-column expression failed.",
+                target_type=output_type,
+                row=row_index,
+                source_rows=tuple(getattr(row, "source_rows", ())),
+                source_rows_truncated=bool(
+                    getattr(row, "source_rows_truncated", False)
+                ),
+            )
+            continue
+        if is_cell_error(value):
+            row[name] = value
+            continue
+        try:
+            result_text = expression_value_to_text(value)
+        except PowerQueryExpressionError as exc:
+            if "exceeds the 80 MiB" in str(exc):
+                raise TransformationError(
+                    f"Custom column {name!r}, row {row_index}: {exc}"
+                ) from exc
+            row[name] = PowerQueryCellError(
+                reason="Expression.Error",
+                message=str(exc) or "The custom-column expression failed.",
+                target_type=output_type,
+                row=row_index,
+                source_rows=tuple(getattr(row, "source_rows", ())),
+                source_rows_truncated=bool(
+                    getattr(row, "source_rows_truncated", False)
+                ),
+            )
+            continue
+        total_output_bytes += len(result_text.encode("utf-8"))
+        if total_output_bytes > MAX_EXPRESSION_OUTPUT_BYTES:
             raise TransformationError(
-                f"Custom column {name!r}, row {row_index}: {exc}"
-            ) from exc
+                f"Custom column {name!r} exceeds the 80 MiB total output limit."
+            )
+        row[name] = (
+            None if value is None else result_text
+        ) if output_type == "text" else value
     return ImportCandidate(
         kind=candidate.kind,
         headers=[*candidate.headers, name],
         rows=candidate.rows,
         options=candidate.options,
         notices=candidate.notices,
+        source_id=candidate.source_id,
     )
 
 
@@ -2763,9 +2799,10 @@ def _keep_columns(candidate: ImportCandidate, columns: list[str]) -> ImportCandi
     return ImportCandidate(
         kind=candidate.kind,
         headers=headers,
-        rows=[{header: row[header] for header in headers} for row in candidate.rows],
+        rows=[lineaged_row({header: row[header] for header in headers}, row) for row in candidate.rows],
         options=candidate.options,
         notices=candidate.notices,
+        source_id=candidate.source_id,
     )
 
 
@@ -2786,10 +2823,10 @@ def _promote_headers(candidate: ImportCandidate) -> ImportCandidate:
         len(candidate.headers),
     )
     rows = [
-        {
+        lineaged_row({
             new_header: row[old_header]
             for old_header, new_header in zip(candidate.headers, promoted)
-        }
+        }, row)
         for row in candidate.rows[1:]
     ]
     return ImportCandidate(
@@ -2798,6 +2835,7 @@ def _promote_headers(candidate: ImportCandidate) -> ImportCandidate:
         rows=rows,
         options=candidate.options,
         notices=candidate.notices,
+        source_id=candidate.source_id,
     )
 
 
@@ -2805,15 +2843,15 @@ def _demote_headers(candidate: ImportCandidate) -> ImportCandidate:
     """Move column names into a new first row and assign default names."""
     headers = [f"Column{index}" for index in range(1, len(candidate.headers) + 1)]
     rows = [
-        {
+        lineaged_row({
             header: old_header
             for header, old_header in zip(headers, candidate.headers)
-        },
+        }),
         *(
-            {
+            lineaged_row({
                 new_header: row[old_header]
                 for old_header, new_header in zip(candidate.headers, headers)
-            }
+            }, row)
             for row in candidate.rows
         ),
     ]
@@ -2823,6 +2861,7 @@ def _demote_headers(candidate: ImportCandidate) -> ImportCandidate:
         rows=rows,
         options=candidate.options,
         notices=candidate.notices,
+        source_id=candidate.source_id,
     )
 
 
@@ -2844,13 +2883,16 @@ def _transpose_table(candidate: ImportCandidate) -> ImportCandidate:
     rows = []
     for old_header in candidate.headers:
         values = [row[old_header] for row in candidate.rows]
-        rows.append(dict(zip(headers, values)))
+        rows.append(lineaged_row(
+            dict(zip(headers, values)), *candidate.rows
+        ))
     return ImportCandidate(
         kind=candidate.kind,
         headers=headers,
         rows=rows,
         options=candidate.options,
         notices=candidate.notices,
+        source_id=candidate.source_id,
     )
 
 
@@ -2860,9 +2902,10 @@ def _reorder_columns(candidate: ImportCandidate, columns: list[str]) -> ImportCa
     return ImportCandidate(
         kind=candidate.kind,
         headers=headers,
-        rows=[{header: row[header] for header in headers} for row in candidate.rows],
+        rows=[lineaged_row({header: row[header] for header in headers}, row) for row in candidate.rows],
         options=candidate.options,
         notices=candidate.notices,
+        source_id=candidate.source_id,
     )
 
 
@@ -2908,7 +2951,7 @@ def _duplicate_column(
         )
     headers = [*candidate.headers, new_name]
     rows = [
-        {**row, new_name: row[column]}
+        lineaged_row({**row, new_name: row[column]}, row)
         for row in candidate.rows
     ]
     return ImportCandidate(
@@ -2917,6 +2960,7 @@ def _duplicate_column(
         rows=rows,
         options=candidate.options,
         notices=candidate.notices,
+        source_id=candidate.source_id,
     )
 
 
@@ -2947,7 +2991,7 @@ def _add_index_column(
             )
 
     rows = [
-        {**row, new_name: start + row_index * increment}
+        lineaged_row({**row, new_name: start + row_index * increment}, row)
         for row_index, row in enumerate(candidate.rows)
     ]
     return ImportCandidate(
@@ -2956,6 +3000,7 @@ def _add_index_column(
         rows=rows,
         options=candidate.options,
         notices=candidate.notices,
+        source_id=candidate.source_id,
     )
 
 
@@ -3203,6 +3248,10 @@ def _convert_column(rows: list[dict[str, Any]], column: str, target_type: str) -
                 value=value,
                 target_type=target_type,
                 row=row_index,
+                source_rows=tuple(getattr(row, "source_rows", ())),
+                source_rows_truncated=bool(
+                    getattr(row, "source_rows_truncated", False)
+                ),
             ))
     for row, value in zip(rows, converted_values):
         row[column] = value
@@ -3342,6 +3391,10 @@ def _convert_column_using_locale(
                 target_type=target_type,
                 culture=culture,
                 row=row_index,
+                source_rows=tuple(getattr(row, "source_rows", ())),
+                source_rows_truncated=bool(
+                    getattr(row, "source_rows_truncated", False)
+                ),
             ))
     for row, value in zip(rows, converted_values):
         row[column] = value
@@ -3433,6 +3486,8 @@ def count_conversion_errors(values: list[Any], target_type: str) -> int:
 
 def _convert_value(value: Any, target_type: str, row_index: int, column: str) -> Any:
     if is_cell_error(value) or value is None:
+        return value
+    if target_type == "any":
         return value
     if target_type == "text":
         return cell_to_text(value)

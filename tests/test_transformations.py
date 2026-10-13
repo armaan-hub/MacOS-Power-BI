@@ -312,6 +312,138 @@ class TransformationTests(unittest.TestCase):
             {"Region": "text", "Field": "text", "Amount": "decimal_number"},
         )
 
+    def test_unpivot_preserves_mixed_native_values_and_reports_any_type(self) -> None:
+        source = ImportCandidate("inline", ["Key", "Amount", "Note"], [
+            {"Key": "A", "Amount": "1.25", "Note": "cash"},
+            {"Key": "B", "Amount": None, "Note": ""},
+        ], {}, [])
+        steps = [
+            {"op": "convert_type", "column": "Amount", "type": "decimal_number"},
+            {"op": "convert_type", "column": "Note", "type": "text"},
+            {
+                "op": "unpivot_columns", "columns": ["Amount", "Note"],
+                "attribute_name": "Field", "value_name": "Value",
+            },
+        ]
+
+        result = apply_transformations(source, steps)
+        types = column_types_after_steps(
+            source.headers, steps,
+            initial_types={"Key": "text", "Amount": "text", "Note": "text"},
+        )
+
+        self.assertEqual(types["Value"], "any")
+        self.assertEqual(result.rows, [
+            {"Key": "A", "Field": "Amount", "Value": Decimal("1.25")},
+            {"Key": "A", "Field": "Note", "Value": "cash"},
+            {"Key": "B", "Field": "Note", "Value": ""},
+        ])
+
+    def test_custom_column_cell_errors_follow_evaluated_branches_only(self) -> None:
+        source = ImportCandidate("inline", ["UseFault", "Fault", "Value"], [
+            {
+                "UseFault": "false",
+                "Fault": PowerQueryCellError("DataFormat.Error", "bad source value"),
+                "Value": "safe",
+            },
+            {
+                "UseFault": "true",
+                "Fault": PowerQueryCellError("DataFormat.Error", "bad source value"),
+                "Value": "safe",
+            },
+        ], {"source_id": "source-1"}, [])
+
+        result = apply_transformations(source, [
+            {
+                "op": "add_custom_column",
+                "name": "Selected",
+                "expression": 'if [UseFault] = "true" then [Fault] else [Value]',
+            },
+        ])
+
+        self.assertEqual(result.rows[0]["Selected"], "safe")
+        self.assertEqual(result.rows[1]["Selected"], source.rows[1]["Fault"])
+
+    def test_demote_headers_synthetic_row_has_no_source_row_lineage(self) -> None:
+        source = ImportCandidate("inline", ["Key", "Amount"], [
+            {"Key": "A", "Amount": "bad"},
+        ], {"source_id": "source-1"}, [])
+
+        result = apply_transformations(source, [{"op": "demote_headers"}])
+
+        self.assertEqual(result.rows[0].source_rows, ())
+        self.assertEqual(result.rows[1].source_rows[0][1], 1)
+
+    def test_lineage_union_is_bounded_and_marks_truncation(self) -> None:
+        from analytics_studio.file_import import LineagedRow, lineaged_row
+
+        parents = [
+            LineagedRow({}, source_rows=((f"source-{index}", 1),))
+            for index in range(130)
+        ]
+
+        result = lineaged_row({"Value": "x"}, *parents)
+
+        self.assertEqual(len(result.source_rows), 128)
+        self.assertTrue(result.source_rows_truncated)
+
+    def test_conversion_error_keeps_original_source_row_after_filter_and_projection(self) -> None:
+        source = ImportCandidate("inline", ["Key", "Amount"], [
+            {"Key": "drop", "Amount": "0"},
+            {"Key": "keep", "Amount": "12"},
+            {"Key": "keep", "Amount": "bad"},
+        ], {"source_id": "sales-source"}, [])
+
+        result = apply_transformations(source, [
+            {"op": "filter_rows", "column": "Key", "operator": "equals", "value": "keep"},
+            {"op": "keep_columns", "columns": ["Key", "Amount"]},
+            {"op": "convert_type", "column": "Amount", "type": "whole_number"},
+        ])
+
+        error = result.rows[-1]["Amount"]
+        self.assertIsInstance(error, PowerQueryCellError)
+        self.assertEqual(error.row, 2)
+        self.assertEqual(len(error.source_rows), 1)
+        self.assertEqual(error.source_rows[0][1], 3)
+
+    def test_unpivot_retains_source_row_lineage_for_conversion_errors(self) -> None:
+        source = ImportCandidate("inline", ["Key", "A", "B"], [
+            {"Key": "drop", "A": "1", "B": "2"},
+            {"Key": "keep", "A": "3", "B": "bad"},
+        ], {"source_id": "sales-source"}, [])
+
+        result = apply_transformations(source, [
+            {"op": "filter_rows", "column": "Key", "operator": "equals", "value": "keep"},
+            {
+                "op": "unpivot_columns", "columns": ["A", "B"],
+                "attribute_name": "Field", "value_name": "Value",
+            },
+            {"op": "convert_type", "column": "Value", "type": "whole_number"},
+        ])
+
+        error = result.rows[1]["Value"]
+        self.assertIsInstance(error, PowerQueryCellError)
+        self.assertEqual(error.row, 2)
+        self.assertEqual(error.source_rows[0][1], 2)
+
+    def test_custom_column_runtime_errors_are_cell_values_and_propagate(self) -> None:
+        source = ImportCandidate("inline", ["Amount"], [
+            {"Amount": "2"},
+            {"Amount": "0"},
+        ], {"source_id": "sales-source"}, [])
+
+        result = apply_transformations(source, [
+            {"op": "add_custom_column", "name": "Rate", "expression": "10 / [Amount]"},
+            {"op": "add_custom_column", "name": "Label", "expression": "[Rate] & \"x\""},
+        ])
+
+        self.assertEqual(result.rows[0]["Rate"], "5")
+        rate_error = result.rows[1]["Rate"]
+        self.assertIsInstance(rate_error, PowerQueryCellError)
+        self.assertEqual(rate_error.reason, "Expression.Error")
+        self.assertEqual(rate_error.row, 2)
+        self.assertEqual(result.rows[1]["Label"], rate_error)
+
     def test_remove_rows_with_errors_supports_all_or_selected_columns(self) -> None:
         error = PowerQueryCellError("DataFormat.Error", "bad value", "bad", "number", row=1)
         source = ImportCandidate("inline", ["A", "B"], [

@@ -2977,7 +2977,7 @@ def _parse_type(value: str) -> str:
             "rounding and range semantics differ from a regular number."
         )
     types = {
-        "type text": "text", "type number": "decimal_number",
+        "type text": "text", "type any": "any", "type number": "decimal_number",
         "type logical": "boolean", "type date": "date",
         "type datetime": "datetime", "type time": "time",
         "int64.type": "whole_number",
@@ -2990,7 +2990,7 @@ def _parse_type(value: str) -> str:
 
 def _m_type(value: str) -> str:
     return {
-        "text": "type text", "whole_number": "Int64.Type",
+        "text": "type text", "any": "type any", "whole_number": "Int64.Type",
         "decimal_number": "type number", "number": "type number",
         "boolean": "type logical", "date": "type date",
         "datetime": "type datetime", "time": "type time",
@@ -3577,6 +3577,7 @@ class PowerQueryMEditorDialog(QDialog):
                         self._query_sources[name.casefold()]["candidate"]
                         for name in source_names
                     ])
+                    source_candidate.source_id = self._source_candidate.source_id
                 except KeyError as exc:
                     missing_name = source_names[
                         next(

@@ -20,6 +20,7 @@ from analytics_studio.local_table_dialogs import (
     ManageQueryFunctionsDialog,
     TransformDataDialog,
 )
+from analytics_studio.power_query_values import PowerQueryCellError
 from analytics_studio.power_query_m import (
     PowerQueryMScriptError,
     m_script_matches_steps,
@@ -261,17 +262,20 @@ class QueryFunctionDefinitionTests(unittest.TestCase):
         )
         self.assertEqual([row["MaybeName"] for row in result.rows], [None, None])
 
-    def test_custom_column_rejects_a_false_output_type(self) -> None:
-        with self.assertRaisesRegex(TransformationError, "whole number"):
-            apply_transformations(
-                self.source,
-                [{
-                    "op": "add_custom_column",
-                    "name": "Wrong",
-                    "expression": '"not a number"',
-                    "output_type": "whole_number",
-                }],
-            )
+    def test_custom_column_records_a_false_output_type_as_cell_errors(self) -> None:
+        result = apply_transformations(
+            self.source,
+            [{
+                "op": "add_custom_column",
+                "name": "Wrong",
+                "expression": '"not a number"',
+                "output_type": "whole_number",
+            }],
+        )
+
+        errors = [row["Wrong"] for row in result.rows]
+        self.assertTrue(all(isinstance(error, PowerQueryCellError) for error in errors))
+        self.assertTrue(all("whole number" in error.message for error in errors))
 
     def test_project_migration_persists_and_validates_function_registry(self) -> None:
         old = new_project("v77")

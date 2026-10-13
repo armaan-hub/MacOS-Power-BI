@@ -1410,6 +1410,36 @@ in
                 )
                 self.assertEqual(m_compatibility_issues([step]), [])
 
+    def test_mixed_unpivot_values_keep_any_metadata_and_native_cells(self) -> None:
+        source = ImportCandidate("inline", ["Key", "Amount", "Note"], [
+            {"Key": "A", "Amount": "1.25", "Note": "cash"},
+            {"Key": "B", "Amount": None, "Note": ""},
+        ], {}, [])
+        initial_types = {"Key": "text", "Amount": "text", "Note": "text"}
+        steps = [
+            {"op": "convert_type", "column": "Amount", "type": "decimal_number"},
+            {
+                "op": "unpivot_columns", "columns": ["Amount", "Note"],
+                "attribute_name": "Field", "value_name": "Value",
+            },
+        ]
+        script = steps_to_m_script(steps, "Mixed Values")
+        parsed = parse_m_script(script, "Mixed Values", initial_column_types=initial_types)
+        result = apply_transformations(source, parsed)
+        types = column_types_after_steps(
+            source.headers, parsed, output_headers=result.headers,
+            initial_types=initial_types,
+        )
+
+        self.assertEqual(parsed, steps)
+        self.assertEqual(types["Value"], "any")
+        self.assertEqual(result.rows, [
+            {"Key": "A", "Field": "Amount", "Value": Decimal("1.25")},
+            {"Key": "A", "Field": "Note", "Value": "cash"},
+            {"Key": "B", "Field": "Note", "Value": ""},
+        ])
+        self.assertEqual(m_compatibility_issues(steps), [])
+
     def test_table_pivot_aggregations_round_trip_from_dynamic_values(self) -> None:
         source = ImportCandidate(
             "inline",

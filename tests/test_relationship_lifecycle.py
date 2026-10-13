@@ -7,6 +7,7 @@ from pathlib import Path
 import tempfile
 import unittest
 from unittest.mock import patch
+from decimal import Decimal
 
 os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
 
@@ -225,6 +226,45 @@ class RelationshipLifecycleTests(unittest.TestCase):
             propagate_relationship_filters(
                 [colliding_dimension, orders], [relationship], set()
             )
+
+    def test_any_relationship_keys_compare_native_values_without_text_coercion(self) -> None:
+        mixed = {
+            "id": "mixed",
+            "name": "Mixed",
+            "headers": ["Value"],
+            "column_types": {"Value": "any"},
+            "rows": [{"Value": "1"}, {"Value": Decimal("1")}],
+            "filter_rows": [{"Value": "1"}],
+        }
+        facts = {
+            "id": "facts",
+            "name": "Facts",
+            "headers": ["Value", "Amount"],
+            "column_types": {"Value": "any", "Amount": "decimal_number"},
+            "rows": [
+                {"Value": "1", "Amount": Decimal("10")},
+                {"Value": Decimal("1"), "Amount": Decimal("20")},
+            ],
+        }
+        relationship = {
+            "relationship_version": 1,
+            "id": "mixed-facts",
+            "from_table_id": "mixed",
+            "from_column": "Value",
+            "to_table_id": "facts",
+            "to_column": "Value",
+            "cardinality": "one_to_many",
+            "cross_filter_direction": "single",
+            "is_active": True,
+        }
+
+        filtered = propagate_relationship_filters([mixed, facts], [relationship], {"mixed"})
+
+        self.assertEqual(filtered["facts"], [facts["rows"][0]])
+        self.assertNotEqual(
+            _relationship_value_key("1", "any"),
+            _relationship_value_key(Decimal("1"), "any"),
+        )
 
     def test_active_relationship_filters_a_qualified_measure_across_tables(self) -> None:
         controller = self.controller("measure-settings.ini")
