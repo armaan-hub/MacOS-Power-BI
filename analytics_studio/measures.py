@@ -46,10 +46,21 @@ from analytics_studio.relationships import (
     relationship_filter_directions,
     unknown_member_table_ids,
 )
+from analytics_studio.power_query_values import cell_key, cell_to_text, is_cell_error
 
 
 class MeasureError(ValueError):
     """A measure definition is invalid or cannot be evaluated for this table."""
+
+
+def _reject_power_query_error(value: Any, column: str, row: int | None) -> None:
+    if not is_cell_error(value):
+        return
+    location = f" at row {row}" if row is not None else ""
+    raise MeasureError(
+        f"Column {column!r} contains a Power Query cell error{location}: {value.message}. "
+        "Remove or replace the error before evaluating this DAX expression."
+    )
 
 
 MAX_MEASURES = 100
@@ -1645,15 +1656,16 @@ def evaluate_calculated_table(
         expression, source_table, source_candidate.headers
     )
     column = definition["column"]
-    seen: set[str] = set()
+    seen: set[tuple[Any, ...]] = set()
     rows: list[dict[str, Any]] = []
     for source_row in source_candidate.rows:
         value = source_row.get(column)
-        normalized = "" if value is None else str(value)
-        if normalized in seen:
+        _reject_power_query_error(value, column, len(rows) + 1)
+        key = cell_key(value)
+        if key in seen:
             continue
-        seen.add(normalized)
-        rows.append({column: normalized})
+        seen.add(key)
+        rows.append({column: value})
     return [column], rows
 
 
@@ -1756,7 +1768,8 @@ def evaluate_calculated_columns(
                         f"Column {column!r} does not exist in table {table_name!r}."
                     )
                 raw = row.get(actual)
-                value = "" if raw is None else str(raw).strip()
+                _reject_power_query_error(raw, actual, row_index)
+                value = "" if raw is None else cell_to_text(raw).strip()
                 if not value:
                     return None
                 if value.casefold() in {"true", "false"}:
@@ -1869,12 +1882,7 @@ def evaluate_calculated_columns(
             )
         column_type = "boolean" if value_kinds == {"boolean"} else "decimal_number"
         for row, value in zip(output_rows, result_values):
-            if value is None:
-                row[name] = ""
-            elif isinstance(value, bool):
-                row[name] = "True" if value else "False"
-            else:
-                row[name] = str(value)
+            row[name] = value
         output_headers.append(name)
         output_types[name] = column_type
 
@@ -2521,11 +2529,11 @@ def evaluate_measures(
                         evaluation_filter_ids,
                     )
                 ):
-                    output_rows.append({header: "" for header in output_headers})
+                    output_rows.append({header: None for header in output_headers})
             else:
                 output_rows = list(source_context["rows"])
                 if function == "ALL" and source_context["id"] in unknown_member_ids:
-                    output_rows.append({header: "" for header in output_headers})
+                    output_rows.append({header: None for header in output_headers})
         else:
             resolved_columns = [
                 resolve_table(reference[1], reference[2])
@@ -2551,7 +2559,7 @@ def evaluate_measures(
                         evaluation_filter_ids,
                     )
                 ):
-                    source_rows.append({header: "" for header in source_context["headers"]})
+                    source_rows.append({header: None for header in source_context["headers"]})
             else:
                 (
                     source_rows,
@@ -2567,24 +2575,11 @@ def evaluate_measures(
                     filter_roots_after_clear,
                     {column.casefold() for column in output_headers},
                 ):
-                    source_rows.append({header: "" for header in source_context["headers"]})
+                    source_rows.append({header: None for header in source_context["headers"]})
 
             def value_key(value: Any, column: str) -> tuple[str, Any]:
-                if value is None or str(value) == "":
-                    return ("blank", "")
-                text = str(value)
-                column_type = str(source_context.get("column_types", {}).get(column, "text"))
-                if column_type in {"whole_number", "decimal_number"}:
-                    try:
-                        number = Decimal(text.replace(",", ""))
-                    except (DecimalException, ValueError):
-                        return ("value", text)
-                    return ("number", number)
-                if column_type == "boolean":
-                    lowered = text.casefold()
-                    if lowered in {"true", "false"}:
-                        return ("boolean", lowered == "true")
-                return ("value", text)
+                _reject_power_query_error(value, column, None)
+                return cell_key(value)
 
             output_rows = []
             seen_values: set[tuple[tuple[str, Any], ...]] = set()
@@ -2593,7 +2588,7 @@ def evaluate_measures(
                 if key in seen_values:
                     continue
                 seen_values.add(key)
-                output_rows.append({column: row.get(column, "") for column in output_headers})
+                output_rows.append({column: row.get(column) for column in output_headers})
 
         value_context = dict(source_context)
         value_context["headers"] = output_headers
@@ -2620,7 +2615,7 @@ def evaluate_measures(
             ):
                 table_rows = [
                     *table_rows,
-                    {header: "" for header in current_context["headers"]},
+                    {header: None for header in current_context["headers"]},
                 ]
             return context, table_rows
         if argument[0] == "call" and argument[1] in {
@@ -2634,7 +2629,9 @@ def evaluate_measures(
         values = []
         filtered_rows = rows_by_table_id[context["id"]]
         for row_index, row in enumerate(filtered_rows, 1):
-            value = str(row.get(actual, "") or "").strip()
+            raw_value = row.get(actual)
+            _reject_power_query_error(raw_value, actual, row_index)
+            value = "" if raw_value is None else cell_to_text(raw_value).strip()
             if not value:
                 continue
             try:
@@ -2832,7 +2829,9 @@ def evaluate_measures(
             )
         if not matches:
             return None
-        raw_value = str(matches[0].get(target_column, "") or "").strip()
+        related_value = matches[0].get(target_column)
+        _reject_power_query_error(related_value, target_column, row_index)
+        raw_value = "" if related_value is None else cell_to_text(related_value).strip()
         if not raw_value:
             return None
         try:
@@ -3200,6 +3199,7 @@ def evaluate_measures(
         row_index: int | None = None,
     ) -> Any:
         """Convert a row value or scalar literal using the column's saved type."""
+        _reject_power_query_error(value, column, row_index)
         is_literal = row_index is None
         if (is_literal and value is None) or (
             not is_literal and (value is None or not str(value).strip())
@@ -4341,14 +4341,19 @@ def evaluate_measures(
         nonlocal evaluation_contexts_by_id, evaluation_filter_ids
 
         table_id = iterated_table["id"]
-        allowed_rows = frozenset(
-            row_index
-            for row_index, iterate_row in enumerate(iterated_table["rows"])
-            if all(
-                str(iterate_row.get(header, "")).strip() == str(row.get(header, "")).strip()
-                for header in iterated_table["headers"]
-            )
-        )
+        allowed_row_indexes = []
+        for row_index, iterate_row in enumerate(iterated_table["rows"]):
+            matches = True
+            for header in iterated_table["headers"]:
+                left, right = iterate_row.get(header), row.get(header)
+                _reject_power_query_error(left, header, row_index + 1)
+                _reject_power_query_error(right, header, None)
+                if cell_key(left) != cell_key(right):
+                    matches = False
+                    break
+            if matches:
+                allowed_row_indexes.append(row_index)
+        allowed_rows = frozenset(allowed_row_indexes)
         
         updated_by_id = {key: dict(value) for key, value in evaluation_contexts_by_id.items()}
         target_context = updated_by_id.get(table_id)
@@ -4441,7 +4446,9 @@ def evaluate_measures(
                     raise MeasureError(
                         f"Column {name!r} does not exist in table {iterated_table['name']!r}."
                     )
-                raw_value = str(row.get(actual, "") or "")
+                source_value = row.get(actual)
+                _reject_power_query_error(source_value, actual, row_index)
+                raw_value = "" if source_value is None else cell_to_text(source_value)
                 if not raw_value or (not allow_text and not raw_value.strip()):
                     return None
                 column_types = iterated_table.get("column_types", {})
@@ -5174,21 +5181,25 @@ def evaluate_measures(
         reference = arguments[0]
         if function == "COUNTA":
             context, actual = resolve_table(reference[1], reference[2])
-            return Decimal(sum(
-                bool(str(row.get(actual, "") or "").strip())
-                for row in rows_by_table_id[context["id"]]
-            ))
+            count = 0
+            for row_index, row in enumerate(rows_by_table_id[context["id"]], 1):
+                value = row.get(actual)
+                _reject_power_query_error(value, actual, row_index)
+                if value is not None:
+                    count += 1
+            return Decimal(count)
         if function in {"DISTINCTCOUNT", "DISTINCTCOUNTNOBLANK"}:
             context, actual = resolve_table(reference[1], reference[2])
             rows = rows_by_table_id[context["id"]]
             if not rows:
                 return None
-            values: set[str] = set()
-            for row in rows:
+            values: set[tuple[Any, ...]] = set()
+            for row_index, row in enumerate(rows, 1):
                 value = row.get(actual)
-                values.add("" if value is None else str(value))
+                _reject_power_query_error(value, actual, row_index)
+                values.add(cell_key(value))
             if function == "DISTINCTCOUNTNOBLANK":
-                values.discard("")
+                values.discard(cell_key(None))
             return Decimal(len(values))
         values = numeric_values(reference[2], reference[1])
         if function == "COUNT": return Decimal(len(values))

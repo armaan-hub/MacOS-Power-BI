@@ -3,6 +3,8 @@
 from __future__ import annotations
 
 from contextlib import closing
+from datetime import date
+from decimal import Decimal
 from pathlib import Path
 from html import escape
 import tempfile
@@ -288,7 +290,7 @@ class FileImportTests(unittest.TestCase):
 
         self.assertEqual(candidate.kind, "excel")
         self.assertEqual(candidate.headers, ["ID", "Value"])
-        self.assertEqual(candidate.rows, [{"ID": "7", "Value": "alpha"}])
+        self.assertEqual(candidate.rows, [{"ID": 7, "Value": "alpha"}])
         self.assertEqual(candidate.row_count, 1)
         self.assertEqual(candidate.options, {"sheet_name": "Data", "header_row": 2})
 
@@ -409,8 +411,8 @@ class FileImportTests(unittest.TestCase):
         candidate = parse_file(path, options={"sheet_name": "Data", "header_row": 1})
 
         self.assertEqual(candidate.rows, [{
-            "Name": "Ada", "Amount": "12.5", "Active": "TRUE",
-            "Date": "2024-01-01", "Formula": "13.5", "Missing": "",
+            "Name": "Ada", "Amount": Decimal("12.5"), "Active": True,
+            "Date": date(2024, 1, 1), "Formula": Decimal("13.5"), "Missing": None,
         }])
         self.assertIn("saved cached values are imported", candidate.notices[0])
         self.assertIn("no saved value and will import as blank", candidate.notices[1])
@@ -427,7 +429,8 @@ class FileImportTests(unittest.TestCase):
     def test_json_accepts_flat_records_with_deterministic_union_of_keys(self) -> None:
         path = self.write_text(
             "records.json",
-            '[{"id":1,"name":"Ada"},{"name":null,"active":true}]',
+            '[{"id":1,"name":"Ada"},{"name":null,"active":true},'
+            '{"name":"","active":false}]',
         )
 
         candidate = parse_file(path)
@@ -437,8 +440,9 @@ class FileImportTests(unittest.TestCase):
         self.assertEqual(candidate.headers, ["id", "name", "active"])
         self.assertEqual(candidate.headers, repeated.headers)
         self.assertEqual(candidate.rows, [
-            {"id": "1", "name": "Ada", "active": ""},
-            {"id": "", "name": "", "active": "TRUE"},
+            {"id": 1, "name": "Ada", "active": None},
+            {"id": None, "name": None, "active": True},
+            {"id": None, "name": "", "active": False},
         ])
 
     def test_json_rejects_nested_values_duplicate_keys_and_non_array_root(self) -> None:

@@ -62,10 +62,10 @@ class FillDownUpLifecycleTests(unittest.TestCase):
         self.assertEqual(dialog._preview_candidate.rows, [
             {"Region": "", "Category": "", "Sales": "0"},
             {"Region": "", "Category": "Tools", "Sales": "1"},
-            {"Region": "West", "Category": "Tools", "Sales": "2"},
-            {"Region": "West", "Category": "Tools", "Sales": "3"},
+            {"Region": "West", "Category": "", "Sales": "2"},
+            {"Region": "", "Category": "", "Sales": "3"},
             {"Region": "East", "Category": "Food", "Sales": "4"},
-            {"Region": "East", "Category": "Food", "Sales": "5"},
+            {"Region": "", "Category": "", "Sales": "5"},
         ])
 
         dialog.step_list.setCurrentRow(-1)
@@ -73,12 +73,12 @@ class FillDownUpLifecycleTests(unittest.TestCase):
         self.select_fill_columns(dialog)
         dialog._add_step()
         self.assertEqual(dialog._preview_candidate.rows, [
-            {"Region": "West", "Category": "Tools", "Sales": "0"},
-            {"Region": "West", "Category": "Tools", "Sales": "1"},
-            {"Region": "West", "Category": "Tools", "Sales": "2"},
-            {"Region": "West", "Category": "Tools", "Sales": "3"},
+            {"Region": "", "Category": "", "Sales": "0"},
+            {"Region": "", "Category": "Tools", "Sales": "1"},
+            {"Region": "West", "Category": "", "Sales": "2"},
+            {"Region": "", "Category": "", "Sales": "3"},
             {"Region": "East", "Category": "Food", "Sales": "4"},
-            {"Region": "East", "Category": "Food", "Sales": "5"},
+            {"Region": "", "Category": "", "Sales": "5"},
         ])
         dialog._accept_candidate()
         self.assertEqual([step["op"] for step in dialog.steps], ["fill_down", "fill_up"])
@@ -96,10 +96,10 @@ class FillDownUpLifecycleTests(unittest.TestCase):
         reopened = self.controller("reopened-settings.ini")
         self.assertTrue(reopened.open_project_path(project_path))
         self.assertEqual([row["Region"] for row in reopened._rows], [
-            "North", "North", "North", "North",
+            "", "", "North", "",
         ])
         self.assertEqual([row["Category"] for row in reopened._rows], [
-            "Services", "Services", "Services", "Food",
+            "Services", "", "", "Food",
         ])
 
         self.source_path.write_text(
@@ -108,10 +108,10 @@ class FillDownUpLifecycleTests(unittest.TestCase):
         )
         reopened.refresh_source()
         self.assertEqual([row["Region"] for row in reopened._rows], [
-            "North", "North", "North", "East", "East",
+            "North", "", "", "East", "",
         ])
         self.assertEqual([row["Category"] for row in reopened._rows], [
-            "Office", "Office", "Office", "Food", "Food",
+            "Office", "", "", "Food", "",
         ])
 
 

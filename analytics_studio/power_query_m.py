@@ -652,7 +652,7 @@ def _keep_duplicates_m_expression(previous: str, columns: list[str]) -> str:
         "        each not List.Contains(ExistingColumns, _))),",
         f"    Indexed = Table.AddIndexColumn({reference}, OrderColumn, 0, 1, Int64.Type),",
         "    Keyed = Table.AddColumn(Indexed, GroupKeyColumn, each Text.Combine(",
-        f"        List.Transform({{{row_key_values}}}, each if _ = null then \"0:\" else Text.From(Text.Length(_), \"en-US\") & \":\" & _), \"\"), type text),",
+        f"        List.Transform({{{row_key_values}}}, each if _ = null then \"N:\" else \"T\" & Text.From(Text.Length(_), \"en-US\") & \":\" & _), \"\"), type text),",
         f"    Grouped = Table.Group(Keyed, {{GroupKeyColumn}}, {{{{GroupRowsColumn, each _, type table}}}}, GroupKind.Global, Comparer.Ordinal),",
         "    DuplicateGroups = Table.SelectRows(Grouped, each Table.RowCount(Record.Field(_, GroupRowsColumn)) > 1),",
         "    DuplicateRows = Table.Combine({Table.FirstN(Keyed, 0)} & Table.Column(DuplicateGroups, GroupRowsColumn)),",
@@ -755,14 +755,14 @@ def _parse_keep_duplicates_m_expression(
         if not columns:
             raise PowerQueryMScriptError("Keep Duplicates needs at least one key column.")
         key_value_expression = (
-            'each if _ = null then "0:" else '
-            'Text.From(Text.Length(_), "en-US") & ":" & _'
+            'each if _ = null then "N:" else '
+            '"T" & Text.From(Text.Length(_), "en-US") & ":" & _'
         )
         if _compact_m_whitespace(transform_args[1]) != _compact_m_whitespace(
             key_value_expression
         ):
             raise PowerQueryMScriptError(
-                "The Keep Duplicates M expression must normalize null text keys safely."
+                "The Keep Duplicates M expression must distinguish null from empty text keys."
             )
     except PowerQueryMScriptError:
         raise
@@ -852,6 +852,17 @@ def _parse_table_call(
     if function == "Table.RemoveColumns":
         _expect_count(function, args, 1)
         return [{"op": "remove_column", "column": column} for column in _parse_string_list(args[0])]
+    if function == "Table.RemoveRowsWithErrors":
+        if len(args) not in {0, 1}:
+            raise PowerQueryMScriptError(
+                "Table.RemoveRowsWithErrors accepts a table and an optional column list."
+            )
+        step: dict[str, Any] = {"op": "remove_rows_with_errors"}
+        if len(args) == 1 and args[0].strip() != "null":
+            columns = _parse_string_list(args[0])
+            if columns:
+                step["columns"] = columns
+        return [step]
     if function == "Table.SelectColumns":
         _expect_count(function, args, 1)
         return [{"op": "keep_columns", "columns": _parse_string_list(args[0])}]
@@ -1198,8 +1209,7 @@ def _parse_m_conditional_predicate(
         value = arguments[1]
         if value[0] == "field":
             raise PowerQueryMScriptError(
-                "Text conditional predicates cannot use a column comparison value because "
-                "the local table model does not preserve nulls in that column."
+                "Text conditional predicates in the supported M subset require a literal text search value."
             )
         elif value[0] == "literal" and isinstance(value[1], str):
             test_value, test_kind = value[1], "value"
@@ -1230,9 +1240,8 @@ def _parse_m_conditional_predicate(
         }
 
     if node[0] == "call" and node[1] in _M_TEXT_PREDICATES:
-        # Text predicates return nullable logical for null input. A bare M if
-        # would therefore have different behavior from the normalized local
-        # text-cell model, so accept only the explicit guard above.
+        # A bare M if cannot use the nullable logical result for a Null input,
+        # so accept only the explicit guard handled above.
         return None
     if (
         node[0] == "unary"
@@ -1268,16 +1277,14 @@ def _parse_m_conditional_predicate(
     else:
         literal = right[1]
         if literal is None:
-            raise PowerQueryMScriptError(
-                "Conditional comparisons to null are unsupported because the local table model "
-                "stores null and empty text as the same cell value."
-            )
-        try:
-            test_value = expression_value_to_text(literal)
-        except ExpressionError as exc:
-            raise PowerQueryMScriptError(str(exc)) from exc
-        test_kind = "value"
-        right_type = _m_conditional_literal_type(literal)
+            test_value, test_kind, right_type = "", "null", "null"
+        else:
+            try:
+                test_value = expression_value_to_text(literal)
+            except ExpressionError as exc:
+                raise PowerQueryMScriptError(str(exc)) from exc
+            test_kind = "value"
+            right_type = _m_conditional_literal_type(literal)
 
     if operator in {"greater_than", "greater_than_or_equal", "less_than", "less_than_or_equal"}:
         if left_type not in _M_NUMERIC_TYPES or right_type not in _M_NUMERIC_TYPES:
@@ -1285,25 +1292,12 @@ def _parse_m_conditional_predicate(
                 "Ordered conditional M comparisons are supported only for numeric columns "
                 "after an explicit numeric type conversion."
             )
-    elif left_type != right_type and not (
+    elif left_type != right_type and right_type != "null" and not (
         left_type in _M_NUMERIC_TYPES and right_type in _M_NUMERIC_TYPES
     ):
         raise PowerQueryMScriptError(
             "A conditional comparison must use matching M input and comparison types."
         )
-    if operator in {"equals", "not_equals"}:
-        if left_type in _M_NUMERIC_TYPES or right_type in _M_NUMERIC_TYPES:
-            raise PowerQueryMScriptError(
-                "Numeric conditional equality is unsupported because the local step engine "
-                "compares normalized text rather than numeric values."
-            )
-        if left_type == "text" and (
-            test_kind == "column" or test_value == ""
-        ):
-            raise PowerQueryMScriptError(
-                "Text conditional equality to another column or an empty string is unsupported "
-                "because the local table model conflates null and empty text."
-            )
     return {
         "column": column,
         "operator": operator,
@@ -1376,6 +1370,8 @@ def _m_conditional_column_call(
     }
 
     def comparison_value(value: str, kind: str, column_type: str) -> str:
+        if kind == "null":
+            return "null"
         if kind == "column":
             return _m_field(value)
         if column_type in _M_NUMERIC_TYPES:
@@ -1411,6 +1407,8 @@ def _m_conditional_column_call(
             right_type = (
                 _m_conditional_column_type(input_column_types, clause["test_value"])
                 if clause["test_value_kind"] == "column"
+                else "null"
+                if clause["test_value_kind"] == "null"
                 else column_type
             )
             if operator in {
@@ -1421,25 +1419,12 @@ def _m_conditional_column_call(
                 )
             if operator in {"equals", "not_equals"} and (
                 column_type != right_type
+                and right_type != "null"
                 and not (column_type in _M_NUMERIC_TYPES and right_type in _M_NUMERIC_TYPES)
             ):
                 raise PowerQueryMScriptError(
                     "A conditional comparison must use matching M input and comparison types."
                 )
-            if operator in {"equals", "not_equals"}:
-                if column_type in _M_NUMERIC_TYPES or right_type in _M_NUMERIC_TYPES:
-                    raise PowerQueryMScriptError(
-                        "Numeric conditional equality is unsupported because the local step "
-                        "engine compares normalized text rather than numeric values."
-                    )
-                if column_type == "text" and (
-                    clause["test_value_kind"] == "column"
-                    or clause["test_value"] == ""
-                ):
-                    raise PowerQueryMScriptError(
-                        "Text conditional equality to another column or an empty string is "
-                        "unsupported because the local table model conflates null and empty text."
-                    )
             right = comparison_value(
                 clause["test_value"], clause["test_value_kind"], column_type
             )
@@ -1462,8 +1447,7 @@ def _m_conditional_column_call(
         }[operator]
         if clause["test_value_kind"] == "column":
             raise PowerQueryMScriptError(
-                "Text conditional predicates cannot use a column comparison value because "
-                "the local table model does not preserve nulls in that column."
+                "Text conditional predicates in the supported M subset require a literal text search value."
             )
         value = _m_string(clause["test_value"])
         negative = operator.startswith("does_not_")
@@ -1512,6 +1496,13 @@ def _parse_row_filter(
         )
     except ExpressionError as exc:
         raise PowerQueryMScriptError(f"Unsupported row filter: {exc}") from exc
+    blank_filter = _parse_null_or_empty_filter(tree)
+    if blank_filter is not None:
+        column, operator = blank_filter
+        return [{
+            "op": "filter_rows", "column": column,
+            "operator": operator, "value": "",
+        }]
     if tree[0] != "binary" or tree[1] not in {"and", "or"}:
         column, operator, value = _parse_row_predicate_tree(tree)
         reference = (
@@ -1621,7 +1612,7 @@ def _parse_row_predicate_tree(tree: tuple[Any, ...]) -> tuple[str, str, Any]:
             if value is None:
                 if operator not in {"equals", "not_equals"}:
                     raise PowerQueryMScriptError("Null can only be used with equality in a row filter.")
-                return left_field, "is_blank" if operator == "equals" else "is_not_blank", ""
+                return left_field, "is_null" if operator == "equals" else "is_not_null", ""
             if isinstance(value, bool):
                 value = "true" if value else "false"
             else:
@@ -1723,8 +1714,46 @@ def _parse_blank_row_guard(tree: tuple[Any, ...]) -> str | None:
     return field_name if None in blank_values else None
 
 
+def _parse_null_or_empty_filter(
+    tree: tuple[Any, ...],
+) -> tuple[str, str] | None:
+    """Recognize the canonical M forms for local blank and nonblank filters."""
+    if tree[0] != "binary" or tree[1] not in {"or", "and"}:
+        return None
+    checks = _flatten_boolean_tree(tree, tree[1])
+    if len(checks) != 2:
+        return None
+    expected_operator = "=" if tree[1] == "or" else "<>"
+    values: set[Any] = set()
+    column: str | None = None
+    for check in checks:
+        if check[0] != "binary" or check[1] != expected_operator:
+            return None
+        left, right = check[2], check[3]
+        if left[0] == "literal" and right[0] == "field":
+            left, right = right, left
+        if left[0] != "field" or right[0] != "literal" or right[1] not in {None, ""}:
+            return None
+        if column is not None and column.casefold() != left[1].casefold():
+            return None
+        column = left[1]
+        values.add(right[1])
+    if column is None or values != {None, ""}:
+        return None
+    return column, "is_blank" if tree[1] == "or" else "is_not_blank"
+
+
 def _filter_clause_to_m_predicate(clause: dict[str, str]) -> str:
     column = _m_field(clause["column"])
+    operator = clause["operator"]
+    if operator == "is_null":
+        return f"{column} = null"
+    if operator == "is_not_null":
+        return f"{column} <> null"
+    if operator == "is_blank":
+        return f'({column} = null or {column} = "")'
+    if operator == "is_not_blank":
+        return f'({column} <> null and {column} <> "")'
     comparison_value = (
         clause["parameter"]
         if "parameter" in clause
@@ -1733,7 +1762,6 @@ def _filter_clause_to_m_predicate(clause: dict[str, str]) -> str:
     comparators = {
         "equals": "=", "not_equals": "<>",
     }
-    operator = clause["operator"]
     if operator in comparators:
         return f"{column} {comparators[operator]} {comparison_value}"
     numeric_comparators = {
@@ -1751,9 +1779,6 @@ def _filter_clause_to_m_predicate(clause: dict[str, str]) -> str:
             f"Number.From({column}) {numeric_comparators[operator]} "
             f"{numeric_value})"
         )
-    if operator in {"is_blank", "is_not_blank"}:
-        comparator = "=" if operator == "is_blank" else "<>"
-        return f"{column} {comparator} null"
     function = {
         "contains": "Text.Contains",
         "does_not_contain": "Text.Contains",
@@ -1800,6 +1825,12 @@ def _step_to_m_call(
             f'Table.SelectRows({previous}, each not List.IsEmpty('
             'List.RemoveMatchingItems(Record.FieldValues(_), {null, ""})))'
         )
+    if op == "remove_rows_with_errors":
+        columns = (
+            f", {_m_string_list(step['columns'])}"
+            if "columns" in step else ""
+        )
+        return f"Table.RemoveRowsWithErrors({previous}{columns})"
     if op == "remove_column":
         return f"Table.RemoveColumns({previous}, {{{_m_string(step['column'])}}})"
     if op == "keep_columns":
@@ -1938,7 +1969,7 @@ def _step_to_m_call(
             )
         transform = (
             "{" + _m_string(column)
-            + f', each if _ = null or _ = "" then "" else {function}({arguments}), type text' + "}"
+            + f', each if _ = null then null else if _ = "" then "" else {function}({arguments}), type text' + "}"
         )
         return f"Table.TransformColumns({previous}, {{{transform}}})"
     if op == "split_column":
@@ -1974,7 +2005,8 @@ def _step_to_m_call(
     if op == "split_column_to_rows":
         column = step["column"]
         splitter = (
-            "each Text.Split(if _ = null then \"\" else _, "
+            'each if _ = null then {null} else if _ = "" then {""} else '
+            "Text.Split(_, "
             f"{_m_string(step['delimiter'])})"
         )
         transformed = (
@@ -2339,15 +2371,20 @@ def _parse_split_to_rows(
             "The expanded column must be the same column transformed by Text.Split."
         )
     expression_match = re.fullmatch(r"each\s+(.+)", expression, re.DOTALL)
-    call = _CALL.fullmatch(expression_match.group(1).strip()) if expression_match else None
+    guarded_call = re.fullmatch(
+        r'if\s+_\s*=\s*null\s+then\s+\{null\}\s+else\s+'
+        r'if\s+_\s*=\s*""\s+then\s+\{""\}\s+else\s+(.+)',
+        expression_match.group(1).strip(), re.DOTALL,
+    ) if expression_match else None
+    call = _CALL.fullmatch(guarded_call.group(1).strip()) if guarded_call else None
     if call is None or call.group(1) != "Text.Split":
         raise PowerQueryMScriptError(
-            "Table.ExpandListColumn is supported only over each Text.Split(_, delimiter)."
+            "Table.ExpandListColumn requires null-preserving guarded Text.Split(_, delimiter)."
         )
     split_arguments = _split_top_level(call.group(2), ",")
-    if len(split_arguments) != 2 or _compact_m_whitespace(split_arguments[0]) != 'if_=nullthen""else_':
+    if len(split_arguments) != 2 or split_arguments[0].strip() != "_":
         raise PowerQueryMScriptError(
-            'Text.Split must coalesce a null cell to "" before splitting.'
+            "Text.Split must operate on the current non-null cell."
         )
     return {
         "op": "split_column_to_rows",
@@ -2369,21 +2406,16 @@ def _parse_delimiter_transform(
             f"Unsupported Table.TransformColumns function {expression!r}."
         )
     conditional = each_match.group(1).strip()
-    if not conditional.startswith("if "):
+    guarded_call = re.fullmatch(
+        r'if\s+_\s*=\s*null\s+then\s+null\s+else\s+'
+        r'if\s+_\s*=\s*""\s+then\s+""\s+else\s+(.+)',
+        conditional, re.DOTALL,
+    )
+    if guarded_call is None:
         raise PowerQueryMScriptError(
-            "Delimiter extraction must normalize null and empty cells to empty text."
+            "Delimiter extraction must preserve null and guard empty text."
         )
-    then_at = _find_keyword(conditional, "then")
-    else_at = _find_keyword(conditional, "else")
-    if then_at < 0 or else_at < then_at:
-        raise PowerQueryMScriptError("The empty-text guard must include then and else branches.")
-    condition = conditional[3:then_at].strip()
-    empty_branch = conditional[then_at + len("then"):else_at].strip()
-    if condition != '_ = null or _ = ""' or _parse_string(empty_branch) != "":
-        raise PowerQueryMScriptError(
-            "Delimiter extraction must normalize null and empty cells to empty text."
-        )
-    call = _CALL.fullmatch(conditional[else_at + len("else"):].strip())
+    call = _CALL.fullmatch(guarded_call.group(1).strip())
     if call is None:
         raise PowerQueryMScriptError("The guarded delimiter extraction call is invalid.")
     arguments = _split_top_level(call.group(2), ",")
@@ -2442,6 +2474,7 @@ def _validate_m_text_inputs(
         "keep_columns", "remove_column", "rename_column", "reorder_columns",
         "keep_top_rows", "remove_top_rows", "keep_bottom_rows", "remove_bottom_rows",
         "keep_range_rows", "remove_alternate_rows", "add_index_column", "remove_blank_rows",
+        "remove_rows_with_errors",
     }
 
     def types_before(index: int) -> dict[str, str]:
@@ -2454,8 +2487,7 @@ def _validate_m_text_inputs(
         if transpose_seen and op not in safe_after_transpose:
             raise PowerQueryMScriptError(
                 f"M operation {op!r} after Table.Transpose is not supported because the "
-                "local text model cannot preserve M cell types or distinguish null from "
-                "empty text."
+                "bounded local M bridge cannot infer transformed types for generated columns."
             )
         text_filter_operators = {
             "contains", "does_not_contain", "begins_with",
@@ -2475,8 +2507,8 @@ def _validate_m_text_inputs(
         if op in text_operations or filter_uses_text:
             if pivot_seen:
                 raise PowerQueryMScriptError(
-                    "M text operations after Pivot are not supported: Pivot creates nullable, "
-                    "data-derived columns that this local text model cannot type safely."
+                    "M text operations after Pivot are not supported: Pivot creates "
+                    "data-derived columns whose names and types cannot be statically tracked."
                 )
             types = types_before(index)
             columns = (

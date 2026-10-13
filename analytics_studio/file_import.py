@@ -9,7 +9,7 @@ from __future__ import annotations
 
 import csv
 from dataclasses import dataclass
-from datetime import datetime, timedelta
+from datetime import date, datetime, time as datetime_time, timedelta
 from decimal import Decimal
 import io
 import json
@@ -23,6 +23,8 @@ from typing import Any, Callable, Mapping
 import zipfile
 import zlib
 from xml.etree import ElementTree
+
+from analytics_studio.power_query_values import PowerQueryCellError, cell_to_text
 
 
 MAX_SOURCE_BYTES = 10 * 1024 * 1024
@@ -74,7 +76,7 @@ class ImportCandidate:
 
     kind: str
     headers: list[str]
-    rows: list[dict[str, str]]
+    rows: list[dict[str, Any]]
     options: dict[str, Any]
     notices: list[str]
 
@@ -318,7 +320,7 @@ def _parse_sqlite(
         if width == 0:
             raise FileImportError(f"SQLite object {table_name!r} has no columns.")
         headers = _normalize_headers(raw_headers, width)
-        rows: list[dict[str, str]] = []
+        rows: list[dict[str, Any]] = []
         rendered_bytes = 0
         for values in cursor:
             if control is not None:
@@ -326,17 +328,19 @@ def _parse_sqlite(
             row_number = len(rows) + 1
             _check_row_limit(row_number)
             _check_cell_limit(row_number, width)
-            normalized_values: list[str] = []
+            normalized_values: list[Any] = []
             for value in values:
-                if value is None:
-                    rendered = ""
-                elif isinstance(value, bytes):
+                if isinstance(value, bytes):
                     raise FileImportError(
                         f"SQLite table {table_name!r} contains binary data; BLOB columns are not supported."
                     )
+                elif isinstance(value, float) and not math.isfinite(value):
+                    raise FileImportError(
+                        f"SQLite table {table_name!r} contains a non-finite number."
+                    )
                 else:
-                    rendered = str(value)
-                rendered_bytes += len(rendered.encode("utf-8"))
+                    rendered = value
+                rendered_bytes += len(cell_to_text(rendered).encode("utf-8"))
                 if rendered_bytes > MAX_SQLITE_TEXT_BYTES:
                     raise FileImportError(
                         "The SQLite object exceeds the 80 MiB rendered-text import limit."
@@ -443,7 +447,7 @@ def _parse_parquet(
                 )
             field_types.append(data_type)
 
-        rows: list[dict[str, str]] = []
+        rows: list[dict[str, Any]] = []
         rendered_text_bytes = sum(len(header.encode("utf-8")) for header in headers)
         if rendered_text_bytes > MAX_PARQUET_TEXT_BYTES:
             raise FileImportError("Parquet column names exceed the converted-text result limit.")
@@ -459,37 +463,22 @@ def _parse_parquet(
             _check_row_limit(next_count)
             _check_cell_limit(next_count, len(headers))
 
-            values_by_column: list[list[str | None]] = []
+            values_by_column: list[list[Any]] = []
             for column_index, field in enumerate(schema):
                 array = batch.column(column_index)
                 if pa.types.is_dictionary(array.type):
                     array = array.dictionary_decode()
-                if pa.types.is_boolean(field_types[column_index]):
-                    rendered = [
-                        None if value is None else ("TRUE" if value else "FALSE")
-                        for value in array.to_pylist()
-                    ]
-                else:
-                    try:
-                        rendered = array.cast(pa.string(), safe=True).to_pylist()
-                    except Exception as exc:
-                        raise FileImportError(
-                            f"Could not convert Parquet column {headers[column_index]!r} "
-                            f"({field.type}) to text: {exc}"
-                        ) from exc
+                rendered = array.to_pylist()
 
                 if pa.types.is_floating(field_types[column_index]):
                     for value in rendered:
-                        if value is not None and value.casefold() in {
-                            "nan", "+nan", "-nan", "inf", "+inf", "-inf",
-                            "infinity", "+infinity", "-infinity",
-                        }:
+                        if isinstance(value, float) and not math.isfinite(value):
                             raise FileImportError(
                                 f"Parquet column {headers[column_index]!r} contains a non-finite number."
                             )
                 for value in rendered:
                     if value is not None:
-                        rendered_text_bytes += len(value.encode("utf-8"))
+                        rendered_text_bytes += len(cell_to_text(value).encode("utf-8"))
                         if rendered_text_bytes > MAX_PARQUET_TEXT_BYTES:
                             raise FileImportError(
                                 f"Converted Parquet text exceeds the "
@@ -504,8 +493,7 @@ def _parse_parquet(
                         control.report(f"Read {row_number:,} Parquet rows…")
                     control.check_cancelled()
                 rows.append({
-                    header: ("" if values_by_column[column_index][row_index] is None
-                             else values_by_column[column_index][row_index])
+                    header: values_by_column[column_index][row_index]
                     for column_index, header in enumerate(headers)
                 })
 
@@ -514,7 +502,7 @@ def _parse_parquet(
                 f"{path.name} declares {declared_rows:,} rows but yielded {len(rows):,}."
             )
         notices = [
-            "Parquet scalar values are converted to text; nulls become blank and the source types are not retained."
+            "Parquet scalar values retain their source types; nested and binary values are not supported."
         ]
         return ImportCandidate("parquet", headers, rows, options, notices)
     except FileImportError:
@@ -800,6 +788,51 @@ def _legacy_excel_cell_text(
     return str(value) if value is not None else ""
 
 
+def _legacy_excel_cell_value(
+    xlrd: Any,
+    book: Any,
+    sheet: Any,
+    row_index: int,
+    column_index: int,
+) -> Any:
+    cell_type = sheet.cell_type(row_index, column_index)
+    value = sheet.cell_value(row_index, column_index)
+    if cell_type in {xlrd.XL_CELL_EMPTY, xlrd.XL_CELL_BLANK}:
+        return None
+    if cell_type == xlrd.XL_CELL_TEXT:
+        return str(value)
+    if cell_type == xlrd.XL_CELL_BOOLEAN:
+        return bool(value)
+    if cell_type == xlrd.XL_CELL_ERROR:
+        message = xlrd.error_text_from_code.get(value, f"#ERROR({value})")
+        return PowerQueryCellError("Expression.Error", message)
+    if cell_type == xlrd.XL_CELL_DATE:
+        try:
+            year, month, day, hour, minute, second = xlrd.xldate_as_tuple(
+                value, book.datemode
+            )
+            if year == month == day == 0:
+                return datetime_time(hour, minute, second)
+            if hour or minute or second:
+                return datetime(year, month, day, hour, minute, second)
+            return date(year, month, day)
+        except (OverflowError, ValueError, xlrd.xldate.XLDateError):
+            pass
+    if cell_type in {xlrd.XL_CELL_NUMBER, xlrd.XL_CELL_DATE}:
+        try:
+            number = Decimal(str(value))
+        except (ArithmeticError, ValueError) as exc:
+            raise FileImportError(
+                f"Worksheet {sheet.name!r} contains an unreadable numeric cell."
+            ) from exc
+        if not number.is_finite():
+            raise FileImportError(
+                f"Worksheet {sheet.name!r} contains a non-finite numeric cell."
+            )
+        return int(number) if number == number.to_integral_value() else number
+    return value if value is not None else None
+
+
 def _read_excel_sheet_index(
     workbook: zipfile.ZipFile,
     display_name: str,
@@ -873,18 +906,24 @@ def _read_excel_shared_strings(
 
 
 def _auto_header_index(
-    records: list[tuple[int, list[str]]], minimum_support_rows: int
+    records: list[tuple[int, list[Any]]], minimum_support_rows: int
 ) -> int | None:
     """Find a broad row whose populated columns recur in following records."""
     best: tuple[tuple[int, int, int, int], int] | None = None
     for index, (_, values) in enumerate(records):
-        positions = [column for column, value in enumerate(values) if value.strip()]
+        positions = [
+            column for column, value in enumerate(values)
+            if cell_to_text(value).strip()
+        ]
         width = len(positions)
         if width < 2:
             continue
         following = records[index + 1:index + 6]
         overlaps = [
-            sum(column < len(row) and bool(row[column].strip()) for column in positions)
+            sum(
+                column < len(row) and bool(cell_to_text(row[column]).strip())
+                for column in positions
+            )
             for _, row in following
         ]
         supported = [count for count in overlaps if count >= 2]
@@ -978,13 +1017,16 @@ def _excel_prefix_rows(
 
 
 def _excel_sheet_quality(
-    records: list[tuple[int, list[str]]],
+    records: list[tuple[int, list[Any]]],
 ) -> tuple[tuple[int, int, int, int], int] | None:
     header_index = _auto_header_index(records, minimum_support_rows=1)
     if header_index is None:
         return None
     raw_headers = records[header_index][1]
-    headers = [re.sub(r"[^a-z0-9]+", " ", value.casefold()).strip() for value in raw_headers]
+    headers = [
+        re.sub(r"[^a-z0-9]+", " ", cell_to_text(value).casefold()).strip()
+        for value in raw_headers
+    ]
 
     def has_header_term(*terms: str) -> bool:
         return any(term in header for header in headers for term in terms)
@@ -997,9 +1039,15 @@ def _excel_sheet_quality(
         has_header_term("vat", "tax"),
     ))
     data_rows = records[header_index + 1:]
-    header_positions = [index for index, value in enumerate(raw_headers) if value.strip()]
+    header_positions = [
+        index for index, value in enumerate(raw_headers)
+        if cell_to_text(value).strip()
+    ]
     populated_cells = sum(
-        sum(column < len(row) and bool(row[column].strip()) for column in header_positions)
+        sum(
+            column < len(row) and bool(cell_to_text(row[column]).strip())
+            for column in header_positions
+        )
         for _, row in data_rows
     )
     density = int(1000 * populated_cells / max(1, len(data_rows) * len(header_positions)))
@@ -1158,7 +1206,7 @@ def _parse_json(
     headers: list[str] = []
     header_by_key: dict[str, str] = {}
     used_headers: set[str] = set()
-    rows: list[dict[str, str]] = []
+    rows: list[dict[str, Any]] = []
     try:
         for row_index, record in enumerate(_iter_json_array(decoded, decoder), 1):
             if control is not None:
@@ -1185,10 +1233,7 @@ def _parse_json(
                         f"JSON row {row_index}, field {key!r} is nested; only scalar values are supported."
                     )
             _check_cell_limit(row_index, len(headers))
-            rows.append({
-                header_by_key[key]: _json_scalar_text(value)
-                for key, value in record.items()
-            })
+            rows.append({header_by_key[key]: value for key, value in record.items()})
             if control is not None and row_index % _PROGRESS_ROW_INTERVAL == 0:
                 control.report(f"Read {row_index:,} JSON rows…")
     except json.JSONDecodeError as exc:
@@ -1208,7 +1253,7 @@ def _parse_json(
         if control is not None:
             control.check_cancelled()
         for header in headers:
-            row.setdefault(header, "")
+            row.setdefault(header, None)
         if control is not None and row_index % _PROGRESS_ROW_INTERVAL == 0:
             control.report(f"Preparing {row_index:,} JSON rows…")
     return ImportCandidate("json", headers, rows, options, [])
@@ -1304,16 +1349,6 @@ def _is_json_scalar(value: Any) -> bool:
     return value is None or isinstance(value, (str, bool, int, float))
 
 
-def _json_scalar_text(value: Any) -> str:
-    if value is None:
-        return ""
-    if value is True:
-        return "TRUE"
-    if value is False:
-        return "FALSE"
-    return str(value)
-
-
 def _parse_xml(
     path: Path,
     options: dict[str, Any],
@@ -1330,7 +1365,8 @@ def _parse_xml(
     record_tag: str | None = None
     pending_record: ElementTree.Element | None = None
     headers: list[str] | None = None
-    rows: list[dict[str, str]] = []
+    rows: list[dict[str, Any]] = []
+    xsi_nil = "{http://www.w3.org/2001/XMLSchema-instance}nil"
     try:
         for event, element in ElementTree.iterparse(
             io.BytesIO(content), events=("start", "end")
@@ -1365,9 +1401,15 @@ def _parse_xml(
                             f"XML record {len(rows) + 1} has attributes; attributes are not supported."
                         )
                 elif len(stack) == 2:
-                    if element.attrib:
+                    unsupported_attributes = set(element.attrib) - {xsi_nil}
+                    if unsupported_attributes:
                         raise FileImportError(
                             f"XML field {_local_name(element.tag)!r} has attributes; attributes are not supported."
+                        )
+                    nil_value = element.attrib.get(xsi_nil)
+                    if nil_value is not None and nil_value.casefold() not in {"true", "1", "false", "0"}:
+                        raise FileImportError(
+                            f"XML field {_local_name(element.tag)!r} has an invalid xsi:nil value."
                         )
                 else:
                     raise FileImportError(
@@ -1399,9 +1441,14 @@ def _parse_xml(
                         f"XML record {row_index} has a different ordered field structure."
                     )
 
-                values = {
-                    header: field.text or "" for header, field in zip(headers, fields)
-                }
+                values: dict[str, Any] = {}
+                for header, field in zip(headers, fields):
+                    nil_value = field.attrib.get(xsi_nil, "false").casefold() in {"true", "1"}
+                    if nil_value and ((field.text or "").strip() or len(field)):
+                        raise FileImportError(
+                            f"XML field {header!r} is marked nil but contains a value."
+                        )
+                    values[header] = None if nil_value else field.text or ""
                 rows.append(values)
                 _check_cell_limit(len(rows), len(headers))
                 if control is not None and row_index % _PROGRESS_ROW_INTERVAL == 0:
@@ -1419,7 +1466,7 @@ def _parse_xml(
         raise FileImportError("XML contains no tabular records.")
     normalized_headers = _normalize_headers(headers, len(headers))
     if normalized_headers != headers:
-        normalized_rows: list[dict[str, str]] = []
+        normalized_rows: list[dict[str, Any]] = []
         for row_index, row in enumerate(rows, 1):
             if control is not None:
                 control.check_cancelled()
@@ -1496,9 +1543,9 @@ def _parse_excel(
                 raise FileImportError(f"Worksheet {sheet_name!r} was not found in {path.name}.")
             sheet_path = selected_sheet[1]
             header_row = options["header_row"]
-            raw_headers: list[str] | None = None
-            data_records: list[list[str]] = []
-            auto_header_records: list[tuple[int, list[str]]] = []
+            raw_headers: list[Any] | None = None
+            data_records: list[list[Any]] = []
+            auto_header_records: list[tuple[int, list[Any]]] = []
             data_width = 0
             formula_seen = False
             formula_cache_missing = False
@@ -1508,10 +1555,10 @@ def _parse_excel(
             sheet_data_tag = f"{main_ns}sheetData"
             stack: list[ElementTree.Element] = []
             current_row_number: int | None = None
-            current_values: dict[int, str] | None = None
+            current_values: dict[int, Any] | None = None
             next_column = 0
 
-            def append_data_record(values: list[str]) -> None:
+            def append_data_record(values: list[Any]) -> None:
                 nonlocal data_width
                 if control is not None:
                     control.check_cancelled()
@@ -1584,7 +1631,7 @@ def _parse_excel(
                             formula_seen = True
                             if value is None or value.text is None:
                                 formula_cache_missing = True
-                        current_values[column] = _excel_cell_text(
+                        current_values[column] = _excel_cell_value(
                             element, shared_strings, date_styles, time_styles, date_1904, main_ns
                         )
                         element.clear()
@@ -1605,9 +1652,9 @@ def _parse_excel(
                     ):
                         row_width = max(current_values.keys(), default=-1) + 1
                         row_values = [
-                            current_values.get(index, "") for index in range(row_width)
+                            current_values.get(index) for index in range(row_width)
                         ]
-                        if any(value.strip() for value in row_values):
+                        if any(cell_to_text(value).strip() for value in row_values):
                             if options["header_row"] is None and raw_headers is None:
                                 auto_header_records.append((current_row_number, row_values))
                                 header_index = _auto_header_index(
@@ -1668,14 +1715,16 @@ def _parse_excel(
     _check_column_limit(width)
     _check_row_limit(len(data_records))
     _check_cell_limit(len(data_records), width)
-    headers = _normalize_headers(raw_headers, width)
+    headers = _normalize_headers(
+        [cell_to_text(value) for value in raw_headers], width
+    )
     rows = []
     for row_number, record in enumerate(data_records, 1):
         if control is not None:
             control.check_cancelled()
             if row_number % _PROGRESS_ROW_INTERVAL == 0:
                 control.report(f"Preparing {row_number:,} Excel rows…")
-        padded = record + [""] * (width - len(record))
+        padded = record + [None] * (width - len(record))
         rows.append(dict(zip(headers, padded)))
 
     normalized_options = {"sheet_name": sheet_name, "header_row": header_row}
@@ -1708,11 +1757,11 @@ def _parse_legacy_excel(
 
         header_row = options["header_row"]
         raw_headers: list[str] | None = None
-        data_records: list[list[str]] = []
-        auto_header_records: list[tuple[int, list[str]]] = []
+        data_records: list[list[Any]] = []
+        auto_header_records: list[tuple[int, list[Any]]] = []
         data_width = 0
 
-        def append_data_record(values: list[str]) -> None:
+        def append_data_record(values: list[Any]) -> None:
             nonlocal data_width
             if control is not None:
                 control.check_cancelled()
@@ -1744,10 +1793,10 @@ def _parse_legacy_excel(
             row_width = sheet.row_len(row_index)
             _check_column_limit(row_width)
             values = [
-                _legacy_excel_cell_text(xlrd, book, sheet, row_index, column_index)
+                _legacy_excel_cell_value(xlrd, book, sheet, row_index, column_index)
                 for column_index in range(row_width)
             ]
-            is_populated = any(value.strip() for value in values)
+            is_populated = any(cell_to_text(value).strip() for value in values)
             if options["header_row"] is None and raw_headers is None:
                 if not is_populated:
                     continue
@@ -1779,7 +1828,9 @@ def _parse_legacy_excel(
             )
             commit_auto_header(header_index if header_index is not None else 0)
 
-        if raw_headers is None or not any(value.strip() for value in raw_headers):
+        if raw_headers is None or not any(
+            cell_to_text(value).strip() for value in raw_headers
+        ):
             if options["header_row"] is None:
                 raise FileImportError(f"Worksheet {sheet_name!r} has no non-empty header row.")
             raise FileImportError(
@@ -1790,14 +1841,16 @@ def _parse_legacy_excel(
         _check_column_limit(width)
         _check_row_limit(len(data_records))
         _check_cell_limit(len(data_records), width)
-        headers = _normalize_headers(raw_headers, width)
+        headers = _normalize_headers(
+            [cell_to_text(value) for value in raw_headers], width
+        )
         rows = []
         for row_number, record in enumerate(data_records, 1):
             if control is not None:
                 control.check_cancelled()
                 if row_number % _PROGRESS_ROW_INTERVAL == 0:
                     control.report(f"Preparing {row_number:,} Excel rows…")
-            padded = record + [""] * (width - len(record))
+            padded = record + [None] * (width - len(record))
             rows.append(dict(zip(headers, padded)))
 
         notices = [
@@ -1896,6 +1949,7 @@ def _read_excel_styles(
     date_styles: set[int] = set()
     time_styles: set[int] = set()
     built_in_dates = set(range(14, 23)) | {45, 46, 47}
+    built_in_times = {18, 19, 20, 21, 45, 46, 47}
     for style_index, style in enumerate(cell_xfs):
         if control is not None:
             control.check_cancelled()
@@ -1903,14 +1957,15 @@ def _read_excel_styles(
         format_code = custom_formats.get(number_format, "")
         is_elapsed_time = re.search(r"\[(?:h+|m+|s+)\]", format_code, re.IGNORECASE) is not None
         normalized = re.sub(r'"[^"]*"|\\.|\[[^]]+\]', "", format_code).casefold()
-        is_date = not is_elapsed_time and (
-            number_format in built_in_dates or any(char in normalized for char in "ymd")
+        has_calendar_part = any(char in normalized for char in "yd")
+        has_clock_part = any(char in normalized for char in "hs")
+        is_temporal = not is_elapsed_time and (
+            number_format in built_in_dates
+            or any(char in normalized for char in "ymdhs")
         )
-        if is_date:
+        if is_temporal:
             date_styles.add(style_index)
-            if number_format in {18, 19, 20, 21, 22, 45, 46, 47} or any(
-                char in normalized for char in "hs"
-            ):
+            if number_format in built_in_times or (has_clock_part and not has_calendar_part):
                 time_styles.add(style_index)
     return date_styles, time_styles
 
@@ -1964,6 +2019,90 @@ def _excel_cell_text(
         return str(number.quantize(Decimal(1))) if number == number.to_integral_value() else format(number.normalize(), "f")
     except (ArithmeticError, ValueError):
         return raw
+
+
+def _excel_cell_value(
+    cell: ElementTree.Element,
+    shared_strings: list[str],
+    date_styles: set[int],
+    time_styles: set[int],
+    date_1904: bool,
+    main_ns: str,
+) -> Any:
+    cell_type = cell.attrib.get("t", "")
+    try:
+        style_index = int(cell.attrib.get("s", "0"))
+    except ValueError:
+        style_index = 0
+    if cell_type == "inlineStr":
+        inline = cell.find(f"{main_ns}is")
+        return (
+            "" if inline is None
+            else "".join(item.text or "" for item in inline.iter(f"{main_ns}t"))
+        )
+
+    value = cell.find(f"{main_ns}v")
+    if value is None or value.text is None:
+        return None
+    raw = value.text
+    if cell_type == "s":
+        try:
+            shared_string_index = int(raw)
+            if shared_string_index < 0:
+                raise IndexError
+            return shared_strings[shared_string_index]
+        except (ValueError, IndexError) as exc:
+            reference = cell.attrib.get("r", "unknown")
+            raise FileImportError(
+                f"Excel cell {reference} points to an invalid shared-string entry."
+            ) from exc
+    if cell_type == "b":
+        if raw not in {"0", "1"}:
+            raise FileImportError(
+                f"Excel cell {cell.attrib.get('r', 'unknown')} has an invalid Boolean value."
+            )
+        return raw == "1"
+    if cell_type == "e":
+        return PowerQueryCellError("Expression.Error", raw or "Excel cell error")
+    if cell_type in {"str", "d"}:
+        if cell_type == "d":
+            try:
+                parsed_datetime = datetime.fromisoformat(raw.replace("Z", "+00:00"))
+            except ValueError:
+                try:
+                    return date.fromisoformat(raw)
+                except ValueError:
+                    raise FileImportError(
+                        f"Excel cell {cell.attrib.get('r', 'unknown')} has an invalid date value."
+                    ) from None
+            return parsed_datetime
+        return raw
+
+    try:
+        number = Decimal(raw)
+    except (ArithmeticError, ValueError) as exc:
+        raise FileImportError(
+            f"Excel cell {cell.attrib.get('r', 'unknown')} has an invalid numeric value."
+        ) from exc
+    if not number.is_finite():
+        raise FileImportError(
+            f"Excel cell {cell.attrib.get('r', 'unknown')} has a non-finite numeric value."
+        )
+    if style_index in date_styles:
+        try:
+            epoch = datetime(1904, 1, 1) if date_1904 else datetime(1899, 12, 30)
+            parsed = epoch + timedelta(days=float(number))
+            if style_index in time_styles:
+                if Decimal(0) <= number < Decimal(1):
+                    return datetime_time(
+                        parsed.hour, parsed.minute, parsed.second, parsed.microsecond
+                    )
+                return parsed
+            return parsed.date()
+        except (ArithmeticError, ValueError, OverflowError):
+            # Invalid/ambiguous serials remain the original numeric value.
+            pass
+    return int(number) if number == number.to_integral_value() else number
 
 
 def _normalize_headers(raw_headers: list[str], width: int) -> list[str]:

@@ -68,9 +68,9 @@ class KeepDuplicatesSelectedColumnsLifecycleTests(unittest.TestCase):
         dialog._add_step()
         self.assertEqual(dialog._steps[1]["columns"], ["Key"])
         self.assertEqual(dialog._preview_candidate.rows, [
-            {"Key": "A", "Amount": "1"},
-            {"Key": "A", "Amount": "2"},
-            {"Key": "A", "Amount": "5"},
+            {"Key": "A", "Amount": 1},
+            {"Key": "A", "Amount": 2},
+            {"Key": "A", "Amount": 5},
         ])
         dialog._accept_candidate()
         self.assertTrue(controller._commit_transform_steps(
@@ -90,8 +90,8 @@ class KeepDuplicatesSelectedColumnsLifecycleTests(unittest.TestCase):
         reopened = self.controller("reopened-settings.ini")
         self.assertTrue(reopened.open_project_path(project_path))
         self.assertEqual(reopened._rows, [
-            {"Key": "x", "Amount": "10"},
-            {"Key": "x", "Amount": "11"},
+            {"Key": "x", "Amount": 10},
+            {"Key": "x", "Amount": 11},
         ])
 
         self.source_path.write_text(
@@ -99,9 +99,9 @@ class KeepDuplicatesSelectedColumnsLifecycleTests(unittest.TestCase):
         )
         reopened.refresh_source()
         self.assertEqual(reopened._rows, [
-            {"Key": "m", "Amount": "20"},
-            {"Key": "m", "Amount": "21"},
-            {"Key": "m", "Amount": "23"},
+            {"Key": "m", "Amount": 20},
+            {"Key": "m", "Amount": 21},
+            {"Key": "m", "Amount": 23},
         ])
 
 

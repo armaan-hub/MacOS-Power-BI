@@ -24,6 +24,7 @@ from analytics_studio.file_import import (
     ImportCandidate,
     _normalize_headers,
 )
+from analytics_studio.power_query_values import cell_to_text
 
 
 REQUEST_TIMEOUT_SECONDS = 10
@@ -145,7 +146,7 @@ def read_odata_entity_set(
     request_url = entity_url
     visited: set[str] = set()
     total_response_bytes = 0
-    raw_rows: list[dict[str, str]] = []
+    raw_rows: list[dict[str, Any]] = []
     raw_headers: list[str] = []
     header_set: set[str] = set()
     text_bytes = 0
@@ -170,7 +171,7 @@ def read_odata_entity_set(
                 break
             if not isinstance(record, dict):
                 raise ODataError("The OData entity list contains a non-object row.")
-            row: dict[str, str] = {}
+            row: dict[str, Any] = {}
             for key, value in record.items():
                 if key.startswith("@odata.") or key.startswith("odata."):
                     continue
@@ -189,9 +190,9 @@ def read_odata_entity_set(
                     if len(raw_rows) > row_limit:
                         raw_rows = raw_rows[:row_limit]
                         truncated = True
-                text = _cell_text(value, key)
+                cell = _cell_value(value, key)
                 try:
-                    encoded_size = len(text.encode("utf-8"))
+                    encoded_size = len(cell_to_text(cell).encode("utf-8"))
                 except UnicodeEncodeError as exc:
                     raise ODataError(
                         f"OData property {key!r} contains invalid Unicode."
@@ -201,7 +202,7 @@ def read_odata_entity_set(
                 text_bytes += encoded_size
                 if text_bytes > MAX_SQLITE_TEXT_BYTES:
                     raise ODataError("The OData result exceeds the 80 MiB rendered text limit.")
-                row[key] = text
+                row[key] = cell
             if len(raw_rows) < row_limit:
                 raw_rows.append(row)
             else:
@@ -225,7 +226,7 @@ def read_odata_entity_set(
     headers = _normalize_headers(raw_headers, len(raw_headers))
     header_map = dict(zip(raw_headers, headers))
     rows = [
-        {header_map[key]: row.get(key, "") for key in raw_headers}
+        {header_map[key]: row.get(key) for key in raw_headers}
         for row in raw_rows
     ]
     notices = []
@@ -368,15 +369,13 @@ def _next_link(page: dict[str, Any]) -> str | None:
     return None
 
 
-def _cell_text(value: Any, property_name: str) -> str:
-    if value is None:
-        return ""
-    if isinstance(value, bool):
-        return "TRUE" if value else "FALSE"
+def _cell_value(value: Any, property_name: str) -> Any:
     if isinstance(value, (str, int, Decimal)):
-        return str(value)
+        return value
+    if value is None or isinstance(value, bool):
+        return value
     if isinstance(value, float) and math.isfinite(value):
-        return str(value)
+        return value
     if isinstance(value, (dict, list)):
         raise ODataError(
             f"OData property {property_name!r} is nested; this importer supports scalar fields only."

@@ -77,14 +77,14 @@ Supported shapes::
     {"op": "transpose_table"}
 
 Filter operators include exact, text, numeric, and blank-state comparisons.
-Numeric comparisons parse values as finite decimals. Empty values do not match
-numeric comparisons. Blank-state operators match normalized empty strings and
+Numeric comparisons parse values as finite decimals. Null and empty text do not
+match numeric comparisons. Blank-state operators match null or empty text and
 do not take a comparison value. Advanced filters support up to 64 clauses
 across columns; AND binds tighter than OR. Sorts are stable,
 case-insensitive for text, numeric when every non-empty value is numeric, and
-keep empty values at the end in either direction. Grouping uses exact cell
-values and preserves the first-seen group order. Numeric aggregates ignore
-empty values and reject invalid non-empty values; min/max compare numeric
+keep null and empty text at the end in either direction. Grouping uses typed
+cell values and preserves the first-seen group order. Numeric aggregates ignore
+null and empty values; cell errors propagate to aggregate cells. Min/max compare numeric
 values when possible and otherwise compare case-insensitive text. Replace
 values matches whole cell text. Merge columns combines at least two selected
 fields in saved order, inserts the configured separator between every value,
@@ -94,28 +94,29 @@ row for each exact value tuple in its selected key columns; legacy steps without
 keys compare the complete row. Keep duplicates retains every row whose exact
 selected key tuple occurs more than once, preserving the current row order. Keep
 columns retains the selected columns in their current source order. Unpivot retains other columns and emits one row
-per selected non-empty cell; unpivot-other keeps the selected columns fixed and
+per selected non-null cell; unpivot-other keeps the selected columns fixed and
 un-pivots the rest. Attribute values are the original column names. Both
-generated columns have text type, and empty cells are omitted because this
-table model normalizes source nulls to empty strings.
+generated columns have text type; null cells are omitted and empty-text cells
+are retained.
 Pivot turns distinct values from one attribute column into new columns, using
 all remaining columns as row keys. It can keep a single value per key/category
 or aggregate duplicates. Generated pivot columns default to text in the model.
-Custom columns use a bounded, safe M-style expression subset; they do not run
-arbitrary Python or implement the full Power Query M language.
+Custom columns use a bounded, safe M-style expression subset over native scalar,
+null, empty-text, and error values; they do not run arbitrary Python or implement
+the full Power Query M language.
 Conditional columns test ordered clauses against one row and return the first
 matching literal or source-column value, followed by a literal or column value
 for the final else branch. Equality and text operators compare exact strings;
 ordered comparisons use finite decimal values when both sides parse as numbers
 and otherwise use ordinal string ordering. Empty cells are normalized to blank
 strings before a conditional step runs. Fill Down copies the preceding
-non-empty value into blank cells; Fill Up copies the following non-empty value
-into blank cells. Leading blanks in Fill Down and trailing blanks in Fill Up
-remain blank when no source value exists in that direction.
+non-null value into null cells; Fill Up copies the following non-null value
+into null cells. Empty text is not filled. Leading or trailing nulls remain
+null when no source value exists in that direction.
 Duplicate Column appends an exact copy of the selected field's values, and the
 model metadata keeps the source column's type for the copy.
-Remove blank rows drops only rows where every normalized cell is the empty
-string; whitespace-only text is retained.
+Remove blank rows drops only rows where every cell is null or empty text;
+whitespace-only text is retained.
 Remove top rows removes the requested number of rows from the start of the
 current row order and leaves the remaining order unchanged.
 Remove bottom rows removes the requested number from the end of the current
@@ -190,6 +191,13 @@ from analytics_studio.power_query_expression import (
     expression_value_to_text,
     referenced_columns,
 )
+from analytics_studio.power_query_values import (
+    PowerQueryCellError,
+    cell_key,
+    cell_to_text,
+    is_cell_error,
+    is_supported_cell_value,
+)
 
 
 MAX_TRANSFORMATION_STEPS = 256
@@ -220,6 +228,8 @@ class TransformationError(ValueError):
 _FILTER_OPERATORS = {
     "equals",
     "not_equals",
+    "is_null",
+    "is_not_null",
     "is_blank",
     "is_not_blank",
     "contains",
@@ -233,7 +243,9 @@ _FILTER_OPERATORS = {
     "less_than",
     "less_than_or_equal",
 }
-FILTER_OPERATORS_WITHOUT_VALUE = frozenset({"is_blank", "is_not_blank"})
+FILTER_OPERATORS_WITHOUT_VALUE = frozenset({
+    "is_null", "is_not_null", "is_blank", "is_not_blank",
+})
 _NUMERIC_FILTER_OPERATORS = {
     "greater_than",
     "greater_than_or_equal",
@@ -273,7 +285,7 @@ _CONDITIONAL_OPERATORS = {
     "contains",
     "does_not_contain",
 }
-_CONDITIONAL_VALUE_KINDS = {"value", "column"}
+_CONDITIONAL_VALUE_KINDS = {"value", "column", "null"}
 MAX_CONDITIONAL_CLAUSES = 64
 MAX_FILTER_CLAUSES = 64
 MAX_MERGE_SEPARATOR_CHARS = 32_767
@@ -327,6 +339,7 @@ _STEP_FIELDS: dict[str, set[str]] = {
     "remove_duplicates": {"op"},
     "keep_duplicates": {"op", "columns"},
     "remove_blank_rows": {"op"},
+    "remove_rows_with_errors": {"op"},
     "remove_top_rows": {"op", "count"},
     "remove_bottom_rows": {"op", "count"},
     "keep_top_rows": {"op", "count"},
@@ -361,6 +374,12 @@ def validate_steps(steps: Any) -> list[dict[str, Any]]:
         if not isinstance(op, str) or op not in _STEP_FIELDS:
             raise TransformationError(f"Transformation step {index} has an unsupported operation.")
         if op == "remove_duplicates":
+            allowed_shapes = (_STEP_FIELDS[op], _STEP_FIELDS[op] | {"columns"})
+            if set(step) not in allowed_shapes:
+                raise TransformationError(
+                    f"Transformation step {index} has missing or unsupported fields."
+                )
+        elif op == "remove_rows_with_errors":
             allowed_shapes = (_STEP_FIELDS[op], _STEP_FIELDS[op] | {"columns"})
             if set(step) not in allowed_shapes:
                 raise TransformationError(
@@ -404,6 +423,20 @@ def validate_steps(steps: Any) -> list[dict[str, Any]]:
             if len(set(columns)) != len(columns):
                 raise TransformationError(
                     f"Transformation step {index} selects a duplicate key column more than once."
+                )
+            step = {**step, "columns": columns}
+        elif op == "remove_rows_with_errors" and "columns" in step:
+            columns = step["columns"]
+            if not isinstance(columns, list) or not columns or any(
+                not isinstance(column, str) or not column.strip() for column in columns
+            ):
+                raise TransformationError(
+                    f"Transformation step {index} needs one or more error-check columns."
+                )
+            columns = [column.strip() for column in columns]
+            if len(set(columns)) != len(columns):
+                raise TransformationError(
+                    f"Transformation step {index} selects an error-check column more than once."
                 )
             step = {**step, "columns": columns}
         elif op in {
@@ -819,7 +852,11 @@ def validate_steps(steps: Any) -> list[dict[str, Any]]:
                     raise TransformationError(
                         f"Clause {clause_index} in step {index} needs a comparison column."
                     )
-                if output_kind not in _CONDITIONAL_VALUE_KINDS:
+                if test_value_kind == "null" and test_value:
+                    raise TransformationError(
+                        f"Clause {clause_index} in step {index} must use an empty placeholder for a null comparison."
+                    )
+                if output_kind not in {"value", "column"}:
                     raise TransformationError(
                         f"Clause {clause_index} in step {index} has an invalid output type."
                     )
@@ -840,7 +877,7 @@ def validate_steps(steps: Any) -> list[dict[str, Any]]:
                     f"Transformation step {index} needs a valid final else value."
                 )
             else_kind = else_kind.strip()
-            if else_kind not in _CONDITIONAL_VALUE_KINDS:
+            if else_kind not in {"value", "column"}:
                 raise TransformationError(
                     f"Transformation step {index} has an invalid final else type."
                 )
@@ -1145,11 +1182,24 @@ def apply_transformations(
             _check_candidate_limits(result.headers, result.rows)
             continue
         if op == "remove_blank_rows":
-            # Source nulls are normalized to empty strings. Keep whitespace-only
-            # text because Power Query's blank-row operation does not trim cells.
+            # Keep whitespace-only text because Power Query's blank-row operation
+            # removes null and empty-text cells without trimming text.
             result.rows = [
                 row for row in result.rows
-                if any(row[header] != "" for header in result.headers)
+                if any(row[header] is not None and row[header] != "" for header in result.headers)
+            ]
+            _check_candidate_limits(result.headers, result.rows)
+            continue
+        if op == "remove_rows_with_errors":
+            columns = step.get("columns", result.headers)
+            missing = next((column for column in columns if column not in result.headers), None)
+            if missing is not None:
+                raise TransformationError(
+                    f"Error-check column {missing!r} does not exist."
+                )
+            result.rows = [
+                row for row in result.rows
+                if not any(is_cell_error(row[column]) for column in columns)
             ]
             _check_candidate_limits(result.headers, result.rows)
             continue
@@ -1316,7 +1366,9 @@ def apply_transformations(
             old_value = step["value"]
             replacement = step["replacement"]
             for row in result.rows:
-                if row[column] == old_value:
+                if not is_cell_error(row[column]) and _filter_values_equal(
+                    row[column], old_value
+                ):
                     row[column] = replacement
         elif op == "extract_text_by_delimiter":
             _extract_text_by_delimiter(
@@ -1345,13 +1397,17 @@ def apply_transformations(
             _split_column_to_rows(result, column, step["delimiter"])
         elif op == "trim_text":
             for row in result.rows:
-                row[column] = row[column].strip()
+                value = row[column]
+                if value is not None and not is_cell_error(value):
+                    row[column] = cell_to_text(value).strip()
         elif op == "clean_text":
             for row in result.rows:
-                row[column] = "".join(
-                    character for character in row[column]
-                    if unicodedata.category(character) != "Cc"
-                )
+                value = row[column]
+                if value is not None and not is_cell_error(value):
+                    row[column] = "".join(
+                        character for character in cell_to_text(value)
+                        if unicodedata.category(character) != "Cc"
+                    )
         elif op in {"lowercase_text", "uppercase_text", "proper_case_text", "reverse_text"}:
             operation = {
                 "lowercase_text": "Lowercase Text",
@@ -1367,7 +1423,10 @@ def apply_transformations(
             }[op]
             total_output_bytes = 0
             for row in result.rows:
-                converted = transform_text(row[column])
+                value = row[column]
+                if value is None or is_cell_error(value):
+                    continue
+                converted = transform_text(cell_to_text(value))
                 try:
                     total_output_bytes += len(converted.encode("utf-8"))
                 except UnicodeEncodeError as exc:
@@ -1408,7 +1467,7 @@ _WHOLE_NUMBER_TEXT = re.compile(r"^[+-]?\d+$")
 
 def infer_column_types(
     headers: list[str],
-    rows: list[dict[str, str]],
+    rows: list[dict[str, Any]],
     *,
     sample_size: int = 200,
 ) -> dict[str, str]:
@@ -1423,11 +1482,39 @@ def infer_column_types(
     inferred = {header: "text" for header in headers}
     sample = rows[:sample_size]
     for header in headers:
-        sample_values = [str(row.get(header, "")).strip() for row in sample]
-        sample_values = [value for value in sample_values if value]
-        all_values = [str(row.get(header, "")).strip() for row in rows]
-        all_values = [value for value in all_values if value]
-        if not sample_values or _is_identifier_column(header, all_values):
+        sample_cells = [
+            row.get(header, "") for row in sample
+            if row.get(header, "") not in (None, "")
+            and not is_cell_error(row.get(header, ""))
+        ]
+        all_cells = [
+            row.get(header, "") for row in rows
+            if row.get(header, "") not in (None, "")
+            and not is_cell_error(row.get(header, ""))
+        ]
+        sample_values = [
+            cell_to_text(row.get(header, "")).strip()
+            for row in sample
+            if row.get(header, "") not in (None, "")
+            and not is_cell_error(row.get(header, ""))
+        ]
+        all_values = [
+            cell_to_text(row.get(header, "")).strip()
+            for row in rows
+            if row.get(header, "") not in (None, "")
+            and not is_cell_error(row.get(header, ""))
+        ]
+        if not sample_values:
+            continue
+
+        native_type = _infer_native_type(sample_cells)
+        if native_type is not None and _infer_native_type(all_cells) == native_type:
+            # Preserve explicitly typed source columns, including numeric IDs.
+            # Text identifiers still use the conservative header/leading-zero
+            # checks below because their original type carries no type signal.
+            inferred[header] = native_type
+            continue
+        if _is_identifier_column(header, all_values):
             continue
 
         lowered = {value.casefold() for value in sample_values}
@@ -1458,10 +1545,31 @@ def infer_column_types(
                         candidate_type = "decimal_number"
         if (
             candidate_type is not None
-            and count_conversion_errors(all_values, candidate_type) == 0
+            and count_conversion_errors(all_cells, candidate_type) == 0
         ):
             inferred[header] = candidate_type
     return inferred
+
+
+def _infer_native_type(values: list[Any]) -> str | None:
+    if not values:
+        return None
+    if all(isinstance(value, bool) for value in values):
+        return "boolean"
+    if all(isinstance(value, datetime) for value in values):
+        return "datetime"
+    if all(isinstance(value, date) and not isinstance(value, datetime) for value in values):
+        return "date"
+    if all(isinstance(value, time) for value in values):
+        return "time"
+    if all(isinstance(value, int) and not isinstance(value, bool) for value in values):
+        return "whole_number"
+    if all(
+        isinstance(value, (int, float, Decimal)) and not isinstance(value, bool)
+        for value in values
+    ):
+        return "decimal_number"
+    return None
 
 
 def _is_identifier_column(header: str, values: list[str]) -> bool:
@@ -1635,11 +1743,17 @@ def column_types_after_steps(
             selected = set(step["columns"])
             if op == "unpivot_columns":
                 retained = [header for header in types if header not in selected]
+                unpivoted = [header for header in types if header in selected]
             else:
                 retained = [header for header in types if header in selected]
+                unpivoted = [header for header in types if header not in selected]
+            unpivoted_types = {types[header] for header in unpivoted}
             types = {header: types[header] for header in retained}
             types[step["attribute_name"]] = "text"
-            types[step["value_name"]] = "text"
+            types[step["value_name"]] = (
+                next(iter(unpivoted_types))
+                if len(unpivoted_types) == 1 else "text"
+            )
         elif op == "pivot_column":
             attribute_column = step["attribute_column"]
             value_column = step["value_column"]
@@ -1747,22 +1861,30 @@ def _merge_columns(
         if header not in selected:
             headers.append(header)
 
-    rows: list[dict[str, str]] = []
+    rows: list[dict[str, Any]] = []
     total_output_bytes = 0
     for row in candidate.rows:
         values = [row[column] for column in columns]
+        existing_error = next((value for value in values if is_cell_error(value)), None)
+        text_values = [
+            "" if value is None or value == "" else cell_to_text(value)
+            for value in values
+            if not is_cell_error(value)
+        ]
+        merged_value: Any = existing_error if existing_error is not None else separator.join(text_values)
         try:
-            merged_bytes = sum(len(value.encode("utf-8")) for value in values)
+            merged_bytes = len(cell_to_text(merged_value).encode("utf-8"))
         except UnicodeEncodeError as exc:
             raise TransformationError(
                 f"A value in the merged columns cannot be encoded as UTF-8 in row {len(rows) + 1}."
             ) from exc
-        merged_bytes += separator_bytes * (len(values) - 1)
+        if existing_error is None:
+            merged_bytes = sum(len(value.encode("utf-8")) for value in text_values)
+            merged_bytes += separator_bytes * (len(values) - 1)
         total_output_bytes += merged_bytes
         if total_output_bytes > MAX_EXPRESSION_OUTPUT_BYTES:
             raise TransformationError("The merged column exceeds the 80 MiB output limit.")
-        merged_value = separator.join(values)
-        rebuilt: dict[str, str] = {}
+        rebuilt: dict[str, Any] = {}
         for index, header in enumerate(candidate.headers):
             if index == first_position:
                 rebuilt[new_name] = merged_value
@@ -1796,14 +1918,19 @@ def _split_column(candidate: ImportCandidate, column: str, delimiter: str) -> No
 
     headers = list(candidate.headers)
     headers[column_index:column_index + 1] = [first_name, second_name]
-    rows: list[dict[str, str]] = []
+    rows: list[dict[str, Any]] = []
     for row in candidate.rows:
-        first, found, remainder = row[column].partition(delimiter)
-        rebuilt: dict[str, str] = {}
+        value = row[column]
+        if value is None or is_cell_error(value):
+            first, second = value, value
+        else:
+            first, found, remainder = cell_to_text(value).partition(delimiter)
+            second = remainder if found else ""
+        rebuilt: dict[str, Any] = {}
         for header in candidate.headers:
             if header == column:
                 rebuilt[first_name] = first
-                rebuilt[second_name] = remainder if found else ""
+                rebuilt[second_name] = second
             else:
                 rebuilt[header] = row[header]
         rows.append(rebuilt)
@@ -1836,8 +1963,9 @@ def _extract_text_by_delimiter(
     _column_index(candidate.headers, column)
     for row_index, row in enumerate(candidate.rows, 1):
         value = row[column]
-        if not value:
+        if value is None or value == "" or is_cell_error(value):
             continue
+        value = cell_to_text(value)
 
         delimiter_index = _find_delimiter_occurrence(value, delimiter, occurrence)
         if delimiter_index < 0:
@@ -1864,8 +1992,9 @@ def _extract_text_between_delimiters(
     _column_index(candidate.headers, column)
     for row_index, row in enumerate(candidate.rows, 1):
         value = row[column]
-        if not value:
+        if value is None or value == "" or is_cell_error(value):
             continue
+        value = cell_to_text(value)
 
         start_index = _find_delimiter_occurrence(
             value, start_delimiter, start_occurrence
@@ -1897,7 +2026,11 @@ def _split_column_by_each_delimiter(
     # rows with fewer segments receive blank values in the remaining columns.
     output_count = max(
         2,
-        max((row[column].count(delimiter) + 1 for row in candidate.rows), default=1),
+        max((
+            cell_to_text(row[column]).count(delimiter) + 1
+            for row in candidate.rows
+            if row[column] is not None and not is_cell_error(row[column])
+        ), default=1),
     )
     if output_count > MAX_COLUMNS - len(candidate.headers) + 1:
         raise TransformationError(
@@ -1919,11 +2052,15 @@ def _split_column_by_each_delimiter(
 
     headers = list(candidate.headers)
     headers[column_index:column_index + 1] = output_names
-    rows: list[dict[str, str]] = []
+    rows: list[dict[str, Any]] = []
     for row in candidate.rows:
-        parts = row[column].split(delimiter)
-        parts.extend([""] * (output_count - len(parts)))
-        rebuilt: dict[str, str] = {}
+        value = row[column]
+        if value is None or is_cell_error(value):
+            parts = [value] * output_count
+        else:
+            parts = cell_to_text(value).split(delimiter)
+            parts.extend([""] * (output_count - len(parts)))
+        rebuilt: dict[str, Any] = {}
         for header in candidate.headers:
             if header == column:
                 rebuilt.update(zip(output_names, parts))
@@ -1959,15 +2096,26 @@ def _split_column_by_positions(
             f"Splitting {column!r} exceeds the {MAX_CELLS:,}-cell import limit."
         )
 
-    rows: list[dict[str, str]] = []
+    rows: list[dict[str, Any]] = []
     for row in candidate.rows:
         value = row[column]
+        if value is None or is_cell_error(value):
+            parts = [value] * (len(positions) + 1)
+            rebuilt: dict[str, Any] = {}
+            for header in candidate.headers:
+                if header == column:
+                    rebuilt.update(zip(output_names, parts))
+                else:
+                    rebuilt[header] = row[header]
+            rows.append(rebuilt)
+            continue
+        value = cell_to_text(value)
         parts = [
             value[start:end]
             for start, end in zip(positions, positions[1:])
         ]
         parts.append(value[positions[-1]:])
-        rebuilt: dict[str, str] = {}
+        rebuilt: dict[str, Any] = {}
         for header in candidate.headers:
             if header == column:
                 rebuilt.update(zip(output_names, parts))
@@ -1984,10 +2132,14 @@ def _split_column_to_rows(
 ) -> None:
     """Split at every delimiter, repeating the other cell values on each row."""
     _column_index(candidate.headers, column)
-    rows: list[dict[str, str]] = []
+    rows: list[dict[str, Any]] = []
     for row in candidate.rows:
         value = row[column]
-        part_count = value.count(delimiter) + 1
+        if value is None or is_cell_error(value):
+            parts = [value]
+        else:
+            parts = cell_to_text(value).split(delimiter)
+        part_count = len(parts)
         expanded_count = len(rows) + part_count
         if expanded_count > MAX_DATA_ROWS:
             raise TransformationError(
@@ -1997,7 +2149,7 @@ def _split_column_to_rows(
             raise TransformationError(
                 f"Splitting into rows exceeds the {MAX_CELLS:,}-cell limit."
             )
-        for part in value.split(delimiter):
+        for part in parts:
             expanded = dict(row)
             expanded[column] = part
             rows.append(expanded)
@@ -2019,16 +2171,32 @@ def _group_by(
         if "column" in aggregate:
             _column_index(candidate.headers, aggregate["column"])
 
-    grouped: dict[tuple[str, ...], list[tuple[int, dict[str, str]]]] = {}
+    grouped: dict[
+        tuple[tuple[Any, ...], ...], list[tuple[int, dict[str, Any]]]
+    ] = {}
+    key_values_by_key: dict[tuple[tuple[Any, ...], ...], tuple[Any, ...]] = {}
     for row_index, row in enumerate(candidate.rows, 1):
-        key = tuple(row[column] for column in columns)
+        key_values = tuple(row[column] for column in columns)
+        error_column = next(
+            (column for column, value in zip(columns, key_values) if is_cell_error(value)),
+            None,
+        )
+        if error_column is not None:
+            raise TransformationError(
+                f"Cannot group: row {row_index} of group key column {error_column!r} contains an error."
+            )
+        key = tuple(cell_key(value) for value in key_values)
+        key_values_by_key.setdefault(key, key_values)
         grouped.setdefault(key, []).append((row_index, row))
     if len(grouped) * len(result_headers) > MAX_CELLS:
         raise TransformationError(f"Grouping exceeds the {MAX_CELLS:,}-cell import limit.")
 
-    result_rows: list[dict[str, str]] = []
+    result_rows: list[dict[str, Any]] = []
     for key, members in grouped.items():
-        result = {column: value for column, value in zip(columns, key)}
+        result = {
+            column: value
+            for column, value in zip(columns, key_values_by_key[key])
+        }
         for aggregate in aggregations:
             result[aggregate["new_name"]] = _aggregate_group(
                 aggregate, members, candidate.headers
@@ -2078,7 +2246,7 @@ def _unpivot_columns(
         1
         for row in candidate.rows
         for column in pivot_headers
-        if row[column] != ""
+        if row[column] is not None
     )
     if result_row_count > MAX_DATA_ROWS:
         raise TransformationError(
@@ -2089,11 +2257,11 @@ def _unpivot_columns(
             f"Unpivoting exceeds the {MAX_CELLS:,}-cell import limit."
         )
 
-    result_rows: list[dict[str, str]] = []
+    result_rows: list[dict[str, Any]] = []
     for row in candidate.rows:
         for column in pivot_headers:
             value = row[column]
-            if value == "":
+            if value is None:
                 continue
             unpivoted = {header: row[header] for header in retained_headers}
             unpivoted[attribute_name] = column
@@ -2123,16 +2291,28 @@ def _pivot_column(
     ]
 
     pivot_values: list[str] = []
-    seen_values: set[str] = set()
+    seen_values: dict[str, tuple[Any, ...]] = {}
     for row_index, row in enumerate(candidate.rows, 1):
         value = row[attribute_column]
-        if not value.strip():
+        if is_cell_error(value):
+            raise TransformationError(
+                f"Cannot pivot: row {row_index} of {attribute_column!r} contains an error."
+            )
+        value_text = cell_to_text(value)
+        if not value_text.strip():
             raise TransformationError(
                 f"Cannot pivot: row {row_index} has a blank value in {attribute_column!r}."
             )
-        if value not in seen_values:
-            seen_values.add(value)
-            pivot_values.append(value)
+        value_key = cell_key(value)
+        previous_key = seen_values.get(value_text)
+        if previous_key is not None and previous_key != value_key:
+            raise TransformationError(
+                f"Cannot pivot: distinct typed categories in {attribute_column!r} "
+                f"produce the same output column {value_text!r}; convert the column to text first."
+            )
+        if previous_key is None:
+            seen_values[value_text] = value_key
+            pivot_values.append(value_text)
     if not pivot_values and not key_headers:
         raise TransformationError("Cannot pivot an empty table without remaining key columns.")
 
@@ -2146,25 +2326,39 @@ def _pivot_column(
         raise TransformationError(f"Pivoting exceeds the {MAX_COLUMNS}-column import limit.")
 
     grouped: dict[
-        tuple[str, ...],
-        dict[str, list[tuple[int, dict[str, str]]]],
+        tuple[tuple[Any, ...], ...],
+        dict[str, list[tuple[int, dict[str, Any]]]],
     ] = {}
+    key_values_by_key: dict[tuple[tuple[Any, ...], ...], tuple[Any, ...]] = {}
     for row_index, row in enumerate(candidate.rows, 1):
-        key = tuple(row[header] for header in key_headers)
+        key_values = tuple(row[header] for header in key_headers)
+        error_column = next(
+            (header for header, value in zip(key_headers, key_values) if is_cell_error(value)),
+            None,
+        )
+        if error_column is not None:
+            raise TransformationError(
+                f"Cannot pivot: row {row_index} of key column {error_column!r} contains an error."
+            )
+        key = tuple(cell_key(value) for value in key_values)
+        key_values_by_key.setdefault(key, key_values)
         group = grouped.setdefault(key, {})
-        group.setdefault(row[attribute_column], []).append((row_index, row))
+        group.setdefault(cell_to_text(row[attribute_column]), []).append((row_index, row))
     if len(grouped) > MAX_DATA_ROWS:
         raise TransformationError(f"Pivoting exceeds the {MAX_DATA_ROWS:,}-row import limit.")
     if len(grouped) * len(result_headers) > MAX_CELLS:
         raise TransformationError(f"Pivoting exceeds the {MAX_CELLS:,}-cell import limit.")
 
-    result_rows: list[dict[str, str]] = []
+    result_rows: list[dict[str, Any]] = []
     for key, cells in grouped.items():
-        result = {header: value for header, value in zip(key_headers, key)}
+        result = {
+            header: value
+            for header, value in zip(key_headers, key_values_by_key[key])
+        }
         for pivot_value in pivot_values:
             members = cells.get(pivot_value, [])
             if not members:
-                result[pivot_value] = ""
+                result[pivot_value] = None
             elif aggregation == "none":
                 if len(members) != 1:
                     raise TransformationError(
@@ -2173,10 +2367,11 @@ def _pivot_column(
                     )
                 result[pivot_value] = members[0][1][value_column]
             elif aggregation == "count_all":
-                result[pivot_value] = str(len(members))
+                result[pivot_value] = len(members)
             elif aggregation == "count_non_blank":
-                result[pivot_value] = str(
-                    sum(row[value_column] != "" for _, row in members)
+                result[pivot_value] = sum(
+                    row[value_column] is not None and row[value_column] != ""
+                    for _, row in members
                 )
             else:
                 result[pivot_value] = _aggregate_group(
@@ -2232,21 +2427,33 @@ def _add_conditional_column(
         )
 
     for row in candidate.rows:
-        result = else_value if else_kind == "value" else row[else_value]
+        result = (
+            else_value
+            if else_kind == "value"
+            else _conditional_output_text(row[else_value])
+        )
         for clause in clauses:
             left = row[clause["column"]]
             right = (
                 row[clause["test_value"]]
                 if clause["test_value_kind"] == "column"
+                else None
+                if clause["test_value_kind"] == "null"
                 else clause["test_value"]
             )
+            if is_cell_error(left) or is_cell_error(right):
+                result = left if is_cell_error(left) else right
+                break
             if _conditional_clause_matches(left, right, clause["operator"]):
                 result = (
-                    row[clause["output"]]
+                    _conditional_output_text(row[clause["output"]])
                     if clause["output_kind"] == "column"
                     else clause["output"]
                 )
                 break
+        if is_cell_error(result):
+            row[name] = result
+            continue
         row[name] = result
     return ImportCandidate(
         kind=candidate.kind,
@@ -2257,25 +2464,55 @@ def _add_conditional_column(
     )
 
 
-def _conditional_clause_matches(left: str, right: str, operator: str) -> bool:
+def _conditional_output_text(value: Any) -> Any:
+    """Return text at the conditional-column boundary without flattening Null or Error."""
+    if value is None or is_cell_error(value):
+        return value
+    try:
+        return cell_to_text(value)
+    except TypeError as exc:
+        raise TransformationError(str(exc)) from exc
+
+
+def _conditional_clause_matches(left: Any, right: Any, operator: str) -> bool:
+    if is_cell_error(left) or is_cell_error(right):
+        error = left if is_cell_error(left) else right
+        raise TransformationError(f"Conditional Column encountered a cell error: {error.message}")
+    if isinstance(left, bool) and isinstance(right, str):
+        boolean_literal = right.casefold()
+        if boolean_literal in {"true", "false"}:
+            right = boolean_literal == "true"
+    if operator in {"equals", "not_equals"}:
+        if left is None or right is None:
+            matched = left is None and right is None
+        elif isinstance(left, (int, float, Decimal)) and not isinstance(left, bool):
+            try:
+                matched = _parse_number(left) == _parse_number(right)
+            except TransformationError:
+                matched = left == right
+        else:
+            matched = left == right
+        return matched if operator == "equals" else not matched
+    if left is None or right is None:
+        return operator in {"does_not_contain", "does_not_begin_with", "does_not_end_with"}
     if operator == "equals":
         return left == right
     if operator == "not_equals":
         return left != right
     if operator in {"contains", "does_not_contain"}:
-        matched = right in left
+        matched = cell_to_text(right) in cell_to_text(left)
         return matched if operator == "contains" else not matched
     if operator in {"begins_with", "does_not_begin_with"}:
-        matched = left.startswith(right)
+        matched = cell_to_text(left).startswith(cell_to_text(right))
         return matched if operator == "begins_with" else not matched
     if operator in {"ends_with", "does_not_end_with"}:
-        matched = left.endswith(right)
+        matched = cell_to_text(left).endswith(cell_to_text(right))
         return matched if operator == "ends_with" else not matched
 
     try:
         left_number, right_number = _parse_number(left), _parse_number(right)
     except TransformationError:
-        left_value, right_value = left, right
+        left_value, right_value = cell_to_text(left), cell_to_text(right)
     else:
         left_value, right_value = left_number, right_number
     if operator == "greater_than":
@@ -2322,7 +2559,15 @@ def _add_custom_column(
         )
 
     total_output_bytes = 0
+    referenced = referenced_columns(formula)
     for row_index, row in enumerate(candidate.rows, 1):
+        propagated_error = next(
+            (row[column] for column in referenced if is_cell_error(row[column])),
+            None,
+        )
+        if propagated_error is not None:
+            row[name] = propagated_error
+            continue
         try:
             value = evaluate_expression(
                 formula, row, parameter_values, function_map
@@ -2342,7 +2587,9 @@ def _add_custom_column(
                 raise PowerQueryExpressionError(
                     "The custom-column output exceeds the 80 MiB total limit."
                 )
-            row[name] = result_text
+            row[name] = (
+                None if value is None else result_text
+            ) if output_type == "text" else value
         except PowerQueryExpressionError as exc:
             raise TransformationError(
                 f"Custom column {name!r}, row {row_index}: {exc}"
@@ -2369,25 +2616,44 @@ def _parameter_filter_text(value: Any) -> str:
 
 def _aggregate_group(
     aggregate: dict[str, str],
-    members: list[tuple[int, dict[str, str]]],
+    members: list[tuple[int, dict[str, Any]]],
     headers: list[str],
-) -> str:
+) -> Any:
     operation = aggregate["operation"]
     if operation == "count_rows":
-        return str(len(members))
+        return len(members)
+    if operation in {
+        "count_distinct_rows", "count_distinct_values", "sum", "average",
+        "median", "min", "max",
+    }:
+        checked_columns = headers if operation == "count_distinct_rows" else [aggregate["column"]]
+        first_error = next(
+            (
+                row[column]
+                for _, row in members
+                for column in checked_columns
+                if is_cell_error(row[column])
+            ),
+            None,
+        )
+        if first_error is not None:
+            return first_error
     if operation == "count_distinct_rows":
-        return str(len({tuple(row[header] for header in headers) for _, row in members}))
+        return len({
+            tuple(cell_key(row[header]) for header in headers)
+            for _, row in members
+        })
     column = aggregate["column"]
     if operation == "count_distinct_values":
-        return str(len({row[column] for _, row in members}))
+        return len({cell_key(row[column]) for _, row in members})
     if operation in {"sum", "average", "median"}:
         values = [
             _parse_row_number(row[column], row_index, column)
             for row_index, row in members
-            if row[column] != ""
+            if row[column] is not None and row[column] != ""
         ]
         if not values:
-            return ""
+            return None
         with localcontext() as context:
             context.prec = _aggregate_precision(values)
             context.Emax = MAX_EMAX
@@ -2408,12 +2674,15 @@ def _aggregate_group(
                 raise TransformationError(
                     "The numeric aggregation result exceeds the supported range."
                 ) from exc
-        return str(result)
+        return result
 
-    non_empty = [row[column] for _, row in members if row[column] != ""]
+    non_empty = [
+        row[column] for _, row in members
+        if row[column] is not None and row[column] != ""
+    ]
     if not non_empty:
-        return ""
-    numeric_values: list[tuple[str, Decimal]] = []
+        return None
+    numeric_values: list[tuple[Any, Decimal]] = []
     for value in non_empty:
         try:
             numeric_values.append((value, _parse_number(value)))
@@ -2425,8 +2694,8 @@ def _aggregate_group(
             numeric_values, key=lambda item: item[1]
         )
         return selected[0]
-    return min(non_empty, key=str.casefold) if operation == "min" else max(
-        non_empty, key=str.casefold
+    return min(non_empty, key=lambda value: cell_to_text(value).casefold()) if operation == "min" else max(
+        non_empty, key=lambda value: cell_to_text(value).casefold()
     )
 
 
@@ -2446,14 +2715,14 @@ def _aggregate_precision(values: list[Decimal]) -> int:
 
 def _remove_duplicates(
     headers: list[str],
-    rows: list[dict[str, str]],
+    rows: list[dict[str, Any]],
     columns: list[str] | None = None,
-) -> list[dict[str, str]]:
+) -> list[dict[str, Any]]:
     key_columns = _duplicate_key_columns(headers, columns)
-    seen: set[tuple[str, ...]] = set()
-    unique: list[dict[str, str]] = []
+    seen: set[tuple[tuple[Any, ...], ...]] = set()
+    unique: list[dict[str, Any]] = []
     for row in rows:
-        key = tuple(row[header] for header in key_columns)
+        key = tuple(cell_key(row[header]) for header in key_columns)
         if key not in seen:
             seen.add(key)
             unique.append(row)
@@ -2462,14 +2731,15 @@ def _remove_duplicates(
 
 def _keep_duplicates(
     headers: list[str],
-    rows: list[dict[str, str]],
+    rows: list[dict[str, Any]],
     columns: list[str],
-) -> list[dict[str, str]]:
+) -> list[dict[str, Any]]:
     key_columns = _duplicate_key_columns(headers, columns)
-    counts = Counter(tuple(row[column] for column in key_columns) for row in rows)
+    key_for_row = lambda row: tuple(cell_key(row[column]) for column in key_columns)
+    counts = Counter(key_for_row(row) for row in rows)
     return [
         row for row in rows
-        if counts[tuple(row[column] for column in key_columns)] > 1
+        if counts[key_for_row(row)] > 1
     ]
 
 
@@ -2505,8 +2775,14 @@ def _promote_headers(candidate: ImportCandidate) -> ImportCandidate:
         raise TransformationError(
             "Cannot use the first row as headers because the table has no data rows."
         )
+    first_row_values = [candidate.rows[0][header] for header in candidate.headers]
+    header_error = next((value for value in first_row_values if is_cell_error(value)), None)
+    if header_error is not None:
+        raise TransformationError(
+            f"Cannot promote headers because the first row contains an error: {header_error.message}"
+        )
     promoted = normalize_promoted_headers(
-        [candidate.rows[0][header] for header in candidate.headers],
+        [cell_to_text(value) for value in first_row_values],
         len(candidate.headers),
     )
     rows = [
@@ -2608,13 +2884,15 @@ def _fill_values(
     """Propagate adjacent non-empty values through selected columns."""
     for column in columns:
         _column_index(candidate.headers, column)
-        source_value = ""
+        source_value = None
+        has_source_value = False
         rows = candidate.rows if fill_down else reversed(candidate.rows)
         for row in rows:
             value = row[column]
-            if value:
+            if value is not None:
                 source_value = value
-            elif source_value:
+                has_source_value = True
+            elif has_source_value:
                 row[column] = source_value
     return candidate
 
@@ -2669,7 +2947,7 @@ def _add_index_column(
             )
 
     rows = [
-        {**row, new_name: str(start + row_index * increment)}
+        {**row, new_name: start + row_index * increment}
         for row_index, row in enumerate(candidate.rows)
     ]
     return ImportCandidate(
@@ -2712,8 +2990,15 @@ def _check_candidate_limits(headers: Any, rows: Any) -> None:
     for row_index, row in enumerate(rows, 1):
         if not isinstance(row, dict) or set(row) != expected:
             raise TransformationError(f"Import candidate row {row_index} does not match its columns.")
-        if any(not isinstance(value, str) for value in row.values()):
-            raise TransformationError(f"Import candidate row {row_index} contains a non-text value.")
+        invalid_value = next(
+            (value for value in row.values() if not is_supported_cell_value(value)),
+            None,
+        )
+        if any(not is_supported_cell_value(value) for value in row.values()):
+            raise TransformationError(
+                f"Import candidate row {row_index} contains an unsupported cell value "
+                f"of type {type(invalid_value).__name__}."
+            )
 
 
 def _column_index(headers: list[str], column: str) -> int:
@@ -2776,14 +3061,18 @@ def _filter_rows_advanced(
 
 
 def _filter_value_matches(
-    value: str,
+    value: Any,
     column: str,
     operator: str,
     expected: str | Decimal,
     row_index: int,
 ) -> bool:
+    if is_cell_error(value):
+        raise TransformationError(
+            f"Cannot evaluate row {row_index} of column {column!r}: {value.message}"
+        )
     if operator in _NUMERIC_FILTER_OPERATORS:
-        if value == "":
+        if value is None or value == "":
             return False
         number = _parse_row_number(value, row_index, column)
         if not isinstance(expected, Decimal):
@@ -2797,37 +3086,64 @@ def _filter_value_matches(
         if operator == "less_than_or_equal":
             return number <= expected
     elif operator == "equals":
-        return value == expected
+        return _filter_values_equal(value, expected)
     elif operator == "not_equals":
-        return value != expected
+        return not _filter_values_equal(value, expected)
+    elif operator == "is_null":
+        return value is None
+    elif operator == "is_not_null":
+        return value is not None
     elif operator == "is_blank":
-        return value == ""
+        return value is None or value == ""
     elif operator == "is_not_blank":
-        return value != ""
+        return value is not None and value != ""
     elif operator == "contains":
-        return expected in value
+        return str(expected) in cell_to_text(value)
     elif operator == "does_not_contain":
-        return expected not in value
+        return str(expected) not in cell_to_text(value)
     elif operator == "begins_with":
-        return value.startswith(expected)
+        return cell_to_text(value).startswith(str(expected))
     elif operator == "does_not_begin_with":
-        return not value.startswith(expected)
+        return not cell_to_text(value).startswith(str(expected))
     elif operator == "ends_with":
-        return value.endswith(expected)
+        return cell_to_text(value).endswith(str(expected))
     elif operator == "does_not_end_with":
-        return not value.endswith(expected)
+        return not cell_to_text(value).endswith(str(expected))
     raise TransformationError(f"Unsupported filter operator {operator!r}.")
 
 
+def _filter_values_equal(value: Any, expected: str | Decimal) -> bool:
+    if value is None:
+        return False
+    if is_cell_error(value):
+        return False
+    if isinstance(value, bool):
+        if not isinstance(expected, str) or expected.strip().casefold() not in {"true", "false"}:
+            return False
+        return value == (expected.strip().casefold() == "true")
+    if isinstance(value, (int, float, Decimal)):
+        try:
+            return _parse_number(value) == _parse_number(expected)
+        except TransformationError:
+            return False
+    if isinstance(value, (date, datetime, time)):
+        return cell_to_text(value) == expected
+    return value == expected
+
+
 def _sort_rows(
-    rows: list[dict[str, str]],
+    rows: list[dict[str, Any]],
     column: str,
     direction: str,
     *,
     case_sensitive: bool = False,
-) -> list[dict[str, str]]:
-    non_empty = [row for row in rows if row[column] != ""]
-    empty = [row for row in rows if row[column] == ""]
+) -> list[dict[str, Any]]:
+    non_empty = [
+        row for row in rows
+        if row[column] is not None and row[column] != "" and not is_cell_error(row[column])
+    ]
+    empty = [row for row in rows if row[column] is None or row[column] == ""]
+    errors = [row for row in rows if is_cell_error(row[column])]
     values = [row[column] for row in non_empty]
     numeric = True
     for value in values:
@@ -2839,9 +3155,20 @@ def _sort_rows(
     if numeric:
         ordered = sorted(non_empty, key=lambda row: _parse_number(row[column]), reverse=direction == "desc")
     else:
-        key = (lambda row: row[column]) if case_sensitive else (lambda row: row[column].casefold())
-        ordered = sorted(non_empty, key=key, reverse=direction == "desc")
-    return ordered + empty
+        key = (
+            (lambda row: cell_to_text(row[column]))
+            if case_sensitive
+            else (lambda row: cell_to_text(row[column]).casefold())
+        )
+        try:
+            ordered = sorted(non_empty, key=key, reverse=direction == "desc")
+        except TypeError:
+            ordered = sorted(
+                non_empty,
+                key=lambda row: cell_to_text(row[column]).casefold(),
+                reverse=direction == "desc",
+            )
+    return ordered + empty + errors
 
 
 def _sort_rows_by_columns(
@@ -2860,32 +3187,23 @@ def _sort_rows_by_columns(
     return ordered
 
 
-def _convert_column(rows: list[dict[str, str]], column: str, target_type: str) -> None:
+def _convert_column(rows: list[dict[str, Any]], column: str, target_type: str) -> None:
     target_type = canonical_column_type(target_type)
-    converted_values: list[str] = []
-    diagnostics: list[dict[str, Any]] = []
-    error_count = 0
+    converted_values: list[Any] = []
     for row_index, row in enumerate(rows, 1):
         value = row[column]
         try:
             converted_values.append(
                 _convert_value(value, target_type, row_index, column)
             )
-        except TransformationError:
-            error_count += 1
-            if len(diagnostics) < MAX_CONVERSION_DIAGNOSTICS:
-                diagnostics.append({
-                    "row": row_index,
-                    "column": column,
-                    "value": value,
-                    "target_type": target_type,
-                    "culture": None,
-                })
-            converted_values.append(value)
-    if error_count:
-        raise _conversion_diagnostics_error(
-            column, target_type, diagnostics, error_count
-        )
+        except TransformationError as exc:
+            converted_values.append(PowerQueryCellError(
+                reason="DataFormat.Error",
+                message=str(exc),
+                value=value,
+                target_type=target_type,
+                row=row_index,
+            ))
     for row, value in zip(rows, converted_values):
         row[column] = value
 
@@ -3000,13 +3318,11 @@ def _parse_locale_time(value: str, locale: Locale) -> time:
 
 
 def _convert_column_using_locale(
-    rows: list[dict[str, str]], column: str, target_type: str, culture: str
+    rows: list[dict[str, Any]], column: str, target_type: str, culture: str
 ) -> None:
     target_type = canonical_column_type(target_type)
     locale = Locale.parse(culture.replace("-", "_"))
-    converted_values: list[str] = []
-    diagnostics: list[dict[str, Any]] = []
-    error_count = 0
+    converted_values: list[Any] = []
     for row_index, row in enumerate(rows, 1):
         value = row[column]
         try:
@@ -3014,20 +3330,19 @@ def _convert_column_using_locale(
                 _convert_value_using_locale(value, target_type, locale)
             )
         except (DecimalException, IndexError, OverflowError, ValueError):
-            error_count += 1
-            if len(diagnostics) < MAX_CONVERSION_DIAGNOSTICS:
-                diagnostics.append({
-                    "row": row_index,
-                    "column": column,
-                    "value": value,
-                    "target_type": target_type,
-                    "culture": culture,
-                })
-            converted_values.append(value)
-    if error_count:
-        raise _conversion_diagnostics_error(
-            column, target_type, diagnostics, error_count, culture
-        )
+            converted_values.append(PowerQueryCellError(
+                reason="DataFormat.Error",
+                message=(
+                    f"Cannot convert value {_conversion_diagnostic_value(cell_to_text(value))} "
+                    f"in row {row_index} of column "
+                    f"{_conversion_diagnostic_value(column)} to {target_type} "
+                    f"using culture {culture}."
+                ),
+                value=value,
+                target_type=target_type,
+                culture=culture,
+                row=row_index,
+            ))
     for row, value in zip(rows, converted_values):
         row[column] = value
 
@@ -3048,38 +3363,42 @@ def _int64_number_text(number: Decimal) -> str:
     return str(int(rounded))
 
 
-def _convert_value_using_locale(value: str, target_type: str, locale: Locale) -> str:
-    if value == "":
+def _convert_value_using_locale(value: Any, target_type: str, locale: Locale) -> Any:
+    if is_cell_error(value) or value is None:
         return value
+    source = cell_to_text(value)
+    if source == "":
+        raise ValueError
     if target_type in {"whole_number", "decimal_number"}:
         number = parse_decimal(
-            value.strip(), locale=locale, strict=True, numbering_system="default"
+            source.strip(), locale=locale, strict=True, numbering_system="default"
         )
         if not number.is_finite():
             raise ValueError
         if target_type == "whole_number":
-            return _int64_number_text(number)
-        return _decimal_number_text(number)
+            return int(_int64_number_text(number))
+        return Decimal(_decimal_number_text(number))
     if target_type == "date":
-        stripped = value.strip()
+        stripped = source.strip()
         try:
-            return date.fromisoformat(stripped).isoformat()
+            return date.fromisoformat(stripped)
         except ValueError:
             try:
                 return datetime.fromisoformat(
                     stripped.replace("Z", "+00:00")
-                ).date().isoformat()
+                ).date()
             except ValueError:
-                return parse_date(stripped, locale=locale).isoformat()
+                parsed = parse_date(stripped, locale=locale)
+                return date(parsed.year, parsed.month, parsed.day)
     if target_type == "time":
         try:
-            return time.fromisoformat(value.strip()).isoformat()
+            return time.fromisoformat(source.strip())
         except ValueError:
-            return _parse_locale_time(value, locale).isoformat()
+            return _parse_locale_time(source, locale)
     if target_type == "datetime":
-        stripped = value.strip()
+        stripped = source.strip()
         try:
-            return datetime.fromisoformat(stripped.replace("Z", "+00:00")).isoformat()
+            return datetime.fromisoformat(stripped.replace("Z", "+00:00"))
         except ValueError:
             pass
         match = _locale_datetime_time_match(stripped, locale)
@@ -3089,17 +3408,22 @@ def _convert_value_using_locale(value: str, target_type: str, locale: Locale) ->
                 raise ValueError
             parsed_date = parse_date(date_text, locale=locale)
             parsed_time = _parse_locale_time(match.group(0).strip(), locale)
-            return datetime.combine(parsed_date, parsed_time).isoformat()
+            return datetime.combine(parsed_date, parsed_time)
         parsed_date = parse_date(stripped, locale=locale)
-        return datetime.combine(parsed_date, time.min).isoformat()
+        return datetime.combine(parsed_date, time.min)
     raise ValueError
 
 
-def count_conversion_errors(values: list[str], target_type: str) -> int:
+def count_conversion_errors(values: list[Any], target_type: str) -> int:
     """Count values that fail a model type without changing the supplied values."""
     target_type = canonical_column_type(target_type)
     errors = 0
     for row_index, value in enumerate(values, 1):
+        if is_cell_error(value):
+            errors += 1
+            continue
+        if value is None or value == "":
+            continue
         try:
             _convert_value(value, target_type, row_index, "column")
         except TransformationError:
@@ -3107,43 +3431,47 @@ def count_conversion_errors(values: list[str], target_type: str) -> int:
     return errors
 
 
-def _convert_value(value: str, target_type: str, row_index: int, column: str) -> str:
-    if value == "" or target_type == "text":
+def _convert_value(value: Any, target_type: str, row_index: int, column: str) -> Any:
+    if is_cell_error(value) or value is None:
         return value
+    if target_type == "text":
+        return cell_to_text(value)
+    source = cell_to_text(value)
     try:
         if target_type == "decimal_number":
-            return _decimal_number_text(_parse_number(value))
+            return Decimal(_decimal_number_text(_parse_number(source)))
         if target_type == "whole_number":
-            return _int64_number_text(_parse_number(value))
+            return int(_int64_number_text(_parse_number(source)))
         if target_type == "boolean":
-            lowered = value.strip().casefold()
+            lowered = source.strip().casefold()
             if lowered not in {"true", "false"}:
                 raise ValueError
-            return lowered
+            return lowered == "true"
         if target_type == "date":
-            stripped = value.strip()
+            stripped = source.strip()
             try:
-                return date.fromisoformat(stripped).isoformat()
+                return date.fromisoformat(stripped)
             except ValueError:
                 pass
             try:
                 return datetime.fromisoformat(
                     stripped.replace("Z", "+00:00")
-                ).date().isoformat()
+                ).date()
             except ValueError:
                 raise ValueError
         if target_type == "datetime":
-            return datetime.fromisoformat(value.strip().replace("Z", "+00:00")).isoformat()
+            return datetime.fromisoformat(source.strip().replace("Z", "+00:00"))
         if target_type == "time":
-            return time.fromisoformat(value.strip()).isoformat()
+            return time.fromisoformat(source.strip())
         raise ValueError
     except (TransformationError, ValueError, OverflowError) as exc:
         raise TransformationError(
-            f"Cannot convert value {value!r} in row {row_index} of column {column!r} to {target_type}."
+            f"Cannot convert value {_conversion_diagnostic_value(source)} in row {row_index} "
+            f"of column {_conversion_diagnostic_value(column)} to {target_type}."
         ) from exc
 
 
-def _parse_row_number(value: str, row_index: int, column: str) -> Decimal:
+def _parse_row_number(value: Any, row_index: int, column: str) -> Decimal:
     try:
         return _parse_number(value)
     except TransformationError as exc:
@@ -3152,9 +3480,20 @@ def _parse_row_number(value: str, row_index: int, column: str) -> Decimal:
         ) from exc
 
 
-def _parse_number(value: str) -> Decimal:
+def _parse_number(value: Any) -> Decimal:
+    if isinstance(value, bool):
+        raise TransformationError("A boolean value is not a numeric cell.")
     try:
-        number = Decimal(value.strip())
+        if isinstance(value, Decimal):
+            number = value
+        elif isinstance(value, int):
+            number = Decimal(value)
+        elif isinstance(value, float):
+            number = Decimal(str(value))
+        elif isinstance(value, str):
+            number = Decimal(value.strip())
+        else:
+            raise ValueError
     except (DecimalException, ValueError):
         raise TransformationError("Expected a finite number.") from None
     if not number.is_finite():

@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import os
+from decimal import Decimal
 from pathlib import Path
 import tempfile
 import unittest
@@ -85,7 +86,7 @@ class CalculatedColumnLifecycleTests(unittest.TestCase):
 
         self.assertTrue(self.save_dialog(controller, "Line total", "[Quantity] * [Unit price]"))
         self.assertEqual(controller._headers, ["Quantity", "Unit price", "Line total"])
-        self.assertEqual([row["Line total"] for row in controller._rows], ["25.0", "24"])
+        self.assertEqual([row["Line total"] for row in controller._rows], [Decimal("25.0"), Decimal("24")])
         model_table = controller._model_table_for_source(
             controller._project, controller.activeTableId
         )
@@ -97,7 +98,7 @@ class CalculatedColumnLifecycleTests(unittest.TestCase):
         self.assertTrue(controller._save_to(project_path))
         reopened = self.controller("reopened.ini")
         self.assertTrue(reopened.open_project_path(project_path))
-        self.assertEqual([row["Line total"] for row in reopened._rows], ["25.0", "24"])
+        self.assertEqual([row["Line total"] for row in reopened._rows], [Decimal("25.0"), Decimal("24")])
 
         self.assertTrue(self.save_dialog(
             reopened,
@@ -105,13 +106,13 @@ class CalculatedColumnLifecycleTests(unittest.TestCase):
             "[Quantity] * [Unit price] + 1",
             selected_name="Line total",
         ))
-        self.assertEqual([row["Line total"] for row in reopened._rows], ["26.0", "25"])
+        self.assertEqual([row["Line total"] for row in reopened._rows], [Decimal("26.0"), Decimal("25")])
 
         self.source_path.write_text(
             "Quantity,Unit price\n4,10\n1,2\n", encoding="utf-8"
         )
         reopened.refresh_source()
-        self.assertEqual([row["Line total"] for row in reopened._rows], ["41", "3"])
+        self.assertEqual([row["Line total"] for row in reopened._rows], [Decimal("41"), Decimal("3")])
 
         self.assertTrue(self.save_dialog(
             reopened,

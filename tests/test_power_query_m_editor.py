@@ -5,6 +5,8 @@ from __future__ import annotations
 import os
 import unittest
 from copy import deepcopy
+from datetime import date, datetime, time
+from decimal import Decimal
 from unittest.mock import patch
 
 os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
@@ -20,6 +22,7 @@ from PySide6.QtWidgets import (
 )
 
 from analytics_studio.file_import import MAX_DATA_ROWS, ImportCandidate
+from analytics_studio.power_query_values import PowerQueryCellError, is_cell_error
 from analytics_studio.power_query_expression import compile_expression, evaluate_expression
 from analytics_studio.power_query_m import (
     PowerQueryMEditorDialog,
@@ -299,7 +302,7 @@ in
 
         self.assertEqual(result.headers, ["Region", "Revenue", "Customer", "Net"])
         self.assertEqual(result.rows, [
-            {"Region": "East", "Revenue": "12", "Customer": "Ada", "Net": "10.8"},
+            {"Region": "East", "Revenue": Decimal("12"), "Customer": "Ada", "Net": "10.8"},
         ])
 
     def test_advanced_filter_m_round_trip_keeps_and_before_or(self) -> None:
@@ -362,6 +365,56 @@ in
         self.assertEqual(
             apply_transformations(self.source, parsed),
             apply_transformations(self.source, [step]),
+        )
+
+    def test_null_and_blank_filters_round_trip_with_distinct_semantics(self) -> None:
+        source = ImportCandidate("inline", ["Value"], [
+            {"Value": None}, {"Value": ""}, {"Value": "x"},
+        ], {}, [])
+        expected_values = {
+            "is_null": [None],
+            "is_not_null": ["", "x"],
+            "is_blank": [None, ""],
+            "is_not_blank": ["x"],
+        }
+
+        for operator, values in expected_values.items():
+            with self.subTest(operator=operator):
+                step = {
+                    "op": "filter_rows", "column": "Value",
+                    "operator": operator, "value": "",
+                }
+                script = steps_to_m_script([step], "Values")
+                parsed = parse_m_script(script, "Values")
+
+                self.assertEqual(m_compatibility_issues([step]), [])
+                self.assertEqual(parsed, [step])
+                self.assertEqual(
+                    [row["Value"] for row in apply_transformations(source, parsed).rows],
+                    values,
+                )
+
+    def test_conditional_null_comparison_round_trips_separately_from_empty_text(self) -> None:
+        source = ImportCandidate("inline", ["Value"], [
+            {"Value": None}, {"Value": ""}, {"Value": "x"},
+        ], {}, [])
+        step = {
+            "op": "conditional_column", "name": "Null match",
+            "clauses": [{
+                "column": "Value", "operator": "equals", "test_value": "",
+                "test_value_kind": "null", "output": "yes", "output_kind": "value",
+            }],
+            "else_value": "no", "else_kind": "value",
+        }
+        script = steps_to_m_script([step], "Values")
+        parsed = parse_m_script(script, "Values")
+
+        self.assertIn('[#"Value"] = null', script)
+        self.assertEqual(m_compatibility_issues([step]), [])
+        self.assertEqual(parsed, [step])
+        self.assertEqual(
+            [row["Null match"] for row in apply_transformations(source, parsed).rows],
+            ["yes", "no", "no"],
         )
 
     def test_advanced_filter_m_rejects_grouping_outside_local_and_or_model(self) -> None:
@@ -477,6 +530,28 @@ in
         with self.assertRaisesRegex(PowerQueryMScriptError, "explicit numeric type conversion"):
             parse_m_script(script, "Sales Data")
 
+    def test_boolean_conditional_m_equality_round_trips(self) -> None:
+        source = ImportCandidate(
+            "inline", ["Flag"],
+            [{"Flag": True}, {"Flag": False}], {}, [],
+        )
+        script = '''let
+    Source = #"Flags",
+    Typed = Table.TransformColumnTypes(Source, {{"Flag", type logical}}),
+    Added = Table.AddColumn(Typed, "Label", each if [Flag] = true then "yes" else "no", type text)
+in
+    Added'''
+
+        steps = parse_m_script(script, "Flags")
+        generated = steps_to_m_script(steps, "Flags")
+
+        self.assertEqual(m_compatibility_issues(steps), [])
+        self.assertEqual(parse_m_script(generated, "Flags"), steps)
+        self.assertEqual(
+            [row["Label"] for row in apply_transformations(source, steps).rows],
+            ["yes", "no"],
+        )
+
     def test_conditional_column_all_text_predicates_round_trip(self) -> None:
         source = ImportCandidate(
             "inline", ["Customer"],
@@ -544,9 +619,17 @@ in
                     apply_transformations(source, [step]),
                 )
 
-    def test_conditional_numeric_equality_is_rejected(self) -> None:
+    def test_conditional_numeric_equality_round_trips(self) -> None:
+        source = ImportCandidate(
+            "inline", ["Revenue", "Region"],
+            [
+                {"Revenue": "12.0", "Region": "12"},
+                {"Revenue": "13", "Region": "14"},
+                {"Revenue": None, "Region": "12"},
+            ], {}, [],
+        )
         for operator, m_operator in (("equals", "="), ("not_equals", "<>")):
-            for test_kind, right in (("value", "12.0"), ("column", "Region")):
+            for test_kind, right in (("value", "12"), ("column", "Region")):
                 with self.subTest(operator=operator, test_kind=test_kind):
                     step = {
                         "op": "conditional_column", "name": "Matched",
@@ -562,7 +645,7 @@ in
                         {"op": "convert_type", "column": "Region", "type": "decimal_number"},
                         step,
                     ]
-                    comparison = f"[{right}]" if test_kind == "column" else "12.0"
+                    comparison = f"[{right}]" if test_kind == "column" else "12"
                     script = f'''let
     Source = #"Sales Data",
     Typed = Table.TransformColumnTypes(Source, {{{{"Revenue", type number}}, {{"Region", type number}}}}),
@@ -570,13 +653,22 @@ in
 in
     Added'''
 
-                    with self.assertRaisesRegex(PowerQueryMScriptError, "Numeric conditional equality"):
-                        steps_to_m_script(steps, "Sales Data")
-                    self.assertEqual(len(m_compatibility_issues(steps)), 1)
-                    with self.assertRaisesRegex(PowerQueryMScriptError, "Numeric conditional equality"):
-                        parse_m_script(script, "Sales Data")
+                    self.assertEqual(m_compatibility_issues(steps), [])
+                    self.assertEqual(parse_m_script(script, "Sales Data"), steps)
+                    self.assertEqual(
+                        parse_m_script(steps_to_m_script(steps, "Sales Data"), "Sales Data"),
+                        steps,
+                    )
+                    actual = apply_transformations(source, steps)
+                    self.assertEqual(actual, apply_transformations(source, parse_m_script(script, "Sales Data")))
+                    expected = (
+                        ["yes", "no", "no"]
+                        if operator == "equals"
+                        else ["no", "yes", "yes"]
+                    )
+                    self.assertEqual([row["Matched"] for row in actual.rows], expected)
 
-    def test_ambiguous_text_conditional_comparisons_are_rejected(self) -> None:
+    def test_conditional_text_equality_supports_empty_and_column_values(self) -> None:
         scripts = (
             '''let
     Source = #"Sales Data",
@@ -605,13 +697,13 @@ in
     Added''',
         )
 
-        for script in scripts:
+        for script_index, script in enumerate(scripts):
             with self.subTest(script=script):
-                with self.assertRaisesRegex(
-                    PowerQueryMScriptError,
-                    "(conflates null and empty text|does not preserve nulls|same cell value|supported null guard)",
-                ):
-                    parse_m_script(script, "Sales Data")
+                if script_index < 2:
+                    self.assertEqual(len(parse_m_script(script, "Sales Data")), 1)
+                else:
+                    with self.assertRaises(PowerQueryMScriptError):
+                        parse_m_script(script, "Sales Data")
 
         ambiguous_steps = (
             {
@@ -633,10 +725,34 @@ in
                 "else_value": "no", "else_kind": "value",
             },
         )
-        for step in ambiguous_steps:
-            with self.subTest(step=step):
-                with self.assertRaisesRegex(PowerQueryMScriptError, "(conflates null and empty text|does not preserve nulls)"):
-                    steps_to_m_script([step], "Sales Data")
+        self.assertEqual(m_compatibility_issues([ambiguous_steps[0]]), [])
+        self.assertEqual(
+            parse_m_script(steps_to_m_script([ambiguous_steps[0]], "Sales Data"), "Sales Data"),
+            [ambiguous_steps[0]],
+        )
+        with self.assertRaisesRegex(PowerQueryMScriptError, "literal text search value"):
+            steps_to_m_script([ambiguous_steps[1]], "Sales Data")
+
+        source = ImportCandidate(
+            "inline", ["Customer", "Region"],
+            [
+                {"Customer": None, "Region": ""},
+                {"Customer": "", "Region": ""},
+                {"Customer": "East", "Region": "East"},
+                {"Customer": "West", "Region": "East"},
+            ], {}, [],
+        )
+        for step, expected in zip(
+            ambiguous_steps[:1] + ({**ambiguous_steps[0], "name": "Matched", "clauses": [{
+                **ambiguous_steps[0]["clauses"][0], "test_value": "Region", "test_value_kind": "column",
+            }]},),
+            (["no", "yes", "no", "no"], ["no", "yes", "yes", "no"]),
+        ):
+            script = steps_to_m_script([step], "Sales Data")
+            parsed = parse_m_script(script, "Sales Data")
+            result = apply_transformations(source, parsed)
+            self.assertEqual(result, apply_transformations(source, [step]))
+            self.assertEqual([row[step["name"]] for row in result.rows], expected)
 
     def test_locale_type_conversion_round_trips_and_replays_from_m(self) -> None:
         source = ImportCandidate(
@@ -691,12 +807,14 @@ in
         self.assertEqual(direct.rows, replayed.rows)
         self.assertEqual(direct.rows, [
             {
-                "Amount": "1234.50", "Units": "2000", "Date": "2024-12-31",
-                "Stamp": "2024-12-31T13:45:00", "Clock": "13:45:30",
+                "Amount": Decimal("1234.50"), "Units": 2000,
+                "Date": date(2024, 12, 31),
+                "Stamp": datetime(2024, 12, 31, 13, 45), "Clock": time(13, 45, 30),
             },
             {
-                "Amount": "2500.25", "Units": "3000", "Date": "2025-01-01",
-                "Stamp": "2025-01-01T00:00:00", "Clock": "14:15:00",
+                "Amount": Decimal("2500.25"), "Units": 3000,
+                "Date": date(2025, 1, 1),
+                "Stamp": datetime(2025, 1, 1, 0, 0), "Clock": time(14, 15),
             },
         ])
         self.assertEqual(
@@ -750,9 +868,9 @@ in
             [{"op": "convert_type", "column": "Units", "type": "whole_number"}],
         ])
         for raw, expected in (
-            ("2.5", "2"), ("3.5", "4"), ("-2.5", "-2"),
-            ("9223372036854775807", "9223372036854775807"),
-            ("-9223372036854775808", "-9223372036854775808"),
+            ("2.5", 2), ("3.5", 4), ("-2.5", -2),
+            ("9223372036854775807", 9223372036854775807),
+            ("-9223372036854775808", -9223372036854775808),
         ):
             with self.subTest(raw=raw):
                 for steps in step_sets:
@@ -764,8 +882,9 @@ in
             with self.subTest(raw=raw):
                 for steps in step_sets:
                     source = ImportCandidate("inline", ["Units"], [{"Units": raw}], {}, [])
-                    with self.assertRaisesRegex(TransformationError, "to whole_number"):
-                        apply_transformations(source, steps)
+                    result = apply_transformations(source, steps)
+                    self.assertIsInstance(result.rows[0]["Units"], PowerQueryCellError)
+                    self.assertIn("to whole_number", result.rows[0]["Units"].message)
 
     def test_m_decimal_conversion_observes_double_overflow_and_underflow(self) -> None:
         scripts = [
@@ -791,10 +910,11 @@ in
             for raw in ("1E309", "-1E309"):
                 source = ImportCandidate("inline", ["Amount"], [{"Amount": raw}], {}, [])
                 with self.subTest(steps=steps, raw=raw):
-                    with self.assertRaisesRegex(TransformationError, "to decimal_number"):
-                        apply_transformations(source, steps)
+                    result = apply_transformations(source, steps)
+                    self.assertIsInstance(result.rows[0]["Amount"], PowerQueryCellError)
+                    self.assertIn("to decimal_number", result.rows[0]["Amount"].message)
 
-            for raw, expected in (("1E-400", "0"), ("-1E-400", "-0")):
+            for raw, expected in (("1E-400", Decimal("0")), ("-1E-400", Decimal("-0"))):
                 source = ImportCandidate("inline", ["Amount"], [{"Amount": raw}], {}, [])
                 with self.subTest(steps=steps, raw=raw):
                     result = apply_transformations(source, steps)
@@ -817,8 +937,29 @@ in
         self.assertEqual(direct.rows, replayed.rows)
         self.assertEqual(
             column_types_after_steps(self.source.headers, steps),
-            column_types_after_steps(self.source.headers, parsed),
+            column_types_after_steps(self.source.headers, parse_m_script(
+                steps_to_m_script(steps, "Sales Data"), "Sales Data"
+            )),
         )
+
+    def test_remove_rows_with_errors_round_trips_selected_columns(self) -> None:
+        error = PowerQueryCellError(
+            "DataFormat.Error", "bad value", "bad", "number", row=1
+        )
+        source = ImportCandidate("inline", ["A", "B"], [
+            {"A": error, "B": "keep"},
+            {"A": "keep", "B": error},
+            {"A": "clean", "B": "clean"},
+        ], {}, [])
+        step = {"op": "remove_rows_with_errors", "columns": ["A"]}
+        script = steps_to_m_script([step], "Errors")
+        parsed = parse_m_script(script, "Errors")
+
+        self.assertIn('Table.RemoveRowsWithErrors(Source, {"A"})', script)
+        self.assertEqual(parsed, [step])
+        self.assertEqual(apply_transformations(source, parsed).rows, [
+            source.rows[1], source.rows[2],
+        ])
 
     def test_value_dependent_operations_after_transpose_are_rejected(self) -> None:
         unsupported_operations = [
@@ -836,7 +977,7 @@ in
     {output}'''
             with self.subTest(operation=operation):
                 with self.assertRaisesRegex(
-                    PowerQueryMScriptError, "distinguish null from empty text"
+                    PowerQueryMScriptError, "generated columns"
                 ):
                     parse_m_script(script, "Sales Data")
 
@@ -848,7 +989,7 @@ in
     Typed'''
         with self.subTest(operation="explicit type conversion"):
             with self.assertRaisesRegex(
-                PowerQueryMScriptError, "distinguish null from empty text"
+                PowerQueryMScriptError, "generated columns"
             ):
                 parse_m_script(explicit_type_conversion, "Sales Data")
 
@@ -1078,7 +1219,7 @@ in
         self.assertEqual(null_steps[-1]["expression"], "null")
         self.assertEqual(
             [row["Calc"] for row in apply_transformations(self.source, null_steps).rows],
-            ["", ""],
+            [None, None],
         )
 
     def test_custom_column_text_clean_round_trips_control_characters_and_null(self) -> None:
@@ -1205,14 +1346,16 @@ in
             through_m.rows,
             [
                 {
-                    "Region": "East", "Total": "44", "Average": "14.66666666666666666666666667",
-                    "Median": "12", "Minimum": "12", "Maximum": "20", "Rows": "3",
-                    "Unique rows": "2", "Customers": "2",
+                    "Region": "East", "Total": Decimal("44"),
+                    "Average": Decimal("14.66666666666666666666666667"),
+                    "Median": Decimal("12"), "Minimum": "12", "Maximum": "20",
+                    "Rows": 3, "Unique rows": 2, "Customers": 2,
                 },
                 {
-                    "Region": "West", "Total": "5", "Average": "5", "Median": "5",
-                    "Minimum": "5", "Maximum": "5", "Rows": "1", "Unique rows": "1",
-                    "Customers": "1",
+                    "Region": "West", "Total": Decimal("5"),
+                    "Average": Decimal("5"), "Median": Decimal("5"),
+                    "Minimum": "5", "Maximum": "5", "Rows": 1, "Unique rows": 1,
+                    "Customers": 1,
                 },
             ],
         )
@@ -1372,10 +1515,10 @@ in
         self.assertEqual(
             direct.rows,
             [
-                {"Region": "A", "2024": "3", "2025": "0"},
-                {"Region": "B", "2024": "0", "2025": "2"},
-                {"Region": "C", "2024": "", "2025": "1"},
-                {"Region": "D", "2024": "1", "2025": ""},
+                {"Region": "A", "2024": 3, "2025": 0},
+                {"Region": "B", "2024": 0, "2025": 2},
+                {"Region": "C", "2024": None, "2025": 1},
+                {"Region": "D", "2024": 1, "2025": None},
             ],
         )
         self.assertEqual(
@@ -1622,7 +1765,7 @@ in
         )
         script = steps_to_m_script([step], "Sales Data")
         self.assertIn(
-            'if _ = null or _ = "" then "" else Text.BeforeDelimiter(_, "||", 1)',
+            'if _ = null then null else if _ = "" then "" else Text.BeforeDelimiter(_, "||", 1)',
             script,
         )
         result = apply_transformations(source, parse_m_script(script, "Sales Data"))
@@ -1639,10 +1782,10 @@ in
     Extracted'''
         relative_from_end = '''let
     Source = #"Sales Data",
-    Extracted = Table.TransformColumns(Source, {{"Code", each if _ = null or _ = "" then "" else Text.BeforeDelimiter(_, "||", {1, RelativePosition.FromEnd}), type text}})
+    Extracted = Table.TransformColumns(Source, {{"Code", each if _ = null then null else if _ = "" then "" else Text.BeforeDelimiter(_, "||", {1, RelativePosition.FromEnd}), type text}})
 in
     Extracted'''
-        with self.assertRaisesRegex(PowerQueryMScriptError, "normalize null and empty"):
+        with self.assertRaisesRegex(PowerQueryMScriptError, "preserve null"):
             parse_m_script(unguarded, "Sales Data")
         with self.assertRaisesRegex(PowerQueryMScriptError, "whole-number argument"):
             parse_m_script(relative_from_end, "Sales Data")
@@ -1684,7 +1827,7 @@ in
                 self.assertEqual(m_compatibility_issues([step]), [])
                 if step["op"] == "split_column_to_rows":
                     self.assertIn(
-                        'Text.Split(if _ = null then "" else _, ":")',
+                        'if _ = null then {null} else if _ = "" then {""} else Text.Split(_, ":")',
                         script,
                     )
                 elif step["op"] == "split_column_by_each_delimiter":
@@ -1749,6 +1892,21 @@ in
             )),
             apply_transformations(source, composed),
         )
+
+    def test_split_to_rows_preserves_null_and_empty_text(self) -> None:
+        source = ImportCandidate("inline", ["Code"], [
+            {"Code": None},
+            {"Code": ""},
+            {"Code": "a:b"},
+        ], {}, [])
+        step = {"op": "split_column_to_rows", "column": "Code", "delimiter": ":"}
+        script = steps_to_m_script([step], "Split")
+        parsed = parse_m_script(script, "Split")
+        result = apply_transformations(source, parsed)
+
+        self.assertIn('if _ = null then {null} else if _ = "" then {""}', script)
+        self.assertEqual(parsed, [step])
+        self.assertEqual([row["Code"] for row in result.rows], [None, "", "a", "b"])
 
     def test_m_positional_split_rejects_unsupported_positions_and_column_names(self) -> None:
         wrong_names = (
@@ -1957,7 +2115,7 @@ in
     Source = #"Sales Data",
     Extracted = Table.TransformColumns(
         Source,
-        {{"Code", each if _ = null or _ = "" then "" else Text.BeforeDelimiter(_, "#(lf)", 0), type text}}
+        {{"Code", each if _ = null then null else if _ = "" then "" else Text.BeforeDelimiter(_, "#(lf)", 0), type text}}
     )
 in
     Extracted'''
@@ -2233,6 +2391,17 @@ in
                 self.source,
                 {"op": "transpose_table"},
             ),
+            (
+                ImportCandidate(
+                    "inline", ["Value"], [
+                        {"Value": PowerQueryCellError(
+                            "DataFormat.Error", "bad value", "bad", "number", row=1
+                        )},
+                        {"Value": "ok"},
+                    ], {}, [],
+                ),
+                {"op": "remove_rows_with_errors"},
+            ),
         ]
 
         operation_dialog = TransformDataDialog(self.source, query_name="Sales Data")
@@ -2244,7 +2413,7 @@ in
         covered_operations = {step["op"] for step in cases} | {
             step["op"] for _source, step in additional_cases
         }
-        self.assertEqual(len(exposed_operations), 46)
+        self.assertEqual(len(exposed_operations), 47)
         self.assertEqual(covered_operations, exposed_operations)
 
         for step in cases:
@@ -2575,7 +2744,7 @@ in
 
         self.assertEqual(dialog.quality_table.item(0, 1).text(), "95.2% (100)")
         self.assertEqual(dialog.quality_table.item(0, 2).text(), "4.8% (5)")
-        self.assertEqual(dialog.quality_table.item(0, 3).text(), "Not tracked")
+        self.assertEqual(dialog.quality_table.item(0, 3).text(), "0.0% (0)")
         self.assertEqual(dialog.profile_table.item(0, 2).text(), "1")
         self.assertEqual(dialog.profile_table.item(0, 3).text(), "0")
         self.assertEqual(dialog.profile_table.item(0, 4).text(), "A (100)")
@@ -2599,7 +2768,7 @@ in
         self.assertEqual(dialog.profile_table.item(0, 3).text(), "1")
         dialog.deleteLater()
 
-    def test_failed_type_preview_shows_all_conversion_row_diagnostics(self) -> None:
+    def test_type_preview_keeps_cell_errors_and_remove_errors_clears_rows(self) -> None:
         source = ImportCandidate(
             "inline",
             ["Amount"],
@@ -2621,10 +2790,21 @@ in
 
         dialog._add_step()
 
-        self.assertEqual(dialog._steps, [])
-        self.assertIn("2 conversion errors total", dialog.error_label.text())
-        self.assertIn("row 2", dialog.error_label.text())
-        self.assertIn("row 4 value 'also bad'", dialog.error_label.text())
+        self.assertEqual(dialog._steps, [{
+            "op": "convert_type", "column": "Amount", "type": "whole_number",
+        }])
+        self.assertTrue(is_cell_error(dialog._preview_candidate.rows[1]["Amount"]))
+        self.assertEqual(dialog._preview_candidate.rows[1]["Amount"].row, 2)
+        self.assertIn("row 2", dialog._preview_candidate.rows[1]["Amount"].message)
+        self.assertEqual(dialog.quality_table.item(0, 3).text(), "50.0% (2)")
+
+        dialog.operation_combo.setCurrentIndex(
+            dialog.operation_combo.findData("remove_rows_with_errors")
+        )
+        dialog._add_step()
+        self.assertEqual(dialog._preview_candidate.rows, [
+            {"Amount": 10}, {"Amount": 20},
+        ])
         dialog.deleteLater()
 
     def test_query_navigator_keeps_steps_and_preview_per_query(self) -> None:
@@ -2921,7 +3101,7 @@ in
         self.assertEqual(m_compatibility_issues(steps), [])
         self.assertIn("Comparer.Ordinal", script)
         self.assertIn("Table.Sort", script)
-        self.assertIn('then "0:"', script)
+        self.assertIn('then "N:"', script)
         self.assertEqual(replayed, direct)
         self.assertEqual([row["Row"] for row in replayed.rows], [
             "first", "second", "blank-copy", "blank-copy",
@@ -2959,6 +3139,27 @@ in
         with self.assertRaisesRegex(PowerQueryMScriptError, "requires 'Key' to remain text-typed"):
             steps_to_m_script(numeric_key, "Sales Data")
         self.assertEqual(m_compatibility_issues(numeric_key)[0]["step"], 2)
+
+    def test_keep_duplicates_m_distinguishes_null_and_empty_text_keys(self) -> None:
+        source = ImportCandidate(
+            "inline", ["Key", "Row"],
+            [
+                {"Key": None, "Row": "null-1"},
+                {"Key": None, "Row": "null-2"},
+                {"Key": "", "Row": "empty-1"},
+                {"Key": "", "Row": "empty-2"},
+                {"Key": "x", "Row": "single"},
+            ], {}, [],
+        )
+        steps = [{"op": "keep_duplicates", "columns": ["Key"]}]
+
+        script = steps_to_m_script(steps, "Keys")
+        result = apply_transformations(source, parse_m_script(script, "Keys"))
+
+        self.assertIn('then "N:" else "T"', script)
+        self.assertEqual([row["Row"] for row in result.rows], [
+            "null-1", "null-2", "empty-1", "empty-2",
+        ])
 
     def test_keep_duplicates_m_rejects_noncanonical_comparer_edits(self) -> None:
         script = steps_to_m_script(

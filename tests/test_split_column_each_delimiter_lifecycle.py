@@ -69,9 +69,9 @@ class SplitColumnEachDelimiterLifecycleTests(unittest.TestCase):
         dialog._add_step()
         headers = ["Code.1", "Code.2", "Code.3", "Code.4", "Amount"]
         expected_rows = [
-            {"Code.1": "A", "Code.2": "", "Code.3": "C", "Code.4": "", "Amount": "10"},
-            {"Code.1": "x", "Code.2": "y", "Code.3": "", "Code.4": "", "Amount": "20"},
-            {"Code.1": "", "Code.2": "z", "Code.3": "", "Code.4": "", "Amount": "30"},
+            {"Code.1": "A", "Code.2": "", "Code.3": "C", "Code.4": "", "Amount": 10},
+            {"Code.1": "x", "Code.2": "y", "Code.3": "", "Code.4": "", "Amount": 20},
+            {"Code.1": "", "Code.2": "z", "Code.3": "", "Code.4": "", "Amount": 30},
         ]
         self.assertEqual(dialog._preview_candidate.headers, headers)
         self.assertEqual(dialog._preview_candidate.rows, expected_rows)
@@ -100,8 +100,8 @@ class SplitColumnEachDelimiterLifecycleTests(unittest.TestCase):
         self.assertTrue(reopened.open_project_path(project_path))
         self.assertEqual(reopened._headers, ["Code.1", "Code.2", "Amount"])
         self.assertEqual(reopened._rows, [
-            {"Code.1": "M", "Code.2": "N", "Amount": "40"},
-            {"Code.1": "", "Code.2": "", "Amount": "50"},
+            {"Code.1": "M", "Code.2": "N", "Amount": 40},
+            {"Code.1": "", "Code.2": "", "Amount": 50},
         ])
 
         self.source_path.write_text(
@@ -110,7 +110,7 @@ class SplitColumnEachDelimiterLifecycleTests(unittest.TestCase):
         reopened.refresh_source()
         self.assertEqual(reopened._headers, ["Code.1", "Code.2", "Code.3", "Amount"])
         self.assertEqual(reopened._rows, [
-            {"Code.1": "P", "Code.2": "Q", "Code.3": "R", "Amount": "60"},
+            {"Code.1": "P", "Code.2": "Q", "Code.3": "R", "Amount": 60},
         ])
 
     def test_split_each_delimiter_requires_a_delimiter(self) -> None:

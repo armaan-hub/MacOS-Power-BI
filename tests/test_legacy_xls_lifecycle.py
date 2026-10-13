@@ -8,6 +8,8 @@ import shutil
 import tempfile
 import time
 import unittest
+from datetime import date
+from decimal import Decimal
 
 os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
 
@@ -73,12 +75,12 @@ class LegacyXlsLifecycleTests(unittest.TestCase):
         self.assertEqual(candidate.options, {"sheet_name": "Data", "header_row": 3})
         self.assertEqual(candidate.rows, [
             {
-                "Name": "Ada", "Order Date": "2024-01-01",
-                "Amount": "12.5", "Amount x 2": "25",
+                "Name": "Ada", "Order Date": date(2024, 1, 1),
+                "Amount": Decimal("12.5"), "Amount x 2": 25,
             },
             {
-                "Name": "Bob", "Order Date": "2024-01-02",
-                "Amount": "5", "Amount x 2": "10",
+                "Name": "Bob", "Order Date": date(2024, 1, 2),
+                "Amount": 5, "Amount x 2": 10,
             },
         ])
 
@@ -99,12 +101,12 @@ class LegacyXlsLifecycleTests(unittest.TestCase):
         reopened.refresh_source()
         self.assertEqual(reopened._rows, [
             {
-                "Name": "Ada", "Order Date": "2024-01-01",
-                "Amount": "15", "Amount x 2": "30",
+                "Name": "Ada", "Order Date": date(2024, 1, 1),
+                "Amount": 15, "Amount x 2": 30,
             },
             {
-                "Name": "Bob", "Order Date": "2024-01-02",
-                "Amount": "6", "Amount x 2": "12",
+                "Name": "Bob", "Order Date": date(2024, 1, 2),
+                "Amount": 6, "Amount x 2": 12,
             },
         ])
         dialog.deleteLater()

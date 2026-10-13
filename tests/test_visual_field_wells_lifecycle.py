@@ -379,3 +379,33 @@ def test_table_visual_evaluates_measure_columns_at_group_grain_and_refreshes(
     assert failed_measure["error"].startswith(
         "Measure 'Removed Measure' could not be evaluated:"
     )
+
+
+def test_table_visual_groups_typed_null_empty_and_numeric_zero_values(
+    tmp_path: Path,
+) -> None:
+    source_path = tmp_path / "typed-values.json"
+    source_path.write_text(
+        '[{"Category":null,"Amount":0},{"Category":"","Amount":2},'
+        '{"Category":1,"Amount":3},{"Category":"1","Amount":4}]',
+        encoding="utf-8",
+    )
+    app = QApplication.instance() or QApplication(["typed visual values tests"])
+    controller = StudioController(
+        app,
+        QSettings(str(tmp_path / "typed-visual-settings.ini"), QSettings.Format.IniFormat),
+    )
+    assert controller._commit_import(source_path, parse_file(source_path))
+    assert controller.create_measure("Total", "SUM([Amount])")
+
+    controller.add_visual("table", "Typed values", 40, 40, 360, 240)
+    controller.add_field_to_well("Fields", "Category")
+    controller.add_field_to_well("Fields", "__dax_measure__:Total")
+
+    rows = controller.visualTableData("Typed values")["rows"]
+    assert rows == [
+        {"values": ["(null)", "0"], "category": "(null)", "highlighted": False},
+        {"values": ["", "2"], "category": "", "highlighted": False},
+        {"values": ["1", "3"], "category": "1", "highlighted": False},
+        {"values": ["1", "4"], "category": "1", "highlighted": False},
+    ]

@@ -68,7 +68,7 @@ class TransposeTableLifecycleTests(unittest.TestCase):
         self.assertEqual(dialog._preview_candidate.headers, ["Column1", "Column2"])
         self.assertEqual(dialog._preview_candidate.rows, [
             {"Column1": "Ada", "Column2": "Lin"},
-            {"Column1": "10", "Column2": "20"},
+            {"Column1": 10, "Column2": 20},
         ])
         dialog._accept_candidate()
         self.assertTrue(controller._commit_transform_steps(
@@ -89,7 +89,7 @@ class TransposeTableLifecycleTests(unittest.TestCase):
         self.assertTrue(reopened.open_project_path(project_path))
         self.assertEqual(reopened._rows, [
             {"Column1": "Grace", "Column2": "Jo"},
-            {"Column1": "30", "Column2": "40"},
+            {"Column1": 30, "Column2": 40},
         ])
 
         self.source_path.write_text(
@@ -99,7 +99,7 @@ class TransposeTableLifecycleTests(unittest.TestCase):
         self.assertEqual(reopened._headers, ["Column1", "Column2", "Column3"])
         self.assertEqual(reopened._rows, [
             {"Column1": "Kai", "Column2": "Mia", "Column3": "Noah"},
-            {"Column1": "50", "Column2": "60", "Column3": "70"},
+            {"Column1": 50, "Column2": 60, "Column3": 70},
         ])
 
     def test_transpose_rejects_a_table_without_data_rows(self) -> None:

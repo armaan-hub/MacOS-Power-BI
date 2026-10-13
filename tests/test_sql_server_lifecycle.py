@@ -170,8 +170,8 @@ class SQLServerLifecycleTests(unittest.TestCase):
         self.assertEqual(
             result.rows,
             [{
-                "id": "7", "amount": "12.50", "active": "TRUE",
-                "created": "2026-10-08", "note": "",
+                "id": 7, "amount": Decimal("12.50"), "active": True,
+                "created": date(2026, 10, 8), "note": None,
             }],
         )
         self.assertEqual(result.options["schema"], "sales]archive")

@@ -51,7 +51,7 @@ class SavedMergeLifecycleTests(unittest.TestCase):
             ids.append(controller.activeTableId)
         return ids
 
-    def test_merge_kinds_use_ordered_composite_keys_and_never_match_blanks(self) -> None:
+    def test_merge_kinds_use_ordered_composite_keys_and_match_equal_blank_values(self) -> None:
         left = ImportCandidate("csv", ["sale", "region", "year"], [
             {"sale": "L1", "region": "East", "year": "2026"},
             {"sale": "L2", "region": "West", "year": "2026"},
@@ -65,12 +65,12 @@ class SavedMergeLifecycleTests(unittest.TestCase):
             {"area": "East", "period": "2028", "manager": "Nia"},
         ], {}, [])
         expected_row_counts = {
-            "inner": 1,
+            "inner": 2,
             "left_outer": 4,
             "right_outer": 4,
-            "full_outer": 7,
-            "left_anti": 3,
-            "right_anti": 3,
+            "full_outer": 6,
+            "left_anti": 2,
+            "right_anti": 2,
         }
         for join_kind, expected_count in expected_row_counts.items():
             with self.subTest(join_kind=join_kind):
@@ -88,12 +88,36 @@ class SavedMergeLifecycleTests(unittest.TestCase):
                     self.assertEqual(result.rows[0]["sale"], "L1")
                 if join_kind == "left_anti":
                     self.assertEqual(
-                        {row["sale"] for row in result.rows}, {"L2", "L3", "L4"}
+                        {row["sale"] for row in result.rows}, {"L2", "L4"}
                     )
                 if join_kind == "right_anti":
                     self.assertEqual(
-                        {row["manager"] for row in result.rows}, {"Lee", "Blank", "Nia"}
+                        {row["manager"] for row in result.rows}, {"Lee", "Nia"}
                     )
+
+    def test_merge_keys_preserve_null_empty_and_scalar_type_semantics(self) -> None:
+        left = ImportCandidate("inline", ["key", "left"], [
+            {"key": None, "left": "null"},
+            {"key": "", "left": "empty"},
+            {"key": 1, "left": "number"},
+            {"key": "1", "left": "text"},
+        ], {}, [])
+        right = ImportCandidate("inline", ["key", "right"], [
+            {"key": None, "right": "null"},
+            {"key": "", "right": "empty"},
+            {"key": 1, "right": "number"},
+            {"key": "1", "right": "text"},
+        ], {}, [])
+
+        result = merge_candidates(
+            left, right, left_keys=["key"], right_keys=["key"], join_kind="inner"
+        )
+
+        self.assertEqual(result.row_count, 4)
+        self.assertEqual(
+            [(row["left"], row["right"]) for row in result.rows],
+            [("null", "null"), ("empty", "empty"), ("number", "number"), ("text", "text")],
+        )
 
     def test_merge_dialog_create_save_reopen_and_refresh(self) -> None:
         controller = self.controller("settings.ini")
@@ -119,7 +143,7 @@ class SavedMergeLifecycleTests(unittest.TestCase):
             if header.endswith(".region")
         )
         self.assertEqual(dialog._accepted_candidate.rows[0][manager_column], "Kim")
-        self.assertEqual(dialog._accepted_candidate.rows[1][manager_column], "")
+        self.assertIsNone(dialog._accepted_candidate.rows[1][manager_column])
 
         dialog.join_kind_combo.setCurrentIndex(
             dialog.join_kind_combo.findData("inner")
@@ -151,10 +175,10 @@ class SavedMergeLifecycleTests(unittest.TestCase):
         query_id = query_source["id"]
         self.assertEqual(query_source["query_definition"], definition)
         self.assertEqual(
-            controller._loaded_candidates[query_id].rows[1][manager_column], ""
+            controller._loaded_candidates[query_id].rows[1][manager_column], None
         )
         self.assertEqual(
-            controller._loaded_candidates[query_id].rows[1][west_column], ""
+            controller._loaded_candidates[query_id].rows[1][west_column], None
         )
 
         project_path = self.root / "merge-project.npa"
@@ -186,7 +210,7 @@ class SavedMergeLifecycleTests(unittest.TestCase):
         )
         reopened.refresh_all_sources()
         refreshed_rows = reopened._loaded_candidates[query_id].rows
-        self.assertEqual(refreshed_rows[0]["amount"], "12")
+        self.assertEqual(refreshed_rows[0]["amount"], 12)
         self.assertEqual(refreshed_rows[0][manager_column], "Nia")
         dialog.deleteLater()
 

@@ -83,6 +83,7 @@ class UnpivotLifecycleTests(unittest.TestCase):
         ])
         self.assertEqual(selected_dialog._preview_candidate.rows, [
             {"Region": "North", "Store": "1", "Note": "foo", "Field": "Q1", "Amount": "10"},
+            {"Region": "North", "Store": "1", "Note": "foo", "Field": "Q2", "Amount": ""},
             {"Region": "South", "Store": "2", "Note": "bar", "Field": "Q1", "Amount": "5"},
             {"Region": "South", "Store": "2", "Note": "bar", "Field": "Q2", "Amount": "15"},
         ])
@@ -97,6 +98,7 @@ class UnpivotLifecycleTests(unittest.TestCase):
         self.assertEqual(other_dialog._preview_candidate.rows, [
             {"Region": "North", "Store": "1", "Field": "Department", "Amount": "Produce"},
             {"Region": "North", "Store": "1", "Field": "Q1", "Amount": "10"},
+            {"Region": "North", "Store": "1", "Field": "Q2", "Amount": ""},
             {"Region": "South", "Store": "2", "Field": "Department", "Amount": "Dairy"},
             {"Region": "South", "Store": "2", "Field": "Q1", "Amount": "5"},
             {"Region": "South", "Store": "2", "Field": "Q2", "Amount": "15"},
@@ -135,6 +137,7 @@ class UnpivotLifecycleTests(unittest.TestCase):
         reopened.refresh_all_sources()
         self.assertEqual(reopened._loaded_candidates[selected_id].rows, [
             {"Region": "Central", "Store": "5", "Note": "xyz", "Field": "Q1", "Amount": "40"},
+            {"Region": "Central", "Store": "5", "Note": "xyz", "Field": "Q2", "Amount": ""},
         ])
         self.assertEqual(reopened._loaded_candidates[other_id].rows, [
             {"Region": "South", "Store": "6", "Field": "Department", "Amount": "Chilled"},

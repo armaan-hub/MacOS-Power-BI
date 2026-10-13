@@ -628,7 +628,7 @@ class ReportAndMeasureWorkflowTests(unittest.TestCase):
             'CALCULATE(DISTINCTCOUNT([Value]), [Region] = "Missing")',
         ))
         self.assertEqual(controller.reportKpis["Distinct values"], "3")
-        self.assertEqual(controller.reportKpis["Distinct values without blank"], "2")
+        self.assertEqual(controller.reportKpis["Distinct values without blank"], "3")
         self.assertEqual(controller.reportKpis["No matching values"], "—")
 
         controller.add_visual("card", "Distinct blank card", 20, 20, 150, 90)
@@ -643,7 +643,7 @@ class ReportAndMeasureWorkflowTests(unittest.TestCase):
             "Fields", "__dax_measure__:Distinct values without blank"
         )
         self.assertEqual(
-            controller.visualCardData("Distinct no-blank card")["value"], "2"
+            controller.visualCardData("Distinct no-blank card")["value"], "3"
         )
 
         project_path = self.root / "distinct-count.npa"
@@ -651,13 +651,13 @@ class ReportAndMeasureWorkflowTests(unittest.TestCase):
         reopened = self.controller()
         self.assertTrue(reopened.open_project_path(project_path))
         self.assertEqual(reopened.reportKpis["Distinct values"], "3")
-        self.assertEqual(reopened.reportKpis["Distinct values without blank"], "2")
+        self.assertEqual(reopened.reportKpis["Distinct values without blank"], "3")
         self.assertEqual(reopened.reportKpis["No matching values"], "—")
         self.assertEqual(
             reopened.visualCardData("Distinct blank card")["value"], "3"
         )
         self.assertEqual(
-            reopened.visualCardData("Distinct no-blank card")["value"], "2"
+            reopened.visualCardData("Distinct no-blank card")["value"], "3"
         )
 
         source_path.write_text(

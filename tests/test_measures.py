@@ -9,11 +9,13 @@ import unittest
 from analytics_studio.measures import (
     MeasureError,
     evaluate_measures,
+    evaluate_calculated_columns,
     normalize_calculated_column,
     normalize_measure,
     rename_table_references,
     validate_measures,
 )
+from analytics_studio.power_query_values import PowerQueryCellError
 from analytics_studio.project import FORMAT_VERSION, ProjectFileError, new_project, validate_project
 
 
@@ -53,6 +55,54 @@ class MeasureTests(unittest.TestCase):
         self.assertEqual(result["Rate"], Decimal("29.0") / 3)
         self.assertEqual(result["Double rate"], Decimal("29.0") / 3 * 2)
 
+    def test_numeric_zero_is_not_treated_as_blank_and_power_query_errors_are_not_text(self) -> None:
+        measures = [
+            {"name": "Count", "expression": "COUNT([Value])"},
+            {"name": "Nonblank", "expression": "COUNTA([Value])"},
+            {"name": "Unique", "expression": "DISTINCTCOUNT([Value])"},
+        ]
+        result = evaluate_measures(measures, [{"Value": 0}], ["Value"], "Values")
+        self.assertEqual(result, {
+            "Count": Decimal(1),
+            "Nonblank": Decimal(1),
+            "Unique": Decimal(1),
+        })
+
+        error = PowerQueryCellError(
+            "DataFormat.Error", "not numeric", "bad", "decimal_number", row=1,
+        )
+        with self.assertRaisesRegex(MeasureError, "Power Query cell error"):
+            evaluate_measures(
+                [{"name": "Total", "expression": "SUM([Value])"}],
+                [{"Value": error}], ["Value"], "Values",
+            )
+
+    def test_calculated_columns_preserve_native_null_boolean_and_numeric_values(self) -> None:
+        headers, rows, types = evaluate_calculated_columns(
+            [
+                {"name": "Nullable", "expression": "[Quantity]"},
+                {"name": "Flag", "expression": "IF([Quantity] > 1, TRUE(), FALSE())"},
+                {"name": "Adjusted", "expression": "[Quantity] + 1"},
+            ],
+            [
+                {"Quantity": Decimal(0)},
+                {"Quantity": None},
+                {"Quantity": Decimal(2)},
+            ],
+            ["Quantity"],
+            "Sales",
+        )
+
+        self.assertEqual(headers, ["Quantity", "Nullable", "Flag", "Adjusted"])
+        self.assertEqual(types, {
+            "Nullable": "decimal_number", "Flag": "boolean", "Adjusted": "decimal_number",
+        })
+        self.assertEqual(rows, [
+            {"Quantity": Decimal(0), "Nullable": Decimal(0), "Flag": False, "Adjusted": Decimal(1)},
+            {"Quantity": None, "Nullable": None, "Flag": False, "Adjusted": Decimal(1)},
+            {"Quantity": Decimal(2), "Nullable": Decimal(2), "Flag": True, "Adjusted": Decimal(3)},
+        ])
+
     def test_count_text_distinct_count_and_empty_divide_alternate(self) -> None:
         measures = [
             {"name": "Rows", "expression": "COUNTROWS()"},
@@ -64,7 +114,7 @@ class MeasureTests(unittest.TestCase):
         result = evaluate_measures(measures, self.rows, self.headers)
 
         self.assertEqual(result["Rows"], Decimal(3))
-        self.assertEqual(result["Notes"], Decimal(2))
+        self.assertEqual(result["Notes"], Decimal(3))
         self.assertEqual(result["Unique regions"], Decimal(2))
         self.assertEqual(result["Safe rate"], Decimal(-1))
 
@@ -96,7 +146,7 @@ class MeasureTests(unittest.TestCase):
 
         result = evaluate_measures(measures, rows, ["Value"], "Values")
         self.assertEqual(result["Including blank"], Decimal(4))
-        self.assertEqual(result["Without blank"], Decimal(3))
+        self.assertEqual(result["Without blank"], Decimal(4))
         self.assertIsNone(result["Filtered empty"])
         self.assertIsNone(result["Filtered empty without blank"])
 
@@ -104,7 +154,7 @@ class MeasureTests(unittest.TestCase):
             measures[:2], [{"Value": ""}, {"Value": ""}], ["Value"], "Values"
         )
         self.assertEqual(blank_only["Including blank"], Decimal(1))
-        self.assertEqual(blank_only["Without blank"], Decimal(0))
+        self.assertEqual(blank_only["Without blank"], Decimal(1))
 
         no_rows = evaluate_measures(measures[:2], [], ["Value"], "Values")
         self.assertIsNone(no_rows["Including blank"])
@@ -118,6 +168,13 @@ class MeasureTests(unittest.TestCase):
         )
         self.assertEqual(typed_zero["Including blank"], Decimal(2))
         self.assertEqual(typed_zero["Without blank"], Decimal(1))
+
+        blank_and_empty = evaluate_measures(
+            measures[:2], [{"Value": None}, {"Value": ""}, {"Value": ""}],
+            ["Value"], "Values",
+        )
+        self.assertEqual(blank_and_empty["Including blank"], Decimal(2))
+        self.assertEqual(blank_and_empty["Without blank"], Decimal(1))
 
         with self.assertRaises(MeasureError):
             normalize_measure(

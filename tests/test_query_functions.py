@@ -182,7 +182,7 @@ class QueryFunctionDefinitionTests(unittest.TestCase):
         self.assertEqual(
             [row["Normalized"] for row in result.rows], ["ADA", "BOB"]
         )
-        self.assertEqual([row["Doubled"] for row in result.rows], ["2.5", "8"])
+        self.assertEqual([row["Doubled"] for row in result.rows], [Decimal("2.50"), Decimal("8")])
         self.assertEqual(
             column_types_after_steps(
                 self.source.headers, steps, output_headers=result.headers
@@ -259,7 +259,7 @@ class QueryFunctionDefinitionTests(unittest.TestCase):
             self.source, parsed,
             parameters=parameter_values([], self.functions),
         )
-        self.assertEqual([row["MaybeName"] for row in result.rows], ["", ""])
+        self.assertEqual([row["MaybeName"] for row in result.rows], [None, None])
 
     def test_custom_column_rejects_a_false_output_type(self) -> None:
         with self.assertRaisesRegex(TransformationError, "whole number"):
@@ -463,7 +463,7 @@ class QueryFunctionDefinitionTests(unittest.TestCase):
                         row["Doubled"]
                         for row in dialog._query_states[root_id]["preview_candidate"].rows
                     ],
-                    ["30", "60"],
+                    [Decimal("30"), Decimal("60")],
                 )
                 self.assertEqual(
                     [
@@ -472,7 +472,7 @@ class QueryFunctionDefinitionTests(unittest.TestCase):
                             "preview_candidate"
                         ].rows
                     ],
-                    ["30", "60"],
+                    [Decimal("30"), Decimal("60")],
                 )
                 dialog._switch_query(dialog._query_order.index(root_id))
                 for query_id in dialog._query_order:
@@ -498,22 +498,22 @@ class QueryFunctionDefinitionTests(unittest.TestCase):
 
             self.assertEqual(
                 [row["Doubled"] for row in controller._loaded_candidates[root_id].rows],
-                ["30", "60"],
+                [Decimal("30"), Decimal("60")],
             )
             self.assertEqual(
                 [row["Doubled"] for row in controller._loaded_candidates[reference_id].rows],
-                ["30", "60"],
+                [Decimal("30"), Decimal("60")],
             )
             self.assertEqual(
                 [row["Recomputed"] for row in controller._loaded_candidates[excluded_id].rows],
-                ["30", "60"],
+                [Decimal("30"), Decimal("60")],
             )
             self.assertEqual(
                 [
                     row["Doubled"]
                     for row in controller._loaded_candidates[excluded_reference_id].rows
                 ],
-                ["30", "60"],
+                [Decimal("30"), Decimal("60")],
             )
             self.assertEqual(
                 controller._project["query_functions"][0]["expression"], "Value * 3"
@@ -536,7 +536,7 @@ class QueryFunctionDefinitionTests(unittest.TestCase):
             ):
                 self.assertEqual(
                     [row[column] for row in reopened._loaded_candidates[query_id].rows],
-                    ["30", "60"],
+                    [Decimal("30"), Decimal("60")],
                 )
             reopened.refresh_all_sources()
             for query_id, column in (
@@ -547,7 +547,7 @@ class QueryFunctionDefinitionTests(unittest.TestCase):
             ):
                 self.assertEqual(
                     [row[column] for row in reopened._loaded_candidates[query_id].rows],
-                    ["30", "60"],
+                    [Decimal("30"), Decimal("60")],
                 )
 
 

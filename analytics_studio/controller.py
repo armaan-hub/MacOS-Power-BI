@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from collections import defaultdict
 from copy import deepcopy
+import base64
 import calendar
 import csv
 from datetime import date, datetime, time, timedelta, timezone
@@ -49,6 +50,7 @@ from analytics_studio.folder_import_dialog import FolderImportDialog
 from analytics_studio.inline_data import sample_candidate, source_from_candidate
 from analytics_studio.query_parameters import parameter_references, parameter_values
 from analytics_studio.query_functions import function_references
+from analytics_studio.power_query_values import cell_key, cell_to_text, is_cell_error
 from analytics_studio.date_table_dialog import DateTableDialog
 from analytics_studio.date_tables import DateTableError, validate_date_table_rows
 from analytics_studio.calendar_table_dialog import CalendarTableDialog
@@ -119,6 +121,22 @@ from analytics_studio.transformations import (
 PREVIEW_ROW_LIMIT = 500
 CHART_TYPES = {"column", "bar", "line"}
 CHART_VISUALS = {"Monthly revenue", "Region revenue"}
+
+
+def _profile_cell_type(value: Any) -> str:
+    if is_cell_error(value):
+        return "error"
+    if isinstance(value, bool):
+        return "boolean"
+    if isinstance(value, (int, float, Decimal)):
+        return "number"
+    if isinstance(value, datetime):
+        return "datetime"
+    if isinstance(value, date):
+        return "date"
+    if isinstance(value, time):
+        return "time"
+    return "text"
 
 
 def _rename_table_references_in_project(
@@ -578,17 +596,171 @@ def _relative_time_bounds(
     return anchor, anchor + span, True
 
 
+_REPORT_FILTER_VALUE_TOKEN = "__npa_pqv1__:"
+
+
+def _encode_report_filter_value(value: Any) -> str:
+    """Keep typed scalar categories distinct across the QML string-value filter API."""
+    if value is None:
+        return _REPORT_FILTER_VALUE_TOKEN + "null"
+    if value == "":
+        return _REPORT_FILTER_VALUE_TOKEN + "empty"
+    if isinstance(value, str) and value.startswith(_REPORT_FILTER_VALUE_TOKEN):
+        encoded = base64.urlsafe_b64encode(value.encode("utf-8")).decode("ascii")
+        return _REPORT_FILTER_VALUE_TOKEN + "text:" + encoded.rstrip("=")
+    if isinstance(value, bool):
+        kind, canonical = "boolean", "true" if value else "false"
+    elif isinstance(value, (int, float, Decimal)):
+        number = Decimal(str(value))
+        kind, canonical = "number", str(number.normalize()) if number else "0"
+    elif isinstance(value, datetime):
+        kind, canonical = "datetime", value.isoformat()
+    elif isinstance(value, date):
+        kind, canonical = "date", value.isoformat()
+    elif isinstance(value, time):
+        kind, canonical = "time", value.isoformat()
+    else:
+        kind, canonical = "text", cell_to_text(value)
+    payload = json.dumps(
+        [kind, canonical, cell_to_text(value)],
+        ensure_ascii=False,
+        separators=(",", ":"),
+    )
+    encoded = base64.urlsafe_b64encode(payload.encode("utf-8")).decode("ascii")
+    return _REPORT_FILTER_VALUE_TOKEN + "value:" + encoded.rstrip("=")
+
+
+def _decode_report_filter_value(value: Any) -> tuple[str, Any] | None:
+    if not isinstance(value, str) or not value.startswith(_REPORT_FILTER_VALUE_TOKEN):
+        return None
+    payload = value[len(_REPORT_FILTER_VALUE_TOKEN):]
+    if payload == "null":
+        return ("null", None)
+    if payload == "empty":
+        return ("empty", "")
+    if payload.startswith("text:"):
+        encoded = payload[5:]
+        try:
+            decoded = base64.urlsafe_b64decode(encoded + "=" * (-len(encoded) % 4))
+            text = decoded.decode("utf-8")
+        except (ValueError, UnicodeDecodeError):
+            return None
+        return ("text", text) if text.startswith(_REPORT_FILTER_VALUE_TOKEN) else None
+    if payload.startswith("value:"):
+        encoded = payload[6:]
+        try:
+            decoded = json.loads(
+                base64.urlsafe_b64decode(encoded + "=" * (-len(encoded) % 4))
+            )
+        except (ValueError, UnicodeDecodeError, json.JSONDecodeError):
+            return None
+        if (
+            isinstance(decoded, list)
+            and len(decoded) in {2, 3}
+            and decoded[0] in {"boolean", "number", "datetime", "date", "time", "text"}
+            and isinstance(decoded[1], str)
+            and (len(decoded) == 2 or isinstance(decoded[2], str))
+        ):
+            label = decoded[2] if len(decoded) == 3 else decoded[1]
+            return ("typed", (decoded[0], decoded[1], label))
+    return None
+
+
+def _report_filter_token_identity(
+    token: tuple[str, Any] | None,
+) -> tuple[str, Any] | None:
+    if token is not None and token[0] == "typed":
+        return ("typed", token[1][:2])
+    return token
+
+
+def _report_filter_value_kind_label(value: str) -> str:
+    token = _decode_report_filter_value(value)
+    if token is None:
+        return "Text"
+    if token[0] == "null":
+        return "Null"
+    if token[0] == "empty":
+        return "Empty text"
+    if token[0] == "text":
+        return "Text"
+    if token[0] == "typed":
+        return {
+            "boolean": "Boolean",
+            "number": "Number",
+            "datetime": "Date/time",
+            "date": "Date",
+            "time": "Time",
+            "text": "Text",
+        }.get(token[1][0], "Value")
+    return "Value"
+
+
+def _report_filter_token_label(value: str, *, include_type: bool = False) -> str:
+    token = _decode_report_filter_value(value)
+    if token is None:
+        return "(Blank)" if value == "" else value
+    kind, decoded = token
+    if kind == "null":
+        return "(Null)"
+    if kind == "empty":
+        return "(Empty text)"
+    if kind == "typed":
+        scalar_kind, _canonical, label = decoded
+        label = label.upper() if scalar_kind == "boolean" else label
+        return f"{label} ({_report_filter_value_kind_label(value)})" if include_type else label
+    if kind == "text" and include_type:
+        return f"{decoded} (Text)"
+    return str(decoded)
+
+
+def _disambiguate_report_filter_labels(values: dict[str, str]) -> dict[str, str]:
+    by_label: defaultdict[str, list[str]] = defaultdict(list)
+    for token, label in values.items():
+        by_label[label].append(token)
+    labels = dict(values)
+    for label, tokens in by_label.items():
+        if len(tokens) < 2:
+            continue
+        for token in tokens:
+            labels[token] = f"{label} ({_report_filter_value_kind_label(token)})"
+    for _ in range(len(labels)):
+        collisions: defaultdict[str, list[str]] = defaultdict(list)
+        for token, label in labels.items():
+            collisions[label].append(token)
+        duplicated = [tokens for tokens in collisions.values() if len(tokens) > 1]
+        if not duplicated:
+            break
+        for tokens in duplicated:
+            for token in tokens:
+                labels[token] = (
+                    f"{labels[token]} ({_report_filter_value_kind_label(token)})"
+                )
+    used: set[str] = set()
+    for token in sorted(labels):
+        label = labels[token]
+        suffix = 1
+        while label in used:
+            label = f"{labels[token]} [{suffix}]"
+            suffix += 1
+        labels[token] = label
+        used.add(label)
+    return labels
+
+
 def _report_filter_clause_matches(
     raw_value: Any,
     clause: dict[str, Any],
     column_type: str,
 ) -> bool:
-    value = "" if raw_value is None else str(raw_value)
+    if is_cell_error(raw_value):
+        return False
+    value = None if raw_value is None else cell_to_text(raw_value)
     operator = clause["operator"]
     if operator == _REPORT_FILTER_TOP_N:
         return False
     if operator == "report_month":
-        return _report_month(value) == str(clause.get("value", ""))
+        return value is not None and _report_month(value) == str(clause.get("value", ""))
     if operator == _REPORT_FILTER_RELATIVE_DATE:
         if column_type != "date" or clause.get("_invalid_relative_date") or not value:
             return False
@@ -618,25 +790,64 @@ def _report_filter_clause_matches(
         selected_values = clause.get("_normalized_values")
         if selected_values is None:
             selected_values = frozenset(clause["values"])
-        if value == "":
-            is_selected = bool(clause.get("_includes_blank", "" in clause.get("values", [])))
-        elif column_type in _REPORT_FILTER_NUMERIC_TYPES | _REPORT_FILTER_TEMPORAL_TYPES:
-            try:
-                actual_value = _parse_report_filter_value(value, column_type)
-            except (DecimalException, ValueError, TypeError):
-                return False
-            is_selected = actual_value in selected_values
+        token_values = clause.get("_normalized_token_values", frozenset())
+        if raw_value is None:
+            is_selected = (
+                ("null", None) in token_values
+                or bool(clause.get("_includes_blank", "" in clause.get("values", [])))
+            )
+        elif raw_value == "":
+            is_selected = (
+                ("empty", "") in token_values
+                or bool(clause.get("_includes_blank", "" in clause.get("values", [])))
+            )
         else:
-            is_selected = value in selected_values
+            actual_token = _report_filter_token_identity(
+                _decode_report_filter_value(_encode_report_filter_value(raw_value))
+            )
+            is_selected = actual_token in {
+                _report_filter_token_identity(token) for token in token_values
+            }
+            if not is_selected:
+                legacy_values = frozenset(
+                    selected for selected in selected_values
+                    if _decode_report_filter_value(selected) is None
+                )
+                if value.startswith(_REPORT_FILTER_VALUE_TOKEN):
+                    is_selected = ("text", value) in token_values or value in legacy_values
+                elif column_type in _REPORT_FILTER_NUMERIC_TYPES | _REPORT_FILTER_TEMPORAL_TYPES:
+                    try:
+                        actual_value = _parse_report_filter_value(value, column_type)
+                    except (DecimalException, ValueError, TypeError):
+                        return False
+                    is_selected = actual_value in legacy_values
+                else:
+                    is_selected = value in legacy_values
         return is_selected if operator == "is_any_of" else not is_selected
     expected = clause["value"]
+    expected_token = _decode_report_filter_value(expected)
+    if expected_token is not None and operator in {"equals", "not_equals"}:
+        kind, decoded = expected_token
+        if kind == "null":
+            matches = raw_value is None
+        elif kind == "empty":
+            matches = raw_value == ""
+        elif kind == "typed":
+            matches = _report_filter_token_identity(
+                _decode_report_filter_value(_encode_report_filter_value(raw_value))
+            ) == _report_filter_token_identity(expected_token)
+        else:
+            matches = raw_value == decoded
+        return matches if operator == "equals" else not matches
     if operator == "is_blank":
-        return value == ""
+        return value is None or value == ""
     if operator == "is_not_blank":
-        return value != ""
+        return value is not None and value != ""
     typed_comparison = column_type in _REPORT_FILTER_NUMERIC_TYPES | _REPORT_FILTER_TEMPORAL_TYPES
-    if value == "" and typed_comparison:
+    if (value is None or value == "") and typed_comparison:
         return False
+    if value is None:
+        return operator == "not_equals"
     if operator == "equals":
         if typed_comparison:
             try:
@@ -733,14 +944,22 @@ def _compile_report_filter(
             continue
         values = clause["values"]
         clause["_includes_blank"] = "" in values
+        clause["_normalized_token_values"] = frozenset(
+            _report_filter_token_identity(token) for value in values
+            if (token := _decode_report_filter_value(value)) is not None
+        )
         try:
             if column_type in _REPORT_FILTER_NUMERIC_TYPES | _REPORT_FILTER_TEMPORAL_TYPES:
                 clause["_normalized_values"] = frozenset(
                     _parse_report_filter_value(value, column_type)
-                    for value in values if value != ""
+                    for value in values
+                    if value != "" and _decode_report_filter_value(value) is None
                 )
             else:
-                clause["_normalized_values"] = frozenset(values)
+                clause["_normalized_values"] = frozenset(
+                    value for value in values
+                    if _decode_report_filter_value(value) is None
+                )
         except (DecimalException, ValueError, TypeError):
             clause["_invalid_values"] = True
     return compiled
@@ -787,14 +1006,17 @@ def _report_filter_summary(clauses: list[dict[str, Any]], logic: str) -> str:
         elif operator in _REPORT_FILTER_VALUELESS:
             summaries.append(_REPORT_FILTER_OPERATOR_LABELS[operator])
         elif operator in _REPORT_FILTER_MULTI_VALUE:
-            values = ["(Blank)" if item == "" else item for item in clause["values"]]
+            values = [
+                _report_filter_token_label(item, include_type=True)
+                for item in clause["values"]
+            ]
             preview = ", ".join(values[:3])
             if len(values) > 3:
                 preview += f", +{len(values) - 3} more"
             summaries.append(f"{_REPORT_FILTER_OPERATOR_LABELS[operator]} {preview}")
         else:
             label = symbols.get(operator, _REPORT_FILTER_OPERATOR_LABELS[operator])
-            value = clause["value"] or "(Blank)"
+            value = _report_filter_token_label(clause["value"], include_type=True)
             summaries.append(f"{label} {value}")
     return f" {logic.upper()} ".join(summaries)
 
@@ -813,7 +1035,9 @@ def _report_field(headers: list[str], role: str) -> str | None:
 
 
 def _report_number(value: Any) -> Decimal | None:
-    text = str(value or "").strip()
+    if value is None or is_cell_error(value):
+        return None
+    text = cell_to_text(value).strip()
     if not text:
         return None
     negative = text.startswith("(") and text.endswith(")")
@@ -828,6 +1052,11 @@ def _report_number(value: Any) -> Decimal | None:
     if not number.is_finite():
         return None
     return -number if negative else number
+
+
+def _report_cell_text(value: Any) -> str:
+    """Render report cells without hiding Null, Error, false, or numeric zero."""
+    return "(null)" if value is None else cell_to_text(value)
 
 
 def _report_month(value: Any) -> str | None:
@@ -891,9 +1120,9 @@ class CsvTableModel(QAbstractTableModel):
     def __init__(self, parent: QObject | None = None) -> None:
         super().__init__(parent)
         self._headers: list[str] = []
-        self._rows: list[dict[str, str | None]] = []
+        self._rows: list[dict[str, Any]] = []
 
-    def replace_data(self, headers: list[str], rows: list[dict[str, str | None]]) -> None:
+    def replace_data(self, headers: list[str], rows: list[dict[str, Any]]) -> None:
         self.beginResetModel()
         self._headers = list(headers)
         self._rows = list(rows[:PREVIEW_ROW_LIMIT])
@@ -918,7 +1147,7 @@ class CsvTableModel(QAbstractTableModel):
         if index.row() >= len(self._rows) or index.column() >= len(self._headers):
             return None
         value = self._rows[index.row()].get(self._headers[index.column()], "")
-        return "" if value is None else str(value)
+        return "(null)" if value is None else cell_to_text(value)
 
     def headerData(
         self,
@@ -1485,6 +1714,88 @@ class StudioController(QObject):
         series = self._generate_dynamic_visual_series(visual_name)
         return [dict(item) for item in series]
 
+    def _visual_has_cell_errors(
+        self,
+        visual: dict[str, Any],
+        rows_by_table: dict[str, list[dict[str, Any]]],
+    ) -> bool:
+        fields = visual.get("fields", {})
+        visual_type = str(visual.get("type", ""))
+        wells_by_type = {
+            "map": ("Location", "Latitude", "Longitude", "Size", "Legend"),
+            "scatter": ("X-axis", "Y-axis", "Legend", "Details"),
+            "gauge": ("Value", "Minimum", "Maximum", "Target"),
+            "kpi": ("Indicator", "Trend axis", "Target goals"),
+            "slicer": ("Fields", "X-axis"),
+            "table": ("Fields",),
+            "matrix": ("Rows", "Columns", "Values"),
+        }
+        wells = wells_by_type.get(
+            visual_type,
+            ("X-axis", "Y-axis", "Column Y-axis", "Line Y-axis", "Legend"),
+        )
+        bound_table_id = str(visual.get("table_id") or self._active_model_table_id())
+        bound_rows = rows_by_table.get(bound_table_id, [])
+        for well_name in wells:
+            bindings = fields.get(well_name, [])
+            if not isinstance(bindings, list):
+                continue
+            for binding in bindings:
+                if isinstance(binding, dict):
+                    column = str(binding.get("column", ""))
+                elif isinstance(binding, (list, tuple)):
+                    column = str(binding[1] if len(binding) > 1 else (binding[0] if binding else ""))
+                else:
+                    column = str(binding)
+                if not column:
+                    continue
+                if _visual_measure_name(column):
+                    # Measure evaluation checks its own referenced columns and
+                    # reports a MeasureError. Unrelated table cells must not blank it.
+                    continue
+                elif any(is_cell_error(row.get(column)) for row in bound_rows):
+                    return True
+        return False
+
+    @Slot(str, result=str)
+    def visualErrorMessage(self, visual_name: str) -> str:  # noqa: N802
+        page = self._active_page()
+        visual = next((
+            item for item in (page.get("visuals", []) if page else [])
+            if isinstance(item, dict) and item.get("title") == visual_name
+        ), None)
+        if visual is None:
+            return ""
+        rows_by_table, measure_context, filter_table_ids = self._report_filter_context(visual_name)
+        if self._visual_has_cell_errors(visual, rows_by_table):
+            return "Power Query errors are present in this visual's data."
+        fields = visual.get("fields", {})
+        for bindings in fields.values() if isinstance(fields, dict) else []:
+            if not isinstance(bindings, list):
+                continue
+            for binding in bindings:
+                if isinstance(binding, dict):
+                    column = str(binding.get("column", ""))
+                elif isinstance(binding, (list, tuple)):
+                    column = str(binding[1] if len(binding) > 1 else (binding[0] if binding else ""))
+                else:
+                    column = str(binding)
+                measure_name = _visual_measure_name(column)
+                if measure_name is None:
+                    continue
+                try:
+                    self._measure_value_for_visual_group(
+                        measure_name,
+                        measure_context,
+                        filter_table_ids,
+                        {},
+                        str(visual.get("table_id") or self._active_model_table_id()),
+                    )
+                except MeasureError as exc:
+                    if "Power Query cell error" in str(exc):
+                        return "Power Query errors are present in this visual's data."
+        return ""
+
     @Slot(str, result="QVariantList")
     def visualLineSeries(self, visual_name: str) -> list[dict[str, object]]:  # noqa: N802
         series = self._generate_dynamic_visual_series(
@@ -1521,6 +1832,11 @@ class StudioController(QObject):
             visual_name, include_highlights=include_highlights
         )
         source_rows = rows_by_table.get(bound_table_id, [])
+        if self._visual_has_cell_errors(visual, rows_by_table):
+            return {
+                "value": 0.0, "minimum": 0.0, "maximum": 1.0,
+                "target": None, "highlight_value": None, "has_value": False,
+            }
         fields = visual.get("fields", {})
 
         def aggregate_well(well_name: str) -> Decimal | None:
@@ -1715,6 +2031,8 @@ class StudioController(QObject):
             visual_name, include_highlights=include_highlights
         )
         rows = rows_by_table.get(bound_table_id, [])
+        if self._visual_has_cell_errors(visual, rows_by_table):
+            return []
         location_field = field_name("Location")
         size_field = field_name("Size")
         legend_field = field_name("Legend")
@@ -1726,16 +2044,13 @@ class StudioController(QObject):
                 continue
             location_value = row.get(location_field) if location_field else None
             label = (
-                str(location_value).strip()
-                if location_value is not None and str(location_value).strip()
+                _report_cell_text(location_value)
+                if location_field
                 else f"{float(latitude):.4g}, {float(longitude):.4g}"
             )
             size = _report_number(row.get(size_field)) if size_field else None
             legend_value = row.get(legend_field) if legend_field else None
-            group = (
-                "(Blank)" if legend_field and (legend_value is None or not str(legend_value).strip())
-                else str(legend_value) if legend_field else ""
-            )
+            group = _report_cell_text(legend_value) if legend_field else ""
             points.append({
                 "id": f"{label}|{latitude}|{longitude}|{group}",
                 "label": label,
@@ -1781,6 +2096,8 @@ class StudioController(QObject):
             visual_name, include_highlights=include_highlights
         )
         rows = rows_by_table.get(bound_table_id, [])
+        if self._visual_has_cell_errors(visual, rows_by_table):
+            return []
         points: list[dict[str, object]] = []
         for row in rows:
             x_value = _report_number(row.get(x_field))
@@ -1788,17 +2105,11 @@ class StudioController(QObject):
             if x_value is None or y_value is None:
                 continue
             legend_value = row.get(legend_field) if legend_field else None
-            group = (
-                "(Blank)" if legend_field and (legend_value is None or not str(legend_value).strip())
-                else (str(legend_value) if legend_field else "Series")
-            )
+            group = _report_cell_text(legend_value) if legend_field else "Series"
             category_value = row.get(details_field) if details_field else (
                 legend_value if legend_field else row.get(x_field)
             )
-            label = (
-                "(Blank)" if category_value is None or not str(category_value).strip()
-                else str(category_value)
-            )
+            label = _report_cell_text(category_value)
             x_number, y_number = float(x_value), float(y_value)
             points.append({
                 "id": f"{label}|{group}|{x_number}|{y_number}",
@@ -1868,7 +2179,7 @@ class StudioController(QObject):
                 ),
             }
         category_column = dimension_columns[0] if dimension_columns else ""
-        highlighted_categories: set[str] = set()
+        highlighted_categories: set[tuple[Any, ...]] = set()
         has_highlight = any(
             selected
             and (source := next((
@@ -1883,7 +2194,7 @@ class StudioController(QObject):
                 visual_name, include_highlights=True
             )
             highlighted_categories = {
-                str(row.get(category_column, "") or "")
+                cell_key(row.get(category_column))
                 for row in highlight_rows.get(bound_table_id, [])
             }
 
@@ -1891,36 +2202,36 @@ class StudioController(QObject):
             rows = [
                 {
                     "values": [
-                        "" if row.get(column) is None else str(row.get(column, ""))
+                        _report_cell_text(row.get(column, ""))
                         for column in bindings
                     ],
-                    "category": str(row.get(category_column, "") or ""),
-                    "highlighted": str(row.get(category_column, "") or "") in highlighted_categories,
+                    "category": _report_cell_text(row.get(category_column, "")),
+                    "highlighted": cell_key(row.get(category_column)) in highlighted_categories,
                 }
                 for row in source_rows[:50]
             ]
             return {"columns": columns, "rows": rows, "total_rows": len(source_rows)}
 
-        grouped_rows: dict[tuple[str, ...], dict[str, Any]] = {}
+        grouped_rows: dict[tuple[tuple[Any, ...], ...], dict[str, Any]] = {}
+        group_values: dict[tuple[tuple[Any, ...], ...], tuple[Any, ...]] = {}
         for row in source_rows:
-            key = tuple(
-                "" if row.get(column) is None else str(row.get(column, ""))
-                for column in dimension_columns
-            )
+            raw_values = tuple(row.get(column) for column in dimension_columns)
+            key = tuple(cell_key(value) for value in raw_values)
             grouped_rows.setdefault(key, row)
+            group_values.setdefault(key, raw_values)
         group_keys = list(grouped_rows)
         if not dimension_columns:
             group_keys = [()]  # A measure-only Table shows its total context.
 
         rows: list[dict[str, object]] = []
         for key in group_keys[:50]:
-            group_filters = dict(zip(dimension_columns, key, strict=True))
+            group_filters = dict(zip(dimension_columns, group_values[key], strict=True))
             row_values: list[str] = []
             for binding in bindings:
                 measure_name = measure_names[binding]
                 if measure_name is None:
                     raw_value = grouped_rows[key].get(binding)
-                    row_values.append("" if raw_value is None else str(raw_value))
+                    row_values.append(_report_cell_text(raw_value))
                     continue
                 try:
                     value = self._measure_value_for_visual_group(
@@ -1942,11 +2253,14 @@ class StudioController(QObject):
                     "" if value is None else _format_report_number(value)
                 )
 
-            category = key[0] if key else ""
+            category = _report_cell_text(group_values[key][0]) if key else ""
             rows.append({
                 "values": row_values,
                 "category": category,
-                "highlighted": category in highlighted_categories,
+                "highlighted": (
+                    cell_key(group_values[key][0]) in highlighted_categories
+                    if key else False
+                ),
             })
         return {"columns": columns, "rows": rows, "total_rows": len(group_keys)}
 
@@ -1988,25 +2302,38 @@ class StudioController(QObject):
         from collections import defaultdict
         from decimal import Decimal
 
-        grouped: defaultdict[tuple[str, str], Decimal | None] = defaultdict(Decimal)
-        counts: defaultdict[tuple[str, str], int] = defaultdict(int)
-        row_values: set[str] = set()
-        column_values: set[str] = set()
-        raw_values_by_cell: dict[tuple[str, str], tuple[set[str], set[str]]] = {}
+        grouped: defaultdict[tuple[tuple[Any, ...], tuple[Any, ...]], Decimal | None] = defaultdict(Decimal)
+        counts: defaultdict[tuple[tuple[Any, ...], tuple[Any, ...]], int] = defaultdict(int)
+        error_cells: set[tuple[tuple[Any, ...], tuple[Any, ...]]] = set()
+        row_values: dict[tuple[Any, ...], Any] = {}
+        column_values: dict[tuple[Any, ...], Any] = {}
+        row_displays: dict[tuple[Any, ...], str] = {}
+        column_displays: dict[tuple[Any, ...], str] = {}
+        raw_values_by_cell: dict[
+            tuple[tuple[Any, ...], tuple[Any, ...]], tuple[set[Any], set[Any]]
+        ] = {}
         for row in source_rows:
-            row_key = "(Blank)" if row.get(row_field) is None or not str(row.get(row_field)).strip() else str(row.get(row_field))
-            column_key = "(Blank)" if row.get(column_field) is None or not str(row.get(column_field)).strip() else str(row.get(column_field))
+            row_value = row.get(row_field)
+            column_value = row.get(column_field)
+            row_key, column_key = cell_key(row_value), cell_key(column_value)
             key = (row_key, column_key)
+            row_values.setdefault(row_key, row_value)
+            column_values.setdefault(column_key, column_value)
+            row_displays.setdefault(row_key, _report_cell_text(row_value))
+            column_displays.setdefault(column_key, _report_cell_text(column_value))
             if measure_name:
                 row_raw_values, column_raw_values = raw_values_by_cell.setdefault(
                     key, (set(), set())
                 )
-                row_raw_values.add("" if row.get(row_field) is None else str(row.get(row_field)))
-                column_raw_values.add("" if row.get(column_field) is None else str(row.get(column_field)))
+                row_raw_values.add(row_value)
+                column_raw_values.add(column_value)
             else:
                 raw_value = row.get(value_field)
+                if is_cell_error(raw_value):
+                    error_cells.add(key)
+                    continue
                 if aggregation == "count":
-                    if raw_value is None or not str(raw_value).strip():
+                    if raw_value is None or raw_value == "":
                         continue
                     amount = Decimal(1)
                 else:
@@ -2015,9 +2342,6 @@ class StudioController(QObject):
                         continue
                 grouped[key] += amount
                 counts[key] += 1
-            row_values.add(row_key)
-            column_values.add(column_key)
-
         if measure_name:
             for key, (row_raw_values, column_raw_values) in raw_values_by_cell.items():
                 try:
@@ -2033,7 +2357,7 @@ class StudioController(QObject):
                     )
                     counts[key] = 1
                 except (MeasureError, KeyError, TypeError, ValueError):
-                    continue
+                    error_cells.add(key)
 
         if aggregation == "average" and not measure_name:
             grouped = defaultdict(
@@ -2045,10 +2369,16 @@ class StudioController(QObject):
                 },
             )
 
-        sorted_rows = sorted(row_values, key=str.casefold)
-        sorted_columns = sorted(column_values, key=str.casefold)
-        columns = [row_field, *sorted_columns]
-        highlighted_categories: set[str] = set()
+        sorted_rows = sorted(
+            row_values,
+            key=lambda key: (row_displays[key].casefold(), row_displays[key], repr(key)),
+        )
+        sorted_columns = sorted(
+            column_values,
+            key=lambda key: (column_displays[key].casefold(), column_displays[key], repr(key)),
+        )
+        columns = [row_field, *(column_displays[key] for key in sorted_columns)]
+        highlighted_categories: set[tuple[Any, ...]] = set()
         has_highlight = any(
             selected
             and (source := next((
@@ -2063,27 +2393,28 @@ class StudioController(QObject):
                 visual_name, include_highlights=True
             )
             highlighted_categories = {
-                "(Blank)" if row.get(row_field) is None or not str(row.get(row_field)).strip()
-                else str(row.get(row_field))
+                cell_key(row.get(row_field))
                 for row in highlight_rows.get(bound_table_id, [])
             }
 
         matrix_rows = []
         for row_key in sorted_rows:
-            values = [row_key]
+            values = [row_displays[row_key]]
             for column_key in sorted_columns:
-                cell_key = (row_key, column_key)
-                if cell_key not in grouped:
+                data_key = (row_key, column_key)
+                if data_key in error_cells:
+                    values.append("Error")
+                elif data_key not in grouped:
                     values.append("")
-                elif grouped[cell_key] is None:
+                elif grouped[data_key] is None:
                     values.append("")
                 elif not measure_name and aggregation == "count":
-                    values.append(f"{int(grouped[cell_key]):,}")
+                    values.append(f"{int(grouped[data_key]):,}")
                 else:
-                    values.append(_format_report_number(grouped[cell_key]))
+                    values.append(_format_report_number(grouped[data_key]))
             matrix_rows.append({
                 "values": values,
-                "category": row_key,
+                "category": row_displays[row_key],
                 "highlighted": row_key in highlighted_categories,
             })
         return {
@@ -2134,7 +2465,7 @@ class StudioController(QObject):
                     _format_report_number(value) if value is not None else "—"
                 )
             except (MeasureError, KeyError, TypeError, ValueError):
-                formatted = "—"
+                formatted = "Error"
             has_highlights = any(
                 selected
                 and (source := next((
@@ -2159,7 +2490,7 @@ class StudioController(QObject):
                         if highlight_measure_value is not None else "—"
                     )
                 except (MeasureError, KeyError, TypeError, ValueError):
-                    highlight_value = "—"
+                    highlight_value = "Error"
             return {
                 "label": f"Measure · {measure_name}",
                 "value": formatted,
@@ -2173,8 +2504,10 @@ class StudioController(QObject):
 
         def aggregate(source_rows: list[dict[str, Any]]) -> str:
             values = [row.get(field_name) for row in source_rows]
+            if any(is_cell_error(value) for value in values):
+                return "Error"
             if aggregation == "count":
-                count = sum(value is not None and bool(str(value).strip()) for value in values)
+                count = sum(value is not None and value != "" for value in values)
                 return f"{count:,}"
             numbers = [number for value in values if (number := _report_number(value)) is not None]
             if not numbers:
@@ -2382,12 +2715,19 @@ class StudioController(QObject):
         candidate = self._loaded_candidates.get(source_id)
         if candidate is None or column not in candidate.headers:
             return []
-        distinct = {"" if row.get(column) is None else str(row.get(column, "")) for row in candidate.rows}
-        ordered = sorted(distinct, key=lambda value: (value.casefold(), value))[:1000]
-        return [
-            {"label": value if value else "(Blank)", "value": value}
-            for value in ordered
-        ]
+        distinct: dict[str, str] = {}
+        for row in candidate.rows:
+            raw_value = row.get(column)
+            if is_cell_error(raw_value):
+                continue
+            value = _encode_report_filter_value(raw_value)
+            distinct[value] = _report_filter_token_label(value)
+        distinct = _disambiguate_report_filter_labels(distinct)
+        ordered = sorted(
+            distinct.items(),
+            key=lambda item: (item[1].casefold(), item[1], item[0]),
+        )[:1000]
+        return [{"label": label, "value": value} for value, label in ordered]
 
     @Slot(str, str, str, result="QVariantList")
     def searchPageFilterValues(  # noqa: N802
@@ -2403,21 +2743,22 @@ class StudioController(QObject):
         if candidate is None or column not in candidate.headers:
             return []
         query = (search or "").strip().casefold()
-        distinct = {
-            "" if row.get(column) is None else str(row.get(column, ""))
-            for row in candidate.rows
-        }
+        distinct: dict[str, str] = {}
+        for row in candidate.rows:
+            raw_value = row.get(column)
+            if is_cell_error(raw_value):
+                continue
+            value = _encode_report_filter_value(raw_value)
+            distinct[value] = _report_filter_token_label(value)
+        distinct = _disambiguate_report_filter_labels(distinct)
         ordered = sorted(
             (
-                value for value in distinct
-                if not query or query in (value if value else "(blank)").casefold()
+                (value, label) for value, label in distinct.items()
+                if not query or query in label.casefold()
             ),
-            key=lambda value: (value.casefold(), value),
+            key=lambda item: (item[1].casefold(), item[1], item[0]),
         )[:200]
-        return [
-            {"label": value if value else "(Blank)", "value": value}
-            for value in ordered
-        ]
+        return [{"label": label, "value": value} for value, label in ordered]
 
     @Slot(str, result="QVariantList")
     def pageFilterOperators(self, column_type: str) -> list[dict[str, str]]:  # noqa: N802
@@ -2521,21 +2862,31 @@ class StudioController(QObject):
         """Summarize quality and value distribution for one active table column."""
         if not self.sourceLoaded or column not in self._headers:
             return {}
-        values = [
-            "" if row.get(column) is None else str(row.get(column, ""))
-            for row in self._rows
+        values = [row.get(column, "") for row in self._rows]
+        null_count = sum(value is None for value in values)
+        empty_count = sum(value == "" for value in values if not is_cell_error(value))
+        valid_values = [
+            value for value in values
+            if value is not None and value != "" and not is_cell_error(value)
         ]
-        non_empty = [value for value in values if value != ""]
-        frequencies: dict[str, int] = {}
-        for value in non_empty:
-            frequencies[value] = frequencies.get(value, 0) + 1
+        frequencies: dict[tuple[Any, ...], dict[str, Any]] = {}
+        for value in valid_values:
+            key = cell_key(value)
+            entry = frequencies.setdefault(key, {
+                "value": cell_to_text(value),
+                "type": _profile_cell_type(value),
+                "count": 0,
+            })
+            entry["count"] += 1
         type_name = self._active_column_type_map().get(column, "text")
-        errors = count_conversion_errors(non_empty, type_name) if type_name != "text" else 0
-        valid_count = len(non_empty) - errors
+        errors = count_conversion_errors(values, type_name) if type_name != "text" else sum(
+            is_cell_error(value) for value in values
+        )
+        valid_count = len(values) - null_count - empty_count - errors
         row_count = len(values)
         top_values = sorted(
-            frequencies.items(),
-            key=lambda item: (-item[1], item[0].casefold(), item[0]),
+            frequencies.values(),
+            key=lambda item: (-item["count"], item["value"].casefold(), item["value"], item["type"]),
         )[:5]
         return {
             "column": column,
@@ -2543,18 +2894,18 @@ class StudioController(QObject):
             "rowCount": row_count,
             "validCount": valid_count,
             "errorCount": errors,
-            "emptyCount": row_count - len(non_empty),
+            "emptyCount": empty_count,
+            "nullCount": null_count,
             "validPercent": round(valid_count * 100 / row_count) if row_count else 0,
             "errorPercent": round(errors * 100 / row_count) if row_count else 0,
-            "emptyPercent": (
-                round((row_count - len(non_empty)) * 100 / row_count)
-                if row_count else 0
-            ),
+            "emptyPercent": round(empty_count * 100 / row_count) if row_count else 0,
+            "nullPercent": round(null_count * 100 / row_count) if row_count else 0,
             "distinctCount": len(frequencies),
-            "uniqueCount": sum(1 for count in frequencies.values() if count == 1),
+            "uniqueCount": sum(1 for item in frequencies.values() if item["count"] == 1),
             "topValues": [
-                {"value": value, "count": count}
-                for value, count in top_values
+                {key: value for key, value in item.items() if key != "type"}
+                if item["type"] == "text" else item
+                for item in top_values
             ],
         }
 
@@ -3984,7 +4335,7 @@ class StudioController(QObject):
             if column_type in _REPORT_FILTER_NUMERIC_TYPES | _REPORT_FILTER_TEMPORAL_TYPES:
                 try:
                     for selected_value in selected_values:
-                        if selected_value:
+                        if selected_value and _decode_report_filter_value(selected_value) is None:
                             _parse_report_filter_value(selected_value, column_type)
                 except (DecimalException, ValueError) as exc:
                     self._set_status(str(exc) or "A selected value does not match this field's type.")
@@ -4021,11 +4372,12 @@ class StudioController(QObject):
                     self._set_status("This filter condition needs a comparison value.")
                     return False
                 elif column_type in _REPORT_FILTER_NUMERIC_TYPES | _REPORT_FILTER_TEMPORAL_TYPES:
-                    try:
-                        _parse_report_filter_value(clause_value, column_type)
-                    except (DecimalException, ValueError) as exc:
-                        self._set_status(str(exc) or "Enter a valid comparison value for this field.")
-                        return False
+                    if _decode_report_filter_value(clause_value) is None:
+                        try:
+                            _parse_report_filter_value(clause_value, column_type)
+                        except (DecimalException, ValueError) as exc:
+                            self._set_status(str(exc) or "Enter a valid comparison value for this field.")
+                            return False
                 clauses.append({"operator": clause_operator, "value": clause_value})
         if len(clauses) == 2 and logic not in {"and", "or"}:
             self._set_status("Choose AND or OR for the two filter conditions.")
@@ -6975,10 +7327,7 @@ class StudioController(QObject):
         if source.get("kind") == "inline":
             headers = list(source["headers"])
             rows = [
-                {
-                    header: "" if row[header] is None else str(row[header])
-                    for header in headers
-                }
+                {header: row[header] for header in headers}
                 for row in source["rows"]
             ]
             return ImportCandidate("inline", headers, rows, {"name": source["name"]}, [])
@@ -10579,7 +10928,7 @@ class StudioController(QObject):
         measure_name: str,
         table_context: list[dict[str, Any]],
         filter_table_ids: set[str],
-        group_filters: dict[str, str | set[str]],
+        group_filters: dict[str, Any | set[Any]],
         group_table_id: str,
     ) -> Decimal | None:
         """Evaluate one saved measure with chart-category filters applied."""
@@ -10615,17 +10964,17 @@ class StudioController(QObject):
             blank_allowed = dict(context.get("filter_column_blank_allowed", {}))
             for column, value in table_filters.items():
                 selected_values = value if isinstance(value, set) else {value}
+                selected_keys = {cell_key(item) for item in selected_values}
                 matching = frozenset(
                     index for index, row in enumerate(rows)
-                    if ("" if row.get(column) is None else str(row.get(column)))
-                    in selected_values
+                    if cell_key(row.get(column)) in selected_keys
                 )
                 existing = column_rows.get(column)
                 column_rows[column] = (
                     matching if existing is None else matching & existing
                 )
                 blank_allowed[column] = (
-                    "" in selected_values
+                    any(item is None or item == "" for item in selected_values)
                     and blank_allowed.get(column, True)
                 )
             context["filter_column_rows"] = column_rows
@@ -10680,34 +11029,51 @@ class StudioController(QObject):
     ) -> list[dict[str, object]]:
         if not category_column:
             return []
-        groups: set[tuple[str, str]] = set()
+        groups: set[tuple[tuple[Any, ...], tuple[Any, ...]]] = set()
+        category_values: dict[tuple[Any, ...], Any] = {}
+        legend_values: dict[tuple[Any, ...], Any] = {}
         for row in visual_rows:
-            category = "" if row.get(category_column) is None else str(
-                row.get(category_column)
-            )
-            legend = (
-                "" if legend_column and row.get(legend_column) is None
-                else str(row.get(legend_column, "")) if legend_column else ""
-            )
-            groups.add((category, legend))
-        grouped_values: dict[tuple[str, str], Decimal | None] = {}
-        for category, legend in groups:
-            filters = {category_column: category}
+            category = row.get(category_column)
+            legend = row.get(legend_column) if legend_column else ""
+            category_key, legend_key = cell_key(category), cell_key(legend)
+            category_values.setdefault(category_key, category)
+            legend_values.setdefault(legend_key, legend)
+            groups.add((category_key, legend_key))
+        grouped_values: dict[
+            tuple[tuple[Any, ...], tuple[Any, ...]], Decimal | None
+        ] = {}
+        for category_key, legend_key in groups:
+            filters = {category_column: category_values[category_key]}
             if stacked and legend_column:
-                filters[legend_column] = legend
-            grouped_values[(category, legend)] = self._measure_value_for_visual_group(
+                filters[legend_column] = legend_values[legend_key]
+            grouped_values[(category_key, legend_key)] = self._measure_value_for_visual_group(
                 measure_name, table_context, set(filter_table_ids), filters,
                 group_table_id,
             )
-        categories = sorted({category for category, _ in groups}, key=str.casefold)
+        categories = sorted(
+            {category for category, _ in groups},
+            key=lambda key: (
+                _report_cell_text(category_values[key]).casefold(),
+                _report_cell_text(category_values[key]), repr(key),
+            ),
+        )
         if not stacked or not legend_column:
             series: list[dict[str, object]] = []
             for category in categories:
-                value = grouped_values.get((category, ""))
+                value = grouped_values.get((category, cell_key("")))
                 if value is not None:
-                    series.append({"label": category, "value": float(value)})
+                    series.append({
+                        "label": _report_cell_text(category_values[category]),
+                        "value": float(value),
+                    })
             return series
-        legends = sorted({legend for _, legend in groups}, key=str.casefold)
+        legends = sorted(
+            {legend for _, legend in groups},
+            key=lambda key: (
+                _report_cell_text(legend_values[key]).casefold(),
+                _report_cell_text(legend_values[key]), repr(key),
+            ),
+        )
         series = []
         for category in categories:
             present = [
@@ -10718,12 +11084,12 @@ class StudioController(QObject):
             if not present:
                 continue
             series.append({
-                "label": category,
+                "label": _report_cell_text(category_values[category]),
                 "value": float(sum(
                     (value for _legend, value in present), Decimal(0)
                 )),
                 "segments": [
-                    {"label": legend, "value": float(value)}
+                    {"label": _report_cell_text(legend_values[legend]), "value": float(value)}
                     for legend, value in present
                 ],
             })
@@ -10794,15 +11160,27 @@ class StudioController(QObject):
         visual_rows = visual_rows_by_table.get(bound_table_id)
         if visual_rows is None:
             return []
+        if self._visual_has_cell_errors(visual, visual_rows_by_table):
+            return []
 
         if visual.get("type") == "slicer":
             if not x_col or _visual_measure_name(x_col) is not None:
                 return []
-            values = sorted({
-                "" if row.get(x_col) is None else str(row.get(x_col, ""))
+            values = {
+                cell_key(row.get(x_col)): row.get(x_col)
                 for row in visual_rows
-            }, key=str.casefold)
-            return [{"label": value, "value": 1.0} for value in values]
+            }
+            ordered = sorted(
+                values.values(),
+                key=lambda value: (
+                    _report_cell_text(value).casefold(),
+                    _report_cell_text(value), repr(cell_key(value)),
+                ),
+            )
+            return [
+                {"label": _report_cell_text(value), "value": 1.0}
+                for value in ordered
+            ]
 
         visual_rows = self._apply_visual_top_n_rows(
             visual_name, visual_rows, bound_table_id
@@ -10838,29 +11216,30 @@ class StudioController(QObject):
             from collections import defaultdict
             from decimal import Decimal
 
-            grouped: defaultdict[tuple[str, str], Decimal] = defaultdict(Decimal)
-            counts: defaultdict[tuple[str, str], int] = defaultdict(int)
+            grouped: defaultdict[
+                tuple[tuple[Any, ...], tuple[Any, ...]], Decimal
+            ] = defaultdict(Decimal)
+            counts: defaultdict[
+                tuple[tuple[Any, ...], tuple[Any, ...]], int
+            ] = defaultdict(int)
+            category_values: dict[tuple[Any, ...], Any] = {}
+            segment_values: dict[tuple[Any, ...], Any] = {}
             for row in visual_rows:
                 raw_value = row.get(y_col)
                 if aggregation == "count":
-                    if raw_value is None or not str(raw_value).strip():
+                    if raw_value is None or raw_value == "" or is_cell_error(raw_value):
                         continue
                     amount = Decimal(1)
-                elif raw_value is not None and str(raw_value).strip():
-                    try:
-                        amount = Decimal(str(raw_value).replace("$", "").replace(",", "").strip())
-                    except Exception:
-                        continue
-                    if not amount.is_finite():
-                        continue
                 else:
-                    continue
-
+                    amount = _report_number(raw_value)
+                    if amount is None:
+                        continue
                 category_value = row.get(x_col)
-                category = "(Blank)" if category_value is None or not str(category_value).strip() else str(category_value)
                 legend_value = row.get(legend_col) if legend_col else y_col
-                segment = "(Blank)" if legend_col and (legend_value is None or not str(legend_value).strip()) else str(legend_value)
-                key = (category, segment)
+                category_key, segment_key = cell_key(category_value), cell_key(legend_value)
+                category_values.setdefault(category_key, category_value)
+                segment_values.setdefault(segment_key, legend_value)
+                key = (category_key, segment_key)
                 grouped[key] += amount
                 counts[key] += 1
 
@@ -10874,15 +11253,27 @@ class StudioController(QObject):
                     },
                 )
 
-            categories = sorted({category for category, _ in grouped}, key=str.casefold)
-            segments = sorted({segment for _, segment in grouped}, key=str.casefold)
+            categories = sorted(
+                {category for category, _ in grouped},
+                key=lambda key: (
+                    _report_cell_text(category_values[key]).casefold(),
+                    _report_cell_text(category_values[key]), repr(key),
+                ),
+            )
+            segments = sorted(
+                {segment for _, segment in grouped},
+                key=lambda key: (
+                    _report_cell_text(segment_values[key]).casefold(),
+                    _report_cell_text(segment_values[key]), repr(key),
+                ),
+            )
             return [
                 {
-                    "label": category,
+                    "label": _report_cell_text(category_values[category]),
                     "value": float(sum((grouped.get((category, segment), Decimal(0)) for segment in segments), Decimal(0))),
                     "segments": [
                         {
-                            "label": segment,
+                            "label": _report_cell_text(segment_values[segment]),
                             "value": float(grouped.get((category, segment), Decimal(0))),
                         }
                         for segment in segments
@@ -10893,33 +11284,28 @@ class StudioController(QObject):
 
         from collections import defaultdict
         from decimal import Decimal
-        aggregated: defaultdict[str, Decimal] = defaultdict(Decimal)
-        value_counts: defaultdict[str, int] = defaultdict(int)
+        aggregated: defaultdict[tuple[Any, ...], Decimal] = defaultdict(Decimal)
+        value_counts: defaultdict[tuple[Any, ...], int] = defaultdict(int)
+        category_values: dict[tuple[Any, ...], Any] = {}
         for row in visual_rows:
             if y_col:
                 val = row.get(y_col, "")
                 if aggregation == "count":
-                    if val is None or not str(val).strip():
+                    if val is None or val == "" or is_cell_error(val):
                         continue
                     amount = Decimal(1)
-                elif val is not None and str(val).strip():
-                    # Strip currency symbols and commas if it's a string, then parse
-                    val_str = str(val).replace("$", "").replace(",", "").strip()
-                    try:
-                        amount = Decimal(val_str)
-                    except Exception:
-                        continue
-                    if not amount.is_finite():
-                        continue
                 else:
-                    continue
+                    amount = _report_number(val)
+                    if amount is None:
+                        continue
             else:
                 amount = Decimal(1)
-            
-            key = str(row.get(x_col, "")) if x_col else "(Blank)"
-            if key:
-                aggregated[key] += amount
-                value_counts[key] += 1
+
+            category = row.get(x_col) if x_col else "(Blank)"
+            key = cell_key(category)
+            category_values.setdefault(key, category)
+            aggregated[key] += amount
+            value_counts[key] += 1
 
         if aggregation == "average":
             aggregated = defaultdict(
@@ -10935,19 +11321,32 @@ class StudioController(QObject):
             "column", "area", "line", "lineClusteredColumn", "waterfall", "ribbon", "kpi",
         }:
             if visual.get("type") == "kpi":
-                def kpi_sort_key(item: tuple[str, Decimal]) -> tuple[int, Decimal | str]:
+                def kpi_sort_key(item: tuple[tuple[Any, ...], Decimal]) -> tuple[int, Decimal | str]:
+                    label = _report_cell_text(category_values[item[0]])
                     try:
-                        numeric = Decimal(item[0])
+                        numeric = Decimal(label)
                     except (DecimalException, ValueError):
-                        return (1, item[0].casefold())
-                    return (0, numeric) if numeric.is_finite() else (1, item[0].casefold())
+                        return (1, label.casefold())
+                    return (0, numeric) if numeric.is_finite() else (1, label.casefold())
 
                 ordered_values = sorted(aggregated.items(), key=kpi_sort_key)
             else:
-                ordered_values = sorted(aggregated.items())
-            series = [{"label": key, "value": float(value)} for key, value in ordered_values]
+                ordered_values = sorted(
+                    aggregated.items(),
+                    key=lambda item: (
+                        _report_cell_text(category_values[item[0]]).casefold(),
+                        _report_cell_text(category_values[item[0]]), repr(item[0]),
+                    ),
+                )
+            series = [
+                {"label": _report_cell_text(category_values[key]), "value": float(value)}
+                for key, value in ordered_values
+            ]
         else:
-            series = [{"label": key, "value": float(value)} for key, value in sorted(aggregated.items(), key=lambda x: x[1], reverse=True)]
+            series = [
+                {"label": _report_cell_text(category_values[key]), "value": float(value)}
+                for key, value in sorted(aggregated.items(), key=lambda item: item[1], reverse=True)
+            ]
 
         return series
 

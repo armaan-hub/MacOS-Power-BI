@@ -6,6 +6,8 @@ import os
 from pathlib import Path
 import tempfile
 import unittest
+from decimal import Decimal
+from decimal import Decimal
 from unittest.mock import patch
 
 os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
@@ -78,8 +80,8 @@ class WebImportLifecycleTests(unittest.TestCase):
         json_result = parse_web_payload(json_payload, json_objects[0]["options"])
         self.assertEqual(json_result.headers, ["id", "amount", "note", "active"])
         self.assertEqual(json_result.rows, [
-            {"id": "1", "amount": "12.5", "note": "", "active": ""},
-            {"id": "2", "amount": "20", "note": "", "active": "TRUE"},
+            {"id": 1, "amount": Decimal("12.5"), "note": None, "active": None},
+            {"id": 2, "amount": 20, "note": None, "active": True},
         ])
 
         csv_payload = WebPayload(

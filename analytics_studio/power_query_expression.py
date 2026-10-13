@@ -7,8 +7,9 @@ evaluated against one row at a time.
 
 from __future__ import annotations
 
-from datetime import date, datetime
+from datetime import date, datetime, time
 from decimal import Decimal, DecimalException, ROUND_HALF_EVEN, localcontext
+import math
 import re
 import unicodedata
 from typing import Any
@@ -166,11 +167,11 @@ def referenced_functions(expression: tuple[Any, ...]) -> set[str]:
 
 def evaluate_expression(
     expression: tuple[Any, ...],
-    row: dict[str, str],
+    row: dict[str, Any],
     parameters: dict[str, Any] | None = None,
     query_functions: dict[str, tuple[dict[str, str], tuple[Any, ...]]] | None = None,
 ) -> Any:
-    """Evaluate a parsed formula against one normalized-text table row."""
+    """Evaluate a parsed formula against one typed table row."""
     try:
         return _evaluate(
             _bind_parameters(expression, parameters or {}), row,
@@ -183,7 +184,7 @@ def evaluate_expression(
 
 
 def expression_value_to_text(value: Any) -> str:
-    """Convert a formula result to the app's normalized-text cell format."""
+    """Render a formula result at a text output boundary."""
     if value is None:
         return ""
     if isinstance(value, bool):
@@ -192,6 +193,12 @@ def expression_value_to_text(value: Any) -> str:
         return _decimal_to_text(value)
     if isinstance(value, date):
         return value.isoformat()
+    if isinstance(value, time):
+        return value.isoformat()
+    if isinstance(value, int) and not isinstance(value, bool):
+        return str(value)
+    if isinstance(value, float) and math.isfinite(value):
+        return str(value)
     if isinstance(value, str):
         _check_text_size(value)
         return value
@@ -458,7 +465,7 @@ def _read_string(expression: str, position: int) -> tuple[tuple[str, str, int], 
 
 def _evaluate(
     node: tuple[Any, ...],
-    row: dict[str, str],
+    row: dict[str, Any],
     query_functions: dict[str, tuple[dict[str, str], tuple[Any, ...]]] | None = None,
 ) -> Any:
     functions = query_functions or {}
@@ -469,7 +476,7 @@ def _evaluate(
         name = node[1]
         if name not in row:
             raise ExpressionError(f"Column {name!r} does not exist at this step.")
-        return None if row[name] == "" else row[name]
+        return row[name]
     if kind == "symbol":
         raise ExpressionError(
             f"The parameter {node[1]!r} has no value in this expression context."
@@ -776,6 +783,12 @@ def _value_to_text(value: Any) -> str:
     if isinstance(value, Decimal):
         return _decimal_to_text(value)
     if isinstance(value, date):
+        return value.isoformat()
+    if isinstance(value, int) and not isinstance(value, bool):
+        return str(value)
+    if isinstance(value, float) and math.isfinite(value):
+        return str(value)
+    if isinstance(value, time):
         return value.isoformat()
     if isinstance(value, str):
         return value

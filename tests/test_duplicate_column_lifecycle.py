@@ -67,8 +67,8 @@ class DuplicateColumnLifecycleTests(unittest.TestCase):
             "Amount", "Label", "Amount copy",
         ])
         self.assertEqual(dialog._preview_candidate.rows, [
-            {"Amount": "1", "Label": "A", "Amount copy": "1"},
-            {"Amount": "2", "Label": "B", "Amount copy": "2"},
+            {"Amount": 1, "Label": "A", "Amount copy": 1},
+            {"Amount": 2, "Label": "B", "Amount copy": 2},
         ])
         dialog._accept_candidate()
         self.assertTrue(controller._commit_transform_steps(
@@ -97,7 +97,7 @@ class DuplicateColumnLifecycleTests(unittest.TestCase):
         reopened = self.controller("reopened-settings.ini")
         self.assertTrue(reopened.open_project_path(project_path))
         self.assertEqual(reopened._rows, [
-            {"Amount": "3", "Label": "C", "Amount copy": "3"},
+            {"Amount": 3, "Label": "C", "Amount copy": 3},
         ])
         self.assertEqual(
             self.table_for(reopened, source_id)["column_types"]["Amount copy"],
@@ -107,8 +107,8 @@ class DuplicateColumnLifecycleTests(unittest.TestCase):
         self.source_path.write_text("Amount,Label\n004,D\n005,E\n", encoding="utf-8")
         reopened.refresh_source()
         self.assertEqual(reopened._rows, [
-            {"Amount": "4", "Label": "D", "Amount copy": "4"},
-            {"Amount": "5", "Label": "E", "Amount copy": "5"},
+            {"Amount": 4, "Label": "D", "Amount copy": 4},
+            {"Amount": 5, "Label": "E", "Amount copy": 5},
         ])
         self.assertEqual(
             self.table_for(reopened, source_id)["column_types"]["Amount copy"],

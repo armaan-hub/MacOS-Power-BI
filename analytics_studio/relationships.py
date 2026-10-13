@@ -7,6 +7,8 @@ from copy import deepcopy
 from decimal import Decimal, DecimalException
 from typing import Any
 
+from analytics_studio.power_query_values import cell_to_text, is_cell_error
+
 
 RELATIONSHIP_VERSION = 1
 RELATIONSHIP_CARDINALITIES = {
@@ -202,12 +204,19 @@ def propagate_relationship_filters(
 
 
 def _relationship_value_key(value: Any, column_type: str) -> tuple[str, Any]:
-    if value is None or str(value) == "":
-        return "blank", ""
-    text = str(value)
+    if is_cell_error(value):
+        raise RelationshipError(
+            "A relationship key contains a Power Query cell error; remove or replace the error first."
+        )
+    if value is None:
+        return "null", None
+    if isinstance(value, str) and value == "":
+        return "empty", ""
     if column_type in {"whole_number", "decimal_number"}:
+        if isinstance(value, bool):
+            raise RelationshipError("A relationship key contains a value that does not match its model type.")
         try:
-            number = Decimal(text)
+            number = Decimal(cell_to_text(value))
         except DecimalException as exc:
             raise RelationshipError("A relationship key contains a value that is not numeric.") from exc
         if not number.is_finite() or (
@@ -215,10 +224,18 @@ def _relationship_value_key(value: Any, column_type: str) -> tuple[str, Any]:
         ):
             raise RelationshipError("A relationship key contains a value that does not match its model type.")
         return "number", number
+    if column_type == "boolean":
+        if isinstance(value, bool):
+            return "boolean", value
+        if isinstance(value, str) and value.casefold() in {"true", "false"}:
+            return "boolean", value.casefold() == "true"
+        raise RelationshipError("A relationship key contains a value that does not match its model type.")
+    if isinstance(value, bool):
+        return "boolean", value
     # The local model has no persisted collation setting. Use the common
     # case-insensitive convention consistently for relationship joins,
     # one-side uniqueness, unknown-member detection, and RELATED lookups.
-    return "value", text.casefold()
+    return "value", cell_to_text(value).casefold()
 
 
 def unknown_member_table_ids(

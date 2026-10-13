@@ -141,7 +141,7 @@ class RefreshAllTests(unittest.TestCase):
 
         expected_current = [
             {"id": "A", "value": "10"},
-            {"id": "B", "value": "20"},
+            {"id": "B", "value": 20},
             {"id": "C", "value": "30"},
         ]
         self.assertEqual(controller._loaded_candidates[first_query_id].rows, expected_current[:2])
@@ -333,8 +333,8 @@ class RefreshAllTests(unittest.TestCase):
         self.assertEqual(web_read.call_count, 1)
         self.assertEqual(sql_read.call_count, 1)
         self.assertEqual(controller._loaded_candidates[sqlite_id].rows, [
-            {"id": "1", "value": "20"},
-            {"id": "2", "value": "30"},
+            {"id": 1, "value": 20},
+            {"id": 2, "value": 30},
         ])
         self.assertEqual(controller._loaded_candidates[odata_id].rows, [{"id": "O", "value": "2"}])
         self.assertEqual(controller._loaded_candidates[web_id].rows, [{"id": "W", "value": "2"}])

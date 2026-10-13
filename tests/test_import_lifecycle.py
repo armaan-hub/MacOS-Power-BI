@@ -304,9 +304,12 @@ class ImportLifecycleTests(unittest.TestCase):
             encoding="utf-8",
         )
 
-        expected = {"name": "Ada", "amount": "12"}
         for source_path in (csv_path, excel_path, json_path, xml_path):
             with self.subTest(kind=source_path.suffix):
+                expected = {
+                    "name": "Ada",
+                    "amount": 12 if source_path.suffix in {".xlsx", ".json"} else "12",
+                }
                 controller = self.new_controller()
                 dialog = FileImportPreviewDialog(source_path, replacing=False)
                 if source_path.suffix in {".xlsx", ".xlsm", ".xls"}:

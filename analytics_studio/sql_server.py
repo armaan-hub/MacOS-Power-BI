@@ -16,6 +16,7 @@ from analytics_studio.file_import import (
     ImportCandidate,
     _normalize_headers,
 )
+from analytics_studio.power_query_values import cell_to_text
 
 
 SUPPORTED_DRIVERS = (
@@ -143,7 +144,7 @@ def read_sql_server_object(
         if width > MAX_COLUMNS:
             raise SQLServerError(f"The selected table has more than {MAX_COLUMNS} columns.")
         effective_row_limit = min(row_limit, MAX_CELLS // max(width, 1))
-        rows: list[dict[str, str]] = []
+        rows: list[dict[str, Any]] = []
         text_size = 0
         truncated = False
         while True:
@@ -154,10 +155,10 @@ def read_sql_server_object(
                 if len(rows) >= effective_row_limit:
                     truncated = True
                     break
-                values: dict[str, str] = {}
+                values: dict[str, Any] = {}
                 for header, value in zip(headers, record):
-                    text = _cell_text(value)
-                    encoded_size = len(text.encode("utf-8"))
+                    cell = _cell_value(value)
+                    encoded_size = len(cell_to_text(cell).encode("utf-8"))
                     if encoded_size > 1024 * 1024:
                         raise SQLServerError("A SQL Server value exceeds the 1 MiB per-cell text limit.")
                     text_size += encoded_size
@@ -165,7 +166,7 @@ def read_sql_server_object(
                         raise SQLServerError(
                             f"The SQL Server result exceeds the {MAX_SQLITE_TEXT_BYTES // (1024 * 1024)} MiB text limit."
                         )
-                    values[header] = text
+                    values[header] = cell
                 rows.append(values)
             if truncated:
                 break
@@ -267,11 +268,7 @@ def _required_identifier(settings: dict[str, Any], key: str, maximum: int) -> st
     return value
 
 
-def _cell_text(value: Any) -> str:
-    if value is None:
-        return ""
-    if isinstance(value, bool):
-        return "TRUE" if value else "FALSE"
+def _cell_value(value: Any) -> Any:
     if isinstance(value, (bytes, bytearray, memoryview)):
         raise SQLServerError("Binary SQL Server columns can't be imported as table text.")
     if isinstance(value, float) and not math.isfinite(value):
@@ -279,11 +276,11 @@ def _cell_text(value: Any) -> str:
     if isinstance(value, Decimal) and not value.is_finite():
         raise SQLServerError("The SQL Server result contains a non-finite number.")
     if isinstance(value, (datetime, date, time)):
-        return value.isoformat()
+        return value
     if isinstance(value, UUID):
         return str(value)
-    if isinstance(value, (str, int, float, Decimal)):
-        return str(value)
+    if value is None or isinstance(value, (str, bool, int, float, Decimal)):
+        return value
     raise SQLServerError(f"SQL Server returned an unsupported value type: {type(value).__name__}.")
 
 

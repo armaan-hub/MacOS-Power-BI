@@ -6,6 +6,8 @@ import os
 from pathlib import Path
 import tempfile
 import unittest
+from datetime import date, datetime, time
+from decimal import Decimal
 
 os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
 
@@ -78,11 +80,11 @@ class ChangeTypeUsingLocaleLifecycleTests(unittest.TestCase):
             self.add_locale_step(dialog, column, target_type)
 
         expected = {
-            "Whole": "1234",
-            "Decimal": "1234.50",
-            "Date": "2024-12-31",
-            "Stamp": "2024-12-31T13:45:00",
-            "Clock": "13:45:30",
+            "Whole": 1234,
+            "Decimal": Decimal("1234.50"),
+            "Date": date(2024, 12, 31),
+            "Stamp": datetime(2024, 12, 31, 13, 45),
+            "Clock": time(13, 45, 30),
         }
         self.assertEqual(dialog._preview_candidate.rows, [expected])
         dialog._accept_candidate()
@@ -111,11 +113,11 @@ class ChangeTypeUsingLocaleLifecycleTests(unittest.TestCase):
         reopened = self.controller("reopened-settings.ini")
         self.assertTrue(reopened.open_project_path(project_path))
         self.assertEqual(reopened._rows, [{
-            "Whole": "2000",
-            "Decimal": "2500.25",
-            "Date": "2025-01-01",
-            "Stamp": "2025-01-01T00:00:00",
-            "Clock": "14:15:00",
+            "Whole": 2000,
+            "Decimal": Decimal("2500.25"),
+            "Date": date(2025, 1, 1),
+            "Stamp": datetime(2025, 1, 1, 0, 0),
+            "Clock": time(14, 15),
         }])
 
         self.source_path.write_text(
@@ -125,11 +127,11 @@ class ChangeTypeUsingLocaleLifecycleTests(unittest.TestCase):
         )
         reopened.refresh_source()
         self.assertEqual(reopened._rows, [{
-            "Whole": "3000",
-            "Decimal": "3750.75",
-            "Date": "2025-01-02",
-            "Stamp": "2025-01-02T15:30:00",
-            "Clock": "16:00:00",
+            "Whole": 3000,
+            "Decimal": Decimal("3750.75"),
+            "Date": date(2025, 1, 2),
+            "Stamp": datetime(2025, 1, 2, 15, 30),
+            "Clock": time(16, 0),
         }])
 
 

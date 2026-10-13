@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import os
 from pathlib import Path
+from datetime import date
 import tempfile
 import unittest
 from unittest.mock import patch
@@ -187,7 +188,7 @@ class DateTableLifecycleTests(unittest.TestCase):
         self.assertTrue(controller.setColumnType("Date", "date"), controller.statusMessage)
         self.assertEqual(controller._project["model"]["tables"][0]["date_column"], "Date")
         self.assertEqual(controller._project["model"]["tables"][0]["column_types"]["Date"], "date")
-        self.assertEqual(controller._rows[0]["Date"], "2024-01-01")
+        self.assertEqual(controller._rows[0]["Date"], date(2024, 1, 1))
 
     def test_user_can_clear_an_existing_date_table_mark(self) -> None:
         controller = self.controller("settings.ini")

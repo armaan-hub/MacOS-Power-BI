@@ -1723,7 +1723,7 @@ class CalculateBooleanFilterTests(unittest.TestCase):
         )
         self.assertEqual(values, {
             "ALL Parent Rows": 4,
-            "ALL Parent Keys": 3,
+            "ALL Parent Keys": 4,
         })
 
     def test_allnoblankrow_excludes_virtual_member_but_keeps_physical_blank(self) -> None:

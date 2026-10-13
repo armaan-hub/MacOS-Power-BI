@@ -4,9 +4,10 @@ from __future__ import annotations
 
 from collections import defaultdict
 from copy import deepcopy
-from typing import Sequence
+from typing import Any, Sequence
 
 from analytics_studio.file_import import MAX_CELLS, MAX_COLUMNS, MAX_DATA_ROWS, ImportCandidate
+from analytics_studio.power_query_values import cell_key, is_cell_error
 
 
 class QueryError(ValueError):
@@ -108,19 +109,18 @@ def merge_candidates(
     if len(output_headers) > MAX_COLUMNS:
         raise QueryError(f"The merged table exceeds the {MAX_COLUMNS:,}-column limit.")
 
-    right_index: dict[tuple[str, ...], list[int]] = defaultdict(list)
-    right_keys_by_row: list[tuple[str, ...] | None] = []
+    right_index: dict[tuple[tuple[Any, ...], ...], list[int]] = defaultdict(list)
+    right_keys_by_row: list[tuple[tuple[Any, ...], ...]] = []
     for row_index, row in enumerate(right.rows):
         key = _merge_key(row, right_keys)
         right_keys_by_row.append(key)
-        if key is not None:
-            right_index[key].append(row_index)
+        right_index[key].append(row_index)
     left_keys_present = {
-        key for row in left.rows
-        if (key := _merge_key(row, left_keys)) is not None
+        _merge_key(row, left_keys)
+        for row in left.rows
     }
 
-    output_rows: list[dict[str, str]] = []
+    output_rows: list[dict[str, Any]] = []
     matched_right: set[int] = set()
 
     def add_row(left_index: int | None, right_index_value: int | None) -> None:
@@ -130,19 +130,17 @@ def merge_candidates(
             raise QueryError(f"The merged table exceeds the {MAX_CELLS:,}-cell limit.")
         left_row = left.rows[left_index] if left_index is not None else None
         right_row = right.rows[right_index_value] if right_index_value is not None else None
-        output: dict[str, str] = {}
+        output: dict[str, Any] = {}
         for header in left.headers:
-            value = left_row.get(header, "") if left_row is not None else ""
-            output[header] = "" if value is None else str(value)
+            output[header] = left_row.get(header) if left_row is not None else None
         for output_header in output_headers[len(left.headers):]:
             source_column = column_sources[output_header]["column"]
-            value = right_row.get(source_column, "") if right_row is not None else ""
-            output[output_header] = "" if value is None else str(value)
+            output[output_header] = right_row.get(source_column) if right_row is not None else None
         output_rows.append(output)
 
     for left_index, row in enumerate(left.rows):
         key = _merge_key(row, left_keys)
-        matches = right_index.get(key, []) if key is not None else []
+        matches = right_index.get(key, [])
         if join_kind == "left_anti":
             if not matches:
                 add_row(left_index, None)
@@ -158,7 +156,7 @@ def merge_candidates(
 
     if join_kind == "right_anti":
         for right_index_value, key in enumerate(right_keys_by_row):
-            if key is None or key not in left_keys_present:
+            if key not in left_keys_present:
                 add_row(None, right_index_value)
     elif join_kind in {"right_outer", "full_outer"}:
         for right_index_value in range(len(right.rows)):
@@ -174,8 +172,10 @@ def merge_candidates(
     )
 
 
-def _merge_key(row: dict[str, str], columns: Sequence[str]) -> tuple[str, ...] | None:
-    values = tuple(row.get(column, "") for column in columns)
-    if any(value is None or str(value) == "" for value in values):
-        return None
-    return tuple(str(value) for value in values)
+def _merge_key(
+    row: dict[str, Any], columns: Sequence[str]
+) -> tuple[tuple[Any, ...], ...]:
+    values = tuple(row.get(column) for column in columns)
+    if any(is_cell_error(value) for value in values):
+        raise QueryError("A merge key contains a cell error and cannot be compared.")
+    return tuple(cell_key(value) for value in values)

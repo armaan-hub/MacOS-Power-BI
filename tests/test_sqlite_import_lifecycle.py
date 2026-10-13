@@ -92,15 +92,15 @@ class SQLiteImportLifecycleTests(unittest.TestCase):
         self.assertEqual(
             controller._loaded_candidates[table_id].rows,
             [
-                {"id": "1", "amount": "10", "note": ""},
-                {"id": "2", "amount": "20", "note": "initial"},
+                {"id": 1, "amount": 10, "note": None},
+                {"id": 2, "amount": 20, "note": "initial"},
             ],
         )
         self.assertEqual(
             controller._loaded_candidates[view_id].rows,
             [
-                {"id": "1", "amount": "10", "doubled": "20"},
-                {"id": "2", "amount": "20", "doubled": "40"},
+                {"id": 1, "amount": 10, "doubled": 20},
+                {"id": 2, "amount": 20, "doubled": 40},
             ],
         )
 
@@ -115,11 +115,11 @@ class SQLiteImportLifecycleTests(unittest.TestCase):
         self.assertTrue(reopened.open_project_path(project_path))
         self.assertEqual(
             reopened._loaded_candidates[table_id].rows[-1],
-            {"id": "3", "amount": "30", "note": "new"},
+            {"id": 3, "amount": 30, "note": "new"},
         )
         self.assertEqual(
             reopened._loaded_candidates[view_id].rows[-1],
-            {"id": "3", "amount": "30", "doubled": "60"},
+            {"id": 3, "amount": 30, "doubled": 60},
         )
 
         with closing(sqlite3.connect(self.database_path)) as database:
@@ -127,10 +127,10 @@ class SQLiteImportLifecycleTests(unittest.TestCase):
                 database.execute("UPDATE metrics SET amount = 25 WHERE id = 1")
         reopened.refresh_all_sources()
         self.assertEqual(
-            reopened._loaded_candidates[table_id].rows[0]["amount"], "25"
+            reopened._loaded_candidates[table_id].rows[0]["amount"], 25
         )
         self.assertEqual(
-            reopened._loaded_candidates[view_id].rows[0]["doubled"], "50"
+            reopened._loaded_candidates[view_id].rows[0]["doubled"], 50
         )
 
     def test_source_settings_preview_can_switch_sqlite_table_or_view(self) -> None:
@@ -182,7 +182,7 @@ class SQLiteImportLifecycleTests(unittest.TestCase):
         self.assertEqual(selected, ["metrics_view"])
         self.assertEqual(
             controller._loaded_candidates[controller.activeTableId].rows[0],
-            {"id": "1", "amount": "10", "doubled": "20"},
+            {"id": 1, "amount": 10, "doubled": 20},
         )
 
 

@@ -112,8 +112,8 @@ class SavedAppendLifecycleTests(unittest.TestCase):
             "operation": "append", "source_ids": source_ids,
         })
         self.assertEqual(controller._loaded_candidates[query_id].rows, [
-            {"id": "N1", "amount": "10"},
-            {"id": "S1", "amount": "20"},
+            {"id": "N1", "amount": 10},
+            {"id": "S1", "amount": 20},
         ])
 
         project_path = self.root / "append-project.npa"
@@ -127,9 +127,9 @@ class SavedAppendLifecycleTests(unittest.TestCase):
         self.assertTrue(reopened.open_project_path(project_path))
         self.assertEqual(reopened.activeTableId, query_id)
         self.assertEqual(reopened._loaded_candidates[query_id].rows, [
-            {"id": "N1", "amount": "100"},
-            {"id": "N2", "amount": "110"},
-            {"id": "S1", "amount": "200"},
+            {"id": "N1", "amount": 100},
+            {"id": "N2", "amount": 110},
+            {"id": "S1", "amount": 200},
         ])
 
         self.left_path.write_text(
@@ -140,10 +140,10 @@ class SavedAppendLifecycleTests(unittest.TestCase):
         )
         reopened.refresh_all_sources()
         self.assertEqual(reopened._loaded_candidates[query_id].rows, [
-            {"id": "N1", "amount": "101"},
-            {"id": "N2", "amount": "111"},
-            {"id": "S1", "amount": "201"},
-            {"id": "S2", "amount": "210"},
+            {"id": "N1", "amount": 101},
+            {"id": "N2", "amount": 111},
+            {"id": "S1", "amount": 201},
+            {"id": "S2", "amount": 210},
         ])
 
 

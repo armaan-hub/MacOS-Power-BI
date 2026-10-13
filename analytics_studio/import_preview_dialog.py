@@ -41,6 +41,7 @@ from analytics_studio.file_import import (
     normalize_options,
     parse_file,
 )
+from analytics_studio.power_query_values import cell_to_text
 
 
 PREVIEW_ROW_LIMIT = 100
@@ -189,7 +190,7 @@ class ImportPreviewTableModel(QAbstractTableModel):
         if index.row() >= len(self._rows) or index.column() >= len(self._headers):
             return None
         value = self._rows[index.row()].get(self._headers[index.column()], "")
-        return "" if value is None else str(value)
+        return "(null)" if value is None else cell_to_text(value)
 
     def headerData(
         self,

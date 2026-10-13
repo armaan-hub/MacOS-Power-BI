@@ -73,7 +73,7 @@ class PromoteHeadersLifecycleTests(unittest.TestCase):
             dialog.option_combo.findData("whole_number")
         )
         dialog._add_step()
-        self.assertEqual(dialog._preview_candidate.rows[0]["Column 2"], "1")
+        self.assertEqual(dialog._preview_candidate.rows[0]["Column 2"], 1)
         dialog._accept_candidate()
         self.assertTrue(controller._commit_transform_steps(
             source_id, dialog.steps, dialog.candidate, previewed_source=raw
@@ -93,8 +93,8 @@ class PromoteHeadersLifecycleTests(unittest.TestCase):
         reopened = self.controller("reopened-settings.ini")
         self.assertTrue(reopened.open_project_path(project_path))
         self.assertEqual(reopened._rows, [
-            {"Name": "Count", "Column 2": "4", "Name.1": "Zone"},
-            {"Name": "Cara", "Column 2": "8", "Name.1": "South"},
+            {"Name": "Count", "Column 2": 4, "Name.1": "Zone"},
+            {"Name": "Cara", "Column 2": 8, "Name.1": "South"},
         ])
         self.assertEqual(
             self.table_for(reopened, source_id)["column_types"]["Column 2"],
@@ -107,8 +107,8 @@ class PromoteHeadersLifecycleTests(unittest.TestCase):
         )
         reopened.refresh_source()
         self.assertEqual(reopened._rows, [
-            {"Name": "Count", "Column 2": "7", "Name.1": "Zone"},
-            {"Name": "Dana", "Column 2": "9", "Name.1": "North"},
+            {"Name": "Count", "Column 2": 7, "Name.1": "Zone"},
+            {"Name": "Dana", "Column 2": 9, "Name.1": "North"},
         ])
 
     def test_promote_headers_reports_an_empty_table(self) -> None:

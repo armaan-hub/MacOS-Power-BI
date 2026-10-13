@@ -59,9 +59,9 @@ class AddIndexColumnLifecycleTests(unittest.TestCase):
         dialog.index_increment_edit.setText("-10")
         dialog._add_step()
         self.assertEqual(dialog._preview_candidate.rows, [
-            {"name": "A", "Sequence": "100"},
-            {"name": "B", "Sequence": "90"},
-            {"name": "C", "Sequence": "80"},
+            {"name": "A", "Sequence": 100},
+            {"name": "B", "Sequence": 90},
+            {"name": "C", "Sequence": 80},
         ])
         dialog._accept_candidate()
         self.assertTrue(controller._commit_transform_steps(
@@ -79,8 +79,8 @@ class AddIndexColumnLifecycleTests(unittest.TestCase):
         reopened = self.controller("reopened-settings.ini")
         self.assertTrue(reopened.open_project_path(project_path))
         self.assertEqual(reopened._rows, [
-            {"name": "D", "Sequence": "100"},
-            {"name": "E", "Sequence": "90"},
+            {"name": "D", "Sequence": 100},
+            {"name": "E", "Sequence": 90},
         ])
         self.assertEqual(
             self.table_for(reopened, source_id)["column_types"]["Sequence"],
@@ -89,7 +89,7 @@ class AddIndexColumnLifecycleTests(unittest.TestCase):
 
         self.source_path.write_text("name\nF\n", encoding="utf-8")
         reopened.refresh_source()
-        self.assertEqual(reopened._rows, [{"name": "F", "Sequence": "100"}])
+        self.assertEqual(reopened._rows, [{"name": "F", "Sequence": 100}])
 
 
 if __name__ == "__main__":

@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import os
 from pathlib import Path
+from datetime import date
 import tempfile
 import unittest
 from unittest.mock import patch
@@ -106,9 +107,9 @@ class CalendarTableLifecycleTests(unittest.TestCase):
         self.assertEqual(table["date_column"], "Date")
         self.assertEqual(table["column_types"]["Date"], "date")
         self.assertEqual(controller._loaded_candidates[source_id].rows, [
-            {"Date": "2024-02-28"},
-            {"Date": "2024-02-29"},
-            {"Date": "2024-03-01"},
+            {"Date": date(2024, 2, 28)},
+            {"Date": date(2024, 2, 29)},
+            {"Date": date(2024, 3, 1)},
         ])
         self.assertEqual(controller.tableCatalog[0]["queryExpression"],
                          "CALENDAR(DATE(2024, 2, 28), DATE(2024, 3, 1))")
@@ -152,8 +153,8 @@ class CalendarTableLifecycleTests(unittest.TestCase):
             str(sales_id), str(forecast_id),
         ])
         calendar_rows = controller._loaded_candidates[calendar_id].rows
-        self.assertEqual(calendar_rows[0]["Date"], "2019-04-01")
-        self.assertEqual(calendar_rows[-1]["Date"], "2023-03-31")
+        self.assertEqual(calendar_rows[0]["Date"], date(2019, 4, 1))
+        self.assertEqual(calendar_rows[-1]["Date"], date(2023, 3, 31))
         table = controller._model_table_for_source(controller._project, calendar_id)
         self.assertEqual(table["date_column"], "Date")
         self.assertEqual(controller.tableCatalog[-1]["queryExpression"], "CALENDARAUTO(3)")
@@ -169,7 +170,7 @@ class CalendarTableLifecycleTests(unittest.TestCase):
         self.assertTrue(controller.setColumnType("ExtraDate", "date"), controller.statusMessage)
         self.assertEqual(
             controller._loaded_candidates[calendar_id].rows[0]["Date"],
-            "2018-04-01",
+            date(2018, 4, 1),
         )
         self.assertIn(
             late_id,
@@ -186,7 +187,7 @@ class CalendarTableLifecycleTests(unittest.TestCase):
         self.assertTrue(reopened.open_project_path(project_path))
         self.assertEqual(
             reopened._loaded_candidates[calendar_id].rows[-1]["Date"],
-            "2025-03-31",
+            date(2025, 3, 31),
         )
 
         late_source_path.write_text(
@@ -195,7 +196,7 @@ class CalendarTableLifecycleTests(unittest.TestCase):
         reopened.refresh_all_sources()
         self.assertEqual(
             reopened._loaded_candidates[calendar_id].rows[-1]["Date"],
-            "2027-03-31",
+            date(2027, 3, 31),
         )
 
 

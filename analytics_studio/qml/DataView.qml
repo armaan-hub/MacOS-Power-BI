@@ -325,6 +325,12 @@ Item {
                     font.pixelSize: 10
                 }
                 Text {
+                    text: "Null " + dataPage.activeColumnProfile.nullCount
+                          + " (" + dataPage.activeColumnProfile.nullPercent + "%)"
+                    color: "#596a79"
+                    font.pixelSize: 10
+                }
+                Text {
                     text: "Distinct " + dataPage.activeColumnProfile.distinctCount
                           + " · unique " + dataPage.activeColumnProfile.uniqueCount
                     color: "#596a79"
@@ -335,7 +341,10 @@ Item {
                     text: {
                         const top = dataPage.activeColumnProfile.topValues || []
                         const values = top.map(function(item) {
-                            return String(item.value) + " (" + item.count + ")"
+                            const typedValue = !item.type || item.type === "text"
+                                    ? String(item.value)
+                                    : String(item.value) + " [" + item.type + "]"
+                            return typedValue + " (" + item.count + ")"
                         })
                         return "Top: " + (values.length ? values.join(", ") : "No non-empty values")
                     }

@@ -69,8 +69,8 @@ class ReorderColumnsLifecycleTests(unittest.TestCase):
             "region", "name", "amount",
         ])
         self.assertEqual(dialog._preview_candidate.rows, [
-            {"region": "East", "name": "A", "amount": "10"},
-            {"region": "West", "name": "B", "amount": "20"},
+            {"region": "East", "name": "A", "amount": 10},
+            {"region": "West", "name": "B", "amount": 20},
         ])
         dialog._accept_candidate()
         self.assertTrue(controller._commit_transform_steps(
@@ -90,7 +90,7 @@ class ReorderColumnsLifecycleTests(unittest.TestCase):
         reopened = self.controller("reopened-settings.ini")
         self.assertTrue(reopened.open_project_path(project_path))
         self.assertEqual(reopened._rows, [
-            {"region": "North", "name": "C", "amount": "30"},
+            {"region": "North", "name": "C", "amount": 30},
         ])
         self.assertEqual(
             self.table_for(reopened, source_id)["column_types"]["amount"],
@@ -102,8 +102,8 @@ class ReorderColumnsLifecycleTests(unittest.TestCase):
         )
         reopened.refresh_source()
         self.assertEqual(reopened._rows, [
-            {"region": "South", "name": "D", "amount": "40"},
-            {"region": "Central", "name": "E", "amount": "50"},
+            {"region": "South", "name": "D", "amount": 40},
+            {"region": "Central", "name": "E", "amount": 50},
         ])
 
 

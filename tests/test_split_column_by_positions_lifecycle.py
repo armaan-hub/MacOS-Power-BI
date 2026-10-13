@@ -69,9 +69,9 @@ class SplitColumnByPositionsLifecycleTests(unittest.TestCase):
         dialog._add_step()
         expected_headers = ["Code.1", "Code.2", "Code.3", "Amount"]
         expected_rows = [
-            {"Code.1": "A🙂", "Code.2": "B-", "Code.3": "C", "Amount": "10"},
-            {"Code.1": "AB", "Code.2": "", "Code.3": "", "Amount": "20"},
-            {"Code.1": "Z🌍", "Code.2": "Q-", "Code.3": "R", "Amount": "30"},
+            {"Code.1": "A🙂", "Code.2": "B-", "Code.3": "C", "Amount": 10},
+            {"Code.1": "AB", "Code.2": "", "Code.3": "", "Amount": 20},
+            {"Code.1": "Z🌍", "Code.2": "Q-", "Code.3": "R", "Amount": 30},
         ]
         self.assertEqual(dialog._preview_candidate.headers, expected_headers)
         self.assertEqual(dialog._preview_candidate.rows, expected_rows)
@@ -98,8 +98,8 @@ class SplitColumnByPositionsLifecycleTests(unittest.TestCase):
         reopened = self.controller("reopened-settings.ini")
         self.assertTrue(reopened.open_project_path(project_path))
         self.assertEqual(reopened._rows, [
-            {"Code.1": "M🙂", "Code.2": "N-", "Code.3": "O", "Amount": "40"},
-            {"Code.1": "PQ", "Code.2": "", "Code.3": "", "Amount": "50"},
+            {"Code.1": "M🙂", "Code.2": "N-", "Code.3": "O", "Amount": 40},
+            {"Code.1": "PQ", "Code.2": "", "Code.3": "", "Amount": 50},
         ])
 
         self.source_path.write_text(
@@ -107,7 +107,7 @@ class SplitColumnByPositionsLifecycleTests(unittest.TestCase):
         )
         reopened.refresh_source()
         self.assertEqual(reopened._rows, [
-            {"Code.1": "T🙂", "Code.2": "U-", "Code.3": "V", "Amount": "60"},
+            {"Code.1": "T🙂", "Code.2": "U-", "Code.3": "V", "Amount": 60},
         ])
 
     def test_split_positions_reject_non_increasing_indexes(self) -> None:

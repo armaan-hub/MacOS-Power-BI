@@ -5,12 +5,17 @@ from __future__ import annotations
 import copy
 import json
 import unittest
+from datetime import date
+from decimal import Decimal
 from unittest.mock import patch
 
 from analytics_studio.file_import import ImportCandidate
+from analytics_studio.power_query_values import PowerQueryCellError, is_cell_error
 from analytics_studio.transformations import (
     TransformationError,
     apply_transformations,
+    column_types_after_steps,
+    count_conversion_errors,
     infer_column_types,
 )
 
@@ -99,6 +104,24 @@ class TransformationTests(unittest.TestCase):
             {"Metric": "decimal_number", "Key": "text"},
         )
 
+    def test_type_detection_keeps_whitespace_only_values_as_text(self) -> None:
+        self.assertEqual(
+            infer_column_types(["Amount"], [{"Amount": "12"}, {"Amount": " "}]),
+            {"Amount": "text"},
+        )
+        self.assertEqual(
+            infer_column_types(
+                ["Flag"], [{"Flag": "true"}, {"Flag": " "}], sample_size=1
+            ),
+            {"Flag": "text"},
+        )
+
+    def test_conversion_quality_does_not_count_null_or_empty_as_errors(self) -> None:
+        self.assertEqual(
+            count_conversion_errors([None, "", "12", " "], "whole_number"),
+            1,
+        )
+
     def test_ordered_steps_rename_convert_filter_and_sort(self) -> None:
         source = candidate()
 
@@ -111,7 +134,7 @@ class TransformationTests(unittest.TestCase):
 
         self.assertEqual(result.headers, ["Name", "Revenue", "Active", "Date", "Group"])
         self.assertEqual([row["Name"] for row in result.rows], ["gamma", "alpha"])
-        self.assertEqual(result.rows[1]["Revenue"], "10")
+        self.assertEqual(result.rows[1]["Revenue"], Decimal("10"))
         self.assertEqual(result.options, source.options)
         self.assertEqual(result.notices, source.notices)
         self.assertIsNot(result, source)
@@ -138,7 +161,7 @@ class TransformationTests(unittest.TestCase):
         self.assertEqual([row["Name"] for row in not_equals.rows], ["beta"])
         self.assertEqual([row["Name"] for row in less_than.rows], ["beta"])
 
-    def test_convert_supported_types_and_keep_empty_cells_empty(self) -> None:
+    def test_convert_supported_types_keeps_null_and_turns_empty_text_into_error(self) -> None:
         source = candidate()
         source.rows[0]["Active"] = " true "
         source.rows[2]["Active"] = "TRUE"
@@ -150,9 +173,160 @@ class TransformationTests(unittest.TestCase):
             {"op": "convert_type", "column": "Date", "type": "date"},
         ])
 
-        self.assertEqual([row["Active"] for row in result.rows], ["true", "false", "true"])
-        self.assertEqual(result.rows[0]["Date"], "2024-01-02")
-        self.assertEqual(result.rows[1]["Date"], "")
+        self.assertEqual([row["Active"] for row in result.rows], [True, False, True])
+        self.assertEqual(result.rows[0]["Date"], date(2024, 1, 2))
+        self.assertIsInstance(result.rows[1]["Date"], PowerQueryCellError)
+        self.assertEqual(result.rows[1]["Date"].value, "")
+
+    def test_null_empty_native_values_and_conversion_errors_remain_distinct(self) -> None:
+        source = ImportCandidate("inline", ["Value"], [
+            {"Value": 12},
+            {"Value": "12"},
+            {"Value": None},
+            {"Value": ""},
+            {"Value": "bad"},
+        ], {}, [])
+
+        result = apply_transformations(source, [{
+            "op": "convert_type", "column": "Value", "type": "decimal_number",
+        }])
+
+        self.assertEqual(result.rows[0]["Value"], Decimal(12))
+        self.assertEqual(result.rows[1]["Value"], Decimal(12))
+        self.assertIsNone(result.rows[2]["Value"])
+        self.assertIsInstance(result.rows[3]["Value"], PowerQueryCellError)
+        self.assertEqual(result.rows[3]["Value"].value, "")
+        self.assertIsInstance(result.rows[4]["Value"], PowerQueryCellError)
+
+    def test_split_column_preserves_null_and_error_in_both_outputs(self) -> None:
+        error = PowerQueryCellError("DataFormat.Error", "bad text", "bad", "text", row=2)
+        source = ImportCandidate("inline", ["Value"], [
+            {"Value": None}, {"Value": error}, {"Value": "left:right"},
+        ], {}, [])
+
+        result = apply_transformations(source, [{
+            "op": "split_column", "column": "Value", "delimiter": ":",
+        }])
+
+        self.assertEqual(result.rows[0], {"Value.1": None, "Value.2": None})
+        self.assertEqual(result.rows[1]["Value.1"], error)
+        self.assertEqual(result.rows[1]["Value.2"], error)
+        self.assertEqual(result.rows[2], {"Value.1": "left", "Value.2": "right"})
+
+    def test_group_and_pivot_reject_error_keys_and_typed_category_collisions(self) -> None:
+        error = PowerQueryCellError("DataFormat.Error", "bad key", "bad", "text", row=2)
+        group_source = ImportCandidate("inline", ["Key", "Amount"], [
+            {"Key": "ok", "Amount": 1}, {"Key": error, "Amount": 2},
+        ], {}, [])
+        pivot_source = ImportCandidate("inline", ["Key", "Attribute", "Value"], [
+            {"Key": "x", "Attribute": 1, "Value": 10},
+            {"Key": "x", "Attribute": "1", "Value": 20},
+        ], {}, [])
+        pivot_error_source = ImportCandidate("inline", ["Key", "Attribute", "Value"], [
+            {"Key": "x", "Attribute": error, "Value": 10},
+        ], {}, [])
+
+        with self.assertRaisesRegex(TransformationError, "group key.*error"):
+            apply_transformations(group_source, [{
+                "op": "group_by", "columns": ["Key"], "aggregations": [
+                    {"operation": "sum", "column": "Amount", "new_name": "Total"},
+                ],
+            }])
+        for source in (pivot_source, pivot_error_source):
+            with self.subTest(source=source):
+                with self.assertRaisesRegex(TransformationError, "pivot.*(typed|error)"):
+                    apply_transformations(source, [{
+                        "op": "pivot_column", "attribute_column": "Attribute",
+                        "value_column": "Value", "aggregation": "sum",
+                    }])
+
+    def test_fill_down_fills_null_but_preserves_empty_text(self) -> None:
+        source = ImportCandidate("inline", ["Value"], [
+            {"Value": "North"},
+            {"Value": None},
+            {"Value": ""},
+            {"Value": "South"},
+            {"Value": None},
+        ], {}, [])
+
+        result = apply_transformations(source, [{
+            "op": "fill_down", "columns": ["Value"],
+        }])
+
+        self.assertEqual([row["Value"] for row in result.rows], [
+            "North", "North", "", "South", "South",
+        ])
+
+    def test_null_filters_distinguish_null_from_empty_and_blank_filters(self) -> None:
+        source = ImportCandidate("inline", ["Value"], [
+            {"Value": None}, {"Value": ""}, {"Value": "x"},
+        ], {}, [])
+
+        is_null = apply_transformations(source, [{
+            "op": "filter_rows", "column": "Value", "operator": "is_null", "value": "",
+        }])
+        is_not_null = apply_transformations(source, [{
+            "op": "filter_rows", "column": "Value", "operator": "is_not_null", "value": "",
+        }])
+        is_blank = apply_transformations(source, [{
+            "op": "filter_rows", "column": "Value", "operator": "is_blank", "value": "",
+        }])
+        is_not_blank = apply_transformations(source, [{
+            "op": "filter_rows", "column": "Value", "operator": "is_not_blank", "value": "",
+        }])
+
+        self.assertEqual(is_null.rows, [{"Value": None}])
+        self.assertEqual(is_not_null.rows, [{"Value": ""}, {"Value": "x"}])
+        self.assertEqual(is_blank.rows, [{"Value": None}, {"Value": ""}])
+        self.assertEqual(is_not_blank.rows, [{"Value": "x"}])
+
+    def test_unpivot_omits_nulls_but_keeps_empty_text(self) -> None:
+        source = ImportCandidate("inline", ["Key", "A", "B"], [
+            {"Key": "first", "A": None, "B": ""},
+            {"Key": "second", "A": "x", "B": None},
+        ], {}, [])
+
+        result = apply_transformations(source, [{
+            "op": "unpivot_columns", "columns": ["A", "B"],
+            "attribute_name": "Attribute", "value_name": "Value",
+        }])
+
+        self.assertEqual(result.rows, [
+            {"Key": "first", "Attribute": "B", "Value": ""},
+            {"Key": "second", "Attribute": "A", "Value": "x"},
+        ])
+
+    def test_unpivot_keeps_homogeneous_value_column_type(self) -> None:
+        step = {
+            "op": "unpivot_columns", "columns": ["Q1", "Q2"],
+            "attribute_name": "Field", "value_name": "Amount",
+        }
+
+        self.assertEqual(
+            column_types_after_steps(
+                ["Region", "Q1", "Q2"], [step],
+                initial_types={
+                    "Region": "text", "Q1": "decimal_number", "Q2": "decimal_number",
+                },
+            ),
+            {"Region": "text", "Field": "text", "Amount": "decimal_number"},
+        )
+
+    def test_remove_rows_with_errors_supports_all_or_selected_columns(self) -> None:
+        error = PowerQueryCellError("DataFormat.Error", "bad value", "bad", "number", row=1)
+        source = ImportCandidate("inline", ["A", "B"], [
+            {"A": "ok", "B": "ok"},
+            {"A": error, "B": "kept when checking B"},
+            {"A": "kept when checking B", "B": error},
+        ], {}, [])
+
+        all_columns = apply_transformations(source, [{"op": "remove_rows_with_errors"}])
+        selected_column = apply_transformations(source, [{
+            "op": "remove_rows_with_errors", "columns": ["A"],
+        }])
+
+        self.assertEqual(all_columns.rows, [source.rows[0]])
+        self.assertEqual(selected_column.rows, [source.rows[0], source.rows[2]])
 
     def test_input_candidate_is_not_mutated_and_nested_metadata_is_copied(self) -> None:
         source = candidate()
@@ -203,10 +377,12 @@ class TransformationTests(unittest.TestCase):
 
     def test_invalid_conversion_and_numeric_filter_report_stable_row_and_column(self) -> None:
         source = candidate()
-        with self.assertRaisesRegex(TransformationError, r"row 3.*Active.*boolean"):
-            apply_transformations(source, [
-                {"op": "convert_type", "column": "Active", "type": "boolean"},
-            ])
+        converted = apply_transformations(source, [
+            {"op": "convert_type", "column": "Active", "type": "boolean"},
+        ])
+        self.assertIsInstance(converted.rows[2]["Active"], PowerQueryCellError)
+        self.assertEqual(converted.rows[2]["Active"].row, 3)
+        self.assertIn("Active", converted.rows[2]["Active"].message)
 
         source.rows[2]["Amount"] = "not a number"
         with self.assertRaisesRegex(TransformationError, r"row 3.*Amount.*number"):
@@ -214,7 +390,7 @@ class TransformationTests(unittest.TestCase):
                 {"op": "filter_rows", "column": "Amount", "operator": "greater_than", "value": "1"},
             ])
 
-    def test_type_conversion_reports_bounded_row_diagnostics_atomically(self) -> None:
+    def test_type_conversion_keeps_a_structured_error_in_each_invalid_cell(self) -> None:
         source = ImportCandidate(
             "csv",
             ["Amount"],
@@ -229,35 +405,18 @@ class TransformationTests(unittest.TestCase):
         )
         original = copy.deepcopy(source)
 
-        with self.assertRaises(TransformationError) as raised:
-            apply_transformations(source, [{
-                "op": "convert_type", "column": "Amount", "type": "whole_number",
-            }])
-
-        error = raised.exception
-        self.assertEqual(error.error_count, 2)
-        self.assertEqual(error.row_diagnostics, [
-            {
-                "row": 2,
-                "column": "Amount",
-                "value": "bad",
-                "target_type": "whole_number",
-                "culture": None,
-            },
-            {
-                "row": 4,
-                "column": "Amount",
-                "value": "also bad",
-                "target_type": "whole_number",
-                "culture": None,
-            },
+        result = apply_transformations(source, [{
+            "op": "convert_type", "column": "Amount", "type": "whole_number",
+        }])
+        errors = [row["Amount"] for row in result.rows if is_cell_error(row["Amount"])]
+        self.assertEqual([(error.row, error.value, error.target_type) for error in errors], [
+            (2, "bad", "whole_number"),
+            (4, "also bad", "whole_number"),
         ])
-        self.assertIn("2 conversion errors total", str(error))
-        self.assertIn("row 4 value 'also bad'", str(error))
-        self.assertIn("1-based in the input to this step", str(error))
+        self.assertTrue(all(error.reason == "DataFormat.Error" for error in errors))
         self.assertEqual(source, original)
 
-    def test_locale_conversion_reports_all_sampled_bad_rows_and_culture(self) -> None:
+    def test_locale_conversion_keeps_culture_and_row_on_each_error_cell(self) -> None:
         source = ImportCandidate(
             "csv",
             ["Amount"],
@@ -271,26 +430,19 @@ class TransformationTests(unittest.TestCase):
             [],
         )
 
-        with self.assertRaises(TransformationError) as raised:
-            apply_transformations(source, [{
-                "op": "convert_type_using_locale",
-                "column": "Amount",
-                "type": "decimal_number",
-                "culture": "de-DE",
-            }])
+        result = apply_transformations(source, [{
+            "op": "convert_type_using_locale",
+            "column": "Amount",
+            "type": "decimal_number",
+            "culture": "de-DE",
+        }])
+        errors = [row["Amount"] for row in result.rows if is_cell_error(row["Amount"])]
+        self.assertEqual([error.row for error in errors], [2, 3, 4])
+        self.assertTrue(all(error.culture == "de-DE" for error in errors))
+        self.assertEqual([error.value for error in errors], ["bad", "2,x", ""])
+        self.assertTrue(all("de-DE" in error.message for error in errors))
 
-        error = raised.exception
-        self.assertEqual(error.error_count, 2)
-        self.assertEqual(
-            [item["row"] for item in error.row_diagnostics], [2, 3]
-        )
-        self.assertTrue(all(
-            item["culture"] == "de-DE" for item in error.row_diagnostics
-        ))
-        self.assertIn("using culture de-DE", str(error))
-        self.assertIn("row 3 value '2,x'", str(error))
-
-    def test_conversion_diagnostics_cap_examples_but_count_every_error(self) -> None:
+    def test_each_conversion_error_is_bounded_and_keeps_its_source_value(self) -> None:
         long_column = "Column " + ("y" * 500)
         source = ImportCandidate(
             "csv",
@@ -305,22 +457,17 @@ class TransformationTests(unittest.TestCase):
             [],
         )
 
-        with self.assertRaises(TransformationError) as raised:
-            apply_transformations(source, [{
-                "op": "convert_type", "column": long_column, "type": "whole_number",
-            }])
-
-        error = raised.exception
-        self.assertEqual(error.error_count, 25)
-        self.assertEqual(len(error.row_diagnostics), 20)
-        self.assertEqual(error.row_diagnostics[0]["row"], 1)
-        self.assertEqual(error.row_diagnostics[-1]["row"], 20)
-        self.assertEqual(len(error.row_diagnostics[0]["value"]), 508)
-        self.assertEqual(error.row_diagnostics[0]["column"], long_column)
-        self.assertIn("Showing the first 20 of 25 errors", str(error))
-        self.assertNotIn("row 21 value", str(error))
-        self.assertNotIn(long_column, str(error))
-        self.assertLess(len(str(error)), 5_000)
+        result = apply_transformations(source, [{
+            "op": "convert_type", "column": long_column, "type": "whole_number",
+        }])
+        errors = [row[long_column] for row in result.rows]
+        self.assertEqual(len(errors), 25)
+        self.assertTrue(all(is_cell_error(error) for error in errors))
+        self.assertEqual(errors[0].row, 1)
+        self.assertEqual(errors[-1].row, 25)
+        self.assertEqual(len(errors[0].value), 508)
+        self.assertEqual(errors[0].target_type, "whole_number")
+        self.assertLess(len(errors[0].message), 2_000)
 
     def test_transformation_failure_does_not_change_input(self) -> None:
         source = candidate()
@@ -329,6 +476,7 @@ class TransformationTests(unittest.TestCase):
             apply_transformations(source, [
                 {"op": "rename_column", "column": "Name", "new_name": "Label"},
                 {"op": "convert_type", "column": "Active", "type": "boolean"},
+                {"op": "filter_rows", "column": "Active", "operator": "equals", "value": "true"},
             ])
         self.assertEqual(source, original)
 

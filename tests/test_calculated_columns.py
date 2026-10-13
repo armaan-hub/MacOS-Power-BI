@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from decimal import Decimal
+
 from analytics_studio.measures import (
     MeasureError,
     evaluate_calculated_columns,
@@ -31,16 +33,16 @@ def test_calculated_columns_evaluate_numeric_boolean_and_prior_column_references
     assert headers == ["Quantity", "Unit price", "Line total", "Large order", "Rounded"]
     assert rows == [
         {
-            "Quantity": "2", "Unit price": "12.25", "Line total": "24.50",
-            "Large order": "True", "Rounded": "24.5",
+            "Quantity": "2", "Unit price": "12.25", "Line total": Decimal("24.50"),
+            "Large order": True, "Rounded": Decimal("24.5"),
         },
         {
-            "Quantity": "3", "Unit price": "8", "Line total": "24",
-            "Large order": "True", "Rounded": "24.0",
+            "Quantity": "3", "Unit price": "8", "Line total": Decimal("24"),
+            "Large order": True, "Rounded": Decimal("24.0"),
         },
         {
-            "Quantity": "", "Unit price": "9", "Line total": "0",
-            "Large order": "False", "Rounded": "0.0",
+            "Quantity": "", "Unit price": "9", "Line total": Decimal("0"),
+            "Large order": False, "Rounded": Decimal("0.0"),
         },
     ]
     assert types == {
@@ -59,7 +61,7 @@ def test_calculated_columns_preserve_blank_direct_values_and_allow_same_table_qu
     )
 
     assert headers == ["Amount", "Copy amount"]
-    assert [row["Copy amount"] for row in rows] == ["5", ""]
+    assert [row["Copy amount"] for row in rows] == [Decimal("5"), None]
     assert types == {"Copy amount": "decimal_number"}
 
 

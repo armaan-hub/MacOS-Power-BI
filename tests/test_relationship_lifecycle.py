@@ -18,8 +18,10 @@ from analytics_studio.file_import import parse_file
 from analytics_studio.relationship_dialog import RelationshipDialog
 from analytics_studio.relationships import (
     RelationshipError,
+    _relationship_value_key,
     propagate_relationship_filters,
 )
+from analytics_studio.power_query_values import PowerQueryCellError
 
 
 class RelationshipLifecycleTests(unittest.TestCase):
@@ -42,6 +44,17 @@ class RelationshipLifecycleTests(unittest.TestCase):
 
     def tearDown(self) -> None:
         self.temp_dir.cleanup()
+
+    def test_relationship_keys_keep_null_and_empty_text_distinct_and_reject_errors(self) -> None:
+        self.assertNotEqual(
+            _relationship_value_key(None, "text"),
+            _relationship_value_key("", "text"),
+        )
+        with self.assertRaisesRegex(RelationshipError, "Power Query cell error"):
+            _relationship_value_key(
+                PowerQueryCellError("DataFormat.Error", "not numeric", "bad", "whole_number", row=2),
+                "whole_number",
+            )
 
     def controller(self, name: str) -> StudioController:
         settings = QSettings(str(self.root / name), QSettings.Format.IniFormat)

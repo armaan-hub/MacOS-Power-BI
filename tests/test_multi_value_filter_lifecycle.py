@@ -13,7 +13,7 @@ os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
 from PySide6.QtCore import QSettings
 from PySide6.QtWidgets import QApplication
 
-from analytics_studio.controller import StudioController
+from analytics_studio.controller import StudioController, _encode_report_filter_value
 from analytics_studio.file_import import parse_file
 
 
@@ -55,14 +55,14 @@ class MultiValueFilterLifecycleTests(unittest.TestCase):
         table_id = self.table_id(controller, source_path.name)
 
         values = controller.pageFilterValues(table_id, "Region")
-        self.assertIn({"label": "(Blank)", "value": ""}, values)
+        self.assertIn({"label": "(Empty text)", "value": "__npa_pqv1__:empty"}, values)
         self.assertEqual(
             controller.searchPageFilterValues(table_id, "Region", "est"),
-            [{"label": "West", "value": "West"}],
+            [{"label": "West", "value": _encode_report_filter_value("West")}],
         )
         self.assertEqual(
-            controller.searchPageFilterValues(table_id, "Region", "(blank)"),
-            [{"label": "(Blank)", "value": ""}],
+            controller.searchPageFilterValues(table_id, "Region", "(empty text)"),
+            [{"label": "(Empty text)", "value": "__npa_pqv1__:empty"}],
         )
 
         selected_json = json.dumps(["East", "North", ""])
@@ -136,6 +136,67 @@ class MultiValueFilterLifecycleTests(unittest.TestCase):
             table_id, "Region", "is_any_of", json.dumps([str(value) for value in range(1001)])
         ))
         self.assertEqual(len(controller.activePageFilters), 2)
+
+    def test_null_and_empty_text_picker_values_filter_separately(self) -> None:
+        source_path = self.root / "typed-regions.json"
+        source_path.write_text(
+            '[{"Region":null,"Revenue":10},'
+            '{"Region":"","Revenue":20},'
+            '{"Region":"East","Revenue":30}]',
+            encoding="utf-8",
+        )
+        controller = self.controller("typed-settings.ini")
+        self.assertTrue(controller._commit_import(source_path, parse_file(source_path)))
+        table_id = self.table_id(controller, source_path.name)
+        options = controller.pageFilterValues(table_id, "Region")
+        null_option = next(option for option in options if option["label"] == "(Null)")
+        empty_option = next(option for option in options if option["label"] == "(Empty text)")
+
+        self.assertTrue(controller.addPageMultiValueFilter(
+            table_id, "Region", "is_any_of", json.dumps([null_option["value"]])
+        ))
+        self.assertEqual(controller.reportKpis["Revenue"], "10")
+        self.assertTrue(controller.addPageMultiValueFilter(
+            table_id, "Region", "is_any_of", json.dumps([empty_option["value"]])
+        ))
+        self.assertEqual(controller.reportKpis["Revenue"], "20")
+
+    def test_picker_values_keep_numeric_and_text_categories_separate(self) -> None:
+        source_path = self.root / "mixed-categories.json"
+        source_path.write_text(
+            '[{"Category":1,"Revenue":10},'
+            '{"Category":"1","Revenue":20},'
+            '{"Category":"1 (Number)","Revenue":30}]',
+            encoding="utf-8",
+        )
+        controller = self.controller("mixed-categories-settings.ini")
+        self.assertTrue(controller._commit_import(source_path, parse_file(source_path)))
+        table_id = self.table_id(controller, source_path.name)
+        options = controller.pageFilterValues(table_id, "Category")
+        labels_by_value = {option["value"]: option["label"] for option in options}
+        self.assertEqual(len({option["value"] for option in options}), 3)
+        number_value = _encode_report_filter_value(1)
+        text_value = _encode_report_filter_value("1")
+        self.assertTrue(labels_by_value[number_value].startswith("1 (Number)"))
+        self.assertEqual(labels_by_value[text_value], "1 (Text)")
+        self.assertEqual(len(set(labels_by_value.values())), 3)
+
+        self.assertTrue(controller.addPageMultiValueFilter(
+            table_id, "Category", "is_any_of", json.dumps([number_value])
+        ))
+        self.assertEqual(controller.reportKpis["Revenue"], "10")
+        self.assertEqual(
+            controller.activePageFilters[0]["displayValue"],
+            "is any of 1 (Number)",
+        )
+        self.assertTrue(controller.addPageMultiValueFilter(
+            table_id, "Category", "is_any_of", json.dumps([text_value])
+        ))
+        self.assertEqual(controller.reportKpis["Revenue"], "20")
+        self.assertEqual(
+            controller.activePageFilters[0]["displayValue"],
+            "is any of 1 (Text)",
+        )
 
 
 if __name__ == "__main__":

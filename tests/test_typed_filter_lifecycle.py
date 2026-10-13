@@ -13,7 +13,7 @@ os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
 from PySide6.QtCore import QSettings
 from PySide6.QtWidgets import QApplication, QDialog
 
-from analytics_studio.controller import StudioController
+from analytics_studio.controller import StudioController, _report_filter_clause_matches
 from analytics_studio.file_import import parse_file
 from analytics_studio.relationship_dialog import RelationshipDialog
 
@@ -33,6 +33,18 @@ class TypedFilterLifecycleTests(unittest.TestCase):
     def controller(self, name: str) -> StudioController:
         settings = QSettings(str(self.root / name), QSettings.Format.IniFormat)
         return StudioController(self.app, settings)
+
+    def test_text_report_filters_keep_null_separate_from_empty_text(self) -> None:
+        equals_empty = {"operator": "equals", "value": ""}
+        not_equals_empty = {"operator": "not_equals", "value": ""}
+        blank = {"operator": "is_blank", "value": ""}
+
+        self.assertFalse(_report_filter_clause_matches(None, equals_empty, "text"))
+        self.assertTrue(_report_filter_clause_matches("", equals_empty, "text"))
+        self.assertTrue(_report_filter_clause_matches(None, not_equals_empty, "text"))
+        self.assertFalse(_report_filter_clause_matches("", not_equals_empty, "text"))
+        self.assertTrue(_report_filter_clause_matches(None, blank, "text"))
+        self.assertTrue(_report_filter_clause_matches("", blank, "text"))
 
     @staticmethod
     def table_id(controller: StudioController, source_name: str) -> str:

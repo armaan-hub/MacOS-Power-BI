@@ -4,6 +4,8 @@ from __future__ import annotations
 
 from collections import Counter
 from copy import deepcopy
+from datetime import date, datetime, time
+from decimal import Decimal
 from typing import Any, Callable
 from uuid import uuid4
 
@@ -54,6 +56,7 @@ from analytics_studio.power_query_m import (
     step_expression_to_m,
     steps_to_m_script,
 )
+from analytics_studio.power_query_values import cell_key, cell_to_text, is_cell_error
 from analytics_studio.query_dependencies_dialog import QueryDependenciesDialog
 from analytics_studio.query_parameters import (
     QUERY_PARAMETER_TYPES,
@@ -88,10 +91,27 @@ from analytics_studio.transformations import (
     TransformationError,
     apply_transformations,
     column_types_after_steps,
+    count_conversion_errors,
     infer_column_types,
     validate_applied_step_metadata,
     validate_steps,
 )
+
+
+def _profile_cell_type(value: Any) -> str:
+    if is_cell_error(value):
+        return "error"
+    if isinstance(value, bool):
+        return "boolean"
+    if isinstance(value, (int, float, Decimal)):
+        return "number"
+    if isinstance(value, datetime):
+        return "datetime"
+    if isinstance(value, date):
+        return "date"
+    if isinstance(value, time):
+        return "time"
+    return "text"
 
 
 class EnterDataDialog(QDialog):
@@ -1380,6 +1400,7 @@ class TransformDataDialog(QDialog):
 
     _STEP_OPERATIONS_WITHOUT_SETTINGS = frozenset({
         "promote_headers", "demote_headers", "transpose_table", "remove_blank_rows",
+        "remove_rows_with_errors",
     })
 
     def __init__(
@@ -1742,6 +1763,7 @@ class TransformDataDialog(QDialog):
             ("Remove duplicates", "remove_duplicates"),
             ("Keep duplicates", "keep_duplicates"),
             ("Remove blank rows", "remove_blank_rows"),
+            ("Remove rows with errors", "remove_rows_with_errors"),
             ("Remove top rows", "remove_top_rows"),
             ("Remove bottom rows", "remove_bottom_rows"),
             ("Keep top rows", "keep_top_rows"),
@@ -2189,9 +2211,11 @@ class TransformDataDialog(QDialog):
         self.preview.setModel(ImportPreviewTableModel(self.preview))
         self.preview_tabs.addTab(self.preview, "Data preview")
 
-        self.quality_table = QTableWidget(0, 4)
+        self.quality_table = QTableWidget(0, 5)
         self.quality_table.setObjectName("powerQueryColumnQualityTable")
-        self.quality_table.setHorizontalHeaderLabels(("Column", "Valid", "Empty", "Errors"))
+        self.quality_table.setHorizontalHeaderLabels(
+            ("Column", "Valid", "Empty text", "Errors", "Null")
+        )
         self.quality_table.verticalHeader().setVisible(False)
         self.quality_table.setEditTriggers(QAbstractItemView.EditTrigger.NoEditTriggers)
         self.quality_table.setSelectionBehavior(QAbstractItemView.SelectionBehavior.SelectRows)
@@ -2468,6 +2492,7 @@ class TransformDataDialog(QDialog):
                 command("Filter\nrows", "filter_rows", "Filter one column with a supported comparison."),
                 command("Advanced\nfilter", "filter_rows_advanced", "Build an AND/OR filter across columns."),
                 command("Remove\nblank rows", "remove_blank_rows", "Remove rows where every field is blank."),
+                command("Remove\nerrors", "remove_rows_with_errors", "Remove rows with an error in any column."),
             ]),
             ("Keep or remove rows", [
                 command("Keep top\nrows", "keep_top_rows", "Keep the first N rows."),
@@ -4373,6 +4398,7 @@ class TransformDataDialog(QDialog):
             "remove_duplicates",
             "keep_duplicates",
             "remove_blank_rows",
+            "remove_rows_with_errors",
             "remove_top_rows",
             "remove_bottom_rows",
             "keep_top_rows",
@@ -4407,6 +4433,8 @@ class TransformDataDialog(QDialog):
         if op in {"filter_rows", "filter_rows_advanced"}:
             self.option_combo.addItem("Equals", "equals")
             self.option_combo.addItem("Does not equal", "not_equals")
+            self.option_combo.addItem("Is null", "is_null")
+            self.option_combo.addItem("Is not null", "is_not_null")
             self.option_combo.addItem("Is blank", "is_blank")
             self.option_combo.addItem("Is not blank", "is_not_blank")
             self.option_combo.addItem("Contains", "contains")
@@ -4422,7 +4450,7 @@ class TransformDataDialog(QDialog):
             self.option_combo.setToolTip(
                 "Text filters compare exact, case-sensitive values. Empty text criteria follow normal substring, prefix, or suffix matching. "
                 "Numeric greater/less-than filters use finite invariant numbers and exclude blank cells. "
-                "Blank means an empty string; whitespace-only values are not blank."
+                "Null checks match only null; blank checks match null or empty text. Whitespace-only values are not blank."
             )
         elif op == "sort_rows":
             self.option_combo.addItem("Ascending", "asc")
@@ -4953,7 +4981,7 @@ class TransformDataDialog(QDialog):
                 if self.keep_columns_list.item(index).checkState() == Qt.CheckState.Checked
             ]
             return {"op": op, "columns": columns}
-        if op == "remove_blank_rows":
+        if op in {"remove_blank_rows", "remove_rows_with_errors"}:
             return {"op": op}
         if op == "keep_range_rows":
             try:
@@ -5874,6 +5902,12 @@ class TransformDataDialog(QDialog):
                 detail = "entire rows"
             elif step["op"] == "remove_blank_rows":
                 detail = "all fields empty"
+            elif step["op"] == "remove_rows_with_errors":
+                detail = (
+                    "all fields"
+                    if "columns" not in step
+                    else f"columns: {', '.join(step['columns'])}"
+                )
             elif step["op"] == "keep_range_rows":
                 detail = f"from row {step['first_row']}, {step['count']} rows"
             elif step["op"] == "remove_alternate_rows":
@@ -6189,42 +6223,79 @@ class TransformDataDialog(QDialog):
         self.profile_table.setRowCount(len(candidate.headers))
         self.schema_table.setRowCount(len(candidate.headers))
         for index, column in enumerate(candidate.headers):
-            counts = Counter(str(row.get(column, "")) for row in rows)
-            empty_count = counts.get("", 0)
-            valid_count = row_count - empty_count
+            values = [row.get(column, "") for row in rows]
+            null_count = sum(value is None for value in values)
+            empty_count = sum(
+                value == "" for value in values if not is_cell_error(value)
+            )
+            type_name = type_map.get(column, "text")
+            error_count = (
+                count_conversion_errors(values, type_name)
+                if type_name != "text"
+                else sum(is_cell_error(value) for value in values)
+            )
+            valid_values = [
+                value for value in values
+                if value is not None and value != "" and not is_cell_error(value)
+            ]
+            valid_count = row_count - null_count - empty_count - error_count
             valid_percent = (100.0 * valid_count / row_count) if row_count else 0.0
             empty_percent = (100.0 * empty_count / row_count) if row_count else 0.0
+            error_percent = (100.0 * error_count / row_count) if row_count else 0.0
+            null_percent = (100.0 * null_count / row_count) if row_count else 0.0
             quality_values = (
                 column,
                 f"{valid_percent:.1f}% ({valid_count:,})",
                 f"{empty_percent:.1f}% ({empty_count:,})",
-                "Not tracked",
+                f"{error_percent:.1f}% ({error_count:,})",
+                f"{null_percent:.1f}% ({null_count:,})",
             )
             for column_index, value in enumerate(quality_values):
                 self.quality_table.setItem(index, column_index, QTableWidgetItem(value))
 
-            # Match the Data view: blanks count as empty for quality, but do not
-            # contribute to distinct/unique values or the most-common values list.
-            non_empty_counts = Counter({value: count for value, count in counts.items() if value})
+            # Null, empty text, and errors remain separate from valid value frequencies.
+            non_empty_counts: dict[tuple[Any, ...], dict[str, Any]] = {}
+            for value in valid_values:
+                key = cell_key(value)
+                entry = non_empty_counts.setdefault(key, {
+                    "value": cell_to_text(value),
+                    "type": _profile_cell_type(value),
+                    "count": 0,
+                })
+                entry["count"] += 1
             top_values = sorted(
-                non_empty_counts.items(),
-                key=lambda item: (-item[1], item[0].casefold(), item[0]),
+                non_empty_counts.values(),
+                key=lambda item: (
+                    -item["count"], item["value"].casefold(),
+                    item["value"], item["type"],
+                ),
             )[:3]
-            top_text = ", ".join(f"{value} ({count:,})" for value, count in top_values)
+            top_text = ", ".join(
+                f"{item['value']}"
+                + (f" [{item['type']}]" if item["type"] != "text" else "")
+                + f" ({item['count']:,})"
+                for item in top_values
+            )
             profile_values = (
                 column,
-                type_map.get(column, "text"),
+                type_name,
                 f"{len(non_empty_counts):,}",
-                f"{sum(1 for count in non_empty_counts.values() if count == 1):,}",
+                f"{sum(1 for item in non_empty_counts.values() if item['count'] == 1):,}",
                 top_text or "—",
             )
             for column_index, value in enumerate(profile_values):
                 self.profile_table.setItem(index, column_index, QTableWidgetItem(value))
 
             sample_values: list[str] = []
+            sample_keys: set[tuple[Any, ...]] = set()
             for row in candidate.rows[:100]:
-                value = str(row.get(column, ""))
-                if value and value not in sample_values:
+                raw_value = row.get(column, "")
+                if raw_value is None or raw_value == "" or is_cell_error(raw_value):
+                    continue
+                value = cell_to_text(raw_value)
+                key = cell_key(raw_value)
+                if key not in sample_keys:
+                    sample_keys.add(key)
                     sample_values.append(value)
                     if len(sample_values) == 3:
                         break
@@ -6241,7 +6312,7 @@ class TransformDataDialog(QDialog):
                 self.schema_table.setItem(index, column_index, item)
         self.profile_scope_note.setText(
             f"Profile covers all {row_count:,} rows in the selected scope. "
-            "This local text model rejects invalid typed conversions and does not retain cell-level error values."
+            "Null, empty text, and conversion errors are counted separately."
         )
 
     def _update_step_controls(self) -> None:

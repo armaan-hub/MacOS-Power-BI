@@ -103,8 +103,8 @@ class ODataImportLifecycleTests(unittest.TestCase):
         self.assertEqual(requested, list(pages))
         self.assertEqual(result.headers, ["id", "amount", "active", "note"])
         self.assertEqual(result.rows, [
-            {"id": "1", "amount": "10.50", "active": "TRUE", "note": ""},
-            {"id": "2", "amount": "20.25", "active": "FALSE", "note": ""},
+            {"id": 1, "amount": Decimal("10.50"), "active": True, "note": None},
+            {"id": 2, "amount": Decimal("20.25"), "active": False, "note": None},
         ])
 
         with patch(

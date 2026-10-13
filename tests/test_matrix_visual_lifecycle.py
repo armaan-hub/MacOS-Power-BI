@@ -14,6 +14,7 @@ from PySide6.QtWidgets import QApplication
 
 from analytics_studio.controller import StudioController
 from analytics_studio.file_import import parse_file
+from analytics_studio.power_query_values import PowerQueryCellError
 
 QQuickStyle.setStyle("Basic")
 
@@ -95,6 +96,8 @@ def test_matrix_groups_aggregates_and_persists(tmp_path: Path) -> None:
         controller.set_field_aggregation("Values", "Sales", "Sum")
 
         app.processEvents()
+
+
         QTest.qWait(50)
         matrix = next(
             item for item in _items(window.contentItem())
@@ -165,3 +168,41 @@ def test_matrix_groups_aggregates_and_persists(tmp_path: Path) -> None:
         window.deleteLater()
         engine.deleteLater()
         app.processEvents()
+
+
+def test_matrix_keeps_null_and_empty_row_and_column_groups_separate(
+    tmp_path: Path,
+) -> None:
+    source_path = tmp_path / "typed-matrix.json"
+    source_path.write_text(
+        '[{"Region":null,"Quarter":"Q1","Sales":10},'
+        '{"Region":"","Quarter":"Q1","Sales":20}]',
+        encoding="utf-8",
+    )
+    app = QApplication.instance() or QApplication(["typed matrix semantics tests"])
+    controller = StudioController(
+        app,
+        QSettings(str(tmp_path / "typed-matrix-settings.ini"), QSettings.Format.IniFormat),
+    )
+    assert controller._commit_import(source_path, parse_file(source_path))
+    controller.add_visual("matrix", "Typed matrix", 40, 40, 360, 240)
+    controller.add_field_to_well("Rows", "Region")
+    controller.add_field_to_well("Columns", "Quarter")
+    controller.add_field_to_well("Values", "Sales")
+
+    assert controller.visualMatrixData("Typed matrix") == {
+        "columns": ["Region", "Q1"],
+        "rows": [
+            {"values": ["", "20"], "category": "", "highlighted": False},
+            {"values": ["(null)", "10"], "category": "(null)", "highlighted": False},
+        ],
+        "total_rows": 2,
+    }
+
+    source_id = str(controller._active_source_id)
+    controller._loaded_candidates[source_id].rows[0]["Sales"] = PowerQueryCellError(
+        "DataFormat.Error", "invalid amount", "bad", "decimal_number", row=1,
+    )
+    controller._report_filter_context_cache.clear()
+    error_matrix = controller.visualMatrixData("Typed matrix")
+    assert error_matrix["rows"][1]["values"] == ["(null)", "Error"]

@@ -129,8 +129,8 @@ class PowerQuerySessionCombineTests(unittest.TestCase):
             self.assertEqual(root_state["steps"], steps)
             reference = dialog._query_states[reference_id]
             self.assertEqual(reference["preview_candidate"].rows, [
-                {"Region": "South", "Amount": "15"},
-                {"Region": "North", "Amount": "25"},
+                {"Region": "South", "Amount": 15},
+                {"Region": "North", "Amount": 25},
             ])
             self.assertEqual(controller._project, project_before)
             dialog._accept_candidate()
@@ -158,10 +158,10 @@ class PowerQuerySessionCombineTests(unittest.TestCase):
             {"Region": "South", "Amount": "15"},
             {"Region": "North", "Amount": "25"},
         ])
-        self.assertEqual(
-            controller._loaded_candidates[reference_id].rows,
-            controller._loaded_candidates[root_id].rows,
-        )
+        self.assertEqual(controller._loaded_candidates[reference_id].rows, [
+            {"Region": "South", "Amount": 15},
+            {"Region": "North", "Amount": 25},
+        ])
 
         project_path = self.root / "source-settings-session.npa"
         self.assertTrue(controller._save_to(project_path))
@@ -178,10 +178,9 @@ class PowerQuerySessionCombineTests(unittest.TestCase):
         self.assertEqual(reopened._loaded_candidates[root_id].rows, [
             {"Region": "Dubai", "Amount": "35"},
         ])
-        self.assertEqual(
-            reopened._loaded_candidates[reference_id].rows,
-            reopened._loaded_candidates[root_id].rows,
-        )
+        self.assertEqual(reopened._loaded_candidates[reference_id].rows, [
+            {"Region": "Dubai", "Amount": 35},
+        ])
 
     def test_folder_source_settings_replays_dependencies_and_persists_recipe(self) -> None:
         controller = self.controller()
@@ -270,7 +269,14 @@ class PowerQuerySessionCombineTests(unittest.TestCase):
             )
             self.assertEqual(
                 dialog._query_states[reference_id]["preview_candidate"].rows,
-                root_state["preview_candidate"].rows,
+                [
+                    {
+                        "Source.Name": "archive/records-extra.csv",
+                        "Region": "Abu Dhabi",
+                        "Amount": 35,
+                    },
+                    {"Source.Name": "records.csv", "Region": "Dubai", "Amount": 25},
+                ],
             )
             self.assertEqual(controller._project, project_before)
             dialog._accept_candidate()
@@ -293,10 +299,14 @@ class PowerQuerySessionCombineTests(unittest.TestCase):
         self.assertEqual(saved_source["path"], str(new_folder.resolve()))
         self.assertEqual(saved_source["parser_options"], candidate.options)
         self.assertEqual(saved_source["transform_steps"], steps)
-        self.assertEqual(
-            controller._loaded_candidates[reference_id].rows,
-            controller._loaded_candidates[root_id].rows,
-        )
+        self.assertEqual(controller._loaded_candidates[reference_id].rows, [
+            {
+                "Source.Name": "archive/records-extra.csv",
+                "Region": "Abu Dhabi",
+                "Amount": 35,
+            },
+            {"Source.Name": "records.csv", "Region": "Dubai", "Amount": 25},
+        ])
 
         project_path = self.root / "folder-source-settings.npa"
         self.assertTrue(controller._save_to(project_path))
@@ -322,10 +332,14 @@ class PowerQuerySessionCombineTests(unittest.TestCase):
                 {"Source.Name": "records.csv", "Region": "Dubai", "Amount": "25"},
             ],
         )
-        self.assertEqual(
-            reopened._loaded_candidates[reference_id].rows,
-            reopened._loaded_candidates[root_id].rows,
-        )
+        self.assertEqual(reopened._loaded_candidates[reference_id].rows, [
+            {
+                "Source.Name": "archive/records-extra.csv",
+                "Region": "Abu Dhabi",
+                "Amount": 45,
+            },
+            {"Source.Name": "records.csv", "Region": "Dubai", "Amount": 25},
+        ])
 
     def test_folder_source_settings_are_available_in_query_context_menu(self) -> None:
         candidate = ImportCandidate(
@@ -484,7 +498,7 @@ class PowerQuerySessionCombineTests(unittest.TestCase):
             })
             self.assertEqual(
                 dialog._query_states[reference_id]["preview_candidate"].rows,
-                [{"Region": "Abu Dhabi", "Amount": "20"}],
+                [{"Region": "Abu Dhabi", "Amount": 20}],
             )
             self.assertEqual(controller._project, project_before)
             dialog._accept_candidate()
@@ -513,7 +527,7 @@ class PowerQuerySessionCombineTests(unittest.TestCase):
             {"Region": "Abu Dhabi", "Amount": "20"},
         ])
         self.assertEqual(controller._loaded_candidates[reference_id].rows, [
-            {"Region": "Abu Dhabi", "Amount": "20"},
+            {"Region": "Abu Dhabi", "Amount": 20},
         ])
 
         project_path = self.root / "sqlite-source-settings.npa"
@@ -538,7 +552,7 @@ class PowerQuerySessionCombineTests(unittest.TestCase):
             reopened._loaded_candidates[root_id].rows[0]["Amount"], "35"
         )
         self.assertEqual(
-            reopened._loaded_candidates[reference_id].rows[0]["Amount"], "35"
+            reopened._loaded_candidates[reference_id].rows[0]["Amount"], 35
         )
 
     def test_sqlite_source_settings_reject_duplicate_binding_atomically(self) -> None:
@@ -936,7 +950,7 @@ class PowerQuerySessionCombineTests(unittest.TestCase):
             ).click()
             for query_id in (reference_id, append_id, merge_id):
                 result = dialog._query_states[query_id]["preview_candidate"]
-                self.assertTrue(any(row.get("Amount") == "15" for row in result.rows))
+            self.assertTrue(any(row.get("Amount") == 15 for row in result.rows))
             dialog._accept_candidate()
             return QDialog.DialogCode.Accepted
 
@@ -951,7 +965,7 @@ class PowerQuerySessionCombineTests(unittest.TestCase):
             self.assertTrue(controller.transform_data_dialog(), controller.statusMessage)
         for query_id in (reference_id, append_id, merge_id):
             self.assertTrue(any(
-                row.get("Amount") == "15"
+                row.get("Amount") == 15
                 for row in controller._loaded_candidates[query_id].rows
             ))
 
@@ -2284,8 +2298,8 @@ class PowerQuerySessionCombineTests(unittest.TestCase):
             )
 
         self.assertEqual(refreshed_rows, [
-            {"id": "5", "Region": "North", "Amount": "50"},
-            {"id": "6", "Region": "South", "Amount": "60"},
+            {"id": "5", "Region": "North", "Amount": 50},
+            {"id": "6", "Region": "South", "Amount": 60},
         ])
 
         (self.root / "north.csv").write_text(
@@ -2323,8 +2337,8 @@ class PowerQuerySessionCombineTests(unittest.TestCase):
             {"id": "9", "Region": "West", "Amount": "28"},
         ])
         self.assertEqual(refreshed_append_rows, [
-            {"id": "9", "Region": "West", "Amount": "28"},
-            {"id": "6", "Region": "South", "Amount": "60"},
+            {"id": "9", "Region": "West", "Amount": 28},
+            {"id": "6", "Region": "South", "Amount": 60},
         ])
         self.assertEqual(
             controller._project["query_parameters"][0]["current_value"], "25"
@@ -2643,9 +2657,9 @@ class PowerQuerySessionCombineTests(unittest.TestCase):
         self.assertEqual(
             reopened._loaded_candidates[query_id].rows,
             [
-                {"id": "1", "Region": "North", "Amount": "100"},
-                {"id": "5", "Region": "North", "Amount": "110"},
-                {"id": "3", "Region": "South", "Amount": "300"},
+                {"id": "1", "Region": "North", "Amount": 100},
+                {"id": "5", "Region": "North", "Amount": 110},
+                {"id": "3", "Region": "South", "Amount": 300},
             ],
         )
 
@@ -2877,7 +2891,7 @@ class PowerQuerySessionCombineTests(unittest.TestCase):
         self.assertEqual(reopened._loaded_candidates[query_id].row_count, 3)
         merged_rows = reopened._loaded_candidates[query_id].rows
         self.assertEqual(merged_rows[0]["south.Region"], "South")
-        self.assertEqual(merged_rows[1]["south.Region"], "")
+        self.assertIsNone(merged_rows[1]["south.Region"])
         self.assertEqual(merged_rows[2]["south.Region"], "South")
 
 

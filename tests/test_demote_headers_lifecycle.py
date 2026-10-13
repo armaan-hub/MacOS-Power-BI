@@ -68,8 +68,8 @@ class DemoteHeadersLifecycleTests(unittest.TestCase):
         self.assertEqual(dialog._preview_candidate.headers, ["Column1", "Column2"])
         self.assertEqual(dialog._preview_candidate.rows, [
             {"Column1": "Name", "Column2": "Amount"},
-            {"Column1": "Ada", "Column2": "12"},
-            {"Column1": "Lin", "Column2": "3"},
+            {"Column1": "Ada", "Column2": 12},
+            {"Column1": "Lin", "Column2": 3},
         ])
         dialog._accept_candidate()
         self.assertTrue(controller._commit_transform_steps(
@@ -90,8 +90,8 @@ class DemoteHeadersLifecycleTests(unittest.TestCase):
         self.assertTrue(reopened.open_project_path(project_path))
         self.assertEqual(reopened._rows, [
             {"Column1": "Name", "Column2": "Amount"},
-            {"Column1": "Mia", "Column2": "4"},
-            {"Column1": "Noah", "Column2": "8"},
+            {"Column1": "Mia", "Column2": 4},
+            {"Column1": "Noah", "Column2": 8},
         ])
         self.assertEqual(
             self.table_for(reopened, source_id)["column_types"],
@@ -102,7 +102,7 @@ class DemoteHeadersLifecycleTests(unittest.TestCase):
         reopened.refresh_source()
         self.assertEqual(reopened._rows, [
             {"Column1": "Name", "Column2": "Amount"},
-            {"Column1": "Omar", "Column2": "9"},
+            {"Column1": "Omar", "Column2": 9},
         ])
 
 

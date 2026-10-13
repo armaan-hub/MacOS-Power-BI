@@ -26,6 +26,7 @@ from analytics_studio.file_import import (
     _normalize_headers,
     parse_file,
 )
+from analytics_studio.power_query_values import cell_to_text
 
 
 REQUEST_TIMEOUT_SECONDS = 10
@@ -420,8 +421,8 @@ def _parse_json_table(
         row = {}
         for raw_header in raw_headers:
             header = header_map[raw_header]
-            value = _json_cell_text(record.get(raw_header))
-            rendered_bytes += len(value.encode("utf-8"))
+            value = _json_cell_value(record.get(raw_header))
+            rendered_bytes += len(cell_to_text(value).encode("utf-8"))
             if rendered_bytes > MAX_SQLITE_TEXT_BYTES:
                 raise WebImportError("The JSON table exceeds the 80 MiB rendered-text limit.")
             row[header] = value
@@ -504,15 +505,11 @@ def _decode_json(body: bytes) -> Any:
         raise WebImportError("The web server returned invalid UTF-8 JSON.") from exc
 
 
-def _json_cell_text(value: Any) -> str:
-    if value is None:
-        return ""
-    if isinstance(value, bool):
-        return "TRUE" if value else "FALSE"
-    if isinstance(value, (str, int, Decimal)):
-        return str(value)
+def _json_cell_value(value: Any) -> Any:
+    if value is None or isinstance(value, (str, int, bool, Decimal)):
+        return value
     if isinstance(value, float) and math.isfinite(value):
-        return str(value)
+        return value
     raise WebImportError("The selected JSON table contains an unsupported scalar value.")
 
 

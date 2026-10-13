@@ -8,6 +8,7 @@ from pathlib import Path
 import sqlite3
 import tempfile
 import unittest
+from decimal import Decimal
 from unittest.mock import patch
 
 os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
@@ -33,6 +34,7 @@ from analytics_studio.inline_data import parse_pasted_table, sample_candidate
 from analytics_studio.local_table_dialogs import EnterDataDialog, TransformDataDialog
 from analytics_studio.power_query_m import PowerQueryMEditorDialog
 from analytics_studio.project import FORMAT_VERSION
+from analytics_studio.power_query_values import PowerQueryCellError
 from analytics_studio.transformations import apply_transformations
 
 QQuickStyle.setStyle("Basic")
@@ -797,7 +799,7 @@ in
             dialog.steps,
             [{"op": "convert_type", "column": "Revenue", "type": "whole_number"}],
         )
-        self.assertEqual(dialog.candidate.rows[0]["Revenue"], "12")
+        self.assertEqual(dialog.candidate.rows[0]["Revenue"], 12)
 
         canceled = TransformDataDialog(raw)
         canceled.reject()
@@ -1152,8 +1154,8 @@ in
         self.assertEqual(reference_table["column_types"]["Revenue"], "decimal_number")
         self.assertEqual(controller._active_source_id, reference_id)
         self.assertEqual(controller._loaded_candidates[reference_id].rows, [
-            {"Region": "East", "Revenue": "1.25"},
-            {"Region": "West", "Revenue": "2.5"},
+            {"Region": "East", "Revenue": Decimal("1.25")},
+            {"Region": "West", "Revenue": Decimal("2.5")},
         ])
 
         project_path = self.root / "referenced.npa"
@@ -1166,8 +1168,8 @@ in
         source_path.write_text("Region,Revenue\nNorth,7.75\nSouth,8.25\n", encoding="utf-8")
         reopened.refresh_source()
         self.assertEqual(reopened._loaded_candidates[reference_id].rows, [
-            {"Region": "North", "Revenue": "7.75"},
-            {"Region": "South", "Revenue": "8.25"},
+            {"Region": "North", "Revenue": Decimal("7.75")},
+            {"Region": "South", "Revenue": Decimal("8.25")},
         ])
         refreshed_table = next(
             item for item in reopened._project["model"]["tables"]
@@ -1233,8 +1235,8 @@ in
         reference_id = created["id"]
         self.assertEqual(controller._loaded_candidates[reference_id].headers, ["Market", "Revenue"])
         self.assertEqual(controller._loaded_candidates[reference_id].rows, [
-            {"Market": "East", "Revenue": "1.25"},
-            {"Market": "West", "Revenue": "2.5"},
+            {"Market": "East", "Revenue": Decimal("1.25")},
+            {"Market": "West", "Revenue": Decimal("2.5")},
         ])
         reference_table = next(
             item for item in controller._project["model"]["tables"]
@@ -1252,12 +1254,12 @@ in
         )
         controller.refresh_all_sources()
         self.assertEqual(controller._loaded_candidates[source_id].rows, [
-            {"Market": "North", "Revenue": "7.75"},
-            {"Market": "South", "Revenue": "8.25"},
+            {"Market": "North", "Revenue": Decimal("7.75")},
+            {"Market": "South", "Revenue": Decimal("8.25")},
         ])
         self.assertEqual(controller._loaded_candidates[reference_id].rows, [
-            {"Market": "East", "Revenue": "1.25"},
-            {"Market": "West", "Revenue": "2.5"},
+            {"Market": "East", "Revenue": Decimal("1.25")},
+            {"Market": "West", "Revenue": Decimal("2.5")},
         ])
 
     def test_reference_name_skips_names_reserved_by_unloaded_tables(self) -> None:
@@ -2078,7 +2080,7 @@ in
         transformed = apply_transformations(raw, steps)
         source_id = controller._active_source_id
         self.assertTrue(controller._commit_transform_steps(source_id, steps, transformed))
-        self.assertEqual([row["Revenue"] for row in controller._rows], ["20", "12"])
+        self.assertEqual([row["Revenue"] for row in controller._rows], [Decimal("20"), Decimal("12")])
 
         project_path = self.root / "report.npa"
         self.assertTrue(controller._save_to(project_path))
@@ -2087,9 +2089,9 @@ in
         )
         reopened = self.controller()
         self.assertTrue(reopened.open_project_path(project_path))
-        self.assertEqual([row["Revenue"] for row in reopened._rows], ["30", "20", "12"])
+        self.assertEqual([row["Revenue"] for row in reopened._rows], [Decimal("30"), Decimal("20"), Decimal("12")])
         reopened.refresh_source()
-        self.assertEqual([row["Revenue"] for row in reopened._rows], ["30", "20", "12"])
+        self.assertEqual([row["Revenue"] for row in reopened._rows], [Decimal("30"), Decimal("20"), Decimal("12")])
 
     def test_applied_step_settings_save_reopen_and_replay_on_source_refresh(self) -> None:
         source = self.root / "settings.csv"
@@ -2187,7 +2189,7 @@ in
         reopened.refresh_source()
         self.assertEqual(reopened.rowCount, 3)
 
-    def test_failed_transform_replay_preserves_last_good_state(self) -> None:
+    def test_conversion_error_survives_source_refresh_as_a_cell_error(self) -> None:
         source = self.root / "sales.csv"
         source.write_text("Revenue\n12\n", encoding="utf-8")
         controller = self.controller()
@@ -2197,18 +2199,103 @@ in
         self.assertTrue(controller._commit_transform_steps(
             controller._active_source_id, steps, apply_transformations(raw, steps)
         ))
-        rows_before = copy.deepcopy(controller._rows)
-        project_before = copy.deepcopy(controller._project)
-        dirty_before = controller.dirty
         source.write_text("Revenue\nnot-a-number\n", encoding="utf-8")
 
-        with patch.object(QMessageBox, "critical"):
-            controller.refresh_source()
+        controller.refresh_source()
 
-        self.assertEqual(controller._rows, rows_before)
-        self.assertEqual(controller._project, project_before)
-        self.assertEqual(controller.dirty, dirty_before)
-        self.assertIn("Could not refresh", controller.sourceWarning)
+        self.assertEqual(len(controller._rows), 1)
+        error = controller._rows[0]["Revenue"]
+        self.assertIsInstance(error, PowerQueryCellError)
+        self.assertEqual((error.value, error.target_type, error.row), (
+            "not-a-number", "decimal_number", 1,
+        ))
+        self.assertNotIn("Could not refresh", controller.sourceWarning)
+
+    def test_typed_values_and_remove_errors_survive_apply_reopen_and_refresh(self) -> None:
+        source = self.root / "typed-values.json"
+        source.write_text(
+            '[{"Value":0,"Note":"ok"},{"Value":null,"Note":null},'
+            '{"Value":"","Note":""},{"Value":"bad","Note":"bad"}]',
+            encoding="utf-8",
+        )
+        controller = self.controller()
+        raw = parse_file(source)
+        self.assertTrue(controller._commit_import(source, raw))
+        source_id = controller._active_source_id
+        self.assertIsNotNone(source_id)
+        raw_profile = controller.profileColumn("Value")
+        self.assertEqual(
+            (raw_profile["nullCount"], raw_profile["emptyCount"], raw_profile["errorCount"]),
+            (1, 1, 0),
+        )
+
+        convert_step = {
+            "op": "convert_type", "column": "Value", "type": "whole_number",
+        }
+        converted = apply_transformations(raw, [convert_step])
+        self.assertTrue(controller._commit_transform_steps(
+            source_id, [convert_step], converted, previewed_source=raw,
+        ))
+        current = controller._loaded_candidates[source_id]
+        error = current.rows[3]["Value"]
+        self.assertIsInstance(error, PowerQueryCellError)
+        self.assertEqual((error.reason, error.value, error.target_type, error.row), (
+            "DataFormat.Error", "bad", "whole_number", 4,
+        ))
+        profile = controller.profileColumn("Value")
+        self.assertEqual(
+            (profile["nullCount"], profile["emptyCount"], profile["errorCount"]),
+            (1, 0, 2),
+        )
+        self.assertEqual(
+            (controller.profileColumn("Note")["nullCount"],
+             controller.profileColumn("Note")["emptyCount"]),
+            (1, 1),
+        )
+
+        steps = [convert_step, {"op": "remove_rows_with_errors"}]
+        cleaned = apply_transformations(raw, steps)
+        self.assertTrue(controller._commit_transform_steps(
+            source_id, steps, cleaned, previewed_source=raw,
+        ))
+        expected = [0, None]
+        self.assertEqual(
+            [row["Value"] for row in controller._loaded_candidates[source_id].rows],
+            expected,
+        )
+        project_path = self.root / "typed-values.npa"
+        self.assertTrue(controller._save_to(project_path))
+
+        reopened = StudioController(
+            self.app,
+            QSettings(str(self.root / "typed-values-reopened.ini"), QSettings.Format.IniFormat),
+        )
+        self.assertTrue(reopened.open_project_path(project_path))
+        reopened_id = reopened._active_source_id
+        self.assertIsNotNone(reopened_id)
+        self.assertEqual(
+            reopened._project["data_sources"][0]["transform_steps"], steps,
+        )
+        self.assertEqual(
+            [row["Value"] for row in reopened._loaded_candidates[reopened_id].rows],
+            expected,
+        )
+        reopened.refresh_source()
+        self.assertEqual(
+            [row["Value"] for row in reopened._loaded_candidates[reopened_id].rows],
+            expected,
+        )
+
+        source.write_text(
+            '[{"Value":7,"Note":"ok"},{"Value":null,"Note":null},'
+            '{"Value":"","Note":""}]',
+            encoding="utf-8",
+        )
+        reopened.refresh_source()
+        self.assertEqual(
+            [row["Value"] for row in reopened._loaded_candidates[reopened_id].rows],
+            [7, None],
+        )
 
     def test_transform_rejects_source_changed_after_preview(self) -> None:
         source = self.root / "sales.csv"

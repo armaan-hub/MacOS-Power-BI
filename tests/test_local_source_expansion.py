@@ -294,8 +294,8 @@ class LocalSourceExpansionTests(unittest.TestCase):
         )
         reopened.refresh_all_sources()
         self.assertEqual(reopened._loaded_candidates[source_id].rows, [
-            {"id": "A", "value": "11"},
-            {"id": "B", "value": "12"},
+            {"id": "A", "value": 11},
+            {"id": "B", "value": 12},
         ])
         self.assertEqual(parse_file(source_path).kind, "parquet")
         dialog.deleteLater()

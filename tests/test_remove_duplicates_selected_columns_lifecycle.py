@@ -68,9 +68,9 @@ class RemoveDuplicatesSelectedColumnsLifecycleTests(unittest.TestCase):
         dialog._add_step()
         self.assertEqual(dialog._steps[1]["columns"], ["Key"])
         self.assertEqual(dialog._preview_candidate.rows, [
-            {"Key": "A", "Amount": "1"},
-            {"Key": "a", "Amount": "3"},
-            {"Key": "B", "Amount": "4"},
+            {"Key": "A", "Amount": 1},
+            {"Key": "a", "Amount": 3},
+            {"Key": "B", "Amount": 4},
         ])
         dialog._accept_candidate()
         self.assertTrue(controller._commit_transform_steps(
@@ -90,15 +90,15 @@ class RemoveDuplicatesSelectedColumnsLifecycleTests(unittest.TestCase):
         reopened = self.controller("reopened-settings.ini")
         self.assertTrue(reopened.open_project_path(project_path))
         self.assertEqual(reopened._rows, [
-            {"Key": "A", "Amount": "10"},
-            {"Key": "b", "Amount": "12"},
+            {"Key": "A", "Amount": 10},
+            {"Key": "b", "Amount": 12},
         ])
 
         self.source_path.write_text(
             "Key,Amount\nx,20\nx,21\n", encoding="utf-8"
         )
         reopened.refresh_source()
-        self.assertEqual(reopened._rows, [{"Key": "x", "Amount": "20"}])
+        self.assertEqual(reopened._rows, [{"Key": "x", "Amount": 20}])
 
 
 if __name__ == "__main__":

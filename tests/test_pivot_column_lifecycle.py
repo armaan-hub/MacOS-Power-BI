@@ -6,6 +6,7 @@ import os
 from pathlib import Path
 import tempfile
 import unittest
+from decimal import Decimal
 
 os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
 
@@ -61,32 +62,32 @@ class PivotColumnLifecycleTests(unittest.TestCase):
         expected_headers = ["Region", "Store", "Jan", "Feb", "Mar"]
         expected = {
             "count_all": [
-                {"Region": "North", "Store": "1", "Jan": "3", "Feb": "1", "Mar": "1"},
-                {"Region": "South", "Store": "2", "Jan": "", "Feb": "1", "Mar": "1"},
+                {"Region": "North", "Store": "1", "Jan": 3, "Feb": 1, "Mar": 1},
+                {"Region": "South", "Store": "2", "Jan": None, "Feb": 1, "Mar": 1},
             ],
             "count_non_blank": [
-                {"Region": "North", "Store": "1", "Jan": "2", "Feb": "1", "Mar": "0"},
-                {"Region": "South", "Store": "2", "Jan": "", "Feb": "1", "Mar": "1"},
+                {"Region": "North", "Store": "1", "Jan": 2, "Feb": 1, "Mar": 0},
+                {"Region": "South", "Store": "2", "Jan": None, "Feb": 1, "Mar": 1},
             ],
             "min": [
-                {"Region": "North", "Store": "1", "Jan": "10", "Feb": "5", "Mar": ""},
-                {"Region": "South", "Store": "2", "Jan": "", "Feb": "7", "Mar": "4"},
+                {"Region": "North", "Store": "1", "Jan": "10", "Feb": "5", "Mar": None},
+                {"Region": "South", "Store": "2", "Jan": None, "Feb": "7", "Mar": "4"},
             ],
             "max": [
-                {"Region": "North", "Store": "1", "Jan": "20", "Feb": "5", "Mar": ""},
-                {"Region": "South", "Store": "2", "Jan": "", "Feb": "7", "Mar": "4"},
+                {"Region": "North", "Store": "1", "Jan": "20", "Feb": "5", "Mar": None},
+                {"Region": "South", "Store": "2", "Jan": None, "Feb": "7", "Mar": "4"},
             ],
             "median": [
-                {"Region": "North", "Store": "1", "Jan": "15", "Feb": "5", "Mar": ""},
-                {"Region": "South", "Store": "2", "Jan": "", "Feb": "7", "Mar": "4"},
+                {"Region": "North", "Store": "1", "Jan": Decimal("15"), "Feb": Decimal("5"), "Mar": None},
+                {"Region": "South", "Store": "2", "Jan": None, "Feb": Decimal("7"), "Mar": Decimal("4")},
             ],
             "sum": [
-                {"Region": "North", "Store": "1", "Jan": "30", "Feb": "5", "Mar": ""},
-                {"Region": "South", "Store": "2", "Jan": "", "Feb": "7", "Mar": "4"},
+                {"Region": "North", "Store": "1", "Jan": Decimal("30"), "Feb": Decimal("5"), "Mar": None},
+                {"Region": "South", "Store": "2", "Jan": None, "Feb": Decimal("7"), "Mar": Decimal("4")},
             ],
             "average": [
-                {"Region": "North", "Store": "1", "Jan": "15", "Feb": "5", "Mar": ""},
-                {"Region": "South", "Store": "2", "Jan": "", "Feb": "7", "Mar": "4"},
+                {"Region": "North", "Store": "1", "Jan": Decimal("15"), "Feb": Decimal("5"), "Mar": None},
+                {"Region": "South", "Store": "2", "Jan": None, "Feb": Decimal("7"), "Mar": Decimal("4")},
             ],
         }
 
@@ -126,8 +127,8 @@ class PivotColumnLifecycleTests(unittest.TestCase):
         self.assertTrue(reopened.open_project_path(project_path))
         self.assertEqual(reopened._headers, expected_headers)
         self.assertEqual(reopened._rows, [
-            {"Region": "East", "Store": "3", "Jan": "3", "Feb": "8", "Mar": ""},
-            {"Region": "West", "Store": "4", "Jan": "", "Feb": "", "Mar": "5"},
+            {"Region": "East", "Store": "3", "Jan": Decimal("3"), "Feb": Decimal("8"), "Mar": None},
+            {"Region": "West", "Store": "4", "Jan": None, "Feb": None, "Mar": Decimal("5")},
         ])
 
         self.source_path.write_text(
@@ -138,8 +139,8 @@ class PivotColumnLifecycleTests(unittest.TestCase):
         reopened.refresh_source()
         self.assertEqual(reopened._headers, ["Region", "Store", "Apr", "Jan"])
         self.assertEqual(reopened._rows, [
-            {"Region": "Central", "Store": "5", "Apr": "25", "Jan": ""},
-            {"Region": "South", "Store": "2", "Apr": "", "Jan": "10"},
+            {"Region": "Central", "Store": "5", "Apr": Decimal("25"), "Jan": None},
+            {"Region": "South", "Store": "2", "Apr": None, "Jan": Decimal("10")},
         ])
 
 

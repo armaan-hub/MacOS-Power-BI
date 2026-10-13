@@ -58,8 +58,8 @@ class ColumnTypeLifecycleTests(unittest.TestCase):
         table = self.table_for(controller, source_id)
         self.assertEqual(table["column_types"]["Revenue"], "whole_number")
         self.assertEqual(controller._rows, [
-            {"Region": "East", "Revenue": "12"},
-            {"Region": "West", "Revenue": "20"},
+            {"Region": "East", "Revenue": 12},
+            {"Region": "West", "Revenue": 20},
         ])
 
         project_path = self.root / "typed-project.npa"
@@ -71,7 +71,7 @@ class ColumnTypeLifecycleTests(unittest.TestCase):
             self.table_for(reopened, source_id)["column_types"]["Revenue"],
             "whole_number",
         )
-        self.assertEqual(reopened._rows[0]["Revenue"], "12")
+        self.assertEqual(reopened._rows[0]["Revenue"], 12)
 
         self.source_path.write_text(
             "Region,Revenue\nEast,12.00\nWest,20.00\nNorth,30.00\n",
@@ -80,7 +80,7 @@ class ColumnTypeLifecycleTests(unittest.TestCase):
         reopened.refresh_source()
         self.assertEqual(reopened.rowCount, 3)
         self.assertEqual(reopened._rows[-1], {
-            "Region": "North", "Revenue": "30",
+            "Region": "North", "Revenue": 30,
         })
         self.assertEqual(
             self.table_for(reopened, source_id)["column_types"]["Revenue"],

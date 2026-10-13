@@ -1076,7 +1076,15 @@ ApplicationWindow {
                                                         const measures = fields["Line Y-axis"] || []
                                                         return measures.length ? mainWindow.studioController.visualFieldLabel(String(measures[0])) : "Line"
                                                     }
-                                                    emptyMessage: "No data is available yet."
+                                                    emptyMessage: {
+                                                        const visuals = mainWindow.studioController.activeVisualObjects
+                                                        const visual = visuals.find(function(item) {
+                                                            return String(item.title) === String(modelData.title)
+                                                        })
+                                                        if (!visual) return "No data is available yet."
+                                                        const errorMessage = mainWindow.studioController.visualErrorMessage(String(visual.title))
+                                                        return errorMessage || "No data is available yet."
+                                                    }
 
                                                     series: {
                                                         const visuals = mainWindow.studioController.activeVisualObjects

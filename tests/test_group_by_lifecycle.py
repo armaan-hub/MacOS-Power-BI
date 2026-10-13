@@ -6,6 +6,7 @@ import os
 from pathlib import Path
 import tempfile
 import unittest
+from decimal import Decimal
 
 os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
 
@@ -83,25 +84,25 @@ class GroupByLifecycleTests(unittest.TestCase):
         ])
         self.assertEqual(dialog._preview_candidate.rows, [
             {
-                "Region": "North", "Product": "A", "Total revenue": "70",
-                "Average revenue": "17.5", "Median revenue": "15",
+                "Region": "North", "Product": "A", "Total revenue": Decimal("70"),
+                "Average revenue": Decimal("17.5"), "Median revenue": Decimal("15"),
                 "Minimum revenue": "10", "Maximum revenue": "30",
-                "Distinct revenue values": "3", "Transaction count": "4",
-                "Distinct row count": "3",
+                "Distinct revenue values": 3, "Transaction count": 4,
+                "Distinct row count": 3,
             },
             {
-                "Region": "North", "Product": "B", "Total revenue": "",
-                "Average revenue": "", "Median revenue": "",
-                "Minimum revenue": "", "Maximum revenue": "",
-                "Distinct revenue values": "1", "Transaction count": "1",
-                "Distinct row count": "1",
+                "Region": "North", "Product": "B", "Total revenue": None,
+                "Average revenue": None, "Median revenue": None,
+                "Minimum revenue": None, "Maximum revenue": None,
+                "Distinct revenue values": 1, "Transaction count": 1,
+                "Distinct row count": 1,
             },
             {
-                "Region": "South", "Product": "A", "Total revenue": "4",
-                "Average revenue": "4", "Median revenue": "4",
+                "Region": "South", "Product": "A", "Total revenue": Decimal("4"),
+                "Average revenue": Decimal("4"), "Median revenue": Decimal("4"),
                 "Minimum revenue": "4", "Maximum revenue": "4",
-                "Distinct revenue values": "1", "Transaction count": "1",
-                "Distinct row count": "1",
+                "Distinct revenue values": 1, "Transaction count": 1,
+                "Distinct row count": 1,
             },
         ])
         dialog._accept_candidate()
@@ -121,13 +122,13 @@ class GroupByLifecycleTests(unittest.TestCase):
         reopened = self.controller("reopened-settings.ini")
         self.assertTrue(reopened.open_project_path(project_path))
         self.assertEqual(reopened._rows[0], {
-            "Region": "North", "Product": "A", "Total revenue": "85",
-            "Average revenue": "17", "Median revenue": "15",
+            "Region": "North", "Product": "A", "Total revenue": Decimal("85"),
+            "Average revenue": Decimal("17"), "Median revenue": Decimal("15"),
             "Minimum revenue": "5", "Maximum revenue": "35",
-            "Distinct revenue values": "4", "Transaction count": "5",
-            "Distinct row count": "4",
+            "Distinct revenue values": 4, "Transaction count": 5,
+            "Distinct row count": 4,
         })
-        self.assertEqual(reopened._rows[1]["Distinct revenue values"], "1")
+        self.assertEqual(reopened._rows[1]["Distinct revenue values"], 1)
 
         self.source_path.write_text(
             "Region,Product,Revenue,Units\n"
@@ -137,18 +138,18 @@ class GroupByLifecycleTests(unittest.TestCase):
         reopened.refresh_source()
         self.assertEqual(reopened._rows, [
             {
-                "Region": "East", "Product": "C", "Total revenue": "8",
-                "Average revenue": "4", "Median revenue": "4",
+                "Region": "East", "Product": "C", "Total revenue": Decimal("8"),
+                "Average revenue": Decimal("4"), "Median revenue": Decimal("4"),
                 "Minimum revenue": "2", "Maximum revenue": "6",
-                "Distinct revenue values": "2", "Transaction count": "2",
-                "Distinct row count": "2",
+                "Distinct revenue values": 2, "Transaction count": 2,
+                "Distinct row count": 2,
             },
             {
-                "Region": "West", "Product": "D", "Total revenue": "9",
-                "Average revenue": "9", "Median revenue": "9",
+                "Region": "West", "Product": "D", "Total revenue": Decimal("9"),
+                "Average revenue": Decimal("9"), "Median revenue": Decimal("9"),
                 "Minimum revenue": "9", "Maximum revenue": "9",
-                "Distinct revenue values": "1", "Transaction count": "1",
-                "Distinct row count": "1",
+                "Distinct revenue values": 1, "Transaction count": 1,
+                "Distinct row count": 1,
             },
         ])
 

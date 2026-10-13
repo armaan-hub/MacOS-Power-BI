@@ -14,6 +14,7 @@ from PySide6.QtWidgets import QApplication
 
 from analytics_studio.controller import StudioController
 from analytics_studio.file_import import parse_file
+from analytics_studio.power_query_values import PowerQueryCellError
 
 QQuickStyle.setStyle("Basic")
 
@@ -49,7 +50,6 @@ def test_card_visual_aggregates_filters_highlights_and_persists(tmp_path: Path) 
         window.show()
         controller.setCurrentView("Report")
         app.processEvents()
-
         # Existing summary cards use the same renderer and still show built-in values.
         assert controller.visualCardData("Revenue KPI")["value"] == "47"
         builtin_card = next(
@@ -144,3 +144,28 @@ def test_card_visual_aggregates_filters_highlights_and_persists(tmp_path: Path) 
         window.deleteLater()
         engine.deleteLater()
         app.processEvents()
+
+
+def test_card_shows_power_query_cell_errors_instead_of_partial_aggregates(
+    tmp_path: Path,
+) -> None:
+    app = QApplication.instance() or QApplication(["card Power Query error tests"])
+    source_path = tmp_path / "error-sales.json"
+    source_path.write_text(
+        '[{"Category":"A","Amount":10},{"Category":"B","Amount":20}]',
+        encoding="utf-8",
+    )
+    controller = StudioController(
+        app,
+        QSettings(str(tmp_path / "error-settings.ini"), QSettings.Format.IniFormat),
+    )
+    assert controller._commit_import(source_path, parse_file(source_path))
+    controller.add_visual("card", "Error card", 14, 14, 120, 80)
+    controller.add_field_to_well("Fields", "Amount")
+    source_id = str(controller._active_source_id)
+    controller._loaded_candidates[source_id].rows[0]["Amount"] = PowerQueryCellError(
+        "DataFormat.Error", "invalid amount", "bad", "decimal_number", row=1,
+    )
+    controller._report_filter_context_cache.clear()
+
+    assert controller.visualCardData("Error card")["value"] == "Error"
