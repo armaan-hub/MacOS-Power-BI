@@ -214,6 +214,114 @@ class TransformationTests(unittest.TestCase):
                 {"op": "filter_rows", "column": "Amount", "operator": "greater_than", "value": "1"},
             ])
 
+    def test_type_conversion_reports_bounded_row_diagnostics_atomically(self) -> None:
+        source = ImportCandidate(
+            "csv",
+            ["Amount"],
+            [
+                {"Amount": "10"},
+                {"Amount": "bad"},
+                {"Amount": "20"},
+                {"Amount": "also bad"},
+            ],
+            {},
+            [],
+        )
+        original = copy.deepcopy(source)
+
+        with self.assertRaises(TransformationError) as raised:
+            apply_transformations(source, [{
+                "op": "convert_type", "column": "Amount", "type": "whole_number",
+            }])
+
+        error = raised.exception
+        self.assertEqual(error.error_count, 2)
+        self.assertEqual(error.row_diagnostics, [
+            {
+                "row": 2,
+                "column": "Amount",
+                "value": "bad",
+                "target_type": "whole_number",
+                "culture": None,
+            },
+            {
+                "row": 4,
+                "column": "Amount",
+                "value": "also bad",
+                "target_type": "whole_number",
+                "culture": None,
+            },
+        ])
+        self.assertIn("2 conversion errors total", str(error))
+        self.assertIn("row 4 value 'also bad'", str(error))
+        self.assertIn("1-based in the input to this step", str(error))
+        self.assertEqual(source, original)
+
+    def test_locale_conversion_reports_all_sampled_bad_rows_and_culture(self) -> None:
+        source = ImportCandidate(
+            "csv",
+            ["Amount"],
+            [
+                {"Amount": "1,5"},
+                {"Amount": "bad"},
+                {"Amount": "2,x"},
+                {"Amount": ""},
+            ],
+            {},
+            [],
+        )
+
+        with self.assertRaises(TransformationError) as raised:
+            apply_transformations(source, [{
+                "op": "convert_type_using_locale",
+                "column": "Amount",
+                "type": "decimal_number",
+                "culture": "de-DE",
+            }])
+
+        error = raised.exception
+        self.assertEqual(error.error_count, 2)
+        self.assertEqual(
+            [item["row"] for item in error.row_diagnostics], [2, 3]
+        )
+        self.assertTrue(all(
+            item["culture"] == "de-DE" for item in error.row_diagnostics
+        ))
+        self.assertIn("using culture de-DE", str(error))
+        self.assertIn("row 3 value '2,x'", str(error))
+
+    def test_conversion_diagnostics_cap_examples_but_count_every_error(self) -> None:
+        long_column = "Column " + ("y" * 500)
+        source = ImportCandidate(
+            "csv",
+            [long_column],
+            [
+                {long_column: "invalid " + ("x" * 500)}
+                if index == 0
+                else {long_column: f"invalid {index}"}
+                for index in range(25)
+            ],
+            {},
+            [],
+        )
+
+        with self.assertRaises(TransformationError) as raised:
+            apply_transformations(source, [{
+                "op": "convert_type", "column": long_column, "type": "whole_number",
+            }])
+
+        error = raised.exception
+        self.assertEqual(error.error_count, 25)
+        self.assertEqual(len(error.row_diagnostics), 20)
+        self.assertEqual(error.row_diagnostics[0]["row"], 1)
+        self.assertEqual(error.row_diagnostics[-1]["row"], 20)
+        self.assertEqual(len(error.row_diagnostics[0]["value"]), 508)
+        self.assertEqual(error.row_diagnostics[0]["column"], long_column)
+        self.assertIn("Showing the first 20 of 25 errors", str(error))
+        self.assertNotIn("row 21 value", str(error))
+        self.assertNotIn(long_column, str(error))
+        self.assertLess(len(str(error)), 5_000)
+
     def test_transformation_failure_does_not_change_input(self) -> None:
         source = candidate()
         original = copy.deepcopy(source)

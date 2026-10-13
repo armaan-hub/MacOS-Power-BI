@@ -198,10 +198,23 @@ MAX_INDEX_VALUE = 2**63 - 1
 MAX_GROUP_DECIMAL_PRECISION = 4096
 MAX_SPLIT_POSITION = MAX_EXPRESSION_OUTPUT_BYTES
 MAX_DELIMITER_OCCURRENCE = MAX_DATA_ROWS
+MAX_CONVERSION_DIAGNOSTICS = 20
+MAX_CONVERSION_DIAGNOSTIC_VALUE_CHARS = 120
 
 
 class TransformationError(ValueError):
     """A malformed transformation or a step that cannot be replayed."""
+
+    def __init__(
+        self,
+        message: str,
+        *,
+        row_diagnostics: list[dict[str, Any]] | None = None,
+        error_count: int = 0,
+    ) -> None:
+        super().__init__(message)
+        self.row_diagnostics = deepcopy(row_diagnostics or [])
+        self.error_count = error_count
 
 
 _FILTER_OPERATORS = {
@@ -2849,8 +2862,75 @@ def _sort_rows_by_columns(
 
 def _convert_column(rows: list[dict[str, str]], column: str, target_type: str) -> None:
     target_type = canonical_column_type(target_type)
+    converted_values: list[str] = []
+    diagnostics: list[dict[str, Any]] = []
+    error_count = 0
     for row_index, row in enumerate(rows, 1):
-        row[column] = _convert_value(row[column], target_type, row_index, column)
+        value = row[column]
+        try:
+            converted_values.append(
+                _convert_value(value, target_type, row_index, column)
+            )
+        except TransformationError:
+            error_count += 1
+            if len(diagnostics) < MAX_CONVERSION_DIAGNOSTICS:
+                diagnostics.append({
+                    "row": row_index,
+                    "column": column,
+                    "value": value,
+                    "target_type": target_type,
+                    "culture": None,
+                })
+            converted_values.append(value)
+    if error_count:
+        raise _conversion_diagnostics_error(
+            column, target_type, diagnostics, error_count
+        )
+    for row, value in zip(rows, converted_values):
+        row[column] = value
+
+
+def _conversion_diagnostics_error(
+    column: str,
+    target_type: str,
+    diagnostics: list[dict[str, Any]],
+    error_count: int,
+    culture: str | None = None,
+) -> TransformationError:
+    first = diagnostics[0]
+    culture_text = f" using culture {culture}" if culture else ""
+    message = (
+        f"Cannot convert value {_conversion_diagnostic_value(first['value'])} "
+        f"in row {first['row']} "
+        f"of column {_conversion_diagnostic_value(column)} "
+        f"to {target_type}{culture_text}."
+    )
+    if error_count > 1:
+        other_errors = diagnostics[1:]
+        message += f" {error_count} conversion errors total."
+        if other_errors:
+            examples = "; ".join(
+                f"row {item['row']} value {_conversion_diagnostic_value(item['value'])}"
+                for item in other_errors
+            )
+            message += f" Other failing rows: {examples}."
+        if error_count > len(diagnostics):
+            message += (
+                f" Showing the first {len(diagnostics)} of {error_count} errors."
+            )
+    message += " Row numbers are 1-based in the input to this step."
+    return TransformationError(
+        message,
+        row_diagnostics=diagnostics,
+        error_count=error_count,
+    )
+
+
+def _conversion_diagnostic_value(value: str) -> str:
+    if len(value) <= MAX_CONVERSION_DIAGNOSTIC_VALUE_CHARS:
+        return repr(value)
+    prefix = value[:MAX_CONVERSION_DIAGNOSTIC_VALUE_CHARS - 1]
+    return f"{prefix!r}…"
 
 
 def _canonical_culture(culture: str) -> str:
@@ -2924,15 +3004,32 @@ def _convert_column_using_locale(
 ) -> None:
     target_type = canonical_column_type(target_type)
     locale = Locale.parse(culture.replace("-", "_"))
+    converted_values: list[str] = []
+    diagnostics: list[dict[str, Any]] = []
+    error_count = 0
     for row_index, row in enumerate(rows, 1):
         value = row[column]
         try:
-            row[column] = _convert_value_using_locale(value, target_type, locale)
-        except (DecimalException, IndexError, OverflowError, ValueError) as exc:
-            raise TransformationError(
-                f"Cannot convert value {value!r} in row {row_index} of column {column!r} "
-                f"to {target_type} using culture {culture}."
-            ) from exc
+            converted_values.append(
+                _convert_value_using_locale(value, target_type, locale)
+            )
+        except (DecimalException, IndexError, OverflowError, ValueError):
+            error_count += 1
+            if len(diagnostics) < MAX_CONVERSION_DIAGNOSTICS:
+                diagnostics.append({
+                    "row": row_index,
+                    "column": column,
+                    "value": value,
+                    "target_type": target_type,
+                    "culture": culture,
+                })
+            converted_values.append(value)
+    if error_count:
+        raise _conversion_diagnostics_error(
+            column, target_type, diagnostics, error_count, culture
+        )
+    for row, value in zip(rows, converted_values):
+        row[column] = value
 
 
 def _decimal_number_text(number: Decimal) -> str:

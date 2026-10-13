@@ -20,6 +20,7 @@ from PySide6.QtWidgets import (
 )
 
 from analytics_studio.file_import import MAX_DATA_ROWS, ImportCandidate
+from analytics_studio.power_query_expression import compile_expression, evaluate_expression
 from analytics_studio.power_query_m import (
     PowerQueryMEditorDialog,
     PowerQueryMScriptError,
@@ -1080,6 +1081,55 @@ in
             ["", ""],
         )
 
+    def test_custom_column_text_clean_round_trips_control_characters_and_null(self) -> None:
+        source = ImportCandidate(
+            "inline",
+            ["Customer"],
+            [
+                {"Customer": "A\x01B\x7f\u0085C\u200bD"},
+                {"Customer": ""},
+            ],
+            {},
+            [],
+        )
+        step = {
+            "op": "add_custom_column",
+            "name": "Cleaned",
+            "expression": "Text.Clean([Customer])",
+        }
+        source_types = {"Customer": "text"}
+        script = steps_to_m_script(
+            [step], "Customers", initial_column_types=source_types
+        )
+        parsed = parse_m_script(
+            script, "Customers", initial_column_types=source_types
+        )
+        direct = apply_transformations(source, [step])
+        through_m = apply_transformations(source, parsed)
+
+        self.assertIn("Text.Clean([Customer])", script)
+        self.assertEqual(parsed, [step])
+        self.assertEqual(through_m, direct)
+        self.assertEqual(
+            [row["Cleaned"] for row in through_m.rows], ["ABC\u200bD", ""]
+        )
+        self.assertEqual(
+            column_types_after_steps(
+                source.headers, parsed, output_headers=through_m.headers,
+                initial_types=source_types,
+            ),
+            column_types_after_steps(
+                source.headers, [step], output_headers=direct.headers,
+                initial_types=source_types,
+            ),
+        )
+        self.assertTrue(m_script_matches_steps(
+            script, "Customers", [step], initial_column_types=source_types
+        ))
+        self.assertIsNone(
+            evaluate_expression(compile_expression("Text.Clean(null)"), {})
+        )
+
     def test_text_transform_rejects_a_declared_non_text_output_type(self) -> None:
         script = '''let
     Source = #"Sales Data",
@@ -2075,6 +2125,128 @@ in
             {"op": "fill_up", "columns": ["Region", "Customer"]},
         ]
 
+        additional_source = ImportCandidate(
+            "inline",
+            ["Region", "Revenue", "Customer"],
+            [
+                {"Region": "East", "Revenue": "12", "Customer": "alpha,beta"},
+                {"Region": "West", "Revenue": "20", "Customer": "beta,gamma"},
+                {"Region": "East", "Revenue": "5", "Customer": "gamma,alpha"},
+            ],
+            {},
+            [],
+        )
+        pivot_source = ImportCandidate(
+            "inline",
+            ["Region", "Year", "Sales"],
+            [
+                {"Region": "East", "Year": "2024", "Sales": "10"},
+                {"Region": "East", "Year": "2025", "Sales": "20"},
+                {"Region": "West", "Year": "2024", "Sales": "5"},
+            ],
+            {},
+            [],
+        )
+        additional_cases = [
+            (
+                additional_source,
+                {"op": "filter_rows_advanced", "clauses": [{
+                    "column": "Region", "operator": "equals", "value": "East",
+                    "join": "and",
+                }]},
+            ),
+            (
+                additional_source,
+                {"op": "convert_type_using_locale", "column": "Revenue",
+                 "type": "decimal_number", "culture": "en-US"},
+            ),
+            (
+                additional_source,
+                {"op": "extract_text_by_delimiter", "column": "Customer",
+                 "side": "before", "delimiter": ",", "occurrence": 0},
+            ),
+            (
+                ImportCandidate(
+                    "inline", ["Code"], [{"Code": "left[middle]right"}], {}, []
+                ),
+                {"op": "extract_text_between_delimiters", "column": "Code",
+                 "start_delimiter": "[", "end_delimiter": "]",
+                 "start_occurrence": 0, "end_occurrence": 0},
+            ),
+            (
+                ImportCandidate(
+                    "inline", ["Code"], [{"Code": "a:b:c"}, {"Code": "x:y"}], {}, []
+                ),
+                {"op": "split_column", "column": "Code", "delimiter": ":"},
+            ),
+            (
+                ImportCandidate(
+                    "inline", ["Code"], [{"Code": "a:b:c"}, {"Code": "x:y"}], {}, []
+                ),
+                {"op": "split_column_by_each_delimiter", "column": "Code",
+                 "delimiter": ":"},
+            ),
+            (
+                ImportCandidate(
+                    "inline", ["Code"], [{"Code": "a:b:c"}, {"Code": "x:y"}], {}, []
+                ),
+                {"op": "split_column_to_rows", "column": "Code", "delimiter": ":"},
+            ),
+            (
+                ImportCandidate(
+                    "inline", ["Code"], [{"Code": "abcd"}, {"Code": "wxyz"}], {}, []
+                ),
+                {"op": "split_column_by_positions", "column": "Code",
+                 "positions": [0, 2]},
+            ),
+            (
+                additional_source,
+                {"op": "merge_columns", "columns": ["Region", "Customer"],
+                 "separator": "-", "new_name": "Joined"},
+            ),
+            (
+                additional_source,
+                {"op": "group_by", "columns": ["Region"], "aggregations": [{
+                    "operation": "sum", "column": "Revenue", "new_name": "Total",
+                }]},
+            ),
+            (
+                additional_source,
+                {"op": "unpivot_columns", "columns": ["Revenue", "Customer"],
+                 "attribute_name": "Attribute", "value_name": "Value"},
+            ),
+            (
+                additional_source,
+                {"op": "unpivot_other_columns", "columns": ["Region"],
+                 "attribute_name": "Attribute", "value_name": "Value"},
+            ),
+            (
+                pivot_source,
+                {"op": "pivot_column", "attribute_column": "Year",
+                 "value_column": "Sales", "aggregation": "none"},
+            ),
+            (
+                additional_source,
+                {"op": "keep_duplicates", "columns": ["Region"]},
+            ),
+            (
+                self.source,
+                {"op": "transpose_table"},
+            ),
+        ]
+
+        operation_dialog = TransformDataDialog(self.source, query_name="Sales Data")
+        exposed_operations = {
+            str(operation_dialog.operation_combo.itemData(index))
+            for index in range(operation_dialog.operation_combo.count())
+        }
+        operation_dialog.deleteLater()
+        covered_operations = {step["op"] for step in cases} | {
+            step["op"] for _source, step in additional_cases
+        }
+        self.assertEqual(len(exposed_operations), 46)
+        self.assertEqual(covered_operations, exposed_operations)
+
         for step in cases:
             with self.subTest(operation=step["op"], step=step):
                 self.assertEqual(m_compatibility_issues([step]), [])
@@ -2097,6 +2269,23 @@ in
                 self.assertEqual(
                     column_types_after_steps(source.headers, parsed_steps, output_headers=through_m.headers),
                     column_types_after_steps(source.headers, [step], output_headers=direct.headers),
+                )
+
+        for source, step in additional_cases:
+            with self.subTest(operation=step["op"], step=step):
+                self.assertEqual(m_compatibility_issues([step]), [])
+                script = steps_to_m_script([step], "Sales Data")
+                parsed_steps = parse_m_script(script, "Sales Data")
+                direct = apply_transformations(source, [step])
+                through_m = apply_transformations(source, parsed_steps)
+                self.assertEqual(through_m, direct)
+                self.assertEqual(
+                    column_types_after_steps(
+                        source.headers, parsed_steps, output_headers=through_m.headers
+                    ),
+                    column_types_after_steps(
+                        source.headers, [step], output_headers=direct.headers
+                    ),
                 )
 
     def test_editor_previews_and_applies_without_committing_to_source(self) -> None:
@@ -2408,6 +2597,34 @@ in
         dialog = TransformDataDialog(singleton_and_blank)
         self.assertEqual(dialog.profile_table.item(0, 2).text(), "1")
         self.assertEqual(dialog.profile_table.item(0, 3).text(), "1")
+        dialog.deleteLater()
+
+    def test_failed_type_preview_shows_all_conversion_row_diagnostics(self) -> None:
+        source = ImportCandidate(
+            "inline",
+            ["Amount"],
+            [
+                {"Amount": "10"},
+                {"Amount": "bad"},
+                {"Amount": "20"},
+                {"Amount": "also bad"},
+            ],
+            {},
+            [],
+        )
+        dialog = TransformDataDialog(source)
+        dialog.operation_combo.setCurrentIndex(
+            dialog.operation_combo.findData("convert_type")
+        )
+        dialog.column_combo.setCurrentText("Amount")
+        dialog._set_combo_data(dialog.option_combo, "whole_number")
+
+        dialog._add_step()
+
+        self.assertEqual(dialog._steps, [])
+        self.assertIn("2 conversion errors total", dialog.error_label.text())
+        self.assertIn("row 2", dialog.error_label.text())
+        self.assertIn("row 4 value 'also bad'", dialog.error_label.text())
         dialog.deleteLater()
 
     def test_query_navigator_keeps_steps_and_preview_per_query(self) -> None:
@@ -2903,7 +3120,11 @@ in
         accepted = session.accepted_queries
         self.assertIsNotNone(accepted)
         rebound = accepted["append"]["m_script"]
-        self.assertIn('Table.Combine({#"North Renamed", #"South"})', rebound)
+        self.assertIn(
+            'Table.Combine({#"North Renamed", // Keep the source note during parent rename.\n'
+            '        #"South"})',
+            rebound,
+        )
         self.assertIn("// Keep the source note during parent rename.", rebound)
         self.assertIn("// Keep authored step names on parent rename.", rebound)
         self.assertIn("NorthOnly = Table.SelectRows", rebound)

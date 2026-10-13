@@ -2807,8 +2807,18 @@ class PowerQuerySessionCombineTests(unittest.TestCase):
         staged_types: dict[str, dict[str, str]] = {}
 
         def accept_editor(dialog: TransformDataDialog) -> QDialog.DialogCode:
-            dialog._query_states[source_ids[0]]["column_types"]["Amount"] = "whole_number"
-            dialog._query_states[source_ids[1]]["column_types"]["Amount"] = "decimal_number"
+            for source_id, type_name in zip(
+                source_ids, ("whole_number", "decimal_number")
+            ):
+                dialog.query_list.setCurrentRow(dialog._query_order.index(source_id))
+                dialog.operation_combo.setCurrentIndex(
+                    dialog.operation_combo.findData("convert_type")
+                )
+                dialog.column_combo.setCurrentText("Amount")
+                dialog.option_combo.setCurrentIndex(
+                    dialog.option_combo.findData(type_name)
+                )
+                dialog._add_step()
             button = dialog.findChild(QToolButton, "powerQueryMergeQueriesButton")
             self.assertIsNotNone(button)
             button.click()

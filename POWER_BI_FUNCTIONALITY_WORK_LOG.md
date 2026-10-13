@@ -713,4 +713,18 @@ The Advanced Editor now emits and parses the two parent references of a saved Ap
 
 The bounded custom-column expression evaluator now accepts `Text.Clean`. It removes Unicode control-category (`Cc`) characters, matching the local Clean Text step and Microsoft's documented behavior. The M expression type checker preserves its nullable text result, and the formula placeholder now demonstrates the function. This extends the local M subset; it does not add arbitrary M execution.
 
-Automated acceptance for this increment remains pending. No tests were run.
+Acceptance now covers C0/C1 control removal, preservation of a non-control format character, nullable `Text.Clean(null)` evaluation, custom-column M emit/parse/replay, preview, save/reopen, and refresh after source changes. The local normalized-cell model still stores a null formula result as empty text.
+
+## 2026-10-13 — Complete local Power Query operation-ID M coverage
+
+The Power Query M operation matrix now enumerates the Transform Data editor's 46 operation IDs and requires a representative script to emit, parse, replay, and produce the same local rows and type map as the direct transformation. The added cases cover advanced filters, locale conversion, delimiter extraction, all split forms, merge columns, Group, both Unpivot forms, Pivot, Keep Duplicates, and Transpose. Focused M tests also round-trip `Text.Clean` formulas with nullable output. This closes P2 operation-ID coverage for the bounded local bridge; it does not prove every possible M form or external Mashup equivalence.
+
+Two regression assertions were corrected: Append M rebinding now checks that the source comment and newline remain in place, and the Merge lifecycle fixture updates its source-type metadata consistently with its derived type map. Focused Power Query M, custom-column lifecycle, and session-combine coverage passed **134 tests and 166 subtests**. The full pytest suite passed **686 tests and 495 subtests**; `compileall` and `git diff --check` passed. These checks use the local bridge and do not establish Mashup-runtime behavior or null/empty fidelity.
+
+## 2026-10-13 — Report all row failures from type conversions
+
+Invariant and locale-aware type conversion now scan every row before returning. If any value fails, the transformation still fails atomically, and its error includes the exact number of invalid values plus up to 20 bounded examples with the 1-based row ordinal at the current step input, column, raw value, target type, and culture. Long values are truncated in the message; structured diagnostics retain the example values. The editor displays this message when a type-change preview fails. This is deterministic conversion diagnosis, not persistent cell-level Error values, source-row lineage, null/empty separation, or a Remove Errors operation.
+
+Acceptance covers multiple invalid values in both conversion paths, locale details, bounded examples, unchanged source candidates, and the editor error message.
+
+Focused transformations, Power Query M/editor lifecycle, and session-combine suites passed **153 tests and 186 subtests**. Full `python3 -m pytest -q` passed **690 tests and 495 subtests**. `python3 -m compileall -q analytics_studio tests` and `git diff --check` passed. The run was local and does not establish Mashup equivalence or persistent cell-level errors.
