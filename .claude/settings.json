@@ -1,0 +1,15 @@
+{
+  "permissions": {
+    "deny": [
+      "Read(./.venv/**)",
+      "Read(./build/**)",
+      "Read(./dist/**)",
+      "Read(./**/__pycache__/**)",
+      "Read(./*.egg-info/**)",
+      "Read(./.pytest_cache/**)",
+      "Read(./.playwright-mcp/**)",
+      "Read(./.council/**)",
+      "Read(./.DS_Store)"
+    ]
+  }
+}
