@@ -280,6 +280,7 @@ _RANK_ARITY = {
 _WINDOW_SCALARS = {"RANK", "ROWNUMBER"}
 _FUNCTIONS |= {"ORDERBY", "PARTITIONBY", "MATCHBY"}
 _FUNCTIONS |= set(_TABLE_FUNCTION_ARITY) | set(_RANK_ARITY)
+_FUNCTIONS.add("RELATEDTABLE")
 _TABLE_FIRST_PARENTS = _ALL_ITERATORS | {
     "COUNTROWS", "CONCATENATEX", "ISEMPTY", "CONTAINS", "CONTAINSROW", "ADDCOLUMNS", "SELECTCOLUMNS", "SUMMARIZE",
     "FILTER", "RANKX", "CALCULATETABLE", "DISTINCT", "VALUES", "FILTERS",
@@ -1049,6 +1050,22 @@ def _membership(value: tuple[Any, ...], table: tuple[Any, ...]) -> tuple[Any, ..
     if value[0] != "tuple" and table[0] == "call" and table[1] in {"TOPN", "SELECTCOLUMNS", "SUMMARIZE", "EXCEPT", "INTERSECT"}:
         raise MeasureError(f"IN does not accept the table returned by {table[1]}.")
     return ("in", value, table)
+
+
+def _mixes_table_and_scalar_branches(function: str, arguments: tuple[Any, ...] | list[Any]) -> bool:
+    """IF / SWITCH with a table (CALCULATETABLE, RELATEDTABLE, TOPN...) in one result branch and a scalar (or the implicit
+    BLANK) in another: Power BI refuses it when the expression is compiled, even when the branch is never evaluated."""
+    if function == "IF":
+        branches = list(arguments[1:3]) + [("blank",)] * (3 - len(arguments))
+    elif len(arguments) % 2 == 0:  # SWITCH(expression, value, result, ..., default)
+        branches = list(arguments[2:-1:2]) + [arguments[-1]]
+    else:  # no default: BLANK
+        branches = list(arguments[2::2]) + [("blank",)]
+    tables = [
+        isinstance(b, tuple) and b and (b[0] == "table_call" or (b[0] == "call" and (b[1] == "CALCULATETABLE" or b[1] in _TABLE_FUNCTION_ARITY)))
+        for b in branches
+    ]
+    return any(tables) and not all(tables)
 
 
 def _is_all_table_value_argument(node: Any) -> bool:
@@ -2142,6 +2159,10 @@ class _Parser:
                         arguments.append(("omitted",))
                         break
             self._expect(")")
+            if function == "RELATEDTABLE":  # CALCULATETABLE(table): the row context of the enclosing iterator becomes the filter
+                if len(arguments) != 1 or arguments[0][0] != "table":
+                    raise MeasureError("RELATEDTABLE needs one table, such as RELATEDTABLE('Sales').")
+                return ("call", "CALCULATETABLE", (arguments[0],))
             if function in dax_math.STAT_PERCENTILE_COLUMN:
                 if len(arguments) != 2 or arguments[0][0] != "reference":
                     raise MeasureError(f"{function} needs a column reference and a percentile between 0 and 1.")
@@ -2227,6 +2248,8 @@ class _Parser:
                 )
             elif function == "ROUND" and len(arguments) != 2:
                 raise MeasureError("ROUND needs a numeric expression and a number of digits.")
+            elif function in {"IF", "SWITCH"} and len(arguments) >= 2 and _mixes_table_and_scalar_branches(function, arguments):
+                raise MeasureError(f"{function} cannot return a table in one branch and a single value in another.")
             elif function == "IF" and len(arguments) not in {2, 3}:
                 raise MeasureError(
                     "IF needs a condition, a value for true, and an optional value for false."

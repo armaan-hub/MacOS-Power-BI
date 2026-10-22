@@ -346,6 +346,7 @@ DAX_FUNCTION_TEMPLATES: dict[str, tuple[str, str | None]] = {
     "PREVIOUSYEAR": ("PREVIOUSYEAR('Calendar'[Date])", "'Calendar'[Date]"),
     "REMOVEFILTERS": ("REMOVEFILTERS()", None),
     "RELATED": ("RELATED('Related table'[Column])", "'Related table'[Column]"),
+    "RELATEDTABLE": ("RELATEDTABLE('Related table')", "'Related table'"),
     "ROUND": ("ROUND(number, digits)", "number"),
     "EXP": ("EXP(number)", "number"),
     "INT": ("INT(number)", "number"),
