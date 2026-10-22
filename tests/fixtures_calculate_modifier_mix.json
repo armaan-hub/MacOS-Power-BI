@@ -1,0 +1,1410 @@
+{
+"source": "Live Power BI Desktop 2.157.879.0 answers (Critic 81 loop corpus); models FB/CB/ZO/ZB/ZS/ZM/FX as in tests/critic3_models.py",
+"items": [
+{
+"model": "CB",
+"expr": "CALCULATE(AVERAGE(CB_Fact[Qty]),CROSSFILTER(CB_Fact[Prod],CB_Dim[Prod],NONE),TREATAS({DATE(2024,4,1),DATE(2024,2,25)},CB_Fact[Ship]))",
+"powerbi": "4"
+},
+{
+"model": "CB",
+"expr": "CALCULATE(CALCULATE(AVERAGE(CB_Fact[Qty]),ALLSELECTED(),ALLNOBLANKROW(CB_Cal[MonthNo])),FILTER(ALL(CB_Cal[Year]),CB_Cal[Year]<>2024),CB_Dim[Grp] IN {\"X\",\"Y\"})",
+"powerbi": "3.8"
+},
+{
+"model": "CB",
+"expr": "CALCULATE(CALCULATE(CALCULATE(COUNTROWS(ALL(CB_Fact)),CALCULATETABLE(VALUES(CB_Fact[Dt]),CB_Fact[Dt]=DATE(2024,2,20))),CB_Fact[Id]<=10),ALLSELECTED(CB_Cal[MonthNo]),CALCULATETABLE(VALUES(CB_Cal[MonthNo]),CB_Cal[MonthNo]=3))",
+"powerbi": "13"
+},
+{
+"model": "CB",
+"expr": "CALCULATE(CALCULATE(CALCULATE(COUNTROWS(DISTINCT(CB_Fact[Qty])),ALLEXCEPT(CB_Dim,CB_Dim[Cat],CB_Dim[Prod])),ALLSELECTED(),TREATAS({\"Y\",\"X\"},CB_Dim[Grp])),ALL(CB_Fact))",
+"powerbi": "7"
+},
+{
+"model": "CB",
+"expr": "CALCULATE(CALCULATE(CONCATENATEX(VALUES(CB_Cal[Year]),CB_Cal[Year],\",\",CB_Cal[Year],ASC),ALL(CB_Cal),ALLSELECTED()),FILTER(VALUES(CB_Fact[Dt]),CB_Fact[Dt]=DATE(2023,12,31)),CB_Fact[Amt] IN {60.0,35.0})",
+"powerbi": "2023,2024"
+},
+{
+"model": "CB",
+"expr": "CALCULATE(CALCULATE(CONCATENATEX(VALUES(CB_Fact[Prod]),CB_Fact[Prod],\",\",CB_Fact[Prod],ASC),CROSSFILTER(CB_Fact[Prod],CB_Dim[Prod],BOTH),ALLEXCEPT(CB_Cal,CB_Cal[Date])),CB_Cal[Year]=2024,TREATAS({\"X\",\"Y\"},CB_Dim[Grp]))",
+"powerbi": "P1,P2,P3,P4"
+},
+{
+"model": "CB",
+"expr": "CALCULATE(CALCULATE(COUNTROWS(ALL(CB_Cal[MonthNo])),ALL(CB_Cal[Day],CB_Cal[Year]),ALLSELECTED()),CB_Cal[MonthNo]<=2,CB_Cal[Date]=DATE(2024,1,5))",
+"powerbi": "12"
+},
+{
+"model": "CB",
+"expr": "CALCULATE(CALCULATE(COUNTROWS(ALL(CB_Fact)),ALL(CB_Cal[Date]),ALLSELECTED(CB_Fact)),CB_Fact[Ship]<>DATE(2024,1,9),TREATAS({2023,2024},CB_Cal[Year]))",
+"powerbi": "13"
+},
+{
+"model": "CB",
+"expr": "CALCULATE(CALCULATE(COUNTROWS(ALL(CB_Fact)),CROSSFILTER(CB_Fact[Prod],CB_Dim[Prod],BOTH),ALLNOBLANKROW(CB_Dim[Grp])),FILTER(ALL(CB_Dim[Cat]),CB_Dim[Cat]<>\"C\"),FILTER(ALL(CB_Fact[Amt]),CB_Fact[Amt]<>10.0))",
+"powerbi": "13"
+},
+{
+"model": "CB",
+"expr": "CALCULATE(CALCULATE(COUNTROWS(ALL(CB_Fact)),REMOVEFILTERS(CB_Fact[Prod]),ALLSELECTED(CB_Cal)),CB_Dim[Prod] IN {\"P5\",\"P2\"},CALCULATETABLE(VALUES(CB_Dim[Grp]),CB_Dim[Grp]=\"Y\"))",
+"powerbi": "13"
+},
+{
+"model": "CB",
+"expr": "CALCULATE(CALCULATE(COUNTROWS(ALL(CB_Fact[Prod])),ALLSELECTED(CB_Dim),REMOVEFILTERS(CB_Fact[Reg])),CB_Fact[Dt]<=DATE(2024,3,15),CB_Dim[Prod] IN {\"P3\",\"P1\"})",
+"powerbi": "4"
+},
+{
+"model": "CB",
+"expr": "CALCULATE(CALCULATE(COUNTROWS(ALL(CB_Fact[Prod])),CROSSFILTER(CB_Fact[Prod],CB_Dim[Prod],NONE),ALLSELECTED()),CB_Dim[Prod]<>\"P1\",FILTER(VALUES(CB_Dim[Cat]),CB_Dim[Cat]=\"A\"))",
+"powerbi": "4"
+},
+{
+"model": "CB",
+"expr": "CALCULATE(CALCULATE(COUNTROWS(ALLSELECTED(CB_Dim)),ALLEXCEPT(CB_Cal,CB_Cal[Year],CB_Cal[Day]),ALLSELECTED(CB_Cal)),FILTER(CB_Fact,CB_Fact[Amt]=25.0),CALCULATETABLE(VALUES(CB_Fact[Amt]),CB_Fact[Amt]=30.0))",
+"powerbi": "1"
+},
+{
+"model": "CB",
+"expr": "CALCULATE(CALCULATE(COUNTROWS(ALLSELECTED(CB_Dim)),ALLSELECTED(CB_Fact),ALLNOBLANKROW(CB_Cal)),CALCULATETABLE(VALUES(CB_Cal[Date]),CB_Cal[Date]=DATE(2024,3,15)),KEEPFILTERS(CB_Cal[Year]=2024))",
+"powerbi": "5"
+},
+{
+"model": "CB",
+"expr": "CALCULATE(CALCULATE(COUNTROWS(ALLSELECTED(CB_Dim[Grp])),CROSSFILTER(CB_Fact[Prod],CB_Dim[Prod],BOTH),REMOVEFILTERS(CB_Fact[Ship])),CALCULATETABLE(VALUES(CB_Cal[MonthNo]),CB_Cal[MonthNo]=1),KEEPFILTERS(CB_Cal[Date]=DATE(2023,1,15)))",
+"powerbi": "2"
+},
+{
+"model": "CB",
+"expr": "CALCULATE(CALCULATE(COUNTROWS(ALLSELECTED(CB_Fact)),ALLSELECTED(CB_Cal),ALLEXCEPT(CB_Dim,CB_Dim[Prod],CB_Dim[Cat])),CALCULATETABLE(VALUES(CB_Cal[Year]),CB_Cal[Year]=2024),KEEPFILTERS(CB_Fact[Dt]=DATE(2024,2,20)))",
+"powerbi": "1"
+},
+{
+"model": "CB",
+"expr": "CALCULATE(CALCULATE(COUNTROWS(ALLSELECTED(CB_Fact[Dt])),ALLSELECTED(CB_Fact),ALLEXCEPT(CB_Dim,CB_Dim[Prod])),TREATAS({15,31},CB_Cal[Day]),CB_Cal[Year]>2023)",
+"powerbi": "8"
+},
+{
+"model": "CB",
+"expr": "CALCULATE(CALCULATE(COUNTROWS(ALLSELECTED(CB_Fact[Id])),ALLSELECTED(CB_Cal),REMOVEFILTERS(CB_Dim)),CB_Dim[Cat] IN {\"A\",\"B\"},CB_Cal[Day]>31)",
+"powerbi": "13"
+},
+{
+"model": "CB",
+"expr": "CALCULATE(CALCULATE(COUNTROWS(ALLSELECTED(CB_Fact[Prod])),ALLEXCEPT(CB_Cal,CB_Cal[MonthNo],CB_Cal[Day]),ALLSELECTED()),FILTER(CB_Fact,CB_Fact[Prod]=\"P2\"),CALCULATETABLE(VALUES(CB_Fact[Prod]),CB_Fact[Prod]=\"P1\"))",
+"powerbi": "BLANK"
+},
+{
+"model": "CB",
+"expr": "CALCULATE(CALCULATE(COUNTROWS(ALLSELECTED(CB_Fact[Prod])),ALLNOBLANKROW(CB_Fact),ALLSELECTED(CB_Dim)),FILTER(VALUES(CB_Dim[Cat]),CB_Dim[Cat]=\"C\"),TREATAS({DATE(2024,1,5),DATE(2023,1,15)},CB_Cal[Date]))",
+"powerbi": "4"
+},
+{
+"model": "CB",
+"expr": "CALCULATE(CALCULATE(COUNTROWS(ALLSELECTED(CB_Fact[Reg])),ALLNOBLANKROW(CB_Dim[Prod]),ALLSELECTED()),FILTER(CB_Dim,CB_Dim[Grp]=\"X\"),CB_Cal[MonthNo]=1)",
+"powerbi": "3"
+},
+{
+"model": "CB",
+"expr": "CALCULATE(CALCULATE(COUNTROWS(CB_Cal),ALLSELECTED(CB_Fact[Dt]),CROSSFILTER(CB_Fact[Prod],CB_Dim[Prod],NONE)),TREATAS({DATE(2024,12,31)},CB_Fact[Dt]),FILTER(CB_Cal,CB_Cal[Date]=DATE(2023,1,15)))",
+"powerbi": "1"
+},
+{
+"model": "CB",
+"expr": "CALCULATE(CALCULATE(COUNTROWS(CB_Dim),CROSSFILTER(CB_Fact[Prod],CB_Dim[Prod],BOTH),ALL(CB_Dim)),CB_Dim[Grp]=\"X\")",
+"powerbi": "5"
+},
+{
+"model": "CB",
+"expr": "CALCULATE(CALCULATE(COUNTROWS(CB_Dim),CROSSFILTER(CB_Fact[Prod],CB_Dim[Prod],BOTH),ALL(CB_Dim)),KEEPFILTERS(CB_Dim[Cat]=\"A\"))",
+"powerbi": "5"
+},
+{
+"model": "CB",
+"expr": "CALCULATE(CALCULATE(COUNTROWS(CB_Dim),CROSSFILTER(CB_Fact[Prod],CB_Dim[Prod],BOTH),ALL(CB_Dim)),TREATAS({\"A\",\"B\"},CB_Dim[Cat]))",
+"powerbi": "5"
+},
+{
+"model": "CB",
+"expr": "CALCULATE(CALCULATE(COUNTROWS(CB_Dim),CROSSFILTER(CB_Fact[Prod],CB_Dim[Prod],BOTH),ALL(CB_Fact)),CB_Fact[Qty]>2,CB_Dim[Grp]=\"X\")",
+"powerbi": "5"
+},
+{
+"model": "CB",
+"expr": "CALCULATE(CALCULATE(COUNTROWS(CB_Dim),CROSSFILTER(CB_Fact[Prod],CB_Dim[Prod],BOTH),TREATAS({2024,2023},CB_Cal[Year])),REMOVEFILTERS(CB_Fact))",
+"powerbi": "4"
+},
+{
+"model": "CB",
+"expr": "CALCULATE(CALCULATE(COUNTROWS(CB_Fact),ALLEXCEPT(CB_Dim,CB_Dim[Grp]),CROSSFILTER(CB_Fact[Prod],CB_Dim[Prod],NONE)),CB_Dim[Prod] IN {\"P5\",\"P2\"},CB_Cal[Day]<=31)",
+"powerbi": "13"
+},
+{
+"model": "CB",
+"expr": "CALCULATE(CALCULATE(COUNTROWS(CB_Fact),USERELATIONSHIP(CB_Fact[Ship],CB_Cal[Date]),ALL(CB_Cal[Year])),CB_Dim[Prod]=\"P1\")",
+"powerbi": "5"
+},
+{
+"model": "CB",
+"expr": "CALCULATE(CALCULATE(COUNTROWS(CB_Fact),USERELATIONSHIP(CB_Fact[Ship],CB_Cal[Date]),ALL(CB_Cal[Year])),CB_Fact[Id]<=7)",
+"powerbi": "7"
+},
+{
+"model": "CB",
+"expr": "CALCULATE(CALCULATE(COUNTROWS(CB_Fact),USERELATIONSHIP(CB_Fact[Ship],CB_Cal[Date]),ALL(CB_Cal[Year])),FILTER(ALL(CB_Dim[Cat]),CB_Dim[Cat]<>\"B\"))",
+"powerbi": "8"
+},
+{
+"model": "CB",
+"expr": "CALCULATE(CALCULATE(COUNTROWS(CB_Fact),USERELATIONSHIP(CB_Fact[Ship],CB_Cal[Date]),ALL(CB_Cal[Year])),KEEPFILTERS(CB_Dim[Cat]=\"A\"))",
+"powerbi": "8"
+},
+{
+"model": "CB",
+"expr": "CALCULATE(CALCULATE(COUNTROWS(CB_Fact),USERELATIONSHIP(CB_Fact[Ship],CB_Cal[Date]),ALL(CB_Cal[Year])),TREATAS({\"A\",\"B\"},CB_Dim[Cat]))",
+"powerbi": "13"
+},
+{
+"model": "CB",
+"expr": "CALCULATE(CALCULATE(COUNTROWS(CB_Fact),USERELATIONSHIP(CB_Fact[Ship],CB_Cal[Date]),ALL(CB_Fact)),FILTER(ALL(CB_Dim[Cat]),CB_Dim[Cat]<>\"B\"))",
+"powerbi": "13"
+},
+{
+"model": "CB",
+"expr": "CALCULATE(CALCULATE(COUNTROWS(CB_Fact),USERELATIONSHIP(CB_Fact[Ship],CB_Cal[Date]),ALL(CB_Fact)),KEEPFILTERS(CB_Dim[Cat]=\"A\"))",
+"powerbi": "13"
+},
+{
+"model": "CB",
+"expr": "CALCULATE(CALCULATE(COUNTROWS(CB_Fact),USERELATIONSHIP(CB_Fact[Ship],CB_Cal[Date]),ALL(CB_Fact)),TREATAS({\"A\",\"B\"},CB_Dim[Cat]))",
+"powerbi": "13"
+},
+{
+"model": "CB",
+"expr": "CALCULATE(CALCULATE(COUNTROWS(DISTINCT(CB_Fact[Amt])),REMOVEFILTERS(CB_Fact[Ship]),ALLSELECTED()),CB_Dim[Cat]<>\"C\",FILTER(CB_Cal,CB_Cal[Date]=DATE(2023,1,15)))",
+"powerbi": "2"
+},
+{
+"model": "CB",
+"expr": "CALCULATE(CALCULATE(COUNTROWS(DISTINCT(CB_Fact[Reg])),ALLNOBLANKROW(CB_Fact),ALLSELECTED(CB_Dim)),FILTER(ALL(CB_Cal[MonthNo]),CB_Cal[MonthNo]<>2),CB_Fact[Amt] IN {50.0,70.0})",
+"powerbi": "3"
+},
+{
+"model": "CB",
+"expr": "CALCULATE(CALCULATE(COUNTROWS(FILTER(CB_Cal,TRUE())),CROSSFILTER(CB_Fact[Prod],CB_Dim[Prod],NONE),ALLNOBLANKROW(CB_Cal)),FILTER(ALL(CB_Cal[Date]),CB_Cal[Date]<>DATE(2024,1,5)),FILTER(CB_Fact,CB_Fact[Prod]=\"P4\"))",
+"powerbi": "731"
+},
+{
+"model": "CB",
+"expr": "CALCULATE(CALCULATE(COUNTROWS(FILTER(CB_Dim,TRUE())),REMOVEFILTERS(CB_Dim[Grp]),ALLSELECTED(CB_Dim)),FILTER(CB_Cal,CB_Cal[Date]=DATE(2024,1,5)),FILTER(ALL(CB_Cal[Year]),CB_Cal[Year]<>2024))",
+"powerbi": "5"
+},
+{
+"model": "CB",
+"expr": "CALCULATE(CALCULATE(COUNTROWS(FILTER(CB_Dim,TRUE())),REMOVEFILTERS(CB_Fact[Reg]),ALLSELECTED()),CB_Dim[Prod] IN {\"P1\",\"P4\"},CB_Fact[Dt]=DATE(2023,2,10))",
+"powerbi": "2"
+},
+{
+"model": "CB",
+"expr": "CALCULATE(CALCULATE(COUNTROWS(FILTER(CB_Fact,TRUE())),ALLEXCEPT(CB_Dim,CB_Dim[Prod]),ALLSELECTED(CB_Cal[MonthNo])),TREATAS({DATE(2024,1,5)},CB_Fact[Dt]),CALCULATETABLE(VALUES(CB_Dim[Cat]),CB_Dim[Cat]=\"B\"))",
+"powerbi": "3"
+},
+{
+"model": "CB",
+"expr": "CALCULATE(CALCULATE(COUNTROWS(FILTER(CB_Fact,TRUE())),ALLSELECTED(CB_Cal),ALL(CB_Dim)),CALCULATETABLE(VALUES(CB_Fact[Prod]),CB_Fact[Prod]=\"P3\"),TREATAS({DATE(2024,1,5),DATE(2023,1,15)},CB_Cal[Date]))",
+"powerbi": "BLANK"
+},
+{
+"model": "CB",
+"expr": "CALCULATE(CALCULATE(COUNTROWS(FILTER(CB_Fact,TRUE())),ALLSELECTED(CB_Dim),ALLSELECTED(CB_Fact[Id])),FILTER(CB_Dim,CB_Dim[Cat]=\"B\"),TREATAS({\"P3\",\"P4\"},CB_Dim[Prod]))",
+"powerbi": "5"
+},
+{
+"model": "CB",
+"expr": "CALCULATE(CALCULATE(COUNTROWS(VALUES(CB_Cal[MonthNo])),REMOVEFILTERS(CB_Dim[Prod]),ALLSELECTED(CB_Fact[Ship])),CB_Cal[MonthNo]>1,CALCULATETABLE(VALUES(CB_Cal[MonthNo]),CB_Cal[MonthNo]=1))",
+"powerbi": "BLANK"
+},
+{
+"model": "CB",
+"expr": "CALCULATE(CALCULATE(COUNTROWS(VALUES(CB_Dim[Grp])),ALLEXCEPT(CB_Dim,CB_Dim[Cat]),ALLSELECTED(CB_Dim)),CB_Cal[Year] IN {2023,2024},CB_Fact[Ship]<=DATE(2023,1,15))",
+"powerbi": "2"
+},
+{
+"model": "CB",
+"expr": "CALCULATE(CALCULATE(COUNTROWS(VALUES(CB_Dim[Prod])),ALLSELECTED(),REMOVEFILTERS(CB_Cal)),TREATAS({2,3},CB_Cal[MonthNo]),TREATAS({12},CB_Fact[Id]))",
+"powerbi": "5"
+},
+{
+"model": "CB",
+"expr": "CALCULATE(CALCULATE(COUNTROWS(VALUES(CB_Fact)),ALLSELECTED(CB_Fact[Reg]),REMOVEFILTERS(CB_Fact)),FILTER(CB_Fact,CB_Fact[Qty]=6),FILTER(ALL(CB_Dim[Prod]),CB_Dim[Prod]<>\"P4\"))",
+"powerbi": "13"
+},
+{
+"model": "CB",
+"expr": "CALCULATE(CALCULATE(COUNTROWS(VALUES(CB_Fact[Amt])),ALLSELECTED(CB_Dim),REMOVEFILTERS(CB_Dim[Prod])),TREATAS({\"A\",\"B\"},CB_Dim[Cat]),CALCULATETABLE(VALUES(CB_Cal[Year]),CB_Cal[Year]=2024))",
+"powerbi": "7"
+},
+{
+"model": "CB",
+"expr": "CALCULATE(CALCULATE(DISTINCTCOUNT(CB_Cal[Year]),CROSSFILTER(CB_Fact[Prod],CB_Dim[Prod],NONE),ALLEXCEPT(CB_Fact,CB_Fact[Amt])),TREATAS({DATE(2024,3,15)},CB_Cal[Date]),CALCULATETABLE(VALUES(CB_Cal[Day]),CB_Cal[Day]=31))",
+"powerbi": "2"
+},
+{
+"model": "CB",
+"expr": "CALCULATE(CALCULATE(DISTINCTCOUNT(CB_Dim[Prod]),ALLEXCEPT(CB_Fact,CB_Fact[Id]),ALLSELECTED(CB_Cal[Day])),CALCULATETABLE(VALUES(CB_Dim[Grp]),CB_Dim[Grp]=\"Y\"),CB_Fact[Reg] IN {\"west\",\"West\"})",
+"powerbi": "5"
+},
+{
+"model": "CB",
+"expr": "CALCULATE(CALCULATE(DISTINCTCOUNT(CB_Fact[Reg]),ALLEXCEPT(CB_Fact,CB_Fact[Amt],CB_Fact[Reg]),ALLSELECTED(CB_Dim[Cat])),CB_Cal[Year]=2024,KEEPFILTERS(CB_Dim[Cat]=\"B\"))",
+"powerbi": "3"
+},
+{
+"model": "CB",
+"expr": "CALCULATE(CALCULATE(MAX(CB_Dim[Prod]),ALLEXCEPT(CB_Fact,CB_Fact[Amt]),ALLSELECTED(CB_Dim)),FILTER(VALUES(CB_Cal[Day]),CB_Cal[Day]=15),KEEPFILTERS(CB_Cal[MonthNo]=2))",
+"powerbi": "P5"
+},
+{
+"model": "CB",
+"expr": "CALCULATE(CALCULATE(MAX(CB_Fact[Amt]),ALLSELECTED(CB_Cal),ALLEXCEPT(CB_Cal,CB_Cal[Day])),FILTER(VALUES(CB_Cal[MonthNo]),CB_Cal[MonthNo]=2),TREATAS({\"A\"},CB_Dim[Cat]))",
+"powerbi": "40"
+},
+{
+"model": "CB",
+"expr": "CALCULATE(CALCULATE(MAX(CB_Fact[Amt]),REMOVEFILTERS(CB_Cal[Day]),ALLSELECTED(CB_Fact[Amt])),FILTER(VALUES(CB_Dim[Prod]),CB_Dim[Prod]=\"P1\"),KEEPFILTERS(CB_Cal[Day]=5))",
+"powerbi": "20"
+},
+{
+"model": "CB",
+"expr": "CALCULATE(CALCULATE(MAX(CB_Fact[Qty]),ALLEXCEPT(CB_Fact,CB_Fact[Prod]),ALLSELECTED(CB_Dim[Prod])),FILTER(CB_Dim,CB_Dim[Prod]=\"P2\"),FILTER(ALL(CB_Fact[Prod]),CB_Fact[Prod]<>\"P3\"))",
+"powerbi": "7"
+},
+{
+"model": "CB",
+"expr": "CALCULATE(CALCULATE(MAX(CB_Fact[Ship]),ALLSELECTED(CB_Cal[Year]),REMOVEFILTERS(CB_Cal)),KEEPFILTERS(CB_Fact[Prod]=\"P4\"),FILTER(VALUES(CB_Cal[MonthNo]),CB_Cal[MonthNo]=12))",
+"powerbi": "04/01/2024 00:00:00"
+},
+{
+"model": "CB",
+"expr": "CALCULATE(CALCULATE(MAX(CB_Fact[Ship]),ALLSELECTED(CB_Fact),ALL(CB_Fact[Amt])),FILTER(VALUES(CB_Fact[Id]),CB_Fact[Id]=5),CALCULATETABLE(VALUES(CB_Cal[Date]),CB_Cal[Date]=DATE(2024,3,15)))",
+"powerbi": "BLANK"
+},
+{
+"model": "CB",
+"expr": "CALCULATE(CALCULATE(MIN(CB_Cal[Date]),ALLSELECTED(CB_Cal),CROSSFILTER(CB_Fact[Prod],CB_Dim[Prod],NONE)),FILTER(VALUES(CB_Cal[Year]),CB_Cal[Year]=2024),TREATAS({\"P4\",\"P5\"},CB_Dim[Prod]))",
+"powerbi": "01/01/2024 00:00:00"
+},
+{
+"model": "CB",
+"expr": "CALCULATE(CALCULATE(MIN(CB_Cal[MonthNo]),REMOVEFILTERS(CB_Dim[Prod]),CROSSFILTER(CB_Fact[Prod],CB_Dim[Prod],NONE)),CALCULATETABLE(VALUES(CB_Fact[Prod]),CB_Fact[Prod]=\"P4\"),FILTER(CB_Cal,CB_Cal[Date]=DATE(2024,2,10)))",
+"powerbi": "2"
+},
+{
+"model": "CB",
+"expr": "CALCULATE(CALCULATE(MIN(CB_Dim[Grp]),ALLSELECTED(),ALLNOBLANKROW(CB_Fact[Qty])),CB_Dim[Prod]<>\"P4\",CB_Cal[Year]>2023)",
+"powerbi": "X"
+},
+{
+"model": "CB",
+"expr": "CALCULATE(CALCULATE(MIN(CB_Fact[Reg]),ALLSELECTED(),ALL(CB_Cal[Year],CB_Cal[Date])),KEEPFILTERS(CB_Fact[Qty]=2),CB_Fact[Amt]>60.0)",
+"powerbi": "BLANK"
+},
+{
+"model": "CB",
+"expr": "CALCULATE(CALCULATE(SUM(CB_Cal[MonthNo]),ALL(CB_Dim[Prod],CB_Dim[Grp]),ALLSELECTED()),USERELATIONSHIP(CB_Fact[Ship],CB_Cal[Date]),FILTER(ALL(CB_Fact[Dt]),CB_Fact[Dt]<>DATE(2023,2,10)))",
+"powerbi": "4766"
+},
+{
+"model": "CB",
+"expr": "CALCULATE(CALCULATE(SUM(CB_Cal[MonthNo]),ALLSELECTED(CB_Cal),ALLEXCEPT(CB_Dim,CB_Dim[Prod],CB_Dim[Cat])),TREATAS({6,3},CB_Fact[Id]),CB_Cal[MonthNo]>3)",
+"powerbi": "4404"
+},
+{
+"model": "CB",
+"expr": "CALCULATE(CALCULATE(SUM(CB_Fact[Amt]),ALLSELECTED(CB_Fact[Prod]),ALLEXCEPT(CB_Cal,CB_Cal[Day])),TREATAS({\"X\"},CB_Dim[Grp]),USERELATIONSHIP(CB_Fact[Ship],CB_Cal[Date]))",
+"powerbi": "210"
+},
+{
+"model": "CB",
+"expr": "CALCULATE(CALCULATE(SUM(CB_Fact[Amt]),CROSSFILTER(CB_Fact[Prod],CB_Dim[Prod],NONE),ALL(CB_Fact)),KEEPFILTERS(CB_Dim[Cat]=\"A\"))",
+"powerbi": "375"
+},
+{
+"model": "CB",
+"expr": "CALCULATE(CALCULATE(SUM(CB_Fact[Amt]),CROSSFILTER(CB_Fact[Prod],CB_Dim[Prod],NONE),ALL(CB_Fact)),TREATAS({\"A\",\"B\"},CB_Dim[Cat]))",
+"powerbi": "375"
+},
+{
+"model": "CB",
+"expr": "CALCULATE(CALCULATE(SUM(CB_Fact[Id]),ALLSELECTED(CB_Dim[Grp]),CROSSFILTER(CB_Fact[Prod],CB_Dim[Prod],NONE)),CB_Cal[Year]<>2024,CB_Cal[Date]<>DATE(2024,1,5))",
+"powerbi": "26"
+},
+{
+"model": "CB",
+"expr": "CALCULATE(CALCULATE(SUM(CB_Fact[Qty]),ALL(CB_Cal),ALLSELECTED(CB_Cal)),CALCULATETABLE(VALUES(CB_Cal[MonthNo]),CB_Cal[MonthNo]=3),KEEPFILTERS(CB_Dim[Grp]=\"Y\"))",
+"powerbi": "21"
+},
+{
+"model": "CB",
+"expr": "CALCULATE(CALCULATE(SUM(CB_Fact[Qty]),ALL(CB_Fact),ALLSELECTED(CB_Fact[Id])),USERELATIONSHIP(CB_Fact[Ship],CB_Cal[Date]),FILTER(VALUES(CB_Fact[Reg]),CB_Fact[Reg]=\"west\"))",
+"powerbi": "39"
+},
+{
+"model": "CB",
+"expr": "CALCULATE(CALCULATE(SUM(CB_Fact[Qty]),ALLEXCEPT(CB_Fact,CB_Fact[Id],CB_Fact[Reg]),ALLSELECTED(CB_Dim)),CB_Cal[Day]=10,FILTER(ALL(CB_Cal[Date]),CB_Cal[Date]<>DATE(2024,2,10)))",
+"powerbi": "39"
+},
+{
+"model": "CB",
+"expr": "CALCULATE(CALCULATE(SUMX(CB_Cal,CB_Cal[Day]),CROSSFILTER(CB_Fact[Prod],CB_Dim[Prod],BOTH),ALLSELECTED()),TREATAS({\"P1\",\"P4\"},CB_Dim[Prod]),CB_Dim[Grp]=\"X\")",
+"powerbi": "11505"
+},
+{
+"model": "CB",
+"expr": "CALCULATE(CALCULATE(SUMX(CB_Cal,CB_Cal[Year]),ALLSELECTED(CB_Dim[Prod]),CB_Fact[Prod] IN {\"P1\",\"P3\"}),ALLSELECTED())",
+"powerbi": "1479179"
+},
+{
+"model": "CB",
+"expr": "CALCULATE(CALCULATE(SUMX(CB_Fact,CB_Fact[Id]),ALLEXCEPT(CB_Cal,CB_Cal[Year]),ALLSELECTED(CB_Fact)),CB_Cal[Year]<>2024,CB_Dim[Prod]<>\"P4\")",
+"powerbi": "18"
+},
+{
+"model": "CB",
+"expr": "CALCULATE(CONCATENATEX(VALUES(CB_Fact[Amt]),CB_Fact[Amt],\",\",CB_Fact[Amt],ASC),ALLSELECTED(CB_Fact),CB_Dim[Prod] IN {\"P3\",\"P1\"})",
+"powerbi": "5,10,15,20,35,50,60"
+},
+{
+"model": "CB",
+"expr": "CALCULATE(CONCATENATEX(VALUES(CB_Fact[Id]),CB_Fact[Id],\",\",CB_Fact[Id],ASC),ALLNOBLANKROW(CB_Cal[MonthNo]),USERELATIONSHIP(CB_Fact[Ship],CB_Cal[Date]))",
+"powerbi": "1,2,3,4,5,6,7,8,9,10,11,12,13"
+},
+{
+"model": "CB",
+"expr": "CALCULATE(COUNTROWS(ALL(CB_Dim[Cat])),ALLSELECTED(),TREATAS({\"C\",\"A\"},CB_Dim[Cat]))",
+"powerbi": "3"
+},
+{
+"model": "CB",
+"expr": "CALCULATE(COUNTROWS(ALLSELECTED(CB_Cal[MonthNo])),CROSSFILTER(CB_Fact[Prod],CB_Dim[Prod],BOTH),CALCULATETABLE(VALUES(CB_Cal[Date]),CB_Cal[Date]=DATE(2024,1,5)))",
+"powerbi": "12"
+},
+{
+"model": "CB",
+"expr": "CALCULATE(COUNTROWS(ALLSELECTED(CB_Dim[Prod])),ALLEXCEPT(CB_Fact,CB_Cal[MonthNo]),USERELATIONSHIP(CB_Fact[Ship],CB_Cal[Date]))",
+"powerbi": "5"
+},
+{
+"model": "CB",
+"expr": "CALCULATE(COUNTROWS(CB_Fact),ALLSELECTED(CB_Fact),USERELATIONSHIP(CB_Fact[Ship],CB_Cal[Date]))",
+"powerbi": "13"
+},
+{
+"model": "CB",
+"expr": "CALCULATE(COUNTROWS(FILTER(CB_Cal,TRUE())),ALLSELECTED(),CALCULATETABLE(VALUES(CB_Dim[Cat]),CB_Dim[Cat]=\"C\"))",
+"powerbi": "731"
+},
+{
+"model": "CB",
+"expr": "CALCULATE(COUNTROWS(FILTER(CB_Cal,TRUE())),ALLSELECTED(CB_Cal),TREATAS({13,10},CB_Fact[Id]))",
+"powerbi": "731"
+},
+{
+"model": "CB",
+"expr": "CALCULATE(COUNTROWS(FILTER(CB_Dim,TRUE())),CROSSFILTER(CB_Fact[Prod],CB_Dim[Prod],BOTH),TREATAS({10,5},CB_Cal[Day]))",
+"powerbi": "2"
+},
+{
+"model": "CB",
+"expr": "CALCULATE(COUNTROWS(FILTER(CB_Fact,TRUE())),ALLSELECTED(CB_Cal),CALCULATETABLE(VALUES(CB_Cal[Date]),CB_Cal[Date]=DATE(2024,3,15)))",
+"powerbi": "2"
+},
+{
+"model": "CB",
+"expr": "CALCULATE(COUNTROWS(VALUES(CB_Cal[Date])),CROSSFILTER(CB_Fact[Prod],CB_Dim[Prod],BOTH),CB_Fact[Prod] IN {\"P1\",\"P4\"})",
+"powerbi": "731"
+},
+{
+"model": "CB",
+"expr": "CALCULATE(COUNTROWS(VALUES(CB_Fact[Qty])),CROSSFILTER(CB_Fact[Prod],CB_Dim[Prod],NONE),FILTER(CB_Dim,CB_Dim[Prod]=\"P2\"))",
+"powerbi": "7"
+},
+{
+"model": "CB",
+"expr": "CALCULATE(MAX(CB_Fact[Amt]),ALLNOBLANKROW(CB_Dim[Cat]),USERELATIONSHIP(CB_Fact[Ship],CB_Cal[Date]))",
+"powerbi": "70"
+},
+{
+"model": "CB",
+"expr": "CALCULATE(SUM(CB_Fact[Id]),ALLEXCEPT(CB_Fact,CB_Dim[Prod]),USERELATIONSHIP(CB_Fact[Ship],CB_Cal[Date]))",
+"powerbi": "91"
+},
+{
+"model": "CB",
+"expr": "CALCULATE(SUM(CB_Fact[Id]),ALLSELECTED(CB_Dim[Cat]),TREATAS({\"X\",\"Y\"},CB_Dim[Grp]))",
+"powerbi": "91"
+},
+{
+"model": "CB",
+"expr": "CALCULATE(SUMX(CB_Fact,CALCULATE(SUM(CB_Fact[Amt]),USERELATIONSHIP(CB_Fact[Ship],CB_Cal[Date]),ALL(CB_Cal))),CB_Fact[Prod]=\"P2\")",
+"powerbi": "95"
+},
+{
+"model": "CB",
+"expr": "CALCULATE(SUMX(CB_Fact,CALCULATE(SUM(CB_Fact[Amt]),USERELATIONSHIP(CB_Fact[Ship],CB_Cal[Date]),ALL(CB_Cal))),CB_Fact[Qty]>2,CB_Dim[Grp]=\"X\")",
+"powerbi": "70"
+},
+{
+"model": "CB",
+"expr": "CALCULATE(SUMX(CB_Fact,CALCULATE(SUM(CB_Fact[Amt]),USERELATIONSHIP(CB_Fact[Ship],CB_Cal[Date]),ALL(CB_Cal))),FILTER(ALL(CB_Dim[Cat]),CB_Dim[Cat]<>\"B\"))",
+"powerbi": "160"
+},
+{
+"model": "CB",
+"expr": "CALCULATE(SUMX(CB_Fact,CALCULATE(SUM(CB_Fact[Amt]),USERELATIONSHIP(CB_Fact[Ship],CB_Cal[Date]),ALL(CB_Cal))),KEEPFILTERS(CB_Dim[Cat]=\"A\"))",
+"powerbi": "160"
+},
+{
+"model": "CB",
+"expr": "CALCULATE(SUMX(CB_Fact,CALCULATE(SUM(CB_Fact[Amt]),USERELATIONSHIP(CB_Fact[Ship],CB_Cal[Date]),ALL(CB_Cal))),TREATAS({\"A\",\"B\"},CB_Dim[Cat]))",
+"powerbi": "375"
+},
+{
+"model": "CB",
+"expr": "CALCULATE(SUMX(CB_Fact,CB_Fact[Amt]),ALLSELECTED(CB_Dim),CB_Dim[Cat] IN {\"B\",\"A\"})",
+"powerbi": "375"
+},
+{
+"model": "CB",
+"expr": "CALCULATE(SUMX(CB_Fact,CB_Fact[Amt]),CROSSFILTER(CB_Fact[Prod],CB_Dim[Prod],NONE),FILTER(VALUES(CB_Fact[Ship]),CB_Fact[Ship]=DATE(2024,1,9)))",
+"powerbi": "40"
+},
+{
+"model": "CB",
+"expr": "CALCULATE([mShareDim],TREATAS({DATE(2023,3,1),DATE(2023,1,20)},CB_Fact[Ship]),ALLSELECTED())",
+"powerbi": "1"
+},
+{
+"model": "CB",
+"expr": "CALCULATE([mYtd],CALCULATETABLE(VALUES(CB_Cal[Year]),CB_Cal[Year]=2023),ALLSELECTED())",
+"powerbi": "155"
+},
+{
+"model": "CB",
+"expr": "IF(CALCULATE(IF(COUNTROWS(FILTER(CB_Cal,TRUE()))>0,COUNTROWS(ALLSELECTED(CB_Dim)),-1),CROSSFILTER(CB_Fact[Prod],CB_Dim[Prod],NONE),CALCULATETABLE(VALUES(CB_Cal[Date]),CB_Cal[Date]=DATE(2024,1,5)))>0,COUNTX(SUMMARIZE(CB_Dim,CB_Dim[Prod]),CALCULATE(DIVIDE(COUNTROWS(VALUES(CB_Fact[Amt])),COUNTROWS(ALL(CB_Cal[Date]))),ALL(CB_Dim[Prod]))),-1)",
+"powerbi": "5"
+},
+{
+"model": "CB",
+"expr": "VAR v=CALCULATETABLE(ALL(CB_Dim),CB_Cal[MonthNo]=1) RETURN CALCULATE(MAX(CB_Fact[Ship]),v,ALLSELECTED(CB_Cal))",
+"powerbi": "12/31/2024 00:00:00"
+},
+{
+"model": "CB",
+"expr": "VAR v=CALCULATETABLE(ALLEXCEPT(CB_Dim,CB_Dim[Grp]),CALCULATETABLE(VALUES(CB_Fact[Dt]),CB_Fact[Dt]=DATE(2024,3,15))) RETURN CALCULATE(COUNTROWS(ALLSELECTED(CB_Fact[Amt])),v,ALLSELECTED(CB_Fact[Reg]))",
+"powerbi": "12"
+},
+{
+"model": "CB",
+"expr": "VAR v=CALCULATETABLE(ALLNOBLANKROW(CB_Cal),FILTER(VALUES(CB_Dim[Prod]),CB_Dim[Prod]=\"P3\")) RETURN CALCULATE(COUNTROWS(CB_Cal),v,ALLSELECTED())",
+"powerbi": "731"
+},
+{
+"model": "CB",
+"expr": "VAR v=CALCULATETABLE(CB_Fact,FILTER(CB_Dim,CB_Dim[Cat]=\"A\")) RETURN CALCULATE(COUNTROWS(FILTER(CB_Fact,TRUE())),v,ALLSELECTED())",
+"powerbi": "8"
+},
+{
+"model": "CB",
+"expr": "VAR v=CALCULATETABLE(CB_Fact,KEEPFILTERS(CB_Dim[Prod]=\"P4\")) RETURN CALCULATE(DISTINCTCOUNT(CB_Fact[Amt]),v,ALLSELECTED(CB_Fact[Amt]))",
+"powerbi": "2"
+},
+{
+"model": "CB",
+"expr": "VAR v=CALCULATETABLE(DISTINCT(CB_Dim[Cat]),TREATAS({2024},CB_Cal[Year])) RETURN CALCULATE(COUNTROWS(VALUES(CB_Fact)),v,ALLSELECTED(CB_Fact[Id]))",
+"powerbi": "13"
+},
+{
+"model": "CB",
+"expr": "VAR v=CALCULATETABLE(FILTER(CB_Dim,CB_Dim[Grp]=\"P4\" || TRUE()),CB_Fact[Qty]<=1) RETURN CALCULATE(COUNTROWS(VALUES(CB_Dim)),v,CROSSFILTER(CB_Fact[Prod],CB_Dim[Prod],NONE))",
+"powerbi": "5"
+},
+{
+"model": "CB",
+"expr": "VAR v=CALCULATETABLE(FILTER(CB_Dim,CB_Dim[Grp]=\"Y\" || TRUE()),TREATAS({70.0,60.0},CB_Fact[Amt])) RETURN CALCULATE(SUMX(CB_Cal,CB_Cal[MonthNo]),v,ALLSELECTED())",
+"powerbi": "4766"
+},
+{
+"model": "CB",
+"expr": "VAR v=CALCULATETABLE(FILTER(CB_Fact,CB_Fact[Dt]=6 || TRUE()),TREATAS({DATE(2023,1,15)},CB_Fact[Ship])) RETURN CALCULATE(CONCATENATEX(VALUES(CB_Dim[Grp]),CB_Dim[Grp],\",\",CB_Dim[Grp],ASC),v,ALLSELECTED(CB_Fact))",
+"powerbi": "Y"
+},
+{
+"model": "CB",
+"expr": "VAR v=CALCULATETABLE(TOPN(3,CB_Cal,CB_Cal[MonthNo]),CB_Fact[Amt]<>10.0) RETURN CALCULATE(CONCATENATEX(VALUES(CB_Dim[Cat]),CB_Dim[Cat],\",\",CB_Dim[Cat],ASC),v,ALLSELECTED(CB_Fact))",
+"powerbi": "A,B,C"
+},
+{
+"model": "CB",
+"expr": "VAR v=CALCULATETABLE(VALUES(CB_Dim[Cat]),TREATAS({\"X\"},CB_Dim[Grp])) RETURN CALCULATE(CONCATENATEX(VALUES(CB_Fact[Amt]),CB_Fact[Amt],\",\",CB_Fact[Amt],ASC),v,ALLSELECTED(CB_Cal[MonthNo]))",
+"powerbi": ",5,10,15,20,25,30,35,40,50,60,70"
+},
+{
+"model": "CB",
+"expr": "VAR v=CALCULATETABLE(VALUES(CB_Dim[Prod]),CALCULATETABLE(VALUES(CB_Cal[MonthNo]),CB_Cal[MonthNo]=12)) RETURN CALCULATE(CONCATENATEX(VALUES(CB_Fact[Id]),CB_Fact[Id],\",\",CB_Fact[Id],ASC),v,CROSSFILTER(CB_Fact[Prod],CB_Dim[Prod],NONE))",
+"powerbi": "1,2,3,4,5,6,7,8,9,10,11,12,13"
+},
+{
+"model": "CB",
+"expr": "VAR v=CALCULATETABLE(VALUES(CB_Fact),CALCULATETABLE(VALUES(CB_Cal[Day]),CB_Cal[Day]=10)) RETURN CALCULATE(CONCATENATEX(VALUES(CB_Fact[Dt]),CB_Fact[Dt],\",\",CB_Fact[Dt],ASC),v,ALLSELECTED(CB_Fact[Ship]))",
+"powerbi": "2/10/2023,2/10/2024"
+},
+{
+"model": "FB",
+"expr": "CALCULATE(CALCULATE(COUNTROWS(ALL(FB_Cal[Year])),ALLNOBLANKROW(FB_Fact),USERELATIONSHIP(FB_Fact[Dt],FB_Cal[Date])),FB_Cal[Year]=2024)",
+"powerbi": "2"
+},
+{
+"model": "FB",
+"expr": "CALCULATE(CALCULATE(COUNTROWS(ALL(FB_Cal[Year])),ALLSELECTED(FB_Fact),USERELATIONSHIP(FB_Fact[Dt],FB_Cal[Date])),FB_Fact[Qty]>2)",
+"powerbi": "2"
+},
+{
+"model": "FB",
+"expr": "CALCULATE(CALCULATE(COUNTROWS(ALL(FB_Cal[Year])),REMOVEFILTERS(FB_Fact),USERELATIONSHIP(FB_Fact[Dt],FB_Cal[Date])),FB_Cal[Year]=2024)",
+"powerbi": "2"
+},
+{
+"model": "FB",
+"expr": "CALCULATE(CALCULATE(COUNTROWS(ALL(FB_Cal[Year])),USERELATIONSHIP(FB_Fact[Dt],FB_Cal[Date]),ALLSELECTED(FB_Fact)),FB_Dim[Cat]=\"A\")",
+"powerbi": "2"
+},
+{
+"model": "FB",
+"expr": "CALCULATE(CALCULATE(COUNTROWS(ALL(FB_Cal[Year])),USERELATIONSHIP(FB_Fact[Dt],FB_Cal[Date]),REMOVEFILTERS(FB_Fact)),FB_Cal[Year]=2024)",
+"powerbi": "2"
+},
+{
+"model": "FB",
+"expr": "CALCULATE(CALCULATE(COUNTROWS(FB_Cal),ALLEXCEPT(FB_Cal,FB_Cal[Year]),USERELATIONSHIP(FB_Fact[Dt],FB_Cal[Date])),FB_Fact[Qty]>2)",
+"powerbi": "731"
+},
+{
+"model": "FB",
+"expr": "CALCULATE(CALCULATE(COUNTROWS(FB_Dim),ALLSELECTED(FB_Fact),USERELATIONSHIP(FB_Fact[Dt],FB_Cal[Date])),FB_Dim[Cat]=\"A\")",
+"powerbi": "2"
+},
+{
+"model": "FB",
+"expr": "CALCULATE(CALCULATE(COUNTROWS(FB_Fact),ALLEXCEPT(FB_Cal,FB_Cal[Year]),USERELATIONSHIP(FB_Fact[Dt],FB_Cal[Date])),FB_Dim[Cat]=\"A\")",
+"powerbi": "8"
+},
+{
+"model": "FB",
+"expr": "CALCULATE(CALCULATE(COUNTROWS(FB_Fact),REMOVEFILTERS(FB_Fact),USERELATIONSHIP(FB_Fact[Dt],FB_Cal[Date])),FB_Dim[Cat]=\"A\")",
+"powerbi": "13"
+},
+{
+"model": "FB",
+"expr": "CALCULATE(CALCULATE(COUNTROWS(FB_Fact),USERELATIONSHIP(FB_Fact[Dt],FB_Cal[Date]),ALLNOBLANKROW(FB_Fact)),FB_Cal[Year]=2024)",
+"powerbi": "8"
+},
+{
+"model": "FB",
+"expr": "CALCULATE(CALCULATE(COUNTROWS(FB_Fact),USERELATIONSHIP(FB_Fact[Dt],FB_Cal[Date]),REMOVEFILTERS(FB_Fact)),FB_Dim[Cat]=\"A\")",
+"powerbi": "13"
+},
+{
+"model": "FB",
+"expr": "CALCULATE(CALCULATE(DISTINCTCOUNT(FB_Cal[Year]),USERELATIONSHIP(FB_Fact[Dt],FB_Cal[Date]),ALL(FB_Dim)),FB_Fact[Qty]>2)",
+"powerbi": "2"
+},
+{
+"model": "FB",
+"expr": "CALCULATE(CALCULATE(DISTINCTCOUNT(FB_Cal[Year]),USERELATIONSHIP(FB_Fact[Dt],FB_Cal[Date]),ALLSELECTED(FB_Fact)),FB_Cal[MonthNo]=1)",
+"powerbi": "2"
+},
+{
+"model": "FB",
+"expr": "CALCULATE(COUNTROWS(ALL(FB_Cal[Year])),ALLEXCEPT(FB_Cal,FB_Cal[Year]),USERELATIONSHIP(FB_Fact[Dt],FB_Cal[Date]))",
+"powerbi": "2"
+},
+{
+"model": "FB",
+"expr": "CALCULATE(COUNTROWS(ALL(FB_Cal[Year])),ALLNOBLANKROW(FB_Fact),USERELATIONSHIP(FB_Fact[Dt],FB_Cal[Date]))",
+"powerbi": "2"
+},
+{
+"model": "FB",
+"expr": "CALCULATE(COUNTROWS(ALL(FB_Cal[Year])),USERELATIONSHIP(FB_Fact[Dt],FB_Cal[Date]),ALLEXCEPT(FB_Cal,FB_Cal[Year]))",
+"powerbi": "2"
+},
+{
+"model": "FB",
+"expr": "CALCULATE(DISTINCTCOUNT(FB_Cal[Year]),ALLNOBLANKROW(FB_Fact),USERELATIONSHIP(FB_Fact[Dt],FB_Cal[Date]))",
+"powerbi": "2"
+},
+{
+"model": "FB",
+"expr": "CALCULATE(SUM(FB_Fact[Amt]),ALL(FB_Fact),USERELATIONSHIP(FB_Fact[Dt],FB_Cal[Date]))",
+"powerbi": "375"
+},
+{
+"model": "FB",
+"expr": "SUMX(FB_Cal,CALCULATE(COUNTROWS(FB_Cal),USERELATIONSHIP(FB_Fact[Dt],FB_Cal[Date]),ALLEXCEPT(FB_Fact,FB_Fact[Prod])))",
+"powerbi": "731"
+},
+{
+"model": "FB",
+"expr": "SUMX(FB_Cal,CALCULATE(SUM(FB_Fact[Amt]),USERELATIONSHIP(FB_Fact[Dt],FB_Cal[Date]),ALL(FB_Cal)))",
+"powerbi": "274125"
+},
+{
+"model": "FB",
+"expr": "SUMX(FB_Cal,CALCULATE(SUM(FB_Fact[Amt]),USERELATIONSHIP(FB_Fact[Dt],FB_Cal[Date]),ALLNOBLANKROW(FB_Fact)))",
+"powerbi": "375"
+},
+{
+"model": "FB",
+"expr": "SUMX(FB_Dim,CALCULATE(COUNTROWS(FB_Dim),USERELATIONSHIP(FB_Fact[Dt],FB_Cal[Date]),ALL(FB_Dim)))",
+"powerbi": "25"
+},
+{
+"model": "FB",
+"expr": "SUMX(FB_Dim,CALCULATE(COUNTROWS(FB_Fact),USERELATIONSHIP(FB_Fact[Dt],FB_Cal[Date]),ALLNOBLANKROW(FB_Fact)))",
+"powerbi": "65"
+},
+{
+"model": "FB",
+"expr": "SUMX(FB_Fact,CALCULATE(COUNTROWS(FB_Cal),USERELATIONSHIP(FB_Fact[Dt],FB_Cal[Date]),REMOVEFILTERS(FB_Fact)))",
+"powerbi": "9503"
+},
+{
+"model": "FB",
+"expr": "SUMX(FB_Fact,CALCULATE(COUNTROWS(FB_Fact),USERELATIONSHIP(FB_Fact[Dt],FB_Cal[Date]),ALLSELECTED(FB_Fact)))",
+"powerbi": "169"
+},
+{
+"model": "FB",
+"expr": "SUMX(FB_Fact,CALCULATE(SUM(FB_Fact[Amt]),USERELATIONSHIP(FB_Fact[Dt],FB_Cal[Date]),ALLSELECTED(FB_Fact)))",
+"powerbi": "4875"
+},
+{
+"model": "FB",
+"expr": "SUMX(VALUES(FB_Cal[Year]),CALCULATE(COUNTROWS(FB_Dim),USERELATIONSHIP(FB_Fact[Dt],FB_Cal[Date]),ALLEXCEPT(FB_Fact,FB_Fact[Prod])))",
+"powerbi": "10"
+},
+{
+"model": "FB",
+"expr": "SUMX(VALUES(FB_Cal[Year]),CALCULATE(COUNTROWS(FB_Dim),USERELATIONSHIP(FB_Fact[Dt],FB_Cal[Date]),REMOVEFILTERS(FB_Fact)))",
+"powerbi": "10"
+},
+{
+"model": "FX",
+"expr": "CALCULATE(AVERAGE(Facts[Sales]),ALLSELECTED(),TREATAS({0,5},Facts[Quantity]))",
+"powerbi": "1.25"
+},
+{
+"model": "FX",
+"expr": "CALCULATE(CALCULATE(COUNTROWS(ALL(Facts)),ALLEXCEPT(Facts,Facts[Region]),ALLSELECTED()),Facts[Quantity]=2,Facts[Sales]<>20.0)",
+"powerbi": "6"
+},
+{
+"model": "FX",
+"expr": "CALCULATE(CALCULATE(COUNTROWS(ALLSELECTED(Facts)),ALLSELECTED(),ALLEXCEPT(Facts,Facts[Region])),FILTER(VALUES(Facts[Sales]),Facts[Sales]=0.0),KEEPFILTERS(Facts[Note]=\"Late\"))",
+"powerbi": "6"
+},
+{
+"model": "FX",
+"expr": "CALCULATE(CALCULATE(COUNTROWS(ALLSELECTED(Facts[Region])),ALLSELECTED(Facts),REMOVEFILTERS(Facts[Quantity])),CALCULATETABLE(VALUES(Facts[Quantity]),Facts[Quantity]=5),TREATAS({\"Paid\",\"Late\"},Facts[Note]))",
+"powerbi": "3"
+},
+{
+"model": "FX",
+"expr": "CALCULATE(CALCULATE(COUNTROWS(DISTINCT(Facts[Note])),ALLSELECTED(),REMOVEFILTERS(Facts)),TREATAS({0.0},Facts[Sales]),Facts[Quantity]>3)",
+"powerbi": "3"
+},
+{
+"model": "FX",
+"expr": "CALCULATE(CALCULATE(COUNTROWS(FILTER(Facts,TRUE())),ALLSELECTED(Facts),ALLNOBLANKROW(Facts)),CALCULATETABLE(VALUES(Facts[Quantity]),Facts[Quantity]=2),CALCULATETABLE(VALUES(Facts[Region]),Facts[Region]=\"East\"))",
+"powerbi": "6"
+},
+{
+"model": "FX",
+"expr": "CALCULATE(CALCULATE(DISTINCTCOUNT(Facts[Note]),REMOVEFILTERS(Facts[Region]),ALLSELECTED()),Facts[Sales]<=10.5,FILTER(VALUES(Facts[Sales]),Facts[Sales]=0.0))",
+"powerbi": "2"
+},
+{
+"model": "FX",
+"expr": "CALCULATE(CALCULATE(MAX(Facts[Quantity]),ALLSELECTED(Facts[Quantity]),ALLNOBLANKROW(Facts)),CALCULATETABLE(VALUES(Facts[Region]),Facts[Region]=\"East\"),Facts[Quantity] IN {5,2})",
+"powerbi": "5"
+},
+{
+"model": "FX",
+"expr": "CALCULATE(CALCULATE(SUM(Facts[Quantity]),ALLSELECTED(),ALL(Facts)),TREATAS({3,0},Facts[Quantity]),CALCULATETABLE(VALUES(Facts[Sales]),Facts[Sales]=10.5))",
+"powerbi": "15"
+},
+{
+"model": "FX",
+"expr": "CALCULATE(CALCULATE(SUM(Facts[Quantity]),ALLSELECTED(),REMOVEFILTERS(Facts[Quantity])),FILTER(ALL(Facts[Sales]),Facts[Sales]<>2.5),TREATAS({\"Late\",\"Paid\"},Facts[Note]))",
+"powerbi": "7"
+},
+{
+"model": "FX",
+"expr": "CALCULATE(COUNTROWS(FILTER(Facts,TRUE())),ALLSELECTED(Facts),TREATAS({3,4},Facts[Quantity]))",
+"powerbi": "2"
+},
+{
+"model": "FX",
+"expr": "CALCULATE(DIVIDE(CALCULATE(SUM(Facts[Quantity]),ALLEXCEPT(Facts,Facts[Sales])),VAR v=ALLNOBLANKROW(Facts) RETURN COUNTROWS(CALCULATETABLE(v,ALL(Facts[Quantity],Facts[Sales])))),ALLSELECTED(Facts),TREATAS({\"West\",\"North\"},Facts[Region]))",
+"powerbi": "2.5"
+},
+{
+"model": "FX",
+"expr": "CALCULATE(MAX(Facts[Quantity]),ALLSELECTED(),Facts[Quantity] IN {1,3})",
+"powerbi": "3"
+},
+{
+"model": "FX",
+"expr": "CALCULATE(MAX(Facts[Quantity]),ALLSELECTED(),TREATAS({\"East\"},Facts[Region]))",
+"powerbi": "5"
+},
+{
+"model": "FX",
+"expr": "VAR v=CALCULATETABLE(DISTINCT(Facts[Sales]),KEEPFILTERS(Facts[Note]=\"Late\")) RETURN CALCULATE(SUMX(Facts,Facts[Quantity]),v,ALLSELECTED(Facts[Region]))",
+"powerbi": "4"
+},
+{
+"model": "ZB",
+"expr": "CALCULATE(CALCULATE(COUNTROWS(ALL(ZB_Fact)),ALL(ZB_Cal[Day]),ALLSELECTED()),KEEPFILTERS(ZB_Cal[MonthNo]=2),CALCULATETABLE(VALUES(ZB_Fact[Id]),ZB_Fact[Id]=3))",
+"powerbi": "10"
+},
+{
+"model": "ZB",
+"expr": "CALCULATE(CALCULATE(COUNTROWS(ALL(ZB_Reg)),ALLSELECTED(ZB_Cal[Day]),ALL(ZB_Reg[Reg])),CALCULATETABLE(VALUES(ZB_Fact[Prod]),ZB_Fact[Prod]=\"P1\"),ZB_Reg[Reg] IN {\"South\",\"West\"})",
+"powerbi": "4"
+},
+{
+"model": "ZB",
+"expr": "CALCULATE(CALCULATE(COUNTROWS(ALL(ZB_Reg)),ALLSELECTED(ZB_Reg),ALLEXCEPT(ZB_Reg,ZB_Reg[Zone])),FILTER(ZB_Dim,ZB_Dim[Grp]=\"Y\"),ZB_Fact[Amt]>10.0)",
+"powerbi": "4"
+},
+{
+"model": "ZB",
+"expr": "CALCULATE(CALCULATE(COUNTROWS(ALLSELECTED(ZB_Fact)),ALLSELECTED(),ALL(ZB_Reg[Zone])),ZB_Dim[Prod] IN {\"P3\",\"P1\"},FILTER(VALUES(ZB_Cal[MonthNo]),ZB_Cal[MonthNo]=12))",
+"powerbi": "BLANK"
+},
+{
+"model": "ZB",
+"expr": "CALCULATE(CALCULATE(COUNTROWS(DISTINCT(ZB_Fact[Prod])),ALLEXCEPT(ZB_Reg,ZB_Reg[Zone]),ALLSELECTED(ZB_Fact)),KEEPFILTERS(ZB_Fact[Dt]=DATE(2024,2,10)),ZB_Cal[Date]=DATE(2024,3,15))",
+"powerbi": "BLANK"
+},
+{
+"model": "ZB",
+"expr": "CALCULATE(CALCULATE(COUNTROWS(DISTINCT(ZB_Reg[Zone])),REMOVEFILTERS(ZB_Cal),ALLSELECTED()),TREATAS({DATE(2023,1,20)},ZB_Fact[Ship]),ZB_Cal[MonthNo]>3)",
+"powerbi": "1"
+},
+{
+"model": "ZB",
+"expr": "CALCULATE(CALCULATE(COUNTROWS(FILTER(ZB_Fact,TRUE())),ALL(ZB_Reg[Zone],ZB_Reg[Reg]),ALLSELECTED()),ZB_Cal[Day]<>5,KEEPFILTERS(ZB_Fact[Dt]=DATE(2024,3,15)))",
+"powerbi": "2"
+},
+{
+"model": "ZB",
+"expr": "CALCULATE(CALCULATE(COUNTROWS(FILTER(ZB_Fact,TRUE())),ALLEXCEPT(ZB_Dim,ZB_Dim[Cat]),ALLSELECTED(ZB_Fact)),ZB_Cal[Date]<>DATE(2023,1,15),FILTER(ALL(ZB_Dim[Prod]),ZB_Dim[Prod]<>\"P4\"))",
+"powerbi": "8"
+},
+{
+"model": "ZB",
+"expr": "CALCULATE(CALCULATE(COUNTROWS(VALUES(ZB_Dim[Grp])),ALLSELECTED(ZB_Cal),ALLSELECTED(ZB_Reg[Zone])),FILTER(VALUES(ZB_Fact[Amt]),ZB_Fact[Amt]=60.0),FILTER(ZB_Fact,ZB_Fact[Ship]=DATE(2024,4,1)))",
+"powerbi": "BLANK"
+},
+{
+"model": "ZB",
+"expr": "CALCULATE(CALCULATE(COUNTROWS(ZB_Dim),ALLSELECTED(ZB_Reg),ALLNOBLANKROW(ZB_Fact)),ZB_Cal[Date]<>DATE(2024,3,15),FILTER(VALUES(ZB_Dim[Cat]),ZB_Dim[Cat]=\"A\"))",
+"powerbi": "5"
+},
+{
+"model": "ZB",
+"expr": "CALCULATE(CALCULATE(COUNTROWS(ZB_Dim),CROSSFILTER(ZB_Fact[Prod],ZB_Dim[Prod],BOTH),ALL(ZB_Dim)),KEEPFILTERS(ZB_Dim[Cat]=\"A\"))",
+"powerbi": "5"
+},
+{
+"model": "ZB",
+"expr": "CALCULATE(CALCULATE(COUNTROWS(ZB_Dim),CROSSFILTER(ZB_Fact[Prod],ZB_Dim[Prod],BOTH),ALL(ZB_Dim)),ZB_Cal[MonthNo]=1)",
+"powerbi": "3"
+},
+{
+"model": "ZB",
+"expr": "CALCULATE(CALCULATE(COUNTROWS(ZB_Dim),CROSSFILTER(ZB_Fact[Prod],ZB_Dim[Prod],BOTH),ALL(ZB_Fact)),TREATAS({\"A\",\"B\"},ZB_Dim[Cat]))",
+"powerbi": "5"
+},
+{
+"model": "ZB",
+"expr": "CALCULATE(CALCULATE(COUNTROWS(ZB_Dim),CROSSFILTER(ZB_Fact[Prod],ZB_Dim[Prod],BOTH),ALL(ZB_Fact)),ZB_Dim[Grp]=\"X\")",
+"powerbi": "5"
+},
+{
+"model": "ZB",
+"expr": "CALCULATE(CALCULATE(COUNTROWS(ZB_Fact),ALLSELECTED(ZB_Cal),ALLNOBLANKROW(ZB_Fact[Qty])),ZB_Cal[MonthNo] IN {3,1},FILTER(VALUES(ZB_Reg[Reg]),ZB_Reg[Reg]=\"East\"))",
+"powerbi": "4"
+},
+{
+"model": "ZB",
+"expr": "CALCULATE(CALCULATE(COUNTROWS(ZB_Fact),USERELATIONSHIP(ZB_Fact[Ship],ZB_Cal[Date]),ALL(ZB_Cal[Year])),FILTER(ALL(ZB_Dim[Cat]),ZB_Dim[Cat]<>\"B\"))",
+"powerbi": "6"
+},
+{
+"model": "ZB",
+"expr": "CALCULATE(CALCULATE(COUNTROWS(ZB_Fact),USERELATIONSHIP(ZB_Fact[Ship],ZB_Cal[Date]),ALL(ZB_Cal[Year])),KEEPFILTERS(ZB_Dim[Cat]=\"A\"))",
+"powerbi": "5"
+},
+{
+"model": "ZB",
+"expr": "CALCULATE(CALCULATE(COUNTROWS(ZB_Fact),USERELATIONSHIP(ZB_Fact[Ship],ZB_Cal[Date]),ALL(ZB_Cal[Year])),TREATAS({\"A\",\"B\"},ZB_Dim[Cat]))",
+"powerbi": "9"
+},
+{
+"model": "ZB",
+"expr": "CALCULATE(CALCULATE(COUNTROWS(ZB_Fact),USERELATIONSHIP(ZB_Fact[Ship],ZB_Cal[Date]),ALL(ZB_Cal[Year])),ZB_Fact[Id]>3,ZB_Cal[Year]=2024)",
+"powerbi": "7"
+},
+{
+"model": "ZB",
+"expr": "CALCULATE(CALCULATE(COUNTROWS(ZB_Fact),USERELATIONSHIP(ZB_Fact[Ship],ZB_Cal[Date]),ALL(ZB_Fact)),FILTER(ALL(ZB_Dim[Cat]),ZB_Dim[Cat]<>\"B\"))",
+"powerbi": "10"
+},
+{
+"model": "ZB",
+"expr": "CALCULATE(CALCULATE(COUNTROWS(ZB_Fact),USERELATIONSHIP(ZB_Fact[Ship],ZB_Cal[Date]),ALL(ZB_Fact)),KEEPFILTERS(ZB_Dim[Cat]=\"A\"))",
+"powerbi": "10"
+},
+{
+"model": "ZB",
+"expr": "CALCULATE(CALCULATE(COUNTROWS(ZB_Fact),USERELATIONSHIP(ZB_Fact[Ship],ZB_Cal[Date]),ALL(ZB_Fact)),TREATAS({\"A\",\"B\"},ZB_Dim[Cat]))",
+"powerbi": "10"
+},
+{
+"model": "ZB",
+"expr": "CALCULATE(CALCULATE(COUNTROWS(ZB_Fact),USERELATIONSHIP(ZB_Fact[Ship],ZB_Cal[Date]),ALL(ZB_Fact)),ZB_Fact[Qty]>2)",
+"powerbi": "10"
+},
+{
+"model": "ZB",
+"expr": "CALCULATE(CALCULATE(DISTINCTCOUNT(ZB_Fact[Qty]),ALLSELECTED(),REMOVEFILTERS(ZB_Cal[Day])),CALCULATETABLE(VALUES(ZB_Reg[Reg]),ZB_Reg[Reg]=\"South\"),ZB_Fact[Ship]=DATE(2024,2,11))",
+"powerbi": "BLANK"
+},
+{
+"model": "ZB",
+"expr": "CALCULATE(CALCULATE(DISTINCTCOUNT(ZB_Fact[Reg]),ALLSELECTED(),REMOVEFILTERS(ZB_Dim[Cat])),ZB_Dim[Cat]<>\"A\",FILTER(ALL(ZB_Reg[Zone]),ZB_Reg[Zone]<>\"Z1\"))",
+"powerbi": "1"
+},
+{
+"model": "ZB",
+"expr": "CALCULATE(CALCULATE(DISTINCTCOUNT(ZB_Reg[Reg]),ALL(ZB_Dim),ALLSELECTED(ZB_Fact[Prod])),FILTER(VALUES(ZB_Dim[Prod]),ZB_Dim[Prod]=\"P5\"),FILTER(ZB_Fact,ZB_Fact[Amt]=30.0))",
+"powerbi": "1"
+},
+{
+"model": "ZB",
+"expr": "CALCULATE(CALCULATE(DISTINCTCOUNT(ZB_Reg[Reg]),ALLEXCEPT(ZB_Fact,ZB_Fact[Id],ZB_Dim[Cat]),ALLSELECTED()),FILTER(ALL(ZB_Dim[Cat]),ZB_Dim[Cat]<>\"A\"),TREATAS({\"P4\",\"P1\"},ZB_Dim[Prod]))",
+"powerbi": "3"
+},
+{
+"model": "ZB",
+"expr": "CALCULATE(CALCULATE(MIN(ZB_Fact[Reg]),ALLNOBLANKROW(ZB_Reg),ALLSELECTED(ZB_Cal)),ZB_Cal[MonthNo]<=1,ZB_Fact[Dt]=DATE(2024,3,15))",
+"powerbi": "BLANK"
+},
+{
+"model": "ZB",
+"expr": "CALCULATE(CALCULATE(SUM(ZB_Fact[Amt]),CROSSFILTER(ZB_Fact[Prod],ZB_Dim[Prod],NONE),ALL(ZB_Fact)),KEEPFILTERS(ZB_Dim[Cat]=\"A\"))",
+"powerbi": "300"
+},
+{
+"model": "ZB",
+"expr": "CALCULATE(CALCULATE(SUM(ZB_Fact[Amt]),CROSSFILTER(ZB_Fact[Prod],ZB_Dim[Prod],NONE),ALL(ZB_Fact)),TREATAS({\"A\",\"B\"},ZB_Dim[Cat]))",
+"powerbi": "300"
+},
+{
+"model": "ZB",
+"expr": "CALCULATE(CALCULATE(SUMX(ZB_Fact,ZB_Fact[Id]),ALLSELECTED(ZB_Dim),ALLEXCEPT(ZB_Cal,ZB_Cal[Day])),ZB_Fact[Qty]>4,ZB_Cal[Date]<>DATE(2024,1,5))",
+"powerbi": "13"
+},
+{
+"model": "ZB",
+"expr": "CALCULATE(CONCATENATEX(VALUES(ZB_Fact[Amt]),ZB_Fact[Amt],\",\",ZB_Fact[Amt],ASC),ALLSELECTED(),TREATAS({DATE(2024,1,9)},ZB_Fact[Ship]))",
+"powerbi": "40"
+},
+{
+"model": "ZB",
+"expr": "CALCULATE(COUNTROWS(ALL(ZB_Fact)),ALLSELECTED(ZB_Fact),TREATAS({\"Z1\"},ZB_Reg[Zone]))",
+"powerbi": "10"
+},
+{
+"model": "ZB",
+"expr": "CALCULATE(COUNTROWS(VALUES(ZB_Fact[Reg])),ALLSELECTED(ZB_Dim),TREATAS({\"A\"},ZB_Dim[Cat]))",
+"powerbi": "2"
+},
+{
+"model": "ZB",
+"expr": "CALCULATE(COUNTROWS(ZB_Fact),ALLSELECTED(ZB_Reg),ZB_Fact[Amt] IN {15.0,30.0})",
+"powerbi": "2"
+},
+{
+"model": "ZB",
+"expr": "CALCULATE(SUMX(ZB_Fact,CALCULATE(SUM(ZB_Fact[Amt]),USERELATIONSHIP(ZB_Fact[Ship],ZB_Cal[Date]),ALL(ZB_Cal))),FILTER(ALL(ZB_Dim[Cat]),ZB_Dim[Cat]<>\"B\"))",
+"powerbi": "120"
+},
+{
+"model": "ZB",
+"expr": "CALCULATE(SUMX(ZB_Fact,CALCULATE(SUM(ZB_Fact[Amt]),USERELATIONSHIP(ZB_Fact[Ship],ZB_Cal[Date]),ALL(ZB_Cal))),KEEPFILTERS(ZB_Dim[Cat]=\"A\"))",
+"powerbi": "115"
+},
+{
+"model": "ZB",
+"expr": "CALCULATE(SUMX(ZB_Fact,CALCULATE(SUM(ZB_Fact[Amt]),USERELATIONSHIP(ZB_Fact[Ship],ZB_Cal[Date]),ALL(ZB_Cal))),TREATAS({\"A\",\"B\"},ZB_Dim[Cat]))",
+"powerbi": "295"
+},
+{
+"model": "ZB",
+"expr": "CALCULATE(SUMX(ZB_Fact,CALCULATE(SUM(ZB_Fact[Amt]),USERELATIONSHIP(ZB_Fact[Ship],ZB_Cal[Date]),ALL(ZB_Cal))),ZB_Cal[Year]=2024)",
+"powerbi": "170"
+},
+{
+"model": "ZB",
+"expr": "CALCULATE([mAllC],ZB_Cal[Year] IN {2023,2024},ALLSELECTED())",
+"powerbi": "300"
+},
+{
+"model": "ZB",
+"expr": "SUMX(ZB_Fact,CALCULATE(SUM(ZB_Fact[Amt]),USERELATIONSHIP(ZB_Fact[Ship],ZB_Cal[Date]),ALL(ZB_Cal)))",
+"powerbi": "300"
+},
+{
+"model": "ZB",
+"expr": "VAR v=CALCULATETABLE(ALLEXCEPT(ZB_Dim,ZB_Dim[Grp]),ZB_Fact[Dt]>DATE(2024,2,20)) RETURN CALCULATE(CONCATENATEX(VALUES(ZB_Fact[Ship]),ZB_Fact[Ship],\",\",ZB_Fact[Ship],ASC),v,ALLSELECTED(ZB_Dim))",
+"powerbi": "1/15/2023,1/20/2023,2/12/2023,3/1/2023,1/6/2024,1/9/2024,2/11/2024,2/25/2024,3/20/2024,4/1/2024"
+},
+{
+"model": "ZB",
+"expr": "VAR v=CALCULATETABLE(DISTINCT(ZB_Cal[Year]),FILTER(ZB_Dim,ZB_Dim[Prod]=\"P2\")) RETURN CALCULATE(COUNTROWS(FILTER(ZB_Dim,TRUE())),v,ALLSELECTED(ZB_Reg[Zone]))",
+"powerbi": "5"
+},
+{
+"model": "ZB",
+"expr": "VAR v=CALCULATETABLE(FILTER(ZB_Cal,ZB_Cal[Day]=12 || TRUE()),FILTER(VALUES(ZB_Fact[Reg]),ZB_Fact[Reg]=\"West\")) RETURN CALCULATE(MAX(ZB_Dim[Cat]),v,ALLSELECTED(ZB_Fact))",
+"powerbi": "C"
+},
+{
+"model": "ZB",
+"expr": "VAR v=CALCULATETABLE(SUMMARIZE(ZB_Fact,ZB_Fact[Reg]),TREATAS({\"Z1\"},ZB_Reg[Zone])) RETURN CALCULATE(CONCATENATEX(VALUES(ZB_Fact[Ship]),ZB_Fact[Ship],\",\",ZB_Fact[Ship],ASC),v,ALLSELECTED(ZB_Dim))",
+"powerbi": "1/15/2023,1/20/2023,2/12/2023,3/1/2023,1/6/2024,1/9/2024,2/11/2024,2/25/2024"
+},
+{
+"model": "ZB",
+"expr": "VAR v=CALCULATETABLE(ZB_Dim,FILTER(ALL(ZB_Fact[Id]),ZB_Fact[Id]<>3)) RETURN CALCULATE(COUNTROWS(FILTER(ZB_Fact,TRUE())),v,ALLSELECTED(ZB_Cal))",
+"powerbi": "10"
+},
+{
+"model": "ZM",
+"expr": "CALCULATE(AVERAGE(ZM_F2[Amt]),ALLSELECTED(ZM_F2),TREATAS({\"n2\",\"n1\"},ZM_B[N]))",
+"powerbi": "250"
+},
+{
+"model": "ZM",
+"expr": "CALCULATE(CALCULATE(AVERAGE(ZM_F[Id]),ALLSELECTED(),ALL(ZM_U[K])),CALCULATETABLE(VALUES(ZM_F2[Amt]),ZM_F2[Amt]=300.0),ZM_F[Id] IN {3,4})",
+"powerbi": "3.5"
+},
+{
+"model": "ZM",
+"expr": "CALCULATE(CALCULATE(CONCATENATEX(VALUES(ZM_F[Amt]),ZM_F[Amt],\",\",ZM_F[Amt],ASC),ALL(ZM_W[K],ZM_W[Y]),ALLSELECTED()),ZM_W[K]<>\"k2\",FILTER(ALL(ZM_F[Amt]),ZM_F[Amt]<>32.0))",
+"powerbi": "1,2,4,8,16"
+},
+{
+"model": "ZM",
+"expr": "CALCULATE(CALCULATE(COUNTROWS(ALL(ZM_U[K])),ALLNOBLANKROW(ZM_F2[K]),ALLSELECTED(ZM_F[Amt])),FILTER(ALL(ZM_U[X]),ZM_U[X]<>\"x4\"),ZM_F2[Amt]=300.0)",
+"powerbi": "5"
+},
+{
+"model": "ZM",
+"expr": "CALCULATE(CALCULATE(COUNTROWS(ALL(ZM_W)),ALLEXCEPT(ZM_U,ZM_U[K]),ALLSELECTED()),ZM_A[Id]=2,KEEPFILTERS(ZM_B[K]=\"k5\"))",
+"powerbi": "5"
+},
+{
+"model": "ZM",
+"expr": "CALCULATE(CALCULATE(COUNTROWS(FILTER(ZM_A,TRUE())),REMOVEFILTERS(ZM_A),ALLSELECTED(ZM_W[K])),CALCULATETABLE(VALUES(ZM_F2[Amt]),ZM_F2[Amt]=100.0),TREATAS({\"x1\"},ZM_U[X]))",
+"powerbi": "6"
+},
+{
+"model": "ZM",
+"expr": "CALCULATE(CALCULATE(COUNTROWS(FILTER(ZM_F,TRUE())),ALLSELECTED(),ALLEXCEPT(ZM_A,ZM_A[K])),ZM_F2[Amt] IN {100.0,200.0},CALCULATETABLE(VALUES(ZM_A[K]),ZM_A[K]=\"k4\"))",
+"powerbi": "6"
+},
+{
+"model": "ZM",
+"expr": "CALCULATE(CALCULATE(COUNTROWS(ZM_A),ALL(ZM_F2[Amt]),ALLSELECTED(ZM_F2)),TREATAS({6},ZM_A[Id]),FILTER(VALUES(ZM_F[Amt]),ZM_F[Amt]=4.0))",
+"powerbi": "1"
+},
+{
+"model": "ZM",
+"expr": "CALCULATE(CALCULATE(COUNTROWS(ZM_F2),ALLEXCEPT(ZM_U,ZM_U[K]),ALLSELECTED()),ZM_F2[Id]=1,TREATAS({\"x2\"},ZM_U[X]))",
+"powerbi": "1"
+},
+{
+"model": "ZM",
+"expr": "CALCULATE(CALCULATE(MAX(ZM_A[Id]),ALLSELECTED(ZM_F2),ALLEXCEPT(ZM_A,ZM_A[V])),TREATAS({\"k1\",\"k4\"},ZM_U[K]),ZM_A[Id] IN {6,3})",
+"powerbi": "6"
+},
+{
+"model": "ZM",
+"expr": "CALCULATE(CALCULATE(SUM(ZM_A[V]),ALLSELECTED(ZM_W),ALLEXCEPT(ZM_F,ZM_F[Id],ZM_F[Amt])),ZM_F2[K]<>\"k1\",KEEPFILTERS(ZM_A[K]=\"k1\"))",
+"powerbi": "30"
+},
+{
+"model": "ZM",
+"expr": "CALCULATE(CALCULATE(SUM(ZM_F2[Id]),ALLSELECTED(),ALLEXCEPT(ZM_B,ZM_B[N])),FILTER(ALL(ZM_F2[K]),ZM_F2[K]<>\"k2\"),CALCULATETABLE(VALUES(ZM_A[K]),ZM_A[K]=\"k4\"))",
+"powerbi": "5"
+},
+{
+"model": "ZM",
+"expr": "CALCULATE(CALCULATE(SUM(ZM_F[Id]),ALLSELECTED(),ALL(ZM_F2[K])),ZM_B[N] IN {\"n1\",\"n2\"},TREATAS({\"k4\"},ZM_A[K]))",
+"powerbi": "21"
+},
+{
+"model": "ZM",
+"expr": "CALCULATE(COUNTROWS(ALL(ZM_F2[Id])),ALLSELECTED(ZM_W[K]),TREATAS({6,2},ZM_A[Id]))",
+"powerbi": "4"
+},
+{
+"model": "ZM",
+"expr": "CALCULATE(COUNTROWS(ALL(ZM_W[Y])),ALLSELECTED(),CALCULATETABLE(VALUES(ZM_A[K]),ZM_A[K]=\"k3\"))",
+"powerbi": "5"
+},
+{
+"model": "ZM",
+"expr": "CALCULATE(SUM(ZM_F[Amt]),ALLSELECTED(ZM_B[K]),TREATAS({\"n5\"},ZM_B[N]))",
+"powerbi": "63"
+},
+{
+"model": "ZM",
+"expr": "CALCULATE(VAR v=CALCULATETABLE(ZM_B,ZM_F[K]<>\"k1\") RETURN COUNTROWS(v),ALLSELECTED(ZM_A[V]),TREATAS({2.0,32.0},ZM_F[Amt]))",
+"powerbi": "4"
+},
+{
+"model": "ZM",
+"expr": "VAR v=CALCULATETABLE(ALLNOBLANKROW(ZM_U),FILTER(ALL(ZM_F[K]),ZM_F[K]<>\"k4\")) RETURN CALCULATE(DISTINCTCOUNT(ZM_W[K]),v,ALLSELECTED())",
+"powerbi": "3"
+},
+{
+"model": "ZM",
+"expr": "VAR v=CALCULATETABLE(FILTER(ZM_B,ZM_B[K]=\"k2\" || TRUE()),ZM_U[K] IN {\"k1\",\"k2\"}) RETURN CALCULATE(COUNTROWS(ALLSELECTED(ZM_U)),v,ALLSELECTED(ZM_B))",
+"powerbi": "5"
+},
+{
+"model": "ZM",
+"expr": "VAR v=CALCULATETABLE(TOPN(3,ZM_U,ZM_U[X]),ZM_F[Id]<=3) RETURN CALCULATE(CONCATENATEX(VALUES(ZM_A[Id]),ZM_A[Id],\",\",ZM_A[Id],ASC),v,ALLSELECTED(ZM_F2))",
+"powerbi": "1,2,3,4,5,6"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(CALCULATE(AVERAGE(ZO_Fact[Qty]),ALLSELECTED(ZO_Cal),REMOVEFILTERS(ZO_Dim)),TREATAS({\"East\"},ZO_Fact[Reg]),CALCULATETABLE(VALUES(ZO_Cal[Day]),ZO_Cal[Day]=10))",
+"powerbi": "BLANK"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(CALCULATE(CONCATENATEX(VALUES(ZO_Fact[Amt]),ZO_Fact[Amt],\",\",ZO_Fact[Amt],ASC),ALLSELECTED(ZO_Cal),ALLEXCEPT(ZO_Dim,ZO_Dim[Prod],ZO_Dim[Grp])),FILTER(VALUES(ZO_Dim[Grp]),ZO_Dim[Grp]=\"Y\"),ZO_Cal[Date]=DATE(2024,3,15))",
+"powerbi": "BLANK"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(CALCULATE(COUNTROWS(ALLSELECTED(ZO_Dim)),ALLSELECTED(ZO_Dim),ALLEXCEPT(ZO_Fact,ZO_Fact[Prod])),FILTER(VALUES(ZO_Fact[Reg]),ZO_Fact[Reg]=\"East\"),ZO_Cal[MonthNo]<>3)",
+"powerbi": "6"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(CALCULATE(COUNTROWS(DISTINCT(ZO_Fact[Qty])),ALLSELECTED(),ALL(ZO_Cal)),ZO_Fact[Prod]<>\"P3\",TREATAS({\"North\"},ZO_Fact[Reg]))",
+"powerbi": "2"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(CALCULATE(COUNTROWS(VALUES(ZO_Cal[Date])),REMOVEFILTERS(ZO_Cal[Date]),ALLSELECTED()),FILTER(ZO_Cal,ZO_Cal[MonthNo]=2),FILTER(VALUES(ZO_Fact[Reg]),ZO_Fact[Reg]=\"East\"))",
+"powerbi": "57"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(CALCULATE(COUNTROWS(VALUES(ZO_Fact[Amt])),ALLEXCEPT(ZO_Dim,ZO_Dim[Cat]),ALLSELECTED()),ZO_Dim[Cat] IN {\"C\",\"A\"},ZO_Fact[Prod]=\"P9\")",
+"powerbi": "BLANK"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(CALCULATE(COUNTROWS(VALUES(ZO_Fact[Dt])),ALLSELECTED(),ALLNOBLANKROW(ZO_Cal[MonthNo])),FILTER(ALL(ZO_Dim[Grp]),ZO_Dim[Grp]<>\"Y\"),KEEPFILTERS(ZO_Fact[Qty]=1))",
+"powerbi": "2"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(CALCULATE(COUNTROWS(ZO_Dim),CROSSFILTER(ZO_Fact[Prod],ZO_Dim[Prod],BOTH),ALL(ZO_Dim)),ZO_Cal[Year]=2024)",
+"powerbi": "3"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(CALCULATE(COUNTROWS(ZO_Fact),USERELATIONSHIP(ZO_Fact[Ship],ZO_Cal[Date]),ALL(ZO_Cal[Year])),KEEPFILTERS(ZO_Dim[Cat]=\"A\"))",
+"powerbi": "6"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(CALCULATE(COUNTROWS(ZO_Fact),USERELATIONSHIP(ZO_Fact[Ship],ZO_Cal[Date]),ALL(ZO_Cal[Year])),TREATAS({\"A\",\"B\"},ZO_Dim[Cat]))",
+"powerbi": "9"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(CALCULATE(COUNTROWS(ZO_Fact),USERELATIONSHIP(ZO_Fact[Ship],ZO_Cal[Date]),ALL(ZO_Cal[Year])),ZO_Dim[Prod]=\"P1\")",
+"powerbi": "3"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(CALCULATE(COUNTROWS(ZO_Fact),USERELATIONSHIP(ZO_Fact[Ship],ZO_Cal[Date]),ALL(ZO_Fact)),FILTER(ALL(ZO_Dim[Cat]),ZO_Dim[Cat]<>\"B\"))",
+"powerbi": "13"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(CALCULATE(COUNTROWS(ZO_Fact),USERELATIONSHIP(ZO_Fact[Ship],ZO_Cal[Date]),ALL(ZO_Fact)),KEEPFILTERS(ZO_Dim[Cat]=\"A\"))",
+"powerbi": "13"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(CALCULATE(COUNTROWS(ZO_Fact),USERELATIONSHIP(ZO_Fact[Ship],ZO_Cal[Date]),ALL(ZO_Fact)),TREATAS({\"A\",\"B\"},ZO_Dim[Cat]))",
+"powerbi": "13"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(CALCULATE(COUNTROWS(ZO_Fact),USERELATIONSHIP(ZO_Fact[Ship],ZO_Cal[Date]),ALL(ZO_Fact)),ZO_Fact[Id]<=7)",
+"powerbi": "13"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(CALCULATE(MAX(ZO_Dim[Prod]),ALL(ZO_Fact[Amt],ZO_Fact[Prod]),CROSSFILTER(ZO_Fact[Prod],ZO_Dim[Prod],BOTH)),TREATAS({DATE(2024,2,10),DATE(2024,3,15)},ZO_Cal[Date]),USERELATIONSHIP(ZO_Fact[Ship],ZO_Cal[Date]))",
+"powerbi": "BLANK"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(CALCULATE(SUM(ZO_Fact[Amt]),ALLNOBLANKROW(ZO_Dim),ALLSELECTED()),KEEPFILTERS(ZO_Cal[MonthNo]=2),ZO_Fact[Qty] IN {5,2})",
+"powerbi": "50"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(CALCULATE(SUM(ZO_Fact[Amt]),CROSSFILTER(ZO_Fact[Prod],ZO_Dim[Prod],NONE),ALL(ZO_Fact)),KEEPFILTERS(ZO_Dim[Cat]=\"A\"))",
+"powerbi": "375"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(CALCULATE(SUM(ZO_Fact[Amt]),CROSSFILTER(ZO_Fact[Prod],ZO_Dim[Prod],NONE),ALL(ZO_Fact)),ZO_Cal[Year]=2024)",
+"powerbi": "375"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(CALCULATE(SUM(ZO_Fact[Amt]),REMOVEFILTERS(ZO_Fact),ALLSELECTED()),FILTER(ALL(ZO_Fact[Id]),ZO_Fact[Id]<>12),FILTER(ALL(ZO_Fact[Id]),ZO_Fact[Id]<>6))",
+"powerbi": "375"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(COUNTROWS(ALL(ZO_Cal[Day])),CROSSFILTER(ZO_Fact[Prod],ZO_Dim[Prod],NONE),TREATAS({\"North\",\"East\"},ZO_Fact[Reg]))",
+"powerbi": "32"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(COUNTROWS(ALL(ZO_Dim)),ALLSELECTED(ZO_Cal),TREATAS({\"Y\",\"X\"},ZO_Dim[Grp]))",
+"powerbi": "6"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(COUNTROWS(ALL(ZO_Fact[Reg])),CROSSFILTER(ZO_Fact[Prod],ZO_Dim[Prod],NONE),TREATAS({\"X\",\"Y\"},ZO_Dim[Grp]))",
+"powerbi": "3"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(COUNTROWS(ALLSELECTED(ZO_Cal)),ALLSELECTED(ZO_Cal),TREATAS({\"Y\",\"X\"},ZO_Dim[Grp]))",
+"powerbi": "732"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(COUNTROWS(ALLSELECTED(ZO_Fact[Prod])),ALLSELECTED(ZO_Cal[MonthNo]),ZO_Fact[Id] IN {9,2})",
+"powerbi": "7"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(COUNTROWS(FILTER(ZO_Fact,TRUE())),ALLSELECTED(ZO_Dim),TREATAS({12},ZO_Fact[Id]))",
+"powerbi": "1"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(COUNTROWS(VALUES(ZO_Fact[Reg])),ALLEXCEPT(ZO_Dim,ZO_Dim[Grp]),USERELATIONSHIP(ZO_Fact[Ship],ZO_Cal[Date]))",
+"powerbi": "3"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(IF(COUNTROWS(ZO_Fact)>0,SUMX(ZO_Fact,ZO_Fact[Amt]),-1),ALLSELECTED(ZO_Dim),TREATAS({3,2},ZO_Cal[MonthNo]))",
+"powerbi": "165"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(SUM(ZO_Cal[Year]),CROSSFILTER(ZO_Fact[Prod],ZO_Dim[Prod],NONE),FILTER(ZO_Fact,ZO_Fact[Dt]=DATE(2023,12,31)))",
+"powerbi": "2023"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(SUM(ZO_Fact[Amt]),ALL(ZO_Cal[Date]),ALLSELECTED(ZO_Fact))",
+"powerbi": "375"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(SUM(ZO_Fact[Qty]),ALLSELECTED(),CALCULATETABLE(VALUES(ZO_Fact[Id]),ZO_Fact[Id]=4))",
+"powerbi": "4"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(SUMX(ZO_Fact,CALCULATE(SUM(ZO_Fact[Amt]),USERELATIONSHIP(ZO_Fact[Ship],ZO_Cal[Date]),ALL(ZO_Cal))),KEEPFILTERS(ZO_Dim[Cat]=\"A\"))",
+"powerbi": "140"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(SUMX(ZO_Fact,CALCULATE(SUM(ZO_Fact[Amt]),USERELATIONSHIP(ZO_Fact[Ship],ZO_Cal[Date]),ALL(ZO_Cal))),TREATAS({\"A\",\"B\"},ZO_Dim[Cat]))",
+"powerbi": "295"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(SUMX(ZO_Fact,CALCULATE(SUM(ZO_Fact[Amt]),USERELATIONSHIP(ZO_Fact[Ship],ZO_Cal[Date]),ALL(ZO_Cal))),ZO_Dim[Cat]=\"A\")",
+"powerbi": "140"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(SUMX(ZO_Fact,CALCULATE(SUM(ZO_Fact[Amt]),USERELATIONSHIP(ZO_Fact[Ship],ZO_Cal[Date]),ALL(ZO_Cal))),ZO_Fact[Qty]>2)",
+"powerbi": "205"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE([mAllF],CALCULATETABLE(VALUES(ZO_Fact[Amt]),ZO_Fact[Amt]=50.0),CROSSFILTER(ZO_Fact[Prod],ZO_Dim[Prod],BOTH))",
+"powerbi": "375"
+},
+{
+"model": "ZO",
+"expr": "VAR v=CALCULATETABLE(ALL(ZO_Cal[MonthNo]),FILTER(ALL(ZO_Dim[Cat]),ZO_Dim[Cat]<>\"C\")) RETURN CALCULATE(COUNTROWS(ALL(ZO_Cal[MonthNo])),v,ALLSELECTED(ZO_Fact[Ship]))",
+"powerbi": "13"
+},
+{
+"model": "ZO",
+"expr": "VAR v=CALCULATETABLE(ALLNOBLANKROW(ZO_Dim),ZO_Dim[Cat] IN {\"C\",\"A\"}) RETURN CALCULATE(COUNTROWS(VALUES(ZO_Fact)),v,ALLSELECTED())",
+"powerbi": "10"
+},
+{
+"model": "ZO",
+"expr": "VAR v=CALCULATETABLE(DISTINCT(ZO_Dim),KEEPFILTERS(ZO_Fact[Ship]=DATE(2023,1,20))) RETURN CALCULATE(COUNTROWS(DISTINCT(ZO_Fact[Amt])),v,CROSSFILTER(ZO_Fact[Prod],ZO_Dim[Prod],NONE))",
+"powerbi": "12"
+},
+{
+"model": "ZS",
+"expr": "CALCULATE(CALCULATE(COUNTROWS(ALL(ZS_Fact[Qty])),REMOVEFILTERS(ZS_Dim),ALLSELECTED(ZS_Cal)),KEEPFILTERS(ZS_Reg[Zone]=\"Z1\"),ZS_Sup[Region] IN {\"R3\",\"R2\"})",
+"powerbi": "6"
+},
+{
+"model": "ZS",
+"expr": "CALCULATE(CALCULATE(COUNTROWS(ALLSELECTED(ZS_Reg)),REMOVEFILTERS(ZS_Dim[Cat]),CROSSFILTER(ZS_Fact[Prod],ZS_Dim[Prod],NONE)),FILTER(VALUES(ZS_Fact[Prod]),ZS_Fact[Prod]=\"P1\"),ZS_Fact2[Dt]=DATE(2024,2,5))",
+"powerbi": "3"
+},
+{
+"model": "ZS",
+"expr": "CALCULATE(CALCULATE(COUNTROWS(DISTINCT(ZS_Fact[Amt])),ALLSELECTED(ZS_Dim),REMOVEFILTERS(ZS_Fact2)),CALCULATETABLE(VALUES(ZS_Fact2[Prod]),ZS_Fact2[Prod]=\"P1\"),ZS_Reg[Region]=\"R1\")",
+"powerbi": "10"
+},
+{
+"model": "ZS",
+"expr": "CALCULATE(CALCULATE(COUNTROWS(VALUES(ZS_Fact)),ALLSELECTED(ZS_Sup),REMOVEFILTERS(ZS_Dim[Cat])),ZS_Fact2[Amt]>8.0,ZS_Fact[Qty]>2)",
+"powerbi": "1"
+},
+{
+"model": "ZS",
+"expr": "CALCULATE(CALCULATE(COUNTROWS(VALUES(ZS_Fact2[Dt])),ALLNOBLANKROW(ZS_Cal),CROSSFILTER(ZS_Fact[Prod],ZS_Dim[Prod],NONE)),FILTER(ALL(ZS_Reg[Zone]),ZS_Reg[Zone]<>\"Z2\"),ZS_Dim[Grp]=\"Y\")",
+"powerbi": "2"
+},
+{
+"model": "ZS",
+"expr": "CALCULATE(CALCULATE(COUNTROWS(VALUES(ZS_Reg)),ALLEXCEPT(ZS_Sup,ZS_Sup[Sup]),ALLSELECTED(ZS_Fact)),FILTER(VALUES(ZS_Reg[Zone]),ZS_Reg[Zone]=\"Z2\"),CALCULATETABLE(VALUES(ZS_Fact[Dt]),ZS_Fact[Dt]=DATE(2023,1,15)))",
+"powerbi": "3"
+},
+{
+"model": "ZS",
+"expr": "CALCULATE(CALCULATE(COUNTROWS(ZS_Dim),CROSSFILTER(ZS_Fact[Prod],ZS_Dim[Prod],BOTH),ALL(ZS_Dim)),KEEPFILTERS(ZS_Dim[Cat]=\"A\"))",
+"powerbi": "5"
+},
+{
+"model": "ZS",
+"expr": "CALCULATE(CALCULATE(COUNTROWS(ZS_Dim),CROSSFILTER(ZS_Fact[Prod],ZS_Dim[Prod],BOTH),ALL(ZS_Dim)),TREATAS({\"A\",\"B\"},ZS_Dim[Cat]))",
+"powerbi": "5"
+},
+{
+"model": "ZS",
+"expr": "CALCULATE(CALCULATE(COUNTROWS(ZS_Dim),CROSSFILTER(ZS_Fact[Prod],ZS_Dim[Prod],BOTH),ALL(ZS_Fact)),TREATAS({\"A\",\"B\"},ZS_Dim[Cat]))",
+"powerbi": "5"
+},
+{
+"model": "ZS",
+"expr": "CALCULATE(CALCULATE(MIN(ZS_Fact2[Prod]),ALL(ZS_Cal[Day],ZS_Cal[MonthNo]),ALLSELECTED(ZS_Fact[Qty])),FILTER(VALUES(ZS_Fact[Amt]),ZS_Fact[Amt]=15.0),FILTER(ALL(ZS_Reg[Region]),ZS_Reg[Region]<>\"R1\"))",
+"powerbi": "P3"
+},
+{
+"model": "ZS",
+"expr": "CALCULATE(CALCULATE(MIN(ZS_Fact[Amt]),ALLSELECTED(),REMOVEFILTERS(ZS_Fact2)),KEEPFILTERS(ZS_Sup[Region]=\"R2\"),ZS_Dim[Grp]<>\"Y\")",
+"powerbi": "5"
+},
+{
+"model": "ZS",
+"expr": "CALCULATE(CALCULATE(MIN(ZS_Fact[Qty]),ALLSELECTED(ZS_Dim[Cat]),ALLSELECTED()),ZS_Sup[Cat]<>\"C\",CALCULATETABLE(VALUES(ZS_Sup[Region]),ZS_Sup[Region]=\"R1\"))",
+"powerbi": "1"
+},
+{
+"model": "ZS",
+"expr": "CALCULATE(CALCULATE(SUM(ZS_Fact[Amt]),CROSSFILTER(ZS_Fact[Prod],ZS_Dim[Prod],NONE),ALL(ZS_Fact)),KEEPFILTERS(ZS_Dim[Cat]=\"A\"))",
+"powerbi": "300"
+},
+{
+"model": "ZS",
+"expr": "CALCULATE(CALCULATE(SUM(ZS_Fact[Amt]),CROSSFILTER(ZS_Fact[Prod],ZS_Dim[Prod],NONE),ALL(ZS_Fact)),ZS_Fact[Qty]>2)",
+"powerbi": "300"
+},
+{
+"model": "ZS",
+"expr": "CALCULATE(CALCULATE(SUM(ZS_Fact[Amt]),CROSSFILTER(ZS_Fact[Prod],ZS_Dim[Prod],NONE),ALL(ZS_Fact)),ZS_Fact[Qty]>2,ZS_Dim[Grp]=\"X\")",
+"powerbi": "300"
+},
+{
+"model": "ZS",
+"expr": "CALCULATE(COUNTROWS(ALLSELECTED(ZS_Fact)),CROSSFILTER(ZS_Fact[Prod],ZS_Dim[Prod],NONE),TREATAS({\"A\",\"B\"},ZS_Dim[Cat]))",
+"powerbi": "10"
+},
+{
+"model": "ZS",
+"expr": "CALCULATE(COUNTROWS(FILTER(ZS_Fact,TRUE())),ALLSELECTED(),CALCULATETABLE(VALUES(ZS_Fact[Amt]),ZS_Fact[Amt]=70.0))",
+"powerbi": "1"
+},
+{
+"model": "ZS",
+"expr": "CALCULATE(COUNTROWS(VALUES(ZS_Dim[Prod])),ALLSELECTED(),CALCULATETABLE(VALUES(ZS_Dim[Grp]),ZS_Dim[Grp]=\"X\"))",
+"powerbi": "3"
+},
+{
+"model": "ZS",
+"expr": "CALCULATE(COUNTROWS(ZS_Fact2),CROSSFILTER(ZS_Fact[Prod],ZS_Dim[Prod],NONE),TREATAS({\"S1\",\"S2\"},ZS_Sup[Sup]))",
+"powerbi": "5"
+},
+{
+"model": "ZS",
+"expr": "IF(CALCULATE(COUNTROWS(ALL(ZS_Sup[Region])),ALLSELECTED(ZS_Sup),TREATAS({DATE(2023,6,6)},ZS_Fact2[Dt]))>0,CALCULATE(COUNTROWS(VALUES(ZS_Fact[Dt])),ALLEXCEPT(ZS_Fact,ZS_Fact[Id])),-1)",
+"powerbi": "6"
+},
+{
+"model": "ZS",
+"expr": "VAR v=CALCULATETABLE(DISTINCT(ZS_Dim[Cat]),ZS_Fact2[Amt]>8.0) RETURN CALCULATE(CONCATENATEX(VALUES(ZS_Fact2[Dt]),ZS_Fact2[Dt],\",\",ZS_Fact2[Dt],ASC),v,CROSSFILTER(ZS_Fact[Prod],ZS_Dim[Prod],NONE))",
+"powerbi": "7/1/2024"
+}
+]
+}

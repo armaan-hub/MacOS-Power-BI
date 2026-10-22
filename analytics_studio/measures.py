@@ -1164,7 +1164,7 @@ def _has_supported_all_usage(
         if function in _TABLE_FUNCTION_ARITY:
             if not _table_position(parent_function, argument_index) and not (
                 function == "CALCULATETABLE" and parent_function in {"CALCULATE", "CALCULATETABLE"}
-            ):
+            ) and not (parent_function == "CALCULATETABLE" and argument_index >= 1):
                 return False
             return all(
                 _has_supported_all_usage(argument, function, index, len(arguments))
@@ -1186,7 +1186,7 @@ def _has_supported_all_usage(
             return (
                 parent_function in {"CALCULATE", "CALCULATETABLE"}
                 and argument_index > 0
-                and parent_argument_count > 2
+                and (parent_argument_count > 2 or parent_function == "CALCULATETABLE")
             )
         if function == "ALLEXCEPT":
             try:
@@ -1643,6 +1643,28 @@ def _general_calculate_filters_valid(filters: tuple[tuple[Any, ...], ...]) -> bo
     return True
 
 
+_RELATIONSHIP_MODIFIERS = {"USERELATIONSHIP", "CROSSFILTER"}
+_MIX_MODIFIERS = _RELATIONSHIP_MODIFIERS | {"ALLSELECTED"}
+
+
+def _modifier_mix_filters_valid(filters: tuple[tuple[Any, ...], ...]) -> bool:
+    """CALCULATE filters that mix USERELATIONSHIP / CROSSFILTER with clearing, Boolean and table filters (general path)."""
+    modifiers = [
+        node for node in filters if isinstance(node, tuple) and node[:1] == ("call",) and node[1] in _MIX_MODIFIERS
+    ]
+    if not modifiers:
+        return False
+    for node in modifiers:
+        if node[1] == "USERELATIONSHIP":
+            _validate_userelationship_call(node)
+        elif node[1] == "CROSSFILTER":
+            _validate_crossfilter_call(node)
+        else:
+            _validate_filter_clear_call(node, "ALLSELECTED")
+    rest = tuple(node for node in filters if node not in modifiers)
+    return not rest or _general_calculate_filters_valid(rest)
+
+
 def _validate_general_filter_literals(node: tuple[Any, ...]) -> None:
     if node[:2] == ("call", "KEEPFILTERS") and len(node[2]) == 1:
         node = node[2][0]
@@ -1835,7 +1857,7 @@ def _validate_literal_positions(
             try:
                 _legacy_calculate_filters_valid(arguments)
             except MeasureError:
-                if not _general_calculate_filters_valid(arguments[1:]):
+                if not _general_calculate_filters_valid(arguments[1:]) and not _modifier_mix_filters_valid(arguments[1:]):
                     raise
                 for filter_argument in arguments[1:]:
                     _validate_general_filter_literals(filter_argument)
@@ -2605,7 +2627,7 @@ class _Parser:
                             predicate, _keep = _calculate_filter_argument(filter_argument)
                             _calculate_boolean_filter_column(predicate)
                 except MeasureError:
-                    if not _general_calculate_filters_valid(tuple(arguments[1:])):
+                    if not _general_calculate_filters_valid(tuple(arguments[1:])) and not _modifier_mix_filters_valid(tuple(arguments[1:])):
                         raise
             return ("call", function, tuple(arguments))
         raise MeasureError(f"Unexpected token {token.value!r}; expected a number, measure, or function.")
@@ -4209,6 +4231,7 @@ def evaluate_measures(
 
     derived_count = 0
     row_stack: list[tuple[dict[str, Any], dict[str, Any], int]] = []
+    selected_iteration_depth = 0  # how many iterations over a SELECTCOLUMNS table are running
 
     def derived_table(
         headers: list[str],
@@ -4327,7 +4350,10 @@ def evaluate_measures(
 
         shadow="install": an iterator over a table value filters ALLSELECTED to that table's rows for the loop;
         shadow="clear": CONCATENATEX only removes the outer filters on the columns it iterates."""
+        nonlocal selected_iteration_depth
         saved_state = push_shadow(context, rows, shadow)
+        selected = bool(context.get("selected_columns"))
+        selected_iteration_depth += selected
         try:
             for row_index, row in enumerate(rows, 1):
                 frame = (context, row, row_index)
@@ -4337,6 +4363,7 @@ def evaluate_measures(
                 finally:
                     row_stack.pop()
         finally:
+            selected_iteration_depth -= selected
             pop_shadow(saved_state)
 
     def typed_row(context: dict[str, Any], row: dict[str, Any]) -> dict[str, Any]:
@@ -4692,6 +4719,7 @@ def evaluate_measures(
                 headers, out_rows, lineage, {k: v for k, v in types.items() if k in headers}, row_identity=add and not context.get("derived", False) or add and bool(context.get("row_identity")),
             )
             if not add:  # the walk order of a selected column is that of the columns it was computed from
+                selected_context["selected_columns"] = True
                 selected_context["order_source"] = (context, {id(out): source for out, source in zip(out_rows, source_rows)})
             return selected_context, selected_rows
         if function == "SUMMARIZE":
@@ -8528,7 +8556,27 @@ def evaluate_measures(
         """CALCULATE with any mix of Boolean, table-valued, KEEPFILTERS and clearing (ALL, ALLEXCEPT, REMOVEFILTERS) filters.
 
         The filters are evaluated in the original context, then a row context is transitioned, then the clearing
-        modifiers run, then the filters replace (or, with KEEPFILTERS, intersect) the filters on their columns."""
+        modifiers run, then the filters replace (or, with KEEPFILTERS, intersect) the filters on their columns.
+        USERELATIONSHIP / CROSSFILTER of the same CALCULATE change the relationships only for the expression: the clearing
+        modifiers (and the tables they expand to) still read the enclosing context's relationships (tests/test_calculate_modifier_mix.py)."""
+        relationship_modifiers = tuple(
+            argument for argument in filter_arguments if argument[0] == "call" and argument[1] in _RELATIONSHIP_MODIFIERS
+        )
+        if relationship_modifiers:
+            filter_arguments = tuple(argument for argument in filter_arguments if argument not in relationship_modifiers)
+            userelationships = tuple(argument for argument in relationship_modifiers if argument[1] == "USERELATIONSHIP")
+            crossfilters = tuple(argument for argument in relationship_modifiers if argument[1] == "CROSSFILTER")
+            original_expression = expression_node
+
+            def with_relationships() -> Any:
+                scoped = ("thunk", lambda: evaluate(original_expression))
+                if crossfilters:
+                    scoped = ("thunk", lambda inner=scoped: evaluate_with_crossfilters(inner, crossfilters))
+                if userelationships:
+                    scoped = ("thunk", lambda inner=scoped: evaluate_with_userelationships(inner, userelationships))
+                return evaluate(scoped)
+
+            expression_node = ("thunk", with_relationships)
         pushed = row_context is not None and (not row_stack or row_stack[-1][1] is not row_context[1])
         if pushed:
             row_stack.append(row_context)  # type: ignore[arg-type]
@@ -8539,7 +8587,7 @@ def evaluate_measures(
                 keep, node = False, argument
                 while node[:2] == ("call", "KEEPFILTERS") and len(node[2]) == 1:
                     keep, node = True, node[2][0]
-                if node[0] == "call" and node[1] in {"ALL", "ALLNOBLANKROW", "REMOVEFILTERS", "ALLEXCEPT"}:
+                if node[0] == "call" and node[1] in {"ALL", "ALLNOBLANKROW", "REMOVEFILTERS", "ALLEXCEPT", "ALLSELECTED"}:
                     clearing.append(node)
                 elif _is_general_table_filter(node):
                     additions.append((keep, general_table_filter_sets(node)))
@@ -8608,6 +8656,8 @@ def evaluate_measures(
                 if index == len(clearing):
                     return apply_additions()
                 modifier = clearing[index]
+                if modifier[1] == "ALLSELECTED":
+                    return evaluate_with_allselected(("thunk", lambda: clear_then_apply(index + 1)), modifier)
                 return evaluate_with_filter_clear(("thunk", lambda: clear_then_apply(index + 1)), modifier, modifier[1])
 
             if transition:
@@ -9445,6 +9495,10 @@ def evaluate_measures(
             if len(arguments) == 1:
                 return evaluate(arguments[0])
             if not uses_legacy_calculate(arguments):
+                if selected_iteration_depth and not _general_calculate_filters_valid(tuple(arguments[1:])):
+                    # a modifier mix inside an iteration over SELECTCOLUMNS: Power BI does not find T[col] among the renamed
+                    # columns (live: error) while the local engine reads it through the lineage, so the mix stays refused here
+                    raise MeasureError("CALCULATE filters must be column comparisons joined with AND, OR, or NOT.")
                 return evaluate_with_general_filters(arguments[0], tuple(arguments[1:]))
             try:
                 userelationship_modifiers = tuple(
