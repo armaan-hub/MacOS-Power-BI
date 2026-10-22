@@ -1,0 +1,842 @@
+{
+ "powerbi_version": "2.157.879.0 (26.08)+da30fe74eb0b8a8786ab7326b69c400a0e951831",
+ "frozen": "2026-10-21",
+ "items": [
+  {
+   "expr": "VAR tbl=FILTER(Facts,Facts[Quantity]>2) RETURN CALCULATE(SUM(Facts[Sales]),tbl)",
+   "powerbi": "22.5"
+  },
+  {
+   "expr": "VAR tbl=FILTER(Facts,Facts[Quantity]>2) RETURN CALCULATE(COUNTROWS(Facts),tbl)",
+   "powerbi": "3"
+  },
+  {
+   "expr": "VAR tbl=FILTER(Facts,Facts[Quantity]>2) RETURN CALCULATE(SUM(Facts[Sales]),tbl,Facts[Quantity]>3)",
+   "powerbi": "2.5"
+  },
+  {
+   "expr": "VAR tbl=FILTER(Facts,Facts[Quantity]>2) RETURN CALCULATE(SUM(Facts[Sales]),tbl,Facts[Region]=\"East\")",
+   "powerbi": "2.5"
+  },
+  {
+   "expr": "VAR tbl=FILTER(Facts,Facts[Quantity]>2) RETURN CALCULATE(SUM(Facts[Sales]),KEEPFILTERS(tbl),Facts[Region]=\"West\")",
+   "powerbi": "20"
+  },
+  {
+   "expr": "VAR tbl=FILTER(Facts,Facts[Quantity]>2) RETURN CALCULATE(SUM(Facts[Sales]),KEEPFILTERS(tbl))",
+   "powerbi": "22.5"
+  },
+  {
+   "expr": "VAR tbl=FILTER(Facts,Facts[Quantity]>2) RETURN CALCULATE(SUM(Facts[Sales]),tbl,ALL(Facts[Region]))",
+   "powerbi": "22.5"
+  },
+  {
+   "expr": "VAR tbl=FILTER(Facts,Facts[Quantity]>2) RETURN CALCULATE(SUM(Facts[Sales]),tbl,REMOVEFILTERS(Facts[Quantity]))",
+   "powerbi": "22.5"
+  },
+  {
+   "expr": "VAR tbl=FILTER(Facts,Facts[Quantity]>2) RETURN CALCULATE(CALCULATE(SUM(Facts[Sales]),tbl),Facts[Region]=\"East\")",
+   "powerbi": "22.5"
+  },
+  {
+   "expr": "VAR tbl=FILTER(Facts,Facts[Quantity]>2) RETURN CALCULATE(CALCULATE(SUM(Facts[Sales]),Facts[Region]=\"East\"),tbl)",
+   "powerbi": "2.5"
+  },
+  {
+   "expr": "VAR tbl=FILTER(Facts,Facts[Quantity]>2) RETURN COUNTROWS(tbl)",
+   "powerbi": "3"
+  },
+  {
+   "expr": "VAR tbl=FILTER(Facts,Facts[Region]=\"East\") RETURN CALCULATE(SUM(Facts[Sales]),tbl)",
+   "powerbi": "11.5"
+  },
+  {
+   "expr": "VAR tbl=FILTER(Facts,Facts[Region]=\"East\") RETURN CALCULATE(COUNTROWS(Facts),tbl)",
+   "powerbi": "3"
+  },
+  {
+   "expr": "VAR tbl=FILTER(Facts,Facts[Region]=\"East\") RETURN CALCULATE(SUM(Facts[Sales]),tbl,Facts[Quantity]>3)",
+   "powerbi": "2.5"
+  },
+  {
+   "expr": "VAR tbl=FILTER(Facts,Facts[Region]=\"East\") RETURN CALCULATE(SUM(Facts[Sales]),tbl,Facts[Region]=\"East\")",
+   "powerbi": "11.5"
+  },
+  {
+   "expr": "VAR tbl=FILTER(Facts,Facts[Region]=\"East\") RETURN CALCULATE(SUM(Facts[Sales]),KEEPFILTERS(tbl),Facts[Region]=\"West\")",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "VAR tbl=FILTER(Facts,Facts[Region]=\"East\") RETURN CALCULATE(SUM(Facts[Sales]),KEEPFILTERS(tbl))",
+   "powerbi": "11.5"
+  },
+  {
+   "expr": "VAR tbl=FILTER(Facts,Facts[Region]=\"East\") RETURN CALCULATE(SUM(Facts[Sales]),tbl,ALL(Facts[Region]))",
+   "powerbi": "11.5"
+  },
+  {
+   "expr": "VAR tbl=FILTER(Facts,Facts[Region]=\"East\") RETURN CALCULATE(SUM(Facts[Sales]),tbl,REMOVEFILTERS(Facts[Quantity]))",
+   "powerbi": "11.5"
+  },
+  {
+   "expr": "VAR tbl=FILTER(Facts,Facts[Region]=\"East\") RETURN CALCULATE(CALCULATE(SUM(Facts[Sales]),tbl),Facts[Region]=\"East\")",
+   "powerbi": "11.5"
+  },
+  {
+   "expr": "VAR tbl=FILTER(Facts,Facts[Region]=\"East\") RETURN CALCULATE(CALCULATE(SUM(Facts[Sales]),Facts[Region]=\"East\"),tbl)",
+   "powerbi": "11.5"
+  },
+  {
+   "expr": "VAR tbl=FILTER(Facts,Facts[Region]=\"East\") RETURN COUNTROWS(tbl)",
+   "powerbi": "3"
+  },
+  {
+   "expr": "VAR tbl=FILTER(Facts,Facts[Quantity]>2&&Facts[Region]<>\"West\") RETURN CALCULATE(SUM(Facts[Sales]),tbl)",
+   "powerbi": "2.5"
+  },
+  {
+   "expr": "VAR tbl=FILTER(Facts,Facts[Quantity]>2&&Facts[Region]<>\"West\") RETURN CALCULATE(COUNTROWS(Facts),tbl)",
+   "powerbi": "2"
+  },
+  {
+   "expr": "VAR tbl=FILTER(Facts,Facts[Quantity]>2&&Facts[Region]<>\"West\") RETURN CALCULATE(SUM(Facts[Sales]),tbl,Facts[Quantity]>3)",
+   "powerbi": "2.5"
+  },
+  {
+   "expr": "VAR tbl=FILTER(Facts,Facts[Quantity]>2&&Facts[Region]<>\"West\") RETURN CALCULATE(SUM(Facts[Sales]),tbl,Facts[Region]=\"East\")",
+   "powerbi": "2.5"
+  },
+  {
+   "expr": "VAR tbl=FILTER(Facts,Facts[Quantity]>2&&Facts[Region]<>\"West\") RETURN CALCULATE(SUM(Facts[Sales]),KEEPFILTERS(tbl),Facts[Region]=\"West\")",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "VAR tbl=FILTER(Facts,Facts[Quantity]>2&&Facts[Region]<>\"West\") RETURN CALCULATE(SUM(Facts[Sales]),KEEPFILTERS(tbl))",
+   "powerbi": "2.5"
+  },
+  {
+   "expr": "VAR tbl=FILTER(Facts,Facts[Quantity]>2&&Facts[Region]<>\"West\") RETURN CALCULATE(SUM(Facts[Sales]),tbl,ALL(Facts[Region]))",
+   "powerbi": "2.5"
+  },
+  {
+   "expr": "VAR tbl=FILTER(Facts,Facts[Quantity]>2&&Facts[Region]<>\"West\") RETURN CALCULATE(SUM(Facts[Sales]),tbl,REMOVEFILTERS(Facts[Quantity]))",
+   "powerbi": "2.5"
+  },
+  {
+   "expr": "VAR tbl=FILTER(Facts,Facts[Quantity]>2&&Facts[Region]<>\"West\") RETURN CALCULATE(CALCULATE(SUM(Facts[Sales]),tbl),Facts[Region]=\"East\")",
+   "powerbi": "2.5"
+  },
+  {
+   "expr": "VAR tbl=FILTER(Facts,Facts[Quantity]>2&&Facts[Region]<>\"West\") RETURN CALCULATE(CALCULATE(SUM(Facts[Sales]),Facts[Region]=\"East\"),tbl)",
+   "powerbi": "2.5"
+  },
+  {
+   "expr": "VAR tbl=FILTER(Facts,Facts[Quantity]>2&&Facts[Region]<>\"West\") RETURN COUNTROWS(tbl)",
+   "powerbi": "2"
+  },
+  {
+   "expr": "VAR tbl=FILTER(ALL(Facts[Region]),Facts[Region]<>\"East\") RETURN CALCULATE(SUM(Facts[Sales]),tbl)",
+   "powerbi": "20"
+  },
+  {
+   "expr": "VAR tbl=FILTER(ALL(Facts[Region]),Facts[Region]<>\"East\") RETURN CALCULATE(COUNTROWS(Facts),tbl)",
+   "powerbi": "3"
+  },
+  {
+   "expr": "VAR tbl=FILTER(ALL(Facts[Region]),Facts[Region]<>\"East\") RETURN CALCULATE(SUM(Facts[Sales]),tbl,Facts[Quantity]>3)",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "VAR tbl=FILTER(ALL(Facts[Region]),Facts[Region]<>\"East\") RETURN CALCULATE(SUM(Facts[Sales]),tbl,Facts[Region]=\"East\")",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "VAR tbl=FILTER(ALL(Facts[Region]),Facts[Region]<>\"East\") RETURN CALCULATE(SUM(Facts[Sales]),KEEPFILTERS(tbl),Facts[Region]=\"West\")",
+   "powerbi": "20"
+  },
+  {
+   "expr": "VAR tbl=FILTER(ALL(Facts[Region]),Facts[Region]<>\"East\") RETURN CALCULATE(SUM(Facts[Sales]),KEEPFILTERS(tbl))",
+   "powerbi": "20"
+  },
+  {
+   "expr": "VAR tbl=FILTER(ALL(Facts[Region]),Facts[Region]<>\"East\") RETURN CALCULATE(SUM(Facts[Sales]),tbl,ALL(Facts[Region]))",
+   "powerbi": "20"
+  },
+  {
+   "expr": "VAR tbl=FILTER(ALL(Facts[Region]),Facts[Region]<>\"East\") RETURN CALCULATE(SUM(Facts[Sales]),tbl,REMOVEFILTERS(Facts[Quantity]))",
+   "powerbi": "20"
+  },
+  {
+   "expr": "VAR tbl=FILTER(ALL(Facts[Region]),Facts[Region]<>\"East\") RETURN CALCULATE(CALCULATE(SUM(Facts[Sales]),tbl),Facts[Region]=\"East\")",
+   "powerbi": "20"
+  },
+  {
+   "expr": "VAR tbl=FILTER(ALL(Facts[Region]),Facts[Region]<>\"East\") RETURN CALCULATE(CALCULATE(SUM(Facts[Sales]),Facts[Region]=\"East\"),tbl)",
+   "powerbi": "11.5"
+  },
+  {
+   "expr": "VAR tbl=FILTER(ALL(Facts[Region]),Facts[Region]<>\"East\") RETURN COUNTROWS(tbl)",
+   "powerbi": "2"
+  },
+  {
+   "expr": "VAR tbl=FILTER(ALL(Facts[Region],Facts[Quantity]),Facts[Quantity]>2) RETURN CALCULATE(SUM(Facts[Sales]),tbl)",
+   "powerbi": "22.5"
+  },
+  {
+   "expr": "VAR tbl=FILTER(ALL(Facts[Region],Facts[Quantity]),Facts[Quantity]>2) RETURN CALCULATE(COUNTROWS(Facts),tbl)",
+   "powerbi": "3"
+  },
+  {
+   "expr": "VAR tbl=FILTER(ALL(Facts[Region],Facts[Quantity]),Facts[Quantity]>2) RETURN CALCULATE(SUM(Facts[Sales]),tbl,Facts[Quantity]>3)",
+   "powerbi": "2.5"
+  },
+  {
+   "expr": "VAR tbl=FILTER(ALL(Facts[Region],Facts[Quantity]),Facts[Quantity]>2) RETURN CALCULATE(SUM(Facts[Sales]),tbl,Facts[Region]=\"East\")",
+   "powerbi": "2.5"
+  },
+  {
+   "expr": "VAR tbl=FILTER(ALL(Facts[Region],Facts[Quantity]),Facts[Quantity]>2) RETURN CALCULATE(SUM(Facts[Sales]),KEEPFILTERS(tbl),Facts[Region]=\"West\")",
+   "powerbi": "20"
+  },
+  {
+   "expr": "VAR tbl=FILTER(ALL(Facts[Region],Facts[Quantity]),Facts[Quantity]>2) RETURN CALCULATE(SUM(Facts[Sales]),KEEPFILTERS(tbl))",
+   "powerbi": "22.5"
+  },
+  {
+   "expr": "VAR tbl=FILTER(ALL(Facts[Region],Facts[Quantity]),Facts[Quantity]>2) RETURN CALCULATE(SUM(Facts[Sales]),tbl,ALL(Facts[Region]))",
+   "powerbi": "22.5"
+  },
+  {
+   "expr": "VAR tbl=FILTER(ALL(Facts[Region],Facts[Quantity]),Facts[Quantity]>2) RETURN CALCULATE(SUM(Facts[Sales]),tbl,REMOVEFILTERS(Facts[Quantity]))",
+   "powerbi": "22.5"
+  },
+  {
+   "expr": "VAR tbl=FILTER(ALL(Facts[Region],Facts[Quantity]),Facts[Quantity]>2) RETURN CALCULATE(CALCULATE(SUM(Facts[Sales]),tbl),Facts[Region]=\"East\")",
+   "powerbi": "22.5"
+  },
+  {
+   "expr": "VAR tbl=FILTER(ALL(Facts[Region],Facts[Quantity]),Facts[Quantity]>2) RETURN CALCULATE(CALCULATE(SUM(Facts[Sales]),Facts[Region]=\"East\"),tbl)",
+   "powerbi": "2.5"
+  },
+  {
+   "expr": "VAR tbl=FILTER(ALL(Facts[Region],Facts[Quantity]),Facts[Quantity]>2) RETURN COUNTROWS(tbl)",
+   "powerbi": "3"
+  },
+  {
+   "expr": "VAR tbl=FILTER(ALL(Facts[Quantity]),Facts[Quantity]>=3) RETURN CALCULATE(SUM(Facts[Sales]),tbl)",
+   "powerbi": "22.5"
+  },
+  {
+   "expr": "VAR tbl=FILTER(ALL(Facts[Quantity]),Facts[Quantity]>=3) RETURN CALCULATE(COUNTROWS(Facts),tbl)",
+   "powerbi": "3"
+  },
+  {
+   "expr": "VAR tbl=FILTER(ALL(Facts[Quantity]),Facts[Quantity]>=3) RETURN CALCULATE(SUM(Facts[Sales]),tbl,Facts[Quantity]>3)",
+   "powerbi": "2.5"
+  },
+  {
+   "expr": "VAR tbl=FILTER(ALL(Facts[Quantity]),Facts[Quantity]>=3) RETURN CALCULATE(SUM(Facts[Sales]),tbl,Facts[Region]=\"East\")",
+   "powerbi": "2.5"
+  },
+  {
+   "expr": "VAR tbl=FILTER(ALL(Facts[Quantity]),Facts[Quantity]>=3) RETURN CALCULATE(SUM(Facts[Sales]),KEEPFILTERS(tbl),Facts[Region]=\"West\")",
+   "powerbi": "20"
+  },
+  {
+   "expr": "VAR tbl=FILTER(ALL(Facts[Quantity]),Facts[Quantity]>=3) RETURN CALCULATE(SUM(Facts[Sales]),KEEPFILTERS(tbl))",
+   "powerbi": "22.5"
+  },
+  {
+   "expr": "VAR tbl=FILTER(ALL(Facts[Quantity]),Facts[Quantity]>=3) RETURN CALCULATE(SUM(Facts[Sales]),tbl,ALL(Facts[Region]))",
+   "powerbi": "22.5"
+  },
+  {
+   "expr": "VAR tbl=FILTER(ALL(Facts[Quantity]),Facts[Quantity]>=3) RETURN CALCULATE(SUM(Facts[Sales]),tbl,REMOVEFILTERS(Facts[Quantity]))",
+   "powerbi": "22.5"
+  },
+  {
+   "expr": "VAR tbl=FILTER(ALL(Facts[Quantity]),Facts[Quantity]>=3) RETURN CALCULATE(CALCULATE(SUM(Facts[Sales]),tbl),Facts[Region]=\"East\")",
+   "powerbi": "2.5"
+  },
+  {
+   "expr": "VAR tbl=FILTER(ALL(Facts[Quantity]),Facts[Quantity]>=3) RETURN CALCULATE(CALCULATE(SUM(Facts[Sales]),Facts[Region]=\"East\"),tbl)",
+   "powerbi": "2.5"
+  },
+  {
+   "expr": "VAR tbl=FILTER(ALL(Facts[Quantity]),Facts[Quantity]>=3) RETURN COUNTROWS(tbl)",
+   "powerbi": "3"
+  },
+  {
+   "expr": "VAR tbl=FILTER(ALL(Facts[Note]),ISBLANK(Facts[Note])) RETURN CALCULATE(SUM(Facts[Sales]),tbl)",
+   "powerbi": "22.5"
+  },
+  {
+   "expr": "VAR tbl=FILTER(ALL(Facts[Note]),ISBLANK(Facts[Note])) RETURN CALCULATE(COUNTROWS(Facts),tbl)",
+   "powerbi": "2"
+  },
+  {
+   "expr": "VAR tbl=FILTER(ALL(Facts[Note]),ISBLANK(Facts[Note])) RETURN CALCULATE(SUM(Facts[Sales]),tbl,Facts[Quantity]>3)",
+   "powerbi": "2.5"
+  },
+  {
+   "expr": "VAR tbl=FILTER(ALL(Facts[Note]),ISBLANK(Facts[Note])) RETURN CALCULATE(SUM(Facts[Sales]),tbl,Facts[Region]=\"East\")",
+   "powerbi": "2.5"
+  },
+  {
+   "expr": "VAR tbl=FILTER(ALL(Facts[Note]),ISBLANK(Facts[Note])) RETURN CALCULATE(SUM(Facts[Sales]),KEEPFILTERS(tbl),Facts[Region]=\"West\")",
+   "powerbi": "20"
+  },
+  {
+   "expr": "VAR tbl=FILTER(ALL(Facts[Note]),ISBLANK(Facts[Note])) RETURN CALCULATE(SUM(Facts[Sales]),KEEPFILTERS(tbl))",
+   "powerbi": "22.5"
+  },
+  {
+   "expr": "VAR tbl=FILTER(ALL(Facts[Note]),ISBLANK(Facts[Note])) RETURN CALCULATE(SUM(Facts[Sales]),tbl,ALL(Facts[Region]))",
+   "powerbi": "22.5"
+  },
+  {
+   "expr": "VAR tbl=FILTER(ALL(Facts[Note]),ISBLANK(Facts[Note])) RETURN CALCULATE(SUM(Facts[Sales]),tbl,REMOVEFILTERS(Facts[Quantity]))",
+   "powerbi": "22.5"
+  },
+  {
+   "expr": "VAR tbl=FILTER(ALL(Facts[Note]),ISBLANK(Facts[Note])) RETURN CALCULATE(CALCULATE(SUM(Facts[Sales]),tbl),Facts[Region]=\"East\")",
+   "powerbi": "2.5"
+  },
+  {
+   "expr": "VAR tbl=FILTER(ALL(Facts[Note]),ISBLANK(Facts[Note])) RETURN CALCULATE(CALCULATE(SUM(Facts[Sales]),Facts[Region]=\"East\"),tbl)",
+   "powerbi": "2.5"
+  },
+  {
+   "expr": "VAR tbl=FILTER(ALL(Facts[Note]),ISBLANK(Facts[Note])) RETURN COUNTROWS(tbl)",
+   "powerbi": "1"
+  },
+  {
+   "expr": "VAR tbl=FILTER(VALUES(Facts[Region]),Facts[Region]<>\"North\") RETURN CALCULATE(SUM(Facts[Sales]),tbl)",
+   "powerbi": "31.5"
+  },
+  {
+   "expr": "VAR tbl=FILTER(VALUES(Facts[Region]),Facts[Region]<>\"North\") RETURN CALCULATE(COUNTROWS(Facts),tbl)",
+   "powerbi": "5"
+  },
+  {
+   "expr": "VAR tbl=FILTER(VALUES(Facts[Region]),Facts[Region]<>\"North\") RETURN CALCULATE(SUM(Facts[Sales]),tbl,Facts[Quantity]>3)",
+   "powerbi": "2.5"
+  },
+  {
+   "expr": "VAR tbl=FILTER(VALUES(Facts[Region]),Facts[Region]<>\"North\") RETURN CALCULATE(SUM(Facts[Sales]),tbl,Facts[Region]=\"East\")",
+   "powerbi": "11.5"
+  },
+  {
+   "expr": "VAR tbl=FILTER(VALUES(Facts[Region]),Facts[Region]<>\"North\") RETURN CALCULATE(SUM(Facts[Sales]),KEEPFILTERS(tbl),Facts[Region]=\"West\")",
+   "powerbi": "20"
+  },
+  {
+   "expr": "VAR tbl=FILTER(VALUES(Facts[Region]),Facts[Region]<>\"North\") RETURN CALCULATE(SUM(Facts[Sales]),KEEPFILTERS(tbl))",
+   "powerbi": "31.5"
+  },
+  {
+   "expr": "VAR tbl=FILTER(VALUES(Facts[Region]),Facts[Region]<>\"North\") RETURN CALCULATE(SUM(Facts[Sales]),tbl,ALL(Facts[Region]))",
+   "powerbi": "31.5"
+  },
+  {
+   "expr": "VAR tbl=FILTER(VALUES(Facts[Region]),Facts[Region]<>\"North\") RETURN CALCULATE(SUM(Facts[Sales]),tbl,REMOVEFILTERS(Facts[Quantity]))",
+   "powerbi": "31.5"
+  },
+  {
+   "expr": "VAR tbl=FILTER(VALUES(Facts[Region]),Facts[Region]<>\"North\") RETURN CALCULATE(CALCULATE(SUM(Facts[Sales]),tbl),Facts[Region]=\"East\")",
+   "powerbi": "31.5"
+  },
+  {
+   "expr": "VAR tbl=FILTER(VALUES(Facts[Region]),Facts[Region]<>\"North\") RETURN CALCULATE(CALCULATE(SUM(Facts[Sales]),Facts[Region]=\"East\"),tbl)",
+   "powerbi": "11.5"
+  },
+  {
+   "expr": "VAR tbl=FILTER(VALUES(Facts[Region]),Facts[Region]<>\"North\") RETURN COUNTROWS(tbl)",
+   "powerbi": "2"
+  },
+  {
+   "expr": "VAR tbl=FILTER(Facts,ISBLANK(Facts[Sales])) RETURN CALCULATE(SUM(Facts[Sales]),tbl)",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "VAR tbl=FILTER(Facts,ISBLANK(Facts[Sales])) RETURN CALCULATE(COUNTROWS(Facts),tbl)",
+   "powerbi": "1"
+  },
+  {
+   "expr": "VAR tbl=FILTER(Facts,ISBLANK(Facts[Sales])) RETURN CALCULATE(SUM(Facts[Sales]),tbl,Facts[Quantity]>3)",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "VAR tbl=FILTER(Facts,ISBLANK(Facts[Sales])) RETURN CALCULATE(SUM(Facts[Sales]),tbl,Facts[Region]=\"East\")",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "VAR tbl=FILTER(Facts,ISBLANK(Facts[Sales])) RETURN CALCULATE(SUM(Facts[Sales]),KEEPFILTERS(tbl),Facts[Region]=\"West\")",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "VAR tbl=FILTER(Facts,ISBLANK(Facts[Sales])) RETURN CALCULATE(SUM(Facts[Sales]),KEEPFILTERS(tbl))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "VAR tbl=FILTER(Facts,ISBLANK(Facts[Sales])) RETURN CALCULATE(SUM(Facts[Sales]),tbl,ALL(Facts[Region]))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "VAR tbl=FILTER(Facts,ISBLANK(Facts[Sales])) RETURN CALCULATE(SUM(Facts[Sales]),tbl,REMOVEFILTERS(Facts[Quantity]))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "VAR tbl=FILTER(Facts,ISBLANK(Facts[Sales])) RETURN CALCULATE(CALCULATE(SUM(Facts[Sales]),tbl),Facts[Region]=\"East\")",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "VAR tbl=FILTER(Facts,ISBLANK(Facts[Sales])) RETURN CALCULATE(CALCULATE(SUM(Facts[Sales]),Facts[Region]=\"East\"),tbl)",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "VAR tbl=FILTER(Facts,ISBLANK(Facts[Sales])) RETURN COUNTROWS(tbl)",
+   "powerbi": "1"
+  },
+  {
+   "expr": "VAR tbl=VALUES(Facts[Region]) RETURN CALCULATE(SUM(Facts[Sales]),tbl)",
+   "powerbi": "31.5"
+  },
+  {
+   "expr": "VAR tbl=VALUES(Facts[Region]) RETURN CALCULATE(COUNTROWS(Facts),tbl)",
+   "powerbi": "6"
+  },
+  {
+   "expr": "VAR tbl=VALUES(Facts[Region]) RETURN CALCULATE(SUM(Facts[Sales]),tbl,Facts[Quantity]>3)",
+   "powerbi": "2.5"
+  },
+  {
+   "expr": "VAR tbl=VALUES(Facts[Region]) RETURN CALCULATE(SUM(Facts[Sales]),tbl,Facts[Region]=\"East\")",
+   "powerbi": "11.5"
+  },
+  {
+   "expr": "VAR tbl=VALUES(Facts[Region]) RETURN CALCULATE(SUM(Facts[Sales]),KEEPFILTERS(tbl),Facts[Region]=\"West\")",
+   "powerbi": "20"
+  },
+  {
+   "expr": "VAR tbl=VALUES(Facts[Region]) RETURN CALCULATE(SUM(Facts[Sales]),KEEPFILTERS(tbl))",
+   "powerbi": "31.5"
+  },
+  {
+   "expr": "VAR tbl=VALUES(Facts[Region]) RETURN CALCULATE(SUM(Facts[Sales]),tbl,ALL(Facts[Region]))",
+   "powerbi": "31.5"
+  },
+  {
+   "expr": "VAR tbl=VALUES(Facts[Region]) RETURN CALCULATE(SUM(Facts[Sales]),tbl,REMOVEFILTERS(Facts[Quantity]))",
+   "powerbi": "31.5"
+  },
+  {
+   "expr": "VAR tbl=VALUES(Facts[Region]) RETURN CALCULATE(CALCULATE(SUM(Facts[Sales]),tbl),Facts[Region]=\"East\")",
+   "powerbi": "31.5"
+  },
+  {
+   "expr": "VAR tbl=VALUES(Facts[Region]) RETURN CALCULATE(CALCULATE(SUM(Facts[Sales]),Facts[Region]=\"East\"),tbl)",
+   "powerbi": "11.5"
+  },
+  {
+   "expr": "VAR tbl=VALUES(Facts[Region]) RETURN COUNTROWS(tbl)",
+   "powerbi": "3"
+  },
+  {
+   "expr": "VAR tbl=ALL(Facts[Region]) RETURN CALCULATE(SUM(Facts[Sales]),tbl)",
+   "powerbi": "31.5"
+  },
+  {
+   "expr": "VAR tbl=ALL(Facts[Region]) RETURN CALCULATE(COUNTROWS(Facts),tbl)",
+   "powerbi": "6"
+  },
+  {
+   "expr": "VAR tbl=ALL(Facts[Region]) RETURN CALCULATE(SUM(Facts[Sales]),tbl,Facts[Quantity]>3)",
+   "powerbi": "2.5"
+  },
+  {
+   "expr": "VAR tbl=ALL(Facts[Region]) RETURN CALCULATE(SUM(Facts[Sales]),tbl,Facts[Region]=\"East\")",
+   "powerbi": "11.5"
+  },
+  {
+   "expr": "VAR tbl=ALL(Facts[Region]) RETURN CALCULATE(SUM(Facts[Sales]),KEEPFILTERS(tbl),Facts[Region]=\"West\")",
+   "powerbi": "20"
+  },
+  {
+   "expr": "VAR tbl=ALL(Facts[Region]) RETURN CALCULATE(SUM(Facts[Sales]),KEEPFILTERS(tbl))",
+   "powerbi": "31.5"
+  },
+  {
+   "expr": "VAR tbl=ALL(Facts[Region]) RETURN CALCULATE(SUM(Facts[Sales]),tbl,ALL(Facts[Region]))",
+   "powerbi": "31.5"
+  },
+  {
+   "expr": "VAR tbl=ALL(Facts[Region]) RETURN CALCULATE(SUM(Facts[Sales]),tbl,REMOVEFILTERS(Facts[Quantity]))",
+   "powerbi": "31.5"
+  },
+  {
+   "expr": "VAR tbl=ALL(Facts[Region]) RETURN CALCULATE(CALCULATE(SUM(Facts[Sales]),tbl),Facts[Region]=\"East\")",
+   "powerbi": "31.5"
+  },
+  {
+   "expr": "VAR tbl=ALL(Facts[Region]) RETURN CALCULATE(CALCULATE(SUM(Facts[Sales]),Facts[Region]=\"East\"),tbl)",
+   "powerbi": "11.5"
+  },
+  {
+   "expr": "VAR tbl=ALL(Facts[Region]) RETURN COUNTROWS(tbl)",
+   "powerbi": "3"
+  },
+  {
+   "expr": "VAR tbl=ALL(Facts[Region],Facts[Quantity]) RETURN CALCULATE(SUM(Facts[Sales]),tbl)",
+   "powerbi": "31.5"
+  },
+  {
+   "expr": "VAR tbl=ALL(Facts[Region],Facts[Quantity]) RETURN CALCULATE(COUNTROWS(Facts),tbl)",
+   "powerbi": "6"
+  },
+  {
+   "expr": "VAR tbl=ALL(Facts[Region],Facts[Quantity]) RETURN CALCULATE(SUM(Facts[Sales]),tbl,Facts[Quantity]>3)",
+   "powerbi": "2.5"
+  },
+  {
+   "expr": "VAR tbl=ALL(Facts[Region],Facts[Quantity]) RETURN CALCULATE(SUM(Facts[Sales]),tbl,Facts[Region]=\"East\")",
+   "powerbi": "11.5"
+  },
+  {
+   "expr": "VAR tbl=ALL(Facts[Region],Facts[Quantity]) RETURN CALCULATE(SUM(Facts[Sales]),KEEPFILTERS(tbl),Facts[Region]=\"West\")",
+   "powerbi": "20"
+  },
+  {
+   "expr": "VAR tbl=ALL(Facts[Region],Facts[Quantity]) RETURN CALCULATE(SUM(Facts[Sales]),KEEPFILTERS(tbl))",
+   "powerbi": "31.5"
+  },
+  {
+   "expr": "VAR tbl=ALL(Facts[Region],Facts[Quantity]) RETURN CALCULATE(SUM(Facts[Sales]),tbl,ALL(Facts[Region]))",
+   "powerbi": "31.5"
+  },
+  {
+   "expr": "VAR tbl=ALL(Facts[Region],Facts[Quantity]) RETURN CALCULATE(SUM(Facts[Sales]),tbl,REMOVEFILTERS(Facts[Quantity]))",
+   "powerbi": "31.5"
+  },
+  {
+   "expr": "VAR tbl=ALL(Facts[Region],Facts[Quantity]) RETURN CALCULATE(CALCULATE(SUM(Facts[Sales]),tbl),Facts[Region]=\"East\")",
+   "powerbi": "31.5"
+  },
+  {
+   "expr": "VAR tbl=ALL(Facts[Region],Facts[Quantity]) RETURN CALCULATE(CALCULATE(SUM(Facts[Sales]),Facts[Region]=\"East\"),tbl)",
+   "powerbi": "11.5"
+  },
+  {
+   "expr": "VAR tbl=ALL(Facts[Region],Facts[Quantity]) RETURN COUNTROWS(tbl)",
+   "powerbi": "6"
+  },
+  {
+   "expr": "VAR tbl=DISTINCT(Facts[Quantity]) RETURN CALCULATE(SUM(Facts[Sales]),tbl)",
+   "powerbi": "31.5"
+  },
+  {
+   "expr": "VAR tbl=DISTINCT(Facts[Quantity]) RETURN CALCULATE(COUNTROWS(Facts),tbl)",
+   "powerbi": "6"
+  },
+  {
+   "expr": "VAR tbl=DISTINCT(Facts[Quantity]) RETURN CALCULATE(SUM(Facts[Sales]),tbl,Facts[Quantity]>3)",
+   "powerbi": "2.5"
+  },
+  {
+   "expr": "VAR tbl=DISTINCT(Facts[Quantity]) RETURN CALCULATE(SUM(Facts[Sales]),tbl,Facts[Region]=\"East\")",
+   "powerbi": "11.5"
+  },
+  {
+   "expr": "VAR tbl=DISTINCT(Facts[Quantity]) RETURN CALCULATE(SUM(Facts[Sales]),KEEPFILTERS(tbl),Facts[Region]=\"West\")",
+   "powerbi": "20"
+  },
+  {
+   "expr": "VAR tbl=DISTINCT(Facts[Quantity]) RETURN CALCULATE(SUM(Facts[Sales]),KEEPFILTERS(tbl))",
+   "powerbi": "31.5"
+  },
+  {
+   "expr": "VAR tbl=DISTINCT(Facts[Quantity]) RETURN CALCULATE(SUM(Facts[Sales]),tbl,ALL(Facts[Region]))",
+   "powerbi": "31.5"
+  },
+  {
+   "expr": "VAR tbl=DISTINCT(Facts[Quantity]) RETURN CALCULATE(SUM(Facts[Sales]),tbl,REMOVEFILTERS(Facts[Quantity]))",
+   "powerbi": "31.5"
+  },
+  {
+   "expr": "VAR tbl=DISTINCT(Facts[Quantity]) RETURN CALCULATE(CALCULATE(SUM(Facts[Sales]),tbl),Facts[Region]=\"East\")",
+   "powerbi": "11.5"
+  },
+  {
+   "expr": "VAR tbl=DISTINCT(Facts[Quantity]) RETURN CALCULATE(CALCULATE(SUM(Facts[Sales]),Facts[Region]=\"East\"),tbl)",
+   "powerbi": "11.5"
+  },
+  {
+   "expr": "VAR tbl=DISTINCT(Facts[Quantity]) RETURN COUNTROWS(tbl)",
+   "powerbi": "6"
+  },
+  {
+   "expr": "VAR t1=FILTER(Facts,Facts[Quantity]>2) VAR t2=FILTER(Facts,Facts[Region]=\"East\") RETURN CALCULATE(SUM(Facts[Sales]),t1,t2)",
+   "powerbi": "2.5"
+  },
+  {
+   "expr": "VAR t1=FILTER(Facts,Facts[Quantity]>2) VAR t2=FILTER(Facts,Facts[Region]=\"East\") RETURN CALCULATE(COUNTROWS(Facts),t1,KEEPFILTERS(t2))",
+   "powerbi": "1"
+  },
+  {
+   "expr": "VAR t1=FILTER(Facts,Facts[Quantity]>2) VAR t2=FILTER(Facts,Facts[Quantity]>2&&Facts[Region]<>\"West\") RETURN CALCULATE(SUM(Facts[Sales]),t1,t2)",
+   "powerbi": "2.5"
+  },
+  {
+   "expr": "VAR t1=FILTER(Facts,Facts[Quantity]>2) VAR t2=FILTER(Facts,Facts[Quantity]>2&&Facts[Region]<>\"West\") RETURN CALCULATE(COUNTROWS(Facts),t1,KEEPFILTERS(t2))",
+   "powerbi": "2"
+  },
+  {
+   "expr": "VAR t1=FILTER(Facts,Facts[Quantity]>2) VAR t2=FILTER(ALL(Facts[Region]),Facts[Region]<>\"East\") RETURN CALCULATE(SUM(Facts[Sales]),t1,t2)",
+   "powerbi": "20"
+  },
+  {
+   "expr": "VAR t1=FILTER(Facts,Facts[Quantity]>2) VAR t2=FILTER(ALL(Facts[Region]),Facts[Region]<>\"East\") RETURN CALCULATE(COUNTROWS(Facts),t1,KEEPFILTERS(t2))",
+   "powerbi": "2"
+  },
+  {
+   "expr": "VAR t1=FILTER(Facts,Facts[Quantity]>2) VAR t2=FILTER(ALL(Facts[Region],Facts[Quantity]),Facts[Quantity]>2) RETURN CALCULATE(SUM(Facts[Sales]),t1,t2)",
+   "powerbi": "22.5"
+  },
+  {
+   "expr": "VAR t1=FILTER(Facts,Facts[Quantity]>2) VAR t2=FILTER(ALL(Facts[Region],Facts[Quantity]),Facts[Quantity]>2) RETURN CALCULATE(COUNTROWS(Facts),t1,KEEPFILTERS(t2))",
+   "powerbi": "3"
+  },
+  {
+   "expr": "VAR t1=FILTER(Facts,Facts[Quantity]>2) VAR t2=FILTER(ALL(Facts[Quantity]),Facts[Quantity]>=3) RETURN CALCULATE(SUM(Facts[Sales]),t1,t2)",
+   "powerbi": "22.5"
+  },
+  {
+   "expr": "VAR t1=FILTER(Facts,Facts[Quantity]>2) VAR t2=FILTER(ALL(Facts[Quantity]),Facts[Quantity]>=3) RETURN CALCULATE(COUNTROWS(Facts),t1,KEEPFILTERS(t2))",
+   "powerbi": "3"
+  },
+  {
+   "expr": "VAR t1=FILTER(Facts,Facts[Region]=\"East\") VAR t2=FILTER(Facts,Facts[Quantity]>2&&Facts[Region]<>\"West\") RETURN CALCULATE(SUM(Facts[Sales]),t1,t2)",
+   "powerbi": "2.5"
+  },
+  {
+   "expr": "VAR t1=FILTER(Facts,Facts[Region]=\"East\") VAR t2=FILTER(Facts,Facts[Quantity]>2&&Facts[Region]<>\"West\") RETURN CALCULATE(COUNTROWS(Facts),t1,KEEPFILTERS(t2))",
+   "powerbi": "1"
+  },
+  {
+   "expr": "VAR t1=FILTER(Facts,Facts[Region]=\"East\") VAR t2=FILTER(ALL(Facts[Region]),Facts[Region]<>\"East\") RETURN CALCULATE(SUM(Facts[Sales]),t1,t2)",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "VAR t1=FILTER(Facts,Facts[Region]=\"East\") VAR t2=FILTER(ALL(Facts[Region]),Facts[Region]<>\"East\") RETURN CALCULATE(COUNTROWS(Facts),t1,KEEPFILTERS(t2))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "VAR t1=FILTER(Facts,Facts[Region]=\"East\") VAR t2=FILTER(ALL(Facts[Region],Facts[Quantity]),Facts[Quantity]>2) RETURN CALCULATE(SUM(Facts[Sales]),t1,t2)",
+   "powerbi": "2.5"
+  },
+  {
+   "expr": "VAR t1=FILTER(Facts,Facts[Region]=\"East\") VAR t2=FILTER(ALL(Facts[Region],Facts[Quantity]),Facts[Quantity]>2) RETURN CALCULATE(COUNTROWS(Facts),t1,KEEPFILTERS(t2))",
+   "powerbi": "1"
+  },
+  {
+   "expr": "VAR t1=FILTER(Facts,Facts[Region]=\"East\") VAR t2=FILTER(ALL(Facts[Quantity]),Facts[Quantity]>=3) RETURN CALCULATE(SUM(Facts[Sales]),t1,t2)",
+   "powerbi": "2.5"
+  },
+  {
+   "expr": "VAR t1=FILTER(Facts,Facts[Region]=\"East\") VAR t2=FILTER(ALL(Facts[Quantity]),Facts[Quantity]>=3) RETURN CALCULATE(COUNTROWS(Facts),t1,KEEPFILTERS(t2))",
+   "powerbi": "1"
+  },
+  {
+   "expr": "VAR t1=FILTER(Facts,Facts[Quantity]>2&&Facts[Region]<>\"West\") VAR t2=FILTER(ALL(Facts[Region]),Facts[Region]<>\"East\") RETURN CALCULATE(SUM(Facts[Sales]),t1,t2)",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "VAR t1=FILTER(Facts,Facts[Quantity]>2&&Facts[Region]<>\"West\") VAR t2=FILTER(ALL(Facts[Region]),Facts[Region]<>\"East\") RETURN CALCULATE(COUNTROWS(Facts),t1,KEEPFILTERS(t2))",
+   "powerbi": "1"
+  },
+  {
+   "expr": "VAR t1=FILTER(Facts,Facts[Quantity]>2&&Facts[Region]<>\"West\") VAR t2=FILTER(ALL(Facts[Region],Facts[Quantity]),Facts[Quantity]>2) RETURN CALCULATE(SUM(Facts[Sales]),t1,t2)",
+   "powerbi": "2.5"
+  },
+  {
+   "expr": "VAR t1=FILTER(Facts,Facts[Quantity]>2&&Facts[Region]<>\"West\") VAR t2=FILTER(ALL(Facts[Region],Facts[Quantity]),Facts[Quantity]>2) RETURN CALCULATE(COUNTROWS(Facts),t1,KEEPFILTERS(t2))",
+   "powerbi": "2"
+  },
+  {
+   "expr": "VAR t1=FILTER(Facts,Facts[Quantity]>2&&Facts[Region]<>\"West\") VAR t2=FILTER(ALL(Facts[Quantity]),Facts[Quantity]>=3) RETURN CALCULATE(SUM(Facts[Sales]),t1,t2)",
+   "powerbi": "2.5"
+  },
+  {
+   "expr": "VAR t1=FILTER(Facts,Facts[Quantity]>2&&Facts[Region]<>\"West\") VAR t2=FILTER(ALL(Facts[Quantity]),Facts[Quantity]>=3) RETURN CALCULATE(COUNTROWS(Facts),t1,KEEPFILTERS(t2))",
+   "powerbi": "2"
+  },
+  {
+   "expr": "VAR t1=FILTER(ALL(Facts[Region]),Facts[Region]<>\"East\") VAR t2=FILTER(ALL(Facts[Region],Facts[Quantity]),Facts[Quantity]>2) RETURN CALCULATE(SUM(Facts[Sales]),t1,t2)",
+   "powerbi": "20"
+  },
+  {
+   "expr": "VAR t1=FILTER(ALL(Facts[Region]),Facts[Region]<>\"East\") VAR t2=FILTER(ALL(Facts[Region],Facts[Quantity]),Facts[Quantity]>2) RETURN CALCULATE(COUNTROWS(Facts),t1,KEEPFILTERS(t2))",
+   "powerbi": "2"
+  },
+  {
+   "expr": "VAR t1=FILTER(ALL(Facts[Region]),Facts[Region]<>\"East\") VAR t2=FILTER(ALL(Facts[Quantity]),Facts[Quantity]>=3) RETURN CALCULATE(SUM(Facts[Sales]),t1,t2)",
+   "powerbi": "20"
+  },
+  {
+   "expr": "VAR t1=FILTER(ALL(Facts[Region]),Facts[Region]<>\"East\") VAR t2=FILTER(ALL(Facts[Quantity]),Facts[Quantity]>=3) RETURN CALCULATE(COUNTROWS(Facts),t1,KEEPFILTERS(t2))",
+   "powerbi": "2"
+  },
+  {
+   "expr": "VAR t1=FILTER(ALL(Facts[Region],Facts[Quantity]),Facts[Quantity]>2) VAR t2=FILTER(ALL(Facts[Quantity]),Facts[Quantity]>=3) RETURN CALCULATE(SUM(Facts[Sales]),t1,t2)",
+   "powerbi": "22.5"
+  },
+  {
+   "expr": "VAR t1=FILTER(ALL(Facts[Region],Facts[Quantity]),Facts[Quantity]>2) VAR t2=FILTER(ALL(Facts[Quantity]),Facts[Quantity]>=3) RETURN CALCULATE(COUNTROWS(Facts),t1,KEEPFILTERS(t2))",
+   "powerbi": "3"
+  },
+  {
+   "expr": "VAR tbl=FILTER(Facts,Facts[Quantity]>2) RETURN SUMX(tbl,1)",
+   "powerbi": "3"
+  },
+  {
+   "expr": "VAR tbl=FILTER(Facts,Facts[Quantity]>2) RETURN CALCULATE(SUM(Facts[Sales]),Facts[Quantity]>1,tbl)",
+   "powerbi": "22.5"
+  },
+  {
+   "expr": "SUMX(VALUES(Facts[Region]),VAR tbl=FILTER(Facts,Facts[Quantity]>2) RETURN CALCULATE(SUM(Facts[Sales]),tbl))",
+   "powerbi": "67.5"
+  },
+  {
+   "expr": "CALCULATE(VAR tbl=FILTER(Facts,Facts[Quantity]>2) RETURN CALCULATE(SUM(Facts[Sales]),tbl),Facts[Region]=\"East\")",
+   "powerbi": "2.5"
+  },
+  {
+   "expr": "VAR tbl=FILTER(Facts,Facts[Region]=\"East\") RETURN SUMX(tbl,1)",
+   "powerbi": "3"
+  },
+  {
+   "expr": "VAR tbl=FILTER(Facts,Facts[Region]=\"East\") RETURN CALCULATE(SUM(Facts[Sales]),Facts[Quantity]>1,tbl)",
+   "powerbi": "13"
+  },
+  {
+   "expr": "SUMX(VALUES(Facts[Region]),VAR tbl=FILTER(Facts,Facts[Region]=\"East\") RETURN CALCULATE(SUM(Facts[Sales]),tbl))",
+   "powerbi": "34.5"
+  },
+  {
+   "expr": "CALCULATE(VAR tbl=FILTER(Facts,Facts[Region]=\"East\") RETURN CALCULATE(SUM(Facts[Sales]),tbl),Facts[Region]=\"East\")",
+   "powerbi": "11.5"
+  },
+  {
+   "expr": "VAR tbl=FILTER(Facts,Facts[Quantity]>2&&Facts[Region]<>\"West\") RETURN SUMX(tbl,1)",
+   "powerbi": "2"
+  },
+  {
+   "expr": "VAR tbl=FILTER(Facts,Facts[Quantity]>2&&Facts[Region]<>\"West\") RETURN CALCULATE(SUM(Facts[Sales]),Facts[Quantity]>1,tbl)",
+   "powerbi": "2.5"
+  },
+  {
+   "expr": "SUMX(VALUES(Facts[Region]),VAR tbl=FILTER(Facts,Facts[Quantity]>2&&Facts[Region]<>\"West\") RETURN CALCULATE(SUM(Facts[Sales]),tbl))",
+   "powerbi": "7.5"
+  },
+  {
+   "expr": "CALCULATE(VAR tbl=FILTER(Facts,Facts[Quantity]>2&&Facts[Region]<>\"West\") RETURN CALCULATE(SUM(Facts[Sales]),tbl),Facts[Region]=\"East\")",
+   "powerbi": "2.5"
+  },
+  {
+   "expr": "VAR tbl=FILTER(ALL(Facts[Region]),Facts[Region]<>\"East\") RETURN SUMX(tbl,1)",
+   "powerbi": "2"
+  },
+  {
+   "expr": "VAR tbl=FILTER(ALL(Facts[Region]),Facts[Region]<>\"East\") RETURN CALCULATE(SUM(Facts[Sales]),Facts[Quantity]>1,tbl)",
+   "powerbi": "20"
+  },
+  {
+   "expr": "SUMX(VALUES(Facts[Region]),VAR tbl=FILTER(ALL(Facts[Region]),Facts[Region]<>\"East\") RETURN CALCULATE(SUM(Facts[Sales]),tbl))",
+   "powerbi": "60"
+  },
+  {
+   "expr": "CALCULATE(VAR tbl=FILTER(ALL(Facts[Region]),Facts[Region]<>\"East\") RETURN CALCULATE(SUM(Facts[Sales]),tbl),Facts[Region]=\"East\")",
+   "powerbi": "20"
+  },
+  {
+   "expr": "VAR tbl=FILTER(ALL(Facts[Region],Facts[Quantity]),Facts[Quantity]>2) RETURN SUMX(tbl,1)",
+   "powerbi": "3"
+  },
+  {
+   "expr": "VAR tbl=FILTER(ALL(Facts[Region],Facts[Quantity]),Facts[Quantity]>2) RETURN CALCULATE(SUM(Facts[Sales]),Facts[Quantity]>1,tbl)",
+   "powerbi": "22.5"
+  },
+  {
+   "expr": "SUMX(VALUES(Facts[Region]),VAR tbl=FILTER(ALL(Facts[Region],Facts[Quantity]),Facts[Quantity]>2) RETURN CALCULATE(SUM(Facts[Sales]),tbl))",
+   "powerbi": "67.5"
+  },
+  {
+   "expr": "CALCULATE(VAR tbl=FILTER(ALL(Facts[Region],Facts[Quantity]),Facts[Quantity]>2) RETURN CALCULATE(SUM(Facts[Sales]),tbl),Facts[Region]=\"East\")",
+   "powerbi": "22.5"
+  },
+  {
+   "expr": "VAR tbl=FILTER(ALL(Facts[Quantity]),Facts[Quantity]>=3) RETURN SUMX(tbl,1)",
+   "powerbi": "3"
+  },
+  {
+   "expr": "VAR tbl=FILTER(ALL(Facts[Quantity]),Facts[Quantity]>=3) RETURN CALCULATE(SUM(Facts[Sales]),Facts[Quantity]>1,tbl)",
+   "powerbi": "22.5"
+  },
+  {
+   "expr": "SUMX(VALUES(Facts[Region]),VAR tbl=FILTER(ALL(Facts[Quantity]),Facts[Quantity]>=3) RETURN CALCULATE(SUM(Facts[Sales]),tbl))",
+   "powerbi": "22.5"
+  },
+  {
+   "expr": "CALCULATE(VAR tbl=FILTER(ALL(Facts[Quantity]),Facts[Quantity]>=3) RETURN CALCULATE(SUM(Facts[Sales]),tbl),Facts[Region]=\"East\")",
+   "powerbi": "2.5"
+  },
+  {
+   "expr": "VAR tbl=FILTER(ALL(Facts[Note]),ISBLANK(Facts[Note])) RETURN SUMX(tbl,1)",
+   "powerbi": "1"
+  },
+  {
+   "expr": "VAR tbl=FILTER(ALL(Facts[Note]),ISBLANK(Facts[Note])) RETURN CALCULATE(SUM(Facts[Sales]),Facts[Quantity]>1,tbl)",
+   "powerbi": "22.5"
+  },
+  {
+   "expr": "SUMX(VALUES(Facts[Region]),VAR tbl=FILTER(ALL(Facts[Note]),ISBLANK(Facts[Note])) RETURN CALCULATE(SUM(Facts[Sales]),tbl))",
+   "powerbi": "22.5"
+  },
+  {
+   "expr": "CALCULATE(VAR tbl=FILTER(ALL(Facts[Note]),ISBLANK(Facts[Note])) RETURN CALCULATE(SUM(Facts[Sales]),tbl),Facts[Region]=\"East\")",
+   "powerbi": "2.5"
+  },
+  {
+   "expr": "VAR tbl=FILTER(VALUES(Facts[Region]),Facts[Region]<>\"North\") RETURN SUMX(tbl,1)",
+   "powerbi": "2"
+  },
+  {
+   "expr": "VAR tbl=FILTER(VALUES(Facts[Region]),Facts[Region]<>\"North\") RETURN CALCULATE(SUM(Facts[Sales]),Facts[Quantity]>1,tbl)",
+   "powerbi": "33"
+  },
+  {
+   "expr": "SUMX(VALUES(Facts[Region]),VAR tbl=FILTER(VALUES(Facts[Region]),Facts[Region]<>\"North\") RETURN CALCULATE(SUM(Facts[Sales]),tbl))",
+   "powerbi": "94.5"
+  },
+  {
+   "expr": "CALCULATE(VAR tbl=FILTER(VALUES(Facts[Region]),Facts[Region]<>\"North\") RETURN CALCULATE(SUM(Facts[Sales]),tbl),Facts[Region]=\"East\")",
+   "powerbi": "11.5"
+  },
+  {
+   "expr": "VAR tbl=FILTER(Facts,ISBLANK(Facts[Sales])) RETURN SUMX(tbl,1)",
+   "powerbi": "1"
+  },
+  {
+   "expr": "VAR tbl=FILTER(Facts,ISBLANK(Facts[Sales])) RETURN CALCULATE(SUM(Facts[Sales]),Facts[Quantity]>1,tbl)",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "SUMX(VALUES(Facts[Region]),VAR tbl=FILTER(Facts,ISBLANK(Facts[Sales])) RETURN CALCULATE(SUM(Facts[Sales]),tbl))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "CALCULATE(VAR tbl=FILTER(Facts,ISBLANK(Facts[Sales])) RETURN CALCULATE(SUM(Facts[Sales]),tbl),Facts[Region]=\"East\")",
+   "powerbi": "BLANK"
+  }
+ ]
+}

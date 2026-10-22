@@ -1,0 +1,106 @@
+{
+ "powerbi_version": "2.157.879.0 (26.08)+da30fe74eb0b8a8786ab7326b69c400a0e951831",
+ "frozen": "2026-10-21",
+ "items": [
+  {
+   "expr": "0*-1",
+   "powerbi": "0"
+  },
+  {
+   "expr": "PRODUCT(Facts[Sales])",
+   "powerbi": "0"
+  },
+  {
+   "expr": "IFERROR(1E308+1E308,3)",
+   "powerbi": "3"
+  },
+  {
+   "expr": "IFERROR(1/0,2)",
+   "powerbi": "2"
+  },
+  {
+   "expr": "IF(TRUE(),ABS(BLANK()),1)",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "IF(TRUE(),CALCULATE(BLANK()),1)",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COALESCE(ABS(BLANK()),7)",
+   "powerbi": "7"
+  },
+  {
+   "expr": "MAXX(Facts,IF(Facts[Sales]>0,Facts[Sales]))",
+   "powerbi": "20"
+  },
+  {
+   "expr": "MINX(Facts,IF(Facts[Sales]>0,Facts[Sales],0))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "COUNTX(Facts,IFERROR(Facts[Sales]/Facts[Quantity],0))",
+   "powerbi": "5"
+  },
+  {
+   "expr": "MAXX(Facts,SWITCH(TRUE(),Facts[Sales]>5,1,0))",
+   "powerbi": "1"
+  },
+  {
+   "expr": "SUMX(Facts,IF(Facts[Sales]>0,Facts[Sales]))",
+   "powerbi": "33"
+  },
+  {
+   "expr": "AVERAGEX(Facts,IFERROR(Facts[Sales]/Facts[Quantity],0))",
+   "powerbi": "2.18333333333333"
+  },
+  {
+   "expr": "CALCULATE(SUM(Facts[Sales]),Facts[Region]=\"east\")",
+   "powerbi": "11.5"
+  },
+  {
+   "expr": "CALCULATE(SUM(Facts[Sales]),Facts[Region]=\"EAST\")",
+   "powerbi": "11.5"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(Facts),Facts[Region]<>\"EAST\")",
+   "powerbi": "3"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(Facts),Facts[Note]=\"paid\")",
+   "powerbi": "3"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(Facts),Facts[Note]=\"Paid \")",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "DISTINCTCOUNT(Facts[Region])",
+   "powerbi": "3"
+  },
+  {
+   "expr": "DISTINCTCOUNT(Facts[Note])",
+   "powerbi": "3"
+  },
+  {
+   "expr": "1E308*10",
+   "powerbi": "Infinity"
+  },
+  {
+   "expr": "1E308+1E308",
+   "powerbi": "Infinity"
+  },
+  {
+   "expr": "IFERROR(IF(1/0,1,2),9)",
+   "powerbi": "1"
+  },
+  {
+   "expr": "AND(1/0,1)",
+   "powerbi": "True"
+  },
+  {
+   "expr": "NOT(1/0)",
+   "powerbi": "False"
+  }
+ ]
+}

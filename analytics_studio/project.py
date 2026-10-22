@@ -15,7 +15,7 @@ from uuid import uuid4
 
 
 FORMAT_ID = "com.analytics-studio.project"
-FORMAT_VERSION = 78
+FORMAT_VERSION = 83
 MAX_M_SCRIPT_LENGTH = 32_000
 REPORT_THEMES = {
     "Default": {"primary": "#0078D4", "secondary": "#107C71"},
@@ -411,6 +411,16 @@ def validate_project(value: Any) -> dict[str, Any]:
             value = _migrate_v76_to_v77(value)
         elif version == 77:
             value = _migrate_v77_to_v78(value)
+        elif version == 78:
+            value = _migrate_v78_to_v79(value)
+        elif version == 79:
+            value = _migrate_v79_to_v80(value)
+        elif version == 80:
+            value = _migrate_v80_to_v81(value)
+        elif version == 81:
+            value = _migrate_v81_to_v82(value)
+        elif version == 82:
+            value = _migrate_v82_to_v83(value)
         else:
             raise UnsupportedProjectVersion(f"Project format version {version} is not supported.")
         version = value.get("format_version")
@@ -1046,6 +1056,9 @@ def validate_project(value: Any) -> dict[str, Any]:
             image_path = visual.get("image_path")
             if image_path is not None and not isinstance(image_path, str):
                 raise ProjectFileError("Report visual image_path must be a string.")
+            for key in ("shape_map_file", "shape_map_key", "shape_map_object"):
+                if key in visual and not isinstance(visual[key], str):
+                    raise ProjectFileError(f"Report visual {key} must be a string.")
             for key in ("show_data_labels", "show_legend"):
                 if key in visual and type(visual[key]) is not bool:
                     raise ProjectFileError(f"Report visual {key} must be a boolean.")
@@ -1124,6 +1137,77 @@ def validate_project(value: Any) -> dict[str, Any]:
                 raise ProjectFileError(f"Unsupported model column type {type_name!r}.")
             normalized_types[column] = canonical_type
         table["column_types"] = normalized_types
+        column_summarizations = table.get("column_summarizations", {})
+        if not isinstance(column_summarizations, dict):
+            raise ProjectFileError(
+                "Each model table column_summarizations field must be an object."
+            )
+        normalized_summarizations: dict[str, str] = {}
+        for column, summarization in column_summarizations.items():
+            if (
+                not isinstance(column, str)
+                or not column.strip()
+                or not isinstance(summarization, str)
+                or summarization not in {"auto", "sum", "average", "count"}
+            ):
+                raise ProjectFileError(
+                    "Model column summarization settings need non-empty column names and a supported summarization."
+                )
+            normalized_summarizations[column] = summarization
+        table["column_summarizations"] = normalized_summarizations
+        column_sort_by = table.get("column_sort_by", {})
+        if not isinstance(column_sort_by, dict):
+            raise ProjectFileError(
+                "Each model table column_sort_by field must be an object."
+            )
+        normalized_sort_by: dict[str, str] = {}
+        for category, sort_column in column_sort_by.items():
+            if (
+                not isinstance(category, str)
+                or not category.strip()
+                or not isinstance(sort_column, str)
+                or not sort_column.strip()
+            ):
+                raise ProjectFileError(
+                    "Model column sort settings need non-empty category and sort column names."
+                )
+            normalized_sort_by[category] = sort_column
+        table["column_sort_by"] = normalized_sort_by
+        group_by_columns = table.get("group_by_columns", {})
+        if not isinstance(group_by_columns, dict):
+            raise ProjectFileError(
+                "Each model table group_by_columns field must be an object."
+            )
+        normalized_group_by: dict[str, list[str]] = {}
+        for grouped_column, related_columns in group_by_columns.items():
+            if (
+                not isinstance(grouped_column, str)
+                or not grouped_column.strip()
+                or not isinstance(related_columns, list)
+                or any(
+                    not isinstance(column, str) or not column.strip()
+                    for column in related_columns
+                )
+            ):
+                raise ProjectFileError(
+                    "Model group by column settings need non-empty column names and lists of column names."
+                )
+            unique_columns = list(dict.fromkeys(related_columns))
+            if grouped_column in unique_columns:
+                raise ProjectFileError(
+                    f"Model column {grouped_column!r} cannot group by itself."
+                )
+            if unique_columns:
+                normalized_group_by[grouped_column] = unique_columns
+        table["group_by_columns"] = normalized_group_by
+        key_column = table.get("key_column")
+        if key_column is not None:
+            if not isinstance(key_column, str) or not key_column.strip():
+                raise ProjectFileError(
+                    "A model table key_column must be a non-empty column name or null."
+                )
+            key_column = key_column.strip()
+        table["key_column"] = key_column
         date_column = table.get("date_column")
         if date_column is not None:
             if not isinstance(date_column, str) or not date_column.strip():
@@ -1161,6 +1245,13 @@ def validate_project(value: Any) -> dict[str, Any]:
         model["measures"] = validate_measures(model["measures"])
     except MeasureError as exc:
         raise ProjectFileError(f"The project model measures are invalid: {exc}") from exc
+    model_table_ids = {str(table.get("id", "")) for table in model["tables"]}
+    for measure in model["measures"]:
+        home_table_id = measure.get("home_table_id")
+        if home_table_id is not None and home_table_id not in model_table_ids:
+            raise ProjectFileError(
+                f"Measure {measure['name']!r} refers to a missing home table."
+            )
 
     return deepcopy(value)
 
@@ -1965,4 +2056,67 @@ def _migrate_v77_to_v78(value: dict[str, Any]) -> dict[str, Any]:
     migrated = deepcopy(value)
     migrated.setdefault("query_functions", [])
     migrated["format_version"] = 78
+    return migrated
+
+
+def _migrate_v78_to_v79(value: dict[str, Any]) -> dict[str, Any]:
+    """Add per-column default summarization metadata to model tables."""
+    migrated = deepcopy(value)
+    model = migrated.setdefault("model", {})
+    if isinstance(model, dict):
+        tables = model.setdefault("tables", [])
+        if isinstance(tables, list):
+            for table in tables:
+                if isinstance(table, dict):
+                    table.setdefault("column_summarizations", {})
+    migrated["format_version"] = 79
+    return migrated
+
+
+def _migrate_v79_to_v80(value: dict[str, Any]) -> dict[str, Any]:
+    """Add per-category Sort by Column metadata to model tables."""
+    migrated = deepcopy(value)
+    model = migrated.setdefault("model", {})
+    if isinstance(model, dict):
+        tables = model.setdefault("tables", [])
+        if isinstance(tables, list):
+            for table in tables:
+                if isinstance(table, dict):
+                    table.setdefault("column_sort_by", {})
+    migrated["format_version"] = 80
+    return migrated
+
+
+def _migrate_v80_to_v81(value: dict[str, Any]) -> dict[str, Any]:
+    """Add per-column Group by columns metadata to model tables."""
+    migrated = deepcopy(value)
+    model = migrated.setdefault("model", {})
+    if isinstance(model, dict):
+        tables = model.setdefault("tables", [])
+        if isinstance(tables, list):
+            for table in tables:
+                if isinstance(table, dict):
+                    table.setdefault("group_by_columns", {})
+    migrated["format_version"] = 81
+    return migrated
+
+
+def _migrate_v81_to_v82(value: dict[str, Any]) -> dict[str, Any]:
+    """Add an optional featured-table key column to model tables."""
+    migrated = deepcopy(value)
+    model = migrated.setdefault("model", {})
+    if isinstance(model, dict):
+        tables = model.setdefault("tables", [])
+        if isinstance(tables, list):
+            for table in tables:
+                if isinstance(table, dict):
+                    table.setdefault("key_column", None)
+    migrated["format_version"] = 82
+    return migrated
+
+
+def _migrate_v82_to_v83(value: dict[str, Any]) -> dict[str, Any]:
+    """Enable saved M sparse-boundary row transformations."""
+    migrated = deepcopy(value)
+    migrated["format_version"] = 83
     return migrated

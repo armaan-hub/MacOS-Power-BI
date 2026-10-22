@@ -142,15 +142,18 @@ class FolderImportDialog(QDialog):
         replacing: bool,
         initial_options: dict[str, Any] | None = None,
         source_editing: bool = False,
+        allow_transform: bool = True,
         parent: QWidget | None = None,
     ) -> None:
         super().__init__(parent)
         self.folder = Path(folder).expanduser().resolve()
         self.replacing = replacing
         self.source_editing = source_editing
+        self.allow_transform = bool(allow_transform) and not source_editing
         self._options = normalize_folder_options(initial_options)
         self._file_options = dict(self._options["file_options"])
         self._candidate: ImportCandidate | None = None
+        self._accepted_action: str | None = None
         self._files: list[Path] = []
         self._selected_sample_name = self._options["sample_file"]
         self._parse_pool = QThreadPool.globalInstance()
@@ -192,7 +195,7 @@ class FolderImportDialog(QDialog):
         layout.addWidget(self.folder_label)
 
         self.replacement_label = QLabel(
-            "This folder is already linked to a table. Importing will replace that table's data and saved transform steps."
+            "This folder is already linked to a table. Importing replaces its source data and reapplies its saved transformation steps."
         )
         self.replacement_label.setWordWrap(True)
         self.replacement_label.setStyleSheet(
@@ -295,11 +298,19 @@ class FolderImportDialog(QDialog):
         )
         self.import_button = self.buttons.button(QDialogButtonBox.StandardButton.Ok)
         self.import_button.setText(
-            "Apply settings" if source_editing else "Import folder"
+            "Apply settings" if source_editing else "Load"
         )
         self.import_button.setEnabled(False)
         self.buttons.accepted.connect(self._accept_candidate)
         self.buttons.rejected.connect(self.reject)
+        self.transform_button = self.buttons.addButton(
+            "Transform data", QDialogButtonBox.ButtonRole.ActionRole
+        )
+        self.transform_button.setVisible(self.allow_transform)
+        self.transform_button.setEnabled(False)
+        self.transform_button.clicked.connect(
+            lambda: self._accept_candidate("transform")
+        )
         layout.addWidget(self.buttons)
 
         self.file_kind_combo.currentIndexChanged.connect(self._file_kind_changed)
@@ -314,6 +325,18 @@ class FolderImportDialog(QDialog):
     @property
     def candidate(self) -> ImportCandidate | None:
         return self._candidate if self.result() == QDialog.DialogCode.Accepted else None
+
+    @property
+    def selected_action(self) -> str | None:
+        return (
+            self._accepted_action
+            if self.result() == QDialog.DialogCode.Accepted
+            else None
+        )
+
+    def _set_action_buttons_enabled(self, enabled: bool) -> None:
+        self.import_button.setEnabled(enabled)
+        self.transform_button.setEnabled(enabled and self.allow_transform)
 
     def _current_options(self) -> dict[str, Any]:
         return normalize_folder_options({
@@ -488,6 +511,7 @@ class FolderImportDialog(QDialog):
             replacing=False,
             initial_options=self._file_options,
             parent=self,
+            allow_transform=False,
         )
         dialog.setWindowTitle("Set sample file options")
         dialog.import_button.setText("Use these options")
@@ -585,7 +609,7 @@ class FolderImportDialog(QDialog):
             f"{candidate.row_count:,} rows · {len(candidate.headers):,} columns · "
             f"{len(self._files):,} files combined"
         )
-        self.import_button.setEnabled(True)
+        self._set_action_buttons_enabled(True)
 
     def _on_parse_failed(self, request_id: int, message: str) -> None:
         if not self._release_parse_task(request_id):
@@ -606,13 +630,13 @@ class FolderImportDialog(QDialog):
         self.progress_widget.setVisible(busy or self._active_discovery_id is not None)
         if busy:
             self.progress_label.setText("Scanning and reading matching files…")
-            self.import_button.setEnabled(False)
+            self._set_action_buttons_enabled(False)
         self._update_preview_button()
 
     def _clear_candidate(self, *_args: Any) -> None:
         self._cancel_pending_preview()
         self._candidate = None
-        self.import_button.setEnabled(False)
+        self._set_action_buttons_enabled(False)
         self.notice_label.clear()
         self.notice_label.setVisible(False)
         model = self.table.model()
@@ -632,9 +656,14 @@ class FolderImportDialog(QDialog):
         self.error_label.clear()
         self.error_label.setVisible(False)
 
-    def _accept_candidate(self) -> None:
+    def _accept_candidate(self, action: str = "load") -> None:
         if self._candidate is None:
             return
+        if action not in {"load", "transform"}:
+            return
+        if action == "transform" and not self.allow_transform:
+            return
+        self._accepted_action = action
         self.accept()
 
     def reject(self) -> None:

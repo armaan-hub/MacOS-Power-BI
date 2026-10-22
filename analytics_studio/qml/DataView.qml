@@ -5,6 +5,8 @@ import QtQuick.Layouts 6.5
 Item {
     id: root
     property var appController
+    property string selectedFieldName: ""
+    signal selectedColumnRequested(string columnName)
 
     function typeForColumn(column) {
         const types = root.appController ? (root.appController.columnTypes || []) : []
@@ -13,6 +15,11 @@ Item {
                 return String(types[index].type)
         }
         return "text"
+    }
+
+    function columnNameAt(index) {
+        const headers = root.appController ? (root.appController.headers || []) : []
+        return index >= 0 && index < headers.length ? String(headers[index]) : ""
     }
 
     function queryGroupFor(sourceId) {
@@ -30,10 +37,14 @@ Item {
         sourceComponent: Component {
             ColumnLayout {
                 id: dataPage
+                objectName: "dataPage"
                 property var activeColumnProfile: ({})
                 anchors.fill: parent
-                anchors.margins: 18
-                spacing: 12
+                anchors.leftMargin: 18
+                anchors.rightMargin: 18
+                anchors.topMargin: 12
+                anchors.bottomMargin: 12
+                spacing: 8
 
                 function refreshColumnProfile() {
                     const column = typeColumnCombo.currentText
@@ -42,12 +53,348 @@ Item {
                             : ({})
                 }
 
-                Component.onCompleted: refreshColumnProfile()
+                function refreshProfileForSelection() {
+                    const headers = root.appController ? (root.appController.headers || []) : []
+                    const selected = headers.indexOf(root.selectedFieldName) >= 0
+                            ? root.selectedFieldName
+                            : typeColumnCombo.currentText
+                    activeColumnProfile = root.appController && selected !== ""
+                            ? root.appController.profileColumn(selected)
+                            : ({})
+                }
+
+                function syncSelectedField() {
+                    const headers = root.appController ? (root.appController.headers || []) : []
+                    const selectedIndex = headers.indexOf(root.selectedFieldName)
+                    if (selectedIndex >= 0 && typeColumnCombo.currentIndex !== selectedIndex)
+                        typeColumnCombo.currentIndex = selectedIndex
+                    else if (selectedIndex < 0) {
+                        const fallbackIndex = headers.length > 0 ? 0 : -1
+                        if (typeColumnCombo.currentIndex !== fallbackIndex)
+                            typeColumnCombo.currentIndex = fallbackIndex
+                    }
+                    Qt.callLater(dataPage.refreshProfileForSelection)
+                }
+
+                Component.onCompleted: {
+                    syncSelectedField()
+                    refreshColumnProfile()
+                }
 
                 Connections {
                     target: root.appController
                     ignoreUnknownSignals: true
-                    function onStateChanged() { dataPage.refreshColumnProfile() }
+                    function onStateChanged() {
+                        dataPage.syncSelectedField()
+                        dataPage.refreshColumnProfile()
+                    }
+                }
+
+                Connections {
+                    target: root
+                    function onSelectedFieldNameChanged() { dataPage.syncSelectedField() }
+                }
+
+                Dialog {
+                    id: dataFilterDialog
+                    objectName: "dataViewColumnFilterDialog"
+                    property string columnName: ""
+                    property bool compactLayout: height < 400
+                    property bool draftAllSelected: true
+                    property var draftValueKeys: ({})
+                    property var draftFilterResults: ({})
+                    property real overlayWidth: Overlay.overlay ? Overlay.overlay.width : root.width
+                    property real overlayHeight: Overlay.overlay ? Overlay.overlay.height : root.height
+                    parent: Overlay.overlay
+                    anchors.centerIn: Overlay.overlay
+                    modal: true
+                    width: Math.min(560, Math.max(1, overlayWidth - 32))
+                    height: Math.min(580, Math.max(1, overlayHeight - 32))
+                    padding: compactLayout ? 6 : 12
+                    title: "Filter preview: " + columnName
+
+                    function refreshFilterResults() {
+                        if (!root.appController || !root.appController.dataModel)
+                            return
+                        draftFilterResults = root.appController.dataModel.columnFilterValues(
+                            columnName, valueSearch.text
+                        )
+                    }
+
+                    function valueIsSelected(key) {
+                        return draftAllSelected ? !draftValueKeys[key] : Boolean(draftValueKeys[key])
+                    }
+
+                    function setValueSelected(key, selected) {
+                        const nextKeys = Object.assign({}, draftValueKeys)
+                        if (draftAllSelected) {
+                            if (selected)
+                                delete nextKeys[key]
+                            else
+                                nextKeys[key] = true
+                        } else if (selected) {
+                            nextKeys[key] = true
+                        } else {
+                            delete nextKeys[key]
+                        }
+                        draftValueKeys = nextKeys
+                    }
+
+                    function setAllValuesSelected(selected) {
+                        draftAllSelected = selected
+                        draftValueKeys = ({})
+                    }
+
+                    function valueSelectionSummary() {
+                        const count = Object.keys(draftValueKeys).length
+                        if (draftAllSelected)
+                            return count ? "All except " + count + " excluded" : "All values selected"
+                        return count + (count === 1 ? " value selected" : " values selected")
+                    }
+
+                    function valueSearchSummary() {
+                        const matching = Number(draftFilterResults.matchCount || 0)
+                        const total = Number(draftFilterResults.totalCount || 0)
+                        if (!matching)
+                            return "No values match · " + total + " distinct values"
+                        if (draftFilterResults.truncated)
+                            return "Showing first 2,000 of " + matching + " matches · " + total + " distinct values"
+                        return matching + (matching === 1 ? " match" : " matches")
+                                + " · " + total + " distinct values"
+                    }
+
+                    onAboutToShow: {
+                        const rule = root.appController.dataModel.columnFilter(columnName)
+                        filterModeTabs.currentIndex = rule.operator === "values" ? 0 : rule.operator ? 1 : 0
+                        const currentOperator = String(rule.operator || "equals")
+                        filterOperator.currentIndex = 0
+                        for (let index = 0; index < filterOperator.model.length; index++) {
+                            if (String(filterOperator.model[index].value) === currentOperator) {
+                                filterOperator.currentIndex = index
+                                break
+                            }
+                        }
+                        filterValue.text = String(rule.value || "")
+                        valueSearch.text = ""
+                        draftAllSelected = rule.operator === "values" ? rule.all !== false : true
+                        const nextKeys = ({})
+                        for (const key of (rule.keys || []))
+                            nextKeys[String(key)] = true
+                        draftValueKeys = nextKeys
+                        Qt.callLater(function() {
+                            dataFilterDialog.refreshFilterResults()
+                            if (filterModeTabs.currentIndex === 0)
+                                valueSearch.forceActiveFocus()
+                        })
+                    }
+
+                    contentItem: ColumnLayout {
+                        spacing: dataFilterDialog.compactLayout ? 3 : 8
+                        Label {
+                            objectName: "dataViewFilterModeNotice"
+                            Layout.fillWidth: true
+                            visible: !dataFilterDialog.compactLayout
+                            text: "Values and Condition are alternatives. Applying this tab replaces the current filter for this column."
+                            wrapMode: Text.WordWrap
+                            Accessible.name: text
+                        }
+                        TabBar {
+                            id: filterModeTabs
+                            objectName: "dataViewFilterTabs"
+                            Layout.fillWidth: true
+                            Accessible.name: "Filter mode for " + dataFilterDialog.columnName
+                            Accessible.description: "Values and Condition are alternatives. Applying the selected tab replaces the current filter for this column."
+                            TabButton {
+                                objectName: "dataViewFilterTabValues"
+                                text: "Values"
+                                Accessible.name: "Values filter for " + dataFilterDialog.columnName
+                                onClicked: filterModeTabs.currentIndex = 0
+                            }
+                            TabButton {
+                                objectName: "dataViewFilterTabCondition"
+                                text: "Condition"
+                                Accessible.name: "Condition filter for " + dataFilterDialog.columnName
+                                onClicked: filterModeTabs.currentIndex = 1
+                            }
+                        }
+                        StackLayout {
+                            Layout.fillWidth: true
+                            Layout.fillHeight: true
+                            currentIndex: filterModeTabs.currentIndex
+                            ColumnLayout {
+                                spacing: dataFilterDialog.compactLayout ? 3 : 8
+                                Label {
+                                    Layout.fillWidth: true
+                                    visible: !dataFilterDialog.compactLayout
+                                    text: "Values are from rows that pass filters on other columns."
+                                    wrapMode: Text.WordWrap
+                                }
+                                TextField {
+                                    id: valueSearch
+                                    objectName: "dataViewFilterSearch"
+                                    Accessible.name: "Search values in " + dataFilterDialog.columnName
+                                    Accessible.description: "Search all distinct values in this column; the display limit does not limit search."
+                                    Layout.fillWidth: true
+                                    placeholderText: "Search values"
+                                    maximumLength: 2_000
+                                    Layout.preferredHeight: dataFilterDialog.compactLayout ? 36 : implicitHeight
+                                    onTextChanged: dataFilterDialog.refreshFilterResults()
+                                }
+                                RowLayout {
+                                    Layout.fillWidth: true
+                                    Button {
+                                        objectName: "dataViewSelectAllValues"
+                                        text: "Select all values"
+                                        Accessible.name: text + " in " + dataFilterDialog.columnName
+                                        Accessible.description: "Select every value in the checklist, including values hidden by search."
+                                        Layout.minimumHeight: dataFilterDialog.compactLayout ? 28 : 0
+                                        Layout.preferredHeight: dataFilterDialog.compactLayout ? 32 : implicitHeight
+                                        onClicked: dataFilterDialog.setAllValuesSelected(true)
+                                    }
+                                    Button {
+                                        objectName: "dataViewSelectNoValues"
+                                        text: "Select no values"
+                                        Accessible.name: text + " in " + dataFilterDialog.columnName
+                                        Accessible.description: "Deselect every value in the checklist, including values hidden by search."
+                                        Layout.minimumHeight: dataFilterDialog.compactLayout ? 28 : 0
+                                        Layout.preferredHeight: dataFilterDialog.compactLayout ? 32 : implicitHeight
+                                        onClicked: dataFilterDialog.setAllValuesSelected(false)
+                                    }
+                                    Item { Layout.fillWidth: true }
+                                }
+                                Label {
+                                    objectName: "dataViewFilterSelectionSummary"
+                                    Layout.fillWidth: true
+                                    text: dataFilterDialog.valueSelectionSummary()
+                                    Accessible.name: text
+                                }
+                                ListView {
+                                    id: valueOptionsList
+                                    objectName: "dataViewFilterValueList"
+                                    Layout.fillWidth: true
+                                    Layout.fillHeight: true
+                                    Layout.minimumHeight: dataFilterDialog.compactLayout ? 32 : 120
+                                    Layout.preferredHeight: 260
+                                    clip: true
+                                    model: dataFilterDialog.draftFilterResults.values || []
+                                    delegate: CheckBox {
+                                        required property int index
+                                        required property var modelData
+                                        width: valueOptionsList.width
+                                        objectName: "dataViewFilterValueOption_" + index
+                                        text: String(modelData.label)
+                                        checked: dataFilterDialog.valueIsSelected(String(modelData.key))
+                                        Accessible.name: "Include value " + text + " for " + dataFilterDialog.columnName
+                                        Accessible.description: "Toggle this distinct value in the Data-view preview filter."
+                                        onToggled: dataFilterDialog.setValueSelected(String(modelData.key), checked)
+                                    }
+                                }
+                                Label {
+                                    objectName: "dataViewFilterValueNotice"
+                                    Layout.fillWidth: true
+                                    visible: !dataFilterDialog.compactLayout
+                                    text: dataFilterDialog.valueSearchSummary()
+                                    wrapMode: Text.WordWrap
+                                    Accessible.name: text
+                                }
+                            }
+                            ColumnLayout {
+                                spacing: 8
+                                Label {
+                                    Layout.fillWidth: true
+                                    text: "Filter rows shown in Data view. This does not change the loaded table, report calculations, or saved Power Query steps."
+                                    wrapMode: Text.WordWrap
+                                }
+                                ComboBox {
+                                    id: filterOperator
+                                    objectName: "dataViewFilterOperator"
+                                    Accessible.name: "Condition operator for " + dataFilterDialog.columnName
+                                    Layout.fillWidth: true
+                                    textRole: "label"
+                                    valueRole: "value"
+                                    model: [
+                                        { label: "Equals", value: "equals" },
+                                        { label: "Does not equal", value: "not_equals" },
+                                        { label: "Contains", value: "contains" },
+                                        { label: "Does not contain", value: "does_not_contain" },
+                                        { label: "Begins with", value: "begins_with" },
+                                        { label: "Ends with", value: "ends_with" },
+                                        { label: "Greater than", value: "greater_than" },
+                                        { label: "Greater than or equal", value: "greater_than_or_equal" },
+                                        { label: "Less than", value: "less_than" },
+                                        { label: "Less than or equal", value: "less_than_or_equal" },
+                                        { label: "Is blank", value: "is_blank" },
+                                        { label: "Is not blank", value: "is_not_blank" },
+                                        { label: "Is null", value: "is_null" },
+                                        { label: "Is not null", value: "is_not_null" }
+                                    ]
+                                }
+                                TextField {
+                                    id: filterValue
+                                    objectName: "dataViewFilterValue"
+                                    Accessible.name: "Condition value for " + dataFilterDialog.columnName
+                                    Layout.fillWidth: true
+                                    placeholderText: "Value"
+                                    maximumLength: 2_000
+                                    enabled: ["is_null", "is_not_null", "is_blank", "is_not_blank"].indexOf(
+                                        String(filterOperator.currentValue)
+                                    ) < 0
+                                }
+                            }
+                        }
+                        Connections {
+                            target: root.appController.dataModel
+                            function onFilterChanged() { dataFilterDialog.refreshFilterResults() }
+                            function onDataReplaced() { dataFilterDialog.refreshFilterResults() }
+                        }
+                    }
+
+                    footer: RowLayout {
+                        spacing: 8
+                        Button {
+                            objectName: "dataViewClearColumnFilter"
+                            text: "Clear filter"
+                            Accessible.name: "Clear filter for " + dataFilterDialog.columnName
+                            enabled: root.appController.dataModel.activeFilterColumns.indexOf(
+                                dataFilterDialog.columnName
+                            ) >= 0
+                            onClicked: {
+                                root.appController.dataModel.clearColumnFilter(
+                                    dataFilterDialog.columnName
+                                )
+                                dataFilterDialog.close()
+                            }
+                        }
+                        Item { Layout.fillWidth: true }
+                        Button {
+                            objectName: "dataViewCancelColumnFilter"
+                            text: "Cancel"
+                            Accessible.name: "Cancel filter changes for " + dataFilterDialog.columnName
+                            onClicked: dataFilterDialog.reject()
+                        }
+                        Button {
+                            objectName: "dataViewApplyColumnFilter"
+                            text: "Apply filter"
+                            Accessible.name: text + " for " + dataFilterDialog.columnName
+                            Accessible.description: "Applying this tab replaces the current filter for this column."
+                            onClicked: {
+                                if (filterModeTabs.currentIndex === 0) {
+                                    root.appController.dataModel.setColumnValueFilter(
+                                        dataFilterDialog.columnName,
+                                        dataFilterDialog.draftAllSelected,
+                                        Object.keys(dataFilterDialog.draftValueKeys)
+                                    )
+                                } else {
+                                    root.appController.dataModel.setColumnFilter(
+                                        dataFilterDialog.columnName,
+                                        String(filterOperator.currentValue),
+                                        filterValue.text
+                                    )
+                                }
+                                dataFilterDialog.close()
+                            }
+                        }
+                    }
                 }
 
             RowLayout {
@@ -64,6 +411,7 @@ Item {
                     }
                 }
                 ComboBox {
+                    objectName: "activeTableComboBox"
                     visible: (root.appController.tableCatalog || []).length > 0
                     Layout.preferredWidth: 210
                     model: root.appController.tableCatalog || []
@@ -97,6 +445,7 @@ Item {
                     onClicked: root.appController.removeTable(String(root.appController.activeTableId))
                 }
                 Button {
+                    objectName: "dataViewImportButton"
                     text: root.appController.modelTables.length > 0 ? "Add table" : "Import data"
                     Accessible.name: "Add CSV, Excel, JSON, XML, or Parquet table"
                     background: Rectangle { radius: 4; color: parent.down ? "#0d665d" : (parent.hovered ? "#16897d" : "#107C71"); border.color: "#0d665d" }
@@ -112,6 +461,24 @@ Item {
                     background: Rectangle { radius: 4; color: parent.hovered ? "#edf5fb" : "#f7fafc"; border.color: "#c4dcec" }
                     contentItem: Text { text: parent.text; color: "#0067b8"; font.pixelSize: 10; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter }
                     onClicked: root.appController.executeCommand("transformData")
+                }
+                Button {
+                    id: dataViewFilterRowsButton
+                    objectName: "dataViewFilterRowsButton"
+                    visible: root.appController.sourceLoaded && root.appController.columnCount > 0
+                    enabled: typeColumnCombo.currentText !== ""
+                    text: {
+                        const count = root.appController.dataModel.activeFilterColumns.length
+                        return count > 0 ? "Filter rows (" + count + ")" : "Filter rows"
+                    }
+                    Accessible.name: "Filter data view rows"
+                    Accessible.description: "Open Values or Condition for the selected column. This filter changes the Data view preview only; it does not change loaded model rows, report calculations, or saved Power Query steps. Use Transform data to save a row filter."
+                    ToolTip.visible: hovered
+                    ToolTip.text: "Temporary · Data view only. Use Transform data to save a row filter."
+                    onClicked: {
+                        dataFilterDialog.columnName = typeColumnCombo.currentText
+                        dataFilterDialog.open()
+                    }
                 }
                 Button {
                     visible: (root.appController.tableCatalog || []).filter(function(table) {
@@ -254,10 +621,14 @@ Item {
                 }
                 ComboBox {
                     id: typeColumnCombo
+                    objectName: "typeColumnCombo"
                     Layout.preferredWidth: 210
                     model: root.appController.headers || []
                     Accessible.name: "Column to change type"
-                    onActivated: dataPage.refreshColumnProfile()
+                    onActivated: {
+                        root.selectedColumnRequested(currentText)
+                        dataPage.refreshColumnProfile()
+                    }
                     onCurrentIndexChanged: dataPage.refreshColumnProfile()
                 }
                 ComboBox {
@@ -297,7 +668,9 @@ Item {
             }
 
             RowLayout {
+                objectName: "dataViewColumnProfile"
                 visible: root.appController.sourceLoaded && dataPage.activeColumnProfile.column !== undefined
+                         && dataPage.height >= 320
                 Layout.fillWidth: true
                 spacing: 12
 
@@ -381,6 +754,10 @@ Item {
             Rectangle {
                 Layout.fillWidth: true
                 Layout.fillHeight: true
+                Layout.minimumHeight: 106
+                Layout.minimumWidth: 0
+                Layout.preferredWidth: 0
+                Layout.maximumWidth: dataPage.width
                 radius: 6
                 color: "#ffffff"
                 border.color: "#dce2e8"
@@ -393,28 +770,50 @@ Item {
                     HorizontalHeaderView {
                         id: headerView
                         Layout.fillWidth: true
+                        Layout.minimumWidth: 0
+                        Layout.preferredWidth: 0
                         syncView: tableView
                         clip: true
                         delegate: Rectangle {
+                            required property int index
                             implicitHeight: 44
                             implicitWidth: Math.max(110, headerLabel.implicitWidth + 24)
                             color: "#f0f5f8"
                             border.color: "#e0e5e9"
+                            Accessible.role: Accessible.Button
+                            Accessible.name: root.columnNameAt(index) + ", "
+                                    + root.typeForColumn(root.columnNameAt(index))
+                                    + (root.appController.dataModel.sortColumn === root.columnNameAt(index)
+                                       ? ", sorted " + root.appController.dataModel.sortDirection
+                                       : "")
+                            Accessible.description: "Click the column heading to sort. Use its filter button to filter Data view rows."
                             Text {
                                 id: headerLabel
+                                objectName: "dataColumnHeaderName_" + index
                                 anchors.top: parent.top
                                 anchors.left: parent.left
                                 anchors.right: parent.right
                                 anchors.topMargin: 5
                                 anchors.leftMargin: 10
-                                anchors.rightMargin: 8
-                                text: display
+                                anchors.rightMargin: 24
+                                text: root.columnNameAt(index)
                                 color: "#465463"
                                 font.pixelSize: 11
                                 font.weight: Font.DemiBold
                                 elide: Text.ElideRight
-                                Accessible.name: String(display)
-                                       + ", " + root.typeForColumn(String(display))
+                            }
+                            Text {
+                                id: sortIndicator
+                                anchors.right: parent.right
+                                anchors.top: parent.top
+                                anchors.topMargin: 4
+                                anchors.rightMargin: 30
+                                visible: root.appController.dataModel.sortColumn === root.columnNameAt(index)
+                                text: root.appController.dataModel.sortDirection === "ascending"
+                                      ? "↑" : "↓"
+                                color: "#107c71"
+                                font.pixelSize: 14
+                                font.weight: Font.DemiBold
                             }
                             Text {
                                 anchors.left: parent.left
@@ -424,7 +823,7 @@ Item {
                                 anchors.rightMargin: 8
                                 anchors.bottomMargin: 4
                                 text: {
-                                    const selectedType = root.typeForColumn(String(display))
+                                    const selectedType = root.typeForColumn(root.columnNameAt(index))
                                     const labels = {
                                         text: "Text",
                                         any: "Any (mixed)",
@@ -441,13 +840,78 @@ Item {
                                 font.pixelSize: 9
                                 elide: Text.ElideRight
                             }
+                            TapHandler {
+                                acceptedButtons: Qt.LeftButton
+                                onTapped: function(eventPoint, button) {
+                                    const topLeft = filterColumnButton.mapToItem(null, 0, 0)
+                                    const bottomRight = filterColumnButton.mapToItem(
+                                        null, filterColumnButton.width, filterColumnButton.height
+                                    )
+                                    const point = eventPoint.scenePosition
+                                    const insideFilterButton = point.x >= topLeft.x
+                                            && point.x <= bottomRight.x
+                                            && point.y >= topLeft.y
+                                            && point.y <= bottomRight.y
+                                    if (!insideFilterButton)
+                                        root.appController.dataModel.sortByColumn(index)
+                                }
+                            }
+                            Button {
+                                id: filterColumnButton
+                                objectName: "dataViewFilterColumn_" + index
+                                z: 2
+                                anchors.right: parent.right
+                                anchors.top: parent.top
+                                anchors.topMargin: 4
+                                width: 24
+                                height: 23
+                                hoverEnabled: true
+                                text: root.appController.dataModel.activeFilterColumns.indexOf(root.columnNameAt(index)) >= 0
+                                      ? "▼" : "▽"
+                                Accessible.name: "Filter preview rows by " + root.columnNameAt(index)
+                                Accessible.description: root.appController.dataModel.activeFilterColumns.indexOf(root.columnNameAt(index)) >= 0
+                                        ? "A Data view filter is active. Open to change or clear it."
+                                        : "Filter the rows shown in Data view."
+                                ToolTip.visible: hovered
+                                ToolTip.text: Accessible.description
+                                background: Rectangle {
+                                    radius: 3
+                                    color: parent.hovered ? "#e1ebf1"
+                                          : root.appController.dataModel.activeFilterColumns.indexOf(
+                                                root.columnNameAt(index)
+                                            ) >= 0 ? "#e5f2ef" : "#f7f9fa"
+                                    border.color: root.appController.dataModel.activeFilterColumns.indexOf(
+                                                      root.columnNameAt(index)
+                                                  ) >= 0 ? "#95bcae" : "#d6dee4"
+                                }
+                                contentItem: Item {
+                                    Icon {
+                                        objectName: "dataViewFilterIcon"
+                                        anchors.centerIn: parent
+                                        width: 14
+                                        height: 14
+                                        name: "filter"
+                                        color: root.appController.dataModel.activeFilterColumns.indexOf(
+                                                   root.columnNameAt(index)
+                                               ) >= 0 ? "#107c71" : "#526575"
+                                    }
+                                }
+                                onClicked: {
+                                    dataFilterDialog.columnName = root.columnNameAt(index)
+                                    dataFilterDialog.open()
+                                }
+                            }
                         }
                     }
 
                     TableView {
                         id: tableView
+                        objectName: "dataViewTable"
                         Layout.fillWidth: true
                         Layout.fillHeight: true
+                        Layout.minimumHeight: 30
+                        Layout.minimumWidth: 0
+                        Layout.preferredWidth: 0
                         model: root.appController.dataModel
                         clip: true
                         columnSpacing: 1
@@ -473,6 +937,64 @@ Item {
                             }
                         }
                     }
+
+                    Connections {
+                        target: root.appController.dataModel
+                        function onPageChanged() {
+                            tableView.contentY = 0
+                        }
+                        function onDataReplaced() {
+                            tableView.contentX = 0
+                            tableView.contentY = 0
+                        }
+                    }
+
+                    RowLayout {
+                        objectName: "dataViewPagingControls"
+                        Layout.fillWidth: true
+                        Layout.minimumHeight: 32
+                        Layout.preferredHeight: 32
+                        spacing: 6
+
+                        Text {
+                            objectName: "dataViewPageRange"
+                            Layout.fillWidth: true
+                            text: root.appController.dataModel.pageRange
+                            color: "#526575"
+                            font.pixelSize: 11
+                            elide: Text.ElideRight
+                            Accessible.name: text
+                        }
+                        Text {
+                            objectName: "dataViewPageIndicator"
+                            visible: root.appController.dataModel.pageCount > 0
+                            text: "Page " + root.appController.dataModel.currentPage
+                                  + " of " + root.appController.dataModel.pageCount
+                            color: "#526575"
+                            font.pixelSize: 11
+                            Accessible.name: text
+                        }
+                        Button {
+                            objectName: "dataViewPreviousPage"
+                            text: "Previous"
+                            Layout.minimumHeight: 32
+                            Layout.preferredHeight: 32
+                            Layout.maximumHeight: 32
+                            enabled: root.appController.dataModel.canGoPrevious
+                            Accessible.name: "Previous preview page"
+                            onClicked: root.appController.dataModel.previousPage()
+                        }
+                        Button {
+                            objectName: "dataViewNextPage"
+                            text: "Next"
+                            Layout.minimumHeight: 32
+                            Layout.preferredHeight: 32
+                            Layout.maximumHeight: 32
+                            enabled: root.appController.dataModel.canGoNext
+                            Accessible.name: "Next preview page"
+                            onClicked: root.appController.dataModel.nextPage()
+                        }
+                    }
                 }
 
                 Text {
@@ -486,7 +1008,7 @@ Item {
 
             Text {
                 Layout.fillWidth: true
-                text: "The table preview shows up to 500 rows; column profiles use all rows in the active table. Report cards and charts recognize common sales, date, geographic, cost, and quantity field names."
+                text: "The table preview shows 500 rows per page; use Previous and Next to inspect all loaded rows. Use the funnel beside a column name to filter the Data view; use Transform data to save a Power Query filter. Column profiles use all rows in the active table."
                 color: "#5d6975"
                 font.pixelSize: 11
             }

@@ -21,6 +21,7 @@ from analytics_studio.file_import import (
     parse_file,
     recommend_excel_sheet,
 )
+from analytics_studio.transformations import apply_transformations
 
 
 class FileImportTests(unittest.TestCase):
@@ -294,7 +295,7 @@ class FileImportTests(unittest.TestCase):
         self.assertEqual(candidate.row_count, 1)
         self.assertEqual(candidate.options, {"sheet_name": "Data", "header_row": 2})
 
-    def test_excel_auto_detects_header_after_title_block_and_persists_resolved_row(self) -> None:
+    def test_excel_auto_detects_header_after_title_block_and_keeps_auto_option(self) -> None:
         path = self.root / "title-block.xlsx"
         title_rows = [[f"Report title {row}"] for row in range(1, 12)]
         rows = title_rows + [
@@ -309,7 +310,103 @@ class FileImportTests(unittest.TestCase):
         self.assertEqual(candidate.headers, ["Date", "Emirates", "Quantity", "Sales", "VAT-5%"])
         self.assertEqual(candidate.row_count, 2)
         self.assertEqual(candidate.rows[0]["Emirates"], "Dubai")
-        self.assertEqual(candidate.options, {"sheet_name": "VAT 5%", "header_row": 12})
+        self.assertEqual(candidate.options, {"sheet_name": "VAT 5%", "header_row": None})
+
+    def test_excel_import_notice_explains_rows_before_selected_header(self) -> None:
+        path = self.root / "header-preamble-notice.xlsx"
+        rows = [[f"Report title {row}"] for row in range(1, 12)] + [
+            ["Date", "Particulars", "Value"],
+            ["2026-08-01", "Sale", 100],
+            [None, "Grand Total", 100],
+        ]
+        self.make_xlsx_with_rows(path, [("VAT 5%", rows)])
+
+        candidate = parse_file(path)
+
+        self.assertIsNone(candidate.options["header_row"])
+        self.assertEqual(candidate.row_count, 2)
+        self.assertIn(
+            "Using worksheet row 12 as column names; rows 1–11 are excluded from the imported table.",
+            candidate.notices,
+        )
+
+    def test_excel_preserves_blank_rows_for_transform_row_counts(self) -> None:
+        path = self.root / "blank-rows-before-headers.xlsx"
+        self.make_xlsx_with_rows(path, [("Data", [
+            ["Raw Header", "Old Value"],
+            ["Report title"],
+            [],
+            [],
+            ["ID", "Value"],
+            [1, "first"],
+            [2, "second"],
+        ])])
+
+        # Excel can omit a row element entirely for an empty row. Keep the
+        # physical row number gap so Power Query row-count operations see it.
+        rewritten = path.with_suffix(".rewritten.xlsx")
+        with ZipFile(path) as source, ZipFile(rewritten, "w", ZIP_DEFLATED) as target:
+            for info in source.infolist():
+                contents = source.read(info.filename)
+                if info.filename == "xl/worksheets/sheet1.xml":
+                    contents = contents.replace(b'<row r="3"></row>', b"")
+                target.writestr(info, contents)
+        rewritten.replace(path)
+
+        raw = parse_file(path, options={"sheet_name": "Data", "header_row": 1})
+
+        self.assertEqual(raw.row_count, 6)
+        self.assertEqual(raw.rows[1], {"Raw Header": None, "Old Value": None})
+        self.assertEqual(raw.rows[2], {"Raw Header": None, "Old Value": None})
+
+        transformed = apply_transformations(raw, [
+            {"op": "remove_top_rows", "count": 3},
+            {"op": "promote_headers"},
+        ])
+        self.assertEqual(transformed.headers, ["ID", "Value"])
+        self.assertEqual(transformed.rows, [
+            {"ID": 1, "Value": "first"},
+            {"ID": 2, "Value": "second"},
+        ])
+
+    def test_excel_auto_header_keeps_nonempty_rows_in_normalized_import(self) -> None:
+        path = self.root / "blank-data-row.xlsx"
+        self.make_xlsx_with_rows(path, [("Data", [
+            ["Report title"],
+            ["ID", "Value"],
+            [1, "first"],
+            [],
+            [2, "second"],
+            [3, "third"],
+            [],
+            [],
+            [],
+        ])])
+
+        # This gap is a blank source row even though the workbook omits its
+        # worksheet row element.
+        rewritten = path.with_suffix(".rewritten.xlsx")
+        with ZipFile(path) as source, ZipFile(rewritten, "w", ZIP_DEFLATED) as target:
+            for info in source.infolist():
+                contents = source.read(info.filename)
+                if info.filename == "xl/worksheets/sheet1.xml":
+                    contents = contents.replace(b'<row r="4"></row>', b"")
+                target.writestr(info, contents)
+        rewritten.replace(path)
+
+        candidate = parse_file(path)
+
+        self.assertEqual(candidate.options, {"sheet_name": "Data", "header_row": None})
+        self.assertEqual(candidate.row_count, 3)
+        self.assertEqual(candidate.rows[0], {"ID": 1, "Value": "first"})
+        self.assertEqual(candidate.rows[1], {"ID": 2, "Value": "second"})
+        self.assertEqual(candidate.rows[2], {"ID": 3, "Value": "third"})
+
+        reparsed = parse_file(path, options=candidate.options)
+        self.assertEqual(reparsed.options, candidate.options)
+        self.assertEqual(reparsed.headers, candidate.headers)
+        self.assertEqual(reparsed.row_count, candidate.row_count)
+        self.assertEqual(reparsed.rows, candidate.rows)
 
     def test_excel_recommends_best_tabular_sheet_and_keeps_manual_choice(self) -> None:
         path = self.root / "multiple-sheets.xlsx"
@@ -333,7 +430,7 @@ class FileImportTests(unittest.TestCase):
         automatic = parse_file(path)
         manual = parse_file(path, options={"sheet_name": "Sales Reg", "header_row": 1})
 
-        self.assertEqual(automatic.options, {"sheet_name": "VAT 5%", "header_row": 1})
+        self.assertEqual(automatic.options, {"sheet_name": "VAT 5%", "header_row": None})
         self.assertEqual(manual.headers, ["Date", "Emirates", "Sales", "VAT-5%"])
         self.assertEqual(manual.options, {"sheet_name": "Sales Reg", "header_row": 1})
 

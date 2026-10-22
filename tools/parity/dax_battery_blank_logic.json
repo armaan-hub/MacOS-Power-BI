@@ -1,0 +1,562 @@
+{
+ "powerbi_version": "2.157.879.0 (26.08)+da30fe74eb0b8a8786ab7326b69c400a0e951831",
+ "frozen": "2026-10-21",
+ "items": [
+  {
+   "expr": "IF(ISBLANK(BLANK()),1,2)",
+   "powerbi": "1"
+  },
+  {
+   "expr": "IF(ISBLANK(0),1,2)",
+   "powerbi": "2"
+  },
+  {
+   "expr": "IF(ISBLANK(SUM(Facts[Sales])),1,2)",
+   "powerbi": "2"
+  },
+  {
+   "expr": "IF(ISBLANK(MAX(Facts[Note])),1,2)",
+   "powerbi": "2"
+  },
+  {
+   "expr": "IF(ISBLANK(SUM(Facts[Sales])-SUM(Facts[Sales])),1,2)",
+   "powerbi": "2"
+  },
+  {
+   "expr": "IF(ISBLANK(1/0),1,2)",
+   "powerbi": "2"
+  },
+  {
+   "expr": "IF(NOT(ISBLANK(BLANK())),1,2)",
+   "powerbi": "2"
+  },
+  {
+   "expr": "IF(ISBLANK(BLANK()) && TRUE(),1,2)",
+   "powerbi": "1"
+  },
+  {
+   "expr": "IFERROR(1/0,-1)",
+   "powerbi": "-1"
+  },
+  {
+   "expr": "IFERROR(5,-1)",
+   "powerbi": "5"
+  },
+  {
+   "expr": "IFERROR(BLANK(),-1)",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "IFERROR(SQRT(-1),7)",
+   "powerbi": "7"
+  },
+  {
+   "expr": "IFERROR(LN(0),7)",
+   "powerbi": "7"
+  },
+  {
+   "expr": "IFERROR(DIVIDE(1,0),7)",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "IFERROR(1/0,BLANK())",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "IFERROR(0/0,3)",
+   "powerbi": "3"
+  },
+  {
+   "expr": "IFERROR(SUM(Facts[Sales])/0,9)",
+   "powerbi": "9"
+  },
+  {
+   "expr": "SWITCH(2,1,10,2,20,30)",
+   "powerbi": "20"
+  },
+  {
+   "expr": "SWITCH(5,1,10,2,20,30)",
+   "powerbi": "30"
+  },
+  {
+   "expr": "SWITCH(5,1,10,2,20)",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "SWITCH(TRUE(),1>2,10,2>1,20,30)",
+   "powerbi": "20"
+  },
+  {
+   "expr": "SWITCH(TRUE(),SUM(Facts[Sales])>100,1,SUM(Facts[Sales])>10,2,3)",
+   "powerbi": "2"
+  },
+  {
+   "expr": "SWITCH(BLANK(),0,10,20)",
+   "powerbi": "20"
+  },
+  {
+   "expr": "SWITCH(0,BLANK(),10,20)",
+   "powerbi": "20"
+  },
+  {
+   "expr": "SWITCH(1,1,BLANK(),2)",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "SWITCH(2,1,10)",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "SWITCH(SUM(Facts[Quantity]),0,1,2)",
+   "powerbi": "2"
+  },
+  {
+   "expr": "IF(TRUE(),1)",
+   "powerbi": "1"
+  },
+  {
+   "expr": "IF(FALSE(),1)",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "IF(BLANK(),1,2)",
+   "powerbi": "2"
+  },
+  {
+   "expr": "IF(0,1,2)",
+   "powerbi": "2"
+  },
+  {
+   "expr": "IF(2,1,2)",
+   "powerbi": "1"
+  },
+  {
+   "expr": "IF(BLANK(),1)",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "CEILING(2.1,1)",
+   "powerbi": "3"
+  },
+  {
+   "expr": "CEILING(-2.1,1)",
+   "powerbi": "-2"
+  },
+  {
+   "expr": "CEILING(2.1,0.5)",
+   "powerbi": "2.5"
+  },
+  {
+   "expr": "CEILING(2.1,2)",
+   "powerbi": "4"
+  },
+  {
+   "expr": "CEILING(5,0)",
+   "powerbi": "0"
+  },
+  {
+   "expr": "CEILING(2.1,-1)",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 19) An argument of function 'CEILING' has the wrong data type or the result is too large or too small.\""
+  },
+  {
+   "expr": "CEILING(-2.1,-1)",
+   "powerbi": "-3"
+  },
+  {
+   "expr": "CEILING(BLANK(),1)",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "CEILING(2.1,BLANK())",
+   "powerbi": "0"
+  },
+  {
+   "expr": "CEILING(2.1)",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 19) Too few arguments were passed to the CEILING function. The minimum argument count for the function is 2.\""
+  },
+  {
+   "expr": "CEILING(0,1)",
+   "powerbi": "0"
+  },
+  {
+   "expr": "CEILING(7,3)",
+   "powerbi": "9"
+  },
+  {
+   "expr": "FLOOR(2.9,1)",
+   "powerbi": "2"
+  },
+  {
+   "expr": "FLOOR(-2.1,1)",
+   "powerbi": "-3"
+  },
+  {
+   "expr": "FLOOR(2.9,0.5)",
+   "powerbi": "2.5"
+  },
+  {
+   "expr": "FLOOR(7,3)",
+   "powerbi": "6"
+  },
+  {
+   "expr": "FLOOR(5,0)",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 19) Division by zero has occurred when evaluating function 'FLOOR'.\""
+  },
+  {
+   "expr": "FLOOR(2.1,-1)",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 19) An argument of function 'FLOOR' has the wrong data type or the result is too large or too small.\""
+  },
+  {
+   "expr": "FLOOR(-2.1,-1)",
+   "powerbi": "-2"
+  },
+  {
+   "expr": "FLOOR(BLANK(),1)",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "FLOOR(2.9)",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 19) Too few arguments were passed to the FLOOR function. The minimum argument count for the function is 2.\""
+  },
+  {
+   "expr": "MEDIAN(Facts[Sales])",
+   "powerbi": "2.5"
+  },
+  {
+   "expr": "MEDIAN(Facts[Quantity])",
+   "powerbi": "2.5"
+  },
+  {
+   "expr": "MEDIAN(Facts[Note])",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 26) MEDIAN does not support expressions of type string/Boolean/date.\""
+  },
+  {
+   "expr": "PRODUCT(Facts[Quantity])",
+   "powerbi": "0"
+  },
+  {
+   "expr": "PRODUCT(Facts[Sales])",
+   "powerbi": "0"
+  },
+  {
+   "expr": "COUNTBLANK(Facts[Note])",
+   "powerbi": "2"
+  },
+  {
+   "expr": "COUNTBLANK(Facts[Sales])",
+   "powerbi": "1"
+  },
+  {
+   "expr": "COUNTBLANK(Facts[Region])",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "ABS(BLANK())",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "BLANK()+1",
+   "powerbi": "1"
+  },
+  {
+   "expr": "BLANK()*5",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "SUM(Facts[Sales])+BLANK()",
+   "powerbi": "31.5"
+  },
+  {
+   "expr": "BLANK()-1",
+   "powerbi": "-1"
+  },
+  {
+   "expr": "1-BLANK()",
+   "powerbi": "1"
+  },
+  {
+   "expr": "BLANK()/2",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "2/BLANK()",
+   "powerbi": "Infinity"
+  },
+  {
+   "expr": "BLANK()+BLANK()",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "IF(BLANK()+BLANK()=0,1,2)",
+   "powerbi": "1"
+  },
+  {
+   "expr": "IF(ISBLANK(BLANK()+BLANK()),1,2)",
+   "powerbi": "1"
+  },
+  {
+   "expr": "IF(SUM(Facts[Sales])>100,1)",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "IF(SUM(Facts[Sales])>10,1)",
+   "powerbi": "1"
+  },
+  {
+   "expr": "BLANK()/0",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "0/BLANK()",
+   "powerbi": "NaN"
+  },
+  {
+   "expr": "BLANK()/BLANK()",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "0*BLANK()",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "IF(BLANK()=BLANK(),1,2)",
+   "powerbi": "1"
+  },
+  {
+   "expr": "IF(BLANK()=0,1,2)",
+   "powerbi": "1"
+  },
+  {
+   "expr": "IF(0=BLANK(),1,2)",
+   "powerbi": "1"
+  },
+  {
+   "expr": "IF(BLANK()<1,1,2)",
+   "powerbi": "1"
+  },
+  {
+   "expr": "IF(BLANK()>-1,1,2)",
+   "powerbi": "1"
+  },
+  {
+   "expr": "FLOOR(0,-1)",
+   "powerbi": "0"
+  },
+  {
+   "expr": "CEILING(0,-1)",
+   "powerbi": "0"
+  },
+  {
+   "expr": "CEILING(0,0)",
+   "powerbi": "0"
+  },
+  {
+   "expr": "FLOOR(0,0)",
+   "powerbi": "0"
+  },
+  {
+   "expr": "FLOOR(BLANK(),0)",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "CEILING(BLANK(),0)",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "CEILING(-2.1,-0.5)",
+   "powerbi": "-2.5"
+  },
+  {
+   "expr": "FLOOR(-2.1,-0.5)",
+   "powerbi": "-2"
+  },
+  {
+   "expr": "CEILING(0.3,0.1)",
+   "powerbi": "0.3"
+  },
+  {
+   "expr": "FLOOR(0.3,0.1)",
+   "powerbi": "0.3"
+  },
+  {
+   "expr": "CEILING(1.1,0.1)",
+   "powerbi": "1.1"
+  },
+  {
+   "expr": "FLOOR(2.9,BLANK())",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 19) Division by zero has occurred when evaluating function 'FLOOR'.\""
+  },
+  {
+   "expr": "CEILING(-5,0)",
+   "powerbi": "0"
+  },
+  {
+   "expr": "FLOOR(-5,0)",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 19) Division by zero has occurred when evaluating function 'FLOOR'.\""
+  },
+  {
+   "expr": "FLOOR(2.9,0)",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 19) Division by zero has occurred when evaluating function 'FLOOR'.\""
+  },
+  {
+   "expr": "CEILING(10,3)",
+   "powerbi": "12"
+  },
+  {
+   "expr": "FLOOR(10,3)",
+   "powerbi": "9"
+  },
+  {
+   "expr": "FLOOR(-10,3)",
+   "powerbi": "-12"
+  },
+  {
+   "expr": "CEILING(-10,3)",
+   "powerbi": "-9"
+  },
+  {
+   "expr": "CEILING(2.5,0.3)",
+   "powerbi": "2.7"
+  },
+  {
+   "expr": "FLOOR(2.5,0.3)",
+   "powerbi": "2.4"
+  },
+  {
+   "expr": "CEILING(123456.789,0.01)",
+   "powerbi": "123456.79"
+  },
+  {
+   "expr": "FLOOR(1E10,7)",
+   "powerbi": "9999999996"
+  },
+  {
+   "expr": "SWITCH(TRUE(),BLANK(),1,2)",
+   "powerbi": "2"
+  },
+  {
+   "expr": "SWITCH(1,TRUE(),5,9)",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 28) Function 'SWITCH' does not support comparing values of type Integer with values of type True/False. Consider using the VALUE or FORMAT function to convert one of the values.\""
+  },
+  {
+   "expr": "SWITCH(TRUE(),1,5,9)",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 33) Function 'SWITCH' does not support comparing values of type True/False with values of type Integer. Consider using the VALUE or FORMAT function to convert one of the values.\""
+  },
+  {
+   "expr": "SWITCH(TRUE(),SUM(Facts[Sales])>10,1/0,2)",
+   "powerbi": "Infinity"
+  },
+  {
+   "expr": "SWITCH(1,2,1/0,1,7)",
+   "powerbi": "7"
+  },
+  {
+   "expr": "IFERROR(IFERROR(1/0,SQRT(-1)),4)",
+   "powerbi": "4"
+  },
+  {
+   "expr": "IFERROR(IFERROR(1/0,5),4)",
+   "powerbi": "5"
+  },
+  {
+   "expr": "IF(1/0>1,1,2)",
+   "powerbi": "1"
+  },
+  {
+   "expr": "IFERROR(1/0>1,2)",
+   "powerbi": "True"
+  },
+  {
+   "expr": "IFERROR(SUM(Facts[Sales]),0)",
+   "powerbi": "31.5"
+  },
+  {
+   "expr": "IFERROR(SUM(Facts[Sales])/SUM(Facts[Quantity])*0,5)",
+   "powerbi": "0"
+  },
+  {
+   "expr": "IF(ISBLANK(SUM(Facts[Sales])),0,SUM(Facts[Sales])*2)",
+   "powerbi": "63"
+  },
+  {
+   "expr": "COALESCE(IFERROR(1/0,BLANK()),9)",
+   "powerbi": "9"
+  },
+  {
+   "expr": "CALCULATE(IFERROR(SUM(Facts[Sales])/0,0))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "COUNTBLANK(Facts[Quantity])",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MEDIAN(Facts[Sales])+1",
+   "powerbi": "3.5"
+  },
+  {
+   "expr": "PRODUCT(Facts[Quantity])+1",
+   "powerbi": "1"
+  },
+  {
+   "expr": "SUMX(Facts,IF(Facts[Quantity]>1,Facts[Sales]))",
+   "powerbi": "33"
+  },
+  {
+   "expr": "SUMX(Facts,IFERROR(Facts[Sales]/Facts[Quantity],0))",
+   "powerbi": "10.9166666666667"
+  },
+  {
+   "expr": "SUMX(Facts,SWITCH(TRUE(),Facts[Quantity]>2,1,2))",
+   "powerbi": "9"
+  },
+  {
+   "expr": "SUMX(Facts,CEILING(Facts[Sales],1))",
+   "powerbi": "33"
+  },
+  {
+   "expr": "SUMX(Facts,FLOOR(Facts[Sales],2))",
+   "powerbi": "30"
+  },
+  {
+   "expr": "SUMX(Facts,Facts[Sales]*2)",
+   "powerbi": "63"
+  },
+  {
+   "expr": "SUMX(Facts,Facts[Sales]+Facts[Quantity])",
+   "powerbi": "46.5"
+  },
+  {
+   "expr": "SUMX(Facts,Facts[Sales]*Facts[Quantity])",
+   "powerbi": "92"
+  },
+  {
+   "expr": "AVERAGEX(Facts,Facts[Sales]*2)",
+   "powerbi": "12.6"
+  },
+  {
+   "expr": "MAXX(Facts,IF(Facts[Quantity]>1,Facts[Sales]))",
+   "powerbi": "20"
+  },
+  {
+   "expr": "COUNTX(Facts,Facts[Sales]*2)",
+   "powerbi": "5"
+  },
+  {
+   "expr": "SUMX(Facts,IF(Facts[Sales]>0,Facts[Sales],BLANK()))",
+   "powerbi": "33"
+  },
+  {
+   "expr": "SUMX(Facts,SWITCH(Facts[Quantity],0,10,5,50,1))",
+   "powerbi": "64"
+  },
+  {
+   "expr": "SUMX(Facts,IFERROR(SQRT(Facts[Sales]),-1))",
+   "powerbi": "8.2936451342877"
+  },
+  {
+   "expr": "SUMX(Facts,Facts[Sales]-Facts[Quantity])",
+   "powerbi": "16.5"
+  }
+ ]
+}

@@ -74,5 +74,32 @@ class VisualLifecycleTests(unittest.TestCase):
         removed = next((v for v in visuals_final if v["id"] == v_id), None)
         self.assertIsNone(removed)
 
+    def test_visual_positions_and_sizes_stay_within_the_report_page(self) -> None:
+        controller = self.controller()
+        visual_id = controller.add_visual("column", "Bounded", 1200, 700, 500, 300)
+        visual = controller.activeVisualObjects[0]
+        self.assertEqual(
+            (visual["x"], visual["y"], visual["width"], visual["height"]),
+            (780, 420, 500, 300),
+        )
+
+        controller.move_visual(visual_id, 5000, 5000)
+        visual = controller.activeVisualObjects[0]
+        self.assertEqual((visual["x"], visual["y"]), (780, 420))
+
+        controller.resize_visual(visual_id, 2000, 2000)
+        visual = controller.activeVisualObjects[0]
+        self.assertEqual((visual["width"], visual["height"]), (500, 300))
+        self.assertLessEqual(visual["x"] + visual["width"], 1280)
+        self.assertLessEqual(visual["y"] + visual["height"], 720)
+
+        controller.set_visual_property("x", 5000)
+        controller.set_visual_property("y", 5000)
+        controller.set_visual_property("width", 5000)
+        controller.set_visual_property("height", 5000)
+        visual = controller.activeVisualObjects[0]
+        self.assertEqual((visual["x"], visual["y"]), (780, 420))
+        self.assertEqual((visual["width"], visual["height"]), (500, 300))
+
 if __name__ == "__main__":
     unittest.main()

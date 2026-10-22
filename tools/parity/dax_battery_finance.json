@@ -1,0 +1,1750 @@
+{
+ "powerbi_version": "2.157.879.0 (26.08)+da30fe74eb0b8a8786ab7326b69c400a0e951831",
+ "frozen": "2026-10-21",
+ "items": [
+  {
+   "expr": "PMT(0.05, 10, 0)",
+   "powerbi": "0"
+  },
+  {
+   "expr": "PMT(\"0.05\", \"10\", \"-1000\")",
+   "powerbi": "129.504574965457"
+  },
+  {
+   "expr": "PMT(0.05, 10, BLANK(), BLANK())",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "PMT(0.05, 10, -1000, 0, 1)",
+   "powerbi": "123.337690443292"
+  },
+  {
+   "expr": "PMT(0.05, 10, -1000, 500, 1)",
+   "powerbi": "85.4783690311698"
+  },
+  {
+   "expr": "PMT(BLANK(), 10, BLANK())",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "PMT(0.1365, 36, 49000.76, 0, 1)",
+   "powerbi": "-5944.64311122985"
+  },
+  {
+   "expr": "PMT(1,2,3,4,5,6)",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 33) Too many arguments were passed to the PMT function. The maximum argument count for the function is 5.\""
+  },
+  {
+   "expr": "PMT(0.05, 10, BLANK())",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "PMT(0.1734, 36, 6605.15, 0, 0)",
+   "powerbi": "-1148.96586535749"
+  },
+  {
+   "expr": "PMT(0.05, 10, -1000)",
+   "powerbi": "129.504574965457"
+  },
+  {
+   "expr": "PMT(0.05, 10, -1000, \"\")",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 40) Cannot convert value '' of type Text to type Number.\""
+  },
+  {
+   "expr": "PMT(0.1953, 15.5, -11346.97, 24329.07, 1)",
+   "powerbi": "1711.44537791736"
+  },
+  {
+   "expr": "PMT(-0.5, 1000, -1000)",
+   "powerbi": "4.66631809251646E-299"
+  },
+  {
+   "expr": "PMT(0.05, 10, -1000, 0, 1.5)",
+   "powerbi": "123.337690443292"
+  },
+  {
+   "expr": "PMT(0.05, -1000, -1000)",
+   "powerbi": "-3.23348562380216E-20"
+  },
+  {
+   "expr": "PMT(0.05, 0, BLANK())",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 19) An argument of function 'PMT' has the wrong data type or the result is too large or too small.\""
+  },
+  {
+   "expr": "PMT(0.05, 1E10, -1000)",
+   "powerbi": "50"
+  },
+  {
+   "expr": "PMT(0.05, 10, -1000, 0)",
+   "powerbi": "129.504574965457"
+  },
+  {
+   "expr": "PMT(0.05, 1E-10, -1000)",
+   "powerbi": "10247967157168.9"
+  },
+  {
+   "expr": "PV(0.05, 10, -1000, 0, \"x\")",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 42) Cannot convert value 'x' of type Text to type Integer.\""
+  },
+  {
+   "expr": "PV(0.05, 10, -1000, \"500\")",
+   "powerbi": "7414.77830241443"
+  },
+  {
+   "expr": "PV(1E-15, 10, -1000)",
+   "powerbi": "11102.2302462514"
+  },
+  {
+   "expr": "PV(-1.5, 3, -1000)",
+   "powerbi": "-6000"
+  },
+  {
+   "expr": "PV(-0.5, 2.5, -1000)",
+   "powerbi": "9313.70849898476"
+  },
+  {
+   "expr": "PV(0.05, 1E300, -1000)",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 19) An argument of function 'PV' has the wrong data type or the result is too large or too small.\""
+  },
+  {
+   "expr": "PV(\"0.05\", \"10\", \"-1000\")",
+   "powerbi": "7721.73492918481"
+  },
+  {
+   "expr": "PV(0.05, 10, TRUE())",
+   "powerbi": "-7.72173492918481"
+  },
+  {
+   "expr": "PV(1E-15, 10, -1000, 5)",
+   "powerbi": "11097.2302462514"
+  },
+  {
+   "expr": "PV(0.233, 360, -24423.63, 0, 0)",
+   "powerbi": "104822.446351931"
+  },
+  {
+   "expr": "PV(0.05, 10, -1000, 0, 2.5)",
+   "powerbi": "8107.82167564405"
+  },
+  {
+   "expr": "PV(1E-6, 360, -1000, 0, 1)",
+   "powerbi": "359935.387753692"
+  },
+  {
+   "expr": "PV(0.05, 10, -1000, 500, 1)",
+   "powerbi": "7800.86504887367"
+  },
+  {
+   "expr": "PV(-1, 10, -1000)",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 19) Division by zero has occurred when evaluating function 'PV'.\""
+  },
+  {
+   "expr": "PV(0.05, BLANK(), -1000)",
+   "powerbi": "0"
+  },
+  {
+   "expr": "PV(0.1, 1, 100, 100, 1)",
+   "powerbi": "-190.909090909091"
+  },
+  {
+   "expr": "PV(-1, 0, -1000)",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 19) An argument of function 'PV' has the wrong data type or the result is too large or too small.\""
+  },
+  {
+   "expr": "PV(1E-8, -360, -1000)",
+   "powerbi": "-360000.642410915"
+  },
+  {
+   "expr": "PV(-0.5, -1000, -1000)",
+   "powerbi": "-2000"
+  },
+  {
+   "expr": "PV(0.05, 10, -1000, 500)",
+   "powerbi": "7414.77830241443"
+  },
+  {
+   "expr": "FV(0.05, 1E10, -1000)",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 19) An argument of function 'FV' has the wrong data type or the result is too large or too small.\""
+  },
+  {
+   "expr": "FV(0.005, 360, -200000, 0, 1)",
+   "powerbi": "201907523.532968"
+  },
+  {
+   "expr": "FV(-1, 10, -1000)",
+   "powerbi": "1000"
+  },
+  {
+   "expr": "FV(-0.5, 2.5, -1000)",
+   "powerbi": "1646.44660940673"
+  },
+  {
+   "expr": "FV(1E-12, 5E9, -1)",
+   "powerbi": "5012967590.48953"
+  },
+  {
+   "expr": "FV(0.0000001, 10, -1000)",
+   "powerbi": "10000.0045066828"
+  },
+  {
+   "expr": "FV(0, 10, -1000, 500, 1)",
+   "powerbi": "9500"
+  },
+  {
+   "expr": "FV(-1, 1, BLANK())",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "FV(0.1652, 1, 46055.75, 0, 1)",
+   "powerbi": "-53664.1599"
+  },
+  {
+   "expr": "FV(0.05, 10, BLANK(), 500)",
+   "powerbi": "-814.447313388721"
+  },
+  {
+   "expr": "FV(0.0816, 10, 34478.59, 0, 0)",
+   "powerbi": "-503287.334413732"
+  },
+  {
+   "expr": "FV(0, 0, -1000)",
+   "powerbi": "0"
+  },
+  {
+   "expr": "FV(1E-10, -7, -1)",
+   "powerbi": "-7.0000005791826"
+  },
+  {
+   "expr": "FV(BLANK(), 10, -1000)",
+   "powerbi": "10000"
+  },
+  {
+   "expr": "FV(-1, 1, -1000)",
+   "powerbi": "1000"
+  },
+  {
+   "expr": "FV(0.05, 10, -1000, 0, 1.5)",
+   "powerbi": "13206.7871623263"
+  },
+  {
+   "expr": "FV(1E-15, 10, -1000, 5)",
+   "powerbi": "11097.2302462516"
+  },
+  {
+   "expr": "FV(BLANK(), BLANK(), BLANK())",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "FV(-1, -1, -1000)",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 19) Division by zero has occurred when evaluating function 'FV'.\""
+  },
+  {
+   "expr": "FV(0.05, 10, TRUE())",
+   "powerbi": "-12.5778925355488"
+  },
+  {
+   "expr": "NPER(0.05, -100, 1000, 1000)",
+   "powerbi": "22.517085305411"
+  },
+  {
+   "expr": "NPER(0.1586, -78.68, 249531.9, -322.53, 1)",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 19) An argument of function 'NPER' has the wrong data type or the result is too large or too small.\""
+  },
+  {
+   "expr": "NPER(\"0.05\", \"-100\", \"1000\")",
+   "powerbi": "14.2066990828905"
+  },
+  {
+   "expr": "NPER(0.05, 1E300, 1000)",
+   "powerbi": "0"
+  },
+  {
+   "expr": "NPER(TRUE(), -100, 1000)",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 19) An argument of function 'NPER' has the wrong data type or the result is too large or too small.\""
+  },
+  {
+   "expr": "NPER(0.1365, -121.18, 204290.40000000002, -109.09, 1)",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 19) An argument of function 'NPER' has the wrong data type or the result is too large or too small.\""
+  },
+  {
+   "expr": "NPER(-1.5, -100, 1000)",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 19) An argument of function 'NPER' has the wrong data type or the result is too large or too small.\""
+  },
+  {
+   "expr": "NPER(0.05, -100, 1000, 0, \"x\")",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 45) Cannot convert value 'x' of type Text to type Integer.\""
+  },
+  {
+   "expr": "NPER(0.05, -100, 1000, -500)",
+   "powerbi": "8.31038622252056"
+  },
+  {
+   "expr": "NPER(0.05, -100, 1000, -1000)",
+   "powerbi": "0"
+  },
+  {
+   "expr": "NPER(0.05, -50.0001, 1000)",
+   "powerbi": "268.955138822643"
+  },
+  {
+   "expr": "NPER(0.05, -100, 5000)",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 19) An argument of function 'NPER' has the wrong data type or the result is too large or too small.\""
+  },
+  {
+   "expr": "NPER(0.05, -100, 1000, -3000)",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 19) An argument of function 'NPER' has the wrong data type or the result is too large or too small.\""
+  },
+  {
+   "expr": "NPER(1E-15, -100, 1000)",
+   "powerbi": "8.99999999999996"
+  },
+  {
+   "expr": "NPER(1,2)",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 19) Too few arguments were passed to the NPER function. The minimum argument count for the function is 3.\""
+  },
+  {
+   "expr": "NPER(0.05, -100, 1000)",
+   "powerbi": "14.2066990828905"
+  },
+  {
+   "expr": "NPER(-1, -100, 1000)",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 19) An argument of function 'NPER' has the wrong data type or the result is too large or too small.\""
+  },
+  {
+   "expr": "NPER(-1, 0, 1000)",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 19) An argument of function 'NPER' has the wrong data type or the result is too large or too small.\""
+  },
+  {
+   "expr": "NPER(0.05, 0, 1000)",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 19) An argument of function 'NPER' has the wrong data type or the result is too large or too small.\""
+  },
+  {
+   "expr": "NPER(0.0000001, -100, 1000)",
+   "powerbi": "10.0000054942212"
+  },
+  {
+   "expr": "NPER(0.5, -100, 1000)",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 19) An argument of function 'NPER' has the wrong data type or the result is too large or too small.\""
+  },
+  {
+   "expr": "NPER(-0.05, 100, -1000)",
+   "powerbi": "7.90483654733971"
+  },
+  {
+   "expr": "RATE(10, -1, 1E30)",
+   "powerbi": "-0.998999899934818"
+  },
+  {
+   "expr": "RATE(10, -100, 800, 0, 0, \"0.1\")",
+   "powerbi": "0.042774978035587"
+  },
+  {
+   "expr": "RATE(2, -1, 1.1E14)",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 19) An argument of function 'RATE' has the wrong data type or the result is too large or too small.\""
+  },
+  {
+   "expr": "RATE(361, -597.26, 52579.65, 164.34, 0)",
+   "powerbi": "0.0111511431694913"
+  },
+  {
+   "expr": "RATE(0.5, 0, -100, 110)",
+   "powerbi": "0.209999999999563"
+  },
+  {
+   "expr": "RATE(1, 100, -100)",
+   "powerbi": "-7.50733680629903E-09"
+  },
+  {
+   "expr": "RATE(10, -100, 800, 0, 0, 1E-12)",
+   "powerbi": "0.0427749780349174"
+  },
+  {
+   "expr": "RATE(12, 100, -1000)",
+   "powerbi": "0.0292285407691384"
+  },
+  {
+   "expr": "RATE(30, 100, -1)",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 19) An argument of function 'RATE' has the wrong data type or the result is too large or too small.\""
+  },
+  {
+   "expr": "RATE(10, -100, 800, 0, 0, 1E5)",
+   "powerbi": "0.0427749780351451"
+  },
+  {
+   "expr": "RATE(0, -100, 800)",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 19) An argument of function 'RATE' has the wrong data type or the result is too large or too small.\""
+  },
+  {
+   "expr": "RATE(10, -100, 800, 0, 0, -0.5)",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 19) An argument of function 'RATE' has the wrong data type or the result is too large or too small.\""
+  },
+  {
+   "expr": "RATE(10, -100, 800, 0, 0, 4515423.199268307)",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 19) An argument of function 'RATE' has the wrong data type or the result is too large or too small.\""
+  },
+  {
+   "expr": "RATE(12, 100, 1000)",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 19) An argument of function 'RATE' has the wrong data type or the result is too large or too small.\""
+  },
+  {
+   "expr": "RATE(10, -100, 800, 0, 0, 10640890.556430213)",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 19) An argument of function 'RATE' has the wrong data type or the result is too large or too small.\""
+  },
+  {
+   "expr": "RATE(10, -1, 1E68)",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 19) An argument of function 'RATE' has the wrong data type or the result is too large or too small.\""
+  },
+  {
+   "expr": "RATE(10, -100, 800, 0, 0, -0.99999999)",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 19) An argument of function 'RATE' has the wrong data type or the result is too large or too small.\""
+  },
+  {
+   "expr": "RATE(10, -1, 1E71)",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 19) An argument of function 'RATE' has the wrong data type or the result is too large or too small.\""
+  },
+  {
+   "expr": "RATE(10, -100, 800, 0, 0, 1E4)",
+   "powerbi": "0.042774978048209"
+  },
+  {
+   "expr": "RATE(10, -100, 800, 0, 0, 1E15)",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 19) An argument of function 'RATE' has the wrong data type or the result is too large or too small.\""
+  },
+  {
+   "expr": "RATE(16, -187.71, 224758.0, 2280.1, 1)",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 19) An argument of function 'RATE' has the wrong data type or the result is too large or too small.\""
+  },
+  {
+   "expr": "RATE(360, -1000, 150000, 0, 0, 0)",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 19) An argument of function 'RATE' has the wrong data type or the result is too large or too small.\""
+  },
+  {
+   "expr": "RATE(2, -1, 4E14)",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 19) An argument of function 'RATE' has the wrong data type or the result is too large or too small.\""
+  },
+  {
+   "expr": "RATE(120, 0, -1000, 3000, 0, -0.9)",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 19) An argument of function 'RATE' has the wrong data type or the result is too large or too small.\""
+  },
+  {
+   "expr": "RATE(10, BLANK(), 100, -200)",
+   "powerbi": "0.0717734625363799"
+  },
+  {
+   "expr": "RATE(1, -100, 100)",
+   "powerbi": "3.91650399232324E-09"
+  },
+  {
+   "expr": "IPMT(0.1953, 9, 15.5, -11346.97, 24329.07, 1)",
+   "powerbi": "2305.37931124197"
+  },
+  {
+   "expr": "IPMT(0.05, 1, 1E-4, -1000)",
+   "powerbi": "49.9999999999945"
+  },
+  {
+   "expr": "IPMT(0.05, -1, 10, -1000)",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 19) An argument of function 'IPMT' has the wrong data type or the result is too large or too small.\""
+  },
+  {
+   "expr": "IPMT(2, 2, 10, -1000)",
+   "powerbi": "1999.93225850156"
+  },
+  {
+   "expr": "IPMT(0, 5, 10, -1000, 500)",
+   "powerbi": "0"
+  },
+  {
+   "expr": "IPMT(0.05, 1, 1E10, -1000)",
+   "powerbi": "50"
+  },
+  {
+   "expr": "IPMT(0.1768, 1, 2, -11788.56, 31929.22, 1)",
+   "powerbi": "0"
+  },
+  {
+   "expr": "IPMT(1, 2, 10, -1000)",
+   "powerbi": "999.022482893451"
+  },
+  {
+   "expr": "IPMT(0.05, 2, 10, -1000, 500, 1)",
+   "powerbi": "45.7260815484415"
+  },
+  {
+   "expr": "IPMT(-0.05, 3, 10, -1000)",
+   "powerbi": "-37.8508627463815"
+  },
+  {
+   "expr": "IPMT(1E-5, 3, 10, -1000)",
+   "powerbi": "0.0080000799988"
+  },
+  {
+   "expr": "IPMT(0.05, 1, 10, -1000, 0, BLANK())",
+   "powerbi": "50"
+  },
+  {
+   "expr": "IPMT(0, 0, 10, -1000)",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 19) An argument of function 'IPMT' has the wrong data type or the result is too large or too small.\""
+  },
+  {
+   "expr": "IPMT(0.05, 0, 10, -1000)",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 19) An argument of function 'IPMT' has the wrong data type or the result is too large or too small.\""
+  },
+  {
+   "expr": "IPMT(0.05, 2, 10, BLANK(), 0, 1)",
+   "powerbi": "0"
+  },
+  {
+   "expr": "IPMT(0.1586, 2, 6, -48552.44, 29377.85, 1)",
+   "powerbi": "6352.90136257269"
+  },
+  {
+   "expr": "IPMT(0.05, TRUE(), 10, -1000)",
+   "powerbi": "50"
+  },
+  {
+   "expr": "IPMT(0.05, 1, 10, -1000, 0, 0.5)",
+   "powerbi": "0"
+  },
+  {
+   "expr": "IPMT(0.05, 2, 10, 0, 500)",
+   "powerbi": "1.98761437413642"
+  },
+  {
+   "expr": "IPMT(0.05, 10.5, 10, -1000)",
+   "powerbi": "3.12105080949872"
+  },
+  {
+   "expr": "PPMT(0.05, 1, 1E-4, -1000)",
+   "powerbi": "10247942.1571643"
+  },
+  {
+   "expr": "PPMT(0.05, 10.99999, 10, -1000)",
+   "powerbi": "129.504511779977"
+  },
+  {
+   "expr": "PPMT(0, 1, 10, -1000)",
+   "powerbi": "100"
+  },
+  {
+   "expr": "PPMT(0.05, 1, 5, -1000, 100, 1)",
+   "powerbi": "202.740303157563"
+  },
+  {
+   "expr": "PPMT(0.05, TRUE(), 10, -1000)",
+   "powerbi": "79.5045749654567"
+  },
+  {
+   "expr": "PPMT(0.05, 0.5, 10, -1000)",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 19) An argument of function 'PPMT' has the wrong data type or the result is too large or too small.\""
+  },
+  {
+   "expr": "PPMT(1E-10, 5, 10, -1000)",
+   "powerbi": "99.999999995"
+  },
+  {
+   "expr": "PPMT(0.05, 1, 10, -1000, 0, 1)",
+   "powerbi": "123.337690443292"
+  },
+  {
+   "expr": "PPMT(0.05, 2, 10, 1000, -500, 1)",
+   "powerbi": "-39.7522874827283"
+  },
+  {
+   "expr": "PPMT(10, 3, 10, -1000, 0, 1)",
+   "powerbi": "4.24097618388836E-06"
+  },
+  {
+   "expr": "PPMT(0.05, 2, 10, 0, 500)",
+   "powerbi": "-41.7399018568647"
+  },
+  {
+   "expr": "PPMT(0.05, -1, 10, -1000)",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 19) An argument of function 'PPMT' has the wrong data type or the result is too large or too small.\""
+  },
+  {
+   "expr": "PPMT(0.05, 1, 0.5, -1000)",
+   "powerbi": "2024.69507659596"
+  },
+  {
+   "expr": "PPMT(0.1586, 2, 6, -48552.44, 29377.85, 1)",
+   "powerbi": "2143.41403104215"
+  },
+  {
+   "expr": "PPMT(0.1953, 9, 15.5, -11346.97, 24329.07, 1)",
+   "powerbi": "-593.933933324604"
+  },
+  {
+   "expr": "PPMT(1E300, 1, 10, -1000)",
+   "powerbi": "0"
+  },
+  {
+   "expr": "CUMIPMT(0.1365, 36, 49000.76, 8, 28, 1)",
+   "powerbi": "-110255.588251433"
+  },
+  {
+   "expr": "CUMIPMT(0.05, 10, 1000, 1, 10, BLANK())",
+   "powerbi": "-295.045749654567"
+  },
+  {
+   "expr": "CUMIPMT(0.05, 10.5, 1000, 1, 10.5, 0)",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 19) An argument of function 'CUMIPMT' has the wrong data type or the result is too large or too small.\""
+  },
+  {
+   "expr": "CUMIPMT(0.05, 10, 1000, 1, 10, 0.5)",
+   "powerbi": "-233.376904432921"
+  },
+  {
+   "expr": "CUMIPMT(0.05, 10, 1000, 1, 10, TRUE())",
+   "powerbi": "-233.376904432921"
+  },
+  {
+   "expr": "CUMIPMT(1E-20, 10, 1000, 3, 7, 0)",
+   "powerbi": "1.13686837721616E-13"
+  },
+  {
+   "expr": "CUMIPMT(0.0816, 10, 25885.26, 5, 7, 0)",
+   "powerbi": "-3765.67795237193"
+  },
+  {
+   "expr": "CUMIPMT(0.05, 10, 1000, 1, 10, 9223372036854775808)",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 50) The result of a conversion or arithmetic operation is either too large or too small.\""
+  },
+  {
+   "expr": "CUMIPMT(0.05, 5.5, 1000, 6, 6, 0)",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 19) An argument of function 'CUMIPMT' has the wrong data type or the result is too large or too small.\""
+  },
+  {
+   "expr": "CUMIPMT(0.05, 10, 1000, 1.9, 5.9, 0)",
+   "powerbi": "-186.244262682833"
+  },
+  {
+   "expr": "CUMIPMT(0.05, 10, 1000, 5, 5, 0)",
+   "powerbi": "-32.8662671913505"
+  },
+  {
+   "expr": "CUMIPMT(100, 10, 1000, 1, 10, 1)",
+   "powerbi": "-8900.9900990099"
+  },
+  {
+   "expr": "CUMIPMT(0.05, 10, 1000, 1, 10, \"1\")",
+   "powerbi": "-233.376904432921"
+  },
+  {
+   "expr": "CUMIPMT(0.1734, 36, 6605.15, 34, 36, 0)",
+   "powerbi": "-922.080286596974"
+  },
+  {
+   "expr": "CUMIPMT(0.05, 0, 1000, 1, 10, 0)",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 19) An argument of function 'CUMIPMT' has the wrong data type or the result is too large or too small.\""
+  },
+  {
+   "expr": "CUMIPMT(0.05, 10, 1000, 10, 10.0001, 0)",
+   "powerbi": "-6.16688452216457"
+  },
+  {
+   "expr": "CUMPRINC(1E-10, 10, 1000, 1, 10, 0)",
+   "powerbi": "-1000"
+  },
+  {
+   "expr": "CUMPRINC(0.05, 5.5, 1000, 1, 5, 1)",
+   "powerbi": "-902.47863808338"
+  },
+  {
+   "expr": "CUMPRINC(0.05, 10, 1000, 1, 10, -0.4)",
+   "powerbi": "-1000"
+  },
+  {
+   "expr": "CUMPRINC(100, 10, 1000, 1, 10, 1)",
+   "powerbi": "-1000"
+  },
+  {
+   "expr": "CUMPRINC(0.05, 10, 1000, \"a\", 3, 0)",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 44) Cannot convert value 'a' of type Text to type Integer.\""
+  },
+  {
+   "expr": "CUMPRINC(1E-300, 10, 1000, 2, 5, 1)",
+   "powerbi": "-400"
+  },
+  {
+   "expr": "CUMPRINC(0.05, 10, 1000, 0.99999, 3, 0)",
+   "powerbi": "-250.638172578602"
+  },
+  {
+   "expr": "CUMPRINC(TRUE(), 10, 1000, 1, 10, 0)",
+   "powerbi": "-1000"
+  },
+  {
+   "expr": "CUMPRINC(0.05, 5, 1000, 5.0000001, 5.5, 0)",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 19) An argument of function 'CUMPRINC' has the wrong data type or the result is too large or too small.\""
+  },
+  {
+   "expr": "CUMPRINC(0.05, 10, \"abc\", 1, 10, 0)",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 38) Cannot convert value 'abc' of type Text to type Number.\""
+  },
+  {
+   "expr": "CUMPRINC(0.05, 10, 1000, 1, 10, -0.5)",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 19) An argument of function 'CUMPRINC' has the wrong data type or the result is too large or too small.\""
+  },
+  {
+   "expr": "CUMPRINC(0.1953, 15, 11346.97, 5, 9, 1)",
+   "powerbi": "-2062.93995937326"
+  },
+  {
+   "expr": "CUMPRINC(0.05, 10, 1000, 0, 5, 0)",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 19) An argument of function 'CUMPRINC' has the wrong data type or the result is too large or too small.\""
+  },
+  {
+   "expr": "CUMPRINC(1E-15, 10, 1000, 1, 10, 0)",
+   "powerbi": "-1000"
+  },
+  {
+   "expr": "ISPMT(0.1992, 3, 15, -47333.75)",
+   "powerbi": "7543.1064"
+  },
+  {
+   "expr": "ISPMT(0.05, 1, 1, 1000)",
+   "powerbi": "0"
+  },
+  {
+   "expr": "ISPMT(0.05, 5, BLANK(), 0)",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 19) Division by zero has occurred when evaluating function 'ISPMT'.\""
+  },
+  {
+   "expr": "ISPMT(0.1586, 2, 6, -48552.44)",
+   "powerbi": "5133.61132266667"
+  },
+  {
+   "expr": "ISPMT(0.05, 7, 3, 1000)",
+   "powerbi": "66.6666666666667"
+  },
+  {
+   "expr": "ISPMT(0.05, 1E300, 10, 1000)",
+   "powerbi": "5E+300"
+  },
+  {
+   "expr": "ISPMT(0.0439, 20, 48, -47523.97)",
+   "powerbi": "1217.00966508333"
+  },
+  {
+   "expr": "ISPMT(0.05, -1, 10, 1000)",
+   "powerbi": "-55"
+  },
+  {
+   "expr": "ISPMT(0.05, 5, 10, BLANK())",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "ISPMT(0.05, 0, 0, 1000)",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 19) Division by zero has occurred when evaluating function 'ISPMT'.\""
+  },
+  {
+   "expr": "ISPMT(0, 5, 10, 1000)",
+   "powerbi": "0"
+  },
+  {
+   "expr": "ISPMT(0.05, -1E300, 10, 1000)",
+   "powerbi": "-5E+300"
+  },
+  {
+   "expr": "SLN(BLANK(), BLANK(), 5)",
+   "powerbi": "0"
+  },
+  {
+   "expr": "SLN(10000, 1000, TRUE())",
+   "powerbi": "9000"
+  },
+  {
+   "expr": "SLN(-10000, 1000, 5)",
+   "powerbi": "-2200"
+  },
+  {
+   "expr": "SLN(10000, 1000, 2.5)",
+   "powerbi": "3600"
+  },
+  {
+   "expr": "SLN(10000, 1000, 0)",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 19) Division by zero has occurred when evaluating function 'SLN'.\""
+  },
+  {
+   "expr": "SLN(10000.55, 1000.25, 7.5)",
+   "powerbi": "1200.04"
+  },
+  {
+   "expr": "SLN(1E300, -1E300, 1E-300)",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 19) An argument of function 'SLN' has the wrong data type or the result is too large or too small.\""
+  },
+  {
+   "expr": "SLN(TRUE(), 0, 1)",
+   "powerbi": "1"
+  },
+  {
+   "expr": "SLN(10000, 1000, 1E-10)",
+   "powerbi": "90000000000000"
+  },
+  {
+   "expr": "SLN(33899.899999999994, 11316.17, 6)",
+   "powerbi": "3763.955"
+  },
+  {
+   "expr": "SYD(459426.69999999995, 145679.08, 3, 2)",
+   "powerbi": "104582.54"
+  },
+  {
+   "expr": "SYD(10000, 1000, BLANK(), 1)",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 19) An argument of function 'SYD' has the wrong data type or the result is too large or too small.\""
+  },
+  {
+   "expr": "SYD(10000, BLANK(), 5, 1)",
+   "powerbi": "3333.33333333333"
+  },
+  {
+   "expr": "SYD(361037.1, 119956.07, 20, 17)",
+   "powerbi": "4592.01961904762"
+  },
+  {
+   "expr": "SYD(10000, 1000, 5, BLANK())",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 19) An argument of function 'SYD' has the wrong data type or the result is too large or too small.\""
+  },
+  {
+   "expr": "SYD(10000, 0, 5, 1)",
+   "powerbi": "3333.33333333333"
+  },
+  {
+   "expr": "SYD(10000, 1000, 5, TRUE())",
+   "powerbi": "3000"
+  },
+  {
+   "expr": "SYD(10000, 1000, 5, 2)",
+   "powerbi": "2400"
+  },
+  {
+   "expr": "SYD(10000, -1000, 5, 1)",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 19) An argument of function 'SYD' has the wrong data type or the result is too large or too small.\""
+  },
+  {
+   "expr": "SYD(1E300, 1000, 5, 1)",
+   "powerbi": "3.33333333333333E+299"
+  },
+  {
+   "expr": "SYD(10000, 1000, 1, 1)",
+   "powerbi": "9000"
+  },
+  {
+   "expr": "SYD(BLANK(), 1000, 5, 1)",
+   "powerbi": "-333.333333333333"
+  },
+  {
+   "expr": "SYD(225113.9, 16219.53, 5, 1)",
+   "powerbi": "69631.4566666667"
+  },
+  {
+   "expr": "SYD(70323.0, 19569.77, 15, 5)",
+   "powerbi": "4652.37941666667"
+  },
+  {
+   "expr": "DB(38508.4, 13211.48, 8, 3, 11)",
+   "powerbi": "3729.24772135417"
+  },
+  {
+   "expr": "DB(1000000, 2000000, 6, 1)",
+   "powerbi": "-122000"
+  },
+  {
+   "expr": "DB(1000000, 100000, 6.5, 7, 7)",
+   "powerbi": "17488.7291379431"
+  },
+  {
+   "expr": "DB(1000000, 100000, 6, 1, 6.4)",
+   "powerbi": "159500"
+  },
+  {
+   "expr": "DB(1000000, 100000, 1E6, 2)",
+   "powerbi": "0"
+  },
+  {
+   "expr": "DB(1000000, 100000, 1E10, 1E10)",
+   "powerbi": "0"
+  },
+  {
+   "expr": "DB(1000000, 100000, 6, 0, 7)",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 19) An argument of function 'DB' has the wrong data type or the result is too large or too small.\""
+  },
+  {
+   "expr": "DB(1000000, 100000, 6.5, 7, 6)",
+   "powerbi": "21617.2969889056"
+  },
+  {
+   "expr": "DB(1000000, 100000, 6, 1, 1E19)",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 45) The result of a conversion or arithmetic operation is either too large or too small.\""
+  },
+  {
+   "expr": "DB(65618.4, 21817.41, 4, 5, 2)",
+   "powerbi": "5530.73167371953"
+  },
+  {
+   "expr": "DB(1000000, 100000, 60, 60, 3)",
+   "powerbi": "3979.16781024409"
+  },
+  {
+   "expr": "DB(1000000, 100000, -6, 1)",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 19) An argument of function 'DB' has the wrong data type or the result is too large or too small.\""
+  },
+  {
+   "expr": "DB(1000000, 100000, 6, 2, 7)",
+   "powerbi": "259639.416666667"
+  },
+  {
+   "expr": "DB(70323.0, 19569.77, 15, 9, 12)",
+   "powerbi": "2908.39032719578"
+  },
+  {
+   "expr": "DB(10000, 1000, 5, 2, 2)",
+   "powerbi": "3463.065"
+  },
+  {
+   "expr": "DB(BLANK(), 100000, 6, 1)",
+   "powerbi": "0"
+  },
+  {
+   "expr": "DB(1000000, 100000, 1E6, 1E5)",
+   "powerbi": "0"
+  },
+  {
+   "expr": "DB(65618.4, 21817.41, 4, 4, 2)",
+   "powerbi": "8744.23980034708"
+  },
+  {
+   "expr": "DB(1000000, 100000, 6, 1, 7.5)",
+   "powerbi": "212666.666666667"
+  },
+  {
+   "expr": "DB(1000000, BLANK(), 6, 1)",
+   "powerbi": "1000000"
+  },
+  {
+   "expr": "DDB(\"2400\", \"300\", \"10\", \"1\", \"2\")",
+   "powerbi": "480"
+  },
+  {
+   "expr": "DDB(2400, 300, 5, 3, 2.5)",
+   "powerbi": "300"
+  },
+  {
+   "expr": "DDB(385258.7, 79093.76, 8, 7, 1)",
+   "powerbi": "21612.7876264095"
+  },
+  {
+   "expr": "DDB(2400, 300, 5, 5, 2.5)",
+   "powerbi": "0"
+  },
+  {
+   "expr": "DDB(-2400, -300, 10, 1)",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 19) An argument of function 'DDB' has the wrong data type or the result is too large or too small.\""
+  },
+  {
+   "expr": "DDB(2400, 300, 10.6, 11)",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 19) An argument of function 'DDB' has the wrong data type or the result is too large or too small.\""
+  },
+  {
+   "expr": "DDB(1E10, 300, 10, 1)",
+   "powerbi": "2000000000"
+  },
+  {
+   "expr": "DDB(2400, 3000, 10, 1)",
+   "powerbi": "0"
+  },
+  {
+   "expr": "DDB(459426.69999999995, 145679.08, 3, 1, 2.5)",
+   "powerbi": "313747.62"
+  },
+  {
+   "expr": "DDB(2400, 300, 10, 1, BLANK())",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 19) An argument of function 'DDB' has the wrong data type or the result is too large or too small.\""
+  },
+  {
+   "expr": "DDB(2400, 300, 10, 1, \"x\")",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 41) Cannot convert value 'x' of type Text to type Number.\""
+  },
+  {
+   "expr": "DDB(2400, 300, 10, 11, 2)",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 19) An argument of function 'DDB' has the wrong data type or the result is too large or too small.\""
+  },
+  {
+   "expr": "DDB(2400, 300, 10, BLANK())",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 19) An argument of function 'DDB' has the wrong data type or the result is too large or too small.\""
+  },
+  {
+   "expr": "DDB(2400, 300, 5, 3, 2)",
+   "powerbi": "345.6"
+  },
+  {
+   "expr": "DDB(2400, 300, 100, 50, 2)",
+   "powerbi": "17.8368822899812"
+  },
+  {
+   "expr": "DDB(1E300, 300, 10, 1)",
+   "powerbi": "2E+299"
+  },
+  {
+   "expr": "DDB(2400, 0, 10, 5)",
+   "powerbi": "196.608"
+  },
+  {
+   "expr": "DDB(2400, 300, 10, 1, -2)",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 19) An argument of function 'DDB' has the wrong data type or the result is too large or too small.\""
+  },
+  {
+   "expr": "VDB(TRUE(), 0, 1, 0, 1)",
+   "powerbi": "1"
+  },
+  {
+   "expr": "VDB(2400, 300, 10, 3, 10, 1)",
+   "powerbi": "1438.5"
+  },
+  {
+   "expr": "VDB(2400, 300, 10, 9, 9.5, 1, FALSE())",
+   "powerbi": "102.75"
+  },
+  {
+   "expr": "VDB(2400, 300, 5, 0.5, 4.75, 2)",
+   "powerbi": "1620"
+  },
+  {
+   "expr": "VDB(2400, 300, 10, 4.9, 5.1, 0.5, FALSE())",
+   "powerbi": "41.9999999999999"
+  },
+  {
+   "expr": "VDB(2400, 300, 10, 8.75, 9.0, 1)",
+   "powerbi": "51.4545454545455"
+  },
+  {
+   "expr": "VDB(2400, 300, 10, 2, 10, 2)",
+   "powerbi": "1236"
+  },
+  {
+   "expr": "VDB(2400, 300, 5, 1.5, 4.75, 2)",
+   "powerbi": "852"
+  },
+  {
+   "expr": "VDB(2400, 300, 10, 9.5, 10, 2, FALSE())",
+   "powerbi": "0"
+  },
+  {
+   "expr": "VDB(2400, 300, 10, 5.5, 7.5, 3, FALSE())",
+   "powerbi": "42.8628"
+  },
+  {
+   "expr": "VDB(412571.9, 83934.51, 8, 4, 6, 1.5)",
+   "powerbi": "61104.3897344649"
+  },
+  {
+   "expr": "VDB(2400, 300, 10, 0, 0.5, 1)",
+   "powerbi": "120"
+  },
+  {
+   "expr": "VDB(2400, 300, 10, 0, 7.5, 1.5)",
+   "powerbi": "1721.7757265625"
+  },
+  {
+   "expr": "VDB(2400, 300, 10, 1, 1.5, 3, FALSE())",
+   "powerbi": "252"
+  },
+  {
+   "expr": "VDB(2400, 300, 10, 7.5, 9.5, 0.5, FALSE())",
+   "powerbi": "420"
+  },
+  {
+   "expr": "VDB(2400, 3000, 10, 0, 10)",
+   "powerbi": "-600"
+  },
+  {
+   "expr": "VDB(2400, 300, 10, 5.4, 5.6, 2, FALSE())",
+   "powerbi": "28.9406975999999"
+  },
+  {
+   "expr": "VDB(2400, 300, 5, 0.5, 4, 2)",
+   "powerbi": "1562.64"
+  },
+  {
+   "expr": "VDB(2400, 300, 10, 0, 6.5, 1.5)",
+   "powerbi": "1570.4860171875"
+  },
+  {
+   "expr": "VDB(2400, 300, 3, 0.75, 2, 2)",
+   "powerbi": "825"
+  },
+  {
+   "expr": "VDB(2400, 300, 10, 1, 1.5, 0.5, FALSE())",
+   "powerbi": "105"
+  },
+  {
+   "expr": "VDB(2400, 300, 10, 5, 7.5, 10, FALSE())",
+   "powerbi": "0"
+  },
+  {
+   "expr": "VDB(2400, 300, 5, 1.5, 3.75, 2)",
+   "powerbi": "765.96"
+  },
+  {
+   "expr": "VDB(2400, 300, 10, 6, 10, 1.5, \"1\")",
+   "powerbi": "432.660267082265"
+  },
+  {
+   "expr": "VDB(2400, 300, 10.5, 0, 10)",
+   "powerbi": "2100"
+  },
+  {
+   "expr": "VDB(2400, 300, 10, 7, 10, 1)",
+   "powerbi": "616.5"
+  },
+  {
+   "expr": "VDB(2400, 300, 100, 0, 100, 2)",
+   "powerbi": "2100"
+  },
+  {
+   "expr": "VDB(2400, 300, 10, 5.5, 10, 1.5)",
+   "powerbi": "685.02579375"
+  },
+  {
+   "expr": "VDB(2400, 300, 10, 9, 10, 1.5)",
+   "powerbi": "151.289709375"
+  },
+  {
+   "expr": "VDB(2400, 300, 10, 6, 10, 1.5, 1)",
+   "powerbi": "432.660267082265"
+  },
+  {
+   "expr": "EFFECT(-2, 12)",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 19) An argument of function 'EFFECT' has the wrong data type or the result is too large or too small.\""
+  },
+  {
+   "expr": "EFFECT(0.05, 2147483649)",
+   "powerbi": "0.0512712968532125"
+  },
+  {
+   "expr": "EFFECT(BLANK(), 12)",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 19) An argument of function 'EFFECT' has the wrong data type or the result is too large or too small.\""
+  },
+  {
+   "expr": "EFFECT(-0.5, 12)",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 19) An argument of function 'EFFECT' has the wrong data type or the result is too large or too small.\""
+  },
+  {
+   "expr": "EFFECT(1, 12)",
+   "powerbi": "1.61303529022468"
+  },
+  {
+   "expr": "EFFECT(0.2372, 12)",
+   "powerbi": "0.26476472341398"
+  },
+  {
+   "expr": "EFFECT(0.05, 1)",
+   "powerbi": "0.05"
+  },
+  {
+   "expr": "EFFECT(0.05, 2147483648)",
+   "powerbi": "0.0512712968287357"
+  },
+  {
+   "expr": "EFFECT(0, 0)",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 19) An argument of function 'EFFECT' has the wrong data type or the result is too large or too small.\""
+  },
+  {
+   "expr": "EFFECT(0.05, 1.0001)",
+   "powerbi": "0.05"
+  },
+  {
+   "expr": "EFFECT(0, 12)",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 19) An argument of function 'EFFECT' has the wrong data type or the result is too large or too small.\""
+  },
+  {
+   "expr": "EFFECT(-0.05, 12)",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 19) An argument of function 'EFFECT' has the wrong data type or the result is too large or too small.\""
+  },
+  {
+   "expr": "NOMINAL(0.05, 0)",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 19) An argument of function 'NOMINAL' has the wrong data type or the result is too large or too small.\""
+  },
+  {
+   "expr": "NOMINAL(0.2168, 12)",
+   "powerbi": "0.19783757752246"
+  },
+  {
+   "expr": "NOMINAL(TRUE(), 12)",
+   "powerbi": "0.713557132311544"
+  },
+  {
+   "expr": "NOMINAL(0.05, 1E19)",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 33) The result of a conversion or arithmetic operation is either too large or too small.\""
+  },
+  {
+   "expr": "NOMINAL(0.05, \"x\")",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 33) Cannot convert value 'x' of type Text to type Integer.\""
+  },
+  {
+   "expr": "NOMINAL(0.05, 0.5)",
+   "powerbi": "0.05"
+  },
+  {
+   "expr": "NOMINAL(0.05, 12)",
+   "powerbi": "0.0488894854037776"
+  },
+  {
+   "expr": "NOMINAL(0.141, 52)",
+   "powerbi": "0.132072510001636"
+  },
+  {
+   "expr": "NOMINAL(0.05, 2147483649)",
+   "powerbi": "0.0487899780500634"
+  },
+  {
+   "expr": "NOMINAL(-2, 12)",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 19) An argument of function 'NOMINAL' has the wrong data type or the result is too large or too small.\""
+  },
+  {
+   "expr": "NOMINAL(1E10, 4)",
+   "powerbi": "1260.91106409897"
+  },
+  {
+   "expr": "NOMINAL(0.05, 4294967295)",
+   "powerbi": "0.0487899780159839"
+  },
+  {
+   "expr": "RRI(1,2)",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 19) Too few arguments were passed to the RRI function. The minimum argument count for the function is 3.\""
+  },
+  {
+   "expr": "RRI(2.5, 1000, 2000)",
+   "powerbi": "0.319507910772894"
+  },
+  {
+   "expr": "RRI(7, 3, 1000)",
+   "powerbi": "1.29303798654038"
+  },
+  {
+   "expr": "RRI(2, 1, 4)",
+   "powerbi": "1"
+  },
+  {
+   "expr": "RRI(10, 32046.56, 40379.6)",
+   "powerbi": "0.0233826727300197"
+  },
+  {
+   "expr": "RRI(10, 1000, 0)",
+   "powerbi": "-1"
+  },
+  {
+   "expr": "RRI(10, 1E300, 1E-300)",
+   "powerbi": "-1"
+  },
+  {
+   "expr": "RRI(7, 1000, 3)",
+   "powerbi": "-0.563897324915776"
+  },
+  {
+   "expr": "RRI(TRUE(), 1000, 2000)",
+   "powerbi": "1"
+  },
+  {
+   "expr": "RRI(BLANK(), 1000, 2000)",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 19) An argument of function 'RRI' has the wrong data type or the result is too large or too small.\""
+  },
+  {
+   "expr": "RRI(0.5, 1000, 2000)",
+   "powerbi": "3"
+  },
+  {
+   "expr": "RRI(10, 1000, 2000)",
+   "powerbi": "0.0717734625362931"
+  },
+  {
+   "expr": "RRI(10, 1, 1.000000000001)",
+   "powerbi": "9.99200722162641E-14"
+  },
+  {
+   "expr": "RRI(3.5, 21857.08, 1378.59)",
+   "powerbi": "-0.545955943715142"
+  },
+  {
+   "expr": "PDURATION(0.07, 100, 200)",
+   "powerbi": "10.2447683510587"
+  },
+  {
+   "expr": "PDURATION(1E-8, 1000, 2000)",
+   "powerbi": "69314718.8238263"
+  },
+  {
+   "expr": "PDURATION(1E-300, 1000, 2000)",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 19) Division by zero has occurred when evaluating function 'PDURATION'.\""
+  },
+  {
+   "expr": "PDURATION(0.025, 0, 0)",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 19) An argument of function 'PDURATION' has the wrong data type or the result is too large or too small.\""
+  },
+  {
+   "expr": "PDURATION(0.025, TRUE(), 2)",
+   "powerbi": "28.0710345259387"
+  },
+  {
+   "expr": "PDURATION(1E10, 1000, 2000)",
+   "powerbi": "0.0301029995662674"
+  },
+  {
+   "expr": "PDURATION(0.025, 1E300, 1E-300)",
+   "powerbi": "-55949.9749465614"
+  },
+  {
+   "expr": "PDURATION(0.025, 1E-300, 2E-300)",
+   "powerbi": "28.0710345259319"
+  },
+  {
+   "expr": "PDURATION(-1.5, 1000, 2000)",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 19) An argument of function 'PDURATION' has the wrong data type or the result is too large or too small.\""
+  },
+  {
+   "expr": "PDURATION(0.025, 1000, TRUE())",
+   "powerbi": "-279.749874732807"
+  },
+  {
+   "expr": "PDURATION(1E300, 1000, 2000)",
+   "powerbi": "0.00100343331887994"
+  },
+  {
+   "expr": "PDURATION(0.025, BLANK(), 2000)",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 19) An argument of function 'PDURATION' has the wrong data type or the result is too large or too small.\""
+  },
+  {
+   "expr": "DOLLARDE(1.02, 9.3E18)",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 34) The result of a conversion or arithmetic operation is either too large or too small.\""
+  },
+  {
+   "expr": "DOLLARDE(1.02, 0.5)",
+   "powerbi": "1.02"
+  },
+  {
+   "expr": "DOLLARDE(1.999999, 1000000)",
+   "powerbi": "1.999999"
+  },
+  {
+   "expr": "DOLLARDE(54.76, 100)",
+   "powerbi": "54.76"
+  },
+  {
+   "expr": "DOLLARDE(1.02, 1.5)",
+   "powerbi": "1.1"
+  },
+  {
+   "expr": "DOLLARDE(1.02, 2.9)",
+   "powerbi": "1.06666666666667"
+  },
+  {
+   "expr": "DOLLARDE(1.1, 10)",
+   "powerbi": "1.1"
+  },
+  {
+   "expr": "DOLLARDE(1.001, 1000)",
+   "powerbi": "1.001"
+  },
+  {
+   "expr": "DOLLARDE(0.22, 8)",
+   "powerbi": "0.275"
+  },
+  {
+   "expr": "DOLLARDE(1.02, 16)",
+   "powerbi": "1.125"
+  },
+  {
+   "expr": "DOLLARDE(11.8, 32)",
+   "powerbi": "13.5"
+  },
+  {
+   "expr": "DOLLARDE(1.12345, 100000)",
+   "powerbi": "1.12345"
+  },
+  {
+   "expr": "DOLLARDE(29.38, 2)",
+   "powerbi": "30.9"
+  },
+  {
+   "expr": "DOLLARDE(1.02, TRUE())",
+   "powerbi": "1.02"
+  },
+  {
+   "expr": "DOLLARFR(1.02, 9.3E18)",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 34) The result of a conversion or arithmetic operation is either too large or too small.\""
+  },
+  {
+   "expr": "DOLLARFR(1.10, 8)",
+   "powerbi": "1.08"
+  },
+  {
+   "expr": "DOLLARFR(0, 16)",
+   "powerbi": "0"
+  },
+  {
+   "expr": "DOLLARFR(2.25, 4)",
+   "powerbi": "2.1"
+  },
+  {
+   "expr": "DOLLARFR(1.02, 1E18)",
+   "powerbi": "1.02"
+  },
+  {
+   "expr": "DOLLARFR(1.02, \"x\")",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 34) Cannot convert value 'x' of type Text to type Integer.\""
+  },
+  {
+   "expr": "DOLLARFR(1.02, 8)",
+   "powerbi": "1.016"
+  },
+  {
+   "expr": "DOLLARFR(1.02, 0.99)",
+   "powerbi": "1.02"
+  },
+  {
+   "expr": "DOLLARFR(1.01, 100)",
+   "powerbi": "1.01"
+  },
+  {
+   "expr": "DOLLARFR(1.4, 3)",
+   "powerbi": "1.12"
+  },
+  {
+   "expr": "DOLLARFR(1.0001, 10000)",
+   "powerbi": "1.0001"
+  },
+  {
+   "expr": "DOLLARFR(1.9999, 10000)",
+   "powerbi": "1.9999"
+  },
+  {
+   "expr": "RATE(12, -100, 1200)",
+   "powerbi": "-4.34341564979987E-10"
+  },
+  {
+   "expr": "RATE(10, -100, 800, 0, 0, 1E9)",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 19) An argument of function 'RATE' has the wrong data type or the result is too large or too small.\""
+  },
+  {
+   "expr": "RATE(10, -1, 1E60)",
+   "powerbi": "-0.9999989999999"
+  },
+  {
+   "expr": "RATE(10, -1, 1E65)",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 19) An argument of function 'RATE' has the wrong data type or the result is too large or too small.\""
+  },
+  {
+   "expr": "RATE(2, -1, 1E14)",
+   "powerbi": "-0.999999899999993"
+  },
+  {
+   "expr": "RATE(2, -1, 1E15)",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 19) An argument of function 'RATE' has the wrong data type or the result is too large or too small.\""
+  },
+  {
+   "expr": "PV(1E-8, 360, -1000)",
+   "powerbi": "359999.346407639"
+  },
+  {
+   "expr": "FV(1E-8, 360, -1000)",
+   "powerbi": "360000.642407599"
+  },
+  {
+   "expr": "NPER(1E-300, -100, 1000)",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 19) Division by zero has occurred when evaluating function 'NPER'.\""
+  },
+  {
+   "expr": "PMT(1E-15, 10, -1000)",
+   "powerbi": "100.000000000001"
+  },
+  {
+   "expr": "IPMT(1E-15, 5, 10, -1000)",
+   "powerbi": "6.00000000000001E-13"
+  },
+  {
+   "expr": "CUMPRINC(0.05, 10, 1000, 1.0000001, 3, 0)",
+   "powerbi": "-250.638172578602"
+  },
+  {
+   "expr": "CUMIPMT(0.05, 10, 1000, 2.5, 2.2, 0)",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 19) An argument of function 'CUMIPMT' has the wrong data type or the result is too large or too small.\""
+  },
+  {
+   "expr": "DB(1000000, 100000, 6, 7, 7)",
+   "powerbi": "15845.0984738481"
+  },
+  {
+   "expr": "DB(1000000, 100000, 0.5, 1, 6)",
+   "powerbi": "249975"
+  },
+  {
+   "expr": "VDB(2400, 300, 10, 2.5, 10, 1)",
+   "powerbi": "1545.88235294118"
+  },
+  {
+   "expr": "VDB(2400, 300, 10, 0.25, 9.75)",
+   "powerbi": "1976.99179008"
+  },
+  {
+   "expr": "VDB(2400, 300, 5, 3.5, 4.5, 2, TRUE())",
+   "powerbi": "109.2"
+  },
+  {
+   "expr": "VDB(2400, 300, 1, 0.5, 1)",
+   "powerbi": "525"
+  },
+  {
+   "expr": "VDB(2400, 100, 3, 1.5, 3, 2)",
+   "powerbi": "394.444444444445"
+  },
+  {
+   "expr": "EFFECT(0.05, 4294967296)",
+   "powerbi": "0.0512712968897862"
+  },
+  {
+   "expr": "EFFECT(0.05, 4294967295)",
+   "powerbi": "0.0512712968775477"
+  },
+  {
+   "expr": "EFFECT(0.05, 4000000000)",
+   "powerbi": "0.0512711005338033"
+  },
+  {
+   "expr": "EFFECT(0.05, 1E10)",
+   "powerbi": "0.0512711007250206"
+  },
+  {
+   "expr": "PDURATION(1E-15, 1000, 2000)",
+   "powerbi": "624331476816536"
+  },
+  {
+   "expr": "DOLLARFR(1.02, 16)",
+   "powerbi": "1.0032"
+  },
+  {
+   "expr": "DOLLARDE(BLANK(), 16)",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "PMT(1,2)",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 19) Too few arguments were passed to the PMT function. The minimum argument count for the function is 3.\""
+  },
+  {
+   "expr": "PV(1,2)",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 19) Too few arguments were passed to the PV function. The minimum argument count for the function is 3.\""
+  },
+  {
+   "expr": "FV(1,2)",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 19) Too few arguments were passed to the FV function. The minimum argument count for the function is 3.\""
+  },
+  {
+   "expr": "RATE(1,2)",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 19) Too few arguments were passed to the RATE function. The minimum argument count for the function is 3.\""
+  },
+  {
+   "expr": "RATE(1,2,3,4,5,6,7)",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 36) Too many arguments were passed to the RATE function. The maximum argument count for the function is 6.\""
+  },
+  {
+   "expr": "IPMT(1,2,3)",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 19) Too few arguments were passed to the IPMT function. The minimum argument count for the function is 4.\""
+  },
+  {
+   "expr": "PPMT(1,2,3)",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 19) Too few arguments were passed to the PPMT function. The minimum argument count for the function is 4.\""
+  },
+  {
+   "expr": "CUMIPMT(1,2,3,4,5)",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 19) Too few arguments were passed to the CUMIPMT function. The minimum argument count for the function is 6.\""
+  },
+  {
+   "expr": "CUMPRINC(1,2,3,4,5,6,7)",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 40) Too many arguments were passed to the CUMPRINC function. The maximum argument count for the function is 6.\""
+  },
+  {
+   "expr": "ISPMT(1,2,3)",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 19) Too few arguments were passed to the ISPMT function. The minimum argument count for the function is 4.\""
+  },
+  {
+   "expr": "SLN(1,2)",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 19) Too few arguments were passed to the SLN function. The minimum argument count for the function is 3.\""
+  },
+  {
+   "expr": "SYD(1,2,3)",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 19) Too few arguments were passed to the SYD function. The minimum argument count for the function is 4.\""
+  },
+  {
+   "expr": "DB(1,2,3)",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 19) Too few arguments were passed to the DB function. The minimum argument count for the function is 4.\""
+  },
+  {
+   "expr": "DDB(1,2,3)",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 19) Too few arguments were passed to the DDB function. The minimum argument count for the function is 4.\""
+  },
+  {
+   "expr": "VDB(1,2,3,4)",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 19) Too few arguments were passed to the VDB function. The minimum argument count for the function is 5.\""
+  },
+  {
+   "expr": "VDB(1,2,3,4,5,6,7,8)",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 37) Too many arguments were passed to the VDB function. The maximum argument count for the function is 7.\""
+  },
+  {
+   "expr": "EFFECT(1)",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 19) Too few arguments were passed to the EFFECT function. The minimum argument count for the function is 2.\""
+  },
+  {
+   "expr": "NOMINAL(1,2,3)",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 31) Too many arguments were passed to the NOMINAL function. The maximum argument count for the function is 2.\""
+  },
+  {
+   "expr": "PDURATION(1,2)",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 19) Too few arguments were passed to the PDURATION function. The minimum argument count for the function is 3.\""
+  },
+  {
+   "expr": "DOLLARDE(1)",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 19) Too few arguments were passed to the DOLLARDE function. The minimum argument count for the function is 2.\""
+  },
+  {
+   "expr": "DOLLARFR(1,2,3)",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 32) Too many arguments were passed to the DOLLARFR function. The maximum argument count for the function is 2.\""
+  },
+  {
+   "expr": "CUMIPMT(0.05, 10, 1000, \"a\", 3, 0)",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 43) Cannot convert value 'a' of type Text to type Integer.\""
+  },
+  {
+   "expr": "CUMPRINC(0.05, 10, 1000, 1, \"x\", 0)",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 47) Cannot convert value 'x' of type Text to type Integer.\""
+  },
+  {
+   "expr": "CUMIPMT(0.05, 10, 1000, 1, 5, \"x\")",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 49) Cannot convert value 'x' of type Text to type Integer.\""
+  },
+  {
+   "expr": "DB(1000000, 100000, 6, \"x\", 7)",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 42) Cannot convert value 'x' of type Text to type Integer.\""
+  },
+  {
+   "expr": "DB(1000000, 100000, 6, 2, \"x\")",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 45) Cannot convert value 'x' of type Text to type Integer.\""
+  },
+  {
+   "expr": "DDB(2400, 300, 10, \"x\", 2)",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 38) Cannot convert value 'x' of type Text to type Integer.\""
+  },
+  {
+   "expr": "DDB(2400, 300, 10, 2, \"x\")",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 41) Cannot convert value 'x' of type Text to type Number.\""
+  },
+  {
+   "expr": "VDB(92236.43, 138354.64, 2, 0.3, 2, 1, FALSE())",
+   "powerbi": "-46118.21"
+  },
+  {
+   "expr": "VDB(100, 150, 10, 0.3, 10, 2)",
+   "powerbi": "-50"
+  },
+  {
+   "expr": "VDB(100, 150, 10, 1.3, 10, 2)",
+   "powerbi": "0"
+  },
+  {
+   "expr": "VDB(100, 150, 10, 0.3, 0.5, 2)",
+   "powerbi": "-10"
+  },
+  {
+   "expr": "VDB(2400, 300, 10, 0, 10, 2, \"TRUE\")",
+   "powerbi": "2100"
+  },
+  {
+   "expr": "VDB(2400, 300, 10, 6, 10, 1.5, \"0\")",
+   "powerbi": "605.1588375"
+  },
+  {
+   "expr": "VDB(2400, 300, 10, 6, 10, 1.5, \"x\")",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 50) Cannot convert value 'x' of type Text to type True/False.\""
+  },
+  {
+   "expr": "NOMINAL(0.5, 113213169)",
+   "powerbi": "0.405465094817892"
+  },
+  {
+   "expr": "NOMINAL(0.1, 480208813)",
+   "powerbi": "0.095310090746493"
+  },
+  {
+   "expr": "NOMINAL(0.05, 3000000000)",
+   "powerbi": "0.0487896389955722"
+  },
+  {
+   "expr": "NOMINAL(0.05, 1E18)",
+   "powerbi": "-111.022302462516"
+  },
+  {
+   "expr": "NOMINAL(1E-15, 365)",
+   "powerbi": "-4.05231403988182E-14"
+  },
+  {
+   "expr": "RRI(1E17, 1000, 2000)",
+   "powerbi": "-1.11022302462516E-16"
+  },
+  {
+   "expr": "RRI(1E17, 2000, 1000)",
+   "powerbi": "2.22044604925031E-16"
+  },
+  {
+   "expr": "RRI(0.0001, 1, 2)",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 19) An argument of function 'RRI' has the wrong data type or the result is too large or too small.\""
+  },
+  {
+   "expr": "EFFECT(0.05, 3000000000)",
+   "powerbi": "0.0512711001310586"
+  },
+  {
+   "expr": "PMT(0.05, 10, -1000, 0, 9E18)",
+   "powerbi": "123.337690443292"
+  },
+  {
+   "expr": "PMT(0.05, 10, -1000, 0, 9.3E18)",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 43) The result of a conversion or arithmetic operation is either too large or too small.\""
+  },
+  {
+   "expr": "DOLLARDE(1.02, 9E18)",
+   "powerbi": "1.02222222222222"
+  },
+  {
+   "expr": "DOLLARFR(1.02, 12345678901234)",
+   "powerbi": "1.00246913578025"
+  },
+  {
+   "expr": "RATE(0, -100, 800, 0, 0, -1)",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 19) An argument of function 'RATE' has the wrong data type or has an invalid value.\""
+  },
+  {
+   "expr": "RATE(10, -100, 800, 0, 0, 1500000)",
+   "powerbi": "0.0427749827887523"
+  },
+  {
+   "expr": "DB(1000000, 100000, 3E9, 1)",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 19) An argument of function 'DB' has the wrong data type or the result is too large or too small.\""
+  },
+  {
+   "expr": "DB(1000000, 100000, 1E10, 5E9)",
+   "powerbi": "0"
+  },
+  {
+   "expr": "NPER(0.05, -100, 1000, 0, 0.4)",
+   "powerbi": "14.2066990828905"
+  },
+  {
+   "expr": "IPMT(0.05, 11.4, 10.5, -1000)",
+   "powerbi": "0.607053099852678"
+  },
+  {
+   "expr": "IPMT(0.05, 11.5, 10.5, -1000)",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 19) An argument of function 'IPMT' has the wrong data type or the result is too large or too small.\""
+  }
+ ]
+}

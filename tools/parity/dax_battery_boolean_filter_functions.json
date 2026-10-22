@@ -1,0 +1,838 @@
+{
+ "powerbi_version": "2.157.879.0 (26.08)+da30fe74eb0b8a8786ab7326b69c400a0e951831",
+ "frozen": "2026-10-21",
+ "items": [
+  {
+   "expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]>COUNTROWS(VALUES(Facts[Region])))",
+   "powerbi": "2"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]>SUMX(VALUES(Facts[Region]),1))",
+   "powerbi": "2"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]>MAXX(VALUES(Facts[Region]),1))",
+   "powerbi": "4"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]>COUNTX(VALUES(Facts[Region]),1))",
+   "powerbi": "2"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]>COUNTROWS(DISTINCT(Facts[Note])))",
+   "powerbi": "2"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]>SUMX(DISTINCT(Facts[Note]),1))",
+   "powerbi": "2"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]>MAXX(DISTINCT(Facts[Note]),1))",
+   "powerbi": "4"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]>COUNTX(DISTINCT(Facts[Note]),1))",
+   "powerbi": "2"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]>COUNTROWS(ALL(Facts)))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]>SUMX(ALL(Facts),1))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]>MAXX(ALL(Facts),1))",
+   "powerbi": "4"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]>COUNTX(ALL(Facts),1))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]>COUNTROWS(ALL(Facts[Region])))",
+   "powerbi": "2"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]>SUMX(ALL(Facts[Region]),1))",
+   "powerbi": "2"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]>MAXX(ALL(Facts[Region]),1))",
+   "powerbi": "4"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]>COUNTX(ALL(Facts[Region]),1))",
+   "powerbi": "2"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]>COUNTROWS(ALLNOBLANKROW(Facts)))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]>SUMX(ALLNOBLANKROW(Facts),1))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]>MAXX(ALLNOBLANKROW(Facts),1))",
+   "powerbi": "4"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]>COUNTX(ALLNOBLANKROW(Facts),1))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]>COUNTROWS(ALLEXCEPT(Facts,Facts[Region])))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]>SUMX(ALLEXCEPT(Facts,Facts[Region]),1))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]>MAXX(ALLEXCEPT(Facts,Facts[Region]),1))",
+   "powerbi": "4"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]>COUNTX(ALLEXCEPT(Facts,Facts[Region]),1))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]>COUNTROWS(ALLSELECTED(Facts)))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]>SUMX(ALLSELECTED(Facts),1))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]>MAXX(ALLSELECTED(Facts),1))",
+   "powerbi": "4"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]>COUNTX(ALLSELECTED(Facts),1))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]>COUNTROWS(CALCULATETABLE(Facts,Facts[Region]=\"East\")))",
+   "powerbi": "2"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]>SUMX(CALCULATETABLE(Facts,Facts[Region]=\"East\"),1))",
+   "powerbi": "2"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]>MAXX(CALCULATETABLE(Facts,Facts[Region]=\"East\"),1))",
+   "powerbi": "4"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]>COUNTX(CALCULATETABLE(Facts,Facts[Region]=\"East\"),1))",
+   "powerbi": "2"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]>COUNTROWS(FILTER(Facts,Facts[Region]=\"East\")))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 72) A function 'FILTER' has been used in a True/False expression that is used as a table filter expression. This is not allowed.\""
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]>SUMX(FILTER(Facts,Facts[Region]=\"East\"),1))",
+   "powerbi": "2"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]>MAXX(FILTER(Facts,Facts[Region]=\"East\"),1))",
+   "powerbi": "4"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]>COUNTX(FILTER(Facts,Facts[Region]=\"East\"),1))",
+   "powerbi": "2"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]>COUNTROWS(TOPN(2,Facts,Facts[Quantity])))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 72) A function 'TOPN' has been used in a True/False expression that is used as a table filter expression. This is not allowed.\""
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]>SUMX(TOPN(2,Facts,Facts[Quantity]),1))",
+   "powerbi": "3"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]>MAXX(TOPN(2,Facts,Facts[Quantity]),1))",
+   "powerbi": "4"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]>COUNTX(TOPN(2,Facts,Facts[Quantity]),1))",
+   "powerbi": "3"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]>COUNTROWS(SELECTCOLUMNS(Facts,\"a\",Facts[Quantity])))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 72) A function 'SELECTCOLUMNS' has been used in a True/False expression that is used as a table filter expression. This is not allowed.\""
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]>SUMX(SELECTCOLUMNS(Facts,\"a\",Facts[Quantity]),1))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]>MAXX(SELECTCOLUMNS(Facts,\"a\",Facts[Quantity]),1))",
+   "powerbi": "4"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]>COUNTX(SELECTCOLUMNS(Facts,\"a\",Facts[Quantity]),1))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]>COUNTROWS(ADDCOLUMNS(Facts,\"a\",1)))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 72) A function 'ADDCOLUMNS' has been used in a True/False expression that is used as a table filter expression. This is not allowed.\""
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]>SUMX(ADDCOLUMNS(Facts,\"a\",1),1))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]>MAXX(ADDCOLUMNS(Facts,\"a\",1),1))",
+   "powerbi": "4"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]>COUNTX(ADDCOLUMNS(Facts,\"a\",1),1))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]>COUNTROWS(SUMMARIZE(Facts,Facts[Region])))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 72) A function 'SUMMARIZE' has been used in a True/False expression that is used as a table filter expression. This is not allowed.\""
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]>SUMX(SUMMARIZE(Facts,Facts[Region]),1))",
+   "powerbi": "2"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]>MAXX(SUMMARIZE(Facts,Facts[Region]),1))",
+   "powerbi": "4"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]>COUNTX(SUMMARIZE(Facts,Facts[Region]),1))",
+   "powerbi": "2"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]>COUNTROWS(GROUPBY(Facts,Facts[Region])))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 72) A function 'GROUPBY' has been used in a True/False expression that is used as a table filter expression. This is not allowed.\""
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]>SUMX(GROUPBY(Facts,Facts[Region]),1))",
+   "powerbi": "2"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]>MAXX(GROUPBY(Facts,Facts[Region]),1))",
+   "powerbi": "4"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]>COUNTX(GROUPBY(Facts,Facts[Region]),1))",
+   "powerbi": "2"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]>COUNTROWS(UNION(VALUES(Facts[Region]),VALUES(Facts[Region]))))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]>SUMX(UNION(VALUES(Facts[Region]),VALUES(Facts[Region])),1))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]>MAXX(UNION(VALUES(Facts[Region]),VALUES(Facts[Region])),1))",
+   "powerbi": "4"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]>COUNTX(UNION(VALUES(Facts[Region]),VALUES(Facts[Region])),1))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]>COUNTROWS(EXCEPT(VALUES(Facts[Region]),VALUES(Facts[Region]))))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 72) A function 'EXCEPT' has been used in a True/False expression that is used as a table filter expression. This is not allowed.\""
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]>SUMX(EXCEPT(VALUES(Facts[Region]),VALUES(Facts[Region])),1))",
+   "powerbi": "5"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]>MAXX(EXCEPT(VALUES(Facts[Region]),VALUES(Facts[Region])),1))",
+   "powerbi": "5"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]>COUNTX(EXCEPT(VALUES(Facts[Region]),VALUES(Facts[Region])),1))",
+   "powerbi": "5"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]>COUNTROWS(INTERSECT(VALUES(Facts[Region]),VALUES(Facts[Region]))))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 72) A function 'INTERSECT' has been used in a True/False expression that is used as a table filter expression. This is not allowed.\""
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]>SUMX(INTERSECT(VALUES(Facts[Region]),VALUES(Facts[Region])),1))",
+   "powerbi": "2"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]>MAXX(INTERSECT(VALUES(Facts[Region]),VALUES(Facts[Region])),1))",
+   "powerbi": "4"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]>COUNTX(INTERSECT(VALUES(Facts[Region]),VALUES(Facts[Region])),1))",
+   "powerbi": "2"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]>COUNTROWS(CROSSJOIN(VALUES(Facts[Region]),VALUES(Facts[Note]))))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]>SUMX(CROSSJOIN(VALUES(Facts[Region]),VALUES(Facts[Note])),1))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]>MAXX(CROSSJOIN(VALUES(Facts[Region]),VALUES(Facts[Note])),1))",
+   "powerbi": "4"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]>COUNTX(CROSSJOIN(VALUES(Facts[Region]),VALUES(Facts[Note])),1))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]>COUNTROWS(GENERATE(VALUES(Facts[Region]),VALUES(Facts[Note]))))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]>SUMX(GENERATE(VALUES(Facts[Region]),VALUES(Facts[Note])),1))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]>MAXX(GENERATE(VALUES(Facts[Region]),VALUES(Facts[Note])),1))",
+   "powerbi": "4"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]>COUNTX(GENERATE(VALUES(Facts[Region]),VALUES(Facts[Note])),1))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]>COUNTROWS(ROW(\"a\",1)))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 72) A function 'ROW' has been used in a True/False expression that is used as a table filter expression. This is not allowed.\""
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]>SUMX(ROW(\"a\",1),1))",
+   "powerbi": "4"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]>MAXX(ROW(\"a\",1),1))",
+   "powerbi": "4"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]>COUNTX(ROW(\"a\",1),1))",
+   "powerbi": "4"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]>COUNTROWS(TREATAS({1},Facts[Quantity])))",
+   "powerbi": "4"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]>SUMX(TREATAS({1},Facts[Quantity]),1))",
+   "powerbi": "4"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]>MAXX(TREATAS({1},Facts[Quantity]),1))",
+   "powerbi": "4"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]>COUNTX(TREATAS({1},Facts[Quantity]),1))",
+   "powerbi": "4"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]>COUNTROWS(KEEPFILTERS(VALUES(Facts[Region]))))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 72) KEEPFILTERS function can only be used as a top level filter argument of CALCULATE and CALCULATETABLE or with a table argument of a function performing a table scan.\""
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]>SUMX(KEEPFILTERS(VALUES(Facts[Region])),1))",
+   "powerbi": "2"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]>MAXX(KEEPFILTERS(VALUES(Facts[Region])),1))",
+   "powerbi": "4"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]>COUNTX(KEEPFILTERS(VALUES(Facts[Region])),1))",
+   "powerbi": "2"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]>COUNTROWS(SAMPLE(2,Facts,Facts[Quantity])))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 72) A function 'SAMPLE' has been used in a True/False expression that is used as a table filter expression. This is not allowed.\""
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]>SUMX(SAMPLE(2,Facts,Facts[Quantity]),1))",
+   "powerbi": "3"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]>MAXX(SAMPLE(2,Facts,Facts[Quantity]),1))",
+   "powerbi": "4"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]>COUNTX(SAMPLE(2,Facts,Facts[Quantity]),1))",
+   "powerbi": "3"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]>COUNTROWS(NATURALINNERJOIN(Facts,Facts)))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]>SUMX(NATURALINNERJOIN(Facts,Facts),1))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]>MAXX(NATURALINNERJOIN(Facts,Facts),1))",
+   "powerbi": "4"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]>COUNTX(NATURALINNERJOIN(Facts,Facts),1))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]>COUNTROWS(DATATABLE(\"a\",INTEGER,{{1}})))",
+   "powerbi": "4"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]>SUMX(DATATABLE(\"a\",INTEGER,{{1}}),1))",
+   "powerbi": "4"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]>MAXX(DATATABLE(\"a\",INTEGER,{{1}}),1))",
+   "powerbi": "4"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]>COUNTX(DATATABLE(\"a\",INTEGER,{{1}}),1))",
+   "powerbi": "4"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]>COUNTROWS({1,2}))",
+   "powerbi": "3"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]>SUMX({1,2},1))",
+   "powerbi": "3"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]>MAXX({1,2},1))",
+   "powerbi": "4"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]>COUNTX({1,2},1))",
+   "powerbi": "3"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]>COUNTROWS(GENERATESERIES(1,3)))",
+   "powerbi": "2"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]>SUMX(GENERATESERIES(1,3),1))",
+   "powerbi": "2"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]>MAXX(GENERATESERIES(1,3),1))",
+   "powerbi": "4"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]>COUNTX(GENERATESERIES(1,3),1))",
+   "powerbi": "2"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]>COUNTROWS(ADDMISSINGITEMS(Facts[Region],VALUES(Facts[Region]),Facts[Region])))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 72) A function 'ADDMISSINGITEMS' has been used in a True/False expression that is used as a table filter expression. This is not allowed.\""
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]>SUMX(ADDMISSINGITEMS(Facts[Region],VALUES(Facts[Region]),Facts[Region]),1))",
+   "powerbi": "2"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]>MAXX(ADDMISSINGITEMS(Facts[Region],VALUES(Facts[Region]),Facts[Region]),1))",
+   "powerbi": "4"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]>COUNTX(ADDMISSINGITEMS(Facts[Region],VALUES(Facts[Region]),Facts[Region]),1))",
+   "powerbi": "2"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]>COUNTROWS(TOPNSKIP(2,0,Facts,Facts[Quantity])))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 72) A function 'TOPNSKIP' has been used in a True/False expression that is used as a table filter expression. This is not allowed.\""
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]>SUMX(TOPNSKIP(2,0,Facts,Facts[Quantity]),1))",
+   "powerbi": "3"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]>MAXX(TOPNSKIP(2,0,Facts,Facts[Quantity]),1))",
+   "powerbi": "4"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]>COUNTX(TOPNSKIP(2,0,Facts,Facts[Quantity]),1))",
+   "powerbi": "3"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]>COUNTROWS(FILTERS(Facts[Region])))",
+   "powerbi": "2"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]>SUMX(FILTERS(Facts[Region]),1))",
+   "powerbi": "2"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]>MAXX(FILTERS(Facts[Region]),1))",
+   "powerbi": "4"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]>COUNTX(FILTERS(Facts[Region]),1))",
+   "powerbi": "2"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]>COUNTROWS(VALUES(Facts)))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]>SUMX(VALUES(Facts),1))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]>MAXX(VALUES(Facts),1))",
+   "powerbi": "4"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]>COUNTX(VALUES(Facts),1))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]>COUNTROWS(DISTINCT(Facts)))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]>SUMX(DISTINCT(Facts),1))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]>MAXX(DISTINCT(Facts),1))",
+   "powerbi": "4"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]>COUNTX(DISTINCT(Facts),1))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]>COUNTROWS(SUMMARIZECOLUMNS(Facts[Region])))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 72) A function 'SUMMARIZECOLUMNS' has been used in a True/False expression that is used as a table filter expression. This is not allowed.\""
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]>SUMX(SUMMARIZECOLUMNS(Facts[Region]),1))",
+   "powerbi": "2"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]>MAXX(SUMMARIZECOLUMNS(Facts[Region]),1))",
+   "powerbi": "4"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]>COUNTX(SUMMARIZECOLUMNS(Facts[Region]),1))",
+   "powerbi": "2"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]>COUNTROWS(SUBSTITUTEWITHINDEX(VALUES(Facts[Region]),\"i\",VALUES(Facts[Region]))))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 72) Too few arguments were passed to the SUBSTITUTEWITHINDEX function. The minimum argument count for the function is 4.\""
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]>SUMX(SUBSTITUTEWITHINDEX(VALUES(Facts[Region]),\"i\",VALUES(Facts[Region])),1))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 67) Too few arguments were passed to the SUBSTITUTEWITHINDEX function. The minimum argument count for the function is 4.\""
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]>MAXX(SUBSTITUTEWITHINDEX(VALUES(Facts[Region]),\"i\",VALUES(Facts[Region])),1))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 67) Too few arguments were passed to the SUBSTITUTEWITHINDEX function. The minimum argument count for the function is 4.\""
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]>COUNTX(SUBSTITUTEWITHINDEX(VALUES(Facts[Region]),\"i\",VALUES(Facts[Region])),1))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 69) Too few arguments were passed to the SUBSTITUTEWITHINDEX function. The minimum argument count for the function is 4.\""
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]>LOOKUPVALUE(Facts[Quantity],Facts[Region],\"West\"))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 62) A function 'LOOKUPVALUE' has been used in a True/False expression that is used as a table filter expression. This is not allowed.\""
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(Facts),KEEPFILTERS(Facts[Quantity]>LOOKUPVALUE(Facts[Quantity],Facts[Region],\"West\")))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 74) A function 'LOOKUPVALUE' has been used in a True/False expression that is used as a table filter expression. This is not allowed.\""
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]>CALCULATE(COUNTROWS(Facts)))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 62) A function 'CALCULATE' has been used in a True/False expression that is used as a table filter expression. This is not allowed.\""
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(Facts),KEEPFILTERS(Facts[Quantity]>CALCULATE(COUNTROWS(Facts))))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 74) A function 'CALCULATE' has been used in a True/False expression that is used as a table filter expression. This is not allowed.\""
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]>CALCULATE(MAX(Facts[Quantity])))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 62) A function 'CALCULATE' has been used in a True/False expression that is used as a table filter expression. This is not allowed.\""
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(Facts),KEEPFILTERS(Facts[Quantity]>CALCULATE(MAX(Facts[Quantity]))))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 74) A function 'CALCULATE' has been used in a True/False expression that is used as a table filter expression. This is not allowed.\""
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]>SELECTEDVALUE(Facts[Quantity]))",
+   "powerbi": "5"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(Facts),KEEPFILTERS(Facts[Quantity]>SELECTEDVALUE(Facts[Quantity])))",
+   "powerbi": "5"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]>HASONEVALUE(Facts[Region]))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 46) DAX comparison operations do not support comparing values of type Integer with values of type True/False. Consider using the VALUE or FORMAT function to convert one of the values.\""
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(Facts),KEEPFILTERS(Facts[Quantity]>HASONEVALUE(Facts[Region])))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 58) DAX comparison operations do not support comparing values of type Integer with values of type True/False. Consider using the VALUE or FORMAT function to convert one of the values.\""
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]>ISBLANK(1))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 46) DAX comparison operations do not support comparing values of type Integer with values of type True/False. Consider using the VALUE or FORMAT function to convert one of the values.\""
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(Facts),KEEPFILTERS(Facts[Quantity]>ISBLANK(1)))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 58) DAX comparison operations do not support comparing values of type Integer with values of type True/False. Consider using the VALUE or FORMAT function to convert one of the values.\""
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]>COUNTROWS(Facts)+1)",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(Facts),KEEPFILTERS(Facts[Quantity]>COUNTROWS(Facts)+1))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]>IF(COUNTROWS(Facts)>1,1,2))",
+   "powerbi": "4"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(Facts),KEEPFILTERS(Facts[Quantity]>IF(COUNTROWS(Facts)>1,1,2)))",
+   "powerbi": "4"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]>SWITCH(TRUE(),1>0,1))",
+   "powerbi": "4"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(Facts),KEEPFILTERS(Facts[Quantity]>SWITCH(TRUE(),1>0,1)))",
+   "powerbi": "4"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]>RANKX(ALL(Facts),Facts[Quantity]))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 79) A single value for column 'Quantity' in table 'Facts' cannot be determined. This can happen when a measure or function formula refers to a column that contains many values without specifying an aggregation such as min, max, count, or sum to get a single result.\""
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(Facts),KEEPFILTERS(Facts[Quantity]>RANKX(ALL(Facts),Facts[Quantity])))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 91) A single value for column 'Quantity' in table 'Facts' cannot be determined. This can happen when a measure or function formula refers to a column that contains many values without specifying an aggregation such as min, max, count, or sum to get a single result.\""
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]>COUNTROWS(RELATEDTABLE(Facts)))",
+   "powerbi": "4"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(Facts),KEEPFILTERS(Facts[Quantity]>COUNTROWS(RELATEDTABLE(Facts))))",
+   "powerbi": "4"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]>MAXX(Facts,Facts[Quantity]))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(Facts),KEEPFILTERS(Facts[Quantity]>MAXX(Facts,Facts[Quantity])))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]>SUMX(Facts,Facts[Quantity]))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(Facts),KEEPFILTERS(Facts[Quantity]>SUMX(Facts,Facts[Quantity])))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]>AVERAGEX(FILTER(Facts,Facts[Quantity]>1),Facts[Quantity]))",
+   "powerbi": "2"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(Facts),KEEPFILTERS(Facts[Quantity]>AVERAGEX(FILTER(Facts,Facts[Quantity]>1),Facts[Quantity])))",
+   "powerbi": "2"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]>SUMX(FILTER(Facts,Facts[Quantity]>1),CALCULATE(1)))",
+   "powerbi": "1"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(Facts),KEEPFILTERS(Facts[Quantity]>SUMX(FILTER(Facts,Facts[Quantity]>1),CALCULATE(1))))",
+   "powerbi": "1"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]>SUMX(TOPN(2,Facts,Facts[Quantity]),Facts[Quantity]))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(Facts),KEEPFILTERS(Facts[Quantity]>SUMX(TOPN(2,Facts,Facts[Quantity]),Facts[Quantity])))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]>SUMX(SELECTCOLUMNS(Facts,\"a\",Facts[Quantity]),[a]))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(Facts),KEEPFILTERS(Facts[Quantity]>SUMX(SELECTCOLUMNS(Facts,\"a\",Facts[Quantity]),[a])))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]>SUMX(Facts,COUNTROWS(FILTER(Facts,Facts[Quantity]>1))))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(Facts),KEEPFILTERS(Facts[Quantity]>SUMX(Facts,COUNTROWS(FILTER(Facts,Facts[Quantity]>1)))))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]>SUMX(Facts,CALCULATE(COUNTROWS(Facts))))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(Facts),KEEPFILTERS(Facts[Quantity]>SUMX(Facts,CALCULATE(COUNTROWS(Facts)))))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]>SUMX(Facts,LOOKUPVALUE(Facts[Quantity],Facts[Region],\"West\")))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 85) A table of multiple values was supplied where a single value was expected.\""
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(Facts),KEEPFILTERS(Facts[Quantity]>SUMX(Facts,LOOKUPVALUE(Facts[Quantity],Facts[Region],\"West\"))))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 97) A table of multiple values was supplied where a single value was expected.\""
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]>SUMX(Facts,COUNTROWS(TOPN(1,Facts,Facts[Quantity]))))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(Facts),KEEPFILTERS(Facts[Quantity]>SUMX(Facts,COUNTROWS(TOPN(1,Facts,Facts[Quantity])))))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]>MAXX(FILTER(ALL(Facts),Facts[Quantity]>1),Facts[Quantity]))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(Facts),KEEPFILTERS(Facts[Quantity]>MAXX(FILTER(ALL(Facts),Facts[Quantity]>1),Facts[Quantity])))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]>MINX(FILTER(VALUES(Facts[Quantity]),Facts[Quantity]>1),Facts[Quantity]))",
+   "powerbi": "3"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(Facts),KEEPFILTERS(Facts[Quantity]>MINX(FILTER(VALUES(Facts[Quantity]),Facts[Quantity]>1),Facts[Quantity])))",
+   "powerbi": "3"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]>COUNTX(FILTER(Facts,Facts[Quantity]>1),1))",
+   "powerbi": "1"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(Facts),KEEPFILTERS(Facts[Quantity]>COUNTX(FILTER(Facts,Facts[Quantity]>1),1)))",
+   "powerbi": "1"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]>COUNTROWS(DISTINCT(FILTER(Facts,Facts[Quantity]>1))))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 81) A function 'FILTER' has been used in a True/False expression that is used as a table filter expression. This is not allowed.\""
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(Facts),KEEPFILTERS(Facts[Quantity]>COUNTROWS(DISTINCT(FILTER(Facts,Facts[Quantity]>1)))))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 93) A function 'FILTER' has been used in a True/False expression that is used as a table filter expression. This is not allowed.\""
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]>SUMX(CALCULATETABLE(FILTER(Facts,Facts[Quantity]>1),Facts[Region]=\"East\"),1))",
+   "powerbi": "3"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(Facts),KEEPFILTERS(Facts[Quantity]>SUMX(CALCULATETABLE(FILTER(Facts,Facts[Quantity]>1),Facts[Region]=\"East\"),1)))",
+   "powerbi": "3"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]>SUMX(FILTER(CALCULATETABLE(Facts,Facts[Region]=\"East\"),Facts[Quantity]>1),1))",
+   "powerbi": "3"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(Facts),KEEPFILTERS(Facts[Quantity]>SUMX(FILTER(CALCULATETABLE(Facts,Facts[Region]=\"East\"),Facts[Quantity]>1),1)))",
+   "powerbi": "3"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]>COUNTROWS(CALCULATETABLE(FILTER(Facts,Facts[Quantity]>1),Facts[Region]=\"East\")))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 87) A function 'FILTER' has been used in a True/False expression that is used as a table filter expression. This is not allowed.\""
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(Facts),KEEPFILTERS(Facts[Quantity]>COUNTROWS(CALCULATETABLE(FILTER(Facts,Facts[Quantity]>1),Facts[Region]=\"East\"))))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 99) A function 'FILTER' has been used in a True/False expression that is used as a table filter expression. This is not allowed.\""
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]>CONCATENATEX(VALUES(Facts[Region]),Facts[Region],\",\")=\"East,West,North\")",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 46) DAX comparison operations do not support comparing values of type Integer with values of type Text. Consider using the VALUE or FORMAT function to convert one of the values.\""
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(Facts),KEEPFILTERS(Facts[Quantity]>CONCATENATEX(VALUES(Facts[Region]),Facts[Region],\",\")=\"East,West,North\"))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 58) DAX comparison operations do not support comparing values of type Integer with values of type Text. Consider using the VALUE or FORMAT function to convert one of the values.\""
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]>LEN(CONCATENATEX(VALUES(Facts[Region]),Facts[Region],\",\")))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(Facts),KEEPFILTERS(Facts[Quantity]>LEN(CONCATENATEX(VALUES(Facts[Region]),Facts[Region],\",\"))))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]>DISTINCTCOUNT(Facts[Region]))",
+   "powerbi": "2"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(Facts),KEEPFILTERS(Facts[Quantity]>DISTINCTCOUNT(Facts[Region])))",
+   "powerbi": "2"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]>COUNTA(Facts[Note]))",
+   "powerbi": "1"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(Facts),KEEPFILTERS(Facts[Quantity]>COUNTA(Facts[Note])))",
+   "powerbi": "1"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]>COUNTBLANK(Facts[Note]))",
+   "powerbi": "3"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(Facts),KEEPFILTERS(Facts[Quantity]>COUNTBLANK(Facts[Note])))",
+   "powerbi": "3"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]>SUM(Facts[Sales]))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(Facts),KEEPFILTERS(Facts[Quantity]>SUM(Facts[Sales])))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]>VALUE(\"3\"))",
+   "powerbi": "2"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(Facts),KEEPFILTERS(Facts[Quantity]>VALUE(\"3\")))",
+   "powerbi": "2"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]>1+SUMX(FILTER(Facts,TRUE()),1))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(Facts),KEEPFILTERS(Facts[Quantity]>1+SUMX(FILTER(Facts,TRUE()),1)))",
+   "powerbi": "BLANK"
+  }
+ ]
+}

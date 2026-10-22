@@ -1,0 +1,1742 @@
+{
+ "powerbi_version": "2.157.879.0 (26.08)+da30fe74eb0b8a8786ab7326b69c400a0e951831",
+ "frozen": "2026-10-21",
+ "items": [
+  {
+   "expr": "CALCULATE(SUM(Facts[Sales]),FILTER(ALL(Facts[Region]),Facts[Region]=\"East\"))",
+   "powerbi": "11.5"
+  },
+  {
+   "expr": "CALCULATE(SUM(Facts[Sales]),FILTER(ALL(Facts[Region]),Facts[Region]<>\"East\"))",
+   "powerbi": "20"
+  },
+  {
+   "expr": "CALCULATE(SUM(Facts[Sales]),FILTER(ALL(Facts),Facts[Quantity]>2))",
+   "powerbi": "22.5"
+  },
+  {
+   "expr": "CALCULATE(SUM(Facts[Sales]),FILTER(Facts,Facts[Quantity]>2))",
+   "powerbi": "22.5"
+  },
+  {
+   "expr": "CALCULATE(SUM(Facts[Sales]),FILTER(ALL(Facts[Quantity]),Facts[Quantity]>2))",
+   "powerbi": "22.5"
+  },
+  {
+   "expr": "CALCULATE(SUM(Facts[Sales]),FILTER(ALL(Facts[Quantity]),Facts[Quantity]>AVERAGE(Facts[Quantity])))",
+   "powerbi": "22.5"
+  },
+  {
+   "expr": "CALCULATE(SUM(Facts[Sales]),FILTER(ALL(Facts[Region]),Facts[Region]=\"East\"),Facts[Quantity]>1)",
+   "powerbi": "13"
+  },
+  {
+   "expr": "CALCULATE(SUM(Facts[Sales]),Facts[Region] IN {\"East\",\"West\"})",
+   "powerbi": "31.5"
+  },
+  {
+   "expr": "CALCULATE(SUM(Facts[Sales]),Facts[Quantity] IN {1,2,3})",
+   "powerbi": "29"
+  },
+  {
+   "expr": "CALCULATE(SUM(Facts[Sales]),NOT(Facts[Region] IN {\"East\"}))",
+   "powerbi": "20"
+  },
+  {
+   "expr": "CALCULATE(SUM(Facts[Sales]),Facts[Region] IN VALUES(Facts[Region]))",
+   "powerbi": "31.5"
+  },
+  {
+   "expr": "CALCULATE(SUM(Facts[Sales]),VALUES(Facts[Region]))",
+   "powerbi": "31.5"
+  },
+  {
+   "expr": "CALCULATE(SUM(Facts[Sales]),ALL(Facts[Region]),Facts[Region]=\"East\")",
+   "powerbi": "11.5"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(Facts),FILTER(VALUES(Facts[Region]),Facts[Region]<>\"East\"))",
+   "powerbi": "3"
+  },
+  {
+   "expr": "CALCULATE(SUM(Facts[Sales]),TOPN(2,ALL(Facts[Quantity]),Facts[Quantity]))",
+   "powerbi": "2.5"
+  },
+  {
+   "expr": "CALCULATE(SUM(Facts[Sales]),TOPN(2,ALL(Facts[Quantity]),Facts[Quantity],ASC))",
+   "powerbi": "-1.5"
+  },
+  {
+   "expr": "CALCULATE(SUM(Facts[Sales]),KEEPFILTERS(Facts[Region]=\"East\"))",
+   "powerbi": "11.5"
+  },
+  {
+   "expr": "CALCULATE(SUM(Facts[Sales]),KEEPFILTERS(FILTER(ALL(Facts[Region]),Facts[Region]=\"East\")))",
+   "powerbi": "11.5"
+  },
+  {
+   "expr": "CALCULATE(SUM(Facts[Sales]),ALL(Facts[Quantity]),FILTER(ALL(Facts[Region]),Facts[Region]=\"East\"))",
+   "powerbi": "11.5"
+  },
+  {
+   "expr": "CALCULATE(SUM(Facts[Sales]),FILTER(ALL(Facts[Region],Facts[Quantity]),Facts[Region]=\"East\" && Facts[Quantity]>1))",
+   "powerbi": "13"
+  },
+  {
+   "expr": "CALCULATE(SUM(Facts[Sales]),FILTER(CALCULATETABLE(Facts,Facts[Region]=\"East\"),Facts[Quantity]>1))",
+   "powerbi": "13"
+  },
+  {
+   "expr": "CALCULATE(SUM(Facts[Sales]),CALCULATETABLE(Facts,Facts[Region]=\"East\"))",
+   "powerbi": "11.5"
+  },
+  {
+   "expr": "CALCULATE(SUM(Facts[Sales]),SUMMARIZE(Facts,Facts[Region]))",
+   "powerbi": "31.5"
+  },
+  {
+   "expr": "CALCULATE(SUM(Facts[Sales]),DISTINCT(Facts[Region]))",
+   "powerbi": "31.5"
+  },
+  {
+   "expr": "CALCULATE(SUM(Facts[Sales]),EXCEPT(ALL(Facts[Region]),{\"East\"}))",
+   "powerbi": "20"
+  },
+  {
+   "expr": "CALCULATE(SUM(Facts[Sales]),INTERSECT(ALL(Facts[Region]),{\"East\",\"North\"}))",
+   "powerbi": "11.5"
+  },
+  {
+   "expr": "CALCULATE(SUM(Facts[Sales]),Facts[Region]&\"\"=\"East\")",
+   "powerbi": "11.5"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(Facts),UPPER(Facts[Region])=\"EAST\")",
+   "powerbi": "3"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(Facts),LEN(Facts[Region])=4)",
+   "powerbi": "5"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]*2>4)",
+   "powerbi": "3"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(Facts),Facts[Sales]+Facts[Quantity]>10)",
+   "powerbi": "2"
+  },
+  {
+   "expr": "SUMX(Facts,CALCULATE(SUM(Facts[Sales]),FILTER(ALL(Facts),Facts[Quantity]<EARLIER(Facts[Quantity]))))",
+   "powerbi": "65.5"
+  },
+  {
+   "expr": "SUMX(Facts,CALCULATE(SUM(Facts[Sales]),FILTER(ALL(Facts),Facts[Quantity]<=EARLIER(Facts[Quantity]))))",
+   "powerbi": "97"
+  },
+  {
+   "expr": "SUMX(Facts,CALCULATE(COUNTROWS(Facts),FILTER(ALL(Facts[Region]),Facts[Region]=EARLIER(Facts[Region]))))",
+   "powerbi": "6"
+  },
+  {
+   "expr": "SUMX(Facts,CALCULATE(SUM(Facts[Sales]),Facts[Region]=EARLIER(Facts[Region])))",
+   "powerbi": "31.5"
+  },
+  {
+   "expr": "SUMX(Facts,CALCULATE(SUM(Facts[Sales]),ALLEXCEPT(Facts,Facts[Region])))",
+   "powerbi": "74.5"
+  },
+  {
+   "expr": "SUMX(VALUES(Facts[Region]),CALCULATE(SUM(Facts[Sales]),FILTER(ALL(Facts[Quantity]),Facts[Quantity]>2)))",
+   "powerbi": "22.5"
+  },
+  {
+   "expr": "SUMX(Facts,CALCULATE(SUM(Facts[Sales]),FILTER(ALL(Facts),Facts[Region]=Facts[Region])))",
+   "powerbi": "189"
+  },
+  {
+   "expr": "SUMX(CALCULATETABLE(Facts,Facts[Region]=\"East\"),Facts[Sales])",
+   "powerbi": "11.5"
+  },
+  {
+   "expr": "MAXX(CALCULATETABLE(VALUES(Facts[Quantity]),Facts[Region]=\"West\"),Facts[Quantity])",
+   "powerbi": "3"
+  },
+  {
+   "expr": "COUNTROWS(CALCULATETABLE(Facts,Facts[Region]=\"East\"))",
+   "powerbi": "3"
+  },
+  {
+   "expr": "COUNTROWS(CALCULATETABLE(Facts,FILTER(ALL(Facts[Region]),Facts[Region]=\"East\")))",
+   "powerbi": "3"
+  },
+  {
+   "expr": "COUNTROWS(CALCULATETABLE(Facts,Facts[Region] IN {\"East\",\"West\"}))",
+   "powerbi": "5"
+  },
+  {
+   "expr": "COUNTROWS(CALCULATETABLE(VALUES(Facts[Region]),Facts[Quantity]>1))",
+   "powerbi": "3"
+  },
+  {
+   "expr": "CALCULATETABLE(1,Facts[Region]=\"East\")",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 19) The CALCULATETABLE function expects a table expression for argument '1', but a string or numeric expression was used.\""
+  },
+  {
+   "expr": "ISONORAFTER(3,2)",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISONORAFTER(2,3)",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISONORAFTER(2,2)",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISONORAFTER(2,3,DESC)",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISONORAFTER(3,2,DESC)",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISONORAFTER(\"b\",\"a\")",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISONORAFTER(\"a\",\"b\")",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISONORAFTER(2,2,ASC,1,1)",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISONORAFTER(2,2,ASC,1,2)",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISONORAFTER(2,2,ASC,3,2)",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISONORAFTER(BLANK(),0)",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISONORAFTER(1,BLANK())",
+   "powerbi": "True"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(Facts,ISONORAFTER(Facts[Quantity],2)))",
+   "powerbi": "4"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(Facts,ISONORAFTER(Facts[Quantity],2,DESC)))",
+   "powerbi": "3"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(Facts,ISONORAFTER(Facts[Quantity],2,ASC,Facts[Region],\"East\")))",
+   "powerbi": "4"
+  },
+  {
+   "expr": "\"a\" IN {1,\"a\"}",
+   "powerbi": "True"
+  },
+  {
+   "expr": "COUNTROWS({1,\"a\"})",
+   "powerbi": "2"
+  },
+  {
+   "expr": "COUNTROWS({1,2,3})",
+   "powerbi": "3"
+  },
+  {
+   "expr": "2 IN {1,2.0}",
+   "powerbi": "True"
+  },
+  {
+   "expr": "TRUE() IN {1}",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 29) Function 'CONTAINSROW' does not support comparing values of type Integer with values of type True/False. Consider using the VALUE or FORMAT function to convert one of the values.\""
+  },
+  {
+   "expr": "BLANK() IN {1,2}",
+   "powerbi": "False"
+  },
+  {
+   "expr": "BLANK() IN {BLANK()}",
+   "powerbi": "True"
+  },
+  {
+   "expr": "COUNTROWS({(1,\"a\"),(2,\"b\")})",
+   "powerbi": "2"
+  },
+  {
+   "expr": "(-8)^(1/3)",
+   "powerbi": "-2"
+  },
+  {
+   "expr": "(-8)^2",
+   "powerbi": "64"
+  },
+  {
+   "expr": "2^0.5",
+   "powerbi": "1.4142135623731"
+  },
+  {
+   "expr": "0^0",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 19) An argument of function 'POWER' has the wrong data type or the result is too large or too small.\""
+  },
+  {
+   "expr": "(-1)^0.5",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 19) An argument of function 'POWER' has the wrong data type or the result is too large or too small.\""
+  },
+  {
+   "expr": "(-2)^3",
+   "powerbi": "-8"
+  },
+  {
+   "expr": "8^(1/3)",
+   "powerbi": "2"
+  },
+  {
+   "expr": "0^(-1)",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 19) Division by zero has occurred when evaluating function 'POWER'.\""
+  },
+  {
+   "expr": "(-8)^(-1)",
+   "powerbi": "-0.125"
+  },
+  {
+   "expr": "POWER(-8,1/3)",
+   "powerbi": "-2"
+  },
+  {
+   "expr": "POWER(-8,2)",
+   "powerbi": "64"
+  },
+  {
+   "expr": "POWER(0,0)",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 19) An argument of function 'POWER' has the wrong data type or the result is too large or too small.\""
+  },
+  {
+   "expr": "POWER(0,-1)",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 19) Division by zero has occurred when evaluating function 'POWER'.\""
+  },
+  {
+   "expr": "POWER(2,1024)",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 19) An argument of function 'POWER' has the wrong data type or the result is too large or too small.\""
+  },
+  {
+   "expr": "10^308",
+   "powerbi": "1E+308"
+  },
+  {
+   "expr": "10^309",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 19) An argument of function 'POWER' has the wrong data type or the result is too large or too small.\""
+  },
+  {
+   "expr": "(-1)^1000000000000",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 19) An argument of function 'POWER' has the wrong data type or the result is too large or too small.\""
+  },
+  {
+   "expr": "CALCULATE(SUM(Facts[Sales]),REMOVEFILTERS(Facts[Note]),FILTER(Facts,Facts[Quantity]>1),Facts[Region]=\"West\")",
+   "powerbi": "20"
+  },
+  {
+   "expr": "CALCULATE(SUM(Facts[Sales]),ALL(Facts[Note]),FILTER(Facts,Facts[Quantity]>1),Facts[Region]=\"West\")",
+   "powerbi": "20"
+  },
+  {
+   "expr": "CALCULATE(SUM(Facts[Sales]),Facts[Sales]=Facts[Quantity])",
+   "powerbi": "0"
+  },
+  {
+   "expr": "CALCULATE(SUM(Facts[Sales]),Facts[Sales]<Facts[Quantity])",
+   "powerbi": "1"
+  },
+  {
+   "expr": "CALCULATE(SUM(Facts[Sales]),Facts[Note]=\"Paid\" || Facts[Region]=\"East\")",
+   "powerbi": "11.5"
+  },
+  {
+   "expr": "CALCULATE(SUM(Facts[Sales]),Facts[Note]=\"Paid\" && Facts[Region]=\"East\")",
+   "powerbi": "9"
+  },
+  {
+   "expr": "CALCULATE(SUM(Facts[Sales]),FILTER(Facts,SUM(Facts[Quantity])>10))",
+   "powerbi": "31.5"
+  },
+  {
+   "expr": "CALCULATE(SUM(Facts[Sales]),FILTER(Facts,SUM(Facts[Quantity])>100))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "CALCULATE(SUM(Facts[Sales]),FILTER(Facts,Facts[Quantity]>1),Facts[Region]=\"East\")",
+   "powerbi": "13"
+  },
+  {
+   "expr": "CALCULATE(SUM(Facts[Sales]),FILTER(Facts,Facts[Quantity]>1),FILTER(Facts,Facts[Region]=\"East\"))",
+   "powerbi": "13"
+  },
+  {
+   "expr": "CALCULATE(SUM(Facts[Sales]),FILTER(FILTER(Facts,Facts[Quantity]>1),Facts[Region]=\"East\"))",
+   "powerbi": "13"
+  },
+  {
+   "expr": "CALCULATE(SUM(Facts[Sales]),KEEPFILTERS(FILTER(Facts,Facts[Quantity]>1)))",
+   "powerbi": "33"
+  },
+  {
+   "expr": "CALCULATE(SUM(Facts[Sales]),FILTER(ALL(Facts),Facts[Region]=\"East\"))",
+   "powerbi": "11.5"
+  },
+  {
+   "expr": "CALCULATE(SUM(Facts[Sales]),FILTER(ALL(Facts),Facts[Region]=\"East\"),Facts[Quantity]>2)",
+   "powerbi": "2.5"
+  },
+  {
+   "expr": "CALCULATE(SUM(Facts[Sales]),FILTER(ALL(Facts),Facts[Region]=\"East\"),FILTER(ALL(Facts),Facts[Quantity]>2))",
+   "powerbi": "2.5"
+  },
+  {
+   "expr": "CALCULATE(SUM(Facts[Sales]),Facts[Quantity]>1,Facts[Quantity]<5)",
+   "powerbi": "30.5"
+  },
+  {
+   "expr": "CALCULATE(SUM(Facts[Sales]),Facts[Region]=\"East\",Facts[Region]=\"West\")",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "CALCULATE(SUM(Facts[Sales]),Facts[Region]=\"East\",KEEPFILTERS(Facts[Quantity]>2))",
+   "powerbi": "2.5"
+  },
+  {
+   "expr": "CALCULATE(SUM(Facts[Sales]),REMOVEFILTERS(Facts[Region]),Facts[Region]=\"East\")",
+   "powerbi": "11.5"
+  },
+  {
+   "expr": "CALCULATE(SUM(Facts[Sales]),REMOVEFILTERS(),Facts[Region]=\"East\")",
+   "powerbi": "11.5"
+  },
+  {
+   "expr": "CALCULATE(SUM(Facts[Sales]),ALLEXCEPT(Facts,Facts[Region]),Facts[Quantity]>2)",
+   "powerbi": "22.5"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(Facts),ALL(Facts),Facts[Quantity]>2)",
+   "powerbi": "3"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(Facts),ALL(Facts),FILTER(Facts,Facts[Quantity]>2))",
+   "powerbi": "3"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(Facts),ALL(Facts[Region]),ALL(Facts[Quantity]))",
+   "powerbi": "6"
+  },
+  {
+   "expr": "COUNTROWS(SELECTCOLUMNS(Facts,Facts[Region]))",
+   "powerbi": "6"
+  },
+  {
+   "expr": "SUMX(SELECTCOLUMNS(Facts,Facts[Quantity]),[Quantity])",
+   "powerbi": "15"
+  },
+  {
+   "expr": "COUNTROWS(SELECTCOLUMNS(Facts,Facts[Region],Facts[Quantity]))",
+   "powerbi": "6"
+  },
+  {
+   "expr": "MAXX(SELECTCOLUMNS(Facts,Facts[Quantity]*2),[Value])",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 44) Function SELECTCOLUMNS expects a column name as argument number 2. The column name can only be omitted for simple column references.\""
+  },
+  {
+   "expr": "MAXX(SELECTCOLUMNS(Facts,Facts[Quantity]+1),[Quantity])",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 44) Function SELECTCOLUMNS expects a column name as argument number 2. The column name can only be omitted for simple column references.\""
+  },
+  {
+   "expr": "CONTAINSROW(ROW(\"a\",1,\"b\",2),1,2)",
+   "powerbi": "True"
+  },
+  {
+   "expr": "CONTAINSROW(ROW(\"a\",1,\"b\",2),1,3)",
+   "powerbi": "False"
+  },
+  {
+   "expr": "CONTAINSROW({1,2},1)",
+   "powerbi": "True"
+  },
+  {
+   "expr": "CONTAINSROW({1,2},3)",
+   "powerbi": "False"
+  },
+  {
+   "expr": "CONTAINSROW(ROW(\"a\",1,\"b\",2),1)",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 19) The number of arguments is invalid. Function CONTAINSROW must have a value for each column in the table expression.\""
+  },
+  {
+   "expr": "COUNTROWS({(1,\"a\"),(2,\"b\"),(3,\"c\")})",
+   "powerbi": "3"
+  },
+  {
+   "expr": "COUNTROWS({(1,2)})",
+   "powerbi": "1"
+  },
+  {
+   "expr": "MAXX({(1,\"a\"),(2,\"b\")},[Value1])",
+   "powerbi": "2"
+  },
+  {
+   "expr": "MAXX({(1,5),(2,6)},[Value2])",
+   "powerbi": "6"
+  },
+  {
+   "expr": "SUMX({(1,5),(2,6)},[Value1]+[Value2])",
+   "powerbi": "14"
+  },
+  {
+   "expr": "(1,\"a\") IN {(1,\"a\"),(2,\"b\")}",
+   "powerbi": "True"
+  },
+  {
+   "expr": "(1,\"b\") IN {(1,\"a\"),(2,\"b\")}",
+   "powerbi": "False"
+  },
+  {
+   "expr": "(2,\"b\") IN {(1,\"a\"),(2,\"b\")}",
+   "powerbi": "True"
+  },
+  {
+   "expr": "1 IN {1,\"a\"}",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 24) Function 'CONTAINSROW' does not support comparing values of type Text with values of type Integer. Consider using the VALUE or FORMAT function to convert one of the values.\""
+  },
+  {
+   "expr": "\"b\" IN {1,\"a\"}",
+   "powerbi": "False"
+  },
+  {
+   "expr": "TRUE() IN {1,2}",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 29) Function 'CONTAINSROW' does not support comparing values of type Integer with values of type True/False. Consider using the VALUE or FORMAT function to convert one of the values.\""
+  },
+  {
+   "expr": "1 IN {TRUE(),2}",
+   "powerbi": "True"
+  },
+  {
+   "expr": "(-8)^(2/3)",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 19) An argument of function 'POWER' has the wrong data type or the result is too large or too small.\""
+  },
+  {
+   "expr": "(-27)^(1/3)",
+   "powerbi": "-3"
+  },
+  {
+   "expr": "(-16)^(1/4)",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 19) An argument of function 'POWER' has the wrong data type or the result is too large or too small.\""
+  },
+  {
+   "expr": "(-32)^(1/5)",
+   "powerbi": "-2"
+  },
+  {
+   "expr": "(-8)^0.3333333333",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 19) An argument of function 'POWER' has the wrong data type or the result is too large or too small.\""
+  },
+  {
+   "expr": "(-8)^0.5",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 19) An argument of function 'POWER' has the wrong data type or the result is too large or too small.\""
+  },
+  {
+   "expr": "(-8)^(-1/3)",
+   "powerbi": "-0.5"
+  },
+  {
+   "expr": "(-1)^(1/3)",
+   "powerbi": "-1"
+  },
+  {
+   "expr": "POWER(-2,0.5)",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 19) An argument of function 'POWER' has the wrong data type or the result is too large or too small.\""
+  },
+  {
+   "expr": "POWER(-2,1/3)",
+   "powerbi": "-1.25992104989487"
+  },
+  {
+   "expr": "(-8)^(1/3.0)",
+   "powerbi": "-2"
+  },
+  {
+   "expr": "(-9)^(1/2)",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 19) An argument of function 'POWER' has the wrong data type or the result is too large or too small.\""
+  },
+  {
+   "expr": "(-1)^(2/4)",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 19) An argument of function 'POWER' has the wrong data type or the result is too large or too small.\""
+  },
+  {
+   "expr": "(-64)^(1/6)",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 19) An argument of function 'POWER' has the wrong data type or the result is too large or too small.\""
+  },
+  {
+   "expr": "(-64)^(1/3)",
+   "powerbi": "-4"
+  },
+  {
+   "expr": "(-1)^999999999999",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 19) An argument of function 'POWER' has the wrong data type or the result is too large or too small.\""
+  },
+  {
+   "expr": "(-1)^100",
+   "powerbi": "1"
+  },
+  {
+   "expr": "2^1000",
+   "powerbi": "1.07150860718627E+301"
+  },
+  {
+   "expr": "2^10000",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 19) An argument of function 'POWER' has the wrong data type or the result is too large or too small.\""
+  },
+  {
+   "expr": "(-2)^1001",
+   "powerbi": "-2.14301721437253E+301"
+  },
+  {
+   "expr": "0.5^2000",
+   "powerbi": "0"
+  },
+  {
+   "expr": "10^(-400)",
+   "powerbi": "0"
+  },
+  {
+   "expr": "ISONORAFTER(\"a\",\"A\")",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISONORAFTER(TRUE(),FALSE())",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISONORAFTER(FALSE(),TRUE())",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISONORAFTER(1,\"a\")",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 19) DAX comparison operations do not support comparing values of type Integer with values of type Text. Consider using the VALUE or FORMAT function to convert one of the values.\""
+  },
+  {
+   "expr": "ISONORAFTER(\"a\",1)",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 19) DAX comparison operations do not support comparing values of type Text with values of type Integer. Consider using the VALUE or FORMAT function to convert one of the values.\""
+  },
+  {
+   "expr": "ISONORAFTER(1)",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 19) Too few arguments were passed to the ISONORAFTER function. The minimum argument count for the function is 2.\""
+  },
+  {
+   "expr": "ISONORAFTER(1,2,ASC)",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISONORAFTER(1,2,DESC,1)",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 19) IsOnOrAfter() function contains a scalar expression to compare without a value to compare against.\""
+  },
+  {
+   "expr": "ISONORAFTER(1,2,DESC,2,1)",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISONORAFTER(2,2,DESC,1,1)",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISONORAFTER(2,2,DESC,1,2)",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISONORAFTER(2,2,DESC,3,2)",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISONORAFTER(3,2,ASC,0,100)",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISONORAFTER(2,2,ASC,\"b\",\"a\")",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISONORAFTER(2,2,ASC,\"a\",\"b\")",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISONORAFTER(2,2,DESC,\"a\",\"b\")",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISONORAFTER(1.5,1.4)",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISONORAFTER(DATE(2024,1,2),DATE(2024,1,1))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISONORAFTER(DATE(2024,1,1),DATE(2024,1,2))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISONORAFTER(BLANK(),BLANK())",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISONORAFTER(0,BLANK())",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISONORAFTER(\"\",BLANK())",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISONORAFTER(BLANK(),\"\")",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISONORAFTER(BLANK(),\"a\")",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISONORAFTER(\"a\",BLANK())",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISONORAFTER(2,2,ASC,3)",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 19) IsOnOrAfter() function contains a scalar expression to compare without a value to compare against.\""
+  },
+  {
+   "expr": "ISONORAFTER(2,2,3)",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 35) Unexpected value for ORDER argument in ISONORAFTER function. Use 0/FALSE/DESC for descending order or 1/TRUE/ASC for ascending order.\""
+  },
+  {
+   "expr": "ISONORAFTER(2,2,ASC,3,2,DESC)",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISONORAFTER(2,2,ASC,3,2,ASC,1,0)",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISONORAFTER(2,2,ASC,3,2,DESC,1,2)",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISONORAFTER(2,2,ASC,3,2,DESC,1,0)",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISONORAFTER(2,2,ASC,3,3,DESC,1,2)",
+   "powerbi": "False"
+  },
+  {
+   "expr": "(-1)^2147483647",
+   "powerbi": "-1"
+  },
+  {
+   "expr": "(-1)^2147483648",
+   "powerbi": "1"
+  },
+  {
+   "expr": "(-1)^4294967296",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 19) An argument of function 'POWER' has the wrong data type or the result is too large or too small.\""
+  },
+  {
+   "expr": "(-1)^4294967295",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 19) An argument of function 'POWER' has the wrong data type or the result is too large or too small.\""
+  },
+  {
+   "expr": "1^1000000000000",
+   "powerbi": "1"
+  },
+  {
+   "expr": "1^3000000000",
+   "powerbi": "1"
+  },
+  {
+   "expr": "0^3000000000",
+   "powerbi": "0"
+  },
+  {
+   "expr": "2^(-3000000000)",
+   "powerbi": "0"
+  },
+  {
+   "expr": "(-2)^2147483647",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 19) An argument of function 'POWER' has the wrong data type or the result is too large or too small.\""
+  },
+  {
+   "expr": "1.0000001^2147483647",
+   "powerbi": "1.83664479767806E+93"
+  },
+  {
+   "expr": "1^(-1000000000000)",
+   "powerbi": "1"
+  },
+  {
+   "expr": "(-1)^(-1000000000000)",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 19) An argument of function 'POWER' has the wrong data type or the result is too large or too small.\""
+  },
+  {
+   "expr": "(-1)^(-999999999999)",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 19) An argument of function 'POWER' has the wrong data type or the result is too large or too small.\""
+  },
+  {
+   "expr": "5^0",
+   "powerbi": "1"
+  },
+  {
+   "expr": "(-5)^0",
+   "powerbi": "1"
+  },
+  {
+   "expr": "0^0.5",
+   "powerbi": "0"
+  },
+  {
+   "expr": "0^(-0.5)",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 19) Division by zero has occurred when evaluating function 'POWER'.\""
+  },
+  {
+   "expr": "0^1",
+   "powerbi": "0"
+  },
+  {
+   "expr": "(-0)^(-1)",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 19) Division by zero has occurred when evaluating function 'POWER'.\""
+  },
+  {
+   "expr": "(-1)^1.5",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 19) An argument of function 'POWER' has the wrong data type or the result is too large or too small.\""
+  },
+  {
+   "expr": "(-1)^3.0",
+   "powerbi": "-1"
+  },
+  {
+   "expr": "(-8)^(3/3)",
+   "powerbi": "-8"
+  },
+  {
+   "expr": "(-8)^(1/3)*1",
+   "powerbi": "-2"
+  },
+  {
+   "expr": "(-0.001)^(1/3)",
+   "powerbi": "-0.1"
+  },
+  {
+   "expr": "(-1E-300)^(1/3)",
+   "powerbi": "-1.00000000000006E-100"
+  },
+  {
+   "expr": "(-1E300)^(1/3)",
+   "powerbi": "-9.99999999999938E+99"
+  },
+  {
+   "expr": "(-8)^(1/-3)",
+   "powerbi": "-0.5"
+  },
+  {
+   "expr": "(-8)^(-1/3.0)",
+   "powerbi": "-0.5"
+  },
+  {
+   "expr": "(-8)^(1/9)",
+   "powerbi": "-1.25992104989487"
+  },
+  {
+   "expr": "(-512)^(1/9)",
+   "powerbi": "-2"
+  },
+  {
+   "expr": "(-8)^(1/1)",
+   "powerbi": "-8"
+  },
+  {
+   "expr": "(-8)^(1/7)",
+   "powerbi": "-1.34590019263236"
+  },
+  {
+   "expr": "(-8)^(1/0.5)",
+   "powerbi": "64"
+  },
+  {
+   "expr": "(-8)^(1/1.5)",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 19) An argument of function 'POWER' has the wrong data type or the result is too large or too small.\""
+  },
+  {
+   "expr": "POWER(-8,-1/3)",
+   "powerbi": "-0.5"
+  },
+  {
+   "expr": "POWER(-8,3/9)",
+   "powerbi": "-2"
+  },
+  {
+   "expr": "POWER(-8,0.2)",
+   "powerbi": "-1.5157165665104"
+  },
+  {
+   "expr": "POWER(-32,0.2)",
+   "powerbi": "-2"
+  },
+  {
+   "expr": "POWER(-32,1/5)",
+   "powerbi": "-2"
+  },
+  {
+   "expr": "POWER(-243,1/5)",
+   "powerbi": "-3"
+  },
+  {
+   "expr": "POWER(-243,0.2)",
+   "powerbi": "-3"
+  },
+  {
+   "expr": "POWER(-3125,0.2)",
+   "powerbi": "-5"
+  },
+  {
+   "expr": "POWER(-8,0.3333333333333333)",
+   "powerbi": "-2"
+  },
+  {
+   "expr": "POWER(-8,0.33333333333333)",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 19) An argument of function 'POWER' has the wrong data type or the result is too large or too small.\""
+  },
+  {
+   "expr": "POWER(-8,0.333333333333)",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 19) An argument of function 'POWER' has the wrong data type or the result is too large or too small.\""
+  },
+  {
+   "expr": "(-1)^2147483649",
+   "powerbi": "-1"
+  },
+  {
+   "expr": "(-1)^2200000000",
+   "powerbi": "1"
+  },
+  {
+   "expr": "(-1)^2500000000",
+   "powerbi": "1"
+  },
+  {
+   "expr": "(-1)^3000000000",
+   "powerbi": "1"
+  },
+  {
+   "expr": "(-1)^3500000000",
+   "powerbi": "1"
+  },
+  {
+   "expr": "(-1)^4000000000",
+   "powerbi": "1"
+  },
+  {
+   "expr": "(-1)^4200000000",
+   "powerbi": "1"
+  },
+  {
+   "expr": "(-1)^4294967000",
+   "powerbi": "1"
+  },
+  {
+   "expr": "(-1)^(-2147483647)",
+   "powerbi": "-1"
+  },
+  {
+   "expr": "(-1)^(-2147483648)",
+   "powerbi": "1"
+  },
+  {
+   "expr": "(-1)^(-2147483649)",
+   "powerbi": "-1"
+  },
+  {
+   "expr": "(-1)^(-3000000000)",
+   "powerbi": "1"
+  },
+  {
+   "expr": "(-1)^1E10",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 19) An argument of function 'POWER' has the wrong data type or the result is too large or too small.\""
+  },
+  {
+   "expr": "(-1.0)^3000000001",
+   "powerbi": "-1"
+  },
+  {
+   "expr": "1.5^3000000000",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 19) An argument of function 'POWER' has the wrong data type or the result is too large or too small.\""
+  },
+  {
+   "expr": "(-1)^2147483646",
+   "powerbi": "1"
+  },
+  {
+   "expr": "0.5^3000000000",
+   "powerbi": "0"
+  },
+  {
+   "expr": "(-0.5)^3000000000",
+   "powerbi": "0"
+  },
+  {
+   "expr": "(-0.5)^3000000001",
+   "powerbi": "0"
+  },
+  {
+   "expr": "(-1)^4294967294",
+   "powerbi": "1"
+  },
+  {
+   "expr": "(-1)^4294967200",
+   "powerbi": "1"
+  },
+  {
+   "expr": "(-1)^4294967293",
+   "powerbi": "-1"
+  },
+  {
+   "expr": "(-0.5)^1E12",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 19) An argument of function 'POWER' has the wrong data type or the result is too large or too small.\""
+  },
+  {
+   "expr": "(-2)^1E12",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 19) An argument of function 'POWER' has the wrong data type or the result is too large or too small.\""
+  },
+  {
+   "expr": "(-0.5)^4294967295",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 19) An argument of function 'POWER' has the wrong data type or the result is too large or too small.\""
+  },
+  {
+   "expr": "(-0.5)^4294967294",
+   "powerbi": "0"
+  },
+  {
+   "expr": "(-1)^(-4294967294)",
+   "powerbi": "1"
+  },
+  {
+   "expr": "(-1)^(-4294967295)",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 19) An argument of function 'POWER' has the wrong data type or the result is too large or too small.\""
+  },
+  {
+   "expr": "(-0.5)^(-1E12)",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 19) An argument of function 'POWER' has the wrong data type or the result is too large or too small.\""
+  },
+  {
+   "expr": "(-1E-5)^1E12",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 19) An argument of function 'POWER' has the wrong data type or the result is too large or too small.\""
+  },
+  {
+   "expr": "0.5^1E12",
+   "powerbi": "0"
+  },
+  {
+   "expr": "(-1)^4294967294.5",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 19) An argument of function 'POWER' has the wrong data type or the result is too large or too small.\""
+  },
+  {
+   "expr": "(-1)^4294967295.5",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 19) An argument of function 'POWER' has the wrong data type or the result is too large or too small.\""
+  },
+  {
+   "expr": "CALCULATE(SUM(Facts[Sales]),FILTER(ALL(Facts),Facts[Quantity]>=3))",
+   "powerbi": "22.5"
+  },
+  {
+   "expr": "CALCULATE(SUM(Facts[Sales]),FILTER(Facts,Facts[Sales]>0))",
+   "powerbi": "33"
+  },
+  {
+   "expr": "CALCULATE(SUM(Facts[Sales]),FILTER(VALUES(Facts[Region]),Facts[Region]<>\"West\"))",
+   "powerbi": "11.5"
+  },
+  {
+   "expr": "CALCULATE(SUM(Facts[Sales]),FILTER(ALL(Facts[Quantity]),Facts[Quantity] IN {1,2,5}))",
+   "powerbi": "11.5"
+  },
+  {
+   "expr": "CALCULATE(SUM(Facts[Sales]),Facts[Region] IN {\"East\",\"North\"})",
+   "powerbi": "11.5"
+  },
+  {
+   "expr": "CALCULATE(SUM(Facts[Sales]),Facts[Quantity]*2>4)",
+   "powerbi": "22.5"
+  },
+  {
+   "expr": "CALCULATE(SUM(Facts[Sales]),UPPER(Facts[Region])=\"WEST\")",
+   "powerbi": "20"
+  },
+  {
+   "expr": "CALCULATE(SUM(Facts[Sales]),NOT(Facts[Note]=\"Paid\"))",
+   "powerbi": "22.5"
+  },
+  {
+   "expr": "CALCULATE(SUM(Facts[Sales]),Facts[Sales]>Facts[Quantity])",
+   "powerbi": "30.5"
+  },
+  {
+   "expr": "CALCULATE(SUM(Facts[Sales]),KEEPFILTERS(Facts[Quantity]>1))",
+   "powerbi": "33"
+  },
+  {
+   "expr": "CALCULATE(SUM(Facts[Sales]),VALUES(Facts[Note]))",
+   "powerbi": "31.5"
+  },
+  {
+   "expr": "CALCULATE(SUM(Facts[Sales]),ALL(Facts[Region]))",
+   "powerbi": "31.5"
+  },
+  {
+   "expr": "CALCULATE(SUM(Facts[Sales]),ALLEXCEPT(Facts,Facts[Note]))",
+   "powerbi": "31.5"
+  },
+  {
+   "expr": "CALCULATE(SUM(Facts[Sales]),REMOVEFILTERS(Facts[Quantity]))",
+   "powerbi": "31.5"
+  },
+  {
+   "expr": "CALCULATE(SUM(Facts[Sales]),FILTER(ALL(Facts[Region],Facts[Note]),Facts[Region]=\"East\" && Facts[Note]=\"Paid\"))",
+   "powerbi": "9"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(Facts),FILTER(ALL(Facts[Region]),Facts[Region]=\"East\"))",
+   "powerbi": "3"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(Facts),FILTER(ALL(Facts),Facts[Quantity]>=3))",
+   "powerbi": "3"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(Facts),FILTER(Facts,Facts[Sales]>0))",
+   "powerbi": "3"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(Facts),FILTER(VALUES(Facts[Region]),Facts[Region]<>\"West\"))",
+   "powerbi": "4"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(Facts),FILTER(ALL(Facts[Quantity]),Facts[Quantity] IN {1,2,5}))",
+   "powerbi": "3"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(Facts),Facts[Region] IN {\"East\",\"North\"})",
+   "powerbi": "4"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(Facts),UPPER(Facts[Region])=\"WEST\")",
+   "powerbi": "2"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(Facts),NOT(Facts[Note]=\"Paid\"))",
+   "powerbi": "3"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(Facts),Facts[Sales]>Facts[Quantity])",
+   "powerbi": "2"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(Facts),TOPN(2,ALL(Facts[Quantity]),Facts[Quantity]))",
+   "powerbi": "2"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(Facts),KEEPFILTERS(Facts[Quantity]>1))",
+   "powerbi": "4"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(Facts),VALUES(Facts[Note]))",
+   "powerbi": "6"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(Facts),DISTINCT(Facts[Region]))",
+   "powerbi": "6"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(Facts),ALL(Facts[Region]))",
+   "powerbi": "6"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(Facts),ALLEXCEPT(Facts,Facts[Note]))",
+   "powerbi": "6"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(Facts),REMOVEFILTERS(Facts[Quantity]))",
+   "powerbi": "6"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(Facts),CALCULATETABLE(Facts,Facts[Region]=\"East\"))",
+   "powerbi": "3"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(Facts),EXCEPT(ALL(Facts[Region]),{\"East\"}))",
+   "powerbi": "3"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(Facts),FILTER(ALL(Facts[Region],Facts[Note]),Facts[Region]=\"East\" && Facts[Note]=\"Paid\"))",
+   "powerbi": "2"
+  },
+  {
+   "expr": "CALCULATE(MAX(Facts[Quantity]),FILTER(ALL(Facts[Region]),Facts[Region]=\"East\"))",
+   "powerbi": "5"
+  },
+  {
+   "expr": "CALCULATE(MAX(Facts[Quantity]),FILTER(ALL(Facts),Facts[Quantity]>=3))",
+   "powerbi": "5"
+  },
+  {
+   "expr": "CALCULATE(MAX(Facts[Quantity]),FILTER(Facts,Facts[Sales]>0))",
+   "powerbi": "5"
+  },
+  {
+   "expr": "CALCULATE(MAX(Facts[Quantity]),FILTER(VALUES(Facts[Region]),Facts[Region]<>\"West\"))",
+   "powerbi": "5"
+  },
+  {
+   "expr": "CALCULATE(MAX(Facts[Quantity]),FILTER(ALL(Facts[Quantity]),Facts[Quantity] IN {1,2,5}))",
+   "powerbi": "5"
+  },
+  {
+   "expr": "CALCULATE(MAX(Facts[Quantity]),Facts[Region] IN {\"East\",\"North\"})",
+   "powerbi": "5"
+  },
+  {
+   "expr": "CALCULATE(MAX(Facts[Quantity]),Facts[Quantity]*2>4)",
+   "powerbi": "5"
+  },
+  {
+   "expr": "CALCULATE(MAX(Facts[Quantity]),UPPER(Facts[Region])=\"WEST\")",
+   "powerbi": "3"
+  },
+  {
+   "expr": "CALCULATE(MAX(Facts[Quantity]),NOT(Facts[Note]=\"Paid\"))",
+   "powerbi": "5"
+  },
+  {
+   "expr": "CALCULATE(MAX(Facts[Quantity]),Facts[Sales]>Facts[Quantity])",
+   "powerbi": "3"
+  },
+  {
+   "expr": "CALCULATE(MAX(Facts[Quantity]),TOPN(2,ALL(Facts[Quantity]),Facts[Quantity]))",
+   "powerbi": "5"
+  },
+  {
+   "expr": "CALCULATE(MAX(Facts[Quantity]),KEEPFILTERS(Facts[Quantity]>1))",
+   "powerbi": "5"
+  },
+  {
+   "expr": "CALCULATE(MAX(Facts[Quantity]),VALUES(Facts[Note]))",
+   "powerbi": "5"
+  },
+  {
+   "expr": "CALCULATE(MAX(Facts[Quantity]),DISTINCT(Facts[Region]))",
+   "powerbi": "5"
+  },
+  {
+   "expr": "CALCULATE(MAX(Facts[Quantity]),ALL(Facts[Region]))",
+   "powerbi": "5"
+  },
+  {
+   "expr": "CALCULATE(MAX(Facts[Quantity]),ALLEXCEPT(Facts,Facts[Note]))",
+   "powerbi": "5"
+  },
+  {
+   "expr": "CALCULATE(MAX(Facts[Quantity]),REMOVEFILTERS(Facts[Quantity]))",
+   "powerbi": "5"
+  },
+  {
+   "expr": "CALCULATE(MAX(Facts[Quantity]),CALCULATETABLE(Facts,Facts[Region]=\"East\"))",
+   "powerbi": "5"
+  },
+  {
+   "expr": "CALCULATE(MAX(Facts[Quantity]),EXCEPT(ALL(Facts[Region]),{\"East\"}))",
+   "powerbi": "4"
+  },
+  {
+   "expr": "CALCULATE(MAX(Facts[Quantity]),FILTER(ALL(Facts[Region],Facts[Note]),Facts[Region]=\"East\" && Facts[Note]=\"Paid\"))",
+   "powerbi": "2"
+  },
+  {
+   "expr": "CALCULATE(AVERAGE(Facts[Sales]),FILTER(ALL(Facts[Region]),Facts[Region]=\"East\"))",
+   "powerbi": "3.83333333333333"
+  },
+  {
+   "expr": "CALCULATE(AVERAGE(Facts[Sales]),FILTER(ALL(Facts),Facts[Quantity]>=3))",
+   "powerbi": "11.25"
+  },
+  {
+   "expr": "CALCULATE(AVERAGE(Facts[Sales]),FILTER(Facts,Facts[Sales]>0))",
+   "powerbi": "11"
+  },
+  {
+   "expr": "CALCULATE(AVERAGE(Facts[Sales]),FILTER(VALUES(Facts[Region]),Facts[Region]<>\"West\"))",
+   "powerbi": "3.83333333333333"
+  },
+  {
+   "expr": "CALCULATE(AVERAGE(Facts[Sales]),FILTER(ALL(Facts[Quantity]),Facts[Quantity] IN {1,2,5}))",
+   "powerbi": "3.83333333333333"
+  },
+  {
+   "expr": "CALCULATE(AVERAGE(Facts[Sales]),Facts[Region] IN {\"East\",\"North\"})",
+   "powerbi": "3.83333333333333"
+  },
+  {
+   "expr": "CALCULATE(AVERAGE(Facts[Sales]),Facts[Quantity]*2>4)",
+   "powerbi": "11.25"
+  },
+  {
+   "expr": "CALCULATE(AVERAGE(Facts[Sales]),UPPER(Facts[Region])=\"WEST\")",
+   "powerbi": "10"
+  },
+  {
+   "expr": "CALCULATE(AVERAGE(Facts[Sales]),NOT(Facts[Note]=\"Paid\"))",
+   "powerbi": "11.25"
+  },
+  {
+   "expr": "CALCULATE(AVERAGE(Facts[Sales]),Facts[Sales]>Facts[Quantity])",
+   "powerbi": "15.25"
+  },
+  {
+   "expr": "CALCULATE(AVERAGE(Facts[Sales]),TOPN(2,ALL(Facts[Quantity]),Facts[Quantity]))",
+   "powerbi": "2.5"
+  },
+  {
+   "expr": "CALCULATE(AVERAGE(Facts[Sales]),KEEPFILTERS(Facts[Quantity]>1))",
+   "powerbi": "11"
+  },
+  {
+   "expr": "CALCULATE(AVERAGE(Facts[Sales]),VALUES(Facts[Note]))",
+   "powerbi": "6.3"
+  },
+  {
+   "expr": "CALCULATE(AVERAGE(Facts[Sales]),DISTINCT(Facts[Region]))",
+   "powerbi": "6.3"
+  },
+  {
+   "expr": "CALCULATE(AVERAGE(Facts[Sales]),ALL(Facts[Region]))",
+   "powerbi": "6.3"
+  },
+  {
+   "expr": "CALCULATE(AVERAGE(Facts[Sales]),ALLEXCEPT(Facts,Facts[Note]))",
+   "powerbi": "6.3"
+  },
+  {
+   "expr": "CALCULATE(AVERAGE(Facts[Sales]),REMOVEFILTERS(Facts[Quantity]))",
+   "powerbi": "6.3"
+  },
+  {
+   "expr": "CALCULATE(AVERAGE(Facts[Sales]),CALCULATETABLE(Facts,Facts[Region]=\"East\"))",
+   "powerbi": "3.83333333333333"
+  },
+  {
+   "expr": "CALCULATE(AVERAGE(Facts[Sales]),EXCEPT(ALL(Facts[Region]),{\"East\"}))",
+   "powerbi": "10"
+  },
+  {
+   "expr": "CALCULATE(AVERAGE(Facts[Sales]),FILTER(ALL(Facts[Region],Facts[Note]),Facts[Region]=\"East\" && Facts[Note]=\"Paid\"))",
+   "powerbi": "4.5"
+  },
+  {
+   "expr": "CALCULATE(COUNT(Facts[Sales]),FILTER(ALL(Facts[Region]),Facts[Region]=\"East\"))",
+   "powerbi": "3"
+  },
+  {
+   "expr": "CALCULATE(COUNT(Facts[Sales]),FILTER(ALL(Facts),Facts[Quantity]>=3))",
+   "powerbi": "2"
+  },
+  {
+   "expr": "CALCULATE(COUNT(Facts[Sales]),FILTER(Facts,Facts[Sales]>0))",
+   "powerbi": "3"
+  },
+  {
+   "expr": "CALCULATE(COUNT(Facts[Sales]),FILTER(VALUES(Facts[Region]),Facts[Region]<>\"West\"))",
+   "powerbi": "3"
+  },
+  {
+   "expr": "CALCULATE(COUNT(Facts[Sales]),FILTER(ALL(Facts[Quantity]),Facts[Quantity] IN {1,2,5}))",
+   "powerbi": "3"
+  },
+  {
+   "expr": "CALCULATE(COUNT(Facts[Sales]),Facts[Region] IN {\"East\",\"North\"})",
+   "powerbi": "3"
+  },
+  {
+   "expr": "CALCULATE(COUNT(Facts[Sales]),Facts[Quantity]*2>4)",
+   "powerbi": "2"
+  },
+  {
+   "expr": "CALCULATE(COUNT(Facts[Sales]),UPPER(Facts[Region])=\"WEST\")",
+   "powerbi": "2"
+  },
+  {
+   "expr": "CALCULATE(COUNT(Facts[Sales]),NOT(Facts[Note]=\"Paid\"))",
+   "powerbi": "2"
+  },
+  {
+   "expr": "CALCULATE(COUNT(Facts[Sales]),Facts[Sales]>Facts[Quantity])",
+   "powerbi": "2"
+  },
+  {
+   "expr": "CALCULATE(COUNT(Facts[Sales]),TOPN(2,ALL(Facts[Quantity]),Facts[Quantity]))",
+   "powerbi": "1"
+  },
+  {
+   "expr": "CALCULATE(COUNT(Facts[Sales]),KEEPFILTERS(Facts[Quantity]>1))",
+   "powerbi": "3"
+  },
+  {
+   "expr": "CALCULATE(COUNT(Facts[Sales]),VALUES(Facts[Note]))",
+   "powerbi": "5"
+  },
+  {
+   "expr": "CALCULATE(COUNT(Facts[Sales]),DISTINCT(Facts[Region]))",
+   "powerbi": "5"
+  },
+  {
+   "expr": "CALCULATE(COUNT(Facts[Sales]),ALL(Facts[Region]))",
+   "powerbi": "5"
+  },
+  {
+   "expr": "CALCULATE(COUNT(Facts[Sales]),ALLEXCEPT(Facts,Facts[Note]))",
+   "powerbi": "5"
+  },
+  {
+   "expr": "CALCULATE(COUNT(Facts[Sales]),REMOVEFILTERS(Facts[Quantity]))",
+   "powerbi": "5"
+  },
+  {
+   "expr": "CALCULATE(COUNT(Facts[Sales]),CALCULATETABLE(Facts,Facts[Region]=\"East\"))",
+   "powerbi": "3"
+  },
+  {
+   "expr": "CALCULATE(COUNT(Facts[Sales]),EXCEPT(ALL(Facts[Region]),{\"East\"}))",
+   "powerbi": "2"
+  },
+  {
+   "expr": "CALCULATE(COUNT(Facts[Sales]),FILTER(ALL(Facts[Region],Facts[Note]),Facts[Region]=\"East\" && Facts[Note]=\"Paid\"))",
+   "powerbi": "2"
+  },
+  {
+   "expr": "CALCULATE(SUM(Facts[Sales]),FILTER(ALL(Facts[Region]),Facts[Region]=\"East\"),FILTER(ALL(Facts),Facts[Quantity]>=3))",
+   "powerbi": "2.5"
+  },
+  {
+   "expr": "CALCULATE(SUM(Facts[Sales]),FILTER(ALL(Facts[Region]),Facts[Region]=\"East\"),FILTER(Facts,Facts[Sales]>0))",
+   "powerbi": "13"
+  },
+  {
+   "expr": "CALCULATE(SUM(Facts[Sales]),FILTER(ALL(Facts[Region]),Facts[Region]=\"East\"),FILTER(VALUES(Facts[Region]),Facts[Region]<>\"West\"))",
+   "powerbi": "11.5"
+  },
+  {
+   "expr": "CALCULATE(SUM(Facts[Sales]),FILTER(ALL(Facts[Region]),Facts[Region]=\"East\"),FILTER(ALL(Facts[Quantity]),Facts[Quantity] IN {1,2,5}))",
+   "powerbi": "11.5"
+  },
+  {
+   "expr": "CALCULATE(SUM(Facts[Sales]),FILTER(ALL(Facts[Region]),Facts[Region]=\"East\"),Facts[Region] IN {\"East\",\"North\"})",
+   "powerbi": "11.5"
+  },
+  {
+   "expr": "CALCULATE(SUM(Facts[Sales]),FILTER(ALL(Facts[Region]),Facts[Region]=\"East\"),Facts[Quantity]*2>4)",
+   "powerbi": "2.5"
+  },
+  {
+   "expr": "CALCULATE(SUM(Facts[Sales]),FILTER(ALL(Facts[Region]),Facts[Region]=\"East\"),UPPER(Facts[Region])=\"WEST\")",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "CALCULATE(SUM(Facts[Sales]),FILTER(ALL(Facts[Region]),Facts[Region]=\"East\"),NOT(Facts[Note]=\"Paid\"))",
+   "powerbi": "2.5"
+  },
+  {
+   "expr": "CALCULATE(SUM(Facts[Sales]),FILTER(ALL(Facts[Region]),Facts[Region]=\"East\"),Facts[Sales]>Facts[Quantity])",
+   "powerbi": "10.5"
+  },
+  {
+   "expr": "CALCULATE(SUM(Facts[Sales]),FILTER(ALL(Facts[Region]),Facts[Region]=\"East\"),TOPN(2,ALL(Facts[Quantity]),Facts[Quantity]))",
+   "powerbi": "2.5"
+  },
+  {
+   "expr": "CALCULATE(SUM(Facts[Sales]),FILTER(ALL(Facts[Region]),Facts[Region]=\"East\"),KEEPFILTERS(Facts[Quantity]>1))",
+   "powerbi": "13"
+  },
+  {
+   "expr": "CALCULATE(SUM(Facts[Sales]),FILTER(ALL(Facts),Facts[Quantity]>=3),FILTER(Facts,Facts[Sales]>0))",
+   "powerbi": "22.5"
+  },
+  {
+   "expr": "CALCULATE(SUM(Facts[Sales]),FILTER(ALL(Facts),Facts[Quantity]>=3),FILTER(VALUES(Facts[Region]),Facts[Region]<>\"West\"))",
+   "powerbi": "2.5"
+  },
+  {
+   "expr": "CALCULATE(SUM(Facts[Sales]),FILTER(ALL(Facts),Facts[Quantity]>=3),FILTER(ALL(Facts[Quantity]),Facts[Quantity] IN {1,2,5}))",
+   "powerbi": "2.5"
+  },
+  {
+   "expr": "CALCULATE(SUM(Facts[Sales]),FILTER(ALL(Facts),Facts[Quantity]>=3),Facts[Region] IN {\"East\",\"North\"})",
+   "powerbi": "2.5"
+  },
+  {
+   "expr": "CALCULATE(SUM(Facts[Sales]),FILTER(ALL(Facts),Facts[Quantity]>=3),Facts[Quantity]*2>4)",
+   "powerbi": "22.5"
+  },
+  {
+   "expr": "CALCULATE(SUM(Facts[Sales]),FILTER(ALL(Facts),Facts[Quantity]>=3),UPPER(Facts[Region])=\"WEST\")",
+   "powerbi": "20"
+  },
+  {
+   "expr": "CALCULATE(SUM(Facts[Sales]),FILTER(ALL(Facts),Facts[Quantity]>=3),NOT(Facts[Note]=\"Paid\"))",
+   "powerbi": "22.5"
+  },
+  {
+   "expr": "CALCULATE(SUM(Facts[Sales]),FILTER(ALL(Facts),Facts[Quantity]>=3),Facts[Sales]>Facts[Quantity])",
+   "powerbi": "20"
+  },
+  {
+   "expr": "CALCULATE(SUM(Facts[Sales]),FILTER(ALL(Facts),Facts[Quantity]>=3),TOPN(2,ALL(Facts[Quantity]),Facts[Quantity]))",
+   "powerbi": "2.5"
+  },
+  {
+   "expr": "CALCULATE(SUM(Facts[Sales]),FILTER(ALL(Facts),Facts[Quantity]>=3),KEEPFILTERS(Facts[Quantity]>1))",
+   "powerbi": "22.5"
+  },
+  {
+   "expr": "CALCULATE(SUM(Facts[Sales]),FILTER(Facts,Facts[Sales]>0),FILTER(VALUES(Facts[Region]),Facts[Region]<>\"West\"))",
+   "powerbi": "13"
+  },
+  {
+   "expr": "CALCULATE(SUM(Facts[Sales]),FILTER(Facts,Facts[Sales]>0),FILTER(ALL(Facts[Quantity]),Facts[Quantity] IN {1,2,5}))",
+   "powerbi": "13"
+  },
+  {
+   "expr": "CALCULATE(SUM(Facts[Sales]),FILTER(Facts,Facts[Sales]>0),Facts[Region] IN {\"East\",\"North\"})",
+   "powerbi": "13"
+  },
+  {
+   "expr": "CALCULATE(SUM(Facts[Sales]),FILTER(Facts,Facts[Sales]>0),Facts[Quantity]*2>4)",
+   "powerbi": "22.5"
+  },
+  {
+   "expr": "CALCULATE(SUM(Facts[Sales]),FILTER(Facts,Facts[Sales]>0),UPPER(Facts[Region])=\"WEST\")",
+   "powerbi": "20"
+  },
+  {
+   "expr": "CALCULATE(SUM(Facts[Sales]),FILTER(Facts,Facts[Sales]>0),NOT(Facts[Note]=\"Paid\"))",
+   "powerbi": "22.5"
+  },
+  {
+   "expr": "CALCULATE(SUM(Facts[Sales]),FILTER(Facts,Facts[Sales]>0),Facts[Sales]>Facts[Quantity])",
+   "powerbi": "30.5"
+  },
+  {
+   "expr": "CALCULATE(SUM(Facts[Sales]),FILTER(Facts,Facts[Sales]>0),TOPN(2,ALL(Facts[Quantity]),Facts[Quantity]))",
+   "powerbi": "2.5"
+  },
+  {
+   "expr": "CALCULATE(SUM(Facts[Sales]),FILTER(Facts,Facts[Sales]>0),KEEPFILTERS(Facts[Quantity]>1))",
+   "powerbi": "33"
+  },
+  {
+   "expr": "CALCULATE(SUM(Facts[Sales]),FILTER(VALUES(Facts[Region]),Facts[Region]<>\"West\"),FILTER(ALL(Facts[Quantity]),Facts[Quantity] IN {1,2,5}))",
+   "powerbi": "11.5"
+  },
+  {
+   "expr": "CALCULATE(SUM(Facts[Sales]),FILTER(VALUES(Facts[Region]),Facts[Region]<>\"West\"),Facts[Region] IN {\"East\",\"North\"})",
+   "powerbi": "11.5"
+  },
+  {
+   "expr": "CALCULATE(SUM(Facts[Sales]),FILTER(VALUES(Facts[Region]),Facts[Region]<>\"West\"),Facts[Quantity]*2>4)",
+   "powerbi": "2.5"
+  },
+  {
+   "expr": "CALCULATE(SUM(Facts[Sales]),FILTER(VALUES(Facts[Region]),Facts[Region]<>\"West\"),UPPER(Facts[Region])=\"WEST\")",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "CALCULATE(SUM(Facts[Sales]),FILTER(VALUES(Facts[Region]),Facts[Region]<>\"West\"),NOT(Facts[Note]=\"Paid\"))",
+   "powerbi": "2.5"
+  },
+  {
+   "expr": "CALCULATE(SUM(Facts[Sales]),FILTER(VALUES(Facts[Region]),Facts[Region]<>\"West\"),Facts[Sales]>Facts[Quantity])",
+   "powerbi": "10.5"
+  },
+  {
+   "expr": "CALCULATE(SUM(Facts[Sales]),FILTER(VALUES(Facts[Region]),Facts[Region]<>\"West\"),TOPN(2,ALL(Facts[Quantity]),Facts[Quantity]))",
+   "powerbi": "2.5"
+  },
+  {
+   "expr": "CALCULATE(SUM(Facts[Sales]),FILTER(VALUES(Facts[Region]),Facts[Region]<>\"West\"),KEEPFILTERS(Facts[Quantity]>1))",
+   "powerbi": "13"
+  },
+  {
+   "expr": "CALCULATE(SUM(Facts[Sales]),FILTER(ALL(Facts[Quantity]),Facts[Quantity] IN {1,2,5}),Facts[Region] IN {\"East\",\"North\"})",
+   "powerbi": "11.5"
+  },
+  {
+   "expr": "CALCULATE(SUM(Facts[Sales]),FILTER(ALL(Facts[Quantity]),Facts[Quantity] IN {1,2,5}),Facts[Quantity]*2>4)",
+   "powerbi": "2.5"
+  },
+  {
+   "expr": "CALCULATE(SUM(Facts[Sales]),FILTER(ALL(Facts[Quantity]),Facts[Quantity] IN {1,2,5}),UPPER(Facts[Region])=\"WEST\")",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "CALCULATE(SUM(Facts[Sales]),FILTER(ALL(Facts[Quantity]),Facts[Quantity] IN {1,2,5}),NOT(Facts[Note]=\"Paid\"))",
+   "powerbi": "2.5"
+  },
+  {
+   "expr": "CALCULATE(SUM(Facts[Sales]),FILTER(ALL(Facts[Quantity]),Facts[Quantity] IN {1,2,5}),Facts[Sales]>Facts[Quantity])",
+   "powerbi": "10.5"
+  },
+  {
+   "expr": "CALCULATE(SUM(Facts[Sales]),FILTER(ALL(Facts[Quantity]),Facts[Quantity] IN {1,2,5}),TOPN(2,ALL(Facts[Quantity]),Facts[Quantity]))",
+   "powerbi": "2.5"
+  },
+  {
+   "expr": "CALCULATE(SUM(Facts[Sales]),FILTER(ALL(Facts[Quantity]),Facts[Quantity] IN {1,2,5}),KEEPFILTERS(Facts[Quantity]>1))",
+   "powerbi": "13"
+  },
+  {
+   "expr": "CALCULATE(SUM(Facts[Sales]),Facts[Region] IN {\"East\",\"North\"},Facts[Quantity]*2>4)",
+   "powerbi": "2.5"
+  },
+  {
+   "expr": "CALCULATE(SUM(Facts[Sales]),Facts[Region] IN {\"East\",\"North\"},UPPER(Facts[Region])=\"WEST\")",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "CALCULATE(SUM(Facts[Sales]),Facts[Region] IN {\"East\",\"North\"},NOT(Facts[Note]=\"Paid\"))",
+   "powerbi": "2.5"
+  },
+  {
+   "expr": "CALCULATE(SUM(Facts[Sales]),Facts[Region] IN {\"East\",\"North\"},Facts[Sales]>Facts[Quantity])",
+   "powerbi": "10.5"
+  },
+  {
+   "expr": "CALCULATE(SUM(Facts[Sales]),Facts[Region] IN {\"East\",\"North\"},TOPN(2,ALL(Facts[Quantity]),Facts[Quantity]))",
+   "powerbi": "2.5"
+  },
+  {
+   "expr": "CALCULATE(SUM(Facts[Sales]),Facts[Region] IN {\"East\",\"North\"},KEEPFILTERS(Facts[Quantity]>1))",
+   "powerbi": "13"
+  },
+  {
+   "expr": "CALCULATE(SUM(Facts[Sales]),Facts[Quantity]*2>4,UPPER(Facts[Region])=\"WEST\")",
+   "powerbi": "20"
+  },
+  {
+   "expr": "CALCULATE(SUM(Facts[Sales]),Facts[Quantity]*2>4,NOT(Facts[Note]=\"Paid\"))",
+   "powerbi": "22.5"
+  },
+  {
+   "expr": "CALCULATE(SUM(Facts[Sales]),Facts[Quantity]*2>4,Facts[Sales]>Facts[Quantity])",
+   "powerbi": "20"
+  },
+  {
+   "expr": "CALCULATE(SUM(Facts[Sales]),Facts[Quantity]*2>4,TOPN(2,ALL(Facts[Quantity]),Facts[Quantity]))",
+   "powerbi": "2.5"
+  },
+  {
+   "expr": "CALCULATE(SUM(Facts[Sales]),Facts[Quantity]*2>4,KEEPFILTERS(Facts[Quantity]>1))",
+   "powerbi": "22.5"
+  },
+  {
+   "expr": "CALCULATE(SUM(Facts[Sales]),UPPER(Facts[Region])=\"WEST\",NOT(Facts[Note]=\"Paid\"))",
+   "powerbi": "20"
+  },
+  {
+   "expr": "CALCULATE(SUM(Facts[Sales]),UPPER(Facts[Region])=\"WEST\",Facts[Sales]>Facts[Quantity])",
+   "powerbi": "20"
+  },
+  {
+   "expr": "CALCULATE(SUM(Facts[Sales]),UPPER(Facts[Region])=\"WEST\",TOPN(2,ALL(Facts[Quantity]),Facts[Quantity]))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "CALCULATE(SUM(Facts[Sales]),UPPER(Facts[Region])=\"WEST\",KEEPFILTERS(Facts[Quantity]>1))",
+   "powerbi": "20"
+  },
+  {
+   "expr": "CALCULATE(SUM(Facts[Sales]),NOT(Facts[Note]=\"Paid\"),Facts[Sales]>Facts[Quantity])",
+   "powerbi": "20"
+  },
+  {
+   "expr": "CALCULATE(SUM(Facts[Sales]),NOT(Facts[Note]=\"Paid\"),TOPN(2,ALL(Facts[Quantity]),Facts[Quantity]))",
+   "powerbi": "2.5"
+  },
+  {
+   "expr": "CALCULATE(SUM(Facts[Sales]),NOT(Facts[Note]=\"Paid\"),KEEPFILTERS(Facts[Quantity]>1))",
+   "powerbi": "22.5"
+  },
+  {
+   "expr": "CALCULATE(SUM(Facts[Sales]),Facts[Sales]>Facts[Quantity],TOPN(2,ALL(Facts[Quantity]),Facts[Quantity]))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "CALCULATE(SUM(Facts[Sales]),Facts[Sales]>Facts[Quantity],KEEPFILTERS(Facts[Quantity]>1))",
+   "powerbi": "30.5"
+  },
+  {
+   "expr": "CALCULATE(SUM(Facts[Sales]),TOPN(2,ALL(Facts[Quantity]),Facts[Quantity]),KEEPFILTERS(Facts[Quantity]>1))",
+   "powerbi": "2.5"
+  },
+  {
+   "expr": "SUMX(Facts,CALCULATE(SUM(Facts[Sales]),ALL(Facts[Quantity])))",
+   "powerbi": "31.5"
+  },
+  {
+   "expr": "SUMX(Facts,CALCULATE(SUM(Facts[Sales]),ALLEXCEPT(Facts,Facts[Note])))",
+   "powerbi": "72"
+  },
+  {
+   "expr": "SUMX(Facts,CALCULATE(SUM(Facts[Sales]),ALLEXCEPT(Facts,Facts[Region],Facts[Note])))",
+   "powerbi": "40.5"
+  },
+  {
+   "expr": "SUMX(Facts,CALCULATE(SUM(Facts[Sales]),ALL(Facts[Sales],Facts[Note])))",
+   "powerbi": "31.5"
+  },
+  {
+   "expr": "SUMX(Facts,CALCULATE(SUM(Facts[Sales]),Facts[Quantity]>1))",
+   "powerbi": "33"
+  },
+  {
+   "expr": "SUMX(Facts,CALCULATE(SUM(Facts[Sales]),FILTER(VALUES(Facts[Region]),Facts[Region]=EARLIER(Facts[Region]))))",
+   "powerbi": "31.5"
+  },
+  {
+   "expr": "SUMX(Facts,CALCULATE(SUM(Facts[Sales]),REMOVEFILTERS()))",
+   "powerbi": "189"
+  },
+  {
+   "expr": "SUMX(Facts,CALCULATE(COUNTROWS(Facts),ALLEXCEPT(Facts,Facts[Region])))",
+   "powerbi": "14"
+  },
+  {
+   "expr": "SUMX(Facts,CALCULATE(COUNTROWS(Facts),ALL(Facts[Quantity],Facts[Sales])))",
+   "powerbi": "8"
+  },
+  {
+   "expr": "SUMX(Facts,CALCULATE(COUNTROWS(Facts),ALLEXCEPT(Facts,Facts[Note])))",
+   "powerbi": "14"
+  },
+  {
+   "expr": "SUMX(Facts,CALCULATE(COUNTROWS(Facts),ALL(Facts)))",
+   "powerbi": "36"
+  }
+ ]
+}

@@ -87,7 +87,7 @@ class CalculateBooleanFilterTests(unittest.TestCase):
             (
                 "Intersect blue sales",
                 "CALCULATE(SUM([Amount]), KEEPFILTERS('Sales'[Color] = \"Blue\"))",
-                "0",
+                "—",
             ),
             (
                 "Intersect red sales",
@@ -482,19 +482,7 @@ class CalculateBooleanFilterTests(unittest.TestCase):
 
     def test_parser_rejects_unsupported_filter_shapes_and_literal_positions(self) -> None:
         for expression, message in (
-            (
-                "CALCULATE(SUM([Amount]), 'Sales'[Amount] = 'Sales'[ID])",
-                "one column with a scalar literal",
-            ),
-            (
-                "CALCULATE(SUM([Amount]), 'Sales'[Color] = \"Blue\" || 'Sales'[Region] = \"East\")",
-                "only one column",
-            ),
 
-            (
-                "SUM([Amount]) + IF(TRUE(), \"Blue\", \"Red\")",
-                "String literals are supported only",
-            ),
             (
                 "KEEPFILTERS('Sales'[Color] = \"Blue\")",
                 "only as a CALCULATE",
@@ -623,9 +611,9 @@ class CalculateBooleanFilterTests(unittest.TestCase):
             active_table_id="sales-id",
         )
         self.assertEqual(values["Matching visible row"], 20)
-        self.assertEqual(values["Excluded row stays excluded"], 0)
+        self.assertIsNone(values["Excluded row stays excluded"])
 
-    def test_filter_table_text_comparisons_follow_local_case_sensitive_rules(self) -> None:
+    def test_filter_table_text_comparisons_ignore_ascii_case_like_power_bi(self) -> None:
         rows = [
             {"Color": "Blue", "Amount": "20"},
             {"Color": "blue", "Amount": "10"},
@@ -647,7 +635,7 @@ class CalculateBooleanFilterTests(unittest.TestCase):
                     ),
                 },
                 {
-                    "name": "Case-sensitive complement",
+                    "name": "Case-insensitive complement",
                     "expression": (
                         "CALCULATE(SUM([Amount]), FILTER('Sales', "
                         "'Sales'[Color] <> \"blue\"))"
@@ -660,8 +648,9 @@ class CalculateBooleanFilterTests(unittest.TestCase):
             table_context=context,
             active_table_id="sales-id",
         )
-        self.assertEqual(values["Lowercase match"], 10)
-        self.assertEqual(values["Case-sensitive complement"], 20)
+        # Power BI stores "Blue" and "blue" as one value and matches "blue" against both (verified live).
+        self.assertEqual(values["Lowercase match"], 30)
+        self.assertIsNone(values["Case-insensitive complement"])
 
     def test_filter_table_preserves_other_table_filter_roots_and_relationships(self) -> None:
         categories = [
@@ -751,38 +740,6 @@ class CalculateBooleanFilterTests(unittest.TestCase):
                 "FILTER('Sales', 'Sales'[Amount] > 10)",
                 "sole table-valued CALCULATE filter argument",
             ),
-            (
-                "CALCULATE(SUM([Amount]), FILTER('Sales', 'Other'[Amount] > 10))",
-                "same loaded table",
-            ),
-            (
-                "CALCULATE(SUM([Amount]), FILTER('Sales', [Amount] > 10))",
-                "qualified column",
-            ),
-            (
-                "CALCULATE(SUM([Amount]), FILTER('Sales', SUM([Amount]) > 10))",
-                "scalar literal",
-            ),
-            (
-                "CALCULATE(SUM([Amount]), FILTER('Sales', 'Sales'[Amount] > 10), "
-                "'Sales'[Color] = \"Blue\")",
-                "only CALCULATE filter argument",
-            ),
-            (
-                "CALCULATE(SUM([Amount]), FILTER('Sales', 'Sales'[Amount] > 10), "
-                "FILTER('Sales', 'Sales'[Color] = \"Blue\"))",
-                "only CALCULATE filter argument",
-            ),
-            (
-                "CALCULATE(SUM([Amount]), FILTER(FILTER('Sales', "
-                "'Sales'[Amount] > 10), 'Sales'[Color] = \"Blue\"))",
-                "base table name",
-            ),
-            (
-                "CALCULATE(SUM([Amount]), "
-                "KEEPFILTERS(FILTER('Sales', 'Sales'[Amount] > 10)))",
-                "table-valued FILTER",
-            ),
         ):
             with self.subTest(expression=expression):
                 with self.assertRaisesRegex(MeasureError, message):
@@ -808,15 +765,11 @@ class CalculateBooleanFilterTests(unittest.TestCase):
                 "FILTER('Sales', 'Sales'[Missing] = \"Blue\"))",
                 "does not exist",
             ),
-            (
-                "CALCULATE(SUM([Amount]), "
-                "FILTER('Sales', 'Sales'[Color] > \"Blue\"))",
-                "only equality filters",
-            ),
+            # Power BI orders text in FILTER (Region>"East" is valid) but rejects number-versus-text comparisons.
             (
                 "CALCULATE(SUM([Amount]), "
                 "FILTER('Sales', 'Sales'[Amount] = \"10\"))",
-                "needs a numeric CALCULATE filter value",
+                "matching local data types",
             ),
         ):
             with self.subTest(expression=expression):
@@ -830,33 +783,31 @@ class CalculateBooleanFilterTests(unittest.TestCase):
                         active_table_id="sales-id",
                     )
 
-    def test_boolean_filter_cannot_rebuild_an_opaque_table_filter_context(self) -> None:
+    def test_boolean_filter_replaces_one_column_of_an_enclosing_filter_table(self) -> None:
         rows = [
             {"Color": "Blue", "Amount": "10"},
             {"Color": "Red", "Amount": "20"},
         ]
-        with self.assertRaisesRegex(MeasureError, "cannot replace a table-valued FILTER rowset"):
-            evaluate_measures(
-                [{
-                    "name": "Nested replacement",
-                    "expression": (
-                        "CALCULATE(CALCULATE(SUM([Amount]), "
-                        "'Sales'[Color] = \"Blue\"), FILTER('Sales', "
-                        "'Sales'[Amount] > 0))"
-                    ),
-                }],
-                rows,
-                ["Color", "Amount"],
-                "Sales",
-                table_context=[{
-                    "id": "sales-id",
-                    "name": "Sales",
-                    "headers": ["Color", "Amount"],
-                    "rows": rows,
-                    "column_types": {"Color": "text", "Amount": "whole_number"},
-                }],
-                active_table_id="sales-id",
-            )
+        context = [{
+            "id": "sales-id",
+            "name": "Sales",
+            "headers": ["Color", "Amount"],
+            "rows": rows,
+            "column_types": {"Color": "text", "Amount": "whole_number"},
+        }]
+        # The FILTER table is a set of whole rows: the inner Color filter drops Color from their identity but the
+        # Amount of the surviving rows still constrains (Power BI: tools/parity/dax_battery_filter_shapes*.json).
+        for expression, expected in (
+            ("CALCULATE(CALCULATE(SUM([Amount]), 'Sales'[Color] = \"Blue\"), FILTER('Sales', 'Sales'[Amount] > 0))", 10),
+            ("CALCULATE(CALCULATE(SUM([Amount]), 'Sales'[Color] = \"Blue\"), FILTER('Sales', 'Sales'[Amount] > 15))", None),
+            ("CALCULATE(CALCULATE(SUM([Amount]), 'Sales'[Color] = \"Red\"), FILTER('Sales', 'Sales'[Amount] > 15))", 20),
+        ):
+            with self.subTest(expression=expression):
+                values = evaluate_measures(
+                    [{"name": "Nested replacement", "expression": expression}],
+                    rows, ["Color", "Amount"], "Sales", table_context=context, active_table_id="sales-id",
+                )
+                self.assertEqual(values["Nested replacement"], expected)
 
     def test_measure_lifecycle_recomputes_table_filter_after_reopen(self) -> None:
         controller = self.controller("settings.ini")
@@ -945,7 +896,7 @@ class CalculateBooleanFilterTests(unittest.TestCase):
         reopened = self.controller("reopened.ini")
         self.assertTrue(reopened.open_project_path(project_path))
         self.assertEqual(reopened.reportKpis["Blue sales"], "12")
-        self.assertEqual(reopened.reportKpis["Blue sales intersection"], "0")
+        self.assertEqual(reopened.reportKpis["Blue sales intersection"], "—")
 
     def test_removefilters_combines_with_boolean_filters_and_reopens(self) -> None:
         controller = self.controller("mixed-removefilters-settings.ini")
@@ -985,7 +936,7 @@ class CalculateBooleanFilterTests(unittest.TestCase):
         self.assertEqual(controller.reportKpis["Clear all then West"], "120")
         self.assertEqual(controller.reportKpis["Clear table then West"], "120")
         self.assertEqual(controller.reportKpis["Clear color then high West"], "90")
-        self.assertEqual(controller.reportKpis["Keep East while selecting West"], "0")
+        self.assertEqual(controller.reportKpis["Keep East while selecting West"], "—")
 
         project_path = self.root / "mixed-removefilters.npa"
         self.assertTrue(controller._save_to(project_path))
@@ -1005,18 +956,26 @@ class CalculateBooleanFilterTests(unittest.TestCase):
         self.assertEqual(reopened.reportKpis["Clear all then West"], "121")
         self.assertEqual(reopened.reportKpis["Clear table then West"], "121")
         self.assertEqual(reopened.reportKpis["Clear color then high West"], "90")
-        self.assertEqual(reopened.reportKpis["Keep East while selecting West"], "0")
+        self.assertEqual(reopened.reportKpis["Keep East while selecting West"], "—")
 
-    def test_filter_clear_modifier_rejects_additional_table_and_boolean_filters(self) -> None:
+    def test_filter_clear_modifier_with_table_and_boolean_filters_is_accepted(self) -> None:
+        # Power BI accepts a clearing modifier next to FILTER and Boolean filters (compared live in
+        # tools/parity/dax_battery_tables2.json); the general CALCULATE path evaluates them.
         for expression in (
             "CALCULATE(SUM([Amount]), REMOVEFILTERS('Sales'[Color]), "
             "FILTER('Sales', 'Sales'[Amount] > 10), 'Sales'[Region] = \"West\")",
             "CALCULATE(SUM([Amount]), ALL('Sales'[Color]), "
             "FILTER('Sales', 'Sales'[Amount] > 10), 'Sales'[Region] = \"West\")",
+            "CALCULATE(SUM([Amount]), 'Sales'[Amount] = 'Sales'[ID])",
+            "CALCULATE(SUM([Amount]), 'Sales'[Color] = \"Blue\" || 'Sales'[Region] = \"East\")",
+            "CALCULATE(SUM([Amount]), FILTER('Sales', SUM([Amount]) > 10))",
+            "CALCULATE(SUM([Amount]), FILTER('Sales', 'Sales'[Amount] > 10), 'Sales'[Color] = \"Blue\")",
+            "CALCULATE(SUM([Amount]), FILTER('Sales', 'Sales'[Amount] > 10), FILTER('Sales', 'Sales'[Color] = \"Blue\"))",
+            "CALCULATE(SUM([Amount]), FILTER(FILTER('Sales', 'Sales'[Amount] > 10), 'Sales'[Color] = \"Blue\"))",
+            "CALCULATE(SUM([Amount]), KEEPFILTERS(FILTER('Sales', 'Sales'[Amount] > 10)))",
         ):
             with self.subTest(expression=expression):
-                with self.assertRaisesRegex(MeasureError, "only filter argument beside"):
-                    normalize_measure("Mixed filter clear", expression)
+                normalize_measure("General filters", expression)
 
     def test_filter_clear_modifier_combines_with_table_filter_and_reopens(self) -> None:
         controller = self.controller("mixed-filter-clear-table-filter.ini")
@@ -1066,7 +1025,7 @@ class CalculateBooleanFilterTests(unittest.TestCase):
         self.assertEqual(controller.reportKpis["ALL color then visible rows"], "20")
         self.assertEqual(controller.reportKpis["ALLNOBLANKROW color then visible rows"], "20")
         self.assertEqual(controller.reportKpis["ALLEXCEPT then visible rows"], "20")
-        self.assertEqual(controller.reportKpis["ALL all then no visible matches"], "0")
+        self.assertEqual(controller.reportKpis["ALL all then no visible matches"], "—")
 
         project_path = self.root / "mixed-filter-clear-table-filter.npa"
         self.assertTrue(controller._save_to(project_path))
@@ -1088,7 +1047,7 @@ class CalculateBooleanFilterTests(unittest.TestCase):
         self.assertEqual(reopened.reportKpis["ALL color then visible rows"], "21")
         self.assertEqual(reopened.reportKpis["ALLNOBLANKROW color then visible rows"], "21")
         self.assertEqual(reopened.reportKpis["ALLEXCEPT then visible rows"], "21")
-        self.assertEqual(reopened.reportKpis["ALL all then no visible matches"], "0")
+        self.assertEqual(reopened.reportKpis["ALL all then no visible matches"], "—")
 
     def test_all_combines_with_boolean_filters_and_reopens(self) -> None:
         controller = self.controller("mixed-all-settings.ini")
@@ -1138,7 +1097,7 @@ class CalculateBooleanFilterTests(unittest.TestCase):
         self.assertEqual(controller.reportKpis["ALLNOBLANKROW color then West"], "120")
         self.assertEqual(controller.reportKpis["ALLEXCEPT then West"], "120")
         self.assertEqual(controller.reportKpis["ALL color then high West"], "90")
-        self.assertEqual(controller.reportKpis["ALL color and keep East"], "0")
+        self.assertEqual(controller.reportKpis["ALL color and keep East"], "—")
 
         project_path = self.root / "mixed-all.npa"
         self.assertTrue(controller._save_to(project_path))
@@ -1160,7 +1119,7 @@ class CalculateBooleanFilterTests(unittest.TestCase):
         self.assertEqual(reopened.reportKpis["ALLNOBLANKROW color then West"], "121")
         self.assertEqual(reopened.reportKpis["ALLEXCEPT then West"], "121")
         self.assertEqual(reopened.reportKpis["ALL color then high West"], "90")
-        self.assertEqual(reopened.reportKpis["ALL color and keep East"], "0")
+        self.assertEqual(reopened.reportKpis["ALL color and keep East"], "—")
 
     def test_removefilters_clears_columns_tables_and_all_filters(self) -> None:
         rows = [
@@ -1304,19 +1263,14 @@ class CalculateBooleanFilterTests(unittest.TestCase):
             active_table_id="sales-id",
         )
         self.assertEqual(values, {"Remove Table": 30, "Remove All": 30, "Outer Context": 10})
-        with self.assertRaisesRegex(MeasureError, "opaque table-valued FILTER rowset"):
-            evaluate_measures(
-                [{
-                    "name": "Remove Color",
-                    "expression": "CALCULATE(SUM([Amount]), REMOVEFILTERS('Sales'[Color]))",
-                }],
-                rows,
-                context[0]["headers"],
-                "Sales",
-                table_context=context,
-                filter_table_ids={"sales-id"},
-                active_table_id="sales-id",
-            )
+        # Removing one column of a FILTER table keeps the other columns of its rows as the filter: the filtered
+        # row has Amount 10, so removing Color still leaves Amount = 10 (Power BI: tools/parity/dax_battery_filter_shapes4.json).
+        values = evaluate_measures(
+            [{"name": "Remove Color", "expression": "CALCULATE(SUM([Amount]), REMOVEFILTERS('Sales'[Color]))"}],
+            rows, context[0]["headers"], "Sales", table_context=context,
+            filter_table_ids={"sales-id"}, active_table_id="sales-id",
+        )
+        self.assertEqual(values, {"Remove Color": 10})
         incomplete_context = [{
             "id": "sales-id",
             "name": "Sales",
@@ -1543,7 +1497,9 @@ class CalculateBooleanFilterTests(unittest.TestCase):
             "All Sales": 30,
             "All Region": 30,
             "All Context": 130,
-            "ALL Amounts with Other Roots": 10,
+            # ALL(column) clears the filters on its own table (Region) but the Category filter still reaches
+            # Sales through the relationship, so the distinct visible amounts are 10 and 20.
+            "ALL Amounts with Other Roots": 30,
         })
 
     def test_all_modifier_parser_and_target_validation(self) -> None:
@@ -1644,7 +1600,9 @@ class CalculateBooleanFilterTests(unittest.TestCase):
         self.assertEqual(values["ALL Color Values"], 2)
         self.assertEqual(values["ALL Color Region Tuples"], 3)
         self.assertEqual(values["ALL Table Sum"], 50)
-        self.assertEqual(values["ALL Amount Sum"], 10)
+        # ALL(column) ignores the filters on its own table and sums the distinct values 10 and 20
+        # (Power BI saved answer: CALCULATE(COUNTROWS(ALL(Facts[Region])),Facts[Quantity]>3) = 3).
+        self.assertEqual(values["ALL Amount Sum"], 30)
         self.assertEqual(values["ALL Table Average"], Decimal(50) / Decimal(3))
 
     def test_all_table_form_includes_one_virtual_unknown_parent_row(self) -> None:
@@ -1808,7 +1766,9 @@ class CalculateBooleanFilterTests(unittest.TestCase):
         self.assertEqual(values, {
             "ALL physical plus virtual": 3,
             "No generated blank": 2,
-            "Residual filter stays": 1,
+            # ALLNOBLANKROW(column) ignores the Label filter on its own table (Power BI saved answer:
+            # CALCULATE(COUNTROWS(ALLNOBLANKROW(Facts[Region])),Facts[Quantity]>3) = 3): both keys remain.
+            "Residual filter stays": 2,
             "Physical blank remains": 2,
             "Modifier excludes generated blank": 2,
             "Nested ALL restores generated blank": 3,
@@ -2029,7 +1989,7 @@ class CalculateBooleanFilterTests(unittest.TestCase):
             "Allselected columns": 30,
             "Allselected then West": 30,
             "Allselected then Blue": 20,
-            "Keep selected East while choosing West": 0,
+            "Keep selected East while choosing West": None,
             "Nested allselected": 20,
         })
 
@@ -2121,7 +2081,7 @@ class CalculateBooleanFilterTests(unittest.TestCase):
             filter_table_ids={"sales-id"},
             active_table_id="sales-id",
         )
-        self.assertEqual(values["Empty rows"], 0)
+        self.assertIsNone(values["Empty rows"])
 
         with self.assertRaisesRegex(MeasureError, "Table 'Missing' is not loaded"):
             evaluate_measures(
@@ -2242,7 +2202,7 @@ class CalculateBooleanFilterTests(unittest.TestCase):
         self.assertEqual(controller.reportKpis["Selected West sales"], "50")
         self.assertEqual(controller.reportKpis["Selected Blue sales"], "10")
         self.assertEqual(controller.reportKpis["Selected high sales"], "20")
-        self.assertEqual(controller.reportKpis["Keep selected East while choosing West"], "0")
+        self.assertEqual(controller.reportKpis["Keep selected East while choosing West"], "—")
         project_path = self.root / "allselected.npa"
         self.assertTrue(controller._save_to(project_path))
 
@@ -2263,7 +2223,7 @@ class CalculateBooleanFilterTests(unittest.TestCase):
         self.assertEqual(reopened.reportKpis["Selected West sales"], "50")
         self.assertEqual(reopened.reportKpis["Selected Blue sales"], "12")
         self.assertEqual(reopened.reportKpis["Selected high sales"], "21")
-        self.assertEqual(reopened.reportKpis["Keep selected East while choosing West"], "0")
+        self.assertEqual(reopened.reportKpis["Keep selected East while choosing West"], "—")
 
     def test_allexcept_preserves_named_columns_and_external_relationship_roots(self) -> None:
         categories = [{"Key": "1"}, {"Key": "2"}]
@@ -2372,7 +2332,7 @@ class CalculateBooleanFilterTests(unittest.TestCase):
             "cross_filter_direction": "single",
             "is_active": True,
         }]
-        for blank_allowed, expected in ((True, 1), (False, 0)):
+        for blank_allowed, expected in ((True, 1), (False, None)):
             with self.subTest(blank_allowed=blank_allowed):
                 values = evaluate_measures(
                     [{
@@ -2455,12 +2415,26 @@ class CalculateBooleanFilterTests(unittest.TestCase):
             {"Color": "Red", "Amount": "10"},
             {"Color": "Blue", "Amount": "20"},
         ]
+        # A FILTER table kept as whole rows is handled like any other (the rows keep constraining the columns
+        # that are left: ALLEXCEPT(Sales, Color) leaves the Color of the filtered row); only a saved filter
+        # without per-column information cannot say which columns it covers.
+        filtered = {
+            "id": "sales-id",
+            "name": "Sales",
+            "headers": ["Color", "Amount"],
+            "rows": rows,
+            "column_types": {"Color": "text", "Amount": "whole_number"},
+            "filter_rows": [rows[0]],
+            "filter_table_rows": {0},
+            "filter_context_complete": False,
+        }
+        values = evaluate_measures(
+            [{"name": "Preserve color", "expression": "CALCULATE(SUM([Amount]), ALLEXCEPT('Sales', 'Sales'[Color]))"}],
+            rows, ["Color", "Amount"], "Sales", table_context=[filtered],
+            filter_table_ids={"sales-id"}, active_table_id="sales-id",
+        )
+        self.assertEqual(values, {"Preserve color": 10})
         contexts = [
-            ({
-                "filter_rows": [rows[0]],
-                "filter_table_rows": {0},
-                "filter_context_complete": False,
-            }, "opaque table-valued FILTER"),
             ({
                 "filter_rows": [rows[0]],
                 "filter_context_complete": False,
@@ -2490,7 +2464,7 @@ class CalculateBooleanFilterTests(unittest.TestCase):
                         active_table_id="sales-id",
                     )
 
-    def test_all_column_virtual_blank_respects_residual_filter_provenance(self) -> None:
+    def test_all_column_ignores_other_column_filters_and_keeps_virtual_blank(self) -> None:
         categories = [
             {"CategoryId": "1", "Label": "A"},
             {"CategoryId": "2", "Label": "B"},
@@ -2550,9 +2524,12 @@ class CalculateBooleanFilterTests(unittest.TestCase):
             filter_table_ids={"category-id"},
             active_table_id="category-id",
         )
+        # ALL(column) ignores every filter on the table, so the Label filter does not remove
+        # the unmatched-key blank member. Power BI saved answer: tools/parity/dax_battery_adversarial.json,
+        # CALCULATE(COUNTROWS(ALL(Facts[Region])),Facts[Quantity]>3) = 3 while VALUES gives 2.
         self.assertEqual(values, {
-            "Report filter excludes unknown": 1,
-            "Boolean filter excludes unknown": 1,
+            "Report filter excludes unknown": 3,
+            "Boolean filter excludes unknown": 3,
             "Modifier clears residual filter": 3,
         })
 
@@ -2855,7 +2832,7 @@ class CalculateBooleanFilterTests(unittest.TestCase):
             filter_table_ids={"region-id", "sales-id"},
             active_table_id="category-id",
         )
-        self.assertEqual(values["No visible parent keys"], 0)
+        self.assertIsNone(values["No visible parent keys"])
 
     def test_all_column_unknown_member_intersects_bidirectional_child_tables(self) -> None:
         categories = [{"Key": "1"}, {"Key": "2"}]
@@ -2932,7 +2909,7 @@ class CalculateBooleanFilterTests(unittest.TestCase):
             filter_table_ids={"sales-id", "returns-id"},
             active_table_id="category-id",
         )
-        self.assertEqual(values["No intersecting category keys"], 0)
+        self.assertIsNone(values["No intersecting category keys"])
 
     def test_all_modifier_measure_lifecycle_after_source_change(self) -> None:
         controller = self.controller("all-settings.ini")

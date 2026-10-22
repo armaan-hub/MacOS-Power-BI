@@ -1,0 +1,3455 @@
+{
+ "cells": [],
+ "measures": [
+  {
+   "expr": "COUNTROWS(VAT)",
+   "powerbi": "611",
+   "local": "611",
+   "status": "match"
+  },
+  {
+   "expr": "SUM(VAT[Quantity])",
+   "powerbi": "30745.89",
+   "local": "30745.89",
+   "status": "match"
+  },
+  {
+   "expr": "AVERAGE(VAT[Quantity])",
+   "powerbi": "59.5850581395349",
+   "local": "59.58505813953488372093023256",
+   "status": "match"
+  },
+  {
+   "expr": "MIN(VAT[Quantity])",
+   "powerbi": "-1250",
+   "local": "-1250",
+   "status": "match"
+  },
+  {
+   "expr": "MAX(VAT[Quantity])",
+   "powerbi": "2600",
+   "local": "2600",
+   "status": "match"
+  },
+  {
+   "expr": "COUNT(VAT[Quantity])",
+   "powerbi": "516",
+   "local": "516",
+   "status": "match"
+  },
+  {
+   "expr": "COUNTBLANK(VAT[Quantity])",
+   "powerbi": "95",
+   "local": "95",
+   "status": "match"
+  },
+  {
+   "expr": "MEDIAN(VAT[Quantity])",
+   "powerbi": "13",
+   "local": "13",
+   "status": "match"
+  },
+  {
+   "expr": "DISTINCTCOUNT(VAT[Quantity])",
+   "powerbi": "149",
+   "local": "149",
+   "status": "match"
+  },
+  {
+   "expr": "SUMX(VAT,VAT[Quantity]*2)",
+   "powerbi": "61491.78",
+   "local": "61491.78",
+   "status": "match"
+  },
+  {
+   "expr": "SUM(VAT[Value])",
+   "powerbi": "1498307.26",
+   "local": "1498307.26",
+   "status": "match"
+  },
+  {
+   "expr": "AVERAGE(VAT[Value])",
+   "powerbi": "2614.84687609075",
+   "local": "2614.846876090750436300174520",
+   "status": "match"
+  },
+  {
+   "expr": "MIN(VAT[Value])",
+   "powerbi": "-4650",
+   "local": "-4650",
+   "status": "match"
+  },
+  {
+   "expr": "MAX(VAT[Value])",
+   "powerbi": "749153.63",
+   "local": "749153.63",
+   "status": "match"
+  },
+  {
+   "expr": "COUNT(VAT[Value])",
+   "powerbi": "573",
+   "local": "573",
+   "status": "match"
+  },
+  {
+   "expr": "COUNTBLANK(VAT[Value])",
+   "powerbi": "38",
+   "local": "38",
+   "status": "match"
+  },
+  {
+   "expr": "MEDIAN(VAT[Value])",
+   "powerbi": "375",
+   "local": "375",
+   "status": "match"
+  },
+  {
+   "expr": "DISTINCTCOUNT(VAT[Value])",
+   "powerbi": "459",
+   "local": "459",
+   "status": "match"
+  },
+  {
+   "expr": "SUMX(VAT,VAT[Value]*2)",
+   "powerbi": "2996614.52",
+   "local": "2996614.52",
+   "status": "match"
+  },
+  {
+   "expr": "SUM(VAT[Gross Total])",
+   "powerbi": "1662055.84",
+   "local": "1662055.84",
+   "status": "match"
+  },
+  {
+   "expr": "AVERAGE(VAT[Gross Total])",
+   "powerbi": "2900.62101221641",
+   "local": "2900.621012216404886561954625",
+   "status": "match"
+  },
+  {
+   "expr": "MIN(VAT[Gross Total])",
+   "powerbi": "0",
+   "local": "0",
+   "status": "match"
+  },
+  {
+   "expr": "MAX(VAT[Gross Total])",
+   "powerbi": "785522.3",
+   "local": "785522.3",
+   "status": "match"
+  },
+  {
+   "expr": "COUNT(VAT[Gross Total])",
+   "powerbi": "573",
+   "local": "573",
+   "status": "match"
+  },
+  {
+   "expr": "COUNTBLANK(VAT[Gross Total])",
+   "powerbi": "38",
+   "local": "38",
+   "status": "match"
+  },
+  {
+   "expr": "MEDIAN(VAT[Gross Total])",
+   "powerbi": "491.41",
+   "local": "491.41",
+   "status": "match"
+  },
+  {
+   "expr": "DISTINCTCOUNT(VAT[Gross Total])",
+   "powerbi": "418",
+   "local": "418",
+   "status": "match"
+  },
+  {
+   "expr": "SUMX(VAT,VAT[Gross Total]*2)",
+   "powerbi": "3324111.68",
+   "local": "3324111.68",
+   "status": "match"
+  },
+  {
+   "expr": "SUM(VAT[Sales])",
+   "powerbi": "1585055.76",
+   "local": "1585055.76",
+   "status": "match"
+  },
+  {
+   "expr": "AVERAGE(VAT[Sales])",
+   "powerbi": "2766.24041884817",
+   "local": "2766.240418848167539267015707",
+   "status": "match"
+  },
+  {
+   "expr": "MIN(VAT[Sales])",
+   "powerbi": "3",
+   "local": "3",
+   "status": "match"
+  },
+  {
+   "expr": "MAX(VAT[Sales])",
+   "powerbi": "749153.63",
+   "local": "749153.63",
+   "status": "match"
+  },
+  {
+   "expr": "COUNT(VAT[Sales])",
+   "powerbi": "573",
+   "local": "573",
+   "status": "match"
+  },
+  {
+   "expr": "COUNTBLANK(VAT[Sales])",
+   "powerbi": "38",
+   "local": "38",
+   "status": "match"
+  },
+  {
+   "expr": "MEDIAN(VAT[Sales])",
+   "powerbi": "468",
+   "local": "468",
+   "status": "match"
+  },
+  {
+   "expr": "DISTINCTCOUNT(VAT[Sales])",
+   "powerbi": "419",
+   "local": "419",
+   "status": "match"
+  },
+  {
+   "expr": "SUMX(VAT,VAT[Sales]*2)",
+   "powerbi": "3170111.52",
+   "local": "3170111.52",
+   "status": "match"
+  },
+  {
+   "expr": "SUM(VAT[VAT-5%])",
+   "powerbi": "79148.18",
+   "local": "79148.18",
+   "status": "match"
+  },
+  {
+   "expr": "AVERAGE(VAT[VAT-5%])",
+   "powerbi": "143.644609800363",
+   "local": "143.6446098003629764065335753",
+   "status": "match"
+  },
+  {
+   "expr": "MIN(VAT[VAT-5%])",
+   "powerbi": "0.45",
+   "local": "0.45",
+   "status": "match"
+  },
+  {
+   "expr": "MAX(VAT[VAT-5%])",
+   "powerbi": "37406.97",
+   "local": "37406.97",
+   "status": "match"
+  },
+  {
+   "expr": "COUNT(VAT[VAT-5%])",
+   "powerbi": "551",
+   "local": "551",
+   "status": "match"
+  },
+  {
+   "expr": "COUNTBLANK(VAT[VAT-5%])",
+   "powerbi": "60",
+   "local": "60",
+   "status": "match"
+  },
+  {
+   "expr": "MEDIAN(VAT[VAT-5%])",
+   "powerbi": "25",
+   "local": "25",
+   "status": "match"
+  },
+  {
+   "expr": "DISTINCTCOUNT(VAT[VAT-5%])",
+   "powerbi": "416",
+   "local": "416",
+   "status": "match"
+  },
+  {
+   "expr": "SUMX(VAT,VAT[VAT-5%]*2)",
+   "powerbi": "158296.36",
+   "local": "158296.36",
+   "status": "match"
+  },
+  {
+   "expr": "SUM(VAT[Discount])",
+   "powerbi": "2148.1",
+   "local": "2148.10",
+   "status": "match"
+  },
+  {
+   "expr": "AVERAGE(VAT[Discount])",
+   "powerbi": "93.3956521739131",
+   "local": "93.39565217391304347826086957",
+   "status": "match"
+  },
+  {
+   "expr": "MIN(VAT[Discount])",
+   "powerbi": "3",
+   "local": "3",
+   "status": "match"
+  },
+  {
+   "expr": "MAX(VAT[Discount])",
+   "powerbi": "1038.3",
+   "local": "1038.3",
+   "status": "match"
+  },
+  {
+   "expr": "COUNT(VAT[Discount])",
+   "powerbi": "23",
+   "local": "23",
+   "status": "match"
+  },
+  {
+   "expr": "COUNTBLANK(VAT[Discount])",
+   "powerbi": "588",
+   "local": "588",
+   "status": "match"
+  },
+  {
+   "expr": "MEDIAN(VAT[Discount])",
+   "powerbi": "55",
+   "local": "55",
+   "status": "match"
+  },
+  {
+   "expr": "DISTINCTCOUNT(VAT[Discount])",
+   "powerbi": "20",
+   "local": "20",
+   "status": "match"
+  },
+  {
+   "expr": "SUMX(VAT,VAT[Discount]*2)",
+   "powerbi": "4296.2",
+   "local": "4296.20",
+   "status": "match"
+  },
+  {
+   "expr": "DISTINCTCOUNT(VAT[Particulars])",
+   "powerbi": "211",
+   "local": "211",
+   "status": "match"
+  },
+  {
+   "expr": "COUNTA(VAT[Particulars])",
+   "powerbi": "573",
+   "local": "573",
+   "status": "match"
+  },
+  {
+   "expr": "COUNTBLANK(VAT[Particulars])",
+   "powerbi": "38",
+   "local": "38",
+   "status": "match"
+  },
+  {
+   "expr": "DISTINCTCOUNT(VAT[Address])",
+   "powerbi": "70",
+   "local": "70",
+   "status": "match"
+  },
+  {
+   "expr": "COUNTA(VAT[Address])",
+   "powerbi": "573",
+   "local": "573",
+   "status": "match"
+  },
+  {
+   "expr": "COUNTBLANK(VAT[Address])",
+   "powerbi": "39",
+   "local": "39",
+   "status": "match"
+  },
+  {
+   "expr": "DISTINCTCOUNT(VAT[Emirates])",
+   "powerbi": "9",
+   "local": "9",
+   "status": "match"
+  },
+  {
+   "expr": "COUNTA(VAT[Emirates])",
+   "powerbi": "572",
+   "local": "572",
+   "status": "match"
+  },
+  {
+   "expr": "COUNTBLANK(VAT[Emirates])",
+   "powerbi": "39",
+   "local": "39",
+   "status": "match"
+  },
+  {
+   "expr": "DISTINCTCOUNT(VAT[Voucher Type])",
+   "powerbi": "4",
+   "local": "4",
+   "status": "match"
+  },
+  {
+   "expr": "COUNTA(VAT[Voucher Type])",
+   "powerbi": "573",
+   "local": "573",
+   "status": "match"
+  },
+  {
+   "expr": "COUNTBLANK(VAT[Voucher Type])",
+   "powerbi": "39",
+   "local": "39",
+   "status": "match"
+  },
+  {
+   "expr": "DISTINCTCOUNT(VAT[Voucher No.])",
+   "powerbi": "574",
+   "local": "574",
+   "status": "match"
+  },
+  {
+   "expr": "COUNTA(VAT[Voucher No.])",
+   "powerbi": "573",
+   "local": "573",
+   "status": "match"
+  },
+  {
+   "expr": "COUNTBLANK(VAT[Voucher No.])",
+   "powerbi": "39",
+   "local": "39",
+   "status": "match"
+  },
+  {
+   "expr": "DISTINCTCOUNT(VAT[Voucher Ref.])",
+   "powerbi": "538",
+   "local": "538",
+   "status": "match"
+  },
+  {
+   "expr": "COUNTA(VAT[Voucher Ref.])",
+   "powerbi": "573",
+   "local": "573",
+   "status": "match"
+  },
+  {
+   "expr": "COUNTBLANK(VAT[Voucher Ref.])",
+   "powerbi": "39",
+   "local": "39",
+   "status": "match"
+  },
+  {
+   "expr": "DISTINCTCOUNT(VAT[TRN])",
+   "powerbi": "202",
+   "local": "202",
+   "status": "match"
+  },
+  {
+   "expr": "COUNTA(VAT[TRN])",
+   "powerbi": "573",
+   "local": "573",
+   "status": "match"
+  },
+  {
+   "expr": "COUNTBLANK(VAT[TRN])",
+   "powerbi": "70",
+   "local": "70",
+   "status": "match"
+  },
+  {
+   "expr": "SUMX(VAT,VAT[Gross Total]-VAT[Discount]+VAT[Quantity])",
+   "powerbi": "1690653.63",
+   "local": "1690653.63",
+   "status": "match"
+  },
+  {
+   "expr": "SUM(VAT[Value])-SUM(VAT[Gross Total])-SUM(VAT[Quantity])+SUM(VAT[Discount])",
+   "powerbi": "-192346.370000001",
+   "local": "-192346.37",
+   "status": "match"
+  },
+  {
+   "expr": "DIVIDE(SUM(VAT[Quantity]),SUM(VAT[Gross Total]))",
+   "powerbi": "0.0184987106089047",
+   "local": "0.01849871060890469239589447247",
+   "status": "match"
+  },
+  {
+   "expr": "SUM(VAT[Quantity])/SUM(VAT[Gross Total])",
+   "powerbi": "0.0184987106089047",
+   "local": "0.01849871060890469239589447247",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(SUM(VAT[Value]),VAT[Gross Total]>10000)",
+   "powerbi": "1041780.88",
+   "local": "1041780.88",
+   "status": "match"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(VAT,VAT[Value]>10000))",
+   "powerbi": "16",
+   "local": "16",
+   "status": "match"
+  },
+  {
+   "expr": "SUMX(FILTER(VAT,VAT[Quantity]>0),VAT[Quantity])",
+   "powerbi": "34798.89",
+   "local": "34798.89",
+   "status": "match"
+  },
+  {
+   "expr": "IF(ISBLANK(SUM(VAT[Value])),0,SUM(VAT[Value]))",
+   "powerbi": "1498307.26",
+   "local": "1498307.26",
+   "status": "match"
+  },
+  {
+   "expr": "ROUND(SUM(VAT[Quantity])/SUM(VAT[Gross Total]),4)",
+   "powerbi": "0.0185",
+   "local": "0.0185",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(VAT),VAT[Discount]>0)",
+   "powerbi": "23",
+   "local": "23",
+   "status": "match"
+  },
+  {
+   "expr": "MAXX(VAT,VAT[Value])",
+   "powerbi": "749153.63",
+   "local": "749153.63",
+   "status": "match"
+  },
+  {
+   "expr": "MINX(VAT,VAT[Value])",
+   "powerbi": "-4650",
+   "local": "-4650",
+   "status": "match"
+  },
+  {
+   "expr": "AVERAGEX(VAT,VAT[Quantity]/VAT[Gross Total])",
+   "powerbi": "NaN",
+   "local": "NaN",
+   "status": "match"
+  },
+  {
+   "expr": "COUNTX(VAT,VAT[Quantity])",
+   "powerbi": "516",
+   "local": "516",
+   "status": "match"
+  },
+  {
+   "expr": "MIN(VAT[Date])",
+   "powerbi": "08/01/2026 00:00:00",
+   "local": "08/01/2026 00:00:00",
+   "status": "match"
+  },
+  {
+   "expr": "MAX(VAT[Date])",
+   "powerbi": "08/31/2026 00:00:00",
+   "local": "08/31/2026 00:00:00",
+   "status": "match"
+  },
+  {
+   "expr": "COUNT(VAT[Date])",
+   "powerbi": "572",
+   "local": "572",
+   "status": "match"
+  },
+  {
+   "expr": "COUNTBLANK(VAT[Date])",
+   "powerbi": "39",
+   "local": "39",
+   "status": "match"
+  },
+  {
+   "expr": "DISTINCTCOUNT(VAT[Date])",
+   "powerbi": "26",
+   "local": "26",
+   "status": "match"
+  },
+  {
+   "expr": "YEAR(MAX(VAT[Date]))",
+   "powerbi": "2026",
+   "local": "2026",
+   "status": "match"
+  },
+  {
+   "expr": "MONTH(MIN(VAT[Date]))",
+   "powerbi": "8",
+   "local": "8",
+   "status": "match"
+  },
+  {
+   "expr": "DATEDIFF(MIN(VAT[Date]),MAX(VAT[Date]),DAY)",
+   "powerbi": "30",
+   "local": "30",
+   "status": "match"
+  },
+  {
+   "expr": "FORMAT(MAX(VAT[Date]),\"dd-MMM-yyyy\")",
+   "powerbi": "31-Aug-2026",
+   "local": "31-Aug-2026",
+   "status": "match"
+  },
+  {
+   "expr": "EOMONTH(MAX(VAT[Date]),0)",
+   "powerbi": "08/31/2026 00:00:00",
+   "local": "08/31/2026 00:00:00",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(SUM(VAT[Value]),VAT[Date]>=DATE(2026,8,15))",
+   "powerbi": "359953.15",
+   "local": "359953.15",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(VAT),VAT[Date]=MIN(VAT[Date]))",
+   "powerbi": "24",
+   "local": "24",
+   "status": "match"
+  },
+  {
+   "expr": "SUMX(VAT,IF(VAT[Date]>DATE(2026,8,15),1,0))",
+   "powerbi": "286",
+   "local": "286",
+   "status": "match"
+  },
+  {
+   "expr": "COUNTX(VAT,YEAR(VAT[Date]))",
+   "powerbi": "572",
+   "local": "572",
+   "status": "match"
+  },
+  {
+   "expr": "MAXX(VAT,VAT[Date])",
+   "powerbi": "08/31/2026 00:00:00",
+   "local": "08/31/2026 00:00:00",
+   "status": "match"
+  },
+  {
+   "expr": "MINX(VAT,DAY(VAT[Date]))",
+   "powerbi": "1",
+   "local": "1",
+   "status": "match"
+  },
+  {
+   "expr": "SELECTEDVALUE(VAT[Date])",
+   "powerbi": "BLANK",
+   "local": "BLANK",
+   "status": "match"
+  },
+  {
+   "expr": "SUMX(VAT,WEEKDAY(VAT[Date]))",
+   "powerbi": "2485",
+   "local": "2485",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(SUM(VAT[Value]),VAT[Date]<DATE(2026,8,15))",
+   "powerbi": "1138354.11",
+   "local": "1138354.11",
+   "status": "match"
+  },
+  {
+   "expr": "MAX(VAT[Date])-MIN(VAT[Date])",
+   "powerbi": "01/29/1900 00:00:00",
+   "local": "01/29/1900 00:00:00",
+   "status": "match"
+  },
+  {
+   "expr": "MAX(VAT[Date])&\"\"",
+   "powerbi": "8/31/2026",
+   "local": "8/31/2026",
+   "status": "match"
+  },
+  {
+   "expr": "FORMAT(MIN(VAT[Date]),\"dddd, d MMMM yyyy\")",
+   "powerbi": "Saturday, 1 August 2026",
+   "local": "Saturday, 1 August 2026",
+   "status": "match"
+  },
+  {
+   "expr": "WEEKNUM(MAX(VAT[Date]))",
+   "powerbi": "36",
+   "local": "36",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(VAT),VAT[Date]>=EDATE(DATE(2026,8,15),-1))",
+   "powerbi": "572",
+   "local": "572",
+   "status": "match"
+  },
+  {
+   "expr": "COUNTROWS(VALUES(VAT[Emirates]))",
+   "powerbi": "9",
+   "local": "9",
+   "status": "match"
+  },
+  {
+   "expr": "COUNTROWS(DISTINCT(VAT[Emirates]))",
+   "powerbi": "9",
+   "local": "9",
+   "status": "match"
+  },
+  {
+   "expr": "MAX(VAT[Emirates])",
+   "powerbi": "Umm Al Quwain",
+   "local": "Umm Al Quwain",
+   "status": "match"
+  },
+  {
+   "expr": "MIN(VAT[Emirates])",
+   "powerbi": "Abu Dhabi",
+   "local": "Abu Dhabi",
+   "status": "match"
+  },
+  {
+   "expr": "SELECTEDVALUE(VAT[Emirates],\"many\")",
+   "powerbi": "many",
+   "local": "many",
+   "status": "match"
+  },
+  {
+   "expr": "HASONEVALUE(VAT[Emirates])",
+   "powerbi": "False",
+   "local": "False",
+   "status": "match"
+  },
+  {
+   "expr": "SUMX(VALUES(VAT[Emirates]),CALCULATE(SUM(VAT[Value])))",
+   "powerbi": "1498307.26",
+   "local": "1498307.26",
+   "status": "match"
+  },
+  {
+   "expr": "MAXX(VALUES(VAT[Emirates]),CALCULATE(SUM(VAT[Value])))",
+   "powerbi": "749153.63",
+   "local": "749153.63",
+   "status": "match"
+  },
+  {
+   "expr": "SUMX(VAT,LEN(VAT[Emirates]))",
+   "powerbi": "4080",
+   "local": "4080",
+   "status": "match"
+  },
+  {
+   "expr": "COUNTX(VAT,IF(LEFT(VAT[Emirates],1)=\"A\",1,BLANK()))",
+   "powerbi": "236",
+   "local": "236",
+   "status": "match"
+  },
+  {
+   "expr": "UPPER(MAX(VAT[Emirates]))",
+   "powerbi": "UMM AL QUWAIN",
+   "local": "UMM AL QUWAIN",
+   "status": "match"
+  },
+  {
+   "expr": "LEN(MIN(VAT[Emirates]))",
+   "powerbi": "9",
+   "local": "9",
+   "status": "match"
+  },
+  {
+   "expr": "CONCATENATEX(VALUES(VAT[Emirates]),VAT[Emirates],\", \",VAT[Emirates],ASC)",
+   "powerbi": ", Abu Dhabi, Ajman, Dubai, Fujairah, Ras Al Khaimah, Sajja, Sharjah, Umm Al Quwain",
+   "local": ", Abu Dhabi, Ajman, Dubai, Fujairah, Ras Al Khaimah, Sajja, Sharjah, Umm Al Quwain",
+   "status": "match"
+  },
+  {
+   "expr": "CONCATENATEX(VALUES(VAT[Emirates]),VAT[Emirates]&\"=\"&FORMAT(CALCULATE(SUM(VAT[Value])),\"#,0.00\"),\"; \",VAT[Emirates],DESC)",
+   "powerbi": "Umm Al Quwain=25.50; Sharjah=40,620.80; Sajja=62.40; Ras Al Khaimah=32,220.50; Fujairah=3,739.36; Dubai=259,801.81; Ajman=6,517.75; Abu Dhabi=406,165.51; =749,153.63",
+   "local": "Umm Al Quwain=25.50; Sharjah=40,620.80; Sajja=62.40; Ras Al Khaimah=32,220.50; Fujairah=3,739.36; Dubai=259,801.81; Ajman=6,517.75; Abu Dhabi=406,165.51; =749,153.63",
+   "status": "match"
+  },
+  {
+   "expr": "AVERAGEX(VALUES(VAT[Emirates]),CALCULATE(SUM(VAT[Value])))",
+   "powerbi": "166478.584444444",
+   "local": "166478.5844444444444444444444",
+   "status": "match"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(VAT,VAT[Emirates]<>MAX(VAT[Emirates])))",
+   "powerbi": "609",
+   "local": "609",
+   "status": "match"
+  },
+  {
+   "expr": "COUNTROWS(VALUES(VAT[Voucher Type]))",
+   "powerbi": "4",
+   "local": "4",
+   "status": "match"
+  },
+  {
+   "expr": "COUNTROWS(DISTINCT(VAT[Voucher Type]))",
+   "powerbi": "4",
+   "local": "4",
+   "status": "match"
+  },
+  {
+   "expr": "MAX(VAT[Voucher Type])",
+   "powerbi": "SALES-LOOPS",
+   "local": "SALES-LOOPS",
+   "status": "match"
+  },
+  {
+   "expr": "MIN(VAT[Voucher Type])",
+   "powerbi": "",
+   "local": "",
+   "status": "match"
+  },
+  {
+   "expr": "SELECTEDVALUE(VAT[Voucher Type],\"many\")",
+   "powerbi": "many",
+   "local": "many",
+   "status": "match"
+  },
+  {
+   "expr": "HASONEVALUE(VAT[Voucher Type])",
+   "powerbi": "False",
+   "local": "False",
+   "status": "match"
+  },
+  {
+   "expr": "SUMX(VALUES(VAT[Voucher Type]),CALCULATE(SUM(VAT[Value])))",
+   "powerbi": "1498307.26",
+   "local": "1498307.26",
+   "status": "match"
+  },
+  {
+   "expr": "MAXX(VALUES(VAT[Voucher Type]),CALCULATE(SUM(VAT[Value])))",
+   "powerbi": "792527.88",
+   "local": "792527.88",
+   "status": "match"
+  },
+  {
+   "expr": "SUMX(VAT,LEN(VAT[Voucher Type]))",
+   "powerbi": "6292",
+   "local": "6292",
+   "status": "match"
+  },
+  {
+   "expr": "COUNTX(VAT,IF(LEFT(VAT[Voucher Type],1)=\"A\",1,BLANK()))",
+   "powerbi": "BLANK",
+   "local": "BLANK",
+   "status": "match"
+  },
+  {
+   "expr": "UPPER(MAX(VAT[Voucher Type]))",
+   "powerbi": "SALES-LOOPS",
+   "local": "SALES-LOOPS",
+   "status": "match"
+  },
+  {
+   "expr": "LEN(MIN(VAT[Voucher Type]))",
+   "powerbi": "0",
+   "local": "0",
+   "status": "match"
+  },
+  {
+   "expr": "CONCATENATEX(VALUES(VAT[Voucher Type]),VAT[Voucher Type],\", \",VAT[Voucher Type],ASC)",
+   "powerbi": ", , Credit Note, SALES-LOOPS",
+   "local": ", , Credit Note, SALES-LOOPS",
+   "status": "match"
+  },
+  {
+   "expr": "CONCATENATEX(VALUES(VAT[Voucher Type]),VAT[Voucher Type]&\"=\"&FORMAT(CALCULATE(SUM(VAT[Value])),\"#,0.00\"),\"; \",VAT[Voucher Type],DESC)",
+   "powerbi": "SALES-LOOPS=792,527.88; Credit Note=-43,374.25; =749,153.63; =",
+   "local": "SALES-LOOPS=792,527.88; Credit Note=-43,374.25; =749,153.63; =",
+   "status": "match"
+  },
+  {
+   "expr": "AVERAGEX(VALUES(VAT[Voucher Type]),CALCULATE(SUM(VAT[Value])))",
+   "powerbi": "499435.753333333",
+   "local": "499435.7533333333333333333333",
+   "status": "match"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(VAT,VAT[Voucher Type]<>MAX(VAT[Voucher Type])))",
+   "powerbi": "92",
+   "local": "92",
+   "status": "match"
+  },
+  {
+   "expr": "IF(SUM(VAT[Value])>0,\"pos\",\"neg\")",
+   "powerbi": "pos",
+   "local": "pos",
+   "status": "match"
+  },
+  {
+   "expr": "FORMAT(SUM(VAT[Value]),\"#,0.00\")",
+   "powerbi": "1,498,307.26",
+   "local": "1,498,307.26",
+   "status": "match"
+  },
+  {
+   "expr": "\"Total: \"&FORMAT(SUM(VAT[Value]),\"#,0\")",
+   "powerbi": "Total: 1,498,307",
+   "local": "Total: 1,498,307",
+   "status": "match"
+  },
+  {
+   "expr": "SUM(VAT[Value])&\"\"",
+   "powerbi": "1498307.26",
+   "local": "1498307.26",
+   "status": "match"
+  },
+  {
+   "expr": "FORMAT(SUM(VAT[Quantity])/SUM(VAT[Gross Total]),\"0.00%\")",
+   "powerbi": "1.85%",
+   "local": "1.85%",
+   "status": "match"
+  },
+  {
+   "expr": "VAR t=SUM(VAT[Value]) VAR s=SUM(VAT[Gross Total]) RETURN IF(s=0,BLANK(),t/s)",
+   "powerbi": "0.901478292089151",
+   "local": "0.9014782920891514691828885845",
+   "status": "match"
+  },
+  {
+   "expr": "SUM(VAT[Value])^2",
+   "powerbi": "2244924645368.71",
+   "local": "2244924645368.7076",
+   "status": "match"
+  },
+  {
+   "expr": "CONVERT(SUM(VAT[Value]),INTEGER)",
+   "powerbi": "1498307",
+   "local": "1498307",
+   "status": "match"
+  },
+  {
+   "expr": "ROUND(SUM(VAT[Value]),1)&\"\"",
+   "powerbi": "1498307.3",
+   "local": "1498307.3",
+   "status": "match"
+  },
+  {
+   "expr": "SUM(VAT[Gross Total])>SUM(VAT[Value])",
+   "powerbi": "True",
+   "local": "True",
+   "status": "match"
+  },
+  {
+   "expr": "AND(SUM(VAT[Value])>0,SUM(VAT[Gross Total])>0)",
+   "powerbi": "True",
+   "local": "True",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(SUM(VAT[Value]),VAT[Particulars]=\"AMS Maritime LLC\")",
+   "powerbi": "11175",
+   "local": "11175",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(VAT),VAT[Particulars]=\"AMS Maritime LLC\")",
+   "powerbi": "2",
+   "local": "2",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(SUM(VAT[Value]),VAT[Particulars]=\"AQAM General Trading LLC\")",
+   "powerbi": "255",
+   "local": "255",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(VAT),VAT[Particulars]=\"AQAM General Trading LLC\")",
+   "powerbi": "1",
+   "local": "1",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(SUM(VAT[Value]),VAT[Particulars]=\"ASS Scaffolding Contracting LLC\")",
+   "powerbi": "1674.75",
+   "local": "1674.75",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(VAT),VAT[Particulars]=\"ASS Scaffolding Contracting LLC\")",
+   "powerbi": "6",
+   "local": "6",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(SUM(VAT[Value]),VAT[Particulars]=\"Accurate Vision Contracting LLC\")",
+   "powerbi": "115",
+   "local": "115",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(VAT),VAT[Particulars]=\"Accurate Vision Contracting LLC\")",
+   "powerbi": "1",
+   "local": "1",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(SUM(VAT[Value]),VAT[Particulars]=\"Acube Technicasl Services\")",
+   "powerbi": "-102",
+   "local": "-102",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(VAT),VAT[Particulars]=\"Acube Technicasl Services\")",
+   "powerbi": "1",
+   "local": "1",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(SUM(VAT[Value]),VAT[Particulars]=\"Ajmal Steel Tubes & Pipe Industries LLC\")",
+   "powerbi": "5031.75",
+   "local": "5031.75",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(VAT),VAT[Particulars]=\"Ajmal Steel Tubes & Pipe Industries LLC\")",
+   "powerbi": "8",
+   "local": "8",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(SUM(VAT[Value]),VAT[Particulars]=\"Al Ahlam Insulation Material Supply LLC\")",
+   "powerbi": "494.5",
+   "local": "494.5",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(VAT),VAT[Particulars]=\"Al Ahlam Insulation Material Supply LLC\")",
+   "powerbi": "1",
+   "local": "1",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(SUM(VAT[Value]),VAT[Particulars]=\"Al Bahar Marine Services LLC\")",
+   "powerbi": "585",
+   "local": "585",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(VAT),VAT[Particulars]=\"Al Bahar Marine Services LLC\")",
+   "powerbi": "1",
+   "local": "1",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(SUM(VAT[Value]),VAT[Particulars]=\"Al Bahiya Trading And Services - Sol Proprietorship LLC\")",
+   "powerbi": "14070",
+   "local": "14070",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(VAT),VAT[Particulars]=\"Al Bahiya Trading And Services - Sol Proprietorship LLC\")",
+   "powerbi": "2",
+   "local": "2",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(SUM(VAT[Value]),VAT[Particulars]=\"Al Bait Trading LLC FZ\")",
+   "powerbi": "1271.5",
+   "local": "1271.5",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(VAT),VAT[Particulars]=\"Al Bait Trading LLC FZ\")",
+   "powerbi": "2",
+   "local": "2",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(SUM(VAT[Value]),VAT[Particulars]=\"Al Etihad Gold FZCO\")",
+   "powerbi": "1440",
+   "local": "1440",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(VAT),VAT[Particulars]=\"Al Etihad Gold FZCO\")",
+   "powerbi": "1",
+   "local": "1",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(SUM(VAT[Value]),VAT[Particulars]=\"Al Fitr Building Cleaning Services LLC\")",
+   "powerbi": "1040",
+   "local": "1040",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(VAT),VAT[Particulars]=\"Al Fitr Building Cleaning Services LLC\")",
+   "powerbi": "1",
+   "local": "1",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(SUM(VAT[Value]),VAT[Particulars]=\"Al Fitr Elecromechanical Works LLC\")",
+   "powerbi": "-1040",
+   "local": "-1040",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(VAT),VAT[Particulars]=\"Al Fitr Elecromechanical Works LLC\")",
+   "powerbi": "3",
+   "local": "3",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(SUM(VAT[Value]),VAT[Particulars]=\"Al Ghaimah Eng Co LLC\")",
+   "powerbi": "880.5",
+   "local": "880.5",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(VAT),VAT[Particulars]=\"Al Ghaimah Eng Co LLC\")",
+   "powerbi": "1",
+   "local": "1",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(SUM(VAT[Value]),VAT[Particulars]=\"Al Marmoom Top Technical Services LLC\")",
+   "powerbi": "6300",
+   "local": "6300",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(VAT),VAT[Particulars]=\"Al Marmoom Top Technical Services LLC\")",
+   "powerbi": "1",
+   "local": "1",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(SUM(VAT[Value]),VAT[Particulars]=\"Al Mazen General Trading LLC\")",
+   "powerbi": "7130",
+   "local": "7130",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(VAT),VAT[Particulars]=\"Al Mazen General Trading LLC\")",
+   "powerbi": "1",
+   "local": "1",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(SUM(VAT[Value]),VAT[Particulars]=\"Al Nasiya General Contracting L.L.C. Co\")",
+   "powerbi": "49.5",
+   "local": "49.5",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(VAT),VAT[Particulars]=\"Al Nasiya General Contracting L.L.C. Co\")",
+   "powerbi": "1",
+   "local": "1",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(SUM(VAT[Value]),VAT[Particulars]=\"Al Raya Al Hamra Blg Cont LLC\")",
+   "powerbi": "442",
+   "local": "442.0",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(VAT),VAT[Particulars]=\"Al Raya Al Hamra Blg Cont LLC\")",
+   "powerbi": "3",
+   "local": "3",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(SUM(VAT[Value]),VAT[Particulars]=\"Al Rehab Advertising Trading LLC\")",
+   "powerbi": "355",
+   "local": "355",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(VAT),VAT[Particulars]=\"Al Rehab Advertising Trading LLC\")",
+   "powerbi": "1",
+   "local": "1",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(SUM(VAT[Value]),VAT[Particulars]=\"Al Sweidi Shams Contracting\")",
+   "powerbi": "797.5",
+   "local": "797.50",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(VAT),VAT[Particulars]=\"Al Sweidi Shams Contracting\")",
+   "powerbi": "6",
+   "local": "6",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(SUM(VAT[Value]),VAT[Particulars]=\"Al Taweq Al Dhabi Tech Cont\")",
+   "powerbi": "760",
+   "local": "760",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(VAT),VAT[Particulars]=\"Al Taweq Al Dhabi Tech Cont\")",
+   "powerbi": "1",
+   "local": "1",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(SUM(VAT[Value]),VAT[Particulars]=\"Al Wahdania General Trading Co LLC Fujairah Branch\")",
+   "powerbi": "1840",
+   "local": "1840",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(VAT),VAT[Particulars]=\"Al Wahdania General Trading Co LLC Fujairah Branch\")",
+   "powerbi": "2",
+   "local": "2",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(SUM(VAT[Value]),VAT[Particulars]=\"Al Wazeer Concrete Carpenter Cont.\")",
+   "powerbi": "2894.25",
+   "local": "2894.25",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(VAT),VAT[Particulars]=\"Al Wazeer Concrete Carpenter Cont.\")",
+   "powerbi": "3",
+   "local": "3",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(SUM(VAT[Value]),VAT[Particulars]=\"Al Wissam Stones LLC\")",
+   "powerbi": "15089",
+   "local": "15089",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(VAT),VAT[Particulars]=\"Al Wissam Stones LLC\")",
+   "powerbi": "5",
+   "local": "5",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(SUM(VAT[Value]),VAT[Particulars]=\"Alfan Alameeq Decore Est\")",
+   "powerbi": "212.5",
+   "local": "212.5",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(VAT),VAT[Particulars]=\"Alfan Alameeq Decore Est\")",
+   "powerbi": "1",
+   "local": "1",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(SUM(VAT[Value]),VAT[Particulars]=\"Andaman Technical Works LLC\")",
+   "powerbi": "2320",
+   "local": "2320",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(VAT),VAT[Particulars]=\"Andaman Technical Works LLC\")",
+   "powerbi": "3",
+   "local": "3",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(SUM(VAT[Value]),VAT[Particulars]=\"Arabian Road Technology LLC- FZ\")",
+   "powerbi": "-165",
+   "local": "-165",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(VAT),VAT[Particulars]=\"Arabian Road Technology LLC- FZ\")",
+   "powerbi": "1",
+   "local": "1",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(SUM(VAT[Value]),VAT[Particulars]=\"Aroma International Building Contracting LLC OPC\")",
+   "powerbi": "300",
+   "local": "300",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(VAT),VAT[Particulars]=\"Aroma International Building Contracting LLC OPC\")",
+   "powerbi": "1",
+   "local": "1",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(SUM(VAT[Value]),VAT[Particulars]=\"Astraco Construction LLC\")",
+   "powerbi": "661.5",
+   "local": "661.5",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(VAT),VAT[Particulars]=\"Astraco Construction LLC\")",
+   "powerbi": "2",
+   "local": "2",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(SUM(VAT[Value]),VAT[Particulars]=\"Azalea Catering Services LLC\")",
+   "powerbi": "630",
+   "local": "630",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(VAT),VAT[Particulars]=\"Azalea Catering Services LLC\")",
+   "powerbi": "1",
+   "local": "1",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(SUM(VAT[Value]),VAT[Particulars]=\"Azhad Industries Co LLC\")",
+   "powerbi": "767",
+   "local": "767",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(VAT),VAT[Particulars]=\"Azhad Industries Co LLC\")",
+   "powerbi": "1",
+   "local": "1",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(SUM(VAT[Value]),VAT[Particulars]=\"BELREMAITHA STEEL FACTORY L.L.C\")",
+   "powerbi": "262.5",
+   "local": "262.5",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(VAT),VAT[Particulars]=\"BELREMAITHA STEEL FACTORY L.L.C\")",
+   "powerbi": "1",
+   "local": "1",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(SUM(VAT[Value]),VAT[Particulars]=\"Bait Al Muhtarif Tailoringl L.L.C SP\")",
+   "powerbi": "62.4",
+   "local": "62.4",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(VAT),VAT[Particulars]=\"Bait Al Muhtarif Tailoringl L.L.C SP\")",
+   "powerbi": "1",
+   "local": "1",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(SUM(VAT[Value]),VAT[Particulars]=\"Bandhan Contracting and General Maintenance LLC\")",
+   "powerbi": "154",
+   "local": "154",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(VAT),VAT[Particulars]=\"Bandhan Contracting and General Maintenance LLC\")",
+   "powerbi": "1",
+   "local": "1",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(SUM(VAT[Value]),VAT[Particulars]=\"Bellomassi Food Industries LLC\")",
+   "powerbi": "124",
+   "local": "124",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(VAT),VAT[Particulars]=\"Bellomassi Food Industries LLC\")",
+   "powerbi": "1",
+   "local": "1",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(SUM(VAT[Value]),VAT[Particulars]=\"Bin Ham North Ocean Elevators LLC\")",
+   "powerbi": "0",
+   "local": "0.00",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(VAT),VAT[Particulars]=\"Bin Ham North Ocean Elevators LLC\")",
+   "powerbi": "2",
+   "local": "2",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(SUM(VAT[Value]),VAT[Particulars]=\"Bin Hamoodah Trading and General Services Company LLC SPC\")",
+   "powerbi": "791.25",
+   "local": "791.25",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(VAT),VAT[Particulars]=\"Bin Hamoodah Trading and General Services Company LLC SPC\")",
+   "powerbi": "3",
+   "local": "3",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(SUM(VAT[Value]),VAT[Particulars]=\"Bin Odeh Building Contracting LLC\")",
+   "powerbi": "1370",
+   "local": "1370",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(VAT),VAT[Particulars]=\"Bin Odeh Building Contracting LLC\")",
+   "powerbi": "5",
+   "local": "5",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(SUM(VAT[Value]),VAT[Particulars]=\"Bond Chem LLC\")",
+   "powerbi": "380",
+   "local": "380",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(VAT),VAT[Particulars]=\"Bond Chem LLC\")",
+   "powerbi": "3",
+   "local": "3",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(SUM(VAT[Value]),VAT[Particulars]=\"Brilliant Furniture Movers LLC\")",
+   "powerbi": "210",
+   "local": "210",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(VAT),VAT[Particulars]=\"Brilliant Furniture Movers LLC\")",
+   "powerbi": "1",
+   "local": "1",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(SUM(VAT[Value]),VAT[Particulars]=\"Brio Metal Industries LLC\")",
+   "powerbi": "750.5",
+   "local": "750.5",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(VAT),VAT[Particulars]=\"Brio Metal Industries LLC\")",
+   "powerbi": "4",
+   "local": "4",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(SUM(VAT[Value]),VAT[Particulars]=\"Builtex Decoration Design & Implementation LLC\")",
+   "powerbi": "1965.75",
+   "local": "1965.75",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(VAT),VAT[Particulars]=\"Builtex Decoration Design & Implementation LLC\")",
+   "powerbi": "5",
+   "local": "5",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(SUM(VAT[Value]),VAT[Particulars]=\"Buraq Allail Building Contracting LLC\")",
+   "powerbi": "2462.5",
+   "local": "2462.5",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(VAT),VAT[Particulars]=\"Buraq Allail Building Contracting LLC\")",
+   "powerbi": "4",
+   "local": "4",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(SUM(VAT[Value]),VAT[Particulars]=\"CWS Infra Contracting LLC\")",
+   "powerbi": "713",
+   "local": "713",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(VAT),VAT[Particulars]=\"CWS Infra Contracting LLC\")",
+   "powerbi": "1",
+   "local": "1",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(SUM(VAT[Value]),VAT[Particulars]=\"Cash Customer\")",
+   "powerbi": "2053.1",
+   "local": "2053.1",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(VAT),VAT[Particulars]=\"Cash Customer\")",
+   "powerbi": "16",
+   "local": "16",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(SUM(VAT[Value]),VAT[Particulars]=\"Centre Core Professional Technical Services LLC\")",
+   "powerbi": "2488.6",
+   "local": "2488.6",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(VAT),VAT[Particulars]=\"Centre Core Professional Technical Services LLC\")",
+   "powerbi": "3",
+   "local": "3",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(SUM(VAT[Value]),VAT[Particulars]=\"Civen Construction (Civenco) LLC\")",
+   "powerbi": "1200",
+   "local": "1200",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(VAT),VAT[Particulars]=\"Civen Construction (Civenco) LLC\")",
+   "powerbi": "1",
+   "local": "1",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(SUM(VAT[Value]),VAT[Particulars]=\"Concrete Technology LLC\")",
+   "powerbi": "66359.7",
+   "local": "66359.7",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(VAT),VAT[Particulars]=\"Concrete Technology LLC\")",
+   "powerbi": "24",
+   "local": "24",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(SUM(VAT[Value]),VAT[Particulars]=\"Construction Machinery Center Company LLC\")",
+   "powerbi": "460.5",
+   "local": "460.5",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(VAT),VAT[Particulars]=\"Construction Machinery Center Company LLC\")",
+   "powerbi": "6",
+   "local": "6",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(SUM(VAT[Value]),VAT[Particulars]=\"Copper Fitout Interiors LLC\")",
+   "powerbi": "191",
+   "local": "191",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(VAT),VAT[Particulars]=\"Copper Fitout Interiors LLC\")",
+   "powerbi": "1",
+   "local": "1",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(SUM(VAT[Value]),VAT[Particulars]=\"Cross Road Drilling LLC\")",
+   "powerbi": "3109",
+   "local": "3109",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(VAT),VAT[Particulars]=\"Cross Road Drilling LLC\")",
+   "powerbi": "4",
+   "local": "4",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(SUM(VAT[Value]),VAT[Particulars]=\"Crystal Engineering Building Contracting LLC\")",
+   "powerbi": "1073.75",
+   "local": "1073.75",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(VAT),VAT[Particulars]=\"Crystal Engineering Building Contracting LLC\")",
+   "powerbi": "2",
+   "local": "2",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(SUM(VAT[Value]),VAT[Particulars]=\"D3 Wooden Industries LLC\")",
+   "powerbi": "1368",
+   "local": "1368",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(VAT),VAT[Particulars]=\"D3 Wooden Industries LLC\")",
+   "powerbi": "1",
+   "local": "1",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(SUM(VAT[Value]),VAT[Particulars]=\"DNB Construction LLC\")",
+   "powerbi": "650",
+   "local": "650",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(VAT),VAT[Particulars]=\"DNB Construction LLC\")",
+   "powerbi": "1",
+   "local": "1",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(SUM(VAT[Value]),VAT[Particulars]=\"Decagon Scaffolding and Engineering Co LLC\")",
+   "powerbi": "1170",
+   "local": "1170",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(VAT),VAT[Particulars]=\"Decagon Scaffolding and Engineering Co LLC\")",
+   "powerbi": "1",
+   "local": "1",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(SUM(VAT[Value]),VAT[Particulars]=\"Decai Global Construction LLC\")",
+   "powerbi": "2800",
+   "local": "2800",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(VAT),VAT[Particulars]=\"Decai Global Construction LLC\")",
+   "powerbi": "1",
+   "local": "1",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(SUM(VAT[Value]),VAT[Particulars]=\"Denholm Yam Steel Factory LLC\")",
+   "powerbi": "0",
+   "local": "0.0",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(VAT),VAT[Particulars]=\"Denholm Yam Steel Factory LLC\")",
+   "powerbi": "2",
+   "local": "2",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(SUM(VAT[Value]),VAT[Particulars]=\"Denholm YamContracting Company LLC\")",
+   "powerbi": "82697.5",
+   "local": "82697.50",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(VAT),VAT[Particulars]=\"Denholm YamContracting Company LLC\")",
+   "powerbi": "24",
+   "local": "24",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(SUM(VAT[Value]),VAT[Particulars]=\"Department of Culture and Tourism\")",
+   "powerbi": "818",
+   "local": "818",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(VAT),VAT[Particulars]=\"Department of Culture and Tourism\")",
+   "powerbi": "1",
+   "local": "1",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(SUM(VAT[Value]),VAT[Particulars]=\"Designs and Dimensions Interior Designs LLc\")",
+   "powerbi": "480",
+   "local": "480",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(VAT),VAT[Particulars]=\"Designs and Dimensions Interior Designs LLc\")",
+   "powerbi": "2",
+   "local": "2",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(SUM(VAT[Value]),VAT[Particulars]=\"Designsmith Interiorworks LLC\")",
+   "powerbi": "14851.91",
+   "local": "14851.91",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(VAT),VAT[Particulars]=\"Designsmith Interiorworks LLC\")",
+   "powerbi": "22",
+   "local": "22",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(SUM(VAT[Value]),VAT[Particulars]=\"Dhabi Alsahra Tailoring & Embroidery LLC\")",
+   "powerbi": "371.46",
+   "local": "371.46",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(VAT),VAT[Particulars]=\"Dhabi Alsahra Tailoring & Embroidery LLC\")",
+   "powerbi": "5",
+   "local": "5",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(SUM(VAT[Value]),VAT[Particulars]=\"Dhafir Technologies LLC\")",
+   "powerbi": "21521.5",
+   "local": "21521.50",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(VAT),VAT[Particulars]=\"Dhafir Technologies LLC\")",
+   "powerbi": "14",
+   "local": "14",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(SUM(VAT[Value]),VAT[Particulars]=\"Diamond Lease LLC\")",
+   "powerbi": "58",
+   "local": "58",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(VAT),VAT[Particulars]=\"Diamond Lease LLC\")",
+   "powerbi": "1",
+   "local": "1",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(SUM(VAT[Value]),VAT[Particulars]=\"Dottand Exhibition Organing Co LLC\")",
+   "powerbi": "1500",
+   "local": "1500",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(VAT),VAT[Particulars]=\"Dottand Exhibition Organing Co LLC\")",
+   "powerbi": "1",
+   "local": "1",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(SUM(VAT[Value]),VAT[Particulars]=\"Dragoons Security Services LLC\")",
+   "powerbi": "830",
+   "local": "830",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(VAT),VAT[Particulars]=\"Dragoons Security Services LLC\")",
+   "powerbi": "1",
+   "local": "1",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(SUM(VAT[Value]),VAT[Particulars]=\"Drilltech Oilfield Equipment Manufacturing and Services LLC\")",
+   "powerbi": "1477",
+   "local": "1477",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(VAT),VAT[Particulars]=\"Drilltech Oilfield Equipment Manufacturing and Services LLC\")",
+   "powerbi": "1",
+   "local": "1",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(SUM(VAT[Value]),VAT[Particulars]=\"Dutest Industrial LLC\")",
+   "powerbi": "-252",
+   "local": "-252",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(VAT),VAT[Particulars]=\"Dutest Industrial LLC\")",
+   "powerbi": "1",
+   "local": "1",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(SUM(VAT[Value]),VAT[Particulars]=\"Eissa Fiber Glass LLC\")",
+   "powerbi": "4115",
+   "local": "4115",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(VAT),VAT[Particulars]=\"Eissa Fiber Glass LLC\")",
+   "powerbi": "1",
+   "local": "1",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(SUM(VAT[Value]),VAT[Particulars]=\"Elite Overseas Building Contracting LLC\")",
+   "powerbi": "6983",
+   "local": "6983.00",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(VAT),VAT[Particulars]=\"Elite Overseas Building Contracting LLC\")",
+   "powerbi": "9",
+   "local": "9",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(SUM(VAT[Value]),VAT[Particulars]=\"Emirates Engineering Industries LLC\")",
+   "powerbi": "330",
+   "local": "330",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(VAT),VAT[Particulars]=\"Emirates Engineering Industries LLC\")",
+   "powerbi": "1",
+   "local": "1",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(SUM(VAT[Value]),VAT[Particulars]=\"Emirates Recuritment Services Est\")",
+   "powerbi": "28600",
+   "local": "28600",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(VAT),VAT[Particulars]=\"Emirates Recuritment Services Est\")",
+   "powerbi": "1",
+   "local": "1",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(SUM(VAT[Value]),VAT[Particulars]=\"Emirates Specialized Contracting & Oilfield Services LLc\")",
+   "powerbi": "218",
+   "local": "218",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(VAT),VAT[Particulars]=\"Emirates Specialized Contracting & Oilfield Services LLc\")",
+   "powerbi": "3",
+   "local": "3",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(SUM(VAT[Value]),VAT[Particulars]=\"Engineurs Engineering Consulting LLC\")",
+   "powerbi": "1600",
+   "local": "1600",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(VAT),VAT[Particulars]=\"Engineurs Engineering Consulting LLC\")",
+   "powerbi": "1",
+   "local": "1",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(SUM(VAT[Value]),VAT[Particulars]=\"Fast Concrete Products Factory LLC\")",
+   "powerbi": "388.8",
+   "local": "388.8",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(VAT),VAT[Particulars]=\"Fast Concrete Products Factory LLC\")",
+   "powerbi": "1",
+   "local": "1",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(SUM(VAT[Value]),VAT[Particulars]=\"Fibrex Contracting\")",
+   "powerbi": "6848",
+   "local": "6848",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(VAT),VAT[Particulars]=\"Fibrex Contracting\")",
+   "powerbi": "1",
+   "local": "1",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(SUM(VAT[Value]),VAT[Particulars]=\"Fidelity Building Contracting LLC\")",
+   "powerbi": "350",
+   "local": "350",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(VAT),VAT[Particulars]=\"Fidelity Building Contracting LLC\")",
+   "powerbi": "1",
+   "local": "1",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(SUM(VAT[Value]),VAT[Particulars]=\"Fillit Diesel Trading Llc\")",
+   "powerbi": "1380.5",
+   "local": "1380.50",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(VAT),VAT[Particulars]=\"Fillit Diesel Trading Llc\")",
+   "powerbi": "2",
+   "local": "2",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(SUM(VAT[Value]),VAT[Particulars]=\"Firelex Technical Services Co LLC\")",
+   "powerbi": "241.75",
+   "local": "241.75",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(VAT),VAT[Particulars]=\"Firelex Technical Services Co LLC\")",
+   "powerbi": "1",
+   "local": "1",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(SUM(VAT[Value]),VAT[Particulars]=\"Firepro Star Safety & Security LLC\")",
+   "powerbi": "2917.5",
+   "local": "2917.5",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(VAT),VAT[Particulars]=\"Firepro Star Safety & Security LLC\")",
+   "powerbi": "1",
+   "local": "1",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(SUM(VAT[Value]),VAT[Particulars]=\"Firmo Technical Petroleum Services LLC\")",
+   "powerbi": "80",
+   "local": "80",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(VAT),VAT[Particulars]=\"Firmo Technical Petroleum Services LLC\")",
+   "powerbi": "1",
+   "local": "1",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(SUM(VAT[Value]),VAT[Particulars]=\"First Class Equipment Repairing\")",
+   "powerbi": "581",
+   "local": "581",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(VAT),VAT[Particulars]=\"First Class Equipment Repairing\")",
+   "powerbi": "1",
+   "local": "1",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(SUM(VAT[Value]),VAT[Particulars]=\"Flowmatic Technical Services Co LLC\")",
+   "powerbi": "131.6",
+   "local": "131.6",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(VAT),VAT[Particulars]=\"Flowmatic Technical Services Co LLC\")",
+   "powerbi": "2",
+   "local": "2",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(SUM(VAT[Value]),VAT[Particulars]=\"Freeze Land Tech Cont\")",
+   "powerbi": "11680",
+   "local": "11680",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(VAT),VAT[Particulars]=\"Freeze Land Tech Cont\")",
+   "powerbi": "3",
+   "local": "3",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(SUM(VAT[Value]),VAT[Particulars]=\"Fusion International Marine Equipments and Services LLC SPC\")",
+   "powerbi": "472",
+   "local": "472",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(VAT),VAT[Particulars]=\"Fusion International Marine Equipments and Services LLC SPC\")",
+   "powerbi": "1",
+   "local": "1",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(SUM(VAT[Value]),VAT[Particulars]=\"Future Trans Motors LLC\")",
+   "powerbi": "75",
+   "local": "75",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(VAT),VAT[Particulars]=\"Future Trans Motors LLC\")",
+   "powerbi": "1",
+   "local": "1",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(SUM(VAT[Value]),VAT[Particulars]=\"GDES Instrumentation Contracting LLCSPC\")",
+   "powerbi": "7665",
+   "local": "7665",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(VAT),VAT[Particulars]=\"GDES Instrumentation Contracting LLCSPC\")",
+   "powerbi": "3",
+   "local": "3",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(SUM(VAT[Value]),VAT[Particulars]=\"Galva Coat Industries\")",
+   "powerbi": "10923.25",
+   "local": "10923.25",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(VAT),VAT[Particulars]=\"Galva Coat Industries\")",
+   "powerbi": "3",
+   "local": "3",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(SUM(VAT[Value]),VAT[Particulars]=\"Gdes Me FZCO\")",
+   "powerbi": "90",
+   "local": "90",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(VAT),VAT[Particulars]=\"Gdes Me FZCO\")",
+   "powerbi": "3",
+   "local": "3",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(SUM(VAT[Value]),VAT[Particulars]=\"Global Emirates Services Co. LLC\")",
+   "powerbi": "0",
+   "local": "0",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(VAT),VAT[Particulars]=\"Global Emirates Services Co. LLC\")",
+   "powerbi": "2",
+   "local": "2",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(SUM(VAT[Value]),VAT[Particulars]=\"Good Day International Services LLC\")",
+   "powerbi": "652.5",
+   "local": "652.5",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(VAT),VAT[Particulars]=\"Good Day International Services LLC\")",
+   "powerbi": "2",
+   "local": "2",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(SUM(VAT[Value]),VAT[Particulars]=\"Goodtech Electromechanical Works LLC\")",
+   "powerbi": "359.25",
+   "local": "359.25",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(VAT),VAT[Particulars]=\"Goodtech Electromechanical Works LLC\")",
+   "powerbi": "4",
+   "local": "4",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(SUM(VAT[Value]),VAT[Particulars]=\"Grand Fairway Catering LLC\")",
+   "powerbi": "4825.65",
+   "local": "4825.65",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(VAT),VAT[Particulars]=\"Grand Fairway Catering LLC\")",
+   "powerbi": "1",
+   "local": "1",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(SUM(VAT[Value]),VAT[Particulars]=\"Grand Total\")",
+   "powerbi": "749153.63",
+   "local": "749153.63",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(VAT),VAT[Particulars]=\"Grand Total\")",
+   "powerbi": "1",
+   "local": "1",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(SUM(VAT[Value]),VAT[Particulars]=\"Grey Stone LLC\")",
+   "powerbi": "2765",
+   "local": "2765",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(VAT),VAT[Particulars]=\"Grey Stone LLC\")",
+   "powerbi": "1",
+   "local": "1",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(SUM(VAT[Value]),VAT[Particulars]=\"Gulf Dunes Landscaping and Agricultural Services Company LLC\")",
+   "powerbi": "500.75",
+   "local": "500.75",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(VAT),VAT[Particulars]=\"Gulf Dunes Landscaping and Agricultural Services Company LLC\")",
+   "powerbi": "1",
+   "local": "1",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(SUM(VAT[Value]),VAT[Particulars]=\"Gulf Precast Concrete Co. LLC SPC\")",
+   "powerbi": "42455.25",
+   "local": "42455.25",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(VAT),VAT[Particulars]=\"Gulf Precast Concrete Co. LLC SPC\")",
+   "powerbi": "27",
+   "local": "27",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(SUM(VAT[Value]),VAT[Particulars]=\"Hassyan Water Company APSC\")",
+   "powerbi": "3250",
+   "local": "3250",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(VAT),VAT[Particulars]=\"Hassyan Water Company APSC\")",
+   "powerbi": "1",
+   "local": "1",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(SUM(VAT[Value]),VAT[Particulars]=\"Head On Technical Services LLC\")",
+   "powerbi": "1754.5",
+   "local": "1754.5",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(VAT),VAT[Particulars]=\"Head On Technical Services LLC\")",
+   "powerbi": "2",
+   "local": "2",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(SUM(VAT[Value]),VAT[Particulars]=\"Hydrolic Technical Equipments Maintenance Sole Propreitorship LLC\")",
+   "powerbi": "82",
+   "local": "82",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(VAT),VAT[Particulars]=\"Hydrolic Technical Equipments Maintenance Sole Propreitorship LLC\")",
+   "powerbi": "1",
+   "local": "1",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(SUM(VAT[Value]),VAT[Particulars]=\"IG Global FZCO\")",
+   "powerbi": "648",
+   "local": "648",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(VAT),VAT[Particulars]=\"IG Global FZCO\")",
+   "powerbi": "1",
+   "local": "1",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(SUM(VAT[Value]),VAT[Particulars]=\"IMCO Engineering & Construction\")",
+   "powerbi": "192.5",
+   "local": "192.5",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(VAT),VAT[Particulars]=\"IMCO Engineering & Construction\")",
+   "powerbi": "1",
+   "local": "1",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(SUM(VAT[Value]),VAT[Particulars]=\"Interiors International Industries LLC\")",
+   "powerbi": "41",
+   "local": "41",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(VAT),VAT[Particulars]=\"Interiors International Industries LLC\")",
+   "powerbi": "1",
+   "local": "1",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(SUM(VAT[Value]),VAT[Particulars]=\"International Gas Services LLC\")",
+   "powerbi": "4761",
+   "local": "4761",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(VAT),VAT[Particulars]=\"International Gas Services LLC\")",
+   "powerbi": "1",
+   "local": "1",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(SUM(VAT[Value]),VAT[Particulars]=\"Jace Korea Co Ltd Abu Dhabi\")",
+   "powerbi": "3800",
+   "local": "3800",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(VAT),VAT[Particulars]=\"Jace Korea Co Ltd Abu Dhabi\")",
+   "powerbi": "1",
+   "local": "1",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(SUM(VAT[Value]),VAT[Particulars]=\"Jahan Auto Repair LLC\")",
+   "powerbi": "0",
+   "local": "0",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(VAT),VAT[Particulars]=\"Jahan Auto Repair LLC\")",
+   "powerbi": "2",
+   "local": "2",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(SUM(VAT[Value]),VAT[Particulars]=\"Julfar Contracting LLC\")",
+   "powerbi": "1950",
+   "local": "1950",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(VAT),VAT[Particulars]=\"Julfar Contracting LLC\")",
+   "powerbi": "1",
+   "local": "1",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(SUM(VAT[Value]),VAT[Particulars]=\"Kaddah Bldg Cleaning Equip Tr Co LLC\")",
+   "powerbi": "116",
+   "local": "116",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(VAT),VAT[Particulars]=\"Kaddah Bldg Cleaning Equip Tr Co LLC\")",
+   "powerbi": "1",
+   "local": "1",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(SUM(VAT[Value]),VAT[Particulars]=\"Kchoi General Trading LLC\")",
+   "powerbi": "374.5",
+   "local": "374.5",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(VAT),VAT[Particulars]=\"Kchoi General Trading LLC\")",
+   "powerbi": "1",
+   "local": "1",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(SUM(VAT[Value]),VAT[Particulars]=\"Level 2 Tech Cont LLC\")",
+   "powerbi": "3342.5",
+   "local": "3342.5",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(VAT),VAT[Particulars]=\"Level 2 Tech Cont LLC\")",
+   "powerbi": "2",
+   "local": "2",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(SUM(VAT[Value]),VAT[Particulars]=\"Lutz Jesco Middle East FZE\")",
+   "powerbi": "875",
+   "local": "875",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(VAT),VAT[Particulars]=\"Lutz Jesco Middle East FZE\")",
+   "powerbi": "1",
+   "local": "1",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(SUM(VAT[Value]),VAT[Particulars]=\"M M K Kings Technical Works L.L.C\")",
+   "powerbi": "2845.5",
+   "local": "2845.5",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(VAT),VAT[Particulars]=\"M M K Kings Technical Works L.L.C\")",
+   "powerbi": "2",
+   "local": "2",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(SUM(VAT[Value]),VAT[Particulars]=\"MMC Global Information Technology LLC\")",
+   "powerbi": "133.6",
+   "local": "133.6",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(VAT),VAT[Particulars]=\"MMC Global Information Technology LLC\")",
+   "powerbi": "1",
+   "local": "1",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(SUM(VAT[Value]),VAT[Particulars]=\"Malmo Gas Installation Cont\")",
+   "powerbi": "376",
+   "local": "376",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(VAT),VAT[Particulars]=\"Malmo Gas Installation Cont\")",
+   "powerbi": "2",
+   "local": "2",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(SUM(VAT[Value]),VAT[Particulars]=\"Medaf Studio LLC\")",
+   "powerbi": "831.25",
+   "local": "831.25",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(VAT),VAT[Particulars]=\"Medaf Studio LLC\")",
+   "powerbi": "1",
+   "local": "1",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(SUM(VAT[Value]),VAT[Particulars]=\"Mediapro International LLC\")",
+   "powerbi": "1110",
+   "local": "1110",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(VAT),VAT[Particulars]=\"Mediapro International LLC\")",
+   "powerbi": "1",
+   "local": "1",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(SUM(VAT[Value]),VAT[Particulars]=\"Metro- Mac Automation\")",
+   "powerbi": "147",
+   "local": "147.0",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(VAT),VAT[Particulars]=\"Metro- Mac Automation\")",
+   "powerbi": "4",
+   "local": "4",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(SUM(VAT[Value]),VAT[Particulars]=\"Modu Spaces Prefab Building - Sole Proprietorship LLC\")",
+   "powerbi": "10470",
+   "local": "10470",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(VAT),VAT[Particulars]=\"Modu Spaces Prefab Building - Sole Proprietorship LLC\")",
+   "powerbi": "3",
+   "local": "3",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(SUM(VAT[Value]),VAT[Particulars]=\"Mohamed Elmasri Technical Works LLc\")",
+   "powerbi": "2400",
+   "local": "2400",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(VAT),VAT[Particulars]=\"Mohamed Elmasri Technical Works LLc\")",
+   "powerbi": "1",
+   "local": "1",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(SUM(VAT[Value]),VAT[Particulars]=\"Muhammad Qasim Tanks & Barrels Tr LLC\")",
+   "powerbi": "340",
+   "local": "340",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(VAT),VAT[Particulars]=\"Muhammad Qasim Tanks & Barrels Tr LLC\")",
+   "powerbi": "1",
+   "local": "1",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(SUM(VAT[Value]),VAT[Particulars]=\"NDT International Maintenance and Cleaning Services LLC\")",
+   "powerbi": "1669",
+   "local": "1669.0",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(VAT),VAT[Particulars]=\"NDT International Maintenance and Cleaning Services LLC\")",
+   "powerbi": "6",
+   "local": "6",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(SUM(VAT[Value]),VAT[Particulars]=\"NFT Specialized in Tower Cranes LLC SPC\")",
+   "powerbi": "132.5",
+   "local": "132.5",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(VAT),VAT[Particulars]=\"NFT Specialized in Tower Cranes LLC SPC\")",
+   "powerbi": "1",
+   "local": "1",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(SUM(VAT[Value]),VAT[Particulars]=\"Neelkanth Cables Manufacturing LLC\")",
+   "powerbi": "931",
+   "local": "931",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(VAT),VAT[Particulars]=\"Neelkanth Cables Manufacturing LLC\")",
+   "powerbi": "1",
+   "local": "1",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(SUM(VAT[Value]),VAT[Particulars]=\"Neptune Lubricant  Tr LLC\")",
+   "powerbi": "442.75",
+   "local": "442.75",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(VAT),VAT[Particulars]=\"Neptune Lubricant  Tr LLC\")",
+   "powerbi": "2",
+   "local": "2",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(SUM(VAT[Value]),VAT[Particulars]=\"New American for Building Contracting LLC\")",
+   "powerbi": "249.5",
+   "local": "249.5",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(VAT),VAT[Particulars]=\"New American for Building Contracting LLC\")",
+   "powerbi": "2",
+   "local": "2",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(SUM(VAT[Value]),VAT[Particulars]=\"New West Zone Supermarket & Department Store LLC\")",
+   "powerbi": "1135.25",
+   "local": "1135.25",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(VAT),VAT[Particulars]=\"New West Zone Supermarket & Department Store LLC\")",
+   "powerbi": "1",
+   "local": "1",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(SUM(VAT[Value]),VAT[Particulars]=\"OMEGA ELECTRICAL - L.L.C - S.P.C\")",
+   "powerbi": "55",
+   "local": "55",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(VAT),VAT[Particulars]=\"OMEGA ELECTRICAL - L.L.C - S.P.C\")",
+   "powerbi": "1",
+   "local": "1",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(SUM(VAT[Value]),VAT[Particulars]=\"Oceanic Oilfield Services LLC\")",
+   "powerbi": "108",
+   "local": "108",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(VAT),VAT[Particulars]=\"Oceanic Oilfield Services LLC\")",
+   "powerbi": "1",
+   "local": "1",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(SUM(VAT[Value]),VAT[Particulars]=\"Oilman Industries Sole Proprietorship LLC\")",
+   "powerbi": "733",
+   "local": "733",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(VAT),VAT[Particulars]=\"Oilman Industries Sole Proprietorship LLC\")",
+   "powerbi": "2",
+   "local": "2",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(SUM(VAT[Value]),VAT[Particulars]=\"Omega Power Electricals LLC\")",
+   "powerbi": "1551.5",
+   "local": "1551.5",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(VAT),VAT[Particulars]=\"Omega Power Electricals LLC\")",
+   "powerbi": "5",
+   "local": "5",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(SUM(VAT[Value]),VAT[Particulars]=\"On Time Heavy Vechicles and Equipment Machines Repair\")",
+   "powerbi": "294.5",
+   "local": "294.5",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(VAT),VAT[Particulars]=\"On Time Heavy Vechicles and Equipment Machines Repair\")",
+   "powerbi": "6",
+   "local": "6",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(SUM(VAT[Value]),VAT[Particulars]=\"One to Eight Electromechnical Contracting LLCSPC\")",
+   "powerbi": "338",
+   "local": "338",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(VAT),VAT[Particulars]=\"One to Eight Electromechnical Contracting LLCSPC\")",
+   "powerbi": "1",
+   "local": "1",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(SUM(VAT[Value]),VAT[Particulars]=\"Opal Landscaping LLC\")",
+   "powerbi": "390",
+   "local": "390",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(VAT),VAT[Particulars]=\"Opal Landscaping LLC\")",
+   "powerbi": "1",
+   "local": "1",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(SUM(VAT[Value]),VAT[Particulars]=\"Orental LLC\")",
+   "powerbi": "1100",
+   "local": "1100",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(VAT),VAT[Particulars]=\"Orental LLC\")",
+   "powerbi": "3",
+   "local": "3",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(SUM(VAT[Value]),VAT[Particulars]=\"Orient Concrete Products Factory\")",
+   "powerbi": "3600",
+   "local": "3600",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(VAT),VAT[Particulars]=\"Orient Concrete Products Factory\")",
+   "powerbi": "3",
+   "local": "3",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(SUM(VAT[Value]),VAT[Particulars]=\"Oriental Develop General Maintenance LLC\")",
+   "powerbi": "1321.2",
+   "local": "1321.2",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(VAT),VAT[Particulars]=\"Oriental Develop General Maintenance LLC\")",
+   "powerbi": "4",
+   "local": "4",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(SUM(VAT[Value]),VAT[Particulars]=\"Orix General Trading\")",
+   "powerbi": "4125",
+   "local": "4125",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(VAT),VAT[Particulars]=\"Orix General Trading\")",
+   "powerbi": "1",
+   "local": "1",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(SUM(VAT[Value]),VAT[Particulars]=\"Out of the Box LLC\")",
+   "powerbi": "781.25",
+   "local": "781.25",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(VAT),VAT[Particulars]=\"Out of the Box LLC\")",
+   "powerbi": "1",
+   "local": "1",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(SUM(VAT[Value]),VAT[Particulars]=\"PPA Consultancy Holdings Ltd-Dubai Branch\")",
+   "powerbi": "3370",
+   "local": "3370",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(VAT),VAT[Particulars]=\"PPA Consultancy Holdings Ltd-Dubai Branch\")",
+   "powerbi": "1",
+   "local": "1",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(SUM(VAT[Value]),VAT[Particulars]=\"Pacific Ocean Elect Switch Gear Ind LLC\")",
+   "powerbi": "731",
+   "local": "731",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(VAT),VAT[Particulars]=\"Pacific Ocean Elect Switch Gear Ind LLC\")",
+   "powerbi": "1",
+   "local": "1",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(SUM(VAT[Value]),VAT[Particulars]=\"Pamposh Pns Contracting  LLC\")",
+   "powerbi": "468",
+   "local": "468",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(VAT),VAT[Particulars]=\"Pamposh Pns Contracting  LLC\")",
+   "powerbi": "1",
+   "local": "1",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(SUM(VAT[Value]),VAT[Particulars]=\"Pamposh Sa Contracting LLC\")",
+   "powerbi": "468",
+   "local": "468",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(VAT),VAT[Particulars]=\"Pamposh Sa Contracting LLC\")",
+   "powerbi": "1",
+   "local": "1",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(SUM(VAT[Value]),VAT[Particulars]=\"Peter Bruce Furniture Manufacturing LLC\")",
+   "powerbi": "1700",
+   "local": "1700",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(VAT),VAT[Particulars]=\"Peter Bruce Furniture Manufacturing LLC\")",
+   "powerbi": "1",
+   "local": "1",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(SUM(VAT[Value]),VAT[Particulars]=\"Petrosafe Specialized Piping LLC\")",
+   "powerbi": "1121",
+   "local": "1121",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(VAT),VAT[Particulars]=\"Petrosafe Specialized Piping LLC\")",
+   "powerbi": "2",
+   "local": "2",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(SUM(VAT[Value]),VAT[Particulars]=\"Pivotolai Engineering Services & Consultancy LLC SPC\")",
+   "powerbi": "320",
+   "local": "320",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(VAT),VAT[Particulars]=\"Pivotolai Engineering Services & Consultancy LLC SPC\")",
+   "powerbi": "1",
+   "local": "1",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(SUM(VAT[Value]),VAT[Particulars]=\"Planworks Communications LLC\")",
+   "powerbi": "381",
+   "local": "381",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(VAT),VAT[Particulars]=\"Planworks Communications LLC\")",
+   "powerbi": "4",
+   "local": "4",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(SUM(VAT[Value]),VAT[Particulars]=\"Power Recruitment LLC\")",
+   "powerbi": "71952",
+   "local": "71952",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(VAT),VAT[Particulars]=\"Power Recruitment LLC\")",
+   "powerbi": "3",
+   "local": "3",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(SUM(VAT[Value]),VAT[Particulars]=\"Precision Plastic Products Co LLC\")",
+   "powerbi": "-255",
+   "local": "-255",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(VAT),VAT[Particulars]=\"Precision Plastic Products Co LLC\")",
+   "powerbi": "1",
+   "local": "1",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(SUM(VAT[Value]),VAT[Particulars]=\"Premier Trade for Goods Wholesalers Co LLC\")",
+   "powerbi": "1260",
+   "local": "1260",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(VAT),VAT[Particulars]=\"Premier Trade for Goods Wholesalers Co LLC\")",
+   "powerbi": "1",
+   "local": "1",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(SUM(VAT[Value]),VAT[Particulars]=\"Profile Recruitment\")",
+   "powerbi": "71287.5",
+   "local": "71287.5",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(VAT),VAT[Particulars]=\"Profile Recruitment\")",
+   "powerbi": "3",
+   "local": "3",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(SUM(VAT[Value]),VAT[Particulars]=\"Proworkers Recruitment Services LLC SPC\")",
+   "powerbi": "6870",
+   "local": "6870.0",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(VAT),VAT[Particulars]=\"Proworkers Recruitment Services LLC SPC\")",
+   "powerbi": "7",
+   "local": "7",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(SUM(VAT[Value]),VAT[Particulars]=\"Qate Marine Services LLC\")",
+   "powerbi": "686",
+   "local": "686",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(VAT),VAT[Particulars]=\"Qate Marine Services LLC\")",
+   "powerbi": "2",
+   "local": "2",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(SUM(VAT[Value]),VAT[Particulars]=\"REM Facade Solutions & Project Management Co LLC\")",
+   "powerbi": "661",
+   "local": "661",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(VAT),VAT[Particulars]=\"REM Facade Solutions & Project Management Co LLC\")",
+   "powerbi": "4",
+   "local": "4",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(SUM(VAT[Value]),VAT[Particulars]=\"Rabih Trading LLC\")",
+   "powerbi": "265",
+   "local": "265",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(VAT),VAT[Particulars]=\"Rabih Trading LLC\")",
+   "powerbi": "1",
+   "local": "1",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(SUM(VAT[Value]),VAT[Particulars]=\"Ramah Al Sahra Used Cars Tr LLC SP\")",
+   "powerbi": "3",
+   "local": "3",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(VAT),VAT[Particulars]=\"Ramah Al Sahra Used Cars Tr LLC SP\")",
+   "powerbi": "1",
+   "local": "1",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(SUM(VAT[Value]),VAT[Particulars]=\"Rayned Water Development\")",
+   "powerbi": "116.5",
+   "local": "116.5",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(VAT),VAT[Particulars]=\"Rayned Water Development\")",
+   "powerbi": "1",
+   "local": "1",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(SUM(VAT[Value]),VAT[Particulars]=\"Re Sustainability Middle East FZ LLC\")",
+   "powerbi": "796.2",
+   "local": "796.2",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(VAT),VAT[Particulars]=\"Re Sustainability Middle East FZ LLC\")",
+   "powerbi": "2",
+   "local": "2",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(SUM(VAT[Value]),VAT[Particulars]=\"Reem Al Karama Technical Services\")",
+   "powerbi": "129",
+   "local": "129",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(VAT),VAT[Particulars]=\"Reem Al Karama Technical Services\")",
+   "powerbi": "1",
+   "local": "1",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(SUM(VAT[Value]),VAT[Particulars]=\"Relaze East General Contracting LLC SPC\")",
+   "powerbi": "3617",
+   "local": "3617",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(VAT),VAT[Particulars]=\"Relaze East General Contracting LLC SPC\")",
+   "powerbi": "2",
+   "local": "2",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(SUM(VAT[Value]),VAT[Particulars]=\"Reliable Team Technical Services LLC\")",
+   "powerbi": "0",
+   "local": "0.00",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(VAT),VAT[Particulars]=\"Reliable Team Technical Services LLC\")",
+   "powerbi": "2",
+   "local": "2",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(SUM(VAT[Value]),VAT[Particulars]=\"Riddhi Siddhi Crusher & Land Transport\")",
+   "powerbi": "69.36",
+   "local": "69.36",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(VAT),VAT[Particulars]=\"Riddhi Siddhi Crusher & Land Transport\")",
+   "powerbi": "2",
+   "local": "2",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(SUM(VAT[Value]),VAT[Particulars]=\"Robou Al Dhaid Transport LLCSPC\")",
+   "powerbi": "1245",
+   "local": "1245",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(VAT),VAT[Particulars]=\"Robou Al Dhaid Transport LLCSPC\")",
+   "powerbi": "2",
+   "local": "2",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(SUM(VAT[Value]),VAT[Particulars]=\"Rockany Industries LLC\")",
+   "powerbi": "1632",
+   "local": "1632",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(VAT),VAT[Particulars]=\"Rockany Industries LLC\")",
+   "powerbi": "4",
+   "local": "4",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(SUM(VAT[Value]),VAT[Particulars]=\"Royal Hospitality LLC\")",
+   "powerbi": "1906.25",
+   "local": "1906.25",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(VAT),VAT[Particulars]=\"Royal Hospitality LLC\")",
+   "powerbi": "1",
+   "local": "1",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(SUM(VAT[Value]),VAT[Particulars]=\"Rukin Al Manarah Fiber Glass Ind LLC\")",
+   "powerbi": "180",
+   "local": "180",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(VAT),VAT[Particulars]=\"Rukin Al Manarah Fiber Glass Ind LLC\")",
+   "powerbi": "2",
+   "local": "2",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(SUM(VAT[Value]),VAT[Particulars]=\"Sabve Rohini Constructions LLC\")",
+   "powerbi": "139",
+   "local": "139",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(VAT),VAT[Particulars]=\"Sabve Rohini Constructions LLC\")",
+   "powerbi": "1",
+   "local": "1",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(SUM(VAT[Value]),VAT[Particulars]=\"Safety World LLC\")",
+   "powerbi": "3282.75",
+   "local": "3282.75",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(VAT),VAT[Particulars]=\"Safety World LLC\")",
+   "powerbi": "4",
+   "local": "4",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(SUM(VAT[Value]),VAT[Particulars]=\"Sagie Al Hikma Technical Works\")",
+   "powerbi": "2356.25",
+   "local": "2356.25",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(VAT),VAT[Particulars]=\"Sagie Al Hikma Technical Works\")",
+   "powerbi": "1",
+   "local": "1",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(SUM(VAT[Value]),VAT[Particulars]=\"Sam Precious Metals FZ LLC\")",
+   "powerbi": "9469.5",
+   "local": "9469.5",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(VAT),VAT[Particulars]=\"Sam Precious Metals FZ LLC\")",
+   "powerbi": "12",
+   "local": "12",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(SUM(VAT[Value]),VAT[Particulars]=\"Samanco LLC\")",
+   "powerbi": "450",
+   "local": "450",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(VAT),VAT[Particulars]=\"Samanco LLC\")",
+   "powerbi": "1",
+   "local": "1",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(SUM(VAT[Value]),VAT[Particulars]=\"Samples Accounts\")",
+   "powerbi": "316",
+   "local": "316",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(VAT),VAT[Particulars]=\"Samples Accounts\")",
+   "powerbi": "7",
+   "local": "7",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(SUM(VAT[Value]),VAT[Particulars]=\"Saniservices LLC\")",
+   "powerbi": "172.5",
+   "local": "172.5",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(VAT),VAT[Particulars]=\"Saniservices LLC\")",
+   "powerbi": "3",
+   "local": "3",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(SUM(VAT[Value]),VAT[Particulars]=\"Saveto LLC\")",
+   "powerbi": "970.5",
+   "local": "970.5",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(VAT),VAT[Particulars]=\"Saveto LLC\")",
+   "powerbi": "5",
+   "local": "5",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(SUM(VAT[Value]),VAT[Particulars]=\"Schroeder Projekt Electromechanic LLC\")",
+   "powerbi": "645",
+   "local": "645.0",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(VAT),VAT[Particulars]=\"Schroeder Projekt Electromechanic LLC\")",
+   "powerbi": "2",
+   "local": "2",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(SUM(VAT[Value]),VAT[Particulars]=\"Shbab Awafi Tech Cont\")",
+   "powerbi": "1082",
+   "local": "1082",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(VAT),VAT[Particulars]=\"Shbab Awafi Tech Cont\")",
+   "powerbi": "1",
+   "local": "1",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(SUM(VAT[Value]),VAT[Particulars]=\"Silver Coast Construction & Boring LLC\")",
+   "powerbi": "650",
+   "local": "650",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(VAT),VAT[Particulars]=\"Silver Coast Construction & Boring LLC\")",
+   "powerbi": "1",
+   "local": "1",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(SUM(VAT[Value]),VAT[Particulars]=\"Sky High Hr Provision Services LLC SPC\")",
+   "powerbi": "1508",
+   "local": "1508",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(VAT),VAT[Particulars]=\"Sky High Hr Provision Services LLC SPC\")",
+   "powerbi": "2",
+   "local": "2",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(SUM(VAT[Value]),VAT[Particulars]=\"Skycore Technical Services LLC\")",
+   "powerbi": "717",
+   "local": "717",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(VAT),VAT[Particulars]=\"Skycore Technical Services LLC\")",
+   "powerbi": "1",
+   "local": "1",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(SUM(VAT[Value]),VAT[Particulars]=\"Skypro Cleaning Services Co LLC\")",
+   "powerbi": "143",
+   "local": "143",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(VAT),VAT[Particulars]=\"Skypro Cleaning Services Co LLC\")",
+   "powerbi": "1",
+   "local": "1",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(SUM(VAT[Value]),VAT[Particulars]=\"Solaya Contractin GLLC\")",
+   "powerbi": "-1337.5",
+   "local": "-1337.5",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(VAT),VAT[Particulars]=\"Solaya Contractin GLLC\")",
+   "powerbi": "1",
+   "local": "1",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(SUM(VAT[Value]),VAT[Particulars]=\"Sooaulux Technical Service LLC\")",
+   "powerbi": "1464",
+   "local": "1464",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(VAT),VAT[Particulars]=\"Sooaulux Technical Service LLC\")",
+   "powerbi": "7",
+   "local": "7",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(SUM(VAT[Value]),VAT[Particulars]=\"Southern Food & Catering Services LLC\")",
+   "powerbi": "1940",
+   "local": "1940",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(VAT),VAT[Particulars]=\"Southern Food & Catering Services LLC\")",
+   "powerbi": "2",
+   "local": "2",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(SUM(VAT[Value]),VAT[Particulars]=\"Souvenir Building Materials L.L.C\")",
+   "powerbi": "10221.3",
+   "local": "10221.30",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(VAT),VAT[Particulars]=\"Souvenir Building Materials L.L.C\")",
+   "powerbi": "27",
+   "local": "27",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(SUM(VAT[Value]),VAT[Particulars]=\"Specialized Projects Engineering Company LLC\")",
+   "powerbi": "225",
+   "local": "225",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(VAT),VAT[Particulars]=\"Specialized Projects Engineering Company LLC\")",
+   "powerbi": "1",
+   "local": "1",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(SUM(VAT[Value]),VAT[Particulars]=\"Steelmaster Constructors for Steel Constructions Contracting Co LLC\")",
+   "powerbi": "1176",
+   "local": "1176",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(VAT),VAT[Particulars]=\"Steelmaster Constructors for Steel Constructions Contracting Co LLC\")",
+   "powerbi": "1",
+   "local": "1",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(SUM(VAT[Value]),VAT[Particulars]=\"Styropack for Plastic Factory LLC\")",
+   "powerbi": "550",
+   "local": "550",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(VAT),VAT[Particulars]=\"Styropack for Plastic Factory LLC\")",
+   "powerbi": "1",
+   "local": "1",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(SUM(VAT[Value]),VAT[Particulars]=\"Subh Aldrari Contracting LLC\")",
+   "powerbi": "919.5",
+   "local": "919.5",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(VAT),VAT[Particulars]=\"Subh Aldrari Contracting LLC\")",
+   "powerbi": "4",
+   "local": "4",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(SUM(VAT[Value]),VAT[Particulars]=\"Summertown International FZE\")",
+   "powerbi": "5",
+   "local": "5",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(VAT),VAT[Particulars]=\"Summertown International FZE\")",
+   "powerbi": "1",
+   "local": "1",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(SUM(VAT[Value]),VAT[Particulars]=\"Tackle Home Technical Services\")",
+   "powerbi": "660",
+   "local": "660",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(VAT),VAT[Particulars]=\"Tackle Home Technical Services\")",
+   "powerbi": "2",
+   "local": "2",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(SUM(VAT[Value]),VAT[Particulars]=\"Target Engineering Construction Company LLC\")",
+   "powerbi": "12215",
+   "local": "12215",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(VAT),VAT[Particulars]=\"Target Engineering Construction Company LLC\")",
+   "powerbi": "8",
+   "local": "8",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(SUM(VAT[Value]),VAT[Particulars]=\"Taseheel Internatioanl Bldg Cont LLC\")",
+   "powerbi": "-45",
+   "local": "-45",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(VAT),VAT[Particulars]=\"Taseheel Internatioanl Bldg Cont LLC\")",
+   "powerbi": "1",
+   "local": "1",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(SUM(VAT[Value]),VAT[Particulars]=\"Technical Bees General Maintenance General Contracting Sole Proprietorship LLC\")",
+   "powerbi": "667.25",
+   "local": "667.25",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(VAT),VAT[Particulars]=\"Technical Bees General Maintenance General Contracting Sole Proprietorship LLC\")",
+   "powerbi": "2",
+   "local": "2",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(SUM(VAT[Value]),VAT[Particulars]=\"Technical Diesel Services Center - LLC\")",
+   "powerbi": "100",
+   "local": "100",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(VAT),VAT[Particulars]=\"Technical Diesel Services Center - LLC\")",
+   "powerbi": "1",
+   "local": "1",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(SUM(VAT[Value]),VAT[Particulars]=\"Tekfen General Contracting\")",
+   "powerbi": "12587.5",
+   "local": "12587.50",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(VAT),VAT[Particulars]=\"Tekfen General Contracting\")",
+   "powerbi": "2",
+   "local": "2",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(SUM(VAT[Value]),VAT[Particulars]=\"Timishuara Electrical & Mechincal Contracting Co TEMCO Sole Proprietorship LLC\")",
+   "powerbi": "68.75",
+   "local": "68.75",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(VAT),VAT[Particulars]=\"Timishuara Electrical & Mechincal Contracting Co TEMCO Sole Proprietorship LLC\")",
+   "powerbi": "1",
+   "local": "1",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(SUM(VAT[Value]),VAT[Particulars]=\"Train Environmental Services\")",
+   "powerbi": "3360",
+   "local": "3360",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(VAT),VAT[Particulars]=\"Train Environmental Services\")",
+   "powerbi": "2",
+   "local": "2",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(SUM(VAT[Value]),VAT[Particulars]=\"Trakeeb Interior Design LLC\")",
+   "powerbi": "234",
+   "local": "234",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(VAT),VAT[Particulars]=\"Trakeeb Interior Design LLC\")",
+   "powerbi": "1",
+   "local": "1",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(SUM(VAT[Value]),VAT[Particulars]=\"Truth General Contracting LLC\")",
+   "powerbi": "58",
+   "local": "58",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(VAT),VAT[Particulars]=\"Truth General Contracting LLC\")",
+   "powerbi": "3",
+   "local": "3",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(SUM(VAT[Value]),VAT[Particulars]=\"Unesia Alum Cont Co LLC\")",
+   "powerbi": "1650",
+   "local": "1650",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(VAT),VAT[Particulars]=\"Unesia Alum Cont Co LLC\")",
+   "powerbi": "1",
+   "local": "1",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(SUM(VAT[Value]),VAT[Particulars]=\"Unikai Foods PJSC\")",
+   "powerbi": "1140",
+   "local": "1140",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(VAT),VAT[Particulars]=\"Unikai Foods PJSC\")",
+   "powerbi": "1",
+   "local": "1",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(SUM(VAT[Value]),VAT[Particulars]=\"Unique Electromechanical LLC\")",
+   "powerbi": "127.5",
+   "local": "127.5",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(VAT),VAT[Particulars]=\"Unique Electromechanical LLC\")",
+   "powerbi": "1",
+   "local": "1",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(SUM(VAT[Value]),VAT[Particulars]=\"Unique glow Cleaning Services LLC SOC\")",
+   "powerbi": "862.5",
+   "local": "862.5",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(VAT),VAT[Particulars]=\"Unique glow Cleaning Services LLC SOC\")",
+   "powerbi": "1",
+   "local": "1",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(SUM(VAT[Value]),VAT[Particulars]=\"United Agencies\")",
+   "powerbi": "517.5",
+   "local": "517.5",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(VAT),VAT[Particulars]=\"United Agencies\")",
+   "powerbi": "1",
+   "local": "1",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(SUM(VAT[Value]),VAT[Particulars]=\"United Engineering and Contracting Co LLC\")",
+   "powerbi": "270",
+   "local": "270",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(VAT),VAT[Particulars]=\"United Engineering and Contracting Co LLC\")",
+   "powerbi": "1",
+   "local": "1",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(SUM(VAT[Value]),VAT[Particulars]=\"Wadi Al Taween Grocery\")",
+   "powerbi": "757.5",
+   "local": "757.5",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(VAT),VAT[Particulars]=\"Wadi Al Taween Grocery\")",
+   "powerbi": "1",
+   "local": "1",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(SUM(VAT[Value]),VAT[Particulars]=\"Walk Throught General Contracting Sole Proprietorship LLC\")",
+   "powerbi": "3253.25",
+   "local": "3253.25",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(VAT),VAT[Particulars]=\"Walk Throught General Contracting Sole Proprietorship LLC\")",
+   "powerbi": "2",
+   "local": "2",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(SUM(VAT[Value]),VAT[Particulars]=\"World Stars Tech Cont LLC\")",
+   "powerbi": "10800",
+   "local": "10800",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(VAT),VAT[Particulars]=\"World Stars Tech Cont LLC\")",
+   "powerbi": "3",
+   "local": "3",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(SUM(VAT[Value]),VAT[Particulars]=\"Xcon Scaffolding LLC\")",
+   "powerbi": "525",
+   "local": "525",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(VAT),VAT[Particulars]=\"Xcon Scaffolding LLC\")",
+   "powerbi": "1",
+   "local": "1",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(SUM(VAT[Value]),VAT[Particulars]=\"Zenith Infra Technical Services LLC\")",
+   "powerbi": "377.5",
+   "local": "377.5",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(VAT),VAT[Particulars]=\"Zenith Infra Technical Services LLC\")",
+   "powerbi": "4",
+   "local": "4",
+   "status": "match"
+  }
+ ]
+}

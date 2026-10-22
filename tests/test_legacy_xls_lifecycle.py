@@ -10,6 +10,7 @@ import time
 import unittest
 from datetime import date
 from decimal import Decimal
+from unittest.mock import patch
 
 os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
 
@@ -17,7 +18,12 @@ from PySide6.QtCore import QSettings
 from PySide6.QtWidgets import QApplication
 
 from analytics_studio.controller import StudioController
-from analytics_studio.file_import import list_excel_sheets, recommend_excel_sheet
+from analytics_studio.file_import import (
+    _open_legacy_excel,
+    list_excel_sheets,
+    parse_file,
+    recommend_excel_sheet,
+)
 from analytics_studio.import_preview_dialog import FileImportPreviewDialog
 
 
@@ -56,7 +62,11 @@ class LegacyXlsLifecycleTests(unittest.TestCase):
         self.assertEqual(list_excel_sheets(self.source_path), ["Cover", "Data"])
         self.assertEqual(recommend_excel_sheet(self.source_path), "Data")
 
-        dialog = FileImportPreviewDialog(self.source_path, replacing=False)
+        dialog = FileImportPreviewDialog(
+            self.source_path,
+            replacing=False,
+            initial_options={"header_row": None},
+        )
         self.wait_for_preview(dialog)
         self.assertEqual(dialog.sheet_combo.currentText(), "Data")
         self.assertTrue(dialog.header_auto_checkbox.isChecked())
@@ -72,7 +82,11 @@ class LegacyXlsLifecycleTests(unittest.TestCase):
         candidate = dialog.candidate
         self.assertIsNotNone(candidate)
         assert candidate is not None
-        self.assertEqual(candidate.options, {"sheet_name": "Data", "header_row": 3})
+        self.assertEqual(candidate.options, {"sheet_name": "Data", "header_row": None})
+        reparsed = parse_file(self.source_path, options=candidate.options)
+        self.assertEqual(reparsed.options, candidate.options)
+        self.assertEqual(reparsed.headers, candidate.headers)
+        self.assertEqual(reparsed.rows, candidate.rows)
         self.assertEqual(candidate.rows, [
             {
                 "Name": "Ada", "Order Date": date(2024, 1, 1),
@@ -130,6 +144,57 @@ class LegacyXlsLifecycleTests(unittest.TestCase):
             "sheet_name": "Data", "header_row": 3,
         })
         dialog.deleteLater()
+
+    def test_transform_raw_rows_reparse_works_for_legacy_xls(self) -> None:
+        dialog = FileImportPreviewDialog(self.source_path, replacing=False)
+        self.wait_for_preview(dialog)
+        self.assertTrue(dialog.transform_raw_rows_checkbox.isChecked())
+
+        dialog.transform_button.click()
+        deadline = time.monotonic() + 5
+        while dialog.candidate is None and time.monotonic() < deadline:
+            self.app.processEvents()
+            time.sleep(0.005)
+        self.app.processEvents()
+
+        candidate = dialog.candidate
+        self.assertIsNotNone(candidate)
+        assert candidate is not None
+        expected = parse_file(
+            self.source_path,
+            options={"sheet_name": "Data", "header_row": None, "raw_rows": True},
+        )
+        self.assertEqual(candidate.options, expected.options)
+        self.assertEqual(candidate.headers, expected.headers)
+        self.assertEqual(candidate.rows, expected.rows)
+        self.assertIsNone(candidate.header_row_used)
+        dialog.deleteLater()
+
+    def test_raw_legacy_xls_uses_biff_declared_trailing_rows(self) -> None:
+        def open_with_declared_blank_tail(path, cancel_event=None):
+            xlrd, book = _open_legacy_excel(path, cancel_event)
+            sheet = book.sheet_by_name("Data")
+            sheet._dimnrows = sheet.nrows + 3
+            return xlrd, book
+
+        with patch(
+            "analytics_studio.file_import._open_legacy_excel",
+            side_effect=open_with_declared_blank_tail,
+        ):
+            raw = parse_file(
+                self.source_path,
+                options={"sheet_name": "Data", "header_row": None, "raw_rows": True},
+            )
+            automatic = parse_file(
+                self.source_path,
+                options={"sheet_name": "Data", "header_row": None},
+            )
+
+        self.assertEqual(raw.row_count, 8)
+        self.assertTrue(all(
+            value is None for row in raw.rows[-3:] for value in row.values()
+        ))
+        self.assertEqual(automatic.row_count, 2)
 
 
 if __name__ == "__main__":

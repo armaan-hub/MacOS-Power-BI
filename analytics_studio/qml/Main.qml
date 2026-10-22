@@ -1,6 +1,7 @@
 import QtQuick 6.5
 import QtQuick.Controls 6.5
 import QtQuick.Layouts 6.5
+import QtQuick.Dialogs 6.5
 
 ApplicationWindow {
     id: mainWindow
@@ -15,17 +16,431 @@ ApplicationWindow {
     property string ribbonTabName: "Home"
     property string lastWorkspaceView: ""
     property bool navigationVisible: true
-    property bool filtersExpanded: false
-    property bool dataPaneExpanded: false
+    property bool filtersExpanded: true
+    property bool dataPaneExpanded: mainWindow.studioController.sourceLoaded
+    property bool fieldDragActive: false
+    property point fieldDragPosition: Qt.point(0, 0)
+    property var visualWellDropTargets: []
+    property var reportCanvasDropTargets: []
     property bool visualizationsVisible: true
     property bool inspectorVisible: true
     property string activeVisualTab: "build"
     property bool fitZoom: true
     property real reportZoom: 0.7
     property string fieldSearchQuery: ""
+    property string selectedFieldBinding: ""
+    property string expandedMeasureName: ""
     property var selectedReportFilterValues: []
+    property bool reportPdfExporting: false
+    property var reportPdfCapture: null
     readonly property var kpiNames: mainWindow.studioController.reportKpiNames
     readonly property var kpiColors: ["#107C71", "#0078D4", "#8764B8", "#D9A300", "#C65911"]
+
+    function fieldDataType(binding) {
+        const field = String(binding)
+        const types = mainWindow.studioController.columnTypes || []
+        for (let index = 0; index < types.length; index++) {
+            if (String(types[index].column) === field)
+                return String(types[index].type || "text")
+        }
+        return mainWindow.studioController.visualFieldIsMeasure(field) ? "measure" : "text"
+    }
+
+    function measureNameForBinding(binding) {
+        if (!mainWindow.studioController.visualFieldIsMeasure(String(binding)))
+            return ""
+        const label = String(mainWindow.studioController.visualFieldLabel(String(binding)))
+        return label.indexOf("Measure · ") === 0 ? label.slice(10) : label
+    }
+
+    function measureExpressionForBinding(binding) {
+        const name = mainWindow.measureNameForBinding(binding).toLocaleLowerCase()
+        if (!name)
+            return ""
+        const measures = mainWindow.studioController.modelMeasures || []
+        for (let index = 0; index < measures.length; index++) {
+            if (String(measures[index].name).toLocaleLowerCase() === name)
+                return String(measures[index].expression || "")
+        }
+        return ""
+    }
+
+    function fieldWellOptions(binding) {
+        const wells = mainWindow.studioController.activeVisualWells || []
+        const fieldOptions = mainWindow.studioController.activeVisualFieldOptions || []
+        if (fieldOptions.indexOf(String(binding)) < 0)
+            return []
+        if (!mainWindow.studioController.visualFieldIsMeasure(String(binding)))
+            return wells
+
+        const chartType = String(mainWindow.studioController.selectedChartType || "")
+        if (["scatter", "map", "slicer"].indexOf(chartType) >= 0)
+            return []
+        const measureWells = [
+            "Y-axis", "Column Y-axis", "Line Y-axis", "Value", "Minimum",
+            "Maximum", "Target", "Indicator", "Target goals", "Fields", "Values"
+        ]
+        return wells.filter(function(well) {
+            return measureWells.indexOf(String(well.name)) >= 0
+        })
+    }
+
+    function updateFieldDragPosition(x, y) {
+        mainWindow.fieldDragPosition = Qt.point(x, y)
+    }
+
+    function beginFieldDrag(binding, label, x, y) {
+        fieldDragProxy.fieldBinding = String(binding)
+        fieldDragProxy.fieldLabel = String(label)
+        updateFieldDragPosition(x, y)
+        fieldDragActive = true
+    }
+
+    function finishFieldDrag(binding) {
+        if (!fieldDragActive || fieldDragProxy.fieldBinding !== String(binding))
+            return
+        if (pointIsInsideItem(filterFieldDropTarget)) {
+            if (!selectFilterField(binding))
+                mainWindow.studioController.reportStagedAction(
+                    "Filter field",
+                    "Drop a column field here; DAX measures cannot be used as filter columns."
+                )
+        } else {
+            let droppedOnTarget = false
+            for (let index = visualWellDropTargets.length - 1; index >= 0; index--) {
+                const target = visualWellDropTargets[index]
+                if (pointIsInsideItem(target.item)) {
+                    if (!addFieldToVisualWell(target.wellName, binding))
+                        mainWindow.studioController.reportStagedAction(
+                            "Visual field",
+                            "That field type is not accepted in this visual's selected field well."
+                        )
+                    droppedOnTarget = true
+                    break
+                }
+            }
+            if (!droppedOnTarget) {
+                for (let index = reportCanvasDropTargets.length - 1; index >= 0; index--) {
+                    const target = reportCanvasDropTargets[index]
+                    if (!pointIsInsideItem(target.item))
+                        continue
+                    mainWindow.studioController.selectVisual(target.title)
+                    const wellName = reportCanvasWellForField(binding)
+                    if (!wellName) {
+                        mainWindow.studioController.reportStagedAction(
+                            "Visual field",
+                            "This visual has no available field well for the dropped field."
+                        )
+                    } else {
+                        mainWindow.studioController.add_field_to_well(wellName, String(binding))
+                    }
+                    droppedOnTarget = true
+                    break
+                }
+            }
+            if (!droppedOnTarget && pointIsInsideItem(reportPageBody))
+                createVisualFromCanvasDrop(String(binding))
+        }
+        fieldDragActive = false
+    }
+
+    function reportCanvasWellForField(binding) {
+        const options = fieldWellOptions(String(binding))
+        if (!options.length)
+            return ""
+        const visual = (mainWindow.studioController.activeVisualObjects || []).find(function(item) {
+            return String(item.title) === String(mainWindow.studioController.selectedVisual)
+        })
+        if (!visual)
+            return ""
+        const type = String(visual.type)
+        const fields = visual.fields || {}
+        const numericTypes = ["whole_number", "decimal_number"]
+        const numeric = numericTypes.indexOf(fieldDataType(binding)) >= 0
+        let preferred
+        if (type === "card" || type === "table")
+            preferred = ["Fields"]
+        else if (type === "slicer")
+            preferred = ["Fields"]
+        else if (type === "matrix")
+            preferred = numeric ? ["Values", "Rows", "Columns"] : ["Rows", "Columns", "Values"]
+        else if (type === "scatter")
+            preferred = numeric ? ["X-axis", "Y-axis", "Tooltips"] : ["Details", "Legend", "Tooltips"]
+        else if (type === "lineClusteredColumn")
+            preferred = numeric ? ["Column Y-axis", "Line Y-axis", "Tooltips"] : ["X-axis", "Legend", "Tooltips"]
+        else if (type === "gauge")
+            preferred = numeric ? ["Value", "Tooltips"] : ["Tooltips"]
+        else if (type === "kpi")
+            preferred = numeric ? ["Indicator", "Target goals", "Tooltips"] : ["Trend axis", "Tooltips"]
+        else if (type === "map")
+            preferred = numeric ? ["Latitude", "Longitude", "Size", "Tooltips"] : ["Location", "Legend", "Tooltips"]
+        else if (type === "filledMap" || type === "shapeMap")
+            preferred = numeric ? ["Values", "Tooltips"] : ["Location", "Legend", "Tooltips"]
+        else if (mainWindow.studioController.visualFieldIsMeasure(String(binding)))
+            preferred = ["Y-axis", "Value", "Indicator", "Values", "Fields", "Tooltips"]
+        else
+            preferred = numeric ? ["Y-axis", "Tooltips", "X-axis"] : ["X-axis", "Legend", "Tooltips"]
+
+        for (let index = 0; index < preferred.length; index++) {
+            const option = options.find(function(well) { return String(well.name) === preferred[index] })
+            if (!option)
+                continue
+            const assigned = fields[preferred[index]] || []
+            if (assigned.indexOf(String(binding)) >= 0)
+                return preferred[index]
+            const singleValueWells = ["Value", "Minimum", "Maximum", "Target", "Indicator", "Target goals", "Values"]
+            if (singleValueWells.indexOf(preferred[index]) < 0 || assigned.length === 0)
+                return preferred[index]
+        }
+        return ""
+    }
+
+    function createVisualFromCanvasDrop(binding) {
+        if (!mainWindow.studioController.filteredFields.includes(String(binding)))
+            return
+        const isMeasure = mainWindow.studioController.visualFieldIsMeasure(String(binding))
+        const type = isMeasure ? "card" : "table"
+        const width = isMeasure ? 300 : 460
+        const height = isMeasure ? 180 : 300
+        const point = reportPageBody.mapFromItem(null, fieldDragPosition.x, fieldDragPosition.y)
+        const x = Math.max(0, Math.min(1280 - width, Math.round((point.x - width / 2) / 10) * 10))
+        const y = Math.max(0, Math.min(720 - height, Math.round((point.y - height / 2) / 10) * 10))
+        const baseTitle = isMeasure ? "Card" : "Table"
+        let title = baseTitle
+        let suffix = 2
+        while ((mainWindow.studioController.activePageVisuals || []).indexOf(title) >= 0) {
+            title = baseTitle + " " + suffix
+            suffix++
+        }
+        mainWindow.studioController.add_visual(type, title, x, y, width, height)
+        mainWindow.studioController.add_field_to_well("Fields", String(binding))
+    }
+
+    function pointIsInsideItem(item) {
+        if (!item || !item.visible || !item.enabled)
+            return false
+        const point = item.mapFromItem(null, fieldDragPosition.x, fieldDragPosition.y)
+        return point.x >= 0 && point.y >= 0 && point.x <= item.width && point.y <= item.height
+    }
+
+    function registerVisualWellDropTarget(wellName, item) {
+        const targets = visualWellDropTargets.filter(function(target) {
+            return target.wellName !== String(wellName) && target.item !== item
+        })
+        targets.push({ wellName: String(wellName), item: item })
+        visualWellDropTargets = targets
+    }
+
+    function unregisterVisualWellDropTarget(item) {
+        visualWellDropTargets = visualWellDropTargets.filter(function(target) {
+            return target.item !== item
+        })
+    }
+
+    function registerReportCanvasDropTarget(visualId, title, item) {
+        const targets = reportCanvasDropTargets.filter(function(target) {
+            return target.visualId !== String(visualId) && target.item !== item
+        })
+        targets.push({ visualId: String(visualId), title: String(title), item: item })
+        reportCanvasDropTargets = targets
+    }
+
+    function unregisterReportCanvasDropTarget(visualId, item) {
+        reportCanvasDropTargets = reportCanvasDropTargets.filter(function(target) {
+            return target.visualId !== String(visualId) && target.item !== item
+        })
+    }
+
+    function openReportPdfDialog() {
+        reportPdfFileDialog.open()
+    }
+
+    function beginReportPdfExport(path) {
+        if (!path || reportPdfExporting)
+            return
+        const pageIndices = []
+        const pages = mainWindow.studioController.pages || []
+        for (let index = 0; index < pages.length; index++) {
+            if (!Boolean(pages[index].hidden))
+                pageIndices.push(index)
+        }
+        if (!pageIndices.length) {
+            mainWindow.studioController.reportStagedAction(
+                "Export report PDF", "Unhide at least one report page before exporting."
+            )
+            return
+        }
+        if (!mainWindow.studioController.beginReportPageCapture())
+            return
+        reportPdfCapture = { path: String(path), pageIndices: pageIndices, images: [], nextIndex: 0 }
+        reportPdfExporting = true
+        captureNextReportPdfPage()
+    }
+
+    function captureNextReportPdfPage() {
+        if (!reportPdfCapture)
+            return
+        if (reportPdfCapture.nextIndex >= reportPdfCapture.pageIndices.length) {
+            mainWindow.studioController.exportReportPdfImages(
+                reportPdfCapture.images, reportPdfCapture.path
+            )
+            mainWindow.studioController.endReportPageCapture()
+            reportPdfCapture = null
+            reportPdfExporting = false
+            return
+        }
+        const pageIndex = reportPdfCapture.pageIndices[reportPdfCapture.nextIndex]
+        if (!mainWindow.studioController.setReportPageForCapture(Number(pageIndex))) {
+            finishReportPdfCaptureError("A report page could not be prepared for capture.")
+            return
+        }
+        reportPdfCaptureTimer.restart()
+    }
+
+    function finishReportPdfCaptureError(message) {
+        mainWindow.studioController.reportStagedAction("Export report PDF", message)
+        mainWindow.studioController.endReportPageCapture()
+        reportPdfCapture = null
+        reportPdfExporting = false
+    }
+
+    function fieldDragOverItem(item) {
+        return fieldDragActive && pointIsInsideItem(item)
+    }
+
+    function filterFieldIndexForBinding(binding) {
+        if (!binding || mainWindow.studioController.visualFieldIsMeasure(String(binding)))
+            return -1
+        const tableId = String(mainWindow.studioController.activeTableId || "")
+        const fields = mainWindow.studioController.pageFilterFields || []
+        return fields.findIndex(function(field) {
+            return String(field.tableId) === tableId && String(field.column) === String(binding)
+        })
+    }
+
+    function selectFilterField(binding) {
+        const index = filterFieldIndexForBinding(String(binding))
+        if (index < 0)
+            return false
+        pageFilterFieldCombo.currentIndex = index
+        selectedReportFilterValues = []
+        filterValueSearch.text = ""
+        pageFilterValueCombo.currentIndex = pageFilterValueCombo.count > 0 ? 0 : -1
+        pageFilterValueCombo.editText = ""
+        return true
+    }
+
+    function addFieldToVisualWell(wellName, binding) {
+        const options = fieldWellOptions(String(binding))
+        if (!options.some(function(well) { return String(well.name) === String(wellName) }))
+            return false
+        selectedFieldBinding = String(binding)
+        expandedMeasureName = measureNameForBinding(String(binding))
+        mainWindow.studioController.add_field_to_well(String(wellName), String(binding))
+        return true
+    }
+
+    function defaultVisualWellForField(binding) {
+        const options = fieldWellOptions(String(binding))
+        if (!options.length)
+            return ""
+        const measure = mainWindow.studioController.visualFieldIsMeasure(String(binding))
+        const chartType = String(mainWindow.studioController.selectedChartType || "")
+        const numericTypes = ["whole_number", "decimal_number"]
+        let preferred
+        if (measure) {
+            preferred = chartType === "matrix" ? ["Values"]
+                        : chartType === "gauge" ? ["Value"]
+                        : chartType === "kpi" ? ["Indicator"]
+                        : chartType === "lineClusteredColumn" ? ["Column Y-axis", "Line Y-axis"]
+                        : ["Y-axis", "Value", "Fields", "Values", "Indicator"]
+        } else {
+            preferred = chartType === "slicer" || chartType === "table" || chartType === "card" ? ["Fields"]
+                        : chartType === "matrix" ? ["Rows"]
+                        : chartType === "map" ? ["Location"]
+                        : chartType === "filledMap" || chartType === "shapeMap" ? (numericTypes.indexOf(fieldDataType(binding)) >= 0 ? ["Values"] : ["Location"])
+                        : chartType === "scatter" ? ["Details", "X-axis", "Legend"]
+                        : ["X-axis", "Rows", "Fields", "Location", "Details", "Legend"]
+        }
+        for (let index = 0; index < preferred.length; index++) {
+            const found = options.find(function(well) { return String(well.name) === preferred[index] })
+            if (found)
+                return String(found.name)
+        }
+        return String(options[0].name)
+    }
+
+    Item {
+        id: fieldDragProxy
+        objectName: "fieldDragProxy"
+        parent: Overlay.overlay
+        x: parent.mapFromItem(null, mainWindow.fieldDragPosition.x, mainWindow.fieldDragPosition.y).x - width / 2
+        y: parent.mapFromItem(null, mainWindow.fieldDragPosition.x, mainWindow.fieldDragPosition.y).y - height / 2
+        width: 150
+        height: 26
+        z: 10000
+        visible: mainWindow.fieldDragActive
+        property string fieldBinding: ""
+        property string fieldLabel: ""
+        Rectangle {
+            anchors.fill: parent
+            radius: 4
+            color: "#e6f2f0"
+            border.color: "#107c71"
+            Text {
+                anchors.fill: parent
+                anchors.leftMargin: 8
+                anchors.rightMargin: 8
+                verticalAlignment: Text.AlignVCenter
+                text: fieldDragProxy.fieldLabel
+                color: "#244c49"
+                font.pixelSize: 10
+                elide: Text.ElideRight
+            }
+        }
+    }
+
+    FileDialog {
+        id: reportPdfFileDialog
+        objectName: "reportPdfFileDialog"
+        title: "Export report to PDF"
+        fileMode: FileDialog.SaveFile
+        nameFilters: ["PDF documents (*.pdf)"]
+        defaultSuffix: "pdf"
+        onAccepted: mainWindow.beginReportPdfExport(selectedFile.toLocalFile())
+    }
+
+    Timer {
+        id: reportPdfCaptureTimer
+        interval: 100
+        repeat: false
+        onTriggered: {
+            if (!mainWindow.reportPdfCapture)
+                return
+            const capturePath = mainWindow.studioController.reportPageCapturePath(
+                Number(mainWindow.reportPdfCapture.nextIndex)
+            )
+            if (!capturePath) {
+                mainWindow.finishReportPdfCaptureError("A temporary report image path could not be created.")
+                return
+            }
+            const accepted = reportPageBody.grabToImage(function(result) {
+                if (!mainWindow.reportPdfCapture)
+                    return
+                if (!result.saveToFile(capturePath)) {
+                    mainWindow.finishReportPdfCaptureError("Qt could not save a rendered report page.")
+                    return
+                }
+                const imagePaths = mainWindow.reportPdfCapture.images.slice()
+                imagePaths.push(capturePath)
+                mainWindow.reportPdfCapture.images = imagePaths
+                mainWindow.reportPdfCapture.nextIndex++
+                mainWindow.captureNextReportPdfPage()
+            }, Qt.size(2560, 1440))
+            if (!accepted)
+                mainWindow.finishReportPdfCaptureError("Qt could not render a report page for PDF export.")
+        }
+    }
 
     readonly property var ribbonTabs: ["File", "Home", "Insert", "Modeling", "View", "Optimize", "Help"]
     readonly property var dataHomeGroups: [
@@ -63,7 +478,8 @@ ApplicationWindow {
                 { label: "New project", visibleLabel: "New", iconName: "file", commandId: "project.new", description: "Create a new project." },
                 { label: "Open project", visibleLabel: "Open", iconName: "open", commandId: "project.open", description: "Open a saved Analytics Studio project." },
                 { label: "Save", visibleLabel: "Save", iconName: "save", commandId: "project.save", description: "Save the current project." },
-                { label: "Save as", visibleLabel: "Save as", iconName: "saveAs", commandId: "project.saveAs", description: "Save a copy to another location." }
+                { label: "Save as", visibleLabel: "Save as", iconName: "saveAs", commandId: "project.saveAs", description: "Save a copy to another location." },
+                { label: "Export report (PDF)", visibleLabel: "Export PDF", iconName: "pdf", commandId: "report.exportPdf", description: "Export visible report pages as an A4 landscape PDF." }
             ]},
             { title: "Data", actions: [
                 { label: "Get data", visibleLabel: "Get data", width: 48, iconName: "getData", commandId: "data.openPicker", splitGetData: true, description: "Choose a connector from the full data source picker." },
@@ -260,6 +676,12 @@ ApplicationWindow {
                 mainWindow.selectRibbonForView(viewName)
             }
         }
+        function onFieldQueryChanged(query) {
+            mainWindow.fieldSearchQuery = query
+        }
+        function onActiveSourceReady() {
+            mainWindow.dataPaneExpanded = true
+        }
     }
 
     function runCommand(commandId) {
@@ -269,6 +691,7 @@ ApplicationWindow {
         case "project.save": mainWindow.studioController.executeCommand("saveProject"); break
         case "project.saveAs": mainWindow.studioController.executeCommand("saveProjectAs"); break
         case "project.exportData": mainWindow.studioController.executeCommand("exportData"); break
+        case "report.exportPdf": mainWindow.openReportPdfDialog(); break
         case "data.openPicker": openGetDataPicker(null); break
         case "data.sqlServer": clearFieldSearch(); mainWindow.studioController.connectDataSource("microsoft_sql_server"); break
         case "data.importCsv": clearFieldSearch(); mainWindow.studioController.executeCommand("importCsv"); break
@@ -325,7 +748,7 @@ ApplicationWindow {
         case "view.togglePanes": inspectorVisible = !inspectorVisible; break
         case "view.zoomFit": zoomToFit(); break
         case "view.resetLayout":
-            navigationVisible = true; filtersExpanded = false; dataPaneExpanded = false
+            navigationVisible = true; filtersExpanded = true; dataPaneExpanded = false
             visualizationsVisible = true; inspectorVisible = true; zoomToFit(); break
         case "view.zoomIn": fitZoom = false; reportZoom = Math.min(1.5, reportZoom + 0.1); break
         case "view.zoomOut": fitZoom = false; reportZoom = Math.max(0.15, reportZoom - 0.1); break
@@ -1021,6 +1444,7 @@ ApplicationWindow {
                                 clip: true
                                 Item {
                                     id: reportPageBody
+                                    objectName: "reportPageBody"
                                     width: 1280
                                     height: 720
                                     transform: Scale { xScale: mainWindow.reportZoom; yScale: mainWindow.reportZoom; origin.x: 0; origin.y: 0 }
@@ -1032,6 +1456,7 @@ ApplicationWindow {
                                         Item {
                                             objectName: "reportEmptyState"
                                             visible: mainWindow.studioController.activeVisualObjects.length === 0
+                                                     && !mainWindow.reportPdfExporting
                                             anchors.fill: parent
                                             ColumnLayout {
                                                 anchors.centerIn: parent
@@ -1049,10 +1474,19 @@ ApplicationWindow {
                                         Repeater {
                                             model: mainWindow.studioController.activeVisualObjects
                                             delegate: Item {
+                                                id: reportVisualDelegate
+                                                objectName: "reportVisual_" + String(modelData.id)
+                                                property bool resizing: false
                                                 x: Number(modelData.x)
                                                 y: Number(modelData.y)
                                                 width: Number(modelData.width)
                                                 height: Number(modelData.height)
+                                                Component.onCompleted: mainWindow.registerReportCanvasDropTarget(
+                                                    String(modelData.id), String(modelData.title), reportVisualDelegate
+                                                )
+                                                Component.onDestruction: mainWindow.unregisterReportCanvasDropTarget(
+                                                    String(modelData.id), reportVisualDelegate
+                                                )
 
                                                 ChartCard {
                                                     objectName: "chartCard_" + String(modelData.title)
@@ -1150,6 +1584,24 @@ ApplicationWindow {
                                                         })
                                                         return visual && visual.type === "map"
                                                             ? mainWindow.studioController.visualMapData(String(visual.title), true)
+                                                            : []
+                                                    }
+
+                                                    shapeRegions: {
+                                                        const visual = mainWindow.studioController.activeVisualObjects.find(function(item) {
+                                                            return String(item.title) === String(modelData.title)
+                                                        })
+                                                        return visual && (visual.type === "filledMap" || visual.type === "shapeMap")
+                                                            ? mainWindow.studioController.visualShapeMapData(String(visual.title), false)
+                                                            : []
+                                                    }
+
+                                                    highlightShapeRegions: {
+                                                        const visual = mainWindow.studioController.activeVisualObjects.find(function(item) {
+                                                            return String(item.title) === String(modelData.title)
+                                                        })
+                                                        return visual && (visual.type === "filledMap" || visual.type === "shapeMap")
+                                                            ? mainWindow.studioController.visualShapeMapData(String(visual.title), true)
                                                             : []
                                                     }
 
@@ -1485,6 +1937,7 @@ ApplicationWindow {
 
                                                 DragHandler {
                                                     target: parent
+                                                    enabled: !reportVisualDelegate.resizing
                                                     onActiveChanged: {
                                                         if (!active) {
                                                             mainWindow.studioController.move_visual(String(modelData.id), Math.round(parent.x / 10) * 10, Math.round(parent.y / 10) * 10);
@@ -1493,8 +1946,11 @@ ApplicationWindow {
                                                 }
                                                 
                                                 Rectangle {
-                                                    width: 14
-                                                    height: 14
+                                                    objectName: "visualResizeHandle_" + String(modelData.id)
+                                                    // Keep the selected resize target usable in scene space
+                                                    // while the report page zoom changes.
+                                                    width: Math.min(parent.width, 16 / Math.max(0.15, mainWindow.reportZoom))
+                                                    height: Math.min(parent.height, 16 / Math.max(0.15, mainWindow.reportZoom))
                                                     anchors.right: parent.right
                                                     anchors.bottom: parent.bottom
                                                     color: "transparent"
@@ -1504,43 +1960,61 @@ ApplicationWindow {
                                                         anchors.fill: parent
                                                         onPaint: {
                                                             var ctx = getContext("2d");
-                                                            ctx.strokeStyle = "#8aaebf";
-                                                            ctx.lineWidth = 1;
-                                                            ctx.beginPath();
-                                                            ctx.moveTo(width, 0);
-                                                            ctx.lineTo(0, height);
-                                                            ctx.moveTo(width, 5);
-                                                            ctx.lineTo(5, height);
-                                                            ctx.moveTo(width, 10);
-                                                            ctx.lineTo(10, height);
-                                                            ctx.stroke();
+                                                            var zoom = Math.max(0.15, mainWindow.reportZoom);
+                                                            var spacing = 5 / zoom;
+                                                            ctx.strokeStyle = "#107c71";
+                                                            ctx.lineWidth = 1 / zoom;
+                                                            for (var mark = 0; mark < 3; mark++) {
+                                                                var offset = mark * spacing;
+                                                                ctx.beginPath();
+                                                                ctx.moveTo(width - offset, 0);
+                                                                ctx.lineTo(0, height - offset);
+                                                                ctx.stroke();
+                                                            }
                                                         }
                                                     }
 
                                                     MouseArea {
+                                                        objectName: "visualResizeMouseArea_" + String(modelData.id)
                                                         anchors.fill: parent
                                                         cursorShape: Qt.SizeFDiagCursor
+                                                        Accessible.name: "Resize visual"
                                                         property real startX
                                                         property real startY
                                                         property real startWidth
                                                         property real startHeight
+                                                        property real dragWidth
+                                                        property real dragHeight
+                                                        function pointInVisual(mouseX, mouseY) {
+                                                            return parent.parent.mapFromItem(parent, mouseX, mouseY)
+                                                        }
                                                         onPressed: function(mouse) {
-                                                            startX = mouse.x
-                                                            startY = mouse.y
+                                                            parent.parent.resizing = true
+                                                            const point = pointInVisual(mouse.x, mouse.y)
+                                                            startX = point.x
+                                                            startY = point.y
                                                             startWidth = parent.parent.width
                                                             startHeight = parent.parent.height
+                                                            dragWidth = startWidth
+                                                            dragHeight = startHeight
                                                         }
                                                         onPositionChanged: function(mouse) {
                                                             if (pressed) {
-                                                                let newWidth = Math.max(50, startWidth + (mouse.x - startX))
-                                                                let newHeight = Math.max(50, startHeight + (mouse.y - startY))
+                                                                const point = pointInVisual(mouse.x, mouse.y)
+                                                                // Keep the interactive floor aligned with the controller and project schema.
+                                                                let newWidth = Math.max(10, startWidth + (point.x - startX))
+                                                                let newHeight = Math.max(10, startHeight + (point.y - startY))
+                                                                dragWidth = newWidth
+                                                                dragHeight = newHeight
                                                                 parent.parent.width = newWidth
                                                                 parent.parent.height = newHeight
                                                             }
                                                         }
                                                         onReleased: {
-                                                            mainWindow.studioController.resize_visual(String(modelData.id), Math.round(parent.parent.width / 10) * 10, Math.round(parent.parent.height / 10) * 10);
+                                                            mainWindow.studioController.resize_visual(String(modelData.id), Math.round(dragWidth / 10) * 10, Math.round(dragHeight / 10) * 10);
+                                                            parent.parent.resizing = false
                                                         }
+                                                        onCanceled: parent.parent.resizing = false
                                                     }
                                                 }
                                             }
@@ -1559,9 +2033,16 @@ ApplicationWindow {
                     spacing: 0
 
                     DataView {
+                        id: dataViewWorkspace
+                        objectName: "dataViewWorkspace"
                         Layout.fillWidth: true
                         Layout.fillHeight: true
                         appController: mainWindow.studioController
+                        selectedFieldName: mainWindow.selectedFieldBinding
+                        onSelectedColumnRequested: function(columnName) {
+                            mainWindow.selectedFieldBinding = columnName
+                            mainWindow.expandedMeasureName = ""
+                        }
                     }
 
                     Rectangle {
@@ -1589,6 +2070,72 @@ ApplicationWindow {
                             }
                             Rectangle { Layout.fillWidth: true; height: 1; color: "#dce1e4" }
 
+                            RowLayout {
+                                Layout.fillWidth: true
+                                Layout.leftMargin: 8
+                                Layout.rightMargin: 8
+                                Layout.topMargin: 7
+                                spacing: 5
+                                Text {
+                                    text: "Table"
+                                    color: "#64798a"
+                                    font.pixelSize: 9
+                                }
+                                ComboBox {
+                                    id: dataPaneTableSelector
+                                    objectName: "dataPaneTableSelector"
+                                    Layout.fillWidth: true
+                                    Layout.preferredHeight: 27
+                                    model: mainWindow.studioController.tableCatalog.filter(function(table) {
+                                        return Boolean(table.loaded) && Boolean(table.loadEnabled)
+                                    })
+                                    textRole: "displayName"
+                                    valueRole: "sourceId"
+                                    currentIndex: {
+                                        const tables = mainWindow.studioController.tableCatalog.filter(function(table) {
+                                            return Boolean(table.loaded) && Boolean(table.loadEnabled)
+                                        })
+                                        return tables.findIndex(function(table) {
+                                            return String(table.sourceId) === String(mainWindow.studioController.activeTableId)
+                                        })
+                                    }
+                                    enabled: count > 1
+                                    Accessible.name: "Select loaded table for data fields"
+                                    Accessible.description: "Choose which loaded model table appears in the fields list."
+                                    background: Rectangle {
+                                        radius: 3
+                                        color: dataPaneTableSelector.enabled ? "#ffffff" : "#f3f5f6"
+                                        border.color: dataPaneTableSelector.activeFocus ? "#6b91aa" : "#cfd7dd"
+                                    }
+                                    contentItem: Text {
+                                        leftPadding: 7
+                                        rightPadding: dataPaneTableSelector.indicator.width + 4
+                                        text: dataPaneTableSelector.displayText || "No loaded tables"
+                                        color: dataPaneTableSelector.enabled ? "#40515e" : "#7b878f"
+                                        font.pixelSize: 9
+                                        verticalAlignment: Text.AlignVCenter
+                                        elide: Text.ElideRight
+                                    }
+                                    delegate: ItemDelegate {
+                                        required property string displayName
+                                        width: dataPaneTableSelector.width
+                                        text: displayName
+                                        background: Rectangle { color: highlighted ? "#e9eff3" : "#ffffff" }
+                                        contentItem: Text {
+                                            text: displayName
+                                            color: "#40515e"
+                                            font.pixelSize: 9
+                                            elide: Text.ElideRight
+                                            verticalAlignment: Text.AlignVCenter
+                                        }
+                                    }
+                                    onActivated: function(index) {
+                                        const selected = model[index]
+                                        if (selected && String(selected.sourceId) !== String(mainWindow.studioController.activeTableId))
+                                            mainWindow.studioController.selectTable(String(selected.sourceId))
+                                    }
+                                }
+                            }
                             Text {
                                 Layout.fillWidth: true
                                 Layout.leftMargin: 10
@@ -1613,6 +2160,16 @@ ApplicationWindow {
                                 font.pixelSize: 8
                                 wrapMode: Text.Wrap
                             }
+                            Text {
+                                Layout.fillWidth: true
+                                Layout.leftMargin: 10
+                                Layout.rightMargin: 10
+                                Layout.bottomMargin: 5
+                                text: "Select a field to inspect its column profile or DAX."
+                                color: "#72818b"
+                                font.pixelSize: 8
+                                wrapMode: Text.Wrap
+                            }
                             TextField {
                                 Layout.fillWidth: true
                                 Layout.preferredHeight: 25
@@ -1634,30 +2191,90 @@ ApplicationWindow {
                             }
                             ListView {
                                 id: dataFieldsList
+                                objectName: "dataFieldsList"
                                 Layout.fillWidth: true
                                 Layout.fillHeight: true
                                 model: mainWindow.studioController.filteredFields
                                 clip: true
-                                delegate: RowLayout {
+                                delegate: ColumnLayout {
                                     required property var modelData
                                     width: ListView.view.width
-                                    height: 25
-                                    spacing: 5
-                                    Layout.leftMargin: 8
-                                    Layout.rightMargin: 7
-                                    Icon {
-                                        name: mainWindow.studioController.visualFieldIsMeasure(String(modelData)) || ["Revenue", "Cost", "Margin", "Units", "Orders"].indexOf(String(modelData)) >= 0 ? "measure" : "column"
-                                        color: mainWindow.studioController.visualFieldIsMeasure(String(modelData)) || ["Revenue", "Cost", "Margin", "Units", "Orders"].indexOf(String(modelData)) >= 0 ? "#0078D4" : "#107C71"
-                                        implicitWidth: 14
-                                        implicitHeight: 14
-                                    }
-                                    Text {
+                                    spacing: 2
+                                    property string bindingName: String(modelData)
+                                    property string displayName: mainWindow.studioController.visualFieldLabel(bindingName)
+                                    property string daxName: mainWindow.measureNameForBinding(bindingName)
+                                    property bool daxExpanded: daxName !== "" && mainWindow.expandedMeasureName === daxName
+
+                                    Button {
+                                        objectName: "dataFieldSelect_" + bindingName
                                         Layout.fillWidth: true
-                                        text: mainWindow.studioController.visualFieldLabel(String(modelData))
-                                        color: "#3f505d"
-                                        font.pixelSize: 9
-                                        elide: Text.ElideRight
-                                        Accessible.name: mainWindow.studioController.visualFieldLabel(String(modelData)) + " source field"
+                                        Layout.preferredHeight: 29
+                                        hoverEnabled: true
+                                        focusPolicy: Qt.StrongFocus
+                                        Accessible.name: "Select " + displayName
+                                        Accessible.description: daxName !== ""
+                                                ? "Select this measure to inspect its saved DAX expression."
+                                                : "Select this field to inspect its column profile and type."
+                                        background: Rectangle {
+                                            radius: 4
+                                            color: mainWindow.selectedFieldBinding === bindingName ? "#e7f2ee"
+                                                   : (parent.hovered ? "#f2f6f7" : "transparent")
+                                            border.color: mainWindow.selectedFieldBinding === bindingName ? "#c6dfd5"
+                                                          : (parent.activeFocus ? "#0078d4" : "transparent")
+                                            border.width: mainWindow.selectedFieldBinding === bindingName || parent.activeFocus ? 1 : 0
+                                        }
+                                        contentItem: RowLayout {
+                                            spacing: 6
+                                            FieldIcon {
+                                                kind: mainWindow.fieldDataType(bindingName)
+                                                Layout.preferredWidth: 22
+                                                Layout.preferredHeight: 20
+                                            }
+                                            Text {
+                                                Layout.fillWidth: true
+                                                text: displayName
+                                                color: "#344553"
+                                                font.pixelSize: 10
+                                                elide: Text.ElideRight
+                                            }
+                                        }
+                                        onClicked: {
+                                            mainWindow.selectedFieldBinding = bindingName
+                                            mainWindow.expandedMeasureName = daxExpanded ? "" : daxName
+                                        }
+                                    }
+
+                                    Rectangle {
+                                        visible: daxExpanded
+                                        Layout.fillWidth: true
+                                        Layout.leftMargin: 27
+                                        Layout.rightMargin: 4
+                                        implicitHeight: Math.min(112, daxExpressionText.implicitHeight + 12)
+                                        radius: 4
+                                        color: "#f6f8fa"
+                                        border.color: "#e1e6e9"
+                                        Text {
+                                            id: daxExpressionText
+                                            anchors.fill: parent
+                                            anchors.margins: 6
+                                            text: mainWindow.measureExpressionForBinding(bindingName)
+                                            color: "#334b5d"
+                                            font.family: "monospace"
+                                            font.pixelSize: 9
+                                            wrapMode: Text.WrapAnywhere
+                                            maximumLineCount: 6
+                                            elide: Text.ElideRight
+                                            Accessible.name: "DAX expression for " + daxName
+                                        }
+                                    }
+                                    Button {
+                                        visible: daxExpanded
+                                        Layout.alignment: Qt.AlignRight
+                                        Layout.rightMargin: 4
+                                        Layout.preferredHeight: 23
+                                        text: "Edit DAX"
+                                        Accessible.name: "Edit DAX measure " + daxName
+                                        onClicked: mainWindow.studioController.editMeasure(daxName)
                                     }
                                 }
                                 Text {
@@ -1671,6 +2288,7 @@ ApplicationWindow {
                                     horizontalAlignment: Text.AlignHCenter
                                 }
                                 Button {
+                                    objectName: "reportFieldsImportButton"
                                     visible: !mainWindow.studioController.sourceLoaded
                                     anchors.horizontalCenter: parent.horizontalCenter
                                     anchors.top: parent.verticalCenter
@@ -1697,6 +2315,10 @@ ApplicationWindow {
                         Layout.fillHeight: true
                         appController: mainWindow.studioController
                         onImportRequested: mainWindow.runCommand("data.importFile")
+                        onDataViewRequested: function(sourceId) {
+                            if (mainWindow.studioController.selectTable(sourceId))
+                                mainWindow.navigateToView("Data")
+                        }
                     }
                     Rectangle {
                         Layout.preferredWidth: 210
@@ -1732,7 +2354,7 @@ ApplicationWindow {
                                 Text { text: "Relationships"; color: "#687681"; font.pixelSize: 9 }
                                 Text { text: String(mainWindow.studioController.modelRelationships.length); color: "#334653"; font.pixelSize: 11 }
                                 Item { Layout.fillHeight: true }
-                                Text { Layout.fillWidth: true; text: "Model changes are read-only in this release."; color: "#7a858d"; font.pixelSize: 9; wrapMode: Text.Wrap }
+                                Text { Layout.fillWidth: true; text: "Use Modeling to manage relationships and calculated columns. Open a table card to inspect its rows."; color: "#7a858d"; font.pixelSize: 9; wrapMode: Text.Wrap }
                             }
                         }
                     }
@@ -1759,12 +2381,17 @@ ApplicationWindow {
                             }
                             Rectangle { Layout.fillWidth: true; height: 1; color: "#dce1e4" }
                             ListView {
+                                objectName: "modelDataTableList"
                                 Layout.fillWidth: true
                                 Layout.fillHeight: true
-                                model: mainWindow.studioController.modelTables
+                                model: (mainWindow.studioController.tableCatalog || []).filter(function(table) {
+                                    return Boolean(table.loadEnabled)
+                                })
                                 clip: true
                                 delegate: ColumnLayout {
                                     required property var modelData
+                                    objectName: "modelDataTableEntry"
+                                    property string tableSourceId: String(modelData.sourceId)
                                     width: ListView.view.width
                                     spacing: 0
                                     RowLayout {
@@ -1772,17 +2399,42 @@ ApplicationWindow {
                                         Layout.preferredHeight: 31
                                         Layout.leftMargin: 8
                                         Icon { name: "table"; color: "#637c8e"; implicitWidth: 15; implicitHeight: 15 }
-                                        Text { Layout.fillWidth: true; text: String(modelData); color: "#3f505d"; font.pixelSize: 10; elide: Text.ElideRight }
+                                        Text {
+                                            objectName: "modelDataTableName"
+                                            Layout.fillWidth: true
+                                            text: String(modelData.name)
+                                            color: "#3f505d"
+                                            font.pixelSize: 10
+                                            elide: Text.ElideRight
+                                        }
+                                    }
+                                    Text {
+                                        objectName: "modelDataTableUnavailable"
+                                        visible: !Boolean(modelData.loaded)
+                                        Layout.fillWidth: true
+                                        Layout.preferredHeight: visible ? 20 : 0
+                                        Layout.leftMargin: 26
+                                        text: "Source unavailable"
+                                        color: "#8a5a00"
+                                        font.pixelSize: 9
+                                        Accessible.name: "Source unavailable for " + String(modelData.name)
                                     }
                                     Repeater {
-                                        model: mainWindow.studioController.sourceLoaded ? mainWindow.studioController.headers : []
+                                        model: Boolean(modelData.loaded) ? modelData.headers : []
                                         delegate: RowLayout {
                                             required property var modelData
                                             Layout.fillWidth: true
                                             Layout.preferredHeight: 24
                                             Layout.leftMargin: 26
                                             Icon { name: "column"; color: "#85939c"; implicitWidth: 12; implicitHeight: 12 }
-                                            Text { Layout.fillWidth: true; text: String(modelData); color: "#586872"; font.pixelSize: 9; elide: Text.ElideRight }
+                                            Text {
+                                                objectName: "modelDataTableField"
+                                                Layout.fillWidth: true
+                                                text: String(modelData)
+                                                color: "#586872"
+                                                font.pixelSize: 9
+                                                elide: Text.ElideRight
+                                            }
                                         }
                                     }
                                 }
@@ -1807,6 +2459,7 @@ ApplicationWindow {
                     Item {
                         Layout.preferredWidth: mainWindow.filtersExpanded ? 145 : 32
                         Layout.fillHeight: true
+                        objectName: "reportFiltersPane"
                         Rectangle {
                             anchors.fill: parent
                             color: mainWindow.filtersExpanded ? "#ffffff" : "#f8f9fa"
@@ -1822,6 +2475,7 @@ ApplicationWindow {
                                     Icon { name: "filter"; color: "#61798b"; implicitWidth: 14; implicitHeight: 14 }
                                     Text { Layout.fillWidth: true; text: "Filters"; color: "#354755"; font.pixelSize: 9; font.weight: Font.DemiBold }
                                     ToolButton {
+                                        objectName: "collapseReportFiltersPaneButton"
                                         onClicked: mainWindow.filtersExpanded = false
                                         Accessible.name: "Collapse Filters pane"
                                         ToolTip.visible: hovered
@@ -1837,8 +2491,10 @@ ApplicationWindow {
                                     spacing: 7
                                     Text { text: "Report filters"; color: "#64727d"; font.pixelSize: 9; font.weight: Font.DemiBold }
                                     Rectangle {
+                                        objectName: "reportRegionFilterCard"
                                         Layout.fillWidth: true
                                         Layout.preferredHeight: 86
+                                        visible: mainWindow.studioController.regions.length > 1
                                         color: "#ffffff"
                                         border.color: "#d9dfe3"
                                         ColumnLayout {
@@ -1883,6 +2539,7 @@ ApplicationWindow {
                                         }
                                     }
                                     Button {
+                                        objectName: "clearFiltersButton"
                                         text: "Clear filters"
                                         enabled: mainWindow.studioController.filterActive
                                         background: Rectangle { radius: 3; color: parent.enabled ? "#f3f5f6" : "#f7f8f9"; border.color: "#d7dde1" }
@@ -1912,6 +2569,7 @@ ApplicationWindow {
                                             }
                                             ComboBox {
                                                 id: filterScopeCombo
+                                                objectName: "filterScopeCombo"
                                                 Layout.fillWidth: true
                                                 model: ["Report", "Page", "Selected visual"]
                                                 currentIndex: 1
@@ -1934,6 +2592,7 @@ ApplicationWindow {
                                             }
                                             ComboBox {
                                                 id: visualFilterTargetCombo
+                                                objectName: "visualFilterTargetCombo"
                                                 visible: filterScopeCombo.currentIndex === 2
                                                 Layout.fillWidth: true
                                                 model: mainWindow.studioController.activePageVisuals
@@ -2034,6 +2693,7 @@ ApplicationWindow {
                                             }
                                             ComboBox {
                                                 id: pageFilterFieldCombo
+                                                objectName: "pageFilterFieldCombo"
                                                 Layout.fillWidth: true
                                                 model: mainWindow.studioController.pageFilterFields
                                                 textRole: "label"
@@ -2072,8 +2732,28 @@ ApplicationWindow {
                                                     contentItem: Text { text: label; color: "#455661"; font.pixelSize: 9; verticalAlignment: Text.AlignVCenter; elide: Text.ElideRight }
                                                 }
                                             }
+                                            Rectangle {
+                                                id: filterFieldDropTarget
+                                                objectName: "filterFieldDropTarget"
+                                                Layout.fillWidth: true
+                                                Layout.preferredHeight: 34
+                                                color: mainWindow.fieldDragOverItem(filterFieldDropTarget) ? "#e6f2f0" : "#f8fafb"
+                                                border.color: mainWindow.fieldDragOverItem(filterFieldDropTarget) ? "#107c71" : "#cbd5dc"
+                                                Text {
+                                                    anchors.fill: parent
+                                                    anchors.leftMargin: 6
+                                                    anchors.rightMargin: 6
+                                                    verticalAlignment: Text.AlignVCenter
+                                                    horizontalAlignment: Text.AlignHCenter
+                                                    text: "Drop a column here, then set a condition"
+                                                    color: "#526b7b"
+                                                    font.pixelSize: 8
+                                                    wrapMode: Text.Wrap
+                                                }
+                                            }
                                             ComboBox {
                                                 id: pageFilterOperatorCombo
+                                                objectName: "pageFilterOperatorCombo"
                                                 Layout.fillWidth: true
                                                 model: {
                                                     const fields = mainWindow.studioController.pageFilterFields
@@ -2312,6 +2992,7 @@ ApplicationWindow {
                                             }
                                             ComboBox {
                                                 id: pageFilterValueCombo
+                                                objectName: "pageFilterValueCombo"
                                                 visible: String(pageFilterOperatorCombo.currentValue) !== "is_any_of"
                                                          && String(pageFilterOperatorCombo.currentValue) !== "is_none_of"
                                                          && String(pageFilterOperatorCombo.currentValue) !== "relative_date"
@@ -2511,6 +3192,7 @@ ApplicationWindow {
                                                 background: Rectangle { radius: 3; color: "#ffffff"; border.color: secondFilterValue.activeFocus ? "#718da1" : "#ccd4da" }
                                             }
                                             Button {
+                                                objectName: "applyFieldFilterButton"
                                                 Layout.fillWidth: true
                                                 text: filterScopeCombo.currentIndex === 0
                                                       ? "Add report filter"
@@ -2677,6 +3359,7 @@ ApplicationWindow {
                                     Item { Layout.fillHeight: true }
                                 }
                                 ToolButton {
+                                    objectName: "expandReportFiltersPaneButton"
                                     visible: !mainWindow.filtersExpanded
                                     Layout.fillWidth: true
                                     Layout.fillHeight: true
@@ -2864,8 +3547,8 @@ ApplicationWindow {
                                                 { type: "donut", name: "Donut chart", icon: "donut", accent: "#0078D4", active: true },
                                                 { type: "treemap", name: "Treemap", icon: "treemap", accent: "#0078D4", active: true },
                                                 { type: "map", name: "Map", icon: "worldMap", accent: "#107C71", active: true },
-                                                { type: "filledMap", name: "Filled map", icon: "filledMap" },
-                                                { type: "shapeMap", name: "Shape map", icon: "shapeMap" },
+                                                { type: "filledMap", name: "Filled map", icon: "filledMap", active: true },
+                                                { type: "shapeMap", name: "Shape map", icon: "shapeMap", active: true },
                                                 { type: "azureMaps", name: "Azure Maps", icon: "azureMaps" },
                                                 { type: "gauge", name: "Gauge", icon: "gauge", accent: "#0078D4", active: true },
                                                 { type: "card", name: "Card (new)", icon: "newCard", active: true },
@@ -2970,9 +3653,13 @@ ApplicationWindow {
                                                 Layout.topMargin: 6
                                             }
                                             Rectangle {
+                                                id: visualWellDropTarget
+                                                objectName: "visualFieldDrop_" + visualWellDelegate.wellName.replace(/[^A-Za-z0-9]/g, "_")
                                                 Layout.fillWidth: true
                                                 Layout.preferredHeight: Math.max(27, modelData.fields.length * 30)
-                                                color: "#fafafa"
+                                                color: mainWindow.fieldDragOverItem(visualWellDropTarget) ? "#e6f2f0" : "#fafafa"
+                                                Component.onCompleted: mainWindow.registerVisualWellDropTarget(visualWellDelegate.wellName, visualWellDropTarget)
+                                                Component.onDestruction: mainWindow.unregisterVisualWellDropTarget(visualWellDropTarget)
                                                 
                                                 Canvas {
                                                     anchors.fill: parent
@@ -3012,7 +3699,9 @@ ApplicationWindow {
                                                         model: modelData.fields
                                                         delegate: Rectangle {
                                                             required property var modelData
-                                                            property string fieldName: String(modelData)
+                                                            property var fieldBinding: modelData
+                                                            property string fieldName: typeof modelData === "object" && modelData !== null
+                                                                    ? String(modelData.column || "") : String(modelData)
                                                             width: parent.width
                                                             height: 29
                                                             color: "#ffffff"
@@ -3023,7 +3712,7 @@ ApplicationWindow {
                                                                 Item { Layout.preferredWidth: 6; Layout.fillHeight: true }
                                                                 Text {
                                                                     Layout.fillWidth: true
-                                                                    text: mainWindow.studioController.visualFieldLabel(fieldName)
+                                                                    text: mainWindow.studioController.visualFieldLabel(fieldBinding)
                                                                     color: "#202020"
                                                                     font.pixelSize: 10
                                                                     elide: Text.ElideRight
@@ -3031,7 +3720,7 @@ ApplicationWindow {
                                                                 ToolButton {
                                                                     id: visualAggregationButton
                                                                     objectName: "visualFieldAggregation"
-                                                                    visible: !mainWindow.studioController.visualFieldIsMeasure(fieldName) && (((visualWellDelegate.wellName === "Y-axis"
+                                                                    visible: !mainWindow.studioController.visualFieldIsMeasure(fieldBinding) && (((visualWellDelegate.wellName === "Y-axis"
                                                                                 && mainWindow.studioController.selectedChartType !== "scatter")
                                                                             || ((visualWellDelegate.wellName === "Column Y-axis"
                                                                                  || visualWellDelegate.wellName === "Line Y-axis")
@@ -3044,7 +3733,7 @@ ApplicationWindow {
                                                                                  || visualWellDelegate.wellName === "Target")
                                                                                 && mainWindow.studioController.selectedChartType === "gauge")
                                                                             || (visualWellDelegate.wellName === "Values"
-                                                                                && mainWindow.studioController.selectedChartType === "matrix"))
+                                                                                && ["matrix", "filledMap", "shapeMap"].indexOf(String(mainWindow.studioController.selectedChartType)) >= 0))
                                                                     property string aggregationLabel: "Sum"
                                                                     function refreshAggregationLabel() {
                                                                         const controller = mainWindow.studioController
@@ -3092,8 +3781,9 @@ ApplicationWindow {
                                                                 }
                                                                 ToolButton {
                                                                     text: "×"
+                                                                    objectName: "visualFieldRemove_" + visualWellDelegate.wellName + "_" + fieldName
                                                                     Accessible.name: "Remove " + fieldName + " from " + visualWellDelegate.wellName
-                                                                    onClicked: mainWindow.studioController.remove_field_from_well(visualWellDelegate.wellName, fieldName)
+                                                                    onClicked: mainWindow.studioController.remove_field_from_well(visualWellDelegate.wellName, fieldBinding)
                                                                     contentItem: Text { text: "×"; color: "#657784"; font.pixelSize: 14; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter }
                                                                     background: Rectangle { color: parent.hovered ? "#f1f4f6" : "transparent" }
                                                                 }
@@ -3112,6 +3802,23 @@ ApplicationWindow {
                                                 }
                                             }
                                         }
+                                    }
+
+                                    Button {
+                                        objectName: "shapeMapChooseBoundary"
+                                        visible: ["filledMap", "shapeMap"].indexOf(String(mainWindow.studioController.selectedChartType)) >= 0
+                                        Layout.fillWidth: true
+                                        Layout.leftMargin: 7
+                                        Layout.rightMargin: 8
+                                        Layout.topMargin: 6
+                                        text: {
+                                            const visual = mainWindow.studioController.activeVisualObjects.find(function(item) {
+                                                return String(item.title) === String(mainWindow.studioController.selectedVisual)
+                                            })
+                                            return visual && visual.shape_map_file ? "Change boundary file…" : "Choose boundary file…"
+                                        }
+                                        Accessible.name: text
+                                        onClicked: mainWindow.studioController.choose_shape_map_file()
                                     }
 
                                     Text {
@@ -3509,6 +4216,54 @@ ApplicationWindow {
                                         contentItem: Icon { name: "collapsePane"; color: "#657784"; implicitWidth: 14; implicitHeight: 14 }
                                     }
                                 }
+                                ComboBox {
+                                    id: reportTableSelector
+                                    objectName: "reportTableSelector"
+                                    visible: mainWindow.dataPaneExpanded
+                                    Layout.fillWidth: true
+                                    Layout.preferredHeight: 24
+                                    Layout.leftMargin: 7
+                                    Layout.rightMargin: 7
+                                    Layout.bottomMargin: 3
+                                    model: mainWindow.studioController.tableCatalog.filter(function(table) {
+                                        return Boolean(table.loaded) && Boolean(table.loadEnabled)
+                                    })
+                                    textRole: "displayName"
+                                    valueRole: "sourceId"
+                                    currentIndex: {
+                                        const tables = mainWindow.studioController.tableCatalog.filter(function(table) {
+                                            return Boolean(table.loaded) && Boolean(table.loadEnabled)
+                                        })
+                                        return tables.findIndex(function(table) {
+                                            return String(table.sourceId) === String(mainWindow.studioController.activeTableId)
+                                        })
+                                    }
+                                    enabled: count > 1
+                                    Accessible.name: "Select table for report fields"
+                                    Accessible.description: "Choose a loaded model table to browse. Table visuals can use fields from directly related tables."
+                                    background: Rectangle { radius: 3; color: reportTableSelector.enabled ? "#ffffff" : "#f3f5f6"; border.color: reportTableSelector.activeFocus ? "#6b91aa" : "#cfd7dd" }
+                                    contentItem: Text {
+                                        leftPadding: 6
+                                        rightPadding: reportTableSelector.indicator.width + 3
+                                        text: reportTableSelector.displayText || "No loaded tables"
+                                        color: reportTableSelector.enabled ? "#40515e" : "#7b878f"
+                                        font.pixelSize: 9
+                                        verticalAlignment: Text.AlignVCenter
+                                        elide: Text.ElideRight
+                                    }
+                                    delegate: ItemDelegate {
+                                        required property string displayName
+                                        width: reportTableSelector.width
+                                        text: displayName
+                                        background: Rectangle { color: highlighted ? "#e9eff3" : "#ffffff" }
+                                        contentItem: Text { text: displayName; color: "#40515e"; font.pixelSize: 9; elide: Text.ElideRight; verticalAlignment: Text.AlignVCenter }
+                                    }
+                                    onActivated: function(index) {
+                                        const selected = model[index]
+                                        if (selected && String(selected.sourceId) !== String(mainWindow.studioController.activeTableId))
+                                            mainWindow.studioController.selectTable(String(selected.sourceId))
+                                    }
+                                }
                                 TextField {
                                     visible: mainWindow.dataPaneExpanded
                                     Layout.fillWidth: true
@@ -3540,31 +4295,184 @@ ApplicationWindow {
                                     elide: Text.ElideRight
                                     Accessible.name: text
                                 }
+                                Text {
+                                    visible: mainWindow.dataPaneExpanded && mainWindow.studioController.sourceLoaded
+                                    Layout.fillWidth: true
+                                    Layout.preferredHeight: 20
+                                    Layout.leftMargin: 9
+                                    Layout.rightMargin: 7
+                                    text: mainWindow.studioController.selectedVisual
+                                            ? "Select a field, then use + to add it."
+                                            : "Select a visual first, then use + to add fields."
+                                    color: "#71808a"
+                                    font.pixelSize: 8
+                                    wrapMode: Text.Wrap
+                                    Accessible.name: text
+                                }
                                 ListView {
                                     visible: mainWindow.dataPaneExpanded
+                                    objectName: "reportFieldsList"
                                     Layout.fillWidth: true
                                     Layout.fillHeight: true
                                     model: mainWindow.studioController.filteredFields
                                     clip: true
-                                    delegate: RowLayout {
+                                delegate: ColumnLayout {
                                         required property var modelData
                                         width: ListView.view.width
-                                        height: 22
-                                        spacing: 5
-                                        Layout.leftMargin: 8
-                                        Icon {
-                                            name: mainWindow.studioController.visualFieldIsMeasure(String(modelData)) || ["Revenue", "Cost", "Margin", "Units", "Orders"].indexOf(String(modelData)) >= 0 ? "measure" : "column"
-                                            color: mainWindow.studioController.visualFieldIsMeasure(String(modelData)) || ["Revenue", "Cost", "Margin", "Units", "Orders"].indexOf(String(modelData)) >= 0 ? "#0078D4" : "#107C71"
-                                            implicitWidth: 14
-                                            implicitHeight: 14
-                                        }
-                                        Text {
+                                    spacing: 2
+                                    property string bindingName: String(modelData)
+                                    property string displayName: mainWindow.studioController.reportFieldDisplayLabel(bindingName)
+                                    property string daxName: mainWindow.measureNameForBinding(bindingName)
+                                    property bool daxExpanded: daxName !== "" && mainWindow.expandedMeasureName === daxName
+
+                                    RowLayout {
+                                        Layout.fillWidth: true
+                                        spacing: 2
+                                        Button {
+                                            id: reportFieldSelectButton
+                                            objectName: "reportFieldSelect_" + bindingName
                                             Layout.fillWidth: true
-                                            text: mainWindow.studioController.visualFieldLabel(String(modelData))
-                                            color: "#3f505d"
-                                            font.pixelSize: 9
+                                            Layout.preferredHeight: 28
+                                            hoverEnabled: true
+                                            focusPolicy: Qt.StrongFocus
+                                            Accessible.name: "Select " + displayName
+                                            Accessible.description: daxName !== ""
+                                                    ? "Select this measure to inspect its saved DAX expression."
+                                                    : "Select this field. Use Add to visual to place it in a field well."
+                                            background: Rectangle {
+                                                radius: 4
+                                                color: mainWindow.selectedFieldBinding === bindingName ? "#e7f2ee"
+                                                       : (parent.hovered ? "#f2f6f7" : "transparent")
+                                                border.color: mainWindow.selectedFieldBinding === bindingName ? "#c6dfd5"
+                                                              : (parent.activeFocus ? "#0078d4" : "transparent")
+                                                border.width: mainWindow.selectedFieldBinding === bindingName || parent.activeFocus ? 1 : 0
+                                            }
+                                            contentItem: RowLayout {
+                                                spacing: 5
+                                                FieldIcon {
+                                                    kind: mainWindow.fieldDataType(bindingName)
+                                                    Layout.preferredWidth: 22
+                                                    Layout.preferredHeight: 20
+                                                }
+                                                Text {
+                                                    Layout.fillWidth: true
+                                                    text: displayName
+                                                    color: "#344553"
+                                                    font.pixelSize: 9
+                                                    elide: Text.ElideRight
+                                                }
+                                            }
+                                            DragHandler {
+                                                id: reportFieldDragHandler
+                                                target: null
+                                                acceptedButtons: Qt.LeftButton
+                                                onActiveChanged: {
+                                                    if (active) {
+                                                        mainWindow.beginFieldDrag(
+                                                            bindingName,
+                                                            displayName,
+                                                            centroid.scenePosition.x,
+                                                            centroid.scenePosition.y
+                                                        )
+                                                    } else {
+                                                        mainWindow.finishFieldDrag(bindingName)
+                                                    }
+                                                }
+                                                onCentroidChanged: {
+                                                    if (active)
+                                                        mainWindow.updateFieldDragPosition(
+                                                            centroid.scenePosition.x,
+                                                            centroid.scenePosition.y
+                                                        )
+                                                }
+                                            }
+                                            onClicked: {
+                                                mainWindow.selectedFieldBinding = bindingName
+                                                mainWindow.expandedMeasureName = daxExpanded ? "" : daxName
+                                            }
+                                        }
+                                        ToolButton {
+                                            id: fieldAddButton
+                                            objectName: "reportFieldAdd_" + bindingName
+                                            text: "+"
+                                            enabled: mainWindow.fieldWellOptions(bindingName).length > 0
+                                            Accessible.name: "Add " + displayName + " to selected visual"
+                                            Accessible.description: enabled
+                                                    ? "Choose a field well on the selected visual."
+                                                    : (mainWindow.studioController.selectedVisual
+                                                       ? "This visual has no available well for this field."
+                                                       : "Select a report visual first.")
+                                            ToolTip.visible: hovered
+                                            ToolTip.text: Accessible.description
+                                            implicitWidth: 24
+                                            implicitHeight: 25
+                                            background: Rectangle {
+                                                radius: 4
+                                                color: parent.enabled ? (parent.hovered ? "#e7f2ee" : "transparent") : "transparent"
+                                                border.color: parent.activeFocus ? "#0078d4" : "transparent"
+                                            }
+                                            contentItem: Text {
+                                                text: "+"
+                                                color: fieldAddButton.enabled ? "#107c71" : "#a3adb4"
+                                                font.pixelSize: 16
+                                                horizontalAlignment: Text.AlignHCenter
+                                                verticalAlignment: Text.AlignVCenter
+                                            }
+                                            onClicked: fieldWellMenu.popup()
+                                        }
+                                    }
+
+                                    Menu {
+                                        id: fieldWellMenu
+                                        objectName: "reportFieldWellMenu"
+                                        Repeater {
+                                            model: mainWindow.fieldWellOptions(bindingName)
+                                            delegate: MenuItem {
+                                                required property var modelData
+                                                objectName: "reportFieldWell_" + String(modelData.name)
+                                                text: "Add to " + String(modelData.name)
+                                                Accessible.name: text + " for " + displayName
+                                                onTriggered: {
+                                                    mainWindow.selectedFieldBinding = bindingName
+                                                    mainWindow.expandedMeasureName = daxName
+                                                    mainWindow.studioController.add_field_to_well(
+                                                        String(modelData.name), bindingName
+                                                    )
+                                                }
+                                            }
+                                        }
+                                    }
+
+                                    Rectangle {
+                                        visible: daxExpanded
+                                        Layout.fillWidth: true
+                                        Layout.leftMargin: 24
+                                        Layout.rightMargin: 3
+                                        implicitHeight: Math.min(104, daxExpressionTextDetail.implicitHeight + 10)
+                                        radius: 4
+                                        color: "#f6f8fa"
+                                        border.color: "#e1e6e9"
+                                        Text {
+                                            id: daxExpressionTextDetail
+                                            anchors.fill: parent
+                                            anchors.margins: 5
+                                            text: mainWindow.measureExpressionForBinding(bindingName)
+                                            color: "#334b5d"
+                                            font.family: "monospace"
+                                            font.pixelSize: 8
+                                            wrapMode: Text.WrapAnywhere
+                                            maximumLineCount: 6
                                             elide: Text.ElideRight
-                                            Accessible.name: mainWindow.studioController.visualFieldLabel(String(modelData)) + " field; listed for reference"
+                                            Accessible.name: "DAX expression for " + daxName
+                                        }
+                                    }
+                                    Button {
+                                        visible: daxExpanded
+                                        Layout.alignment: Qt.AlignRight
+                                        Layout.preferredHeight: 22
+                                        text: "Edit DAX"
+                                        Accessible.name: "Edit DAX measure " + daxName
+                                        onClicked: mainWindow.studioController.editMeasure(daxName)
                                         }
                                     }
                                     Text {
@@ -3830,6 +4738,24 @@ ApplicationWindow {
                     onClicked: mainWindow.runCommand("view.zoomFit")
                 }
             }
+        }
+    }
+
+    Rectangle {
+        anchors.fill: parent
+        z: 9999
+        visible: mainWindow.reportPdfExporting
+        color: "#bfffffff"
+        MouseArea {
+            anchors.fill: parent
+            acceptedButtons: Qt.AllButtons
+        }
+        Text {
+            anchors.centerIn: parent
+            text: "Preparing report PDF…"
+            color: "#344553"
+            font.pixelSize: 16
+            font.weight: Font.DemiBold
         }
     }
 

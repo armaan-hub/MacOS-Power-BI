@@ -1,0 +1,138 @@
+{
+ "powerbi_version": "2.157.879.0 (26.08)+da30fe74eb0b8a8786ab7326b69c400a0e951831",
+ "frozen": "2026-10-21",
+ "items": [
+  {
+   "expr": "COUNTROWS(FILTER(Facts,Facts[Region]=\"East\"))",
+   "powerbi": "3"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(Facts,Facts[Region]=\"east\"))",
+   "powerbi": "3"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(Facts,Facts[Region]=\"East \"))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(Facts,Facts[Quantity]>2))",
+   "powerbi": "3"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(Facts,Facts[Quantity]>=3 && Facts[Region]=\"East\"))",
+   "powerbi": "1"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(Facts,Facts[Region]=\"East\" || Facts[Region]=\"West\"))",
+   "powerbi": "5"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(Facts,NOT(Facts[Region]=\"East\")))",
+   "powerbi": "3"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(Facts,AND(Facts[Quantity]>1,Facts[Region]<>\"East\")))",
+   "powerbi": "2"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(Facts,OR(Facts[Quantity]=0,Facts[Region]=\"North\")))",
+   "powerbi": "2"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(Facts,Facts[Quantity]>100))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(Facts,Facts[Sales]>0))",
+   "powerbi": "3"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(Facts,Facts[Sales]=0))",
+   "powerbi": "2"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(Facts,Facts[Sales]<>0))",
+   "powerbi": "4"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(Facts,Facts[Sales]=BLANK()))",
+   "powerbi": "2"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(Facts,Facts[Note]=\"\"))",
+   "powerbi": "2"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(Facts,Facts[Note]=BLANK()))",
+   "powerbi": "2"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(Facts,Facts[Note]<>\"Paid\"))",
+   "powerbi": "3"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(ALL(Facts),Facts[Quantity]>2))",
+   "powerbi": "3"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(Facts,Facts[Quantity]>1))+1",
+   "powerbi": "5"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(Facts,Facts[Quantity]>100))+1",
+   "powerbi": "1"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(FILTER(Facts,Facts[Quantity]>1)),Facts[Region]=\"East\")",
+   "powerbi": "2"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(FILTER(ALL(Facts),Facts[Quantity]>1)),Facts[Region]=\"East\")",
+   "powerbi": "4"
+  },
+  {
+   "expr": "SUMX(FILTER(Facts,Facts[Region]=\"East\"),Facts[Sales])",
+   "powerbi": "11.5"
+  },
+  {
+   "expr": "SUMX(FILTER(Facts,Facts[Quantity]>1),Facts[Sales]*Facts[Quantity])",
+   "powerbi": "93.5"
+  },
+  {
+   "expr": "SUMX(FILTER(Facts,Facts[Quantity]>100),Facts[Sales])",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "AVERAGEX(FILTER(Facts,Facts[Region]=\"East\"),Facts[Sales])",
+   "powerbi": "3.83333333333333"
+  },
+  {
+   "expr": "MAXX(FILTER(Facts,Facts[Region]<>\"East\"),Facts[Quantity])",
+   "powerbi": "4"
+  },
+  {
+   "expr": "MINX(FILTER(Facts,Facts[Quantity]>0),Facts[Sales])",
+   "powerbi": "-1.5"
+  },
+  {
+   "expr": "COUNTX(FILTER(Facts,Facts[Quantity]>1),Facts[Sales])",
+   "powerbi": "3"
+  },
+  {
+   "expr": "COUNTAX(FILTER(Facts,Facts[Quantity]>1),Facts[Note])",
+   "powerbi": "2"
+  },
+  {
+   "expr": "SUMX(FILTER(ALL(Facts),Facts[Region]=\"East\"),Facts[Sales])",
+   "powerbi": "11.5"
+  },
+  {
+   "expr": "SUMX(FILTER(Facts,Facts[Region]=\"East\"),Facts[Sales])+SUMX(FILTER(Facts,Facts[Region]=\"West\"),Facts[Sales])",
+   "powerbi": "31.5"
+  },
+  {
+   "expr": "DIVIDE(SUMX(FILTER(Facts,Facts[Region]=\"East\"),Facts[Sales]),COUNTROWS(FILTER(Facts,Facts[Region]=\"East\")))",
+   "powerbi": "3.83333333333333"
+  }
+ ]
+}

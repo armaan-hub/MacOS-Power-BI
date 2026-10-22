@@ -20,7 +20,9 @@ from PySide6.QtWidgets import QApplication, QDialog
 from analytics_studio.controller import StudioController
 from analytics_studio.file_import import ImportCandidate
 from analytics_studio.project import load_project
+from analytics_studio import sql_server
 from analytics_studio.sql_server import (
+    SQLServerError,
     SUPPORTED_DRIVERS,
     list_sql_server_objects,
     read_sql_server_object,
@@ -106,6 +108,49 @@ class _FakeConnection:
         self.closed = True
 
 
+class _BoundaryCursor:
+    def __init__(self, metadata, description, rows, *, execute_error=None, metadata_error=None):
+        self.metadata = metadata
+        self.description = description
+        self.rows = rows
+        self.execute_error = execute_error
+        self.metadata_error = metadata_error
+        self.timeout = None
+        self.query = None
+        self.executed = False
+
+    def columns(self, table, schema):
+        if self.metadata_error:
+            raise self.metadata_error
+        return _FakeResult(self.metadata)
+
+    def execute(self, query):
+        self.query = query
+        if self.execute_error:
+            raise self.execute_error
+        self.executed = True
+        return self
+
+    def fetchmany(self, size):
+        rows, self.rows = self.rows, []
+        return rows
+
+    def close(self):
+        pass
+
+
+class _BoundaryConnection:
+    def __init__(self, cursor):
+        self._cursor = cursor
+        self.closed = False
+
+    def cursor(self):
+        return self._cursor
+
+    def close(self):
+        self.closed = True
+
+
 class SQLServerLifecycleTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls) -> None:
@@ -131,6 +176,109 @@ class SQLServerLifecycleTests(unittest.TestCase):
             {"schema": "sales", "table_name": "orders", "object_type": "TABLE"},
             [],
         )
+
+    @staticmethod
+    def _read_boundary(rows, *, metadata=None, description=None, row_limit=100_000,
+                       execute_error=None, metadata_error=None):
+        metadata = metadata or [(None, "sales", "orders", "value", 4, "int", 10)]
+        description = description or [("value", str, None, None, None, None, True)]
+        cursor = _BoundaryCursor(
+            metadata, description, rows,
+            execute_error=execute_error, metadata_error=metadata_error,
+        )
+        connection = _BoundaryConnection(cursor)
+        fake_pyodbc = types.SimpleNamespace(
+            SQL_BINARY=-2, SQL_VARBINARY=-3, SQL_LONGVARBINARY=-4,
+            SQL_LONGVARCHAR=-1, SQL_WLONGVARCHAR=-10,
+            SQL_SS_XML=-152, SQL_SS_UDT=-151,
+        )
+        with (
+            patch.dict(sys.modules, {"pyodbc": fake_pyodbc}),
+            patch("analytics_studio.sql_server._connect", return_value=connection),
+        ):
+            result = read_sql_server_object(
+                CONNECTION,
+                {"schema": "sales", "table_name": "orders", "object_type": "TABLE"},
+                "secret",
+                row_limit=row_limit,
+            )
+        return result, cursor, connection
+
+    def test_reader_rejects_binary_xml_lob_and_unbounded_text_metadata(self) -> None:
+        unsupported_codes = [-2, -3, -4, -1, -10, -152, -151]
+        unsupported_metadata = [
+            (None, "sales", "orders", "value", code, "unsupported", 10)
+            for code in unsupported_codes
+        ] + [
+            (None, "sales", "orders", "value", 12, "varchar", 8001),
+            (None, "sales", "orders", "value", -9, "nvarchar", 4001),
+        ]
+        for metadata in unsupported_metadata:
+            with self.subTest(sql_type=metadata[5], code=metadata[4], size=metadata[6]):
+                with self.assertRaisesRegex(SQLServerError, "binary, XML, or unbounded text"):
+                    self._read_boundary([], metadata=[metadata])
+
+    def test_reader_rejects_binary_nonfinite_unsupported_and_oversized_cells(self) -> None:
+        cases = [
+            ((b"blob",), [("value", bytes)], "binary"),
+            ((float("inf"),), [("value", str)], "non-finite"),
+            ((Decimal("NaN"),), [("value", str)], "non-finite"),
+            ((object(),), [("value", str)], "unsupported value type"),
+            (("x" * (1024 * 1024 + 1),), [("value", str)], "1 MiB per-cell"),
+        ]
+        for row, description, message in cases:
+            with self.subTest(message=message):
+                with self.assertRaisesRegex(SQLServerError, message):
+                    self._read_boundary([row], description=description)
+
+    def test_reader_enforces_column_cell_row_and_total_text_limits(self) -> None:
+        two_columns = [
+            (None, "sales", "orders", "left", 4, "int", 10),
+            (None, "sales", "orders", "right", 4, "int", 10),
+        ]
+        with patch.object(sql_server, "MAX_COLUMNS", 1):
+            with self.assertRaisesRegex(SQLServerError, "more than 1 columns"):
+                self._read_boundary(
+                    [(1, 2)], metadata=two_columns,
+                    description=[("left", int), ("right", int)],
+                )
+
+        with patch.object(sql_server, "MAX_CELLS", 2):
+            result, _, _ = self._read_boundary([("one",), ("two",), ("three",)])
+            self.assertEqual(result.rows, [{"value": "one"}, {"value": "two"}])
+            self.assertTrue(any("capped at 2 rows" in notice for notice in result.notices))
+
+        result, _, _ = self._read_boundary([("one",), ("two",)], row_limit=1)
+        self.assertEqual(result.rows, [{"value": "one"}])
+        self.assertIn("Preview is limited to 1 rows.", result.notices)
+
+        with patch.object(sql_server, "MAX_SQLITE_TEXT_BYTES", 3):
+            with self.assertRaisesRegex(SQLServerError, "text limit"):
+                self._read_boundary([("four",)])
+
+    def test_reader_wraps_query_timeouts_and_closes_the_connection(self) -> None:
+        cursor = _BoundaryCursor(
+            [(None, "sales", "orders", "value", 4, "int", 10)],
+            [("value", str)], [], execute_error=TimeoutError("query timed out"),
+        )
+        connection = _BoundaryConnection(cursor)
+        fake_pyodbc = types.SimpleNamespace(
+            SQL_BINARY=-2, SQL_VARBINARY=-3, SQL_LONGVARBINARY=-4,
+            SQL_LONGVARCHAR=-1, SQL_WLONGVARCHAR=-10,
+            SQL_SS_XML=-152, SQL_SS_UDT=-151,
+        )
+        with (
+            patch.dict(sys.modules, {"pyodbc": fake_pyodbc}),
+            patch("analytics_studio.sql_server._connect", return_value=connection),
+        ):
+            with self.assertRaisesRegex(SQLServerError, "Could not read the selected SQL Server table"):
+                read_sql_server_object(
+                    CONNECTION,
+                    {"schema": "sales", "table_name": "orders", "object_type": "TABLE"},
+                    "secret",
+                )
+        self.assertEqual(cursor.timeout, sql_server.QUERY_TIMEOUT_SECONDS)
+        self.assertTrue(connection.closed)
 
     def test_bounded_reader_lists_objects_quotes_identifiers_and_normalizes_values(self) -> None:
         connection = _FakeConnection([

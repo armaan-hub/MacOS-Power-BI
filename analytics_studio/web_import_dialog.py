@@ -39,11 +39,13 @@ class WebImportDialog(QDialog):
         parent=None,
         *,
         source_editing: bool = False,
+        allow_transform: bool = True,
         initial_connection: dict[str, Any] | None = None,
         initial_options: dict[str, Any] | None = None,
     ) -> None:
         super().__init__(parent)
         self._source_editing = source_editing
+        self.allow_transform = bool(allow_transform) and not source_editing
         self._initial_options = dict(initial_options or {})
         self.setWindowTitle(
             "Edit Web source settings" if source_editing else "Import from Web"
@@ -55,6 +57,7 @@ class WebImportDialog(QDialog):
         self._candidate: ImportCandidate | None = None
         self._accepted_candidate: ImportCandidate | None = None
         self._accepted_url = ""
+        self._accepted_action: str | None = None
         self._busy = False
 
         layout = QVBoxLayout(self)
@@ -132,12 +135,19 @@ class WebImportDialog(QDialog):
 
         buttons = QDialogButtonBox(QDialogButtonBox.StandardButton.Cancel)
         self.import_button = QPushButton(
-            "Apply settings" if source_editing else "Import data"
+            "Apply settings" if source_editing else "Load"
         )
         self.import_button.setEnabled(False)
         buttons.addButton(self.import_button, QDialogButtonBox.ButtonRole.AcceptRole)
+        self.transform_button = QPushButton("Transform data")
+        self.transform_button.setVisible(self.allow_transform)
+        self.transform_button.setEnabled(False)
+        buttons.addButton(self.transform_button, QDialogButtonBox.ButtonRole.ActionRole)
         buttons.rejected.connect(self.reject)
-        self.import_button.clicked.connect(self._accept_import)
+        self.import_button.clicked.connect(lambda: self._accept_import("load"))
+        self.transform_button.clicked.connect(
+            lambda: self._accept_import("transform")
+        )
         layout.addWidget(buttons)
 
         self.url_edit.textChanged.connect(self._invalidate_url)
@@ -152,6 +162,18 @@ class WebImportDialog(QDialog):
     @property
     def url(self) -> str:
         return self._accepted_url if self.result() == QDialog.DialogCode.Accepted else ""
+
+    @property
+    def selected_action(self) -> str | None:
+        return (
+            self._accepted_action
+            if self.result() == QDialog.DialogCode.Accepted
+            else None
+        )
+
+    def _set_action_buttons_enabled(self, enabled: bool) -> None:
+        self.import_button.setEnabled(enabled)
+        self.transform_button.setEnabled(enabled and self.allow_transform)
 
     def _connect(self) -> None:
         if self._busy:
@@ -220,14 +242,18 @@ class WebImportDialog(QDialog):
                 f"Preview · showing up to {min(self._candidate.row_count, PREVIEW_ROW_LIMIT):,} rows.{notice}"
             )
             self.status_label.setStyleSheet("color: #526477; padding: 2px 0;")
-            self.import_button.setEnabled(True)
+            self._set_action_buttons_enabled(True)
         except (WebImportError, TypeError, ValueError) as exc:
             self._set_error(str(exc))
         finally:
             self._set_busy(False)
 
-    def _accept_import(self) -> None:
+    def _accept_import(self, action: str = "load") -> None:
         if self._candidate is None:
+            return
+        if action not in {"load", "transform"}:
+            return
+        if action == "transform" and not self.allow_transform:
             return
         self._set_busy(True)
         self.status_label.setText("Importing the selected Web data…")
@@ -240,6 +266,7 @@ class WebImportDialog(QDialog):
             return
         self._accepted_candidate = candidate
         self._accepted_url = url
+        self._accepted_action = action
         self.accept()
 
     def _selected_options(self) -> dict[str, Any]:
@@ -294,7 +321,7 @@ class WebImportDialog(QDialog):
     def _clear_preview(self) -> None:
         self._candidate = None
         self.preview_model.set_candidate(None)
-        self.import_button.setEnabled(False)
+        self._set_action_buttons_enabled(False)
 
     def _set_busy(self, busy: bool) -> None:
         self._busy = busy
@@ -304,7 +331,7 @@ class WebImportDialog(QDialog):
         self.delimiter_combo.setEnabled(not busy)
         self.encoding_combo.setEnabled(not busy)
         self.header_check.setEnabled(not busy)
-        self.import_button.setEnabled(not busy and self._candidate is not None)
+        self._set_action_buttons_enabled(not busy and self._candidate is not None)
 
     def _set_error(self, message: str) -> None:
         self.status_label.setText(message)

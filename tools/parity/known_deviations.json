@@ -1,0 +1,86 @@
+[
+ {
+  "expr": "T.INV(0.95,1e10)",
+  "powerbi": "1.6448533237763",
+  "app": "1.6448536271",
+  "why": "Power BI's solver is inexact here (asked twice, same answer); the app returns the mathematically correct value"
+ },
+ {
+  "expr": "T.INV(0.95,2147483647)",
+  "powerbi": "1.6448536460143",
+  "app": "1.6448536277",
+  "why": "Power BI's solver is inexact here (asked twice, same answer); the app returns the mathematically correct value"
+ },
+ {
+  "expr": "T.INV(0.35,50000000)",
+  "powerbi": "-0.385320474583522",
+  "app": "-0.385320468620",
+  "why": "Power BI's solver is inexact here (asked twice, same answer); the app returns the mathematically correct value"
+ },
+ {
+  "expr": "T.INV(0.65,50000000)",
+  "powerbi": "0.385320474583522",
+  "app": "0.385320468620",
+  "why": "Power BI's solver is inexact here (asked twice, same answer); the app returns the mathematically correct value"
+ },
+ {
+  "expr": "T.INV.2T(0.2,1e10)",
+  "powerbi": "1.28155184241157",
+  "app": "1.28155156563",
+  "why": "Power BI's solver is inexact here (asked twice, same answer); the app returns the mathematically correct value"
+ },
+ {
+  "expr": "T.INV.2T(0.3,50000000)",
+  "powerbi": "1.03643340367666",
+  "app": "1.03643340024",
+  "why": "Power BI's solver is inexact here (asked twice, same answer); the app returns the mathematically correct value"
+ },
+ {
+  "expr": "T.INV.2T(0.8,50000000)",
+  "powerbi": "0.253347108743936",
+  "app": "0.253347104484",
+  "why": "Power BI's solver is inexact here (asked twice, same answer); the app returns the mathematically correct value"
+ },
+ {
+  "expr": "T.INV.2T(1.2,50000000)",
+  "powerbi": "-0.253347108743936",
+  "app": "-0.253347104484",
+  "why": "Power BI's solver is inexact here (asked twice, same answer); the app returns the mathematically correct value"
+ },
+ {
+  "expr": "CHISQ.INV.RT(1e-12,1)",
+  "powerbi": "50.8441713324492",
+  "app": "50.8441279",
+  "why": "Power BI's solver is inexact here (asked twice, same answer); the app returns the mathematically correct value"
+ },
+ {
+  "expr": "CHISQ.INV.RT(1e-15,1)",
+  "powerbi": "64.4320389693635",
+  "app": "64.4304635",
+  "why": "Power BI's solver is inexact here (asked twice, same answer); the app returns the mathematically correct value"
+ },
+ {
+  "expr": "BETA.INV(1e-300,50,3)",
+  "powerbi": "7.4e-14",
+  "app": "8.66e-7",
+  "why": "Power BI's solver is inexact here (asked twice, same answer); the app returns the mathematically correct value"
+ },
+ {
+  "expr": "BETA.INV(1e-300,1e5,3)",
+  "powerbi": "4.3e-6",
+  "app": "0.99299",
+  "why": "Power BI's solver is inexact here (asked twice, same answer); the app returns the mathematically correct value"
+ },
+ {
+  "expr": "CONCATENATEX(SELECTCOLUMNS(Facts,Facts[Region]),[Region],\",\")",
+  "powerbi": "East,East,East,West,West,North",
+  "app": "East,West,East,North,West,East",
+  "why": "DAX defines no row order here (no ORDER BY): Power BI iterates in storage order (the dictionary order of the columns the expression reads, so equal values come together), the app iterates in row order; both are valid results"
+ },
+ {
+  "expr": "CALCULATE(COUNTROWS(Facts),TOPN(2,SUMMARIZE(Facts,Facts[Region],Facts[Note])))",
+  "powerbi": "2",
+  "app": "3",
+  "why": "DAX defines no row order here (no ORDER BY): Power BI iterates in storage order (the dictionary order of the columns the expression reads, so equal values come together), the app iterates in row order; both are valid results"
+ }
+]

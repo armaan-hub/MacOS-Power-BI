@@ -35,6 +35,26 @@ def candidate() -> ImportCandidate:
 
 
 class TransformationTests(unittest.TestCase):
+    def test_count_rows_returns_a_single_whole_number_cell(self) -> None:
+        source = candidate()
+        step = {"op": "count_rows"}
+
+        result = apply_transformations(source, [step])
+
+        self.assertEqual(result.headers, ["Count"])
+        self.assertEqual(result.rows, [{"Count": 3}])
+        self.assertEqual(
+            column_types_after_steps(
+                source.headers, [step], output_headers=result.headers
+            ),
+            {"Count": "whole_number"},
+        )
+        empty = ImportCandidate("csv", ["Value"], [], {}, [])
+        self.assertEqual(
+            apply_transformations(empty, [step]).rows,
+            [{"Count": 0}],
+        )
+
     def test_type_detection_is_conservative_and_preserves_identifier_text(self) -> None:
         headers = ["Date", "Amount", "Units", "TRN", "Voucher No.", "Active", "Mixed"]
         rows = [

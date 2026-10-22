@@ -177,11 +177,13 @@ class ColumnTypeLifecycleTests(unittest.TestCase):
                 if dialog.ribbon_tabs.tabText(index) == "Home"
             )
             dialog.ribbon_tabs.setCurrentIndex(home_index)
-            reference_button = next(
-                button for button in dialog.ribbon_tabs.currentWidget().findChildren(QToolButton)
-                if button.text() == "Reference\nquery"
+            manage_button = dialog.findChild(QToolButton, "powerQueryManageQueriesButton")
+            self.assertIsNotNone(manage_button)
+            reference_action = next(
+                action for action in manage_button.menu().actions()
+                if action.text() == "Reference Query"
             )
-            reference_button.click()
+            reference_action.trigger()
             reference_id = dialog._active_query_id
             reference = dialog._query_states[reference_id]
             self.assertEqual(

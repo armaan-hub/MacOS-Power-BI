@@ -128,6 +128,42 @@ class TopNFilterLifecycleTests(unittest.TestCase):
             {"East": 6.0, "North": 5.0, "South": 40.0, "West": 70.0},
         )
 
+    def test_measure_allselected_uses_pre_top_n_page_selection_on_public_series(self) -> None:
+        controller = self.controller("measure-top-n-settings.ini")
+        self.assertTrue(controller._commit_import(
+            self.source_path, parse_file(self.source_path)
+        ))
+        table_id = self.table_id(controller)
+        model_table = next(
+            item for item in controller._project["model"]["tables"]
+            if item.get("id") == table_id
+        )
+        table_name = str(model_table["name"]).replace("'", "''")
+        expression = (
+            "DIVIDE(SUM([Revenue]), "
+            f"CALCULATE(SUM([Revenue]), ALLSELECTED('{table_name}'[Region])))"
+        )
+        self.assertTrue(controller.create_measure("Selected Region Share", expression))
+        visual_name = "Region revenue"
+        controller.add_chart(visual_name)
+        controller.selectVisual(visual_name)
+        self.assertTrue(controller.addPageMultiValueFilter(
+            table_id, "Region", "is_any_of", '["North", "East", "South"]'
+        ))
+        controller.add_field_to_well("X-axis", "Region")
+        controller.add_field_to_well(
+            "Y-axis", "__dax_measure__:Selected Region Share"
+        )
+        self.assertTrue(controller.addVisualTopNFilter(
+            visual_name, table_id, "Region", "top", 1, "Revenue"
+        ))
+
+        # East is the only displayed group. Its 90 revenue share is still
+        # divided by the pre-Top-N North/East/South selection total of 215.
+        series = controller.visualSeries(visual_name)
+        self.assertEqual([item["label"] for item in series], ["East"])
+        self.assertAlmostEqual(float(series[0]["value"]), 90 / 215)
+
 
 if __name__ == "__main__":
     unittest.main()

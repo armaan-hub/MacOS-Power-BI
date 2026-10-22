@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import copy
+from contextlib import closing
 import os
 from pathlib import Path
 import sqlite3
@@ -78,6 +79,19 @@ class PowerQuerySessionCombineTests(unittest.TestCase):
             "parser_options": dict(candidate.options),
             "transform_steps": [],
         }
+
+    def trigger_source_menu_item(
+        self, dialog: TransformDataDialog, label: str
+    ) -> None:
+        button = dialog.findChild(QToolButton, "powerQueryNewSourceButton")
+        self.assertIsNotNone(button)
+        action = next(
+            (item for item in button.menu().actions() if item.text() == label),
+            None,
+        )
+        self.assertIsNotNone(action, f"Missing Power Query source action: {label}")
+        self.assertTrue(action.isEnabled())
+        action.trigger()
 
     def root_with_reference(self) -> tuple[
         StudioController, Path, str, str, list[dict[str, str]]
@@ -188,6 +202,113 @@ class PowerQuerySessionCombineTests(unittest.TestCase):
         self.assertEqual(reopened._loaded_candidates[reference_id].rows, [
             {"Region": "Dubai", "Amount": 35},
         ])
+
+    def test_session_apply_keeps_query_errors_and_blanks_them_in_the_model(self) -> None:
+        controller, path, root_id, reference_id, _steps = self.root_with_reference()
+        path.write_text("Region,Amount\n East ,10\nWest,bad\n", encoding="utf-8")
+        controller.refresh_source()
+        convert = {"op": "convert_type", "column": "Amount", "type": "whole_number"}
+
+        def add_conversion(dialog: TransformDataDialog) -> QDialog.DialogCode:
+            dialog.query_list.setCurrentRow(dialog._query_order.index(root_id))
+            dialog.operation_combo.setCurrentIndex(
+                dialog.operation_combo.findData("convert_type")
+            )
+            dialog.column_combo.setCurrentText("Amount")
+            dialog.option_combo.setCurrentIndex(
+                dialog.option_combo.findData(convert["type"])
+            )
+            dialog._add_step()
+            dialog._accept_candidate()
+            return QDialog.DialogCode.Accepted
+
+        with patch.object(TransformDataDialog, "exec", new=add_conversion):
+            self.assertTrue(controller.transform_data_dialog(), controller.statusMessage)
+
+        for source_id in (root_id, reference_id):
+            query_value = controller._query_candidates[source_id].rows[1]["Amount"]
+            self.assertIsInstance(query_value, PowerQueryCellError, source_id)
+            self.assertEqual(query_value.reason, "DataFormat.Error")
+            model_rows = controller._loaded_candidates[source_id].rows
+            self.assertEqual(
+                [row["Amount"] for row in model_rows], [10, None], source_id
+            )
+
+        # A session delete must drop the query-facing cache with the model one.
+        self.assertIn(reference_id, controller._query_candidates)
+        self.assertTrue(controller._commit_transform_session(
+            {}, deleted_query_ids={reference_id}
+        ), controller.statusMessage)
+        self.assertNotIn(reference_id, controller._query_candidates)
+        self.assertNotIn(reference_id, controller._loaded_candidates)
+
+    def test_refresh_keeps_query_errors_blanks_model_and_refreshes_dependents(self) -> None:
+        controller, path, root_id, reference_id, trim = self.root_with_reference()
+        steps = [*trim, {"op": "convert_type", "column": "Amount", "type": "whole_number"}]
+        raw = controller._raw_candidates[root_id]
+        self.assertTrue(controller._commit_transform_steps(
+            root_id, steps, apply_transformations(raw, steps), previewed_source=raw
+        ), controller.statusMessage)
+        stale = controller._query_candidates[root_id]
+        self.assertEqual([row["Amount"] for row in stale.rows], [10, 20])
+
+        path.write_text("Region,Amount\n East ,10\nWest,bad\nNorth,7\n", encoding="utf-8")
+        controller._refresh_sources([root_id], refresh_all=True)
+
+        for source_id in (root_id, reference_id):
+            query_rows = controller._query_candidates[source_id].rows
+            self.assertEqual(len(query_rows), 3, source_id)
+            error = query_rows[1]["Amount"]
+            self.assertIsInstance(error, PowerQueryCellError, source_id)
+            self.assertEqual(error.reason, "DataFormat.Error")
+            self.assertEqual(
+                [row["Amount"] for row in controller._loaded_candidates[source_id].rows],
+                [10, None, 7],
+                source_id,
+            )
+
+    def test_reimporting_a_source_refreshes_query_cache_for_it_and_dependents(self) -> None:
+        controller, path, root_id, reference_id, _steps = self.root_with_reference()
+        path.write_text("Region,Amount\nEast,99\n", encoding="utf-8")
+
+        self.assertTrue(controller._commit_import(path, parse_file(path)), controller.statusMessage)
+
+        self.assertEqual(controller._source_id_for_path(path), root_id)
+        # Query results are fresh (not the stale 10/20 rows) and match the model
+        # for these error-free sources; the reference query carries typed values.
+        for source_id, expected in ((root_id, "99"), (reference_id, 99)):
+            self.assertEqual(
+                [row["Amount"] for row in controller._query_candidates[source_id].rows],
+                [expected], source_id,
+            )
+            self.assertEqual(
+                [row["Amount"] for row in controller._loaded_candidates[source_id].rows],
+                [expected], source_id,
+            )
+
+    def test_new_saved_query_blanks_format_errors_in_model_but_keeps_them_in_query(self) -> None:
+        controller, _path, root_id, _reference_id, _steps = self.root_with_reference()
+        bad = PowerQueryCellError("DataFormat.Error", "bad", "bad", "whole_number", row=1)
+        candidate = ImportCandidate(
+            "query", ["Region", "Amount"],
+            [{"Region": "East", "Amount": 5}, {"Region": "West", "Amount": bad}],
+            {}, [],
+        )
+        self.assertTrue(controller._create_saved_query(
+            "Errors", [root_id], candidate,
+            {"operation": "reference", "source_ids": [root_id]},
+            {"Region": "text", "Amount": "whole_number"},
+        ), controller.statusMessage)
+        source_id = str(controller._active_source_id)
+
+        self.assertIsInstance(
+            controller._query_candidates[source_id].rows[1]["Amount"], PowerQueryCellError
+        )
+        self.assertEqual(
+            [row["Amount"] for row in controller._loaded_candidates[source_id].rows],
+            [5, None],
+        )
+        self.assertEqual([row["Amount"] for row in controller._rows], [5, None])
 
     def test_folder_source_settings_replays_dependencies_and_persists_recipe(self) -> None:
         controller = self.controller()
@@ -453,7 +574,7 @@ class PowerQuerySessionCombineTests(unittest.TestCase):
             (old_path, [("Dubai", "10")]),
             (new_path, [("Abu Dhabi", "20")]),
         ):
-            with sqlite3.connect(path) as connection:
+            with closing(sqlite3.connect(path)) as connection, connection:
                 connection.execute(
                     "CREATE TABLE Sales (Region TEXT, Amount TEXT)"
                 )
@@ -551,7 +672,7 @@ class PowerQuerySessionCombineTests(unittest.TestCase):
         self.assertEqual(
             reopened_source["parser_options"]["table_name"], "SalesView"
         )
-        with sqlite3.connect(new_path) as connection:
+        with closing(sqlite3.connect(new_path)) as connection, connection:
             connection.execute(
                 "UPDATE Sales SET Amount = '35' WHERE Region = 'Abu Dhabi'"
             )
@@ -569,7 +690,7 @@ class PowerQuerySessionCombineTests(unittest.TestCase):
         first_path = self.root / "first.sqlite"
         second_path = self.root / "second.sqlite"
         for path, region in ((first_path, "Dubai"), (second_path, "Abu Dhabi")):
-            with sqlite3.connect(path) as connection:
+            with closing(sqlite3.connect(path)) as connection, connection:
                 connection.execute(
                     "CREATE TABLE Sales (Region TEXT, Amount TEXT)"
                 )
@@ -639,7 +760,7 @@ class PowerQuerySessionCombineTests(unittest.TestCase):
             (original_path, "Dubai"),
             (target_path, "Abu Dhabi"),
         ):
-            with sqlite3.connect(path) as connection:
+            with closing(sqlite3.connect(path)) as connection, connection:
                 connection.execute(
                     "CREATE TABLE Sales (Region TEXT, Amount TEXT)"
                 )
@@ -670,7 +791,14 @@ class PowerQuerySessionCombineTests(unittest.TestCase):
         )
 
         def accept_editor(dialog: TransformDataDialog) -> QDialog.DialogCode:
-            dialog.findChild(QToolButton, "powerQueryNewSourceButton").click()
+            new_source_button = dialog.findChild(
+                QToolButton, "powerQueryNewSourceButton"
+            )
+            self.assertIsNotNone(new_source_button)
+            next(
+                action for action in new_source_button.menu().actions()
+                if action.text() == "From File…"
+            ).trigger()
             staged_id = dialog._query_order[-1]
             self.assertEqual(
                 dialog._query_states[staged_id]["source_record"]["path"],
@@ -717,7 +845,7 @@ class PowerQuerySessionCombineTests(unittest.TestCase):
         third_path = self.root / "third.sqlite"
         paths = (first_path, second_path, third_path)
         for path, region in zip(paths, ("Dubai", "Abu Dhabi", "Sharjah")):
-            with sqlite3.connect(path) as connection:
+            with closing(sqlite3.connect(path)) as connection, connection:
                 connection.execute(
                     "CREATE TABLE Sales (Region TEXT, Amount TEXT)"
                 )
@@ -789,7 +917,7 @@ class PowerQuerySessionCombineTests(unittest.TestCase):
     def test_sqlite_binding_check_preserves_distinct_quoted_object_names(self) -> None:
         controller = self.controller()
         path = self.root / "unicode-identifiers.sqlite"
-        with sqlite3.connect(path) as connection:
+        with closing(sqlite3.connect(path)) as connection, connection:
             connection.execute('CREATE TABLE "Straße" (Value TEXT)')
             connection.execute('CREATE TABLE "STRASSE" (Value TEXT)')
             connection.execute('CREATE TABLE "Sales" (Value TEXT)')
@@ -1216,7 +1344,10 @@ class PowerQuerySessionCombineTests(unittest.TestCase):
             button = dialog.findChild(QToolButton, "powerQueryNewSourceButton")
             self.assertIsNotNone(button)
             self.assertTrue(button.isEnabled())
-            button.click()
+            next(
+                action for action in button.menu().actions()
+                if action.text() == "From File…"
+            ).trigger()
             new_id = dialog._query_order[-1]
             staged = dialog._query_states[new_id]
             self.assertTrue(staged["is_new_source"])
@@ -1359,7 +1490,10 @@ class PowerQuerySessionCombineTests(unittest.TestCase):
         def cancel_with_new_source(dialog: TransformDataDialog) -> QDialog.DialogCode:
             button = dialog.findChild(QToolButton, "powerQueryNewSourceButton")
             self.assertIsNotNone(button)
-            button.click()
+            next(
+                action for action in button.menu().actions()
+                if action.text() == "From File…"
+            ).trigger()
             self.assertTrue(dialog._query_states[source_record["id"]]["is_new_source"])
             return QDialog.DialogCode.Rejected
 
@@ -1398,10 +1532,7 @@ class PowerQuerySessionCombineTests(unittest.TestCase):
         }
 
         def accept_folder_source(dialog: TransformDataDialog) -> QDialog.DialogCode:
-            button = dialog.findChild(QToolButton, "powerQueryFolderSourceButton")
-            self.assertIsNotNone(button)
-            self.assertTrue(button.isEnabled())
-            button.click()
+            self.trigger_source_menu_item(dialog, "From Folder…")
             self.assertTrue(
                 dialog._query_states[source_record["id"]]["is_new_source"]
             )
@@ -1459,10 +1590,7 @@ class PowerQuerySessionCombineTests(unittest.TestCase):
         }
 
         def accept_web_source(dialog: TransformDataDialog) -> QDialog.DialogCode:
-            button = dialog.findChild(QToolButton, "powerQueryWebSourceButton")
-            self.assertIsNotNone(button)
-            self.assertTrue(button.isEnabled())
-            button.click()
+            self.trigger_source_menu_item(dialog, "Web…")
             staged = dialog._query_states[source_record["id"]]
             self.assertTrue(staged["is_new_source"])
             self.assertEqual(staged["source_record"]["connection"], source_record["connection"])
@@ -1519,7 +1647,7 @@ class PowerQuerySessionCombineTests(unittest.TestCase):
         }
 
         def accept_source(dialog: TransformDataDialog) -> QDialog.DialogCode:
-            dialog.findChild(QToolButton, "powerQueryWebSourceButton").click()
+            self.trigger_source_menu_item(dialog, "Web…")
             dialog.findChild(QToolButton, "powerQueryRefreshPreviewButton").click()
             self.assertEqual(dialog._preview_candidate.rows, refreshed.rows)
             self.assertTrue(
@@ -1571,7 +1699,7 @@ class PowerQuerySessionCombineTests(unittest.TestCase):
         }
 
         def accept_source(dialog: TransformDataDialog) -> QDialog.DialogCode:
-            dialog.findChild(QToolButton, "powerQueryODataSourceButton").click()
+            self.trigger_source_menu_item(dialog, "OData Feed…")
             self.assertTrue(dialog._query_states[source_record["id"]]["is_new_source"])
             dialog._accept_candidate()
             return QDialog.DialogCode.Accepted
@@ -1637,9 +1765,8 @@ class PowerQuerySessionCombineTests(unittest.TestCase):
             deletions.append(reference)
 
         def accept_sources(dialog: TransformDataDialog) -> QDialog.DialogCode:
-            button = dialog.findChild(QToolButton, "powerQuerySqlServerSourceButton")
             for source in source_records:
-                button.click()
+                self.trigger_source_menu_item(dialog, "SQL Server…")
             dialog._accept_candidate()
             return QDialog.DialogCode.Accepted
 
@@ -1769,10 +1896,7 @@ class PowerQuerySessionCombineTests(unittest.TestCase):
         )
 
         def accept_sql_source(dialog: TransformDataDialog) -> QDialog.DialogCode:
-            button = dialog.findChild(QToolButton, "powerQuerySqlServerSourceButton")
-            self.assertIsNotNone(button)
-            self.assertTrue(button.isEnabled())
-            button.click()
+            self.trigger_source_menu_item(dialog, "SQL Server…")
             self.assertEqual(
                 dialog._query_states[source_record["id"]]["source_record"]["_staged_password"],
                 "local-only-secret",
@@ -1827,7 +1951,11 @@ class PowerQuerySessionCombineTests(unittest.TestCase):
         def accept_after_file_change(dialog: TransformDataDialog) -> QDialog.DialogCode:
             button = dialog.findChild(QToolButton, "powerQueryNewSourceButton")
             self.assertIsNotNone(button)
-            button.click()
+            add_file_action = next(
+                action for action in button.menu().actions()
+                if action.text() == "From File…"
+            )
+            add_file_action.trigger()
             new_path.write_text("Region\nSouth\n", encoding="utf-8")
             dialog._accept_candidate()
             return QDialog.DialogCode.Accepted
@@ -2960,7 +3088,10 @@ class PowerQuerySessionCombineTests(unittest.TestCase):
         self.assertTrue(controller._save_to(project_path))
         reopened = self.controller("lineage-reopened.ini")
         self.assertTrue(reopened.open_project_path(project_path))
-        reopened_error = reopened._loaded_candidates[source_id].rows[-1]["Amount"]
+        # The model-facing candidate loads DataFormat.Error as blank; the
+        # error-bearing query result keeps row lineage across save/reopen.
+        self.assertIsNone(reopened._loaded_candidates[source_id].rows[-1]["Amount"])
+        reopened_error = reopened._query_candidates[source_id].rows[-1]["Amount"]
         self.assertIsInstance(reopened_error, PowerQueryCellError)
         self.assertEqual(reopened_error.source_rows, ((source_id, 2),))
         self.assertEqual(reopened_error.row, 3)
@@ -2981,7 +3112,7 @@ class PowerQuerySessionCombineTests(unittest.TestCase):
     def test_mixed_unpivot_any_type_persists_and_replays_from_sqlite(self) -> None:
         controller = self.controller()
         path = self.root / "mixed.sqlite"
-        with sqlite3.connect(path) as connection:
+        with closing(sqlite3.connect(path)) as connection, connection:
             connection.execute(
                 "CREATE TABLE Mixed (Key TEXT, Amount REAL, Note TEXT)"
             )

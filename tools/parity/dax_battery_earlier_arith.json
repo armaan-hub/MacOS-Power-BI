@@ -1,0 +1,958 @@
+{
+ "powerbi_version": "2.157.879.0 (26.08)+da30fe74eb0b8a8786ab7326b69c400a0e951831",
+ "frozen": "2026-10-21",
+ "items": [
+  {
+   "expr": "SUMX(Facts,COUNTROWS(FILTER(Facts,Facts[Quantity]>EARLIER(Facts[Quantity])*1)))",
+   "powerbi": "15"
+  },
+  {
+   "expr": "SUMX(Facts,COUNTROWS(FILTER(Facts,Facts[Quantity]>EARLIER(Facts[Quantity])*2)))",
+   "powerbi": "9"
+  },
+  {
+   "expr": "SUMX(Facts,COUNTROWS(FILTER(Facts,Facts[Quantity]>EARLIER(Facts[Quantity])+0)))",
+   "powerbi": "15"
+  },
+  {
+   "expr": "SUMX(Facts,COUNTROWS(FILTER(Facts,Facts[Quantity]>EARLIER(Facts[Quantity])+1)))",
+   "powerbi": "10"
+  },
+  {
+   "expr": "SUMX(Facts,COUNTROWS(FILTER(Facts,Facts[Quantity]>EARLIER(Facts[Quantity])-1)))",
+   "powerbi": "21"
+  },
+  {
+   "expr": "SUMX(Facts,COUNTROWS(FILTER(Facts,Facts[Quantity]>EARLIER(Facts[Quantity])/1)))",
+   "powerbi": "15"
+  },
+  {
+   "expr": "SUMX(Facts,COUNTROWS(FILTER(Facts,Facts[Quantity]>EARLIER(Facts[Quantity])/2)))",
+   "powerbi": "24"
+  },
+  {
+   "expr": "SUMX(Facts,COUNTROWS(FILTER(Facts,Facts[Quantity]>-EARLIER(Facts[Quantity]))))",
+   "powerbi": "35"
+  },
+  {
+   "expr": "SUMX(Facts,COUNTROWS(FILTER(Facts,Facts[Sales]>EARLIER(Facts[Sales])*1)))",
+   "powerbi": "14"
+  },
+  {
+   "expr": "SUMX(Facts,COUNTROWS(FILTER(Facts,Facts[Sales]>EARLIER(Facts[Sales])*2)))",
+   "powerbi": "14"
+  },
+  {
+   "expr": "SUMX(Facts,COUNTROWS(FILTER(Facts,Facts[Sales]>EARLIER(Facts[Sales])+0)))",
+   "powerbi": "14"
+  },
+  {
+   "expr": "SUMX(Facts,COUNTROWS(FILTER(Facts,Facts[Sales]>EARLIER(Facts[Sales])+1)))",
+   "powerbi": "14"
+  },
+  {
+   "expr": "SUMX(Facts,COUNTROWS(FILTER(Facts,Facts[Sales]>EARLIER(Facts[Sales])-1)))",
+   "powerbi": "22"
+  },
+  {
+   "expr": "SUMX(Facts,COUNTROWS(FILTER(Facts,Facts[Sales]>EARLIER(Facts[Sales])/1)))",
+   "powerbi": "14"
+  },
+  {
+   "expr": "SUMX(Facts,COUNTROWS(FILTER(Facts,Facts[Sales]>EARLIER(Facts[Sales])/2)))",
+   "powerbi": "18"
+  },
+  {
+   "expr": "SUMX(Facts,COUNTROWS(FILTER(Facts,Facts[Sales]>-EARLIER(Facts[Sales]))))",
+   "powerbi": "27"
+  },
+  {
+   "expr": "SUMX(VALUES(Facts[Quantity]),COUNTROWS(FILTER(Facts,Facts[Quantity]>EARLIER(Facts[Quantity])*1)))",
+   "powerbi": "15"
+  },
+  {
+   "expr": "SUMX(VALUES(Facts[Quantity]),COUNTROWS(FILTER(Facts,Facts[Quantity]>EARLIER(Facts[Quantity])*2)))",
+   "powerbi": "9"
+  },
+  {
+   "expr": "SUMX(VALUES(Facts[Quantity]),COUNTROWS(FILTER(Facts,Facts[Quantity]>EARLIER(Facts[Quantity])+0)))",
+   "powerbi": "15"
+  },
+  {
+   "expr": "SUMX(VALUES(Facts[Quantity]),COUNTROWS(FILTER(Facts,Facts[Quantity]>EARLIER(Facts[Quantity])+1)))",
+   "powerbi": "10"
+  },
+  {
+   "expr": "SUMX(VALUES(Facts[Quantity]),COUNTROWS(FILTER(Facts,Facts[Quantity]>EARLIER(Facts[Quantity])-1)))",
+   "powerbi": "21"
+  },
+  {
+   "expr": "SUMX(VALUES(Facts[Quantity]),COUNTROWS(FILTER(Facts,Facts[Quantity]>EARLIER(Facts[Quantity])/1)))",
+   "powerbi": "15"
+  },
+  {
+   "expr": "SUMX(VALUES(Facts[Quantity]),COUNTROWS(FILTER(Facts,Facts[Quantity]>EARLIER(Facts[Quantity])/2)))",
+   "powerbi": "24"
+  },
+  {
+   "expr": "SUMX(VALUES(Facts[Quantity]),COUNTROWS(FILTER(Facts,Facts[Quantity]>-EARLIER(Facts[Quantity]))))",
+   "powerbi": "35"
+  },
+  {
+   "expr": "SUMX(VALUES(Facts[Quantity]),COUNTROWS(FILTER(Facts,Facts[Sales]>EARLIER(Facts[Sales])*1)))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 92) A single value for column 'Sales' in table 'Facts' cannot be determined. This can happen when a measure or function formula refers to a column that contains many values without specifying an aggregation such as min, max, count, or sum to get a single result.\""
+  },
+  {
+   "expr": "SUMX(VALUES(Facts[Quantity]),COUNTROWS(FILTER(Facts,Facts[Sales]>EARLIER(Facts[Sales])*2)))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 92) A single value for column 'Sales' in table 'Facts' cannot be determined. This can happen when a measure or function formula refers to a column that contains many values without specifying an aggregation such as min, max, count, or sum to get a single result.\""
+  },
+  {
+   "expr": "SUMX(VALUES(Facts[Quantity]),COUNTROWS(FILTER(Facts,Facts[Sales]>EARLIER(Facts[Sales])+0)))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 92) A single value for column 'Sales' in table 'Facts' cannot be determined. This can happen when a measure or function formula refers to a column that contains many values without specifying an aggregation such as min, max, count, or sum to get a single result.\""
+  },
+  {
+   "expr": "SUMX(VALUES(Facts[Quantity]),COUNTROWS(FILTER(Facts,Facts[Sales]>EARLIER(Facts[Sales])+1)))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 92) A single value for column 'Sales' in table 'Facts' cannot be determined. This can happen when a measure or function formula refers to a column that contains many values without specifying an aggregation such as min, max, count, or sum to get a single result.\""
+  },
+  {
+   "expr": "SUMX(VALUES(Facts[Quantity]),COUNTROWS(FILTER(Facts,Facts[Sales]>EARLIER(Facts[Sales])-1)))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 92) A single value for column 'Sales' in table 'Facts' cannot be determined. This can happen when a measure or function formula refers to a column that contains many values without specifying an aggregation such as min, max, count, or sum to get a single result.\""
+  },
+  {
+   "expr": "SUMX(VALUES(Facts[Quantity]),COUNTROWS(FILTER(Facts,Facts[Sales]>EARLIER(Facts[Sales])/1)))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 92) A single value for column 'Sales' in table 'Facts' cannot be determined. This can happen when a measure or function formula refers to a column that contains many values without specifying an aggregation such as min, max, count, or sum to get a single result.\""
+  },
+  {
+   "expr": "SUMX(VALUES(Facts[Quantity]),COUNTROWS(FILTER(Facts,Facts[Sales]>EARLIER(Facts[Sales])/2)))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 92) A single value for column 'Sales' in table 'Facts' cannot be determined. This can happen when a measure or function formula refers to a column that contains many values without specifying an aggregation such as min, max, count, or sum to get a single result.\""
+  },
+  {
+   "expr": "SUMX(VALUES(Facts[Quantity]),COUNTROWS(FILTER(Facts,Facts[Sales]>-EARLIER(Facts[Sales]))))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 93) A single value for column 'Sales' in table 'Facts' cannot be determined. This can happen when a measure or function formula refers to a column that contains many values without specifying an aggregation such as min, max, count, or sum to get a single result.\""
+  },
+  {
+   "expr": "SUMX(ALL(Facts[Quantity]),COUNTROWS(FILTER(Facts,Facts[Quantity]>EARLIER(Facts[Quantity])*1)))",
+   "powerbi": "15"
+  },
+  {
+   "expr": "SUMX(ALL(Facts[Quantity]),COUNTROWS(FILTER(Facts,Facts[Quantity]>EARLIER(Facts[Quantity])*2)))",
+   "powerbi": "9"
+  },
+  {
+   "expr": "SUMX(ALL(Facts[Quantity]),COUNTROWS(FILTER(Facts,Facts[Quantity]>EARLIER(Facts[Quantity])+0)))",
+   "powerbi": "15"
+  },
+  {
+   "expr": "SUMX(ALL(Facts[Quantity]),COUNTROWS(FILTER(Facts,Facts[Quantity]>EARLIER(Facts[Quantity])+1)))",
+   "powerbi": "10"
+  },
+  {
+   "expr": "SUMX(ALL(Facts[Quantity]),COUNTROWS(FILTER(Facts,Facts[Quantity]>EARLIER(Facts[Quantity])-1)))",
+   "powerbi": "21"
+  },
+  {
+   "expr": "SUMX(ALL(Facts[Quantity]),COUNTROWS(FILTER(Facts,Facts[Quantity]>EARLIER(Facts[Quantity])/1)))",
+   "powerbi": "15"
+  },
+  {
+   "expr": "SUMX(ALL(Facts[Quantity]),COUNTROWS(FILTER(Facts,Facts[Quantity]>EARLIER(Facts[Quantity])/2)))",
+   "powerbi": "24"
+  },
+  {
+   "expr": "SUMX(ALL(Facts[Quantity]),COUNTROWS(FILTER(Facts,Facts[Quantity]>-EARLIER(Facts[Quantity]))))",
+   "powerbi": "35"
+  },
+  {
+   "expr": "SUMX(ALL(Facts[Quantity]),COUNTROWS(FILTER(Facts,Facts[Sales]>EARLIER(Facts[Sales])*1)))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 89) A single value for column 'Sales' in table 'Facts' cannot be determined. This can happen when a measure or function formula refers to a column that contains many values without specifying an aggregation such as min, max, count, or sum to get a single result.\""
+  },
+  {
+   "expr": "SUMX(ALL(Facts[Quantity]),COUNTROWS(FILTER(Facts,Facts[Sales]>EARLIER(Facts[Sales])*2)))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 89) A single value for column 'Sales' in table 'Facts' cannot be determined. This can happen when a measure or function formula refers to a column that contains many values without specifying an aggregation such as min, max, count, or sum to get a single result.\""
+  },
+  {
+   "expr": "SUMX(ALL(Facts[Quantity]),COUNTROWS(FILTER(Facts,Facts[Sales]>EARLIER(Facts[Sales])+0)))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 89) A single value for column 'Sales' in table 'Facts' cannot be determined. This can happen when a measure or function formula refers to a column that contains many values without specifying an aggregation such as min, max, count, or sum to get a single result.\""
+  },
+  {
+   "expr": "SUMX(ALL(Facts[Quantity]),COUNTROWS(FILTER(Facts,Facts[Sales]>EARLIER(Facts[Sales])+1)))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 89) A single value for column 'Sales' in table 'Facts' cannot be determined. This can happen when a measure or function formula refers to a column that contains many values without specifying an aggregation such as min, max, count, or sum to get a single result.\""
+  },
+  {
+   "expr": "SUMX(ALL(Facts[Quantity]),COUNTROWS(FILTER(Facts,Facts[Sales]>EARLIER(Facts[Sales])-1)))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 89) A single value for column 'Sales' in table 'Facts' cannot be determined. This can happen when a measure or function formula refers to a column that contains many values without specifying an aggregation such as min, max, count, or sum to get a single result.\""
+  },
+  {
+   "expr": "SUMX(ALL(Facts[Quantity]),COUNTROWS(FILTER(Facts,Facts[Sales]>EARLIER(Facts[Sales])/1)))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 89) A single value for column 'Sales' in table 'Facts' cannot be determined. This can happen when a measure or function formula refers to a column that contains many values without specifying an aggregation such as min, max, count, or sum to get a single result.\""
+  },
+  {
+   "expr": "SUMX(ALL(Facts[Quantity]),COUNTROWS(FILTER(Facts,Facts[Sales]>EARLIER(Facts[Sales])/2)))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 89) A single value for column 'Sales' in table 'Facts' cannot be determined. This can happen when a measure or function formula refers to a column that contains many values without specifying an aggregation such as min, max, count, or sum to get a single result.\""
+  },
+  {
+   "expr": "SUMX(ALL(Facts[Quantity]),COUNTROWS(FILTER(Facts,Facts[Sales]>-EARLIER(Facts[Sales]))))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 90) A single value for column 'Sales' in table 'Facts' cannot be determined. This can happen when a measure or function formula refers to a column that contains many values without specifying an aggregation such as min, max, count, or sum to get a single result.\""
+  },
+  {
+   "expr": "SUMX(ALL(Facts),COUNTROWS(FILTER(Facts,Facts[Quantity]>EARLIER(Facts[Quantity])*1)))",
+   "powerbi": "15"
+  },
+  {
+   "expr": "SUMX(ALL(Facts),COUNTROWS(FILTER(Facts,Facts[Quantity]>EARLIER(Facts[Quantity])*2)))",
+   "powerbi": "9"
+  },
+  {
+   "expr": "SUMX(ALL(Facts),COUNTROWS(FILTER(Facts,Facts[Quantity]>EARLIER(Facts[Quantity])+0)))",
+   "powerbi": "15"
+  },
+  {
+   "expr": "SUMX(ALL(Facts),COUNTROWS(FILTER(Facts,Facts[Quantity]>EARLIER(Facts[Quantity])+1)))",
+   "powerbi": "10"
+  },
+  {
+   "expr": "SUMX(ALL(Facts),COUNTROWS(FILTER(Facts,Facts[Quantity]>EARLIER(Facts[Quantity])-1)))",
+   "powerbi": "21"
+  },
+  {
+   "expr": "SUMX(ALL(Facts),COUNTROWS(FILTER(Facts,Facts[Quantity]>EARLIER(Facts[Quantity])/1)))",
+   "powerbi": "15"
+  },
+  {
+   "expr": "SUMX(ALL(Facts),COUNTROWS(FILTER(Facts,Facts[Quantity]>EARLIER(Facts[Quantity])/2)))",
+   "powerbi": "24"
+  },
+  {
+   "expr": "SUMX(ALL(Facts),COUNTROWS(FILTER(Facts,Facts[Quantity]>-EARLIER(Facts[Quantity]))))",
+   "powerbi": "35"
+  },
+  {
+   "expr": "SUMX(ALL(Facts),COUNTROWS(FILTER(Facts,Facts[Sales]>EARLIER(Facts[Sales])*1)))",
+   "powerbi": "14"
+  },
+  {
+   "expr": "SUMX(ALL(Facts),COUNTROWS(FILTER(Facts,Facts[Sales]>EARLIER(Facts[Sales])*2)))",
+   "powerbi": "14"
+  },
+  {
+   "expr": "SUMX(ALL(Facts),COUNTROWS(FILTER(Facts,Facts[Sales]>EARLIER(Facts[Sales])+0)))",
+   "powerbi": "14"
+  },
+  {
+   "expr": "SUMX(ALL(Facts),COUNTROWS(FILTER(Facts,Facts[Sales]>EARLIER(Facts[Sales])+1)))",
+   "powerbi": "14"
+  },
+  {
+   "expr": "SUMX(ALL(Facts),COUNTROWS(FILTER(Facts,Facts[Sales]>EARLIER(Facts[Sales])-1)))",
+   "powerbi": "22"
+  },
+  {
+   "expr": "SUMX(ALL(Facts),COUNTROWS(FILTER(Facts,Facts[Sales]>EARLIER(Facts[Sales])/1)))",
+   "powerbi": "14"
+  },
+  {
+   "expr": "SUMX(ALL(Facts),COUNTROWS(FILTER(Facts,Facts[Sales]>EARLIER(Facts[Sales])/2)))",
+   "powerbi": "18"
+  },
+  {
+   "expr": "SUMX(ALL(Facts),COUNTROWS(FILTER(Facts,Facts[Sales]>-EARLIER(Facts[Sales]))))",
+   "powerbi": "27"
+  },
+  {
+   "expr": "SUMX(DISTINCT(Facts[Quantity]),COUNTROWS(FILTER(Facts,Facts[Quantity]>EARLIER(Facts[Quantity])*1)))",
+   "powerbi": "15"
+  },
+  {
+   "expr": "SUMX(DISTINCT(Facts[Quantity]),COUNTROWS(FILTER(Facts,Facts[Quantity]>EARLIER(Facts[Quantity])*2)))",
+   "powerbi": "9"
+  },
+  {
+   "expr": "SUMX(DISTINCT(Facts[Quantity]),COUNTROWS(FILTER(Facts,Facts[Quantity]>EARLIER(Facts[Quantity])+0)))",
+   "powerbi": "15"
+  },
+  {
+   "expr": "SUMX(DISTINCT(Facts[Quantity]),COUNTROWS(FILTER(Facts,Facts[Quantity]>EARLIER(Facts[Quantity])+1)))",
+   "powerbi": "10"
+  },
+  {
+   "expr": "SUMX(DISTINCT(Facts[Quantity]),COUNTROWS(FILTER(Facts,Facts[Quantity]>EARLIER(Facts[Quantity])-1)))",
+   "powerbi": "21"
+  },
+  {
+   "expr": "SUMX(DISTINCT(Facts[Quantity]),COUNTROWS(FILTER(Facts,Facts[Quantity]>EARLIER(Facts[Quantity])/1)))",
+   "powerbi": "15"
+  },
+  {
+   "expr": "SUMX(DISTINCT(Facts[Quantity]),COUNTROWS(FILTER(Facts,Facts[Quantity]>EARLIER(Facts[Quantity])/2)))",
+   "powerbi": "24"
+  },
+  {
+   "expr": "SUMX(DISTINCT(Facts[Quantity]),COUNTROWS(FILTER(Facts,Facts[Quantity]>-EARLIER(Facts[Quantity]))))",
+   "powerbi": "35"
+  },
+  {
+   "expr": "SUMX(DISTINCT(Facts[Quantity]),COUNTROWS(FILTER(Facts,Facts[Sales]>EARLIER(Facts[Sales])*1)))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 94) A single value for column 'Sales' in table 'Facts' cannot be determined. This can happen when a measure or function formula refers to a column that contains many values without specifying an aggregation such as min, max, count, or sum to get a single result.\""
+  },
+  {
+   "expr": "SUMX(DISTINCT(Facts[Quantity]),COUNTROWS(FILTER(Facts,Facts[Sales]>EARLIER(Facts[Sales])*2)))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 94) A single value for column 'Sales' in table 'Facts' cannot be determined. This can happen when a measure or function formula refers to a column that contains many values without specifying an aggregation such as min, max, count, or sum to get a single result.\""
+  },
+  {
+   "expr": "SUMX(DISTINCT(Facts[Quantity]),COUNTROWS(FILTER(Facts,Facts[Sales]>EARLIER(Facts[Sales])+0)))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 94) A single value for column 'Sales' in table 'Facts' cannot be determined. This can happen when a measure or function formula refers to a column that contains many values without specifying an aggregation such as min, max, count, or sum to get a single result.\""
+  },
+  {
+   "expr": "SUMX(DISTINCT(Facts[Quantity]),COUNTROWS(FILTER(Facts,Facts[Sales]>EARLIER(Facts[Sales])+1)))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 94) A single value for column 'Sales' in table 'Facts' cannot be determined. This can happen when a measure or function formula refers to a column that contains many values without specifying an aggregation such as min, max, count, or sum to get a single result.\""
+  },
+  {
+   "expr": "SUMX(DISTINCT(Facts[Quantity]),COUNTROWS(FILTER(Facts,Facts[Sales]>EARLIER(Facts[Sales])-1)))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 94) A single value for column 'Sales' in table 'Facts' cannot be determined. This can happen when a measure or function formula refers to a column that contains many values without specifying an aggregation such as min, max, count, or sum to get a single result.\""
+  },
+  {
+   "expr": "SUMX(DISTINCT(Facts[Quantity]),COUNTROWS(FILTER(Facts,Facts[Sales]>EARLIER(Facts[Sales])/1)))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 94) A single value for column 'Sales' in table 'Facts' cannot be determined. This can happen when a measure or function formula refers to a column that contains many values without specifying an aggregation such as min, max, count, or sum to get a single result.\""
+  },
+  {
+   "expr": "SUMX(DISTINCT(Facts[Quantity]),COUNTROWS(FILTER(Facts,Facts[Sales]>EARLIER(Facts[Sales])/2)))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 94) A single value for column 'Sales' in table 'Facts' cannot be determined. This can happen when a measure or function formula refers to a column that contains many values without specifying an aggregation such as min, max, count, or sum to get a single result.\""
+  },
+  {
+   "expr": "SUMX(DISTINCT(Facts[Quantity]),COUNTROWS(FILTER(Facts,Facts[Sales]>-EARLIER(Facts[Sales]))))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 95) A single value for column 'Sales' in table 'Facts' cannot be determined. This can happen when a measure or function formula refers to a column that contains many values without specifying an aggregation such as min, max, count, or sum to get a single result.\""
+  },
+  {
+   "expr": "SUMX(VALUES(Facts[Sales]),COUNTROWS(FILTER(Facts,Facts[Quantity]>EARLIER(Facts[Quantity])*1)))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 92) A single value for column 'Quantity' in table 'Facts' cannot be determined. This can happen when a measure or function formula refers to a column that contains many values without specifying an aggregation such as min, max, count, or sum to get a single result.\""
+  },
+  {
+   "expr": "SUMX(VALUES(Facts[Sales]),COUNTROWS(FILTER(Facts,Facts[Quantity]>EARLIER(Facts[Quantity])*2)))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 92) A single value for column 'Quantity' in table 'Facts' cannot be determined. This can happen when a measure or function formula refers to a column that contains many values without specifying an aggregation such as min, max, count, or sum to get a single result.\""
+  },
+  {
+   "expr": "SUMX(VALUES(Facts[Sales]),COUNTROWS(FILTER(Facts,Facts[Quantity]>EARLIER(Facts[Quantity])+0)))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 92) A single value for column 'Quantity' in table 'Facts' cannot be determined. This can happen when a measure or function formula refers to a column that contains many values without specifying an aggregation such as min, max, count, or sum to get a single result.\""
+  },
+  {
+   "expr": "SUMX(VALUES(Facts[Sales]),COUNTROWS(FILTER(Facts,Facts[Quantity]>EARLIER(Facts[Quantity])+1)))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 92) A single value for column 'Quantity' in table 'Facts' cannot be determined. This can happen when a measure or function formula refers to a column that contains many values without specifying an aggregation such as min, max, count, or sum to get a single result.\""
+  },
+  {
+   "expr": "SUMX(VALUES(Facts[Sales]),COUNTROWS(FILTER(Facts,Facts[Quantity]>EARLIER(Facts[Quantity])-1)))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 92) A single value for column 'Quantity' in table 'Facts' cannot be determined. This can happen when a measure or function formula refers to a column that contains many values without specifying an aggregation such as min, max, count, or sum to get a single result.\""
+  },
+  {
+   "expr": "SUMX(VALUES(Facts[Sales]),COUNTROWS(FILTER(Facts,Facts[Quantity]>EARLIER(Facts[Quantity])/1)))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 92) A single value for column 'Quantity' in table 'Facts' cannot be determined. This can happen when a measure or function formula refers to a column that contains many values without specifying an aggregation such as min, max, count, or sum to get a single result.\""
+  },
+  {
+   "expr": "SUMX(VALUES(Facts[Sales]),COUNTROWS(FILTER(Facts,Facts[Quantity]>EARLIER(Facts[Quantity])/2)))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 92) A single value for column 'Quantity' in table 'Facts' cannot be determined. This can happen when a measure or function formula refers to a column that contains many values without specifying an aggregation such as min, max, count, or sum to get a single result.\""
+  },
+  {
+   "expr": "SUMX(VALUES(Facts[Sales]),COUNTROWS(FILTER(Facts,Facts[Quantity]>-EARLIER(Facts[Quantity]))))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 93) A single value for column 'Quantity' in table 'Facts' cannot be determined. This can happen when a measure or function formula refers to a column that contains many values without specifying an aggregation such as min, max, count, or sum to get a single result.\""
+  },
+  {
+   "expr": "SUMX(VALUES(Facts[Sales]),COUNTROWS(FILTER(Facts,Facts[Sales]>EARLIER(Facts[Sales])*1)))",
+   "powerbi": "14"
+  },
+  {
+   "expr": "SUMX(VALUES(Facts[Sales]),COUNTROWS(FILTER(Facts,Facts[Sales]>EARLIER(Facts[Sales])*2)))",
+   "powerbi": "14"
+  },
+  {
+   "expr": "SUMX(VALUES(Facts[Sales]),COUNTROWS(FILTER(Facts,Facts[Sales]>EARLIER(Facts[Sales])+0)))",
+   "powerbi": "14"
+  },
+  {
+   "expr": "SUMX(VALUES(Facts[Sales]),COUNTROWS(FILTER(Facts,Facts[Sales]>EARLIER(Facts[Sales])+1)))",
+   "powerbi": "14"
+  },
+  {
+   "expr": "SUMX(VALUES(Facts[Sales]),COUNTROWS(FILTER(Facts,Facts[Sales]>EARLIER(Facts[Sales])-1)))",
+   "powerbi": "22"
+  },
+  {
+   "expr": "SUMX(VALUES(Facts[Sales]),COUNTROWS(FILTER(Facts,Facts[Sales]>EARLIER(Facts[Sales])/1)))",
+   "powerbi": "14"
+  },
+  {
+   "expr": "SUMX(VALUES(Facts[Sales]),COUNTROWS(FILTER(Facts,Facts[Sales]>EARLIER(Facts[Sales])/2)))",
+   "powerbi": "18"
+  },
+  {
+   "expr": "SUMX(VALUES(Facts[Sales]),COUNTROWS(FILTER(Facts,Facts[Sales]>-EARLIER(Facts[Sales]))))",
+   "powerbi": "27"
+  },
+  {
+   "expr": "SUMX(ALL(Facts[Sales]),COUNTROWS(FILTER(Facts,Facts[Quantity]>EARLIER(Facts[Quantity])*1)))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 89) A single value for column 'Quantity' in table 'Facts' cannot be determined. This can happen when a measure or function formula refers to a column that contains many values without specifying an aggregation such as min, max, count, or sum to get a single result.\""
+  },
+  {
+   "expr": "SUMX(ALL(Facts[Sales]),COUNTROWS(FILTER(Facts,Facts[Quantity]>EARLIER(Facts[Quantity])*2)))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 89) A single value for column 'Quantity' in table 'Facts' cannot be determined. This can happen when a measure or function formula refers to a column that contains many values without specifying an aggregation such as min, max, count, or sum to get a single result.\""
+  },
+  {
+   "expr": "SUMX(ALL(Facts[Sales]),COUNTROWS(FILTER(Facts,Facts[Quantity]>EARLIER(Facts[Quantity])+0)))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 89) A single value for column 'Quantity' in table 'Facts' cannot be determined. This can happen when a measure or function formula refers to a column that contains many values without specifying an aggregation such as min, max, count, or sum to get a single result.\""
+  },
+  {
+   "expr": "SUMX(ALL(Facts[Sales]),COUNTROWS(FILTER(Facts,Facts[Quantity]>EARLIER(Facts[Quantity])+1)))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 89) A single value for column 'Quantity' in table 'Facts' cannot be determined. This can happen when a measure or function formula refers to a column that contains many values without specifying an aggregation such as min, max, count, or sum to get a single result.\""
+  },
+  {
+   "expr": "SUMX(ALL(Facts[Sales]),COUNTROWS(FILTER(Facts,Facts[Quantity]>EARLIER(Facts[Quantity])-1)))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 89) A single value for column 'Quantity' in table 'Facts' cannot be determined. This can happen when a measure or function formula refers to a column that contains many values without specifying an aggregation such as min, max, count, or sum to get a single result.\""
+  },
+  {
+   "expr": "SUMX(ALL(Facts[Sales]),COUNTROWS(FILTER(Facts,Facts[Quantity]>EARLIER(Facts[Quantity])/1)))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 89) A single value for column 'Quantity' in table 'Facts' cannot be determined. This can happen when a measure or function formula refers to a column that contains many values without specifying an aggregation such as min, max, count, or sum to get a single result.\""
+  },
+  {
+   "expr": "SUMX(ALL(Facts[Sales]),COUNTROWS(FILTER(Facts,Facts[Quantity]>EARLIER(Facts[Quantity])/2)))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 89) A single value for column 'Quantity' in table 'Facts' cannot be determined. This can happen when a measure or function formula refers to a column that contains many values without specifying an aggregation such as min, max, count, or sum to get a single result.\""
+  },
+  {
+   "expr": "SUMX(ALL(Facts[Sales]),COUNTROWS(FILTER(Facts,Facts[Quantity]>-EARLIER(Facts[Quantity]))))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 90) A single value for column 'Quantity' in table 'Facts' cannot be determined. This can happen when a measure or function formula refers to a column that contains many values without specifying an aggregation such as min, max, count, or sum to get a single result.\""
+  },
+  {
+   "expr": "SUMX(ALL(Facts[Sales]),COUNTROWS(FILTER(Facts,Facts[Sales]>EARLIER(Facts[Sales])*1)))",
+   "powerbi": "14"
+  },
+  {
+   "expr": "SUMX(ALL(Facts[Sales]),COUNTROWS(FILTER(Facts,Facts[Sales]>EARLIER(Facts[Sales])*2)))",
+   "powerbi": "14"
+  },
+  {
+   "expr": "SUMX(ALL(Facts[Sales]),COUNTROWS(FILTER(Facts,Facts[Sales]>EARLIER(Facts[Sales])+0)))",
+   "powerbi": "14"
+  },
+  {
+   "expr": "SUMX(ALL(Facts[Sales]),COUNTROWS(FILTER(Facts,Facts[Sales]>EARLIER(Facts[Sales])+1)))",
+   "powerbi": "14"
+  },
+  {
+   "expr": "SUMX(ALL(Facts[Sales]),COUNTROWS(FILTER(Facts,Facts[Sales]>EARLIER(Facts[Sales])-1)))",
+   "powerbi": "22"
+  },
+  {
+   "expr": "SUMX(ALL(Facts[Sales]),COUNTROWS(FILTER(Facts,Facts[Sales]>EARLIER(Facts[Sales])/1)))",
+   "powerbi": "14"
+  },
+  {
+   "expr": "SUMX(ALL(Facts[Sales]),COUNTROWS(FILTER(Facts,Facts[Sales]>EARLIER(Facts[Sales])/2)))",
+   "powerbi": "18"
+  },
+  {
+   "expr": "SUMX(ALL(Facts[Sales]),COUNTROWS(FILTER(Facts,Facts[Sales]>-EARLIER(Facts[Sales]))))",
+   "powerbi": "27"
+  },
+  {
+   "expr": "SUMX(Facts,COUNTROWS(FILTER(Facts,Facts[Quantity]<EARLIER(Facts[Quantity])*1)))",
+   "powerbi": "15"
+  },
+  {
+   "expr": "SUMX(Facts,COUNTROWS(FILTER(Facts,Facts[Quantity]<EARLIER(Facts[Quantity])+1)))",
+   "powerbi": "21"
+  },
+  {
+   "expr": "SUMX(Facts,COUNTROWS(FILTER(Facts,Facts[Quantity]<EARLIER(Facts[Quantity])-1)))",
+   "powerbi": "10"
+  },
+  {
+   "expr": "SUMX(Facts,COUNTROWS(FILTER(Facts,Facts[Quantity]<-EARLIER(Facts[Quantity]))))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "SUMX(Facts,COUNTROWS(FILTER(Facts,Facts[Quantity]>=EARLIER(Facts[Quantity])*1)))",
+   "powerbi": "21"
+  },
+  {
+   "expr": "SUMX(Facts,COUNTROWS(FILTER(Facts,Facts[Quantity]>=EARLIER(Facts[Quantity])+1)))",
+   "powerbi": "15"
+  },
+  {
+   "expr": "SUMX(Facts,COUNTROWS(FILTER(Facts,Facts[Quantity]>=EARLIER(Facts[Quantity])-1)))",
+   "powerbi": "26"
+  },
+  {
+   "expr": "SUMX(Facts,COUNTROWS(FILTER(Facts,Facts[Quantity]>=-EARLIER(Facts[Quantity]))))",
+   "powerbi": "36"
+  },
+  {
+   "expr": "SUMX(Facts,COUNTROWS(FILTER(Facts,Facts[Quantity]<=EARLIER(Facts[Quantity])*1)))",
+   "powerbi": "21"
+  },
+  {
+   "expr": "SUMX(Facts,COUNTROWS(FILTER(Facts,Facts[Quantity]<=EARLIER(Facts[Quantity])+1)))",
+   "powerbi": "26"
+  },
+  {
+   "expr": "SUMX(Facts,COUNTROWS(FILTER(Facts,Facts[Quantity]<=EARLIER(Facts[Quantity])-1)))",
+   "powerbi": "15"
+  },
+  {
+   "expr": "SUMX(Facts,COUNTROWS(FILTER(Facts,Facts[Quantity]<=-EARLIER(Facts[Quantity]))))",
+   "powerbi": "1"
+  },
+  {
+   "expr": "SUMX(Facts,COUNTROWS(FILTER(Facts,Facts[Quantity]=EARLIER(Facts[Quantity])*1)))",
+   "powerbi": "6"
+  },
+  {
+   "expr": "SUMX(Facts,COUNTROWS(FILTER(Facts,Facts[Quantity]=EARLIER(Facts[Quantity])+1)))",
+   "powerbi": "5"
+  },
+  {
+   "expr": "SUMX(Facts,COUNTROWS(FILTER(Facts,Facts[Quantity]=EARLIER(Facts[Quantity])-1)))",
+   "powerbi": "5"
+  },
+  {
+   "expr": "SUMX(Facts,COUNTROWS(FILTER(Facts,Facts[Quantity]=-EARLIER(Facts[Quantity]))))",
+   "powerbi": "1"
+  },
+  {
+   "expr": "SUMX(Facts,COUNTROWS(FILTER(Facts,Facts[Quantity]<>EARLIER(Facts[Quantity])*1)))",
+   "powerbi": "30"
+  },
+  {
+   "expr": "SUMX(Facts,COUNTROWS(FILTER(Facts,Facts[Quantity]<>EARLIER(Facts[Quantity])+1)))",
+   "powerbi": "31"
+  },
+  {
+   "expr": "SUMX(Facts,COUNTROWS(FILTER(Facts,Facts[Quantity]<>EARLIER(Facts[Quantity])-1)))",
+   "powerbi": "31"
+  },
+  {
+   "expr": "SUMX(Facts,COUNTROWS(FILTER(Facts,Facts[Quantity]<>-EARLIER(Facts[Quantity]))))",
+   "powerbi": "35"
+  },
+  {
+   "expr": "SUMX(VALUES(Facts[Quantity]),COUNTROWS(FILTER(Facts,Facts[Quantity]<EARLIER(Facts[Quantity])*1)))",
+   "powerbi": "15"
+  },
+  {
+   "expr": "SUMX(VALUES(Facts[Quantity]),COUNTROWS(FILTER(Facts,Facts[Quantity]<EARLIER(Facts[Quantity])+1)))",
+   "powerbi": "21"
+  },
+  {
+   "expr": "SUMX(VALUES(Facts[Quantity]),COUNTROWS(FILTER(Facts,Facts[Quantity]<EARLIER(Facts[Quantity])-1)))",
+   "powerbi": "10"
+  },
+  {
+   "expr": "SUMX(VALUES(Facts[Quantity]),COUNTROWS(FILTER(Facts,Facts[Quantity]<-EARLIER(Facts[Quantity]))))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "SUMX(VALUES(Facts[Quantity]),COUNTROWS(FILTER(Facts,Facts[Quantity]>=EARLIER(Facts[Quantity])*1)))",
+   "powerbi": "21"
+  },
+  {
+   "expr": "SUMX(VALUES(Facts[Quantity]),COUNTROWS(FILTER(Facts,Facts[Quantity]>=EARLIER(Facts[Quantity])+1)))",
+   "powerbi": "15"
+  },
+  {
+   "expr": "SUMX(VALUES(Facts[Quantity]),COUNTROWS(FILTER(Facts,Facts[Quantity]>=EARLIER(Facts[Quantity])-1)))",
+   "powerbi": "26"
+  },
+  {
+   "expr": "SUMX(VALUES(Facts[Quantity]),COUNTROWS(FILTER(Facts,Facts[Quantity]>=-EARLIER(Facts[Quantity]))))",
+   "powerbi": "36"
+  },
+  {
+   "expr": "SUMX(VALUES(Facts[Quantity]),COUNTROWS(FILTER(Facts,Facts[Quantity]<=EARLIER(Facts[Quantity])*1)))",
+   "powerbi": "21"
+  },
+  {
+   "expr": "SUMX(VALUES(Facts[Quantity]),COUNTROWS(FILTER(Facts,Facts[Quantity]<=EARLIER(Facts[Quantity])+1)))",
+   "powerbi": "26"
+  },
+  {
+   "expr": "SUMX(VALUES(Facts[Quantity]),COUNTROWS(FILTER(Facts,Facts[Quantity]<=EARLIER(Facts[Quantity])-1)))",
+   "powerbi": "15"
+  },
+  {
+   "expr": "SUMX(VALUES(Facts[Quantity]),COUNTROWS(FILTER(Facts,Facts[Quantity]<=-EARLIER(Facts[Quantity]))))",
+   "powerbi": "1"
+  },
+  {
+   "expr": "SUMX(VALUES(Facts[Quantity]),COUNTROWS(FILTER(Facts,Facts[Quantity]=EARLIER(Facts[Quantity])*1)))",
+   "powerbi": "6"
+  },
+  {
+   "expr": "SUMX(VALUES(Facts[Quantity]),COUNTROWS(FILTER(Facts,Facts[Quantity]=EARLIER(Facts[Quantity])+1)))",
+   "powerbi": "5"
+  },
+  {
+   "expr": "SUMX(VALUES(Facts[Quantity]),COUNTROWS(FILTER(Facts,Facts[Quantity]=EARLIER(Facts[Quantity])-1)))",
+   "powerbi": "5"
+  },
+  {
+   "expr": "SUMX(VALUES(Facts[Quantity]),COUNTROWS(FILTER(Facts,Facts[Quantity]=-EARLIER(Facts[Quantity]))))",
+   "powerbi": "1"
+  },
+  {
+   "expr": "SUMX(VALUES(Facts[Quantity]),COUNTROWS(FILTER(Facts,Facts[Quantity]<>EARLIER(Facts[Quantity])*1)))",
+   "powerbi": "30"
+  },
+  {
+   "expr": "SUMX(VALUES(Facts[Quantity]),COUNTROWS(FILTER(Facts,Facts[Quantity]<>EARLIER(Facts[Quantity])+1)))",
+   "powerbi": "31"
+  },
+  {
+   "expr": "SUMX(VALUES(Facts[Quantity]),COUNTROWS(FILTER(Facts,Facts[Quantity]<>EARLIER(Facts[Quantity])-1)))",
+   "powerbi": "31"
+  },
+  {
+   "expr": "SUMX(VALUES(Facts[Quantity]),COUNTROWS(FILTER(Facts,Facts[Quantity]<>-EARLIER(Facts[Quantity]))))",
+   "powerbi": "35"
+  },
+  {
+   "expr": "SUMX(Facts,CALCULATE(COUNTROWS(Facts),Facts[Quantity]>EARLIER(Facts[Quantity])*1))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "SUMX(Facts,CALCULATE(COUNTROWS(Facts),Facts[Quantity]>EARLIER(Facts[Quantity])*2))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "SUMX(Facts,CALCULATE(COUNTROWS(Facts),Facts[Quantity]>EARLIER(Facts[Quantity])+0))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "SUMX(Facts,CALCULATE(COUNTROWS(Facts),Facts[Quantity]>EARLIER(Facts[Quantity])+1))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "SUMX(Facts,CALCULATE(COUNTROWS(Facts),Facts[Quantity]>EARLIER(Facts[Quantity])-1))",
+   "powerbi": "6"
+  },
+  {
+   "expr": "SUMX(Facts,CALCULATE(COUNTROWS(Facts),Facts[Quantity]>EARLIER(Facts[Quantity])/1))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "SUMX(Facts,CALCULATE(COUNTROWS(Facts),Facts[Quantity]>EARLIER(Facts[Quantity])/2))",
+   "powerbi": "5"
+  },
+  {
+   "expr": "SUMX(Facts,CALCULATE(COUNTROWS(Facts),Facts[Quantity]>-EARLIER(Facts[Quantity])))",
+   "powerbi": "5"
+  },
+  {
+   "expr": "SUMX(Facts,CALCULATE(COUNTROWS(Facts),Facts[Quantity]>(EARLIER(Facts[Quantity]))*1))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "SUMX(Facts,CALCULATE(COUNTROWS(Facts),Facts[Quantity]>EARLIER(Facts[Quantity])*1+0))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "SUMX(Facts,CALCULATE(COUNTROWS(Facts),Facts[Quantity]>1*EARLIER(Facts[Quantity])))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "SUMX(Facts,CALCULATE(COUNTROWS(Facts),Facts[Quantity]>0+EARLIER(Facts[Quantity])))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "SUMX(Facts,CALCULATE(COUNTROWS(Facts),Facts[Quantity]>2*EARLIER(Facts[Quantity])-1))",
+   "powerbi": "1"
+  },
+  {
+   "expr": "SUMX(Facts,CALCULATE(COUNTROWS(Facts),Facts[Quantity]>ABS(EARLIER(Facts[Quantity]))*1))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "SUMX(Facts,CALCULATE(COUNTROWS(Facts),Facts[Quantity]*2>EARLIER(Facts[Quantity])*3))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "SUMX(Facts,CALCULATE(COUNTROWS(Facts),Facts[Quantity]*2<=EARLIER(Facts[Quantity])+2))",
+   "powerbi": "3"
+  },
+  {
+   "expr": "SUMX(Facts,CALCULATE(COUNTROWS(Facts),Facts[Quantity]*3>EARLIER(Facts[Quantity])*4))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "SUMX(Facts,CALCULATE(COUNTROWS(Facts),Facts[Quantity]*3<=EARLIER(Facts[Quantity])+3))",
+   "powerbi": "2"
+  },
+  {
+   "expr": "SUMX(Facts,CALCULATE(COUNTROWS(Facts),Facts[Sales]*2>EARLIER(Facts[Sales])*1))",
+   "powerbi": "3"
+  },
+  {
+   "expr": "SUMX(Facts,CALCULATE(COUNTROWS(Facts),Facts[Quantity]+Facts[Quantity]>EARLIER(Facts[Quantity])))",
+   "powerbi": "5"
+  },
+  {
+   "expr": "SUMX(Facts,COUNTROWS(FILTER(Facts,Facts[Quantity]>EARLIER(Facts[Region])*1)))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 77) Cannot convert value 'East' of type Text to type Number.\""
+  },
+  {
+   "expr": "SUMX(Facts,COUNTROWS(FILTER(Facts,Facts[Quantity]>EARLIER(Facts[Region])+0)))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 77) Cannot convert value 'East' of type Text to type Number.\""
+  },
+  {
+   "expr": "SUMX(Facts,COUNTROWS(FILTER(Facts,Facts[Quantity]>-EARLIER(Facts[Region]))))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 78) Cannot convert value 'East' of type Text to type Number.\""
+  },
+  {
+   "expr": "SUMX(Facts,COUNTROWS(FILTER(Facts,Facts[Quantity]>EARLIER(Facts[Region])&\"x\")))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 53) DAX comparison operations do not support comparing values of type Integer with values of type Text. Consider using the VALUE or FORMAT function to convert one of the values.\""
+  },
+  {
+   "expr": "SUMX(Facts,COUNTROWS(FILTER(Facts,Facts[Quantity]>LEN(EARLIER(Facts[Region]))*1)))",
+   "powerbi": "5"
+  },
+  {
+   "expr": "SUMX(Facts,COUNTROWS(FILTER(Facts,Facts[Quantity]>EARLIER(Facts[Region])&\"\")))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 53) DAX comparison operations do not support comparing values of type Integer with values of type Text. Consider using the VALUE or FORMAT function to convert one of the values.\""
+  },
+  {
+   "expr": "SUMX(Facts,COUNTROWS(FILTER(Facts,Facts[Region]=EARLIER(Facts[Region]))))",
+   "powerbi": "14"
+  },
+  {
+   "expr": "SUMX(Facts,COUNTROWS(FILTER(Facts,Facts[Region]=EARLIER(Facts[Region])&\"\")))",
+   "powerbi": "14"
+  },
+  {
+   "expr": "SUMX(VALUES(Facts[Region]),COUNTROWS(FILTER(Facts,Facts[Region]=EARLIER(Facts[Region]))))",
+   "powerbi": "6"
+  },
+  {
+   "expr": "SUMX(Facts,COUNTROWS(FILTER(Facts,LEN(Facts[Region])>EARLIER(LEN(Facts[Region])))))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 80) The first argument of EARLIER/EARLIEST is not a valid column reference in the earlier row context.\""
+  },
+  {
+   "expr": "SUMX(Facts,COUNTROWS(FILTER(Facts,Facts[Quantity]>EARLIER(Facts[Note])*1)))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 77) Cannot convert value 'Paid' of type Text to type Number.\""
+  },
+  {
+   "expr": "SUMX(Facts,COUNTROWS(FILTER(Facts,Facts[Quantity]>EARLIER(Facts[Note])+0)))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 77) Cannot convert value 'Paid' of type Text to type Number.\""
+  },
+  {
+   "expr": "SUMX(Facts,COUNTROWS(FILTER(Facts,Facts[Quantity]>-EARLIER(Facts[Note]))))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 78) Cannot convert value 'Paid' of type Text to type Number.\""
+  },
+  {
+   "expr": "SUMX(Facts,COUNTROWS(FILTER(Facts,Facts[Quantity]>EARLIER(Facts[Note])&\"x\")))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 53) DAX comparison operations do not support comparing values of type Integer with values of type Text. Consider using the VALUE or FORMAT function to convert one of the values.\""
+  },
+  {
+   "expr": "SUMX(Facts,COUNTROWS(FILTER(Facts,Facts[Quantity]>LEN(EARLIER(Facts[Note]))*1)))",
+   "powerbi": "14"
+  },
+  {
+   "expr": "SUMX(Facts,COUNTROWS(FILTER(Facts,Facts[Quantity]>EARLIER(Facts[Note])&\"\")))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 53) DAX comparison operations do not support comparing values of type Integer with values of type Text. Consider using the VALUE or FORMAT function to convert one of the values.\""
+  },
+  {
+   "expr": "SUMX(Facts,COUNTROWS(FILTER(Facts,Facts[Note]=EARLIER(Facts[Note]))))",
+   "powerbi": "14"
+  },
+  {
+   "expr": "SUMX(Facts,COUNTROWS(FILTER(Facts,Facts[Note]=EARLIER(Facts[Note])&\"\")))",
+   "powerbi": "14"
+  },
+  {
+   "expr": "SUMX(VALUES(Facts[Note]),COUNTROWS(FILTER(Facts,Facts[Note]=EARLIER(Facts[Note]))))",
+   "powerbi": "6"
+  },
+  {
+   "expr": "SUMX(Facts,COUNTROWS(FILTER(Facts,LEN(Facts[Note])>EARLIER(LEN(Facts[Note])))))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 78) The first argument of EARLIER/EARLIEST is not a valid column reference in the earlier row context.\""
+  },
+  {
+   "expr": "SUMX(Facts,COUNTROWS(FILTER(Facts,Facts[Quantity]>EARLIER(Facts[Sales])*1)))",
+   "powerbi": "19"
+  },
+  {
+   "expr": "SUMX(Facts,COUNTROWS(FILTER(Facts,Facts[Sales]=EARLIER(Facts[Sales])*1)))",
+   "powerbi": "8"
+  },
+  {
+   "expr": "SUMX(Facts,COUNTROWS(FILTER(Facts,Facts[Sales]=EARLIER(Facts[Sales]))))",
+   "powerbi": "8"
+  },
+  {
+   "expr": "SUMX(Facts,COUNTROWS(FILTER(Facts,Facts[Quantity]>EARLIER(Facts[Quantity])))*2)",
+   "powerbi": "30"
+  },
+  {
+   "expr": "SUMX(Facts,EARLIER(Facts[Quantity])*1)",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 30) EARLIER/EARLIEST refers to an earlier row context which doesn't exist.\""
+  },
+  {
+   "expr": "SUMX(Facts,EARLIER(Facts[Quantity])+1)",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 30) EARLIER/EARLIEST refers to an earlier row context which doesn't exist.\""
+  },
+  {
+   "expr": "SUMX(Facts,COUNTROWS(FILTER(Facts,Facts[Quantity]>EARLIER(Facts[Quantity]))))",
+   "powerbi": "15"
+  },
+  {
+   "expr": "SUMX(Facts,SUMX(Facts,COUNTROWS(FILTER(Facts,Facts[Quantity]>EARLIER(Facts[Quantity],1)*1))))",
+   "powerbi": "90"
+  },
+  {
+   "expr": "SUMX(Facts,SUMX(VALUES(Facts[Quantity]),COUNTROWS(FILTER(Facts,Facts[Quantity]>EARLIER(Facts[Quantity],1)*1))))",
+   "powerbi": "90"
+  },
+  {
+   "expr": "SUMX(Facts,COUNTROWS(FILTER(Facts,Facts[Quantity]>EARLIER(Facts[Quantity],1)*1)))",
+   "powerbi": "15"
+  },
+  {
+   "expr": "SUMX(Facts,SUMX(Facts,COUNTROWS(FILTER(Facts,Facts[Quantity]>EARLIER(Facts[Quantity],2)*1))))",
+   "powerbi": "90"
+  },
+  {
+   "expr": "SUMX(Facts,SUMX(VALUES(Facts[Quantity]),COUNTROWS(FILTER(Facts,Facts[Quantity]>EARLIER(Facts[Quantity],2)*1))))",
+   "powerbi": "90"
+  },
+  {
+   "expr": "SUMX(Facts,COUNTROWS(FILTER(Facts,Facts[Quantity]>EARLIER(Facts[Quantity],2)*1)))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 69) EARLIER/EARLIEST refers to an earlier row context which doesn't exist.\""
+  },
+  {
+   "expr": "SUMX(Facts,SUMX(Facts,COUNTROWS(FILTER(Facts,Facts[Quantity]>EARLIER(Facts[Quantity],3)*1))))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 80) EARLIER/EARLIEST refers to an earlier row context which doesn't exist.\""
+  },
+  {
+   "expr": "SUMX(Facts,SUMX(VALUES(Facts[Quantity]),COUNTROWS(FILTER(Facts,Facts[Quantity]>EARLIER(Facts[Quantity],3)*1))))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 98) EARLIER/EARLIEST refers to an earlier row context which doesn't exist.\""
+  },
+  {
+   "expr": "SUMX(Facts,COUNTROWS(FILTER(Facts,Facts[Quantity]>EARLIER(Facts[Quantity],3)*1)))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 69) EARLIER/EARLIEST refers to an earlier row context which doesn't exist.\""
+  },
+  {
+   "expr": "SUMX(Facts,SUMX(Facts,COUNTROWS(FILTER(Facts,Facts[Quantity]>EARLIER(Facts[Quantity],2)+1))))",
+   "powerbi": "60"
+  },
+  {
+   "expr": "SUMX(Facts,SUMX(VALUES(Facts[Quantity]),COUNTROWS(FILTER(Facts,Facts[Quantity]>EARLIER(Facts[Quantity],2)+1))))",
+   "powerbi": "60"
+  },
+  {
+   "expr": "SUMX(Facts,COUNTROWS(FILTER(Facts,Facts[Quantity]>EARLIER(Facts[Quantity],2)+1)))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 69) EARLIER/EARLIEST refers to an earlier row context which doesn't exist.\""
+  },
+  {
+   "expr": "SUMX(Facts,SUMX(Facts,COUNTROWS(FILTER(Facts,Facts[Quantity]>EARLIER(Facts[Quantity])*1))))",
+   "powerbi": "90"
+  },
+  {
+   "expr": "SUMX(Facts,SUMX(VALUES(Facts[Quantity]),COUNTROWS(FILTER(Facts,Facts[Quantity]>EARLIER(Facts[Quantity])*1))))",
+   "powerbi": "90"
+  },
+  {
+   "expr": "SUMX(Facts,COUNTROWS(FILTER(Facts,Facts[Quantity]>EARLIER(Facts[Quantity],0)*1)))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 93) The second argument of function EARLIER must be an integer greater than zero.\""
+  },
+  {
+   "expr": "SUMX(Facts,COUNTROWS(FILTER(Facts,Facts[Quantity]>EARLIEST(Facts[Quantity])*1)))",
+   "powerbi": "15"
+  },
+  {
+   "expr": "SUMX(Facts,COUNTROWS(FILTER(Facts,Facts[Quantity]>EARLIEST(Facts[Quantity])+1)))",
+   "powerbi": "10"
+  },
+  {
+   "expr": "SUMX(Facts,SUMX(Facts,COUNTROWS(FILTER(Facts,Facts[Quantity]>EARLIEST(Facts[Quantity])*1))))",
+   "powerbi": "90"
+  },
+  {
+   "expr": "SUMX(Facts,COUNTROWS(FILTER(Facts,Facts[Quantity]>EARLIER(1)*1)))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 77) The first argument of EARLIER/EARLIEST is not a valid column reference in the earlier row context.\""
+  },
+  {
+   "expr": "SUMX(Facts,COUNTROWS(FILTER(Facts,Facts[Quantity]>EARLIER(Facts[Quantity]+1)*1)))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 77) The first argument of EARLIER/EARLIEST is not a valid column reference in the earlier row context.\""
+  },
+  {
+   "expr": "COUNTROWS(FILTER(Facts,Facts[Quantity]>EARLIER(Facts[Quantity])*1))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 58) EARLIER/EARLIEST refers to an earlier row context which doesn't exist.\""
+  },
+  {
+   "expr": "COUNTROWS(FILTER(Facts,Facts[Quantity]>EARLIER(Facts[Quantity])))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 58) EARLIER/EARLIEST refers to an earlier row context which doesn't exist.\""
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]>EARLIER(Facts[Quantity])*1)",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 62) EARLIER/EARLIEST refers to an earlier row context which doesn't exist.\""
+  },
+  {
+   "expr": "SUMX(Facts,COUNTROWS(FILTER(Facts,Facts[Quantity]*2>EARLIER(Facts[Quantity])+EARLIER(Facts[Sales]))))",
+   "powerbi": "16"
+  },
+  {
+   "expr": "SUMX(Facts,COUNTROWS(FILTER(Facts,Facts[Quantity]+Facts[Sales]>EARLIER(Facts[Quantity])+EARLIER(Facts[Sales]))))",
+   "powerbi": "15"
+  },
+  {
+   "expr": "SUMX(Facts,COUNTROWS(FILTER(Facts,Facts[Quantity]>EARLIER(Facts[Quantity])*EARLIER(Facts[Quantity]))))",
+   "powerbi": "10"
+  },
+  {
+   "expr": "MAXX(Facts,COUNTROWS(FILTER(Facts,Facts[Quantity]>EARLIER(Facts[Quantity])*1)))",
+   "powerbi": "5"
+  },
+  {
+   "expr": "MINX(Facts,COUNTROWS(FILTER(Facts,Facts[Quantity]>EARLIER(Facts[Quantity])*1)))",
+   "powerbi": "1"
+  },
+  {
+   "expr": "AVERAGEX(Facts,COUNTROWS(FILTER(Facts,Facts[Quantity]>EARLIER(Facts[Quantity])*1)))",
+   "powerbi": "3"
+  },
+  {
+   "expr": "COUNTX(Facts,COUNTROWS(FILTER(Facts,Facts[Quantity]>EARLIER(Facts[Quantity])*1)))",
+   "powerbi": "5"
+  },
+  {
+   "expr": "SUMX(FILTER(Facts,Facts[Quantity]>1),COUNTROWS(FILTER(Facts,Facts[Quantity]>EARLIER(Facts[Quantity])*1)))",
+   "powerbi": "6"
+  },
+  {
+   "expr": "SUMX(Facts,CALCULATE(COUNTROWS(FILTER(Facts,Facts[Quantity]>EARLIER(Facts[Quantity])*1)),Facts[Region]=\"East\"))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 79) EARLIER/EARLIEST refers to an earlier row context which doesn't exist.\""
+  },
+  {
+   "expr": "SUMX(Facts,SUMX(FILTER(Facts,Facts[Quantity]>EARLIER(Facts[Quantity])*1),Facts[Sales]))",
+   "powerbi": "92"
+  },
+  {
+   "expr": "SUMX(Facts,CALCULATE(SUM(Facts[Sales]),Facts[Quantity]>EARLIER(Facts[Quantity])*1))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "SUMX(Facts,CALCULATE(SUM(Facts[Sales]),Facts[Quantity]<EARLIER(Facts[Quantity])+1))",
+   "powerbi": "31.5"
+  },
+  {
+   "expr": "SUMX(Facts,CALCULATE(COUNTROWS(Facts),KEEPFILTERS(Facts[Quantity]>EARLIER(Facts[Quantity])*1)))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "SUMX(Facts,CALCULATE(COUNTROWS(Facts),ALL(Facts[Region]),Facts[Quantity]>EARLIER(Facts[Quantity])*1))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "SUMX(Facts,CALCULATE(COUNTROWS(Facts),Facts[Quantity]>EARLIER(Facts[Quantity])*1,Facts[Region]=\"East\"))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "SUMX(Facts,CALCULATE(COUNTROWS(Facts),FILTER(ALL(Facts),Facts[Quantity]>EARLIER(Facts[Quantity])*1)))",
+   "powerbi": "15"
+  }
+ ]
+}

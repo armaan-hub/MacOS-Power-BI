@@ -7,6 +7,11 @@ Rectangle {
     property string title: "Card"
     property string visualName: title
     property var cardData: ({ label: "", value: "Add a field", aggregation: "", highlight_value: "", has_highlights: false })
+    readonly property string detailLabel: !cardData.label
+            ? ""
+            : String(cardData.aggregation) === "Measure"
+                ? String(cardData.label)
+                : String(cardData.aggregation) + " of " + String(cardData.label)
     property color valueColor: "#0078D4"
     property bool selected: false
     signal requestedSelection(string visualName)
@@ -28,9 +33,7 @@ Rectangle {
     border.width: selected || activeFocus ? 2 : 1
     border.color: selected ? "#0078D4" : (activeFocus ? "#718b9e" : "#d9e0e6")
     Accessible.name: title + ": " + String(cardData.value || "")
-    Accessible.description: cardData.label
-            ? String(cardData.aggregation) + " of " + String(cardData.label)
-            : "Card visual. Add a field to show a value."
+    Accessible.description: root.detailLabel || "Card visual. Add a field to show a value."
     Accessible.role: Accessible.Button
     activeFocusOnTab: true
     Keys.onReturnPressed: requestedSelection(visualName)
@@ -72,7 +75,7 @@ Rectangle {
         Text {
             Layout.fillWidth: true
             visible: Boolean(root.cardData.label)
-            text: String(root.cardData.aggregation) + " of " + String(root.cardData.label)
+            text: root.detailLabel
             color: "#647382"
             font.pixelSize: 10
             horizontalAlignment: Text.AlignHCenter

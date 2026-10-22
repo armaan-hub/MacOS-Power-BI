@@ -70,12 +70,13 @@ class ColumnProfileTests(unittest.TestCase):
         blank_profile = controller.profileColumn("Blank")
         self.assertEqual(blank_profile["distinctCount"], 0)
         self.assertEqual(blank_profile["uniqueCount"], 0)
+        # The loaded model stores "a" and "A" as one value under the first spelling (Power BI's VertiPaq);
+        # the Power Query dialog below profiles the query's own values, which keep them apart.
         self.assertEqual(controller.profileColumn("Ties")["topValues"], [
-            {"value": "A", "count": 1},
-            {"value": "a", "count": 1},
+            {"value": "a", "count": 2},
         ])
 
-        candidate = controller._loaded_candidates[controller._active_source_id]
+        candidate = controller._query_candidates[controller._active_source_id]  # the Power Query editor profiles query values
         dialog = TransformDataDialog(candidate)
         self.assertEqual(dialog.profile_table.item(2, 2).text(), "1")
         self.assertEqual(dialog.profile_table.item(2, 3).text(), "1")

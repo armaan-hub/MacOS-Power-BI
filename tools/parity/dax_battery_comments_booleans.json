@@ -1,0 +1,1735 @@
+{
+ "powerbi_version": "2.157.879.0 (26.08)+da30fe74eb0b8a8786ab7326b69c400a0e951831",
+ "frozen": "2026-10-22",
+ "items": [
+  {
+   "expr": "1 // c\n",
+   "powerbi": "1"
+  },
+  {
+   "expr": "1 // c\n+ 0",
+   "powerbi": "1"
+  },
+  {
+   "expr": "// c\n1",
+   "powerbi": "1"
+  },
+  {
+   "expr": "1 -- c\n",
+   "powerbi": "1"
+  },
+  {
+   "expr": "1 -- c\n+ 0",
+   "powerbi": "1"
+  },
+  {
+   "expr": "-- c\n1",
+   "powerbi": "1"
+  },
+  {
+   "expr": "1 /* c */\n",
+   "powerbi": "1"
+  },
+  {
+   "expr": "1 /* c */\n+ 0",
+   "powerbi": "1"
+  },
+  {
+   "expr": "/* c */\n1",
+   "powerbi": "1"
+  },
+  {
+   "expr": "SUM(Facts[Quantity]) // c\n",
+   "powerbi": "15"
+  },
+  {
+   "expr": "SUM(Facts[Quantity]) // c\n+ 0",
+   "powerbi": "15"
+  },
+  {
+   "expr": "// c\nSUM(Facts[Quantity])",
+   "powerbi": "15"
+  },
+  {
+   "expr": "SUM(Facts[Quantity]) -- c\n",
+   "powerbi": "15"
+  },
+  {
+   "expr": "SUM(Facts[Quantity]) -- c\n+ 0",
+   "powerbi": "15"
+  },
+  {
+   "expr": "-- c\nSUM(Facts[Quantity])",
+   "powerbi": "15"
+  },
+  {
+   "expr": "SUM(Facts[Quantity]) /* c */\n",
+   "powerbi": "15"
+  },
+  {
+   "expr": "SUM(Facts[Quantity]) /* c */\n+ 0",
+   "powerbi": "15"
+  },
+  {
+   "expr": "/* c */\nSUM(Facts[Quantity])",
+   "powerbi": "15"
+  },
+  {
+   "expr": "COUNTROWS(Facts) // c\n",
+   "powerbi": "6"
+  },
+  {
+   "expr": "COUNTROWS(Facts) // c\n+ 0",
+   "powerbi": "6"
+  },
+  {
+   "expr": "// c\nCOUNTROWS(Facts)",
+   "powerbi": "6"
+  },
+  {
+   "expr": "COUNTROWS(Facts) -- c\n",
+   "powerbi": "6"
+  },
+  {
+   "expr": "COUNTROWS(Facts) -- c\n+ 0",
+   "powerbi": "6"
+  },
+  {
+   "expr": "-- c\nCOUNTROWS(Facts)",
+   "powerbi": "6"
+  },
+  {
+   "expr": "COUNTROWS(Facts) /* c */\n",
+   "powerbi": "6"
+  },
+  {
+   "expr": "COUNTROWS(Facts) /* c */\n+ 0",
+   "powerbi": "6"
+  },
+  {
+   "expr": "/* c */\nCOUNTROWS(Facts)",
+   "powerbi": "6"
+  },
+  {
+   "expr": "SUMX(Facts,Facts[Quantity]*2) // c\n",
+   "powerbi": "30"
+  },
+  {
+   "expr": "SUMX(Facts,Facts[Quantity]*2) // c\n+ 0",
+   "powerbi": "30"
+  },
+  {
+   "expr": "// c\nSUMX(Facts,Facts[Quantity]*2)",
+   "powerbi": "30"
+  },
+  {
+   "expr": "SUMX(Facts,Facts[Quantity]*2) -- c\n",
+   "powerbi": "30"
+  },
+  {
+   "expr": "SUMX(Facts,Facts[Quantity]*2) -- c\n+ 0",
+   "powerbi": "30"
+  },
+  {
+   "expr": "-- c\nSUMX(Facts,Facts[Quantity]*2)",
+   "powerbi": "30"
+  },
+  {
+   "expr": "SUMX(Facts,Facts[Quantity]*2) /* c */\n",
+   "powerbi": "30"
+  },
+  {
+   "expr": "SUMX(Facts,Facts[Quantity]*2) /* c */\n+ 0",
+   "powerbi": "30"
+  },
+  {
+   "expr": "/* c */\nSUMX(Facts,Facts[Quantity]*2)",
+   "powerbi": "30"
+  },
+  {
+   "expr": "\"x\" // c\n",
+   "powerbi": "x"
+  },
+  {
+   "expr": "\"x\" // c\n& \"y\"",
+   "powerbi": "xy"
+  },
+  {
+   "expr": "// c\n\"x\"",
+   "powerbi": "x"
+  },
+  {
+   "expr": "\"x\" -- c\n",
+   "powerbi": "x"
+  },
+  {
+   "expr": "\"x\" -- c\n& \"y\"",
+   "powerbi": "xy"
+  },
+  {
+   "expr": "-- c\n\"x\"",
+   "powerbi": "x"
+  },
+  {
+   "expr": "\"x\" /* c */\n",
+   "powerbi": "x"
+  },
+  {
+   "expr": "\"x\" /* c */\n& \"y\"",
+   "powerbi": "xy"
+  },
+  {
+   "expr": "/* c */\n\"x\"",
+   "powerbi": "x"
+  },
+  {
+   "expr": "1 /* a */ + /* b */ 2",
+   "powerbi": "3"
+  },
+  {
+   "expr": "1 +/**/ 2",
+   "powerbi": "3"
+  },
+  {
+   "expr": "1 /* a\nb\nc */ + 2",
+   "powerbi": "3"
+  },
+  {
+   "expr": "1 /* a // b */ + 1",
+   "powerbi": "2"
+  },
+  {
+   "expr": "1 // a /* b\n+ 1",
+   "powerbi": "2"
+  },
+  {
+   "expr": "1 -- a /* b\n+ 1",
+   "powerbi": "2"
+  },
+  {
+   "expr": "1 /* a -- b */ + 1",
+   "powerbi": "2"
+  },
+  {
+   "expr": "1 /* unterminated",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"The end of the input was reached.\""
+  },
+  {
+   "expr": "1 /*/ + 2",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"The end of the input was reached.\""
+  },
+  {
+   "expr": "1 /**/ + 2",
+   "powerbi": "3"
+  },
+  {
+   "expr": "/* only */",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 10) Argument '2' in ROW function is required.\""
+  },
+  {
+   "expr": "// only",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"The end of the input was reached.\""
+  },
+  {
+   "expr": "SUMX(Facts,Facts[Quantity]--1\n)",
+   "powerbi": "15"
+  },
+  {
+   "expr": "SUMX(Facts,Facts[Quantity]- -1)",
+   "powerbi": "21"
+  },
+  {
+   "expr": "SUMX(Facts,Facts[Quantity]-/* c */-1)",
+   "powerbi": "21"
+  },
+  {
+   "expr": "SUMX(Facts,Facts[Quantity]//x\n)",
+   "powerbi": "15"
+  },
+  {
+   "expr": "SUMX(Facts,Facts[Quantity]\n--1\n)",
+   "powerbi": "15"
+  },
+  {
+   "expr": "SUMX(Facts,--Facts[Quantity]\n)",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 19) Argument '2' in SUMX function is required.\""
+  },
+  {
+   "expr": "COUNTROWS(FILTER(Facts,Facts[Quantity]>--1\n))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (2, 1) The syntax for ')' is incorrect. (EVALUATE ROW(\"v\", COUNTROWS(FILTER(Facts,Facts[Quantity]>--1 )))).\""
+  },
+  {
+   "expr": "\"a--b\" & \"c//d\" & \"e/*f*/g\"",
+   "powerbi": "a--bc//de/*f*/g"
+  },
+  {
+   "expr": "LEN(\"a/*b*/c\")",
+   "powerbi": "7"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(Facts),Facts[Region]=\"East\" // east\n)",
+   "powerbi": "3"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(Facts),/* filter */Facts[Quantity]>2)",
+   "powerbi": "3"
+  },
+  {
+   "expr": "VAR a=1 // one\nVAR b=2 /* two */\nRETURN a+b",
+   "powerbi": "3"
+  },
+  {
+   "expr": "IF(1>0, // yes\n10, -- no\n20)",
+   "powerbi": "10"
+  },
+  {
+   "expr": "SWITCH(TRUE(),\n1>2,1, // a\n1>0,2)",
+   "powerbi": "2"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(Facts,Facts[Region]=\"East\" /* e */ && Facts[Quantity]>1))",
+   "powerbi": "2"
+  },
+  {
+   "expr": "1 // c\r\n+ 2",
+   "powerbi": "3"
+  },
+  {
+   "expr": "1 -- c\r\n+ 2",
+   "powerbi": "3"
+  },
+  {
+   "expr": "1 /* c\r\n */ + 2",
+   "powerbi": "3"
+  },
+  {
+   "expr": "Facts[Quantity]",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 19) A single value for column 'Quantity' in table 'Facts' cannot be determined. This can happen when a measure or function formula refers to a column that contains many values without specifying an aggregation such as min, max, count, or sum to get a single result.\""
+  },
+  {
+   "expr": "COUNTROWS(Facts)--x\n",
+   "powerbi": "6"
+  },
+  {
+   "expr": "SUMX(Facts,TRUE())",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 30) The function SUMX cannot work with values of type Boolean.\""
+  },
+  {
+   "expr": "SUMX(Facts,FALSE())",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 30) The function SUMX cannot work with values of type Boolean.\""
+  },
+  {
+   "expr": "SUMX(Facts,Facts[Quantity]>1)",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 30) The function SUMX cannot work with values of type Boolean.\""
+  },
+  {
+   "expr": "SUMX(Facts,NOT(Facts[Quantity]>1))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 30) The function SUMX cannot work with values of type Boolean.\""
+  },
+  {
+   "expr": "SUMX(Facts,Facts[Quantity]>1&&Facts[Quantity]<5)",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 30) The function SUMX cannot work with values of type Boolean.\""
+  },
+  {
+   "expr": "SUMX(Facts,Facts[Quantity]>4||Facts[Quantity]<1)",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 30) The function SUMX cannot work with values of type Boolean.\""
+  },
+  {
+   "expr": "SUMX(Facts,ISBLANK(Facts[Sales]))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 30) The function SUMX cannot work with values of type Boolean.\""
+  },
+  {
+   "expr": "SUMX(Facts,IF(Facts[Quantity]>1,TRUE(),FALSE()))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 30) The function SUMX cannot work with values of type Boolean.\""
+  },
+  {
+   "expr": "SUMX(Facts,Facts[Region]=\"East\")",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 30) The function SUMX cannot work with values of type Boolean.\""
+  },
+  {
+   "expr": "SUMX(Facts,Facts[Note]=BLANK())",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 30) The function SUMX cannot work with values of type Boolean.\""
+  },
+  {
+   "expr": "SUMX(Facts,(Facts[Quantity]>1)*1)",
+   "powerbi": "4"
+  },
+  {
+   "expr": "SUMX(Facts,(Facts[Quantity]>1)+0)",
+   "powerbi": "4"
+  },
+  {
+   "expr": "SUMX(Facts,INT(Facts[Quantity]>1))",
+   "powerbi": "4"
+  },
+  {
+   "expr": "SUMX(Facts,IF(Facts[Quantity]>1,1))",
+   "powerbi": "4"
+  },
+  {
+   "expr": "SUMX(Facts,IF(Facts[Quantity]>1,1,0))",
+   "powerbi": "4"
+  },
+  {
+   "expr": "SUMX(Facts,Facts[Quantity]>1 && 1)",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 30) The function SUMX cannot work with values of type Boolean.\""
+  },
+  {
+   "expr": "SUMX(Facts,VALUE(Facts[Quantity]>1))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 30) Cannot convert value 'TRUE' of type Text to type Number.\""
+  },
+  {
+   "expr": "SUMX(Facts,--(Facts[Quantity]>1)\n)",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 19) Argument '2' in SUMX function is required.\""
+  },
+  {
+   "expr": "SUMX(Facts,-(Facts[Quantity]>1))",
+   "powerbi": "-4"
+  },
+  {
+   "expr": "SUMX(Facts,ABS(Facts[Quantity]>1))",
+   "powerbi": "4"
+  },
+  {
+   "expr": "SUMX(Facts,ISBLANK(Facts[Note]))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 30) The function SUMX cannot work with values of type Boolean.\""
+  },
+  {
+   "expr": "SUMX(Facts,ISBLANK(Facts[Quantity]))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 30) The function SUMX cannot work with values of type Boolean.\""
+  },
+  {
+   "expr": "SUMX(Facts,AND(Facts[Quantity]>1,Facts[Quantity]<5))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 30) The function SUMX cannot work with values of type Boolean.\""
+  },
+  {
+   "expr": "SUMX(Facts,OR(Facts[Quantity]>4,Facts[Quantity]<1))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 30) The function SUMX cannot work with values of type Boolean.\""
+  },
+  {
+   "expr": "SUMX(Facts,Facts[Quantity] IN {1,2})",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 30) The function SUMX cannot work with values of type Boolean.\""
+  },
+  {
+   "expr": "SUMX(Facts,CONTAINSSTRING(Facts[Region],\"a\"))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 30) The function SUMX cannot work with values of type Boolean.\""
+  },
+  {
+   "expr": "SUMX(Facts,ISNUMBER(Facts[Quantity]))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 30) The function SUMX cannot work with values of type Boolean.\""
+  },
+  {
+   "expr": "SUMX(Facts,HASONEVALUE(Facts[Region]))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 30) The function SUMX cannot work with values of type Boolean.\""
+  },
+  {
+   "expr": "SUMX(Facts,EARLIER(Facts[Quantity])>1)",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 30) EARLIER/EARLIEST refers to an earlier row context which doesn't exist.\""
+  },
+  {
+   "expr": "SUMX(Facts,Facts[Quantity]=EARLIER(Facts[Quantity]))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 46) EARLIER/EARLIEST refers to an earlier row context which doesn't exist.\""
+  },
+  {
+   "expr": "AVERAGEX(Facts,TRUE())",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 34) The function AVERAGEX cannot work with values of type Boolean.\""
+  },
+  {
+   "expr": "AVERAGEX(Facts,FALSE())",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 34) The function AVERAGEX cannot work with values of type Boolean.\""
+  },
+  {
+   "expr": "AVERAGEX(Facts,Facts[Quantity]>1)",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 34) The function AVERAGEX cannot work with values of type Boolean.\""
+  },
+  {
+   "expr": "AVERAGEX(Facts,NOT(Facts[Quantity]>1))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 34) The function AVERAGEX cannot work with values of type Boolean.\""
+  },
+  {
+   "expr": "AVERAGEX(Facts,Facts[Quantity]>1&&Facts[Quantity]<5)",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 34) The function AVERAGEX cannot work with values of type Boolean.\""
+  },
+  {
+   "expr": "AVERAGEX(Facts,Facts[Quantity]>4||Facts[Quantity]<1)",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 34) The function AVERAGEX cannot work with values of type Boolean.\""
+  },
+  {
+   "expr": "AVERAGEX(Facts,ISBLANK(Facts[Sales]))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 34) The function AVERAGEX cannot work with values of type Boolean.\""
+  },
+  {
+   "expr": "AVERAGEX(Facts,IF(Facts[Quantity]>1,TRUE(),FALSE()))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 34) The function AVERAGEX cannot work with values of type Boolean.\""
+  },
+  {
+   "expr": "AVERAGEX(Facts,Facts[Region]=\"East\")",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 34) The function AVERAGEX cannot work with values of type Boolean.\""
+  },
+  {
+   "expr": "AVERAGEX(Facts,Facts[Note]=BLANK())",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 34) The function AVERAGEX cannot work with values of type Boolean.\""
+  },
+  {
+   "expr": "AVERAGEX(Facts,(Facts[Quantity]>1)*1)",
+   "powerbi": "0.666666666666667"
+  },
+  {
+   "expr": "AVERAGEX(Facts,(Facts[Quantity]>1)+0)",
+   "powerbi": "0.666666666666667"
+  },
+  {
+   "expr": "AVERAGEX(Facts,INT(Facts[Quantity]>1))",
+   "powerbi": "0.666666666666667"
+  },
+  {
+   "expr": "AVERAGEX(Facts,IF(Facts[Quantity]>1,1))",
+   "powerbi": "1"
+  },
+  {
+   "expr": "AVERAGEX(Facts,IF(Facts[Quantity]>1,1,0))",
+   "powerbi": "0.666666666666667"
+  },
+  {
+   "expr": "AVERAGEX(Facts,Facts[Quantity]>1 && 1)",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 34) The function AVERAGEX cannot work with values of type Boolean.\""
+  },
+  {
+   "expr": "AVERAGEX(Facts,VALUE(Facts[Quantity]>1))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 34) Cannot convert value 'TRUE' of type Text to type Number.\""
+  },
+  {
+   "expr": "AVERAGEX(Facts,--(Facts[Quantity]>1)\n)",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 19) Argument '2' in AVERAGEX function is required.\""
+  },
+  {
+   "expr": "AVERAGEX(Facts,-(Facts[Quantity]>1))",
+   "powerbi": "-0.666666666666667"
+  },
+  {
+   "expr": "AVERAGEX(Facts,ABS(Facts[Quantity]>1))",
+   "powerbi": "0.666666666666667"
+  },
+  {
+   "expr": "AVERAGEX(Facts,ISBLANK(Facts[Note]))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 34) The function AVERAGEX cannot work with values of type Boolean.\""
+  },
+  {
+   "expr": "AVERAGEX(Facts,ISBLANK(Facts[Quantity]))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 34) The function AVERAGEX cannot work with values of type Boolean.\""
+  },
+  {
+   "expr": "AVERAGEX(Facts,AND(Facts[Quantity]>1,Facts[Quantity]<5))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 34) The function AVERAGEX cannot work with values of type Boolean.\""
+  },
+  {
+   "expr": "AVERAGEX(Facts,OR(Facts[Quantity]>4,Facts[Quantity]<1))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 34) The function AVERAGEX cannot work with values of type Boolean.\""
+  },
+  {
+   "expr": "AVERAGEX(Facts,Facts[Quantity] IN {1,2})",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 34) The function AVERAGEX cannot work with values of type Boolean.\""
+  },
+  {
+   "expr": "AVERAGEX(Facts,CONTAINSSTRING(Facts[Region],\"a\"))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 34) The function AVERAGEX cannot work with values of type Boolean.\""
+  },
+  {
+   "expr": "AVERAGEX(Facts,ISNUMBER(Facts[Quantity]))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 34) The function AVERAGEX cannot work with values of type Boolean.\""
+  },
+  {
+   "expr": "AVERAGEX(Facts,HASONEVALUE(Facts[Region]))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 34) The function AVERAGEX cannot work with values of type Boolean.\""
+  },
+  {
+   "expr": "AVERAGEX(Facts,EARLIER(Facts[Quantity])>1)",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 34) EARLIER/EARLIEST refers to an earlier row context which doesn't exist.\""
+  },
+  {
+   "expr": "AVERAGEX(Facts,Facts[Quantity]=EARLIER(Facts[Quantity]))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 50) EARLIER/EARLIEST refers to an earlier row context which doesn't exist.\""
+  },
+  {
+   "expr": "COUNTX(Facts,TRUE())",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 32) The function COUNTX cannot work with values of type Boolean.\""
+  },
+  {
+   "expr": "COUNTX(Facts,FALSE())",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 32) The function COUNTX cannot work with values of type Boolean.\""
+  },
+  {
+   "expr": "COUNTX(Facts,Facts[Quantity]>1)",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 32) The function COUNTX cannot work with values of type Boolean.\""
+  },
+  {
+   "expr": "COUNTX(Facts,NOT(Facts[Quantity]>1))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 32) The function COUNTX cannot work with values of type Boolean.\""
+  },
+  {
+   "expr": "COUNTX(Facts,Facts[Quantity]>1&&Facts[Quantity]<5)",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 32) The function COUNTX cannot work with values of type Boolean.\""
+  },
+  {
+   "expr": "COUNTX(Facts,Facts[Quantity]>4||Facts[Quantity]<1)",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 32) The function COUNTX cannot work with values of type Boolean.\""
+  },
+  {
+   "expr": "COUNTX(Facts,ISBLANK(Facts[Sales]))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 32) The function COUNTX cannot work with values of type Boolean.\""
+  },
+  {
+   "expr": "COUNTX(Facts,IF(Facts[Quantity]>1,TRUE(),FALSE()))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 32) The function COUNTX cannot work with values of type Boolean.\""
+  },
+  {
+   "expr": "COUNTX(Facts,Facts[Region]=\"East\")",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 32) The function COUNTX cannot work with values of type Boolean.\""
+  },
+  {
+   "expr": "COUNTX(Facts,Facts[Note]=BLANK())",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 32) The function COUNTX cannot work with values of type Boolean.\""
+  },
+  {
+   "expr": "COUNTX(Facts,(Facts[Quantity]>1)*1)",
+   "powerbi": "6"
+  },
+  {
+   "expr": "COUNTX(Facts,(Facts[Quantity]>1)+0)",
+   "powerbi": "6"
+  },
+  {
+   "expr": "COUNTX(Facts,INT(Facts[Quantity]>1))",
+   "powerbi": "6"
+  },
+  {
+   "expr": "COUNTX(Facts,IF(Facts[Quantity]>1,1))",
+   "powerbi": "4"
+  },
+  {
+   "expr": "COUNTX(Facts,IF(Facts[Quantity]>1,1,0))",
+   "powerbi": "6"
+  },
+  {
+   "expr": "COUNTX(Facts,Facts[Quantity]>1 && 1)",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 32) The function COUNTX cannot work with values of type Boolean.\""
+  },
+  {
+   "expr": "COUNTX(Facts,VALUE(Facts[Quantity]>1))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 32) Cannot convert value 'TRUE' of type Text to type Number.\""
+  },
+  {
+   "expr": "COUNTX(Facts,--(Facts[Quantity]>1)\n)",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 19) Argument '2' in COUNTX function is required.\""
+  },
+  {
+   "expr": "COUNTX(Facts,-(Facts[Quantity]>1))",
+   "powerbi": "6"
+  },
+  {
+   "expr": "COUNTX(Facts,ABS(Facts[Quantity]>1))",
+   "powerbi": "6"
+  },
+  {
+   "expr": "COUNTX(Facts,ISBLANK(Facts[Note]))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 32) The function COUNTX cannot work with values of type Boolean.\""
+  },
+  {
+   "expr": "COUNTX(Facts,ISBLANK(Facts[Quantity]))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 32) The function COUNTX cannot work with values of type Boolean.\""
+  },
+  {
+   "expr": "COUNTX(Facts,AND(Facts[Quantity]>1,Facts[Quantity]<5))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 32) The function COUNTX cannot work with values of type Boolean.\""
+  },
+  {
+   "expr": "COUNTX(Facts,OR(Facts[Quantity]>4,Facts[Quantity]<1))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 32) The function COUNTX cannot work with values of type Boolean.\""
+  },
+  {
+   "expr": "COUNTX(Facts,Facts[Quantity] IN {1,2})",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 32) The function COUNTX cannot work with values of type Boolean.\""
+  },
+  {
+   "expr": "COUNTX(Facts,CONTAINSSTRING(Facts[Region],\"a\"))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 32) The function COUNTX cannot work with values of type Boolean.\""
+  },
+  {
+   "expr": "COUNTX(Facts,ISNUMBER(Facts[Quantity]))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 32) The function COUNTX cannot work with values of type Boolean.\""
+  },
+  {
+   "expr": "COUNTX(Facts,HASONEVALUE(Facts[Region]))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 32) The function COUNTX cannot work with values of type Boolean.\""
+  },
+  {
+   "expr": "COUNTX(Facts,EARLIER(Facts[Quantity])>1)",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 32) EARLIER/EARLIEST refers to an earlier row context which doesn't exist.\""
+  },
+  {
+   "expr": "COUNTX(Facts,Facts[Quantity]=EARLIER(Facts[Quantity]))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 48) EARLIER/EARLIEST refers to an earlier row context which doesn't exist.\""
+  },
+  {
+   "expr": "COUNTAX(Facts,TRUE())",
+   "powerbi": "6"
+  },
+  {
+   "expr": "COUNTAX(Facts,FALSE())",
+   "powerbi": "6"
+  },
+  {
+   "expr": "COUNTAX(Facts,Facts[Quantity]>1)",
+   "powerbi": "6"
+  },
+  {
+   "expr": "COUNTAX(Facts,NOT(Facts[Quantity]>1))",
+   "powerbi": "6"
+  },
+  {
+   "expr": "COUNTAX(Facts,Facts[Quantity]>1&&Facts[Quantity]<5)",
+   "powerbi": "6"
+  },
+  {
+   "expr": "COUNTAX(Facts,Facts[Quantity]>4||Facts[Quantity]<1)",
+   "powerbi": "6"
+  },
+  {
+   "expr": "COUNTAX(Facts,ISBLANK(Facts[Sales]))",
+   "powerbi": "6"
+  },
+  {
+   "expr": "COUNTAX(Facts,IF(Facts[Quantity]>1,TRUE(),FALSE()))",
+   "powerbi": "6"
+  },
+  {
+   "expr": "COUNTAX(Facts,Facts[Region]=\"East\")",
+   "powerbi": "6"
+  },
+  {
+   "expr": "COUNTAX(Facts,Facts[Note]=BLANK())",
+   "powerbi": "6"
+  },
+  {
+   "expr": "COUNTAX(Facts,(Facts[Quantity]>1)*1)",
+   "powerbi": "6"
+  },
+  {
+   "expr": "COUNTAX(Facts,(Facts[Quantity]>1)+0)",
+   "powerbi": "6"
+  },
+  {
+   "expr": "COUNTAX(Facts,INT(Facts[Quantity]>1))",
+   "powerbi": "6"
+  },
+  {
+   "expr": "COUNTAX(Facts,IF(Facts[Quantity]>1,1))",
+   "powerbi": "4"
+  },
+  {
+   "expr": "COUNTAX(Facts,IF(Facts[Quantity]>1,1,0))",
+   "powerbi": "6"
+  },
+  {
+   "expr": "COUNTAX(Facts,Facts[Quantity]>1 && 1)",
+   "powerbi": "6"
+  },
+  {
+   "expr": "COUNTAX(Facts,VALUE(Facts[Quantity]>1))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 33) Cannot convert value 'TRUE' of type Text to type Number.\""
+  },
+  {
+   "expr": "COUNTAX(Facts,--(Facts[Quantity]>1)\n)",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 19) Argument '2' in COUNTAX function is required.\""
+  },
+  {
+   "expr": "COUNTAX(Facts,-(Facts[Quantity]>1))",
+   "powerbi": "6"
+  },
+  {
+   "expr": "COUNTAX(Facts,ABS(Facts[Quantity]>1))",
+   "powerbi": "6"
+  },
+  {
+   "expr": "COUNTAX(Facts,ISBLANK(Facts[Note]))",
+   "powerbi": "6"
+  },
+  {
+   "expr": "COUNTAX(Facts,ISBLANK(Facts[Quantity]))",
+   "powerbi": "6"
+  },
+  {
+   "expr": "COUNTAX(Facts,AND(Facts[Quantity]>1,Facts[Quantity]<5))",
+   "powerbi": "6"
+  },
+  {
+   "expr": "COUNTAX(Facts,OR(Facts[Quantity]>4,Facts[Quantity]<1))",
+   "powerbi": "6"
+  },
+  {
+   "expr": "COUNTAX(Facts,Facts[Quantity] IN {1,2})",
+   "powerbi": "6"
+  },
+  {
+   "expr": "COUNTAX(Facts,CONTAINSSTRING(Facts[Region],\"a\"))",
+   "powerbi": "6"
+  },
+  {
+   "expr": "COUNTAX(Facts,ISNUMBER(Facts[Quantity]))",
+   "powerbi": "6"
+  },
+  {
+   "expr": "COUNTAX(Facts,HASONEVALUE(Facts[Region]))",
+   "powerbi": "6"
+  },
+  {
+   "expr": "COUNTAX(Facts,EARLIER(Facts[Quantity])>1)",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 33) EARLIER/EARLIEST refers to an earlier row context which doesn't exist.\""
+  },
+  {
+   "expr": "COUNTAX(Facts,Facts[Quantity]=EARLIER(Facts[Quantity]))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 49) EARLIER/EARLIEST refers to an earlier row context which doesn't exist.\""
+  },
+  {
+   "expr": "MAXX(Facts,TRUE())",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 30) The function MAXX cannot work with values of type Boolean.\""
+  },
+  {
+   "expr": "MAXX(Facts,FALSE())",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 30) The function MAXX cannot work with values of type Boolean.\""
+  },
+  {
+   "expr": "MAXX(Facts,Facts[Quantity]>1)",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 30) The function MAXX cannot work with values of type Boolean.\""
+  },
+  {
+   "expr": "MAXX(Facts,NOT(Facts[Quantity]>1))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 30) The function MAXX cannot work with values of type Boolean.\""
+  },
+  {
+   "expr": "MAXX(Facts,Facts[Quantity]>1&&Facts[Quantity]<5)",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 30) The function MAXX cannot work with values of type Boolean.\""
+  },
+  {
+   "expr": "MAXX(Facts,Facts[Quantity]>4||Facts[Quantity]<1)",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 30) The function MAXX cannot work with values of type Boolean.\""
+  },
+  {
+   "expr": "MAXX(Facts,ISBLANK(Facts[Sales]))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 30) The function MAXX cannot work with values of type Boolean.\""
+  },
+  {
+   "expr": "MAXX(Facts,IF(Facts[Quantity]>1,TRUE(),FALSE()))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 30) The function MAXX cannot work with values of type Boolean.\""
+  },
+  {
+   "expr": "MAXX(Facts,Facts[Region]=\"East\")",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 30) The function MAXX cannot work with values of type Boolean.\""
+  },
+  {
+   "expr": "MAXX(Facts,Facts[Note]=BLANK())",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 30) The function MAXX cannot work with values of type Boolean.\""
+  },
+  {
+   "expr": "MAXX(Facts,(Facts[Quantity]>1)*1)",
+   "powerbi": "1"
+  },
+  {
+   "expr": "MAXX(Facts,(Facts[Quantity]>1)+0)",
+   "powerbi": "1"
+  },
+  {
+   "expr": "MAXX(Facts,INT(Facts[Quantity]>1))",
+   "powerbi": "1"
+  },
+  {
+   "expr": "MAXX(Facts,IF(Facts[Quantity]>1,1))",
+   "powerbi": "1"
+  },
+  {
+   "expr": "MAXX(Facts,IF(Facts[Quantity]>1,1,0))",
+   "powerbi": "1"
+  },
+  {
+   "expr": "MAXX(Facts,Facts[Quantity]>1 && 1)",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 30) The function MAXX cannot work with values of type Boolean.\""
+  },
+  {
+   "expr": "MAXX(Facts,VALUE(Facts[Quantity]>1))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 30) Cannot convert value 'TRUE' of type Text to type Number.\""
+  },
+  {
+   "expr": "MAXX(Facts,--(Facts[Quantity]>1)\n)",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 19) Argument '2' in MAXX function is required.\""
+  },
+  {
+   "expr": "MAXX(Facts,-(Facts[Quantity]>1))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "MAXX(Facts,ABS(Facts[Quantity]>1))",
+   "powerbi": "1"
+  },
+  {
+   "expr": "MAXX(Facts,ISBLANK(Facts[Note]))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 30) The function MAXX cannot work with values of type Boolean.\""
+  },
+  {
+   "expr": "MAXX(Facts,ISBLANK(Facts[Quantity]))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 30) The function MAXX cannot work with values of type Boolean.\""
+  },
+  {
+   "expr": "MAXX(Facts,AND(Facts[Quantity]>1,Facts[Quantity]<5))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 30) The function MAXX cannot work with values of type Boolean.\""
+  },
+  {
+   "expr": "MAXX(Facts,OR(Facts[Quantity]>4,Facts[Quantity]<1))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 30) The function MAXX cannot work with values of type Boolean.\""
+  },
+  {
+   "expr": "MAXX(Facts,Facts[Quantity] IN {1,2})",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 30) The function MAXX cannot work with values of type Boolean.\""
+  },
+  {
+   "expr": "MAXX(Facts,CONTAINSSTRING(Facts[Region],\"a\"))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 30) The function MAXX cannot work with values of type Boolean.\""
+  },
+  {
+   "expr": "MAXX(Facts,ISNUMBER(Facts[Quantity]))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 30) The function MAXX cannot work with values of type Boolean.\""
+  },
+  {
+   "expr": "MAXX(Facts,HASONEVALUE(Facts[Region]))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 30) The function MAXX cannot work with values of type Boolean.\""
+  },
+  {
+   "expr": "MAXX(Facts,EARLIER(Facts[Quantity])>1)",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 30) EARLIER/EARLIEST refers to an earlier row context which doesn't exist.\""
+  },
+  {
+   "expr": "MAXX(Facts,Facts[Quantity]=EARLIER(Facts[Quantity]))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 46) EARLIER/EARLIEST refers to an earlier row context which doesn't exist.\""
+  },
+  {
+   "expr": "MINX(Facts,TRUE())",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 30) The function MINX cannot work with values of type Boolean.\""
+  },
+  {
+   "expr": "MINX(Facts,FALSE())",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 30) The function MINX cannot work with values of type Boolean.\""
+  },
+  {
+   "expr": "MINX(Facts,Facts[Quantity]>1)",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 30) The function MINX cannot work with values of type Boolean.\""
+  },
+  {
+   "expr": "MINX(Facts,NOT(Facts[Quantity]>1))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 30) The function MINX cannot work with values of type Boolean.\""
+  },
+  {
+   "expr": "MINX(Facts,Facts[Quantity]>1&&Facts[Quantity]<5)",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 30) The function MINX cannot work with values of type Boolean.\""
+  },
+  {
+   "expr": "MINX(Facts,Facts[Quantity]>4||Facts[Quantity]<1)",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 30) The function MINX cannot work with values of type Boolean.\""
+  },
+  {
+   "expr": "MINX(Facts,ISBLANK(Facts[Sales]))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 30) The function MINX cannot work with values of type Boolean.\""
+  },
+  {
+   "expr": "MINX(Facts,IF(Facts[Quantity]>1,TRUE(),FALSE()))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 30) The function MINX cannot work with values of type Boolean.\""
+  },
+  {
+   "expr": "MINX(Facts,Facts[Region]=\"East\")",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 30) The function MINX cannot work with values of type Boolean.\""
+  },
+  {
+   "expr": "MINX(Facts,Facts[Note]=BLANK())",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 30) The function MINX cannot work with values of type Boolean.\""
+  },
+  {
+   "expr": "MINX(Facts,(Facts[Quantity]>1)*1)",
+   "powerbi": "0"
+  },
+  {
+   "expr": "MINX(Facts,(Facts[Quantity]>1)+0)",
+   "powerbi": "0"
+  },
+  {
+   "expr": "MINX(Facts,INT(Facts[Quantity]>1))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "MINX(Facts,IF(Facts[Quantity]>1,1))",
+   "powerbi": "1"
+  },
+  {
+   "expr": "MINX(Facts,IF(Facts[Quantity]>1,1,0))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "MINX(Facts,Facts[Quantity]>1 && 1)",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 30) The function MINX cannot work with values of type Boolean.\""
+  },
+  {
+   "expr": "MINX(Facts,VALUE(Facts[Quantity]>1))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 30) Cannot convert value 'TRUE' of type Text to type Number.\""
+  },
+  {
+   "expr": "MINX(Facts,--(Facts[Quantity]>1)\n)",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 19) Argument '2' in MINX function is required.\""
+  },
+  {
+   "expr": "MINX(Facts,-(Facts[Quantity]>1))",
+   "powerbi": "-1"
+  },
+  {
+   "expr": "MINX(Facts,ABS(Facts[Quantity]>1))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "MINX(Facts,ISBLANK(Facts[Note]))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 30) The function MINX cannot work with values of type Boolean.\""
+  },
+  {
+   "expr": "MINX(Facts,ISBLANK(Facts[Quantity]))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 30) The function MINX cannot work with values of type Boolean.\""
+  },
+  {
+   "expr": "MINX(Facts,AND(Facts[Quantity]>1,Facts[Quantity]<5))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 30) The function MINX cannot work with values of type Boolean.\""
+  },
+  {
+   "expr": "MINX(Facts,OR(Facts[Quantity]>4,Facts[Quantity]<1))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 30) The function MINX cannot work with values of type Boolean.\""
+  },
+  {
+   "expr": "MINX(Facts,Facts[Quantity] IN {1,2})",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 30) The function MINX cannot work with values of type Boolean.\""
+  },
+  {
+   "expr": "MINX(Facts,CONTAINSSTRING(Facts[Region],\"a\"))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 30) The function MINX cannot work with values of type Boolean.\""
+  },
+  {
+   "expr": "MINX(Facts,ISNUMBER(Facts[Quantity]))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 30) The function MINX cannot work with values of type Boolean.\""
+  },
+  {
+   "expr": "MINX(Facts,HASONEVALUE(Facts[Region]))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 30) The function MINX cannot work with values of type Boolean.\""
+  },
+  {
+   "expr": "MINX(Facts,EARLIER(Facts[Quantity])>1)",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 30) EARLIER/EARLIEST refers to an earlier row context which doesn't exist.\""
+  },
+  {
+   "expr": "MINX(Facts,Facts[Quantity]=EARLIER(Facts[Quantity]))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 46) EARLIER/EARLIEST refers to an earlier row context which doesn't exist.\""
+  },
+  {
+   "expr": "PRODUCTX(Facts,TRUE())",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 34) The function PRODUCTX cannot work with values of type Boolean.\""
+  },
+  {
+   "expr": "PRODUCTX(Facts,FALSE())",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 34) The function PRODUCTX cannot work with values of type Boolean.\""
+  },
+  {
+   "expr": "PRODUCTX(Facts,Facts[Quantity]>1)",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 34) The function PRODUCTX cannot work with values of type Boolean.\""
+  },
+  {
+   "expr": "PRODUCTX(Facts,NOT(Facts[Quantity]>1))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 34) The function PRODUCTX cannot work with values of type Boolean.\""
+  },
+  {
+   "expr": "PRODUCTX(Facts,Facts[Quantity]>1&&Facts[Quantity]<5)",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 34) The function PRODUCTX cannot work with values of type Boolean.\""
+  },
+  {
+   "expr": "PRODUCTX(Facts,Facts[Quantity]>4||Facts[Quantity]<1)",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 34) The function PRODUCTX cannot work with values of type Boolean.\""
+  },
+  {
+   "expr": "PRODUCTX(Facts,ISBLANK(Facts[Sales]))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 34) The function PRODUCTX cannot work with values of type Boolean.\""
+  },
+  {
+   "expr": "PRODUCTX(Facts,IF(Facts[Quantity]>1,TRUE(),FALSE()))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 34) The function PRODUCTX cannot work with values of type Boolean.\""
+  },
+  {
+   "expr": "PRODUCTX(Facts,Facts[Region]=\"East\")",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 34) The function PRODUCTX cannot work with values of type Boolean.\""
+  },
+  {
+   "expr": "PRODUCTX(Facts,Facts[Note]=BLANK())",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 34) The function PRODUCTX cannot work with values of type Boolean.\""
+  },
+  {
+   "expr": "PRODUCTX(Facts,(Facts[Quantity]>1)*1)",
+   "powerbi": "0"
+  },
+  {
+   "expr": "PRODUCTX(Facts,(Facts[Quantity]>1)+0)",
+   "powerbi": "0"
+  },
+  {
+   "expr": "PRODUCTX(Facts,INT(Facts[Quantity]>1))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "PRODUCTX(Facts,IF(Facts[Quantity]>1,1))",
+   "powerbi": "1"
+  },
+  {
+   "expr": "PRODUCTX(Facts,IF(Facts[Quantity]>1,1,0))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "PRODUCTX(Facts,Facts[Quantity]>1 && 1)",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 34) The function PRODUCTX cannot work with values of type Boolean.\""
+  },
+  {
+   "expr": "PRODUCTX(Facts,VALUE(Facts[Quantity]>1))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 34) Cannot convert value 'TRUE' of type Text to type Number.\""
+  },
+  {
+   "expr": "PRODUCTX(Facts,--(Facts[Quantity]>1)\n)",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 19) Argument '2' in PRODUCTX function is required.\""
+  },
+  {
+   "expr": "PRODUCTX(Facts,-(Facts[Quantity]>1))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "PRODUCTX(Facts,ABS(Facts[Quantity]>1))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "PRODUCTX(Facts,ISBLANK(Facts[Note]))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 34) The function PRODUCTX cannot work with values of type Boolean.\""
+  },
+  {
+   "expr": "PRODUCTX(Facts,ISBLANK(Facts[Quantity]))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 34) The function PRODUCTX cannot work with values of type Boolean.\""
+  },
+  {
+   "expr": "PRODUCTX(Facts,AND(Facts[Quantity]>1,Facts[Quantity]<5))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 34) The function PRODUCTX cannot work with values of type Boolean.\""
+  },
+  {
+   "expr": "PRODUCTX(Facts,OR(Facts[Quantity]>4,Facts[Quantity]<1))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 34) The function PRODUCTX cannot work with values of type Boolean.\""
+  },
+  {
+   "expr": "PRODUCTX(Facts,Facts[Quantity] IN {1,2})",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 34) The function PRODUCTX cannot work with values of type Boolean.\""
+  },
+  {
+   "expr": "PRODUCTX(Facts,CONTAINSSTRING(Facts[Region],\"a\"))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 34) The function PRODUCTX cannot work with values of type Boolean.\""
+  },
+  {
+   "expr": "PRODUCTX(Facts,ISNUMBER(Facts[Quantity]))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 34) The function PRODUCTX cannot work with values of type Boolean.\""
+  },
+  {
+   "expr": "PRODUCTX(Facts,HASONEVALUE(Facts[Region]))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 34) The function PRODUCTX cannot work with values of type Boolean.\""
+  },
+  {
+   "expr": "PRODUCTX(Facts,EARLIER(Facts[Quantity])>1)",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 34) EARLIER/EARLIEST refers to an earlier row context which doesn't exist.\""
+  },
+  {
+   "expr": "PRODUCTX(Facts,Facts[Quantity]=EARLIER(Facts[Quantity]))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 50) EARLIER/EARLIEST refers to an earlier row context which doesn't exist.\""
+  },
+  {
+   "expr": "MEDIANX(Facts,TRUE())",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 33) MEDIANX does not support expressions of type string/Boolean/date.\""
+  },
+  {
+   "expr": "MEDIANX(Facts,FALSE())",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 33) MEDIANX does not support expressions of type string/Boolean/date.\""
+  },
+  {
+   "expr": "MEDIANX(Facts,Facts[Quantity]>1)",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 33) MEDIANX does not support expressions of type string/Boolean/date.\""
+  },
+  {
+   "expr": "MEDIANX(Facts,NOT(Facts[Quantity]>1))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 33) MEDIANX does not support expressions of type string/Boolean/date.\""
+  },
+  {
+   "expr": "MEDIANX(Facts,Facts[Quantity]>1&&Facts[Quantity]<5)",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 33) MEDIANX does not support expressions of type string/Boolean/date.\""
+  },
+  {
+   "expr": "MEDIANX(Facts,Facts[Quantity]>4||Facts[Quantity]<1)",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 33) MEDIANX does not support expressions of type string/Boolean/date.\""
+  },
+  {
+   "expr": "MEDIANX(Facts,ISBLANK(Facts[Sales]))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 33) MEDIANX does not support expressions of type string/Boolean/date.\""
+  },
+  {
+   "expr": "MEDIANX(Facts,IF(Facts[Quantity]>1,TRUE(),FALSE()))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 33) MEDIANX does not support expressions of type string/Boolean/date.\""
+  },
+  {
+   "expr": "MEDIANX(Facts,Facts[Region]=\"East\")",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 33) MEDIANX does not support expressions of type string/Boolean/date.\""
+  },
+  {
+   "expr": "MEDIANX(Facts,Facts[Note]=BLANK())",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 33) MEDIANX does not support expressions of type string/Boolean/date.\""
+  },
+  {
+   "expr": "MEDIANX(Facts,(Facts[Quantity]>1)*1)",
+   "powerbi": "1"
+  },
+  {
+   "expr": "MEDIANX(Facts,(Facts[Quantity]>1)+0)",
+   "powerbi": "1"
+  },
+  {
+   "expr": "MEDIANX(Facts,INT(Facts[Quantity]>1))",
+   "powerbi": "1"
+  },
+  {
+   "expr": "MEDIANX(Facts,IF(Facts[Quantity]>1,1))",
+   "powerbi": "1"
+  },
+  {
+   "expr": "MEDIANX(Facts,IF(Facts[Quantity]>1,1,0))",
+   "powerbi": "1"
+  },
+  {
+   "expr": "MEDIANX(Facts,Facts[Quantity]>1 && 1)",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 33) MEDIANX does not support expressions of type string/Boolean/date.\""
+  },
+  {
+   "expr": "MEDIANX(Facts,VALUE(Facts[Quantity]>1))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 33) Cannot convert value 'FALSE' of type Text to type Number.\""
+  },
+  {
+   "expr": "MEDIANX(Facts,--(Facts[Quantity]>1)\n)",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 19) Argument '2' in MEDIANX function is required.\""
+  },
+  {
+   "expr": "MEDIANX(Facts,-(Facts[Quantity]>1))",
+   "powerbi": "-1"
+  },
+  {
+   "expr": "MEDIANX(Facts,ABS(Facts[Quantity]>1))",
+   "powerbi": "1"
+  },
+  {
+   "expr": "MEDIANX(Facts,ISBLANK(Facts[Note]))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 33) MEDIANX does not support expressions of type string/Boolean/date.\""
+  },
+  {
+   "expr": "MEDIANX(Facts,ISBLANK(Facts[Quantity]))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 33) MEDIANX does not support expressions of type string/Boolean/date.\""
+  },
+  {
+   "expr": "MEDIANX(Facts,AND(Facts[Quantity]>1,Facts[Quantity]<5))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 33) MEDIANX does not support expressions of type string/Boolean/date.\""
+  },
+  {
+   "expr": "MEDIANX(Facts,OR(Facts[Quantity]>4,Facts[Quantity]<1))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 33) MEDIANX does not support expressions of type string/Boolean/date.\""
+  },
+  {
+   "expr": "MEDIANX(Facts,Facts[Quantity] IN {1,2})",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 33) MEDIANX does not support expressions of type string/Boolean/date.\""
+  },
+  {
+   "expr": "MEDIANX(Facts,CONTAINSSTRING(Facts[Region],\"a\"))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 33) MEDIANX does not support expressions of type string/Boolean/date.\""
+  },
+  {
+   "expr": "MEDIANX(Facts,ISNUMBER(Facts[Quantity]))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 33) MEDIANX does not support expressions of type string/Boolean/date.\""
+  },
+  {
+   "expr": "MEDIANX(Facts,HASONEVALUE(Facts[Region]))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 33) MEDIANX does not support expressions of type string/Boolean/date.\""
+  },
+  {
+   "expr": "MEDIANX(Facts,EARLIER(Facts[Quantity])>1)",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 33) EARLIER/EARLIEST refers to an earlier row context which doesn't exist.\""
+  },
+  {
+   "expr": "MEDIANX(Facts,Facts[Quantity]=EARLIER(Facts[Quantity]))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 49) EARLIER/EARLIEST refers to an earlier row context which doesn't exist.\""
+  },
+  {
+   "expr": "GEOMEANX(Facts,TRUE())",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 34) The function GEOMEANX cannot work with values of type Boolean.\""
+  },
+  {
+   "expr": "GEOMEANX(Facts,FALSE())",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 34) The function GEOMEANX cannot work with values of type Boolean.\""
+  },
+  {
+   "expr": "GEOMEANX(Facts,Facts[Quantity]>1)",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 34) The function GEOMEANX cannot work with values of type Boolean.\""
+  },
+  {
+   "expr": "GEOMEANX(Facts,NOT(Facts[Quantity]>1))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 34) The function GEOMEANX cannot work with values of type Boolean.\""
+  },
+  {
+   "expr": "GEOMEANX(Facts,Facts[Quantity]>1&&Facts[Quantity]<5)",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 34) The function GEOMEANX cannot work with values of type Boolean.\""
+  },
+  {
+   "expr": "GEOMEANX(Facts,Facts[Quantity]>4||Facts[Quantity]<1)",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 34) The function GEOMEANX cannot work with values of type Boolean.\""
+  },
+  {
+   "expr": "GEOMEANX(Facts,ISBLANK(Facts[Sales]))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 34) The function GEOMEANX cannot work with values of type Boolean.\""
+  },
+  {
+   "expr": "GEOMEANX(Facts,IF(Facts[Quantity]>1,TRUE(),FALSE()))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 34) The function GEOMEANX cannot work with values of type Boolean.\""
+  },
+  {
+   "expr": "GEOMEANX(Facts,Facts[Region]=\"East\")",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 34) The function GEOMEANX cannot work with values of type Boolean.\""
+  },
+  {
+   "expr": "GEOMEANX(Facts,Facts[Note]=BLANK())",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 34) The function GEOMEANX cannot work with values of type Boolean.\""
+  },
+  {
+   "expr": "GEOMEANX(Facts,(Facts[Quantity]>1)*1)",
+   "powerbi": "0"
+  },
+  {
+   "expr": "GEOMEANX(Facts,(Facts[Quantity]>1)+0)",
+   "powerbi": "0"
+  },
+  {
+   "expr": "GEOMEANX(Facts,INT(Facts[Quantity]>1))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "GEOMEANX(Facts,IF(Facts[Quantity]>1,1))",
+   "powerbi": "1"
+  },
+  {
+   "expr": "GEOMEANX(Facts,IF(Facts[Quantity]>1,1,0))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "GEOMEANX(Facts,Facts[Quantity]>1 && 1)",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 34) The function GEOMEANX cannot work with values of type Boolean.\""
+  },
+  {
+   "expr": "GEOMEANX(Facts,VALUE(Facts[Quantity]>1))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 34) Cannot convert value 'TRUE' of type Text to type Number.\""
+  },
+  {
+   "expr": "GEOMEANX(Facts,--(Facts[Quantity]>1)\n)",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 19) Argument '2' in GEOMEANX function is required.\""
+  },
+  {
+   "expr": "GEOMEANX(Facts,-(Facts[Quantity]>1))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "GEOMEANX(Facts,ABS(Facts[Quantity]>1))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "GEOMEANX(Facts,ISBLANK(Facts[Note]))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 34) The function GEOMEANX cannot work with values of type Boolean.\""
+  },
+  {
+   "expr": "GEOMEANX(Facts,ISBLANK(Facts[Quantity]))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 34) The function GEOMEANX cannot work with values of type Boolean.\""
+  },
+  {
+   "expr": "GEOMEANX(Facts,AND(Facts[Quantity]>1,Facts[Quantity]<5))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 34) The function GEOMEANX cannot work with values of type Boolean.\""
+  },
+  {
+   "expr": "GEOMEANX(Facts,OR(Facts[Quantity]>4,Facts[Quantity]<1))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 34) The function GEOMEANX cannot work with values of type Boolean.\""
+  },
+  {
+   "expr": "GEOMEANX(Facts,Facts[Quantity] IN {1,2})",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 34) The function GEOMEANX cannot work with values of type Boolean.\""
+  },
+  {
+   "expr": "GEOMEANX(Facts,CONTAINSSTRING(Facts[Region],\"a\"))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 34) The function GEOMEANX cannot work with values of type Boolean.\""
+  },
+  {
+   "expr": "GEOMEANX(Facts,ISNUMBER(Facts[Quantity]))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 34) The function GEOMEANX cannot work with values of type Boolean.\""
+  },
+  {
+   "expr": "GEOMEANX(Facts,HASONEVALUE(Facts[Region]))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 34) The function GEOMEANX cannot work with values of type Boolean.\""
+  },
+  {
+   "expr": "GEOMEANX(Facts,EARLIER(Facts[Quantity])>1)",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 34) EARLIER/EARLIEST refers to an earlier row context which doesn't exist.\""
+  },
+  {
+   "expr": "GEOMEANX(Facts,Facts[Quantity]=EARLIER(Facts[Quantity]))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 50) EARLIER/EARLIEST refers to an earlier row context which doesn't exist.\""
+  },
+  {
+   "expr": "STDEVX.S(Facts,TRUE())",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 34) The function STDEVX.S cannot work with values of type Boolean.\""
+  },
+  {
+   "expr": "STDEVX.S(Facts,FALSE())",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 34) The function STDEVX.S cannot work with values of type Boolean.\""
+  },
+  {
+   "expr": "STDEVX.S(Facts,Facts[Quantity]>1)",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 34) The function STDEVX.S cannot work with values of type Boolean.\""
+  },
+  {
+   "expr": "STDEVX.S(Facts,NOT(Facts[Quantity]>1))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 34) The function STDEVX.S cannot work with values of type Boolean.\""
+  },
+  {
+   "expr": "STDEVX.S(Facts,Facts[Quantity]>1&&Facts[Quantity]<5)",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 34) The function STDEVX.S cannot work with values of type Boolean.\""
+  },
+  {
+   "expr": "STDEVX.S(Facts,Facts[Quantity]>4||Facts[Quantity]<1)",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 34) The function STDEVX.S cannot work with values of type Boolean.\""
+  },
+  {
+   "expr": "STDEVX.S(Facts,ISBLANK(Facts[Sales]))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 34) The function STDEVX.S cannot work with values of type Boolean.\""
+  },
+  {
+   "expr": "STDEVX.S(Facts,IF(Facts[Quantity]>1,TRUE(),FALSE()))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 34) The function STDEVX.S cannot work with values of type Boolean.\""
+  },
+  {
+   "expr": "STDEVX.S(Facts,Facts[Region]=\"East\")",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 34) The function STDEVX.S cannot work with values of type Boolean.\""
+  },
+  {
+   "expr": "STDEVX.S(Facts,Facts[Note]=BLANK())",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 34) The function STDEVX.S cannot work with values of type Boolean.\""
+  },
+  {
+   "expr": "STDEVX.S(Facts,(Facts[Quantity]>1)*1)",
+   "powerbi": "0.516397779494322"
+  },
+  {
+   "expr": "STDEVX.S(Facts,(Facts[Quantity]>1)+0)",
+   "powerbi": "0.516397779494322"
+  },
+  {
+   "expr": "STDEVX.S(Facts,INT(Facts[Quantity]>1))",
+   "powerbi": "0.516397779494322"
+  },
+  {
+   "expr": "STDEVX.S(Facts,IF(Facts[Quantity]>1,1))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "STDEVX.S(Facts,IF(Facts[Quantity]>1,1,0))",
+   "powerbi": "0.516397779494322"
+  },
+  {
+   "expr": "STDEVX.S(Facts,Facts[Quantity]>1 && 1)",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 34) The function STDEVX.S cannot work with values of type Boolean.\""
+  },
+  {
+   "expr": "STDEVX.S(Facts,VALUE(Facts[Quantity]>1))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 34) Cannot convert value 'TRUE' of type Text to type Number.\""
+  },
+  {
+   "expr": "STDEVX.S(Facts,--(Facts[Quantity]>1)\n)",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 19) Argument '2' in STDEVX.S function is required.\""
+  },
+  {
+   "expr": "STDEVX.S(Facts,-(Facts[Quantity]>1))",
+   "powerbi": "0.516397779494322"
+  },
+  {
+   "expr": "STDEVX.S(Facts,ABS(Facts[Quantity]>1))",
+   "powerbi": "0.516397779494322"
+  },
+  {
+   "expr": "STDEVX.S(Facts,ISBLANK(Facts[Note]))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 34) The function STDEVX.S cannot work with values of type Boolean.\""
+  },
+  {
+   "expr": "STDEVX.S(Facts,ISBLANK(Facts[Quantity]))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 34) The function STDEVX.S cannot work with values of type Boolean.\""
+  },
+  {
+   "expr": "STDEVX.S(Facts,AND(Facts[Quantity]>1,Facts[Quantity]<5))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 34) The function STDEVX.S cannot work with values of type Boolean.\""
+  },
+  {
+   "expr": "STDEVX.S(Facts,OR(Facts[Quantity]>4,Facts[Quantity]<1))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 34) The function STDEVX.S cannot work with values of type Boolean.\""
+  },
+  {
+   "expr": "STDEVX.S(Facts,Facts[Quantity] IN {1,2})",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 34) The function STDEVX.S cannot work with values of type Boolean.\""
+  },
+  {
+   "expr": "STDEVX.S(Facts,CONTAINSSTRING(Facts[Region],\"a\"))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 34) The function STDEVX.S cannot work with values of type Boolean.\""
+  },
+  {
+   "expr": "STDEVX.S(Facts,ISNUMBER(Facts[Quantity]))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 34) The function STDEVX.S cannot work with values of type Boolean.\""
+  },
+  {
+   "expr": "STDEVX.S(Facts,HASONEVALUE(Facts[Region]))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 34) The function STDEVX.S cannot work with values of type Boolean.\""
+  },
+  {
+   "expr": "STDEVX.S(Facts,EARLIER(Facts[Quantity])>1)",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 34) EARLIER/EARLIEST refers to an earlier row context which doesn't exist.\""
+  },
+  {
+   "expr": "STDEVX.S(Facts,Facts[Quantity]=EARLIER(Facts[Quantity]))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 50) EARLIER/EARLIEST refers to an earlier row context which doesn't exist.\""
+  },
+  {
+   "expr": "VARX.P(Facts,TRUE())",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 32) The function VARX.P cannot work with values of type Boolean.\""
+  },
+  {
+   "expr": "VARX.P(Facts,FALSE())",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 32) The function VARX.P cannot work with values of type Boolean.\""
+  },
+  {
+   "expr": "VARX.P(Facts,Facts[Quantity]>1)",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 32) The function VARX.P cannot work with values of type Boolean.\""
+  },
+  {
+   "expr": "VARX.P(Facts,NOT(Facts[Quantity]>1))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 32) The function VARX.P cannot work with values of type Boolean.\""
+  },
+  {
+   "expr": "VARX.P(Facts,Facts[Quantity]>1&&Facts[Quantity]<5)",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 32) The function VARX.P cannot work with values of type Boolean.\""
+  },
+  {
+   "expr": "VARX.P(Facts,Facts[Quantity]>4||Facts[Quantity]<1)",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 32) The function VARX.P cannot work with values of type Boolean.\""
+  },
+  {
+   "expr": "VARX.P(Facts,ISBLANK(Facts[Sales]))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 32) The function VARX.P cannot work with values of type Boolean.\""
+  },
+  {
+   "expr": "VARX.P(Facts,IF(Facts[Quantity]>1,TRUE(),FALSE()))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 32) The function VARX.P cannot work with values of type Boolean.\""
+  },
+  {
+   "expr": "VARX.P(Facts,Facts[Region]=\"East\")",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 32) The function VARX.P cannot work with values of type Boolean.\""
+  },
+  {
+   "expr": "VARX.P(Facts,Facts[Note]=BLANK())",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 32) The function VARX.P cannot work with values of type Boolean.\""
+  },
+  {
+   "expr": "VARX.P(Facts,(Facts[Quantity]>1)*1)",
+   "powerbi": "0.222222222222222"
+  },
+  {
+   "expr": "VARX.P(Facts,(Facts[Quantity]>1)+0)",
+   "powerbi": "0.222222222222222"
+  },
+  {
+   "expr": "VARX.P(Facts,INT(Facts[Quantity]>1))",
+   "powerbi": "0.222222222222222"
+  },
+  {
+   "expr": "VARX.P(Facts,IF(Facts[Quantity]>1,1))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "VARX.P(Facts,IF(Facts[Quantity]>1,1,0))",
+   "powerbi": "0.222222222222222"
+  },
+  {
+   "expr": "VARX.P(Facts,Facts[Quantity]>1 && 1)",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 32) The function VARX.P cannot work with values of type Boolean.\""
+  },
+  {
+   "expr": "VARX.P(Facts,VALUE(Facts[Quantity]>1))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 32) Cannot convert value 'TRUE' of type Text to type Number.\""
+  },
+  {
+   "expr": "VARX.P(Facts,--(Facts[Quantity]>1)\n)",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 19) Argument '2' in VARX.P function is required.\""
+  },
+  {
+   "expr": "VARX.P(Facts,-(Facts[Quantity]>1))",
+   "powerbi": "0.222222222222222"
+  },
+  {
+   "expr": "VARX.P(Facts,ABS(Facts[Quantity]>1))",
+   "powerbi": "0.222222222222222"
+  },
+  {
+   "expr": "VARX.P(Facts,ISBLANK(Facts[Note]))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 32) The function VARX.P cannot work with values of type Boolean.\""
+  },
+  {
+   "expr": "VARX.P(Facts,ISBLANK(Facts[Quantity]))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 32) The function VARX.P cannot work with values of type Boolean.\""
+  },
+  {
+   "expr": "VARX.P(Facts,AND(Facts[Quantity]>1,Facts[Quantity]<5))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 32) The function VARX.P cannot work with values of type Boolean.\""
+  },
+  {
+   "expr": "VARX.P(Facts,OR(Facts[Quantity]>4,Facts[Quantity]<1))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 32) The function VARX.P cannot work with values of type Boolean.\""
+  },
+  {
+   "expr": "VARX.P(Facts,Facts[Quantity] IN {1,2})",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 32) The function VARX.P cannot work with values of type Boolean.\""
+  },
+  {
+   "expr": "VARX.P(Facts,CONTAINSSTRING(Facts[Region],\"a\"))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 32) The function VARX.P cannot work with values of type Boolean.\""
+  },
+  {
+   "expr": "VARX.P(Facts,ISNUMBER(Facts[Quantity]))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 32) The function VARX.P cannot work with values of type Boolean.\""
+  },
+  {
+   "expr": "VARX.P(Facts,HASONEVALUE(Facts[Region]))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 32) The function VARX.P cannot work with values of type Boolean.\""
+  },
+  {
+   "expr": "VARX.P(Facts,EARLIER(Facts[Quantity])>1)",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 32) EARLIER/EARLIEST refers to an earlier row context which doesn't exist.\""
+  },
+  {
+   "expr": "VARX.P(Facts,Facts[Quantity]=EARLIER(Facts[Quantity]))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 48) EARLIER/EARLIEST refers to an earlier row context which doesn't exist.\""
+  },
+  {
+   "expr": "PERCENTILEX.INC(Facts,Facts[Quantity]>1,0.5)",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 41) PERCENTILEX.INC does not support expressions of type string/Boolean/date.\""
+  },
+  {
+   "expr": "SUMX(VALUES(Facts[Region]),Facts[Quantity]>1)",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 46) A single value for column 'Quantity' in table 'Facts' cannot be determined. This can happen when a measure or function formula refers to a column that contains many values without specifying an aggregation such as min, max, count, or sum to get a single result.\""
+  },
+  {
+   "expr": "SUMX(Facts,SUMX(Facts,Facts[Quantity]>1))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 41) The function SUMX cannot work with values of type Boolean.\""
+  },
+  {
+   "expr": "SUMX(Facts,COUNTX(Facts,Facts[Quantity]>1))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 43) The function COUNTX cannot work with values of type Boolean.\""
+  },
+  {
+   "expr": "SUMX(FILTER(Facts,Facts[Quantity]>1),Facts[Quantity]>1)",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 56) The function SUMX cannot work with values of type Boolean.\""
+  },
+  {
+   "expr": "COUNTX(FILTER(Facts,Facts[Quantity]>1),Facts[Quantity]>1)",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 58) The function COUNTX cannot work with values of type Boolean.\""
+  },
+  {
+   "expr": "CALCULATE(SUMX(Facts,Facts[Quantity]>1),Facts[Quantity]>1)",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 40) The function SUMX cannot work with values of type Boolean.\""
+  },
+  {
+   "expr": "SUMX(ALL(Facts[Quantity]),Facts[Quantity]>1)",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 45) The function SUMX cannot work with values of type Boolean.\""
+  },
+  {
+   "expr": "PERCENTILEX.INC(Facts,TRUE(),0.5)",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 41) PERCENTILEX.INC does not support expressions of type string/Boolean/date.\""
+  },
+  {
+   "expr": "SUMX(VALUES(Facts[Region]),TRUE())",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 46) The function SUMX cannot work with values of type Boolean.\""
+  },
+  {
+   "expr": "SUMX(Facts,SUMX(Facts,TRUE()))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 41) The function SUMX cannot work with values of type Boolean.\""
+  },
+  {
+   "expr": "SUMX(Facts,COUNTX(Facts,TRUE()))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 43) The function COUNTX cannot work with values of type Boolean.\""
+  },
+  {
+   "expr": "SUMX(FILTER(Facts,Facts[Quantity]>1),TRUE())",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 56) The function SUMX cannot work with values of type Boolean.\""
+  },
+  {
+   "expr": "COUNTX(FILTER(Facts,Facts[Quantity]>1),TRUE())",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 58) The function COUNTX cannot work with values of type Boolean.\""
+  },
+  {
+   "expr": "CALCULATE(SUMX(Facts,TRUE()),Facts[Quantity]>1)",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 40) The function SUMX cannot work with values of type Boolean.\""
+  },
+  {
+   "expr": "SUMX(ALL(Facts[Quantity]),TRUE())",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 45) The function SUMX cannot work with values of type Boolean.\""
+  },
+  {
+   "expr": "COUNTROWS(FILTER(Facts,Facts[Quantity]>1))",
+   "powerbi": "4"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]>1)",
+   "powerbi": "4"
+  },
+  {
+   "expr": "SUMX(Facts,IF(Facts[Quantity]>1,Facts[Sales],0))",
+   "powerbi": "33"
+  },
+  {
+   "expr": "COUNTAX(Facts,Facts[Region])",
+   "powerbi": "6"
+  },
+  {
+   "expr": "COUNTX(Facts,Facts[Region])",
+   "powerbi": "6"
+  },
+  {
+   "expr": "COUNTX(Facts,Facts[Sales])",
+   "powerbi": "5"
+  },
+  {
+   "expr": "COUNTX(Facts,Facts[Note])",
+   "powerbi": "4"
+  },
+  {
+   "expr": "COUNTAX(Facts,Facts[Note])",
+   "powerbi": "4"
+  },
+  {
+   "expr": "COUNTAX(Facts,Facts[Sales])",
+   "powerbi": "5"
+  }
+ ],
+ "note": "Probe '1 // c' removed: the oracle wraps expressions as EVALUATE ROW(\"v\", <expr>) on one line, so a trailing line comment hides the closing parenthesis; every comment probe here ends its comment with a newline."
+}

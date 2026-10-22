@@ -1,0 +1,446 @@
+{
+ "powerbi_version": "2.157.879.0 (26.08)+da30fe74eb0b8a8786ab7326b69c400a0e951831",
+ "frozen": "2026-10-21",
+ "items": [
+  {
+   "expr": "CALCULATE(COUNTROWS(ALLSELECTED(Facts[Region])),Facts[Quantity]>3)",
+   "powerbi": "3"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(ALLSELECTED(Facts[Quantity])),Facts[Quantity]>3)",
+   "powerbi": "2"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(ALLSELECTED(Facts[Note])),Facts[Quantity]>3)",
+   "powerbi": "3"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(ALLSELECTED(Facts)),Facts[Quantity]>3)",
+   "powerbi": "2"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(ALLSELECTED(Facts[Region],Facts[Note])),Facts[Quantity]>3)",
+   "powerbi": "5"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(ALLSELECTED(Facts[Region],Facts[Quantity])),Facts[Quantity]>3)",
+   "powerbi": "2"
+  },
+  {
+   "expr": "CALCULATE(SUMX(ALLSELECTED(Facts[Region]),Facts[Quantity]*0+1),Facts[Quantity]>3)",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 61) A single value for column 'Quantity' in table 'Facts' cannot be determined. This can happen when a measure or function formula refers to a column that contains many values without specifying an aggregation such as min, max, count, or sum to get a single result.\""
+  },
+  {
+   "expr": "CALCULATE(SUMX(ALLSELECTED(Facts),Facts[Quantity]),Facts[Quantity]>3)",
+   "powerbi": "9"
+  },
+  {
+   "expr": "CALCULATE(MAXX(ALLSELECTED(Facts[Quantity]),Facts[Quantity]),Facts[Quantity]>3)",
+   "powerbi": "5"
+  },
+  {
+   "expr": "CALCULATE(CONCATENATEX(ALLSELECTED(Facts[Region]),Facts[Region],\",\"),Facts[Quantity]>3)",
+   "powerbi": "East,West,North"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(ALLSELECTED(Facts[Region])),Facts[Region]=\"East\")",
+   "powerbi": "1"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(ALLSELECTED(Facts[Quantity])),Facts[Region]=\"East\")",
+   "powerbi": "6"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(ALLSELECTED(Facts[Note])),Facts[Region]=\"East\")",
+   "powerbi": "3"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(ALLSELECTED(Facts)),Facts[Region]=\"East\")",
+   "powerbi": "3"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(ALLSELECTED(Facts[Region],Facts[Note])),Facts[Region]=\"East\")",
+   "powerbi": "2"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(ALLSELECTED(Facts[Region],Facts[Quantity])),Facts[Region]=\"East\")",
+   "powerbi": "3"
+  },
+  {
+   "expr": "CALCULATE(SUMX(ALLSELECTED(Facts[Region]),Facts[Quantity]*0+1),Facts[Region]=\"East\")",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 61) A single value for column 'Quantity' in table 'Facts' cannot be determined. This can happen when a measure or function formula refers to a column that contains many values without specifying an aggregation such as min, max, count, or sum to get a single result.\""
+  },
+  {
+   "expr": "CALCULATE(SUMX(ALLSELECTED(Facts),Facts[Quantity]),Facts[Region]=\"East\")",
+   "powerbi": "8"
+  },
+  {
+   "expr": "CALCULATE(MAXX(ALLSELECTED(Facts[Quantity]),Facts[Quantity]),Facts[Region]=\"East\")",
+   "powerbi": "5"
+  },
+  {
+   "expr": "CALCULATE(CONCATENATEX(ALLSELECTED(Facts[Region]),Facts[Region],\",\"),Facts[Region]=\"East\")",
+   "powerbi": "East"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(ALLSELECTED(Facts[Region])),Facts[Note]=\"Paid\")",
+   "powerbi": "3"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(ALLSELECTED(Facts[Quantity])),Facts[Note]=\"Paid\")",
+   "powerbi": "6"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(ALLSELECTED(Facts[Note])),Facts[Note]=\"Paid\")",
+   "powerbi": "1"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(ALLSELECTED(Facts)),Facts[Note]=\"Paid\")",
+   "powerbi": "3"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(ALLSELECTED(Facts[Region],Facts[Note])),Facts[Note]=\"Paid\")",
+   "powerbi": "2"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(ALLSELECTED(Facts[Region],Facts[Quantity])),Facts[Note]=\"Paid\")",
+   "powerbi": "6"
+  },
+  {
+   "expr": "CALCULATE(SUMX(ALLSELECTED(Facts[Region]),Facts[Quantity]*0+1),Facts[Note]=\"Paid\")",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 61) A single value for column 'Quantity' in table 'Facts' cannot be determined. This can happen when a measure or function formula refers to a column that contains many values without specifying an aggregation such as min, max, count, or sum to get a single result.\""
+  },
+  {
+   "expr": "CALCULATE(SUMX(ALLSELECTED(Facts),Facts[Quantity]),Facts[Note]=\"Paid\")",
+   "powerbi": "3"
+  },
+  {
+   "expr": "CALCULATE(MAXX(ALLSELECTED(Facts[Quantity]),Facts[Quantity]),Facts[Note]=\"Paid\")",
+   "powerbi": "5"
+  },
+  {
+   "expr": "CALCULATE(CONCATENATEX(ALLSELECTED(Facts[Region]),Facts[Region],\",\"),Facts[Note]=\"Paid\")",
+   "powerbi": "East,West,North"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(ALLSELECTED(Facts[Region])),Facts[Sales]>0)",
+   "powerbi": "3"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(ALLSELECTED(Facts[Quantity])),Facts[Sales]>0)",
+   "powerbi": "6"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(ALLSELECTED(Facts[Note])),Facts[Sales]>0)",
+   "powerbi": "3"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(ALLSELECTED(Facts)),Facts[Sales]>0)",
+   "powerbi": "3"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(ALLSELECTED(Facts[Region],Facts[Note])),Facts[Sales]>0)",
+   "powerbi": "5"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(ALLSELECTED(Facts[Region],Facts[Quantity])),Facts[Sales]>0)",
+   "powerbi": "6"
+  },
+  {
+   "expr": "CALCULATE(SUMX(ALLSELECTED(Facts[Region]),Facts[Quantity]*0+1),Facts[Sales]>0)",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 61) A single value for column 'Quantity' in table 'Facts' cannot be determined. This can happen when a measure or function formula refers to a column that contains many values without specifying an aggregation such as min, max, count, or sum to get a single result.\""
+  },
+  {
+   "expr": "CALCULATE(SUMX(ALLSELECTED(Facts),Facts[Quantity]),Facts[Sales]>0)",
+   "powerbi": "10"
+  },
+  {
+   "expr": "CALCULATE(MAXX(ALLSELECTED(Facts[Quantity]),Facts[Quantity]),Facts[Sales]>0)",
+   "powerbi": "5"
+  },
+  {
+   "expr": "CALCULATE(CONCATENATEX(ALLSELECTED(Facts[Region]),Facts[Region],\",\"),Facts[Sales]>0)",
+   "powerbi": "East,West,North"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(ALLSELECTED(Facts[Region])),Facts[Quantity]<3,Facts[Region]=\"West\")",
+   "powerbi": "1"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(ALLSELECTED(Facts[Quantity])),Facts[Quantity]<3,Facts[Region]=\"West\")",
+   "powerbi": "3"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(ALLSELECTED(Facts[Note])),Facts[Quantity]<3,Facts[Region]=\"West\")",
+   "powerbi": "3"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(ALLSELECTED(Facts)),Facts[Quantity]<3,Facts[Region]=\"West\")",
+   "powerbi": "1"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(ALLSELECTED(Facts[Region],Facts[Note])),Facts[Quantity]<3,Facts[Region]=\"West\")",
+   "powerbi": "2"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(ALLSELECTED(Facts[Region],Facts[Quantity])),Facts[Quantity]<3,Facts[Region]=\"West\")",
+   "powerbi": "1"
+  },
+  {
+   "expr": "CALCULATE(SUMX(ALLSELECTED(Facts[Region]),Facts[Quantity]*0+1),Facts[Quantity]<3,Facts[Region]=\"West\")",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 61) A single value for column 'Quantity' in table 'Facts' cannot be determined. This can happen when a measure or function formula refers to a column that contains many values without specifying an aggregation such as min, max, count, or sum to get a single result.\""
+  },
+  {
+   "expr": "CALCULATE(SUMX(ALLSELECTED(Facts),Facts[Quantity]),Facts[Quantity]<3,Facts[Region]=\"West\")",
+   "powerbi": "0"
+  },
+  {
+   "expr": "CALCULATE(MAXX(ALLSELECTED(Facts[Quantity]),Facts[Quantity]),Facts[Quantity]<3,Facts[Region]=\"West\")",
+   "powerbi": "2"
+  },
+  {
+   "expr": "CALCULATE(CONCATENATEX(ALLSELECTED(Facts[Region]),Facts[Region],\",\"),Facts[Quantity]<3,Facts[Region]=\"West\")",
+   "powerbi": "West"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(ALLSELECTED(Facts[Region])),FILTER(Facts,Facts[Quantity]>3))",
+   "powerbi": "2"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(ALLSELECTED(Facts[Quantity])),FILTER(Facts,Facts[Quantity]>3))",
+   "powerbi": "2"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(ALLSELECTED(Facts[Note])),FILTER(Facts,Facts[Quantity]>3))",
+   "powerbi": "2"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(ALLSELECTED(Facts)),FILTER(Facts,Facts[Quantity]>3))",
+   "powerbi": "2"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(ALLSELECTED(Facts[Region],Facts[Note])),FILTER(Facts,Facts[Quantity]>3))",
+   "powerbi": "2"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(ALLSELECTED(Facts[Region],Facts[Quantity])),FILTER(Facts,Facts[Quantity]>3))",
+   "powerbi": "2"
+  },
+  {
+   "expr": "CALCULATE(SUMX(ALLSELECTED(Facts[Region]),Facts[Quantity]*0+1),FILTER(Facts,Facts[Quantity]>3))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 61) A single value for column 'Quantity' in table 'Facts' cannot be determined. This can happen when a measure or function formula refers to a column that contains many values without specifying an aggregation such as min, max, count, or sum to get a single result.\""
+  },
+  {
+   "expr": "CALCULATE(SUMX(ALLSELECTED(Facts),Facts[Quantity]),FILTER(Facts,Facts[Quantity]>3))",
+   "powerbi": "9"
+  },
+  {
+   "expr": "CALCULATE(MAXX(ALLSELECTED(Facts[Quantity]),Facts[Quantity]),FILTER(Facts,Facts[Quantity]>3))",
+   "powerbi": "5"
+  },
+  {
+   "expr": "CALCULATE(CONCATENATEX(ALLSELECTED(Facts[Region]),Facts[Region],\",\"),FILTER(Facts,Facts[Quantity]>3))",
+   "powerbi": "East,North"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(ALLSELECTED(Facts[Region])),FILTER(ALL(Facts[Region]),Facts[Region]<>\"East\"))",
+   "powerbi": "2"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(ALLSELECTED(Facts[Quantity])),FILTER(ALL(Facts[Region]),Facts[Region]<>\"East\"))",
+   "powerbi": "6"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(ALLSELECTED(Facts[Note])),FILTER(ALL(Facts[Region]),Facts[Region]<>\"East\"))",
+   "powerbi": "3"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(ALLSELECTED(Facts)),FILTER(ALL(Facts[Region]),Facts[Region]<>\"East\"))",
+   "powerbi": "3"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(ALLSELECTED(Facts[Region],Facts[Note])),FILTER(ALL(Facts[Region]),Facts[Region]<>\"East\"))",
+   "powerbi": "3"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(ALLSELECTED(Facts[Region],Facts[Quantity])),FILTER(ALL(Facts[Region]),Facts[Region]<>\"East\"))",
+   "powerbi": "3"
+  },
+  {
+   "expr": "CALCULATE(SUMX(ALLSELECTED(Facts[Region]),Facts[Quantity]*0+1),FILTER(ALL(Facts[Region]),Facts[Region]<>\"East\"))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 61) A single value for column 'Quantity' in table 'Facts' cannot be determined. This can happen when a measure or function formula refers to a column that contains many values without specifying an aggregation such as min, max, count, or sum to get a single result.\""
+  },
+  {
+   "expr": "CALCULATE(SUMX(ALLSELECTED(Facts),Facts[Quantity]),FILTER(ALL(Facts[Region]),Facts[Region]<>\"East\"))",
+   "powerbi": "7"
+  },
+  {
+   "expr": "CALCULATE(MAXX(ALLSELECTED(Facts[Quantity]),Facts[Quantity]),FILTER(ALL(Facts[Region]),Facts[Region]<>\"East\"))",
+   "powerbi": "5"
+  },
+  {
+   "expr": "CALCULATE(CONCATENATEX(ALLSELECTED(Facts[Region]),Facts[Region],\",\"),FILTER(ALL(Facts[Region]),Facts[Region]<>\"East\"))",
+   "powerbi": "West,North"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(ALLSELECTED(Facts[Region])),KEEPFILTERS(Facts[Region]=\"East\"),Facts[Quantity]>1)",
+   "powerbi": "1"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(ALLSELECTED(Facts[Quantity])),KEEPFILTERS(Facts[Region]=\"East\"),Facts[Quantity]>1)",
+   "powerbi": "4"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(ALLSELECTED(Facts[Note])),KEEPFILTERS(Facts[Region]=\"East\"),Facts[Quantity]>1)",
+   "powerbi": "3"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(ALLSELECTED(Facts)),KEEPFILTERS(Facts[Region]=\"East\"),Facts[Quantity]>1)",
+   "powerbi": "2"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(ALLSELECTED(Facts[Region],Facts[Note])),KEEPFILTERS(Facts[Region]=\"East\"),Facts[Quantity]>1)",
+   "powerbi": "2"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(ALLSELECTED(Facts[Region],Facts[Quantity])),KEEPFILTERS(Facts[Region]=\"East\"),Facts[Quantity]>1)",
+   "powerbi": "2"
+  },
+  {
+   "expr": "CALCULATE(SUMX(ALLSELECTED(Facts[Region]),Facts[Quantity]*0+1),KEEPFILTERS(Facts[Region]=\"East\"),Facts[Quantity]>1)",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 61) A single value for column 'Quantity' in table 'Facts' cannot be determined. This can happen when a measure or function formula refers to a column that contains many values without specifying an aggregation such as min, max, count, or sum to get a single result.\""
+  },
+  {
+   "expr": "CALCULATE(SUMX(ALLSELECTED(Facts),Facts[Quantity]),KEEPFILTERS(Facts[Region]=\"East\"),Facts[Quantity]>1)",
+   "powerbi": "7"
+  },
+  {
+   "expr": "CALCULATE(MAXX(ALLSELECTED(Facts[Quantity]),Facts[Quantity]),KEEPFILTERS(Facts[Region]=\"East\"),Facts[Quantity]>1)",
+   "powerbi": "5"
+  },
+  {
+   "expr": "CALCULATE(CONCATENATEX(ALLSELECTED(Facts[Region]),Facts[Region],\",\"),KEEPFILTERS(Facts[Region]=\"East\"),Facts[Quantity]>1)",
+   "powerbi": "East"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(ALLSELECTED(Facts[Region])),Facts[Region]=\"East\",Facts[Region]=\"West\")",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(ALLSELECTED(Facts[Quantity])),Facts[Region]=\"East\",Facts[Region]=\"West\")",
+   "powerbi": "6"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(ALLSELECTED(Facts[Note])),Facts[Region]=\"East\",Facts[Region]=\"West\")",
+   "powerbi": "3"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(ALLSELECTED(Facts)),Facts[Region]=\"East\",Facts[Region]=\"West\")",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(ALLSELECTED(Facts[Region],Facts[Note])),Facts[Region]=\"East\",Facts[Region]=\"West\")",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(ALLSELECTED(Facts[Region],Facts[Quantity])),Facts[Region]=\"East\",Facts[Region]=\"West\")",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "CALCULATE(SUMX(ALLSELECTED(Facts),Facts[Quantity]),Facts[Region]=\"East\",Facts[Region]=\"West\")",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "CALCULATE(MAXX(ALLSELECTED(Facts[Quantity]),Facts[Quantity]),Facts[Region]=\"East\",Facts[Region]=\"West\")",
+   "powerbi": "5"
+  },
+  {
+   "expr": "CALCULATE(CONCATENATEX(ALLSELECTED(Facts[Region]),Facts[Region],\",\"),Facts[Region]=\"East\",Facts[Region]=\"West\")",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(ALLSELECTED(Facts[Region])),Facts[Quantity]>2,Facts[Quantity]<5)",
+   "powerbi": "3"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(ALLSELECTED(Facts[Quantity])),Facts[Quantity]>2,Facts[Quantity]<5)",
+   "powerbi": "2"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(ALLSELECTED(Facts[Note])),Facts[Quantity]>2,Facts[Quantity]<5)",
+   "powerbi": "3"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(ALLSELECTED(Facts)),Facts[Quantity]>2,Facts[Quantity]<5)",
+   "powerbi": "2"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(ALLSELECTED(Facts[Region],Facts[Note])),Facts[Quantity]>2,Facts[Quantity]<5)",
+   "powerbi": "5"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(ALLSELECTED(Facts[Region],Facts[Quantity])),Facts[Quantity]>2,Facts[Quantity]<5)",
+   "powerbi": "2"
+  },
+  {
+   "expr": "CALCULATE(SUMX(ALLSELECTED(Facts[Region]),Facts[Quantity]*0+1),Facts[Quantity]>2,Facts[Quantity]<5)",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 61) A single value for column 'Quantity' in table 'Facts' cannot be determined. This can happen when a measure or function formula refers to a column that contains many values without specifying an aggregation such as min, max, count, or sum to get a single result.\""
+  },
+  {
+   "expr": "CALCULATE(SUMX(ALLSELECTED(Facts),Facts[Quantity]),Facts[Quantity]>2,Facts[Quantity]<5)",
+   "powerbi": "7"
+  },
+  {
+   "expr": "CALCULATE(MAXX(ALLSELECTED(Facts[Quantity]),Facts[Quantity]),Facts[Quantity]>2,Facts[Quantity]<5)",
+   "powerbi": "4"
+  },
+  {
+   "expr": "CALCULATE(CONCATENATEX(ALLSELECTED(Facts[Region]),Facts[Region],\",\"),Facts[Quantity]>2,Facts[Quantity]<5)",
+   "powerbi": "East,West,North"
+  },
+  {
+   "expr": "SUMX(VALUES(Facts[Region]),COUNTROWS(ALLSELECTED(Facts[Note])))",
+   "powerbi": "9"
+  },
+  {
+   "expr": "SUMX(VALUES(Facts[Region]),COUNTROWS(ALLSELECTED(Facts[Region])))",
+   "powerbi": "9"
+  },
+  {
+   "expr": "SUMX(VALUES(Facts[Region]),COUNTROWS(ALLSELECTED(Facts)))",
+   "powerbi": "18"
+  },
+  {
+   "expr": "SUMX(Facts,COUNTROWS(ALLSELECTED(Facts[Region])))",
+   "powerbi": "18"
+  },
+  {
+   "expr": "SUMX(FILTER(Facts,Facts[Quantity]>2),COUNTROWS(ALLSELECTED(Facts[Region])))",
+   "powerbi": "9"
+  },
+  {
+   "expr": "CALCULATE(SUMX(VALUES(Facts[Region]),COUNTROWS(ALLSELECTED(Facts[Note]))),Facts[Quantity]>2)",
+   "powerbi": "9"
+  },
+  {
+   "expr": "CALCULATE(SUMX(VALUES(Facts[Region]),COUNTROWS(ALLSELECTED(Facts[Region]))),Facts[Region]<>\"East\")",
+   "powerbi": "4"
+  },
+  {
+   "expr": "CALCULATE(CALCULATE(COUNTROWS(ALLSELECTED(Facts[Region])),Facts[Quantity]>3),Facts[Region]=\"East\")",
+   "powerbi": "1"
+  },
+  {
+   "expr": "CALCULATE(CALCULATE(COUNTROWS(ALLSELECTED(Facts[Region])),Facts[Quantity]>3),Facts[Region]<>\"East\")",
+   "powerbi": "2"
+  },
+  {
+   "expr": "CALCULATE(CALCULATE(COUNTROWS(ALLSELECTED(Facts[Region])),Facts[Region]<>\"East\"),Facts[Quantity]>3)",
+   "powerbi": "2"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(ALLSELECTED(Facts[Region])),ALL(Facts[Region]),Facts[Quantity]>3)",
+   "powerbi": "3"
+  }
+ ]
+}

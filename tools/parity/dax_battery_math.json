@@ -1,0 +1,758 @@
+{
+ "powerbi_version": "2.157.879.0 (26.08)+da30fe74eb0b8a8786ab7326b69c400a0e951831",
+ "frozen": "2026-10-21",
+ "items": [
+  {
+   "expr": "ROUNDUP(2.341,0)",
+   "powerbi": "3"
+  },
+  {
+   "expr": "ROUNDUP(2.341,1)",
+   "powerbi": "2.4"
+  },
+  {
+   "expr": "ROUNDUP(2.341,-1)",
+   "powerbi": "10"
+  },
+  {
+   "expr": "ROUNDUP(2.341,2)",
+   "powerbi": "2.35"
+  },
+  {
+   "expr": "ROUNDUP(-2.341,0)",
+   "powerbi": "-3"
+  },
+  {
+   "expr": "ROUNDUP(-2.341,1)",
+   "powerbi": "-2.4"
+  },
+  {
+   "expr": "ROUNDUP(-2.341,-1)",
+   "powerbi": "-10"
+  },
+  {
+   "expr": "ROUNDUP(-2.341,2)",
+   "powerbi": "-2.35"
+  },
+  {
+   "expr": "ROUNDUP(2.5,0)",
+   "powerbi": "3"
+  },
+  {
+   "expr": "ROUNDUP(2.5,1)",
+   "powerbi": "2.5"
+  },
+  {
+   "expr": "ROUNDUP(2.5,-1)",
+   "powerbi": "10"
+  },
+  {
+   "expr": "ROUNDUP(2.5,2)",
+   "powerbi": "2.5"
+  },
+  {
+   "expr": "ROUNDUP(0,0)",
+   "powerbi": "0"
+  },
+  {
+   "expr": "ROUNDUP(0,1)",
+   "powerbi": "0"
+  },
+  {
+   "expr": "ROUNDUP(0,-1)",
+   "powerbi": "0"
+  },
+  {
+   "expr": "ROUNDUP(0,2)",
+   "powerbi": "0"
+  },
+  {
+   "expr": "ROUNDUP(1234.5678,0)",
+   "powerbi": "1235"
+  },
+  {
+   "expr": "ROUNDUP(1234.5678,1)",
+   "powerbi": "1234.6"
+  },
+  {
+   "expr": "ROUNDUP(1234.5678,-1)",
+   "powerbi": "1240"
+  },
+  {
+   "expr": "ROUNDUP(1234.5678,2)",
+   "powerbi": "1234.57"
+  },
+  {
+   "expr": "ROUNDDOWN(2.341,0)",
+   "powerbi": "2"
+  },
+  {
+   "expr": "ROUNDDOWN(2.341,1)",
+   "powerbi": "2.3"
+  },
+  {
+   "expr": "ROUNDDOWN(2.341,-1)",
+   "powerbi": "0"
+  },
+  {
+   "expr": "ROUNDDOWN(2.341,2)",
+   "powerbi": "2.34"
+  },
+  {
+   "expr": "ROUNDDOWN(-2.341,0)",
+   "powerbi": "-2"
+  },
+  {
+   "expr": "ROUNDDOWN(-2.341,1)",
+   "powerbi": "-2.3"
+  },
+  {
+   "expr": "ROUNDDOWN(-2.341,-1)",
+   "powerbi": "0"
+  },
+  {
+   "expr": "ROUNDDOWN(-2.341,2)",
+   "powerbi": "-2.34"
+  },
+  {
+   "expr": "ROUNDDOWN(2.5,0)",
+   "powerbi": "2"
+  },
+  {
+   "expr": "ROUNDDOWN(2.5,1)",
+   "powerbi": "2.5"
+  },
+  {
+   "expr": "ROUNDDOWN(2.5,-1)",
+   "powerbi": "0"
+  },
+  {
+   "expr": "ROUNDDOWN(2.5,2)",
+   "powerbi": "2.5"
+  },
+  {
+   "expr": "ROUNDDOWN(0,0)",
+   "powerbi": "0"
+  },
+  {
+   "expr": "ROUNDDOWN(0,1)",
+   "powerbi": "0"
+  },
+  {
+   "expr": "ROUNDDOWN(0,-1)",
+   "powerbi": "0"
+  },
+  {
+   "expr": "ROUNDDOWN(0,2)",
+   "powerbi": "0"
+  },
+  {
+   "expr": "ROUNDDOWN(1234.5678,0)",
+   "powerbi": "1234"
+  },
+  {
+   "expr": "ROUNDDOWN(1234.5678,1)",
+   "powerbi": "1234.5"
+  },
+  {
+   "expr": "ROUNDDOWN(1234.5678,-1)",
+   "powerbi": "1230"
+  },
+  {
+   "expr": "ROUNDDOWN(1234.5678,2)",
+   "powerbi": "1234.56"
+  },
+  {
+   "expr": "ROUNDUP(BLANK(),1)",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "ROUNDUP(1.5,BLANK())",
+   "powerbi": "2"
+  },
+  {
+   "expr": "ROUND(BLANK(),0)",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "ROUND(2.5,BLANK())",
+   "powerbi": "3"
+  },
+  {
+   "expr": "ROUND(1.2345,2.5)",
+   "powerbi": "1.235"
+  },
+  {
+   "expr": "ROUND(1234567.891,-3)",
+   "powerbi": "1235000"
+  },
+  {
+   "expr": "ROUND(-2.5,0)",
+   "powerbi": "-3"
+  },
+  {
+   "expr": "ROUND(0.5,0)",
+   "powerbi": "1"
+  },
+  {
+   "expr": "ROUND(1.005,2)",
+   "powerbi": "1.01"
+  },
+  {
+   "expr": "ROUND(2.675,2)",
+   "powerbi": "2.68"
+  },
+  {
+   "expr": "MROUND(10,3)",
+   "powerbi": "9"
+  },
+  {
+   "expr": "MROUND(-10,-3)",
+   "powerbi": "-9"
+  },
+  {
+   "expr": "MROUND(10,-3)",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 19) An argument of function 'MROUND' has the wrong data type or the result is too large or too small.\""
+  },
+  {
+   "expr": "MROUND(1.3,0.2)",
+   "powerbi": "1.4"
+  },
+  {
+   "expr": "MROUND(5,0)",
+   "powerbi": "0"
+  },
+  {
+   "expr": "MROUND(BLANK(),2)",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "ISEVEN(2)",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISEVEN(3)",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISODD(3)",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISEVEN(2.5)",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISEVEN(BLANK())",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISEVEN(-2)",
+   "powerbi": "True"
+  },
+  {
+   "expr": "EVEN(1.5)",
+   "powerbi": "2"
+  },
+  {
+   "expr": "ODD(1.5)",
+   "powerbi": "3"
+  },
+  {
+   "expr": "EVEN(-1)",
+   "powerbi": "-2"
+  },
+  {
+   "expr": "ODD(2)",
+   "powerbi": "3"
+  },
+  {
+   "expr": "LOG(100,10)",
+   "powerbi": "2"
+  },
+  {
+   "expr": "LOG(8,2)",
+   "powerbi": "3"
+  },
+  {
+   "expr": "LOG(8)",
+   "powerbi": "0.903089986991943"
+  },
+  {
+   "expr": "LOG(0,10)",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 19) An argument of function 'LOG' has the wrong data type or the result is too large or too small.\""
+  },
+  {
+   "expr": "LOG10(1000)",
+   "powerbi": "3"
+  },
+  {
+   "expr": "LOG10(0)",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 19) An argument of function 'LOG10' has the wrong data type or the result is too large or too small.\""
+  },
+  {
+   "expr": "LOG(1,1)",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 19) Division by zero has occurred when evaluating function 'LOG'.\""
+  },
+  {
+   "expr": "PI()",
+   "powerbi": "3.14159265358979"
+  },
+  {
+   "expr": "SIN(0)",
+   "powerbi": "0"
+  },
+  {
+   "expr": "COS(0)",
+   "powerbi": "1"
+  },
+  {
+   "expr": "TAN(0)",
+   "powerbi": "0"
+  },
+  {
+   "expr": "SIN(PI()/2)",
+   "powerbi": "1"
+  },
+  {
+   "expr": "ASIN(1)",
+   "powerbi": "1.5707963267949"
+  },
+  {
+   "expr": "ACOS(1)",
+   "powerbi": "0"
+  },
+  {
+   "expr": "ATAN(1)",
+   "powerbi": "0.785398163397448"
+  },
+  {
+   "expr": "ASIN(2)",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 19) An argument of function 'ASIN' has the wrong data type or the result is too large or too small.\""
+  },
+  {
+   "expr": "DEGREES(PI())",
+   "powerbi": "180"
+  },
+  {
+   "expr": "RADIANS(180)",
+   "powerbi": "3.14159265358979"
+  },
+  {
+   "expr": "SINH(1)",
+   "powerbi": "1.1752011936438"
+  },
+  {
+   "expr": "COSH(1)",
+   "powerbi": "1.54308063481524"
+  },
+  {
+   "expr": "TANH(1)",
+   "powerbi": "0.761594155955765"
+  },
+  {
+   "expr": "ASINH(1)",
+   "powerbi": "0.881373587019543"
+  },
+  {
+   "expr": "ACOSH(1)",
+   "powerbi": "0"
+  },
+  {
+   "expr": "ATANH(0.5)",
+   "powerbi": "0.549306144334055"
+  },
+  {
+   "expr": "ATANH(1)",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 19) An argument of function 'ATANH' has the wrong data type or the result is too large or too small.\""
+  },
+  {
+   "expr": "FACT(5)",
+   "powerbi": "120"
+  },
+  {
+   "expr": "FACT(0)",
+   "powerbi": "1"
+  },
+  {
+   "expr": "FACT(-1)",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 19) An argument of function 'FACT' has the wrong data type or the result is too large or too small.\""
+  },
+  {
+   "expr": "FACT(20)",
+   "powerbi": "2.43290200817664E+18"
+  },
+  {
+   "expr": "FACT(171)",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 19) An argument of function 'FACT' has the wrong data type or the result is too large or too small.\""
+  },
+  {
+   "expr": "FACT(5.7)",
+   "powerbi": "120"
+  },
+  {
+   "expr": "GCD(12,18)",
+   "powerbi": "6"
+  },
+  {
+   "expr": "LCM(4,6)",
+   "powerbi": "12"
+  },
+  {
+   "expr": "GCD(0,5)",
+   "powerbi": "5"
+  },
+  {
+   "expr": "QUOTIENT(7,2)",
+   "powerbi": "3"
+  },
+  {
+   "expr": "QUOTIENT(-7,2)",
+   "powerbi": "-3"
+  },
+  {
+   "expr": "QUOTIENT(7,0)",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 19) Division by zero has occurred when evaluating function 'QUOTIENT'.\""
+  },
+  {
+   "expr": "SQRTPI(1)",
+   "powerbi": "1.77245385090552"
+  },
+  {
+   "expr": "CURRENCY(1.23456)",
+   "powerbi": "1.2346"
+  },
+  {
+   "expr": "CURRENCY(1.5)",
+   "powerbi": "1.5"
+  },
+  {
+   "expr": "ISO.CEILING(1.2,1)",
+   "powerbi": "2"
+  },
+  {
+   "expr": "CEILING(1.2,0.5)",
+   "powerbi": "1.5"
+  },
+  {
+   "expr": "CEILING(-1.2,1)",
+   "powerbi": "-1"
+  },
+  {
+   "expr": "FLOOR(1.7,0.5)",
+   "powerbi": "1.5"
+  },
+  {
+   "expr": "FLOOR(-1.2,1)",
+   "powerbi": "-2"
+  },
+  {
+   "expr": "EXP(1)",
+   "powerbi": "2.71828182845905"
+  },
+  {
+   "expr": "POWER(2,0.5)",
+   "powerbi": "1.4142135623731"
+  },
+  {
+   "expr": "SQRT(2)",
+   "powerbi": "1.4142135623731"
+  },
+  {
+   "expr": "INT(-1.5)",
+   "powerbi": "-2"
+  },
+  {
+   "expr": "TRUNC(-1.567,2)",
+   "powerbi": "-1.56"
+  },
+  {
+   "expr": "TRUNC(1234.567,-2)",
+   "powerbi": "1200"
+  },
+  {
+   "expr": "SIGN(-3)",
+   "powerbi": "-1"
+  },
+  {
+   "expr": "ABS(-3.5)",
+   "powerbi": "3.5"
+  },
+  {
+   "expr": "MOD(-7,3)",
+   "powerbi": "2"
+  },
+  {
+   "expr": "MOD(7,-3)",
+   "powerbi": "-2"
+  },
+  {
+   "expr": "MOD(7.5,2)",
+   "powerbi": "1.5"
+  },
+  {
+   "expr": "DIVIDE(7,2)",
+   "powerbi": "3.5"
+  },
+  {
+   "expr": "DIVIDE(1,0,-1)",
+   "powerbi": "-1"
+  },
+  {
+   "expr": "COMBIN(5,2)",
+   "powerbi": "10"
+  },
+  {
+   "expr": "COMBINA(5,2)",
+   "powerbi": "15"
+  },
+  {
+   "expr": "PERMUT(5,2)",
+   "powerbi": "20"
+  },
+  {
+   "expr": "RAND()<1",
+   "powerbi": "True"
+  },
+  {
+   "expr": "RANDBETWEEN(1,1)",
+   "powerbi": "1"
+  },
+  {
+   "expr": "AVERAGEA(Facts[Sales])",
+   "powerbi": "6.3"
+  },
+  {
+   "expr": "MAXA(Facts[Sales])",
+   "powerbi": "20"
+  },
+  {
+   "expr": "MINA(Facts[Sales])",
+   "powerbi": "-1.5"
+  },
+  {
+   "expr": "STDEV.S(Facts[Sales])",
+   "powerbi": "8.94846355527026"
+  },
+  {
+   "expr": "STDEV.P(Facts[Sales])",
+   "powerbi": "8.0037491215055"
+  },
+  {
+   "expr": "VAR.S(Facts[Sales])",
+   "powerbi": "80.075"
+  },
+  {
+   "expr": "VAR.P(Facts[Sales])",
+   "powerbi": "64.06"
+  },
+  {
+   "expr": "STDEV.S(Facts[Quantity])",
+   "powerbi": "1.87082869338697"
+  },
+  {
+   "expr": "VAR.P(Facts[Quantity])",
+   "powerbi": "2.91666666666667"
+  },
+  {
+   "expr": "PERCENTILE.INC(Facts[Sales],0.5)",
+   "powerbi": "2.5"
+  },
+  {
+   "expr": "PERCENTILE.INC(Facts[Sales],0.25)",
+   "powerbi": "0"
+  },
+  {
+   "expr": "PERCENTILE.EXC(Facts[Sales],0.5)",
+   "powerbi": "2.5"
+  },
+  {
+   "expr": "PERCENTILE.INC(Facts[Sales],0)",
+   "powerbi": "-1.5"
+  },
+  {
+   "expr": "PERCENTILE.INC(Facts[Sales],1)",
+   "powerbi": "20"
+  },
+  {
+   "expr": "PERCENTILE.INC(Facts[Sales],1.5)",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 19) The percentile value should be in the range 0..1, inclusive.\""
+  },
+  {
+   "expr": "PERCENTILE.EXC(Facts[Sales],0.1)",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 19) The percentile value should be in the range 1/(N+1)..N/(N+1) inclusive, where N is the number of data values.\""
+  },
+  {
+   "expr": "PERCENTILE.EXC(Facts[Quantity],0.5)",
+   "powerbi": "2.5"
+  },
+  {
+   "expr": "GEOMEAN(Facts[Quantity])",
+   "powerbi": "0"
+  },
+  {
+   "expr": "GEOMEAN(Facts[Sales])",
+   "powerbi": "0"
+  },
+  {
+   "expr": "GEOMEANX(Facts,Facts[Quantity]+1)",
+   "powerbi": "2.99379516552391"
+  },
+  {
+   "expr": "STDEVX.S(Facts,Facts[Quantity])",
+   "powerbi": "1.87082869338697"
+  },
+  {
+   "expr": "STDEVX.P(Facts,Facts[Quantity])",
+   "powerbi": "1.70782512765993"
+  },
+  {
+   "expr": "VARX.S(Facts,Facts[Quantity])",
+   "powerbi": "3.5"
+  },
+  {
+   "expr": "VARX.P(Facts,Facts[Quantity])",
+   "powerbi": "2.91666666666667"
+  },
+  {
+   "expr": "STDEVX.S(Facts,Facts[Sales])",
+   "powerbi": "8.94846355527026"
+  },
+  {
+   "expr": "MEDIANX(Facts,Facts[Sales])",
+   "powerbi": "1.25"
+  },
+  {
+   "expr": "MEDIANX(Facts,Facts[Quantity])",
+   "powerbi": "2.5"
+  },
+  {
+   "expr": "PERCENTILEX.INC(Facts,Facts[Quantity],0.3)",
+   "powerbi": "1.5"
+  },
+  {
+   "expr": "PERCENTILEX.EXC(Facts,Facts[Quantity],0.3)",
+   "powerbi": "1.1"
+  },
+  {
+   "expr": "COUNTAX(Facts,Facts[Sales])",
+   "powerbi": "5"
+  },
+  {
+   "expr": "AVERAGEX(Facts,Facts[Sales])",
+   "powerbi": "6.3"
+  },
+  {
+   "expr": "SUMX(Facts,Facts[Sales]*Facts[Quantity])",
+   "powerbi": "92"
+  },
+  {
+   "expr": "PRODUCTX(Facts,Facts[Quantity]+1)",
+   "powerbi": "720"
+  },
+  {
+   "expr": "PERCENTILEX.INC(Facts,Facts[Sales],0.5)",
+   "powerbi": "1.25"
+  },
+  {
+   "expr": "PERCENTILEX.EXC(Facts,Facts[Sales],0.5)",
+   "powerbi": "1.25"
+  },
+  {
+   "expr": "PERCENTILEX.INC(Facts,Facts[Sales],0.25)",
+   "powerbi": "0"
+  },
+  {
+   "expr": "PRODUCTX(Facts,Facts[Sales]+1)",
+   "powerbi": "-422.625"
+  },
+  {
+   "expr": "PRODUCTX(Facts,Facts[Sales])",
+   "powerbi": "0"
+  },
+  {
+   "expr": "GEOMEANX(Facts,Facts[Sales]+2)",
+   "powerbi": "3.67786570513065"
+  },
+  {
+   "expr": "VARX.P(Facts,Facts[Sales])",
+   "powerbi": "64.06"
+  },
+  {
+   "expr": "VARX.S(Facts,Facts[Sales])",
+   "powerbi": "80.075"
+  },
+  {
+   "expr": "MEDIANX(Facts,Facts[Sales]+0)",
+   "powerbi": "1.25"
+  },
+  {
+   "expr": "MEDIANX(Facts,IF(Facts[Quantity]=0,BLANK(),Facts[Quantity]))",
+   "powerbi": "2.5"
+  },
+  {
+   "expr": "MEDIANX(Facts,Facts[Sales]*1)",
+   "powerbi": "1.25"
+  },
+  {
+   "expr": "GEOMEANX(Facts,Facts[Sales])",
+   "powerbi": "0"
+  },
+  {
+   "expr": "GEOMEANX(Facts,Facts[Sales]-5)",
+   "powerbi": "5.67816341394225"
+  },
+  {
+   "expr": "ISODD(2.5)",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISODD(-1)",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISODD(BLANK())",
+   "powerbi": "False"
+  },
+  {
+   "expr": "MEDIANX(Facts,IF(Facts[Quantity]<2,BLANK(),Facts[Quantity]))",
+   "powerbi": "2.5"
+  },
+  {
+   "expr": "AVERAGEX(Facts,IF(Facts[Quantity]<2,BLANK(),Facts[Quantity]))",
+   "powerbi": "3.5"
+  },
+  {
+   "expr": "STDEV.P(Facts[Region])",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 27) The function STDEV.P cannot work with values of type String.\""
+  },
+  {
+   "expr": "VAR.S(Facts[Quantity])",
+   "powerbi": "3.5"
+  },
+  {
+   "expr": "STDEV.P(Facts[Quantity])",
+   "powerbi": "1.70782512765993"
+  },
+  {
+   "expr": "AVERAGEA(Facts[Quantity])",
+   "powerbi": "2.5"
+  },
+  {
+   "expr": "PERCENTILE.INC(Facts[Quantity],0.3)",
+   "powerbi": "1.5"
+  },
+  {
+   "expr": "PERCENTILE.INC(Facts[Quantity],0.99)",
+   "powerbi": "4.95"
+  },
+  {
+   "expr": "PERCENTILE.EXC(Facts[Quantity],0.9)",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 19) The percentile value should be in the range 1/(N+1)..N/(N+1) inclusive, where N is the number of data values.\""
+  },
+  {
+   "expr": "PERCENTILE.EXC(Facts[Quantity],0.95)",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 19) The percentile value should be in the range 1/(N+1)..N/(N+1) inclusive, where N is the number of data values.\""
+  }
+ ]
+}

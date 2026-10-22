@@ -19,6 +19,7 @@ from uuid import uuid4
 
 from PySide6.QtCore import (
     QAbstractTableModel,
+    QMarginsF,
     QModelIndex,
     QObject,
     Property,
@@ -29,7 +30,14 @@ from PySide6.QtCore import (
     QTimer,
     QUrl,
 )
-from PySide6.QtGui import QDesktopServices, QImage
+from PySide6.QtGui import (
+    QDesktopServices,
+    QImage,
+    QPageLayout,
+    QPageSize,
+    QPainter,
+    QPdfWriter,
+)
 from PySide6.QtWidgets import QApplication, QDialog, QFileDialog, QInputDialog, QLineEdit, QMessageBox
 
 from analytics_studio.project import (
@@ -56,7 +64,13 @@ from analytics_studio.folder_import_dialog import FolderImportDialog
 from analytics_studio.inline_data import sample_candidate, source_from_candidate
 from analytics_studio.query_parameters import parameter_references, parameter_values
 from analytics_studio.query_functions import function_references
-from analytics_studio.power_query_values import cell_key, cell_to_text, is_cell_error
+from analytics_studio.power_query_values import (
+    cell_key,
+    cell_to_text,
+    is_cell_error,
+    is_supported_cell_value,
+    model_text_normalizer,
+)
 from analytics_studio.date_table_dialog import DateTableDialog
 from analytics_studio.date_tables import DateTableError, validate_date_table_rows
 from analytics_studio.calendar_table_dialog import CalendarTableDialog
@@ -79,9 +93,11 @@ from analytics_studio.power_query_m import (
 )
 from analytics_studio.measure_dialog import MeasureDialog
 from analytics_studio.calculated_column_dialog import CalculatedColumnDialog
+from analytics_studio import dax_dates
 from analytics_studio.measures import (
     MAX_MEASURES,
     MeasureError,
+    VisualAxisContext,
     evaluate_calculated_table,
     evaluate_calculated_columns,
     evaluate_measures,
@@ -104,12 +120,21 @@ from analytics_studio.sql_server_dialog import SQLServerImportDialog
 from analytics_studio.odata import ODataError, read_odata_entity_set
 from analytics_studio.odata_dialog import ODataFeedImportDialog
 from analytics_studio.relationship_dialog import RelationshipDialog
+from analytics_studio.group_by_columns_dialog import GroupByColumnsDialog
+from analytics_studio.shape_map import (
+    ShapeMapError,
+    available_topology_objects,
+    boundary_key_properties,
+    load_boundary_features,
+)
 from analytics_studio.relationships import (
     RELATIONSHIP_VERSION,
     RelationshipError,
     _relationship_value_key,
+    detect_relationship_candidates,
     normalize_relationships,
     propagate_relationship_filters,
+    relationship_filter_directions,
 )
 from analytics_studio.web_import import read_web_source
 from analytics_studio.web_import_dialog import WebImportDialog
@@ -143,6 +168,41 @@ def _profile_cell_type(value: Any) -> str:
     if isinstance(value, time):
         return "time"
     return "text"
+
+
+def _model_candidate_with_format_errors_as_blank(
+    candidate: ImportCandidate,
+) -> ImportCandidate:
+    """Return a model-facing copy where typed conversion errors load as blanks.
+
+    Power Query keeps the original error-bearing candidate for previews and M
+    operations. The semantic model receives blank values for the DataFormat.Error
+    cells observed during the Power BI Desktop comparison, and its text columns
+    follow the VertiPaq load rules (trailing spaces dropped, ASCII-case variants
+    stored under their first-seen spelling) observed in the same comparison.
+    """
+    normalizers = {header: model_text_normalizer() for header in candidate.headers}
+    rows = []
+    for row in candidate.rows:
+        values = {
+            key: (
+                None
+                if is_cell_error(value)
+                and getattr(value, "reason", "") == "DataFormat.Error"
+                else normalizers[key](value) if key in normalizers else value
+            )
+            for key, value in row.items()
+        }
+        rows.append(lineaged_row(values, row))
+    return ImportCandidate(
+        kind=candidate.kind,
+        headers=list(candidate.headers),
+        rows=rows,
+        options=dict(candidate.options),
+        notices=list(candidate.notices),
+        source_id=candidate.source_id,
+        header_row_used=candidate.header_row_used,
+    )
 
 
 def _rename_table_references_in_project(
@@ -398,15 +458,55 @@ _VISUAL_FIELD_AGGREGATIONS = {
     "count": "Count",
     "average": "Average",
 }
+_MODEL_COLUMN_SUMMARIZATIONS = {"auto", "sum", "average", "count"}
+_NUMERIC_MODEL_COLUMN_TYPES = {"whole_number", "decimal_number"}
+_MODEL_SORT_COLUMN_TYPES = {
+    "text", "whole_number", "decimal_number", "boolean", "date", "datetime", "time", "any",
+}
 _VISUAL_MEASURE_PREFIX = "__dax_measure__:"
 
 
 def _visual_measure_name(binding: Any) -> str | None:
-    value = str(binding)
+    if isinstance(binding, dict):
+        value = str(binding.get("column", ""))
+    elif isinstance(binding, (list, tuple)):
+        value = str(binding[1] if len(binding) > 1 else (binding[0] if binding else ""))
+    else:
+        value = str(binding)
     if not value.startswith(_VISUAL_MEASURE_PREFIX):
         return None
     name = value[len(_VISUAL_MEASURE_PREFIX):]
     return name or None
+
+
+def _visual_field_column(binding: Any) -> str:
+    if isinstance(binding, dict):
+        return str(binding.get("column", ""))
+    if isinstance(binding, (list, tuple)):
+        return str(binding[1] if len(binding) > 1 else (binding[0] if binding else ""))
+    return str(binding)
+
+
+def _visual_well_binding(
+    bindings: Any, default_table_id: str
+) -> tuple[str, str] | None:
+    """Read a well's first field and retain its explicit model-table identity."""
+    if not isinstance(bindings, list) or not bindings:
+        return None
+    binding = bindings[0]
+    if isinstance(binding, dict):
+        column = str(binding.get("column", ""))
+        table_id = str(binding.get("table_id", binding.get("tableId", default_table_id)))
+    elif isinstance(binding, (list, tuple)):
+        if len(binding) >= 2:
+            table_id, column = str(binding[0]), str(binding[1])
+        elif binding:
+            table_id, column = default_table_id, str(binding[0])
+        else:
+            return None
+    else:
+        table_id, column = default_table_id, str(binding)
+    return (table_id, column) if column else None
 
 
 def _visual_measure_binding(name: str) -> str:
@@ -638,6 +738,7 @@ def _relative_time_bounds(
 
 
 _REPORT_FILTER_VALUE_TOKEN = "__npa_pqv1__:"
+_DATA_VIEW_ERROR_VALUE_TOKEN = "__npa_dvf1__error:"
 
 
 def _encode_report_filter_value(value: Any) -> str:
@@ -669,6 +770,61 @@ def _encode_report_filter_value(value: Any) -> str:
     )
     encoded = base64.urlsafe_b64encode(payload.encode("utf-8")).decode("ascii")
     return _REPORT_FILTER_VALUE_TOKEN + "value:" + encoded.rstrip("=")
+
+
+def _encode_data_view_filter_value(value: Any) -> str:
+    if is_cell_error(value):
+        # Data-view filters operate on displayed cell values, not the source-row
+        # lineage attached to each error instance.
+        payload = json.dumps(cell_to_text(value), ensure_ascii=False)
+        encoded = base64.urlsafe_b64encode(payload.encode("utf-8")).decode("ascii")
+        return _DATA_VIEW_ERROR_VALUE_TOKEN + encoded.rstrip("=")
+    encoded = _encode_report_filter_value(value)
+    token = _decode_report_filter_value(encoded)
+    if token is None or token[0] != "typed":
+        return encoded
+    kind, canonical, _label = token[1]
+    payload = json.dumps([kind, canonical], ensure_ascii=False, separators=(",", ":"))
+    encoded = base64.urlsafe_b64encode(payload.encode("utf-8")).decode("ascii")
+    return _REPORT_FILTER_VALUE_TOKEN + "value:" + encoded.rstrip("=")
+
+
+def _data_view_filter_value_label(value: Any, key: str) -> str:
+    if is_cell_error(value):
+        return f"{cell_to_text(value)} (Error)"
+    return _report_filter_token_label(key)
+
+
+def _disambiguate_data_view_filter_labels(values: dict[str, str]) -> dict[str, str]:
+    by_label: defaultdict[str, list[str]] = defaultdict(list)
+    for key, label in values.items():
+        by_label[label].append(key)
+    labels = dict(values)
+    for label, keys in by_label.items():
+        if len(keys) < 2:
+            continue
+        for key in keys:
+            kind = (
+                "Error"
+                if key.startswith(_DATA_VIEW_ERROR_VALUE_TOKEN)
+                else _report_filter_value_kind_label(key)
+            )
+            labels[key] = f"{label} ({kind})"
+
+    # A literal value can already look like a generated type suffix (for
+    # example, text "1 (Number)" beside numeric 1). Ensure the final visible
+    # and accessible labels remain unique after type disambiguation.
+    unique_labels: dict[str, str] = {}
+    used_labels: set[str] = set()
+    for key, label in labels.items():
+        candidate = label
+        duplicate_index = 2
+        while candidate in used_labels:
+            candidate = f"{label} (option {duplicate_index})"
+            duplicate_index += 1
+        unique_labels[key] = candidate
+        used_labels.add(candidate)
+    return unique_labels
 
 
 def _decode_report_filter_value(value: Any) -> tuple[str, Any] | None:
@@ -1112,6 +1268,122 @@ def _report_cell_text(value: Any) -> str:
     return "(null)" if value is None else cell_to_text(value)
 
 
+def _shape_join_key(value: Any) -> str:
+    if value is None or is_cell_error(value):
+        return ""
+    return _report_cell_text(value).strip().casefold()
+
+
+def _model_sort_scalar_family(value: Any) -> str | None:
+    """Classify supported scalar cells without conflating bools and numbers."""
+    if isinstance(value, bool):
+        return "boolean"
+    if isinstance(value, (int, float, Decimal)):
+        return "number"
+    if isinstance(value, datetime):
+        return "datetime-aware" if value.utcoffset() is not None else "datetime-naive"
+    if isinstance(value, date):
+        return "date"
+    if isinstance(value, time):
+        return "time-aware" if value.utcoffset() is not None else "time-naive"
+    if isinstance(value, str):
+        return "text"
+    return None
+
+
+def _model_sort_value_key(value: Any, type_name: str) -> tuple[str, tuple[Any, ...]]:
+    """Build a deterministic typed ascending key for a supported model scalar."""
+    if not is_supported_cell_value(value) or is_cell_error(value):
+        raise ValueError("contains an unsupported value")
+    family = _model_sort_scalar_family(value)
+    if type_name == "any":
+        if family is None:
+            raise ValueError("contains an unsupported value")
+        declared_family = family
+    else:
+        declared_family = type_name
+
+    if declared_family in {"whole_number", "decimal_number", "number"}:
+        if isinstance(value, bool):
+            raise ValueError("does not contain numeric values")
+        number = _report_number(value)
+        if number is None:
+            raise ValueError("does not contain numeric values")
+        if declared_family in {"whole_number"} and number != number.to_integral_value():
+            raise ValueError("contains a non-integer value for a whole-number column")
+        return "number", (number,)
+
+    if declared_family == "boolean":
+        if isinstance(value, bool):
+            boolean_value = value
+        elif isinstance(value, str) and value.strip().casefold() in {"true", "false"}:
+            boolean_value = value.strip().casefold() == "true"
+        else:
+            raise ValueError("does not contain boolean values")
+        return "boolean", (boolean_value,)
+
+    if declared_family == "text":
+        if not isinstance(value, str):
+            raise ValueError("does not contain text values")
+        return "text", (value.casefold(), value)
+
+    if declared_family == "date":
+        if isinstance(value, datetime):
+            raise ValueError("does not contain date-only values")
+        if isinstance(value, date):
+            parsed_date = value
+        elif isinstance(value, str):
+            try:
+                parsed_date = date.fromisoformat(value)
+            except ValueError as exc:
+                try:
+                    parsed_date = datetime.fromisoformat(
+                        value.replace("Z", "+00:00")
+                    ).date()
+                except ValueError:
+                    raise ValueError("contains an invalid date value") from exc
+        else:
+            raise ValueError("does not contain date values")
+        return "date", (parsed_date.toordinal(),)
+
+    if declared_family == "datetime" or declared_family.startswith("datetime-"):
+        if isinstance(value, datetime):
+            parsed_datetime = value
+        elif isinstance(value, str):
+            try:
+                parsed_datetime = datetime.fromisoformat(value.replace("Z", "+00:00"))
+            except ValueError as exc:
+                raise ValueError("contains an invalid datetime value") from exc
+        else:
+            raise ValueError("does not contain datetime values")
+        if parsed_datetime.utcoffset() is None:
+            return "datetime-naive", (parsed_datetime.isoformat(),)
+        utc_value = parsed_datetime.astimezone(timezone.utc)
+        return "datetime-aware", (utc_value.isoformat(), parsed_datetime.isoformat())
+
+    if declared_family == "time" or declared_family == "time-naive":
+        if isinstance(value, time):
+            parsed_time = value
+        elif isinstance(value, str):
+            try:
+                parsed_time = time.fromisoformat(value)
+            except ValueError as exc:
+                raise ValueError("contains an invalid time value") from exc
+        else:
+            raise ValueError("does not contain time values")
+        if parsed_time.utcoffset() is not None:
+            raise ValueError("timezone-aware time values are unsupported")
+        return "time-naive", (
+            parsed_time.hour, parsed_time.minute, parsed_time.second,
+            parsed_time.microsecond,
+        )
+
+    if declared_family == "time-aware":
+        raise ValueError("timezone-aware time values are unsupported")
+
+    raise ValueError("has an unsupported model column type")
+
+
 def _report_month(value: Any) -> str | None:
     text = str(value or "").strip()
     if not text:
@@ -1128,7 +1400,18 @@ def _report_month(value: Any) -> str | None:
     return None
 
 
-def _format_report_number(value: Decimal) -> str:
+def _format_report_number(value: Decimal | bool | str) -> str:
+    """A measure value as shown on cards, tables and the measure list (text and True/False pass through)."""
+    if isinstance(value, bool):
+        return "True" if value else "False"
+    if isinstance(value, str):
+        return value
+    if dax_dates.is_date(value):
+        return dax_dates.date_text(value)
+    if value.is_nan():
+        return "NaN"
+    if value.is_infinite():
+        return "-Infinity" if value < 0 else "Infinity"
     return f"{value:,.0f}" if value == value.to_integral_value() else f"{value:,.2f}"
 
 
@@ -1168,20 +1451,403 @@ def _web_table_name(url: str, options: dict[str, Any]) -> str:
 
 
 class CsvTableModel(QAbstractTableModel):
-    """Read-only CSV preview model, limited to the first 500 records."""
+    """Read-only table preview, showing one bounded 500-row page at a time."""
+
+    pageChanged = Signal()
+    dataReplaced = Signal()
+    sortChanged = Signal()
+    filterChanged = Signal()
 
     def __init__(self, parent: QObject | None = None) -> None:
         super().__init__(parent)
         self._headers: list[str] = []
+        self._column_types: dict[str, str] = {}
         self._rows: list[dict[str, Any]] = []
+        self._source_rows: list[dict[str, Any]] = []
+        self._all_rows: list[dict[str, Any]] = []
+        self._page_index = 0
+        self._table_key = ""
+        self._sort_by_table: dict[str, tuple[str, str]] = {}
+        self._filters_by_table: dict[str, dict[str, dict[str, Any]]] = {}
+        self._column_filters: dict[str, dict[str, Any]] = {}
+        self._sort_column = ""
+        self._sort_direction = ""
 
-    def replace_data(self, headers: list[str], rows: list[dict[str, Any]]) -> None:
+    def replace_data(
+        self,
+        headers: list[str],
+        rows: list[dict[str, Any]],
+        table_key: str | None = None,
+        column_types: dict[str, str] | None = None,
+    ) -> None:
         self.beginResetModel()
         self._headers = list(headers)
-        self._rows = list(rows[:PREVIEW_ROW_LIMIT])
+        self._column_types = dict(column_types or {})
+        self._source_rows = list(rows)
+        self._table_key = str(table_key or "")
+        self._sort_column, self._sort_direction = self._sort_by_table.get(
+            self._table_key, ("", "")
+        )
+        self._column_filters = deepcopy(
+            self._filters_by_table.get(self._table_key, {})
+        )
+        self._column_filters = {
+            column: rule for column, rule in self._column_filters.items()
+            if column in self._headers
+        }
+        self._prune_stale_value_filter_keys()
+        if self._table_key:
+            self._filters_by_table[self._table_key] = deepcopy(self._column_filters)
+        if self._sort_column not in self._headers:
+            self._sort_column = ""
+            self._sort_direction = ""
+            self._sort_by_table.pop(self._table_key, None)
+        self._apply_sort()
+        self._page_index = 0
+        self._update_page_rows()
         self.endResetModel()
+        self.pageChanged.emit()
+        self.sortChanged.emit()
+        self.dataReplaced.emit()
+
+    def _prune_stale_value_filter_keys(self) -> None:
+        for column, rule in list(self._column_filters.items()):
+            if rule.get("operator") != "values":
+                continue
+            requested = {
+                key for key in rule.get("keys", []) if isinstance(key, str)
+            }
+            present: set[str] = set()
+            if requested:
+                for row in self._source_rows:
+                    key = _encode_data_view_filter_value(row.get(column))
+                    if key in requested:
+                        present.add(key)
+                        if present == requested:
+                            break
+            rule["keys"] = sorted(present)
+            if rule.get("all", True) and not present:
+                self._column_filters.pop(column, None)
+
+    def _sort_key(self, value: Any, column: str) -> tuple[Any, ...]:
+        if value is None:
+            return (0, "")
+        if is_cell_error(value):
+            return (1, cell_to_text(value).casefold())
+        column_type = self._column_types.get(column, "text")
+        if isinstance(value, str):
+            try:
+                if column_type == "boolean":
+                    lowered = value.strip().casefold()
+                    if lowered in {"true", "false"}:
+                        value = lowered == "true"
+                else:
+                    value = _parse_report_filter_value(value, column_type)
+            except (ValueError, DecimalException):
+                pass
+        if isinstance(value, bool):
+            return (2, int(value))
+        if isinstance(value, (int, float, Decimal)):
+            try:
+                number = Decimal(str(value))
+            except DecimalException:
+                return (3, 1, cell_to_text(value).casefold())
+            if not number.is_finite():
+                return (3, 1, str(number).casefold())
+            return (3, 0, number)
+        if isinstance(value, datetime):
+            return (4, value.isoformat())
+        if isinstance(value, (date, time)):
+            return (4, value.isoformat())
+        if isinstance(value, str):
+            return (5, value.casefold())
+        return (6, cell_to_text(value).casefold())
+
+    def _apply_sort(self) -> None:
+        self._all_rows = self._rows_with_filters()
+
+    def _rows_with_filters(self, exclude_column: str = "") -> list[dict[str, Any]]:
+        if self._sort_column and self._sort_column in self._headers:
+            column = self._sort_column
+            rows = sorted(
+                self._source_rows,
+                key=lambda row: self._sort_key(row.get(column), column),
+                reverse=self._sort_direction == "descending",
+            )
+        else:
+            rows = list(self._source_rows)
+        for column, rule in self._column_filters.items():
+            if column == exclude_column:
+                continue
+            rows = [
+                row for row in rows
+                if self._matches_column_filter(row.get(column), column, rule)
+            ]
+        return rows
+
+    def _matches_column_filter(
+        self, raw_value: Any, column: str, rule: dict[str, Any]
+    ) -> bool:
+        operator = rule["operator"]
+        if operator == "values":
+            keys = set(rule.get("keys", []))
+            key = _encode_data_view_filter_value(raw_value)
+            return key not in keys if rule.get("all", True) else key in keys
+        expected = rule["value"]
+        if operator == "is_null":
+            return raw_value is None
+        if operator == "is_not_null":
+            return raw_value is not None
+        if operator == "is_blank":
+            return raw_value is None or raw_value == ""
+        if operator == "is_not_blank":
+            return raw_value is not None and raw_value != ""
+        actual_text = "(null)" if raw_value is None else cell_to_text(raw_value)
+        if operator in {"equals", "not_equals"}:
+            column_type = self._column_types.get(column, "text")
+            if column_type in {
+                "whole_number", "decimal_number", "fixed_decimal", "currency",
+                "percentage", "date", "datetime", "time", "boolean",
+            }:
+                matched = self._sort_key(raw_value, column) == self._sort_key(
+                    expected, column
+                )
+            else:
+                matched = actual_text.casefold() == expected.casefold()
+            return matched if operator == "equals" else not matched
+        actual = actual_text.casefold()
+        needle = expected.casefold()
+        if operator == "contains":
+            return needle in actual
+        if operator == "does_not_contain":
+            return needle not in actual
+        if operator == "begins_with":
+            return actual.startswith(needle)
+        if operator == "does_not_begin_with":
+            return not actual.startswith(needle)
+        if operator == "ends_with":
+            return actual.endswith(needle)
+        if operator == "does_not_end_with":
+            return not actual.endswith(needle)
+        if raw_value is None or is_cell_error(raw_value):
+            return False
+        actual_key = self._sort_key(raw_value, column)
+        expected_key = self._sort_key(expected, column)
+        if operator == "greater_than":
+            return actual_key > expected_key
+        if operator == "greater_than_or_equal":
+            return actual_key >= expected_key
+        if operator == "less_than":
+            return actual_key < expected_key
+        if operator == "less_than_or_equal":
+            return actual_key <= expected_key
+        return True
+
+    @Property("QVariantList", notify=filterChanged)
+    def activeFilterColumns(self) -> list[str]:  # noqa: N802
+        return list(self._column_filters)
+
+    @Slot(str, result=bool)
+    def isColumnFiltered(self, column: str) -> bool:  # noqa: N802
+        return column in self._column_filters
+
+    @Slot(str, result="QVariantMap")
+    def columnFilter(self, column: str) -> dict[str, Any]:  # noqa: N802
+        return deepcopy(self._column_filters.get(column, {}))
+
+    @Slot(str, str, result="QVariantMap")
+    def columnFilterValues(self, column: str, search: str) -> dict[str, Any]:  # noqa: N802
+        """Search the full distinct preview domain after other-column filters."""
+        if column not in self._headers:
+            return {
+                "values": [], "matchCount": 0, "totalCount": 0, "truncated": False
+            }
+        distinct: dict[str, str] = {}
+        for row in self._rows_with_filters(exclude_column=column):
+            raw_value = row.get(column)
+            key = _encode_data_view_filter_value(raw_value)
+            distinct[key] = _data_view_filter_value_label(raw_value, key)
+        labels = _disambiguate_data_view_filter_labels(distinct)
+        query = (search or "").strip().casefold()
+        matched = [
+            (key, label) for key, label in labels.items()
+            if not query or query in label.casefold()
+        ]
+        matched.sort(key=lambda item: (item[1].casefold(), item[1], item[0]))
+        return {
+            "values": [
+                {"key": key, "label": label}
+                for key, label in matched[:2_000]
+            ],
+            "matchCount": len(matched),
+            "totalCount": len(distinct),
+            "truncated": len(matched) > 2_000,
+        }
+
+    @Slot(str, str, str)
+    def setColumnFilter(self, column: str, operator: str, value: str) -> None:  # noqa: N802
+        """Filter the Data view preview while leaving model and report rows intact."""
+        supported = {
+            "equals", "not_equals", "is_null", "is_not_null", "is_blank",
+            "is_not_blank", "contains", "does_not_contain", "begins_with",
+            "does_not_begin_with", "ends_with", "does_not_end_with",
+            "greater_than", "greater_than_or_equal", "less_than",
+            "less_than_or_equal",
+        }
+        if column not in self._headers or operator not in supported:
+            return
+        if len(value) > 2_000:
+            return
+        self.beginResetModel()
+        self._column_filters[column] = {"operator": operator, "value": value}
+        if self._table_key:
+            self._filters_by_table[self._table_key] = deepcopy(self._column_filters)
+        self._apply_sort()
+        self._page_index = 0
+        self._update_page_rows()
+        self.endResetModel()
+        self.pageChanged.emit()
+        self.filterChanged.emit()
+
+    @Slot(str, bool, "QVariantList")
+    def setColumnValueFilter(
+        self, column: str, all_selected: bool, keys: list[str]
+    ) -> None:  # noqa: N802
+        """Apply a full-domain include/exclude filter to preview rows only."""
+        if (
+            column not in self._headers
+            or not isinstance(keys, list)
+            or len(keys) > 100_000
+            or any(not isinstance(key, str) for key in keys)
+        ):
+            return
+        requested = set(keys)
+        present: set[str] = set()
+        if requested:
+            for row in self._source_rows:
+                key = _encode_data_view_filter_value(row.get(column))
+                if key in requested:
+                    present.add(key)
+                    if present == requested:
+                        break
+        normalized = sorted(present)
+        if all_selected and not normalized:
+            self.clearColumnFilter(column)
+            return
+        self.beginResetModel()
+        self._column_filters[column] = {
+            "operator": "values",
+            "all": bool(all_selected),
+            "keys": normalized,
+        }
+        if self._table_key:
+            self._filters_by_table[self._table_key] = deepcopy(self._column_filters)
+        self._apply_sort()
+        self._page_index = 0
+        self._update_page_rows()
+        self.endResetModel()
+        self.pageChanged.emit()
+        self.filterChanged.emit()
+
+    @Slot(str)
+    def clearColumnFilter(self, column: str) -> None:  # noqa: N802
+        if column not in self._column_filters:
+            return
+        self.beginResetModel()
+        self._column_filters.pop(column, None)
+        if self._table_key:
+            if self._column_filters:
+                self._filters_by_table[self._table_key] = deepcopy(self._column_filters)
+            else:
+                self._filters_by_table.pop(self._table_key, None)
+        self._apply_sort()
+        self._page_index = 0
+        self._update_page_rows()
+        self.endResetModel()
+        self.pageChanged.emit()
+        self.filterChanged.emit()
+
+    @Property(str, notify=sortChanged)
+    def sortColumn(self) -> str:  # noqa: N802
+        return self._sort_column
+
+    @Property(str, notify=sortChanged)
+    def sortDirection(self) -> str:  # noqa: N802
+        return self._sort_direction
+
+    @Slot(int)
+    def sortByColumn(self, column_index: int) -> None:  # noqa: N802
+        if column_index < 0 or column_index >= len(self._headers):
+            return
+        column = self._headers[column_index]
+        if column == self._sort_column:
+            direction = "descending" if self._sort_direction == "ascending" else "ascending"
+        else:
+            direction = "ascending"
+        self.beginResetModel()
+        self._sort_column = column
+        self._sort_direction = direction
+        if self._table_key:
+            self._sort_by_table[self._table_key] = (column, direction)
+        self._apply_sort()
+        self._page_index = 0
+        self._update_page_rows()
+        self.endResetModel()
+        self.pageChanged.emit()
+        self.sortChanged.emit()
+
+    def _update_page_rows(self) -> None:
+        start = self._page_index * PREVIEW_ROW_LIMIT
+        self._rows = self._all_rows[start:start + PREVIEW_ROW_LIMIT]
+
+    def _set_page(self, page_index: int) -> None:
+        page_count = self.pageCount
+        next_index = max(0, min(page_index, max(0, page_count - 1)))
+        if next_index == self._page_index:
+            return
+        self.beginResetModel()
+        self._page_index = next_index
+        self._update_page_rows()
+        self.endResetModel()
+        self.pageChanged.emit()
+
+    @Property(int, notify=pageChanged)
+    def currentPage(self) -> int:  # noqa: N802
+        return self._page_index + 1 if self.pageCount else 0
+
+    @Property(int, notify=pageChanged)
+    def pageCount(self) -> int:  # noqa: N802
+        return (len(self._all_rows) + PREVIEW_ROW_LIMIT - 1) // PREVIEW_ROW_LIMIT
+
+    @Property(str, notify=pageChanged)
+    def pageRange(self) -> str:  # noqa: N802
+        if not self._all_rows:
+            return "No rows"
+        first_row = self._page_index * PREVIEW_ROW_LIMIT + 1
+        last_row = min(first_row + len(self._rows) - 1, len(self._all_rows))
+        return f"Rows {first_row:,}–{last_row:,} of {len(self._all_rows):,}"
+
+    @Property(bool, notify=pageChanged)
+    def canGoPrevious(self) -> bool:  # noqa: N802
+        return self._page_index > 0
+
+    @Property(bool, notify=pageChanged)
+    def canGoNext(self) -> bool:  # noqa: N802
+        return self._page_index + 1 < self.pageCount
+
+    @Slot()
+    def previousPage(self) -> None:  # noqa: N802
+        if self.canGoPrevious:
+            self._set_page(self._page_index - 1)
+
+    @Slot()
+    def nextPage(self) -> None:  # noqa: N802
+        if self.canGoNext:
+            self._set_page(self._page_index + 1)
 
     def clear(self) -> None:
+        self._sort_by_table.clear()
+        self._filters_by_table.clear()
         self.replace_data([], [])
 
     def rowCount(self, parent: QModelIndex = QModelIndex()) -> int:  # noqa: N802 (Qt API)
@@ -1213,7 +1879,7 @@ class CsvTableModel(QAbstractTableModel):
         if orientation == Qt.Orientation.Horizontal and 0 <= section < len(self._headers):
             return self._headers[section]
         if orientation == Qt.Orientation.Vertical:
-            return section + 1
+            return self._page_index * PREVIEW_ROW_LIMIT + section + 1
         return None
 
     def roleNames(self) -> dict[int, bytes]:  # noqa: N802 (Qt API)
@@ -1226,6 +1892,8 @@ class StudioController(QObject):
 
     stateChanged = Signal()
     statusChanged = Signal(str)
+    fieldQueryChanged = Signal(str)
+    activeSourceReady = Signal()
 
     def __init__(self, parent: QObject | None = None, settings: QSettings | None = None) -> None:
         super().__init__(parent)
@@ -1244,6 +1912,7 @@ class StudioController(QObject):
         self._active_source_kind: str | None = None
         self._active_parser_options: dict[str, Any] = {}
         self._loaded_candidates: dict[str, ImportCandidate] = {}
+        self._query_candidates: dict[str, ImportCandidate] = {}
         self._raw_candidates: dict[str, ImportCandidate] = {}
         self._source_load_errors: dict[str, str] = {}
         self._sql_server_passwords: dict[str, str] = {}
@@ -1263,6 +1932,7 @@ class StudioController(QObject):
         self._measure_errors: dict[str, str] = {}
         self._visual_kpis: dict[str, str] = {}
         self._cross_filters: dict[str, list[str]] = {}
+        self._report_page_capture_state: dict[str, Any] | None = None
         self._filter_context_error = ""
         self._report_filter_context_cache: dict[
             tuple[str | None, bool],
@@ -1287,6 +1957,12 @@ class StudioController(QObject):
         self._region_visual_series: dict[str, list[dict[str, str | float]]] = {}
         self._model_tables: list[str] = []
         self._table_catalog: list[dict[str, Any]] = []
+        self._column_sort_orders: dict[
+            tuple[str, str], dict[tuple[Any, ...], tuple[str, tuple[Any, ...]]]
+        ] = {}
+        self._column_sort_attempt_statuses: dict[
+            tuple[str, str], dict[str, Any]
+        ] = {}
         self._model_relationships: list[str] = []
         self._recent_source_store = RecentSourcesStore(settings)
         self._table_model = CsvTableModel(self)
@@ -1378,6 +2054,8 @@ class StudioController(QObject):
             wells = ["Indicator", "Trend axis", "Target goals", "Tooltips"]
         elif v_type == "map":
             wells = ["Location", "Latitude", "Longitude", "Size", "Legend", "Tooltips"]
+        elif v_type in {"filledMap", "shapeMap"}:
+            wells = ["Location", "Legend", "Values", "Tooltips"]
         elif v_type in {
             "column", "bar", "stackedBar", "stackedColumn", "bar100", "column100",
             "stackedArea", "area100",
@@ -1519,7 +2197,7 @@ class StudioController(QObject):
             )
         ) or (
             well_name == "Values" and (
-                visual.get("type") != "matrix"
+                visual.get("type") not in {"matrix", "filledMap", "shapeMap"}
                 or field_name not in visual.get("fields", {}).get(well_name, [])
             )
         ):
@@ -1718,13 +2396,40 @@ class StudioController(QObject):
             return [item for item in options if _visual_measure_name(item) is None]
         return options
 
-    @Slot(str, result=str)
-    def visualFieldLabel(self, binding: str) -> str:  # noqa: N802
-        measure_name = _visual_measure_name(binding)
-        return f"Measure · {measure_name}" if measure_name else binding
+    @Slot("QVariant", result=str)
+    def visualFieldLabel(self, binding: Any) -> str:  # noqa: N802
+        column = _visual_field_column(binding)
+        measure_name = _visual_measure_name(column)
+        if measure_name:
+            return f"Measure · {measure_name}"
+        table_id = str(binding.get("table_id", "")) if isinstance(binding, dict) else ""
+        table = next((
+            item for item in self._table_catalog
+            if table_id and str(item.get("id", "")) == table_id
+        ), None)
+        if table is not None:
+            table_name = str(table.get("displayName") or table.get("name") or table_id)
+            return f"{table_name} · {column}"
+        return column
 
-    @Slot(str, result=bool)
-    def visualFieldIsMeasure(self, binding: str) -> bool:  # noqa: N802
+    @Slot("QVariant", result=str)
+    def reportFieldDisplayLabel(self, binding: Any) -> str:  # noqa: N802
+        column = _visual_field_column(binding)
+        measure_name = _visual_measure_name(column)
+        if measure_name:
+            return f"Measure · {measure_name}"
+        table_id = self._active_model_table_id()
+        table = next((
+            item for item in self._table_catalog
+            if table_id and str(item.get("id", "")) == table_id
+        ), None)
+        if table is None:
+            return column
+        table_name = str(table.get("displayName") or table.get("name") or table_id)
+        return f"{table_name} · {column}"
+
+    @Slot("QVariant", result=bool)
+    def visualFieldIsMeasure(self, binding: Any) -> bool:  # noqa: N802
         return _visual_measure_name(binding) is not None
 
     @Property("QVariantMap", notify=stateChanged)
@@ -1776,6 +2481,8 @@ class StudioController(QObject):
         visual_type = str(visual.get("type", ""))
         wells_by_type = {
             "map": ("Location", "Latitude", "Longitude", "Size", "Legend"),
+            "filledMap": ("Location", "Legend", "Values"),
+            "shapeMap": ("Location", "Legend", "Values"),
             "scatter": ("X-axis", "Y-axis", "Legend", "Details"),
             "gauge": ("Value", "Minimum", "Maximum", "Target"),
             "kpi": ("Indicator", "Trend axis", "Target goals"),
@@ -1794,8 +2501,10 @@ class StudioController(QObject):
             if not isinstance(bindings, list):
                 continue
             for binding in bindings:
+                binding_table_id = bound_table_id
                 if isinstance(binding, dict):
                     column = str(binding.get("column", ""))
+                    binding_table_id = str(binding.get("table_id", bound_table_id))
                 elif isinstance(binding, (list, tuple)):
                     column = str(binding[1] if len(binding) > 1 else (binding[0] if binding else ""))
                 else:
@@ -1806,8 +2515,10 @@ class StudioController(QObject):
                     # Measure evaluation checks its own referenced columns and
                     # reports a MeasureError. Unrelated table cells must not blank it.
                     continue
-                elif any(is_cell_error(row.get(column)) for row in bound_rows):
-                    return True
+                else:
+                    binding_rows = rows_by_table.get(binding_table_id, bound_rows)
+                    if any(is_cell_error(row.get(column)) for row in binding_rows):
+                        return True
         return False
 
     @Slot(str, result=str)
@@ -1819,6 +2530,22 @@ class StudioController(QObject):
         ), None)
         if visual is None:
             return ""
+        if visual.get("type") in {"filledMap", "shapeMap"}:
+            boundary_path = str(visual.get("shape_map_file", ""))
+            if not boundary_path:
+                return "Choose a local GeoJSON or TopoJSON boundary file."
+            try:
+                load_boundary_features(
+                    boundary_path,
+                    object_name=str(visual.get("shape_map_object", "")),
+                )
+            except ShapeMapError as exc:
+                return str(exc)
+            if not _visual_well_binding(
+                visual.get("fields", {}).get("Location", []),
+                str(visual.get("table_id") or self._active_model_table_id()),
+            ):
+                return "Add a field to the Location well."
         rows_by_table, measure_context, filter_table_ids = self._report_filter_context(visual_name)
         if self._visual_has_cell_errors(visual, rows_by_table):
             return "Power Query errors are present in this visual's data."
@@ -2115,6 +2842,150 @@ class StudioController(QObject):
         return points
 
     @Slot(str, bool, result="QVariantList")
+    def visualShapeMapData(
+        self, visual_name: str, include_highlights: bool = False
+    ) -> list[dict[str, object]]:  # noqa: N802
+        """Join report rows to a local GeoJSON/TopoJSON boundary source."""
+        page = self._active_page()
+        visual = next((
+            item for item in (page.get("visuals", []) if page else [])
+            if isinstance(item, dict) and item.get("title") == visual_name
+        ), None)
+        if visual is None or visual.get("type") not in {"filledMap", "shapeMap"}:
+            return []
+        boundary_path = str(visual.get("shape_map_file", ""))
+        key_property = str(visual.get("shape_map_key", ""))
+        if not boundary_path or not key_property:
+            return []
+        try:
+            features = load_boundary_features(
+                boundary_path,
+                object_name=str(visual.get("shape_map_object", "")),
+            )
+        except ShapeMapError:
+            return []
+
+        if include_highlights:
+            has_highlight = any(
+                selected
+                and (source := next((
+                    item for item in (page.get("visuals", []) if page else [])
+                    if isinstance(item, dict) and item.get("title") == source_title
+                ), None)) is not None
+                and self._visual_interaction_mode(source, visual) == "highlight"
+                for source_title, selected in self._cross_filters.items()
+            )
+            if not has_highlight:
+                return []
+
+        bound_table_id = str(visual.get("table_id") or self._active_model_table_id())
+        fields = visual.get("fields", {})
+        location_binding = _visual_well_binding(fields.get("Location", []), bound_table_id)
+        if location_binding is None:
+            return []
+        location_table_id, location_field = location_binding
+        if location_table_id != bound_table_id:
+            return []
+        value_binding = _visual_well_binding(fields.get("Values", []), bound_table_id)
+        value_field = value_binding[1] if value_binding else ""
+        legend_binding = _visual_well_binding(fields.get("Legend", []), bound_table_id)
+        legend_field = legend_binding[1] if legend_binding else ""
+
+        rows_by_table, measure_context, filter_table_ids = self._report_filter_context(
+            visual_name, include_highlights=include_highlights
+        )
+        rows = rows_by_table.get(bound_table_id, [])
+        if self._visual_has_cell_errors(visual, rows_by_table):
+            return []
+
+        measure_name = _visual_measure_name(value_field)
+        aggregation = str(visual.get("field_aggregations", {}).get(value_field, "sum")).casefold()
+        if aggregation not in _VISUAL_FIELD_AGGREGATIONS:
+            aggregation = "sum"
+        grouped: dict[str, dict[str, Any]] = {}
+        for row in rows:
+            location_value = row.get(location_field)
+            join_key = _shape_join_key(location_value)
+            if not join_key:
+                continue
+            bucket = grouped.setdefault(join_key, {
+                "count": 0,
+                "sum": Decimal(0),
+                "number_count": 0,
+                "value_count": 0,
+                "source_values": {},
+                "groups": {},
+            })
+            bucket["count"] += 1
+            bucket["source_values"].setdefault(cell_key(location_value), location_value)
+            legend_value = _report_cell_text(row.get(legend_field)) if legend_field else ""
+            group = bucket["groups"].setdefault(legend_value, 0)
+            bucket["groups"][legend_value] = group + 1
+            if not value_field:
+                continue
+            if measure_name:
+                continue
+            raw_value = row.get(value_field)
+            if aggregation == "count":
+                if raw_value is not None and bool(str(raw_value).strip()):
+                    bucket["value_count"] += 1
+                continue
+            number = _report_number(raw_value)
+            if number is not None:
+                bucket["sum"] += number
+                bucket["number_count"] += 1
+
+        feature_rows: list[dict[str, object]] = []
+        for feature in features:
+            properties = feature.get("properties", {})
+            boundary_value = properties.get(key_property) if isinstance(properties, dict) else None
+            boundary_label = _report_cell_text(boundary_value) if boundary_value is not None else ""
+            join_key = _shape_join_key(boundary_value)
+            bucket = grouped.get(join_key, {}) if join_key else {}
+            source_values = bucket.get("source_values", {})
+            filter_value = next(iter(source_values.values()), None)
+            matched = bool(bucket)
+            metric: Decimal | None = None
+            if matched:
+                if measure_name:
+                    try:
+                        metric = self._measure_value_for_visual_group(
+                            measure_name,
+                            measure_context,
+                            filter_table_ids,
+                            {location_field: set(source_values.values())},
+                            bound_table_id,
+                        )
+                    except (MeasureError, KeyError, TypeError, ValueError):
+                        metric = None
+                elif not value_field:
+                    metric = Decimal(bucket.get("count", 0))
+                elif aggregation == "count":
+                    metric = Decimal(bucket.get("value_count", 0))
+                elif bucket.get("number_count", 0):
+                    metric = bucket["sum"]
+                    if aggregation == "average":
+                        metric /= bucket["number_count"]
+            groups = bucket.get("groups", {})
+            group = max(groups, key=lambda value: (groups[value], value.casefold())) if groups else ""
+            try:
+                metric_value = float(metric) if metric is not None else None
+            except (OverflowError, ValueError):
+                metric_value = None
+            if metric_value is not None and not math.isfinite(metric_value):
+                metric_value = None
+            feature_rows.append({
+                "id": str(feature.get("id", boundary_label)),
+                "label": boundary_label or str(feature.get("id", "Region")),
+                "filter_value": _report_cell_text(filter_value) if filter_value is not None else "",
+                "value": metric_value,
+                "group": group,
+                "matched": matched,
+                "polygons": feature.get("polygons", []),
+            })
+        return feature_rows
+
+    @Slot(str, bool, result="QVariantList")
     def visualScatterData(
         self, visual_name: str, include_highlights: bool = False
     ) -> list[dict[str, object]]:  # noqa: N802
@@ -2173,6 +3044,304 @@ class StudioController(QObject):
             })
         return points
 
+    def _measure_reference_table_id(
+        self, measure_name: str
+    ) -> tuple[str | None, str | None]:
+        definition = next((
+            item for item in self._project.get("model", {}).get("measures", [])
+            if str(item.get("name", "")).casefold() == measure_name.casefold()
+        ), None)
+        if definition is None:
+            return None, f"Measure {measure_name!r} no longer exists."
+        try:
+            references = [
+                token.value.split("\0", 1)
+                for token in tokenize(str(definition.get("expression", "")))
+                if token.kind == "reference"
+            ]
+        except MeasureError as exc:
+            return None, str(exc)
+        home_table_id = str(definition.get("home_table_id", ""))
+        available_tables = self._measure_table_context()
+        if not references:
+            if home_table_id and any(
+                str(table.get("id", "")) == home_table_id
+                for table in available_tables
+            ):
+                return home_table_id, None
+            return None, "A related-table Table visual needs a loaded measure home table."
+
+        table_ids: set[str] = set()
+        for reference in references:
+            table_name, column = reference if len(reference) == 2 else ("", "")
+            matches = (
+                [table for table in available_tables
+                 if str(table.get("name", "")).casefold() == table_name.casefold()]
+                if table_name
+                else [table for table in available_tables
+                      if str(table.get("id", "")) == home_table_id]
+            )
+            if len(matches) != 1:
+                label = table_name or home_table_id or "home table"
+                return None, f"Measure table {label!r} is missing or ambiguous."
+            context = matches[0]
+            if not any(str(header).casefold() == column.casefold() for header in context["headers"]):
+                return None, f"Measure column {table_name}[{column}] is not loaded."
+            table_ids.add(str(context["id"]))
+        if len(table_ids) != 1:
+            return None, "A related-table Table visual supports one measure source table."
+        return next(iter(table_ids)), None
+
+    @staticmethod
+    def _cross_table_relationship_error(
+        dimension_id: str,
+        fact_id: str,
+        table_context: list[dict[str, Any]],
+        relationships: list[dict[str, Any]],
+    ) -> str | None:
+        contexts = {str(table["id"]): table for table in table_context}
+        dimension, fact = contexts.get(dimension_id), contexts.get(fact_id)
+        if dimension is None or fact is None:
+            return "Both related tables must be loaded and enabled for report visuals."
+
+        supported = [
+            relationship for relationship in relationships
+            if str(relationship.get("from_table_id", "")) == dimension_id
+            and str(relationship.get("to_table_id", "")) == fact_id
+            and relationship.get("is_active", True)
+            and relationship.get("cardinality") == "one_to_many"
+            and relationship_filter_directions(relationship) == ("from_to",)
+        ]
+        if not supported:
+            direct = [
+                relationship for relationship in relationships
+                if {
+                    str(relationship.get("from_table_id", "")),
+                    str(relationship.get("to_table_id", "")),
+                } == {dimension_id, fact_id}
+            ]
+            if any(not relationship.get("is_active", True) for relationship in direct):
+                return "The related-table Table visual needs a direct active relationship."
+            return (
+                "The related-table Table visual needs a direct, active, single-direction "
+                "one-to-many relationship from its dimension to the measure table."
+            )
+
+        adjacency: dict[str, list[str]] = defaultdict(list)
+        loaded_ids = set(contexts)
+        for relationship in relationships:
+            if not relationship.get("is_active", True):
+                continue
+            from_id = str(relationship.get("from_table_id", ""))
+            to_id = str(relationship.get("to_table_id", ""))
+            if from_id not in loaded_ids or to_id not in loaded_ids:
+                continue
+            for direction in relationship_filter_directions(relationship):
+                if direction == "from_to":
+                    adjacency[from_id].append(to_id)
+                elif direction == "to_from":
+                    adjacency[to_id].append(from_id)
+
+        def count_paths(current: str, visited: frozenset[str]) -> int:
+            if current == fact_id:
+                return 1
+            count = 0
+            for neighbor in adjacency.get(current, set()):
+                if neighbor not in visited:
+                    count += count_paths(neighbor, visited | {neighbor})
+                    if count > 1:
+                        return 2
+            return count
+
+        if len(supported) != 1 or count_paths(dimension_id, frozenset({dimension_id})) != 1:
+            return "Ambiguous active relationship paths connect the dimension and measure tables."
+
+        relationship = supported[0]
+        dimension_column = str(relationship.get("from_column", ""))
+        fact_column = str(relationship.get("to_column", ""))
+        if dimension_column not in dimension["headers"] or fact_column not in fact["headers"]:
+            return "The active relationship refers to a column that is no longer loaded."
+        dimension_type = str(dimension.get("column_types", {}).get(dimension_column, "text"))
+        fact_type = str(fact.get("column_types", {}).get(fact_column, "text"))
+        if not (
+            dimension_type == fact_type
+            or "any" in {dimension_type, fact_type}
+            or {dimension_type, fact_type} <= {"whole_number", "decimal_number"}
+        ):
+            return "The active relationship has incompatible key column types."
+
+        try:
+            dimension_keys: set[tuple[str, Any]] = set()
+            for row in dimension["rows"]:
+                key = _relationship_value_key(row.get(dimension_column), dimension_type)
+                if key[0] in {"null", "empty"}:
+                    return "The dimension relationship key contains a blank value."
+                if key in dimension_keys:
+                    return "The dimension relationship key must contain unique values."
+                dimension_keys.add(key)
+            for row in fact["rows"]:
+                key = _relationship_value_key(row.get(fact_column), fact_type)
+                if key[0] in {"null", "empty"}:
+                    return "The fact relationship key contains a blank value."
+                if key not in dimension_keys:
+                    return "Unmatched fact relationship keys prevent this visual from rendering."
+        except RelationshipError as exc:
+            return str(exc)
+        return None
+
+    def _cross_table_table_data(
+        self,
+        visual: dict[str, Any],
+        field_bindings: list[Any],
+        columns: list[str],
+        rows_by_table: dict[str, list[dict[str, Any]]],
+        table_context: list[dict[str, Any]],
+        filter_table_ids: set[str],
+    ) -> dict[str, object] | None:
+        bound_table_id = str(
+            visual.get("table_id") or self._active_model_table_id()
+        )
+        dimensions: list[tuple[str, str]] = []
+        measures: list[str] = []
+        for binding in field_bindings:
+            column = _visual_field_column(binding)
+            measure_name = _visual_measure_name(column)
+            if measure_name is not None:
+                measures.append(measure_name)
+            else:
+                table_id = (
+                    str(binding.get("table_id", bound_table_id))
+                    if isinstance(binding, dict)
+                    else bound_table_id
+                )
+                dimensions.append((table_id, column))
+
+        explicit_cross_binding = any(
+            isinstance(binding, dict)
+            and str(binding.get("table_id", bound_table_id)) != bound_table_id
+            for binding in field_bindings
+        )
+        if len(measures) != 1:
+            has_cross_measure = explicit_cross_binding
+            for measure in measures:
+                measure_table_id, measure_error = self._measure_reference_table_id(measure)
+                if measure_error:
+                    continue
+                if any(table_id != measure_table_id for table_id, _column in dimensions):
+                    has_cross_measure = True
+            if has_cross_measure:
+                return {
+                    "columns": columns, "rows": [], "total_rows": 0,
+                    "error": "A related-table Table visual supports one dimension field and one measure.",
+                }
+            return None
+
+        measure_table_id, measure_error = self._measure_reference_table_id(measures[0])
+        if measure_error:
+            if explicit_cross_binding:
+                return {
+                    "columns": columns, "rows": [], "total_rows": 0,
+                    "error": measure_error,
+                }
+            return None
+        if measure_table_id is None or not dimensions or all(
+            table_id == measure_table_id for table_id, _column in dimensions
+        ):
+            return None
+        if len(dimensions) != 1:
+            return {
+                "columns": columns, "rows": [], "total_rows": 0,
+                "error": "A related-table Table visual supports one dimension field and one measure.",
+            }
+
+        dimension_id, dimension_column = dimensions[0]
+        relationship_error = self._cross_table_relationship_error(
+            dimension_id,
+            measure_table_id,
+            table_context,
+            self._project.get("model", {}).get("relationships", []),
+        )
+        if relationship_error:
+            return {
+                "columns": columns, "rows": [], "total_rows": 0,
+                "error": relationship_error,
+            }
+
+        dimension_context = next((
+            table for table in table_context
+            if str(table.get("id", "")) == dimension_id
+        ), None)
+        if dimension_context is None or dimension_column not in dimension_context["headers"]:
+            return {
+                "columns": columns, "rows": [], "total_rows": 0,
+                "error": f"Dimension field {dimension_column!r} is no longer available.",
+            }
+        source_rows = rows_by_table.get(dimension_id, [])
+        if any(is_cell_error(row.get(dimension_column)) for row in source_rows):
+            return {
+                "columns": columns, "rows": [], "total_rows": 0,
+                "error": "Power Query errors are present in this visual's data.",
+            }
+
+        page = self._active_page()
+        has_highlight = any(
+            selected
+            and (source := next((
+                item for item in (page.get("visuals", []) if page else [])
+                if isinstance(item, dict) and item.get("title") == source_title
+            ), None)) is not None
+            and self._visual_interaction_mode(source, visual) == "highlight"
+            for source_title, selected in self._cross_filters.items()
+        )
+        highlighted_categories: set[tuple[Any, ...]] = set()
+        if has_highlight:
+            highlight_rows, _, _ = self._report_filter_context(
+                str(visual.get("title", "")), include_highlights=True
+            )
+            highlighted_categories = {
+                cell_key(row.get(dimension_column))
+                for row in highlight_rows.get(dimension_id, [])
+            }
+
+        grouped_rows: dict[tuple[Any, ...], dict[str, Any]] = {}
+        group_values: dict[tuple[Any, ...], Any] = {}
+        for row in source_rows:
+            value = row.get(dimension_column)
+            key = cell_key(value)
+            grouped_rows.setdefault(key, row)
+            group_values.setdefault(key, value)
+
+        rows: list[dict[str, object]] = []
+        for key in list(grouped_rows)[:50]:
+            try:
+                value = self._measure_value_for_visual_group(
+                    measures[0],
+                    table_context,
+                    set(filter_table_ids),
+                    {dimension_column: group_values[key]},
+                    dimension_id,
+                )
+            except (MeasureError, KeyError, RelationshipError, TypeError, ValueError) as exc:
+                detail = str(exc).strip() or "evaluation failed"
+                return {
+                    "columns": columns, "rows": [], "total_rows": 0,
+                    "error": f"Measure {measures[0]!r} could not be evaluated: {detail}",
+                }
+
+            values: list[str] = []
+            for binding in field_bindings:
+                column = _visual_field_column(binding)
+                if _visual_measure_name(column) is not None:
+                    values.append("" if value is None else _format_report_number(value))
+                else:
+                    values.append(_report_cell_text(grouped_rows[key].get(column)))
+            rows.append({
+                "values": values,
+                "category": _report_cell_text(group_values[key]),
+                "highlighted": cell_key(group_values[key]) in highlighted_categories,
+            })
+        return {"columns": columns, "rows": rows, "total_rows": len(grouped_rows)}
+
     @Slot(str, result="QVariantMap")
     def visualTableData(self, visual_name: str) -> dict[str, object]:  # noqa: N802
         page = self._active_page()
@@ -2184,30 +3353,43 @@ class StudioController(QObject):
             return {"columns": [], "rows": [], "total_rows": 0}
 
         fields = visual.get("fields", {}).get("Fields", [])
-        bindings: list[str] = []
+        field_bindings: list[Any] = []
         for binding in fields:
-            if isinstance(binding, dict):
-                field = binding.get("column")
-            elif isinstance(binding, (list, tuple)):
-                field = binding[1] if len(binding) > 1 else (binding[0] if binding else None)
-            else:
-                field = binding
-            if field is not None and str(field) not in bindings:
-                bindings.append(str(field))
+            field = _visual_field_column(binding)
+            if field and all(
+                _visual_field_column(existing) != field
+                or (
+                    isinstance(existing, dict) and isinstance(binding, dict)
+                    and str(existing.get("table_id", "")) != str(binding.get("table_id", ""))
+                )
+                for existing in field_bindings
+            ):
+                field_bindings.append(binding)
+        bindings = [_visual_field_column(binding) for binding in field_bindings]
         if not bindings:
             return {"columns": [], "rows": [], "total_rows": 0}
 
         bound_table_id = str(visual.get("table_id") or self._active_model_table_id())
         rows_by_table, measure_context, filter_table_ids = self._report_filter_context(visual_name)
-        source_rows = rows_by_table.get(bound_table_id, [])
         measure_names = {
             binding: _visual_measure_name(binding)
             for binding in bindings
         }
+        columns = [measure_names[binding] or binding for binding in bindings]
+        cross_table_data = self._cross_table_table_data(
+            visual,
+            field_bindings,
+            columns,
+            rows_by_table,
+            measure_context,
+            filter_table_ids,
+        )
+        if cross_table_data is not None:
+            return cross_table_data
+        source_rows = rows_by_table.get(bound_table_id, [])
         dimension_columns = [
             binding for binding in bindings if measure_names[binding] is None
         ]
-        columns = [measure_names[binding] or binding for binding in bindings]
         model_table = next((
             item for item in self._table_catalog
             if str(item.get("id", "")) == bound_table_id
@@ -2327,24 +3509,17 @@ class StudioController(QObject):
         if visual is None or visual.get("type") != "matrix":
             return {"columns": [], "rows": [], "total_rows": 0}
 
-        def field_name(well_name: str) -> str:
-            bindings = visual.get("fields", {}).get(well_name, [])
-            if not isinstance(bindings, list) or not bindings:
-                return ""
-            binding = bindings[0]
-            if isinstance(binding, dict):
-                return str(binding.get("column", ""))
-            if isinstance(binding, (list, tuple)):
-                return str(binding[1] if len(binding) > 1 else (binding[0] if binding else ""))
-            return str(binding)
-
-        row_field = field_name("Rows")
-        column_field = field_name("Columns")
-        value_field = field_name("Values")
+        bound_table_id = str(visual.get("table_id") or self._active_model_table_id())
+        fields = visual.get("fields", {})
+        row_binding = _visual_well_binding(fields.get("Rows", []), bound_table_id)
+        column_binding = _visual_well_binding(fields.get("Columns", []), bound_table_id)
+        value_binding = _visual_well_binding(fields.get("Values", []), bound_table_id)
+        row_field = row_binding[1] if row_binding else ""
+        column_field = column_binding[1] if column_binding else ""
+        value_field = value_binding[1] if value_binding else ""
         if not row_field or not column_field or not value_field:
             return {"columns": [], "rows": [], "total_rows": 0}
 
-        bound_table_id = str(visual.get("table_id") or self._active_model_table_id())
         rows_by_table, measure_context, filter_table_ids = self._report_filter_context(visual_name)
         source_rows = rows_by_table.get(bound_table_id, [])
         measure_name = _visual_measure_name(value_field)
@@ -2422,13 +3597,22 @@ class StudioController(QObject):
                 },
             )
 
-        sorted_rows = sorted(
-            row_values,
-            key=lambda key: (row_displays[key].casefold(), row_displays[key], repr(key)),
+        row_model_order = self._active_model_column_sort_order(
+            row_binding[0] if row_binding else "", row_field, bound_table_id, row_values,
         )
-        sorted_columns = sorted(
-            column_values,
-            key=lambda key: (column_displays[key].casefold(), column_displays[key], repr(key)),
+        column_model_order = self._active_model_column_sort_order(
+            column_binding[0] if column_binding else "", column_field,
+            bound_table_id, column_values,
+        )
+        sorted_rows = self._ordered_category_keys(
+            list(row_values), row_model_order,
+            lambda key: (row_displays[key].casefold(), row_displays[key], repr(key)),
+        )
+        sorted_columns = self._ordered_category_keys(
+            list(column_values), column_model_order,
+            lambda key: (
+                column_displays[key].casefold(), column_displays[key], repr(key),
+            ),
         )
         columns = [row_field, *(column_displays[key] for key in sorted_columns)]
         highlighted_categories: set[tuple[Any, ...]] = set()
@@ -2650,6 +3834,7 @@ class StudioController(QObject):
         page = self._active_page()
         return (
             self._current_region is not None
+            or bool(self._cross_filters)
             or bool(self._project.get("report", {}).get("filters"))
             or bool(page and (page.get("filters") or page.get("visual_filters")))
         )
@@ -2978,6 +4163,11 @@ class StudioController(QObject):
     def modelRelationships(self) -> list[str]:  # noqa: N802
         return list(self._model_relationships)
 
+    @Property("QVariantList", notify=stateChanged)
+    def modelRelationshipCatalog(self) -> list[dict[str, Any]]:  # noqa: N802
+        relationships = self._project.get("model", {}).get("relationships", [])
+        return [dict(relationship) for relationship in relationships if isinstance(relationship, dict)]
+
     @Property(bool, notify=stateChanged)
     def canManageRelationships(self) -> bool:  # noqa: N802
         has_two_loaded_tables = sum(
@@ -3091,11 +4281,39 @@ class StudioController(QObject):
         if len(eligible_tables) < 2 and not existing_relationships:
             self._set_status("Load at least two tables before managing relationships.")
             return False
+        detection_tables = []
+        model_tables_by_id = {
+            str(item.get("id") or item.get("source_id") or ""): item
+            for item in self._project.get("model", {}).get("tables", [])
+        }
+        for table in eligible_tables:
+            source_id = str(table.get("sourceId", ""))
+            candidate = self._loaded_candidates.get(source_id)
+            if candidate is None:
+                continue
+            model_table = model_tables_by_id.get(str(table.get("id", "")), {})
+            detection_tables.append({
+                "id": str(table.get("id", "")),
+                "name": str(table.get("name", "")),
+                "headers": list(candidate.headers),
+                "rows": candidate.rows,
+                "column_types": dict(table.get("columnTypes", {})),
+                "calculated_columns": [
+                    str(item["name"])
+                    for item in model_table.get("calculated_columns", [])
+                    if isinstance(item, dict) and isinstance(item.get("name"), str)
+                ],
+                "group_by_columns": dict(model_table.get("group_by_columns", {})),
+                "key_column": model_table.get("key_column"),
+            })
         dialog = RelationshipDialog(
             self._table_catalog,
             existing_relationships,
             lambda candidate: self._validate_relationship_candidate(
                 candidate, allow_unavailable=existing_relationships
+            ),
+            detect_candidates=lambda current, target_tables=None: detect_relationship_candidates(
+                detection_tables, current, target_tables
             ),
         )
         if dialog.exec() != QDialog.DialogCode.Accepted:
@@ -3510,6 +4728,26 @@ class StudioController(QObject):
             None,
         )
         table_name = str(table.get("name")) if table else str(source.get("name", "table"))
+        removed_table_ids = {source_id}
+        if table is not None:
+            removed_table_ids.add(str(table.get("id", "")))
+        home_table_measures = [
+            str(measure.get("name", "Measure"))
+            for measure in self._project.get("model", {}).get("measures", [])
+            if str(measure.get("home_table_id", "")) in removed_table_ids
+        ]
+        if home_table_measures:
+            names = ", ".join(home_table_measures)
+            self._set_status(
+                f"Move or remove measures tied to {table_name} before removing the table: {names}"
+            )
+            QMessageBox.warning(
+                None,
+                "Table contains measure home tables",
+                f"These measures use {table_name} as their home table: {names}. "
+                "Edit or remove those measures before removing the table.",
+            )
+            return False
         answer = QMessageBox.question(
             None,
             "Remove table",
@@ -3529,9 +4767,6 @@ class StudioController(QObject):
             item for item in next_project["model"].get("tables", [])
             if item.get("id") != source_id and item.get("source_id") != source_id
         ]
-        removed_table_ids = {source_id}
-        if table is not None:
-            removed_table_ids.add(str(table.get("id", "")))
         reference_prefixes = (f"{table_name}.", f"{table_name}[")
         next_project["model"]["relationships"] = [
             relationship
@@ -3589,6 +4824,7 @@ class StudioController(QObject):
                     credential_cleanup_failed = True
 
         self._loaded_candidates.pop(source_id, None)
+        self._query_candidates.pop(source_id, None)
         self._raw_candidates.pop(source_id, None)
         self._source_load_errors.pop(source_id, None)
         self._source_load_errors.pop("__active_selection__", None)
@@ -3669,6 +4905,22 @@ class StudioController(QObject):
         dialog = ODataFeedImportDialog()
         if dialog.exec() != QDialog.DialogCode.Accepted or dialog.candidate is None:
             return False
+        if dialog.selected_action == "transform":
+            candidate = deepcopy(dialog.candidate)
+            options = dict(candidate.options)
+            entity_set = str(options.get("entity_set_name", "OData query"))
+            source_record = {
+                "id": str(uuid4()),
+                "name": f"{entity_set} · OData Feed",
+                "query_name": entity_set,
+                "kind": "odata",
+                "connection": {"service_root": dialog.service_root},
+                "parser_options": options,
+                "transform_steps": [],
+            }
+            return self.transform_data_dialog(
+                pending_source=(candidate, source_record)
+            )
         return self._commit_odata_import(
             {"service_root": dialog.service_root},
             dialog.candidate,
@@ -3678,6 +4930,22 @@ class StudioController(QObject):
         dialog = WebImportDialog()
         if dialog.exec() != QDialog.DialogCode.Accepted or dialog.candidate is None:
             return False
+        if dialog.selected_action == "transform":
+            candidate = deepcopy(dialog.candidate)
+            options = dict(candidate.options)
+            query_name = _web_table_name(dialog.url, options)
+            source_record = {
+                "id": str(uuid4()),
+                "name": f"{query_name} · Web",
+                "query_name": query_name,
+                "kind": "web",
+                "connection": {"url": dialog.url},
+                "parser_options": options,
+                "transform_steps": [],
+            }
+            return self.transform_data_dialog(
+                pending_source=(candidate, source_record)
+            )
         return self._commit_web_import({"url": dialog.url}, dialog.candidate)
 
     def _commit_web_import(
@@ -3760,8 +5028,11 @@ class StudioController(QObject):
             source_table = self._model_table_for_source(next_project, source_id)
             if source_table is not None:
                 source_table["column_types"] = base_types
+            query_candidate = source_candidate
             source_candidate, calculated_types = self._apply_calculated_columns(
-                source_id, source_candidate, project=next_project,
+                source_id,
+                _model_candidate_with_format_errors_as_blank(query_candidate),
+                project=next_project,
                 column_types=base_types,
             )
             if source_table is not None:
@@ -3769,8 +5040,10 @@ class StudioController(QObject):
                     **base_types, **calculated_types
                 }
             next_project = validate_project(next_project)
-            dependent_candidates, dependent_types = self._rebuild_query_dependents(
-                next_project, {source_id: source_candidate}
+            dependent_candidates, dependent_types, dependent_query_candidates = self._rebuild_query_dependents(
+                next_project,
+                {source_id: source_candidate},
+                base_query_candidates={source_id: query_candidate},
             )
             for dependent_id, type_map in dependent_types.items():
                 table = next(
@@ -3793,18 +5066,22 @@ class StudioController(QObject):
         self._source_load_errors.pop(source_id, None)
         self._source_load_errors.pop("__active_selection__", None)
         self._loaded_candidates.update(dependent_candidates)
+        self._query_candidates[source_id] = query_candidate
+        self._query_candidates.update(dependent_query_candidates)
         self._raw_candidates[source_id] = parsed
         for updated_id in dependent_candidates:
             self._source_load_errors.pop(updated_id, None)
         self._source_warning = self._compose_source_warning()
         self._current_region = None
         self._install_source(None, source_id, source_candidate)
+        self.setFieldQuery("")
         self._dirty = True
         self._refresh_model_view()
         self._refresh_report()
         self.stateChanged.emit()
         notice = f" · {parsed.notices[0]}" if parsed.notices else ""
         self._set_status(f"Loaded {source_name} · {parsed.row_count:,} rows{notice}")
+        self.activeSourceReady.emit()
         return True
 
     def _commit_odata_import(
@@ -3887,8 +5164,11 @@ class StudioController(QObject):
             source_table = self._model_table_for_source(next_project, source_id)
             if source_table is not None:
                 source_table["column_types"] = base_types
+            query_candidate = source_candidate
             source_candidate, calculated_types = self._apply_calculated_columns(
-                source_id, source_candidate, project=next_project,
+                source_id,
+                _model_candidate_with_format_errors_as_blank(query_candidate),
+                project=next_project,
                 column_types=base_types,
             )
             if source_table is not None:
@@ -3896,8 +5176,10 @@ class StudioController(QObject):
                     **base_types, **calculated_types
                 }
             next_project = validate_project(next_project)
-            dependent_candidates, dependent_types = self._rebuild_query_dependents(
-                next_project, {source_id: source_candidate}
+            dependent_candidates, dependent_types, dependent_query_candidates = self._rebuild_query_dependents(
+                next_project,
+                {source_id: source_candidate},
+                base_query_candidates={source_id: query_candidate},
             )
             for dependent_id, type_map in dependent_types.items():
                 table = next(
@@ -3920,24 +5202,49 @@ class StudioController(QObject):
         self._source_load_errors.pop(source_id, None)
         self._source_load_errors.pop("__active_selection__", None)
         self._loaded_candidates.update(dependent_candidates)
+        self._query_candidates[source_id] = query_candidate
+        self._query_candidates.update(dependent_query_candidates)
         self._raw_candidates[source_id] = parsed
         for updated_id in dependent_candidates:
             self._source_load_errors.pop(updated_id, None)
         self._source_warning = self._compose_source_warning()
         self._current_region = None
         self._install_source(None, source_id, source_candidate)
+        self.setFieldQuery("")
         self._dirty = True
         self._refresh_model_view()
         self._refresh_report()
         self.stateChanged.emit()
         notice = f" · {parsed.notices[0]}" if parsed.notices else ""
         self._set_status(f"Loaded {source_name} · {parsed.row_count:,} rows{notice}")
+        self.activeSourceReady.emit()
         return True
 
     def _import_sql_server_dialog(self) -> bool:
         dialog = SQLServerImportDialog()
         if dialog.exec() != QDialog.DialogCode.Accepted or dialog.candidate is None:
             return False
+        if dialog.selected_action == "transform":
+            candidate = deepcopy(dialog.candidate)
+            settings = dialog.connection_settings
+            options = dict(candidate.options)
+            credential_ref = str(uuid4())
+            source_name = (
+                f"{settings['database']}.{options['schema']}.{options['table_name']}"
+            )
+            source_record = {
+                "id": str(uuid4()),
+                "name": source_name,
+                "query_name": str(options["table_name"]),
+                "kind": "sql_server",
+                "connection": {**settings, "credential_ref": credential_ref},
+                "parser_options": options,
+                "transform_steps": [],
+                "_staged_password": dialog.password,
+            }
+            return self.transform_data_dialog(
+                pending_source=(candidate, source_record)
+            )
         return self._commit_sql_server_import(
             dialog.connection_settings,
             dialog.password,
@@ -4036,8 +5343,11 @@ class StudioController(QObject):
             source_table = self._model_table_for_source(next_project, source_id)
             if source_table is not None:
                 source_table["column_types"] = base_types
+            query_candidate = source_candidate
             source_candidate, calculated_types = self._apply_calculated_columns(
-                source_id, source_candidate, project=next_project,
+                source_id,
+                _model_candidate_with_format_errors_as_blank(query_candidate),
+                project=next_project,
                 column_types=base_types,
             )
             if source_table is not None:
@@ -4045,8 +5355,10 @@ class StudioController(QObject):
                     **base_types, **calculated_types
                 }
             next_project = validate_project(next_project)
-            dependent_candidates, dependent_types = self._rebuild_query_dependents(
-                next_project, {source_id: source_candidate}
+            dependent_candidates, dependent_types, dependent_query_candidates = self._rebuild_query_dependents(
+                next_project,
+                {source_id: source_candidate},
+                base_query_candidates={source_id: query_candidate},
             )
             for dependent_id, type_map in dependent_types.items():
                 table = next(
@@ -4078,17 +5390,21 @@ class StudioController(QObject):
         self._source_load_errors.pop(source_id, None)
         self._source_load_errors.pop("__active_selection__", None)
         self._loaded_candidates.update(dependent_candidates)
+        self._query_candidates[source_id] = query_candidate
+        self._query_candidates.update(dependent_query_candidates)
         self._raw_candidates[source_id] = parsed
         for updated_id in dependent_candidates:
             self._source_load_errors.pop(updated_id, None)
         self._source_warning = self._compose_source_warning()
         self._current_region = None
         self._install_source(None, source_id, source_candidate)
+        self.setFieldQuery("")
         self._dirty = True
         self._refresh_model_view()
         self._refresh_report()
         self.stateChanged.emit()
         self._set_status(f"Loaded {source_name} · {parsed.row_count:,} rows")
+        self.activeSourceReady.emit()
         return True
 
     @staticmethod
@@ -4153,6 +5469,73 @@ class StudioController(QObject):
         self._selected_visual_ids.clear()
         self._creating_visual = False
         self._dirty = True
+        self._refresh_report()
+        self.stateChanged.emit()
+
+    @Slot(result=bool)
+    def beginReportPageCapture(self) -> bool:  # noqa: N802
+        if self._current_view != "Report" or self._report_page_capture_state is not None:
+            self._set_status("Switch to Report view before exporting report pages.")
+            return False
+        capture_directory = tempfile.TemporaryDirectory(prefix="analytics-studio-report-")
+        self._report_page_capture_state = {
+            "page_id": self._active_page_id,
+            "selected_visual": self._selected_visual,
+            "selected_visual_ids": list(self._selected_visual_ids),
+            "creating_visual": self._creating_visual,
+            "cross_filters": deepcopy(self._cross_filters),
+            "dirty": self._dirty,
+            "capture_directory": capture_directory,
+        }
+        self._selected_visual = ""
+        self._selected_visual_ids = []
+        self._creating_visual = False
+        self._cross_filters.clear()
+        self._refresh_report()
+        self.stateChanged.emit()
+        return True
+
+    @Slot(int, result=str)
+    def reportPageCapturePath(self, capture_index: int) -> str:  # noqa: N802
+        state = self._report_page_capture_state
+        if state is None or capture_index < 0:
+            return ""
+        directory = state["capture_directory"].name
+        return str(Path(directory) / f"page-{capture_index + 1}.png")
+
+    @Slot(int, result=bool)
+    def setReportPageForCapture(self, index: int) -> bool:  # noqa: N802
+        if self._report_page_capture_state is None:
+            return False
+        pages = self._project["report"]["pages"]
+        if index < 0 or index >= len(pages):
+            return False
+        page_id = str(pages[index]["id"])
+        if self._active_page_id != page_id:
+            self._active_page_id = page_id
+            self._project["report"]["active_page_id"] = page_id
+            self._refresh_report()
+            self.stateChanged.emit()
+        return True
+
+    @Slot()
+    def endReportPageCapture(self) -> None:  # noqa: N802
+        state = self._report_page_capture_state
+        if state is None:
+            return
+        pages = self._project["report"]["pages"]
+        page_id = state["page_id"]
+        if not any(page["id"] == page_id for page in pages):
+            page_id = str(pages[0]["id"])
+        self._active_page_id = page_id
+        self._project["report"]["active_page_id"] = page_id
+        self._selected_visual = str(state["selected_visual"])
+        self._selected_visual_ids = list(state["selected_visual_ids"])
+        self._creating_visual = bool(state["creating_visual"])
+        self._cross_filters = deepcopy(state["cross_filters"])
+        self._dirty = bool(state["dirty"])
+        self._report_page_capture_state = None
+        state["capture_directory"].cleanup()
         self._refresh_report()
         self.stateChanged.emit()
 
@@ -4841,6 +6224,7 @@ class StudioController(QObject):
         if self._field_query == query:
             return
         self._field_query = query
+        self.fieldQueryChanged.emit(query)
         self.stateChanged.emit()
 
     @Slot(result=bool)
@@ -4888,6 +6272,7 @@ class StudioController(QObject):
 
         sources = candidate.get("data_sources", [])
         loaded_candidates: dict[str, ImportCandidate] = {}
+        query_candidates: dict[str, ImportCandidate] = {}
         raw_candidates: dict[str, ImportCandidate] = {}
         source_paths: dict[str, Path | None] = {}
         load_errors: dict[str, str] = {}
@@ -4906,7 +6291,11 @@ class StudioController(QObject):
                 if kind == "inline":
                     raw = self._raw_candidate_for_source(source)
                 elif kind == "query":
-                    raw = self._query_candidate(source, loaded_candidates, project=candidate)
+                    raw = self._query_candidate(
+                        source,
+                        {**loaded_candidates, **query_candidates},
+                        project=candidate,
+                    )
                 elif kind == "sql_server":
                     raw = self._sql_server_candidate_for_source(source)
                 elif kind == "odata":
@@ -4944,6 +6333,10 @@ class StudioController(QObject):
                     raw, source_steps,
                     parameters=parameter_values(candidate.get("query_parameters", []), candidate.get("query_functions", [])),
                 )
+                query_candidates[source_id] = query_candidate
+                model_candidate = _model_candidate_with_format_errors_as_blank(
+                    query_candidate
+                )
                 initial_types = (
                     self._query_input_column_types(
                         source, candidate, candidate=raw
@@ -4958,7 +6351,7 @@ class StudioController(QObject):
                     initial_types=initial_types,
                 )
                 loaded_candidates[source_id], calculated_types = self._apply_calculated_columns(
-                    source_id, query_candidate, project=candidate,
+                    source_id, model_candidate, project=candidate,
                     column_types=type_map,
                 )
                 type_map.update(calculated_types)
@@ -5034,13 +6427,14 @@ class StudioController(QObject):
         self._clipboard_visual_config = None
         self._clipboard_format_config = None
         self._format_painter_active = False
-        self._field_query = ""
+        self.setFieldQuery("")
         self._current_region = None
         self._active_source_id = active_source_id
         self._active_source_path = active_source_path
         self._active_source_kind = active_source_kind
         self._active_parser_options = active_parser_options
         self._loaded_candidates = loaded_candidates
+        self._query_candidates = query_candidates
         self._raw_candidates = raw_candidates
         self._source_load_errors = load_errors
         if active_source_id in loaded_candidates:
@@ -5056,6 +6450,8 @@ class StudioController(QObject):
         self._refresh_report()
         self.stateChanged.emit()
         self._set_status(f"Opened {path.name}" + (" from recovery copy" if recovered else ""))
+        if active_source_id is not None:
+            self.activeSourceReady.emit()
 
         if recovered:
             QMessageBox.warning(
@@ -5113,7 +6509,9 @@ class StudioController(QObject):
                 None, "Folder unavailable", f"Choose an existing folder: {folder}"
             )
             return None
-        dialog = FolderImportDialog(folder, replacing=False)
+        dialog = FolderImportDialog(
+            folder, replacing=False, allow_transform=False
+        )
         if dialog.exec() != QDialog.DialogCode.Accepted or dialog.candidate is None:
             return None
         candidate = dialog.candidate
@@ -5152,7 +6550,9 @@ class StudioController(QObject):
 
         from analytics_studio.import_preview_dialog import FileImportPreviewDialog
 
-        dialog = FileImportPreviewDialog(path, replacing=False)
+        dialog = FileImportPreviewDialog(
+            path, replacing=False, allow_transform=False
+        )
         if dialog.exec() != QDialog.DialogCode.Accepted or dialog.candidate is None:
             return None
         candidate = dialog.candidate
@@ -5340,6 +6740,7 @@ class StudioController(QObject):
             replacing=False,
             initial_options=dict(source_record.get("parser_options", {})),
             source_editing=True,
+            allow_transform=False,
         )
         if dialog.exec() != QDialog.DialogCode.Accepted or dialog.candidate is None:
             return None
@@ -5360,7 +6761,7 @@ class StudioController(QObject):
         self,
     ) -> tuple[ImportCandidate, dict[str, Any]] | None:
         """Preview SQL Server data and keep its password session-local until Apply."""
-        dialog = SQLServerImportDialog()
+        dialog = SQLServerImportDialog(allow_transform=False)
         if dialog.exec() != QDialog.DialogCode.Accepted or dialog.candidate is None:
             return None
         candidate = dialog.candidate
@@ -5389,7 +6790,7 @@ class StudioController(QObject):
         self,
     ) -> tuple[ImportCandidate, dict[str, Any]] | None:
         """Preview an anonymous OData entity set for staged session import."""
-        dialog = ODataFeedImportDialog()
+        dialog = ODataFeedImportDialog(allow_transform=False)
         if dialog.exec() != QDialog.DialogCode.Accepted or dialog.candidate is None:
             return None
         candidate = dialog.candidate
@@ -5410,7 +6811,7 @@ class StudioController(QObject):
         self,
     ) -> tuple[ImportCandidate, dict[str, Any]] | None:
         """Preview an anonymous HTTPS source for staged session import."""
-        dialog = WebImportDialog()
+        dialog = WebImportDialog(allow_transform=False)
         if dialog.exec() != QDialog.DialogCode.Accepted or dialog.candidate is None:
             return None
         candidate = dialog.candidate
@@ -5457,6 +6858,20 @@ class StudioController(QObject):
         )
         if dialog.exec() != QDialog.DialogCode.Accepted or dialog.candidate is None:
             return False
+        if dialog.selected_action == "transform":
+            candidate = deepcopy(dialog.candidate)
+            source_record = {
+                "id": str(uuid4()),
+                "name": folder.name or str(folder),
+                "query_name": folder.name or "Folder data",
+                "kind": "folder",
+                "path": str(folder),
+                "parser_options": dict(candidate.options),
+                "transform_steps": [],
+            }
+            return self.transform_data_dialog(
+                pending_source=(candidate, source_record)
+            )
         return self._commit_import(folder, dialog.candidate)
 
     def import_csv_path(self, path: Path) -> bool:
@@ -5499,19 +6914,64 @@ class StudioController(QObject):
                 and self._resolved_source_path(source) == target
                 and isinstance(source.get("parser_options", {}).get("table_name"), str)
             }
+        elif source_kind == "excel" and initial_options is None:
+            existing_source_id = self._source_id_for_path(path, kind="excel")
+            existing_source = next(
+                (
+                    source
+                    for source in self._project.get("data_sources", [])
+                    if str(source.get("id", "")) == existing_source_id
+                ),
+                None,
+            )
+            if existing_source is not None:
+                initial_options = dict(existing_source.get("parser_options", {}))
 
         dialog = FileImportPreviewDialog(
             path,
             replacing=(
                 self._source_id_for_path(path) is not None
-                if source_kind != "sqlite"
+                if source_kind not in {"sqlite", "excel"}
                 else False
             ),
             initial_options=initial_options,
             existing_sqlite_tables=existing_sqlite_tables,
+            replacement_check=(
+                (
+                    lambda candidate: self._source_id_for_path(
+                        path,
+                        kind=candidate.kind,
+                        parser_options=candidate.options,
+                        header_row_used=candidate.header_row_used,
+                    ) is not None
+                )
+                if source_kind == "excel"
+                else None
+            ),
         )
         if dialog.exec() != QDialog.DialogCode.Accepted or dialog.candidate is None:
             return False
+        if dialog.selected_action == "transform":
+            candidate = deepcopy(dialog.candidate)
+            desired_name = (
+                str(candidate.options.get("table_name", "")).strip()
+                if candidate.kind == "sqlite"
+                else str(candidate.options.get("sheet_name", "")).strip()
+                if candidate.kind == "excel"
+                else path.stem
+            ) or path.stem or "New Source"
+            staged_source = {
+                "id": str(uuid4()),
+                "name": path.name,
+                "query_name": desired_name,
+                "kind": candidate.kind,
+                "path": str(path),
+                "parser_options": dict(candidate.options),
+                "transform_steps": [],
+            }
+            return self.transform_data_dialog(
+                pending_source=(candidate, staged_source)
+            )
         return self._commit_import(path, dialog.candidate)
 
     def _commit_import(self, path: Path, parsed: ImportCandidate) -> bool:
@@ -5521,6 +6981,7 @@ class StudioController(QObject):
             path,
             kind=parsed.kind,
             parser_options=parsed.options,
+            header_row_used=parsed.header_row_used,
         ) or str(uuid4())
         parsed.set_source_identity(source_id, preserve_origins=parsed.kind == "folder")
         existing_source = next(
@@ -5533,11 +6994,12 @@ class StudioController(QObject):
              if table.get("id") == source_id or table.get("source_id") == source_id),
             None,
         )
-        desired_table_name = (
-            str(parsed.options.get("table_name", "")).strip()
-            if parsed.kind == "sqlite"
-            else path.stem
-        )
+        if parsed.kind == "sqlite":
+            desired_table_name = str(parsed.options.get("table_name", "")).strip()
+        elif parsed.kind == "excel":
+            desired_table_name = str(parsed.options.get("sheet_name", "")).strip()
+        else:
+            desired_table_name = path.stem
         table_name = (
             str(existing_table.get("name"))
             if existing_table is not None
@@ -5596,8 +7058,11 @@ class StudioController(QObject):
             source_table = self._model_table_for_source(next_project, source_id)
             if source_table is not None:
                 source_table["column_types"] = base_types
+            query_candidate = source_candidate
             source_candidate, calculated_types = self._apply_calculated_columns(
-                source_id, source_candidate, project=next_project,
+                source_id,
+                _model_candidate_with_format_errors_as_blank(query_candidate),
+                project=next_project,
                 column_types=base_types,
             )
             if source_table is not None:
@@ -5605,8 +7070,10 @@ class StudioController(QObject):
                     **base_types, **calculated_types
                 }
             next_project = validate_project(next_project)
-            dependent_candidates, dependent_types = self._rebuild_query_dependents(
-                next_project, {source_id: source_candidate}
+            dependent_candidates, dependent_types, dependent_query_candidates = self._rebuild_query_dependents(
+                next_project,
+                {source_id: source_candidate},
+                base_query_candidates={source_id: query_candidate},
             )
             for dependent_id, type_map in dependent_types.items():
                 dependent_table = next(
@@ -5618,6 +7085,11 @@ class StudioController(QObject):
                 if dependent_table is not None:
                     dependent_table["column_types"] = type_map
             next_project = validate_project(next_project)
+            relationship_candidates = {source_id: source_candidate}
+            relationship_candidates.update(dependent_candidates)
+            self._validate_loaded_relationship_candidates(
+                next_project, relationship_candidates
+            )
         except (ProjectFileError, QueryError, OSError, TypeError, ValueError) as exc:
             QMessageBox.critical(None, "Could not import data", str(exc))
             return False
@@ -5632,17 +7104,21 @@ class StudioController(QObject):
         self._source_load_errors.pop(source_id, None)
         self._source_load_errors.pop("__active_selection__", None)
         self._loaded_candidates.update(dependent_candidates)
+        self._query_candidates[source_id] = query_candidate
+        self._query_candidates.update(dependent_query_candidates)
         self._raw_candidates[source_id] = parsed
         for updated_id in dependent_candidates:
             self._source_load_errors.pop(updated_id, None)
         self._source_warning = self._compose_source_warning()
         self._current_region = None
         self._install_source(path, source_id, source_candidate)
+        self.setFieldQuery("")
         self._dirty = True
         self._refresh_model_view()
         self._refresh_report()
         self.stateChanged.emit()
         self._set_status(f"Loaded {path.name} · {parsed.row_count:,} rows")
+        self.activeSourceReady.emit()
         try:
             self._recent_source_store.add(
                 path, parsed.kind, parsed.options, display_name=path.name
@@ -5720,11 +7196,13 @@ class StudioController(QObject):
         self._source_warning = self._compose_source_warning()
         self._current_region = None
         self._install_source(None, source_id, parsed)
+        self.setFieldQuery("")
         self._dirty = True
         self._refresh_model_view()
         self._refresh_report()
         self.stateChanged.emit()
         self._set_status(f"Loaded {table_name} · {len(self._rows):,} rows")
+        self.activeSourceReady.emit()
         return True
 
     def append_queries_dialog(self) -> bool:
@@ -5869,8 +7347,10 @@ class StudioController(QObject):
             self._set_status(f"Could not create {label}: {exc}")
             return False
 
+        model_candidate = _model_candidate_with_format_errors_as_blank(transformed)
         self._project = next_project
-        self._loaded_candidates[source_id] = transformed
+        self._loaded_candidates[source_id] = model_candidate
+        self._query_candidates[source_id] = transformed
         self._raw_candidates[source_id] = candidate
         self._active_source_id = source_id
         self._active_source_path = None
@@ -5880,7 +7360,7 @@ class StudioController(QObject):
         self._source_load_errors.pop("__active_selection__", None)
         self._source_warning = self._compose_source_warning()
         self._current_region = None
-        self._install_source(None, source_id, transformed)
+        self._install_source(None, source_id, model_candidate)
         self._dirty = True
         self._refresh_model_view()
         self._refresh_report()
@@ -5888,8 +7368,148 @@ class StudioController(QObject):
         self._set_status(f"Created {table_name} · {len(transformed.rows):,} rows")
         return True
 
-    def transform_data_dialog(self, *, open_advanced_editor: bool = False) -> bool:
+    def _transform_pending_import_without_active_source(
+        self,
+        pending_source: tuple[ImportCandidate, dict[str, Any]],
+        *,
+        open_advanced_editor: bool = False,
+    ) -> bool:
+        """Open Power Query for a staged first import without loading it first."""
+        candidate, supplied_record = pending_source
+        if not isinstance(candidate, ImportCandidate) or not isinstance(supplied_record, dict):
+            self._set_status("The staged source preview is invalid.")
+            return False
+        source_record = deepcopy(supplied_record)
+        source_id = str(source_record.get("id", "")).strip()
+        source_kind = str(source_record.get("kind", ""))
+        source_path = str(source_record.get("path", "")).strip()
+        local_source_kinds = {"csv", "excel", "json", "xml", "parquet", "sqlite", "folder"}
+        remote_source_kinds = {"sql_server", "odata", "web"}
+        connection = source_record.get("connection")
+        required_connection_key = {
+            "sql_server": "credential_ref",
+            "odata": "service_root",
+            "web": "url",
+        }.get(source_kind)
+        if (
+            not source_id
+            or source_kind != candidate.kind
+            or not isinstance(source_record.get("parser_options"), dict)
+            or dict(source_record["parser_options"]) != dict(candidate.options)
+            or (
+                source_kind in local_source_kinds
+                and not source_path
+            )
+            or (
+                source_kind not in local_source_kinds | remote_source_kinds
+            )
+            or (
+                source_kind in remote_source_kinds
+                and (
+                    not isinstance(connection, dict)
+                    or not str(connection.get(required_connection_key, "")).strip()
+                )
+            )
+            or (
+                source_kind == "sql_server"
+                and not str(source_record.get("_staged_password", ""))
+            )
+        ):
+            self._set_status("The staged source details do not match its preview.")
+            return False
+
+        candidate = deepcopy(candidate)
+        candidate.set_source_identity(
+            source_id, preserve_origins=source_kind == "folder"
+        )
+        used_names = {
+            str(table.get("name", "")).strip().casefold()
+            for table in self._project.get("model", {}).get("tables", [])
+            if str(table.get("name", "")).strip()
+        }
+        used_names.update(
+            str(item.get("query_name", item.get("name", ""))).strip().casefold()
+            for item in self._project.get("data_sources", [])
+            if str(item.get("query_name", item.get("name", ""))).strip()
+        )
+        base_name = str(
+            source_record.get("query_name") or source_record.get("name") or "New Source"
+        ).strip() or "New Source"
+        query_name = base_name
+        suffix = 2
+        while query_name.casefold() in used_names:
+            suffix_text = f" ({suffix})"
+            query_name = f"{base_name[:120 - len(suffix_text)].rstrip()}{suffix_text}"
+            suffix += 1
+        source_record.update({
+            "id": source_id,
+            "query_name": query_name,
+            "parser_options": dict(candidate.options),
+            "transform_steps": [],
+        })
+        if source_path:
+            source_record["path"] = str(Path(source_path).expanduser().resolve())
+        source_types = infer_column_types(candidate.headers, candidate.rows)
+        staged_query = {
+            "id": source_id,
+            "name": query_name,
+            "display_name": query_name,
+            "candidate": candidate,
+            "source_candidate": candidate,
+            "source_column_types": source_types,
+            "column_types": dict(source_types),
+            "steps": [],
+            "is_new_query": True,
+            "is_new_source": True,
+            "source_record": source_record,
+        }
+        try:
+            dialog = TransformDataDialog(
+                candidate,
+                [],
+                query_name=query_name,
+                queries=[staged_query],
+                active_query_id=source_id,
+                reserved_query_names=used_names,
+                query_parameters=self._project.get("query_parameters", []),
+                query_functions=self._project.get("query_functions", []),
+                new_source_candidate=self._new_power_query_source_candidate,
+                edit_source_candidate=self._edit_power_query_source_candidate,
+                new_folder_source_candidate=self._new_power_query_folder_candidate,
+                new_sql_server_source_candidate=self._new_power_query_sql_server_candidate,
+                new_odata_source_candidate=self._new_power_query_odata_candidate,
+                new_web_source_candidate=self._new_power_query_web_candidate,
+                refresh_candidate=self._refresh_transform_query_preview,
+            )
+        except (OSError, QueryError, ValueError, TypeError) as exc:
+            self._set_status(f"Could not open Transform data: {exc}")
+            QMessageBox.critical(None, "Could not transform data", str(exc))
+            return False
+        if open_advanced_editor:
+            QTimer.singleShot(0, dialog._open_advanced_editor)
+        if dialog.exec() != QDialog.DialogCode.Accepted:
+            return False
+        accepted_queries = dialog.accepted_queries
+        if accepted_queries is None:
+            return False
+        return self._commit_transform_session(
+            accepted_queries,
+            query_parameters=dialog.accepted_parameters,
+            query_functions=dialog.accepted_functions,
+        )
+
+    def transform_data_dialog(
+        self,
+        *,
+        open_advanced_editor: bool = False,
+        pending_source: tuple[ImportCandidate, dict[str, Any]] | None = None,
+    ) -> bool:
         if not self.sourceLoaded or self._active_source_id is None:
+            if pending_source is not None:
+                return self._transform_pending_import_without_active_source(
+                    pending_source,
+                    open_advanced_editor=open_advanced_editor,
+                )
             self._set_status("Load a table before transforming data.")
             return False
         source = next(
@@ -6120,6 +7740,14 @@ class StudioController(QObject):
                 new_web_source_candidate=self._new_power_query_web_candidate,
                 refresh_candidate=self._refresh_transform_query_preview,
             )
+            if pending_source is not None:
+                query_ids_before = set(dialog._query_states)
+                dialog._stage_new_source(lambda: pending_source)
+                if len(dialog._query_states) == len(query_ids_before):
+                    raise ValueError(
+                        dialog.error_label.text()
+                        or "The imported source could not be staged in Power Query."
+                    )
         except (OSError, QueryError, ValueError) as exc:
             self._set_status(f"Could not open Transform data: {exc}")
             QMessageBox.critical(None, "Could not transform data", str(exc))
@@ -6133,7 +7761,9 @@ class StudioController(QObject):
         accepted_functions = dialog.accepted_functions
         deleted_query_ids = dialog.deleted_query_ids
         if accepted_queries is not None and (
-            str(source["id"]) in accepted_queries or deleted_query_ids
+            str(source["id"]) in accepted_queries
+            or deleted_query_ids
+            or pending_source is not None
         ):
             return self._commit_transform_session(
                 accepted_queries,
@@ -6351,6 +7981,11 @@ class StudioController(QObject):
         if measure is None:
             self._set_status(f"Measure {measure_name!r} no longer exists.")
             return False
+        home_table_id = str(measure.get("home_table_id", "")) or None
+        home_table = next((
+            item for item in self._table_catalog
+            if str(item.get("id", "")) == str(home_table_id or "")
+        ), None)
         dialog = MeasureDialog(
             list(self._headers),
             [str(item["name"]) for item in measures],
@@ -6360,7 +7995,16 @@ class StudioController(QObject):
                 if str(item["name"]).casefold() != measure_name.casefold()
             ],
             preview_callback=lambda name, expression: self._preview_measure_expression(
-                name, expression, editing_name=measure_name
+                name, expression, editing_name=measure_name,
+                home_table_id=home_table_id,
+            ),
+            home_table_id=home_table_id,
+            home_table_name=(
+                str(home_table.get("name", "")) if home_table else ""
+            ),
+            home_table_display_name=(
+                str(home_table.get("displayName") or home_table.get("name"))
+                if home_table else home_table_id
             ),
             initial_measure={
                 "name": str(measure["name"]),
@@ -6368,6 +8012,7 @@ class StudioController(QObject):
                 "description": str(measure.get("description", "")),
                 "display_folder": str(measure.get("display_folder", "")),
                 "is_hidden": bool(measure.get("is_hidden", False)),
+                "home_table_id": home_table_id,
             },
         )
         if dialog.exec() != QDialog.DialogCode.Accepted or dialog.measure is None:
@@ -6379,6 +8024,7 @@ class StudioController(QObject):
             description=dialog.measure.get("description", ""),
             display_folder=dialog.measure.get("display_folder", ""),
             is_hidden=dialog.measure.get("is_hidden", False),
+            home_table_id=dialog.measure.get("home_table_id"),
         )
 
     @Slot(str, result=bool)
@@ -6462,7 +8108,9 @@ class StudioController(QObject):
                 output_headers=query_candidate.headers,
             )
             calculated_candidate, calculated_types = self._apply_calculated_columns(
-                source_id, query_candidate, project=next_project,
+                source_id,
+                _model_candidate_with_format_errors_as_blank(query_candidate),
+                project=next_project,
                 column_types=base_types,
             )
             next_table["column_types"] = {**base_types, **calculated_types}
@@ -6476,6 +8124,7 @@ class StudioController(QObject):
 
         self._project = next_project
         self._loaded_candidates[source_id] = calculated_candidate
+        self._query_candidates[source_id] = query_candidate
         if source_id == self._active_source_id:
             self._install_source(self._active_source_path, source_id, calculated_candidate)
         self._dirty = True
@@ -6490,21 +8139,70 @@ class StudioController(QObject):
         if not self.sourceLoaded:
             self._set_status("Import a table before creating a measure.")
             return False
+        quick_table_name = ""
+        quick_table_display_name = ""
+        if quick:
+            active_source_id = self._active_source_id
+            active_table_matches = [
+                table for table in self._table_catalog
+                if active_source_id is not None
+                and table.get("sourceId") == active_source_id
+            ]
+            active_table = (
+                active_table_matches[0]
+                if len(active_table_matches) == 1 else None
+            )
+            semantic_name = str(active_table.get("name", "")) if active_table else ""
+            if (
+                active_table is None
+                or not active_table.get("loaded")
+                or not active_table.get("loadEnabled")
+                or not semantic_name.strip()
+            ):
+                self._set_status(
+                    "Select an active, loaded model table before creating a quick measure."
+                )
+                return False
+            quick_table_name = semantic_name
+            quick_table_display_name = str(
+                active_table.get("displayName") or semantic_name
+            )
         measures = self._project.get("model", {}).get("measures", [])
-        dialog = MeasureDialog(
-            list(self._headers),
-            [str(item["name"]) for item in measures],
-            quick=quick,
-            default_column=(
+        home_table_id = self._active_model_table_id()
+        home_table = next((
+            item for item in self._table_catalog
+            if str(item.get("id", "")) == str(home_table_id or "")
+        ), None)
+        dialog_kwargs: dict[str, Any] = {
+            "quick": quick,
+            "home_table_id": home_table_id,
+            "home_table_name": (
+                str(home_table.get("name", "")) if home_table else ""
+            ),
+            "home_table_display_name": (
+                str(home_table.get("displayName") or home_table.get("name"))
+                if home_table else ""
+            ),
+            "default_column": (
                 _report_field(self._headers, "revenue")
                 or next((
                     header for header in self._headers
                     if any(_report_number(row.get(header, "")) is not None for row in self._rows)
                 ), None)
             ),
-            field_references=self._dax_field_references(),
-            measure_references=[str(item["name"]) for item in measures],
-            preview_callback=self._preview_measure_expression,
+            "field_references": self._dax_field_references(),
+            "measure_references": [str(item["name"]) for item in measures],
+            "preview_callback": lambda name, expression: self._preview_measure_expression(
+                name, expression, home_table_id=home_table_id
+            ),
+        }
+        if quick:
+            dialog_kwargs["quick_table_name"] = quick_table_name
+            dialog_kwargs["quick_table_display_name"] = quick_table_display_name
+        dialog = MeasureDialog(
+            list(self._headers),
+            [str(item["name"]) for item in measures],
+            **dialog_kwargs,
         )
         if dialog.exec() != QDialog.DialogCode.Accepted or dialog.measure is None:
             return False
@@ -6514,6 +8212,7 @@ class StudioController(QObject):
             description=dialog.measure.get("description", ""),
             display_folder=dialog.measure.get("display_folder", ""),
             is_hidden=dialog.measure.get("is_hidden", False),
+            home_table_id=dialog.measure.get("home_table_id"),
         )
 
     def _dax_field_references(self) -> list[tuple[str, str]]:
@@ -6545,9 +8244,12 @@ class StudioController(QObject):
         expression: str,
         *,
         editing_name: str | None = None,
+        home_table_id: str | None = None,
     ) -> str:
         """Validate and evaluate a draft measure without changing project state."""
-        measure = normalize_measure(name, expression)
+        measure = normalize_measure(
+            name, expression, home_table_id=home_table_id
+        )
         current = list(self._project.get("model", {}).get("measures", []))
         if editing_name is None:
             if any(
@@ -6612,6 +8314,7 @@ class StudioController(QObject):
         description: str = "",
         display_folder: str = "",
         is_hidden: bool = False,
+        home_table_id: str | None = None,
     ) -> bool:
         """Validate, evaluate, then transactionally add a local DAX measure."""
         if not self.sourceLoaded:
@@ -6621,6 +8324,10 @@ class StudioController(QObject):
             measure = normalize_measure(
                 name, expression, description=description,
                 display_folder=display_folder, is_hidden=is_hidden,
+                home_table_id=(
+                    self._active_model_table_id()
+                    if home_table_id is None else home_table_id
+                ),
             )
             current = list(self._project.get("model", {}).get("measures", []))
             if any(item["name"].casefold() == measure["name"].casefold() for item in current):
@@ -6666,6 +8373,7 @@ class StudioController(QObject):
         description: str | None = None,
         display_folder: str | None = None,
         is_hidden: bool | None = None,
+        home_table_id: str | None = None,
     ) -> bool:
         """Validate and transactionally replace one saved local DAX measure."""
         if not self.sourceLoaded:
@@ -6693,6 +8401,10 @@ class StudioController(QObject):
                 is_hidden=(
                     current[index].get("is_hidden", False)
                     if is_hidden is None else is_hidden
+                ),
+                home_table_id=(
+                    current[index].get("home_table_id")
+                    if home_table_id is None else home_table_id
                 ),
             )
             if any(
@@ -6826,6 +8538,418 @@ class StudioController(QObject):
             table for table in project.get("model", {}).get("tables", [])
             if table.get("id") == source_id or table.get("source_id") == source_id
         ), None)
+
+    def _loaded_numeric_model_column(
+        self, model_table_id: str, column: str
+    ) -> dict[str, Any] | None:
+        """Return the model record only when this is its loaded numeric source field."""
+        model_table = next((
+            table for table in self._project.get("model", {}).get("tables", [])
+            if table.get("id") == model_table_id
+        ), None)
+        catalog_table = next((
+            table for table in self._table_catalog
+            if table.get("id") == model_table_id
+        ), None)
+        if model_table is None or catalog_table is None or not catalog_table.get("loaded"):
+            return None
+        source_id = str(model_table.get("source_id") or model_table.get("id") or "")
+        candidate = self._loaded_candidates.get(source_id)
+        if (
+            candidate is None
+            or column not in candidate.headers
+            or column not in model_table.get("column_types", {})
+            or model_table.get("column_types", {}).get(column)
+            not in _NUMERIC_MODEL_COLUMN_TYPES
+            or any(
+                str(item.get("name", "")) == column
+                for item in model_table.get("calculated_columns", [])
+            )
+        ):
+            return None
+        return model_table
+
+    def _model_column_sort_table_context(
+        self, model_table_id: str
+    ) -> tuple[dict[str, Any] | None, ImportCandidate | None, str]:
+        """Resolve a model catalog ID to its current, report-loaded source data."""
+        table = next((
+            item for item in self._project.get("model", {}).get("tables", [])
+            if item.get("id") == model_table_id
+        ), None)
+        if table is None:
+            return None, None, "The model table is unavailable."
+        source_id = str(table.get("source_id") or table.get("id") or "")
+        source = next((
+            item for item in self._project.get("data_sources", [])
+            if str(item.get("id", "")) == source_id
+        ), None)
+        if source is not None and not self._source_load_enabled(source):
+            return table, None, "The source table is not enabled for report loading."
+        candidate = self._loaded_candidates.get(source_id)
+        if candidate is None:
+            return table, None, "The source table is not currently loaded."
+        return table, candidate, ""
+
+    def _validate_model_column_sort_rule(
+        self,
+        model_table_id: str,
+        category_column: str,
+        sort_column: str,
+    ) -> tuple[dict[tuple[Any, ...], tuple[str, tuple[Any, ...]]] | None, str]:
+        """Validate a complete source column pair and return category order keys."""
+        if not category_column or not sort_column:
+            return None, "Choose both a category column and a sort column."
+        if category_column == sort_column:
+            return None, "A column cannot sort itself."
+        table, candidate, unavailable_reason = self._model_column_sort_table_context(
+            model_table_id
+        )
+        if table is None or candidate is None:
+            return None, unavailable_reason
+        calculated = {
+            str(item.get("name", ""))
+            for item in table.get("calculated_columns", [])
+            if isinstance(item, dict)
+        }
+        types = table.get("column_types", {})
+        for column in (category_column, sort_column):
+            if column in calculated:
+                return None, f"{column!r} is a calculated column; choose a source column."
+            if column not in candidate.headers or column not in types:
+                return None, f"{column!r} is missing from the loaded source table."
+
+        def values_and_keys(column: str) -> tuple[list[tuple[Any, tuple[Any, ...], tuple[str, tuple[Any, ...]]]], str]:
+            declared_type = str(types[column])
+            values: list[tuple[Any, tuple[Any, ...], tuple[str, tuple[Any, ...]]]] = []
+            families: set[str] = set()
+            for row_index, row in enumerate(candidate.rows, start=1):
+                value = row.get(column)
+                if value is None or value == "":
+                    return [], f"{column!r} contains a blank value at row {row_index}."
+                if is_cell_error(value):
+                    return [], f"{column!r} contains a cell error at row {row_index}."
+                if not is_supported_cell_value(value):
+                    return [], f"{column!r} contains an unsupported value at row {row_index}."
+                try:
+                    order_key = _model_sort_value_key(value, declared_type)
+                except (OverflowError, TypeError, ValueError, DecimalException) as exc:
+                    return [], f"{column!r} {exc}."
+                families.add(order_key[0])
+                values.append((value, cell_key(value), order_key))
+            if not values:
+                return [], f"{column!r} has no nonblank values."
+            if declared_type == "any" and len(families) != 1:
+                return [], f"{column!r} has heterogeneous values in an any-typed column."
+            if len(families) != 1:
+                return [], f"{column!r} contains mixed or unsupported temporal values."
+            return values, ""
+
+        category_values, reason = values_and_keys(category_column)
+        if reason:
+            return None, reason
+        sort_values, reason = values_and_keys(sort_column)
+        if reason:
+            return None, reason
+        if len(category_values) != len(sort_values):
+            return None, "The loaded source rows do not align for the selected columns."
+
+        category_to_sort: dict[tuple[Any, ...], tuple[str, tuple[Any, ...]]] = {}
+        typed_category_to_sort: dict[
+            tuple[str, tuple[Any, ...]], tuple[str, tuple[Any, ...]]
+        ] = {}
+        typed_sort_to_category: dict[
+            tuple[str, tuple[Any, ...]], tuple[str, tuple[Any, ...]]
+        ] = {}
+        for (_category_value, category_key, category_order), (
+            _sort_value, _sort_key, sort_order,
+        ) in zip(category_values, sort_values):
+            previous_sort = typed_category_to_sort.get(category_order)
+            if previous_sort is not None and previous_sort != sort_order:
+                return None, f"{category_column!r} maps to more than one {sort_column!r} value."
+            previous_category = typed_sort_to_category.get(sort_order)
+            if previous_category is not None and previous_category != category_order:
+                return None, f"{sort_column!r} maps to more than one {category_column!r} value."
+            typed_category_to_sort[category_order] = sort_order
+            typed_sort_to_category[sort_order] = category_order
+            category_to_sort[category_key] = sort_order
+        return category_to_sort, ""
+
+    @Slot(str, str, str, result=bool)
+    def set_model_column_sort_by(
+        self, model_table_id: str, category_column: str, sort_column: str
+    ) -> bool:
+        """Persist a valid one-to-one Sort by Column rule transactionally."""
+        category_column, sort_column = str(category_column), str(sort_column)
+        if sort_column == "":
+            return self.clear_model_column_sort_by(model_table_id, category_column)
+        sort_order, reason = self._validate_model_column_sort_rule(
+            model_table_id, category_column, sort_column
+        )
+        table = next((
+            item for item in self._project.get("model", {}).get("tables", [])
+            if item.get("id") == model_table_id
+        ), None)
+        if sort_order is None or table is None:
+            if table is not None and category_column not in table.get("column_sort_by", {}):
+                self._column_sort_attempt_statuses[(model_table_id, category_column)] = {
+                    "active": False, "reason": reason or "The sort rule is invalid.",
+                }
+                self._refresh_model_view()
+                self.stateChanged.emit()
+            self._set_status(f"Could not set Sort by Column: {reason}")
+            return False
+        current = table.get("column_sort_by", {}).get(category_column)
+        if current == sort_column:
+            self._column_sort_attempt_statuses.pop((model_table_id, category_column), None)
+            self._refresh_model_view()
+            return True
+        try:
+            next_project = deepcopy(self._project)
+            next_table = next(
+                item for item in next_project.get("model", {}).get("tables", [])
+                if item.get("id") == model_table_id
+            )
+            next_table.setdefault("column_sort_by", {})[category_column] = sort_column
+            next_project = validate_project(next_project)
+        except (ProjectFileError, StopIteration, TypeError, ValueError) as exc:
+            self._set_status(f"Could not set Sort by Column: {exc}")
+            return False
+        self._project = next_project
+        self._column_sort_attempt_statuses.pop((model_table_id, category_column), None)
+        self._dirty = True
+        self._refresh_model_view()
+        self._refresh_report()
+        self.stateChanged.emit()
+        self._set_status(f"Set {category_column!r} to sort by {sort_column!r}.")
+        return True
+
+    @Slot(str, str, result=bool)
+    def clear_model_column_sort_by(self, model_table_id: str, category_column: str) -> bool:
+        """Clear one saved mapping even when its source field is dormant or missing."""
+        table = next((
+            item for item in self._project.get("model", {}).get("tables", [])
+            if item.get("id") == model_table_id
+        ), None)
+        if table is None:
+            self._set_status("The model table is unavailable.")
+            return False
+        current = table.get("column_sort_by", {})
+        has_rule = category_column in current
+        had_attempt = (model_table_id, category_column) in self._column_sort_attempt_statuses
+        if not has_rule and not had_attempt:
+            return False
+        next_project = deepcopy(self._project)
+        next_table = next(
+            item for item in next_project.get("model", {}).get("tables", [])
+            if item.get("id") == model_table_id
+        )
+        next_table.setdefault("column_sort_by", {}).pop(category_column, None)
+        self._project = validate_project(next_project)
+        self._column_sort_attempt_statuses.pop((model_table_id, category_column), None)
+        self._dirty = self._dirty or has_rule
+        self._refresh_model_view()
+        self._refresh_report()
+        self.stateChanged.emit()
+        if has_rule:
+            self._set_status(f"Cleared Sort by Column for {category_column!r}.")
+        return True
+
+    @Slot(str, str, result=bool)
+    def edit_model_column_group_by(self, model_table_id: str, column: str) -> bool:
+        """Edit the same-table GroupByColumns metadata for one loaded column."""
+        model_table = next((
+            item for item in self._project.get("model", {}).get("tables", [])
+            if str(item.get("id") or item.get("source_id") or "") == model_table_id
+        ), None)
+        if model_table is None:
+            self._set_status("The model table is unavailable.")
+            return False
+        source_id = str(model_table.get("source_id") or model_table.get("id") or "")
+        candidate = self._loaded_candidates.get(source_id)
+        if candidate is None or column not in candidate.headers:
+            self._set_status("Group by columns requires a loaded source column.")
+            return False
+
+        current = list(model_table.get("group_by_columns", {}).get(column, []))
+        dialog_headers = list(dict.fromkeys([
+            *(str(header) for header in candidate.headers),
+            *current,
+        ]))
+        dialog = GroupByColumnsDialog(
+            str(model_table.get("name") or source_id),
+            column,
+            dialog_headers,
+            current,
+            available_headers=[str(header) for header in candidate.headers],
+        )
+        if dialog.exec() != QDialog.DialogCode.Accepted:
+            return False
+        selected = dialog.selected_columns
+        if selected == current:
+            self._set_status("No Group by columns changes to save.")
+            return True
+
+        try:
+            next_project = deepcopy(self._project)
+            next_table = next(
+                item for item in next_project.get("model", {}).get("tables", [])
+                if str(item.get("id") or item.get("source_id") or "") == model_table_id
+            )
+            group_by = next_table.setdefault("group_by_columns", {})
+            if selected:
+                group_by[column] = selected
+            else:
+                group_by.pop(column, None)
+            next_project = validate_project(next_project)
+        except (ProjectFileError, StopIteration, TypeError, ValueError) as exc:
+            self._set_status(f"Could not update Group by columns: {exc}")
+            return False
+
+        self._project = next_project
+        self._dirty = True
+        self._refresh_model_view()
+        self.stateChanged.emit()
+        self._set_status(f"Updated Group by columns for {column!r}.")
+        return True
+
+    @Slot(str, str, result=bool)
+    def set_model_key_column(self, model_table_id: str, column: str) -> bool:
+        """Set or clear one unique loaded source column as this table's key."""
+        column = str(column)
+        model_table = next((
+            item for item in self._project.get("model", {}).get("tables", [])
+            if str(item.get("id") or item.get("source_id") or "") == model_table_id
+        ), None)
+        if model_table is None:
+            self._set_status("The model table is unavailable.")
+            return False
+        source_id = str(model_table.get("source_id") or model_table.get("id") or "")
+        current = str(model_table.get("key_column") or "")
+        if current == column:
+            return True
+        if column:
+            candidate = self._loaded_candidates.get(source_id)
+            if candidate is None or column not in candidate.headers:
+                self._set_status("Key column requires a loaded source column.")
+                return False
+            column_types = model_table.get("column_types", {})
+            column_type = (
+                str(column_types.get(column, "text"))
+                if isinstance(column_types, dict)
+                else "text"
+            )
+            seen_values: set[tuple[str, Any]] = set()
+            try:
+                for row in candidate.rows:
+                    if not isinstance(row, dict):
+                        self._set_status("Could not validate key values in the loaded table.")
+                        return False
+                    value_key = _relationship_value_key(row.get(column), column_type)
+                    if value_key in seen_values:
+                        self._set_status(
+                            f"{column!r} cannot be the key column because its values are not unique."
+                        )
+                        return False
+                    seen_values.add(value_key)
+            except RelationshipError as exc:
+                self._set_status(f"Could not validate key column {column!r}: {exc}")
+                return False
+
+        try:
+            next_project = deepcopy(self._project)
+            next_table = next(
+                item for item in next_project.get("model", {}).get("tables", [])
+                if str(item.get("id") or item.get("source_id") or "") == model_table_id
+            )
+            next_table["key_column"] = column or None
+            next_project = validate_project(next_project)
+        except (ProjectFileError, StopIteration, TypeError, ValueError) as exc:
+            self._set_status(f"Could not update key column: {exc}")
+            return False
+
+        self._project = next_project
+        self._dirty = True
+        self._refresh_model_view()
+        self.stateChanged.emit()
+        self._set_status(
+            f"Set {column!r} as the key column." if column else "Cleared the table key column."
+        )
+        return True
+
+    def _active_model_column_sort_order(
+        self,
+        model_table_id: str,
+        category_column: str,
+        row_context_table_id: str,
+        category_values: dict[tuple[Any, ...], Any] | None = None,
+    ) -> dict[tuple[Any, ...], tuple[str, tuple[Any, ...]]] | None:
+        """Return an active order only for the field's own row context."""
+        if not model_table_id or model_table_id != row_context_table_id:
+            return None
+        order = self._column_sort_orders.get((model_table_id, category_column))
+        if order is None:
+            return None
+        if category_values is not None and any(key not in order for key in category_values):
+            return None
+        return order
+
+    @staticmethod
+    def _ordered_category_keys(
+        keys: set[tuple[Any, ...]] | list[tuple[Any, ...]],
+        model_order: dict[tuple[Any, ...], tuple[str, tuple[Any, ...]]] | None,
+        fallback_key: Any,
+    ) -> list[tuple[Any, ...]]:
+        if model_order is None:
+            return sorted(keys, key=fallback_key)
+        return sorted(keys, key=lambda key: (model_order[key], repr(key)))
+
+    @Slot(str, str, str, result=bool)
+    def set_column_default_summarization(
+        self, model_table_id: str, column: str, summarization: str
+    ) -> bool:
+        if (
+            not isinstance(summarization, str)
+            or summarization not in _MODEL_COLUMN_SUMMARIZATIONS
+        ):
+            self._set_status("Choose Auto, Sum, Average, or Count.")
+            return False
+        table = self._loaded_numeric_model_column(model_table_id, column)
+        if table is None:
+            self._set_status(
+                "Default summarization requires a loaded numeric source column in the selected model table."
+            )
+            return False
+        current = table.get("column_summarizations", {}).get(column)
+        if current == summarization:
+            return True
+        try:
+            next_project = deepcopy(self._project)
+            next_table = next(
+                item for item in next_project.get("model", {}).get("tables", [])
+                if item.get("id") == model_table_id
+            )
+            next_table.setdefault("column_summarizations", {})[column] = summarization
+            next_project = validate_project(next_project)
+        except (ProjectFileError, StopIteration, TypeError, ValueError) as exc:
+            self._set_status(f"Could not update default summarization: {exc}")
+            return False
+
+        self._project = next_project
+        self._dirty = True
+        self._refresh_model_view()
+        self.stateChanged.emit()
+        self._set_status(f"Set {column!r} default summarization to {summarization.title()}.")
+        return True
+
+    def _model_column_default_summarization(
+        self, model_table_id: str, column: str
+    ) -> str | None:
+        table = self._loaded_numeric_model_column(model_table_id, column)
+        if table is None:
+            return None
+        value = table.get("column_summarizations", {}).get(column)
+        return value if value in _MODEL_COLUMN_SUMMARIZATIONS else None
 
     @classmethod
     def _query_input_column_types(
@@ -7092,7 +9216,7 @@ class StudioController(QObject):
                 well_order = ("Details", "Legend", "X-axis")
             elif source_visual.get("type") == "kpi":
                 well_order = ("Trend axis",)
-            elif source_visual.get("type") == "map":
+            elif source_visual.get("type") in {"map", "filledMap", "shapeMap"}:
                 well_order = ("Location",)
             else:
                 well_order = ("Rows", "Fields", "Field", "X-axis", "Category")
@@ -7390,6 +9514,16 @@ class StudioController(QObject):
         )
         return result
 
+    def _query_input_candidates(
+        self,
+        overrides: dict[str, ImportCandidate] | None = None,
+    ) -> dict[str, ImportCandidate]:
+        """Return error-bearing query outputs with the model cache as fallback."""
+        candidates = dict(self._loaded_candidates)
+        candidates.update(self._query_candidates)
+        candidates.update(overrides or {})
+        return candidates
+
     def _raw_candidate_for_source(self, source: dict[str, Any]) -> ImportCandidate:
         source_id = str(source.get("id", ""))
         if source.get("kind") == "inline":
@@ -7401,7 +9535,7 @@ class StudioController(QObject):
             candidate = ImportCandidate("inline", headers, rows, {"name": source["name"]}, [])
         elif source.get("kind") == "query":
             return self._query_candidate(
-                source, self._loaded_candidates, project=self._project
+                source, self._query_input_candidates(), project=self._project
             )
         elif source.get("kind") == "sql_server":
             candidate = self._sql_server_candidate_for_source(source)
@@ -8000,22 +10134,30 @@ class StudioController(QObject):
         self,
         project: dict[str, Any],
         base_candidates: dict[str, ImportCandidate],
-    ) -> tuple[dict[str, ImportCandidate], dict[str, dict[str, str]]]:
+        *,
+        base_query_candidates: dict[str, ImportCandidate] | None = None,
+    ) -> tuple[
+        dict[str, ImportCandidate],
+        dict[str, dict[str, str]],
+        dict[str, ImportCandidate],
+    ]:
         """Re-evaluate included queries downstream of changed candidates."""
-        candidates = dict(self._loaded_candidates)
-        candidates.update(base_candidates)
+        query_updates = dict(base_query_candidates or {})
+        candidates = self._query_input_candidates(query_updates)
         updates = dict(base_candidates)
+        changed_ids = set(base_candidates) | set(query_updates)
         type_maps: dict[str, dict[str, str]] = {}
         for source in self._source_dependency_order(project.get("data_sources", [])):
             if source.get("kind") != "query":
                 continue
             source_id = str(source["id"])
             dependencies = source["query_definition"]["source_ids"]
-            if source_id in updates or not any(item in updates for item in dependencies):
+            if source_id in changed_ids or not any(item in changed_ids for item in dependencies):
                 continue
             if not self._source_refresh_included(source):
-                previous = candidates.get(source_id)
-                if previous is None:
+                previous_query = candidates.get(source_id)
+                previous_model = self._loaded_candidates.get(source_id)
+                if previous_query is None or previous_model is None:
                     raise QueryError(
                         f"Cannot refresh dependent query {source.get('name', source_id)!r}: "
                         "it is excluded from report refresh and has no cached result. "
@@ -8023,7 +10165,10 @@ class StudioController(QObject):
                     )
                 # Preserve this query's last evaluated data, then let included
                 # downstream queries continue from that saved in-memory result.
-                updates[source_id] = previous
+                query_updates[source_id] = previous_query
+                candidates[source_id] = previous_query
+                updates[source_id] = previous_model
+                changed_ids.add(source_id)
                 continue
             if not all(item in candidates for item in dependencies):
                 continue
@@ -8044,14 +10189,18 @@ class StudioController(QObject):
                 ),
             )
             transformed, calculated_types = self._apply_calculated_columns(
-                source_id, query_candidate, project=project,
+                source_id,
+                _model_candidate_with_format_errors_as_blank(query_candidate),
+                project=project,
                 column_types=type_map,
             )
-            candidates[source_id] = transformed
+            candidates[source_id] = query_candidate
+            query_updates[source_id] = query_candidate
             updates[source_id] = transformed
             type_maps[source_id] = type_map
             type_maps[source_id].update(calculated_types)
-        return updates, type_maps
+            changed_ids.add(source_id)
+        return updates, type_maps, query_updates
 
     def _resolved_source_path(self, source: dict[str, Any]) -> Path:
         stored_path = str(source["path"])
@@ -8176,7 +10325,9 @@ class StudioController(QObject):
                 initial_types=source_column_types,
             )
             calculated_candidate, calculated_types = self._apply_calculated_columns(
-                source_id, confirmed, project=next_project,
+                source_id,
+                _model_candidate_with_format_errors_as_blank(confirmed),
+                project=next_project,
                 column_types=type_map,
             )
             type_map.update(calculated_types)
@@ -8195,8 +10346,10 @@ class StudioController(QObject):
                     "column_types": type_map,
                 })
             next_project = validate_project(next_project)
-            dependent_candidates, dependent_types = self._rebuild_query_dependents(
-                next_project, {source_id: calculated_candidate}
+            dependent_candidates, dependent_types, dependent_query_candidates = self._rebuild_query_dependents(
+                next_project,
+                {source_id: calculated_candidate},
+                base_query_candidates={source_id: confirmed},
             )
             for dependent_id, dependent_type_map in dependent_types.items():
                 dependent_table = next(
@@ -8208,6 +10361,11 @@ class StudioController(QObject):
                 if dependent_table is not None:
                     dependent_table["column_types"] = dependent_type_map
             next_project = validate_project(next_project)
+            relationship_candidates = {source_id: calculated_candidate}
+            relationship_candidates.update(dependent_candidates)
+            self._validate_loaded_relationship_candidates(
+                next_project, relationship_candidates
+            )
         except (StopIteration, OSError, ProjectFileError, QueryError, TypeError, ValueError) as exc:
             self._set_status(f"Could not apply transformations: {exc}")
             return False
@@ -8215,12 +10373,19 @@ class StudioController(QObject):
         self._project = next_project
         self._raw_candidates[source_id] = raw_candidate
         self._loaded_candidates.update(dependent_candidates)
+        self._query_candidates[source_id] = confirmed
+        self._query_candidates.update(dependent_query_candidates)
         for updated_id in dependent_candidates:
             self._source_load_errors.pop(updated_id, None)
         if source_id == self._active_source_id:
             self._headers = list(calculated_candidate.headers)
             self._rows = [dict(row) for row in calculated_candidate.rows]
-            self._table_model.replace_data(self._headers, self._rows)
+            self._table_model.replace_data(
+                self._headers,
+                self._rows,
+                table_key=self._active_source_id,
+                column_types=self._active_column_type_map(),
+            )
         self._source_warning = self._compose_source_warning()
         self._current_region = None
         self._dirty = True
@@ -8997,6 +11162,7 @@ class StudioController(QObject):
         try:
             next_project = deepcopy(session_project)
             base_candidates: dict[str, ImportCandidate] = {}
+            base_query_candidates: dict[str, ImportCandidate] = {}
             changes: dict[str, tuple[dict[str, Any], dict[str, Any], list[dict[str, Any]]]] = {}
             step_change_ids: set[str] = set()
             metadata_change_ids: set[str] = set()
@@ -9163,7 +11329,7 @@ class StudioController(QObject):
                 )
                 calculated_candidate, calculated_types = self._apply_calculated_columns(
                     source_id,
-                    transformed,
+                    _model_candidate_with_format_errors_as_blank(transformed),
                     project=next_project,
                     column_types=type_map,
                 )
@@ -9200,6 +11366,7 @@ class StudioController(QObject):
                 ):
                     changes[source_id] = (current_source, result, steps)
                     base_candidates[source_id] = calculated_candidate
+                    base_query_candidates[source_id] = transformed
 
             affected_sqlite_source_ids = set(source_settings_change_ids)
             affected_sqlite_source_ids.update(
@@ -9300,8 +11467,10 @@ class StudioController(QObject):
                         return False
 
             next_project = validate_project(next_project)
-            dependent_candidates, dependent_types = self._rebuild_query_dependents(
-                next_project, base_candidates
+            dependent_candidates, dependent_types, dependent_query_candidates = self._rebuild_query_dependents(
+                next_project,
+                base_candidates,
+                base_query_candidates=base_query_candidates,
             )
             for dependent_id, type_map in dependent_types.items():
                 table = self._model_table_for_source(next_project, dependent_id)
@@ -9405,10 +11574,12 @@ class StudioController(QObject):
                 credential_cleanup_failed = True
         for deleted_id in deleted_query_ids:
             self._loaded_candidates.pop(deleted_id, None)
+            self._query_candidates.pop(deleted_id, None)
             self._raw_candidates.pop(deleted_id, None)
             self._source_load_errors.pop(deleted_id, None)
         self._raw_candidates.update(raw_snapshots)
         self._loaded_candidates.update(dependent_candidates)
+        self._query_candidates.update(dependent_query_candidates)
         for updated_id in dependent_candidates:
             self._source_load_errors.pop(updated_id, None)
         self._sync_active_source_after_session_settings()
@@ -9496,23 +11667,53 @@ class StudioController(QObject):
         *,
         kind: str | None = None,
         parser_options: dict[str, Any] | None = None,
+        header_row_used: int | None = None,
     ) -> str | None:
         target = Path(path).expanduser().resolve()
+        legacy_auto_header_source_id: str | None = None
         for source in self._project.get("data_sources", []):
             if source.get("kind") == "inline" or not source.get("path"):
                 continue
             if kind is not None and source.get("kind") != kind:
                 continue
+            try:
+                if self._resolved_source_path(source) != target:
+                    continue
+            except (OSError, RuntimeError, TypeError, ValueError):
+                continue
+
             if kind == "sqlite" and parser_options is not None:
                 existing_options = source.get("parser_options", {})
                 if existing_options.get("table_name") != parser_options.get("table_name"):
                     continue
-            try:
-                if self._resolved_source_path(source) == target:
+            elif kind == "excel" and parser_options is not None:
+                existing_options = source.get("parser_options", {})
+                if existing_options.get("sheet_name") != parser_options.get("sheet_name"):
+                    continue
+                # Raw worksheet rows and header-promoted rows are distinct
+                # sources even when both store automatic header selection.
+                if bool(existing_options.get("raw_rows", False)) != bool(
+                    parser_options.get("raw_rows", False)
+                ):
+                    continue
+                saved_header_row = existing_options.get("header_row")
+                requested_header_row = parser_options.get("header_row")
+                if saved_header_row == requested_header_row:
                     return str(source["id"])
-            except (OSError, RuntimeError, TypeError, ValueError):
+                # Older auto-detect imports persisted the detected row number.
+                # Reimporting that same detected row should replace the source
+                # and normalize its options instead of silently adding a table.
+                legacy_auto_header_match = (
+                    requested_header_row is None
+                    and isinstance(saved_header_row, int)
+                    and not isinstance(saved_header_row, bool)
+                    and saved_header_row == header_row_used
+                )
+                if legacy_auto_header_match and legacy_auto_header_source_id is None:
+                    legacy_auto_header_source_id = str(source["id"])
                 continue
-        return None
+            return str(source["id"])
+        return legacy_auto_header_source_id
 
     def _unique_table_name(self, desired_name: str) -> str:
         base = desired_name.strip() or "Table"
@@ -9621,9 +11822,15 @@ class StudioController(QObject):
                                 "Include it in report refresh and try again."
                             )
                         refreshed[source_id] = previous
+                        query_candidates[source_id] = self._query_candidates.get(
+                            source_id, previous
+                        )
                         continue
+                    # Downstream queries consume error-bearing query results, not
+                    # the blanked model projection.
                     raw = self._query_candidate(
-                        source, refreshed, project=self._project
+                        source, {**refreshed, **query_candidates},
+                        project=self._project,
                     )
                 elif kind == "inline":
                     raw = self._raw_candidate_for_source(source)
@@ -9675,7 +11882,9 @@ class StudioController(QObject):
                 query_candidates[source_id] = query_candidate
                 refreshed[source_id], calculated_type_maps[source_id] = (
                     self._apply_calculated_columns(
-                        source_id, query_candidate, column_types=base_types
+                        source_id,
+                        _model_candidate_with_format_errors_as_blank(query_candidate),
+                        column_types=base_types,
                     )
                 )
 
@@ -9710,6 +11919,7 @@ class StudioController(QObject):
 
         self._project = next_project
         self._loaded_candidates.update(refreshed)
+        self._query_candidates.update(query_candidates)
         self._raw_candidates.update(raw_candidates)
         if metadata_changed:
             self._dirty = True
@@ -9833,10 +12043,25 @@ class StudioController(QObject):
         delta_x = next_x - float(visual.get("x", 0))
         delta_y = next_y - float(visual.get("y", 0))
         group_id = visual.get("group_id")
-        for item in visuals:
-            if isinstance(item, dict) and (
-                item is visual or (group_id and item.get("group_id") == group_id)
-            ):
+        moving = [
+            item for item in visuals
+            if isinstance(item, dict)
+            and (item is visual or (group_id and item.get("group_id") == group_id))
+        ]
+        if moving:
+            left = min(float(item.get("x", 0)) for item in moving)
+            top = min(float(item.get("y", 0)) for item in moving)
+            right = max(
+                float(item.get("x", 0)) + min(1280.0, max(10.0, float(item.get("width", 300))))
+                for item in moving
+            )
+            bottom = max(
+                float(item.get("y", 0)) + min(720.0, max(10.0, float(item.get("height", 200))))
+                for item in moving
+            )
+            delta_x = max(-left, min(delta_x, 1280.0 - right))
+            delta_y = max(-top, min(delta_y, 720.0 - bottom))
+            for item in moving:
                 item["x"] = max(0.0, float(item.get("x", 0)) + delta_x)
                 item["y"] = max(0.0, float(item.get("y", 0)) + delta_y)
         self._dirty = True
@@ -9887,15 +12112,59 @@ class StudioController(QObject):
         if not table_id or (not is_measure and field_name not in self._headers):
             self._set_status("Choose a field from the loaded table.")
             return
-        bound_table_id = str(visual.get("table_id", ""))
-        if bound_table_id and bound_table_id != table_id:
-            self._set_status("This visual is bound to another table. Select that table to add fields.")
-            return
 
         fields = visual.setdefault("fields", {})
         well_fields = fields.setdefault(well_name, [])
         table_field_well = visual.get("type") == "table" and well_name == "Fields"
-        if field_name in well_fields:
+        bound_table_id = str(visual.get("table_id", ""))
+        stored_binding: Any = field_name
+        if (
+            bound_table_id
+            and bound_table_id != table_id
+            and not is_measure
+            and table_field_well
+        ):
+            measures = [
+                _visual_measure_name(item)
+                for item in well_fields
+                if _visual_measure_name(item) is not None
+            ]
+            dimensions = [
+                item for item in well_fields
+                if _visual_measure_name(item) is None
+            ]
+            if len(measures) != 1 or dimensions:
+                self._set_status(
+                    "A related-table field needs one existing DAX measure and no other table fields."
+                )
+                return
+            measure_table_id, measure_error = self._measure_reference_table_id(
+                measures[0]
+            )
+            if measure_error or measure_table_id != bound_table_id:
+                self._set_status(
+                    measure_error
+                    or "The related-table field must group a measure from the visual's current table."
+                )
+                return
+            stored_binding = {"table_id": table_id, "column": field_name}
+            visual["table_id"] = table_id
+        elif bound_table_id and bound_table_id != table_id and not is_measure:
+            self._set_status(
+                "This visual is bound to another table. Select a related-table field only for a Table visual with one measure."
+            )
+            return
+        elif not bound_table_id and not is_measure:
+            visual["table_id"] = table_id
+
+        if any(
+            _visual_field_column(item) == field_name
+            and (
+                not isinstance(item, dict)
+                or str(item.get("table_id", table_id)) == table_id
+            )
+            for item in well_fields
+        ):
             return
         if is_measure and well_fields and not table_field_well:
             self._set_status("This value well uses one DAX measure at a time.")
@@ -9932,30 +12201,100 @@ class StudioController(QObject):
         if visual.get("type") == "map" and well_name in {"Location", "Latitude", "Longitude", "Size", "Legend"} and well_fields:
             self._set_status("This Map supports one field in each location, coordinate, size, and legend well.")
             return
+        if visual.get("type") in {"filledMap", "shapeMap"} and well_name in {"Location", "Legend", "Values"} and well_fields:
+            self._set_status("This map supports one field in each Location, Legend, and Values well.")
+            return
 
+        if is_measure and table_field_well:
+            existing_dimensions = [
+                item for item in well_fields
+                if _visual_measure_name(item) is None
+            ]
+            if existing_dimensions:
+                measure_table_id, measure_error = self._measure_reference_table_id(
+                    measure_name or ""
+                )
+                if (
+                    not measure_error
+                    and measure_table_id != str(visual.get("table_id", table_id))
+                ):
+                    if len(existing_dimensions) != 1:
+                        self._set_status(
+                            "A related-table Table visual supports one dimension field and one measure."
+                        )
+                        return
+                    dimension = existing_dimensions[0]
+                    if isinstance(dimension, dict):
+                        dimension_table_id = str(dimension.get("table_id", table_id))
+                        dimension_column = _visual_field_column(dimension)
+                    else:
+                        dimension_table_id = str(visual.get("table_id", table_id))
+                        dimension_column = _visual_field_column(dimension)
+                    well_fields[well_fields.index(dimension)] = {
+                        "table_id": dimension_table_id,
+                        "column": dimension_column,
+                    }
         visual.setdefault("table_id", table_id)
-        well_fields.append(field_name)
-        if not is_measure and well_name in {
-            "Y-axis", "Column Y-axis", "Line Y-axis", "Value", "Minimum",
-            "Maximum", "Target", "Indicator", "Target goals",
-        } and visual.get("type") != "scatter":
-            visual.setdefault("field_aggregations", {}).setdefault(field_name, "sum")
-        elif not is_measure and visual.get("type") == "card" and well_name == "Fields":
-            has_numeric = any(_report_number(row.get(field_name)) is not None for row in self._rows)
-            visual.setdefault("field_aggregations", {}).setdefault(
-                field_name, "sum" if has_numeric else "count"
+        well_fields.append(stored_binding)
+        if not is_measure:
+            visual_type = str(visual.get("type", ""))
+            fallback_aggregation: str | None = None
+            supports_model_default = (
+                (well_name == "Y-axis" and visual_type != "scatter")
+                or (
+                    visual_type == "lineClusteredColumn"
+                    and well_name in {"Column Y-axis", "Line Y-axis"}
+                )
+                or (
+                    visual_type == "gauge"
+                    and well_name in {"Value", "Minimum", "Maximum", "Target"}
+                )
+                or (visual_type == "card" and well_name == "Fields")
+                or (visual_type == "matrix" and well_name == "Values")
+                or (visual_type in {"filledMap", "shapeMap"} and well_name == "Values")
             )
-        elif not is_measure and visual.get("type") == "matrix" and well_name == "Values":
-            has_numeric = any(_report_number(row.get(field_name)) is not None for row in self._rows)
-            visual.setdefault("field_aggregations", {}).setdefault(
-                field_name, "sum" if has_numeric else "count"
-            )
+            if well_name in {
+                "Y-axis", "Column Y-axis", "Line Y-axis", "Value", "Minimum",
+                "Maximum", "Target", "Indicator", "Target goals",
+            } and visual_type != "scatter":
+                fallback_aggregation = "sum"
+            elif visual_type == "card" and well_name == "Fields":
+                has_numeric = any(
+                    _report_number(row.get(field_name)) is not None
+                    for row in self._rows
+                )
+                fallback_aggregation = "sum" if has_numeric else "count"
+            elif visual_type == "matrix" and well_name == "Values":
+                has_numeric = any(
+                    _report_number(row.get(field_name)) is not None
+                    for row in self._rows
+                )
+                fallback_aggregation = "sum" if has_numeric else "count"
+            elif visual_type in {"filledMap", "shapeMap"} and well_name == "Values":
+                has_numeric = any(
+                    _report_number(row.get(field_name)) is not None
+                    for row in self._rows
+                )
+                fallback_aggregation = "sum" if has_numeric else "count"
+            if fallback_aggregation is not None:
+                model_default = (
+                    self._model_column_default_summarization(table_id, field_name)
+                    if supports_model_default else None
+                )
+                aggregation = (
+                    model_default
+                    if model_default not in {None, "auto"}
+                    else fallback_aggregation
+                )
+                visual.setdefault("field_aggregations", {}).setdefault(
+                    field_name, aggregation
+                )
         self._dirty = True
         self._refresh_report()
         self.stateChanged.emit()
 
-    @Slot(str, str)
-    def remove_field_from_well(self, well_name: str, field_name: str) -> None:
+    @Slot(str, "QVariant")
+    def remove_field_from_well(self, well_name: str, field_binding: Any) -> None:
         if not self._selected_visual:
             return
         page = self._active_page()
@@ -9966,16 +12305,17 @@ class StudioController(QObject):
         if visual is None:
             return
         well_fields = visual.get("fields", {}).get(well_name, [])
-        if field_name not in well_fields:
+        if field_binding not in well_fields:
             return
-        well_fields.remove(field_name)
+        field_name = _visual_field_column(field_binding)
+        well_fields.remove(field_binding)
         if well_name in {
             "Y-axis", "Column Y-axis", "Line Y-axis", "Value", "Minimum",
             "Maximum", "Target", "Indicator", "Target goals",
         } or (
             well_name == "Fields" and visual.get("type") == "card"
         ) or (
-            well_name == "Values" and visual.get("type") == "matrix"
+            well_name == "Values" and visual.get("type") in {"matrix", "filledMap", "shapeMap"}
         ):
             visual.get("field_aggregations", {}).pop(field_name, None)
         self._dirty = True
@@ -10010,6 +12350,10 @@ class StudioController(QObject):
             )
             or (well_name == "Fields" and visual is not None and visual.get("type") == "card")
             or (well_name == "Values" and visual is not None and visual.get("type") == "matrix")
+            or (
+                well_name == "Values" and visual is not None
+                and visual.get("type") in {"filledMap", "shapeMap"}
+            )
         )
         if visual is None or not allowed_well or field_name not in visual.get("fields", {}).get(well_name, []):
             self._set_status("Choose an assigned field first.")
@@ -10062,6 +12406,8 @@ class StudioController(QObject):
             "gauge": "Gauge",
             "kpi": "KPI",
             "map": "Map",
+            "filledMap": "Filled map",
+            "shapeMap": "Shape map",
             "area": "Area chart",
             "pie": "Pie chart",
             "donut": "Donut chart",
@@ -10160,7 +12506,18 @@ class StudioController(QObject):
             if not math.isfinite(normalized):
                 self._set_status("Enter a finite number for the visual position or size.")
                 return
-            normalized = max(10.0 if property_key in {"width", "height"} else 0.0, normalized)
+            if property_key == "x":
+                width = min(1280.0, max(10.0, float(visual.get("width", 300))))
+                normalized = min(max(0.0, normalized), 1280.0 - width)
+            elif property_key == "y":
+                height = min(720.0, max(10.0, float(visual.get("height", 200))))
+                normalized = min(max(0.0, normalized), 720.0 - height)
+            elif property_key == "width":
+                x = min(1270.0, max(0.0, float(visual.get("x", 0))))
+                normalized = min(max(10.0, normalized), 1280.0 - x)
+            else:
+                y = min(710.0, max(0.0, float(visual.get("y", 0))))
+                normalized = min(max(10.0, normalized), 720.0 - y)
         elif property_key == "color":
             normalized = str(value)
             if (
@@ -10209,13 +12566,86 @@ class StudioController(QObject):
         self._dirty = True
         self.stateChanged.emit()
 
+    @Slot()
+    def choose_shape_map_file(self) -> None:
+        """Attach one bounded local GeoJSON/TopoJSON boundary source."""
+        page = self._active_page()
+        visual = next((
+            item for item in (page.get("visuals", []) if page else [])
+            if isinstance(item, dict) and item.get("title") == self._selected_visual
+        ), None)
+        if visual is None or visual.get("type") not in {"filledMap", "shapeMap"}:
+            return
+        path_text, _ = QFileDialog.getOpenFileName(
+            None,
+            "Choose map boundary file",
+            "",
+            "Map boundaries (*.geojson *.json);;All files (*)",
+        )
+        if not path_text:
+            return
+        object_name = ""
+        try:
+            object_names = available_topology_objects(path_text)
+            if len(object_names) > 1:
+                object_name, accepted = QInputDialog.getItem(
+                    None,
+                    "Choose geometry object",
+                    "TopoJSON geometry object:",
+                    object_names,
+                    0,
+                    False,
+                )
+                if not accepted:
+                    return
+            features = load_boundary_features(path_text, object_name=object_name)
+            key_properties = boundary_key_properties(features)
+        except ShapeMapError as exc:
+            QMessageBox.warning(None, "Could not load map boundary", str(exc))
+            return
+        if not key_properties:
+            QMessageBox.warning(
+                None,
+                "Could not join map boundary",
+                "Each map region needs a populated property that can match the Location field.",
+            )
+            return
+        preferred = next((
+            key for key in key_properties
+            if key.casefold() in {"name", "name_1", "admin", "iso_a3", "code", "id"}
+        ), key_properties[0])
+        key_property, accepted = QInputDialog.getItem(
+            None,
+            "Choose location key",
+            "Match the report's Location values to this boundary property:",
+            key_properties,
+            key_properties.index(preferred),
+            False,
+        )
+        if not accepted:
+            return
+        visual["shape_map_file"] = str(Path(path_text).expanduser().resolve())
+        visual["shape_map_object"] = object_name
+        visual["shape_map_key"] = str(key_property)
+        self._report_filter_context_cache.clear()
+        self._dirty = True
+        self._refresh_report()
+        self.stateChanged.emit()
+        self._set_status(f"Loaded {len(features):,} map boundary region(s)")
+
     @Slot(str, int, int)
     def resize_visual(self, visual_id: str, width: int, height: int) -> None:
-        page = self._project["report"]["pages"][self.activePageIndex]
+        page = self._active_page()
+        if page is None:
+            return
         for visual in page.get("visuals", []):
             if isinstance(visual, dict) and visual.get("id") == visual_id:
-                visual["width"] = max(10, width)
-                visual["height"] = max(10, height)
+                x = min(1270.0, max(0.0, float(visual.get("x", 0))))
+                y = min(710.0, max(0.0, float(visual.get("y", 0))))
+                visual["x"] = x
+                visual["y"] = y
+                visual["width"] = min(1280 - int(x), max(10, width))
+                visual["height"] = min(720 - int(y), max(10, height))
                 self._dirty = True
                 self.stateChanged.emit()
                 return
@@ -10278,6 +12708,10 @@ class StudioController(QObject):
         from uuid import uuid4
         page = self._project["report"]["pages"][self.activePageIndex]
         visuals = page.setdefault("visuals", [])
+        width = min(1280, max(10, int(width)))
+        height = min(720, max(10, int(height)))
+        x = min(1280 - width, max(0, int(x)))
+        y = min(720 - height, max(0, int(y)))
         new_id = str(uuid4())
         visuals.append({
             "id": new_id,
@@ -10421,15 +12855,20 @@ class StudioController(QObject):
         self._set_status(f"Added {visual_name}")
 
     def clear_filters(self) -> None:
-
-
         page = self._active_page()
         report_filters = self._project.get("report", {}).get("filters", [])
         page_filters = page.get("filters", []) if page else []
         visual_filters = page.get("visual_filters", []) if page else []
-        if self._current_region is None and not report_filters and not page_filters and not visual_filters:
+        if (
+            self._current_region is None
+            and not report_filters
+            and not page_filters
+            and not visual_filters
+            and not self._cross_filters
+        ):
             return
         self._current_region = None
+        self._cross_filters.clear()
         self._project.setdefault("report", {})["filters"] = []
         if page is not None:
             page["filters"] = []
@@ -10438,7 +12877,7 @@ class StudioController(QObject):
             self._dirty = True
         self._refresh_report()
         self.stateChanged.emit()
-        self._set_status("Report and current-page filters cleared")
+        self._set_status("Report, current-page, and visual selections cleared")
 
     def show_about(self) -> None:
         QMessageBox.about(
@@ -10501,6 +12940,79 @@ class StudioController(QObject):
         if target.suffix.casefold() != ".csv":
             target = target.with_suffix(".csv")
         return self.export_data_path(target)
+
+    @Slot("QVariantList", str, result=bool)
+    def exportReportPdfImages(self, page_images: list[object], path: str) -> bool:  # noqa: N802
+        """Write rendered, chrome-free report pages to an A4 landscape PDF."""
+        images: list[QImage] = []
+        for source in page_images:
+            if isinstance(source, QImage):
+                image = source
+            elif isinstance(source, str):
+                image = QImage(source)
+            else:
+                continue
+            if not image.isNull():
+                images.append(image)
+        if not images:
+            self._set_status("Capture at least one report page before exporting a PDF.")
+            return False
+        target = Path(path).expanduser().resolve()
+        if target.suffix.casefold() != ".pdf":
+            target = target.with_suffix(".pdf")
+        if self._project_path is not None and target == self._project_path.resolve():
+            self._set_status("Choose a separate PDF path so the report project is preserved.")
+            return False
+
+        temp_path: Path | None = None
+        painter: QPainter | None = None
+        try:
+            target.parent.mkdir(parents=True, exist_ok=True)
+            fd, temp_name = tempfile.mkstemp(
+                prefix=f".{target.stem}.", suffix=".pdf", dir=target.parent
+            )
+            os.close(fd)
+            temp_path = Path(temp_name)
+            writer = QPdfWriter(str(temp_path))
+            writer.setCreator("Analytics Studio")
+            writer.setTitle(f"{self.projectName} report")
+            writer.setResolution(300)
+            writer.setPageLayout(QPageLayout(
+                QPageSize(QPageSize.PageSizeId.A4),
+                QPageLayout.Orientation.Landscape,
+                QMarginsF(12, 12, 12, 12),
+                QPageLayout.Unit.Millimeter,
+            ))
+            painter = QPainter(writer)
+            if not painter.isActive():
+                raise OSError("Qt could not start the PDF writer.")
+            page_rect = writer.pageLayout().paintRectPixels(writer.resolution())
+            for index, image in enumerate(images):
+                if index and not writer.newPage():
+                    raise OSError("Qt could not add a page to the PDF.")
+                scaled = image.scaled(
+                    page_rect.size(),
+                    Qt.AspectRatioMode.KeepAspectRatio,
+                    Qt.TransformationMode.SmoothTransformation,
+                )
+                x = page_rect.x() + (page_rect.width() - scaled.width()) / 2
+                y = page_rect.y() + (page_rect.height() - scaled.height()) / 2
+                painter.drawImage(x, y, scaled)
+            painter.end()
+            painter = None
+            if not temp_path.is_file() or temp_path.stat().st_size == 0:
+                raise OSError("Qt produced an empty PDF file.")
+            os.replace(temp_path, target)
+        except (OSError, RuntimeError, TypeError, ValueError) as exc:
+            if painter is not None and painter.isActive():
+                painter.end()
+            self._set_status(f"Could not export report PDF: {exc}")
+            return False
+        finally:
+            if temp_path is not None:
+                temp_path.unlink(missing_ok=True)
+        self._set_status(f"Exported {len(images)} report pages to {target.name}")
+        return True
 
     def export_data_path(self, path: Path) -> bool:
         """Export the current transformed table as UTF-8 CSV, without changing it."""
@@ -10678,6 +13190,7 @@ class StudioController(QObject):
         self._active_source_kind = None
         self._active_parser_options = {}
         self._loaded_candidates = {}
+        self._query_candidates = {}
         self._raw_candidates = {}
         self._source_load_errors = {}
         self._selected_visual = ""
@@ -10686,7 +13199,7 @@ class StudioController(QObject):
         self._clipboard_visual_config = None
         self._clipboard_format_config = None
         self._format_painter_active = False
-        self._field_query = ""
+        self.setFieldQuery("")
         self._current_region = None
         self._clear_source(clear_selection=True)
         self._refresh_model_view()
@@ -10713,7 +13226,12 @@ class StudioController(QObject):
         self._active_parser_options = dict(parsed.options)
         self._headers = list(parsed.headers)
         self._rows = list(parsed.rows)
-        self._table_model.replace_data(parsed.headers, parsed.rows)
+        self._table_model.replace_data(
+            self._headers,
+            self._rows,
+            table_key=self._active_source_id,
+            column_types=self._active_column_type_map(),
+        )
         if self._current_region not in self.regions:
             self._current_region = None
 
@@ -11025,6 +13543,8 @@ class StudioController(QObject):
         filter_table_ids: set[str],
         group_filters: dict[str, Any | set[Any]],
         group_table_id: str,
+        *,
+        visual_axis_context: VisualAxisContext | None = None,
     ) -> Decimal | None:
         """Evaluate one saved measure with chart-category filters applied."""
         contexts: list[dict[str, Any]] = []
@@ -11085,10 +13605,10 @@ class StudioController(QObject):
             ]
             filter_table_ids = {*filter_table_ids, table_id}
 
-        active_table_id = self._active_model_table_id()
+        active_table_id = group_table_id
         active_context = contexts_by_id.get(active_table_id)
         if active_context is None:
-            raise MeasureError("The active model table is unavailable for this visual.")
+            raise MeasureError("The visual's bound model table is unavailable.")
         target_measure = next((
             str(item["name"])
             for item in self._project.get("model", {}).get("measures", [])
@@ -11101,12 +13621,13 @@ class StudioController(QObject):
             self._project.get("model", {}).get("measures", []),
             list(active_rows),
             list(active_context["headers"]),
-            self._active_model_table_name(),
+            str(active_context.get("name", active_table_id)),
             measure_names=[target_measure],
             table_context=contexts,
             relationships=self._project.get("model", {}).get("relationships", []),
             filter_table_ids=filter_table_ids,
             active_table_id=active_table_id or None,
+            visual_axis_context=visual_axis_context,
         )
         return values[target_measure]
 
@@ -11121,6 +13642,9 @@ class StudioController(QObject):
         group_table_id: str,
         *,
         stacked: bool,
+        category_model_table_id: str,
+        legend_model_table_id: str,
+        visual_axis_values: tuple[Any, ...] | None = None,
     ) -> list[dict[str, object]]:
         if not category_column:
             return []
@@ -11134,6 +13658,50 @@ class StudioController(QObject):
             category_values.setdefault(category_key, category)
             legend_values.setdefault(legend_key, legend)
             groups.add((category_key, legend_key))
+        visual_axis_context = None
+        if (
+            not legend_column
+            and not stacked
+            and category_model_table_id == group_table_id
+        ):
+            axis_table = next(
+                (
+                    context for context in table_context
+                    if str(context.get("id", "")) == group_table_id
+                ),
+                None,
+            )
+            if axis_table is not None:
+                axis_column = next(
+                    (
+                        str(header) for header in axis_table["headers"]
+                        if str(header).casefold() == category_column.casefold()
+                    ),
+                    None,
+                )
+                if axis_column is not None:
+                    axis_selection_values = (
+                        category_values.values()
+                        if visual_axis_values is None
+                        else visual_axis_values
+                    )
+                    selected_keys = {
+                        cell_key(value) for value in axis_selection_values
+                    }
+                    selected_rows = frozenset(
+                        index for index, row in enumerate(axis_table["rows"])
+                        if cell_key(row.get(axis_column)) in selected_keys
+                    )
+                    visual_axis_context = VisualAxisContext(
+                        table_id=group_table_id,
+                        column=axis_column,
+                        selected_rows=selected_rows,
+                        blank_allowed=any(
+                            value is None or value == ""
+                            for value in axis_selection_values
+                        ),
+                        filter_table_ids=frozenset(filter_table_ids),
+                    )
         grouped_values: dict[
             tuple[tuple[Any, ...], tuple[Any, ...]], Decimal | None
         ] = {}
@@ -11144,10 +13712,15 @@ class StudioController(QObject):
             grouped_values[(category_key, legend_key)] = self._measure_value_for_visual_group(
                 measure_name, table_context, set(filter_table_ids), filters,
                 group_table_id,
+                visual_axis_context=visual_axis_context,
             )
-        categories = sorted(
-            {category for category, _ in groups},
-            key=lambda key: (
+        category_keys = {category for category, _ in groups}
+        category_order = self._active_model_column_sort_order(
+            category_model_table_id, category_column, group_table_id, category_values,
+        )
+        categories = self._ordered_category_keys(
+            category_keys, category_order,
+            lambda key: (
                 _report_cell_text(category_values[key]).casefold(),
                 _report_cell_text(category_values[key]), repr(key),
             ),
@@ -11162,9 +13735,13 @@ class StudioController(QObject):
                         "value": float(value),
                     })
             return series
-        legends = sorted(
-            {legend for _, legend in groups},
-            key=lambda key: (
+        legend_keys = {legend for _, legend in groups}
+        legend_order = self._active_model_column_sort_order(
+            legend_model_table_id, legend_column, group_table_id, legend_values,
+        )
+        legends = self._ordered_category_keys(
+            legend_keys, legend_order,
+            lambda key: (
                 _report_cell_text(legend_values[key]).casefold(),
                 _report_cell_text(legend_values[key]), repr(key),
             ),
@@ -11228,27 +13805,18 @@ class StudioController(QObject):
                 return self._region_visual_series.get(visual_name, self._region_series)
             return []
 
-        def well_column(bindings: Any) -> str | None:
-            if not isinstance(bindings, list) or not bindings:
-                return None
-            binding = bindings[0]
-            if isinstance(binding, dict):
-                value = binding.get("column")
-            elif isinstance(binding, (list, tuple)):
-                value = binding[1] if len(binding) > 1 else binding[0]
-            else:
-                value = binding
-            return str(value) if value is not None else None
-
-        x_col = well_column(x_axis)
-        y_col = well_column(y_axis)
-        legend_col = well_column(fields.get("Legend", []))
+        bound_table_id = str(visual.get("table_id") or self._active_model_table_id())
+        x_binding = _visual_well_binding(x_axis, bound_table_id)
+        y_binding = _visual_well_binding(y_axis, bound_table_id)
+        legend_binding = _visual_well_binding(fields.get("Legend", []), bound_table_id)
+        x_col = x_binding[1] if x_binding else None
+        y_col = y_binding[1] if y_binding else None
+        legend_col = legend_binding[1] if legend_binding else None
         aggregation = str(
             visual.get("field_aggregations", {}).get(y_col, "sum")
         ).casefold()
         if aggregation not in _VISUAL_FIELD_AGGREGATIONS:
             aggregation = "sum"
-        bound_table_id = str(visual.get("table_id") or self._active_model_table_id())
         visual_rows_by_table, visual_measure_context, visual_filter_table_ids = self._report_filter_context(
             visual_name, include_highlights=include_highlights
         )
@@ -11265,18 +13833,27 @@ class StudioController(QObject):
                 cell_key(row.get(x_col)): row.get(x_col)
                 for row in visual_rows
             }
-            ordered = sorted(
-                values.values(),
-                key=lambda value: (
-                    _report_cell_text(value).casefold(),
-                    _report_cell_text(value), repr(cell_key(value)),
+            model_order = self._active_model_column_sort_order(
+                x_binding[0] if x_binding else "", x_col, bound_table_id, values,
+            )
+            ordered_keys = self._ordered_category_keys(
+                list(values), model_order,
+                lambda key: (
+                    _report_cell_text(values[key]).casefold(),
+                    _report_cell_text(values[key]), repr(key),
                 ),
             )
+            ordered = [values[key] for key in ordered_keys]
             return [
                 {"label": _report_cell_text(value), "value": 1.0}
                 for value in ordered
             ]
 
+        visual_axis_values = (
+            tuple(row.get(x_col) for row in visual_rows)
+            if x_col is not None
+            else None
+        )
         visual_rows = self._apply_visual_top_n_rows(
             visual_name, visual_rows, bound_table_id
         )
@@ -11297,6 +13874,11 @@ class StudioController(QObject):
                     visual_filter_table_ids,
                     bound_table_id,
                     stacked=stacked,
+                    category_model_table_id=(x_binding[0] if x_binding else ""),
+                    legend_model_table_id=(
+                        legend_binding[0] if legend_binding else ""
+                    ),
+                    visual_axis_values=visual_axis_values,
                 )
             except (MeasureError, KeyError, TypeError, ValueError):
                 return []
@@ -11348,16 +13930,24 @@ class StudioController(QObject):
                     },
                 )
 
-            categories = sorted(
-                {category for category, _ in grouped},
-                key=lambda key: (
+            category_order = self._active_model_column_sort_order(
+                x_binding[0] if x_binding else "", x_col, bound_table_id,
+                category_values,
+            )
+            legend_order = self._active_model_column_sort_order(
+                legend_binding[0] if legend_binding else "",
+                legend_col or "", bound_table_id, segment_values,
+            )
+            categories = self._ordered_category_keys(
+                {category for category, _ in grouped}, category_order,
+                lambda key: (
                     _report_cell_text(category_values[key]).casefold(),
                     _report_cell_text(category_values[key]), repr(key),
                 ),
             )
-            segments = sorted(
-                {segment for _, segment in grouped},
-                key=lambda key: (
+            segments = self._ordered_category_keys(
+                {segment for _, segment in grouped}, legend_order,
+                lambda key: (
                     _report_cell_text(segment_values[key]).casefold(),
                     _report_cell_text(segment_values[key]), repr(key),
                 ),
@@ -11412,10 +14002,22 @@ class StudioController(QObject):
                 },
             )
 
+        model_order = self._active_model_column_sort_order(
+            x_binding[0] if x_binding else "", x_col or "", bound_table_id,
+            category_values,
+        )
         if visual.get("type", "bar") in {
             "column", "area", "line", "lineClusteredColumn", "waterfall", "ribbon", "kpi",
         }:
-            if visual.get("type") == "kpi":
+            if model_order is not None:
+                ordered_values = [
+                    (key, aggregated[key])
+                    for key in self._ordered_category_keys(
+                        list(aggregated), model_order,
+                        lambda key: (repr(key),),
+                    )
+                ]
+            elif visual.get("type") == "kpi":
                 def kpi_sort_key(item: tuple[tuple[Any, ...], Decimal]) -> tuple[int, Decimal | str]:
                     label = _report_cell_text(category_values[item[0]])
                     try:
@@ -11437,6 +14039,18 @@ class StudioController(QObject):
                 {"label": _report_cell_text(category_values[key]), "value": float(value)}
                 for key, value in ordered_values
             ]
+        elif model_order is not None:
+            ordered_values = [
+                (key, aggregated[key])
+                for key in self._ordered_category_keys(
+                    list(aggregated), model_order,
+                    lambda key: (repr(key),),
+                )
+            ]
+            series = [
+                {"label": _report_cell_text(category_values[key]), "value": float(value)}
+                for key, value in ordered_values
+            ]
         else:
             series = [
                 {"label": _report_cell_text(category_values[key]), "value": float(value)}
@@ -11450,11 +14064,32 @@ class StudioController(QObject):
         sources = self._project.get("data_sources", [])
         sources_by_id = {str(source.get("id")): source for source in sources}
         catalog: list[dict[str, Any]] = []
+        self._column_sort_orders = {}
         catalog_source_ids: set[str] = set()
         for table in model.get("tables", []):
+            table.setdefault("column_sort_by", {})
+            model_table_id = str(table.get("id") or table.get("source_id") or "")
             source_id = str(table.get("source_id") or table.get("id") or "")
             source = sources_by_id.get(source_id)
             parsed = self._loaded_candidates.get(source_id)
+            sort_rules = dict(table.get("column_sort_by", {}))
+            sort_statuses: dict[str, dict[str, Any]] = {}
+            for category_column, sort_column in sort_rules.items():
+                order, reason = self._validate_model_column_sort_rule(
+                    model_table_id, category_column, sort_column
+                )
+                active = order is not None
+                sort_statuses[category_column] = {
+                    "active": active,
+                    "reason": "Active" if active else reason,
+                }
+                if order is not None:
+                    self._column_sort_orders[(model_table_id, category_column)] = order
+            for (attempt_table_id, category_column), status in list(
+                self._column_sort_attempt_statuses.items()
+            ):
+                if attempt_table_id == model_table_id and category_column not in sort_rules:
+                    sort_statuses[category_column] = dict(status)
             name = str(table.get("name", "Unnamed table"))
             query_group = str(source.get("query_group", "")) if source else ""
             load_enabled = self._source_load_enabled(source) if source else True
@@ -11468,6 +14103,14 @@ class StudioController(QObject):
             catalog.append({
                 "id": str(table.get("id") or source_id),
                 "sourceId": source_id,
+                "hasModelMetadata": True,
+                "columnSummarizations": dict(
+                    table.get("column_summarizations", {})
+                ),
+                "columnSortBy": sort_rules,
+                "columnSortByStatuses": sort_statuses,
+                "groupByColumns": dict(table.get("group_by_columns", {})),
+                "keyColumnName": str(table.get("key_column") or ""),
                 "name": name,
                 "displayName": f"{query_group} / {name}" if query_group else name,
                 "queryGroup": query_group,
@@ -11512,6 +14155,12 @@ class StudioController(QObject):
             catalog.append({
                 "id": source_id,
                 "sourceId": source_id,
+                "hasModelMetadata": False,
+                "columnSummarizations": {},
+                "columnSortBy": {},
+                "columnSortByStatuses": {},
+                "groupByColumns": {},
+                "keyColumnName": "",
                 "name": name,
                 "displayName": f"{query_group} / {name}" if query_group else name,
                 "queryGroup": query_group,

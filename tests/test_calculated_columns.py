@@ -41,7 +41,7 @@ def test_calculated_columns_evaluate_numeric_boolean_and_prior_column_references
             "Large order": True, "Rounded": Decimal("24.0"),
         },
         {
-            "Quantity": "", "Unit price": "9", "Line total": Decimal("0"),
+            "Quantity": "", "Unit price": "9", "Line total": None,
             "Large order": False, "Rounded": Decimal("0.0"),
         },
     ]

@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import copy
+from contextlib import closing
 import os
 from pathlib import Path
 import sqlite3
@@ -20,22 +21,28 @@ from PySide6.QtWidgets import (
     QApplication,
     QDialog,
     QDialogButtonBox,
-    QLabel,
     QMessageBox,
     QToolButton,
 )
 
 from analytics_studio.controller import StudioController
-from analytics_studio.file_import import parse_file
+from analytics_studio.file_import import ImportCandidate, parse_file
 from analytics_studio.folder_import import default_folder_options, parse_folder
-from analytics_studio.folder_import_dialog import FolderImportDialog
 from analytics_studio.import_preview_dialog import FileImportPreviewDialog
 from analytics_studio.inline_data import parse_pasted_table, sample_candidate
-from analytics_studio.local_table_dialogs import EnterDataDialog, TransformDataDialog
+from analytics_studio.measure_dialog import MeasureDialog
+from analytics_studio.local_table_dialogs import (
+    CustomColumnDialog,
+    EnterDataDialog,
+    TransformDataDialog,
+)
+from analytics_studio.odata_dialog import ODataFeedImportDialog
+from analytics_studio.sql_server_dialog import SQLServerImportDialog
 from analytics_studio.power_query_m import PowerQueryMEditorDialog
 from analytics_studio.project import FORMAT_VERSION
 from analytics_studio.power_query_values import PowerQueryCellError
 from analytics_studio.transformations import apply_transformations
+from analytics_studio.web_import_dialog import WebImportDialog
 
 QQuickStyle.setStyle("Basic")
 
@@ -122,7 +129,265 @@ class HomeFileWorkflowTests(unittest.TestCase):
         self.assertEqual(dialog.windowTitle(), "Edit source settings")
         self.assertEqual(dialog.import_button.text(), "Apply settings")
         self.assertFalse(dialog.replacement_label.isVisible())
+        self.assertTrue(dialog.transform_button.isHidden())
         dialog.reject()
+
+    def test_file_preview_offers_load_or_transform_after_preview(self) -> None:
+        path = self.root / "choice.csv"
+        path.write_text("Region,Revenue\nDubai,10\n", encoding="utf-8")
+
+        dialog = FileImportPreviewDialog(path, replacing=False)
+
+        self.assertTrue(dialog.import_button.isEnabled())
+        self.assertEqual(dialog.import_button.text(), "Load")
+        self.assertFalse(dialog.transform_button.isHidden())
+        self.assertTrue(dialog.transform_button.isEnabled())
+        self.assertIsNone(dialog.selected_action)
+
+        dialog._accept_candidate("transform")
+
+        self.assertEqual(dialog.selected_action, "transform")
+        self.assertEqual(dialog.candidate.headers, ["Region", "Revenue"])
+
+    def test_file_preview_displays_excel_header_row_notice(self) -> None:
+        path = self.root / "header-notice.csv"
+        path.write_text("Date,Value\n2026-08-01,100\n", encoding="utf-8")
+        dialog = FileImportPreviewDialog(path, replacing=False)
+        notice = (
+            "Using worksheet row 12 as column names; rows 1–11 are excluded "
+            "from the imported table."
+        )
+        candidate = ImportCandidate(
+            "excel",
+            ["Date", "Value"],
+            [{"Date": "2026-08-01", "Value": 100}],
+            {"sheet_name": "VAT 5%", "header_row": 12},
+            [notice],
+        )
+
+        dialog._show_preview_candidate(candidate)
+
+        self.assertFalse(dialog.notice_label.isHidden())
+        self.assertEqual(dialog.notice_label.text(), notice)
+        dialog.reject()
+
+    def test_remote_import_dialog_buttons_select_load_and_transform(self) -> None:
+        sql_candidate = ImportCandidate(
+            "sql_server", ["Id"], [{"Id": "1"}],
+            {"schema": "dbo", "table_name": "Sales", "object_type": "table"}, [],
+        )
+        sql = SQLServerImportDialog()
+        sql._candidate = sql_candidate
+        sql._set_action_buttons_enabled(True)
+        with (
+            patch.object(sql, "_settings", return_value={
+                "server": "localhost", "port": 1433,
+                "database": "SalesDb", "username": "analyst", "driver": "ODBC",
+            }),
+            patch("analytics_studio.sql_server_dialog.read_sql_server_object", return_value=sql_candidate),
+        ):
+            sql.transform_button.click()
+        self.assertEqual(sql.selected_action, "transform")
+
+        odata_candidate = ImportCandidate(
+            "odata", ["Id"], [{"Id": "1"}], {"entity_set_name": "Orders"}, [],
+        )
+        odata = ODataFeedImportDialog()
+        odata._candidate = odata_candidate
+        odata._set_action_buttons_enabled(True)
+        with (
+            patch.object(odata, "_root", return_value="https://example.test/odata/"),
+            patch("analytics_studio.odata_dialog.read_odata_entity_set", return_value=odata_candidate),
+        ):
+            odata.import_button.click()
+        self.assertEqual(odata.selected_action, "load")
+
+        web_candidate = ImportCandidate(
+            "web", ["Id"], [{"Id": "1"}],
+            {"resource_type": "json", "json_path": "$.data"}, [],
+        )
+        web = WebImportDialog()
+        web.url_edit.setText("https://example.test/data.json")
+        web._candidate = web_candidate
+        web._set_action_buttons_enabled(True)
+        with patch("analytics_studio.web_import_dialog.read_web_source", return_value=web_candidate):
+            web.transform_button.click()
+        self.assertEqual(web.selected_action, "transform")
+
+    def test_import_transform_stages_before_load_and_close_apply_commits(self) -> None:
+        path = self.root / "staged.csv"
+        path.write_text("Region,Revenue\nDubai,10\n", encoding="utf-8")
+        controller = self.controller()
+        project_before = copy.deepcopy(controller._project)
+
+        def choose_transform(dialog: FileImportPreviewDialog) -> int:
+            dialog._accept_candidate("transform")
+            return QDialog.DialogCode.Accepted
+
+        def close_and_apply(dialog: TransformDataDialog) -> int:
+            self.assertEqual(len(dialog._query_states), 1)
+            staged = next(iter(dialog._query_states.values()))
+            self.assertTrue(staged["is_new_source"])
+            self.assertFalse(controller.sourceLoaded)
+            self.assertEqual(controller._project, project_before)
+            dialog._accept_candidate()
+            return QDialog.DialogCode.Accepted
+
+        with (
+            patch.object(FileImportPreviewDialog, "exec", new=choose_transform),
+            patch.object(TransformDataDialog, "exec", new=close_and_apply),
+        ):
+            self.assertTrue(controller._import_file_path(path))
+
+        self.assertTrue(controller.sourceLoaded)
+        self.assertEqual(controller._rows, [{"Region": "Dubai", "Revenue": "10"}])
+        self.assertEqual(len(controller._project["data_sources"]), 1)
+        self.assertEqual(controller._project["data_sources"][0]["kind"], "csv")
+
+    def test_cancel_transform_import_leaves_project_unmodified(self) -> None:
+        path = self.root / "cancel-transform.csv"
+        path.write_text("Region,Revenue\nDubai,10\n", encoding="utf-8")
+        controller = self.controller()
+        project_before = copy.deepcopy(controller._project)
+
+        def choose_transform(dialog: FileImportPreviewDialog) -> int:
+            dialog._accept_candidate("transform")
+            return QDialog.DialogCode.Accepted
+
+        with (
+            patch.object(FileImportPreviewDialog, "exec", new=choose_transform),
+            patch.object(TransformDataDialog, "exec", return_value=QDialog.DialogCode.Rejected),
+        ):
+            self.assertFalse(controller._import_file_path(path))
+
+        self.assertFalse(controller.sourceLoaded)
+        self.assertEqual(controller._project, project_before)
+        self.assertFalse(controller.dirty)
+
+    def test_transform_import_adds_to_existing_power_query_session(self) -> None:
+        original_path = self.root / "existing.csv"
+        original_path.write_text("Region,Revenue\nDubai,10\n", encoding="utf-8")
+        imported_path = self.root / "new.csv"
+        imported_path.write_text("Region,Revenue\nAbu Dhabi,20\n", encoding="utf-8")
+        controller = self.controller()
+        self.assertTrue(controller._commit_import(original_path, parse_file(original_path)))
+        existing_id = str(controller._active_source_id)
+        project_before = copy.deepcopy(controller._project)
+
+        def choose_transform(dialog: FileImportPreviewDialog) -> int:
+            dialog._accept_candidate("transform")
+            return QDialog.DialogCode.Accepted
+
+        def close_and_apply(dialog: TransformDataDialog) -> int:
+            self.assertIn(existing_id, dialog._query_states)
+            staged_ids = {
+                query_id for query_id, query in dialog._query_states.items()
+                if query.get("is_new_source")
+            }
+            self.assertEqual(len(staged_ids), 1)
+            self.assertEqual(controller._project, project_before)
+            dialog._accept_candidate()
+            return QDialog.DialogCode.Accepted
+
+        with (
+            patch.object(FileImportPreviewDialog, "exec", new=choose_transform),
+            patch.object(TransformDataDialog, "exec", new=close_and_apply),
+        ):
+            self.assertTrue(controller._import_file_path(imported_path))
+
+        self.assertEqual(len(controller._project["data_sources"]), 2)
+        self.assertNotEqual(controller._active_source_id, existing_id)
+        self.assertEqual(controller._rows, [{"Region": "Abu Dhabi", "Revenue": "20"}])
+
+    def test_non_file_importers_stage_transform_without_committing(self) -> None:
+        controller = self.controller()
+        cases = (
+            (
+                "analytics_studio.controller.SQLServerImportDialog",
+                "_import_sql_server_dialog",
+                ImportCandidate(
+                    "sql_server", ["Id"], [{"Id": "1"}],
+                    {"schema": "dbo", "table_name": "Sales", "object_type": "table"}, [],
+                ),
+                {
+                    "connection_settings": {
+                        "server": "localhost", "port": 1433,
+                        "database": "SalesDb", "username": "analyst", "driver": "ODBC",
+                    },
+                    "password": "session-secret",
+                },
+                "sql_server",
+            ),
+            (
+                "analytics_studio.controller.ODataFeedImportDialog",
+                "_import_odata_dialog",
+                ImportCandidate(
+                    "odata", ["Id"], [{"Id": "1"}],
+                    {"entity_set_name": "Orders"}, [],
+                ),
+                {"service_root": "https://example.test/odata/"},
+                "odata",
+            ),
+            (
+                "analytics_studio.controller.WebImportDialog",
+                "_import_web_dialog",
+                ImportCandidate(
+                    "web", ["Id"], [{"Id": "1"}],
+                    {"resource_type": "json", "json_path": "$.data"}, [],
+                ),
+                {"url": "https://example.test/data.json"},
+                "web",
+            ),
+        )
+        for dialog_path, import_method, candidate, accepted_values, expected_kind in cases:
+            with self.subTest(kind=expected_kind):
+                controller = self.controller()
+                with patch(dialog_path) as dialog_type:
+                    dialog = dialog_type.return_value
+                    dialog.exec.return_value = QDialog.DialogCode.Accepted
+                    dialog.candidate = candidate
+                    dialog.selected_action = "transform"
+                    for key, value in accepted_values.items():
+                        setattr(dialog, key, value)
+                    with patch.object(
+                        controller, "transform_data_dialog", return_value=True
+                    ) as transform:
+                        self.assertTrue(getattr(controller, import_method)())
+
+                pending_candidate, pending_source = transform.call_args.kwargs[
+                    "pending_source"
+                ]
+                self.assertEqual(pending_candidate.kind, expected_kind)
+                self.assertEqual(pending_source["kind"], expected_kind)
+                self.assertEqual(controller._project["data_sources"], [])
+                if expected_kind == "sql_server":
+                    self.assertEqual(pending_source["_staged_password"], "session-secret")
+
+    def test_folder_import_can_open_power_query_before_project_commit(self) -> None:
+        folder = self.root / "monthly"
+        folder.mkdir()
+        controller = self.controller()
+        candidate = ImportCandidate(
+            "folder", ["Region"], [{"Region": "Dubai"}],
+            {"file_kind": "csv", "recursive": False}, [],
+        )
+
+        with patch("analytics_studio.controller.FolderImportDialog") as dialog_type:
+            dialog = dialog_type.return_value
+            dialog.exec.return_value = QDialog.DialogCode.Accepted
+            dialog.candidate = candidate
+            dialog.selected_action = "transform"
+            with patch.object(
+                controller, "transform_data_dialog", return_value=True
+            ) as transform:
+                self.assertTrue(controller._import_folder_path(folder))
+
+        pending_candidate, pending_source = transform.call_args.kwargs[
+            "pending_source"
+        ]
+        self.assertEqual(pending_candidate.kind, "folder")
+        self.assertEqual(pending_source["path"], str(folder.resolve()))
+        self.assertEqual(controller._project["data_sources"], [])
 
     def test_power_query_source_settings_reuses_connector_and_parser_options(self) -> None:
         controller = self.controller()
@@ -175,7 +440,7 @@ class HomeFileWorkflowTests(unittest.TestCase):
             (old_path, [("Dubai", "10")]),
             (new_path, [("Abu Dhabi", "20")]),
         ):
-            with sqlite3.connect(path) as connection:
+            with closing(sqlite3.connect(path)) as connection, connection:
                 connection.execute(
                     "CREATE TABLE Sales (Region TEXT, Amount TEXT)"
                 )
@@ -279,7 +544,7 @@ class HomeFileWorkflowTests(unittest.TestCase):
         first_path = self.root / "first.sqlite"
         second_path = self.root / "second.sqlite"
         for path in (first_path, second_path):
-            with sqlite3.connect(path) as connection:
+            with closing(sqlite3.connect(path)) as connection, connection:
                 connection.execute("CREATE TABLE Sales (Region TEXT, Amount TEXT)")
                 connection.execute("INSERT INTO Sales VALUES ('Dubai', '10')")
             candidate = parse_file(path, options={"table_name": "Sales"})
@@ -340,6 +605,67 @@ class HomeFileWorkflowTests(unittest.TestCase):
         new_measure.assert_called_once_with()
         quick_measure.assert_called_once_with()
         export.assert_called_once_with()
+
+    def test_home_excel_command_opens_preview_before_staging_transform(self) -> None:
+        controller = self.controller()
+        workbook = self.root / "vat.xlsx"
+        workbook.touch()
+        candidate = ImportCandidate(
+            "excel",
+            ["Region", "Sales"],
+            [{"Region": "Dubai", "Sales": 10}],
+            {"sheet_name": "VAT 5%"},
+            [],
+        )
+
+        self.addCleanup(self.app.processEvents)
+        engine = QQmlEngine()
+        self.addCleanup(engine.deleteLater)
+        component = QQmlComponent(engine)
+        self.addCleanup(component.deleteLater)
+        component.loadUrl(QUrl.fromLocalFile(
+            str(Path(__file__).resolve().parents[1] / "analytics_studio" / "qml" / "Main.qml")
+        ))
+        self.assertFalse(component.isError(), "\n".join(
+            error.toString() for error in component.errors()
+        ))
+        window = component.createWithInitialProperties({"studioController": controller})
+        self.assertIsNotNone(window, "\n".join(
+            error.toString() for error in component.errors()
+        ))
+        assert window is not None
+        self.addCleanup(window.deleteLater)
+        excel_commands = {
+            action["commandId"]
+            for group in window.property("dataHomeGroups").toVariant()
+            for action in group["actions"]
+        }
+        self.assertIn("data.importExcel", excel_commands)
+
+        with (
+            patch(
+                "analytics_studio.controller.QFileDialog.getOpenFileName",
+                return_value=(str(workbook), "Excel workbooks (*.xls *.xlsx *.xlsm)"),
+            ) as picker,
+            patch("analytics_studio.import_preview_dialog.FileImportPreviewDialog") as preview,
+            patch.object(controller, "transform_data_dialog", return_value=True) as transform,
+        ):
+            preview.return_value.exec.return_value = QDialog.DialogCode.Accepted
+            preview.return_value.candidate = candidate
+            preview.return_value.selected_action = "transform"
+            window.runCommand("data.importExcel")
+
+        picker.assert_called_once()
+        self.assertIn("Excel workbooks", picker.call_args.args[3])
+        preview.assert_called_once()
+        self.assertEqual(preview.call_args.args[0], workbook.resolve())
+        self.assertFalse(preview.call_args.kwargs["replacing"])
+        transform.assert_called_once()
+        staged_candidate, staged_source = transform.call_args.kwargs["pending_source"]
+        self.assertEqual(staged_candidate, candidate)
+        self.assertEqual(staged_source["kind"], "excel")
+        self.assertEqual(staged_source["query_name"], "VAT 5%")
+        self.assertFalse(controller.sourceLoaded)
 
     def test_transform_data_qml_command_reaches_dialog_and_commits_step(self) -> None:
         controller = self.controller()
@@ -768,11 +1094,254 @@ in
         engine.deleteLater()
         self.app.processEvents()
 
+    def test_model_view_new_measure_command_creates_extrema_and_recomputes(self) -> None:
+        controller = self.controller()
+        source = self.root / "sales.csv"
+        source.write_text("Region,Revenue\nEast,12\nWest,20\n", encoding="utf-8")
+        self.assertTrue(controller._commit_import(source, parse_file(source)))
+
+        engine = QQmlEngine()
+        component = QQmlComponent(engine)
+        component.loadUrl(QUrl.fromLocalFile(
+            str(Path(__file__).resolve().parents[1] / "analytics_studio" / "qml" / "Main.qml")
+        ))
+        window = component.createWithInitialProperties({"studioController": controller})
+        self.assertIsNotNone(window, "\n".join(
+            error.toString() for error in component.errors()
+        ))
+        window.show()
+        controller.setCurrentView("Model")
+        self.app.processEvents()
+        dax_button = window.findChild(QObject, "newDaxMeasureButton")
+        self.assertIsNotNone(dax_button)
+        assert dax_button is not None
+
+        measures = iter((
+            ("Highest revenue", "MAXX", "20"),
+            ("Lowest revenue", "MINX", "12"),
+        ))
+
+        def accept_extreme(dialog: MeasureDialog) -> int:
+            measure_name, function, expected = next(measures)
+            expression = f"{function}('sales', [Revenue])"
+            dialog.name_edit.setText(measure_name)
+            dialog.expression_edit.setPlainText(expression)
+            dialog.preview_button.click()
+            self.assertEqual(
+                dialog.preview_label.text(),
+                f"Current report-context result: {expected}",
+            )
+            dialog.save_button.click()
+            self.assertEqual(dialog.result(), QDialog.DialogCode.Accepted)
+            return dialog.result()
+
+        with patch.object(MeasureDialog, "exec", new=accept_extreme):
+            dax_button.click()
+            dax_button.click()
+
+        saved_measures = {
+            measure["name"]: measure for measure in controller.modelMeasures
+            if measure["name"] in {"Highest revenue", "Lowest revenue"}
+        }
+        self.assertEqual(
+            saved_measures["Highest revenue"]["expression"],
+            "MAXX('sales', [Revenue])",
+        )
+        self.assertEqual(saved_measures["Highest revenue"]["value"], "20")
+        self.assertEqual(
+            saved_measures["Lowest revenue"]["expression"],
+            "MINX('sales', [Revenue])",
+        )
+        self.assertEqual(saved_measures["Lowest revenue"]["value"], "12")
+
+        controller.add_visual("card", "Highest revenue card", 20, 20, 150, 90)
+        controller.add_field_to_well(
+            "Fields", "__dax_measure__:Highest revenue"
+        )
+        controller.add_visual("card", "Lowest revenue card", 190, 20, 150, 90)
+        controller.add_field_to_well(
+            "Fields", "__dax_measure__:Lowest revenue"
+        )
+        self.assertEqual(
+            controller.visualCardData("Highest revenue card")["value"], "20"
+        )
+        self.assertEqual(
+            controller.visualCardData("Lowest revenue card")["value"], "12"
+        )
+        project_path = self.root / "model-view-maxx.npa"
+        self.assertTrue(controller._save_to(project_path))
+
+        reopened = self.controller()
+        self.assertTrue(reopened.open_project_path(project_path))
+        self.assertEqual(reopened.reportKpis["Highest revenue"], "20")
+        self.assertEqual(reopened.reportKpis["Lowest revenue"], "12")
+        self.assertEqual(
+            reopened.visualCardData("Highest revenue card")["value"], "20"
+        )
+        self.assertEqual(
+            reopened.visualCardData("Lowest revenue card")["value"], "12"
+        )
+        source.write_text(
+            "Region,Revenue\nEast,4\nWest,25\n",
+            encoding="utf-8",
+        )
+        reopened.refresh_source()
+        self.assertEqual(reopened.reportKpis["Highest revenue"], "25")
+        self.assertEqual(reopened.reportKpis["Lowest revenue"], "4")
+        self.assertEqual(
+            reopened.visualCardData("Highest revenue card")["value"], "25"
+        )
+        self.assertEqual(
+            reopened.visualCardData("Lowest revenue card")["value"], "4"
+        )
+
+        window.deleteLater()
+        engine.deleteLater()
+        self.app.processEvents()
+
+    def test_model_table_card_opens_selected_table_in_data_view(self) -> None:
+        controller = self.controller()
+        first = self.root / "region_sales.csv"
+        first.write_text("Region,Revenue\nEast,12\n", encoding="utf-8")
+        self.assertTrue(controller._commit_import(first, parse_file(first)))
+        first_id = controller.activeTableId
+        second = self.root / "item_stock.csv"
+        second.write_text("Item,Quantity\nPens,4\n", encoding="utf-8")
+        self.assertTrue(controller._commit_import(second, parse_file(second)))
+        self.assertNotEqual(controller.activeTableId, first_id)
+        first_table = next(
+            table for table in controller.tableCatalog
+            if table["sourceId"] == first_id
+        )
+        second_table = next(
+            table for table in controller.tableCatalog
+            if table["sourceId"] == controller.activeTableId
+        )
+        controller._project["model"]["relationships"] = [{
+            "relationship_version": 1,
+            "id": "items-to-regions",
+            "from": "Items[Item]",
+            "to": "Region Sales[Region]",
+            "from_table_id": second_table["id"],
+            "from_column": "Item",
+            "to_table_id": first_table["id"],
+            "to_column": "Region",
+            "cardinality": "many_to_one",
+            "cross_filter_direction": "single",
+            "is_active": True,
+        }]
+        controller._refresh_model_view()
+        controller.stateChanged.emit()
+
+        engine = QQmlEngine()
+        component = QQmlComponent(engine)
+        component.loadUrl(QUrl.fromLocalFile(
+            str(Path(__file__).resolve().parents[1] / "analytics_studio" / "qml" / "Main.qml")
+        ))
+        window = component.createWithInitialProperties({"studioController": controller})
+        self.assertIsNotNone(window, "\n".join(
+            error.toString() for error in component.errors()
+        ))
+        window.show()
+        def cleanup_main_window() -> None:
+            # Imported test data marks the controller dirty. Keep teardown from
+            # opening the real Save/Discard/Cancel prompt in the offscreen UI.
+            controller._dirty = False
+            window.close()
+            window.deleteLater()
+            component.deleteLater()
+            engine.deleteLater()
+            self.app.processEvents()
+
+        self.addCleanup(cleanup_main_window)
+
+        def visual_descendants(item: QObject) -> list[QObject]:
+            descendants: list[QObject] = []
+            for child in item.childItems():
+                descendants.append(child)
+                descendants.extend(visual_descendants(child))
+            return descendants
+
+        window_items = visual_descendants(window.contentItem())
+        data_navigation = next(
+            (item for item in window_items if item.objectName() == "workspaceNavigationButton_Data"),
+            None,
+        )
+        model_navigation = next(
+            (item for item in window_items if item.objectName() == "workspaceNavigationButton_Model"),
+            None,
+        )
+        self.assertIsNotNone(data_navigation)
+        self.assertIsNotNone(model_navigation)
+        self.assertTrue(data_navigation.isVisible())
+        self.assertTrue(data_navigation.isEnabled())
+        self.assertTrue(model_navigation.isVisible())
+        self.assertTrue(model_navigation.isEnabled())
+        data_navigation.click()
+        self.assertEqual(controller.currentView, "Data")
+        model_navigation.click()
+        self.assertEqual(controller.currentView, "Model")
+        self.app.processEvents()
+
+        model_diagram = window.findChild(QObject, "modelRelationshipDiagram")
+        model_view = window.findChild(QObject, "modelViewRoot")
+        model_toggle = window.findChild(QObject, "toggleModelDiagramButton")
+        self.assertIsNotNone(model_diagram)
+        self.assertIsNotNone(model_view)
+        self.assertIsNotNone(model_toggle)
+        self.assertTrue(model_diagram.property("visible"))
+        self.assertEqual(len(model_view.property("diagramNodes").toVariant()), 2)
+        self.assertEqual(len(model_view.property("diagramRelationshipRoutes").toVariant()), 1)
+        relationship_link = next(
+            item for item in visual_descendants(model_diagram)
+            if item.objectName() == "modelDiagramRelationshipLink_items-to-regions"
+        )
+        self.assertTrue(relationship_link.isVisible())
+        relationship_link.click()
+        self.assertEqual(
+            str(model_view.property("selectedModelTableId")), str(second_table["id"])
+        )
+        self.assertEqual(str(model_view.property("selectedModelColumn")), "Item")
+        model_toggle.click()
+        self.assertFalse(model_diagram.property("visible"))
+
+        target_id = controller.tableCatalog[0]["sourceId"]
+        table_cards = window.findChild(QObject, "modelTableCardsFlow")
+        self.assertIsNotNone(table_cards)
+
+        table_buttons = [
+            item for item in visual_descendants(table_cards)
+            if item.objectName() == "openModelTableDataButton"
+        ]
+        self.assertEqual(len(table_buttons), 2)
+        for button in table_buttons:
+            self.assertTrue(button.property("enabled"))
+        target_button = next(
+            button for button in table_buttons
+            if button.property("tableSourceId") == target_id
+        )
+        target_headers = next(
+            table["headers"]
+            for table in controller.tableCatalog
+            if table["sourceId"] == target_id
+        )
+
+        with patch.object(controller, "selectTable", return_value=False) as select_table:
+            target_button.click()
+        select_table.assert_called_once_with(target_id)
+        self.assertEqual(controller.currentView, "Model")
+
+        target_button.click()
+        self.assertEqual(controller.activeTableId, target_id)
+        self.assertEqual(controller.currentView, "Data")
+        self.assertEqual(controller.headers, target_headers)
+        self.assertIsNotNone(window.findChild(QObject, "dataViewTable"))
+
     def test_transform_dialog_previews_step_order_and_returns_only_after_accept(self) -> None:
         raw = parse_pasted_table("Region,Revenue\nEast,12\nWest,20")
         dialog = TransformDataDialog(raw)
-        self.assertEqual(dialog.windowTitle(), "Power Query Editor")
-        self.assertIn("Power Query M", dialog.findChildren(QLabel)[1].text())
+        self.assertEqual(dialog.windowTitle(), "Current Query - Power Query Editor")
+        self.assertIn("Power Query M", dialog.advanced_editor_button.toolTip())
         self.assertIsNotNone(dialog.findChild(QObject, "openPowerQueryMEditorButton"))
         dialog.operation_combo.setCurrentIndex(
             dialog.operation_combo.findData("convert_type")
@@ -885,13 +1454,36 @@ in
 
         for operation, button in dialog.ribbon_command_buttons.items():
             with self.subTest(operation=operation):
-                button.click()
-                self.assertEqual(dialog.operation_combo.currentData(), operation)
+                self.assertIsNotNone(button)
+                if operation not in dialog._STEP_OPERATIONS_WITHOUT_SETTINGS:
+                    if operation == "add_custom_column":
+                        previous_operation = dialog.operation_combo.currentData()
+
+                        def accept_column(editor: CustomColumnDialog) -> int:
+                            self.assertEqual(
+                                [editor.column_list.item(index).text()
+                                 for index in range(editor.column_list.count())],
+                                ["Region", "Revenue"],
+                            )
+                            editor.reject()
+                            return editor.result()
+
+                        with patch.object(
+                            CustomColumnDialog, "exec", new=accept_column
+                        ):
+                            button.click()
+                        self.assertEqual(
+                            dialog.operation_combo.currentData(), previous_operation
+                        )
+                        self.assertEqual(dialog.step_list.count(), 0)
+                    else:
+                        button.click()
+                        self.assertEqual(dialog.operation_combo.currentData(), operation)
 
         dialog.ribbon_tabs.setCurrentIndex(3)
         schema_button = next(
             button for button in dialog.ribbon_tabs.currentWidget().findChildren(QToolButton)
-            if button.text() == "Schema\nview"
+            if " ".join(button.text().split()).casefold() == "schema view"
         )
         schema_button.click()
         self.assertIs(dialog.preview_tabs.currentWidget(), dialog.schema_table)
@@ -906,7 +1498,7 @@ in
 
         preview_toggle = next(
             button for button in dialog.ribbon_tabs.currentWidget().findChildren(QToolButton)
-            if button.text() == "Data\npreview"
+            if " ".join(button.text().split()).casefold() == "data preview"
         )
         preview_toggle.click()
         self.assertTrue(dialog.preview.isHidden())
@@ -915,12 +1507,12 @@ in
 
         steps_toggle = next(
             button for button in dialog.ribbon_tabs.currentWidget().findChildren(QToolButton)
-            if button.text() == "Applied\nsteps"
+            if button.objectName() == "powerQueryQuerySettingsToggleButton"
         )
         steps_toggle.click()
-        self.assertTrue(dialog.steps_panel.isHidden())
+        self.assertTrue(dialog.settings_steps_pane.isHidden())
         steps_toggle.click()
-        self.assertFalse(dialog.steps_panel.isHidden())
+        self.assertFalse(dialog.settings_steps_pane.isHidden())
 
         self.assertEqual(dialog.advanced_editor_button.objectName(), "openPowerQueryMEditorButton")
         self.assertIn(dialog.advanced_editor_button, dialog.ribbon_tabs.currentWidget().findChildren(QToolButton))
@@ -932,10 +1524,48 @@ in
         dialog.ribbon_tabs.setCurrentIndex(4)
         add_step = next(
             button for button in dialog.ribbon_tabs.currentWidget().findChildren(QToolButton)
-            if button.text() == "Add / new\nstep"
+            if " ".join(button.text().split()).casefold() == "add step"
         )
         add_step.click()
         self.assertEqual(dialog._steps[-1], {"op": "trim_text", "column": "Revenue"})
+
+    def test_power_query_count_rows_applies_saves_reopens_and_refreshes(self) -> None:
+        source = self.root / "sales.csv"
+        source.write_text("Name\nAda\nLin\nMo\n", encoding="utf-8")
+        controller = self.controller()
+        self.assertTrue(controller._commit_import(source, parse_file(source)))
+        source_id = controller._active_source_id
+
+        def accept_count_rows(dialog: TransformDataDialog) -> QDialog.DialogCode:
+            dialog.ribbon_command_buttons["count_rows"].click()
+            self.assertEqual(dialog._preview_candidate.rows, [{"Count": 3}])
+            dialog._accept_candidate()
+            return QDialog.DialogCode.Accepted
+
+        with patch.object(TransformDataDialog, "exec", new=accept_count_rows):
+            self.assertTrue(controller.transform_data_dialog())
+
+        self.assertEqual(controller._rows, [{"Count": 3}])
+        source_record = next(
+            item for item in controller._project["data_sources"]
+            if item["id"] == source_id
+        )
+        self.assertEqual(source_record["transform_steps"], [{"op": "count_rows"}])
+        table = next(
+            item for item in controller._project["model"]["tables"]
+            if item.get("source_id") == source_id
+        )
+        self.assertEqual(table["column_types"], {"Count": "whole_number"})
+
+        project_path = self.root / "count-rows.npa"
+        self.assertTrue(controller._save_to(project_path))
+        reopened = self.controller()
+        self.assertTrue(reopened.open_project_path(project_path))
+        self.assertEqual(reopened._rows, [{"Count": 3}])
+
+        source.write_text("Name\nAda\nLin\nMo\nKai\n", encoding="utf-8")
+        reopened.refresh_source()
+        self.assertEqual(reopened._rows, [{"Count": 4}])
 
     def test_power_query_session_applies_independent_queries_as_one_transaction(self) -> None:
         controller = self.controller()
@@ -1119,11 +1749,13 @@ in
                 )
             )
             dialog.ribbon_tabs.setCurrentIndex(home_index)
-            reference_button = next(
-                button for button in dialog.ribbon_tabs.currentWidget().findChildren(QToolButton)
-                if button.text() == "Reference\nquery"
+            manage_button = dialog.findChild(QToolButton, "powerQueryManageQueriesButton")
+            self.assertIsNotNone(manage_button)
+            reference_action = next(
+                action for action in manage_button.menu().actions()
+                if action.text() == "Reference Query"
             )
-            reference_button.click()
+            reference_action.trigger()
             reference_id = dialog._active_query_id
             reference = dialog._query_states[reference_id]
             self.assertEqual(reference["query_definition"], {
@@ -1195,11 +1827,13 @@ in
                 if dialog.ribbon_tabs.tabText(index) == "Home"
             )
             dialog.ribbon_tabs.setCurrentIndex(home_index)
-            reference_button = next(
-                button for button in dialog.ribbon_tabs.currentWidget().findChildren(QToolButton)
-                if button.text() == "Reference\nquery"
+            manage_button = dialog.findChild(QToolButton, "powerQueryManageQueriesButton")
+            self.assertIsNotNone(manage_button)
+            reference_action = next(
+                action for action in manage_button.menu().actions()
+                if action.text() == "Reference Query"
             )
-            reference_button.click()
+            reference_action.trigger()
             reference_id = dialog._active_query_id
             created["id"] = reference_id
 
@@ -2204,8 +2838,11 @@ in
 
         controller.refresh_source()
 
+        # Refresh succeeds: the conversion failure is a cell error in the query
+        # result and loads into the model as a blank.
         self.assertEqual(len(controller._rows), 1)
-        error = controller._rows[0]["Revenue"]
+        self.assertIsNone(controller._rows[0]["Revenue"])
+        error = controller._query_candidates[controller._active_source_id].rows[0]["Revenue"]
         self.assertIsInstance(error, PowerQueryCellError)
         self.assertEqual((error.value, error.target_type, error.row), (
             "not-a-number", "decimal_number", 1,
@@ -2237,16 +2874,22 @@ in
         self.assertTrue(controller._commit_transform_steps(
             source_id, [convert_step], converted, previewed_source=raw,
         ))
-        current = controller._loaded_candidates[source_id]
-        error = current.rows[3]["Value"]
+        # The query result keeps the typed errors; the loaded model has blanks
+        # at the DataFormat.Error cells, as Power BI Desktop's model does.
+        error = controller._query_candidates[source_id].rows[3]["Value"]
         self.assertIsInstance(error, PowerQueryCellError)
         self.assertEqual((error.reason, error.value, error.target_type, error.row), (
             "DataFormat.Error", "bad", "whole_number", 4,
         ))
+        current = controller._loaded_candidates[source_id]
+        self.assertIsNone(current.rows[3]["Value"])
+        self.assertEqual(
+            [row["Value"] for row in current.rows[:3]], [0, None, None],
+        )
         profile = controller.profileColumn("Value")
         self.assertEqual(
             (profile["nullCount"], profile["emptyCount"], profile["errorCount"]),
-            (1, 0, 2),
+            (3, 0, 0),
         )
         self.assertEqual(
             (controller.profileColumn("Note")["nullCount"],

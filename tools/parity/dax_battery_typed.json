@@ -1,0 +1,3738 @@
+{
+ "powerbi_version": "2.157.879.0 (26.08)+da30fe74eb0b8a8786ab7326b69c400a0e951831",
+ "frozen": "2026-10-21",
+ "items": [
+  {
+   "expr": "AND(TRUE(),FALSE())",
+   "powerbi": "False"
+  },
+  {
+   "expr": "OR(TRUE(),FALSE())",
+   "powerbi": "True"
+  },
+  {
+   "expr": "NOT(TRUE())",
+   "powerbi": "False"
+  },
+  {
+   "expr": "TRUE()&&FALSE()",
+   "powerbi": "False"
+  },
+  {
+   "expr": "TRUE()||FALSE()",
+   "powerbi": "True"
+  },
+  {
+   "expr": "NOT(1)",
+   "powerbi": "False"
+  },
+  {
+   "expr": "NOT(0)",
+   "powerbi": "True"
+  },
+  {
+   "expr": "NOT(BLANK())",
+   "powerbi": "True"
+  },
+  {
+   "expr": "AND(1,0)",
+   "powerbi": "False"
+  },
+  {
+   "expr": "OR(0,2)",
+   "powerbi": "True"
+  },
+  {
+   "expr": "AND(BLANK(),TRUE())",
+   "powerbi": "False"
+  },
+  {
+   "expr": "OR(BLANK(),TRUE())",
+   "powerbi": "True"
+  },
+  {
+   "expr": "1=1",
+   "powerbi": "True"
+  },
+  {
+   "expr": "1<>1",
+   "powerbi": "False"
+  },
+  {
+   "expr": "1<2",
+   "powerbi": "True"
+  },
+  {
+   "expr": "\"a\"=\"A\"",
+   "powerbi": "True"
+  },
+  {
+   "expr": "\"a\"=\"b\"",
+   "powerbi": "False"
+  },
+  {
+   "expr": "\"abc\"<\"abd\"",
+   "powerbi": "True"
+  },
+  {
+   "expr": "\"a\"<\"B\"",
+   "powerbi": "True"
+  },
+  {
+   "expr": "\"B\"<\"a\"",
+   "powerbi": "False"
+  },
+  {
+   "expr": "\"\u00e9\"=\"\u00c9\"",
+   "powerbi": "True"
+  },
+  {
+   "expr": "TRUE()=TRUE()",
+   "powerbi": "True"
+  },
+  {
+   "expr": "TRUE()=1",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 19) DAX comparison operations do not support comparing values of type True/False with values of type Integer. Consider using the VALUE or FORMAT function to convert one of the values.\""
+  },
+  {
+   "expr": "1=TRUE()",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 19) DAX comparison operations do not support comparing values of type Integer with values of type True/False. Consider using the VALUE or FORMAT function to convert one of the values.\""
+  },
+  {
+   "expr": "\"1\"=1",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 19) DAX comparison operations do not support comparing values of type Text with values of type Integer. Consider using the VALUE or FORMAT function to convert one of the values.\""
+  },
+  {
+   "expr": "BLANK()=0",
+   "powerbi": "True"
+  },
+  {
+   "expr": "BLANK()=\"\"",
+   "powerbi": "True"
+  },
+  {
+   "expr": "0=BLANK()",
+   "powerbi": "True"
+  },
+  {
+   "expr": "\"\"=BLANK()",
+   "powerbi": "True"
+  },
+  {
+   "expr": "BLANK()=BLANK()",
+   "powerbi": "True"
+  },
+  {
+   "expr": "BLANK()<1",
+   "powerbi": "True"
+  },
+  {
+   "expr": "BLANK()>-1",
+   "powerbi": "True"
+  },
+  {
+   "expr": "\"a\"<>\"A\"",
+   "powerbi": "False"
+  },
+  {
+   "expr": "TRUE()>FALSE()",
+   "powerbi": "True"
+  },
+  {
+   "expr": "\"a\"=1",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 19) DAX comparison operations do not support comparing values of type Text with values of type Integer. Consider using the VALUE or FORMAT function to convert one of the values.\""
+  },
+  {
+   "expr": "\"a\"&\"b\"",
+   "powerbi": "ab"
+  },
+  {
+   "expr": "\"a\"&1",
+   "powerbi": "a1"
+  },
+  {
+   "expr": "1&2",
+   "powerbi": "12"
+  },
+  {
+   "expr": "\"a\"&BLANK()",
+   "powerbi": "a"
+  },
+  {
+   "expr": "BLANK()&BLANK()",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "\"a\"&TRUE()",
+   "powerbi": "aTRUE"
+  },
+  {
+   "expr": "1.5&\"\"",
+   "powerbi": "1.5"
+  },
+  {
+   "expr": "1E20&\"\"",
+   "powerbi": "1E+20"
+  },
+  {
+   "expr": "0.1+0.2&\"\"",
+   "powerbi": "0.3"
+  },
+  {
+   "expr": "CONCATENATE(\"a\",\"b\")",
+   "powerbi": "ab"
+  },
+  {
+   "expr": "CONCATENATE(\"a\",1)",
+   "powerbi": "a1"
+  },
+  {
+   "expr": "LEN(\"hello\")",
+   "powerbi": "5"
+  },
+  {
+   "expr": "LEN(\"\")",
+   "powerbi": "0"
+  },
+  {
+   "expr": "LEN(BLANK())",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "LEN(12.50)",
+   "powerbi": "4"
+  },
+  {
+   "expr": "LEN(TRUE())",
+   "powerbi": "4"
+  },
+  {
+   "expr": "UPPER(\"ab\")",
+   "powerbi": "AB"
+  },
+  {
+   "expr": "LOWER(\"AB\")",
+   "powerbi": "ab"
+  },
+  {
+   "expr": "UPPER(BLANK())",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "UPPER(1.5)",
+   "powerbi": "1.5"
+  },
+  {
+   "expr": "LEFT(\"hello\",2)",
+   "powerbi": "he"
+  },
+  {
+   "expr": "LEFT(\"hello\")",
+   "powerbi": "h"
+  },
+  {
+   "expr": "LEFT(\"hello\",0)",
+   "powerbi": ""
+  },
+  {
+   "expr": "LEFT(\"hello\",10)",
+   "powerbi": "hello"
+  },
+  {
+   "expr": "LEFT(\"hello\",-1)",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 19) An argument of function 'LEFT' has the wrong data type or has an invalid value.\""
+  },
+  {
+   "expr": "RIGHT(\"hello\",2)",
+   "powerbi": "lo"
+  },
+  {
+   "expr": "RIGHT(\"hello\")",
+   "powerbi": "o"
+  },
+  {
+   "expr": "MID(\"hello\",2,3)",
+   "powerbi": "ell"
+  },
+  {
+   "expr": "MID(\"hello\",0,3)",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 19) An argument of function 'MID' has the wrong data type or has an invalid value.\""
+  },
+  {
+   "expr": "MID(\"hello\",2,100)",
+   "powerbi": "ello"
+  },
+  {
+   "expr": "MID(\"hello\",10,3)",
+   "powerbi": ""
+  },
+  {
+   "expr": "TRIM(\"  a   b  \")",
+   "powerbi": "a b"
+  },
+  {
+   "expr": "TRIM(BLANK())",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "LEFT(12345,2)",
+   "powerbi": "12"
+  },
+  {
+   "expr": "LEFT(\"hello\",1.5)",
+   "powerbi": "he"
+  },
+  {
+   "expr": "LEFT(\"hello\",BLANK())",
+   "powerbi": ""
+  },
+  {
+   "expr": "SUBSTITUTE(\"banana\",\"a\",\"o\")",
+   "powerbi": "bonono"
+  },
+  {
+   "expr": "SUBSTITUTE(\"banana\",\"a\",\"o\",2)",
+   "powerbi": "banona"
+  },
+  {
+   "expr": "SUBSTITUTE(\"Banana\",\"a\",\"o\")",
+   "powerbi": "Bonono"
+  },
+  {
+   "expr": "REPLACE(\"hello\",2,2,\"XY\")",
+   "powerbi": "hXYlo"
+  },
+  {
+   "expr": "REPT(\"ab\",3)",
+   "powerbi": "ababab"
+  },
+  {
+   "expr": "REPT(\"ab\",0)",
+   "powerbi": ""
+  },
+  {
+   "expr": "FIND(\"l\",\"hello\")",
+   "powerbi": "3"
+  },
+  {
+   "expr": "FIND(\"L\",\"hello\")",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 19) The search Text provided to function 'FIND' could not be found in the given text.\""
+  },
+  {
+   "expr": "FIND(\"z\",\"hello\",1,-1)",
+   "powerbi": "-1"
+  },
+  {
+   "expr": "SEARCH(\"L\",\"hello\")",
+   "powerbi": "3"
+  },
+  {
+   "expr": "SEARCH(\"z\",\"hello\",1,0)",
+   "powerbi": "0"
+  },
+  {
+   "expr": "EXACT(\"a\",\"A\")",
+   "powerbi": "False"
+  },
+  {
+   "expr": "EXACT(\"a\",\"a\")",
+   "powerbi": "True"
+  },
+  {
+   "expr": "VALUE(\"12.5\")",
+   "powerbi": "12.5"
+  },
+  {
+   "expr": "VALUE(\"abc\")",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 19) Cannot convert value 'abc' of type Text to type Number.\""
+  },
+  {
+   "expr": "VALUE(\" 12 \")",
+   "powerbi": "12"
+  },
+  {
+   "expr": "VALUE(\"1,234\")",
+   "powerbi": "1234"
+  },
+  {
+   "expr": "VALUE(\"\")",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 19) Cannot convert value '' of type Text to type Number.\""
+  },
+  {
+   "expr": "VALUE(BLANK())",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "FIXED(1234.567,1)",
+   "powerbi": "1,234.6"
+  },
+  {
+   "expr": "FIXED(1234.567,1,TRUE())",
+   "powerbi": "1234.6"
+  },
+  {
+   "expr": "FIXED(1234.567)",
+   "powerbi": "1,234.57"
+  },
+  {
+   "expr": "UNICHAR(65)",
+   "powerbi": "A"
+  },
+  {
+   "expr": "UNICODE(\"A\")",
+   "powerbi": "65"
+  },
+  {
+   "expr": "UNICODE(\"\")",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "CODE(\"A\")",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 19) Failed to resolve name 'CODE'. It is not a valid table, variable, or function name.\""
+  },
+  {
+   "expr": "CHAR(65)",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 19) Failed to resolve name 'CHAR'. It is not a valid table, variable, or function name.\""
+  },
+  {
+   "expr": "FORMAT(1234.5,\"#,0.0\")",
+   "powerbi": "1,234.5"
+  },
+  {
+   "expr": "FORMAT(0.256,\"0.0%\")",
+   "powerbi": "25.6%"
+  },
+  {
+   "expr": "FORMAT(5,\"000\")",
+   "powerbi": "005"
+  },
+  {
+   "expr": "FORMAT(TRUE(),\"\")",
+   "powerbi": "True"
+  },
+  {
+   "expr": "FORMAT(1234.5,\"General Number\")",
+   "powerbi": "1234.5"
+  },
+  {
+   "expr": "FORMAT(1234.5,\"Currency\")",
+   "powerbi": "$1,234.50"
+  },
+  {
+   "expr": "FORMAT(1234.5,\"Fixed\")",
+   "powerbi": "1234.50"
+  },
+  {
+   "expr": "FORMAT(1234.5,\"Standard\")",
+   "powerbi": "1,234.50"
+  },
+  {
+   "expr": "FORMAT(0.5,\"Percent\")",
+   "powerbi": "50.00%"
+  },
+  {
+   "expr": "FORMAT(1234.5,\"0.00\")",
+   "powerbi": "1234.50"
+  },
+  {
+   "expr": "FORMAT(-5,\"0.0\")",
+   "powerbi": "-5.0"
+  },
+  {
+   "expr": "FORMAT(1234.5,\"#,##0\")",
+   "powerbi": "1,235"
+  },
+  {
+   "expr": "FORMAT(BLANK(),\"0\")",
+   "powerbi": ""
+  },
+  {
+   "expr": "FORMAT(\"abc\",\"@\")",
+   "powerbi": "abc"
+  },
+  {
+   "expr": "FORMAT(1234.5,\"\")",
+   "powerbi": "1234.5"
+  },
+  {
+   "expr": "FORMAT(1234.5,\"0.0E+0\")",
+   "powerbi": "1.2E+3"
+  },
+  {
+   "expr": "FORMAT(1,\"Yes/No\")",
+   "powerbi": "Yes"
+  },
+  {
+   "expr": "FORMAT(0,\"True/False\")",
+   "powerbi": "False"
+  },
+  {
+   "expr": "FORMAT(1234.5,\"0\")",
+   "powerbi": "1235"
+  },
+  {
+   "expr": "FORMAT(2.5,\"0\")",
+   "powerbi": "3"
+  },
+  {
+   "expr": "FORMAT(3.5,\"0\")",
+   "powerbi": "4"
+  },
+  {
+   "expr": "FORMAT(0.125,\"0.00\")",
+   "powerbi": "0.13"
+  },
+  {
+   "expr": "FORMAT(1234,\"#\")",
+   "powerbi": "1234"
+  },
+  {
+   "expr": "IF(TRUE(),\"a\",\"b\")",
+   "powerbi": "a"
+  },
+  {
+   "expr": "IF(FALSE(),\"a\",\"b\")",
+   "powerbi": "b"
+  },
+  {
+   "expr": "IF(TRUE(),\"a\")",
+   "powerbi": "a"
+  },
+  {
+   "expr": "IF(FALSE(),\"a\")",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "IF(TRUE(),\"a\",1)",
+   "powerbi": "a"
+  },
+  {
+   "expr": "IF(TRUE(),1,\"a\")",
+   "powerbi": "1"
+  },
+  {
+   "expr": "IF(FALSE(),1,\"a\")",
+   "powerbi": "a"
+  },
+  {
+   "expr": "IF(TRUE(),TRUE(),FALSE())",
+   "powerbi": "True"
+  },
+  {
+   "expr": "IF(1,\"y\",\"n\")",
+   "powerbi": "y"
+  },
+  {
+   "expr": "IF(0,\"y\",\"n\")",
+   "powerbi": "n"
+  },
+  {
+   "expr": "IF(BLANK(),\"y\",\"n\")",
+   "powerbi": "n"
+  },
+  {
+   "expr": "IF(\"a\",\"y\",\"n\")",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 22) Cannot convert value 'a' of type Text to type True/False.\""
+  },
+  {
+   "expr": "IF(TRUE(),BLANK(),1)",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "SWITCH(2,1,\"a\",2,\"b\",\"c\")",
+   "powerbi": "b"
+  },
+  {
+   "expr": "SWITCH(3,1,\"a\",2,\"b\",\"c\")",
+   "powerbi": "c"
+  },
+  {
+   "expr": "SWITCH(3,1,\"a\",2,\"b\")",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "SWITCH(\"x\",\"x\",1,\"y\",2)",
+   "powerbi": "1"
+  },
+  {
+   "expr": "SWITCH(\"X\",\"x\",1,\"y\",2)",
+   "powerbi": "1"
+  },
+  {
+   "expr": "SWITCH(TRUE(),1>2,\"a\",2>1,\"b\",\"c\")",
+   "powerbi": "b"
+  },
+  {
+   "expr": "SWITCH(TRUE(),FALSE(),\"a\")",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "SWITCH(BLANK(),0,\"zero\",BLANK(),\"blank\",\"other\")",
+   "powerbi": "blank"
+  },
+  {
+   "expr": "SWITCH(0,BLANK(),\"blank\",0,\"zero\",\"other\")",
+   "powerbi": "zero"
+  },
+  {
+   "expr": "SWITCH(1,1,\"a\",1,\"b\")",
+   "powerbi": "a"
+  },
+  {
+   "expr": "SWITCH(TRUE(),TRUE(),1,TRUE(),2)",
+   "powerbi": "1"
+  },
+  {
+   "expr": "ISBLANK(BLANK())",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISBLANK(0)",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISBLANK(\"\")",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISBLANK(\"a\")",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISBLANK(1/0)",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISBLANK(TRUE())",
+   "powerbi": "False"
+  },
+  {
+   "expr": "COALESCE(BLANK(),\"a\")",
+   "powerbi": "a"
+  },
+  {
+   "expr": "COALESCE(BLANK(),BLANK())",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COALESCE(\"\",1)",
+   "powerbi": ""
+  },
+  {
+   "expr": "IFERROR(1/0,\"x\")",
+   "powerbi": "x"
+  },
+  {
+   "expr": "IFERROR(VALUE(\"z\"),\"bad\")",
+   "powerbi": "bad"
+  },
+  {
+   "expr": "IFERROR(\"a\",\"b\")",
+   "powerbi": "a"
+  },
+  {
+   "expr": "ISERROR(1/0)",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISERROR(1)",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISNUMBER(1)",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISNUMBER(\"1\")",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISTEXT(\"a\")",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISTEXT(1)",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISTEXT(BLANK())",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISNONTEXT(\"a\")",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISNONTEXT(BLANK())",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISLOGICAL(TRUE())",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISLOGICAL(1)",
+   "powerbi": "False"
+  },
+  {
+   "expr": "CONVERT(\"1\",INTEGER)",
+   "powerbi": "1"
+  },
+  {
+   "expr": "CONVERT(1.5,STRING)",
+   "powerbi": "1.5"
+  },
+  {
+   "expr": "INT(\"5\")",
+   "powerbi": "5"
+  },
+  {
+   "expr": "\"5\"+1",
+   "powerbi": "6"
+  },
+  {
+   "expr": "1+\"a\"",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 21) Cannot convert value 'a' of type Text to type Number.\""
+  },
+  {
+   "expr": "\"5\"*\"2\"",
+   "powerbi": "10"
+  },
+  {
+   "expr": "-\"5\"",
+   "powerbi": "-5"
+  },
+  {
+   "expr": "TRUE()+1",
+   "powerbi": "2"
+  },
+  {
+   "expr": "TRUE()+TRUE()",
+   "powerbi": "2"
+  },
+  {
+   "expr": "-TRUE()",
+   "powerbi": "-1"
+  },
+  {
+   "expr": "\"1\"=1+0",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 19) DAX comparison operations do not support comparing values of type Text with values of type Integer. Consider using the VALUE or FORMAT function to convert one of the values.\""
+  },
+  {
+   "expr": "2^3",
+   "powerbi": "8"
+  },
+  {
+   "expr": "2^0.5",
+   "powerbi": "1.4142135623731"
+  },
+  {
+   "expr": "-2^2",
+   "powerbi": "-4"
+  },
+  {
+   "expr": "(-2)^2",
+   "powerbi": "4"
+  },
+  {
+   "expr": "2^-1",
+   "powerbi": "0.5"
+  },
+  {
+   "expr": "2^3^2",
+   "powerbi": "512"
+  },
+  {
+   "expr": "0^0",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 19) An argument of function 'POWER' has the wrong data type or the result is too large or too small.\""
+  },
+  {
+   "expr": "2*3^2",
+   "powerbi": "18"
+  },
+  {
+   "expr": "-2^2+1",
+   "powerbi": "-3"
+  },
+  {
+   "expr": "2^BLANK()",
+   "powerbi": "1"
+  },
+  {
+   "expr": "BLANK()^2",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "4^0.5",
+   "powerbi": "2"
+  },
+  {
+   "expr": "10^15",
+   "powerbi": "1E+15"
+  },
+  {
+   "expr": "10^20",
+   "powerbi": "1E+20"
+  },
+  {
+   "expr": "POWER(2,3)",
+   "powerbi": "8"
+  },
+  {
+   "expr": "TRUE()^2",
+   "powerbi": "1"
+  },
+  {
+   "expr": "1&\"\"",
+   "powerbi": "1"
+  },
+  {
+   "expr": "100&\"\"",
+   "powerbi": "100"
+  },
+  {
+   "expr": "1000000&\"\"",
+   "powerbi": "1000000"
+  },
+  {
+   "expr": "123456789012345&\"\"",
+   "powerbi": "123456789012345"
+  },
+  {
+   "expr": "1234567890123456&\"\"",
+   "powerbi": "1234567890123456"
+  },
+  {
+   "expr": "12345678901234567&\"\"",
+   "powerbi": "12345678901234567"
+  },
+  {
+   "expr": "0.1&\"\"",
+   "powerbi": "0.1"
+  },
+  {
+   "expr": "0.00001&\"\"",
+   "powerbi": "0.00001"
+  },
+  {
+   "expr": "0.000001&\"\"",
+   "powerbi": "0.000001"
+  },
+  {
+   "expr": "0.0000001&\"\"",
+   "powerbi": "0.0000001"
+  },
+  {
+   "expr": "1/3&\"\"",
+   "powerbi": "0.333333333333333"
+  },
+  {
+   "expr": "(1/3)&\"\"",
+   "powerbi": "0.333333333333333"
+  },
+  {
+   "expr": "2/3&\"\"",
+   "powerbi": "0.666666666666667"
+  },
+  {
+   "expr": "100000000000000000000&\"\"",
+   "powerbi": "1E+20"
+  },
+  {
+   "expr": "1E15&\"\"",
+   "powerbi": "1E+15"
+  },
+  {
+   "expr": "1E14&\"\"",
+   "powerbi": "100000000000000"
+  },
+  {
+   "expr": "123456789012345678&\"\"",
+   "powerbi": "123456789012345678"
+  },
+  {
+   "expr": "-0.5&\"\"",
+   "powerbi": "-0.5"
+  },
+  {
+   "expr": "(0.1+0.2)&\"\"",
+   "powerbi": "0.3"
+  },
+  {
+   "expr": "1.0E-5&\"\"",
+   "powerbi": "0.00001"
+  },
+  {
+   "expr": "123.456&\"\"",
+   "powerbi": "123.456"
+  },
+  {
+   "expr": "1E-10&\"\"",
+   "powerbi": "0.0000000001"
+  },
+  {
+   "expr": "1.5E+300&\"\"",
+   "powerbi": "1.5E+300"
+  },
+  {
+   "expr": "(1E300*1E10)&\"\"",
+   "powerbi": "inf"
+  },
+  {
+   "expr": "(2^53)&\"\"",
+   "powerbi": "9.00719925474099E+15"
+  },
+  {
+   "expr": "(2^53+1)&\"\"",
+   "powerbi": "9.00719925474099E+15"
+  },
+  {
+   "expr": "12345.6789012345678&\"\"",
+   "powerbi": "12345.6789012346"
+  },
+  {
+   "expr": "0.30000000000000004&\"\"",
+   "powerbi": "0.3"
+  },
+  {
+   "expr": "VAR x=2 RETURN x*3",
+   "powerbi": "6"
+  },
+  {
+   "expr": "VAR x=2 VAR y=x+1 RETURN x*y",
+   "powerbi": "6"
+  },
+  {
+   "expr": "VAR x=\"a\" RETURN x&\"b\"",
+   "powerbi": "ab"
+  },
+  {
+   "expr": "VAR x=1 RETURN VAR y=2 RETURN x+y",
+   "powerbi": "3"
+  },
+  {
+   "expr": "VAR x=BLANK() RETURN ISBLANK(x)",
+   "powerbi": "True"
+  },
+  {
+   "expr": "VAR x=SUM(Facts[Sales]) RETURN x/2",
+   "powerbi": "15.75"
+  },
+  {
+   "expr": "VAR x=1 RETURN IF(x>0,\"p\",\"n\")",
+   "powerbi": "p"
+  },
+  {
+   "expr": "VAR _a=1 RETURN _a",
+   "powerbi": "1"
+  },
+  {
+   "expr": "VAR x=1 VAR x=2 RETURN x",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 33) Variable 'x' cannot be created because a table or variable with the same name already exists.\""
+  },
+  {
+   "expr": "1/0",
+   "powerbi": "Infinity"
+  },
+  {
+   "expr": "-1/0",
+   "powerbi": "-Infinity"
+  },
+  {
+   "expr": "0/0",
+   "powerbi": "NaN"
+  },
+  {
+   "expr": "2/BLANK()",
+   "powerbi": "Infinity"
+  },
+  {
+   "expr": "BLANK()/2",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "BLANK()/BLANK()",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "1E308*10",
+   "powerbi": "Infinity"
+  },
+  {
+   "expr": "-1E308*10",
+   "powerbi": "-Infinity"
+  },
+  {
+   "expr": "1/0-1/0",
+   "powerbi": "NaN"
+  },
+  {
+   "expr": "1/0+1",
+   "powerbi": "Infinity"
+  },
+  {
+   "expr": "1/0>1",
+   "powerbi": "True"
+  },
+  {
+   "expr": "1/0=1/0",
+   "powerbi": "True"
+  },
+  {
+   "expr": "0/0=0/0",
+   "powerbi": "False"
+  },
+  {
+   "expr": "0/0>1",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ROUND(1/0,2)",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 19) An argument of function 'ROUND' has the wrong data type or the result is too large or too small.\""
+  },
+  {
+   "expr": "ABS(-1/0)",
+   "powerbi": "Infinity"
+  },
+  {
+   "expr": "-(1/0)",
+   "powerbi": "-Infinity"
+  },
+  {
+   "expr": "IF(1/0>1,\"inf\",\"fin\")",
+   "powerbi": "inf"
+  },
+  {
+   "expr": "IF(0/0>1,\"a\",\"b\")",
+   "powerbi": "b"
+  },
+  {
+   "expr": "IF(0/0=0/0,\"eq\",\"ne\")",
+   "powerbi": "ne"
+  },
+  {
+   "expr": "1/0&\"\"",
+   "powerbi": "inf"
+  },
+  {
+   "expr": "(1/0)*0",
+   "powerbi": "NaN"
+  },
+  {
+   "expr": "SQRT(-1)",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 19) An argument of function 'SQRT' has the wrong data type or the result is too large or too small.\""
+  },
+  {
+   "expr": "LN(0)",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 19) An argument of function 'LN' has the wrong data type or the result is too large or too small.\""
+  },
+  {
+   "expr": "LN(-1)",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 19) An argument of function 'LN' has the wrong data type or the result is too large or too small.\""
+  },
+  {
+   "expr": "EXP(1000)",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 19) An argument of function 'EXP' has the wrong data type or the result is too large or too small.\""
+  },
+  {
+   "expr": "MOD(1,0)",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 19) Division by zero has occurred when evaluating function 'MOD'.\""
+  },
+  {
+   "expr": "INT(1/0)",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 19) An argument of function 'INT' has the wrong data type or the result is too large or too small.\""
+  },
+  {
+   "expr": "DIVIDE(1,0)",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "DIVIDE(1,0,5)",
+   "powerbi": "5"
+  },
+  {
+   "expr": "1/0<2",
+   "powerbi": "False"
+  },
+  {
+   "expr": "0/0<2",
+   "powerbi": "False"
+  },
+  {
+   "expr": "2<0/0",
+   "powerbi": "False"
+  },
+  {
+   "expr": "INT(0/0)",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 19) An argument of function 'INT' has the wrong data type or the result is too large or too small.\""
+  },
+  {
+   "expr": "SUM(Facts[Sales])/0",
+   "powerbi": "Infinity"
+  },
+  {
+   "expr": "SUM(Facts[Sales])*(1/0)",
+   "powerbi": "Infinity"
+  },
+  {
+   "expr": "SIGN(1/0)",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 19) An argument of function 'SIGN' has the wrong data type or the result is too large or too small.\""
+  },
+  {
+   "expr": "ISERROR(0/0)",
+   "powerbi": "True"
+  },
+  {
+   "expr": "IFERROR(0/0,9)",
+   "powerbi": "9"
+  },
+  {
+   "expr": "FORMAT(1/0,\"0\")",
+   "powerbi": "inf"
+  },
+  {
+   "expr": "ABS(BLANK())",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "ABS(-5)",
+   "powerbi": "5"
+  },
+  {
+   "expr": "ABS(\"5\")",
+   "powerbi": "5"
+  },
+  {
+   "expr": "ABS(TRUE())",
+   "powerbi": "1"
+  },
+  {
+   "expr": "(0.00001*1)&\"\"",
+   "powerbi": "0.00001"
+  },
+  {
+   "expr": "(1E-10*1)&\"\"",
+   "powerbi": "0.0000000001"
+  },
+  {
+   "expr": "(1/100000)&\"\"",
+   "powerbi": "0.00001"
+  },
+  {
+   "expr": "(1/10000)&\"\"",
+   "powerbi": "0.0001"
+  },
+  {
+   "expr": "(1/1000000)&\"\"",
+   "powerbi": "0.000001"
+  },
+  {
+   "expr": "(1/3)*0.00001&\"\"",
+   "powerbi": "3.33333333333333E-06"
+  },
+  {
+   "expr": "(2^-20)&\"\"",
+   "powerbi": "9.5367431640625E-07"
+  },
+  {
+   "expr": "(1E5*1E10)&\"\"",
+   "powerbi": "1E+15"
+  },
+  {
+   "expr": "(1E14*10)&\"\"",
+   "powerbi": "1E+15"
+  },
+  {
+   "expr": "(1E14*1)&\"\"",
+   "powerbi": "100000000000000"
+  },
+  {
+   "expr": "(123456789012345*10)&\"\"",
+   "powerbi": "1234567890123450"
+  },
+  {
+   "expr": "(1E15+1)&\"\"",
+   "powerbi": "1E+15"
+  },
+  {
+   "expr": "(1E15*1)&\"\"",
+   "powerbi": "1E+15"
+  },
+  {
+   "expr": "(1E16/10)&\"\"",
+   "powerbi": "1E+15"
+  },
+  {
+   "expr": "999999999999999*1&\"\"",
+   "powerbi": "999999999999999"
+  },
+  {
+   "expr": "(999999999999999*1)&\"\"",
+   "powerbi": "999999999999999"
+  },
+  {
+   "expr": "(0.1*3)&\"\"",
+   "powerbi": "0.3"
+  },
+  {
+   "expr": "(1498307.2599999998)&\"\"",
+   "powerbi": "1498307.26"
+  },
+  {
+   "expr": "1498307.26&\"\"",
+   "powerbi": "1498307.26"
+  },
+  {
+   "expr": "(1234.5*100)&\"\"",
+   "powerbi": "123450"
+  },
+  {
+   "expr": "(1E-5*1)&\"\"",
+   "powerbi": "0.00001"
+  },
+  {
+   "expr": "(1E-4*1)&\"\"",
+   "powerbi": "0.0001"
+  },
+  {
+   "expr": "(0.5*0.00001)&\"\"",
+   "powerbi": "0.000005"
+  },
+  {
+   "expr": "1234567.891&\"\"",
+   "powerbi": "1234567.891"
+  },
+  {
+   "expr": "(100/3)&\"\"",
+   "powerbi": "33.3333333333333"
+  },
+  {
+   "expr": "(1E10/3)&\"\"",
+   "powerbi": "3333333333.33333"
+  },
+  {
+   "expr": "(1E12/3)&\"\"",
+   "powerbi": "333333333333.333"
+  },
+  {
+   "expr": "(1E14/3)&\"\"",
+   "powerbi": "33333333333333.3"
+  },
+  {
+   "expr": "(1E15/3)&\"\"",
+   "powerbi": "333333333333333"
+  },
+  {
+   "expr": "(1E15/7)&\"\"",
+   "powerbi": "142857142857143"
+  },
+  {
+   "expr": "-1234.5678&\"\"",
+   "powerbi": "-1234.5678"
+  },
+  {
+   "expr": "(0-1E-5)&\"\"",
+   "powerbi": "-0.00001"
+  },
+  {
+   "expr": "(1E-5/3)&\"\"",
+   "powerbi": "3.33333333333333E-06"
+  },
+  {
+   "expr": "(5*1E-6)&\"\"",
+   "powerbi": "0.000005"
+  },
+  {
+   "expr": "VALUE(\"$5\")",
+   "powerbi": "5"
+  },
+  {
+   "expr": "VALUE(\"5%\")",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 19) Cannot convert value '5%' of type Text to type Number.\""
+  },
+  {
+   "expr": "VALUE(\"1e3\")",
+   "powerbi": "1000"
+  },
+  {
+   "expr": "VALUE(\"-5\")",
+   "powerbi": "-5"
+  },
+  {
+   "expr": "VALUE(\"+5\")",
+   "powerbi": "5"
+  },
+  {
+   "expr": "VALUE(\"0x10\")",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 19) Cannot convert value '0x10' of type Text to type Number.\""
+  },
+  {
+   "expr": "VALUE(\"(5)\")",
+   "powerbi": "-5"
+  },
+  {
+   "expr": "VALUE(\"1.\")",
+   "powerbi": "1"
+  },
+  {
+   "expr": "VALUE(\".5\")",
+   "powerbi": "0.5"
+  },
+  {
+   "expr": "VALUE(\"5-\")",
+   "powerbi": "-5"
+  },
+  {
+   "expr": "\"5,5\"+0",
+   "powerbi": "55"
+  },
+  {
+   "expr": "\" 5 \"+0",
+   "powerbi": "5"
+  },
+  {
+   "expr": "\"1e2\"+0",
+   "powerbi": "100"
+  },
+  {
+   "expr": "\"$5\"+0",
+   "powerbi": "5"
+  },
+  {
+   "expr": "\"TRUE\"+0",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 19) Cannot convert value 'TRUE' of type Text to type Number.\""
+  },
+  {
+   "expr": "TRUE()&\"\"",
+   "powerbi": "TRUE"
+  },
+  {
+   "expr": "FALSE()&\"\"",
+   "powerbi": "FALSE"
+  },
+  {
+   "expr": "\"x\"&(1=1)",
+   "powerbi": "xTRUE"
+  },
+  {
+   "expr": "LEN(1/3)",
+   "powerbi": "17"
+  },
+  {
+   "expr": "LEFT(1/3,5)",
+   "powerbi": "0.333"
+  },
+  {
+   "expr": "UPPER(TRUE())",
+   "powerbi": "TRUE"
+  },
+  {
+   "expr": "LOWER(1E20)",
+   "powerbi": "1e+20"
+  },
+  {
+   "expr": "LEN(0.1+0.2)",
+   "powerbi": "3"
+  },
+  {
+   "expr": "LEN(1E-5*1)",
+   "powerbi": "7"
+  },
+  {
+   "expr": "(0.000012345*1)&\"\"",
+   "powerbi": "0.000012345"
+  },
+  {
+   "expr": "(0.0000123456789*1)&\"\"",
+   "powerbi": "0.0000123456789"
+  },
+  {
+   "expr": "(1.5E-7*1)&\"\"",
+   "powerbi": "0.00000015"
+  },
+  {
+   "expr": "(1/12345678)&\"\"",
+   "powerbi": "8.10000066420005E-08"
+  },
+  {
+   "expr": "(1/1234)&\"\"",
+   "powerbi": "8.10372771474878E-04"
+  },
+  {
+   "expr": "(1/16384)&\"\"",
+   "powerbi": "0.00006103515625"
+  },
+  {
+   "expr": "(1/65536)&\"\"",
+   "powerbi": "1.52587890625E-05"
+  },
+  {
+   "expr": "(1/1048576)&\"\"",
+   "powerbi": "9.5367431640625E-07"
+  },
+  {
+   "expr": "(1/3000000)&\"\"",
+   "powerbi": "3.33333333333333E-07"
+  },
+  {
+   "expr": "(1/8000000)&\"\"",
+   "powerbi": "0.000000125"
+  },
+  {
+   "expr": "(1/1000000000)&\"\"",
+   "powerbi": "0.000000001"
+  },
+  {
+   "expr": "(1/100000000000)&\"\"",
+   "powerbi": "0.00000000001"
+  },
+  {
+   "expr": "(1/7)&\"\"",
+   "powerbi": "0.142857142857143"
+  },
+  {
+   "expr": "(1/70000)&\"\"",
+   "powerbi": "1.42857142857143E-05"
+  },
+  {
+   "expr": "(1/700000)&\"\"",
+   "powerbi": "1.42857142857143E-06"
+  },
+  {
+   "expr": "(1/7000000)&\"\"",
+   "powerbi": "1.42857142857143E-07"
+  },
+  {
+   "expr": "(1/32)&\"\"",
+   "powerbi": "0.03125"
+  },
+  {
+   "expr": "(1/1024)&\"\"",
+   "powerbi": "0.0009765625"
+  },
+  {
+   "expr": "(1/1048576)*3&\"\"",
+   "powerbi": "2.86102294921875E-06"
+  },
+  {
+   "expr": "10^-6&\"\"",
+   "powerbi": "0.000001"
+  },
+  {
+   "expr": "10^-3&\"\"",
+   "powerbi": "0.001"
+  },
+  {
+   "expr": "10^2&\"\"",
+   "powerbi": "100"
+  },
+  {
+   "expr": "2^10&\"\"",
+   "powerbi": "1024"
+  },
+  {
+   "expr": "(1/3)*1000000&\"\"",
+   "powerbi": "333333.333333333"
+  },
+  {
+   "expr": "(2/3)*1E15&\"\"",
+   "powerbi": "666666666666667"
+  },
+  {
+   "expr": "1E300&\"\"",
+   "powerbi": "1E+300"
+  },
+  {
+   "expr": "0.5E-3&\"\"",
+   "powerbi": "0.0005"
+  },
+  {
+   "expr": "(1/2^30)&\"\"",
+   "powerbi": "9.31322574615479E-10"
+  },
+  {
+   "expr": "(1/0)&\"\"",
+   "powerbi": "inf"
+  },
+  {
+   "expr": "(-1/0)&\"\"",
+   "powerbi": "-inf"
+  },
+  {
+   "expr": "(0/0)&\"\"",
+   "powerbi": "-nan(ind)"
+  },
+  {
+   "expr": "CONCATENATE(BLANK(),BLANK())",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "CONCATENATE(BLANK(),\"a\")",
+   "powerbi": "a"
+  },
+  {
+   "expr": "LEFT(\"hello\",2.5)",
+   "powerbi": "hel"
+  },
+  {
+   "expr": "LEFT(\"hello\",0.5)",
+   "powerbi": "h"
+  },
+  {
+   "expr": "LEFT(BLANK(),2)",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "RIGHT(\"hello\",2.5)",
+   "powerbi": "llo"
+  },
+  {
+   "expr": "MID(\"hello\",2.5,1)",
+   "powerbi": "l"
+  },
+  {
+   "expr": "ISNUMBER(TRUE())",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISNUMBER(BLANK())",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISLOGICAL(BLANK())",
+   "powerbi": "False"
+  },
+  {
+   "expr": "0/0<>0/0",
+   "powerbi": "True"
+  },
+  {
+   "expr": "1/0<>1/0",
+   "powerbi": "False"
+  },
+  {
+   "expr": "1/0=-1/0",
+   "powerbi": "False"
+  },
+  {
+   "expr": "-1/0<1/0",
+   "powerbi": "True"
+  },
+  {
+   "expr": "\"a\"<>\"b\"",
+   "powerbi": "True"
+  },
+  {
+   "expr": "\"a\"<=\"A\"",
+   "powerbi": "True"
+  },
+  {
+   "expr": "\"b\">=\"A\"",
+   "powerbi": "True"
+  },
+  {
+   "expr": "FALSE()<TRUE()",
+   "powerbi": "True"
+  },
+  {
+   "expr": "NOT(\"a\")",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 23) Cannot convert value 'a' of type Text to type True/False.\""
+  },
+  {
+   "expr": "AND(\"a\",TRUE())",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 23) Cannot convert value 'a' of type Text to type True/False.\""
+  },
+  {
+   "expr": "TRUE()&&1",
+   "powerbi": "True"
+  },
+  {
+   "expr": "1&&0",
+   "powerbi": "False"
+  },
+  {
+   "expr": "BLANK()&&TRUE()",
+   "powerbi": "False"
+  },
+  {
+   "expr": "\"abc\"&\"def\"&\"g\"",
+   "powerbi": "abcdefg"
+  },
+  {
+   "expr": "1+2&3+4",
+   "powerbi": "37"
+  },
+  {
+   "expr": "1&2=12",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 19) DAX comparison operations do not support comparing values of type Text with values of type Integer. Consider using the VALUE or FORMAT function to convert one of the values.\""
+  },
+  {
+   "expr": "\"a\"&\"b\"=\"AB\"",
+   "powerbi": "True"
+  },
+  {
+   "expr": "-\"a\"",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 20) Cannot convert value 'a' of type Text to type Number.\""
+  },
+  {
+   "expr": "UPPER(\"hello world\")",
+   "powerbi": "HELLO WORLD"
+  },
+  {
+   "expr": "LOWER(\"Hello World\")",
+   "powerbi": "hello world"
+  },
+  {
+   "expr": "TRIM(\"a  b   c\")",
+   "powerbi": "a b c"
+  },
+  {
+   "expr": "LEN(\" a \")",
+   "powerbi": "3"
+  },
+  {
+   "expr": "SUBSTITUTE(\"aaa\",\"a\",\"bb\")",
+   "powerbi": "bbbbbb"
+  },
+  {
+   "expr": "SUBSTITUTE(\"aaa\",\"\",\"x\")",
+   "powerbi": "aaa"
+  },
+  {
+   "expr": "SUBSTITUTE(\"abc\",\"B\",\"x\")",
+   "powerbi": "abc"
+  },
+  {
+   "expr": "SUBSTITUTE(BLANK(),\"a\",\"b\")",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "REPLACE(\"hello\",1,0,\"X\")",
+   "powerbi": "Xhello"
+  },
+  {
+   "expr": "REPLACE(\"hello\",10,2,\"X\")",
+   "powerbi": "helloX"
+  },
+  {
+   "expr": "REPT(\"-\",5)",
+   "powerbi": "-----"
+  },
+  {
+   "expr": "REPT(\"ab\",-1)",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 19) An argument of function 'REPT' has the wrong data type or has an invalid value.\""
+  },
+  {
+   "expr": "FIND(\"l\",\"hello\",4)",
+   "powerbi": "4"
+  },
+  {
+   "expr": "FIND(\"l\",\"hello\",5)",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 19) The search Text provided to function 'FIND' could not be found in the given text.\""
+  },
+  {
+   "expr": "FIND(\"\",\"hello\")",
+   "powerbi": "1"
+  },
+  {
+   "expr": "SEARCH(\"l?\",\"hello\")",
+   "powerbi": "3"
+  },
+  {
+   "expr": "SEARCH(\"h*o\",\"hello\")",
+   "powerbi": "1"
+  },
+  {
+   "expr": "SEARCH(\"~?\",\"a?b\")",
+   "powerbi": "2"
+  },
+  {
+   "expr": "EXACT(BLANK(),\"\")",
+   "powerbi": "True"
+  },
+  {
+   "expr": "EXACT(1,\"1\")",
+   "powerbi": "True"
+  },
+  {
+   "expr": "FIXED(1234.5678,2,FALSE())",
+   "powerbi": "1,234.57"
+  },
+  {
+   "expr": "FIXED(0.5,0)",
+   "powerbi": "1"
+  },
+  {
+   "expr": "FIXED(2.5,0)",
+   "powerbi": "3"
+  },
+  {
+   "expr": "FIXED(-1234.5,0)",
+   "powerbi": "-1,235"
+  },
+  {
+   "expr": "FIXED(1234.5,-2)",
+   "powerbi": "1,200"
+  },
+  {
+   "expr": "FIXED(1234567.891,2)",
+   "powerbi": "1,234,567.89"
+  },
+  {
+   "expr": "UNICODE(\"abc\")",
+   "powerbi": "97"
+  },
+  {
+   "expr": "VALUE(\"1,234.5\")",
+   "powerbi": "1234.5"
+  },
+  {
+   "expr": "VALUE(\"  \")",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 19) Cannot convert value '' of type Text to type Number.\""
+  },
+  {
+   "expr": "VALUE(\"-\")",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 19) Cannot convert value '-' of type Text to type Number.\""
+  },
+  {
+   "expr": "VALUE(\"1e\")",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 19) Cannot convert value '1e' of type Text to type Number.\""
+  },
+  {
+   "expr": "\"abc\"=\"\"",
+   "powerbi": "False"
+  },
+  {
+   "expr": "LEN(\"a\"&\"b\")",
+   "powerbi": "2"
+  },
+  {
+   "expr": "IF(1=1,\"yes\",\"no\")&\"!\"",
+   "powerbi": "yes!"
+  },
+  {
+   "expr": "IF(\"a\"=\"A\",1,0)",
+   "powerbi": "1"
+  },
+  {
+   "expr": "SWITCH(TRUE(),1>2,\"a\",\"none\")",
+   "powerbi": "none"
+  },
+  {
+   "expr": "SWITCH(\"b\",\"a\",1,\"b\",2,3)",
+   "powerbi": "2"
+  },
+  {
+   "expr": "SWITCH(1,1,\"x\")",
+   "powerbi": "x"
+  },
+  {
+   "expr": "SWITCH(2,1,\"x\")",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "IF(ISBLANK(BLANK()),\"blank\",\"not\")",
+   "powerbi": "blank"
+  },
+  {
+   "expr": "COALESCE(BLANK(),BLANK(),\"z\")",
+   "powerbi": "z"
+  },
+  {
+   "expr": "COALESCE(1,\"a\")",
+   "powerbi": "1"
+  },
+  {
+   "expr": "IFERROR(1,\"a\")",
+   "powerbi": "1"
+  },
+  {
+   "expr": "IFERROR(\"a\"+1,\"b\")",
+   "powerbi": "b"
+  },
+  {
+   "expr": "IFERROR(1/0,0)",
+   "powerbi": "0"
+  },
+  {
+   "expr": "IFERROR(LEFT(\"a\",-1),\"neg\")",
+   "powerbi": "neg"
+  },
+  {
+   "expr": "NOT(AND(TRUE(),FALSE()))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "IF(AND(1>0,2>1),\"ok\",\"no\")",
+   "powerbi": "ok"
+  },
+  {
+   "expr": "IF(OR(1>5,2>1),\"ok\",\"no\")",
+   "powerbi": "ok"
+  },
+  {
+   "expr": "TRUE()=(1=1)",
+   "powerbi": "True"
+  },
+  {
+   "expr": "(1=1)=(2=2)",
+   "powerbi": "True"
+  },
+  {
+   "expr": "(1=2)=(2=3)",
+   "powerbi": "True"
+  },
+  {
+   "expr": "\"x\"&IF(TRUE(),1,2)",
+   "powerbi": "x1"
+  },
+  {
+   "expr": "VAR a=1 VAR b=a+1 VAR c=a+b RETURN a&b&c",
+   "powerbi": "123"
+  },
+  {
+   "expr": "VAR a=\"x\" RETURN LEN(a)",
+   "powerbi": "1"
+  },
+  {
+   "expr": "VAR a=1 RETURN VAR a2=a+1 RETURN a2*2",
+   "powerbi": "4"
+  },
+  {
+   "expr": "VAR t=IF(1>0,\"pos\",\"neg\") RETURN UPPER(t)",
+   "powerbi": "POS"
+  },
+  {
+   "expr": "VAR a=BLANK() RETURN a+1",
+   "powerbi": "1"
+  },
+  {
+   "expr": "VAR a=1/0 RETURN a>1",
+   "powerbi": "True"
+  },
+  {
+   "expr": "VAR a=SUM(Facts[Sales]) VAR b=SUM(Facts[Quantity]) RETURN a-b",
+   "powerbi": "16.5"
+  },
+  {
+   "expr": "VAR a=2 RETURN a^3",
+   "powerbi": "8"
+  },
+  {
+   "expr": "VAR a=TRUE() RETURN NOT(a)",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR a=1 RETURN CALCULATE(SUM(Facts[Sales]),Facts[Quantity]>a)",
+   "powerbi": "33"
+  },
+  {
+   "expr": "SUMX(Facts,LEN(Facts[Region]))",
+   "powerbi": "25"
+  },
+  {
+   "expr": "SUMX(Facts,IF(Facts[Region]=\"East\",1,0))",
+   "powerbi": "3"
+  },
+  {
+   "expr": "COUNTX(Facts,IF(Facts[Region]=\"East\",1,BLANK()))",
+   "powerbi": "3"
+  },
+  {
+   "expr": "SUMX(Facts,Facts[Quantity]^2)",
+   "powerbi": "55"
+  },
+  {
+   "expr": "IF(SUM(Facts[Sales])>20,\"big\",\"small\")",
+   "powerbi": "big"
+  },
+  {
+   "expr": "IF(SUM(Facts[Sales])>20,SUM(Facts[Sales]),\"n/a\")",
+   "powerbi": "31.5"
+  },
+  {
+   "expr": "\"Total: \"&SUM(Facts[Sales])",
+   "powerbi": "Total: 31.5"
+  },
+  {
+   "expr": "\"Rows: \"&COUNTROWS(Facts)",
+   "powerbi": "Rows: 6"
+  },
+  {
+   "expr": "FORMAT(SUM(Facts[Sales]),\"0.0\")",
+   "powerbi": "31.5"
+  },
+  {
+   "expr": "SUMX(Facts,Facts[Sales]/0)",
+   "powerbi": "NaN"
+  },
+  {
+   "expr": "SUMX(Facts,IF(Facts[Quantity]=0,0,Facts[Sales]/Facts[Quantity]))",
+   "powerbi": "10.9166666666667"
+  },
+  {
+   "expr": "AVERAGEX(Facts,Facts[Sales]/Facts[Quantity])",
+   "powerbi": "NaN"
+  },
+  {
+   "expr": "MAXX(Facts,Facts[Sales]/Facts[Quantity])",
+   "powerbi": "6.66666666666667"
+  },
+  {
+   "expr": "MINX(Facts,Facts[Sales]/Facts[Quantity])",
+   "powerbi": "-1.5"
+  },
+  {
+   "expr": "SUMX(Facts,Facts[Sales]/Facts[Quantity])",
+   "powerbi": "NaN"
+  },
+  {
+   "expr": "MAXX(Facts,1/0)",
+   "powerbi": "Infinity"
+  },
+  {
+   "expr": "MINX(Facts,-1/0)",
+   "powerbi": "-Infinity"
+  },
+  {
+   "expr": "SUMX(Facts,1/0)",
+   "powerbi": "Infinity"
+  },
+  {
+   "expr": "AVERAGEX(Facts,1/0)",
+   "powerbi": "Infinity"
+  },
+  {
+   "expr": "MAXX(Facts,0/0)",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MINX(Facts,0/0)",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "IF(1/0,1,2)",
+   "powerbi": "1"
+  },
+  {
+   "expr": "IF(0/0,1,2)",
+   "powerbi": "1"
+  },
+  {
+   "expr": "NOT(1/0)",
+   "powerbi": "False"
+  },
+  {
+   "expr": "NOT(0/0)",
+   "powerbi": "False"
+  },
+  {
+   "expr": "AND(1/0,1)",
+   "powerbi": "True"
+  },
+  {
+   "expr": "OR(1/0,0)",
+   "powerbi": "True"
+  },
+  {
+   "expr": "OR(0/0,0)",
+   "powerbi": "True"
+  },
+  {
+   "expr": "SWITCH(1/0,1,1,2)",
+   "powerbi": "2"
+  },
+  {
+   "expr": "SWITCH(1/0,1/0,\"inf\",2)",
+   "powerbi": "inf"
+  },
+  {
+   "expr": "IFERROR(IF(1/0,1,2),9)",
+   "powerbi": "1"
+  },
+  {
+   "expr": "IFERROR(IF(NOT(1/0),1,2),9)",
+   "powerbi": "2"
+  },
+  {
+   "expr": "IFERROR(1/0>1,2)",
+   "powerbi": "True"
+  },
+  {
+   "expr": "IFERROR(SWITCH(1/0,1,1,2),5)",
+   "powerbi": "2"
+  },
+  {
+   "expr": "IFERROR(IF(ISBLANK(1/0),1,2),5)",
+   "powerbi": "2"
+  },
+  {
+   "expr": "SUMX(Facts,Facts[Sales]*1E200*1E200)",
+   "powerbi": "NaN"
+  },
+  {
+   "expr": "1E308+1E308",
+   "powerbi": "Infinity"
+  },
+  {
+   "expr": "ABS(-1E308*10)",
+   "powerbi": "Infinity"
+  },
+  {
+   "expr": "IF(TRUE(),FALSE(),TRUE())+1",
+   "powerbi": "1"
+  },
+  {
+   "expr": "COALESCE(1/0,5)",
+   "powerbi": "Infinity"
+  },
+  {
+   "expr": "MAX(1/0,2)",
+   "powerbi": "Infinity"
+  },
+  {
+   "expr": "-(0/0)",
+   "powerbi": "NaN"
+  },
+  {
+   "expr": "0/0+1",
+   "powerbi": "NaN"
+  },
+  {
+   "expr": "POWER(10,400)",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 19) An argument of function 'POWER' has the wrong data type or the result is too large or too small.\""
+  },
+  {
+   "expr": "10^400",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 19) An argument of function 'POWER' has the wrong data type or the result is too large or too small.\""
+  },
+  {
+   "expr": "EXP(710)",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 19) An argument of function 'EXP' has the wrong data type or the result is too large or too small.\""
+  },
+  {
+   "expr": "1/0*0",
+   "powerbi": "NaN"
+  },
+  {
+   "expr": "1/BLANK()",
+   "powerbi": "Infinity"
+  },
+  {
+   "expr": "0/BLANK()",
+   "powerbi": "NaN"
+  },
+  {
+   "expr": "DIVIDE(1/0,2)",
+   "powerbi": "Infinity"
+  },
+  {
+   "expr": "ROUND(5.5,0)",
+   "powerbi": "6"
+  },
+  {
+   "expr": "ROUND(-5.5,0)",
+   "powerbi": "-6"
+  },
+  {
+   "expr": "ROUND(2.5,0)",
+   "powerbi": "3"
+  },
+  {
+   "expr": "INT(-0.5)",
+   "powerbi": "-1"
+  },
+  {
+   "expr": "CALCULATE(SUM(Facts[Sales]),Facts[Sales]>AVERAGE(Facts[Sales]))",
+   "powerbi": "30.5"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]>AVERAGE(Facts[Quantity]))",
+   "powerbi": "3"
+  },
+  {
+   "expr": "CALCULATE(SUM(Facts[Sales]),Facts[Region]=IF(1>0,\"East\",\"West\"))",
+   "powerbi": "11.5"
+  },
+  {
+   "expr": "CALCULATE(SUM(Facts[Sales]),Facts[Region]=\"E\"&\"ast\")",
+   "powerbi": "11.5"
+  },
+  {
+   "expr": "CALCULATE(SUM(Facts[Sales]),Facts[Quantity]>=1+1)",
+   "powerbi": "33"
+  },
+  {
+   "expr": "CALCULATE(SUM(Facts[Sales]),Facts[Quantity]<MAX(Facts[Quantity])-2)",
+   "powerbi": "9"
+  },
+  {
+   "expr": "VAR r=\"West\" RETURN CALCULATE(SUM(Facts[Sales]),Facts[Region]=r)",
+   "powerbi": "20"
+  },
+  {
+   "expr": "VAR m=AVERAGE(Facts[Quantity]) RETURN CALCULATE(SUM(Facts[Sales]),Facts[Quantity]>m)",
+   "powerbi": "22.5"
+  },
+  {
+   "expr": "CALCULATE(SUM(Facts[Sales]),Facts[Quantity]>2*AVERAGE(Facts[Quantity]))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "CALCULATE(SUM(Facts[Sales]),Facts[Region]<>LEFT(\"East\",2)&\"st\")",
+   "powerbi": "20"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(Facts),Facts[Sales]>SUM(Facts[Sales])/COUNTROWS(Facts))",
+   "powerbi": "2"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(Facts),Facts[Sales]>BLANK())",
+   "powerbi": "3"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(Facts),Facts[Note]=BLANK())",
+   "powerbi": "2"
+  },
+  {
+   "expr": "CALCULATE(SUM(Facts[Sales]),Facts[Region]=UPPER(\"east\"))",
+   "powerbi": "11.5"
+  },
+  {
+   "expr": "COUNTROWS(VALUES(Facts[Region]))",
+   "powerbi": "3"
+  },
+  {
+   "expr": "COUNTROWS(DISTINCT(Facts[Region]))",
+   "powerbi": "3"
+  },
+  {
+   "expr": "SELECTEDVALUE(Facts[Region],\"many\")",
+   "powerbi": "many"
+  },
+  {
+   "expr": "SELECTEDVALUE(Facts[Region])",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "HASONEVALUE(Facts[Region])",
+   "powerbi": "False"
+  },
+  {
+   "expr": "CALCULATE(SELECTEDVALUE(Facts[Region]),Facts[Region]=\"East\")",
+   "powerbi": "East"
+  },
+  {
+   "expr": "CALCULATE(HASONEVALUE(Facts[Region]),Facts[Region]=\"East\")",
+   "powerbi": "True"
+  },
+  {
+   "expr": "CALCULATE(SELECTEDVALUE(Facts[Region]),Facts[Region]=\"East\"||Facts[Region]=\"West\")",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "SELECTEDVALUE(Facts[Quantity],-1)",
+   "powerbi": "-1"
+  },
+  {
+   "expr": "CALCULATE(SELECTEDVALUE(Facts[Quantity]),Facts[Region]=\"North\")",
+   "powerbi": "4"
+  },
+  {
+   "expr": "CALCULATE(SELECTEDVALUE(Facts[Sales]),Facts[Region]=\"North\")",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "CALCULATE(SELECTEDVALUE(Facts[Note],\"n\"),Facts[Region]=\"North\")",
+   "powerbi": "Late"
+  },
+  {
+   "expr": "CALCULATE(SELECTEDVALUE(Facts[Note],\"n\"),Facts[Region]=\"West\")",
+   "powerbi": "n"
+  },
+  {
+   "expr": "CALCULATE(SELECTEDVALUE(Facts[Note],\"n\"),Facts[Region]=\"East\")",
+   "powerbi": "n"
+  },
+  {
+   "expr": "CALCULATE(HASONEVALUE(Facts[Note]),Facts[Region]=\"West\")",
+   "powerbi": "False"
+  },
+  {
+   "expr": "COUNTROWS(VALUES(Facts[Note]))",
+   "powerbi": "3"
+  },
+  {
+   "expr": "COUNTROWS(DISTINCT(Facts[Note]))",
+   "powerbi": "3"
+  },
+  {
+   "expr": "COUNTROWS(VALUES(Facts[Sales]))",
+   "powerbi": "6"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(VALUES(Facts[Region])),Facts[Region]=\"East\")",
+   "powerbi": "1"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(VALUES(Facts[Region])),Facts[Quantity]>2)",
+   "powerbi": "3"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(DISTINCT(Facts[Note])),Facts[Region]=\"West\")",
+   "powerbi": "2"
+  },
+  {
+   "expr": "COUNTROWS(VALUES(Facts))",
+   "powerbi": "6"
+  },
+  {
+   "expr": "COUNTROWS(DISTINCT(Facts))",
+   "powerbi": "6"
+  },
+  {
+   "expr": "SUMX(VALUES(Facts[Region]),CALCULATE(SUM(Facts[Quantity])))",
+   "powerbi": "15"
+  },
+  {
+   "expr": "MAXX(VALUES(Facts[Region]),CALCULATE(SUM(Facts[Quantity])))",
+   "powerbi": "8"
+  },
+  {
+   "expr": "COUNTX(VALUES(Facts[Region]),Facts[Region])",
+   "powerbi": "3"
+  },
+  {
+   "expr": "COUNTAX(VALUES(Facts[Region]),Facts[Region])",
+   "powerbi": "3"
+  },
+  {
+   "expr": "CONCATENATEX(DISTINCT(Facts[Region]),Facts[Region],\", \",Facts[Region],ASC)",
+   "powerbi": "East, North, West"
+  },
+  {
+   "expr": "SUMX(DISTINCT(Facts[Region]),1)",
+   "powerbi": "3"
+  },
+  {
+   "expr": "AVERAGEX(VALUES(Facts[Region]),CALCULATE(SUM(Facts[Quantity])))",
+   "powerbi": "5"
+  },
+  {
+   "expr": "MINX(DISTINCT(Facts[Quantity]),Facts[Quantity])",
+   "powerbi": "0"
+  },
+  {
+   "expr": "SUMX(VALUES(Facts[Quantity]),Facts[Quantity])",
+   "powerbi": "15"
+  },
+  {
+   "expr": "MAX(1,2)",
+   "powerbi": "2"
+  },
+  {
+   "expr": "MAX(1,BLANK())",
+   "powerbi": "1"
+  },
+  {
+   "expr": "MAX(BLANK(),-1)",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MAX(BLANK(),BLANK())",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MIN(BLANK(),1)",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MIN(3,2)",
+   "powerbi": "2"
+  },
+  {
+   "expr": "MIN(-1/0,2)",
+   "powerbi": "-Infinity"
+  },
+  {
+   "expr": "MAX(0/0,2)",
+   "powerbi": "NaN"
+  },
+  {
+   "expr": "MIN(0/0,2)",
+   "powerbi": "NaN"
+  },
+  {
+   "expr": "MAX(\"a\",\"b\")",
+   "powerbi": "b"
+  },
+  {
+   "expr": "MAX(TRUE(),FALSE())",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 23) Min or Max of booleans are not currently supported.\""
+  },
+  {
+   "expr": "MAX(1,\"a\")",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 19) Function 'MAX' does not support comparing values of type Integer with values of type Text. Consider using the VALUE or FORMAT function to convert one of the values.\""
+  },
+  {
+   "expr": "MAX(1,TRUE())",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 25) Min or Max of booleans are not currently supported.\""
+  },
+  {
+   "expr": "MAX(SUM(Facts[Sales]),20)",
+   "powerbi": "31.5"
+  },
+  {
+   "expr": "MIN(SUM(Facts[Sales]),20)",
+   "powerbi": "20"
+  },
+  {
+   "expr": "COUNTAX(Facts,Facts[Note])",
+   "powerbi": "4"
+  },
+  {
+   "expr": "MAX(Facts[Note])",
+   "powerbi": "Paid"
+  },
+  {
+   "expr": "MIN(Facts[Note])",
+   "powerbi": "Late"
+  },
+  {
+   "expr": "MAX(Facts[Region])",
+   "powerbi": "West"
+  },
+  {
+   "expr": "MIN(Facts[Region])",
+   "powerbi": "East"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]=2.5)",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]>2.5)",
+   "powerbi": "3"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]<=2.5)",
+   "powerbi": "3"
+  },
+  {
+   "expr": "CONCATENATEX(Facts,Facts[Region],\",\",Facts[Quantity],DESC)",
+   "powerbi": "East,North,West,East,East,West"
+  },
+  {
+   "expr": "CONCATENATEX(Facts,Facts[Region],\",\",Facts[Quantity])",
+   "powerbi": "West,East,East,West,North,East"
+  },
+  {
+   "expr": "CONCATENATEX(Facts,Facts[Region]&\"-\"&Facts[Quantity],\" + \",Facts[Quantity],ASC)",
+   "powerbi": "West-0 + East-1 + East-2 + West-3 + North-4 + East-5"
+  },
+  {
+   "expr": "CONCATENATEX(Facts,Facts[Region],\",\",Facts[Region],DESC)",
+   "powerbi": "West,West,North,East,East,East"
+  },
+  {
+   "expr": "CALCULATE(CONCATENATEX(Facts,Facts[Region],\",\"),Facts[Region]=\"East\")",
+   "powerbi": "East,East,East"
+  },
+  {
+   "expr": "SELECTEDVALUE(Facts[Sales])",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "CALCULATE(SELECTEDVALUE(Facts[Sales]),Facts[Quantity]=3)",
+   "powerbi": "20"
+  },
+  {
+   "expr": "CALCULATE(HASONEVALUE(Facts[Sales]),Facts[Region]=\"North\")",
+   "powerbi": "True"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(VALUES(Facts[Note])),Facts[Region]=\"East\")",
+   "powerbi": "2"
+  },
+  {
+   "expr": "SELECTEDVALUE(Facts[Quantity],\"x\")",
+   "powerbi": "x"
+  },
+  {
+   "expr": "CALCULATE(SELECTEDVALUE(Facts[Quantity],\"x\"),Facts[Quantity]=3)&\"\"",
+   "powerbi": "3"
+  },
+  {
+   "expr": "CALCULATE(SELECTEDVALUE(Facts[Region],\"x\"),Facts[Quantity]>100)",
+   "powerbi": "x"
+  },
+  {
+   "expr": "CONVERT(1.5,INTEGER)",
+   "powerbi": "2"
+  },
+  {
+   "expr": "CONVERT(2.5,INTEGER)",
+   "powerbi": "3"
+  },
+  {
+   "expr": "CONVERT(-1.5,INTEGER)",
+   "powerbi": "-2"
+  },
+  {
+   "expr": "CONVERT(\"12\",INTEGER)",
+   "powerbi": "12"
+  },
+  {
+   "expr": "CONVERT(\"1.5\",DOUBLE)",
+   "powerbi": "1.5"
+  },
+  {
+   "expr": "CONVERT(TRUE(),INTEGER)",
+   "powerbi": "1"
+  },
+  {
+   "expr": "CONVERT(1,BOOLEAN)",
+   "powerbi": "True"
+  },
+  {
+   "expr": "CONVERT(0,BOOLEAN)",
+   "powerbi": "False"
+  },
+  {
+   "expr": "CONVERT(\"TRUE\",BOOLEAN)",
+   "powerbi": "True"
+  },
+  {
+   "expr": "CONVERT(12.5,STRING)",
+   "powerbi": "12.5"
+  },
+  {
+   "expr": "CONVERT(TRUE(),STRING)",
+   "powerbi": "TRUE"
+  },
+  {
+   "expr": "CONVERT(BLANK(),INTEGER)",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "CONVERT(BLANK(),STRING)",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "CONVERT(1.239,CURRENCY)",
+   "powerbi": "1.239"
+  },
+  {
+   "expr": "CONVERT(\"abc\",INTEGER)",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 27) Cannot convert value 'abc' of type Text to type Integer.\""
+  },
+  {
+   "expr": "CONVERT(1E10,INTEGER)",
+   "powerbi": "10000000000"
+  },
+  {
+   "expr": "CONVERT(1,DATETIME)",
+   "powerbi": "12/31/1899 00:00:00"
+  },
+  {
+   "expr": "DATE(2024,1,31)&\"\"",
+   "powerbi": "1/31/2024"
+  },
+  {
+   "expr": "FORMAT(DATE(2024,1,31),\"\")",
+   "powerbi": "1/31/2024"
+  },
+  {
+   "expr": "FORMAT(DATE(2024,3,5),\"yyyy-MM-dd\")",
+   "powerbi": "2024-03-05"
+  },
+  {
+   "expr": "FORMAT(DATE(2024,3,5),\"dd/MM/yyyy\")",
+   "powerbi": "05/03/2024"
+  },
+  {
+   "expr": "FORMAT(DATE(2024,3,5),\"d\")",
+   "powerbi": "5"
+  },
+  {
+   "expr": "FORMAT(DATE(2024,3,5),\"dd\")",
+   "powerbi": "05"
+  },
+  {
+   "expr": "FORMAT(DATE(2024,3,5),\"ddd\")",
+   "powerbi": "Tue"
+  },
+  {
+   "expr": "FORMAT(DATE(2024,3,5),\"dddd\")",
+   "powerbi": "Tuesday"
+  },
+  {
+   "expr": "FORMAT(DATE(2024,3,5),\"m\")",
+   "powerbi": "3"
+  },
+  {
+   "expr": "FORMAT(DATE(2024,3,5),\"mm\")",
+   "powerbi": "03"
+  },
+  {
+   "expr": "FORMAT(DATE(2024,3,5),\"mmm\")",
+   "powerbi": "Mar"
+  },
+  {
+   "expr": "FORMAT(DATE(2024,3,5),\"mmmm\")",
+   "powerbi": "March"
+  },
+  {
+   "expr": "FORMAT(DATE(2024,3,5),\"MMM\")",
+   "powerbi": "Mar"
+  },
+  {
+   "expr": "FORMAT(DATE(2024,3,5),\"MMMM\")",
+   "powerbi": "March"
+  },
+  {
+   "expr": "FORMAT(DATE(2024,3,5),\"yy\")",
+   "powerbi": "24"
+  },
+  {
+   "expr": "FORMAT(DATE(2024,3,5),\"yyyy\")",
+   "powerbi": "2024"
+  },
+  {
+   "expr": "FORMAT(DATE(2024,3,5),\"General Date\")",
+   "powerbi": "3/5/2024"
+  },
+  {
+   "expr": "FORMAT(DATE(2024,3,5),\"Long Date\")",
+   "powerbi": "Tuesday, March 5, 2024"
+  },
+  {
+   "expr": "FORMAT(DATE(2024,3,5),\"Medium Date\")",
+   "powerbi": "05-Mar-24"
+  },
+  {
+   "expr": "FORMAT(DATE(2024,3,5),\"Short Date\")",
+   "powerbi": "3/5/2024"
+  },
+  {
+   "expr": "FORMAT(DATE(2024,3,5),\"Long Time\")",
+   "powerbi": "12:00:00 AM"
+  },
+  {
+   "expr": "FORMAT(DATE(2024,3,5),\"Short Time\")",
+   "powerbi": "00:00"
+  },
+  {
+   "expr": "FORMAT(DATE(2024,3,5),\"yyyy-MM-dd HH:mm:ss\")",
+   "powerbi": "2024-03-05 00:00:00"
+  },
+  {
+   "expr": "FORMAT(DATE(2024,3,5),\"h:mm AM/PM\")",
+   "powerbi": "12:00 AM"
+  },
+  {
+   "expr": "FORMAT(DATE(2024,3,5)+0.5,\"h:mm AM/PM\")",
+   "powerbi": "12:00 PM"
+  },
+  {
+   "expr": "FORMAT(DATE(2024,3,5)+0.75,\"hh:nn:ss\")",
+   "powerbi": "18:00:00"
+  },
+  {
+   "expr": "FORMAT(DATE(2024,3,5)+0.75,\"HH:mm:ss\")",
+   "powerbi": "18:00:00"
+  },
+  {
+   "expr": "FORMAT(DATE(2024,3,5)+0.75,\"hh:mm tt\")",
+   "powerbi": "18:00 tt"
+  },
+  {
+   "expr": "FORMAT(DATE(2024,3,5),\"q\")",
+   "powerbi": "1"
+  },
+  {
+   "expr": "FORMAT(DATE(2024,3,5),\"w\")",
+   "powerbi": "3"
+  },
+  {
+   "expr": "FORMAT(DATE(2024,3,5),\"ww\")",
+   "powerbi": "10"
+  },
+  {
+   "expr": "FORMAT(DATE(2024,3,5),\"y\")",
+   "powerbi": "65"
+  },
+  {
+   "expr": "FORMAT(DATE(2024,3,5),\"MMM yyyy\")",
+   "powerbi": "Mar 2024"
+  },
+  {
+   "expr": "FORMAT(DATE(2024,3,5),\"dd-MMM-yy\")",
+   "powerbi": "05-Mar-24"
+  },
+  {
+   "expr": "FORMAT(DATE(2024,3,5),\"ddd, dd MMM\")",
+   "powerbi": "Tue, 05 Mar"
+  },
+  {
+   "expr": "FORMAT(DATE(2024,12,25),\"dddd, MMMM d, yyyy\")",
+   "powerbi": "Wednesday, December 25, 2024"
+  },
+  {
+   "expr": "FORMAT(DATE(2024,3,5),\"ddddd\")",
+   "powerbi": "3/5/2024"
+  },
+  {
+   "expr": "FORMAT(DATE(2024,3,5),\"dddddd\")",
+   "powerbi": "Tuesday, March 5, 2024"
+  },
+  {
+   "expr": "FORMAT(DATE(2024,3,5),\"yyyy\\Qq\")",
+   "powerbi": "2024Q1"
+  },
+  {
+   "expr": "FORMAT(DATE(2024,3,5),\"\\Q\\1\")",
+   "powerbi": "Q1"
+  },
+  {
+   "expr": "FORMAT(DATE(2024,3,5),\"\"\"x\"\"yyyy\")",
+   "powerbi": "x2024"
+  },
+  {
+   "expr": "YEAR(DATE(2024,3,5))",
+   "powerbi": "2024"
+  },
+  {
+   "expr": "MONTH(DATE(2024,3,5))",
+   "powerbi": "3"
+  },
+  {
+   "expr": "DAY(DATE(2024,3,5))",
+   "powerbi": "5"
+  },
+  {
+   "expr": "HOUR(DATE(2024,3,5)+0.75)",
+   "powerbi": "18"
+  },
+  {
+   "expr": "MINUTE(DATE(2024,3,5)+0.51)",
+   "powerbi": "14"
+  },
+  {
+   "expr": "SECOND(DATE(2024,3,5)+0.5000579)",
+   "powerbi": "5"
+  },
+  {
+   "expr": "WEEKDAY(DATE(2024,3,5))",
+   "powerbi": "3"
+  },
+  {
+   "expr": "WEEKDAY(DATE(2024,3,5),2)",
+   "powerbi": "2"
+  },
+  {
+   "expr": "WEEKDAY(DATE(2024,3,5),3)",
+   "powerbi": "1"
+  },
+  {
+   "expr": "WEEKNUM(DATE(2024,3,5))",
+   "powerbi": "10"
+  },
+  {
+   "expr": "WEEKNUM(DATE(2024,1,1),2)",
+   "powerbi": "1"
+  },
+  {
+   "expr": "QUARTER(DATE(2024,12,5))",
+   "powerbi": "4"
+  },
+  {
+   "expr": "EOMONTH(DATE(2024,1,15),1)",
+   "powerbi": "02/29/2024 00:00:00"
+  },
+  {
+   "expr": "EOMONTH(DATE(2024,1,31),-1)",
+   "powerbi": "12/31/2023 00:00:00"
+  },
+  {
+   "expr": "EDATE(DATE(2024,1,31),1)",
+   "powerbi": "02/29/2024 00:00:00"
+  },
+  {
+   "expr": "EDATE(DATE(2024,3,31),-1)",
+   "powerbi": "02/29/2024 00:00:00"
+  },
+  {
+   "expr": "DATEDIFF(DATE(2024,1,1),DATE(2024,3,5),MONTH)",
+   "powerbi": "2"
+  },
+  {
+   "expr": "DATEDIFF(DATE(2024,1,1),DATE(2024,3,5),YEAR)",
+   "powerbi": "0"
+  },
+  {
+   "expr": "DATEDIFF(DATE(2024,3,5),DATE(2024,1,1),DAY)",
+   "powerbi": "-64"
+  },
+  {
+   "expr": "DATEDIFF(DATE(2024,1,1),DATE(2024,3,5),QUARTER)",
+   "powerbi": "0"
+  },
+  {
+   "expr": "DATEDIFF(DATE(2024,1,1),DATE(2024,3,5),WEEK)",
+   "powerbi": "9"
+  },
+  {
+   "expr": "DATEDIFF(DATE(2024,1,1),DATE(2024,1,1)+1.5,HOUR)",
+   "powerbi": "36"
+  },
+  {
+   "expr": "DATE(2024,13,1)",
+   "powerbi": "01/01/2025 00:00:00"
+  },
+  {
+   "expr": "DATE(2024,0,1)",
+   "powerbi": "12/01/2023 00:00:00"
+  },
+  {
+   "expr": "DATE(2024,2,30)",
+   "powerbi": "03/01/2024 00:00:00"
+  },
+  {
+   "expr": "DATE(2024,1,0)",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 19) An argument of function 'DATE' has the wrong data type or the result is too large or too small.\""
+  },
+  {
+   "expr": "DATE(1899,12,30)",
+   "powerbi": "12/30/1899 00:00:00"
+  },
+  {
+   "expr": "DATE(1900,1,1)",
+   "powerbi": "01/01/1900 00:00:00"
+  },
+  {
+   "expr": "DATE(2024,1.5,1)",
+   "powerbi": "02/01/2024 00:00:00"
+  },
+  {
+   "expr": "DATE(2024,\"3\",5)",
+   "powerbi": "03/05/2024 00:00:00"
+  },
+  {
+   "expr": "DATE(10000,1,1)",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 19) An argument of function 'DATE' has the wrong data type or the result is too large or too small.\""
+  },
+  {
+   "expr": "DATE(2024,1,1)+1",
+   "powerbi": "01/02/2024 00:00:00"
+  },
+  {
+   "expr": "DATE(2024,1,1)-1",
+   "powerbi": "12/31/2023 00:00:00"
+  },
+  {
+   "expr": "1+DATE(2024,1,1)",
+   "powerbi": "01/02/2024 00:00:00"
+  },
+  {
+   "expr": "DATE(2024,1,1)>DATE(2023,1,1)",
+   "powerbi": "True"
+  },
+  {
+   "expr": "DATE(2024,1,1)=DATE(2024,1,1)",
+   "powerbi": "True"
+  },
+  {
+   "expr": "DATE(2024,1,1)>5",
+   "powerbi": "True"
+  },
+  {
+   "expr": "DATE(2024,1,1)=\"a\"",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 19) DAX comparison operations do not support comparing values of type Date with values of type Text. Consider using the VALUE or FORMAT function to convert one of the values.\""
+  },
+  {
+   "expr": "DATE(2024,1,1)=BLANK()",
+   "powerbi": "False"
+  },
+  {
+   "expr": "MAX(DATE(2024,1,1),DATE(2023,1,1))",
+   "powerbi": "01/01/2024 00:00:00"
+  },
+  {
+   "expr": "IF(TRUE(),DATE(2024,1,1),DATE(2023,1,1))",
+   "powerbi": "01/01/2024 00:00:00"
+  },
+  {
+   "expr": "DATEVALUE(\"2024-03-05\")",
+   "powerbi": "03/05/2024 00:00:00"
+  },
+  {
+   "expr": "DATEVALUE(\"3/5/2024\")",
+   "powerbi": "03/05/2024 00:00:00"
+  },
+  {
+   "expr": "DATEVALUE(\"March 5, 2024\")",
+   "powerbi": "03/05/2024 00:00:00"
+  },
+  {
+   "expr": "DATEVALUE(\"abc\")",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 19) Cannot convert value 'abc' of type Text to type Date.\""
+  },
+  {
+   "expr": "TIMEVALUE(\"13:30\")",
+   "powerbi": "12/30/1899 13:30:00"
+  },
+  {
+   "expr": "TIME(13,30,0)",
+   "powerbi": "12/30/1899 13:30:00"
+  },
+  {
+   "expr": "TIME(25,0,0)",
+   "powerbi": "12/30/1899 01:00:00"
+  },
+  {
+   "expr": "FORMAT(TIME(13,30,0),\"h:mm AM/PM\")",
+   "powerbi": "1:30 PM"
+  },
+  {
+   "expr": "INT(DATE(2024,1,1))",
+   "powerbi": "45292"
+  },
+  {
+   "expr": "VALUE(DATE(2024,1,1))",
+   "powerbi": "45292"
+  },
+  {
+   "expr": "INT(DATE(2024,3,1)-DATE(2024,2,1))",
+   "powerbi": "29"
+  },
+  {
+   "expr": "DATE(2024,1,1)-DATE(2023,1,1)",
+   "powerbi": "12/30/1900 00:00:00"
+  },
+  {
+   "expr": "CONVERT(DATE(2024,1,1),INTEGER)",
+   "powerbi": "45292"
+  },
+  {
+   "expr": "CONVERT(DATE(2024,1,1),STRING)",
+   "powerbi": "1/1/2024"
+  },
+  {
+   "expr": "DATE(2024,1,1)+DATE(2024,1,1)",
+   "powerbi": "01/03/2148 00:00:00"
+  },
+  {
+   "expr": "YEAR(NOW())>2000",
+   "powerbi": "True"
+  },
+  {
+   "expr": "YEAR(TODAY())-YEAR(NOW())",
+   "powerbi": "0"
+  },
+  {
+   "expr": "TODAY()=INT(NOW())",
+   "powerbi": "True"
+  },
+  {
+   "expr": "TODAY()<=NOW()",
+   "powerbi": "True"
+  },
+  {
+   "expr": "HOUR(TODAY())",
+   "powerbi": "0"
+  },
+  {
+   "expr": "FORMAT(TODAY(),\"yyyy\")=FORMAT(NOW(),\"yyyy\")",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISBLANK(DATE(2024,1,1))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "YEAR(BLANK())",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MONTH(BLANK())",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "FORMAT(BLANK(),\"yyyy\")",
+   "powerbi": ""
+  },
+  {
+   "expr": "ISNUMBER(DATE(2024,1,1))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISTEXT(DATE(2024,1,1))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "LEN(DATE(2024,1,1))",
+   "powerbi": "8"
+  },
+  {
+   "expr": "LEFT(DATE(2024,1,1),4)",
+   "powerbi": "1/1/"
+  },
+  {
+   "expr": "UPPER(DATE(2024,1,1))",
+   "powerbi": "1/1/2024"
+  },
+  {
+   "expr": "SWITCH(DATE(2024,1,1),DATE(2024,1,1),\"y\",\"n\")",
+   "powerbi": "y"
+  },
+  {
+   "expr": "DATE(2024,1,1)<>DATE(2024,1,2)",
+   "powerbi": "True"
+  },
+  {
+   "expr": "COALESCE(BLANK(),DATE(2024,1,1))",
+   "powerbi": "01/01/2024 00:00:00"
+  },
+  {
+   "expr": "DATE(2024,1,1)&\" x\"",
+   "powerbi": "1/1/2024 x"
+  },
+  {
+   "expr": "DATE(2024,1,1)+0.5&\"\"",
+   "powerbi": "1/1/2024 12:00:00 PM"
+  },
+  {
+   "expr": "SUMX(Facts,YEAR(DATE(2024,Facts[Quantity],1)))",
+   "powerbi": "12143"
+  },
+  {
+   "expr": "COUNTX(Facts,DATE(2024,Facts[Quantity],1))",
+   "powerbi": "6"
+  },
+  {
+   "expr": "DATE(50,1,1)",
+   "powerbi": "01/01/1950 00:00:00"
+  },
+  {
+   "expr": "DATE(99,1,1)",
+   "powerbi": "01/01/1999 00:00:00"
+  },
+  {
+   "expr": "DATE(1000,1,1)",
+   "powerbi": "01/01/1000 00:00:00"
+  },
+  {
+   "expr": "DATE(1,1,1)",
+   "powerbi": "01/01/2001 00:00:00"
+  },
+  {
+   "expr": "DATE(0,1,1)",
+   "powerbi": "01/01/2000 00:00:00"
+  },
+  {
+   "expr": "DATE(1899,12,29)",
+   "powerbi": "12/29/1899 00:00:00"
+  },
+  {
+   "expr": "DATE(1899,12,31)",
+   "powerbi": "12/31/1899 00:00:00"
+  },
+  {
+   "expr": "DATE(1899,1,1)",
+   "powerbi": "01/01/1899 00:00:00"
+  },
+  {
+   "expr": "DATE(2024,1,-1)",
+   "powerbi": "12/30/2023 00:00:00"
+  },
+  {
+   "expr": "DATE(2024,-1,1)",
+   "powerbi": "11/01/2023 00:00:00"
+  },
+  {
+   "expr": "DATE(2024,1,32)",
+   "powerbi": "02/01/2024 00:00:00"
+  },
+  {
+   "expr": "DATE(2024,1,400)",
+   "powerbi": "02/03/2025 00:00:00"
+  },
+  {
+   "expr": "DATE(9999,12,31)",
+   "powerbi": "12/31/9999 00:00:00"
+  },
+  {
+   "expr": "DATE(9999,12,32)",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 19) An argument of function 'DATE' has the wrong data type or the result is too large or too small.\""
+  },
+  {
+   "expr": "DATE(1900,1,0)",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 19) An argument of function 'DATE' has the wrong data type or the result is too large or too small.\""
+  },
+  {
+   "expr": "TIMEVALUE(\"1:30 PM\")",
+   "powerbi": "12/30/1899 13:30:00"
+  },
+  {
+   "expr": "TIMEVALUE(\"13:30:15\")",
+   "powerbi": "12/30/1899 13:30:15"
+  },
+  {
+   "expr": "TIMEVALUE(\"1:30:15 AM\")",
+   "powerbi": "12/30/1899 01:30:15"
+  },
+  {
+   "expr": "TIMEVALUE(\"abc\")",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 19) Cannot convert value 'abc' of type Text to type Date.\""
+  },
+  {
+   "expr": "DATEVALUE(\"5 March 2024\")",
+   "powerbi": "03/05/2024 00:00:00"
+  },
+  {
+   "expr": "DATEVALUE(\"2024/03/05\")",
+   "powerbi": "03/05/2024 00:00:00"
+  },
+  {
+   "expr": "DATEVALUE(\"Mar 5, 2024\")",
+   "powerbi": "03/05/2024 00:00:00"
+  },
+  {
+   "expr": "DATEVALUE(\"05-Mar-2024\")",
+   "powerbi": "03/05/2024 00:00:00"
+  },
+  {
+   "expr": "DATEVALUE(\"2024-03-05 10:30\")",
+   "powerbi": "03/05/2024 00:00:00"
+  },
+  {
+   "expr": "DATEVALUE(\"3/5/24\")",
+   "powerbi": "03/05/2024 00:00:00"
+  },
+  {
+   "expr": "DATEVALUE(\"13/5/2024\")",
+   "powerbi": "05/13/2024 00:00:00"
+  },
+  {
+   "expr": "DATEVALUE(\"2024-13-01\")",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 19) Cannot convert value '2024-13-01' of type Text to type Date.\""
+  },
+  {
+   "expr": "YEAR(\"2024-03-05\")",
+   "powerbi": "2024"
+  },
+  {
+   "expr": "MONTH(\"March 5, 2024\")",
+   "powerbi": "3"
+  },
+  {
+   "expr": "YEAR(45292)",
+   "powerbi": "2024"
+  },
+  {
+   "expr": "MONTH(45292.5)",
+   "powerbi": "1"
+  },
+  {
+   "expr": "DAY(0)",
+   "powerbi": "30"
+  },
+  {
+   "expr": "YEAR(-1)",
+   "powerbi": "1899"
+  },
+  {
+   "expr": "HOUR(TIME(13,30,0))",
+   "powerbi": "13"
+  },
+  {
+   "expr": "WEEKDAY(DATE(2024,3,3),1)",
+   "powerbi": "1"
+  },
+  {
+   "expr": "WEEKDAY(DATE(2024,3,3),2)",
+   "powerbi": "7"
+  },
+  {
+   "expr": "WEEKDAY(DATE(2024,3,3),3)",
+   "powerbi": "6"
+  },
+  {
+   "expr": "WEEKDAY(DATE(2024,3,4),11)",
+   "powerbi": "1"
+  },
+  {
+   "expr": "WEEKDAY(DATE(2024,3,3),17)",
+   "powerbi": "1"
+  },
+  {
+   "expr": "WEEKDAY(DATE(2024,3,3),4)",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 19) An argument of function 'WEEKDAY' has the wrong data type or the result is too large or too small.\""
+  },
+  {
+   "expr": "WEEKNUM(DATE(2024,12,31))",
+   "powerbi": "53"
+  },
+  {
+   "expr": "WEEKNUM(DATE(2024,12,31),21)",
+   "powerbi": "1"
+  },
+  {
+   "expr": "WEEKNUM(DATE(2024,1,1),21)",
+   "powerbi": "1"
+  },
+  {
+   "expr": "WEEKNUM(DATE(2021,1,3),21)",
+   "powerbi": "53"
+  },
+  {
+   "expr": "WEEKNUM(DATE(2024,1,7),1)",
+   "powerbi": "2"
+  },
+  {
+   "expr": "WEEKNUM(DATE(2024,1,7),2)",
+   "powerbi": "1"
+  },
+  {
+   "expr": "WEEKNUM(DATE(2024,1,8),2)",
+   "powerbi": "2"
+  },
+  {
+   "expr": "DATEDIFF(DATE(2024,1,31),DATE(2024,2,1),MONTH)",
+   "powerbi": "1"
+  },
+  {
+   "expr": "DATEDIFF(DATE(2024,12,31),DATE(2025,1,1),YEAR)",
+   "powerbi": "1"
+  },
+  {
+   "expr": "DATEDIFF(DATE(2024,3,31),DATE(2024,4,1),QUARTER)",
+   "powerbi": "1"
+  },
+  {
+   "expr": "DATEDIFF(DATE(2024,3,2),DATE(2024,3,3),WEEK)",
+   "powerbi": "1"
+  },
+  {
+   "expr": "DATEDIFF(DATE(2024,3,3),DATE(2024,3,4),WEEK)",
+   "powerbi": "0"
+  },
+  {
+   "expr": "DATEDIFF(DATE(2024,1,1)+0.9,DATE(2024,1,2)+0.1,DAY)",
+   "powerbi": "1"
+  },
+  {
+   "expr": "DATEDIFF(DATE(2024,1,1)+0.99,DATE(2024,1,1)+1.01,HOUR)",
+   "powerbi": "1"
+  },
+  {
+   "expr": "DATEDIFF(DATE(2024,1,1),DATE(2024,1,1)+0.002,MINUTE)",
+   "powerbi": "2"
+  },
+  {
+   "expr": "DATEDIFF(DATE(2024,1,1),DATE(2024,1,1)+0.00002,SECOND)",
+   "powerbi": "1"
+  },
+  {
+   "expr": "DATEDIFF(DATE(2024,1,1),DATE(2024,1,2),BLANK())",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 58) The third argument Interval can only be one of the following: YEAR, QUARTER, MONTH, WEEK, DAY, HOUR, MINUTE, SECOND.\""
+  },
+  {
+   "expr": "DATEDIFF(BLANK(),DATE(2024,1,2),DAY)",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "EDATE(DATE(2024,1,31)+0.5,1)",
+   "powerbi": "02/29/2024 00:00:00"
+  },
+  {
+   "expr": "EOMONTH(DATE(2024,1,31)+0.5,0)",
+   "powerbi": "01/31/2024 00:00:00"
+  },
+  {
+   "expr": "EDATE(DATE(2024,1,31),1.5)",
+   "powerbi": "03/31/2024 00:00:00"
+  },
+  {
+   "expr": "EOMONTH(DATE(2024,2,29),12)",
+   "powerbi": "02/28/2025 00:00:00"
+  },
+  {
+   "expr": "EDATE(BLANK(),1)",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "EOMONTH(DATE(2024,1,1),BLANK())",
+   "powerbi": "01/31/2024 00:00:00"
+  },
+  {
+   "expr": "FORMAT(DATE(2024,3,5)+0.5,\"General Date\")",
+   "powerbi": "3/5/2024 12:00:00 PM"
+  },
+  {
+   "expr": "FORMAT(DATE(2024,3,5)+0.5,\"Medium Time\")",
+   "powerbi": "12:00 PM"
+  },
+  {
+   "expr": "FORMAT(DATE(2024,3,5)+0.5,\"Short Time\")",
+   "powerbi": "12:00"
+  },
+  {
+   "expr": "FORMAT(DATE(2024,3,5)+0.5,\"Long Time\")",
+   "powerbi": "12:00:00 PM"
+  },
+  {
+   "expr": "FORMAT(DATE(2024,3,5)+0.5,\"h:mm:ss a/p\")",
+   "powerbi": "12:00:00 p"
+  },
+  {
+   "expr": "FORMAT(DATE(2024,3,5)+0.5,\"h AM/PM\")",
+   "powerbi": "12 PM"
+  },
+  {
+   "expr": "FORMAT(DATE(2024,3,5)+0.25,\"h:mm AM/PM\")",
+   "powerbi": "6:00 AM"
+  },
+  {
+   "expr": "FORMAT(DATE(2024,3,5)+0.25,\"hh:mm AM/PM\")",
+   "powerbi": "06:00 AM"
+  },
+  {
+   "expr": "FORMAT(DATE(2024,3,5)+0.25,\"H:mm\")",
+   "powerbi": "6:00"
+  },
+  {
+   "expr": "FORMAT(DATE(2024,3,5)+0.25,\"m\")",
+   "powerbi": "3"
+  },
+  {
+   "expr": "FORMAT(DATE(2024,3,5)+0.25,\"h:m\")",
+   "powerbi": "6:0"
+  },
+  {
+   "expr": "FORMAT(DATE(2024,3,5)+0.25,\"mm:ss\")",
+   "powerbi": "03:00"
+  },
+  {
+   "expr": "FORMAT(DATE(2024,3,5)+0.2501,\"h:mm:ss\")",
+   "powerbi": "6:00:09"
+  },
+  {
+   "expr": "FORMAT(DATE(2024,3,5),\"MM/dd/yyyy\")",
+   "powerbi": "03/05/2024"
+  },
+  {
+   "expr": "FORMAT(DATE(2024,3,5),\"M/d/yy\")",
+   "powerbi": "3/5/24"
+  },
+  {
+   "expr": "FORMAT(DATE(2024,3,5),\"yyy\")",
+   "powerbi": "2465"
+  },
+  {
+   "expr": "FORMAT(DATE(2024,3,5),\"c\")",
+   "powerbi": "3/5/2024"
+  },
+  {
+   "expr": "FORMAT(DATE(2024,3,5)+0.25,\"c\")",
+   "powerbi": "3/5/2024 6:00:00 AM"
+  },
+  {
+   "expr": "FORMAT(DATE(2024,3,5),\"dd.MM.yyyy\")",
+   "powerbi": "05.03.2024"
+  },
+  {
+   "expr": "FORMAT(DATE(2024,3,5),\"yyyymmdd\")",
+   "powerbi": "20240305"
+  },
+  {
+   "expr": "FORMAT(DATE(2024,3,5),\"yyyyMMdd\")",
+   "powerbi": "20240305"
+  },
+  {
+   "expr": "FORMAT(DATE(2024,3,5),\"d MMMM yyyy\")",
+   "powerbi": "5 March 2024"
+  },
+  {
+   "expr": "FORMAT(DATE(2024,3,5),\"mmm-yy\")",
+   "powerbi": "Mar-24"
+  },
+  {
+   "expr": "FORMAT(DATE(2024,3,5),\"Q\")",
+   "powerbi": "1"
+  },
+  {
+   "expr": "FORMAT(DATE(2024,12,31),\"y\")",
+   "powerbi": "366"
+  },
+  {
+   "expr": "FORMAT(DATE(2024,1,1),\"ww\")",
+   "powerbi": "1"
+  },
+  {
+   "expr": "FORMAT(DATE(2024,3,3),\"w\")",
+   "powerbi": "1"
+  },
+  {
+   "expr": "FORMAT(DATE(2024,3,5),\"dddd d mmmm yyyy\")",
+   "powerbi": "Tuesday 5 March 2024"
+  },
+  {
+   "expr": "FORMAT(DATE(2024,3,5),\"[$-409]d\")",
+   "powerbi": "5"
+  },
+  {
+   "expr": "FORMAT(DATE(2024,3,5),\"ddd\")&FORMAT(DATE(2024,3,6),\"ddd\")",
+   "powerbi": "TueWed"
+  },
+  {
+   "expr": "FORMAT(DATE(2024,3,5),\"h\")",
+   "powerbi": "0"
+  },
+  {
+   "expr": "FORMAT(DATE(2024,3,5),\"s\")",
+   "powerbi": "0"
+  },
+  {
+   "expr": "FORMAT(DATE(2024,3,5),\"n\")",
+   "powerbi": "0"
+  },
+  {
+   "expr": "FORMAT(DATE(2024,3,5)+0.001,\"ss\")",
+   "powerbi": "26"
+  },
+  {
+   "expr": "FORMAT(45292,\"yyyy\")",
+   "powerbi": "2024"
+  },
+  {
+   "expr": "FORMAT(45292,\"0\")",
+   "powerbi": "45292"
+  },
+  {
+   "expr": "FORMAT(DATE(2024,3,5),\"0\")",
+   "powerbi": "45356"
+  },
+  {
+   "expr": "FORMAT(DATE(2024,3,5),\"0.00\")",
+   "powerbi": "45356.00"
+  },
+  {
+   "expr": "FORMAT(DATE(2024,3,5),\"#,0\")",
+   "powerbi": "45,356"
+  },
+  {
+   "expr": "DATE(2024,1,1)*2",
+   "powerbi": "90584"
+  },
+  {
+   "expr": "CALCULATE(LOOKUPVALUE(Facts[Sales],Facts[Quantity],3),Facts[Region]=\"East\")",
+   "powerbi": "20"
+  },
+  {
+   "expr": "CALCULATE(LOOKUPVALUE(Facts[Sales],Facts[Quantity],3),Facts[Region]=\"West\")",
+   "powerbi": "20"
+  },
+  {
+   "expr": "LOOKUPVALUE(Facts[Sales],Facts[Region],\"East\")",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 31) A table of multiple values was supplied where a single value was expected.\""
+  },
+  {
+   "expr": "LOOKUPVALUE(Facts[Region],Facts[Quantity],3,Facts[Sales],20)",
+   "powerbi": "West"
+  },
+  {
+   "expr": "LOOKUPVALUE(Facts[Region],Facts[Quantity],3,Facts[Sales],21)",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "LOOKUPVALUE(Facts[Region],Facts[Quantity],3,Facts[Sales],21,\"alt\")",
+   "powerbi": "alt"
+  },
+  {
+   "expr": "LOOKUPVALUE(Facts[Note],Facts[Region],\"West\")",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 31) A table of multiple values was supplied where a single value was expected.\""
+  },
+  {
+   "expr": "LOOKUPVALUE(Facts[Note],Facts[Quantity],0)",
+   "powerbi": "Paid"
+  },
+  {
+   "expr": "LOOKUPVALUE(Facts[Note],Facts[Quantity],4)",
+   "powerbi": "Late"
+  },
+  {
+   "expr": "LOOKUPVALUE(Facts[Sales],Facts[Region],\"east\",Facts[Quantity],3)",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "CONTAINS(Facts,Facts[Region],\"east\")",
+   "powerbi": "True"
+  },
+  {
+   "expr": "CONTAINS(Facts,Facts[Region],\"East\",Facts[Quantity],3)",
+   "powerbi": "False"
+  },
+  {
+   "expr": "CONTAINS(Facts,Facts[Region],\"East\",Facts[Quantity],2)",
+   "powerbi": "True"
+  },
+  {
+   "expr": "CONTAINS(VALUES(Facts[Region]),Facts[Region],\"West\")",
+   "powerbi": "True"
+  },
+  {
+   "expr": "CONTAINS(Facts,Facts[Note],BLANK())",
+   "powerbi": "True"
+  },
+  {
+   "expr": "CONTAINS(Facts,Facts[Sales],0)",
+   "powerbi": "True"
+  },
+  {
+   "expr": "CONTAINS(Facts,Facts[Sales],BLANK())",
+   "powerbi": "True"
+  },
+  {
+   "expr": "CONTAINS(Facts,Facts[Sales],\"x\")",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 34) Function 'CONTAINS' does not support comparing values of type Number with values of type Text. Consider using the VALUE or FORMAT function to convert one of the values.\""
+  },
+  {
+   "expr": "1 IN {1,2}",
+   "powerbi": "True"
+  },
+  {
+   "expr": "3 IN {1,2}",
+   "powerbi": "False"
+  },
+  {
+   "expr": "\"a\" IN {\"A\",\"b\"}",
+   "powerbi": "True"
+  },
+  {
+   "expr": "BLANK() IN {0}",
+   "powerbi": "False"
+  },
+  {
+   "expr": "BLANK() IN {BLANK()}",
+   "powerbi": "True"
+  },
+  {
+   "expr": "0 IN {BLANK()}",
+   "powerbi": "False"
+  },
+  {
+   "expr": "\"1\" IN {1}",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 26) Function 'CONTAINSROW' does not support comparing values of type Integer with values of type Text. Consider using the VALUE or FORMAT function to convert one of the values.\""
+  },
+  {
+   "expr": "TRUE() IN {TRUE()}",
+   "powerbi": "True"
+  },
+  {
+   "expr": "1 IN VALUES(Facts[Quantity])",
+   "powerbi": "True"
+  },
+  {
+   "expr": "\"East\" IN VALUES(Facts[Region])",
+   "powerbi": "True"
+  },
+  {
+   "expr": "\"x\" IN VALUES(Facts[Region])",
+   "powerbi": "False"
+  },
+  {
+   "expr": "Facts[Quantity] IN {1}",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 19) A single value for column 'Quantity' in table 'Facts' cannot be determined. This can happen when a measure or function formula refers to a column that contains many values without specifying an aggregation such as min, max, count, or sum to get a single result.\""
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity] IN {1,2,99})",
+   "powerbi": "2"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(Facts),NOT(Facts[Quantity] IN {1,2}))",
+   "powerbi": "4"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(Facts),Facts[Region] IN {\"east\",\"WEST\"})",
+   "powerbi": "5"
+  },
+  {
+   "expr": "CONTAINSROW({1,2,3},2)",
+   "powerbi": "True"
+  },
+  {
+   "expr": "CONTAINSROW({1,2,3},5)",
+   "powerbi": "False"
+  },
+  {
+   "expr": "CONTAINSROW(VALUES(Facts[Quantity]),4)",
+   "powerbi": "True"
+  },
+  {
+   "expr": "SUMX({1,2,3},[Value])",
+   "powerbi": "6"
+  },
+  {
+   "expr": "COUNTROWS({1,2,3})",
+   "powerbi": "3"
+  },
+  {
+   "expr": "COUNTROWS({\"a\",\"b\"})",
+   "powerbi": "2"
+  },
+  {
+   "expr": "MAXX({1,5,3},[Value])",
+   "powerbi": "5"
+  },
+  {
+   "expr": "CONCATENATEX({\"a\",\"b\"},[Value],\"-\")",
+   "powerbi": "a-b"
+  },
+  {
+   "expr": "COUNTROWS(GENERATESERIES(1,5))",
+   "powerbi": "5"
+  },
+  {
+   "expr": "SUMX(GENERATESERIES(1,5,2),[Value])",
+   "powerbi": "9"
+  },
+  {
+   "expr": "COUNTROWS(GENERATESERIES(5,1))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTROWS(GENERATESERIES(1,2,0.5))",
+   "powerbi": "3"
+  },
+  {
+   "expr": "SUMX(GENERATESERIES(0,1,0.25),[Value])",
+   "powerbi": "2.5"
+  },
+  {
+   "expr": "COUNTROWS(GENERATESERIES(1,5,-1))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 29) GenerateSeries function cannot have an IncrementValue less than or equal to zero.\""
+  },
+  {
+   "expr": "COUNTROWS(ROW(\"a\",1,\"b\",\"x\"))",
+   "powerbi": "1"
+  },
+  {
+   "expr": "SUMX(ROW(\"a\",SUM(Facts[Sales])),[a])",
+   "powerbi": "31.5"
+  },
+  {
+   "expr": "SUMX(ROW(\"a\",1,\"b\",2),[a]+[b])",
+   "powerbi": "3"
+  },
+  {
+   "expr": "ISEMPTY(Facts)",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISEMPTY(FILTER(Facts,Facts[Quantity]>99))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISEMPTY(VALUES(Facts[Region]))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "CALCULATE(ISEMPTY(Facts),Facts[Region]=\"nope\")",
+   "powerbi": "True"
+  },
+  {
+   "expr": "CALCULATE(ISEMPTY(Facts),Facts[Region]=\"East\")",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISFILTERED(Facts[Region])",
+   "powerbi": "False"
+  },
+  {
+   "expr": "CALCULATE(ISFILTERED(Facts[Region]),Facts[Region]=\"East\")",
+   "powerbi": "True"
+  },
+  {
+   "expr": "CALCULATE(ISFILTERED(Facts[Quantity]),Facts[Region]=\"East\")",
+   "powerbi": "False"
+  },
+  {
+   "expr": "CALCULATE(ISFILTERED(Facts),Facts[Region]=\"East\")",
+   "powerbi": "True"
+  },
+  {
+   "expr": "CALCULATE(ISCROSSFILTERED(Facts[Quantity]),Facts[Region]=\"East\")",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISCROSSFILTERED(Facts[Quantity])",
+   "powerbi": "False"
+  },
+  {
+   "expr": "CALCULATE(ISCROSSFILTERED(Facts),Facts[Region]=\"East\")",
+   "powerbi": "True"
+  },
+  {
+   "expr": "HASONEFILTER(Facts[Region])",
+   "powerbi": "False"
+  },
+  {
+   "expr": "CALCULATE(HASONEFILTER(Facts[Region]),Facts[Region]=\"East\")",
+   "powerbi": "True"
+  },
+  {
+   "expr": "CALCULATE(HASONEFILTER(Facts[Region]),Facts[Region]=\"East\"||Facts[Region]=\"West\")",
+   "powerbi": "False"
+  },
+  {
+   "expr": "CALCULATE(HASONEFILTER(Facts[Quantity]),Facts[Region]=\"East\")",
+   "powerbi": "False"
+  },
+  {
+   "expr": "CALCULATE(HASONEFILTER(Facts[Quantity]),Facts[Quantity]>2)",
+   "powerbi": "False"
+  },
+  {
+   "expr": "CALCULATE(HASONEFILTER(Facts[Quantity]),Facts[Quantity]=3)",
+   "powerbi": "True"
+  },
+  {
+   "expr": "CALCULATE(HASONEVALUE(Facts[Quantity]),Facts[Region]=\"East\")",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISINSCOPE(Facts[Region])",
+   "powerbi": "False"
+  },
+  {
+   "expr": "SUMX(VALUES(Facts[Region]),IF(ISFILTERED(Facts[Region]),1,0))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "SUMX(VALUES(Facts[Region]),IF(HASONEVALUE(Facts[Region]),1,0))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "SUMX(VALUES(Facts[Region]),IF(ISINSCOPE(Facts[Region]),1,0))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "SUMX(Facts,IF(ISFILTERED(Facts[Region]),1,0))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "SUMX(Facts,IF(ISCROSSFILTERED(Facts[Region]),1,0))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "COMBINEVALUES(\",\",1,2)",
+   "powerbi": "1,2"
+  },
+  {
+   "expr": "COMBINEVALUES(\"-\",\"a\",\"b\",\"c\")",
+   "powerbi": "a-b-c"
+  },
+  {
+   "expr": "COMBINEVALUES(\",\",BLANK(),\"x\")",
+   "powerbi": ",x"
+  },
+  {
+   "expr": "COMBINEVALUES(\",\",1.5,TRUE())",
+   "powerbi": "1.5,TRUE"
+  },
+  {
+   "expr": "USERNAME()<>\"\"",
+   "powerbi": "True"
+  },
+  {
+   "expr": "USERPRINCIPALNAME()<>\"\"",
+   "powerbi": "True"
+  },
+  {
+   "expr": "FIRSTNONBLANK(Facts[Quantity],1)",
+   "powerbi": "0"
+  },
+  {
+   "expr": "LASTNONBLANK(Facts[Quantity],1)",
+   "powerbi": "5"
+  },
+  {
+   "expr": "FIRSTNONBLANK(Facts[Sales],1)",
+   "powerbi": "-1.5"
+  },
+  {
+   "expr": "FIRSTNONBLANK(Facts[Note],1)",
+   "powerbi": "Late"
+  },
+  {
+   "expr": "LASTNONBLANK(Facts[Note],1)",
+   "powerbi": "Paid"
+  },
+  {
+   "expr": "FIRSTNONBLANK(Facts[Quantity],SUM(Facts[Sales]))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "LASTNONBLANK(Facts[Quantity],SUM(Facts[Sales]))",
+   "powerbi": "5"
+  },
+  {
+   "expr": "FIRSTNONBLANKVALUE(Facts[Quantity],SUM(Facts[Sales]))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "LASTNONBLANKVALUE(Facts[Quantity],SUM(Facts[Sales]))",
+   "powerbi": "2.5"
+  },
+  {
+   "expr": "CALCULATE(FIRSTNONBLANK(Facts[Quantity],1),Facts[Region]=\"West\")",
+   "powerbi": "0"
+  },
+  {
+   "expr": "CALCULATE(LASTNONBLANK(Facts[Quantity],1),Facts[Region]=\"West\")",
+   "powerbi": "3"
+  },
+  {
+   "expr": "FIRSTNONBLANK(Facts[Region],1)",
+   "powerbi": "East"
+  },
+  {
+   "expr": "LASTNONBLANK(Facts[Region],1)",
+   "powerbi": "West"
+  },
+  {
+   "expr": "CALCULATE(FIRSTNONBLANK(Facts[Quantity],1),Facts[Region]=\"zzz\")",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTROWS(ALLEXCEPT(Facts,Facts[Region]))",
+   "powerbi": "6"
+  },
+  {
+   "expr": "COUNTROWS(ALLNOBLANKROW(Facts))",
+   "powerbi": "6"
+  },
+  {
+   "expr": "COUNTROWS(ALL(Facts))",
+   "powerbi": "6"
+  },
+  {
+   "expr": "COUNTROWS(ALL(Facts[Region]))",
+   "powerbi": "3"
+  },
+  {
+   "expr": "COUNTROWS(ALL(Facts[Region],Facts[Quantity]))",
+   "powerbi": "6"
+  },
+  {
+   "expr": "COUNTROWS(ALLSELECTED(Facts))",
+   "powerbi": "6"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(ALL(Facts[Region])),Facts[Region]=\"East\")",
+   "powerbi": "3"
+  }
+ ]
+}

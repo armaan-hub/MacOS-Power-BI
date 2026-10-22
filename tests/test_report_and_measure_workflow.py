@@ -11,9 +11,10 @@ from unittest.mock import patch
 
 os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
 
-from PySide6.QtCore import QSettings
+from PySide6.QtCore import QSettings, Qt
 from PySide6.QtGui import QTextCursor
-from PySide6.QtWidgets import QApplication
+from PySide6.QtTest import QTest
+from PySide6.QtWidgets import QApplication, QDialog, QWidget
 
 from analytics_studio.controller import StudioController
 from analytics_studio.file_import import parse_file
@@ -103,17 +104,211 @@ class ReportAndMeasureWorkflowTests(unittest.TestCase):
         self.assertEqual(reopened.modelMeasures[1]["value"], "116.83")
         self.assertIn("Average Sale KPI", reopened.activePageVisuals)
 
-    def test_invalid_measure_is_transactional_and_quick_aggregate_expression_works(self) -> None:
+    def test_screenshot_average_formula_matches_filtered_visual_context(self) -> None:
         controller = self.populated_controller()
-        before_project = controller._project.copy()
+        expression = "SUM([Sales]) / COUNTROWS()"
+        draft = MeasureDialog(
+            list(controller.headers), [],
+            field_references=controller._dax_field_references(),
+            preview_callback=controller._preview_measure_expression,
+        )
+        draft.name_edit.setText("Draft Average Sales")
+        draft.expression_edit.setPlainText(expression)
+        draft.preview_button.click()
+        self.assertEqual(
+            draft.preview_label.text(),
+            "Current report-context result: 116.83",
+        )
+        draft.deleteLater()
+        self.app.processEvents()
+
+        def accept_screenshot_measure(dialog: MeasureDialog) -> int:
+            dialog.name_edit.setText("Average Sales")
+            dialog.expression_edit.setPlainText(expression)
+            dialog.preview_button.click()
+            self.assertEqual(
+                dialog.preview_label.text(),
+                "Current report-context result: 116.83",
+            )
+            dialog.save_button.click()
+            return dialog.result()
+
+        with patch.object(MeasureDialog, "exec", new=accept_screenshot_measure):
+            self.assertTrue(controller.new_measure_dialog(), controller.statusMessage)
+        self.assertEqual(controller.modelMeasures[0]["value"], "116.83")
+
+        measure_binding = "__dax_measure__:Average Sales"
+        controller.add_visual("card", "Average sales card", 20, 20, 160, 90)
+        controller.add_field_to_well("Fields", measure_binding)
+        self.assertEqual(controller.visualCardData("Average sales card")["value"], "116.83")
+
+        controller.add_visual("column", "Average sales by emirate", 200, 20, 360, 240)
+        controller.add_field_to_well("X-axis", "Emirates")
+        controller.add_field_to_well("Y-axis", measure_binding)
+        self.assertEqual(controller.visualSeries("Average sales by emirate"), [
+            {"label": "Abu Dhabi", "value": 100.5},
+            {"label": "Dubai", "value": 125.0},
+        ])
+
+        self.assertTrue(controller.addPageFilterRule(
+            str(controller.activeTableId), "Emirates", "equals", "Dubai", "", "", "and"
+        ))
+        filtered_draft = MeasureDialog(
+            list(controller.headers), [],
+            field_references=controller._dax_field_references(),
+            preview_callback=controller._preview_measure_expression,
+        )
+        filtered_draft.name_edit.setText("Filtered Draft Average Sales")
+        filtered_draft.expression_edit.setPlainText(expression)
+        filtered_draft.preview_button.click()
+        self.assertEqual(
+            filtered_draft.preview_label.text(),
+            "Current report-context result: 125",
+        )
+        filtered_draft.deleteLater()
+        self.app.processEvents()
+        self.assertEqual(controller.modelMeasures[0]["value"], "125")
+        self.assertEqual(controller.visualCardData("Average sales card")["value"], "125")
+        self.assertEqual(controller.visualSeries("Average sales by emirate"), [
+            {"label": "Dubai", "value": 125.0},
+        ])
+
+        project_path = self.root / "screenshot-average.npa"
+        self.assertTrue(controller._save_to(project_path))
+        reopened = self.controller()
+        self.assertTrue(reopened.open_project_path(project_path))
+        self.assertEqual(reopened.modelMeasures[0]["expression"], expression)
+        self.assertEqual(reopened.modelMeasures[0]["value"], "125")
+        self.assertEqual(reopened.visualCardData("Average sales card")["value"], "125")
+        self.assertEqual(reopened.visualSeries("Average sales by emirate"), [
+            {"label": "Dubai", "value": 125.0},
+        ])
+
+    def test_measure_home_table_survives_table_switch_and_project_reopen(self) -> None:
+        sales_path = self.root / "Sales.csv"
+        sales_path.write_text("Amount\n10\n20\n", encoding="utf-8")
+        targets_path = self.root / "Targets.csv"
+        targets_path.write_text("Amount\n99\n", encoding="utf-8")
+        controller = self.controller()
+        self.assertTrue(controller._commit_import(sales_path, parse_file(sales_path)))
+        sales_source_id = str(controller.activeTableId)
+        self.assertTrue(controller._commit_import(targets_path, parse_file(targets_path)))
+        targets_source_id = str(controller.activeTableId)
+        self.assertTrue(controller.selectTable(sales_source_id))
+
+        self.assertTrue(controller.create_measure("Sales total", "SUM([Amount])"))
+        self.assertTrue(controller.create_measure("Sales rows", "COUNTROWS()"))
+        sales_table_id = str(controller._active_model_table_id())
+        for measure in controller._project["model"]["measures"]:
+            self.assertEqual(measure["home_table_id"], sales_table_id)
+
+        self.assertTrue(controller.selectTable(targets_source_id))
+        self.assertEqual(controller._measure_values["Sales total"], "30")
+        self.assertEqual(controller._measure_values["Sales rows"], "2")
+
+        project_path = self.root / "home-table.npa"
+        self.assertTrue(controller._save_to(project_path))
+        reopened = self.controller()
+        self.assertTrue(reopened.open_project_path(project_path))
+        self.assertEqual(reopened._measure_values["Sales total"], "30")
+        self.assertEqual(reopened._measure_values["Sales rows"], "2")
+
+        with patch("analytics_studio.controller.QMessageBox.warning") as warning:
+            self.assertFalse(reopened.removeTable(sales_source_id))
+        warning.assert_called_once()
+
+    def test_unsupported_local_measure_is_transactional_and_quick_aggregate_expression_works(self) -> None:
+        controller = self.populated_controller()
+        before_project = deepcopy(controller._project)
         dirty_before = controller.dirty
 
         self.assertFalse(controller.create_measure("Invalid", "CALCULATE()"))
 
         self.assertEqual(controller._project, before_project)
         self.assertEqual(controller.dirty, dirty_before)
+        # Power BI refuses a direct CALCULATE inside a CALCULATE Boolean filter ("A function 'CALCULATE' has been used in
+        # a True/False expression", tools/parity/dax_battery_boolean_scalar_rhs.json), so the local engine does too.
+        self.assertFalse(controller.create_measure(
+            "Unsupported local filter value",
+            "CALCULATE(COUNTROWS('VAT sample'), 'VAT sample'[Quantity] > CALCULATE(COUNTROWS('VAT sample')))",
+        ))
+        self.assertTrue(controller.statusMessage)
+        self.assertEqual(controller._project, before_project)
+        self.assertEqual(controller.dirty, dirty_before)
+        # ...while the row count of another column's values on the right of a comparison is accepted, as in Power BI
+        # (answer 2 for the same shape on Facts, tools/parity/dax_battery_adversarial.json).
+        self.assertTrue(controller.create_measure(
+            "Quantity above value count",
+            "CALCULATE(COUNTROWS('VAT sample'), 'VAT sample'[Quantity] > COUNTROWS(VALUES('VAT sample'[Sales])))",
+        ))
         self.assertTrue(controller.create_measure("Quantity total", "SUM([Quantity])"))
         self.assertEqual(controller.reportKpis["Quantity total"], "6")
+
+    def test_divide_coalesce_measure_previews_displays_persists_and_refreshes(self) -> None:
+        source_path = self.root / "fallback-sales.csv"
+        source_path.write_text(
+            "Numerator,Denominator\n10,0\n",
+            encoding="utf-8",
+        )
+        controller = self.controller()
+        self.assertTrue(controller._commit_import(source_path, parse_file(source_path)))
+        expression = "COALESCE(DIVIDE(SUM([Numerator]), SUM([Denominator])), 7)"
+        project_before_preview = deepcopy(controller._project)
+        dialog = MeasureDialog(
+            list(controller.headers), [],
+            field_references=controller._dax_field_references(),
+            preview_callback=controller._preview_measure_expression,
+        )
+        dialog.name_edit.setText("Safe rate")
+        dialog.function_combo.setCurrentText("COALESCE")
+        dialog.insert_function_button.click()
+        dialog.expression_edit.textCursor().insertText(
+            "DIVIDE(SUM([Numerator]), SUM([Denominator]))"
+        )
+        expression_cursor = dialog.expression_edit.textCursor()
+        formula_draft = dialog.expression_edit.toPlainText()
+        fallback_start = formula_draft.index("expression2")
+        expression_cursor.setPosition(fallback_start)
+        expression_cursor.setPosition(
+            fallback_start + len("expression2"),
+            QTextCursor.MoveMode.KeepAnchor,
+        )
+        dialog.expression_edit.setTextCursor(expression_cursor)
+        expression_cursor.insertText("7")
+        self.assertEqual(dialog.expression_edit.toPlainText(), expression)
+        dialog.show()
+        self.app.processEvents()
+        dialog.preview_button.click()
+        self.assertEqual(
+            dialog.preview_label.text(), "Current report-context result: 7"
+        )
+        self.assertEqual(controller._project, project_before_preview)
+        dialog.save_button.click()
+        self.assertEqual(dialog.measure, {"name": "Safe rate", "expression": expression})
+        self.assertTrue(controller.create_measure(
+            dialog.measure["name"], dialog.measure["expression"]
+        ))
+        dialog.deleteLater()
+        self.app.processEvents()
+        self.assertEqual(controller.reportKpis["Safe rate"], "7")
+        controller.add_visual("card", "Safe rate card", 20, 20, 150, 90)
+        controller.add_field_to_well("Fields", "__dax_measure__:Safe rate")
+        self.assertEqual(controller.visualCardData("Safe rate card")["value"], "7")
+
+        project_path = self.root / "coalesce-measure.npa"
+        self.assertTrue(controller._save_to(project_path))
+        reopened = self.controller()
+        self.assertTrue(reopened.open_project_path(project_path))
+        self.assertEqual(reopened.reportKpis["Safe rate"], "7")
+        self.assertEqual(reopened.visualCardData("Safe rate card")["value"], "7")
+
+        source_path.write_text(
+            "Numerator,Denominator\n10,2\n",
+            encoding="utf-8",
+        )
+        reopened.refresh_source()
+        self.assertEqual(reopened.reportKpis["Safe rate"], "5")
+        self.assertEqual(reopened.visualCardData("Safe rate card")["value"], "5")
 
     def test_scalar_math_measures_persist_and_recompute(self) -> None:
         controller = self.populated_controller()
@@ -132,6 +327,78 @@ class ReportAndMeasureWorkflowTests(unittest.TestCase):
         self.assertTrue(reopened.open_project_path(path))
         self.assertEqual(reopened.reportKpis["Rounded average"], "116.80")
         self.assertEqual(reopened.reportKpis["Absolute loss"], "10")
+
+    def test_maxx_minx_measures_persist_into_cards_and_recompute_after_refresh(self) -> None:
+        source_path = self.root / "amounts.csv"
+        source_path.write_text(
+            "Amount\n-2.5\n0\n9.75\n",
+            encoding="utf-8",
+        )
+        controller = self.controller()
+        self.assertTrue(controller._commit_import(source_path, parse_file(source_path)))
+        table_name = str(controller.tableCatalog[0]["name"])
+
+        for measure_name, function, expected in (
+            ("Highest amount", "MAXX", "9.75"),
+            ("Lowest amount", "MINX", "-2.50"),
+        ):
+            expression = f"{function}('{table_name}', [Amount])"
+            dialog = MeasureDialog(
+                list(controller.headers), [],
+                field_references=controller._dax_field_references(),
+                preview_callback=controller._preview_measure_expression,
+            )
+            dialog.name_edit.setText(measure_name)
+            dialog.expression_edit.setPlainText(expression)
+            dialog.preview_button.click()
+            self.assertEqual(
+                dialog.preview_label.text(),
+                f"Current report-context result: {expected}",
+            )
+            dialog.save_button.click()
+            self.assertEqual(
+                dialog.measure, {"name": measure_name, "expression": expression}
+            )
+            self.assertTrue(controller.create_measure(
+                dialog.measure["name"], dialog.measure["expression"]
+            ))
+            dialog.deleteLater()
+            self.app.processEvents()
+
+        self.assertEqual(controller.reportKpis["Highest amount"], "9.75")
+        self.assertEqual(controller.reportKpis["Lowest amount"], "-2.50")
+
+        controller.add_visual("card", "Highest amount card", 20, 20, 150, 90)
+        controller.add_field_to_well("Fields", "__dax_measure__:Highest amount")
+        controller.add_visual("card", "Lowest amount card", 190, 20, 150, 90)
+        controller.add_field_to_well("Fields", "__dax_measure__:Lowest amount")
+        self.assertEqual(
+            controller.visualCardData("Highest amount card")["value"], "9.75"
+        )
+        self.assertEqual(
+            controller.visualCardData("Lowest amount card")["value"], "-2.50"
+        )
+
+        project_path = self.root / "extrema-measures.npa"
+        self.assertTrue(controller._save_to(project_path))
+        reopened = self.controller()
+        self.assertTrue(reopened.open_project_path(project_path))
+        self.assertEqual(reopened.reportKpis["Highest amount"], "9.75")
+        self.assertEqual(reopened.reportKpis["Lowest amount"], "-2.50")
+
+        source_path.write_text(
+            "Amount\n4.25\n8\n1\n",
+            encoding="utf-8",
+        )
+        reopened.refresh_source()
+        self.assertEqual(reopened.reportKpis["Highest amount"], "8")
+        self.assertEqual(reopened.reportKpis["Lowest amount"], "1")
+        self.assertEqual(
+            reopened.visualCardData("Highest amount card")["value"], "8"
+        )
+        self.assertEqual(
+            reopened.visualCardData("Lowest amount card")["value"], "1"
+        )
 
     def test_conditional_measures_follow_report_filter_and_reopen(self) -> None:
         controller = self.populated_controller()
@@ -171,8 +438,9 @@ class ReportAndMeasureWorkflowTests(unittest.TestCase):
             "Count boolean results",
             "COUNTAX('VAT sample', IF([Sales] > 100, TRUE(), FALSE()))",
         ))
-        self.assertTrue(controller.create_measure(
-            "Ignore boolean results",
+        # Power BI 2.157.879.0 refuses a Boolean value in COUNTX (tools/parity/dax_battery_comments_booleans.json)
+        self.assertFalse(controller.create_measure(
+            "Boolean countx",
             "COUNTX('VAT sample', IF([Sales] > 100, TRUE(), FALSE()))",
         ))
         self.assertTrue(controller.create_measure("Numeric zero", "0"))
@@ -180,7 +448,6 @@ class ReportAndMeasureWorkflowTests(unittest.TestCase):
         self.assertEqual(controller.reportKpis["Average line sales"], "250.50")
         self.assertEqual(controller.reportKpis["Count sales values"], "3")
         self.assertEqual(controller.reportKpis["Count boolean results"], "3")
-        self.assertEqual(controller.reportKpis["Ignore boolean results"], "—")
         self.assertEqual(controller.reportKpis["Numeric zero"], "0")
 
         controller.setRegionFilter("Dubai")
@@ -188,7 +455,6 @@ class ReportAndMeasureWorkflowTests(unittest.TestCase):
         self.assertEqual(controller.reportKpis["Average line sales"], "225")
         self.assertEqual(controller.reportKpis["Count sales values"], "2")
         self.assertEqual(controller.reportKpis["Count boolean results"], "2")
-        self.assertEqual(controller.reportKpis["Ignore boolean results"], "—")
         self.assertEqual(controller.reportKpis["Numeric zero"], "0")
         controller.setRegionFilter("All regions")
 
@@ -200,7 +466,6 @@ class ReportAndMeasureWorkflowTests(unittest.TestCase):
         self.assertEqual(reopened.reportKpis["Average line sales"], "250.50")
         self.assertEqual(reopened.reportKpis["Count sales values"], "3")
         self.assertEqual(reopened.reportKpis["Count boolean results"], "3")
-        self.assertEqual(reopened.reportKpis["Ignore boolean results"], "—")
         self.assertEqual(reopened.reportKpis["Numeric zero"], "0")
 
     def test_blank_count_measure_previews_displays_and_refreshes(self) -> None:
@@ -485,16 +750,21 @@ class ReportAndMeasureWorkflowTests(unittest.TestCase):
         })
 
         quick_dialog = MeasureDialog(
-            ["Date", "Sales"], [], quick=True, default_column="Sales"
+            ["Date", "Sales"], [], quick=True, default_column="Sales",
+            quick_table_name="Sales", quick_table_display_name="Finance / Sales",
         )
         self.assertEqual(quick_dialog.column_combo.currentText(), "Sales")
+        self.assertEqual(
+            quick_dialog.quick_table_context.text(), "Using table: Finance / Sales"
+        )
         quick_dialog._accept_measure()
         self.assertEqual(quick_dialog.measure, {
-            "name": "Sum of Sales", "expression": "SUM([Sales])",
+            "name": "Sum of Sales", "expression": "SUM('Sales'[Sales])",
         })
 
         quick_distinct = MeasureDialog(
-            ["Sales"], [], quick=True, default_column="Sales"
+            ["Sales"], [], quick=True, default_column="Sales",
+            quick_table_name="O'Brien", quick_table_display_name="Finance / O'Brien",
         )
         quick_distinct.function_combo.setCurrentIndex(
             quick_distinct.function_combo.findData("DISTINCTCOUNTNOBLANK")
@@ -502,8 +772,137 @@ class ReportAndMeasureWorkflowTests(unittest.TestCase):
         quick_distinct._accept_measure()
         self.assertEqual(quick_distinct.measure, {
             "name": "Distinct count without blank of Sales",
-            "expression": "DISTINCTCOUNTNOBLANK([Sales])",
+            "expression": "DISTINCTCOUNTNOBLANK('O''Brien'[Sales])",
         })
+
+        missing_table = MeasureDialog(
+            ["Sales"], [], quick=True, default_column="Sales"
+        )
+        self.assertFalse(missing_table.save_button.isEnabled())
+        self.assertIn("model table", missing_table.error_label.text().casefold())
+        missing_table._accept_measure()
+        self.assertIsNone(missing_table.measure)
+
+    def test_quick_measure_stays_bound_to_source_through_switch_reopen_and_refresh(self) -> None:
+        orders_path = self.root / "Orders.csv"
+        targets_path = self.root / "Targets.csv"
+        orders_path.write_text("Amount\n10\n20\n", encoding="utf-8")
+        targets_path.write_text("Amount\n1000\n", encoding="utf-8")
+
+        controller = self.controller()
+        self.assertTrue(controller._commit_import(orders_path, parse_file(orders_path)))
+        orders_id = controller._active_source_id
+        self.assertTrue(controller._commit_import(targets_path, parse_file(targets_path)))
+        targets_id = controller._active_source_id
+        self.assertTrue(controller.selectTable(orders_id))
+
+        def accept_quick_measure(dialog: MeasureDialog) -> int:
+            dialog._accept_measure()
+            return int(dialog.result())
+
+        with patch.object(MeasureDialog, "exec", new=accept_quick_measure):
+            self.assertTrue(controller.quick_measure_dialog())
+        self.assertEqual(controller.reportKpis["Sum of Amount"], "30")
+        self.assertTrue(controller.selectTable(targets_id))
+        self.assertEqual(
+            controller.reportKpis["Sum of Amount"], "30",
+            "Quick Measure must stay bound to the table where it was created",
+        )
+        self.assertEqual(
+            controller.modelMeasures[0]["expression"], "SUM('Orders'[Amount])"
+        )
+
+        project_path = self.root / "quick-measure-table-binding.npa"
+        self.assertTrue(controller._save_to(project_path))
+        reopened = self.controller()
+        self.assertTrue(reopened.open_project_path(project_path))
+        self.assertTrue(reopened.selectTable(targets_id))
+        self.assertEqual(reopened.reportKpis["Sum of Amount"], "30")
+        self.assertEqual(
+            reopened.modelMeasures[0]["expression"], "SUM('Orders'[Amount])"
+        )
+
+        orders_path.write_text("Amount\n10\n25\n", encoding="utf-8")
+        self.assertTrue(reopened.selectTable(orders_id))
+        reopened.refresh_source()
+        self.assertEqual(reopened.reportKpis["Sum of Amount"], "35")
+        self.assertTrue(reopened.selectTable(targets_id))
+        self.assertEqual(reopened.reportKpis["Sum of Amount"], "35")
+
+    def test_quick_measure_requires_active_loaded_model_table_mapping(self) -> None:
+        source_path = self.root / "orphaned-source.csv"
+        source_path.write_text("Amount\n10\n", encoding="utf-8")
+        controller = self.controller()
+        self.assertTrue(controller._commit_import(source_path, parse_file(source_path)))
+        project_before = deepcopy(controller._project)
+        dirty_before = controller.dirty
+        controller._table_catalog = []
+
+        with patch("analytics_studio.controller.MeasureDialog") as dialog_type:
+            self.assertFalse(controller.quick_measure_dialog())
+
+        dialog_type.assert_not_called()
+        self.assertIn("loaded model table", controller.statusMessage.casefold())
+        self.assertEqual(controller._project, project_before)
+        self.assertEqual(controller.dirty, dirty_before)
+
+    def test_measure_save_rejects_evaluation_errors_and_keeps_the_draft_open(self) -> None:
+        controller = self.populated_controller()
+        before_project = deepcopy(controller._project)
+        dirty_before = controller.dirty
+        dialog = MeasureDialog(
+            list(controller.headers), [],
+            preview_callback=controller._preview_measure_expression,
+        )
+        dialog.name_edit.setText("Unsupported draft")
+        expression = "RELATED('VAT sample'[Sales])"
+        dialog.expression_edit.setPlainText(expression)
+        dialog.show()
+        self.app.processEvents()
+
+        dialog.save_button.click()
+        self.app.processEvents()
+
+        self.assertTrue(dialog.isVisible())
+        self.assertIsNone(dialog.measure)
+        self.assertEqual(dialog.name_edit.text(), "Unsupported draft")
+        self.assertEqual(dialog.expression_edit.toPlainText(), expression)
+        self.assertIn("row context", dialog.preview_label.text())
+        self.assertEqual(controller._project, before_project)
+        self.assertEqual(controller.dirty, dirty_before)
+        dialog.close()
+        dialog.deleteLater()
+        self.app.processEvents()
+
+    def test_measure_save_rechecks_the_latest_draft_before_accepting(self) -> None:
+        calls = []
+
+        def preview(name: str, expression: str) -> str:
+            calls.append((name, expression))
+            return "Current result: 42"
+
+        dialog = MeasureDialog(["Sales"], [], preview_callback=preview)
+        dialog.name_edit.setText("Latest draft")
+        dialog.expression_edit.setPlainText("SUM([Sales])")
+        dialog.show()
+        self.app.processEvents()
+        dialog.preview_button.click()
+        dialog.expression_edit.setPlainText("SUM([Sales]) + 1")
+
+        dialog.save_button.click()
+
+        self.assertEqual(calls, [
+            ("Latest draft", "SUM([Sales])"),
+            ("Latest draft", "SUM([Sales]) + 1"),
+        ])
+        self.assertEqual(dialog.measure, {
+            "name": "Latest draft", "expression": "SUM([Sales]) + 1",
+        })
+        self.assertEqual(
+            dialog.preview_label.text(), "Current report-context result: Current result: 42"
+        )
+        dialog.deleteLater()
+        self.app.processEvents()
 
     def test_measure_editor_searches_inserts_and_previews_supported_dax(self) -> None:
         self.assertEqual(set(DAX_FUNCTION_TEMPLATES), set(DAX_FUNCTION_NAMES))
@@ -521,14 +920,53 @@ class ReportAndMeasureWorkflowTests(unittest.TestCase):
         selection = dialog.expression_edit.textCursor()
         selection.select(QTextCursor.SelectionType.Document)
         dialog.expression_edit.setTextCursor(selection)
+        dialog.show()
+        self.app.processEvents()
+
+        # Exercise the editable picker as a user would: type a function name,
+        # inspect the filtered completion, and click the matching suggestion.
+        function_picker = dialog.function_combo
+        function_picker.setFocus()
+        function_picker.lineEdit().clear()
+        QTest.keyClicks(function_picker.lineEdit(), "NOBLANKROW")
+        self.app.processEvents()
+        self.assertEqual(function_picker.completer().completionCount(), 1)
+        self.assertEqual(
+            function_picker.completer().currentCompletion(), "ALLNOBLANKROW"
+        )
+        completion_popup = function_picker.completer().popup()
+        completion_index = function_picker.completer().completionModel().index(0, 0)
+        completion_rect = completion_popup.visualRect(completion_index)
+        QTest.mouseClick(
+            completion_popup.viewport(),
+            Qt.MouseButton.LeftButton,
+            pos=completion_rect.center(),
+        )
+        self.app.processEvents()
+        self.assertEqual(function_picker.currentText(), "ALLNOBLANKROW")
+        self.assertIn("ALLNOBLANKROW", dialog.function_signature_label.text())
         dialog.function_combo.setCurrentText("SUM")
         dialog.insert_function_button.click()
         self.assertEqual(dialog.expression_edit.toPlainText(), "SUM([Column])")
         self.assertEqual(dialog.expression_edit.textCursor().selectedText(), "[Column]")
         self.assertIn("SUM([Column])", dialog.function_signature_label.text())
+        self.assertIn("Local syntax:", dialog.function_signature_label.text())
+        self.assertNotIn("<code>", dialog.function_signature_label.text())
+        dialog.expression_edit.clear()
+        dialog.function_combo.setCurrentText("COALESCE")
+        dialog.insert_function_button.click()
+        self.assertEqual(
+            dialog.expression_edit.toPlainText(), "COALESCE(expression1, expression2)"
+        )
+        self.assertEqual(
+            dialog.expression_edit.textCursor().selectedText(), "expression1"
+        )
         for parser_form in ("BLANK", "DISTINCT", "FALSE", "TRUE"):
             self.assertIn(parser_form, DAX_FUNCTION_NAMES)
 
+        dialog.expression_edit.clear()
+        dialog.function_combo.setCurrentText("SUM")
+        dialog.insert_function_button.click()
         dialog.field_combo.setCurrentIndex(
             dialog.field_combo.findData("'VAT sample'[Sales]")
         )
@@ -565,6 +1003,671 @@ class ReportAndMeasureWorkflowTests(unittest.TestCase):
         self.assertEqual(
             dialog.expression_edit.textCursor().selectedText(), "[Column]"
         )
+
+    def test_maxx_minx_templates_match_local_function_catalog(self) -> None:
+        self.assertIn("MAXX", DAX_FUNCTION_NAMES)
+        self.assertIn("MINX", DAX_FUNCTION_NAMES)
+        self.assertEqual(set(DAX_FUNCTION_TEMPLATES), set(DAX_FUNCTION_NAMES))
+        self.assertEqual(
+            DAX_FUNCTION_TEMPLATES["MAXX"],
+            ("MAXX('Table', row_expression)", "'Table'"),
+        )
+        self.assertEqual(
+            DAX_FUNCTION_TEMPLATES["MINX"],
+            ("MINX('Table', row_expression)", "'Table'"),
+        )
+
+    def test_maxx_minx_are_searchable_and_insert_their_table_argument(self) -> None:
+        dialog = MeasureDialog(["Sales"], [])
+        dialog.show()
+        self.app.processEvents()
+
+        for function in ("MAXX", "MINX"):
+            dialog.expression_edit.clear()
+            picker = dialog.function_combo
+            picker.setFocus()
+            picker.lineEdit().clear()
+            QTest.keyClicks(picker.lineEdit(), function)
+            self.app.processEvents()
+            self.assertEqual(picker.completer().completionCount(), 1)
+            self.assertEqual(picker.completer().currentCompletion(), function)
+
+            popup = picker.completer().popup()
+            completion_index = picker.completer().completionModel().index(0, 0)
+            QTest.mouseClick(
+                popup.viewport(), Qt.MouseButton.LeftButton,
+                pos=popup.visualRect(completion_index).center(),
+            )
+            self.app.processEvents()
+            dialog.insert_function_button.click()
+
+            template, selected_argument = DAX_FUNCTION_TEMPLATES[function]
+            self.assertEqual(dialog.expression_edit.toPlainText(), template)
+            self.assertEqual(
+                dialog.expression_edit.textCursor().selectedText(), selected_argument
+            )
+
+        dialog.close()
+        dialog.deleteLater()
+        self.app.processEvents()
+
+    def test_maxx_minx_inline_hints_follow_nested_row_expression_arguments(self) -> None:
+        dialog = MeasureDialog(["Sales"], [])
+        dialog.show()
+        self.app.processEvents()
+
+        dialog.expression_edit.setPlainText("MAXX('Sales', ")
+        dialog.expression_edit.moveCursor(QTextCursor.MoveOperation.End)
+        dialog._refresh_inline_editor_help()
+        self.assertIn("MAXX · argument 2 of 2", dialog.inline_help_label.text())
+        self.assertIn("row_expression", dialog.inline_help_label.text())
+
+        dialog.expression_edit.setPlainText("MINX('Sales', MAXX('Orders', ")
+        dialog.expression_edit.moveCursor(QTextCursor.MoveOperation.End)
+        dialog._refresh_inline_editor_help()
+        self.assertIn("MAXX · argument 2 of 2", dialog.inline_help_label.text())
+        self.assertIn("row_expression", dialog.inline_help_label.text())
+        dialog.close()
+        dialog.deleteLater()
+        self.app.processEvents()
+
+    def test_maxx_minx_scope_help_is_accessible_and_measure_only(self) -> None:
+        dialog = MeasureDialog(["Sales"], [])
+        scope_help = dialog.findChild(QWidget, "daxLocalScopeHelp")
+        self.assertIsNotNone(scope_help)
+        assert scope_help is not None
+        visible_text = scope_help.property("text") or scope_help.toolTip()
+        accessible_text = scope_help.accessibleDescription()
+        combined = f"{visible_text} {accessible_text}".casefold()
+        for expected in (
+            "local dax measure form only",
+            "loaded table",
+            "supported all",
+            "allnoblankrow",
+            "allselected",
+            "numeric or blank",
+            "variant",
+            "text",
+            "date",
+            "boolean",
+            "arbitrary table",
+            "calculated-column",
+        ):
+            self.assertIn(expected, combined)
+        self.assertTrue(scope_help.accessibleName())
+
+        quick_dialog = MeasureDialog(["Sales"], [], quick=True)
+        self.assertIsNone(quick_dialog.findChild(QWidget, "daxLocalScopeHelp"))
+        dialog.deleteLater()
+        quick_dialog.deleteLater()
+        self.app.processEvents()
+
+    def test_maxx_measure_dialog_previews_a_loaded_table_row_expression(self) -> None:
+        controller = self.populated_controller()
+        dialog = MeasureDialog(
+            list(controller.headers), [],
+            field_references=controller._dax_field_references(),
+            preview_callback=controller._preview_measure_expression,
+        )
+        dialog.name_edit.setText("Largest sale")
+        dialog.expression_edit.setPlainText("MAXX('VAT sample', [Sales])")
+        dialog.preview_button.click()
+        self.assertEqual(
+            dialog.preview_label.text(), "Current report-context result: 200"
+        )
+        self.assertNotIn("Largest sale", controller.reportKpis)
+        dialog.deleteLater()
+        self.app.processEvents()
+
+    def test_maxx_dialog_rejects_invalid_type_in_preview_and_save(self) -> None:
+        controller = self.populated_controller()
+        dialog = MeasureDialog(
+            list(controller.headers), [],
+            field_references=controller._dax_field_references(),
+            preview_callback=controller._preview_measure_expression,
+        )
+        dialog.name_edit.setText("Highest emirate")
+        dialog.expression_edit.setPlainText("MAXX('VAT sample', [Emirates])")
+
+        dialog.preview_button.click()
+
+        self.assertIn("numeric result", dialog.preview_label.text())
+        self.assertNotIn("Highest emirate", controller.reportKpis)
+        dialog.save_button.click()
+        self.assertNotEqual(dialog.result(), QDialog.DialogCode.Accepted)
+        self.assertIsNone(dialog.measure)
+        self.assertFalse(any(
+            measure["name"] == "Highest emirate" for measure in controller.modelMeasures
+        ))
+        dialog.deleteLater()
+        self.app.processEvents()
+
+    def test_maxx_minx_measure_can_be_edited_and_saved(self) -> None:
+        controller = self.populated_controller()
+        self.assertTrue(controller.create_measure(
+            "Extreme sale", "MAXX('VAT sample', [Sales])"
+        ))
+
+        def accept_minx(dialog: MeasureDialog) -> int:
+            self.assertEqual(
+                dialog.expression_edit.toPlainText(), "MAXX('VAT sample', [Sales])"
+            )
+            dialog.expression_edit.setPlainText("MINX('VAT sample', [Sales])")
+            dialog.preview_button.click()
+            self.assertEqual(
+                dialog.preview_label.text(), "Current report-context result: 50"
+            )
+            dialog.save_button.click()
+            return dialog.result()
+
+        with patch.object(MeasureDialog, "exec", new=accept_minx):
+            self.assertTrue(controller.editMeasure("Extreme sale"))
+
+        updated = next(
+            measure for measure in controller.modelMeasures
+            if measure["name"] == "Extreme sale"
+        )
+        self.assertEqual(updated["expression"], "MINX('VAT sample', [Sales])")
+        self.assertEqual(updated["value"], "50")
+
+    def test_measure_editor_inline_completion_and_nested_argument_help(self) -> None:
+        dialog = MeasureDialog(["Sales"], [])
+        dialog.show()
+        self.app.processEvents()
+        dialog.expression_edit.setPlainText("SUM")
+        dialog.expression_edit.moveCursor(QTextCursor.MoveOperation.End)
+        dialog._refresh_inline_editor_help()
+        self.assertTrue(dialog.inline_function_suggestions.isVisible())
+        self.assertIn(
+            "SUM",
+            [dialog.inline_function_suggestions.item(index).text()
+             for index in range(dialog.inline_function_suggestions.count())],
+        )
+        self.assertEqual(dialog.expression_edit.toPlainText(), "SUM")
+
+        QTest.keyClick(dialog.expression_edit, Qt.Key.Key_Tab)
+        self.app.processEvents()
+        self.assertEqual(dialog.expression_edit.toPlainText(), "SUM([Column])")
+        self.assertEqual(dialog.expression_edit.textCursor().selectedText(), "[Column]")
+
+        dialog.expression_edit.setPlainText("SUM")
+        dialog.expression_edit.moveCursor(QTextCursor.MoveOperation.End)
+        dialog._refresh_inline_editor_help()
+        self.assertGreaterEqual(dialog.inline_function_suggestions.count(), 2)
+        QTest.keyClick(dialog.expression_edit, Qt.Key.Key_Down)
+        selected_function = str(
+            dialog.inline_function_suggestions.currentItem().data(
+                Qt.ItemDataRole.UserRole
+            )
+        )
+        self.assertEqual(dialog.inline_function_suggestions.currentRow(), 1)
+        QTest.keyClick(dialog.expression_edit, Qt.Key.Key_Return)
+        expected_template = DAX_FUNCTION_TEMPLATES[selected_function][0]
+        self.assertEqual(dialog.expression_edit.toPlainText(), expected_template)
+
+        dialog.expression_edit.setPlainText("IF")
+        dialog.expression_edit.moveCursor(QTextCursor.MoveOperation.End)
+        dialog._refresh_inline_editor_help()
+        original_draft = dialog.expression_edit.toPlainText()
+        self.assertTrue(dialog.inline_function_suggestions.isVisible())
+        QTest.keyClick(dialog.expression_edit, Qt.Key.Key_Escape)
+        self.app.processEvents()
+        self.assertTrue(dialog.isVisible())
+        self.assertFalse(dialog.inline_function_suggestions.isVisible())
+        self.assertEqual(dialog.expression_edit.toPlainText(), original_draft)
+
+        dialog.expression_edit.setPlainText(
+            "CALCULATE(SUM([Sales]), IF(TRUE(), 1,"
+        )
+        dialog.expression_edit.moveCursor(QTextCursor.MoveOperation.End)
+        dialog._refresh_inline_editor_help()
+        self.assertIn("IF · argument 3 of 3", dialog.inline_help_label.text())
+        self.assertIn("value_if_false", dialog.inline_help_label.text())
+
+        dialog.expression_edit.setPlainText('SUMX("AVERAGE')
+        dialog.expression_edit.moveCursor(QTextCursor.MoveOperation.End)
+        dialog._refresh_inline_editor_help()
+        self.assertFalse(dialog.inline_function_suggestions.isVisible())
+        self.assertIn("pause inside text strings", dialog.inline_help_label.text())
+
+        dialog.expression_edit.setPlainText("'Sales'[SUMX")
+        dialog.expression_edit.moveCursor(QTextCursor.MoveOperation.End)
+        dialog._refresh_inline_editor_help()
+        self.assertFalse(dialog.inline_function_suggestions.isVisible())
+        self.assertIn("column", dialog.inline_help_label.text().casefold())
+        dialog.deleteLater()
+        self.app.processEvents()
+
+    def test_measure_editor_completes_loaded_fields_and_saved_measures(self) -> None:
+        dialog = MeasureDialog(
+            ["Net Sales", "Sales Amount"],
+            [],
+            field_references=[
+                ("VAT 5%[Net Sales]", "'VAT 5%'[Net Sales]"),
+                ("VAT 5%[Sales Amount]", "'VAT 5%'[Sales Amount]"),
+                ("VAT 5%[Vendor's Net Sales]", "'VAT 5%'[Vendor's Net Sales]"),
+                ("Other[Net Sales]", "'Other'[Net Sales]"),
+                ("O'Brien Data[Net Value]", "'O''Brien Data'[Net Value]"),
+                ("O'Brien Data[Vendor's Net Sales]", "'O''Brien Data'[Vendor's Net Sales]"),
+                ("O'Brien Dept[Net Value]", "'O''Brien Dept'[Net Value]"),
+            ],
+            measure_references=["Net Sales", "Net Sales Budget"],
+            home_table_name="VAT 5%",
+        )
+        dialog.show()
+        self.app.processEvents()
+
+        # A column-argument function offers only fields from the measure's
+        # home table, then completes the unqualified DAX column reference.
+        expression = "SUM([Net])"
+        dialog.expression_edit.setPlainText(expression)
+        cursor = dialog.expression_edit.textCursor()
+        cursor.setPosition(expression.index("Net") + 3)
+        dialog.expression_edit.setTextCursor(cursor)
+        dialog._refresh_inline_editor_help()
+        suggestions = dialog.inline_function_suggestions
+        self.assertTrue(suggestions.isVisible())
+        self.assertEqual(
+            [suggestions.item(index).text() for index in range(suggestions.count())],
+            ["Net Sales"],
+        )
+        self.assertEqual(
+            str(suggestions.item(0).data(Qt.ItemDataRole.UserRole + 1)),
+            "column",
+        )
+        QTest.keyClick(dialog.expression_edit, Qt.Key.Key_Tab)
+        self.assertEqual(dialog.expression_edit.toPlainText(), "SUM([Net Sales])")
+        self.assertEqual(
+            dialog.expression_edit.textCursor().position(),
+            "SUM([Net Sales])".index(")"),
+        )
+        self.assertFalse(suggestions.isVisible())
+
+        # Table-name completion makes the qualified field picker discoverable
+        # even when the formula starts with an escaped quoted table name.
+        dialog.expression_edit.setPlainText("'O''Brien Da")
+        dialog.expression_edit.moveCursor(QTextCursor.MoveOperation.End)
+        dialog._refresh_inline_editor_help()
+        self.assertEqual(
+            [suggestions.item(index).text() for index in range(suggestions.count())],
+            ["O'Brien Data"],
+        )
+        QTest.keyClick(dialog.expression_edit, Qt.Key.Key_Tab)
+        self.assertEqual(
+            dialog.expression_edit.toPlainText(), "'O''Brien Data'"
+        )
+        self.assertEqual(
+            dialog.expression_edit.textCursor().position(),
+            len("'O''Brien Data'"),
+        )
+        self.assertFalse(suggestions.isVisible())
+
+        # Apostrophes inside bracketed column names are reference content,
+        # both in the home table and in a table-qualified reference.
+        expression = "SUM([Vendor's Net)"
+        dialog.expression_edit.setPlainText(expression)
+        cursor = dialog.expression_edit.textCursor()
+        cursor.setPosition(expression.index(")"))
+        dialog.expression_edit.setTextCursor(cursor)
+        dialog._refresh_inline_editor_help()
+        self.assertEqual(
+            [suggestions.item(index).text() for index in range(suggestions.count())],
+            ["Vendor's Net Sales"],
+        )
+        QTest.keyClick(dialog.expression_edit, Qt.Key.Key_Tab)
+        self.assertEqual(
+            dialog.expression_edit.toPlainText(), "SUM([Vendor's Net Sales])"
+        )
+        self.assertEqual(
+            dialog.expression_edit.textCursor().position(),
+            "SUM([Vendor's Net Sales])".index(")"),
+        )
+        self.assertFalse(suggestions.isVisible())
+
+        expression = "SUM('O''Brien Data'[Vendor's N])"
+        dialog.expression_edit.setPlainText(expression)
+        cursor = dialog.expression_edit.textCursor()
+        cursor.setPosition(expression.index("Vendor's N") + len("Vendor's N"))
+        dialog.expression_edit.setTextCursor(cursor)
+        dialog._refresh_inline_editor_help()
+        self.assertEqual(
+            [suggestions.item(index).text() for index in range(suggestions.count())],
+            ["Vendor's Net Sales"],
+        )
+        QTest.keyClick(dialog.expression_edit, Qt.Key.Key_Enter)
+        qualified_expected = "SUM('O''Brien Data'[Vendor's Net Sales])"
+        self.assertEqual(dialog.expression_edit.toPlainText(), qualified_expected)
+        self.assertEqual(
+            dialog.expression_edit.textCursor().position(),
+            qualified_expected.index(")"),
+        )
+        self.assertFalse(suggestions.isVisible())
+
+        # Once an apostrophe-containing column reference is closed, it must
+        # not poison lexical state or suppress later function completion.
+        expression = "SUM([Vendor's Net Sales]) + AVER"
+        dialog.expression_edit.setPlainText(expression)
+        dialog.expression_edit.moveCursor(QTextCursor.MoveOperation.End)
+        dialog._refresh_inline_editor_help()
+        self.assertTrue(suggestions.isVisible())
+        self.assertIn(
+            "AVERAGE",
+            [suggestions.item(index).text() for index in range(suggestions.count())],
+        )
+
+        # A quoted table name with an escaped apostrophe narrows field matches;
+        # clicking a row must preserve the suffix after the reference.
+        expression = "SUM('O''Brien Data'[Net]) + 1"
+        dialog.expression_edit.setPlainText(expression)
+        cursor = dialog.expression_edit.textCursor()
+        cursor.setPosition(expression.index("[Net") + len("[Net"))
+        dialog.expression_edit.setTextCursor(cursor)
+        dialog._refresh_inline_editor_help()
+        self.assertEqual(
+            [suggestions.item(index).text() for index in range(suggestions.count())],
+            ["Net Value"],
+        )
+        item_rect = suggestions.visualItemRect(suggestions.item(0))
+        QTest.mouseClick(
+            suggestions.viewport(), Qt.MouseButton.LeftButton,
+            pos=item_rect.center(),
+        )
+        self.app.processEvents()
+        self.assertEqual(
+            dialog.expression_edit.toPlainText(),
+            "SUM('O''Brien Data'[Net Value]) + 1",
+        )
+        qualified_expected = "SUM('O''Brien Data'[Net Value]) + 1"
+        self.assertEqual(
+            dialog.expression_edit.textCursor().position(),
+            qualified_expected.index(")"),
+        )
+        self.assertFalse(suggestions.isVisible())
+
+        # When multiple table names match, mouse acceptance preserves the
+        # qualifier suffix and positions the caret after the existing quote.
+        expression = "SUM('O''Brien D'[Net Value]) + 1"
+        dialog.expression_edit.setPlainText(expression)
+        cursor = dialog.expression_edit.textCursor()
+        cursor.setPosition(expression.index("O''Brien D") + len("O''Brien D"))
+        dialog.expression_edit.setTextCursor(cursor)
+        dialog._refresh_inline_editor_help()
+        self.assertEqual(
+            [suggestions.item(index).text() for index in range(suggestions.count())],
+            ["O'Brien Data", "O'Brien Dept"],
+        )
+        second_row = suggestions.visualItemRect(suggestions.item(1))
+        QTest.mouseClick(
+            suggestions.viewport(), Qt.MouseButton.LeftButton,
+            pos=second_row.center(),
+        )
+        self.app.processEvents()
+        table_expected = "SUM('O''Brien Dept'[Net Value]) + 1"
+        self.assertEqual(dialog.expression_edit.toPlainText(), table_expected)
+        self.assertEqual(
+            dialog.expression_edit.textCursor().position(),
+            table_expected.index("[Net Value]"),
+        )
+        self.assertFalse(suggestions.isVisible())
+
+        # Scalar expression references offer saved measures, not columns.
+        expression = "CALCULATE([Net S])"
+        dialog.expression_edit.setPlainText(expression)
+        cursor = dialog.expression_edit.textCursor()
+        cursor.setPosition(expression.index("Net") + len("Net S"))
+        dialog.expression_edit.setTextCursor(cursor)
+        dialog._refresh_inline_editor_help()
+        self.assertEqual(
+            [suggestions.item(index).text() for index in range(suggestions.count())],
+            ["Net Sales", "Net Sales Budget"],
+        )
+        self.assertEqual(
+            str(suggestions.item(0).data(Qt.ItemDataRole.UserRole + 1)),
+            "measure",
+        )
+        original = dialog.expression_edit.toPlainText()
+        QTest.keyClick(dialog.expression_edit, Qt.Key.Key_Escape)
+        self.app.processEvents()
+        self.assertFalse(suggestions.isVisible())
+        self.assertEqual(dialog.expression_edit.toPlainText(), original)
+
+        # Enter accepts a saved measure and advances over the existing
+        # bracket without reopening the popup.
+        expression = "CALCULATE([Net S])"
+        dialog.expression_edit.setPlainText(expression)
+        cursor = dialog.expression_edit.textCursor()
+        cursor.setPosition(expression.index("Net S") + len("Net S"))
+        dialog.expression_edit.setTextCursor(cursor)
+        dialog._refresh_inline_editor_help()
+        QTest.keyClick(dialog.expression_edit, Qt.Key.Key_Return)
+        measure_expected = "CALCULATE([Net Sales])"
+        self.assertEqual(dialog.expression_edit.toPlainText(), measure_expected)
+        self.assertEqual(
+            dialog.expression_edit.textCursor().position(),
+            measure_expected.index(")"),
+        )
+        self.assertFalse(suggestions.isVisible())
+
+        expression = "CALCULATE([Net S]) + 1"
+        dialog.expression_edit.setPlainText(expression)
+        cursor = dialog.expression_edit.textCursor()
+        cursor.setPosition(expression.index("Net S") + len("Net S"))
+        dialog.expression_edit.setTextCursor(cursor)
+        dialog._refresh_inline_editor_help()
+        self.assertEqual(
+            [suggestions.item(index).text() for index in range(suggestions.count())],
+            ["Net Sales", "Net Sales Budget"],
+        )
+        second_measure = suggestions.visualItemRect(suggestions.item(1))
+        QTest.mouseClick(
+            suggestions.viewport(), Qt.MouseButton.LeftButton,
+            pos=second_measure.center(),
+        )
+        self.app.processEvents()
+        measure_click_expected = "CALCULATE([Net Sales Budget]) + 1"
+        self.assertEqual(
+            dialog.expression_edit.toPlainText(), measure_click_expected
+        )
+        self.assertEqual(
+            dialog.expression_edit.textCursor().position(),
+            measure_click_expected.index(")"),
+        )
+        self.assertFalse(suggestions.isVisible())
+
+        # Strings and a caret after a completed reference never show a token
+        # popup. Ordinary function completion remains unchanged.
+        dialog.expression_edit.setPlainText('SUM("Net S")')
+        dialog.expression_edit.moveCursor(QTextCursor.MoveOperation.End)
+        dialog._refresh_inline_editor_help()
+        self.assertFalse(suggestions.isVisible())
+        dialog.expression_edit.setPlainText("SUM([Net Sales])")
+        dialog.expression_edit.moveCursor(QTextCursor.MoveOperation.End)
+        dialog._refresh_inline_editor_help()
+        self.assertFalse(suggestions.isVisible())
+        dialog.expression_edit.setPlainText("SUM")
+        dialog.expression_edit.moveCursor(QTextCursor.MoveOperation.End)
+        dialog._refresh_inline_editor_help()
+        self.assertTrue(suggestions.isVisible())
+        self.assertEqual(
+            str(suggestions.item(0).data(Qt.ItemDataRole.UserRole + 1)),
+            "function",
+        )
+        dialog.deleteLater()
+        self.app.processEvents()
+
+    def test_measure_editor_suggests_columns_at_open_aggregation_argument(self) -> None:
+        dialog = MeasureDialog(
+            ["Net Sales", "Sales Amount"],
+            [],
+            field_references=[
+                ("VAT 5%[Net Sales]", "'VAT 5%'[Net Sales]"),
+                ("VAT 5%[Sales Amount]", "'VAT 5%'[Sales Amount]"),
+                ("Other[Sales Amount]", "'Other'[Sales Amount]"),
+            ],
+            home_table_name="VAT 5%",
+        )
+        dialog.show()
+        self.app.processEvents()
+        suggestions = dialog.inline_function_suggestions
+
+        dialog.expression_edit.setPlainText("SUM(")
+        dialog.expression_edit.moveCursor(QTextCursor.MoveOperation.End)
+        dialog._refresh_inline_editor_help()
+        self.assertTrue(suggestions.isVisible())
+        self.assertEqual(
+            [suggestions.item(index).text() for index in range(suggestions.count())],
+            ["Net Sales", "Sales Amount"],
+        )
+        self.assertEqual(
+            str(suggestions.item(0).data(Qt.ItemDataRole.UserRole + 1)),
+            "column",
+        )
+        self.assertIn("SUM([Column])", dialog.function_signature_label.text())
+        self.assertIn("Local syntax:", dialog.function_signature_label.text())
+        self.assertNotIn("<code>", dialog.function_signature_label.text())
+        self.assertGreaterEqual(dialog.function_signature_label.minimumHeight(), 32)
+        self.assertIn("argument 1 of 1", dialog.inline_help_label.text())
+        self.assertIn("home table", dialog.inline_help_label.text())
+        self.assertEqual(dialog.function_combo.currentText(), "")
+
+        expression = "SUM(UNSUPPORTED([Sa]))"
+        dialog.expression_edit.setPlainText(expression)
+        cursor = dialog.expression_edit.textCursor()
+        cursor.setPosition(expression.index("Sa") + len("Sa"))
+        dialog.expression_edit.setTextCursor(cursor)
+        dialog._refresh_inline_editor_help()
+        self.assertFalse(suggestions.isVisible())
+        self.assertIn(
+            "Choose a function or place the caret",
+            dialog.function_signature_label.text(),
+        )
+        self.assertNotIn("SUM · argument", dialog.inline_help_label.text())
+
+        expression = "SUM(Sa)"
+        dialog.expression_edit.setPlainText(expression)
+        cursor = dialog.expression_edit.textCursor()
+        cursor.setPosition(expression.index(")"))
+        dialog.expression_edit.setTextCursor(cursor)
+        dialog._refresh_inline_editor_help()
+        self.assertEqual(
+            [suggestions.item(index).text() for index in range(suggestions.count())],
+            ["Sales Amount"],
+        )
+        QTest.keyClick(dialog.expression_edit, Qt.Key.Key_Tab)
+        self.assertEqual(
+            dialog.expression_edit.toPlainText(), "SUM([Sales Amount])"
+        )
+        self.assertEqual(
+            dialog.expression_edit.textCursor().position(),
+            "SUM([Sales Amount])".index(")"),
+        )
+
+        dialog.expression_edit.setPlainText("COUNTROWS(")
+        dialog.expression_edit.moveCursor(QTextCursor.MoveOperation.End)
+        dialog._refresh_inline_editor_help()
+        self.assertFalse(suggestions.isVisible())
+        self.assertIn("COUNTROWS", dialog.inline_help_label.text())
+
+        expression = "SUM((Sales))"
+        dialog.expression_edit.setPlainText(expression)
+        cursor = dialog.expression_edit.textCursor()
+        cursor.setPosition(expression.index("Sales") + len("Sales"))
+        dialog.expression_edit.setTextCursor(cursor)
+        dialog._refresh_inline_editor_help()
+        self.assertFalse(suggestions.isVisible())
+
+        expression = "SUM([Net Sales]) / COUNTROWS()"
+        dialog.expression_edit.setPlainText(expression)
+        dialog.expression_edit.moveCursor(QTextCursor.MoveOperation.End)
+        dialog._refresh_inline_editor_help()
+        self.assertFalse(suggestions.isVisible())
+        self.assertIn(
+            "Choose a function or place the caret",
+            dialog.function_signature_label.text(),
+        )
+        dialog.deleteLater()
+        self.app.processEvents()
+
+    def test_completed_home_table_field_previews_with_the_expected_result(self) -> None:
+        controller = self.populated_controller()
+        home_table = controller._table_catalog[0]
+        dialog = MeasureDialog(
+            list(controller.headers),
+            [],
+            home_table_id=str(home_table["id"]),
+            home_table_name=str(home_table["name"]),
+            field_references=controller._dax_field_references(),
+            preview_callback=lambda name, expression: controller._preview_measure_expression(
+                name, expression, home_table_id=str(home_table["id"])
+            ),
+        )
+        dialog.show()
+        self.app.processEvents()
+        dialog.name_edit.setText("Completed sales")
+        expression = "SUM([Sa])"
+        dialog.expression_edit.setPlainText(expression)
+        cursor = dialog.expression_edit.textCursor()
+        cursor.setPosition(expression.index("Sa") + len("Sa"))
+        dialog.expression_edit.setTextCursor(cursor)
+        dialog._refresh_inline_editor_help()
+
+        self.assertEqual(
+            [dialog.inline_function_suggestions.item(index).text()
+             for index in range(dialog.inline_function_suggestions.count())],
+            ["Sales"],
+        )
+        QTest.keyClick(dialog.expression_edit, Qt.Key.Key_Enter)
+        self.assertEqual(dialog.expression_edit.toPlainText(), "SUM([Sales])")
+        dialog.preview_button.click()
+        self.assertEqual(
+            dialog.preview_label.text(),
+            "Current report-context result: 350.50",
+        )
+        dialog.deleteLater()
+        self.app.processEvents()
+
+    def test_countrows_help_explains_optional_home_table_argument(self) -> None:
+        dialog = MeasureDialog(["Sales"], [])
+        dialog.show()
+        self.app.processEvents()
+
+        dialog.function_combo.setCurrentText("COUNTROWS")
+        self.assertIn(
+            "table argument is optional",
+            dialog.function_signature_label.text(),
+        )
+        self.assertIn(
+            "this measure's home table",
+            dialog.function_signature_label.text(),
+        )
+
+        dialog.expression_edit.setPlainText("COUNTROWS(")
+        dialog.expression_edit.moveCursor(QTextCursor.MoveOperation.End)
+        dialog._refresh_inline_editor_help()
+        self.assertIn("table argument is optional", dialog.inline_help_label.text())
+        self.assertIn("omit it", dialog.inline_help_label.text())
+        self.assertIn("home table", dialog.inline_help_label.text())
+        self.assertIn("ALLSELECTED", dialog.inline_help_label.text())
+
+        dialog.deleteLater()
+        self.app.processEvents()
+
+    def test_dax_inline_completion_preserves_unicode_before_the_caret(self) -> None:
+        dialog = MeasureDialog(["Sales", "Name"], [])
+        dialog.show()
+        self.app.processEvents()
+        expression = 'IF([Name] = "😀", SUM([Sales]), SUM'
+        dialog.expression_edit.setPlainText(expression)
+        dialog.expression_edit.moveCursor(QTextCursor.MoveOperation.End)
+        dialog._refresh_inline_editor_help()
+        self.assertTrue(dialog.inline_function_suggestions.isVisible())
+
+        QTest.keyClick(dialog.expression_edit, Qt.Key.Key_Tab)
+        self.assertEqual(
+            dialog.expression_edit.toPlainText(),
+            'IF([Name] = "😀", SUM([Sales]), SUM([Column])',
+        )
+        self.assertEqual(dialog.expression_edit.textCursor().selectedText(), "[Column]")
         dialog.deleteLater()
         self.app.processEvents()
 
@@ -573,10 +1676,16 @@ class ReportAndMeasureWorkflowTests(unittest.TestCase):
         self.assertTrue(controller._commit_inline(
             parse_pasted_table("Value\nA\nA\nB", name="DAX values")
         ))
+        preview_calls = []
+
+        def preview(name: str, expression: str) -> str:
+            preview_calls.append((name, expression))
+            return controller._preview_measure_expression(name, expression)
+
         dialog = MeasureDialog(
             list(controller.headers), [],
             field_references=controller._dax_field_references(),
-            preview_callback=controller._preview_measure_expression,
+            preview_callback=preview,
         )
         dialog.name_edit.setText("Unique values without blank")
         dialog.function_combo.setCurrentText("DISTINCTCOUNTNOBLANK")
@@ -595,11 +1704,20 @@ class ReportAndMeasureWorkflowTests(unittest.TestCase):
             dialog.preview_label.text(),
             "Current report-context result: 2",
         )
+        latest_expression = "DISTINCTCOUNT('DAX values'[Value])"
+        dialog.expression_edit.setPlainText(latest_expression)
         dialog.save_button.click()
         self.assertEqual(dialog.measure, {
             "name": "Unique values without blank",
-            "expression": "DISTINCTCOUNTNOBLANK('DAX values'[Value])",
+            "expression": latest_expression,
         })
+        self.assertEqual(preview_calls, [
+            (
+                "Unique values without blank",
+                "DISTINCTCOUNTNOBLANK('DAX values'[Value])",
+            ),
+            ("Unique values without blank", latest_expression),
+        ])
         self.assertTrue(controller.create_measure(
             dialog.measure["name"], dialog.measure["expression"]
         ))
@@ -627,8 +1745,10 @@ class ReportAndMeasureWorkflowTests(unittest.TestCase):
             "No matching values",
             'CALCULATE(DISTINCTCOUNT([Value]), [Region] = "Missing")',
         ))
-        self.assertEqual(controller.reportKpis["Distinct values"], "3")
-        self.assertEqual(controller.reportKpis["Distinct values without blank"], "3")
+        # Power BI drops the trailing space of " ", so it joins the empty text: only "" and "0" remain
+        # (verified live: DISTINCTCOUNT 2, DISTINCTCOUNTNOBLANK 2, COUNTBLANK 3 for this column).
+        self.assertEqual(controller.reportKpis["Distinct values"], "2")
+        self.assertEqual(controller.reportKpis["Distinct values without blank"], "2")
         self.assertEqual(controller.reportKpis["No matching values"], "—")
 
         controller.add_visual("card", "Distinct blank card", 20, 20, 150, 90)
@@ -636,28 +1756,28 @@ class ReportAndMeasureWorkflowTests(unittest.TestCase):
             "Fields", "__dax_measure__:Distinct values"
         )
         self.assertEqual(
-            controller.visualCardData("Distinct blank card")["value"], "3"
+            controller.visualCardData("Distinct blank card")["value"], "2"
         )
         controller.add_visual("card", "Distinct no-blank card", 190, 20, 150, 90)
         controller.add_field_to_well(
             "Fields", "__dax_measure__:Distinct values without blank"
         )
         self.assertEqual(
-            controller.visualCardData("Distinct no-blank card")["value"], "3"
+            controller.visualCardData("Distinct no-blank card")["value"], "2"
         )
 
         project_path = self.root / "distinct-count.npa"
         self.assertTrue(controller._save_to(project_path))
         reopened = self.controller()
         self.assertTrue(reopened.open_project_path(project_path))
-        self.assertEqual(reopened.reportKpis["Distinct values"], "3")
-        self.assertEqual(reopened.reportKpis["Distinct values without blank"], "3")
+        self.assertEqual(reopened.reportKpis["Distinct values"], "2")
+        self.assertEqual(reopened.reportKpis["Distinct values without blank"], "2")
         self.assertEqual(reopened.reportKpis["No matching values"], "—")
         self.assertEqual(
-            reopened.visualCardData("Distinct blank card")["value"], "3"
+            reopened.visualCardData("Distinct blank card")["value"], "2"
         )
         self.assertEqual(
-            reopened.visualCardData("Distinct no-blank card")["value"], "3"
+            reopened.visualCardData("Distinct no-blank card")["value"], "2"
         )
 
         source_path.write_text(
@@ -742,7 +1862,8 @@ class ReportAndMeasureWorkflowTests(unittest.TestCase):
         self.assertTrue(dialog.hidden_checkbox.isChecked())
         self.assertTrue(dialog.save_button.isEnabled())
         self.assertEqual(dialog.save_button.text(), "Save measure")
-        self.assertLessEqual(dialog.help_scroll_area.maximumHeight(), 132)
+        self.assertTrue(dialog.content_scroll_area.widgetResizable())
+        self.assertIn("supported local DAX subset", dialog.function_help_label.text())
 
         dialog.expression_edit.setPlainText("SUM([Sales]) * 2")
         dialog.save_button.click()

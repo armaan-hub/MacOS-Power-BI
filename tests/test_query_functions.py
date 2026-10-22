@@ -11,12 +11,13 @@ from unittest.mock import patch
 
 os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
 
-from PySide6.QtCore import QSettings
+from PySide6.QtCore import QSettings, Qt
 from PySide6.QtWidgets import QApplication, QDialog, QToolButton
 
 from analytics_studio.controller import StudioController
 from analytics_studio.file_import import ImportCandidate, parse_file
 from analytics_studio.local_table_dialogs import (
+    CustomColumnDialog,
     ManageQueryFunctionsDialog,
     TransformDataDialog,
 )
@@ -282,9 +283,8 @@ class QueryFunctionDefinitionTests(unittest.TestCase):
         old["format_version"] = 77
         old.pop("query_functions")
         migrated = validate_project(old)
-        self.assertEqual(migrated["format_version"], 78)
+        self.assertEqual(migrated["format_version"], FORMAT_VERSION)
         self.assertEqual(migrated["query_functions"], [])
-        self.assertEqual(FORMAT_VERSION, 78)
 
         project = new_project("functions")
         project["query_functions"] = self.functions
@@ -327,6 +327,38 @@ class QueryFunctionDefinitionTests(unittest.TestCase):
             "output_type": "decimal_number",
         })
         dialog.deleteLater()
+
+    def test_custom_column_dialog_inserts_saved_functions_and_validates_the_call(self) -> None:
+        transform = TransformDataDialog(
+            self.source, query_name="Sales", query_functions=self.functions
+        )
+
+        def accept_column(editor: CustomColumnDialog) -> int:
+            item = editor.function_list.findItems(
+                "NormalizeName", Qt.MatchFlag.MatchExactly
+            )[0]
+            editor.function_list.setCurrentItem(item)
+            editor._insert_selected_function()
+            self.assertEqual(
+                editor.expression_edit.textCursor().selectedText(), "[Column]"
+            )
+            editor.column_list.setCurrentRow(0)
+            editor._insert_selected_column()
+            editor.name_edit.setText("Normalized")
+            self.assertEqual(
+                editor.expression_edit.toPlainText(), "NormalizeName([Name])"
+            )
+            editor._accept_column()
+            return editor.result()
+
+        with patch.object(CustomColumnDialog, "exec", new=accept_column):
+            transform._select_ribbon_operation("add_custom_column")
+        self.assertEqual(
+            [row["Normalized"] for row in transform._preview_candidate.rows],
+            ["ADA", "BOB"],
+        )
+        transform.deleteLater()
+        self.app.processEvents()
 
     def test_unavailable_query_blocks_changes_to_a_function_it_uses(self) -> None:
         unavailable_candidate = ImportCandidate("query", [], [], {}, [])
@@ -530,7 +562,7 @@ class QueryFunctionDefinitionTests(unittest.TestCase):
                 QSettings(str(root / "reopened-settings.ini"), QSettings.Format.IniFormat),
             )
             self.assertTrue(reopened.open_project_path(project_path), reopened.statusMessage)
-            self.assertEqual(reopened._project["format_version"], 78)
+            self.assertEqual(reopened._project["format_version"], FORMAT_VERSION)
             self.assertEqual(reopened._project["query_functions"][0]["expression"], "Value * 3")
             for query_id, column in (
                 (root_id, "Doubled"),

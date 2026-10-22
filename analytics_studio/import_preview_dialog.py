@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from pathlib import Path
 import threading
-from typing import Any
+from typing import Any, Callable
 
 from PySide6.QtCore import (
     QAbstractTableModel,
@@ -208,9 +208,9 @@ class ImportPreviewTableModel(QAbstractTableModel):
 
 
 class FileImportPreviewDialog(QDialog):
-    """Let the user choose file options, inspect a preview, then commit it.
+    """Let the user choose file options and inspect a preview before continuing.
 
-    ``candidate`` is intentionally available only after the Import data button
+    ``candidate`` is intentionally available only after Load or Transform data
     accepts the dialog. Parsing and option changes only update the preview.
     """
 
@@ -222,17 +222,25 @@ class FileImportPreviewDialog(QDialog):
         initial_options: dict[str, Any] | None = None,
         existing_sqlite_tables: set[str] | None = None,
         source_editing: bool = False,
+        replacement_check: Callable[[ImportCandidate], bool] | None = None,
+        allow_transform: bool = True,
     ) -> None:
         super().__init__(parent)
         self.path = Path(path).expanduser().resolve()
         self.replacing = replacing
+        self.replacement_check = replacement_check
         self.source_editing = bool(source_editing)
+        self.allow_transform = bool(allow_transform) and not self.source_editing
         self.initial_options = dict(initial_options or {})
         self.existing_sqlite_tables = set(existing_sqlite_tables or ())
         self._kind: str | None = None
         self._base_options: dict[str, Any] = {}
         self._preview_candidate: ImportCandidate | None = None
         self._accepted_candidate: ImportCandidate | None = None
+        self._accepted_action: str | None = None
+        self._pending_accept_action: str | None = None
+        self._pending_accept_options: dict[str, Any] | None = None
+        self._pending_fallback_candidate: ImportCandidate | None = None
         self._last_error = ""
         self._parse_pool = QThreadPool.globalInstance()
         self._parse_tasks: dict[int, _ImportParseTask] = {}
@@ -256,9 +264,16 @@ class FileImportPreviewDialog(QDialog):
 
     @property
     def candidate(self) -> ImportCandidate | None:
-        """Return the parsed candidate only after the dialog is accepted."""
+        """Return the parsed candidate only after the user chooses an action."""
         if self.result() == QDialog.DialogCode.Accepted:
             return self._accepted_candidate
+        return None
+
+    @property
+    def selected_action(self) -> str | None:
+        """Return ``load`` or ``transform`` after an accepted preview."""
+        if self.result() == QDialog.DialogCode.Accepted:
+            return self._accepted_action
         return None
 
     def _build_ui(self) -> None:
@@ -279,7 +294,7 @@ class FileImportPreviewDialog(QDialog):
         layout.addWidget(self.file_label)
 
         self.replacement_label = QLabel(
-            "This file is already linked to a table in this project. Importing will replace that table's data and saved transform steps."
+            "This source is already linked to a table in this project. Importing replaces its source data and reapplies its saved transformation steps."
         )
         self.replacement_label.setWordWrap(True)
         self.replacement_label.setStyleSheet(
@@ -348,20 +363,40 @@ class FileImportPreviewDialog(QDialog):
         )
         self.import_button = self.buttons.button(QDialogButtonBox.StandardButton.Ok)
         self.import_button.setText(
-            "Apply settings" if self.source_editing else "Import data"
+            "Apply settings" if self.source_editing else "Load"
         )
         self.import_button.setEnabled(False)
         self.buttons.accepted.connect(self._accept_candidate)
         self.buttons.rejected.connect(self.reject)
+        self.transform_button = self.buttons.addButton(
+            "Transform data", QDialogButtonBox.ButtonRole.ActionRole
+        )
+        self.transform_button.setVisible(self.allow_transform)
+        self.transform_button.setEnabled(False)
+        self.transform_button.clicked.connect(
+            lambda: self._accept_candidate("transform")
+        )
+        self._set_action_buttons_enabled(False)
         layout.addWidget(self.buttons)
+
+    def _set_action_buttons_enabled(self, enabled: bool) -> None:
+        self.import_button.setEnabled(enabled)
+        self.transform_button.setEnabled(enabled and self.allow_transform)
 
     def _initialize_file(self) -> None:
         try:
             self._kind = kind_for_path(self.path)
-            self._base_options = normalize_options(
-                self._kind,
-                {**default_options(self._kind), **self.initial_options},
-            )
+            options = {**default_options(self._kind), **self.initial_options}
+            if (
+                self._kind == "excel"
+                and not self.source_editing
+                and not self.replacing
+                and "header_row" not in self.initial_options
+            ):
+                # Match the observed Power BI direct worksheet-import path for
+                # new imports without changing parser or legacy-project defaults.
+                options["header_row"] = 1
+            self._base_options = normalize_options(self._kind, options)
         except Exception as exc:
             self._show_error(str(exc) or "This file cannot be imported.")
             self.count_label.setText("No preview is available.")
@@ -461,10 +496,32 @@ class FileImportPreviewDialog(QDialog):
         header_row_layout.addStretch(1)
         self.options_form.addRow("Column names", header_row_widget)
         self.header_auto_checkbox.toggled.connect(self.header_row_spin.setDisabled)
-        self.header_auto_checkbox.toggled.connect(self._refresh_preview)
+        self.header_auto_checkbox.toggled.connect(self._on_excel_header_mode_changed)
         self.header_row_spin.valueChanged.connect(self._refresh_preview)
+
+        self.transform_raw_rows_checkbox = QCheckBox(
+            "Start Transform from raw worksheet rows (no headers)"
+        )
+        self.transform_raw_rows_checkbox.setChecked(
+            self.allow_transform and bool(self.initial_options.get("raw_rows", True))
+        )
+        self.transform_raw_rows_checkbox.setEnabled(self.allow_transform)
+        self.options_form.addRow("Transform start", self.transform_raw_rows_checkbox)
+        self.transform_start_note = QLabel(
+            "When selected, Transform re-reads the worksheet without promoting headers and keeps the worksheet's declared row and column extent under Column1, Column2, … names. The grid above remains the Load preview; Load keeps its current column-name setting."
+        )
+        self.transform_start_note.setWordWrap(True)
+        self.transform_start_note.setStyleSheet("color: #526477; padding: 0 0 2px 0;")
+        self.options_form.addRow("", self.transform_start_note)
+        self.options_form.setRowVisible(
+            self.transform_raw_rows_checkbox, self.allow_transform
+        )
+        self.options_form.setRowVisible(self.transform_start_note, self.allow_transform)
         self._start_background_options_discovery()
         return True
+
+    def _on_excel_header_mode_changed(self, _automatic: bool) -> None:
+        self._refresh_preview()
 
     def _current_options(self) -> dict[str, Any]:
         options = dict(self._base_options)
@@ -555,7 +612,7 @@ class FileImportPreviewDialog(QDialog):
         self._active_options_id = None
         self._source_options_pending = False
         self._set_preview_busy(False)
-        self.import_button.setEnabled(False)
+        self._set_action_buttons_enabled(False)
 
     def _apply_excel_options(
         self,
@@ -596,12 +653,15 @@ class FileImportPreviewDialog(QDialog):
     def _refresh_preview(self, *_args: Any) -> None:
         if self._source_options_pending:
             return
+        self._pending_accept_action = None
+        self._pending_accept_options = None
+        self._pending_fallback_candidate = None
         self._cancel_pending_preview()
         self._preview_candidate = None
         model = self.table.model()
         assert isinstance(model, ImportPreviewTableModel)
         model.set_candidate(None)
-        self.import_button.setEnabled(False)
+        self._set_action_buttons_enabled(False)
 
         if self._requires_background_parse():
             self._start_background_preview()
@@ -627,14 +687,16 @@ class FileImportPreviewDialog(QDialog):
         except OSError:
             return False
 
-    def _start_background_preview(self) -> None:
+    def _start_background_preview(
+        self, options: dict[str, Any] | None = None
+    ) -> None:
         self._next_parse_id += 1
         request_id = self._next_parse_id
         cancel_event = threading.Event()
         task = _ImportParseTask(
             request_id,
             self.path,
-            self._current_options(),
+            dict(options) if options is not None else self._current_options(),
             cancel_event,
         )
         task.signals.progress.connect(self._on_parse_progress)
@@ -685,6 +747,20 @@ class FileImportPreviewDialog(QDialog):
         self._active_parse_id = None
         self._set_preview_busy(False)
         self._show_preview_candidate(candidate)
+        pending_action = self._pending_accept_action
+        pending_options = self._pending_accept_options
+        self._pending_accept_action = None
+        self._pending_accept_options = None
+        self._pending_fallback_candidate = None
+        if pending_action is not None:
+            if pending_options != candidate.options:
+                self._show_preview_error(
+                    "The Transform preview did not match the selected header settings. Try again."
+                )
+                return
+            self._accepted_candidate = candidate
+            self._accepted_action = pending_action
+            super().accept()
 
     def _on_parse_failed(self, request_id: int, message: str) -> None:
         is_current = self._release_parse_task(request_id)
@@ -692,7 +768,19 @@ class FileImportPreviewDialog(QDialog):
             return
         self._active_parse_id = None
         self._set_preview_busy(False)
-        self._show_preview_error(message)
+        pending_action = self._pending_accept_action
+        fallback_candidate = self._pending_fallback_candidate
+        self._pending_accept_action = None
+        self._pending_accept_options = None
+        self._pending_fallback_candidate = None
+        if pending_action == "transform" and fallback_candidate is not None:
+            self._show_preview_candidate(fallback_candidate)
+            self._show_error(
+                "Transform preview failed: "
+                f"{message} The automatic preview is restored; retry Transform or choose Load."
+            )
+        else:
+            self._show_preview_error(message)
 
     def _on_parse_cancelled(self, request_id: int) -> None:
         is_current = self._release_parse_task(request_id)
@@ -700,14 +788,22 @@ class FileImportPreviewDialog(QDialog):
             return
         self._active_parse_id = None
         self._set_preview_busy(False)
+        self._pending_accept_action = None
+        self._pending_accept_options = None
+        self._pending_fallback_candidate = None
         self.count_label.setText("Preview canceled. Change an option to try again.")
-        self.import_button.setEnabled(False)
+        self._set_action_buttons_enabled(False)
 
     def _set_preview_busy(self, busy: bool) -> None:
         self.progress_widget.setVisible(busy)
+        self.options_group.setEnabled(not busy and not self._source_options_pending)
         if busy:
-            self.progress_label.setText("Reading source data…")
-            self.import_button.setEnabled(False)
+            self.progress_label.setText(
+                "Preparing the Transform preview…"
+                if self._pending_accept_action == "transform"
+                else "Reading source data…"
+            )
+            self._set_action_buttons_enabled(False)
 
     def _show_preview_error(self, message: str) -> None:
         model = self.table.model()
@@ -717,15 +813,20 @@ class FileImportPreviewDialog(QDialog):
         self.notice_label.setVisible(False)
         self.count_label.setText("No preview is available until the file options are valid.")
         self._show_error(message)
-        self.import_button.setEnabled(False)
+        self._set_action_buttons_enabled(False)
 
     def _show_preview_candidate(self, candidate: ImportCandidate) -> None:
         self._preview_candidate = candidate
-        if self._kind == "sqlite":
+        if self.replacement_check is not None:
+            is_replacing = self.replacement_check(candidate)
+        elif self._kind == "sqlite":
             selected_table = self._current_options().get("table_name")
-            self.replacement_label.setVisible(
-                bool(selected_table and selected_table in self.existing_sqlite_tables)
+            is_replacing = bool(
+                selected_table and selected_table in self.existing_sqlite_tables
             )
+        else:
+            is_replacing = self.replacing
+        self.replacement_label.setVisible(is_replacing and not self.source_editing)
         model = self.table.model()
         assert isinstance(model, ImportPreviewTableModel)
         model.set_candidate(candidate)
@@ -738,7 +839,7 @@ class FileImportPreviewDialog(QDialog):
         notices = [str(notice) for notice in candidate.notices if str(notice).strip()]
         self.notice_label.setText(" ".join(notices))
         self.notice_label.setVisible(bool(notices))
-        self.import_button.setEnabled(bool(candidate.headers))
+        self._set_action_buttons_enabled(bool(candidate.headers))
 
     def _show_error(self, message: str) -> None:
         self._last_error = message
@@ -750,14 +851,39 @@ class FileImportPreviewDialog(QDialog):
         self.error_label.clear()
         self.error_label.setVisible(False)
 
-    def _accept_candidate(self) -> None:
+    def _accept_candidate(self, action: str = "load") -> None:
         if self._preview_candidate is None:
             return
+        if action not in {"load", "transform"}:
+            return
+        if action == "transform" and not self.allow_transform:
+            return
+        if action == "transform" and self._kind == "excel":
+            transform_options = self._current_options()
+            transform_options["raw_rows"] = self.transform_raw_rows_checkbox.isChecked()
+            if transform_options["raw_rows"]:
+                transform_options["header_row"] = None
+            else:
+                transform_options.pop("raw_rows")
+            if self._preview_candidate.options != transform_options:
+                self._pending_accept_action = action
+                self._pending_accept_options = transform_options
+                self._pending_fallback_candidate = self._preview_candidate
+                self._preview_candidate = None
+                model = self.table.model()
+                assert isinstance(model, ImportPreviewTableModel)
+                model.set_candidate(None)
+                self._start_background_preview(transform_options)
+                return
         self._accepted_candidate = self._preview_candidate
+        self._accepted_action = action
         super().accept()
 
     def reject(self) -> None:
         self._cancel_pending_options()
         self._cancel_pending_preview()
+        self._pending_accept_action = None
+        self._pending_accept_options = None
+        self._pending_fallback_candidate = None
         self._accepted_candidate = None
         super().reject()

@@ -64,6 +64,9 @@ Supported shapes::
     {"op": "remove_blank_rows"}
     {"op": "remove_top_rows", "count": 4}
     {"op": "remove_bottom_rows", "count": 4}
+    {"op": "remove_sparse_top_rows"}
+    {"op": "remove_sparse_bottom_rows"}
+    {"op": "m_sparse_boundary_helper", "name": "FilterNullAndWhitespace"}
     {"op": "keep_top_rows", "count": 4}
     {"op": "keep_bottom_rows", "count": 4}
     {"op": "keep_range_rows", "first_row": 6, "count": 8}
@@ -113,6 +116,9 @@ strings before a conditional step runs. Fill Down copies the preceding
 non-null value into null cells; Fill Up copies the following non-null value
 into null cells. Empty text is not filled. Leading or trailing nulls remain
 null when no source value exists in that direction.
+Sparse-boundary steps trim only consecutive rows from the selected edge while
+at most one cell is non-null and non-whitespace. They keep internal sparse
+rows; a cell error makes the row predicate false and stops trimming.
 Duplicate Column appends an exact copy of the selected field's values, and the
 model metadata keeps the source column's type for the copy.
 Remove blank rows drops only rows where every cell is null or empty text;
@@ -304,6 +310,7 @@ _CONVERT_TYPES = SUPPORTED_COLUMN_TYPES | {"number", "any"}  # Keep M type-any s
 _LOCALE_CONVERT_TYPES = {"whole_number", "decimal_number", "date", "datetime", "time"}
 _LOCALE_CLOCK_PATTERN = r"(?<!\S)\d{1,2}:\d{2}(?::\d{2}(?:[.,]\d{1,6})?)?"
 _STEP_FIELDS: dict[str, set[str]] = {
+    "count_rows": {"op"},
     "rename_column": {"op", "column", "new_name"},
     "remove_column": {"op", "column"},
     "filter_rows": {"op", "column", "operator", "value"},
@@ -344,6 +351,9 @@ _STEP_FIELDS: dict[str, set[str]] = {
     "remove_rows_with_errors": {"op"},
     "remove_top_rows": {"op", "count"},
     "remove_bottom_rows": {"op", "count"},
+    "remove_sparse_top_rows": {"op"},
+    "remove_sparse_bottom_rows": {"op"},
+    "m_sparse_boundary_helper": {"op", "name"},
     "keep_top_rows": {"op", "count"},
     "keep_bottom_rows": {"op", "count"},
     "keep_range_rows": {"op", "first_row", "count"},
@@ -359,7 +369,11 @@ _STEP_FIELDS: dict[str, set[str]] = {
 }
 
 
-def validate_steps(steps: Any) -> list[dict[str, Any]]:
+def validate_steps(
+    steps: Any,
+    *,
+    allow_unused_sparse_boundary_helper: bool = False,
+) -> list[dict[str, Any]]:
     """Validate and copy an ordered JSON-serializable step list."""
     if not isinstance(steps, list):
         raise TransformationError("Transformation steps must be a list.")
@@ -401,6 +415,11 @@ def validate_steps(steps: Any) -> list[dict[str, Any]]:
                 _STEP_FIELDS[op], _STEP_FIELDS[op] | {"output_type"}
             ):
                 raise TransformationError(f"Transformation step {index} has missing or unsupported fields.")
+        elif op == "promote_headers":
+            if set(step) not in (
+                _STEP_FIELDS[op], _STEP_FIELDS[op] | {"promote_all_scalars"}
+            ):
+                raise TransformationError(f"Transformation step {index} has missing or unsupported fields.")
         elif set(step) != _STEP_FIELDS[op]:
             raise TransformationError(f"Transformation step {index} has missing or unsupported fields.")
         if op == "add_custom_column" and "output_type" in step:
@@ -413,6 +432,20 @@ def validate_steps(steps: Any) -> list[dict[str, Any]]:
             if step["output_type"] == "text":
                 step = dict(step)
                 step.pop("output_type")
+        if op == "promote_headers" and "promote_all_scalars" in step:
+            if not isinstance(step["promote_all_scalars"], bool):
+                raise TransformationError(
+                    f"Transformation step {index} PromoteAllScalars setting must be Boolean."
+                )
+        if op == "m_sparse_boundary_helper":
+            name = step["name"]
+            if not isinstance(name, str) or not re.fullmatch(
+                r"[A-Za-z_][A-Za-z0-9_]*", name
+            ):
+                raise TransformationError(
+                    f"Transformation step {index} needs a simple M helper name."
+                )
+            step = {**step, "name": name}
         if op in {"remove_duplicates", "keep_duplicates"} and "columns" in step:
             columns = step["columns"]
             if not isinstance(columns, list) or not columns or any(
@@ -994,7 +1027,9 @@ def validate_steps(steps: Any) -> list[dict[str, Any]]:
                 selected_columns.add(column)
                 validated_sorts.append({"column": column, "direction": direction})
             step = {**step, "sorts": validated_sorts}
-        elif any(not isinstance(value, str) for value in step.values()):
+        elif op != "promote_headers" and any(
+            not isinstance(value, str) for value in step.values()
+        ):
             raise TransformationError(f"Transformation step {index} values must be strings.")
 
         column = step.get("column")
@@ -1051,6 +1086,23 @@ def validate_steps(steps: Any) -> list[dict[str, Any]]:
                 raise TransformationError(f"Transformation step {index}: {exc}") from exc
             step = {**step, "column": step["column"].strip(), "culture": culture}
         validated.append(deepcopy(step))
+    helper_steps = [
+        (index, step) for index, step in enumerate(validated)
+        if step["op"] == "m_sparse_boundary_helper"
+    ]
+    if len(helper_steps) > 1:
+        raise TransformationError("Only one sparse-boundary helper binding is supported.")
+    if helper_steps:
+        helper_index, _helper_step = helper_steps[0]
+        if helper_index != 0:
+            raise TransformationError(
+                "The sparse-boundary helper binding must appear before table steps."
+            )
+        if not allow_unused_sparse_boundary_helper and not any(
+            step["op"] in {"remove_sparse_top_rows", "remove_sparse_bottom_rows"}
+            for step in validated
+        ):
+            raise TransformationError("The sparse-boundary helper binding is unused.")
     return validated
 
 
@@ -1111,7 +1163,9 @@ def apply_transformations(
     parameters: dict[str, Any] | None = None,
 ) -> ImportCandidate:
     """Return a transformed copy of ``candidate`` after replaying ``steps``."""
-    validated_steps = validate_steps(steps)
+    validated_steps = validate_steps(
+        steps, allow_unused_sparse_boundary_helper=True
+    )
     parameter_values = parameters if parameters is not None else {}
     from analytics_studio.query_functions import (
         QueryFunctionError,
@@ -1149,7 +1203,9 @@ def apply_transformations(
                 clauses.append(resolved_clause)
             resolved["clauses"] = clauses
         resolved_steps.append(resolved)
-    validated_steps = validate_steps(resolved_steps)
+    validated_steps = validate_steps(
+        resolved_steps, allow_unused_sparse_boundary_helper=True
+    )
     _validate_candidate(candidate)
 
     result = ImportCandidate(
@@ -1162,6 +1218,19 @@ def apply_transformations(
     )
     for step in validated_steps:
         op = step["op"]
+        if op == "m_sparse_boundary_helper":
+            continue
+        if op == "count_rows":
+            result = ImportCandidate(
+                kind=result.kind,
+                headers=["Count"],
+                rows=[{"Count": len(result.rows)}],
+                options=deepcopy(result.options),
+                notices=deepcopy(result.notices),
+                source_id=result.source_id,
+            )
+            _check_candidate_limits(result.headers, result.rows)
+            continue
         if op in {"remove_duplicates", "keep_duplicates"}:
             if op == "remove_duplicates":
                 result.rows = _remove_duplicates(
@@ -1177,7 +1246,9 @@ def apply_transformations(
             continue
         if op in {"promote_headers", "demote_headers", "transpose_table"}:
             if op == "promote_headers":
-                result = _promote_headers(result)
+                result = _promote_headers(
+                    result, step.get("promote_all_scalars", True)
+                )
             elif op == "demote_headers":
                 result = _demote_headers(result)
             else:
@@ -1213,6 +1284,23 @@ def apply_transformations(
         if op == "remove_bottom_rows":
             keep_count = max(0, len(result.rows) - step["count"])
             result.rows = result.rows[:keep_count]
+            _check_candidate_limits(result.headers, result.rows)
+            continue
+        if op in {"remove_sparse_top_rows", "remove_sparse_bottom_rows"}:
+            if op == "remove_sparse_top_rows":
+                first = 0
+                while first < len(result.rows) and _is_sparse_boundary_row(
+                    result.rows[first], result.headers
+                ):
+                    first += 1
+                result.rows = result.rows[first:]
+            else:
+                end = len(result.rows)
+                while end and _is_sparse_boundary_row(
+                    result.rows[end - 1], result.headers
+                ):
+                    end -= 1
+                result.rows = result.rows[:end]
             _check_candidate_limits(result.headers, result.rows)
             continue
         if op == "keep_top_rows":
@@ -1358,7 +1446,9 @@ def apply_transformations(
         elif op == "filter_rows":
             result.rows = _filter_rows(result.rows, column, step["operator"], step["value"])
         elif op == "sort_rows":
-            result.rows = _sort_rows(result.rows, column, step["direction"])
+            result.rows = _sort_rows(
+                result.rows, column, step["direction"], case_sensitive=True
+            )
         elif op == "convert_type":
             _convert_column(result.rows, column, step["type"])
         elif op == "convert_type_using_locale":
@@ -1638,7 +1728,9 @@ def column_types_after_steps(
         header: canonical_column_type(supplied_types.get(header, "text"))
         for header in headers
     }
-    validated_steps = validate_steps(steps)
+    validated_steps = validate_steps(
+        steps, allow_unused_sparse_boundary_helper=True
+    )
     header_count: int | None = len(headers)
     header_names_known = True
     for step_index, step in enumerate(validated_steps):
@@ -1649,6 +1741,10 @@ def column_types_after_steps(
             header_names_known = False
             if op == "transpose_table":
                 header_count = None
+        elif op == "count_rows":
+            types = {"Count": "whole_number"}
+            header_count = 1
+            header_names_known = True
         elif op == "rename_column":
             column_type = types.pop(step["column"], "text")
             types[step["new_name"].strip()] = column_type
@@ -1808,6 +1904,8 @@ def column_types_after_steps(
         # distinguish retained keys from appended data-derived categories.
         if op == "keep_columns":
             header_count = len(step["columns"])
+        elif op == "count_rows":
+            header_count = 1
         elif op == "remove_column" and header_count is not None:
             header_count = max(0, header_count - 1)
         elif op in {"duplicate_column", "add_index_column", "add_custom_column", "conditional_column"}:
@@ -2806,7 +2904,29 @@ def _keep_columns(candidate: ImportCandidate, columns: list[str]) -> ImportCandi
     )
 
 
-def _promote_headers(candidate: ImportCandidate) -> ImportCandidate:
+def _is_sparse_boundary_row(row: dict[str, Any], headers: list[str]) -> bool:
+    """Match the captured M helper's at-most-one-nonblank row predicate.
+
+    Cell errors make the M predicate fail inside ``try ... otherwise false``,
+    so those rows stop boundary trimming and remain in the table.
+    """
+    meaningful = 0
+    for header in headers:
+        value = row[header]
+        if is_cell_error(value):
+            return False
+        if value is None or (isinstance(value, str) and not value.strip()):
+            continue
+        meaningful += 1
+        if meaningful > 1:
+            return False
+    return True
+
+
+def _promote_headers(
+    candidate: ImportCandidate,
+    promote_all_scalars: bool = True,
+) -> ImportCandidate:
     """Use the first data row's values as unique column names."""
     if not candidate.rows:
         raise TransformationError(
@@ -2818,10 +2938,23 @@ def _promote_headers(candidate: ImportCandidate) -> ImportCandidate:
         raise TransformationError(
             f"Cannot promote headers because the first row contains an error: {header_error.message}"
         )
-    promoted = normalize_promoted_headers(
-        [cell_to_text(value) for value in first_row_values],
-        len(candidate.headers),
-    )
+    header_values = [
+        (
+            "true" if value is True else "false" if value is False
+            else cell_to_text(value)
+        )
+        if (
+            promote_all_scalars
+            or isinstance(value, str)
+            or (
+                isinstance(value, (int, float, Decimal))
+                and not isinstance(value, bool)
+            )
+        )
+        else f"Column{index + 1}"
+        for index, value in enumerate(first_row_values)
+    ]
+    promoted = normalize_promoted_headers(header_values, len(candidate.headers))
     rows = [
         lineaged_row({
             new_header: row[old_header]

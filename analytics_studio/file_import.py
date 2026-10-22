@@ -49,6 +49,7 @@ EXCEL_MAIN_NS = "http://schemas.openxmlformats.org/spreadsheetml/2006/main"
 EXCEL_REL_NS = "http://schemas.openxmlformats.org/officeDocument/2006/relationships"
 PACKAGE_REL_NS = "http://schemas.openxmlformats.org/package/2006/relationships"
 WORKSHEET_REL = "http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet"
+_EXCEL_XSTRING_ESCAPE = re.compile(r"_x([0-9A-Fa-f]{4})_")
 
 
 class FileImportError(ValueError):
@@ -86,6 +87,7 @@ class ImportCandidate:
     options: dict[str, Any]
     notices: list[str]
     source_id: str | None = None
+    header_row_used: int | None = None
 
     def __post_init__(self) -> None:
         if not self.source_id:
@@ -204,8 +206,8 @@ def default_options(kind: str) -> dict[str, Any]:
     if kind == "csv":
         return {"delimiter": ",", "encoding": "utf-8-sig", "has_header": True}
     if kind == "excel":
-        # ``None`` means first worksheet / first non-empty row. ``parse_file``
-        # resolves these to the actual sheet and one-based row in its candidate.
+        # ``None`` means choose the worksheet and detect the header row. Raw
+        # rows are an opt-in extension for Excel.Workbook(..., null, false).
         return {"sheet_name": None, "header_row": None}
     if kind in {"json", "xml", "parquet"}:
         return {}
@@ -226,7 +228,10 @@ def normalize_options(kind: str, options: Mapping[str, Any] | None = None) -> di
         raise FileImportError("Import options must be an object.")
 
     defaults = default_options(kind)
-    unknown = sorted(map(str, set(supplied) - set(defaults)))
+    allowed = set(defaults)
+    if kind == "excel":
+        allowed.add("raw_rows")
+    unknown = sorted(map(str, set(supplied) - allowed))
     if unknown:
         raise FileImportError(f"Unsupported {kind.upper()} import option(s): {', '.join(map(str, unknown))}.")
     result = {**defaults, **supplied}
@@ -259,6 +264,15 @@ def normalize_options(kind: str, options: Mapping[str, Any] | None = None) -> di
             not isinstance(header_row, int) or isinstance(header_row, bool) or header_row < 1
         ):
             raise FileImportError("The Excel header row must be a positive row number or automatic selection.")
+        raw_rows = supplied.get("raw_rows", False)
+        if not isinstance(raw_rows, bool):
+            raise FileImportError("The Excel raw-rows option must be true or false.")
+        if raw_rows and header_row is not None:
+            raise FileImportError("Raw worksheet rows cannot be combined with a selected header row.")
+        if raw_rows:
+            result["raw_rows"] = True
+        else:
+            result.pop("raw_rows", None)
     elif kind == "sqlite":
         table_name = result["table_name"]
         if table_name is not None and (
@@ -997,11 +1011,24 @@ def _read_excel_shared_strings(
             if control is not None:
                 control.check_cancelled()
             if event == "end" and item.tag == f"{main_ns}si":
-                strings.append(
-                    "".join(node.text or "" for node in item.iter(f"{main_ns}t"))
-                )
+                text = "".join(node.text or "" for node in item.iter(f"{main_ns}t"))
+                strings.append(_decode_excel_xstring(text))
                 item.clear()
     return strings
+
+
+def _decode_excel_xstring(value: str) -> str:
+    """Decode SpreadsheetML ``_xHHHH_`` escapes in one left-to-right pass."""
+    if "_x" not in value:
+        return value
+    pieces: list[str] = []
+    position = 0
+    for match in _EXCEL_XSTRING_ESCAPE.finditer(value):
+        pieces.append(value[position:match.start()])
+        pieces.append(chr(int(match.group(1), 16)))
+        position = match.end()
+    pieces.append(value[position:])
+    return "".join(pieces)
 
 
 def _auto_header_index(
@@ -1642,16 +1669,22 @@ def _parse_excel(
                 raise FileImportError(f"Worksheet {sheet_name!r} was not found in {path.name}.")
             sheet_path = selected_sheet[1]
             header_row = options["header_row"]
-            raw_headers: list[Any] | None = None
+            raw_rows = bool(options.get("raw_rows", False))
+            raw_headers: list[Any] | None = [] if raw_rows else None
             data_records: list[list[Any]] = []
             auto_header_records: list[tuple[int, list[Any]]] = []
             data_width = 0
+            preserve_source_rows = raw_rows or options["header_row"] is not None
+            last_data_row_number: int | None = 0 if raw_rows else None
+            declared_last_row = 0
+            declared_width = 0
             formula_seen = False
             formula_cache_missing = False
             implicit_row_number = 0
             row_tag = f"{main_ns}row"
             cell_tag = f"{main_ns}c"
             sheet_data_tag = f"{main_ns}sheetData"
+            dimension_tag = f"{main_ns}dimension"
             stack: list[ElementTree.Element] = []
             current_row_number: int | None = None
             current_values: dict[int, Any] | None = None
@@ -1670,12 +1703,27 @@ def _parse_excel(
                 if control is not None and len(data_records) % _PROGRESS_ROW_INTERVAL == 0:
                     control.report(f"Read {len(data_records):,} Excel rows…")
 
+            def append_data_record_at_row(row_number: int, values: list[Any]) -> None:
+                nonlocal last_data_row_number
+                populated = any(cell_to_text(value).strip() for value in values)
+                if not preserve_source_rows and not populated:
+                    return
+                if preserve_source_rows and last_data_row_number is not None:
+                    for _ in range(last_data_row_number + 1, row_number):
+                        append_data_record([])
+                append_data_record(values)
+                if preserve_source_rows and (
+                    last_data_row_number is None or row_number > last_data_row_number
+                ):
+                    last_data_row_number = row_number
+
             def commit_auto_header(index: int) -> None:
-                nonlocal raw_headers, header_row
+                nonlocal raw_headers, header_row, last_data_row_number
                 header_row = auto_header_records[index][0]
                 raw_headers = auto_header_records[index][1]
-                for _, buffered_values in auto_header_records[index + 1:]:
-                    append_data_record(buffered_values)
+                last_data_row_number = header_row
+                for row_number, buffered_values in auto_header_records[index + 1:]:
+                    append_data_record_at_row(row_number, buffered_values)
                 auto_header_records.clear()
 
             with workbook.open(sheet_path) as sheet_stream:
@@ -1686,7 +1734,18 @@ def _parse_excel(
                         control.check_cancelled()
                     if event == "start":
                         parent = stack[-1] if stack else None
-                        if element.tag == row_tag and parent is not None and parent.tag == sheet_data_tag:
+                        if raw_rows and element.tag == dimension_tag:
+                            dimension = element.attrib.get("ref", "")
+                            if dimension:
+                                last_cell = dimension.rsplit(":", 1)[-1]
+                                last_column, last_row = _excel_cell_position(
+                                    last_cell, 0, 0
+                                )
+                                _check_row_limit(last_row)
+                                _check_column_limit(last_column + 1)
+                                declared_last_row = max(declared_last_row, last_row)
+                                declared_width = max(declared_width, last_column + 1)
+                        elif element.tag == row_tag and parent is not None and parent.tag == sheet_data_tag:
                             implicit_row_number += 1
                             try:
                                 current_row_number = int(
@@ -1698,11 +1757,7 @@ def _parse_excel(
                                 raise FileImportError(
                                     f"Worksheet {sheet_name!r} contains an invalid row number."
                                 )
-                            current_values = (
-                                {}
-                                if header_row is None or current_row_number >= header_row
-                                else None
-                            )
+                            current_values = {} if raw_rows or header_row is None or current_row_number >= header_row else None
                             next_column = 0
                         stack.append(element)
                         continue
@@ -1753,8 +1808,11 @@ def _parse_excel(
                         row_values = [
                             current_values.get(index) for index in range(row_width)
                         ]
-                        if any(cell_to_text(value).strip() for value in row_values):
-                            if options["header_row"] is None and raw_headers is None:
+                        if raw_rows:
+                            assert raw_headers is not None
+                            append_data_record_at_row(current_row_number, row_values)
+                        elif options["header_row"] is None and raw_headers is None:
+                            if any(cell_to_text(value).strip() for value in row_values):
                                 auto_header_records.append((current_row_number, row_values))
                                 header_index = _auto_header_index(
                                     auto_header_records, minimum_support_rows=2
@@ -1766,11 +1824,12 @@ def _parse_excel(
                                         auto_header_records, minimum_support_rows=1
                                     )
                                     commit_auto_header(fallback_index if fallback_index is not None else 0)
-                            elif raw_headers is None:
-                                if current_row_number == header_row:
-                                    raw_headers = row_values
-                            elif current_row_number > header_row:
-                                append_data_record(row_values)
+                        elif raw_headers is None:
+                            if current_row_number == header_row:
+                                raw_headers = row_values
+                                last_data_row_number = current_row_number
+                        elif current_row_number > header_row:
+                            append_data_record_at_row(current_row_number, row_values)
                         element.clear()
                         parent.clear()
                         current_row_number = None
@@ -1793,6 +1852,12 @@ def _parse_excel(
                     header_index = 0
                 commit_auto_header(header_index)
 
+            if preserve_source_rows:
+                # Worksheet dimensions may include omitted blank <row> elements,
+                # including trailing rows used by Power Query's source table.
+                while last_data_row_number < declared_last_row:
+                    append_data_record_at_row(last_data_row_number + 1, [])
+
             if formula_seen:
                 notices.append("Excel formulas are not recalculated; saved cached values are imported.")
             if formula_cache_missing:
@@ -1810,12 +1875,22 @@ def _parse_excel(
         if options["header_row"] is None:
             raise FileImportError(f"Worksheet {sheet_name!r} has no non-empty header row.")
         raise FileImportError(f"Header row {options['header_row']} is empty or missing in worksheet {sheet_name!r}.")
-    width = max([len(raw_headers), *(len(record) for record in data_records)], default=0)
+    width = max(
+        [
+            len(raw_headers),
+            data_width,
+            declared_width if raw_rows else 0,
+            *(len(record) for record in data_records),
+        ],
+        default=0,
+    )
     _check_column_limit(width)
     _check_row_limit(len(data_records))
     _check_cell_limit(len(data_records), width)
-    headers = _normalize_headers(
-        [cell_to_text(value) for value in raw_headers], width
+    headers = (
+        [f"Column{index}" for index in range(1, width + 1)]
+        if raw_rows
+        else _normalize_headers([cell_to_text(value) for value in raw_headers], width)
     )
     rows = []
     for row_number, record in enumerate(data_records, 1):
@@ -1826,8 +1901,27 @@ def _parse_excel(
         padded = record + [None] * (width - len(record))
         rows.append(dict(zip(headers, padded)))
 
-    normalized_options = {"sheet_name": sheet_name, "header_row": header_row}
-    return ImportCandidate("excel", headers, rows, normalized_options, notices)
+    if header_row is not None and header_row > 1:
+        notices.insert(
+            0,
+            f"Using worksheet row {header_row} as column names; rows 1–{header_row - 1} are excluded from the imported table.",
+        )
+    normalized_options = {"sheet_name": sheet_name, "header_row": options["header_row"]}
+    if raw_rows:
+        normalized_options["raw_rows"] = True
+    if raw_rows:
+        notices.insert(
+            0,
+            "Starting with raw worksheet rows; headers are not promoted and empty rows in the declared worksheet range are preserved.",
+        )
+    return ImportCandidate(
+        "excel",
+        headers,
+        rows,
+        normalized_options,
+        notices,
+        header_row_used=header_row,
+    )
 
 
 def _parse_legacy_excel(
@@ -1855,10 +1949,18 @@ def _parse_legacy_excel(
             raise FileImportError(f"Worksheet {sheet_name!r} has no tabular columns.")
 
         header_row = options["header_row"]
-        raw_headers: list[str] | None = None
+        raw_rows = bool(options.get("raw_rows", False))
+        raw_headers: list[str] | None = [] if raw_rows else None
         data_records: list[list[Any]] = []
         auto_header_records: list[tuple[int, list[Any]]] = []
         data_width = 0
+        preserve_source_rows = raw_rows or options["header_row"] is not None
+        last_data_row_number: int | None = 0 if raw_rows else None
+        declared_rows = max(sheet.nrows, int(getattr(sheet, "_dimnrows", sheet.nrows)))
+        declared_columns = max(sheet.ncols, int(getattr(sheet, "_dimncols", sheet.ncols)))
+        if raw_rows:
+            _check_row_limit(declared_rows)
+            _check_column_limit(declared_columns)
 
         def append_data_record(values: list[Any]) -> None:
             nonlocal data_width
@@ -1873,15 +1975,31 @@ def _parse_legacy_excel(
             if control is not None and len(data_records) % _PROGRESS_ROW_INTERVAL == 0:
                 control.report(f"Read {len(data_records):,} Excel rows…")
 
+        def append_data_record_at_row(row_number: int, values: list[Any]) -> None:
+            nonlocal last_data_row_number
+            populated = any(cell_to_text(value).strip() for value in values)
+            if not preserve_source_rows and not populated:
+                return
+            if preserve_source_rows and last_data_row_number is not None:
+                for _ in range(last_data_row_number + 1, row_number):
+                    append_data_record([])
+            append_data_record(values)
+            if preserve_source_rows and (
+                last_data_row_number is None or row_number > last_data_row_number
+            ):
+                last_data_row_number = row_number
+
         def commit_auto_header(index: int) -> None:
-            nonlocal raw_headers, header_row
+            nonlocal raw_headers, header_row, last_data_row_number
             header_row = auto_header_records[index][0]
             raw_headers = auto_header_records[index][1]
-            for _, buffered_values in auto_header_records[index + 1:]:
-                append_data_record(buffered_values)
+            last_data_row_number = header_row
+            for row_number, buffered_values in auto_header_records[index + 1:]:
+                append_data_record_at_row(row_number, buffered_values)
             auto_header_records.clear()
 
-        for row_index in range(sheet.nrows):
+        parse_row_count = declared_rows if raw_rows else sheet.nrows
+        for row_index in range(parse_row_count):
             if control is not None:
                 control.check_cancelled()
                 if row_index and row_index % _PROGRESS_ROW_INTERVAL == 0:
@@ -1889,14 +2007,17 @@ def _parse_legacy_excel(
             row_number = row_index + 1
             if header_row is not None and row_number < header_row:
                 continue
-            row_width = sheet.row_len(row_index)
+            row_width = sheet.row_len(row_index) if row_index < sheet.nrows else 0
             _check_column_limit(row_width)
             values = [
                 _legacy_excel_cell_value(xlrd, book, sheet, row_index, column_index)
                 for column_index in range(row_width)
             ]
             is_populated = any(cell_to_text(value).strip() for value in values)
-            if options["header_row"] is None and raw_headers is None:
+            if raw_rows:
+                assert raw_headers is not None
+                append_data_record_at_row(row_number, values)
+            elif options["header_row"] is None and raw_headers is None:
                 if not is_populated:
                     continue
                 auto_header_records.append((row_number, values))
@@ -1917,8 +2038,9 @@ def _parse_legacy_excel(
             elif header_row is not None and raw_headers is None:
                 if row_number == header_row:
                     raw_headers = values
-            elif raw_headers is not None and is_populated:
-                append_data_record(values)
+                    last_data_row_number = row_number
+            elif raw_headers is not None and header_row is not None and row_number > header_row:
+                append_data_record_at_row(row_number, values)
 
         if options["header_row"] is None and raw_headers is None and auto_header_records:
             header_index = _auto_header_index(
@@ -1927,21 +2049,28 @@ def _parse_legacy_excel(
             )
             commit_auto_header(header_index if header_index is not None else 0)
 
-        if raw_headers is None or not any(
+        if raw_headers is None or (not raw_rows and not any(
             cell_to_text(value).strip() for value in raw_headers
-        ):
+        )):
             if options["header_row"] is None:
                 raise FileImportError(f"Worksheet {sheet_name!r} has no non-empty header row.")
             raise FileImportError(
                 f"Header row {options['header_row']} is empty or missing in worksheet {sheet_name!r}."
             )
 
-        width = max([len(raw_headers), *(len(record) for record in data_records)], default=0)
+        width = max([
+            len(raw_headers),
+            data_width,
+            declared_columns if raw_rows else sheet.ncols,
+            *(len(record) for record in data_records),
+        ], default=0)
         _check_column_limit(width)
         _check_row_limit(len(data_records))
         _check_cell_limit(len(data_records), width)
-        headers = _normalize_headers(
-            [cell_to_text(value) for value in raw_headers], width
+        headers = (
+            [f"Column{index}" for index in range(1, width + 1)]
+            if raw_rows
+            else _normalize_headers([cell_to_text(value) for value in raw_headers], width)
         )
         rows = []
         for row_number, record in enumerate(data_records, 1):
@@ -1956,8 +2085,26 @@ def _parse_legacy_excel(
             "Formula expressions are not recalculated; saved formula results are imported when present.",
             "Date-formatted numbers use the workbook's 1900 or 1904 date system; ambiguous or invalid date serials remain numeric.",
         ]
-        normalized_options = {"sheet_name": sheet_name, "header_row": header_row}
-        return ImportCandidate("excel", headers, rows, normalized_options, notices)
+        if header_row is not None and header_row > 1:
+            notices.insert(
+                0,
+                f"Using worksheet row {header_row} as column names; rows 1–{header_row - 1} are excluded from the imported table.",
+            )
+        normalized_options = {"sheet_name": sheet_name, "header_row": options["header_row"]}
+        if raw_rows:
+            normalized_options["raw_rows"] = True
+            notices.insert(
+                0,
+                "Starting with raw worksheet rows; headers are not promoted.",
+            )
+        return ImportCandidate(
+            "excel",
+            headers,
+            rows,
+            normalized_options,
+            notices,
+            header_row_used=header_row,
+        )
     except FileImportError:
         raise
     except Exception as exc:
@@ -2084,7 +2231,8 @@ def _excel_cell_text(
         style_index = 0
     if cell_type == "inlineStr":
         inline = cell.find(f"{main_ns}is")
-        return "".join(item.text or "" for item in inline.iter(f"{main_ns}t")) if inline is not None else ""
+        text = "".join(item.text or "" for item in inline.iter(f"{main_ns}t")) if inline is not None else ""
+        return _decode_excel_xstring(text)
 
     value = cell.find(f"{main_ns}v")
     raw = value.text if value is not None and value.text is not None else ""
@@ -2101,7 +2249,9 @@ def _excel_cell_text(
             ) from exc
     if cell_type == "b":
         return "TRUE" if raw == "1" else "FALSE"
-    if cell_type in {"str", "e"} or not raw:
+    if cell_type == "str":
+        return _decode_excel_xstring(raw)
+    if cell_type == "e" or not raw:
         return raw
     if style_index in date_styles:
         try:
@@ -2135,10 +2285,10 @@ def _excel_cell_value(
         style_index = 0
     if cell_type == "inlineStr":
         inline = cell.find(f"{main_ns}is")
-        return (
-            "" if inline is None
-            else "".join(item.text or "" for item in inline.iter(f"{main_ns}t"))
+        text = "" if inline is None else "".join(
+            item.text or "" for item in inline.iter(f"{main_ns}t")
         )
+        return _decode_excel_xstring(text)
 
     value = cell.find(f"{main_ns}v")
     if value is None or value.text is None:
@@ -2164,6 +2314,8 @@ def _excel_cell_value(
     if cell_type == "e":
         return PowerQueryCellError("Expression.Error", raw or "Excel cell error")
     if cell_type in {"str", "d"}:
+        if cell_type == "str":
+            return _decode_excel_xstring(raw)
         if cell_type == "d":
             try:
                 parsed_datetime = datetime.fromisoformat(raw.replace("Z", "+00:00"))
@@ -2201,7 +2353,14 @@ def _excel_cell_value(
         except (ArithmeticError, ValueError, OverflowError):
             # Invalid/ambiguous serials remain the original numeric value.
             pass
-    return int(number) if number == number.to_integral_value() else number
+    if number == number.to_integral_value():
+        return int(number)
+    # Excel stores IEEE doubles and writes 17 digits (66.15 as 66.150000000000006); Power Query
+    # reads the double, so keep its shortest round-trip text instead of the file's raw digits.
+    try:
+        return Decimal(repr(float(number)))
+    except OverflowError:
+        return number
 
 
 def _normalize_headers(raw_headers: list[str], width: int) -> list[str]:

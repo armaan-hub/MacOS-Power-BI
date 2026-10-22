@@ -19,11 +19,12 @@ os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
 
 from PySide6.QtCore import QSettings, QTimer
 from PySide6.QtGui import QFont, QFontDatabase
-from PySide6.QtWidgets import QApplication, QDialog, QMessageBox
+from PySide6.QtWidgets import QApplication, QDialog, QMessageBox, QToolButton
 
 from analytics_studio.controller import StudioController
 from analytics_studio.file_import import ImportCancelledError, parse_file
 from analytics_studio.import_preview_dialog import FileImportPreviewDialog
+from analytics_studio.local_table_dialogs import TransformDataDialog
 
 
 class ImportLifecycleTests(unittest.TestCase):
@@ -52,6 +53,17 @@ class ImportLifecycleTests(unittest.TestCase):
         self.app.processEvents()
         self.assertTrue(dialog.import_button.isEnabled())
 
+    def wait_for_acceptance(self, dialog: FileImportPreviewDialog) -> None:
+        deadline = time.monotonic() + 5
+        while (
+            dialog.result() != QDialog.DialogCode.Accepted
+            and time.monotonic() < deadline
+        ):
+            self.app.processEvents()
+            time.sleep(0.005)
+        self.app.processEvents()
+        self.assertEqual(dialog.result(), QDialog.DialogCode.Accepted)
+
     def tearDown(self) -> None:
         self.temp_dir.cleanup()
 
@@ -72,6 +84,75 @@ class ImportLifecycleTests(unittest.TestCase):
             archive.writestr("xl/_rels/workbook.xml.rels", relationships)
             archive.writestr("xl/worksheets/sheet1.xml", sheet)
 
+    def write_xlsx_with_header_preamble(self, path: Path) -> None:
+        workbook = '''<workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"
+ xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships">
+ <sheets><sheet name="VAT 5%" sheetId="1" r:id="rId1"/></sheets>
+</workbook>'''
+        relationships = '''<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">
+ <Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet1.xml"/>
+</Relationships>'''
+
+        def cell(reference: str, value: object) -> str:
+            if value is None:
+                return ""
+            if isinstance(value, int):
+                return f'<c r="{reference}"><v>{value}</v></c>'
+            return f'<c r="{reference}" t="inlineStr"><is><t>{value}</t></is></c>'
+
+        rows = [
+            f'<row r="{row}">{cell(f"A{row}", f"Report title {row}")}</row>'
+            for row in range(1, 12)
+        ]
+        rows.extend((
+            '<row r="12">'
+            f'{cell("A12", "Date")}{cell("B12", "Particulars")}{cell("C12", "Value")}'
+            '</row>',
+            '<row r="13">'
+            f'{cell("A13", "2026-08-01")}{cell("B13", "Sale")}{cell("C13", 100)}'
+            '</row>',
+            # Row 14 is omitted; auto mode drops this internal gap and the
+            # trailing empty rows, while an accidental manual reparse retains
+            # them and changes the row count.
+            '<row r="15">'
+            f'{cell("B15", "Grand Total")}{cell("C15", 100)}'
+            '</row>',
+            '<row r="16"></row>',
+            '<row r="17"></row>',
+            '<row r="18"></row>',
+        ))
+        sheet = (
+            '<worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">'
+            f'<sheetData>{"".join(rows)}</sheetData></worksheet>'
+        )
+        with ZipFile(path, "w", ZIP_DEFLATED) as archive:
+            archive.writestr("xl/workbook.xml", workbook)
+            archive.writestr("xl/_rels/workbook.xml.rels", relationships)
+            archive.writestr("xl/worksheets/sheet1.xml", sheet)
+
+    def write_two_sheet_xlsx(self, path: Path) -> None:
+        workbook = '''<workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"
+ xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships">
+ <sheets><sheet name="Data" sheetId="1" r:id="rId1"/>
+ <sheet name="Archive" sheetId="2" r:id="rId2"/></sheets>
+</workbook>'''
+        relationships = '''<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">
+ <Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet1.xml"/>
+ <Relationship Id="rId2" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet2.xml"/>
+</Relationships>'''
+
+        def sheet(name: str, amount: int) -> str:
+            return f'''<worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"><sheetData>
+ <row r="1"><c r="A1" t="inlineStr"><is><t>name</t></is></c><c r="B1" t="inlineStr"><is><t>amount</t></is></c></row>
+ <row r="2"><c r="A2" t="inlineStr"><is><t>  {name}  </t></is></c><c r="B2"><v>{amount}</v></c></row>
+</sheetData></worksheet>'''
+
+        with ZipFile(path, "w", ZIP_DEFLATED) as archive:
+            archive.writestr("xl/workbook.xml", workbook)
+            archive.writestr("xl/_rels/workbook.xml.rels", relationships)
+            archive.writestr("xl/worksheets/sheet1.xml", sheet("  Ada  ", 12))
+            archive.writestr("xl/worksheets/sheet2.xml", sheet("Grace", 8))
+
     def test_preview_requires_accept_and_uses_selected_csv_options(self) -> None:
         path = self.root / "sales.csv"
         path.write_text("name;amount\nAda;12\n", encoding="utf-8")
@@ -90,6 +171,596 @@ class ImportLifecycleTests(unittest.TestCase):
 
         self.assertEqual(dialog.candidate.options["delimiter"], ";")
         self.assertEqual(dialog.candidate.rows, [{"name": "Ada", "amount": "12"}])
+
+    def test_excel_preview_notice_and_load_transform_buttons(self) -> None:
+        path = self.root / "header-preamble.xlsx"
+        self.write_xlsx_with_header_preamble(path)
+        notice = (
+            "Using worksheet row 12 as column names; rows 1–11 are excluded "
+            "from the imported table."
+        )
+        expected_options = {
+            "load": {"sheet_name": "VAT 5%", "header_row": None},
+            "transform": {"sheet_name": "VAT 5%", "header_row": None, "raw_rows": True},
+        }
+        expected_transform = parse_file(path, options=expected_options["transform"])
+        accepted_candidates = {}
+
+        for action in ("load", "transform"):
+            with self.subTest(action=action):
+                dialog = FileImportPreviewDialog(
+                    path,
+                    replacing=False,
+                    initial_options={"header_row": None},
+                )
+                self.wait_for_preview(dialog)
+
+                candidate = dialog._preview_candidate
+                self.assertIsNotNone(candidate)
+                assert candidate is not None
+                self.assertEqual(candidate.options["sheet_name"], "VAT 5%")
+                self.assertIsNone(candidate.options["header_row"])
+                self.assertTrue(dialog.header_auto_checkbox.isChecked())
+                self.assertIn(notice, candidate.notices)
+                self.assertEqual(candidate.headers, ["Date", "Particulars", "Value"])
+                self.assertEqual(candidate.row_count, 2)
+                self.assertIn("Grand Total", [row["Particulars"] for row in candidate.rows])
+                self.assertEqual(dialog.notice_label.text(), notice)
+                self.assertTrue(dialog.import_button.isEnabled())
+                self.assertFalse(dialog.import_button.isHidden())
+                self.assertFalse(dialog.transform_button.isHidden())
+                self.assertTrue(dialog.transform_button.isEnabled())
+                self.assertTrue(dialog.transform_raw_rows_checkbox.isChecked())
+
+                if action == "load":
+                    dialog.import_button.click()
+                else:
+                    dialog.transform_button.click()
+                    self.wait_for_acceptance(dialog)
+                self.assertEqual(dialog.selected_action, action)
+                accepted_candidates[action] = dialog.candidate
+                self.assertIsNotNone(dialog.candidate)
+                self.assertEqual(dialog.candidate.options, expected_options[action])
+
+        self.assertEqual(
+            accepted_candidates["load"].headers,
+            ["Date", "Particulars", "Value"],
+        )
+        self.assertEqual(
+            accepted_candidates["transform"].headers,
+            expected_transform.headers,
+        )
+        self.assertEqual(
+            accepted_candidates["transform"].rows,
+            expected_transform.rows,
+        )
+
+    def test_excel_transform_respects_a_manual_header_row(self) -> None:
+        path = self.root / "manual-header.xlsx"
+        self.write_xlsx_with_header_preamble(path)
+        dialog = FileImportPreviewDialog(
+            path,
+            replacing=False,
+            initial_options={"sheet_name": "VAT 5%", "header_row": 2},
+        )
+        self.wait_for_preview(dialog)
+
+        self.assertTrue(dialog.transform_raw_rows_checkbox.isChecked())
+        self.assertTrue(dialog.transform_raw_rows_checkbox.isEnabled())
+        dialog.transform_raw_rows_checkbox.setChecked(False)
+        dialog.transform_button.click()
+        self.wait_for_acceptance(dialog)
+
+        self.assertEqual(
+            dialog.candidate.options,
+            {"sheet_name": "VAT 5%", "header_row": 2},
+        )
+
+    def test_excel_transform_can_keep_automatic_header_detection(self) -> None:
+        path = self.root / "automatic-transform.xlsx"
+        self.write_xlsx_with_header_preamble(path)
+        dialog = FileImportPreviewDialog(path, replacing=False)
+        self.wait_for_preview(dialog)
+
+        self.assertEqual(dialog._preview_candidate.options["header_row"], 1)
+        self.assertTrue(dialog.transform_raw_rows_checkbox.isChecked())
+        dialog.header_auto_checkbox.setChecked(True)
+        self.assertTrue(dialog.transform_raw_rows_checkbox.isChecked())
+        self.wait_for_preview(dialog)
+        self.assertTrue(dialog.transform_raw_rows_checkbox.isChecked())
+        dialog.transform_raw_rows_checkbox.setChecked(False)
+        dialog.transform_button.click()
+
+        self.assertEqual(dialog.selected_action, "transform")
+        self.assertEqual(
+            dialog.candidate.options,
+            {"sheet_name": "VAT 5%", "header_row": None},
+        )
+
+    def test_cancel_during_excel_transform_reparse_never_accepts_stale_candidate(self) -> None:
+        path = self.root / "cancel-transform.xlsx"
+        self.write_xlsx_with_header_preamble(path)
+        dialog = FileImportPreviewDialog(path, replacing=False)
+        self.wait_for_preview(dialog)
+        original_parse_file = parse_file
+        parse_started = threading.Event()
+        release_parse = threading.Event()
+
+        def delayed_raw_rows_parse(
+            candidate_path: Path,
+            options: dict[str, Any] | None = None,
+            **kwargs: Any,
+        ) -> object:
+            if options and options.get("raw_rows") is True:
+                parse_started.set()
+                release_parse.wait(timeout=5)
+            return original_parse_file(candidate_path, options=options, **kwargs)
+
+        with patch(
+            "analytics_studio.import_preview_dialog.parse_file",
+            side_effect=delayed_raw_rows_parse,
+        ):
+            dialog.transform_button.click()
+            deadline = time.monotonic() + 5
+            while not parse_started.is_set() and time.monotonic() < deadline:
+                self.app.processEvents()
+                time.sleep(0.005)
+            self.assertTrue(parse_started.is_set())
+            dialog.reject()
+            release_parse.set()
+
+            deadline = time.monotonic() + 5
+            while dialog._parse_tasks and time.monotonic() < deadline:
+                self.app.processEvents()
+                time.sleep(0.005)
+            self.app.processEvents()
+
+        self.assertEqual(dialog.result(), QDialog.DialogCode.Rejected)
+        self.assertIsNone(dialog.candidate)
+        self.assertIsNone(dialog.selected_action)
+
+    def test_failed_excel_transform_reparse_does_not_accept_auto_preview(self) -> None:
+        path = self.root / "failed-transform.xlsx"
+        self.write_xlsx_with_header_preamble(path)
+        dialog = FileImportPreviewDialog(path, replacing=False)
+        self.wait_for_preview(dialog)
+        original_parse_file = parse_file
+        fail_next_raw_rows = True
+
+        def fail_raw_rows(candidate_path: Path, options: dict[str, Any] | None = None, **kwargs: Any) -> object:
+            nonlocal fail_next_raw_rows
+            if options and options.get("raw_rows") is True:
+                if fail_next_raw_rows:
+                    fail_next_raw_rows = False
+                    raise ValueError("raw-row reparse failed")
+            return original_parse_file(candidate_path, options=options, **kwargs)
+
+        with patch(
+            "analytics_studio.import_preview_dialog.parse_file",
+            side_effect=fail_raw_rows,
+        ):
+            dialog.transform_button.click()
+            deadline = time.monotonic() + 5
+            while not dialog._last_error and time.monotonic() < deadline:
+                self.app.processEvents()
+                time.sleep(0.005)
+            self.app.processEvents()
+            self.assertIn("raw-row reparse failed", dialog._last_error)
+            self.assertIn("automatic preview is restored", dialog._last_error)
+            self.assertEqual(
+                dialog._preview_candidate.options,
+                {"sheet_name": "VAT 5%", "header_row": 1},
+            )
+            self.assertTrue(dialog.import_button.isEnabled())
+            self.assertTrue(dialog.transform_button.isEnabled())
+            dialog.transform_button.click()
+            self.wait_for_acceptance(dialog)
+
+        self.assertTrue(dialog.candidate.options["raw_rows"])
+
+    def test_excel_load_and_transform_commit_save_reopen_keep_their_source_modes(self) -> None:
+        path = self.root / "header-preamble.xlsx"
+        self.write_xlsx_with_header_preamble(path)
+        expected_by_action = {
+            "load": parse_file(
+                path,
+                options={"sheet_name": "VAT 5%", "header_row": 1},
+            ),
+            "transform": parse_file(
+                path,
+                options={"sheet_name": "VAT 5%", "header_row": None, "raw_rows": True},
+            ),
+        }
+
+        for action in ("load", "transform"):
+            with self.subTest(action=action):
+                expected_candidate = expected_by_action[action]
+                controller = self.new_controller()
+                project_before = copy.deepcopy(controller._project)
+                candidates_before = copy.deepcopy(controller._loaded_candidates)
+                headers_before = controller.headers
+                rows_before = copy.deepcopy(controller._rows)
+                accepted_preview = {}
+
+                def choose_preview_action(
+                    dialog: FileImportPreviewDialog,
+                    selected_action: str = action,
+                ) -> int:
+                    self.wait_for_preview(dialog)
+                    self.assertEqual(
+                        dialog._preview_candidate.options,
+                        {"sheet_name": "VAT 5%", "header_row": 1},
+                    )
+                    self.assertTrue(dialog.transform_raw_rows_checkbox.isEnabled())
+                    self.assertTrue(dialog.transform_raw_rows_checkbox.isChecked())
+                    self.assertEqual(
+                        dialog._preview_candidate.row_count,
+                        expected_by_action["load"].row_count,
+                    )
+                    button = (
+                        dialog.import_button
+                        if selected_action == "load"
+                        else dialog.transform_button
+                    )
+                    dialog.show()
+                    self.app.processEvents()
+                    self.assertTrue(button.isEnabled())
+                    self.assertTrue(button.isVisible())
+                    button.click()
+                    if selected_action == "transform":
+                        self.wait_for_acceptance(dialog)
+                    self.assertEqual(dialog.selected_action, selected_action)
+                    self.assertIsNotNone(dialog.candidate)
+                    accepted_preview["candidate"] = dialog.candidate
+                    return QDialog.DialogCode.Accepted
+
+                def close_and_apply(dialog: TransformDataDialog) -> int:
+                    self.assertEqual(len(dialog._query_states), 1)
+                    staged = next(iter(dialog._query_states.values()))
+                    self.assertTrue(staged["is_new_source"])
+                    self.assertEqual(
+                        staged["source_candidate"].options,
+                        expected_candidate.options,
+                    )
+                    self.assertEqual(
+                        staged["source_candidate"].headers,
+                        expected_candidate.headers,
+                    )
+                    self.assertEqual(
+                        staged["source_candidate"].rows,
+                        expected_candidate.rows,
+                    )
+
+                    # A first-import Transform stays staged until the visible
+                    # Home ribbon Close & Load command accepts the session.
+                    self.assertEqual(controller._project, project_before)
+                    self.assertEqual(controller._loaded_candidates, candidates_before)
+                    self.assertEqual(controller.headers, headers_before)
+                    self.assertEqual(controller._rows, rows_before)
+                    self.assertFalse(controller.sourceLoaded)
+                    self.assertIsNone(controller._active_source_id)
+                    self.assertFalse(controller.dirty)
+
+                    close_load_button = dialog.findChild(
+                        QToolButton, "powerQueryCloseApplyButton"
+                    )
+                    self.assertIsNotNone(close_load_button)
+                    dialog.show()
+                    self.app.processEvents()
+                    assert close_load_button is not None
+                    self.assertTrue(dialog.ribbon_tabs.isAncestorOf(close_load_button))
+                    self.assertEqual(
+                        dialog.ribbon_tabs.tabText(dialog.ribbon_tabs.currentIndex()),
+                        "Home",
+                    )
+                    self.assertEqual(
+                        " ".join(close_load_button.text().split()), "Close & Load"
+                    )
+                    self.assertFalse(dialog.buttons.isVisible())
+                    self.assertTrue(close_load_button.isVisible())
+                    self.assertTrue(close_load_button.isEnabled())
+                    close_load_button.click()
+                    self.assertEqual(dialog.result(), QDialog.DialogCode.Accepted)
+                    self.assertIsNotNone(dialog.accepted_queries)
+                    return dialog.result()
+
+                with patch.object(
+                    FileImportPreviewDialog, "exec", new=choose_preview_action
+                ):
+                    if action == "transform":
+                        with patch.object(
+                            TransformDataDialog, "exec", new=close_and_apply
+                        ):
+                            self.assertTrue(controller.import_excel_path(path))
+                    else:
+                        self.assertTrue(controller.import_excel_path(path))
+
+                candidate = accepted_preview["candidate"]
+                self.assertEqual(candidate.options, expected_candidate.options)
+                self.assertEqual(controller.headers, expected_candidate.headers)
+                self.assertEqual(controller._rows, expected_candidate.rows)
+                self.assertEqual(
+                    controller._active_parser_options,
+                    expected_candidate.options,
+                )
+                self.assertEqual(len(controller._project["data_sources"]), 1)
+                source = controller._project["data_sources"][0]
+                self.assertEqual(source["parser_options"], expected_candidate.options)
+
+                project_path = self.root / f"{action}-header-preamble.npa"
+                self.assertTrue(controller._save_to(project_path))
+                reopened = self.new_controller()
+                self.assertTrue(reopened.open_project_path(project_path))
+                self.assertEqual(reopened.headers, expected_candidate.headers)
+                self.assertEqual(reopened._rows, expected_candidate.rows)
+                self.assertEqual(
+                    reopened._active_parser_options,
+                    expected_candidate.options,
+                )
+                reopened.refresh_source()
+                self.assertEqual(reopened.headers, expected_candidate.headers)
+                self.assertEqual(reopened._rows, expected_candidate.rows)
+
+    def test_excel_header_modes_have_distinct_source_ids_and_refresh_independently(self) -> None:
+        path = self.root / "two-header-modes.xlsx"
+        self.write_xlsx_with_header_preamble(path)
+        auto_candidate = parse_file(
+            path,
+            options={"sheet_name": "VAT 5%", "header_row": None},
+        )
+        row_one_candidate = parse_file(
+            path,
+            options={"sheet_name": "VAT 5%", "header_row": 1},
+        )
+        self.assertEqual(auto_candidate.header_row_used, 12)
+        self.assertEqual(row_one_candidate.header_row_used, 1)
+        controller = self.new_controller()
+
+        self.assertTrue(controller._commit_import(path, auto_candidate))
+        auto_source_id = controller.activeTableId
+        auto_source = next(
+            source for source in controller._project["data_sources"]
+            if source["id"] == auto_source_id
+        )
+        self.assertTrue(controller._commit_import(path, row_one_candidate))
+        row_one_source_id = controller.activeTableId
+        row_one_source = next(
+            source for source in controller._project["data_sources"]
+            if source["id"] == row_one_source_id
+        )
+        self.assertNotEqual(auto_source_id, row_one_source_id)
+        tables_by_source_id = {
+            str(table.get("source_id", table.get("id"))): table
+            for table in controller._project["model"]["tables"]
+        }
+        self.assertNotEqual(
+            tables_by_source_id[auto_source_id]["name"],
+            tables_by_source_id[row_one_source_id]["name"],
+        )
+        self.assertEqual(
+            controller._source_id_for_path(
+                path,
+                kind="excel",
+                parser_options=auto_candidate.options,
+            ),
+            auto_source_id,
+        )
+        self.assertEqual(
+            controller._source_id_for_path(
+                path,
+                kind="excel",
+                parser_options=row_one_candidate.options,
+            ),
+            row_one_source_id,
+        )
+
+        row_one_source["transform_steps"] = [
+            {"op": "remove_top_rows", "count": 1},
+        ]
+        self.assertTrue(controller._commit_import(path, auto_candidate))
+        self.assertEqual(controller.activeTableId, auto_source_id)
+        self.assertEqual(auto_source["transform_steps"], [])
+        self.assertEqual(
+            row_one_source["transform_steps"],
+            [{"op": "remove_top_rows", "count": 1}],
+        )
+
+        project_path = self.root / "two-header-modes.npa"
+        self.assertTrue(controller._save_to(project_path))
+        reopened = self.new_controller()
+        self.assertTrue(reopened.open_project_path(project_path))
+        self.assertEqual(
+            reopened._source_id_for_path(
+                path,
+                kind="excel",
+                parser_options=auto_candidate.options,
+            ),
+            auto_source_id,
+        )
+        self.assertEqual(
+            reopened._source_id_for_path(
+                path,
+                kind="excel",
+                parser_options=row_one_candidate.options,
+            ),
+            row_one_source_id,
+        )
+        reopened.refresh_all_sources()
+        self.assertEqual(
+            reopened._loaded_candidates[auto_source_id].headers,
+            auto_candidate.headers,
+        )
+        self.assertEqual(
+            reopened._loaded_candidates[auto_source_id].rows,
+            auto_candidate.rows,
+        )
+        self.assertEqual(
+            reopened._project["data_sources"][1]["transform_steps"],
+            [{"op": "remove_top_rows", "count": 1}],
+        )
+
+    def test_excel_raw_rows_and_automatic_headers_have_distinct_source_ids(self) -> None:
+        path = self.root / "raw-and-automatic.xlsx"
+        self.write_xlsx_with_header_preamble(path)
+        automatic_candidate = parse_file(
+            path,
+            options={"sheet_name": "VAT 5%", "header_row": None},
+        )
+        raw_candidate = parse_file(
+            path,
+            options={"sheet_name": "VAT 5%", "header_row": None, "raw_rows": True},
+        )
+        controller = self.new_controller()
+
+        self.assertTrue(controller._commit_import(path, automatic_candidate))
+        automatic_source_id = controller.activeTableId
+        self.assertTrue(controller._commit_import(path, raw_candidate))
+        raw_source_id = controller.activeTableId
+        self.assertNotEqual(automatic_source_id, raw_source_id)
+        self.assertEqual(len(controller._project["data_sources"]), 2)
+
+        self.assertEqual(
+            controller._source_id_for_path(
+                path,
+                kind="excel",
+                parser_options=automatic_candidate.options,
+                header_row_used=automatic_candidate.header_row_used,
+            ),
+            automatic_source_id,
+        )
+        self.assertEqual(
+            controller._source_id_for_path(
+                path,
+                kind="excel",
+                parser_options=raw_candidate.options,
+                header_row_used=raw_candidate.header_row_used,
+            ),
+            raw_source_id,
+        )
+
+        project_path = self.root / "raw-and-automatic.npa"
+        self.assertTrue(controller._save_to(project_path))
+        reopened = self.new_controller()
+        self.assertTrue(reopened.open_project_path(project_path))
+        self.assertEqual(
+            reopened._source_id_for_path(
+                path,
+                kind="excel",
+                parser_options=automatic_candidate.options,
+                header_row_used=automatic_candidate.header_row_used,
+            ),
+            automatic_source_id,
+        )
+        self.assertEqual(
+            reopened._source_id_for_path(
+                path,
+                kind="excel",
+                parser_options=raw_candidate.options,
+                header_row_used=raw_candidate.header_row_used,
+            ),
+            raw_source_id,
+        )
+        controller = reopened
+
+        replacement_matches: list[str | None] = []
+
+        def replacement_check(candidate: Any) -> bool:
+            matched_source_id = controller._source_id_for_path(
+                path,
+                kind=candidate.kind,
+                parser_options=candidate.options,
+                header_row_used=candidate.header_row_used,
+            )
+            replacement_matches.append(matched_source_id)
+            return matched_source_id is not None
+
+        dialog = FileImportPreviewDialog(
+            path,
+            replacing=False,
+            initial_options={"sheet_name": "VAT 5%", "header_row": None},
+            replacement_check=replacement_check,
+        )
+        self.wait_for_preview(dialog)
+        self.assertEqual(replacement_matches, [automatic_source_id])
+        self.assertFalse(dialog.replacement_label.isHidden())
+
+        dialog.transform_button.click()
+        self.wait_for_acceptance(dialog)
+        self.assertEqual(dialog.candidate.options, raw_candidate.options)
+        self.assertEqual(
+            replacement_matches,
+            [automatic_source_id, raw_source_id],
+        )
+        self.assertFalse(dialog.replacement_label.isHidden())
+
+    def test_auto_header_reimport_reuses_legacy_numeric_header_source(self) -> None:
+        path = self.root / "legacy-auto-header.xlsx"
+        self.write_xlsx_with_header_preamble(path)
+        legacy_candidate = parse_file(
+            path,
+            options={"sheet_name": "VAT 5%", "header_row": 12},
+        )
+        auto_candidate = parse_file(
+            path,
+            options={"sheet_name": "VAT 5%", "header_row": None},
+        )
+        self.assertEqual(auto_candidate.header_row_used, 12)
+        controller = self.new_controller()
+        self.assertTrue(controller._commit_import(path, legacy_candidate))
+        legacy_source_id = controller.activeTableId
+
+        project_path = self.root / "legacy-auto-header.npa"
+        self.assertTrue(controller._save_to(project_path))
+        reopened = self.new_controller()
+        self.assertTrue(reopened.open_project_path(project_path))
+        self.assertEqual(
+            reopened._source_id_for_path(
+                path,
+                kind="excel",
+                parser_options=auto_candidate.options,
+                header_row_used=auto_candidate.header_row_used,
+            ),
+            legacy_source_id,
+        )
+
+        self.assertTrue(reopened._commit_import(path, auto_candidate))
+        self.assertEqual(reopened.activeTableId, legacy_source_id)
+        self.assertEqual(len(reopened._project["data_sources"]), 1)
+        self.assertEqual(
+            reopened._project["data_sources"][0]["parser_options"],
+            {"sheet_name": "VAT 5%", "header_row": None},
+        )
+
+    def test_auto_header_reimport_prefers_exact_match_over_legacy_fallback(self) -> None:
+        path = self.root / "auto-and-legacy-header.xlsx"
+        self.write_xlsx_with_header_preamble(path)
+        auto_candidate = parse_file(
+            path,
+            options={"sheet_name": "VAT 5%", "header_row": None},
+        )
+        legacy_candidate = parse_file(
+            path,
+            options={"sheet_name": "VAT 5%", "header_row": 12},
+        )
+        controller = self.new_controller()
+        self.assertTrue(controller._commit_import(path, auto_candidate))
+        exact_auto_source_id = controller.activeTableId
+        self.assertTrue(controller._commit_import(path, legacy_candidate))
+        legacy_source_id = controller.activeTableId
+        self.assertNotEqual(legacy_source_id, exact_auto_source_id)
+
+        # Persisted projects can contain both modes in either order. A legacy
+        # compatibility match must not shadow the exact automatic source.
+        controller._project["data_sources"].reverse()
+        self.assertEqual(
+            controller._source_id_for_path(
+                path,
+                kind="excel",
+                parser_options=auto_candidate.options,
+                header_row_used=auto_candidate.header_row_used,
+            ),
+            exact_auto_source_id,
+        )
 
     def test_preview_restores_parser_options_for_a_recent_source(self) -> None:
         path = self.root / "sales.csv"
@@ -216,9 +887,73 @@ class ImportLifecycleTests(unittest.TestCase):
         self.assertNotEqual(parser_thread_ids[0], threading.get_ident())
         dialog.deleteLater()
 
+    def test_excel_replacement_warning_tracks_selected_worksheet(self) -> None:
+        path = self.root / "multi-sheet.xlsx"
+        self.write_two_sheet_xlsx(path)
+        controller = self.new_controller()
+        original = parse_file(path, options={"sheet_name": "Data"})
+        self.assertTrue(controller._commit_import(path, original))
+        data_id = controller.activeTableId
+        data_source = next(
+            source for source in controller._project["data_sources"]
+            if source["id"] == data_id
+        )
+        data_source["transform_steps"] = [{"op": "trim_text", "column": "name"}]
+        replacement_states: list[tuple[str, bool]] = []
+
+        def wait_for_sheet(dialog: FileImportPreviewDialog, sheet_name: str) -> None:
+            deadline = time.monotonic() + 5
+            while time.monotonic() < deadline:
+                self.app.processEvents()
+                candidate = dialog._preview_candidate
+                if candidate is not None and candidate.options.get("sheet_name") == sheet_name:
+                    return
+                time.sleep(0.005)
+            self.fail(f"Preview did not finish for worksheet {sheet_name!r}")
+
+        def accept_selected_sheet(dialog: FileImportPreviewDialog) -> int:
+            wait_for_sheet(dialog, "Data")
+            self.assertEqual(
+                dialog._preview_candidate.options,
+                {"sheet_name": "Data", "header_row": None},
+            )
+            self.assertTrue(dialog.header_auto_checkbox.isChecked())
+            self.assertIn("reapplies its saved transformation steps", dialog.replacement_label.text())
+            replacement_states.append(("Data", not dialog.replacement_label.isHidden()))
+            dialog.sheet_combo.setCurrentText("Archive")
+            wait_for_sheet(dialog, "Archive")
+            replacement_states.append(("Archive", not dialog.replacement_label.isHidden()))
+            dialog.sheet_combo.setCurrentText("Data")
+            wait_for_sheet(dialog, "Data")
+            replacement_states.append(("Data", not dialog.replacement_label.isHidden()))
+            dialog.sheet_combo.setCurrentText("Archive")
+            wait_for_sheet(dialog, "Archive")
+            dialog._accept_candidate()
+            return QDialog.DialogCode.Accepted
+
+        with patch.object(FileImportPreviewDialog, "exec", new=accept_selected_sheet):
+            self.assertTrue(controller.import_excel_path(path))
+
+        self.assertEqual(
+            replacement_states,
+            [("Data", True), ("Archive", False), ("Data", True)],
+        )
+        self.assertEqual(
+            {table["name"] for table in controller._project["model"]["tables"]},
+            {"Data", "Archive"},
+        )
+        self.assertTrue(controller._commit_import(
+            path, parse_file(path, options={"sheet_name": "Data"})
+        ))
+        self.assertEqual(controller.activeTableId, data_id)
+        self.assertEqual(
+            controller._loaded_candidates[data_id].rows,
+            [{"name": "Ada", "amount": 12}],
+        )
+
     def test_canceling_sqlite_options_discovery_ignores_late_results(self) -> None:
         path = self.root / "async-options.sqlite"
-        with sqlite3.connect(path) as database:
+        with closing(sqlite3.connect(path)) as database, database:
             database.execute("CREATE TABLE metrics (id INTEGER)")
 
         discovery_started = threading.Event()

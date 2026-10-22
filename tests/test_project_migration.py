@@ -8,12 +8,15 @@ from pathlib import Path
 import tempfile
 import unittest
 
+import analytics_studio.project as project_module
 from analytics_studio.project import (
     FORMAT_ID,
     FORMAT_VERSION,
     ProjectFileError,
+    UnsupportedProjectVersion,
     load_project,
     new_project,
+    save_project,
     validate_project,
 )
 
@@ -57,6 +60,23 @@ def make_v1_project() -> dict:
 
 
 class ProjectMigrationTests(unittest.TestCase):
+    def test_every_supported_version_entrypoint_migrates_to_current_format(self) -> None:
+        document = make_v1_project()
+        historical_versions: dict[int, dict] = {}
+
+        for version in range(1, FORMAT_VERSION):
+            self.assertEqual(document["format_version"], version)
+            historical_versions[version] = copy.deepcopy(document)
+            migrate = getattr(
+                project_module, f"_migrate_v{version}_to_v{version + 1}"
+            )
+            document = migrate(document)
+
+        for version, historical in historical_versions.items():
+            with self.subTest(starting_version=version):
+                migrated = validate_project(historical)
+                self.assertEqual(migrated["format_version"], FORMAT_VERSION)
+
     def test_v63_projects_migrate_to_calculated_table_format(self) -> None:
         document = new_project("v63 migration")
         document["format_version"] = 63
@@ -86,7 +106,6 @@ class ProjectMigrationTests(unittest.TestCase):
         migrated = validate_project(document)
 
         self.assertEqual(migrated["format_version"], FORMAT_VERSION)
-        self.assertEqual(FORMAT_VERSION, 78)
 
     def test_v76_projects_migrate_and_preserve_measure_metadata(self) -> None:
         document = new_project("v76 measure metadata")
@@ -101,8 +120,242 @@ class ProjectMigrationTests(unittest.TestCase):
 
         migrated = validate_project(document)
 
-        self.assertEqual(migrated["format_version"], 78)
+        self.assertEqual(migrated["format_version"], FORMAT_VERSION)
         self.assertEqual(migrated["model"]["measures"], document["model"]["measures"])
+
+    def test_v78_migration_adds_empty_column_defaults_without_changing_visuals(self) -> None:
+        document = add_legacy_starter_visuals(new_project("v78 model defaults"))
+        document["format_version"] = 78
+        document["model"]["tables"] = [{
+            "id": "orders-catalog-id",
+            "source_id": "orders-source-id",
+            "name": "Orders",
+            "column_types": {"Amount": "decimal_number"},
+            "calculated_columns": [],
+        }]
+        visuals = document["report"]["pages"][0]["visuals"]
+        visuals[0]["fields"] = {"Fields": ["Amount"]}
+        visuals[0]["field_aggregations"] = {"Amount": "average"}
+        visuals[5]["fields"] = {"X-axis": ["Month"], "Y-axis": ["Amount"]}
+        visuals[5]["field_aggregations"] = {"Amount": "count"}
+        original_aggregations = [
+            copy.deepcopy(visual.get("field_aggregations", {}))
+            for visual in visuals
+        ]
+
+        migrated = validate_project(document)
+
+        self.assertEqual(migrated["format_version"], FORMAT_VERSION)
+        self.assertEqual(
+            migrated["model"]["tables"][0]["column_summarizations"], {}
+        )
+        self.assertEqual(
+            [
+                visual.get("field_aggregations", {})
+                for visual in migrated["report"]["pages"][0]["visuals"]
+            ],
+            original_aggregations,
+        )
+
+    def test_v79_migration_adds_model_sort_maps_without_changing_existing_metadata(self) -> None:
+        document = new_project("v79 model sorting")
+        document["format_version"] = 79
+        document["model"]["tables"] = [
+            {
+                "id": "orders-catalog",
+                "source_id": "orders-source",
+                "name": "Orders",
+                "column_types": {"Month": "text", "MonthNumber": "whole_number"},
+                "column_summarizations": {"MonthNumber": "sum"},
+                "calculated_columns": [],
+            },
+            {
+                "id": "calendar-catalog",
+                "source_id": "calendar-source",
+                "name": "Calendar",
+                "column_types": {"Date": "date"},
+                "column_summarizations": {},
+                "calculated_columns": [],
+            },
+        ]
+        document["model"]["measures"] = [{
+            "name": "Revenue", "expression": "SUM([MonthNumber])",
+        }]
+        document["report"]["pages"][0]["visuals"] = [{
+            "id": "orders-chart", "type": "column", "title": "Orders by month",
+            "x": 10, "y": 10, "width": 400, "height": 250,
+            "show_data_labels": False, "show_legend": False,
+            "fields": {"X-axis": ["Month"], "Y-axis": ["Revenue"]},
+        }]
+        original_visuals = copy.deepcopy(document["report"]["pages"][0]["visuals"])
+        original_measures = copy.deepcopy(document["model"]["measures"])
+
+        migrated = validate_project(document)
+
+        self.assertEqual(migrated["format_version"], FORMAT_VERSION)
+        self.assertEqual(
+            [table["column_sort_by"] for table in migrated["model"]["tables"]],
+            [{}, {}],
+        )
+        self.assertEqual(migrated["model"]["tables"][0]["column_summarizations"], {
+            "MonthNumber": "sum",
+        })
+        self.assertEqual(migrated["model"]["measures"], original_measures)
+        self.assertEqual(
+            migrated["report"]["pages"][0]["visuals"], original_visuals
+        )
+
+    def test_v80_and_v81_migrations_add_relationship_key_metadata_defaults(self) -> None:
+        v80 = new_project("v80 group-by metadata")
+        v80["format_version"] = 80
+        v80["model"]["tables"] = [{
+            "id": "regions",
+            "source_id": "regions-source",
+            "name": "Regions",
+            "column_types": {"Region": "text", "RegionID": "whole_number"},
+            "column_summarizations": {},
+            "column_sort_by": {"Region": "RegionID"},
+            "calculated_columns": [],
+        }]
+
+        migrated_v80 = validate_project(v80)
+
+        self.assertEqual(migrated_v80["format_version"], FORMAT_VERSION)
+        self.assertEqual(
+            migrated_v80["model"]["tables"][0]["group_by_columns"], {}
+        )
+        self.assertIsNone(migrated_v80["model"]["tables"][0]["key_column"])
+        self.assertEqual(
+            migrated_v80["model"]["tables"][0]["column_sort_by"],
+            {"Region": "RegionID"},
+        )
+
+        v81 = new_project("v81 key metadata")
+        v81["format_version"] = 81
+        v81["model"]["tables"] = [{
+            "id": "regions",
+            "source_id": "regions-source",
+            "name": "Regions",
+            "column_types": {"Region": "text", "RegionID": "whole_number"},
+            "column_summarizations": {},
+            "column_sort_by": {},
+            "group_by_columns": {"Region": ["RegionID"]},
+            "calculated_columns": [],
+        }]
+
+        migrated_v81 = validate_project(v81)
+
+        self.assertEqual(migrated_v81["format_version"], FORMAT_VERSION)
+        self.assertIsNone(migrated_v81["model"]["tables"][0]["key_column"])
+        self.assertEqual(
+            migrated_v81["model"]["tables"][0]["group_by_columns"],
+            {"Region": ["RegionID"]},
+        )
+
+    def test_v82_project_migrates_to_v83_without_rewriting_existing_data(self) -> None:
+        document = new_project("v82 sparse-boundary migration")
+        document["format_version"] = 82
+        document["report"]["pages"][0]["name"] = "Existing page"
+        before = copy.deepcopy(document)
+
+        migrated = validate_project(document)
+
+        self.assertEqual(migrated["format_version"], FORMAT_VERSION)
+        self.assertEqual(FORMAT_VERSION, 83)
+        self.assertEqual(
+            migrated["report"]["pages"][0]["name"],
+            before["report"]["pages"][0]["name"],
+        )
+        self.assertEqual(migrated["data_sources"], before["data_sources"])
+        self.assertEqual(document["format_version"], 82)
+
+    def test_model_sort_maps_validate_shape_and_preserve_stale_names(self) -> None:
+        document = new_project("sort map validation")
+        document["model"]["tables"] = [{
+            "id": "orders",
+            "source_id": "orders",
+            "name": "Orders",
+            "column_types": {"Month": "text", "Month Number": "whole_number"},
+            "column_sort_by": {
+                "Removed category": "Removed sort key",
+                "Month": "Month Number",
+            },
+        }]
+
+        validated = validate_project(document)
+
+        self.assertEqual(
+            validated["model"]["tables"][0]["column_sort_by"],
+            {"Removed category": "Removed sort key", "Month": "Month Number"},
+        )
+
+        for invalid_map in (
+            [], None, "Month=Month Number", {" ": "Month Number"},
+            {"Month": " "}, {"Month": 2}, {2: "Month Number"},
+        ):
+            invalid = copy.deepcopy(document)
+            invalid["model"]["tables"][0]["column_sort_by"] = invalid_map
+            with self.subTest(invalid_map=invalid_map):
+                with self.assertRaisesRegex(ProjectFileError, "sort"):
+                    validate_project(invalid)
+
+    def test_column_summarization_values_and_dormant_keys_are_validated(self) -> None:
+        for value in ("auto", "sum", "average", "count"):
+            document = new_project(f"valid column summarization {value}")
+            document["model"]["tables"] = [{
+                "id": "orders",
+                "source_id": "orders",
+                "name": "Orders",
+                "column_types": {"Amount": "decimal_number"},
+                "column_summarizations": {"Amount": value},
+            }]
+            with self.subTest(value=value):
+                validated = validate_project(document)
+                self.assertEqual(
+                    validated["model"]["tables"][0]["column_summarizations"],
+                    {"Amount": value},
+                )
+
+        dormant = new_project("dormant column summarization")
+        dormant["model"]["tables"] = [{
+            "id": "orders",
+            "source_id": "orders",
+            "name": "Orders",
+            "column_types": {"Amount": "decimal_number"},
+            "column_summarizations": {
+                "Removed amount": "average",
+                "Amount": "count",
+            },
+        }]
+        validated = validate_project(dormant)
+        self.assertEqual(
+            validated["model"]["tables"][0]["column_summarizations"],
+            {"Removed amount": "average", "Amount": "count"},
+        )
+
+    def test_malformed_column_summarization_maps_are_rejected(self) -> None:
+        malformed_maps = (
+            [],
+            None,
+            "Amount=sum",
+            {" ": "sum"},
+            {"Amount": "median"},
+            {"Amount": None},
+            {"Amount": 1},
+            {1: "sum"},
+        )
+        for invalid_map in malformed_maps:
+            document = new_project("invalid column summarization")
+            document["model"]["tables"] = [{
+                "id": "orders",
+                "source_id": "orders",
+                "name": "Orders",
+                "column_types": {"Amount": "decimal_number"},
+                "column_summarizations": invalid_map,
+            }]
+            with self.subTest(value=invalid_map):
+                with self.assertRaisesRegex(ProjectFileError, "summarization"):
+                    validate_project(document)
 
     def test_saved_m_text_is_bounded_and_rejects_nulls(self) -> None:
         document = new_project("M text")
@@ -317,7 +570,6 @@ class ProjectMigrationTests(unittest.TestCase):
     def test_v1_validation_selects_first_v1_supported_source_and_adds_defaults(self) -> None:
         migrated = validate_project(make_v1_project())
 
-        self.assertEqual(FORMAT_VERSION, 78)
         self.assertEqual(migrated["format_version"], FORMAT_VERSION)
         self.assertEqual(migrated["active_source_id"], "excel")
         self.assertEqual(migrated["data_sources"][2]["parser_options"], {
@@ -402,6 +654,38 @@ class ProjectMigrationTests(unittest.TestCase):
 
         with self.assertRaises(ProjectFileError):
             validate_project(document)
+
+    def test_corrupt_primary_recovers_the_last_good_project_backup(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "recovery.npa"
+            save_project(path, new_project("Last good"))
+            save_project(path, new_project("Current"))
+            path.write_text("{broken json", encoding="utf-8")
+
+            recovered, used_backup = load_project(path)
+
+        self.assertTrue(used_backup)
+        self.assertEqual(recovered["name"], "Last good")
+
+    def test_project_load_reports_when_primary_and_backup_are_both_corrupt(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "broken.npa"
+            path.write_text("{broken primary", encoding="utf-8")
+            Path(f"{path}.bak").write_text("{broken backup", encoding="utf-8")
+
+            with self.assertRaisesRegex(ProjectFileError, "recovery copy also failed"):
+                load_project(path)
+
+    def test_newer_primary_version_does_not_fall_back_to_older_backup(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "newer.npa"
+            newer = new_project("Written by a newer app")
+            newer["format_version"] = FORMAT_VERSION + 1
+            path.write_text(json.dumps(newer), encoding="utf-8")
+            save_project(Path(f"{path}.bak"), new_project("Older backup"))
+
+            with self.assertRaises(UnsupportedProjectVersion):
+                load_project(path)
 
 
 if __name__ == "__main__":

@@ -2,8 +2,20 @@ __pycache__/
 *.py[cod]
 .pytest_cache/
 .playwright-mcp/
+.council/
 .venv/
 build/
 dist/
 *.egg-info/
 .DS_Store
+
+# Not for the public repo: nested repos, generated output, real business data
+/rea/
+/gridcraft/
+/graphify-out/
+/tests/Data/
+/tools/parity/_smoke/
+/docs/verification-artifacts/
+/g3.json
+*.npa
+*.npa.bak

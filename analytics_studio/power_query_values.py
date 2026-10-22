@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import string
 from dataclasses import dataclass
 from datetime import date, datetime, time
 from decimal import Decimal
@@ -108,3 +109,32 @@ def cell_key(value: Any) -> tuple[Any, ...]:
     if isinstance(value, time):
         return ("time", value.isoformat())
     return ("text", value)
+
+
+# Power BI's VertiPaq store (verified on 2.157.879.0) drops trailing characters U+0000-U+0020 from
+# text it loads, compares and groups text case-insensitively for ASCII letters only, and keeps the
+# first-seen spelling of every group. Calculated tables keep trailing spaces; Power Query keeps all of it.
+_MODEL_TEXT_TRAILING = "".join(chr(code) for code in range(0x21))
+_ASCII_FOLD = str.maketrans(string.ascii_uppercase, string.ascii_lowercase)
+
+
+def ascii_fold(text: str) -> str:
+    """The key under which the model treats two text values as the same value."""
+    return text.translate(_ASCII_FOLD)
+
+
+def model_text_normalizer() -> Any:
+    """Return a per-column function mapping loaded text to its model spelling.
+
+    Each call to the returned function trims trailing control characters and spaces and then
+    returns the first spelling seen for that ASCII-case-insensitive value, so call it in row order.
+    """
+    spellings: dict[str, str] = {}
+
+    def normalize(value: Any) -> Any:
+        if not isinstance(value, str):
+            return value
+        trimmed = value.rstrip(_MODEL_TEXT_TRAILING)
+        return spellings.setdefault(ascii_fold(trimmed), trimmed)
+
+    return normalize

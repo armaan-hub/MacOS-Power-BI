@@ -1,0 +1,111 @@
+{
+ "powerbi_version": "2.157.879.0 (26.08)+da30fe74eb0b8a8786ab7326b69c400a0e951831",
+ "frozen": "2026-10-21",
+ "note": "Not replayed by the gate: ALLSELECTED inside an iteration keeps the iterated rows as a shadow filter (FILTER, TOPN, CALCULATETABLE) and drops row-transition filters; the app does not model that yet (14 of 25 differ). Also: SUMX over an empty ALLSELECTED(column) with a bare column in its body is a static error in Power BI but BLANK in the app (lazy evaluation).",
+ "items": [
+  {
+   "expr": "SUMX(Facts,COUNTROWS(ALLSELECTED(Facts)))",
+   "powerbi": "36"
+  },
+  {
+   "expr": "SUMX(Facts,COUNTROWS(ALLSELECTED(Facts[Region])))",
+   "powerbi": "18"
+  },
+  {
+   "expr": "SUMX(FILTER(Facts,Facts[Quantity]>2),COUNTROWS(ALLSELECTED(Facts)))",
+   "powerbi": "9"
+  },
+  {
+   "expr": "SUMX(FILTER(Facts,Facts[Quantity]>2),COUNTROWS(ALLSELECTED(Facts[Region])))",
+   "powerbi": "9"
+  },
+  {
+   "expr": "SUMX(FILTER(Facts,Facts[Quantity]>2),COUNTROWS(ALLSELECTED(Facts[Quantity])))",
+   "powerbi": "9"
+  },
+  {
+   "expr": "SUMX(FILTER(Facts,Facts[Quantity]>2),COUNTROWS(ALLSELECTED(Facts[Note])))",
+   "powerbi": "6"
+  },
+  {
+   "expr": "SUMX(FILTER(Facts,Facts[Region]=\"East\"),COUNTROWS(ALLSELECTED(Facts)))",
+   "powerbi": "9"
+  },
+  {
+   "expr": "SUMX(FILTER(ALL(Facts[Region]),Facts[Region]<>\"East\"),COUNTROWS(ALLSELECTED(Facts)))",
+   "powerbi": "6"
+  },
+  {
+   "expr": "SUMX(FILTER(ALL(Facts[Region]),Facts[Region]<>\"East\"),COUNTROWS(ALLSELECTED(Facts[Region])))",
+   "powerbi": "4"
+  },
+  {
+   "expr": "SUMX(VALUES(Facts[Region]),COUNTROWS(ALLSELECTED(Facts)))",
+   "powerbi": "18"
+  },
+  {
+   "expr": "SUMX(ALL(Facts[Region]),COUNTROWS(ALLSELECTED(Facts)))",
+   "powerbi": "18"
+  },
+  {
+   "expr": "SUMX(SUMMARIZE(Facts,Facts[Region]),COUNTROWS(ALLSELECTED(Facts)))",
+   "powerbi": "18"
+  },
+  {
+   "expr": "SUMX(TOPN(2,Facts,Facts[Quantity]),COUNTROWS(ALLSELECTED(Facts)))",
+   "powerbi": "4"
+  },
+  {
+   "expr": "SUMX(CALCULATETABLE(Facts,Facts[Quantity]>2),COUNTROWS(ALLSELECTED(Facts)))",
+   "powerbi": "9"
+  },
+  {
+   "expr": "SUMX(ADDCOLUMNS(Facts,\"x\",1),COUNTROWS(ALLSELECTED(Facts)))",
+   "powerbi": "36"
+  },
+  {
+   "expr": "SUMX(SELECTCOLUMNS(Facts,\"r\",Facts[Region]),COUNTROWS(ALLSELECTED(Facts)))",
+   "powerbi": "36"
+  },
+  {
+   "expr": "SUMX(FILTER(Facts,Facts[Quantity]>2),CALCULATE(COUNTROWS(ALLSELECTED(Facts))))",
+   "powerbi": "9"
+  },
+  {
+   "expr": "SUMX(FILTER(Facts,Facts[Quantity]>2),CALCULATE(COUNTROWS(ALLSELECTED(Facts)),Facts[Region]=\"East\"))",
+   "powerbi": "3"
+  },
+  {
+   "expr": "CALCULATE(SUMX(FILTER(Facts,Facts[Quantity]>2),COUNTROWS(ALLSELECTED(Facts))),Facts[Region]=\"East\")",
+   "powerbi": "1"
+  },
+  {
+   "expr": "CALCULATE(SUMX(FILTER(Facts,Facts[Quantity]>2),COUNTROWS(ALLSELECTED(Facts))),Facts[Quantity]>3)",
+   "powerbi": "4"
+  },
+  {
+   "expr": "CALCULATE(SUMX(Facts,COUNTROWS(ALLSELECTED(Facts))),Facts[Quantity]>3)",
+   "powerbi": "4"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(Facts,COUNTROWS(ALLSELECTED(Facts))>3))",
+   "powerbi": "6"
+  },
+  {
+   "expr": "SUMX(FILTER(Facts,Facts[Quantity]>2),SUMX(FILTER(Facts,Facts[Quantity]>3),COUNTROWS(ALLSELECTED(Facts))))",
+   "powerbi": "12"
+  },
+  {
+   "expr": "SUMX(FILTER(Facts,Facts[Quantity]>1),SUMX(FILTER(Facts,Facts[Quantity]>3),COUNTROWS(ALLSELECTED(Facts))))",
+   "powerbi": "16"
+  },
+  {
+   "expr": "SUMX(Facts,SUMX(FILTER(Facts,Facts[Quantity]>3),COUNTROWS(ALLSELECTED(Facts))))",
+   "powerbi": "24"
+  },
+  {
+   "expr": "CALCULATE(SUMX(ALLSELECTED(Facts[Region]),Facts[Quantity]*0+1),Facts[Region]=\"East\",Facts[Region]=\"West\")",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 61) A single value for column 'Quantity' in table 'Facts' cannot be determined. This can happen when a measure or function formula refers to a column that contains many values without specifying an aggregation such as min, max, count, or sum to get a single result.\""
+  }
+ ]
+}

@@ -1,0 +1,562 @@
+{
+ "powerbi_version": "2.157.879.0 (26.08)+da30fe74eb0b8a8786ab7326b69c400a0e951831",
+ "frozen": "2026-10-22",
+ "items": [
+  {
+   "expr": "5 /* /* */ */ + 1",
+   "powerbi": "6"
+  },
+  {
+   "expr": "5 /* /* */ + 1",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"The end of the input was reached.\""
+  },
+  {
+   "expr": "/*/ 1 /*/ + 1",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"The end of the input was reached.\""
+  },
+  {
+   "expr": "5 /* /* /* */ */ */ + 1",
+   "powerbi": "6"
+  },
+  {
+   "expr": "5 /* /* /* */ */ + 1",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"The end of the input was reached.\""
+  },
+  {
+   "expr": "5 /* a */ /* b */ + 1",
+   "powerbi": "6"
+  },
+  {
+   "expr": "5 /*/*/ + 1",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"The end of the input was reached.\""
+  },
+  {
+   "expr": "5 /**/ + 1",
+   "powerbi": "6"
+  },
+  {
+   "expr": "5 /* * / */ + 1",
+   "powerbi": "6"
+  },
+  {
+   "expr": "5 /* /* */ */ */ + 1",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 34) The syntax for '/' is incorrect. (EVALUATE ROW(\"v\", 5 /* /* */ */ */ + 1)).\""
+  },
+  {
+   "expr": "5 /* \"*/\" */ + 1",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 27) The following syntax error occurred during parsing: Invalid token, Line 1, Offset 27, \" */ + 1).\""
+  },
+  {
+   "expr": "5 /* // */ + 1",
+   "powerbi": "6"
+  },
+  {
+   "expr": "5 // /* \n + 1",
+   "powerbi": "6"
+  },
+  {
+   "expr": "5 -- /* \n + 1",
+   "powerbi": "6"
+  },
+  {
+   "expr": "5 /* -- */ + 1",
+   "powerbi": "6"
+  },
+  {
+   "expr": "5 /* a",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"The end of the input was reached.\""
+  },
+  {
+   "expr": "5 */ + 1",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 22) The syntax for '/' is incorrect. (EVALUATE ROW(\"v\", 5 */ + 1)).\""
+  },
+  {
+   "expr": "/* a */ 5",
+   "powerbi": "5"
+  },
+  {
+   "expr": "5 /* a */",
+   "powerbi": "5"
+  },
+  {
+   "expr": "\"/*\" & \"*/\"",
+   "powerbi": "/**/"
+  },
+  {
+   "expr": "LEN(\"/* x */\")",
+   "powerbi": "7"
+  },
+  {
+   "expr": "5 /* \n /* \n */ \n */ + 1",
+   "powerbi": "6"
+  },
+  {
+   "expr": "{1}",
+   "powerbi": "1"
+  },
+  {
+   "expr": "{1,2}",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 19) A table of multiple values was supplied where a single value was expected.\""
+  },
+  {
+   "expr": "{1} IN {1}",
+   "powerbi": "True"
+  },
+  {
+   "expr": "{2} IN {1,2}",
+   "powerbi": "True"
+  },
+  {
+   "expr": "{(1,2)}",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 19) The expression refers to multiple columns. Multiple columns cannot be converted to a scalar value.\""
+  },
+  {
+   "expr": "{\"a\"}",
+   "powerbi": "a"
+  },
+  {
+   "expr": "{TRUE()}",
+   "powerbi": "True"
+  },
+  {
+   "expr": "{BLANK()}",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "{1}+1",
+   "powerbi": "2"
+  },
+  {
+   "expr": "{1}=1",
+   "powerbi": "True"
+  },
+  {
+   "expr": "{{1}}",
+   "powerbi": "1"
+  },
+  {
+   "expr": "{1}&\"x\"",
+   "powerbi": "1x"
+  },
+  {
+   "expr": "COUNTROWS({1})",
+   "powerbi": "1"
+  },
+  {
+   "expr": "COUNTROWS({1,2,3})",
+   "powerbi": "3"
+  },
+  {
+   "expr": "COUNTROWS({{1,2},{3,4}})",
+   "powerbi": "2"
+  },
+  {
+   "expr": "COUNTROWS({(1,2),(3,4)})",
+   "powerbi": "2"
+  },
+  {
+   "expr": "SUMX({1,2,3},[Value])",
+   "powerbi": "6"
+  },
+  {
+   "expr": "SUMX(Facts,{1,2}=1)",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 30) The function SUMX cannot work with values of type Boolean.\""
+  },
+  {
+   "expr": "SUMX(Facts,{1})",
+   "powerbi": "6"
+  },
+  {
+   "expr": "SUMX(Facts,{Facts[Quantity]})",
+   "powerbi": "15"
+  },
+  {
+   "expr": "CALCULATE({1})",
+   "powerbi": "1"
+  },
+  {
+   "expr": "IF({1}=1,2,3)",
+   "powerbi": "2"
+  },
+  {
+   "expr": "{1}//c\n",
+   "powerbi": "1"
+  },
+  {
+   "expr": "{1,2}//c\n",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 19) A table of multiple values was supplied where a single value was expected.\""
+  },
+  {
+   "expr": "MAX({1})",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 23) The MAX function only accepts a column reference as an argument.\""
+  },
+  {
+   "expr": "{1}*{2}",
+   "powerbi": "2"
+  },
+  {
+   "expr": "-{3}",
+   "powerbi": "-3"
+  },
+  {
+   "expr": "NOT {TRUE()}",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISBLANK({BLANK()})",
+   "powerbi": "True"
+  },
+  {
+   "expr": "LEN({\"abc\"})",
+   "powerbi": "3"
+  },
+  {
+   "expr": "{1,2}=1",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 19) A table of multiple values was supplied where a single value was expected.\""
+  },
+  {
+   "expr": "1 IN {1}",
+   "powerbi": "True"
+  },
+  {
+   "expr": "{} ",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 19) The expression refers to multiple columns. Multiple columns cannot be converted to a scalar value.\""
+  },
+  {
+   "expr": "COMBINA(0,0)",
+   "powerbi": "1"
+  },
+  {
+   "expr": "COMBINA(0,1)",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 19) The result of function 'COMBINA' is too large (overflow).\""
+  },
+  {
+   "expr": "COMBINA(1,0)",
+   "powerbi": "1"
+  },
+  {
+   "expr": "COMBINA(5,0)",
+   "powerbi": "1"
+  },
+  {
+   "expr": "COMBINA(3,2)",
+   "powerbi": "6"
+  },
+  {
+   "expr": "COMBIN(0,0)",
+   "powerbi": "1"
+  },
+  {
+   "expr": "COMBIN(5,0)",
+   "powerbi": "1"
+  },
+  {
+   "expr": "PERMUT(0,0)",
+   "powerbi": "1"
+  },
+  {
+   "expr": "PERMUT(5,0)",
+   "powerbi": "1"
+  },
+  {
+   "expr": "COMBINA(-1,0)",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 19) An argument of function 'COMBINA' has the wrong data type or the result is too large or too small. If the argument is expected to be a date, that date must be between March 1, 1900 and December 31, 9999.\""
+  },
+  {
+   "expr": "COMBINA(0,-1)",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 19) The result of function 'COMBINA' is too large (overflow).\""
+  },
+  {
+   "expr": "COMBINA(1,1)",
+   "powerbi": "1"
+  },
+  {
+   "expr": "COMBINA(2,2)",
+   "powerbi": "3"
+  },
+  {
+   "expr": "SUM(Facts[ Quantity ])",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 23) Column ' Quantity ' in table 'Facts' cannot be found or may not be used in this expression.\""
+  },
+  {
+   "expr": "SUM(Facts[Quantity ])",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 23) Column 'Quantity ' in table 'Facts' cannot be found or may not be used in this expression.\""
+  },
+  {
+   "expr": "SUM(Facts[ quantity])",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 23) Column ' quantity' in table 'Facts' cannot be found or may not be used in this expression.\""
+  },
+  {
+   "expr": "SUM(Facts[quantity])",
+   "powerbi": "15"
+  },
+  {
+   "expr": "SUM(Facts[QUANTITY])",
+   "powerbi": "15"
+  },
+  {
+   "expr": "SUM(Facts[ ])",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 23) Column ' ' in table 'Facts' cannot be found or may not be used in this expression.\""
+  },
+  {
+   "expr": "SUM(Facts[])",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 23) Column '' in table 'Facts' cannot be found or may not be used in this expression.\""
+  },
+  {
+   "expr": "COUNTROWS(FILTER(Facts,Facts[ Quantity]>1))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 42) Column ' Quantity' in table 'Facts' cannot be found or may not be used in this expression.\""
+  },
+  {
+   "expr": "SUM(Facts[\tQuantity])",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 23) Column ' Quantity' in table 'Facts' cannot be found or may not be used in this expression.\""
+  },
+  {
+   "expr": "SUM( Facts[Quantity] )",
+   "powerbi": "15"
+  },
+  {
+   "expr": "SUM(Facts [Quantity])",
+   "powerbi": "15"
+  },
+  {
+   "expr": "SUM('Facts'[Quantity])",
+   "powerbi": "15"
+  },
+  {
+   "expr": "SUM('Facts' [Quantity])",
+   "powerbi": "15"
+  },
+  {
+   "expr": "SUM(Facts[Quantity]/*c*/)",
+   "powerbi": "15"
+  },
+  {
+   "expr": "SUM(Facts/*c*/[Quantity])",
+   "powerbi": "15"
+  },
+  {
+   "expr": "SUM(Facts[Quantity]\n)",
+   "powerbi": "15"
+  },
+  {
+   "expr": "SUM(\n Facts[Quantity]\n)",
+   "powerbi": "15"
+  },
+  {
+   "expr": "SUMX(ADDCOLUMNS(Facts,\"f\",Facts[Quantity]>1),[f])",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 64) The function SUMX cannot work with values of type Boolean.\""
+  },
+  {
+   "expr": "SUMX(SELECTCOLUMNS(Facts,\"f\",Facts[Quantity]>1),[f])",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 67) The function SUMX cannot work with values of type Boolean.\""
+  },
+  {
+   "expr": "SUMX(ADDCOLUMNS(Facts,\"f\",IF(Facts[Quantity]>1,TRUE(),FALSE())),[f])",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 83) The function SUMX cannot work with values of type Boolean.\""
+  },
+  {
+   "expr": "SUMX(ADDCOLUMNS(Facts,\"f\",Facts[Quantity]>1),[f]*1)",
+   "powerbi": "4"
+  },
+  {
+   "expr": "AVERAGEX(ADDCOLUMNS(Facts,\"f\",Facts[Quantity]>1),[f])",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 68) The function AVERAGEX cannot work with values of type Boolean.\""
+  },
+  {
+   "expr": "AVERAGEX(SELECTCOLUMNS(Facts,\"f\",Facts[Quantity]>1),[f])",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 71) The function AVERAGEX cannot work with values of type Boolean.\""
+  },
+  {
+   "expr": "AVERAGEX(ADDCOLUMNS(Facts,\"f\",IF(Facts[Quantity]>1,TRUE(),FALSE())),[f])",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 87) The function AVERAGEX cannot work with values of type Boolean.\""
+  },
+  {
+   "expr": "AVERAGEX(ADDCOLUMNS(Facts,\"f\",Facts[Quantity]>1),[f]*1)",
+   "powerbi": "0.666666666666667"
+  },
+  {
+   "expr": "COUNTX(ADDCOLUMNS(Facts,\"f\",Facts[Quantity]>1),[f])",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 66) The function COUNTX cannot work with values of type Boolean.\""
+  },
+  {
+   "expr": "COUNTX(SELECTCOLUMNS(Facts,\"f\",Facts[Quantity]>1),[f])",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 69) The function COUNTX cannot work with values of type Boolean.\""
+  },
+  {
+   "expr": "COUNTX(ADDCOLUMNS(Facts,\"f\",IF(Facts[Quantity]>1,TRUE(),FALSE())),[f])",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 85) The function COUNTX cannot work with values of type Boolean.\""
+  },
+  {
+   "expr": "COUNTX(ADDCOLUMNS(Facts,\"f\",Facts[Quantity]>1),[f]*1)",
+   "powerbi": "6"
+  },
+  {
+   "expr": "COUNTAX(ADDCOLUMNS(Facts,\"f\",Facts[Quantity]>1),[f])",
+   "powerbi": "6"
+  },
+  {
+   "expr": "COUNTAX(SELECTCOLUMNS(Facts,\"f\",Facts[Quantity]>1),[f])",
+   "powerbi": "6"
+  },
+  {
+   "expr": "COUNTAX(ADDCOLUMNS(Facts,\"f\",IF(Facts[Quantity]>1,TRUE(),FALSE())),[f])",
+   "powerbi": "6"
+  },
+  {
+   "expr": "COUNTAX(ADDCOLUMNS(Facts,\"f\",Facts[Quantity]>1),[f]*1)",
+   "powerbi": "6"
+  },
+  {
+   "expr": "MAXX(ADDCOLUMNS(Facts,\"f\",Facts[Quantity]>1),[f])",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 64) The function MAXX cannot work with values of type Boolean.\""
+  },
+  {
+   "expr": "MAXX(SELECTCOLUMNS(Facts,\"f\",Facts[Quantity]>1),[f])",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 67) The function MAXX cannot work with values of type Boolean.\""
+  },
+  {
+   "expr": "MAXX(ADDCOLUMNS(Facts,\"f\",IF(Facts[Quantity]>1,TRUE(),FALSE())),[f])",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 83) The function MAXX cannot work with values of type Boolean.\""
+  },
+  {
+   "expr": "MAXX(ADDCOLUMNS(Facts,\"f\",Facts[Quantity]>1),[f]*1)",
+   "powerbi": "1"
+  },
+  {
+   "expr": "MINX(ADDCOLUMNS(Facts,\"f\",Facts[Quantity]>1),[f])",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 64) The function MINX cannot work with values of type Boolean.\""
+  },
+  {
+   "expr": "MINX(SELECTCOLUMNS(Facts,\"f\",Facts[Quantity]>1),[f])",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 67) The function MINX cannot work with values of type Boolean.\""
+  },
+  {
+   "expr": "MINX(ADDCOLUMNS(Facts,\"f\",IF(Facts[Quantity]>1,TRUE(),FALSE())),[f])",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 83) The function MINX cannot work with values of type Boolean.\""
+  },
+  {
+   "expr": "MINX(ADDCOLUMNS(Facts,\"f\",Facts[Quantity]>1),[f]*1)",
+   "powerbi": "0"
+  },
+  {
+   "expr": "PRODUCTX(ADDCOLUMNS(Facts,\"f\",Facts[Quantity]>1),[f])",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 68) The function PRODUCTX cannot work with values of type Boolean.\""
+  },
+  {
+   "expr": "PRODUCTX(SELECTCOLUMNS(Facts,\"f\",Facts[Quantity]>1),[f])",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 71) The function PRODUCTX cannot work with values of type Boolean.\""
+  },
+  {
+   "expr": "PRODUCTX(ADDCOLUMNS(Facts,\"f\",IF(Facts[Quantity]>1,TRUE(),FALSE())),[f])",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 87) The function PRODUCTX cannot work with values of type Boolean.\""
+  },
+  {
+   "expr": "PRODUCTX(ADDCOLUMNS(Facts,\"f\",Facts[Quantity]>1),[f]*1)",
+   "powerbi": "0"
+  },
+  {
+   "expr": "MEDIANX(ADDCOLUMNS(Facts,\"f\",Facts[Quantity]>1),[f])",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 67) MEDIANX does not support expressions of type string/Boolean/date.\""
+  },
+  {
+   "expr": "MEDIANX(SELECTCOLUMNS(Facts,\"f\",Facts[Quantity]>1),[f])",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 70) MEDIANX does not support expressions of type string/Boolean/date.\""
+  },
+  {
+   "expr": "MEDIANX(ADDCOLUMNS(Facts,\"f\",IF(Facts[Quantity]>1,TRUE(),FALSE())),[f])",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 86) MEDIANX does not support expressions of type string/Boolean/date.\""
+  },
+  {
+   "expr": "MEDIANX(ADDCOLUMNS(Facts,\"f\",Facts[Quantity]>1),[f]*1)",
+   "powerbi": "1"
+  },
+  {
+   "expr": "SUMX(ADDCOLUMNS(Facts,\"f\",Facts[Quantity]>1),IF([f],1,0))",
+   "powerbi": "4"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(ADDCOLUMNS(Facts,\"f\",Facts[Quantity]>1),[f]))",
+   "powerbi": "4"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(ADDCOLUMNS(Facts,\"f\",Facts[Quantity]>1),[f]=TRUE()))",
+   "powerbi": "4"
+  },
+  {
+   "expr": "SUMX(ADDCOLUMNS(Facts,\"f\",Facts[Quantity]>1),[f]+0)",
+   "powerbi": "4"
+  },
+  {
+   "expr": "SUMX(ADDCOLUMNS(Facts,\"f\",Facts[Quantity]>1),INT([f]))",
+   "powerbi": "4"
+  },
+  {
+   "expr": "IF(FALSE(),TRUE())",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISBLANK(IF(FALSE(),TRUE()))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "IF(FALSE(),1)",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "ISBLANK(IF(FALSE(),1))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "SWITCH(1,2,TRUE())",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISBLANK(SWITCH(1,2,TRUE()))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "COUNTAX(Facts,IF(Facts[Quantity]>2,TRUE()))",
+   "powerbi": "6"
+  },
+  {
+   "expr": "COALESCE(IF(FALSE(),TRUE()),5)",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISBLANK(IFERROR(BLANK(),TRUE()))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "IF(FALSE(),\"a\")",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "ISBLANK(IF(FALSE(),\"a\"))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "IF(FALSE(),TRUE(),BLANK())",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISBLANK(IF(FALSE(),TRUE(),BLANK()))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "IF(TRUE(),BLANK(),TRUE())",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISBLANK(IF(TRUE(),BLANK(),TRUE()))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISBLANK(IF(FALSE(),DATE(2020,1,1)))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "IF(FALSE(),DATE(2020,1,1))",
+   "powerbi": "BLANK"
+  }
+ ]
+}

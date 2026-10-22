@@ -16,6 +16,8 @@ Rectangle {
     property var kpiData: ({})
     property var mapPoints: []
     property var highlightMapPoints: []
+    property var shapeRegions: []
+    property var highlightShapeRegions: []
     property var scatterPoints: []
     property var highlightScatterPoints: []
     property color seriesColor: "#0078D4"
@@ -113,6 +115,97 @@ Rectangle {
             })
         }
         return { points: positioned, plotLeft: plotLeft, plotTop: plotTop, plotWidth: plotWidth, plotHeight: plotHeight }
+    }
+    function shapeMapLayout(regions, canvasWidth, canvasHeight) {
+        const plotLeft = 8
+        const plotTop = 8
+        const plotWidth = Math.max(1, canvasWidth - 16)
+        const plotHeight = Math.max(1, canvasHeight - 16)
+        let minX = Infinity
+        let maxX = -Infinity
+        let minY = Infinity
+        let maxY = -Infinity
+        for (let i = 0; i < (regions || []).length; ++i) {
+            const polygons = regions[i].polygons || []
+            for (let p = 0; p < polygons.length; ++p) {
+                const rings = polygons[p] || []
+                for (let r = 0; r < rings.length; ++r) {
+                    const ring = rings[r] || []
+                    for (let j = 0; j < ring.length; ++j) {
+                        const x = Number(ring[j][0])
+                        const y = Number(ring[j][1])
+                        if (!Number.isFinite(x) || !Number.isFinite(y)) continue
+                        minX = Math.min(minX, x); maxX = Math.max(maxX, x)
+                        minY = Math.min(minY, y); maxY = Math.max(maxY, y)
+                    }
+                }
+            }
+        }
+        if (!Number.isFinite(minX) || !Number.isFinite(minY))
+            return { regions: [], plotLeft: plotLeft, plotTop: plotTop, plotWidth: plotWidth, plotHeight: plotHeight }
+        const spanX = Math.max(0.000001, maxX - minX)
+        const spanY = Math.max(0.000001, maxY - minY)
+        const scale = Math.min(plotWidth / spanX, plotHeight / spanY)
+        const drawnWidth = spanX * scale
+        const drawnHeight = spanY * scale
+        const offsetX = plotLeft + (plotWidth - drawnWidth) / 2
+        const offsetY = plotTop + (plotHeight - drawnHeight) / 2
+        const positioned = []
+        for (let i = 0; i < (regions || []).length; ++i) {
+            const region = regions[i]
+            const polygons = []
+            for (let p = 0; p < (region.polygons || []).length; ++p) {
+                const rings = []
+                for (let r = 0; r < region.polygons[p].length; ++r) {
+                    const ring = []
+                    for (let j = 0; j < region.polygons[p][r].length; ++j) {
+                        const point = region.polygons[p][r][j]
+                        ring.push([
+                            offsetX + (Number(point[0]) - minX) * scale,
+                            offsetY + (maxY - Number(point[1])) * scale,
+                        ])
+                    }
+                    rings.push(ring)
+                }
+                polygons.push(rings)
+            }
+            positioned.push({
+                id: String(region.id || ""), label: String(region.label || ""),
+                filterValue: String(region.filter_value || ""), group: String(region.group || ""),
+                value: Number(region.value), matched: Boolean(region.matched), polygons: polygons,
+            })
+        }
+        return { regions: positioned, plotLeft: plotLeft, plotTop: plotTop, plotWidth: plotWidth, plotHeight: plotHeight }
+    }
+    function pointInRing(x, y, ring) {
+        let inside = false
+        for (let i = 0, j = ring.length - 1; i < ring.length; j = i++) {
+            const xi = Number(ring[i][0]), yi = Number(ring[i][1])
+            const xj = Number(ring[j][0]), yj = Number(ring[j][1])
+            const crosses = ((yi > y) !== (yj > y))
+                    && (x < (xj - xi) * (y - yi) / ((yj - yi) || 0.000001) + xi)
+            if (crosses) inside = !inside
+        }
+        return inside
+    }
+    function pointInRegion(x, y, region) {
+        const polygons = region.polygons || []
+        for (let p = 0; p < polygons.length; ++p) {
+            let inside = false
+            const rings = polygons[p] || []
+            for (let r = 0; r < rings.length; ++r) {
+                if (root.pointInRing(x, y, rings[r])) inside = !inside
+            }
+            if (inside) return true
+        }
+        return false
+    }
+    function shapeColor(value, minimum, maximum) {
+        const ratio = maximum <= minimum ? 0.55 : Math.max(0, Math.min(1, (value - minimum) / (maximum - minimum)))
+        const from = [218, 238, 234]
+        const to = [16, 124, 113]
+        const color = from.map(function(start, index) { return Math.round(start + (to[index] - start) * ratio) })
+        return "rgb(" + color[0] + "," + color[1] + "," + color[2] + ")"
     }
     function isStacked() {
         return root.chartType === "stackedBar" || root.chartType === "stackedColumn"
@@ -341,6 +434,8 @@ Rectangle {
     Accessible.name: title + " chart"
     Accessible.description: "Activate to select this chart. " + (chartType === "map"
         ? ((mapPoints || []).length + " mapped locations.")
+        : chartType === "filledMap" || chartType === "shapeMap"
+            ? ((shapeRegions || []).length + " boundary regions.")
         : chartType === "kpi"
             ? ((kpiData || {}).has_value ? "Current " + valueLabel(kpiData.value) + "." : "No data is available yet.")
             : chartType === "scatter"
@@ -457,7 +552,9 @@ Rectangle {
 
                 if (root.chartType === "gauge" ? !(root.gaugeData || {}).has_value
                         : root.chartType === "kpi" ? !(root.kpiData || {}).has_value
-                        : root.chartType === "map" ? !(root.mapPoints || []).length
+                    : root.chartType === "map" ? !(root.mapPoints || []).length
+                    : root.chartType === "filledMap" || root.chartType === "shapeMap"
+                        ? !(root.shapeRegions || []).length
                         : root.chartType === "scatter" ? !(root.scatterPoints || []).length
                         : (root.chartType === "lineClusteredColumn"
                            ? !values.length || !lineValues.length
@@ -656,6 +753,80 @@ Rectangle {
                         for (let slot = 0; slot < count; ++slot) {
                             const index = count === 1 ? trend.length - 1 : Math.round(slot * (trend.length - 1) / (count - 1))
                             ctx.fillText(String(trend[index].label || "").slice(0, 7), xFor(index), plotBottom + 4, 52)
+                        }
+                    }
+                } else if (root.chartType === "filledMap" || root.chartType === "shapeMap") {
+                    const layout = root.shapeMapLayout(root.shapeRegions || [], width, height)
+                    const regions = layout.regions || []
+                    const highlights = root.shapeMapLayout(root.highlightShapeRegions || [], width, height).regions || []
+                    const highlightsById = ({})
+                    let hasHighlights = false
+                    let minimum = Infinity
+                    let maximum = -Infinity
+                    const groupNames = []
+                    for (let i = 0; i < highlights.length; ++i) {
+                        if (highlights[i].matched) {
+                            highlightsById[highlights[i].id] = highlights[i]
+                            hasHighlights = true
+                        }
+                    }
+                    for (let i = 0; i < regions.length; ++i) {
+                        const region = regions[i]
+                        if (!region.matched) continue
+                        if (Number.isFinite(region.value)) {
+                            minimum = Math.min(minimum, region.value)
+                            maximum = Math.max(maximum, region.value)
+                        }
+                        if (region.group && groupNames.indexOf(region.group) < 0)
+                            groupNames.push(region.group)
+                    }
+                    groupNames.sort()
+                    ctx.fillStyle = "#f4f7f7"
+                    ctx.fillRect(layout.plotLeft, layout.plotTop, layout.plotWidth, layout.plotHeight)
+                    for (let i = 0; i < regions.length; ++i) {
+                        const region = regions[i]
+                        if (!region.polygons.length) continue
+                        const highlighted = Boolean(highlightsById[region.id])
+                        ctx.globalAlpha = hasHighlights && !highlighted ? 0.28 : 1
+                        if (highlighted)
+                            ctx.fillStyle = "#C65911"
+                        else if (!region.matched)
+                            ctx.fillStyle = "#e2e8e7"
+                        else if (groupNames.length > 1)
+                            ctx.fillStyle = root.pieColor(groupNames.indexOf(region.group))
+                        else
+                            ctx.fillStyle = root.shapeColor(Number(region.value) || 0, minimum, maximum)
+                        ctx.strokeStyle = "#ffffff"
+                        ctx.lineWidth = 0.75
+                        for (let p = 0; p < region.polygons.length; ++p) {
+                            ctx.beginPath()
+                            const rings = region.polygons[p] || []
+                            for (let r = 0; r < rings.length; ++r) {
+                                const ring = rings[r] || []
+                                if (ring.length < 3) continue
+                                ctx.moveTo(ring[0][0], ring[0][1])
+                                for (let j = 1; j < ring.length; ++j)
+                                    ctx.lineTo(ring[j][0], ring[j][1])
+                                ctx.closePath()
+                            }
+                            ctx.fillRule = Qt.OddEvenFill
+                            ctx.fill()
+                            ctx.fillRule = Qt.WindingFill
+                            ctx.stroke()
+                        }
+                        ctx.globalAlpha = 1
+                    }
+                    if (root.showLegend && groupNames.length > 0) {
+                        ctx.font = "9px sans-serif"
+                        ctx.textAlign = "left"
+                        ctx.textBaseline = "middle"
+                        let legendY = layout.plotTop + 5
+                        for (let i = 0; i < Math.min(groupNames.length, 6); ++i) {
+                            ctx.fillStyle = root.pieColor(i)
+                            ctx.fillRect(layout.plotLeft + 5, legendY, 8, 8)
+                            ctx.fillStyle = "#354452"
+                            ctx.fillText(groupNames[i], layout.plotLeft + 17, legendY + 4, Math.max(24, layout.plotWidth * 0.35))
+                            legendY += 13
                         }
                     }
                 } else if (root.chartType === "map") {
@@ -1572,6 +1743,8 @@ Rectangle {
                 return
             if (!root.filterOnCategory || (root.chartType === "scatter"
                     ? !(root.scatterPoints || []).length
+                    : root.chartType === "filledMap" || root.chartType === "shapeMap"
+                        ? !(root.shapeRegions || []).length
                     : root.chartType === "map"
                         ? !(root.mapPoints || []).length
                         : (!root.series || root.series.length === 0)))
@@ -1579,7 +1752,17 @@ Rectangle {
             const point = chart.mapFromItem(root, mouse.x, mouse.y)
             const values = root.series
             let index = -1
-            if (root.chartType === "map") {
+            if (root.chartType === "filledMap" || root.chartType === "shapeMap") {
+                const layout = root.shapeMapLayout(root.shapeRegions || [], chart.width, chart.height)
+                for (let i = layout.regions.length - 1; i >= 0; --i) {
+                    const region = layout.regions[i]
+                    if (region.matched && root.pointInRegion(point.x, point.y, region)) {
+                        root.categoryRequested(region.filterValue)
+                        return
+                    }
+                }
+                return
+            } else if (root.chartType === "map") {
                 const layout = root.mapLayout(root.mapPoints || [], chart.width, chart.height)
                 let nearest = null
                 let nearestDistance = 400
@@ -1827,6 +2010,8 @@ Rectangle {
     onKpiDataChanged: chart.requestPaint()
     onMapPointsChanged: chart.requestPaint()
     onHighlightMapPointsChanged: chart.requestPaint()
+    onShapeRegionsChanged: chart.requestPaint()
+    onHighlightShapeRegionsChanged: chart.requestPaint()
     onScatterPointsChanged: chart.requestPaint()
     onHighlightScatterPointsChanged: chart.requestPaint()
     onSeriesColorChanged: chart.requestPaint()

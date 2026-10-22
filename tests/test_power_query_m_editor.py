@@ -7,21 +7,26 @@ import unittest
 from copy import deepcopy
 from datetime import date, datetime, time
 from decimal import Decimal
-from unittest.mock import patch
+from unittest.mock import MagicMock, patch
 
 os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
 
-from PySide6.QtCore import QTimer
+from PySide6.QtCore import QEvent, QPoint, QRect, QTimer, Qt
+from PySide6.QtGui import QColor, QKeyEvent, QPalette
+from PySide6.QtTest import QTest
 from PySide6.QtWidgets import (
     QApplication,
     QDialog,
     QDialogButtonBox,
     QInputDialog,
     QMessageBox,
+    QSplitter,
+    QScrollArea,
     QToolButton,
 )
 
 from analytics_studio.file_import import MAX_DATA_ROWS, ImportCandidate
+from analytics_studio.local_table_dialogs import CustomColumnDialog
 from analytics_studio.power_query_values import PowerQueryCellError, is_cell_error
 from analytics_studio.power_query_expression import compile_expression, evaluate_expression
 from analytics_studio.power_query_m import (
@@ -32,14 +37,20 @@ from analytics_studio.power_query_m import (
     parse_m_script,
     parse_m_query_script,
     rewrite_m_append_source_names,
+    replace_step_expression_in_m,
+    step_expression_to_m,
     steps_to_m_script,
 )
-from analytics_studio.local_table_dialogs import TransformDataDialog
+from analytics_studio.local_table_dialogs import (
+    TransformDataDialog,
+    _PowerQueryValueFilterDialog,
+)
 from analytics_studio.query_dependencies_dialog import QueryDependenciesDialog
 from analytics_studio.transformations import (
     TransformationError,
     apply_transformations,
     column_types_after_steps,
+    validate_steps,
 )
 
 
@@ -72,6 +83,233 @@ class PowerQueryMEditorTests(unittest.TestCase):
         self.assertIn("background-color: #f4f6f8", advanced.styleSheet())
         dialog.deleteLater()
         advanced.deleteLater()
+
+    def test_transform_editor_uses_resizable_three_pane_workspace_at_supported_sizes(self) -> None:
+        dialog = TransformDataDialog(self.source, query_name="Sales Data")
+        splitter = dialog.findChild(QSplitter, "powerQueryWorkspaceSplitter")
+        right_splitter = dialog.findChild(
+            QSplitter, "powerQuerySettingsStepsSplitter"
+        )
+
+        self.assertIsNotNone(splitter)
+        self.assertIsNotNone(right_splitter)
+        self.assertEqual(splitter.orientation(), Qt.Orientation.Horizontal)
+        self.assertEqual(right_splitter.orientation(), Qt.Orientation.Vertical)
+        self.assertEqual(splitter.count(), 3)
+        self.assertEqual(right_splitter.count(), 2)
+        self.assertEqual(
+            [splitter.widget(index).objectName() for index in range(splitter.count())],
+            [
+                "powerQueryQueriesPane",
+                "powerQueryPreviewPane",
+                "powerQuerySettingsStepsPane",
+            ],
+        )
+        self.assertIs(dialog.query_settings_panel.parentWidget(), right_splitter)
+        self.assertIs(dialog.steps_panel.parentWidget(), right_splitter)
+        self.assertTrue(dialog.operation_settings_panel.isHidden())
+        self.assertFalse(dialog.step_settings_toggle.isChecked())
+        editor_layout = dialog.editor_panel.layout()
+        self.assertEqual(
+            editor_layout.indexOf(dialog.formula_bar_row) + 1,
+            editor_layout.indexOf(dialog.preview_tabs),
+        )
+        available = dialog.screen().availableGeometry()
+        self.assertEqual(dialog.minimumWidth(), min(900, available.width()))
+        self.assertEqual(dialog.minimumHeight(), min(650, available.height()))
+        self.assertLessEqual(dialog.width(), available.width())
+        self.assertLessEqual(dialog.height(), available.height())
+
+        if available.width() < 900:
+            dialog.show()
+            self.app.processEvents()
+            compact_sizes = splitter.sizes()
+            self.assertEqual(len(compact_sizes), 3)
+            self.assertTrue(all(size > 0 for size in compact_sizes))
+            dialog.hide()
+
+        for width, height in ((900, 650), (1240, 820)):
+            with self.subTest(size=(width, height)):
+                dialog.resize(width, height)
+                dialog.show()
+                self.app.processEvents()
+                pane_sizes = splitter.sizes()
+                side_sizes = right_splitter.sizes()
+                self.assertEqual(len(pane_sizes), 3)
+                self.assertTrue(all(size > 0 for size in pane_sizes))
+                self.assertGreaterEqual(pane_sizes[0], 150)
+                self.assertGreaterEqual(pane_sizes[1], 360)
+                self.assertGreaterEqual(pane_sizes[2], 220)
+                self.assertEqual(len(side_sizes), 2)
+                self.assertTrue(all(size > 0 for size in side_sizes))
+                self.assertGreater(splitter.handleWidth(), 0)
+                self.assertGreater(right_splitter.handleWidth(), 0)
+
+        dialog.resize(1240, 820)
+        self.app.processEvents()
+        splitter.setSizes([230, 650, 310])
+        self.app.processEvents()
+        before_drag = splitter.sizes()
+        handle = splitter.handle(1)
+        start = handle.rect().center()
+        finish = start + QPoint(-35, 0)
+        QTest.mousePress(handle, Qt.MouseButton.LeftButton, pos=start)
+        QTest.mouseMove(handle, finish, delay=100)
+        QTest.mouseRelease(handle, Qt.MouseButton.LeftButton, pos=finish)
+        self.app.processEvents()
+        self.assertNotEqual(splitter.sizes(), before_drag)
+
+        dialog.deleteLater()
+
+    def test_transform_editor_keeps_ribbon_panes_and_preview_headers_light_in_dark_mode(self) -> None:
+        original_palette = self.app.palette()
+        dark_palette = QPalette(original_palette)
+        dark_palette.setColor(QPalette.ColorRole.Window, QColor("#1e1e1e"))
+        dark_palette.setColor(QPalette.ColorRole.Base, QColor("#171717"))
+        dark_palette.setColor(QPalette.ColorRole.Button, QColor("#1e1e1e"))
+        self.app.setPalette(dark_palette)
+        try:
+            dialog = TransformDataDialog(self.source, query_name="Sales Data")
+            ribbon_scroll = dialog.ribbon_tabs.widget(0).findChild(
+                QScrollArea, "powerQueryRibbonScrollArea"
+            )
+            self.assertIsNotNone(ribbon_scroll)
+            dialog.show()
+            self.app.processEvents()
+
+            for widget in (
+                ribbon_scroll,
+                dialog.editor_panel,
+                dialog.steps_panel,
+            ):
+                with self.subTest(widget=widget.objectName()):
+                    self.assertEqual(
+                        widget.palette().color(QPalette.ColorRole.Window),
+                        QColor("#ffffff"),
+                    )
+            for header in (
+                dialog.preview.horizontalHeader(),
+                dialog.preview.verticalHeader(),
+            ):
+                with self.subTest(header=type(header).__name__):
+                    self.assertEqual(
+                        header.palette().color(QPalette.ColorRole.Window),
+                        QColor("#edf2f5"),
+                    )
+            dialog.deleteLater()
+        finally:
+            self.app.setPalette(original_palette)
+
+    def test_ribbon_row_cleanup_then_promote_headers_stages_and_cancel_preserves_source(self) -> None:
+        source = ImportCandidate(
+            "inline",
+            ["Column1", "Column2", "Column3"],
+            [
+                {
+                    "Column1": f"VAT workbook metadata {index + 1}",
+                    "Column2": "",
+                    "Column3": "",
+                }
+                for index in range(10)
+            ]
+            + [
+                {"Column1": "Date", "Column2": "Particulars", "Column3": "Amount"},
+                {"Column1": "2026-08-01", "Column2": "Invoice A", "Column3": "50.00"},
+            ],
+            {},
+            [],
+        )
+        original_headers = deepcopy(source.headers)
+        original_rows = deepcopy(source.rows)
+        dialog = TransformDataDialog(source, query_name="VAT 5%")
+
+        self.assertTrue(dialog.operation_settings_panel.isHidden())
+        remove_top_rows = dialog.ribbon_command_buttons["remove_top_rows"]
+        remove_top_rows.click()
+        self.assertFalse(dialog.operation_settings_panel.isHidden())
+        self.assertTrue(dialog.step_settings_toggle.isChecked())
+        dialog.value_edit.setText("10")
+        dialog.add_button.click()
+
+        dialog.ribbon_command_buttons["promote_headers"].click()
+
+        self.assertEqual(
+            [step["op"] for step in dialog._steps],
+            ["remove_top_rows", "promote_headers"],
+        )
+        self.assertEqual(
+            dialog._preview_candidate.headers,
+            ["Date", "Particulars", "Amount"],
+        )
+        self.assertEqual(
+            dialog._preview_candidate.rows,
+            [{"Date": "2026-08-01", "Particulars": "Invoice A", "Amount": "50.00"}],
+        )
+
+        dialog.buttons.button(QDialogButtonBox.StandardButton.Cancel).click()
+
+        self.assertEqual(dialog.result(), QDialog.DialogCode.Rejected)
+        self.assertEqual(source.headers, original_headers)
+        self.assertEqual(source.rows, original_rows)
+        dialog.deleteLater()
+
+    def test_count_rows_ribbon_stages_typed_preview_and_round_trips_through_m(self) -> None:
+        step = {"op": "count_rows"}
+        script = steps_to_m_script([step], "Sales Data")
+        self.assertIn("Table.RowCount(Source)", script)
+        self.assertEqual(parse_m_script(script, "Sales Data"), [step])
+
+        dialog = TransformDataDialog(self.source, query_name="Sales Data")
+        dialog.ribbon_command_buttons["count_rows"].click()
+
+        self.assertEqual(dialog._steps, [step])
+        self.assertEqual(dialog._preview_candidate.headers, ["Count"])
+        self.assertEqual(dialog._preview_candidate.rows, [{"Count": 2}])
+        self.assertEqual(dialog.step_list.currentRow(), 0)
+        dialog.deleteLater()
+
+    def test_no_settings_ribbon_commands_apply_and_refresh_the_preview(self) -> None:
+        error = PowerQueryCellError(
+            "DataFormat.Error", "bad value", "bad", "number", row=1
+        )
+        cases = [
+            (
+                "remove_blank_rows",
+                ImportCandidate(
+                    "inline", ["Value"], [{"Value": ""}, {"Value": "keep"}], {}, []
+                ),
+                [{"Value": "keep"}],
+            ),
+            (
+                "remove_rows_with_errors",
+                ImportCandidate(
+                    "inline", ["Value"], [{"Value": error}, {"Value": "keep"}], {}, []
+                ),
+                [{"Value": "keep"}],
+            ),
+            (
+                "demote_headers",
+                ImportCandidate("inline", ["Name"], [{"Name": "Ada"}], {}, []),
+                [{"Column1": "Name"}, {"Column1": "Ada"}],
+            ),
+            (
+                "transpose_table",
+                ImportCandidate(
+                    "inline", ["Name", "Value"],
+                    [{"Name": "Ada", "Value": "12"}], {}, [],
+                ),
+                [{"Column1": "Ada"}, {"Column1": "12"}],
+            ),
+        ]
+
+        for operation, source, expected_rows in cases:
+            with self.subTest(operation=operation):
+                dialog = TransformDataDialog(source)
+                dialog.ribbon_command_buttons[operation].click()
+                self.assertEqual(dialog._steps, [{"op": operation}])
+                self.assertEqual(dialog._preview_candidate.rows, expected_rows)
+                self.assertTrue(dialog.operation_settings_panel.isHidden())
+                dialog.deleteLater()
 
     def test_home_advanced_editor_opens_separate_dialog_for_active_query(self) -> None:
         steps = [{"op": "trim_text", "column": "Customer"}]
@@ -1048,6 +1286,32 @@ in
         ])
         self.assertEqual(m_compatibility_issues(steps), [])
 
+    def test_single_column_sort_matches_m_round_trip_before_row_window(self) -> None:
+        source = ImportCandidate(
+            "inline",
+            ["Name", "Id"],
+            [
+                {"Name": "a", "Id": "lower-a"},
+                {"Name": "B", "Id": "upper-b"},
+                {"Name": "A", "Id": "upper-a"},
+                {"Name": "b", "Id": "lower-b"},
+            ],
+            {},
+            [],
+        )
+        steps = [
+            {"op": "sort_rows", "column": "Name", "direction": "asc"},
+            {"op": "keep_top_rows", "count": 2},
+        ]
+
+        local = apply_transformations(source, steps)
+        script = steps_to_m_script(steps, "Names")
+        parsed = parse_m_script(script, "Names")
+        from_m = apply_transformations(source, parsed)
+
+        self.assertEqual([row["Id"] for row in local.rows], ["upper-a", "upper-b"])
+        self.assertEqual(from_m.rows, local.rows)
+
     def test_table_sort_accepts_default_and_mixed_column_criteria(self) -> None:
         script = '''let
     Source = #"Sales Data",
@@ -1688,6 +1952,214 @@ in
             parse_m_script(range_without_count, "Sales Data"),
         )
 
+    def test_captured_sparse_boundary_query_round_trips_as_bounded_steps(self) -> None:
+        script = '''let
+    Source = #"Sales Data",
+    FilterNullAndWhitespace = each List.Select(_, each _ <> null and (not (_ is text) or Text.Trim(_) <> "")),
+    #"Removed Bottom Rows" = Table.RemoveLastN(Source, each try List.IsEmpty(List.Skip(FilterNullAndWhitespace(Record.FieldValues(_)), 1)) otherwise false),
+    #"Removed Top Rows" = Table.Skip(#"Removed Bottom Rows", each try List.IsEmpty(List.Skip(FilterNullAndWhitespace(Record.FieldValues(_)), 1)) otherwise false),
+    #"Promoted Headers" = Table.PromoteHeaders(#"Removed Top Rows", [PromoteAllScalars = true])
+in
+    #"Promoted Headers"'''
+        expected = [
+            {"op": "m_sparse_boundary_helper", "name": "FilterNullAndWhitespace"},
+            {"op": "remove_sparse_bottom_rows"},
+            {"op": "remove_sparse_top_rows"},
+            {"op": "promote_headers", "promote_all_scalars": True},
+        ]
+
+        parsed = parse_m_script(script, "Sales Data")
+        emitted = steps_to_m_script(parsed, "Sales Data")
+
+        self.assertEqual(parsed, expected)
+        self.assertEqual(parse_m_script(emitted, "Sales Data"), expected)
+        self.assertTrue(m_script_matches_steps(script, "Sales Data", expected))
+        self.assertEqual(m_compatibility_issues(expected), [])
+        self.assertIn("[PromoteAllScalars=true]", emitted)
+        self.assertIn(
+            "List.Select(_, each _ <> null",
+            step_expression_to_m(parsed, "Sales Data", 0),
+        )
+        self.assertIn(
+            "Table.Skip(", step_expression_to_m(parsed, "Sales Data", 2)
+        )
+        self.assertIn(
+            "Table.PromoteHeaders(", step_expression_to_m(parsed, "Sales Data", 3)
+        )
+        replaced = replace_step_expression_in_m(
+            parsed, "Sales Data", 3, 'Table.DemoteHeaders(#"Step 2")'
+        )
+        self.assertEqual(
+            parse_m_script(replaced, "Sales Data")[-1], {"op": "demote_headers"}
+        )
+
+        raw_source = ImportCandidate(
+            "inline",
+            ["Column1", "Column2", "Column3"],
+            [
+                {"Column1": "Report title", "Column2": None, "Column3": None},
+                {"Column1": None, "Column2": "Report date", "Column3": ""},
+                {"Column1": "Date", "Column2": "Particulars", "Column3": "Sales"},
+                {"Column1": "2026-08-01", "Column2": "Freeze Land", "Column3": 4500},
+                {"Column1": None, "Column2": "Grand Total", "Column3": 4500},
+                {"Column1": None, "Column2": "", "Column3": None},
+            ],
+            {},
+            [],
+        )
+        replayed = apply_transformations(raw_source, parsed)
+        self.assertEqual(replayed.headers, ["Date", "Particulars", "Sales"])
+        self.assertEqual(
+            replayed.rows,
+            [
+                {"Date": "2026-08-01", "Particulars": "Freeze Land", "Sales": 4500},
+                {"Date": None, "Particulars": "Grand Total", "Sales": 4500},
+            ],
+        )
+
+    def test_sparse_helper_name_is_rewritten_around_parameter_and_function_collisions(self) -> None:
+        steps = [
+            {"op": "m_sparse_boundary_helper", "name": "FilterNullAndWhitespace"},
+            {"op": "remove_sparse_top_rows"},
+        ]
+        function = {
+            "name": "FilterNullAndWhitespace",
+            "parameter": "Value",
+            "parameter_type": "text",
+            "return_type": "text",
+            "expression": "Text.Trim(Value)",
+        }
+        collision_contexts = [
+            {"parameter_names": {"FilterNullAndWhitespace"}},
+            {"query_functions": [function]},
+        ]
+
+        for context in collision_contexts:
+            with self.subTest(context=sorted(context)):
+                script = steps_to_m_script(steps, "Sales Data", **context)
+                self.assertIn("FilterNullAndWhitespace2 = each List.Select", script)
+                self.assertIn(
+                    "FilterNullAndWhitespace2(Record.FieldValues(_))", script
+                )
+                self.assertTrue(
+                    m_script_matches_steps(
+                        script, "Sales Data", steps, **context
+                    )
+                )
+
+    def test_promote_headers_preserves_the_m_default_and_all_scalars_option(self) -> None:
+        default_script = '''let
+    Source = #"Sales Data",
+    Promoted = Table.PromoteHeaders(Source)
+in
+    Promoted'''
+        default_steps = [{"op": "promote_headers", "promote_all_scalars": False}]
+        self.assertEqual(parse_m_script(default_script, "Sales Data"), default_steps)
+        self.assertIn(
+            "Table.PromoteHeaders(Source)",
+            steps_to_m_script(default_steps, "Sales Data"),
+        )
+
+        source = ImportCandidate(
+            "inline", ["Rank", "Logical", "Date", "Name"],
+            [{
+                "Rank": 7,
+                "Logical": True,
+                "Date": date(2026, 10, 21),
+                "Name": "Name",
+            }, {
+                "Rank": 8,
+                "Logical": False,
+                "Date": date(2026, 10, 22),
+                "Name": "Ada",
+            }],
+            {}, [],
+        )
+        default_result = apply_transformations(source, default_steps)
+        scalar_result = apply_transformations(source, [
+            {"op": "promote_headers", "promote_all_scalars": True}
+        ])
+        self.assertEqual(default_result.headers, ["7", "Column2", "Column3", "Name"])
+        self.assertEqual(scalar_result.headers, ["7", "true", "2026-10-21", "Name"])
+
+    def test_sparse_boundary_steps_remove_only_consecutive_edges(self) -> None:
+        source = ImportCandidate(
+            "inline",
+            ["A", "B", "C"],
+            [
+                {"A": None, "B": "", "C": " \t"},
+                {"A": 0, "B": None, "C": ""},
+                {"A": 0, "B": False, "C": None},
+                {"A": "internal sparse row", "B": None, "C": ""},
+                {"A": "data", "B": 1, "C": None},
+                {"A": None, "B": "   ", "C": ""},
+                {"A": "trailing label", "B": None, "C": ""},
+            ],
+            {},
+            [],
+        )
+
+        result = apply_transformations(source, [
+            {"op": "m_sparse_boundary_helper", "name": "FilterNullAndWhitespace"},
+            {"op": "remove_sparse_top_rows"},
+            {"op": "remove_sparse_bottom_rows"},
+        ])
+
+        self.assertEqual(result.rows, source.rows[2:5])
+        self.assertEqual(len(source.rows), 7)
+
+    def test_sparse_boundary_error_predicate_keeps_error_row(self) -> None:
+        error = PowerQueryCellError("DataFormat.Error", "bad source value")
+        source = ImportCandidate(
+            "inline", ["A", "B"],
+            [{"A": error, "B": None}, {"A": None, "B": ""},
+             {"A": "data", "B": 1}], {}, [],
+        )
+
+        result = apply_transformations(source, [
+            {"op": "remove_sparse_top_rows"},
+            {"op": "remove_sparse_bottom_rows"},
+        ])
+
+        self.assertEqual(result.rows, source.rows)
+
+        trailing_error = ImportCandidate(
+            "inline", ["A", "B"],
+            [
+                {"A": "data", "B": 1},
+                {"A": None, "B": ""},
+                {"A": error, "B": None},
+            ], {}, [],
+        )
+        bottom_result = apply_transformations(trailing_error, [
+            {"op": "remove_sparse_bottom_rows"},
+        ])
+        self.assertEqual(bottom_result.rows, trailing_error.rows)
+
+    def test_sparse_boundary_m_support_rejects_predicate_and_header_option_near_misses(self) -> None:
+        helper = (
+            'FilterNullAndWhitespace = each List.Select(_, each _ <> null and '
+            '(not (_ is text) or Text.Trim(_) <> ""))'
+        )
+        bad_predicate = f'''let
+    Source = #"Sales Data",
+    {helper},
+    Rows = Table.Skip(Source, each try List.IsEmpty(List.Skip(FilterNullAndWhitespace(Record.FieldValues(_)), 1)) otherwise true)
+in
+    Rows'''
+        bad_headers = '''let
+    Source = #"Sales Data",
+    Headers = Table.PromoteHeaders(Source, [PromoteAllScalars=true, Culture="en-US"])
+in
+    Headers'''
+
+        with self.assertRaisesRegex(PowerQueryMScriptError, "predicate is outside"):
+            parse_m_script(bad_predicate, "Sales Data")
+        with self.assertRaisesRegex(
+            PowerQueryMScriptError, r"only \[PromoteAllScalars=true\]"
+        ):
+            parse_m_script(bad_headers, "Sales Data")
+
     def test_remove_blank_rows_round_trips_and_removes_only_null_and_empty_cells(self) -> None:
         source = ImportCandidate(
             "inline",
@@ -2063,7 +2535,7 @@ in
         with self.assertRaisesRegex(PowerQueryMScriptError, "explicit text conversion"):
             steps_to_m_script(promoted_then_split, "Sales Data")
         promoted_cast_then_split = [
-            {"op": "promote_headers"},
+            {"op": "promote_headers", "promote_all_scalars": True},
             {"op": "convert_type", "column": "Code", "type": "text"},
             {"op": "split_column", "column": "Code", "delimiter": ":"},
         ]
@@ -2240,8 +2712,90 @@ in
             [{"A\nB": "value", "Calc": "value"}],
         )
 
+    def test_sparse_boundary_steps_are_authored_without_column_settings(self) -> None:
+        source = ImportCandidate(
+            "inline",
+            ["A", "B"],
+            [
+                {"A": "title", "B": None},
+                {"A": "detail", "B": "value"},
+                {"A": None, "B": "  "},
+            ],
+            {},
+            [],
+        )
+        dialog = TransformDataDialog(source, query_name="Sales Data")
+        expected_steps = [
+            {"op": "remove_sparse_bottom_rows"},
+            {"op": "remove_sparse_top_rows"},
+        ]
+
+        for index, step in enumerate(expected_steps):
+            if dialog.step_list.currentRow() >= 0:
+                self.assertEqual(dialog.add_button.text(), "New step")
+                dialog.add_button.click()
+                self.assertEqual(dialog.step_list.currentRow(), -1)
+
+            operation_index = dialog.operation_combo.findData(step["op"])
+            self.assertGreaterEqual(operation_index, 0)
+            dialog.operation_combo.setCurrentIndex(operation_index)
+            edge = "bottom" if step["op"].endswith("bottom_rows") else "top"
+            self.assertEqual(
+                dialog.operation_combo.itemData(
+                    operation_index, Qt.ItemDataRole.ToolTipRole
+                ),
+                f"Remove consecutive {edge} rows with at most one nonblank cell; "
+                "stop at the first row with two or more nonblank cells or a cell error.",
+            )
+            self.assertTrue(dialog.column_combo.isHidden())
+            self.assertTrue(dialog.column_label.isHidden())
+            self.assertEqual(dialog._create_step(), step)
+            dialog.add_button.click()
+            self.assertEqual(dialog._steps, expected_steps[: index + 1])
+            self.assertEqual(
+                dialog.step_list.item(index).toolTip(),
+                f"Remove Sparse {edge.title()} Rows: consecutive boundary rows with "
+                "at most one nonblank field; stop at the first row with two or more "
+                "nonblank fields or a cell error",
+            )
+            self.assertFalse(dialog.step_settings_button.isEnabled())
+
+        script = steps_to_m_script(dialog._steps, "Sales Data")
+        parsed = parse_m_script(script, "Sales Data")
+        self.assertEqual(script.count("FilterNullAndWhitespace ="), 1)
+        self.assertIn("Table.RemoveLastN(", script)
+        self.assertIn("Table.Skip(", script)
+        self.assertTrue(m_script_matches_steps(script, "Sales Data", dialog._steps))
+        self.assertEqual(
+            apply_transformations(source, parsed),
+            apply_transformations(source, dialog._steps),
+        )
+
+        ribbon_dialog = TransformDataDialog(source, query_name="Sales Data")
+        self.assertIn("remove_sparse_top_rows", ribbon_dialog.ribbon_command_buttons)
+        self.assertIn("remove_sparse_bottom_rows", ribbon_dialog.ribbon_command_buttons)
+        for operation, label, edge in (
+            ("remove_sparse_top_rows", "Sparse Top", "top"),
+            ("remove_sparse_bottom_rows", "Sparse Bottom", "bottom"),
+        ):
+            button = ribbon_dialog.ribbon_command_buttons[operation]
+            self.assertEqual(button.text(), label)
+            self.assertEqual(
+                button.toolTip(),
+                f"Remove consecutive {edge} rows with at most one nonblank cell; "
+                "stop at the first row with two or more nonblank cells or a cell error.",
+            )
+        ribbon_dialog.ribbon_command_buttons["remove_sparse_bottom_rows"].click()
+        self.assertEqual(
+            ribbon_dialog._steps, [{"op": "remove_sparse_bottom_rows"}]
+        )
+        ribbon_dialog.ribbon_command_buttons["remove_sparse_top_rows"].click()
+        self.assertEqual(ribbon_dialog._steps, expected_steps)
+        self.assertEqual(ribbon_dialog._preview_candidate.row_count, 1)
+
     def test_each_declared_m_step_round_trips_and_replays_like_native_transform(self) -> None:
         cases = [
+            {"op": "count_rows"},
             {"op": "remove_column", "column": "Customer"},
             {"op": "keep_columns", "columns": ["Region", "Revenue"]},
             {"op": "rename_column", "column": "Region", "new_name": "Area"},
@@ -2331,6 +2885,17 @@ in
                 {"Region": "East", "Year": "2024", "Sales": "10"},
                 {"Region": "East", "Year": "2025", "Sales": "20"},
                 {"Region": "West", "Year": "2024", "Sales": "5"},
+            ],
+            {},
+            [],
+        )
+        sparse_source = ImportCandidate(
+            "inline",
+            ["A", "B"],
+            [
+                {"A": "title", "B": None},
+                {"A": "detail", "B": "value"},
+                {"A": None, "B": "  "},
             ],
             {},
             [],
@@ -2432,6 +2997,8 @@ in
                 ),
                 {"op": "remove_rows_with_errors"},
             ),
+            (sparse_source, {"op": "remove_sparse_top_rows"}),
+            (sparse_source, {"op": "remove_sparse_bottom_rows"}),
         ]
 
         operation_dialog = TransformDataDialog(self.source, query_name="Sales Data")
@@ -2443,7 +3010,7 @@ in
         covered_operations = {step["op"] for step in cases} | {
             step["op"] for _source, step in additional_cases
         }
-        self.assertEqual(len(exposed_operations), 47)
+        self.assertEqual(len(exposed_operations), 50)
         self.assertEqual(covered_operations, exposed_operations)
 
         for step in cases:
@@ -2475,6 +3042,13 @@ in
                 self.assertEqual(m_compatibility_issues([step]), [])
                 script = steps_to_m_script([step], "Sales Data")
                 parsed_steps = parse_m_script(script, "Sales Data")
+                if step["op"] in {
+                    "remove_sparse_top_rows", "remove_sparse_bottom_rows",
+                }:
+                    self.assertEqual(script.count("FilterNullAndWhitespace ="), 1)
+                    self.assertTrue(
+                        m_script_matches_steps(script, "Sales Data", [step])
+                    )
                 direct = apply_transformations(source, [step])
                 through_m = apply_transformations(source, parsed_steps)
                 self.assertEqual(through_m, direct)
@@ -2536,7 +3110,7 @@ in
         self.assertEqual(dialog._preview_candidate, accepted_candidate)
         dialog.deleteLater()
 
-    def test_custom_column_settings_dialog_cancel_and_save_replay_downstream_steps(self) -> None:
+    def test_custom_column_dialog_cancel_and_save_replay_downstream_steps(self) -> None:
         dialog = TransformDataDialog(
             self.source,
             [
@@ -2553,33 +3127,29 @@ in
         accepted_steps = deepcopy(dialog._steps)
         accepted_candidate = deepcopy(dialog._preview_candidate)
 
-        def cancel_settings(settings: QDialog) -> QDialog.DialogCode:
-            self.assertEqual(settings.windowTitle(), "Add custom column Settings")
-            self.assertEqual(dialog.value_edit.text(), "Band")
-            self.assertEqual(dialog.custom_expression_edit.toPlainText(), '"  gold  "')
-            dialog.custom_expression_edit.setPlainText('" canceled "')
-            settings.reject()
-            return QDialog.DialogCode.Rejected
+        def cancel_settings(editor: CustomColumnDialog) -> QDialog.DialogCode:
+            self.assertEqual(editor.windowTitle(), "Custom Column")
+            self.assertEqual(editor.name_edit.text(), "Band")
+            self.assertEqual(editor.expression_edit.toPlainText(), '"  gold  "')
+            editor.expression_edit.setPlainText('" canceled "')
+            editor.reject()
+            return editor.result()
 
-        with patch.object(QDialog, "exec", new=cancel_settings):
+        with patch.object(CustomColumnDialog, "exec", new=cancel_settings):
             dialog._edit_selected_step_settings()
         self.assertEqual(dialog._steps, accepted_steps)
         self.assertEqual(dialog._preview_candidate, accepted_candidate)
         self.assertEqual(dialog.custom_expression_edit.toPlainText(), '"  gold  "')
 
-        def accept_settings(settings: QDialog) -> QDialog.DialogCode:
-            buttons = settings.findChild(
-                QDialogButtonBox, "powerQueryStepSettingsButtons"
-            )
-            self.assertIsNotNone(buttons)
-            dialog.custom_expression_edit.setPlainText("Text.Unknown([Customer])")
-            buttons.button(QDialogButtonBox.StandardButton.Save).click()
-            self.assertFalse(dialog.error_label.isHidden())
-            dialog.custom_expression_edit.setPlainText('"  silver  "')
-            buttons.button(QDialogButtonBox.StandardButton.Save).click()
-            return settings.result()
+        def accept_settings(editor: CustomColumnDialog) -> QDialog.DialogCode:
+            editor.expression_edit.setPlainText("Text.Unknown([Customer])")
+            editor._accept_column()
+            self.assertFalse(editor.error_label.isHidden())
+            editor.expression_edit.setPlainText('"  silver  "')
+            editor._accept_column()
+            return editor.result()
 
-        with patch.object(QDialog, "exec", new=accept_settings):
+        with patch.object(CustomColumnDialog, "exec", new=accept_settings):
             dialog._edit_selected_step_settings()
         self.assertEqual(dialog._steps[0]["expression"], '"  silver  "')
         self.assertEqual(dialog._steps[1], {"op": "trim_text", "column": "Band"})
@@ -2658,6 +3228,160 @@ in
 
         self.assertEqual(dialog._steps, accepted_steps)
         self.assertEqual(dialog._preview_candidate, accepted_candidate)
+        dialog.deleteLater()
+
+    def test_captured_sparse_helper_is_visible_fixed_and_has_no_settings(self) -> None:
+        dialog = TransformDataDialog(
+            self.source,
+            [
+                {"op": "m_sparse_boundary_helper", "name": "FilterNullAndWhitespace"},
+                {"op": "remove_sparse_bottom_rows"},
+                {"op": "remove_sparse_top_rows"},
+            ],
+            query_name="Sales Data",
+        )
+        dialog.step_list.setCurrentRow(0)
+        settings_button = dialog.findChild(
+            QToolButton, "editAppliedStepSettingsButton"
+        )
+
+        self.assertIn("Filter Null And Whitespace", dialog.step_list.item(0).text())
+        self.assertIsNotNone(settings_button)
+        self.assertFalse(settings_button.isEnabled())
+        self.assertFalse(dialog.remove_button.isEnabled())
+        self.assertFalse(dialog.down_button.isEnabled())
+        self.assertFalse(dialog.update_button.isEnabled())
+        self.assertTrue(dialog.formula_bar.isReadOnly())
+        self.assertIn("List.Select", dialog.formula_bar.text())
+        self.assertFalse(dialog.apply_formula_button.isEnabled())
+
+        dialog.step_list.setCurrentRow(1)
+        self.assertFalse(settings_button.isEnabled())
+        self.assertFalse(dialog.up_button.isEnabled())
+        dialog.deleteLater()
+
+    def test_sparse_steps_show_m_formulas_previews_and_noneditable_update_state(self) -> None:
+        source = ImportCandidate(
+            "inline", ["Column1", "Column2"],
+            [
+                {"Column1": None, "Column2": ""},
+                {"Column1": "Report title", "Column2": None},
+                {"Column1": "Date", "Column2": "Sales"},
+                {"Column1": "2026-08-01", "Column2": 10},
+                {"Column1": None, "Column2": ""},
+            ], {}, [],
+        )
+        steps = [
+            {"op": "m_sparse_boundary_helper", "name": "FilterNullAndWhitespace"},
+            {"op": "remove_sparse_bottom_rows"},
+            {"op": "remove_sparse_top_rows"},
+            {"op": "promote_headers", "promote_all_scalars": True},
+        ]
+        dialog = TransformDataDialog(source, steps, query_name="Sales Data")
+
+        dialog.step_list.setCurrentRow(1)
+        self.assertIn("Table.RemoveLastN(", dialog.formula_bar.text())
+        self.assertIn(
+            "FilterNullAndWhitespace(Record.FieldValues(_))",
+            dialog.formula_bar.text(),
+        )
+        self.assertFalse(dialog.update_button.isEnabled())
+        self.assertEqual(dialog._selected_preview_candidate().rows, source.rows[:-1])
+
+        dialog.step_list.setCurrentRow(2)
+        self.assertIn("Table.Skip(", dialog.formula_bar.text())
+        self.assertIn(
+            "FilterNullAndWhitespace(Record.FieldValues(_))",
+            dialog.formula_bar.text(),
+        )
+        self.assertFalse(dialog.update_button.isEnabled())
+        selected = dialog._selected_preview_candidate()
+        self.assertEqual(selected.headers, source.headers)
+        self.assertEqual(selected.rows, [source.rows[2], source.rows[3]])
+
+        dialog.step_list.setCurrentRow(3)
+        self.assertIn("Table.PromoteHeaders(", dialog.formula_bar.text())
+        self.assertEqual(
+            dialog._selected_preview_candidate().headers, ["Date", "Sales"]
+        )
+        self.assertEqual(dialog.preview.model().rowCount(), 1)
+        dialog.deleteLater()
+
+    def test_removing_final_sparse_trim_prunes_helper_and_leaves_applicable_steps(self) -> None:
+        source = ImportCandidate(
+            "inline", ["A"], [{"A": None}, {"A": "value"}], {}, [],
+        )
+        dialog = TransformDataDialog(source, [
+            {"op": "m_sparse_boundary_helper", "name": "FilterNullAndWhitespace"},
+            {"op": "remove_sparse_bottom_rows"},
+        ])
+        dialog.step_list.setCurrentRow(1)
+
+        self.assertFalse(dialog.update_button.isEnabled())
+        dialog._remove_step()
+
+        self.assertEqual(dialog._steps, [])
+        self.assertEqual(validate_steps(dialog._steps), [])
+        self.assertEqual(apply_transformations(source, dialog._steps).rows, source.rows)
+        dialog.deleteLater()
+
+    def test_formula_bar_can_replace_sparse_trim_while_later_trim_keeps_helper(self) -> None:
+        source = ImportCandidate(
+            "inline", ["Column1", "Column2"],
+            [
+                {"Column1": None, "Column2": ""},
+                {"Column1": "Report title", "Column2": None},
+                {"Column1": "Date", "Column2": "Sales"},
+                {"Column1": "2026-08-01", "Column2": 10},
+                {"Column1": None, "Column2": ""},
+            ], {}, [],
+        )
+        dialog = TransformDataDialog(source, [
+            {"op": "m_sparse_boundary_helper", "name": "FilterNullAndWhitespace"},
+            {"op": "remove_sparse_bottom_rows"},
+            {"op": "remove_sparse_top_rows"},
+        ], query_name="Sales Data")
+        dialog._step_metadata = [{}, {"name": "Remove last sparse rows"}, {"name": "Trim preamble"}]
+        dialog.step_list.setCurrentRow(1)
+        dialog.formula_bar.setText("Table.RemoveLastN(Source, 1)")
+
+        dialog._apply_formula_bar()
+
+        self.assertEqual(dialog._steps, [
+            {"op": "m_sparse_boundary_helper", "name": "FilterNullAndWhitespace"},
+            {"op": "remove_bottom_rows", "count": 1},
+            {"op": "remove_sparse_top_rows"},
+        ])
+        self.assertEqual(dialog._step_metadata, [{}, {}, {"name": "Trim preamble"}])
+        self.assertEqual(
+            dialog._preview_candidate.rows,
+            [source.rows[2], source.rows[3]],
+        )
+        dialog.deleteLater()
+
+    def test_formula_bar_replacing_final_sparse_trim_prunes_helper_and_round_trips(self) -> None:
+        source = ImportCandidate(
+            "inline", ["A"],
+            [{"A": None}, {"A": "value"}, {"A": None}], {}, [],
+        )
+        dialog = TransformDataDialog(source, [
+            {"op": "m_sparse_boundary_helper", "name": "FilterNullAndWhitespace"},
+            {"op": "remove_sparse_bottom_rows"},
+        ], query_name="Sparse input")
+        dialog._step_metadata = [{}, {"name": "Remove trailing sparse rows"}]
+        dialog.step_list.setCurrentRow(1)
+        dialog.formula_bar.setText("Table.RemoveLastN(Source, 1)")
+
+        dialog._apply_formula_bar()
+
+        expected = [{"op": "remove_bottom_rows", "count": 1}]
+        self.assertEqual(dialog._steps, expected)
+        self.assertEqual(dialog._step_metadata, [{}])
+        self.assertEqual(
+            dialog._preview_candidate.rows, [{"A": None}, {"A": "value"}]
+        )
+        emitted = steps_to_m_script(dialog._steps, "Sparse input")
+        self.assertEqual(parse_m_script(emitted, "Sparse input"), expected)
         dialog.deleteLater()
 
     def test_multiline_formula_is_routed_to_advanced_editor(self) -> None:
@@ -2779,11 +3503,16 @@ in
         self.assertEqual(dialog.profile_table.item(0, 3).text(), "0")
         self.assertEqual(dialog.profile_table.item(0, 4).text(), "A (100)")
         self.assertIn("105 rows", dialog.profile_scope_note.text())
+        self.assertEqual(dialog.preview_header._profiles[0]["valid"], "95%")
+        self.assertEqual(dialog.preview_header._profiles[0]["empty"], "5%")
+        self.assertEqual(dialog.preview_header._profiles[0]["distinct"], 1)
 
         dialog.profile_scope_combo.setCurrentIndex(1)
         self.assertEqual(dialog.quality_table.item(0, 1).text(), "100.0% (100)")
         self.assertEqual(dialog.profile_table.item(0, 2).text(), "1")
         self.assertIn("100 rows", dialog.profile_scope_note.text())
+        self.assertEqual(dialog.preview_header._profiles[0]["valid"], "100%")
+        self.assertEqual(dialog.preview_header._profiles[0]["empty"], "0%")
         dialog.deleteLater()
 
         singleton_and_blank = ImportCandidate(
@@ -2796,6 +3525,763 @@ in
         dialog = TransformDataDialog(singleton_and_blank)
         self.assertEqual(dialog.profile_table.item(0, 2).text(), "1")
         self.assertEqual(dialog.profile_table.item(0, 3).text(), "1")
+        dialog.deleteLater()
+
+    def test_inline_column_quality_and_distribution_toggles_resize_the_header(self) -> None:
+        dialog = TransformDataDialog(self.source)
+        header = dialog.preview_header
+
+        self.assertEqual(header.height(), 148)
+        self.assertEqual(header._profiles[0]["name"], "Region")
+        self.assertEqual(header._profiles[0]["distinct"], 2)
+        self.assertEqual(header._profiles[0]["unique"], 2)
+
+        dialog._show_quality_view(False)
+        self.assertEqual(header.height(), 106)
+        dialog._show_profile_view(False)
+        self.assertEqual(header.height(), 27)
+        dialog._show_quality_view(True)
+        self.assertEqual(header.height(), 78)
+        dialog._show_profile_view(True)
+        self.assertEqual(header.height(), 148)
+        dialog.deleteLater()
+
+    def test_preview_column_menu_sorts_and_opens_filter_settings(self) -> None:
+        dialog = TransformDataDialog(self.source)
+        sort_actions = [MagicMock() for _ in range(4)]
+        with patch("analytics_studio.local_table_dialogs.QMenu") as menu_type:
+            menu = menu_type.return_value
+            menu.addAction.side_effect = sort_actions
+            menu.exec.return_value = sort_actions[1]
+            dialog.preview_header.sectionClicked.emit(0)
+
+        self.assertEqual(dialog._steps[-1], {
+            "op": "sort_rows", "column": "Region", "direction": "desc",
+        })
+        self.assertEqual(dialog._preview_candidate.rows[0]["Region"], "West")
+        dialog.deleteLater()
+        dialog = TransformDataDialog(self.source)
+        filter_actions = [MagicMock() for _ in range(4)]
+        with patch("analytics_studio.local_table_dialogs.QMenu") as menu_type:
+            menu = menu_type.return_value
+            menu.addAction.side_effect = filter_actions
+            menu.exec.return_value = filter_actions[-1]
+            dialog.preview_header.sectionClicked.emit(0)
+
+        self.assertEqual(dialog.operation_combo.currentData(), "filter_rows")
+        self.assertEqual(dialog.column_combo.currentText(), "Region")
+        self.assertEqual(dialog.option_combo.currentData(), "equals")
+        self.assertFalse(dialog.operation_settings_panel.isHidden())
+        self.assertEqual(dialog.step_list.currentRow(), -1)
+        dialog.value_edit.setText("East")
+        dialog.add_button.click()
+        self.assertEqual(
+            dialog._preview_candidate.rows,
+            [{"Region": "East", "Revenue": "12", "Customer": "  Ada  "}],
+        )
+        dialog.deleteLater()
+
+    def test_preview_column_menu_filters_selected_values_and_round_trips_m(self) -> None:
+        source = ImportCandidate(
+            "inline",
+            ["Region", "Amount"],
+            [
+                {"Region": "East", "Amount": "10"},
+                {"Region": "West", "Amount": "20"},
+                {"Region": "East", "Amount": "30"},
+                {"Region": "North", "Amount": "40"},
+            ],
+            {},
+            [],
+        )
+        dialog = TransformDataDialog(source, query_name="Sales")
+        menu_actions = [MagicMock() for _ in range(4)]
+        with (
+            patch("analytics_studio.local_table_dialogs.QMenu") as menu_type,
+            patch(
+                "analytics_studio.local_table_dialogs._PowerQueryValueFilterDialog"
+            ) as filter_type,
+        ):
+            menu = menu_type.return_value
+            menu.addAction.side_effect = menu_actions
+            menu.exec.return_value = menu_actions[2]
+            value_dialog = filter_type.return_value
+            value_dialog.exec.return_value = QDialog.DialogCode.Accepted
+            value_dialog.selected_values.return_value = ["East", "North"]
+            dialog.preview_header.sectionClicked.emit(0)
+
+        filter_type.assert_called_once_with(
+            "Region", ["East", "West", "North"], dialog
+        )
+        self.assertEqual(
+            [row["Amount"] for row in dialog._preview_candidate.rows],
+            ["10", "30", "40"],
+        )
+        self.assertEqual(dialog._steps[-1], {
+            "op": "filter_rows_advanced",
+            "clauses": [
+                {
+                    "column": "Region", "operator": "equals", "value": "East",
+                    "join": "and",
+                },
+                {
+                    "column": "Region", "operator": "equals", "value": "North",
+                    "join": "or",
+                },
+            ],
+        })
+        self.assertTrue(dialog.preview_header._profiles[0]["filter_active"])
+        script = steps_to_m_script(dialog._steps, "Sales")
+        self.assertTrue(m_script_matches_steps(script, "Sales", dialog._steps))
+        self.assertEqual(parse_m_script(script, "Sales"), dialog._steps)
+        dialog.deleteLater()
+
+    def test_header_filter_button_opens_existing_value_filter_once_for_its_column(self) -> None:
+        source = ImportCandidate(
+            "inline",
+            ["Region", "Amount"],
+            [
+                {"Region": "East", "Amount": "10"},
+                {"Region": "West", "Amount": "20"},
+            ],
+            {},
+            [],
+        )
+        dialog = TransformDataDialog(source, query_name="Sales")
+        dialog.resize(1100, 720)
+        dialog.show()
+        self.app.processEvents()
+        button = next(
+            control
+            for control in dialog.preview_header._filter_buttons
+            if control.property("logicalIndex") == 0
+        )
+        expected_menu_position = button.mapToGlobal(QPoint(0, button.height()))
+
+        self.assertEqual(button.accessibleName(), "Sort and filter Region")
+        self.assertIn("Power Query preview", button.accessibleDescription())
+        self.assertTrue(button.objectName().startswith("powerQueryHeaderFilterButton"))
+        self.assertEqual(
+            len({control.objectName() for control in dialog.preview_header._filter_buttons}),
+            len(dialog.preview_header._filter_buttons),
+        )
+        self.assertTrue(button.isVisible())
+        self.assertEqual(button.focusPolicy(), Qt.FocusPolicy.StrongFocus)
+
+        menu_actions = [MagicMock() for _ in range(4)]
+        with (
+            patch("analytics_studio.local_table_dialogs.QMenu") as menu_type,
+            patch(
+                "analytics_studio.local_table_dialogs._PowerQueryValueFilterDialog"
+            ) as filter_type,
+        ):
+            menu = menu_type.return_value
+            menu.addAction.side_effect = menu_actions
+            menu.exec.return_value = menu_actions[2]
+            value_dialog = filter_type.return_value
+            value_dialog.exec.return_value = QDialog.DialogCode.Accepted
+            value_dialog.selected_values.return_value = ["East"]
+
+            QTest.mouseClick(button, Qt.MouseButton.LeftButton)
+            self.app.processEvents()
+
+        menu_type.assert_called_once_with(dialog)
+        menu.exec.assert_called_once_with(expected_menu_position)
+        filter_type.assert_called_once_with("Region", ["East", "West"], dialog)
+        self.assertEqual(
+            [row["Region"] for row in dialog._preview_candidate.rows], ["East"]
+        )
+        self.assertEqual(dialog._steps[-1]["op"], "filter_rows_advanced")
+        dialog.deleteLater()
+
+    def test_header_filter_button_accepts_keyboard_activation(self) -> None:
+        dialog = TransformDataDialog(self.source, query_name="Sales Data")
+        dialog.resize(1100, 720)
+        dialog.show()
+        self.app.processEvents()
+        button = next(
+            control
+            for control in dialog.preview_header._filter_buttons
+            if control.property("logicalIndex") == 0
+        )
+        menu_actions = [MagicMock() for _ in range(4)]
+        with patch("analytics_studio.local_table_dialogs.QMenu") as menu_type:
+            menu = menu_type.return_value
+            menu.addAction.side_effect = menu_actions
+            menu.exec.return_value = None
+
+            button.setFocus(Qt.FocusReason.OtherFocusReason)
+            self.app.processEvents()
+            self.assertTrue(button.hasFocus())
+            QTest.keyClick(button, Qt.Key.Key_Space)
+            self.app.processEvents()
+
+        menu_type.assert_called_once_with(dialog)
+        menu.exec.assert_called_once()
+        dialog.deleteLater()
+
+    def test_header_filter_button_leaves_modified_tab_keys_to_qt(self) -> None:
+        dialog = TransformDataDialog(self.source, query_name="Sales Data")
+        dialog.resize(1100, 720)
+        dialog.show()
+        self.app.processEvents()
+        header = dialog.preview_header
+        button = next(
+            control
+            for control in header._filter_buttons
+            if control.property("logicalIndex") == 0
+        )
+
+        event = QKeyEvent(
+            QEvent.Type.KeyPress,
+            Qt.Key.Key_Tab,
+            Qt.KeyboardModifier.ControlModifier,
+        )
+        self.assertFalse(header.eventFilter(button, event))
+        alt_tab = QKeyEvent(
+            QEvent.Type.KeyPress,
+            Qt.Key.Key_Tab,
+            Qt.KeyboardModifier.AltModifier,
+        )
+        self.assertFalse(header.eventFilter(button, alt_tab))
+        dialog.deleteLater()
+
+    def test_header_filter_button_preserves_clicks_elsewhere_on_the_header(self) -> None:
+        dialog = TransformDataDialog(self.source, query_name="Sales Data")
+        dialog.resize(1100, 720)
+        dialog.show()
+        self.app.processEvents()
+        header = dialog.preview_header
+        x = header.sectionViewportPosition(0) + 14
+        self.assertLess(x, header.sectionViewportPosition(0) + header.sectionSize(0) - 35)
+        button = next(
+            control
+            for control in header._filter_buttons
+            if control.property("logicalIndex") == 0
+        )
+        expected_menu_position = button.mapToGlobal(QPoint(0, button.height()))
+
+        menu_actions = [MagicMock() for _ in range(4)]
+        with patch("analytics_studio.local_table_dialogs.QMenu") as menu_type:
+            menu = menu_type.return_value
+            menu.addAction.side_effect = menu_actions
+            menu.exec.return_value = None
+            QTest.mouseClick(
+                header.viewport(),
+                Qt.MouseButton.LeftButton,
+                pos=QPoint(x, 12),
+            )
+            self.app.processEvents()
+
+        menu_type.assert_called_once_with(dialog)
+        menu.exec.assert_called_once_with(expected_menu_position)
+        dialog.deleteLater()
+
+    def test_header_filter_button_tab_order_tracks_visible_columns_after_scroll(self) -> None:
+        headers = [f"Column {index}" for index in range(16)]
+        source = ImportCandidate(
+            "inline",
+            headers,
+            [{header: index for index, header in enumerate(headers)}],
+            {},
+            [],
+        )
+        dialog = TransformDataDialog(source, query_name="Wide table")
+        dialog.resize(1320, 700)
+        dialog.show()
+        self.app.processEvents()
+        header = dialog.preview_header
+        scrollbar = dialog.preview.horizontalScrollBar()
+
+        def ordered_buttons() -> list[QToolButton]:
+            return sorted(
+                (
+                    button
+                    for button in header._filter_buttons
+                    if button.isVisible()
+                    and isinstance(button.property("logicalIndex"), int)
+                    and button.property("logicalIndex") >= 0
+                ),
+                key=lambda button: int(button.property("logicalIndex")),
+            )
+
+        before = ordered_buttons()
+        before_indices = [int(button.property("logicalIndex")) for button in before]
+        self.assertGreaterEqual(len(before), 2)
+        self.assertGreater(scrollbar.maximum(), 0)
+        scrollbar.setValue(scrollbar.value() + max(1, scrollbar.singleStep()))
+        self.app.processEvents()
+        after = ordered_buttons()
+        after_indices = [int(button.property("logicalIndex")) for button in after]
+        self.assertGreater(after_indices[0], before_indices[0])
+        self.assertTrue(set(before_indices).intersection(after_indices))
+        self.assertEqual(
+            [button.accessibleName() for button in after],
+            [f"Sort and filter {headers[index]}" for index in after_indices],
+        )
+        self.assertEqual(
+            len({button.objectName() for button in header._filter_buttons}),
+            len(header._filter_buttons),
+        )
+
+        menu_actions = [MagicMock() for _ in range(4)]
+        with (
+            patch("analytics_studio.local_table_dialogs.QMenu") as menu_type,
+            patch.object(dialog, "_open_preview_value_filter") as open_filter,
+        ):
+            menu = menu_type.return_value
+            menu.addAction.side_effect = menu_actions
+            menu.exec.return_value = menu_actions[2]
+            QTest.mouseClick(after[0], Qt.MouseButton.LeftButton)
+            self.app.processEvents()
+        menu_type.assert_called_once_with(dialog)
+        menu.exec.assert_called_once()
+        open_filter.assert_called_once_with(headers[after_indices[0]])
+
+        for left, right in zip(after, after[1:]):
+            left.setFocus(Qt.FocusReason.OtherFocusReason)
+            self.app.processEvents()
+            self.assertTrue(left.hasFocus())
+            QTest.keyClick(left, Qt.Key.Key_Tab)
+            self.app.processEvents()
+            self.assertIs(self.app.focusWidget(), right)
+        after[-1].setFocus(Qt.FocusReason.OtherFocusReason)
+        self.app.processEvents()
+        QTest.keyClick(
+            after[-1],
+            Qt.Key.Key_Tab,
+            Qt.KeyboardModifier.ShiftModifier,
+        )
+        self.app.processEvents()
+        self.assertIs(self.app.focusWidget(), after[-2])
+
+        after[-1].setFocus(Qt.FocusReason.OtherFocusReason)
+        self.app.processEvents()
+        QTest.keyClick(after[-1], Qt.Key.Key_Tab)
+        self.app.processEvents()
+        self.assertNotIn(self.app.focusWidget(), after)
+
+        after[0].setFocus(Qt.FocusReason.OtherFocusReason)
+        self.app.processEvents()
+        QTest.keyClick(
+            after[0],
+            Qt.Key.Key_Tab,
+            Qt.KeyboardModifier.ShiftModifier,
+        )
+        self.app.processEvents()
+        self.assertNotIn(self.app.focusWidget(), after)
+        dialog.deleteLater()
+
+    def test_header_filter_button_tracks_visible_columns_after_scroll_and_resize(self) -> None:
+        headers = [f"Column {index}" for index in range(18)]
+        source = ImportCandidate(
+            "inline",
+            headers,
+            [{header: f"value {index}" for index, header in enumerate(headers)}],
+            {},
+            [],
+        )
+        dialog = TransformDataDialog(source, query_name="Wide table")
+        dialog.resize(1320, 700)
+        dialog.show()
+        self.app.processEvents()
+        header = dialog.preview_header
+        for index in range(len(headers)):
+            header.resizeSection(index, 160)
+        self.app.processEvents()
+
+        def expected_buttons() -> dict[int, QRect]:
+            viewport_rect = header.viewport().rect()
+            expected: dict[int, QRect] = {}
+            for logical_index in range(header.count()):
+                if header.isSectionHidden(logical_index):
+                    continue
+                dropdown = QRect(
+                    header.sectionViewportPosition(logical_index)
+                    + header.sectionSize(logical_index)
+                    - 29,
+                    3,
+                    23,
+                    21,
+                )
+                if viewport_rect.contains(dropdown):
+                    expected[logical_index] = dropdown
+            return expected
+
+        def assert_button_layout() -> None:
+            expected = expected_buttons()
+            assigned: dict[int, QToolButton] = {
+                int(button.property("logicalIndex")): button
+                for button in header._filter_buttons
+                if button.property("logicalIndex") is not None
+                and int(button.property("logicalIndex")) >= 0
+            }
+            self.assertEqual(set(assigned), set(expected))
+            for logical_index, geometry in expected.items():
+                button = assigned[logical_index]
+                self.assertTrue(button.isVisible())
+                self.assertEqual(button.geometry(), geometry)
+                self.assertEqual(
+                    button.accessibleName(),
+                    f"Sort and filter {headers[logical_index]}",
+                )
+                self.assertEqual(button.focusPolicy(), Qt.FocusPolicy.StrongFocus)
+            for button in header._filter_buttons:
+                if button.property("logicalIndex") == -1:
+                    self.assertFalse(button.isVisible())
+                    self.assertEqual(button.focusPolicy(), Qt.FocusPolicy.NoFocus)
+
+        assert_button_layout()
+        first_visible = min(expected_buttons())
+        original_profiles = [dict(profile) for profile in header._profiles]
+        renamed_profiles = [dict(profile) for profile in original_profiles]
+        renamed_profiles[first_visible]["name"] = "Renamed column"
+        header.set_profiles(renamed_profiles)
+        self.assertEqual(
+            next(
+                button.accessibleName()
+                for button in header._filter_buttons
+                if button.property("logicalIndex") == first_visible
+            ),
+            "Sort and filter Renamed column",
+        )
+        header.set_profiles(original_profiles)
+        assert_button_layout()
+
+        header.resizeSection(first_visible, 205)
+        dialog._show_quality_view(False)
+        dialog._show_profile_view(False)
+        self.app.processEvents()
+        assert_button_layout()
+
+        scrollbar = dialog.preview.horizontalScrollBar()
+        self.assertGreater(scrollbar.maximum(), 0)
+        first_button = next(
+            button
+            for button in header._filter_buttons
+            if button.property("logicalIndex") == first_visible
+        )
+        first_button.setFocus(Qt.FocusReason.OtherFocusReason)
+        self.app.processEvents()
+        self.assertTrue(first_button.hasFocus())
+        scrollbar.setValue(scrollbar.maximum())
+        self.app.processEvents()
+        assert_button_layout()
+        self.assertGreater(min(expected_buttons()), 0)
+        self.assertIs(self.app.focusWidget(), header)
+
+        last_visible = max(expected_buttons())
+        self.assertEqual(
+            next(
+                button.accessibleName()
+                for button in header._filter_buttons
+                if button.property("logicalIndex") == last_visible
+            ),
+            f"Sort and filter {headers[last_visible]}",
+        )
+
+        old_viewport_width = header.viewport().width()
+        dialog.resize(900, 700)
+        self.app.processEvents()
+        self.assertNotEqual(header.viewport().width(), old_viewport_width)
+        assert_button_layout()
+        self.assertTrue(
+            any(
+                not button.isVisible()
+                and button.focusPolicy() == Qt.FocusPolicy.NoFocus
+                for button in header._filter_buttons
+            )
+        )
+
+        target_button = next(
+            button
+            for button in header._filter_buttons
+            if button.isVisible()
+            and isinstance(button.property("logicalIndex"), int)
+            and button.property("logicalIndex") >= 0
+        )
+        expected_menu_position = target_button.mapToGlobal(
+            QPoint(0, target_button.height())
+        )
+        with patch("analytics_studio.local_table_dialogs.QMenu") as menu_type:
+            menu = menu_type.return_value
+            menu.addAction.side_effect = [MagicMock() for _ in range(4)]
+            menu.exec.return_value = None
+            QTest.mouseClick(target_button, Qt.MouseButton.LeftButton)
+            self.app.processEvents()
+
+        menu.exec.assert_called_once_with(expected_menu_position)
+        dialog.deleteLater()
+
+    def test_preview_column_menu_clamps_anchor_when_filter_button_is_clipped(self) -> None:
+        dialog = TransformDataDialog(self.source, query_name="Sales Data")
+        dialog.resize(1100, 700)
+        dialog.show()
+        self.app.processEvents()
+        header = dialog.preview_header
+        viewport = header.viewport()
+        viewport_rect = viewport.rect()
+        header.resizeSection(0, viewport_rect.width() + 40)
+        self.app.processEvents()
+        clipped_anchor = QRect(
+            header.sectionViewportPosition(0)
+            + header.sectionSize(0)
+            - header._FILTER_BUTTON_SIZE.width()
+            - 6,
+            3,
+            header._FILTER_BUTTON_SIZE.width(),
+            header._FILTER_BUTTON_SIZE.height(),
+        )
+        self.assertFalse(viewport_rect.contains(clipped_anchor))
+        self.assertGreater(clipped_anchor.left(), viewport_rect.right())
+        self.assertFalse(
+            any(
+                button.isVisible() and button.property("logicalIndex") == 0
+                for button in header._filter_buttons
+            )
+        )
+        click_x = header.sectionViewportPosition(0) + 14
+        self.assertGreaterEqual(click_x, viewport_rect.left())
+        self.assertLess(click_x, viewport_rect.right())
+        expected_position = viewport.mapToGlobal(
+            QPoint(viewport_rect.right(), clipped_anchor.bottom() + 1)
+        )
+        viewport_origin = viewport.mapToGlobal(QPoint(0, 0))
+        relative_position = expected_position - viewport_origin
+        self.assertTrue(viewport_rect.contains(relative_position))
+
+        with patch("analytics_studio.local_table_dialogs.QMenu") as menu_type:
+            menu = menu_type.return_value
+            menu.addAction.side_effect = [MagicMock() for _ in range(4)]
+            menu.exec.return_value = None
+            QTest.mouseClick(
+                viewport,
+                Qt.MouseButton.LeftButton,
+                pos=QPoint(click_x, 12),
+            )
+            self.app.processEvents()
+
+        menu.exec.assert_called_once_with(expected_position)
+        dialog.deleteLater()
+
+    def test_power_query_value_filter_dialog_search_and_selection(self) -> None:
+        dialog = _PowerQueryValueFilterDialog(
+            "Region", ["East", "West", None, ""]
+        )
+        self.assertEqual(
+            [dialog.value_list.item(index).text()
+             for index in range(dialog.value_list.count())],
+            ["East", "West", "(null)", "(empty text)"],
+        )
+        self.assertEqual(dialog.selected_values(), ["East", "West", None, ""])
+        dialog.search_edit.setText("west")
+        self.assertTrue(dialog.value_list.item(0).isHidden())
+        self.assertFalse(dialog.value_list.item(1).isHidden())
+        dialog.value_list.item(1).setCheckState(Qt.CheckState.Unchecked)
+        self.assertEqual(dialog.selected_values(), ["East", None, ""])
+        self.assertTrue(dialog.apply_button.isEnabled())
+        dialog.deleteLater()
+
+    def test_value_filter_keeps_null_and_empty_text_distinct(self) -> None:
+        source = ImportCandidate(
+            "inline",
+            ["Region"],
+            [{"Region": None}, {"Region": ""}, {"Region": "East"}],
+            {},
+            [],
+        )
+        dialog = TransformDataDialog(source, query_name="Blank values")
+
+        self.assertTrue(
+            dialog._add_filter_by_selected_values("Region", [None, ""])
+        )
+        self.assertEqual(
+            dialog._steps[-1],
+            {
+                "op": "filter_rows_advanced",
+                "clauses": [
+                    {
+                        "column": "Region", "operator": "is_null", "value": "",
+                        "join": "and",
+                    },
+                    {
+                        "column": "Region", "operator": "equals", "value": "",
+                        "join": "or",
+                    },
+                ],
+            },
+        )
+        self.assertEqual(
+            [row["Region"] for row in dialog._preview_candidate.rows],
+            [None, ""],
+        )
+        dialog.deleteLater()
+
+    def test_selected_value_filter_failure_preserves_steps_metadata_and_preview(self) -> None:
+        base_steps = [
+            {
+                "op": "filter_rows",
+                "column": "Customer",
+                "operator": "equals",
+                "value": "Lin",
+            },
+            {
+                "op": "rename_column",
+                "column": "Region",
+                "new_name": "Territory",
+            },
+        ]
+        metadata = [
+            {"name": "Lin only", "description": "Keep Lin's record."},
+            {"name": "Rename region", "description": "Keep the suffix attached."},
+        ]
+        inserted_filter = {
+            "op": "filter_rows_advanced",
+            "clauses": [{
+                "column": "Region",
+                "operator": "equals",
+                "value": "East",
+                "join": "and",
+            }],
+        }
+        proposed_steps = [base_steps[0], inserted_filter, base_steps[1]]
+        dialog = TransformDataDialog(self.source, steps=base_steps, query_name="Sales")
+        dialog._step_metadata = deepcopy(metadata)
+        dialog._render_steps()
+        dialog.step_list.setCurrentRow(0)
+        self.app.processEvents()
+
+        original_steps = deepcopy(dialog._steps)
+        original_metadata = deepcopy(dialog._step_metadata)
+        original_full_candidate = deepcopy(dialog._preview_candidate)
+        original_selected_candidate = deepcopy(dialog._selected_preview_candidate())
+        model = dialog.preview.model()
+        original_visible_headers = list(model._headers)
+        original_visible_rows = deepcopy(model._rows)
+
+        def fail_inserted_suffix(source, steps, *, parameters=None):
+            if steps == proposed_steps:
+                raise TransformationError("Injected suffix replay failure")
+            return apply_transformations(source, steps, parameters=parameters)
+
+        with patch(
+            "analytics_studio.local_table_dialogs.apply_transformations",
+            side_effect=fail_inserted_suffix,
+        ) as replay:
+            self.assertFalse(
+                dialog._add_filter_by_selected_values("Region", ["East"])
+            )
+        replay.assert_called_once()
+        self.assertEqual(dialog._steps, original_steps)
+        self.assertEqual(dialog._step_metadata, original_metadata)
+        self.assertEqual(dialog._preview_candidate, original_full_candidate)
+        self.assertEqual(dialog.step_list.currentRow(), 0)
+        self.assertEqual(dialog._selected_preview_candidate(), original_selected_candidate)
+        self.assertEqual(dialog.preview.model()._headers, original_visible_headers)
+        self.assertEqual(dialog.preview.model()._rows, original_visible_rows)
+        self.assertIn("Injected suffix replay failure", dialog.error_label.text())
+        dialog.deleteLater()
+
+    def test_value_filter_appends_when_no_or_final_step_is_selected(self) -> None:
+        base_step = {
+            "op": "filter_rows",
+            "column": "Region",
+            "operator": "equals",
+            "value": "East",
+        }
+        value_filter = {
+            "op": "filter_rows_advanced",
+            "clauses": [
+                {
+                    "column": "Region",
+                    "operator": "equals",
+                    "value": "East",
+                    "join": "and",
+                },
+                {
+                    "column": "Region",
+                    "operator": "equals",
+                    "value": "West",
+                    "join": "or",
+                },
+            ],
+        }
+        cases = [
+            ("empty pipeline", [], -1, []),
+            (
+                "existing pipeline without a selected step",
+                [base_step],
+                -1,
+                [{"name": "East only", "description": "Keep East."}],
+            ),
+            (
+                "final step selected",
+                [base_step],
+                0,
+                [{"name": "East only", "description": "Keep East."}],
+            ),
+        ]
+
+        for label, base_steps, selected_row, base_metadata in cases:
+            with self.subTest(label=label):
+                dialog = TransformDataDialog(
+                    self.source, steps=base_steps, query_name="Sales"
+                )
+                dialog._step_metadata = deepcopy(base_metadata)
+                dialog._render_steps()
+                if selected_row >= 0:
+                    dialog.step_list.setCurrentRow(selected_row)
+                else:
+                    dialog.step_list.setCurrentRow(-1)
+
+                self.assertTrue(
+                    dialog._add_filter_by_selected_values(
+                        "Region", ["East", "West"]
+                    )
+                )
+                expected_steps = [*base_steps, value_filter]
+                self.assertEqual(dialog._steps, expected_steps)
+                self.assertEqual(
+                    dialog._step_metadata, [*base_metadata, {}]
+                )
+                self.assertEqual(
+                    dialog.step_list.currentRow(), len(expected_steps) - 1
+                )
+                script = steps_to_m_script(expected_steps, "Sales")
+                self.assertEqual(parse_m_script(script, "Sales"), expected_steps)
+                dialog.deleteLater()
+
+    def test_ribbon_sort_applies_to_selected_preview_column_and_prompts_without_selection(self) -> None:
+        source = ImportCandidate(
+            "inline", ["Name"], [{"Name": "a"}, {"Name": "b"}], {}, []
+        )
+        dialog = TransformDataDialog(source)
+        dialog.preview.setCurrentIndex(dialog.preview.model().index(0, 0))
+        dialog.ribbon_tabs.setCurrentIndex(0)
+        descending = dialog.findChild(QToolButton, "powerQuerySortDescendingButton")
+
+        self.assertIsNotNone(descending)
+        descending.click()
+
+        self.assertEqual(
+            dialog._steps,
+            [{"op": "sort_rows", "column": "Name", "direction": "desc"}],
+        )
+        self.assertEqual(
+            [row["Name"] for row in dialog._preview_candidate.rows], ["b", "a"]
+        )
+        self.assertTrue(dialog.operation_settings_panel.isHidden())
+        dialog.deleteLater()
+
+        dialog = TransformDataDialog(source)
+        dialog.ribbon_tabs.setCurrentIndex(0)
+        ascending = dialog.findChild(QToolButton, "powerQuerySortAscendingButton")
+        self.assertIsNotNone(ascending)
+        ascending.click()
+        self.assertEqual(dialog._steps, [])
+        self.assertEqual(dialog.operation_combo.currentData(), "sort_rows")
+        self.assertEqual(dialog.option_combo.currentData(), "asc")
+        self.assertFalse(dialog.operation_settings_panel.isHidden())
         dialog.deleteLater()
 
     def test_type_preview_keeps_cell_errors_and_remove_errors_clears_rows(self) -> None:

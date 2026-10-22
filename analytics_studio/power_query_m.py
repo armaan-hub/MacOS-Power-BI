@@ -130,6 +130,7 @@ def parse_m_query_script(
     functions_by_name = {item["name"]: item for item in known_functions}
     function_names = set(functions_by_name)
     declared_functions: set[str] = set()
+    sparse_boundary_helper: str | None = None
     table_step_seen = False
     seen_names: set[str] = set()
     previous_name = ""
@@ -169,13 +170,38 @@ def parse_m_query_script(
                 )
             declared_functions.add(name)
             continue
+        if not table_step_seen and _is_sparse_boundary_helper_definition(rhs):
+            if sparse_boundary_helper is not None:
+                raise PowerQueryMScriptError(
+                    "Only one canonical sparse-boundary helper binding is supported."
+                )
+            if not _IDENTIFIER.fullmatch(name):
+                raise PowerQueryMScriptError(
+                    "The sparse-boundary helper must use a simple M identifier."
+                )
+            reserved_helper_names = {
+                "source",
+                *(parameter.casefold() for parameter in known_parameters),
+                *(function_name.casefold() for function_name in functions_by_name),
+            }
+            if name.casefold() in reserved_helper_names:
+                raise PowerQueryMScriptError(
+                    f"Sparse-boundary helper name {name!r} conflicts with a query binding."
+                )
+            sparse_boundary_helper = name
+            parsed_steps.append({"op": "m_sparse_boundary_helper", "name": name})
+            continue
         if "=>" in rhs:
             raise PowerQueryMScriptError(
                 f"Function binding {name!r} is not present in the staged project registry."
             )
         table_step_seen = True
         input_types = _m_column_types_after_steps(
-            parsed_steps, initial_column_types
+            [
+                step for step in parsed_steps
+                if step["op"] != "m_sparse_boundary_helper"
+            ],
+            initial_column_types,
         )
         parsed_steps.extend(
             _parse_table_call(
@@ -184,6 +210,7 @@ def parse_m_query_script(
                 input_types,
                 parameter_names=known_parameters,
                 query_functions=known_functions,
+                sparse_boundary_helper=sparse_boundary_helper,
             )
         )
         previous_name = name
@@ -214,6 +241,13 @@ def parse_m_query_script(
                 "Remove unused Power Query function binding(s): "
                 + ", ".join(sorted(unused_bindings))
                 + "."
+            )
+        if sparse_boundary_helper is not None and not any(
+            step["op"] in {"remove_sparse_top_rows", "remove_sparse_bottom_rows"}
+            for step in validated_steps
+        ):
+            raise PowerQueryMScriptError(
+                f"Remove unused sparse-boundary helper binding {sparse_boundary_helper!r}."
             )
         for step in validated_steps:
             if step["op"] == "add_custom_column":
@@ -256,6 +290,10 @@ def steps_to_m_script(
         initial_column_types=initial_column_types,
     )
     used_functions = function_references(validated, known_functions)
+    uses_sparse_boundary = any(
+        step["op"] in {"remove_sparse_top_rows", "remove_sparse_bottom_rows"}
+        for step in validated
+    )
     functions_by_name = {item["name"]: item for item in known_functions}
     missing_functions = used_functions - functions_by_name.keys()
     if missing_functions:
@@ -275,14 +313,47 @@ def steps_to_m_script(
     for function in known_functions:
         if function["name"] in used_functions:
             bindings.append(f"    {function['name']} = {query_function_to_m(function)}")
+    helper_steps = [
+        step for step in validated if step["op"] == "m_sparse_boundary_helper"
+    ]
+    reserved_names = {
+        "source",
+        *(name.casefold() for name in functions_by_name),
+        *(name.casefold() for name in (parameter_names or set())),
+    }
+    sparse_boundary_helper_name = (
+        helper_steps[0]["name"] if helper_steps else "FilterNullAndWhitespace"
+    )
+    if sparse_boundary_helper_name.casefold() in reserved_names:
+        base_name = sparse_boundary_helper_name
+        suffix = 2
+        while sparse_boundary_helper_name.casefold() in reserved_names:
+            sparse_boundary_helper_name = f"{base_name}{suffix}"
+            suffix += 1
+    if uses_sparse_boundary:
+        bindings.append(
+            f"    {sparse_boundary_helper_name} = "
+            + _sparse_boundary_helper_definition()
+        )
     previous = "Source"
-    for index, step in enumerate(validated, 1):
-        step_name = f"Step {index}"
+    table_step_number = 0
+    for index, step in enumerate(validated):
+        if step["op"] == "m_sparse_boundary_helper":
+            continue
+        table_step_number += 1
+        step_name = f"Step {table_step_number}"
         binding = _m_quoted_name(step_name)
         input_types = _m_column_types_after_steps(
-            validated[:index - 1], initial_column_types
+            [
+                previous_step for previous_step in validated[:index]
+                if previous_step["op"] != "m_sparse_boundary_helper"
+            ],
+            initial_column_types,
         )
-        call = _step_to_m_call(previous, step, input_types)
+        call = _step_to_m_call(
+            previous, step, input_types,
+            sparse_boundary_helper_name=sparse_boundary_helper_name,
+        )
         bindings.append(f"    {binding} = {call}")
         previous = binding
     return "let\n" + ",\n".join(bindings) + f"\nin\n    {previous}"
@@ -298,8 +369,29 @@ def step_expression_to_m(
     initial_column_types: dict[str, str] | None = None,
 ) -> str:
     """Return one generated table expression without assuming it fits on one line."""
+    validated = validate_steps(
+        steps, allow_unused_sparse_boundary_helper=True
+    )
+    if not 0 <= index < len(validated):
+        raise PowerQueryMScriptError("The selected step has no generated M binding.")
+    selected = validated[index]
+    if selected["op"] == "m_sparse_boundary_helper":
+        prefix = validated
+    else:
+        prefix = validated[: index + 1]
+        if (
+            any(step["op"] == "m_sparse_boundary_helper" for step in prefix)
+            and not any(
+                step["op"] in {"remove_sparse_top_rows", "remove_sparse_bottom_rows"}
+                for step in prefix
+            )
+        ):
+            prefix = [
+                step for step in prefix
+                if step["op"] != "m_sparse_boundary_helper"
+            ]
     script = steps_to_m_script(
-        steps[: index + 1], query_name,
+        prefix, query_name,
         parameter_names=parameter_names,
         query_functions=query_functions,
         initial_column_types=initial_column_types,
@@ -307,9 +399,21 @@ def step_expression_to_m(
     bindings, _output_name = _generated_bindings(script)
     from analytics_studio.query_functions import function_references
     used_function_count = len(
-        function_references(steps[:index + 1], query_functions or [])
+        function_references(prefix, query_functions or [])
     )
-    binding_index = index + 1 + used_function_count
+    if selected["op"] == "m_sparse_boundary_helper":
+        binding_index = 1 + used_function_count
+    else:
+        actual_steps_before = sum(
+            step["op"] != "m_sparse_boundary_helper" for step in prefix[:-1]
+        )
+        helper_binding_count = int(any(
+            step["op"] in {"remove_sparse_top_rows", "remove_sparse_bottom_rows"}
+            for step in prefix
+        ))
+        binding_index = (
+            1 + used_function_count + helper_binding_count + actual_steps_before
+        )
     if not 0 <= binding_index < len(bindings):
         raise PowerQueryMScriptError("The selected step has no generated M binding.")
     binding = bindings[binding_index]
@@ -330,8 +434,38 @@ def replace_step_expression_in_m(
     initial_column_types: dict[str, str] | None = None,
 ) -> str:
     """Render a generated query with one selected step expression replaced."""
+    validated = validate_steps(
+        steps, allow_unused_sparse_boundary_helper=True
+    )
+    if not 0 <= index < len(validated):
+        raise PowerQueryMScriptError("The selected step has no generated M binding.")
+    selected = validated[index]
+    if selected["op"] == "m_sparse_boundary_helper":
+        if _compact_m_whitespace(expression) != _compact_m_whitespace(
+            _sparse_boundary_helper_definition()
+        ):
+            raise PowerQueryMScriptError(
+                "The captured sparse-boundary helper has a fixed supported definition."
+            )
+        return steps_to_m_script(
+            validated, query_name,
+            parameter_names=parameter_names,
+            query_functions=query_functions,
+            initial_column_types=initial_column_types,
+        )
+    prefix = validated[: index + 1]
+    if (
+        any(step["op"] == "m_sparse_boundary_helper" for step in prefix)
+        and not any(
+            step["op"] in {"remove_sparse_top_rows", "remove_sparse_bottom_rows"}
+            for step in prefix
+        )
+    ):
+        prefix = [
+            step for step in prefix if step["op"] != "m_sparse_boundary_helper"
+        ]
     script = steps_to_m_script(
-        steps[: index + 1], query_name,
+        prefix, query_name,
         parameter_names=parameter_names,
         query_functions=query_functions,
         initial_column_types=initial_column_types,
@@ -339,9 +473,16 @@ def replace_step_expression_in_m(
     bindings, output_name = _generated_bindings(script)
     from analytics_studio.query_functions import function_references
     used_function_count = len(
-        function_references(steps[:index + 1], query_functions or [])
+        function_references(prefix, query_functions or [])
     )
-    binding_index = index + 1 + used_function_count
+    actual_steps_before = sum(
+        step["op"] != "m_sparse_boundary_helper" for step in prefix[:-1]
+    )
+    helper_binding_count = int(any(
+        step["op"] in {"remove_sparse_top_rows", "remove_sparse_bottom_rows"}
+        for step in prefix
+    ))
+    binding_index = 1 + used_function_count + helper_binding_count + actual_steps_before
     if not 0 <= binding_index < len(bindings):
         raise PowerQueryMScriptError("The selected step has no generated M binding.")
     binding = bindings[binding_index]
@@ -350,11 +491,51 @@ def replace_step_expression_in_m(
         raise PowerQueryMScriptError("The selected M binding has no expression.")
     name = binding[:equals_at].strip()
     bindings[binding_index] = f"{name} = {expression.strip()}"
-    return (
+    edited_script = (
         "let\n"
         + ",\n".join(f"    {item.strip()}" for item in bindings)
         + f"\nin\n    {output_name}"
     )
+    helper_definition = _compact_m_whitespace(
+        _sparse_boundary_helper_definition()
+    )
+    helper_binding_index: int | None = None
+    for candidate_index, candidate in enumerate(bindings):
+        candidate_equals = _find_top_level_character(candidate, "=")
+        if (
+            candidate_equals >= 0
+            and _compact_m_whitespace(candidate[candidate_equals + 1:])
+            == helper_definition
+        ):
+            helper_binding_index = candidate_index
+            break
+    if helper_binding_index is not None:
+        without_helper = [
+            candidate
+            for candidate_index, candidate in enumerate(bindings)
+            if candidate_index != helper_binding_index
+        ]
+        helper_free_script = (
+            "let\n"
+            + ",\n".join(f"    {item.strip()}" for item in without_helper)
+            + f"\nin\n    {output_name}"
+        )
+        try:
+            parsed_without_helper = parse_m_script(
+                helper_free_script, query_name,
+                parameter_names=parameter_names,
+                query_functions=query_functions,
+                initial_column_types=initial_column_types,
+            )
+        except PowerQueryMScriptError:
+            pass
+        else:
+            if not any(
+                step["op"] == "m_sparse_boundary_helper"
+                for step in parsed_without_helper
+            ):
+                return helper_free_script
+    return edited_script
 
 
 def _generated_bindings(script: str) -> tuple[list[str], str]:
@@ -386,6 +567,8 @@ def m_compatibility_issues(
     query_name = "__PowerQueryMCompatibilityProbe__"
 
     for index, step in enumerate(validated, 1):
+        if step["op"] == "m_sparse_boundary_helper":
+            continue
         try:
             # Conditional comparisons need the type conversions that precede
             # them in order to retain the M value type in the generated script.
@@ -458,6 +641,8 @@ def _canonical_m_steps(steps: list[dict[str, Any]]) -> list[dict[str, Any]]:
     """Normalize known local aliases that have equivalent M representations."""
     canonical: list[dict[str, Any]] = []
     for source in validate_steps(steps):
+        if source["op"] == "m_sparse_boundary_helper":
+            continue
         step = dict(source)
         if step["op"] == "sort_rows":
             direction = {"asc": "asc", "desc": "desc"}[step["direction"]]
@@ -467,6 +652,8 @@ def _canonical_m_steps(steps: list[dict[str, Any]]) -> list[dict[str, Any]]:
             }
         elif step["op"] == "convert_type":
             step["type"] = canonical_column_type(step["type"])
+        elif step["op"] == "promote_headers":
+            step.setdefault("promote_all_scalars", True)
         elif step["op"] == "add_custom_column":
             step["expression"] = _unwrap_text_from(step["expression"])
         elif step["op"] == "filter_rows_advanced" and len(step["clauses"]) == 1:
@@ -830,6 +1017,7 @@ def _parse_table_call(
     *,
     parameter_names: set[str] | None = None,
     query_functions: list[dict[str, Any]] | None = None,
+    sparse_boundary_helper: str | None = None,
 ) -> list[dict[str, Any]]:
     if rhs.strip().casefold().startswith("let"):
         return [_parse_keep_duplicates_m_expression(rhs, previous_name)]
@@ -838,6 +1026,16 @@ def _parse_table_call(
         raise PowerQueryMScriptError("Each applied step must call a supported Table.* function.")
     function = match.group(1)
     arguments = _split_top_level(match.group(2), ",")
+    if function == "Table.FromValue":
+        expected = (
+            f"Table.FromValue(Table.RowCount({previous_name}), "
+            f"[DefaultColumnName = {_m_string('Count')}])"
+        )
+        if _compact_m_whitespace(rhs) != _compact_m_whitespace(expected):
+            raise PowerQueryMScriptError(
+                "Table.FromValue is supported here only for the local Count Rows result table."
+            )
+        return [{"op": "count_rows"}]
     if function == "Table.ExpandListColumn":
         _expect_count(function, arguments, 2)
         column = _parse_string(arguments[1])
@@ -1023,11 +1221,27 @@ def _parse_table_call(
         return [{"op": "keep_top_rows", "count": _parse_nonnegative_integer(args[0])}]
     if function == "Table.Skip":
         _expect_count(function, args, 1)
+        if sparse_boundary_helper and _is_sparse_boundary_predicate(
+            args[0], sparse_boundary_helper
+        ):
+            return [{"op": "remove_sparse_top_rows"}]
+        if _looks_like_sparse_boundary_predicate(args[0]):
+            raise PowerQueryMScriptError(
+                "This Table.Skip predicate is outside the captured local M subset."
+            )
         return [{"op": "remove_top_rows", "count": _parse_nonnegative_integer(args[0])}]
     if function == "Table.RemoveLastN":
         if len(args) > 1:
             raise PowerQueryMScriptError(
-                "The local row-removal step supports a numeric Table.RemoveLastN count only."
+                "Table.RemoveLastN supports a numeric count or the captured sparse-boundary predicate."
+            )
+        if args and sparse_boundary_helper and _is_sparse_boundary_predicate(
+            args[0], sparse_boundary_helper
+        ):
+            return [{"op": "remove_sparse_bottom_rows"}]
+        if args and _looks_like_sparse_boundary_predicate(args[0]):
+            raise PowerQueryMScriptError(
+                "This Table.RemoveLastN predicate is outside the captured local M subset."
             )
         return [{
             "op": "remove_bottom_rows",
@@ -1101,8 +1315,14 @@ def _parse_table_call(
         _expect_count(function, args, 1)
         return [{"op": "reorder_columns", "columns": _parse_string_list(args[0])}]
     if function == "Table.PromoteHeaders":
-        _expect_count(function, args, 0)
-        return [{"op": "promote_headers"}]
+        if args and not (
+            len(args) == 1
+            and _compact_m_whitespace(args[0]) == "[PromoteAllScalars=true]"
+        ):
+            raise PowerQueryMScriptError(
+                "Table.PromoteHeaders supports no options or only [PromoteAllScalars=true]."
+            )
+        return [{"op": "promote_headers", "promote_all_scalars": bool(args)}]
     if function == "Table.DemoteHeaders":
         _expect_count(function, args, 0)
         return [{"op": "demote_headers"}]
@@ -1818,8 +2038,15 @@ def _step_to_m_call(
     previous: str,
     step: dict[str, Any],
     input_column_types: dict[str, str] | None = None,
+    *,
+    sparse_boundary_helper_name: str = "FilterNullAndWhitespace",
 ) -> str:
     op = step["op"]
+    if op == "count_rows":
+        return (
+            f"Table.FromValue(Table.RowCount({previous}), "
+            f"[DefaultColumnName = {_m_string('Count')}])"
+        )
     if op == "remove_blank_rows":
         return (
             f'Table.SelectRows({previous}, each not List.IsEmpty('
@@ -1900,6 +2127,12 @@ def _step_to_m_call(
         return f"Table.Skip({previous}, {step['count']})"
     if op == "remove_bottom_rows":
         return f"Table.RemoveLastN({previous}, {step['count']})"
+    if op == "remove_sparse_top_rows":
+        predicate = _sparse_boundary_predicate(sparse_boundary_helper_name)
+        return f"Table.Skip({previous}, {predicate})"
+    if op == "remove_sparse_bottom_rows":
+        predicate = _sparse_boundary_predicate(sparse_boundary_helper_name)
+        return f"Table.RemoveLastN({previous}, {predicate})"
     if op == "keep_bottom_rows":
         return f"Table.LastN({previous}, {step['count']})"
     if op == "keep_range_rows":
@@ -2034,6 +2267,8 @@ def _step_to_m_call(
     if op == "reorder_columns":
         return f"Table.ReorderColumns({previous}, {_m_string_list(step['columns'])})"
     if op == "promote_headers":
+        if step.get("promote_all_scalars", True):
+            return f"Table.PromoteHeaders({previous}, [PromoteAllScalars=true])"
         return f"Table.PromoteHeaders({previous})"
     if op == "demote_headers":
         return f"Table.DemoteHeaders({previous})"
@@ -2473,6 +2708,7 @@ def _validate_m_text_inputs(
     safe_after_transpose = {
         "keep_columns", "remove_column", "rename_column", "reorder_columns",
         "keep_top_rows", "remove_top_rows", "keep_bottom_rows", "remove_bottom_rows",
+        "remove_sparse_top_rows", "remove_sparse_bottom_rows",
         "keep_range_rows", "remove_alternate_rows", "add_index_column", "remove_blank_rows",
         "remove_rows_with_errors",
     }
@@ -2967,6 +3203,41 @@ def _compact_m_whitespace(value: str) -> str:
             compact.append(character)
         index += 1
     return "".join(compact)
+
+
+def _sparse_boundary_helper_definition() -> str:
+    return (
+        'each List.Select(_, each _ <> null and '
+        '(not (_ is text) or Text.Trim(_) <> ""))'
+    )
+
+
+def _sparse_boundary_predicate(helper_name: str) -> str:
+    return (
+        f"each try List.IsEmpty(List.Skip({helper_name}"
+        "(Record.FieldValues(_)), 1)) otherwise false"
+    )
+
+
+def _is_sparse_boundary_helper_definition(expression: str) -> bool:
+    return _compact_m_whitespace(expression) == _compact_m_whitespace(
+        _sparse_boundary_helper_definition()
+    )
+
+
+def _is_sparse_boundary_predicate(expression: str, helper_name: str) -> bool:
+    return _compact_m_whitespace(expression) == _compact_m_whitespace(
+        _sparse_boundary_predicate(helper_name)
+    )
+
+
+def _looks_like_sparse_boundary_predicate(expression: str) -> bool:
+    compact = _compact_m_whitespace(expression)
+    return (
+        compact.startswith("eachtryList.IsEmpty(List.Skip(")
+        and "Record.FieldValues(_)" in compact
+        and "otherwise" in compact
+    )
 
 
 def _parse_type(value: str) -> str:

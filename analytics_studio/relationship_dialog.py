@@ -7,7 +7,9 @@ from typing import Any, Callable
 from uuid import uuid4
 
 from PySide6.QtCore import Qt
+from PySide6.QtGui import QAction, QActionGroup
 from PySide6.QtWidgets import (
+    QAbstractItemView,
     QCheckBox,
     QComboBox,
     QDialog,
@@ -17,12 +19,17 @@ from PySide6.QtWidgets import (
     QLabel,
     QListWidget,
     QListWidgetItem,
+    QMenu,
     QMessageBox,
     QPushButton,
+    QToolButton,
     QVBoxLayout,
 )
 
-from analytics_studio.relationships import RelationshipError, RELATIONSHIP_VERSION
+from analytics_studio.relationships import (
+    RelationshipError,
+    RELATIONSHIP_VERSION,
+)
 
 
 class RelationshipDialog(QDialog):
@@ -34,6 +41,8 @@ class RelationshipDialog(QDialog):
         relationships: list[dict[str, Any]],
         validate_candidate: Callable[[list[dict[str, Any]]], list[dict[str, Any]]],
         parent=None,
+        *,
+        detect_candidates: Callable[..., list[dict[str, Any]]] | None = None,
     ) -> None:
         super().__init__(parent)
         self.setWindowTitle("Manage relationships")
@@ -46,6 +55,7 @@ class RelationshipDialog(QDialog):
         self._table_by_id = {str(table["id"]): table for table in self._tables}
         self._relationships = deepcopy(relationships)
         self._validate_candidate = validate_candidate
+        self._detect_candidates = detect_candidates
         self._editing_index: int | None = None
         self._refreshing_list = False
 
@@ -67,17 +77,107 @@ class RelationshipDialog(QDialog):
 
         list_header = QHBoxLayout()
         list_header.addWidget(QLabel("Relationships"), 1)
+        self.filter_button = QToolButton()
+        self.filter_button.setText("Filter")
+        self.filter_button.setToolTip(
+            "Filter relationships by cardinality and cross-filter direction."
+        )
+        self.filter_button.setPopupMode(
+            QToolButton.ToolButtonPopupMode.InstantPopup
+        )
+        filter_menu = QMenu(self.filter_button)
+        cardinality_menu = filter_menu.addMenu("Cardinality")
+        self._cardinality_filter_actions: dict[str, QAction] = {}
+        for label, value in (
+            ("Many-to-one (*:1)", "many_to_one"),
+            ("One-to-one (1:1)", "one_to_one"),
+            ("One-to-many (1:*)", "one_to_many"),
+            ("Many-to-many (*:*)", "many_to_many"),
+        ):
+            action = cardinality_menu.addAction(label)
+            action.setCheckable(True)
+            action.toggled.connect(self._apply_relationship_filters)
+            self._cardinality_filter_actions[value] = action
+        direction_menu = filter_menu.addMenu("Cross-filter direction")
+        self._direction_filter_actions: dict[str, QAction] = {}
+        for label, value in (("Single", "single"), ("Both", "both")):
+            action = direction_menu.addAction(label)
+            action.setCheckable(True)
+            action.toggled.connect(self._apply_relationship_filters)
+            self._direction_filter_actions[value] = action
+        filter_menu.addSeparator()
+        clear_filters_action = filter_menu.addAction("Clear filters")
+        clear_filters_action.triggered.connect(self._clear_relationship_filters)
+        self.filter_button.setMenu(filter_menu)
+        list_header.addWidget(self.filter_button)
+        self.sort_button = QToolButton()
+        self._sort_field = "fromtablecolumn"
+        self._sort_order = "asc"
+        sort_menu = QMenu(self.sort_button)
+        sort_field_menu = sort_menu.addMenu("Sort by")
+        self._sort_field_group = QActionGroup(self)
+        self._sort_field_group.setExclusive(True)
+        self._sort_field_actions: dict[str, QAction] = {}
+        for label, value in (
+            ("From table/column", "fromtablecolumn"),
+            ("Relationship", "relationship"),
+            ("To table/column", "totablecolumn"),
+            ("Active state", "active"),
+        ):
+            action = sort_field_menu.addAction(label)
+            action.setCheckable(True)
+            action.setData(value)
+            self._sort_field_group.addAction(action)
+            self._sort_field_actions[value] = action
+        self._sort_field_actions[self._sort_field].setChecked(True)
+        order_menu = sort_menu.addMenu("Order")
+        self._sort_order_group = QActionGroup(self)
+        self._sort_order_group.setExclusive(True)
+        self._sort_order_actions: dict[str, QAction] = {}
+        for label, value in (("Ascending", "asc"), ("Descending", "desc")):
+            action = order_menu.addAction(label)
+            action.setCheckable(True)
+            action.setData(value)
+            self._sort_order_group.addAction(action)
+            self._sort_order_actions[value] = action
+        self._sort_order_actions[self._sort_order].setChecked(True)
+        self._sort_field_group.triggered.connect(self._sort_changed)
+        self._sort_order_group.triggered.connect(self._sort_changed)
+        self.sort_button.setMenu(sort_menu)
+        self._update_sort_button()
+        list_header.addWidget(self.sort_button)
+        self.detect_button = QToolButton()
+        self.detect_button.setText("Autodetect")
+        self.detect_button.setToolButtonStyle(Qt.ToolButtonStyle.ToolButtonTextOnly)
+        self.detect_button.setToolTip(
+            "Suggest relationships from column names, types, and loaded values. "
+            "Use the arrow to scope suggestions to selected tables."
+        )
+        self.detect_button.setPopupMode(
+            QToolButton.ToolButtonPopupMode.MenuButtonPopup
+        )
+        self.detect_button.clicked.connect(
+            lambda _checked=False: self._autodetect_relationships()
+        )
+        detect_menu = QMenu(self.detect_button)
+        choose_scope_action = detect_menu.addAction("Choose tables to connect…")
+        choose_scope_action.triggered.connect(self._choose_autodetect_scope)
+        self.detect_button.setMenu(detect_menu)
+        list_header.addWidget(self.detect_button)
         self.new_button = QPushButton("New relationship")
         self.new_button.clicked.connect(self._start_new)
         list_header.addWidget(self.new_button)
         self.delete_button = QPushButton("Delete")
         self.delete_button.setEnabled(False)
-        self.delete_button.clicked.connect(self._delete_selected)
+        self.delete_button.clicked.connect(self._confirm_delete_selected)
         list_header.addWidget(self.delete_button)
         layout.addLayout(list_header)
 
         self.relationship_list = QListWidget()
         self.relationship_list.setMinimumHeight(125)
+        self.relationship_list.setSelectionMode(
+            QAbstractItemView.SelectionMode.ExtendedSelection
+        )
         self.relationship_list.currentRowChanged.connect(self._select_relationship)
         layout.addWidget(self.relationship_list)
 
@@ -101,9 +201,9 @@ class RelationshipDialog(QDialog):
         self.to_column = QComboBox()
         self.cardinality = QComboBox()
         for label, value in (
-            ("One-to-many (1:*)", "one_to_many"),
             ("Many-to-one (*:1)", "many_to_one"),
             ("One-to-one (1:1)", "one_to_one"),
+            ("One-to-many (1:*)", "one_to_many"),
             ("Many-to-many (*:*)", "many_to_many"),
         ):
             self.cardinality.addItem(label, value)
@@ -156,18 +256,175 @@ class RelationshipDialog(QDialog):
     def relationships(self) -> list[dict[str, Any]]:
         return deepcopy(self._relationships) if self.result() == QDialog.DialogCode.Accepted else []
 
-    def _refresh_relationship_list(self, select_index: int | None = None) -> None:
+    def _refresh_relationship_list(
+        self,
+        select_index: int | None = None,
+        selected_indexes: set[int] | None = None,
+    ) -> None:
         self._refreshing_list = True
         self.relationship_list.clear()
-        for index, relationship in enumerate(self._relationships):
+        relationship_indexes = sorted(
+            range(len(self._relationships)),
+            key=lambda index: self._relationship_sort_value(
+                self._relationships[index]
+            ),
+            reverse=self._sort_order == "desc",
+        )
+        for index in relationship_indexes:
+            relationship = self._relationships[index]
             item = QListWidgetItem(self._relationship_label(relationship))
             item.setData(Qt.ItemDataRole.UserRole, index)
             self.relationship_list.addItem(item)
         self._refreshing_list = False
-        if select_index is not None and 0 <= select_index < len(self._relationships):
-            self.relationship_list.setCurrentRow(select_index)
-        elif not self._relationships:
+        self._apply_relationship_filters()
+        if selected_indexes:
+            for row in range(self.relationship_list.count()):
+                item = self.relationship_list.item(row)
+                if (
+                    not item.isHidden()
+                    and item.data(Qt.ItemDataRole.UserRole) in selected_indexes
+                ):
+                    item.setSelected(True)
+        target_row = next((
+            row
+            for row in range(self.relationship_list.count())
+            if self.relationship_list.item(row).data(Qt.ItemDataRole.UserRole)
+            == select_index
+            and not self.relationship_list.item(row).isHidden()
+        ), None)
+        if target_row is None and select_index is not None:
+            target_row = next((
+                row
+                for row in range(self.relationship_list.count())
+                if not self.relationship_list.item(row).isHidden()
+            ), None)
+        if target_row is not None:
+            self.relationship_list.setCurrentRow(target_row)
+        elif not self._relationships or not any(
+            not self.relationship_list.item(row).isHidden()
+            for row in range(self.relationship_list.count())
+        ):
             self.relationship_list.setCurrentRow(-1)
+            self._start_new(clear_selection=False)
+
+    def _relationship_sort_value(self, relationship: dict[str, Any]) -> str:
+        field = self._sort_field
+        if field == "fromtablecolumn":
+            return str(relationship.get("from_column") or "").lower()
+        if field == "relationship":
+            cardinality = {
+                "one_to_one": "OneToOne",
+                "many_to_one": "ManyToOne",
+                "one_to_many": "OneToMany",
+                "many_to_many": "ManyToMany",
+            }.get(str(relationship.get("cardinality", "")), "")
+            direction = {
+                "single": "OneDirection",
+                "both": "BothDirections",
+            }.get(str(relationship.get("cross_filter_direction", "")), "")
+            return cardinality + direction
+        if field == "totablecolumn":
+            return str(relationship.get("to_column") or "").lower()
+        if field == "active":
+            if "is_active" not in relationship:
+                return ""
+            return str(bool(relationship.get("is_active"))).lower()
+        return ""
+
+    def _update_sort_button(self) -> None:
+        label = self._sort_field_actions[self._sort_field].text()
+        direction = "ascending" if self._sort_order == "asc" else "descending"
+        arrow = "↑" if self._sort_order == "asc" else "↓"
+        self.sort_button.setText(f"Sort {arrow}")
+        self.sort_button.setToolTip(f"Sort by {label}, {direction}.")
+
+    def _sort_changed(self, *_args: Any) -> None:
+        field_action = self._sort_field_group.checkedAction()
+        order_action = self._sort_order_group.checkedAction()
+        if field_action is not None:
+            self._sort_field = str(field_action.data())
+        if order_action is not None:
+            self._sort_order = str(order_action.data())
+        current_index = self._relationship_index_at(
+            self.relationship_list.currentRow()
+        )
+        selected_indexes = set(self._selected_relationship_indexes())
+        self._update_sort_button()
+        self._refresh_relationship_list(
+            select_index=current_index,
+            selected_indexes=selected_indexes,
+        )
+
+    def _relationship_index_at(self, row: int) -> int | None:
+        item = self.relationship_list.item(row)
+        if item is None:
+            return None
+        index = item.data(Qt.ItemDataRole.UserRole)
+        if isinstance(index, int) and 0 <= index < len(self._relationships):
+            return index
+        return None
+
+    def _selected_relationship_indexes(self) -> list[int]:
+        indexes = set()
+        for item in self.relationship_list.selectedItems():
+            index = item.data(Qt.ItemDataRole.UserRole)
+            if isinstance(index, int) and 0 <= index < len(self._relationships):
+                indexes.add(index)
+        return sorted(indexes)
+
+    def _apply_relationship_filters(self, *_args: Any) -> None:
+        cardinalities = {
+            value
+            for value, action in self._cardinality_filter_actions.items()
+            if action.isChecked()
+        }
+        directions = {
+            value
+            for value, action in self._direction_filter_actions.items()
+            if action.isChecked()
+        }
+        visible_rows = []
+        for row in range(self.relationship_list.count()):
+            item = self.relationship_list.item(row)
+            relationship_index = item.data(Qt.ItemDataRole.UserRole)
+            if not isinstance(relationship_index, int):
+                continue
+            relationship = self._relationships[relationship_index]
+            matches_cardinality = (
+                not cardinalities or relationship.get("cardinality") in cardinalities
+            )
+            matches_direction = (
+                not directions
+                or relationship.get("cross_filter_direction") in directions
+            )
+            hidden = not (matches_cardinality and matches_direction)
+            item.setHidden(hidden)
+            if hidden:
+                item.setSelected(False)
+            else:
+                visible_rows.append(row)
+        active_filter_count = bool(cardinalities) + bool(directions)
+        self.filter_button.setText(
+            f"Filter ({active_filter_count})" if active_filter_count else "Filter"
+        )
+        current_row = self.relationship_list.currentRow()
+        if (
+            current_row >= 0
+            and self.relationship_list.item(current_row).isHidden()
+        ):
+            self.relationship_list.setCurrentRow(
+                visible_rows[0] if visible_rows else -1
+            )
+        if not visible_rows:
+            self.delete_button.setEnabled(False)
+
+    def _clear_relationship_filters(self, *_args: Any) -> None:
+        for action in (
+            *self._cardinality_filter_actions.values(),
+            *self._direction_filter_actions.values(),
+        ):
+            action.setChecked(False)
+        self._apply_relationship_filters()
 
     def _relationship_label(self, relationship: dict[str, Any]) -> str:
         if relationship.get("relationship_version") != RELATIONSHIP_VERSION:
@@ -191,14 +448,15 @@ class RelationshipDialog(QDialog):
     def _select_relationship(self, row: int) -> None:
         if self._refreshing_list:
             return
-        if row < 0 or row >= len(self._relationships):
+        relationship_index = self._relationship_index_at(row)
+        if relationship_index is None:
             self.delete_button.setEnabled(False)
             self._start_new(clear_selection=False)
             return
         self.delete_button.setEnabled(True)
-        relationship = self._relationships[row]
+        relationship = self._relationships[relationship_index]
         if relationship.get("relationship_version") != RELATIONSHIP_VERSION:
-            self._editing_index = row
+            self._editing_index = relationship_index
             self.legacy_note.setText(
                 "This project contains older display-only relationship metadata. "
                 "It cannot be converted automatically; delete it and create a new relationship."
@@ -207,7 +465,7 @@ class RelationshipDialog(QDialog):
             self._set_editable(False)
             return
         self.legacy_note.hide()
-        self._editing_index = row
+        self._editing_index = relationship_index
         self._set_table_selection(self.from_table, relationship.get("from_table_id"))
         self._set_table_selection(self.to_table, relationship.get("to_table_id"))
         self._populate_columns(self.from_table, self.from_column, relationship.get("from_column"))
@@ -217,6 +475,109 @@ class RelationshipDialog(QDialog):
         self.active_check.setChecked(bool(relationship.get("is_active", True)))
         self.apply_button.setText("Update relationship")
         self._set_editable(len(self._tables) > 1)
+
+    def _choose_autodetect_scope(self) -> None:
+        if self._detect_candidates is None or len(self._tables) < 2:
+            return
+        dialog = QDialog(self)
+        dialog.setWindowTitle("Choose tables to connect")
+        dialog.setMinimumWidth(380)
+        layout = QVBoxLayout(dialog)
+        note = QLabel(
+            "Select at least two tables. Suggestions may connect through other tables."
+        )
+        note.setWordWrap(True)
+        layout.addWidget(note)
+        table_list = QListWidget(dialog)
+        for table in self._tables:
+            table_id = str(table["id"])
+            display_name = str(table.get("displayName") or table.get("name") or table_id)
+            item = QListWidgetItem(display_name, table_list)
+            item.setFlags(
+                item.flags()
+                | Qt.ItemFlag.ItemIsEnabled
+                | Qt.ItemFlag.ItemIsUserCheckable
+            )
+            item.setCheckState(Qt.CheckState.Unchecked)
+            item.setData(Qt.ItemDataRole.UserRole, table_id)
+        layout.addWidget(table_list)
+        buttons = QDialogButtonBox(
+            QDialogButtonBox.StandardButton.Ok
+            | QDialogButtonBox.StandardButton.Cancel,
+            dialog,
+        )
+        accept_button = buttons.button(QDialogButtonBox.StandardButton.Ok)
+        accept_button.setEnabled(False)
+
+        def update_accept_state(*_args: Any) -> None:
+            selected_count = sum(
+                table_list.item(row).checkState() == Qt.CheckState.Checked
+                for row in range(table_list.count())
+            )
+            accept_button.setEnabled(selected_count >= 2)
+
+        table_list.itemChanged.connect(update_accept_state)
+        buttons.accepted.connect(dialog.accept)
+        buttons.rejected.connect(dialog.reject)
+        layout.addWidget(buttons)
+        if dialog.exec() != QDialog.DialogCode.Accepted:
+            return
+        target_tables = {
+            str(table_list.item(row).data(Qt.ItemDataRole.UserRole))
+            for row in range(table_list.count())
+            if table_list.item(row).checkState() == Qt.CheckState.Checked
+        }
+        if len(target_tables) >= 2:
+            self._autodetect_relationships(target_tables)
+
+    def _autodetect_relationships(
+        self, tables_to_be_connected: set[str] | None = None
+    ) -> None:
+        if self._detect_candidates is None:
+            return
+        try:
+            relationship_snapshot = deepcopy(self._relationships)
+            if tables_to_be_connected is None:
+                suggestions = self._detect_candidates(relationship_snapshot)
+            else:
+                suggestions = self._detect_candidates(
+                    relationship_snapshot, tables_to_be_connected
+                )
+        except RelationshipError as exc:
+            self.status_label.setText(f"Could not detect relationships: {exc}")
+            return
+        if not suggestions:
+            message = (
+                "No additional relationships were detected for the selected tables."
+                if tables_to_be_connected is not None
+                else "No additional relationships were detected."
+            )
+            QMessageBox.information(
+                self,
+                "Autodetect",
+                message,
+            )
+            self.status_label.setText(message)
+            return
+        if tables_to_be_connected is not None:
+            result_message = (
+                f"Detected {len(suggestions):,} proposed relationship(s) "
+                f"to connect {len(tables_to_be_connected):,} selected tables. "
+                "Review them, then select Save to keep them."
+            )
+        else:
+            result_message = (
+                f"Detected {len(suggestions):,} proposed relationship(s). "
+                "Review them, then select Save to keep them."
+            )
+        QMessageBox.information(
+            self,
+            "Autodetect",
+            result_message,
+        )
+        self._relationships.extend(deepcopy(suggestions))
+        self._refresh_relationship_list(len(self._relationships) - 1)
+        self.status_label.setText(result_message)
 
     def _start_new(self, *, clear_selection: bool = True) -> None:
         self._editing_index = None
@@ -241,14 +602,48 @@ class RelationshipDialog(QDialog):
             if len(self._tables) < 2 else "Choose related columns, cardinality, and filter direction."
         )
 
+    def _confirm_delete_selected(self) -> None:
+        indexes = self._selected_relationship_indexes()
+        if not indexes:
+            index = self._relationship_index_at(self.relationship_list.currentRow())
+            if index is not None:
+                indexes = [index]
+        if not indexes:
+            return
+        is_multiple = len(indexes) > 1
+        subject = (
+            f"Remove {len(indexes):,} selected relationships from the pending changes?"
+            if is_multiple
+            else "Remove this relationship from the pending changes?"
+        )
+        if not is_multiple:
+            label = self._relationship_label(self._relationships[indexes[0]])
+            subject += f"\n\n{label}"
+        result = QMessageBox.question(
+            self,
+            "Delete relationships" if is_multiple else "Delete relationship",
+            subject + "\n\nThe project changes when you select Save.",
+            QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
+            QMessageBox.StandardButton.No,
+        )
+        if result == QMessageBox.StandardButton.Yes:
+            self._delete_selected()
+
     def _delete_selected(self) -> None:
-        row = self.relationship_list.currentRow()
-        if 0 <= row < len(self._relationships):
-            self._relationships.pop(row)
-            next_row = min(row, len(self._relationships) - 1)
-            self._refresh_relationship_list(next_row if next_row >= 0 else None)
-            if next_row < 0:
-                self._start_new()
+        indexes = self._selected_relationship_indexes()
+        if not indexes:
+            index = self._relationship_index_at(self.relationship_list.currentRow())
+            if index is not None:
+                indexes = [index]
+        if not indexes:
+            return
+        first_index = min(indexes)
+        for index in reversed(indexes):
+            self._relationships.pop(index)
+        next_index = min(first_index, len(self._relationships) - 1)
+        self._refresh_relationship_list(next_index if next_index >= 0 else None)
+        if next_index < 0:
+            self._start_new()
 
     def _apply_form(self) -> None:
         from_table_id = self.from_table.currentData()
@@ -336,6 +731,9 @@ class RelationshipDialog(QDialog):
             self.apply_button,
         ):
             widget.setEnabled(enabled)
+        self.detect_button.setEnabled(
+            enabled and self._detect_candidates is not None
+        )
         self.new_button.setEnabled(len(self._tables) > 1)
 
     def _save(self) -> None:

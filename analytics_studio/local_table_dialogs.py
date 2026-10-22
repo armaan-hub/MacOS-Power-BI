@@ -2,17 +2,36 @@
 
 from __future__ import annotations
 
-from collections import Counter
 from copy import copy, deepcopy
 from datetime import date, datetime, time
 from decimal import Decimal
+from pathlib import Path
 from typing import Any, Callable
 from uuid import uuid4
 
-from PySide6.QtCore import QRegularExpression, QSignalBlocker, Qt
-from PySide6.QtGui import QIntValidator, QRegularExpressionValidator, QTextCursor
+from PySide6.QtCore import (
+    QEvent,
+    QPoint,
+    QRegularExpression,
+    QRect,
+    QSignalBlocker,
+    QSize,
+    Qt,
+    Signal,
+)
+from PySide6.QtGui import (
+    QColor,
+    QIntValidator,
+    QIcon,
+    QPalette,
+    QPainter,
+    QPen,
+    QRegularExpressionValidator,
+    QTextCursor,
+)
 from PySide6.QtWidgets import (
     QAbstractItemView,
+    QApplication,
     QCheckBox,
     QComboBox,
     QDialog,
@@ -21,6 +40,7 @@ from PySide6.QtWidgets import (
     QFrame,
     QGridLayout,
     QGroupBox,
+    QHeaderView,
     QHBoxLayout,
     QLabel,
     QLineEdit,
@@ -32,6 +52,8 @@ from PySide6.QtWidgets import (
     QPushButton,
     QPlainTextEdit,
     QScrollArea,
+    QSplitter,
+    QStyle,
     QTableView,
     QTableWidget,
     QTableWidgetItem,
@@ -44,7 +66,7 @@ from PySide6.QtWidgets import (
 from analytics_studio.dialog_theme import apply_light_dialog_theme
 from analytics_studio.file_import import MAX_DATA_ROWS, ImportCandidate, lineaged_row
 from analytics_studio.import_preview_dialog import ImportPreviewTableModel
-from analytics_studio.inline_data import parse_pasted_table
+from analytics_studio.inline_data import parse_pasted_table, source_from_candidate
 from analytics_studio.power_query_m import (
     PowerQueryMEditorDialog,
     PowerQueryMScriptError,
@@ -67,7 +89,6 @@ from analytics_studio.query_parameters import (
 )
 from analytics_studio.query_functions import (
     QUERY_FUNCTION_TYPES,
-    QueryEvaluationContext,
     QueryFunctionError,
     function_references,
     normalize_query_function,
@@ -96,6 +117,852 @@ from analytics_studio.transformations import (
     validate_applied_step_metadata,
     validate_steps,
 )
+
+
+_CUSTOM_COLUMN_FUNCTIONS: dict[str, tuple[str, str]] = {
+    "Text.From": ("Text.From(value)", "Text.From([Column])"),
+    "Text.Upper": ("Text.Upper(text)", "Text.Upper([Column])"),
+    "Text.Lower": ("Text.Lower(text)", "Text.Lower([Column])"),
+    "Text.Trim": ("Text.Trim(text)", "Text.Trim([Column])"),
+    "Text.Clean": ("Text.Clean(text)", "Text.Clean([Column])"),
+    "Text.Length": ("Text.Length(text)", "Text.Length([Column])"),
+    "Text.Contains": (
+        "Text.Contains(text, substring)", 'Text.Contains([Column], "value")',
+    ),
+    "Text.StartsWith": (
+        "Text.StartsWith(text, substring)", 'Text.StartsWith([Column], "value")',
+    ),
+    "Text.EndsWith": (
+        "Text.EndsWith(text, substring)", 'Text.EndsWith([Column], "value")',
+    ),
+    "Text.Replace": (
+        "Text.Replace(text, old, new)", 'Text.Replace([Column], "old", "new")',
+    ),
+    "Number.From": ("Number.From(value)", "Number.From([Column])"),
+    "Number.Abs": ("Number.Abs(number)", "Number.Abs([Column])"),
+    "Number.Round": ("Number.Round(number, digits)", "Number.Round([Column], 0)"),
+    "Date.From": ("Date.From(value)", "Date.From([Column])"),
+    "Date.Year": ("Date.Year(date)", "Date.Year([Column])"),
+    "Date.Month": ("Date.Month(date)", "Date.Month([Column])"),
+    "Date.Day": ("Date.Day(date)", "Date.Day([Column])"),
+}
+
+_MAX_PREVIEW_FILTER_VALUES = 2_000
+
+
+def _m_field_reference(name: str) -> str:
+    """Return the safe row-field syntax accepted by the local M subset."""
+    if "]" in name:
+        return '[#"' + name.replace('"', '""') + '"]'
+    return f"[{name}]"
+
+
+class CustomColumnDialog(QDialog):
+    """Formula-first editor for the supported row-scoped Power Query subset."""
+
+    def __init__(
+        self,
+        columns: list[str],
+        *,
+        initial_name: str = "",
+        initial_expression: str = "",
+        functions: list[dict[str, str]] | None = None,
+        parameters: list[dict[str, str]] | None = None,
+        validate_callback: Callable[[str, str], str | None] | None = None,
+        parent: QWidget | None = None,
+    ) -> None:
+        super().__init__(parent)
+        apply_light_dialog_theme(self)
+        self.setObjectName("powerQueryCustomColumnDialog")
+        self.setWindowTitle("Custom Column")
+        self.setMinimumSize(760, 500)
+        self.resize(920, 590)
+        self._columns = list(columns)
+        self._functions = [dict(item) for item in (functions or [])]
+        self._parameters = [dict(item) for item in (parameters or [])]
+        self._validate_callback = validate_callback
+        self._accepted_value: tuple[str, str] | None = None
+
+        layout = QVBoxLayout(self)
+        layout.setContentsMargins(18, 16, 18, 14)
+        layout.setSpacing(10)
+        title = QLabel("Add a custom column")
+        title.setObjectName("customColumnDialogTitle")
+        title.setStyleSheet("font-size: 18px; font-weight: 600; color: #273b49;")
+        layout.addWidget(title)
+        intro = QLabel(
+            "Name the new column and write a formula for each row of this query."
+        )
+        intro.setStyleSheet("color: #526477;")
+        layout.addWidget(intro)
+
+        name_row = QHBoxLayout()
+        name_row.addWidget(QLabel("New column name"))
+        self.name_edit = QLineEdit()
+        self.name_edit.setObjectName("customColumnNameEdit")
+        self.name_edit.setMaxLength(120)
+        self.name_edit.setPlaceholderText("Column name")
+        self.name_edit.setText(initial_name)
+        name_row.addWidget(self.name_edit, 1)
+        layout.addLayout(name_row)
+
+        editor_row = QHBoxLayout()
+        editor_row.setSpacing(12)
+        formula_panel = QWidget()
+        formula_layout = QVBoxLayout(formula_panel)
+        formula_layout.setContentsMargins(0, 0, 0, 0)
+        formula_layout.setSpacing(5)
+        formula_heading = QLabel("Custom column formula")
+        formula_heading.setStyleSheet("font-weight: 600; color: #344b5b;")
+        formula_layout.addWidget(formula_heading)
+        self.expression_edit = QPlainTextEdit()
+        self.expression_edit.setObjectName("customColumnFormulaEdit")
+        self.expression_edit.setPlaceholderText(
+            'if [Quantity] > 0 then Text.Clean([Name]) else "No quantity"'
+        )
+        self.expression_edit.setPlainText(initial_expression)
+        self.expression_edit.setMinimumHeight(150)
+        formula_layout.addWidget(self.expression_edit, 1)
+
+        parameter_row = QHBoxLayout()
+        self.parameter_combo = QComboBox()
+        self.parameter_combo.setObjectName("customColumnDialogParameterCombo")
+        self.parameter_combo.addItem("Insert saved parameter…", "")
+        for parameter in self._parameters:
+            self.parameter_combo.addItem(parameter["name"], parameter["name"])
+        self.insert_parameter_button = QPushButton("Insert parameter")
+        self.insert_parameter_button.setObjectName(
+            "customColumnDialogInsertParameterButton"
+        )
+        self.insert_parameter_button.setEnabled(bool(self._parameters))
+        self.insert_parameter_button.clicked.connect(self._insert_parameter)
+        parameter_row.addWidget(self.parameter_combo, 1)
+        parameter_row.addWidget(self.insert_parameter_button)
+        formula_layout.addLayout(parameter_row)
+
+        self.syntax_help_label = QLabel()
+        self.syntax_help_label.setObjectName("customColumnSyntaxHelp")
+        self.syntax_help_label.setWordWrap(True)
+        self.syntax_help_label.setMinimumHeight(38)
+        self.syntax_help_label.setStyleSheet(
+            "padding: 7px; background: #f4f7f9; border: 1px solid #dbe3e8; "
+            "border-radius: 4px; color: #425768;"
+        )
+        formula_layout.addWidget(self.syntax_help_label)
+        editor_row.addWidget(formula_panel, 1)
+
+        reference_panel = QWidget()
+        reference_panel.setObjectName("customColumnReferencePanel")
+        reference_panel.setMinimumWidth(235)
+        reference_panel.setMaximumWidth(300)
+        reference_layout = QVBoxLayout(reference_panel)
+        reference_layout.setContentsMargins(0, 0, 0, 0)
+        reference_layout.setSpacing(5)
+        columns_heading = QLabel("Available columns")
+        columns_heading.setStyleSheet("font-weight: 600; color: #344b5b;")
+        reference_layout.addWidget(columns_heading)
+        self.column_list = QListWidget()
+        self.column_list.setObjectName("customColumnAvailableColumns")
+        self.column_list.setSelectionMode(QAbstractItemView.SelectionMode.SingleSelection)
+        for column in self._columns:
+            item = QListWidgetItem(column)
+            item.setData(Qt.ItemDataRole.UserRole, column)
+            item.setToolTip("Double-click to insert this column into the formula.")
+            self.column_list.addItem(item)
+        self.column_list.itemDoubleClicked.connect(self._insert_selected_column)
+        reference_layout.addWidget(self.column_list, 1)
+        self.insert_column_button = QPushButton("Insert column")
+        self.insert_column_button.setObjectName("customColumnInsertColumnButton")
+        self.insert_column_button.clicked.connect(self._insert_selected_column)
+        reference_layout.addWidget(self.insert_column_button)
+
+        function_heading = QLabel("Supported functions")
+        function_heading.setStyleSheet("font-weight: 600; color: #344b5b;")
+        reference_layout.addWidget(function_heading)
+        self.function_list = QListWidget()
+        self.function_list.setObjectName("customColumnSupportedFunctions")
+        self.function_list.setMaximumHeight(132)
+        for function, (syntax, insertion) in _CUSTOM_COLUMN_FUNCTIONS.items():
+            item = QListWidgetItem(function)
+            item.setData(Qt.ItemDataRole.UserRole, (function, syntax, insertion))
+            self.function_list.addItem(item)
+        for function in self._functions:
+            syntax = f"{function['name']}({function['parameter']})"
+            insertion = f"{function['name']}([Column])"
+            item = QListWidgetItem(function["name"])
+            item.setData(
+                Qt.ItemDataRole.UserRole,
+                (function["name"], syntax, insertion),
+            )
+            item.setToolTip(
+                f"Saved scalar function · {function['parameter_type'].replace('_', ' ')} "
+                f"→ {function['return_type'].replace('_', ' ')}"
+            )
+            self.function_list.addItem(item)
+        self.function_list.currentItemChanged.connect(self._show_function_help)
+        self.function_list.itemDoubleClicked.connect(self._insert_selected_function)
+        reference_layout.addWidget(self.function_list)
+        self.function_help_label = QLabel(
+            "Choose a function to see its local syntax, then insert it at the caret."
+        )
+        self.function_help_label.setObjectName("customColumnFunctionHelp")
+        self.function_help_label.setWordWrap(True)
+        self.function_help_label.setMinimumHeight(42)
+        self.function_help_label.setStyleSheet("color: #526477;")
+        reference_layout.addWidget(self.function_help_label)
+        self.insert_function_button = QPushButton("Insert function")
+        self.insert_function_button.setObjectName(
+            "customColumnInsertFunctionButton"
+        )
+        self.insert_function_button.clicked.connect(self._insert_selected_function)
+        reference_layout.addWidget(self.insert_function_button)
+        editor_row.addWidget(reference_panel)
+        layout.addLayout(editor_row, 1)
+
+        self.error_label = QLabel()
+        self.error_label.setObjectName("customColumnDialogError")
+        self.error_label.setWordWrap(True)
+        self.error_label.setStyleSheet("color: #a4262c;")
+        self.error_label.setVisible(False)
+        layout.addWidget(self.error_label)
+        self.buttons = QDialogButtonBox(
+            QDialogButtonBox.StandardButton.Cancel
+            | QDialogButtonBox.StandardButton.Ok,
+            parent=self,
+        )
+        self.save_button = self.buttons.button(QDialogButtonBox.StandardButton.Ok)
+        self.save_button.setText("Add column" if not initial_name else "Save column")
+        self.buttons.accepted.connect(self._accept_column)
+        self.buttons.rejected.connect(self.reject)
+        layout.addWidget(self.buttons)
+
+        self.expression_edit.textChanged.connect(self._update_syntax_help)
+        self.name_edit.textChanged.connect(self._refresh_save_state)
+        self._update_syntax_help()
+        self._refresh_save_state()
+
+    @property
+    def column(self) -> tuple[str, str] | None:
+        return self._accepted_value
+
+    def _insert_selected_column(self, *_args: object) -> None:
+        item = self.column_list.currentItem()
+        if item is None:
+            return
+        self._insert_formula_text(_m_field_reference(str(item.data(Qt.ItemDataRole.UserRole))))
+
+    def _insert_selected_function(self, *_args: object) -> None:
+        item = self.function_list.currentItem()
+        if item is None:
+            return
+        _function, _syntax, insertion = item.data(Qt.ItemDataRole.UserRole)
+        self._insert_formula_text(str(insertion))
+
+    def _insert_parameter(self) -> None:
+        name = str(self.parameter_combo.currentData() or "")
+        if name:
+            self._insert_formula_text(name)
+
+    def _insert_formula_text(self, text: str) -> None:
+        cursor = self.expression_edit.textCursor()
+        start = cursor.selectionStart() if cursor.hasSelection() else cursor.position()
+        cursor.insertText(text)
+        open_paren = text.find("(")
+        if open_paren >= 0:
+            placeholder_start = open_paren + 1
+            while placeholder_start < len(text) and text[placeholder_start].isspace():
+                placeholder_start += 1
+            placeholder_end = placeholder_start
+            while placeholder_end < len(text) and text[placeholder_end] not in ",)":
+                placeholder_end += 1
+            if placeholder_end > placeholder_start:
+                cursor.setPosition(start + placeholder_start)
+                cursor.setPosition(
+                    start + placeholder_end,
+                    QTextCursor.MoveMode.KeepAnchor,
+                )
+        self.expression_edit.setTextCursor(cursor)
+        self.expression_edit.setFocus()
+
+    def _show_function_help(self, current: QListWidgetItem | None, *_args: object) -> None:
+        if current is None:
+            self.function_help_label.setText(
+                "Choose a function to see its local syntax, then insert it at the caret."
+            )
+            return
+        function, syntax, _insertion = current.data(Qt.ItemDataRole.UserRole)
+        self.function_help_label.setText(
+            f"<code>{function}</code> · syntax: <code>{syntax}</code> · "
+            "Only the displayed local form is supported."
+        )
+
+    def _update_syntax_help(self) -> None:
+        formula = self.expression_edit.toPlainText().strip()
+        lowered = formula.casefold()
+        if lowered.startswith("if") and "then" not in lowered:
+            text = (
+                "Condition: compare fields, literals, and values with and/or/not. "
+                "After the condition, add <code>then</code> and the true result, "
+                "then <code>else</code> and the fallback."
+            )
+        elif lowered.startswith("if") and "else" not in lowered:
+            text = (
+                "The true-result expression comes after <code>then</code>. "
+                "Add <code>else</code> followed by the result for a false condition."
+            )
+        elif lowered.startswith("if"):
+            text = (
+                "Conditional form: <code>if condition then value_if_true "
+                "else value_if_false</code>. Nest another if/then/else for more branches."
+            )
+        else:
+            text = (
+                "Use <code>if condition then value_if_true else value_if_false</code> "
+                "for conditional results. This editor supports a safe M subset; "
+                "it is not a full M runtime."
+            )
+        self.syntax_help_label.setText(text)
+
+    def _refresh_save_state(self, *_args: object) -> None:
+        self.save_button.setEnabled(
+            bool(self.name_edit.text().strip() and self.expression_edit.toPlainText().strip())
+        )
+
+    def _accept_column(self) -> None:
+        name = self.name_edit.text().strip()
+        expression = self.expression_edit.toPlainText().strip()
+        if not name or not expression:
+            self.error_label.setText("Enter a column name and formula.")
+            self.error_label.setVisible(True)
+            return
+        if self._validate_callback is not None:
+            error = self._validate_callback(name, expression)
+            if error:
+                self.error_label.setText(error)
+                self.error_label.setVisible(True)
+                return
+        self._accepted_value = (name, expression)
+        super().accept()
+
+
+class _PowerQueryProfileHeader(QHeaderView):
+    """Power Query style column names with quality and distribution summaries."""
+
+    filterRequested = Signal(int)
+
+    _HEADER_ROW_HEIGHT = 27
+    _FULL_HEIGHT = 148
+    _FILTER_BUTTON_SIZE = QSize(23, 21)
+
+    def __init__(self, parent: QWidget | None = None) -> None:
+        super().__init__(Qt.Orientation.Horizontal, parent)
+        self._profiles: list[dict[str, Any]] = []
+        self._filter_buttons: list[QToolButton] = []
+        self._updating_filter_buttons = False
+        self._show_quality = True
+        self._show_distribution = True
+        self.setSectionsClickable(True)
+        self.setHighlightSections(False)
+        self.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
+        self.setAccessibleName("Power Query preview column headers")
+        self.setAccessibleDescription(
+            "Use each column's sort and filter button, or click elsewhere in the "
+            "column header, to open its options."
+        )
+        self.setToolTip(
+            "Click a column header for sort and filter options. Filter by values "
+            "to keep selected values, or filter by condition."
+        )
+        self.setMinimumSectionSize(150)
+        self.setDefaultSectionSize(220)
+        self.setSectionResizeMode(QHeaderView.ResizeMode.Interactive)
+        self.setFixedHeight(self._FULL_HEIGHT)
+        self.sectionResized.connect(self._update_filter_buttons)
+        self.sectionMoved.connect(self._update_filter_buttons)
+        self.geometriesChanged.connect(self._update_filter_buttons)
+
+    def set_profiles(self, profiles: list[dict[str, Any]]) -> None:
+        self._profiles = list(profiles)
+        self.viewport().update()
+        self._update_filter_buttons()
+
+    def set_quality_visible(self, visible: bool) -> None:
+        self._show_quality = bool(visible)
+        self._update_header_height()
+
+    def set_distribution_visible(self, visible: bool) -> None:
+        self._show_distribution = bool(visible)
+        self._update_header_height()
+
+    def _update_header_height(self) -> None:
+        if self._show_quality and self._show_distribution:
+            height = self._FULL_HEIGHT
+        elif self._show_quality:
+            height = 78
+        elif self._show_distribution:
+            height = 106
+        else:
+            height = self._HEADER_ROW_HEIGHT
+        self.setFixedHeight(height)
+        self.viewport().update()
+        self._update_filter_buttons()
+
+    def _filter_button_rect(self, logical_index: int) -> QRect:
+        return QRect(
+            self.sectionViewportPosition(logical_index)
+            + self.sectionSize(logical_index)
+            - self._FILTER_BUTTON_SIZE.width()
+            - 6,
+            3,
+            self._FILTER_BUTTON_SIZE.width(),
+            self._FILTER_BUTTON_SIZE.height(),
+        )
+
+    def _new_filter_button(self) -> QToolButton:
+        button = QToolButton(self.viewport())
+        button.setObjectName(
+            f"powerQueryHeaderFilterButton{len(self._filter_buttons)}"
+        )
+        button.setArrowType(Qt.ArrowType.DownArrow)
+        button.setAutoRaise(False)
+        button.setToolButtonStyle(Qt.ToolButtonStyle.ToolButtonIconOnly)
+        button.setFixedSize(self._FILTER_BUTTON_SIZE)
+        button.setFocusPolicy(Qt.FocusPolicy.NoFocus)
+        button.setProperty("logicalIndex", -1)
+        button.setStyleSheet(
+            "QToolButton { padding: 0; margin: 0; border: 1px solid #aebbc4; "
+            "background: #ffffff; color: #526575; }"
+            "QToolButton[filterActive=\"true\"] { border-color: #77aa9c; "
+            "background: #e5f2ef; color: #107c71; }"
+            "QToolButton:focus { border: 2px solid #0078d4; }"
+        )
+        button.installEventFilter(self)
+        button.clicked.connect(self._filter_button_clicked)
+        self._filter_buttons.append(button)
+        return button
+
+    def _profile_name(self, logical_index: int) -> str:
+        if 0 <= logical_index < len(self._profiles):
+            name = self._profiles[logical_index].get("name")
+            if name is not None:
+                return str(name)
+        if self.model() is not None:
+            return str(
+                self.model().headerData(
+                    logical_index,
+                    Qt.Orientation.Horizontal,
+                    Qt.ItemDataRole.DisplayRole,
+                )
+                or f"Column {logical_index + 1}"
+            )
+        return f"Column {logical_index + 1}"
+
+    def _update_filter_buttons(self, *_args: Any) -> None:
+        if self._updating_filter_buttons:
+            return
+        self._updating_filter_buttons = True
+        try:
+            viewport_rect = self.viewport().rect()
+            visible_sections: list[tuple[int, QRect]] = []
+            for logical_index in range(self.count()):
+                if self.isSectionHidden(logical_index):
+                    continue
+                rect = self._filter_button_rect(logical_index)
+                if viewport_rect.contains(rect):
+                    visible_sections.append((logical_index, rect))
+
+            while len(self._filter_buttons) < len(visible_sections):
+                self._new_filter_button()
+
+            for slot, (logical_index, rect) in enumerate(visible_sections):
+                button = self._filter_buttons[slot]
+                if button.property("logicalIndex") != logical_index:
+                    if button.hasFocus():
+                        self.setFocus(Qt.FocusReason.OtherFocusReason)
+                    button.setProperty("logicalIndex", logical_index)
+                column_name = self._profile_name(logical_index)
+                accessible_name = f"Sort and filter {column_name}"
+                if button.accessibleName() != accessible_name:
+                    button.setAccessibleName(accessible_name)
+                    button.setAccessibleDescription(
+                        "Open sort and filter options for "
+                        f"{column_name!r} in the Power Query preview."
+                    )
+                    button.setToolTip(
+                        f"Sort or filter {column_name}. Filter by values or condition."
+                    )
+                profile = (
+                    self._profiles[logical_index]
+                    if logical_index < len(self._profiles)
+                    else {}
+                )
+                button.setProperty(
+                    "filterActive", bool(profile.get("filter_active", False))
+                )
+                button.style().unpolish(button)
+                button.style().polish(button)
+                button.setGeometry(rect)
+                button.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
+                button.show()
+                button.raise_()
+
+            for button in self._filter_buttons[len(visible_sections):]:
+                if button.hasFocus():
+                    self.setFocus(Qt.FocusReason.OtherFocusReason)
+                button.hide()
+                button.setFocusPolicy(Qt.FocusPolicy.NoFocus)
+                button.setProperty("logicalIndex", -1)
+
+            visible_buttons = self._filter_buttons[:len(visible_sections)]
+            for left, right in zip(visible_buttons, visible_buttons[1:]):
+                QWidget.setTabOrder(left, right)
+        finally:
+            self._updating_filter_buttons = False
+
+    def _filter_button_clicked(self, *_args: Any) -> None:
+        button = self.sender()
+        if not isinstance(button, QToolButton):
+            return
+        logical_index = button.property("logicalIndex")
+        if isinstance(logical_index, int) and 0 <= logical_index < self.count():
+            self.filterRequested.emit(logical_index)
+
+    def eventFilter(self, watched: Any, event: Any) -> bool:  # noqa: N802
+        if watched in self._filter_buttons and event.type() == QEvent.Type.KeyPress:
+            modifiers = event.modifiers()
+            supported_modifiers = {
+                Qt.KeyboardModifier.NoModifier,
+                Qt.KeyboardModifier.ShiftModifier,
+            }
+            is_plain_tab = (
+                event.key() == Qt.Key.Key_Tab
+                and modifiers == Qt.KeyboardModifier.NoModifier
+            )
+            is_shift_tab = (
+                event.key() == Qt.Key.Key_Tab
+                and modifiers == Qt.KeyboardModifier.ShiftModifier
+            )
+            is_backtab = (
+                event.key() == Qt.Key.Key_Backtab
+                and modifiers in supported_modifiers
+            )
+            if is_plain_tab or is_shift_tab or is_backtab:
+                direction = -1 if is_shift_tab or is_backtab else 1
+                visible_buttons = [
+                    button
+                    for button in self._filter_buttons
+                    if button.isVisible()
+                    and button.focusPolicy() != Qt.FocusPolicy.NoFocus
+                ]
+                if watched not in visible_buttons:
+                    return super().eventFilter(watched, event)
+                current_index = visible_buttons.index(watched)
+                target_index = current_index + direction
+                if 0 <= target_index < len(visible_buttons):
+                    visible_buttons[target_index].setFocus(
+                        Qt.FocusReason.TabFocusReason
+                    )
+                    return True
+        return super().eventFilter(watched, event)
+
+    def resizeEvent(self, event: Any) -> None:  # noqa: N802
+        super().resizeEvent(event)
+        self._update_filter_buttons()
+
+    def paintSection(
+        self, painter: QPainter, rect: Any, logical_index: int
+    ) -> None:  # noqa: N802
+        if not rect.isValid():
+            return
+        painter.save()
+        painter.fillRect(rect, QColor("#f3f3f3"))
+        painter.setPen(QPen(QColor("#d4d4d4"), 1))
+        painter.drawLine(rect.bottomLeft(), rect.bottomRight())
+        painter.drawLine(rect.topRight(), rect.bottomRight())
+
+        profile = (
+            self._profiles[logical_index]
+            if logical_index < len(self._profiles)
+            else {}
+        )
+        header = QRect(
+            rect.left() + 6,
+            rect.top(),
+            max(0, rect.width() - 11),
+            self._HEADER_ROW_HEIGHT,
+        )
+        painter.setPen(QColor("#3d4650"))
+        type_name = str(profile.get("type", "any"))
+        type_glyph = {
+            "text": "ABC",
+            "whole_number": "123",
+            "decimal_number": "1.2",
+            "fixed_decimal": "1.2",
+            "decimal": "1.2",
+            "currency": "1.2",
+            "percentage": "%",
+            "date": "CAL",
+            "datetime": "CAL",
+            "datetime_zone": "CAL",
+            "time": "CLK",
+            "boolean": "T/F",
+        }.get(type_name, "ABC")
+        painter.setFont(self.font())
+        painter.drawText(
+            header.adjusted(0, 1, -25, 0),
+            Qt.AlignmentFlag.AlignVCenter | Qt.AlignmentFlag.AlignLeft,
+            f"{type_glyph}  {str(profile.get('name', ''))}",
+        )
+        filter_active = bool(profile.get("filter_active", False))
+        dropdown = QRect(rect.right() - 28, rect.top() + 3, 23, 21)
+        painter.fillRect(
+            dropdown,
+            QColor("#e5f2ef" if filter_active else "#ffffff"),
+        )
+        painter.setPen(
+            QPen(QColor("#77aa9c" if filter_active else "#aebbc4"), 1)
+        )
+        painter.drawRect(dropdown)
+        painter.setPen(QPen(QColor("#107c71" if filter_active else "#526575"), 1.3))
+        cx, cy = dropdown.center().x(), dropdown.center().y()
+        painter.drawLine(cx - 5, cy - 5, cx + 5, cy - 5)
+        painter.drawLine(cx - 5, cy - 5, cx - 1, cy - 1)
+        painter.drawLine(cx + 5, cy - 5, cx + 1, cy - 1)
+        painter.drawLine(cx - 1, cy - 1, cx - 1, cy + 3)
+        painter.drawLine(cx - 1, cy + 3, cx + 2, cy + 5)
+        painter.setPen(QPen(QColor("#d0d0d0"), 1))
+        painter.drawLine(
+            rect.left(),
+            rect.top() + self._HEADER_ROW_HEIGHT,
+            rect.right(),
+            rect.top() + self._HEADER_ROW_HEIGHT,
+        )
+
+        y = rect.top() + self._HEADER_ROW_HEIGHT + 5
+        if self._show_quality:
+            painter.setFont(self.font())
+            painter.setPen(QColor("#4d555c"))
+            for label, value, color in (
+                ("Valid", profile.get("valid", "0%"), "#00a99d"),
+                ("Error", profile.get("error", "0%"), "#e35d5b"),
+                ("Empty", profile.get("empty", "0%"), "#858b90"),
+            ):
+                painter.setPen(QPen(QColor(color), 1))
+                painter.setBrush(QColor(color))
+                painter.drawEllipse(rect.left() + 9, y + 3, 6, 6)
+                painter.setPen(QColor("#4d555c"))
+                painter.drawText(
+                    rect.left() + 21,
+                    y,
+                    max(40, rect.width() - 56),
+                    13,
+                    Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignVCenter,
+                    label,
+                )
+                painter.drawText(
+                    rect.right() - 40,
+                    y,
+                    34,
+                    13,
+                    Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter,
+                    str(value),
+                )
+                y += 13
+
+        if self._show_distribution:
+            counts = profile.get("frequencies", [])
+            chart_top = rect.top() + (76 if self._show_quality else 39)
+            chart_bottom = rect.top() + (126 if self._show_quality else 86)
+            chart_left = rect.left() + 7
+            chart_right = rect.right() - 7
+            painter.fillRect(
+                chart_left,
+                chart_bottom,
+                max(0, chart_right - chart_left),
+                1,
+                QColor("#c8d1d3"),
+            )
+            if counts:
+                max_count = max(counts) or 1
+                visible_counts = counts[: max(1, rect.width() // 4)]
+                bar_width = max(2.0, (chart_right - chart_left) / len(visible_counts))
+                painter.setPen(Qt.PenStyle.NoPen)
+                painter.setBrush(QColor("#12b7aa"))
+                for index, count in enumerate(visible_counts):
+                    bar_height = max(
+                        2,
+                        int((chart_bottom - chart_top) * count / max_count),
+                    )
+                    left = chart_left + int(index * bar_width)
+                    width = max(1, int(bar_width * 0.62))
+                    painter.drawRect(
+                        left,
+                        chart_bottom - bar_height,
+                        width,
+                        bar_height,
+                    )
+            painter.setPen(QColor("#606a70"))
+            painter.setFont(self.font())
+            painter.drawText(
+                QRect(
+                    rect.left() + 6,
+                    chart_bottom + 3,
+                    rect.width() - 12,
+                    15,
+                ),
+                Qt.AlignmentFlag.AlignVCenter | Qt.AlignmentFlag.AlignLeft,
+                f"{profile.get('distinct', 0)} distinct, {profile.get('unique', 0)} unique",
+            )
+        painter.restore()
+
+
+class _PowerQueryValueFilterDialog(QDialog):
+    """Select exact preview values for a supported local row-filter step."""
+
+    def __init__(
+        self,
+        column: str,
+        values: list[Any],
+        parent: QWidget | None = None,
+    ) -> None:
+        super().__init__(parent)
+        apply_light_dialog_theme(self)
+        self._values = list(values)
+        self.setObjectName("powerQueryValueFilterDialog")
+        self.setWindowTitle(f"Filter by values — {column}")
+        self.setMinimumSize(340, 390)
+        self.resize(420, 520)
+
+        layout = QVBoxLayout(self)
+        layout.setContentsMargins(14, 12, 14, 12)
+        layout.setSpacing(8)
+        guidance = QLabel(
+            f"Choose values to keep in {column!r}. The filter will be added as an "
+            "applied step."
+        )
+        guidance.setWordWrap(True)
+        layout.addWidget(guidance)
+
+        self.search_edit = QLineEdit()
+        self.search_edit.setObjectName("powerQueryValueFilterSearch")
+        self.search_edit.setPlaceholderText("Search values")
+        layout.addWidget(self.search_edit)
+
+        self.select_all_checkbox = QCheckBox("Select all visible values")
+        self.select_all_checkbox.setObjectName("powerQueryValueFilterSelectAll")
+        self.select_all_checkbox.setTristate(True)
+        layout.addWidget(self.select_all_checkbox)
+
+        self.value_list = QListWidget()
+        self.value_list.setObjectName("powerQueryValueFilterList")
+        self._items: list[QListWidgetItem] = []
+        labels = [self._display_value(value) for value in self._values]
+        label_counts: dict[str, int] = {}
+        for label in labels:
+            label_counts[label] = label_counts.get(label, 0) + 1
+        for index, (value, label) in enumerate(zip(self._values, labels)):
+            if label_counts[label] > 1:
+                label = f"{label} [{_profile_cell_type(value)}]"
+            item = QListWidgetItem(label)
+            item.setData(Qt.ItemDataRole.UserRole, index)
+            item.setFlags(item.flags() | Qt.ItemFlag.ItemIsUserCheckable)
+            item.setCheckState(
+                Qt.CheckState.Checked
+                if len(self._values) <= MAX_FILTER_CLAUSES
+                else Qt.CheckState.Unchecked
+            )
+            self.value_list.addItem(item)
+            self._items.append(item)
+        layout.addWidget(self.value_list, 1)
+
+        self.selection_note = QLabel()
+        self.selection_note.setObjectName("powerQueryValueFilterSelectionNote")
+        layout.addWidget(self.selection_note)
+
+        buttons = QDialogButtonBox(
+            QDialogButtonBox.StandardButton.Ok
+            | QDialogButtonBox.StandardButton.Cancel,
+            parent=self,
+        )
+        buttons.button(QDialogButtonBox.StandardButton.Ok).setText("Apply filter")
+        buttons.button(QDialogButtonBox.StandardButton.Ok).setObjectName(
+            "applyPowerQueryValueFilterButton"
+        )
+        self.apply_button = buttons.button(QDialogButtonBox.StandardButton.Ok)
+        buttons.accepted.connect(self.accept)
+        buttons.rejected.connect(self.reject)
+        layout.addWidget(buttons)
+
+        self.search_edit.textChanged.connect(self._filter_visible_values)
+        self.select_all_checkbox.stateChanged.connect(self._select_visible_values)
+        self.value_list.itemChanged.connect(self._refresh_selection_state)
+        self._refresh_selection_state()
+
+    @staticmethod
+    def _display_value(value: Any) -> str:
+        if value is None:
+            return "(null)"
+        if value == "":
+            return "(empty text)"
+        return cell_to_text(value)
+
+    def _filter_visible_values(self, text: str) -> None:
+        needle = text.strip().casefold()
+        for item in self._items:
+            item.setHidden(needle not in item.text().casefold())
+        self._refresh_selection_state()
+
+    def _select_visible_values(self, state: int) -> None:
+        visible_items = [item for item in self._items if not item.isHidden()]
+        if state == Qt.CheckState.PartiallyChecked.value:
+            selected_state = (
+                Qt.CheckState.Unchecked
+                if visible_items
+                and all(
+                    item.checkState() == Qt.CheckState.Checked
+                    for item in visible_items
+                )
+                else Qt.CheckState.Checked
+            )
+        else:
+            selected_state = (
+                Qt.CheckState.Checked
+                if state == Qt.CheckState.Checked.value
+                else Qt.CheckState.Unchecked
+            )
+        for item in visible_items:
+            item.setCheckState(selected_state)
+        self._refresh_selection_state()
+
+    def _refresh_selection_state(self, *_args: Any) -> None:
+        visible_items = [item for item in self._items if not item.isHidden()]
+        visible_checked_count = sum(
+            item.checkState() == Qt.CheckState.Checked for item in visible_items
+        )
+        checked_count = sum(
+            item.checkState() == Qt.CheckState.Checked for item in self._items
+        )
+        self.selection_note.setText(
+            f"{checked_count:,} selected from {len(self._values):,} values. "
+            f"Choose 1–{MAX_FILTER_CLAUSES} values to apply this local filter."
+        )
+        self.apply_button.setEnabled(0 < checked_count <= MAX_FILTER_CLAUSES)
+        if not visible_items or visible_checked_count == 0:
+            state = Qt.CheckState.Unchecked
+        elif visible_checked_count == len(visible_items):
+            state = Qt.CheckState.Checked
+        else:
+            state = Qt.CheckState.PartiallyChecked
+        previous = self.select_all_checkbox.blockSignals(True)
+        self.select_all_checkbox.setCheckState(state)
+        self.select_all_checkbox.blockSignals(previous)
+
+    def selected_values(self) -> list[Any]:
+        return [
+            self._values[int(item.data(Qt.ItemDataRole.UserRole))]
+            for item in self._items
+            if item.checkState() == Qt.CheckState.Checked
+        ]
 
 
 def _candidate_with_source_id(
@@ -1409,7 +2276,8 @@ class TransformDataDialog(QDialog):
 
     _STEP_OPERATIONS_WITHOUT_SETTINGS = frozenset({
         "promote_headers", "demote_headers", "transpose_table", "remove_blank_rows",
-        "remove_rows_with_errors",
+        "remove_rows_with_errors", "remove_sparse_top_rows",
+        "remove_sparse_bottom_rows", "m_sparse_boundary_helper", "count_rows",
     })
 
     def __init__(
@@ -1462,6 +2330,255 @@ class TransformDataDialog(QDialog):
     ) -> None:
         super().__init__(parent)
         apply_light_dialog_theme(self)
+        editor_palette = QPalette(self.palette())
+        editor_palette.setColor(QPalette.ColorRole.Window, QColor("#ffffff"))
+        editor_palette.setColor(QPalette.ColorRole.Base, QColor("#ffffff"))
+        editor_palette.setColor(QPalette.ColorRole.Button, QColor("#ffffff"))
+        self.setPalette(editor_palette)
+        self.setStyleSheet(self.styleSheet() + """
+            QDialog#powerQueryEditorDialog { background: #ffffff; }
+            QWidget#powerQueryQueriesPane, QWidget#powerQuerySettingsStepsPane {
+                background: #ffffff;
+            }
+            QTabWidget#powerQueryRibbonTabs::pane {
+                border: 0;
+                border-bottom: 1px solid #d6d6d6;
+                background: #ffffff;
+            }
+            QTabWidget#powerQueryRibbonTabs,
+            QTabWidget#powerQueryRibbonTabs QTabBar {
+                background: #ffffff;
+            }
+            QTabWidget#powerQueryRibbonTabs QTabBar::base,
+            QTabWidget#powerQueryRibbonTabs::tab-bar {
+                background: #ffffff;
+                border: 0;
+            }
+            QTabWidget#powerQueryRibbonTabs QWidget#powerQueryRibbonPage,
+            QTabWidget#powerQueryRibbonTabs QWidget#powerQueryRibbonGroup {
+                background-color: #f7f5f5;
+                color: #333333;
+            }
+            QWidget#powerQueryRibbonPage,
+            QWidget#powerQueryRibbonGroup {
+                background-color: #f7f5f5;
+            }
+            QTabWidget#powerQueryRibbonTabs QTabBar::tab {
+                background: transparent;
+                border: 0;
+                min-width: 52px;
+                padding: 4px 11px 5px 11px;
+                color: #444c53;
+                font-size: 12px;
+            }
+            QTabWidget#powerQueryRibbonTabs QTabBar::tab:selected {
+                background: #ffffff;
+                color: #252525;
+                border-bottom: 0;
+                font-weight: 600;
+            }
+            QTabWidget#powerQueryRibbonTabs QToolButton {
+                background: transparent;
+                border: 1px solid transparent;
+                border-radius: 2px;
+                padding: 1px 3px;
+                color: #30363b;
+                font-size: 10px;
+                text-align: center;
+            }
+            QTabWidget#powerQueryRibbonTabs QToolButton[powerQueryRibbonSize="small"] {
+                font-size: 9px;
+                text-align: left;
+                padding-left: 2px;
+            }
+            QTabWidget#powerQueryRibbonTabs QToolButton[powerQueryRibbonSize="large"] {
+                font-size: 10px;
+            }
+            QTabWidget#powerQueryRibbonTabs QToolButton[powerQueryRibbonSize="medium"] {
+                font-size: 9px;
+            }
+            QTabWidget#powerQueryRibbonTabs QToolButton#openPowerQueryMEditorHomeButton {
+                font-size: 9px;
+                padding: 0;
+                border: 0;
+            }
+            QTabWidget#powerQueryRibbonTabs QToolButton:hover {
+                background: #e4edf7;
+                border-color: #a8bfd7;
+            }
+            QTabWidget#powerQueryRibbonTabs QToolButton:focus {
+                background: #e4edf7;
+                border: 1px solid #7da5c9;
+                padding: 2px 4px;
+            }
+            QTabWidget#powerQueryRibbonTabs QToolButton:pressed,
+            QTabWidget#powerQueryRibbonTabs QToolButton:checked {
+                background: #dce9f5;
+                border-color: #9fb8d1;
+                color: #293943;
+            }
+            QTabWidget#powerQueryRibbonTabs QToolButton:disabled {
+                background: transparent;
+                border-color: transparent;
+                color: #929a9f;
+            }
+            QLabel#powerQueryRibbonGroupCaption {
+                color: #555b60;
+                font-size: 10px;
+                padding-top: 2px;
+            }
+            QTabWidget#powerQueryRibbonTabs QToolButton#powerQueryFileButton {
+                background: #c03223;
+                border: 0;
+                border-radius: 0;
+                color: #ffffff;
+                font-size: 11px;
+                font-weight: 600;
+                padding: 4px 12px;
+                text-align: center;
+            }
+            QTabWidget#powerQueryRibbonTabs QToolButton#powerQueryFileButton:hover {
+                background: #a9271c;
+            }
+            QToolButton#powerQueryFileButton::menu-indicator {
+                image: none;
+                width: 0;
+            }
+            QTabWidget#powerQueryRibbonTabs QToolButton::menu-indicator {
+                width: 8px;
+                height: 8px;
+            }
+            QToolButton#powerQuerySettingsCloseButton {
+                background: transparent;
+                border: 0;
+                color: #66727a;
+                font-size: 15px;
+                padding: 0;
+            }
+            QToolButton#powerQuerySettingsCloseButton:hover {
+                background: #f0f2f3;
+                color: #26343c;
+            }
+            QLabel#powerQuerySettingsTitle {
+                color: #30383d;
+                font-size: 12px;
+                font-weight: 500;
+            }
+            QLabel#powerQueryStepsEmptyState {
+                color: #7b858c;
+                font-size: 11px;
+                padding: 8px;
+            }
+            QSplitter#powerQueryWorkspaceSplitter::handle:horizontal {
+                background: #d8d8d8;
+                width: 1px;
+            }
+            QSplitter#powerQuerySettingsStepsSplitter::handle:vertical {
+                background: #e2e2e2;
+                height: 1px;
+            }
+            QLabel#powerQueryQueriesHeading,
+            QLabel#powerQueryPropertiesHeading,
+            QLabel#powerQueryAppliedStepsHeading {
+                color: #347552;
+                font-size: 10px;
+                font-weight: 600;
+            }
+            QListWidget#powerQueryQueriesList,
+            QListWidget#powerQueryAppliedStepsList {
+                background: #ffffff;
+                border: 0;
+                selection-background-color: #d8f1e3;
+                selection-color: #264f38;
+            }
+            QListWidget#powerQueryQueriesList::item,
+            QListWidget#powerQueryAppliedStepsList::item {
+                padding: 4px 5px;
+            }
+            QListWidget#powerQueryQueriesList::item:selected,
+            QListWidget#powerQueryAppliedStepsList::item:selected {
+                background: #d8f1e3;
+                color: #264f38;
+            }
+            QGroupBox#powerQuerySettingsPanel {
+                background-color: #ffffff;
+                border: 0;
+                border-left: 1px solid #dddddd;
+                border-radius: 0;
+                margin-top: 0;
+                padding-top: 1px;
+            }
+            QGroupBox#powerQuerySettingsPanel::title {
+                left: 7px;
+                padding: 0 3px;
+                color: #30383d;
+                font-weight: 500;
+            }
+            QToolButton#powerQueryAllPropertiesButton {
+                color: #3675a7;
+                text-align: left;
+                padding: 0;
+            }
+            QTableView#powerQueryDataPreview {
+                background: #ffffff;
+                alternate-background-color: #ffffff;
+                gridline-color: #d5d5d5;
+                border: 0;
+                font-size: 11px;
+            }
+            QTableView#powerQueryDataPreview QHeaderView {
+                background-color: #edf2f5;
+                color: #30485b;
+            }
+            QTableView#powerQueryDataPreview QHeaderView::section,
+            QTableView#powerQueryDataPreview QTableCornerButton::section {
+                background-color: #edf2f5;
+                color: #30485b;
+                border: 0;
+                border-right: 1px solid #d6dee5;
+                border-bottom: 1px solid #d6dee5;
+                padding: 5px 7px;
+            }
+            QWidget#powerQueryPreviewPane,
+            QWidget#powerQueryAppliedStepsPane {
+                background-color: #ffffff;
+                color: #243746;
+            }
+            QWidget#powerQueryFormulaBarRow {
+                background: #ffffff;
+                border-top: 1px solid #e2e2e2;
+                border-bottom: 1px solid #d4d4d4;
+                min-height: 34px;
+            }
+            QLabel#powerQueryFormulaGlyph {
+                color: #47525a;
+                font-weight: 600;
+                font-style: italic;
+                padding: 0 5px;
+            }
+            QLabel#powerQueryCountLabel {
+                background: #f4f4f4;
+                color: #606a70;
+                font-size: 10px;
+                border-top: 1px solid #d6d6d6;
+                padding: 4px 8px;
+            }
+            QPushButton#cancelPowerQueryFormulaEditButton,
+            QPushButton#applyPowerQueryFormulaButton {
+                min-height: 24px;
+                max-height: 24px;
+                padding: 0;
+                border-radius: 2px;
+            }
+            QLabel#powerQueryFormulaEquals {
+                color: #58636a;
+                padding: 0 1px;
+            }
+            QDialogButtonBox QPushButton {
+                min-height: 26px;
+                padding: 2px 12px;
+            }
+        """)
         fallback_name = query_name.strip() or "Current Query"
         self._reserved_query_names = {
             str(name).strip().casefold()
@@ -1600,69 +2717,125 @@ class TransformDataDialog(QDialog):
         self._accepted_steps: list[dict[str, Any]] | None = None
         self._accepted_queries: dict[str, dict[str, Any]] | None = None
         self._preview_candidate = active_query["preview_candidate"]
-        self.setWindowTitle("Power Query Editor")
-        self.setMinimumSize(900, 650)
-        self.resize(1240, 820)
+        self.setObjectName("powerQueryEditorDialog")
+        self.setWindowTitle(f"{fallback_name} - Power Query Editor")
+        screen = self.screen() or QApplication.primaryScreen()
+        workspace_scale = 1.0
+        if screen is not None:
+            available = screen.availableGeometry()
+            workspace_scale = min(1.0, max(0.45, available.width() / 732))
+            minimum_width = min(900, available.width())
+            minimum_height = min(650, available.height())
+            self.setMinimumSize(minimum_width, minimum_height)
+            self.resize(
+                min(available.width(), max(minimum_width, int(available.width() * 0.96))),
+                min(available.height(), max(minimum_height, int(available.height() * 0.93))),
+            )
+        else:
+            self.setMinimumSize(900, 650)
+            self.resize(1240, 820)
 
         layout = QVBoxLayout(self)
-        layout.setContentsMargins(16, 14, 16, 12)
-        layout.setSpacing(9)
-        header = QHBoxLayout()
-        title = QLabel("Power Query Editor")
-        title.setStyleSheet("font-size: 18px; font-weight: 600; color: #273b49;")
-        header.addWidget(title, 1)
-        layout.addLayout(header)
+        layout.setContentsMargins(0, 0, 0, 0)
+        layout.setSpacing(0)
         self.ribbon_tabs = QTabWidget()
         self.ribbon_tabs.setObjectName("powerQueryRibbonTabs")
+        self.ribbon_tabs.setDocumentMode(True)
+        self.ribbon_tabs.setMaximumHeight(132)
         layout.addWidget(self.ribbon_tabs)
-        type_note = QLabel(
-            "Ribbon commands create replayable local steps. Advanced Editor supports a documented subset of Power Query M."
+        self.file_button = QToolButton(self.ribbon_tabs)
+        self.file_button.setObjectName("powerQueryFileButton")
+        self.file_button.setText("File")
+        self.file_button.setFixedSize(56, 29)
+        self.file_button.setPopupMode(QToolButton.ToolButtonPopupMode.InstantPopup)
+        self.file_menu = QMenu(self.file_button)
+        self.file_button.setMenu(self.file_menu)
+        self.ribbon_tabs.setCornerWidget(
+            self.file_button, Qt.Corner.TopLeftCorner
         )
-        type_note.setWordWrap(True)
-        type_note.setStyleSheet("color: #526477;")
-        layout.addWidget(type_note)
 
-        body = QHBoxLayout()
-        body.setSpacing(12)
-        layout.addLayout(body, 1)
+        self.workspace_splitter = QSplitter(Qt.Orientation.Horizontal, self)
+        self.workspace_splitter.setObjectName("powerQueryWorkspaceSplitter")
+        self.workspace_splitter.setChildrenCollapsible(False)
+        layout.addWidget(self.workspace_splitter, 1)
 
         self.query_panel = QWidget()
+        self.query_panel.setObjectName("powerQueryQueriesPane")
+        self.query_panel.setMinimumWidth(max(100, round(150 * workspace_scale)))
         query_column = QVBoxLayout(self.query_panel)
-        query_column.setContentsMargins(0, 0, 0, 0)
-        query_column.addWidget(QLabel("Queries"))
+        query_column.setContentsMargins(8, 8, 4, 0)
+        query_column.setSpacing(3)
+        self.queries_heading = QLabel("Queries [0]")
+        self.queries_heading.setObjectName("powerQueryQueriesHeading")
+        query_column.addWidget(self.queries_heading)
         self.query_list = QListWidget()
         self.query_list.setObjectName("powerQueryQueriesList")
-        self.query_list.setMinimumWidth(155)
-        self.query_list.setMaximumWidth(220)
+        self.query_list.setMinimumWidth(max(90, round(140 * workspace_scale)))
+        self.query_list.setMaximumWidth(260)
+        self.query_list.setIconSize(QSize(16, 16))
+        self.query_list.setSpacing(2)
         self.query_list.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
         self.query_list.customContextMenuRequested.connect(self._show_query_context_menu)
         query_column.addWidget(self.query_list, 1)
-        self.query_settings_panel = QGroupBox("Query Settings", self.query_panel)
-        query_settings_layout = QFormLayout(self.query_settings_panel)
-        query_settings_layout.setContentsMargins(8, 10, 8, 8)
+        self.query_settings_panel = QGroupBox("Query Settings")
+        self.query_settings_panel.setObjectName("powerQuerySettingsPanel")
+        self.query_settings_panel.setTitle("")
+        query_settings_layout = QVBoxLayout(self.query_settings_panel)
+        query_settings_layout.setContentsMargins(7, 6, 7, 5)
+        query_settings_layout.setSpacing(4)
+        settings_heading_row = QHBoxLayout()
+        settings_heading_row.setContentsMargins(0, 0, 0, 2)
+        settings_title = QLabel("Query Settings")
+        settings_title.setObjectName("powerQuerySettingsTitle")
+        settings_heading_row.addWidget(settings_title, 1)
+        self.settings_close_button = QToolButton(self.query_settings_panel)
+        self.settings_close_button.setObjectName("powerQuerySettingsCloseButton")
+        self.settings_close_button.setText("×")
+        self.settings_close_button.setFixedSize(22, 22)
+        self.settings_close_button.setToolTip("Hide Query Settings")
+        settings_heading_row.addWidget(self.settings_close_button)
+        query_settings_layout.addLayout(settings_heading_row)
+        properties_heading = QLabel("▾  PROPERTIES")
+        properties_heading.setObjectName("powerQueryPropertiesHeading")
+        query_settings_layout.addWidget(properties_heading)
+        query_settings_layout.addWidget(QLabel("Name"))
         self.query_name_edit = QLineEdit()
         self.query_name_edit.setObjectName("powerQueryNameEdit")
         self.query_name_edit.setMaxLength(120)
         self.query_name_edit.setPlaceholderText("Query name")
-        query_settings_layout.addRow("Name", self.query_name_edit)
+        query_settings_layout.addWidget(self.query_name_edit)
+        self.all_properties_button = QToolButton(self.query_settings_panel)
+        self.all_properties_button.setObjectName("powerQueryAllPropertiesButton")
+        self.all_properties_button.setText("All Properties")
+        self.all_properties_button.setToolButtonStyle(
+            Qt.ToolButtonStyle.ToolButtonTextOnly
+        )
+        self.all_properties_button.setAutoRaise(True)
+        query_settings_layout.addWidget(
+            self.all_properties_button, 0, Qt.AlignmentFlag.AlignLeft
+        )
+        self.optional_properties_panel = QWidget(self.query_settings_panel)
+        optional_properties_layout = QFormLayout(self.optional_properties_panel)
+        optional_properties_layout.setContentsMargins(0, 0, 0, 0)
+        optional_properties_layout.setSpacing(4)
         self.query_description_edit = QPlainTextEdit()
         self.query_description_edit.setObjectName("powerQueryDescriptionEdit")
         self.query_description_edit.setPlaceholderText("Optional description")
         self.query_description_edit.setMaximumHeight(64)
-        query_settings_layout.addRow("Description", self.query_description_edit)
+        optional_properties_layout.addRow("Description", self.query_description_edit)
         self.query_group_edit = QLineEdit()
         self.query_group_edit.setObjectName("powerQueryGroupEdit")
         self.query_group_edit.setPlaceholderText("Optional group")
         self.query_group_edit.setToolTip(
             "Assign this source or query to a project query group. Leave empty to remove the group."
         )
-        query_settings_layout.addRow("Group", self.query_group_edit)
+        optional_properties_layout.addRow("Group", self.query_group_edit)
         self.query_load_enabled_checkbox = QCheckBox("Enable load")
         self.query_load_enabled_checkbox.setObjectName("powerQueryEnableLoadCheckBox")
         self.query_load_enabled_checkbox.setToolTip(
             "Include this saved query as a table in the semantic model."
         )
-        query_settings_layout.addRow("Model", self.query_load_enabled_checkbox)
+        optional_properties_layout.addRow("Model", self.query_load_enabled_checkbox)
         self.query_refresh_included_checkbox = QCheckBox("Include in report refresh")
         self.query_refresh_included_checkbox.setObjectName(
             "powerQueryRefreshIncludedCheckBox"
@@ -1670,8 +2843,14 @@ class TransformDataDialog(QDialog):
         self.query_refresh_included_checkbox.setToolTip(
             "Re-evaluate this saved query when report data is refreshed."
         )
-        query_settings_layout.addRow("Refresh", self.query_refresh_included_checkbox)
-        query_column.addWidget(self.query_settings_panel)
+        optional_properties_layout.addRow("Refresh", self.query_refresh_included_checkbox)
+        query_settings_layout.addWidget(self.optional_properties_panel)
+        self.optional_properties_panel.setVisible(False)
+        self.all_properties_button.clicked.connect(
+            lambda: self.optional_properties_panel.setVisible(
+                not self.optional_properties_panel.isVisible()
+            )
+        )
         self.query_name_edit.setText(active_query.get("name", ""))
         self.query_description_edit.setPlainText(active_query.get("description", ""))
         self.query_group_edit.setText(active_query.get("query_group", ""))
@@ -1694,20 +2873,30 @@ class TransformDataDialog(QDialog):
             self._refresh_inclusion_changed
         )
         self.query_panel.setVisible(True)
-        body.addWidget(self.query_panel)
 
         self.steps_panel = QWidget()
+        self.steps_panel.setObjectName("powerQueryAppliedStepsPane")
+        self.steps_panel.setPalette(editor_palette)
         step_column = QVBoxLayout(self.steps_panel)
         step_column.setContentsMargins(0, 0, 0, 0)
-        step_column.addWidget(QLabel("Applied steps"))
+        self.applied_steps_heading = QLabel("▾  APPLIED STEPS")
+        self.applied_steps_heading.setObjectName("powerQueryAppliedStepsHeading")
+        step_column.addWidget(self.applied_steps_heading)
         self.step_list = QListWidget()
-        self.step_list.setMinimumWidth(225)
+        self.step_list.setObjectName("powerQueryAppliedStepsList")
+        self.step_list.setMinimumWidth(max(100, round(180 * workspace_scale)))
         self.step_list.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
         self.step_list.customContextMenuRequested.connect(self._show_step_context_menu)
         self.step_list.itemDoubleClicked.connect(
             lambda _item: self._edit_selected_step_settings()
         )
         step_column.addWidget(self.step_list, 1)
+        self.steps_empty_label = QLabel("No transformation steps yet")
+        self.steps_empty_label.setObjectName("powerQueryStepsEmptyState")
+        self.steps_empty_label.setAlignment(
+            Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignTop
+        )
+        step_column.addWidget(self.steps_empty_label, 1)
         step_buttons = QHBoxLayout()
         self.step_settings_button = QToolButton()
         self.step_settings_button.setObjectName("editAppliedStepSettingsButton")
@@ -1728,9 +2917,18 @@ class TransformDataDialog(QDialog):
         step_buttons.addWidget(self.up_button)
         step_buttons.addWidget(self.down_button)
         step_column.addLayout(step_buttons)
-        body.addWidget(self.steps_panel)
+        for button in (
+            self.step_settings_button,
+            self.remove_button,
+            self.up_button,
+            self.down_button,
+        ):
+            button.setVisible(False)
 
         self.editor_panel = QWidget()
+        self.editor_panel.setObjectName("powerQueryPreviewPane")
+        self.editor_panel.setPalette(editor_palette)
+        self.editor_panel.setMinimumWidth(max(160, round(360 * workspace_scale)))
         editor = QVBoxLayout(self.editor_panel)
         self.operation_settings_panel = QWidget()
         self.operation_settings_panel.setObjectName("powerQueryStepSettingsPanel")
@@ -1773,8 +2971,11 @@ class TransformDataDialog(QDialog):
             ("Keep duplicates", "keep_duplicates"),
             ("Remove blank rows", "remove_blank_rows"),
             ("Remove rows with errors", "remove_rows_with_errors"),
+            ("Count rows", "count_rows"),
             ("Remove top rows", "remove_top_rows"),
             ("Remove bottom rows", "remove_bottom_rows"),
+            ("Remove sparse top rows", "remove_sparse_top_rows"),
+            ("Remove sparse bottom rows", "remove_sparse_bottom_rows"),
             ("Keep top rows", "keep_top_rows"),
             ("Keep bottom rows", "keep_bottom_rows"),
             ("Keep range of rows", "keep_range_rows"),
@@ -1786,6 +2987,14 @@ class TransformDataDialog(QDialog):
             ("Transpose table", "transpose_table"),
         ):
             self.operation_combo.addItem(label, value)
+            if value in {"remove_sparse_top_rows", "remove_sparse_bottom_rows"}:
+                edge = "top" if value == "remove_sparse_top_rows" else "bottom"
+                self.operation_combo.setItemData(
+                    self.operation_combo.count() - 1,
+                    f"Remove consecutive {edge} rows with at most one nonblank cell; "
+                    "stop at the first row with two or more nonblank cells or a cell error.",
+                    Qt.ItemDataRole.ToolTipRole,
+                )
         self.column_combo = QComboBox()
         self.sort_criteria_widget = QWidget()
         sort_criteria_layout = QVBoxLayout(self.sort_criteria_widget)
@@ -1892,6 +3101,7 @@ class TransformDataDialog(QDialog):
         custom_parameter_layout.addWidget(self.custom_parameter_combo, 1)
         custom_parameter_layout.addWidget(self.insert_custom_parameter_button)
         self.custom_parameter_widget = custom_parameter_row
+        self.custom_parameter_label = QLabel("Parameter")
         self.custom_function_combo = QComboBox()
         self.custom_function_combo.setObjectName("customColumnFunctionCombo")
         self.custom_function_combo.setToolTip(
@@ -1910,6 +3120,7 @@ class TransformDataDialog(QDialog):
         custom_function_layout.addWidget(self.custom_function_combo, 1)
         custom_function_layout.addWidget(self.insert_custom_function_button)
         self.custom_function_widget = custom_function_row
+        self.custom_function_label = QLabel("Function")
         self._conditional_clauses: list[dict[str, str]] = []
         self._filter_clauses: list[dict[str, str]] = []
         self.conditional_column_label = QLabel("Conditional rules")
@@ -2156,8 +3367,8 @@ class TransformDataDialog(QDialog):
         form.addRow(self.filter_parameter_label, self.filter_parameter_combo)
         form.addRow(self.index_start_label, self.index_start_edit)
         form.addRow(self.index_increment_label, self.index_increment_edit)
-        form.addRow("Parameter", self.custom_parameter_widget)
-        form.addRow("Function", self.custom_function_widget)
+        form.addRow(self.custom_parameter_label, self.custom_parameter_widget)
+        form.addRow(self.custom_function_label, self.custom_function_widget)
         form.addRow(self.custom_output_type_label, self.custom_output_type_combo)
         form.addRow(self.custom_expression_label, self.custom_expression_edit)
         form.addRow(self.conditional_column_label, self.conditional_column_widget)
@@ -2172,52 +3383,104 @@ class TransformDataDialog(QDialog):
         form.addRow(self.attribute_name_label, self.attribute_name_edit)
         form.addRow(self.value_column_name_label, self.value_column_name_edit)
         form.addRow(self.group_aggregation_label, self.group_aggregation_widget)
-        editor.addWidget(self.operation_settings_panel)
 
         self.add_button = QPushButton("Add step")
         self.add_button.setObjectName("addTransformStepButton")
         self.update_button = QPushButton("Update selected")
         self.update_button.setObjectName("updateTransformStepButton")
         action_row = QHBoxLayout()
+        self.step_settings_toggle = QToolButton(self.editor_panel)
+        self.step_settings_toggle.setObjectName("powerQueryStepSettingsToggle")
+        self.step_settings_toggle.setText("Step settings")
+        self.step_settings_toggle.setToolTip(
+            "Show or hide the selected transformation's settings. Ribbon commands open this pane when needed."
+        )
+        self.step_settings_toggle.setCheckable(True)
+        self.step_settings_toggle.setChecked(False)
+        self.step_settings_toggle.toggled.connect(
+            self.operation_settings_panel.setVisible
+        )
+        action_row.addWidget(self.step_settings_toggle)
         action_row.addWidget(self.add_button)
         action_row.addWidget(self.update_button)
         action_row.addStretch(1)
-        editor.addLayout(action_row)
+        form.addRow(action_row)
+        editor.addWidget(self.operation_settings_panel)
         self.error_label = QLabel()
         self.error_label.setWordWrap(True)
         self.error_label.setStyleSheet("color: #a4262c;")
         self.error_label.setVisible(False)
         editor.addWidget(self.error_label)
-        formula_row = QHBoxLayout()
-        formula_row.addWidget(QLabel("Formula bar"))
-        self.formula_bar = QLineEdit()
-        self.formula_bar.setObjectName("powerQueryFormulaBar")
-        self.formula_bar.setMaxLength(32_000)
-        self.formula_bar.setPlaceholderText("Select an applied step to inspect its M expression")
-        formula_row.addWidget(self.formula_bar, 1)
-        self.apply_formula_button = QPushButton("Apply formula")
+        self.operation_settings_panel.setVisible(False)
+        self.formula_bar_row = QWidget(self.editor_panel)
+        self.formula_bar_row.setObjectName("powerQueryFormulaBarRow")
+        formula_row = QHBoxLayout(self.formula_bar_row)
+        formula_row.setContentsMargins(5, 3, 5, 3)
+        formula_row.setSpacing(5)
+        self.cancel_formula_button = QPushButton("×")
+        self.cancel_formula_button.setObjectName(
+            "cancelPowerQueryFormulaEditButton"
+        )
+        self.cancel_formula_button.setFixedWidth(27)
+        self.cancel_formula_button.setToolTip("Cancel formula edit")
+        self.cancel_formula_button.clicked.connect(self._refresh_formula_bar)
+        formula_row.addWidget(self.cancel_formula_button)
+        self.apply_formula_button = QPushButton("✓")
         self.apply_formula_button.setObjectName("applyPowerQueryFormulaButton")
+        self.apply_formula_button.setFixedWidth(27)
         self.apply_formula_button.setToolTip(
             "Parse and preview this supported M expression as the selected applied step."
         )
         self.apply_formula_button.clicked.connect(self._apply_formula_bar)
         formula_row.addWidget(self.apply_formula_button)
+        formula_label = QLabel("fx")
+        formula_label.setObjectName("powerQueryFormulaGlyph")
+        formula_row.addWidget(formula_label)
+        formula_equals = QLabel("=")
+        formula_equals.setObjectName("powerQueryFormulaEquals")
+        formula_row.addWidget(formula_equals)
+        self.formula_bar = QLineEdit()
+        self.formula_bar.setObjectName("powerQueryFormulaBar")
+        self.formula_bar.setMaxLength(32_000)
+        self.formula_bar.setPlaceholderText("Select an applied step to inspect its M expression")
+        formula_row.addWidget(self.formula_bar, 1)
         self.formula_edit_button = QPushButton("Edit M…")
         self.formula_edit_button.setObjectName("editPowerQueryFormulaButton")
         self.formula_edit_button.setToolTip(
             "Open the separate Advanced Editor to edit the complete supported M query."
         )
         self.formula_edit_button.clicked.connect(self._open_advanced_editor)
-        formula_row.addWidget(self.formula_edit_button)
+        self.formula_edit_button.setVisible(False)
         self.formula_bar.returnPressed.connect(self._apply_formula_bar)
-        editor.addLayout(formula_row)
+        editor.addWidget(self.formula_bar_row)
 
         self.preview_tabs = QTabWidget()
         self.preview_tabs.setObjectName("powerQueryPreviewTabs")
+        self.preview_tabs.tabBar().hide()
         self.preview = QTableView()
-        self.preview.setAlternatingRowColors(True)
-        self.preview.horizontalHeader().setStretchLastSection(True)
+        self.preview.setObjectName("powerQueryDataPreview")
+        self.preview.setAlternatingRowColors(False)
+        self.preview_header = _PowerQueryProfileHeader(self.preview)
+        header_palette = QPalette(editor_palette)
+        header_palette.setColor(QPalette.ColorRole.Window, QColor("#edf2f5"))
+        header_palette.setColor(QPalette.ColorRole.Base, QColor("#edf2f5"))
+        self.preview_header.setPalette(header_palette)
+        self.preview.verticalHeader().setPalette(header_palette)
+        self.preview_header.sectionClicked.connect(
+            self._show_preview_column_menu
+        )
+        self.preview_header.filterRequested.connect(
+            self._show_preview_column_menu
+        )
+        self.preview.setHorizontalHeader(self.preview_header)
+        self.preview.horizontalHeader().setStretchLastSection(False)
+        self.preview.horizontalHeader().setDefaultSectionSize(198)
+        self.preview.horizontalHeader().setMinimumSectionSize(105)
+        self.preview.verticalHeader().setDefaultSectionSize(26)
         self.preview.setModel(ImportPreviewTableModel(self.preview))
+        self.preview.horizontalScrollBar().valueChanged.connect(
+            self.preview_header._update_filter_buttons
+        )
         self.preview_tabs.addTab(self.preview, "Data preview")
 
         self.quality_table = QTableWidget(0, 5)
@@ -2270,9 +3533,49 @@ class TransformDataDialog(QDialog):
         self.preview_tabs.addTab(self.schema_table, "Schema")
         self.profile_scope_combo.currentIndexChanged.connect(self._refresh_column_profiles)
         editor.addWidget(self.preview_tabs, 1)
-        body.addWidget(self.editor_panel, 1)
+
+        self.settings_steps_splitter = QSplitter(Qt.Orientation.Vertical, self)
+        self.settings_steps_splitter.setObjectName("powerQuerySettingsStepsSplitter")
+        self.settings_steps_splitter.setChildrenCollapsible(False)
+        self.settings_steps_splitter.addWidget(self.query_settings_panel)
+        self.settings_steps_splitter.addWidget(self.steps_panel)
+        self.settings_steps_splitter.setStretchFactor(0, 0)
+        self.settings_steps_splitter.setStretchFactor(1, 1)
+        self.settings_steps_splitter.setHandleWidth(1)
+        self.settings_steps_pane = QWidget()
+        self.settings_steps_pane.setObjectName("powerQuerySettingsStepsPane")
+        self.settings_steps_pane.setMinimumWidth(max(110, round(220 * workspace_scale)))
+        settings_steps_layout = QVBoxLayout(self.settings_steps_pane)
+        settings_steps_layout.setContentsMargins(0, 0, 0, 0)
+        settings_steps_layout.addWidget(self.settings_steps_splitter)
+
+        self.workspace_splitter.addWidget(self.query_panel)
+        self.workspace_splitter.addWidget(self.editor_panel)
+        self.workspace_splitter.addWidget(self.settings_steps_pane)
+        self.workspace_splitter.setStretchFactor(0, 0)
+        self.workspace_splitter.setStretchFactor(1, 1)
+        self.workspace_splitter.setStretchFactor(2, 0)
+        settings_width = max(
+            round(220 * workspace_scale), round(self.width() * 0.13)
+        )
+        queries_width = max(
+            round(150 * workspace_scale), round(self.width() * 0.09)
+        )
+        self.workspace_splitter.setSizes([
+            queries_width,
+            max(1, self.width() - queries_width - settings_width),
+            settings_width,
+        ])
+        self.workspace_splitter.setCollapsible(0, False)
+        self.workspace_splitter.setCollapsible(1, False)
+        self.workspace_splitter.setCollapsible(2, False)
+        self.settings_steps_splitter.setSizes([
+            max(140, round(self.height() * 0.15)),
+            max(1, self.height() - 320),
+        ])
 
         self.count_label = QLabel()
+        self.count_label.setObjectName("powerQueryCountLabel")
         self.count_label.setStyleSheet("color: #526477;")
         layout.addWidget(self.count_label)
         self.buttons = QDialogButtonBox(
@@ -2283,9 +3586,14 @@ class TransformDataDialog(QDialog):
         self.apply_button.setText("Close & Apply")
         self.buttons.accepted.connect(self._accept_candidate)
         self.buttons.rejected.connect(self.reject)
+        self.buttons.setVisible(False)
         layout.addWidget(self.buttons)
 
-        self.operation_combo.currentIndexChanged.connect(self._configure_editor)
+        self._last_non_custom_operation = self.operation_combo.currentData()
+        self.operation_combo.currentIndexChanged.connect(
+            self._on_operation_combo_changed
+        )
+        self.operation_combo.activated.connect(self._on_operation_combo_activated)
         self.option_combo.currentIndexChanged.connect(
             self._update_filter_value_visibility
         )
@@ -2354,6 +3662,14 @@ class TransformDataDialog(QDialog):
         self._configure_group_aggregate_fields()
         self._update_step_controls()
         self._populate_ribbon()
+        self.file_menu.addAction(
+            "Close & Apply", lambda: self.apply_button.click()
+        )
+        self.file_menu.addSeparator()
+        self.file_menu.addAction("Close", self.reject)
+        self.settings_close_button.clicked.connect(
+            lambda: self._set_settings_steps_pane_visible(False)
+        )
         self._populate_queries()
         self._set_query_editing_enabled(
             not bool(active_query.get("is_unavailable"))
@@ -2362,9 +3678,28 @@ class TransformDataDialog(QDialog):
     def _populate_ribbon(self) -> None:
         """Expose every supported local transform through task-oriented ribbon tabs."""
         self.ribbon_command_buttons: dict[str, QToolButton] = {}
+        self._ribbon_icon_cache: dict[str, QIcon] = {}
 
-        def command(label: str, operation: str, tooltip: str) -> dict[str, Any]:
-            return {"label": label, "operation": operation, "tooltip": tooltip}
+        def command(
+            label: str,
+            operation: str,
+            tooltip: str,
+            *,
+            size: str = "small",
+            slot: tuple[int, int, int, int] | None = None,
+            width: int | None = None,
+        ) -> dict[str, Any]:
+            entry = {
+                "label": label,
+                "operation": operation,
+                "tooltip": tooltip,
+                "size": size,
+            }
+            if slot is not None:
+                entry["slot"] = slot
+            if width is not None:
+                entry["width"] = width
+            return entry
 
         def action(
             label: str,
@@ -2374,200 +3709,333 @@ class TransformDataDialog(QDialog):
             checkable: bool = False,
             checked: bool = False,
             object_name: str = "powerQueryRibbonAction",
+            size: str = "small",
+            slot: tuple[int, int, int, int] | None = None,
+            width: int | None = None,
+            menu_items: list[tuple[str, Any, bool]] | None = None,
+            menu_button_popup: bool = False,
+            enabled: bool = True,
         ) -> dict[str, Any]:
-            return {
+            entry = {
                 "label": label,
                 "tooltip": tooltip,
                 "callback": callback,
                 "checkable": checkable,
                 "checked": checked,
                 "object_name": object_name,
+                "size": size,
+                "enabled": enabled,
             }
+            if slot is not None:
+                entry["slot"] = slot
+            if width is not None:
+                entry["width"] = width
+            if menu_items is not None:
+                entry["menu_items"] = menu_items
+            if menu_button_popup:
+                entry["menu_button_popup"] = True
+            return entry
 
         self.home_advanced_editor_button = QToolButton(self)
         self.home_advanced_editor_button.setObjectName(
             "openPowerQueryMEditorHomeButton"
         )
-        self.home_advanced_editor_button.setText("Advanced\nEditor (M)")
+        self.home_advanced_editor_button.setText("Advanced Editor")
         self.home_advanced_editor_button.setToolTip(
             "Edit and preview this query in the separate Advanced Editor for the supported local M subset."
         )
         self.home_advanced_editor_button.clicked.connect(self._open_advanced_editor)
 
+        source_menu_items = [
+            ("From File…", self._add_new_source, self._new_source_candidate_callback is not None),
+            ("From Folder…", self._add_folder_source, self._new_folder_source_candidate_callback is not None),
+            ("SQL Server…", self._add_sql_server_source, self._new_sql_server_source_candidate_callback is not None),
+            ("OData Feed…", self._add_odata_source, self._new_odata_source_candidate_callback is not None),
+            ("Web…", self._add_web_source, self._new_web_source_candidate_callback is not None),
+        ]
+        recent_source_menu_items = [
+            (
+                str(query.get("display_name") or query.get("name") or "Query"),
+                lambda query_id=str(query_id): self._switch_query(
+                    self._query_order.index(query_id)
+                ) if query_id in self._query_order else None,
+                True,
+            )
+            for query_id, query in self._query_states.items()
+        ]
+        manage_query_menu_items = [
+            ("Duplicate Query", self._duplicate_selected_query, True),
+            ("Reference Query", self._create_reference_query, True),
+            ("Edit Source Settings", self._edit_source_settings, True),
+            ("Delete Query", self._delete_selected_query, True),
+        ]
+        data_type_menu_items = [
+            ("Text", lambda: self._select_ribbon_data_type("text"), True),
+            ("Whole Number", lambda: self._select_ribbon_data_type("whole_number"), True),
+            ("Decimal Number", lambda: self._select_ribbon_data_type("decimal_number"), True),
+            ("Boolean", lambda: self._select_ribbon_data_type("boolean"), True),
+            ("Date", lambda: self._select_ribbon_data_type("date"), True),
+            ("Date/Time", lambda: self._select_ribbon_data_type("datetime"), True),
+            ("Time", lambda: self._select_ribbon_data_type("time"), True),
+        ]
         home_groups = [
-            ("Query", [{
-                "label": "Advanced\nEditor (M)",
-                "tooltip": self.home_advanced_editor_button.toolTip(),
-                "widget": self.home_advanced_editor_button,
-            }]),
-            ("Sources", [
+            ("Close", [action(
+                "Close &\nLoad",
+                "Apply the staged query changes and return to the report.",
+                self.apply_button.click,
+                object_name="powerQueryCloseApplyButton",
+                size="large",
+                slot=(0, 0, 3, 1),
+                width=48,
+                menu_items=[
+                    ("Close & Load", self.apply_button.click, True),
+                    ("Close", self.reject, True),
+                ],
+                menu_button_popup=True,
+            )], "office"),
+            ("Query", [
                 action(
-                    "New source\n(file)",
-                    "Preview a CSV, Excel, JSON, XML, Parquet, or SQLite file and stage it in this session. It is added only by Close & Apply.",
-                    self._add_new_source,
-                    object_name="powerQueryNewSourceButton",
-                ),
-                action(
-                    "Edit source\nsettings",
-                    "Change the file path or parser options for a supported file-backed query while keeping its query ID, steps, and model schema.",
-                    self._edit_source_settings,
-                    object_name="powerQueryEditSourceSettingsButton",
-                ),
-                action(
-                    "From\nfolder",
-                    "Preview and combine matching local files from a folder, then stage the source for Close & Apply.",
-                    self._add_folder_source,
-                    object_name="powerQueryFolderSourceButton",
-                ),
-                action(
-                    "SQL\nServer",
-                    "Connect to a SQL Server table or view and stage it for Close & Apply.",
-                    self._add_sql_server_source,
-                    object_name="powerQuerySqlServerSourceButton",
-                ),
-                action(
-                    "OData\nFeed",
-                    "Connect to an anonymous OData v4 entity set and stage it for Close & Apply.",
-                    self._add_odata_source,
-                    object_name="powerQueryODataSourceButton",
-                ),
-                action(
-                    "Web\nsource",
-                    "Connect to an anonymous HTTPS table or data file and stage it for Close & Apply.",
-                    self._add_web_source,
-                    object_name="powerQueryWebSourceButton",
-                ),
-            ]),
-            ("Preview", [
-                action(
-                    "Refresh\npreview",
+                    "Refresh\nPreview",
                     "Refresh included sources and dependencies, replay current steps, and use cached sources for excluded queries.",
                     self._refresh_source_preview,
                     object_name="powerQueryRefreshPreviewButton",
-                ),
-            ]),
-            ("Queries", [
-                action(
-                    "Reference\nquery",
-                    "Create a new query that follows this query's result and transformations.",
-                    self._create_reference_query,
+                    size="large",
+                    slot=(0, 0, 3, 1),
+                    width=50,
                 ),
                 action(
-                    "Duplicate\nquery",
-                    "Create an independent copy of this query and its applied steps.",
-                    self._duplicate_selected_query,
+                    "Properties",
+                    "Expand query properties in the Query Settings pane.",
+                    self.all_properties_button.click,
+                    object_name="powerQueryPropertiesButton",
+                    size="small",
+                    slot=(0, 1, 1, 1),
+                    width=100,
+                ),
+                {
+                    "label": "Advanced Editor",
+                    "tooltip": self.home_advanced_editor_button.toolTip(),
+                    "widget": self.home_advanced_editor_button,
+                    "size": "small",
+                    "slot": (1, 1, 1, 1),
+                    "width": 104,
+                },
+                action(
+                    "Manage",
+                    "Duplicate, reference, edit, or delete the current query.",
+                    lambda: None,
+                    object_name="powerQueryManageQueriesButton",
+                    size="small",
+                    slot=(2, 1, 1, 1),
+                    width=100,
+                    menu_items=manage_query_menu_items,
+                ),
+            ], "office"),
+            ("Manage Columns", [
+                command("Choose Columns", "keep_columns", "Choose the columns that remain in the query.", size="medium", slot=(0, 0, 3, 1), width=52),
+                command("Remove Columns", "remove_column", "Remove the selected column.", size="medium", slot=(0, 1, 3, 1), width=52),
+            ], "office"),
+            ("Reduce Rows", [
+                command("Keep Rows", "keep_top_rows", "Keep the first N rows.", size="medium", slot=(0, 0, 3, 1), width=47),
+                command("Remove Rows", "remove_top_rows", "Remove the first N rows.", size="medium", slot=(0, 1, 3, 1), width=47),
+                command(
+                    "Sparse Top", "remove_sparse_top_rows",
+                    "Remove consecutive top rows with at most one nonblank cell; "
+                    "stop at the first row with two or more nonblank cells or a cell error.",
+                    size="small", slot=(0, 2, 1, 1), width=104,
+                ),
+                command(
+                    "Sparse Bottom", "remove_sparse_bottom_rows",
+                    "Remove consecutive bottom rows with at most one nonblank cell; "
+                    "stop at the first row with two or more nonblank cells or a cell error.",
+                    size="small", slot=(1, 2, 1, 1), width=104,
+                ),
+            ], "office"),
+            ("Sort", [
+                action(
+                    "", "Sort rows in ascending order.",
+                    lambda: self._select_ribbon_sort("asc"),
+                    object_name="powerQuerySortAscendingButton",
+                    size="small", slot=(0, 0, 1, 1), width=25,
                 ),
                 action(
-                    "Delete\nquery",
-                    "Remove this query from the project when no model or query dependencies would break.",
-                    self._delete_selected_query,
+                    "", "Sort rows in descending order.",
+                    lambda: self._select_ribbon_sort("desc"),
+                    object_name="powerQuerySortDescendingButton",
+                    size="small", slot=(1, 0, 1, 1), width=25,
                 ),
-            ]),
-            ("Parameters", [
+            ], "office"),
+            ("Transform", [
+                command("Split Column", "split_column", "Split a column at its first delimiter.", size="medium", slot=(0, 0, 3, 1), width=50),
+                command("Group By", "group_by", "Group rows and add supported aggregations.", size="medium", slot=(0, 1, 3, 1), width=50),
                 action(
-                    "Manage\nparameters",
-                    "Create, edit, and remove project parameters used by supported Power Query M row filters.",
-                    self._manage_query_parameters,
-                    object_name="managePowerQueryParametersButton",
+                    "Data Type: Any",
+                    "Choose a target data type. The selection configures the Convert Type step.",
+                    lambda: self._select_ribbon_operation("convert_type"),
+                    object_name="powerQueryDataTypeButton",
+                    size="small",
+                    slot=(0, 2, 1, 1),
+                    width=145,
+                    menu_items=data_type_menu_items,
                 ),
+                command("Use First Row as Headers", "promote_headers", "Use the first row as column names.", size="small", slot=(1, 2, 1, 1), width=150),
+                command("Replace Values", "replace_value", "Replace matching values in a column.", size="small", slot=(2, 2, 1, 1), width=145),
                 action(
-                    "Manage\nfunctions",
-                    "Create and reuse safe typed scalar M functions in custom-column formulas.",
-                    self._manage_query_functions,
-                    object_name="managePowerQueryFunctionsButton",
+                    "Detect Data Types",
+                    "Infer safe types for columns and add explicit conversion steps.",
+                    self._detect_data_types,
+                    object_name="powerQueryDetectDataTypesButton",
+                    size="small",
+                    slot=(3, 2, 1, 1),
+                    width=145,
                 ),
-            ]),
+            ], "office"),
             ("Combine", [
                 action(
-                    "Append\nqueries",
-                    "Append the current staged results of two queries into a new query.",
-                    self._append_queries,
-                    object_name="powerQueryAppendQueriesButton",
-                ),
-                action(
-                    "Merge\nqueries",
+                    "Merge Queries",
                     "Join the current staged results of two queries into a new query.",
                     self._merge_queries,
                     object_name="powerQueryMergeQueriesButton",
+                    size="small",
+                    slot=(0, 0, 1, 1),
+                    width=112,
                 ),
-            ]),
-            ("Columns", [
-                command("Keep\ncolumns", "keep_columns", "Choose the columns that remain in the query."),
-                command("Remove\ncolumn", "remove_column", "Remove the selected column."),
-                command("Rename\ncolumn", "rename_column", "Rename the selected column."),
-                command("Reorder\ncolumns", "reorder_columns", "Drag columns into the required order."),
-            ]),
-            ("Filter rows", [
-                command("Filter\nrows", "filter_rows", "Filter one column with a supported comparison."),
-                command("Advanced\nfilter", "filter_rows_advanced", "Build an AND/OR filter across columns."),
-                command("Remove\nblank rows", "remove_blank_rows", "Remove rows where every field is blank."),
-                command("Remove\nerrors", "remove_rows_with_errors", "Remove rows with an error in any column."),
-            ]),
-            ("Keep or remove rows", [
-                command("Keep top\nrows", "keep_top_rows", "Keep the first N rows."),
-                command("Keep bottom\nrows", "keep_bottom_rows", "Keep the last N rows."),
-                command("Keep row\nrange", "keep_range_rows", "Keep a range beginning at a one-based row number."),
-                command("Remove top\nrows", "remove_top_rows", "Remove the first N rows."),
-                command("Remove bottom\nrows", "remove_bottom_rows", "Remove the last N rows."),
-                command("Remove\nalternate", "remove_alternate_rows", "Remove repeating groups of rows."),
-            ]),
-            ("Sort and group", [
-                command("Sort", "sort_rows", "Sort rows by one column."),
-                command("Sort by\nmultiple", "sort_rows_by_columns", "Set prioritized sort levels across columns."),
-                command("Group by", "group_by", "Group rows and add supported aggregations."),
-            ]),
-            ("Duplicates", [
-                command("Remove\nduplicates", "remove_duplicates", "Keep the first row for each duplicate key."),
-                command("Keep\nduplicates", "keep_duplicates", "Keep rows whose selected key occurs more than once."),
-            ]),
+                action(
+                    "Append Queries",
+                    "Append the current staged results of two queries into a new query.",
+                    self._append_queries,
+                    object_name="powerQueryAppendQueriesButton",
+                    size="small",
+                    slot=(1, 0, 1, 1),
+                    width=112,
+                ),
+                action(
+                    "Combine Files",
+                    "Combine Files is unavailable for this source type.",
+                    lambda: None,
+                    object_name="powerQueryCombineFilesButton",
+                    size="small",
+                    slot=(2, 0, 1, 1),
+                    width=112,
+                    enabled=False,
+                ),
+            ], "office"),
+            ("Parameters", [action(
+                "Manage\nParameters",
+                "Create, edit, and remove project parameters used by supported Power Query M row filters.",
+                self._manage_query_parameters,
+                object_name="managePowerQueryParametersButton",
+                size="large",
+                slot=(0, 0, 3, 1),
+                width=68,
+            )], "office"),
+            ("Data Sources", [action(
+                "Data Source\nSettings",
+                "Change the path or parser options for a supported file-backed query.",
+                self._edit_source_settings,
+                object_name="powerQueryEditSourceSettingsButton",
+                size="large",
+                slot=(0, 0, 3, 1),
+                width=72,
+            )], "office"),
+            ("New Query", [action(
+                "New Source",
+                "Add a supported file, folder, SQL Server, OData, or web source.",
+                lambda: None,
+                object_name="powerQueryNewSourceButton",
+                size="small",
+                slot=(0, 0, 1, 1),
+                width=102,
+                menu_items=source_menu_items,
+            ), action(
+                "Recent Sources",
+                "Switch to a source query already open in this editor.",
+                lambda: None,
+                object_name="powerQueryRecentSourcesButton",
+                size="small",
+                slot=(1, 0, 1, 1),
+                width=102,
+                menu_items=recent_source_menu_items,
+            ), action(
+                "Enter Data",
+                "Create a query from values you type or paste.",
+                self._add_entered_data_source,
+                object_name="powerQueryEnterDataButton",
+                size="small",
+                slot=(2, 0, 1, 1),
+                width=102,
+            )], "office"),
         ]
         transform_groups = [
-            ("Data type", [
-                action(
-                    "Detect data\ntypes",
-                    "Infer supported types from the first 200 rows, then keep a detected type only when the full column converts cleanly.",
-                    self._detect_data_types,
-                    object_name="powerQueryDetectDataTypesButton",
+            ("Table", [
+                command("Transpose", "transpose_table", "Swap table rows and columns.", size="medium", slot=(0, 0, 3, 1)),
+                command("Demote Headers", "demote_headers", "Use column names as the first data row.", size="medium", slot=(0, 1, 3, 1)),
+                command("Count Rows", "count_rows", "Add a query step that returns the row count.", slot=(0, 2, 1, 1)),
+            ], "office"),
+            ("Any Column", [
+                command("Change Type", "convert_type", "Convert values to a supported data type.", slot=(0, 0, 1, 1)),
+                command("Type w/ Locale", "convert_type_using_locale", "Convert values using an explicit culture.", slot=(1, 0, 1, 1)),
+                command("Rename", "rename_column", "Rename the selected column.", slot=(2, 0, 1, 1)),
+                command("Reorder", "reorder_columns", "Drag columns into the required order.", slot=(3, 0, 1, 1)),
+                command("Fill Down", "fill_down", "Fill blank cells with the preceding value.", slot=(0, 1, 1, 1)),
+                command("Fill Up", "fill_up", "Fill blank cells with the following value.", slot=(1, 1, 1, 1)),
+                command("Pivot", "pivot_column", "Pivot distinct values into columns.", slot=(2, 1, 1, 1)),
+                command("Unpivot Cols", "unpivot_columns", "Turn selected columns into attribute/value rows.", slot=(3, 1, 1, 1)),
+                command("Unpivot Other", "unpivot_other_columns", "Keep selected columns and unpivot the rest.", slot=(0, 2, 1, 1)),
+                command("Remove Duplicates", "remove_duplicates", "Keep the first row for each duplicate key.", slot=(1, 2, 1, 1)),
+                command("Keep Duplicates", "keep_duplicates", "Keep rows whose selected key occurs more than once.", slot=(2, 2, 1, 1)),
+            ], "office"),
+            ("Text Column", [
+                command("Trim", "trim_text", "Remove leading and trailing whitespace.", slot=(0, 0, 1, 1)),
+                command("Clean", "clean_text", "Remove control characters.", slot=(1, 0, 1, 1)),
+                command("Lowercase", "lowercase_text", "Convert text to lowercase.", slot=(2, 0, 1, 1)),
+                command("Uppercase", "uppercase_text", "Convert text to uppercase.", slot=(3, 0, 1, 1)),
+                command("Capitalize", "proper_case_text", "Capitalize each word.", slot=(0, 1, 1, 1)),
+                command("Reverse", "reverse_text", "Reverse text in the selected column.", slot=(1, 1, 1, 1)),
+                command("Split Each Delim.", "split_column_by_each_delimiter", "Split at every delimiter into columns.", slot=(2, 1, 1, 1)),
+                command("Split to Rows", "split_column_to_rows", "Create a row for each delimited value.", slot=(3, 1, 1, 1)),
+                command("Split at Positions", "split_column_by_positions", "Split text at character positions.", slot=(0, 2, 1, 1)),
+                command("Extract Delim.", "extract_text_by_delimiter", "Extract text around a selected delimiter occurrence.", slot=(1, 2, 1, 1)),
+                command("Between Delims", "extract_text_between_delimiters", "Extract text between matching delimiters.", slot=(2, 2, 1, 1)),
+            ], "office"),
+            ("Rows", [
+                command("Filter Rows", "filter_rows", "Filter one column with a supported comparison.", slot=(0, 0, 1, 1)),
+                command("Advanced Filter", "filter_rows_advanced", "Build an AND/OR filter across columns.", slot=(1, 0, 1, 1)),
+                command("Keep Bottom", "keep_bottom_rows", "Keep the last N rows.", slot=(2, 0, 1, 1)),
+                command("Keep Range", "keep_range_rows", "Keep a range beginning at a one-based row number.", slot=(3, 0, 1, 1)),
+                command("Remove Bottom", "remove_bottom_rows", "Remove the last N rows.", slot=(0, 1, 1, 1)),
+                command("Remove Alternate", "remove_alternate_rows", "Remove repeating groups of rows.", slot=(1, 1, 1, 1)),
+                command("Remove Blank Rows", "remove_blank_rows", "Remove rows where every field is blank.", slot=(2, 1, 1, 1)),
+                command("Remove Error Rows", "remove_rows_with_errors", "Remove rows with an error in any column.", slot=(3, 1, 1, 1)),
+                command("Sort Rows", "sort_rows", "Sort the selected column ascending or descending.", slot=(0, 2, 1, 1)),
+                command("Sort by Columns", "sort_rows_by_columns", "Set multiple column sort priorities.", slot=(1, 2, 1, 1)),
+                command(
+                    "Sparse Top", "remove_sparse_top_rows",
+                    "Remove consecutive top rows with at most one nonblank cell; "
+                    "stop at the first row with two or more nonblank cells or a cell error.",
+                    slot=(2, 2, 1, 1),
                 ),
-                command("Change\ntype", "convert_type", "Convert values to a supported data type."),
-                command("Type using\nlocale", "convert_type_using_locale", "Convert values using an explicit culture."),
-            ]),
-            ("Text", [
-                command("Trim", "trim_text", "Remove leading and trailing whitespace."),
-                command("Clean", "clean_text", "Remove control characters."),
-                command("Lowercase", "lowercase_text", "Convert text to lowercase."),
-                command("UPPERCASE", "uppercase_text", "Convert text to uppercase."),
-                command("Capitalize\nwords", "proper_case_text", "Capitalize each word."),
-                command("Reverse", "reverse_text", "Reverse text in the selected column."),
-                command("Replace\nvalues", "replace_value", "Replace matching values in a column."),
-            ]),
-            ("Split and extract", [
-                command("Split by\ndelimiter", "split_column", "Split a column at its first delimiter."),
-                command("Split into\ncolumns", "split_column_by_each_delimiter", "Split at every delimiter into columns."),
-                command("Split into\nrows", "split_column_to_rows", "Create a row for each delimited value."),
-                command("Split by\npositions", "split_column_by_positions", "Split text at character positions."),
-                command("Extract before /\nafter", "extract_text_by_delimiter", "Extract text around a selected delimiter occurrence."),
-                command("Extract between\ndelimiters", "extract_text_between_delimiters", "Extract text between matching delimiters."),
-            ]),
-            ("Reshape and fill", [
-                command("Merge\ncolumns", "merge_columns", "Combine selected columns in their displayed order."),
-                command("Fill down", "fill_down", "Fill blank cells with the preceding value."),
-                command("Fill up", "fill_up", "Fill blank cells with the following value."),
-                command("Pivot", "pivot_column", "Pivot distinct values into columns."),
-                command("Unpivot\ncolumns", "unpivot_columns", "Turn selected columns into attribute/value rows."),
-                command("Unpivot other\ncolumns", "unpivot_other_columns", "Keep selected columns and unpivot the rest."),
-                command("Promote\nheaders", "promote_headers", "Use the first row as column names."),
-                command("Demote\nheaders", "demote_headers", "Use column names as the first data row."),
-                command("Transpose", "transpose_table", "Swap table rows and columns."),
-            ]),
+                command(
+                    "Sparse Bottom", "remove_sparse_bottom_rows",
+                    "Remove consecutive bottom rows with at most one nonblank cell; "
+                    "stop at the first row with two or more nonblank cells or a cell error.",
+                    slot=(3, 2, 1, 1),
+                ),
+            ], "office"),
         ]
         add_column_groups = [
-            ("Add a column", [
-                command("Custom\ncolumn", "add_custom_column", "Create a column with a supported M-subset expression."),
-                command("Conditional\ncolumn", "conditional_column", "Create a column from ordered conditional rules."),
-                command("Index\ncolumn", "add_index_column", "Add an index with a chosen start and increment."),
-                command("Duplicate\ncolumn", "duplicate_column", "Copy a column under a new name."),
-            ]),
+            ("General", [
+                command("Custom Column", "add_custom_column", "Create a column with a supported M-subset expression.", size="medium", slot=(0, 0, 3, 1)),
+                command("Conditional Column", "conditional_column", "Create a column from ordered conditional rules.", size="medium", slot=(0, 1, 3, 1), width=74),
+                command("Index Column", "add_index_column", "Add an index with a chosen start and increment.", size="medium", slot=(0, 2, 3, 1)),
+                command("Duplicate Column", "duplicate_column", "Copy a column under a new name.", size="medium", slot=(0, 3, 3, 1)),
+                action("Manage Functions", "Create and reuse safe typed scalar M functions in custom-column formulas.", self._manage_query_functions, object_name="managePowerQueryFunctionsButton", size="medium", slot=(0, 4, 3, 1)),
+            ], "office"),
+            ("From Text", [
+                command("Merge Columns", "merge_columns", "Combine selected columns in their displayed order.", size="medium", slot=(0, 0, 3, 1)),
+                command("Extract Delim.", "extract_text_by_delimiter", "Extract text around a selected delimiter occurrence.", slot=(0, 1, 1, 1)),
+                command("Between Delims", "extract_text_between_delimiters", "Extract text between matching delimiters.", slot=(1, 1, 1, 1)),
+            ], "office"),
         ]
 
         self.advanced_editor_button = QToolButton(self)
@@ -2579,56 +4047,112 @@ class TransformDataDialog(QDialog):
         self.advanced_editor_button.clicked.connect(self._open_advanced_editor)
 
         view_groups = [
-            ("Show panes", [
+            ("Layout", [
                 action(
-                    "Applied\nsteps", "Show or hide the applied steps pane.",
-                    self._set_steps_panel_visible, checkable=True, checked=True,
+                    "Query Settings",
+                    "Show or hide Query Settings and Applied Steps.",
+                    self._set_settings_steps_pane_visible,
+                    checkable=True,
+                    checked=True,
+                    object_name="powerQueryQuerySettingsToggleButton",
+                    size="medium",
+                    slot=(0, 0, 3, 1),
                 ),
                 action(
-                    "Data\npreview", "Show or hide the data preview and profiling pane.",
-                    self._set_preview_visible, checkable=True, checked=True,
+                    "Formula Bar",
+                    "Show or hide the formula bar for the selected query step.",
+                    self._set_formula_bar_visible,
+                    checkable=True,
+                    checked=True,
+                    object_name="powerQueryFormulaBarToggleButton",
+                    slot=(0, 1, 1, 1),
+                ),
+            ], "office"),
+            ("Data Preview", [
+                action(
+                    "Data Preview",
+                    "Show or hide the data preview and profiling pane.",
+                    self._set_preview_visible,
+                    checkable=True,
+                    checked=True,
+                    slot=(0, 0, 1, 1),
                 ),
                 action(
-                    "Column\nquality", "Show valid and empty value counts by column.",
+                    "Column Quality",
+                    "Show valid and empty value counts by column.",
                     self._show_quality_view,
+                    checkable=True,
+                    checked=True,
+                    slot=(1, 0, 1, 1),
                 ),
                 action(
-                    "Column\nprofile", "Profile distinct, unique, and frequent values by column.",
+                    "Column Profile",
+                    "Profile distinct, unique, and frequent values by column.",
                     self._show_profile_view,
+                    checkable=True,
+                    checked=True,
+                    slot=(2, 0, 1, 1),
                 ),
+            ], "office"),
+            ("Columns", [
                 action(
-                    "Schema\nview", "Show the selected step's column names, types, and sample values.",
+                    "Schema View",
+                    "Show the selected step's column names, types, and sample values.",
                     self._show_schema_view,
+                    size="medium",
+                    slot=(0, 0, 3, 1),
                 ),
-            ]),
-            ("Query", [{"label": "Advanced\nEditor (M)", "tooltip": self.advanced_editor_button.toolTip(), "widget": self.advanced_editor_button}]),
+            ], "office"),
+            ("Parameters", [action(
+                "Manage\nParameters",
+                "Create, edit, and remove project parameters used by supported Power Query M row filters.",
+                self._manage_query_parameters,
+                object_name="powerQueryManageParametersViewButton",
+                size="medium",
+                slot=(0, 0, 3, 1),
+            )], "office"),
+            ("Advanced", [
+                {
+                    "label": "Advanced Editor",
+                    "tooltip": self.advanced_editor_button.toolTip(),
+                    "widget": self.advanced_editor_button,
+                    "size": "medium",
+                    "slot": (0, 0, 3, 1),
+                },
+            ], "office"),
             ("Dependencies", [
                 action(
-                    "Diagram\nview",
+                    "Diagram View",
                     "View source-to-query dependencies for the current editor session.",
                     self._show_query_dependencies,
                     object_name="powerQueryDiagramViewButton",
+                    size="medium",
+                    slot=(0, 0, 3, 1),
                 ),
-            ]),
+            ], "office"),
         ]
         tools_groups = [
             ("Applied step actions", [
-                action("Add / new\nstep", "Add a transformation step.", lambda: self.add_button.click()),
-                action("Update\nselected", "Update the selected step from the editor controls.", lambda: self.update_button.click()),
-                action("Remove\nselected", "Remove the selected applied step.", lambda: self.remove_button.click()),
-                action("Move step\nup", "Move the selected step earlier in the query.", lambda: self.up_button.click()),
-                action("Move step\ndown", "Move the selected step later in the query.", lambda: self.down_button.click()),
-            ]),
+                action("Add Step", "Add a transformation step.", lambda: self.add_button.click(), slot=(0, 0, 1, 1)),
+                action("Update Step", "Update the selected step from the editor controls.", lambda: self.update_button.click(), slot=(1, 0, 1, 1)),
+                action("Remove Step", "Remove the selected applied step.", lambda: self.remove_button.click(), slot=(2, 0, 1, 1)),
+                action("Move Step Up", "Move the selected step earlier in the query.", lambda: self.up_button.click(), slot=(0, 1, 1, 1)),
+                action("Move Step Down", "Move the selected step later in the query.", lambda: self.down_button.click(), slot=(1, 1, 1, 1)),
+            ], "office"),
         ]
         help_groups = [
             ("Power Query", [
                 action(
-                    "Feature\nguide",
+                    "Feature Guide",
                     "See the available ribbon commands and the supported M subset.",
                     self._show_feature_guide,
+                    size="medium",
+                    slot=(0, 0, 3, 1),
                 ),
-            ]),
+            ], "office"),
         ]
+        view_groups.extend(tools_groups)
+        view_groups.extend(help_groups)
 
         for tab_name, groups in (
             ("Home", home_groups),
@@ -2639,33 +4163,90 @@ class TransformDataDialog(QDialog):
             ("Help", help_groups),
         ):
             self.ribbon_tabs.addTab(self._make_ribbon_page(groups), tab_name)
+        tab_bar = self.ribbon_tabs.tabBar()
+        tab_bar.setElideMode(Qt.TextElideMode.ElideNone)
+        tab_bar.setUsesScrollButtons(False)
+        tab_bar.setDrawBase(False)
+        tab_bar.setFixedHeight(28)
+        tab_bar.setStyleSheet("""
+            QTabBar { background: #ffffff; }
+            QTabBar::base { background: #ffffff; border: 0; }
+            QTabBar::tab-bar { background: #ffffff; }
+            QTabBar::tab {
+                background: #ffffff;
+                border: 0;
+                min-width: 52px;
+                padding: 4px 11px 5px 11px;
+                color: #444c53;
+                font-size: 12px;
+            }
+            QTabBar::tab:selected {
+                background: #ffffff;
+                color: #252525;
+                border-bottom: 0;
+                font-weight: 600;
+            }
+        """)
+        tab_bar.setTabVisible(4, False)
+        tab_bar.setTabVisible(5, False)
+        self.ribbon_tabs.setCurrentIndex(0)
+        self.query_settings_toggle_button = self.findChild(
+            QToolButton, "powerQueryQuerySettingsToggleButton"
+        )
 
-    def _make_ribbon_page(self, groups: list[tuple[str, list[dict[str, Any]]]]) -> QWidget:
+    def _make_ribbon_page(
+        self,
+        groups: list[tuple[Any, ...]],
+    ) -> QWidget:
         page = QWidget(self.ribbon_tabs)
-        row = QHBoxLayout(page)
-        row.setContentsMargins(6, 6, 6, 6)
-        row.setSpacing(7)
-        for title, entries in groups:
-            group = QGroupBox(title, page)
-            group.setStyleSheet("QGroupBox { font-weight: 600; }")
-            grid = QGridLayout(group)
-            grid.setContentsMargins(7, 10, 7, 7)
-            grid.setHorizontalSpacing(4)
-            grid.setVerticalSpacing(4)
-            columns = 2 if len(entries) > 1 else 1
+        page.setObjectName("powerQueryRibbonPage")
+        page_layout = QVBoxLayout(page)
+        page_layout.setContentsMargins(0, 0, 0, 0)
+        page_layout.setSpacing(0)
+        scroll = QScrollArea(page)
+        scroll.setObjectName("powerQueryRibbonScrollArea")
+        scroll.setPalette(self.palette())
+        scroll.setFrameShape(QFrame.Shape.NoFrame)
+        scroll.setWidgetResizable(True)
+        scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAsNeeded)
+        scroll.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
+        body = QWidget(scroll)
+        row = QHBoxLayout(body)
+        row.setContentsMargins(2, 0, 2, 0)
+        row.setSpacing(0)
+        for group_index, group_spec in enumerate(groups):
+            title, entries = group_spec[:2]
+            presentation = group_spec[2] if len(group_spec) > 2 else "office"
+            group = QWidget(page)
+            group.setObjectName("powerQueryRibbonGroup")
+            group_layout = QVBoxLayout(group)
+            group_layout.setContentsMargins(2, 1, 2, 1)
+            group_layout.setSpacing(0)
+            grid = QGridLayout()
+            grid.setContentsMargins(0, 0, 0, 0)
+            grid.setHorizontalSpacing(1)
+            grid.setVerticalSpacing(1)
+            default_size = {
+                "large": "large",
+                "tiles": "medium",
+                "stack": "small",
+                "grid": "small",
+                "office": "small",
+            }.get(presentation, "small")
+            fallback_row = 0
             for index, entry in enumerate(entries):
+                size = str(entry.get("size", default_size))
+                label = str(entry.get("label", "")).strip()
+                text = label if size != "small" else " ".join(label.split())
                 button = entry.get("widget")
                 if button is None:
                     button = QToolButton(group)
-                    button.setText(entry["label"])
+                    button.setText(text)
                     button.setObjectName(
                         f"powerQueryCommand_{entry['operation']}"
                         if "operation" in entry
                         else entry.get("object_name", "powerQueryRibbonAction")
                     )
-                    button.setToolButtonStyle(Qt.ToolButtonStyle.ToolButtonTextOnly)
-                    button.setMinimumSize(86, 42)
-                    button.setMaximumWidth(116)
                     button.setToolTip(entry["tooltip"])
                     if "operation" in entry:
                         operation = entry["operation"]
@@ -2681,9 +4262,92 @@ class TransformDataDialog(QDialog):
                             lambda checked=False, fn=callback, checkable=entry.get("checkable", False):
                                 fn(checked) if checkable else fn()
                         )
-                grid.addWidget(button, index // columns, index % columns)
+                    menu_items = entry.get("menu_items")
+                    if menu_items:
+                        menu = QMenu(button)
+                        for menu_label, menu_callback, enabled in menu_items:
+                            menu_action = menu.addAction(menu_label)
+                            menu_action.setEnabled(bool(enabled))
+                            if enabled:
+                                menu_action.triggered.connect(
+                                    lambda _checked=False, fn=menu_callback: fn()
+                                )
+                        button.setMenu(menu)
+                        button.setPopupMode(
+                            QToolButton.ToolButtonPopupMode.MenuButtonPopup
+                            if entry.get("menu_button_popup")
+                            else QToolButton.ToolButtonPopupMode.InstantPopup
+                        )
+                if "widget" in entry:
+                    button.setText(text)
+                icon = self._ribbon_icon(entry)
+                button.setIcon(icon)
+                if icon.isNull():
+                    button.setToolButtonStyle(Qt.ToolButtonStyle.ToolButtonTextOnly)
+                elif size == "small":
+                    button.setToolButtonStyle(Qt.ToolButtonStyle.ToolButtonTextBesideIcon)
+                else:
+                    button.setToolButtonStyle(Qt.ToolButtonStyle.ToolButtonTextUnderIcon)
+                if size != "small":
+                    words = text.split()
+                    wrapped: list[str] = []
+                    line = ""
+                    for word in words:
+                        candidate = f"{line} {word}".strip()
+                        if line and len(candidate) > 7:
+                            wrapped.append(line)
+                            line = word
+                        else:
+                            line = candidate
+                    if line:
+                        wrapped.append(line)
+                    text = "\n".join(wrapped)
+                    button.setText(text)
+                if size == "large":
+                    button_size = QSize(int(entry.get("width", 58)), 72)
+                    icon_size = QSize(34, 34)
+                elif size == "medium":
+                    button_size = QSize(int(entry.get("width", 62)), 72)
+                    icon_size = QSize(32, 32)
+                else:
+                    requested_width = int(entry.get("width", 0))
+                    small_width = requested_width or min(180, max(108, int(len(text) * 6 + 34)))
+                    button_size = QSize(small_width, 23)
+                    icon_size = QSize(18, 18)
+                    if button.objectName() == "openPowerQueryMEditorHomeButton":
+                        icon_size = QSize(16, 16)
+                button.setIconSize(icon_size)
+                button.setFixedSize(button_size)
+                button.setProperty("powerQueryRibbonSize", size)
+                button.setEnabled(bool(entry.get("enabled", True)))
+                button.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
+                button.setAutoRaise(True)
+                slot = entry.get("slot")
+                if slot is None:
+                    if presentation == "tiles":
+                        slot = (0, index, 1, 1)
+                    else:
+                        slot = (fallback_row, 0, 1, 1)
+                        fallback_row += 1
+                grid.addWidget(button, *slot)
+            group_layout.addLayout(grid)
+            caption = QLabel(title, group)
+            caption.setObjectName("powerQueryRibbonGroupCaption")
+            caption.setAlignment(Qt.AlignmentFlag.AlignCenter)
+            caption.setFixedHeight(19)
+            group_layout.addWidget(caption)
             row.addWidget(group, 0, Qt.AlignmentFlag.AlignTop)
+            if group_index < len(groups) - 1:
+                separator = QFrame(page)
+                separator.setFrameShape(QFrame.Shape.VLine)
+                separator.setFrameShadow(QFrame.Shadow.Plain)
+                separator.setStyleSheet("color: #d0d0d0;")
+                row.addWidget(separator, 0, Qt.AlignmentFlag.AlignTop)
         row.addStretch(1)
+        row.activate()
+        body.setMinimumWidth(row.sizeHint().width() + 2)
+        scroll.setWidget(body)
+        page_layout.addWidget(scroll)
         self._update_refresh_preview_button()
         new_source_button = self.findChild(QToolButton, "powerQueryNewSourceButton")
         if new_source_button is not None:
@@ -2691,22 +4355,213 @@ class TransformDataDialog(QDialog):
                 self._new_source_candidate_callback is not None
             )
         self._update_edit_source_settings_button()
-        folder_source_button = self.findChild(
-            QToolButton, "powerQueryFolderSourceButton"
-        )
-        if folder_source_button is not None:
-            folder_source_button.setEnabled(
-                self._new_folder_source_candidate_callback is not None
-            )
-        for object_name, callback in (
-            ("powerQuerySqlServerSourceButton", self._new_sql_server_source_candidate_callback),
-            ("powerQueryODataSourceButton", self._new_odata_source_candidate_callback),
-            ("powerQueryWebSourceButton", self._new_web_source_candidate_callback),
-        ):
-            button = self.findChild(QToolButton, object_name)
-            if button is not None:
-                button.setEnabled(callback is not None)
+        if new_source_button is not None:
+            new_source_button.setEnabled(any(
+                callback is not None
+                for callback in (
+                    self._new_source_candidate_callback,
+                    self._new_folder_source_candidate_callback,
+                    self._new_sql_server_source_candidate_callback,
+                    self._new_odata_source_candidate_callback,
+                    self._new_web_source_candidate_callback,
+                )
+            ))
         return page
+
+    def _ribbon_icon(self, entry: dict[str, Any]):
+        operation_icons = {
+            "keep_columns": "table",
+            "remove_column": "table_edit_c65911",
+            "rename_column": "table_edit",
+            "reorder_columns": "data_bar_horizontal",
+            "filter_rows": "filter",
+            "filter_rows_advanced": "filter",
+            "remove_blank_rows": "dismiss_c65911",
+            "remove_rows_with_errors": "dismiss_c65911",
+            "keep_top_rows": "data_bar_vertical_ascending",
+            "keep_bottom_rows": "data_bar_vertical",
+            "keep_range_rows": "table",
+            "remove_top_rows": "table_edit_c65911",
+            "remove_bottom_rows": "table_edit_c65911",
+            "remove_sparse_top_rows": "table_edit_c65911",
+            "remove_sparse_bottom_rows": "table_edit_c65911",
+            "remove_alternate_rows": "table_edit_c65911",
+            "sort_rows": "data_bar_vertical_ascending",
+            "sort_rows_by_columns": "data_bar_vertical_ascending",
+            "group_by": "table_multiple_107c71",
+            "remove_duplicates": "dismiss_c65911",
+            "keep_duplicates": "table_multiple_107c71",
+            "count_rows": "data_bar_vertical",
+            "convert_type": "table_edit",
+            "convert_type_using_locale": "document",
+            "trim_text": "text_align_left",
+            "clean_text": "text_align_left",
+            "lowercase_text": "text_align_left",
+            "uppercase_text": "text_align_left",
+            "proper_case_text": "text_align_left",
+            "reverse_text": "text_align_left",
+            "replace_value": "text_align_left",
+            "split_column": "text_add",
+            "split_column_by_each_delimiter": "text_add",
+            "split_column_to_rows": "text_add",
+            "split_column_by_positions": "text_add",
+            "extract_text_by_delimiter": "text_add",
+            "extract_text_between_delimiters": "text_add",
+            "merge_columns": "table_multiple_107c71",
+            "fill_down": "data_bar_vertical",
+            "fill_up": "data_bar_vertical_ascending",
+            "pivot_column": "table_multiple_107c71",
+            "unpivot_columns": "table_multiple_107c71",
+            "unpivot_other_columns": "table_multiple_107c71",
+            "promote_headers": "table_edit",
+            "demote_headers": "table_edit",
+            "transpose_table": "table_multiple_107c71",
+            "add_custom_column": "text_add",
+            "conditional_column": "filter",
+            "add_index_column": "data_bar_vertical_add",
+            "duplicate_column": "table_multiple_107c71",
+        }
+        object_icons = {
+            "powerQueryCloseApplyButton": "save_107c71",
+            "powerQueryNewSourceButton": "folder_open_8a6d1d",
+            "powerQueryRecentSourcesButton": "history_0078d4",
+            "powerQueryEnterDataButton": "table_add_107c71",
+            "powerQueryPropertiesButton": "settings_647382",
+            "powerQueryManageQueriesButton": "table_edit_0078d4",
+            "powerQuerySortAscendingButton": "data_bar_vertical_ascending",
+            "powerQuerySortDescendingButton": "data_bar_vertical",
+            "powerQueryDataTypeButton": "table_edit_107c71",
+            "powerQueryCombineFilesButton": "folder_open_647382",
+            "powerQueryEditSourceSettingsButton": "settings_c65911",
+            "powerQueryFolderSourceButton": "folder_open_8a6d1d",
+            "powerQuerySqlServerSourceButton": "database",
+            "powerQueryODataSourceButton": "database",
+            "powerQueryWebSourceButton": "document_arrow_right",
+            "powerQueryRefreshPreviewButton": "arrow_sync",
+            "managePowerQueryParametersButton": "math_symbols_107c71",
+            "powerQueryManageParametersViewButton": "math_symbols_107c71",
+            "managePowerQueryFunctionsButton": "code",
+            "powerQueryAppendQueriesButton": "table_multiple",
+            "powerQueryMergeQueriesButton": "table_multiple",
+            "powerQueryDetectDataTypesButton": "data_histogram_107c71",
+            "powerQueryDiagramViewButton": "flowchart",
+        }
+        label_icons = {
+            "advanced editor": "code",
+            "advanced ed.": "code",
+            "advanced editor (m)": "code",
+            "reference": "branch",
+            "reference query": "branch",
+            "properties": "settings",
+            "manage": "table_edit",
+            "data type: any": "table_edit",
+            "use first row as headers": "table_edit",
+            "recent sources": "history",
+            "enter data": "table_add",
+            "duplicate": "table_multiple",
+            "duplicate query": "table_multiple",
+            "delete": "dismiss",
+            "delete query": "dismiss",
+            "applied steps": "checkmark",
+            "data preview": "table",
+            "column quality": "data_bar_vertical",
+            "column profile": "data_histogram",
+            "schema view": "table_edit",
+            "query settings": "settings",
+            "formula bar": "code",
+            "manage parameters": "math_symbols",
+            "query dependencies": "flowchart",
+            "diagram view": "flowchart",
+            "count rows": "data_bar_vertical",
+            "add step": "add",
+            "update step": "checkmark",
+            "remove step": "dismiss",
+            "move step up": "data_bar_vertical_ascending",
+            "move step down": "data_bar_vertical",
+            "feature guide": "question",
+        }
+        operation = str(entry.get("operation", "")).casefold()
+        widget = entry.get("widget")
+        object_name = str(
+            entry.get("object_name")
+            or (widget.objectName() if widget is not None else "")
+        )
+        label = " ".join(str(entry.get("label", "")).split()).casefold()
+        reference_icons = {
+            "close_load": "close_load",
+            "powerQueryRefreshPreviewButton": "refresh_preview",
+            "powerQueryPropertiesButton": "properties",
+            "openPowerQueryMEditorHomeButton": "advanced_editor",
+            "powerQueryManageQueriesButton": "manage_query",
+            "powerQuerySortAscendingButton": "sort_ascending",
+            "powerQuerySortDescendingButton": "sort_descending",
+            "powerQueryMergeQueriesButton": "merge_queries",
+            "powerQueryAppendQueriesButton": "append_queries",
+            "powerQueryCombineFilesButton": "combine_files",
+            "managePowerQueryParametersButton": "manage_parameters",
+            "powerQueryEditSourceSettingsButton": "data_source_settings",
+            "powerQueryNewSourceButton": "new_source",
+            "powerQueryRecentSourcesButton": "recent_sources",
+            "powerQueryEnterDataButton": "enter_data",
+        }
+        operation_reference_icons = {
+            "keep_columns": "choose_columns",
+            "remove_column": "remove_columns",
+            "keep_top_rows": "keep_rows",
+            "remove_top_rows": "remove_rows",
+            "promote_headers": "use_first_row_headers",
+            "replace_value": "replace_values",
+            "split_column": "split_column",
+            "group_by": "group_by",
+        }
+        reference_icon_name = (
+            reference_icons.get(object_name)
+            or operation_reference_icons.get(operation)
+        )
+        if object_name == "powerQueryCloseApplyButton":
+            reference_icon_name = "close_load"
+        if reference_icon_name is not None:
+            cache_key = f"reference:{reference_icon_name}"
+            cached = self._ribbon_icon_cache.get(cache_key)
+            if cached is not None:
+                return cached
+            icon_path = (
+                Path(__file__).resolve().parent
+                / "qml"
+                / "icons"
+                / "power_query_ribbon"
+                / f"{reference_icon_name}.png"
+            )
+            icon = QIcon(str(icon_path)) if icon_path.is_file() else QIcon()
+            self._ribbon_icon_cache[cache_key] = icon
+            return icon
+        if object_name == "powerQueryDataTypeButton":
+            return QIcon()
+        icon_name = (
+            operation_icons.get(operation)
+            or object_icons.get(object_name)
+            or label_icons.get(label)
+        )
+        if icon_name is None:
+            return QIcon()
+
+        cached = self._ribbon_icon_cache.get(icon_name)
+        if cached is not None:
+            return cached
+
+        icon_directory = Path(__file__).resolve().parent / "qml" / "icons" / "fluent"
+        candidates = [
+            icon_directory / f"{icon_name}_0078d4_20_regular.svg",
+            icon_directory / f"{icon_name}_107c71_20_regular.svg",
+            icon_directory / f"{icon_name}_c65911_20_regular.svg",
+            icon_directory / f"{icon_name}_8a6d1d_20_regular.svg",
+            icon_directory / f"{icon_name}_647382_20_regular.svg",
+            icon_directory / f"{icon_name}_20_regular.svg",
+        ]
+        icon_path = next((candidate for candidate in candidates if candidate.is_file()), None)
+        icon = QIcon(str(icon_path)) if icon_path is not None else QIcon()
+        self._ribbon_icon_cache[icon_name] = icon
+        return icon
 
     def _update_refresh_preview_button(self) -> None:
         button = self.findChild(QToolButton, "powerQueryRefreshPreviewButton")
@@ -2912,29 +4767,188 @@ class TransformDataDialog(QDialog):
         self._save_active_query_state()
         self._update_refresh_preview_button()
 
+    def _select_ribbon_sort(self, direction: str) -> None:
+        selected_index = self.preview.currentIndex()
+        selected_column = (
+            self._preview_candidate.headers[selected_index.column()]
+            if selected_index.isValid()
+            and 0 <= selected_index.column() < len(self._preview_candidate.headers)
+            else None
+        )
+        self._select_ribbon_operation("sort_rows")
+        index = self.option_combo.findData(direction)
+        if index >= 0:
+            self.option_combo.setCurrentIndex(index)
+        if selected_column is not None:
+            self.column_combo.setCurrentText(selected_column)
+            previous_step_count = len(self._steps)
+            self._add_step()
+            if len(self._steps) > previous_step_count:
+                self.step_settings_toggle.setChecked(False)
+
+    def _select_ribbon_data_type(self, data_type: str) -> None:
+        self._select_ribbon_operation("convert_type")
+        index = self.option_combo.findData(data_type)
+        if index >= 0:
+            self.option_combo.setCurrentIndex(index)
+
     def _select_ribbon_operation(self, operation: str) -> None:
         operation_index = self.operation_combo.findData(operation)
         if operation_index < 0:
+            self._show_error(
+                f"The {operation.replace('_', ' ').title()} command is not available in this editor."
+            )
+            return
+        if operation == "add_custom_column":
+            if self.step_list.currentRow() >= 0:
+                self.step_list.setCurrentRow(-1)
+            self.operation_combo.setCurrentIndex(operation_index)
+            self._configure_editor()
+            if not self._launch_custom_column_dialog():
+                self._restore_non_custom_operation()
             return
         if self.step_list.currentRow() >= 0:
             self.step_list.setCurrentRow(-1)
+        self.step_settings_toggle.setChecked(True)
         self.operation_combo.setCurrentIndex(operation_index)
         self._configure_editor()
+        if operation in self._STEP_OPERATIONS_WITHOUT_SETTINGS:
+            self._add_step()
+            self.step_settings_toggle.setChecked(False)
+            return
         if self.preview.currentIndex().isValid() and not self.column_combo.isHidden():
             header_index = self.preview.currentIndex().column()
             if 0 <= header_index < len(self._preview_candidate.headers):
                 self.column_combo.setCurrentText(self._preview_candidate.headers[header_index])
         self._clear_error()
 
+    def _custom_column_base(self, editing_index: int | None) -> ImportCandidate:
+        steps = self._steps[:editing_index] if editing_index is not None else self._steps
+        return apply_transformations(
+            self._source_candidate, steps, parameters=self._parameter_values()
+        )
+
+    def _validate_custom_column_draft(
+        self,
+        name: str,
+        expression: str,
+        editing_index: int | None,
+    ) -> str | None:
+        step: dict[str, Any] = {
+            "op": "add_custom_column", "name": name, "expression": expression,
+        }
+        next_steps = deepcopy(self._steps)
+        if editing_index is None:
+            next_steps.append(step)
+        else:
+            if not 0 <= editing_index < len(next_steps):
+                return "The selected custom-column step is no longer available."
+            old_step = next_steps[editing_index]
+            if "output_type" in old_step:
+                step["output_type"] = old_step["output_type"]
+            next_steps[editing_index] = step
+        try:
+            validated = validate_steps(next_steps)
+            apply_transformations(
+                self._source_candidate,
+                validated,
+                parameters=self._parameter_values(),
+            )
+        except (TransformationError, ValueError) as exc:
+            return str(exc)
+        return None
+
+    def _launch_custom_column_dialog(
+        self,
+        editing_index: int | None = None,
+        *,
+        initial_name: str = "",
+        initial_expression: str = "",
+    ) -> bool:
+        existing = (
+            self._steps[editing_index]
+            if editing_index is not None and 0 <= editing_index < len(self._steps)
+            else {}
+        )
+        try:
+            base = self._custom_column_base(editing_index)
+        except TransformationError as exc:
+            self._show_error(str(exc))
+            return False
+        dialog = CustomColumnDialog(
+            base.headers,
+            initial_name=str(existing.get("name", initial_name)),
+            initial_expression=str(existing.get("expression", initial_expression)),
+            functions=self._query_functions,
+            parameters=self._query_parameters,
+            validate_callback=lambda name, expression: self._validate_custom_column_draft(
+                name, expression, editing_index
+            ),
+            parent=self,
+        )
+        if dialog.exec() != QDialog.DialogCode.Accepted or dialog.column is None:
+            return False
+        name, expression = dialog.column
+        self.operation_combo.setCurrentIndex(
+            self.operation_combo.findData("add_custom_column")
+        )
+        self.value_edit.setText(name)
+        self.custom_expression_edit.setPlainText(expression)
+        if editing_index is None:
+            self._add_step()
+        else:
+            self._set_combo_data(
+                self.custom_output_type_combo,
+                existing.get("output_type", "text"),
+            )
+            self.step_list.setCurrentRow(editing_index)
+            self._update_selected_step()
+        return True
+
+    def _on_operation_combo_changed(self, *_args: Any) -> None:
+        operation = self.operation_combo.currentData()
+        if operation != "add_custom_column":
+            self._last_non_custom_operation = operation
+        self._configure_editor(*_args)
+
+    def _restore_non_custom_operation(self) -> None:
+        operation_index = self.operation_combo.findData(
+            self._last_non_custom_operation
+        )
+        if operation_index >= 0:
+            self.operation_combo.setCurrentIndex(operation_index)
+        self._configure_editor()
+
+    def _on_operation_combo_activated(self, index: int) -> None:
+        if self.operation_combo.itemData(index) != "add_custom_column":
+            return
+        if self.step_list.currentRow() >= 0:
+            self.step_list.setCurrentRow(-1)
+        self.step_settings_toggle.setChecked(True)
+        self._configure_editor()
+        if not self._launch_custom_column_dialog():
+            self._restore_non_custom_operation()
+
     def _set_steps_panel_visible(self, visible: bool) -> None:
         self.steps_panel.setVisible(visible)
+
+    def _set_formula_bar_visible(self, visible: bool) -> None:
+        self.formula_bar_row.setVisible(bool(visible))
+
+    def _set_settings_steps_pane_visible(self, visible: bool) -> None:
+        self.settings_steps_pane.setVisible(bool(visible))
+        toggle = getattr(self, "query_settings_toggle_button", None)
+        if toggle is not None and toggle.isChecked() != bool(visible):
+            toggle.setChecked(bool(visible))
 
     def _populate_queries(self) -> None:
         blocker = QSignalBlocker(self.query_list)
         self.query_list.clear()
+        self.queries_heading.setText(f"Queries [{len(self._query_order)}]")
+        query_icon = self.style().standardIcon(QStyle.SP_FileIcon)
         for query_id in self._query_order:
             query = self._query_states[query_id]
-            item = QListWidgetItem(query["display_name"])
+            item = QListWidgetItem(query_icon, query["display_name"])
             item.setData(Qt.ItemDataRole.UserRole, query_id)
             item.setToolTip(
                 query.get("preview_error") or query.get("description") or query["name"]
@@ -2989,6 +5003,20 @@ class TransformDataDialog(QDialog):
         """Stage a file-backed root query without mutating project state."""
         self._stage_new_source(self._new_source_candidate_callback)
 
+    def _add_entered_data_source(self) -> None:
+        """Stage a typed or pasted inline table as a new Power Query source."""
+        dialog = EnterDataDialog(replacing=False, parent=self)
+        if dialog.exec() != QDialog.DialogCode.Accepted or dialog.candidate is None:
+            return
+        candidate = deepcopy(dialog.candidate)
+        source_id = str(uuid4())
+        query_name = str(candidate.options.get("name", "Entered data")).strip() or "Entered data"
+        candidate.set_source_identity(source_id)
+        source_record = source_from_candidate(candidate, source_id, query_name)
+        source_record["query_name"] = query_name
+        source_record["transform_steps"] = []
+        self._stage_new_source(lambda: (candidate, source_record))
+
     def _add_folder_source(self) -> None:
         """Stage a combined folder source without mutating project state."""
         self._stage_new_source(self._new_folder_source_candidate_callback)
@@ -3024,7 +5052,7 @@ class TransformDataDialog(QDialog):
                 raise ValueError("The source preview did not contain a table.")
             supported_kinds = {
                 "csv", "excel", "json", "xml", "parquet", "sqlite", "folder",
-                "sql_server", "odata", "web",
+                "sql_server", "odata", "web", "inline",
             }
             if candidate.kind not in supported_kinds:
                 raise ValueError("Choose a supported local or remote table source.")
@@ -3041,7 +5069,7 @@ class TransformDataDialog(QDialog):
             if source_kind in {"csv", "excel", "json", "xml", "parquet", "sqlite", "folder"}:
                 if not source_path:
                     raise ValueError("The selected local source needs a valid path.")
-            else:
+            elif source_kind in {"sql_server", "odata", "web"}:
                 connection = source_record.get("connection")
                 if not isinstance(connection, dict) or not isinstance(
                     source_record.get("parser_options", {}), dict
@@ -3058,6 +5086,8 @@ class TransformDataDialog(QDialog):
                     source_record.get("_staged_password", "")
                 ):
                     raise ValueError("Enter a SQL Server password before adding this source.")
+            elif source_kind != "inline":
+                raise ValueError("Choose a supported local, remote, or entered-data source.")
 
             used_names = set(self._reserved_query_names)
             used_names.update(
@@ -3087,9 +5117,12 @@ class TransformDataDialog(QDialog):
                 ),
                 "query_name": query_name,
                 "kind": candidate.kind,
-                "parser_options": deepcopy(candidate.options),
                 "transform_steps": [],
             })
+            if source_kind == "inline":
+                source_record.pop("parser_options", None)
+            else:
+                source_record["parser_options"] = deepcopy(candidate.options)
             if source_path:
                 source_record["path"] = source_path
             else:
@@ -3986,17 +6019,192 @@ class TransformDataDialog(QDialog):
             self._clear_error()
 
     def _set_preview_visible(self, visible: bool) -> None:
+        if visible:
+            self.preview_tabs.setCurrentWidget(self.preview)
+            self.preview.setVisible(True)
         self.preview.setVisible(visible)
         self.preview_tabs.setVisible(visible)
 
-    def _show_quality_view(self) -> None:
-        self.preview_tabs.setCurrentWidget(self.quality_table)
+    def _show_quality_view(self, visible: bool = True) -> None:
+        self.preview_header.set_quality_visible(visible)
 
-    def _show_profile_view(self) -> None:
-        self.preview_tabs.setCurrentIndex(2)
+    def _show_profile_view(self, visible: bool = True) -> None:
+        self.preview_header.set_distribution_visible(visible)
+
+    def _show_preview_column_menu(self, logical_index: int) -> None:
+        headers = self._selected_preview_candidate().headers
+        if logical_index < 0 or logical_index >= len(headers):
+            return
+        column = headers[logical_index]
+        menu = QMenu(self)
+        sort_ascending = menu.addAction("Sort ascending")
+        sort_descending = menu.addAction("Sort descending")
+        menu.addSeparator()
+        filter_values = menu.addAction("Filter by values…")
+        filter_condition = menu.addAction("Filter by condition…")
+        selected = menu.exec(self._preview_column_menu_position(logical_index))
+
+        if selected is filter_values:
+            self._open_preview_value_filter(column)
+            return
+        if selected not in {sort_ascending, sort_descending, filter_condition}:
+            return
+        self.step_list.setCurrentRow(-1)
+        operation = (
+            "sort_rows"
+            if selected in {sort_ascending, sort_descending}
+            else "filter_rows"
+        )
+        operation_index = self.operation_combo.findData(operation)
+        if operation_index < 0:
+            return
+        self.operation_combo.setCurrentIndex(operation_index)
+        self.column_combo.setCurrentIndex(self.column_combo.findText(column))
+        self.step_settings_toggle.setChecked(True)
+
+        if selected in {sort_ascending, sort_descending}:
+            direction = "asc" if selected is sort_ascending else "desc"
+            self._set_combo_data(self.option_combo, direction)
+            self._add_step()
+            return
+
+        self._set_combo_data(self.option_combo, "equals")
+        self.filter_parameter_combo.setCurrentIndex(0)
+        self.value_edit.setFocus()
+
+    def _preview_column_menu_position(self, logical_index: int) -> QPoint:
+        header = self.preview_header
+        for button in header._filter_buttons:
+            if (
+                button.property("logicalIndex") == logical_index
+                and button.isVisible()
+            ):
+                return button.mapToGlobal(QPoint(0, button.height()))
+
+        # A partly clipped section may not have a visible filter button. Keep
+        # header clicks usable by anchoring at the nearest visible viewport edge.
+        viewport = header.viewport()
+        anchor_rect = header._filter_button_rect(logical_index)
+        viewport_rect = viewport.rect()
+        x = min(max(anchor_rect.left(), viewport_rect.left()), viewport_rect.right())
+        y = min(
+            max(anchor_rect.bottom() + 1, viewport_rect.top()),
+            viewport_rect.bottom(),
+        )
+        return viewport.mapToGlobal(QPoint(x, y))
+
+    def _open_preview_value_filter(self, column: str) -> None:
+        candidate = self._selected_preview_candidate()
+        if column not in candidate.headers:
+            self._show_error(f"Column {column!r} is not present in this preview step.")
+            return
+        values: list[Any] = []
+        seen: set[tuple[Any, ...]] = set()
+        for row in candidate.rows:
+            value = row.get(column)
+            if is_cell_error(value):
+                self._show_error(
+                    f"Column {column!r} contains errors. Remove or replace those "
+                    "errors before filtering by values."
+                )
+                return
+            key = cell_key(value)
+            if key not in seen:
+                seen.add(key)
+                values.append(value)
+                if len(values) > _MAX_PREVIEW_FILTER_VALUES:
+                    self._show_error(
+                        f"Column {column!r} has more than "
+                        f"{_MAX_PREVIEW_FILTER_VALUES:,} distinct preview values. "
+                        "Use Filter by condition or Advanced Filter instead."
+                    )
+                    return
+        if not values:
+            self._show_error("There are no values in this column preview to filter.")
+            return
+        value_dialog = _PowerQueryValueFilterDialog(column, values, self)
+        if value_dialog.exec() != QDialog.DialogCode.Accepted:
+            return
+        self._add_filter_by_selected_values(column, value_dialog.selected_values())
+
+    def _add_filter_by_selected_values(
+        self, column: str, selected_values: list[Any]
+    ) -> bool:
+        if not selected_values:
+            self._show_error("Select at least one value to add a filter step.")
+            return False
+        if len(selected_values) > MAX_FILTER_CLAUSES:
+            self._show_error(
+                f"This local value filter supports at most {MAX_FILTER_CLAUSES} "
+                "selected values. Search the list or use Advanced Filter."
+            )
+            return False
+
+        clauses: list[dict[str, str]] = []
+        for index, value in enumerate(selected_values):
+            if is_cell_error(value):
+                self._show_error(
+                    "Error values cannot be included in a value filter. "
+                    "Remove or replace errors first."
+                )
+                return False
+            if value is None:
+                operator = "is_null"
+                comparison = ""
+            else:
+                operator = "equals"
+                comparison = cell_to_text(value)
+            clauses.append({
+                "column": column,
+                "operator": operator,
+                "value": comparison,
+                "join": "and" if index == 0 else "or",
+            })
+        selected_index = self.step_list.currentRow()
+        insert_at = (
+            selected_index + 1
+            if 0 <= selected_index < len(self._steps)
+            else len(self._steps)
+        )
+        try:
+            next_steps = deepcopy(self._steps)
+            next_steps.insert(
+                insert_at,
+                {"op": "filter_rows_advanced", "clauses": clauses},
+            )
+            next_steps = validate_steps(next_steps)
+            next_metadata = validate_applied_step_metadata(
+                deepcopy(self._step_metadata), len(self._steps)
+            )
+            next_metadata.insert(insert_at, {})
+            next_metadata = validate_applied_step_metadata(
+                next_metadata, len(next_steps)
+            )
+            transformed = apply_transformations(
+                self._source_candidate,
+                next_steps,
+                parameters=self._parameter_values(),
+            )
+        except TransformationError as exc:
+            self._show_error(str(exc))
+            return False
+        self._steps = next_steps
+        self._step_metadata = next_metadata
+        self._preview_candidate = transformed
+        self._render_steps()
+        self._refresh_preview()
+        self._configure_editor()
+        self.step_list.setCurrentRow(insert_at)
+        self._clear_error()
+        return True
 
     def _show_schema_view(self) -> None:
         self.preview_tabs.setCurrentWidget(self.schema_table)
+
+    def _show_data_preview(self) -> None:
+        self.preview_tabs.setCurrentWidget(self.preview)
+        self.preview.setVisible(True)
+        self.preview_tabs.setVisible(True)
 
     def _show_query_dependencies(self) -> None:
         self._save_active_query_state()
@@ -4053,6 +6261,8 @@ class TransformDataDialog(QDialog):
         return set(self._deleted_query_ids)
 
     def _configure_editor(self, *_args: Any) -> None:
+        if _args:
+            self.step_settings_toggle.setChecked(True)
         op = str(self.operation_combo.currentData())
         selected_index = self.step_list.currentRow()
         base_candidate = (
@@ -4161,7 +6371,13 @@ class TransformDataDialog(QDialog):
         self.custom_parameter_widget.setVisible(
             custom_visible and self.custom_parameter_combo.count() > 1
         )
+        self.custom_parameter_label.setVisible(
+            custom_visible and self.custom_parameter_combo.count() > 1
+        )
         self.custom_function_widget.setVisible(
+            custom_visible and self.custom_function_combo.count() > 1
+        )
+        self.custom_function_label.setVisible(
             custom_visible and self.custom_function_combo.count() > 1
         )
         self.custom_output_type_label.setVisible(custom_visible)
@@ -4424,10 +6640,13 @@ class TransformDataDialog(QDialog):
             self.group_aggregate_column_combo.addItems(base_candidate.headers)
             self._render_group_aggregations()
         column_visible = op not in {
+            "count_rows",
             "remove_duplicates",
             "keep_duplicates",
             "remove_blank_rows",
             "remove_rows_with_errors",
+            "remove_sparse_top_rows",
+            "remove_sparse_bottom_rows",
             "remove_top_rows",
             "remove_bottom_rows",
             "keep_top_rows",
@@ -4877,12 +7096,23 @@ class TransformDataDialog(QDialog):
             self._configure_editor()
             self._clear_error()
             return
+        if self.operation_combo.currentData() == "add_custom_column":
+            accepted = self._launch_custom_column_dialog(
+                initial_name=self.value_edit.text(),
+                initial_expression=self.custom_expression_edit.toPlainText(),
+            )
+            if not accepted:
+                self._restore_non_custom_operation()
+            return
         self._add_step()
 
     def _create_step(self) -> dict[str, Any]:
         op = str(self.operation_combo.currentData())
         column = self.column_combo.currentText()
-        if op in {"promote_headers", "demote_headers", "transpose_table"}:
+        if op in {
+            "count_rows", "promote_headers", "demote_headers", "transpose_table",
+            "remove_sparse_top_rows", "remove_sparse_bottom_rows",
+        }:
             return {"op": op}
         if op == "rename_column":
             return {"op": op, "column": column, "new_name": self.value_edit.text().strip()}
@@ -5591,16 +7821,35 @@ class TransformDataDialog(QDialog):
         index = self.step_list.currentRow()
         if index < 0:
             return
+        original_steps = deepcopy(self._steps)
+        original_metadata = deepcopy(self._step_metadata)
         removed_step = self._steps.pop(index)
-        removed_metadata = self._step_metadata.pop(index)
+        self._step_metadata.pop(index)
+        if removed_step["op"] in {
+            "remove_sparse_top_rows", "remove_sparse_bottom_rows",
+        } and not any(
+            step["op"] in {"remove_sparse_top_rows", "remove_sparse_bottom_rows"}
+            for step in self._steps
+        ):
+            helper_index = next(
+                (
+                    helper_index
+                    for helper_index, step in enumerate(self._steps)
+                    if step["op"] == "m_sparse_boundary_helper"
+                ),
+                None,
+            )
+            if helper_index is not None:
+                self._steps.pop(helper_index)
+                self._step_metadata.pop(helper_index)
         try:
             transformed = apply_transformations(
                 self._source_candidate, self._steps,
                 parameters=self._parameter_values(),
             )
         except TransformationError as exc:
-            self._steps.insert(index, removed_step)
-            self._step_metadata.insert(index, removed_metadata)
+            self._steps = original_steps
+            self._step_metadata = original_metadata
             self._show_error(str(exc))
             return
         self._preview_candidate = transformed
@@ -5692,6 +7941,9 @@ class TransformDataDialog(QDialog):
             return
         self._select_step(index)
         self.step_list.scrollToItem(self.step_list.item(index))
+        if step["op"] == "add_custom_column":
+            self._launch_custom_column_dialog(index)
+            return
         operation_name = self.operation_combo.currentText()
         settings_dialog = QDialog(self)
         settings_dialog.setObjectName("powerQueryStepSettingsDialog")
@@ -5701,12 +7953,14 @@ class TransformDataDialog(QDialog):
         dialog_layout = QVBoxLayout(settings_dialog)
         dialog_layout.setContentsMargins(16, 14, 16, 12)
         dialog_layout.addWidget(QLabel(f"Edit settings for {operation_name.lower()}"))
+        settings_was_visible = not self.operation_settings_panel.isHidden()
         scroll = QScrollArea(settings_dialog)
         scroll.setWidgetResizable(True)
         scroll.setFrameShape(QFrame.Shape.NoFrame)
         editor_layout = self.editor_panel.layout()
         editor_layout.removeWidget(self.operation_settings_panel)
         scroll.setWidget(self.operation_settings_panel)
+        self.operation_settings_panel.setVisible(True)
         dialog_layout.addWidget(scroll, 1)
         editor_layout.removeWidget(self.error_label)
         self.error_label.setParent(settings_dialog)
@@ -5731,6 +7985,7 @@ class TransformDataDialog(QDialog):
         finally:
             self.operation_settings_panel.setParent(self.editor_panel)
             editor_layout.insertWidget(0, self.operation_settings_panel)
+            self.operation_settings_panel.setVisible(settings_was_visible)
             self.error_label.setParent(self.editor_panel)
             editor_layout.insertWidget(2, self.error_label)
             self.operation_combo.setVisible(True)
@@ -5793,7 +8048,9 @@ class TransformDataDialog(QDialog):
         self.step_list.clear()
         for index, step in enumerate(self._steps):
             op = (
-                "Keep Range of Rows"
+                "Count Rows"
+                if step["op"] == "count_rows"
+                else "Keep Range of Rows"
                 if step["op"] == "keep_range_rows"
                 else "Remove Alternate Rows"
                 if step["op"] == "remove_alternate_rows"
@@ -5813,6 +8070,12 @@ class TransformDataDialog(QDialog):
                 if step["op"] == "promote_headers"
                 else "Use Headers as First Row"
                 if step["op"] == "demote_headers"
+                else "Remove Sparse Top Rows"
+                if step["op"] == "remove_sparse_top_rows"
+                else "Remove Sparse Bottom Rows"
+                if step["op"] == "remove_sparse_bottom_rows"
+                else "Filter Null And Whitespace"
+                if step["op"] == "m_sparse_boundary_helper"
                 else step["op"].replace("_", " ").title()
             )
             detail = step.get("column", "")
@@ -5820,10 +8083,19 @@ class TransformDataDialog(QDialog):
                 op = "Change Type Using Locale"
             if step["op"] == "promote_headers":
                 detail = "first data row becomes column names"
+            elif step["op"] == "count_rows":
+                detail = "row count → Count"
             elif step["op"] == "demote_headers":
                 detail = "column names become the first data row"
             elif step["op"] == "transpose_table":
                 detail = "rows ↔ columns; original column names are dropped"
+            elif step["op"] in {"remove_sparse_top_rows", "remove_sparse_bottom_rows"}:
+                detail = (
+                    "consecutive boundary rows with at most one nonblank field; "
+                    "stop at the first row with two or more nonblank fields or a cell error"
+                )
+            elif step["op"] == "m_sparse_boundary_helper":
+                detail = "function definition; does not change table rows"
             elif step["op"] == "sort_rows_by_columns":
                 detail = ", ".join(
                     f"{sort['column']} {sort['direction']}" for sort in step["sorts"]
@@ -5955,6 +8227,9 @@ class TransformDataDialog(QDialog):
                 f"{description}\n\n{default_label}" if description else default_label
             )
             self.step_list.addItem(item)
+        has_steps = bool(self._steps)
+        self.step_list.setVisible(has_steps)
+        self.steps_empty_label.setVisible(not has_steps)
         self._update_step_controls()
         self._refresh_formula_bar()
 
@@ -6084,7 +8359,9 @@ class TransformDataDialog(QDialog):
 
     def _refresh_formula_bar(self) -> None:
         index = self.step_list.currentRow()
+        self.formula_bar.setReadOnly(False)
         self.formula_edit_button.setEnabled(True)
+        self.cancel_formula_button.setEnabled(False)
         if index < 0:
             state = self._query_states.get(self._active_query_id, {})
             try:
@@ -6109,7 +8386,32 @@ class TransformDataDialog(QDialog):
             self.formula_bar.setEnabled(False)
             self.apply_formula_button.setEnabled(False)
             return
-        current_steps = self._steps[: index + 1]
+        if index >= len(self._steps):
+            self.formula_bar.clear()
+            self.formula_bar.setPlaceholderText(
+                "Select an applied step to inspect its M expression"
+            )
+            self.formula_bar.setEnabled(False)
+            self.apply_formula_button.setEnabled(False)
+            return
+        selected_helper = self._steps[index]["op"] == "m_sparse_boundary_helper"
+        current_steps = (
+            self._steps if selected_helper else self._steps[: index + 1]
+        )
+        expression_index = index
+        if (
+            not selected_helper
+            and any(step["op"] == "m_sparse_boundary_helper" for step in current_steps)
+            and not any(
+                step["op"] in {"remove_sparse_top_rows", "remove_sparse_bottom_rows"}
+                for step in current_steps
+            )
+        ):
+            current_steps = [
+                step for step in current_steps
+                if step["op"] != "m_sparse_boundary_helper"
+            ]
+            expression_index -= 1
         issues = m_compatibility_issues(
             current_steps,
             parameter_names=set(self._parameter_values()),
@@ -6134,7 +8436,7 @@ class TransformDataDialog(QDialog):
             expression = step_expression_to_m(
                 current_steps,
                 self._query_name,
-                index,
+                expression_index,
                 parameter_names=set(self._parameter_values()),
                 query_functions=self._query_functions,
                 initial_column_types=self._query_states.get(
@@ -6159,9 +8461,13 @@ class TransformDataDialog(QDialog):
         self.formula_bar.setPlaceholderText("Select an applied step to inspect its M expression")
         self.formula_bar.setText(expression)
         self.formula_bar.setEnabled(True)
-        self.apply_formula_button.setEnabled(True)
+        self.formula_bar.setReadOnly(selected_helper)
+        self.apply_formula_button.setEnabled(not selected_helper)
+        self.cancel_formula_button.setEnabled(not selected_helper)
         self.formula_bar.setToolTip(
-            "Edit this supported step expression and press Return or Apply formula. Edit the complete query in Advanced Editor."
+            "This captured function definition is read-only in the local subset."
+            if selected_helper
+            else "Edit this supported step expression and press Return or Apply formula. Edit the complete query in Advanced Editor."
         )
 
     def _apply_formula_bar(self) -> None:
@@ -6169,6 +8475,11 @@ class TransformDataDialog(QDialog):
         expression = self.formula_bar.text().strip()
         if not 0 <= index < len(self._steps):
             self._show_error("Select an applied step before editing its formula.")
+            return
+        if self._steps[index]["op"] == "m_sparse_boundary_helper":
+            self._show_error(
+                "This captured sparse-boundary helper definition is fixed in the local M subset."
+            )
             return
         if not expression:
             self._show_error("Enter a Power Query M table expression.")
@@ -6193,13 +8504,49 @@ class TransformDataDialog(QDialog):
                     self._active_query_id, {}
                 ).get("source_column_types", {}),
             )
-            if len(parsed_prefix) <= index:
+            selected_table_index = sum(
+                step["op"] != "m_sparse_boundary_helper"
+                for step in self._steps[:index]
+            )
+            parsed_table_positions = [
+                parsed_index
+                for parsed_index, parsed_step in enumerate(parsed_prefix)
+                if parsed_step["op"] != "m_sparse_boundary_helper"
+            ]
+            if selected_table_index >= len(parsed_table_positions):
                 raise PowerQueryMScriptError(
                     "The edited M expression did not produce a local table step."
                 )
-            edited_steps = parsed_prefix[index:]
-            next_steps = validate_steps(
-                [*self._steps[:index], *edited_steps, *self._steps[index + 1:]]
+            edited_steps = parsed_prefix[
+                parsed_table_positions[selected_table_index]:
+            ]
+            next_steps = [
+                *self._steps[:index], *edited_steps, *self._steps[index + 1:]
+            ]
+            next_metadata = [
+                *deepcopy(self._step_metadata[:index]),
+                *(
+                    [deepcopy(self._step_metadata[index])]
+                    if edited_steps[0]["op"] == self._steps[index]["op"]
+                    else [{}]
+                ),
+                *({} for _ in edited_steps[1:]),
+                *deepcopy(self._step_metadata[index + 1:]),
+            ]
+            if not any(
+                step["op"] in {"remove_sparse_top_rows", "remove_sparse_bottom_rows"}
+                for step in next_steps
+            ):
+                retained = [
+                    (step, metadata)
+                    for step, metadata in zip(next_steps, next_metadata)
+                    if step["op"] != "m_sparse_boundary_helper"
+                ]
+                next_steps = [step for step, _metadata in retained]
+                next_metadata = [metadata for _step, metadata in retained]
+            next_steps = validate_steps(next_steps)
+            next_metadata = validate_applied_step_metadata(
+                next_metadata, len(next_steps)
             )
             transformed = apply_transformations(
                 self._source_candidate, next_steps,
@@ -6208,20 +8555,13 @@ class TransformDataDialog(QDialog):
         except (PowerQueryMScriptError, TransformationError, ValueError) as exc:
             self._show_error(str(exc))
             return
-        for offset, edited_step in enumerate(edited_steps):
-            edited_index = index + offset
-            if edited_index >= len(self._step_metadata):
-                self._step_metadata.append({})
-            old_step = self._steps[edited_index] if edited_index < len(self._steps) else None
-            if old_step is None or old_step.get("op") != edited_step.get("op"):
-                self._step_metadata[edited_index] = {}
-        self._step_metadata = self._step_metadata[:len(next_steps)]
         self._steps = next_steps
+        self._step_metadata = next_metadata
         self._preview_candidate = transformed
         self._render_steps()
         self._refresh_preview()
         self._configure_editor()
-        self.step_list.setCurrentRow(index)
+        self.step_list.setCurrentRow(min(index, self.step_list.count() - 1))
         self._clear_error()
 
     def _refresh_column_profiles(self, *_args: Any) -> None:
@@ -6236,6 +8576,14 @@ class TransformDataDialog(QDialog):
             if 0 <= selected_step < len(self._steps)
             else self._steps
         )
+        active_filter_columns: set[str] = set()
+        for step in profile_steps:
+            if step["op"] == "filter_rows":
+                active_filter_columns.add(step["column"])
+            elif step["op"] == "filter_rows_advanced":
+                active_filter_columns.update(
+                    clause["column"] for clause in step["clauses"]
+                )
         try:
             type_map = column_types_after_steps(
                 self._source_candidate.headers,
@@ -6251,6 +8599,7 @@ class TransformDataDialog(QDialog):
         self.quality_table.setRowCount(len(candidate.headers))
         self.profile_table.setRowCount(len(candidate.headers))
         self.schema_table.setRowCount(len(candidate.headers))
+        inline_profiles: list[dict[str, Any]] = []
         for index, column in enumerate(candidate.headers):
             values = [row.get(column, "") for row in rows]
             null_count = sum(value is None for value in values)
@@ -6305,11 +8654,35 @@ class TransformDataDialog(QDialog):
                 + f" ({item['count']:,})"
                 for item in top_values
             )
+            frequencies = [
+                int(item["count"])
+                for item in sorted(
+                    non_empty_counts.values(),
+                    key=lambda item: (
+                        -item["count"], item["value"].casefold(),
+                        item["value"], item["type"],
+                    ),
+                )
+            ]
+            unique_count = sum(
+                1 for item in non_empty_counts.values() if item["count"] == 1
+            )
+            inline_profiles.append({
+                "name": column,
+                "type": type_name,
+                "valid": f"{valid_percent:.0f}%",
+                "error": f"{error_percent:.0f}%",
+                "empty": f"{(empty_percent + null_percent):.0f}%",
+                "distinct": len(non_empty_counts),
+                "unique": unique_count,
+                "frequencies": frequencies,
+                "filter_active": column in active_filter_columns,
+            })
             profile_values = (
                 column,
                 type_name,
                 f"{len(non_empty_counts):,}",
-                f"{sum(1 for item in non_empty_counts.values() if item['count'] == 1):,}",
+                f"{unique_count:,}",
                 top_text or "—",
             )
             for column_index, value in enumerate(profile_values):
@@ -6339,6 +8712,7 @@ class TransformDataDialog(QDialog):
                 if column_index == 4 and sample_values:
                     item.setToolTip("\n".join(sample_values))
                 self.schema_table.setItem(index, column_index, item)
+        self.preview_header.set_profiles(inline_profiles)
         self.profile_scope_note.setText(
             f"Profile covers all {row_count:,} rows in the selected scope. "
             "Null, empty text, and conversion errors are counted separately."
@@ -6347,15 +8721,28 @@ class TransformDataDialog(QDialog):
     def _update_step_controls(self) -> None:
         index = self.step_list.currentRow()
         valid = 0 <= index < len(self._steps)
-        self.remove_button.setEnabled(valid)
-        self.up_button.setEnabled(valid and index > 0)
-        self.down_button.setEnabled(valid and index < len(self._steps) - 1)
+        is_sparse_helper = (
+            valid and self._steps[index]["op"] == "m_sparse_boundary_helper"
+        )
+        helper_precedes_step = (
+            valid and index == 1
+            and self._steps[0]["op"] == "m_sparse_boundary_helper"
+        )
+        self.remove_button.setEnabled(valid and not is_sparse_helper)
+        self.up_button.setEnabled(valid and index > 0 and not helper_precedes_step)
+        self.down_button.setEnabled(
+            valid and index < len(self._steps) - 1 and not is_sparse_helper
+        )
         self.step_settings_button.setEnabled(
             valid
             and self._steps[index]["op"] not in self._STEP_OPERATIONS_WITHOUT_SETTINGS
         )
         self.add_button.setText("New step" if valid else "Add step")
-        self.update_button.setEnabled(valid)
+        self.update_button.setEnabled(
+            valid
+            and self._steps[index]["op"] not in self._STEP_OPERATIONS_WITHOUT_SETTINGS
+            and self.operation_combo.findData(self._steps[index]["op"]) >= 0
+        )
 
     def _show_error(self, message: str) -> None:
         self.error_label.setStyleSheet("color: #a4262c;")

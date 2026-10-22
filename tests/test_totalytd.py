@@ -286,8 +286,8 @@ class TotalYtdTests(unittest.TestCase):
                 'TOTALYTD(SUM([Amount]), \'Calendar\'[Date], 1, "6/30")',
             )
 
-        with self.assertRaisesRegex(MeasureError, "String literals are supported only"):
-            normalize_measure("Unexpected string", '"6/30"')
+        # a bare text literal is a valid text measure now (verified against Power BI)
+        self.assertEqual(normalize_measure("Text literal", '"6/30"')["expression"], '"6/30"')
 
         with self.assertRaisesRegex(MeasureError, "optional filter argument"):
             normalize_measure("Unexpected omission", "DIVIDE(1,,3)")
@@ -1817,7 +1817,7 @@ class TotalYtdTests(unittest.TestCase):
         self.assertEqual(controller.reportKpis["ALL all then West YTD"], "50")
         self.assertEqual(controller.reportKpis["ALL Region then West YTD"], "50")
         self.assertEqual(controller.reportKpis["West high sales year to date"], "30")
-        self.assertEqual(controller.reportKpis["Keep East while selecting West"], "0")
+        self.assertEqual(controller.reportKpis["Keep East while selecting West"], "—")
 
         project_path = self.root / "combined-filters.npa"
         self.assertTrue(controller._save_to(project_path))
@@ -1844,7 +1844,7 @@ class TotalYtdTests(unittest.TestCase):
         self.assertEqual(reopened.reportKpis["West year to date"], "60")
         self.assertEqual(reopened.reportKpis["ALLSELECTED West year to date"], "60")
         self.assertEqual(reopened.reportKpis["West high sales year to date"], "35")
-        self.assertEqual(reopened.reportKpis["Keep East while selecting West"], "0")
+        self.assertEqual(reopened.reportKpis["Keep East while selecting West"], "—")
 
     def test_totalqtd_measure_survives_reopen_and_recomputes_from_sources(self) -> None:
         calendar_path = self.root / "Calendar QTD.csv"
@@ -2657,6 +2657,136 @@ class TotalYtdTests(unittest.TestCase):
             [item["is_active"] for item in reopened._project["model"]["relationships"]],
             [True, False],
         )
+
+    def test_extended_time_measures_reopen_and_refresh_from_sources(self) -> None:
+        calendar_path = self.root / "Calendar extended lifecycle.csv"
+        calendar_start = date(2023, 1, 1)
+        calendar_end = date(2025, 12, 31)
+        calendar_path.write_text(
+            "Date\n" + "\n".join(
+                (calendar_start + timedelta(days=offset)).isoformat()
+                for offset in range((calendar_end - calendar_start).days + 1)
+            ) + "\n",
+            encoding="utf-8",
+        )
+        orders_path = self.root / "Orders extended lifecycle.csv"
+
+        def write_orders(rows: list[tuple[str, int]]) -> None:
+            orders_path.write_text(
+                "OrderDate,Amount\n" + "\n".join(
+                    f"{order_date},{amount}" for order_date, amount in rows
+                ) + "\n",
+                encoding="utf-8",
+            )
+
+        initial_rows = [
+            ("2024-02-01", 13), ("2024-02-28", 14),
+            ("2024-03-14", 1), ("2024-03-15", 10), ("2024-03-16", 2),
+            ("2024-04-01", 3), ("2024-04-15", 4), ("2024-04-30", 5),
+            ("2024-05-01", 6), ("2024-06-30", 7), ("2024-07-01", 8),
+            ("2025-03-15", 9), ("2025-11-01", 11),
+        ]
+        refreshed_rows = [
+            ("2024-02-01", 130), ("2024-02-28", 140),
+            ("2024-03-14", 110), ("2024-03-15", 100), ("2024-03-16", 120),
+            ("2024-04-01", 30), ("2024-04-15", 40), ("2024-04-30", 50),
+            ("2024-05-01", 60), ("2024-06-30", 70), ("2024-07-01", 80),
+            ("2025-03-15", 90), ("2025-11-01", 110),
+        ]
+        second_refresh_rows = [
+            ("2024-02-01", 201), ("2024-02-28", 202),
+            ("2024-03-14", 101), ("2024-03-15", 1000), ("2024-03-16", 102),
+            ("2024-04-01", 103), ("2024-04-15", 104), ("2024-04-30", 105),
+            ("2024-05-01", 106), ("2024-06-30", 107), ("2024-07-01", 108),
+            ("2025-03-15", 109), ("2025-11-01", 111),
+        ]
+        write_orders(initial_rows)
+
+        controller = self.controller("extended-time-lifecycle.ini")
+        self.assertTrue(
+            controller._commit_import(calendar_path, parse_file(calendar_path)),
+            controller.statusMessage,
+        )
+        calendar_id = str(controller.activeTableId)
+        self.assertTrue(controller.setColumnType("Date", "date"), controller.statusMessage)
+        self.mark_calendar(controller)
+        calendar_table = controller._model_table_for_source(
+            controller._project, calendar_id
+        )
+        assert calendar_table is not None
+        calendar_name = str(calendar_table["name"])
+
+        self.assertTrue(
+            controller._commit_import(orders_path, parse_file(orders_path)),
+            controller.statusMessage,
+        )
+        orders_id = str(controller.activeTableId)
+        self.assertTrue(
+            controller.setColumnType("OrderDate", "date"), controller.statusMessage
+        )
+        self.assertTrue(
+            controller.setColumnType("Amount", "whole_number"), controller.statusMessage
+        )
+        self.add_date_relationship(controller, calendar_id, orders_id)
+        self.assertTrue(controller.addPageFilterRule(
+            calendar_id, "Date", "equals", "2024-03-15", "", "", "and"
+        ), controller.statusMessage)
+
+        expressions = {
+            "Previous day": (
+                f"CALCULATE(SUM([Amount]), PREVIOUSDAY('{calendar_name}'[Date]))"
+            ),
+            "Next day": f"CALCULATE(SUM([Amount]), NEXTDAY('{calendar_name}'[Date]))",
+            "Next month": f"CALCULATE(SUM([Amount]), NEXTMONTH('{calendar_name}'[Date]))",
+            "Next quarter": f"CALCULATE(SUM([Amount]), NEXTQUARTER('{calendar_name}'[Date]))",
+            "Next year": f"CALCULATE(SUM([Amount]), NEXTYEAR('{calendar_name}'[Date]))",
+            "Previous month parallel period": (
+                f"CALCULATE(SUM([Amount]), "
+                f"PARALLELPERIOD('{calendar_name}'[Date], -1, MONTH))"
+            ),
+        }
+        for name, expression in expressions.items():
+            self.assertTrue(controller.create_measure(name, expression), controller.statusMessage)
+
+        expected_initial = {
+            "Previous day": "1",
+            "Next day": "2",
+            "Next month": "12",
+            "Next quarter": "25",
+            "Next year": "20",
+            "Previous month parallel period": "27",
+        }
+        for name, expected in expected_initial.items():
+            self.assertEqual(controller.reportKpis[name], expected, name)
+
+        project_path = self.root / "extended-time-lifecycle.npa"
+        self.assertTrue(controller._save_to(project_path))
+        write_orders(refreshed_rows)
+        reopened = self.controller("extended-time-reopened.ini")
+        self.assertTrue(reopened.open_project_path(project_path))
+        expected_reopened = {
+            "Previous day": "110",
+            "Next day": "120",
+            "Next month": "120",
+            "Next quarter": "250",
+            "Next year": "200",
+            "Previous month parallel period": "270",
+        }
+        for name, expected in expected_reopened.items():
+            self.assertEqual(reopened.reportKpis[name], expected, name)
+
+        write_orders(second_refresh_rows)
+        reopened.refresh_all_sources()
+        expected_refreshed = {
+            "Previous day": "101",
+            "Next day": "102",
+            "Next month": "312",
+            "Next quarter": "525",
+            "Next year": "220",
+            "Previous month parallel period": "403",
+        }
+        for name, expected in expected_refreshed.items():
+            self.assertEqual(reopened.reportKpis[name], expected, name)
 
 
 if __name__ == "__main__":

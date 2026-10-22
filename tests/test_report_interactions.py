@@ -5,6 +5,8 @@ from copy import deepcopy
 from pathlib import Path
 from types import SimpleNamespace
 
+import pytest
+
 os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
 
 from PySide6.QtCore import QPoint, QPointF, QUrl, Qt
@@ -261,6 +263,317 @@ def test_qml_chart_click_filters_peer_chart_and_preserves_page_filter() -> None:
         app.processEvents()
 
 
+def test_qml_chart_resize_grip_changes_visual_size() -> None:
+    app = QApplication.instance() or QApplication(["report interaction tests"])
+    controller = StudioController()
+    visual_id = controller.add_visual("bar", "Resizable", 100, 100, 300, 200)
+    controller.setCurrentView("Report")
+    state_changes: list[bool] = []
+    controller.stateChanged.connect(lambda: state_changes.append(True))
+
+    engine = QQmlEngine()
+    component = QQmlComponent(engine)
+    qml_path = Path(__file__).resolve().parents[1] / "analytics_studio" / "qml" / "Main.qml"
+    component.loadUrl(QUrl.fromLocalFile(str(qml_path)))
+    assert not component.isError(), "\n".join(error.toString() for error in component.errors())
+    window = component.createWithInitialProperties({"studioController": controller})
+    assert window is not None, "\n".join(error.toString() for error in component.errors())
+
+    def visual_items(item: QQuickItem):
+        yield item
+        for child in item.childItems():
+            yield from visual_items(child)
+
+    try:
+        window.resize(1280, 900)
+        window.show()
+        app.processEvents()
+        QTest.qWait(100)
+        handle = next(
+            item for item in visual_items(window.contentItem())
+            if item.objectName() == f"visualResizeHandle_{visual_id}"
+        )
+        mouse_area = next(
+            item for item in visual_items(handle)
+            if item.objectName() == f"visualResizeMouseArea_{visual_id}"
+        )
+        visual_delegate = next(
+            item for item in visual_items(window.contentItem())
+            if item.objectName() == f"reportVisual_{visual_id}"
+        )
+        assert handle.isVisible()
+        start = handle.mapToScene(
+            QPointF(handle.width() / 2, handle.height() / 2)
+        )
+        start_point = QPoint(round(start.x()), round(start.y()))
+        end_point = start_point + QPoint(84, 56)
+
+        QTest.mousePress(window, Qt.MouseButton.LeftButton,
+                         Qt.KeyboardModifier.NoModifier, start_point)
+        app.processEvents()
+        assert mouse_area.property("pressed"), (
+            f"Resize handle did not receive press at {start_point}; "
+            f"handle scene bounds={handle.mapToScene(QPointF(0, 0))}, "
+            f"size={handle.width()}x{handle.height()}"
+        )
+        QTest.mouseMove(window, end_point, 50)
+        app.processEvents()
+        assert visual_delegate.width() > 300, (
+            f"Resize drag did not change delegate width: {visual_delegate.width()}"
+        )
+        changes_before_release = len(state_changes)
+        QTest.mouseRelease(window, Qt.MouseButton.LeftButton,
+                            Qt.KeyboardModifier.NoModifier, end_point)
+        QTest.qWait(100)
+        app.processEvents()
+        assert len(state_changes) > changes_before_release, (
+            "Releasing the resize grip did not commit the new size; "
+            f"local dimensions are {visual_delegate.width()}x{visual_delegate.height()}"
+        )
+
+        visual = next(
+            item for item in controller.activeVisualObjects
+            if item["id"] == visual_id
+        )
+        assert visual["width"] >= 350, visual
+        assert visual["height"] >= 230, visual
+    finally:
+        controller._dirty = False
+        window.close()
+        window.deleteLater()
+        engine.deleteLater()
+        app.processEvents()
+
+
+@pytest.mark.parametrize("report_zoom", [0.15, 1.5], ids=["min-zoom", "max-zoom"])
+@pytest.mark.parametrize(
+    "drag_delta", [QPoint(30, 24), QPoint(-30, -24)], ids=["grow", "shrink"]
+)
+def test_qml_chart_resize_grip_stays_usable_across_zoom_and_direction(
+    report_zoom: float,
+    drag_delta: QPoint,
+) -> None:
+    app = QApplication.instance() or QApplication(["report interaction tests"])
+    controller = StudioController()
+    visual_id = controller.add_visual("bar", "Small zoom", 100, 100, 300, 200)
+    controller.setCurrentView("Report")
+
+    engine = QQmlEngine()
+    component = QQmlComponent(engine)
+    qml_path = Path(__file__).resolve().parents[1] / "analytics_studio" / "qml" / "Main.qml"
+    component.loadUrl(QUrl.fromLocalFile(str(qml_path)))
+    assert not component.isError(), "\n".join(error.toString() for error in component.errors())
+    window = component.createWithInitialProperties({"studioController": controller})
+    assert window is not None, "\n".join(error.toString() for error in component.errors())
+
+    def visual_items(item: QQuickItem):
+        yield item
+        for child in item.childItems():
+            yield from visual_items(child)
+
+    try:
+        window.resize(1280, 900)
+        window.show()
+        app.processEvents()
+        QTest.qWait(100)
+        # Main.qml schedules Fit to Page on completion. Set the explicit zoom
+        # after that initial layout so the test observes the minimum zoom.
+        window.setProperty("fitZoom", False)
+        window.setProperty("reportZoom", report_zoom)
+        app.processEvents()
+        assert window.property("reportZoom") == report_zoom
+        handle = next(
+            item for item in visual_items(window.contentItem())
+            if item.objectName() == f"visualResizeHandle_{visual_id}"
+        )
+        mouse_area = next(
+            item for item in visual_items(handle)
+            if item.objectName() == f"visualResizeMouseArea_{visual_id}"
+        )
+        visual_delegate = next(
+            item for item in visual_items(window.contentItem())
+            if item.objectName() == f"reportVisual_{visual_id}"
+        )
+        assert handle.isVisible()
+
+        top_left = mouse_area.mapToScene(QPointF(0, 0))
+        bottom_right = mouse_area.mapToScene(
+            QPointF(mouse_area.width(), mouse_area.height())
+        )
+        hit_width = bottom_right.x() - top_left.x()
+        hit_height = bottom_right.y() - top_left.y()
+        assert hit_width == pytest.approx(16, abs=0.2), (
+            "The resize target shrinks with report zoom: "
+            f"{hit_width:.1f} Qt scene units wide at "
+            f"{report_zoom:.0%} zoom"
+        )
+        assert hit_height == pytest.approx(16, abs=0.2), (
+            f"Resize target is only {hit_height:.1f} Qt scene units tall at "
+            f"{report_zoom:.0%} zoom"
+        )
+
+        start = mouse_area.mapToScene(
+            QPointF(mouse_area.width() / 2, mouse_area.height() / 2)
+        )
+        start_point = QPoint(round(start.x()), round(start.y()))
+        end_point = start_point + drag_delta
+        QTest.mousePress(window, Qt.MouseButton.LeftButton,
+                         Qt.KeyboardModifier.NoModifier, start_point)
+        app.processEvents()
+        assert mouse_area.property("pressed"), (
+            f"Resize target did not receive the press at {report_zoom:.0%} zoom"
+        )
+        QTest.mouseMove(window, end_point, 50)
+        app.processEvents()
+        expected_comparison = (
+            visual_delegate.width() > 300
+            if drag_delta.x() > 0
+            else visual_delegate.width() < 300
+        )
+        assert expected_comparison, (
+            f"Resize drag did not {('grow' if drag_delta.x() > 0 else 'shrink')} "
+            f"the visual at {report_zoom:.0%} zoom: {visual_delegate.width()}"
+        )
+        QTest.mouseRelease(window, Qt.MouseButton.LeftButton,
+                            Qt.KeyboardModifier.NoModifier, end_point)
+        QTest.qWait(100)
+        app.processEvents()
+        visual = next(
+            item for item in controller.activeVisualObjects
+            if item["id"] == visual_id
+        )
+        expected_width = round(max(10, 300 + drag_delta.x() / report_zoom) / 10) * 10
+        expected_height = round(max(10, 200 + drag_delta.y() / report_zoom) / 10) * 10
+        assert (visual["width"], visual["height"]) == (
+            expected_width,
+            expected_height,
+        ), visual
+        if drag_delta.x() > 0:
+            assert visual["width"] > 300 and visual["height"] > 200, visual
+        else:
+            assert visual["width"] < 300 and visual["height"] < 200, visual
+            assert visual["width"] >= 10 and visual["height"] >= 10, visual
+    finally:
+        controller._dirty = False
+        window.close()
+        window.deleteLater()
+        engine.deleteLater()
+        app.processEvents()
+
+
+def test_qml_chart_can_shrink_below_50_and_keeps_size_after_reopen(tmp_path: Path) -> None:
+    app = QApplication.instance() or QApplication(["report interaction tests"])
+    controller = StudioController()
+    visual_id = controller.add_visual("bar", "Small chart", 100, 100, 40, 40)
+    controller.setCurrentView("Report")
+
+    engine = QQmlEngine()
+    component = QQmlComponent(engine)
+    qml_path = Path(__file__).resolve().parents[1] / "analytics_studio" / "qml" / "Main.qml"
+    component.loadUrl(QUrl.fromLocalFile(str(qml_path)))
+    assert not component.isError(), "\n".join(error.toString() for error in component.errors())
+    window = component.createWithInitialProperties({"studioController": controller})
+    assert window is not None, "\n".join(error.toString() for error in component.errors())
+
+    def visual_items(item: QQuickItem):
+        yield item
+        for child in item.childItems():
+            yield from visual_items(child)
+
+    try:
+        window.resize(1280, 900)
+        window.show()
+        app.processEvents()
+        QTest.qWait(100)
+        window.setProperty("fitZoom", False)
+        window.setProperty("reportZoom", 1.0)
+        app.processEvents()
+
+        mouse_area = next(
+            item for item in visual_items(window.contentItem())
+            if item.objectName() == f"visualResizeMouseArea_{visual_id}"
+        )
+        visual_delegate = next(
+            item for item in visual_items(window.contentItem())
+            if item.objectName() == f"reportVisual_{visual_id}"
+        )
+        assert (visual_delegate.width(), visual_delegate.height()) == (40, 40)
+
+        start = mouse_area.mapToScene(
+            QPointF(mouse_area.width() / 2, mouse_area.height() / 2)
+        )
+        start_point = QPoint(round(start.x()), round(start.y()))
+        end_point = start_point + QPoint(-20, -20)
+        QTest.mousePress(window, Qt.MouseButton.LeftButton,
+                         Qt.KeyboardModifier.NoModifier, start_point)
+        app.processEvents()
+        assert mouse_area.property("pressed")
+        QTest.mouseMove(window, end_point, 50)
+        app.processEvents()
+        assert (visual_delegate.width(), visual_delegate.height()) == (20, 20)
+        QTest.mouseRelease(window, Qt.MouseButton.LeftButton,
+                           Qt.KeyboardModifier.NoModifier, end_point)
+        QTest.qWait(100)
+        app.processEvents()
+
+        saved_visual = next(
+            visual for visual in controller.activeVisualObjects
+            if visual["id"] == visual_id
+        )
+        assert (saved_visual["width"], saved_visual["height"]) == (20, 20)
+        project_path = tmp_path / "small-chart-resize.npa"
+        assert controller._save_to(project_path)
+
+        reopened = StudioController()
+        assert reopened.open_project_path(str(project_path))
+        reopened_visual = next(
+            visual for visual in reopened.activeVisualObjects
+            if visual["id"] == visual_id
+        )
+        assert (reopened_visual["width"], reopened_visual["height"]) == (20, 20)
+
+        mouse_area = next(
+            item for item in visual_items(window.contentItem())
+            if item.objectName() == f"visualResizeMouseArea_{visual_id}"
+        )
+        visual_delegate = next(
+            item for item in visual_items(window.contentItem())
+            if item.objectName() == f"reportVisual_{visual_id}"
+        )
+
+        minimum_start = mouse_area.mapToScene(
+            QPointF(mouse_area.width() / 2, mouse_area.height() / 2)
+        )
+        minimum_start_point = QPoint(round(minimum_start.x()), round(minimum_start.y()))
+        minimum_end_point = minimum_start_point + QPoint(-20, -20)
+        QTest.mousePress(window, Qt.MouseButton.LeftButton,
+                         Qt.KeyboardModifier.NoModifier, minimum_start_point)
+        app.processEvents()
+        QTest.mouseMove(window, minimum_end_point, 50)
+        app.processEvents()
+        assert (visual_delegate.width(), visual_delegate.height()) == (10, 10)
+        QTest.mouseRelease(window, Qt.MouseButton.LeftButton,
+                           Qt.KeyboardModifier.NoModifier, minimum_end_point)
+        QTest.qWait(100)
+        app.processEvents()
+        project_path = tmp_path / "small-chart-resize.npa"
+        assert controller._save_to(project_path)
+
+        minimum_reopened = StudioController()
+        assert minimum_reopened.open_project_path(str(project_path))
+        minimum_visual = next(
+            visual for visual in minimum_reopened.activeVisualObjects
+            if visual["id"] == visual_id
+        )
+        assert (minimum_visual["width"], minimum_visual["height"]) == (10, 10)
+    finally:
+        controller._dirty = False
+        window.close()
+        window.deleteLater()
+        engine.deleteLater()
+        app.processEvents()
+
+
 def test_cross_filter_selection_is_transient_ui_state() -> None:
     controller = StudioController()
 
@@ -270,6 +583,35 @@ def test_cross_filter_selection_is_transient_ui_state() -> None:
     assert not controller._dirty
     controller.toggle_cross_filter("Source", "A")
     assert controller.selectedCrossFiltersForVisual("Source") == []
+    assert not controller._dirty
+
+
+def test_clear_filters_removes_transient_chart_selections_and_restores_peer_rows() -> None:
+    controller = _loaded_sales_controller()
+    page = controller._project["report"]["pages"][0]
+    page["filters"] = []
+    page["visual_filters"] = []
+    controller._project["report"]["filters"] = []
+    page["visuals"] = [
+        {"title": "Source", "type": "bar", "fields": {"X-axis": ["Category"]}},
+        {"title": "Target", "type": "bar", "fields": {"X-axis": ["Category"], "Y-axis": ["Amount"]}},
+    ]
+    controller._refresh_report()
+
+    controller.toggle_cross_filter("Source", "A")
+
+    assert controller.filterActive
+    assert controller.visualSeries("Target") == [{"label": "A", "value": 30.0}]
+    controller._dirty = False
+    controller.clear_filters()
+
+    assert controller._cross_filters == {}
+    assert controller.selectedCrossFiltersForVisual("Source") == []
+    assert not controller.filterActive
+    assert controller.visualSeries("Target") == [
+        {"label": "A", "value": 30.0},
+        {"label": "B", "value": 30.0},
+    ]
     assert not controller._dirty
 
 
@@ -490,7 +832,7 @@ def test_slicer_fields_well_supplies_values_and_filters_peer_charts() -> None:
 
 
 def test_slicer_field_picker_and_binding_reject_dax_measures() -> None:
-    app = QApplication.instance() or QApplication(["slicer measure eligibility tests"])
+    _app = QApplication.instance() or QApplication(["slicer measure eligibility tests"])
     controller = _loaded_sales_controller()
     controller._project["model"].setdefault("measures", []).append({
         "name": "Sales Total", "expression": "SUM([Amount])",

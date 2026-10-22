@@ -279,7 +279,7 @@ def test_table_visual_evaluates_measure_columns_at_group_grain_and_refreshes(
             {"values": ["A", "15", "Jan", "2", "0"], "category": "A", "highlighted": False},
             {"values": ["A", "3", "Feb", "1", "0"], "category": "A", "highlighted": False},
             {"values": ["B", "7", "Jan", "1", "0"], "category": "B", "highlighted": False},
-            {"values": ["B", "0", "Feb", "", "0"], "category": "B", "highlighted": False},
+            {"values": ["B", "", "Feb", "", "0"], "category": "B", "highlighted": False},
         ],
         "total_rows": 4,
     }
@@ -323,7 +323,7 @@ def test_table_visual_evaluates_measure_columns_at_group_grain_and_refreshes(
     controller.toggle_cross_filter("Category filter", "B")
     assert [row["values"] for row in controller.visualTableData("Grouped table")["rows"]] == [
         ["B", "7", "Jan", "1", "0"],
-        ["B", "0", "Feb", "", "0"],
+        ["B", "", "Feb", "", "0"],
     ]
     assert controller.visualTableData("Measure only table")["rows"] == [
         {"values": ["7", "1"], "category": "", "highlighted": False},
@@ -409,3 +409,106 @@ def test_table_visual_groups_typed_null_empty_and_numeric_zero_values(
         {"values": ["1", "3"], "category": "1", "highlighted": False},
         {"values": ["1", "4"], "category": "1", "highlighted": False},
     ]
+
+
+def test_allselected_chart_axis_restores_page_selection_and_other_filters(
+    tmp_path: Path,
+) -> None:
+    import pytest
+
+    csv_path = tmp_path / "sales.csv"
+    csv_path.write_text(
+        "Category,Month,Amount\n"
+        "A,Jan,60\nA,Feb,10\nB,Jan,30\nB,Feb,15\nC,Jan,10\nC,Feb,900\n",
+        encoding="utf-8",
+    )
+    app = QApplication.instance() or QApplication(["ALLSELECTED chart tests"])
+    controller = StudioController(
+        app,
+        QSettings(str(tmp_path / "allselected-settings.ini"), QSettings.Format.IniFormat),
+    )
+    assert controller._commit_import(csv_path, parse_file(csv_path))
+    table_id = controller._active_model_table_id()
+    model_table = next(
+        item for item in controller._project["model"]["tables"]
+        if item.get("id") == table_id
+    )
+    table_name = str(model_table["name"]).replace("'", "''")
+    share_expression = (
+        "DIVIDE(SUM([Amount]), "
+        f"CALCULATE(SUM([Amount]), ALLSELECTED('{table_name}'[Category])))"
+    )
+    assert controller.create_measure("Selected Share", share_expression)
+    assert controller.create_measure("Sales Total", "SUM([Amount])")
+
+    assert controller.addPageMultiValueFilter(
+        table_id, "Category", "is_any_of", '["A", "B"]'
+    )
+    assert controller.addPageFilter(table_id, "Month", "Jan")
+
+    share_binding = "__dax_measure__:Selected Share"
+    total_binding = "__dax_measure__:Sales Total"
+    controller.add_visual("column", "Selected share by category", 40, 40, 360, 240)
+    controller.add_field_to_well("X-axis", "Category")
+    controller.add_field_to_well("Y-axis", share_binding)
+    controller.add_visual("column", "Sales by category", 420, 40, 360, 240)
+    controller.add_field_to_well("X-axis", "Category")
+    controller.add_field_to_well("Y-axis", total_binding)
+    controller.add_visual("card", "Selected share card", 40, 300, 220, 130)
+    controller.add_field_to_well("Fields", share_binding)
+
+    share_series = controller.visualSeries("Selected share by category")
+    assert [item["label"] for item in share_series] == ["A", "B"]
+    assert [item["value"] for item in share_series] == pytest.approx([2 / 3, 1 / 3])
+    assert controller.visualSeries("Sales by category") == [
+        {"label": "A", "value": 60.0},
+        {"label": "B", "value": 30.0},
+    ]
+    assert controller.visualCardData("Selected share card")["value"] == "1"
+
+    rows_by_table, topn_context, filter_roots = controller._report_filter_context(
+        "Selected share by category"
+    )
+    pre_topn_rows = rows_by_table[table_id]
+    topn_rows = [row for row in pre_topn_rows if row["Category"] == "B"]
+    topn_series = controller._measure_visual_series(
+        "Selected Share",
+        "Category",
+        None,
+        topn_rows,
+        topn_context,
+        filter_roots,
+        table_id,
+        stacked=False,
+        category_model_table_id=table_id,
+        legend_model_table_id="",
+        visual_axis_values=tuple(row["Category"] for row in pre_topn_rows),
+    )
+    assert [item["label"] for item in topn_series] == ["B"]
+    assert topn_series[0]["value"] == pytest.approx(1 / 3)
+
+    project_path = tmp_path / "allselected-chart.npa"
+    assert controller._save_to(project_path)
+    reopened = StudioController(
+        app,
+        QSettings(str(tmp_path / "allselected-reopened.ini"), QSettings.Format.IniFormat),
+    )
+    assert reopened.open_project_path(project_path)
+    reopened_share = reopened.visualSeries("Selected share by category")
+    assert [item["value"] for item in reopened_share] == pytest.approx([2 / 3, 1 / 3])
+    assert reopened.visualCardData("Selected share card")["value"] == "1"
+
+    csv_path.write_text(
+        "Category,Month,Amount\n"
+        "A,Jan,45\nA,Feb,10\nB,Jan,45\nB,Feb,15\nC,Jan,100\nC,Feb,900\n",
+        encoding="utf-8",
+    )
+    reopened.refresh_source()
+    refreshed_share = reopened.visualSeries("Selected share by category")
+    assert [item["label"] for item in refreshed_share] == ["A", "B"]
+    assert [item["value"] for item in refreshed_share] == pytest.approx([0.5, 0.5])
+    assert reopened.visualSeries("Sales by category") == [
+        {"label": "A", "value": 45.0},
+        {"label": "B", "value": 45.0},
+    ]
+    assert reopened.visualCardData("Selected share card")["value"] == "1"

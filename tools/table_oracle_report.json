@@ -1,0 +1,653 @@
+{
+ "cells": [],
+ "measures": [
+  {
+   "expr": "COUNTROWS(DSI)",
+   "powerbi": "371",
+   "local": "371",
+   "status": "match"
+  },
+  {
+   "expr": "SUM(DSI[Gross Amt])",
+   "powerbi": "1176289.68",
+   "local": "1176289.68",
+   "status": "match"
+  },
+  {
+   "expr": "AVERAGE(DSI[Gross Amt])",
+   "powerbi": "3179.1612972973",
+   "local": "3179.161297297297297297297297",
+   "status": "match"
+  },
+  {
+   "expr": "MIN(DSI[Gross Amt])",
+   "powerbi": "2.6",
+   "local": "2.6",
+   "status": "match"
+  },
+  {
+   "expr": "MAX(DSI[Gross Amt])",
+   "powerbi": "588144.84",
+   "local": "588144.84",
+   "status": "match"
+  },
+  {
+   "expr": "COUNT(DSI[Gross Amt])",
+   "powerbi": "370",
+   "local": "370",
+   "status": "match"
+  },
+  {
+   "expr": "COUNTBLANK(DSI[Gross Amt])",
+   "powerbi": "1",
+   "local": "1",
+   "status": "match"
+  },
+  {
+   "expr": "MEDIAN(DSI[Gross Amt])",
+   "powerbi": "242.5",
+   "local": "242.5",
+   "status": "match"
+  },
+  {
+   "expr": "DISTINCTCOUNT(DSI[Gross Amt])",
+   "powerbi": "251",
+   "local": "251",
+   "status": "match"
+  },
+  {
+   "expr": "SUMX(DSI,DSI[Gross Amt]*2)",
+   "powerbi": "2352579.36",
+   "local": "2352579.36",
+   "status": "match"
+  },
+  {
+   "expr": "SUM(DSI[Disc Amt])",
+   "powerbi": "309.2",
+   "local": "309.20",
+   "status": "match"
+  },
+  {
+   "expr": "AVERAGE(DSI[Disc Amt])",
+   "powerbi": "0.835675675675676",
+   "local": "0.8356756756756756756756756757",
+   "status": "match"
+  },
+  {
+   "expr": "MIN(DSI[Disc Amt])",
+   "powerbi": "0",
+   "local": "0",
+   "status": "match"
+  },
+  {
+   "expr": "MAX(DSI[Disc Amt])",
+   "powerbi": "154.6",
+   "local": "154.6",
+   "status": "match"
+  },
+  {
+   "expr": "COUNT(DSI[Disc Amt])",
+   "powerbi": "370",
+   "local": "370",
+   "status": "match"
+  },
+  {
+   "expr": "COUNTBLANK(DSI[Disc Amt])",
+   "powerbi": "1",
+   "local": "1",
+   "status": "match"
+  },
+  {
+   "expr": "MEDIAN(DSI[Disc Amt])",
+   "powerbi": "0",
+   "local": "0",
+   "status": "match"
+  },
+  {
+   "expr": "DISTINCTCOUNT(DSI[Disc Amt])",
+   "powerbi": "9",
+   "local": "9",
+   "status": "match"
+  },
+  {
+   "expr": "SUMX(DSI,DSI[Disc Amt]*2)",
+   "powerbi": "618.4",
+   "local": "618.40",
+   "status": "match"
+  },
+  {
+   "expr": "SUM(DSI[VAT Amt])",
+   "powerbi": "58679.82",
+   "local": "58679.82",
+   "status": "match"
+  },
+  {
+   "expr": "AVERAGE(DSI[VAT Amt])",
+   "powerbi": "158.594108108108",
+   "local": "158.5941081081081081081081081",
+   "status": "match"
+  },
+  {
+   "expr": "MIN(DSI[VAT Amt])",
+   "powerbi": "0",
+   "local": "0",
+   "status": "match"
+  },
+  {
+   "expr": "MAX(DSI[VAT Amt])",
+   "powerbi": "29339.91",
+   "local": "29339.91",
+   "status": "match"
+  },
+  {
+   "expr": "COUNT(DSI[VAT Amt])",
+   "powerbi": "370",
+   "local": "370",
+   "status": "match"
+  },
+  {
+   "expr": "COUNTBLANK(DSI[VAT Amt])",
+   "powerbi": "1",
+   "local": "1",
+   "status": "match"
+  },
+  {
+   "expr": "MEDIAN(DSI[VAT Amt])",
+   "powerbi": "11.955",
+   "local": "11.955",
+   "status": "match"
+  },
+  {
+   "expr": "DISTINCTCOUNT(DSI[VAT Amt])",
+   "powerbi": "244",
+   "local": "244",
+   "status": "match"
+  },
+  {
+   "expr": "SUMX(DSI,DSI[VAT Amt]*2)",
+   "powerbi": "117359.64",
+   "local": "117359.64",
+   "status": "match"
+  },
+  {
+   "expr": "SUM(DSI[Net Amount])",
+   "powerbi": "1234660.3",
+   "local": "1234660.30",
+   "status": "match"
+  },
+  {
+   "expr": "AVERAGE(DSI[Net Amount])",
+   "powerbi": "3336.91972972973",
+   "local": "3336.919729729729729729729730",
+   "status": "match"
+  },
+  {
+   "expr": "MIN(DSI[Net Amount])",
+   "powerbi": "2.73",
+   "local": "2.73",
+   "status": "match"
+  },
+  {
+   "expr": "MAX(DSI[Net Amount])",
+   "powerbi": "617330.15",
+   "local": "617330.15",
+   "status": "match"
+  },
+  {
+   "expr": "COUNT(DSI[Net Amount])",
+   "powerbi": "370",
+   "local": "370",
+   "status": "match"
+  },
+  {
+   "expr": "COUNTBLANK(DSI[Net Amount])",
+   "powerbi": "1",
+   "local": "1",
+   "status": "match"
+  },
+  {
+   "expr": "MEDIAN(DSI[Net Amount])",
+   "powerbi": "254.625",
+   "local": "254.625",
+   "status": "match"
+  },
+  {
+   "expr": "DISTINCTCOUNT(DSI[Net Amount])",
+   "powerbi": "253",
+   "local": "253",
+   "status": "match"
+  },
+  {
+   "expr": "SUMX(DSI,DSI[Net Amount]*2)",
+   "powerbi": "2469320.6",
+   "local": "2469320.60",
+   "status": "match"
+  },
+  {
+   "expr": "DISTINCTCOUNT(DSI[PI#])",
+   "powerbi": "371",
+   "local": "371",
+   "status": "match"
+  },
+  {
+   "expr": "COUNTA(DSI[PI#])",
+   "powerbi": "371",
+   "local": "371",
+   "status": "match"
+  },
+  {
+   "expr": "COUNTBLANK(DSI[PI#])",
+   "powerbi": "BLANK",
+   "local": "BLANK",
+   "status": "match"
+  },
+  {
+   "expr": "DISTINCTCOUNT(DSI[Party Code])",
+   "powerbi": "22",
+   "local": "22",
+   "status": "match"
+  },
+  {
+   "expr": "COUNTA(DSI[Party Code])",
+   "powerbi": "369",
+   "local": "369",
+   "status": "match"
+  },
+  {
+   "expr": "COUNTBLANK(DSI[Party Code])",
+   "powerbi": "2",
+   "local": "2",
+   "status": "match"
+  },
+  {
+   "expr": "DISTINCTCOUNT(DSI[Party Name])",
+   "powerbi": "22",
+   "local": "22",
+   "status": "match"
+  },
+  {
+   "expr": "COUNTA(DSI[Party Name])",
+   "powerbi": "369",
+   "local": "369",
+   "status": "match"
+  },
+  {
+   "expr": "COUNTBLANK(DSI[Party Name])",
+   "powerbi": "2",
+   "local": "2",
+   "status": "match"
+  },
+  {
+   "expr": "DISTINCTCOUNT(DSI[Remarks])",
+   "powerbi": "160",
+   "local": "160",
+   "status": "match"
+  },
+  {
+   "expr": "COUNTA(DSI[Remarks])",
+   "powerbi": "314",
+   "local": "314",
+   "status": "match"
+  },
+  {
+   "expr": "COUNTBLANK(DSI[Remarks])",
+   "powerbi": "57",
+   "local": "57",
+   "status": "match"
+  },
+  {
+   "expr": "DISTINCTCOUNT(DSI[PUR_VAT_TRN])",
+   "powerbi": "140",
+   "local": "140",
+   "status": "match"
+  },
+  {
+   "expr": "COUNTA(DSI[PUR_VAT_TRN])",
+   "powerbi": "361",
+   "local": "361",
+   "status": "match"
+  },
+  {
+   "expr": "COUNTBLANK(DSI[PUR_VAT_TRN])",
+   "powerbi": "10",
+   "local": "10",
+   "status": "match"
+  },
+  {
+   "expr": "SUMX(DSI,DSI[Gross Amt]-DSI[Disc Amt]+DSI[VAT Amt])",
+   "powerbi": "1234660.3",
+   "local": "1234660.30",
+   "status": "match"
+  },
+  {
+   "expr": "SUM(DSI[Net Amount])-SUM(DSI[Gross Amt])-SUM(DSI[VAT Amt])+SUM(DSI[Disc Amt])",
+   "powerbi": "1.04762420960469E-10",
+   "local": "0",
+   "status": "match"
+  },
+  {
+   "expr": "DIVIDE(SUM(DSI[VAT Amt]),SUM(DSI[Gross Amt]))",
+   "powerbi": "0.0498855179958733",
+   "local": "0.04988551799587326142315556148",
+   "status": "match"
+  },
+  {
+   "expr": "SUM(DSI[VAT Amt])/SUM(DSI[Gross Amt])",
+   "powerbi": "0.0498855179958733",
+   "local": "0.04988551799587326142315556148",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(SUM(DSI[Net Amount]),DSI[Gross Amt]>10000)",
+   "powerbi": "1019965.03",
+   "local": "1019965.03",
+   "status": "match"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(DSI,DSI[Net Amount]>10000))",
+   "powerbi": "8",
+   "local": "8",
+   "status": "match"
+  },
+  {
+   "expr": "SUMX(FILTER(DSI,DSI[VAT Amt]>0),DSI[VAT Amt])",
+   "powerbi": "58679.82",
+   "local": "58679.82",
+   "status": "match"
+  },
+  {
+   "expr": "IF(ISBLANK(SUM(DSI[Net Amount])),0,SUM(DSI[Net Amount]))",
+   "powerbi": "1234660.3",
+   "local": "1234660.30",
+   "status": "match"
+  },
+  {
+   "expr": "ROUND(SUM(DSI[VAT Amt])/SUM(DSI[Gross Amt]),4)",
+   "powerbi": "0.0499",
+   "local": "0.0499",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(DSI),DSI[Disc Amt]>0)",
+   "powerbi": "7",
+   "local": "7",
+   "status": "match"
+  },
+  {
+   "expr": "MAXX(DSI,DSI[Net Amount])",
+   "powerbi": "617330.15",
+   "local": "617330.15",
+   "status": "match"
+  },
+  {
+   "expr": "MINX(DSI,DSI[Net Amount])",
+   "powerbi": "2.73",
+   "local": "2.73",
+   "status": "match"
+  },
+  {
+   "expr": "AVERAGEX(DSI,DSI[VAT Amt]/DSI[Gross Amt])",
+   "powerbi": "0.0495879573427031",
+   "local": "0.04958795734270279802458201941",
+   "status": "match"
+  },
+  {
+   "expr": "COUNTX(DSI,DSI[VAT Amt])",
+   "powerbi": "370",
+   "local": "370",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(SUM(DSI[Net Amount]),DSI[Party Name]=\"AEP INTERNATIONAL TRADING LLC\")",
+   "powerbi": "14490",
+   "local": "14490",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(DSI),DSI[Party Name]=\"AEP INTERNATIONAL TRADING LLC\")",
+   "powerbi": "1",
+   "local": "1",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(SUM(DSI[Net Amount]),DSI[Party Name]=\"ASG PLATINUM TRADING L.L.C.\")",
+   "powerbi": "441",
+   "local": "441",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(DSI),DSI[Party Name]=\"ASG PLATINUM TRADING L.L.C.\")",
+   "powerbi": "1",
+   "local": "1",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(SUM(DSI[Net Amount]),DSI[Party Name]=\"AUTOBOND TRADING (AL HATHBOOR)\")",
+   "powerbi": "15120",
+   "local": "15120",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(DSI),DSI[Party Name]=\"AUTOBOND TRADING (AL HATHBOOR)\")",
+   "powerbi": "1",
+   "local": "1",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(SUM(DSI[Net Amount]),DSI[Party Name]=\"CASH IN HAND\")",
+   "powerbi": "178274.63",
+   "local": "178274.63",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(DSI),DSI[Party Name]=\"CASH IN HAND\")",
+   "powerbi": "313",
+   "local": "313",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(SUM(DSI[Net Amount]),DSI[Party Name]=\"CATCO STAR TRADING L.L.C.\")",
+   "powerbi": "13184",
+   "local": "13184",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(DSI),DSI[Party Name]=\"CATCO STAR TRADING L.L.C.\")",
+   "powerbi": "2",
+   "local": "2",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(SUM(DSI[Net Amount]),DSI[Party Name]=\"DAR AL FONOON LLC\")",
+   "powerbi": "4414.46",
+   "local": "4414.46",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(DSI),DSI[Party Name]=\"DAR AL FONOON LLC\")",
+   "powerbi": "9",
+   "local": "9",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(SUM(DSI[Net Amount]),DSI[Party Name]=\"FAIROOZA TRADING CO. L.L.C.\")",
+   "powerbi": "1281",
+   "local": "1281",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(DSI),DSI[Party Name]=\"FAIROOZA TRADING CO. L.L.C.\")",
+   "powerbi": "1",
+   "local": "1",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(SUM(DSI[Net Amount]),DSI[Party Name]=\"GDT FZCO DUBAI BRANCH\")",
+   "powerbi": "4948.17",
+   "local": "4948.17",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(DSI),DSI[Party Name]=\"GDT FZCO DUBAI BRANCH\")",
+   "powerbi": "4",
+   "local": "4",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(SUM(DSI[Net Amount]),DSI[Party Name]=\"GOLDEN SANDS ABRASIVES L.L.C.\")",
+   "powerbi": "15764.71",
+   "local": "15764.71",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(DSI),DSI[Party Name]=\"GOLDEN SANDS ABRASIVES L.L.C.\")",
+   "powerbi": "13",
+   "local": "13",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(SUM(DSI[Net Amount]),DSI[Party Name]=\"GULF METAL WIRES INDUSTRY L.L.C.\")",
+   "powerbi": "178.5",
+   "local": "178.5",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(DSI),DSI[Party Name]=\"GULF METAL WIRES INDUSTRY L.L.C.\")",
+   "powerbi": "1",
+   "local": "1",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(SUM(DSI[Net Amount]),DSI[Party Name]=\"MAMS TRADING L.L.C.\")",
+   "powerbi": "1260",
+   "local": "1260",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(DSI),DSI[Party Name]=\"MAMS TRADING L.L.C.\")",
+   "powerbi": "1",
+   "local": "1",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(SUM(DSI[Net Amount]),DSI[Party Name]=\"MANBAA AL ANWAR TRADING L.L.C\")",
+   "powerbi": "279.3",
+   "local": "279.3",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(DSI),DSI[Party Name]=\"MANBAA AL ANWAR TRADING L.L.C\")",
+   "powerbi": "1",
+   "local": "1",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(SUM(DSI[Net Amount]),DSI[Party Name]=\"MEGA TOOLS LLC\")",
+   "powerbi": "700",
+   "local": "700",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(DSI),DSI[Party Name]=\"MEGA TOOLS LLC\")",
+   "powerbi": "1",
+   "local": "1",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(SUM(DSI[Net Amount]),DSI[Party Name]=\"MORDERN CUTTING TOOLS\")",
+   "powerbi": "10680",
+   "local": "10680",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(DSI),DSI[Party Name]=\"MORDERN CUTTING TOOLS\")",
+   "powerbi": "2",
+   "local": "2",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(SUM(DSI[Net Amount]),DSI[Party Name]=\"PREPAID CARDS\")",
+   "powerbi": "1572.5",
+   "local": "1572.5",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(DSI),DSI[Party Name]=\"PREPAID CARDS\")",
+   "powerbi": "2",
+   "local": "2",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(SUM(DSI[Net Amount]),DSI[Party Name]=\"RAJ TOOLS & ENGG\")",
+   "powerbi": "940",
+   "local": "940",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(DSI),DSI[Party Name]=\"RAJ TOOLS & ENGG\")",
+   "powerbi": "1",
+   "local": "1",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(SUM(DSI[Net Amount]),DSI[Party Name]=\"SAFINAT AL SAHRAA TRADING CO. L.L.C.\")",
+   "powerbi": "264.6",
+   "local": "264.6",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(DSI),DSI[Party Name]=\"SAFINAT AL SAHRAA TRADING CO. L.L.C.\")",
+   "powerbi": "1",
+   "local": "1",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(SUM(DSI[Net Amount]),DSI[Party Name]=\"SKOLE TRADING L.L.C.\")",
+   "powerbi": "1969.8",
+   "local": "1969.8",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(DSI),DSI[Party Name]=\"SKOLE TRADING L.L.C.\")",
+   "powerbi": "2",
+   "local": "2",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(SUM(DSI[Net Amount]),DSI[Party Name]=\"SPEED STAR GENERAL TRADING LLC\")",
+   "powerbi": "337883.63",
+   "local": "337883.63",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(DSI),DSI[Party Name]=\"SPEED STAR GENERAL TRADING LLC\")",
+   "powerbi": "2",
+   "local": "2",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(SUM(DSI[Net Amount]),DSI[Party Name]=\"TRUE QUALITY GENERAL TRADING\")",
+   "powerbi": "619.5",
+   "local": "619.5",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(DSI),DSI[Party Name]=\"TRUE QUALITY GENERAL TRADING\")",
+   "powerbi": "1",
+   "local": "1",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(SUM(DSI[Net Amount]),DSI[Party Name]=\"WEICON MIDDLE EAST LLC\")",
+   "powerbi": "13064.35",
+   "local": "13064.35",
+   "status": "match"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(DSI),DSI[Party Name]=\"WEICON MIDDLE EAST LLC\")",
+   "powerbi": "9",
+   "local": "9",
+   "status": "match"
+  }
+ ]
+}
