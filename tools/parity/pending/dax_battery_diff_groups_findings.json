@@ -40,34 +40,6 @@
    "powerbi": "5"
   },
   {
-   "expr": "CONCATENATEX(SELECTCOLUMNS(Facts,\"v\",IF(Facts[Quantity]>2,7,\"x\")),[v]&\"\",\"|\")",
-   "powerbi": "x|x|x|7|7|7"
-  },
-  {
-   "expr": "CONCATENATEX(Facts,Facts[Quantity],\"|\",IF(Facts[Quantity]>2,7,\"x\"))",
-   "powerbi": "3|4|5|0|1|2"
-  },
-  {
-   "expr": "CONCATENATEX(Facts,Facts[Quantity],\"|\",IF(Facts[Quantity]>2,TRUE(),\"x\"))",
-   "powerbi": "0|1|2|3|4|5"
-  },
-  {
-   "expr": "CONCATENATEX(Facts,Facts[Quantity],\"|\",IF(Facts[Quantity]>2,TRUE(),7))",
-   "powerbi": "0|1|2|3|4|5"
-  },
-  {
-   "expr": "CONCATENATEX(Facts,Facts[Quantity],\"|\",IF(Facts[Quantity]>2,TRUE(),BLANK()),ASC)",
-   "powerbi": "0|1|2|3|4|5"
-  },
-  {
-   "expr": "CONCATENATEX(Facts,Facts[Quantity],\"|\",IF(Facts[Quantity]>2,TRUE()),DESC)",
-   "powerbi": "3|4|5|0|1|2"
-  },
-  {
-   "expr": "CONCATENATEX(Facts,Facts[Quantity],\"|\",IF(Facts[Quantity]>2,7),DESC)",
-   "powerbi": "3|4|5|0|1|2"
-  },
-  {
    "expr": "IF(FALSE(),+TRUE())",
    "powerbi": "False"
   },
@@ -112,112 +84,12 @@
    "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 46) DAX comparison operations do not support comparing values of type Text with values of type Integer. Consider using the VALUE or FORMAT function to convert one of the values.\""
   },
   {
-   "expr": "CONCATENATEX(Facts,Facts[Quantity]>2,\",\")",
-   "powerbi": "FALSE,FALSE,FALSE,TRUE,TRUE,TRUE"
-  },
-  {
-   "expr": "CONCATENATEX(Facts,ISBLANK(Facts[Sales]),\",\")",
-   "powerbi": "TRUE,FALSE,FALSE,FALSE,FALSE,FALSE"
-  },
-  {
-   "expr": "CONCATENATEX(Facts,SWITCH(TRUE(),Facts[Quantity]>3,TRUE(),FALSE()),\",\")",
-   "powerbi": "FALSE,FALSE,FALSE,FALSE,TRUE,TRUE"
-  },
-  {
-   "expr": "CONCATENATEX(Facts,COALESCE(Facts[Sales]>0,FALSE()),\",\")",
-   "powerbi": "FALSE,FALSE,FALSE,TRUE,TRUE,TRUE"
-  },
-  {
-   "expr": "CONCATENATEX(Facts,IF(Facts[Quantity]>2,TRUE()),\",\")",
-   "powerbi": "FALSE,FALSE,FALSE,TRUE,TRUE,TRUE"
-  },
-  {
-   "expr": "CONCATENATEX(Facts,Facts[Quantity],\",\",Facts[Region])",
-   "powerbi": "1,2,5,4,0,3"
-  },
-  {
-   "expr": "CONCATENATEX(Facts,Facts[Quantity],\",\",Facts[Region],DESC)",
-   "powerbi": "0,3,4,1,2,5"
-  },
-  {
-   "expr": "CONCATENATEX(Facts,Facts[Region]&\"-\"&Facts[Quantity],\"|\",Facts[Region],ASC)",
-   "powerbi": "East-1|East-2|East-5|North-4|West-0|West-3"
-  },
-  {
-   "expr": "CONCATENATEX(Facts,Facts[Region],\"\")",
-   "powerbi": "EastEastEastWestWestNorth"
-  },
-  {
-   "expr": "CONCATENATEX(Facts,Facts[Region])",
-   "powerbi": "EastEastEastWestWestNorth"
-  },
-  {
-   "expr": "CONCATENATEX(TOPN(3,Facts,Facts[Quantity]),Facts[Quantity],\",\")",
-   "powerbi": "3,5,4"
-  },
-  {
-   "expr": "CONCATENATEX(ADDCOLUMNS(Facts,\"d\",Facts[Quantity]*2),[d],\",\")",
-   "powerbi": "0,2,4,6,8,10"
-  },
-  {
-   "expr": "CONCATENATEX(SELECTCOLUMNS(Facts,\"d\",-Facts[Quantity]),[d],\",\")",
-   "powerbi": "0,-1,-2,-3,-4,-5"
-  },
-  {
-   "expr": "CONCATENATEX(Facts,Facts[Region],\",\",BLANK())",
-   "powerbi": "East,East,East,West,West,North"
-  },
-  {
-   "expr": "CONCATENATEX(Facts,IF(Facts[Quantity]>2,Facts[Region]),\",\")",
-   "powerbi": ",,East,,West,North"
-  },
-  {
-   "expr": "CONCATENATEX(Facts,Facts[Quantity]&\"\",\",\")",
-   "powerbi": "0,1,2,3,4,5"
-  },
-  {
-   "expr": "CONCATENATEX(Facts,FORMAT(Facts[Quantity],\"00\"),\",\")",
-   "powerbi": "00,01,02,03,04,05"
-  },
-  {
-   "expr": "CONCATENATEX(Facts,LEFT(Facts[Region],1),\",\")",
-   "powerbi": "E,E,E,W,W,N"
-  },
-  {
-   "expr": "CONCATENATEX(Facts,UPPER(Facts[Region]),\",\")",
-   "powerbi": "EAST,EAST,EAST,WEST,WEST,NORTH"
-  },
-  {
    "expr": "CONCATENATEX({\"b\",\"A\",\"a\",\"B\"},[Value],\",\")",
    "powerbi": "b,A,A,b"
   },
   {
-   "expr": "CONCATENATEX(TOPN(2,{3,1,2},[Value],ASC),[Value],\",\")",
-   "powerbi": "2,1"
-  },
-  {
-   "expr": "CONCATENATEX(TOPN(2,{3,1,2},[Value]),[Value],\",\")",
-   "powerbi": "2,3"
-  },
-  {
    "expr": "CONCATENATEX(TOPN(5,{3,1,2},[Value]),[Value],\",\")",
    "powerbi": "1,3,2"
-  },
-  {
-   "expr": "CONCATENATEX(TOPN(1.5,{3,1,2},[Value]),[Value],\",\")",
-   "powerbi": "2,3"
-  },
-  {
-   "expr": "CONCATENATEX(TOPN(2,{3,1,2},[Value],0),[Value],\",\")",
-   "powerbi": "2,3"
-  },
-  {
-   "expr": "CONCATENATEX(TOPN(2,{3,1,2},[Value],1),[Value],\",\")",
-   "powerbi": "2,1"
-  },
-  {
-   "expr": "CONCATENATEX(TOPN(2,{3,1,2},[Value],TRUE()),[Value],\",\")",
-   "powerbi": "2,1"
   },
   {
    "expr": "TIME(0,0,86400)&\"\"",
@@ -304,36 +176,12 @@
    "powerbi": "x"
   },
   {
-   "expr": "SEARCH(\"\",\"abc\",4)",
-   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 19) The search Text provided to function 'SEARCH' could not be found in the given text.\""
-  },
-  {
-   "expr": "SEARCH(\"\",\"abc\",5)",
-   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 19) The search Text provided to function 'SEARCH' could not be found in the given text.\""
-  },
-  {
-   "expr": "FIND(\"\",\"abc\",4)",
-   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 19) The search Text provided to function 'FIND' could not be found in the given text.\""
-  },
-  {
-   "expr": "FIND(\"x\",\"abc\",1,\"nf\")",
-   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 36) Cannot convert value 'nf' of type Text to type Integer.\""
-  },
-  {
    "expr": "FIXED(1234.567,BLANK())",
    "powerbi": "1,235"
   },
   {
-   "expr": "UNICHAR(55296)",
-   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 19) The code point does not correspond to a valid character.\""
-  },
-  {
    "expr": "UNICHAR(128512)",
    "powerbi": "??"
-  },
-  {
-   "expr": "LEN(UNICHAR(128512))",
-   "powerbi": "2"
   },
   {
    "expr": "COMBINEVALUES(BLANK(),\"a\",\"b\")",
@@ -382,70 +230,6 @@
   {
    "expr": "SUMX(SELECTCOLUMNS(Facts,\"r\",Facts[Region],\"q\",Facts[Quantity],\"s\",Facts[Sales]),ROWNUMBER(SELECTCOLUMNS(Facts,\"r\",Facts[Region],\"q\",Facts[Quantity],\"s\",Facts[Sales]),ORDERBY([r])))",
    "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 100) Tied rows detected in the relation parameter for ROWNUMBER function.\""
-  },
-  {
-   "expr": "CONCATENATEX(Facts,Facts[Quantity],\",\")",
-   "powerbi": "0,1,2,3,4,5"
-  },
-  {
-   "expr": "CONCATENATEX(Facts,Facts[Region],\",\")",
-   "powerbi": "East,East,East,West,West,North"
-  },
-  {
-   "expr": "CONCATENATEX(Facts,Facts[Sales],\",\")",
-   "powerbi": ",-1.5,0,2.5,10.5,20"
-  },
-  {
-   "expr": "CONCATENATEX(Facts,Facts[Quantity]*-1,\",\")",
-   "powerbi": "0,-1,-2,-3,-4,-5"
-  },
-  {
-   "expr": "CONCATENATEX(Facts,Facts[Note],\",\")",
-   "powerbi": ",,Paid,Paid,Paid,Late"
-  },
-  {
-   "expr": "CONCATENATEX(Facts,IF(Facts[Quantity]>2,TRUE(),FALSE()),\",\")",
-   "powerbi": "FALSE,FALSE,FALSE,TRUE,TRUE,TRUE"
-  },
-  {
-   "expr": "CONCATENATEX(Facts,IF(Facts[Quantity]>2,1),\",\")",
-   "powerbi": ",,,1,1,1"
-  },
-  {
-   "expr": "CONCATENATEX(Facts,IF(Facts[Quantity]>2,\"a\"),\",\")",
-   "powerbi": ",,,a,a,a"
-  },
-  {
-   "expr": "CONCATENATEX(Facts,NOT(Facts[Quantity]>2),\",\")",
-   "powerbi": "TRUE,TRUE,TRUE,FALSE,FALSE,FALSE"
-  },
-  {
-   "expr": "CONCATENATEX(Facts,Facts[Quantity]>2 && Facts[Quantity]<5,\",\")",
-   "powerbi": "FALSE,FALSE,FALSE,TRUE,TRUE,FALSE"
-  },
-  {
-   "expr": "LEN(\"a\"&UNICHAR(128512)&\"b\")",
-   "powerbi": "4"
-  },
-  {
-   "expr": "LEFT(\"a\"&UNICHAR(128512)&\"b\",2)=\"a\"&UNICHAR(55357)",
-   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 55) The code point does not correspond to a valid character.\""
-  },
-  {
-   "expr": "FIND(\"b\",\"a\"&UNICHAR(128512)&\"b\")",
-   "powerbi": "4"
-  },
-  {
-   "expr": "SEARCH(\"b\",\"a\"&UNICHAR(128512)&\"b\")",
-   "powerbi": "4"
-  },
-  {
-   "expr": "LEN(REPLACE(\"a\"&UNICHAR(128512)&\"b\",2,1,\"X\"))",
-   "powerbi": "4"
-  },
-  {
-   "expr": "LEN(SUBSTITUTE(\"a\"&UNICHAR(128512)&\"b\",\"b\",\"\"))",
-   "powerbi": "3"
   },
   {
    "expr": "SIN(PI())",

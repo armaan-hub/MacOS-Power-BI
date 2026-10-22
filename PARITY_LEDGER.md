@@ -41,6 +41,8 @@ Rule: a slice is finished only when it is compared with Power BI, its items are 
 | dax_battery_iferror_hard_errors | 165 | 0 | 0 | 0 | 0 |
 | dax_battery_concatenatex_order | 189 | 0 | 0 | 0 | 0 |
 | dax_battery_not_operator | 30 | 0 | 4 | 0 | 0 |
+| dax_battery_promoted_pending | 632 | 0 | 0 | 0 | 0 |
+| dax_battery_utf16_text | 244 | 0 | 0 | 0 | 0 |
 | table VAT | 575 | 0 | 0 | 0 | 0 |
 
 ## Pending work (1197): Power BI answers, the app refuses

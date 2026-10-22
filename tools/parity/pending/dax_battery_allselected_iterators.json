@@ -4,19 +4,7 @@
  "note": "Not replayed by the gate: ALLSELECTED inside an iteration keeps the iterated rows as a shadow filter (FILTER, TOPN, CALCULATETABLE) and drops row-transition filters; the app does not model that yet (14 of 25 differ). Also: SUMX over an empty ALLSELECTED(column) with a bare column in its body is a static error in Power BI but BLANK in the app (lazy evaluation).",
  "items": [
   {
-   "expr": "SUMX(Facts,COUNTROWS(ALLSELECTED(Facts)))",
-   "powerbi": "36"
-  },
-  {
-   "expr": "SUMX(Facts,COUNTROWS(ALLSELECTED(Facts[Region])))",
-   "powerbi": "18"
-  },
-  {
    "expr": "SUMX(FILTER(Facts,Facts[Quantity]>2),COUNTROWS(ALLSELECTED(Facts)))",
-   "powerbi": "9"
-  },
-  {
-   "expr": "SUMX(FILTER(Facts,Facts[Quantity]>2),COUNTROWS(ALLSELECTED(Facts[Region])))",
    "powerbi": "9"
   },
   {
@@ -40,32 +28,12 @@
    "powerbi": "4"
   },
   {
-   "expr": "SUMX(VALUES(Facts[Region]),COUNTROWS(ALLSELECTED(Facts)))",
-   "powerbi": "18"
-  },
-  {
-   "expr": "SUMX(ALL(Facts[Region]),COUNTROWS(ALLSELECTED(Facts)))",
-   "powerbi": "18"
-  },
-  {
-   "expr": "SUMX(SUMMARIZE(Facts,Facts[Region]),COUNTROWS(ALLSELECTED(Facts)))",
-   "powerbi": "18"
-  },
-  {
    "expr": "SUMX(TOPN(2,Facts,Facts[Quantity]),COUNTROWS(ALLSELECTED(Facts)))",
    "powerbi": "4"
   },
   {
    "expr": "SUMX(CALCULATETABLE(Facts,Facts[Quantity]>2),COUNTROWS(ALLSELECTED(Facts)))",
    "powerbi": "9"
-  },
-  {
-   "expr": "SUMX(ADDCOLUMNS(Facts,\"x\",1),COUNTROWS(ALLSELECTED(Facts)))",
-   "powerbi": "36"
-  },
-  {
-   "expr": "SUMX(SELECTCOLUMNS(Facts,\"r\",Facts[Region]),COUNTROWS(ALLSELECTED(Facts)))",
-   "powerbi": "36"
   },
   {
    "expr": "SUMX(FILTER(Facts,Facts[Quantity]>2),CALCULATE(COUNTROWS(ALLSELECTED(Facts))))",
@@ -78,18 +46,6 @@
   {
    "expr": "CALCULATE(SUMX(FILTER(Facts,Facts[Quantity]>2),COUNTROWS(ALLSELECTED(Facts))),Facts[Region]=\"East\")",
    "powerbi": "1"
-  },
-  {
-   "expr": "CALCULATE(SUMX(FILTER(Facts,Facts[Quantity]>2),COUNTROWS(ALLSELECTED(Facts))),Facts[Quantity]>3)",
-   "powerbi": "4"
-  },
-  {
-   "expr": "CALCULATE(SUMX(Facts,COUNTROWS(ALLSELECTED(Facts))),Facts[Quantity]>3)",
-   "powerbi": "4"
-  },
-  {
-   "expr": "COUNTROWS(FILTER(Facts,COUNTROWS(ALLSELECTED(Facts))>3))",
-   "powerbi": "6"
   },
   {
    "expr": "SUMX(FILTER(Facts,Facts[Quantity]>2),SUMX(FILTER(Facts,Facts[Quantity]>3),COUNTROWS(ALLSELECTED(Facts))))",

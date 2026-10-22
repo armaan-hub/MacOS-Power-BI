@@ -1,0 +1,983 @@
+{
+ "powerbi_version": "2.157.879.0 (26.08)+da30fe74eb0b8a8786ab7326b69c400a0e951831",
+ "frozen": "2026-10-22",
+ "note": "UTF-16 code-unit text functions, UNICHAR/UNICODE validity and FIND/SEARCH empty-needle and NotFoundValue rules (iteration 80).",
+ "items": [
+  {
+   "expr": "LEN(UNICHAR(128512))",
+   "powerbi": "2"
+  },
+  {
+   "expr": "UNICODE(UNICHAR(128512))",
+   "powerbi": "128512"
+  },
+  {
+   "expr": "LEN(\"a\"&UNICHAR(128512)&\"b\")",
+   "powerbi": "4"
+  },
+  {
+   "expr": "LEN(LEFT(\"a\"&UNICHAR(128512)&\"b\",1))",
+   "powerbi": "1"
+  },
+  {
+   "expr": "LEN(LEFT(\"a\"&UNICHAR(128512)&\"b\",2))",
+   "powerbi": "2"
+  },
+  {
+   "expr": "LEN(LEFT(\"a\"&UNICHAR(128512)&\"b\",3))",
+   "powerbi": "3"
+  },
+  {
+   "expr": "LEN(LEFT(\"a\"&UNICHAR(128512)&\"b\",4))",
+   "powerbi": "4"
+  },
+  {
+   "expr": "LEN(RIGHT(\"a\"&UNICHAR(128512)&\"b\",1))",
+   "powerbi": "1"
+  },
+  {
+   "expr": "LEN(RIGHT(\"a\"&UNICHAR(128512)&\"b\",2))",
+   "powerbi": "2"
+  },
+  {
+   "expr": "LEN(RIGHT(\"a\"&UNICHAR(128512)&\"b\",3))",
+   "powerbi": "3"
+  },
+  {
+   "expr": "LEN(MID(\"a\"&UNICHAR(128512)&\"b\",2,1))",
+   "powerbi": "1"
+  },
+  {
+   "expr": "LEN(MID(\"a\"&UNICHAR(128512)&\"b\",2,2))",
+   "powerbi": "2"
+  },
+  {
+   "expr": "LEN(MID(\"a\"&UNICHAR(128512)&\"b\",3,1))",
+   "powerbi": "1"
+  },
+  {
+   "expr": "LEN(MID(\"a\"&UNICHAR(128512)&\"b\",4,1))",
+   "powerbi": "1"
+  },
+  {
+   "expr": "MID(\"a\"&UNICHAR(128512)&\"b\",4,1)",
+   "powerbi": "b"
+  },
+  {
+   "expr": "MID(\"a\"&UNICHAR(128512)&\"b\",2,2)=UNICHAR(128512)",
+   "powerbi": "True"
+  },
+  {
+   "expr": "UNICODE(MID(\"a\"&UNICHAR(128512)&\"b\",2,1))",
+   "powerbi": "ERR:\"Query (1, 19) An argument of function 'UNICODE' has the wrong data type or has an invalid value.\""
+  },
+  {
+   "expr": "UNICODE(MID(\"a\"&UNICHAR(128512)&\"b\",3,1))",
+   "powerbi": "56832"
+  },
+  {
+   "expr": "UNICODE(RIGHT(\"a\"&UNICHAR(128512)&\"b\",2))",
+   "powerbi": "56832"
+  },
+  {
+   "expr": "UNICODE(RIGHT(\"a\"&UNICHAR(128512)&\"b\",3))",
+   "powerbi": "128512"
+  },
+  {
+   "expr": "FIND(UNICHAR(128512),\"a\"&UNICHAR(128512)&\"b\")",
+   "powerbi": "2"
+  },
+  {
+   "expr": "SEARCH(UNICHAR(128512),\"a\"&UNICHAR(128512)&\"b\")",
+   "powerbi": "2"
+  },
+  {
+   "expr": "FIND(\"b\",\"a\"&UNICHAR(128512)&\"b\")",
+   "powerbi": "4"
+  },
+  {
+   "expr": "SEARCH(\"b\",\"a\"&UNICHAR(128512)&\"b\")",
+   "powerbi": "4"
+  },
+  {
+   "expr": "SEARCH(\"?b\",\"a\"&UNICHAR(128512)&\"b\")",
+   "powerbi": "3"
+  },
+  {
+   "expr": "SEARCH(\"a?b\",\"a\"&UNICHAR(128512)&\"b\")",
+   "powerbi": "ERR:\"Query (1, 19) The search Text provided to function 'SEARCH' could not be found in the given text.\""
+  },
+  {
+   "expr": "SEARCH(\"a??b\",\"a\"&UNICHAR(128512)&\"b\")",
+   "powerbi": "1"
+  },
+  {
+   "expr": "SEARCH(\"a*b\",\"a\"&UNICHAR(128512)&\"b\")",
+   "powerbi": "1"
+  },
+  {
+   "expr": "FIND(\"b\",\"a\"&UNICHAR(128512)&\"b\",4)",
+   "powerbi": "4"
+  },
+  {
+   "expr": "FIND(\"b\",\"a\"&UNICHAR(128512)&\"b\",5)",
+   "powerbi": "ERR:\"Query (1, 19) The search Text provided to function 'FIND' could not be found in the given text.\""
+  },
+  {
+   "expr": "FIND(\"b\",\"a\"&UNICHAR(128512)&\"b\",3)",
+   "powerbi": "4"
+  },
+  {
+   "expr": "FIND(\"\",\"a\"&UNICHAR(128512)&\"b\",4)",
+   "powerbi": "1"
+  },
+  {
+   "expr": "FIND(\"\",\"a\"&UNICHAR(128512)&\"b\",5)",
+   "powerbi": "ERR:\"Query (1, 19) The search Text provided to function 'FIND' could not be found in the given text.\""
+  },
+  {
+   "expr": "LEN(REPLACE(\"a\"&UNICHAR(128512)&\"b\",2,1,\"X\"))",
+   "powerbi": "4"
+  },
+  {
+   "expr": "LEN(REPLACE(\"a\"&UNICHAR(128512)&\"b\",2,2,\"X\"))",
+   "powerbi": "3"
+  },
+  {
+   "expr": "LEN(REPLACE(\"a\"&UNICHAR(128512)&\"b\",4,1,\"X\"))",
+   "powerbi": "4"
+  },
+  {
+   "expr": "REPLACE(\"a\"&UNICHAR(128512)&\"b\",2,2,\"X\")",
+   "powerbi": "aXb"
+  },
+  {
+   "expr": "LEN(SUBSTITUTE(\"a\"&UNICHAR(128512)&\"b\",\"b\",\"\"))",
+   "powerbi": "3"
+  },
+  {
+   "expr": "LEN(SUBSTITUTE(\"a\"&UNICHAR(128512)&\"b\",UNICHAR(128512),\"xx\"))",
+   "powerbi": "4"
+  },
+  {
+   "expr": "SUBSTITUTE(\"a\"&UNICHAR(128512)&\"b\",UNICHAR(128512),\"-\")",
+   "powerbi": "a-b"
+  },
+  {
+   "expr": "LEN(REPT(UNICHAR(128512),3))",
+   "powerbi": "6"
+  },
+  {
+   "expr": "LEN(UNICHAR(128512)&UNICHAR(128512))",
+   "powerbi": "4"
+  },
+  {
+   "expr": "EXACT(UNICHAR(128512),UNICHAR(128512))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "LEN(UPPER(\"a\"&UNICHAR(128512)&\"b\"))",
+   "powerbi": "4"
+  },
+  {
+   "expr": "UPPER(UNICHAR(66560))=UNICHAR(66560)",
+   "powerbi": "True"
+  },
+  {
+   "expr": "LOWER(UNICHAR(66560))=UNICHAR(66600)",
+   "powerbi": "False"
+  },
+  {
+   "expr": "UPPER(UNICHAR(66600))=UNICHAR(66560)",
+   "powerbi": "False"
+  },
+  {
+   "expr": "LEN(UPPER(UNICHAR(66560)))",
+   "powerbi": "2"
+  },
+  {
+   "expr": "LEN(TRIM(\" \"&UNICHAR(128512)&\"  b\"))",
+   "powerbi": "4"
+  },
+  {
+   "expr": "LEN(FORMAT(UNICHAR(128512),\"@\"))",
+   "powerbi": "2"
+  },
+  {
+   "expr": "LEN(CONCATENATE(UNICHAR(128512),\"a\"))",
+   "powerbi": "3"
+  },
+  {
+   "expr": "LEN(COMBINEVALUES(\"-\",UNICHAR(128512),\"a\"))",
+   "powerbi": "4"
+  },
+  {
+   "expr": "LEN(LEFT(UNICHAR(128512),1))",
+   "powerbi": "1"
+  },
+  {
+   "expr": "LEN(RIGHT(UNICHAR(128512),1))",
+   "powerbi": "1"
+  },
+  {
+   "expr": "LEN(MID(UNICHAR(128512),1,1))",
+   "powerbi": "1"
+  },
+  {
+   "expr": "LEN(MID(UNICHAR(128512),2,1))",
+   "powerbi": "1"
+  },
+  {
+   "expr": "UNICODE(LEFT(UNICHAR(128512),1))",
+   "powerbi": "ERR:\"Query (1, 19) An argument of function 'UNICODE' has the wrong data type or has an invalid value.\""
+  },
+  {
+   "expr": "UNICODE(RIGHT(UNICHAR(128512),1))",
+   "powerbi": "56832"
+  },
+  {
+   "expr": "UNICHAR(UNICODE(LEFT(UNICHAR(128512),1)))=LEFT(UNICHAR(128512),1)",
+   "powerbi": "ERR:\"Query (1, 27) An argument of function 'UNICODE' has the wrong data type or has an invalid value.\""
+  },
+  {
+   "expr": "LEN(UNICHAR(55357))",
+   "powerbi": "ERR:\"Query (1, 23) The code point does not correspond to a valid character.\""
+  },
+  {
+   "expr": "LEN(UNICHAR(55357)&UNICHAR(56832))",
+   "powerbi": "ERR:\"Query (1, 23) The code point does not correspond to a valid character.\""
+  },
+  {
+   "expr": "UNICHAR(55357)&UNICHAR(56832)=UNICHAR(128512)",
+   "powerbi": "ERR:\"Query (1, 19) The code point does not correspond to a valid character.\""
+  },
+  {
+   "expr": "LEFT(UNICHAR(128512),1)&RIGHT(UNICHAR(128512),1)=UNICHAR(128512)",
+   "powerbi": "True"
+  },
+  {
+   "expr": "EXACT(UNICHAR(55357)&UNICHAR(56832),UNICHAR(128512))",
+   "powerbi": "ERR:\"Query (1, 25) The code point does not correspond to a valid character.\""
+  },
+  {
+   "expr": "LEN(UNICHAR(65536))",
+   "powerbi": "2"
+  },
+  {
+   "expr": "LEN(UNICHAR(1114111))",
+   "powerbi": "ERR:\"Query (1, 23) The code point does not correspond to a valid character.\""
+  },
+  {
+   "expr": "LEN(UNICHAR(65535))",
+   "powerbi": "ERR:\"Query (1, 23) The code point does not correspond to a valid character.\""
+  },
+  {
+   "expr": "UNICODE(UNICHAR(65536))",
+   "powerbi": "65536"
+  },
+  {
+   "expr": "UNICODE(UNICHAR(1114111))",
+   "powerbi": "ERR:\"Query (1, 27) The code point does not correspond to a valid character.\""
+  },
+  {
+   "expr": "FIND(\"\",\"abc\",0)",
+   "powerbi": "ERR:\"Query (1, 19) An argument of function 'FIND' has the wrong data type or has an invalid value.\""
+  },
+  {
+   "expr": "FIND(\"\",\"abc\",1)",
+   "powerbi": "1"
+  },
+  {
+   "expr": "FIND(\"\",\"abc\",2)",
+   "powerbi": "1"
+  },
+  {
+   "expr": "FIND(\"\",\"abc\",3)",
+   "powerbi": "1"
+  },
+  {
+   "expr": "FIND(\"\",\"abc\",4)",
+   "powerbi": "ERR:\"Query (1, 19) The search Text provided to function 'FIND' could not be found in the given text.\""
+  },
+  {
+   "expr": "FIND(\"\",\"abc\",5)",
+   "powerbi": "ERR:\"Query (1, 19) The search Text provided to function 'FIND' could not be found in the given text.\""
+  },
+  {
+   "expr": "FIND(\"\",\"abc\")",
+   "powerbi": "1"
+  },
+  {
+   "expr": "FIND(\"\",\"abc\",1,\"nf\")",
+   "powerbi": "ERR:\"Query (1, 35) Cannot convert value 'nf' of type Text to type Integer.\""
+  },
+  {
+   "expr": "FIND(\"\",\"abc\",9,\"nf\")",
+   "powerbi": "ERR:\"Query (1, 35) Cannot convert value 'nf' of type Text to type Integer.\""
+  },
+  {
+   "expr": "FIND(\"x\",\"abc\",1,\"nf\")",
+   "powerbi": "ERR:\"Query (1, 36) Cannot convert value 'nf' of type Text to type Integer.\""
+  },
+  {
+   "expr": "FIND(\"\",\"\",0)",
+   "powerbi": "ERR:\"Query (1, 19) An argument of function 'FIND' has the wrong data type or has an invalid value.\""
+  },
+  {
+   "expr": "FIND(\"\",\"\",1)",
+   "powerbi": "1"
+  },
+  {
+   "expr": "FIND(\"\",\"\",2)",
+   "powerbi": "ERR:\"Query (1, 19) The search Text provided to function 'FIND' could not be found in the given text.\""
+  },
+  {
+   "expr": "FIND(\"\",\"\",3)",
+   "powerbi": "ERR:\"Query (1, 19) The search Text provided to function 'FIND' could not be found in the given text.\""
+  },
+  {
+   "expr": "FIND(\"\",\"\",4)",
+   "powerbi": "ERR:\"Query (1, 19) The search Text provided to function 'FIND' could not be found in the given text.\""
+  },
+  {
+   "expr": "FIND(\"\",\"\",5)",
+   "powerbi": "ERR:\"Query (1, 19) The search Text provided to function 'FIND' could not be found in the given text.\""
+  },
+  {
+   "expr": "FIND(\"\",\"\")",
+   "powerbi": "1"
+  },
+  {
+   "expr": "FIND(\"\",\"\",1,\"nf\")",
+   "powerbi": "ERR:\"Query (1, 32) Cannot convert value 'nf' of type Text to type Integer.\""
+  },
+  {
+   "expr": "FIND(\"\",\"\",9,\"nf\")",
+   "powerbi": "ERR:\"Query (1, 32) Cannot convert value 'nf' of type Text to type Integer.\""
+  },
+  {
+   "expr": "FIND(\"x\",\"\",1,\"nf\")",
+   "powerbi": "ERR:\"Query (1, 33) Cannot convert value 'nf' of type Text to type Integer.\""
+  },
+  {
+   "expr": "FIND(\"\",\"a\",0)",
+   "powerbi": "ERR:\"Query (1, 19) An argument of function 'FIND' has the wrong data type or has an invalid value.\""
+  },
+  {
+   "expr": "FIND(\"\",\"a\",1)",
+   "powerbi": "1"
+  },
+  {
+   "expr": "FIND(\"\",\"a\",2)",
+   "powerbi": "ERR:\"Query (1, 19) The search Text provided to function 'FIND' could not be found in the given text.\""
+  },
+  {
+   "expr": "FIND(\"\",\"a\",3)",
+   "powerbi": "ERR:\"Query (1, 19) The search Text provided to function 'FIND' could not be found in the given text.\""
+  },
+  {
+   "expr": "FIND(\"\",\"a\",4)",
+   "powerbi": "ERR:\"Query (1, 19) The search Text provided to function 'FIND' could not be found in the given text.\""
+  },
+  {
+   "expr": "FIND(\"\",\"a\",5)",
+   "powerbi": "ERR:\"Query (1, 19) The search Text provided to function 'FIND' could not be found in the given text.\""
+  },
+  {
+   "expr": "FIND(\"\",\"a\")",
+   "powerbi": "1"
+  },
+  {
+   "expr": "FIND(\"\",\"a\",1,\"nf\")",
+   "powerbi": "ERR:\"Query (1, 33) Cannot convert value 'nf' of type Text to type Integer.\""
+  },
+  {
+   "expr": "FIND(\"\",\"a\",9,\"nf\")",
+   "powerbi": "ERR:\"Query (1, 33) Cannot convert value 'nf' of type Text to type Integer.\""
+  },
+  {
+   "expr": "FIND(\"x\",\"a\",1,\"nf\")",
+   "powerbi": "ERR:\"Query (1, 34) Cannot convert value 'nf' of type Text to type Integer.\""
+  },
+  {
+   "expr": "SEARCH(\"\",\"abc\",0)",
+   "powerbi": "ERR:\"Query (1, 19) An argument of function 'SEARCH' has the wrong data type or has an invalid value.\""
+  },
+  {
+   "expr": "SEARCH(\"\",\"abc\",1)",
+   "powerbi": "1"
+  },
+  {
+   "expr": "SEARCH(\"\",\"abc\",2)",
+   "powerbi": "1"
+  },
+  {
+   "expr": "SEARCH(\"\",\"abc\",3)",
+   "powerbi": "1"
+  },
+  {
+   "expr": "SEARCH(\"\",\"abc\",4)",
+   "powerbi": "ERR:\"Query (1, 19) The search Text provided to function 'SEARCH' could not be found in the given text.\""
+  },
+  {
+   "expr": "SEARCH(\"\",\"abc\",5)",
+   "powerbi": "ERR:\"Query (1, 19) The search Text provided to function 'SEARCH' could not be found in the given text.\""
+  },
+  {
+   "expr": "SEARCH(\"\",\"abc\")",
+   "powerbi": "1"
+  },
+  {
+   "expr": "SEARCH(\"\",\"abc\",1,\"nf\")",
+   "powerbi": "ERR:\"Query (1, 37) Cannot convert value 'nf' of type Text to type Integer.\""
+  },
+  {
+   "expr": "SEARCH(\"\",\"abc\",9,\"nf\")",
+   "powerbi": "ERR:\"Query (1, 37) Cannot convert value 'nf' of type Text to type Integer.\""
+  },
+  {
+   "expr": "SEARCH(\"x\",\"abc\",1,\"nf\")",
+   "powerbi": "ERR:\"Query (1, 38) Cannot convert value 'nf' of type Text to type Integer.\""
+  },
+  {
+   "expr": "SEARCH(\"\",\"\",0)",
+   "powerbi": "ERR:\"Query (1, 19) An argument of function 'SEARCH' has the wrong data type or has an invalid value.\""
+  },
+  {
+   "expr": "SEARCH(\"\",\"\",1)",
+   "powerbi": "ERR:\"Query (1, 19) The search Text provided to function 'SEARCH' could not be found in the given text.\""
+  },
+  {
+   "expr": "SEARCH(\"\",\"\",2)",
+   "powerbi": "ERR:\"Query (1, 19) The search Text provided to function 'SEARCH' could not be found in the given text.\""
+  },
+  {
+   "expr": "SEARCH(\"\",\"\",3)",
+   "powerbi": "ERR:\"Query (1, 19) The search Text provided to function 'SEARCH' could not be found in the given text.\""
+  },
+  {
+   "expr": "SEARCH(\"\",\"\",4)",
+   "powerbi": "ERR:\"Query (1, 19) The search Text provided to function 'SEARCH' could not be found in the given text.\""
+  },
+  {
+   "expr": "SEARCH(\"\",\"\",5)",
+   "powerbi": "ERR:\"Query (1, 19) The search Text provided to function 'SEARCH' could not be found in the given text.\""
+  },
+  {
+   "expr": "SEARCH(\"\",\"\")",
+   "powerbi": "ERR:\"Query (1, 19) The search Text provided to function 'SEARCH' could not be found in the given text.\""
+  },
+  {
+   "expr": "SEARCH(\"\",\"\",1,\"nf\")",
+   "powerbi": "ERR:\"Query (1, 34) Cannot convert value 'nf' of type Text to type Integer.\""
+  },
+  {
+   "expr": "SEARCH(\"\",\"\",9,\"nf\")",
+   "powerbi": "ERR:\"Query (1, 34) Cannot convert value 'nf' of type Text to type Integer.\""
+  },
+  {
+   "expr": "SEARCH(\"x\",\"\",1,\"nf\")",
+   "powerbi": "ERR:\"Query (1, 35) Cannot convert value 'nf' of type Text to type Integer.\""
+  },
+  {
+   "expr": "SEARCH(\"\",\"a\",0)",
+   "powerbi": "ERR:\"Query (1, 19) An argument of function 'SEARCH' has the wrong data type or has an invalid value.\""
+  },
+  {
+   "expr": "SEARCH(\"\",\"a\",1)",
+   "powerbi": "1"
+  },
+  {
+   "expr": "SEARCH(\"\",\"a\",2)",
+   "powerbi": "ERR:\"Query (1, 19) The search Text provided to function 'SEARCH' could not be found in the given text.\""
+  },
+  {
+   "expr": "SEARCH(\"\",\"a\",3)",
+   "powerbi": "ERR:\"Query (1, 19) The search Text provided to function 'SEARCH' could not be found in the given text.\""
+  },
+  {
+   "expr": "SEARCH(\"\",\"a\",4)",
+   "powerbi": "ERR:\"Query (1, 19) The search Text provided to function 'SEARCH' could not be found in the given text.\""
+  },
+  {
+   "expr": "SEARCH(\"\",\"a\",5)",
+   "powerbi": "ERR:\"Query (1, 19) The search Text provided to function 'SEARCH' could not be found in the given text.\""
+  },
+  {
+   "expr": "SEARCH(\"\",\"a\")",
+   "powerbi": "1"
+  },
+  {
+   "expr": "SEARCH(\"\",\"a\",1,\"nf\")",
+   "powerbi": "ERR:\"Query (1, 35) Cannot convert value 'nf' of type Text to type Integer.\""
+  },
+  {
+   "expr": "SEARCH(\"\",\"a\",9,\"nf\")",
+   "powerbi": "ERR:\"Query (1, 35) Cannot convert value 'nf' of type Text to type Integer.\""
+  },
+  {
+   "expr": "SEARCH(\"x\",\"a\",1,\"nf\")",
+   "powerbi": "ERR:\"Query (1, 36) Cannot convert value 'nf' of type Text to type Integer.\""
+  },
+  {
+   "expr": "LEN(UNICHAR(0))",
+   "powerbi": "ERR:\"Query (1, 23) An argument of function 'UNICHAR' has the wrong data type or the result is too large or too small.\""
+  },
+  {
+   "expr": "LEN(UNICHAR(1))",
+   "powerbi": "ERR:\"Query (1, 23) Function 'UNICHAR' does not return invalid XML characters.\""
+  },
+  {
+   "expr": "LEN(UNICHAR(31))",
+   "powerbi": "ERR:\"Query (1, 23) Function 'UNICHAR' does not return invalid XML characters.\""
+  },
+  {
+   "expr": "LEN(UNICHAR(127))",
+   "powerbi": "1"
+  },
+  {
+   "expr": "LEN(UNICHAR(128))",
+   "powerbi": "1"
+  },
+  {
+   "expr": "LEN(UNICHAR(159))",
+   "powerbi": "1"
+  },
+  {
+   "expr": "LEN(UNICHAR(160))",
+   "powerbi": "1"
+  },
+  {
+   "expr": "LEN(UNICHAR(173))",
+   "powerbi": "1"
+  },
+  {
+   "expr": "LEN(UNICHAR(55295))",
+   "powerbi": "1"
+  },
+  {
+   "expr": "LEN(UNICHAR(55296))",
+   "powerbi": "ERR:\"Query (1, 23) The code point does not correspond to a valid character.\""
+  },
+  {
+   "expr": "LEN(UNICHAR(56319))",
+   "powerbi": "ERR:\"Query (1, 23) The code point does not correspond to a valid character.\""
+  },
+  {
+   "expr": "LEN(UNICHAR(56320))",
+   "powerbi": "ERR:\"Query (1, 23) The code point does not correspond to a valid character.\""
+  },
+  {
+   "expr": "LEN(UNICHAR(57343))",
+   "powerbi": "ERR:\"Query (1, 23) The code point does not correspond to a valid character.\""
+  },
+  {
+   "expr": "LEN(UNICHAR(57344))",
+   "powerbi": "1"
+  },
+  {
+   "expr": "LEN(UNICHAR(64975))",
+   "powerbi": "1"
+  },
+  {
+   "expr": "LEN(UNICHAR(64976))",
+   "powerbi": "ERR:\"Query (1, 23) The code point does not correspond to a valid character.\""
+  },
+  {
+   "expr": "LEN(UNICHAR(65007))",
+   "powerbi": "ERR:\"Query (1, 23) The code point does not correspond to a valid character.\""
+  },
+  {
+   "expr": "LEN(UNICHAR(65008))",
+   "powerbi": "1"
+  },
+  {
+   "expr": "LEN(UNICHAR(65533))",
+   "powerbi": "1"
+  },
+  {
+   "expr": "LEN(UNICHAR(65534))",
+   "powerbi": "ERR:\"Query (1, 23) The code point does not correspond to a valid character.\""
+  },
+  {
+   "expr": "LEN(UNICHAR(131069))",
+   "powerbi": "2"
+  },
+  {
+   "expr": "LEN(UNICHAR(131070))",
+   "powerbi": "ERR:\"Query (1, 23) The code point does not correspond to a valid character.\""
+  },
+  {
+   "expr": "LEN(UNICHAR(131071))",
+   "powerbi": "ERR:\"Query (1, 23) The code point does not correspond to a valid character.\""
+  },
+  {
+   "expr": "LEN(UNICHAR(1048574))",
+   "powerbi": "ERR:\"Query (1, 23) The code point does not correspond to a valid character.\""
+  },
+  {
+   "expr": "LEN(UNICHAR(1048575))",
+   "powerbi": "ERR:\"Query (1, 23) The code point does not correspond to a valid character.\""
+  },
+  {
+   "expr": "LEN(UNICHAR(1048576))",
+   "powerbi": "2"
+  },
+  {
+   "expr": "LEN(UNICHAR(1114109))",
+   "powerbi": "2"
+  },
+  {
+   "expr": "LEN(UNICHAR(1114110))",
+   "powerbi": "ERR:\"Query (1, 23) The code point does not correspond to a valid character.\""
+  },
+  {
+   "expr": "LEN(UNICHAR(1114112))",
+   "powerbi": "ERR:\"Query (1, 23) An argument of function 'UNICHAR' has the wrong data type or the result is too large or too small.\""
+  },
+  {
+   "expr": "LEN(UNICHAR(2000000))",
+   "powerbi": "ERR:\"Query (1, 23) An argument of function 'UNICHAR' has the wrong data type or the result is too large or too small.\""
+  },
+  {
+   "expr": "UNICODE(UNICHAR(65534))",
+   "powerbi": "ERR:\"Query (1, 27) The code point does not correspond to a valid character.\""
+  },
+  {
+   "expr": "UNICODE(UNICHAR(64976))",
+   "powerbi": "ERR:\"Query (1, 27) The code point does not correspond to a valid character.\""
+  },
+  {
+   "expr": "UNICODE(UNICHAR(131070))",
+   "powerbi": "ERR:\"Query (1, 27) The code point does not correspond to a valid character.\""
+  },
+  {
+   "expr": "UNICODE(LEFT(UNICHAR(128512)&\"x\",1))",
+   "powerbi": "ERR:\"Query (1, 19) An argument of function 'UNICODE' has the wrong data type or has an invalid value.\""
+  },
+  {
+   "expr": "UNICODE(MID(\"a\"&UNICHAR(128512)&\"b\",3,2))",
+   "powerbi": "56832"
+  },
+  {
+   "expr": "LEN(SUBSTITUTE(\"a\"&UNICHAR(128512)&\"b\",RIGHT(UNICHAR(128512),1),\"\"))",
+   "powerbi": "3"
+  },
+  {
+   "expr": "LEN(SUBSTITUTE(\"a\"&UNICHAR(128512)&\"b\",LEFT(UNICHAR(128512),1),\"\"))",
+   "powerbi": "3"
+  },
+  {
+   "expr": "LEN(SUBSTITUTE(\"a\"&UNICHAR(128512)&\"b\",LEFT(UNICHAR(128512),1),\"Z\"))",
+   "powerbi": "4"
+  },
+  {
+   "expr": "FIND(RIGHT(UNICHAR(128512),1),\"a\"&UNICHAR(128512)&\"b\")",
+   "powerbi": "3"
+  },
+  {
+   "expr": "FIND(LEFT(UNICHAR(128512),1),\"a\"&UNICHAR(128512)&\"b\")",
+   "powerbi": "2"
+  },
+  {
+   "expr": "SEARCH(LEFT(UNICHAR(128512),1),\"a\"&UNICHAR(128512)&\"b\")",
+   "powerbi": "2"
+  },
+  {
+   "expr": "LEN(REPLACE(\"a\"&UNICHAR(128512)&\"b\",3,1,\"\"))",
+   "powerbi": "3"
+  },
+  {
+   "expr": "LEN(REPLACE(\"a\"&UNICHAR(128512)&\"b\",3,0,\"Q\"))",
+   "powerbi": "5"
+  },
+  {
+   "expr": "LEN(REPLACE(\"a\"&UNICHAR(128512)&\"b\",1,0,\"Q\"))",
+   "powerbi": "5"
+  },
+  {
+   "expr": "LEN(LEFT(\"a\"&UNICHAR(128512)&\"b\",0))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "LEN(MID(\"a\"&UNICHAR(128512)&\"b\",9,1))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "LEN(MID(\"a\"&UNICHAR(128512)&\"b\",4,9))",
+   "powerbi": "1"
+  },
+  {
+   "expr": "LEN(FIXED(1234.5,1)&UNICHAR(128512))",
+   "powerbi": "9"
+  },
+  {
+   "expr": "LEN(REPT(\"ab\"&UNICHAR(128512),2))",
+   "powerbi": "8"
+  },
+  {
+   "expr": "LEN(CONCATENATEX(ROW(\"a\",1),UNICHAR(128512),UNICHAR(128512)))",
+   "powerbi": "2"
+  },
+  {
+   "expr": "CONTAINSSTRING(\"a\"&UNICHAR(128512)&\"b\",\"b\")",
+   "powerbi": "True"
+  },
+  {
+   "expr": "CONTAINSSTRING(\"a\"&UNICHAR(128512)&\"b\",UNICHAR(128512))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "CONTAINSSTRINGEXACT(\"a\"&UNICHAR(128512)&\"b\",LEFT(UNICHAR(128512),1))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "CONTAINSSTRING(\"a\"&UNICHAR(128512)&\"b\",LEFT(UNICHAR(128512),1))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "\"a\"&UNICHAR(128512)&\"b\">\"a\"",
+   "powerbi": "True"
+  },
+  {
+   "expr": "UNICHAR(128512)>\"z\"",
+   "powerbi": "True"
+  },
+  {
+   "expr": "UNICHAR(128512)=\"z\"",
+   "powerbi": "False"
+  },
+  {
+   "expr": "LEN(UNICHAR(2))",
+   "powerbi": "ERR:\"Query (1, 23) Function 'UNICHAR' does not return invalid XML characters.\""
+  },
+  {
+   "expr": "LEN(UNICHAR(3))",
+   "powerbi": "ERR:\"Query (1, 23) Function 'UNICHAR' does not return invalid XML characters.\""
+  },
+  {
+   "expr": "LEN(UNICHAR(4))",
+   "powerbi": "ERR:\"Query (1, 23) Function 'UNICHAR' does not return invalid XML characters.\""
+  },
+  {
+   "expr": "LEN(UNICHAR(5))",
+   "powerbi": "ERR:\"Query (1, 23) Function 'UNICHAR' does not return invalid XML characters.\""
+  },
+  {
+   "expr": "LEN(UNICHAR(6))",
+   "powerbi": "ERR:\"Query (1, 23) Function 'UNICHAR' does not return invalid XML characters.\""
+  },
+  {
+   "expr": "LEN(UNICHAR(7))",
+   "powerbi": "ERR:\"Query (1, 23) Function 'UNICHAR' does not return invalid XML characters.\""
+  },
+  {
+   "expr": "LEN(UNICHAR(8))",
+   "powerbi": "ERR:\"Query (1, 23) Function 'UNICHAR' does not return invalid XML characters.\""
+  },
+  {
+   "expr": "LEN(UNICHAR(9))",
+   "powerbi": "1"
+  },
+  {
+   "expr": "LEN(UNICHAR(10))",
+   "powerbi": "1"
+  },
+  {
+   "expr": "LEN(UNICHAR(11))",
+   "powerbi": "ERR:\"Query (1, 23) Function 'UNICHAR' does not return invalid XML characters.\""
+  },
+  {
+   "expr": "LEN(UNICHAR(12))",
+   "powerbi": "ERR:\"Query (1, 23) Function 'UNICHAR' does not return invalid XML characters.\""
+  },
+  {
+   "expr": "LEN(UNICHAR(13))",
+   "powerbi": "1"
+  },
+  {
+   "expr": "LEN(UNICHAR(14))",
+   "powerbi": "ERR:\"Query (1, 23) Function 'UNICHAR' does not return invalid XML characters.\""
+  },
+  {
+   "expr": "LEN(UNICHAR(15))",
+   "powerbi": "ERR:\"Query (1, 23) Function 'UNICHAR' does not return invalid XML characters.\""
+  },
+  {
+   "expr": "LEN(UNICHAR(16))",
+   "powerbi": "ERR:\"Query (1, 23) Function 'UNICHAR' does not return invalid XML characters.\""
+  },
+  {
+   "expr": "LEN(UNICHAR(17))",
+   "powerbi": "ERR:\"Query (1, 23) Function 'UNICHAR' does not return invalid XML characters.\""
+  },
+  {
+   "expr": "LEN(UNICHAR(18))",
+   "powerbi": "ERR:\"Query (1, 23) Function 'UNICHAR' does not return invalid XML characters.\""
+  },
+  {
+   "expr": "LEN(UNICHAR(19))",
+   "powerbi": "ERR:\"Query (1, 23) Function 'UNICHAR' does not return invalid XML characters.\""
+  },
+  {
+   "expr": "LEN(UNICHAR(20))",
+   "powerbi": "ERR:\"Query (1, 23) Function 'UNICHAR' does not return invalid XML characters.\""
+  },
+  {
+   "expr": "LEN(UNICHAR(21))",
+   "powerbi": "ERR:\"Query (1, 23) Function 'UNICHAR' does not return invalid XML characters.\""
+  },
+  {
+   "expr": "LEN(UNICHAR(22))",
+   "powerbi": "ERR:\"Query (1, 23) Function 'UNICHAR' does not return invalid XML characters.\""
+  },
+  {
+   "expr": "LEN(UNICHAR(23))",
+   "powerbi": "ERR:\"Query (1, 23) Function 'UNICHAR' does not return invalid XML characters.\""
+  },
+  {
+   "expr": "LEN(UNICHAR(24))",
+   "powerbi": "ERR:\"Query (1, 23) Function 'UNICHAR' does not return invalid XML characters.\""
+  },
+  {
+   "expr": "LEN(UNICHAR(25))",
+   "powerbi": "ERR:\"Query (1, 23) Function 'UNICHAR' does not return invalid XML characters.\""
+  },
+  {
+   "expr": "LEN(UNICHAR(26))",
+   "powerbi": "ERR:\"Query (1, 23) Function 'UNICHAR' does not return invalid XML characters.\""
+  },
+  {
+   "expr": "LEN(UNICHAR(27))",
+   "powerbi": "ERR:\"Query (1, 23) Function 'UNICHAR' does not return invalid XML characters.\""
+  },
+  {
+   "expr": "LEN(UNICHAR(28))",
+   "powerbi": "ERR:\"Query (1, 23) Function 'UNICHAR' does not return invalid XML characters.\""
+  },
+  {
+   "expr": "LEN(UNICHAR(29))",
+   "powerbi": "ERR:\"Query (1, 23) Function 'UNICHAR' does not return invalid XML characters.\""
+  },
+  {
+   "expr": "LEN(UNICHAR(30))",
+   "powerbi": "ERR:\"Query (1, 23) Function 'UNICHAR' does not return invalid XML characters.\""
+  },
+  {
+   "expr": "LEN(UNICHAR(32))",
+   "powerbi": "1"
+  },
+  {
+   "expr": "LEN(UNICHAR(33))",
+   "powerbi": "1"
+  },
+  {
+   "expr": "LEN(UNICHAR(8232))",
+   "powerbi": "1"
+  },
+  {
+   "expr": "LEN(UNICHAR(8233))",
+   "powerbi": "1"
+  },
+  {
+   "expr": "LEN(UNICHAR(65279))",
+   "powerbi": "1"
+  },
+  {
+   "expr": "LEN(UNICHAR(65532))",
+   "powerbi": "1"
+  },
+  {
+   "expr": "LEN(UNICHAR(917505))",
+   "powerbi": "2"
+  },
+  {
+   "expr": "LEN(UNICHAR(983040))",
+   "powerbi": "2"
+  },
+  {
+   "expr": "LEN(UNICHAR(1048573))",
+   "powerbi": "2"
+  },
+  {
+   "expr": "FIND(\"x\",\"abc\",1,0)",
+   "powerbi": "0"
+  },
+  {
+   "expr": "FIND(\"x\",\"abc\",1,-1)",
+   "powerbi": "-1"
+  },
+  {
+   "expr": "FIND(\"x\",\"abc\",1,\"7\")",
+   "powerbi": "7"
+  },
+  {
+   "expr": "FIND(\"x\",\"abc\",1,TRUE())",
+   "powerbi": "1"
+  },
+  {
+   "expr": "FIND(\"x\",\"abc\",1,BLANK())",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "FIND(\"x\",\"abc\",1,1.5)",
+   "powerbi": "2"
+  },
+  {
+   "expr": "FIND(\"x\",\"abc\",1,\"\")",
+   "powerbi": "ERR:\"Query (1, 36) Cannot convert value '' of type Text to type Integer.\""
+  },
+  {
+   "expr": "SEARCH(\"x\",\"abc\",1,0)",
+   "powerbi": "0"
+  },
+  {
+   "expr": "SEARCH(\"x\",\"abc\",1,\"7\")",
+   "powerbi": "7"
+  },
+  {
+   "expr": "SEARCH(\"x\",\"abc\",1,BLANK())",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "FIND(\"b\",\"abc\",1,\"nf\")",
+   "powerbi": "ERR:\"Query (1, 36) Cannot convert value 'nf' of type Text to type Integer.\""
+  },
+  {
+   "expr": "FIND(\"b\",\"abc\",1,5)",
+   "powerbi": "2"
+  },
+  {
+   "expr": "FIND(\"x\",\"abc\",1,DATE(2020,1,1))",
+   "powerbi": "43831"
+  },
+  {
+   "expr": "UNICODE(\"\")",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "UNICODE(BLANK())",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "LEN(UNICHAR(9)&UNICHAR(10)&UNICHAR(13))",
+   "powerbi": "3"
+  },
+  {
+   "expr": "UNICHAR(9)&\"x\"=\"\tx\"",
+   "powerbi": "True"
+  },
+  {
+   "expr": "LEN(\"a\"&UNICHAR(10)&\"b\")",
+   "powerbi": "3"
+  },
+  {
+   "expr": "LEN(\"a\"&UNICHAR(13)&UNICHAR(10)&\"b\")",
+   "powerbi": "4"
+  },
+  {
+   "expr": "LEN(\"a\"&UNICHAR(11)&\"b\")",
+   "powerbi": "ERR:\"Query (1, 27) Function 'UNICHAR' does not return invalid XML characters.\""
+  }
+ ]
+}

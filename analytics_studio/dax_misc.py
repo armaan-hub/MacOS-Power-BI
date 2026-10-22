@@ -227,7 +227,7 @@ def _contains_exact(haystack: str, needle: str) -> bool:
 
 
 def _contains_string(function: str, args: list[object]) -> bool:
-    text, find = dax_typed.to_text(args[0]), dax_typed.to_text(args[1])
+    text, find = dax_typed._units(dax_typed.to_text(args[0])), dax_typed._units(dax_typed.to_text(args[1]))  # UTF-16 units
     if function == "CONTAINSSTRINGEXACT":
         return _contains_exact(text, find)
     if text == "":
