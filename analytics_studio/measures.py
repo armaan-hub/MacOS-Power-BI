@@ -4402,6 +4402,163 @@ def evaluate_measures(
         except (MeasureError, ArithmeticError, ValueError, TypeError, KeyError):  # a row this order cannot place: keep source order
             return rows
 
+    def summarize_related_group(
+        context: dict[str, Any], reference: tuple[Any, ...], own_header: str | None
+    ) -> tuple[dict[str, Any], str, Callable[[dict[str, Any]], Any]] | None:
+        """SUMMARIZE(Fact, Dim[col]): a column of a table on the one side of the summarized table, reached through its
+        active relationships (several hops for a snowflake). None when the column is the summarized table's own (or the table
+        is unknown, which keeps the old own-column reading). The reader gives the column's value for one typed input row:
+        a key with no partner reaches the unknown member, whose columns are BLANK (live Power BI, tests/fixtures_summarize_related.json)."""
+        if not reference[1]:
+            return None
+        try:
+            target = resolve_table_context(str(reference[1]))
+        except MeasureError:
+            return None
+        lineage = base_lineage(context)
+        if own_header is not None and (lineage.get(own_header) or (None,))[0] is not None and lineage[own_header][0]["id"] == target["id"]:
+            return None
+        target_column = next((h for h in target["headers"] if h.casefold() == str(reference[2]).casefold()), None)
+        if target_column is None:
+            return None
+        sources: dict[str, dict[str, str]] = {}  # table id -> casefolded column -> header of the input table
+        for header, (base, column) in lineage.items():
+            sources.setdefault(base["id"], {})[column.casefold()] = header
+        if target["id"] in sources:
+            return None
+        found: list[tuple[str, str, str, str]] | None = None
+        for start_id, columns in sources.items():
+            queue: list[tuple[str, list[tuple[str, str, str, str]]]] = [(start_id, [])]
+            seen = {start_id}
+            while queue and found is None:
+                node, path = queue.pop(0)
+                for one_id, here, there in one_side_links(node):
+                    if one_id in seen or one_id not in contexts_by_id or (not path and here.casefold() not in columns):
+                        continue
+                    seen.add(one_id)
+                    step = path + [(node, here, one_id, there)]
+                    if one_id == target["id"]:
+                        found = step
+                        break
+                    queue.append((one_id, step))
+            if found is not None:
+                first_header = columns[found[0][1].casefold()]
+                break
+        if found is None:
+            if own_header is not None and own_header in lineage:  # a column of a table that is not on its one side: not the same-named own column
+                raise MeasureError(f"Column '{target['name']}'[{target_column}] is not reachable from the SUMMARIZE table through a many-to-one relationship.")
+            return None
+        hops = found
+
+        def read(typed: dict[str, Any]) -> Any:
+            key = typed[first_header]
+            row: dict[str, Any] | None = None
+            for position, (_node, _here, one_id, there) in enumerate(hops):
+                one_context = contexts_by_id[one_id]
+                matches = one_side_value_index(one_context, there).get(cell_key(key))
+                if not matches:
+                    return None  # the unknown member
+                row = one_context["rows"][min(matches)]
+                if position + 1 < len(hops):
+                    next_here = hops[position + 1][1]
+                    key = typed_cell(one_context, next_here, row.get(next_here))
+            one_context = contexts_by_id[hops[-1][2]]
+            return typed_cell(one_context, target_column, row.get(target_column)) if row is not None else None
+
+        read.key_column = hops[0][1] if len(hops) == 1 and target_column.casefold() == hops[0][3].casefold() else None  # type: ignore[attr-defined]
+        return target, target_column, read
+
+    def loaded_table_ids(name: str) -> list[str]:
+        return [item["id"] for item in table_names.get(name.casefold(), [])]
+
+    def expression_table_ids(node: Any, seen: set[str] | None = None) -> set[str] | None:
+        """The ids of the tables an expression reads, through the measures it names; None when it reads them all (ALL(), ALLSELECTED())."""
+        seen = set() if seen is None else seen
+        found: set[str] = set()
+        stack = [node]
+        while stack:
+            item = stack.pop()
+            if not isinstance(item, tuple) or not item:
+                continue
+            if item[0] == "table" and len(item) > 1:
+                found.update(loaded_table_ids(str(item[1])))  # not a loaded table: a keyword such as Dense
+            elif item[0] == "reference" and len(item) > 2:
+                if item[1]:
+                    found.update(loaded_table_ids(str(item[1])))
+                elif str(item[2]).casefold() in by_name:
+                    key = str(item[2]).casefold()
+                    if key not in seen:
+                        seen.add(key)
+                        inner = expression_table_ids(parsed[key], seen)
+                        if inner is None:
+                            return None
+                        found |= inner
+            elif item[0] == "call" and item[1] in {"ALL", "ALLSELECTED", "REMOVEFILTERS", "ALLNOBLANKROW"} and not item[2]:
+                return None
+            stack.extend(child for child in item if isinstance(child, tuple))
+        return found
+
+    def summarize_reach(table_id: str, allowed: frozenset[int]) -> dict[str, frozenset[int] | None]:
+        """The rows of every table on the one side of table_id that the given rows point at; keys with no partner (the unknown member)
+        are left out. None for a table all of whose rows are pointed at (nothing to narrow)."""
+        reached: dict[str, frozenset[int] | None] = {}
+        queue: list[tuple[str, frozenset[int]]] = [(table_id, allowed)]
+        while queue:
+            current_id, rows_here = queue.pop()
+            current = contexts_by_id.get(current_id)
+            for one_id, here_column, there_column in one_side_links(current_id):
+                one_context = contexts_by_id.get(one_id)
+                if current is None or one_context is None or one_id == table_id or one_id in reached:
+                    continue
+                index = one_side_value_index(one_context, there_column)
+                found: set[int] = set()
+                for position in rows_here:
+                    found |= index.get(cell_key(typed_cell(current, here_column, current["rows"][position].get(here_column))), frozenset())
+                reached[one_id] = None if len(found) == len(one_context["rows"]) else frozenset(found)
+                queue.append((one_id, frozenset(found)))
+        return reached
+
+    def summarize_group_value(
+        expression: tuple[Any, ...], group_context: dict[str, Any], group_row: dict[str, Any], source: dict[str, Any], members: list[int],
+        key_columns: dict[str, str], unknown_tables: frozenset[str] = frozenset(),
+    ) -> Any:
+        """An extension column of SUMMARIZE: the group is the set of rows of the summarized table it holds, which also filter the
+        tables on that table's one side to the rows they reach (live Power BI: SUMMARIZE(Fact, Fact[Qty], "x", CALCULATE(SUM(Cal[Year])))
+        sees only the dates of the group's fact rows)."""
+        by_column = transition_filters(group_context, group_row)
+        allowed = frozenset(members)
+        read = expression_table_ids(expression)  # a table the column never reads needs no narrowing (and may be ambiguous to reach)
+        extra: dict[str, tuple[dict[str, Any], dict[str, frozenset[int]]]] = {}
+        if read is None or source["id"] in read or unknown_tables:
+            extra[source["id"]] = (source, {column: allowed for column in source["headers"]})
+        for one_id, one_rows in summarize_reach(source["id"], allowed).items():
+            if one_rows is not None and (read is None or one_id in read):
+                one_context = contexts_by_id[one_id]
+                extra[one_id] = (one_context, {column: one_rows for column in one_context["headers"]})
+        merged: dict[str, tuple[dict[str, Any], dict[str, frozenset[int]]]] = {}
+        for table_id, (base_context, column_rows) in extra.items():
+            held = by_column.get(table_id, (base_context, {}))[1]
+            merged[table_id] = (base_context, {
+                column: (rows & held[column] if column in held else rows) for column, rows in column_rows.items()
+            })
+        # a group on the key column of the relationship (Dim[Prod] for Fact[Prod]) is the same key as the summarized table's own column;
+        # any other column of a table on the one side only reaches the summarized table by the context transition
+        own = {t: (c, dict(r)) for t, (c, r) in by_column.items() if t == source["id"]}
+        # a group whose one-side column is BLANK is the unknown member: it has no row of that table, only the group's fact rows
+        hidden_keys = {t: v for t, v in by_column.items() if t != source["id"] and t not in unknown_tables}
+        for header, source_column in key_columns.items():
+            key_rows = one_side_value_index(source, source_column).get(cell_key(group_row[header]), frozenset()) if group_row.get(header) is not None else allowed
+            own.setdefault(source["id"], (source, {}))[1][source_column] = key_rows
+        if not any(t != source["id"] for t in merged) and not unknown_tables:
+            merged = {}
+        elif source["id"] in merged and source["id"] in own:  # a key column of the group keeps standing as the key
+            kept = {c: r for c, r in merged[source["id"]][1].items() if c not in own[source["id"]][1]}
+            merged = {**merged, source["id"]: (source, kept)}
+        visible = {t: v for t, v in merged.items() if t != source["id"] and t not in hidden_keys}
+        hidden = {t: v for t, v in merged.items() if t not in visible}
+        return with_column_filters(own, lambda: with_column_filters(hidden_keys, lambda: with_column_filters(
+            hidden, lambda: with_column_filters(visible, lambda: evaluate(expression), False), True), True), "keys")
+
     def table_function_rows(argument: tuple[Any, ...]) -> tuple[dict[str, Any], list[dict[str, Any]]]:
         nonlocal eff_touched
         function, arguments = argument[1], argument[2]
@@ -4472,11 +4629,18 @@ def evaluate_measures(
             context, rows = table_argument_value(arguments[0])
             split = next((i for i, a in enumerate(arguments[1:], 1) if a[0] == "string"), len(arguments))
             group_columns = []
+            related_groups: dict[str, tuple[dict[str, Any], str, Callable[[dict[str, Any]], Any]]] = {}  # header -> (one-side table, column, reader)
             for reference in arguments[1:split]:
                 if reference[0] != "reference":
                     raise MeasureError("SUMMARIZE groups by column references in the local engine.")
                 header_by_key = {h.casefold(): h for h in context["headers"]}
                 actual = header_by_key.get(reference[2].casefold())
+                related = summarize_related_group(context, reference, actual)
+                if related is not None:
+                    actual = related[1]
+                    if actual.casefold() in {c.casefold() for c in group_columns}:
+                        raise MeasureError(f"SUMMARIZE groups by two columns named {actual!r} in the local engine.")
+                    related_groups[actual] = related
                 if actual is None:
                     raise MeasureError(f"Column {reference[2]!r} does not exist in the SUMMARIZE table.")
                 group_columns.append(actual)
@@ -4489,31 +4653,44 @@ def evaluate_measures(
                 taken_names.add(name.casefold())
             full_lineage = base_lineage(context)
             groups: dict[tuple[Any, ...], dict[str, Any]] = {}
+            source_base = contexts_by_id.get(context["id"]) if not context.get("derived") else None
+            source_positions = {id(r): i for i, r in enumerate(source_base["rows"])} if source_base is not None else {}
+            group_members: dict[tuple[Any, ...], list[int]] = {}  # group -> rows of the summarized loaded table in it
             for row in rows:
                 typed = typed_row(context, row)
+                if related_groups:
+                    typed = {**typed, **{c: group[2](typed) for c, group in related_groups.items()}}
                 key = row_key(typed[c] for c in group_columns)
                 groups.setdefault(key, {c: typed[c] for c in group_columns})
+                if id(row) in source_positions:
+                    group_members.setdefault(key, []).append(source_positions[id(row)])
+            group_key_of = list(groups)
             lineage = {c: full_lineage[c] for c in group_columns if c in full_lineage}
-            group_context, group_rows = derived_table(
-                list(group_columns), list(groups.values()), lineage,
-                {c: context.get("column_types", {}).get(c, "text") for c in group_columns},
-            )
+            lineage.update({c: (group[0], group[1]) for c, group in related_groups.items()})
+            group_types = {c: context.get("column_types", {}).get(c, "text") for c in group_columns}
+            group_types.update({c: group[0].get("column_types", {}).get(group[1], "text") for c, group in related_groups.items()})
+            group_context, group_rows = derived_table(list(group_columns), list(groups.values()), lineage, group_types)
             out_rows = []
             saved_shadow, saved_touched = push_shadow(context, rows, "install"), eff_touched  # SUMMARIZE's input table is the shadow
             try:
-                for group_row in group_rows:
+                for group_position, group_row in enumerate(group_rows):
                     row = dict(group_row)
                     eff_touched = frozenset()
+                    members = group_members.get(group_key_of[group_position]) if source_base is not None else None
                     for name, expression in zip(names, expressions):
-                        row[name] = evaluate_with_context_transition(expression, group_context, group_row, keys=True)
+                        if members:
+                            row[name] = summarize_group_value(
+                                expression, group_context, group_row, source_base, members,
+                                {c: g[2].key_column for c, g in related_groups.items() if g[2].key_column},  # type: ignore[attr-defined]
+                                frozenset(g[0]["id"] for c, g in related_groups.items() if group_row.get(c) is None),
+                            )
+                        else:
+                            row[name] = evaluate_with_context_transition(expression, group_context, group_row, keys=True)
                     out_rows.append(row)
             finally:
                 pop_shadow(saved_shadow)
                 eff_touched = saved_touched
-            return derived_table(
-                list(group_columns) + names, out_rows, lineage,
-                {c: context.get("column_types", {}).get(c, "text") for c in group_columns},
-            )
+            return derived_table(list(group_columns) + names, out_rows, lineage, group_types)
         if function == "TOPN":
             count = Decimal(dax_typed.whole(in_row_expression(lambda: evaluate(arguments[0])), "TOPN"))
             context, rows = table_argument_value(arguments[1])
@@ -9116,6 +9293,8 @@ def evaluate_measures(
                 result = in_row_expression(lambda frame=frame: evaluate(arguments[1], frame))
                 if isinstance(result, bool) and function not in {"MAXX", "MINX"}:
                     raise MeasureError(f"The function {function} cannot work with values of type Boolean.")
+                if isinstance(result, str) and arguments[1][0] == "reference" and function not in {"MAXX", "MINX"}:
+                    raise MeasureError(f"The function {function} cannot work with values of type String.")  # a text column, even of digits
                 if result is not None:
                     values.append(as_number(result))
                 elif function in {"MEDIANX", "PERCENTILEX.INC", "PERCENTILEX.EXC"}:
