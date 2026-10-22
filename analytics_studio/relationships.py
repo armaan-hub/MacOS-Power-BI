@@ -245,6 +245,10 @@ def propagate_relationship_filters(
                 if after != before or target_id not in unknown_state:
                     unknown_state[target_id] = after
                     changed = changed or after != before
+            elif source_role == "peer":  # a one-to-one / many-to-many partner does not carry the blank member (not modelled): orphans stay out
+                if unknown_state.get(target_id, True):
+                    unknown_state[target_id] = False
+                    changed = True
             elif source_role == "many":  # the many side filters its one side: the blank member stays only while a visible row is an orphan
                 known = all_keys(target_id, target_column, target_type)
                 orphan_visible = any(

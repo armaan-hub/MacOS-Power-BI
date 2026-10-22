@@ -733,7 +733,7 @@ def _parallelperiod_dates(
         l = max(last_shifted)
         if unit == "YEAR":
             start = _year_to_date_start(f, (12, 31))
-            end = _year_to_date_start(l + timedelta(days=366), (12, 31)) - timedelta(days=1)
+            end = date(l.year, 12, 31)
         elif unit == "QUARTER":
             start = date(f.year, ((f.month - 1) // 3) * 3 + 1, 1)
             l_start_month = ((l.month - 1) // 3) * 3 + 1
@@ -3804,7 +3804,7 @@ def evaluate_measures(
         updated["filter_context_complete"] = True
         updated_filter_roots = set(evaluation_filter_ids)
         if with_expansion:  # ALL(column) / ALLSELECTED(column) as a table: filters of the one-side tables do not reach the column (live Power BI)
-            for related_id in expanded_table_ids(table_id)[1:]:
+            for related_id in cleared_by_column_table(table_id):
                 related = updated_by_id[related_id]
                 for state in ("filter_rows", "filter_table_rows", "filter_shapes", "filter_column_extra"):
                     related.pop(state, None)
@@ -3824,13 +3824,14 @@ def evaluate_measures(
             for layer in eff_layers:  # the rows an enclosing iterator walks still narrow this table for ALLSELECTED
                 if layer.table != other_id:
                     continue
-                allowed = frozenset(
-                    index for index, base_row in enumerate(other["rows"])
-                    if row_key(typed_cell(other, column, base_row.get(column)) for column in layer.columns) in layer.tuples
+                allowed = BlankSet(
+                    (index for index, base_row in enumerate(other["rows"])
+                     if row_key(typed_cell(other, column, base_row.get(column)) for column in layer.columns) in layer.tuples),
+                    row_key(None for _column in layer.columns) in layer.tuples,  # the iterated rows list the unknown member
                 )
                 for column in layer.columns:
                     existing = other_rows.get(column)
-                    other_rows[column] = allowed if existing is None else allowed & existing
+                    other_rows[column] = allowed if existing is None else meet_rows(allowed, existing)
             other["filter_column_rows"] = other_rows
             other["filter_context_complete"] = True
             if other_rows:
@@ -3860,7 +3861,7 @@ def evaluate_measures(
                 updated_contexts,
                 relationship_definitions,
                 updated_filter_roots,
-                ignore_exclusions=expanded_table_ids(table_id)[1:] if with_expansion else (),
+                ignore_exclusions=cleared_by_column_table(table_id) if with_expansion else (),
             )
         except RelationshipError as exc:
             raise MeasureError(f"Could not apply ALL column filters: {exc}") from exc
@@ -6174,6 +6175,37 @@ def evaluate_measures(
             f"Iterator {function} comparison branches need matching local data types."
         )
 
+    def cleared_by_column_table(table_id: str) -> list[str]:
+        """Tables whose filters ALL(column) / ALLSELECTED(column) as a table value does not feel: the one-side tables of the
+        column's table and the tables it is linked to by a many-to-many relationship (Critic 4, R-2). A bidirectional
+        one-to-many filter still reaches the column (it decides whether the unknown member is visible)."""
+        peers = {
+            other for relationship in relationship_definitions
+            if isinstance(relationship, dict) and relationship.get("cardinality") == "many_to_many" and relationship.get("is_active", True)
+            for table, other in (
+                (str(relationship.get("from_table_id", "")), str(relationship.get("to_table_id", ""))),
+                (str(relationship.get("to_table_id", "")), str(relationship.get("from_table_id", ""))),
+            ) if table == table_id
+        }
+        return [other for other in dict.fromkeys([*expanded_table_ids(table_id)[1:], *peers]) if other in evaluation_contexts_by_id]
+
+    def has_number_branch(expression: tuple[Any, ...]) -> bool:
+        """IF / SWITCH / COALESCE with a plain number as one of its results make the iterated value a number, even on rows that pick a date."""
+        if expression[0] == "number":
+            return True
+        if expression[0] != "call":
+            return False
+        name, call_arguments = expression[1], expression[2]
+        if name == "IF":
+            results = call_arguments[1:3]
+        elif name == "COALESCE":
+            results = call_arguments
+        elif name == "SWITCH":
+            results = call_arguments[2::2] + (call_arguments[-1:] if len(call_arguments) % 2 == 0 else ())
+        else:
+            return False
+        return any(has_number_branch(result) for result in results)
+
     def iterator_expression_category(
         expression: tuple[Any, ...],
         row_context: tuple[dict[str, Any], dict[str, Any], int] | None,
@@ -7687,16 +7719,17 @@ def evaluate_measures(
                     if wanted is _NOTHING or (wanted is not None and not wanted & {column.casefold() for column in layer.columns}):
                         continue
                     base_context = evaluation_contexts_by_id[layer.table]
-                    allowed = frozenset(
-                        index for index, base_row in enumerate(base_context["rows"])
-                        if row_key(typed_cell(base_context, column, base_row.get(column)) for column in layer.columns) in layer.tuples
+                    allowed = BlankSet(
+                        (index for index, base_row in enumerate(base_context["rows"])
+                         if row_key(typed_cell(base_context, column, base_row.get(column)) for column in layer.columns) in layer.tuples),
+                        row_key(None for _column in layer.columns) in layer.tuples,  # the iterated rows list the unknown member
                     )
                     _ctx, by_column, _shapes, kept = activated.setdefault(layer.table, (base_context, {}, [], {}))
                     for column in layer.columns:
                         now = current_filter(layer.table, column.casefold())
-                        merged = allowed if now is None else allowed & now
-                        by_column[column] = merged if column not in by_column else by_column[column] & merged
-                        kept[column] = allowed if column not in kept else kept[column] & allowed
+                        merged = allowed if now is None else meet_rows(allowed, now)
+                        by_column[column] = merged if column not in by_column else meet_rows(by_column[column], merged)
+                        kept[column] = allowed if column not in kept else meet_rows(kept[column], allowed)
                 for table_id, by_header in restore.items():
                     base_context = evaluation_contexts_by_id[table_id]
                     _ctx, by_column, _shapes, _kept = activated.setdefault(table_id, (base_context, {}, [], {}))
@@ -8695,6 +8728,7 @@ def evaluate_measures(
         try:
             clearing: list[tuple[Any, ...]] = []
             additions: list[tuple[bool, dict[str, tuple[dict[str, Any], dict[str, frozenset[int]], list[dict[str, Any]]]]]] = []
+            table_filters_present = False
             for argument in filter_arguments:  # every filter is evaluated in the original filter context
                 keep, node = False, argument
                 while node[:2] == ("call", "KEEPFILTERS") and len(node[2]) == 1:
@@ -8703,8 +8737,22 @@ def evaluate_measures(
                     clearing.append(node)
                 elif _is_general_table_filter(node):
                     additions.append((keep, general_table_filter_sets(node)))
+                    table_filters_present = True
                 else:
                     additions.append((keep, general_boolean_filter_sets(node)))
+            if table_filters_present and relationship_modifiers and unknown_member_ids and any(
+                (ends := [resolve_table(column[1], column[2])[0]["id"] for column in modifier[2][:2]])
+                and any(
+                    table_id in ends and any(other != table_id and other in unknown_member_ids for other in ends) and table_id not in unknown_member_ids
+                    for _keep, filters in additions for table_id in filters
+                )
+                for modifier in relationship_modifiers if modifier[1] == "USERELATIONSHIP"
+            ):
+                # live Power BI carries the filtered table's related-table columns through its original link into the
+                # replaced one; with rows that match no member (a hidden unknown member) that is not modelled yet
+                raise MeasureError(
+                    "USERELATIONSHIP together with a table filter is not supported when rows match no member of the related table."
+                )
             transition = all_row_context_filters(row_context) if row_context is not None else {}
 
             def apply_additions() -> Any:
@@ -9583,7 +9631,7 @@ def evaluate_measures(
             for value in values:
                 total = dax_typed.QUIET.add(total, value)
             result = total if function == "SUMX" else dax_typed.QUIET.divide(total, Decimal(len(values)))
-            if function == "SUMX" and all(isinstance(value, dax_dates.DaxDateTime) for value in values) and result.is_finite():
+            if function == "SUMX" and not has_number_branch(arguments[1]) and all(isinstance(value, dax_dates.DaxDateTime) for value in values) and result.is_finite():
                 return dax_dates.DaxDateTime(result)  # live Power BI: SUMX over dates is a date, AVERAGEX over dates is a plain number
             return result
         if function in {"COUNTX", "COUNTAX"}:

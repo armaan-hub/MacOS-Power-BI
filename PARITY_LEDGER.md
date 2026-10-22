@@ -26,15 +26,15 @@ Rule: a slice is finished only when it is compared with Power BI, its items are 
 | dax_battery_allselected | 110 | 0 | 0 | 0 | 0 |
 | dax_battery_var_tables | 209 | 0 | 0 | 0 | 0 |
 | dax_battery_earlier_arith | 238 | 0 | 0 | 0 | 0 |
-| dax_battery_boolean_scalar_rhs | 488 | 0 | 29 | 0 | 0 |
+| dax_battery_boolean_scalar_rhs | 488 | 4 | 25 | 0 | 0 |
 | dax_battery_filter_transition | 575 | 0 | 0 | 0 | 0 |
 | dax_battery_boolean_filter_functions | 200 | 0 | 8 | 0 | 0 |
-| dax_battery_sdet_filters | 553 | 0 | 107 | 0 | 0 |
+| dax_battery_sdet_filters | 553 | 7 | 100 | 0 | 0 |
 | dax_battery_comments_booleans | 410 | 0 | 22 | 0 | 0 |
 | dax_battery_round2_scope | 132 | 0 | 7 | 0 | 0 |
-| dax_battery_round2 | 2313 | 6 | 111 | 0 | 0 |
+| dax_battery_round2 | 2313 | 12 | 105 | 0 | 0 |
 | dax_battery_critic_shapes | 43 | 0 | 52 | 0 | 0 |
-| dax_battery_round3 | 2246 | 0 | 118 | 0 | 0 |
+| dax_battery_round3 | 2246 | 2 | 116 | 0 | 0 |
 | dax_battery_round4 | 7499 | 0 | 679 | 0 | 0 |
 | dax_battery_round5 | 1168 | 0 | 53 | 0 | 0 |
 | dax_battery_diff_groups | 484 | 0 | 0 | 0 | 0 |
@@ -48,7 +48,7 @@ Rule: a slice is finished only when it is compared with Power BI, its items are 
 | dax_battery_allselected_critic2 | 7420 | 0 | 0 | 0 | 0 |
 | table VAT | 575 | 0 | 0 | 0 | 0 |
 
-## Pending work (1190): Power BI answers, the app refuses
+## Pending work (1171): Power BI answers, the app refuses
 
 - `CALCULATE(COUNTROWS(Facts),COUNTROWS(CALCULATETABLE(Facts,Facts[Region]="East"))<Facts[Quantity])` (Power BI: `4`) [dax_battery_boolean_scalar_rhs]
 - `CALCULATE(CALCULATE(COUNTROWS(Facts),Facts[Quantity]>COUNTROWS(CALCULATETABLE(Facts,Facts[Region]="East"))),Facts[Region]="East")` (Power BI: `2`) [dax_battery_boolean_scalar_rhs]
@@ -75,10 +75,6 @@ Rule: a slice is finished only when it is compared with Power BI, its items are 
 - `SUMX(Facts,CALCULATE(COUNTROWS(Facts),Facts[Quantity]>COUNTROWS(CALCULATETABLE(Facts,Facts[Region]="East"))))` (Power BI: `4`) [dax_battery_boolean_scalar_rhs]
 - `SUMX(VALUES(Facts[Region]),CALCULATE(COUNTROWS(Facts),Facts[Quantity]>MAXX(CALCULATETABLE(VALUES(Facts[Quantity]),Facts[Region]="East"),Facts[Quantity])))` (Power BI: `BLANK`) [dax_battery_boolean_scalar_rhs]
 - `SUMX(Facts,CALCULATE(COUNTROWS(Facts),Facts[Quantity]>MAXX(CALCULATETABLE(VALUES(Facts[Quantity]),Facts[Region]="East"),Facts[Quantity])))` (Power BI: `2`) [dax_battery_boolean_scalar_rhs]
-- `CALCULATE(COUNTROWS(Facts),Facts[Region]=MAXX(VALUES(Facts[Note]),Facts[Note]))` (Power BI: `BLANK`) [dax_battery_boolean_scalar_rhs]
-- `CALCULATE(COUNTROWS(Facts),Facts[Note]=MAXX(VALUES(Facts[Note]),Facts[Note]))` (Power BI: `3`) [dax_battery_boolean_scalar_rhs]
-- `CALCULATE(COUNTROWS(Facts),Facts[Region]=MAXX(VALUES(Facts[Region]),Facts[Region]))` (Power BI: `2`) [dax_battery_boolean_scalar_rhs]
-- `CALCULATE(COUNTROWS(Facts),Facts[Note]=MAXX(VALUES(Facts[Region]),Facts[Region]))` (Power BI: `BLANK`) [dax_battery_boolean_scalar_rhs]
 - `CALCULATE(COUNTROWS(Facts),Facts[Quantity]>SUMX(KEEPFILTERS(VALUES(Facts[Region])),1))` (Power BI: `2`) [dax_battery_boolean_filter_functions]
 - `CALCULATE(COUNTROWS(Facts),Facts[Quantity]>MAXX(KEEPFILTERS(VALUES(Facts[Region])),1))` (Power BI: `4`) [dax_battery_boolean_filter_functions]
 - `CALCULATE(COUNTROWS(Facts),Facts[Quantity]>COUNTX(KEEPFILTERS(VALUES(Facts[Region])),1))` (Power BI: `2`) [dax_battery_boolean_filter_functions]
@@ -89,11 +85,6 @@ Rule: a slice is finished only when it is compared with Power BI, its items are 
 - `CALCULATE(COUNTROWS(Facts),KEEPFILTERS(Facts[Quantity]>COUNTROWS(RELATEDTABLE(Facts))))` (Power BI: `4`) [dax_battery_boolean_filter_functions]
 - `CALCULATE(COUNTROWS(Facts),COUNTROWS(CALCULATETABLE(Facts,Facts[Region]="East"))<Facts[Quantity])` (Power BI: `4`) [dax_battery_sdet_filters]
 - `CALCULATE(COUNTROWS(Facts),COUNTROWS(CALCULATETABLE(Facts,Facts[Region]="East"))=Facts[Quantity])` (Power BI: `2`) [dax_battery_sdet_filters]
-- `CALCULATE(COUNTROWS(Facts),Facts[Region]=MAXX(VALUES(Facts[Region]),Facts[Region]))` (Power BI: `2`) [dax_battery_sdet_filters]
-- `CALCULATE(COUNTROWS(Facts),Facts[Region]<MINX(VALUES(Facts[Region]),Facts[Region]))` (Power BI: `BLANK`) [dax_battery_sdet_filters]
-- `CALCULATE(COUNTROWS(Facts),Facts[Region]=MAXX(CALCULATETABLE(Facts,Facts[Quantity]>2),Facts[Region]))` (Power BI: `2`) [dax_battery_sdet_filters]
-- `CALCULATE(COUNTROWS(Facts),Facts[Note]=MAXX(CALCULATETABLE(Facts,Facts[Quantity]>2),Facts[Note]))` (Power BI: `1`) [dax_battery_sdet_filters]
-- `CALCULATE(COUNTROWS(Facts),Facts[Note]<>MINX(Facts,Facts[Note]))` (Power BI: `5`) [dax_battery_sdet_filters]
 - `SUMX(Facts,CALCULATE(COUNTROWS(Facts),Facts[Quantity]>COUNTROWS(CALCULATETABLE(Facts,Facts[Region]="East"))))` (Power BI: `4`) [dax_battery_sdet_filters]
 - `MAXX(Facts,CALCULATE(COUNTROWS(Facts),Facts[Quantity]>COUNTROWS(CALCULATETABLE(Facts,Facts[Region]="West"))))` (Power BI: `1`) [dax_battery_sdet_filters]
 - `SUMX(VALUES(Facts[Region]),CALCULATE(COUNTROWS(Facts),Facts[Quantity]>COUNTROWS(CALCULATETABLE(Facts,Facts[Quantity]>1))))` (Power BI: `3`) [dax_battery_sdet_filters]
@@ -113,8 +104,6 @@ Rule: a slice is finished only when it is compared with Power BI, its items are 
 - `CALCULATE(COUNTROWS(Facts),Facts[Quantity]<PERCENTILE.INC(Facts[Quantity],0.5))` (Power BI: `3`) [dax_battery_sdet_filters]
 - `CALCULATE(COUNTROWS(Facts),Facts[Quantity]<MINA(Facts[Quantity])+2)` (Power BI: `2`) [dax_battery_sdet_filters]
 - `CALCULATE(COUNTROWS(Facts),Facts[Quantity]<AVERAGEA(Facts[Quantity]))` (Power BI: `3`) [dax_battery_sdet_filters]
-- `CALCULATE(COUNTROWS(Facts),Facts[Quantity]<LEN(MAXX(CALCULATETABLE(Facts,Facts[Region]="West"),Facts[Region])))` (Power BI: `4`) [dax_battery_sdet_filters]
-- `CALCULATE(COUNTROWS(Facts),Facts[Quantity]<FIND("s",MAXX(VALUES(Facts[Region]),Facts[Region])))` (Power BI: `3`) [dax_battery_sdet_filters]
 - `SUMX(ADDCOLUMNS(Facts,"q2",Facts[Quantity]*2),COUNTROWS(FILTER(Facts,Facts[Quantity]>EARLIER([q2]))))` (Power BI: `9`) [dax_battery_sdet_filters]
 - `SUMX(ADDCOLUMNS(Facts,"q2",Facts[Quantity]*2),COUNTROWS(FILTER(Facts,Facts[Quantity]*2>EARLIER([q2])*2)))` (Power BI: `9`) [dax_battery_sdet_filters]
 - `SUMX(SELECTCOLUMNS(Facts,"q",Facts[Quantity]),COUNTROWS(FILTER(Facts,Facts[Quantity]>EARLIER([q])*2)))` (Power BI: `9`) [dax_battery_sdet_filters]
@@ -254,10 +243,6 @@ Rule: a slice is finished only when it is compared with Power BI, its items are 
 - `PERCENTILE.INC(Facts[Quantity],BLANK())` (Power BI: `0`) [dax_battery_round2]
 - `PERCENTILE.INC(Facts[Sales],BLANK())` (Power BI: `-1.5`) [dax_battery_round2]
 - `VARX.S(FILTER(Facts,Facts[Region]="North"),Facts[Quantity])` (Power BI: `NaN`) [dax_battery_round2]
-- `MAXX(Facts,Facts[Note])` (Power BI: `Paid`) [dax_battery_round2]
-- `MINX(Facts,Facts[Note])` (Power BI: `Late`) [dax_battery_round2]
-- `MAXX(Facts,Facts[Region])` (Power BI: `West`) [dax_battery_round2]
-- `MINX(Facts,Facts[Region])` (Power BI: `East`) [dax_battery_round2]
 - `COUNTAX(Facts,Facts[Region] IN {"East","West"})` (Power BI: `6`) [dax_battery_round2]
 - `SUM(Facts/**/ [Quantity])` (Power BI: `15`) [dax_battery_round2]
 - `SUM('Facts'/*c*/[Quantity])` (Power BI: `15`) [dax_battery_round2]
@@ -265,8 +250,6 @@ Rule: a slice is finished only when it is compared with Power BI, its items are 
 - `BLANK( //c
 )` (Power BI: `BLANK`) [dax_battery_round2]
 - `COUNTROWS({{1,2},{3,4}})` (Power BI: `2`) [dax_battery_round2]
-- `MAXX({"a","b"},[Value])` (Power BI: `b`) [dax_battery_round2]
-- `MINX({"a","b"},[Value])` (Power BI: `a`) [dax_battery_round2]
 - `HOUR("13:45")` (Power BI: `13`) [dax_battery_round2]
 - `HOUR("1:45 PM")` (Power BI: `13`) [dax_battery_round2]
 - `MINUTE("13:45:30")` (Power BI: `45`) [dax_battery_round2]
@@ -504,8 +487,6 @@ Rule: a slice is finished only when it is compared with Power BI, its items are 
 - `CALCULATE(COUNTROWS(Facts),Facts[Quantity]+COUNTROWS(UNION(Facts,Facts))>5)` (Power BI: `6`) [dax_battery_round3]
 - `CALCULATE(COUNTROWS(Facts),Facts[Region]=IF(TRUE(),1,"a"))` (Power BI: `BLANK`) [dax_battery_round3]
 - `CALCULATE(COUNTROWS(Facts),Facts[Region]>IF(TRUE(),1,"a"))` (Power BI: `6`) [dax_battery_round3]
-- `CALCULATE(COUNTROWS(Facts),Facts[Region]=MAXX(Facts,Facts[Region]))` (Power BI: `2`) [dax_battery_round3]
-- `CALCULATE(COUNTROWS(Facts),Facts[Region]>MAXX(Facts,Facts[Region]))` (Power BI: `BLANK`) [dax_battery_round3]
 - `COUNTAX(Facts,Facts[Quantity] IN {1,2})` (Power BI: `6`) [dax_battery_round3]
 - `COUNTAX(Facts,IF(Facts[Quantity]>2,Facts[Quantity] IN {1,2}))` (Power BI: `6`) [dax_battery_round4]
 - `COUNTAX(Facts,IF(Facts[Quantity]>2,Facts[Region] IN {"East","West"}))` (Power BI: `6`) [dax_battery_round4]
