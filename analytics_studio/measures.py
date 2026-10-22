@@ -1131,7 +1131,7 @@ def _has_supported_all_usage(
         if function in _TABLE_FUNCTION_ARITY:
             if not _table_position(parent_function, argument_index) and not (
                 function == "CALCULATETABLE" and parent_function in {"CALCULATE", "CALCULATETABLE"}
-            ):
+            ) and not (parent_function == "CALCULATETABLE" and argument_index >= 1):
                 return False
             return all(
                 _has_supported_all_usage(argument, function, index, len(arguments))
@@ -1153,7 +1153,7 @@ def _has_supported_all_usage(
             return (
                 parent_function in {"CALCULATE", "CALCULATETABLE"}
                 and argument_index > 0
-                and parent_argument_count > 2
+                and (parent_argument_count > 2 or parent_function == "CALCULATETABLE")
             )
         if function == "ALLEXCEPT":
             try:
@@ -1610,6 +1610,28 @@ def _general_calculate_filters_valid(filters: tuple[tuple[Any, ...], ...]) -> bo
     return True
 
 
+_RELATIONSHIP_MODIFIERS = {"USERELATIONSHIP", "CROSSFILTER"}
+_MIX_MODIFIERS = _RELATIONSHIP_MODIFIERS | {"ALLSELECTED"}
+
+
+def _modifier_mix_filters_valid(filters: tuple[tuple[Any, ...], ...]) -> bool:
+    """CALCULATE filters that mix USERELATIONSHIP / CROSSFILTER with clearing, Boolean and table filters (general path)."""
+    modifiers = [
+        node for node in filters if isinstance(node, tuple) and node[:1] == ("call",) and node[1] in _MIX_MODIFIERS
+    ]
+    if not modifiers:
+        return False
+    for node in modifiers:
+        if node[1] == "USERELATIONSHIP":
+            _validate_userelationship_call(node)
+        elif node[1] == "CROSSFILTER":
+            _validate_crossfilter_call(node)
+        else:
+            _validate_filter_clear_call(node, "ALLSELECTED")
+    rest = tuple(node for node in filters if node not in modifiers)
+    return not rest or _general_calculate_filters_valid(rest)
+
+
 def _validate_general_filter_literals(node: tuple[Any, ...]) -> None:
     if node[:2] == ("call", "KEEPFILTERS") and len(node[2]) == 1:
         node = node[2][0]
@@ -1802,7 +1824,7 @@ def _validate_literal_positions(
             try:
                 _legacy_calculate_filters_valid(arguments)
             except MeasureError:
-                if not _general_calculate_filters_valid(arguments[1:]):
+                if not _general_calculate_filters_valid(arguments[1:]) and not _modifier_mix_filters_valid(arguments[1:]):
                     raise
                 for filter_argument in arguments[1:]:
                     _validate_general_filter_literals(filter_argument)
@@ -2566,7 +2588,7 @@ class _Parser:
                             predicate, _keep = _calculate_filter_argument(filter_argument)
                             _calculate_boolean_filter_column(predicate)
                 except MeasureError:
-                    if not _general_calculate_filters_valid(tuple(arguments[1:])):
+                    if not _general_calculate_filters_valid(tuple(arguments[1:])) and not _modifier_mix_filters_valid(tuple(arguments[1:])):
                         raise
             return ("call", function, tuple(arguments))
         raise MeasureError(f"Unexpected token {token.value!r}; expected a number, measure, or function.")
@@ -8253,7 +8275,27 @@ def evaluate_measures(
         """CALCULATE with any mix of Boolean, table-valued, KEEPFILTERS and clearing (ALL, ALLEXCEPT, REMOVEFILTERS) filters.
 
         The filters are evaluated in the original context, then a row context is transitioned, then the clearing
-        modifiers run, then the filters replace (or, with KEEPFILTERS, intersect) the filters on their columns."""
+        modifiers run, then the filters replace (or, with KEEPFILTERS, intersect) the filters on their columns.
+        USERELATIONSHIP / CROSSFILTER of the same CALCULATE change the relationships only for the expression: the clearing
+        modifiers (and the tables they expand to) still read the enclosing context's relationships (tests/test_calculate_modifier_mix.py)."""
+        relationship_modifiers = tuple(
+            argument for argument in filter_arguments if argument[0] == "call" and argument[1] in _RELATIONSHIP_MODIFIERS
+        )
+        if relationship_modifiers:
+            filter_arguments = tuple(argument for argument in filter_arguments if argument not in relationship_modifiers)
+            userelationships = tuple(argument for argument in relationship_modifiers if argument[1] == "USERELATIONSHIP")
+            crossfilters = tuple(argument for argument in relationship_modifiers if argument[1] == "CROSSFILTER")
+            original_expression = expression_node
+
+            def with_relationships() -> Any:
+                scoped = ("thunk", lambda: evaluate(original_expression))
+                if crossfilters:
+                    scoped = ("thunk", lambda inner=scoped: evaluate_with_crossfilters(inner, crossfilters))
+                if userelationships:
+                    scoped = ("thunk", lambda inner=scoped: evaluate_with_userelationships(inner, userelationships))
+                return evaluate(scoped)
+
+            expression_node = ("thunk", with_relationships)
         pushed = row_context is not None and (not row_stack or row_stack[-1][1] is not row_context[1])
         if pushed:
             row_stack.append(row_context)  # type: ignore[arg-type]
@@ -8264,7 +8306,7 @@ def evaluate_measures(
                 keep, node = False, argument
                 while node[:2] == ("call", "KEEPFILTERS") and len(node[2]) == 1:
                     keep, node = True, node[2][0]
-                if node[0] == "call" and node[1] in {"ALL", "ALLNOBLANKROW", "REMOVEFILTERS", "ALLEXCEPT"}:
+                if node[0] == "call" and node[1] in {"ALL", "ALLNOBLANKROW", "REMOVEFILTERS", "ALLEXCEPT", "ALLSELECTED"}:
                     clearing.append(node)
                 elif _is_general_table_filter(node):
                     additions.append((keep, general_table_filter_sets(node)))
@@ -8333,6 +8375,8 @@ def evaluate_measures(
                 if index == len(clearing):
                     return apply_additions()
                 modifier = clearing[index]
+                if modifier[1] == "ALLSELECTED":
+                    return evaluate_with_allselected(("thunk", lambda: clear_then_apply(index + 1)), modifier)
                 return evaluate_with_filter_clear(("thunk", lambda: clear_then_apply(index + 1)), modifier, modifier[1])
 
             if transition:
