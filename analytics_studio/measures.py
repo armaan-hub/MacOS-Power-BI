@@ -4401,6 +4401,11 @@ def evaluate_measures(
                 group_columns.append(actual)
             names = [dax_typed.to_text(evaluate(arguments[i])) for i in range(split, len(arguments), 2)]
             expressions = [arguments[i] for i in range(split + 1, len(arguments), 2)]
+            taken_names = {column.casefold() for column in group_columns}
+            for name in names:
+                if name.casefold() in taken_names:  # a static error in Power BI, raised even when the rows are never read
+                    raise MeasureError(f"Function 'SUMMARIZE' cannot add column [{name}] since it already exists.")
+                taken_names.add(name.casefold())
             full_lineage = base_lineage(context)
             groups: dict[tuple[Any, ...], dict[str, Any]] = {}
             for row in rows:
@@ -6747,6 +6752,15 @@ def evaluate_measures(
                 evaluation_filter_ids = previous_filter_ids
         # The local report evaluator has saved report/page/visual selections and
         # relationship roots. Other ALLSELECTED forms keep the current context.
+        if eff_active():
+            def with_the_other_filters() -> Any:
+                if filter_arguments:
+                    if len(filter_arguments) == 1 and filter_arguments[0][0] == "call" and filter_arguments[0][1] == "FILTER":
+                        return evaluate_with_table_filter(expression, filter_arguments[0])
+                    return evaluate_with_boolean_filters(expression, filter_arguments)
+                return evaluate(expression)
+
+            return evaluate_with_filter_clear(("thunk", with_the_other_filters), modifier, "ALLSELECTED")
         if filter_arguments:
             if (
                 len(filter_arguments) == 1
@@ -7117,6 +7131,60 @@ def evaluate_measures(
             dropped = {}
         if not dropped:
             return evaluate_with_filter_clear_core(expression, modifier, function, *rest, **named)
+        if function == "ALLSELECTED" and eff_active():
+            # CALCULATE(e, ALLSELECTED(X)): what X holds of the context transition or of an outer filter a shadow replaced is
+            # cleared, then every shadow touching X is put back whole (outer and explicit filters on X stay)
+            to_clear: dict[str, list[str]] = {}
+            for table_id, wanted_columns in dropped.items():
+                headers = evaluation_contexts_by_id[table_id]["headers"]
+                for header in headers:
+                    folded = header.casefold()
+                    if wanted_columns is not None and folded not in wanted_columns:
+                        continue
+                    now = current_filter(table_id, folded)
+                    if now is None:
+                        continue
+                    tagged = eff_transition.get(table_id, {}).get(folded)
+                    if (tagged is not None and now is tagged[0]) or (folded in eff_suppressed.get(table_id, {}) and now is eff_suppressed[table_id][folded]):
+                        to_clear.setdefault(table_id, []).append(header)
+            def activate_now() -> Any:
+                """Put the shadows touching X back as filters that intersect with what the context holds by then."""
+                activated: dict[str, tuple[dict[str, Any], dict[str, frozenset[int]], list[dict[str, Any]], dict[str, frozenset[int]]]] = {}
+                for layer in eff_layers:
+                    wanted = dropped.get(layer.table, _NOTHING)
+                    if wanted is _NOTHING or (wanted is not None and not wanted & {column.casefold() for column in layer.columns}):
+                        continue
+                    base_context = evaluation_contexts_by_id[layer.table]
+                    allowed = frozenset(
+                        index for index, base_row in enumerate(base_context["rows"])
+                        if row_key(typed_cell(base_context, column, base_row.get(column)) for column in layer.columns) in layer.tuples
+                    )
+                    _ctx, by_column, _shapes, kept = activated.setdefault(layer.table, (base_context, {}, [], {}))
+                    for column in layer.columns:
+                        now = current_filter(layer.table, column.casefold())
+                        merged = allowed if now is None else allowed & now
+                        by_column[column] = merged if column not in by_column else by_column[column] & merged
+                        kept[column] = allowed if column not in kept else kept[column] & allowed
+                if not activated:
+                    return evaluate(inner)
+                return with_column_filters(activated, lambda: evaluate(inner), "activate")
+
+            inner = expression
+            expression = ("thunk", activate_now)
+            for table_id, headers in to_clear.items():
+                step = expression
+                references = tuple(("reference", evaluation_contexts_by_id[table_id]["name"], header) for header in headers)
+                expression = ("thunk", lambda step=step, references=references: evaluate_with_filter_clear_core(
+                    step, ("call", "REMOVEFILTERS", references), "REMOVEFILTERS"))
+            saved_touched_only = eff_touched
+            eff_touched = eff_touched | {
+                (table_id, name) for table_id, columns in dropped.items()
+                for name in (columns if columns is not None else {h.casefold() for h in evaluation_contexts_by_id[table_id]["headers"]})
+            }
+            try:
+                return evaluate(expression)
+            finally:
+                eff_touched = saved_touched_only
         saved_eff = (eff_layers, eff_touched)
         layers, touched = eff_layers, eff_touched
         for table_id, columns in dropped.items():
@@ -7479,7 +7547,17 @@ def evaluate_measures(
         for table_id, entry in filters_by_table.items():
             base_context, column_rows = entry[0], entry[1]
             touched = frozenset(column.casefold() for column in column_rows)
-            if transition == "keys":  # SUMMARIZE group keys: seen by ALLSELECTED on columns they do not belong to
+            if transition == "activate":  # a shadow put back as an ordinary filter (ALLSELECTED(X) as a CALCULATE argument)
+                for column in (entry[3] if len(entry) > 3 else {}):
+                    folded = column.casefold()
+                    merged_rows = column_rows.get(column)
+                    before = current_filter(table_id, folded)
+                    tagged = new_transition.get(table_id, {}).get(folded)
+                    if tagged is not None and before is tagged[0]:  # the intersection stays "only a transition" where it was
+                        new_transition[table_id] = {**new_transition[table_id], folded: (merged_rows, tagged[1])}
+                    elif folded in new_suppressed.get(table_id, {}) and before is new_suppressed[table_id][folded]:
+                        new_suppressed[table_id] = {**new_suppressed[table_id], folded: merged_rows}
+            elif transition == "keys":  # SUMMARIZE group keys: seen by ALLSELECTED on columns they do not belong to
                 new_keys[table_id] = {**new_keys.get(table_id, {}), **{column.casefold(): rows for column, rows in column_rows.items()}}
             elif transition:  # the row's values become filters ALLSELECTED never sees
                 new_transition[table_id] = {**new_transition.get(table_id, {}), **{
