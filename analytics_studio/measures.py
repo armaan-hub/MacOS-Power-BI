@@ -48,12 +48,28 @@ from typing import Any, Callable, Iterable
 from analytics_studio.relationships import (
     RelationshipError,
     _relationship_value_key,
-    propagate_relationship_filters,
+    propagate_relationship_filters as _propagate_relationship_filters,
     relationship_filter_directions,
     unknown_member_table_ids,
 )
 from analytics_studio import dax_dates, dax_ext, dax_format, dax_iteration_order, dax_math, dax_order, dax_typed
 from analytics_studio.power_query_values import ascii_fold, cell_key, cell_to_text, is_cell_error
+
+
+def _frozen(indexes: Iterable[int]) -> frozenset[int]:
+    """frozenset(x) keeps x itself when it already is one (filters are compared by identity and a BlankSet keeps its flag)."""
+    return indexes if isinstance(indexes, frozenset) else frozenset(indexes)
+
+
+class BlankSet(frozenset):
+    """Allowed row indexes of one column that also select the virtual blank member (a row of BLANKs) when blank is true."""
+
+    blank: bool = False
+
+    def __new__(cls, rows: Iterable[int] = (), blank: bool = False) -> "BlankSet":
+        instance = super().__new__(cls, rows)
+        instance.blank = blank
+        return instance
 
 
 class MeasureError(ValueError):
@@ -3553,6 +3569,46 @@ def evaluate_measures(
         table_names.setdefault(context["name"].casefold(), []).append(context)
 
     try:
+        unknown_member_ids = unknown_member_table_ids(
+            list(contexts_by_id.values()), relationship_definitions
+        )
+    except (RelationshipError, DecimalException) as exc:
+        raise MeasureError(f"Could not inspect model relationships: {exc}") from exc
+    unknown_member_exclusions: dict[str, set[str] | None] = {}
+
+    def unknown_member_hidden(table_id: str) -> bool:
+        """ALLNOBLANKROW(T) removes the blank member from every view of T; ALLNOBLANKROW(T[column]) only keeps the rows that
+        point at it out of the facts (live Power BI: VALUES(T[c]) still lists it, SUM over the facts drops its rows)."""
+        return table_id in unknown_member_exclusions and unknown_member_exclusions[table_id] is None
+
+    def own_unknown_member_selected(context: dict[str, Any], ignore_exclusion: bool = False) -> bool:
+        """Do the filters on this table itself still select its virtual blank member (the predicate holds for a row of BLANKs)?"""
+        table_id = context["id"]
+        if table_id in unknown_member_exclusions and not ignore_exclusion:
+            return False
+        if "filter_table_rows" in context:
+            return bool(context.get("filter_table_unknown", False))  # FILTER(VALUES(T)..) lists it, FILTER(T,..) never does
+        blank_allowed = context.get("filter_column_blank_allowed", {})
+        if not context.get("filter_column_rows") and "filter_rows" in context:
+            return False  # rows supplied by a visual or slicer without per-column provenance: a selection never includes the blank
+        return all(blank_allowed.get(column, False) for column in context.get("filter_column_rows", {}))
+
+    def propagate_relationship_filters(
+        tables: list[dict[str, Any]], relationships: list[dict[str, Any]], filter_table_ids: Any,
+        ignore_exclusions: Iterable[str] = (),
+    ) -> dict[str, list[dict[str, Any]]]:
+        """Relationship propagation that also carries the virtual blank member: fact rows whose key has no match in a
+        one-side table stay while that table's own filters still select its blank member."""
+        ignored = set(ignore_exclusions)
+        excluded = {table_id for table_id in unknown_member_exclusions if table_id in unknown_member_ids and table_id not in ignored}
+        filter_table_ids = set(filter_table_ids) | excluded  # ALLNOBLANKROW leaves no filter on its table, only the missing blank member
+        selected = {
+            str(table.get("id")): own_unknown_member_selected(table, str(table.get("id")) in ignored)
+            for table in tables if table.get("id") in filter_table_ids and table.get("id") in unknown_member_ids
+        }
+        return _propagate_relationship_filters(tables, relationships, filter_table_ids, selected)
+
+    try:
         rows_by_table_id = propagate_relationship_filters(
             list(contexts_by_id.values()),
             relationship_definitions,
@@ -3560,13 +3616,6 @@ def evaluate_measures(
         )
     except RelationshipError as exc:
         raise MeasureError(f"Could not apply model relationships: {exc}") from exc
-    try:
-        unknown_member_ids = unknown_member_table_ids(
-            list(contexts_by_id.values()), relationship_definitions
-        )
-    except (RelationshipError, DecimalException) as exc:
-        raise MeasureError(f"Could not inspect model relationships: {exc}") from exc
-    unknown_member_exclusions: dict[str, set[str] | None] = {}
 
     value_cache: dict[tuple[str, int], Decimal | None] = {}
     resolving: set[str] = set()
@@ -3693,7 +3742,7 @@ def evaluate_measures(
                 "ALL column table expressions need complete per-column filter context."
             )
         remaining_column_rows = {
-            column: frozenset(indexes)
+            column: _frozen(indexes)
             for column, indexes in existing_column_rows.items()
             if column.casefold() not in columns_to_clear
         }
@@ -3765,6 +3814,7 @@ def evaluate_measures(
                 updated_contexts,
                 relationship_definitions,
                 updated_filter_roots,
+                ignore_exclusions=expanded_table_ids(table_id)[1:] if with_expansion else (),
             )
         except RelationshipError as exc:
             raise MeasureError(f"Could not apply ALL column filters: {exc}") from exc
@@ -3814,7 +3864,7 @@ def evaluate_measures(
         if axis.selected_rows is not None:
             existing_columns[axis.column] = axis.selected_rows
         updated["filter_column_rows"] = {
-            column: frozenset(indexes)
+            column: _frozen(indexes)
             for column, indexes in existing_columns.items()
         }
 
@@ -3867,15 +3917,11 @@ def evaluate_measures(
         if source_id not in unknown_member_ids:
             return False
         current_source_context = contexts_by_id[source_id]
-        if "filter_table_rows" in current_source_context:
-            # This bounded FILTER rowset is opaque and contains only the
-            # physical rows evaluated by its predicate. Do not infer that the
-            # generated unknown member survived it.
+        if "filter_table_rows" in current_source_context and not current_source_context.get("filter_table_unknown", False):
+            # FILTER(T, ..) iterates the stored rows only: the generated unknown member is never one of them.
             return False
-        if source_id in unknown_member_exclusions:
-            excluded_columns = unknown_member_exclusions[source_id]
-            if excluded_columns is None or excluded_columns - (columns_being_cleared or set()):
-                return False
+        if unknown_member_hidden(source_id):
+            return False
         blank_allowed = current_source_context.get(
             "filter_column_blank_allowed", {}
         )
@@ -4031,7 +4077,7 @@ def evaluate_measures(
                 )
                 if (
                     source_context["id"] in unknown_member_ids
-                    and source_context["id"] not in unknown_member_exclusions
+                    and not unknown_member_hidden(source_context["id"])
                     and unknown_member_passes_remaining_filters(
                         current_context,
                         evaluation_contexts_by_id,
@@ -4070,7 +4116,7 @@ def evaluate_measures(
                     # a FILTER table holds only the rows its predicate saw: it never includes the generated blank
                     add_unknown_member = (
                         source_context["id"] in unknown_member_ids
-                        and source_context["id"] not in unknown_member_exclusions
+                        and not unknown_member_hidden(source_context["id"])
                         and not _context_shapes(evaluation_contexts_by_id.get(source_context["id"], source_context))
                         and unknown_member_passes_remaining_filters(
                             source_context, contexts_after_clear, filter_roots_after_clear, cleared_columns,
@@ -4090,7 +4136,7 @@ def evaluate_measures(
                 )
                 if (
                     source_context["id"] in unknown_member_ids
-                    and source_context["id"] not in unknown_member_exclusions
+                    and not unknown_member_hidden(source_context["id"])
                     and unknown_member_passes_remaining_filters(
                         current_context,
                         evaluation_contexts_by_id,
@@ -5402,6 +5448,7 @@ def evaluate_measures(
 
     def table_argument_value(
         argument: tuple[Any, ...],
+        include_unknown: bool = False,
     ) -> tuple[dict[str, Any], list[dict[str, Any]]]:
         if argument[0] == "table":
             context = resolve_table_context(str(argument[1]))
@@ -5410,8 +5457,9 @@ def evaluate_measures(
                 context["id"], context
             )
             if (
-                context["id"] in unknown_member_ids
-                and context["id"] not in unknown_member_exclusions
+                include_unknown  # live Power BI: only VALUES/ALL-like readers see the unknown member, a base-table reference never does
+                and context["id"] in unknown_member_ids
+                and not unknown_member_hidden(context["id"])
                 and unknown_member_passes_remaining_filters(
                     current_context,
                     evaluation_contexts_by_id,
@@ -5470,7 +5518,9 @@ def evaluate_measures(
         if argument[0] == "call" and argument[1] == "ROW":
             pairs = argument[2]
             names = [str(dax_typed.to_text(evaluate(pairs[i]))) for i in range(0, len(pairs), 2)]
-            row = in_row_expression(lambda: {name: evaluate(pairs[i + 1], None, allow_text=True) for name, i in zip(names, range(0, len(pairs), 2))})
+            # ROW inside GENERATE / ADDCOLUMNS sees the row of the enclosing iteration (a CALCULATE in it transitions that row)
+            enclosing = row_stack[-1] if row_stack else None
+            row = in_row_expression(lambda: {name: evaluate(pairs[i + 1], enclosing, allow_text=True) for name, i in zip(names, range(0, len(pairs), 2))})
             return derived_table(names, [row])
         if argument[0] == "table_call":
             source = argument[2]
@@ -5487,7 +5537,7 @@ def evaluate_measures(
                         distinct_rows.append(inner_row)
                 return inner_context, distinct_rows
             if source[0] == "table":
-                context, source_rows = table_argument_value(source)
+                context, source_rows = table_argument_value(source, include_unknown=argument[1] == "VALUES")
                 seen_rows: set[tuple[Any, ...]] = set()
                 unique_rows = []
                 for source_row in source_rows:
@@ -5507,10 +5557,22 @@ def evaluate_measures(
                 if key not in seen:
                     seen.add(key)
                     value_rows.append({actual: value})
+            if (
+                argument[1] == "VALUES"  # live Power BI: VALUES lists the virtual blank member while it is visible, DISTINCT never does
+                and context["id"] in unknown_member_ids
+                and not unknown_member_hidden(context["id"])
+                and cell_key(None) not in seen
+                and unknown_member_passes_remaining_filters(
+                    evaluation_contexts_by_id.get(context["id"], context), evaluation_contexts_by_id, evaluation_filter_ids,
+                )
+            ):
+                unknown_row = [{actual: None}]  # unsorted, it comes after the stored values
+            else:
+                unknown_row = []
             single_column = dict(context)
             single_column["headers"] = [actual]
             single_column["lineage"] = {actual: (context, actual)}
-            return single_column, order_distinct_values(context, actual, value_rows)
+            return single_column, order_distinct_values(context, actual, value_rows) + unknown_row
         if argument[0] == "call" and argument[1] == "ALLEXCEPT":
             kept_context = resolve_table_context(str(argument[2][0][1]))
             names_checked = [resolve_table(ref[1], ref[2])[1].casefold() for ref in argument[2][1:]]
@@ -6157,7 +6219,7 @@ def evaluate_measures(
                         del column_filters[old_date_column]
                     column_filters[date_column] = period_indexes
                     updated["filter_column_rows"] = {
-                        column: frozenset(indexes)
+                        column: _frozen(indexes)
                         for column, indexes in column_filters.items()
                     }
                     blank_allowed = dict(
@@ -6719,7 +6781,7 @@ def evaluate_measures(
 
             updated["filter_context_complete"] = True
             updated["filter_column_rows"] = {
-                column: frozenset(indexes)
+                column: _frozen(indexes)
                 for column, indexes in column_filters.items()
             }
             updated["filter_column_blank_allowed"] = blank_column_filters
@@ -6987,11 +7049,6 @@ def evaluate_measures(
                 relationship_definitions,
                 evaluation_filter_ids,
             )
-            unknown_member_ids = unknown_member_table_ids(
-                list(evaluation_contexts_by_id.values()),
-                relationship_definitions,
-                rows_by_table_id,
-            )
         except (RelationshipError, DecimalException) as exc:
             relationship_definitions = previous_relationships
             rows_by_table_id = previous_rows
@@ -7142,11 +7199,6 @@ def evaluate_measures(
                 list(evaluation_contexts_by_id.values()),
                 relationship_definitions,
                 evaluation_filter_ids,
-            )
-            unknown_member_ids = unknown_member_table_ids(
-                list(evaluation_contexts_by_id.values()),
-                relationship_definitions,
-                rows_by_table_id,
             )
         except (RelationshipError, DecimalException) as exc:
             relationship_definitions = previous_relationships
@@ -7543,7 +7595,7 @@ def evaluate_measures(
                     f"{function} cannot clear individual columns because their per-column filter context is unavailable."
                 )
             remaining_column_rows = {
-                column: frozenset(indexes)
+                column: _frozen(indexes)
                 for column, indexes in existing_column_rows.items()
                 if column.casefold() not in table_columns
             }
@@ -7589,17 +7641,6 @@ def evaluate_measures(
         elif function == "ALLNOBLANKROW" and target_context is not None and modifier_arguments[0][0] == "table":
             # the table without its blank row is the expanded table of the rows that exist: only the one-side rows they point at
             narrow_one_side_tables(updated_by_id, updated_filter_roots, target_context["id"], range(len(target_context["rows"])))
-
-        try:
-            filtered_rows_by_id = propagate_relationship_filters(
-                updated_contexts,
-                relationship_definitions,
-                updated_filter_roots,
-            )
-        except RelationshipError as exc:
-            raise MeasureError(
-                f"Could not apply {function}: {exc}"
-            ) from exc
 
         previous_rows = rows_by_table_id
         previous_context = current_context
@@ -7649,7 +7690,21 @@ def evaluate_measures(
             for related_id, related_columns in clear_plan.items():
                 if related_id != target_context["id"] and related_columns is None:
                     updated_unknown_member_exclusions.pop(related_id, None)  # the one-side table is cleared whole too
-        unknown_member_exclusions = updated_unknown_member_exclusions
+        unknown_member_exclusions = updated_unknown_member_exclusions  # the propagation below must see the blank members this call excludes
+        try:
+            filtered_rows_by_id = propagate_relationship_filters(
+                updated_contexts,
+                relationship_definitions,
+                updated_filter_roots,
+            )
+        except RelationshipError as exc:
+            unknown_member_exclusions = previous_unknown_member_exclusions
+            raise MeasureError(
+                f"Could not apply {function}: {exc}"
+            ) from exc
+        except BaseException:
+            unknown_member_exclusions = previous_unknown_member_exclusions
+            raise
         context_sequence += 1
         current_context = context_sequence
         evaluation_contexts_by_id = updated_by_id
@@ -7875,6 +7930,10 @@ def evaluate_measures(
                     updated_column_rows[column] = projected & extra[column] if column in extra else projected
                 surviving.append({**shape, "active": remaining})
             updated_column_rows.update(column_rows)
+            blank_flags = dict(target_context.get("filter_column_blank_allowed", {}))
+            for column, rows in column_rows.items():
+                blank_flags[column] = bool(getattr(rows, "blank", False))
+            target_context["filter_column_blank_allowed"] = blank_flags
             surviving.extend(new_shapes)
             target_context["filter_shapes"] = tuple(surviving)
             target_context["filter_column_extra"] = extra
@@ -7932,7 +7991,7 @@ def evaluate_measures(
                     if cell_key(typed_cell(base_context, base_column, base_row.get(base_column)))
                     == cell_key(wanted)
                 )
-                filters.setdefault(base_context["id"], (base_context, {}))[1][base_column] = allowed
+                filters.setdefault(base_context["id"], (base_context, {}))[1][base_column] = BlankSet(allowed, wanted is None)
             for base_id, (base_context, base_filters) in list(filters.items()):  # every column of a loaded table: the row reaches its one side too
                 if base_id in contexts_by_id and len(base_filters) == len(base_context["headers"]) and (not iterated_table.get("derived") or iterated_table.get("row_identity")):
                     reverse = {column: header for header, (ctx, column) in lineage.items() if ctx["id"] == base_id}
@@ -7953,7 +8012,7 @@ def evaluate_measures(
                 _reject_power_query_error(right, header, None)
                 if cell_key(left) == cell_key(right):
                     per_column[header].append(row_index)
-        transitioned = {table_id: (iterated_table, {header: frozenset(indexes) for header, indexes in per_column.items()})}
+        transitioned = {table_id: (iterated_table, {header: BlankSet(indexes, row.get(header) is None) for header, indexes in per_column.items()})}
         if base_table is not None:
             add_one_side_transition(table_id, row, transitioned)
         return transitioned
@@ -7986,11 +8045,15 @@ def evaluate_measures(
                 continue
             key_value = row.get(from_column) if typed else typed_cell(many_context, from_column, row.get(from_column))
             matches = one_side_value_index(one_context, to_column).get(cell_key(key_value))
-            if not matches:
-                continue  # an unmatched key belongs to the unknown member, which no loaded row stands for
+            if not matches:  # an unmatched key belongs to the unknown member: the one side is filtered to that member only
+                transitioned[one_id] = (one_context, {header: BlankSet((), True) for header in one_context["headers"]})
+                continue
             related_row = one_context["rows"][min(matches)]
             transitioned[one_id] = (one_context, {
-                header: one_side_value_index(one_context, header).get(cell_key(typed_cell(one_context, header, related_row.get(header))), frozenset())
+                header: BlankSet(
+                    one_side_value_index(one_context, header).get(cell_key(typed_cell(one_context, header, related_row.get(header))), frozenset()),
+                    related_row.get(header) is None,
+                )
                 for header in one_context["headers"]
             })
             add_one_side_transition(one_id, related_row, transitioned)  # a stored row, never typed
@@ -8057,6 +8120,10 @@ def evaluate_measures(
         wanted = {key(base_rows[index]) for index in source_rows}
         return frozenset(index for index, row in enumerate(base_rows) if key(row) in wanted)
 
+    def meet_rows(left: frozenset[int], right: frozenset[int]) -> frozenset[int]:
+        """Intersection of two allowed-row sets; the blank member survives only when both keep it."""
+        return BlankSet(left & right, bool(getattr(left, "blank", False)) and bool(getattr(right, "blank", False)))
+
     def general_table_filter_sets(node: tuple[Any, ...]) -> dict[str, tuple[dict[str, Any], dict[str, frozenset[int]], list[dict[str, Any]]]]:
         """A table-valued CALCULATE filter: the loaded rows whose lineage-column values appear in the table.
 
@@ -8088,9 +8155,10 @@ def evaluate_measures(
                     value = row.get(header)
                     values.append(member(value if context.get("derived") else typed_cell(base_context, base_column, value)))
                 wanted.add(tuple(values))
-            allowed = frozenset(
-                index for index, base_row in enumerate(base_context["rows"])
-                if tuple(member(typed_cell(base_context, column, base_row.get(column))) for _header, column in pairs) in wanted
+            allowed = BlankSet(
+                (index for index, base_row in enumerate(base_context["rows"])
+                 if tuple(member(typed_cell(base_context, column, base_row.get(column))) for _header, column in pairs) in wanted),
+                tuple(member(None) for _pair in pairs) in wanted,  # the table lists the blank member (VALUES / ALL, never FILTER(T, ..))
             )
             columns = tuple(column for _header, column in pairs)
             filters[table_id] = (
@@ -8238,9 +8306,16 @@ def evaluate_measures(
             for frame in iterate_rows(group_context, group_rows)
             if conjuncts_pass(node, frame)
         }
-        allowed = frozenset(
-            index for index, raw in enumerate(context["rows"])
-            if row_key(typed_cell(context, name, raw.get(name)) for name in names) in passing
+        blank_passes = False
+        if table_id in unknown_member_ids:  # the virtual blank member is a row of BLANKs: does the test hold for it?
+            try:
+                blank_passes = conjuncts_pass(node, (group_context, {name: None for name in names}, len(group_rows) + 1))
+            except MeasureError:
+                blank_passes = False
+        allowed = BlankSet(
+            (index for index, raw in enumerate(context["rows"])
+             if row_key(typed_cell(context, name, raw.get(name)) for name in names) in passing),
+            blank_passes,
         )
         shapes = [{"columns": tuple(names), "rows": allowed, "active": tuple(names), "dirty": False}] if len(names) > 1 else []
         return {table_id: (context, {name: allowed for name in names}, shapes)}
@@ -8300,14 +8375,14 @@ def evaluate_measures(
                                         active_after = tuple(name for name in shape["active"] if name not in replaced_here)
                                         rows = shape_projection_rows(table_state, shape["rows"], active_after)
                                         previous = rows if previous is None else previous & rows
-                                target[column] = allowed if previous is None else allowed & previous
+                                target[column] = allowed if previous is None else meet_rows(allowed, previous)
                             if keep:
                                 # intersected with what is there, so nothing is replaced - unless a replacing filter
                                 # on the same column ran first: it has already dropped the old filter (and the
                                 # column from any FILTER table), and KEEPFILTERS only intersects with its result
                                 for column, allowed in column_rows.items():
                                     if column not in replaced_here:
-                                        kept[column] = allowed if column not in kept else allowed & kept[column]
+                                        kept[column] = allowed if column not in kept else meet_rows(allowed, kept[column])
                             else:
                                 replaced_here.update(column_rows)
                             if overlap or keep:  # intersected filters no longer form one clean shape of whole rows
@@ -9135,7 +9210,10 @@ def evaluate_measures(
             total = Decimal(0)
             for value in values:
                 total = dax_typed.QUIET.add(total, value)
-            return total if function == "SUMX" else dax_typed.QUIET.divide(total, Decimal(len(values)))
+            result = total if function == "SUMX" else dax_typed.QUIET.divide(total, Decimal(len(values)))
+            if function == "SUMX" and all(isinstance(value, dax_dates.DaxDateTime) for value in values) and result.is_finite():
+                return dax_dates.DaxDateTime(result)  # live Power BI: SUMX over dates is a date, AVERAGEX over dates is a plain number
+            return result
         if function in {"COUNTX", "COUNTAX"}:
             context, iteration_rows = table_argument_value(arguments[0])
             validation_row = iteration_rows[0] if iteration_rows else {}

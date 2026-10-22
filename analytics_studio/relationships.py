@@ -60,8 +60,16 @@ def propagate_relationship_filters(
     tables: list[dict[str, Any]],
     relationships: list[dict[str, Any]],
     filter_table_ids: set[str],
+    unknown_selected: dict[str, bool] | None = None,
 ) -> dict[str, list[dict[str, Any]]]:
-    """Propagate explicitly filtered rows across active, loaded relationships."""
+    """Propagate explicitly filtered rows across active, loaded relationships.
+
+    unknown_selected: for the filtered tables whose virtual blank member (the "unknown member" that collects the rows of a
+    related table whose key is BLANK or has no match) is still selected by their own filters. Rows of a table on the other
+    side of the relationship whose key has no match in the one-side table are reached through that member (live Power BI:
+    CALCULATE(SUM(Fact[Amt]), Dim[Cat] <> "A") keeps the facts of unknown products). A filtered table missing from the
+    mapping, or mapped to True, selects it; a table narrowed by another table's filter keeps it only while a visible row of
+    that table is such an orphan."""
     tables_by_id: dict[str, dict[str, Any]] = {}
     rows_by_id: dict[str, list[dict[str, Any]]] = {}
     for table in tables:
@@ -82,13 +90,14 @@ def propagate_relationship_filters(
         if table is not None and "filter_rows" in table:
             rows_by_id[table_id] = list(table["filter_rows"])
 
-    edges_by_source: dict[str, list[tuple[str, str, str, str, str]]] = defaultdict(list)
+    edges_by_source: dict[str, list[tuple[str, str, str, str, str, str]]] = defaultdict(list)
 
     def add_edge(
         source_id: str,
         source_column: str,
         target_id: str,
         target_column: str,
+        source_role: str = "peer",
     ) -> None:
         source_table = tables_by_id[source_id]
         target_table = tables_by_id[target_id]
@@ -106,7 +115,7 @@ def propagate_relationship_filters(
         if not compatible:
             raise RelationshipError("An active relationship has incompatible column types.")
         edges_by_source[source_id].append(
-            (target_id, source_column, target_column, source_type, target_type)
+            (target_id, source_column, target_column, source_type, target_type, source_role)
         )
 
     def validate_unique_key(table_id: str, column: str) -> None:
@@ -149,10 +158,13 @@ def propagate_relationship_filters(
         if cardinality in {"one_to_one", "many_to_one"}:
             validate_unique_key(to_id, to_column)
         filter_directions = relationship_filter_directions(relationship)
+        # the blank member exists on the one side of a one-to-many relationship; one-to-one and many-to-many ends are peers
+        from_role = "one" if cardinality == "one_to_many" else "many" if cardinality == "many_to_one" else "peer"
+        to_role = "one" if cardinality == "many_to_one" else "many" if cardinality == "one_to_many" else "peer"
         if "from_to" in filter_directions:
-            add_edge(from_id, from_column, to_id, to_column)
+            add_edge(from_id, from_column, to_id, to_column, from_role)
         if "to_from" in filter_directions:
-            add_edge(to_id, to_column, from_id, from_column)
+            add_edge(to_id, to_column, from_id, from_column, to_role)
 
     filter_roots = {table_id for table_id in filter_table_ids if table_id in tables_by_id}
     for root_id in sorted(
@@ -188,21 +200,58 @@ def propagate_relationship_filters(
 
     constrained = deque(filter_roots)
     constrained_ids = set(constrained)
+    # does the virtual blank member of a constrained table survive the constraints so far?
+    unknown_state: dict[str, bool] = {
+        root_id: (unknown_selected or {}).get(root_id, True) for root_id in filter_roots
+    }
+    all_key_cache: dict[tuple[str, str], set[tuple[str, Any]]] = {}
+
+    def all_keys(table_id: str, column: str, column_type: str) -> set[tuple[str, Any]]:
+        cached = all_key_cache.get((table_id, column))
+        if cached is None:
+            cached = {_relationship_value_key(row.get(column), column_type) for row in tables_by_id[table_id]["rows"]}
+            all_key_cache[(table_id, column)] = cached
+        return cached
+
     while constrained:
         source_id = constrained.popleft()
-        for target_id, source_column, target_column, source_type, target_type in edges_by_source.get(source_id, []):
+        for target_id, source_column, target_column, source_type, target_type, source_role in edges_by_source.get(source_id, []):
             source_keys = {
                 _relationship_value_key(row.get(source_column), source_type)
                 for row in rows_by_id[source_id]
             }
             current_target_rows = rows_by_id[target_id]
-            filtered_target_rows = [
-                row for row in current_target_rows
-                if _relationship_value_key(row.get(target_column), target_type) in source_keys
-            ]
+            if source_role == "one" and unknown_state.get(source_id, True):
+                known = all_keys(source_id, source_column, source_type)
+                filtered_target_rows = [
+                    row for row in current_target_rows
+                    if (key := _relationship_value_key(row.get(target_column), target_type)) in source_keys or key not in known
+                ]
+            else:
+                filtered_target_rows = [
+                    row for row in current_target_rows
+                    if _relationship_value_key(row.get(target_column), target_type) in source_keys
+                ]
             changed = len(filtered_target_rows) != len(current_target_rows)
             if changed:
                 rows_by_id[target_id] = filtered_target_rows
+            if source_role == "one":  # the blank member of the filtered table relates to the blank member of its source only
+                before = unknown_state.get(target_id, True)
+                after = before and unknown_state.get(source_id, True)
+                if after != before or target_id not in unknown_state:
+                    unknown_state[target_id] = after
+                    changed = changed or after != before
+            elif source_role == "many":  # the many side filters its one side: the blank member stays only while a visible row is an orphan
+                known = all_keys(target_id, target_column, target_type)
+                orphan_visible = any(
+                    _relationship_value_key(row.get(source_column), source_type) not in known
+                    for row in rows_by_id[source_id]
+                )
+                before = unknown_state.get(target_id, True)
+                after = before and orphan_visible
+                if after != before or target_id not in unknown_state:
+                    unknown_state[target_id] = after
+                    changed = changed or after != before
             if target_id not in constrained_ids or changed:
                 constrained_ids.add(target_id)
                 constrained.append(target_id)

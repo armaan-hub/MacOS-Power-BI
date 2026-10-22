@@ -1773,8 +1773,9 @@ class CalculateBooleanFilterTests(unittest.TestCase):
             "Physical blank remains": 2,
             "Modifier excludes generated blank": 2,
             "Nested ALL restores generated blank": 3,
-            "Nested ALL modifier restores generated blank": 3,
-            "Nested table ALL modifier restores generated blank": 3,
+            # live Power BI (iteration 82): COUNTROWS(table) never counts the generated blank member, only VALUES / ALL do
+            "Nested ALL modifier restores generated blank": 2,
+            "Nested table ALL modifier restores generated blank": 2,
             "Column modifier keeps residual filter": 1,
         })
 
@@ -1845,7 +1846,7 @@ class CalculateBooleanFilterTests(unittest.TestCase):
             "Known key amount pairs": 2,
             "Known amount total": 30,
             "Known amount average": 15,
-            "Column ALL modifier restores unknown": 3,
+            "Column ALL modifier restores unknown": 2,  # COUNTROWS(table) does not count the generated blank (live Power BI)
         })
 
     def test_allnoblankrow_column_modifier_preserves_other_direct_filters(self) -> None:
@@ -2340,7 +2341,8 @@ class CalculateBooleanFilterTests(unittest.TestCase):
                 values = evaluate_measures(
                     [{
                         "name": "Keep blank key filter",
-                        "expression": "CALCULATE(COUNTROWS('Category'), ALLEXCEPT('Category', 'Category'[Key]))",
+                        # live Power BI (iteration 82): COUNTROWS(table) never counts the unknown member, VALUES(table) lists it while visible
+                        "expression": "CALCULATE(COUNTROWS(VALUES('Category')), ALLEXCEPT('Category', 'Category'[Key]))",
                     }],
                     categories,
                     ["Key", "Label"],
@@ -3531,9 +3533,9 @@ class CalculateBooleanFilterTests(unittest.TestCase):
             active_table_id="category-id",
         )
         self.assertEqual(sales_root, {
-            "Visible categories": 3,
+            "Visible categories": 2,  # the generated blank member is not a row COUNTROWS(table) counts (live Power BI)
             "Both directions": 1,
-            "Nested override": 3,
+            "Nested override": 2,
         })
 
     def test_crossfilter_measure_persists_and_replays_after_source_change(self) -> None:

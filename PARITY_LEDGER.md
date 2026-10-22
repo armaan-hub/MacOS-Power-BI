@@ -1,6 +1,6 @@
 # Parity ledger: Analytics Studio vs Power BI Desktop
 
-Generated 2026-10-22 by `tools/parity_check.py`. Power BI answers were saved from Power BI Desktop 2.157.879.0 (26.08)+da30fe74eb0b8a8786ab7326b69c400a0e951831; the gate replays them against the app on every run.
+Generated 2026-10-23 by `tools/parity_check.py`. Power BI answers were saved from Power BI Desktop 2.157.879.0 (26.08)+da30fe74eb0b8a8786ab7326b69c400a0e951831; the gate replays them against the app on every run.
 
 Rule: a slice is finished only when it is compared with Power BI, its items are locked here (`--accept`) and the gate passes.  Locked items are never re-investigated, only guarded.
 
@@ -32,7 +32,7 @@ Rule: a slice is finished only when it is compared with Power BI, its items are 
 | dax_battery_sdet_filters | 553 | 0 | 107 | 0 | 0 |
 | dax_battery_comments_booleans | 410 | 0 | 22 | 0 | 0 |
 | dax_battery_round2_scope | 132 | 0 | 7 | 0 | 0 |
-| dax_battery_round2 | 2313 | 0 | 117 | 0 | 0 |
+| dax_battery_round2 | 2313 | 1 | 116 | 0 | 0 |
 | dax_battery_critic_shapes | 43 | 0 | 52 | 0 | 0 |
 | dax_battery_round3 | 2246 | 0 | 118 | 0 | 0 |
 | dax_battery_round4 | 7499 | 0 | 679 | 0 | 0 |
@@ -48,7 +48,7 @@ Rule: a slice is finished only when it is compared with Power BI, its items are 
 | dax_battery_allselected_critic2 | 7420 | 0 | 0 | 0 | 0 |
 | table VAT | 575 | 0 | 0 | 0 | 0 |
 
-## Pending work (1196): Power BI answers, the app refuses
+## Pending work (1195): Power BI answers, the app refuses
 
 - `CALCULATE(COUNTROWS(Facts),COUNTROWS(CALCULATETABLE(Facts,Facts[Region]="East"))<Facts[Quantity])` (Power BI: `4`) [dax_battery_boolean_scalar_rhs]
 - `CALCULATE(CALCULATE(COUNTROWS(Facts),Facts[Quantity]>COUNTROWS(CALCULATETABLE(Facts,Facts[Region]="East"))),Facts[Region]="East")` (Power BI: `2`) [dax_battery_boolean_scalar_rhs]
@@ -289,7 +289,6 @@ Rule: a slice is finished only when it is compared with Power BI, its items are 
 - `LN(BLANK())` (Power BI: `-Infinity`) [dax_battery_round2]
 - `TRUNC(1234.567,1.9)` (Power BI: `1234.56`) [dax_battery_round2]
 - `ISO.CEILING(2.1,-2)` (Power BI: `4`) [dax_battery_round2]
-- `SUMX(GENERATE({1,2,3},ROW("z",[Value]*2)),[z])` (Power BI: `12`) [dax_battery_round2]
 - `CALCULATETABLE(ROW("c",1),Facts[Quantity]>COUNTROWS(VALUES(Facts[Region])))` (Power BI: `1`) [dax_battery_round2]
 - `CALCULATETABLE(ROW("c",1),Facts[Quantity]>COUNTROWS(ALL(Facts[Region])))` (Power BI: `1`) [dax_battery_round2]
 - `CALCULATETABLE(ROW("c",1),Facts[Quantity]>COUNTROWS(DISTINCT(Facts[Region])))` (Power BI: `1`) [dax_battery_round2]
