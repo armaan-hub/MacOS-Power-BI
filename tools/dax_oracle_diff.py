@@ -57,12 +57,13 @@ def guest(script: str) -> str:
     folder.mkdir(exist_ok=True)
     name = f"run-{time.time_ns()}.ps1"  # fresh name each call: the guest's share view caches by path
     (folder / name).write_text("\ufeff" + script, encoding="utf-8")
-    # one guest call at a time across every process: each call opens a console window in the guest, and several
-    # agents calling together used to pile a dozen of them on the screen
+    # one guest call at a time across every process (the guest is slow when queries overlap)
     with open(folder / "guest.lock", "w") as lock:
         fcntl.flock(lock, fcntl.LOCK_EX)
         out = subprocess.run(
-            ["prlctl", "exec", VM, "--current-user", "powershell", "-NoProfile", "-NonInteractive", "-WindowStyle", "Hidden",
+            # no --current-user: the script then runs as SYSTEM in session 0, which has no desktop, so no window can open
+            # (it still reaches the shared folder and Power BI's local port)
+            ["prlctl", "exec", VM, "powershell", "-NoProfile", "-NonInteractive",
              "-ExecutionPolicy", "Bypass", "-File", rf"\\Mac\Home\.rea_scratch\{name}"],
             capture_output=True, text=True, encoding="utf-8", errors="replace", timeout=300,
         ).stdout
