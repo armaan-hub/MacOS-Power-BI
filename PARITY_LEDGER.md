@@ -31,17 +31,19 @@ Rule: a slice is finished only when it is compared with Power BI, its items are 
 | dax_battery_boolean_filter_functions | 200 | 0 | 8 | 0 | 0 |
 | dax_battery_sdet_filters | 553 | 0 | 107 | 0 | 0 |
 | dax_battery_comments_booleans | 410 | 0 | 22 | 0 | 0 |
-| dax_battery_round2_scope | 131 | 0 | 8 | 0 | 0 |
-| dax_battery_round2 | 2307 | 0 | 123 | 0 | 0 |
+| dax_battery_round2_scope | 132 | 0 | 7 | 0 | 0 |
+| dax_battery_round2 | 2312 | 0 | 118 | 0 | 0 |
 | dax_battery_critic_shapes | 43 | 0 | 52 | 0 | 0 |
-| dax_battery_round3 | 2245 | 0 | 119 | 0 | 0 |
-| dax_battery_round4 | 7472 | 0 | 706 | 0 | 0 |
-| dax_battery_round5 | 1160 | 0 | 61 | 0 | 0 |
+| dax_battery_round3 | 2246 | 0 | 118 | 0 | 0 |
+| dax_battery_round4 | 7499 | 0 | 679 | 0 | 0 |
+| dax_battery_round5 | 1168 | 0 | 53 | 0 | 0 |
 | dax_battery_diff_groups | 484 | 0 | 0 | 0 | 0 |
 | dax_battery_iferror_hard_errors | 165 | 0 | 0 | 0 | 0 |
+| dax_battery_concatenatex_order | 189 | 0 | 0 | 0 | 0 |
+| dax_battery_not_operator | 30 | 0 | 4 | 0 | 0 |
 | table VAT | 575 | 0 | 0 | 0 | 0 |
 
-## Pending work (1235): Power BI answers, the app refuses
+## Pending work (1197): Power BI answers, the app refuses
 
 - `CALCULATE(COUNTROWS(Facts),COUNTROWS(CALCULATETABLE(Facts,Facts[Region]="East"))<Facts[Quantity])` (Power BI: `4`) [dax_battery_boolean_scalar_rhs]
 - `CALCULATE(CALCULATE(COUNTROWS(Facts),Facts[Quantity]>COUNTROWS(CALCULATETABLE(Facts,Facts[Region]="East"))),Facts[Region]="East")` (Power BI: `2`) [dax_battery_boolean_scalar_rhs]
@@ -211,7 +213,6 @@ Rule: a slice is finished only when it is compared with Power BI, its items are 
 - `MINX(Facts,ABS(Facts[Quantity]>1))` (Power BI: `0`) [dax_battery_comments_booleans]
 - `{{1}}` (Power BI: `1`) [dax_battery_round2_scope]
 - `COUNTROWS({{1,2},{3,4}})` (Power BI: `2`) [dax_battery_round2_scope]
-- `NOT {TRUE()}` (Power BI: `False`) [dax_battery_round2_scope]
 - `SUM(Facts/*c*/[Quantity])` (Power BI: `15`) [dax_battery_round2_scope]
 - `COUNTX(ADDCOLUMNS(Facts,"f",Facts[Quantity]>1),[f]*1)` (Power BI: `6`) [dax_battery_round2_scope]
 - `COUNTAX(ADDCOLUMNS(Facts,"f",Facts[Quantity]>1),[f]*1)` (Power BI: `6`) [dax_battery_round2_scope]
@@ -261,10 +262,8 @@ Rule: a slice is finished only when it is compared with Power BI, its items are 
 - `SUM(Facts/**/ [Quantity])` (Power BI: `15`) [dax_battery_round2]
 - `SUM('Facts'/*c*/[Quantity])` (Power BI: `15`) [dax_battery_round2]
 - `SUM(Facts/*c*/[Quantity])` (Power BI: `15`) [dax_battery_round2]
-- `NOT/*c*/TRUE()` (Power BI: `False`) [dax_battery_round2]
 - `BLANK( //c
 )` (Power BI: `BLANK`) [dax_battery_round2]
-- `NOT 1 IN {1}` (Power BI: `False`) [dax_battery_round2]
 - `COUNTROWS({{1,2},{3,4}})` (Power BI: `2`) [dax_battery_round2]
 - `MAXX({"a","b"},[Value])` (Power BI: `b`) [dax_battery_round2]
 - `MINX({"a","b"},[Value])` (Power BI: `a`) [dax_battery_round2]
@@ -275,7 +274,6 @@ Rule: a slice is finished only when it is compared with Power BI, its items are 
 - `COUNTROWS(FILTER(Facts,COUNTROWS(CALCULATETABLE(Facts,Facts[Region]=EARLIER(Facts[Region])))>2 && Facts[Quantity]>1))` (Power BI: `BLANK`) [dax_battery_round2]
 - `COUNTROWS(FILTER(Facts,COUNTROWS(CALCULATETABLE(Facts,Facts[Region]=EARLIER(Facts[Region])))>=COUNTROWS(CALCULATETABLE(Facts,Facts[Region]="East"))))` (Power BI: `6`) [dax_battery_round2]
 - `COUNTROWS(FILTER(Facts,NOT(ISEMPTY(CALCULATETABLE(Facts,Facts[Region]=EARLIER(Facts[Region]),Facts[Quantity]>3)))))` (Power BI: `2`) [dax_battery_round2]
-- `COUNTROWS(FILTER(Facts,NOT ISEMPTY(CALCULATETABLE(Facts,Facts[Region]="East"))))` (Power BI: `3`) [dax_battery_round2]
 - `COUNTROWS(FILTER(Facts,Facts[Quantity] IN CALCULATETABLE(VALUES(Facts[Quantity]),Facts[Region]=EARLIER(Facts[Region]))))` (Power BI: `6`) [dax_battery_round2]
 - `ISBLANK(BLANK()=BLANK())` (Power BI: `False`) [dax_battery_round2]
 - `TRUE()==TRUE()` (Power BI: `True`) [dax_battery_round2]
@@ -335,8 +333,6 @@ Rule: a slice is finished only when it is compared with Power BI, its items are 
 - `LEN(TOJSON(Facts))` (Power BI: `289`) [dax_battery_round2]
 - `TOCSV(DATATABLE("a",INTEGER,"b",STRING,{{1,"x"},{2,"y,z"}}),5,";")` (Power BI: `[a];[b]`) [dax_battery_round2]
 - `CONCATENATEX(ADDCOLUMNS(ALL(Facts[Quantity]),"n",INDEX(1,ALL(Facts[Quantity]),ORDERBY(Facts[Quantity]))),[n],",",Facts[Quantity])` (Power BI: `0,0,0,0,0,0`) [dax_battery_round2]
-- `NOT TRUE()` (Power BI: `False`) [dax_battery_round2]
-- `NOT TRUE() && TRUE()` (Power BI: `False`) [dax_battery_round2]
 - `ROW("a",1)` (Power BI: `1`) [dax_battery_round2]
 - `DATATABLE("a",INTEGER,{{1}})` (Power BI: `1`) [dax_battery_round2]
 - `COUNTAX(Facts,IF(Facts[Quantity]>2,TRUE(),0))` (Power BI: `6`) [dax_battery_round2]
@@ -403,7 +399,6 @@ Rule: a slice is finished only when it is compared with Power BI, its items are 
 - `VAR a = 1 // xRETURN a` (Power BI: `1`) [dax_battery_round3]
 - `VAR a = 1 -- xRETURN a` (Power BI: `1`) [dax_battery_round3]
 - `1 == 1` (Power BI: `True`) [dax_battery_round3]
-- `IF(FALSE(),NOT NOT TRUE())` (Power BI: `False`) [dax_battery_round3]
 - `COUNTAX(Facts,IF(Facts[Quantity]>3,Facts[Quantity]>4,"x"))` (Power BI: `6`) [dax_battery_round3]
 - `COUNTX(Facts,IF(Facts[Quantity]>3,Facts[Quantity]>4,"x"))` (Power BI: `BLANK`) [dax_battery_round3]
 - `MAXX(Facts,IF(Facts[Quantity]>3,Facts[Quantity]>4,"x"))` (Power BI: `BLANK`) [dax_battery_round3]
@@ -518,32 +513,12 @@ Rule: a slice is finished only when it is compared with Power BI, its items are 
 - `COUNTAX(Facts,IF(Facts[Quantity]>2,Facts[Region] IN {"East","West"}))` (Power BI: `6`) [dax_battery_round4]
 - `COUNTAX(Facts,IF(Facts[Quantity]>2,ISEMPTY(FILTER(Facts,Facts[Quantity]>10))))` (Power BI: `6`) [dax_battery_round4]
 - `COUNTAX(Facts,IF(Facts[Quantity]>2,ISEMPTY(FILTER(Facts,Facts[Quantity]>1))))` (Power BI: `6`) [dax_battery_round4]
-- `CONCATENATEX(Facts,IF(Facts[Quantity]>2,NOT ISBLANK(Facts[Sales])),"|",Facts[Quantity])` (Power BI: `FALSE|FALSE|FALSE|TRUE|FALSE|TRUE`) [dax_battery_round4]
-- `COUNTAX(Facts,IF(Facts[Quantity]>2,NOT ISBLANK(Facts[Sales])))` (Power BI: `6`) [dax_battery_round4]
-- `CONCATENATEX(Facts,IF(Facts[Quantity]>2,1,NOT ISBLANK(Facts[Sales])),"|",Facts[Quantity])` (Power BI: `TRUE|TRUE|TRUE|1|1|1`) [dax_battery_round4]
 - `COUNTAX(Facts,IF(Facts[Quantity]>2,CONTAINSROW({1,2},Facts[Quantity])))` (Power BI: `6`) [dax_battery_round4]
 - `COUNTAX(Facts,IF(Facts[Quantity]>2,CONTAINS(Facts,Facts[Quantity],Facts[Quantity])))` (Power BI: `6`) [dax_battery_round4]
 - `COUNTAX(Facts,IF(Facts[Quantity]>2,HASONEFILTER(Facts[Region])))` (Power BI: `6`) [dax_battery_round4]
 - `COUNTAX(Facts,IF(Facts[Quantity]>2,ISFILTERED(Facts[Region])))` (Power BI: `6`) [dax_battery_round4]
 - `COUNTAX(Facts,IF(Facts[Quantity]>2,ISINSCOPE(Facts[Region])))` (Power BI: `6`) [dax_battery_round4]
 - `COUNTAX(Facts,IF(Facts[Quantity]>2,ISCROSSFILTERED(Facts[Region])))` (Power BI: `6`) [dax_battery_round4]
-- `VAR x=IF(1>2,TRUE()) RETURN NOT x` (Power BI: `True`) [dax_battery_round4]
-- `VAR x=IF(1>2,1) RETURN NOT x` (Power BI: `True`) [dax_battery_round4]
-- `VAR x=IF(1>2,ISBLANK(1)) RETURN NOT x` (Power BI: `True`) [dax_battery_round4]
-- `VAR x=IF(1>2,FALSE(),BLANK()) RETURN NOT x` (Power BI: `True`) [dax_battery_round4]
-- `VAR x=IF(1>2,BLANK()) RETURN NOT x` (Power BI: `True`) [dax_battery_round4]
-- `VAR x=SWITCH(9,1,TRUE()) RETURN NOT x` (Power BI: `True`) [dax_battery_round4]
-- `VAR x=SWITCH(9,1,1) RETURN NOT x` (Power BI: `True`) [dax_battery_round4]
-- `VAR x=IFERROR(BLANK(),TRUE()) RETURN NOT x` (Power BI: `True`) [dax_battery_round4]
-- `VAR x=IFERROR(BLANK(),1) RETURN NOT x` (Power BI: `True`) [dax_battery_round4]
-- `CONCATENATEX(ADDCOLUMNS(Facts,"b",Facts[Quantity]>1),NOT [b],"|",Facts[Quantity])` (Power BI: `TRUE|TRUE|FALSE|FALSE|FALSE|FALSE`) [dax_battery_round4]
-- `COUNTAX(ADDCOLUMNS(Facts,"b",Facts[Quantity]>1),NOT [b])` (Power BI: `6`) [dax_battery_round4]
-- `COUNTROWS(FILTER(ROW("a",IF(1>2,TRUE())),NOT [a]))` (Power BI: `1`) [dax_battery_round4]
-- `COUNTROWS(FILTER(ROW("a",IF(1>2,1)),NOT [a]))` (Power BI: `1`) [dax_battery_round4]
-- `COUNTROWS(FILTER(ROW("a",SWITCH(9,1,TRUE())),NOT [a]))` (Power BI: `1`) [dax_battery_round4]
-- `COUNTROWS(FILTER(ROW("a",SWITCH(9,1,1)),NOT [a]))` (Power BI: `1`) [dax_battery_round4]
-- `COUNTROWS(FILTER(ROW("a",IFERROR(BLANK(),TRUE())),NOT [a]))` (Power BI: `1`) [dax_battery_round4]
-- `COUNTROWS(FILTER(ROW("a",COALESCE(BLANK(),BLANK())),NOT [a]))` (Power BI: `1`) [dax_battery_round4]
 - `SUMX(Facts,CALCULATE(COUNTROWS(Facts),Facts[Quantity]>SUMX(OFFSET(1,SUMMARIZE(Facts,Facts[Region]),ORDERBY(Facts[Region])),Facts[Quantity])))` (Power BI: `1`) [dax_battery_round4]
 - `SUMX(Facts,CALCULATE(COUNTROWS(Facts),KEEPFILTERS(Facts[Quantity]>SUMX(OFFSET(1,SUMMARIZE(Facts,Facts[Region]),ORDERBY(Facts[Region])),Facts[Quantity]))))` (Power BI: `1`) [dax_battery_round4]
 - `COUNTROWS(FILTER(ALL(Facts),Facts[Quantity]>SUMX(OFFSET(1,SUMMARIZE(Facts,Facts[Region]),ORDERBY(Facts[Region])),Facts[Quantity])))` (Power BI: `1`) [dax_battery_round4]
@@ -981,17 +956,11 @@ Rule: a slice is finished only when it is compared with Power BI, its items are 
 - `CONCATENATEX(Facts,SWITCH(TRUE(),TRUE(),Facts[Note],CALCULATE(SUM(Facts[Sales]),Facts[Region]="Nowhere")),"|",Facts[Quantity])` (Power BI: `Paid|Paid|Paid||Late|`) [dax_battery_round4]
 - `CONCATENATEX(Facts,SWITCH(TRUE(),TRUE(),Facts[Note],TRUE()),"|",Facts[Quantity])` (Power BI: `Paid|Paid|Paid||Late|`) [dax_battery_round4]
 - `CONCATENATEX(Facts,SWITCH(TRUE(),TRUE(),Facts[Note],FALSE()),"|",Facts[Quantity])` (Power BI: `Paid|Paid|Paid||Late|`) [dax_battery_round4]
-- `CONCATENATEX(Facts,IF(NOT IF(Facts[Quantity]>2,TRUE()),"y","n"),"|",Facts[Quantity])` (Power BI: `y|y|y|n|n|n`) [dax_battery_round4]
 - `CONCATENATEX(Facts,SUMX(ROW("a",1),IF(IF(Facts[Quantity]>2,TRUE()),1,2)),"|",Facts[Quantity])` (Power BI: `2|2|2|1|1|1`) [dax_battery_round4]
-- `CONCATENATEX(Facts,IF(NOT IF(Facts[Quantity]>2,1),"y","n"),"|",Facts[Quantity])` (Power BI: `y|y|y|n|n|n`) [dax_battery_round4]
 - `CONCATENATEX(Facts,SUMX(ROW("a",1),IF(IF(Facts[Quantity]>2,1),1,2)),"|",Facts[Quantity])` (Power BI: `2|2|2|1|1|1`) [dax_battery_round4]
-- `CONCATENATEX(Facts,IF(NOT SWITCH(Facts[Quantity],1,TRUE()),"y","n"),"|",Facts[Quantity])` (Power BI: `y|n|y|y|y|y`) [dax_battery_round4]
 - `CONCATENATEX(Facts,SUMX(ROW("a",1),IF(SWITCH(Facts[Quantity],1,TRUE()),1,2)),"|",Facts[Quantity])` (Power BI: `2|1|2|2|2|2`) [dax_battery_round4]
-- `CONCATENATEX(Facts,IF(NOT SWITCH(Facts[Quantity],1,1),"y","n"),"|",Facts[Quantity])` (Power BI: `y|n|y|y|y|y`) [dax_battery_round4]
 - `CONCATENATEX(Facts,SUMX(ROW("a",1),IF(SWITCH(Facts[Quantity],1,1),1,2)),"|",Facts[Quantity])` (Power BI: `2|1|2|2|2|2`) [dax_battery_round4]
-- `CONCATENATEX(Facts,IF(NOT COALESCE(IF(Facts[Quantity]>2,TRUE()),FALSE()),"y","n"),"|",Facts[Quantity])` (Power BI: `y|y|y|n|n|n`) [dax_battery_round4]
 - `CONCATENATEX(Facts,SUMX(ROW("a",1),IF(COALESCE(IF(Facts[Quantity]>2,TRUE()),FALSE()),1,2)),"|",Facts[Quantity])` (Power BI: `2|2|2|1|1|1`) [dax_battery_round4]
-- `CONCATENATEX(Facts,IF(NOT IFERROR(IF(Facts[Quantity]>2,TRUE()),BLANK()),"y","n"),"|",Facts[Quantity])` (Power BI: `y|y|y|n|n|n`) [dax_battery_round4]
 - `CONCATENATEX(Facts,SUMX(ROW("a",1),IF(IFERROR(IF(Facts[Quantity]>2,TRUE()),BLANK()),1,2)),"|",Facts[Quantity])` (Power BI: `2|2|2|1|1|1`) [dax_battery_round4]
 - `COUNTAX(ADDCOLUMNS(Facts,"b",Facts[Quantity]>1),IF(Facts[Quantity]>2,[b],1))` (Power BI: `6`) [dax_battery_round4]
 - `COUNTAX(ADDCOLUMNS(Facts,"b",Facts[Quantity]>1),IF(Facts[Quantity]>2,[b],"x"))` (Power BI: `6`) [dax_battery_round4]
@@ -1021,7 +990,6 @@ Rule: a slice is finished only when it is compared with Power BI, its items are 
 - `COUNTAX(ADDCOLUMNS(Facts,"b",TRUE()),IF(Facts[Quantity]>2,[b],Facts[Sales]))` (Power BI: `6`) [dax_battery_round4]
 - `COUNTAX(ADDCOLUMNS(Facts,"b",TRUE()),IF(Facts[Quantity]>2,1,[b]))` (Power BI: `6`) [dax_battery_round4]
 - `COUNTAX(ADDCOLUMNS(Facts,"b",TRUE()),IFERROR(IF(Facts[Quantity]>2,[b]),5))` (Power BI: `6`) [dax_battery_round4]
-- `COUNTROWS(FILTER(ADDCOLUMNS(Facts,"b",Facts[Quantity]>1),NOT IF(Facts[Quantity]>2,[b])))` (Power BI: `3`) [dax_battery_round4]
 - `CONCATENATEX(Facts,SWITCH(Facts[Region],"East",Facts[Region]="East","West",BLANK()),"|",Facts[Quantity])` (Power BI: `|TRUE|TRUE|||TRUE`) [dax_battery_round4]
 - `CONCATENATEX(Facts,SWITCH(Facts[Region],"East",Facts[Region]="East","West",Facts[Region]="East"),"|",Facts[Quantity])` (Power BI: `FALSE|TRUE|TRUE|FALSE|FALSE|TRUE`) [dax_battery_round4]
 - `CONCATENATEX(Facts,SWITCH(Facts[Region],"East",Facts[Region]="East",Facts[Region]="East"),"|",Facts[Quantity])` (Power BI: `FALSE|TRUE|TRUE|FALSE|FALSE|TRUE`) [dax_battery_round4]
@@ -1229,7 +1197,6 @@ Rule: a slice is finished only when it is compared with Power BI, its items are 
 - `IF(1>2,1)==0` (Power BI: `False`) [dax_battery_round5]
 - `IF(1>2,1)==BLANK()` (Power BI: `True`) [dax_battery_round5]
 - `IFERROR(BLANK(),TRUE())==BLANK()` (Power BI: `False`) [dax_battery_round5]
-- `ISBLANK(IF(NOT HASONEVALUE(Facts[Region]),BLANK()))` (Power BI: `True`) [dax_battery_round5]
 - `COUNTAX(ADDCOLUMNS(Facts,"b",Facts[Quantity]>2,"c",Facts[Sales]>1),IFERROR(1/0,IF([b],[c])))` (Power BI: `6`) [dax_battery_round5]
 - `COUNTX(ADDCOLUMNS(Facts,"b",Facts[Quantity]>2,"c",Facts[Sales]>1),IFERROR(1/0,IF([b],[c])))` (Power BI: `BLANK`) [dax_battery_round5]
 - `COUNTX(ADDCOLUMNS(Facts,"b",Facts[Quantity]>2,"c",Facts[Sales]>1),IF([b],IF([c],BLANK()),[b]))` (Power BI: `BLANK`) [dax_battery_round5]
@@ -1238,11 +1205,6 @@ Rule: a slice is finished only when it is compared with Power BI, its items are 
 - `COUNTX(ADDCOLUMNS(Facts,"b",Facts[Quantity]>2,"c",Facts[Sales]>1),IF([b],[c],1))` (Power BI: `3`) [dax_battery_round5]
 - `COUNTAX(ADDCOLUMNS(Facts,"b",Facts[Quantity]>2,"c",Facts[Sales]>1),IF([c],[b],"s"))` (Power BI: `6`) [dax_battery_round5]
 - `COUNTX(ADDCOLUMNS(Facts,"b",Facts[Quantity]>2,"c",Facts[Sales]>1),IF([c],[b],"s"))` (Power BI: `BLANK`) [dax_battery_round5]
-- `CONCATENATEX(ADDCOLUMNS(Facts,"b",Facts[Quantity]>2,"c",Facts[Sales]>1),ISBLANK(IF(NOT [b],[c])),"|",Facts[Quantity])` (Power BI: `FALSE|FALSE|FALSE|FALSE|FALSE|FALSE`) [dax_battery_round5]
-- `COUNTAX(ADDCOLUMNS(Facts,"b",Facts[Quantity]>2,"c",Facts[Sales]>1),IF(NOT [b],[c]))` (Power BI: `6`) [dax_battery_round5]
-- `CONCATENATEX(ADDCOLUMNS(Facts,"b",Facts[Quantity]>2,"c",Facts[Sales]>1),IF(NOT [b],[c])&"","|",Facts[Quantity])` (Power BI: `FALSE|FALSE|TRUE|FALSE|FALSE|FALSE`) [dax_battery_round5]
-- `CONCATENATEX(ADDCOLUMNS(Facts,"b",Facts[Quantity]>2,"n",IF(Facts[Quantity]>2,TRUE()),"m",IF(Facts[Quantity]>2,TRUE(),BLANK())),ISBLANK(NOT [n]),"|",Facts[Quantity])` (Power BI: `FALSE|FALSE|FALSE|FALSE|FALSE|FALSE`) [dax_battery_round5]
-- `COUNTAX(ADDCOLUMNS(Facts,"b",Facts[Quantity]>2,"n",IF(Facts[Quantity]>2,TRUE()),"m",IF(Facts[Quantity]>2,TRUE(),BLANK())),NOT [n])` (Power BI: `6`) [dax_battery_round5]
 - `COUNTX(Facts,IF(Facts[Quantity]>4,Facts[Note]="",7))` (Power BI: `5`) [dax_battery_round5]
 - `COUNTX(Facts,IFERROR(Facts[Sales]>1,IF(Facts[Quantity]>4,7)))` (Power BI: `BLANK`) [dax_battery_round5]
 - `COUNTAX(Facts,IF(Facts[Quantity]>4,IF(Facts[Quantity]>4,Facts[Sales],FALSE()),IF(Facts[Region]="East",BLANK(),SWITCH(TRUE(),Facts[Quantity]>2,7,Facts[Quantity]>=0,Facts[Quantity]>1))))` (Power BI: `4`) [dax_battery_round5]
@@ -1254,8 +1216,6 @@ Rule: a slice is finished only when it is compared with Power BI, its items are 
 - `MAXX(Facts,IF(Facts[Quantity]>2,TRUE(),"x"))` (Power BI: `BLANK`) [dax_battery_round5]
 - `COUNTAX(Facts,IFERROR(Facts[Quantity]/(Facts[Quantity]-2)>0,IF(Facts[Quantity]>3,1)))` (Power BI: `6`) [dax_battery_round5]
 - `COUNTAX(Facts,IFERROR(Facts[Quantity]/(Facts[Quantity]-2)>0,IF(Facts[Quantity]>3,1,BLANK())))` (Power BI: `6`) [dax_battery_round5]
-- `COUNTROWS(FILTER(Facts,NOT IF(Facts[Quantity]>2,TRUE())))` (Power BI: `3`) [dax_battery_round5]
-- `COUNTROWS(FILTER(Facts,NOT IF(Facts[Quantity]>2,TRUE(),BLANK())))` (Power BI: `3`) [dax_battery_round5]
 - `COUNTX(Facts,IFERROR(VALUE(Facts[Region])>1,1))` (Power BI: `6`) [dax_battery_round5]
 - `COUNTAX(Facts,IFERROR(VALUE(Facts[Region])>1,1))` (Power BI: `6`) [dax_battery_round5]
 - `COUNTX(Facts,IFERROR(VALUE(Facts[Region])>1,"a"))` (Power BI: `BLANK`) [dax_battery_round5]
@@ -1281,6 +1241,10 @@ Rule: a slice is finished only when it is compared with Power BI, its items are 
 - `COUNTAX(Facts,IF(Facts[Sales]>1,Facts[Sales],TRUE()))` (Power BI: `6`) [dax_battery_round5]
 - `COUNTX(Facts,IF(Facts[Quantity]>2,SWITCH(TRUE(),Facts[Quantity]>2,SWITCH(Facts[Quantity],1,BLANK(),4,CALCULATE(COUNTROWS(Facts)>3),7),Facts[Quantity]>4,IF(Facts[Quantity]>2,CALCULATE(BLANK()),ISBLANK(Facts[Sales]))),IF(Facts[Quantity]<0,IF(Facts[Quantity]>=0,TRUE(),DATE(2020,1,1)),SELECTEDVALUE(Facts[Region]))))` (Power BI: `2`) [dax_battery_round5]
 - `COUNTAX(Facts,IF(Facts[Quantity]>4,SELECTEDVALUE(Facts[Region]),TRUE()))` (Power BI: `5`) [dax_battery_round5]
+- `NOT 1=2` (Power BI: `True`) [dax_battery_not_operator]
+- `NOT 1=1` (Power BI: `False`) [dax_battery_not_operator]
+- `NOT 1=2 && 1=1` (Power BI: `True`) [dax_battery_not_operator]
+- `NOT 1=2 || 1=2` (Power BI: `True`) [dax_battery_not_operator]
 
 ## Known deviations from Power BI (14): imprecise or unspecified in Power BI, each explained
 

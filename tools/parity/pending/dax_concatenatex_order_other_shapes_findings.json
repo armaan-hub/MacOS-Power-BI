@@ -1,0 +1,4424 @@
+{
+ "note": "Live Power BI Desktop 2.157.879.0 answers (iteration-79 Critic; calculated tables built with UNION/ROW from ) the app still does not match after iteration 79: mostly ORDER BY tie order for 9 or more groups (Power BI uses an unstable sort), the walk order of column sets whose grouped/source-order switch is not modelled, and TOPN ties at the n-th place.",
+ "tables": {
+  "CrDates": {
+   "cols": [
+    [
+     "d",
+     "dateTime"
+    ],
+    [
+     "v",
+     "int64"
+    ],
+    [
+     "s",
+     "string"
+    ]
+   ],
+   "rows": [
+    [
+     "2024-03-01",
+     "0",
+     "a"
+    ],
+    [
+     "2024-03-06",
+     "1",
+     "b"
+    ],
+    [
+     "2024-03-03",
+     "2",
+     "c"
+    ],
+    [
+     "2024-03-06",
+     "0",
+     "a"
+    ],
+    [
+     "2024-02-27",
+     "1",
+     null
+    ],
+    [
+     "2024-03-03",
+     "2",
+     "c"
+    ],
+    [
+     "2024-03-10",
+     "0",
+     "a"
+    ],
+    [
+     "2024-02-27",
+     "1",
+     "b"
+    ],
+    [
+     "2024-03-01",
+     "2",
+     "c"
+    ],
+    [
+     "2024-03-13",
+     "0",
+     "a"
+    ],
+    [
+     "2024-03-03",
+     "1",
+     "b"
+    ],
+    [
+     "2024-03-08",
+     "2",
+     "c"
+    ]
+   ]
+  },
+  "CrDtm": {
+   "cols": [
+    [
+     "t",
+     "dateTime"
+    ],
+    [
+     "w",
+     "int64"
+    ]
+   ],
+   "rows": [
+    [
+     "2024-03-01",
+     "0"
+    ],
+    [
+     "2024-03-01",
+     "1"
+    ],
+    [
+     "2024-03-01",
+     "0"
+    ],
+    [
+     "2024-03-02",
+     "1"
+    ],
+    [
+     "2024-03-01",
+     "0"
+    ],
+    [
+     "2024-03-02",
+     "1"
+    ],
+    [
+     "2024-03-01",
+     "0"
+    ],
+    [
+     "2024-03-03",
+     "1"
+    ]
+   ]
+  },
+  "CrBool": {
+   "cols": [
+    [
+     "b",
+     "boolean"
+    ],
+    [
+     "t",
+     "string"
+    ],
+    [
+     "n",
+     "int64"
+    ]
+   ],
+   "rows": [
+    [
+     "True",
+     "z",
+     "0"
+    ],
+    [
+     "False",
+     "y",
+     "3"
+    ],
+    [
+     "False",
+     "x",
+     "2"
+    ],
+    [
+     "True",
+     "z",
+     "1"
+    ],
+    [
+     "True",
+     null,
+     "0"
+    ],
+    [
+     "False",
+     "z",
+     "3"
+    ],
+    [
+     "True",
+     "y",
+     "2"
+    ],
+    [
+     "False",
+     "x",
+     "1"
+    ],
+    [
+     "False",
+     "z",
+     "0"
+    ],
+    [
+     "True",
+     null,
+     "3"
+    ],
+    [
+     "False",
+     "z",
+     "2"
+    ],
+    [
+     "False",
+     "y",
+     "1"
+    ]
+   ]
+  },
+  "CrTxt": {
+   "cols": [
+    [
+     "s",
+     "string"
+    ],
+    [
+     "n",
+     "int64"
+    ],
+    [
+     "k",
+     "int64"
+    ]
+   ],
+   "rows": [
+    [
+     "zulu",
+     "1",
+     "77"
+    ],
+    [
+     "delta",
+     "2",
+     "3"
+    ],
+    [
+     "tango",
+     "1",
+     "5"
+    ],
+    [
+     "kilo",
+     "1",
+     "77"
+    ],
+    [
+     "Mike",
+     "1",
+     "0"
+    ],
+    [
+     "six",
+     "2",
+     "0"
+    ],
+    [
+     "mike",
+     "1",
+     "0"
+    ],
+    [
+     "Echo",
+     "3",
+     "100000"
+    ],
+    [
+     "sierra",
+     "1",
+     "77"
+    ],
+    [
+     "lima",
+     "3",
+     "100000"
+    ],
+    [
+     "one",
+     "0",
+     "77"
+    ],
+    [
+     "eight",
+     "0",
+     "100000"
+    ],
+    [
+     "yankee",
+     "3",
+     "0"
+    ],
+    [
+     "foxtrot",
+     "2",
+     "77"
+    ],
+    [
+     "romeo",
+     "0",
+     "0"
+    ],
+    [
+     "november",
+     "3",
+     "0"
+    ],
+    [
+     "three",
+     "0",
+     "5"
+    ],
+    [
+     "ten",
+     "1",
+     "77"
+    ],
+    [
+     "Xray",
+     "2",
+     "100000"
+    ],
+    [
+     "golf",
+     "1",
+     "100000"
+    ],
+    [
+     "quebec",
+     "3",
+     "100000"
+    ],
+    [
+     "bravo",
+     "1",
+     "0"
+    ],
+    [
+     "five",
+     "0",
+     "3"
+    ],
+    [
+     "Alpha",
+     "2",
+     "0"
+    ],
+    [
+     "whiskey",
+     "1",
+     "100000"
+    ],
+    [
+     "hotel",
+     "1",
+     "100000"
+    ],
+    [
+     "papa",
+     "2",
+     "0"
+    ],
+    [
+     "Zulu",
+     "1",
+     "3"
+    ],
+    [
+     "seven",
+     "0",
+     "3"
+    ],
+    [
+     "Bravo",
+     "2",
+     "0"
+    ],
+    [
+     "victor",
+     "3",
+     "0"
+    ],
+    [
+     "india",
+     "0",
+     "0"
+    ],
+    [
+     "oscar",
+     "1",
+     "77"
+    ],
+    [
+     "two",
+     "3",
+     "77"
+    ],
+    [
+     "nine",
+     "1",
+     "5"
+    ],
+    [
+     "charlie",
+     "2",
+     "5"
+    ],
+    [
+     "uniform",
+     "1",
+     "5"
+    ],
+    [
+     "juliet",
+     "3",
+     "0"
+    ],
+    [
+     "ALPHA",
+     "0",
+     "100000"
+    ],
+    [
+     "four",
+     "1",
+     "77"
+    ],
+    [
+     "eight",
+     "0",
+     "5"
+    ],
+    [
+     "seven",
+     "3",
+     "5"
+    ],
+    [
+     "delta",
+     "1",
+     "100000"
+    ],
+    [
+     "bravo",
+     "2",
+     "77"
+    ],
+    [
+     "hotel",
+     "1",
+     "100000"
+    ],
+    [
+     "sierra",
+     "1",
+     "5"
+    ],
+    [
+     "Xray",
+     "0",
+     "3"
+    ],
+    [
+     "sierra",
+     "3",
+     "0"
+    ],
+    [
+     "delta",
+     "0",
+     "77"
+    ],
+    [
+     "juliet",
+     "2",
+     "100000"
+    ],
+    [
+     "oscar",
+     "2",
+     "100000"
+    ],
+    [
+     "three",
+     "2",
+     "100000"
+    ],
+    [
+     "whiskey",
+     "2",
+     "100000"
+    ],
+    [
+     "Echo",
+     "1",
+     "5"
+    ],
+    [
+     "four",
+     "0",
+     "77"
+    ],
+    [
+     "nine",
+     "2",
+     "3"
+    ],
+    [
+     "whiskey",
+     "3",
+     "77"
+    ],
+    [
+     "five",
+     "0",
+     "77"
+    ],
+    [
+     "Zulu",
+     "1",
+     "77"
+    ],
+    [
+     "Mike",
+     "3",
+     "3"
+    ]
+   ]
+  },
+  "CrWide": {
+   "cols": [
+    [
+     "k",
+     "int64"
+    ],
+    [
+     "m",
+     "int64"
+    ]
+   ],
+   "rows": [
+    [
+     "31",
+     "0"
+    ],
+    [
+     "100000",
+     "1"
+    ],
+    [
+     "5",
+     "2"
+    ],
+    [
+     "100000",
+     "0"
+    ],
+    [
+     "5",
+     "1"
+    ],
+    [
+     "5",
+     "2"
+    ],
+    [
+     "100000",
+     "0"
+    ],
+    [
+     "70000",
+     "1"
+    ],
+    [
+     "70000",
+     "2"
+    ],
+    [
+     "31",
+     "0"
+    ],
+    [
+     "5",
+     "1"
+    ],
+    [
+     "999",
+     "2"
+    ],
+    [
+     "100000",
+     "0"
+    ],
+    [
+     "31",
+     "1"
+    ],
+    [
+     "5",
+     "2"
+    ],
+    [
+     "70000",
+     "0"
+    ],
+    [
+     "0",
+     "1"
+    ],
+    [
+     "100000",
+     "2"
+    ],
+    [
+     "5",
+     "0"
+    ],
+    [
+     "31",
+     "1"
+    ]
+   ]
+  },
+  "CrDec": {
+   "cols": [
+    [
+     "x",
+     "double"
+    ],
+    [
+     "y",
+     "int64"
+    ]
+   ],
+   "rows": [
+    [
+     "1.25",
+     "0"
+    ],
+    [
+     "0.1",
+     "1"
+    ],
+    [
+     "-0.0",
+     "2"
+    ],
+    [
+     "0.1",
+     "0"
+    ],
+    [
+     "1.25",
+     "1"
+    ],
+    [
+     "2.5",
+     "2"
+    ],
+    [
+     "0.5",
+     "0"
+    ],
+    [
+     "-1.0",
+     "1"
+    ],
+    [
+     "0.1",
+     "2"
+    ],
+    [
+     "3.0",
+     "0"
+    ]
+   ]
+  },
+  "CrDec1": {
+   "cols": [
+    [
+     "x",
+     "double"
+    ]
+   ],
+   "rows": [
+    [
+     "1.25"
+    ],
+    [
+     "0.1"
+    ],
+    [
+     "-0.0"
+    ],
+    [
+     "0.1"
+    ],
+    [
+     "1.25"
+    ],
+    [
+     "2.5"
+    ],
+    [
+     "0.5"
+    ],
+    [
+     "-1.0"
+    ],
+    [
+     "0.1"
+    ],
+    [
+     "3.0"
+    ],
+    [
+     null
+    ]
+   ]
+  },
+  "CrDec2": {
+   "cols": [
+    [
+     "x",
+     "double"
+    ]
+   ],
+   "rows": [
+    [
+     "1.5"
+    ],
+    [
+     "0.1"
+    ],
+    [
+     "-0.0"
+    ],
+    [
+     "0.1"
+    ],
+    [
+     "1.5"
+    ],
+    [
+     "2.5"
+    ],
+    [
+     "0.5"
+    ],
+    [
+     "-1.0"
+    ],
+    [
+     "0.1"
+    ],
+    [
+     "3.0"
+    ],
+    [
+     null
+    ]
+   ]
+  },
+  "CrMany": {
+   "cols": [
+    [
+     "a",
+     "string"
+    ],
+    [
+     "b",
+     "int64"
+    ],
+    [
+     "c",
+     "string"
+    ],
+    [
+     "e",
+     "boolean"
+    ]
+   ],
+   "rows": [
+    [
+     null,
+     "0",
+     "m",
+     "True"
+    ],
+    [
+     "p",
+     "2",
+     "m",
+     "False"
+    ],
+    [
+     "r",
+     "1",
+     "n",
+     "False"
+    ],
+    [
+     "q",
+     "0",
+     "n",
+     "False"
+    ],
+    [
+     "p",
+     "2",
+     "m",
+     "True"
+    ],
+    [
+     "r",
+     "1",
+     "m",
+     "False"
+    ],
+    [
+     "q",
+     "0",
+     "n",
+     "False"
+    ],
+    [
+     null,
+     "2",
+     "n",
+     "False"
+    ],
+    [
+     "r",
+     "1",
+     "m",
+     "True"
+    ],
+    [
+     "q",
+     "0",
+     "m",
+     "False"
+    ],
+    [
+     "p",
+     "2",
+     "n",
+     "False"
+    ],
+    [
+     "r",
+     "1",
+     "n",
+     "False"
+    ],
+    [
+     "q",
+     "0",
+     "m",
+     "True"
+    ],
+    [
+     "p",
+     "2",
+     "m",
+     "False"
+    ],
+    [
+     null,
+     "1",
+     "n",
+     "False"
+    ],
+    [
+     "q",
+     "0",
+     "n",
+     "False"
+    ],
+    [
+     "p",
+     "2",
+     "m",
+     "True"
+    ],
+    [
+     "r",
+     "1",
+     "m",
+     "False"
+    ],
+    [
+     "q",
+     "0",
+     "n",
+     "False"
+    ],
+    [
+     "p",
+     "2",
+     "n",
+     "False"
+    ]
+   ]
+  },
+  "CrBig": {
+   "cols": [
+    [
+     "a",
+     "string"
+    ],
+    [
+     "b",
+     "int64"
+    ]
+   ],
+   "rows": [
+    [
+     "fig",
+     "1"
+    ],
+    [
+     "apple",
+     "2"
+    ],
+    [
+     "kiwi",
+     "2"
+    ],
+    [
+     "fig",
+     "3"
+    ],
+    [
+     "date",
+     "4"
+    ],
+    [
+     "kiwi",
+     "3"
+    ],
+    [
+     "date",
+     "1"
+    ],
+    [
+     "kiwi",
+     "2"
+    ],
+    [
+     "kiwi",
+     "2"
+    ],
+    [
+     "pear",
+     "3"
+    ],
+    [
+     "apple",
+     "3"
+    ],
+    [
+     "apple",
+     "4"
+    ],
+    [
+     "apple",
+     "1"
+    ],
+    [
+     "date",
+     "1"
+    ],
+    [
+     "fig",
+     "3"
+    ],
+    [
+     "pear",
+     "1"
+    ],
+    [
+     "fig",
+     "4"
+    ],
+    [
+     "date",
+     "3"
+    ],
+    [
+     "apple",
+     "4"
+    ],
+    [
+     "apple",
+     "3"
+    ],
+    [
+     "apple",
+     "3"
+    ],
+    [
+     "kiwi",
+     "3"
+    ],
+    [
+     "kiwi",
+     "4"
+    ],
+    [
+     "fig",
+     "3"
+    ],
+    [
+     "date",
+     "2"
+    ],
+    [
+     "pear",
+     "4"
+    ],
+    [
+     "apple",
+     "3"
+    ],
+    [
+     "pear",
+     "4"
+    ],
+    [
+     "apple",
+     "2"
+    ],
+    [
+     "date",
+     "2"
+    ],
+    [
+     "kiwi",
+     "1"
+    ],
+    [
+     "apple",
+     "4"
+    ],
+    [
+     "date",
+     "1"
+    ],
+    [
+     "apple",
+     "3"
+    ],
+    [
+     "apple",
+     "3"
+    ],
+    [
+     "kiwi",
+     "2"
+    ],
+    [
+     "apple",
+     "2"
+    ],
+    [
+     "pear",
+     "3"
+    ],
+    [
+     "pear",
+     "3"
+    ],
+    [
+     "date",
+     "4"
+    ],
+    [
+     "date",
+     "3"
+    ],
+    [
+     "fig",
+     "4"
+    ],
+    [
+     "fig",
+     "4"
+    ],
+    [
+     "pear",
+     "3"
+    ],
+    [
+     "fig",
+     "3"
+    ],
+    [
+     "apple",
+     "4"
+    ],
+    [
+     "pear",
+     "1"
+    ],
+    [
+     "date",
+     "2"
+    ],
+    [
+     "date",
+     "1"
+    ],
+    [
+     "date",
+     "4"
+    ],
+    [
+     "kiwi",
+     "4"
+    ],
+    [
+     "kiwi",
+     "3"
+    ],
+    [
+     "kiwi",
+     "3"
+    ],
+    [
+     "fig",
+     "1"
+    ],
+    [
+     "apple",
+     "4"
+    ],
+    [
+     "date",
+     "1"
+    ],
+    [
+     "fig",
+     "3"
+    ],
+    [
+     "kiwi",
+     "2"
+    ],
+    [
+     "apple",
+     "3"
+    ],
+    [
+     "date",
+     "2"
+    ],
+    [
+     "kiwi",
+     "2"
+    ],
+    [
+     "apple",
+     "2"
+    ],
+    [
+     "fig",
+     "2"
+    ],
+    [
+     "pear",
+     "3"
+    ],
+    [
+     "fig",
+     "3"
+    ],
+    [
+     "fig",
+     "3"
+    ],
+    [
+     "date",
+     "1"
+    ],
+    [
+     "pear",
+     "3"
+    ],
+    [
+     "fig",
+     "3"
+    ],
+    [
+     "fig",
+     "3"
+    ]
+   ]
+  },
+  "CrCase": {
+   "cols": [
+    [
+     "s",
+     "string"
+    ],
+    [
+     "n",
+     "int64"
+    ]
+   ],
+   "rows": [
+    [
+     "b",
+     "0"
+    ],
+    [
+     "a",
+     "1"
+    ],
+    [
+     "A",
+     "0"
+    ],
+    [
+     "B",
+     "1"
+    ],
+    [
+     "c",
+     "0"
+    ],
+    [
+     "C",
+     "1"
+    ],
+    [
+     "a",
+     "0"
+    ],
+    [
+     "b",
+     "1"
+    ],
+    [
+     "D",
+     "0"
+    ],
+    [
+     "d",
+     "1"
+    ],
+    [
+     "A",
+     "0"
+    ]
+   ]
+  },
+  "CrEmpty": {
+   "cols": [
+    [
+     "s",
+     "string"
+    ],
+    [
+     "n",
+     "int64"
+    ]
+   ],
+   "rows": [
+    [
+     "x",
+     "0"
+    ],
+    [
+     "",
+     "1"
+    ],
+    [
+     "y",
+     "2"
+    ],
+    [
+     null,
+     "0"
+    ],
+    [
+     "x",
+     "1"
+    ],
+    [
+     "",
+     "2"
+    ],
+    [
+     null,
+     "0"
+    ],
+    [
+     "z",
+     "1"
+    ],
+    [
+     "y",
+     "2"
+    ],
+    [
+     "",
+     "0"
+    ]
+   ]
+  },
+  "CrNumTxt": {
+   "cols": [
+    [
+     "s",
+     "string"
+    ],
+    [
+     "n",
+     "int64"
+    ]
+   ],
+   "rows": [
+    [
+     "10",
+     "0"
+    ],
+    [
+     "9",
+     "1"
+    ],
+    [
+     "100",
+     "0"
+    ],
+    [
+     "2",
+     "1"
+    ],
+    [
+     "9",
+     "0"
+    ],
+    [
+     "1",
+     "1"
+    ],
+    [
+     "10",
+     "0"
+    ],
+    [
+     "abc",
+     "1"
+    ],
+    [
+     "2",
+     "0"
+    ]
+   ]
+  },
+  "CrNeg": {
+   "cols": [
+    [
+     "q",
+     "int64"
+    ],
+    [
+     "r",
+     "int64"
+    ]
+   ],
+   "rows": [
+    [
+     "-5",
+     "1"
+    ],
+    [
+     "3",
+     "2"
+    ],
+    [
+     "-5",
+     "2"
+    ],
+    [
+     "0",
+     "1"
+    ],
+    [
+     "7",
+     "3"
+    ],
+    [
+     "3",
+     "1"
+    ],
+    [
+     "-1",
+     "3"
+    ],
+    [
+     "0",
+     "2"
+    ],
+    [
+     "7",
+     "1"
+    ]
+   ]
+  },
+  "CrB33": {
+   "cols": [
+    [
+     "a",
+     "string"
+    ],
+    [
+     "b",
+     "int64"
+    ]
+   ],
+   "rows": [
+    [
+     "fig",
+     "1"
+    ],
+    [
+     "apple",
+     "2"
+    ],
+    [
+     "kiwi",
+     "2"
+    ],
+    [
+     "fig",
+     "3"
+    ],
+    [
+     "date",
+     "4"
+    ],
+    [
+     "kiwi",
+     "3"
+    ],
+    [
+     "date",
+     "1"
+    ],
+    [
+     "kiwi",
+     "2"
+    ],
+    [
+     "kiwi",
+     "2"
+    ],
+    [
+     "pear",
+     "3"
+    ],
+    [
+     "apple",
+     "3"
+    ],
+    [
+     "apple",
+     "4"
+    ],
+    [
+     "apple",
+     "1"
+    ],
+    [
+     "date",
+     "1"
+    ],
+    [
+     "fig",
+     "3"
+    ],
+    [
+     "pear",
+     "1"
+    ],
+    [
+     "fig",
+     "4"
+    ],
+    [
+     "date",
+     "3"
+    ],
+    [
+     "apple",
+     "4"
+    ],
+    [
+     "apple",
+     "3"
+    ],
+    [
+     "apple",
+     "3"
+    ],
+    [
+     "kiwi",
+     "3"
+    ],
+    [
+     "kiwi",
+     "4"
+    ],
+    [
+     "fig",
+     "3"
+    ],
+    [
+     "date",
+     "2"
+    ],
+    [
+     "pear",
+     "4"
+    ],
+    [
+     "apple",
+     "3"
+    ],
+    [
+     "pear",
+     "4"
+    ],
+    [
+     "apple",
+     "2"
+    ],
+    [
+     "date",
+     "2"
+    ],
+    [
+     "kiwi",
+     "1"
+    ],
+    [
+     "apple",
+     "4"
+    ],
+    [
+     "date",
+     "1"
+    ]
+   ]
+  },
+  "CrB45": {
+   "cols": [
+    [
+     "a",
+     "string"
+    ],
+    [
+     "b",
+     "int64"
+    ]
+   ],
+   "rows": [
+    [
+     "fig",
+     "1"
+    ],
+    [
+     "apple",
+     "2"
+    ],
+    [
+     "kiwi",
+     "2"
+    ],
+    [
+     "fig",
+     "3"
+    ],
+    [
+     "date",
+     "4"
+    ],
+    [
+     "kiwi",
+     "3"
+    ],
+    [
+     "date",
+     "1"
+    ],
+    [
+     "kiwi",
+     "2"
+    ],
+    [
+     "kiwi",
+     "2"
+    ],
+    [
+     "pear",
+     "3"
+    ],
+    [
+     "apple",
+     "3"
+    ],
+    [
+     "apple",
+     "4"
+    ],
+    [
+     "apple",
+     "1"
+    ],
+    [
+     "date",
+     "1"
+    ],
+    [
+     "fig",
+     "3"
+    ],
+    [
+     "pear",
+     "1"
+    ],
+    [
+     "fig",
+     "4"
+    ],
+    [
+     "date",
+     "3"
+    ],
+    [
+     "apple",
+     "4"
+    ],
+    [
+     "apple",
+     "3"
+    ],
+    [
+     "apple",
+     "3"
+    ],
+    [
+     "kiwi",
+     "3"
+    ],
+    [
+     "kiwi",
+     "4"
+    ],
+    [
+     "fig",
+     "3"
+    ],
+    [
+     "date",
+     "2"
+    ],
+    [
+     "pear",
+     "4"
+    ],
+    [
+     "apple",
+     "3"
+    ],
+    [
+     "pear",
+     "4"
+    ],
+    [
+     "apple",
+     "2"
+    ],
+    [
+     "date",
+     "2"
+    ],
+    [
+     "kiwi",
+     "1"
+    ],
+    [
+     "apple",
+     "4"
+    ],
+    [
+     "date",
+     "1"
+    ],
+    [
+     "apple",
+     "3"
+    ],
+    [
+     "apple",
+     "3"
+    ],
+    [
+     "kiwi",
+     "2"
+    ],
+    [
+     "apple",
+     "2"
+    ],
+    [
+     "pear",
+     "3"
+    ],
+    [
+     "pear",
+     "3"
+    ],
+    [
+     "date",
+     "4"
+    ],
+    [
+     "date",
+     "3"
+    ],
+    [
+     "fig",
+     "4"
+    ],
+    [
+     "fig",
+     "4"
+    ],
+    [
+     "pear",
+     "3"
+    ],
+    [
+     "fig",
+     "3"
+    ]
+   ]
+  },
+  "CrB20": {
+   "cols": [
+    [
+     "a",
+     "string"
+    ],
+    [
+     "b",
+     "int64"
+    ]
+   ],
+   "rows": [
+    [
+     "fig",
+     "1"
+    ],
+    [
+     "apple",
+     "2"
+    ],
+    [
+     "kiwi",
+     "2"
+    ],
+    [
+     "fig",
+     "3"
+    ],
+    [
+     "date",
+     "4"
+    ],
+    [
+     "kiwi",
+     "3"
+    ],
+    [
+     "date",
+     "1"
+    ],
+    [
+     "kiwi",
+     "2"
+    ],
+    [
+     "kiwi",
+     "2"
+    ],
+    [
+     "pear",
+     "3"
+    ],
+    [
+     "apple",
+     "3"
+    ],
+    [
+     "apple",
+     "4"
+    ],
+    [
+     "apple",
+     "1"
+    ],
+    [
+     "date",
+     "1"
+    ],
+    [
+     "fig",
+     "3"
+    ],
+    [
+     "pear",
+     "1"
+    ],
+    [
+     "fig",
+     "4"
+    ],
+    [
+     "date",
+     "3"
+    ],
+    [
+     "apple",
+     "4"
+    ],
+    [
+     "apple",
+     "3"
+    ]
+   ]
+  },
+  "CrT2": {
+   "cols": [
+    [
+     "s",
+     "string"
+    ],
+    [
+     "n",
+     "int64"
+    ]
+   ],
+   "rows": [
+    [
+     "egg",
+     "0"
+    ],
+    [
+     "ice",
+     "1"
+    ],
+    [
+     "yam",
+     "1"
+    ],
+    [
+     "cod",
+     "2"
+    ],
+    [
+     "bun",
+     "1"
+    ],
+    [
+     "ale",
+     "2"
+    ],
+    [
+     "cod",
+     "0"
+    ],
+    [
+     "ham",
+     "0"
+    ],
+    [
+     "dill",
+     "0"
+    ],
+    [
+     "udon",
+     "2"
+    ],
+    [
+     "lime",
+     "0"
+    ],
+    [
+     "lime",
+     "1"
+    ],
+    [
+     "fig",
+     "0"
+    ],
+    [
+     "vine",
+     "1"
+    ],
+    [
+     "cod",
+     "0"
+    ],
+    [
+     "oat",
+     "1"
+    ],
+    [
+     "flan",
+     "2"
+    ],
+    [
+     "wheat",
+     "2"
+    ],
+    [
+     "leek",
+     "2"
+    ],
+    [
+     "zest",
+     "0"
+    ],
+    [
+     "date",
+     "2"
+    ],
+    [
+     "dill",
+     "2"
+    ],
+    [
+     "yam",
+     "0"
+    ],
+    [
+     "kiwi",
+     "0"
+    ],
+    [
+     "ice",
+     "0"
+    ],
+    [
+     "lime",
+     "1"
+    ],
+    [
+     "sage",
+     "0"
+    ],
+    [
+     "vine",
+     "0"
+    ],
+    [
+     "ale",
+     "1"
+    ],
+    [
+     "sage",
+     "0"
+    ],
+    [
+     "bun",
+     "2"
+    ],
+    [
+     "tea",
+     "0"
+    ],
+    [
+     "wheat",
+     "1"
+    ],
+    [
+     "yam",
+     "0"
+    ],
+    [
+     "wheat",
+     "0"
+    ],
+    [
+     "zest",
+     "0"
+    ],
+    [
+     "Pear",
+     "2"
+    ],
+    [
+     "leek",
+     "0"
+    ],
+    [
+     "rye",
+     "1"
+    ],
+    [
+     "jam",
+     "2"
+    ],
+    [
+     "vine",
+     "0"
+    ],
+    [
+     "date",
+     "1"
+    ],
+    [
+     "mango",
+     "2"
+    ],
+    [
+     "oat",
+     "2"
+    ],
+    [
+     "sage",
+     "2"
+    ],
+    [
+     "udon",
+     "0"
+    ],
+    [
+     "oat",
+     "0"
+    ],
+    [
+     "jam",
+     "1"
+    ],
+    [
+     "nut",
+     "1"
+    ],
+    [
+     "wheat",
+     "1"
+    ]
+   ]
+  },
+  "CrT1": {
+   "cols": [
+    [
+     "s",
+     "string"
+    ]
+   ],
+   "rows": [
+    [
+     "ham"
+    ],
+    [
+     "leek"
+    ],
+    [
+     "pea"
+    ],
+    [
+     "lime"
+    ],
+    [
+     "ale"
+    ],
+    [
+     "ale"
+    ],
+    [
+     "ham"
+    ],
+    [
+     "udon"
+    ],
+    [
+     "date"
+    ],
+    [
+     "fig"
+    ],
+    [
+     "jam"
+    ],
+    [
+     "jam"
+    ],
+    [
+     "sage"
+    ],
+    [
+     "nut"
+    ],
+    [
+     "ale"
+    ],
+    [
+     "date"
+    ],
+    [
+     "lime"
+    ],
+    [
+     "Pear"
+    ],
+    [
+     "kale"
+    ],
+    [
+     "lime"
+    ],
+    [
+     "oat"
+    ],
+    [
+     "leek"
+    ],
+    [
+     "sage"
+    ],
+    [
+     "jam"
+    ],
+    [
+     "yam"
+    ],
+    [
+     "jam"
+    ],
+    [
+     "fig"
+    ],
+    [
+     "nut"
+    ],
+    [
+     "mango"
+    ],
+    [
+     "gum"
+    ],
+    [
+     "plum"
+    ],
+    [
+     "yam"
+    ],
+    [
+     "rye"
+    ],
+    [
+     "leek"
+    ],
+    [
+     "date"
+    ],
+    [
+     "mango"
+    ],
+    [
+     "kale"
+    ],
+    [
+     "jam"
+    ],
+    [
+     "fig"
+    ],
+    [
+     "cod"
+    ],
+    [
+     "date"
+    ],
+    [
+     "rye"
+    ],
+    [
+     "nut"
+    ],
+    [
+     "ham"
+    ],
+    [
+     "sage"
+    ],
+    [
+     "sage"
+    ],
+    [
+     "cod"
+    ],
+    [
+     "egg"
+    ],
+    [
+     "pea"
+    ],
+    [
+     "wheat"
+    ]
+   ]
+  },
+  "CrD2": {
+   "cols": [
+    [
+     "d",
+     "dateTime"
+    ],
+    [
+     "v",
+     "int64"
+    ]
+   ],
+   "rows": [
+    [
+     "2024-07-31",
+     "0"
+    ],
+    [
+     "2024-07-27",
+     "1"
+    ],
+    [
+     "2024-03-23",
+     "2"
+    ],
+    [
+     "2024-05-16",
+     "0"
+    ],
+    [
+     "2024-08-14",
+     "1"
+    ],
+    [
+     "2024-06-10",
+     "2"
+    ],
+    [
+     "2024-04-30",
+     "0"
+    ],
+    [
+     "2024-05-19",
+     "1"
+    ],
+    [
+     "2024-03-18",
+     "2"
+    ],
+    [
+     "2024-05-29",
+     "0"
+    ],
+    [
+     "2024-03-10",
+     "1"
+    ],
+    [
+     "2024-04-06",
+     "2"
+    ],
+    [
+     "2024-05-03",
+     "0"
+    ],
+    [
+     "2024-06-07",
+     "1"
+    ],
+    [
+     "2024-09-02",
+     "2"
+    ],
+    [
+     "2024-09-11",
+     "0"
+    ],
+    [
+     "2024-08-08",
+     "1"
+    ],
+    [
+     "2024-09-05",
+     "2"
+    ],
+    [
+     "2024-05-23",
+     "0"
+    ],
+    [
+     "2024-05-02",
+     "1"
+    ],
+    [
+     "2024-08-03",
+     "2"
+    ],
+    [
+     "2024-03-22",
+     "0"
+    ],
+    [
+     "2024-06-10",
+     "1"
+    ],
+    [
+     "2024-07-29",
+     "2"
+    ],
+    [
+     "2024-05-02",
+     "0"
+    ],
+    [
+     "2024-03-12",
+     "1"
+    ],
+    [
+     "2024-08-05",
+     "2"
+    ],
+    [
+     "2024-04-14",
+     "0"
+    ],
+    [
+     "2024-05-07",
+     "1"
+    ],
+    [
+     "2024-04-21",
+     "2"
+    ],
+    [
+     "2024-05-26",
+     "0"
+    ],
+    [
+     "2024-04-12",
+     "1"
+    ],
+    [
+     "2024-04-21",
+     "2"
+    ],
+    [
+     "2024-03-02",
+     "0"
+    ],
+    [
+     "2024-04-20",
+     "1"
+    ],
+    [
+     "2024-07-04",
+     "2"
+    ],
+    [
+     "2024-09-08",
+     "0"
+    ],
+    [
+     "2024-06-29",
+     "1"
+    ],
+    [
+     "2024-04-15",
+     "2"
+    ],
+    [
+     "2024-08-05",
+     "0"
+    ]
+   ]
+  },
+  "CrI2": {
+   "cols": [
+    [
+     "k",
+     "int64"
+    ]
+   ],
+   "rows": [
+    [
+     "3"
+    ],
+    [
+     "1"
+    ],
+    [
+     "2"
+    ],
+    [
+     "3"
+    ],
+    [
+     "1"
+    ],
+    [
+     "0"
+    ],
+    [
+     "2"
+    ],
+    [
+     "2"
+    ],
+    [
+     "7"
+    ],
+    [
+     "5"
+    ],
+    [
+     "4"
+    ],
+    [
+     "5"
+    ],
+    [
+     "6"
+    ],
+    [
+     "6"
+    ],
+    [
+     "9"
+    ],
+    [
+     "8"
+    ],
+    [
+     "8"
+    ],
+    [
+     "1"
+    ]
+   ]
+  },
+  "CrI3": {
+   "cols": [
+    [
+     "k",
+     "int64"
+    ],
+    [
+     "m",
+     "int64"
+    ]
+   ],
+   "rows": [
+    [
+     "2",
+     "6"
+    ],
+    [
+     "9",
+     "0"
+    ],
+    [
+     "11",
+     "0"
+    ],
+    [
+     "4",
+     "9"
+    ],
+    [
+     "9",
+     "10"
+    ],
+    [
+     "4",
+     "11"
+    ],
+    [
+     "5",
+     "7"
+    ],
+    [
+     "6",
+     "8"
+    ],
+    [
+     "6",
+     "9"
+    ],
+    [
+     "8",
+     "7"
+    ],
+    [
+     "1",
+     "6"
+    ],
+    [
+     "0",
+     "5"
+    ],
+    [
+     "9",
+     "4"
+    ],
+    [
+     "2",
+     "8"
+    ],
+    [
+     "10",
+     "4"
+    ],
+    [
+     "10",
+     "4"
+    ],
+    [
+     "0",
+     "2"
+    ],
+    [
+     "4",
+     "6"
+    ],
+    [
+     "11",
+     "9"
+    ],
+    [
+     "6",
+     "9"
+    ],
+    [
+     "5",
+     "10"
+    ],
+    [
+     "6",
+     "8"
+    ],
+    [
+     "0",
+     "2"
+    ],
+    [
+     "6",
+     "11"
+    ],
+    [
+     "2",
+     "1"
+    ]
+   ]
+  },
+  "CrBF": {
+   "cols": [
+    [
+     "b",
+     "boolean"
+    ],
+    [
+     "n",
+     "int64"
+    ]
+   ],
+   "rows": [
+    [
+     "True",
+     "0"
+    ],
+    [
+     "False",
+     "3"
+    ],
+    [
+     "False",
+     "2"
+    ],
+    [
+     "True",
+     "1"
+    ],
+    [
+     "True",
+     "0"
+    ],
+    [
+     "False",
+     "3"
+    ],
+    [
+     "True",
+     "2"
+    ],
+    [
+     "False",
+     "1"
+    ],
+    [
+     "False",
+     "0"
+    ],
+    [
+     "True",
+     "3"
+    ]
+   ]
+  },
+  "CrWeek": {
+   "cols": [
+    [
+     "d",
+     "dateTime"
+    ]
+   ],
+   "rows": [
+    [
+     "2026-04-20"
+    ],
+    [
+     "2024-01-22"
+    ],
+    [
+     "2025-06-23"
+    ],
+    [
+     "2024-01-22"
+    ],
+    [
+     "2026-11-16"
+    ],
+    [
+     "2024-10-07"
+    ],
+    [
+     "2025-06-23"
+    ],
+    [
+     "2024-03-25"
+    ],
+    [
+     "2025-12-01"
+    ],
+    [
+     "2024-01-01"
+    ]
+   ]
+  },
+  "CrWeek2": {
+   "cols": [
+    [
+     "d",
+     "dateTime"
+    ],
+    [
+     "v",
+     "int64"
+    ]
+   ],
+   "rows": [
+    [
+     "2026-04-20",
+     "0"
+    ],
+    [
+     "2024-01-22",
+     "1"
+    ],
+    [
+     "2025-06-23",
+     "0"
+    ],
+    [
+     "2024-01-22",
+     "1"
+    ],
+    [
+     "2026-11-16",
+     "0"
+    ],
+    [
+     "2024-10-07",
+     "1"
+    ],
+    [
+     "2025-06-23",
+     "0"
+    ],
+    [
+     "2024-03-25",
+     "1"
+    ],
+    [
+     "2025-12-01",
+     "0"
+    ],
+    [
+     "2024-01-01",
+     "1"
+    ]
+   ]
+  },
+  "CsDR100": {
+   "headers": [
+    "d",
+    "s",
+    "n"
+   ],
+   "types": {
+    "d": "date",
+    "s": "text",
+    "n": "whole_number"
+   },
+   "pbi_types": {
+    "d": "dateTime",
+    "s": "string",
+    "n": "int64"
+   },
+   "rows": [
+    {
+     "d": "2024-04-09",
+     "s": "p",
+     "n": "0"
+    },
+    {
+     "d": "2024-01-01",
+     "s": "q",
+     "n": "1"
+    },
+    {
+     "d": "2024-02-20",
+     "s": "r",
+     "n": "0"
+    },
+    {
+     "d": "2024-01-01",
+     "s": "p",
+     "n": "1"
+    },
+    {
+     "d": "2024-04-09",
+     "s": "q",
+     "n": "0"
+    },
+    {
+     "d": "2024-02-03",
+     "s": "r",
+     "n": "1"
+    },
+    {
+     "d": "2024-02-20",
+     "s": "p",
+     "n": "0"
+    },
+    {
+     "d": "2024-01-01",
+     "s": "q",
+     "n": "1"
+    },
+    {
+     "d": "2024-04-09",
+     "s": "r",
+     "n": "0"
+    },
+    {
+     "d": "2024-02-03",
+     "s": "p",
+     "n": "1"
+    }
+   ]
+  }
+ },
+ "items": [
+  {
+   "table": "CrDates",
+   "expr": "CONCATENATEX(CrDates,FORMAT(CrDates[d],\"yyyy-mm-dd\"),\",\",CrDates[v])",
+   "powerbi": "2024-03-06,2024-03-10,2024-03-01,2024-03-13,2024-03-03,2024-02-27,2024-02-27,2024-03-06,2024-03-01,2024-03-03,2024-03-03,2024-03-08",
+   "app": "2024-03-01,2024-03-06,2024-03-10,2024-03-13,2024-02-27,2024-02-27,2024-03-03,2024-03-06,2024-03-01,2024-03-03,2024-03-03,2024-03-08",
+   "kind": "other"
+  },
+  {
+   "table": "CrDates",
+   "expr": "CONCATENATEX(CrDates,FORMAT(CrDates[d],\"yyyy-mm-dd\"),\",\",CrDates[v],DESC)",
+   "powerbi": "2024-03-08,2024-03-03,2024-03-01,2024-03-03,2024-03-03,2024-02-27,2024-02-27,2024-03-06,2024-03-01,2024-03-13,2024-03-10,2024-03-06",
+   "app": "2024-03-01,2024-03-03,2024-03-03,2024-03-08,2024-02-27,2024-02-27,2024-03-03,2024-03-06,2024-03-01,2024-03-06,2024-03-10,2024-03-13",
+   "kind": "order-by-ties"
+  },
+  {
+   "table": "CrDates",
+   "expr": "CONCATENATEX(CrDates,FORMAT(CrDates[d],\"yyyy-mm-dd\"),\",\",CrDates[s])",
+   "powerbi": "2024-02-27,2024-03-01,2024-03-06,2024-03-10,2024-03-13,2024-03-03,2024-02-27,2024-03-06,2024-03-01,2024-03-03,2024-03-03,2024-03-08",
+   "app": "2024-02-27,2024-03-01,2024-03-06,2024-03-10,2024-03-13,2024-02-27,2024-03-03,2024-03-06,2024-03-01,2024-03-03,2024-03-03,2024-03-08",
+   "kind": "other"
+  },
+  {
+   "table": "CrDates",
+   "expr": "CONCATENATEX(CrDates,FORMAT(CrDates[d],\"yyyy-mm-dd\"),\",\",CrDates[s],DESC)",
+   "powerbi": "2024-03-01,2024-03-08,2024-03-03,2024-03-03,2024-03-03,2024-02-27,2024-03-06,2024-03-01,2024-03-13,2024-03-10,2024-03-06,2024-02-27",
+   "app": "2024-03-01,2024-03-03,2024-03-03,2024-03-08,2024-02-27,2024-03-03,2024-03-06,2024-03-01,2024-03-06,2024-03-10,2024-03-13,2024-02-27",
+   "kind": "order-by-ties"
+  },
+  {
+   "table": "CrDates",
+   "expr": "CONCATENATEX(CrDates,CrDates[v]&\"\",\",\",CrDates[d])",
+   "powerbi": "1,1,2,0,1,2,2,1,0,2,0,0",
+   "app": "1,1,0,2,1,2,2,0,1,2,0,0",
+   "kind": "other"
+  },
+  {
+   "table": "CrDates",
+   "expr": "CONCATENATEX(CrDates,CrDates[v]&\"\",\",\",CrDates[d],DESC)",
+   "powerbi": "0,0,2,1,0,1,2,2,2,0,1,1",
+   "app": "0,0,2,0,1,1,2,2,0,2,1,1",
+   "kind": "order-by-ties"
+  },
+  {
+   "table": "CrDates",
+   "expr": "CONCATENATEX(CrDates,CrDates[s]&\"\",\",\",CrDates[d])",
+   "powerbi": "b,,a,c,b,c,c,b,a,c,a,a",
+   "app": ",b,a,c,b,c,c,a,b,c,a,a",
+   "kind": "other"
+  },
+  {
+   "table": "CrDates",
+   "expr": "CONCATENATEX(CrDates,CrDates[s]&\"\",\",\",CrDates[d],DESC)",
+   "powerbi": "a,a,c,b,a,b,c,c,c,a,,b",
+   "app": "a,a,c,a,b,b,c,c,a,c,,b",
+   "kind": "order-by-ties"
+  },
+  {
+   "table": "CrDates",
+   "expr": "CONCATENATEX(CrDates,CrDates[s]&\"\",\",\",CrDates[v])",
+   "powerbi": "a,a,a,a,b,b,,b,c,c,c,c",
+   "app": "a,a,a,a,,b,b,b,c,c,c,c",
+   "kind": "other"
+  },
+  {
+   "table": "CrDates",
+   "expr": "CONCATENATEX(CrDates,FORMAT(CrDates[d],\"yyyy-mm-dd\"),\",\",LEN(FORMAT(CrDates[d],\"yyyy-mm-dd\")))",
+   "powerbi": "2024-03-03,2024-02-27,2024-03-01,2024-03-01,2024-03-03,2024-03-03,2024-02-27,2024-03-06,2024-03-06,2024-03-08,2024-03-10,2024-03-13",
+   "app": "2024-02-27,2024-02-27,2024-03-01,2024-03-01,2024-03-03,2024-03-03,2024-03-03,2024-03-06,2024-03-06,2024-03-08,2024-03-10,2024-03-13",
+   "kind": "order-by-ties"
+  },
+  {
+   "table": "CrDates",
+   "expr": "CONCATENATEX(CrDates,FORMAT(CrDates[d],\"yyyy-mm-dd\"),\",\",ISBLANK(CrDates[d]),DESC)",
+   "powerbi": "2024-03-03,2024-02-27,2024-03-01,2024-03-01,2024-03-03,2024-03-03,2024-02-27,2024-03-06,2024-03-06,2024-03-08,2024-03-10,2024-03-13",
+   "app": "2024-02-27,2024-02-27,2024-03-01,2024-03-01,2024-03-03,2024-03-03,2024-03-03,2024-03-06,2024-03-06,2024-03-08,2024-03-10,2024-03-13",
+   "kind": "order-by-ties"
+  },
+  {
+   "table": "CrDtm",
+   "expr": "CONCATENATEX(TOPN(3,CrDtm,CrDtm[w],DESC),FORMAT(CrDtm[t],\"yyyy-mm-dd hh:nn\"),\",\")",
+   "powerbi": "2024-03-02 00:00,2024-03-02 00:00,2024-03-01 00:00,2024-03-03 00:00",
+   "app": "2024-03-01 00:00,2024-03-02 00:00,2024-03-02 00:00,2024-03-03 00:00",
+   "kind": "order-by-ties"
+  },
+  {
+   "table": "CrDtm",
+   "expr": "CONCATENATEX(TOPN(3,CrDtm,CrDtm[t],ASC,CrDtm[w],DESC),FORMAT(CrDtm[t],\"yyyy-mm-dd hh:nn\")&\"/\"&CrDtm[w]&\"\",\",\")",
+   "powerbi": "2024-03-01 00:00/0,2024-03-01 00:00/0,2024-03-01 00:00/0,2024-03-01 00:00/0,2024-03-01 00:00/1",
+   "app": "2024-03-01 00:00/1,2024-03-01 00:00/0,2024-03-01 00:00/0,2024-03-01 00:00/0,2024-03-01 00:00/0",
+   "kind": "order-by-ties"
+  },
+  {
+   "table": "CrBool",
+   "expr": "CONCATENATEX(CrBool,CrBool[b]&\"\",\",\",CrBool[t])",
+   "powerbi": "TRUE,TRUE,FALSE,FALSE,FALSE,FALSE,TRUE,FALSE,TRUE,TRUE,FALSE,FALSE",
+   "app": "TRUE,TRUE,FALSE,FALSE,FALSE,FALSE,TRUE,FALSE,FALSE,FALSE,TRUE,TRUE",
+   "kind": "other"
+  },
+  {
+   "table": "CrBool",
+   "expr": "CONCATENATEX(CrBool,CrBool[b]&\"\",\",\",CrBool[t],DESC)",
+   "powerbi": "FALSE,FALSE,FALSE,TRUE,TRUE,FALSE,TRUE,FALSE,FALSE,FALSE,TRUE,TRUE",
+   "app": "FALSE,FALSE,FALSE,TRUE,TRUE,FALSE,FALSE,TRUE,FALSE,FALSE,TRUE,TRUE",
+   "kind": "order-by-ties"
+  },
+  {
+   "table": "CrBool",
+   "expr": "CONCATENATEX(CrBool,CrBool[b]&\"\",\",\",CrBool[n],DESC)",
+   "powerbi": "FALSE,TRUE,FALSE,FALSE,FALSE,TRUE,FALSE,FALSE,TRUE,FALSE,TRUE,TRUE",
+   "app": "FALSE,FALSE,TRUE,FALSE,FALSE,TRUE,FALSE,FALSE,TRUE,FALSE,TRUE,TRUE",
+   "kind": "order-by-ties"
+  },
+  {
+   "table": "CrBool",
+   "expr": "CONCATENATEX(CrBool,CrBool[t]&\"\",\",\",CrBool[b])",
+   "powerbi": "y,y,z,x,x,z,z,,,z,z,y",
+   "app": "z,z,z,y,y,x,x,,,z,z,y",
+   "kind": "other"
+  },
+  {
+   "table": "CrBool",
+   "expr": "CONCATENATEX(CrBool,CrBool[t]&\"\",\",\",CrBool[b],DESC)",
+   "powerbi": "z,,z,,y,x,x,y,y,z,z,z",
+   "app": ",,z,z,y,z,z,z,y,y,x,x",
+   "kind": "order-by-ties"
+  },
+  {
+   "table": "CrBool",
+   "expr": "CONCATENATEX(CrBool,CrBool[t]&\"\",\",\",CrBool[n],DESC)",
+   "powerbi": ",y,z,z,y,x,z,y,x,,z,z",
+   "app": ",z,y,z,y,x,z,y,x,,z,z",
+   "kind": "order-by-ties"
+  },
+  {
+   "table": "CrBool",
+   "expr": "CONCATENATEX(CrBool,CrBool[n]&\"\",\",\",CrBool[b])",
+   "powerbi": "2,1,0,2,3,3,1,0,0,2,3,1",
+   "app": "0,1,1,2,2,3,3,0,0,1,2,3",
+   "kind": "other"
+  },
+  {
+   "table": "CrBool",
+   "expr": "CONCATENATEX(CrBool,CrBool[n]&\"\",\",\",CrBool[b],DESC)",
+   "powerbi": "0,2,1,0,3,3,3,0,1,1,2,2",
+   "app": "0,0,1,2,3,0,1,1,2,2,3,3",
+   "kind": "order-by-ties"
+  },
+  {
+   "table": "CrBool",
+   "expr": "CONCATENATEX(CrBool,CrBool[n]&\"\",\",\",CrBool[t])",
+   "powerbi": "0,3,1,2,3,1,2,0,1,0,3,2",
+   "app": "0,3,1,2,1,2,3,0,0,1,2,3",
+   "kind": "other"
+  },
+  {
+   "table": "CrBool",
+   "expr": "CONCATENATEX(CrBool,CrBool[n]&\"\",\",\",CrBool[t],DESC)",
+   "powerbi": "3,2,0,1,0,3,1,2,2,1,3,0",
+   "app": "0,0,1,2,3,1,2,3,1,2,0,3",
+   "kind": "order-by-ties"
+  },
+  {
+   "table": "CrBool",
+   "expr": "CONCATENATEX(TOPN(3,CrBool,CrBool[t],DESC),CrBool[b]&\"\",\",\")",
+   "powerbi": "FALSE,FALSE,FALSE,TRUE,TRUE",
+   "app": "TRUE,TRUE,FALSE,FALSE,FALSE",
+   "kind": "order-by-ties"
+  },
+  {
+   "table": "CrBool",
+   "expr": "CONCATENATEX(TOPN(4,CrBool,CrBool[t],ASC),CrBool[b]&\"\"&\"/\"&CrBool[t]&\"\",\",\")",
+   "powerbi": "FALSE/x,TRUE/,FALSE/x,TRUE/",
+   "app": "FALSE/x,FALSE/x,TRUE/,TRUE/",
+   "kind": "order-by-ties"
+  },
+  {
+   "table": "CrTxt",
+   "expr": "CONCATENATEX(CrTxt,CrTxt[s]&\"\",\",\",CrTxt[n])",
+   "powerbi": "one,five,romeo,eight,three,five,Alpha,seven,eight,delta,india,four,Xray,bravo,tango,whiskey,hotel,Mike,zulu,zulu,oscar,nine,sierra,uniform,sierra,four,hotel,delta,kilo,Echo,ten,Mike,golf,zulu,whiskey,delta,six,foxtrot,Xray,Alpha,papa,bravo,charlie,bravo,juliet,oscar,three,nine,yankee,whiskey,lima,Echo,quebec,november,victor,Mike,seven,juliet,two,sierra",
+   "app": "one,eight,romeo,three,five,seven,india,Alpha,eight,Xray,delta,four,five,zulu,tango,kilo,Mike,Mike,sierra,ten,golf,bravo,whiskey,hotel,zulu,oscar,nine,uniform,four,delta,hotel,sierra,Echo,zulu,delta,six,foxtrot,Xray,Alpha,papa,bravo,charlie,bravo,juliet,oscar,three,whiskey,nine,Echo,lima,yankee,novem",
+   "kind": "other"
+  },
+  {
+   "table": "CrTxt",
+   "expr": "CONCATENATEX(CrTxt,CrTxt[s]&\"\",\",\",CrTxt[n],DESC)",
+   "powerbi": "seven,whiskey,quebec,november,sierra,Mike,yankee,Echo,juliet,lima,two,victor,whiskey,delta,six,foxtrot,Xray,Alpha,papa,bravo,charlie,bravo,juliet,oscar,three,nine,tango,zulu,Mike,delta,zulu,hotel,sierra,Mike,kilo,ten,golf,bravo,zulu,whiskey,hotel,Echo,oscar,nine,uniform,sierra,four,five,five,eight,india,delta,one,seven,four,three,romeo,Alpha,Xray,eight",
+   "app": "Echo,lima,yankee,november,quebec,victor,two,juliet,seven,sierra,whiskey,Mike,delta,six,foxtrot,Xray,Alpha,papa,bravo,charlie,bravo,juliet,oscar,three,whiskey,nine,zulu,tango,kilo,Mike,Mike,sierra,ten,golf,bravo,whiskey,hotel,zulu,oscar,nine,uniform,four,delta,hotel,sierra,Echo,zulu,one,eight,romeo,t",
+   "kind": "order-by-ties"
+  },
+  {
+   "table": "CrTxt",
+   "expr": "CONCATENATEX(CrTxt,CrTxt[s]&\"\",\",\",CrTxt[k])",
+   "powerbi": "juliet,india,yankee,victor,romeo,november,bravo,papa,Alpha,Mike,six,Mike,sierra,bravo,five,seven,Mike,Xray,delta,zulu,nine,sierra,tango,three,nine,charlie,uniform,eight,seven,Echo,zulu,oscar,two,four,whiskey,one,four,five,zulu,bravo,foxtrot,sierra,delta,kilo,ten,oscar,eight,lima,quebec,golf,Echo,juliet,hotel,Alpha,three,whiskey,Xray,delta,whiskey,hotel",
+   "app": "Mike,six,Mike,yankee,romeo,november,bravo,Alpha,papa,bravo,victor,india,juliet,sierra,delta,five,zulu,seven,Xray,nine,Mike,tango,three,nine,charlie,uniform,eight,seven,sierra,Echo,zulu,kilo,sierra,one,foxtrot,ten,oscar,two,four,bravo,delta,four,whiskey,five,zulu,Echo,lima,eight,Xray,golf,quebec,whis",
+   "kind": "other"
+  },
+  {
+   "table": "CrTxt",
+   "expr": "CONCATENATEX(CrTxt,CrTxt[s]&\"\",\",\",CrTxt[k],DESC)",
+   "powerbi": "oscar,Echo,lima,eight,whiskey,three,Alpha,Xray,golf,quebec,juliet,whiskey,hotel,hotel,delta,zulu,two,oscar,kilo,five,whiskey,four,bravo,sierra,ten,one,delta,zulu,foxtrot,four,sierra,tango,three,nine,charlie,uniform,eight,seven,Echo,Mike,five,delta,nine,seven,Xray,zulu,romeo,yankee,india,Mike,six,juliet,victor,bravo,Mike,papa,Alpha,sierra,bravo,november",
+   "app": "Echo,lima,eight,Xray,golf,quebec,whiskey,hotel,Alpha,delta,hotel,juliet,oscar,three,whiskey,zulu,kilo,sierra,one,foxtrot,ten,oscar,two,four,bravo,delta,four,whiskey,five,zulu,tango,three,nine,charlie,uniform,eight,seven,sierra,Echo,delta,five,zulu,seven,Xray,nine,Mike,Mike,six,Mike,yankee,romeo,nove",
+   "kind": "order-by-ties"
+  },
+  {
+   "table": "CrTxt",
+   "expr": "CONCATENATEX(CrTxt,CrTxt[n]&\"\",\",\",CrTxt[s])",
+   "powerbi": "2,0,1,2,2,2,0,2,1,3,1,0,0,0,0,0,1,2,1,1,1,0,2,3,1,3,1,3,1,2,1,3,0,2,1,2,3,0,3,0,1,1,3,2,1,1,0,2,3,1,3,3,1,2,0,2,3,1,1,1",
+   "app": "2,0,1,2,2,2,2,1,0,3,1,0,0,0,0,1,0,2,1,1,1,0,3,2,1,3,1,1,3,1,2,3,0,1,2,2,3,0,0,3,1,1,3,2,1,1,0,2,3,1,3,1,2,3,2,0,3,1,1,1",
+   "kind": "other"
+  },
+  {
+   "table": "CrTxt",
+   "expr": "CONCATENATEX(CrTxt,CrTxt[n]&\"\",\",\",CrTxt[s],DESC)",
+   "powerbi": "1,1,1,3,0,2,1,3,2,3,1,3,0,2,1,1,2,3,1,1,3,0,0,3,2,2,1,0,3,2,1,1,1,3,3,1,3,2,0,1,1,1,2,0,1,0,0,0,0,3,1,2,1,0,2,1,2,2,0,2",
+   "app": "1,1,1,3,2,0,1,2,3,3,1,3,0,2,1,1,2,1,1,3,0,3,0,3,2,1,2,0,3,1,2,1,1,3,3,1,3,2,0,1,1,1,2,1,0,0,0,0,0,3,1,2,1,0,2,1,2,2,2,0",
+   "kind": "order-by-ties"
+  },
+  {
+   "table": "CrTxt",
+   "expr": "CONCATENATEX(CrTxt,CrTxt[n]&\"\",\",\",CrTxt[k])",
+   "powerbi": "3,0,3,3,0,3,2,2,2,1,2,1,3,1,0,0,3,0,2,1,2,1,1,0,1,2,1,0,3,1,1,1,3,0,3,0,1,0,1,2,2,1,0,1,1,2,0,3,3,1,3,2,1,0,2,2,2,1,1,1",
+   "app": "1,2,1,3,0,3,1,2,2,2,3,0,3,3,2,0,1,0,0,2,3,1,0,1,2,1,0,3,1,1,1,1,1,0,2,1,1,3,1,2,0,0,3,0,1,3,3,0,2,1,3,1,1,0,1,1,2,2,2,2",
+   "kind": "other"
+  },
+  {
+   "table": "CrTxt",
+   "expr": "CONCATENATEX(CrTxt,CrTxt[n]&\"\",\",\",CrTxt[k],DESC)",
+   "powerbi": "2,3,3,0,2,2,0,2,1,3,2,1,1,1,1,1,3,1,1,0,3,0,2,1,1,0,0,1,2,1,1,1,0,1,2,1,0,3,1,3,0,2,2,0,0,1,0,3,0,1,2,3,3,1,1,2,2,3,2,3",
+   "app": "3,3,0,2,1,3,1,1,0,1,1,2,2,2,2,1,1,1,0,2,1,1,3,1,2,0,0,3,0,1,1,0,1,2,1,0,3,1,1,2,0,1,0,0,2,3,1,2,1,3,0,3,1,2,2,2,3,0,3,3",
+   "kind": "order-by-ties"
+  },
+  {
+   "table": "CrTxt",
+   "expr": "CONCATENATEX(CrTxt,CrTxt[k]&\"\",\",\",CrTxt[s])",
+   "powerbi": "0,100000,0,0,77,5,77,3,100000,100000,5,5,100000,3,77,77,77,77,100000,100000,100000,0,100000,0,77,100000,0,3,0,3,5,0,77,100000,77,0,100000,0,5,3,5,77,0,0,5,77,5,100000,77,5,0,77,100000,100000,3,100000,0,3,77,77",
+   "app": "0,100000,0,0,77,5,3,100000,77,100000,5,100000,5,3,77,77,77,77,100000,100000,100000,0,0,100000,77,100000,0,0,3,5,3,0,77,77,100000,0,100000,0,3,5,77,5,0,0,5,77,5,100000,77,5,0,100000,100000,77,100000,3,0,77,3,77",
+   "kind": "other"
+  },
+  {
+   "table": "CrTxt",
+   "expr": "CONCATENATEX(CrTxt,CrTxt[k]&\"\",\",\",CrTxt[s],DESC)",
+   "powerbi": "77,77,3,0,3,100000,100000,77,100000,0,5,77,5,100000,77,5,0,0,5,77,5,3,0,100000,0,100000,77,77,0,3,5,0,0,3,100000,77,0,100000,0,100000,100000,100000,77,77,77,77,3,100000,5,100000,5,3,100000,77,5,0,77,0,100000,0",
+   "app": "77,3,77,0,100000,3,100000,100000,77,0,5,77,5,100000,77,5,0,77,5,0,3,5,0,100000,0,77,100000,77,0,5,3,0,0,3,100000,77,0,100000,0,100000,100000,100000,77,77,77,3,77,100000,5,100000,5,3,100000,77,5,0,0,77,0,100000",
+   "kind": "order-by-ties"
+  },
+  {
+   "table": "CrTxt",
+   "expr": "CONCATENATEX(CrTxt,CrTxt[k]&\"\",\",\",CrTxt[n])",
+   "powerbi": "77,3,0,5,5,77,100000,3,100000,77,0,77,3,0,5,100000,100000,0,3,77,77,5,77,5,5,77,100000,100000,77,5,77,0,100000,77,100000,3,0,77,100000,0,0,0,5,77,100000,100000,100000,3,0,77,100000,100000,100000,0,0,3,5,0,77,0",
+   "app": "77,100000,0,5,3,3,0,100000,5,3,77,77,77,77,5,77,0,0,77,77,100000,0,100000,100000,3,77,5,5,77,100000,100000,5,5,77,3,0,77,100000,0,0,0,5,77,100000,100000,100000,100000,3,100000,100000,0,0,100000,0,77,0,5,0,77,3",
+   "kind": "other"
+  },
+  {
+   "table": "CrTxt",
+   "expr": "CONCATENATEX(CrTxt,CrTxt[k]&\"\",\",\",CrTxt[n],DESC)",
+   "powerbi": "5,77,100000,0,0,3,0,100000,0,100000,77,0,100000,3,0,77,100000,0,0,0,5,77,100000,100000,100000,3,5,3,0,100000,77,100000,5,0,77,77,100000,0,77,100000,100000,5,77,5,5,77,77,3,77,100000,0,77,77,3,77,5,0,100000,3,5",
+   "app": "100000,100000,0,0,100000,0,77,0,5,0,77,3,3,0,77,100000,0,0,0,5,77,100000,100000,100000,100000,3,77,5,77,0,0,77,77,100000,0,100000,100000,3,77,5,5,77,100000,100000,5,5,77,77,100000,0,5,3,3,0,100000,5,3,77,77,77",
+   "kind": "order-by-ties"
+  },
+  {
+   "table": "CrTxt",
+   "expr": "CONCATENATEX(ALL(CrTxt[s]),CrTxt[s]&\"\",\",\")",
+   "powerbi": "zulu,delta,tango,kilo,Mike,six,Echo,sierra,lima,one,eight,yankee,foxtrot,romeo,november,three,ten,Xray,golf,quebec,bravo,five,Alpha,whiskey,hotel,papa,seven,victor,india,oscar,two,nine,charlie,uniform,juliet,four",
+   "app": "zulu,zulu,delta,tango,kilo,Mike,Mike,six,Echo,sierra,lima,one,eight,yankee,foxtrot,romeo,november,three,ten,Xray,golf,quebec,bravo,bravo,five,Alpha,Alpha,whiskey,hotel,papa,seven,victor,india,oscar,two,nine,charlie,uniform,juliet,four",
+   "kind": "other"
+  },
+  {
+   "table": "CrTxt",
+   "expr": "CONCATENATEX(SELECTCOLUMNS(CrTxt,\"p\",CrTxt[s],\"q\",CrTxt[n]),[p]&\"/\"&[q],\",\")",
+   "powerbi": "zulu/1,delta/2,tango/1,kilo/1,Mike/1,six/2,Mike/1,Echo/3,sierra/1,lima/3,one/0,eight/0,yankee/3,foxtrot/2,romeo/0,november/3,three/0,ten/1,Xray/2,golf/1,quebec/3,bravo/1,five/0,Alpha/2,whiskey/1,hotel/1,papa/2,zulu/1,seven/0,bravo/2,victor/3,india/0,oscar/1,two/3,nine/1,charlie/2,uniform/1,juliet/3,Alpha/0,four/1,eight/0,seven/3,delta/1,bravo/2,hotel/1,sierra/1,Xray/0,sierra/3,delta/0,juliet/2,oscar/2,three/2,whiskey/2,Echo/1,four/0,nine/2,whiskey/3,five/0,zulu/1,Mike/3",
+   "app": "zulu/1,delta/2,tango/1,kilo/1,Mike/1,six/2,mike/1,Echo/3,sierra/1,lima/3,one/0,eight/0,yankee/3,foxtrot/2,romeo/0,november/3,three/0,ten/1,Xray/2,golf/1,quebec/3,bravo/1,five/0,Alpha/2,whiskey/1,hotel/1,papa/2,Zulu/1,seven/0,Bravo/2,victor/3,india/0,oscar/1,two/3,nine/1,charlie/2,uniform/1,juliet/3,",
+   "kind": "other"
+  },
+  {
+   "table": "CrTxt",
+   "expr": "CONCATENATEX(SELECTCOLUMNS(CrTxt,\"p\",CrTxt[s]),[p]&\"\",\",\")",
+   "powerbi": "zulu,zulu,zulu,delta,delta,delta,tango,kilo,Mike,Mike,Mike,six,Echo,Echo,sierra,sierra,sierra,lima,one,eight,eight,yankee,foxtrot,romeo,november,three,three,ten,Xray,Xray,golf,quebec,bravo,bravo,bravo,five,five,Alpha,Alpha,whiskey,whiskey,whiskey,hotel,hotel,papa,seven,seven,victor,india,oscar,oscar,two,nine,nine,charlie,uniform,juliet,juliet,four,four",
+   "app": "zulu,Zulu,Zulu,delta,delta,delta,tango,kilo,Mike,mike,Mike,six,Echo,Echo,sierra,sierra,sierra,lima,one,eight,eight,yankee,foxtrot,romeo,november,three,three,ten,Xray,Xray,golf,quebec,bravo,Bravo,bravo,five,five,Alpha,ALPHA,whiskey,whiskey,whiskey,hotel,hotel,papa,seven,seven,victor,india,oscar,oscar",
+   "kind": "other"
+  },
+  {
+   "table": "CrTxt",
+   "expr": "CONCATENATEX(TOPN(3,CrTxt,CrTxt[n],DESC),CrTxt[s]&\"\",\",\")",
+   "powerbi": "lima,yankee,Echo,november,quebec,victor,two,juliet,seven,sierra,whiskey,Mike",
+   "app": "Echo,lima,yankee,november,quebec,victor,two,juliet,seven,sierra,whiskey,Mike",
+   "kind": "order-by-ties"
+  },
+  {
+   "table": "CrTxt",
+   "expr": "CONCATENATEX(TOPN(4,CrTxt,CrTxt[n],ASC),CrTxt[s]&\"\"&\"/\"&CrTxt[n]&\"\",\",\")",
+   "powerbi": "romeo/0,eight/0,one/0,three/0,five/0,seven/0,india/0,Alpha/0,eight/0,Xray/0,delta/0,four/0,five/0",
+   "app": "one/0,eight/0,romeo/0,three/0,five/0,seven/0,india/0,ALPHA/0,eight/0,Xray/0,delta/0,four/0,five/0",
+   "kind": "order-by-ties"
+  },
+  {
+   "table": "CrTxt",
+   "expr": "CONCATENATEX(TOPN(3,CrTxt,CrTxt[s],ASC,CrTxt[n],DESC),CrTxt[s]&\"\"&\"/\"&CrTxt[n]&\"\",\",\")",
+   "powerbi": "bravo/2,bravo/2,Alpha/2,Alpha/0",
+   "app": "Alpha/2,ALPHA/0,Bravo/2,bravo/2",
+   "kind": "order-by-ties"
+  },
+  {
+   "table": "CrTxt",
+   "expr": "CONCATENATEX(CrTxt,CrTxt[s]&\"\",\",\",LEN(CrTxt[s]&\"\"))",
+   "powerbi": "two,ten,one,six,Mike,Mike,Mike,four,zulu,zulu,kilo,Echo,Echo,lima,Xray,Xray,golf,five,five,papa,nine,nine,four,zulu,romeo,three,three,delta,oscar,delta,bravo,bravo,bravo,Alpha,Alpha,hotel,hotel,seven,seven,tango,india,oscar,delta,eight,eight,victor,quebec,sierra,yankee,juliet,juliet,sierra,sierra,foxtrot,whiskey,whiskey,whiskey,charlie,uniform,november",
+   "app": "six,one,ten,two,zulu,zulu,zulu,kilo,Mike,Mike,Mike,Echo,Echo,lima,Xray,Xray,golf,five,five,papa,nine,nine,four,four,delta,delta,delta,tango,eight,eight,romeo,three,three,bravo,bravo,bravo,Alpha,Alpha,hotel,hotel,seven,seven,india,oscar,oscar,sierra,sierra,sierra,yankee,quebec,victor,juliet,juliet,fo",
+   "kind": "order-by-ties"
+  },
+  {
+   "table": "CrTxt",
+   "expr": "CONCATENATEX(CrTxt,CrTxt[s]&\"\",\",\",ISBLANK(CrTxt[s]),DESC)",
+   "powerbi": "golf,zulu,zulu,delta,delta,delta,tango,kilo,Mike,Mike,Mike,six,Echo,Echo,sierra,sierra,sierra,lima,one,eight,eight,yankee,foxtrot,romeo,november,three,three,ten,Xray,Xray,zulu,quebec,bravo,bravo,bravo,five,five,Alpha,Alpha,whiskey,whiskey,whiskey,hotel,hotel,papa,seven,seven,victor,india,oscar,oscar,two,nine,nine,charlie,uniform,juliet,juliet,four,four",
+   "app": "zulu,zulu,zulu,delta,delta,delta,tango,kilo,Mike,Mike,Mike,six,Echo,Echo,sierra,sierra,sierra,lima,one,eight,eight,yankee,foxtrot,romeo,november,three,three,ten,Xray,Xray,golf,quebec,bravo,bravo,bravo,five,five,Alpha,Alpha,whiskey,whiskey,whiskey,hotel,hotel,papa,seven,seven,victor,india,oscar,oscar",
+   "kind": "order-by-ties"
+  },
+  {
+   "table": "CrWide",
+   "expr": "CONCATENATEX(CrWide,CrWide[k]&\"\",\",\",CrWide[m])",
+   "powerbi": "100000,100000,31,31,5,70000,100000,5,100000,5,70000,31,0,31,5,5,5,999,70000,100000",
+   "app": "31,100000,100000,31,100000,70000,5,100000,5,70000,5,31,0,31,5,5,70000,999,5,100000",
+   "kind": "other"
+  },
+  {
+   "table": "CrWide",
+   "expr": "CONCATENATEX(CrWide,CrWide[k]&\"\",\",\",CrWide[m],DESC)",
+   "powerbi": "5,100000,70000,999,5,5,31,100000,5,70000,5,31,0,5,100000,70000,31,100000,31,100000",
+   "app": "5,5,70000,999,5,100000,100000,5,70000,5,31,0,31,31,100000,100000,31,100000,70000,5",
+   "kind": "order-by-ties"
+  },
+  {
+   "table": "CrWide",
+   "expr": "CONCATENATEX(CrWide,CrWide[m]&\"\",\",\",CrWide[k])",
+   "powerbi": "1,1,0,2,1,2,2,0,0,1,1,2,0,2,1,0,0,2,1,0",
+   "app": "1,2,1,2,1,2,0,0,0,1,1,2,1,2,0,1,0,0,0,2",
+   "kind": "other"
+  },
+  {
+   "table": "CrWide",
+   "expr": "CONCATENATEX(CrWide,CrWide[m]&\"\",\",\",CrWide[k],DESC)",
+   "powerbi": "0,0,2,0,1,0,2,1,2,1,0,1,0,0,2,1,2,1,2,1",
+   "app": "1,0,0,0,2,1,2,0,2,0,0,1,1,2,1,2,1,2,0,1",
+   "kind": "order-by-ties"
+  },
+  {
+   "table": "CrWide",
+   "expr": "CONCATENATEX(TOPN(3,CrWide,CrWide[m],DESC),CrWide[k]&\"\",\",\")",
+   "powerbi": "5,70000,5,999,5,100000",
+   "app": "5,5,70000,999,5,100000",
+   "kind": "order-by-ties"
+  },
+  {
+   "table": "CrWide",
+   "expr": "CONCATENATEX(TOPN(4,CrWide,CrWide[m],ASC),CrWide[k]&\"\"&\"/\"&CrWide[m]&\"\",\",\")",
+   "powerbi": "100000/0,31/0,31/0,100000/0,100000/0,70000/0,5/0",
+   "app": "31/0,100000/0,100000/0,31/0,100000/0,70000/0,5/0",
+   "kind": "order-by-ties"
+  },
+  {
+   "table": "CrWide",
+   "expr": "CONCATENATEX(TOPN(3,CrWide,CrWide[k],ASC,CrWide[m],DESC),CrWide[k]&\"\"&\"/\"&CrWide[m]&\"\",\",\")",
+   "powerbi": "5/2,5/2,5/2,0/1",
+   "app": "0/1,5/2,5/2,5/2",
+   "kind": "order-by-ties"
+  },
+  {
+   "table": "CrWide",
+   "expr": "CONCATENATEX(CrWide,CrWide[k]&\"\",\",\",LEN(CrWide[k]&\"\"))",
+   "powerbi": "5,5,5,0,5,5,5,31,31,31,31,999,70000,70000,70000,100000,100000,100000,100000,100000",
+   "app": "5,5,5,5,5,0,5,31,31,31,31,999,70000,70000,70000,100000,100000,100000,100000,100000",
+   "kind": "order-by-ties"
+  },
+  {
+   "table": "CrWide",
+   "expr": "CONCATENATEX(CrWide,CrWide[k]&\"\",\",\",ISBLANK(CrWide[k]),DESC)",
+   "powerbi": "5,100000,5,100000,5,5,100000,70000,70000,31,31,999,100000,31,5,70000,0,100000,5,31",
+   "app": "31,100000,5,100000,5,5,100000,70000,70000,31,5,999,100000,31,5,70000,0,100000,5,31",
+   "kind": "order-by-ties"
+  },
+  {
+   "table": "CrDec",
+   "expr": "CONCATENATEX(CrDec,CrDec[x]&\"\",\",\",CrDec[y])",
+   "powerbi": "3,0.1,0.5,1.25,1.25,0.1,-1,2.5,0.1,0",
+   "app": "1.25,0.1,0.5,3,0.1,1.25,-1,0,2.5,0.1",
+   "kind": "other"
+  },
+  {
+   "table": "CrDec",
+   "expr": "CONCATENATEX(CrDec,CrDec[x]&\"\",\",\",CrDec[y],DESC)",
+   "powerbi": "0,0.1,2.5,-1,0.1,1.25,1.25,0.1,0.5,3",
+   "app": "0,2.5,0.1,0.1,1.25,-1,1.25,0.1,0.5,3",
+   "kind": "order-by-ties"
+  },
+  {
+   "table": "CrDec",
+   "expr": "CONCATENATEX(CrDec,CrDec[y]&\"\",\",\",CrDec[x])",
+   "powerbi": "1,2,2,1,0,0,1,0,2,0",
+   "app": "1,2,1,0,2,0,0,1,2,0",
+   "kind": "other"
+  },
+  {
+   "table": "CrDec",
+   "expr": "CONCATENATEX(CrDec,CrDec[y]&\"\",\",\",CrDec[x],DESC)",
+   "powerbi": "0,2,1,0,0,0,2,1,2,1",
+   "app": "0,2,0,1,0,1,0,2,2,1",
+   "kind": "order-by-ties"
+  },
+  {
+   "table": "CrDec",
+   "expr": "CONCATENATEX(TOPN(3,CrDec,CrDec[y],DESC),CrDec[x]&\"\",\",\")",
+   "powerbi": "2.5,0.1,0",
+   "app": "0.1,2.5,0",
+   "kind": "order-by-ties"
+  },
+  {
+   "table": "CrDec",
+   "expr": "CONCATENATEX(TOPN(4,CrDec,CrDec[y],ASC),CrDec[x]&\"\"&\"/\"&CrDec[y]&\"\",\",\")",
+   "powerbi": "0.5/0,1.25/0,3/0,0.1/0",
+   "app": "3/0,1.25/0,0.5/0,0.1/0",
+   "kind": "order-by-ties"
+  },
+  {
+   "table": "CrDec",
+   "expr": "CONCATENATEX(CrDec,CrDec[x]&\"\",\",\",CrDec[x]&\"\",DESC)",
+   "powerbi": "3,2.5,1.25,1.25,-1,0.5,0.1,0.1,0.1,0",
+   "app": "3,2.5,1.25,1.25,0.5,0.1,0.1,0.1,0,-1",
+   "kind": "order-by-ties"
+  },
+  {
+   "table": "CrDec",
+   "expr": "CONCATENATEX(CrDec,CrDec[x]&\"\",\",\",LEN(CrDec[x]&\"\"))",
+   "powerbi": "3,0,-1,0.1,0.1,0.5,2.5,0.1,1.25,1.25",
+   "app": "0,3,-1,0.1,0.1,0.1,0.5,2.5,1.25,1.25",
+   "kind": "order-by-ties"
+  },
+  {
+   "table": "CrDec",
+   "expr": "CONCATENATEX(CrDec,CrDec[x]&\"\",\",\",ISBLANK(CrDec[x]),DESC)",
+   "powerbi": "0.5,0,0.1,0.1,0.1,-1,1.25,1.25,2.5,3",
+   "app": "-1,0,0.1,0.1,0.1,0.5,1.25,1.25,2.5,3",
+   "kind": "order-by-ties"
+  },
+  {
+   "table": "CrDec1",
+   "expr": "CONCATENATEX(CrDec1,CrDec1[x]&\"\",\",\",CrDec1[x]&\"\",DESC)",
+   "powerbi": "3,2.5,1.25,1.25,-1,0.5,0.1,0.1,0.1,0,",
+   "app": "3,2.5,1.25,1.25,0.5,0.1,0.1,0.1,0,-1,",
+   "kind": "order-by-ties"
+  },
+  {
+   "table": "CrDec1",
+   "expr": "CONCATENATEX(CrDec1,CrDec1[x]&\"\",\",\",ISBLANK(CrDec1[x]),DESC)",
+   "powerbi": ",-1,0,0.1,0.1,0.5,1.25,1.25,2.5,3,0.1",
+   "app": ",-1,0,0.1,0.1,0.1,0.5,1.25,1.25,2.5,3",
+   "kind": "order-by-ties"
+  },
+  {
+   "table": "CrDec2",
+   "expr": "CONCATENATEX(CrDec2,CrDec2[x]&\"\",\",\",CrDec2[x]&\"\",DESC)",
+   "powerbi": "3,2.5,1.5,1.5,-1,0.5,0.1,0.1,0.1,0,",
+   "app": "3,2.5,1.5,1.5,0.5,0.1,0.1,0.1,0,-1,",
+   "kind": "order-by-ties"
+  },
+  {
+   "table": "CrDec2",
+   "expr": "CONCATENATEX(CrDec2,CrDec2[x]&\"\",\",\",ISBLANK(CrDec2[x]),DESC)",
+   "powerbi": ",-1,0,0.1,0.1,0.5,1.5,1.5,2.5,3,0.1",
+   "app": ",-1,0,0.1,0.1,0.1,0.5,1.5,1.5,2.5,3",
+   "kind": "order-by-ties"
+  },
+  {
+   "table": "CrMany",
+   "expr": "CONCATENATEX(CrMany,CrMany[a]&\"\",\",\",CrMany[b])",
+   "powerbi": "q,q,q,,q,q,q,r,,r,r,r,r,,p,p,p,p,p,p",
+   "app": ",q,q,q,q,q,q,,r,r,r,r,r,,p,p,p,p,p,p",
+   "kind": "other"
+  },
+  {
+   "table": "CrMany",
+   "expr": "CONCATENATEX(CrMany,CrMany[a]&\"\",\",\",CrMany[b],DESC)",
+   "powerbi": "p,p,p,,p,p,p,r,,r,r,r,r,,q,q,q,q,q,q",
+   "app": ",p,p,p,p,p,p,,r,r,r,r,r,,q,q,q,q,q,q",
+   "kind": "order-by-ties"
+  },
+  {
+   "table": "CrMany",
+   "expr": "CONCATENATEX(CrMany,CrMany[a]&\"\",\",\",CrMany[c])",
+   "powerbi": "r,p,p,p,p,,r,r,q,q,,,p,p,r,r,q,q,q,q",
+   "app": ",p,p,p,p,r,r,r,q,q,,,p,p,r,r,q,q,q,q",
+   "kind": "other"
+  },
+  {
+   "table": "CrMany",
+   "expr": "CONCATENATEX(CrMany,CrMany[a]&\"\",\",\",CrMany[c],DESC)",
+   "powerbi": "q,,,p,p,r,r,q,q,q,r,p,p,p,p,,r,r,q,q",
+   "app": ",,p,p,r,r,q,q,q,q,,p,p,p,p,r,r,r,q,q",
+   "kind": "order-by-ties"
+  },
+  {
+   "table": "CrMany",
+   "expr": "CONCATENATEX(CrMany,CrMany[a]&\"\",\",\",CrMany[e])",
+   "powerbi": "q,,p,p,p,p,r,r,r,r,,q,q,q,q,,p,p,r,q",
+   "app": ",,p,p,p,p,r,r,r,r,q,q,q,q,q,,p,p,r,q",
+   "kind": "other"
+  },
+  {
+   "table": "CrMany",
+   "expr": "CONCATENATEX(CrMany,CrMany[a]&\"\",\",\",CrMany[e],DESC)",
+   "powerbi": ",p,p,r,q,p,r,r,r,r,q,q,q,q,q,,,p,p,p",
+   "app": ",p,p,r,q,,,p,p,p,p,r,r,r,r,q,q,q,q,q",
+   "kind": "order-by-ties"
+  },
+  {
+   "table": "CrMany",
+   "expr": "CONCATENATEX(CrMany,CrMany[b]&\"\",\",\",CrMany[a])",
+   "powerbi": "1,0,2,2,2,2,2,2,2,0,0,0,0,0,0,1,1,1,1,1",
+   "app": "0,1,2,2,2,2,2,2,2,0,0,0,0,0,0,1,1,1,1,1",
+   "kind": "other"
+  },
+  {
+   "table": "CrMany",
+   "expr": "CONCATENATEX(CrMany,CrMany[b]&\"\",\",\",CrMany[a],DESC)",
+   "powerbi": "1,1,1,1,1,0,0,0,0,0,0,2,2,2,2,2,2,1,2,0",
+   "app": "1,1,1,1,1,0,0,0,0,0,0,2,2,2,2,2,2,0,1,2",
+   "kind": "order-by-ties"
+  },
+  {
+   "table": "CrMany",
+   "expr": "CONCATENATEX(CrMany,CrMany[b]&\"\",\",\",CrMany[c])",
+   "powerbi": "1,0,0,1,1,0,2,2,2,2,0,0,0,0,1,1,1,2,2,2",
+   "app": "0,0,0,1,1,1,2,2,2,2,0,0,0,0,1,1,1,2,2,2",
+   "kind": "other"
+  },
+  {
+   "table": "CrMany",
+   "expr": "CONCATENATEX(CrMany,CrMany[b]&\"\",\",\",CrMany[c],DESC)",
+   "powerbi": "2,0,0,0,0,1,1,1,2,2,1,0,0,1,1,0,2,2,2,2",
+   "app": "0,0,0,0,1,1,1,2,2,2,0,0,0,1,1,1,2,2,2,2",
+   "kind": "order-by-ties"
+  },
+  {
+   "table": "CrMany",
+   "expr": "CONCATENATEX(CrMany,CrMany[b]&\"\",\",\",CrMany[e])",
+   "powerbi": "2,0,0,0,0,1,1,1,1,1,0,2,2,2,2,0,0,1,2,2",
+   "app": "0,0,0,0,0,1,1,1,1,1,2,2,2,2,2,0,0,1,2,2",
+   "kind": "other"
+  },
+  {
+   "table": "CrMany",
+   "expr": "CONCATENATEX(CrMany,CrMany[b]&\"\",\",\",CrMany[e],DESC)",
+   "powerbi": "0,0,1,2,2,1,1,1,1,1,2,2,2,2,2,0,0,0,0,0",
+   "app": "0,0,1,2,2,0,0,0,0,0,1,1,1,1,1,2,2,2,2,2",
+   "kind": "order-by-ties"
+  },
+  {
+   "table": "CrMany",
+   "expr": "CONCATENATEX(CrMany,CrMany[c]&\"\",\",\",CrMany[a])",
+   "powerbi": "n,m,n,m,m,n,n,m,m,m,n,n,n,n,m,n,m,m,m,n",
+   "app": "m,n,n,m,m,m,m,n,n,m,m,n,n,n,n,m,m,m,n,n",
+   "kind": "other"
+  },
+  {
+   "table": "CrMany",
+   "expr": "CONCATENATEX(CrMany,CrMany[c]&\"\",\",\",CrMany[a],DESC)",
+   "powerbi": "m,m,m,n,n,m,n,n,n,m,n,m,n,n,m,m,m,m,n,n",
+   "app": "m,m,m,n,n,m,m,n,n,n,n,m,m,m,m,n,n,m,n,n",
+   "kind": "order-by-ties"
+  },
+  {
+   "table": "CrMany",
+   "expr": "CONCATENATEX(CrMany,CrMany[c]&\"\",\",\",CrMany[b])",
+   "powerbi": "n,m,m,m,n,n,n,n,n,m,m,m,n,m,n,m,m,n,n,m",
+   "app": "m,m,m,n,n,n,n,m,m,m,n,n,n,m,m,m,m,n,n,n",
+   "kind": "other"
+  },
+  {
+   "table": "CrMany",
+   "expr": "CONCATENATEX(CrMany,CrMany[c]&\"\",\",\",CrMany[b],DESC)",
+   "powerbi": "n,n,n,m,m,m,m,n,n,n,m,m,m,m,m,m,n,n,n,n",
+   "app": "m,m,m,m,n,n,n,m,m,m,n,n,n,m,m,m,n,n,n,n",
+   "kind": "order-by-ties"
+  },
+  {
+   "table": "CrMany",
+   "expr": "CONCATENATEX(CrMany,CrMany[c]&\"\",\",\",CrMany[e])",
+   "powerbi": "n,m,m,m,m,n,n,n,n,n,m,n,n,n,n,m,m,m,m,m",
+   "app": "m,m,m,m,m,n,n,n,n,n,n,n,n,n,n,m,m,m,m,m",
+   "kind": "other"
+  },
+  {
+   "table": "CrMany",
+   "expr": "CONCATENATEX(CrMany,CrMany[c]&\"\",\",\",CrMany[e],DESC)",
+   "powerbi": "m,m,m,m,m,n,n,n,n,n,n,n,n,n,n,m,m,m,m,m",
+   "app": "m,m,m,m,m,m,m,m,m,m,n,n,n,n,n,n,n,n,n,n",
+   "kind": "order-by-ties"
+  },
+  {
+   "table": "CrMany",
+   "expr": "CONCATENATEX(CrMany,CrMany[e]&\"\",\",\",CrMany[a])",
+   "powerbi": "TRUE,FALSE,FALSE,FALSE,FALSE,FALSE,TRUE,TRUE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,TRUE,FALSE,FALSE,FALSE,FALSE,TRUE",
+   "app": "FALSE,FALSE,TRUE,FALSE,FALSE,FALSE,FALSE,TRUE,TRUE,FALSE,FALSE,FALSE,FALSE,FALSE,TRUE,FALSE,FALSE,FALSE,FALSE,TRUE",
+   "kind": "other"
+  },
+  {
+   "table": "CrMany",
+   "expr": "CONCATENATEX(CrMany,CrMany[e]&\"\",\",\",CrMany[a],DESC)",
+   "powerbi": "FALSE,TRUE,FALSE,FALSE,FALSE,TRUE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,TRUE,FALSE,FALSE,FALSE,TRUE,FALSE,FALSE,TRUE",
+   "app": "FALSE,FALSE,FALSE,FALSE,TRUE,FALSE,FALSE,FALSE,FALSE,FALSE,TRUE,FALSE,FALSE,FALSE,FALSE,TRUE,TRUE,FALSE,FALSE,TRUE",
+   "kind": "order-by-ties"
+  },
+  {
+   "table": "CrMany",
+   "expr": "CONCATENATEX(CrMany,CrMany[e]&\"\",\",\",CrMany[b])",
+   "powerbi": "FALSE,FALSE,TRUE,TRUE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,TRUE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,TRUE,TRUE",
+   "app": "FALSE,FALSE,FALSE,FALSE,FALSE,TRUE,TRUE,FALSE,FALSE,FALSE,FALSE,FALSE,TRUE,FALSE,FALSE,FALSE,FALSE,FALSE,TRUE,TRUE",
+   "kind": "other"
+  },
+  {
+   "table": "CrMany",
+   "expr": "CONCATENATEX(CrMany,CrMany[e]&\"\",\",\",CrMany[b],DESC)",
+   "powerbi": "TRUE,FALSE,FALSE,FALSE,FALSE,FALSE,TRUE,TRUE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,TRUE,TRUE",
+   "app": "FALSE,FALSE,FALSE,FALSE,FALSE,TRUE,TRUE,FALSE,FALSE,FALSE,FALSE,FALSE,TRUE,FALSE,FALSE,FALSE,FALSE,FALSE,TRUE,TRUE",
+   "kind": "order-by-ties"
+  },
+  {
+   "table": "CrMany",
+   "expr": "CONCATENATEX(CrMany,CrMany[e]&\"\",\",\",CrMany[c])",
+   "powerbi": "TRUE,FALSE,FALSE,FALSE,FALSE,TRUE,TRUE,TRUE,TRUE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE",
+   "app": "FALSE,FALSE,FALSE,FALSE,FALSE,TRUE,TRUE,TRUE,TRUE,TRUE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE",
+   "kind": "other"
+  },
+  {
+   "table": "CrMany",
+   "expr": "CONCATENATEX(TOPN(3,CrMany,CrMany[b],DESC),CrMany[a]&\"\",\",\")",
+   "powerbi": "p,,p,p,p,p,p",
+   "app": "p,p,,p,p,p,p",
+   "kind": "order-by-ties"
+  },
+  {
+   "table": "CrMany",
+   "expr": "CONCATENATEX(TOPN(3,CrMany,CrMany[a],ASC,CrMany[b],DESC),CrMany[a]&\"\"&\"/\"&CrMany[b]&\"\",\",\")",
+   "powerbi": "/0,/1,/2",
+   "app": "/0,/2,/1",
+   "kind": "order-by-ties"
+  },
+  {
+   "table": "CrMany",
+   "expr": "CONCATENATEX(CrMany,CrMany[a]&\"\",\",\",LEN(CrMany[a]&\"\"))",
+   "powerbi": ",,,p,p,p,p,r,r,r,r,q,q,q,q,q,q,r,p,p",
+   "app": ",,,p,p,p,p,p,p,r,r,r,r,r,q,q,q,q,q,q",
+   "kind": "order-by-ties"
+  },
+  {
+   "table": "CrMany",
+   "expr": "CONCATENATEX(CrMany,CrMany[a]&\"\",\",\",ISBLANK(CrMany[a]),DESC)",
+   "powerbi": ",,,p,p,p,p,r,r,r,r,q,q,q,q,q,q,r,p,p",
+   "app": ",,,p,p,p,p,p,p,r,r,r,r,r,q,q,q,q,q,q",
+   "kind": "order-by-ties"
+  },
+  {
+   "table": "CrBig",
+   "expr": "CONCATENATEX(CrBig,CrBig[a]&\"\",\",\",CrBig[b])",
+   "powerbi": "fig,kiwi,date,date,date,date,date,fig,date,pear,pear,apple,kiwi,apple,apple,apple,kiwi,kiwi,kiwi,apple,kiwi,kiwi,date,date,date,date,fig,pear,fig,fig,fig,fig,fig,fig,fig,fig,fig,apple,apple,apple,apple,apple,apple,apple,kiwi,kiwi,kiwi,kiwi,date,date,pear,pear,pear,pear,pear,apple,fig,fig,apple,apple,apple,apple,fig,kiwi,kiwi,date,date,date,pear,pear",
+   "app": "fig,fig,apple,kiwi,date,date,date,date,date,date,pear,pear,fig,apple,apple,apple,apple,kiwi,kiwi,kiwi,kiwi,kiwi,kiwi,date,date,date,date,fig,fig,fig,fig,fig,fig,fig,fig,fig,apple,apple,apple,apple,apple,apple,apple,kiwi,kiwi,kiwi,kiwi,date,date,pear,pear,pear,pear,pear,pear,fig,fig,fig,apple,apple,a",
+   "kind": "other"
+  },
+  {
+   "table": "CrBig",
+   "expr": "CONCATENATEX(CrBig,CrBig[a]&\"\",\",\",CrBig[b],DESC)",
+   "powerbi": "kiwi,pear,pear,date,date,date,kiwi,fig,apple,apple,apple,apple,apple,fig,fig,fig,fig,fig,fig,fig,fig,fig,fig,fig,apple,apple,apple,apple,apple,apple,apple,kiwi,kiwi,kiwi,kiwi,date,date,pear,pear,pear,pear,pear,pear,apple,kiwi,kiwi,kiwi,kiwi,kiwi,kiwi,date,date,date,date,fig,apple,apple,apple,kiwi,date,date,date,fig,date,date,apple,fig,pear,pear,date",
+   "app": "fig,fig,fig,apple,apple,apple,apple,apple,kiwi,kiwi,date,date,date,pear,pear,fig,fig,fig,fig,fig,fig,fig,fig,fig,apple,apple,apple,apple,apple,apple,apple,kiwi,kiwi,kiwi,kiwi,date,date,pear,pear,pear,pear,pear,pear,fig,apple,apple,apple,apple,kiwi,kiwi,kiwi,kiwi,kiwi,kiwi,date,date,date,date,fig,fig",
+   "kind": "order-by-ties"
+  },
+  {
+   "table": "CrBig",
+   "expr": "CONCATENATEX(CrBig,CrBig[b]&\"\",\",\",CrBig[a])",
+   "powerbi": "3,4,4,4,4,3,3,3,4,3,3,3,1,2,2,2,2,1,1,4,4,3,3,2,2,2,2,4,1,1,1,1,3,1,2,3,3,3,3,3,3,3,3,1,4,4,4,2,2,3,2,2,2,2,4,4,3,3,3,1,3,3,3,3,3,3,1,4,4,1",
+   "app": "1,2,2,2,2,3,3,3,3,3,3,3,4,4,4,4,4,1,1,1,1,1,1,2,2,2,2,3,3,4,4,4,1,1,2,3,3,3,3,3,3,3,3,3,4,4,4,1,2,2,2,2,2,2,3,3,3,3,4,4,1,1,3,3,3,3,3,3,4,4",
+   "kind": "other"
+  },
+  {
+   "table": "CrBig",
+   "expr": "CONCATENATEX(CrBig,CrBig[b]&\"\",\",\",CrBig[a],DESC)",
+   "powerbi": "3,3,3,4,3,3,3,1,1,4,2,2,2,3,3,3,1,4,4,3,2,2,2,3,1,2,1,3,3,3,3,3,3,3,3,4,4,4,2,1,3,2,3,2,2,4,1,1,1,4,4,1,1,3,3,3,3,3,3,3,2,2,2,2,1,4,4,4,4,4",
+   "app": "1,1,3,3,3,3,3,3,4,4,1,2,2,2,2,2,2,3,3,3,3,4,4,1,1,2,3,3,3,3,3,3,3,3,3,4,4,4,1,1,1,1,1,1,2,2,2,2,3,3,4,4,4,1,2,2,2,2,3,3,3,3,3,3,3,4,4,4,4,4",
+   "kind": "order-by-ties"
+  },
+  {
+   "table": "CrBig",
+   "expr": "CONCATENATEX(TOPN(3,CrBig,CrBig[b],DESC),CrBig[a]&\"\",\",\")",
+   "powerbi": "fig,fig,fig,apple,apple,apple,apple,apple,kiwi,kiwi,date,date,date,pear,pear",
+   "app": "date,apple,fig,apple,kiwi,pear,pear,apple,date,fig,fig,apple,date,kiwi,apple",
+   "kind": "order-by-ties"
+  },
+  {
+   "table": "CrBig",
+   "expr": "CONCATENATEX(TOPN(4,CrBig,CrBig[b],ASC),CrBig[a]&\"\"&\"/\"&CrBig[b]&\"\",\",\")",
+   "powerbi": "fig/1,fig/1,apple/1,kiwi/1,date/1,date/1,date/1,date/1,date/1,date/1,pear/1,pear/1",
+   "app": "fig/1,date/1,apple/1,date/1,pear/1,kiwi/1,date/1,pear/1,date/1,fig/1,date/1,date/1",
+   "kind": "order-by-ties"
+  },
+  {
+   "table": "CrBig",
+   "expr": "CONCATENATEX(CrBig,CrBig[a]&\"\",\",\",LEN(CrBig[a]&\"\"))",
+   "powerbi": "fig,fig,fig,fig,fig,fig,fig,fig,fig,fig,fig,fig,fig,fig,fig,kiwi,date,date,date,date,date,date,date,pear,pear,pear,pear,pear,pear,pear,pear,pear,pear,kiwi,kiwi,kiwi,kiwi,kiwi,kiwi,kiwi,kiwi,kiwi,kiwi,kiwi,kiwi,date,date,date,date,date,date,date,date,apple,apple,apple,apple,apple,apple,apple,apple,apple,apple,apple,apple,apple,apple,apple,apple,apple",
+   "app": "fig,fig,fig,fig,fig,fig,fig,fig,fig,fig,fig,fig,fig,fig,fig,kiwi,kiwi,kiwi,kiwi,kiwi,kiwi,kiwi,kiwi,kiwi,kiwi,kiwi,kiwi,kiwi,date,date,date,date,date,date,date,date,date,date,date,date,date,date,date,pear,pear,pear,pear,pear,pear,pear,pear,pear,pear,apple,apple,apple,apple,apple,apple,apple,apple,ap",
+   "kind": "order-by-ties"
+  },
+  {
+   "table": "CrBig",
+   "expr": "CONCATENATEX(CrBig,CrBig[a]&\"\",\",\",ISBLANK(CrBig[a]),DESC)",
+   "powerbi": "kiwi,fig,fig,fig,fig,fig,fig,fig,fig,fig,fig,fig,fig,fig,fig,apple,apple,apple,apple,apple,apple,apple,apple,apple,apple,apple,apple,apple,apple,apple,apple,apple,kiwi,kiwi,kiwi,fig,kiwi,kiwi,kiwi,kiwi,kiwi,kiwi,kiwi,kiwi,kiwi,date,date,date,date,date,date,date,date,date,date,date,date,date,date,date,pear,pear,pear,pear,pear,pear,pear,pear,pear,pear",
+   "app": "fig,fig,fig,fig,fig,fig,fig,fig,fig,fig,fig,fig,fig,fig,fig,apple,apple,apple,apple,apple,apple,apple,apple,apple,apple,apple,apple,apple,apple,apple,apple,apple,kiwi,kiwi,kiwi,kiwi,kiwi,kiwi,kiwi,kiwi,kiwi,kiwi,kiwi,kiwi,kiwi,date,date,date,date,date,date,date,date,date,date,date,date,date,date,dat",
+   "kind": "order-by-ties"
+  },
+  {
+   "table": "CrCase",
+   "expr": "CONCATENATEX(CrCase,CrCase[s]&\"\",\",\",CrCase[n])",
+   "powerbi": "D,a,a,a,c,b,b,b,a,c,D",
+   "app": "b,a,a,a,c,D,b,b,a,c,D",
+   "kind": "other"
+  },
+  {
+   "table": "CrCase",
+   "expr": "CONCATENATEX(CrCase,CrCase[s]&\"\",\",\",CrCase[n],DESC)",
+   "powerbi": "b,b,a,c,D,D,b,a,a,a,c",
+   "app": "b,b,a,c,D,b,a,a,a,c,D",
+   "kind": "order-by-ties"
+  },
+  {
+   "table": "CrCase",
+   "expr": "CONCATENATEX(CrCase,CrCase[n]&\"\",\",\",CrCase[s])",
+   "powerbi": "1,0,0,0,1,0,1,1,0,0,1",
+   "app": "0,0,0,1,0,1,1,0,1,0,1",
+   "kind": "other"
+  },
+  {
+   "table": "CrCase",
+   "expr": "CONCATENATEX(CrCase,CrCase[n]&\"\",\",\",CrCase[s],DESC)",
+   "powerbi": "1,0,0,1,1,0,1,0,0,1,0",
+   "app": "0,1,0,1,0,1,1,0,0,0,1",
+   "kind": "order-by-ties"
+  },
+  {
+   "table": "CrCase",
+   "expr": "CONCATENATEX(ALL(CrCase[s]),CrCase[s]&\"\",\",\")",
+   "powerbi": "b,a,c,D",
+   "app": "b,b,a,a,c,c,D,D",
+   "kind": "other"
+  },
+  {
+   "table": "CrCase",
+   "expr": "CONCATENATEX(SELECTCOLUMNS(CrCase,\"p\",CrCase[s],\"q\",CrCase[n]),[p]&\"/\"&[q],\",\")",
+   "powerbi": "b/0,a/0,a/0,a/0,c/0,D/0,b/1,b/1,a/1,c/1,D/1",
+   "app": "b/0,A/0,a/0,A/0,c/0,D/0,B/1,b/1,a/1,C/1,d/1",
+   "kind": "other"
+  },
+  {
+   "table": "CrCase",
+   "expr": "CONCATENATEX(SELECTCOLUMNS(CrCase,\"p\",CrCase[s]),[p]&\"\",\",\")",
+   "powerbi": "b,b,b,a,a,a,a,c,c,D,D",
+   "app": "b,B,b,a,A,a,A,c,C,D,d",
+   "kind": "other"
+  },
+  {
+   "table": "CrCase",
+   "expr": "CONCATENATEX(TOPN(3,CrCase,CrCase[n],DESC),CrCase[s]&\"\",\",\")",
+   "powerbi": "a,b,b,c,D",
+   "app": "a,B,C,b,d",
+   "kind": "order-by-ties"
+  },
+  {
+   "table": "CrCase",
+   "expr": "CONCATENATEX(TOPN(4,CrCase,CrCase[n],ASC),CrCase[s]&\"\"&\"/\"&CrCase[n]&\"\",\",\")",
+   "powerbi": "b/0,a/0,a/0,a/0,c/0,D/0",
+   "app": "b/0,A/0,c/0,a/0,D/0,A/0",
+   "kind": "order-by-ties"
+  },
+  {
+   "table": "CrCase",
+   "expr": "CONCATENATEX(TOPN(3,CrCase,CrCase[s],ASC,CrCase[n],DESC),CrCase[s]&\"\"&\"/\"&CrCase[n]&\"\",\",\")",
+   "powerbi": "a/0,a/0,a/0,a/1",
+   "app": "a/1,A/0,a/0,A/0",
+   "kind": "order-by-ties"
+  },
+  {
+   "table": "CrCase",
+   "expr": "CONCATENATEX(CrCase,CrCase[s]&\"\",\",\",LEN(CrCase[s]&\"\"))",
+   "powerbi": "a,b,b,a,a,b,a,c,c,D,D",
+   "app": "b,b,b,a,a,a,a,c,c,D,D",
+   "kind": "order-by-ties"
+  },
+  {
+   "table": "CrCase",
+   "expr": "CONCATENATEX(CrCase,CrCase[s]&\"\",\",\",ISBLANK(CrCase[s]),DESC)",
+   "powerbi": "a,b,b,a,a,b,a,c,c,D,D",
+   "app": "b,b,b,a,a,a,a,c,c,D,D",
+   "kind": "order-by-ties"
+  },
+  {
+   "table": "CrEmpty",
+   "expr": "CONCATENATEX(CrEmpty,CrEmpty[s]&\"\",\",\",CrEmpty[n])",
+   "powerbi": ",,x,,,x,z,,y,y",
+   "app": ",,x,,x,,z,,y,y",
+   "kind": "other"
+  },
+  {
+   "table": "CrEmpty",
+   "expr": "CONCATENATEX(CrEmpty,CrEmpty[s]&\"\",\",\",CrEmpty[n],DESC)",
+   "powerbi": ",y,y,,x,z,,,x,",
+   "app": ",y,y,x,,z,,,x,",
+   "kind": "order-by-ties"
+  },
+  {
+   "table": "CrEmpty",
+   "expr": "CONCATENATEX(CrEmpty,CrEmpty[n]&\"\",\",\",CrEmpty[s])",
+   "powerbi": "0,0,1,0,2,0,1,2,2,1",
+   "app": "0,0,0,1,2,0,1,2,2,1",
+   "kind": "other"
+  },
+  {
+   "table": "CrEmpty",
+   "expr": "CONCATENATEX(CrEmpty,CrEmpty[n]&\"\",\",\",CrEmpty[s],DESC)",
+   "powerbi": "1,2,2,0,1,1,0,2,0,0",
+   "app": "1,2,2,0,1,0,1,2,0,0",
+   "kind": "order-by-ties"
+  },
+  {
+   "table": "CrEmpty",
+   "expr": "CONCATENATEX(FILTER(CrEmpty,NOT ISBLANK(CrEmpty[s])),CrEmpty[s]&\"\"&\"/\"&CrEmpty[n]&\"\",\",\")",
+   "powerbi": "x/0,/0,x/1,/1,z/1,/2,y/2,y/2",
+   "app": "x/0,x/1,z/1,y/2,y/2",
+   "kind": "other"
+  },
+  {
+   "table": "CrEmpty",
+   "expr": "CONCATENATEX(TOPN(3,CrEmpty,CrEmpty[n],DESC),CrEmpty[s]&\"\",\",\")",
+   "powerbi": ",y,y",
+   "app": "y,,y",
+   "kind": "order-by-ties"
+  },
+  {
+   "table": "CrEmpty",
+   "expr": "CONCATENATEX(TOPN(3,CrEmpty,CrEmpty[s],ASC,CrEmpty[n],DESC),CrEmpty[s]&\"\"&\"/\"&CrEmpty[n]&\"\",\",\")",
+   "powerbi": "/2,/0,/0",
+   "app": "/2,/1,/0,/0,/0",
+   "kind": "order-by-ties"
+  },
+  {
+   "table": "CrEmpty",
+   "expr": "CONCATENATEX(CrEmpty,CrEmpty[s]&\"\",\",\",LEN(CrEmpty[s]&\"\"))",
+   "powerbi": ",,,,,y,z,x,x,y",
+   "app": ",,,,,x,x,y,y,z",
+   "kind": "order-by-ties"
+  },
+  {
+   "table": "CrEmpty",
+   "expr": "CONCATENATEX(CrEmpty,CrEmpty[s]&\"\",\",\",ISBLANK(CrEmpty[s]),DESC)",
+   "powerbi": ",,x,,,y,y,z,,x",
+   "app": ",,,,,x,x,y,y,z",
+   "kind": "order-by-ties"
+  },
+  {
+   "table": "CrNumTxt",
+   "expr": "CONCATENATEX(CrNumTxt,CrNumTxt[s]&\"\",\",\",CrNumTxt[n])",
+   "powerbi": "2,10,9,100,10,9,2,1,abc",
+   "app": "10,10,9,100,2,9,2,1,abc",
+   "kind": "other"
+  },
+  {
+   "table": "CrNumTxt",
+   "expr": "CONCATENATEX(CrNumTxt,CrNumTxt[s]&\"\",\",\",CrNumTxt[n],DESC)",
+   "powerbi": "9,2,1,abc,2,10,10,9,100",
+   "app": "9,2,1,abc,10,10,9,100,2",
+   "kind": "order-by-ties"
+  },
+  {
+   "table": "CrNumTxt",
+   "expr": "CONCATENATEX(CrNumTxt,CrNumTxt[n]&\"\",\",\",CrNumTxt[s],DESC)",
+   "powerbi": "1,1,0,0,1,0,0,0,1",
+   "app": "1,0,1,0,1,0,0,0,1",
+   "kind": "order-by-ties"
+  },
+  {
+   "table": "CrNumTxt",
+   "expr": "CONCATENATEX(TOPN(3,CrNumTxt,CrNumTxt[n],DESC),CrNumTxt[s]&\"\",\",\")",
+   "powerbi": "1,9,2,abc",
+   "app": "9,2,1,abc",
+   "kind": "order-by-ties"
+  },
+  {
+   "table": "CrNumTxt",
+   "expr": "CONCATENATEX(TOPN(4,CrNumTxt,CrNumTxt[n],ASC),CrNumTxt[s]&\"\"&\"/\"&CrNumTxt[n]&\"\",\",\")",
+   "powerbi": "10/0,10/0,9/0,100/0,2/0",
+   "app": "10/0,100/0,9/0,10/0,2/0",
+   "kind": "order-by-ties"
+  },
+  {
+   "table": "CrNumTxt",
+   "expr": "CONCATENATEX(CrNumTxt,CrNumTxt[s]&\"\",\",\",LEN(CrNumTxt[s]&\"\"))",
+   "powerbi": "1,9,9,2,2,10,10,100,abc",
+   "app": "9,9,2,2,1,10,10,100,abc",
+   "kind": "order-by-ties"
+  },
+  {
+   "table": "CrNumTxt",
+   "expr": "CONCATENATEX(CrNumTxt,CrNumTxt[s]&\"\",\",\",ISBLANK(CrNumTxt[s]),DESC)",
+   "powerbi": "100,10,9,9,10,2,2,1,abc",
+   "app": "10,10,9,9,100,2,2,1,abc",
+   "kind": "order-by-ties"
+  },
+  {
+   "table": "CrNeg",
+   "expr": "CONCATENATEX(CrNeg,CrNeg[q]&\"\",\",\",CrNeg[r],DESC)",
+   "powerbi": "-1,7,-5,0,3,3,0,7,-5",
+   "app": "-1,7,-5,0,3,-5,0,3,7",
+   "kind": "order-by-ties"
+  },
+  {
+   "table": "CrNeg",
+   "expr": "CONCATENATEX(CrNeg,CrNeg[r]&\"\",\",\",CrNeg[q])",
+   "powerbi": "2,1,3,2,1,1,2,1,3",
+   "app": "1,2,3,1,2,1,2,1,3",
+   "kind": "other"
+  },
+  {
+   "table": "CrNeg",
+   "expr": "CONCATENATEX(CrNeg,CrNeg[r]&\"\",\",\",CrNeg[q],DESC)",
+   "powerbi": "3,1,1,2,1,2,3,1,2",
+   "app": "1,3,1,2,1,2,3,1,2",
+   "kind": "order-by-ties"
+  },
+  {
+   "table": "CrNeg",
+   "expr": "CONCATENATEX(TOPN(3,CrNeg,CrNeg[r],DESC),CrNeg[q]&\"\",\",\")",
+   "powerbi": "3,0,-5,-1,7",
+   "app": "7,-1,3,-5,0",
+   "kind": "order-by-ties"
+  },
+  {
+   "table": "CrNeg",
+   "expr": "CONCATENATEX(CrNeg,CrNeg[q]&\"\",\",\",CrNeg[q]&\"\",DESC)",
+   "powerbi": "7,7,-5,-5,3,3,-1,0,0",
+   "app": "7,7,3,3,0,0,-5,-5,-1",
+   "kind": "order-by-ties"
+  },
+  {
+   "table": "CrNeg",
+   "expr": "CONCATENATEX(CrNeg,CrNeg[q]&\"\",\",\",LEN(CrNeg[q]&\"\"))",
+   "powerbi": "7,3,3,7,0,0,-5,-1,-5",
+   "app": "0,0,3,3,7,7,-5,-5,-1",
+   "kind": "order-by-ties"
+  },
+  {
+   "table": "CrNeg",
+   "expr": "CONCATENATEX(CrNeg,CrNeg[q]&\"\",\",\",ISBLANK(CrNeg[q]),DESC)",
+   "powerbi": "0,-5,-1,0,-5,3,3,7,7",
+   "app": "-5,-5,-1,0,0,3,3,7,7",
+   "kind": "order-by-ties"
+  },
+  {
+   "table": "CrEmpty",
+   "expr": "CONCATENATEX(FILTER(CrEmpty,NOT(ISBLANK(CrEmpty[s]))),CrEmpty[s]&\"\"&\"/\"&CrEmpty[n]&\"\",\",\")",
+   "powerbi": "x/0,/0,x/1,/1,z/1,/2,y/2,y/2",
+   "app": "x/0,x/1,z/1,y/2,y/2",
+   "kind": "other"
+  },
+  {
+   "table": "CrB33",
+   "expr": "CONCATENATEX(CrB33,CrB33[a]&\"\",\",\",CrB33[b])",
+   "powerbi": "apple,kiwi,fig,date,date,date,pear,apple,apple,kiwi,kiwi,kiwi,date,date,fig,fig,fig,apple,apple,apple,apple,kiwi,kiwi,date,pear,fig,apple,apple,apple,kiwi,date,pear,pear",
+   "app": "fig,apple,kiwi,date,date,date,pear,apple,apple,kiwi,kiwi,kiwi,date,date,fig,fig,fig,apple,apple,apple,apple,kiwi,kiwi,date,pear,fig,apple,apple,apple,kiwi,date,pear,pear",
+   "kind": "other"
+  },
+  {
+   "table": "CrB33",
+   "expr": "CONCATENATEX(CrB33,CrB33[a]&\"\",\",\",CrB33[b],DESC)",
+   "powerbi": "fig,pear,pear,date,kiwi,apple,apple,apple,fig,fig,fig,apple,apple,apple,apple,kiwi,kiwi,date,pear,apple,kiwi,kiwi,kiwi,date,date,apple,fig,date,date,date,pear,kiwi,apple",
+   "app": "fig,apple,apple,apple,kiwi,date,pear,pear,fig,fig,fig,apple,apple,apple,apple,kiwi,kiwi,date,pear,apple,apple,kiwi,kiwi,kiwi,date,date,fig,apple,kiwi,date,date,date,pear",
+   "kind": "order-by-ties"
+  },
+  {
+   "table": "CrB33",
+   "expr": "CONCATENATEX(CrB33,CrB33[b]&\"\",\",\",CrB33[a])",
+   "powerbi": "2,3,3,3,4,2,3,4,4,1,4,1,1,3,2,2,1,3,3,3,1,4,2,2,3,4,1,3,2,3,4,1,4",
+   "app": "1,2,2,3,3,3,3,4,4,4,1,1,1,2,2,3,4,1,3,3,3,4,1,2,2,2,3,3,4,1,3,4,4",
+   "kind": "other"
+  },
+  {
+   "table": "CrB33",
+   "expr": "CONCATENATEX(CrB33,CrB33[b]&\"\",\",\",CrB33[a],DESC)",
+   "powerbi": "4,4,3,1,3,2,2,2,1,4,3,1,3,3,3,4,1,3,1,2,2,1,4,3,4,1,4,3,4,3,3,2,2",
+   "app": "1,3,4,4,1,2,2,2,3,3,4,1,3,3,3,4,1,1,1,2,2,3,4,1,2,2,3,3,3,3,4,4,4",
+   "kind": "order-by-ties"
+  },
+  {
+   "table": "CrB33",
+   "expr": "CONCATENATEX(TOPN(3,CrB33,CrB33[b],DESC),CrB33[a]&\"\",\",\")",
+   "powerbi": "fig,apple,apple,apple,kiwi,date,pear,pear",
+   "app": "date,apple,fig,apple,kiwi,pear,pear,apple",
+   "kind": "order-by-ties"
+  },
+  {
+   "table": "CrB33",
+   "expr": "CONCATENATEX(TOPN(4,CrB33,CrB33[b],ASC),CrB33[a]&\"\"&\"/\"&CrB33[b]&\"\",\",\")",
+   "powerbi": "fig/1,apple/1,kiwi/1,date/1,date/1,date/1,pear/1",
+   "app": "fig/1,date/1,apple/1,date/1,pear/1,kiwi/1,date/1",
+   "kind": "order-by-ties"
+  },
+  {
+   "table": "CrB33",
+   "expr": "CONCATENATEX(CrB33,CrB33[a]&\"\",\",\",LEN(CrB33[a]&\"\"))",
+   "powerbi": "fig,fig,fig,fig,fig,kiwi,date,date,date,date,date,date,pear,pear,pear,pear,kiwi,kiwi,kiwi,kiwi,kiwi,kiwi,date,apple,apple,apple,apple,apple,apple,apple,apple,apple,apple",
+   "app": "fig,fig,fig,fig,fig,kiwi,kiwi,kiwi,kiwi,kiwi,kiwi,kiwi,date,date,date,date,date,date,date,pear,pear,pear,pear,apple,apple,apple,apple,apple,apple,apple,apple,apple,apple",
+   "kind": "order-by-ties"
+  },
+  {
+   "table": "CrB33",
+   "expr": "CONCATENATEX(CrB33,CrB33[a]&\"\",\",\",ISBLANK(CrB33[a]),DESC)",
+   "powerbi": "kiwi,fig,fig,fig,fig,apple,apple,apple,apple,apple,apple,apple,apple,apple,apple,kiwi,fig,kiwi,kiwi,kiwi,kiwi,kiwi,date,date,date,date,date,date,date,pear,pear,pear,pear",
+   "app": "fig,fig,fig,fig,fig,apple,apple,apple,apple,apple,apple,apple,apple,apple,apple,kiwi,kiwi,kiwi,kiwi,kiwi,kiwi,kiwi,date,date,date,date,date,date,date,pear,pear,pear,pear",
+   "kind": "order-by-ties"
+  },
+  {
+   "table": "CrB45",
+   "expr": "CONCATENATEX(CrB45,CrB45[a]&\"\",\",\",CrB45[b])",
+   "powerbi": "kiwi,date,date,pear,fig,apple,date,kiwi,kiwi,kiwi,kiwi,apple,date,date,apple,apple,pear,pear,apple,fig,fig,fig,fig,apple,apple,apple,apple,apple,kiwi,kiwi,date,date,pear,pear,apple,fig,fig,apple,apple,fig,kiwi,date,date,pear,pear",
+   "app": "fig,apple,kiwi,date,date,date,pear,apple,apple,apple,kiwi,kiwi,kiwi,kiwi,date,date,fig,fig,fig,fig,apple,apple,apple,apple,apple,apple,kiwi,kiwi,date,date,pear,pear,pear,pear,fig,fig,fig,apple,apple,apple,kiwi,date,date,pear,pear",
+   "kind": "other"
+  },
+  {
+   "table": "CrB45",
+   "expr": "CONCATENATEX(CrB45,CrB45[a]&\"\",\",\",CrB45[b],DESC)",
+   "powerbi": "kiwi,pear,pear,date,date,fig,apple,apple,apple,fig,fig,apple,fig,fig,fig,apple,apple,apple,apple,apple,kiwi,kiwi,date,date,pear,pear,pear,pear,fig,apple,kiwi,date,date,kiwi,kiwi,apple,apple,kiwi,apple,fig,pear,date,date,date,kiwi",
+   "app": "fig,fig,fig,apple,apple,apple,kiwi,date,date,pear,pear,fig,fig,fig,fig,apple,apple,apple,apple,apple,apple,kiwi,kiwi,date,date,pear,pear,pear,pear,apple,apple,apple,kiwi,kiwi,kiwi,kiwi,date,date,fig,apple,kiwi,date,date,date,pear",
+   "kind": "order-by-ties"
+  },
+  {
+   "table": "CrB45",
+   "expr": "CONCATENATEX(CrB45,CrB45[b]&\"\",\",\",CrB45[a])",
+   "powerbi": "4,3,3,3,2,2,2,4,3,4,1,3,3,2,1,4,3,3,2,1,4,1,3,3,1,3,3,4,4,4,2,1,2,2,2,4,3,3,3,3,3,3,4,4,1",
+   "app": "1,2,2,2,3,3,3,3,3,3,4,4,4,1,1,1,2,2,3,3,4,4,1,3,3,3,3,4,4,4,1,2,2,2,2,3,3,4,1,3,3,3,3,4,4",
+   "kind": "other"
+  },
+  {
+   "table": "CrB45",
+   "expr": "CONCATENATEX(CrB45,CrB45[b]&\"\",\",\",CrB45[a],DESC)",
+   "powerbi": "3,3,4,4,3,1,3,3,3,1,4,2,2,2,2,3,3,1,3,3,4,4,4,1,2,2,3,3,4,1,4,1,4,3,3,3,3,3,3,2,2,2,1,4,4",
+   "app": "1,3,3,3,3,4,4,1,2,2,2,2,3,3,4,1,3,3,3,3,4,4,4,1,1,1,2,2,3,3,4,4,1,2,2,2,3,3,3,3,3,3,4,4,4",
+   "kind": "order-by-ties"
+  },
+  {
+   "table": "CrB45",
+   "expr": "CONCATENATEX(TOPN(3,CrB45,CrB45[b],DESC),CrB45[a]&\"\",\",\")",
+   "powerbi": "fig,fig,fig,apple,apple,apple,kiwi,date,date,pear,pear",
+   "app": "date,apple,fig,apple,kiwi,pear,pear,apple,date,fig,fig",
+   "kind": "order-by-ties"
+  },
+  {
+   "table": "CrB45",
+   "expr": "CONCATENATEX(TOPN(4,CrB45,CrB45[b],ASC),CrB45[a]&\"\"&\"/\"&CrB45[b]&\"\",\",\")",
+   "powerbi": "fig/1,apple/1,kiwi/1,date/1,date/1,date/1,pear/1",
+   "app": "fig/1,date/1,apple/1,date/1,pear/1,kiwi/1,date/1",
+   "kind": "order-by-ties"
+  },
+  {
+   "table": "CrB45",
+   "expr": "CONCATENATEX(CrB45,CrB45[a]&\"\",\",\",LEN(CrB45[a]&\"\"))",
+   "powerbi": "fig,fig,fig,fig,fig,fig,fig,fig,kiwi,date,date,date,date,date,date,pear,pear,pear,pear,pear,pear,pear,kiwi,kiwi,kiwi,kiwi,kiwi,kiwi,kiwi,date,date,date,apple,apple,apple,apple,apple,apple,apple,apple,apple,apple,apple,apple,apple",
+   "app": "fig,fig,fig,fig,fig,fig,fig,fig,kiwi,kiwi,kiwi,kiwi,kiwi,kiwi,kiwi,kiwi,date,date,date,date,date,date,date,date,date,pear,pear,pear,pear,pear,pear,pear,apple,apple,apple,apple,apple,apple,apple,apple,apple,apple,apple,apple,apple",
+   "kind": "order-by-ties"
+  },
+  {
+   "table": "CrB45",
+   "expr": "CONCATENATEX(CrB45,CrB45[a]&\"\",\",\",ISBLANK(CrB45[a]),DESC)",
+   "powerbi": "kiwi,fig,fig,fig,fig,fig,fig,fig,apple,apple,apple,apple,apple,apple,apple,apple,apple,apple,apple,apple,apple,kiwi,fig,kiwi,kiwi,kiwi,kiwi,kiwi,kiwi,date,date,date,date,date,date,date,date,date,pear,pear,pear,pear,pear,pear,pear",
+   "app": "fig,fig,fig,fig,fig,fig,fig,fig,apple,apple,apple,apple,apple,apple,apple,apple,apple,apple,apple,apple,apple,kiwi,kiwi,kiwi,kiwi,kiwi,kiwi,kiwi,kiwi,date,date,date,date,date,date,date,date,date,pear,pear,pear,pear,pear,pear,pear",
+   "kind": "order-by-ties"
+  },
+  {
+   "table": "CrB20",
+   "expr": "CONCATENATEX(CrB20,CrB20[a]&\"\",\",\",CrB20[b])",
+   "powerbi": "pear,fig,date,date,apple,apple,kiwi,kiwi,kiwi,fig,fig,apple,apple,kiwi,date,pear,fig,apple,apple,date",
+   "app": "fig,apple,date,date,pear,apple,kiwi,kiwi,kiwi,fig,fig,apple,apple,kiwi,date,pear,fig,apple,apple,date",
+   "kind": "other"
+  },
+  {
+   "table": "CrB20",
+   "expr": "CONCATENATEX(CrB20,CrB20[a]&\"\",\",\",CrB20[b],DESC)",
+   "powerbi": "fig,date,apple,apple,fig,fig,apple,apple,kiwi,date,pear,kiwi,kiwi,apple,kiwi,fig,apple,pear,date,date",
+   "app": "fig,apple,apple,date,fig,fig,apple,apple,kiwi,date,pear,apple,kiwi,kiwi,kiwi,fig,apple,date,date,pear",
+   "kind": "order-by-ties"
+  },
+  {
+   "table": "CrB20",
+   "expr": "CONCATENATEX(CrB20,CrB20[b]&\"\",\",\",CrB20[a])",
+   "powerbi": "1,3,3,2,4,4,3,1,4,1,1,3,3,4,2,2,2,3,3,1",
+   "app": "1,2,3,3,4,4,1,1,3,4,1,3,3,4,2,2,2,3,1,3",
+   "kind": "other"
+  },
+  {
+   "table": "CrB20",
+   "expr": "CONCATENATEX(CrB20,CrB20[b]&\"\",\",\",CrB20[a],DESC)",
+   "powerbi": "3,1,2,3,2,2,3,3,1,4,4,3,1,1,2,4,1,3,3,4",
+   "app": "1,3,2,2,2,3,1,3,3,4,1,1,3,4,1,2,3,3,4,4",
+   "kind": "order-by-ties"
+  },
+  {
+   "table": "CrB20",
+   "expr": "CONCATENATEX(TOPN(3,CrB20,CrB20[b],DESC),CrB20[a]&\"\",\",\")",
+   "powerbi": "apple,fig,apple,date",
+   "app": "date,apple,fig,apple",
+   "kind": "order-by-ties"
+  },
+  {
+   "table": "CrB20",
+   "expr": "CONCATENATEX(TOPN(4,CrB20,CrB20[b],ASC),CrB20[a]&\"\"&\"/\"&CrB20[b]&\"\",\",\")",
+   "powerbi": "fig/1,apple/1,date/1,date/1,pear/1",
+   "app": "fig/1,date/1,apple/1,date/1,pear/1",
+   "kind": "order-by-ties"
+  },
+  {
+   "table": "CrB20",
+   "expr": "CONCATENATEX(TOPN(3,CrB20,CrB20[a],ASC,CrB20[b],DESC),CrB20[a]&\"\"&\"/\"&CrB20[b]&\"\",\",\")",
+   "powerbi": "apple/3,apple/4,apple/3,apple/4",
+   "app": "apple/4,apple/4,apple/3,apple/3",
+   "kind": "order-by-ties"
+  },
+  {
+   "table": "CrB20",
+   "expr": "CONCATENATEX(CrB20,CrB20[a]&\"\",\",\",LEN(CrB20[a]&\"\"))",
+   "powerbi": "fig,fig,fig,fig,kiwi,date,date,date,date,pear,pear,kiwi,kiwi,kiwi,apple,apple,apple,apple,apple,apple",
+   "app": "fig,fig,fig,fig,kiwi,kiwi,kiwi,kiwi,date,date,date,date,pear,pear,apple,apple,apple,apple,apple,apple",
+   "kind": "order-by-ties"
+  },
+  {
+   "table": "CrB20",
+   "expr": "CONCATENATEX(CrB20,CrB20[a]&\"\",\",\",ISBLANK(CrB20[a]),DESC)",
+   "powerbi": "kiwi,fig,fig,fig,apple,apple,apple,apple,apple,apple,fig,kiwi,kiwi,kiwi,date,date,date,date,pear,pear",
+   "app": "fig,fig,fig,fig,apple,apple,apple,apple,apple,apple,kiwi,kiwi,kiwi,kiwi,date,date,date,date,pear,pear",
+   "kind": "order-by-ties"
+  },
+  {
+   "table": "CrT2",
+   "expr": "CONCATENATEX(CrT2,CrT2[s]&\"\",\",\",CrT2[n])",
+   "powerbi": "tea,cod,ham,dill,lime,fig,cod,zest,yam,kiwi,ice,sage,vine,sage,egg,yam,wheat,zest,leek,vine,udon,oat,oat,ale,wheat,lime,ice,vine,yam,jam,rye,bun,lime,nut,date,wheat,mango,jam,cod,ale,bun,Pear,udon,oat,sage,flan,wheat,leek,date,dill",
+   "app": "egg,cod,ham,dill,lime,fig,cod,zest,yam,kiwi,ice,sage,vine,sage,tea,yam,wheat,zest,leek,vine,udon,oat,ice,yam,bun,lime,vine,oat,lime,ale,wheat,rye,date,jam,nut,wheat,cod,ale,udon,flan,wheat,leek,date,dill,bun,Pear,jam,mango,oat,sage",
+   "kind": "other"
+  },
+  {
+   "table": "CrT2",
+   "expr": "CONCATENATEX(CrT2,CrT2[s]&\"\",\",\",CrT2[n],DESC)",
+   "powerbi": "ale,bun,flan,wheat,Pear,leek,jam,mango,oat,sage,date,dill,cod,udon,bun,vine,lime,ice,wheat,oat,ale,wheat,lime,jam,rye,nut,yam,date,cod,egg,ham,dill,lime,fig,cod,zest,yam,kiwi,ice,sage,vine,sage,tea,yam,wheat,zest,leek,vine,udon,oat",
+   "app": "cod,ale,udon,flan,wheat,leek,date,dill,bun,Pear,jam,mango,oat,sage,ice,yam,bun,lime,vine,oat,lime,ale,wheat,rye,date,jam,nut,wheat,egg,cod,ham,dill,lime,fig,cod,zest,yam,kiwi,ice,sage,vine,sage,tea,yam,wheat,zest,leek,vine,udon,oat",
+   "kind": "order-by-ties"
+  },
+  {
+   "table": "CrT2",
+   "expr": "CONCATENATEX(CrT2,CrT2[n]&\"\",\",\",CrT2[s])",
+   "powerbi": "2,1,2,1,0,0,2,2,1,2,0,0,0,2,0,0,1,1,2,0,0,2,0,1,1,2,1,2,1,0,2,1,0,2,0,0,2,0,0,0,1,0,2,1,1,1,0,0,0,0",
+   "app": "2,1,1,2,2,0,0,2,1,0,2,0,0,2,0,1,0,2,1,0,2,0,0,1,1,2,1,1,2,0,2,1,0,0,2,0,2,0,1,0,0,2,1,0,1,1,0,0,0,0",
+   "kind": "other"
+  },
+  {
+   "table": "CrT2",
+   "expr": "CONCATENATEX(CrT2,CrT2[n]&\"\",\",\",CrT2[s],DESC)",
+   "powerbi": "0,0,0,1,0,0,1,1,2,0,1,0,2,0,0,2,0,0,1,2,2,1,0,1,2,0,1,1,2,0,0,2,1,1,0,0,2,0,0,0,2,2,1,2,0,0,2,1,2,1",
+   "app": "0,0,1,0,0,2,1,0,1,1,0,0,2,0,0,0,0,2,1,2,1,2,0,1,2,0,1,1,2,0,0,2,1,1,0,0,2,0,0,0,2,2,1,2,0,0,1,2,2,1",
+   "kind": "order-by-ties"
+  },
+  {
+   "table": "CrT2",
+   "expr": "CONCATENATEX(TOPN(3,CrT2,CrT2[n],DESC),CrT2[s]&\"\",\",\")",
+   "powerbi": "cod,udon,ale,flan,wheat,leek,date,dill,bun,Pear,jam,mango,oat,sage",
+   "app": "cod,ale,udon,flan,wheat,leek,date,dill,bun,Pear,jam,mango,oat,sage",
+   "kind": "order-by-ties"
+  },
+  {
+   "table": "CrT2",
+   "expr": "CONCATENATEX(TOPN(4,CrT2,CrT2[n],ASC),CrT2[s]&\"\"&\"/\"&CrT2[n]&\"\",\",\")",
+   "powerbi": "cod/0,dill/0,ham/0,egg/0,lime/0,fig/0,cod/0,zest/0,yam/0,kiwi/0,ice/0,sage/0,vine/0,sage/0,tea/0,yam/0,wheat/0,zest/0,leek/0,vine/0,udon/0,oat/0",
+   "app": "egg/0,cod/0,ham/0,dill/0,lime/0,fig/0,cod/0,zest/0,yam/0,kiwi/0,ice/0,sage/0,vine/0,sage/0,tea/0,yam/0,wheat/0,zest/0,leek/0,vine/0,udon/0,oat/0",
+   "kind": "order-by-ties"
+  },
+  {
+   "table": "CrT2",
+   "expr": "CONCATENATEX(CrT2,CrT2[s]&\"\",\",\",LEN(CrT2[s]&\"\"))",
+   "powerbi": "nut,ice,ice,yam,yam,yam,cod,cod,cod,bun,bun,ale,ale,ham,fig,oat,oat,oat,tea,rye,jam,jam,egg,zest,vine,sage,lime,lime,lime,sage,vine,Pear,flan,leek,leek,zest,vine,date,date,kiwi,sage,dill,dill,udon,udon,mango,wheat,wheat,wheat,wheat",
+   "app": "egg,ice,ice,yam,yam,yam,cod,cod,cod,bun,bun,ale,ale,ham,fig,oat,oat,oat,tea,rye,jam,jam,nut,dill,dill,udon,udon,lime,lime,lime,vine,vine,vine,flan,leek,leek,zest,zest,date,date,kiwi,sage,sage,sage,Pear,wheat,wheat,wheat,wheat,mango",
+   "kind": "order-by-ties"
+  },
+  {
+   "table": "CrT2",
+   "expr": "CONCATENATEX(CrT2,CrT2[s]&\"\",\",\",ISBLANK(CrT2[s]),DESC)",
+   "powerbi": "oat,ice,ice,yam,yam,yam,cod,cod,cod,bun,bun,ale,ale,ham,dill,dill,udon,udon,lime,lime,lime,fig,vine,vine,vine,egg,oat,oat,flan,wheat,wheat,wheat,wheat,leek,leek,zest,zest,date,date,kiwi,sage,sage,sage,tea,Pear,rye,jam,jam,mango,nut",
+   "app": "egg,ice,ice,yam,yam,yam,cod,cod,cod,bun,bun,ale,ale,ham,dill,dill,udon,udon,lime,lime,lime,fig,vine,vine,vine,oat,oat,oat,flan,wheat,wheat,wheat,wheat,leek,leek,zest,zest,date,date,kiwi,sage,sage,sage,tea,Pear,rye,jam,jam,mango,nut",
+   "kind": "order-by-ties"
+  },
+  {
+   "table": "CrT1",
+   "expr": "CONCATENATEX(CrT1,CrT1[s]&\"\",\",\",LEN(CrT1[s]&\"\"))",
+   "powerbi": "jam,ham,ham,ale,ale,fig,fig,fig,jam,jam,jam,ham,jam,nut,nut,nut,oat,yam,yam,gum,rye,rye,cod,cod,egg,pea,pea,ale,udon,leek,leek,kale,plum,Pear,kale,lime,lime,lime,sage,sage,sage,leek,date,date,date,date,sage,mango,wheat,mango",
+   "app": "ham,ham,ham,pea,pea,ale,ale,ale,fig,fig,fig,jam,jam,jam,jam,jam,nut,nut,nut,oat,yam,yam,gum,rye,rye,cod,cod,egg,leek,leek,leek,lime,lime,lime,udon,date,date,date,date,sage,sage,sage,sage,Pear,kale,kale,plum,mango,mango,wheat",
+   "kind": "order-by-ties"
+  },
+  {
+   "table": "CrT1",
+   "expr": "CONCATENATEX(CrT1,CrT1[s]&\"\",\",\",ISBLANK(CrT1[s]),DESC)",
+   "powerbi": "jam,ham,ham,leek,leek,leek,pea,pea,lime,lime,lime,ale,ale,ale,udon,date,date,date,date,fig,fig,fig,jam,jam,jam,ham,jam,sage,sage,sage,sage,nut,nut,nut,Pear,kale,kale,oat,yam,yam,mango,mango,gum,plum,rye,rye,cod,cod,egg,wheat",
+   "app": "ham,ham,ham,leek,leek,leek,pea,pea,lime,lime,lime,ale,ale,ale,udon,date,date,date,date,fig,fig,fig,jam,jam,jam,jam,jam,sage,sage,sage,sage,nut,nut,nut,Pear,kale,kale,oat,yam,yam,mango,mango,gum,plum,rye,rye,cod,cod,egg,wheat",
+   "kind": "order-by-ties"
+  },
+  {
+   "table": "CrD2",
+   "expr": "CONCATENATEX(CrD2,FORMAT(CrD2[d],\"yyyy-mm-dd\"),\",\",CrD2[v])",
+   "powerbi": "2024-08-05,2024-05-16,2024-04-30,2024-05-29,2024-05-03,2024-09-11,2024-05-23,2024-03-22,2024-05-02,2024-04-14,2024-05-26,2024-03-02,2024-09-08,2024-07-31,2024-06-07,2024-04-12,2024-08-08,2024-05-02,2024-06-29,2024-06-10,2024-04-20,2024-03-12,2024-07-27,2024-08-14,2024-05-07,2024-05-19,2024-03-10,2024-08-03,2024-03-23,2024-07-04,2024-09-05,2024-04-21,2024-09-02,2024-04-21,2024-06-10,2024-04-06,2024-07-29,2024-04-15,2024-03-18,2024-08-05",
+   "app": "2024-07-31,2024-05-16,2024-04-30,2024-05-29,2024-05-03,2024-09-11,2024-05-23,2024-03-22,2024-05-02,2024-04-14,2024-05-26,2024-03-02,2024-09-08,2024-08-05,2024-07-27,2024-08-14,2024-05-19,2024-03-10,2024-06-07,2024-08-08,2024-05-02,2024-06-10,2024-03-12,2024-05-07,2024-04-12,2024-04-20,2024-06-29,202",
+   "kind": "other"
+  },
+  {
+   "table": "CrD2",
+   "expr": "CONCATENATEX(CrD2,FORMAT(CrD2[d],\"yyyy-mm-dd\"),\",\",CrD2[v],DESC)",
+   "powerbi": "2024-07-04,2024-09-02,2024-06-10,2024-04-21,2024-09-05,2024-03-23,2024-08-05,2024-08-03,2024-04-21,2024-04-06,2024-07-29,2024-03-18,2024-04-15,2024-06-07,2024-07-27,2024-05-07,2024-03-10,2024-04-12,2024-04-20,2024-08-14,2024-06-29,2024-08-08,2024-05-02,2024-05-19,2024-06-10,2024-03-12,2024-07-31,2024-05-16,2024-04-30,2024-05-29,2024-05-03,2024-09-11,2024-05-23,2024-03-22,2024-05-02,2024-04-14,2024-05-26,2024-03-02,2024-09-08,2024-08-05",
+   "app": "2024-03-23,2024-06-10,2024-03-18,2024-04-06,2024-09-02,2024-09-05,2024-08-03,2024-07-29,2024-08-05,2024-04-21,2024-04-21,2024-07-04,2024-04-15,2024-07-27,2024-08-14,2024-05-19,2024-03-10,2024-06-07,2024-08-08,2024-05-02,2024-06-10,2024-03-12,2024-05-07,2024-04-12,2024-04-20,2024-06-29,2024-07-31,202",
+   "kind": "order-by-ties"
+  },
+  {
+   "table": "CrD2",
+   "expr": "CONCATENATEX(CrD2,CrD2[v]&\"\",\",\",CrD2[d])",
+   "powerbi": "0,1,1,2,0,2,2,1,0,2,1,2,2,0,0,1,0,1,0,1,0,0,0,1,1,2,1,2,1,2,0,2,2,0,1,1,2,2,0,0",
+   "app": "0,1,1,2,0,2,2,1,0,2,1,2,2,0,1,0,0,1,0,1,0,0,0,1,2,1,1,2,1,2,0,2,2,0,1,1,2,2,0,0",
+   "kind": "other"
+  },
+  {
+   "table": "CrD2",
+   "expr": "CONCATENATEX(CrD2,CrD2[v]&\"\",\",\",CrD2[d],DESC)",
+   "powerbi": "0,0,2,2,1,1,0,2,2,0,2,1,2,1,2,1,1,0,0,0,1,0,1,0,0,1,0,2,2,1,2,0,1,2,2,0,2,1,1,0",
+   "app": "0,0,2,2,1,1,2,0,2,0,2,1,2,1,2,1,1,0,0,0,1,0,1,0,1,0,0,2,2,1,2,0,1,2,2,0,2,1,1,0",
+   "kind": "order-by-ties"
+  },
+  {
+   "table": "CrD2",
+   "expr": "CONCATENATEX(TOPN(3,CrD2,CrD2[v],DESC),FORMAT(CrD2[d],\"yyyy-mm-dd\"),\",\")",
+   "powerbi": "2024-06-10,2024-03-18,2024-03-23,2024-04-06,2024-09-02,2024-09-05,2024-08-03,2024-07-29,2024-08-05,2024-04-21,2024-04-21,2024-07-04,2024-04-15",
+   "app": "2024-03-23,2024-06-10,2024-03-18,2024-04-06,2024-09-02,2024-09-05,2024-08-03,2024-07-29,2024-08-05,2024-04-21,2024-04-21,2024-07-04,2024-04-15",
+   "kind": "order-by-ties"
+  },
+  {
+   "table": "CrD2",
+   "expr": "CONCATENATEX(TOPN(4,CrD2,CrD2[v],ASC),FORMAT(CrD2[d],\"yyyy-mm-dd\")&\"/\"&CrD2[v]&\"\",\",\")",
+   "powerbi": "2024-04-30/0,2024-07-31/0,2024-05-29/0,2024-05-16/0,2024-05-03/0,2024-09-11/0,2024-05-23/0,2024-03-22/0,2024-05-02/0,2024-04-14/0,2024-05-26/0,2024-03-02/0,2024-09-08/0,2024-08-05/0",
+   "app": "2024-07-31/0,2024-05-16/0,2024-04-30/0,2024-05-29/0,2024-05-03/0,2024-09-11/0,2024-05-23/0,2024-03-22/0,2024-05-02/0,2024-04-14/0,2024-05-26/0,2024-03-02/0,2024-09-08/0,2024-08-05/0",
+   "kind": "order-by-ties"
+  },
+  {
+   "table": "CrD2",
+   "expr": "CONCATENATEX(CrD2,FORMAT(CrD2[d],\"yyyy-mm-dd\"),\",\",LEN(FORMAT(CrD2[d],\"yyyy-mm-dd\")))",
+   "powerbi": "2024-08-03,2024-07-27,2024-03-23,2024-05-16,2024-08-14,2024-06-10,2024-04-30,2024-05-19,2024-03-18,2024-05-29,2024-03-10,2024-04-06,2024-05-03,2024-06-07,2024-09-02,2024-09-11,2024-08-08,2024-09-05,2024-05-23,2024-05-02,2024-07-31,2024-03-22,2024-06-10,2024-07-29,2024-05-02,2024-03-12,2024-08-05,2024-04-14,2024-05-07,2024-04-21,2024-05-26,2024-04-12,2024-04-21,2024-03-02,2024-04-20,2024-07-04,2024-09-08,2024-06-29,2024-04-15,2024-08-05",
+   "app": "2024-07-31,2024-07-27,2024-03-23,2024-05-16,2024-08-14,2024-06-10,2024-04-30,2024-05-19,2024-03-18,2024-05-29,2024-03-10,2024-04-06,2024-05-03,2024-06-07,2024-09-02,2024-09-11,2024-08-08,2024-09-05,2024-05-23,2024-05-02,2024-08-03,2024-03-22,2024-06-10,2024-07-29,2024-05-02,2024-03-12,2024-08-05,202",
+   "kind": "order-by-ties"
+  },
+  {
+   "table": "CrD2",
+   "expr": "CONCATENATEX(CrD2,FORMAT(CrD2[d],\"yyyy-mm-dd\"),\",\",ISBLANK(CrD2[d]),DESC)",
+   "powerbi": "2024-08-03,2024-07-27,2024-03-23,2024-05-16,2024-08-14,2024-06-10,2024-04-30,2024-05-19,2024-03-18,2024-05-29,2024-03-10,2024-04-06,2024-05-03,2024-06-07,2024-09-02,2024-09-11,2024-08-08,2024-09-05,2024-05-23,2024-05-02,2024-07-31,2024-03-22,2024-06-10,2024-07-29,2024-05-02,2024-03-12,2024-08-05,2024-04-14,2024-05-07,2024-04-21,2024-05-26,2024-04-12,2024-04-21,2024-03-02,2024-04-20,2024-07-04,2024-09-08,2024-06-29,2024-04-15,2024-08-05",
+   "app": "2024-07-31,2024-07-27,2024-03-23,2024-05-16,2024-08-14,2024-06-10,2024-04-30,2024-05-19,2024-03-18,2024-05-29,2024-03-10,2024-04-06,2024-05-03,2024-06-07,2024-09-02,2024-09-11,2024-08-08,2024-09-05,2024-05-23,2024-05-02,2024-08-03,2024-03-22,2024-06-10,2024-07-29,2024-05-02,2024-03-12,2024-08-05,202",
+   "kind": "order-by-ties"
+  },
+  {
+   "table": "CrI2",
+   "expr": "CONCATENATEX(CrI2,CrI2[k]&\"\",\",\",LEN(CrI2[k]&\"\"))",
+   "powerbi": "4,1,1,1,2,2,2,3,3,0,5,5,6,6,7,8,8,9",
+   "app": "0,1,1,1,2,2,2,3,3,4,5,5,6,6,7,8,8,9",
+   "kind": "order-by-ties"
+  },
+  {
+   "table": "CrI2",
+   "expr": "CONCATENATEX(CrI2,CrI2[k]&\"\",\",\",ISBLANK(CrI2[k]),DESC)",
+   "powerbi": "4,1,1,1,2,2,2,3,3,0,5,5,6,6,7,8,8,9",
+   "app": "0,1,1,1,2,2,2,3,3,4,5,5,6,6,7,8,8,9",
+   "kind": "order-by-ties"
+  },
+  {
+   "table": "CrI3",
+   "expr": "CONCATENATEX(CrI3,CrI3[k]&\"\",\",\",CrI3[m])",
+   "powerbi": "11,9,2,0,0,10,9,10,0,1,2,4,5,8,6,2,6,11,6,4,6,5,9,4,6",
+   "app": "9,11,2,0,0,9,10,10,0,1,2,4,5,8,2,6,6,4,6,6,11,5,9,4,6",
+   "kind": "other"
+  },
+  {
+   "table": "CrI3",
+   "expr": "CONCATENATEX(CrI3,CrI3[k]&\"\",\",\",CrI3[m],DESC)",
+   "powerbi": "6,4,9,5,4,11,6,6,2,6,6,5,8,4,2,1,0,9,10,10,0,0,2,11,9",
+   "app": "4,6,5,9,4,6,6,11,2,6,6,5,8,1,2,4,0,9,10,10,0,0,2,9,11",
+   "kind": "order-by-ties"
+  },
+  {
+   "table": "CrI3",
+   "expr": "CONCATENATEX(CrI3,CrI3[m]&\"\",\",\",CrI3[k])",
+   "powerbi": "5,2,2,6,8,6,1,6,11,9,10,7,11,8,8,9,9,7,0,4,10,4,4,0,9",
+   "app": "2,2,5,6,1,6,8,6,9,11,7,10,8,8,9,9,11,7,0,4,10,4,4,0,9",
+   "kind": "other"
+  },
+  {
+   "table": "CrI3",
+   "expr": "CONCATENATEX(CrI3,CrI3[m]&\"\",\",\",CrI3[k],DESC)",
+   "powerbi": "0,9,4,4,0,10,4,7,11,8,8,9,9,10,7,11,6,9,1,8,6,6,2,5,2",
+   "app": "0,9,4,4,0,4,10,7,8,8,9,9,11,7,10,6,9,11,1,6,8,6,2,2,5",
+   "kind": "order-by-ties"
+  },
+  {
+   "table": "CrI3",
+   "expr": "CONCATENATEX(TOPN(3,CrI3,CrI3[m],DESC),CrI3[k]&\"\",\",\")",
+   "powerbi": "9,4,5,6",
+   "app": "4,6,9,5",
+   "kind": "order-by-ties"
+  },
+  {
+   "table": "CrI3",
+   "expr": "CONCATENATEX(TOPN(4,CrI3,CrI3[m],ASC),CrI3[k]&\"\"&\"/\"&CrI3[m]&\"\",\",\")",
+   "powerbi": "0/2,0/2,9/0,11/0,2/1",
+   "app": "9/0,11/0,2/1,0/2,0/2",
+   "kind": "order-by-ties"
+  },
+  {
+   "table": "CrI3",
+   "expr": "CONCATENATEX(CrI3,CrI3[k]&\"\",\",\",LEN(CrI3[k]&\"\"))",
+   "powerbi": "6,0,0,1,2,2,2,4,4,4,5,5,0,6,6,6,6,8,9,9,9,10,10,11,11",
+   "app": "0,0,0,1,2,2,2,4,4,4,5,5,6,6,6,6,6,8,9,9,9,10,10,11,11",
+   "kind": "order-by-ties"
+  },
+  {
+   "table": "CrI3",
+   "expr": "CONCATENATEX(CrI3,CrI3[k]&\"\",\",\",ISBLANK(CrI3[k]),DESC)",
+   "powerbi": "6,0,0,1,2,2,2,4,4,4,5,5,0,6,6,6,6,8,9,9,9,10,10,11,11",
+   "app": "0,0,0,1,2,2,2,4,4,4,5,5,6,6,6,6,6,8,9,9,9,10,10,11,11",
+   "kind": "order-by-ties"
+  },
+  {
+   "table": "CrBF",
+   "expr": "CONCATENATEX(CrBF,CrBF[b]&\"\",\",\",CrBF[n],DESC)",
+   "powerbi": "FALSE,TRUE,FALSE,FALSE,TRUE,FALSE,TRUE,FALSE,TRUE,TRUE",
+   "app": "FALSE,FALSE,TRUE,FALSE,TRUE,FALSE,TRUE,FALSE,TRUE,TRUE",
+   "kind": "order-by-ties"
+  },
+  {
+   "table": "CrBF",
+   "expr": "CONCATENATEX(CrBF,CrBF[n]&\"\",\",\",CrBF[b])",
+   "powerbi": "2,1,0,3,3,3,0,0,2,1",
+   "app": "0,1,2,3,3,0,0,1,2,3",
+   "kind": "other"
+  },
+  {
+   "table": "CrBF",
+   "expr": "CONCATENATEX(CrBF,CrBF[n]&\"\",\",\",CrBF[b],DESC)",
+   "powerbi": "0,2,0,1,3,0,1,2,3,3",
+   "app": "0,0,1,2,3,0,1,2,3,3",
+   "kind": "order-by-ties"
+  },
+  {
+   "table": "CrBF",
+   "expr": "CONCATENATEX(TOPN(3,CrBF,CrBF[n],DESC),CrBF[b]&\"\",\",\")",
+   "powerbi": "FALSE,TRUE,FALSE",
+   "app": "TRUE,FALSE,FALSE",
+   "kind": "order-by-ties"
+  },
+  {
+   "table": "CrBF",
+   "expr": "CONCATENATEX(TOPN(4,CrBF,CrBF[n],ASC),CrBF[b]&\"\"&\"/\"&CrBF[n]&\"\",\",\")",
+   "powerbi": "FALSE/1,TRUE/1,TRUE/0,TRUE/0,FALSE/0",
+   "app": "TRUE/0,TRUE/0,FALSE/0,TRUE/1,FALSE/1",
+   "kind": "order-by-ties"
+  },
+  {
+   "table": "CrBF",
+   "expr": "CONCATENATEX(CrBF,CrBF[b]&\"\",\",\",ISBLANK(CrBF[b]),DESC)",
+   "powerbi": "TRUE,FALSE,FALSE,FALSE,FALSE,FALSE,TRUE,TRUE,TRUE,TRUE",
+   "app": "FALSE,FALSE,FALSE,FALSE,FALSE,TRUE,TRUE,TRUE,TRUE,TRUE",
+   "kind": "order-by-ties"
+  },
+  {
+   "table": "CrWeek",
+   "expr": "CONCATENATEX(CrWeek,FORMAT(CrWeek[d],\"yyyy-mm-dd\"),\",\",LEN(FORMAT(CrWeek[d],\"yyyy-mm-dd\")))",
+   "powerbi": "2024-10-07,2024-01-22,2025-06-23,2024-01-22,2026-11-16,2026-04-20,2025-06-23,2024-03-25,2025-12-01,2024-01-01",
+   "app": "2026-04-20,2024-01-22,2025-06-23,2024-01-22,2026-11-16,2024-10-07,2025-06-23,2024-03-25,2025-12-01,2024-01-01",
+   "kind": "order-by-ties"
+  },
+  {
+   "table": "CrWeek",
+   "expr": "CONCATENATEX(CrWeek,FORMAT(CrWeek[d],\"yyyy-mm-dd\"),\",\",ISBLANK(CrWeek[d]),DESC)",
+   "powerbi": "2024-10-07,2024-01-22,2025-06-23,2024-01-22,2026-11-16,2026-04-20,2025-06-23,2024-03-25,2025-12-01,2024-01-01",
+   "app": "2026-04-20,2024-01-22,2025-06-23,2024-01-22,2026-11-16,2024-10-07,2025-06-23,2024-03-25,2025-12-01,2024-01-01",
+   "kind": "order-by-ties"
+  },
+  {
+   "table": "CrWeek2",
+   "expr": "CONCATENATEX(CrWeek2,FORMAT(CrWeek2[d],\"yyyy-mm-dd\"),\",\",CrWeek2[v])",
+   "powerbi": "2026-04-20,2025-06-23,2025-06-23,2025-12-01,2026-11-16,2024-10-07,2024-01-22,2024-01-22,2024-03-25,2024-01-01",
+   "app": "2026-04-20,2025-06-23,2026-11-16,2025-06-23,2025-12-01,2024-01-22,2024-01-22,2024-10-07,2024-03-25,2024-01-01",
+   "kind": "other"
+  },
+  {
+   "table": "CrWeek2",
+   "expr": "CONCATENATEX(CrWeek2,FORMAT(CrWeek2[d],\"yyyy-mm-dd\"),\",\",CrWeek2[v],DESC)",
+   "powerbi": "2024-01-01,2024-01-22,2024-01-22,2024-10-07,2024-03-25,2025-12-01,2025-06-23,2025-06-23,2026-04-20,2026-11-16",
+   "app": "2024-01-22,2024-01-22,2024-10-07,2024-03-25,2024-01-01,2026-04-20,2025-06-23,2026-11-16,2025-06-23,2025-12-01",
+   "kind": "order-by-ties"
+  },
+  {
+   "table": "CrWeek2",
+   "expr": "CONCATENATEX(TOPN(3,CrWeek2,CrWeek2[v],DESC),FORMAT(CrWeek2[d],\"yyyy-mm-dd\"),\",\")",
+   "powerbi": "2024-01-22,2024-10-07,2024-01-22,2024-03-25,2024-01-01",
+   "app": "2024-01-22,2024-01-22,2024-10-07,2024-03-25,2024-01-01",
+   "kind": "order-by-ties"
+  },
+  {
+   "table": "CrWeek2",
+   "expr": "CONCATENATEX(TOPN(4,CrWeek2,CrWeek2[v],ASC),FORMAT(CrWeek2[d],\"yyyy-mm-dd\")&\"/\"&CrWeek2[v]&\"\",\",\")",
+   "powerbi": "2026-11-16/0,2025-06-23/0,2025-06-23/0,2026-04-20/0,2025-12-01/0",
+   "app": "2026-04-20/0,2025-06-23/0,2026-11-16/0,2025-06-23/0,2025-12-01/0",
+   "kind": "order-by-ties"
+  },
+  {
+   "table": "CrWeek2",
+   "expr": "CONCATENATEX(CrWeek2,FORMAT(CrWeek2[d],\"yyyy-mm-dd\"),\",\",LEN(FORMAT(CrWeek2[d],\"yyyy-mm-dd\")))",
+   "powerbi": "2024-10-07,2024-01-22,2025-06-23,2024-01-22,2026-11-16,2026-04-20,2025-06-23,2024-03-25,2025-12-01,2024-01-01",
+   "app": "2026-04-20,2024-01-22,2025-06-23,2024-01-22,2026-11-16,2024-10-07,2025-06-23,2024-03-25,2025-12-01,2024-01-01",
+   "kind": "order-by-ties"
+  },
+  {
+   "table": "CrWeek2",
+   "expr": "CONCATENATEX(CrWeek2,FORMAT(CrWeek2[d],\"yyyy-mm-dd\"),\",\",ISBLANK(CrWeek2[d]),DESC)",
+   "powerbi": "2024-10-07,2024-01-22,2025-06-23,2024-01-22,2026-11-16,2026-04-20,2025-06-23,2024-03-25,2025-12-01,2024-01-01",
+   "app": "2026-04-20,2024-01-22,2025-06-23,2024-01-22,2026-11-16,2024-10-07,2025-06-23,2024-03-25,2025-12-01,2024-01-01",
+   "kind": "order-by-ties"
+  },
+  {
+   "table": "CrT2",
+   "expr": "CONCATENATEX(CrT2,CrT2[s]&SUMX(CrT2,1),\",\")",
+   "powerbi": "egg50,ice50,ice50,yam50,yam50,yam50,cod50,cod50,cod50,bun50,bun50,ale50,ale50,ham50,dill50,dill50,udon50,udon50,lime50,lime50,lime50,fig50,vine50,vine50,vine50,oat50,oat50,oat50,flan50,wheat50,wheat50,wheat50,wheat50,leek50,leek50,zest50,zest50,date50,date50,kiwi50,sage50,sage50,sage50,tea50,Pear50,rye50,jam50,jam50,mango50,nut50",
+   "app": "egg50,ice50,yam50,cod50,bun50,ale50,cod50,ham50,dill50,udon50,lime50,lime50,fig50,vine50,cod50,oat50,flan50,wheat50,leek50,zest50,date50,dill50,yam50,kiwi50,ice50,lime50,sage50,vine50,ale50,sage50,bun50,tea50,wheat50,yam50,wheat50,zest50,Pear50,leek50,rye50,jam50,vine50,date50,mango50,oat50,sage50,u",
+   "kind": "other"
+  },
+  {
+   "table": "CrT2",
+   "expr": "CONCATENATEX(CrT2,CrT2[s]&\"\",\",\",-CrT2[n])",
+   "powerbi": "ale,bun,flan,wheat,Pear,leek,jam,mango,oat,sage,date,dill,cod,udon,bun,vine,lime,ice,wheat,oat,ale,wheat,lime,jam,rye,nut,yam,date,cod,egg,ham,dill,lime,fig,cod,zest,yam,kiwi,ice,sage,vine,sage,tea,yam,wheat,zest,leek,vine,udon,oat",
+   "app": "cod,ale,udon,flan,wheat,leek,date,dill,bun,Pear,jam,mango,oat,sage,ice,yam,bun,lime,vine,oat,lime,ale,wheat,rye,date,jam,nut,wheat,egg,cod,ham,dill,lime,fig,cod,zest,yam,kiwi,ice,sage,vine,sage,tea,yam,wheat,zest,leek,vine,udon,oat",
+   "kind": "other"
+  },
+  {
+   "table": "CrT2",
+   "expr": "CONCATENATEX(CrT2,CrT2[s]&\"\",\",\",CrT2[n]*CrT2[n],DESC)",
+   "powerbi": "ale,bun,flan,wheat,Pear,leek,jam,mango,oat,sage,date,dill,cod,udon,bun,vine,lime,ice,wheat,oat,ale,wheat,lime,jam,rye,nut,yam,date,cod,egg,ham,dill,lime,fig,cod,zest,yam,kiwi,ice,sage,vine,sage,tea,yam,wheat,zest,leek,vine,udon,oat",
+   "app": "cod,ale,udon,flan,wheat,leek,date,dill,bun,Pear,jam,mango,oat,sage,ice,yam,bun,lime,vine,oat,lime,ale,wheat,rye,date,jam,nut,wheat,egg,cod,ham,dill,lime,fig,cod,zest,yam,kiwi,ice,sage,vine,sage,tea,yam,wheat,zest,leek,vine,udon,oat",
+   "kind": "order-by-ties"
+  },
+  {
+   "table": "CrT2",
+   "expr": "CONCATENATEX(DISTINCT(CrT2),CrT2[s]&\"/\"&CrT2[n],\",\")",
+   "powerbi": "egg/0,ice/0,yam/0,cod/0,ham/0,dill/0,udon/0,lime/0,fig/0,vine/0,oat/0,wheat/0,leek/0,zest/0,kiwi/0,sage/0,tea/0,ice/1,yam/1,bun/1,ale/1,lime/1,vine/1,oat/1,wheat/1,date/1,rye/1,jam/1,nut/1,cod/2,bun/2,ale/2,dill/2,udon/2,oat/2,flan/2,wheat/2,leek/2,date/2,sage/2,Pear/2,jam/2,mango/2",
+   "app": "egg/0,ice/1,yam/1,cod/2,bun/1,ale/2,cod/0,ham/0,dill/0,udon/2,lime/0,lime/1,fig/0,vine/1,oat/1,flan/2,wheat/2,leek/2,zest/0,date/2,dill/2,yam/0,kiwi/0,ice/0,sage/0,vine/0,ale/1,bun/2,tea/0,wheat/1,wheat/0,Pear/2,leek/0,rye/1,jam/2,date/1,mango/2,oat/2,sage/2,udon/0,oat/0,jam/1,nut/1",
+   "kind": "other"
+  },
+  {
+   "table": "CrT2",
+   "expr": "CONCATENATEX(UNION(SELECTCOLUMNS(CrT2,\"a\",CrT2[s]),SELECTCOLUMNS(CrT2,\"a\",CrT2[s])),[a]&\"\",\",\")",
+   "powerbi": "egg,ice,ice,yam,yam,yam,cod,cod,cod,bun,bun,ale,ale,ham,dill,dill,udon,udon,lime,lime,lime,fig,vine,vine,vine,oat,oat,oat,flan,wheat,wheat,wheat,wheat,leek,leek,zest,zest,date,date,kiwi,sage,sage,sage,tea,Pear,rye,jam,jam,mango,nut,egg,ice,ice,yam,yam,yam,cod,cod,cod,bun,bun,ale,ale,ham,dill,dill,udon,udon,lime,lime,lime,fig,vine,vine,vine,oat,oat,oat,flan,wheat,wheat,wheat,wheat,leek,leek,zest,zest,date,date,kiwi,sage,sage,sage,tea,Pear,rye,jam,jam,mango,nut",
+   "app": "egg,ice,yam,cod,bun,ale,cod,ham,dill,udon,lime,lime,fig,vine,cod,oat,flan,wheat,leek,zest,date,dill,yam,kiwi,ice,lime,sage,vine,ale,sage,bun,tea,wheat,yam,wheat,zest,Pear,leek,rye,jam,vine,date,mango,oat,sage,udon,oat,jam,nut,wheat,egg,ice,yam,cod,bun,ale,cod,ham,dill,udon,lime,lime,fig,vine,cod,oat",
+   "kind": "other"
+  },
+  {
+   "table": "CrMany",
+   "expr": "CONCATENATEX(CrMany,CrMany[a]&SUMX(CrMany,1),\",\")",
+   "powerbi": "20,20,20,p20,p20,p20,p20,p20,p20,r20,r20,r20,r20,r20,q20,q20,q20,q20,q20,q20",
+   "app": "20,p20,r20,q20,p20,r20,q20,20,r20,q20,p20,r20,q20,p20,20,q20,p20,r20,q20,p20",
+   "kind": "other"
+  },
+  {
+   "table": "CrMany",
+   "expr": "CONCATENATEX(CrMany,CrMany[a]&\"\",\",\",-CrMany[b])",
+   "powerbi": "p,p,p,,p,p,p,r,,r,r,r,r,,q,q,q,q,q,q",
+   "app": ",p,p,p,p,p,p,,r,r,r,r,r,,q,q,q,q,q,q",
+   "kind": "other"
+  },
+  {
+   "table": "CrMany",
+   "expr": "CONCATENATEX(CrMany,CrMany[a]&\"\",\",\",CrMany[b]*CrMany[b],DESC)",
+   "powerbi": "p,p,p,,p,p,p,r,,r,r,r,r,,q,q,q,q,q,q",
+   "app": ",p,p,p,p,p,p,,r,r,r,r,r,,q,q,q,q,q,q",
+   "kind": "order-by-ties"
+  },
+  {
+   "table": "CrMany",
+   "expr": "CONCATENATEX(DISTINCT(CrMany),CrMany[a]&\"/\"&CrMany[b],\",\")",
+   "powerbi": "q/0,r/1,p/2,q/0,/1,r/1,/2,p/2,/0,q/0,r/1,p/2",
+   "app": "/0,p/2,r/1,q/0,p/2,r/1,/2,r/1,q/0,p/2,q/0,/1",
+   "kind": "other"
+  },
+  {
+   "table": "CrMany",
+   "expr": "CONCATENATEX(UNION(SELECTCOLUMNS(CrMany,\"a\",CrMany[a]),SELECTCOLUMNS(CrMany,\"a\",CrMany[a])),[a]&\"\",\",\")",
+   "powerbi": ",,,p,p,p,p,p,p,r,r,r,r,r,q,q,q,q,q,q,,,,p,p,p,p,p,p,r,r,r,r,r,q,q,q,q,q,q",
+   "app": ",p,r,q,p,r,q,,r,q,p,r,q,p,,q,p,r,q,p,,p,r,q,p,r,q,,r,q,p,r,q,p,,q,p,r,q,p",
+   "kind": "other"
+  },
+  {
+   "table": "CrMany",
+   "expr": "CONCATENATEX(TOPN(5,CrMany,CrMany[b],DESC,CrMany[a],ASC),CrMany[a]&\"/\"&CrMany[b],\",\")",
+   "powerbi": "p/2,p/2,p/2,/2,p/2,p/2,p/2",
+   "app": "/2,p/2,p/2,p/2,p/2,p/2,p/2",
+   "kind": "order-by-ties"
+  },
+  {
+   "table": "CrMany",
+   "expr": "CONCATENATEX(TOPN(2,SUMMARIZE(CrMany,CrMany[a],CrMany[b]),CrMany[b],DESC),CrMany[a]&\"/\"&CrMany[b],\",\")",
+   "powerbi": "/2,p/2",
+   "app": "p/2,/2",
+   "kind": "order-by-ties"
+  },
+  {
+   "table": "CrBig",
+   "expr": "CONCATENATEX(CrBig,CrBig[a]&CALCULATE(COUNTROWS(CrBig)),\",\")",
+   "powerbi": "fig2,fig2,apple1,kiwi1,date6,date6,date6,date6,date6,date6,pear2,pear2,fig1,apple4,apple4,apple4,apple4,kiwi6,kiwi6,kiwi6,kiwi6,kiwi6,kiwi6,date4,date4,date4,date4,fig9,fig9,fig9,fig9,fig9,fig9,fig9,fig9,fig9,apple7,apple7,apple7,apple7,apple7,apple7,apple7,kiwi4,kiwi4,kiwi4,kiwi4,date2,date2,pear6,pear6,pear6,pear6,pear6,pear6,fig3,fig3,fig3,apple5,apple5,apple5,apple5,apple5,kiwi2,kiwi2,date3,date3,date3,pear2,pear2",
+   "app": "fig2,apple4,kiwi6,fig9,date3,kiwi4,date6,kiwi6,kiwi6,pear6,apple7,apple5,apple1,date6,fig9,pear2,fig3,date2,apple5,apple7,apple7,kiwi4,kiwi2,fig9,date4,pear2,apple7,pear2,apple4,date4,kiwi1,apple5,date6,apple7,apple7,kiwi6,apple4,pear6,pear6,date3,date2,fig3,fig3,pear6,fig9,apple5,pear2,date4,date6,",
+   "kind": "other"
+  },
+  {
+   "table": "CrBig",
+   "expr": "CONCATENATEX(CrBig,CrBig[a]&SUMX(CrBig,1),\",\")",
+   "powerbi": "fig70,fig70,fig70,fig70,fig70,fig70,fig70,fig70,fig70,fig70,fig70,fig70,fig70,fig70,fig70,apple70,apple70,apple70,apple70,apple70,apple70,apple70,apple70,apple70,apple70,apple70,apple70,apple70,apple70,apple70,apple70,apple70,kiwi70,kiwi70,kiwi70,kiwi70,kiwi70,kiwi70,kiwi70,kiwi70,kiwi70,kiwi70,kiwi70,kiwi70,kiwi70,date70,date70,date70,date70,date70,date70,date70,date70,date70,date70,date70,date70,date70,date70,date70,pear70,pear70,pear70,pear70,pear70,pear70,pear70,pear70,pear70,pear70",
+   "app": "fig70,apple70,kiwi70,fig70,date70,kiwi70,date70,kiwi70,kiwi70,pear70,apple70,apple70,apple70,date70,fig70,pear70,fig70,date70,apple70,apple70,apple70,kiwi70,kiwi70,fig70,date70,pear70,apple70,pear70,apple70,date70,kiwi70,apple70,date70,apple70,apple70,kiwi70,apple70,pear70,pear70,date70,date70,fig70",
+   "kind": "other"
+  },
+  {
+   "table": "CrBig",
+   "expr": "CONCATENATEX(CrBig,CrBig[a]&\"\",\",\",-CrBig[b])",
+   "powerbi": "kiwi,pear,pear,date,date,date,kiwi,fig,apple,apple,apple,apple,apple,fig,fig,fig,fig,fig,fig,fig,fig,fig,fig,fig,apple,apple,apple,apple,apple,apple,apple,kiwi,kiwi,kiwi,kiwi,date,date,pear,pear,pear,pear,pear,pear,apple,kiwi,kiwi,kiwi,kiwi,kiwi,kiwi,date,date,date,date,fig,apple,apple,apple,kiwi,date,date,date,fig,date,date,apple,fig,pear,pear,date",
+   "app": "fig,fig,fig,apple,apple,apple,apple,apple,kiwi,kiwi,date,date,date,pear,pear,fig,fig,fig,fig,fig,fig,fig,fig,fig,apple,apple,apple,apple,apple,apple,apple,kiwi,kiwi,kiwi,kiwi,date,date,pear,pear,pear,pear,pear,pear,fig,apple,apple,apple,apple,kiwi,kiwi,kiwi,kiwi,kiwi,kiwi,date,date,date,date,fig,fig",
+   "kind": "other"
+  },
+  {
+   "table": "CrBig",
+   "expr": "CONCATENATEX(CrBig,CrBig[a]&\"\",\",\",CrBig[b]*CrBig[b],DESC)",
+   "powerbi": "kiwi,pear,pear,date,date,date,kiwi,fig,apple,apple,apple,apple,apple,fig,fig,fig,fig,fig,fig,fig,fig,fig,fig,fig,apple,apple,apple,apple,apple,apple,apple,kiwi,kiwi,kiwi,kiwi,date,date,pear,pear,pear,pear,pear,pear,apple,kiwi,kiwi,kiwi,kiwi,kiwi,kiwi,date,date,date,date,fig,apple,apple,apple,kiwi,date,date,date,fig,date,date,apple,fig,pear,pear,date",
+   "app": "fig,fig,fig,apple,apple,apple,apple,apple,kiwi,kiwi,date,date,date,pear,pear,fig,fig,fig,fig,fig,fig,fig,fig,fig,apple,apple,apple,apple,apple,apple,apple,kiwi,kiwi,kiwi,kiwi,date,date,pear,pear,pear,pear,pear,pear,fig,apple,apple,apple,apple,kiwi,kiwi,kiwi,kiwi,kiwi,kiwi,date,date,date,date,fig,fig",
+   "kind": "order-by-ties"
+  },
+  {
+   "table": "CrBig",
+   "expr": "CONCATENATEX(DISTINCT(CrBig),CrBig[a]&\"/\"&CrBig[b],\",\")",
+   "powerbi": "fig/1,apple/1,kiwi/1,date/1,pear/1,fig/2,apple/2,kiwi/2,date/2,fig/3,apple/3,kiwi/3,date/3,pear/3,fig/4,apple/4,kiwi/4,date/4,pear/4",
+   "app": "fig/1,apple/2,kiwi/2,fig/3,date/4,kiwi/3,date/1,pear/3,apple/3,apple/4,apple/1,pear/1,fig/4,date/3,kiwi/4,date/2,pear/4,kiwi/1,fig/2",
+   "kind": "other"
+  },
+  {
+   "table": "CrBig",
+   "expr": "CONCATENATEX(UNION(SELECTCOLUMNS(CrBig,\"a\",CrBig[a]),SELECTCOLUMNS(CrBig,\"a\",CrBig[a])),[a]&\"\",\",\")",
+   "powerbi": "fig,fig,fig,fig,fig,fig,fig,fig,fig,fig,fig,fig,fig,fig,fig,apple,apple,apple,apple,apple,apple,apple,apple,apple,apple,apple,apple,apple,apple,apple,apple,apple,kiwi,kiwi,kiwi,kiwi,kiwi,kiwi,kiwi,kiwi,kiwi,kiwi,kiwi,kiwi,kiwi,date,date,date,date,date,date,date,date,date,date,date,date,date,date,date,pear,pear,pear,pear,pear,pear,pear,pear,pear,pear,fig,fig,fig,fig,fig,fig,fig,fig,fig,fig,fig,fig,fig,fig,fig,apple,apple,apple,apple,apple,apple,apple,apple,apple,apple,apple,apple,apple,apple,apple,apple,apple,kiwi,kiwi,kiwi,kiwi,kiwi,kiwi,kiwi,kiwi,kiwi,kiwi,kiwi,kiwi,kiwi,date,date,date,date,date,date,date,date,date,date,date,date,date,date,date,pear,pear,pear,pear,pear,pear,pear,pear,pear,pear",
+   "app": "fig,apple,kiwi,fig,date,kiwi,date,kiwi,kiwi,pear,apple,apple,apple,date,fig,pear,fig,date,apple,apple,apple,kiwi,kiwi,fig,date,pear,apple,pear,apple,date,kiwi,apple,date,apple,apple,kiwi,apple,pear,pear,date,date,fig,fig,pear,fig,apple,pear,date,date,date,kiwi,kiwi,kiwi,fig,apple,date,fig,kiwi,apple",
+   "kind": "other"
+  },
+  {
+   "table": "CrBig",
+   "expr": "CONCATENATEX(TOPN(2,SUMMARIZE(CrBig,CrBig[a],CrBig[b]),CrBig[b],DESC),CrBig[a]&\"/\"&CrBig[b],\",\")",
+   "powerbi": "apple/4,fig/4,kiwi/4,date/4,pear/4",
+   "app": "fig/4,apple/4,kiwi/4,date/4,pear/4",
+   "kind": "order-by-ties"
+  },
+  {
+   "table": "CrBig",
+   "expr": "CONCATENATEX(VALUES(CrBig[b]),CrBig[b]&\":\"&CONCATENATEX(FILTER(CrBig,CrBig[b]=EARLIER(CrBig[b])),CrBig[a]&\"\",\"\"),\";\")",
+   "powerbi": "1:figfigapplekiwidatedatedatedatedatedatepearpear;2:figappleappleappleapplekiwikiwikiwikiwikiwikiwidatedatedatedate;3:figfigfigfigfigfigfigfigfigappleappleappleappleappleappleapplekiwikiwikiwikiwidatedatepearpearpearpearpearpear;4:figfigfigappleappleappleappleapplekiwikiwidatedatedatepearpear",
+   "app": "1:figdateappledatepearkiwidatepeardatefigdatedate;2:applekiwikiwikiwidateappledatekiwiappledatekiwidatekiwiapplefig;3:figkiwipearapplefigdateappleapplekiwifigappleappleapplepearpeardatepearfigkiwikiwifigapplepearfigfigpearfigfig;4:dateapplefigapplekiwipearpearappledatefigfigappledatekiwiapple",
+   "kind": "other"
+  },
+  {
+   "table": "CrNeg",
+   "expr": "CONCATENATEX(CrNeg,CrNeg[q]&CALCULATE(COUNTROWS(CrNeg)),\",\")",
+   "powerbi": "-51,01,31,71,-51,01,31,-11,71",
+   "app": "-51,31,-51,01,71,31,-11,01,71",
+   "kind": "other"
+  },
+  {
+   "table": "CrNeg",
+   "expr": "CONCATENATEX(CrNeg,CrNeg[q]&SUMX(CrNeg,1),\",\")",
+   "powerbi": "-59,-59,-19,09,09,39,39,79,79",
+   "app": "-59,39,-59,09,79,39,-19,09,79",
+   "kind": "other"
+  },
+  {
+   "table": "CrNeg",
+   "expr": "CONCATENATEX(CrNeg,CrNeg[q]&\"\",\",\",-CrNeg[r])",
+   "powerbi": "-1,7,-5,0,3,3,0,7,-5",
+   "app": "-1,7,-5,0,3,-5,0,3,7",
+   "kind": "other"
+  },
+  {
+   "table": "CrNeg",
+   "expr": "CONCATENATEX(CrNeg,CrNeg[q]&\"\",\",\",CrNeg[r]*CrNeg[r],DESC)",
+   "powerbi": "-1,7,-5,0,3,3,0,7,-5",
+   "app": "-1,7,-5,0,3,-5,0,3,7",
+   "kind": "order-by-ties"
+  },
+  {
+   "table": "CrNeg",
+   "expr": "CONCATENATEX(DISTINCT(CrNeg),CrNeg[q]&\"/\"&CrNeg[r],\",\")",
+   "powerbi": "-5/1,0/1,3/1,7/1,-5/2,0/2,3/2,-1/3,7/3",
+   "app": "-5/1,3/2,-5/2,0/1,7/3,3/1,-1/3,0/2,7/1",
+   "kind": "other"
+  },
+  {
+   "table": "CrNeg",
+   "expr": "CONCATENATEX(UNION(SELECTCOLUMNS(CrNeg,\"a\",CrNeg[q]),SELECTCOLUMNS(CrNeg,\"a\",CrNeg[q])),[a]&\"\",\",\")",
+   "powerbi": "-5,-5,-1,0,0,3,3,7,7,-5,-5,-1,0,0,3,3,7,7",
+   "app": "-5,3,-5,0,7,3,-1,0,7,-5,3,-5,0,7,3,-1,0,7",
+   "kind": "other"
+  },
+  {
+   "table": "CrNeg",
+   "expr": "CONCATENATEX(TOPN(2,SUMMARIZE(CrNeg,CrNeg[q],CrNeg[r]),CrNeg[r],DESC),CrNeg[q]&\"/\"&CrNeg[r],\",\")",
+   "powerbi": "-1/3,7/3",
+   "app": "7/3,-1/3",
+   "kind": "order-by-ties"
+  },
+  {
+   "table": "CrNeg",
+   "expr": "CONCATENATEX(VALUES(CrNeg[r]),CrNeg[r]&\":\"&CONCATENATEX(FILTER(CrNeg,CrNeg[r]=EARLIER(CrNeg[r])),CrNeg[q]&\"\",\"\"),\";\")",
+   "powerbi": "1:-5037;2:-503;3:-17",
+   "app": "1:-5037;2:3-50;3:7-1",
+   "kind": "other"
+  },
+  {
+   "table": "CsDR100",
+   "expr": "CONCATENATEX(CsDR100,CsDR100[s]&FORMAT(CsDR100[d],\"yyyy-mm-dd\"),\",\")",
+   "powerbi": "p2024-01-01,p2024-02-03,p2024-02-20,p2024-04-09,q2024-01-01,q2024-01-01,q2024-04-09,r2024-02-03,r2024-02-20,r2024-04-09",
+   "app": "source order (grouped limit for a date + text set is 2,500; Power BI still groups at 3,000)",
+   "kind": "threshold-zone"
+  }
+ ]
+}

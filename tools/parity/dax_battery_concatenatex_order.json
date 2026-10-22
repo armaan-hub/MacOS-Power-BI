@@ -1,0 +1,763 @@
+{
+ "powerbi_version": "2.157.879.0 (26.08)+da30fe74eb0b8a8786ab7326b69c400a0e951831",
+ "frozen": "2026-10-22",
+ "note": "Table iteration order of CONCATENATEX/TOPN: dictionary order per column, table-column priority (iteration 79).",
+ "items": [
+  {
+   "expr": "CONCATENATEX(Facts,Facts[Region]&\"-\"&Facts[Note],\"|\")",
+   "powerbi": "East-|West-|East-Paid|East-Paid|West-Paid|North-Late"
+  },
+  {
+   "expr": "CONCATENATEX(Facts,Facts[Note]&\"-\"&Facts[Region],\"|\")",
+   "powerbi": "-East|-West|Paid-East|Paid-East|Paid-West|Late-North"
+  },
+  {
+   "expr": "CONCATENATEX(Facts,Facts[Quantity]&\"-\"&Facts[Region],\"|\")",
+   "powerbi": "1-East|2-East|5-East|0-West|3-West|4-North"
+  },
+  {
+   "expr": "CONCATENATEX(Facts,Facts[Region]&\"-\"&Facts[Quantity],\"|\")",
+   "powerbi": "East-1|East-2|East-5|West-0|West-3|North-4"
+  },
+  {
+   "expr": "CONCATENATEX(Facts,Facts[Sales]&\"-\"&Facts[Quantity],\"|\")",
+   "powerbi": "10.5-2|20-3|-1.5-1|-4|0-0|2.5-5"
+  },
+  {
+   "expr": "CONCATENATEX(Facts,Facts[Quantity]&\"-\"&Facts[Sales],\"|\")",
+   "powerbi": "2-10.5|3-20|1--1.5|4-|0-0|5-2.5"
+  },
+  {
+   "expr": "CONCATENATEX(Facts,Facts[Sales]&\"-\"&Facts[Region],\"|\")",
+   "powerbi": "10.5-East|20-West|-1.5-East|-North|0-West|2.5-East"
+  },
+  {
+   "expr": "CONCATENATEX(Facts,Facts[Region]&\"-\"&Facts[Sales],\"|\")",
+   "powerbi": "East-10.5|West-20|East--1.5|North-|West-0|East-2.5"
+  },
+  {
+   "expr": "CONCATENATEX(Facts,Facts[Note]&\"-\"&Facts[Quantity],\"|\")",
+   "powerbi": "-3|-5|Paid-0|Paid-1|Paid-2|Late-4"
+  },
+  {
+   "expr": "CONCATENATEX(Facts,Facts[Quantity]&\"-\"&Facts[Note],\"|\")",
+   "powerbi": "3-|5-|0-Paid|1-Paid|2-Paid|4-Late"
+  },
+  {
+   "expr": "CONCATENATEX(Facts,Facts[Region]&\"-\"&Facts[Note]&\"-\"&Facts[Quantity],\"|\")",
+   "powerbi": "East--5|West--3|East-Paid-1|East-Paid-2|West-Paid-0|North-Late-4"
+  },
+  {
+   "expr": "CONCATENATEX(Facts,Facts[Quantity]&\"-\"&Facts[Note]&\"-\"&Facts[Region],\"|\")",
+   "powerbi": "5--East|3--West|1-Paid-East|2-Paid-East|0-Paid-West|4-Late-North"
+  },
+  {
+   "expr": "CONCATENATEX(Facts,Facts[Sales]&\"-\"&Facts[Quantity]&\"-\"&Facts[Region]&\"-\"&Facts[Note],\"|\")",
+   "powerbi": "10.5-2-East-Paid|20-3-West-|-1.5-1-East-Paid|-4-North-Late|0-0-West-Paid|2.5-5-East-"
+  },
+  {
+   "expr": "CONCATENATEX(Facts,\"a\",\",\")",
+   "powerbi": "a,a,a,a,a,a"
+  },
+  {
+   "expr": "CONCATENATEX(Facts,Facts[Quantity],\",\",Facts[Quantity])",
+   "powerbi": "0,1,2,3,4,5"
+  },
+  {
+   "expr": "CONCATENATEX(Facts,Facts[Quantity],\",\",Facts[Note])",
+   "powerbi": "3,5,4,0,1,2"
+  },
+  {
+   "expr": "CONCATENATEX(Facts,Facts[Quantity],\",\",Facts[Note],DESC)",
+   "powerbi": "0,1,2,4,3,5"
+  },
+  {
+   "expr": "CONCATENATEX(Facts,Facts[Quantity],\",\",Facts[Sales])",
+   "powerbi": "1,4,0,5,2,3"
+  },
+  {
+   "expr": "CONCATENATEX(Facts,Facts[Quantity],\",\",Facts[Sales],DESC)",
+   "powerbi": "3,2,5,0,4,1"
+  },
+  {
+   "expr": "CONCATENATEX(Facts,Facts[Quantity],\",\",Facts[Region],DESC)",
+   "powerbi": "0,3,4,1,2,5"
+  },
+  {
+   "expr": "CONCATENATEX(Facts,Facts[Sales],\",\",Facts[Region])",
+   "powerbi": "10.5,-1.5,2.5,,20,0"
+  },
+  {
+   "expr": "CONCATENATEX(Facts,Facts[Sales],\",\",Facts[Region],DESC)",
+   "powerbi": "20,0,,10.5,-1.5,2.5"
+  },
+  {
+   "expr": "CONCATENATEX(Facts,Facts[Note],\",\",Facts[Region])",
+   "powerbi": ",Paid,Paid,Late,,Paid"
+  },
+  {
+   "expr": "CONCATENATEX(Facts,Facts[Region]&Facts[Note],\",\",Facts[Quantity])",
+   "powerbi": "WestPaid,EastPaid,EastPaid,West,NorthLate,East"
+  },
+  {
+   "expr": "CONCATENATEX(Facts,Facts[Quantity],\",\",Facts[Region],ASC,Facts[Quantity],DESC)",
+   "powerbi": "5,2,1,4,3,0"
+  },
+  {
+   "expr": "CONCATENATEX(Facts,Facts[Quantity],\",\",Facts[Region],DESC,Facts[Quantity],DESC)",
+   "powerbi": "3,0,4,5,2,1"
+  },
+  {
+   "expr": "CONCATENATEX(Facts,Facts[Quantity],\",\",Facts[Region],ASC,Facts[Note],ASC)",
+   "powerbi": "5,1,2,4,3,0"
+  },
+  {
+   "expr": "CONCATENATEX(Facts,Facts[Quantity],\",\",Facts[Note],ASC,Facts[Region],ASC)",
+   "powerbi": "5,3,4,1,2,0"
+  },
+  {
+   "expr": "CONCATENATEX(Facts,Facts[Quantity],\",\",Facts[Note],ASC,Facts[Region],DESC)",
+   "powerbi": "3,5,4,0,1,2"
+  },
+  {
+   "expr": "CONCATENATEX(FILTER(Facts,TRUE()),Facts[Quantity],\",\")",
+   "powerbi": "0,1,2,3,4,5"
+  },
+  {
+   "expr": "CONCATENATEX(FILTER(Facts,Facts[Quantity]<>9),Facts[Region],\",\")",
+   "powerbi": "East,East,East,West,West,North"
+  },
+  {
+   "expr": "CONCATENATEX(FILTER(Facts,Facts[Quantity]>0),Facts[Quantity],\",\")",
+   "powerbi": "1,2,3,4,5"
+  },
+  {
+   "expr": "CONCATENATEX(FILTER(Facts,Facts[Quantity]>0),Facts[Sales],\",\")",
+   "powerbi": ",-1.5,2.5,10.5,20"
+  },
+  {
+   "expr": "CONCATENATEX(FILTER(Facts,Facts[Quantity]>0),Facts[Region],\",\")",
+   "powerbi": "East,East,East,West,North"
+  },
+  {
+   "expr": "CONCATENATEX(FILTER(Facts,Facts[Region]=\"East\"),Facts[Quantity],\",\")",
+   "powerbi": "1,2,5"
+  },
+  {
+   "expr": "CONCATENATEX(FILTER(Facts,Facts[Region]<>\"East\"),Facts[Region],\",\")",
+   "powerbi": "West,West,North"
+  },
+  {
+   "expr": "CONCATENATEX(FILTER(Facts,Facts[Region]<>\"East\"),Facts[Region]&\"-\"&Facts[Quantity],\",\")",
+   "powerbi": "West-0,West-3,North-4"
+  },
+  {
+   "expr": "CONCATENATEX(FILTER(Facts,Facts[Quantity]>=2),Facts[Region]&\"-\"&Facts[Quantity],\",\")",
+   "powerbi": "East-2,East-5,West-3,North-4"
+  },
+  {
+   "expr": "CONCATENATEX(FILTER(Facts,Facts[Quantity]>=2),Facts[Sales]&\"-\"&Facts[Quantity],\",\")",
+   "powerbi": "10.5-2,20-3,-4,2.5-5"
+  },
+  {
+   "expr": "CONCATENATEX(FILTER(Facts,Facts[Quantity]>=2),Facts[Sales],\",\")",
+   "powerbi": ",2.5,10.5,20"
+  },
+  {
+   "expr": "CONCATENATEX(FILTER(Facts,NOT ISBLANK(Facts[Sales])),Facts[Sales],\",\")",
+   "powerbi": "-1.5,0,2.5,10.5,20"
+  },
+  {
+   "expr": "CONCATENATEX(FILTER(Facts,NOT ISBLANK(Facts[Note])),Facts[Note]&\"-\"&Facts[Quantity],\",\")",
+   "powerbi": "Paid-0,Paid-1,Paid-2,Late-4"
+  },
+  {
+   "expr": "CONCATENATEX(ADDCOLUMNS(Facts,\"d\",Facts[Quantity]*2),[d],\",\")",
+   "powerbi": "0,2,4,6,8,10"
+  },
+  {
+   "expr": "CONCATENATEX(ADDCOLUMNS(Facts,\"d\",Facts[Quantity]*2),Facts[Quantity],\",\")",
+   "powerbi": "0,1,2,3,4,5"
+  },
+  {
+   "expr": "CONCATENATEX(ADDCOLUMNS(Facts,\"d\",Facts[Quantity]*2),Facts[Region],\",\")",
+   "powerbi": "East,East,East,West,West,North"
+  },
+  {
+   "expr": "CONCATENATEX(ADDCOLUMNS(Facts,\"d\",Facts[Quantity]*2),[d]&\"-\"&Facts[Region],\",\")",
+   "powerbi": "2-East,4-East,10-East,0-West,6-West,8-North"
+  },
+  {
+   "expr": "CONCATENATEX(ADDCOLUMNS(Facts,\"d\",Facts[Region]&\"x\"),[d],\",\")",
+   "powerbi": "Eastx,Eastx,Eastx,Westx,Westx,Northx"
+  },
+  {
+   "expr": "CONCATENATEX(ADDCOLUMNS(Facts,\"d\",-Facts[Quantity]),[d],\",\")",
+   "powerbi": "0,-1,-2,-3,-4,-5"
+  },
+  {
+   "expr": "CONCATENATEX(ADDCOLUMNS(Facts,\"d\",IF(Facts[Quantity]>2,7,\"x\")),[d]&\"\",\"|\")",
+   "powerbi": "x|x|x|7|7|7"
+  },
+  {
+   "expr": "CONCATENATEX(VALUES(Facts[Region]),Facts[Region],\",\")",
+   "powerbi": "East,West,North"
+  },
+  {
+   "expr": "CONCATENATEX(VALUES(Facts[Quantity]),Facts[Quantity],\",\")",
+   "powerbi": "0,1,2,3,4,5"
+  },
+  {
+   "expr": "CONCATENATEX(VALUES(Facts[Sales]),Facts[Sales],\",\")",
+   "powerbi": ",-1.5,0,2.5,10.5,20"
+  },
+  {
+   "expr": "CONCATENATEX(VALUES(Facts[Note]),Facts[Note],\",\")",
+   "powerbi": ",Paid,Late"
+  },
+  {
+   "expr": "CONCATENATEX(DISTINCT(Facts[Region]),Facts[Region],\",\")",
+   "powerbi": "East,West,North"
+  },
+  {
+   "expr": "CONCATENATEX(DISTINCT(Facts[Note]),Facts[Note],\",\")",
+   "powerbi": ",Paid,Late"
+  },
+  {
+   "expr": "CONCATENATEX(DISTINCT(Facts[Quantity]),Facts[Quantity],\",\")",
+   "powerbi": "0,1,2,3,4,5"
+  },
+  {
+   "expr": "CONCATENATEX(ALL(Facts[Region]),Facts[Region],\",\")",
+   "powerbi": "East,West,North"
+  },
+  {
+   "expr": "CONCATENATEX(ALL(Facts[Note]),Facts[Note],\",\")",
+   "powerbi": ",Paid,Late"
+  },
+  {
+   "expr": "CONCATENATEX(ALL(Facts[Sales]),Facts[Sales],\",\")",
+   "powerbi": ",-1.5,0,2.5,10.5,20"
+  },
+  {
+   "expr": "CONCATENATEX(ALL(Facts[Quantity]),Facts[Quantity],\",\")",
+   "powerbi": "0,1,2,3,4,5"
+  },
+  {
+   "expr": "CONCATENATEX(ALL(Facts),Facts[Quantity],\",\")",
+   "powerbi": "0,1,2,3,4,5"
+  },
+  {
+   "expr": "CONCATENATEX(ALL(Facts),Facts[Region],\",\")",
+   "powerbi": "East,East,East,West,West,North"
+  },
+  {
+   "expr": "CONCATENATEX(ALL(Facts),Facts[Region]&Facts[Quantity],\",\")",
+   "powerbi": "East1,East2,East5,West0,West3,North4"
+  },
+  {
+   "expr": "CONCATENATEX(ALL(Facts[Region],Facts[Note]),Facts[Region]&\"-\"&Facts[Note],\",\")",
+   "powerbi": "East-,West-,East-Paid,West-Paid,North-Late"
+  },
+  {
+   "expr": "CONCATENATEX(ALL(Facts[Note],Facts[Region]),Facts[Note]&\"-\"&Facts[Region],\",\")",
+   "powerbi": "-East,-West,Paid-East,Paid-West,Late-North"
+  },
+  {
+   "expr": "CONCATENATEX(ALL(Facts[Region],Facts[Quantity]),Facts[Region]&\"-\"&Facts[Quantity],\",\")",
+   "powerbi": "East-1,East-2,East-5,West-0,West-3,North-4"
+  },
+  {
+   "expr": "CONCATENATEX(VALUES(Facts[Region]),Facts[Region],\",\",Facts[Region],DESC)",
+   "powerbi": "West,North,East"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(1,Facts,Facts[Quantity]),Facts[Quantity],\",\")",
+   "powerbi": "5"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(2,Facts,Facts[Quantity]),Facts[Quantity],\",\")",
+   "powerbi": "4,5"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(3,Facts,Facts[Quantity]),Facts[Quantity],\",\")",
+   "powerbi": "3,5,4"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(4,Facts,Facts[Quantity]),Facts[Quantity],\",\")",
+   "powerbi": "2,3,5,4"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(5,Facts,Facts[Quantity]),Facts[Quantity],\",\")",
+   "powerbi": "1,3,2,5,4"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(6,Facts,Facts[Quantity]),Facts[Quantity],\",\")",
+   "powerbi": "0,1,2,3,4,5"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(2,Facts,Facts[Quantity],ASC),Facts[Quantity],\",\")",
+   "powerbi": "1,0"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(3,Facts,Facts[Quantity],ASC),Facts[Quantity],\",\")",
+   "powerbi": "2,0,1"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(4,Facts,Facts[Quantity],ASC),Facts[Quantity],\",\")",
+   "powerbi": "3,2,1,0"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(2,Facts,Facts[Sales]),Facts[Quantity],\",\")",
+   "powerbi": "2,3"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(2,Facts,Facts[Sales]),Facts[Sales],\",\")",
+   "powerbi": "10.5,20"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(2,Facts,Facts[Quantity]),Facts[Region]&\"-\"&Facts[Quantity],\",\")",
+   "powerbi": "North-4,East-5"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(3,Facts,Facts[Region]),Facts[Quantity],\",\")",
+   "powerbi": "4,0,3"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(3,Facts,Facts[Sales]),Facts[Quantity],\",\")",
+   "powerbi": "5,3,2"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(3,Facts,Facts[Sales]),Facts[Sales],\",\")",
+   "powerbi": "2.5,20,10.5"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(3,Facts,Facts[Quantity]),Facts[Region]&\"-\"&Facts[Quantity],\",\")",
+   "powerbi": "West-3,North-4,East-5"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(4,Facts,Facts[Sales]),Facts[Quantity],\",\")",
+   "powerbi": "0,5,2,3"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(4,Facts,Facts[Sales]),Facts[Sales],\",\")",
+   "powerbi": "0,2.5,20,10.5"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(4,Facts,Facts[Quantity]),Facts[Region]&\"-\"&Facts[Quantity],\",\")",
+   "powerbi": "East-2,West-3,East-5,North-4"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(3,Facts,Facts[Quantity]),Facts[Region],\",\")",
+   "powerbi": "West,North,East"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(3,Facts,Facts[Quantity]),Facts[Sales],\",\")",
+   "powerbi": "20,2.5,"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(3,Facts,Facts[Quantity]),Facts[Note],\",\")",
+   "powerbi": ",,Late"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(6,Facts,Facts[Quantity]),Facts[Region],\",\")",
+   "powerbi": "East,East,East,West,West,North"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(100,Facts,Facts[Quantity]),Facts[Quantity],\",\")",
+   "powerbi": "0,1,2,3,4,5"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(100,Facts,Facts[Quantity],ASC),Facts[Quantity],\",\")",
+   "powerbi": "0,1,2,3,4,5"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(3,Facts,Facts[Quantity],DESC,Facts[Region],ASC),Facts[Quantity],\",\")",
+   "powerbi": "3,4,5"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(3,VALUES(Facts[Quantity]),Facts[Quantity]),Facts[Quantity],\",\")",
+   "powerbi": "3,5,4"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(3,VALUES(Facts[Region]),Facts[Region]),Facts[Region],\",\")",
+   "powerbi": "East,West,North"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(2,VALUES(Facts[Region]),Facts[Region]),Facts[Region],\",\")",
+   "powerbi": "North,West"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(2,VALUES(Facts[Region]),Facts[Region],ASC),Facts[Region],\",\")",
+   "powerbi": "North,East"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(2,ALL(Facts[Quantity]),Facts[Quantity]),Facts[Quantity],\",\")",
+   "powerbi": "4,5"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(4,ALL(Facts[Quantity]),Facts[Quantity]),Facts[Quantity],\",\")",
+   "powerbi": "2,3,5,4"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(5,ALL(Facts[Quantity]),Facts[Quantity]),Facts[Quantity],\",\")",
+   "powerbi": "1,3,2,5,4"
+  },
+  {
+   "expr": "CONCATENATEX(Facts,Facts[Quantity],\",\")",
+   "powerbi": "0,1,2,3,4,5"
+  },
+  {
+   "expr": "CONCATENATEX(Facts,Facts[Region],\",\")",
+   "powerbi": "East,East,East,West,West,North"
+  },
+  {
+   "expr": "CONCATENATEX(Facts,Facts[Note],\",\")",
+   "powerbi": ",,Paid,Paid,Paid,Late"
+  },
+  {
+   "expr": "CONCATENATEX(Facts,Facts[Sales],\",\")",
+   "powerbi": ",-1.5,0,2.5,10.5,20"
+  },
+  {
+   "expr": "CONCATENATEX(Facts,Facts[Region]&\"-\"&Facts[Quantity],\"|\",Facts[Region],ASC)",
+   "powerbi": "East-1|East-2|East-5|North-4|West-0|West-3"
+  },
+  {
+   "expr": "CONCATENATEX(Facts,Facts[Quantity],\",\",Facts[Region])",
+   "powerbi": "1,2,5,4,0,3"
+  },
+  {
+   "expr": "CONCATENATEX(Facts,Facts[Quantity]>2,\",\")",
+   "powerbi": "FALSE,FALSE,FALSE,TRUE,TRUE,TRUE"
+  },
+  {
+   "expr": "CONCATENATEX(Facts,ISBLANK(Facts[Sales]),\",\")",
+   "powerbi": "TRUE,FALSE,FALSE,FALSE,FALSE,FALSE"
+  },
+  {
+   "expr": "CONCATENATEX(SUMMARIZE(Facts,Facts[Region]),Facts[Region],\",\")",
+   "powerbi": "East,West,North"
+  },
+  {
+   "expr": "CONCATENATEX(SUMMARIZE(Facts,Facts[Note]),Facts[Note],\",\")",
+   "powerbi": ",Paid,Late"
+  },
+  {
+   "expr": "CONCATENATEX(SUMMARIZE(Facts,Facts[Region],Facts[Note]),Facts[Region]&\"-\"&Facts[Note],\",\")",
+   "powerbi": "East-,West-,East-Paid,West-Paid,North-Late"
+  },
+  {
+   "expr": "CONCATENATEX(SUMMARIZE(Facts,Facts[Note],Facts[Region]),Facts[Region]&\"-\"&Facts[Note],\",\")",
+   "powerbi": "East-,West-,East-Paid,West-Paid,North-Late"
+  },
+  {
+   "expr": "CONCATENATEX(SUMMARIZE(Facts,Facts[Region],\"s\",SUM(Facts[Quantity])),Facts[Region]&\"=\"&[s],\",\")",
+   "powerbi": "East=8,West=3,North=4"
+  },
+  {
+   "expr": "CONCATENATEX(SUMMARIZE(Facts,Facts[Quantity]),Facts[Quantity],\",\")",
+   "powerbi": "0,1,2,3,4,5"
+  },
+  {
+   "expr": "CONCATENATEX(SUMMARIZE(Facts,Facts[Sales]),Facts[Sales],\",\")",
+   "powerbi": ",-1.5,0,2.5,10.5,20"
+  },
+  {
+   "expr": "CONCATENATEX(GROUPBY(Facts,Facts[Region],\"s\",SUMX(CURRENTGROUP(),Facts[Quantity])),Facts[Region]&\"=\"&[s],\",\")",
+   "powerbi": "East=8,West=3,North=4"
+  },
+  {
+   "expr": "CONCATENATEX(DISTINCT(Facts),Facts[Quantity],\",\")",
+   "powerbi": "2,3,1,4,0,5"
+  },
+  {
+   "expr": "CONCATENATEX(DISTINCT(SELECTCOLUMNS(Facts,\"r\",Facts[Region])),[r],\",\")",
+   "powerbi": "East,West,North"
+  },
+  {
+   "expr": "CONCATENATEX(UNION(VALUES(Facts[Region]),VALUES(Facts[Region])),Facts[Region],\",\")",
+   "powerbi": "East,West,North,East,West,North"
+  },
+  {
+   "expr": "CONCATENATEX(UNION(ROW(\"a\",3),ROW(\"a\",1),ROW(\"a\",2)),[a],\",\")",
+   "powerbi": "3,1,2"
+  },
+  {
+   "expr": "CONCATENATEX(UNION(ROW(\"a\",\"z\"),ROW(\"a\",\"b\"),ROW(\"a\",\"m\")),[a],\",\")",
+   "powerbi": "z,b,m"
+  },
+  {
+   "expr": "CONCATENATEX({3,1,2},[Value],\",\")",
+   "powerbi": "3,1,2"
+  },
+  {
+   "expr": "CONCATENATEX({\"z\",\"b\",\"m\"},[Value],\",\")",
+   "powerbi": "z,b,m"
+  },
+  {
+   "expr": "CONCATENATEX({3,1,2,3},[Value],\",\")",
+   "powerbi": "3,1,2,3"
+  },
+  {
+   "expr": "CONCATENATEX(ROW(\"a\",5),[a],\",\")",
+   "powerbi": "5"
+  },
+  {
+   "expr": "CONCATENATEX(GENERATESERIES(1,5),[Value],\",\")",
+   "powerbi": "1,2,3,4,5"
+  },
+  {
+   "expr": "CONCATENATEX(EXCEPT(VALUES(Facts[Region]),ROW(\"Region\",\"East\")),Facts[Region],\",\")",
+   "powerbi": "West,North"
+  },
+  {
+   "expr": "CONCATENATEX(CROSSJOIN(VALUES(Facts[Region]),VALUES(Facts[Quantity])),Facts[Region]&Facts[Quantity],\",\")",
+   "powerbi": "East0,West0,North0,East1,West1,North1,East2,West2,North2,East3,West3,North3,East4,West4,North4,East5,West5,North5"
+  },
+  {
+   "expr": "CONCATENATEX(CALCULATETABLE(Facts,Facts[Quantity]>1),Facts[Quantity],\",\")",
+   "powerbi": "2,3,4,5"
+  },
+  {
+   "expr": "CONCATENATEX(CALCULATETABLE(Facts,Facts[Quantity]>1),Facts[Region],\",\")",
+   "powerbi": "East,East,West,North"
+  },
+  {
+   "expr": "CONCATENATEX(CALCULATETABLE(VALUES(Facts[Region]),Facts[Quantity]>1),Facts[Region],\",\")",
+   "powerbi": "East,West,North"
+  },
+  {
+   "expr": "CONCATENATEX(SELECTCOLUMNS(Facts,\"q\",Facts[Quantity]),[q],\",\",[q],DESC)",
+   "powerbi": "5,4,3,2,1,0"
+  },
+  {
+   "expr": "CONCATENATEX(Facts,Facts[Quantity],\",\",Facts[Quantity]>2)",
+   "powerbi": "0,1,2,3,4,5"
+  },
+  {
+   "expr": "CONCATENATEX(Facts,Facts[Quantity],\",\",Facts[Quantity]>2,DESC)",
+   "powerbi": "3,4,5,0,1,2"
+  },
+  {
+   "expr": "CONCATENATEX(Facts,Facts[Quantity],\",\",ISBLANK(Facts[Sales]))",
+   "powerbi": "2,3,1,0,5,4"
+  },
+  {
+   "expr": "CONCATENATEX(Facts,Facts[Quantity],\",\",Facts[Quantity]*0)",
+   "powerbi": "0,1,2,3,4,5"
+  },
+  {
+   "expr": "CONCATENATEX(Facts,Facts[Quantity],\",\",1)",
+   "powerbi": "0,1,2,3,4,5"
+  },
+  {
+   "expr": "CONCATENATEX(Facts,Facts[Quantity],\",\",Facts[Region],ASC,Facts[Quantity],ASC)",
+   "powerbi": "1,2,5,4,0,3"
+  },
+  {
+   "expr": "CONCATENATEX(Facts,Facts[Quantity],\",\",Facts[Region],DESC,Facts[Note],DESC)",
+   "powerbi": "0,3,4,1,2,5"
+  },
+  {
+   "expr": "CONCATENATEX(SUMMARIZE(Facts,Facts[Region],Facts[Note]),Facts[Region],\",\")",
+   "powerbi": "East,West,East,West,North"
+  },
+  {
+   "expr": "CONCATENATEX(SUMMARIZE(Facts,Facts[Region],Facts[Note]),Facts[Note],\",\")",
+   "powerbi": ",,Paid,Paid,Late"
+  },
+  {
+   "expr": "CONCATENATEX(SUMMARIZE(Facts,Facts[Note],Facts[Region]),Facts[Region],\",\")",
+   "powerbi": "East,West,East,West,North"
+  },
+  {
+   "expr": "CONCATENATEX(SUMMARIZE(Facts,Facts[Note],Facts[Region]),Facts[Note],\",\")",
+   "powerbi": ",,Paid,Paid,Late"
+  },
+  {
+   "expr": "CONCATENATEX(SUMMARIZE(Facts,Facts[Region],Facts[Quantity]),Facts[Region],\",\")",
+   "powerbi": "East,East,East,West,West,North"
+  },
+  {
+   "expr": "CONCATENATEX(SUMMARIZE(Facts,Facts[Region],Facts[Quantity]),Facts[Quantity],\",\")",
+   "powerbi": "1,2,5,0,3,4"
+  },
+  {
+   "expr": "CONCATENATEX(SUMMARIZE(Facts,Facts[Quantity],Facts[Region]),Facts[Region],\",\")",
+   "powerbi": "East,East,East,West,West,North"
+  },
+  {
+   "expr": "CONCATENATEX(SUMMARIZE(Facts,Facts[Quantity],Facts[Region]),Facts[Quantity],\",\")",
+   "powerbi": "1,2,5,0,3,4"
+  },
+  {
+   "expr": "CONCATENATEX(SUMMARIZE(Facts,Facts[Region],Facts[Sales]),Facts[Region],\",\")",
+   "powerbi": "East,East,East,West,West,North"
+  },
+  {
+   "expr": "CONCATENATEX(SUMMARIZE(Facts,Facts[Region],Facts[Sales]),Facts[Sales],\",\")",
+   "powerbi": "-1.5,2.5,10.5,0,20,"
+  },
+  {
+   "expr": "CONCATENATEX(ALL(Facts[Region],Facts[Note]),Facts[Region],\",\")",
+   "powerbi": "East,West,East,West,North"
+  },
+  {
+   "expr": "CONCATENATEX(ALL(Facts[Region],Facts[Note]),Facts[Note],\",\")",
+   "powerbi": ",,Paid,Paid,Late"
+  },
+  {
+   "expr": "CONCATENATEX(ALL(Facts[Note],Facts[Region]),Facts[Region],\",\")",
+   "powerbi": "East,West,East,West,North"
+  },
+  {
+   "expr": "CONCATENATEX(ALL(Facts[Note],Facts[Region]),Facts[Note],\",\")",
+   "powerbi": ",,Paid,Paid,Late"
+  },
+  {
+   "expr": "CONCATENATEX(ALL(Facts[Region],Facts[Quantity]),Facts[Region],\",\")",
+   "powerbi": "East,East,East,West,West,North"
+  },
+  {
+   "expr": "CONCATENATEX(ALL(Facts[Region],Facts[Quantity]),Facts[Quantity],\",\")",
+   "powerbi": "1,2,5,0,3,4"
+  },
+  {
+   "expr": "CONCATENATEX(VALUES(Facts),Facts[Region],\",\")",
+   "powerbi": "East,East,East,West,West,North"
+  },
+  {
+   "expr": "CONCATENATEX(VALUES(Facts),Facts[Note],\",\")",
+   "powerbi": ",,Paid,Paid,Paid,Late"
+  },
+  {
+   "expr": "CONCATENATEX(VALUES(Facts),Facts[Quantity],\",\")",
+   "powerbi": "0,1,2,3,4,5"
+  },
+  {
+   "expr": "CONCATENATEX(VALUES(Facts),Facts[Sales],\",\")",
+   "powerbi": ",-1.5,0,2.5,10.5,20"
+  },
+  {
+   "expr": "CONCATENATEX(DISTINCT(Facts),Facts[Region],\",\")",
+   "powerbi": "East,West,East,North,West,East"
+  },
+  {
+   "expr": "CONCATENATEX(DISTINCT(Facts),Facts[Note],\",\")",
+   "powerbi": "Paid,,Paid,Late,Paid,"
+  },
+  {
+   "expr": "CONCATENATEX(DISTINCT(Facts),Facts[Sales],\",\")",
+   "powerbi": "10.5,20,-1.5,,0,2.5"
+  },
+  {
+   "expr": "CONCATENATEX(ALL(Facts),Facts[Note],\",\")",
+   "powerbi": ",,Paid,Paid,Paid,Late"
+  },
+  {
+   "expr": "CONCATENATEX(ALL(Facts),Facts[Sales],\",\")",
+   "powerbi": ",-1.5,0,2.5,10.5,20"
+  },
+  {
+   "expr": "CONCATENATEX(CROSSJOIN(VALUES(Facts[Quantity]),VALUES(Facts[Region])),Facts[Region]&Facts[Quantity],\",\")",
+   "powerbi": "East0,East1,East2,East3,East4,East5,West0,West1,West2,West3,West4,West5,North0,North1,North2,North3,North4,North5"
+  },
+  {
+   "expr": "CONCATENATEX(CROSSJOIN(VALUES(Facts[Region]),VALUES(Facts[Note])),Facts[Region]&\"/\"&Facts[Note],\",\")",
+   "powerbi": "East/,West/,North/,East/Paid,West/Paid,North/Paid,East/Late,West/Late,North/Late"
+  },
+  {
+   "expr": "CONCATENATEX(CROSSJOIN(VALUES(Facts[Region]),ROW(\"a\",1)),Facts[Region],\",\")",
+   "powerbi": "East,West,North"
+  },
+  {
+   "expr": "CONCATENATEX(ADDCOLUMNS(Facts,\"d\",Facts[Quantity]*2),Facts[Sales],\",\")",
+   "powerbi": "10.5,20,-1.5,,0,2.5"
+  },
+  {
+   "expr": "CONCATENATEX(ADDCOLUMNS(Facts,\"d\",Facts[Quantity]*2),[d]&\"-\"&Facts[Note],\",\")",
+   "powerbi": "6-,10-,0-Paid,2-Paid,4-Paid,8-Late"
+  },
+  {
+   "expr": "CONCATENATEX(ADDCOLUMNS(Facts,\"d\",Facts[Sales]*2),[d],\",\")",
+   "powerbi": ",-3,0,5,21,40"
+  },
+  {
+   "expr": "CONCATENATEX(ADDCOLUMNS(Facts,\"d\",Facts[Sales]*2),[d]&\"-\"&Facts[Region],\",\")",
+   "powerbi": "21-East,40-West,-3-East,-North,0-West,5-East"
+  },
+  {
+   "expr": "CONCATENATEX(ADDCOLUMNS(Facts,\"d\",Facts[Quantity]*2,\"e\",Facts[Region]&\"x\"),[d]&[e],\",\")",
+   "powerbi": "2Eastx,4Eastx,10Eastx,0Westx,6Westx,8Northx"
+  },
+  {
+   "expr": "CONCATENATEX(ADDCOLUMNS(Facts,\"d\",7),[d]&Facts[Region],\",\")",
+   "powerbi": "7East,7East,7East,7West,7West,7North"
+  },
+  {
+   "expr": "CONCATENATEX(FILTER(ADDCOLUMNS(Facts,\"d\",Facts[Quantity]*2),Facts[Quantity]>1),[d],\",\")",
+   "powerbi": "4,6,8,10"
+  },
+  {
+   "expr": "CONCATENATEX(ADDCOLUMNS(VALUES(Facts[Region]),\"d\",LEN(Facts[Region])),[d]&Facts[Region],\",\")",
+   "powerbi": "4East,4West,5North"
+  },
+  {
+   "expr": "CONCATENATEX(SELECTCOLUMNS(Facts,\"q\",Facts[Quantity]),[q],\",\")",
+   "powerbi": "0,1,2,3,4,5"
+  },
+  {
+   "expr": "CONCATENATEX(SELECTCOLUMNS(Facts,\"r\",Facts[Region]),[r],\",\")",
+   "powerbi": "East,East,East,West,West,North"
+  },
+  {
+   "expr": "CONCATENATEX(SELECTCOLUMNS(Facts,\"r\",Facts[Region],\"q\",Facts[Quantity]),[r]&[q],\",\")",
+   "powerbi": "East1,East2,East5,West0,West3,North4"
+  },
+  {
+   "expr": "CONCATENATEX(SELECTCOLUMNS(Facts,\"s\",Facts[Sales]),[s],\",\")",
+   "powerbi": ",-1.5,0,2.5,10.5,20"
+  },
+  {
+   "expr": "CONCATENATEX(SELECTCOLUMNS(Facts,\"x\",Facts[Quantity]*2),[x],\",\")",
+   "powerbi": "0,2,4,6,8,10"
+  },
+  {
+   "expr": "CONCATENATEX(SELECTCOLUMNS(Facts,\"x\",-Facts[Quantity]),[x],\",\")",
+   "powerbi": "0,-1,-2,-3,-4,-5"
+  },
+  {
+   "expr": "CONCATENATEX(SELECTCOLUMNS(Facts,\"x\",Facts[Region]&\"z\"),[x],\",\")",
+   "powerbi": "Eastz,Eastz,Eastz,Westz,Westz,Northz"
+  },
+  {
+   "expr": "CONCATENATEX(SELECTCOLUMNS(Facts,\"x\",Facts[Region]&\"z\",\"y\",Facts[Quantity]),[x]&[y],\",\")",
+   "powerbi": "Eastz1,Eastz2,Eastz5,Westz0,Westz3,Northz4"
+  },
+  {
+   "expr": "CONCATENATEX(SELECTCOLUMNS(Facts,\"v\",IF(Facts[Quantity]>2,7,\"x\")),[v]&\"\",\"|\")",
+   "powerbi": "x|x|x|7|7|7"
+  },
+  {
+   "expr": "CONCATENATEX(SELECTCOLUMNS(Facts,\"a\",Facts[Region],\"b\",Facts[Note]),[a],\",\")",
+   "powerbi": "East,East,East,West,West,North"
+  },
+  {
+   "expr": "CONCATENATEX(SELECTCOLUMNS(Facts,\"a\",Facts[Region],\"b\",Facts[Note]),[b],\",\")",
+   "powerbi": ",,Paid,Paid,Paid,Late"
+  },
+  {
+   "expr": "CONCATENATEX(SELECTCOLUMNS(Facts,\"a\",Facts[Region],\"b\",Facts[Note]),[a]&[b],\",\")",
+   "powerbi": "East,West,EastPaid,EastPaid,WestPaid,NorthLate"
+  },
+  {
+   "expr": "CONCATENATEX(SELECTCOLUMNS(Facts,\"a\",Facts[Quantity]),[a],\",\")",
+   "powerbi": "0,1,2,3,4,5"
+  },
+  {
+   "expr": "CONCATENATEX(SELECTCOLUMNS(Facts,\"n\",Facts[Note]),[n],\",\")",
+   "powerbi": ",,Paid,Paid,Paid,Late"
+  }
+ ]
+}

@@ -1,0 +1,23 @@
+{
+ "powerbi_version": "2.157.879.0 (26.08)+da30fe74eb0b8a8786ab7326b69c400a0e951831",
+ "frozen": "2026-10-22",
+ "note": "Verified Power BI answers the app does not match yet: TOPN ties at the n-th place (iteration 79).",
+ "items": [
+  {
+   "expr": "CONCATENATEX(TOPN(2,Facts,Facts[Region]),Facts[Quantity],\",\")",
+   "powerbi": "0,3"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(4,Facts,Facts[Region]),Facts[Quantity],\",\")",
+   "powerbi": "1,2,5,0,3,4"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(3,Facts,Facts[Note]),Facts[Quantity],\",\")",
+   "powerbi": "1,2,0"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(2,Facts,Facts[Region],ASC),Facts[Quantity],\",\")",
+   "powerbi": "1,2,5"
+  }
+ ]
+}

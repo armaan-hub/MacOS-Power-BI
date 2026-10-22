@@ -43,7 +43,7 @@ from decimal import (
 )
 from datetime import date, datetime, time, timedelta
 import re
-from typing import Any, Iterable
+from typing import Any, Callable, Iterable
 
 from analytics_studio.relationships import (
     RelationshipError,
@@ -52,7 +52,7 @@ from analytics_studio.relationships import (
     relationship_filter_directions,
     unknown_member_table_ids,
 )
-from analytics_studio import dax_dates, dax_ext, dax_format, dax_math, dax_order, dax_typed
+from analytics_studio import dax_dates, dax_ext, dax_format, dax_iteration_order, dax_math, dax_order, dax_typed
 from analytics_studio.power_query_values import ascii_fold, cell_key, cell_to_text, is_cell_error
 
 
@@ -307,6 +307,9 @@ def tokenize(expression: str) -> list[Token]:
             if not column.strip():
                 raise MeasureError("A column reference cannot be empty.")
             table = _qualified_table_name(value) if kind == "table_ref" else ""
+            if table.upper() == "NOT" and not value.startswith("'"):  # NOT [Measure]: a negation, not a table called NOT
+                tokens.append(Token("identifier", "NOT"))
+                table = ""
             tokens.append(Token("reference", f"{table}\0{column}"))
         elif kind == "number":
             tokens.append(Token(kind, value))
@@ -1890,6 +1893,23 @@ class _Parser:
             node = ("logical", "&&", node, self._comparison())
         return node
 
+    _AFTER_NOT_GROUP = {"=", "<>", "<", "<=", ">", ">=", "&", "+", "-", "*", "/", "^"}
+
+    def _not_is_operator(self) -> bool:
+        """NOT in front of an operand rather than NOT( ... ) as a function: a bare NOT, or NOT (x) followed by an operator."""
+        if not self._is_keyword("NOT"):
+            return False
+        if self.index + 1 >= len(self.tokens) or self.tokens[self.index + 1].kind != "(":
+            return True
+        depth, position = 0, self.index + 1
+        while position < len(self.tokens):
+            depth += {"(": 1, ")": -1}.get(self.tokens[position].kind, 0)
+            if depth == 0:
+                after = self.tokens[position + 1] if position + 1 < len(self.tokens) else None
+                return after is not None and (after.kind in self._AFTER_NOT_GROUP or (after.kind == "identifier" and after.value == "IN"))
+            position += 1
+        return False
+
     def _comparison(self) -> tuple[Any, ...]:
         node = self._concatenation()
         if self._is_keyword("IN"):
@@ -1927,6 +1947,14 @@ class _Parser:
         return node
 
     def _unary(self) -> tuple[Any, ...]:
+        if self._not_is_operator():
+            # NOT negates the whole comparison that follows: NOT 2>1 && 1>2 reads (NOT (2>1)) && (1>2); NOT (1>2) > (2>1) reads
+            # NOT ((1>2) > (2>1)); 1 + NOT 1>2 is 2 (Power BI, tools/dax_battery_not_operator.json)
+            self._take()
+            operand = self._comparison()
+            if self._is_keyword("IN"):  # Power BI folds a chained IN into the operand and rejects some of those; not modelled
+                raise MeasureError("NOT followed by a comparison and IN needs parentheses in the local engine.")
+            return ("call", "NOT", (operand,))
         if self._peek() in {"+", "-"}:
             operator = self._take().kind
             return ("unary", operator, self._unary())
@@ -3969,7 +3997,122 @@ def evaluate_measures(
     def row_key(values: Iterable[Any]) -> tuple[Any, ...]:
         return tuple(cell_key(ascii_fold(v) if isinstance(v, str) else v) for v in values)
 
-    def table_function_value(argument: tuple[Any, ...]) -> tuple[dict[str, Any], list[dict[str, Any]]]:
+    profile_cache: dict[tuple[str, str], Any] = {}
+
+    def source_profile(source: dict[str, Any], column: str) -> Any:
+        """The dictionary of one loaded column, built once per evaluation."""
+        key = (source["id"], column)
+        if key not in profile_cache:
+            is_text = str(source.get("column_types", {}).get(column, "text")).casefold() == "text"
+            profile_cache[key] = dax_iteration_order.Profile(  # the whole loaded column: filters never shrink a dictionary
+                [
+                    None if raw is None or (not is_text and isinstance(raw, str) and not raw.strip()) else typed_cell(source, column, raw)
+                    for raw in (row.get(column) for row in source["rows"])
+                ]
+            )
+        return profile_cache[key]
+
+    def dictionary_ordered_rows(
+        table_node: tuple[Any, ...], context: dict[str, Any], rows: list[dict[str, Any]], nodes: list[tuple[Any, ...]]
+    ) -> list[dict[str, Any]]:
+        """`rows` of `table_node` in the order Power BI walks them for an iterator reading `nodes` (dax_iteration_order).
+
+        Rows come back unchanged whenever the order is not a measured one: that is the order the app always used."""
+        plan = dax_iteration_order.plan(table_node, variable_nodes.get)
+        header_by_key = {h.casefold(): h for h in context["headers"]}
+        read = dax_iteration_order.columns_read(
+            nodes,
+            lambda name: name in dax_iteration_order.CROSS_TABLE_CALLS,
+            lambda name: name in _AGGREGATING_CALLS or name in _TABLE_FUNCTION_ARITY,
+            lambda name: name.casefold() in by_name and name.casefold() not in header_by_key,
+        ) if plan is not None else None
+        if not read:
+            return rows
+        lineage = base_lineage(context)
+        derived = bool(context.get("derived"))
+        origin = context.get("order_source")
+        # (source table id, source column) -> (source table, column, reader of that column's value for one walked row)
+        combination: dict[tuple[str, str], tuple[dict[str, Any], str, Callable[[dict[str, Any]], Any]]] = {}
+
+        def take_header(header: str) -> None:
+            base, column = lineage[header]
+            combination.setdefault((base["id"], column), (base, column, (
+                (lambda row, h=header: row.get(h)) if derived else (lambda row, h=header: typed_cell(context, h, row.get(h)))
+            )))
+
+        def take_source_column(name: str) -> bool:
+            """A column named in a SELECTCOLUMNS expression: read from the table that was selected from."""
+            if origin is None:
+                return False
+            source_context, source_of = origin
+            header = next((h for h in source_context["headers"] if h.casefold() == name.casefold()), None)
+            source_lineage = base_lineage(source_context)
+            if header is None or header not in source_lineage:
+                return False
+            base, column = source_lineage[header]
+            source_derived = bool(source_context.get("derived"))
+            combination.setdefault((base["id"], column), (base, column, (
+                lambda row, h=header: (
+                    lambda source: source.get(h) if source_derived else typed_cell(source_context, h, source.get(h))
+                )(source_of[id(row)])
+            )))
+            return True
+
+        def take_expression(expression: tuple[Any, ...]) -> bool:
+            sources = dax_iteration_order.columns_read([expression], lambda name: name in dax_iteration_order.CROSS_TABLE_CALLS)
+            if sources is None:
+                return False
+            for _table, name in sources:
+                header = header_by_key.get(name.casefold())
+                if plan.projects:
+                    if not take_source_column(name):
+                        return False
+                elif header is None or header not in lineage:
+                    return False
+                else:
+                    take_header(header)
+            return True
+
+        for _table, name in read:
+            if (_table, name) == dax_iteration_order.ALL_COLUMNS:
+                if plan.computed or plan.projects or sum(1 for every in context["headers"] if every in lineage) > 3:
+                    return rows  # only tables of up to three columns were measured (a four-column table stayed in source order)
+                for every in context["headers"]:
+                    if every in lineage:
+                        take_header(every)
+                continue
+            header = header_by_key.get(name.casefold())
+            if header is None:
+                return rows
+            if header.casefold() in plan.computed:
+                if not take_expression(plan.computed[header.casefold()]):
+                    return rows
+            elif header in lineage and not plan.projects:
+                take_header(header)
+            else:
+                return rows
+        if not all(take_expression(expression) for expression in plan.eager):
+            return rows
+        if plan.dedup:
+            for header in context["headers"]:
+                if header in lineage:
+                    take_header(header)
+        if len({key[0] for key in combination}) != 1:
+            return rows
+        source = next(iter(combination.values()))[0]
+        try:
+            profiles = {key: source_profile(source, column) for key, (_base, column, _read) in combination.items()}
+            in_dictionary_order = dax_iteration_order.grouped(len(source["rows"]), list(profiles.values()), plan.dedup)
+            major_first = sorted(combination, key=lambda key: -source["headers"].index(key[1]))  # a later column is the major key
+
+            def walk_key(row: dict[str, Any]) -> tuple[tuple[int, Any], ...]:
+                return tuple(profiles[key].key(combination[key][2](row)) for key in major_first)
+
+            return sorted(rows, key=walk_key) if in_dictionary_order else rows
+        except (MeasureError, ArithmeticError, ValueError, TypeError, KeyError):  # a row this order cannot place: keep source order
+            return rows
+
+    def table_function_rows(argument: tuple[Any, ...]) -> tuple[dict[str, Any], list[dict[str, Any]]]:
         function, arguments = argument[1], argument[2]
         if function in {"ADDCOLUMNS", "SELECTCOLUMNS"}:
             context, rows = table_argument_value(arguments[0])
@@ -4009,7 +4152,9 @@ def evaluate_measures(
             lineage = base_lineage(context) if add else {}
             headers = (list(context["headers"]) if add else []) + names
             out_rows: list[dict[str, Any]] = []
+            source_rows: list[dict[str, Any]] = []
             for frame in iterate_rows(context, rows):
+                source_rows.append(frame[1])
                 row = typed_row(context, frame[1]) if add else {}
                 for name, expression in zip(names, expressions):
                     try:
@@ -4026,7 +4171,10 @@ def evaluate_measures(
                         lineage[name] = (link_context, link_column)
                 out_rows.append(row)
             types = dict(context.get("column_types", {})) if add else {}
-            return derived_table(headers, out_rows, lineage, {k: v for k, v in types.items() if k in headers})
+            selected_context, selected_rows = derived_table(headers, out_rows, lineage, {k: v for k, v in types.items() if k in headers})
+            if not add:  # the walk order of a selected column is that of the columns it was computed from
+                selected_context["order_source"] = (context, {id(out): source for out, source in zip(out_rows, source_rows)})
+            return selected_context, selected_rows
         if function == "SUMMARIZE":
             context, rows = table_argument_value(arguments[0])
             split = next((i for i, a in enumerate(arguments[1:], 1) if a[0] == "string"), len(arguments))
@@ -4088,23 +4236,51 @@ def evaluate_measures(
                 return context, []
             if not keys_spec:  # no order expression: the first n rows, no ties
                 return context, list(rows[: int(count.to_integral_value(rounding=ROUND_FLOOR))])
-            scored = []
-            for frame in iterate_rows(context, rows):
-                keys = []
-                for expression, descending in keys_spec:
-                    value = in_row_expression(lambda expression=expression, frame=frame: evaluate(expression, frame, allow_text=True))
-                    keys.append(value)
-                scored.append((keys, frame[1]))
-
-            ordered = list(scored)
-            for position in range(len(keys_spec) - 1, -1, -1):
-                sample = next((item[0][position] for item in scored if item[0][position] is not None), None)
-                blank = dax_typed._blank_like(sample) if sample is not None else Decimal(0)
-                ordered.sort(
-                    key=lambda item, p=position, blank=blank: column_order_key(blank if item[0][p] is None else item[0][p]),
-                    reverse=keys_spec[position][1],
-                )
+            walk_nodes = topn_walk_nodes.get(id(argument))
             limit = int(count.to_integral_value(rounding=ROUND_FLOOR))
+
+            def score_rows(source_rows: list[dict[str, Any]]) -> list[tuple[list[Any], dict[str, Any]]]:
+                found = []
+                for frame in iterate_rows(context, source_rows):
+                    keys = []
+                    for expression, descending in keys_spec:
+                        value = in_row_expression(lambda expression=expression, frame=frame: evaluate(expression, frame, allow_text=True))
+                        keys.append(value)
+                    found.append((keys, frame[1]))
+                return found
+
+            def sort_scored(found: list[tuple[list[Any], dict[str, Any]]]) -> list[tuple[list[Any], dict[str, Any]]]:
+                ranked = list(found)
+                for position in range(len(keys_spec) - 1, -1, -1):
+                    sample = next((item[0][position] for item in found if item[0][position] is not None), None)
+                    blank = dax_typed._blank_like(sample) if sample is not None else Decimal(0)
+                    ranked.sort(
+                        key=lambda item, p=position, blank=blank: column_order_key(blank if item[0][p] is None else item[0][p]),
+                        reverse=keys_spec[position][1],
+                    )
+                return ranked
+
+            scored = score_rows(rows)
+            ordered = sort_scored(scored)
+            if walk_nodes is not None and not evaluation_filter_ids and (limit >= len(scored) or row_key(ordered[limit - 1][0]) != row_key(ordered[limit][0])):
+                # consumed by CONCATENATEX with nothing tied at the cut: the source is walked in dictionary order over the columns
+                # read and the kept rows come back as the array of Power BI's heap (a tie at the cut is not modelled: that keeps
+                # the sorted answer over the source order; under a CALCULATE filter the heap order was not measured either)
+                walked = dictionary_ordered_rows(arguments[1], context, rows, [*walk_nodes, *(expression for expression, _d in keys_spec)])
+                scored = score_rows(walked)
+                ordered = sort_scored(scored)
+                if limit >= len(scored):
+                    return dict(context), [item[1] for item in scored]  # nothing is cut: the table comes back in walk order
+                column_keys = [blank_aware_keys([item[0][p] for item in scored]) for p in range(len(keys_spec))]
+
+                def beats(a: int, b: int) -> bool:
+                    for position, (_expression, descending) in enumerate(keys_spec):
+                        left, right = column_keys[position][a], column_keys[position][b]
+                        if left != right:
+                            return (left > right) == descending
+                    return False
+
+                return dict(context), [scored[index][1] for index in dax_iteration_order.heap_top(limit, range(len(scored)), beats)]
             kept = ordered[:limit]
             if kept and len(ordered) > limit:
                 boundary = row_key(v for v in ordered[limit - 1][0])
@@ -4127,7 +4303,7 @@ def evaluate_measures(
                 for context, rows in typed_tables[1:]:
                     merged_headers += [h for h in context["headers"]]
                     lineage.update(base_lineage(context))
-                    output = [{**left, **right} for left in output for right in rows]
+                    output = [{**left, **right} for right in rows for left in output]  # Power BI: the FIRST table varies fastest
                 if len({h.casefold() for h in merged_headers}) != len(merged_headers):
                     raise MeasureError("CROSSJOIN does not allow two columns with the same name.")
                 return derived_table(merged_headers, output, lineage, {
@@ -4817,6 +4993,12 @@ def evaluate_measures(
         """Distinct values in storage order: numbers and dates ascending, text by first appearance in the table."""
         kind = str(context.get("column_types", {}).get(column, "text")).casefold()
         if kind in _COLUMN_NUMBER_TYPES or kind in {"date", "datetime"}:
+            try:
+                wide = not dax_iteration_order.grouped(len(context["rows"]), [source_profile(context, column)], True)
+            except (MeasureError, ArithmeticError, ValueError, TypeError):  # a cell this cannot place: sort as before
+                wide = False
+            if wide:
+                return value_rows  # a wide range keeps first-appearance order
             def is_blank(value: Any) -> bool:
                 # An empty loaded cell in a number or date column is a blank, like the virtual unmatched-key row.
                 return value is None or (isinstance(value, str) and not value.strip())
@@ -4828,16 +5010,20 @@ def evaluate_measures(
                     0 if is_blank(row[column]) else typed_cell(context, column, row[column]),
                 ),
             )
+        if kind == "boolean":  # BLANK, FALSE, TRUE
+            return sorted(value_rows, key=lambda row: (row[column] is not None, typed_cell(context, column, row[column]) if row[column] is not None else False))
         first_seen: dict[Any, int] = {}
         for position, base in enumerate(context["rows"]):
             value = base.get(column)
             first_seen.setdefault(cell_key(ascii_fold(value) if isinstance(value, str) else value), position)
-        return sorted(
+        return sorted(  # a BLANK is the first entry of every dictionary (Power BI, tools/parity/dax_battery_concatenatex_order.json)
             value_rows,
-            key=lambda row: first_seen.get(cell_key(ascii_fold(row[column]) if isinstance(row[column], str) else row[column]), 0),
+            key=lambda row: -1 if row[column] is None else first_seen.get(cell_key(ascii_fold(row[column]) if isinstance(row[column], str) else row[column]), 0),
         )
 
     iterator_depth = 0
+    variable_nodes: dict[str, Any] = {}  # VAR name -> the expression it was declared with (to walk a table held in a VAR)
+    topn_walk_nodes: dict[int, list[tuple[Any, ...]]] = {}  # id of a TOPN node -> expressions its CONCATENATEX consumer reads
     lazy_column_calls: list[Any] = []  # ADDCOLUMNS/SELECTCOLUMNS nodes whose columns COUNTROWS never reads
 
     def in_row_expression(thunk: Any) -> Any:
@@ -4854,6 +5040,15 @@ def evaluate_measures(
             raise _HardError(str(error)) from error
         finally:
             iterator_depth -= 1
+
+    def table_function_value(argument: tuple[Any, ...]) -> tuple[dict[str, Any], list[dict[str, Any]]]:
+        """A table function's rows; VALUES/DISTINCT/ALL of columns and SUMMARIZE come out in Power BI's dictionary order."""
+        context, rows = table_function_rows(argument)
+        walk = dax_iteration_order.plan(argument)
+        if walk is not None and walk.dedup and len(rows) > 1:
+            lineage = base_lineage(context)
+            rows = dictionary_ordered_rows(argument, context, rows, [("reference", "", h) for h in context["headers"] if h in lineage])
+        return context, rows
 
     def table_argument_value(
         argument: tuple[Any, ...],
@@ -7401,8 +7596,10 @@ def evaluate_measures(
         """VAR name = value ... RETURN body: each value is computed once, where the VAR is declared."""
         saved = dict(variables)
         saved_kinds = dict(variable_kinds)
+        saved_nodes = dict(variable_nodes)
         try:
             for name, value_node in node[1]:
+                variable_nodes[name] = value_node
                 variable_kinds[name] = branch_kind(value_node, row_context)
                 if value_node[0] != "var" and _is_all_table_value_argument(value_node):
                     held_table = _TableValue(table_argument_value(value_node))
@@ -7424,6 +7621,8 @@ def evaluate_measures(
             variables.update(saved)
             variable_kinds.clear()
             variable_kinds.update(saved_kinds)
+            variable_nodes.clear()
+            variable_nodes.update(saved_nodes)
 
     def convert_value(value: Any, target: str) -> Any:
         if value is None:
@@ -8670,7 +8869,6 @@ def evaluate_measures(
             quantum = Decimal(1).scaleb(-int(precision))
             return value.quantize(quantum, rounding=ROUND_HALF_UP)
         if function == "CONCATENATEX":
-            context, iteration_rows = table_argument_value(arguments[0])
             delimiter = "" if len(arguments) < 3 else dax_typed.to_text(evaluate(arguments[2], row_context, allow_text=True))
             order_spec: list[tuple[Any, bool]] = []  # (expression, descending); ASC is the default here
             position = 3
@@ -8688,10 +8886,25 @@ def evaluate_measures(
                         descending = direction[1] == 0 or direction[1] is False
                         position += 1
                 order_spec.append((expression, descending))
+            read_nodes = [arguments[1], *(expression for expression, _d in order_spec)]
+            topn_walk_nodes[id(arguments[0])] = read_nodes  # a TOPN argument is walked as this CONCATENATEX reads it
+            try:
+                context, iteration_rows = table_argument_value(arguments[0])
+            finally:
+                topn_walk_nodes.pop(id(arguments[0]), None)
             entries = []
+            iteration_rows = dictionary_ordered_rows(arguments[0], context, iteration_rows, read_nodes)
+            def order_value(expression: tuple[Any, ...], inner: tuple[Any, ...]) -> Any:
+                value = evaluate(expression, inner, allow_text=True)
+                if value is None and expression[0] == "reference" and not inner[0].get("derived"):
+                    header = next((h for h in inner[0]["headers"] if h.casefold() == expression[2].casefold()), None)
+                    if header is not None and inner[1].get(header) == "":
+                        return ""  # an empty text is not a BLANK: Power BI orders BLANK before it
+                return value
+
             for inner in iterate_rows(context, iteration_rows):
                 text = dax_typed.to_text(evaluate(arguments[1], inner, allow_text=True))
-                entries.append(([evaluate(expression, inner, allow_text=True) for expression, _d in order_spec], text))
+                entries.append(([order_value(expression, inner) for expression, _d in order_spec], text))
             for key_index in range(len(order_spec) - 1, -1, -1):
                 column_keys = blank_aware_keys([item[0][key_index] for item in entries])
                 try:
