@@ -33,10 +33,8 @@ def _units(text: str) -> str:
     """Text as UTF-16 code units: every character above U+FFFF becomes its surrogate pair (Power BI counts 2 for it)."""
     if text.isascii():
         return text
-    return "".join(
-        chr(0xD800 + ((ord(c) - 0x10000) >> 10)) + chr(0xDC00 + ((ord(c) - 0x10000) & 0x3FF)) if ord(c) > 0xFFFF else c
-        for c in text
-    )
+    data = text.encode("utf-16-le", "surrogatepass")
+    return "".join(map(chr, memoryview(data).cast("H")))
 
 
 def _from_units(units: str) -> str:
@@ -241,7 +239,10 @@ def text_function(function: str, args: list[object]) -> object:
         if args[0] is None:
             return None
         text = to_text(args[0])
-        return text * whole(args[1], function, minimum=0)
+        times = whole(args[1], function, minimum=0)
+        if len(text) * times > 1 << 26:  # Power BI refuses a result beyond its text size limit
+            raise _error("The result of function 'REPT' is longer than the allowed text size.")
+        return text * times
     if function == "UNICHAR":
         code = whole(args[0], function, minimum=1)
         if code > 0x10FFFF or not _valid_unichar(code):
@@ -281,7 +282,7 @@ def text_function(function: str, args: list[object]) -> object:
         return Decimal(ord(text[0]))
     if function in {"LEFT", "RIGHT"}:
         count = whole(args[1], function, minimum=0) if len(args) > 1 else 1
-        return _from_units(text[:count] if function == "LEFT" else (text[len(text) - count:] if count else ""))
+        return _from_units(text[:count] if function == "LEFT" else (text[max(0, len(text) - count):] if count else ""))
     if function == "MID":
         start = whole(args[1], function, minimum=1)
         count = whole(args[2], function, minimum=0)
@@ -315,13 +316,14 @@ def _find(function: str, args: list[object], within_text: str) -> object:
     haystack = _units(to_text(args[1])) if len(args) > 1 else ""
     start = whole(args[2], function, minimum=1) if len(args) > 2 and args[2] is not None else 1
     not_found = _MISSING
-    if len(args) > 3:  # the result is a number, so the NotFoundValue must convert to one
+    if len(args) > 3:  # the result is a number, so the NotFoundValue must convert to one; with one given nothing raises
         not_found = None if args[3] is None else Decimal(whole(args[3], function))
     if not needle:  # an empty needle is found at 1 provided the start lies inside the text (SEARCH refuses empty text)
         if start > max(len(haystack), 1) or (function == "SEARCH" and not haystack):
-            raise _error(f"The search Text provided to function '{function}' could not be found in the given text.")
-        return Decimal(1)
-    if start > len(haystack):
+            found = -1
+        else:
+            return Decimal(1)
+    elif start > len(haystack):
         found = -1
     elif function == "FIND":
         found = haystack.find(needle, start - 1)

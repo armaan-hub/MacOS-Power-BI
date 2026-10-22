@@ -86,19 +86,24 @@ _PLAN_CONSTANT_CALLS = frozenset({
 })
 
 
-def _eager_logical(is_and: bool, thunks: list[Callable[[], bool]], nodes: list[tuple[Any, ...]], is_constant: Callable[[tuple[Any, ...]], bool]) -> bool:
+def _eager_logical(
+    is_and: bool, thunks: list[Callable[[], bool]], nodes: list[tuple[Any, ...]], is_constant: Callable[[tuple[Any, ...]], bool],
+    left_closed: bool = False,
+) -> bool:
     """&&, ||, AND and OR as Power BI 2.157 runs them: both operands are evaluated and an error in either one is an error.
 
     The one way out is a plan-time constant holding the deciding value (FALSE for AND, TRUE for OR): it settles the result
     and swallows the other operand's error (tools/parity/dax_battery_evaluation_order.json).
     """
     outcomes: list[tuple[bool | None, MeasureError | None]] = []
+    deciding = not is_and
     for thunk in thunks:
         try:
             outcomes.append((thunk(), None))
         except (MeasureRuntimeError, _HardError) as error:
             outcomes.append((None, error))
-    deciding = not is_and
+        if left_closed and len(outcomes) == 1 and outcomes[0][1] is None and outcomes[0][0] is deciding:
+            return deciding  # an operand that does not read the row is settled first; when it decides the right side is never planned
     if any(error is not None for _value, error in outcomes):
         for (value, error), node in zip(outcomes, nodes):
             if error is None and value is deciding and is_constant(node):
@@ -138,6 +143,22 @@ class _Shadow:
             self.table, tuple(self.columns[index] for index in keep),
             lambda: frozenset(tuple(item[index] for index in keep) for item in parent.tuples),
         )
+
+
+_NEVER_CONSTANT_CALLS = frozenset({
+    "RAND", "RANDBETWEEN", "EVALUATEANDLOG", "CALCULATE", "CALCULATETABLE", "FILTER", "ADDCOLUMNS", "SELECTCOLUMNS", "SUMMARIZE",
+    "SUMMARIZECOLUMNS", "TOPN", "VALUES", "DISTINCT", "ALL", "ALLSELECTED", "ALLEXCEPT", "LOOKUPVALUE", "CONTAINS", "CONTAINSROW",
+    "FIRSTNONBLANK", "LASTNONBLANK", "ISEMPTY", "RELATED", "RELATEDTABLE", "USERELATIONSHIP", "ROW", "GENERATESERIES",
+})
+_ROW_SHIELDING_CALLS = frozenset({
+    "SUM", "AVERAGE", "MIN", "MAX", "COUNT", "COUNTA", "COUNTBLANK", "DISTINCTCOUNT", "DISTINCTCOUNTNOBLANK", "MEDIAN", "PRODUCT",
+    "VALUES", "DISTINCT", "ALL", "ALLNOBLANKROW", "ALLEXCEPT", "ALLSELECTED", "REMOVEFILTERS", "ISFILTERED", "ISCROSSFILTERED",
+    "ISINSCOPE", "HASONEVALUE", "SELECTEDVALUE", "KEEPFILTERS", "STDEV.S", "STDEV.P", "VAR.S", "VAR.P",
+})
+_ITERATOR_CALLS = frozenset({
+    "SUMX", "AVERAGEX", "MAXX", "MINX", "COUNTX", "COUNTAX", "PRODUCTX", "MEDIANX", "CONCATENATEX", "FILTER", "ADDCOLUMNS",
+    "SELECTCOLUMNS", "TOPN", "GENERATE", "GENERATEALL", "RANKX", "SUMMARIZE", "GROUPBY",
+})
 
 
 def logical_conjuncts(node: tuple[Any, ...]) -> list[tuple[Any, ...]]:
@@ -5265,8 +5286,9 @@ def evaluate_measures(
             iterator_depth -= 1
 
     def conjuncts_pass(predicate: tuple[Any, ...], frame: tuple[dict[str, Any], dict[str, Any], int]) -> bool:
-        """A FILTER row test. A top-level && chain (or AND) is split: plan-time constants are decided once up front
-        and the remaining conjuncts run left to right on the rows still alive, so a guard really guards."""
+        """A FILTER row test. A top-level && chain (or AND) is split: plan-time constants are decided once up front, a conjunct
+        that does not read the row is evaluated once up front too (its error is raised even when no row would reach it, its
+        value is applied in its place), and the rest run left to right on the rows still alive, so a guard really guards."""
         parts = logical_conjuncts(predicate)
 
         def holds(part: tuple[Any, ...]) -> bool:
@@ -5279,21 +5301,34 @@ def evaluate_measures(
         if key not in conjunct_constants:
             decided: bool | None = True
             failure: MeasureError | None = None
+            ordered: list[tuple[tuple[Any, ...], bool | None]] = []  # (conjunct, its value when it does not read the row)
             for part in parts:
-                if not plan_constant(part):
+                if reads_row(part):
+                    ordered.append((part, None))
                     continue
                 try:
-                    if not holds(part):
-                        decided = False
+                    value = holds(part)
                 except MeasureError as error:
                     failure = failure or error
+                    value = None
+                if plan_constant(part):
+                    if value is False:
+                        decided = False
+                    ordered.append((part, True if value is not False else False))
+                else:
+                    ordered.append((part, value))
             if decided is False:
-                failure = None  # a constant FALSE settles the filter; a constant error elsewhere is swallowed
-            conjunct_constants[key] = (decided, failure, [part for part in parts if not plan_constant(part)])
-        decided, failure, rest = conjunct_constants[key]
+                failure = None  # a constant FALSE settles the filter; a closed error elsewhere is swallowed
+            conjunct_constants[key] = (decided, failure, ordered)
+        decided, failure, ordered = conjunct_constants[key]
         if failure is not None:
             raise failure
-        return bool(decided) and all(holds(part) for part in rest)
+        if not decided:
+            return False
+        for part, closed_value in ordered:
+            if not (holds(part) if closed_value is None else closed_value):
+                return False
+        return True
 
     def table_function_value(argument: tuple[Any, ...]) -> tuple[dict[str, Any], list[dict[str, Any]]]:
         """A table function's rows; VALUES/DISTINCT/ALL of columns and SUMMARIZE come out in Power BI's dictionary order."""
@@ -8049,13 +8084,12 @@ def evaluate_measures(
                     failures[name] = error
                     continue
                 variables[name] = lambda value=value: value
-            if row_context is None:
-                # a closed VAR is evaluated up front: an error in one the RETURN still reads is thrown even from a branch
-                # that would not run (a row-dependent VAR is only read where it is used)
-                for name, _value_node in node[1]:
-                    error = failures.get(name)
-                    if error is not None and not isinstance(error, _DivisionError) and references_variable(node[2], name):
-                        raise _HardError(str(error)) from error
+            # a closed VAR is evaluated up front, also inside an iterator: an error in one the RETURN still reads is thrown
+            # even from a branch that would not run (a row-dependent VAR is only read where it is used)
+            for name, value_node in node[1]:
+                error = failures.get(name)
+                if error is not None and not isinstance(error, _DivisionError) and (row_context is None or not reads_row(value_node)) and references_variable(node[2], name):
+                    raise _HardError(str(error)) from error
             return evaluate(node[2], row_context, allow_text=allow_text, allow_boolean=allow_boolean)
         finally:
             variables.clear()
@@ -8357,38 +8391,70 @@ def evaluate_measures(
         return dax_typed.text_function(function, values)
 
     def plan_constant(node: tuple[Any, ...]) -> bool:
-        """True when Power BI knows the value before scanning any row: literals, pure functions of them, VARs holding
-        one, the metadata aggregates (MAX/MIN of a column, COUNTROWS of a table, DISTINCTCOUNT, SELECTEDVALUE ...) while
-        no filter is active, and a && / || chain that one such operand has already decided."""
-        kind = node[0]
-        if kind in {"number", "string", "boolean", "blank"}:
-            return True
-        if kind == "var":
-            held = variable_nodes.get(node[1])
-            return held is not None and plan_constant(held)
-        if kind == "unary":
-            return plan_constant(node[2])
-        if kind == "logical":
-            if plan_constant(node[2]) and plan_constant(node[3]):
+        """True when Power BI knows the value before scanning any row (tools/parity/dax_battery_evaluation_order.json).
+
+        Literals and any function of them (also of a selected IF/SWITCH/COALESCE/IFERROR path), VARs holding one, the
+        metadata aggregates (MAX/MIN of a column, COUNTROWS of a table, DISTINCTCOUNT, SELECTEDVALUE ...) while no filter is
+        active, ISFILTERED/ISINSCOPE always, and a && / || / AND / OR that one such operand has already decided."""
+        known: dict[int, bool] = {}
+        values: dict[int, tuple[bool, Any]] = {}
+
+        def value_of(operand: tuple[Any, ...]) -> tuple[bool, Any]:
+            """(evaluated without error, the value) of a constant operand, computed once."""
+            cached = values.get(id(operand))
+            if cached is None:
+                try:
+                    cached = (True, evaluate(operand, None, allow_text=True, allow_boolean=True))
+                except MeasureError:
+                    cached = (False, None)
+                values[id(operand)] = cached
+            return cached
+
+        def walk(operand: tuple[Any, ...]) -> bool:
+            result = known.get(id(operand))
+            if result is None:
+                result = known[id(operand)] = decide(operand)
+            return result
+
+        def deciding(left: tuple[Any, ...], right: tuple[Any, ...], is_or: bool) -> bool:
+            const_left, const_right = walk(left), walk(right)
+            if const_left and const_right:
                 return True
-            deciding = node[1] == "||"
-            for operand in (node[2], node[3]):
-                if plan_constant(operand):
-                    try:
-                        if as_boolean(evaluate(operand, None, allow_text=True, allow_boolean=True)) is deciding:
-                            return True
-                    except MeasureError:
-                        pass
+            for operand, is_const in ((left, const_left), (right, const_right)):
+                if is_const:
+                    ok, value = value_of(operand)
+                    if ok and as_boolean(value) is is_or:
+                        return True
             return False
-        if kind in {"binary", "comparison"}:
-            return plan_constant(node[2]) and plan_constant(node[3])
-        if kind == "concat":
-            return all(plan_constant(part) for part in node[1:])
-        if kind == "call":
-            function, arguments = node[1], node[2]
-            if function in {"MAX", "MIN", "DISTINCTCOUNT", "DISTINCTCOUNTNOBLANK", "HASONEVALUE", "ISFILTERED", "ISCROSSFILTERED",
-                            "ISINSCOPE", "SELECTEDVALUE"} and arguments and arguments[0][0] == "reference":
-                return not evaluation_filter_ids and all(plan_constant(argument) for argument in arguments[1:])
+
+        def decide(operand: tuple[Any, ...]) -> bool:
+            kind = operand[0]
+            if kind in {"number", "string", "boolean", "blank"}:
+                return True
+            if kind == "var":
+                held = variable_nodes.get(operand[1])
+                return held is not None and walk(held)
+            if kind == "unary":
+                return walk(operand[2])
+            if kind == "logical":
+                return deciding(operand[2], operand[3], operand[1] == "||")
+            if kind in {"binary", "comparison"}:
+                return walk(operand[2]) and walk(operand[3])
+            if kind == "concat":
+                return all(walk(part) for part in operand[1:])
+            if kind == "table" and str(operand[1]).upper() in {"DAY", "MONTH", "YEAR", "QUARTER", "WEEK", "HOUR", "MINUTE", "SECOND", "ASC", "DESC", "TRUE", "FALSE"}:
+                return True  # an interval or order keyword (DATEDIFF(a,b,DAY)) is a literal
+            if kind != "call":
+                return False
+            function, arguments = operand[1], operand[2]
+            if function in {"AND", "OR"} and len(arguments) == 2:
+                return deciding(arguments[0], arguments[1], function == "OR")
+            if function in {"ISFILTERED", "ISCROSSFILTERED"} and arguments and arguments[0][0] == "reference":
+                return True
+            if function == "ISINSCOPE" and arguments and arguments[0][0] == "reference":
+                return not any(eff_transition.values())  # data once a context transition is in force
+            if function in {"MAX", "MIN", "DISTINCTCOUNT", "DISTINCTCOUNTNOBLANK", "HASONEVALUE", "SELECTEDVALUE"} and arguments and arguments[0][0] == "reference":
+                return not evaluation_filter_ids and all(walk(argument) for argument in arguments[1:])
             if function in {"MINX", "MAXX"} and len(arguments) == 2 and arguments[0][0] == "table" and arguments[1][0] == "reference":
                 return not evaluation_filter_ids
             if function == "COUNTROWS" and len(arguments) == 1:
@@ -8398,19 +8464,79 @@ def evaluate_measures(
                 if source[0] == "table" or (source[0] == "table_call" and source[1] in {"VALUES", "DISTINCT"}):
                     return not evaluation_filter_ids
                 return False
-            if function in {"NOW", "TODAY", "USERNAME", "USERPRINCIPALNAME", "UTCNOW", "UTCTODAY"}:
-                return True
-            if function in {"ISERROR", "IFERROR"}:  # a constant that raises is not folded: it counts as data-dependent
-                if not all(plan_constant(argument) for argument in arguments):
+            if function == "IF" and len(arguments) >= 2:  # only the selected path has to be constant
+                if not walk(arguments[0]):
                     return False
-                try:
-                    for argument in arguments:
-                        evaluate(argument, None, allow_text=True, allow_boolean=True)
-                except MeasureError:
+                ok, condition = value_of(arguments[0])
+                if not ok:
                     return False
+                chosen = arguments[1] if as_boolean(condition) else (arguments[2] if len(arguments) > 2 else None)
+                return chosen is None or walk(chosen)
+            if function == "SWITCH" and len(arguments) >= 3:
+                if not walk(arguments[0]):
+                    return False
+                ok, subject = value_of(arguments[0])
+                if not ok:
+                    return False
+                rest = list(arguments[1:])
+                for case, result in zip(rest[::2], rest[1::2]):
+                    if not walk(case):
+                        return False
+                    matched, case_value = value_of(case)
+                    if matched:
+                        try:
+                            if dax_typed.values_match(subject, case_value):
+                                return walk(result)
+                        except MeasureError:
+                            return False
+                return len(rest) % 2 == 0 or walk(rest[-1])
+            if function == "COALESCE":
+                for argument in arguments:
+                    if not walk(argument):
+                        return False
+                    ok, value = value_of(argument)
+                    if ok and value is not None:
+                        return True
                 return True
-            return (function in _PLAN_CONSTANT_CALLS or function == "COALESCE") and all(plan_constant(argument) for argument in arguments)
-        return False
+            if function == "IFERROR" and len(arguments) == 2:
+                if not walk(arguments[0]):
+                    return False
+                ok, value = value_of(arguments[0])
+                if ok and not dax_typed.is_non_finite(value):
+                    return True
+                return walk(arguments[1])
+            if function == "ISERROR" and len(arguments) == 1:  # a constant that raises is not folded: it counts as data
+                return walk(arguments[0]) and value_of(arguments[0])[0]
+            if function in _NEVER_CONSTANT_CALLS:
+                return False
+            return all(walk(argument) for argument in arguments)
+
+        return walk(node)
+
+    def reads_row(node: tuple[Any, ...], shielded: bool = False, seen: frozenset[str] = frozenset()) -> bool:
+        """Whether the expression reads the current row: a bare column or a measure outside an iterator body or an aggregate,
+        EARLIER, a CALCULATE (it transitions the row), or a VAR that does. Closed expressions are hoisted by Power BI."""
+        if not node:
+            return False
+        head = node[0]
+        if head == "reference":
+            return not shielded
+        if head == "var":
+            held = variable_nodes.get(node[1])
+            return node[1] not in seen and held is not None and reads_row(held, False, seen | {node[1]})
+        if head in {"table", "number", "string", "boolean", "blank"}:
+            return False
+        if head == "table_call":
+            return any(reads_row(item, True, seen) for item in node[2:] if isinstance(item, tuple))
+        if head == "call":
+            function, arguments = node[1], node[2]
+            if function in {"EARLIER", "EARLIEST", "CALCULATE", "CALCULATETABLE"}:
+                return True
+            if function in _ROW_SHIELDING_CALLS:
+                return any(reads_row(argument, True, seen) for argument in arguments)
+            if function in _ITERATOR_CALLS and arguments:
+                return reads_row(arguments[0], shielded, seen) or any(reads_row(argument, True, seen) for argument in arguments[1:])
+        return any(reads_row(item, shielded, seen) for item in node if isinstance(item, tuple))
 
     def references_variable(node: tuple[Any, ...], name: str) -> bool:
         """Whether the expression still reads the VAR after plan-time pruning: the untaken side of an IF with a constant
@@ -8466,6 +8592,8 @@ def evaluate_measures(
                         if references_variable(case, name):
                             return True
                         matched, case_value = settled(case)
+                        if not matched and references_variable(result, name):
+                            return True  # a case that cannot be decided leaves its result in the plan
                         if matched:
                             try:
                                 if dax_typed.values_match(subject, case_value):
@@ -9303,9 +9431,15 @@ def evaluate_measures(
                     lambda: evaluate(arguments[0], row_context, allow_text=True, allow_boolean=allow_boolean)
                 ) is None
             except MeasureRuntimeError as error:
-                # ponytail: Power BI answers FALSE for a SQRT/LN domain error or a plan-time constant that fails; other
-                # errors stay errors. Measured by probe (tools/parity/dax_battery_evaluation_order.json), not understood.
-                if isinstance(error, _DivisionError) or not (str(error).startswith(("SQRT needs", "LN needs")) or plan_constant(arguments[0])):
+                # ponytail: Power BI answers FALSE when the error is the argument function's own (SQRT/LN/LOG domain, UNICHAR, REPT,
+                # EDATE ... "wrong data type") or a conversion of literals, but not when the argument is COALESCE/IFERROR/SWITCH/
+                # CALCULATE, nor a text conversion of data. Measured by probe (dax_battery_evaluation_order), not understood.
+                argument = arguments[0]
+                own_error = "needs a number" in str(error) or "wrong data type" in str(error)
+                swallowed = own_error or (not any(True for _ in _iter_reference_nodes(argument)) and plan_constant(argument))
+                if isinstance(error, _DivisionError) or not swallowed or (
+                    argument[0] == "call" and argument[1] in {"COALESCE", "IFERROR", "SWITCH", "CALCULATE", "ASIN", "ACOS", "DIVIDE"}
+                ):
                     raise
                 return False
         if function == "IFERROR":
@@ -9394,23 +9528,33 @@ def evaluate_measures(
                     lazy_column_calls.pop()
             return Decimal(len(table_rows)) if table_rows else None
         if function == "COALESCE":
-            # Power BI stops at the first non-blank plan-time constant; from the first data-dependent argument on it
-            # evaluates every remaining argument too, and their errors cannot be caught by IFERROR
+            # Power BI stops at the first non-blank plan-time constant. From the first data-dependent argument on it also
+            # evaluates the arguments after it that do not read the current row (so their errors surface); one that reads the
+            # row stays lazy. An error leaving a COALESCE cannot be caught by IFERROR or ISERROR, whichever argument it is.
             result, found, eager = None, False, False
             for argument in arguments:
                 if found and not eager:
                     break
                 if not eager and not plan_constant(argument):
                     eager = True
+                elif eager and found and row_context is not None and reads_row(argument):
+                    continue  # a tail that reads the row is only evaluated when it is reached
+                elif eager and found and plan_constant(argument):
+                    try:
+                        settled = evaluate(argument, row_context, allow_text=True, allow_boolean=True)
+                    except MeasureRuntimeError as error:
+                        raise _HardError(str(error)) from error  # a constant that fails is planned, so it fails the whole measure
+                    if settled is not None:
+                        break  # a non-blank constant ends the chain: what follows it is never planned
                 try:
                     value = evaluate(
                         argument, row_context, allow_text=allow_text,
                         allow_boolean=allow_boolean,
                     )
                 except MeasureRuntimeError as error:
-                    if eager and not isinstance(error, _DivisionError):
-                        raise _HardError(str(error)) from error
-                    raise
+                    if isinstance(error, _DivisionError) or (row_context is not None and reads_row(argument)):
+                        raise  # an error from a lazily evaluated, row-dependent argument is an ordinary one
+                    raise _HardError(str(error)) from error
                 if not found and value is not None:
                     result, found = value, True
             return result
@@ -9535,6 +9679,8 @@ def evaluate_measures(
             smaller = dax_typed.compare("<", first, second)
             return (first if larger else second) if function == "MAX" else (first if smaller else second)
         reference = arguments[0]
+        if reference[0] != "reference" or len(reference) < 3:  # a table or other non-column argument is not a scalar source
+            raise MeasureError(f"{function} needs a column reference in the local engine.")
         if function == "COUNTA":
             context, actual = resolve_table(reference[1], reference[2])
             visible_rows = rows_by_table_id[context["id"]]
