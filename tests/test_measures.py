@@ -1079,8 +1079,7 @@ class MeasureTests(unittest.TestCase):
                     normalize_measure("Invalid iterator", expression)
 
         for expression in (
-            "MAXX('Sales data', [Note])",
-            "MAXX('Sales data', [Mixed])",
+            "MAXX('Sales data', [Mixed])",  # [Note] is text: the largest text is a valid result (tests/test_related_values.py)
             "MAXX('Sales data', TRUE())",
             "MINX('Sales data', IF([Quantity] > 0, [Quantity], TRUE()))",
         ):
@@ -1337,7 +1336,7 @@ class MeasureTests(unittest.TestCase):
             (
                 "SUMX('Sales', RELATED('Products'[Category]))",
                 [relationship],
-                "numeric",
+                "Cannot convert value 'A' of type Text to type Number",
             ),
         )
         for expression, links, message in cases:

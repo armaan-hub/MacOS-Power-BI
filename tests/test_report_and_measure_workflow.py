@@ -1127,7 +1127,7 @@ class ReportAndMeasureWorkflowTests(unittest.TestCase):
             preview_callback=controller._preview_measure_expression,
         )
         dialog.name_edit.setText("Highest emirate")
-        dialog.expression_edit.setPlainText("MAXX('VAT sample', [Emirates])")
+        dialog.expression_edit.setPlainText("MAXX('VAT sample', [Emirates] = \"Dubai\")")  # a Boolean result; the largest text is valid
 
         dialog.preview_button.click()
 
