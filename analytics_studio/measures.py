@@ -79,6 +79,44 @@ class _HardError(MeasureError):
     """
 
 
+_PLAN_CONSTANT_CALLS = frozenset({
+    "BLANK", "TRUE", "FALSE", "PI", "SQRT", "VALUE", "LEN", "ABS", "DATE", "ISBLANK", "ISNUMBER", "ISTEXT", "ISLOGICAL",
+    "ISNONTEXT", "DIVIDE", "NOT", "AND", "OR", "IF", "ROUND", "INT", "LN", "EXP", "POWER", "UPPER", "LOWER", "LEFT", "RIGHT",
+    "MID", "CONCATENATE", "DATEVALUE", "MAX", "MIN", "TIME", "YEAR", "MONTH", "DAY", "SIGN", "MOD", "FIXED", "TRIM",
+})
+
+
+def _eager_logical(is_and: bool, thunks: list[Callable[[], bool]], nodes: list[tuple[Any, ...]], is_constant: Callable[[tuple[Any, ...]], bool]) -> bool:
+    """&&, ||, AND and OR as Power BI 2.157 runs them: both operands are evaluated and an error in either one is an error.
+
+    The one way out is a plan-time constant holding the deciding value (FALSE for AND, TRUE for OR): it settles the result
+    and swallows the other operand's error (tools/parity/dax_battery_evaluation_order.json).
+    """
+    outcomes: list[tuple[bool | None, MeasureError | None]] = []
+    for thunk in thunks:
+        try:
+            outcomes.append((thunk(), None))
+        except (MeasureRuntimeError, _HardError) as error:
+            outcomes.append((None, error))
+    deciding = not is_and
+    if any(error is not None for _value, error in outcomes):
+        for (value, error), node in zip(outcomes, nodes):
+            if error is None and value is deciding and is_constant(node):
+                return deciding
+        raise next(error for _value, error in outcomes if error is not None)
+    values = [value for value, _error in outcomes]
+    return all(values) if is_and else any(values)
+
+
+def logical_conjuncts(node: tuple[Any, ...]) -> list[tuple[Any, ...]]:
+    """The operands of a top-level && chain or AND(a, b), left to right; any other expression is its own single conjunct."""
+    if node[0] == "logical" and node[1] == "&&":
+        return logical_conjuncts(node[2]) + logical_conjuncts(node[3])
+    if node[0] == "call" and node[1] == "AND" and len(node[2]) == 2:
+        return logical_conjuncts(node[2][0]) + logical_conjuncts(node[2][1])
+    return [node]
+
+
 def _consume_infinity(thunk: Any) -> Any:
     """Refuse to let an Infinity/NaN flow into a comparison, ISBLANK or SWITCH.
 
@@ -5041,6 +5079,37 @@ def evaluate_measures(
         finally:
             iterator_depth -= 1
 
+    def conjuncts_pass(predicate: tuple[Any, ...], frame: tuple[dict[str, Any], dict[str, Any], int]) -> bool:
+        """A FILTER row test. A top-level && chain (or AND) is split: plan-time constants are decided once up front
+        and the remaining conjuncts run left to right on the rows still alive, so a guard really guards."""
+        parts = logical_conjuncts(predicate)
+
+        def holds(part: tuple[Any, ...]) -> bool:
+            return dax_typed.to_boolean(in_row_expression(
+                lambda: evaluate(part, frame, allow_text=True, allow_boolean=True)))
+
+        if len(parts) == 1:
+            return holds(parts[0])
+        key = (id(predicate), current_context, tuple(id(item[1]) for item in row_stack[:-1]))
+        if key not in conjunct_constants:
+            decided: bool | None = True
+            failure: MeasureError | None = None
+            for part in parts:
+                if not plan_constant(part):
+                    continue
+                try:
+                    if not holds(part):
+                        decided = False
+                except MeasureError as error:
+                    failure = failure or error
+            if decided is False:
+                failure = None  # a constant FALSE settles the filter; a constant error elsewhere is swallowed
+            conjunct_constants[key] = (decided, failure, [part for part in parts if not plan_constant(part)])
+        decided, failure, rest = conjunct_constants[key]
+        if failure is not None:
+            raise failure
+        return bool(decided) and all(holds(part) for part in rest)
+
     def table_function_value(argument: tuple[Any, ...]) -> tuple[dict[str, Any], list[dict[str, Any]]]:
         """A table function's rows; VALUES/DISTINCT/ALL of columns and SUMMARIZE come out in Power BI's dictionary order."""
         context, rows = table_function_rows(argument)
@@ -5186,10 +5255,7 @@ def evaluate_measures(
                 compile_table_filter_predicate(predicate, context, comparisons)
             except MeasureError:
                 # any row predicate: evaluate it for each row, with the row on the EARLIER stack
-                return context, [
-                    frame[1] for frame in iterate_rows(context, base_rows)
-                    if dax_typed.to_boolean(in_row_expression(lambda frame=frame: evaluate(predicate, frame, allow_text=True, allow_boolean=True)))
-                ]
+                return context, [frame[1] for frame in iterate_rows(context, base_rows) if conjuncts_pass(predicate, frame)]
             return context, [
                 row for position, row in enumerate(base_rows, 1)
                 if table_filter_predicate_matches(predicate, row, position, comparisons)
@@ -5852,6 +5918,7 @@ def evaluate_measures(
             evaluation_contexts_by_id = previous_contexts
             evaluation_filter_ids = previous_filter_ids
 
+    conjunct_constants: dict[Any, Any] = {}
     filter_constants: dict[tuple[int, Any], Any] = {}
 
     def filter_constant(node: tuple[Any, ...]) -> Any:
@@ -7488,7 +7555,7 @@ def evaluate_measures(
         passing = {
             row_key(frame[1][name] for name in names)
             for frame in iterate_rows(group_context, group_rows)
-            if dax_typed.to_boolean(in_row_expression(lambda frame=frame: evaluate(node, frame, allow_text=True, allow_boolean=True)))
+            if conjuncts_pass(node, frame)
         }
         allowed = frozenset(
             index for index, raw in enumerate(context["rows"])
@@ -7915,6 +7982,62 @@ def evaluate_measures(
             return dax_format.format_value(values[0], values[1])
         return dax_typed.text_function(function, values)
 
+    def plan_constant(node: tuple[Any, ...]) -> bool:
+        """True when Power BI knows the value before scanning any row: literals, pure functions of them, VARs holding
+        one, the metadata aggregates (MAX/MIN of a column, COUNTROWS of a table, DISTINCTCOUNT, SELECTEDVALUE ...) while
+        no filter is active, and a && / || chain that one such operand has already decided."""
+        kind = node[0]
+        if kind in {"number", "string", "boolean", "blank"}:
+            return True
+        if kind == "var":
+            held = variable_nodes.get(node[1])
+            return held is not None and plan_constant(held)
+        if kind == "unary":
+            return plan_constant(node[2])
+        if kind == "logical":
+            if plan_constant(node[2]) and plan_constant(node[3]):
+                return True
+            deciding = node[1] == "||"
+            for operand in (node[2], node[3]):
+                if plan_constant(operand):
+                    try:
+                        if as_boolean(evaluate(operand, None, allow_text=True, allow_boolean=True)) is deciding:
+                            return True
+                    except MeasureError:
+                        pass
+            return False
+        if kind in {"binary", "comparison"}:
+            return plan_constant(node[2]) and plan_constant(node[3])
+        if kind == "concat":
+            return all(plan_constant(part) for part in node[1:])
+        if kind == "call":
+            function, arguments = node[1], node[2]
+            if function in {"MAX", "MIN", "DISTINCTCOUNT", "DISTINCTCOUNTNOBLANK", "HASONEVALUE", "ISFILTERED", "ISCROSSFILTERED",
+                            "ISINSCOPE", "SELECTEDVALUE"} and arguments and arguments[0][0] == "reference":
+                return not evaluation_filter_ids and all(plan_constant(argument) for argument in arguments[1:])
+            if function in {"MINX", "MAXX"} and len(arguments) == 2 and arguments[0][0] == "table" and arguments[1][0] == "reference":
+                return not evaluation_filter_ids
+            if function == "COUNTROWS" and len(arguments) == 1:
+                source = arguments[0]
+                if source[0] == "call" and source[1] == "ALL":
+                    return True
+                if source[0] == "table" or (source[0] == "table_call" and source[1] in {"VALUES", "DISTINCT"}):
+                    return not evaluation_filter_ids
+                return False
+            if function in {"NOW", "TODAY", "USERNAME", "USERPRINCIPALNAME", "UTCNOW", "UTCTODAY"}:
+                return True
+            if function in {"ISERROR", "IFERROR"}:  # a constant that raises is not folded: it counts as data-dependent
+                if not all(plan_constant(argument) for argument in arguments):
+                    return False
+                try:
+                    for argument in arguments:
+                        evaluate(argument, None, allow_text=True, allow_boolean=True)
+                except MeasureError:
+                    return False
+                return True
+            return (function in _PLAN_CONSTANT_CALLS or function == "COALESCE") and all(plan_constant(argument) for argument in arguments)
+        return False
+
     def evaluate(
         node: tuple[Any, ...],
         row_context: tuple[dict[str, Any], dict[str, Any], int] | None = None,
@@ -8039,20 +8162,16 @@ def evaluate_measures(
                 return dax_dates.DaxDateTime(result)
             return result
         if kind == "logical":
-            left = as_boolean(_consume_infinity(lambda: evaluate(
-                node[2], row_context, allow_text=allow_text,
-                allow_boolean=allow_boolean,
-            )))
-            if node[1] == "&&":
-                return left and as_boolean(_consume_infinity(lambda: evaluate(
-                        node[3], row_context, allow_text=allow_text,
-                        allow_boolean=allow_boolean,
-                    ))
-                )
-            return left or as_boolean(_consume_infinity(lambda: evaluate(
-                    node[3], row_context, allow_text=allow_text,
-                    allow_boolean=allow_boolean,
-                ))
+            return _eager_logical(
+                node[1] == "&&",
+                [
+                    (lambda operand=operand: as_boolean(_consume_infinity(lambda: evaluate(
+                        operand, row_context, allow_text=allow_text, allow_boolean=allow_boolean,
+                    ))))
+                    for operand in (node[2], node[3])
+                ],
+                [node[2], node[3]],
+                plan_constant,
             )
         if kind == "tablecapture":
             node[2].append(table_argument_value(node[1]))
@@ -8728,9 +8847,16 @@ def evaluate_measures(
                 return False  # a Boolean result has no blank: Power BI answers FALSE
             return value
         if function == "ISBLANK":
-            return _consume_infinity(
-                lambda: evaluate(arguments[0], row_context, allow_text=True, allow_boolean=allow_boolean)
-            ) is None
+            try:
+                return _consume_infinity(
+                    lambda: evaluate(arguments[0], row_context, allow_text=True, allow_boolean=allow_boolean)
+                ) is None
+            except MeasureRuntimeError as error:
+                # ponytail: Power BI answers FALSE for a SQRT/LN domain error or a plan-time constant that fails; other
+                # errors stay errors. Measured by probe (tools/parity/dax_battery_evaluation_order.json), not understood.
+                if isinstance(error, _DivisionError) or not (str(error).startswith(("SQRT needs", "LN needs")) or plan_constant(arguments[0])):
+                    raise
+                return False
         if function == "IFERROR":
             try:
                 value = evaluate(arguments[0], row_context, allow_text=allow_text, allow_boolean=allow_boolean)
@@ -8781,21 +8907,16 @@ def evaluate_measures(
                     return False
             return value
         if function in {"AND", "OR"}:
-            left = as_boolean(_consume_infinity(lambda: evaluate(
-                    arguments[0], row_context, allow_text=allow_text,
-                    allow_boolean=allow_boolean,
-                ))
-            )
-            if function == "AND":
-                return left and as_boolean(_consume_infinity(lambda: evaluate(
-                        arguments[1], row_context, allow_text=allow_text,
-                        allow_boolean=allow_boolean,
-                    ))
-                )
-            return left or as_boolean(_consume_infinity(lambda: evaluate(
-                    arguments[1], row_context, allow_text=allow_text,
-                    allow_boolean=allow_boolean,
-                ))
+            return _eager_logical(
+                function == "AND",
+                [
+                    (lambda operand=operand: as_boolean(_consume_infinity(lambda: evaluate(
+                        operand, row_context, allow_text=allow_text, allow_boolean=allow_boolean,
+                    ))))
+                    for operand in arguments[:2]
+                ],
+                list(arguments[:2]),
+                plan_constant,
             )
         if function == "NOT":
             return not as_boolean(_consume_infinity(lambda: evaluate(
