@@ -32,7 +32,7 @@ Rule: a slice is finished only when it is compared with Power BI, its items are 
 | dax_battery_sdet_filters | 553 | 0 | 107 | 0 | 0 |
 | dax_battery_comments_booleans | 410 | 0 | 22 | 0 | 0 |
 | dax_battery_round2_scope | 132 | 0 | 7 | 0 | 0 |
-| dax_battery_round2 | 2313 | 1 | 116 | 0 | 0 |
+| dax_battery_round2 | 2313 | 6 | 111 | 0 | 0 |
 | dax_battery_critic_shapes | 43 | 0 | 52 | 0 | 0 |
 | dax_battery_round3 | 2246 | 0 | 118 | 0 | 0 |
 | dax_battery_round4 | 7499 | 0 | 679 | 0 | 0 |
@@ -48,7 +48,7 @@ Rule: a slice is finished only when it is compared with Power BI, its items are 
 | dax_battery_allselected_critic2 | 7420 | 0 | 0 | 0 | 0 |
 | table VAT | 575 | 0 | 0 | 0 | 0 |
 
-## Pending work (1195): Power BI answers, the app refuses
+## Pending work (1190): Power BI answers, the app refuses
 
 - `CALCULATE(COUNTROWS(Facts),COUNTROWS(CALCULATETABLE(Facts,Facts[Region]="East"))<Facts[Quantity])` (Power BI: `4`) [dax_battery_boolean_scalar_rhs]
 - `CALCULATE(CALCULATE(COUNTROWS(Facts),Facts[Quantity]>COUNTROWS(CALCULATETABLE(Facts,Facts[Region]="East"))),Facts[Region]="East")` (Power BI: `2`) [dax_battery_boolean_scalar_rhs]
@@ -227,11 +227,6 @@ Rule: a slice is finished only when it is compared with Power BI, its items are 
 - `CALCULATE(STDEV.S(Facts[Quantity]),Facts[Region]="North")` (Power BI: `NaN`) [dax_battery_round2]
 - `CALCULATE(VAR.S(Facts[Sales]),Facts[Sales]=BLANK())` (Power BI: `NaN`) [dax_battery_round2]
 - `CALCULATE(VAR.S(Facts[Quantity]),Facts[Region]="North")` (Power BI: `NaN`) [dax_battery_round2]
-- `COUNT(Facts[Note])` (Power BI: `4`) [dax_battery_round2]
-- `CALCULATE(COUNT(Facts[Note]),Facts[Region]="North")` (Power BI: `1`) [dax_battery_round2]
-- `COUNT(Facts[Region])` (Power BI: `6`) [dax_battery_round2]
-- `CALCULATE(COUNT(Facts[Region]),Facts[Region]="North")` (Power BI: `1`) [dax_battery_round2]
-- `CALCULATE(COUNT(Facts[Region]),Facts[Note]=BLANK())` (Power BI: `2`) [dax_battery_round2]
 - `AVERAGEA(Facts[Note])` (Power BI: `0`) [dax_battery_round2]
 - `CALCULATE(AVERAGEA(Facts[Note]),Facts[Region]="North")` (Power BI: `0`) [dax_battery_round2]
 - `CALCULATE(AVERAGEA(Facts[Note]),Facts[Region]="Nope")` (Power BI: `BLANK`) [dax_battery_round2]

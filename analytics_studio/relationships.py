@@ -51,8 +51,8 @@ def relationship_filter_directions(relationship: dict[str, Any]) -> tuple[str, .
         return (str(override),)
     if relationship.get("cross_filter_direction") == "both":
         return ("from_to", "to_from")
-    if relationship.get("cardinality") == "many_to_one":
-        return ("to_from",)
+    if relationship.get("cardinality") in {"many_to_one", "many_to_many"}:
+        return ("to_from",)  # live Power BI: a single-direction many-to-many filters From by To, like many-to-one
     return ("from_to",)
 
 
@@ -213,9 +213,13 @@ def propagate_relationship_filters(
             all_key_cache[(table_id, column)] = cached
         return cached
 
+    narrowed_by: dict[str, set[str]] = defaultdict(set)  # which tables narrowed a table (a filter never echoes back to its origin)
     while constrained:
         source_id = constrained.popleft()
         for target_id, source_column, target_column, source_type, target_type, source_role in edges_by_source.get(source_id, []):
+            if source_id not in filter_roots and narrowed_by[source_id] <= {target_id}:
+                continue  # live Power BI: no round trip - a table only filtered by its neighbour does not filter that neighbour back
+            narrowed_by[target_id].add(source_id)
             source_keys = {
                 _relationship_value_key(row.get(source_column), source_type)
                 for row in rows_by_id[source_id]

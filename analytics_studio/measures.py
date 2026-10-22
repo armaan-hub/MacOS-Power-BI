@@ -42,6 +42,7 @@ from decimal import (
     localcontext,
 )
 from datetime import date, datetime, time, timedelta
+import os
 import re
 from typing import Any, Callable, Iterable
 
@@ -5036,6 +5037,12 @@ def evaluate_measures(
                 for raw in rows_by_table_id[table_id]:
                     values = {column: typed_cell(context, column, raw.get(column)) for column in columns}
                     seen.setdefault(row_key(values[column] for column in columns), values)
+                if (  # the blank member is a group of its own while it is visible
+                    table_id in unknown_member_ids and not unknown_member_hidden(table_id)
+                    and unknown_member_passes_remaining_filters(
+                        evaluation_contexts_by_id.get(table_id, context), evaluation_contexts_by_id, evaluation_filter_ids)
+                ):
+                    seen.setdefault(row_key([None] * len(columns)), {column: None for column in columns})
                 combos = [{**left, **right} for left in combos for right in seen.values()]
             lineage = {column: (context, column) for context, column in resolved}
             types = {column: context.get("column_types", {}).get(column, "text") for context, column in resolved}
@@ -5137,7 +5144,9 @@ def evaluate_measures(
                 if not key_set:
                     for base_row in tc["rows"]:
                         key_set.add(row_key(typed_cell(tc, column, base_row.get(column)) for _i, column in pairs))
-                if row_key(values[i] for i, _column in pairs) not in key_set:
+                if row_key(values[i] for i, _column in pairs) not in key_set and not (
+                    table_id in unknown_member_ids and all(values[i] is None for i, _column in pairs)
+                ):  # BLANK() in the list names the generated blank member of a table that has one
                     ok = False
             key = row_key(values)
             if ok and key not in seen:
@@ -6420,8 +6429,17 @@ def evaluate_measures(
                 period_indexes.add(row_index)
                 period_rows.append(row)
         time_contexts_by_id = {}
+        # live Power BI: applying a date set to a date key column first removes the other outer filters of its expanded table
+        wiped_ids = set(expanded_table_ids(date_table["id"])) if is_date_key(date_table, date_column) else set()
         for table_id, context in evaluation_contexts_by_id.items():
             updated = dict(context)
+            if table_id in wiped_ids:
+                for state in ("filter_rows", "filter_table_rows", "filter_shapes", "filter_column_extra"):
+                    updated.pop(state, None)
+                updated["filter_column_rows"] = {}
+                updated["filter_column_blank_allowed"] = {}
+                updated["filter_context_complete"] = True
+                context = updated
             if table_id == date_table["id"]:
                 if "filter_table_rows" in context or _context_shapes(context):
                     # the date column drops out of the FILTER rows; its other columns keep constraining by the rows' values
@@ -6480,7 +6498,7 @@ def evaluate_measures(
             time_rows_by_table_id = propagate_relationship_filters(
                 list(time_contexts_by_id.values()),
                 relationship_definitions,
-                evaluation_filter_ids | {date_table["id"]},
+                (evaluation_filter_ids - wiped_ids) | {date_table["id"]},
             )
         except RelationshipError as exc:
             raise MeasureError(
@@ -6494,7 +6512,7 @@ def evaluate_measures(
         context_sequence += 1
         current_context = context_sequence
         evaluation_contexts_by_id = time_contexts_by_id
-        evaluation_filter_ids = evaluation_filter_ids | {date_table["id"]}
+        evaluation_filter_ids = (evaluation_filter_ids - wiped_ids) | {date_table["id"]}
         rows_by_table_id = time_rows_by_table_id
         try:
             return evaluate(expression)
@@ -6943,6 +6961,20 @@ def evaluate_measures(
         ]
         updated_by_id = {context["id"]: context for context in updated_contexts}
         updated_filter_roots = set(evaluation_filter_ids)
+        for key in (extra_date_filters or {}):  # live Power BI: a date set on a date key first removes the table's other outer filters
+            key_context, key_column = targets_by_key[key]
+            if not is_date_key(key_context, key_column):
+                continue
+            for wiped_id in expanded_table_ids(key_context["id"]):
+                wiped = updated_by_id.get(wiped_id)
+                if wiped is None:
+                    continue
+                for state in ("filter_rows", "filter_table_rows", "filter_shapes", "filter_column_extra"):
+                    wiped.pop(state, None)
+                wiped["filter_column_rows"] = {}
+                wiped["filter_column_blank_allowed"] = {}
+                wiped["filter_context_complete"] = True
+                updated_filter_roots.discard(wiped_id)
         for key, filter_sets in filters_by_column.items():
             modes = {keep for _rows, keep, _blank_allowed in filter_sets}
             if len(modes) != 1:
@@ -8068,6 +8100,7 @@ def evaluate_measures(
         filters_by_table: dict[str, tuple[Any, ...]],
         thunk: Any,
         transition: bool | str = False,
+        wiped: bool = False,
     ) -> Any:
         """Run thunk() with column filters (allowed row indexes per column) replacing those columns' filters.
 
@@ -8077,6 +8110,20 @@ def evaluate_measures(
         nonlocal rows_by_table_id, context_sequence, current_context
         nonlocal evaluation_contexts_by_id, evaluation_filter_ids
         nonlocal eff_layers, eff_suppressed, eff_transition, eff_group_keys, eff_touched
+        if transition and transition != "activate" and not wiped:
+            # live Power BI: a row of a table iterated over a date key (SUMX(ALL(Cal[Date]), ..)) first removes the other
+            # outer filters of that table, like a CALCULATE filter on the key does
+            wipe_names = [
+                str(entry[0]["name"]) for entry in filters_by_table.values()
+                if len(entry[1]) < len(entry[0]["headers"]) and any(is_date_key(entry[0], column) for column in entry[1])
+            ]
+            if wipe_names:
+                def wiped_body(names: list[str] = wipe_names) -> Any:
+                    if not names:
+                        return with_column_filters(filters_by_table, thunk, transition, True)
+                    return evaluate_with_filter_clear(
+                        ("thunk", lambda: wiped_body(names[1:])), ("call", "REMOVEFILTERS", (("table", names[0]),)), "REMOVEFILTERS")
+                return wiped_body()
         updated_by_id = {key: dict(value) for key, value in evaluation_contexts_by_id.items()}
         updated_filter_roots = set(evaluation_filter_ids)
         saved_eff = (eff_layers, eff_suppressed, eff_transition, eff_group_keys, eff_touched)
@@ -8366,8 +8413,8 @@ def evaluate_measures(
         groups: dict[str, tuple[dict[str, Any], list[tuple[str, str]]]] = {}
         for header in context["headers"]:
             link = lineage.get(header)
-            if link is not None:
-                groups.setdefault(link[0]["id"], (link[0], []))[1].append((header, link[1]))
+            if link is not None:  # positions are the loaded table's: a table value may carry a copy with the blank member appended
+                groups.setdefault(link[0]["id"], (contexts_by_id.get(link[0]["id"], link[0]), []))[1].append((header, link[1]))
         if not groups:
             return {}  # no column with lineage: nothing to filter
 
@@ -8489,6 +8536,63 @@ def evaluate_measures(
             for c, col in ((left_context, left_column), (right_context, right_column))
         ]
         return categories == ["text", "numeric"]
+
+    def is_date_key(context: dict[str, Any], column: str) -> bool:
+        """A dateTime column that keys its table: on the one side of a relationship, or the marked date column."""
+        if context.get("column_types", {}).get(column) != "date":
+            return False
+        if column == context.get("date_column"):
+            return True
+        for relationship in relationship_definitions:
+            if not isinstance(relationship, dict) or relationship.get("relationship_version") != 1:
+                continue
+            cardinality = relationship.get("cardinality")
+            one_ends = []
+            if cardinality in {"many_to_one", "one_to_one"}:
+                one_ends.append((relationship.get("to_table_id"), relationship.get("to_column")))
+            if cardinality in {"one_to_many", "one_to_one"}:
+                one_ends.append((relationship.get("from_table_id"), relationship.get("from_column")))
+            if (context["id"], column) in one_ends:
+                return True
+        return False
+
+    def date_key_wipe_tables(arguments: tuple[tuple[Any, ...], ...]) -> list[str]:
+        """Tables whose other filters a CALCULATE removes first because one of its (replacing) filter arguments sets a date key
+        column: Boolean tests of it, FILTER(ALL(key), ..), TREATAS onto it and the time-intelligence functions over it
+        (RE-D, 28,639 live probes). KEEPFILTERS, ALL(key), VALUES(key), FILTER(Table, ..) and non-key columns do not wipe."""
+        names: list[str] = []
+        already: set[str] = set()  # tables a clearing modifier of this CALCULATE already empties of filters
+        for argument in arguments[1:]:
+            if argument[0] == "call" and argument[1] in {"REMOVEFILTERS", "ALL", "ALLNOBLANKROW"} and argument[2] and argument[2][0][0] == "table":
+                try:
+                    cleared = expanded_table_ids(resolve_table_context(str(argument[2][0][1]))["id"])
+                except MeasureError:
+                    continue
+                already.update(str(evaluation_contexts_by_id[table_id]["name"]).casefold() for table_id in cleared)
+        for argument in arguments[1:]:
+            node = argument
+            if node[0] == "call" and node[1] == "KEEPFILTERS":
+                continue
+            references: list[tuple[Any, ...]] = []
+            if node[0] == "call" and node[1] in _TIME_FILTER_FUNCTIONS:
+                references = [item for item in node[2][:1] if item[0] == "reference"]
+            elif node[0] == "call" and node[1] == "TREATAS":
+                references = [item for item in node[2][1:] if item[0] == "reference"]
+            elif node[0] == "call" and node[1] == "FILTER":
+                base = node[2][0]
+                if base[0] == "call" and base[1] == "ALL" and len(base[2]) == 1 and base[2][0][0] == "reference":
+                    references = [base[2][0]]
+            elif node[0] != "call" or node[1] in {"NOT", "AND", "OR"}:
+                references = list(_direct_column_references(node))
+            for reference in references:
+                try:
+                    context, column = resolve_table(reference[1], reference[2])
+                except MeasureError:
+                    continue
+                name = str(context["name"])
+                if name.casefold() not in already and name not in names and is_date_key(context, column):
+                    names.append(name)
+        return names
 
     def preevaluate_calculate_boolean_filters(
         arguments: tuple[tuple[Any, ...], ...],
@@ -9487,6 +9591,11 @@ def evaluate_measures(
         if function == "CALCULATE":
             if len(arguments) > 1:
                 arguments = preevaluate_calculate_boolean_filters(arguments, row_context)
+                wipes = date_key_wipe_tables(arguments)
+                if wipes and any(a[0] == "call" and a[1] in _TIME_FILTER_FUNCTIONS for a in arguments[1:]):
+                    wipes = []  # the date sets are computed in this context, then evaluate_with_date_values clears the table when it applies them
+                if wipes:  # live Power BI: replacing a date key column first removes the other filters of its table
+                    arguments = (*arguments, *(("call", "REMOVEFILTERS", (("table", name),)) for name in wipes))
                 node = (node[0], function, arguments)
             if row_context is not None:
                 if len(arguments) > 1 and _general_calculate_filters_valid(tuple(arguments[1:])):
@@ -10312,7 +10421,10 @@ def evaluate_measures(
         reference = arguments[0]
         if reference[0] != "reference" or len(reference) < 3:  # a table or other non-column argument is not a scalar source
             raise MeasureError(f"{function} needs a column reference in the local engine.")
-        if function == "COUNTA":
+        if function == "COUNTA" or (
+            function == "COUNT"  # live Power BI: COUNT of a text column counts its non-blank values
+            and str(resolve_table(reference[1], reference[2])[0].get("column_types", {}).get(resolve_table(reference[1], reference[2])[1], "")).casefold() == "text"
+        ):
             context, actual = resolve_table(reference[1], reference[2])
             visible_rows = rows_by_table_id[context["id"]]
             if not visible_rows:
