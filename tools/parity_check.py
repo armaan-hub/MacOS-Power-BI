@@ -37,7 +37,7 @@ DAX_BATTERIES = ["dax_battery", "dax_battery_review", "dax_battery_blank_logic",
     "dax_battery_boolean_scalar_rhs", "dax_battery_filter_transition", "dax_battery_boolean_filter_functions",
     "dax_battery_sdet_filters", "dax_battery_comments_booleans",
     "dax_battery_round2_scope", "dax_battery_round2", "dax_battery_critic_shapes",
-    "dax_battery_round3", "dax_battery_round4", "dax_battery_round5", "dax_battery_diff_groups", "dax_battery_iferror_hard_errors", "dax_battery_concatenatex_order", "dax_battery_not_operator", "dax_battery_promoted_pending", "dax_battery_utf16_text", "dax_battery_evaluation_order", "dax_battery_allselected_shadow"]
+    "dax_battery_round3", "dax_battery_round4", "dax_battery_round5", "dax_battery_diff_groups", "dax_battery_iferror_hard_errors", "dax_battery_concatenatex_order", "dax_battery_not_operator", "dax_battery_promoted_pending", "dax_battery_utf16_text", "dax_battery_evaluation_order", "dax_battery_allselected_shadow", "dax_battery_allselected_critic2"]
 # Real workbooks: the Power BI answers saved by tools/table_oracle_diff.py are replayed against the app's own import.
 TABLES = {
     "VAT": {"path": ROOT / "tests/Data/Vat File -Aug 2026.xlsx", "header_row": 12, "sheet_name": "VAT 5%",

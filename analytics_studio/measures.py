@@ -3621,7 +3621,9 @@ def evaluate_measures(
                 cleared.add(folded)
         for folded, key_rows in eff_group_keys.get(table_id, {}).items():
             if current_filter(table_id, folded) is key_rows:  # a group key still stands as the SUMMARIZE row set
-                if folded in wanted or any((table_id, name) in eff_touched for name in wanted):
+                if folded in wanted and eff_rank_table:
+                    cleared.discard(folded)  # Power BI: RANKX(ALLSELECTED(col), ...) in a SUMMARIZE column ranks within the group's key
+                elif folded in wanted or any((table_id, name) in eff_touched for name in wanted):
                     cleared.add(folded)  # a key inside the columns asked for, or after a modifier touched them, drops out
                 else:
                     cleared.discard(folded)  # a key outside them narrows the answer to its group
@@ -4125,6 +4127,7 @@ def evaluate_measures(
     eff_group_keys: dict[str, dict[str, Any]] = {}  # SUMMARIZE group keys: table -> casefolded column -> the filter object
     eff_touched: frozenset[tuple[str, str]] = frozenset()  # (table, column) a CALCULATE modifier has cleared or filtered
     eff_blocked = False
+    eff_rank_table = False  # evaluating the table argument of RANKX: ALLSELECTED(col) still sees a SUMMARIZE key on its own column
 
     def current_filter(table_id: str, folded: str) -> Any:
         """The row-index set now filtering one column of a table, None when it is not filtered."""
@@ -7170,6 +7173,7 @@ def evaluate_measures(
             # CALCULATE(e, ALLSELECTED(X)): what X holds of the context transition or of an outer filter a shadow replaced is
             # cleared, then every shadow touching X is put back whole (outer and explicit filters on X stay)
             to_clear: dict[str, list[str]] = {}
+            restore: dict[str, dict[str, Any]] = {}  # table -> column -> the outer filter a transition covered up
             for table_id, wanted_columns in dropped.items():
                 headers = evaluation_contexts_by_id[table_id]["headers"]
                 for header in headers:
@@ -7182,6 +7186,8 @@ def evaluate_measures(
                     tagged = eff_transition.get(table_id, {}).get(folded)
                     if (tagged is not None and now is tagged[0]) or (folded in eff_suppressed.get(table_id, {}) and now is eff_suppressed[table_id][folded]):
                         to_clear.setdefault(table_id, []).append(header)
+                        if tagged is not None and now is tagged[0] and tagged[1] is not None and eff_suppressed.get(table_id, {}).get(folded, _NOTHING) is not tagged[1]:
+                            restore.setdefault(table_id, {})[header] = tagged[1]  # ALLSELECTED still sees the filter the row replaced
             def activate_now() -> Any:
                 """Put the shadows touching X back as filters that intersect with what the context holds by then."""
                 activated: dict[str, tuple[dict[str, Any], dict[str, frozenset[int]], list[dict[str, Any]], dict[str, frozenset[int]]]] = {}
@@ -7200,6 +7206,12 @@ def evaluate_measures(
                         merged = allowed if now is None else allowed & now
                         by_column[column] = merged if column not in by_column else by_column[column] & merged
                         kept[column] = allowed if column not in kept else kept[column] & allowed
+                for table_id, by_header in restore.items():
+                    base_context = evaluation_contexts_by_id[table_id]
+                    _ctx, by_column, _shapes, _kept = activated.setdefault(table_id, (base_context, {}, [], {}))
+                    for header, outer in by_header.items():
+                        now = current_filter(table_id, header.casefold())
+                        by_column[header] = outer if now is None else outer & now
                 if not activated:
                     return evaluate(inner)
                 return with_column_filters(activated, lambda: evaluate(inner), "activate")
@@ -7703,6 +7715,7 @@ def evaluate_measures(
                 if link is None:
                     continue
                 base_context, base_column = link
+                base_context = contexts_by_id.get(base_context["id"], base_context)  # a derived copy of a loaded table: positions are the table's
                 wanted = row.get(header)
                 if not iterated_table.get("derived"):
                     wanted = typed_cell(base_context, base_column, wanted)
@@ -7717,7 +7730,11 @@ def evaluate_measures(
         # each column filters to the rows that hold this row's value in it; together they select the row itself,
         # and clearing some columns (ALLEXCEPT, ALL(column)) leaves the others still filtered by value
         per_column: dict[str, list[int]] = {header: [] for header in iterated_table["headers"]}
-        for row_index, iterate_row in enumerate(iterated_table["rows"]):
+        base_table = contexts_by_id.get(table_id)
+        # a derived copy of a loaded table (ALLSELECTED(T), a subset): its positions are not the table's, so the filter
+        # must be found among the loaded rows
+        source_rows = base_table["rows"] if base_table is not None and iterated_table["rows"] is not base_table["rows"] else iterated_table["rows"]
+        for row_index, iterate_row in enumerate(source_rows):
             for header in iterated_table["headers"]:
                 left, right = iterate_row.get(header), row.get(header)
                 _reject_power_query_error(left, header, row_index + 1)
@@ -8311,7 +8328,13 @@ def evaluate_measures(
                 return None  # a value that is not in the column has no rank
             return rank_of(wanted, values, ascending, False)
         # RANKX(table, expression, [value], [order], [ties])
-        context, rows = table_argument_value(arguments[0])
+        nonlocal eff_rank_table
+        saved_rank_table = eff_rank_table
+        eff_rank_table = True
+        try:
+            context, rows = table_argument_value(arguments[0])
+        finally:
+            eff_rank_table = saved_rank_table
         expression = arguments[1]
         scores = [
             in_row_expression(lambda frame=frame: evaluate(expression, frame, allow_text=True)) for frame in iterate_rows(context, rows)
