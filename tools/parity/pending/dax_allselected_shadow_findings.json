@@ -1,0 +1,3372 @@
+{
+ "powerbi_version": "2.157.879.0 (26.08)+da30fe74eb0b8a8786ab7326b69c400a0e951831",
+ "frozen": "2026-10-22",
+ "note": "Not replayed by the gate: ALLSELECTED shadow-filter probes the app still gets wrong (iteration 80): ALLSELECTED(X) as a CALCULATE filter, SELECTCOLUMNS/TREATAS/GENERATE lineage, EXCEPT/INTERSECT, SUMMARIZE corner cases, MEDIANX blanks. 'table' says which scratch table the probe needs (Facts, AS_A, AS_D).",
+ "items": [
+  {
+   "expr": "SUMX(FILTER(Facts,Facts[Quantity]>2),CALCULATE(SUM(Facts[Quantity]),ALLSELECTED(Facts)))",
+   "powerbi": "36",
+   "table": "Facts"
+  },
+  {
+   "expr": "SUMX(FILTER(Facts,Facts[Quantity]>2),CALCULATE(COUNTROWS(Facts),ALLSELECTED(Facts)))",
+   "powerbi": "9",
+   "table": "Facts"
+  },
+  {
+   "expr": "SUMX(FILTER(Facts,(Facts[Region]=\"East\"&&Facts[Quantity]=2)||(Facts[Region]=\"West\"&&Facts[Quantity]=3)),CALCULATE(COUNTROWS(Facts),ALLSELECTED(Facts[Region]),ALLSELECTED(Facts[Quantity])))",
+   "powerbi": "2",
+   "table": "Facts"
+  },
+  {
+   "expr": "SUMX(FILTER(Facts,(Facts[Region]=\"East\"&&Facts[Quantity]=2)||(Facts[Region]=\"West\"&&Facts[Quantity]=3)),CALCULATE(COUNTROWS(Facts),ALLSELECTED(Facts)))",
+   "powerbi": "4",
+   "table": "Facts"
+  },
+  {
+   "expr": "SUMX(FILTER(Facts,(Facts[Region]=\"East\"&&Facts[Quantity]=2)||(Facts[Region]=\"West\"&&Facts[Quantity]=3)),CALCULATE(COUNTROWS(Facts),KEEPFILTERS(ALLSELECTED(Facts[Region]))))",
+   "powerbi": "2",
+   "table": "Facts"
+  },
+  {
+   "expr": "MAXX(FILTER(AS_A,(AS_A[g]=\"a\"&&AS_A[h]=1)||(AS_A[g]=\"b\"&&AS_A[h]=2)),CALCULATE(COUNTROWS(AS_A),ALLSELECTED(AS_A[g]),ALLSELECTED(AS_A[h])))",
+   "powerbi": "2",
+   "table": "AS_A"
+  },
+  {
+   "expr": "MAXX(SUMMARIZE(FILTER(AS_A,(AS_A[g]=\"a\"&&AS_A[h]=1)||(AS_A[g]=\"b\"&&AS_A[h]=2)),AS_A[g],AS_A[h]),CALCULATE(COUNTROWS(AS_A),ALLSELECTED(AS_A[g]),ALLSELECTED(AS_A[h])))",
+   "powerbi": "4",
+   "table": "AS_A"
+  },
+  {
+   "expr": "MAXX(SUMMARIZE(FILTER(AS_A,(AS_A[g]=\"a\"&&AS_A[h]=1)||(AS_A[g]=\"b\"&&AS_A[h]=2)),AS_A[g]),CALCULATE(COUNTROWS(AS_A),ALLSELECTED(AS_A[g]),ALLSELECTED(AS_A[h])))",
+   "powerbi": "6",
+   "table": "AS_A"
+  },
+  {
+   "expr": "MAXX(SELECTCOLUMNS(FILTER(AS_A,(AS_A[g]=\"a\"&&AS_A[h]=1)||(AS_A[g]=\"b\"&&AS_A[h]=2)),\"g\",AS_A[g],\"h\",AS_A[h]),CALCULATE(COUNTROWS(AS_A),ALLSELECTED(AS_A[g]),ALLSELECTED(AS_A[h])))",
+   "powerbi": "4",
+   "table": "AS_A"
+  },
+  {
+   "expr": "MAXX(SELECTCOLUMNS(FILTER(AS_A,(AS_A[g]=\"a\"&&AS_A[h]=1)||(AS_A[g]=\"b\"&&AS_A[h]=2)),\"g\",AS_A[g]),CALCULATE(COUNTROWS(AS_A),ALLSELECTED(AS_A[g]),ALLSELECTED(AS_A[h])))",
+   "powerbi": "6",
+   "table": "AS_A"
+  },
+  {
+   "expr": "MAXX(SELECTCOLUMNS(FILTER(AS_A,(AS_A[g]=\"a\"&&AS_A[h]=1)||(AS_A[g]=\"b\"&&AS_A[h]=2)),\"x\",AS_A[g]&AS_A[h]),CALCULATE(COUNTROWS(AS_A),ALLSELECTED(AS_A[g]),ALLSELECTED(AS_A[h])))",
+   "powerbi": "8",
+   "table": "AS_A"
+  },
+  {
+   "expr": "MAXX(ADDCOLUMNS(FILTER(AS_A,(AS_A[g]=\"a\"&&AS_A[h]=1)||(AS_A[g]=\"b\"&&AS_A[h]=2)),\"x\",1),CALCULATE(COUNTROWS(AS_A),ALLSELECTED(AS_A[g]),ALLSELECTED(AS_A[h])))",
+   "powerbi": "2",
+   "table": "AS_A"
+  },
+  {
+   "expr": "MAXX(ADDCOLUMNS(SUMMARIZE(FILTER(AS_A,(AS_A[g]=\"a\"&&AS_A[h]=1)||(AS_A[g]=\"b\"&&AS_A[h]=2)),AS_A[g],AS_A[h]),\"x\",1),CALCULATE(COUNTROWS(AS_A),ALLSELECTED(AS_A[g]),ALLSELECTED(AS_A[h])))",
+   "powerbi": "4",
+   "table": "AS_A"
+  },
+  {
+   "expr": "MAXX(FILTER(ALL(AS_A[g],AS_A[h]),(AS_A[g]=\"a\"&&AS_A[h]=1)||(AS_A[g]=\"b\"&&AS_A[h]=2)),CALCULATE(COUNTROWS(AS_A),ALLSELECTED(AS_A[g]),ALLSELECTED(AS_A[h])))",
+   "powerbi": "4",
+   "table": "AS_A"
+  },
+  {
+   "expr": "MAXX(FILTER(SUMMARIZE(AS_A,AS_A[g],AS_A[h]),(AS_A[g]=\"a\"&&AS_A[h]=1)||(AS_A[g]=\"b\"&&AS_A[h]=2)),CALCULATE(COUNTROWS(AS_A),ALLSELECTED(AS_A[g]),ALLSELECTED(AS_A[h])))",
+   "powerbi": "4",
+   "table": "AS_A"
+  },
+  {
+   "expr": "MAXX(TREATAS({(\"a\",1),(\"b\",2)},AS_A[g],AS_A[h]),CALCULATE(COUNTROWS(AS_A),ALLSELECTED(AS_A[g]),ALLSELECTED(AS_A[h])))",
+   "powerbi": "4",
+   "table": "AS_A"
+  },
+  {
+   "expr": "MAXX(CROSSJOIN(VALUES(AS_A[g]),VALUES(AS_A[h])),CALCULATE(COUNTROWS(AS_A),ALLSELECTED(AS_A[g]),ALLSELECTED(AS_A[h])))",
+   "powerbi": "8",
+   "table": "AS_A"
+  },
+  {
+   "expr": "MAXX(FILTER(ALL(AS_A[g]),ISBLANK(AS_A[g])),CALCULATE(COUNTROWS(AS_A),ALLSELECTED(AS_A[g]),ALLSELECTED(AS_A[h])))",
+   "powerbi": "1",
+   "table": "AS_A"
+  },
+  {
+   "expr": "MAXX(FILTER(AS_A,AS_A[g]=\"b\"&&AS_A[h]=2),CALCULATE(COUNTROWS(AS_A),ALLSELECTED(AS_A[g]),ALLSELECTED(AS_A[h])))",
+   "powerbi": "2",
+   "table": "AS_A"
+  },
+  {
+   "expr": "MAXX(FILTER(AS_A,ISBLANK(AS_A[g])),CALCULATE(COUNTROWS(AS_A),ALLSELECTED(AS_A[g]),ALLSELECTED(AS_A[h])))",
+   "powerbi": "1",
+   "table": "AS_A"
+  },
+  {
+   "expr": "MAXX(FILTER(AS_A,ISBLANK(AS_A[h])),CALCULATE(COUNTROWS(AS_A),ALLSELECTED(AS_A[g]),ALLSELECTED(AS_A[h])))",
+   "powerbi": "1",
+   "table": "AS_A"
+  },
+  {
+   "expr": "MAXX(FILTER(AS_A,AS_A[v]>=50),CALCULATE(COUNTROWS(AS_A),ALLSELECTED(AS_A[g]),ALLSELECTED(AS_A[h])))",
+   "powerbi": "1",
+   "table": "AS_A"
+  },
+  {
+   "expr": "SUMX(KEEPFILTERS(FILTER(Facts,Facts[Quantity]>2)),COUNTROWS(ALLSELECTED(Facts)))",
+   "powerbi": "9",
+   "table": "Facts"
+  },
+  {
+   "expr": "MAXX(FILTER(Facts,Facts[Quantity]>2),CONCATENATEX(FILTER(Facts,Facts[Quantity]>3),COUNTROWS(ALLSELECTED(Facts)),\",\"))",
+   "powerbi": "6,6",
+   "table": "Facts"
+  },
+  {
+   "expr": "MAXX(FILTER(Facts,Facts[Quantity]>2),CONCATENATEX(Facts,COUNTROWS(ALLSELECTED(Facts)),\",\"))",
+   "powerbi": "6,6,6,6,6,6",
+   "table": "Facts"
+  },
+  {
+   "expr": "MAXX(FILTER(Facts,Facts[Quantity]>2),CONCATENATEX(ALL(Facts[Region]),COUNTROWS(ALLSELECTED(Facts)),\",\"))",
+   "powerbi": "3,3,3",
+   "table": "Facts"
+  },
+  {
+   "expr": "MAXX(FILTER(Facts,Facts[Region]=\"East\"),CONCATENATEX(FILTER(Facts,Facts[Quantity]>3),COUNTROWS(ALLSELECTED(Facts)),\",\"))",
+   "powerbi": "6,6",
+   "table": "Facts"
+  },
+  {
+   "expr": "SUMX(FILTER(Facts,Facts[Quantity]>2),CALCULATE(CALCULATE(COUNTROWS(ALLSELECTED(Facts)),Facts[Region]=\"East\"),Facts[Quantity]>3))",
+   "powerbi": "3",
+   "table": "Facts"
+  },
+  {
+   "expr": "SUMX(FILTER(Facts,Facts[Quantity]>2),CALCULATE(CALCULATE(COUNTROWS(ALLSELECTED(Facts)),Facts[Quantity]>3),Facts[Region]=\"East\"))",
+   "powerbi": "3",
+   "table": "Facts"
+  },
+  {
+   "expr": "SUMX(FILTER(Facts,Facts[Quantity]>2),CALCULATE(CALCULATE(COUNTROWS(ALLSELECTED(Facts)),Facts[Region]=\"East\"),Facts[Region]=\"North\"))",
+   "powerbi": "3",
+   "table": "Facts"
+  },
+  {
+   "expr": "SUMX(FILTER(Facts,Facts[Quantity]>2),CALCULATE(COUNTROWS(Facts),ALLSELECTED(Facts[Region]),ALLSELECTED(Facts[Quantity]),ALLSELECTED(Facts[Note]),ALLSELECTED(Facts[Sales])))",
+   "powerbi": "9",
+   "table": "Facts"
+  },
+  {
+   "expr": "CALCULATE(SUMX(ALLSELECTED(Facts[Region]),Facts[Quantity]*0+1),Facts[Region]=\"East\",Facts[Region]=\"West\")",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 61) A single value for column 'Quantity' in table 'Facts' cannot be determined. This can happen when a measure or function formula refers to a column that contains many values without specifying an aggregation such as min, max, count, or sum to get a single result.\"",
+   "table": "Facts"
+  },
+  {
+   "expr": "CALCULATE(SUMX(VALUES(Facts[Region]),Facts[Quantity]*0+1),Facts[Region]=\"East\",Facts[Region]=\"West\")",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 56) A single value for column 'Quantity' in table 'Facts' cannot be determined. This can happen when a measure or function formula refers to a column that contains many values without specifying an aggregation such as min, max, count, or sum to get a single result.\"",
+   "table": "Facts"
+  },
+  {
+   "expr": "MAXX(FILTER(Facts,Facts[Quantity]>2),CONCATENATEX(FILTER(ALL(Facts[Region]),Facts[Region]=\"East\"),COUNTROWS(ALLSELECTED(Facts)),\",\"))",
+   "powerbi": "3",
+   "table": "Facts"
+  },
+  {
+   "expr": "MAXX(FILTER(Facts,Facts[Quantity]>2),CONCATENATEX(FILTER(ALL(Facts[Note]),Facts[Note]=\"Paid\"),COUNTROWS(ALLSELECTED(Facts)),\",\"))",
+   "powerbi": "3",
+   "table": "Facts"
+  },
+  {
+   "expr": "MAXX(FILTER(Facts,Facts[Quantity]>2),CONCATENATEX(FILTER(ALL(Facts[Note]),Facts[Note]=\"Paid\"),COUNTROWS(ALLSELECTED(Facts[Quantity])),\",\"))",
+   "powerbi": "3",
+   "table": "Facts"
+  },
+  {
+   "expr": "MAXX(FILTER(Facts,Facts[Quantity]>2),CONCATENATEX(FILTER(ALL(Facts[Note]),Facts[Note]=\"Paid\"),COUNTROWS(ALLSELECTED(Facts[Note])),\",\"))",
+   "powerbi": "3",
+   "table": "Facts"
+  },
+  {
+   "expr": "MAXX(FILTER(Facts,Facts[Quantity]>2),CONCATENATEX(FILTER(ALL(Facts[Region]),Facts[Region]=\"East\"),COUNTROWS(ALLSELECTED(Facts[Region])),\",\"))",
+   "powerbi": "3",
+   "table": "Facts"
+  },
+  {
+   "expr": "MAXX(FILTER(Facts,Facts[Quantity]>2),CONCATENATEX(Facts,COUNTROWS(ALLSELECTED(Facts[Region])),\",\"))",
+   "powerbi": "3,3,3,3,3,3",
+   "table": "Facts"
+  },
+  {
+   "expr": "MAXX(FILTER(Facts,Facts[Quantity]>2),CONCATENATEX(Facts,COUNTROWS(ALLSELECTED(Facts[Quantity])),\",\"))",
+   "powerbi": "6,6,6,6,6,6",
+   "table": "Facts"
+  },
+  {
+   "expr": "SUMX(FILTER(ALL(Facts[Region]),FALSE()),Facts[Quantity])",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 59) A single value for column 'Quantity' in table 'Facts' cannot be determined. This can happen when a measure or function formula refers to a column that contains many values without specifying an aggregation such as min, max, count, or sum to get a single result.\"",
+   "table": "Facts"
+  },
+  {
+   "expr": "SUMX(FILTER(ALL(Facts[Region]),FALSE()),Facts[Quantity]*0+1)",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 59) A single value for column 'Quantity' in table 'Facts' cannot be determined. This can happen when a measure or function formula refers to a column that contains many values without specifying an aggregation such as min, max, count, or sum to get a single result.\"",
+   "table": "Facts"
+  },
+  {
+   "expr": "CALCULATE(SUMX(ALLSELECTED(Facts[Region]),Facts[Sales]),Facts[Region]=\"East\",Facts[Region]=\"West\")",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 61) A single value for column 'Sales' in table 'Facts' cannot be determined. This can happen when a measure or function formula refers to a column that contains many values without specifying an aggregation such as min, max, count, or sum to get a single result.\"",
+   "table": "Facts"
+  },
+  {
+   "expr": "VAR t=Facts RETURN CALCULATE(SUMX(t,COUNTROWS(ALLSELECTED(Facts))),Facts[Quantity]>3)",
+   "powerbi": "36",
+   "table": "Facts"
+  },
+  {
+   "expr": "SUMX(FILTER(Facts,Facts[Quantity]>2),VAR t=Facts RETURN COUNTROWS(ALLSELECTED(Facts)))",
+   "powerbi": "9",
+   "table": "Facts"
+  },
+  {
+   "expr": "CONCATENATEX(SUMMARIZE(FILTER(Facts,Facts[Quantity]>2),Facts[Region],\"z\",COUNTROWS(Facts)),Facts[Region]&\":\"&[z],\",\",Facts[Region])",
+   "powerbi": "East:1,North:1,West:1",
+   "table": "Facts"
+  },
+  {
+   "expr": "CONCATENATEX(SUMMARIZE(FILTER(Facts,Facts[Quantity]>3),Facts[Region],\"z\",COUNTROWS(Facts)),Facts[Region]&\":\"&[z],\",\",Facts[Region])",
+   "powerbi": "East:1,North:1",
+   "table": "Facts"
+  },
+  {
+   "expr": "CONCATENATEX(SUMMARIZE(Facts,Facts[Region],\"z\",CALCULATE(COUNTROWS(ALLSELECTED(Facts[Quantity])),Facts[Note]=\"Paid\")),Facts[Region]&\":\"&[z],\",\",Facts[Region])",
+   "powerbi": "East:3,North:1,West:2",
+   "table": "Facts"
+  },
+  {
+   "expr": "CONCATENATEX(SUMMARIZE(Facts,Facts[Region],\"z\",CALCULATE(COUNTROWS(ALLSELECTED(Facts[Quantity])),Facts[Region]=\"East\")),Facts[Region]&\":\"&[z],\",\",Facts[Region])",
+   "powerbi": "East:3,North:1,West:2",
+   "table": "Facts"
+  },
+  {
+   "expr": "CONCATENATEX(SUMMARIZE(Facts,Facts[Region],\"z\",CALCULATE(COUNTROWS(ALLSELECTED(Facts[Quantity])),ALL(Facts[Region]))),Facts[Region]&\":\"&[z],\",\",Facts[Region])",
+   "powerbi": "East:3,North:1,West:2",
+   "table": "Facts"
+  },
+  {
+   "expr": "CONCATENATEX(SUMMARIZE(Facts,Facts[Region],\"z\",CALCULATE(SUM(Facts[Quantity]),ALLSELECTED(Facts[Region]))),Facts[Region]&\":\"&[z],\",\",Facts[Region])",
+   "powerbi": "East:15,North:15,West:15",
+   "table": "Facts"
+  },
+  {
+   "expr": "CONCATENATEX(SUMMARIZE(Facts,Facts[Region],\"z\",CALCULATE(SUM(Facts[Quantity]),ALLSELECTED(Facts))),Facts[Region]&\":\"&[z],\",\",Facts[Region])",
+   "powerbi": "East:15,North:15,West:15",
+   "table": "Facts"
+  },
+  {
+   "expr": "CONCATENATEX(SUMMARIZE(Facts,Facts[Region],\"z\",CALCULATE(SUM(Facts[Quantity]),ALLSELECTED())),Facts[Region]&\":\"&[z],\",\",Facts[Region])",
+   "powerbi": "East:15,North:15,West:15",
+   "table": "Facts"
+  },
+  {
+   "expr": "CONCATENATEX(SUMMARIZE(Facts,Facts[Region],\"z\",CALCULATE(SUM(Facts[Quantity]),REMOVEFILTERS(Facts[Region]))),Facts[Region]&\":\"&[z],\",\",Facts[Region])",
+   "powerbi": "East:8,North:4,West:3",
+   "table": "Facts"
+  },
+  {
+   "expr": "CONCATENATEX(SUMMARIZE(Facts,Facts[Region],\"z\",CALCULATE(COUNTROWS(VALUES(Facts[Quantity])),ALL(Facts[Region]))),Facts[Region]&\":\"&[z],\",\",Facts[Region])",
+   "powerbi": "East:3,North:1,West:2",
+   "table": "Facts"
+  },
+  {
+   "expr": "CONCATENATEX(SUMMARIZE(Facts,Facts[Region],\"z\",CALCULATE(COUNTROWS(Facts),ALL(Facts[Region]))),Facts[Region]&\":\"&[z],\",\",Facts[Region])",
+   "powerbi": "East:3,North:1,West:2",
+   "table": "Facts"
+  },
+  {
+   "expr": "CONCATENATEX(SUMMARIZE(Facts,Facts[Region],Facts[Note],\"z\",CALCULATE(COUNTROWS(ALLSELECTED(Facts[Quantity])),ALL(Facts[Note]))),Facts[Region]&\"/\"&Facts[Note]&\":\"&[z],\",\",Facts[Region]&Facts[Note])",
+   "powerbi": "East/:1,East/Paid:2,North/Late:1,West/:1,West/Paid:1",
+   "table": "Facts"
+  },
+  {
+   "expr": "CONCATENATEX(SUMMARIZE(Facts,Facts[Region],Facts[Note],\"z\",CALCULATE(COUNTROWS(ALLSELECTED(Facts[Quantity])),ALL(Facts[Note]),ALL(Facts[Region]))),Facts[Region]&\"/\"&Facts[Note]&\":\"&[z],\",\",Facts[Region]&Facts[Note])",
+   "powerbi": "East/:1,East/Paid:2,North/Late:1,West/:1,West/Paid:1",
+   "table": "Facts"
+  },
+  {
+   "expr": "CONCATENATEX(SUMMARIZE(Facts,Facts[Region],Facts[Note],\"z\",CALCULATE(COUNTROWS(ALLSELECTED(Facts[Quantity])),ALL(Facts[Note]),ALL(Facts[Region]),ALL(Facts[Sales]))),Facts[Region]&\"/\"&Facts[Note]&\":\"&[z],\",\",Facts[Region]&Facts[Note])",
+   "powerbi": "East/:1,East/Paid:2,North/Late:1,West/:1,West/Paid:1",
+   "table": "Facts"
+  },
+  {
+   "expr": "SUMX(Facts,CALCULATE(COUNTROWS(Facts),ALLSELECTED()))",
+   "powerbi": "36",
+   "table": "Facts"
+  },
+  {
+   "expr": "SUMX(FILTER(Facts,Facts[Quantity]>2),CALCULATE(COUNTROWS(Facts),ALLSELECTED()))",
+   "powerbi": "9",
+   "table": "Facts"
+  },
+  {
+   "expr": "SUMX(FILTER(Facts,Facts[Quantity]>2),CALCULATE(COUNTROWS(Facts),ALLSELECTED(),Facts[Region]=\"East\"))",
+   "powerbi": "3",
+   "table": "Facts"
+  },
+  {
+   "expr": "COUNTROWS(ALLSELECTED(ProbeT))",
+   "powerbi": "7",
+   "table": "Facts"
+  },
+  {
+   "expr": "SUMX(VALUES(Facts[Region]),DIVIDE(CALCULATE(SUM(Facts[Quantity])),CALCULATE(SUM(Facts[Quantity]),ALLSELECTED(Facts[Region]))))",
+   "powerbi": "1",
+   "table": "Facts"
+  },
+  {
+   "expr": "SUMX(FILTER(VALUES(Facts[Region]),Facts[Region]<>\"East\"),DIVIDE(CALCULATE(SUM(Facts[Quantity])),CALCULATE(SUM(Facts[Quantity]),ALLSELECTED(Facts[Region]))))",
+   "powerbi": "1",
+   "table": "Facts"
+  },
+  {
+   "expr": "MAXX(FILTER(VALUES(Facts[Region]),Facts[Region]<>\"East\"),CALCULATE(SUM(Facts[Quantity]),ALLSELECTED(Facts[Region])))",
+   "powerbi": "7",
+   "table": "Facts"
+  },
+  {
+   "expr": "MAXX(FILTER(VALUES(Facts[Region]),Facts[Region]<>\"East\"),CALCULATE(SUM(Facts[Quantity]),ALLSELECTED(Facts)))",
+   "powerbi": "7",
+   "table": "Facts"
+  },
+  {
+   "expr": "MAXX(FILTER(VALUES(Facts[Region]),Facts[Region]<>\"East\"),CALCULATE(SUM(Facts[Quantity]),ALLSELECTED()))",
+   "powerbi": "7",
+   "table": "Facts"
+  },
+  {
+   "expr": "SUMX(SUMMARIZE(FILTER(AS_A,(AS_A[g]=\"a\"&&AS_A[h]=1)||(AS_A[g]=\"b\"&&AS_A[h]=2)),AS_A[g],AS_A[h]),CALCULATE(COUNTROWS(AS_A),ALLSELECTED(AS_A[g],AS_A[h])))",
+   "powerbi": "8",
+   "table": "AS_A"
+  },
+  {
+   "expr": "SUMX(SUMMARIZE(FILTER(AS_A,(AS_A[g]=\"a\"&&AS_A[h]=1)||(AS_A[g]=\"b\"&&AS_A[h]=2)),AS_A[g],AS_A[h]),CALCULATE(COUNTROWS(AS_A),ALLSELECTED(AS_A[g]),ALLSELECTED(AS_A[h])))",
+   "powerbi": "8",
+   "table": "AS_A"
+  },
+  {
+   "expr": "SUMX(SUMMARIZE(FILTER(AS_A,(AS_A[g]=\"a\"&&AS_A[h]=1)||(AS_A[g]=\"b\"&&AS_A[h]=2)),AS_A[g],AS_A[h]),CALCULATE(COUNTROWS(AS_A),ALLSELECTED(AS_A[g]),ALLSELECTED(AS_A[v])))",
+   "powerbi": "4",
+   "table": "AS_A"
+  },
+  {
+   "expr": "SUMX(SUMMARIZE(FILTER(AS_A,(AS_A[g]=\"a\"&&AS_A[h]=1)||(AS_A[g]=\"b\"&&AS_A[h]=2)),AS_A[g],AS_A[h]),CALCULATE(COUNTROWS(AS_A),ALLSELECTED(AS_A[h]),ALLSELECTED(AS_A[v])))",
+   "powerbi": "4",
+   "table": "AS_A"
+  },
+  {
+   "expr": "SUMX(SUMMARIZE(FILTER(AS_A,(AS_A[g]=\"a\"&&AS_A[h]=1)||(AS_A[g]=\"b\"&&AS_A[h]=2)),AS_A[g],AS_A[h]),CALCULATE(COUNTROWS(AS_A),ALLSELECTED(AS_A[g]),ALLSELECTED(AS_A[h]),ALLSELECTED(AS_A[v])))",
+   "powerbi": "8",
+   "table": "AS_A"
+  },
+  {
+   "expr": "SUMX(SUMMARIZE(FILTER(AS_A,(AS_A[g]=\"a\"&&AS_A[h]=1)||(AS_A[g]=\"b\"&&AS_A[h]=2)),AS_A[g],AS_A[h]),CALCULATE(COUNTROWS(AS_A),ALLSELECTED(AS_A)))",
+   "powerbi": "8",
+   "table": "AS_A"
+  },
+  {
+   "expr": "SUMX(FILTER(AS_A,(AS_A[g]=\"a\"&&AS_A[h]=1)||(AS_A[g]=\"b\"&&AS_A[h]=2)),CALCULATE(COUNTROWS(AS_A),ALLSELECTED(AS_A[v])))",
+   "powerbi": "8",
+   "table": "AS_A"
+  },
+  {
+   "expr": "SUMX(FILTER(AS_A,(AS_A[g]=\"a\"&&AS_A[h]=1)||(AS_A[g]=\"b\"&&AS_A[h]=2)),CALCULATE(COUNTROWS(AS_A),ALLSELECTED(AS_A[g]),ALLSELECTED(AS_A[h])))",
+   "powerbi": "6",
+   "table": "AS_A"
+  },
+  {
+   "expr": "SUMX(FILTER(AS_A,(AS_A[g]=\"a\"&&AS_A[h]=1)||(AS_A[g]=\"b\"&&AS_A[h]=2)),CALCULATE(COUNTROWS(AS_A),ALLSELECTED(AS_A[g]),ALLSELECTED(AS_A[v])))",
+   "powerbi": "8",
+   "table": "AS_A"
+  },
+  {
+   "expr": "SUMX(FILTER(AS_A,(AS_A[g]=\"a\"&&AS_A[h]=1)||(AS_A[g]=\"b\"&&AS_A[h]=2)),CALCULATE(COUNTROWS(AS_A),ALLSELECTED(AS_A[h]),ALLSELECTED(AS_A[v])))",
+   "powerbi": "8",
+   "table": "AS_A"
+  },
+  {
+   "expr": "SUMX(FILTER(AS_A,(AS_A[g]=\"a\"&&AS_A[h]=1)||(AS_A[g]=\"b\"&&AS_A[h]=2)),CALCULATE(COUNTROWS(AS_A),ALLSELECTED(AS_A[g]),ALLSELECTED(AS_A[h]),ALLSELECTED(AS_A[v])))",
+   "powerbi": "16",
+   "table": "AS_A"
+  },
+  {
+   "expr": "SUMX(FILTER(AS_A,(AS_A[g]=\"a\"&&AS_A[h]=1)||(AS_A[g]=\"b\"&&AS_A[h]=2)),CALCULATE(COUNTROWS(AS_A),ALLSELECTED(AS_A)))",
+   "powerbi": "16",
+   "table": "AS_A"
+  },
+  {
+   "expr": "SUMX(FILTER(AS_A,(AS_A[g]=\"a\"&&AS_A[h]=1)||(AS_A[g]=\"b\"&&AS_A[h]=2)),CALCULATE(COUNTROWS(AS_A),ALLSELECTED(AS_A[g],AS_A[v])))",
+   "powerbi": "8",
+   "table": "AS_A"
+  },
+  {
+   "expr": "SUMX(SUMMARIZE(FILTER(AS_A,(AS_A[g]=\"a\"&&AS_A[h]=1)||(AS_A[g]=\"b\"&&AS_A[h]=2)),AS_A[g],AS_A[h]),CALCULATE(COUNTROWS(AS_A),ALLSELECTED(AS_A[g]),AS_A[h]=1))",
+   "powerbi": "6",
+   "table": "AS_A"
+  },
+  {
+   "expr": "SUMX(SUMMARIZE(FILTER(AS_A,(AS_A[g]=\"a\"&&AS_A[h]=1)||(AS_A[g]=\"b\"&&AS_A[h]=2)),AS_A[g],AS_A[h]),CALCULATE(COUNTROWS(AS_A),ALLSELECTED(AS_A[g]),AS_A[h]>=1))",
+   "powerbi": "12",
+   "table": "AS_A"
+  },
+  {
+   "expr": "SUMX(SUMMARIZE(FILTER(Facts,(Facts[Region]=\"East\"&&Facts[Note]=\"Paid\")||(Facts[Region]=\"West\"&&Facts[Note]=\"Paid\")),Facts[Region],Facts[Note]),CALCULATE(COUNTROWS(Facts),ALLSELECTED(Facts[Region])))",
+   "powerbi": "6",
+   "table": "Facts"
+  },
+  {
+   "expr": "SUMX(SUMMARIZE(FILTER(Facts,(Facts[Region]=\"East\"&&Facts[Note]=\"Paid\")||(Facts[Region]=\"West\"&&Facts[Note]=\"Paid\")),Facts[Region],Facts[Note]),CALCULATE(COUNTROWS(Facts),ALLSELECTED(Facts[Region]),ALLSELECTED(Facts[Note])))",
+   "powerbi": "6",
+   "table": "Facts"
+  },
+  {
+   "expr": "CALCULATE(MAXX(FILTER(AS_A,AS_A[h]>2),CALCULATE(SUM(AS_A[v]),REMOVEFILTERS(AS_A[g]),ALLSELECTED(AS_A[g]))),AS_A[g]=\"a\")",
+   "powerbi": "BLANK",
+   "table": "AS_A"
+  },
+  {
+   "expr": "VAR t=Facts RETURN SUMX(t,CALCULATE(COUNTROWS(ALLSELECTED(Facts[Note])),Facts[Note]<>\"Paid\"))",
+   "powerbi": "12",
+   "table": "Facts"
+  },
+  {
+   "expr": "VAR t=SUMMARIZE(Facts,Facts[Region],Facts[Quantity]) RETURN CALCULATE(SUMX(t,CALCULATE(SUMX(ADDCOLUMNS(CALCULATETABLE(Facts,Facts[Quantity]<>3),\"x\",1),SUMX(ALLSELECTED(Facts),Facts[Quantity])),Facts[Sales]<>2)),Facts[Region]=\"West\")",
+   "powerbi": "76",
+   "table": "Facts"
+  },
+  {
+   "expr": "VAR t=Facts RETURN SUMX(t,CALCULATE(COUNTROWS(ALLSELECTED(Facts)),Facts[Sales]>=0))",
+   "powerbi": "30",
+   "table": "Facts"
+  },
+  {
+   "expr": "VAR t=AS_A RETURN CALCULATE(SUMX(t,CALCULATE(COUNTROWS(AS_A),ALLSELECTED(AS_A),REMOVEFILTERS(AS_A[g]))),AS_A[g]=\"a\")",
+   "powerbi": "64",
+   "table": "AS_A"
+  },
+  {
+   "expr": "CALCULATE(AVERAGEX(FILTER(VALUES(Facts[Sales]),Facts[Sales]<>2),SUMX(ADDCOLUMNS(ADDCOLUMNS(FILTER(Facts,(Facts[Sales]<2||Facts[Region]=\"West\")),\"x\",1),\"x\",1),MINX(Facts,COUNTROWS(ALLSELECTED(Facts[Note],Facts[Sales]))))),Facts[Sales]=2,FILTER(ALL(Facts[Region]),Facts[Region]=\"East\"))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 88) Function 'ADDCOLUMNS' cannot add column [x] since it already exists.\"",
+   "table": "Facts"
+  },
+  {
+   "expr": "MINX(SELECTCOLUMNS(Facts,\"c0\",Facts[Quantity],\"c1\",Facts[Note]),COUNTROWS(FILTER(ALLSELECTED(Facts),Facts[Sales]<=10)))",
+   "powerbi": "4",
+   "table": "Facts"
+  },
+  {
+   "expr": "VAR t=AS_A RETURN SUMX(t,CALCULATE(AVERAGEX(ALLSELECTED(AS_A[v]),CALCULATE(COUNTROWS(ALLSELECTED(AS_A[v])),ALLSELECTED(AS_A[v]))),AS_A[h]>=2))",
+   "powerbi": "56",
+   "table": "AS_A"
+  },
+  {
+   "expr": "VAR t=Facts RETURN SUMX(t,COUNTROWS(ALLSELECTED(Facts[Note],Facts[Region])))",
+   "powerbi": "30",
+   "table": "Facts"
+  },
+  {
+   "expr": "VAR t=AS_A RETURN CALCULATE(SUMX(t,CALCULATE(COUNTROWS(ALLSELECTED(AS_A)),KEEPFILTERS(AS_A[g]<>\"a\"),KEEPFILTERS(AS_A[v]<50))),AS_A[v]>=10)",
+   "powerbi": "24",
+   "table": "AS_A"
+  },
+  {
+   "expr": "VAR t=Facts RETURN CALCULATE(SUMX(t,CALCULATE(COUNTROWS(Facts),Facts[Quantity]>=0)),Facts[Note]=\"\")",
+   "powerbi": "6",
+   "table": "Facts"
+  },
+  {
+   "expr": "VAR t=Facts RETURN CALCULATE(SUMX(t,CALCULATE(COUNTROWS(Facts),KEEPFILTERS(Facts[Region]=\"West\"))),Facts[Region]<>\"North\")",
+   "powerbi": "2",
+   "table": "Facts"
+  },
+  {
+   "expr": "CALCULATE(MINX(SELECTCOLUMNS(FILTER(Facts,Facts[Sales]<10),\"c0\",Facts[Note],\"c1\",Facts[Sales]),COUNTROWS(FILTER(ALLSELECTED(Facts),Facts[Region]<>\"West\"))),Facts[Note]=\"\")",
+   "powerbi": "1",
+   "table": "Facts"
+  },
+  {
+   "expr": "COUNTROWS(TREATAS({(\"East\",1),(\"East\",2),(\"West\",3),(\"West\",2)},Facts[Region],Facts[Quantity]))",
+   "powerbi": "4",
+   "table": "Facts"
+  },
+  {
+   "expr": "COUNTROWS(TREATAS({\"East\",\"East\"},Facts[Region]))",
+   "powerbi": "2",
+   "table": "Facts"
+  },
+  {
+   "expr": "SUMX(TREATAS({\"East\",\"East\",\"West\"},Facts[Region]),1)",
+   "powerbi": "3",
+   "table": "Facts"
+  },
+  {
+   "expr": "SUMX(FILTER(SELECTCOLUMNS(Facts,\"c0\",Facts[Region]),Facts[Region]=\"East\"),1)",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 71) A single value for column 'Region' in table 'Facts' cannot be determined. This can happen when a measure or function formula refers to a column that contains many values without specifying an aggregation such as min, max, count, or sum to get a single result.\"",
+   "table": "Facts"
+  },
+  {
+   "expr": "SUMX(FILTER(SELECTCOLUMNS(Facts,\"Region\",Facts[Region]),Facts[Region]=\"East\"),1)",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 75) A single value for column 'Region' in table 'Facts' cannot be determined. This can happen when a measure or function formula refers to a column that contains many values without specifying an aggregation such as min, max, count, or sum to get a single result.\"",
+   "table": "Facts"
+  },
+  {
+   "expr": "SUMX(SELECTCOLUMNS(Facts,\"c0\",Facts[Region],\"q\",Facts[Quantity]),Facts[Quantity])",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 84) A single value for column 'Quantity' in table 'Facts' cannot be determined. This can happen when a measure or function formula refers to a column that contains many values without specifying an aggregation such as min, max, count, or sum to get a single result.\"",
+   "table": "Facts"
+  },
+  {
+   "expr": "SUMX(Facts,SUMX(SELECTCOLUMNS(Facts,\"c0\",Facts[Region]),Facts[Quantity]))",
+   "powerbi": "90",
+   "table": "Facts"
+  },
+  {
+   "expr": "COUNTROWS(SUMMARIZE(Facts,Facts[Region],\"Region\",1))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 29) Function 'SUMMARIZE' cannot add column [Region] since it already exists.\"",
+   "table": "Facts"
+  },
+  {
+   "expr": "VAR t=Facts RETURN SUMX(t,COUNTROWS(ALLSELECTED(Facts)))",
+   "powerbi": "36",
+   "table": "Facts"
+  },
+  {
+   "expr": "VAR t=AS_A RETURN CALCULATE(SUMX(t,SUMX(ALLSELECTED(AS_A),AS_A[v])),AS_A[g]=\"c\")",
+   "powerbi": "2560",
+   "table": "AS_A"
+  },
+  {
+   "expr": "VAR t=AS_A RETURN CALCULATE(SUMX(t,CALCULATE(COUNTROWS(ALLSELECTED(AS_A[h])),AS_A[g]=\"b\")),AS_A[v]<>40)",
+   "powerbi": "32",
+   "table": "AS_A"
+  },
+  {
+   "expr": "SUMX(ALL(Facts[Note]),CALCULATE(COUNTROWS(Facts),ALLSELECTED(Facts[Note])))",
+   "powerbi": "18",
+   "table": "Facts"
+  },
+  {
+   "expr": "AVERAGEX(FILTER(ALL(AS_A[v]),AS_A[v]>=10),SUMX(ADDCOLUMNS(SELECTCOLUMNS(AS_A,\"c0\",AS_A[g],\"c1\",AS_A[h]),\"x\",1),CALCULATE(COUNTROWS(ALLSELECTED(AS_A)),ALLSELECTED(AS_A[h]),ALLEXCEPT(AS_A,AS_A[g]))))",
+   "powerbi": "64",
+   "table": "AS_A"
+  },
+  {
+   "expr": "AVERAGEX(ALLSELECTED(Facts[Sales]),CALCULATE(SUM(Facts[Quantity]),ALLSELECTED(Facts)))",
+   "powerbi": "15",
+   "table": "Facts"
+  },
+  {
+   "expr": "AVERAGEX(FILTER(ALL(AS_A[v],AS_A[h]),AS_A[h]>=3),CALCULATE(SUM(AS_A[v]),ALLSELECTED(AS_A[g]),ALL(AS_A[h])))",
+   "powerbi": "60",
+   "table": "AS_A"
+  },
+  {
+   "expr": "VAR t=Facts RETURN SUMX(t,CALCULATE(COUNTROWS(ALLSELECTED(Facts[Quantity])),FILTER(ALL(Facts[Quantity]),Facts[Quantity]>=2),ALL(Facts[Sales])))",
+   "powerbi": "24",
+   "table": "Facts"
+  },
+  {
+   "expr": "VAR t=Facts RETURN SUMX(t,CALCULATE(SUMX(SELECTCOLUMNS(Facts,\"c0\",Facts[Sales],\"c1\",Facts[Note]),COUNTROWS(Facts)),Facts[Note]<>\"Paid\"))",
+   "powerbi": "3",
+   "table": "Facts"
+  },
+  {
+   "expr": "VAR t=Facts RETURN SUMX(t,CALCULATE(COUNTROWS(ALLSELECTED(Facts)),Facts[Region]=\"West\"))",
+   "powerbi": "12",
+   "table": "Facts"
+  },
+  {
+   "expr": "VAR t=Facts RETURN SUMX(t,COUNTROWS(ALLSELECTED(Facts[Note])))",
+   "powerbi": "18",
+   "table": "Facts"
+  },
+  {
+   "expr": "SUMX(ALL(AS_D[n]),CALCULATE(COUNTROWS(AS_D),FILTER(ALL(AS_D[n]),AS_D[n]<>1),ALLSELECTED(AS_D)))",
+   "powerbi": "20",
+   "table": "AS_D"
+  },
+  {
+   "expr": "MINX(Facts,CALCULATE(SUM(Facts[Quantity]),ALLSELECTED(Facts)))",
+   "powerbi": "15",
+   "table": "Facts"
+  },
+  {
+   "expr": "MINX(AS_A,CALCULATE(COUNTROWS(ALLSELECTED(AS_A)),ALLSELECTED(AS_A[v]),FILTER(ALL(AS_A[h]),AS_A[h]>3)))",
+   "powerbi": "BLANK",
+   "table": "AS_A"
+  },
+  {
+   "expr": "VAR t=FILTER(ALL(Facts[Quantity],Facts[Note]),Facts[Quantity]=3) RETURN SUMX(t,CALCULATE(COUNTROWS(ALLSELECTED(Facts)),FILTER(ALL(Facts[Quantity]),Facts[Quantity]>=0),ALLSELECTED(Facts[Sales])))",
+   "powerbi": "2",
+   "table": "Facts"
+  },
+  {
+   "expr": "VAR t=Facts RETURN SUMX(t,CALCULATE(COUNTROWS(Facts),Facts[Quantity]=2,Facts[Quantity]<2))",
+   "powerbi": "BLANK",
+   "table": "Facts"
+  },
+  {
+   "expr": "MINX(FILTER(ALL(Facts[Region],Facts[Quantity]),Facts[Region]=\"North\"),MAXX(ALLSELECTED(Facts[Sales]),CALCULATE(COUNTROWS(Facts),ALLSELECTED(Facts),ALL(Facts[Quantity]))))",
+   "powerbi": "1",
+   "table": "Facts"
+  },
+  {
+   "expr": "VAR t=AS_A RETURN CALCULATE(SUMX(t,COUNTROWS(AS_A)),AS_A[h]<>3)",
+   "powerbi": "56",
+   "table": "AS_A"
+  },
+  {
+   "expr": "VAR t=SELECTCOLUMNS(Facts,\"c0\",Facts[Region],\"c1\",Facts[Quantity]) RETURN SUMX(t,CALCULATE(COUNTROWS(Facts),ALLSELECTED(Facts[Quantity])))",
+   "powerbi": "14",
+   "table": "Facts"
+  },
+  {
+   "expr": "MAXX(SELECTCOLUMNS(AS_D,\"c0\",AS_D[d],\"c1\",AS_D[n]),CALCULATE(COUNTROWS(AS_D),ALLSELECTED(AS_D)))",
+   "powerbi": "5",
+   "table": "AS_D"
+  },
+  {
+   "expr": "MINX(AS_A,CALCULATE(COUNTROWS(AS_A),ALLSELECTED(AS_A),AS_A[h]<>1))",
+   "powerbi": "5",
+   "table": "AS_A"
+  },
+  {
+   "expr": "VAR t=Facts RETURN CALCULATE(SUMX(t,COUNTROWS(ALLSELECTED(Facts[Quantity]))),Facts[Quantity]<>3)",
+   "powerbi": "36",
+   "table": "Facts"
+  },
+  {
+   "expr": "VAR t=SUMMARIZE(Facts,Facts[Quantity],Facts[Note]) RETURN SUMX(t,SUMX(FILTER(ALL(Facts[Sales],Facts[Region]),Facts[Sales]<>2),CALCULATE(COUNTROWS(Facts),KEEPFILTERS(Facts[Note]<>\"\"),ALLSELECTED(Facts[Quantity]))))",
+   "powerbi": "10",
+   "table": "Facts"
+  },
+  {
+   "expr": "AVERAGEX(ADDCOLUMNS(ALLSELECTED(Facts[Sales]),\"x\",1),CALCULATE(SUM(Facts[Quantity]),ALLSELECTED(Facts),ALLEXCEPT(Facts,Facts[Sales])))",
+   "powerbi": "15",
+   "table": "Facts"
+  },
+  {
+   "expr": "MAXX(FILTER(ALL(Facts[Region],Facts[Quantity]),Facts[Quantity]<>3),CALCULATE(COUNTROWS(Facts),ALLSELECTED(Facts)))",
+   "powerbi": "5",
+   "table": "Facts"
+  },
+  {
+   "expr": "VAR t=AS_A RETURN SUMX(t,COUNTROWS(ALLSELECTED(AS_A[v])))",
+   "powerbi": "56",
+   "table": "AS_A"
+  },
+  {
+   "expr": "MINX(SELECTCOLUMNS(Facts,\"c0\",Facts[Sales],\"c1\",Facts[Quantity]),CALCULATE(SUM(Facts[Quantity]),ALLSELECTED(Facts)))",
+   "powerbi": "15",
+   "table": "Facts"
+  },
+  {
+   "expr": "AVERAGEX(FILTER(ALL(AS_A[g]),AS_A[g]=\"a\"),CALCULATE(SUM(AS_A[v]),ALLSELECTED(AS_A[v]),REMOVEFILTERS(AS_A[g])))",
+   "powerbi": "320",
+   "table": "AS_A"
+  },
+  {
+   "expr": "MAXX(FILTER(VALUES(Facts[Sales]),Facts[Sales]<10),CALCULATE(COUNTROWS(Facts),Facts[Quantity]<>4,ALLSELECTED(Facts)))",
+   "powerbi": "3",
+   "table": "Facts"
+  },
+  {
+   "expr": "CONCATENATEX(SUMMARIZE(AS_D,AS_D[n],\"z\",CALCULATE(COUNTROWS(ALLSELECTED(AS_D[t])),AS_D[d]<DATE(2024,1,15))),AS_D[n]&\":\"&[z],\",\",AS_D[n])",
+   "powerbi": "1:1,2:1,3:1,4:1,5:1",
+   "table": "AS_D"
+  },
+  {
+   "expr": "CALCULATE(SUMX(ADDCOLUMNS(FILTER(FILTER(Facts,Facts[Note]=\"Late\"),(Facts[Sales]>2&&Facts[Region]=\"North\")),\"x\",1),CALCULATE(SUMX(SELECTCOLUMNS(CALCULATETABLE(Facts,Facts[Region]<>\"North\"),\"c0\",Facts[Quantity],\"c1\",Facts[Note]),CALCULATE(SUM(Facts[Quantity]),REMOVEFILTERS(Facts[Quantity]),ALLSELECTED(Facts[Region]))),Facts[Sales]<10)),Facts[Sales]>=0)",
+   "powerbi": "BLANK",
+   "table": "Facts"
+  },
+  {
+   "expr": "MINX(SUMMARIZE(FILTER(AS_D,AS_D[t]<>\"y\"),AS_D[t],AS_D[n]),MAXX(VALUES(AS_D[n]),CALCULATE(CALCULATE(SUM(AS_D[n]),REMOVEFILTERS(AS_D[n]),ALLSELECTED(AS_D[t])),AS_D[d]>DATE(2024,3,5))))",
+   "powerbi": "BLANK",
+   "table": "AS_D"
+  },
+  {
+   "expr": "SUMX(Facts,MAXX(Facts,CALCULATE(CALCULATE(SUM(Facts[Quantity]),ALLSELECTED(Facts[Region])),ALLSELECTED(Facts[Region]),ALLSELECTED(Facts[Sales]))))",
+   "powerbi": "30",
+   "table": "Facts"
+  },
+  {
+   "expr": "CONCATENATEX(SUMMARIZE(Facts,Facts[Region],\"z\",CALCULATE(COUNTROWS(Facts),ALLEXCEPT(Facts,Facts[Note]))),Facts[Region]&\":\"&[z],\",\",Facts[Region])",
+   "powerbi": "East:5,North:1,West:5",
+   "table": "Facts"
+  },
+  {
+   "expr": "MINX(FILTER(ALL(Facts[Quantity]),Facts[Quantity]<1),SUMX(FILTER(ALL(Facts[Quantity]),Facts[Quantity]<>3),CALCULATE(SUM(Facts[Quantity]),Facts[Sales]<0,ALLSELECTED(Facts))))",
+   "powerbi": "5",
+   "table": "Facts"
+  },
+  {
+   "expr": "MINX(CALCULATETABLE(Facts,Facts[Note]<>\"Paid\"),CALCULATE(COUNTROWS(Facts),FILTER(ALL(Facts[Region]),Facts[Region]<>\"West\"),ALLSELECTED(Facts)))",
+   "powerbi": "2",
+   "table": "Facts"
+  },
+  {
+   "expr": "CALCULATE(SUMX(AS_D,CALCULATE(SUMX(FILTER(ALL(AS_D[t]),AS_D[t]=\"z\"),SUMX(ALLSELECTED(AS_D),AS_D[n])),ALLSELECTED(AS_D),ALLSELECTED(AS_D[t]))),AS_D[t]=\"z\",ALL(AS_D[n]))",
+   "powerbi": "5",
+   "table": "AS_D"
+  },
+  {
+   "expr": "SUMX(Facts,CALCULATE(SUMX(FILTER(SELECTCOLUMNS(Facts,\"c0\",Facts[Region],\"c1\",Facts[Sales]),Facts[Sales]>10),CALCULATE(COUNTROWS(Facts),Facts[Sales]<>0,KEEPFILTERS(Facts[Region]=\"North\"))),ALL(Facts)))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 110) A single value for column 'Sales' in table 'Facts' cannot be determined. This can happen when a measure or function formula refers to a column that contains many values without specifying an aggregation such as min, max, count, or sum to get a single result.\"",
+   "table": "Facts"
+  },
+  {
+   "expr": "MAXX(ALLSELECTED(Facts[Region]),MAXX(ALL(Facts[Note]),CALCULATE(COUNTROWS(Facts),ALLSELECTED(Facts))))",
+   "powerbi": "6",
+   "table": "Facts"
+  },
+  {
+   "expr": "MAXX(SUMMARIZE(FILTER(AS_D,AS_D[n]<3),AS_D[n],AS_D[t]),CALCULATE(CALCULATE(COUNTROWS(ALLSELECTED(AS_D[t])),ALLSELECTED(AS_D)),ALL(AS_D[d]),ALLSELECTED(AS_D[d])))",
+   "powerbi": "2",
+   "table": "AS_D"
+  },
+  {
+   "expr": "MAXX(Facts,CALCULATE(SUMX(TOPN(3,Facts,Facts[Quantity]),CALCULATE(COUNTROWS(Facts),FILTER(ALL(Facts[Note]),Facts[Note]=\"Paid\"),ALLSELECTED(Facts[Note]))),Facts[Sales]>=10))",
+   "powerbi": "1",
+   "table": "Facts"
+  },
+  {
+   "expr": "CALCULATE(SUMX(CALCULATETABLE(Facts,Facts[Region]=\"North\"),CALCULATE(COUNTROWS(ALLSELECTED(Facts[Quantity],Facts[Region])),ALLSELECTED(Facts[Quantity]),ALL(Facts))),Facts[Sales]>10,Facts[Quantity]>0)",
+   "powerbi": "BLANK",
+   "table": "Facts"
+  },
+  {
+   "expr": "CONCATENATEX(SUMMARIZE(Facts,Facts[Sales],\"z\",MAXX(FILTER(ALL(Facts[Sales],Facts[Region]),(ISBLANK(Facts[Region])&&Facts[Sales]>=10)),CALCULATE(SUM(Facts[Quantity]),ALLSELECTED(Facts),REMOVEFILTERS(Facts[Note])))),Facts[Sales]&\":\"&[z],\",\",Facts[Sales])",
+   "powerbi": "-1.5:,:,0:,2.5:,10.5:,20:",
+   "table": "Facts"
+  },
+  {
+   "expr": "SUMX(FILTER(SELECTCOLUMNS(Facts,\"c0\",Facts[Note],\"c1\",Facts[Region]),Facts[Region]<>\"West\"),MAXX(Facts,CALCULATE(SUMX(ALLSELECTED(Facts),Facts[Quantity]),ALLSELECTED(Facts[Quantity]))))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 88) A single value for column 'Region' in table 'Facts' cannot be determined. This can happen when a measure or function formula refers to a column that contains many values without specifying an aggregation such as min, max, count, or sum to get a single result.\"",
+   "table": "Facts"
+  },
+  {
+   "expr": "CONCATENATEX(SUMMARIZE(Facts,Facts[Note],\"z\",MAXX(ALLSELECTED(Facts[Note]),CALCULATE(SUM(Facts[Quantity]),FILTER(ALL(Facts[Note]),Facts[Note]<>\"Late\")))),Facts[Note]&\":\"&[z],\",\",Facts[Note])",
+   "powerbi": ":8,Late:,Paid:3",
+   "table": "Facts"
+  },
+  {
+   "expr": "SUMX(Facts,CALCULATE(CALCULATE(COUNTROWS(ALLSELECTED(Facts)),Facts[Region]<>\"North\",Facts[Note]=\"\"),Facts[Quantity]>=1))",
+   "powerbi": "12",
+   "table": "Facts"
+  },
+  {
+   "expr": "CONCATENATEX(SUMMARIZE(Facts,Facts[Note],\"z\",MAXX(FILTER(ALL(Facts[Region]),Facts[Region]<>\"East\"),CALCULATE(COUNTROWS(ALLSELECTED(Facts[Sales])),FILTER(ALL(Facts[Note]),Facts[Note]<>\"\")))),Facts[Note]&\":\"&[z],\",\",Facts[Note])",
+   "powerbi": ":2,Late:1,Paid:3",
+   "table": "Facts"
+  },
+  {
+   "expr": "CONCATENATEX(SUMMARIZE(AS_D,AS_D[t],\"z\",CALCULATE(COUNTROWS(AS_D),AS_D[t]<>\"z\",ALL(AS_D[n]))),AS_D[t]&\":\"&[z],\",\",AS_D[t])",
+   "powerbi": ":1,x:3,y:2,z:",
+   "table": "AS_D"
+  },
+  {
+   "expr": "CALCULATE(SUMX(ALL(Facts[Sales]),SUMX(ADDCOLUMNS(TREATAS({2,10},Facts[Sales]),\"x\",1),CALCULATE(CALCULATE(COUNTROWS(ALLSELECTED(Facts[Note])),ALL(Facts[Quantity])),ALL(Facts[Note]),ALLSELECTED(Facts)))),Facts[Sales]>2,Facts[Quantity]=4)",
+   "powerbi": "BLANK",
+   "table": "Facts"
+  },
+  {
+   "expr": "CONCATENATEX(SUMMARIZE(AS_D,AS_D[t],\"z\",CALCULATE(SUMX(ALLSELECTED(AS_D[d]),CALCULATE(COUNTROWS(ALLSELECTED(AS_D[t])),ALLEXCEPT(AS_D,AS_D[t]))),AS_D[d]<>DATE(2024,3,5))),AS_D[t]&\":\"&[z],\",\",AS_D[t])",
+   "powerbi": ":12,x:12,y:12,z:12",
+   "table": "AS_D"
+  },
+  {
+   "expr": "MAXX(ADDCOLUMNS(ALL(AS_A[g]),\"x\",1),COUNTROWS(FILTER(ALLSELECTED(AS_A),AS_A[h]>2)))",
+   "powerbi": "1",
+   "table": "AS_A"
+  },
+  {
+   "expr": "CALCULATE(SUMX(FILTER(ALL(AS_D[d],AS_D[t]),(AS_D[d]=DATE(2024,1,15)||AS_D[t]=\"y\")),MAXX(FILTER(ALL(AS_D[n],AS_D[t]),AS_D[n]<=1),CALCULATE(CALCULATE(SUM(AS_D[n]),ALL(AS_D)),REMOVEFILTERS(AS_D[t]),ALLSELECTED(AS_D)))),AS_D[d]<DATE(2024,3,5))",
+   "powerbi": "30",
+   "table": "AS_D"
+  },
+  {
+   "expr": "MINX(ALLSELECTED(AS_A[g]),CALCULATE(MAXX(FILTER(AS_A,AS_A[v]<=50),CALCULATE(SUM(AS_A[v]),ALLSELECTED(AS_A))),AS_A[v]<30))",
+   "powerbi": "30",
+   "table": "AS_A"
+  },
+  {
+   "expr": "SUMX(FILTER(ALL(Facts[Note]),Facts[Note]=\"\"),CALCULATE(COUNTROWS(ALLSELECTED(Facts[Note])),ALLSELECTED(Facts),ALLEXCEPT(Facts,Facts[Sales])))",
+   "powerbi": "3",
+   "table": "Facts"
+  },
+  {
+   "expr": "MAXX(FILTER(ALL(Facts[Note],Facts[Region]),Facts[Note]=\"Paid\"),MAXX(SUMMARIZE(FILTER(Facts,(Facts[Sales]<>2||Facts[Region]=\"North\")),Facts[Region],Facts[Quantity]),CALCULATE(CALCULATE(COUNTROWS(Facts),ALL(Facts[Region])),ALLSELECTED(Facts))))",
+   "powerbi": "3",
+   "table": "Facts"
+  },
+  {
+   "expr": "CONCATENATEX(SUMMARIZE(AS_D,AS_D[t],\"z\",CALCULATE(SUM(AS_D[n]),AS_D[t]<>\"x\")),AS_D[t]&\":\"&[z],\",\",AS_D[t])",
+   "powerbi": ":4,x:,y:2,z:5",
+   "table": "AS_D"
+  },
+  {
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(Facts[Note],FILTER(ALL(Facts[Region]),Facts[Region]<>\"West\"),\"z\",CALCULATE(COUNTROWS(Facts),ALLSELECTED(Facts[Note]))),Facts[Note]&\":\"&[z],\",\",Facts[Note])",
+   "powerbi": ":4,Late:4,Paid:4",
+   "table": "Facts"
+  },
+  {
+   "expr": "CONCATENATEX(SUMMARIZE(Facts,Facts[Region],\"z\",MAXX(VALUES(Facts[Region]),CALCULATE(SUM(Facts[Quantity]),FILTER(ALL(Facts[Region]),Facts[Region]<>\"East\")))),Facts[Region]&\":\"&[z],\",\",Facts[Region])",
+   "powerbi": "East:,North:4,West:3",
+   "table": "Facts"
+  },
+  {
+   "expr": "CALCULATE(MAXX(FILTER(ALL(Facts[Region]),Facts[Region]<>\"East\"),CALCULATE(MAXX(Facts,CALCULATE(SUM(Facts[Quantity]),ALLEXCEPT(Facts,Facts[Region]))),ALLSELECTED(Facts[Note]),ALLSELECTED(Facts[Region]))),Facts[Note]<>\"Late\",Facts[Quantity]>0)",
+   "powerbi": "3",
+   "table": "Facts"
+  },
+  {
+   "expr": "CONCATENATEX(SUMMARIZE(Facts,Facts[Region],\"z\",CALCULATE(COUNTROWS(ALLSELECTED(Facts[Quantity])),KEEPFILTERS(Facts[Quantity]>2))),Facts[Region]&\":\"&[z],\",\",Facts[Region])",
+   "powerbi": "East:1,North:1,West:1",
+   "table": "Facts"
+  },
+  {
+   "expr": "CONCATENATEX(SUMMARIZE(Facts,Facts[Region],\"z\",CALCULATE(COUNTROWS(ALLSELECTED(Facts[Note])),Facts[Region]=\"East\")),Facts[Region]&\":\"&[z],\",\",Facts[Region])",
+   "powerbi": "East:2,North:1,West:2",
+   "table": "Facts"
+  },
+  {
+   "expr": "CONCATENATEX(SUMMARIZE(Facts,Facts[Region],\"z\",CALCULATE(COUNTROWS(ALLSELECTED(Facts)),Facts[Quantity]>2)),Facts[Region]&\":\"&[z],\",\",Facts[Region])",
+   "powerbi": "East:3,North:3,West:3",
+   "table": "Facts"
+  },
+  {
+   "expr": "CONCATENATEX(SUMMARIZE(Facts,Facts[Region],\"z\",CALCULATE(COUNTROWS(ALLSELECTED(Facts)),Facts[Note]=\"Paid\")),Facts[Region]&\":\"&[z],\",\",Facts[Region])",
+   "powerbi": "East:3,North:3,West:3",
+   "table": "Facts"
+  },
+  {
+   "expr": "CONCATENATEX(SUMMARIZE(Facts,Facts[Region],\"z\",CALCULATE(COUNTROWS(ALLSELECTED(Facts[Note])),ALL(Facts[Region]))),Facts[Region]&\":\"&[z],\",\",Facts[Region])",
+   "powerbi": "East:2,North:1,West:2",
+   "table": "Facts"
+  },
+  {
+   "expr": "CONCATENATEX(SUMMARIZE(Facts,Facts[Region],\"z\",CALCULATE(COUNTROWS(Facts),ALLEXCEPT(Facts,Facts[Quantity]))),Facts[Region]&\":\"&[z],\",\",Facts[Region])",
+   "powerbi": "East:3,North:1,West:2",
+   "table": "Facts"
+  },
+  {
+   "expr": "CONCATENATEX(SUMMARIZE(Facts,Facts[Region],\"z\",CALCULATE(COUNTROWS(Facts),Facts[Region]=\"East\")),Facts[Region]&\":\"&[z],\",\",Facts[Region])",
+   "powerbi": "East:3,North:,West:",
+   "table": "Facts"
+  },
+  {
+   "expr": "CONCATENATEX(SUMMARIZE(Facts,Facts[Sales],\"z\",CALCULATE(COUNTROWS(ALLSELECTED(Facts)),Facts[Quantity]>1)),Facts[Sales]&\":\"&[z],\",\",Facts[Sales])",
+   "powerbi": "-1.5:4,:4,0:4,2.5:4,10.5:4,20:4",
+   "table": "Facts"
+  },
+  {
+   "expr": "CONCATENATEX(SUMMARIZE(Facts,Facts[Quantity],\"z\",CALCULATE(COUNTROWS(ALLSELECTED(Facts[Note])),Facts[Quantity]>1)),Facts[Quantity]&\":\"&[z],\",\",Facts[Quantity])",
+   "powerbi": "0:1,1:1,2:1,3:1,4:1,5:1",
+   "table": "Facts"
+  },
+  {
+   "expr": "SUMX(FILTER(Facts,(Facts[Note]=\"Late\"&&Facts[Sales]>=10)),MAXX(CALCULATETABLE(Facts,Facts[Note]=\"\"),CALCULATE(CALCULATE(COUNTROWS(Facts),ALLSELECTED(Facts[Quantity])),ALLSELECTED(Facts[Sales]),REMOVEFILTERS(Facts[Quantity]))))",
+   "powerbi": "BLANK",
+   "table": "Facts"
+  },
+  {
+   "expr": "CALCULATE(MAXX(FILTER(ALL(Facts[Sales]),Facts[Sales]<10),CALCULATE(SUMX(ALL(Facts[Region]),CALCULATE(COUNTROWS(Facts),ALLSELECTED(Facts))),Facts[Note]<>\"Late\")),Facts[Quantity]<3,KEEPFILTERS(Facts[Note]<>\"Paid\"))",
+   "powerbi": "6",
+   "table": "Facts"
+  },
+  {
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(Facts[Region],FILTER(ALL(Facts[Quantity]),Facts[Quantity]>3),\"z\",CALCULATE(COUNTROWS(ALLSELECTED(Facts[Quantity])),ALLSELECTED(Facts[Region]),ALL(Facts))),Facts[Region]&\":\"&[z],\",\",Facts[Region])",
+   "powerbi": "East:6,North:6",
+   "table": "Facts"
+  },
+  {
+   "expr": "SUMX(FILTER(SELECTCOLUMNS(Facts,\"c0\",Facts[Sales],\"c1\",Facts[Quantity]),Facts[Quantity]>0),SUMX(ALLSELECTED(Facts[Sales]),CALCULATE(SUM(Facts[Quantity]),ALLEXCEPT(Facts,Facts[Region]))))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 91) A single value for column 'Quantity' in table 'Facts' cannot be determined. This can happen when a measure or function formula refers to a column that contains many values without specifying an aggregation such as min, max, count, or sum to get a single result.\"",
+   "table": "Facts"
+  },
+  {
+   "expr": "SUMX(Facts,CALCULATE(MAXX(ALLSELECTED(Facts[Sales]),COUNTROWS(Facts)),ALLSELECTED(Facts)))",
+   "powerbi": "36",
+   "table": "Facts"
+  },
+  {
+   "expr": "CONCATENATEX(SUMMARIZE(TOPN(3,Facts,Facts[Quantity]),Facts[Note],\"z\",CALCULATE(SUM(Facts[Quantity]),ALLSELECTED(Facts))),Facts[Note]&\":\"&[z],\",\",Facts[Note])",
+   "powerbi": ":12,Late:12",
+   "table": "Facts"
+  },
+  {
+   "expr": "MAXX(Facts,CALCULATE(MAXX(ALLSELECTED(Facts[Sales]),COUNTROWS(Facts)),Facts[Sales]<>2,ALLSELECTED(Facts[Quantity])))",
+   "powerbi": "2",
+   "table": "Facts"
+  },
+  {
+   "expr": "CALCULATE(SUMX(UNION(CALCULATETABLE(Facts,Facts[Note]<>\"Late\"),TOPN(1,FILTER(Facts,Facts[Region]=\"West\"),Facts[Quantity])),CALCULATE(COUNTROWS(ALLSELECTED(Facts[Quantity])),ALL(Facts[Region]))),Facts[Note]=\"Late\",ALLSELECTED(Facts[Sales]))",
+   "powerbi": "25",
+   "table": "Facts"
+  },
+  {
+   "expr": "CALCULATE(MAXX(FILTER(ALL(AS_D[t],AS_D[n]),AS_D[n]<3),SUMX(TREATAS({DATE(2024,1,15),DATE(2024,2,10)},AS_D[d]),CALCULATE(COUNTROWS(ALLSELECTED(AS_D)),AS_D[d]=DATE(2024,1,15),ALLSELECTED(AS_D[t])))),AS_D[t]=\"x\")",
+   "powerbi": "4",
+   "table": "AS_D"
+  },
+  {
+   "expr": "MAXX(AS_D,CALCULATE(SUM(AS_D[n]),ALLSELECTED(AS_D)))",
+   "powerbi": "15",
+   "table": "AS_D"
+  },
+  {
+   "expr": "CONCATENATEX(SUMMARIZE(AS_D,AS_D[n],\"z\",CALCULATE(COUNTROWS(AS_D),AS_D[t]=\"y\",ALLEXCEPT(AS_D,AS_D[d]))),AS_D[n]&\":\"&[z],\",\",AS_D[n])",
+   "powerbi": "1:1,2:1,3:,4:,5:",
+   "table": "AS_D"
+  },
+  {
+   "expr": "CONCATENATEX(SUMMARIZE(Facts,Facts[Sales],\"z\",CALCULATE(COUNTROWS(Facts),ALLSELECTED(Facts[Note]),ALLSELECTED(Facts))),Facts[Sales]&\":\"&[z],\",\",Facts[Sales])",
+   "powerbi": "-1.5:6,:6,0:6,2.5:6,10.5:6,20:6",
+   "table": "Facts"
+  },
+  {
+   "expr": "MAXX(AS_A,CALCULATE(COUNTROWS(AS_A),ALLSELECTED(AS_A)))",
+   "powerbi": "8",
+   "table": "AS_A"
+  },
+  {
+   "expr": "MINX(ADDCOLUMNS(Facts,\"x\",1),MAXX(FILTER(ALL(Facts[Quantity]),Facts[Quantity]<>1),CALCULATE(CALCULATE(COUNTROWS(Facts),ALLSELECTED(Facts[Note])),ALLSELECTED(Facts))))",
+   "powerbi": "5",
+   "table": "Facts"
+  },
+  {
+   "expr": "MAXX(SELECTCOLUMNS(AS_D,\"c0\",AS_D[n],\"c1\",AS_D[d]),MAXX(AS_D,CALCULATE(CALCULATE(COUNTROWS(ALLSELECTED(AS_D)),AS_D[n]<>1),AS_D[t]<>\"z\")))",
+   "powerbi": "3",
+   "table": "AS_D"
+  },
+  {
+   "expr": "CONCATENATEX(SUMMARIZE(CALCULATETABLE(Facts,Facts[Note]=\"\"),Facts[Region],\"z\",CALCULATE(COUNTROWS(Facts),Facts[Quantity]<>1)),Facts[Region]&\":\"&[z],\",\",Facts[Region])",
+   "powerbi": "East:1,West:1",
+   "table": "Facts"
+  },
+  {
+   "expr": "SUMX(ALL(AS_A[g]),SUMX(ALLSELECTED(AS_A[g]),CALCULATE(SUM(AS_A[v]),ALLSELECTED(AS_A),AS_A[v]>10)))",
+   "powerbi": "4960",
+   "table": "AS_A"
+  },
+  {
+   "expr": "CALCULATE(MAXX(UNION(AS_D,AS_D),MAXX(ADDCOLUMNS(TREATAS({\"x\",\"y\"},AS_D[t]),\"x\",1),CALCULATE(CALCULATE(COUNTROWS(ALLSELECTED(AS_D[d])),ALL(AS_D),ALLSELECTED(AS_D[n])),FILTER(ALL(AS_D[n]),AS_D[n]=2)))),AS_D[n]>=3)",
+   "powerbi": "4",
+   "table": "AS_D"
+  },
+  {
+   "expr": "CONCATENATEX(SUMMARIZE(Facts,Facts[Note],\"z\",CALCULATE(AVERAGEX(CALCULATETABLE(Facts,Facts[Region]=\"West\"),COUNTROWS(ALLSELECTED(Facts[Quantity],Facts[Sales]))),Facts[Note]<>\"Late\")),Facts[Note]&\":\"&[z],\",\",Facts[Note])",
+   "powerbi": ":1,Late:,Paid:1",
+   "table": "Facts"
+  },
+  {
+   "expr": "SUMX(SELECTCOLUMNS(Facts,\"c0\",Facts[Sales],\"c1\",Facts[Region]),CALCULATE(CALCULATE(COUNTROWS(Facts),ALLSELECTED(Facts[Note])),ALLSELECTED(Facts)))",
+   "powerbi": "36",
+   "table": "Facts"
+  },
+  {
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(AS_D[t],FILTER(ALL(AS_D[t]),AS_D[t]=\"y\"),\"z\",CALCULATE(COUNTROWS(AS_D),ALL(AS_D[d]),ALLSELECTED(AS_D))),AS_D[t]&\":\"&[z],\",\",AS_D[t])",
+   "powerbi": "y:1",
+   "table": "AS_D"
+  },
+  {
+   "expr": "MAXX(FILTER(VALUES(AS_D[t]),AS_D[t]<>\"y\"),SUMX(SUMMARIZE(FILTER(AS_D,(AS_D[t]<>\"z\"||AS_D[d]>=DATE(2024,3,5))),AS_D[n],AS_D[d]),CALCULATE(COUNTROWS(ALLSELECTED(AS_D)),KEEPFILTERS(AS_D[d]<DATE(2024,3,5)),ALLSELECTED(AS_D[n]))))",
+   "powerbi": "8",
+   "table": "AS_D"
+  },
+  {
+   "expr": "CALCULATE(MAXX(ADDCOLUMNS(CALCULATETABLE(AS_A,AS_A[v]=30),\"x\",1),MAXX(FILTER(VALUES(AS_A[g]),AS_A[g]=\"c\"),CALCULATE(COUNTROWS(ALLSELECTED(AS_A[g])),ALLSELECTED(AS_A),ALL(AS_A[h])))),AS_A[v]=30,REMOVEFILTERS(AS_A[v]))",
+   "powerbi": "BLANK",
+   "table": "AS_A"
+  },
+  {
+   "expr": "CONCATENATEX(SUMMARIZE(CALCULATETABLE(AS_D,AS_D[n]>2),AS_D[t],\"z\",SUMX(ALL(AS_D[n]),CALCULATE(SUM(AS_D[n]),ALLSELECTED(AS_D[n])))),AS_D[t]&\":\"&[z],\",\",AS_D[t])",
+   "powerbi": ":20,x:15,z:25",
+   "table": "AS_D"
+  },
+  {
+   "expr": "CALCULATE(MAXX(FILTER(VALUES(Facts[Note]),Facts[Note]<>\"Late\"),SUMX(FILTER(SELECTCOLUMNS(Facts,\"c0\",Facts[Sales],\"c1\",Facts[Quantity]),Facts[Sales]=2),CALCULATE(SUMX(ALLSELECTED(Facts),Facts[Quantity]),REMOVEFILTERS(Facts[Region])))),Facts[Region]=\"North\")",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 154) A single value for column 'Sales' in table 'Facts' cannot be determined. This can happen when a measure or function formula refers to a column that contains many values without specifying an aggregation such as min, max, count, or sum to get a single result.\"",
+   "table": "Facts"
+  },
+  {
+   "expr": "MINX(TREATAS({2,4},AS_D[n]),MAXX(TREATAS({DATE(2024,1,15),DATE(2024,2,10)},AS_D[d]),CALCULATE(COUNTROWS(ALLSELECTED(AS_D[n],AS_D[t])),ALL(AS_D),ALLSELECTED(AS_D[d]))))",
+   "powerbi": "5",
+   "table": "AS_D"
+  },
+  {
+   "expr": "SUMX(SUMMARIZE(FILTER(Facts,Facts[Quantity]>=2),Facts[Note],Facts[Sales]),SUMX(SUMMARIZE(FILTER(Facts,ISBLANK(Facts[Region])),Facts[Quantity],Facts[Sales]),CALCULATE(COUNTROWS(ALLSELECTED(Facts)),ALLEXCEPT(Facts,Facts[Note]),ALLSELECTED(Facts))))",
+   "powerbi": "BLANK",
+   "table": "Facts"
+  },
+  {
+   "expr": "SUMX(ADDCOLUMNS(FILTER(ALL(Facts[Note],Facts[Quantity]),Facts[Quantity]<0),\"x\",1),MAXX(Facts,CALCULATE(COUNTROWS(ALLSELECTED(Facts[Quantity])),ALLSELECTED(Facts[Note]),FILTER(ALL(Facts[Region]),Facts[Region]<>\"North\"))))",
+   "powerbi": "BLANK",
+   "table": "Facts"
+  },
+  {
+   "expr": "MAXX(VALUES(Facts[Note]),CALCULATE(COUNTROWS(Facts),ALLSELECTED(Facts),ALLEXCEPT(Facts,Facts[Sales])))",
+   "powerbi": "6",
+   "table": "Facts"
+  },
+  {
+   "expr": "CONCATENATEX(SUMMARIZE(AS_A,AS_A[v],\"z\",CALCULATE(COUNTROWS(ALLSELECTED(AS_A)),AS_A[h]<>3)),AS_A[v]&\":\"&[z],\",\",AS_A[v])",
+   "powerbi": "10:7,20:7,30:7,40:7,50:7,60:7,70:7",
+   "table": "AS_A"
+  },
+  {
+   "expr": "MINX(INTERSECT(VALUES(Facts[Sales]),FILTER(VALUES(Facts[Sales]),Facts[Sales]>10)),SUMX(FILTER(ALL(Facts[Quantity]),Facts[Quantity]>1),CALCULATE(COUNTROWS(ALLSELECTED(Facts[Sales])),ALLSELECTED(Facts[Region]),REMOVEFILTERS(Facts[Note]))))",
+   "powerbi": "8",
+   "table": "Facts"
+  },
+  {
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(AS_A[h],FILTER(ALL(AS_A[g]),AS_A[g]=\"a\"),\"z\",CALCULATE(COUNTROWS(ALLSELECTED(AS_A)),ALLSELECTED(AS_A[g]),AS_A[v]<40)),AS_A[h]&\":\"&[z],\",\",AS_A[h])",
+   "powerbi": "1:2,2:2",
+   "table": "AS_A"
+  },
+  {
+   "expr": "MINX(FILTER(ALL(Facts[Sales],Facts[Note]),ISBLANK(Facts[Sales])),CALCULATE(SUMX(INTERSECT(VALUES(Facts[Note]),FILTER(VALUES(Facts[Note]),Facts[Note]=\"Paid\")),COUNTROWS(Facts)),ALL(Facts[Note]),ALLSELECTED(Facts)))",
+   "powerbi": "BLANK",
+   "table": "Facts"
+  },
+  {
+   "expr": "MINX(FILTER(FILTER(AS_D,AS_D[n]=2),AS_D[d]<DATE(2024,2,10)),MAXX(KEEPFILTERS(AS_D),COUNTROWS(ALLSELECTED(AS_D[t],AS_D[d]))))",
+   "powerbi": "1",
+   "table": "AS_D"
+  },
+  {
+   "expr": "MAXX(CROSSJOIN(FILTER(VALUES(Facts[Sales]),Facts[Sales]=0),VALUES(Facts[Quantity])),MAXX(FILTER(KEEPFILTERS(FILTER(ALL(Facts[Quantity]),Facts[Quantity]=0)),Facts[Quantity]=3),COUNTROWS(Facts)))",
+   "powerbi": "BLANK",
+   "table": "Facts"
+  },
+  {
+   "expr": "MAXX(CALCULATETABLE(AS_D,AS_D[d]<>DATE(2024,1,15)),CALCULATE(SUMX(ALLSELECTED(AS_D),AS_D[n]),ALLSELECTED(AS_D[t]),ALLEXCEPT(AS_D,AS_D[n])))",
+   "powerbi": "12",
+   "table": "AS_D"
+  },
+  {
+   "expr": "MINX(CALCULATETABLE(AS_A,AS_A[g]<>\"a\"),MAXX(INTERSECT(VALUES(AS_A[g]),FILTER(VALUES(AS_A[g]),AS_A[g]<>\"b\")),CALCULATE(CALCULATE(COUNTROWS(ALLSELECTED(AS_A)),ALLSELECTED(AS_A),ALL(AS_A)),AS_A[h]>=3)))",
+   "powerbi": "8",
+   "table": "AS_A"
+  },
+  {
+   "expr": "MAXX(TREATAS({\"c\",\"a\"},AS_A[g]),CALCULATE(SUMX(CROSSJOIN(FILTER(VALUES(AS_A[h]),AS_A[h]<>3),VALUES(AS_A[g])),COUNTROWS(AS_A)),ALLSELECTED(AS_A)))",
+   "powerbi": "24",
+   "table": "AS_A"
+  },
+  {
+   "expr": "MINX(TREATAS({4,2},Facts[Quantity]),CALCULATE(MAXX(FILTER(SELECTCOLUMNS(Facts,\"c0\",Facts[Region],\"c1\",Facts[Note]),Facts[Region]<>\"North\"),COUNTROWS(ALLSELECTED(Facts[Quantity],Facts[Note]))),ALL(Facts)))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 134) A single value for column 'Region' in table 'Facts' cannot be determined. This can happen when a measure or function formula refers to a column that contains many values without specifying an aggregation such as min, max, count, or sum to get a single result.\"",
+   "table": "Facts"
+  },
+  {
+   "expr": "MAXX(INTERSECT(VALUES(Facts[Sales]),FILTER(VALUES(Facts[Sales]),Facts[Sales]<>10)),CALCULATE(CALCULATE(COUNTROWS(ALLSELECTED(Facts)),Facts[Region]<>\"West\"),Facts[Region]=\"West\"))",
+   "powerbi": "4",
+   "table": "Facts"
+  },
+  {
+   "expr": "CONCATENATEX(SUMMARIZE(AS_D,AS_D[t],\"z\",CALCULATE(MINX(SELECTCOLUMNS(AS_D,\"c0\",AS_D[d],\"c1\",AS_D[n]),SUMX(ALLSELECTED(AS_D),AS_D[n])),AS_D[t]<>\"x\")),AS_D[t]&\":\"&[z],\",\",AS_D[t])",
+   "powerbi": ":4,x:,y:2,z:5",
+   "table": "AS_D"
+  },
+  {
+   "expr": "SUMX(KEEPFILTERS(ADDCOLUMNS(FILTER(Facts,Facts[Region]=\"North\"),\"x\",1)),CALCULATE(CALCULATE(COUNTROWS(ALLSELECTED(Facts[Quantity])),Facts[Note]=\"Paid\"),Facts[Region]=\"West\"))",
+   "powerbi": "1",
+   "table": "Facts"
+  },
+  {
+   "expr": "MINX(SELECTCOLUMNS(Facts,\"c0\",Facts[Region],\"c1\",Facts[Quantity]),CALCULATE(SUMX(SELECTCOLUMNS(Facts,\"c0\",Facts[Note],\"c1\",Facts[Region]),CALCULATE(COUNTROWS(Facts),ALL(Facts[Sales]),ALLSELECTED(Facts[Sales]))),FILTER(ALL(Facts[Quantity]),Facts[Quantity]>=0)))",
+   "powerbi": "1",
+   "table": "Facts"
+  },
+  {
+   "expr": "SUMX(FILTER(VALUES(Facts[Note]),Facts[Note]=\"Late\"),CALCULATE(CALCULATE(COUNTROWS(Facts),ALLSELECTED(Facts),ALLSELECTED(Facts[Sales])),ALL(Facts)))",
+   "powerbi": "6",
+   "table": "Facts"
+  },
+  {
+   "expr": "SUMX(ALLEXCEPT(Facts,Facts[Note]),CALCULATE(MAXX(KEEPFILTERS(GENERATE(FILTER(VALUES(Facts[Note]),Facts[Note]<>\"Late\"),ROW(\"z\",1))),COUNTROWS(ALLSELECTED(Facts[Quantity],Facts[Note]))),Facts[Region]=\"West\"))",
+   "powerbi": "5",
+   "table": "Facts"
+  },
+  {
+   "expr": "MINX(FILTER(FILTER(AS_D,AS_D[n]>=4),AS_D[t]=\"y\"),CALCULATE(SUMX(INTERSECT(VALUES(AS_D[d]),FILTER(VALUES(AS_D[d]),AS_D[d]>=DATE(2024,1,15))),COUNTROWS(ALLSELECTED(AS_D[n],AS_D[d]))),ALLEXCEPT(AS_D,AS_D[t]),ALLSELECTED(AS_D)))",
+   "powerbi": "BLANK",
+   "table": "AS_D"
+  },
+  {
+   "expr": "SUMX(TOPN(1,KEEPFILTERS(FILTER(AS_D,(AS_D[d]>DATE(2024,1,15)||AS_D[t]=\"x\"))),AS_D[n]),MAXX(EXCEPT(VALUES(AS_D[n]),FILTER(VALUES(AS_D[n]),AS_D[n]<4)),COUNTROWS(ALLSELECTED(AS_D[d],AS_D[n]))))",
+   "powerbi": "1",
+   "table": "AS_D"
+  },
+  {
+   "expr": "CALCULATE(MAXX(KEEPFILTERS(VALUES(AS_A[h])),MAXX(KEEPFILTERS(ALLSELECTED(AS_A[h])),CALCULATE(COUNTROWS(ALLSELECTED(AS_A)),AS_A[g]=\"c\"))),AS_A[h]=1,ALLSELECTED(AS_A))",
+   "powerbi": "BLANK",
+   "table": "AS_A"
+  },
+  {
+   "expr": "CALCULATE(SUMX(KEEPFILTERS(FILTER(ALL(AS_D[t],AS_D[d]),AS_D[t]<>\"x\")),COUNTROWS(ALLSELECTED(AS_D))),AS_D[n]=1)",
+   "powerbi": "BLANK",
+   "table": "AS_D"
+  },
+  {
+   "expr": "MAXX(VALUES(Facts[Region]),MAXX(KEEPFILTERS(GENERATE(FILTER(VALUES(Facts[Sales]),Facts[Sales]>0),ROW(\"z\",1))),CALCULATE(CALCULATE(COUNTROWS(ALLSELECTED(Facts[Region])),Facts[Region]=\"West\"),KEEPFILTERS(Facts[Sales]<10))))",
+   "powerbi": "1",
+   "table": "Facts"
+  },
+  {
+   "expr": "SUMX(VALUES(Facts[Quantity]),CALCULATE(SUMX(KEEPFILTERS(INTERSECT(VALUES(Facts[Note]),FILTER(VALUES(Facts[Note]),Facts[Note]=\"\"))),CALCULATE(COUNTROWS(ALLSELECTED(Facts)),KEEPFILTERS(Facts[Region]=\"North\"))),ALLSELECTED(Facts[Sales])))",
+   "powerbi": "BLANK",
+   "table": "Facts"
+  },
+  {
+   "expr": "CALCULATE(MAXX(KEEPFILTERS(SUMMARIZE(FILTER(Facts,Facts[Region]=\"North\"),Facts[Sales],Facts[Region])),SUMX(ALL(Facts[Note]),CALCULATE(COUNTROWS(ALLSELECTED(Facts[Note])),Facts[Note]=\"\"))),Facts[Region]<>\"East\",ALLSELECTED(Facts[Note]))",
+   "powerbi": "3",
+   "table": "Facts"
+  },
+  {
+   "expr": "CALCULATE(SUMX(FILTER(ALL(AS_D[d],AS_D[t]),(AS_D[d]<>DATE(2024,2,10)||AS_D[t]=\"z\")),SUMX(ALL(AS_D[t]),CALCULATE(CALCULATE(COUNTROWS(ALLSELECTED(AS_D)),FILTER(ALL(AS_D[d]),AS_D[d]<DATE(2024,2,10))),ALLSELECTED(AS_D[d]),AS_D[d]>DATE(2024,1,15)))),AS_D[t]=\"z\",ALLSELECTED(AS_D[d]))",
+   "powerbi": "48",
+   "table": "AS_D"
+  },
+  {
+   "expr": "CALCULATE(SUMX(EXCEPT(VALUES(Facts[Sales]),FILTER(VALUES(Facts[Sales]),Facts[Sales]=0)),CALCULATE(MAXX(Facts,COUNTROWS(ALLSELECTED(Facts))),ALLSELECTED(Facts))),Facts[Note]<>\"Paid\",ALL(Facts[Sales]))",
+   "powerbi": "4",
+   "table": "Facts"
+  },
+  {
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(Facts[Note],FILTER(ALL(Facts[Note]),Facts[Note]<>\"Late\"),\"z\",CALCULATE(COUNTROWS(Facts),REMOVEFILTERS(Facts[Note]),ALLSELECTED(Facts))),Facts[Note]&\":\"&[z],\",\",Facts[Note])",
+   "powerbi": ":6,Paid:6",
+   "table": "Facts"
+  },
+  {
+   "expr": "MAXX(GENERATE(FILTER(VALUES(AS_A[g]),AS_A[g]=\"c\"),ROW(\"z\",1)),CALCULATE(MAXX(AS_A,COUNTROWS(AS_A)),ALL(AS_A[h]),ALLSELECTED(AS_A)))",
+   "powerbi": "1",
+   "table": "AS_A"
+  },
+  {
+   "expr": "MAXX(FILTER(ALL(AS_A[g]),AS_A[g]=\"a\"),CALCULATE(COUNTROWS(ALLSELECTED(AS_A[v])),ALL(AS_A[v]),ALLSELECTED(AS_A)))",
+   "powerbi": "7",
+   "table": "AS_A"
+  },
+  {
+   "expr": "CONCATENATEX(SUMMARIZE(AS_A,AS_A[g],\"z\",CALCULATE(COUNTROWS(ALLSELECTED(AS_A[h])),AS_A[v]<>40)),AS_A[g]&\":\"&[z],\",\",AS_A[g])",
+   "powerbi": ":1,a:2,b:2,c:1",
+   "table": "AS_A"
+  },
+  {
+   "expr": "MAXX(EXCEPT(VALUES(Facts[Sales]),FILTER(VALUES(Facts[Sales]),Facts[Sales]>=10)),CALCULATE(SUMX(KEEPFILTERS(GENERATE(FILTER(VALUES(Facts[Sales]),Facts[Sales]=0),ROW(\"z\",1))),SUMX(ALLSELECTED(Facts),Facts[Quantity])),KEEPFILTERS(Facts[Note]<>\"\")))",
+   "powerbi": "4",
+   "table": "Facts"
+  },
+  {
+   "expr": "CONCATENATEX(SUMMARIZE(AS_D,AS_D[t],\"z\",CALCULATE(COUNTROWS(ALLSELECTED(AS_D)),ALLEXCEPT(AS_D,AS_D[t]),AS_D[d]>=DATE(2024,2,10))),AS_D[t]&\":\"&[z],\",\",AS_D[t])",
+   "powerbi": ":2,x:2,y:2,z:2",
+   "table": "AS_D"
+  },
+  {
+   "expr": "CALCULATE(SUMX(KEEPFILTERS(SUMMARIZE(FILTER(AS_A,(ISBLANK(AS_A[h])&&AS_A[g]=\"b\")),AS_A[g],AS_A[h])),CALCULATE(COUNTROWS(ALLSELECTED(AS_A)),ALLSELECTED(AS_A[h]))),AS_A[v]<30)",
+   "powerbi": "BLANK",
+   "table": "AS_A"
+  },
+  {
+   "expr": "SUMX(KEEPFILTERS(FILTER(ALL(AS_D[n]),AS_D[n]<3)),CALCULATE(SUMX(GENERATE(FILTER(VALUES(AS_D[d]),AS_D[d]<>DATE(2024,3,5)),ROW(\"z\",1)),CALCULATE(COUNTROWS(AS_D),ALL(AS_D[t]))),ALLSELECTED(AS_D),ALLEXCEPT(AS_D,AS_D[n])))",
+   "powerbi": "4",
+   "table": "AS_D"
+  },
+  {
+   "expr": "MAXX(AS_D,MAXX(KEEPFILTERS(ADDCOLUMNS(AS_D,\"x\",1)),CALCULATE(COUNTROWS(ALLSELECTED(AS_D[d])),ALLSELECTED(AS_D))))",
+   "powerbi": "4",
+   "table": "AS_D"
+  },
+  {
+   "expr": "SUMX(TREATAS({DATE(2024,1,15),DATE(2024,3,5)},AS_D[d]),SUMX(AS_D,CALCULATE(CALCULATE(COUNTROWS(ALLSELECTED(AS_D)),ALLSELECTED(AS_D)),ALLEXCEPT(AS_D,AS_D[n]),ALLSELECTED(AS_D[d]))))",
+   "powerbi": "50",
+   "table": "AS_D"
+  },
+  {
+   "expr": "CALCULATE(SUMX(FILTER(VALUES(AS_D[n]),AS_D[n]<>4),CALCULATE(CALCULATE(COUNTROWS(ALLSELECTED(AS_D)),ALLSELECTED(AS_D[n]),FILTER(ALL(AS_D[d]),AS_D[d]<DATE(2024,3,5))),ALLSELECTED(AS_D[d]))),AS_D[n]=4)",
+   "powerbi": "BLANK",
+   "table": "AS_D"
+  },
+  {
+   "expr": "MAXX(FILTER(ALL(Facts[Sales],Facts[Note]),Facts[Sales]>=10),CALCULATE(COUNTROWS(Facts),ALLSELECTED(Facts)))",
+   "powerbi": "2",
+   "table": "Facts"
+  },
+  {
+   "expr": "CONCATENATEX(SUMMARIZE(Facts,Facts[Sales],\"z\",CALCULATE(MINX(Facts,CALCULATE(SUM(Facts[Quantity]),ALLSELECTED(Facts))),Facts[Sales]>=2)),Facts[Sales]&\":\"&[z],\",\",Facts[Sales])",
+   "powerbi": "-1.5:,:,0:,2.5:5,10.5:2,20:3",
+   "table": "Facts"
+  },
+  {
+   "expr": "CALCULATE(MAXX(FILTER(VALUES(AS_A[h]),AS_A[h]=3),CALCULATE(MAXX(ADDCOLUMNS(KEEPFILTERS(AS_A),\"x\",1),CALCULATE(SUM(AS_A[v]),ALLSELECTED(AS_A),AS_A[g]=\"c\")),KEEPFILTERS(AS_A[v]<10))),AS_A[h]<1,KEEPFILTERS(AS_A[h]=2))",
+   "powerbi": "BLANK",
+   "table": "AS_A"
+  },
+  {
+   "expr": "CALCULATE(MAXX(KEEPFILTERS(KEEPFILTERS(VALUES(AS_A[h]))),MAXX(FILTER(ALL(AS_A[g],AS_A[v]),AS_A[g]=\"c\"),COUNTROWS(ALLSELECTED(AS_A)))),AS_A[g]<>\"a\")",
+   "powerbi": "1",
+   "table": "AS_A"
+  },
+  {
+   "expr": "SUMX(FILTER(AS_A,AS_A[v]<>30),CALCULATE(SUMX(AS_A,COUNTROWS(ALLSELECTED(AS_A))),ALLSELECTED(AS_A)))",
+   "powerbi": "343",
+   "table": "AS_A"
+  },
+  {
+   "expr": "MAXX(FILTER(VALUES(AS_D[t]),AS_D[t]<>\"x\"),CALCULATE(MAXX(ALLEXCEPT(AS_D,AS_D[n]),CALCULATE(COUNTROWS(ALLSELECTED(AS_D[n])),AS_D[d]>=DATE(2024,2,10))),ALLSELECTED(AS_D[n]),ALLSELECTED(AS_D)))",
+   "powerbi": "5",
+   "table": "AS_D"
+  },
+  {
+   "expr": "MAXX(KEEPFILTERS(TREATAS({2,10},Facts[Sales])),SUMX(VALUES(Facts[Region]),COUNTROWS(ALLSELECTED(Facts[Note],Facts[Region]))))",
+   "powerbi": "BLANK",
+   "table": "Facts"
+  },
+  {
+   "expr": "SUMX(KEEPFILTERS(FILTER(AS_A,ISBLANK(AS_A[g]))),COUNTROWS(ALLSELECTED(AS_A[h])))",
+   "powerbi": "1",
+   "table": "AS_A"
+  },
+  {
+   "expr": "SUMX(KEEPFILTERS(Facts),CALCULATE(SUMX(Facts,CALCULATE(COUNTROWS(Facts),ALLSELECTED(Facts[Sales]))),ALL(Facts[Region])))",
+   "powerbi": "6",
+   "table": "Facts"
+  },
+  {
+   "expr": "SUMX(KEEPFILTERS(GENERATE(FILTER(VALUES(AS_A[h]),AS_A[h]>3),ROW(\"z\",1))),MAXX(AS_A,COUNTROWS(AS_A)))",
+   "powerbi": "BLANK",
+   "table": "AS_A"
+  },
+  {
+   "expr": "CALCULATE(MAXX(GENERATE(FILTER(VALUES(Facts[Quantity]),Facts[Quantity]>=0),ROW(\"z\",1)),SUMX(EXCEPT(VALUES(Facts[Sales]),FILTER(VALUES(Facts[Sales]),Facts[Sales]>2)),CALCULATE(COUNTROWS(ALLSELECTED(Facts[Region],Facts[Sales])),ALLEXCEPT(Facts,Facts[Region]),ALLSELECTED(Facts[Note])))),Facts[Region]=\"East\",Facts[Quantity]>0)",
+   "powerbi": "3",
+   "table": "Facts"
+  },
+  {
+   "expr": "MAXX(ALL(AS_A[v]),CALCULATE(SUMX(TOPN(2,FILTER(AS_A,(AS_A[g]<>\"c\"&&AS_A[v]>=10)),AS_A[v]),CALCULATE(COUNTROWS(ALLSELECTED(AS_A[v])),ALLSELECTED(AS_A))),ALLSELECTED(AS_A)))",
+   "powerbi": "4",
+   "table": "AS_A"
+  },
+  {
+   "expr": "SUMX(FILTER(VALUES(AS_A[g]),AS_A[g]<>\"a\"),CALCULATE(SUMX(ALLSELECTED(AS_A[h]),CALCULATE(COUNTROWS(ALLSELECTED(AS_A)),ALLSELECTED(AS_A[g]))),REMOVEFILTERS(AS_A[h]),ALLSELECTED(AS_A)))",
+   "powerbi": "60",
+   "table": "AS_A"
+  },
+  {
+   "expr": "MAXX(ALLSELECTED(AS_A[h]),SUMX(AS_A,CALCULATE(CALCULATE(COUNTROWS(ALLSELECTED(AS_A)),AS_A[v]=40),ALLSELECTED(AS_A[v]))))",
+   "powerbi": "16",
+   "table": "AS_A"
+  },
+  {
+   "expr": "CONCATENATEX(SUMMARIZE(AS_D,AS_D[n],\"z\",CALCULATE(COUNTROWS(ALLSELECTED(AS_D)),AS_D[t]=\"x\")),AS_D[n]&\":\"&[z],\",\",AS_D[n])",
+   "powerbi": "1:2,2:2,3:2,4:2,5:2",
+   "table": "AS_D"
+  },
+  {
+   "expr": "MAXX(FILTER(FILTER(AS_A,AS_A[g]=\"b\"),(ISBLANK(AS_A[h])||AS_A[v]>=50)),MAXX(FILTER(AS_A,AS_A[v]<>40),CALCULATE(CALCULATE(COUNTROWS(ALLSELECTED(AS_A)),REMOVEFILTERS(AS_A[v])),ALLSELECTED(AS_A[g]),ALL(AS_A[g]))))",
+   "powerbi": "BLANK",
+   "table": "AS_A"
+  },
+  {
+   "expr": "SUMX(FILTER(VALUES(AS_D[t]),AS_D[t]<>\"z\"),CALCULATE(COUNTROWS(AS_D),ALLSELECTED(AS_D)))",
+   "powerbi": "12",
+   "table": "AS_D"
+  },
+  {
+   "expr": "CONCATENATEX(SUMMARIZE(AS_D,AS_D[n],\"z\",CALCULATE(SUM(AS_D[n]),ALLSELECTED(AS_D))),AS_D[n]&\":\"&[z],\",\",AS_D[n])",
+   "powerbi": "1:15,2:15,3:15,4:15,5:15",
+   "table": "AS_D"
+  },
+  {
+   "expr": "MINX(AS_A,CALCULATE(CALCULATE(SUM(AS_A[v]),ALLSELECTED(AS_A)),KEEPFILTERS(AS_A[g]=\"b\")))",
+   "powerbi": "110",
+   "table": "AS_A"
+  },
+  {
+   "expr": "SUMX(KEEPFILTERS(FILTER(VALUES(AS_D[n]),AS_D[n]>4)),SUMX(SELECTCOLUMNS(AS_D,\"c0\",AS_D[t],\"c1\",AS_D[n]),CALCULATE(COUNTROWS(ALLSELECTED(AS_D)),ALLSELECTED(AS_D),FILTER(ALL(AS_D[d]),AS_D[d]<DATE(2024,3,5)))))",
+   "powerbi": "20",
+   "table": "AS_D"
+  },
+  {
+   "expr": "CALCULATE(SUMX(KEEPFILTERS(GENERATE(FILTER(VALUES(Facts[Note]),Facts[Note]=\"Paid\"),ROW(\"z\",1))),SUMX(VALUES(Facts[Note]),CALCULATE(COUNTROWS(ALLSELECTED(Facts[Sales],Facts[Quantity])),Facts[Quantity]>1))),Facts[Quantity]<0)",
+   "powerbi": "BLANK",
+   "table": "Facts"
+  },
+  {
+   "expr": "MINX(ALLSELECTED(Facts[Region]),CALCULATE(MAXX(ALLEXCEPT(Facts,Facts[Region]),CALCULATE(SUM(Facts[Quantity]),ALLSELECTED(Facts))),Facts[Region]<>\"East\"))",
+   "powerbi": "7",
+   "table": "Facts"
+  },
+  {
+   "expr": "MAXX(SELECTCOLUMNS(CALCULATETABLE(Facts,Facts[Note]<>\"Late\"),\"c0\",Facts[Quantity],\"c1\",Facts[Sales]),MAXX(ALLSELECTED(Facts[Region]),CALCULATE(SUM(Facts[Quantity]),ALLSELECTED(Facts))))",
+   "powerbi": "11",
+   "table": "Facts"
+  },
+  {
+   "expr": "MINX(FILTER(ALL(Facts[Region],Facts[Quantity]),(Facts[Region]<>\"North\"||Facts[Quantity]>=0)),CALCULATE(COUNTROWS(Facts),ALLSELECTED(Facts)))",
+   "powerbi": "6",
+   "table": "Facts"
+  },
+  {
+   "expr": "MINX(KEEPFILTERS(INTERSECT(VALUES(Facts[Quantity]),FILTER(VALUES(Facts[Quantity]),Facts[Quantity]<>4))),CALCULATE(MAXX(SUMMARIZE(CALCULATETABLE(Facts,Facts[Sales]>=10),Facts[Region],Facts[Quantity]),SUMX(ALLSELECTED(Facts),Facts[Quantity])),Facts[Quantity]<>1,ALLSELECTED(Facts)))",
+   "powerbi": "5",
+   "table": "Facts"
+  },
+  {
+   "expr": "CALCULATE(MAXX(EXCEPT(VALUES(AS_A[v]),FILTER(VALUES(AS_A[v]),AS_A[v]>30)),CALCULATE(CALCULATE(SUM(AS_A[v]),ALL(AS_A[h]),ALL(AS_A[g])),ALL(AS_A[v]),ALLSELECTED(AS_A))),AS_A[v]>30,AS_A[h]<>1)",
+   "powerbi": "BLANK",
+   "table": "AS_A"
+  },
+  {
+   "expr": "MAXX(Facts,MAXX(KEEPFILTERS(FILTER(Facts,Facts[Note]=\"\")),CALCULATE(COUNTROWS(Facts),ALLSELECTED(Facts[Region]))))",
+   "powerbi": "1",
+   "table": "Facts"
+  },
+  {
+   "expr": "CALCULATE(MAXX(VALUES(AS_A[g]),SUMX(AS_A,CALCULATE(SUM(AS_A[v]),ALLSELECTED(AS_A)))),AS_A[g]=\"a\",ALL(AS_A))",
+   "powerbi": "240",
+   "table": "AS_A"
+  },
+  {
+   "expr": "CALCULATE(MAXX(SELECTCOLUMNS(KEEPFILTERS(Facts),\"c0\",Facts[Quantity],\"c1\",Facts[Region]),MAXX(Facts,CALCULATE(SUM(Facts[Quantity]),ALL(Facts)))),Facts[Region]=\"West\",Facts[Quantity]<>3)",
+   "powerbi": "15",
+   "table": "Facts"
+  },
+  {
+   "expr": "MINX(SUMMARIZE(FILTER(Facts,Facts[Quantity]=2),Facts[Sales],Facts[Note]),SUMX(CALCULATETABLE(Facts,Facts[Region]<>\"North\"),CALCULATE(CALCULATE(COUNTROWS(ALLSELECTED(Facts[Quantity])),ALLSELECTED(Facts[Quantity])),ALL(Facts[Sales]),ALLSELECTED(Facts[Region]))))",
+   "powerbi": "1",
+   "table": "Facts"
+  },
+  {
+   "expr": "CALCULATE(MAXX(ALLSELECTED(AS_A[h]),CALCULATE(MAXX(KEEPFILTERS(KEEPFILTERS(AS_A)),CALCULATE(SUM(AS_A[v]),AS_A[g]<>\"a\",KEEPFILTERS(AS_A[v]>50))),ALLSELECTED(AS_A))),AS_A[g]<>\"a\",KEEPFILTERS(AS_A[v]=10))",
+   "powerbi": "BLANK",
+   "table": "AS_A"
+  },
+  {
+   "expr": "MINX(EXCEPT(VALUES(AS_D[n]),FILTER(VALUES(AS_D[n]),AS_D[n]=3)),CALCULATE(SUMX(ADDCOLUMNS(KEEPFILTERS(ALL(AS_D[n])),\"x\",1),CALCULATE(COUNTROWS(ALLSELECTED(AS_D[d])),REMOVEFILTERS(AS_D[t]),ALLEXCEPT(AS_D,AS_D[d]))),AS_D[n]<>3))",
+   "powerbi": "20",
+   "table": "AS_D"
+  },
+  {
+   "expr": "CONCATENATEX(SUMMARIZE(Facts,Facts[Region],\"z\",CALCULATE(COUNTROWS(ALLSELECTED(Facts[Quantity])),ALL(Facts),ALLSELECTED(Facts))),Facts[Region]&\":\"&[z],\",\",Facts[Region])",
+   "powerbi": "East:6,North:6,West:6",
+   "table": "Facts"
+  },
+  {
+   "expr": "MAXX(Facts,SUMX(INTERSECT(VALUES(Facts[Quantity]),FILTER(VALUES(Facts[Quantity]),Facts[Quantity]>=0)),CALCULATE(CALCULATE(COUNTROWS(ALLSELECTED(Facts[Note])),KEEPFILTERS(Facts[Sales]=0),ALLSELECTED(Facts)),ALLSELECTED(Facts))))",
+   "powerbi": "18",
+   "table": "Facts"
+  },
+  {
+   "expr": "CALCULATE(SUMX(KEEPFILTERS(CROSSJOIN(FILTER(VALUES(AS_D[d]),AS_D[d]<>DATE(2024,1,15)),VALUES(AS_D[t]))),SUMX(ADDCOLUMNS(FILTER(FILTER(VALUES(AS_D[t]),AS_D[t]<>\"z\"),AS_D[t]<>\"x\"),\"x\",1),CALCULATE(CALCULATE(COUNTROWS(ALLSELECTED(AS_D)),ALLEXCEPT(AS_D,AS_D[t])),AS_D[d]<DATE(2024,2,10),FILTER(ALL(AS_D[d]),AS_D[d]<>DATE(2024,1,15))))),AS_D[d]<DATE(2024,1,15))",
+   "powerbi": "BLANK",
+   "table": "AS_D"
+  },
+  {
+   "expr": "CALCULATE(SUMX(Facts,MAXX(KEEPFILTERS(SELECTCOLUMNS(Facts,\"c0\",Facts[Quantity],\"c1\",Facts[Sales])),CALCULATE(CALCULATE(COUNTROWS(ALLSELECTED(Facts[Note])),Facts[Region]=\"North\",ALLSELECTED(Facts)),Facts[Quantity]>0))),Facts[Quantity]>0,ALL(Facts))",
+   "powerbi": "15",
+   "table": "Facts"
+  },
+  {
+   "expr": "CALCULATE(SUMX(KEEPFILTERS(AS_A),SUMX(SELECTCOLUMNS(AS_A,\"c0\",AS_A[v],\"c1\",AS_A[h]),CALCULATE(COUNTROWS(ALLSELECTED(AS_A)),ALLSELECTED(AS_A)))),AS_A[h]>3,FILTER(ALL(AS_A[g]),AS_A[g]=\"c\"))",
+   "powerbi": "BLANK",
+   "table": "AS_A"
+  },
+  {
+   "expr": "MAXX(KEEPFILTERS(FILTER(ALL(AS_D[n]),AS_D[n]>3)),CALCULATE(COUNTROWS(ALLSELECTED(AS_D)),FILTER(ALL(AS_D[n]),AS_D[n]=3)))",
+   "powerbi": "1",
+   "table": "AS_D"
+  },
+  {
+   "expr": "CALCULATE(SUMX(CROSSJOIN(FILTER(VALUES(Facts[Note]),Facts[Note]<>\"Late\"),VALUES(Facts[Quantity])),SUMX(KEEPFILTERS(FILTER(Facts,Facts[Sales]>10)),CALCULATE(COUNTROWS(ALLSELECTED(Facts[Quantity],Facts[Sales])),ALLSELECTED(Facts[Quantity]),ALL(Facts[Region])))),Facts[Quantity]<1)",
+   "powerbi": "BLANK",
+   "table": "Facts"
+  },
+  {
+   "expr": "CONCATENATEX(SUMMARIZE(AS_A,AS_A[g],\"z\",SUMX(FILTER(SELECTCOLUMNS(FILTER(AS_A,AS_A[h]>=1),\"c0\",AS_A[h],\"c1\",AS_A[v]),AS_A[v]>=50),CALCULATE(COUNTROWS(ALLSELECTED(AS_A)),AS_A[h]<>2,ALLSELECTED(AS_A[h])))),AS_A[g]&\":\"&[z],\",\",AS_A[g])",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 136) A single value for column 'v' in table 'AS_A' cannot be determined. This can happen when a measure or function formula refers to a column that contains many values without specifying an aggregation such as min, max, count, or sum to get a single result.\"",
+   "table": "AS_A"
+  },
+  {
+   "expr": "CALCULATE(SUMX(CALCULATETABLE(Facts,Facts[Note]=\"Late\"),COUNTX(KEEPFILTERS(TOPN(1,FILTER(Facts,ISBLANK(Facts[Region])),Facts[Quantity])),CALCULATE(COUNTROWS(ALLSELECTED(Facts[Quantity])),REMOVEFILTERS(Facts[Note])))),Facts[Region]=\"West\",KEEPFILTERS(Facts[Note]<>\"\"))",
+   "powerbi": "BLANK",
+   "table": "Facts"
+  },
+  {
+   "expr": "MAXX(KEEPFILTERS(FILTER(Facts,Facts[Quantity]>=3)),CALCULATE(SUMX(FILTER(VALUES(Facts[Note]),Facts[Note]<>\"\"),COUNTROWS(Facts)),ALLEXCEPT(Facts,Facts[Sales])))",
+   "powerbi": "1",
+   "table": "Facts"
+  },
+  {
+   "expr": "CALCULATE(MAXX(FILTER(SUMMARIZE(FILTER(Facts,Facts[Note]=\"Paid\"),Facts[Quantity],Facts[Region]),Facts[Quantity]>0),CALCULATE(CALCULATE(SUM(Facts[Quantity]),ALLEXCEPT(Facts,Facts[Quantity]),ALLSELECTED(Facts[Note])),ALL(Facts[Sales]),ALLSELECTED(Facts))),Facts[Sales]<>2,ALL(Facts[Region]))",
+   "powerbi": "3",
+   "table": "Facts"
+  },
+  {
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(AS_D[t],FILTER(ALL(AS_D[t]),AS_D[t]<>\"x\"),\"z\",CALCULATE(SUM(AS_D[n]),ALLSELECTED(AS_D),AS_D[d]<>DATE(2024,3,5))),AS_D[t]&\":\"&[z],\",\",AS_D[t])",
+   "powerbi": ":7,y:7,z:7",
+   "table": "AS_D"
+  },
+  {
+   "expr": "MINX(KEEPFILTERS(CROSSJOIN(FILTER(VALUES(AS_D[n]),AS_D[n]<2),VALUES(AS_D[d]))),CALCULATE(SUMX(FILTER(ALL(AS_D[d]),AS_D[d]=DATE(2024,1,15)),CALCULATE(COUNTROWS(AS_D),ALL(AS_D))),AS_D[d]>DATE(2024,2,10),REMOVEFILTERS(AS_D[t])))",
+   "powerbi": "5",
+   "table": "AS_D"
+  },
+  {
+   "expr": "CALCULATE(MAXX(KEEPFILTERS(FILTER(ALL(Facts[Sales]),Facts[Sales]<0)),CALCULATE(COUNTROWS(Facts),KEEPFILTERS(Facts[Region]=\"West\"))),Facts[Note]=\"Paid\",FILTER(ALL(Facts[Note]),Facts[Note]<>\"Paid\"))",
+   "powerbi": "BLANK",
+   "table": "Facts"
+  },
+  {
+   "expr": "CONCATENATEX(SUMMARIZE(FILTER(AS_D,AS_D[n]>=2),AS_D[t],\"z\",CALCULATE(COUNTROWS(AS_D),ALLSELECTED(AS_D[t]))),AS_D[t]&\":\"&[z],\",\",AS_D[t])",
+   "powerbi": ":4,x:4,y:4,z:4",
+   "table": "AS_D"
+  },
+  {
+   "expr": "SUMX(CROSSJOIN(FILTER(VALUES(AS_A[g]),AS_A[g]=\"b\"),VALUES(AS_A[h])),CALCULATE(COUNTROWS(ALLSELECTED(AS_A)),ALLSELECTED(AS_A),ALL(AS_A)))",
+   "powerbi": "32",
+   "table": "AS_A"
+  },
+  {
+   "expr": "MINX(GENERATE(FILTER(VALUES(Facts[Region]),Facts[Region]=\"East\"),ROW(\"z\",1)),CALCULATE(COUNTROWS(ALLSELECTED(Facts)),ALLSELECTED(Facts[Note]),ALL(Facts)))",
+   "powerbi": "6",
+   "table": "Facts"
+  },
+  {
+   "expr": "MAXX(ALLSELECTED(AS_D[n]),MAXX(KEEPFILTERS(ALL(AS_D[d])),CALCULATE(CALCULATE(COUNTROWS(ALLSELECTED(AS_D[d])),AS_D[n]<4),ALLEXCEPT(AS_D,AS_D[t]))))",
+   "powerbi": "4",
+   "table": "AS_D"
+  },
+  {
+   "expr": "MAXX(INTERSECT(VALUES(Facts[Region]),FILTER(VALUES(Facts[Region]),Facts[Region]<>\"East\")),SUMX(KEEPFILTERS(ALLEXCEPT(Facts,Facts[Quantity])),CALCULATE(COUNTROWS(ALLSELECTED(Facts[Note])),ALL(Facts))))",
+   "powerbi": "18",
+   "table": "Facts"
+  },
+  {
+   "expr": "SUMX(CROSSJOIN(FILTER(VALUES(Facts[Note]),Facts[Note]<>\"Late\"),VALUES(Facts[Region])),CALCULATE(MAXX(Facts,CALCULATE(COUNTROWS(ALLSELECTED(Facts)),ALLSELECTED(Facts),ALL(Facts[Quantity]))),ALLSELECTED(Facts[Quantity]),ALLSELECTED(Facts[Region])))",
+   "powerbi": "15",
+   "table": "Facts"
+  },
+  {
+   "expr": "CONCATENATEX(SUMMARIZE(AS_D,AS_D[n],\"z\",CALCULATE(COUNTROWS(ALLSELECTED(AS_D)),KEEPFILTERS(AS_D[n]=1))),AS_D[n]&\":\"&[z],\",\",AS_D[n])",
+   "powerbi": "1:1,2:1,3:1,4:1,5:1",
+   "table": "AS_D"
+  },
+  {
+   "expr": "MAXX(CROSSJOIN(FILTER(VALUES(Facts[Sales]),Facts[Sales]>0),VALUES(Facts[Quantity])),MAXX(TREATAS({\"Paid\",\"\"},Facts[Note]),CALCULATE(CALCULATE(COUNTROWS(ALLSELECTED(Facts[Quantity])),FILTER(ALL(Facts[Quantity]),Facts[Quantity]>0),Facts[Region]=\"West\"),ALLSELECTED(Facts[Region]),ALLSELECTED(Facts[Region]))))",
+   "powerbi": "5",
+   "table": "Facts"
+  },
+  {
+   "expr": "CALCULATE(SUMX(ALL(Facts[Sales]),SUMX(FILTER(ALL(Facts[Region]),Facts[Region]<>\"North\"),CALCULATE(COUNTROWS(Facts),ALLSELECTED(Facts[Sales])))),Facts[Note]=\"Paid\",Facts[Note]<>\"Late\")",
+   "powerbi": "18",
+   "table": "Facts"
+  },
+  {
+   "expr": "MAXX(KEEPFILTERS(AS_D),CALCULATE(COUNTROWS(ALLSELECTED(AS_D[t])),ALLEXCEPT(AS_D,AS_D[t])))",
+   "powerbi": "4",
+   "table": "AS_D"
+  },
+  {
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(Facts[Quantity],\"z\",CALCULATE(COUNTX(CROSSJOIN(FILTER(VALUES(Facts[Region]),Facts[Region]<>\"North\"),VALUES(Facts[Sales])),CALCULATE(COUNTROWS(Facts),ALLEXCEPT(Facts,Facts[Sales]),ALLSELECTED(Facts))),Facts[Note]=\"Paid\")),Facts[Quantity]&\":\"&[z],\",\",Facts[Quantity])",
+   "powerbi": "0:1,1:1,2:1",
+   "table": "Facts"
+  },
+  {
+   "expr": "VAR t=AS_A RETURN CALCULATE(SUMX(t,MAXX(CROSSJOIN(FILTER(VALUES(AS_A[v]),AS_A[v]<40),VALUES(AS_A[h])),SUMX(ALLSELECTED(AS_A),AS_A[v]))),AS_A[v]>=50)",
+   "powerbi": "BLANK",
+   "table": "AS_A"
+  },
+  {
+   "expr": "MEDIANX(EXCEPT(VALUES(AS_A[h]),FILTER(VALUES(AS_A[h]),AS_A[h]>=3)),CALCULATE(COUNTROWS(AS_A),REMOVEFILTERS(AS_A[g]),FILTER(ALL(AS_A[v]),AS_A[v]=30)))",
+   "powerbi": "BLANK",
+   "table": "AS_A"
+  },
+  {
+   "expr": "MINX(KEEPFILTERS(UNION(FILTER(Facts,(Facts[Sales]<10||Facts[Quantity]>=4)),Facts)),COUNTROWS(ALLSELECTED(Facts[Region])))",
+   "powerbi": "3",
+   "table": "Facts"
+  },
+  {
+   "expr": "VAR t=Facts RETURN SUMX(t,CALCULATE(COUNTROWS(Facts),Facts[Note]<>\"Late\",FILTER(ALL(Facts[Region]),Facts[Region]=\"North\")))",
+   "powerbi": "BLANK",
+   "table": "Facts"
+  },
+  {
+   "expr": "CALCULATE(MEDIANX(CROSSJOIN(FILTER(VALUES(Facts[Note]),Facts[Note]=\"\"),VALUES(Facts[Sales])),CALCULATE(MEDIANX(FILTER(ALL(Facts[Sales],Facts[Region]),ISBLANK(Facts[Sales])),CALCULATE(SUM(Facts[Quantity]),FILTER(ALL(Facts[Quantity]),Facts[Quantity]>=3))),Facts[Quantity]<1)),Facts[Sales]>=0)",
+   "powerbi": "BLANK",
+   "table": "Facts"
+  },
+  {
+   "expr": "CALCULATE(MEDIANX(ALLSELECTED(AS_D[d]),CALCULATE(SUM(AS_D[n]),AS_D[t]=\"y\")),AS_D[n]<>3)",
+   "powerbi": "BLANK",
+   "table": "AS_D"
+  },
+  {
+   "expr": "VAR t=AS_D RETURN CALCULATE(SUMX(t,SUMX(ALLSELECTED(AS_D),AS_D[n])),AS_D[d]<DATE(2024,3,5))",
+   "powerbi": "75",
+   "table": "AS_D"
+  },
+  {
+   "expr": "SUMX(GENERATE(FILTER(VALUES(AS_A[h]),AS_A[h]>2),ROW(\"z\",1)),CALCULATE(MEDIANX(FILTER(ALL(AS_A[v]),AS_A[v]<50),CALCULATE(COUNTROWS(ALLSELECTED(AS_A)),AS_A[g]=\"c\",FILTER(ALL(AS_A[v]),AS_A[v]<>30))),AS_A[v]>30))",
+   "powerbi": "BLANK",
+   "table": "AS_A"
+  },
+  {
+   "expr": "CALCULATE(MEDIANX(ALLEXCEPT(AS_A,AS_A[v]),SUMX(CROSSJOIN(FILTER(VALUES(AS_A[g]),AS_A[g]<>\"b\"),VALUES(AS_A[v])),CALCULATE(COUNTROWS(ALLSELECTED(AS_A[h])),AS_A[h]>3))),AS_A[h]<>3,FILTER(ALL(AS_A[g]),AS_A[g]=\"c\"))",
+   "powerbi": "BLANK",
+   "table": "AS_A"
+  },
+  {
+   "expr": "VAR t=SUMMARIZE(FILTER(Facts,Facts[Note]<>\"Late\"),Facts[Note],Facts[Region]) RETURN CALCULATE(SUMX(t,AVERAGEX(KEEPFILTERS(ALLEXCEPT(Facts,Facts[Note])),COUNTROWS(Facts))),Facts[Note]=\"Late\")",
+   "powerbi": "4",
+   "table": "Facts"
+  },
+  {
+   "expr": "COUNTX(FILTER(ALLEXCEPT(AS_D,AS_D[t]),AS_D[d]>=DATE(2024,1,15)),COUNTROWS(FILTER(ALLSELECTED(AS_D),AS_D[t]<>\"z\")))",
+   "powerbi": "4",
+   "table": "AS_D"
+  },
+  {
+   "expr": "MEDIANX(FILTER(AS_A,AS_A[h]=1),CALCULATE(SUM(AS_A[v]),ALLSELECTED(AS_A),AS_A[v]>10))",
+   "powerbi": "80",
+   "table": "AS_A"
+  },
+  {
+   "expr": "VAR t=SELECTCOLUMNS(AS_D,\"c0\",AS_D[d],\"c1\",AS_D[n]) RETURN CALCULATE(SUMX(t,CALCULATE(SUM(AS_D[n]),ALL(AS_D[t]),ALLSELECTED(AS_D))),AS_D[n]>=3)",
+   "powerbi": "75",
+   "table": "AS_D"
+  },
+  {
+   "expr": "VAR t=Facts RETURN SUMX(t,CALCULATE(SUM(Facts[Quantity]),ALLSELECTED(Facts[Note])))",
+   "powerbi": "15",
+   "table": "Facts"
+  },
+  {
+   "expr": "AVERAGEX(GENERATE(FILTER(VALUES(AS_D[t]),AS_D[t]=\"x\"),ROW(\"z\",1)),CALCULATE(MEDIANX(VALUES(AS_D[d]),CALCULATE(COUNTROWS(ALLSELECTED(AS_D)),AS_D[d]>=DATE(2024,3,5))),AS_D[d]>=DATE(2024,1,15)))",
+   "powerbi": "BLANK",
+   "table": "AS_D"
+  },
+  {
+   "expr": "COUNTX(KEEPFILTERS(ALLEXCEPT(AS_A,AS_A[h])),SUMX(CALCULATETABLE(AS_A,AS_A[v]=40),COUNTROWS(ALLSELECTED(AS_A))))",
+   "powerbi": "2",
+   "table": "AS_A"
+  },
+  {
+   "expr": "VAR t=Facts RETURN CALCULATE(SUMX(t,AVERAGEX(ALLEXCEPT(Facts,Facts[Note]),CALCULATE(COUNTROWS(ALLSELECTED(Facts)),Facts[Note]<>\"Late\",Facts[Note]<>\"\"))),Facts[Note]<>\"Paid\")",
+   "powerbi": "18",
+   "table": "Facts"
+  },
+  {
+   "expr": "CALCULATE(COUNTX(FILTER(AS_D,(AS_D[t]<>\"x\"&&AS_D[n]>=2)),CALCULATE(COUNTROWS(ALLSELECTED(AS_D)),ALL(AS_D[n]),ALLSELECTED(AS_D[t]))),AS_D[t]=\"x\",ALLSELECTED(AS_D[t]))",
+   "powerbi": "BLANK",
+   "table": "AS_D"
+  },
+  {
+   "expr": "CALCULATE(AVERAGEX(VALUES(Facts[Sales]),MEDIANX(Facts,CALCULATE(SUM(Facts[Quantity]),Facts[Note]<>\"Paid\",Facts[Region]=\"East\"))),Facts[Quantity]<1,ALL(Facts[Note]))",
+   "powerbi": "BLANK",
+   "table": "Facts"
+  },
+  {
+   "expr": "MINX(ALLEXCEPT(Facts,Facts[Sales]),CALCULATE(COUNTROWS(Facts),ALLSELECTED(Facts)))",
+   "powerbi": "6",
+   "table": "Facts"
+  },
+  {
+   "expr": "VAR t=AS_A RETURN SUMX(t,CALCULATE(COUNTROWS(ALLSELECTED(AS_A[v])),AS_A[v]<30))",
+   "powerbi": "16",
+   "table": "AS_A"
+  },
+  {
+   "expr": "MEDIANX(KEEPFILTERS(FILTER(Facts,(Facts[Quantity]=4&&Facts[Sales]>=2))),COUNTROWS(ALLSELECTED(Facts[Quantity])))",
+   "powerbi": "BLANK",
+   "table": "Facts"
+  },
+  {
+   "expr": "AVERAGEX(KEEPFILTERS(FILTER(ALL(AS_A[g],AS_A[v]),AS_A[v]<50)),MINX(EXCEPT(VALUES(AS_A[h]),FILTER(VALUES(AS_A[h]),AS_A[h]<>3)),SUMX(ALLSELECTED(AS_A),AS_A[v])))",
+   "powerbi": "BLANK",
+   "table": "AS_A"
+  },
+  {
+   "expr": "CALCULATE(AVERAGEX(KEEPFILTERS(ALL(AS_D[n])),CALCULATE(COUNTROWS(AS_D),ALL(AS_D))),AS_D[d]>DATE(2024,1,15),AS_D[n]>3)",
+   "powerbi": "5",
+   "table": "AS_D"
+  },
+  {
+   "expr": "AVERAGEX(KEEPFILTERS(INTERSECT(VALUES(Facts[Region]),FILTER(VALUES(Facts[Region]),Facts[Region]=\"West\"))),COUNTROWS(ALLSELECTED(Facts[Region],Facts[Note])))",
+   "powerbi": "2",
+   "table": "Facts"
+  },
+  {
+   "expr": "COUNTX(CROSSJOIN(FILTER(VALUES(AS_D[t]),AS_D[t]<>\"z\"),VALUES(AS_D[n])),COUNTROWS(FILTER(ALLSELECTED(AS_D),AS_D[d]>DATE(2024,3,5))))",
+   "powerbi": "BLANK",
+   "table": "AS_D"
+  },
+  {
+   "expr": "SUMX(ALLSELECTED(Facts[Quantity]),MAXX(FILTER(ALL(Facts[Note]),Facts[Note]=\"\"),CALCULATE(COUNTROWS(Facts),ALLSELECTED(Facts))))",
+   "powerbi": "12",
+   "table": "Facts"
+  },
+  {
+   "expr": "COUNTX(AS_D,CALCULATE(SUM(AS_D[n]),ALLSELECTED(AS_D[t]),ALLEXCEPT(AS_D,AS_D[n])))",
+   "powerbi": "5",
+   "table": "AS_D"
+  },
+  {
+   "expr": "MEDIANX(FILTER(KEEPFILTERS(ALL(AS_A[h])),AS_A[h]>=3),COUNTROWS(ALLSELECTED(AS_A[g])))",
+   "powerbi": "4",
+   "table": "AS_A"
+  },
+  {
+   "expr": "CALCULATE(SUMX(Facts,CALCULATE(MEDIANX(KEEPFILTERS(EXCEPT(VALUES(Facts[Note]),FILTER(VALUES(Facts[Note]),Facts[Note]<>\"\"))),SUMX(ALLSELECTED(Facts[Note]),COUNTROWS(ALLSELECTED(Facts[Quantity],Facts[Sales])))),Facts[Sales]>10)),Facts[Note]=\"Late\",REMOVEFILTERS(Facts[Note]))",
+   "powerbi": "BLANK",
+   "table": "Facts"
+  },
+  {
+   "expr": "AVERAGEX(KEEPFILTERS(ADDCOLUMNS(ALL(Facts[Quantity]),\"x\",1)),SUMX(Facts,SUMX(ALLSELECTED(Facts),Facts[Quantity])))",
+   "powerbi": "90",
+   "table": "Facts"
+  },
+  {
+   "expr": "SUMX(GENERATE(FILTER(VALUES(Facts[Quantity]),Facts[Quantity]>=0),ROW(\"z\",1)),SUMX(SELECTCOLUMNS(Facts,\"c0\",Facts[Region],\"c1\",Facts[Quantity]),SUMX(VALUES(Facts[Region]),CALCULATE(COUNTROWS(ALLSELECTED(Facts[Sales])),ALLSELECTED(Facts[Quantity]),REMOVEFILTERS(Facts[Note])))))",
+   "powerbi": "648",
+   "table": "Facts"
+  },
+  {
+   "expr": "AVERAGEX(KEEPFILTERS(TREATAS({3,2},AS_A[h])),CALCULATE(SUM(AS_A[v]),ALLEXCEPT(AS_A,AS_A[v]),ALL(AS_A)))",
+   "powerbi": "320",
+   "table": "AS_A"
+  },
+  {
+   "expr": "SUMX(GENERATE(FILTER(VALUES(Facts[Note]),Facts[Note]=\"Paid\"),ROW(\"z\",1)),SUMX(FILTER(KEEPFILTERS(ALL(Facts[Region])),Facts[Region]<>\"West\"),CALCULATE(COUNTROWS(ALLSELECTED(Facts)),FILTER(ALL(Facts[Quantity]),Facts[Quantity]>2))))",
+   "powerbi": "BLANK",
+   "table": "Facts"
+  },
+  {
+   "expr": "CALCULATE(MAXX(KEEPFILTERS(KEEPFILTERS(FILTER(VALUES(AS_D[t]),AS_D[t]<>\"x\"))),MINX(ALLSELECTED(AS_D[n]),COUNTROWS(AS_D))),AS_D[n]<4,ALL(AS_D))",
+   "powerbi": "3",
+   "table": "AS_D"
+  },
+  {
+   "expr": "VAR t=TREATAS({1,2},Facts[Quantity]) RETURN SUMX(t,CALCULATE(COUNTROWS(ALLSELECTED(Facts)),ALLSELECTED(Facts),ALLSELECTED(Facts[Region])))",
+   "powerbi": "4",
+   "table": "Facts"
+  },
+  {
+   "expr": "AVERAGEX(KEEPFILTERS(EXCEPT(VALUES(AS_D[d]),FILTER(VALUES(AS_D[d]),AS_D[d]<DATE(2024,1,15)))),CALCULATE(COUNTROWS(AS_D),REMOVEFILTERS(AS_D[t]),ALLEXCEPT(AS_D,AS_D[n])))",
+   "powerbi": "5",
+   "table": "AS_D"
+  },
+  {
+   "expr": "VAR t=Facts RETURN CALCULATE(SUMX(t,SUMX(ALLSELECTED(Facts),Facts[Quantity])),Facts[Note]=\"\")",
+   "powerbi": "90",
+   "table": "Facts"
+  },
+  {
+   "expr": "VAR t=Facts RETURN SUMX(t,COUNTROWS(FILTER(ALLSELECTED(Facts),Facts[Sales]<2)))",
+   "powerbi": "18",
+   "table": "Facts"
+  },
+  {
+   "expr": "AVERAGEX(EXCEPT(VALUES(Facts[Quantity]),FILTER(VALUES(Facts[Quantity]),Facts[Quantity]>3)),CALCULATE(MEDIANX(VALUES(Facts[Region]),AVERAGEX(KEEPFILTERS(ADDCOLUMNS(SUMMARIZE(Facts,Facts[Quantity],Facts[Sales]),\"x\",1)),COUNTROWS(ALLSELECTED(Facts[Sales],Facts[Region])))),Facts[Sales]>=2))",
+   "powerbi": "1",
+   "table": "Facts"
+  },
+  {
+   "expr": "VAR t=VALUES(Facts[Quantity]) RETURN CALCULATE(SUMX(t,CALCULATE(SUM(Facts[Quantity]),ALLSELECTED(Facts))),Facts[Sales]<10)",
+   "powerbi": "60",
+   "table": "Facts"
+  },
+  {
+   "expr": "CALCULATE(MINX(SUMMARIZE(FILTER(AS_D,AS_D[d]<DATE(2024,3,5)),AS_D[t],AS_D[d]),CALCULATE(SUM(AS_D[n]),ALLSELECTED(AS_D))),AS_D[d]<>DATE(2024,3,5))",
+   "powerbi": "11",
+   "table": "AS_D"
+  },
+  {
+   "expr": "VAR t=Facts RETURN CALCULATE(SUMX(t,SUMX(ALLSELECTED(Facts),Facts[Quantity])),Facts[Note]<>\"\")",
+   "powerbi": "90",
+   "table": "Facts"
+  },
+  {
+   "expr": "MAXX(KEEPFILTERS(FILTER(SUMMARIZE(FILTER(AS_A,(AS_A[v]<=10&&AS_A[g]=\"a\")),AS_A[v],AS_A[h]),AS_A[v]>=30)),CALCULATE(COUNTROWS(ALLSELECTED(AS_A)),ALL(AS_A[g])))",
+   "powerbi": "BLANK",
+   "table": "AS_A"
+  },
+  {
+   "expr": "AVERAGEX(FILTER(ALL(Facts[Region],Facts[Note]),Facts[Region]<>\"North\"),CALCULATE(COUNTROWS(Facts),ALLSELECTED(Facts[Region])))",
+   "powerbi": "2.5",
+   "table": "Facts"
+  },
+  {
+   "expr": "VAR t=AS_D RETURN CALCULATE(SUMX(t,CALCULATE(COUNTROWS(ALLSELECTED(AS_D)),ALL(AS_D[d]))),AS_D[t]=\"z\")",
+   "powerbi": "25",
+   "table": "AS_D"
+  },
+  {
+   "expr": "SUMX(ADDCOLUMNS(GENERATE(FILTER(VALUES(Facts[Note]),Facts[Note]<>\"Late\"),ROW(\"z\",1)),\"x\",1),CALCULATE(SUM(Facts[Quantity]),ALLSELECTED(Facts)))",
+   "powerbi": "22",
+   "table": "Facts"
+  },
+  {
+   "expr": "CALCULATE(AVERAGEX(INTERSECT(VALUES(AS_D[t]),FILTER(VALUES(AS_D[t]),AS_D[t]=\"z\")),CALCULATE(COUNTROWS(AS_D),ALL(AS_D),ALLSELECTED(AS_D[t]))),AS_D[d]=DATE(2024,2,10),ALLEXCEPT(AS_D,AS_D[d]))",
+   "powerbi": "BLANK",
+   "table": "AS_D"
+  },
+  {
+   "expr": "MINX(KEEPFILTERS(ALL(Facts[Region])),CALCULATE(CALCULATE(COUNTROWS(ALLSELECTED(Facts[Quantity])),ALL(Facts[Quantity]),ALL(Facts)),REMOVEFILTERS(Facts[Sales])))",
+   "powerbi": "6",
+   "table": "Facts"
+  },
+  {
+   "expr": "MINX(FILTER(SELECTCOLUMNS(AS_A,\"c0\",AS_A[v],\"c1\",AS_A[g]),AS_A[g]<>\"a\"),CALCULATE(COUNTROWS(ALLSELECTED(AS_A[h])),AS_A[v]=40))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 77) A single value for column 'g' in table 'AS_A' cannot be determined. This can happen when a measure or function formula refers to a column that contains many values without specifying an aggregation such as min, max, count, or sum to get a single result.\"",
+   "table": "AS_A"
+  },
+  {
+   "expr": "MAXX(KEEPFILTERS(TREATAS({\"a\",\"c\"},AS_A[g])),SUMX(SUMMARIZE(FILTER(AS_A,AS_A[h]<>2),AS_A[v],AS_A[g]),COUNTROWS(ALLSELECTED(AS_A[v],AS_A[g]))))",
+   "powerbi": "25",
+   "table": "AS_A"
+  },
+  {
+   "expr": "MINX(FILTER(Facts,(Facts[Sales]>2||Facts[Note]=\"Paid\")),CALCULATE(MAXX(KEEPFILTERS(ALLEXCEPT(Facts,Facts[Sales])),COUNTROWS(ALLSELECTED(Facts))),Facts[Note]=\"\"))",
+   "powerbi": "2",
+   "table": "Facts"
+  },
+  {
+   "expr": "CONCATENATEX(SUMMARIZE(Facts,Facts[Sales],\"z\",CALCULATE(MEDIANX(ALLSELECTED(Facts[Region]),COUNTROWS(ALLSELECTED(Facts[Region],Facts[Sales]))),Facts[Quantity]<>0)),Facts[Sales]&\":\"&[z],\",\",Facts[Sales])",
+   "powerbi": "-1.5:3,:1,0:2,2.5:3,10.5:3,20:2",
+   "table": "Facts"
+  },
+  {
+   "expr": "MINX(ALLEXCEPT(AS_A,AS_A[v]),SUMX(ALLEXCEPT(AS_A,AS_A[v]),CALCULATE(CALCULATE(SUM(AS_A[v]),ALLSELECTED(AS_A)),ALLSELECTED(AS_A))))",
+   "powerbi": "1920",
+   "table": "AS_A"
+  },
+  {
+   "expr": "MAXX(SELECTCOLUMNS(AS_A,\"c0\",AS_A[h],\"c1\",AS_A[g]),CALCULATE(MAXX(KEEPFILTERS(ALL(AS_A[g])),COUNTROWS(ALLSELECTED(AS_A[h],AS_A[v]))),FILTER(ALL(AS_A[g]),AS_A[g]=\"c\")))",
+   "powerbi": "7",
+   "table": "AS_A"
+  },
+  {
+   "expr": "SUMX(ADDCOLUMNS(Facts,\"x\",1),SUMX(KEEPFILTERS(FILTER(ALL(Facts[Note],Facts[Region]),Facts[Region]=\"West\")),COUNTROWS(ALLSELECTED(Facts[Region]))))",
+   "powerbi": "12",
+   "table": "Facts"
+  },
+  {
+   "expr": "CALCULATE(MAXX(AS_A,CALCULATE(CALCULATE(COUNTROWS(ALLSELECTED(AS_A[g])),KEEPFILTERS(AS_A[v]>=40)),KEEPFILTERS(AS_A[v]>50))),AS_A[h]>=1,KEEPFILTERS(AS_A[v]>=10))",
+   "powerbi": "3",
+   "table": "AS_A"
+  },
+  {
+   "expr": "CONCATENATEX(SUMMARIZE(Facts,Facts[Note],\"z\",CALCULATE(MAXX(Facts,CALCULATE(SUM(Facts[Quantity]),FILTER(ALL(Facts[Quantity]),Facts[Quantity]>3))),Facts[Note]<>\"\")),Facts[Note]&\":\"&[z],\",\",Facts[Note])",
+   "powerbi": ":,Late:4,Paid:",
+   "table": "Facts"
+  },
+  {
+   "expr": "SUMX(FILTER(ALL(AS_D[n],AS_D[t]),(AS_D[t]<>\"x\"||AS_D[n]>=4)),CALCULATE(COUNTROWS(ALLSELECTED(AS_D[d],AS_D[t])),ALLEXCEPT(AS_D,AS_D[n]),ALLSELECTED(AS_D[t])))",
+   "powerbi": "15",
+   "table": "AS_D"
+  },
+  {
+   "expr": "CALCULATE(SUMX(FILTER(ALL(AS_A[v]),AS_A[v]=40),MEDIANX(KEEPFILTERS(SUMMARIZE(FILTER(AS_A,AS_A[h]>1),AS_A[v],AS_A[g])),CALCULATE(SUM(AS_A[v]),ALL(AS_A[v])))),AS_A[v]<30,KEEPFILTERS(AS_A[h]>3))",
+   "powerbi": "BLANK",
+   "table": "AS_A"
+  },
+  {
+   "expr": "MAXX(CROSSJOIN(FILTER(VALUES(AS_A[v]),AS_A[v]<>50),VALUES(AS_A[h])),MAXX(SELECTCOLUMNS(AS_A,\"c0\",AS_A[h],\"c1\",AS_A[v]),CALCULATE(SUM(AS_A[v]),ALLSELECTED(AS_A))))",
+   "powerbi": "320",
+   "table": "AS_A"
+  },
+  {
+   "expr": "SUMX(KEEPFILTERS(KEEPFILTERS(VALUES(AS_A[g]))),CALCULATE(COUNTROWS(ALLSELECTED(AS_A[g],AS_A[h])),ALL(AS_A[g])))",
+   "powerbi": "24",
+   "table": "AS_A"
+  },
+  {
+   "expr": "CALCULATE(MAXX(GENERATE(FILTER(VALUES(AS_A[v]),AS_A[v]<>50),ROW(\"z\",1)),COUNTROWS(FILTER(ALLSELECTED(AS_A),AS_A[h]>2))),AS_A[h]=1,ALLSELECTED(AS_A[v]))",
+   "powerbi": "BLANK",
+   "table": "AS_A"
+  },
+  {
+   "expr": "MINX(Facts,CALCULATE(CALCULATE(SUM(Facts[Quantity]),ALLSELECTED(Facts)),Facts[Note]<>\"\"))",
+   "powerbi": "7",
+   "table": "Facts"
+  },
+  {
+   "expr": "MAXX(AS_A,MAXX(AS_A,CALCULATE(COUNTROWS(ALLSELECTED(AS_A[v])),ALLSELECTED(AS_A[h]),ALL(AS_A[v]))))",
+   "powerbi": "7",
+   "table": "AS_A"
+  },
+  {
+   "expr": "CALCULATE(MAXX(KEEPFILTERS(ALLEXCEPT(Facts,Facts[Region])),COUNTROWS(ALLSELECTED(Facts))),Facts[Region]<>\"North\",KEEPFILTERS(Facts[Quantity]>2))",
+   "powerbi": "2",
+   "table": "Facts"
+  },
+  {
+   "expr": "SUMX(FILTER(SELECTCOLUMNS(Facts,\"c0\",Facts[Sales],\"c1\",Facts[Quantity]),Facts[Sales]<2),COUNTROWS(ALLSELECTED(Facts[Region],Facts[Sales])))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 91) A single value for column 'Sales' in table 'Facts' cannot be determined. This can happen when a measure or function formula refers to a column that contains many values without specifying an aggregation such as min, max, count, or sum to get a single result.\"",
+   "table": "Facts"
+  },
+  {
+   "expr": "MINX(VALUES(Facts[Region]),CALCULATE(SUMX(ALL(Facts[Quantity]),CALCULATE(COUNTROWS(Facts),ALLSELECTED(Facts[Quantity]))),Facts[Sales]=0,ALL(Facts[Quantity])))",
+   "powerbi": "6",
+   "table": "Facts"
+  },
+  {
+   "expr": "SUMX(ALLSELECTED(Facts[Region]),CALCULATE(CALCULATE(COUNTROWS(Facts),ALLSELECTED(Facts[Note])),ALL(Facts),ALLSELECTED(Facts)))",
+   "powerbi": "18",
+   "table": "Facts"
+  },
+  {
+   "expr": "MAXX(Facts,MAXX(INTERSECT(VALUES(Facts[Region]),FILTER(VALUES(Facts[Region]),Facts[Region]<>\"West\")),CALCULATE(COUNTROWS(ALLSELECTED(Facts[Region])),ALL(Facts[Note]),ALLSELECTED(Facts[Quantity]))))",
+   "powerbi": "2",
+   "table": "Facts"
+  },
+  {
+   "expr": "CALCULATE(SUMX(VALUES(Facts[Quantity]),MAXX(KEEPFILTERS(Facts),CALCULATE(COUNTROWS(Facts),Facts[Sales]<>10,Facts[Sales]>10))),Facts[Quantity]>=0,Facts[Note]<>\"Paid\")",
+   "powerbi": "1",
+   "table": "Facts"
+  },
+  {
+   "expr": "MAXX(SELECTCOLUMNS(AS_A,\"c0\",AS_A[v],\"c1\",AS_A[g]),CALCULATE(MAXX(KEEPFILTERS(TREATAS({2,1},AS_A[h])),COUNTROWS(ALLSELECTED(AS_A[v]))),AS_A[h]>3))",
+   "powerbi": "7",
+   "table": "AS_A"
+  },
+  {
+   "expr": "SUMX(ALLSELECTED(Facts[Quantity]),SUMX(KEEPFILTERS(FILTER(ALL(Facts[Region]),Facts[Region]=\"North\")),CALCULATE(COUNTROWS(ALLSELECTED(Facts[Sales],Facts[Region])),ALLSELECTED(Facts[Region]))))",
+   "powerbi": "6",
+   "table": "Facts"
+  },
+  {
+   "expr": "SUMX(AS_D,CALCULATE(CALCULATE(COUNTROWS(ALLSELECTED(AS_D[n])),AS_D[t]<>\"x\"),ALLSELECTED(AS_D[t])))",
+   "powerbi": "25",
+   "table": "AS_D"
+  },
+  {
+   "expr": "CONCATENATEX(SUMMARIZE(AS_D,AS_D[n],\"z\",MINX(ALLSELECTED(AS_D[t]),CALCULATE(COUNTROWS(AS_D),ALLSELECTED(AS_D),ALL(AS_D)))),AS_D[n]&\":\"&[z],\",\",AS_D[n])",
+   "powerbi": "1:5,2:5,3:5,4:5,5:5",
+   "table": "AS_D"
+  },
+  {
+   "expr": "CALCULATE(MAXX(FILTER(VALUES(AS_D[n]),AS_D[n]>=3),MAXX(SUMMARIZE(AS_D,AS_D[t],AS_D[d]),CALCULATE(COUNTROWS(AS_D),ALLSELECTED(AS_D[t]),ALLSELECTED(AS_D[d])))),AS_D[n]<4,ALLSELECTED(AS_D))",
+   "powerbi": "1",
+   "table": "AS_D"
+  },
+  {
+   "expr": "MAXX(FILTER(ALL(Facts[Sales]),Facts[Sales]=2),CALCULATE(MAXX(TOPN(1,FILTER(Facts,Facts[Region]<>\"North\"),Facts[Quantity]),COUNTROWS(ALLSELECTED(Facts))),FILTER(ALL(Facts[Sales]),Facts[Sales]>=10),ALLSELECTED(Facts)))",
+   "powerbi": "BLANK",
+   "table": "Facts"
+  },
+  {
+   "expr": "MINX(KEEPFILTERS(ALL(Facts[Quantity])),SUMX(INTERSECT(VALUES(Facts[Region]),FILTER(VALUES(Facts[Region]),Facts[Region]<>\"East\")),CALCULATE(COUNTROWS(ALLSELECTED(Facts[Quantity],Facts[Sales])),Facts[Sales]=0)))",
+   "powerbi": "4",
+   "table": "Facts"
+  },
+  {
+   "expr": "CALCULATE(MAXX(SELECTCOLUMNS(AS_D,\"c0\",AS_D[t],\"c1\",AS_D[d]),SUMX(KEEPFILTERS(FILTER(ALL(AS_D[t]),AS_D[t]=\"z\")),CALCULATE(COUNTROWS(ALLSELECTED(AS_D[t],AS_D[n])),ALLEXCEPT(AS_D,AS_D[t])))),AS_D[d]>DATE(2024,2,10),AS_D[t]=\"x\")",
+   "powerbi": "BLANK",
+   "table": "AS_D"
+  },
+  {
+   "expr": "MAXX(SELECTCOLUMNS(Facts,\"c0\",Facts[Region],\"c1\",Facts[Sales]),CALCULATE(CALCULATE(COUNTROWS(ALLSELECTED(Facts)),KEEPFILTERS(Facts[Region]<>\"East\")),Facts[Note]<>\"Late\"))",
+   "powerbi": "2",
+   "table": "Facts"
+  },
+  {
+   "expr": "CALCULATE(MAXX(FILTER(ALL(AS_A[g],AS_A[v]),AS_A[v]<=40),CALCULATE(CALCULATE(COUNTROWS(ALLSELECTED(AS_A[g])),AS_A[v]=50),AS_A[h]<>1)),AS_A[h]>=1,FILTER(ALL(AS_A[g]),AS_A[g]<>\"a\"))",
+   "powerbi": "2",
+   "table": "AS_A"
+  },
+  {
+   "expr": "MINX(INTERSECT(VALUES(AS_A[v]),FILTER(VALUES(AS_A[v]),AS_A[v]<>50)),COUNTROWS(FILTER(ALLSELECTED(AS_A),AS_A[h]>=3)))",
+   "powerbi": "1",
+   "table": "AS_A"
+  },
+  {
+   "expr": "CALCULATE(MAXX(INTERSECT(VALUES(AS_A[g]),FILTER(VALUES(AS_A[g]),AS_A[g]=\"c\")),CALCULATE(CALCULATE(COUNTROWS(ALLSELECTED(AS_A[h])),ALLSELECTED(AS_A)),ALLSELECTED(AS_A[h]),ALLSELECTED(AS_A))),AS_A[v]>30,ALLEXCEPT(AS_A,AS_A[h]))",
+   "powerbi": "4",
+   "table": "AS_A"
+  },
+  {
+   "expr": "MINX(KEEPFILTERS(ALLSELECTED(Facts[Note])),CALCULATE(SUMX(ALLSELECTED(Facts[Sales]),COUNTROWS(ALLSELECTED(Facts))),Facts[Quantity]<1))",
+   "powerbi": "6",
+   "table": "Facts"
+  },
+  {
+   "expr": "SUMX(Facts,SUMX(ALLEXCEPT(Facts,Facts[Region]),CALCULATE(CALCULATE(COUNTROWS(ALLSELECTED(Facts)),KEEPFILTERS(Facts[Quantity]=4)),Facts[Region]<>\"West\")))",
+   "powerbi": "36",
+   "table": "Facts"
+  },
+  {
+   "expr": "CONCATENATEX(SUMMARIZE(Facts,Facts[Quantity],\"z\",CALCULATE(COUNTROWS(Facts),Facts[Quantity]>1)),Facts[Quantity]&\":\"&[z],\",\",Facts[Quantity])",
+   "powerbi": "0:,1:,2:1,3:1,4:1,5:1",
+   "table": "Facts"
+  },
+  {
+   "expr": "CALCULATE(MAXX(CALCULATETABLE(AS_A,AS_A[v]>=50),SUMX(AS_A,CALCULATE(CALCULATE(COUNTROWS(ALLSELECTED(AS_A)),AS_A[v]>=40),REMOVEFILTERS(AS_A[v])))),AS_A[v]<40,REMOVEFILTERS(AS_A[h]))",
+   "powerbi": "3",
+   "table": "AS_A"
+  },
+  {
+   "expr": "CONCATENATEX(SUMMARIZE(AS_D,AS_D[n],\"z\",MINX(FILTER(VALUES(AS_D[d]),AS_D[d]<>DATE(2024,3,5)),CALCULATE(SUM(AS_D[n]),FILTER(ALL(AS_D[d]),AS_D[d]>=DATE(2024,3,5))))),AS_D[n]&\":\"&[z],\",\",AS_D[n])",
+   "powerbi": "1:,2:,3:,4:4,5:",
+   "table": "AS_D"
+  },
+  {
+   "expr": "CONCATENATEX(SUMMARIZE(AS_A,AS_A[h],\"z\",CALCULATE(COUNTROWS(ALLSELECTED(AS_A)),AS_A[v]>=30,AS_A[v]>30)),AS_A[h]&\":\"&[z],\",\",AS_A[h])",
+   "powerbi": ":5,1:5,2:5,3:5",
+   "table": "AS_A"
+  },
+  {
+   "expr": "MAXX(KEEPFILTERS(ALL(AS_A[g])),CALCULATE(SUMX(GENERATE(FILTER(VALUES(AS_A[v]),AS_A[v]>10),ROW(\"z\",1)),SUMX(ALLSELECTED(AS_A),AS_A[v])),ALLSELECTED(AS_A[g])))",
+   "powerbi": "1860",
+   "table": "AS_A"
+  },
+  {
+   "expr": "CALCULATE(MAXX(AS_A,CALCULATE(SUMX(KEEPFILTERS(INTERSECT(VALUES(AS_A[v]),FILTER(VALUES(AS_A[v]),AS_A[v]<10))),COUNTROWS(ALLSELECTED(AS_A[g]))),AS_A[g]=\"a\")),AS_A[g]<>\"b\",REMOVEFILTERS(AS_A[h]))",
+   "powerbi": "BLANK",
+   "table": "AS_A"
+  },
+  {
+   "expr": "MINX(KEEPFILTERS(GENERATE(FILTER(VALUES(AS_D[d]),AS_D[d]<DATE(2024,1,15)),ROW(\"z\",1))),SUMX(ADDCOLUMNS(CROSSJOIN(FILTER(VALUES(AS_D[n]),AS_D[n]<2),VALUES(AS_D[d])),\"x\",1),COUNTROWS(ALLSELECTED(AS_D))))",
+   "powerbi": "4",
+   "table": "AS_D"
+  },
+  {
+   "expr": "SUMX(KEEPFILTERS(TREATAS({\"North\",\"West\"},Facts[Region])),CALCULATE(CALCULATE(COUNTROWS(ALLSELECTED(Facts)),Facts[Region]=\"West\"),ALLSELECTED(Facts[Sales])))",
+   "powerbi": "4",
+   "table": "Facts"
+  },
+  {
+   "expr": "CALCULATE(SUMX(TREATAS({\"b\",\"c\"},AS_A[g]),SUMX(KEEPFILTERS(AS_A),COUNTROWS(AS_A))),AS_A[v]>=40,AS_A[v]>10)",
+   "powerbi": "50",
+   "table": "AS_A"
+  },
+  {
+   "expr": "SUMX(AS_A,MAXX(SUMMARIZE(AS_A,AS_A[h],AS_A[v]),CALCULATE(COUNTROWS(AS_A),ALLSELECTED(AS_A[g]))))",
+   "powerbi": "16",
+   "table": "AS_A"
+  },
+  {
+   "expr": "CALCULATE(MAXX(ADDCOLUMNS(FILTER(AS_A,AS_A[g]=\"a\"),\"x\",1),SUMX(FILTER(AS_A,AS_A[v]>50),CALCULATE(CALCULATE(SUM(AS_A[v]),ALLSELECTED(AS_A)),ALL(AS_A[v]),ALLSELECTED(AS_A[h])))),AS_A[h]>=1,KEEPFILTERS(AS_A[g]<>\"c\"))",
+   "powerbi": "60",
+   "table": "AS_A"
+  },
+  {
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(Facts[Note],FILTER(ALL(Facts[Region]),Facts[Region]<>\"West\"),\"z\",CALCULATE(COUNTROWS(ALLSELECTED(Facts)),ALLSELECTED(Facts[Region]),Facts[Quantity]<>2)),Facts[Note]&\":\"&[z],\",\",Facts[Note])",
+   "powerbi": ":3,Late:3,Paid:3",
+   "table": "Facts"
+  },
+  {
+   "expr": "CALCULATE(SUMX(FILTER(SELECTCOLUMNS(FILTER(Facts,Facts[Note]=\"\"),\"c0\",Facts[Sales],\"c1\",Facts[Note]),Facts[Note]=\"\"),MAXX(FILTER(ALL(Facts[Note],Facts[Quantity]),ISBLANK(Facts[Quantity])),COUNTROWS(ALLSELECTED(Facts)))),Facts[Sales]>10,FILTER(ALL(Facts[Note]),Facts[Note]<>\"\"))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 120) A single value for column 'Note' in table 'Facts' cannot be determined. This can happen when a measure or function formula refers to a column that contains many values without specifying an aggregation such as min, max, count, or sum to get a single result.\"",
+   "table": "Facts"
+  },
+  {
+   "expr": "MINX(TOPN(1,AS_D,AS_D[n]),MAXX(KEEPFILTERS(FILTER(ALL(AS_D[n]),AS_D[n]<3)),CALCULATE(SUM(AS_D[n]),ALLSELECTED(AS_D))))",
+   "powerbi": "BLANK",
+   "table": "AS_D"
+  },
+  {
+   "expr": "MINX(FILTER(KEEPFILTERS(FILTER(Facts,Facts[Note]=\"\")),(ISBLANK(Facts[Region])&&Facts[Sales]>=2)),SUMX(ALL(Facts[Region]),CALCULATE(CALCULATE(COUNTROWS(Facts),ALL(Facts[Region]),ALLSELECTED(Facts[Region])),ALL(Facts[Note]))))",
+   "powerbi": "BLANK",
+   "table": "Facts"
+  },
+  {
+   "expr": "MAXX(KEEPFILTERS(AS_A),CALCULATE(CALCULATE(COUNTROWS(AS_A),ALLSELECTED(AS_A[h])),AS_A[g]=\"a\"))",
+   "powerbi": "1",
+   "table": "AS_A"
+  },
+  {
+   "expr": "MINX(FILTER(VALUES(AS_A[v]),AS_A[v]<50),CALCULATE(SUMX(KEEPFILTERS(CROSSJOIN(FILTER(VALUES(AS_A[g]),AS_A[g]=\"c\"),VALUES(AS_A[h]))),COUNTROWS(ALLSELECTED(AS_A[g],AS_A[v]))),ALLEXCEPT(AS_A,AS_A[g])))",
+   "powerbi": "4",
+   "table": "AS_A"
+  },
+  {
+   "expr": "MAXX(FILTER(Facts,Facts[Quantity]>1),CALCULATE(SUMX(FILTER(CALCULATETABLE(Facts,Facts[Quantity]<4),ISBLANK(Facts[Note])),COUNTROWS(Facts)),ALLSELECTED(Facts),ALLSELECTED(Facts)))",
+   "powerbi": "4",
+   "table": "Facts"
+  },
+  {
+   "expr": "SUMX(ALL(Facts[Quantity]),SUMX(KEEPFILTERS(Facts),CALCULATE(COUNTROWS(Facts),REMOVEFILTERS(Facts[Sales]))))",
+   "powerbi": "6",
+   "table": "Facts"
+  },
+  {
+   "expr": "MAXX(AS_A,CALCULATE(MAXX(EXCEPT(VALUES(AS_A[v]),FILTER(VALUES(AS_A[v]),AS_A[v]=40)),COUNTROWS(AS_A)),ALLEXCEPT(AS_A,AS_A[v]),AS_A[g]=\"b\"))",
+   "powerbi": "2",
+   "table": "AS_A"
+  },
+  {
+   "expr": "CONCATENATEX(SUMMARIZE(AS_D,AS_D[n],\"z\",CALCULATE(SUM(AS_D[n]),ALLSELECTED(AS_D),ALLEXCEPT(AS_D,AS_D[d]))),AS_D[n]&\":\"&[z],\",\",AS_D[n])",
+   "powerbi": "1:15,2:15,3:15,4:15,5:15",
+   "table": "AS_D"
+  },
+  {
+   "expr": "CALCULATE(MAXX(TREATAS({0,4},Facts[Quantity]),CALCULATE(SUMX(KEEPFILTERS(VALUES(Facts[Note])),CALCULATE(COUNTROWS(Facts),ALLSELECTED(Facts[Region]))),Facts[Region]<>\"North\",FILTER(ALL(Facts[Sales]),Facts[Sales]=0))),Facts[Quantity]<0,REMOVEFILTERS(Facts[Sales]))",
+   "powerbi": "1",
+   "table": "Facts"
+  },
+  {
+   "expr": "SUMX(KEEPFILTERS(Facts),1)",
+   "powerbi": "6",
+   "table": "Facts"
+  },
+  {
+   "expr": "SUMX(KEEPFILTERS(AS_A),1)",
+   "powerbi": "8",
+   "table": "AS_A"
+  },
+  {
+   "expr": "SUMX(KEEPFILTERS(AS_D),1)",
+   "powerbi": "5",
+   "table": "AS_D"
+  },
+  {
+   "expr": "SUMX(KEEPFILTERS(FILTER(Facts,Facts[Quantity]>2)),1)",
+   "powerbi": "3",
+   "table": "Facts"
+  },
+  {
+   "expr": "SUMX(KEEPFILTERS(ALL(Facts)),1)",
+   "powerbi": "6",
+   "table": "Facts"
+  },
+  {
+   "expr": "SUMX(KEEPFILTERS(VALUES(Facts[Region])),1)",
+   "powerbi": "3",
+   "table": "Facts"
+  },
+  {
+   "expr": "SUMX(KEEPFILTERS(ALL(AS_A[g])),1)",
+   "powerbi": "4",
+   "table": "AS_A"
+  },
+  {
+   "expr": "SUMX(KEEPFILTERS(ALLEXCEPT(AS_A,AS_A[g])),1)",
+   "powerbi": "7",
+   "table": "AS_A"
+  },
+  {
+   "expr": "SUMX(KEEPFILTERS(ALLSELECTED(AS_A[v])),1)",
+   "powerbi": "7",
+   "table": "AS_A"
+  },
+  {
+   "expr": "SUMX(KEEPFILTERS(Facts),COUNTROWS(ALLSELECTED(Facts)))",
+   "powerbi": "36",
+   "table": "Facts"
+  },
+  {
+   "expr": "SUMX(ALL(Facts[Quantity]),SUMX(KEEPFILTERS(Facts),1))",
+   "powerbi": "36",
+   "table": "Facts"
+  },
+  {
+   "expr": "SUMX(ALL(Facts[Quantity]),SUMX(KEEPFILTERS(VALUES(Facts[Region])),1))",
+   "powerbi": "18",
+   "table": "Facts"
+  },
+  {
+   "expr": "MAXX(KEEPFILTERS(AS_D),COUNTROWS(ALLSELECTED(AS_D[t],AS_D[d])))",
+   "powerbi": "5",
+   "table": "AS_D"
+  },
+  {
+   "expr": "SUMX(FILTER(Facts,Facts[Quantity]>2),CALCULATE(COUNTROWS(Facts),ALLSELECTED(Facts),ALL(Facts)))",
+   "powerbi": "18",
+   "table": "Facts"
+  },
+  {
+   "expr": "SUMX(FILTER(Facts,Facts[Quantity]>2),CALCULATE(COUNTROWS(Facts),ALL(Facts),ALLSELECTED(Facts)))",
+   "powerbi": "18",
+   "table": "Facts"
+  },
+  {
+   "expr": "SUMX(FILTER(Facts,Facts[Quantity]>2),CALCULATE(COUNTROWS(Facts),ALLSELECTED(Facts[Region]),ALL(Facts[Region])))",
+   "powerbi": "3",
+   "table": "Facts"
+  },
+  {
+   "expr": "SUMX(FILTER(Facts,Facts[Quantity]>2),CALCULATE(COUNTROWS(Facts),ALL(Facts[Region]),ALLSELECTED(Facts[Region])))",
+   "powerbi": "3",
+   "table": "Facts"
+  },
+  {
+   "expr": "SUMX(FILTER(Facts,Facts[Quantity]>2),CALCULATE(COUNTROWS(Facts),ALLSELECTED(Facts[Region]),ALL(Facts)))",
+   "powerbi": "18",
+   "table": "Facts"
+  },
+  {
+   "expr": "SUMX(FILTER(Facts,Facts[Quantity]>2),CALCULATE(COUNTROWS(Facts),ALL(Facts),ALLSELECTED(Facts[Region])))",
+   "powerbi": "18",
+   "table": "Facts"
+  },
+  {
+   "expr": "SUMX(FILTER(Facts,Facts[Quantity]>2),CALCULATE(COUNTROWS(Facts),ALLSELECTED(Facts),REMOVEFILTERS(Facts[Quantity])))",
+   "powerbi": "9",
+   "table": "Facts"
+  },
+  {
+   "expr": "SUMX(FILTER(Facts,Facts[Quantity]>2),CALCULATE(COUNTROWS(Facts),REMOVEFILTERS(Facts[Quantity]),ALLSELECTED(Facts)))",
+   "powerbi": "9",
+   "table": "Facts"
+  },
+  {
+   "expr": "SUMX(FILTER(Facts,Facts[Quantity]>2),CALCULATE(COUNTROWS(Facts),ALLSELECTED(Facts[Region]),ALL(Facts[Quantity])))",
+   "powerbi": "3",
+   "table": "Facts"
+  },
+  {
+   "expr": "SUMX(FILTER(Facts,Facts[Quantity]>2),CALCULATE(COUNTROWS(Facts),ALL(Facts[Quantity]),ALLSELECTED(Facts[Region])))",
+   "powerbi": "3",
+   "table": "Facts"
+  },
+  {
+   "expr": "SUMX(FILTER(Facts,Facts[Quantity]>2),CALCULATE(COUNTROWS(Facts),ALLSELECTED(Facts),ALLEXCEPT(Facts,Facts[Region])))",
+   "powerbi": "18",
+   "table": "Facts"
+  },
+  {
+   "expr": "SUMX(FILTER(Facts,Facts[Quantity]>2),CALCULATE(COUNTROWS(Facts),ALLEXCEPT(Facts,Facts[Region]),ALLSELECTED(Facts)))",
+   "powerbi": "18",
+   "table": "Facts"
+  },
+  {
+   "expr": "SUMX(SUMMARIZE(FILTER(AS_A,(AS_A[g]=\"a\"&&AS_A[h]=1)||(AS_A[g]=\"b\"&&AS_A[h]=2)),AS_A[g],AS_A[h]),CALCULATE(COUNTROWS(AS_A),ALLSELECTED(AS_A[g]),ALL(AS_A[h])))",
+   "powerbi": "12",
+   "table": "AS_A"
+  },
+  {
+   "expr": "SUMX(SUMMARIZE(FILTER(AS_A,(AS_A[g]=\"a\"&&AS_A[h]=1)||(AS_A[g]=\"b\"&&AS_A[h]=2)),AS_A[g],AS_A[h]),CALCULATE(COUNTROWS(AS_A),ALL(AS_A[h]),ALLSELECTED(AS_A[g])))",
+   "powerbi": "12",
+   "table": "AS_A"
+  },
+  {
+   "expr": "SUMX(SUMMARIZE(FILTER(AS_A,(AS_A[g]=\"a\"&&AS_A[h]=1)||(AS_A[g]=\"b\"&&AS_A[h]=2)),AS_A[g],AS_A[h]),CALCULATE(COUNTROWS(AS_A),ALLSELECTED(AS_A[g]),ALL(AS_A[v])))",
+   "powerbi": "4",
+   "table": "AS_A"
+  },
+  {
+   "expr": "SUMX(SUMMARIZE(FILTER(AS_A,(AS_A[g]=\"a\"&&AS_A[h]=1)||(AS_A[g]=\"b\"&&AS_A[h]=2)),AS_A[g],AS_A[h]),CALCULATE(COUNTROWS(AS_A),ALL(AS_A[v]),ALLSELECTED(AS_A[g])))",
+   "powerbi": "4",
+   "table": "AS_A"
+  },
+  {
+   "expr": "SUMX(SUMMARIZE(FILTER(AS_A,(AS_A[g]=\"a\"&&AS_A[h]=1)||(AS_A[g]=\"b\"&&AS_A[h]=2)),AS_A[g],AS_A[h]),CALCULATE(COUNTROWS(AS_A),ALLSELECTED(AS_A[g]),ALL(AS_A)))",
+   "powerbi": "16",
+   "table": "AS_A"
+  },
+  {
+   "expr": "SUMX(SUMMARIZE(FILTER(AS_A,(AS_A[g]=\"a\"&&AS_A[h]=1)||(AS_A[g]=\"b\"&&AS_A[h]=2)),AS_A[g],AS_A[h]),CALCULATE(COUNTROWS(AS_A),ALL(AS_A),ALLSELECTED(AS_A[g])))",
+   "powerbi": "16",
+   "table": "AS_A"
+  },
+  {
+   "expr": "MEDIANX(ALLSELECTED(AS_D[d]),CALCULATE(SUM(AS_D[n]),AS_D[t]=\"y\"))",
+   "powerbi": "BLANK",
+   "table": "AS_D"
+  },
+  {
+   "expr": "MAXX(AS_A,CALCULATE(MAXX(EXCEPT(VALUES(AS_A[v]),FILTER(VALUES(AS_A[v]),AS_A[v]=40)),COUNTROWS(AS_A)),ALLEXCEPT(AS_A,AS_A[v])))",
+   "powerbi": "2",
+   "table": "AS_A"
+  },
+  {
+   "expr": "MAXX(AS_A,CALCULATE(COUNTROWS(EXCEPT(VALUES(AS_A[v]),FILTER(VALUES(AS_A[v]),AS_A[v]=40))),ALLEXCEPT(AS_A,AS_A[v]),AS_A[g]=\"b\"))",
+   "powerbi": "1",
+   "table": "AS_A"
+  },
+  {
+   "expr": "MAXX(AS_A,CALCULATE(COUNTROWS(EXCEPT(VALUES(AS_A[v]),FILTER(VALUES(AS_A[v]),AS_A[v]=40))),ALLEXCEPT(AS_A,AS_A[v])))",
+   "powerbi": "1",
+   "table": "AS_A"
+  },
+  {
+   "expr": "MAXX(FILTER(AS_A,AS_A[v]=40),CALCULATE(MAXX(EXCEPT(VALUES(AS_A[v]),FILTER(VALUES(AS_A[v]),AS_A[v]=40)),COUNTROWS(AS_A)),ALLEXCEPT(AS_A,AS_A[v])))",
+   "powerbi": "2",
+   "table": "AS_A"
+  },
+  {
+   "expr": "MAXX(FILTER(AS_A,AS_A[v]=40),CALCULATE(COUNTROWS(EXCEPT(VALUES(AS_A[v]),FILTER(VALUES(AS_A[v]),AS_A[v]=40))),ALLEXCEPT(AS_A,AS_A[v])))",
+   "powerbi": "BLANK",
+   "table": "AS_A"
+  },
+  {
+   "expr": "MAXX(FILTER(AS_A,AS_A[v]=10),CALCULATE(COUNTROWS(EXCEPT(VALUES(AS_A[v]),FILTER(VALUES(AS_A[v]),AS_A[v]=40))),ALLEXCEPT(AS_A,AS_A[v])))",
+   "powerbi": "1",
+   "table": "AS_A"
+  },
+  {
+   "expr": "MAXX(FILTER(AS_A,AS_A[v]=20),CALCULATE(COUNTROWS(EXCEPT(VALUES(AS_A[v]),FILTER(VALUES(AS_A[v]),AS_A[v]=40))),ALLEXCEPT(AS_A,AS_A[v])))",
+   "powerbi": "1",
+   "table": "AS_A"
+  },
+  {
+   "expr": "MAXX(FILTER(AS_A,AS_A[v]=30),CALCULATE(COUNTROWS(EXCEPT(VALUES(AS_A[v]),FILTER(VALUES(AS_A[v]),AS_A[v]=40))),ALLEXCEPT(AS_A,AS_A[v])))",
+   "powerbi": "1",
+   "table": "AS_A"
+  },
+  {
+   "expr": "MAXX(FILTER(AS_A,AS_A[v]=50),CALCULATE(COUNTROWS(EXCEPT(VALUES(AS_A[v]),FILTER(VALUES(AS_A[v]),AS_A[v]=40))),ALLEXCEPT(AS_A,AS_A[v])))",
+   "powerbi": "1",
+   "table": "AS_A"
+  },
+  {
+   "expr": "MAXX(AS_A,CALCULATE(MAXX(EXCEPT(VALUES(AS_A[v]),FILTER(VALUES(AS_A[v]),AS_A[v]=40)),COUNTROWS(AS_A)),REMOVEFILTERS(AS_A[g],AS_A[h])))",
+   "powerbi": "2",
+   "table": "AS_A"
+  },
+  {
+   "expr": "MAXX(AS_A,CALCULATE(MAXX(EXCEPT(VALUES(AS_A[v]),FILTER(VALUES(AS_A[v]),AS_A[v]=40)),COUNTROWS(AS_A))))",
+   "powerbi": "2",
+   "table": "AS_A"
+  },
+  {
+   "expr": "MEDIANX(ALL(AS_D[d]),CALCULATE(SUM(AS_D[n]),AS_D[t]=\"y\"))",
+   "powerbi": "BLANK",
+   "table": "AS_D"
+  },
+  {
+   "expr": "MEDIANX(VALUES(AS_D[d]),CALCULATE(SUM(AS_D[n]),AS_D[t]=\"y\"))",
+   "powerbi": "BLANK",
+   "table": "AS_D"
+  },
+  {
+   "expr": "MEDIANX(ADDCOLUMNS({1,2,3,4},\"z\",IF([Value]=1,1,BLANK())),[z])",
+   "powerbi": "BLANK",
+   "table": "Facts"
+  },
+  {
+   "expr": "MEDIANX(ADDCOLUMNS({1,2,3,4},\"z\",IF([Value]=2,2,BLANK())),[z])",
+   "powerbi": "BLANK",
+   "table": "Facts"
+  },
+  {
+   "expr": "MEDIANX(ADDCOLUMNS({1,2,3,4},\"z\",IF([Value]=4,4,BLANK())),[z])",
+   "powerbi": "BLANK",
+   "table": "Facts"
+  },
+  {
+   "expr": "MAXX(FILTER(AS_A,AS_A[v]=40),CALCULATE(MAXX(FILTER(VALUES(AS_A[v]),AS_A[v]<>40),COUNTROWS(AS_A))))",
+   "powerbi": "2",
+   "table": "AS_A"
+  },
+  {
+   "expr": "MAXX(FILTER(AS_A,AS_A[v]=40),CALCULATE(MAXX(FILTER(VALUES(AS_A[v]),AS_A[v]<>40),SUM(AS_A[v]))))",
+   "powerbi": "80",
+   "table": "AS_A"
+  },
+  {
+   "expr": "MAXX(FILTER(AS_A,AS_A[v]=40),CALCULATE(COUNTROWS(FILTER(VALUES(AS_A[v]),AS_A[v]<>40))))",
+   "powerbi": "BLANK",
+   "table": "AS_A"
+  },
+  {
+   "expr": "MAXX(FILTER(AS_A,AS_A[v]=40),CALCULATE(COUNTROWS(FILTER(VALUES(AS_A[v]),AS_A[v]<>40)),AS_A[g]=\"b\"))",
+   "powerbi": "BLANK",
+   "table": "AS_A"
+  },
+  {
+   "expr": "CALCULATE(SUMX(KEEPFILTERS(KEEPFILTERS(FILTER(AS_D,AS_D[t]=\"x\"))),COUNTROWS(ALLSELECTED(AS_D[d],AS_D[t]))),AS_D[n]>=2,AS_D[n]>3)",
+   "powerbi": "BLANK",
+   "table": "AS_D"
+  },
+  {
+   "expr": "CALCULATE(SUMX(AS_D,CALCULATE(COUNTROWS(ALLSELECTED(AS_D)),ALLSELECTED(AS_D),ALLSELECTED(AS_D))),AS_D[t]=\"z\",ALLSELECTED(AS_D))",
+   "powerbi": "1",
+   "table": "AS_D"
+  },
+  {
+   "expr": "CALCULATE(SUMX(FILTER(ALL(Facts[Region]),Facts[Region]=\"West\"),CALCULATE(MAXX(FILTER(ALL(Facts[Note],Facts[Region]),Facts[Note]=\"Paid\"),CALCULATE(COUNTROWS(ALLSELECTED(Facts[Quantity])),ALLSELECTED(Facts))),ALLSELECTED(Facts[Note]),FILTER(ALL(Facts[Sales]),Facts[Sales]<0))),Facts[Note]<>\"Paid\",ALLEXCEPT(Facts,Facts[Region]))",
+   "powerbi": "6",
+   "table": "Facts"
+  },
+  {
+   "expr": "CALCULATE(MAXX(ALLEXCEPT(Facts,Facts[Note]),CALCULATE(MAXX(SUMMARIZE(FILTER(Facts,ISBLANK(Facts[Note])),Facts[Sales],Facts[Quantity]),CALCULATE(SUM(Facts[Quantity]),ALLSELECTED(Facts[Quantity]),ALLEXCEPT(Facts,Facts[Region]))),ALLSELECTED(Facts[Note]))),Facts[Note]=\"\")",
+   "powerbi": "8",
+   "table": "Facts"
+  },
+  {
+   "expr": "MINX(FILTER(VALUES(AS_A[g]),AS_A[g]<>\"a\"),CALCULATE(COUNTROWS(AS_A),ALLSELECTED(AS_A[g])))",
+   "powerbi": "5",
+   "table": "AS_A"
+  },
+  {
+   "expr": "SUMX(FILTER(VALUES(Facts[Quantity]),Facts[Quantity]>=1),CALCULATE(SUMX(INTERSECT(VALUES(Facts[Region]),FILTER(VALUES(Facts[Region]),Facts[Region]=\"North\")),COUNTROWS(Facts)),ALLSELECTED(Facts),ALLSELECTED(Facts)))",
+   "powerbi": "25",
+   "table": "Facts"
+  },
+  {
+   "expr": "SUMX(SELECTCOLUMNS(Facts,\"c0\",Facts[Note],\"c1\",Facts[Region]),CALCULATE(CALCULATE(COUNTROWS(ALLSELECTED(Facts)),Facts[Quantity]<1),Facts[Quantity]<>0))",
+   "powerbi": "6",
+   "table": "Facts"
+  },
+  {
+   "expr": "MINX(CALCULATETABLE(AS_D,AS_D[d]<>DATE(2024,2,10)),CALCULATE(COUNTROWS(ALLSELECTED(AS_D[n],AS_D[d])),KEEPFILTERS(AS_D[n]>=1),ALLSELECTED(AS_D[d])))",
+   "powerbi": "4",
+   "table": "AS_D"
+  },
+  {
+   "expr": "MINX(SELECTCOLUMNS(Facts,\"c0\",Facts[Sales],\"c1\",Facts[Region]),CALCULATE(MAXX(EXCEPT(VALUES(Facts[Region]),FILTER(VALUES(Facts[Region]),Facts[Region]=\"North\")),COUNTROWS(Facts)),REMOVEFILTERS(Facts[Note]),Facts[Quantity]=4))",
+   "powerbi": "1",
+   "table": "Facts"
+  },
+  {
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(Facts[Quantity],\"z\",CALCULATE(COUNTROWS(ALLSELECTED(Facts[Note])),FILTER(ALL(Facts[Quantity]),Facts[Quantity]>=4),ALLSELECTED(Facts))),Facts[Quantity]&\":\"&[z],\",\",Facts[Quantity])",
+   "powerbi": "0:3,1:3,2:3,3:3,4:3,5:3",
+   "table": "Facts"
+  },
+  {
+   "expr": "CALCULATE(MAXX(TREATAS({1,2},AS_D[n]),SUMX(SELECTCOLUMNS(KEEPFILTERS(FILTER(AS_D,AS_D[d]<=DATE(2024,1,15))),\"c0\",AS_D[t],\"c1\",AS_D[n]),COUNTROWS(ALLSELECTED(AS_D[t])))),AS_D[n]>=3,ALLSELECTED(AS_D[d]))",
+   "powerbi": "1",
+   "table": "AS_D"
+  },
+  {
+   "expr": "CALCULATE(MAXX(FILTER(Facts,Facts[Quantity]>=0),MAXX(KEEPFILTERS(Facts),CALCULATE(COUNTROWS(Facts),KEEPFILTERS(Facts[Sales]=10)))),Facts[Note]<>\"\",ALL(Facts[Sales]))",
+   "powerbi": "BLANK",
+   "table": "Facts"
+  },
+  {
+   "expr": "CALCULATE(SUMX(ADDCOLUMNS(TREATAS({\"Paid\",\"\"},Facts[Note]),\"x\",1),MAXX(KEEPFILTERS(TREATAS({0,10},Facts[Sales])),CALCULATE(COUNTROWS(ALLSELECTED(Facts[Region])),REMOVEFILTERS(Facts[Region])))),Facts[Note]<>\"\",Facts[Quantity]=2)",
+   "powerbi": "3",
+   "table": "Facts"
+  },
+  {
+   "expr": "MINX(KEEPFILTERS(EXCEPT(VALUES(Facts[Note]),FILTER(VALUES(Facts[Note]),Facts[Note]<>\"Paid\"))),CALCULATE(MAXX(FILTER(VALUES(Facts[Region]),Facts[Region]<>\"West\"),CALCULATE(COUNTROWS(Facts),ALLSELECTED(Facts[Quantity]))),Facts[Sales]<10))",
+   "powerbi": "1",
+   "table": "Facts"
+  },
+  {
+   "expr": "MAXX(ALLEXCEPT(AS_D,AS_D[d]),CALCULATE(SUM(AS_D[n]),ALLSELECTED(AS_D)))",
+   "powerbi": "15",
+   "table": "AS_D"
+  },
+  {
+   "expr": "MINX(KEEPFILTERS(INTERSECT(VALUES(AS_D[n]),FILTER(VALUES(AS_D[n]),AS_D[n]>=3))),SUMX(GENERATE(FILTER(VALUES(AS_D[d]),AS_D[d]>=DATE(2024,3,5)),ROW(\"z\",1)),CALCULATE(COUNTROWS(ALLSELECTED(AS_D[n])),ALLSELECTED(AS_D[d]),ALL(AS_D[d]))))",
+   "powerbi": "3",
+   "table": "AS_D"
+  },
+  {
+   "expr": "CALCULATE(SUMX(CROSSJOIN(FILTER(VALUES(Facts[Region]),Facts[Region]=\"West\"),VALUES(Facts[Note])),SUMX(ALL(Facts[Region]),CALCULATE(COUNTROWS(Facts),ALLSELECTED(Facts),ALLEXCEPT(Facts,Facts[Region])))),Facts[Note]=\"Paid\",ALL(Facts[Region]))",
+   "powerbi": "18",
+   "table": "Facts"
+  },
+  {
+   "expr": "MINX(FILTER(KEEPFILTERS(FILTER(ALL(AS_A[g]),AS_A[g]=\"a\")),AS_A[g]=\"a\"),CALCULATE(MAXX(GENERATE(FILTER(VALUES(AS_A[h]),AS_A[h]<>1),ROW(\"z\",1)),CALCULATE(COUNTROWS(AS_A),ALLSELECTED(AS_A[h]))),FILTER(ALL(AS_A[v]),AS_A[v]>50)))",
+   "powerbi": "BLANK",
+   "table": "AS_A"
+  },
+  {
+   "expr": "CALCULATE(MAXX(KEEPFILTERS(FILTER(VALUES(AS_D[n]),AS_D[n]<>3)),MAXX(FILTER(VALUES(AS_D[d]),AS_D[d]<>DATE(2024,1,15)),CALCULATE(COUNTROWS(AS_D),ALLSELECTED(AS_D[t])))),AS_D[n]>=4)",
+   "powerbi": "1",
+   "table": "AS_D"
+  },
+  {
+   "expr": "SUMX(ALLEXCEPT(AS_D,AS_D[n]),CALCULATE(COUNTROWS(AS_D),ALL(AS_D[n]),ALLSELECTED(AS_D)))",
+   "powerbi": "25",
+   "table": "AS_D"
+  },
+  {
+   "expr": "SUMX(AS_D,CALCULATE(MAXX(KEEPFILTERS(FILTER(ALL(AS_D[t]),AS_D[t]<>\"y\")),COUNTROWS(ALLSELECTED(AS_D[n],AS_D[d]))),AS_D[n]<1))",
+   "powerbi": "BLANK",
+   "table": "AS_D"
+  },
+  {
+   "expr": "CALCULATE(MAXX(ADDCOLUMNS(FILTER(FILTER(ALL(Facts[Note]),Facts[Note]=\"Late\"),Facts[Note]=\"\"),\"x\",1),COUNTROWS(FILTER(ALLSELECTED(Facts),ISBLANK(Facts[Region])))),Facts[Note]<>\"Late\",Facts[Note]<>\"\")",
+   "powerbi": "BLANK",
+   "table": "Facts"
+  },
+  {
+   "expr": "MAXX(KEEPFILTERS(FILTER(FILTER(VALUES(Facts[Region]),Facts[Region]=\"North\"),Facts[Region]<>\"East\")),SUMX(KEEPFILTERS(ALLSELECTED(Facts[Region])),COUNTROWS(Facts)))",
+   "powerbi": "6",
+   "table": "Facts"
+  },
+  {
+   "expr": "MAXX(VALUES(Facts[Sales]),CALCULATE(MAXX(KEEPFILTERS(CALCULATETABLE(Facts,Facts[Note]<>\"Late\")),CALCULATE(COUNTROWS(Facts),ALLSELECTED(Facts[Sales]))),REMOVEFILTERS(Facts[Region])))",
+   "powerbi": "1",
+   "table": "Facts"
+  },
+  {
+   "expr": "MINX(ALL(Facts[Sales]),CALCULATE(MAXX(KEEPFILTERS(FILTER(ALL(Facts[Quantity],Facts[Region]),Facts[Region]=\"West\")),COUNTROWS(Facts)),ALLSELECTED(Facts)))",
+   "powerbi": "6",
+   "table": "Facts"
+  },
+  {
+   "expr": "MINX(ALLSELECTED(AS_D[d]),MAXX(ALLEXCEPT(AS_D,AS_D[d]),CALCULATE(CALCULATE(COUNTROWS(ALLSELECTED(AS_D[n])),AS_D[d]=DATE(2024,1,15)),ALLSELECTED(AS_D[t]))))",
+   "powerbi": "5",
+   "table": "AS_D"
+  },
+  {
+   "expr": "CONCATENATEX(SUMMARIZE(AS_A,AS_A[v],\"z\",CALCULATE(COUNTROWS(ALLSELECTED(AS_A[g])),ALLSELECTED(AS_A[v]))),AS_A[v]&\":\"&[z],\",\",AS_A[v])",
+   "powerbi": "10:4,20:4,30:4,40:4,50:4,60:4,70:4",
+   "table": "AS_A"
+  },
+  {
+   "expr": "MAXX(KEEPFILTERS(GENERATE(FILTER(VALUES(Facts[Quantity]),Facts[Quantity]<1),ROW(\"z\",1))),SUMX(FILTER(Facts,Facts[Sales]<0),CALCULATE(CALCULATE(SUM(Facts[Quantity]),REMOVEFILTERS(Facts[Note])),Facts[Quantity]=3)))",
+   "powerbi": "BLANK",
+   "table": "Facts"
+  },
+  {
+   "expr": "MAXX(AS_A,CALCULATE(CALCULATE(SUM(AS_A[v]),REMOVEFILTERS(AS_A[g]),ALLSELECTED(AS_A)),AS_A[v]=30))",
+   "powerbi": "30",
+   "table": "AS_A"
+  },
+  {
+   "expr": "SUMX(VALUES(Facts[Quantity]),CALCULATE(MAXX(EXCEPT(VALUES(Facts[Sales]),FILTER(VALUES(Facts[Sales]),Facts[Sales]=0)),SUMX(ALLSELECTED(Facts),Facts[Quantity])),ALLSELECTED(Facts)))",
+   "powerbi": "66",
+   "table": "Facts"
+  },
+  {
+   "expr": "SUMX(GENERATE(FILTER(VALUES(AS_D[n]),AS_D[n]<>3),ROW(\"z\",1)),CALCULATE(CALCULATE(COUNTROWS(ALLSELECTED(AS_D[n])),ALLSELECTED(AS_D),REMOVEFILTERS(AS_D[t])),AS_D[n]<>3))",
+   "powerbi": "16",
+   "table": "AS_D"
+  },
+  {
+   "expr": "CALCULATE(MAXX(EXCEPT(VALUES(Facts[Sales]),FILTER(VALUES(Facts[Sales]),Facts[Sales]=0)),CALCULATE(MAXX(Facts,COUNTROWS(ALLSELECTED(Facts))),ALLSELECTED(Facts[Quantity]),ALL(Facts[Region]))),Facts[Sales]<>10,FILTER(ALL(Facts[Note]),Facts[Note]=\"\"))",
+   "powerbi": "1",
+   "table": "Facts"
+  },
+  {
+   "expr": "CONCATENATEX(SUMMARIZE(Facts,Facts[Quantity],\"z\",CALCULATE(SUM(Facts[Quantity]),ALLSELECTED(Facts))),Facts[Quantity]&\":\"&[z],\",\",Facts[Quantity])",
+   "powerbi": "0:15,1:15,2:15,3:15,4:15,5:15",
+   "table": "Facts"
+  },
+  {
+   "expr": "CALCULATE(MAXX(KEEPFILTERS(VALUES(AS_D[t])),SUMX(GENERATE(FILTER(VALUES(AS_D[t]),AS_D[t]<>\"z\"),ROW(\"z\",1)),CALCULATE(COUNTROWS(AS_D),REMOVEFILTERS(AS_D[d]),AS_D[n]>=3))),AS_D[n]>=3,ALL(AS_D))",
+   "powerbi": "2",
+   "table": "AS_D"
+  },
+  {
+   "expr": "CALCULATE(SUMX(FILTER(ALL(AS_D[t],AS_D[d]),AS_D[t]<>\"y\"),CALCULATE(CALCULATE(SUM(AS_D[n]),ALLSELECTED(AS_D)),ALL(AS_D[n]),AS_D[n]<>3)),AS_D[n]>=3,KEEPFILTERS(AS_D[d]<DATE(2024,3,5)))",
+   "powerbi": "40",
+   "table": "AS_D"
+  },
+  {
+   "expr": "CALCULATE(SUMX(TREATAS({DATE(2024,3,5),DATE(2024,2,10)},AS_D[d]),SUMX(FILTER(ALL(AS_D[n],AS_D[d]),AS_D[n]<3),CALCULATE(COUNTROWS(ALLSELECTED(AS_D[t])),ALLSELECTED(AS_D[d]),ALLEXCEPT(AS_D,AS_D[n])))),AS_D[n]>=1)",
+   "powerbi": "16",
+   "table": "AS_D"
+  },
+  {
+   "expr": "CONCATENATEX(SUMMARIZE(Facts,Facts[Region],\"z\",CALCULATE(COUNTROWS(ALLSELECTED(Facts[Region])),Facts[Note]<>\"\")),Facts[Region]&\":\"&[z],\",\",Facts[Region])",
+   "powerbi": "East:3,North:3,West:3",
+   "table": "Facts"
+  },
+  {
+   "expr": "MINX(INTERSECT(VALUES(AS_D[n]),FILTER(VALUES(AS_D[n]),AS_D[n]>=4)),SUMX(KEEPFILTERS(AS_D),CALCULATE(COUNTROWS(AS_D),ALL(AS_D[n]),REMOVEFILTERS(AS_D[n]))))",
+   "powerbi": "5",
+   "table": "AS_D"
+  },
+  {
+   "expr": "CALCULATE(SUMX(KEEPFILTERS(GENERATE(FILTER(VALUES(Facts[Quantity]),Facts[Quantity]<2),ROW(\"z\",1))),MAXX(ALL(Facts[Region]),CALCULATE(CALCULATE(SUM(Facts[Quantity]),ALLSELECTED(Facts)),REMOVEFILTERS(Facts[Note]),ALL(Facts[Note])))),Facts[Region]=\"East\")",
+   "powerbi": "1",
+   "table": "Facts"
+  },
+  {
+   "expr": "CALCULATE(SUMX(SUMMARIZE(FILTER(Facts,(Facts[Note]<>\"Late\"&&Facts[Region]=\"East\")),Facts[Region],Facts[Note]),CALCULATE(SUMX(ALLEXCEPT(Facts,Facts[Note]),CALCULATE(SUM(Facts[Quantity]),Facts[Note]<>\"\")),ALLEXCEPT(Facts,Facts[Quantity]),ALLSELECTED(Facts[Sales]))),Facts[Note]<>\"Paid\",Facts[Sales]<0)",
+   "powerbi": "BLANK",
+   "table": "Facts"
+  },
+  {
+   "expr": "CONCATENATEX(SUMMARIZE(FILTER(FILTER(AS_A,AS_A[g]<>\"a\"),(AS_A[h]<>1||AS_A[v]>=10)),AS_A[h],\"z\",CALCULATE(COUNTROWS(AS_A),ALLSELECTED(AS_A[g]))),AS_A[h]&\":\"&[z],\",\",AS_A[h])",
+   "powerbi": ":1,1:1,2:2,3:1",
+   "table": "AS_A"
+  },
+  {
+   "expr": "MINX(FILTER(VALUES(Facts[Note]),Facts[Note]<>\"Late\"),MAXX(FILTER(ALL(Facts[Sales],Facts[Region]),Facts[Region]=\"East\"),CALCULATE(CALCULATE(SUM(Facts[Quantity]),ALLSELECTED(Facts)),ALLEXCEPT(Facts,Facts[Note]))))",
+   "powerbi": "11",
+   "table": "Facts"
+  },
+  {
+   "expr": "CONCATENATEX(SUMMARIZE(Facts,Facts[Quantity],\"z\",CALCULATE(AVERAGEX(KEEPFILTERS(FILTER(ALL(Facts[Region]),Facts[Region]<>\"North\")),CALCULATE(SUM(Facts[Quantity]),KEEPFILTERS(Facts[Sales]<10))),Facts[Note]<>\"Late\")),Facts[Quantity]&\":\"&[z],\",\",Facts[Quantity])",
+   "powerbi": "0:0,1:1,2:,3:,4:,5:5",
+   "table": "Facts"
+  },
+  {
+   "expr": "MAXX(FILTER(ALL(AS_A[v]),AS_A[v]>=40),MAXX(AS_A,CALCULATE(COUNTROWS(ALLSELECTED(AS_A[v])),ALLSELECTED(AS_A),AS_A[g]=\"c\")))",
+   "powerbi": "7",
+   "table": "AS_A"
+  },
+  {
+   "expr": "MINX(VALUES(Facts[Region]),CALCULATE(COUNTROWS(ALLSELECTED(Facts)),ALLSELECTED(Facts),REMOVEFILTERS(Facts[Region])))",
+   "powerbi": "6",
+   "table": "Facts"
+  },
+  {
+   "expr": "CALCULATE(SUMX(ALL(Facts[Region]),CALCULATE(SUM(Facts[Quantity]),ALLSELECTED(Facts))),Facts[Note]=\"\",KEEPFILTERS(Facts[Region]<>\"North\"))",
+   "powerbi": "24",
+   "table": "Facts"
+  },
+  {
+   "expr": "MINX(EXCEPT(VALUES(AS_D[t]),FILTER(VALUES(AS_D[t]),AS_D[t]<>\"z\")),SUMX(VALUES(AS_D[t]),CALCULATE(COUNTROWS(ALLSELECTED(AS_D[t],AS_D[n])),ALL(AS_D),ALLSELECTED(AS_D[n]))))",
+   "powerbi": "20",
+   "table": "AS_D"
+  },
+  {
+   "expr": "SUMX(FILTER(AS_A,AS_A[h]>=3),MAXX(KEEPFILTERS(FILTER(VALUES(AS_A[v]),AS_A[v]=40)),CALCULATE(COUNTROWS(AS_A),AS_A[v]<>40)))",
+   "powerbi": "1",
+   "table": "AS_A"
+  },
+  {
+   "expr": "CALCULATE(SUMX(KEEPFILTERS(GENERATE(FILTER(VALUES(AS_D[d]),AS_D[d]<DATE(2024,2,10)),ROW(\"z\",1))),CALCULATE(COUNTROWS(ALLSELECTED(AS_D[t])),AS_D[d]<DATE(2024,2,10))),AS_D[t]=\"y\",AS_D[d]<>DATE(2024,1,15))",
+   "powerbi": "BLANK",
+   "table": "AS_D"
+  },
+  {
+   "expr": "MAXX(FILTER(ALL(AS_D[t]),AS_D[t]=\"x\"),MAXX(FILTER(KEEPFILTERS(FILTER(ALL(AS_D[t]),AS_D[t]<>\"z\")),AS_D[t]<>\"z\"),CALCULATE(CALCULATE(COUNTROWS(ALLSELECTED(AS_D)),AS_D[d]>=DATE(2024,1,15)),AS_D[n]=2)))",
+   "powerbi": "1",
+   "table": "AS_D"
+  },
+  {
+   "expr": "CONCATENATEX(SUMMARIZE(Facts,Facts[Region],\"z\",CALCULATE(COUNTROWS(ALLSELECTED(Facts)),KEEPFILTERS(Facts[Region]=\"West\"),ALLSELECTED(Facts[Note]))),Facts[Region]&\":\"&[z],\",\",Facts[Region])",
+   "powerbi": "East:2,North:2,West:2",
+   "table": "Facts"
+  },
+  {
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(Facts[Quantity],FILTER(ALL(Facts[Region]),Facts[Region]<>\"North\"),\"z\",CALCULATE(COUNTROWS(ALLSELECTED(Facts)),ALL(Facts[Sales]),ALLSELECTED(Facts))),Facts[Quantity]&\":\"&[z],\",\",Facts[Quantity])",
+   "powerbi": "0:5,1:5,2:5,3:5,5:5",
+   "table": "Facts"
+  },
+  {
+   "expr": "MINX(SELECTCOLUMNS(Facts,\"c0\",Facts[Quantity],\"c1\",Facts[Sales]),CALCULATE(MAXX(FILTER(VALUES(Facts[Note]),Facts[Note]<>\"Late\"),COUNTROWS(ALLSELECTED(Facts[Sales]))),KEEPFILTERS(Facts[Sales]>=10),ALLSELECTED(Facts[Sales])))",
+   "powerbi": "2",
+   "table": "Facts"
+  },
+  {
+   "expr": "SUMX(KEEPFILTERS(FILTER(VALUES(Facts[Quantity]),Facts[Quantity]=4)),CALCULATE(SUMX(ALLSELECTED(Facts),Facts[Quantity]),Facts[Note]=\"Late\"))",
+   "powerbi": "4",
+   "table": "Facts"
+  },
+  {
+   "expr": "CALCULATE(AVERAGEX(CROSSJOIN(FILTER(VALUES(Facts[Region]),Facts[Region]=\"North\"),VALUES(Facts[Note])),AVERAGEX(CALCULATETABLE(Facts,Facts[Note]<>\"Late\"),CALCULATE(COUNTROWS(ALLSELECTED(Facts[Quantity])),ALLSELECTED(Facts),REMOVEFILTERS(Facts[Sales])))),Facts[Quantity]=3,ALLEXCEPT(Facts,Facts[Note]))",
+   "powerbi": "BLANK",
+   "table": "Facts"
+  },
+  {
+   "expr": "SUMX(CROSSJOIN(FILTER(VALUES(AS_D[t]),AS_D[t]=\"x\"),VALUES(AS_D[d])),SUMX(KEEPFILTERS(AS_D),COUNTROWS(ALLSELECTED(AS_D))))",
+   "powerbi": "40",
+   "table": "AS_D"
+  },
+  {
+   "expr": "MAXX(ALLSELECTED(Facts[Region]),COUNTX(FILTER(Facts,Facts[Region]=\"North\"),CALCULATE(COUNTROWS(Facts),FILTER(ALL(Facts[Note]),Facts[Note]<>\"\"),ALLSELECTED(Facts[Region]))))",
+   "powerbi": "1",
+   "table": "Facts"
+  },
+  {
+   "expr": "VAR t=Facts RETURN CALCULATE(SUMX(t,COUNTROWS(Facts)),Facts[Note]=\"Paid\")",
+   "powerbi": "18",
+   "table": "Facts"
+  },
+  {
+   "expr": "CALCULATE(MEDIANX(SUMMARIZE(FILTER(Facts,Facts[Note]=\"Late\"),Facts[Quantity],Facts[Note]),CALCULATE(COUNTROWS(ALLSELECTED(Facts[Quantity])),ALLSELECTED(Facts),REMOVEFILTERS(Facts[Region]))),Facts[Region]=\"East\",ALLEXCEPT(Facts,Facts[Region]))",
+   "powerbi": "BLANK",
+   "table": "Facts"
+  },
+  {
+   "expr": "VAR t=GENERATE(FILTER(VALUES(AS_D[t]),AS_D[t]=\"x\"),ROW(\"z\",1)) RETURN SUMX(t,SUMX(KEEPFILTERS(CALCULATETABLE(AS_D,AS_D[n]<>1)),CALCULATE(COUNTROWS(AS_D),ALLSELECTED(AS_D[d]))))",
+   "powerbi": "1",
+   "table": "AS_D"
+  },
+  {
+   "expr": "MEDIANX(KEEPFILTERS(ALLSELECTED(AS_A[v])),CALCULATE(COUNTROWS(ALLSELECTED(AS_A)),AS_A[h]<3))",
+   "powerbi": "7",
+   "table": "AS_A"
+  },
+  {
+   "expr": "MEDIANX(FILTER(FILTER(ALL(AS_A[h],AS_A[g]),AS_A[g]=\"a\"),AS_A[h]>=2),CALCULATE(COUNTROWS(AS_A),FILTER(ALL(AS_A[h]),AS_A[h]<2),FILTER(ALL(AS_A[h]),AS_A[h]<1)))",
+   "powerbi": "BLANK",
+   "table": "AS_A"
+  },
+  {
+   "expr": "VAR t=FILTER(VALUES(Facts[Sales]),Facts[Sales]>0) RETURN CALCULATE(SUMX(t,CALCULATE(COUNTROWS(Facts),ALLSELECTED(Facts[Sales]))),Facts[Sales]>=0)",
+   "powerbi": "9",
+   "table": "Facts"
+  },
+  {
+   "expr": "MEDIANX(ALLEXCEPT(AS_D,AS_D[n]),CALCULATE(SUM(AS_D[n]),ALLSELECTED(AS_D)))",
+   "powerbi": "15",
+   "table": "AS_D"
+  },
+  {
+   "expr": "MINX(ALL(AS_A[h]),CALCULATE(COUNTROWS(AS_A),ALLSELECTED(AS_A),FILTER(ALL(AS_A[v]),AS_A[v]<10)))",
+   "powerbi": "BLANK",
+   "table": "AS_A"
+  },
+  {
+   "expr": "SUMX(KEEPFILTERS(INTERSECT(VALUES(Facts[Note]),FILTER(VALUES(Facts[Note]),Facts[Note]<>\"\"))),COUNTROWS(Facts))",
+   "powerbi": "12",
+   "table": "Facts"
+  },
+  {
+   "expr": "CALCULATE(MINX(FILTER(SELECTCOLUMNS(AS_A,\"c0\",AS_A[h],\"c1\",AS_A[v]),AS_A[h]>3),COUNTROWS(AS_A)),AS_A[h]<1)",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 87) A single value for column 'h' in table 'AS_A' cannot be determined. This can happen when a measure or function formula refers to a column that contains many values without specifying an aggregation such as min, max, count, or sum to get a single result.\"",
+   "table": "AS_A"
+  },
+  {
+   "expr": "VAR t=FILTER(KEEPFILTERS(AS_D),AS_D[d]<DATE(2024,2,10)) RETURN CALCULATE(SUMX(t,COUNTROWS(FILTER(ALLSELECTED(AS_D),AS_D[d]<=DATE(2024,2,10)))),AS_D[t]<>\"x\")",
+   "powerbi": "9",
+   "table": "AS_D"
+  },
+  {
+   "expr": "CALCULATE(MAXX(SELECTCOLUMNS(KEEPFILTERS(FILTER(Facts,Facts[Sales]>2)),\"c0\",Facts[Note],\"c1\",Facts[Region]),CALCULATE(MINX(ALL(Facts[Sales]),COUNTROWS(Facts)),Facts[Region]=\"North\")),Facts[Sales]=0)",
+   "powerbi": "BLANK",
+   "table": "Facts"
+  },
+  {
+   "expr": "MEDIANX(Facts,CALCULATE(SUM(Facts[Quantity]),ALLSELECTED(Facts[Region]),Facts[Quantity]>4))",
+   "powerbi": "BLANK",
+   "table": "Facts"
+  },
+  {
+   "expr": "MINX(AS_A,MINX(KEEPFILTERS(ALLEXCEPT(AS_A,AS_A[v])),COUNTROWS(ALLSELECTED(AS_A[h]))))",
+   "powerbi": "4",
+   "table": "AS_A"
+  },
+  {
+   "expr": "CALCULATE(MEDIANX(ALL(Facts[Note]),COUNTX(GENERATE(FILTER(VALUES(Facts[Sales]),Facts[Sales]<2),ROW(\"z\",1)),SUMX(INTERSECT(VALUES(Facts[Quantity]),FILTER(VALUES(Facts[Quantity]),Facts[Quantity]=2)),COUNTROWS(ALLSELECTED(Facts))))),Facts[Quantity]<4,ALLEXCEPT(Facts,Facts[Region]))",
+   "powerbi": "BLANK",
+   "table": "Facts"
+  },
+  {
+   "expr": "VAR t=AS_A RETURN CALCULATE(SUMX(t,COUNTROWS(FILTER(ALLSELECTED(AS_A),ISBLANK(AS_A[h])))),AS_A[v]<>40)",
+   "powerbi": "8",
+   "table": "AS_A"
+  },
+  {
+   "expr": "VAR t=SUMMARIZE(FILTER(Facts,Facts[Sales]>=2),Facts[Note],Facts[Quantity]) RETURN CALCULATE(SUMX(t,MINX(INTERSECT(VALUES(Facts[Quantity]),FILTER(VALUES(Facts[Quantity]),Facts[Quantity]>4)),CALCULATE(SUM(Facts[Quantity]),ALLSELECTED(Facts)))),Facts[Quantity]<>0)",
+   "powerbi": "15",
+   "table": "Facts"
+  },
+  {
+   "expr": "MAXX(KEEPFILTERS(FILTER(ALL(AS_D[n]),AS_D[n]>2)),COUNTROWS(AS_D))",
+   "powerbi": "5",
+   "table": "AS_D"
+  },
+  {
+   "expr": "VAR t=AS_A RETURN CALCULATE(SUMX(t,CALCULATE(MEDIANX(GENERATE(FILTER(VALUES(AS_A[g]),AS_A[g]=\"a\"),ROW(\"z\",1)),COUNTROWS(ALLSELECTED(AS_A[h],AS_A[v]))),AS_A[g]<>\"a\")),AS_A[h]<3)",
+   "powerbi": "BLANK",
+   "table": "AS_A"
+  },
+  {
+   "expr": "AVERAGEX(FILTER(KEEPFILTERS(Facts),Facts[Sales]<>0),COUNTROWS(FILTER(ALLSELECTED(Facts),ISBLANK(Facts[Sales]))))",
+   "powerbi": "BLANK",
+   "table": "Facts"
+  },
+  {
+   "expr": "VAR t=AS_D RETURN CALCULATE(SUMX(t,COUNTROWS(FILTER(ALLSELECTED(AS_D),ISBLANK(AS_D[d])))),AS_D[n]=4)",
+   "powerbi": "5",
+   "table": "AS_D"
+  },
+  {
+   "expr": "MEDIANX(SUMMARIZE(CALCULATETABLE(Facts,Facts[Sales]<0),Facts[Quantity],Facts[Sales]),MINX(FILTER(VALUES(Facts[Region]),Facts[Region]<>\"East\"),COUNTROWS(FILTER(ALLSELECTED(Facts),(Facts[Region]=\"East\"||Facts[Note]=\"Late\")))))",
+   "powerbi": "BLANK",
+   "table": "Facts"
+  },
+  {
+   "expr": "VAR t=CALCULATETABLE(Facts,Facts[Note]<>\"Late\") RETURN SUMX(t,CALCULATE(SUM(Facts[Quantity]),KEEPFILTERS(Facts[Quantity]>=2),ALLSELECTED(Facts)))",
+   "powerbi": "50",
+   "table": "Facts"
+  },
+  {
+   "expr": "MEDIANX(ALLEXCEPT(AS_A,AS_A[h]),CALCULATE(MAXX(ALLEXCEPT(AS_A,AS_A[g]),MINX(FILTER(AS_A,AS_A[h]=2),CALCULATE(COUNTROWS(ALLSELECTED(AS_A[v])),ALLSELECTED(AS_A)))),AS_A[h]=2))",
+   "powerbi": "BLANK",
+   "table": "AS_A"
+  },
+  {
+   "expr": "CALCULATE(SUMX(ALLSELECTED(Facts[Note]),COUNTX(FILTER(KEEPFILTERS(VALUES(Facts[Region])),Facts[Region]=\"West\"),CALCULATE(COUNTROWS(Facts),ALLSELECTED(Facts[Note])))),Facts[Note]<>\"Paid\",ALLSELECTED(Facts))",
+   "powerbi": "2",
+   "table": "Facts"
+  },
+  {
+   "expr": "VAR t=GENERATE(FILTER(VALUES(AS_D[t]),AS_D[t]<>\"x\"),ROW(\"z\",1)) RETURN SUMX(t,CALCULATE(COUNTX(FILTER(ALL(AS_D[d],AS_D[t]),ISBLANK(AS_D[d])),CALCULATE(COUNTROWS(ALLSELECTED(AS_D)),REMOVEFILTERS(AS_D[t]),ALLSELECTED(AS_D[n]))),AS_D[t]<>\"z\"))",
+   "powerbi": "3",
+   "table": "AS_D"
+  },
+  {
+   "expr": "VAR t=EXCEPT(VALUES(AS_D[t]),FILTER(VALUES(AS_D[t]),AS_D[t]=\"z\")) RETURN SUMX(t,CALCULATE(SUM(AS_D[n]),ALLSELECTED(AS_D)))",
+   "powerbi": "30",
+   "table": "AS_D"
+  },
+  {
+   "expr": "MAXX(CALCULATETABLE(AS_A,AS_A[g]<>\"c\"),CALCULATE(COUNTROWS(AS_A),AS_A[h]<2,ALLSELECTED(AS_A)))",
+   "powerbi": "3",
+   "table": "AS_A"
+  },
+  {
+   "expr": "CALCULATE(COUNTX(SELECTCOLUMNS(Facts,\"c0\",Facts[Region],\"c1\",Facts[Quantity]),SUMX(FILTER(VALUES(Facts[Region]),Facts[Region]=\"North\"),SUMX(KEEPFILTERS(SUMMARIZE(FILTER(Facts,(Facts[Region]=\"East\"||Facts[Quantity]>=3)),Facts[Note],Facts[Quantity])),CALCULATE(COUNTROWS(ALLSELECTED(Facts)),ALL(Facts[Region]),ALL(Facts))))),Facts[Quantity]>=1,Facts[Quantity]<>4)",
+   "powerbi": "BLANK",
+   "table": "Facts"
+  },
+  {
+   "expr": "VAR t=ALL(AS_D[n]) RETURN CALCULATE(SUMX(t,CALCULATE(COUNTROWS(AS_D),AS_D[d]<>DATE(2024,1,15),ALLSELECTED(AS_D[n]))),AS_D[d]<>DATE(2024,3,5))",
+   "powerbi": "15",
+   "table": "AS_D"
+  },
+  {
+   "expr": "CALCULATE(SUMX(KEEPFILTERS(GENERATE(FILTER(VALUES(Facts[Region]),Facts[Region]=\"North\"),ROW(\"z\",1))),SUMX(ALLSELECTED(Facts),Facts[Quantity])),Facts[Quantity]>1,ALL(Facts[Quantity]))",
+   "powerbi": "4",
+   "table": "Facts"
+  },
+  {
+   "expr": "MAXX(ADDCOLUMNS(TOPN(1,Facts,Facts[Quantity]),\"x\",1),MEDIANX(FILTER(ALL(Facts[Sales],Facts[Quantity]),Facts[Quantity]=4),CALCULATE(COUNTROWS(ALLSELECTED(Facts)),Facts[Quantity]>0)))",
+   "powerbi": "BLANK",
+   "table": "Facts"
+  },
+  {
+   "expr": "VAR t=Facts RETURN SUMX(t,CALCULATE(SUMX(SUMMARIZE(FILTER(Facts,Facts[Sales]>=0),Facts[Sales],Facts[Note]),COUNTROWS(ALLSELECTED(Facts[Quantity],Facts[Region]))),Facts[Region]<>\"West\"))",
+   "powerbi": "12",
+   "table": "Facts"
+  },
+  {
+   "expr": "CALCULATE(MINX(KEEPFILTERS(GENERATE(FILTER(VALUES(Facts[Sales]),Facts[Sales]>2),ROW(\"z\",1))),COUNTX(ALLSELECTED(Facts[Sales]),CALCULATE(COUNTROWS(ALLSELECTED(Facts)),Facts[Sales]=2))),Facts[Region]<>\"North\")",
+   "powerbi": "BLANK",
+   "table": "Facts"
+  },
+  {
+   "expr": "SUMX(KEEPFILTERS(INTERSECT(VALUES(AS_A[h]),FILTER(VALUES(AS_A[h]),AS_A[h]<>1))),CALCULATE(MINX(TOPN(3,AS_A,AS_A[v]),COUNTX(FILTER(ALL(AS_A[g],AS_A[v]),(ISBLANK(AS_A[g])||AS_A[v]>=10)),COUNTROWS(ALLSELECTED(AS_A[v],AS_A[g])))),AS_A[v]<10))",
+   "powerbi": "BLANK",
+   "table": "AS_A"
+  },
+  {
+   "expr": "VAR t=FILTER(FILTER(AS_D,AS_D[n]<=3),(AS_D[t]<>\"x\"&&AS_D[n]>=2)) RETURN SUMX(t,CALCULATE(SUM(AS_D[n]),ALLEXCEPT(AS_D,AS_D[t]),ALLSELECTED(AS_D)))",
+   "powerbi": "2",
+   "table": "AS_D"
+  },
+  {
+   "expr": "CALCULATE(AVERAGEX(KEEPFILTERS(FILTER(AS_A,AS_A[v]>30)),CALCULATE(COUNTROWS(ALLSELECTED(AS_A)),AS_A[h]=2)),AS_A[g]=\"a\",AS_A[v]>10)",
+   "powerbi": "BLANK",
+   "table": "AS_A"
+  },
+  {
+   "expr": "AVERAGEX(FILTER(Facts,Facts[Note]=\"Late\"),CALCULATE(SUMX(KEEPFILTERS(ALLEXCEPT(Facts,Facts[Sales])),SUMX(ALLSELECTED(Facts),Facts[Quantity])),Facts[Note]=\"Late\"))",
+   "powerbi": "24",
+   "table": "Facts"
+  },
+  {
+   "expr": "VAR t=ALL(Facts[Region]) RETURN SUMX(t,CALCULATE(SUMX(Facts,CALCULATE(SUM(Facts[Quantity]),ALLSELECTED(Facts[Region]),FILTER(ALL(Facts[Quantity]),Facts[Quantity]>=1))),Facts[Quantity]>=1))",
+   "powerbi": "15",
+   "table": "Facts"
+  },
+  {
+   "expr": "SUMX(CALCULATETABLE(Facts,Facts[Region]<>\"North\"),COUNTX(CROSSJOIN(FILTER(VALUES(Facts[Sales]),Facts[Sales]<>2),VALUES(Facts[Note])),CALCULATE(SUM(Facts[Quantity]),ALLSELECTED(Facts[Note]))))",
+   "powerbi": "15",
+   "table": "Facts"
+  },
+  {
+   "expr": "VAR t=AS_A RETURN SUMX(t,COUNTROWS(ALLSELECTED(AS_A)))",
+   "powerbi": "64",
+   "table": "AS_A"
+  },
+  {
+   "expr": "VAR t=Facts RETURN SUMX(t,COUNTROWS(ALLSELECTED(Facts[Sales],Facts[Region])))",
+   "powerbi": "36",
+   "table": "Facts"
+  },
+  {
+   "expr": "MAXX(ADDCOLUMNS(SELECTCOLUMNS(FILTER(AS_D,(AS_D[d]<=DATE(2024,1,15)&&AS_D[n]>=2)),\"c0\",AS_D[d],\"c1\",AS_D[n]),\"x\",1),CALCULATE(MEDIANX(FILTER(ALL(AS_D[d],AS_D[t]),(AS_D[t]=\"y\"||AS_D[d]>=DATE(2024,2,10))),MAXX(GENERATE(FILTER(VALUES(AS_D[n]),AS_D[n]=1),ROW(\"z\",1)),SUMX(ALLSELECTED(AS_D),AS_D[n]))),AS_D[d]=DATE(2024,2,10)))",
+   "powerbi": "BLANK",
+   "table": "AS_D"
+  },
+  {
+   "expr": "VAR t=FILTER(VALUES(Facts[Region]),Facts[Region]=\"West\") RETURN CALCULATE(SUMX(t,CALCULATE(COUNTROWS(ALLSELECTED(Facts[Sales])),ALLSELECTED(Facts),ALLEXCEPT(Facts,Facts[Region]))),Facts[Sales]>0)",
+   "powerbi": "6",
+   "table": "Facts"
+  },
+  {
+   "expr": "MAXX(KEEPFILTERS(FILTER(AS_D,AS_D[n]<=1)),SUMX(FILTER(FILTER(ALL(AS_D[n]),AS_D[n]=4),AS_D[n]=2),AVERAGEX(ALLEXCEPT(AS_D,AS_D[d]),SUMX(ALLSELECTED(AS_D),AS_D[n]))))",
+   "powerbi": "BLANK",
+   "table": "AS_D"
+  },
+  {
+   "expr": "MEDIANX(SELECTCOLUMNS(FILTER(AS_D,AS_D[t]<>\"x\"),\"c0\",AS_D[d],\"c1\",AS_D[n]),COUNTROWS(FILTER(ALLSELECTED(AS_D),(AS_D[d]>DATE(2024,3,5)&&AS_D[t]=\"y\"))))",
+   "powerbi": "BLANK",
+   "table": "AS_D"
+  },
+  {
+   "expr": "MEDIANX(ALLEXCEPT(AS_A,AS_A[g]),CALCULATE(SUM(AS_A[v]),ALLSELECTED(AS_A)))",
+   "powerbi": "320",
+   "table": "AS_A"
+  },
+  {
+   "expr": "VAR t=Facts RETURN CALCULATE(SUMX(t,CALCULATE(COUNTROWS(ALLSELECTED(Facts)),Facts[Quantity]>2)),Facts[Region]=\"North\")",
+   "powerbi": "18",
+   "table": "Facts"
+  },
+  {
+   "expr": "COUNTX(ADDCOLUMNS(ALLSELECTED(Facts[Note]),\"x\",1),CALCULATE(MAXX(Facts,CALCULATE(MINX(KEEPFILTERS(TREATAS({\"East\",\"North\"},Facts[Region])),SUMX(ALLSELECTED(Facts),Facts[Quantity])),Facts[Quantity]=2)),Facts[Sales]<0))",
+   "powerbi": "BLANK",
+   "table": "Facts"
+  },
+  {
+   "expr": "CALCULATE(SUMX(FILTER(FILTER(Facts,Facts[Quantity]<=0),Facts[Region]=\"West\"),CALCULATE(MINX(INTERSECT(VALUES(Facts[Sales]),FILTER(VALUES(Facts[Sales]),Facts[Sales]<10)),COUNTX(KEEPFILTERS(TREATAS({0,10},Facts[Sales])),SUMX(ALLSELECTED(Facts),Facts[Quantity]))),Facts[Region]<>\"North\")),Facts[Note]=\"Late\",KEEPFILTERS(Facts[Region]<>\"North\"))",
+   "powerbi": "BLANK",
+   "table": "Facts"
+  },
+  {
+   "expr": "SUMX(KEEPFILTERS(VALUES(Facts[Note])),CALCULATE(COUNTROWS(ALLSELECTED(Facts)),Facts[Note]=\"\"))",
+   "powerbi": "6",
+   "table": "Facts"
+  },
+  {
+   "expr": "VAR t=Facts RETURN CALCULATE(SUMX(t,MAXX(KEEPFILTERS(Facts),CALCULATE(COUNTROWS(ALLSELECTED(Facts[Quantity])),Facts[Sales]<>2))),Facts[Note]=\"Late\")",
+   "powerbi": "6",
+   "table": "Facts"
+  },
+  {
+   "expr": "VAR t=AS_A RETURN SUMX(t,CALCULATE(COUNTROWS(ALLSELECTED(AS_A)),ALLSELECTED(AS_A)))",
+   "powerbi": "64",
+   "table": "AS_A"
+  },
+  {
+   "expr": "VAR t=AS_A RETURN SUMX(t,CALCULATE(COUNTROWS(ALLSELECTED(AS_A)),ALLEXCEPT(AS_A,AS_A[g]),KEEPFILTERS(AS_A[g]=\"c\")))",
+   "powerbi": "8",
+   "table": "AS_A"
+  },
+  {
+   "expr": "VAR t=Facts RETURN SUMX(t,SUMX(ALLSELECTED(Facts),Facts[Quantity]))",
+   "powerbi": "90",
+   "table": "Facts"
+  },
+  {
+   "expr": "VAR t=AS_D RETURN SUMX(t,MINX(AS_D,CALCULATE(SUM(AS_D[n]),REMOVEFILTERS(AS_D[n]))))",
+   "powerbi": "5",
+   "table": "AS_D"
+  },
+  {
+   "expr": "VAR t=Facts RETURN SUMX(t,CALCULATE(COUNTROWS(ALLSELECTED(Facts[Region])),ALLEXCEPT(Facts,Facts[Quantity]),Facts[Sales]<>0))",
+   "powerbi": "18",
+   "table": "Facts"
+  },
+  {
+   "expr": "MAXX(ALL(Facts[Quantity]),SUMX(SUMMARIZE(Facts,Facts[Region],Facts[Quantity]),MEDIANX(GENERATE(FILTER(VALUES(Facts[Region]),Facts[Region]=\"North\"),ROW(\"z\",1)),CALCULATE(COUNTROWS(ALLSELECTED(Facts)),Facts[Sales]>2))))",
+   "powerbi": "BLANK",
+   "table": "Facts"
+  },
+  {
+   "expr": "MEDIANX(ALLEXCEPT(AS_A,AS_A[v]),CALCULATE(SUM(AS_A[v]),ALLSELECTED(AS_A)))",
+   "powerbi": "320",
+   "table": "AS_A"
+  },
+  {
+   "expr": "MAXX(SELECTCOLUMNS(KEEPFILTERS(Facts),\"c0\",Facts[Region],\"c1\",Facts[Sales]),CALCULATE(COUNTROWS(Facts),Facts[Note]=\"\",ALLSELECTED(Facts[Region])))",
+   "powerbi": "1",
+   "table": "Facts"
+  },
+  {
+   "expr": "VAR t=GENERATE(FILTER(VALUES(AS_A[h]),AS_A[h]<2),ROW(\"z\",1)) RETURN CALCULATE(SUMX(t,CALCULATE(SUM(AS_A[v]),ALLSELECTED(AS_A))),AS_A[g]<>\"b\")",
+   "powerbi": "260",
+   "table": "AS_A"
+  },
+  {
+   "expr": "MEDIANX(CALCULATETABLE(AS_D,AS_D[d]<>DATE(2024,1,15)),CALCULATE(COUNTROWS(ALLSELECTED(AS_D)),AS_D[t]=\"y\"))",
+   "powerbi": "BLANK",
+   "table": "AS_D"
+  },
+  {
+   "expr": "MAXX(KEEPFILTERS(VALUES(AS_D[d])),CALCULATE(COUNTROWS(ALLSELECTED(AS_D)),AS_D[n]>4))",
+   "powerbi": "1",
+   "table": "AS_D"
+  },
+  {
+   "expr": "SUMX(SUMMARIZE(FILTER(AS_A,AS_A[v]<40),AS_A[v],AS_A[h]),MAXX(EXCEPT(VALUES(AS_A[h]),FILTER(VALUES(AS_A[h]),AS_A[h]<>1)),COUNTROWS(FILTER(ALLSELECTED(AS_A),AS_A[g]=\"b\"))))",
+   "powerbi": "3",
+   "table": "AS_A"
+  },
+  {
+   "expr": "MEDIANX(KEEPFILTERS(GENERATE(FILTER(VALUES(Facts[Region]),Facts[Region]=\"East\"),ROW(\"z\",1))),COUNTROWS(ALLSELECTED(Facts)))",
+   "powerbi": "3",
+   "table": "Facts"
+  },
+  {
+   "expr": "SUMX(KEEPFILTERS(FILTER(AS_D,AS_D[t]=\"y\")),SUMX(ALLSELECTED(AS_D),AS_D[n]))",
+   "powerbi": "2",
+   "table": "AS_D"
+  },
+  {
+   "expr": "SUMX(KEEPFILTERS(FILTER(AS_A,AS_A[g]=\"a\")),COUNTX(FILTER(ALL(AS_A[h]),AS_A[h]<2),COUNTROWS(FILTER(ALLSELECTED(AS_A),AS_A[g]=\"b\"))))",
+   "powerbi": "BLANK",
+   "table": "AS_A"
+  },
+  {
+   "expr": "MAXX(KEEPFILTERS(AS_D),COUNTROWS(ALLSELECTED(AS_D)))",
+   "powerbi": "5",
+   "table": "AS_D"
+  },
+  {
+   "expr": "VAR t=AS_D RETURN SUMX(t,SUMX(EXCEPT(VALUES(AS_D[d]),FILTER(VALUES(AS_D[d]),AS_D[d]>=DATE(2024,3,5))),CALCULATE(COUNTROWS(ALLSELECTED(AS_D[d])),AS_D[d]<DATE(2024,3,5))))",
+   "powerbi": "45",
+   "table": "AS_D"
+  },
+  {
+   "expr": "MAXX(Facts,CALCULATE(COUNTROWS(ALLSELECTED(Facts[Note])),ALLSELECTED(Facts[Note]),KEEPFILTERS(Facts[Region]=\"East\")))",
+   "powerbi": "3",
+   "table": "Facts"
+  },
+  {
+   "expr": "CALCULATE(MAXX(KEEPFILTERS(INTERSECT(VALUES(Facts[Quantity]),FILTER(VALUES(Facts[Quantity]),Facts[Quantity]<0))),CALCULATE(CALCULATE(COUNTROWS(ALLSELECTED(Facts)),ALLSELECTED(Facts[Quantity])),Facts[Sales]>0)),Facts[Region]=\"East\")",
+   "powerbi": "BLANK",
+   "table": "Facts"
+  },
+  {
+   "expr": "CONCATENATEX(SUMMARIZE(AS_D,AS_D[n],\"z\",CALCULATE(COUNTROWS(ALLSELECTED(AS_D[d])),AS_D[n]>=4,AS_D[n]<2)),AS_D[n]&\":\"&[z],\",\",AS_D[n])",
+   "powerbi": "1:1,2:1,3:1,4:1,5:1",
+   "table": "AS_D"
+  },
+  {
+   "expr": "MAXX(FILTER(VALUES(AS_A[g]),AS_A[g]=\"b\"),MAXX(KEEPFILTERS(ALLEXCEPT(AS_A,AS_A[v])),CALCULATE(COUNTROWS(ALLSELECTED(AS_A)),ALLSELECTED(AS_A[v]))))",
+   "powerbi": "3",
+   "table": "AS_A"
+  },
+  {
+   "expr": "MINX(ALLSELECTED(AS_D[t]),SUMX(FILTER(ALL(AS_D[t]),AS_D[t]<>\"x\"),CALCULATE(COUNTROWS(AS_D),ALLSELECTED(AS_D[t]))))",
+   "powerbi": "9",
+   "table": "AS_D"
+  },
+  {
+   "expr": "SUMX(KEEPFILTERS(ADDCOLUMNS(FILTER(Facts,Facts[Sales]<=0),\"x\",1)),COUNTROWS(Facts))",
+   "powerbi": "18",
+   "table": "Facts"
+  },
+  {
+   "expr": "CALCULATE(MAXX(KEEPFILTERS(ALLSELECTED(AS_A[v])),SUMX(FILTER(ALL(AS_A[h],AS_A[g]),ISBLANK(AS_A[g])),SUMX(ALLSELECTED(AS_A),AS_A[v]))),AS_A[g]<>\"c\",ALLEXCEPT(AS_A,AS_A[g]))",
+   "powerbi": "60",
+   "table": "AS_A"
+  },
+  {
+   "expr": "CALCULATE(SUMX(TREATAS({DATE(2024,2,10),DATE(2024,1,15)},AS_D[d]),CALCULATE(CALCULATE(COUNTROWS(AS_D),ALLSELECTED(AS_D[t])),ALLSELECTED(AS_D),FILTER(ALL(AS_D[d]),AS_D[d]>DATE(2024,3,5)))),AS_D[d]>=DATE(2024,2,10))",
+   "powerbi": "BLANK",
+   "table": "AS_D"
+  },
+  {
+   "expr": "MAXX(INTERSECT(VALUES(Facts[Sales]),FILTER(VALUES(Facts[Sales]),Facts[Sales]=0)),SUMX(KEEPFILTERS(CALCULATETABLE(Facts,Facts[Quantity]<>0)),SUMX(ALLSELECTED(Facts),Facts[Quantity])))",
+   "powerbi": "4",
+   "table": "Facts"
+  },
+  {
+   "expr": "MAXX(SELECTCOLUMNS(AS_D,\"c0\",AS_D[d],\"c1\",AS_D[n]),AVERAGEX(SUMMARIZE(FILTER(AS_D,AS_D[d]<=DATE(2024,2,10)),AS_D[n],AS_D[t]),CALCULATE(SUM(AS_D[n]),ALLSELECTED(AS_D))))",
+   "powerbi": "11",
+   "table": "AS_D"
+  },
+  {
+   "expr": "SUMX(ALL(Facts[Sales]),CALCULATE(MAXX(TREATAS({\"West\",\"North\"},Facts[Region]),CALCULATE(COUNTROWS(Facts),Facts[Sales]<>10)),ALL(Facts[Region]),ALLSELECTED(Facts)))",
+   "powerbi": "12",
+   "table": "Facts"
+  },
+  {
+   "expr": "CALCULATE(SUMX(KEEPFILTERS(CROSSJOIN(FILTER(VALUES(Facts[Sales]),Facts[Sales]<0),VALUES(Facts[Note]))),MAXX(FILTER(ALL(Facts[Note],Facts[Region]),Facts[Region]<>\"West\"),CALCULATE(SUM(Facts[Quantity]),FILTER(ALL(Facts[Quantity]),Facts[Quantity]<>1),ALL(Facts[Sales])))),Facts[Region]=\"North\",FILTER(ALL(Facts[Note]),Facts[Note]<>\"Paid\"))",
+   "powerbi": "BLANK",
+   "table": "Facts"
+  },
+  {
+   "expr": "SUMX(KEEPFILTERS(SUMMARIZE(FILTER(Facts,Facts[Region]=\"North\"),Facts[Region],Facts[Sales])),MAXX(EXCEPT(VALUES(Facts[Region]),FILTER(VALUES(Facts[Region]),Facts[Region]=\"West\")),CALCULATE(COUNTROWS(ALLSELECTED(Facts[Note])),ALL(Facts),ALLSELECTED(Facts))))",
+   "powerbi": "3",
+   "table": "Facts"
+  },
+  {
+   "expr": "MAXX(AS_A,SUMX(FILTER(VALUES(AS_A[h]),AS_A[h]>=1),CALCULATE(SUM(AS_A[v]),ALLSELECTED(AS_A))))",
+   "powerbi": "750",
+   "table": "AS_A"
+  },
+  {
+   "expr": "MINX(KEEPFILTERS(FILTER(Facts,(Facts[Region]=\"East\"||Facts[Quantity]>=3))),MAXX(FILTER(FILTER(VALUES(Facts[Region]),Facts[Region]<>\"North\"),Facts[Region]=\"West\"),COUNTROWS(ALLSELECTED(Facts[Note],Facts[Quantity]))))",
+   "powerbi": "5",
+   "table": "Facts"
+  },
+  {
+   "expr": "CALCULATE(MAXX(ADDCOLUMNS(EXCEPT(VALUES(AS_A[h]),FILTER(VALUES(AS_A[h]),AS_A[h]<>2)),\"x\",1),CALCULATE(COUNTROWS(ALLSELECTED(AS_A[v])),REMOVEFILTERS(AS_A[g]),ALLSELECTED(AS_A[h]))),AS_A[v]>=10)",
+   "powerbi": "7",
+   "table": "AS_A"
+  },
+  {
+   "expr": "CALCULATE(SUMX(FILTER(ALL(Facts[Region],Facts[Sales]),Facts[Region]=\"North\"),SUMX(Facts,CALCULATE(CALCULATE(COUNTROWS(Facts),ALLSELECTED(Facts)),ALL(Facts),ALLSELECTED(Facts[Quantity])))),Facts[Sales]<>10,ALLEXCEPT(Facts,Facts[Note]))",
+   "powerbi": "36",
+   "table": "Facts"
+  },
+  {
+   "expr": "CONCATENATEX(SUMMARIZE(Facts,Facts[Note],\"z\",CALCULATE(COUNTROWS(ALLSELECTED(Facts[Note])),Facts[Sales]=0)),Facts[Note]&\":\"&[z],\",\",Facts[Note])",
+   "powerbi": ":3,Late:3,Paid:3",
+   "table": "Facts"
+  },
+  {
+   "expr": "MAXX(SUMMARIZE(FILTER(AS_D,(AS_D[n]=3||AS_D[d]>=DATE(2024,2,10))),AS_D[t],AS_D[d]),MAXX(INTERSECT(VALUES(AS_D[n]),FILTER(VALUES(AS_D[n]),AS_D[n]=4)),CALCULATE(CALCULATE(COUNTROWS(ALLSELECTED(AS_D)),AS_D[t]=\"x\"),ALLEXCEPT(AS_D,AS_D[d]),ALLSELECTED(AS_D))))",
+   "powerbi": "1",
+   "table": "AS_D"
+  },
+  {
+   "expr": "CALCULATE(SUMX(ALLSELECTED(Facts[Note]),CALCULATE(CALCULATE(SUM(Facts[Quantity]),ALLSELECTED(Facts)),KEEPFILTERS(Facts[Region]<>\"West\"))),Facts[Quantity]>=2,ALL(Facts))",
+   "powerbi": "33",
+   "table": "Facts"
+  },
+  {
+   "expr": "MAXX(KEEPFILTERS(ADDCOLUMNS(SUMMARIZE(FILTER(AS_D,AS_D[n]<>4),AS_D[t],AS_D[d]),\"x\",1)),CALCULATE(CALCULATE(SUM(AS_D[n]),ALLSELECTED(AS_D[n])),AS_D[t]<>\"y\"))",
+   "powerbi": "5",
+   "table": "AS_D"
+  },
+  {
+   "expr": "CALCULATE(MAXX(KEEPFILTERS(ALL(AS_A[g])),SUMX(FILTER(AS_A,ISBLANK(AS_A[v])),CALCULATE(COUNTROWS(ALLSELECTED(AS_A)),ALL(AS_A[g])))),AS_A[g]=\"c\",ALLSELECTED(AS_A[g]))",
+   "powerbi": "BLANK",
+   "table": "AS_A"
+  },
+  {
+   "expr": "SUMX(ALL(Facts[Quantity]),CALCULATE(CALCULATE(COUNTROWS(Facts),ALLSELECTED(Facts)),ALLSELECTED(Facts),ALL(Facts)))",
+   "powerbi": "36",
+   "table": "Facts"
+  },
+  {
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(AS_D[t],\"z\",SUMX(FILTER(AS_D,AS_D[t]=\"z\"),CALCULATE(COUNTROWS(ALLSELECTED(AS_D[n])),FILTER(ALL(AS_D[n]),AS_D[n]<2),ALLSELECTED(AS_D)))),AS_D[t]&\":\"&[z],\",\",AS_D[t])",
+   "powerbi": "z:1",
+   "table": "AS_D"
+  },
+  {
+   "expr": "SUMX(FILTER(VALUES(Facts[Quantity]),Facts[Quantity]<1),SUMX(ALL(Facts[Note]),CALCULATE(CALCULATE(COUNTROWS(ALLSELECTED(Facts[Note])),ALLSELECTED(Facts[Sales]),ALLSELECTED(Facts)),Facts[Note]=\"\",ALLSELECTED(Facts[Region]))))",
+   "powerbi": "3",
+   "table": "Facts"
+  },
+  {
+   "expr": "MINX(ADDCOLUMNS(ALLSELECTED(Facts[Sales]),\"x\",1),MAXX(FILTER(KEEPFILTERS(FILTER(ALL(Facts[Note]),Facts[Note]=\"Late\")),Facts[Note]=\"Late\"),CALCULATE(COUNTROWS(ALLSELECTED(Facts[Sales])),KEEPFILTERS(Facts[Quantity]>=1))))",
+   "powerbi": "6",
+   "table": "Facts"
+  },
+  {
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(AS_A[h],FILTER(ALL(AS_A[g]),AS_A[g]<>\"a\"),\"z\",COUNTX(KEEPFILTERS(ADDCOLUMNS(SUMMARIZE(FILTER(AS_A,AS_A[g]<>\"b\"),AS_A[g],AS_A[h]),\"x\",1)),CALCULATE(COUNTROWS(ALLSELECTED(AS_A)),AS_A[v]<30,ALLSELECTED(AS_A[v])))),AS_A[h]&\":\"&[z],\",\",AS_A[h])",
+   "powerbi": "BLANK",
+   "table": "AS_A"
+  },
+  {
+   "expr": "CONCATENATEX(SUMMARIZE(AS_A,AS_A[g],\"z\",CALCULATE(COUNTROWS(ALLSELECTED(AS_A[g])),AS_A[v]=30)),AS_A[g]&\":\"&[z],\",\",AS_A[g])",
+   "powerbi": ":4,a:4,b:4,c:4",
+   "table": "AS_A"
+  },
+  {
+   "expr": "SUMX(EXCEPT(VALUES(Facts[Region]),FILTER(VALUES(Facts[Region]),Facts[Region]=\"East\")),MAXX(ADDCOLUMNS(CALCULATETABLE(Facts,Facts[Region]<>\"North\"),\"x\",1),CALCULATE(COUNTROWS(ALLSELECTED(Facts[Note],Facts[Quantity])),ALLSELECTED(Facts[Sales]),FILTER(ALL(Facts[Sales]),Facts[Sales]=0))))",
+   "powerbi": "10",
+   "table": "Facts"
+  },
+  {
+   "expr": "SUMX(SUMMARIZE(AS_D,AS_D[d],AS_D[t]),CALCULATE(CALCULATE(SUM(AS_D[n]),ALLSELECTED(AS_D),FILTER(ALL(AS_D[n]),AS_D[n]=1)),AS_D[t]=\"x\"))",
+   "powerbi": "5",
+   "table": "AS_D"
+  },
+  {
+   "expr": "MAXX(Facts,CALCULATE(MAXX(KEEPFILTERS(Facts),CALCULATE(SUM(Facts[Quantity]),Facts[Region]=\"West\")),Facts[Region]<>\"East\",ALL(Facts[Sales])))",
+   "powerbi": "3",
+   "table": "Facts"
+  },
+  {
+   "expr": "CONCATENATEX(SUMMARIZE(FILTER(AS_A,AS_A[g]=\"b\"),AS_A[h],\"z\",COUNTX(FILTER(ALL(AS_A[v]),AS_A[v]>40),CALCULATE(SUM(AS_A[v]),ALLSELECTED(AS_A)))),AS_A[h]&\":\"&[z],\",\",AS_A[h])",
+   "powerbi": "1:,2:",
+   "table": "AS_A"
+  },
+  {
+   "expr": "CALCULATE(SUMX(KEEPFILTERS(FILTER(VALUES(AS_D[n]),AS_D[n]>4)),CALCULATE(SUMX(INTERSECT(VALUES(AS_D[t]),FILTER(VALUES(AS_D[t]),AS_D[t]<>\"y\")),COUNTROWS(AS_D)),AS_D[t]=\"z\")),AS_D[n]<2,AS_D[n]=3)",
+   "powerbi": "BLANK",
+   "table": "AS_D"
+  },
+  {
+   "expr": "CALCULATE(SUMX(ADDCOLUMNS(ALLEXCEPT(AS_A,AS_A[g]),\"x\",1),CALCULATE(SUMX(KEEPFILTERS(ALLSELECTED(AS_A[v])),SUMX(ALLSELECTED(AS_A),AS_A[v])),AS_A[h]=3)),AS_A[h]>=3,ALLEXCEPT(AS_A,AS_A[g]))",
+   "powerbi": "2940",
+   "table": "AS_A"
+  },
+  {
+   "expr": "CONCATENATEX(SUMMARIZE(UNION(CALCULATETABLE(AS_A,AS_A[v]=40),AS_A),AS_A[v],\"z\",COUNTROWS(AS_A)),AS_A[v]&\":\"&[z],\",\",AS_A[v])",
+   "powerbi": "10:1,20:1,30:1,40:2,50:1,60:1,70:1",
+   "table": "AS_A"
+  },
+  {
+   "expr": "MINX(ALLEXCEPT(AS_A,AS_A[v]),SUMX(FILTER(ALL(AS_A[h],AS_A[v]),AS_A[v]>=50),CALCULATE(SUM(AS_A[v]),ALLSELECTED(AS_A))))",
+   "powerbi": "540",
+   "table": "AS_A"
+  },
+  {
+   "expr": "SUMX(KEEPFILTERS(AS_A),MAXX(ALLEXCEPT(AS_A,AS_A[h]),CALCULATE(CALCULATE(COUNTROWS(AS_A),AS_A[h]=3),ALL(AS_A))))",
+   "powerbi": "8",
+   "table": "AS_A"
+  },
+  {
+   "expr": "MAXX(CALCULATETABLE(Facts,Facts[Quantity]<4),SUMX(FILTER(GENERATE(FILTER(VALUES(Facts[Quantity]),Facts[Quantity]>=4),ROW(\"z\",1)),Facts[Quantity]>1),CALCULATE(COUNTROWS(ALLSELECTED(Facts[Quantity],Facts[Region])),Facts[Quantity]<3,ALLSELECTED(Facts[Sales]))))",
+   "powerbi": "6",
+   "table": "Facts"
+  },
+  {
+   "expr": "MINX(FILTER(INTERSECT(VALUES(AS_A[h]),FILTER(VALUES(AS_A[h]),AS_A[h]<3)),AS_A[h]<3),SUMX(AS_A,CALCULATE(CALCULATE(COUNTROWS(AS_A),ALLSELECTED(AS_A[v])),AS_A[g]<>\"a\")))",
+   "powerbi": "11",
+   "table": "AS_A"
+  },
+  {
+   "expr": "CALCULATE(MAXX(ALLEXCEPT(AS_A,AS_A[h]),SUMX(EXCEPT(VALUES(AS_A[h]),FILTER(VALUES(AS_A[h]),AS_A[h]=1)),CALCULATE(COUNTROWS(AS_A),ALLSELECTED(AS_A[g]),ALL(AS_A)))),AS_A[g]<>\"a\")",
+   "powerbi": "24",
+   "table": "AS_A"
+  },
+  {
+   "expr": "MINX(FILTER(ALL(AS_D[n],AS_D[t]),(ISBLANK(AS_D[n])||AS_D[t]=\"y\")),SUMX(AS_D,CALCULATE(CALCULATE(COUNTROWS(AS_D),ALLSELECTED(AS_D[d]),ALL(AS_D)),AS_D[n]<>4)))",
+   "powerbi": "25",
+   "table": "AS_D"
+  },
+  {
+   "expr": "CALCULATE(MAXX(CALCULATETABLE(Facts,Facts[Quantity]>2),SUMX(KEEPFILTERS(VALUES(Facts[Region])),CALCULATE(CALCULATE(COUNTROWS(ALLSELECTED(Facts[Sales])),Facts[Region]=\"West\"),FILTER(ALL(Facts[Region]),Facts[Region]=\"East\")))),Facts[Quantity]<>3,KEEPFILTERS(Facts[Quantity]>4))",
+   "powerbi": "3",
+   "table": "Facts"
+  },
+  {
+   "expr": "CALCULATE(MAXX(KEEPFILTERS(CALCULATETABLE(AS_D,AS_D[d]=DATE(2024,2,10))),MAXX(TREATAS({\"z\",\"x\"},AS_D[t]),CALCULATE(CALCULATE(COUNTROWS(ALLSELECTED(AS_D)),ALLSELECTED(AS_D[n]),KEEPFILTERS(AS_D[d]<>DATE(2024,2,10))),AS_D[d]<>DATE(2024,1,15),ALLEXCEPT(AS_D,AS_D[n])))),AS_D[d]<>DATE(2024,3,5),ALL(AS_D[t]))",
+   "powerbi": "BLANK",
+   "table": "AS_D"
+  },
+  {
+   "expr": "SUMX(SELECTCOLUMNS(AS_A,\"c0\",AS_A[g],\"c1\",AS_A[v]),CALCULATE(COUNTROWS(ALLSELECTED(AS_A)),AS_A[v]=10,ALLSELECTED(AS_A[v])))",
+   "powerbi": "8",
+   "table": "AS_A"
+  },
+  {
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(Facts[Sales],FILTER(ALL(Facts[Quantity]),Facts[Quantity]>=1),\"z\",CALCULATE(COUNTROWS(ALLSELECTED(Facts)),ALLSELECTED(Facts[Sales]),REMOVEFILTERS(Facts[Sales]))),Facts[Sales]&\":\"&[z],\",\",Facts[Sales])",
+   "powerbi": "-1.5:5,:5,2.5:5,10.5:5,20:5",
+   "table": "Facts"
+  },
+  {
+   "expr": "MINX(KEEPFILTERS(ADDCOLUMNS(ALL(AS_A[g]),\"x\",1)),MAXX(FILTER(AS_A,ISBLANK(AS_A[g])),COUNTROWS(AS_A)))",
+   "powerbi": "8",
+   "table": "AS_A"
+  },
+  {
+   "expr": "CALCULATE(MAXX(ALLSELECTED(Facts[Sales]),SUMX(KEEPFILTERS(CALCULATETABLE(Facts,Facts[Quantity]>=0)),COUNTROWS(ALLSELECTED(Facts[Sales],Facts[Region])))),Facts[Note]=\"\",ALLSELECTED(Facts))",
+   "powerbi": "1",
+   "table": "Facts"
+  },
+  {
+   "expr": "COUNTX(KEEPFILTERS(CALCULATETABLE(AS_A,AS_A[h]<>2)),MAXX(SELECTCOLUMNS(AS_A,\"c0\",AS_A[v],\"c1\",AS_A[h]),AVERAGEX(FILTER(ALL(AS_A[h]),AS_A[h]>=2),COUNTROWS(ALLSELECTED(AS_A)))))",
+   "powerbi": "5",
+   "table": "AS_A"
+  },
+  {
+   "expr": "MAXX(KEEPFILTERS(FILTER(Facts,Facts[Note]=\"Paid\")),CALCULATE(MAXX(FILTER(Facts,(Facts[Region]=\"East\"||Facts[Note]=\"\")),COUNTROWS(ALLSELECTED(Facts[Region]))),Facts[Region]<>\"West\"))",
+   "powerbi": "1",
+   "table": "Facts"
+  },
+  {
+   "expr": "SUMX(INTERSECT(VALUES(AS_D[d]),FILTER(VALUES(AS_D[d]),AS_D[d]>=DATE(2024,2,10))),CALCULATE(SUM(AS_D[n]),ALLSELECTED(AS_D)))",
+   "powerbi": "14",
+   "table": "AS_D"
+  },
+  {
+   "expr": "VAR t=Facts RETURN SUMX(t,SUMX(SUMMARIZE(FILTER(Facts,Facts[Quantity]>=3),Facts[Note],Facts[Quantity]),COUNTROWS(ALLSELECTED(Facts[Quantity]))))",
+   "powerbi": "54",
+   "table": "Facts"
+  },
+  {
+   "expr": "SUMX(KEEPFILTERS(VALUES(AS_D[t])),CALCULATE(MEDIANX(AS_D,COUNTROWS(AS_D)),AS_D[n]<>3))",
+   "powerbi": "4",
+   "table": "AS_D"
+  },
+  {
+   "expr": "SUMX(INTERSECT(VALUES(AS_A[v]),FILTER(VALUES(AS_A[v]),AS_A[v]=50)),SUMX(KEEPFILTERS(EXCEPT(VALUES(AS_A[g]),FILTER(VALUES(AS_A[g]),AS_A[g]=\"c\"))),SUMX(ALLSELECTED(AS_A),AS_A[v])))",
+   "powerbi": "150",
+   "table": "AS_A"
+  },
+  {
+   "expr": "MINX(KEEPFILTERS(Facts),SUMX(Facts,SUMX(ALLSELECTED(Facts),Facts[Quantity])))",
+   "powerbi": "90",
+   "table": "Facts"
+  },
+  {
+   "expr": "VAR t=AS_D RETURN CALCULATE(SUMX(t,CALCULATE(COUNTROWS(AS_D),ALLSELECTED(AS_D[d]))),AS_D[t]=\"y\")",
+   "powerbi": "5",
+   "table": "AS_D"
+  },
+  {
+   "expr": "MAXX(KEEPFILTERS(VALUES(AS_D[t])),COUNTROWS(AS_D))",
+   "powerbi": "5",
+   "table": "AS_D"
+  },
+  {
+   "expr": "VAR t=Facts RETURN CALCULATE(SUMX(t,COUNTROWS(ALLSELECTED(Facts[Sales],Facts[Region]))),Facts[Quantity]>=1)",
+   "powerbi": "36",
+   "table": "Facts"
+  },
+  {
+   "expr": "CALCULATE(MEDIANX(ADDCOLUMNS(TREATAS({50,30},AS_A[v]),\"x\",1),CALCULATE(COUNTROWS(AS_A),FILTER(ALL(AS_A[h]),AS_A[h]=3))),AS_A[g]<>\"b\",AS_A[v]<>10)",
+   "powerbi": "BLANK",
+   "table": "AS_A"
+  },
+  {
+   "expr": "VAR t=Facts RETURN CALCULATE(SUMX(t,CALCULATE(MAXX(KEEPFILTERS(FILTER(FILTER(Facts,ISBLANK(Facts[Note])),Facts[Quantity]<0)),COUNTROWS(Facts)),Facts[Note]=\"\")),Facts[Sales]>0)",
+   "powerbi": "BLANK",
+   "table": "Facts"
+  },
+  {
+   "expr": "MINX(KEEPFILTERS(GENERATE(FILTER(VALUES(AS_A[g]),AS_A[g]=\"a\"),ROW(\"z\",1))),COUNTROWS(ALLSELECTED(AS_A[v],AS_A[h])))",
+   "powerbi": "7",
+   "table": "AS_A"
+  },
+  {
+   "expr": "CALCULATE(MAXX(TREATAS({DATE(2024,2,10),DATE(2024,1,15)},AS_D[d]),CALCULATE(COUNTROWS(AS_D),ALLSELECTED(AS_D[d]))),AS_D[t]<>\"y\",ALLSELECTED(AS_D[n]))",
+   "powerbi": "2",
+   "table": "AS_D"
+  },
+  {
+   "expr": "SUMX(KEEPFILTERS(SUMMARIZE(FILTER(AS_A,AS_A[v]>=40),AS_A[h],AS_A[g])),CALCULATE(SUMX(EXCEPT(VALUES(AS_A[g]),FILTER(VALUES(AS_A[g]),AS_A[g]<>\"a\")),SUMX(FILTER(ALL(AS_A[g]),AS_A[g]=\"b\"),CALCULATE(COUNTROWS(AS_A),ALLSELECTED(AS_A),ALL(AS_A[h])))),AS_A[h]>2))",
+   "powerbi": "BLANK",
+   "table": "AS_A"
+  },
+  {
+   "expr": "VAR t=Facts RETURN CALCULATE(SUMX(t,CALCULATE(SUM(Facts[Quantity]),ALLSELECTED(Facts))),Facts[Quantity]=1)",
+   "powerbi": "90",
+   "table": "Facts"
+  },
+  {
+   "expr": "SUMX(SUMMARIZE(FILTER(AS_D,AS_D[d]>DATE(2024,1,15)),AS_D[t],AS_D[n]),CALCULATE(COUNTROWS(ALLSELECTED(AS_D[t])),ALLSELECTED(AS_D),AS_D[n]<3))",
+   "powerbi": "4",
+   "table": "AS_D"
+  },
+  {
+   "expr": "MEDIANX(ALLSELECTED(AS_D[d]),COUNTROWS(FILTER(ALLSELECTED(AS_D),ISBLANK(AS_D[n]))))",
+   "powerbi": "BLANK",
+   "table": "AS_D"
+  },
+  {
+   "expr": "AVERAGEX(KEEPFILTERS(AS_D),CALCULATE(SUM(AS_D[n]),ALL(AS_D)))",
+   "powerbi": "15",
+   "table": "AS_D"
+  },
+  {
+   "expr": "AVERAGEX(FILTER(VALUES(AS_D[t]),AS_D[t]=\"y\"),COUNTX(KEEPFILTERS(FILTER(FILTER(FILTER(SUMMARIZE(FILTER(FILTER(AS_D,AS_D[d]<DATE(2024,2,10)),ISBLANK(AS_D[t])),AS_D[t],AS_D[d]),AS_D[d]>DATE(2024,1,15)),AS_D[t]=\"x\"),AS_D[t]<>\"x\")),COUNTROWS(FILTER(ALLSELECTED(AS_D),AS_D[t]<>\"z\"))))",
+   "powerbi": "BLANK",
+   "table": "AS_D"
+  },
+  {
+   "expr": "MEDIANX(EXCEPT(VALUES(Facts[Region]),FILTER(VALUES(Facts[Region]),Facts[Region]=\"East\")),MINX(FILTER(Facts,ISBLANK(Facts[Quantity])),MINX(FILTER(ALL(Facts[Region],Facts[Note]),Facts[Region]=\"East\"),COUNTROWS(ALLSELECTED(Facts)))))",
+   "powerbi": "BLANK",
+   "table": "Facts"
+  },
+  {
+   "expr": "VAR t=INTERSECT(VALUES(Facts[Sales]),FILTER(VALUES(Facts[Sales]),Facts[Sales]>=0)) RETURN SUMX(t,CALCULATE(SUM(Facts[Quantity]),ALLSELECTED(Facts)))",
+   "powerbi": "70",
+   "table": "Facts"
+  },
+  {
+   "expr": "VAR t=AS_D RETURN SUMX(t,COUNTROWS(ALLSELECTED(AS_D)))",
+   "powerbi": "25",
+   "table": "AS_D"
+  },
+  {
+   "expr": "AVERAGEX(FILTER(FILTER(FILTER(VALUES(AS_D[d]),AS_D[d]=DATE(2024,1,15)),AS_D[d]>DATE(2024,3,5)),AS_D[d]>=DATE(2024,2,10)),CALCULATE(COUNTROWS(AS_D),ALL(AS_D[n]),ALLSELECTED(AS_D[t])))",
+   "powerbi": "BLANK",
+   "table": "AS_D"
+  },
+  {
+   "expr": "MAXX(ALL(Facts[Sales]),CALCULATE(COUNTROWS(Facts),ALLSELECTED(Facts)))",
+   "powerbi": "6",
+   "table": "Facts"
+  },
+  {
+   "expr": "AVERAGEX(ALL(Facts[Note]),SUMX(KEEPFILTERS(SUMMARIZE(FILTER(Facts,Facts[Region]=\"West\"),Facts[Quantity],Facts[Sales])),SUMX(ALLSELECTED(Facts),Facts[Quantity])))",
+   "powerbi": "6",
+   "table": "Facts"
+  },
+  {
+   "expr": "VAR t=AS_D RETURN CALCULATE(SUMX(t,COUNTROWS(AS_D)),AS_D[n]<2)",
+   "powerbi": "5",
+   "table": "AS_D"
+  },
+  {
+   "expr": "SUMX(KEEPFILTERS(ALL(AS_A[h])),COUNTROWS(ALLSELECTED(AS_A)))",
+   "powerbi": "32",
+   "table": "AS_A"
+  },
+  {
+   "expr": "MAXX(FILTER(SELECTCOLUMNS(Facts,\"c0\",Facts[Note],\"c1\",Facts[Sales]),Facts[Sales]>10),COUNTROWS(ALLSELECTED(Facts[Quantity])))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 87) A single value for column 'Sales' in table 'Facts' cannot be determined. This can happen when a measure or function formula refers to a column that contains many values without specifying an aggregation such as min, max, count, or sum to get a single result.\"",
+   "table": "Facts"
+  },
+  {
+   "expr": "SUMX(KEEPFILTERS(SELECTCOLUMNS(FILTER(Facts,Facts[Region]<>\"North\"),\"c0\",Facts[Note],\"c1\",Facts[Sales])),CALCULATE(COUNTROWS(Facts),FILTER(ALL(Facts[Sales]),Facts[Sales]=0)))",
+   "powerbi": "3",
+   "table": "Facts"
+  },
+  {
+   "expr": "MEDIANX(CROSSJOIN(FILTER(VALUES(AS_A[g]),AS_A[g]=\"b\"),VALUES(AS_A[h])),AVERAGEX(EXCEPT(VALUES(AS_A[v]),FILTER(VALUES(AS_A[v]),AS_A[v]>=10)),COUNTROWS(ALLSELECTED(AS_A))))",
+   "powerbi": "BLANK",
+   "table": "AS_A"
+  },
+  {
+   "expr": "VAR t=ALLEXCEPT(AS_D,AS_D[t]) RETURN SUMX(t,COUNTX(SELECTCOLUMNS(KEEPFILTERS(FILTER(FILTER(AS_D,AS_D[t]=\"y\"),(AS_D[n]>=4||AS_D[d]>=DATE(2024,3,5)))),\"c0\",AS_D[d],\"c1\",AS_D[n]),CALCULATE(SUM(AS_D[n]),ALLSELECTED(AS_D))))",
+   "powerbi": "BLANK",
+   "table": "AS_D"
+  },
+  {
+   "expr": "VAR t=AS_A RETURN SUMX(t,COUNTROWS(FILTER(ALLSELECTED(AS_A),AS_A[h]<>2)))",
+   "powerbi": "40",
+   "table": "AS_A"
+  },
+  {
+   "expr": "VAR t=AS_A RETURN CALCULATE(SUMX(t,COUNTROWS(ALLSELECTED(AS_A[g]))),AS_A[h]>1)",
+   "powerbi": "32",
+   "table": "AS_A"
+  },
+  {
+   "expr": "AVERAGEX(CROSSJOIN(FILTER(VALUES(Facts[Sales]),Facts[Sales]>=2),VALUES(Facts[Note])),CALCULATE(MINX(EXCEPT(VALUES(Facts[Quantity]),FILTER(VALUES(Facts[Quantity]),Facts[Quantity]>1)),COUNTROWS(Facts)),Facts[Note]=\"Paid\"))",
+   "powerbi": "1",
+   "table": "Facts"
+  },
+  {
+   "expr": "MAXX(EXCEPT(VALUES(Facts[Quantity]),FILTER(VALUES(Facts[Quantity]),Facts[Quantity]>4)),CALCULATE(COUNTROWS(Facts),ALLSELECTED(Facts[Quantity])))",
+   "powerbi": "5",
+   "table": "Facts"
+  },
+  {
+   "expr": "SUMX(GENERATE(FILTER(VALUES(Facts[Region]),Facts[Region]<>\"North\"),ROW(\"z\",1)),MINX(KEEPFILTERS(SUMMARIZE(FILTER(Facts,(Facts[Sales]>2||Facts[Quantity]>=4)),Facts[Region],Facts[Note])),CALCULATE(COUNTROWS(ALLSELECTED(Facts)),ALLEXCEPT(Facts,Facts[Note]))))",
+   "powerbi": "12",
+   "table": "Facts"
+  },
+  {
+   "expr": "AVERAGEX(KEEPFILTERS(AS_D),SUMX(ALLSELECTED(AS_D),AS_D[n]))",
+   "powerbi": "15",
+   "table": "AS_D"
+  },
+  {
+   "expr": "MINX(KEEPFILTERS(CROSSJOIN(FILTER(VALUES(Facts[Region]),Facts[Region]<>\"North\"),VALUES(Facts[Quantity]))),CALCULATE(SUMX(FILTER(TOPN(2,Facts,Facts[Quantity]),Facts[Quantity]<3),COUNTROWS(FILTER(ALLSELECTED(Facts),Facts[Note]=\"\"))),Facts[Region]<>\"East\"))",
+   "powerbi": "BLANK",
+   "table": "Facts"
+  },
+  {
+   "expr": "VAR t=Facts RETURN CALCULATE(SUMX(t,CALCULATE(COUNTROWS(ALLSELECTED(Facts)),Facts[Region]=\"West\")),Facts[Note]<>\"\")",
+   "powerbi": "12",
+   "table": "Facts"
+  },
+  {
+   "expr": "AVERAGEX(FILTER(ALL(Facts[Note],Facts[Sales]),(Facts[Sales]=10&&Facts[Note]=\"\")),SUMX(FILTER(Facts,Facts[Region]=\"East\"),CALCULATE(AVERAGEX(KEEPFILTERS(Facts),SUMX(ALLSELECTED(Facts),Facts[Quantity])),Facts[Region]=\"North\")))",
+   "powerbi": "BLANK",
+   "table": "Facts"
+  },
+  {
+   "expr": "MINX(CALCULATETABLE(Facts,Facts[Region]<>\"West\"),MINX(INTERSECT(VALUES(Facts[Region]),FILTER(VALUES(Facts[Region]),Facts[Region]=\"North\")),COUNTROWS(FILTER(ALLSELECTED(Facts),ISBLANK(Facts[Note])))))",
+   "powerbi": "BLANK",
+   "table": "Facts"
+  },
+  {
+   "expr": "VAR t=FILTER(ALL(Facts[Note]),Facts[Note]<>\"\") RETURN SUMX(t,CALCULATE(COUNTROWS(Facts),ALLSELECTED(Facts)))",
+   "powerbi": "8",
+   "table": "Facts"
+  },
+  {
+   "expr": "MAXX(KEEPFILTERS(VALUES(Facts[Quantity])),CALCULATE(COUNTROWS(Facts),Facts[Note]=\"Paid\"))",
+   "powerbi": "1",
+   "table": "Facts"
+  },
+  {
+   "expr": "MINX(FILTER(KEEPFILTERS(FILTER(FILTER(FILTER(SUMMARIZE(FILTER(Facts,(Facts[Sales]>2||Facts[Region]=\"West\")),Facts[Quantity],Facts[Note]),Facts[Note]<>\"Paid\"),Facts[Note]<>\"Paid\"),Facts[Note]<>\"\")),Facts[Note]<>\"\"),COUNTROWS(ALLSELECTED(Facts[Sales])))",
+   "powerbi": "BLANK",
+   "table": "Facts"
+  }
+ ]
+}

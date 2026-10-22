@@ -108,6 +108,38 @@ def _eager_logical(is_and: bool, thunks: list[Callable[[], bool]], nodes: list[t
     return all(values) if is_and else any(values)
 
 
+_NOTHING = object()
+
+
+class _Shadow:
+    """An iterator's filter as ALLSELECTED sees it: the distinct value tuples of the iterated table over the columns it
+    came from. Built lazily, because most iterations never meet an ALLSELECTED."""
+
+    __slots__ = ("table", "columns", "_build", "_tuples")
+
+    def __init__(self, table: str, columns: tuple[str, ...], build: Callable[[], frozenset[tuple[Any, ...]]]) -> None:
+        self.table, self.columns, self._build, self._tuples = table, columns, build, None
+
+    @property
+    def tuples(self) -> frozenset[tuple[Any, ...]]:
+        if self._tuples is None:
+            self._tuples = self._build()
+        return self._tuples
+
+    def projected(self, dropped: frozenset[str]) -> "_Shadow | None":
+        """The shadow with some columns removed (None when none are left); `dropped` holds casefolded names."""
+        keep = [index for index, column in enumerate(self.columns) if column.casefold() not in dropped]
+        if len(keep) == len(self.columns):
+            return self
+        if not keep:
+            return None
+        parent = self
+        return _Shadow(
+            self.table, tuple(self.columns[index] for index in keep),
+            lambda: frozenset(tuple(item[index] for index in keep) for item in parent.tuples),
+        )
+
+
 def logical_conjuncts(node: tuple[Any, ...]) -> list[tuple[Any, ...]]:
     """The operands of a top-level && chain or AND(a, b), left to right; any other expression is its own single conjunct."""
     if node[0] == "logical" and node[1] == "&&":
@@ -3553,6 +3585,54 @@ def evaluate_measures(
             )
         return context, actual
 
+    def eff_active() -> bool:
+        return not eff_blocked and (bool(eff_layers) or any(eff_transition.values()) or any(eff_suppressed.values()) or any(eff_group_keys.values()))
+
+    def allselected_rows_for(source_context: dict[str, Any], columns: list[str]) -> list[dict[str, Any]] | None:
+        """ALLSELECTED(columns) inside an iterator: the table rows that satisfy every filter touching those columns, where
+        the filters are the iterator shadows, the explicit CALCULATE filters and the outer filters the shadows did not
+        replace. Filters on other columns and the context transition do not count. None when the filter context cannot say."""
+        table_id = source_context["id"]
+        wanted = {column.casefold() for column in columns}
+        cleared = {header.casefold() for header in source_context["headers"]} - wanted
+        for folded, outer in eff_suppressed.get(table_id, {}).items():
+            if current_filter(table_id, folded) is outer:  # still the outer filter the shadow replaced
+                cleared.add(folded)
+        for folded, key_rows in eff_group_keys.get(table_id, {}).items():
+            if current_filter(table_id, folded) is key_rows:  # a group key still stands as the SUMMARIZE row set
+                if folded in wanted or any((table_id, name) in eff_touched for name in wanted):
+                    cleared.add(folded)  # a key inside the columns asked for, or after a modifier touched them, drops out
+                else:
+                    cleared.discard(folded)  # a key outside them narrows the answer to its group
+        replaced_outer: list[Any] = []
+        for folded, (set_by_transition, outer) in eff_transition.get(table_id, {}).items():
+            if current_filter(table_id, folded) is set_by_transition:  # still only the row's context transition
+                cleared.add(folded)
+                shadowed = eff_suppressed.get(table_id, {}).get(folded, _NOTHING)
+                if folded in wanted and outer is not None and shadowed is not outer:
+                    replaced_outer.append(outer)  # the outer filter the transition covered up is still in force for ALLSELECTED
+        try:
+            rows, _contexts, _roots = rows_after_clearing_columns(source_context, cleared)
+        except MeasureError:
+            return None
+        full = source_context["rows"]
+        if replaced_outer:
+            keep_positions = set.intersection(*(set(outer) for outer in replaced_outer))
+            visible = {id(row) for row in rows}
+            rows = [row for position, row in enumerate(full) if position in keep_positions and id(row) in visible]
+        allowed = {id(row) for row in rows}
+        result = [row for row in full if id(row) in allowed] if len(allowed) != len(full) or any(id(r) not in allowed for r in full) else list(full)
+        for layer in eff_layers:
+            if layer.table != table_id:
+                continue
+            positions = [index for index, column in enumerate(layer.columns) if column.casefold() in wanted]
+            if not positions:
+                continue
+            seen = frozenset(tuple(item[index] for index in positions) for item in layer.tuples)
+            names = [layer.columns[index] for index in positions]
+            result = [row for row in result if row_key(typed_cell(source_context, name, row.get(name)) for name in names) in seen]
+        return result
+
     def rows_after_clearing_columns(
         source_context: dict[str, Any],
         columns_to_clear: set[str],
@@ -3869,7 +3949,11 @@ def evaluate_measures(
         if len(arguments) == 1 and arguments[0][0] == "table":
             source_context = resolve_table_context(str(arguments[0][1]))
             output_headers = list(source_context["headers"])
-            if function == "ALLSELECTED":
+            if function == "ALLSELECTED" and eff_active() and (
+                shadowed_rows := allselected_rows_for(source_context, output_headers)
+            ) is not None:
+                output_rows = shadowed_rows
+            elif function == "ALLSELECTED":
                 output_rows = list(rows_by_table_id[source_context["id"]])
                 current_context = evaluation_contexts_by_id.get(
                     source_context["id"], source_context
@@ -3900,7 +3984,10 @@ def evaluate_measures(
                 )
             output_headers = [column for _context, column in resolved_columns]
             allselected_rows = None
-            if function == "ALLSELECTED":
+            shadowed_rows = (
+                allselected_rows_for(source_context, output_headers) if function == "ALLSELECTED" and eff_active() else None
+            )
+            if function == "ALLSELECTED" and shadowed_rows is None:
                 # Power BI: the values of these columns once the filters on the table's other columns are cleared
                 # (a filter on one of the columns themselves stays; Facts: CALCULATE(COUNTROWS(ALLSELECTED(Region)),
                 # Quantity>3) = 3 but Region="East" gives 1; tools/parity/dax_battery_allselected.json)
@@ -3920,7 +4007,9 @@ def evaluate_measures(
                     )
                 except MeasureError:
                     allselected_rows = None  # a filter context without per-column detail: keep the visible rows
-            if function == "ALLSELECTED" and allselected_rows is not None:
+            if shadowed_rows is not None:
+                source_rows = shadowed_rows
+            elif function == "ALLSELECTED" and allselected_rows is not None:
                 if add_unknown_member:
                     source_rows.append({header: None for header in source_context["headers"]})
             elif function == "ALLSELECTED":
@@ -3968,7 +4057,7 @@ def evaluate_measures(
                 seen_values.add(key)
                 output_rows.append({column: row.get(column) for column in output_headers})
 
-        if len(arguments) == 1 and arguments[0][0] != "table" and (function != "ALLSELECTED" or allselected_rows is not None):
+        if len(arguments) == 1 and arguments[0][0] != "table" and (function != "ALLSELECTED" or allselected_rows is not None or shadowed_rows is not None):
             output_rows = order_distinct_values(source_context, output_headers[0], output_rows)
         value_context = dict(source_context)
         value_context["headers"] = output_headers
@@ -4006,17 +4095,101 @@ def evaluate_measures(
             context["lineage"] = lineage
         return context, rows
 
+    # What ALLSELECTED sees inside an iterator (tools/parity/dax_battery_allselected_shadow.json): the iterated table's
+    # distinct tuples ("shadow", one component over the columns it came from), the outer filters those columns replace
+    # ("suppressed"), and the filters that are only a context transition ("transition", which it never sees).
+    eff_layers: tuple[_Shadow, ...] = ()
+    eff_suppressed: dict[str, dict[str, Any]] = {}  # table -> casefolded column -> the outer filter object the shadow replaced
+    eff_transition: dict[str, dict[str, tuple[Any, Any]]] = {}  # table -> casefolded column -> (filter a transition set, filter it replaced)
+    eff_group_keys: dict[str, dict[str, Any]] = {}  # SUMMARIZE group keys: table -> casefolded column -> the filter object
+    eff_touched: frozenset[tuple[str, str]] = frozenset()  # (table, column) a CALCULATE modifier has cleared or filtered
+    eff_blocked = False
+
+    def current_filter(table_id: str, folded: str) -> Any:
+        """The row-index set now filtering one column of a table, None when it is not filtered."""
+        for column, rows in evaluation_contexts_by_id.get(table_id, {}).get("filter_column_rows", {}).items():
+            if column.casefold() == folded:
+                return rows
+        return None
+
+    def without_eff(thunk: Any) -> Any:
+        nonlocal eff_blocked
+        saved = eff_blocked
+        eff_blocked = True
+        try:
+            return thunk()
+        finally:
+            eff_blocked = saved
+
+    def project_layers(layers: tuple[_Shadow, ...], table_id: str, columns: Iterable[str]) -> tuple[_Shadow, ...]:
+        dropped = frozenset(column.casefold() for column in columns)
+        if not dropped:
+            return layers
+        kept: list[_Shadow] = []
+        for layer in layers:
+            projected = layer.projected(dropped) if layer.table == table_id else layer
+            if projected is not None:
+                kept.append(projected)
+        return tuple(kept)
+
+    def shadow_layers_of(context: dict[str, Any], rows: list[dict[str, Any]]) -> list[tuple[str, dict[str, Any], tuple[str, ...], _Shadow]]:
+        """One shadow per loaded table the iterated rows' columns come from (nothing for ROW, {..}, computed columns)."""
+        lineage = base_lineage(context)
+        by_table: dict[str, tuple[dict[str, Any], list[str], list[str]]] = {}
+        for header in context["headers"]:
+            link = lineage.get(header)
+            if link is None:
+                continue
+            entry = by_table.setdefault(link[0]["id"], (link[0], [], []))
+            if link[1] not in entry[1]:
+                entry[1].append(link[1])
+                entry[2].append(header)
+        found = []
+        for table_id, (source, columns, headers) in by_table.items():
+            def build(headers: list[str] = headers) -> frozenset[tuple[Any, ...]]:
+                return frozenset(row_key(typed_row(context, row)[header] for header in headers) for row in rows)
+            found.append((table_id, source, tuple(columns), _Shadow(table_id, tuple(columns), build)))
+        return found
+
+    def push_shadow(context: dict[str, Any], rows: list[dict[str, Any]], mode: str) -> tuple[Any, ...]:
+        """Install (mode "install") or only clear (mode "clear") the shadow of an iterated table; returns what to restore."""
+        nonlocal eff_layers, eff_suppressed, eff_blocked
+        saved = (eff_layers, eff_suppressed, eff_blocked)
+        if mode and not context.get("boolean_filter") and not context.get("no_shadow"):
+            eff_blocked = False
+            layers, suppressed = eff_layers, dict(eff_suppressed)
+            for table_id, _source, columns, layer in shadow_layers_of(context, rows):
+                layers = project_layers(layers, table_id, columns)
+                suppressed[table_id] = {
+                    **suppressed.get(table_id, {}), **{column.casefold(): current_filter(table_id, column.casefold()) for column in columns},
+                }
+                if mode == "install":
+                    layers = (*layers, layer)
+            eff_layers, eff_suppressed = layers, suppressed
+        return saved
+
+    def pop_shadow(saved: tuple[Any, ...]) -> None:
+        nonlocal eff_layers, eff_suppressed, eff_blocked
+        eff_layers, eff_suppressed, eff_blocked = saved
+
     def iterate_rows(
-        context: dict[str, Any], rows: list[dict[str, Any]]
+        context: dict[str, Any], rows: list[dict[str, Any]], shadow: str = ""
     ) -> Iterable[tuple[dict[str, Any], dict[str, Any], int]]:
-        """Yield each row as a row context while keeping it on the stack EARLIER reads."""
-        for row_index, row in enumerate(rows, 1):
-            frame = (context, row, row_index)
-            row_stack.append(frame)
-            try:
-                yield frame
-            finally:
-                row_stack.pop()
+        """Yield each row as a row context while keeping it on the stack EARLIER reads.
+
+        shadow="install": an iterator over a table value filters ALLSELECTED to that table's rows for the loop;
+        shadow="clear": CONCATENATEX only removes the outer filters on the columns it iterates."""
+        saved_state = push_shadow(context, rows, shadow)
+        try:
+            for row_index, row in enumerate(rows, 1):
+                frame = (context, row, row_index)
+                row_stack.append(frame)
+                try:
+                    yield frame
+                finally:
+                    row_stack.pop()
+        finally:
+            pop_shadow(saved_state)
 
     def typed_row(context: dict[str, Any], row: dict[str, Any]) -> dict[str, Any]:
         """A row of a loaded or derived table with every cell as a DAX value."""
@@ -4151,6 +4324,7 @@ def evaluate_measures(
             return rows
 
     def table_function_rows(argument: tuple[Any, ...]) -> tuple[dict[str, Any], list[dict[str, Any]]]:
+        nonlocal eff_touched
         function, arguments = argument[1], argument[2]
         if function in {"ADDCOLUMNS", "SELECTCOLUMNS"}:
             context, rows = table_argument_value(arguments[0])
@@ -4191,7 +4365,7 @@ def evaluate_measures(
             headers = (list(context["headers"]) if add else []) + names
             out_rows: list[dict[str, Any]] = []
             source_rows: list[dict[str, Any]] = []
-            for frame in iterate_rows(context, rows):
+            for frame in iterate_rows(context, rows, "install"):
                 source_rows.append(frame[1])
                 row = typed_row(context, frame[1]) if add else {}
                 for name, expression in zip(names, expressions):
@@ -4239,11 +4413,17 @@ def evaluate_measures(
                 {c: context.get("column_types", {}).get(c, "text") for c in group_columns},
             )
             out_rows = []
-            for group_row in group_rows:
-                row = dict(group_row)
-                for name, expression in zip(names, expressions):
-                    row[name] = evaluate_with_context_transition(expression, group_context, group_row)
-                out_rows.append(row)
+            saved_shadow, saved_touched = push_shadow(context, rows, "install"), eff_touched  # SUMMARIZE's input table is the shadow
+            try:
+                for group_row in group_rows:
+                    row = dict(group_row)
+                    eff_touched = frozenset()
+                    for name, expression in zip(names, expressions):
+                        row[name] = evaluate_with_context_transition(expression, group_context, group_row, keys=True)
+                    out_rows.append(row)
+            finally:
+                pop_shadow(saved_shadow)
+                eff_touched = saved_touched
             return derived_table(
                 list(group_columns) + names, out_rows, lineage,
                 {c: context.get("column_types", {}).get(c, "text") for c in group_columns},
@@ -4279,7 +4459,7 @@ def evaluate_measures(
 
             def score_rows(source_rows: list[dict[str, Any]]) -> list[tuple[list[Any], dict[str, Any]]]:
                 found = []
-                for frame in iterate_rows(context, source_rows):
+                for frame in iterate_rows(context, source_rows, "install"):
                     keys = []
                     for expression, descending in keys_spec:
                         value = in_row_expression(lambda expression=expression, frame=frame: evaluate(expression, frame, allow_text=True))
@@ -4638,7 +4818,7 @@ def evaluate_measures(
         right_types: dict[str, str] = {}
         right_lineage: dict[str, tuple[dict[str, Any], str]] = {}
         pending: list[tuple[dict[str, Any], list[dict[str, Any]]]] = []
-        for frame in iterate_rows(left_context, left_rows):
+        for frame in iterate_rows(left_context, left_rows, "install"):
             right_context, right_rows = table_argument_value(arguments[1])
             if right_headers is None:
                 right_headers = list(right_context["headers"])
@@ -5152,7 +5332,7 @@ def evaluate_measures(
         if argument[0] == "call" and argument[1] == "CURRENTGROUP":
             if not group_stack:
                 raise MeasureError("CURRENTGROUP can only be used inside the aggregations of GROUPBY.")
-            return group_stack[-1]
+            return {**group_stack[-1][0], "no_shadow": True}, group_stack[-1][1]  # iterating CURRENTGROUP() filters nothing
         if argument[0] == "tableconstructor" and not argument[1]:
             return derived_table(["Value"], [])
         if argument[0] == "tableconstructor":
@@ -5235,11 +5415,22 @@ def evaluate_measures(
             names_checked = [resolve_table(ref[1], ref[2])[1].casefold() for ref in argument[2][1:]]
             if len(set(names_checked)) != len(names_checked):
                 raise MeasureError("ALLEXCEPT was given the same column more than once.")
-            cleared = {header.casefold() for header in kept_context["headers"]} - set(names_checked)
-            if counting_rows:  # Power BI's COUNTROWS(ALLEXCEPT(...)) ignores the kept columns' filters too
-                cleared = {header.casefold() for header in kept_context["headers"]}
-            kept_rows, _contexts, _roots = rows_after_clearing_columns(kept_context, cleared)
-            return kept_context, list(kept_rows)
+            # Power BI: the distinct tuples of the columns that are NOT kept, over the whole table with every filter ignored
+            remaining = [header for header in kept_context["headers"] if header.casefold() not in names_checked]
+            if not remaining:
+                raise MeasureError("ALLEXCEPT keeps every column of the table, so it has no columns left.")
+            seen_tuples: set[tuple[Any, ...]] = set()
+            distinct_rows: list[dict[str, Any]] = []
+            for raw in kept_context["rows"]:
+                values = {header: typed_cell(kept_context, header, raw.get(header)) for header in remaining}
+                key = row_key(values[header] for header in remaining)
+                if key not in seen_tuples:
+                    seen_tuples.add(key)
+                    distinct_rows.append(values)
+            return derived_table(
+                remaining, distinct_rows, {header: (kept_context, header) for header in remaining},
+                {header: kept_context.get("column_types", {}).get(header, "text") for header in remaining},
+            )
         if argument[0] == "call" and argument[1] in {
             "ALL", "ALLNOBLANKROW", "ALLSELECTED"
         }:
@@ -5255,7 +5446,7 @@ def evaluate_measures(
                 compile_table_filter_predicate(predicate, context, comparisons)
             except MeasureError:
                 # any row predicate: evaluate it for each row, with the row on the EARLIER stack
-                return context, [frame[1] for frame in iterate_rows(context, base_rows) if conjuncts_pass(predicate, frame)]
+                return context, [frame[1] for frame in iterate_rows(context, base_rows, "install") if conjuncts_pass(predicate, frame)]
             return context, [
                 row for position, row in enumerate(base_rows, 1)
                 if table_filter_predicate_matches(predicate, row, position, comparisons)
@@ -6288,13 +6479,14 @@ def evaluate_measures(
         extra_date_filters: dict[tuple[str, str], tuple[dict, str, frozenset[int]]] | None = None,
     ) -> Decimal | None:
         nonlocal rows_by_table_id, context_sequence, current_context
-        nonlocal evaluation_contexts_by_id, evaluation_filter_ids
+        nonlocal evaluation_contexts_by_id, evaluation_filter_ids, eff_layers, eff_touched
         filters_by_column: dict[
             tuple[str, str], list[tuple[frozenset[int], bool, bool]]
         ] = {}
         targets_by_key: dict[
             tuple[str, str], tuple[dict[str, Any], str]
         ] = {}
+        explicit_here: list[tuple[str, str, bool, Any, dict[str, Any]]] = []
         for key, (target_context, target_column, allowed_rows) in (extra_date_filters or {}).items():
             filters_by_column.setdefault(key, []).append((allowed_rows, False, False))
             targets_by_key[key] = (target_context, target_column)
@@ -6406,6 +6598,7 @@ def evaluate_measures(
             if existing_key is not None:
                 del column_filters[existing_key]
             column_filters[actual_column] = new_rows
+            explicit_here.append((table_id, actual_column, keep, new_rows, target_context))
 
             blank_column_filters = dict(
                 updated.get("filter_column_blank_allowed", {})
@@ -6457,9 +6650,18 @@ def evaluate_measures(
         evaluation_contexts_by_id = updated_by_id
         evaluation_filter_ids = updated_filter_roots
         rows_by_table_id = filtered_rows_by_id
+        saved_layers, saved_touched = eff_layers, eff_touched
+        eff_touched = eff_touched | {(table_id, column.casefold()) for table_id, column, _keep, _rows, _ctx in explicit_here}
+        for table_id, column, keep, rows_allowed, filter_context in explicit_here:  # an explicit filter replaces the shadow on its column
+            if not keep:
+                eff_layers = project_layers(eff_layers, table_id, [column])
+            else:
+                eff_layers = (*eff_layers, _Shadow(table_id, (column,), lambda column=column, rows_allowed=rows_allowed, filter_context=filter_context: frozenset(
+                    row_key([typed_cell(filter_context, column, filter_context["rows"][index].get(column))]) for index in rows_allowed)))
         try:
             return evaluate(expression)
         finally:
+            eff_layers, eff_touched = saved_layers, saved_touched
             rows_by_table_id = previous_rows
             current_context = previous_context
             evaluation_contexts_by_id = previous_contexts
@@ -6890,6 +7092,49 @@ def evaluate_measures(
         expression: tuple[Any, ...],
         modifier: tuple[Any, ...],
         function: str,
+        *rest: Any,
+        **named: Any,
+    ) -> Any:
+        """ALL / REMOVEFILTERS / ALLEXCEPT also strip the cleared columns from the iterator shadows and the transition."""
+        nonlocal eff_layers, eff_suppressed, eff_transition, eff_touched
+        arguments = modifier[2]
+        dropped: dict[str, frozenset[str] | None] = {}  # table id -> casefolded columns, None = every column
+        try:
+            if True:
+                if not arguments:
+                    dropped = {table_id: None for table_id in evaluation_contexts_by_id}
+                elif function == "ALLEXCEPT":
+                    table = resolve_table_context(str(arguments[0][1]))
+                    kept = {resolve_table(ref[1], ref[2])[1].casefold() for ref in arguments[1:]}
+                    dropped = {table["id"]: frozenset(h.casefold() for h in table["headers"]) - kept}
+                elif arguments[0][0] == "table":
+                    dropped = {resolve_table_context(str(arguments[0][1]))["id"]: None}
+                else:
+                    for reference in arguments:
+                        context, column = resolve_table(reference[1], reference[2])
+                        dropped[context["id"]] = dropped.get(context["id"], frozenset()) | {column.casefold()}
+        except MeasureError:
+            dropped = {}
+        if not dropped:
+            return evaluate_with_filter_clear_core(expression, modifier, function, *rest, **named)
+        saved_eff = (eff_layers, eff_touched)
+        layers, touched = eff_layers, eff_touched
+        for table_id, columns in dropped.items():
+            every = columns is None
+            names = frozenset(h.casefold() for h in evaluation_contexts_by_id[table_id]["headers"]) if every else columns
+            if function != "ALLSELECTED":  # ALLSELECTED as a filter argument is not a projection of the shadows
+                layers = project_layers(layers, table_id, names)
+            touched = touched | {(table_id, name) for name in names}
+        eff_layers, eff_touched = layers, touched
+        try:
+            return evaluate_with_filter_clear_core(expression, modifier, function, *rest, **named)
+        finally:
+            eff_layers, eff_touched = saved_eff
+
+    def evaluate_with_filter_clear_core(
+        expression: tuple[Any, ...],
+        modifier: tuple[Any, ...],
+        function: str,
         filter_arguments: tuple[tuple[Any, ...], ...] = (),
         extra_date_filters: dict[
             tuple[str, str], tuple[dict[str, Any], str, frozenset[int]]
@@ -7216,6 +7461,7 @@ def evaluate_measures(
     def with_column_filters(
         filters_by_table: dict[str, tuple[Any, ...]],
         thunk: Any,
+        transition: bool | str = False,
     ) -> Any:
         """Run thunk() with column filters (allowed row indexes per column) replacing those columns' filters.
 
@@ -7224,10 +7470,46 @@ def evaluate_measures(
         FILTER(Facts, Quantity>2)) counts the East row that has Quantity>2, not every East row)."""
         nonlocal rows_by_table_id, context_sequence, current_context
         nonlocal evaluation_contexts_by_id, evaluation_filter_ids
+        nonlocal eff_layers, eff_suppressed, eff_transition, eff_group_keys, eff_touched
         updated_by_id = {key: dict(value) for key, value in evaluation_contexts_by_id.items()}
         updated_filter_roots = set(evaluation_filter_ids)
+        saved_eff = (eff_layers, eff_suppressed, eff_transition, eff_group_keys, eff_touched)
+        new_layers, new_suppressed, new_transition = eff_layers, dict(eff_suppressed), dict(eff_transition)
+        new_keys, new_touched = dict(eff_group_keys), eff_touched
         for table_id, entry in filters_by_table.items():
             base_context, column_rows = entry[0], entry[1]
+            touched = frozenset(column.casefold() for column in column_rows)
+            if transition == "keys":  # SUMMARIZE group keys: seen by ALLSELECTED on columns they do not belong to
+                new_keys[table_id] = {**new_keys.get(table_id, {}), **{column.casefold(): rows for column, rows in column_rows.items()}}
+            elif transition:  # the row's values become filters ALLSELECTED never sees
+                new_transition[table_id] = {**new_transition.get(table_id, {}), **{
+                    column.casefold(): (rows, current_filter(table_id, column.casefold())) for column, rows in column_rows.items()
+                }}  # the filter object it set, and the outer filter it replaced (which ALLSELECTED still sees)
+            else:  # an explicit filter replaces the shadow on its columns
+                replaced = touched - frozenset(column.casefold() for column in (entry[3] if len(entry) > 3 else {}))
+                for shape in (entry[2] if len(entry) > 2 else []):
+                    replaced |= frozenset(column.casefold() for column in shape["columns"])
+                new_layers = project_layers(new_layers, table_id, replaced)
+                new_touched = new_touched | {(table_id, column) for column in touched}
+                for column, allowed in (entry[3] if len(entry) > 3 else {}).items():
+                    # KEEPFILTERS intersects with the shadow instead of replacing it: it becomes one more constraint. The real
+                    # filter on the column is now (transition or replaced outer filter) AND the kept one, so ALLSELECTED
+                    # must keep ignoring that part: the merged object takes over the old one's role.
+                    folded = column.casefold()
+                    merged_rows = column_rows.get(column)
+                    before = current_filter(table_id, folded)
+                    tagged = new_transition.get(table_id, {}).get(folded)
+                    if tagged is not None and before is tagged[0]:
+                        new_transition[table_id] = {**new_transition[table_id], folded: (merged_rows, tagged[1])}
+                    elif folded in new_suppressed.get(table_id, {}) and before is new_suppressed[table_id][folded]:
+                        new_suppressed[table_id] = {**new_suppressed[table_id], folded: merged_rows}
+                    keep_rows = base_context["rows"]
+                    new_layers = (*new_layers, _Shadow(
+                        table_id, (column,),
+                        lambda column=column, allowed=allowed, keep_rows=keep_rows, base_context=base_context: frozenset(
+                            row_key([typed_cell(base_context, column, keep_rows[index].get(column))]) for index in allowed
+                        ),
+                    ))
             new_shapes = entry[2] if len(entry) > 2 else []
             kept_columns = entry[3] if len(entry) > 3 else {}
             target_context = updated_by_id.get(table_id)
@@ -7285,6 +7567,7 @@ def evaluate_measures(
         evaluation_contexts_by_id = updated_by_id
         evaluation_filter_ids = frozenset(updated_filter_roots) if isinstance(previous_filter_ids, frozenset) else updated_filter_roots
         rows_by_table_id = filtered_rows_by_id
+        eff_layers, eff_suppressed, eff_transition, eff_group_keys, eff_touched = new_layers, new_suppressed, new_transition, new_keys, new_touched
         try:
             return thunk()
         finally:
@@ -7292,6 +7575,7 @@ def evaluate_measures(
             current_context = previous_context
             evaluation_contexts_by_id = previous_contexts
             evaluation_filter_ids = previous_filter_ids
+            eff_layers, eff_suppressed, eff_transition, eff_group_keys, eff_touched = saved_eff
 
     def transition_filters(
         iterated_table: dict[str, Any], row: dict[str, Any]
@@ -7342,9 +7626,10 @@ def evaluate_measures(
         expression_node: tuple[Any, ...],
         iterated_table: dict[str, Any],
         row: dict[str, Any],
+        keys: bool = False,
     ) -> Decimal | bool | None:
         '''Create a filter context mimicking the current row context and evaluate.'''
-        return with_column_filters(transition_filters(iterated_table, row), lambda: evaluate(expression_node))
+        return with_column_filters(transition_filters(iterated_table, row), lambda: evaluate(expression_node), "keys" if keys else True)
 
     def all_row_context_filters(
         row_context: tuple[dict[str, Any], dict[str, Any], int] | None,
@@ -7647,7 +7932,7 @@ def evaluate_measures(
                 return evaluate_with_filter_clear(("thunk", lambda: clear_then_apply(index + 1)), modifier, modifier[1])
 
             if transition:
-                return with_column_filters(transition, lambda: clear_then_apply(0))
+                return with_column_filters(transition, lambda: clear_then_apply(0), True)
             return clear_then_apply(0)
         finally:
             if pushed:
@@ -8163,7 +8448,7 @@ def evaluate_measures(
             measure_key = name.casefold()
             if measure_key in by_name:
                 if row_context is not None:
-                    return with_column_filters(all_row_context_filters(row_context), lambda: evaluate(node))
+                    return with_column_filters(all_row_context_filters(row_context), lambda: evaluate(node), True)
                 return resolve(measure_key)
             if row_context is not None:
                 iterated_table, row, row_index = row_context
@@ -8324,7 +8609,7 @@ def evaluate_measures(
                         f"Iterator {function} expression needs a numeric result."
                     )
             values: list[Decimal] = []
-            for frame in iterate_rows(context, iteration_rows):
+            for frame in iterate_rows(context, iteration_rows, "install"):
                 result = in_row_expression(lambda frame=frame: evaluate(arguments[1], frame))
                 if isinstance(result, bool) and function not in {"MAXX", "MINX"}:
                     raise MeasureError(f"The function {function} cannot work with values of type Boolean.")
@@ -8355,7 +8640,7 @@ def evaluate_measures(
                 arguments[1], (context, validation_row, 1)
             )
             count = 0
-            for frame in iterate_rows(context, iteration_rows):
+            for frame in iterate_rows(context, iteration_rows, "install"):
                 result = in_row_expression(lambda frame=frame: evaluate(
                     arguments[1], frame, allow_text=True
                 ))
@@ -8373,7 +8658,7 @@ def evaluate_measures(
             if row_context is not None:
                 if len(arguments) > 1 and _general_calculate_filters_valid(tuple(arguments[1:])):
                     return evaluate_with_general_filters(arguments[0], tuple(arguments[1:]), row_context)
-                return with_column_filters(all_row_context_filters(row_context), lambda: without_row_contexts(lambda: evaluate(node)))
+                return with_column_filters(all_row_context_filters(row_context), lambda: without_row_contexts(lambda: evaluate(node)), True)
             if len(arguments) == 1:
                 return evaluate(arguments[0])
             if not uses_legacy_calculate(arguments):
@@ -9123,7 +9408,7 @@ def evaluate_measures(
                         return ""  # an empty text is not a BLANK: Power BI orders BLANK before it
                 return value
 
-            for inner in iterate_rows(context, iteration_rows):
+            for inner in iterate_rows(context, iteration_rows, "clear"):
                 text = dax_typed.to_text(evaluate(arguments[1], inner, allow_text=True))
                 entries.append(([order_value(expression, inner) for expression, _d in order_spec], text))
             for key_index in range(len(order_spec) - 1, -1, -1):
