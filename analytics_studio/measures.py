@@ -1276,8 +1276,8 @@ def _direct_column_references(node: Any) -> Iterable[tuple[Any, ...]]:
         return
     if node[0] == "call" and node[1] in _AGGREGATING_CALLS and not (node[1] in {"MIN", "MAX"} and len(node[2]) == 2):
         return
-    if node[0] == "table_call":
-        return
+    if node[0] == "table_call" or (node[0] == "call" and node[1] == "RELATED"):
+        return  # RELATED reads the row of the enclosing iterator: a value, not a column the filter picks
     children = node if isinstance(node[0], tuple) else node[1:]
     for child in children:
         if isinstance(child, tuple):
@@ -5681,11 +5681,59 @@ def evaluate_measures(
             return "date/time"
         return "text"
 
+    related_path_cache: dict[tuple[str, str], tuple[Any, list[tuple[str, str, str, str]] | None]] = {}
+
+    def related_path(source_id: str, target_id: str) -> list[tuple[str, str, str, str]] | None:
+        """RELATED's way from the iterated table to the table it reads: the shortest chain of active links that lead from
+        the many side to the one side (a one-to-one link leads both ways), as (table, key column, next table, next key column).
+        A link switched off by CROSSFILTER(..., NONE) does not count. None when there is no way; MeasureError when two ways tie."""
+        cached = related_path_cache.get((source_id, target_id))
+        if cached is not None and cached[0] is relationship_definitions:
+            return cached[1]
+        edges: dict[str, list[tuple[str, str, str, str]]] = {}
+        for relationship in relationship_definitions:
+            if (
+                not isinstance(relationship, dict)
+                or type(relationship.get("relationship_version")) is not int
+                or relationship.get("relationship_version") != 1
+                or not relationship.get("is_active")
+                or relationship.get("filter_direction_override") == "none"
+            ):
+                continue
+            from_id, to_id = str(relationship.get("from_table_id", "")), str(relationship.get("to_table_id", ""))
+            from_column, to_column = str(relationship.get("from_column", "")), str(relationship.get("to_column", ""))
+            cardinality = relationship.get("cardinality")
+            if from_id not in contexts_by_id or to_id not in contexts_by_id:
+                continue
+            if cardinality in {"many_to_one", "one_to_one"}:
+                edges.setdefault(from_id, []).append((from_id, from_column, to_id, to_column))
+            if cardinality in {"one_to_many", "one_to_one"}:
+                edges.setdefault(to_id, []).append((to_id, to_column, from_id, from_column))
+        frontier: dict[str, list[list[tuple[str, str, str, str]]]] = {source_id: [[]]}
+        seen = {source_id}
+        result: list[tuple[str, str, str, str]] | None = None
+        while frontier:
+            if target_id in frontier:
+                if len(frontier[target_id]) > 1:
+                    raise MeasureError("RELATED has more than one direct relationship or path to that related table.")
+                result = frontier[target_id][0]
+                break
+            following: dict[str, list[list[tuple[str, str, str, str]]]] = {}
+            for table_id, paths in frontier.items():
+                for edge in edges.get(table_id, []):
+                    if edge[2] not in seen:
+                        following.setdefault(edge[2], []).extend(path + [edge] for path in paths)
+            seen.update(following)
+            frontier = following
+        related_path_cache[(source_id, target_id)] = (relationship_definitions, result)
+        return result
+
     def related_column_details(
         reference: tuple[Any, ...],
         row_context: tuple[dict[str, Any], dict[str, Any], int] | None,
-    ) -> tuple[dict[str, Any], str, str, str]:
-        """Resolve the one supported direct many-to-one RELATED lookup."""
+    ) -> tuple[dict[str, Any], list[tuple[str, str, str, str]], str, str, str | None]:
+        """Resolve RELATED(Table[column]): the table, the chain of links to it, the column, that column's type and, for a
+        table built by an expression, the header that holds the first link's key."""
         if row_context is None:
             raise MeasureError(
                 "RELATED needs row context inside a supported table iterator."
@@ -5699,132 +5747,92 @@ def evaluate_measures(
         target_table = resolve_table_context(str(reference[1]))
         if iterated_table["id"] == target_table["id"]:
             raise MeasureError("RELATED must refer to a different related table.")
-
-        candidates: list[tuple[str, str]] = []
-        for relationship in relationship_definitions:
-            if (
-                not isinstance(relationship, dict)
-                or type(relationship.get("relationship_version")) is not int
-                or relationship.get("relationship_version") != 1
-                or not relationship.get("is_active")
-            ):
-                continue
-            from_id = str(relationship.get("from_table_id", ""))
-            to_id = str(relationship.get("to_table_id", ""))
-            cardinality = relationship.get("cardinality")
-            if (
-                cardinality == "many_to_one"
-                and from_id == iterated_table["id"]
-                and to_id == target_table["id"]
-            ):
-                candidates.append((
-                    str(relationship.get("from_column", "")),
-                    str(relationship.get("to_column", "")),
-                ))
-            elif (
-                cardinality == "one_to_many"
-                and to_id == iterated_table["id"]
-                and from_id == target_table["id"]
-            ):
-                candidates.append((
-                    str(relationship.get("to_column", "")),
-                    str(relationship.get("from_column", "")),
-                ))
-        if not candidates:
+        whole_table = contexts_by_id.get(iterated_table["id"])
+        if whole_table is not None and iterated_table["headers"] is not whole_table["headers"] and list(iterated_table["headers"]) != list(whole_table["headers"]):
+            raise MeasureError("RELATED needs a row of the whole table; a column of it (VALUES, DISTINCT) has no relationships.")
+        key_header = None
+        if iterated_table.get("derived"):
+            # ADDCOLUMNS, GENERATE, CROSSJOIN... keep whole rows of the loaded tables behind their lineage; SELECTCOLUMNS and
+            # SUMMARIZE do not, so RELATED has no row to start from there
+            lineage = iterated_table.get("lineage") or {}
+            base_ids = {base["id"] for base, _column in lineage.values()}
+            if not iterated_table.get("row_identity") or target_table["id"] in base_ids:
+                raise MeasureError(f"RELATED has no related row to start from in {iterated_table['name']!r}.")
+            paths = [(base_id, related_path(base_id, target_table["id"])) for base_id in sorted(base_ids)]
+            paths = [(base_id, path) for base_id, path in paths if path]
+            if len(paths) > 1:
+                raise MeasureError("RELATED has more than one direct relationship or path to that related table.")
+            hops = paths[0][1] if paths else None
+            if hops:
+                key_header = next((
+                    header for header, (base, column) in lineage.items()
+                    if base["id"] == hops[0][0] and column == hops[0][1]
+                ), None)
+                if key_header is None:
+                    hops = None
+        else:
+            hops = related_path(iterated_table["id"], target_table["id"])
+        if not hops:
             raise MeasureError(
-                f"No direct active many-to-one relationship connects "
+                f"No active many-to-one relationship path connects "
                 f"{iterated_table['name']!r} to {target_table['name']!r}."
             )
-        if len(candidates) != 1:
-            raise MeasureError(
-                f"RELATED has more than one direct relationship from "
-                f"{iterated_table['name']!r} to {target_table['name']!r}."
-            )
-
-        source_column, target_key_column = candidates[0]
-        source_headers = {
-            str(header).casefold(): str(header)
-            for header in iterated_table["headers"]
-        }
         target_headers = {
             str(header).casefold(): str(header)
             for header in target_table["headers"]
         }
-        source_column = source_headers.get(source_column.casefold(), "")
-        target_key_column = target_headers.get(target_key_column.casefold(), "")
         target_column = target_headers.get(str(reference[2]).casefold(), "")
-        if not source_column or not target_key_column or not target_column:
+        if not target_column:
             raise MeasureError(
                 "RELATED refers to a column that is missing from its relationship or target table."
             )
         target_type = str(
             target_table.get("column_types", {}).get(target_column, "unknown")
         ).casefold()
-        if iterator_type_category(target_type) != "numeric":
-            raise MeasureError(
-                "This RELATED subset supports numeric target columns inside table iterators only."
-            )
-        return target_table, source_column, target_key_column, target_column
+        return target_table, hops, target_column, target_type, key_header
 
-    def related_numeric_value(
+    def related_value(
         reference: tuple[Any, ...],
         row_context: tuple[dict[str, Any], dict[str, Any], int] | None,
-    ) -> Decimal | None:
-        target_table, source_column, target_key_column, target_column = (
-            related_column_details(reference, row_context)
-        )
+    ) -> Any:
+        """RELATED(Table[column]) of the current row as a DAX value of the column's type; BLANK when a link finds no row."""
+        target_table, hops, target_column, _, key_header = related_column_details(reference, row_context)
         assert row_context is not None
         iterated_table, row, row_index = row_context
-        source_type = str(
-            iterated_table.get("column_types", {}).get(source_column, "text")
-        )
-        target_key_type = str(
-            target_table.get("column_types", {}).get(target_key_column, "text")
-        )
-
+        current_table, current_row = iterated_table, row
+        if key_header is not None:  # the first link's key, taken from a typed row of an expression-built table
+            current_table = contexts_by_id[hops[0][0]]
+            key = row.get(key_header)
+            if isinstance(key, dax_dates.DaxDateTime):
+                moment = dax_dates.to_datetime(key)
+                key = moment.date().isoformat() if moment.time() == time(0) else moment.isoformat()
+            current_row = {hops[0][1]: key}
         try:
-            source_key = _relationship_value_key(row.get(source_column), source_type)
-            cache_key = (
-                iterated_table["id"], source_column,
-                target_table["id"], target_key_column, target_column,
-            )
-            lookup = related_lookup_cache.get(cache_key)
-            if lookup is None:
-                lookup = {}
-                for candidate in target_table["rows"]:
-                    key = _relationship_value_key(
-                        candidate.get(target_key_column), target_key_type
+            for _, source_column, next_id, next_column in hops:
+                next_table = evaluation_contexts_by_id.get(next_id) or contexts_by_id[next_id]
+                source_type = str(current_table.get("column_types", {}).get(source_column, "text"))
+                index_key = (next_table["id"], next_column, "", "", "")
+                lookup = related_lookup_cache.get(index_key)
+                if lookup is None:
+                    next_key_type = str(next_table.get("column_types", {}).get(next_column, "text"))
+                    lookup = {}
+                    for candidate in next_table["rows"]:
+                        lookup.setdefault(
+                            _relationship_value_key(candidate.get(next_column), next_key_type), []
+                        ).append(candidate)
+                    related_lookup_cache[index_key] = lookup
+                matches = lookup.get(_relationship_value_key(current_row.get(source_column), source_type), [])
+                if len(matches) > 1:
+                    raise MeasureError(
+                        f"RELATED found multiple rows for {next_table['name']!r} "
+                        f"at iterator row {row_index}."
                     )
-                    lookup.setdefault(key, []).append(candidate)
-                related_lookup_cache[cache_key] = lookup
-            matches = lookup.get(source_key, [])
+                if not matches:
+                    return None
+                current_table, current_row = next_table, matches[0]
         except RelationshipError as exc:
             raise MeasureError(f"Could not evaluate RELATED lookup: {exc}") from exc
-        if len(matches) > 1:
-            raise MeasureError(
-                f"RELATED found multiple rows for {target_table['name']!r} "
-                f"at iterator row {row_index}."
-            )
-        if not matches:
-            return None
-        related_value = matches[0].get(target_column)
-        _reject_power_query_error(related_value, target_column, row_index)
-        raw_value = "" if related_value is None else cell_to_text(related_value).strip()
-        if not raw_value:
-            return None
-        try:
-            number = Decimal(raw_value.replace(",", ""))
-        except (DecimalException, ValueError) as exc:
-            raise MeasureError(
-                f"Related column {target_table['name']}[{target_column}] contains "
-                f"a non-numeric value at iterator row {row_index}."
-            ) from exc
-        if not number.is_finite():
-            raise MeasureError(
-                f"Related column {target_table['name']}[{target_column}] contains "
-                "a non-finite number."
-            )
-        return number
+        return evaluate(("reference", "", target_column), (target_table, current_row, row_index), allow_text=True)
 
     def iterator_model_reference_category(
         expression: tuple[Any, ...],
@@ -5930,8 +5938,7 @@ def evaluate_measures(
         if kind == "call":
             function = expression[1]
             if function == "RELATED":
-                related_column_details(expression[2][0], row_context)
-                return "numeric"
+                return iterator_type_category(related_column_details(expression[2][0], row_context)[3])
             if function in _TYPED_ARITY:
                 for argument in expression[2]:
                     iterator_expression_category(argument, row_context)
@@ -6034,14 +6041,15 @@ def evaluate_measures(
                 result_category = iterator_expression_category(
                     expression[2][1], (iterated_table, validation_row, 1)
                 )
+                extreme = function in {"MAXX", "MINX"}
                 if (
                     function in _ALL_ITERATORS - {"COUNTX", "COUNTAX"}
-                    and result_category not in {"numeric", "blank"}
+                    and result_category not in ({"numeric", "blank", "date/time", "text"} if extreme else {"numeric", "blank"})
                 ):
                     raise MeasureError(
                         f"Iterator {function} expression needs a numeric result."
                     )
-                return "numeric"
+                return result_category if extreme and result_category in {"date/time", "text"} else "numeric"
             if function in {
                 "SUM", "AVERAGE", "MIN", "MAX", "COUNT", "COUNTA",
                 "DISTINCTCOUNT", "DISTINCTCOUNTNOBLANK", "COUNTROWS",
@@ -9099,7 +9107,10 @@ def evaluate_measures(
             raise MeasureError("A table constructor with more than one value cannot be used as a single value.")
         _, function, arguments = node
         if function == "RELATED":
-            return related_numeric_value(arguments[0], row_context)
+            if row_context is None and row_stack and row_stack[-1][0].get("derived") and not row_stack[-1][0]["headers"]:
+                # a scalar hoisted out of a CALCULATE filter (see filter_constant) reads the row of the enclosing iterator
+                row_context = next((frame for frame in reversed(row_stack[:-1]) if frame[0]["headers"]), None)
+            return related_value(arguments[0], row_context)
         if function in {"SUMX", "AVERAGEX", "MAXX", "MINX"} or function in dax_math.STAT_ITERATORS:
             context, iteration_rows = table_argument_value(arguments[0])
             if function in {"MAXX", "MINX"}:
@@ -9107,17 +9118,18 @@ def evaluate_measures(
                 result_category = iterator_expression_category(
                     arguments[1], (context, validation_row, 1)
                 )
-                if result_category not in {"numeric", "blank", "date/time"}:
+                if result_category not in {"numeric", "blank", "date/time", "text"}:
                     raise MeasureError(
                         f"Iterator {function} expression needs a numeric result."
                     )
+            text_extreme = function in {"MAXX", "MINX"} and result_category == "text"
             values: list[Decimal] = []
             for frame in iterate_rows(context, iteration_rows, "install"):
-                result = in_row_expression(lambda frame=frame: evaluate(arguments[1], frame))
+                result = in_row_expression(lambda frame=frame: evaluate(arguments[1], frame, allow_text=text_extreme))
                 if isinstance(result, bool) and function not in {"MAXX", "MINX"}:
                     raise MeasureError(f"The function {function} cannot work with values of type Boolean.")
                 if result is not None:
-                    values.append(as_number(result))
+                    values.append(result if text_extreme and isinstance(result, str) else as_number(result))
                 elif function in {"MEDIANX", "PERCENTILEX.INC", "PERCENTILEX.EXC"}:
                     values.append(Decimal(0))  # these three count a blank result as zero
             if function in dax_math.STAT_ITERATORS:
@@ -9125,6 +9137,10 @@ def evaluate_measures(
                     dax_typed.to_number(evaluate(arguments[2], row_context)) if function.startswith("PERCENTILEX") else None
                 )
                 return dax_math.statistic(function, [value for value in values if value.is_finite()], percentile)
+            if text_extreme:  # the largest or smallest text, compared without regard to case
+                if not values:  # Power BI's BLANK here is a text BLANK (comparing it with a number is an error); BLANK has no type here
+                    raise MeasureError(f"{function} of text found no value, and a text BLANK is not modelled by the local DAX engine.")
+                return (max if function == "MAXX" else min)(values, key=dax_typed.text_key)
             if function in {"MAXX", "MINX"}:
                 ordered = [value for value in values if not value.is_nan()]
                 if not ordered:
@@ -9135,7 +9151,10 @@ def evaluate_measures(
             total = Decimal(0)
             for value in values:
                 total = dax_typed.QUIET.add(total, value)
-            return total if function == "SUMX" else dax_typed.QUIET.divide(total, Decimal(len(values)))
+            result = total if function == "SUMX" else dax_typed.QUIET.divide(total, Decimal(len(values)))
+            if function == "SUMX" and all(isinstance(value, dax_dates.DaxDateTime) for value in values) and result.is_finite():
+                return dax_dates.DaxDateTime(result)  # live Power BI: SUMX over dates is a date, AVERAGEX over dates is a plain number
+            return result
         if function in {"COUNTX", "COUNTAX"}:
             context, iteration_rows = table_argument_value(arguments[0])
             validation_row = iteration_rows[0] if iteration_rows else {}
