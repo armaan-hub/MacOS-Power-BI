@@ -1,0 +1,2731 @@
+{
+"source": "Power BI Desktop 2.157.879.0 answers, ZO model, family rt + hand (scratchpad/re_c/fixtures.json); 'pending' = needs the unknown-member rewrite or an unrelated CALCULATE filter subset gap",
+"items": [
+{
+"model": "ZO",
+"expr": "SUMX(ZO_Dim,COUNTROWS(RELATEDTABLE(ZO_Fact)))",
+"powerbi": "10",
+"ctx": "none",
+"status": "match"
+},
+{
+"model": "ZO",
+"expr": "SUMX(ZO_Dim,SUMX(RELATEDTABLE(ZO_Fact),ZO_Fact[Amt]))",
+"powerbi": "300",
+"ctx": "none",
+"status": "match"
+},
+{
+"model": "ZO",
+"expr": "SUMX(VALUES(ZO_Dim),COUNTROWS(RELATEDTABLE(ZO_Fact)))",
+"powerbi": "13",
+"ctx": "none",
+"status": "pending",
+"reason": "unknown member: orphan fact rows reach the virtual BLANK row (Head's rewrite)"
+},
+{
+"model": "ZO",
+"expr": "SUMX(VALUES(ZO_Dim),SUMX(RELATEDTABLE(ZO_Fact),ZO_Fact[Amt]))",
+"powerbi": "375",
+"ctx": "none",
+"status": "pending",
+"reason": "unknown member: orphan fact rows reach the virtual BLANK row (Head's rewrite)"
+},
+{
+"model": "ZO",
+"expr": "SUMX(ALL(ZO_Dim),COUNTROWS(RELATEDTABLE(ZO_Fact)))",
+"powerbi": "13",
+"ctx": "none",
+"status": "pending",
+"reason": "unknown member: orphan fact rows reach the virtual BLANK row (Head's rewrite)"
+},
+{
+"model": "ZO",
+"expr": "SUMX(ALL(ZO_Dim),SUMX(RELATEDTABLE(ZO_Fact),ZO_Fact[Amt]))",
+"powerbi": "375",
+"ctx": "none",
+"status": "pending",
+"reason": "unknown member: orphan fact rows reach the virtual BLANK row (Head's rewrite)"
+},
+{
+"model": "ZO",
+"expr": "SUMX(ALLNOBLANKROW(ZO_Dim),COUNTROWS(RELATEDTABLE(ZO_Fact)))",
+"powerbi": "10",
+"ctx": "none",
+"status": "match"
+},
+{
+"model": "ZO",
+"expr": "SUMX(ALLNOBLANKROW(ZO_Dim),SUMX(RELATEDTABLE(ZO_Fact),ZO_Fact[Amt]))",
+"powerbi": "300",
+"ctx": "none",
+"status": "match"
+},
+{
+"model": "ZO",
+"expr": "COUNTROWS(RELATEDTABLE(ZO_Fact))",
+"powerbi": "13",
+"ctx": "none",
+"status": "match"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(SUMX(ZO_Dim,COUNTROWS(RELATEDTABLE(ZO_Fact))),ZO_Dim[Cat]=\"A\")",
+"powerbi": "6",
+"ctx": "Cat=\"A\"",
+"status": "match"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(SUMX(ZO_Dim,SUMX(RELATEDTABLE(ZO_Fact),ZO_Fact[Amt])),ZO_Dim[Cat]=\"A\")",
+"powerbi": "140",
+"ctx": "Cat=\"A\"",
+"status": "match"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(SUMX(VALUES(ZO_Dim),COUNTROWS(RELATEDTABLE(ZO_Fact))),ZO_Dim[Cat]=\"A\")",
+"powerbi": "6",
+"ctx": "Cat=\"A\"",
+"status": "match"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(SUMX(VALUES(ZO_Dim),SUMX(RELATEDTABLE(ZO_Fact),ZO_Fact[Amt])),ZO_Dim[Cat]=\"A\")",
+"powerbi": "140",
+"ctx": "Cat=\"A\"",
+"status": "match"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(SUMX(ALL(ZO_Dim),COUNTROWS(RELATEDTABLE(ZO_Fact))),ZO_Dim[Cat]=\"A\")",
+"powerbi": "13",
+"ctx": "Cat=\"A\"",
+"status": "pending",
+"reason": "unknown member: orphan fact rows reach the virtual BLANK row (Head's rewrite)"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(SUMX(ALL(ZO_Dim),SUMX(RELATEDTABLE(ZO_Fact),ZO_Fact[Amt])),ZO_Dim[Cat]=\"A\")",
+"powerbi": "375",
+"ctx": "Cat=\"A\"",
+"status": "pending",
+"reason": "unknown member: orphan fact rows reach the virtual BLANK row (Head's rewrite)"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(SUMX(ALLNOBLANKROW(ZO_Dim),COUNTROWS(RELATEDTABLE(ZO_Fact))),ZO_Dim[Cat]=\"A\")",
+"powerbi": "10",
+"ctx": "Cat=\"A\"",
+"status": "match"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(SUMX(ALLNOBLANKROW(ZO_Dim),SUMX(RELATEDTABLE(ZO_Fact),ZO_Fact[Amt])),ZO_Dim[Cat]=\"A\")",
+"powerbi": "300",
+"ctx": "Cat=\"A\"",
+"status": "match"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(COUNTROWS(RELATEDTABLE(ZO_Fact)),ZO_Dim[Cat]=\"A\")",
+"powerbi": "6",
+"ctx": "Cat=\"A\"",
+"status": "match"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(SUMX(ZO_Dim,COUNTROWS(RELATEDTABLE(ZO_Fact))),ZO_Dim[Cat]<>\"A\")",
+"powerbi": "4",
+"ctx": "Cat<>\"A\"",
+"status": "match"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(SUMX(ZO_Dim,SUMX(RELATEDTABLE(ZO_Fact),ZO_Fact[Amt])),ZO_Dim[Cat]<>\"A\")",
+"powerbi": "160",
+"ctx": "Cat<>\"A\"",
+"status": "match"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(SUMX(VALUES(ZO_Dim),COUNTROWS(RELATEDTABLE(ZO_Fact))),ZO_Dim[Cat]<>\"A\")",
+"powerbi": "7",
+"ctx": "Cat<>\"A\"",
+"status": "pending",
+"reason": "unknown member: orphan fact rows reach the virtual BLANK row (Head's rewrite)"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(SUMX(VALUES(ZO_Dim),SUMX(RELATEDTABLE(ZO_Fact),ZO_Fact[Amt])),ZO_Dim[Cat]<>\"A\")",
+"powerbi": "235",
+"ctx": "Cat<>\"A\"",
+"status": "pending",
+"reason": "unknown member: orphan fact rows reach the virtual BLANK row (Head's rewrite)"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(SUMX(ALL(ZO_Dim),COUNTROWS(RELATEDTABLE(ZO_Fact))),ZO_Dim[Cat]<>\"A\")",
+"powerbi": "13",
+"ctx": "Cat<>\"A\"",
+"status": "pending",
+"reason": "unknown member: orphan fact rows reach the virtual BLANK row (Head's rewrite)"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(SUMX(ALL(ZO_Dim),SUMX(RELATEDTABLE(ZO_Fact),ZO_Fact[Amt])),ZO_Dim[Cat]<>\"A\")",
+"powerbi": "375",
+"ctx": "Cat<>\"A\"",
+"status": "pending",
+"reason": "unknown member: orphan fact rows reach the virtual BLANK row (Head's rewrite)"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(SUMX(ALLNOBLANKROW(ZO_Dim),COUNTROWS(RELATEDTABLE(ZO_Fact))),ZO_Dim[Cat]<>\"A\")",
+"powerbi": "10",
+"ctx": "Cat<>\"A\"",
+"status": "match"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(SUMX(ALLNOBLANKROW(ZO_Dim),SUMX(RELATEDTABLE(ZO_Fact),ZO_Fact[Amt])),ZO_Dim[Cat]<>\"A\")",
+"powerbi": "300",
+"ctx": "Cat<>\"A\"",
+"status": "match"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(COUNTROWS(RELATEDTABLE(ZO_Fact)),ZO_Dim[Cat]<>\"A\")",
+"powerbi": "7",
+"ctx": "Cat<>\"A\"",
+"status": "pending",
+"reason": "unknown member: orphan fact rows reach the virtual BLANK row (Head's rewrite)"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(SUMX(ZO_Dim,COUNTROWS(RELATEDTABLE(ZO_Fact))),ZO_Dim[Cat]=BLANK())",
+"powerbi": "BLANK",
+"ctx": "Cat=BLANK()",
+"status": "match"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(SUMX(ZO_Dim,SUMX(RELATEDTABLE(ZO_Fact),ZO_Fact[Amt])),ZO_Dim[Cat]=BLANK())",
+"powerbi": "BLANK",
+"ctx": "Cat=BLANK()",
+"status": "match"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(SUMX(VALUES(ZO_Dim),COUNTROWS(RELATEDTABLE(ZO_Fact))),ZO_Dim[Cat]=BLANK())",
+"powerbi": "3",
+"ctx": "Cat=BLANK()",
+"status": "pending",
+"reason": "unknown member: orphan fact rows reach the virtual BLANK row (Head's rewrite)"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(SUMX(VALUES(ZO_Dim),SUMX(RELATEDTABLE(ZO_Fact),ZO_Fact[Amt])),ZO_Dim[Cat]=BLANK())",
+"powerbi": "75",
+"ctx": "Cat=BLANK()",
+"status": "pending",
+"reason": "unknown member: orphan fact rows reach the virtual BLANK row (Head's rewrite)"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(SUMX(ALL(ZO_Dim),COUNTROWS(RELATEDTABLE(ZO_Fact))),ZO_Dim[Cat]=BLANK())",
+"powerbi": "13",
+"ctx": "Cat=BLANK()",
+"status": "pending",
+"reason": "unknown member: orphan fact rows reach the virtual BLANK row (Head's rewrite)"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(SUMX(ALL(ZO_Dim),SUMX(RELATEDTABLE(ZO_Fact),ZO_Fact[Amt])),ZO_Dim[Cat]=BLANK())",
+"powerbi": "375",
+"ctx": "Cat=BLANK()",
+"status": "pending",
+"reason": "unknown member: orphan fact rows reach the virtual BLANK row (Head's rewrite)"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(SUMX(ALLNOBLANKROW(ZO_Dim),COUNTROWS(RELATEDTABLE(ZO_Fact))),ZO_Dim[Cat]=BLANK())",
+"powerbi": "10",
+"ctx": "Cat=BLANK()",
+"status": "match"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(SUMX(ALLNOBLANKROW(ZO_Dim),SUMX(RELATEDTABLE(ZO_Fact),ZO_Fact[Amt])),ZO_Dim[Cat]=BLANK())",
+"powerbi": "300",
+"ctx": "Cat=BLANK()",
+"status": "match"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(COUNTROWS(RELATEDTABLE(ZO_Fact)),ZO_Dim[Cat]=BLANK())",
+"powerbi": "3",
+"ctx": "Cat=BLANK()",
+"status": "pending",
+"reason": "unknown member: orphan fact rows reach the virtual BLANK row (Head's rewrite)"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(SUMX(ZO_Dim,COUNTROWS(RELATEDTABLE(ZO_Fact))),ZO_Dim[Cat] IN {\"A\",BLANK()})",
+"powerbi": "6",
+"ctx": "Cat IN {\"A\",BLANK()}",
+"status": "pending",
+"reason": "unknown member: blank-filter provenance of the virtual BLANK row (Head's rewrite)"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(SUMX(ZO_Dim,SUMX(RELATEDTABLE(ZO_Fact),ZO_Fact[Amt])),ZO_Dim[Cat] IN {\"A\",BLANK()})",
+"powerbi": "140",
+"ctx": "Cat IN {\"A\",BLANK()}",
+"status": "pending",
+"reason": "unknown member: blank-filter provenance of the virtual BLANK row (Head's rewrite)"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(SUMX(VALUES(ZO_Dim),COUNTROWS(RELATEDTABLE(ZO_Fact))),ZO_Dim[Cat] IN {\"A\",BLANK()})",
+"powerbi": "9",
+"ctx": "Cat IN {\"A\",BLANK()}",
+"status": "pending",
+"reason": "unknown member: blank-filter provenance of the virtual BLANK row (Head's rewrite)"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(SUMX(VALUES(ZO_Dim),SUMX(RELATEDTABLE(ZO_Fact),ZO_Fact[Amt])),ZO_Dim[Cat] IN {\"A\",BLANK()})",
+"powerbi": "215",
+"ctx": "Cat IN {\"A\",BLANK()}",
+"status": "pending",
+"reason": "unknown member: blank-filter provenance of the virtual BLANK row (Head's rewrite)"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(SUMX(ALL(ZO_Dim),COUNTROWS(RELATEDTABLE(ZO_Fact))),ZO_Dim[Cat] IN {\"A\",BLANK()})",
+"powerbi": "13",
+"ctx": "Cat IN {\"A\",BLANK()}",
+"status": "pending",
+"reason": "unknown member: orphan fact rows reach the virtual BLANK row (Head's rewrite)"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(SUMX(ALL(ZO_Dim),SUMX(RELATEDTABLE(ZO_Fact),ZO_Fact[Amt])),ZO_Dim[Cat] IN {\"A\",BLANK()})",
+"powerbi": "375",
+"ctx": "Cat IN {\"A\",BLANK()}",
+"status": "pending",
+"reason": "unknown member: orphan fact rows reach the virtual BLANK row (Head's rewrite)"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(SUMX(ALLNOBLANKROW(ZO_Dim),COUNTROWS(RELATEDTABLE(ZO_Fact))),ZO_Dim[Cat] IN {\"A\",BLANK()})",
+"powerbi": "10",
+"ctx": "Cat IN {\"A\",BLANK()}",
+"status": "match"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(SUMX(ALLNOBLANKROW(ZO_Dim),SUMX(RELATEDTABLE(ZO_Fact),ZO_Fact[Amt])),ZO_Dim[Cat] IN {\"A\",BLANK()})",
+"powerbi": "300",
+"ctx": "Cat IN {\"A\",BLANK()}",
+"status": "match"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(COUNTROWS(RELATEDTABLE(ZO_Fact)),ZO_Dim[Cat] IN {\"A\",BLANK()})",
+"powerbi": "9",
+"ctx": "Cat IN {\"A\",BLANK()}",
+"status": "pending",
+"reason": "unknown member: orphan fact rows reach the virtual BLANK row (Head's rewrite)"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(SUMX(ZO_Dim,COUNTROWS(RELATEDTABLE(ZO_Fact))),ZO_Dim[Cat]<>BLANK())",
+"powerbi": "10",
+"ctx": "Cat<>BLANK()",
+"status": "match"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(SUMX(ZO_Dim,SUMX(RELATEDTABLE(ZO_Fact),ZO_Fact[Amt])),ZO_Dim[Cat]<>BLANK())",
+"powerbi": "300",
+"ctx": "Cat<>BLANK()",
+"status": "match"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(SUMX(VALUES(ZO_Dim),COUNTROWS(RELATEDTABLE(ZO_Fact))),ZO_Dim[Cat]<>BLANK())",
+"powerbi": "10",
+"ctx": "Cat<>BLANK()",
+"status": "match"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(SUMX(VALUES(ZO_Dim),SUMX(RELATEDTABLE(ZO_Fact),ZO_Fact[Amt])),ZO_Dim[Cat]<>BLANK())",
+"powerbi": "300",
+"ctx": "Cat<>BLANK()",
+"status": "match"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(SUMX(ALL(ZO_Dim),COUNTROWS(RELATEDTABLE(ZO_Fact))),ZO_Dim[Cat]<>BLANK())",
+"powerbi": "13",
+"ctx": "Cat<>BLANK()",
+"status": "pending",
+"reason": "unknown member: orphan fact rows reach the virtual BLANK row (Head's rewrite)"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(SUMX(ALL(ZO_Dim),SUMX(RELATEDTABLE(ZO_Fact),ZO_Fact[Amt])),ZO_Dim[Cat]<>BLANK())",
+"powerbi": "375",
+"ctx": "Cat<>BLANK()",
+"status": "pending",
+"reason": "unknown member: orphan fact rows reach the virtual BLANK row (Head's rewrite)"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(SUMX(ALLNOBLANKROW(ZO_Dim),COUNTROWS(RELATEDTABLE(ZO_Fact))),ZO_Dim[Cat]<>BLANK())",
+"powerbi": "10",
+"ctx": "Cat<>BLANK()",
+"status": "match"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(SUMX(ALLNOBLANKROW(ZO_Dim),SUMX(RELATEDTABLE(ZO_Fact),ZO_Fact[Amt])),ZO_Dim[Cat]<>BLANK())",
+"powerbi": "300",
+"ctx": "Cat<>BLANK()",
+"status": "match"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(COUNTROWS(RELATEDTABLE(ZO_Fact)),ZO_Dim[Cat]<>BLANK())",
+"powerbi": "10",
+"ctx": "Cat<>BLANK()",
+"status": "match"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(SUMX(ZO_Dim,COUNTROWS(RELATEDTABLE(ZO_Fact))),ZO_Dim[Prod]<>\"P1\")",
+"powerbi": "7",
+"ctx": "Prod<>\"P1\"",
+"status": "match"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(SUMX(ZO_Dim,SUMX(RELATEDTABLE(ZO_Fact),ZO_Fact[Amt])),ZO_Dim[Prod]<>\"P1\")",
+"powerbi": "255",
+"ctx": "Prod<>\"P1\"",
+"status": "match"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(SUMX(VALUES(ZO_Dim),COUNTROWS(RELATEDTABLE(ZO_Fact))),ZO_Dim[Prod]<>\"P1\")",
+"powerbi": "10",
+"ctx": "Prod<>\"P1\"",
+"status": "pending",
+"reason": "unknown member: orphan fact rows reach the virtual BLANK row (Head's rewrite)"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(SUMX(VALUES(ZO_Dim),SUMX(RELATEDTABLE(ZO_Fact),ZO_Fact[Amt])),ZO_Dim[Prod]<>\"P1\")",
+"powerbi": "330",
+"ctx": "Prod<>\"P1\"",
+"status": "pending",
+"reason": "unknown member: orphan fact rows reach the virtual BLANK row (Head's rewrite)"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(SUMX(ALL(ZO_Dim),COUNTROWS(RELATEDTABLE(ZO_Fact))),ZO_Dim[Prod]<>\"P1\")",
+"powerbi": "13",
+"ctx": "Prod<>\"P1\"",
+"status": "pending",
+"reason": "unknown member: orphan fact rows reach the virtual BLANK row (Head's rewrite)"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(SUMX(ALL(ZO_Dim),SUMX(RELATEDTABLE(ZO_Fact),ZO_Fact[Amt])),ZO_Dim[Prod]<>\"P1\")",
+"powerbi": "375",
+"ctx": "Prod<>\"P1\"",
+"status": "pending",
+"reason": "unknown member: orphan fact rows reach the virtual BLANK row (Head's rewrite)"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(SUMX(ALLNOBLANKROW(ZO_Dim),COUNTROWS(RELATEDTABLE(ZO_Fact))),ZO_Dim[Prod]<>\"P1\")",
+"powerbi": "10",
+"ctx": "Prod<>\"P1\"",
+"status": "match"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(SUMX(ALLNOBLANKROW(ZO_Dim),SUMX(RELATEDTABLE(ZO_Fact),ZO_Fact[Amt])),ZO_Dim[Prod]<>\"P1\")",
+"powerbi": "300",
+"ctx": "Prod<>\"P1\"",
+"status": "match"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(COUNTROWS(RELATEDTABLE(ZO_Fact)),ZO_Dim[Prod]<>\"P1\")",
+"powerbi": "10",
+"ctx": "Prod<>\"P1\"",
+"status": "pending",
+"reason": "unknown member: orphan fact rows reach the virtual BLANK row (Head's rewrite)"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(SUMX(ZO_Dim,COUNTROWS(RELATEDTABLE(ZO_Fact))),ZO_Dim[Cat]<>\"A\"&&ZO_Dim[Grp]=\"X\")",
+"powerbi": "3",
+"ctx": "Cat<>\"A\"&&Grp=\"X\"",
+"status": "pending",
+"reason": "unknown member: blank-filter provenance of the virtual BLANK row (Head's rewrite)"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(SUMX(ZO_Dim,SUMX(RELATEDTABLE(ZO_Fact),ZO_Fact[Amt])),ZO_Dim[Cat]<>\"A\"&&ZO_Dim[Grp]=\"X\")",
+"powerbi": "90",
+"ctx": "Cat<>\"A\"&&Grp=\"X\"",
+"status": "pending",
+"reason": "unknown member: blank-filter provenance of the virtual BLANK row (Head's rewrite)"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(SUMX(VALUES(ZO_Dim),COUNTROWS(RELATEDTABLE(ZO_Fact))),ZO_Dim[Cat]<>\"A\"&&ZO_Dim[Grp]=\"X\")",
+"powerbi": "3",
+"ctx": "Cat<>\"A\"&&Grp=\"X\"",
+"status": "pending",
+"reason": "unknown member: blank-filter provenance of the virtual BLANK row (Head's rewrite)"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(SUMX(VALUES(ZO_Dim),SUMX(RELATEDTABLE(ZO_Fact),ZO_Fact[Amt])),ZO_Dim[Cat]<>\"A\"&&ZO_Dim[Grp]=\"X\")",
+"powerbi": "90",
+"ctx": "Cat<>\"A\"&&Grp=\"X\"",
+"status": "pending",
+"reason": "unknown member: blank-filter provenance of the virtual BLANK row (Head's rewrite)"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(SUMX(ALL(ZO_Dim),COUNTROWS(RELATEDTABLE(ZO_Fact))),ZO_Dim[Cat]<>\"A\"&&ZO_Dim[Grp]=\"X\")",
+"powerbi": "13",
+"ctx": "Cat<>\"A\"&&Grp=\"X\"",
+"status": "pending",
+"reason": "unknown member: orphan fact rows reach the virtual BLANK row (Head's rewrite)"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(SUMX(ALL(ZO_Dim),SUMX(RELATEDTABLE(ZO_Fact),ZO_Fact[Amt])),ZO_Dim[Cat]<>\"A\"&&ZO_Dim[Grp]=\"X\")",
+"powerbi": "375",
+"ctx": "Cat<>\"A\"&&Grp=\"X\"",
+"status": "pending",
+"reason": "unknown member: orphan fact rows reach the virtual BLANK row (Head's rewrite)"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(SUMX(ALLNOBLANKROW(ZO_Dim),COUNTROWS(RELATEDTABLE(ZO_Fact))),ZO_Dim[Cat]<>\"A\"&&ZO_Dim[Grp]=\"X\")",
+"powerbi": "10",
+"ctx": "Cat<>\"A\"&&Grp=\"X\"",
+"status": "match"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(SUMX(ALLNOBLANKROW(ZO_Dim),SUMX(RELATEDTABLE(ZO_Fact),ZO_Fact[Amt])),ZO_Dim[Cat]<>\"A\"&&ZO_Dim[Grp]=\"X\")",
+"powerbi": "300",
+"ctx": "Cat<>\"A\"&&Grp=\"X\"",
+"status": "match"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(COUNTROWS(RELATEDTABLE(ZO_Fact)),ZO_Dim[Cat]<>\"A\"&&ZO_Dim[Grp]=\"X\")",
+"powerbi": "3",
+"ctx": "Cat<>\"A\"&&Grp=\"X\"",
+"status": "match"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(SUMX(ZO_Dim,COUNTROWS(RELATEDTABLE(ZO_Fact))),ZO_Dim[Cat]<=\"B\")",
+"powerbi": "9",
+"ctx": "Cat<=\"B\"",
+"status": "pending",
+"reason": "CALCULATE filter subset: text column inequality filter (not RELATEDTABLE)"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(SUMX(ZO_Dim,SUMX(RELATEDTABLE(ZO_Fact),ZO_Fact[Amt])),ZO_Dim[Cat]<=\"B\")",
+"powerbi": "295",
+"ctx": "Cat<=\"B\"",
+"status": "pending",
+"reason": "CALCULATE filter subset: text column inequality filter (not RELATEDTABLE)"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(SUMX(VALUES(ZO_Dim),COUNTROWS(RELATEDTABLE(ZO_Fact))),ZO_Dim[Cat]<=\"B\")",
+"powerbi": "12",
+"ctx": "Cat<=\"B\"",
+"status": "pending",
+"reason": "CALCULATE filter subset: text column inequality filter (not RELATEDTABLE)"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(SUMX(VALUES(ZO_Dim),SUMX(RELATEDTABLE(ZO_Fact),ZO_Fact[Amt])),ZO_Dim[Cat]<=\"B\")",
+"powerbi": "370",
+"ctx": "Cat<=\"B\"",
+"status": "pending",
+"reason": "CALCULATE filter subset: text column inequality filter (not RELATEDTABLE)"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(SUMX(ALL(ZO_Dim),COUNTROWS(RELATEDTABLE(ZO_Fact))),ZO_Dim[Cat]<=\"B\")",
+"powerbi": "13",
+"ctx": "Cat<=\"B\"",
+"status": "pending",
+"reason": "unknown member: orphan fact rows reach the virtual BLANK row (Head's rewrite)"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(SUMX(ALL(ZO_Dim),SUMX(RELATEDTABLE(ZO_Fact),ZO_Fact[Amt])),ZO_Dim[Cat]<=\"B\")",
+"powerbi": "375",
+"ctx": "Cat<=\"B\"",
+"status": "pending",
+"reason": "unknown member: orphan fact rows reach the virtual BLANK row (Head's rewrite)"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(SUMX(ALLNOBLANKROW(ZO_Dim),COUNTROWS(RELATEDTABLE(ZO_Fact))),ZO_Dim[Cat]<=\"B\")",
+"powerbi": "10",
+"ctx": "Cat<=\"B\"",
+"status": "match"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(SUMX(ALLNOBLANKROW(ZO_Dim),SUMX(RELATEDTABLE(ZO_Fact),ZO_Fact[Amt])),ZO_Dim[Cat]<=\"B\")",
+"powerbi": "300",
+"ctx": "Cat<=\"B\"",
+"status": "match"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(COUNTROWS(RELATEDTABLE(ZO_Fact)),ZO_Dim[Cat]<=\"B\")",
+"powerbi": "12",
+"ctx": "Cat<=\"B\"",
+"status": "pending",
+"reason": "unknown member: orphan fact rows reach the virtual BLANK row (Head's rewrite)"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(SUMX(ZO_Dim,COUNTROWS(RELATEDTABLE(ZO_Fact))),ZO_Dim[Cat]>\"B\")",
+"powerbi": "1",
+"ctx": "Cat>\"B\"",
+"status": "pending",
+"reason": "CALCULATE filter subset: text column inequality filter (not RELATEDTABLE)"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(SUMX(ZO_Dim,SUMX(RELATEDTABLE(ZO_Fact),ZO_Fact[Amt])),ZO_Dim[Cat]>\"B\")",
+"powerbi": "5",
+"ctx": "Cat>\"B\"",
+"status": "pending",
+"reason": "CALCULATE filter subset: text column inequality filter (not RELATEDTABLE)"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(SUMX(VALUES(ZO_Dim),COUNTROWS(RELATEDTABLE(ZO_Fact))),ZO_Dim[Cat]>\"B\")",
+"powerbi": "1",
+"ctx": "Cat>\"B\"",
+"status": "pending",
+"reason": "CALCULATE filter subset: text column inequality filter (not RELATEDTABLE)"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(SUMX(VALUES(ZO_Dim),SUMX(RELATEDTABLE(ZO_Fact),ZO_Fact[Amt])),ZO_Dim[Cat]>\"B\")",
+"powerbi": "5",
+"ctx": "Cat>\"B\"",
+"status": "pending",
+"reason": "CALCULATE filter subset: text column inequality filter (not RELATEDTABLE)"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(SUMX(ALL(ZO_Dim),COUNTROWS(RELATEDTABLE(ZO_Fact))),ZO_Dim[Cat]>\"B\")",
+"powerbi": "13",
+"ctx": "Cat>\"B\"",
+"status": "pending",
+"reason": "unknown member: orphan fact rows reach the virtual BLANK row (Head's rewrite)"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(SUMX(ALL(ZO_Dim),SUMX(RELATEDTABLE(ZO_Fact),ZO_Fact[Amt])),ZO_Dim[Cat]>\"B\")",
+"powerbi": "375",
+"ctx": "Cat>\"B\"",
+"status": "pending",
+"reason": "unknown member: orphan fact rows reach the virtual BLANK row (Head's rewrite)"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(SUMX(ALLNOBLANKROW(ZO_Dim),COUNTROWS(RELATEDTABLE(ZO_Fact))),ZO_Dim[Cat]>\"B\")",
+"powerbi": "10",
+"ctx": "Cat>\"B\"",
+"status": "match"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(SUMX(ALLNOBLANKROW(ZO_Dim),SUMX(RELATEDTABLE(ZO_Fact),ZO_Fact[Amt])),ZO_Dim[Cat]>\"B\")",
+"powerbi": "300",
+"ctx": "Cat>\"B\"",
+"status": "match"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(COUNTROWS(RELATEDTABLE(ZO_Fact)),ZO_Dim[Cat]>\"B\")",
+"powerbi": "1",
+"ctx": "Cat>\"B\"",
+"status": "match"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(SUMX(ZO_Dim,COUNTROWS(RELATEDTABLE(ZO_Fact))),FILTER(ZO_Dim,ZO_Dim[Cat]<>\"A\"))",
+"powerbi": "4",
+"ctx": "FILTER(Dim,Cat<>\"A\")",
+"status": "match"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(SUMX(ZO_Dim,SUMX(RELATEDTABLE(ZO_Fact),ZO_Fact[Amt])),FILTER(ZO_Dim,ZO_Dim[Cat]<>\"A\"))",
+"powerbi": "160",
+"ctx": "FILTER(Dim,Cat<>\"A\")",
+"status": "match"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(SUMX(VALUES(ZO_Dim),COUNTROWS(RELATEDTABLE(ZO_Fact))),FILTER(ZO_Dim,ZO_Dim[Cat]<>\"A\"))",
+"powerbi": "4",
+"ctx": "FILTER(Dim,Cat<>\"A\")",
+"status": "match"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(SUMX(VALUES(ZO_Dim),SUMX(RELATEDTABLE(ZO_Fact),ZO_Fact[Amt])),FILTER(ZO_Dim,ZO_Dim[Cat]<>\"A\"))",
+"powerbi": "160",
+"ctx": "FILTER(Dim,Cat<>\"A\")",
+"status": "match"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(SUMX(ALL(ZO_Dim),COUNTROWS(RELATEDTABLE(ZO_Fact))),FILTER(ZO_Dim,ZO_Dim[Cat]<>\"A\"))",
+"powerbi": "13",
+"ctx": "FILTER(Dim,Cat<>\"A\")",
+"status": "pending",
+"reason": "unknown member: orphan fact rows reach the virtual BLANK row (Head's rewrite)"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(SUMX(ALL(ZO_Dim),SUMX(RELATEDTABLE(ZO_Fact),ZO_Fact[Amt])),FILTER(ZO_Dim,ZO_Dim[Cat]<>\"A\"))",
+"powerbi": "375",
+"ctx": "FILTER(Dim,Cat<>\"A\")",
+"status": "pending",
+"reason": "unknown member: orphan fact rows reach the virtual BLANK row (Head's rewrite)"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(SUMX(ALLNOBLANKROW(ZO_Dim),COUNTROWS(RELATEDTABLE(ZO_Fact))),FILTER(ZO_Dim,ZO_Dim[Cat]<>\"A\"))",
+"powerbi": "10",
+"ctx": "FILTER(Dim,Cat<>\"A\")",
+"status": "match"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(SUMX(ALLNOBLANKROW(ZO_Dim),SUMX(RELATEDTABLE(ZO_Fact),ZO_Fact[Amt])),FILTER(ZO_Dim,ZO_Dim[Cat]<>\"A\"))",
+"powerbi": "300",
+"ctx": "FILTER(Dim,Cat<>\"A\")",
+"status": "match"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(COUNTROWS(RELATEDTABLE(ZO_Fact)),FILTER(ZO_Dim,ZO_Dim[Cat]<>\"A\"))",
+"powerbi": "4",
+"ctx": "FILTER(Dim,Cat<>\"A\")",
+"status": "match"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(SUMX(ZO_Dim,COUNTROWS(RELATEDTABLE(ZO_Fact))),FILTER(VALUES(ZO_Dim),ZO_Dim[Cat]<>\"A\"))",
+"powerbi": "4",
+"ctx": "FILTER(VALUES(Dim),Cat<>\"A\")",
+"status": "pending",
+"reason": "unknown member: blank-filter provenance of the virtual BLANK row (Head's rewrite)"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(SUMX(ZO_Dim,SUMX(RELATEDTABLE(ZO_Fact),ZO_Fact[Amt])),FILTER(VALUES(ZO_Dim),ZO_Dim[Cat]<>\"A\"))",
+"powerbi": "160",
+"ctx": "FILTER(VALUES(Dim),Cat<>\"A\")",
+"status": "pending",
+"reason": "unknown member: blank-filter provenance of the virtual BLANK row (Head's rewrite)"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(SUMX(VALUES(ZO_Dim),COUNTROWS(RELATEDTABLE(ZO_Fact))),FILTER(VALUES(ZO_Dim),ZO_Dim[Cat]<>\"A\"))",
+"powerbi": "7",
+"ctx": "FILTER(VALUES(Dim),Cat<>\"A\")",
+"status": "pending",
+"reason": "unknown member: blank-filter provenance of the virtual BLANK row (Head's rewrite)"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(SUMX(VALUES(ZO_Dim),SUMX(RELATEDTABLE(ZO_Fact),ZO_Fact[Amt])),FILTER(VALUES(ZO_Dim),ZO_Dim[Cat]<>\"A\"))",
+"powerbi": "235",
+"ctx": "FILTER(VALUES(Dim),Cat<>\"A\")",
+"status": "pending",
+"reason": "unknown member: blank-filter provenance of the virtual BLANK row (Head's rewrite)"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(SUMX(ALL(ZO_Dim),COUNTROWS(RELATEDTABLE(ZO_Fact))),FILTER(VALUES(ZO_Dim),ZO_Dim[Cat]<>\"A\"))",
+"powerbi": "13",
+"ctx": "FILTER(VALUES(Dim),Cat<>\"A\")",
+"status": "pending",
+"reason": "unknown member: orphan fact rows reach the virtual BLANK row (Head's rewrite)"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(SUMX(ALL(ZO_Dim),SUMX(RELATEDTABLE(ZO_Fact),ZO_Fact[Amt])),FILTER(VALUES(ZO_Dim),ZO_Dim[Cat]<>\"A\"))",
+"powerbi": "375",
+"ctx": "FILTER(VALUES(Dim),Cat<>\"A\")",
+"status": "pending",
+"reason": "unknown member: orphan fact rows reach the virtual BLANK row (Head's rewrite)"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(SUMX(ALLNOBLANKROW(ZO_Dim),COUNTROWS(RELATEDTABLE(ZO_Fact))),FILTER(VALUES(ZO_Dim),ZO_Dim[Cat]<>\"A\"))",
+"powerbi": "10",
+"ctx": "FILTER(VALUES(Dim),Cat<>\"A\")",
+"status": "match"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(SUMX(ALLNOBLANKROW(ZO_Dim),SUMX(RELATEDTABLE(ZO_Fact),ZO_Fact[Amt])),FILTER(VALUES(ZO_Dim),ZO_Dim[Cat]<>\"A\"))",
+"powerbi": "300",
+"ctx": "FILTER(VALUES(Dim),Cat<>\"A\")",
+"status": "match"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(COUNTROWS(RELATEDTABLE(ZO_Fact)),FILTER(VALUES(ZO_Dim),ZO_Dim[Cat]<>\"A\"))",
+"powerbi": "7",
+"ctx": "FILTER(VALUES(Dim),Cat<>\"A\")",
+"status": "pending",
+"reason": "unknown member: orphan fact rows reach the virtual BLANK row (Head's rewrite)"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(SUMX(ZO_Dim,COUNTROWS(RELATEDTABLE(ZO_Fact))),FILTER(ALL(ZO_Dim[Cat]),ZO_Dim[Cat]<>\"A\"))",
+"powerbi": "4",
+"ctx": "FILTER(ALL(Dim[Cat]),Cat<>\"A\")",
+"status": "pending",
+"reason": "unknown member: blank-filter provenance of the virtual BLANK row (Head's rewrite)"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(SUMX(ZO_Dim,SUMX(RELATEDTABLE(ZO_Fact),ZO_Fact[Amt])),FILTER(ALL(ZO_Dim[Cat]),ZO_Dim[Cat]<>\"A\"))",
+"powerbi": "160",
+"ctx": "FILTER(ALL(Dim[Cat]),Cat<>\"A\")",
+"status": "pending",
+"reason": "unknown member: blank-filter provenance of the virtual BLANK row (Head's rewrite)"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(SUMX(VALUES(ZO_Dim),COUNTROWS(RELATEDTABLE(ZO_Fact))),FILTER(ALL(ZO_Dim[Cat]),ZO_Dim[Cat]<>\"A\"))",
+"powerbi": "7",
+"ctx": "FILTER(ALL(Dim[Cat]),Cat<>\"A\")",
+"status": "pending",
+"reason": "unknown member: blank-filter provenance of the virtual BLANK row (Head's rewrite)"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(SUMX(VALUES(ZO_Dim),SUMX(RELATEDTABLE(ZO_Fact),ZO_Fact[Amt])),FILTER(ALL(ZO_Dim[Cat]),ZO_Dim[Cat]<>\"A\"))",
+"powerbi": "235",
+"ctx": "FILTER(ALL(Dim[Cat]),Cat<>\"A\")",
+"status": "pending",
+"reason": "unknown member: blank-filter provenance of the virtual BLANK row (Head's rewrite)"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(SUMX(ALL(ZO_Dim),COUNTROWS(RELATEDTABLE(ZO_Fact))),FILTER(ALL(ZO_Dim[Cat]),ZO_Dim[Cat]<>\"A\"))",
+"powerbi": "13",
+"ctx": "FILTER(ALL(Dim[Cat]),Cat<>\"A\")",
+"status": "pending",
+"reason": "unknown member: orphan fact rows reach the virtual BLANK row (Head's rewrite)"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(SUMX(ALL(ZO_Dim),SUMX(RELATEDTABLE(ZO_Fact),ZO_Fact[Amt])),FILTER(ALL(ZO_Dim[Cat]),ZO_Dim[Cat]<>\"A\"))",
+"powerbi": "375",
+"ctx": "FILTER(ALL(Dim[Cat]),Cat<>\"A\")",
+"status": "pending",
+"reason": "unknown member: orphan fact rows reach the virtual BLANK row (Head's rewrite)"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(SUMX(ALLNOBLANKROW(ZO_Dim),COUNTROWS(RELATEDTABLE(ZO_Fact))),FILTER(ALL(ZO_Dim[Cat]),ZO_Dim[Cat]<>\"A\"))",
+"powerbi": "10",
+"ctx": "FILTER(ALL(Dim[Cat]),Cat<>\"A\")",
+"status": "match"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(SUMX(ALLNOBLANKROW(ZO_Dim),SUMX(RELATEDTABLE(ZO_Fact),ZO_Fact[Amt])),FILTER(ALL(ZO_Dim[Cat]),ZO_Dim[Cat]<>\"A\"))",
+"powerbi": "300",
+"ctx": "FILTER(ALL(Dim[Cat]),Cat<>\"A\")",
+"status": "match"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(COUNTROWS(RELATEDTABLE(ZO_Fact)),FILTER(ALL(ZO_Dim[Cat]),ZO_Dim[Cat]<>\"A\"))",
+"powerbi": "7",
+"ctx": "FILTER(ALL(Dim[Cat]),Cat<>\"A\")",
+"status": "pending",
+"reason": "unknown member: orphan fact rows reach the virtual BLANK row (Head's rewrite)"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(SUMX(ZO_Dim,COUNTROWS(RELATEDTABLE(ZO_Fact))),FILTER(ALL(ZO_Dim),ZO_Dim[Cat]=\"B\"))",
+"powerbi": "3",
+"ctx": "FILTER(ALL(Dim),Cat=\"B\")",
+"status": "pending",
+"reason": "unknown member: blank-filter provenance of the virtual BLANK row (Head's rewrite)"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(SUMX(ZO_Dim,SUMX(RELATEDTABLE(ZO_Fact),ZO_Fact[Amt])),FILTER(ALL(ZO_Dim),ZO_Dim[Cat]=\"B\"))",
+"powerbi": "155",
+"ctx": "FILTER(ALL(Dim),Cat=\"B\")",
+"status": "pending",
+"reason": "unknown member: blank-filter provenance of the virtual BLANK row (Head's rewrite)"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(SUMX(VALUES(ZO_Dim),COUNTROWS(RELATEDTABLE(ZO_Fact))),FILTER(ALL(ZO_Dim),ZO_Dim[Cat]=\"B\"))",
+"powerbi": "3",
+"ctx": "FILTER(ALL(Dim),Cat=\"B\")",
+"status": "pending",
+"reason": "unknown member: blank-filter provenance of the virtual BLANK row (Head's rewrite)"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(SUMX(VALUES(ZO_Dim),SUMX(RELATEDTABLE(ZO_Fact),ZO_Fact[Amt])),FILTER(ALL(ZO_Dim),ZO_Dim[Cat]=\"B\"))",
+"powerbi": "155",
+"ctx": "FILTER(ALL(Dim),Cat=\"B\")",
+"status": "pending",
+"reason": "unknown member: blank-filter provenance of the virtual BLANK row (Head's rewrite)"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(SUMX(ALL(ZO_Dim),COUNTROWS(RELATEDTABLE(ZO_Fact))),FILTER(ALL(ZO_Dim),ZO_Dim[Cat]=\"B\"))",
+"powerbi": "13",
+"ctx": "FILTER(ALL(Dim),Cat=\"B\")",
+"status": "pending",
+"reason": "unknown member: orphan fact rows reach the virtual BLANK row (Head's rewrite)"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(SUMX(ALL(ZO_Dim),SUMX(RELATEDTABLE(ZO_Fact),ZO_Fact[Amt])),FILTER(ALL(ZO_Dim),ZO_Dim[Cat]=\"B\"))",
+"powerbi": "375",
+"ctx": "FILTER(ALL(Dim),Cat=\"B\")",
+"status": "pending",
+"reason": "unknown member: orphan fact rows reach the virtual BLANK row (Head's rewrite)"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(SUMX(ALLNOBLANKROW(ZO_Dim),COUNTROWS(RELATEDTABLE(ZO_Fact))),FILTER(ALL(ZO_Dim),ZO_Dim[Cat]=\"B\"))",
+"powerbi": "10",
+"ctx": "FILTER(ALL(Dim),Cat=\"B\")",
+"status": "match"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(SUMX(ALLNOBLANKROW(ZO_Dim),SUMX(RELATEDTABLE(ZO_Fact),ZO_Fact[Amt])),FILTER(ALL(ZO_Dim),ZO_Dim[Cat]=\"B\"))",
+"powerbi": "300",
+"ctx": "FILTER(ALL(Dim),Cat=\"B\")",
+"status": "match"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(COUNTROWS(RELATEDTABLE(ZO_Fact)),FILTER(ALL(ZO_Dim),ZO_Dim[Cat]=\"B\"))",
+"powerbi": "3",
+"ctx": "FILTER(ALL(Dim),Cat=\"B\")",
+"status": "match"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(SUMX(ZO_Dim,COUNTROWS(RELATEDTABLE(ZO_Fact))),FILTER(ALL(ZO_Dim[Cat]),ISBLANK(ZO_Dim[Cat])))",
+"powerbi": "BLANK",
+"ctx": "FILTER(ALL(Dim[Cat]),ISBLANK)",
+"status": "pending",
+"reason": "unknown member: blank-filter provenance of the virtual BLANK row (Head's rewrite)"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(SUMX(ZO_Dim,SUMX(RELATEDTABLE(ZO_Fact),ZO_Fact[Amt])),FILTER(ALL(ZO_Dim[Cat]),ISBLANK(ZO_Dim[Cat])))",
+"powerbi": "BLANK",
+"ctx": "FILTER(ALL(Dim[Cat]),ISBLANK)",
+"status": "pending",
+"reason": "unknown member: blank-filter provenance of the virtual BLANK row (Head's rewrite)"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(SUMX(VALUES(ZO_Dim),COUNTROWS(RELATEDTABLE(ZO_Fact))),FILTER(ALL(ZO_Dim[Cat]),ISBLANK(ZO_Dim[Cat])))",
+"powerbi": "3",
+"ctx": "FILTER(ALL(Dim[Cat]),ISBLANK)",
+"status": "pending",
+"reason": "unknown member: blank-filter provenance of the virtual BLANK row (Head's rewrite)"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(SUMX(VALUES(ZO_Dim),SUMX(RELATEDTABLE(ZO_Fact),ZO_Fact[Amt])),FILTER(ALL(ZO_Dim[Cat]),ISBLANK(ZO_Dim[Cat])))",
+"powerbi": "75",
+"ctx": "FILTER(ALL(Dim[Cat]),ISBLANK)",
+"status": "pending",
+"reason": "unknown member: blank-filter provenance of the virtual BLANK row (Head's rewrite)"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(SUMX(ALL(ZO_Dim),COUNTROWS(RELATEDTABLE(ZO_Fact))),FILTER(ALL(ZO_Dim[Cat]),ISBLANK(ZO_Dim[Cat])))",
+"powerbi": "13",
+"ctx": "FILTER(ALL(Dim[Cat]),ISBLANK)",
+"status": "pending",
+"reason": "unknown member: orphan fact rows reach the virtual BLANK row (Head's rewrite)"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(SUMX(ALL(ZO_Dim),SUMX(RELATEDTABLE(ZO_Fact),ZO_Fact[Amt])),FILTER(ALL(ZO_Dim[Cat]),ISBLANK(ZO_Dim[Cat])))",
+"powerbi": "375",
+"ctx": "FILTER(ALL(Dim[Cat]),ISBLANK)",
+"status": "pending",
+"reason": "unknown member: orphan fact rows reach the virtual BLANK row (Head's rewrite)"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(SUMX(ALLNOBLANKROW(ZO_Dim),COUNTROWS(RELATEDTABLE(ZO_Fact))),FILTER(ALL(ZO_Dim[Cat]),ISBLANK(ZO_Dim[Cat])))",
+"powerbi": "10",
+"ctx": "FILTER(ALL(Dim[Cat]),ISBLANK)",
+"status": "match"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(SUMX(ALLNOBLANKROW(ZO_Dim),SUMX(RELATEDTABLE(ZO_Fact),ZO_Fact[Amt])),FILTER(ALL(ZO_Dim[Cat]),ISBLANK(ZO_Dim[Cat])))",
+"powerbi": "300",
+"ctx": "FILTER(ALL(Dim[Cat]),ISBLANK)",
+"status": "match"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(COUNTROWS(RELATEDTABLE(ZO_Fact)),FILTER(ALL(ZO_Dim[Cat]),ISBLANK(ZO_Dim[Cat])))",
+"powerbi": "3",
+"ctx": "FILTER(ALL(Dim[Cat]),ISBLANK)",
+"status": "pending",
+"reason": "unknown member: orphan fact rows reach the virtual BLANK row (Head's rewrite)"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(SUMX(ZO_Dim,COUNTROWS(RELATEDTABLE(ZO_Fact))),ALLNOBLANKROW(ZO_Dim))",
+"powerbi": "10",
+"ctx": "ALLNOBLANKROW(Dim)",
+"status": "match"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(SUMX(ZO_Dim,SUMX(RELATEDTABLE(ZO_Fact),ZO_Fact[Amt])),ALLNOBLANKROW(ZO_Dim))",
+"powerbi": "300",
+"ctx": "ALLNOBLANKROW(Dim)",
+"status": "match"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(SUMX(VALUES(ZO_Dim),COUNTROWS(RELATEDTABLE(ZO_Fact))),ALLNOBLANKROW(ZO_Dim))",
+"powerbi": "10",
+"ctx": "ALLNOBLANKROW(Dim)",
+"status": "match"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(SUMX(VALUES(ZO_Dim),SUMX(RELATEDTABLE(ZO_Fact),ZO_Fact[Amt])),ALLNOBLANKROW(ZO_Dim))",
+"powerbi": "300",
+"ctx": "ALLNOBLANKROW(Dim)",
+"status": "match"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(SUMX(ALL(ZO_Dim),COUNTROWS(RELATEDTABLE(ZO_Fact))),ALLNOBLANKROW(ZO_Dim))",
+"powerbi": "13",
+"ctx": "ALLNOBLANKROW(Dim)",
+"status": "pending",
+"reason": "unknown member: orphan fact rows reach the virtual BLANK row (Head's rewrite)"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(SUMX(ALL(ZO_Dim),SUMX(RELATEDTABLE(ZO_Fact),ZO_Fact[Amt])),ALLNOBLANKROW(ZO_Dim))",
+"powerbi": "375",
+"ctx": "ALLNOBLANKROW(Dim)",
+"status": "pending",
+"reason": "unknown member: orphan fact rows reach the virtual BLANK row (Head's rewrite)"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(SUMX(ALLNOBLANKROW(ZO_Dim),COUNTROWS(RELATEDTABLE(ZO_Fact))),ALLNOBLANKROW(ZO_Dim))",
+"powerbi": "10",
+"ctx": "ALLNOBLANKROW(Dim)",
+"status": "match"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(SUMX(ALLNOBLANKROW(ZO_Dim),SUMX(RELATEDTABLE(ZO_Fact),ZO_Fact[Amt])),ALLNOBLANKROW(ZO_Dim))",
+"powerbi": "300",
+"ctx": "ALLNOBLANKROW(Dim)",
+"status": "match"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(COUNTROWS(RELATEDTABLE(ZO_Fact)),ALLNOBLANKROW(ZO_Dim))",
+"powerbi": "10",
+"ctx": "ALLNOBLANKROW(Dim)",
+"status": "pending",
+"reason": "unknown member: orphan fact rows reach the virtual BLANK row (Head's rewrite)"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(SUMX(ZO_Dim,COUNTROWS(RELATEDTABLE(ZO_Fact))),ALL(ZO_Dim))",
+"powerbi": "10",
+"ctx": "ALL(Dim)",
+"status": "match"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(SUMX(ZO_Dim,SUMX(RELATEDTABLE(ZO_Fact),ZO_Fact[Amt])),ALL(ZO_Dim))",
+"powerbi": "300",
+"ctx": "ALL(Dim)",
+"status": "match"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(SUMX(VALUES(ZO_Dim),COUNTROWS(RELATEDTABLE(ZO_Fact))),ALL(ZO_Dim))",
+"powerbi": "13",
+"ctx": "ALL(Dim)",
+"status": "pending",
+"reason": "unknown member: orphan fact rows reach the virtual BLANK row (Head's rewrite)"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(SUMX(VALUES(ZO_Dim),SUMX(RELATEDTABLE(ZO_Fact),ZO_Fact[Amt])),ALL(ZO_Dim))",
+"powerbi": "375",
+"ctx": "ALL(Dim)",
+"status": "pending",
+"reason": "unknown member: orphan fact rows reach the virtual BLANK row (Head's rewrite)"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(SUMX(ALL(ZO_Dim),COUNTROWS(RELATEDTABLE(ZO_Fact))),ALL(ZO_Dim))",
+"powerbi": "13",
+"ctx": "ALL(Dim)",
+"status": "pending",
+"reason": "unknown member: orphan fact rows reach the virtual BLANK row (Head's rewrite)"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(SUMX(ALL(ZO_Dim),SUMX(RELATEDTABLE(ZO_Fact),ZO_Fact[Amt])),ALL(ZO_Dim))",
+"powerbi": "375",
+"ctx": "ALL(Dim)",
+"status": "pending",
+"reason": "unknown member: orphan fact rows reach the virtual BLANK row (Head's rewrite)"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(SUMX(ALLNOBLANKROW(ZO_Dim),COUNTROWS(RELATEDTABLE(ZO_Fact))),ALL(ZO_Dim))",
+"powerbi": "10",
+"ctx": "ALL(Dim)",
+"status": "match"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(SUMX(ALLNOBLANKROW(ZO_Dim),SUMX(RELATEDTABLE(ZO_Fact),ZO_Fact[Amt])),ALL(ZO_Dim))",
+"powerbi": "300",
+"ctx": "ALL(Dim)",
+"status": "match"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(COUNTROWS(RELATEDTABLE(ZO_Fact)),ALL(ZO_Dim))",
+"powerbi": "13",
+"ctx": "ALL(Dim)",
+"status": "match"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(SUMX(ZO_Dim,COUNTROWS(RELATEDTABLE(ZO_Fact))),TREATAS({\"A\",\"B\"},ZO_Dim[Cat]))",
+"powerbi": "9",
+"ctx": "TREATAS({\"A\",\"B\"},Cat)",
+"status": "pending",
+"reason": "unknown member: blank-filter provenance of the virtual BLANK row (Head's rewrite)"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(SUMX(ZO_Dim,SUMX(RELATEDTABLE(ZO_Fact),ZO_Fact[Amt])),TREATAS({\"A\",\"B\"},ZO_Dim[Cat]))",
+"powerbi": "295",
+"ctx": "TREATAS({\"A\",\"B\"},Cat)",
+"status": "pending",
+"reason": "unknown member: blank-filter provenance of the virtual BLANK row (Head's rewrite)"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(SUMX(VALUES(ZO_Dim),COUNTROWS(RELATEDTABLE(ZO_Fact))),TREATAS({\"A\",\"B\"},ZO_Dim[Cat]))",
+"powerbi": "9",
+"ctx": "TREATAS({\"A\",\"B\"},Cat)",
+"status": "pending",
+"reason": "unknown member: blank-filter provenance of the virtual BLANK row (Head's rewrite)"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(SUMX(VALUES(ZO_Dim),SUMX(RELATEDTABLE(ZO_Fact),ZO_Fact[Amt])),TREATAS({\"A\",\"B\"},ZO_Dim[Cat]))",
+"powerbi": "295",
+"ctx": "TREATAS({\"A\",\"B\"},Cat)",
+"status": "pending",
+"reason": "unknown member: blank-filter provenance of the virtual BLANK row (Head's rewrite)"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(SUMX(ALL(ZO_Dim),COUNTROWS(RELATEDTABLE(ZO_Fact))),TREATAS({\"A\",\"B\"},ZO_Dim[Cat]))",
+"powerbi": "13",
+"ctx": "TREATAS({\"A\",\"B\"},Cat)",
+"status": "pending",
+"reason": "unknown member: orphan fact rows reach the virtual BLANK row (Head's rewrite)"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(SUMX(ALL(ZO_Dim),SUMX(RELATEDTABLE(ZO_Fact),ZO_Fact[Amt])),TREATAS({\"A\",\"B\"},ZO_Dim[Cat]))",
+"powerbi": "375",
+"ctx": "TREATAS({\"A\",\"B\"},Cat)",
+"status": "pending",
+"reason": "unknown member: orphan fact rows reach the virtual BLANK row (Head's rewrite)"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(SUMX(ALLNOBLANKROW(ZO_Dim),COUNTROWS(RELATEDTABLE(ZO_Fact))),TREATAS({\"A\",\"B\"},ZO_Dim[Cat]))",
+"powerbi": "10",
+"ctx": "TREATAS({\"A\",\"B\"},Cat)",
+"status": "match"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(SUMX(ALLNOBLANKROW(ZO_Dim),SUMX(RELATEDTABLE(ZO_Fact),ZO_Fact[Amt])),TREATAS({\"A\",\"B\"},ZO_Dim[Cat]))",
+"powerbi": "300",
+"ctx": "TREATAS({\"A\",\"B\"},Cat)",
+"status": "match"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(COUNTROWS(RELATEDTABLE(ZO_Fact)),TREATAS({\"A\",\"B\"},ZO_Dim[Cat]))",
+"powerbi": "9",
+"ctx": "TREATAS({\"A\",\"B\"},Cat)",
+"status": "match"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(SUMX(ZO_Dim,COUNTROWS(RELATEDTABLE(ZO_Fact))),TREATAS({\"A\",BLANK()},ZO_Dim[Cat]))",
+"powerbi": "6",
+"ctx": "TREATAS({\"A\",BLANK()},Cat)",
+"status": "pending",
+"reason": "unknown member: blank-filter provenance of the virtual BLANK row (Head's rewrite)"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(SUMX(ZO_Dim,SUMX(RELATEDTABLE(ZO_Fact),ZO_Fact[Amt])),TREATAS({\"A\",BLANK()},ZO_Dim[Cat]))",
+"powerbi": "140",
+"ctx": "TREATAS({\"A\",BLANK()},Cat)",
+"status": "pending",
+"reason": "unknown member: blank-filter provenance of the virtual BLANK row (Head's rewrite)"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(SUMX(VALUES(ZO_Dim),COUNTROWS(RELATEDTABLE(ZO_Fact))),TREATAS({\"A\",BLANK()},ZO_Dim[Cat]))",
+"powerbi": "9",
+"ctx": "TREATAS({\"A\",BLANK()},Cat)",
+"status": "pending",
+"reason": "unknown member: blank-filter provenance of the virtual BLANK row (Head's rewrite)"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(SUMX(VALUES(ZO_Dim),SUMX(RELATEDTABLE(ZO_Fact),ZO_Fact[Amt])),TREATAS({\"A\",BLANK()},ZO_Dim[Cat]))",
+"powerbi": "215",
+"ctx": "TREATAS({\"A\",BLANK()},Cat)",
+"status": "pending",
+"reason": "unknown member: blank-filter provenance of the virtual BLANK row (Head's rewrite)"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(SUMX(ALL(ZO_Dim),COUNTROWS(RELATEDTABLE(ZO_Fact))),TREATAS({\"A\",BLANK()},ZO_Dim[Cat]))",
+"powerbi": "13",
+"ctx": "TREATAS({\"A\",BLANK()},Cat)",
+"status": "pending",
+"reason": "unknown member: orphan fact rows reach the virtual BLANK row (Head's rewrite)"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(SUMX(ALL(ZO_Dim),SUMX(RELATEDTABLE(ZO_Fact),ZO_Fact[Amt])),TREATAS({\"A\",BLANK()},ZO_Dim[Cat]))",
+"powerbi": "375",
+"ctx": "TREATAS({\"A\",BLANK()},Cat)",
+"status": "pending",
+"reason": "unknown member: orphan fact rows reach the virtual BLANK row (Head's rewrite)"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(SUMX(ALLNOBLANKROW(ZO_Dim),COUNTROWS(RELATEDTABLE(ZO_Fact))),TREATAS({\"A\",BLANK()},ZO_Dim[Cat]))",
+"powerbi": "10",
+"ctx": "TREATAS({\"A\",BLANK()},Cat)",
+"status": "match"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(SUMX(ALLNOBLANKROW(ZO_Dim),SUMX(RELATEDTABLE(ZO_Fact),ZO_Fact[Amt])),TREATAS({\"A\",BLANK()},ZO_Dim[Cat]))",
+"powerbi": "300",
+"ctx": "TREATAS({\"A\",BLANK()},Cat)",
+"status": "match"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(COUNTROWS(RELATEDTABLE(ZO_Fact)),TREATAS({\"A\",BLANK()},ZO_Dim[Cat]))",
+"powerbi": "9",
+"ctx": "TREATAS({\"A\",BLANK()},Cat)",
+"status": "pending",
+"reason": "unknown member: orphan fact rows reach the virtual BLANK row (Head's rewrite)"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(SUMX(ZO_Dim,COUNTROWS(RELATEDTABLE(ZO_Fact))),KEEPFILTERS(ZO_Dim[Cat]<>\"A\"))",
+"powerbi": "4",
+"ctx": "KEEPFILTERS(Cat<>\"A\")",
+"status": "match"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(SUMX(ZO_Dim,SUMX(RELATEDTABLE(ZO_Fact),ZO_Fact[Amt])),KEEPFILTERS(ZO_Dim[Cat]<>\"A\"))",
+"powerbi": "160",
+"ctx": "KEEPFILTERS(Cat<>\"A\")",
+"status": "match"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(SUMX(VALUES(ZO_Dim),COUNTROWS(RELATEDTABLE(ZO_Fact))),KEEPFILTERS(ZO_Dim[Cat]<>\"A\"))",
+"powerbi": "7",
+"ctx": "KEEPFILTERS(Cat<>\"A\")",
+"status": "pending",
+"reason": "unknown member: orphan fact rows reach the virtual BLANK row (Head's rewrite)"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(SUMX(VALUES(ZO_Dim),SUMX(RELATEDTABLE(ZO_Fact),ZO_Fact[Amt])),KEEPFILTERS(ZO_Dim[Cat]<>\"A\"))",
+"powerbi": "235",
+"ctx": "KEEPFILTERS(Cat<>\"A\")",
+"status": "pending",
+"reason": "unknown member: orphan fact rows reach the virtual BLANK row (Head's rewrite)"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(SUMX(ALL(ZO_Dim),COUNTROWS(RELATEDTABLE(ZO_Fact))),KEEPFILTERS(ZO_Dim[Cat]<>\"A\"))",
+"powerbi": "13",
+"ctx": "KEEPFILTERS(Cat<>\"A\")",
+"status": "pending",
+"reason": "unknown member: orphan fact rows reach the virtual BLANK row (Head's rewrite)"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(SUMX(ALL(ZO_Dim),SUMX(RELATEDTABLE(ZO_Fact),ZO_Fact[Amt])),KEEPFILTERS(ZO_Dim[Cat]<>\"A\"))",
+"powerbi": "375",
+"ctx": "KEEPFILTERS(Cat<>\"A\")",
+"status": "pending",
+"reason": "unknown member: orphan fact rows reach the virtual BLANK row (Head's rewrite)"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(SUMX(ALLNOBLANKROW(ZO_Dim),COUNTROWS(RELATEDTABLE(ZO_Fact))),KEEPFILTERS(ZO_Dim[Cat]<>\"A\"))",
+"powerbi": "10",
+"ctx": "KEEPFILTERS(Cat<>\"A\")",
+"status": "match"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(SUMX(ALLNOBLANKROW(ZO_Dim),SUMX(RELATEDTABLE(ZO_Fact),ZO_Fact[Amt])),KEEPFILTERS(ZO_Dim[Cat]<>\"A\"))",
+"powerbi": "300",
+"ctx": "KEEPFILTERS(Cat<>\"A\")",
+"status": "match"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(COUNTROWS(RELATEDTABLE(ZO_Fact)),KEEPFILTERS(ZO_Dim[Cat]<>\"A\"))",
+"powerbi": "7",
+"ctx": "KEEPFILTERS(Cat<>\"A\")",
+"status": "pending",
+"reason": "unknown member: orphan fact rows reach the virtual BLANK row (Head's rewrite)"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(SUMX(ZO_Dim,COUNTROWS(RELATEDTABLE(ZO_Fact))),ZO_Dim[Prod] IN {\"P1\",\"P9\"})",
+"powerbi": "3",
+"ctx": "Prod IN {\"P1\",\"P9\"}",
+"status": "pending",
+"reason": "unknown member: blank-filter provenance of the virtual BLANK row (Head's rewrite)"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(SUMX(ZO_Dim,SUMX(RELATEDTABLE(ZO_Fact),ZO_Fact[Amt])),ZO_Dim[Prod] IN {\"P1\",\"P9\"})",
+"powerbi": "45",
+"ctx": "Prod IN {\"P1\",\"P9\"}",
+"status": "pending",
+"reason": "unknown member: blank-filter provenance of the virtual BLANK row (Head's rewrite)"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(SUMX(VALUES(ZO_Dim),COUNTROWS(RELATEDTABLE(ZO_Fact))),ZO_Dim[Prod] IN {\"P1\",\"P9\"})",
+"powerbi": "3",
+"ctx": "Prod IN {\"P1\",\"P9\"}",
+"status": "pending",
+"reason": "unknown member: blank-filter provenance of the virtual BLANK row (Head's rewrite)"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(SUMX(VALUES(ZO_Dim),SUMX(RELATEDTABLE(ZO_Fact),ZO_Fact[Amt])),ZO_Dim[Prod] IN {\"P1\",\"P9\"})",
+"powerbi": "45",
+"ctx": "Prod IN {\"P1\",\"P9\"}",
+"status": "pending",
+"reason": "unknown member: blank-filter provenance of the virtual BLANK row (Head's rewrite)"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(SUMX(ALL(ZO_Dim),COUNTROWS(RELATEDTABLE(ZO_Fact))),ZO_Dim[Prod] IN {\"P1\",\"P9\"})",
+"powerbi": "13",
+"ctx": "Prod IN {\"P1\",\"P9\"}",
+"status": "pending",
+"reason": "unknown member: orphan fact rows reach the virtual BLANK row (Head's rewrite)"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(SUMX(ALL(ZO_Dim),SUMX(RELATEDTABLE(ZO_Fact),ZO_Fact[Amt])),ZO_Dim[Prod] IN {\"P1\",\"P9\"})",
+"powerbi": "375",
+"ctx": "Prod IN {\"P1\",\"P9\"}",
+"status": "pending",
+"reason": "unknown member: orphan fact rows reach the virtual BLANK row (Head's rewrite)"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(SUMX(ALLNOBLANKROW(ZO_Dim),COUNTROWS(RELATEDTABLE(ZO_Fact))),ZO_Dim[Prod] IN {\"P1\",\"P9\"})",
+"powerbi": "10",
+"ctx": "Prod IN {\"P1\",\"P9\"}",
+"status": "match"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(SUMX(ALLNOBLANKROW(ZO_Dim),SUMX(RELATEDTABLE(ZO_Fact),ZO_Fact[Amt])),ZO_Dim[Prod] IN {\"P1\",\"P9\"})",
+"powerbi": "300",
+"ctx": "Prod IN {\"P1\",\"P9\"}",
+"status": "match"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(COUNTROWS(RELATEDTABLE(ZO_Fact)),ZO_Dim[Prod] IN {\"P1\",\"P9\"})",
+"powerbi": "3",
+"ctx": "Prod IN {\"P1\",\"P9\"}",
+"status": "match"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(SUMX(ZO_Dim,COUNTROWS(RELATEDTABLE(ZO_Fact))),ZO_Dim[Cat]=\"\")",
+"powerbi": "BLANK",
+"ctx": "Cat=\"\"",
+"status": "match"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(SUMX(ZO_Dim,SUMX(RELATEDTABLE(ZO_Fact),ZO_Fact[Amt])),ZO_Dim[Cat]=\"\")",
+"powerbi": "BLANK",
+"ctx": "Cat=\"\"",
+"status": "match"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(SUMX(VALUES(ZO_Dim),COUNTROWS(RELATEDTABLE(ZO_Fact))),ZO_Dim[Cat]=\"\")",
+"powerbi": "3",
+"ctx": "Cat=\"\"",
+"status": "pending",
+"reason": "unknown member: orphan fact rows reach the virtual BLANK row (Head's rewrite)"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(SUMX(VALUES(ZO_Dim),SUMX(RELATEDTABLE(ZO_Fact),ZO_Fact[Amt])),ZO_Dim[Cat]=\"\")",
+"powerbi": "75",
+"ctx": "Cat=\"\"",
+"status": "pending",
+"reason": "unknown member: orphan fact rows reach the virtual BLANK row (Head's rewrite)"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(SUMX(ALL(ZO_Dim),COUNTROWS(RELATEDTABLE(ZO_Fact))),ZO_Dim[Cat]=\"\")",
+"powerbi": "13",
+"ctx": "Cat=\"\"",
+"status": "pending",
+"reason": "unknown member: orphan fact rows reach the virtual BLANK row (Head's rewrite)"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(SUMX(ALL(ZO_Dim),SUMX(RELATEDTABLE(ZO_Fact),ZO_Fact[Amt])),ZO_Dim[Cat]=\"\")",
+"powerbi": "375",
+"ctx": "Cat=\"\"",
+"status": "pending",
+"reason": "unknown member: orphan fact rows reach the virtual BLANK row (Head's rewrite)"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(SUMX(ALLNOBLANKROW(ZO_Dim),COUNTROWS(RELATEDTABLE(ZO_Fact))),ZO_Dim[Cat]=\"\")",
+"powerbi": "10",
+"ctx": "Cat=\"\"",
+"status": "match"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(SUMX(ALLNOBLANKROW(ZO_Dim),SUMX(RELATEDTABLE(ZO_Fact),ZO_Fact[Amt])),ZO_Dim[Cat]=\"\")",
+"powerbi": "300",
+"ctx": "Cat=\"\"",
+"status": "match"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(COUNTROWS(RELATEDTABLE(ZO_Fact)),ZO_Dim[Cat]=\"\")",
+"powerbi": "3",
+"ctx": "Cat=\"\"",
+"status": "pending",
+"reason": "unknown member: orphan fact rows reach the virtual BLANK row (Head's rewrite)"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(SUMX(ZO_Dim,COUNTROWS(RELATEDTABLE(ZO_Fact))),ZO_Dim[Grp]=\"X\")",
+"powerbi": "6",
+"ctx": "Grp=\"X\"",
+"status": "match"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(SUMX(ZO_Dim,SUMX(RELATEDTABLE(ZO_Fact),ZO_Fact[Amt])),ZO_Dim[Grp]=\"X\")",
+"powerbi": "135",
+"ctx": "Grp=\"X\"",
+"status": "match"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(SUMX(VALUES(ZO_Dim),COUNTROWS(RELATEDTABLE(ZO_Fact))),ZO_Dim[Grp]=\"X\")",
+"powerbi": "6",
+"ctx": "Grp=\"X\"",
+"status": "match"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(SUMX(VALUES(ZO_Dim),SUMX(RELATEDTABLE(ZO_Fact),ZO_Fact[Amt])),ZO_Dim[Grp]=\"X\")",
+"powerbi": "135",
+"ctx": "Grp=\"X\"",
+"status": "match"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(SUMX(ALL(ZO_Dim),COUNTROWS(RELATEDTABLE(ZO_Fact))),ZO_Dim[Grp]=\"X\")",
+"powerbi": "13",
+"ctx": "Grp=\"X\"",
+"status": "pending",
+"reason": "unknown member: orphan fact rows reach the virtual BLANK row (Head's rewrite)"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(SUMX(ALL(ZO_Dim),SUMX(RELATEDTABLE(ZO_Fact),ZO_Fact[Amt])),ZO_Dim[Grp]=\"X\")",
+"powerbi": "375",
+"ctx": "Grp=\"X\"",
+"status": "pending",
+"reason": "unknown member: orphan fact rows reach the virtual BLANK row (Head's rewrite)"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(SUMX(ALLNOBLANKROW(ZO_Dim),COUNTROWS(RELATEDTABLE(ZO_Fact))),ZO_Dim[Grp]=\"X\")",
+"powerbi": "10",
+"ctx": "Grp=\"X\"",
+"status": "match"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(SUMX(ALLNOBLANKROW(ZO_Dim),SUMX(RELATEDTABLE(ZO_Fact),ZO_Fact[Amt])),ZO_Dim[Grp]=\"X\")",
+"powerbi": "300",
+"ctx": "Grp=\"X\"",
+"status": "match"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(COUNTROWS(RELATEDTABLE(ZO_Fact)),ZO_Dim[Grp]=\"X\")",
+"powerbi": "6",
+"ctx": "Grp=\"X\"",
+"status": "match"
+},
+{
+"model": "ZO",
+"expr": "SUMX(ZO_Cal,COUNTROWS(RELATEDTABLE(ZO_Fact)))",
+"powerbi": "11",
+"ctx": "none",
+"status": "match"
+},
+{
+"model": "ZO",
+"expr": "SUMX(ZO_Cal,SUMX(RELATEDTABLE(ZO_Fact),ZO_Fact[Amt]))",
+"powerbi": "290",
+"ctx": "none",
+"status": "match"
+},
+{
+"model": "ZO",
+"expr": "SUMX(VALUES(ZO_Cal),COUNTROWS(RELATEDTABLE(ZO_Fact)))",
+"powerbi": "13",
+"ctx": "none",
+"status": "pending",
+"reason": "unknown member: orphan fact rows reach the virtual BLANK row (Head's rewrite)"
+},
+{
+"model": "ZO",
+"expr": "SUMX(VALUES(ZO_Cal),SUMX(RELATEDTABLE(ZO_Fact),ZO_Fact[Amt]))",
+"powerbi": "375",
+"ctx": "none",
+"status": "pending",
+"reason": "unknown member: orphan fact rows reach the virtual BLANK row (Head's rewrite)"
+},
+{
+"model": "ZO",
+"expr": "SUMX(ALL(ZO_Cal),COUNTROWS(RELATEDTABLE(ZO_Fact)))",
+"powerbi": "13",
+"ctx": "none",
+"status": "pending",
+"reason": "unknown member: orphan fact rows reach the virtual BLANK row (Head's rewrite)"
+},
+{
+"model": "ZO",
+"expr": "SUMX(ALL(ZO_Cal),SUMX(RELATEDTABLE(ZO_Fact),ZO_Fact[Amt]))",
+"powerbi": "375",
+"ctx": "none",
+"status": "pending",
+"reason": "unknown member: orphan fact rows reach the virtual BLANK row (Head's rewrite)"
+},
+{
+"model": "ZO",
+"expr": "SUMX(ALLNOBLANKROW(ZO_Cal),COUNTROWS(RELATEDTABLE(ZO_Fact)))",
+"powerbi": "11",
+"ctx": "none",
+"status": "match"
+},
+{
+"model": "ZO",
+"expr": "SUMX(ALLNOBLANKROW(ZO_Cal),SUMX(RELATEDTABLE(ZO_Fact),ZO_Fact[Amt]))",
+"powerbi": "290",
+"ctx": "none",
+"status": "match"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(SUMX(ZO_Cal,COUNTROWS(RELATEDTABLE(ZO_Fact))),ZO_Cal[Year]=2023)",
+"powerbi": "4",
+"ctx": "Year=2023",
+"status": "match"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(SUMX(ZO_Cal,SUMX(RELATEDTABLE(ZO_Fact),ZO_Fact[Amt])),ZO_Cal[Year]=2023)",
+"powerbi": "85",
+"ctx": "Year=2023",
+"status": "match"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(SUMX(VALUES(ZO_Cal),COUNTROWS(RELATEDTABLE(ZO_Fact))),ZO_Cal[Year]=2023)",
+"powerbi": "4",
+"ctx": "Year=2023",
+"status": "match"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(SUMX(VALUES(ZO_Cal),SUMX(RELATEDTABLE(ZO_Fact),ZO_Fact[Amt])),ZO_Cal[Year]=2023)",
+"powerbi": "85",
+"ctx": "Year=2023",
+"status": "match"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(SUMX(ALL(ZO_Cal),COUNTROWS(RELATEDTABLE(ZO_Fact))),ZO_Cal[Year]=2023)",
+"powerbi": "13",
+"ctx": "Year=2023",
+"status": "pending",
+"reason": "unknown member: orphan fact rows reach the virtual BLANK row (Head's rewrite)"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(SUMX(ALL(ZO_Cal),SUMX(RELATEDTABLE(ZO_Fact),ZO_Fact[Amt])),ZO_Cal[Year]=2023)",
+"powerbi": "375",
+"ctx": "Year=2023",
+"status": "pending",
+"reason": "unknown member: orphan fact rows reach the virtual BLANK row (Head's rewrite)"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(SUMX(ALLNOBLANKROW(ZO_Cal),COUNTROWS(RELATEDTABLE(ZO_Fact))),ZO_Cal[Year]=2023)",
+"powerbi": "11",
+"ctx": "Year=2023",
+"status": "match"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(SUMX(ALLNOBLANKROW(ZO_Cal),SUMX(RELATEDTABLE(ZO_Fact),ZO_Fact[Amt])),ZO_Cal[Year]=2023)",
+"powerbi": "290",
+"ctx": "Year=2023",
+"status": "match"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(COUNTROWS(RELATEDTABLE(ZO_Fact)),ZO_Cal[Year]=2023)",
+"powerbi": "4",
+"ctx": "Year=2023",
+"status": "match"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(SUMX(ZO_Cal,COUNTROWS(RELATEDTABLE(ZO_Fact))),ZO_Cal[Year]<>2023)",
+"powerbi": "7",
+"ctx": "Year<>2023",
+"status": "match"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(SUMX(ZO_Cal,SUMX(RELATEDTABLE(ZO_Fact),ZO_Fact[Amt])),ZO_Cal[Year]<>2023)",
+"powerbi": "205",
+"ctx": "Year<>2023",
+"status": "match"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(SUMX(VALUES(ZO_Cal),COUNTROWS(RELATEDTABLE(ZO_Fact))),ZO_Cal[Year]<>2023)",
+"powerbi": "9",
+"ctx": "Year<>2023",
+"status": "pending",
+"reason": "unknown member: orphan fact rows reach the virtual BLANK row (Head's rewrite)"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(SUMX(VALUES(ZO_Cal),SUMX(RELATEDTABLE(ZO_Fact),ZO_Fact[Amt])),ZO_Cal[Year]<>2023)",
+"powerbi": "290",
+"ctx": "Year<>2023",
+"status": "pending",
+"reason": "unknown member: orphan fact rows reach the virtual BLANK row (Head's rewrite)"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(SUMX(ALL(ZO_Cal),COUNTROWS(RELATEDTABLE(ZO_Fact))),ZO_Cal[Year]<>2023)",
+"powerbi": "13",
+"ctx": "Year<>2023",
+"status": "pending",
+"reason": "unknown member: orphan fact rows reach the virtual BLANK row (Head's rewrite)"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(SUMX(ALL(ZO_Cal),SUMX(RELATEDTABLE(ZO_Fact),ZO_Fact[Amt])),ZO_Cal[Year]<>2023)",
+"powerbi": "375",
+"ctx": "Year<>2023",
+"status": "pending",
+"reason": "unknown member: orphan fact rows reach the virtual BLANK row (Head's rewrite)"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(SUMX(ALLNOBLANKROW(ZO_Cal),COUNTROWS(RELATEDTABLE(ZO_Fact))),ZO_Cal[Year]<>2023)",
+"powerbi": "11",
+"ctx": "Year<>2023",
+"status": "match"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(SUMX(ALLNOBLANKROW(ZO_Cal),SUMX(RELATEDTABLE(ZO_Fact),ZO_Fact[Amt])),ZO_Cal[Year]<>2023)",
+"powerbi": "290",
+"ctx": "Year<>2023",
+"status": "match"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(COUNTROWS(RELATEDTABLE(ZO_Fact)),ZO_Cal[Year]<>2023)",
+"powerbi": "9",
+"ctx": "Year<>2023",
+"status": "pending",
+"reason": "unknown member: orphan fact rows reach the virtual BLANK row (Head's rewrite)"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(SUMX(ZO_Cal,COUNTROWS(RELATEDTABLE(ZO_Fact))),ZO_Cal[Year]<=2023)",
+"powerbi": "4",
+"ctx": "Year<=2023",
+"status": "match"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(SUMX(ZO_Cal,SUMX(RELATEDTABLE(ZO_Fact),ZO_Fact[Amt])),ZO_Cal[Year]<=2023)",
+"powerbi": "85",
+"ctx": "Year<=2023",
+"status": "match"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(SUMX(VALUES(ZO_Cal),COUNTROWS(RELATEDTABLE(ZO_Fact))),ZO_Cal[Year]<=2023)",
+"powerbi": "6",
+"ctx": "Year<=2023",
+"status": "pending",
+"reason": "unknown member: orphan fact rows reach the virtual BLANK row (Head's rewrite)"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(SUMX(VALUES(ZO_Cal),SUMX(RELATEDTABLE(ZO_Fact),ZO_Fact[Amt])),ZO_Cal[Year]<=2023)",
+"powerbi": "170",
+"ctx": "Year<=2023",
+"status": "pending",
+"reason": "unknown member: orphan fact rows reach the virtual BLANK row (Head's rewrite)"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(SUMX(ALL(ZO_Cal),COUNTROWS(RELATEDTABLE(ZO_Fact))),ZO_Cal[Year]<=2023)",
+"powerbi": "13",
+"ctx": "Year<=2023",
+"status": "pending",
+"reason": "unknown member: orphan fact rows reach the virtual BLANK row (Head's rewrite)"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(SUMX(ALL(ZO_Cal),SUMX(RELATEDTABLE(ZO_Fact),ZO_Fact[Amt])),ZO_Cal[Year]<=2023)",
+"powerbi": "375",
+"ctx": "Year<=2023",
+"status": "pending",
+"reason": "unknown member: orphan fact rows reach the virtual BLANK row (Head's rewrite)"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(SUMX(ALLNOBLANKROW(ZO_Cal),COUNTROWS(RELATEDTABLE(ZO_Fact))),ZO_Cal[Year]<=2023)",
+"powerbi": "11",
+"ctx": "Year<=2023",
+"status": "match"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(SUMX(ALLNOBLANKROW(ZO_Cal),SUMX(RELATEDTABLE(ZO_Fact),ZO_Fact[Amt])),ZO_Cal[Year]<=2023)",
+"powerbi": "290",
+"ctx": "Year<=2023",
+"status": "match"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(COUNTROWS(RELATEDTABLE(ZO_Fact)),ZO_Cal[Year]<=2023)",
+"powerbi": "6",
+"ctx": "Year<=2023",
+"status": "pending",
+"reason": "unknown member: orphan fact rows reach the virtual BLANK row (Head's rewrite)"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(SUMX(ZO_Cal,COUNTROWS(RELATEDTABLE(ZO_Fact))),ZO_Cal[Year]=BLANK())",
+"powerbi": "BLANK",
+"ctx": "Year=BLANK()",
+"status": "match"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(SUMX(ZO_Cal,SUMX(RELATEDTABLE(ZO_Fact),ZO_Fact[Amt])),ZO_Cal[Year]=BLANK())",
+"powerbi": "BLANK",
+"ctx": "Year=BLANK()",
+"status": "match"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(SUMX(VALUES(ZO_Cal),COUNTROWS(RELATEDTABLE(ZO_Fact))),ZO_Cal[Year]=BLANK())",
+"powerbi": "2",
+"ctx": "Year=BLANK()",
+"status": "pending",
+"reason": "unknown member: orphan fact rows reach the virtual BLANK row (Head's rewrite)"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(SUMX(VALUES(ZO_Cal),SUMX(RELATEDTABLE(ZO_Fact),ZO_Fact[Amt])),ZO_Cal[Year]=BLANK())",
+"powerbi": "85",
+"ctx": "Year=BLANK()",
+"status": "pending",
+"reason": "unknown member: orphan fact rows reach the virtual BLANK row (Head's rewrite)"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(SUMX(ALL(ZO_Cal),COUNTROWS(RELATEDTABLE(ZO_Fact))),ZO_Cal[Year]=BLANK())",
+"powerbi": "13",
+"ctx": "Year=BLANK()",
+"status": "pending",
+"reason": "unknown member: orphan fact rows reach the virtual BLANK row (Head's rewrite)"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(SUMX(ALL(ZO_Cal),SUMX(RELATEDTABLE(ZO_Fact),ZO_Fact[Amt])),ZO_Cal[Year]=BLANK())",
+"powerbi": "375",
+"ctx": "Year=BLANK()",
+"status": "pending",
+"reason": "unknown member: orphan fact rows reach the virtual BLANK row (Head's rewrite)"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(SUMX(ALLNOBLANKROW(ZO_Cal),COUNTROWS(RELATEDTABLE(ZO_Fact))),ZO_Cal[Year]=BLANK())",
+"powerbi": "11",
+"ctx": "Year=BLANK()",
+"status": "match"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(SUMX(ALLNOBLANKROW(ZO_Cal),SUMX(RELATEDTABLE(ZO_Fact),ZO_Fact[Amt])),ZO_Cal[Year]=BLANK())",
+"powerbi": "290",
+"ctx": "Year=BLANK()",
+"status": "match"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(COUNTROWS(RELATEDTABLE(ZO_Fact)),ZO_Cal[Year]=BLANK())",
+"powerbi": "2",
+"ctx": "Year=BLANK()",
+"status": "pending",
+"reason": "unknown member: orphan fact rows reach the virtual BLANK row (Head's rewrite)"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(SUMX(ZO_Cal,COUNTROWS(RELATEDTABLE(ZO_Fact))),ZO_Cal[Year]>=2024)",
+"powerbi": "7",
+"ctx": "Year>=2024",
+"status": "match"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(SUMX(ZO_Cal,SUMX(RELATEDTABLE(ZO_Fact),ZO_Fact[Amt])),ZO_Cal[Year]>=2024)",
+"powerbi": "205",
+"ctx": "Year>=2024",
+"status": "match"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(SUMX(VALUES(ZO_Cal),COUNTROWS(RELATEDTABLE(ZO_Fact))),ZO_Cal[Year]>=2024)",
+"powerbi": "7",
+"ctx": "Year>=2024",
+"status": "match"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(SUMX(VALUES(ZO_Cal),SUMX(RELATEDTABLE(ZO_Fact),ZO_Fact[Amt])),ZO_Cal[Year]>=2024)",
+"powerbi": "205",
+"ctx": "Year>=2024",
+"status": "match"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(SUMX(ALL(ZO_Cal),COUNTROWS(RELATEDTABLE(ZO_Fact))),ZO_Cal[Year]>=2024)",
+"powerbi": "13",
+"ctx": "Year>=2024",
+"status": "pending",
+"reason": "unknown member: orphan fact rows reach the virtual BLANK row (Head's rewrite)"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(SUMX(ALL(ZO_Cal),SUMX(RELATEDTABLE(ZO_Fact),ZO_Fact[Amt])),ZO_Cal[Year]>=2024)",
+"powerbi": "375",
+"ctx": "Year>=2024",
+"status": "pending",
+"reason": "unknown member: orphan fact rows reach the virtual BLANK row (Head's rewrite)"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(SUMX(ALLNOBLANKROW(ZO_Cal),COUNTROWS(RELATEDTABLE(ZO_Fact))),ZO_Cal[Year]>=2024)",
+"powerbi": "11",
+"ctx": "Year>=2024",
+"status": "match"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(SUMX(ALLNOBLANKROW(ZO_Cal),SUMX(RELATEDTABLE(ZO_Fact),ZO_Fact[Amt])),ZO_Cal[Year]>=2024)",
+"powerbi": "290",
+"ctx": "Year>=2024",
+"status": "match"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(COUNTROWS(RELATEDTABLE(ZO_Fact)),ZO_Cal[Year]>=2024)",
+"powerbi": "7",
+"ctx": "Year>=2024",
+"status": "match"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(SUMX(ZO_Cal,COUNTROWS(RELATEDTABLE(ZO_Fact))),ZO_Cal[Date]<=DATE(2024,2,10))",
+"powerbi": "7",
+"ctx": "Date<=DATE(2024,2,10)",
+"status": "match"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(SUMX(ZO_Cal,SUMX(RELATEDTABLE(ZO_Fact),ZO_Fact[Amt])),ZO_Cal[Date]<=DATE(2024,2,10))",
+"powerbi": "145",
+"ctx": "Date<=DATE(2024,2,10)",
+"status": "match"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(SUMX(VALUES(ZO_Cal),COUNTROWS(RELATEDTABLE(ZO_Fact))),ZO_Cal[Date]<=DATE(2024,2,10))",
+"powerbi": "9",
+"ctx": "Date<=DATE(2024,2,10)",
+"status": "pending",
+"reason": "unknown member: orphan fact rows reach the virtual BLANK row (Head's rewrite)"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(SUMX(VALUES(ZO_Cal),SUMX(RELATEDTABLE(ZO_Fact),ZO_Fact[Amt])),ZO_Cal[Date]<=DATE(2024,2,10))",
+"powerbi": "230",
+"ctx": "Date<=DATE(2024,2,10)",
+"status": "pending",
+"reason": "unknown member: orphan fact rows reach the virtual BLANK row (Head's rewrite)"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(SUMX(ALL(ZO_Cal),COUNTROWS(RELATEDTABLE(ZO_Fact))),ZO_Cal[Date]<=DATE(2024,2,10))",
+"powerbi": "13",
+"ctx": "Date<=DATE(2024,2,10)",
+"status": "pending",
+"reason": "unknown member: orphan fact rows reach the virtual BLANK row (Head's rewrite)"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(SUMX(ALL(ZO_Cal),SUMX(RELATEDTABLE(ZO_Fact),ZO_Fact[Amt])),ZO_Cal[Date]<=DATE(2024,2,10))",
+"powerbi": "375",
+"ctx": "Date<=DATE(2024,2,10)",
+"status": "pending",
+"reason": "unknown member: orphan fact rows reach the virtual BLANK row (Head's rewrite)"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(SUMX(ALLNOBLANKROW(ZO_Cal),COUNTROWS(RELATEDTABLE(ZO_Fact))),ZO_Cal[Date]<=DATE(2024,2,10))",
+"powerbi": "11",
+"ctx": "Date<=DATE(2024,2,10)",
+"status": "match"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(SUMX(ALLNOBLANKROW(ZO_Cal),SUMX(RELATEDTABLE(ZO_Fact),ZO_Fact[Amt])),ZO_Cal[Date]<=DATE(2024,2,10))",
+"powerbi": "290",
+"ctx": "Date<=DATE(2024,2,10)",
+"status": "match"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(COUNTROWS(RELATEDTABLE(ZO_Fact)),ZO_Cal[Date]<=DATE(2024,2,10))",
+"powerbi": "9",
+"ctx": "Date<=DATE(2024,2,10)",
+"status": "pending",
+"reason": "unknown member: orphan fact rows reach the virtual BLANK row (Head's rewrite)"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(SUMX(ZO_Cal,COUNTROWS(RELATEDTABLE(ZO_Fact))),ZO_Cal[Date]>=DATE(2024,2,10))",
+"powerbi": "5",
+"ctx": "Date>=DATE(2024,2,10)",
+"status": "match"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(SUMX(ZO_Cal,SUMX(RELATEDTABLE(ZO_Fact),ZO_Fact[Amt])),ZO_Cal[Date]>=DATE(2024,2,10))",
+"powerbi": "150",
+"ctx": "Date>=DATE(2024,2,10)",
+"status": "match"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(SUMX(VALUES(ZO_Cal),COUNTROWS(RELATEDTABLE(ZO_Fact))),ZO_Cal[Date]>=DATE(2024,2,10))",
+"powerbi": "5",
+"ctx": "Date>=DATE(2024,2,10)",
+"status": "match"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(SUMX(VALUES(ZO_Cal),SUMX(RELATEDTABLE(ZO_Fact),ZO_Fact[Amt])),ZO_Cal[Date]>=DATE(2024,2,10))",
+"powerbi": "150",
+"ctx": "Date>=DATE(2024,2,10)",
+"status": "match"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(SUMX(ALL(ZO_Cal),COUNTROWS(RELATEDTABLE(ZO_Fact))),ZO_Cal[Date]>=DATE(2024,2,10))",
+"powerbi": "13",
+"ctx": "Date>=DATE(2024,2,10)",
+"status": "pending",
+"reason": "unknown member: orphan fact rows reach the virtual BLANK row (Head's rewrite)"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(SUMX(ALL(ZO_Cal),SUMX(RELATEDTABLE(ZO_Fact),ZO_Fact[Amt])),ZO_Cal[Date]>=DATE(2024,2,10))",
+"powerbi": "375",
+"ctx": "Date>=DATE(2024,2,10)",
+"status": "pending",
+"reason": "unknown member: orphan fact rows reach the virtual BLANK row (Head's rewrite)"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(SUMX(ALLNOBLANKROW(ZO_Cal),COUNTROWS(RELATEDTABLE(ZO_Fact))),ZO_Cal[Date]>=DATE(2024,2,10))",
+"powerbi": "11",
+"ctx": "Date>=DATE(2024,2,10)",
+"status": "match"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(SUMX(ALLNOBLANKROW(ZO_Cal),SUMX(RELATEDTABLE(ZO_Fact),ZO_Fact[Amt])),ZO_Cal[Date]>=DATE(2024,2,10))",
+"powerbi": "290",
+"ctx": "Date>=DATE(2024,2,10)",
+"status": "match"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(COUNTROWS(RELATEDTABLE(ZO_Fact)),ZO_Cal[Date]>=DATE(2024,2,10))",
+"powerbi": "5",
+"ctx": "Date>=DATE(2024,2,10)",
+"status": "match"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(SUMX(ZO_Cal,COUNTROWS(RELATEDTABLE(ZO_Fact))),ZO_Cal[MonthNo]=1)",
+"powerbi": "3",
+"ctx": "MonthNo=1",
+"status": "match"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(SUMX(ZO_Cal,SUMX(RELATEDTABLE(ZO_Fact),ZO_Fact[Amt])),ZO_Cal[MonthNo]=1)",
+"powerbi": "65",
+"ctx": "MonthNo=1",
+"status": "match"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(SUMX(VALUES(ZO_Cal),COUNTROWS(RELATEDTABLE(ZO_Fact))),ZO_Cal[MonthNo]=1)",
+"powerbi": "3",
+"ctx": "MonthNo=1",
+"status": "match"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(SUMX(VALUES(ZO_Cal),SUMX(RELATEDTABLE(ZO_Fact),ZO_Fact[Amt])),ZO_Cal[MonthNo]=1)",
+"powerbi": "65",
+"ctx": "MonthNo=1",
+"status": "match"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(SUMX(ALL(ZO_Cal),COUNTROWS(RELATEDTABLE(ZO_Fact))),ZO_Cal[MonthNo]=1)",
+"powerbi": "13",
+"ctx": "MonthNo=1",
+"status": "pending",
+"reason": "unknown member: orphan fact rows reach the virtual BLANK row (Head's rewrite)"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(SUMX(ALL(ZO_Cal),SUMX(RELATEDTABLE(ZO_Fact),ZO_Fact[Amt])),ZO_Cal[MonthNo]=1)",
+"powerbi": "375",
+"ctx": "MonthNo=1",
+"status": "pending",
+"reason": "unknown member: orphan fact rows reach the virtual BLANK row (Head's rewrite)"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(SUMX(ALLNOBLANKROW(ZO_Cal),COUNTROWS(RELATEDTABLE(ZO_Fact))),ZO_Cal[MonthNo]=1)",
+"powerbi": "11",
+"ctx": "MonthNo=1",
+"status": "match"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(SUMX(ALLNOBLANKROW(ZO_Cal),SUMX(RELATEDTABLE(ZO_Fact),ZO_Fact[Amt])),ZO_Cal[MonthNo]=1)",
+"powerbi": "290",
+"ctx": "MonthNo=1",
+"status": "match"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(COUNTROWS(RELATEDTABLE(ZO_Fact)),ZO_Cal[MonthNo]=1)",
+"powerbi": "3",
+"ctx": "MonthNo=1",
+"status": "match"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(SUMX(ZO_Cal,COUNTROWS(RELATEDTABLE(ZO_Fact))),ZO_Cal[Year]=2023||ZO_Cal[Day]=1)",
+"powerbi": "4",
+"ctx": "Year=2023||Day=1",
+"status": "pending",
+"reason": "unknown member: blank-filter provenance of the virtual BLANK row (Head's rewrite)"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(SUMX(ZO_Cal,SUMX(RELATEDTABLE(ZO_Fact),ZO_Fact[Amt])),ZO_Cal[Year]=2023||ZO_Cal[Day]=1)",
+"powerbi": "85",
+"ctx": "Year=2023||Day=1",
+"status": "pending",
+"reason": "unknown member: blank-filter provenance of the virtual BLANK row (Head's rewrite)"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(SUMX(VALUES(ZO_Cal),COUNTROWS(RELATEDTABLE(ZO_Fact))),ZO_Cal[Year]=2023||ZO_Cal[Day]=1)",
+"powerbi": "4",
+"ctx": "Year=2023||Day=1",
+"status": "pending",
+"reason": "unknown member: blank-filter provenance of the virtual BLANK row (Head's rewrite)"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(SUMX(VALUES(ZO_Cal),SUMX(RELATEDTABLE(ZO_Fact),ZO_Fact[Amt])),ZO_Cal[Year]=2023||ZO_Cal[Day]=1)",
+"powerbi": "85",
+"ctx": "Year=2023||Day=1",
+"status": "pending",
+"reason": "unknown member: blank-filter provenance of the virtual BLANK row (Head's rewrite)"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(SUMX(ALL(ZO_Cal),COUNTROWS(RELATEDTABLE(ZO_Fact))),ZO_Cal[Year]=2023||ZO_Cal[Day]=1)",
+"powerbi": "13",
+"ctx": "Year=2023||Day=1",
+"status": "pending",
+"reason": "unknown member: orphan fact rows reach the virtual BLANK row (Head's rewrite)"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(SUMX(ALL(ZO_Cal),SUMX(RELATEDTABLE(ZO_Fact),ZO_Fact[Amt])),ZO_Cal[Year]=2023||ZO_Cal[Day]=1)",
+"powerbi": "375",
+"ctx": "Year=2023||Day=1",
+"status": "pending",
+"reason": "unknown member: orphan fact rows reach the virtual BLANK row (Head's rewrite)"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(SUMX(ALLNOBLANKROW(ZO_Cal),COUNTROWS(RELATEDTABLE(ZO_Fact))),ZO_Cal[Year]=2023||ZO_Cal[Day]=1)",
+"powerbi": "11",
+"ctx": "Year=2023||Day=1",
+"status": "match"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(SUMX(ALLNOBLANKROW(ZO_Cal),SUMX(RELATEDTABLE(ZO_Fact),ZO_Fact[Amt])),ZO_Cal[Year]=2023||ZO_Cal[Day]=1)",
+"powerbi": "290",
+"ctx": "Year=2023||Day=1",
+"status": "match"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(COUNTROWS(RELATEDTABLE(ZO_Fact)),ZO_Cal[Year]=2023||ZO_Cal[Day]=1)",
+"powerbi": "4",
+"ctx": "Year=2023||Day=1",
+"status": "match"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(SUMX(ZO_Cal,COUNTROWS(RELATEDTABLE(ZO_Fact))),FILTER(ZO_Cal,ZO_Cal[Year]=2023))",
+"powerbi": "4",
+"ctx": "FILTER(Cal,Year=2023)",
+"status": "match"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(SUMX(ZO_Cal,SUMX(RELATEDTABLE(ZO_Fact),ZO_Fact[Amt])),FILTER(ZO_Cal,ZO_Cal[Year]=2023))",
+"powerbi": "85",
+"ctx": "FILTER(Cal,Year=2023)",
+"status": "match"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(SUMX(VALUES(ZO_Cal),COUNTROWS(RELATEDTABLE(ZO_Fact))),FILTER(ZO_Cal,ZO_Cal[Year]=2023))",
+"powerbi": "4",
+"ctx": "FILTER(Cal,Year=2023)",
+"status": "match"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(SUMX(VALUES(ZO_Cal),SUMX(RELATEDTABLE(ZO_Fact),ZO_Fact[Amt])),FILTER(ZO_Cal,ZO_Cal[Year]=2023))",
+"powerbi": "85",
+"ctx": "FILTER(Cal,Year=2023)",
+"status": "match"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(SUMX(ALL(ZO_Cal),COUNTROWS(RELATEDTABLE(ZO_Fact))),FILTER(ZO_Cal,ZO_Cal[Year]=2023))",
+"powerbi": "13",
+"ctx": "FILTER(Cal,Year=2023)",
+"status": "pending",
+"reason": "unknown member: orphan fact rows reach the virtual BLANK row (Head's rewrite)"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(SUMX(ALL(ZO_Cal),SUMX(RELATEDTABLE(ZO_Fact),ZO_Fact[Amt])),FILTER(ZO_Cal,ZO_Cal[Year]=2023))",
+"powerbi": "375",
+"ctx": "FILTER(Cal,Year=2023)",
+"status": "pending",
+"reason": "unknown member: orphan fact rows reach the virtual BLANK row (Head's rewrite)"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(SUMX(ALLNOBLANKROW(ZO_Cal),COUNTROWS(RELATEDTABLE(ZO_Fact))),FILTER(ZO_Cal,ZO_Cal[Year]=2023))",
+"powerbi": "11",
+"ctx": "FILTER(Cal,Year=2023)",
+"status": "match"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(SUMX(ALLNOBLANKROW(ZO_Cal),SUMX(RELATEDTABLE(ZO_Fact),ZO_Fact[Amt])),FILTER(ZO_Cal,ZO_Cal[Year]=2023))",
+"powerbi": "290",
+"ctx": "FILTER(Cal,Year=2023)",
+"status": "match"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(COUNTROWS(RELATEDTABLE(ZO_Fact)),FILTER(ZO_Cal,ZO_Cal[Year]=2023))",
+"powerbi": "4",
+"ctx": "FILTER(Cal,Year=2023)",
+"status": "match"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(SUMX(ZO_Cal,COUNTROWS(RELATEDTABLE(ZO_Fact))),FILTER(ALL(ZO_Cal[Year]),ZO_Cal[Year]<>2023))",
+"powerbi": "7",
+"ctx": "FILTER(ALL(Cal[Year]),Year<>2023)",
+"status": "pending",
+"reason": "unknown member: blank-filter provenance of the virtual BLANK row (Head's rewrite)"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(SUMX(ZO_Cal,SUMX(RELATEDTABLE(ZO_Fact),ZO_Fact[Amt])),FILTER(ALL(ZO_Cal[Year]),ZO_Cal[Year]<>2023))",
+"powerbi": "205",
+"ctx": "FILTER(ALL(Cal[Year]),Year<>2023)",
+"status": "pending",
+"reason": "unknown member: blank-filter provenance of the virtual BLANK row (Head's rewrite)"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(SUMX(VALUES(ZO_Cal),COUNTROWS(RELATEDTABLE(ZO_Fact))),FILTER(ALL(ZO_Cal[Year]),ZO_Cal[Year]<>2023))",
+"powerbi": "9",
+"ctx": "FILTER(ALL(Cal[Year]),Year<>2023)",
+"status": "pending",
+"reason": "unknown member: blank-filter provenance of the virtual BLANK row (Head's rewrite)"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(SUMX(VALUES(ZO_Cal),SUMX(RELATEDTABLE(ZO_Fact),ZO_Fact[Amt])),FILTER(ALL(ZO_Cal[Year]),ZO_Cal[Year]<>2023))",
+"powerbi": "290",
+"ctx": "FILTER(ALL(Cal[Year]),Year<>2023)",
+"status": "pending",
+"reason": "unknown member: blank-filter provenance of the virtual BLANK row (Head's rewrite)"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(SUMX(ALL(ZO_Cal),COUNTROWS(RELATEDTABLE(ZO_Fact))),FILTER(ALL(ZO_Cal[Year]),ZO_Cal[Year]<>2023))",
+"powerbi": "13",
+"ctx": "FILTER(ALL(Cal[Year]),Year<>2023)",
+"status": "pending",
+"reason": "unknown member: orphan fact rows reach the virtual BLANK row (Head's rewrite)"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(SUMX(ALL(ZO_Cal),SUMX(RELATEDTABLE(ZO_Fact),ZO_Fact[Amt])),FILTER(ALL(ZO_Cal[Year]),ZO_Cal[Year]<>2023))",
+"powerbi": "375",
+"ctx": "FILTER(ALL(Cal[Year]),Year<>2023)",
+"status": "pending",
+"reason": "unknown member: orphan fact rows reach the virtual BLANK row (Head's rewrite)"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(SUMX(ALLNOBLANKROW(ZO_Cal),COUNTROWS(RELATEDTABLE(ZO_Fact))),FILTER(ALL(ZO_Cal[Year]),ZO_Cal[Year]<>2023))",
+"powerbi": "11",
+"ctx": "FILTER(ALL(Cal[Year]),Year<>2023)",
+"status": "match"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(SUMX(ALLNOBLANKROW(ZO_Cal),SUMX(RELATEDTABLE(ZO_Fact),ZO_Fact[Amt])),FILTER(ALL(ZO_Cal[Year]),ZO_Cal[Year]<>2023))",
+"powerbi": "290",
+"ctx": "FILTER(ALL(Cal[Year]),Year<>2023)",
+"status": "match"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(COUNTROWS(RELATEDTABLE(ZO_Fact)),FILTER(ALL(ZO_Cal[Year]),ZO_Cal[Year]<>2023))",
+"powerbi": "9",
+"ctx": "FILTER(ALL(Cal[Year]),Year<>2023)",
+"status": "pending",
+"reason": "unknown member: orphan fact rows reach the virtual BLANK row (Head's rewrite)"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(SUMX(ZO_Cal,COUNTROWS(RELATEDTABLE(ZO_Fact))),FILTER(VALUES(ZO_Cal[Year]),ZO_Cal[Year]<=2023))",
+"powerbi": "4",
+"ctx": "FILTER(VALUES(Cal[Year]),Year<=2023)",
+"status": "pending",
+"reason": "unknown member: blank-filter provenance of the virtual BLANK row (Head's rewrite)"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(SUMX(ZO_Cal,SUMX(RELATEDTABLE(ZO_Fact),ZO_Fact[Amt])),FILTER(VALUES(ZO_Cal[Year]),ZO_Cal[Year]<=2023))",
+"powerbi": "85",
+"ctx": "FILTER(VALUES(Cal[Year]),Year<=2023)",
+"status": "pending",
+"reason": "unknown member: blank-filter provenance of the virtual BLANK row (Head's rewrite)"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(SUMX(VALUES(ZO_Cal),COUNTROWS(RELATEDTABLE(ZO_Fact))),FILTER(VALUES(ZO_Cal[Year]),ZO_Cal[Year]<=2023))",
+"powerbi": "6",
+"ctx": "FILTER(VALUES(Cal[Year]),Year<=2023)",
+"status": "pending",
+"reason": "unknown member: blank-filter provenance of the virtual BLANK row (Head's rewrite)"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(SUMX(VALUES(ZO_Cal),SUMX(RELATEDTABLE(ZO_Fact),ZO_Fact[Amt])),FILTER(VALUES(ZO_Cal[Year]),ZO_Cal[Year]<=2023))",
+"powerbi": "170",
+"ctx": "FILTER(VALUES(Cal[Year]),Year<=2023)",
+"status": "pending",
+"reason": "unknown member: blank-filter provenance of the virtual BLANK row (Head's rewrite)"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(SUMX(ALL(ZO_Cal),COUNTROWS(RELATEDTABLE(ZO_Fact))),FILTER(VALUES(ZO_Cal[Year]),ZO_Cal[Year]<=2023))",
+"powerbi": "13",
+"ctx": "FILTER(VALUES(Cal[Year]),Year<=2023)",
+"status": "pending",
+"reason": "unknown member: orphan fact rows reach the virtual BLANK row (Head's rewrite)"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(SUMX(ALL(ZO_Cal),SUMX(RELATEDTABLE(ZO_Fact),ZO_Fact[Amt])),FILTER(VALUES(ZO_Cal[Year]),ZO_Cal[Year]<=2023))",
+"powerbi": "375",
+"ctx": "FILTER(VALUES(Cal[Year]),Year<=2023)",
+"status": "pending",
+"reason": "unknown member: orphan fact rows reach the virtual BLANK row (Head's rewrite)"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(SUMX(ALLNOBLANKROW(ZO_Cal),COUNTROWS(RELATEDTABLE(ZO_Fact))),FILTER(VALUES(ZO_Cal[Year]),ZO_Cal[Year]<=2023))",
+"powerbi": "11",
+"ctx": "FILTER(VALUES(Cal[Year]),Year<=2023)",
+"status": "match"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(SUMX(ALLNOBLANKROW(ZO_Cal),SUMX(RELATEDTABLE(ZO_Fact),ZO_Fact[Amt])),FILTER(VALUES(ZO_Cal[Year]),ZO_Cal[Year]<=2023))",
+"powerbi": "290",
+"ctx": "FILTER(VALUES(Cal[Year]),Year<=2023)",
+"status": "match"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(COUNTROWS(RELATEDTABLE(ZO_Fact)),FILTER(VALUES(ZO_Cal[Year]),ZO_Cal[Year]<=2023))",
+"powerbi": "6",
+"ctx": "FILTER(VALUES(Cal[Year]),Year<=2023)",
+"status": "pending",
+"reason": "unknown member: orphan fact rows reach the virtual BLANK row (Head's rewrite)"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(SUMX(ZO_Cal,COUNTROWS(RELATEDTABLE(ZO_Fact))),ALLNOBLANKROW(ZO_Cal))",
+"powerbi": "11",
+"ctx": "ALLNOBLANKROW(Cal)",
+"status": "match"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(SUMX(ZO_Cal,SUMX(RELATEDTABLE(ZO_Fact),ZO_Fact[Amt])),ALLNOBLANKROW(ZO_Cal))",
+"powerbi": "290",
+"ctx": "ALLNOBLANKROW(Cal)",
+"status": "match"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(SUMX(VALUES(ZO_Cal),COUNTROWS(RELATEDTABLE(ZO_Fact))),ALLNOBLANKROW(ZO_Cal))",
+"powerbi": "11",
+"ctx": "ALLNOBLANKROW(Cal)",
+"status": "match"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(SUMX(VALUES(ZO_Cal),SUMX(RELATEDTABLE(ZO_Fact),ZO_Fact[Amt])),ALLNOBLANKROW(ZO_Cal))",
+"powerbi": "290",
+"ctx": "ALLNOBLANKROW(Cal)",
+"status": "match"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(SUMX(ALL(ZO_Cal),COUNTROWS(RELATEDTABLE(ZO_Fact))),ALLNOBLANKROW(ZO_Cal))",
+"powerbi": "13",
+"ctx": "ALLNOBLANKROW(Cal)",
+"status": "pending",
+"reason": "unknown member: orphan fact rows reach the virtual BLANK row (Head's rewrite)"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(SUMX(ALL(ZO_Cal),SUMX(RELATEDTABLE(ZO_Fact),ZO_Fact[Amt])),ALLNOBLANKROW(ZO_Cal))",
+"powerbi": "375",
+"ctx": "ALLNOBLANKROW(Cal)",
+"status": "pending",
+"reason": "unknown member: orphan fact rows reach the virtual BLANK row (Head's rewrite)"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(SUMX(ALLNOBLANKROW(ZO_Cal),COUNTROWS(RELATEDTABLE(ZO_Fact))),ALLNOBLANKROW(ZO_Cal))",
+"powerbi": "11",
+"ctx": "ALLNOBLANKROW(Cal)",
+"status": "match"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(SUMX(ALLNOBLANKROW(ZO_Cal),SUMX(RELATEDTABLE(ZO_Fact),ZO_Fact[Amt])),ALLNOBLANKROW(ZO_Cal))",
+"powerbi": "290",
+"ctx": "ALLNOBLANKROW(Cal)",
+"status": "match"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(COUNTROWS(RELATEDTABLE(ZO_Fact)),ALLNOBLANKROW(ZO_Cal))",
+"powerbi": "11",
+"ctx": "ALLNOBLANKROW(Cal)",
+"status": "pending",
+"reason": "unknown member: orphan fact rows reach the virtual BLANK row (Head's rewrite)"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(SUMX(ZO_Cal,COUNTROWS(RELATEDTABLE(ZO_Fact))),ZO_Cal[Year] IN {2023,BLANK()})",
+"powerbi": "4",
+"ctx": "Year IN {2023,BLANK()}",
+"status": "pending",
+"reason": "unknown member: blank-filter provenance of the virtual BLANK row (Head's rewrite)"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(SUMX(ZO_Cal,SUMX(RELATEDTABLE(ZO_Fact),ZO_Fact[Amt])),ZO_Cal[Year] IN {2023,BLANK()})",
+"powerbi": "85",
+"ctx": "Year IN {2023,BLANK()}",
+"status": "pending",
+"reason": "unknown member: blank-filter provenance of the virtual BLANK row (Head's rewrite)"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(SUMX(VALUES(ZO_Cal),COUNTROWS(RELATEDTABLE(ZO_Fact))),ZO_Cal[Year] IN {2023,BLANK()})",
+"powerbi": "6",
+"ctx": "Year IN {2023,BLANK()}",
+"status": "pending",
+"reason": "unknown member: blank-filter provenance of the virtual BLANK row (Head's rewrite)"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(SUMX(VALUES(ZO_Cal),SUMX(RELATEDTABLE(ZO_Fact),ZO_Fact[Amt])),ZO_Cal[Year] IN {2023,BLANK()})",
+"powerbi": "170",
+"ctx": "Year IN {2023,BLANK()}",
+"status": "pending",
+"reason": "unknown member: blank-filter provenance of the virtual BLANK row (Head's rewrite)"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(SUMX(ALL(ZO_Cal),COUNTROWS(RELATEDTABLE(ZO_Fact))),ZO_Cal[Year] IN {2023,BLANK()})",
+"powerbi": "13",
+"ctx": "Year IN {2023,BLANK()}",
+"status": "pending",
+"reason": "unknown member: orphan fact rows reach the virtual BLANK row (Head's rewrite)"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(SUMX(ALL(ZO_Cal),SUMX(RELATEDTABLE(ZO_Fact),ZO_Fact[Amt])),ZO_Cal[Year] IN {2023,BLANK()})",
+"powerbi": "375",
+"ctx": "Year IN {2023,BLANK()}",
+"status": "pending",
+"reason": "unknown member: orphan fact rows reach the virtual BLANK row (Head's rewrite)"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(SUMX(ALLNOBLANKROW(ZO_Cal),COUNTROWS(RELATEDTABLE(ZO_Fact))),ZO_Cal[Year] IN {2023,BLANK()})",
+"powerbi": "11",
+"ctx": "Year IN {2023,BLANK()}",
+"status": "match"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(SUMX(ALLNOBLANKROW(ZO_Cal),SUMX(RELATEDTABLE(ZO_Fact),ZO_Fact[Amt])),ZO_Cal[Year] IN {2023,BLANK()})",
+"powerbi": "290",
+"ctx": "Year IN {2023,BLANK()}",
+"status": "match"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(COUNTROWS(RELATEDTABLE(ZO_Fact)),ZO_Cal[Year] IN {2023,BLANK()})",
+"powerbi": "6",
+"ctx": "Year IN {2023,BLANK()}",
+"status": "pending",
+"reason": "unknown member: orphan fact rows reach the virtual BLANK row (Head's rewrite)"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(SUMX(ZO_Cal,COUNTROWS(RELATEDTABLE(ZO_Fact))),ZO_Cal[Day]=1)",
+"powerbi": "BLANK",
+"ctx": "Day=1",
+"status": "match"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(SUMX(ZO_Cal,SUMX(RELATEDTABLE(ZO_Fact),ZO_Fact[Amt])),ZO_Cal[Day]=1)",
+"powerbi": "BLANK",
+"ctx": "Day=1",
+"status": "match"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(SUMX(VALUES(ZO_Cal),COUNTROWS(RELATEDTABLE(ZO_Fact))),ZO_Cal[Day]=1)",
+"powerbi": "BLANK",
+"ctx": "Day=1",
+"status": "match"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(SUMX(VALUES(ZO_Cal),SUMX(RELATEDTABLE(ZO_Fact),ZO_Fact[Amt])),ZO_Cal[Day]=1)",
+"powerbi": "BLANK",
+"ctx": "Day=1",
+"status": "match"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(SUMX(ALL(ZO_Cal),COUNTROWS(RELATEDTABLE(ZO_Fact))),ZO_Cal[Day]=1)",
+"powerbi": "13",
+"ctx": "Day=1",
+"status": "pending",
+"reason": "unknown member: orphan fact rows reach the virtual BLANK row (Head's rewrite)"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(SUMX(ALL(ZO_Cal),SUMX(RELATEDTABLE(ZO_Fact),ZO_Fact[Amt])),ZO_Cal[Day]=1)",
+"powerbi": "375",
+"ctx": "Day=1",
+"status": "pending",
+"reason": "unknown member: orphan fact rows reach the virtual BLANK row (Head's rewrite)"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(SUMX(ALLNOBLANKROW(ZO_Cal),COUNTROWS(RELATEDTABLE(ZO_Fact))),ZO_Cal[Day]=1)",
+"powerbi": "11",
+"ctx": "Day=1",
+"status": "match"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(SUMX(ALLNOBLANKROW(ZO_Cal),SUMX(RELATEDTABLE(ZO_Fact),ZO_Fact[Amt])),ZO_Cal[Day]=1)",
+"powerbi": "290",
+"ctx": "Day=1",
+"status": "match"
+},
+{
+"model": "ZO",
+"expr": "CALCULATE(COUNTROWS(RELATEDTABLE(ZO_Fact)),ZO_Cal[Day]=1)",
+"powerbi": "BLANK",
+"ctx": "Day=1",
+"status": "match"
+},
+{
+"model": "ZO",
+"expr": "COUNTX(ZO_Dim,COUNTROWS(RELATEDTABLE(ZO_Fact)))",
+"powerbi": "5",
+"ctx": null,
+"status": "match"
+},
+{
+"model": "ZO",
+"expr": "COUNTX(VALUES(ZO_Dim),COUNTROWS(RELATEDTABLE(ZO_Fact)))",
+"powerbi": "6",
+"ctx": null,
+"status": "pending",
+"reason": "unknown member: orphan fact rows reach the virtual BLANK row (Head's rewrite)"
+},
+{
+"model": "ZO",
+"expr": "COUNTX(ALL(ZO_Dim),COUNTROWS(RELATEDTABLE(ZO_Fact)))",
+"powerbi": "6",
+"ctx": null,
+"status": "pending",
+"reason": "unknown member: orphan fact rows reach the virtual BLANK row (Head's rewrite)"
+},
+{
+"model": "ZO",
+"expr": "SUMX(VALUES(ZO_Dim[Cat]),COUNTROWS(RELATEDTABLE(ZO_Fact)))",
+"powerbi": "13",
+"ctx": null,
+"status": "pending",
+"reason": "unknown member: orphan fact rows reach the virtual BLANK row (Head's rewrite)"
+},
+{
+"model": "ZO",
+"expr": "SUMX(VALUES(ZO_Dim[Cat]),SUMX(RELATEDTABLE(ZO_Fact),ZO_Fact[Amt]))",
+"powerbi": "375",
+"ctx": null,
+"status": "pending",
+"reason": "unknown member: orphan fact rows reach the virtual BLANK row (Head's rewrite)"
+},
+{
+"model": "ZO",
+"expr": "COUNTX(VALUES(ZO_Dim[Cat]),COUNTROWS(RELATEDTABLE(ZO_Fact)))",
+"powerbi": "4",
+"ctx": null,
+"status": "pending",
+"reason": "unknown member: orphan fact rows reach the virtual BLANK row (Head's rewrite)"
+},
+{
+"model": "ZO",
+"expr": "SUMX(ALL(ZO_Dim[Cat]),COUNTROWS(RELATEDTABLE(ZO_Fact)))",
+"powerbi": "13",
+"ctx": null,
+"status": "pending",
+"reason": "unknown member: orphan fact rows reach the virtual BLANK row (Head's rewrite)"
+},
+{
+"model": "ZO",
+"expr": "SUMX(ALL(ZO_Dim[Cat]),SUMX(RELATEDTABLE(ZO_Fact),ZO_Fact[Amt]))",
+"powerbi": "375",
+"ctx": null,
+"status": "pending",
+"reason": "unknown member: orphan fact rows reach the virtual BLANK row (Head's rewrite)"
+},
+{
+"model": "ZO",
+"expr": "COUNTX(ALL(ZO_Dim[Cat]),COUNTROWS(RELATEDTABLE(ZO_Fact)))",
+"powerbi": "4",
+"ctx": null,
+"status": "pending",
+"reason": "unknown member: orphan fact rows reach the virtual BLANK row (Head's rewrite)"
+},
+{
+"model": "ZO",
+"expr": "COUNTX(ALLNOBLANKROW(ZO_Dim),COUNTROWS(RELATEDTABLE(ZO_Fact)))",
+"powerbi": "5",
+"ctx": null,
+"status": "match"
+},
+{
+"model": "ZO",
+"expr": "SUMX(VALUES(ZO_Cal[Year]),COUNTROWS(RELATEDTABLE(ZO_Fact)))",
+"powerbi": "13",
+"ctx": null,
+"status": "pending",
+"reason": "unknown member: orphan fact rows reach the virtual BLANK row (Head's rewrite)"
+},
+{
+"model": "ZO",
+"expr": "SUMX(ALL(ZO_Cal[Year]),COUNTROWS(RELATEDTABLE(ZO_Fact)))",
+"powerbi": "13",
+"ctx": null,
+"status": "pending",
+"reason": "unknown member: orphan fact rows reach the virtual BLANK row (Head's rewrite)"
+}
+]
+}
