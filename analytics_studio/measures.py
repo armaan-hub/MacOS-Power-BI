@@ -4162,6 +4162,7 @@ def evaluate_measures(
 
     derived_count = 0
     row_stack: list[tuple[dict[str, Any], dict[str, Any], int]] = []
+    selected_iteration_depth = 0  # how many iterations over a SELECTCOLUMNS table are running
 
     def derived_table(
         headers: list[str],
@@ -4280,7 +4281,10 @@ def evaluate_measures(
 
         shadow="install": an iterator over a table value filters ALLSELECTED to that table's rows for the loop;
         shadow="clear": CONCATENATEX only removes the outer filters on the columns it iterates."""
+        nonlocal selected_iteration_depth
         saved_state = push_shadow(context, rows, shadow)
+        selected = bool(context.get("selected_columns"))
+        selected_iteration_depth += selected
         try:
             for row_index, row in enumerate(rows, 1):
                 frame = (context, row, row_index)
@@ -4290,6 +4294,7 @@ def evaluate_measures(
                 finally:
                     row_stack.pop()
         finally:
+            selected_iteration_depth -= selected
             pop_shadow(saved_state)
 
     def typed_row(context: dict[str, Any], row: dict[str, Any]) -> dict[str, Any]:
@@ -4488,6 +4493,7 @@ def evaluate_measures(
                 headers, out_rows, lineage, {k: v for k, v in types.items() if k in headers}, row_identity=add and not context.get("derived", False) or add and bool(context.get("row_identity")),
             )
             if not add:  # the walk order of a selected column is that of the columns it was computed from
+                selected_context["selected_columns"] = True
                 selected_context["order_source"] = (context, {id(out): source for out, source in zip(out_rows, source_rows)})
             return selected_context, selected_rows
         if function == "SUMMARIZE":
@@ -9209,6 +9215,10 @@ def evaluate_measures(
             if len(arguments) == 1:
                 return evaluate(arguments[0])
             if not uses_legacy_calculate(arguments):
+                if selected_iteration_depth and not _general_calculate_filters_valid(tuple(arguments[1:])):
+                    # a modifier mix inside an iteration over SELECTCOLUMNS: Power BI does not find T[col] among the renamed
+                    # columns (live: error) while the local engine reads it through the lineage, so the mix stays refused here
+                    raise MeasureError("CALCULATE filters must be column comparisons joined with AND, OR, or NOT.")
                 return evaluate_with_general_filters(arguments[0], tuple(arguments[1:]))
             try:
                 userelationship_modifiers = tuple(
