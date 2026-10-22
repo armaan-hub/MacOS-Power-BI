@@ -4,42 +4,6 @@
  "note": "Not replayed by the gate: evaluation-order probes the app still gets wrong: static errors in untaken IF/SWITCH branches, constant hoisting out of empty iterators, VAR eagerness, IFERROR catchability, BLANK-to-FALSE typing of Boolean IF/SWITCH (iteration 80).",
  "items": [
   {
-   "expr": "VAR x=VALUE(\"a\") VAR y=x+1 RETURN 3",
-   "powerbi": "3"
-  },
-  {
-   "expr": "SUMX(Facts,COALESCE(Facts[Quantity],VALUE(\"a\")))",
-   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 55) Cannot convert value 'a' of type Text to type Number.\""
-  },
-  {
-   "expr": "COALESCE(SUM(Facts[Quantity]),VALUE(\"a\"))",
-   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 49) Cannot convert value 'a' of type Text to type Number.\""
-  },
-  {
-   "expr": "COALESCE(BLANK(),SUM(Facts[Quantity]),VALUE(\"a\"))",
-   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 57) Cannot convert value 'a' of type Text to type Number.\""
-  },
-  {
-   "expr": "COALESCE(SUM(Facts[Quantity]),SUM(Facts[Quantity]),VALUE(\"a\"))",
-   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 70) Cannot convert value 'a' of type Text to type Number.\""
-  },
-  {
-   "expr": "COALESCE(CALCULATE(SUM(Facts[Quantity]),Facts[Region]=\"East\"),VALUE(\"a\"))",
-   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 81) Cannot convert value 'a' of type Text to type Number.\""
-  },
-  {
-   "expr": "VAR x=VALUE(\"a\") RETURN IF(SUM(Facts[Quantity])>100,x,1)",
-   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 25) Cannot convert value 'a' of type Text to type Number.\""
-  },
-  {
-   "expr": "VAR x=VALUE(\"a\") VAR y=x RETURN 5",
-   "powerbi": "5"
-  },
-  {
-   "expr": "VAR x=VALUE(\"a\") VAR y=x RETURN IF(TRUE(),5,y)",
-   "powerbi": "5"
-  },
-  {
    "expr": "VAR x=VALUE(\"a\") RETURN ISBLANK(x)",
    "powerbi": "False"
   },
@@ -48,28 +12,12 @@
    "powerbi": "True"
   },
   {
-   "expr": "VAR x=VALUE(\"a\") RETURN SUMX(Facts,IF(Facts[Quantity]>10,x,1))",
-   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 25) Cannot convert value 'a' of type Text to type Number.\""
-  },
-  {
    "expr": "COUNTROWS(RELATEDTABLE(Facts))",
    "powerbi": "6"
   },
   {
-   "expr": "+TRUE()",
-   "powerbi": "True"
-  },
-  {
    "expr": "+\"a\"",
    "powerbi": "a"
-  },
-  {
-   "expr": "+FALSE()",
-   "powerbi": "False"
-  },
-  {
-   "expr": "+(1>2)",
-   "powerbi": "False"
   },
   {
    "expr": "DIVIDE(1,2,\"a\")",
@@ -340,88 +288,8 @@
    "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 32) The SELECTCOLUMNS function expects a table expression for argument '1', but a string or numeric expression was used.\""
   },
   {
-   "expr": "IF(FALSE(),+TRUE())",
-   "powerbi": "False"
-  },
-  {
-   "expr": "IF(FALSE(),+FALSE())",
-   "powerbi": "False"
-  },
-  {
-   "expr": "IF(FALSE(),+(1>2))",
-   "powerbi": "False"
-  },
-  {
-   "expr": "IF(FALSE(),IF(TRUE(),+TRUE()))",
-   "powerbi": "False"
-  },
-  {
-   "expr": "IF(FALSE(),+ISNUMBER(1))",
-   "powerbi": "False"
-  },
-  {
-   "expr": "IF(FALSE(),+(+TRUE()))",
-   "powerbi": "False"
-  },
-  {
-   "expr": "IF(FALSE(),+(TRUE()))",
-   "powerbi": "False"
-  },
-  {
-   "expr": "IF(FALSE(),+IF(TRUE(),TRUE()))",
-   "powerbi": "False"
-  },
-  {
-   "expr": "IF(FALSE(),+IF(TRUE(),TRUE(),FALSE()))",
-   "powerbi": "False"
-  },
-  {
-   "expr": "IF(TRUE(),+TRUE())",
-   "powerbi": "True"
-  },
-  {
-   "expr": "IF(TRUE(),+FALSE())",
-   "powerbi": "False"
-  },
-  {
-   "expr": "SWITCH(2,1,+TRUE())",
-   "powerbi": "False"
-  },
-  {
-   "expr": "SWITCH(2,1,+TRUE(),3,+TRUE())",
-   "powerbi": "False"
-  },
-  {
-   "expr": "SWITCH(TRUE(),FALSE(),+TRUE())",
-   "powerbi": "False"
-  },
-  {
-   "expr": "IF(FALSE(),+TRUE(),BLANK())",
-   "powerbi": "False"
-  },
-  {
-   "expr": "SUMX(Facts,IF(FALSE(),+TRUE()))",
-   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 30) The function SUMX cannot work with values of type Boolean.\""
-  },
-  {
-   "expr": "CONCATENATEX(Facts,IF(Facts[Quantity]>10,+TRUE()),\"|\")",
-   "powerbi": "FALSE|FALSE|FALSE|FALSE|FALSE|FALSE"
-  },
-  {
    "expr": "IF(FALSE(),+TRUE())=FALSE()",
    "powerbi": "True"
-  },
-  {
-   "expr": "ISBLANK(IF(FALSE(),+TRUE()))",
-   "powerbi": "False"
-  },
-  {
-   "expr": "IF(FALSE(),+TRUE())&\"\"",
-   "powerbi": "FALSE"
-  },
-  {
-   "expr": "IF(TRUE(),IF(FALSE(),+TRUE()))",
-   "powerbi": "False"
   },
   {
    "expr": "COUNTROWS(FILTER(FILTER(Facts,Facts[Quantity]>10),SQRT(-1)>0))",
@@ -500,32 +368,12 @@
    "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 63) An argument of function 'SQRT' has the wrong data type or the result is too large or too small.\""
   },
   {
-   "expr": "VAR x=VALUE(\"a\") RETURN IFERROR(SUM(Facts[Quantity]),x)",
-   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 25) Cannot convert value 'a' of type Text to type Number.\""
-  },
-  {
-   "expr": "VAR x=VALUE(\"a\") RETURN SWITCH(SUM(Facts[Quantity]),15,1,x)",
-   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 25) Cannot convert value 'a' of type Text to type Number.\""
-  },
-  {
    "expr": "VAR x=VALUE(\"a\") VAR y=IF(SUM(Facts[Quantity])>100,x,1) RETURN y",
-   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 25) Cannot convert value 'a' of type Text to type Number.\""
-  },
-  {
-   "expr": "VAR x=VALUE(\"a\") RETURN COALESCE(SUM(Facts[Quantity]),x)",
-   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 25) Cannot convert value 'a' of type Text to type Number.\""
-  },
-  {
-   "expr": "VAR x=VALUE(\"a\") RETURN SUMX(Facts,IF(Facts[Quantity]>100,x,1))",
    "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 25) Cannot convert value 'a' of type Text to type Number.\""
   },
   {
    "expr": "SUMX(Facts,VAR x=VALUE(\"a\") RETURN IF(Facts[Quantity]>10,x,1))",
    "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 36) Cannot convert value 'a' of type Text to type Number.\""
-  },
-  {
-   "expr": "VAR x=VALUE(\"a\") RETURN COUNTROWS(FILTER(Facts,IF(Facts[Quantity]>100,x>0,FALSE())))",
-   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 25) Cannot convert value 'a' of type Text to type Number.\""
   },
   {
    "expr": "VAR t=FILTER(Facts,VALUE(Facts[Region])>0) RETURN 1",
@@ -537,14 +385,6 @@
   },
   {
    "expr": "VAR t=FILTER(Facts,VALUE(Facts[Region])>0) RETURN IF(MAX(Facts[Quantity])>100,COUNTROWS(t),1)",
-   "powerbi": "1"
-  },
-  {
-   "expr": "VAR t=SUMX(Facts,VALUE(Facts[Region])) RETURN IF(MAX(Facts[Quantity])>100,t,1)",
-   "powerbi": "1"
-  },
-  {
-   "expr": "VAR t=SUMX(Facts,VALUE(Facts[Region])) RETURN 1",
    "powerbi": "1"
   },
   {
@@ -784,18 +624,6 @@
    "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 35) A single value for column 'Quantity' in table 'Facts' cannot be determined. This can happen when a measure or function formula refers to a column that contains many values without specifying an aggregation such as min, max, count, or sum to get a single result.\""
   },
   {
-   "expr": "COALESCE(SUM(Facts[Quantity]),-\"a\")",
-   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 50) Cannot convert value 'a' of type Text to type Number.\""
-  },
-  {
-   "expr": "COALESCE(SUM(Facts[Quantity]),ISNUMBER(Facts[Quantity]))",
-   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 58) A single value for column 'Quantity' in table 'Facts' cannot be determined. This can happen when a measure or function formula refers to a column that contains many values without specifying an aggregation such as min, max, count, or sum to get a single result.\""
-  },
-  {
-   "expr": "COALESCE(SUM(Facts[Quantity]),SQRT(\"a\"))",
-   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 54) Cannot convert value 'a' of type Text to type Number.\""
-  },
-  {
    "expr": "IF(FALSE(),LEFT(Facts[Region],2),1)",
    "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 35) A single value for column 'Region' in table 'Facts' cannot be determined. This can happen when a measure or function formula refers to a column that contains many values without specifying an aggregation such as min, max, count, or sum to get a single result.\""
   },
@@ -840,10 +668,6 @@
    "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 53) A single value for column 'Quantity' in table 'Facts' cannot be determined. This can happen when a measure or function formula refers to a column that contains many values without specifying an aggregation such as min, max, count, or sum to get a single result.\""
   },
   {
-   "expr": "IFERROR(VALUE(\"a\")>0,+TRUE())",
-   "powerbi": "True"
-  },
-  {
    "expr": "SUMX(FILTER(Facts,Facts[Quantity]>10),VAR v=-\"a\" RETURN IF(Facts[Quantity]>1,v,1))",
    "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 64) Cannot convert value 'a' of type Text to type Number.\""
   },
@@ -868,30 +692,6 @@
    "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 36) Cannot convert value 'a' of type Text to type Number.\""
   },
   {
-   "expr": "SWITCH(2,1,+(1>2),3,+(1>2))",
-   "powerbi": "False"
-  },
-  {
-   "expr": "SWITCH(2,1,SUM(Facts[Quantity])>0,+TRUE())",
-   "powerbi": "True"
-  },
-  {
-   "expr": "VAR v=-\"a\" VAR w=v RETURN 1",
-   "powerbi": "1"
-  },
-  {
-   "expr": "VAR v=DATEVALUE(\"x\") VAR w=v RETURN 1",
-   "powerbi": "1"
-  },
-  {
-   "expr": "VAR v=NOT \"a\" VAR w=v RETURN 1",
-   "powerbi": "1"
-  },
-  {
-   "expr": "VAR v=SQRT(\"a\") VAR w=v RETURN 1",
-   "powerbi": "1"
-  },
-  {
    "expr": "MAXX(Facts,Facts[Region])",
    "powerbi": "West"
   },
@@ -908,10 +708,6 @@
    "powerbi": "Paid"
   },
   {
-   "expr": "IFERROR(COALESCE(SUM(Facts[Quantity]),VALUE(\"a\")),7)",
-   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 57) Cannot convert value 'a' of type Text to type Number.\""
-  },
-  {
    "expr": "IFERROR(COALESCE(BLANK(),VALUE(\"a\")),7)",
    "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 44) Cannot convert value 'a' of type Text to type Number.\""
   },
@@ -926,14 +722,6 @@
   {
    "expr": "SUMX(Facts,VAR x=SQRT(Facts[Quantity]-1) RETURN IF(ISERROR(x),1,0))",
    "powerbi": "1"
-  },
-  {
-   "expr": "SUMX(Facts,IFERROR(COALESCE(Facts[Quantity],VALUE(\"a\")),1))",
-   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 63) Cannot convert value 'a' of type Text to type Number.\""
-  },
-  {
-   "expr": "SUMX(Facts,IFERROR(COALESCE(Facts[Sales],VALUE(\"a\")),1))",
-   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 60) Cannot convert value 'a' of type Text to type Number.\""
   },
   {
    "expr": "IFERROR(IF(TRUE(),COALESCE(VALUE(\"a\"),1)),7)",
@@ -960,14 +748,6 @@
    "powerbi": "6"
   },
   {
-   "expr": "VAR x=SQRT(-1) RETURN IFERROR(IF(SUM(Facts[Quantity])>100,x,1),5)",
-   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 25) An argument of function 'SQRT' has the wrong data type or the result is too large or too small.\""
-  },
-  {
-   "expr": "COALESCE(IFERROR(COALESCE(SUM(Facts[Quantity]),SQRT(-1)),1),2)",
-   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 66) An argument of function 'SQRT' has the wrong data type or the result is too large or too small.\""
-  },
-  {
    "expr": "IF(ISERROR(SUMX(FILTER(Facts,Facts[Quantity]>10),SQRT(-1))),1,2)",
    "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 68) An argument of function 'SQRT' has the wrong data type or the result is too large or too small.\""
   },
@@ -976,28 +756,8 @@
    "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 44) Cannot convert value 'a' of type Text to type Number.\""
   },
   {
-   "expr": "IFERROR(COALESCE(COALESCE(SUM(Facts[Quantity]),SQRT(-1)),1),2)",
-   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 66) An argument of function 'SQRT' has the wrong data type or the result is too large or too small.\""
-  },
-  {
-   "expr": "IFERROR(COALESCE(SQRT(-1)+SUM(Facts[Quantity]),1),2)",
-   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 36) An argument of function 'SQRT' has the wrong data type or the result is too large or too small.\""
-  },
-  {
-   "expr": "IFERROR(COALESCE(SQRT(SUM(Facts[Quantity])-100),1),2)",
-   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 36) An argument of function 'SQRT' has the wrong data type or the result is too large or too small.\""
-  },
-  {
-   "expr": "IFERROR(COALESCE(VALUE(\"a\")>0 && SUM(Facts[Quantity])>0,1),2)",
-   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 36) Cannot convert value 'a' of type Text to type Number.\""
-  },
-  {
    "expr": "IFERROR(IF(TRUE(),COALESCE(BLANK(),VALUE(\"a\"))),7)",
    "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 54) Cannot convert value 'a' of type Text to type Number.\""
-  },
-  {
-   "expr": "IFERROR(IF(TRUE(),COALESCE(SUM(Facts[Quantity]),SQRT(-1))),7)",
-   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 67) An argument of function 'SQRT' has the wrong data type or the result is too large or too small.\""
   },
   {
    "expr": "IFERROR(IFERROR(SUMX(FILTER(Facts,Facts[Quantity]>10),SQRT(-1)),1),7)",
@@ -1012,10 +772,6 @@
    "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 37) An argument of function 'SQRT' has the wrong data type or the result is too large or too small.\""
   },
   {
-   "expr": "ISBLANK(COALESCE(SUM(Facts[Quantity]),SQRT(-1)))",
-   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 57) An argument of function 'SQRT' has the wrong data type or the result is too large or too small.\""
-  },
-  {
    "expr": "ISERROR(COALESCE(BLANK(),VALUE(\"a\")))",
    "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 44) Cannot convert value 'a' of type Text to type Number.\""
   },
@@ -1026,10 +782,6 @@
   {
    "expr": "SUMX(Facts,IF(ISERROR(COALESCE(BLANK(),VALUE(\"a\"))),1,0))",
    "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 58) Cannot convert value 'a' of type Text to type Number.\""
-  },
-  {
-   "expr": "SUMX(Facts,IF(ISERROR(COALESCE(SUM(Facts[Quantity]),SQRT(-1))),1,0))",
-   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 71) An argument of function 'SQRT' has the wrong data type or the result is too large or too small.\""
   },
   {
    "expr": "SUMX(Facts,IF(ISERROR(SUMX(FILTER(Facts,Facts[Quantity]>10),SQRT(-1))),1,0))",

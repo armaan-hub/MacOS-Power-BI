@@ -5336,6 +5336,8 @@ def evaluate_measures(
             return "blank"
         if node[0] in {"comparison", "logical", "in"}:
             return "bool"
+        if node[0] == "unary" and node[1] == "+" and branch_kind(node[2], row_context) == "bool":
+            return "bool"  # unary plus leaves a True/False value a Boolean
         if node[0] == "var":
             return variable_kinds.get(node[1], "other")  # a VAR holding BLANK() acts as the literal BLANK()
         if node[0] == "let":
@@ -7664,6 +7666,7 @@ def evaluate_measures(
         saved = dict(variables)
         saved_kinds = dict(variable_kinds)
         saved_nodes = dict(variable_nodes)
+        failures: dict[str, MeasureError] = {}
         try:
             for name, value_node in node[1]:
                 variable_nodes[name] = value_node
@@ -7674,14 +7677,22 @@ def evaluate_measures(
                     continue
                 try:
                     value = evaluate(value_node, row_context, allow_text=True, allow_boolean=allow_boolean)
-                except MeasureRuntimeError as error:
-                    def failed(error: MeasureRuntimeError = error) -> Any:
+                except (MeasureRuntimeError, _HardError) as error:
+                    def failed(error: MeasureError = error) -> Any:
                         if isinstance(error, _DivisionError):
                             raise error  # Infinity stays an error value
                         raise _HardError(str(error)) from error  # a used VAR that failed is thrown
                     variables[name] = failed
+                    failures[name] = error
                     continue
                 variables[name] = lambda value=value: value
+            if row_context is None:
+                # a closed VAR is evaluated up front: an error in one the RETURN still reads is thrown even from a branch
+                # that would not run (a row-dependent VAR is only read where it is used)
+                for name, _value_node in node[1]:
+                    error = failures.get(name)
+                    if error is not None and not isinstance(error, _DivisionError) and references_variable(node[2], name):
+                        raise _HardError(str(error)) from error
             return evaluate(node[2], row_context, allow_text=allow_text, allow_boolean=allow_boolean)
         finally:
             variables.clear()
@@ -8038,6 +8049,81 @@ def evaluate_measures(
             return (function in _PLAN_CONSTANT_CALLS or function == "COALESCE") and all(plan_constant(argument) for argument in arguments)
         return False
 
+    def references_variable(node: tuple[Any, ...], name: str) -> bool:
+        """Whether the expression still reads the VAR after plan-time pruning: the untaken side of an IF with a constant
+        condition and the operand a deciding constant removes from a && / || are not read; ISBLANK(x), ISNUMBER(x) ... are not
+        a read of x either."""
+        if not node:
+            return False
+        head = node[0]
+        if head == "var":
+            return node[1] == name
+        if head == "call":
+            function, arguments = node[1], node[2]
+            if function in {"ISBLANK", "ISNUMBER", "ISTEXT", "ISLOGICAL", "ISNONTEXT"} and len(arguments) == 1 and arguments[0][0] == "var":
+                return False
+            if function == "IF" and len(arguments) >= 2 and plan_constant(arguments[0]):
+                try:
+                    taken = as_boolean(evaluate(arguments[0], None, allow_text=True, allow_boolean=True))
+                except MeasureError:
+                    taken = None
+                if taken is not None:
+                    chosen = arguments[1] if taken else (arguments[2] if len(arguments) > 2 else None)
+                    return references_variable(arguments[0], name) or (chosen is not None and references_variable(chosen, name))
+            if function in {"AND", "OR"} and len(arguments) == 2:
+                return logical_reads(function == "OR", arguments[0], arguments[1], name)
+
+            def settled(operand: tuple[Any, ...]) -> tuple[bool, Any]:
+                if not plan_constant(operand):
+                    return False, None
+                try:
+                    return True, evaluate(operand, None, allow_text=True, allow_boolean=True)
+                except MeasureError:
+                    return False, None
+
+            if function == "COALESCE":  # arguments after the first non-blank constant are never read
+                for argument in arguments:
+                    if references_variable(argument, name):
+                        return True
+                    known, value = settled(argument)
+                    if known and value is not None:
+                        return False
+                return False
+            if function == "IFERROR" and len(arguments) == 2:
+                known, value = settled(arguments[0])
+                if known and not dax_typed.is_non_finite(value):
+                    return references_variable(arguments[0], name)
+            if function == "SWITCH" and len(arguments) >= 3:
+                known, subject = settled(arguments[0])
+                if known:
+                    if references_variable(arguments[0], name):
+                        return True
+                    rest = list(arguments[1:])
+                    for case, result in zip(rest[::2], rest[1::2]):
+                        if references_variable(case, name):
+                            return True
+                        matched, case_value = settled(case)
+                        if matched:
+                            try:
+                                if dax_typed.values_match(subject, case_value):
+                                    return references_variable(result, name)
+                            except MeasureError:
+                                return True
+                    return len(rest) % 2 == 1 and references_variable(rest[-1], name)
+        if head == "logical":
+            return logical_reads(node[1] == "||", node[2], node[3], name)
+        return any(references_variable(item, name) for item in node if isinstance(item, tuple))
+
+    def logical_reads(is_or: bool, left: tuple[Any, ...], right: tuple[Any, ...], name: str) -> bool:
+        for operand, other in ((left, right), (right, left)):
+            if plan_constant(operand):
+                try:
+                    if as_boolean(evaluate(operand, None, allow_text=True, allow_boolean=True)) is is_or:
+                        return references_variable(operand, name)  # a deciding constant removes the other operand
+                except MeasureError:
+                    pass
+        return references_variable(left, name) or references_variable(right, name)
+
     def evaluate(
         node: tuple[Any, ...],
         row_context: tuple[dict[str, Any], dict[str, Any], int] | None = None,
@@ -8142,6 +8228,8 @@ def evaluate_measures(
             operand = evaluate(node[2], row_context)
             if operand is None:
                 return None
+            if node[1] == "+" and isinstance(operand, bool):
+                return operand  # unary plus leaves a True/False value alone (-TRUE() is a number)
             value = as_number(operand)
             return value if node[1] == "+" else dax_typed.QUIET.minus(value) if value else Decimal(0)
         if kind == "binary":
@@ -8943,14 +9031,26 @@ def evaluate_measures(
                     lazy_column_calls.pop()
             return Decimal(len(table_rows)) if table_rows else None
         if function == "COALESCE":
+            # Power BI stops at the first non-blank plan-time constant; from the first data-dependent argument on it
+            # evaluates every remaining argument too, and their errors cannot be caught by IFERROR
+            result, found, eager = None, False, False
             for argument in arguments:
-                value = evaluate(
-                    argument, row_context, allow_text=allow_text,
-                    allow_boolean=allow_boolean,
-                )
-                if value is not None:
-                    return value
-            return None
+                if found and not eager:
+                    break
+                if not eager and not plan_constant(argument):
+                    eager = True
+                try:
+                    value = evaluate(
+                        argument, row_context, allow_text=allow_text,
+                        allow_boolean=allow_boolean,
+                    )
+                except MeasureRuntimeError as error:
+                    if eager and not isinstance(error, _DivisionError):
+                        raise _HardError(str(error)) from error
+                    raise
+                if not found and value is not None:
+                    result, found = value, True
+            return result
         if function == "DIVIDE":
             numerator_value = evaluate(arguments[0], row_context)
             denominator_value = evaluate(arguments[1], row_context)

@@ -43,7 +43,7 @@ Rule: a slice is finished only when it is compared with Power BI, its items are 
 | dax_battery_not_operator | 30 | 0 | 4 | 0 | 0 |
 | dax_battery_promoted_pending | 632 | 0 | 0 | 0 | 0 |
 | dax_battery_utf16_text | 244 | 0 | 0 | 0 | 0 |
-| dax_battery_evaluation_order | 2153 | 0 | 0 | 0 | 0 |
+| dax_battery_evaluation_order | 2215 | 0 | 0 | 0 | 0 |
 | table VAT | 575 | 0 | 0 | 0 | 0 |
 
 ## Pending work (1196): Power BI answers, the app refuses
