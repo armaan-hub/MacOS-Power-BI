@@ -38,6 +38,7 @@ Rule: a slice is finished only when it is compared with Power BI, its items are 
 | dax_battery_round4 | 7472 | 0 | 706 | 0 | 0 |
 | dax_battery_round5 | 1160 | 0 | 61 | 0 | 0 |
 | dax_battery_diff_groups | 484 | 0 | 0 | 0 | 0 |
+| dax_battery_iferror_hard_errors | 165 | 0 | 0 | 0 | 0 |
 | table VAT | 575 | 0 | 0 | 0 | 0 |
 
 ## Pending work (1235): Power BI answers, the app refuses

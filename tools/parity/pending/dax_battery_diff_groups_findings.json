@@ -40,18 +40,6 @@
    "powerbi": "5"
   },
   {
-   "expr": "ISBLANK(IFERROR(VALUE(\"a\") IN {1,2},BLANK()))",
-   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 35) Cannot convert value 'a' of type Text to type Number.\""
-  },
-  {
-   "expr": "ISBLANK(IFERROR(MAXX(Facts,VALUE(Facts[Region]))>1,BLANK()))",
-   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 46) Cannot convert value 'East' of type Text to type Number.\""
-  },
-  {
-   "expr": "ISBLANK(IFERROR(SUMX(Facts,VALUE(Facts[Region]))>1,BLANK()))",
-   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 46) Cannot convert value 'East' of type Text to type Number.\""
-  },
-  {
    "expr": "CONCATENATEX(SELECTCOLUMNS(Facts,\"v\",IF(Facts[Quantity]>2,7,\"x\")),[v]&\"\",\"|\")",
    "powerbi": "x|x|x|7|7|7"
   },
@@ -78,54 +66,6 @@
   {
    "expr": "CONCATENATEX(Facts,Facts[Quantity],\"|\",IF(Facts[Quantity]>2,7),DESC)",
    "powerbi": "3|4|5|0|1|2"
-  },
-  {
-   "expr": "IFERROR(SUMX(Facts,VALUE(Facts[Region])),0)",
-   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 38) Cannot convert value 'East' of type Text to type Number.\""
-  },
-  {
-   "expr": "IFERROR(MAXX(Facts,VALUE(Facts[Region])),0)",
-   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 38) Cannot convert value 'East' of type Text to type Number.\""
-  },
-  {
-   "expr": "IFERROR(SUMX(Facts,SQRT(-Facts[Quantity])),0)",
-   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 38) An argument of function 'SQRT' has the wrong data type or the result is too large or too small.\""
-  },
-  {
-   "expr": "IFERROR(SUMX(Facts,LN(0)),7)",
-   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 38) An argument of function 'LN' has the wrong data type or the result is too large or too small.\""
-  },
-  {
-   "expr": "IFERROR(VALUE(\"a\") IN {1,2},FALSE())",
-   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 27) Cannot convert value 'a' of type Text to type Number.\""
-  },
-  {
-   "expr": "IFERROR(VALUE(\"a\") IN {1,2},7)",
-   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 27) Cannot convert value 'a' of type Text to type Number.\""
-  },
-  {
-   "expr": "IFERROR(COUNTX(Facts,VALUE(Facts[Region])),7)",
-   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 40) Cannot convert value 'East' of type Text to type Number.\""
-  },
-  {
-   "expr": "IFERROR(SUMX(Facts,VALUE(Facts[Region]))>1,7)",
-   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 38) Cannot convert value 'East' of type Text to type Number.\""
-  },
-  {
-   "expr": "IFERROR(SUMX(Facts,VALUE(Facts[Region]))>1,TRUE())",
-   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 38) Cannot convert value 'East' of type Text to type Number.\""
-  },
-  {
-   "expr": "IFERROR(MAXX(Facts,DATEVALUE(Facts[Region])),7)",
-   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 38) Cannot convert value 'East' of type Text to type Date.\""
-  },
-  {
-   "expr": "IFERROR(CALCULATE(SUMX(Facts,VALUE(Facts[Region]))),7)",
-   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 48) Cannot convert value 'East' of type Text to type Number.\""
-  },
-  {
-   "expr": "IFERROR(AVERAGEX(Facts,VALUE(Facts[Region])),7)",
-   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 42) Cannot convert value 'East' of type Text to type Number.\""
   },
   {
    "expr": "IF(FALSE(),+TRUE())",

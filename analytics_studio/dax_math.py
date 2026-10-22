@@ -52,6 +52,8 @@ def rounding_function(function: str, args: list[object]) -> Decimal | None:
     digits = dax_typed.whole(args[1], function)
     mode = {"ROUND": ROUND_HALF_UP, "ROUNDUP": ROUND_UP, "ROUNDDOWN": ROUND_DOWN}[function]
     if not number.is_finite():
+        if function == "ROUNDDOWN":
+            return number  # ROUNDDOWN of Infinity is Infinity, an error value
         raise _fail(function)
     if digits > 40:
         return number  # nothing is left to round
@@ -115,7 +117,9 @@ def math_function(function: str, args: list[object]) -> object:
         number = dax_typed.to_number(args[0])
         base = dax_typed.to_number(args[1]) if len(args) > 1 and args[1] is not None else Decimal(10)
         if number <= 0 or base <= 0:
-            raise _fail(function)
+            error = _fail(function)
+            error.infinity = args[0] is None  # LOG(BLANK()) is -Infinity, an error value
+            raise error
         if base == 1:
             raise dax_typed._error("Division by zero has occurred when evaluating function 'LOG'.")
         value = math.log(float(number)) / math.log(float(base)) if function == "LOG" and len(args) > 1 else math.log10(float(number))

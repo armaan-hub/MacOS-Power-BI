@@ -72,6 +72,13 @@ class _DivisionError(MeasureRuntimeError):
     """x/0 or x/BLANK(): Infinity or NaN in Power BI, an error for IFERROR."""
 
 
+class _HardError(MeasureError):
+    """An error Power BI throws instead of returning: IFERROR and ISERROR cannot catch it.
+
+    Raised for an error inside a row expression (SUMX, FILTER, TOPN, IN, ...) or from a VAR that is used.
+    """
+
+
 def _consume_infinity(thunk: Any) -> Any:
     """Refuse to let an Infinity/NaN flow into a comparison, ISBLANK or SWITCH.
 
@@ -1318,6 +1325,8 @@ def _scalar_math_value(function: str, values: list[Decimal | None]) -> Decimal |
     """
     first = values[0]
     if any(value is not None and not value.is_finite() for value in values):
+        if function == "TRUNC" and first is not None and not first.is_finite() and all(value is None or value.is_finite() for value in values[1:]):
+            return first  # TRUNC of Infinity is Infinity, an error value
         raise MeasureRuntimeError(
             f"An argument of function '{function}' has the wrong data type or the result is too large or too small."
         )
@@ -1327,7 +1336,9 @@ def _scalar_math_value(function: str, values: list[Decimal | None]) -> Decimal |
         return (first or Decimal(0)).exp()
     if function == "LN":
         if first is None or first <= 0:
-            raise MeasureRuntimeError("LN needs a number greater than zero.")
+            error = MeasureRuntimeError("LN needs a number greater than zero.")
+            error.infinity = first is None  # LN(BLANK()) is -Infinity, an error value
+            raise error
         return first.ln()
     if function == "POWER":
         exponent = values[1] or Decimal(0)
@@ -1413,6 +1424,8 @@ def _scalar_math(function: str, values: list[Decimal | None]) -> Decimal | None:
     result = _scalar_math_value(function, values)
     if result is None:
         return None
+    if not result.is_finite():
+        return result  # an Infinity argument that the function passes through (TRUNC)
     if result == 0:
         return Decimal(0)  # no negative zero: Power BI shows 0
     if abs(result) > _DOUBLE_MAX:
@@ -3133,7 +3146,7 @@ def _reject_bare_columns_without_row_context(
 
 
 _NUMBER_COLUMN_TYPES = {"whole_number", "decimal_number", "decimal", "fixed_decimal", "currency", "number", "int64", "double"}
-_TEXT_FUNCTIONS = {"UPPER", "LOWER", "TRIM", "LEFT", "RIGHT", "MID", "CONCATENATE", "FORMAT", "SUBSTITUTE", "REPT"}
+_TEXT_FUNCTIONS = {"UPPER", "LOWER", "TRIM", "LEFT", "RIGHT", "MID", "CONCATENATE", "FORMAT", "SUBSTITUTE", "REPT", "FIXED"}
 _BOOLEAN_FUNCTIONS = {"AND", "OR", "NOT", "ISBLANK", "EXACT", "ISNUMBER", "ISTEXT", "ISERROR", "CONTAINSROW", "CONTAINS"}
 
 
@@ -3999,7 +4012,15 @@ def evaluate_measures(
             for frame in iterate_rows(context, rows):
                 row = typed_row(context, frame[1]) if add else {}
                 for name, expression in zip(names, expressions):
-                    row[name] = evaluate(expression, frame, allow_text=True)
+                    try:
+                        row[name] = evaluate(expression, frame, allow_text=True)
+                    except (MeasureRuntimeError, _HardError) as error:
+                        if any(argument is held for held in lazy_column_calls):
+                            row[name] = None  # Power BI does not evaluate a column that COUNTROWS never reads
+                        elif isinstance(error, _HardError) or isinstance(error, _DivisionError):
+                            raise
+                        else:
+                            raise _HardError(str(error)) from error  # a column that is read is evaluated for every row
                     if not add and expression[0] == "reference":
                         link_context, link_column = resolve_table(expression[1], expression[2]) if expression[1] else (context, expression[2])
                         lineage[name] = (link_context, link_column)
@@ -4042,7 +4063,7 @@ def evaluate_measures(
                 {c: context.get("column_types", {}).get(c, "text") for c in group_columns},
             )
         if function == "TOPN":
-            count = Decimal(dax_typed.whole(evaluate(arguments[0]), "TOPN"))
+            count = Decimal(dax_typed.whole(in_row_expression(lambda: evaluate(arguments[0])), "TOPN"))
             context, rows = table_argument_value(arguments[1])
             keys_spec = []
             index = 2
@@ -4071,7 +4092,7 @@ def evaluate_measures(
             for frame in iterate_rows(context, rows):
                 keys = []
                 for expression, descending in keys_spec:
-                    value = evaluate(expression, frame, allow_text=True)
+                    value = in_row_expression(lambda expression=expression, frame=frame: evaluate(expression, frame, allow_text=True))
                     keys.append(value)
                 scored.append((keys, frame[1]))
 
@@ -4816,6 +4837,24 @@ def evaluate_measures(
             key=lambda row: first_seen.get(cell_key(ascii_fold(row[column]) if isinstance(row[column], str) else row[column]), 0),
         )
 
+    iterator_depth = 0
+    lazy_column_calls: list[Any] = []  # ADDCOLUMNS/SELECTCOLUMNS nodes whose columns COUNTROWS never reads
+
+    def in_row_expression(thunk: Any) -> Any:
+        """Run a row-level expression: an error it throws cannot be caught by IFERROR or ISERROR."""
+        nonlocal iterator_depth
+        iterator_depth += 1
+        try:
+            return thunk()
+        except _DivisionError:
+            raise  # Infinity and NaN stay error values
+        except (MeasureRuntimeError, DecimalException, OverflowError) as error:
+            if getattr(error, "infinity", False):
+                raise
+            raise _HardError(str(error)) from error
+        finally:
+            iterator_depth -= 1
+
     def table_argument_value(
         argument: tuple[Any, ...],
     ) -> tuple[dict[str, Any], list[dict[str, Any]]]:
@@ -4872,9 +4911,9 @@ def evaluate_measures(
             names = ["Value"] if width == 1 and items[0][0] != "tuple" else [f"Value{column + 1}" for column in range(width)]
             return derived_table(names, [dict(zip(names, record)) for record in records])
         if argument[0] == "call" and argument[1] == "GENERATESERIES":
-            start = dax_typed.to_number(evaluate(argument[2][0]))
-            stop = dax_typed.to_number(evaluate(argument[2][1]))
-            step = dax_typed.to_number(evaluate(argument[2][2])) if len(argument[2]) > 2 else Decimal(1)
+            start = dax_typed.to_number(in_row_expression(lambda: evaluate(argument[2][0])))
+            stop = dax_typed.to_number(in_row_expression(lambda: evaluate(argument[2][1])))
+            step = dax_typed.to_number(in_row_expression(lambda: evaluate(argument[2][2]))) if len(argument[2]) > 2 else Decimal(1)
             if step <= 0:
                 raise MeasureRuntimeError("GenerateSeries function cannot have an IncrementValue less than or equal to zero.")
             series: list[dict[str, Any]] = []
@@ -4886,7 +4925,7 @@ def evaluate_measures(
         if argument[0] == "call" and argument[1] == "ROW":
             pairs = argument[2]
             names = [str(dax_typed.to_text(evaluate(pairs[i]))) for i in range(0, len(pairs), 2)]
-            row = {name: evaluate(pairs[i + 1], None, allow_text=True) for name, i in zip(names, range(0, len(pairs), 2))}
+            row = in_row_expression(lambda: {name: evaluate(pairs[i + 1], None, allow_text=True) for name, i in zip(names, range(0, len(pairs), 2))})
             return derived_table(names, [row])
         if argument[0] == "table_call":
             source = argument[2]
@@ -4954,7 +4993,7 @@ def evaluate_measures(
                 # any row predicate: evaluate it for each row, with the row on the EARLIER stack
                 return context, [
                     frame[1] for frame in iterate_rows(context, base_rows)
-                    if dax_typed.to_boolean(evaluate(predicate, frame, allow_text=True, allow_boolean=True))
+                    if dax_typed.to_boolean(in_row_expression(lambda frame=frame: evaluate(predicate, frame, allow_text=True, allow_boolean=True)))
                 ]
             return context, [
                 row for position, row in enumerate(base_rows, 1)
@@ -7160,11 +7199,23 @@ def evaluate_measures(
                 if _contains_refused_call_outside_x_iterator(side):
                     raise MeasureError("CALCULATE and FILTER cannot be used inside a True/False filter expression.")
                 if side_index == 2:
+                    try:
+                        filter_constant(side)
+                    except _DivisionError:
+                        pass
+                    except MeasureRuntimeError as error:
+                        raise _HardError(str(error)) from error  # evaluated before the filter, like the scalar on the right
+                    except MeasureError:
+                        pass
                     continue  # the scalar on the left keeps the older per-row path
                 if _is_text_selectedvalue_against_number(side, other):
                     raise MeasureError("DAX comparison operations do not support comparing values of type Integer with values of type Text.")
                 try:
                     value = filter_constant(side)
+                except _DivisionError:
+                    return node  # Infinity stays an error value for the paths below
+                except MeasureRuntimeError as error:
+                    raise _HardError(str(error)) from error  # the scalar side is evaluated before the filter; its error is thrown
                 except MeasureError:
                     return node  # leave it to the paths that report the specific error
                 if value is None:
@@ -7209,7 +7260,7 @@ def evaluate_measures(
         if pushed:
             row_stack.append(row_context)  # type: ignore[arg-type]
         try:
-            return (arguments[0], *(preevaluate_filter_scalars(argument) for argument in arguments[1:]))
+            return (arguments[0], *(in_row_expression(lambda argument=argument: preevaluate_filter_scalars(argument)) for argument in arguments[1:]))
         finally:
             if pushed:
                 row_stack.pop()
@@ -7242,7 +7293,7 @@ def evaluate_measures(
         passing = {
             row_key(frame[1][name] for name in names)
             for frame in iterate_rows(group_context, group_rows)
-            if dax_typed.to_boolean(evaluate(node, frame, allow_text=True, allow_boolean=True))
+            if dax_typed.to_boolean(in_row_expression(lambda frame=frame: evaluate(node, frame, allow_text=True, allow_boolean=True)))
         }
         allowed = frozenset(
             index for index, raw in enumerate(context["rows"])
@@ -7361,7 +7412,9 @@ def evaluate_measures(
                     value = evaluate(value_node, row_context, allow_text=True, allow_boolean=allow_boolean)
                 except MeasureRuntimeError as error:
                     def failed(error: MeasureRuntimeError = error) -> Any:
-                        raise error
+                        if isinstance(error, _DivisionError):
+                            raise error  # Infinity stays an error value
+                        raise _HardError(str(error)) from error  # a used VAR that failed is thrown
                     variables[name] = failed
                     continue
                 variables[name] = lambda value=value: value
@@ -7435,10 +7488,10 @@ def evaluate_measures(
         if function == "ISEMPTY":
             return not table_argument_value(arguments[0])[1]
         if function == "CONTAINSROW":
-            context, rows = table_argument_value(arguments[0])
+            context, rows = in_row_expression(lambda: table_argument_value(arguments[0]))
             if len(arguments) - 1 != len(context["headers"]):
                 raise MeasureRuntimeError("The number of arguments is invalid. Function CONTAINSROW must have a value for each column in the table expression.")
-            wanted_values = [evaluate(argument, row_context, allow_text=True) for argument in arguments[1:]]
+            wanted_values = in_row_expression(lambda: [evaluate(argument, row_context, allow_text=True) for argument in arguments[1:]])
             return any(
                 all(
                     dax_typed.values_match(typed_cell(context, header, row.get(header)), wanted)
@@ -7448,10 +7501,10 @@ def evaluate_measures(
             )
         if function == "CONTAINS":
             context, rows = table_argument_value(arguments[0])
-            pairs = [
+            pairs = in_row_expression(lambda: [
                 (arguments[i][2], evaluate(arguments[i + 1], row_context, allow_text=True))
                 for i in range(1, len(arguments) - 1, 2)
-            ]
+            ])
             names = {header.casefold(): header for header in context["headers"]}
             for column, _ in pairs:
                 if column.casefold() not in names:
@@ -7470,14 +7523,14 @@ def evaluate_measures(
             pair_arguments = arguments[1:]
             alternate = None
             if len(pair_arguments) % 2:
-                alternate = evaluate(pair_arguments[-1], row_context, allow_text=True)
+                alternate = in_row_expression(lambda: evaluate(pair_arguments[-1], row_context, allow_text=True))
                 pair_arguments = pair_arguments[:-1]
             conditions = []
             for index in range(0, len(pair_arguments), 2):
                 search_context, search_column = resolve_table(pair_arguments[index][1], pair_arguments[index][2])
                 if search_context["id"] != result_context["id"]:
                     raise MeasureError("LOOKUPVALUE searches columns of the result column's table in the local engine.")
-                conditions.append((search_column, evaluate(pair_arguments[index + 1], row_context, allow_text=True)))
+                conditions.append((search_column, in_row_expression(lambda index=index: evaluate(pair_arguments[index + 1], row_context, allow_text=True))))
             found: dict[Any, Any] = {}
             for source_row in result_context["rows"]:
                 if all(
@@ -7587,7 +7640,7 @@ def evaluate_measures(
         context, rows = table_argument_value(arguments[0])
         expression = arguments[1]
         scores = [
-            evaluate(expression, frame, allow_text=True) for frame in iterate_rows(context, rows)
+            in_row_expression(lambda frame=frame: evaluate(expression, frame, allow_text=True)) for frame in iterate_rows(context, rows)
         ]
         if len(arguments) > 2 and arguments[2][0] != "omitted":
             wanted = evaluate(arguments[2], row_context, allow_text=True)
@@ -7808,9 +7861,9 @@ def evaluate_measures(
         if kind == "thunk":
             return node[1]()
         if kind == "in":
-            context, rows = table_argument_value(node[2])
+            context, rows = in_row_expression(lambda: table_argument_value(node[2]))
             probe = node[1]
-            wanted_values = [evaluate(member, row_context, allow_text=True) for member in (probe[1] if probe[0] == "tuple" else (probe,))]
+            wanted_values = in_row_expression(lambda: [evaluate(member, row_context, allow_text=True) for member in (probe[1] if probe[0] == "tuple" else (probe,))])
             if len(wanted_values) != len(context["headers"]):
                 raise MeasureRuntimeError("The number of values on the left of IN must match the number of columns of the table.")
             return any(
@@ -7866,7 +7919,7 @@ def evaluate_measures(
                     )
             values: list[Decimal] = []
             for frame in iterate_rows(context, iteration_rows):
-                result = evaluate(arguments[1], frame)
+                result = in_row_expression(lambda frame=frame: evaluate(arguments[1], frame))
                 if isinstance(result, bool) and function not in {"MAXX", "MINX"}:
                     raise MeasureError(f"The function {function} cannot work with values of type Boolean.")
                 if result is not None:
@@ -7897,9 +7950,9 @@ def evaluate_measures(
             )
             count = 0
             for frame in iterate_rows(context, iteration_rows):
-                result = evaluate(
+                result = in_row_expression(lambda frame=frame: evaluate(
                     arguments[1], frame, allow_text=True
-                )
+                ))
                 if result is None:
                     continue
                 if function == "COUNTX" and isinstance(result, bool):
@@ -8558,11 +8611,16 @@ def evaluate_measures(
             direct_allexcept = arguments[0][0] == "call" and arguments[0][1] == "ALLEXCEPT"
             if direct_allexcept:
                 counting_rows.append(True)
+            lazy_columns = arguments[0][0] == "call" and arguments[0][1] in {"ADDCOLUMNS", "SELECTCOLUMNS"}
+            if lazy_columns:
+                lazy_column_calls.append(arguments[0])
             try:
                 _context, table_rows = table_argument_value(arguments[0])
             finally:
                 if direct_allexcept:
                     counting_rows.pop()
+                if lazy_columns:
+                    lazy_column_calls.pop()
             return Decimal(len(table_rows)) if table_rows else None
         if function == "COALESCE":
             for argument in arguments:
