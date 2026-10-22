@@ -998,17 +998,14 @@ def _validate_allexcept_call(node: tuple[Any, ...]) -> None:
         raise MeasureError(
             "ALLEXCEPT needs one base table followed by one or more qualified columns from that table."
         )
-    table_name = str(arguments[0][1]).casefold()
     if any(
-        argument[0] != "reference"
-        or not argument[1]
-        or argument[1].casefold() != table_name
+        (argument[0] != "reference" or not argument[1]) and argument[0] != "table"
         for argument in arguments[1:]
     ):
         raise MeasureError(
-            "ALLEXCEPT columns must be qualified base columns from its first table."
+            "ALLEXCEPT keeps qualified base columns or whole tables related to its first table."
         )
-    named = [argument[2].casefold() for argument in arguments[1:]]
+    named = [(argument[1].casefold(), argument[2].casefold()) for argument in arguments[1:] if argument[0] == "reference"]
     if len(set(named)) != len(named):
         raise MeasureError("ALLEXCEPT was given the same column more than once.")
 
@@ -3659,6 +3656,7 @@ def evaluate_measures(
     def rows_after_clearing_columns(
         source_context: dict[str, Any],
         columns_to_clear: set[str],
+        with_expansion: bool = False,
     ) -> tuple[
         list[dict[str, Any]],
         dict[str, dict[str, Any]],
@@ -3699,6 +3697,15 @@ def evaluate_measures(
         }
         updated["filter_context_complete"] = True
         updated_filter_roots = set(evaluation_filter_ids)
+        if with_expansion:  # ALL(column) / ALLSELECTED(column) as a table: filters of the one-side tables do not reach the column (live Power BI)
+            for related_id in expanded_table_ids(table_id)[1:]:
+                related = updated_by_id[related_id]
+                for state in ("filter_rows", "filter_table_rows", "filter_shapes", "filter_column_extra"):
+                    related.pop(state, None)
+                related["filter_column_rows"] = {}
+                related["filter_column_blank_allowed"] = {}
+                related["filter_context_complete"] = True
+                updated_filter_roots.discard(related_id)
         if remaining_column_rows:
             updated["filter_rows"] = [
                 row
@@ -4017,7 +4024,7 @@ def evaluate_measures(
                 kept_columns = {column.casefold() for column in output_headers}
                 cleared_columns = {header.casefold() for header in source_context["headers"]} - kept_columns
                 try:
-                    allselected_rows = rows_after_clearing_columns(source_context, cleared_columns)
+                    allselected_rows = rows_after_clearing_columns(source_context, cleared_columns, True)
                     source_rows, contexts_after_clear, filter_roots_after_clear = allselected_rows
                     # a FILTER table holds only the rows its predicate saw: it never includes the generated blank
                     add_unknown_member = (
@@ -4058,6 +4065,7 @@ def evaluate_measures(
                 ) = rows_after_clearing_columns(
                     source_context,
                     {header.casefold() for header in source_context["headers"]},
+                    True,
                 )
                 if function == "ALL" and unknown_member_passes_remaining_filters(
                     source_context,
@@ -7140,6 +7148,42 @@ def evaluate_measures(
                 matching_indexes.add(row_index)
         return table_id, matching_indexes
 
+    def allexcept_kept_columns(arguments: tuple[Any, ...]) -> dict[str, set[str]]:
+        """table id -> casefolded columns ALLEXCEPT keeps (a bare table keeps all of its columns)."""
+        kept: dict[str, set[str]] = {}
+        for reference in arguments[1:]:
+            if reference[0] == "table":
+                context = resolve_table_context(str(reference[1]))
+                kept.setdefault(context["id"], set()).update(h.casefold() for h in context["headers"])
+                continue
+            context, actual_column = resolve_table(reference[1], reference[2])
+            kept.setdefault(context["id"], set()).add(actual_column.casefold())
+        return kept
+
+    def expanded_table_ids(table_id: str) -> list[str]:
+        """The table plus every table on its one side reachable through active relationships (live Power BI: ALL(Fact) clears Dim).
+
+        tools/parity: tests/fixtures_fact_all.json. Read from the relationships of the enclosing context, so a USERELATIONSHIP
+        of an outer CALCULATE counts and one in the same CALCULATE does not."""
+        found = [table_id]
+        queue = [table_id]
+        while queue:
+            current = queue.pop()
+            for relationship in relationship_definitions:
+                if (
+                    not isinstance(relationship, dict)
+                    or relationship.get("relationship_version") != 1
+                    or not relationship.get("is_active")
+                ):
+                    continue
+                cardinality = relationship.get("cardinality")
+                from_id, to_id = str(relationship.get("from_table_id", "")), str(relationship.get("to_table_id", ""))
+                many, one = (from_id, to_id) if cardinality == "many_to_one" else (to_id, from_id) if cardinality == "one_to_many" else ("", "")
+                if many == current and one in evaluation_contexts_by_id and one not in found:
+                    found.append(one)
+                    queue.append(one)
+        return found
+
     def evaluate_with_filter_clear(
         expression: tuple[Any, ...],
         modifier: tuple[Any, ...],
@@ -7157,10 +7201,14 @@ def evaluate_measures(
                     dropped = {table_id: None for table_id in evaluation_contexts_by_id}
                 elif function == "ALLEXCEPT":
                     table = resolve_table_context(str(arguments[0][1]))
-                    kept = {resolve_table(ref[1], ref[2])[1].casefold() for ref in arguments[1:]}
-                    dropped = {table["id"]: frozenset(h.casefold() for h in table["headers"]) - kept}
+                    kept = allexcept_kept_columns(arguments)
+                    dropped = {
+                        table_id: frozenset(h.casefold() for h in evaluation_contexts_by_id[table_id]["headers"]) - kept.get(table_id, set())
+                        for table_id in expanded_table_ids(table["id"])
+                    }
                 elif arguments[0][0] == "table":
-                    dropped = {resolve_table_context(str(arguments[0][1]))["id"]: None}
+                    table_id = resolve_table_context(str(arguments[0][1]))["id"]
+                    dropped = {related: None for related in expanded_table_ids(table_id)}
                 else:
                     for reference in arguments:
                         context, column = resolve_table(reference[1], reference[2])
@@ -7268,25 +7316,26 @@ def evaluate_measures(
         clear_all = not modifier_arguments
         target_context: dict[str, Any] | None = None
         columns_to_clear: set[str] = set()
+        # table id -> casefolded columns to clear (None = the whole table); ALL(T) / ALLEXCEPT(T, ...) reach the one-side tables too
+        clear_plan: dict[str, set[str] | None] = {}
         if function == "ALLEXCEPT":
             target_context = resolve_table_context(str(modifier_arguments[0][1]))
-            preserved_columns: set[str] = set()
-            for reference in modifier_arguments[1:]:
-                context, actual_column = resolve_table(
-                    reference[1], reference[2]
+            expansion = expanded_table_ids(target_context["id"])
+            kept_columns = allexcept_kept_columns(modifier_arguments)
+            if any(table_id not in expansion for table_id in kept_columns):
+                raise MeasureError(
+                    "All arguments within an ALLEXCEPT function must be related to (or contained by) its first table."
                 )
-                if context["id"] != target_context["id"]:
-                    raise MeasureError(
-                        "ALLEXCEPT columns must resolve to its first table."
-                    )
-                preserved_columns.add(actual_column.casefold())
-            columns_to_clear = {
-                column.casefold()
-                for column in target_context["headers"]
-                if column.casefold() not in preserved_columns
-            }
+            for table_id in expansion:
+                headers = {h.casefold() for h in evaluation_contexts_by_id[table_id]["headers"]}
+                clear_plan[table_id] = headers - kept_columns.get(table_id, set())
+            if not any(clear_plan.values()):
+                raise MeasureError("ALLEXCEPT keeps every column of the table and the tables related to it.")
+            columns_to_clear = clear_plan[target_context["id"]] or set()
         elif modifier_arguments and modifier_arguments[0][0] == "table":
             target_context = resolve_table_context(str(modifier_arguments[0][1]))
+            for table_id in (expanded_table_ids(target_context["id"]) if function != "ALLSELECTED" else [target_context["id"]]):
+                clear_plan[table_id] = None
         elif modifier_arguments:
             for reference in modifier_arguments:
                 context, actual_column = resolve_table(
@@ -7299,6 +7348,7 @@ def evaluate_measures(
                         f"{function} column arguments must resolve to one loaded table."
                     )
                 columns_to_clear.add(actual_column.casefold())
+            clear_plan[target_context["id"]] = columns_to_clear
 
         updated_contexts = [
             dict(context) for context in evaluation_contexts_by_id.values()
@@ -7310,14 +7360,13 @@ def evaluate_measures(
             targets = list(updated_by_id.values())
         else:
             assert target_context is not None
-            targets = [updated_by_id[target_context["id"]]]
+            targets = [updated_by_id[table_id] for table_id in clear_plan]
 
         for updated in targets:
-            if function == "ALLEXCEPT" and not columns_to_clear:
+            table_columns = clear_plan.get(updated["id"], set()) if not clear_all else set()
+            if function == "ALLEXCEPT" and not table_columns:
                 continue
-            if clear_all or (
-                updated["id"] == target_context["id"] and not columns_to_clear
-            ):
+            if clear_all or (clear_plan.get(updated["id"], _NOTHING) is None):
                 updated.pop("filter_rows", None)
                 updated.pop("filter_table_rows", None)
                 updated.pop("filter_shapes", None)
@@ -7330,7 +7379,7 @@ def evaluate_measures(
 
             existing_column_rows = dict(updated.get("filter_column_rows", {}))
             if _context_shapes(updated):
-                clear_columns_from_shapes(updated, columns_to_clear, existing_column_rows)
+                clear_columns_from_shapes(updated, table_columns, existing_column_rows)
             has_direct_filter_state = (
                 updated["id"] in updated_filter_roots
                 or "filter_rows" in updated
@@ -7346,16 +7395,16 @@ def evaluate_measures(
             remaining_column_rows = {
                 column: frozenset(indexes)
                 for column, indexes in existing_column_rows.items()
-                if column.casefold() not in columns_to_clear
+                if column.casefold() not in table_columns
             }
             updated["filter_column_rows"] = remaining_column_rows
-            prune_cleared_shapes(updated, columns_to_clear)
+            prune_cleared_shapes(updated, table_columns)
             updated["filter_column_blank_allowed"] = {
                 column: allowed
                 for column, allowed in updated.get(
                     "filter_column_blank_allowed", {}
                 ).items()
-                if column.casefold() not in columns_to_clear
+                if column.casefold() not in table_columns
             }
             updated["filter_context_complete"] = True
             if remaining_column_rows:
@@ -7442,6 +7491,10 @@ def evaluate_measures(
                         updated_unknown_member_exclusions[target_id] = remaining_exclusions
                     else:
                         updated_unknown_member_exclusions.pop(target_id, None)
+        if not clear_all and target_context is not None and function != "ALLNOBLANKROW":
+            for related_id, related_columns in clear_plan.items():
+                if related_id != target_context["id"] and related_columns is None:
+                    updated_unknown_member_exclusions.pop(related_id, None)  # the one-side table is cleared whole too
         unknown_member_exclusions = updated_unknown_member_exclusions
         context_sequence += 1
         current_context = context_sequence
@@ -7741,7 +7794,54 @@ def evaluate_measures(
                 _reject_power_query_error(right, header, None)
                 if cell_key(left) == cell_key(right):
                     per_column[header].append(row_index)
-        return {table_id: (iterated_table, {header: frozenset(indexes) for header, indexes in per_column.items()})}
+        transitioned = {table_id: (iterated_table, {header: frozenset(indexes) for header, indexes in per_column.items()})}
+        if base_table is not None:
+            add_one_side_transition(table_id, row, transitioned)
+        return transitioned
+
+    one_side_index_cache: dict[tuple[str, str], dict[Any, frozenset[int]]] = {}
+
+    def one_side_value_index(one_context: dict[str, Any], column: str) -> dict[Any, frozenset[int]]:
+        """key of a value in a one-side column -> the rows holding it (built once per column)."""
+        cache_key = (one_context["id"], column)
+        index = one_side_index_cache.get(cache_key)
+        if index is None:
+            grouped: dict[Any, list[int]] = {}
+            for position, one_row in enumerate(one_context["rows"]):
+                grouped.setdefault(cell_key(typed_cell(one_context, column, one_row.get(column))), []).append(position)
+            index = {key: frozenset(positions) for key, positions in grouped.items()}
+            one_side_index_cache[cache_key] = index
+        return index
+
+    def add_one_side_transition(
+        table_id: str, row: dict[str, Any], transitioned: dict[str, tuple[dict[str, Any], dict[str, frozenset[int]]]]
+    ) -> None:
+        """Iterating a row of a table also filters every table on its one side to that row's related rows (live Power BI: the
+        row context of Fact reaches Dim and Cal, so SUMX(Fact, CALCULATE(COUNTROWS(Dim))) counts one dimension row per fact row)."""
+        many_context = contexts_by_id[table_id]
+        for relationship in relationship_definitions:
+            if (
+                not isinstance(relationship, dict)
+                or relationship.get("relationship_version") != 1
+                or not relationship.get("is_active")
+                or relationship.get("cardinality") != "many_to_one"
+                or str(relationship.get("from_table_id", "")) != table_id
+            ):
+                continue
+            one_id = str(relationship.get("to_table_id", ""))
+            one_context = contexts_by_id.get(one_id)
+            if one_context is None or one_id in transitioned:
+                continue
+            from_column, to_column = str(relationship["from_column"]), str(relationship["to_column"])
+            matches = one_side_value_index(one_context, to_column).get(cell_key(typed_cell(many_context, from_column, row.get(from_column))))
+            if not matches:
+                continue
+            related_row = one_context["rows"][min(matches)]
+            transitioned[one_id] = (one_context, {
+                header: one_side_value_index(one_context, header).get(cell_key(typed_cell(one_context, header, related_row.get(header))), frozenset())
+                for header in one_context["headers"]
+            })
+            add_one_side_transition(one_id, related_row, transitioned)
 
     def without_row_contexts(thunk: Any) -> Any:
         """CALCULATE evaluates its expression with the row contexts it transitioned removed."""

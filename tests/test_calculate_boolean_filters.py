@@ -1169,7 +1169,7 @@ class CalculateBooleanFilterTests(unittest.TestCase):
             "Outer Context": 20,
         })
 
-    def test_removefilters_preserves_unrelated_relationship_roots(self) -> None:
+    def test_removefilters_clears_the_one_side_tables_of_its_table(self) -> None:
         categories = [
             {"CategoryId": "A", "Segment": "Preferred"},
             {"CategoryId": "B", "Segment": "Other"},
@@ -1229,7 +1229,7 @@ class CalculateBooleanFilterTests(unittest.TestCase):
         )
         self.assertEqual(values, {
             "Clear Category": 110,
-            "Clear Sales": 30,
+            "Clear Sales": 130,  # REMOVEFILTERS(Sales) also clears the Category filter (live Power BI, iteration 81)
             "Clear Sales Region": 30,
             "Clear All": 130,
         })
@@ -1433,7 +1433,7 @@ class CalculateBooleanFilterTests(unittest.TestCase):
             "Outer Context": 20,
         })
 
-    def test_all_modifier_preserves_unrelated_relationship_roots(self) -> None:
+    def test_all_modifier_clears_the_one_side_tables_of_its_table(self) -> None:
         categories = [
             {"CategoryId": "A", "Segment": "Preferred"},
             {"CategoryId": "B", "Segment": "Other"},
@@ -1494,12 +1494,13 @@ class CalculateBooleanFilterTests(unittest.TestCase):
         )
         self.assertEqual(values, {
             "All Category": 110,
-            "All Sales": 30,
-            "All Region": 30,
+            # live Power BI 2.157.879.0 (iteration 81, tests/test_all_expanded_table.py): ALL(Sales) clears the filters of the
+            # tables on Sales' one side as well, so the Category filter is gone
+            "All Sales": 130,
+            "All Region": 30,  # ALL(column) clears exactly that physical column: Category still filters Sales
             "All Context": 130,
-            # ALL(column) clears the filters on its own table (Region) but the Category filter still reaches
-            # Sales through the relationship, so the distinct visible amounts are 10 and 20.
-            "ALL Amounts with Other Roots": 30,
+            # ALL(column) as a table ignores every filter, also one that reaches the column through a relationship
+            "ALL Amounts with Other Roots": 130,
         })
 
     def test_all_modifier_parser_and_target_validation(self) -> None:
@@ -2225,7 +2226,7 @@ class CalculateBooleanFilterTests(unittest.TestCase):
         self.assertEqual(reopened.reportKpis["Selected high sales"], "21")
         self.assertEqual(reopened.reportKpis["Keep selected East while choosing West"], "—")
 
-    def test_allexcept_preserves_named_columns_and_external_relationship_roots(self) -> None:
+    def test_allexcept_preserves_named_columns_and_clears_the_one_side_tables(self) -> None:
         categories = [{"Key": "1"}, {"Key": "2"}]
         sales = [
             {"CategoryKey": "1", "Color": "Red", "Region": "East", "Amount": "10"},
@@ -2308,11 +2309,13 @@ class CalculateBooleanFilterTests(unittest.TestCase):
             active_table_id="sales-id",
         )
         self.assertEqual(values, {
+            # live Power BI (iteration 81): ALLEXCEPT(Sales, ...) clears the filters of Sales' one-side tables too, so the Category
+            # filter is gone: Blue rows are 20 + 5 + 30, and keeping only Amount clears everything (105)
             "Base visible": 20,
             "Keep region": 30,
-            "Keep color": 25,
+            "Keep color": 55,
             "Keep both": 20,
-            "Keep unfiltered column": 35,
+            "Keep unfiltered column": 105,
             "Nested keep region": 30,
         })
 
@@ -2385,8 +2388,7 @@ class CalculateBooleanFilterTests(unittest.TestCase):
             "ALLEXCEPT('Sales', 'Sales'[Color])",
             "ALLEXCEPT('Sales'[Color], 'Sales'[Region])",
             "CALCULATE(SUM([Amount]), ALLEXCEPT('Sales', [Color]))",
-            "CALCULATE(SUM([Amount]), ALLEXCEPT('Sales', 'Calendar'[Date]))",
-        ):
+        ):  # (a column of an unrelated table is refused when the model is known, see tests/test_all_expanded_table.py)
             with self.subTest(expression=expression):
                 with self.assertRaises(MeasureError):
                     normalize_measure("Invalid ALLEXCEPT", expression)

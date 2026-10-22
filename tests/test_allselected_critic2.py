@@ -16,6 +16,7 @@ from pathlib import Path
 
 from analytics_studio import dax_dates
 from analytics_studio.measures import MeasureError, evaluate_measures
+from analytics_studio.power_query_values import model_text_normalizer
 from tools.dax_oracle_diff import HEADERS, LOCAL_ROWS
 from tools.parity_check import status
 
@@ -64,6 +65,13 @@ def _model() -> tuple[list[dict], list[dict], list[dict]]:
         relationship("r3", "cb_fact", "Ship", "cb_cal", "Date", False),
         relationship("r4", "cb_fact2", "K", "cb_dim2", "K"),
     ]
+    for table in tables[1:]:  # (Facts is shared with other tests and already clean) the app stores each text column under its first-seen spelling (controller.py) and Power BI does the same
+        for header, kind in table["column_types"].items():
+            if kind == "text":
+                normalize = model_text_normalizer()
+                for row in table["rows"]:
+                    if isinstance(row.get(header), str):
+                        row[header] = normalize(row[header])
     measures = [{"name": name, "expression": text, "home_table_id": "cb_fact"} for name, text in spec["measures"].items()]
     return tables, relationships, measures
 
