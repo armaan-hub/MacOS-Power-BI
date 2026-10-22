@@ -7,6 +7,7 @@ Compared live through ``tools/dax_battery_format.json``.
 
 from __future__ import annotations
 
+import re
 from decimal import Context, Decimal, ROUND_HALF_UP
 
 from analytics_studio import dax_dates, dax_typed
@@ -34,6 +35,12 @@ def format_value(value: object, pattern: object) -> str:
     fmt = "" if pattern is None else dax_typed.to_text(pattern)
     key = fmt.strip().casefold()
     if isinstance(value, bool):
+        if key not in _BOOLEAN_NAMED and key:
+            as_number = Decimal(-1 if value else 0)
+            if dax_dates.is_date_pattern(fmt, False):
+                return dax_dates.format_date(dax_dates.DaxDateTime(as_number), fmt)
+            if key in _NAMED or re.search(r"[0#]", fmt):
+                return format_value(as_number, pattern)  # a number pattern reads TRUE as -1
         names = _BOOLEAN_NAMED.get(key, ("True", "False"))
         return names[0] if value else names[1]
     if isinstance(value, str):
@@ -41,6 +48,8 @@ def format_value(value: object, pattern: object) -> str:
     number: Decimal = value  # type: ignore[assignment]
     if not number.is_finite():
         return dax_typed.number_to_text(number)
+    if not dax_dates.is_date(number) and re.search(r"[@&<>]", fmt) and not re.search(r"[0#]", fmt) and key not in _NAMED:
+        return _text_placeholders(fmt, dax_typed.number_to_text(number))
     if dax_dates.is_date(number) and (key == "" or dax_dates.is_date_pattern(fmt, True)):
         return dax_dates.format_date(number, fmt)
     if not dax_dates.is_date(number) and key and dax_dates.is_date_pattern(fmt, False):
@@ -50,10 +59,30 @@ def format_value(value: object, pattern: object) -> str:
         return names[0] if number != 0 else names[1]
     if key == "":
         return dax_typed.number_to_text(number)
+    if re.search(r"[@&<>]", fmt) and not re.search(r"[0#]", fmt):
+        return _text_placeholders(fmt, dax_typed.number_to_text(number))
     named = _NAMED.get(key)
     if named == "general":
         return dax_typed.number_to_text(number)
     return _custom(number, named or fmt)
+
+
+def _text_placeholders(pattern: str, text: str) -> str:
+    """"@" and "&" take one character of the text from the right; the left-over start goes to the first placeholder."""
+    slots = [i for i, c in enumerate(pattern) if c in "@&"]
+    shown = text.upper() if ">" in pattern else text.lower() if "<" in pattern else text
+    if not slots:
+        return shown
+    taken = shown[len(shown) - len(slots):] if len(shown) >= len(slots) else shown.rjust(len(slots))
+    head = shown[: max(len(shown) - len(slots), 0)]
+    output = []
+    fill = iter(taken)
+    for i, c in enumerate(pattern):
+        if c in "@&":
+            output.append(head + next(fill) if i == slots[0] else next(fill))
+        elif c not in "<>":
+            output.append(c)
+    return "".join(output)
 
 
 def _split_sections(pattern: str) -> list[str]:
@@ -109,6 +138,9 @@ def _tokens(section: str) -> list[tuple[str, str]]:
         elif char in "_*":
             index += 2  # padding / fill characters have no visible effect here
             continue
+        elif char == "[" and section.find("]", index) > 0:
+            index = section.find("]", index) + 1  # [Red] and other colour tags have no visible effect
+            continue
         else:
             tokens.append(("lit", char))
         index += 1
@@ -121,11 +153,15 @@ def _custom(number: Decimal, pattern: str) -> str:
     magnitude = abs(number)
     first = _tokens(sections[0])
     rounds_to_zero = _round(_scale(magnitude, first), _fraction_places(first), first) == 0
+    if negative and rounds_to_zero:
+        negative = False  # a negative value that shows as zero has no sign and uses the zero section
     index = 0
     if len(sections) >= 3 and rounds_to_zero:
         index = 2
     elif len(sections) >= 2 and negative:
         index = 1
+    if index == 2 and not sections[2]:
+        index = 0  # an empty zero section falls back to the first one
     if index == 1 and not sections[1]:
         index = 0  # an empty negative section falls back to the first one, with its minus sign
     tokens = _tokens(sections[index]) if index else first
@@ -197,7 +233,7 @@ def _render(scaled: Decimal, tokens: list[tuple[str, str]]) -> str:
     whole = whole.lstrip("0") or ("0" if exp_index is not None else "")
     fraction = fraction.ljust(places, "0")[:places]
     thousands = _has_thousands(integer_tokens)
-    output = _render_integer(whole, integer_tokens, thousands)
+    output = _render_integer(whole, integer_tokens, thousands, point_index is not None)
     if point_index is not None:
         output += "." + _render_fraction(fraction, fraction_tokens)
         # trailing "." stays, as in Visual Basic ("0.##" shows "1.")
@@ -213,7 +249,7 @@ def _has_thousands(tokens: list[tuple[str, str]]) -> bool:
     )
 
 
-def _render_integer(whole: str, tokens: list[tuple[str, str]], thousands: bool) -> str:
+def _render_integer(whole: str, tokens: list[tuple[str, str]], thousands: bool, has_point: bool = False) -> str:
     placeholders = sum(1 for kind, _ in tokens if kind == "digit")
     remaining = list(whole)
     output: list[str] = []
@@ -241,6 +277,9 @@ def _render_integer(whole: str, tokens: list[tuple[str, str]], thousands: bool) 
             output.append(value)
         elif kind == "percent":
             output.append("%")
+    if placeholders == 0 and has_point:
+        while remaining:
+            emit_digit(remaining.pop())  # ".00" still shows the whole part
     return "".join(reversed(output))
 
 

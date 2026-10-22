@@ -1,0 +1,1943 @@
+{
+ "powerbi_version": "2.157.879.0 (26.08)+da30fe74eb0b8a8786ab7326b69c400a0e951831",
+ "frozen": "2026-10-22",
+ "note": "Answers saved from Power BI Desktop in the sdet rounds 4-6 and the tester findings; the app matches all of them after iteration 77.",
+ "items": [
+  {
+   "expr": "CONCATENATEX(Facts,FORMAT(IF(Facts[Quantity]>2,TRUE()),\"General\"),\"|\",Facts[Quantity])",
+   "powerbi": "Ge0eral|Ge0eral|Ge0eral|Ge0eral|Ge0eral|Ge0eral"
+  },
+  {
+   "expr": "CONCATENATEX(Facts,FORMAT(IF(Facts[Quantity]>2,1),\"General\"),\"|\",Facts[Quantity])",
+   "powerbi": "|||Ge0eral|Ge0eral|Ge0eral"
+  },
+  {
+   "expr": "CONCATENATEX(Facts,FORMAT(IF(Facts[Quantity]>2,BLANK(),TRUE()),\"General\"),\"|\",Facts[Quantity])",
+   "powerbi": "Ge0eral|Ge0eral|Ge0eral|Ge0eral|Ge0eral|Ge0eral"
+  },
+  {
+   "expr": "FORMAT(1,\"General\")",
+   "powerbi": "Ge0eral"
+  },
+  {
+   "expr": "FORMAT(TRUE(),\"General\")",
+   "powerbi": "Ge0eral"
+  },
+  {
+   "expr": "FORMAT(5,\"abc\")",
+   "powerbi": "ab1/4/1900"
+  },
+  {
+   "expr": "FORMAT(1234.5,\"Gen\")",
+   "powerbi": "Ge0"
+  },
+  {
+   "expr": "ROUND(2.4999999999999999,0)",
+   "powerbi": "3"
+  },
+  {
+   "expr": "2.4999999999999999=2.5",
+   "powerbi": "True"
+  },
+  {
+   "expr": "1.00000000000000001=1",
+   "powerbi": "True"
+  },
+  {
+   "expr": "MROUND(2.4999999999999999,1)",
+   "powerbi": "3"
+  },
+  {
+   "expr": "CEILING(2.0000000000000001,1)",
+   "powerbi": "2"
+  },
+  {
+   "expr": "TRUNC(2.9999999999999999)",
+   "powerbi": "3"
+  },
+  {
+   "expr": "FLOOR(2.9999999999999999,1)",
+   "powerbi": "3"
+  },
+  {
+   "expr": "INT(2.9999999999999999)",
+   "powerbi": "3"
+  },
+  {
+   "expr": "SUMX(Facts,CALCULATE(COUNTROWS(Facts),Facts[Quantity]>SUMX(OFFSET(1,ALL(Facts[Quantity]),ORDERBY(Facts[Quantity])),Facts[Quantity])))",
+   "powerbi": "1"
+  },
+  {
+   "expr": "SUMX(Facts,CALCULATE(COUNTROWS(Facts),KEEPFILTERS(Facts[Quantity]>SUMX(OFFSET(1,ALL(Facts[Quantity]),ORDERBY(Facts[Quantity])),Facts[Quantity]))))",
+   "powerbi": "1"
+  },
+  {
+   "expr": "CONCATENATEX(Facts,CALCULATE(COUNTROWS(Facts),Facts[Quantity]>SUMX(OFFSET(1,ALL(Facts[Quantity]),ORDERBY(Facts[Quantity])),Facts[Quantity])),\"|\",Facts[Quantity])",
+   "powerbi": "|||||1"
+  },
+  {
+   "expr": "AVERAGEX(Facts,CALCULATE(COUNTROWS(Facts),Facts[Quantity]>SUMX(OFFSET(1,ALL(Facts[Quantity]),ORDERBY(Facts[Quantity])),Facts[Quantity])))",
+   "powerbi": "1"
+  },
+  {
+   "expr": "COUNTX(Facts,CALCULATE(COUNTROWS(Facts),Facts[Quantity]>SUMX(OFFSET(1,ALL(Facts[Quantity]),ORDERBY(Facts[Quantity])),Facts[Quantity])))",
+   "powerbi": "1"
+  },
+  {
+   "expr": "COUNTAX(Facts,CALCULATE(COUNTROWS(Facts),Facts[Quantity]>SUMX(OFFSET(1,ALL(Facts[Quantity]),ORDERBY(Facts[Quantity])),Facts[Quantity])))",
+   "powerbi": "1"
+  },
+  {
+   "expr": "SUMX(Facts,CALCULATE(COUNTROWS(Facts),Facts[Quantity]>SUMX(OFFSET(-2,ALL(Facts[Quantity]),ORDERBY(Facts[Quantity])),Facts[Quantity])))",
+   "powerbi": "5"
+  },
+  {
+   "expr": "SUMX(Facts,CALCULATE(COUNTROWS(Facts),KEEPFILTERS(Facts[Quantity]>SUMX(OFFSET(-2,ALL(Facts[Quantity]),ORDERBY(Facts[Quantity])),Facts[Quantity]))))",
+   "powerbi": "5"
+  },
+  {
+   "expr": "CONCATENATEX(Facts,CALCULATE(COUNTROWS(Facts),Facts[Quantity]>SUMX(OFFSET(-2,ALL(Facts[Quantity]),ORDERBY(Facts[Quantity])),Facts[Quantity])),\"|\",Facts[Quantity])",
+   "powerbi": "|1|1|1|1|1"
+  },
+  {
+   "expr": "MAXX(Facts,CALCULATE(COUNTROWS(Facts),Facts[Quantity]=SUMX(OFFSET(-2,ALL(Facts[Quantity]),ORDERBY(Facts[Quantity])),Facts[Quantity])))",
+   "powerbi": "1"
+  },
+  {
+   "expr": "AVERAGEX(Facts,CALCULATE(COUNTROWS(Facts),Facts[Quantity]>SUMX(OFFSET(-2,ALL(Facts[Quantity]),ORDERBY(Facts[Quantity])),Facts[Quantity])))",
+   "powerbi": "1"
+  },
+  {
+   "expr": "COUNTX(Facts,CALCULATE(COUNTROWS(Facts),Facts[Quantity]>SUMX(OFFSET(-2,ALL(Facts[Quantity]),ORDERBY(Facts[Quantity])),Facts[Quantity])))",
+   "powerbi": "5"
+  },
+  {
+   "expr": "COUNTAX(Facts,CALCULATE(COUNTROWS(Facts),Facts[Quantity]>SUMX(OFFSET(-2,ALL(Facts[Quantity]),ORDERBY(Facts[Quantity])),Facts[Quantity])))",
+   "powerbi": "5"
+  },
+  {
+   "expr": "MAXX(Facts,CALCULATE(COUNTROWS(Facts),Facts[Quantity]=SUMX(OFFSET(0,ALL(Facts[Quantity]),ORDERBY(Facts[Quantity])),Facts[Quantity])))",
+   "powerbi": "1"
+  },
+  {
+   "expr": "SUMX(Facts,CALCULATE(COUNTROWS(Facts),Facts[Quantity]>SUMX(OFFSET(1,ALL(Facts[Quantity]),ORDERBY(Facts[Quantity],DESC)),Facts[Quantity])))",
+   "powerbi": "5"
+  },
+  {
+   "expr": "SUMX(Facts,CALCULATE(COUNTROWS(Facts),KEEPFILTERS(Facts[Quantity]>SUMX(OFFSET(1,ALL(Facts[Quantity]),ORDERBY(Facts[Quantity],DESC)),Facts[Quantity]))))",
+   "powerbi": "5"
+  },
+  {
+   "expr": "CONCATENATEX(Facts,CALCULATE(COUNTROWS(Facts),Facts[Quantity]>SUMX(OFFSET(1,ALL(Facts[Quantity]),ORDERBY(Facts[Quantity],DESC)),Facts[Quantity])),\"|\",Facts[Quantity])",
+   "powerbi": "|1|1|1|1|1"
+  },
+  {
+   "expr": "MAXX(Facts,CALCULATE(COUNTROWS(Facts),Facts[Quantity]=SUMX(OFFSET(1,ALL(Facts[Quantity]),ORDERBY(Facts[Quantity],DESC)),Facts[Quantity])))",
+   "powerbi": "1"
+  },
+  {
+   "expr": "AVERAGEX(Facts,CALCULATE(COUNTROWS(Facts),Facts[Quantity]>SUMX(OFFSET(1,ALL(Facts[Quantity]),ORDERBY(Facts[Quantity],DESC)),Facts[Quantity])))",
+   "powerbi": "1"
+  },
+  {
+   "expr": "COUNTX(Facts,CALCULATE(COUNTROWS(Facts),Facts[Quantity]>SUMX(OFFSET(1,ALL(Facts[Quantity]),ORDERBY(Facts[Quantity],DESC)),Facts[Quantity])))",
+   "powerbi": "5"
+  },
+  {
+   "expr": "COUNTAX(Facts,CALCULATE(COUNTROWS(Facts),Facts[Quantity]>SUMX(OFFSET(1,ALL(Facts[Quantity]),ORDERBY(Facts[Quantity],DESC)),Facts[Quantity])))",
+   "powerbi": "5"
+  },
+  {
+   "expr": "MAXX(Facts,CALCULATE(COUNTROWS(Facts),Facts[Quantity]=SUMX(WINDOW(-1,REL,0,REL,ALL(Facts[Quantity]),ORDERBY(Facts[Quantity])),Facts[Quantity])))",
+   "powerbi": "1"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(ALL(Facts),Facts[Quantity]>RANK(SKIP,ALL(Facts[Quantity]),ORDERBY(Facts[Quantity]))))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(Facts),FILTER(ALL(Facts),Facts[Quantity]>RANK(SKIP,ALL(Facts[Quantity]),ORDERBY(Facts[Quantity]))))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(ALL(Facts),Facts[Quantity]>RANK(DENSE,ALL(Facts[Quantity]),ORDERBY(Facts[Quantity]))))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(Facts),FILTER(ALL(Facts),Facts[Quantity]>RANK(DENSE,ALL(Facts[Quantity]),ORDERBY(Facts[Quantity]))))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(ALL(Facts),Facts[Quantity]>RANK(DENSE,ALL(Facts[Quantity]),ORDERBY(Facts[Quantity],DESC))))",
+   "powerbi": "2"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(Facts),FILTER(ALL(Facts),Facts[Quantity]>RANK(DENSE,ALL(Facts[Quantity]),ORDERBY(Facts[Quantity],DESC))))",
+   "powerbi": "2"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(ALL(Facts),Facts[Quantity]>ROWNUMBER(ALL(Facts[Quantity]),ORDERBY(Facts[Quantity]))))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(Facts),FILTER(ALL(Facts),Facts[Quantity]>ROWNUMBER(ALL(Facts[Quantity]),ORDERBY(Facts[Quantity]))))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(ALL(Facts),Facts[Quantity]>ROWNUMBER(ALL(Facts[Quantity]),ORDERBY(Facts[Quantity],DESC))))",
+   "powerbi": "2"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(Facts),FILTER(ALL(Facts),Facts[Quantity]>ROWNUMBER(ALL(Facts[Quantity]),ORDERBY(Facts[Quantity],DESC))))",
+   "powerbi": "2"
+  },
+  {
+   "expr": "CONCATENATEX(Facts,RANK(DENSE,ALL(Facts[Quantity]),ORDERBY(Facts[Quantity])),\"|\",Facts[Quantity])",
+   "powerbi": "1|2|3|4|5|6"
+  },
+  {
+   "expr": "CONCATENATEX(ALL(Facts),RANK(DENSE,ALL(Facts[Quantity]),ORDERBY(Facts[Quantity])),\"|\",Facts[Quantity])",
+   "powerbi": "1|2|3|4|5|6"
+  },
+  {
+   "expr": "CONCATENATEX(FILTER(ALL(Facts),TRUE()),RANK(DENSE,ALL(Facts[Quantity]),ORDERBY(Facts[Quantity])),\"|\",Facts[Quantity])",
+   "powerbi": "1|2|3|4|5|6"
+  },
+  {
+   "expr": "CONCATENATEX(VALUES(Facts[Quantity]),RANK(DENSE,ALL(Facts[Quantity]),ORDERBY(Facts[Quantity])),\"|\",Facts[Quantity])",
+   "powerbi": "1|2|3|4|5|6"
+  },
+  {
+   "expr": "SUMX(Facts,RANK(DENSE,ALL(Facts[Quantity]),ORDERBY(Facts[Quantity])))",
+   "powerbi": "21"
+  },
+  {
+   "expr": "CONCATENATEX(Facts,RANK(SKIP,ALL(Facts[Quantity]),ORDERBY(Facts[Quantity])),\"|\",Facts[Quantity])",
+   "powerbi": "1|2|3|4|5|6"
+  },
+  {
+   "expr": "CONCATENATEX(ALL(Facts),RANK(SKIP,ALL(Facts[Quantity]),ORDERBY(Facts[Quantity])),\"|\",Facts[Quantity])",
+   "powerbi": "1|2|3|4|5|6"
+  },
+  {
+   "expr": "CONCATENATEX(FILTER(ALL(Facts),TRUE()),RANK(SKIP,ALL(Facts[Quantity]),ORDERBY(Facts[Quantity])),\"|\",Facts[Quantity])",
+   "powerbi": "1|2|3|4|5|6"
+  },
+  {
+   "expr": "CONCATENATEX(VALUES(Facts[Quantity]),RANK(SKIP,ALL(Facts[Quantity]),ORDERBY(Facts[Quantity])),\"|\",Facts[Quantity])",
+   "powerbi": "1|2|3|4|5|6"
+  },
+  {
+   "expr": "SUMX(Facts,RANK(SKIP,ALL(Facts[Quantity]),ORDERBY(Facts[Quantity])))",
+   "powerbi": "21"
+  },
+  {
+   "expr": "CONCATENATEX(Facts,ROWNUMBER(ALL(Facts[Quantity]),ORDERBY(Facts[Quantity])),\"|\",Facts[Quantity])",
+   "powerbi": "1|2|3|4|5|6"
+  },
+  {
+   "expr": "CONCATENATEX(ALL(Facts),ROWNUMBER(ALL(Facts[Quantity]),ORDERBY(Facts[Quantity])),\"|\",Facts[Quantity])",
+   "powerbi": "1|2|3|4|5|6"
+  },
+  {
+   "expr": "CONCATENATEX(FILTER(ALL(Facts),TRUE()),ROWNUMBER(ALL(Facts[Quantity]),ORDERBY(Facts[Quantity])),\"|\",Facts[Quantity])",
+   "powerbi": "1|2|3|4|5|6"
+  },
+  {
+   "expr": "CONCATENATEX(VALUES(Facts[Quantity]),ROWNUMBER(ALL(Facts[Quantity]),ORDERBY(Facts[Quantity])),\"|\",Facts[Quantity])",
+   "powerbi": "1|2|3|4|5|6"
+  },
+  {
+   "expr": "SUMX(Facts,ROWNUMBER(ALL(Facts[Quantity]),ORDERBY(Facts[Quantity])))",
+   "powerbi": "21"
+  },
+  {
+   "expr": "CONCATENATEX(Facts,RANK(DENSE,ALL(Facts[Quantity]),ORDERBY(Facts[Quantity],DESC)),\"|\",Facts[Quantity])",
+   "powerbi": "6|5|4|3|2|1"
+  },
+  {
+   "expr": "CONCATENATEX(ALL(Facts),RANK(DENSE,ALL(Facts[Quantity]),ORDERBY(Facts[Quantity],DESC)),\"|\",Facts[Quantity])",
+   "powerbi": "6|5|4|3|2|1"
+  },
+  {
+   "expr": "CONCATENATEX(FILTER(ALL(Facts),TRUE()),RANK(DENSE,ALL(Facts[Quantity]),ORDERBY(Facts[Quantity],DESC)),\"|\",Facts[Quantity])",
+   "powerbi": "6|5|4|3|2|1"
+  },
+  {
+   "expr": "CONCATENATEX(VALUES(Facts[Quantity]),RANK(DENSE,ALL(Facts[Quantity]),ORDERBY(Facts[Quantity],DESC)),\"|\",Facts[Quantity])",
+   "powerbi": "6|5|4|3|2|1"
+  },
+  {
+   "expr": "SUMX(Facts,RANK(DENSE,ALL(Facts[Quantity]),ORDERBY(Facts[Quantity],DESC)))",
+   "powerbi": "21"
+  },
+  {
+   "expr": "CONCATENATEX(Facts,SUMX(OFFSET(1,ALL(Facts[Quantity]),ORDERBY(Facts[Quantity])),Facts[Quantity]),\"|\",Facts[Quantity])",
+   "powerbi": "1|2|3|4|5|"
+  },
+  {
+   "expr": "CONCATENATEX(ALL(Facts),SUMX(OFFSET(1,ALL(Facts[Quantity]),ORDERBY(Facts[Quantity])),Facts[Quantity]),\"|\",Facts[Quantity])",
+   "powerbi": "1|2|3|4|5|"
+  },
+  {
+   "expr": "CONCATENATEX(FILTER(ALL(Facts),TRUE()),SUMX(OFFSET(1,ALL(Facts[Quantity]),ORDERBY(Facts[Quantity])),Facts[Quantity]),\"|\",Facts[Quantity])",
+   "powerbi": "1|2|3|4|5|"
+  },
+  {
+   "expr": "CONCATENATEX(VALUES(Facts[Quantity]),SUMX(OFFSET(1,ALL(Facts[Quantity]),ORDERBY(Facts[Quantity])),Facts[Quantity]),\"|\",Facts[Quantity])",
+   "powerbi": "1|2|3|4|5|"
+  },
+  {
+   "expr": "SUMX(Facts,SUMX(OFFSET(1,ALL(Facts[Quantity]),ORDERBY(Facts[Quantity])),Facts[Quantity]))",
+   "powerbi": "15"
+  },
+  {
+   "expr": "CONCATENATEX(Facts,SUMX(OFFSET(0,ALL(Facts[Quantity]),ORDERBY(Facts[Quantity])),Facts[Quantity]),\"|\",Facts[Quantity])",
+   "powerbi": "0|1|2|3|4|5"
+  },
+  {
+   "expr": "CONCATENATEX(ALL(Facts),SUMX(OFFSET(0,ALL(Facts[Quantity]),ORDERBY(Facts[Quantity])),Facts[Quantity]),\"|\",Facts[Quantity])",
+   "powerbi": "0|1|2|3|4|5"
+  },
+  {
+   "expr": "CONCATENATEX(FILTER(ALL(Facts),TRUE()),SUMX(OFFSET(0,ALL(Facts[Quantity]),ORDERBY(Facts[Quantity])),Facts[Quantity]),\"|\",Facts[Quantity])",
+   "powerbi": "0|1|2|3|4|5"
+  },
+  {
+   "expr": "CONCATENATEX(VALUES(Facts[Quantity]),SUMX(OFFSET(0,ALL(Facts[Quantity]),ORDERBY(Facts[Quantity])),Facts[Quantity]),\"|\",Facts[Quantity])",
+   "powerbi": "0|1|2|3|4|5"
+  },
+  {
+   "expr": "SUMX(Facts,SUMX(OFFSET(0,ALL(Facts[Quantity]),ORDERBY(Facts[Quantity])),Facts[Quantity]))",
+   "powerbi": "15"
+  },
+  {
+   "expr": "CONCATENATEX(Facts,SUMX(OFFSET(-2,ALL(Facts[Quantity]),ORDERBY(Facts[Quantity])),Facts[Quantity]),\"|\",Facts[Quantity])",
+   "powerbi": "||0|1|2|3"
+  },
+  {
+   "expr": "CONCATENATEX(ALL(Facts),SUMX(OFFSET(-2,ALL(Facts[Quantity]),ORDERBY(Facts[Quantity])),Facts[Quantity]),\"|\",Facts[Quantity])",
+   "powerbi": "||0|1|2|3"
+  },
+  {
+   "expr": "CONCATENATEX(FILTER(ALL(Facts),TRUE()),SUMX(OFFSET(-2,ALL(Facts[Quantity]),ORDERBY(Facts[Quantity])),Facts[Quantity]),\"|\",Facts[Quantity])",
+   "powerbi": "||0|1|2|3"
+  },
+  {
+   "expr": "CONCATENATEX(VALUES(Facts[Quantity]),SUMX(OFFSET(-2,ALL(Facts[Quantity]),ORDERBY(Facts[Quantity])),Facts[Quantity]),\"|\",Facts[Quantity])",
+   "powerbi": "||0|1|2|3"
+  },
+  {
+   "expr": "SUMX(Facts,SUMX(OFFSET(-2,ALL(Facts[Quantity]),ORDERBY(Facts[Quantity])),Facts[Quantity]))",
+   "powerbi": "6"
+  },
+  {
+   "expr": "CONCATENATEX(Facts,SUMX(OFFSET(1,ALL(Facts[Quantity]),ORDERBY(Facts[Quantity])),1),\"|\",Facts[Quantity])",
+   "powerbi": "1|1|1|1|1|"
+  },
+  {
+   "expr": "CONCATENATEX(ALL(Facts),SUMX(OFFSET(1,ALL(Facts[Quantity]),ORDERBY(Facts[Quantity])),1),\"|\",Facts[Quantity])",
+   "powerbi": "1|1|1|1|1|"
+  },
+  {
+   "expr": "CONCATENATEX(FILTER(ALL(Facts),TRUE()),SUMX(OFFSET(1,ALL(Facts[Quantity]),ORDERBY(Facts[Quantity])),1),\"|\",Facts[Quantity])",
+   "powerbi": "1|1|1|1|1|"
+  },
+  {
+   "expr": "CONCATENATEX(VALUES(Facts[Quantity]),SUMX(OFFSET(1,ALL(Facts[Quantity]),ORDERBY(Facts[Quantity])),1),\"|\",Facts[Quantity])",
+   "powerbi": "1|1|1|1|1|"
+  },
+  {
+   "expr": "SUMX(Facts,SUMX(OFFSET(1,ALL(Facts[Quantity]),ORDERBY(Facts[Quantity])),1))",
+   "powerbi": "5"
+  },
+  {
+   "expr": "CONCATENATEX(Facts,IF(Facts[Quantity]=3,BLANK())=FALSE(),\"|\",Facts[Quantity])",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 38) DAX comparison operations do not support comparing values of type Integer with values of type True/False. Consider using the VALUE or FORMAT function to convert one of the values.\""
+  },
+  {
+   "expr": "CONCATENATEX(Facts,IF(Facts[Quantity]=3,BLANK(),BLANK())=FALSE(),\"|\",Facts[Quantity])",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 38) DAX comparison operations do not support comparing values of type Integer with values of type True/False. Consider using the VALUE or FORMAT function to convert one of the values.\""
+  },
+  {
+   "expr": "CONCATENATEX(Facts,SWITCH(Facts[Quantity],3,BLANK())=FALSE(),\"|\",Facts[Quantity])",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 38) DAX comparison operations do not support comparing values of type Integer with values of type True/False. Consider using the VALUE or FORMAT function to convert one of the values.\""
+  },
+  {
+   "expr": "CONCATENATEX(Facts,SWITCH(Facts[Quantity],3,BLANK(),4,BLANK())=FALSE(),\"|\",Facts[Quantity])",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 38) DAX comparison operations do not support comparing values of type Integer with values of type True/False. Consider using the VALUE or FORMAT function to convert one of the values.\""
+  },
+  {
+   "expr": "CONCATENATEX(Facts,SWITCH(Facts[Quantity],3,BLANK(),BLANK())=FALSE(),\"|\",Facts[Quantity])",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 38) DAX comparison operations do not support comparing values of type Integer with values of type True/False. Consider using the VALUE or FORMAT function to convert one of the values.\""
+  },
+  {
+   "expr": "CONCATENATEX(Facts,IFERROR(BLANK(),BLANK())=FALSE(),\"|\",Facts[Quantity])",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 38) DAX comparison operations do not support comparing values of type Integer with values of type True/False. Consider using the VALUE or FORMAT function to convert one of the values.\""
+  },
+  {
+   "expr": "CONCATENATEX(Facts,COALESCE(BLANK(),BLANK())=FALSE(),\"|\",Facts[Quantity])",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 38) DAX comparison operations do not support comparing values of type Integer with values of type True/False. Consider using the VALUE or FORMAT function to convert one of the values.\""
+  },
+  {
+   "expr": "CONCATENATEX(Facts,COALESCE(BLANK(),IF(Facts[Quantity]=3,BLANK()))=FALSE(),\"|\",Facts[Quantity])",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 38) DAX comparison operations do not support comparing values of type Integer with values of type True/False. Consider using the VALUE or FORMAT function to convert one of the values.\""
+  },
+  {
+   "expr": "CONCATENATEX(VALUES(Facts[Region]),ROWNUMBER(ALL(Facts[Quantity]),ORDERBY(Facts[Quantity])),\"|\",Facts[Region])",
+   "powerbi": "|5|"
+  },
+  {
+   "expr": "CONCATENATEX(ADDCOLUMNS(VALUES(Facts[Quantity]),\"w\",ROWNUMBER(ALL(Facts[Quantity]),ORDERBY(Facts[Quantity]))),[w],\"|\",Facts[Quantity])",
+   "powerbi": "1|2|3|4|5|6"
+  },
+  {
+   "expr": "CONCATENATEX(VALUES(Facts[Region]),RANK(DENSE,ALL(Facts[Quantity]),ORDERBY(Facts[Quantity])),\"|\",Facts[Region])",
+   "powerbi": "|5|"
+  },
+  {
+   "expr": "CONCATENATEX(ADDCOLUMNS(VALUES(Facts[Quantity]),\"w\",RANK(DENSE,ALL(Facts[Quantity]),ORDERBY(Facts[Quantity]))),[w],\"|\",Facts[Quantity])",
+   "powerbi": "1|2|3|4|5|6"
+  },
+  {
+   "expr": "CONCATENATEX(Facts,COUNTROWS(OFFSET(-1,ALL(Facts[Quantity]),ORDERBY(Facts[Quantity]))),\"|\",Facts[Quantity])",
+   "powerbi": "|1|1|1|1|1"
+  },
+  {
+   "expr": "SUMX(Facts,COUNTROWS(OFFSET(-1,ALL(Facts[Quantity]),ORDERBY(Facts[Quantity]))))",
+   "powerbi": "5"
+  },
+  {
+   "expr": "CONCATENATEX(VALUES(Facts[Region]),COUNTROWS(OFFSET(-1,ALL(Facts[Quantity]),ORDERBY(Facts[Quantity]))),\"|\",Facts[Region])",
+   "powerbi": "3|1|1"
+  },
+  {
+   "expr": "CONCATENATEX(ADDCOLUMNS(VALUES(Facts[Quantity]),\"w\",COUNTROWS(OFFSET(-1,ALL(Facts[Quantity]),ORDERBY(Facts[Quantity])))),[w],\"|\",Facts[Quantity])",
+   "powerbi": "|1|1|1|1|1"
+  },
+  {
+   "expr": "CONCATENATEX(Facts,SUMX(OFFSET(-1,ALL(Facts),ORDERBY(Facts[Quantity],ASC,Facts[Region],ASC)),Facts[Quantity]),\"|\",Facts[Quantity])",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 53) OFFSET's Relation parameter may have duplicate rows. This is not allowed.\""
+  },
+  {
+   "expr": "SUMX(Facts,SUMX(OFFSET(-1,ALL(Facts),ORDERBY(Facts[Quantity],ASC,Facts[Region],ASC)),Facts[Quantity]))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 45) OFFSET's Relation parameter may have duplicate rows. This is not allowed.\""
+  },
+  {
+   "expr": "CONCATENATEX(VALUES(Facts[Region]),SUMX(OFFSET(-1,ALL(Facts),ORDERBY(Facts[Quantity],ASC,Facts[Region],ASC)),Facts[Quantity]),\"|\",Facts[Region])",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 69) OFFSET's Relation parameter may have duplicate rows. This is not allowed.\""
+  },
+  {
+   "expr": "CONCATENATEX(ADDCOLUMNS(VALUES(Facts[Quantity]),\"w\",SUMX(OFFSET(-1,ALL(Facts),ORDERBY(Facts[Quantity],ASC,Facts[Region],ASC)),Facts[Quantity])),[w],\"|\",Facts[Quantity])",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 86) OFFSET's Relation parameter may have duplicate rows. This is not allowed.\""
+  },
+  {
+   "expr": "CONCATENATEX(Facts,SUMX(OFFSET(-1,ALL(Facts[Quantity],Facts[Region]),ORDERBY(Facts[Quantity])),Facts[Quantity]),\"|\",Facts[Quantity])",
+   "powerbi": "|0|1|2|3|4"
+  },
+  {
+   "expr": "SUMX(Facts,SUMX(OFFSET(-1,ALL(Facts[Quantity],Facts[Region]),ORDERBY(Facts[Quantity])),Facts[Quantity]))",
+   "powerbi": "10"
+  },
+  {
+   "expr": "CONCATENATEX(VALUES(Facts[Region]),SUMX(OFFSET(-1,ALL(Facts[Quantity],Facts[Region]),ORDERBY(Facts[Quantity])),Facts[Quantity]),\"|\",Facts[Region])",
+   "powerbi": "5|3|2"
+  },
+  {
+   "expr": "CONCATENATEX(ADDCOLUMNS(VALUES(Facts[Quantity]),\"w\",SUMX(OFFSET(-1,ALL(Facts[Quantity],Facts[Region]),ORDERBY(Facts[Quantity])),Facts[Quantity])),[w],\"|\",Facts[Quantity])",
+   "powerbi": "|0|1|2|3|4"
+  },
+  {
+   "expr": "CONCATENATEX(Facts,SUMX(WINDOW(-1,REL,0,REL,ALL(Facts[Quantity]),ORDERBY(Facts[Quantity])),Facts[Quantity]),\"|\",Facts[Quantity])",
+   "powerbi": "0|1|3|5|7|9"
+  },
+  {
+   "expr": "SUMX(Facts,SUMX(WINDOW(-1,REL,0,REL,ALL(Facts[Quantity]),ORDERBY(Facts[Quantity])),Facts[Quantity]))",
+   "powerbi": "25"
+  },
+  {
+   "expr": "CONCATENATEX(VALUES(Facts[Region]),SUMX(WINDOW(-1,REL,0,REL,ALL(Facts[Quantity]),ORDERBY(Facts[Quantity])),Facts[Quantity]),\"|\",Facts[Region])",
+   "powerbi": "12|7|5"
+  },
+  {
+   "expr": "CONCATENATEX(ADDCOLUMNS(VALUES(Facts[Quantity]),\"w\",SUMX(WINDOW(-1,REL,0,REL,ALL(Facts[Quantity]),ORDERBY(Facts[Quantity])),Facts[Quantity])),[w],\"|\",Facts[Quantity])",
+   "powerbi": "0|1|3|5|7|9"
+  },
+  {
+   "expr": "CONCATENATEX(Facts,ROWNUMBER(ALL(Facts[Quantity],Facts[Region]),ORDERBY(Facts[Quantity]),KEEP,PARTITIONBY(Facts[Region])),\"|\",Facts[Quantity])",
+   "powerbi": "1|1|2|2|1|3"
+  },
+  {
+   "expr": "SUMX(Facts,ROWNUMBER(ALL(Facts[Quantity],Facts[Region]),ORDERBY(Facts[Quantity]),KEEP,PARTITIONBY(Facts[Region])))",
+   "powerbi": "10"
+  },
+  {
+   "expr": "CONCATENATEX(VALUES(Facts[Region]),ROWNUMBER(ALL(Facts[Quantity],Facts[Region]),ORDERBY(Facts[Quantity]),KEEP,PARTITIONBY(Facts[Region])),\"|\",Facts[Region])",
+   "powerbi": "|1|"
+  },
+  {
+   "expr": "CONCATENATEX(ADDCOLUMNS(VALUES(Facts[Quantity]),\"w\",ROWNUMBER(ALL(Facts[Quantity],Facts[Region]),ORDERBY(Facts[Quantity]),KEEP,PARTITIONBY(Facts[Region]))),[w],\"|\",Facts[Quantity])",
+   "powerbi": "1|1|2|2|1|3"
+  },
+  {
+   "expr": "CONCATENATEX(Facts,RANK(SKIP,ALL(Facts[Region]),ORDERBY(COUNTROWS(Facts),DESC)),\"|\",Facts[Quantity])",
+   "powerbi": "1|1|1|1|1|1"
+  },
+  {
+   "expr": "SUMX(Facts,RANK(SKIP,ALL(Facts[Region]),ORDERBY(COUNTROWS(Facts),DESC)))",
+   "powerbi": "6"
+  },
+  {
+   "expr": "CONCATENATEX(VALUES(Facts[Region]),RANK(SKIP,ALL(Facts[Region]),ORDERBY(COUNTROWS(Facts),DESC)),\"|\",Facts[Region])",
+   "powerbi": "1|1|1"
+  },
+  {
+   "expr": "CONCATENATEX(ADDCOLUMNS(VALUES(Facts[Quantity]),\"w\",RANK(SKIP,ALL(Facts[Region]),ORDERBY(COUNTROWS(Facts),DESC))),[w],\"|\",Facts[Quantity])",
+   "powerbi": "1|1|1|1|1|1"
+  },
+  {
+   "expr": "SUMX(OFFSET(-1,ALL(Facts),ORDERBY(Facts[Quantity],ASC,Facts[Region],ASC)),Facts[Quantity])",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 34) OFFSET's Relation parameter may have duplicate rows. This is not allowed.\""
+  },
+  {
+   "expr": "CALCULATE(SUMX(OFFSET(-1,ALL(Facts),ORDERBY(Facts[Quantity],ASC,Facts[Region],ASC)),Facts[Quantity]),Facts[Quantity]=3)",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 44) OFFSET's Relation parameter may have duplicate rows. This is not allowed.\""
+  },
+  {
+   "expr": "SUMX(OFFSET(-1,ALL(Facts),ORDERBY(Facts[Quantity])),Facts[Quantity])",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 34) OFFSET's Relation parameter may have duplicate rows. This is not allowed.\""
+  },
+  {
+   "expr": "SUMX(OFFSET(-1,ALL(Facts),ORDERBY(Facts[Quantity],ASC,Facts[Region],ASC,Facts[Sales],ASC,Facts[Note],ASC)),Facts[Quantity])",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 34) OFFSET's Relation parameter may have duplicate rows. This is not allowed.\""
+  },
+  {
+   "expr": "SUMX(OFFSET(-1,ALL(Facts),ORDERBY(Facts[Quantity],ASC,Facts[Region],ASC,Facts[Sales],ASC)),Facts[Quantity])",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 34) OFFSET's Relation parameter may have duplicate rows. This is not allowed.\""
+  },
+  {
+   "expr": "SUMX(INDEX(1,ALL(Facts),ORDERBY(Facts[Quantity])),Facts[Quantity])",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 32) INDEX's Relation parameter may have duplicate rows. This is not allowed.\""
+  },
+  {
+   "expr": "SUMX(INDEX(1,ALL(Facts),ORDERBY(Facts[Quantity],ASC,Facts[Region],ASC)),Facts[Quantity])",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 32) INDEX's Relation parameter may have duplicate rows. This is not allowed.\""
+  },
+  {
+   "expr": "SUMX(WINDOW(1,ABS,2,ABS,ALL(Facts),ORDERBY(Facts[Quantity],ASC,Facts[Region],ASC)),Facts[Quantity])",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 43) WINDOW's Relation parameter may have duplicate rows. This is not allowed.\""
+  },
+  {
+   "expr": "COALESCE(BLANK(),IF(1>2,1))=FALSE()",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 19) DAX comparison operations do not support comparing values of type Integer with values of type True/False. Consider using the VALUE or FORMAT function to convert one of the values.\""
+  },
+  {
+   "expr": "FORMAT(COALESCE(BLANK(),1),\"@\")",
+   "powerbi": "1"
+  },
+  {
+   "expr": "IF(1=2,IF(1=3,BLANK()))=FALSE()",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 19) DAX comparison operations do not support comparing values of type Integer with values of type True/False. Consider using the VALUE or FORMAT function to convert one of the values.\""
+  },
+  {
+   "expr": "FORMAT(1234.5,\"@\")",
+   "powerbi": "1234.5"
+  },
+  {
+   "expr": "FORMAT(1234.5,\"@@\")",
+   "powerbi": "1234.5"
+  },
+  {
+   "expr": "FORMAT(1234.5,\"&\")",
+   "powerbi": "1234.5"
+  },
+  {
+   "expr": "FORMAT(1234.5,\"<\")",
+   "powerbi": "1234.5"
+  },
+  {
+   "expr": "FORMAT(1234.5,\">\")",
+   "powerbi": "1234.5"
+  },
+  {
+   "expr": "FORMAT(1234.5,\"c\")",
+   "powerbi": "5/18/1903 12:00:00 PM"
+  },
+  {
+   "expr": "FORMAT(1234.5,\"d\")",
+   "powerbi": "18"
+  },
+  {
+   "expr": "FORMAT(1234.5,\"h\")",
+   "powerbi": "12"
+  },
+  {
+   "expr": "FORMAT(1234.5,\"m\")",
+   "powerbi": "5"
+  },
+  {
+   "expr": "FORMAT(1234.5,\"n\")",
+   "powerbi": "0"
+  },
+  {
+   "expr": "FORMAT(1234.5,\"q\")",
+   "powerbi": "2"
+  },
+  {
+   "expr": "FORMAT(1234.5,\"s\")",
+   "powerbi": "0"
+  },
+  {
+   "expr": "FORMAT(1234.5,\"w\")",
+   "powerbi": "2"
+  },
+  {
+   "expr": "FORMAT(1234.5,\"y\")",
+   "powerbi": "138"
+  },
+  {
+   "expr": "FORMAT(1234.5,\"C\")",
+   "powerbi": "5/18/1903 12:00:00 PM"
+  },
+  {
+   "expr": "FORMAT(1234.5,\"D\")",
+   "powerbi": "18"
+  },
+  {
+   "expr": "FORMAT(1234.5,\"H\")",
+   "powerbi": "12"
+  },
+  {
+   "expr": "FORMAT(1234.5,\"M\")",
+   "powerbi": "5"
+  },
+  {
+   "expr": "FORMAT(1234.5,\"N\")",
+   "powerbi": "0"
+  },
+  {
+   "expr": "FORMAT(1234.5,\"Q\")",
+   "powerbi": "2"
+  },
+  {
+   "expr": "FORMAT(1234.5,\"S\")",
+   "powerbi": "0"
+  },
+  {
+   "expr": "FORMAT(1234.5,\"W\")",
+   "powerbi": "2"
+  },
+  {
+   "expr": "FORMAT(1234.5,\"Y\")",
+   "powerbi": "138"
+  },
+  {
+   "expr": "FORMAT(5,\"General\")",
+   "powerbi": "Ge0eral"
+  },
+  {
+   "expr": "FORMAT(1,\"x@y\")",
+   "powerbi": "x1y"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(Facts,IF(Facts[Quantity]>2,BLANK())=FALSE()))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 42) DAX comparison operations do not support comparing values of type Integer with values of type True/False. Consider using the VALUE or FORMAT function to convert one of the values.\""
+  },
+  {
+   "expr": "COUNTROWS(FILTER(Facts,IF(Facts[Quantity]>2,BLANK())=TRUE()))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 42) DAX comparison operations do not support comparing values of type Integer with values of type True/False. Consider using the VALUE or FORMAT function to convert one of the values.\""
+  },
+  {
+   "expr": "SUMX(Facts,IF(IF(Facts[Quantity]>2,BLANK())=FALSE(),1,0))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 33) DAX comparison operations do not support comparing values of type Integer with values of type True/False. Consider using the VALUE or FORMAT function to convert one of the values.\""
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(Facts),IF(Facts[Quantity]>2,BLANK())=FALSE())",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 46) DAX comparison operations do not support comparing values of type Integer with values of type True/False. Consider using the VALUE or FORMAT function to convert one of the values.\""
+  },
+  {
+   "expr": "MAXX(Facts,COALESCE(BLANK(),IF(Facts[Quantity]>2,TRUE())))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 30) The function MAXX cannot work with values of type Boolean.\""
+  },
+  {
+   "expr": "MINX(Facts,COALESCE(BLANK(),IF(Facts[Quantity]>2,TRUE())))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 30) The function MINX cannot work with values of type Boolean.\""
+  },
+  {
+   "expr": "FORMAT(IF(FALSE(),TRUE()),\"0\")",
+   "powerbi": "0"
+  },
+  {
+   "expr": "FORMAT(IF(FALSE(),TRUE(),BLANK()),\"0\")",
+   "powerbi": "0"
+  },
+  {
+   "expr": "FORMAT(IF(TRUE(),BLANK(),TRUE()),\"0\")",
+   "powerbi": "0"
+  },
+  {
+   "expr": "FORMAT(IF(FALSE(),1>0),\"0\")",
+   "powerbi": "0"
+  },
+  {
+   "expr": "FORMAT(IF(FALSE(),BLANK(),1>2),\"0\")",
+   "powerbi": "0"
+  },
+  {
+   "expr": "IF(FALSE(),MAX(TRUE(),FALSE()))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 34) Min or Max of booleans are not currently supported.\""
+  },
+  {
+   "expr": "IF(FALSE(),MIN(TRUE(),FALSE()))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 34) Min or Max of booleans are not currently supported.\""
+  },
+  {
+   "expr": "IF(FALSE(),MAXX(Facts,Facts[Quantity]>1))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 41) The function MAXX cannot work with values of type Boolean.\""
+  },
+  {
+   "expr": "IF(FALSE(),COALESCE(BLANK(),TRUE()))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "FORMAT(FALSE(),\"0\")",
+   "powerbi": "0"
+  },
+  {
+   "expr": "FORMAT(TRUE(),\"0\")",
+   "powerbi": "-1"
+  },
+  {
+   "expr": "FORMAT(TRUE(),\"0.0\")",
+   "powerbi": "-1.0"
+  },
+  {
+   "expr": "FORMAT(FALSE(),\"#\")",
+   "powerbi": ""
+  },
+  {
+   "expr": "FORMAT(TRUE(),\"General Number\")",
+   "powerbi": "-1"
+  },
+  {
+   "expr": "FORMAT(TRUE(),\"abc\")",
+   "powerbi": "ab12/29/1899"
+  },
+  {
+   "expr": "FORMAT(TRUE(),\"0%\")",
+   "powerbi": "-100%"
+  },
+  {
+   "expr": "FORMAT(TRUE(),\"#,##0\")",
+   "powerbi": "-1"
+  },
+  {
+   "expr": "FORMAT(FALSE(),\"0.00\")",
+   "powerbi": "0.00"
+  },
+  {
+   "expr": "FORMAT(1>0,\"0\")",
+   "powerbi": "-1"
+  },
+  {
+   "expr": "FORMAT(1>0,\"General Number\")",
+   "powerbi": "-1"
+  },
+  {
+   "expr": "FORMAT(1>2,\"Standard\")",
+   "powerbi": "0.00"
+  },
+  {
+   "expr": "FORMAT(TRUE(),\"Fixed\")",
+   "powerbi": "-1.00"
+  },
+  {
+   "expr": "FORMAT(TRUE(),\"Percent\")",
+   "powerbi": "-100.00%"
+  },
+  {
+   "expr": "FORMAT(TRUE(),\"Scientific\")",
+   "powerbi": "-1.00E+00"
+  },
+  {
+   "expr": "FORMAT(TRUE(),\"Currency\")",
+   "powerbi": "($1.00)"
+  },
+  {
+   "expr": "FORMAT(TRUE(),\"dd/mm/yyyy\")",
+   "powerbi": "29/12/1899"
+  },
+  {
+   "expr": "FORMAT(TRUE(),\"hh:mm\")",
+   "powerbi": "00:00"
+  },
+  {
+   "expr": "FORMAT(TRUE(),\"General Date\")",
+   "powerbi": "12/29/1899"
+  },
+  {
+   "expr": "FORMAT(TRUE(),\"Short Date\")",
+   "powerbi": "12/29/1899"
+  },
+  {
+   "expr": "FORMAT(TRUE(),\"Long Date\")",
+   "powerbi": "Friday, December 29, 1899"
+  },
+  {
+   "expr": "IF(FALSE(),Facts[Quantity] IN {1,2})",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 30) A single value for column 'Quantity' in table 'Facts' cannot be determined. This can happen when a measure or function formula refers to a column that contains many values without specifying an aggregation such as min, max, count, or sum to get a single result.\""
+  },
+  {
+   "expr": "IF(FALSE(),Facts[Region] IN {\"East\"})",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 30) A single value for column 'Region' in table 'Facts' cannot be determined. This can happen when a measure or function formula refers to a column that contains many values without specifying an aggregation such as min, max, count, or sum to get a single result.\""
+  },
+  {
+   "expr": "IF(FALSE(),Facts[Quantity] IN VALUES(Facts[Quantity]))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 30) A single value for column 'Quantity' in table 'Facts' cannot be determined. This can happen when a measure or function formula refers to a column that contains many values without specifying an aggregation such as min, max, count, or sum to get a single result.\""
+  },
+  {
+   "expr": "IF(FALSE(),Facts[Sales]=BLANK())",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 30) A single value for column 'Sales' in table 'Facts' cannot be determined. This can happen when a measure or function formula refers to a column that contains many values without specifying an aggregation such as min, max, count, or sum to get a single result.\""
+  },
+  {
+   "expr": "IF(FALSE(),VAR b = Facts[Quantity]>1 RETURN b)",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 38) A single value for column 'Quantity' in table 'Facts' cannot be determined. This can happen when a measure or function formula refers to a column that contains many values without specifying an aggregation such as min, max, count, or sum to get a single result.\""
+  },
+  {
+   "expr": "IF(FALSE(),Facts[Quantity]>1 && 1)",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 30) A single value for column 'Quantity' in table 'Facts' cannot be determined. This can happen when a measure or function formula refers to a column that contains many values without specifying an aggregation such as min, max, count, or sum to get a single result.\""
+  },
+  {
+   "expr": "IF(FALSE(),+(Facts[Quantity]>1))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 32) A single value for column 'Quantity' in table 'Facts' cannot be determined. This can happen when a measure or function formula refers to a column that contains many values without specifying an aggregation such as min, max, count, or sum to get a single result.\""
+  },
+  {
+   "expr": "IF(FALSE(),NOT(Facts[Quantity]))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 34) A single value for column 'Quantity' in table 'Facts' cannot be determined. This can happen when a measure or function formula refers to a column that contains many values without specifying an aggregation such as min, max, count, or sum to get a single result.\""
+  },
+  {
+   "expr": "IF(FALSE(),AND(Facts[Quantity],1))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 34) A single value for column 'Quantity' in table 'Facts' cannot be determined. This can happen when a measure or function formula refers to a column that contains many values without specifying an aggregation such as min, max, count, or sum to get a single result.\""
+  },
+  {
+   "expr": "IF(FALSE(),EXACT(Facts[Region],\"East\"))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 36) A single value for column 'Region' in table 'Facts' cannot be determined. This can happen when a measure or function formula refers to a column that contains many values without specifying an aggregation such as min, max, count, or sum to get a single result.\""
+  },
+  {
+   "expr": "IF(FALSE(),Facts[Quantity]<>BLANK())",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 30) A single value for column 'Quantity' in table 'Facts' cannot be determined. This can happen when a measure or function formula refers to a column that contains many values without specifying an aggregation such as min, max, count, or sum to get a single result.\""
+  },
+  {
+   "expr": "IF(FALSE(),Facts[Region]=\"East\" || Facts[Region]=\"West\")",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 30) A single value for column 'Region' in table 'Facts' cannot be determined. This can happen when a measure or function formula refers to a column that contains many values without specifying an aggregation such as min, max, count, or sum to get a single result.\""
+  },
+  {
+   "expr": "IF(FALSE(),Facts[Quantity])",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 30) A single value for column 'Quantity' in table 'Facts' cannot be determined. This can happen when a measure or function formula refers to a column that contains many values without specifying an aggregation such as min, max, count, or sum to get a single result.\""
+  },
+  {
+   "expr": "IF(FALSE(),Facts[Quantity]>1)",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 30) A single value for column 'Quantity' in table 'Facts' cannot be determined. This can happen when a measure or function formula refers to a column that contains many values without specifying an aggregation such as min, max, count, or sum to get a single result.\""
+  },
+  {
+   "expr": "IF(FALSE(),Facts[Quantity]+1)",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 30) A single value for column 'Quantity' in table 'Facts' cannot be determined. This can happen when a measure or function formula refers to a column that contains many values without specifying an aggregation such as min, max, count, or sum to get a single result.\""
+  },
+  {
+   "expr": "IF(TRUE(),1,Facts[Quantity])",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 31) A single value for column 'Quantity' in table 'Facts' cannot be determined. This can happen when a measure or function formula refers to a column that contains many values without specifying an aggregation such as min, max, count, or sum to get a single result.\""
+  },
+  {
+   "expr": "IF(TRUE(),1,Facts[Quantity]>1)",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 31) A single value for column 'Quantity' in table 'Facts' cannot be determined. This can happen when a measure or function formula refers to a column that contains many values without specifying an aggregation such as min, max, count, or sum to get a single result.\""
+  },
+  {
+   "expr": "IF(FALSE(),LEN(Facts[Region]))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 34) A single value for column 'Region' in table 'Facts' cannot be determined. This can happen when a measure or function formula refers to a column that contains many values without specifying an aggregation such as min, max, count, or sum to get a single result.\""
+  },
+  {
+   "expr": "IF(FALSE(),Facts[Region]=\"a\")",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 30) A single value for column 'Region' in table 'Facts' cannot be determined. This can happen when a measure or function formula refers to a column that contains many values without specifying an aggregation such as min, max, count, or sum to get a single result.\""
+  },
+  {
+   "expr": "IF(FALSE(),ISBLANK(Facts[Quantity]))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 38) A single value for column 'Quantity' in table 'Facts' cannot be determined. This can happen when a measure or function formula refers to a column that contains many values without specifying an aggregation such as min, max, count, or sum to get a single result.\""
+  },
+  {
+   "expr": "IF(FALSE(),NOT(Facts[Quantity]>1))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 34) A single value for column 'Quantity' in table 'Facts' cannot be determined. This can happen when a measure or function formula refers to a column that contains many values without specifying an aggregation such as min, max, count, or sum to get a single result.\""
+  },
+  {
+   "expr": "IF(FALSE(),Facts[Quantity]>1 || Facts[Quantity]<0)",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 30) A single value for column 'Quantity' in table 'Facts' cannot be determined. This can happen when a measure or function formula refers to a column that contains many values without specifying an aggregation such as min, max, count, or sum to get a single result.\""
+  },
+  {
+   "expr": "IF(FALSE(),Facts[Quantity]>1 && TRUE())",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 30) A single value for column 'Quantity' in table 'Facts' cannot be determined. This can happen when a measure or function formula refers to a column that contains many values without specifying an aggregation such as min, max, count, or sum to get a single result.\""
+  },
+  {
+   "expr": "IF(FALSE(),Facts[Quantity] IN {1})",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 30) A single value for column 'Quantity' in table 'Facts' cannot be determined. This can happen when a measure or function formula refers to a column that contains many values without specifying an aggregation such as min, max, count, or sum to get a single result.\""
+  },
+  {
+   "expr": "IF(FALSE(),Facts[Nope])",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 30) Column 'Nope' in table 'Facts' cannot be found or may not be used in this expression.\""
+  },
+  {
+   "expr": "IF(FALSE(),Nope[x])",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 30) Cannot find table 'Nope'.\""
+  },
+  {
+   "expr": "IF(FALSE(),SUM(Facts[Nope]))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 34) Column 'Nope' in table 'Facts' cannot be found or may not be used in this expression.\""
+  },
+  {
+   "expr": "IF(FALSE(),SUM(Facts[Region]))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 34) The function SUM cannot work with values of type String.\""
+  },
+  {
+   "expr": "IF(FALSE(),SUMX(Facts,Facts[Quantity]>1))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 41) The function SUMX cannot work with values of type Boolean.\""
+  },
+  {
+   "expr": "IF(FALSE(),SELECTEDVALUE(Facts[Nope]))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 44) Column 'Nope' in table 'Facts' cannot be found or may not be used in this expression.\""
+  },
+  {
+   "expr": "IF(FALSE(),CALCULATE(SUM(Facts[Quantity]),Facts[Nope]=1))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 61) Column 'Nope' in table 'Facts' cannot be found or may not be used in this expression.\""
+  },
+  {
+   "expr": "IF(TRUE(),1,MAX(TRUE(),FALSE()))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 35) Min or Max of booleans are not currently supported.\""
+  },
+  {
+   "expr": "IF(TRUE(),1,SUM(Facts[Region]))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 35) The function SUM cannot work with values of type String.\""
+  },
+  {
+   "expr": "IF(TRUE(),1,SUM(Facts[Nope]))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 35) Column 'Nope' in table 'Facts' cannot be found or may not be used in this expression.\""
+  },
+  {
+   "expr": "SWITCH(1,1,1,Facts[Quantity])",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 32) A single value for column 'Quantity' in table 'Facts' cannot be determined. This can happen when a measure or function formula refers to a column that contains many values without specifying an aggregation such as min, max, count, or sum to get a single result.\""
+  },
+  {
+   "expr": "SWITCH(1,1,1,2,Facts[Quantity]>1)",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 34) A single value for column 'Quantity' in table 'Facts' cannot be determined. This can happen when a measure or function formula refers to a column that contains many values without specifying an aggregation such as min, max, count, or sum to get a single result.\""
+  },
+  {
+   "expr": "SWITCH(1,1,1,2,EXACT(Facts[Region],\"a\"))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 40) A single value for column 'Region' in table 'Facts' cannot be determined. This can happen when a measure or function formula refers to a column that contains many values without specifying an aggregation such as min, max, count, or sum to get a single result.\""
+  },
+  {
+   "expr": "IFERROR(1,Facts[Quantity])",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 29) A single value for column 'Quantity' in table 'Facts' cannot be determined. This can happen when a measure or function formula refers to a column that contains many values without specifying an aggregation such as min, max, count, or sum to get a single result.\""
+  },
+  {
+   "expr": "IFERROR(1,Facts[Quantity]>1)",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 29) A single value for column 'Quantity' in table 'Facts' cannot be determined. This can happen when a measure or function formula refers to a column that contains many values without specifying an aggregation such as min, max, count, or sum to get a single result.\""
+  },
+  {
+   "expr": "IFERROR(1,SUM(Facts[Nope]))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 33) Column 'Nope' in table 'Facts' cannot be found or may not be used in this expression.\""
+  },
+  {
+   "expr": "IFERROR(1,Facts[Nope])",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 29) Column 'Nope' in table 'Facts' cannot be found or may not be used in this expression.\""
+  },
+  {
+   "expr": "COALESCE(1,Facts[Quantity])",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 30) A single value for column 'Quantity' in table 'Facts' cannot be determined. This can happen when a measure or function formula refers to a column that contains many values without specifying an aggregation such as min, max, count, or sum to get a single result.\""
+  },
+  {
+   "expr": "COALESCE(1,Facts[Quantity]>1)",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 30) A single value for column 'Quantity' in table 'Facts' cannot be determined. This can happen when a measure or function formula refers to a column that contains many values without specifying an aggregation such as min, max, count, or sum to get a single result.\""
+  },
+  {
+   "expr": "COALESCE(1,SUM(Facts[Nope]))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 34) Column 'Nope' in table 'Facts' cannot be found or may not be used in this expression.\""
+  },
+  {
+   "expr": "TRUE() || Facts[Quantity]>1",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 29) A single value for column 'Quantity' in table 'Facts' cannot be determined. This can happen when a measure or function formula refers to a column that contains many values without specifying an aggregation such as min, max, count, or sum to get a single result.\""
+  },
+  {
+   "expr": "FALSE() && Facts[Quantity]>1",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 30) A single value for column 'Quantity' in table 'Facts' cannot be determined. This can happen when a measure or function formula refers to a column that contains many values without specifying an aggregation such as min, max, count, or sum to get a single result.\""
+  },
+  {
+   "expr": "TRUE() || SUM(Facts[Nope])>1",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 33) Column 'Nope' in table 'Facts' cannot be found or may not be used in this expression.\""
+  },
+  {
+   "expr": "FALSE() && SUM(Facts[Nope])>1",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 34) Column 'Nope' in table 'Facts' cannot be found or may not be used in this expression.\""
+  },
+  {
+   "expr": "TRUE() || EXACT(Facts[Region],\"a\")",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 35) A single value for column 'Region' in table 'Facts' cannot be determined. This can happen when a measure or function formula refers to a column that contains many values without specifying an aggregation such as min, max, count, or sum to get a single result.\""
+  },
+  {
+   "expr": "FALSE() && EXACT(Facts[Region],\"a\")",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 36) A single value for column 'Region' in table 'Facts' cannot be determined. This can happen when a measure or function formula refers to a column that contains many values without specifying an aggregation such as min, max, count, or sum to get a single result.\""
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]=IF(FALSE(),\"a\"))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 46) DAX comparison operations do not support comparing values of type Integer with values of type Text. Consider using the VALUE or FORMAT function to convert one of the values.\""
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]>IF(FALSE(),\"a\"))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 46) DAX comparison operations do not support comparing values of type Integer with values of type Text. Consider using the VALUE or FORMAT function to convert one of the values.\""
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(Facts),Facts[Region]=SELECTEDVALUE(Facts[Quantity]))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 46) DAX comparison operations do not support comparing values of type Text with values of type Integer. Consider using the VALUE or FORMAT function to convert one of the values.\""
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(Facts),Facts[Region]>SELECTEDVALUE(Facts[Quantity]))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 46) DAX comparison operations do not support comparing values of type Text with values of type Integer. Consider using the VALUE or FORMAT function to convert one of the values.\""
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(Facts),Facts[Region]=SELECTEDVALUE(Facts[Sales]))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 46) DAX comparison operations do not support comparing values of type Text with values of type Number. Consider using the VALUE or FORMAT function to convert one of the values.\""
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(Facts),Facts[Region]>SELECTEDVALUE(Facts[Sales]))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 46) DAX comparison operations do not support comparing values of type Text with values of type Number. Consider using the VALUE or FORMAT function to convert one of the values.\""
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(Facts),Facts[Region]=IF(FALSE(),1))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 46) DAX comparison operations do not support comparing values of type Text with values of type Integer. Consider using the VALUE or FORMAT function to convert one of the values.\""
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(Facts),Facts[Region]>IF(FALSE(),1))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 46) DAX comparison operations do not support comparing values of type Text with values of type Integer. Consider using the VALUE or FORMAT function to convert one of the values.\""
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(Facts),Facts[Sales]=IF(FALSE(),\"a\"))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 46) DAX comparison operations do not support comparing values of type Number with values of type Text. Consider using the VALUE or FORMAT function to convert one of the values.\""
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(Facts),Facts[Sales]>IF(FALSE(),\"a\"))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 46) DAX comparison operations do not support comparing values of type Number with values of type Text. Consider using the VALUE or FORMAT function to convert one of the values.\""
+  },
+  {
+   "expr": "1 = IF(FALSE(),\"a\")",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 19) DAX comparison operations do not support comparing values of type Integer with values of type Text. Consider using the VALUE or FORMAT function to convert one of the values.\""
+  },
+  {
+   "expr": "1 < IF(FALSE(),\"a\")",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 19) DAX comparison operations do not support comparing values of type Integer with values of type Text. Consider using the VALUE or FORMAT function to convert one of the values.\""
+  },
+  {
+   "expr": "\"a\" = IF(FALSE(),1)",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 19) DAX comparison operations do not support comparing values of type Text with values of type Integer. Consider using the VALUE or FORMAT function to convert one of the values.\""
+  },
+  {
+   "expr": "\"a\" < IF(FALSE(),1)",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 19) DAX comparison operations do not support comparing values of type Text with values of type Integer. Consider using the VALUE or FORMAT function to convert one of the values.\""
+  },
+  {
+   "expr": "SELECTEDVALUE(Facts[Region]) = SELECTEDVALUE(Facts[Quantity])",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 19) DAX comparison operations do not support comparing values of type Text with values of type Integer. Consider using the VALUE or FORMAT function to convert one of the values.\""
+  },
+  {
+   "expr": "SELECTEDVALUE(Facts[Region]) < SELECTEDVALUE(Facts[Quantity])",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 19) DAX comparison operations do not support comparing values of type Text with values of type Integer. Consider using the VALUE or FORMAT function to convert one of the values.\""
+  },
+  {
+   "expr": "SELECTEDVALUE(Facts[Region]) = 1",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 19) DAX comparison operations do not support comparing values of type Text with values of type Integer. Consider using the VALUE or FORMAT function to convert one of the values.\""
+  },
+  {
+   "expr": "SELECTEDVALUE(Facts[Region]) < 1",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 19) DAX comparison operations do not support comparing values of type Text with values of type Integer. Consider using the VALUE or FORMAT function to convert one of the values.\""
+  },
+  {
+   "expr": "SELECTEDVALUE(Facts[Quantity]) = \"a\"",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 19) DAX comparison operations do not support comparing values of type Integer with values of type Text. Consider using the VALUE or FORMAT function to convert one of the values.\""
+  },
+  {
+   "expr": "SELECTEDVALUE(Facts[Quantity]) < \"a\"",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 19) DAX comparison operations do not support comparing values of type Integer with values of type Text. Consider using the VALUE or FORMAT function to convert one of the values.\""
+  },
+  {
+   "expr": "IF(FALSE(),\"a\") = IF(FALSE(),1)",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 19) DAX comparison operations do not support comparing values of type Text with values of type Integer. Consider using the VALUE or FORMAT function to convert one of the values.\""
+  },
+  {
+   "expr": "IF(FALSE(),\"a\") < IF(FALSE(),1)",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 19) DAX comparison operations do not support comparing values of type Text with values of type Integer. Consider using the VALUE or FORMAT function to convert one of the values.\""
+  },
+  {
+   "expr": "IF(FALSE(),TRUE()) = IF(FALSE(),1)",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 19) DAX comparison operations do not support comparing values of type True/False with values of type Integer. Consider using the VALUE or FORMAT function to convert one of the values.\""
+  },
+  {
+   "expr": "IF(FALSE(),TRUE()) < IF(FALSE(),1)",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 19) DAX comparison operations do not support comparing values of type True/False with values of type Integer. Consider using the VALUE or FORMAT function to convert one of the values.\""
+  },
+  {
+   "expr": "LOOKUPVALUE(Facts[Region],Facts[Quantity],99) = 1",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 19) DAX comparison operations do not support comparing values of type Text with values of type Integer. Consider using the VALUE or FORMAT function to convert one of the values.\""
+  },
+  {
+   "expr": "LOOKUPVALUE(Facts[Region],Facts[Quantity],99) < 1",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 19) DAX comparison operations do not support comparing values of type Text with values of type Integer. Consider using the VALUE or FORMAT function to convert one of the values.\""
+  },
+  {
+   "expr": "LOOKUPVALUE(Facts[Quantity],Facts[Quantity],99) = \"a\"",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 19) DAX comparison operations do not support comparing values of type Integer with values of type Text. Consider using the VALUE or FORMAT function to convert one of the values.\""
+  },
+  {
+   "expr": "LOOKUPVALUE(Facts[Quantity],Facts[Quantity],99) < \"a\"",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 19) DAX comparison operations do not support comparing values of type Integer with values of type Text. Consider using the VALUE or FORMAT function to convert one of the values.\""
+  },
+  {
+   "expr": "SWITCH(1,2,\"a\") = 1",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 19) DAX comparison operations do not support comparing values of type Text with values of type Integer. Consider using the VALUE or FORMAT function to convert one of the values.\""
+  },
+  {
+   "expr": "SWITCH(1,2,\"a\") < 1",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 19) DAX comparison operations do not support comparing values of type Text with values of type Integer. Consider using the VALUE or FORMAT function to convert one of the values.\""
+  },
+  {
+   "expr": "SWITCH(1,2,1) = \"a\"",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 19) DAX comparison operations do not support comparing values of type Integer with values of type Text. Consider using the VALUE or FORMAT function to convert one of the values.\""
+  },
+  {
+   "expr": "SWITCH(1,2,1) < \"a\"",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 19) DAX comparison operations do not support comparing values of type Integer with values of type Text. Consider using the VALUE or FORMAT function to convert one of the values.\""
+  },
+  {
+   "expr": "IFERROR(BLANK(),\"a\") = 1",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 19) DAX comparison operations do not support comparing values of type Text with values of type Integer. Consider using the VALUE or FORMAT function to convert one of the values.\""
+  },
+  {
+   "expr": "IFERROR(BLANK(),\"a\") < 1",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 19) DAX comparison operations do not support comparing values of type Text with values of type Integer. Consider using the VALUE or FORMAT function to convert one of the values.\""
+  },
+  {
+   "expr": "VAR v = IF(FALSE(),\"a\") RETURN v = 1",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 50) DAX comparison operations do not support comparing values of type Text with values of type Integer. Consider using the VALUE or FORMAT function to convert one of the values.\""
+  },
+  {
+   "expr": "VAR v = IF(FALSE(),\"a\") RETURN v < 1",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 50) DAX comparison operations do not support comparing values of type Text with values of type Integer. Consider using the VALUE or FORMAT function to convert one of the values.\""
+  },
+  {
+   "expr": "VAR v = SELECTEDVALUE(Facts[Region]) RETURN v = 1",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 63) DAX comparison operations do not support comparing values of type Text with values of type Integer. Consider using the VALUE or FORMAT function to convert one of the values.\""
+  },
+  {
+   "expr": "VAR v = SELECTEDVALUE(Facts[Region]) RETURN v < 1",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 63) DAX comparison operations do not support comparing values of type Text with values of type Integer. Consider using the VALUE or FORMAT function to convert one of the values.\""
+  },
+  {
+   "expr": "COUNTROWS(FILTER(Facts,Facts[Region]=SELECTEDVALUE(Facts[Quantity])))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 42) DAX comparison operations do not support comparing values of type Text with values of type Integer. Consider using the VALUE or FORMAT function to convert one of the values.\""
+  },
+  {
+   "expr": "SUMX(Facts,IF(Facts[Region]=SELECTEDVALUE(Facts[Quantity]),1,0))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 33) DAX comparison operations do not support comparing values of type Text with values of type Integer. Consider using the VALUE or FORMAT function to convert one of the values.\""
+  },
+  {
+   "expr": "COUNTROWS(FILTER(Facts,Facts[Region]>SELECTEDVALUE(Facts[Quantity])))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 42) DAX comparison operations do not support comparing values of type Text with values of type Integer. Consider using the VALUE or FORMAT function to convert one of the values.\""
+  },
+  {
+   "expr": "SUMX(Facts,IF(Facts[Region]>SELECTEDVALUE(Facts[Quantity]),1,0))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 33) DAX comparison operations do not support comparing values of type Text with values of type Integer. Consider using the VALUE or FORMAT function to convert one of the values.\""
+  },
+  {
+   "expr": "COUNTROWS(FILTER(Facts,Facts[Quantity]=SELECTEDVALUE(Facts[Region])))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 42) DAX comparison operations do not support comparing values of type Integer with values of type Text. Consider using the VALUE or FORMAT function to convert one of the values.\""
+  },
+  {
+   "expr": "SUMX(Facts,IF(Facts[Quantity]=SELECTEDVALUE(Facts[Region]),1,0))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 33) DAX comparison operations do not support comparing values of type Integer with values of type Text. Consider using the VALUE or FORMAT function to convert one of the values.\""
+  },
+  {
+   "expr": "COUNTROWS(FILTER(Facts,Facts[Quantity]>SELECTEDVALUE(Facts[Region])))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 42) DAX comparison operations do not support comparing values of type Integer with values of type Text. Consider using the VALUE or FORMAT function to convert one of the values.\""
+  },
+  {
+   "expr": "SUMX(Facts,IF(Facts[Quantity]>SELECTEDVALUE(Facts[Region]),1,0))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 33) DAX comparison operations do not support comparing values of type Integer with values of type Text. Consider using the VALUE or FORMAT function to convert one of the values.\""
+  },
+  {
+   "expr": "COUNTROWS(FILTER(Facts,Facts[Region]=IF(FALSE(),1)))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 42) DAX comparison operations do not support comparing values of type Text with values of type Integer. Consider using the VALUE or FORMAT function to convert one of the values.\""
+  },
+  {
+   "expr": "COUNTROWS(FILTER(Facts,Facts[Quantity]=IF(FALSE(),\"a\")))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 42) DAX comparison operations do not support comparing values of type Integer with values of type Text. Consider using the VALUE or FORMAT function to convert one of the values.\""
+  },
+  {
+   "expr": "SUMX(Facts,IF(Facts[Quantity]=IF(FALSE(),\"a\"),1,0))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 33) DAX comparison operations do not support comparing values of type Integer with values of type Text. Consider using the VALUE or FORMAT function to convert one of the values.\""
+  },
+  {
+   "expr": "COUNTROWS(FILTER(Facts,Facts[Quantity]>IF(FALSE(),\"a\")))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 42) DAX comparison operations do not support comparing values of type Integer with values of type Text. Consider using the VALUE or FORMAT function to convert one of the values.\""
+  },
+  {
+   "expr": "SUMX(Facts,IF(Facts[Quantity]>IF(FALSE(),\"a\"),1,0))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 33) DAX comparison operations do not support comparing values of type Integer with values of type Text. Consider using the VALUE or FORMAT function to convert one of the values.\""
+  },
+  {
+   "expr": "COUNTROWS(FILTER(Facts,Facts[Region]=LOOKUPVALUE(Facts[Quantity],Facts[Quantity],99)))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 42) DAX comparison operations do not support comparing values of type Text with values of type Integer. Consider using the VALUE or FORMAT function to convert one of the values.\""
+  },
+  {
+   "expr": "COUNTROWS(FILTER(Facts,Facts[Quantity]=LOOKUPVALUE(Facts[Region],Facts[Quantity],99)))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 42) DAX comparison operations do not support comparing values of type Integer with values of type Text. Consider using the VALUE or FORMAT function to convert one of the values.\""
+  },
+  {
+   "expr": "SUMX(Facts,IF(Facts[Quantity]=LOOKUPVALUE(Facts[Region],Facts[Quantity],99),1,0))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 33) DAX comparison operations do not support comparing values of type Integer with values of type Text. Consider using the VALUE or FORMAT function to convert one of the values.\""
+  },
+  {
+   "expr": "COUNTROWS(FILTER(Facts,Facts[Quantity]>LOOKUPVALUE(Facts[Region],Facts[Quantity],99)))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 42) DAX comparison operations do not support comparing values of type Integer with values of type Text. Consider using the VALUE or FORMAT function to convert one of the values.\""
+  },
+  {
+   "expr": "SUMX(Facts,IF(Facts[Quantity]>LOOKUPVALUE(Facts[Region],Facts[Quantity],99),1,0))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 33) DAX comparison operations do not support comparing values of type Integer with values of type Text. Consider using the VALUE or FORMAT function to convert one of the values.\""
+  },
+  {
+   "expr": "COUNTROWS(FILTER(Facts,Facts[Quantity]=IFERROR(BLANK(),\"a\")))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 42) DAX comparison operations do not support comparing values of type Integer with values of type Text. Consider using the VALUE or FORMAT function to convert one of the values.\""
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]=IFERROR(BLANK(),\"a\"))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 46) DAX comparison operations do not support comparing values of type Integer with values of type Text. Consider using the VALUE or FORMAT function to convert one of the values.\""
+  },
+  {
+   "expr": "SUMX(Facts,IF(Facts[Quantity]=IFERROR(BLANK(),\"a\"),1,0))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 33) DAX comparison operations do not support comparing values of type Integer with values of type Text. Consider using the VALUE or FORMAT function to convert one of the values.\""
+  },
+  {
+   "expr": "COUNTROWS(FILTER(Facts,Facts[Quantity]>IFERROR(BLANK(),\"a\")))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 42) DAX comparison operations do not support comparing values of type Integer with values of type Text. Consider using the VALUE or FORMAT function to convert one of the values.\""
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]>IFERROR(BLANK(),\"a\"))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 46) DAX comparison operations do not support comparing values of type Integer with values of type Text. Consider using the VALUE or FORMAT function to convert one of the values.\""
+  },
+  {
+   "expr": "SUMX(Facts,IF(Facts[Quantity]>IFERROR(BLANK(),\"a\"),1,0))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 33) DAX comparison operations do not support comparing values of type Integer with values of type Text. Consider using the VALUE or FORMAT function to convert one of the values.\""
+  },
+  {
+   "expr": "COUNTROWS(FILTER(Facts,Facts[Region]=SWITCH(1,2,1)))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 42) DAX comparison operations do not support comparing values of type Text with values of type Integer. Consider using the VALUE or FORMAT function to convert one of the values.\""
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(Facts),Facts[Region]=SWITCH(1,2,1))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 46) DAX comparison operations do not support comparing values of type Text with values of type Integer. Consider using the VALUE or FORMAT function to convert one of the values.\""
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(Facts),Facts[Region]>SWITCH(1,2,1))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 46) DAX comparison operations do not support comparing values of type Text with values of type Integer. Consider using the VALUE or FORMAT function to convert one of the values.\""
+  },
+  {
+   "expr": "COUNTROWS(FILTER(Facts,Facts[Quantity]=SWITCH(1,2,\"a\")))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 42) DAX comparison operations do not support comparing values of type Integer with values of type Text. Consider using the VALUE or FORMAT function to convert one of the values.\""
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]=SWITCH(1,2,\"a\"))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 46) DAX comparison operations do not support comparing values of type Integer with values of type Text. Consider using the VALUE or FORMAT function to convert one of the values.\""
+  },
+  {
+   "expr": "SUMX(Facts,IF(Facts[Quantity]=SWITCH(1,2,\"a\"),1,0))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 33) DAX comparison operations do not support comparing values of type Integer with values of type Text. Consider using the VALUE or FORMAT function to convert one of the values.\""
+  },
+  {
+   "expr": "COUNTROWS(FILTER(Facts,Facts[Quantity]>SWITCH(1,2,\"a\")))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 42) DAX comparison operations do not support comparing values of type Integer with values of type Text. Consider using the VALUE or FORMAT function to convert one of the values.\""
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]>SWITCH(1,2,\"a\"))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 46) DAX comparison operations do not support comparing values of type Integer with values of type Text. Consider using the VALUE or FORMAT function to convert one of the values.\""
+  },
+  {
+   "expr": "SUMX(Facts,IF(Facts[Quantity]>SWITCH(1,2,\"a\"),1,0))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 33) DAX comparison operations do not support comparing values of type Integer with values of type Text. Consider using the VALUE or FORMAT function to convert one of the values.\""
+  },
+  {
+   "expr": "CALCULATE(COUNT(Facts[Sales]),Facts[Region]=\"North\")",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "CALCULATE(COUNT(Facts[Note]),Facts[Note]=BLANK())",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "CALCULATE(COUNTA(Facts[Sales]),Facts[Region]=\"North\")",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "CALCULATE(COUNTA(Facts[Note]),Facts[Note]=BLANK())",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "CALCULATE(DISTINCTCOUNTNOBLANK(Facts[Sales]),Facts[Region]=\"North\")",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "CALCULATE(DISTINCTCOUNTNOBLANK(Facts[Note]),Facts[Note]=BLANK())",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "TIME(1,2,3)&\"\"",
+   "powerbi": "1:02:03 AM"
+  },
+  {
+   "expr": "(DATE(1899,12,30))&\"\"",
+   "powerbi": "12:00:00 AM"
+  },
+  {
+   "expr": "(DATE(1899,12,30)+TIME(2,0,0))&\"\"",
+   "powerbi": "2:00:00 AM"
+  },
+  {
+   "expr": "TIME(25,0,0)&\"\"",
+   "powerbi": "1:00:00 AM"
+  },
+  {
+   "expr": "TIME(0,60,0)&\"\"",
+   "powerbi": "1:00:00 AM"
+  },
+  {
+   "expr": "TIME(0,0,0)&\"\"",
+   "powerbi": "12:00:00 AM"
+  },
+  {
+   "expr": "TIME(BLANK(),0,0)&\"\"",
+   "powerbi": "12:00:00 AM"
+  },
+  {
+   "expr": "HOUR(0.999999)",
+   "powerbi": "23"
+  },
+  {
+   "expr": "MINUTE(0.0006944)",
+   "powerbi": "0"
+  },
+  {
+   "expr": "SECOND(0.9999999)",
+   "powerbi": "59"
+  },
+  {
+   "expr": "SECOND(TIME(1,2,3)+0.6/86400)",
+   "powerbi": "3"
+  },
+  {
+   "expr": "SUMX(Facts,SUMX(Facts,EARLIER(Facts[Quantity],1.5)))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 65) The second argument of function EARLIER must be an integer greater than zero.\""
+  },
+  {
+   "expr": "SUMX(Facts,SUMX(Facts,EARLIER(Facts[Quantity],\"1\")))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 65) The second argument of function EARLIER must be an integer greater than zero.\""
+  },
+  {
+   "expr": "SUMX(Facts,SUMX(Facts,EARLIER(Facts[Quantity],TRUE())))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 65) The second argument of function EARLIER must be an integer greater than zero.\""
+  },
+  {
+   "expr": "FORMAT(-0.001,\"0%\")",
+   "powerbi": "0%"
+  },
+  {
+   "expr": "FORMAT(-0.001,\"#.##\")",
+   "powerbi": "."
+  },
+  {
+   "expr": "FORMAT(-0.001,\"#,##0;(#,##0)\")",
+   "powerbi": "0"
+  },
+  {
+   "expr": "FORMAT(-0.001,\"#\")",
+   "powerbi": ""
+  },
+  {
+   "expr": "FORMAT(1234.5678,\".00\")",
+   "powerbi": "1234.57"
+  },
+  {
+   "expr": "FORMAT(-0.001,\"$#,##0.00\")",
+   "powerbi": "$0.00"
+  },
+  {
+   "expr": "FORMAT(-0.001,\"\\\\#0\")",
+   "powerbi": "\\0"
+  },
+  {
+   "expr": "FORMAT(-0.001,\"Currency\")",
+   "powerbi": "$0.00"
+  },
+  {
+   "expr": "FORMAT(1234.5678,\"@\")",
+   "powerbi": "1234.5678"
+  },
+  {
+   "expr": "FORMAT(-0.001,\"@\")",
+   "powerbi": "-0.001"
+  },
+  {
+   "expr": "FORMAT(0,\"@\")",
+   "powerbi": "0"
+  },
+  {
+   "expr": "FORMAT(-0.001,\"0.00;;\")",
+   "powerbi": "0.00"
+  },
+  {
+   "expr": "FORMAT(0,\"0.00;;\")",
+   "powerbi": "0.00"
+  },
+  {
+   "expr": "FORMAT(1234.5678,\"[Red]0\")",
+   "powerbi": "1235"
+  },
+  {
+   "expr": "FORMAT(-0.001,\"[Red]0\")",
+   "powerbi": "0"
+  },
+  {
+   "expr": "FORMAT(0,\"[Red]0\")",
+   "powerbi": "0"
+  },
+  {
+   "expr": "FORMAT(-0.001,\"0 ;(0)\")",
+   "powerbi": "0 "
+  },
+  {
+   "expr": "FORMAT(-0.001,\"0\\\\.0\")",
+   "powerbi": "0\\.0"
+  },
+  {
+   "expr": "FORMAT(DATE(2020,3,4),\"ttttt\")",
+   "powerbi": "12:00:00 AM"
+  },
+  {
+   "expr": "FORMAT(DATE(2020,3,4),\"mmmmm\")",
+   "powerbi": "March3"
+  },
+  {
+   "expr": "FORMAT(DATE(2020,3,4)+TIME(13,5,9),\"ttttt\")",
+   "powerbi": "1:05:09 PM"
+  },
+  {
+   "expr": "FORMAT(DATE(2020,3,4)+TIME(13,5,9),\"mmmmm\")",
+   "powerbi": "March3"
+  },
+  {
+   "expr": "FORMAT(TIME(13,5,9),\"General Date\")",
+   "powerbi": "1:05:09 PM"
+  },
+  {
+   "expr": "FORMAT(TIME(13,5,9),\"c\")",
+   "powerbi": "1:05:09 PM"
+  },
+  {
+   "expr": "FORMAT(TIME(13,5,9),\"ttttt\")",
+   "powerbi": "1:05:09 PM"
+  },
+  {
+   "expr": "FORMAT(TIME(13,5,9),\"mmmmm\")",
+   "powerbi": "December12"
+  },
+  {
+   "expr": "FORMAT(DATE(1999,12,31)+TIME(0,0,1),\"ttttt\")",
+   "powerbi": "12:00:01 AM"
+  },
+  {
+   "expr": "FORMAT(DATE(1999,12,31)+TIME(0,0,1),\"mmmmm\")",
+   "powerbi": "December12"
+  },
+  {
+   "expr": "FORMAT(FALSE(),\"General\")",
+   "powerbi": "Ge0eral"
+  },
+  {
+   "expr": "LOG(8,BLANK())",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 19) An argument of function 'LOG' has the wrong data type or the result is too large or too small.\""
+  },
+  {
+   "expr": "QUOTIENT(BLANK(),2)",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "EVEN(BLANK())",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "GCD(-12,18)",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 19) An argument of function 'GCD' has the wrong data type or the result is too large or too small.\""
+  },
+  {
+   "expr": "GCD(12.9,18.9)",
+   "powerbi": "1"
+  },
+  {
+   "expr": "LCM(-4,6)",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 19) An argument of function 'LCM' has the wrong data type or the result is too large or too small.\""
+  },
+  {
+   "expr": "LCM(4.9,6.9)",
+   "powerbi": "35"
+  },
+  {
+   "expr": "DEGREES(BLANK())",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "SEARCH(BLANK(),\"abc\")",
+   "powerbi": "1"
+  },
+  {
+   "expr": "FIND(\"b\",\"abc\",BLANK())",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 19) An argument of function 'FIND' has the wrong data type or has an invalid value.\""
+  },
+  {
+   "expr": "\"a\"&TIME(1,2,3)",
+   "powerbi": "a1:02:03 AM"
+  },
+  {
+   "expr": "CONCATENATEX(INDEX(1,ALL(Facts),ORDERBY(Facts[Quantity])),Facts[Quantity],\",\")",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 40) INDEX's Relation parameter may have duplicate rows. This is not allowed.\""
+  },
+  {
+   "expr": "CONCATENATEX(OFFSET(1,ALL(Facts),ORDERBY(Facts[Quantity])),Facts[Quantity],\",\")",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 41) OFFSET's Relation parameter may have duplicate rows. This is not allowed.\""
+  },
+  {
+   "expr": "CONCATENATEX(WINDOW(1,ABS,2,ABS,ALL(Facts),ORDERBY(Facts[Quantity])),Facts[Quantity],\",\")",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 51) WINDOW's Relation parameter may have duplicate rows. This is not allowed.\""
+  },
+  {
+   "expr": "CONCATENATEX(INDEX(1,VALUES(Facts),ORDERBY(Facts[Quantity])),Facts[Quantity],\",\")",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 40) INDEX's Relation parameter may have duplicate rows. This is not allowed.\""
+  },
+  {
+   "expr": "CONCATENATEX(OFFSET(1,VALUES(Facts),ORDERBY(Facts[Quantity])),Facts[Quantity],\",\")",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 41) OFFSET's Relation parameter may have duplicate rows. This is not allowed.\""
+  },
+  {
+   "expr": "CONCATENATEX(WINDOW(1,ABS,2,ABS,VALUES(Facts),ORDERBY(Facts[Quantity])),Facts[Quantity],\",\")",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 51) WINDOW's Relation parameter may have duplicate rows. This is not allowed.\""
+  },
+  {
+   "expr": "CONCATENATEX(INDEX(1,UNION(VALUES(Facts[Region]),VALUES(Facts[Region])),ORDERBY(Facts[Region])),Facts[Region],\",\")",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 40) INDEX's Relation parameter may have duplicate rows. This is not allowed.\""
+  },
+  {
+   "expr": "CONCATENATEX(OFFSET(1,UNION(VALUES(Facts[Region]),VALUES(Facts[Region])),ORDERBY(Facts[Region])),Facts[Region],\",\")",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 41) OFFSET's Relation parameter may have duplicate rows. This is not allowed.\""
+  },
+  {
+   "expr": "CONCATENATEX(WINDOW(1,ABS,2,ABS,UNION(VALUES(Facts[Region]),VALUES(Facts[Region])),ORDERBY(Facts[Region])),Facts[Region],\",\")",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 51) WINDOW's Relation parameter may have duplicate rows. This is not allowed.\""
+  },
+  {
+   "expr": "SUMX(ADDCOLUMNS(ALL(Facts[Quantity]),\"n\",RANK(DENSE,ALL(Facts[Quantity]),ORDERBY(Facts[Quantity]))),[n])",
+   "powerbi": "21"
+  },
+  {
+   "expr": "SUMX(ADDCOLUMNS(ALL(Facts[Quantity]),\"n\",RANK(SKIP,ALL(Facts[Quantity]),ORDERBY(Facts[Quantity],DESC))),[n])",
+   "powerbi": "21"
+  },
+  {
+   "expr": "SUMX(ADDCOLUMNS(ALL(Facts[Quantity]),\"n\",ROWNUMBER(ALL(Facts[Quantity]),ORDERBY(Facts[Quantity]))),[n])",
+   "powerbi": "21"
+  },
+  {
+   "expr": "SUMX(ADDCOLUMNS(ALL(Facts[Region],Facts[Quantity]),\"n\",ROWNUMBER(ALL(Facts[Region],Facts[Quantity]),ORDERBY(Facts[Quantity]))),[n])",
+   "powerbi": "21"
+  },
+  {
+   "expr": "SUMX(ADDCOLUMNS(ALL(Facts[Region],Facts[Quantity]),\"n\",RANK(SKIP,ALL(Facts[Region],Facts[Quantity]),ORDERBY(Facts[Region]))),[n])",
+   "powerbi": "17"
+  },
+  {
+   "expr": "SUMX(ADDCOLUMNS(ALL(Facts[Region],Facts[Quantity]),\"n\",RANK(DENSE,ALL(Facts[Region],Facts[Quantity]),ORDERBY(Facts[Region]))),[n])",
+   "powerbi": "11"
+  },
+  {
+   "expr": "SUMX(ADDCOLUMNS(ALL(Facts[Region],Facts[Quantity]),\"n\",RANK(DENSE,ALL(Facts[Region],Facts[Quantity]),ORDERBY(Facts[Region]),,PARTITIONBY(Facts[Region]))),[n])",
+   "powerbi": "6"
+  },
+  {
+   "expr": "SUMX(ADDCOLUMNS(ALL(Facts[Region],Facts[Quantity]),\"n\",ROWNUMBER(ALL(Facts[Region],Facts[Quantity]),ORDERBY(Facts[Region],ASC,Facts[Quantity],DESC))),[n])",
+   "powerbi": "21"
+  },
+  {
+   "expr": "MAXX(ADDCOLUMNS(ALL(Facts[Region],Facts[Quantity]),\"n\",ROWNUMBER(ALL(Facts[Region],Facts[Quantity]),ORDERBY(Facts[Region],ASC,Facts[Quantity],DESC))),[n])",
+   "powerbi": "6"
+  },
+  {
+   "expr": "CONCATENATEX(ADDCOLUMNS(ALL(Facts[Region],Facts[Quantity]),\"n\",ROWNUMBER(ALL(Facts[Region],Facts[Quantity]),ORDERBY(Facts[Region],ASC,Facts[Quantity],DESC))),[n],\",\",Facts[Quantity])",
+   "powerbi": "6,3,2,5,4,1"
+  },
+  {
+   "expr": "CONCATENATEX(ADDCOLUMNS(ALL(Facts[Region],Facts[Quantity]),\"n\",RANK(SKIP,ALL(Facts[Region],Facts[Quantity]),ORDERBY(Facts[Region],ASC))),[n],\",\",Facts[Quantity])",
+   "powerbi": "5,1,1,5,4,1"
+  },
+  {
+   "expr": "CONCATENATEX(ADDCOLUMNS(ALL(Facts[Region],Facts[Quantity]),\"n\",RANK(DENSE,ALL(Facts[Region],Facts[Quantity]),ORDERBY(Facts[Region],DESC))),[n],\",\",Facts[Quantity])",
+   "powerbi": "1,3,3,1,2,3"
+  },
+  {
+   "expr": "CONCATENATEX(ADDCOLUMNS(ALL(Facts[Quantity]),\"n\",RANK(DENSE,ALL(Facts[Quantity]),ORDERBY(Facts[Quantity],DESC))),[n],\",\",Facts[Quantity])",
+   "powerbi": "6,5,4,3,2,1"
+  },
+  {
+   "expr": "CONCATENATEX(ADDCOLUMNS(ALL(Facts[Quantity]),\"n\",ROWNUMBER(ALL(Facts[Quantity]),ORDERBY(Facts[Quantity],DESC))),[n],\",\",Facts[Quantity])",
+   "powerbi": "6,5,4,3,2,1"
+  },
+  {
+   "expr": "CONCATENATEX(ALL(Facts[Quantity]),SUMX(OFFSET(-1,ALL(Facts[Quantity]),ORDERBY(Facts[Quantity])),Facts[Quantity]),\",\",Facts[Quantity])",
+   "powerbi": ",0,1,2,3,4"
+  },
+  {
+   "expr": "CONCATENATEX(ALL(Facts[Quantity]),SUMX(OFFSET(1,ALL(Facts[Quantity]),ORDERBY(Facts[Quantity])),Facts[Quantity]),\",\",Facts[Quantity])",
+   "powerbi": "1,2,3,4,5,"
+  },
+  {
+   "expr": "CONCATENATEX(ALL(Facts[Quantity]),SUMX(OFFSET(-1,ALL(Facts[Quantity]),ORDERBY(Facts[Quantity],DESC)),Facts[Quantity]),\",\",Facts[Quantity])",
+   "powerbi": "1,2,3,4,5,"
+  },
+  {
+   "expr": "CONCATENATEX(ALL(Facts[Quantity]),SUMX(OFFSET(2,ALL(Facts[Quantity]),ORDERBY(Facts[Quantity])),Facts[Quantity]),\",\",Facts[Quantity])",
+   "powerbi": "2,3,4,5,,"
+  },
+  {
+   "expr": "CONCATENATEX(ALL(Facts[Quantity]),SUMX(WINDOW(-1,REL,0,REL,ALL(Facts[Quantity]),ORDERBY(Facts[Quantity])),Facts[Quantity]),\",\",Facts[Quantity])",
+   "powerbi": "0,1,3,5,7,9"
+  },
+  {
+   "expr": "CONCATENATEX(ALL(Facts[Quantity]),SUMX(WINDOW(1,ABS,0,REL,ALL(Facts[Quantity]),ORDERBY(Facts[Quantity])),Facts[Quantity]),\",\",Facts[Quantity])",
+   "powerbi": "0,1,3,6,10,15"
+  },
+  {
+   "expr": "CONCATENATEX(ALL(Facts[Quantity]),SUMX(WINDOW(0,REL,1,ABS,ALL(Facts[Quantity]),ORDERBY(Facts[Quantity])),Facts[Quantity]),\",\",Facts[Quantity])",
+   "powerbi": "0,,,,,"
+  },
+  {
+   "expr": "CONCATENATEX(ALL(Facts[Quantity]),COUNTROWS(WINDOW(-2,REL,2,REL,ALL(Facts[Quantity]),ORDERBY(Facts[Quantity]))),\",\",Facts[Quantity])",
+   "powerbi": "3,4,5,5,4,3"
+  },
+  {
+   "expr": "CONCATENATEX(ALL(Facts[Quantity]),COUNTROWS(WINDOW(-2,REL,-1,REL,ALL(Facts[Quantity]),ORDERBY(Facts[Quantity]))),\",\",Facts[Quantity])",
+   "powerbi": ",1,2,2,2,2"
+  },
+  {
+   "expr": "CONCATENATEX(ALL(Facts[Quantity]),COUNTROWS(WINDOW(1,REL,10,REL,ALL(Facts[Quantity]),ORDERBY(Facts[Quantity]))),\",\",Facts[Quantity])",
+   "powerbi": "5,4,3,2,1,"
+  },
+  {
+   "expr": "CONCATENATEX(ALL(Facts[Region],Facts[Quantity]),SUMX(WINDOW(-1,REL,0,REL,ALL(Facts[Region],Facts[Quantity]),ORDERBY(Facts[Quantity]),PARTITIONBY(Facts[Region])),Facts[Quantity]),\",\",Facts[Quantity])",
+   "powerbi": "0,1,3,3,4,7"
+  },
+  {
+   "expr": "CONCATENATEX(ALL(Facts[Region],Facts[Quantity]),SUMX(OFFSET(-1,ALL(Facts[Region],Facts[Quantity]),ORDERBY(Facts[Quantity]),PARTITIONBY(Facts[Region])),Facts[Quantity]),\",\",Facts[Quantity])",
+   "powerbi": ",,1,0,,2"
+  },
+  {
+   "expr": "CONCATENATEX(ALL(Facts[Region],Facts[Quantity]),COUNTROWS(OFFSET(-1,ALL(Facts[Region],Facts[Quantity]),ORDERBY(Facts[Quantity]),PARTITIONBY(Facts[Region]))),\",\",Facts[Quantity])",
+   "powerbi": ",,1,1,,1"
+  },
+  {
+   "expr": "SUMX(ALL(Facts[Quantity]),SUMX(OFFSET(-1,ALL(Facts[Quantity]),ORDERBY(Facts[Quantity])),Facts[Quantity]))",
+   "powerbi": "10"
+  },
+  {
+   "expr": "CONCATENATEX(ALL(Facts[Quantity]),SUMX(OFFSET(-1,FILTER(ALL(Facts[Quantity]),Facts[Quantity]>1),ORDERBY(Facts[Quantity])),Facts[Quantity]),\",\",Facts[Quantity])",
+   "powerbi": ",,,2,3,4"
+  },
+  {
+   "expr": "CONCATENATEX(ALL(Facts[Quantity]),SUMX(OFFSET(-1,TOPN(4,ALL(Facts[Quantity]),Facts[Quantity]),ORDERBY(Facts[Quantity])),Facts[Quantity]),\",\",Facts[Quantity])",
+   "powerbi": ",,,2,3,4"
+  },
+  {
+   "expr": "SUMX(INDEX(1,SELECTCOLUMNS(Facts,\"r\",Facts[Region],\"q\",Facts[Quantity],\"s\",Facts[Sales]),ORDERBY([q])),[q])",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 32) INDEX's Relation parameter may have duplicate rows. This is not allowed.\""
+  },
+  {
+   "expr": "SUMX(INDEX(-1,SELECTCOLUMNS(Facts,\"r\",Facts[Region],\"q\",Facts[Quantity],\"s\",Facts[Sales]),ORDERBY([q])),[q])",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 33) INDEX's Relation parameter may have duplicate rows. This is not allowed.\""
+  },
+  {
+   "expr": "SUMX(INDEX(2,SELECTCOLUMNS(Facts,\"r\",Facts[Region],\"q\",Facts[Quantity],\"s\",Facts[Sales]),ORDERBY([q],DESC)),[q])",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 32) INDEX's Relation parameter may have duplicate rows. This is not allowed.\""
+  },
+  {
+   "expr": "COUNTROWS(INDEX(7,SELECTCOLUMNS(Facts,\"r\",Facts[Region],\"q\",Facts[Quantity],\"s\",Facts[Sales]),ORDERBY([q])))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 37) INDEX's Relation parameter may have duplicate rows. This is not allowed.\""
+  },
+  {
+   "expr": "COUNTROWS(INDEX(0,SELECTCOLUMNS(Facts,\"r\",Facts[Region],\"q\",Facts[Quantity],\"s\",Facts[Sales]),ORDERBY([q])))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 37) INDEX's Relation parameter may have duplicate rows. This is not allowed.\""
+  },
+  {
+   "expr": "COUNTROWS(INDEX(-6,SELECTCOLUMNS(Facts,\"r\",Facts[Region],\"q\",Facts[Quantity],\"s\",Facts[Sales]),ORDERBY([q])))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 38) INDEX's Relation parameter may have duplicate rows. This is not allowed.\""
+  },
+  {
+   "expr": "COUNTROWS(INDEX(-7,SELECTCOLUMNS(Facts,\"r\",Facts[Region],\"q\",Facts[Quantity],\"s\",Facts[Sales]),ORDERBY([q])))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 38) INDEX's Relation parameter may have duplicate rows. This is not allowed.\""
+  },
+  {
+   "expr": "SUMX(INDEX(1,SELECTCOLUMNS(Facts,\"r\",Facts[Region],\"q\",Facts[Quantity],\"s\",Facts[Sales]),ORDERBY([r],ASC,[q],DESC)),[q])",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 32) INDEX's Relation parameter may have duplicate rows. This is not allowed.\""
+  },
+  {
+   "expr": "SUMX(INDEX(1,SELECTCOLUMNS(Facts,\"r\",Facts[Region],\"q\",Facts[Quantity],\"s\",Facts[Sales]),ORDERBY([r],DESC)),[q])",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 32) INDEX's Relation parameter may have duplicate rows. This is not allowed.\""
+  },
+  {
+   "expr": "SUMX(INDEX(1,SELECTCOLUMNS(Facts,\"r\",Facts[Region],\"q\",Facts[Quantity],\"s\",Facts[Sales]),ORDERBY([s])),[q])",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 32) INDEX's Relation parameter may have duplicate rows. This is not allowed.\""
+  },
+  {
+   "expr": "SUMX(INDEX(1,SELECTCOLUMNS(Facts,\"r\",Facts[Region],\"q\",Facts[Quantity],\"s\",Facts[Sales]),ORDERBY([s],DESC)),[q])",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 32) INDEX's Relation parameter may have duplicate rows. This is not allowed.\""
+  },
+  {
+   "expr": "SUMX(INDEX(1.5,SELECTCOLUMNS(Facts,\"r\",Facts[Region],\"q\",Facts[Quantity],\"s\",Facts[Sales]),ORDERBY([q])),[q])",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 34) INDEX's Relation parameter may have duplicate rows. This is not allowed.\""
+  },
+  {
+   "expr": "SUMX(INDEX(\"1\",SELECTCOLUMNS(Facts,\"r\",Facts[Region],\"q\",Facts[Quantity],\"s\",Facts[Sales]),ORDERBY([q])),[q])",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 34) INDEX's Relation parameter may have duplicate rows. This is not allowed.\""
+  },
+  {
+   "expr": "SUMX(INDEX(1+1,SELECTCOLUMNS(Facts,\"r\",Facts[Region],\"q\",Facts[Quantity],\"s\",Facts[Sales]),ORDERBY([q])),[q])",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 34) INDEX's Relation parameter may have duplicate rows. This is not allowed.\""
+  },
+  {
+   "expr": "SUMX(INDEX(COUNTROWS(Facts),SELECTCOLUMNS(Facts,\"r\",Facts[Region],\"q\",Facts[Quantity],\"s\",Facts[Sales]),ORDERBY([q])),[q])",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 47) INDEX's Relation parameter may have duplicate rows. This is not allowed.\""
+  },
+  {
+   "expr": "SUMX(INDEX(1,SELECTCOLUMNS(Facts,\"r\",Facts[Region],\"q\",Facts[Quantity],\"s\",Facts[Sales])),[q])",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 32) INDEX's Relation parameter may have duplicate rows. This is not allowed.\""
+  },
+  {
+   "expr": "SUMX(INDEX(1,SELECTCOLUMNS(Facts,\"r\",Facts[Region],\"q\",Facts[Quantity],\"s\",Facts[Sales]),ORDERBY([q]),,PARTITIONBY([r])),[q])",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 32) INDEX's Relation parameter may have duplicate rows. This is not allowed.\""
+  },
+  {
+   "expr": "SUMX(INDEX(1,SELECTCOLUMNS(Facts,\"r\",Facts[Region],\"q\",Facts[Quantity],\"s\",Facts[Sales]),ORDERBY([q]),PARTITIONBY([r])),[q])",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 32) INDEX's Relation parameter may have duplicate rows. This is not allowed.\""
+  },
+  {
+   "expr": "COUNTROWS(INDEX(1,SELECTCOLUMNS(Facts,\"r\",Facts[Region],\"q\",Facts[Quantity],\"s\",Facts[Sales]),ORDERBY([q]),PARTITIONBY([r])))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 37) INDEX's Relation parameter may have duplicate rows. This is not allowed.\""
+  },
+  {
+   "expr": "CONCATENATEX(INDEX(1,SELECTCOLUMNS(Facts,\"r\",Facts[Region],\"q\",Facts[Quantity],\"s\",Facts[Sales]),ORDERBY([q]),PARTITIONBY([r])),[q],\",\")",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 40) INDEX's Relation parameter may have duplicate rows. This is not allowed.\""
+  },
+  {
+   "expr": "CONCATENATEX(INDEX(-1,SELECTCOLUMNS(Facts,\"r\",Facts[Region],\"q\",Facts[Quantity],\"s\",Facts[Sales]),ORDERBY([q]),PARTITIONBY([r])),[q],\",\")",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 41) INDEX's Relation parameter may have duplicate rows. This is not allowed.\""
+  },
+  {
+   "expr": "CONCATENATEX(OFFSET(1,SELECTCOLUMNS(Facts,\"r\",Facts[Region],\"q\",Facts[Quantity],\"s\",Facts[Sales]),ORDERBY([q])),[q],\",\")",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 41) OFFSET's Relation parameter may have duplicate rows. This is not allowed.\""
+  },
+  {
+   "expr": "CONCATENATEX(OFFSET(-1,SELECTCOLUMNS(Facts,\"r\",Facts[Region],\"q\",Facts[Quantity],\"s\",Facts[Sales]),ORDERBY([q])),[q],\",\")",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 42) OFFSET's Relation parameter may have duplicate rows. This is not allowed.\""
+  },
+  {
+   "expr": "CONCATENATEX(OFFSET(0,SELECTCOLUMNS(Facts,\"r\",Facts[Region],\"q\",Facts[Quantity],\"s\",Facts[Sales]),ORDERBY([q])),[q],\",\")",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 41) OFFSET's Relation parameter may have duplicate rows. This is not allowed.\""
+  },
+  {
+   "expr": "CONCATENATEX(OFFSET(2,SELECTCOLUMNS(Facts,\"r\",Facts[Region],\"q\",Facts[Quantity],\"s\",Facts[Sales]),ORDERBY([q]),PARTITIONBY([r])),[q],\",\")",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 41) OFFSET's Relation parameter may have duplicate rows. This is not allowed.\""
+  },
+  {
+   "expr": "COUNTROWS(OFFSET(1,SELECTCOLUMNS(Facts,\"r\",Facts[Region],\"q\",Facts[Quantity],\"s\",Facts[Sales]),ORDERBY([q])))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 38) OFFSET's Relation parameter may have duplicate rows. This is not allowed.\""
+  },
+  {
+   "expr": "COUNTROWS(OFFSET(6,SELECTCOLUMNS(Facts,\"r\",Facts[Region],\"q\",Facts[Quantity],\"s\",Facts[Sales]),ORDERBY([q])))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 38) OFFSET's Relation parameter may have duplicate rows. This is not allowed.\""
+  },
+  {
+   "expr": "COUNTROWS(OFFSET(-6,SELECTCOLUMNS(Facts,\"r\",Facts[Region],\"q\",Facts[Quantity],\"s\",Facts[Sales]),ORDERBY([q])))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 39) OFFSET's Relation parameter may have duplicate rows. This is not allowed.\""
+  },
+  {
+   "expr": "COUNTROWS(OFFSET(-7,SELECTCOLUMNS(Facts,\"r\",Facts[Region],\"q\",Facts[Quantity],\"s\",Facts[Sales]),ORDERBY([q])))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 39) OFFSET's Relation parameter may have duplicate rows. This is not allowed.\""
+  },
+  {
+   "expr": "CONCATENATEX(WINDOW(1,ABS,2,ABS,SELECTCOLUMNS(Facts,\"r\",Facts[Region],\"q\",Facts[Quantity],\"s\",Facts[Sales]),ORDERBY([q])),[q],\",\")",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 51) WINDOW's Relation parameter may have duplicate rows. This is not allowed.\""
+  },
+  {
+   "expr": "CONCATENATEX(WINDOW(-1,REL,0,REL,SELECTCOLUMNS(Facts,\"r\",Facts[Region],\"q\",Facts[Quantity],\"s\",Facts[Sales]),ORDERBY([q])),[q],\",\")",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 52) WINDOW's Relation parameter may have duplicate rows. This is not allowed.\""
+  },
+  {
+   "expr": "CONCATENATEX(WINDOW(-2,REL,-1,REL,SELECTCOLUMNS(Facts,\"r\",Facts[Region],\"q\",Facts[Quantity],\"s\",Facts[Sales]),ORDERBY([q])),[q],\",\")",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 53) WINDOW's Relation parameter may have duplicate rows. This is not allowed.\""
+  },
+  {
+   "expr": "CONCATENATEX(WINDOW(1,ABS,-1,ABS,SELECTCOLUMNS(Facts,\"r\",Facts[Region],\"q\",Facts[Quantity],\"s\",Facts[Sales]),ORDERBY([q])),[q],\",\")",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 52) WINDOW's Relation parameter may have duplicate rows. This is not allowed.\""
+  },
+  {
+   "expr": "CONCATENATEX(WINDOW(2,ABS,1,ABS,SELECTCOLUMNS(Facts,\"r\",Facts[Region],\"q\",Facts[Quantity],\"s\",Facts[Sales]),ORDERBY([q])),[q],\",\")",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 51) WINDOW's Relation parameter may have duplicate rows. This is not allowed.\""
+  },
+  {
+   "expr": "CONCATENATEX(WINDOW(1,ABS,3,ABS,SELECTCOLUMNS(Facts,\"r\",Facts[Region],\"q\",Facts[Quantity],\"s\",Facts[Sales]),ORDERBY([q]),PARTITIONBY([r])),[q],\",\")",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 51) WINDOW's Relation parameter may have duplicate rows. This is not allowed.\""
+  },
+  {
+   "expr": "CONCATENATEX(WINDOW(1,REL,1,REL,SELECTCOLUMNS(Facts,\"r\",Facts[Region],\"q\",Facts[Quantity],\"s\",Facts[Sales]),ORDERBY([q])),[q],\",\")",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 51) WINDOW's Relation parameter may have duplicate rows. This is not allowed.\""
+  },
+  {
+   "expr": "CONCATENATEX(WINDOW(0,REL,0,REL,SELECTCOLUMNS(Facts,\"r\",Facts[Region],\"q\",Facts[Quantity],\"s\",Facts[Sales]),ORDERBY([q])),[q],\",\")",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 51) WINDOW's Relation parameter may have duplicate rows. This is not allowed.\""
+  },
+  {
+   "expr": "COUNTROWS(WINDOW(1,ABS,10,ABS,SELECTCOLUMNS(Facts,\"r\",Facts[Region],\"q\",Facts[Quantity],\"s\",Facts[Sales]),ORDERBY([q])))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 49) WINDOW's Relation parameter may have duplicate rows. This is not allowed.\""
+  },
+  {
+   "expr": "COUNTROWS(WINDOW(-10,REL,10,REL,SELECTCOLUMNS(Facts,\"r\",Facts[Region],\"q\",Facts[Quantity],\"s\",Facts[Sales]),ORDERBY([q])))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 51) WINDOW's Relation parameter may have duplicate rows. This is not allowed.\""
+  },
+  {
+   "expr": "CONCATENATEX(WINDOW(1,ABS,2,ABS,SELECTCOLUMNS(Facts,\"r\",Facts[Region],\"q\",Facts[Quantity],\"s\",Facts[Sales]),ORDERBY([q]),KEEP,PARTITIONBY([r])),[q],\",\")",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 51) WINDOW's Relation parameter may have duplicate rows. This is not allowed.\""
+  },
+  {
+   "expr": "CONCATENATEX(WINDOW(1,ABS,2,ABS,SELECTCOLUMNS(Facts,\"r\",Facts[Region],\"q\",Facts[Quantity],\"s\",Facts[Sales]),ORDERBY([q]),,,MATCHBY([r])),[q],\",\")",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 32) Despite of MatchBy columns being specified, duplicated rows are encountered in WINDOW's Relation parameter. This is not allowed.\""
+  },
+  {
+   "expr": "SUMX(Facts,RANK(DENSE,SELECTCOLUMNS(Facts,\"r\",Facts[Region],\"q\",Facts[Quantity],\"s\",Facts[Sales]),ORDERBY([q])))",
+   "powerbi": "21"
+  },
+  {
+   "expr": "MAXX(SELECTCOLUMNS(Facts,\"r\",Facts[Region],\"q\",Facts[Quantity],\"s\",Facts[Sales]),RANK(DENSE,SELECTCOLUMNS(Facts,\"r\",Facts[Region],\"q\",Facts[Quantity],\"s\",Facts[Sales]),ORDERBY([q])))",
+   "powerbi": "6"
+  },
+  {
+   "expr": "SUMX(SELECTCOLUMNS(Facts,\"r\",Facts[Region],\"q\",Facts[Quantity],\"s\",Facts[Sales]),RANK(SKIP,SELECTCOLUMNS(Facts,\"r\",Facts[Region],\"q\",Facts[Quantity],\"s\",Facts[Sales]),ORDERBY([q])))",
+   "powerbi": "21"
+  },
+  {
+   "expr": "SUMX(SELECTCOLUMNS(Facts,\"r\",Facts[Region],\"q\",Facts[Quantity],\"s\",Facts[Sales]),RANK(DENSE,SELECTCOLUMNS(Facts,\"r\",Facts[Region],\"q\",Facts[Quantity],\"s\",Facts[Sales]),ORDERBY([r])))",
+   "powerbi": "11"
+  },
+  {
+   "expr": "SUMX(SELECTCOLUMNS(Facts,\"r\",Facts[Region],\"q\",Facts[Quantity],\"s\",Facts[Sales]),RANK(SKIP,SELECTCOLUMNS(Facts,\"r\",Facts[Region],\"q\",Facts[Quantity],\"s\",Facts[Sales]),ORDERBY([r],DESC)))",
+   "powerbi": "17"
+  },
+  {
+   "expr": "SUMX(SELECTCOLUMNS(Facts,\"r\",Facts[Region],\"q\",Facts[Quantity],\"s\",Facts[Sales]),RANK(SKIP,SELECTCOLUMNS(Facts,\"r\",Facts[Region],\"q\",Facts[Quantity],\"s\",Facts[Sales]),ORDERBY([s])))",
+   "powerbi": "21"
+  },
+  {
+   "expr": "SUMX(SELECTCOLUMNS(Facts,\"r\",Facts[Region],\"q\",Facts[Quantity],\"s\",Facts[Sales]),ROWNUMBER(SELECTCOLUMNS(Facts,\"r\",Facts[Region],\"q\",Facts[Quantity],\"s\",Facts[Sales]),ORDERBY([q])))",
+   "powerbi": "21"
+  },
+  {
+   "expr": "SUMX(SELECTCOLUMNS(Facts,\"r\",Facts[Region],\"q\",Facts[Quantity],\"s\",Facts[Sales]),ROWNUMBER(SELECTCOLUMNS(Facts,\"r\",Facts[Region],\"q\",Facts[Quantity],\"s\",Facts[Sales]),ORDERBY([r],ASC,[q],ASC)))",
+   "powerbi": "21"
+  },
+  {
+   "expr": "MAXX(SELECTCOLUMNS(Facts,\"r\",Facts[Region],\"q\",Facts[Quantity],\"s\",Facts[Sales]),ROWNUMBER(SELECTCOLUMNS(Facts,\"r\",Facts[Region],\"q\",Facts[Quantity],\"s\",Facts[Sales]),ORDERBY([r]),PARTITIONBY([q])))",
+   "powerbi": "1"
+  },
+  {
+   "expr": "SUMX(ADDCOLUMNS(SELECTCOLUMNS(Facts,\"r\",Facts[Region],\"q\",Facts[Quantity],\"s\",Facts[Sales]),\"n\",ROWNUMBER(SELECTCOLUMNS(Facts,\"r\",Facts[Region],\"q\",Facts[Quantity],\"s\",Facts[Sales]),ORDERBY([s]))),[n])",
+   "powerbi": "21"
+  },
+  {
+   "expr": "SUMX(ADDCOLUMNS(SELECTCOLUMNS(Facts,\"r\",Facts[Region],\"q\",Facts[Quantity],\"s\",Facts[Sales]),\"n\",ROWNUMBER(SELECTCOLUMNS(Facts,\"r\",Facts[Region],\"q\",Facts[Quantity],\"s\",Facts[Sales]),ORDERBY([r]),MATCHBY([q]))),[n])",
+   "powerbi": "21"
+  },
+  {
+   "expr": "SUMX(ADDCOLUMNS(SELECTCOLUMNS(Facts,\"r\",Facts[Region],\"q\",Facts[Quantity],\"s\",Facts[Sales]),\"n\",RANK(SKIP,SELECTCOLUMNS(Facts,\"r\",Facts[Region],\"q\",Facts[Quantity],\"s\",Facts[Sales]),ORDERBY([r]),,MATCHBY([q]))),[n])",
+   "powerbi": "17"
+  },
+  {
+   "expr": "SUMX(ADDCOLUMNS(SELECTCOLUMNS(Facts,\"r\",Facts[Region],\"q\",Facts[Quantity],\"s\",Facts[Sales]),\"n\",RANK(DENSE,SELECTCOLUMNS(Facts,\"r\",Facts[Region],\"q\",Facts[Quantity],\"s\",Facts[Sales]),ORDERBY([s],DESC))),[n])",
+   "powerbi": "21"
+  },
+  {
+   "expr": "SUMX(ADDCOLUMNS(SELECTCOLUMNS(Facts,\"r\",Facts[Region],\"q\",Facts[Quantity],\"s\",Facts[Sales]),\"n\",RANK(DENSE,SELECTCOLUMNS(Facts,\"r\",Facts[Region],\"q\",Facts[Quantity],\"s\",Facts[Sales]),ORDERBY([s],DESC),,PARTITIONBY([r]))),[n])",
+   "powerbi": "10"
+  },
+  {
+   "expr": "SUMX(Facts,SUMX(Facts,EARLIER(Facts[Quantity],1.0)))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 65) The second argument of function EARLIER must be an integer greater than zero.\""
+  },
+  {
+   "expr": "SUMX(Facts,SUMX(Facts,EARLIER(Facts[Quantity],1.4)))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 65) The second argument of function EARLIER must be an integer greater than zero.\""
+  },
+  {
+   "expr": "SUMX(Facts,SUMX(Facts,EARLIER(Facts[Quantity],1.6)))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 65) The second argument of function EARLIER must be an integer greater than zero.\""
+  },
+  {
+   "expr": "SUMX(Facts,SUMX(Facts,EARLIER(Facts[Quantity],1+0)))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 65) The second argument of function EARLIER must be an integer greater than zero.\""
+  },
+  {
+   "expr": "SUMX(Facts,SUMX(Facts,EARLIER(Facts[Quantity],COUNTROWS(Facts)-5)))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 65) The second argument of function EARLIER must be an integer greater than zero.\""
+  },
+  {
+   "expr": "SUMX(ALL(Facts[Quantity]),RANK(DENSE,ALL(Facts[Quantity]),ORDERBY(Facts[Quantity])))",
+   "powerbi": "21"
+  },
+  {
+   "expr": "SUMX(VALUES(Facts[Quantity]),ROWNUMBER(ALL(Facts[Quantity]),ORDERBY(Facts[Quantity])))",
+   "powerbi": "21"
+  },
+  {
+   "expr": "SUMX(FILTER(ALL(Facts[Quantity]),Facts[Quantity]=3),RANK(DENSE,ALL(Facts[Quantity]),ORDERBY(Facts[Quantity])))",
+   "powerbi": "4"
+  },
+  {
+   "expr": "SUMX(FILTER(ALL(Facts[Quantity]),Facts[Quantity]=3),SUMX(OFFSET(-1,ALL(Facts[Quantity]),ORDERBY(Facts[Quantity])),Facts[Quantity]))",
+   "powerbi": "2"
+  },
+  {
+   "expr": "LEN(LOWER(UNICHAR(304)))",
+   "powerbi": "1"
+  },
+  {
+   "expr": "LEN(UPPER(UNICHAR(223)))",
+   "powerbi": "1"
+  },
+  {
+   "expr": "UNICODE(UPPER(UNICHAR(223)))",
+   "powerbi": "223"
+  },
+  {
+   "expr": "UNICODE(UPPER(UNICHAR(181)))",
+   "powerbi": "181"
+  },
+  {
+   "expr": "UNICODE(LOWER(UNICHAR(7838)))",
+   "powerbi": "7838"
+  }
+ ]
+}

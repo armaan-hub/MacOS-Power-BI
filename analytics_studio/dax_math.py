@@ -69,8 +69,17 @@ def _next_multiple(value: Decimal, base: int) -> Decimal:
     return -magnitude if value < 0 else magnitude
 
 
+_BLANK_IN_BLANK_OUT = {"ASIN", "ASINH", "ATAN", "ATANH", "DEGREES", "RADIANS", "SIN", "SINH", "TAN", "TANH", "SQRTPI", "EVEN"}
+
+
 def math_function(function: str, args: list[object]) -> object:
     """Scalar math: returns the DAX result of an already-evaluated call."""
+    if function in _BLANK_IN_BLANK_OUT and args and args[0] is None:
+        return None
+    if function == "QUOTIENT" and args[0] is None:
+        return None
+    if function == "LOG" and len(args) > 1 and args[1] is None:
+        raise _fail(function)
     if function in {"ROUND", "ROUNDUP", "ROUNDDOWN"}:
         return rounding_function(function, args)
     if function == "PI":

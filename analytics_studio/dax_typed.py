@@ -16,6 +16,19 @@ _INT64_LIMIT = 2**63
 _NUMBER_TEXT = re.compile(r"^[+-]?(?:\d+\.?\d*|\.\d+)(?:[eE][+-]?\d+)?$")
 
 
+_CASE_KEEPS = {"\u00b5", "\u1e9e"}  # Power BI leaves micro sign and capital sharp s unchanged
+
+
+def _simple_case(char: str, upper: bool) -> str:
+    """Power BI maps text one character to one character (no "ß" -> "SS", "İ" -> "i" plus a combining dot)."""
+    if char in _CASE_KEEPS:
+        return char
+    if char == "\u0130" and not upper:
+        return "i"
+    mapped = char.upper() if upper else char.lower()
+    return mapped if len(mapped) == 1 else char
+
+
 def _error(message: str) -> Exception:
     from .measures import MeasureRuntimeError  # imported late: measures imports this module
 
@@ -192,6 +205,8 @@ def text_function(function: str, args: list[object]) -> object:
     if function == "EXACT":
         return to_text(args[0]) == to_text(args[1])
     if function == "REPT":
+        if args[0] is None:
+            return None
         text = to_text(args[0])
         return text * whole(args[1], function, minimum=0)
     if function == "UNICHAR":
@@ -202,6 +217,12 @@ def text_function(function: str, args: list[object]) -> object:
             raise _error("An argument of function 'UNICHAR' has the wrong data type or has an invalid value.") from exc
     if function == "FIXED":
         return _fixed(args)
+    if function in {"FIND", "SEARCH"}:
+        if len(args) > 2 and args[2] is None:
+            raise _error(f"An argument of function '{function}' has the wrong data type or the result is too large or too small.")
+        if function == "SEARCH" and args[0] is None and args[1] is None:
+            raise _error("The search Text provided to function 'SEARCH' could not be found in the given text.")
+        return _find(function, args, "")
     first = args[0]
     if function == "VALUE":
         if first is None:
@@ -213,9 +234,9 @@ def text_function(function: str, args: list[object]) -> object:
     if function == "LEN":
         return Decimal(len(text))
     if function == "UPPER":
-        return text.upper()
+        return "".join(_simple_case(c, True) for c in text)
     if function == "LOWER":
-        return text.lower()
+        return "".join(_simple_case(c, False) for c in text)
     if function == "TRIM":
         return " ".join(part for part in text.split(" ") if part)
     if function == "UNICODE":
@@ -232,7 +253,8 @@ def text_function(function: str, args: list[object]) -> object:
         if not old:
             return text
         if len(args) < 4 or args[3] is None:
-            return text.replace(old, new)
+            replaced = text.replace(old, new)
+            return None if args[2] is None and not replaced else replaced
         instance = whole(args[3], function, minimum=1)
         position = -1
         for _ in range(instance):

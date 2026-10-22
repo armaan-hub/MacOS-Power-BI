@@ -39,7 +39,10 @@ def to_datetime(serial: Decimal, rounding: str = ROUND_HALF_UP) -> datetime:
     if not serial.is_finite():
         raise dax_typed._error("An argument has the wrong data type or the result is too large or too small.")
     days = serial.to_integral_value(rounding=ROUND_FLOOR)
-    seconds = ((serial - days) * _SECONDS_PER_DAY).quantize(Decimal(1), rounding=rounding)
+    scaled = (serial - days) * _SECONDS_PER_DAY
+    if rounding == ROUND_FLOOR:
+        scaled += Decimal("0.00001")  # a repeating-decimal time of day such as TIME(1,2,3) must not fall to the second before
+    seconds = scaled.quantize(Decimal(1), rounding=rounding)
     try:
         return EPOCH + timedelta(days=int(days), seconds=float(seconds))
     except OverflowError as exc:
@@ -53,10 +56,12 @@ def is_date(value: object) -> bool:
 def date_text(value: Decimal) -> str:
     """The text of a date in a concatenation: M/d/yyyy, plus h:mm:ss AM/PM when there is a time of day."""
     moment = to_datetime(value)
+    time_text = f"{moment.hour % 12 or 12}:{moment.minute:02d}:{moment.second:02d} {'AM' if moment.hour < 12 else 'PM'}"
+    if (moment.year, moment.month, moment.day) == (1899, 12, 30):
+        return time_text  # day zero is a time of day only
     text = f"{moment.month}/{moment.day}/{moment.year}"
     if moment.hour or moment.minute or moment.second:
-        hour = moment.hour % 12 or 12
-        text += f" {hour}:{moment.minute:02d}:{moment.second:02d} {'AM' if moment.hour < 12 else 'PM'}"
+        text += " " + time_text
     return text
 
 
@@ -181,6 +186,8 @@ def date_function(function: str, args: list[object], interval: str | None = None
     if function == "DATE":
         return _make_date(*args)
     if function == "TIME":
+        if all(value is None for value in args):
+            return None
         hours, minutes, seconds = (dax_typed.whole(value, "TIME") for value in args)
         total = (hours * 3600 + minutes * 60 + seconds) % 86400
         return DaxDateTime(Decimal(total) / _SECONDS_PER_DAY)
@@ -203,7 +210,7 @@ def date_function(function: str, args: list[object], interval: str | None = None
         if start is None or end is None:
             return None
         return _datediff(start, end, str(interval))
-    moment = _moment(args[0])
+    moment = _moment(args[0], ROUND_FLOOR if function in {"HOUR", "MINUTE", "SECOND"} else ROUND_HALF_UP)
     if moment is None:
         return None
     if function == "YEAR":
@@ -237,7 +244,7 @@ def date_function(function: str, args: list[object], interval: str | None = None
 
 _NAMED_DATE_FORMATS = {
     "general date": "general", "short date": "M/d/yyyy", "ddddd": "M/d/yyyy", "long date": "dddd, MMMM d, yyyy",
-    "dddddd": "dddd, MMMM d, yyyy", "medium date": "dd-MMM-yy", "long time": "h:mm:ss tt", "medium time": "hh:mm tt",
+    "dddddd": "dddd, MMMM d, yyyy", "ttttt": "h:mm:ss AM/PM", "medium date": "dd-MMM-yy", "long time": "h:mm:ss tt", "medium time": "hh:mm tt",
     "short time": "HH:mm",
 }
 
@@ -258,7 +265,7 @@ def format_date(value: Decimal, pattern: str) -> str:
 
 
 _DATE_CODE = re.compile(r"(?i)[dmyhnsqwc]|am/pm|a/p")
-_NUMERIC_AS_DATE = re.compile(r"(?i)yy|dd|mm|hh|ss|am/pm")
+_NUMERIC_AS_DATE = re.compile(r"(?i)yy|dd|mm|hh|ss|am/pm|ttttt")
 
 
 def _strip_literals(pattern: str) -> str:
@@ -274,7 +281,18 @@ def is_date_pattern(pattern: str, for_date_value: bool) -> bool:
     stripped = _strip_literals(pattern)
     if key in {"general number", "currency", "fixed", "standard", "percent", "scientific", "yes/no", "true/false", "on/off"}:
         return False
-    return bool((_DATE_CODE if for_date_value else _NUMERIC_AS_DATE).search(stripped))
+    if for_date_value:
+        return bool(_DATE_CODE.search(stripped))
+    # A number is formatted as a date/time when a date code comes before the first numeric placeholder
+    # ("n" and "General" give minutes; "0 n" stays numeric).
+    if _NUMERIC_AS_DATE.search(stripped) and not re.search(r"[0#]", stripped):
+        return True
+    for char in stripped:
+        if char in "0#.":
+            return False
+        if char in "dmyhnsqwcDMYHNSQWC":
+            return True
+    return bool(_NUMERIC_AS_DATE.search(stripped))
 
 
 def _render_date_pattern(moment: datetime, pattern: str) -> str:
@@ -319,6 +337,8 @@ def _date_tokens(pattern: str) -> list[tuple[str, str]]:
             end = index
             while end < len(pattern) and pattern[end] == char:
                 end += 1
+            if char.lower() == "m" and end - index > 4:
+                end = index + 4  # "mmmmm" is the month name followed by the month number
             tokens.append(("field", pattern[index:end]))
             index = end
         else:

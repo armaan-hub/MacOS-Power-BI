@@ -84,8 +84,9 @@ class MeasureTests(unittest.TestCase):
         ], self.headers, "Sales data")
         for name in ("Sum", "Average", "Minimum", "Maximum"):
             self.assertIsNone(blank_rows[name])
-        self.assertEqual(blank_rows["Count"], Decimal(0))
-        self.assertEqual(blank_rows["Nonblank"], Decimal(0))
+        # Power BI 2.157.879.0: COUNT and COUNTA of a column with no non-blank value are BLANK, not 0
+        self.assertIsNone(blank_rows["Count"])
+        self.assertIsNone(blank_rows["Nonblank"])
 
     def test_measure_home_table_keeps_unqualified_references_stable(self) -> None:
         contexts = [

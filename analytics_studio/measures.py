@@ -1931,7 +1931,10 @@ class _Parser:
         if token.kind == "number":
             try:
                 value = Decimal(token.value)
-            except DecimalException as exc:
+                digits = token.value.lower().split("e")[0].replace(".", "").lstrip("0")
+                if len(digits) > 15 and ("." in token.value or "e" in token.value.lower() or abs(value) > 9223372036854775807):
+                    value = Decimal(repr(float(token.value)))  # Power BI reads such literals as doubles
+            except (DecimalException, OverflowError) as exc:
                 raise MeasureError(f"Invalid numeric literal {token.value!r}.") from exc
             if not value.is_finite():
                 raise MeasureError("Numeric literals must be finite.")
@@ -3053,6 +3056,198 @@ def _sameperiodlastyear_dates(selected_dates: Iterable[date]) -> set[date]:
         for offset in range(1, (destination_end - shifted_end).days + 1):
             shifted.add(shifted_end + timedelta(days=offset))
     return shifted
+
+
+# Functions and operators whose arguments are evaluated in the caller's context: a bare column below them still has no row context.
+_ROW_CONTEXT_FREE_CALLS = {
+    "IF", "SWITCH", "COALESCE", "IFERROR", "AND", "OR", "NOT", "ISBLANK", "ABS", "EXACT",
+    "UPPER", "LOWER", "LEN", "TRIM", "ROUND", "INT",
+}
+_ROW_CONTEXT_FREE_NODES = {"binary", "comparison", "logical", "unary", "concat", "in", "let", "tableconstructor"}
+
+
+def _bare_column_outside_row_context(node: Any, columns: dict[str, set[str]]) -> tuple[str, str] | None:
+    """The first column reference that a measure evaluated without a row context reads directly.
+
+    Power BI refuses such a reference when the query is compiled ("A single value for column ... cannot be
+    determined"), also in an IF/SWITCH branch that would never run.  Only constructs that keep the caller's
+    context are followed; aggregations, iterators, CALCULATE and table functions give their arguments their own
+    context and end the search.
+    """
+    if not isinstance(node, tuple) or not node:
+        return None
+    kind = node[0]
+    if kind == "reference":
+        table, column = node[1], node[2]
+        if table and column.casefold() in columns.get(table.casefold(), ()):
+            return table, column
+        return None
+    if kind == "call":
+        if node[1] not in _ROW_CONTEXT_FREE_CALLS:
+            return None
+        children = node[2]
+    elif kind == "let":
+        children = [value for _name, value in node[1]] + [node[2]]
+    elif kind == "in":
+        children = [node[1]]
+    elif kind in _ROW_CONTEXT_FREE_NODES:
+        children = [part for part in node[1:] if isinstance(part, tuple)]
+    else:
+        return None
+    for child in children:
+        found = _bare_column_outside_row_context(child, columns)
+        if found:
+            return found
+    return None
+
+
+def _measure_references(node: Any, found: set[str]) -> None:
+    if isinstance(node, tuple):
+        if len(node) == 3 and node[0] == "reference" and node[1] == "":
+            found.add(str(node[2]).casefold())
+        for part in node:
+            _measure_references(part, found)
+    elif isinstance(node, (list, frozenset)):
+        for part in node:
+            _measure_references(part, found)
+
+
+def _reject_bare_columns_without_row_context(
+    selected: list[tuple[dict[str, str], tuple[Any, ...]]],
+    every_expression: list[tuple[Any, ...]],
+    columns: dict[str, set[str]],
+) -> None:
+    referenced: set[str] = set()
+    for expression in every_expression:
+        _measure_references(expression, referenced)
+    for item, expression in selected:
+        if item["name"].casefold() in referenced:
+            continue  # used inside another measure, which may supply a row context
+        found = _bare_column_outside_row_context(expression, columns)
+        if found:
+            raise MeasureError(
+                f"A single value for column '{found[1]}' in table '{found[0]}' cannot be determined. "
+                "Refer to the column inside an aggregation such as MIN, MAX, COUNT or SUM, or iterate its table."
+            )
+
+
+
+_NUMBER_COLUMN_TYPES = {"whole_number", "decimal_number", "decimal", "fixed_decimal", "currency", "number", "int64", "double"}
+_TEXT_FUNCTIONS = {"UPPER", "LOWER", "TRIM", "LEFT", "RIGHT", "MID", "CONCATENATE", "FORMAT", "SUBSTITUTE", "REPT"}
+_BOOLEAN_FUNCTIONS = {"AND", "OR", "NOT", "ISBLANK", "EXACT", "ISNUMBER", "ISTEXT", "ISERROR", "CONTAINSROW", "CONTAINS"}
+
+
+def _static_type(node: Any, columns: dict[str, dict[str, str]], variables: dict[str, str | None]) -> str | None:
+    """text / number / boolean when the expression has that type whatever the data, else None (unknown or mixed).
+
+    Power BI checks the operands of a comparison against each other when it compiles the query, so a BLANK() result
+    of an expression typed Text still cannot be compared with a number."""
+    if not isinstance(node, tuple) or not node:
+        return None
+    kind = node[0]
+    if kind == "number":
+        return "number"
+    if kind == "string":
+        return "text"
+    if kind == "boolean":
+        return "boolean"
+    if kind in {"comparison", "logical", "in"}:
+        return "boolean"
+    if kind in {"binary", "unary"}:
+        return "number"
+    if kind == "concat":
+        return "text"
+    if kind == "var":
+        return variables.get(str(node[1]))
+    if kind == "reference":
+        if not node[1]:
+            return None
+        column_type = columns.get(node[1].casefold(), {}).get(str(node[2]).casefold())
+        if not column_type:
+            return None
+        if column_type in _NUMBER_COLUMN_TYPES:
+            return "number"
+        if column_type in {"boolean", "true_false"}:
+            return "boolean"
+        return "text" if column_type == "text" else None  # dates are compared with ISO text literals
+    if kind == "let":
+        scope = dict(variables)
+        for name, value in node[1]:
+            scope[str(name)] = _static_type(value, columns, scope)
+        return _static_type(node[2], columns, scope)
+    if kind != "call":
+        return None
+    function, arguments = node[1], node[2]
+    if function in {"SELECTEDVALUE", "LOOKUPVALUE"} and arguments:
+        return _static_type(arguments[0], columns, variables)
+    if function in _TEXT_FUNCTIONS:
+        return "text"
+    if function in _BOOLEAN_FUNCTIONS:
+        return "boolean"
+    if function in {"IF", "COALESCE", "IFERROR", "SWITCH"}:
+        if function == "IF":
+            results = list(arguments[1:])
+        elif function == "SWITCH":
+            results = [arguments[index] for index in range(2, len(arguments), 2)]
+            if len(arguments) >= 4 and len(arguments) % 2 == 0:
+                results.append(arguments[-1])
+        else:
+            results = list(arguments)
+        if not results:
+            return None
+        types = {_static_type(result, columns, variables) for result in results if result[0] != "blank"}
+        if not types:
+            return "number"  # a conditional that can only give BLANK() is typed Integer
+        return types.pop() if len(types) == 1 and None not in types else None
+    return None
+
+
+def _reject_mismatched_comparison_types(node: Any, columns: dict[str, dict[str, str]], variables: dict[str, str | None] | None = None) -> None:
+    variables = {} if variables is None else variables
+    if not isinstance(node, tuple) or not node:
+        return
+    if node[0] == "let":
+        scope = dict(variables)
+        for name, value in node[1]:
+            _reject_mismatched_comparison_types(value, columns, scope)
+            scope[str(name)] = _static_type(value, columns, scope)
+        _reject_mismatched_comparison_types(node[2], columns, scope)
+        return
+    if node[0] == "reference" and node[1] and columns:
+        known = columns.get(str(node[1]).casefold())
+        if known is None:
+            raise MeasureError(f"Cannot find table '{node[1]}'.")
+        if str(node[2]).casefold() not in known:
+            raise MeasureError(f"Column '{node[2]}' in table '{node[1]}' cannot be found or may not be used in this expression.")
+    if node[0] == "call" and node[1] in {"EARLIER", "EARLIEST"} and len(node[2]) == 2:
+        level = node[2][1]
+        if level[0] != "number" or level[1] != level[1].to_integral_value() or level[1] < 1 or level[1].as_tuple().exponent > 0 or "." in str(level[1]):
+            raise MeasureError("The second argument of function EARLIER must be an integer greater than zero.")
+    if node[0] == "call":
+        function, arguments = node[1], node[2]
+        if function in {"SUMX", "AVERAGEX", "PRODUCTX", "MEDIANX", "MAXX", "MINX"} and len(arguments) >= 2:
+            result_type = _static_type(arguments[1], columns, variables)
+            if result_type == "boolean" or (result_type == "text" and function in {"SUMX", "AVERAGEX", "PRODUCTX", "MEDIANX"}):
+                raise MeasureError(f"The function {function} cannot work with values of type {'Boolean' if result_type == 'boolean' else 'String'}.")
+        elif function in {"SUM", "AVERAGE"} and len(arguments) == 1 and _static_type(arguments[0], columns, variables) == "text":
+            raise MeasureError(f"The function {function} cannot work with values of type String.")
+        elif function in {"MIN", "MAX"} and len(arguments) == 2 and all(_static_type(argument, columns, variables) == "boolean" for argument in arguments):
+            raise MeasureError("Min or Max of booleans are not currently supported.")
+    if node[0] == "comparison":
+        left, right = _static_type(node[2], columns, variables), _static_type(node[3], columns, variables)
+        if left and right and left != right:
+            raise MeasureError(
+                f"DAX comparison operations do not support comparing values of type {left} with values of type {right}. "
+                "Consider using the VALUE or FORMAT function to convert one of the values."
+            )
+    for part in node[1:]:
+        if isinstance(part, tuple) and part and isinstance(part[0], str):
+            _reject_mismatched_comparison_types(part, columns, variables)
+        elif isinstance(part, (tuple, list, frozenset)):
+            for item in part:
+                if isinstance(item, tuple):
+                    _reject_mismatched_comparison_types(item, columns, variables)
+
 
 
 def evaluate_measures(
@@ -4344,6 +4539,23 @@ def evaluate_measures(
     class _Window:
         """The relation, its ordering and partitions, and the current rows of one INDEX / OFFSET / WINDOW / RANK call."""
 
+    def relation_may_have_duplicates(node: tuple[Any, ...]) -> bool:
+        """Power BI refuses a window relation that keeps whole rows of a table (no column set to deduplicate it)."""
+        table_names = {str(ctx["name"]).upper() for ctx in contexts_by_id.values()}
+        if node[0] == "table":
+            return str(node[1]).upper() in table_names
+        if node[0] == "table_call":
+            return node[1] in {"VALUES"} and node[2][0] == "table" and str(node[2][1]).upper() in table_names
+        if node[0] != "call":
+            return False
+        function, arguments = node[1], node[2]
+        if function in {"ALL", "ALLNOBLANKROW", "ALLSELECTED"}:
+            return len(arguments) == 1 and arguments[0][0] == "table" and str(arguments[0][1]).upper() in table_names
+        if function in {"FILTER", "CALCULATETABLE", "TOPN", "ADDCOLUMNS", "SELECTCOLUMNS", "EXCEPT", "INTERSECT"}:
+            source = arguments[1] if function == "TOPN" and len(arguments) > 1 else arguments[0] if arguments else None
+            return source is not None and relation_may_have_duplicates(source)
+        return function == "UNION"
+
     def window_setup(arguments: tuple[tuple[Any, ...], ...], function: str) -> Any:
         keywords: list[str] = []
         order_spec: list[tuple[Any, bool]] = []
@@ -4367,6 +4579,8 @@ def evaluate_measures(
                 raise MeasureError(f"{function} has an argument the local engine does not support.")
         if relation is None:
             raise MeasureError(f"{function}'s relation parameter must be a table in non-visual calculation mode.")
+        if function in {"INDEX", "OFFSET", "WINDOW"} and relation_may_have_duplicates(relation):
+            raise MeasureRuntimeError(f"{function}'s Relation parameter may have duplicate rows. This is not allowed.")
         window = _Window()
         window.context, window.rows = table_argument_value(relation)
         window.typed = [typed_row(window.context, row) for row in window.rows]
@@ -4416,9 +4630,31 @@ def evaluate_measures(
                 groups.setdefault(link[0]["id"], (link[0], []))[1].append((header, link[1]))
         visible: dict[str, set[tuple[Any, ...]]] = {}
         for table_id, (base_context, pairs) in groups.items():
+            # Power BI also reads the row contexts on the stack as filters on the base table (columns that carry lineage).
+            constraints: list[dict[str, Any]] = []
+            for frame_context, frame_row, _index in row_stack:
+                if frame_context.get("boolean_filter"):
+                    continue
+                if frame_context.get("derived"):
+                    frame_lineage = frame_context.get("lineage") or {}
+                    constraint = {
+                        link[1]: frame_row.get(header) for header, link in frame_lineage.items()
+                        if link[0].get("id") == table_id and header in frame_row
+                    }
+                else:
+                    constraint = (
+                        {name: typed_cell(base_context, name, frame_row.get(name)) for name in base_context["headers"] if name in frame_row}
+                        if frame_context.get("id") == table_id else {}
+                    )
+                if constraint:
+                    constraints.append(constraint)
             visible[table_id] = {
                 row_key(typed_cell(base_context, column_name, vrow.get(column_name)) for _h, column_name in pairs)
                 for vrow in rows_by_table_id[table_id]
+                if all(
+                    all(typed_cell(base_context, name, vrow.get(name)) == value for name, value in constraint.items())
+                    for constraint in constraints
+                )
             }
         window.current = [
             i for i in total
@@ -7002,6 +7238,7 @@ def evaluate_measures(
             list(names), list(distinct.values()), {name: (context, name) for name in names},
             {name: context.get("column_types", {}).get(name, "text") for name in names},
         )
+        group_context["boolean_filter"] = True  # window functions do not read this predicate row as a row context
         passing = {
             row_key(frame[1][name] for name in names)
             for frame in iterate_rows(group_context, group_rows)
@@ -8454,7 +8691,7 @@ def evaluate_measures(
                 _reject_power_query_error(value, actual, row_index)
                 if value is not None:
                     count += 1
-            return Decimal(count)
+            return Decimal(count) if count else None  # Power BI returns blank for zero
         if function == "COUNTBLANK":
             context, actual = resolve_table(reference[1], reference[2])
             visible_rows = rows_by_table_id[context["id"]]
@@ -8477,7 +8714,7 @@ def evaluate_measures(
                 values.add(cell_key(ascii_fold(value) if isinstance(value, str) else value))
             if function == "DISTINCTCOUNTNOBLANK":
                 values.discard(cell_key(None))
-            return Decimal(len(values))
+            return Decimal(len(values)) if values or function == "DISTINCTCOUNT" else None
         if function in {"MIN", "MAX", "COUNT"}:
             date_context, date_column = resolve_table(reference[1], reference[2])
             if str(date_context.get("column_types", {}).get(date_column, "")).casefold() in {"date", "datetime"}:
@@ -8489,7 +8726,7 @@ def evaluate_measures(
                     if moment is not None:
                         moments.append(moment)
                 if function == "COUNT":
-                    return Decimal(len(moments)) if visible else None
+                    return Decimal(len(moments)) if moments else None
                 if not moments:
                     return None
                 return (max if function == "MAX" else min)(moments)
@@ -8517,7 +8754,7 @@ def evaluate_measures(
         if function == "COUNT":
             context, actual = resolve_table(reference[1], reference[2])
             visible_rows = rows_by_table_id[context["id"]]
-            return Decimal(len(values)) if visible_rows else None
+            return Decimal(len(values)) if values else None
         if not values:
             return None
         if function == "SUM": return sum(values, Decimal(0))
@@ -8570,4 +8807,23 @@ def evaluate_measures(
     missing = targets - set(by_name) if targets is not None else set()
     if missing:
         raise MeasureError(f"Measure {sorted(missing)[0]!r} does not exist.")
-    return {item["name"]: resolve(item["name"].casefold()) for item in selected}
+    results = {item["name"]: resolve(item["name"].casefold()) for item in selected}
+    # Power BI checks the whole query when it compiles it, also the branches that never run; the engine's own errors come first
+    if targets is not None:
+        _reject_bare_columns_without_row_context(
+            [(item, parsed[item["name"].casefold()]) for item in selected],
+            list(parsed.values()),
+            {
+                str(ctx.get("name", "")).casefold(): {str(h).casefold() for h in ctx.get("headers", [])}
+                for ctx in contexts_by_id.values()
+            },
+        )
+    column_types_by_table = {
+        str(ctx.get("name", "")).casefold(): {
+            str(h).casefold(): str(ctx.get("column_types", {}).get(h, "")).casefold() for h in ctx.get("headers", [])
+        }
+        for ctx in contexts_by_id.values()
+    }
+    for item in selected:
+        _reject_mismatched_comparison_types(parsed[item["name"].casefold()], column_types_by_table)
+    return results
