@@ -8,6 +8,7 @@ Read-only otherwise; never saves the Power BI project.
 from __future__ import annotations
 
 import base64
+import fcntl
 import json
 from pathlib import Path
 import subprocess
@@ -56,11 +57,15 @@ def guest(script: str) -> str:
     folder.mkdir(exist_ok=True)
     name = f"run-{time.time_ns()}.ps1"  # fresh name each call: the guest's share view caches by path
     (folder / name).write_text("\ufeff" + script, encoding="utf-8")
-    out = subprocess.run(
-        ["prlctl", "exec", VM, "--current-user", "powershell", "-NoProfile", "-NonInteractive",
-         "-ExecutionPolicy", "Bypass", "-File", rf"\\Mac\Home\.rea_scratch\{name}"],
-        capture_output=True, text=True, encoding="utf-8", errors="replace", timeout=300,
-    ).stdout
+    # one guest call at a time across every process: each call opens a console window in the guest, and several
+    # agents calling together used to pile a dozen of them on the screen
+    with open(folder / "guest.lock", "w") as lock:
+        fcntl.flock(lock, fcntl.LOCK_EX)
+        out = subprocess.run(
+            ["prlctl", "exec", VM, "--current-user", "powershell", "-NoProfile", "-NonInteractive", "-WindowStyle", "Hidden",
+             "-ExecutionPolicy", "Bypass", "-File", rf"\\Mac\Home\.rea_scratch\{name}"],
+            capture_output=True, text=True, encoding="utf-8", errors="replace", timeout=300,
+        ).stdout
     (folder / name).unlink(missing_ok=True)
     return "\n".join(line for line in out.splitlines() if not line.startswith(("#< CLIXML", "<Objs")))
 
