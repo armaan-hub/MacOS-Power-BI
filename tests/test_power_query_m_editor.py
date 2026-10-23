@@ -7,6 +7,7 @@ import unittest
 from copy import deepcopy
 from datetime import date, datetime, time
 from decimal import Decimal
+from types import SimpleNamespace
 from unittest.mock import MagicMock, patch
 
 os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
@@ -21,6 +22,7 @@ from PySide6.QtWidgets import (
     QInputDialog,
     QMessageBox,
     QSplitter,
+    QMenu,
     QScrollArea,
     QToolButton,
 )
@@ -52,6 +54,30 @@ from analytics_studio.transformations import (
     column_types_after_steps,
     validate_steps,
 )
+
+
+def recording_menu_type(choose=None):
+    """A QMenu stand-in whose exec() records its position instead of blocking.
+
+    ``choose`` is None (dismiss the menu) or a callable receiving the menu and
+    returning the QAction to report as chosen (it may also drive the filter panel).
+    """
+    record = SimpleNamespace(created=[], positions=[])
+
+    class RecordingMenu(QMenu):
+        def __init__(self, *args, **kwargs):
+            super().__init__(*args, **kwargs)
+            record.created.append(args)
+
+        def exec(self, position=None, *rest):  # noqa: A003
+            record.positions.append(position)
+            return choose(self) if choose is not None else None
+
+    return RecordingMenu, record
+
+
+def action_named(text):
+    return lambda menu: next(a for a in menu.actions() if a.text() == text)
 
 
 class PowerQueryMEditorTests(unittest.TestCase):
@@ -3546,39 +3572,17 @@ in
         self.assertEqual(header.height(), 148)
         dialog.deleteLater()
 
-    def test_preview_column_menu_sorts_and_opens_filter_settings(self) -> None:
+    def test_preview_column_menu_sorts_rows(self) -> None:
         dialog = TransformDataDialog(self.source)
-        sort_actions = [MagicMock() for _ in range(4)]
-        with patch("analytics_studio.local_table_dialogs.QMenu") as menu_type:
-            menu = menu_type.return_value
-            menu.addAction.side_effect = sort_actions
-            menu.exec.return_value = sort_actions[1]
+        menu_type, record = recording_menu_type(action_named("Sort Descending"))
+        with patch("analytics_studio.local_table_dialogs.QMenu", menu_type):
             dialog.preview_header.sectionClicked.emit(0)
 
+        self.assertEqual(len(record.positions), 1)
         self.assertEqual(dialog._steps[-1], {
             "op": "sort_rows", "column": "Region", "direction": "desc",
         })
         self.assertEqual(dialog._preview_candidate.rows[0]["Region"], "West")
-        dialog.deleteLater()
-        dialog = TransformDataDialog(self.source)
-        filter_actions = [MagicMock() for _ in range(4)]
-        with patch("analytics_studio.local_table_dialogs.QMenu") as menu_type:
-            menu = menu_type.return_value
-            menu.addAction.side_effect = filter_actions
-            menu.exec.return_value = filter_actions[-1]
-            dialog.preview_header.sectionClicked.emit(0)
-
-        self.assertEqual(dialog.operation_combo.currentData(), "filter_rows")
-        self.assertEqual(dialog.column_combo.currentText(), "Region")
-        self.assertEqual(dialog.option_combo.currentData(), "equals")
-        self.assertFalse(dialog.operation_settings_panel.isHidden())
-        self.assertEqual(dialog.step_list.currentRow(), -1)
-        dialog.value_edit.setText("East")
-        dialog.add_button.click()
-        self.assertEqual(
-            dialog._preview_candidate.rows,
-            [{"Region": "East", "Revenue": "12", "Customer": "  Ada  "}],
-        )
         dialog.deleteLater()
 
     def test_preview_column_menu_filters_selected_values_and_round_trips_m(self) -> None:
@@ -3595,40 +3599,28 @@ in
             [],
         )
         dialog = TransformDataDialog(source, query_name="Sales")
-        menu_actions = [MagicMock() for _ in range(4)]
-        with (
-            patch("analytics_studio.local_table_dialogs.QMenu") as menu_type,
-            patch(
-                "analytics_studio.local_table_dialogs._PowerQueryValueFilterDialog"
-            ) as filter_type,
-        ):
-            menu = menu_type.return_value
-            menu.addAction.side_effect = menu_actions
-            menu.exec.return_value = menu_actions[2]
-            value_dialog = filter_type.return_value
-            value_dialog.exec.return_value = QDialog.DialogCode.Accepted
-            value_dialog.selected_values.return_value = ["East", "North"]
+
+        def uncheck_west_and_press_ok(menu):
+            panel = dialog._column_menu_info.panel
+            labels = [panel.value_list.item(i).text() for i in range(panel.value_list.count())]
+            self.assertEqual(labels, ["(Select All)", "East", "North", "West"])
+            panel.value_list.item(labels.index("West")).setCheckState(
+                Qt.CheckState.Unchecked
+            )
+            panel.ok_button.click()
+            return None
+
+        menu_type, record = recording_menu_type(uncheck_west_and_press_ok)
+        with patch("analytics_studio.local_table_dialogs.QMenu", menu_type):
             dialog.preview_header.sectionClicked.emit(0)
 
-        filter_type.assert_called_once_with(
-            "Region", ["East", "West", "North"], dialog
-        )
         self.assertEqual(
             [row["Amount"] for row in dialog._preview_candidate.rows],
             ["10", "30", "40"],
         )
         self.assertEqual(dialog._steps[-1], {
-            "op": "filter_rows_advanced",
-            "clauses": [
-                {
-                    "column": "Region", "operator": "equals", "value": "East",
-                    "join": "and",
-                },
-                {
-                    "column": "Region", "operator": "equals", "value": "North",
-                    "join": "or",
-                },
-            ],
+            "op": "filter_rows", "column": "Region",
+            "operator": "not_equals", "value": "West",
         })
         self.assertTrue(dialog.preview_header._profiles[0]["filter_active"])
         script = steps_to_m_script(dialog._steps, "Sales")
@@ -3668,30 +3660,25 @@ in
         self.assertTrue(button.isVisible())
         self.assertEqual(button.focusPolicy(), Qt.FocusPolicy.StrongFocus)
 
-        menu_actions = [MagicMock() for _ in range(4)]
-        with (
-            patch("analytics_studio.local_table_dialogs.QMenu") as menu_type,
-            patch(
-                "analytics_studio.local_table_dialogs._PowerQueryValueFilterDialog"
-            ) as filter_type,
-        ):
-            menu = menu_type.return_value
-            menu.addAction.side_effect = menu_actions
-            menu.exec.return_value = menu_actions[2]
-            value_dialog = filter_type.return_value
-            value_dialog.exec.return_value = QDialog.DialogCode.Accepted
-            value_dialog.selected_values.return_value = ["East"]
+        def uncheck_west_and_press_ok(menu):
+            panel = dialog._column_menu_info.panel
+            for index in range(panel.value_list.count()):
+                if panel.value_list.item(index).text() == "West":
+                    panel.value_list.item(index).setCheckState(Qt.CheckState.Unchecked)
+            panel.ok_button.click()
+            return None
 
+        menu_type, record = recording_menu_type(uncheck_west_and_press_ok)
+        with patch("analytics_studio.local_table_dialogs.QMenu", menu_type):
             QTest.mouseClick(button, Qt.MouseButton.LeftButton)
             self.app.processEvents()
 
-        menu_type.assert_called_once_with(dialog)
-        menu.exec.assert_called_once_with(expected_menu_position)
-        filter_type.assert_called_once_with("Region", ["East", "West"], dialog)
+        self.assertEqual(record.created, [(dialog,)])
+        self.assertEqual(record.positions, [expected_menu_position])
         self.assertEqual(
             [row["Region"] for row in dialog._preview_candidate.rows], ["East"]
         )
-        self.assertEqual(dialog._steps[-1]["op"], "filter_rows_advanced")
+        self.assertEqual(dialog._steps[-1]["op"], "filter_rows")
         dialog.deleteLater()
 
     def test_header_filter_button_accepts_keyboard_activation(self) -> None:
@@ -3704,20 +3691,16 @@ in
             for control in dialog.preview_header._filter_buttons
             if control.property("logicalIndex") == 0
         )
-        menu_actions = [MagicMock() for _ in range(4)]
-        with patch("analytics_studio.local_table_dialogs.QMenu") as menu_type:
-            menu = menu_type.return_value
-            menu.addAction.side_effect = menu_actions
-            menu.exec.return_value = None
-
+        menu_type, record = recording_menu_type()
+        with patch("analytics_studio.local_table_dialogs.QMenu", menu_type):
             button.setFocus(Qt.FocusReason.OtherFocusReason)
             self.app.processEvents()
             self.assertTrue(button.hasFocus())
             QTest.keyClick(button, Qt.Key.Key_Space)
             self.app.processEvents()
 
-        menu_type.assert_called_once_with(dialog)
-        menu.exec.assert_called_once()
+        self.assertEqual(record.created, [(dialog,)])
+        self.assertEqual(len(record.positions), 1)
         dialog.deleteLater()
 
     def test_header_filter_button_leaves_modified_tab_keys_to_qt(self) -> None:
@@ -3761,11 +3744,8 @@ in
         )
         expected_menu_position = button.mapToGlobal(QPoint(0, button.height()))
 
-        menu_actions = [MagicMock() for _ in range(4)]
-        with patch("analytics_studio.local_table_dialogs.QMenu") as menu_type:
-            menu = menu_type.return_value
-            menu.addAction.side_effect = menu_actions
-            menu.exec.return_value = None
+        menu_type, record = recording_menu_type()
+        with patch("analytics_studio.local_table_dialogs.QMenu", menu_type):
             QTest.mouseClick(
                 header.viewport(),
                 Qt.MouseButton.LeftButton,
@@ -3773,8 +3753,8 @@ in
             )
             self.app.processEvents()
 
-        menu_type.assert_called_once_with(dialog)
-        menu.exec.assert_called_once_with(expected_menu_position)
+        self.assertEqual(record.created, [(dialog,)])
+        self.assertEqual(record.positions, [expected_menu_position])
         dialog.deleteLater()
 
     def test_header_filter_button_tab_order_tracks_visible_columns_after_scroll(self) -> None:
@@ -3824,19 +3804,16 @@ in
             len(header._filter_buttons),
         )
 
-        menu_actions = [MagicMock() for _ in range(4)]
-        with (
-            patch("analytics_studio.local_table_dialogs.QMenu") as menu_type,
-            patch.object(dialog, "_open_preview_value_filter") as open_filter,
-        ):
-            menu = menu_type.return_value
-            menu.addAction.side_effect = menu_actions
-            menu.exec.return_value = menu_actions[2]
+        menu_type, record = recording_menu_type(
+            lambda menu: self.assertEqual(
+                dialog._column_menu_info.column, headers[after_indices[0]]
+            )
+        )
+        with patch("analytics_studio.local_table_dialogs.QMenu", menu_type):
             QTest.mouseClick(after[0], Qt.MouseButton.LeftButton)
             self.app.processEvents()
-        menu_type.assert_called_once_with(dialog)
-        menu.exec.assert_called_once()
-        open_filter.assert_called_once_with(headers[after_indices[0]])
+        self.assertEqual(record.created, [(dialog,)])
+        self.assertEqual(len(record.positions), 1)
 
         for left, right in zip(after, after[1:]):
             left.setFocus(Qt.FocusReason.OtherFocusReason)
@@ -4003,14 +3980,12 @@ in
         expected_menu_position = target_button.mapToGlobal(
             QPoint(0, target_button.height())
         )
-        with patch("analytics_studio.local_table_dialogs.QMenu") as menu_type:
-            menu = menu_type.return_value
-            menu.addAction.side_effect = [MagicMock() for _ in range(4)]
-            menu.exec.return_value = None
+        menu_type, record = recording_menu_type()
+        with patch("analytics_studio.local_table_dialogs.QMenu", menu_type):
             QTest.mouseClick(target_button, Qt.MouseButton.LeftButton)
             self.app.processEvents()
 
-        menu.exec.assert_called_once_with(expected_menu_position)
+        self.assertEqual(record.positions, [expected_menu_position])
         dialog.deleteLater()
 
     def test_preview_column_menu_clamps_anchor_when_filter_button_is_clipped(self) -> None:
@@ -4050,10 +4025,8 @@ in
         relative_position = expected_position - viewport_origin
         self.assertTrue(viewport_rect.contains(relative_position))
 
-        with patch("analytics_studio.local_table_dialogs.QMenu") as menu_type:
-            menu = menu_type.return_value
-            menu.addAction.side_effect = [MagicMock() for _ in range(4)]
-            menu.exec.return_value = None
+        menu_type, record = recording_menu_type()
+        with patch("analytics_studio.local_table_dialogs.QMenu", menu_type):
             QTest.mouseClick(
                 viewport,
                 Qt.MouseButton.LeftButton,
@@ -4061,7 +4034,7 @@ in
             )
             self.app.processEvents()
 
-        menu.exec.assert_called_once_with(expected_position)
+        self.assertEqual(record.positions, [expected_position])
         dialog.deleteLater()
 
     def test_power_query_value_filter_dialog_search_and_selection(self) -> None:

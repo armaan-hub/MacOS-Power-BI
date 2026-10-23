@@ -143,22 +143,13 @@ class AdvancedMultiColumnFiltersLifecycleTests(unittest.TestCase):
         ))
         modal_state: dict[str, TransformDataDialog] = {}
         callback_errors: list[Exception] = []
+        # Unchecking only South is the shorter "does not equal" condition, exactly
+        # what Power BI writes; it keeps East and North.
         expected_step = {
-            "op": "filter_rows_advanced",
-            "clauses": [
-                {
-                    "column": "Region",
-                    "operator": "equals",
-                    "value": "East",
-                    "join": "and",
-                },
-                {
-                    "column": "Region",
-                    "operator": "equals",
-                    "value": "North",
-                    "join": "or",
-                },
-            ],
+            "op": "filter_rows",
+            "column": "Region",
+            "operator": "not_equals",
+            "value": "South",
         }
         original_metadata = [
             {
@@ -197,159 +188,63 @@ class AdvancedMultiColumnFiltersLifecycleTests(unittest.TestCase):
                 callback_errors.append(exc)
                 abort_modal()
 
-        def drive_value_filter() -> None:
-            value_dialogs = [
-                widget for widget in QApplication.topLevelWidgets()
-                if isinstance(widget, QDialog)
-                and widget.isVisible()
-                and widget.objectName() == "powerQueryValueFilterDialog"
-            ]
-            self.assertEqual(len(value_dialogs), 1)
-            value_dialog = value_dialogs[0]
-            self.assertIsInstance(value_dialog, QDialog)
-            assert isinstance(value_dialog, QDialog)
+        def drive_value_filter(panel) -> None:
+            value_list = panel.value_list
 
-            select_all = value_dialog.findChild(
-                QCheckBox, "powerQueryValueFilterSelectAll"
-            )
-            search_edit = value_dialog.findChild(
-                QLineEdit, "powerQueryValueFilterSearch"
-            )
-            value_list = value_dialog.findChild(
-                QListWidget, "powerQueryValueFilterList"
-            )
-            apply_button = value_dialog.findChild(
-                QPushButton, "applyPowerQueryValueFilterButton"
-            )
-            self.assertIsNotNone(select_all)
-            self.assertIsNotNone(search_edit)
-            self.assertIsNotNone(value_list)
-            self.assertIsNotNone(apply_button)
-            assert select_all is not None
-            assert search_edit is not None
-            assert value_list is not None
-            assert apply_button is not None
+            def item(text: str):
+                matches = value_list.findItems(text, Qt.MatchFlag.MatchExactly)
+                self.assertEqual(len(matches), 1, text)
+                return matches[0]
+
             self.assertEqual(
                 [value_list.item(index).text() for index in range(value_list.count())],
-                ["East", "North", "South"],
+                ["(Select All)", "East", "North", "South"],
             )
+            select_all = item("(Select All)")
             self.assertEqual(
                 select_all.checkState(), Qt.CheckState.Checked,
-                "the fixture has fewer than 64 distinct Region values",
+                "every value starts selected, like Power BI",
             )
 
             # Search narrows Select All to visible values; hidden selections survive.
-            search_edit.setText("East")
+            panel.search_edit.setText("East")
             self.app.processEvents()
-            self.assertFalse(value_list.findItems(
-                "East", Qt.MatchFlag.MatchExactly
-            )[0].isHidden())
-            self.assertTrue(value_list.findItems(
-                "North", Qt.MatchFlag.MatchExactly
-            )[0].isHidden())
-            self.assertTrue(value_list.findItems(
-                "South", Qt.MatchFlag.MatchExactly
-            )[0].isHidden())
-            QTest.mouseClick(
-                select_all,
-                Qt.MouseButton.LeftButton,
-                pos=QPoint(8, select_all.height() // 2),
-            )
-            self.assertEqual(
-                value_dialog.selected_values(), ["North", "South"]
-            )
+            self.assertFalse(item("East").isHidden())
+            self.assertTrue(item("North").isHidden())
+            self.assertTrue(item("South").isHidden())
+            select_all.setCheckState(Qt.CheckState.Unchecked)
+            self.assertEqual(item("East").checkState(), Qt.CheckState.Unchecked)
+            self.assertEqual(item("North").checkState(), Qt.CheckState.Checked)
+            self.assertEqual(item("South").checkState(), Qt.CheckState.Checked)
+            self.assertEqual(panel.selection()["selected"], ["North", "South"])
             self.assertEqual(select_all.checkState(), Qt.CheckState.Unchecked)
 
-            search_edit.clear()
+            panel.search_edit.clear()
             self.app.processEvents()
-            self.assertEqual(
-                value_dialog.selected_values(), ["North", "South"]
-            )
+            self.assertEqual(panel.selection()["selected"], ["North", "South"])
             self.assertEqual(select_all.checkState(), Qt.CheckState.PartiallyChecked)
 
-            # Partial selection restores all visible values; the next click clears them.
-            QTest.mouseClick(
-                select_all,
-                Qt.MouseButton.LeftButton,
-                pos=QPoint(8, select_all.height() // 2),
-            )
+            # Select All selects, then clears, every visible value.
+            select_all.setCheckState(Qt.CheckState.Checked)
             self.assertEqual(
-                value_dialog.selected_values(), ["East", "North", "South"]
+                panel.selection()["selected"], ["East", "North", "South"]
             )
-            self.assertEqual(select_all.checkState(), Qt.CheckState.Checked)
-            QTest.mouseClick(
-                select_all,
-                Qt.MouseButton.LeftButton,
-                pos=QPoint(8, select_all.height() // 2),
-            )
-            self.assertEqual(value_dialog.selected_values(), [])
-            self.assertEqual(select_all.checkState(), Qt.CheckState.Unchecked)
-
-            # Clicking from the unchecked state selects every visible value.
-            QTest.mouseClick(
-                select_all,
-                Qt.MouseButton.LeftButton,
-                pos=QPoint(8, select_all.height() // 2),
-            )
-            self.assertEqual(
-                value_dialog.selected_values(), ["East", "North", "South"]
-            )
-            self.assertEqual(select_all.checkState(), Qt.CheckState.Checked)
-            QTest.mouseClick(
-                select_all,
-                Qt.MouseButton.LeftButton,
-                pos=QPoint(8, select_all.height() // 2),
-            )
-            self.assertEqual(value_dialog.selected_values(), [])
-            self.assertEqual(select_all.checkState(), Qt.CheckState.Unchecked)
+            select_all.setCheckState(Qt.CheckState.Unchecked)
+            self.assertEqual(panel.selection()["selected"], [])
+            self.assertFalse(panel.ok_button.isEnabled())
 
             for value in ("East", "North"):
-                items = value_list.findItems(value, Qt.MatchFlag.MatchExactly)
-                self.assertEqual(len(items), 1)
-                item = items[0]
-                value_list.setCurrentItem(item)
-                value_list.setFocus()
-                QTest.keyClick(value_list, Qt.Key.Key_Space)
-                self.assertEqual(item.checkState(), Qt.CheckState.Checked)
-
+                item(value).setCheckState(Qt.CheckState.Checked)
             self.assertEqual(select_all.checkState(), Qt.CheckState.PartiallyChecked)
-            QTest.mouseClick(
-                select_all,
-                Qt.MouseButton.LeftButton,
-                pos=QPoint(8, select_all.height() // 2),
-            )
-            self.assertEqual(
-                value_dialog.selected_values(), ["East", "North", "South"]
-            )
-            self.assertEqual(select_all.checkState(), Qt.CheckState.Checked)
-            QTest.mouseClick(
-                select_all,
-                Qt.MouseButton.LeftButton,
-                pos=QPoint(8, select_all.height() // 2),
-            )
-            self.assertEqual(value_dialog.selected_values(), [])
-            self.assertEqual(select_all.checkState(), Qt.CheckState.Unchecked)
-            for value in ("East", "North"):
-                item = value_list.findItems(value, Qt.MatchFlag.MatchExactly)[0]
-                value_list.setCurrentItem(item)
-                value_list.setFocus()
-                QTest.keyClick(value_list, Qt.Key.Key_Space)
-                self.assertEqual(item.checkState(), Qt.CheckState.Checked)
-
-            self.assertEqual(value_dialog.selected_values(), ["East", "North"])
-            self.assertTrue(apply_button.isEnabled())
-            QTest.mouseClick(apply_button, Qt.MouseButton.LeftButton)
+            self.assertEqual(panel.selection()["selected"], ["East", "North"])
+            self.assertTrue(panel.ok_button.isEnabled())
+            panel.ok_button.click()
 
         class DeterministicPreviewMenu(QMenu):
             def exec(self, *args, **kwargs):
-                matching = [
-                    action for action in self.actions()
-                    if action.text() == "Filter by values…"
-                ]
-                if len(matching) != 1:
-                    return super().exec(*args, **kwargs)
-                QTimer.singleShot(0, lambda: guarded(drive_value_filter))
-                return matching[0]
+                panel = modal_state["session"]._column_menu_info.panel
+                guarded(lambda: drive_value_filter(panel))
+                return None
 
         def drive_session() -> None:
             sessions = [
