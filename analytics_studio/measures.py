@@ -331,6 +331,7 @@ _TYPED_RESULT_CATEGORY = {
 # Keep them in the editor picker so the visible catalog matches what the local
 # evaluator can recognize.
 DAX_FUNCTION_NAMES = tuple(sorted(_FUNCTIONS | {"BLANK", "DISTINCT", "FALSE", "TRUE", "VALUES"}))
+_MAX_DATE_SERIAL = dax_dates.from_datetime(datetime(9999, 12, 31, 23, 59, 59))
 _TIME_FILTER_FUNCTIONS = {
     "DATEADD", "SAMEPERIODLASTYEAR", "PREVIOUSYEAR", "PREVIOUSQUARTER",
     "PREVIOUSMONTH", "PREVIOUSDAY", "NEXTYEAR", "NEXTQUARTER", "NEXTMONTH", "NEXTDAY",
@@ -9777,6 +9778,26 @@ def evaluate_measures(
                 shifted_dates = set()
         return date_table, actual_date_column, shifted_dates
 
+    def is_date_aggregate(node: tuple[Any, ...]) -> bool:
+        """MAX / MIN / MAXX / MINX of a Date column (possibly inside CALCULATE): empty, they give a typed BLANK date."""
+        if node[0] != "call":
+            return False
+        function, arguments = node[1], node[2]
+        reference = None
+        if function in {"MAX", "MIN"} and len(arguments) == 1:
+            reference = arguments[0]
+        elif function in {"MAXX", "MINX"} and len(arguments) == 2:
+            reference = arguments[1]
+        elif function == "CALCULATE" and arguments:
+            return is_date_aggregate(arguments[0])
+        if reference is None or reference[0] != "reference" or not reference[1]:
+            return False
+        try:
+            context, column = resolve_table(reference[1], reference[2])
+        except MeasureError:
+            return False
+        return str(context.get("column_types", {}).get(column, "")).casefold() in {"date", "datetime"}
+
     def evaluate(
         node: tuple[Any, ...],
         row_context: tuple[dict[str, Any], dict[str, Any], int] | None = None,
@@ -9892,6 +9913,12 @@ def evaluate_measures(
                 return _power(
                     None if left is None else as_number(left), None if right is None else as_number(right)
                 )
+            if node[1] in {"+", "-"} and (left is None) != (right is None):
+                # live Power BI: MAX / MIN of an empty date column is a typed BLANK date, which counts as day zero in + and -
+                if left is None and is_date_aggregate(node[2]):
+                    left = dax_dates.DaxDateTime(Decimal(0))
+                elif right is None and node[1] == "+" and is_date_aggregate(node[3]):
+                    right = dax_dates.DaxDateTime(Decimal(0))
             result = _binary_value(
                 node[1],
                 None if left is None else as_number(left),
@@ -10014,7 +10041,7 @@ def evaluate_measures(
                 total = dax_typed.QUIET.add(total, value)
             result = total if function == "SUMX" else dax_typed.QUIET.divide(total, Decimal(len(values)))
             if function == "SUMX" and not has_number_branch(arguments[1]) and all(isinstance(value, dax_dates.DaxDateTime) for value in values) and result.is_finite():
-                return dax_dates.DaxDateTime(result)  # live Power BI: SUMX over dates is a date, AVERAGEX over dates is a plain number
+                return dax_dates.DaxDateTime(min(result, _MAX_DATE_SERIAL))  # live Power BI: a sum of dates saturates at 12/31/9999 23:59:59  # live Power BI: SUMX over dates is a date, AVERAGEX over dates is a plain number
             return result
         if function in {"COUNTX", "COUNTAX"}:
             context, iteration_rows = table_argument_value(arguments[0])
