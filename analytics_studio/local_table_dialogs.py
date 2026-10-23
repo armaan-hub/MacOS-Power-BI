@@ -23,10 +23,12 @@ from PySide6.QtGui import (
     QColor,
     QIntValidator,
     QIcon,
+    QKeySequence,
     QPalette,
     QPainter,
     QPen,
     QRegularExpressionValidator,
+    QShortcut,
     QTextCursor,
 )
 from PySide6.QtWidgets import (
@@ -63,6 +65,7 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
+from analytics_studio.conditional_column_dialog import ConditionalColumnDialog
 from analytics_studio.dialog_theme import apply_light_dialog_theme
 from analytics_studio.file_import import MAX_DATA_ROWS, ImportCandidate, lineaged_row
 from analytics_studio.import_preview_dialog import ImportPreviewTableModel
@@ -2590,6 +2593,8 @@ class TransformDataDialog(QDialog):
             for query_id, dependent_ids in (query_dependents or {}).items()
         }
         self._deleted_query_ids: set[str] = set()
+        self._operation_dialog: QDialog | None = None
+        self._conditional_dialog: QDialog | None = None
         self._query_parameters = validate_query_parameters(
             deepcopy(query_parameters or [])
         )
@@ -3666,7 +3671,7 @@ class TransformDataDialog(QDialog):
             "Close & Apply", lambda: self.apply_button.click()
         )
         self.file_menu.addSeparator()
-        self.file_menu.addAction("Close", self.reject)
+        self.file_menu.addAction("Close", self.request_close)
         self.settings_close_button.clicked.connect(
             lambda: self._set_settings_steps_pane_visible(False)
         )
@@ -3674,6 +3679,10 @@ class TransformDataDialog(QDialog):
         self._set_query_editing_enabled(
             not bool(active_query.get("is_unavailable"))
         )
+        QShortcut(
+            QKeySequence(QKeySequence.StandardKey.Close), self, self.request_close
+        )
+        self._initial_pending_state = self._pending_state()
 
     def _populate_ribbon(self) -> None:
         """Expose every supported local transform through task-oriented ribbon tabs."""
@@ -3789,7 +3798,7 @@ class TransformDataDialog(QDialog):
                 width=48,
                 menu_items=[
                     ("Close & Load", self.apply_button.click, True),
-                    ("Close", self.reject, True),
+                    ("Close", self.request_close, True),
                 ],
                 menu_button_popup=True,
             )], "office"),
@@ -4767,30 +4776,157 @@ class TransformDataDialog(QDialog):
         self._save_active_query_state()
         self._update_refresh_preview_button()
 
+    # Power BI applies parameterless commands immediately and opens a dialog with
+    # OK / Cancel for commands that need input. These sets drive that split.
+    _POWER_BI_STEP_NAMES: dict[str, str] = {
+        "remove_column": "Removed Columns",
+        "keep_columns": "Removed Other Columns",
+        "rename_column": "Renamed Columns",
+        "reorder_columns": "Reordered Columns",
+        "filter_rows": "Filtered Rows",
+        "filter_rows_advanced": "Filtered Rows",
+        "sort_rows": "Sorted Rows",
+        "sort_rows_by_columns": "Sorted Rows",
+        "convert_type": "Changed Type",
+        "convert_type_using_locale": "Changed Type with Locale",
+        "replace_value": "Replaced Value",
+        "extract_text_between_delimiters": "Extracted Text Between Delimiters",
+        "split_column": "Split Column by Delimiter",
+        "split_column_by_each_delimiter": "Split Column by Delimiter",
+        "split_column_to_rows": "Split Column by Delimiter",
+        "split_column_by_positions": "Split Column by Positions",
+        "merge_columns": "Merged Columns",
+        "fill_down": "Filled Down",
+        "fill_up": "Filled Up",
+        "duplicate_column": "Duplicated Column",
+        "add_index_column": "Added Index",
+        "group_by": "Grouped Rows",
+        "unpivot_columns": "Unpivoted Columns",
+        "unpivot_other_columns": "Unpivoted Other Columns",
+        "pivot_column": "Pivoted Column",
+        "add_custom_column": "Added Custom",
+        "conditional_column": "Added Conditional Column",
+        "trim_text": "Trimmed Text",
+        "clean_text": "Cleaned Text",
+        "lowercase_text": "Lowercased Text",
+        "uppercase_text": "Uppercased Text",
+        "proper_case_text": "Capitalized Each Word",
+        "reverse_text": "Reversed Text",
+        "remove_duplicates": "Removed Duplicates",
+        "keep_duplicates": "Kept Duplicates",
+        "remove_blank_rows": "Removed Blank Rows",
+        "remove_rows_with_errors": "Removed Errors",
+        "count_rows": "Counted Rows",
+        "remove_top_rows": "Removed Top Rows",
+        "remove_bottom_rows": "Removed Bottom Rows",
+        "remove_sparse_top_rows": "Removed Top Rows",
+        "remove_sparse_bottom_rows": "Removed Bottom Rows",
+        "keep_top_rows": "Kept First Rows",
+        "keep_bottom_rows": "Kept Last Rows",
+        "keep_range_rows": "Kept Range of Rows",
+        "remove_alternate_rows": "Removed Alternate Rows",
+        "promote_headers": "Promoted Headers",
+        "demote_headers": "Demoted Headers",
+        "transpose_table": "Transposed Table",
+    }
+    _OPERATION_DIALOG_TITLES: dict[str, str] = {
+        "rename_column": "Rename Column",
+        "keep_columns": "Choose Columns",
+        "reorder_columns": "Reorder Columns",
+        "filter_rows": "Filter Rows",
+        "filter_rows_advanced": "Filter Rows",
+        "sort_rows": "Sort Rows",
+        "sort_rows_by_columns": "Sort Rows",
+        "convert_type": "Change Type",
+        "convert_type_using_locale": "Change Type with Locale",
+        "replace_value": "Replace Values",
+        "extract_text_by_delimiter": "Extract Text Before or After Delimiter",
+        "extract_text_between_delimiters": "Extract Text Between Delimiters",
+        "split_column": "Split Column by Delimiter",
+        "split_column_by_each_delimiter": "Split Column by Delimiter",
+        "split_column_to_rows": "Split Column by Delimiter",
+        "split_column_by_positions": "Split Column by Positions",
+        "merge_columns": "Merge Columns",
+        "add_index_column": "Add Index Column",
+        "group_by": "Group By",
+        "pivot_column": "Pivot Column",
+        "keep_top_rows": "Keep Top Rows",
+        "keep_bottom_rows": "Keep Bottom Rows",
+        "keep_range_rows": "Keep Range of Rows",
+        "remove_top_rows": "Remove Top Rows",
+        "remove_bottom_rows": "Remove Bottom Rows",
+        "remove_alternate_rows": "Remove Alternate Rows",
+    }
+    # Operations that need no input beyond the current column selection.
+    _SELECTION_OPERATIONS_PER_COLUMN = frozenset({
+        "remove_column", "duplicate_column", "trim_text", "clean_text",
+        "lowercase_text", "uppercase_text", "proper_case_text", "reverse_text",
+    })
+    _SELECTION_OPERATIONS_COLUMN_LIST = frozenset({
+        "fill_down", "fill_up", "keep_duplicates", "unpivot_columns",
+        "unpivot_other_columns",
+    })
+    _PARAMETERLESS_OPERATIONS = frozenset({
+        "remove_blank_rows", "remove_rows_with_errors",
+    })
+
+    def _power_bi_step_name(self, step: dict[str, Any]) -> str:
+        """Return Power BI's default name for ``step`` (``Removed Columns1`` when taken)."""
+        op = str(step.get("op", ""))
+        if op == "extract_text_by_delimiter":
+            side = str(step.get("side", "")).strip().title()
+            base = f"Extracted Text {side} Delimiter" if side else ""
+        else:
+            base = self._POWER_BI_STEP_NAMES.get(op, "")
+        if not base:
+            return ""
+        taken = {
+            self.step_list.item(index).text() for index in range(self.step_list.count())
+        }
+        candidate, suffix = base, 0
+        while candidate in taken:
+            suffix += 1
+            candidate = f"{base}{suffix}"
+        return candidate
+
+    def _selected_preview_columns(self) -> list[str]:
+        """Column names selected in the preview grid, left to right (current cell if none)."""
+        headers = self._selected_preview_candidate().headers
+        model = self.preview.selectionModel()
+        indexes = list(model.selectedIndexes()) if model is not None else []
+        current = self.preview.currentIndex()
+        if not indexes and current.isValid():
+            indexes = [current]
+        columns = sorted({index.column() for index in indexes if index.isValid()})
+        return [headers[column] for column in columns if 0 <= column < len(headers)]
+
     def _select_ribbon_sort(self, direction: str) -> None:
-        selected_index = self.preview.currentIndex()
-        selected_column = (
-            self._preview_candidate.headers[selected_index.column()]
-            if selected_index.isValid()
-            and 0 <= selected_index.column() < len(self._preview_candidate.headers)
-            else None
-        )
-        self._select_ribbon_operation("sort_rows")
-        index = self.option_combo.findData(direction)
-        if index >= 0:
-            self.option_combo.setCurrentIndex(index)
-        if selected_column is not None:
-            self.column_combo.setCurrentText(selected_column)
-            previous_step_count = len(self._steps)
-            self._add_step()
-            if len(self._steps) > previous_step_count:
+        selected = self._selected_preview_columns()
+        if self.step_list.currentRow() >= 0:
+            self.step_list.setCurrentRow(-1)
+        if selected:
+            if self._add_step(
+                {"op": "sort_rows", "column": selected[0], "direction": direction},
+                power_bi_name=True,
+            ):
                 self.step_settings_toggle.setChecked(False)
+            return
+        self._open_operation_dialog("sort_rows", selected, option_value=direction)
 
     def _select_ribbon_data_type(self, data_type: str) -> None:
-        self._select_ribbon_operation("convert_type")
-        index = self.option_combo.findData(data_type)
-        if index >= 0:
-            self.option_combo.setCurrentIndex(index)
+        selected = self._selected_preview_columns()
+        if self.step_list.currentRow() >= 0:
+            self.step_list.setCurrentRow(-1)
+        if not selected:
+            self._open_operation_dialog("convert_type", selected, option_value=data_type)
+            return
+        for column in selected:
+            if not self._add_step(
+                {"op": "convert_type", "column": column, "type": data_type},
+                power_bi_name=True,
+            ):
+                return
+        self.step_settings_toggle.setChecked(False)
 
     def _select_ribbon_operation(self, operation: str) -> None:
         operation_index = self.operation_combo.findData(operation)
@@ -4798,6 +4934,9 @@ class TransformDataDialog(QDialog):
             self._show_error(
                 f"The {operation.replace('_', ' ').title()} command is not available in this editor."
             )
+            return
+        if operation == "conditional_column":
+            self._open_conditional_dialog()
             return
         if operation == "add_custom_column":
             if self.step_list.currentRow() >= 0:
@@ -4807,20 +4946,235 @@ class TransformDataDialog(QDialog):
             if not self._launch_custom_column_dialog():
                 self._restore_non_custom_operation()
             return
+        selected = self._selected_preview_columns()
         if self.step_list.currentRow() >= 0:
             self.step_list.setCurrentRow(-1)
-        self.step_settings_toggle.setChecked(True)
+        if self._apply_direct_operation(operation, selected):
+            return
+        self._open_operation_dialog(operation, selected)
+
+    def _apply_direct_operation(self, operation: str, selected: list[str]) -> bool:
+        """Apply a command that needs no further input. False means it needs a dialog."""
+        if operation in self._STEP_OPERATIONS_WITHOUT_SETTINGS | self._PARAMETERLESS_OPERATIONS:
+            steps: list[dict[str, Any]] = [{"op": operation}]
+        elif operation in self._SELECTION_OPERATIONS_PER_COLUMN:
+            if not selected:
+                self._show_error("Select a column in the preview first.")
+                return True
+            taken = set(self._preview_candidate.headers)
+            steps = []
+            for column in selected:
+                step: dict[str, Any] = {"op": operation, "column": column}
+                if operation == "duplicate_column":
+                    new_name, suffix = f"{column} - Copy", 0
+                    while new_name in taken:
+                        suffix += 1
+                        new_name = f"{column} - Copy{suffix}"
+                    taken.add(new_name)
+                    step["new_name"] = new_name
+                steps.append(step)
+        elif operation in self._SELECTION_OPERATIONS_COLUMN_LIST:
+            if not selected:
+                self._show_error("Select one or more columns in the preview first.")
+                return True
+            step = {"op": operation, "columns": list(selected)}
+            if operation in {"unpivot_columns", "unpivot_other_columns"}:
+                step["attribute_name"] = "Attribute"
+                step["value_name"] = "Value"
+            steps = [step]
+        elif operation == "remove_duplicates":
+            steps = (
+                [{"op": operation, "columns": list(selected)}]
+                if selected else [{"op": operation}]
+            )
+        else:
+            return False
+        for step in steps:
+            if not self._add_step(step, power_bi_name=True):
+                break
+        self.step_settings_toggle.setChecked(False)
+        return True
+
+    def _close_operation_dialog(self) -> None:
+        for name in ("_operation_dialog", "_conditional_dialog"):
+            dialog = getattr(self, name, None)
+            if dialog is not None:
+                dialog.reject()
+
+    def _open_operation_dialog(
+        self,
+        operation: str,
+        selected: list[str],
+        *,
+        option_value: str | None = None,
+    ) -> None:
+        """Show the command's settings in a modal OK / Cancel dialog (nothing applies until OK)."""
+        self._close_operation_dialog()
+        operation_index = self.operation_combo.findData(operation)
         self.operation_combo.setCurrentIndex(operation_index)
         self._configure_editor()
-        if operation in self._STEP_OPERATIONS_WITHOUT_SETTINGS:
-            self._add_step()
-            self.step_settings_toggle.setChecked(False)
-            return
-        if self.preview.currentIndex().isValid() and not self.column_combo.isHidden():
-            header_index = self.preview.currentIndex().column()
-            if 0 <= header_index < len(self._preview_candidate.headers):
-                self.column_combo.setCurrentText(self._preview_candidate.headers[header_index])
+        if option_value is not None:
+            index = self.option_combo.findData(option_value)
+            if index >= 0:
+                self.option_combo.setCurrentIndex(index)
+        if selected and not self.column_combo.isHidden():
+            self.column_combo.setCurrentText(selected[0])
         self._clear_error()
+        title = self._OPERATION_DIALOG_TITLES.get(
+            operation, self.operation_combo.currentText()
+        )
+        sub = QDialog(self)
+        sub.setObjectName("powerQueryOperationDialog")
+        sub.setWindowTitle(title)
+        sub.setWindowModality(Qt.WindowModality.ApplicationModal)
+        sub.setMinimumWidth(480)
+        form_hint = self.operation_settings_panel.sizeHint()
+        sub.resize(
+            max(540, min(900, form_hint.width() + 48)),
+            max(170, min(640, form_hint.height() + 110)),
+        )
+        layout = QVBoxLayout(sub)
+        layout.setContentsMargins(16, 14, 16, 12)
+        scroll = QScrollArea(sub)
+        scroll.setWidgetResizable(True)
+        scroll.setFrameShape(QFrame.Shape.NoFrame)
+        editor_layout = self.editor_panel.layout()
+        panel_index = editor_layout.indexOf(self.operation_settings_panel)
+        error_index = editor_layout.indexOf(self.error_label)
+        editor_layout.removeWidget(self.operation_settings_panel)
+        scroll.setWidget(self.operation_settings_panel)
+        self.operation_settings_panel.setVisible(True)
+        layout.addWidget(scroll, 1)
+        editor_layout.removeWidget(self.error_label)
+        self.error_label.setParent(sub)
+        layout.addWidget(self.error_label)
+        chrome = (
+            self.operation_combo, self.operation_label, self.add_button,
+            self.update_button, self.step_settings_toggle,
+        )
+        for widget in chrome:
+            widget.setVisible(False)
+        buttons = QDialogButtonBox(
+            QDialogButtonBox.StandardButton.Ok | QDialogButtonBox.StandardButton.Cancel,
+            parent=sub,
+        )
+        buttons.setObjectName("powerQueryOperationDialogButtons")
+        sub.ok_button = buttons.button(QDialogButtonBox.StandardButton.Ok)
+        sub.cancel_button = buttons.button(QDialogButtonBox.StandardButton.Cancel)
+        sub.ok_button.clicked.connect(
+            lambda: sub.accept() if self._add_step(power_bi_name=True) else None
+        )
+        buttons.rejected.connect(sub.reject)
+        layout.addWidget(buttons)
+
+        def restore(_result: int = 0) -> None:
+            self.operation_settings_panel.setParent(self.editor_panel)
+            editor_layout.insertWidget(max(panel_index, 0), self.operation_settings_panel)
+            self.error_label.setParent(self.editor_panel)
+            editor_layout.insertWidget(max(error_index, 1), self.error_label)
+            for widget in chrome:
+                widget.setVisible(True)
+            self.step_settings_toggle.setChecked(False)
+            self.operation_settings_panel.setVisible(False)
+            if self._operation_dialog is sub:
+                self._operation_dialog = None
+            sub.deleteLater()
+
+        sub.finished.connect(restore)
+        self._operation_dialog = sub
+        sub.show()
+
+    def _conditional_dialog_validator(
+        self, editing_index: int | None
+    ) -> Callable[[dict[str, Any]], str | None]:
+        def validate(step: dict[str, Any]) -> str | None:
+            next_steps = deepcopy(self._steps)
+            if editing_index is None:
+                next_steps.append(step)
+            else:
+                if not 0 <= editing_index < len(next_steps):
+                    return "The selected conditional-column step is no longer available."
+                next_steps[editing_index] = step
+            try:
+                validated = validate_steps(next_steps)
+                apply_transformations(
+                    self._source_candidate, validated,
+                    parameters=self._parameter_values(),
+                )
+            except (TransformationError, ValueError) as exc:
+                return str(exc)
+            return None
+        return validate
+
+    def _open_conditional_dialog(self, editing_index: int | None = None) -> None:
+        """Power BI's Add Conditional Column dialog; OK appends (or updates) the step."""
+        self._close_operation_dialog()
+        selected = self._selected_preview_columns()
+        if editing_index is None and self.step_list.currentRow() >= 0:
+            self.step_list.setCurrentRow(-1)
+        try:
+            base = self._custom_column_base(editing_index)
+        except TransformationError as exc:
+            self._show_error(str(exc))
+            return
+        existing = (
+            self._steps[editing_index]
+            if editing_index is not None and 0 <= editing_index < len(self._steps)
+            else None
+        )
+        sub = ConditionalColumnDialog(
+            base.headers,
+            initial_step=existing,
+            default_column=selected[0] if selected else None,
+            validate_callback=self._conditional_dialog_validator(editing_index),
+            parent=self,
+        )
+        sub.setWindowModality(Qt.WindowModality.ApplicationModal)
+
+        def accepted() -> None:
+            step = sub.step()
+            if editing_index is None:
+                self._add_step(step, power_bi_name=True)
+            else:
+                self.step_list.setCurrentRow(editing_index)
+                self._replace_selected_step(step)
+            self.step_settings_toggle.setChecked(False)
+
+        def finished(_result: int = 0) -> None:
+            if self._conditional_dialog is sub:
+                self._conditional_dialog = None
+            sub.deleteLater()
+
+        sub.accepted.connect(accepted)
+        sub.finished.connect(finished)
+        self._conditional_dialog = sub
+        sub.show()
+
+    def _replace_selected_step(self, step: dict[str, Any]) -> bool:
+        """Replace the selected applied step with an explicit step (used by dialogs)."""
+        index = self.step_list.currentRow()
+        if not 0 <= index < len(self._steps):
+            return False
+        next_steps = deepcopy(self._steps)
+        try:
+            next_steps[index] = step
+            next_steps = validate_steps(next_steps)
+            transformed = apply_transformations(
+                self._source_candidate, next_steps,
+                parameters=self._parameter_values(),
+            )
+        except TransformationError as exc:
+            self._show_error(str(exc))
+            return False
+        if self._steps[index].get("op") != next_steps[index].get("op"):
+            self._step_metadata[index] = {}
+        self._steps = next_steps
+        self._preview_candidate = transformed
+        self._render_steps()
+        self._refresh_preview()
+        self.step_list.setCurrentRow(index)
+        self._clear_error()
+        return True
 
     def _custom_column_base(self, editing_index: int | None) -> ImportCandidate:
         steps = self._steps[:editing_index] if editing_index is not None else self._steps
@@ -4895,7 +5249,7 @@ class TransformDataDialog(QDialog):
         self.value_edit.setText(name)
         self.custom_expression_edit.setPlainText(expression)
         if editing_index is None:
-            self._add_step()
+            self._add_step(power_bi_name=True)
         else:
             self._set_combo_data(
                 self.custom_output_type_combo,
@@ -6939,6 +7293,10 @@ class TransformDataDialog(QDialog):
         show_literal = needs_value and not (show_parameter and using_parameter)
         self.filter_parameter_label.setVisible(show_parameter)
         self.filter_parameter_combo.setVisible(show_parameter)
+        if not is_filter:
+            # _configure_editor already decided whether this command shows a value
+            # field (Replace Values, Keep Top Rows, names...); do not hide it again.
+            return
         self.value_edit.setVisible(show_literal)
         self.value_label.setVisible(show_literal)
 
@@ -7755,24 +8113,33 @@ class TransformDataDialog(QDialog):
             self._render_group_aggregations()
         self._clear_error()
 
-    def _add_step(self) -> None:
+    def _add_step(
+        self,
+        step: dict[str, Any] | None = None,
+        *,
+        power_bi_name: bool = False,
+    ) -> bool:
+        """Append a step built from the form (or the explicit ``step``); True on success."""
         try:
-            next_steps = validate_steps([*self._steps, self._create_step()])
+            new_step = step if step is not None else self._create_step()
+            next_steps = validate_steps([*self._steps, new_step])
             transformed = apply_transformations(
                 self._source_candidate, next_steps,
                 parameters=self._parameter_values(),
             )
         except TransformationError as exc:
             self._show_error(str(exc))
-            return
+            return False
         self._steps = next_steps
-        self._step_metadata.append({})
+        step_name = self._power_bi_step_name(next_steps[-1]) if power_bi_name else ""
+        self._step_metadata.append({"name": step_name} if step_name else {})
         self._preview_candidate = transformed
         self._render_steps()
         self._refresh_preview()
         self._configure_editor()
         self.step_list.setCurrentRow(self.step_list.count() - 1)
         self._clear_error()
+        return True
 
     def _detect_data_types(self) -> None:
         """Add explicit conversion steps for columns with safe inferred types."""
@@ -7943,6 +8310,9 @@ class TransformDataDialog(QDialog):
         self.step_list.scrollToItem(self.step_list.item(index))
         if step["op"] == "add_custom_column":
             self._launch_custom_column_dialog(index)
+            return
+        if step["op"] == "conditional_column":
+            self._open_conditional_dialog(index)
             return
         operation_name = self.operation_combo.currentText()
         settings_dialog = QDialog(self)
@@ -8965,3 +9335,86 @@ class TransformDataDialog(QDialog):
         self._accepted_steps = None
         self._accepted_queries = None
         super().reject()
+
+    # ---- closing the editor like Power BI -------------------------------
+
+    def _pending_state(self) -> dict[str, Any]:
+        """Everything the user can change in this session that Close & Apply would commit."""
+        self._save_active_query_state()
+        return {
+            "order": list(self._query_order),
+            "deleted": sorted(self._deleted_query_ids),
+            "parameters": deepcopy(self._query_parameters),
+            "functions": deepcopy(self._query_functions),
+            "queries": {
+                query_id: {
+                    key: deepcopy(query.get(key))
+                    for key in (
+                        "name", "description", "steps", "step_metadata", "m_script",
+                        "query_group", "load_enabled", "include_in_report_refresh",
+                    )
+                }
+                for query_id, query in self._query_states.items()
+            },
+        }
+
+    def has_pending_changes(self) -> bool:
+        """True when the session holds edits or newly staged queries not yet applied."""
+        if any(
+            query.get("is_new_query") or query.get("is_new_source")
+            or query.get("is_duplicate") or query.get("is_source_settings_changed")
+            for query in self._query_states.values()
+        ):
+            return True
+        return self._pending_state() != self._initial_pending_state
+
+    def _ask_pending_changes(self) -> str:
+        """Ask what to do with unapplied changes: ``apply``, ``discard`` or ``cancel``."""
+        box = QMessageBox(self)
+        box.setObjectName("powerQueryPendingChangesBox")
+        box.setIcon(QMessageBox.Icon.Question)
+        box.setWindowTitle("Power Query Editor")
+        box.setText(
+            "You have pending changes in the Power Query Editor that have not been applied."
+        )
+        box.setInformativeText("Do you want to apply your changes before closing?")
+        apply_button = box.addButton("Apply changes", QMessageBox.ButtonRole.AcceptRole)
+        discard_button = box.addButton(
+            "Discard changes", QMessageBox.ButtonRole.DestructiveRole
+        )
+        cancel_button = box.addButton("Cancel", QMessageBox.ButtonRole.RejectRole)
+        box.setDefaultButton(apply_button)
+        box.setEscapeButton(cancel_button)
+        box.exec()
+        clicked = box.clickedButton()
+        if clicked is apply_button:
+            return "apply"
+        if clicked is discard_button:
+            return "discard"
+        return "cancel"
+
+    def request_close(self) -> bool:
+        """User-facing close (window button, Cmd+W, Esc, File > Close): ask when changes are pending."""
+        self._close_operation_dialog()
+        if not self.has_pending_changes():
+            self.reject()
+            return True
+        choice = self._ask_pending_changes()
+        if choice == "discard":
+            self.reject()
+            return True
+        if choice == "apply":
+            self._accept_candidate()
+            return self.result() == QDialog.DialogCode.Accepted
+        return False
+
+    def closeEvent(self, event: Any) -> None:  # noqa: N802
+        event.ignore()
+        self.request_close()
+
+    def keyPressEvent(self, event: Any) -> None:  # noqa: N802
+        if event.key() == Qt.Key.Key_Escape and not event.modifiers():
+            event.accept()
+            self.request_close()
+            return
+        super().keyPressEvent(event)
