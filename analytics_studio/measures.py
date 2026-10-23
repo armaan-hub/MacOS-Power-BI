@@ -2348,7 +2348,7 @@ class _Parser:
                 if year_end is not None:
                     _parse_year_end_date(year_end[1])
                 if rest and not _general_calculate_filters_valid((rest[0],)):
-                    raise MeasureError(f"{function} filter argument must be a Boolean or table filter expression.")
+                    raise MeasureError(f"{function} needs an expression and marked date-column reference. Filter expressions are not supported unless they are Boolean or table filters.")
             elif function == "DATESYTD":
                 valid_arguments = (
                     len(arguments) == 1 and arguments[0][0] == "reference"

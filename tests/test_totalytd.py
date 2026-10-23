@@ -134,7 +134,7 @@ class TotalYtdTests(unittest.TestCase):
             {"OrderDate": "2024-06-30", "Amount": "5"},
             {"OrderDate": "2024-07-01", "Amount": "7"},
         ]
-        expression = 'TOTALYTD(SUM([Amount]), \'Calendar\'[Date],, "6/30")'
+        expression = 'TOTALYTD(SUM([Amount]), \'Calendar\'[Date], "6/30")'
 
         def fiscal_ytd_for(visible_calendar_rows: list[dict[str, str]]) -> int:
             table_context = [
@@ -187,7 +187,7 @@ class TotalYtdTests(unittest.TestCase):
         values = evaluate_measures(
             [{
                 "name": "Leap Fiscal YTD",
-                "expression": 'TOTALYTD(SUM([Amount]), \'Calendar\'[Date],, "2/29")',
+                "expression": 'TOTALYTD(SUM([Amount]), \'Calendar\'[Date], "2/29")',
             }],
             order_rows,
             ["OrderDate", "Amount"],
@@ -233,7 +233,7 @@ class TotalYtdTests(unittest.TestCase):
         leap_values = evaluate_measures(
             [{
                 "name": "Leap Fiscal YTD",
-                "expression": 'TOTALYTD(SUM([Amount]), \'Calendar\'[Date],, "2/29")',
+                "expression": 'TOTALYTD(SUM([Amount]), \'Calendar\'[Date], "2/29")',
             }],
             leap_orders,
             ["OrderDate", "Amount"],
@@ -271,13 +271,13 @@ class TotalYtdTests(unittest.TestCase):
         with self.assertRaisesRegex(MeasureError, "month/day"):
             normalize_measure(
                 "Invalid year end",
-                'TOTALYTD(SUM([Amount]), \'Calendar\'[Date],, "6/31")',
+                'TOTALYTD(SUM([Amount]), \'Calendar\'[Date], "6/31")',
             )
 
         with self.assertRaisesRegex(MeasureError, "month/day"):
             normalize_measure(
                 "Non-ASCII year end",
-                'TOTALYTD(SUM([Amount]), \'Calendar\'[Date],, "６/３０")',
+                'TOTALYTD(SUM([Amount]), \'Calendar\'[Date], "６/３０")',
             )
 
         with self.assertRaisesRegex(MeasureError, "Filter expressions are not supported"):
@@ -1682,7 +1682,7 @@ class TotalYtdTests(unittest.TestCase):
             controller.create_measure("Sales YTD", expression), controller.statusMessage
         )
         fiscal_expression = (
-            f'TOTALYTD(SUM([Amount]), \'{calendar_name}\'[Date],, "6/30")'
+            f'TOTALYTD(SUM([Amount]), \'{calendar_name}\'[Date], "6/30")'
         )
         self.assertTrue(
             controller.create_measure("Fiscal YTD", fiscal_expression),
