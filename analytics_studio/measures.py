@@ -8623,6 +8623,15 @@ def evaluate_measures(
                 base = node[2][0]
                 if base[0] == "call" and base[1] == "ALL" and len(base[2]) == 1 and base[2][0][0] == "reference":
                     references = [base[2][0]]
+                elif base[0] == "table_call" and base[1] == "VALUES" and base[2][0] == "reference":
+                    references = [base[2]]  # live Power BI (iteration 84): FILTER(VALUES(key), ..) replaces the key like FILTER(ALL(key), ..)
+            elif node[0] == "table_call" and node[1] == "VALUES" and node[2][0] == "reference":
+                references = [node[2]]  # live Power BI (iteration 84): VALUES(key) as a filter replaces the key like a Boolean test of it
+            elif (
+                node[0] == "call" and node[1] == "CALCULATETABLE" and node[2] and node[2][0][0] == "table_call"
+                and node[2][0][1] == "VALUES" and node[2][0][2][0] == "reference"
+            ):
+                references = [node[2][0][2]]
             elif node[0] != "call" or node[1] in {"NOT", "AND", "OR"}:
                 references = list(_direct_column_references(node))
             for reference in references:
@@ -9663,6 +9672,12 @@ def evaluate_measures(
                 node = (node[0], function, arguments)
             if row_context is not None:
                 if len(arguments) > 1 and _general_calculate_filters_valid(tuple(arguments[1:])):
+                    return evaluate_with_general_filters(arguments[0], tuple(arguments[1:]), row_context)
+                if len(arguments) > 2 and any(a[0] == "call" and a[1] in _RELATIONSHIP_MODIFIERS for a in arguments[1:]) and _general_calculate_filters_valid(
+                    tuple(a for a in arguments[1:] if not (a[0] == "call" and a[1] in _RELATIONSHIP_MODIFIERS))
+                ):
+                    # live Power BI: the filter arguments are evaluated BEFORE the row transition, whatever USERELATIONSHIP / CROSSFILTER
+                    # they sit beside (FILTER(Cal, ..) is the whole calendar, not the day the fact row pins)
                     return evaluate_with_general_filters(arguments[0], tuple(arguments[1:]), row_context)
                 return with_column_filters(all_row_context_filters(row_context), lambda: without_row_contexts(lambda: evaluate(node)), True)
             if len(arguments) == 1:
