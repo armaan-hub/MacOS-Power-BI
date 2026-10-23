@@ -159,6 +159,32 @@ class PowerQueryDirectApplyTests(unittest.TestCase):
         self.assertIsNone(dialog._operation_dialog)
         self.assertTrue(dialog.operation_settings_panel.isHidden())
 
+    def test_cancelling_a_dialog_keeps_the_selected_applied_step(self) -> None:
+        dialog = self.open_dialog()
+        self.select_column(dialog, 1)
+        dialog.ribbon_command_buttons["remove_column"].click()
+        self.app.processEvents()
+        self.assertEqual(dialog.step_list.currentRow(), 0)
+        for operation in ("keep_top_rows", "conditional_column"):
+            with self.subTest(operation=operation):
+                dialog.ribbon_command_buttons[operation].click()
+                self.app.processEvents()
+                sub = dialog._operation_dialog or dialog._conditional_dialog
+                sub.reject()
+                self.app.processEvents()
+                self.assertEqual(dialog.step_list.currentRow(), 0)
+                self.assertEqual(len(dialog._steps), 1)
+
+    def test_closing_the_editor_returns_the_borrowed_settings_panel(self) -> None:
+        dialog = self.open_dialog()
+        dialog.ribbon_command_buttons["keep_top_rows"].click()
+        self.app.processEvents()
+        self.assertIsNotNone(dialog._operation_dialog)
+        dialog.reject()
+        self.app.processEvents()
+        self.assertIsNone(dialog._operation_dialog)
+        self.assertIs(dialog.operation_settings_panel.parent(), dialog.editor_panel)
+
     def test_dialog_ok_with_invalid_input_stays_open_with_error(self) -> None:
         dialog = self.open_dialog()
         dialog.ribbon_command_buttons["keep_top_rows"].click()

@@ -5469,7 +5469,7 @@ class TransformDataDialog(QDialog):
             )
             return
         if operation == "conditional_column":
-            self._open_conditional_dialog()
+            self._open_conditional_dialog(prior_row=self.step_list.currentRow())
             return
         if operation == "add_custom_column":
             if self.step_list.currentRow() >= 0:
@@ -5480,11 +5480,12 @@ class TransformDataDialog(QDialog):
                 self._restore_non_custom_operation()
             return
         selected = self._selected_preview_columns()
-        if self.step_list.currentRow() >= 0:
+        prior_row = self.step_list.currentRow()
+        if prior_row >= 0:
             self.step_list.setCurrentRow(-1)
         if self._apply_direct_operation(operation, selected):
             return
-        self._open_operation_dialog(operation, selected)
+        self._open_operation_dialog(operation, selected, prior_row=prior_row)
 
     def _apply_direct_operation(self, operation: str, selected: list[str]) -> bool:
         """Apply a command that needs no further input. False means it needs a dialog."""
@@ -5540,6 +5541,7 @@ class TransformDataDialog(QDialog):
         selected: list[str],
         *,
         option_value: str | None = None,
+        prior_row: int = -1,
     ) -> None:
         """Show the command's settings in a modal OK / Cancel dialog (nothing applies until OK)."""
         self._close_operation_dialog()
@@ -5601,6 +5603,9 @@ class TransformDataDialog(QDialog):
         layout.addWidget(buttons)
 
         def restore(_result: int = 0) -> None:
+            # Release the panel from the scroll area first so its resize events no
+            # longer reach a scroll area that is about to be deleted.
+            scroll.takeWidget()
             self.operation_settings_panel.setParent(self.editor_panel)
             editor_layout.insertWidget(max(panel_index, 0), self.operation_settings_panel)
             self.error_label.setParent(self.editor_panel)
@@ -5611,6 +5616,8 @@ class TransformDataDialog(QDialog):
             self.operation_settings_panel.setVisible(False)
             if self._operation_dialog is sub:
                 self._operation_dialog = None
+            if _result != QDialog.DialogCode.Accepted.value:
+                self._reselect_step(prior_row)
             sub.deleteLater()
 
         sub.finished.connect(restore)
@@ -5639,7 +5646,15 @@ class TransformDataDialog(QDialog):
             return None
         return validate
 
-    def _open_conditional_dialog(self, editing_index: int | None = None) -> None:
+    def _reselect_step(self, row: int) -> None:
+        """After a cancelled dialog, put the applied-step selection back where it was."""
+        if 0 <= row < len(self._steps) and self.step_list.currentRow() < 0:
+            self.step_list.setCurrentRow(row)
+            self.step_settings_toggle.setChecked(False)
+
+    def _open_conditional_dialog(
+        self, editing_index: int | None = None, *, prior_row: int = -1
+    ) -> None:
         """Power BI's Add Conditional Column dialog; OK appends (or updates) the step."""
         self._close_operation_dialog()
         selected = self._selected_preview_columns()
@@ -5676,6 +5691,8 @@ class TransformDataDialog(QDialog):
         def finished(_result: int = 0) -> None:
             if self._conditional_dialog is sub:
                 self._conditional_dialog = None
+            if _result != QDialog.DialogCode.Accepted.value:
+                self._reselect_step(prior_row)
             sub.deleteLater()
 
         sub.accepted.connect(accepted)
@@ -10213,6 +10230,11 @@ class TransformDataDialog(QDialog):
             self._accept_candidate()
             return self.result() == QDialog.DialogCode.Accepted
         return False
+
+    def done(self, result: int) -> None:
+        # A parameter dialog borrows the settings panel; give it back before closing.
+        self._close_operation_dialog()
+        super().done(result)
 
     def closeEvent(self, event: Any) -> None:  # noqa: N802
         event.ignore()
