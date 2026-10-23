@@ -167,6 +167,10 @@ def propagate_relationship_filters(
             add_edge(to_id, to_column, from_id, from_column, to_role)
 
     filter_roots = {table_id for table_id in filter_table_ids if table_id in tables_by_id}
+    # live Power BI (iteration 84, ZS model): a filter reaches each table by its SHORTEST path; a longer second path to a table the
+    # first one already reached is ignored (no error, no second filter).  Two paths of the same length stay refused.
+    tree_edges: set[tuple[str, str]] = set()
+    ignored_edges: set[tuple[str, str]] = set()
     for root_id in sorted(
         filter_roots,
         key=lambda item: str(tables_by_id[item].get("name", item)).casefold(),
@@ -181,6 +185,9 @@ def propagate_relationship_filters(
                     continue
                 next_path = (*path, target_id)
                 previous_path = paths_by_target.get(target_id)
+                if previous_path is not None and len(next_path) > len(previous_path):
+                    ignored_edges.add((source_id, target_id))
+                    continue
                 if previous_path is not None:
                     def describe_path(table_path: tuple[str, ...]) -> str:
                         return " → ".join(
@@ -196,7 +203,9 @@ def propagate_relationship_filters(
                         "Remove or deactivate one relationship path."
                     )
                 paths_by_target[target_id] = next_path
+                tree_edges.add((source_id, target_id))
                 paths.append((target_id, next_path))
+    ignored_edges -= tree_edges
 
     constrained = deque(filter_roots)
     constrained_ids = set(constrained)
@@ -217,6 +226,8 @@ def propagate_relationship_filters(
     while constrained:
         source_id = constrained.popleft()
         for target_id, source_column, target_column, source_type, target_type, source_role in edges_by_source.get(source_id, []):
+            if (source_id, target_id) in ignored_edges:
+                continue  # a longer second path to a table the shortest path already filtered
             if source_id not in filter_roots and narrowed_by[source_id] <= {target_id}:
                 continue  # live Power BI: no round trip - a table only filtered by its neighbour does not filter that neighbour back
             narrowed_by[target_id].add(source_id)
