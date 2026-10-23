@@ -562,6 +562,16 @@ _TIME_SET_ARITY = {
 }
 
 
+def _time_set_call_is_new_form(function: str, arguments: list[tuple[Any, ...]]) -> bool:
+    """The functions of iteration 84 and the table / nested forms of the older ones are checked by _validate_time_set_call; the older
+    functions keep their long-standing messages for the shapes they always refused (wrong arity, a non-column argument)."""
+    if function not in _TIME_FILTER_FUNCTIONS:
+        return True
+    if function in dax_time_sets.YEAR_END_FUNCTIONS and len(arguments) == 2 and arguments[0][0] == "reference" and arguments[1][0] in {"number", "unary", "boolean", "blank"}:
+        return True  # a year end given as a date serial (630 is Sep 21), TRUE() or BLANK()
+    return bool(arguments) and arguments[0][0] in {"call", "table_call", "var"} and _TIME_SET_ARITY[function][0] <= len(arguments) <= _TIME_SET_ARITY[function][1]
+
+
 def _validate_time_set_call(function: str, arguments: list[tuple[Any, ...]]) -> None:
     """Arity and argument kinds of the date-set functions (iteration 84); the date argument is a column or a table expression."""
     low, high = _TIME_SET_ARITY[function]
@@ -1335,6 +1345,8 @@ def _has_supported_all_usage(
         return _has_supported_all_usage(node[2])
     if node[0] == "call":
         function, arguments = node[1], node[2]
+        if function in _TIME_FILTER_FUNCTIONS and _legacy_time_shape(node) and not _table_position(parent_function, argument_index):
+            return False  # a plain PREVIOUSMONTH(Date) as a value stays refused, as it always was
         if function in dax_time_sets.SET_FUNCTIONS or function in _NONBLANK_TABLES:  # a table or, where one value is wanted, that value
             return all(
                 _has_supported_all_usage(argument, function, index, len(arguments))
@@ -1816,13 +1828,15 @@ def _general_calculate_filters_valid(filters: tuple[tuple[Any, ...], ...], legac
     # date sets: the old ladder keeps a CALCULATE whose time functions all have its own shape; one other date set sends all of them here
     general_time_sets = legacy_sets_ok or any(_new_route_time_set(item) for item in filters)
     for node in filters:
+        wrapped = False
         while isinstance(node, tuple) and node[:2] == ("call", "KEEPFILTERS") and len(node[2]) == 1:
             node = node[2][0]
+            wrapped = True
         if not isinstance(node, tuple) or not node:
             return False
         if node[0] == "call" and node[1] in _GENERAL_CLEAR_FUNCTIONS:
             continue
-        if node[0] == "call" and node[1] in dax_time_sets.SET_FUNCTIONS and (general_time_sets or _new_route_time_set(node)):
+        if node[0] == "call" and node[1] in dax_time_sets.SET_FUNCTIONS and (general_time_sets or wrapped or _new_route_time_set(node)):
             continue  # date sets are tables with the lineage of their column (iteration 84)
         if node[0] == "call" and node[1] in _TIME_FILTER_FUNCTIONS | {"USERELATIONSHIP", "CROSSFILTER", "ALLSELECTED"}:
             return False  # these keep their dedicated paths
@@ -2041,7 +2055,7 @@ def _validate_literal_positions(
                     continue  # a table expression, an omitted argument or an ASC/DESC/SKIP/DENSE keyword
                 _validate_literal_positions(argument, allow_blank=True)
             return
-        if function in dax_time_sets.SET_FUNCTIONS or function in _NONBLANK_TABLES or function in {"FIRSTNONBLANKVALUE", "LASTNONBLANKVALUE"}:
+        if (function in dax_time_sets.SET_FUNCTIONS and not (function in _TIME_FILTER_FUNCTIONS and _legacy_time_shape(node))) or function in _NONBLANK_TABLES or function in {"FIRSTNONBLANKVALUE", "LASTNONBLANKVALUE"}:
             for index, argument in enumerate(arguments):
                 if index == 0 and _is_all_table_value_argument(argument):
                     continue  # a column or table expression of dates
@@ -2075,7 +2089,7 @@ def _validate_literal_positions(
             try:
                 _legacy_calculate_filters_valid(arguments)
             except MeasureError:
-                if not _general_calculate_filters_valid(arguments[1:], True) and not _modifier_mix_filters_valid(arguments[1:]):
+                if not _general_calculate_filters_valid(arguments[1:]) and not _modifier_mix_filters_valid(arguments[1:]):
                     raise
                 for filter_argument in arguments[1:]:
                     _validate_general_filter_literals(filter_argument)
@@ -2422,7 +2436,7 @@ class _Parser:
                 return ("call", "CALCULATETABLE", (arguments[0],))
             if function in dax_time_sets.BALANCES:
                 return _balance_call(function, arguments)
-            if function in dax_time_sets.SET_FUNCTIONS:
+            if function in dax_time_sets.SET_FUNCTIONS and _time_set_call_is_new_form(function, arguments):
                 _validate_time_set_call(function, arguments)
             elif function in dax_math.STAT_PERCENTILE_COLUMN:
                 if len(arguments) != 2 or arguments[0][0] != "reference":
@@ -2838,7 +2852,7 @@ class _Parser:
                             predicate, _keep = _calculate_filter_argument(filter_argument)
                             _calculate_boolean_filter_column(predicate)
                 except MeasureError:
-                    if not _general_calculate_filters_valid(tuple(arguments[1:]), True) and not _modifier_mix_filters_valid(tuple(arguments[1:])) and not _time_filters_beside_general_filters(tuple(arguments)):
+                    if not _general_calculate_filters_valid(tuple(arguments[1:])) and not _modifier_mix_filters_valid(tuple(arguments[1:])) and not _time_filters_beside_general_filters(tuple(arguments)):
                         raise
             if (function in _ALL_ITERATORS or function == "CONCATENATEX") and len(arguments) >= 2:
                 _check_set_iterator_body(arguments[0], arguments[1])
@@ -6017,7 +6031,7 @@ def evaluate_measures(
             visible_rows = [{base_column: row.get(header)} for row in visible_rows]
             table_context = {**table_context, "headers": [base_column]}
         if str(base.get("column_types", {}).get(base_column, "")).casefold() not in {"date", "datetime"}:
-            raise MeasureError(f"{function} needs a column of dates.")
+            raise MeasureError(f"{function} needs a Date or DateTime column.")
         raw_by_date: dict[date, Any] = {}
         universe: list[date] = []
         for row_index, row in enumerate(base["rows"], 1):
