@@ -3397,6 +3397,38 @@ def _shift_date(value: date, intervals: int, unit: str, keep_month_end: bool = F
     return date(target_year, target_month, min(value.day, last))
 
 
+def _sparse_period_window(days: set[date], start: date, count: int, unit: str) -> set[date] | None:
+    """DATESINPERIOD month / quarter / year window over a sparse date column (one that is not a full calendar), measured on live Power
+    BI in iteration 84 (13,608 probes on two fact date columns).
+
+    A negative count: when the month of the start date holds no later date of the column the start date stands for the end of its
+    month, so the window is whole months (from the 1st of the month |n|-1 months back); otherwise it is the exact DAX window.
+    0 of 2,268 probes differ.  A positive count has no rule that fits every probe: four readings of the window (exact days, whole
+    months, the exact end taken to the end of its month, with and without that last day) are computed and the answer is given only
+    where they agree (2,058 of 2,268 probes, 0 wrong); None means "refuse"."""
+    boundary = _shift_date(start, count, unit, keep_month_end=True)
+    months = abs(count) * {"MONTH": 1, "QUARTER": 3, "YEAR": 12}[unit]
+
+    def month_end(day: date) -> date:
+        return date(day.year, day.month, monthrange(day.year, day.month)[1])
+
+    if count < 0:
+        exact = {value for value in days if boundary < value <= start}
+        if any(start < value <= month_end(start) for value in days):
+            return exact
+        year, zero_month = divmod(start.year * 12 + start.month - 1 - (months - 1), 12)
+        first = date(year, zero_month + 1, 1) if year >= 1 else date.min
+        return {value for value in days if first <= value <= start}
+    year, zero_month = divmod(start.year * 12 + start.month - 1 + months, 12)
+    readings = [
+        {value for value in days if start <= value < boundary},
+        {value for value in days if start <= value <= (month_end(date(year, zero_month + 1, 1)) if year <= 9999 else date.max)},
+        {value for value in days if start <= value < month_end(boundary)},
+        {value for value in days if start <= value <= month_end(boundary - timedelta(days=1))},
+    ]
+    return readings[0] if all(reading == readings[0] for reading in readings) else None
+
+
 def _scalar_day(value: Any, function: str) -> date | None:
     """A date-set bound as a calendar day: BLANK is None, a date or number is truncated to its day, text is an ISO / date text."""
     if value is None:
@@ -10192,7 +10224,15 @@ def evaluate_measures(
             if available_dates and count:
                 if start_date is None or start_date < min(available_dates):
                     start_date = min(available_dates)
-                if start_date <= max(available_dates):
+                full_calendar = (max(available_dates) - min(available_dates)).days + 1 == len(set(available_dates))
+                if start_date <= max(available_dates) and interval != "DAY" and not full_calendar:
+                    # live Power BI (iteration 84, critic): over a column that is not a full calendar (a fact table's date) a month, quarter or
+                    # year window is not the exact one of DAX (see _sparse_period_window)
+                    window = _sparse_period_window(set(available_dates), start_date, count, interval)
+                    if window is None:
+                        raise MeasureError("DATESINPERIOD over a column that is not a full calendar is not supported when a forward window ends inside a month.")
+                    shifted_dates = window
+                elif start_date <= max(available_dates):
                     # live Power BI (903 of 903 probes): the last day of a month stays the last day of the target month
                     boundary = _shift_date(start_date, count, interval, keep_month_end=True)
                     if count < 0:
