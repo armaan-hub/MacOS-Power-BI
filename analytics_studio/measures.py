@@ -555,6 +555,7 @@ def _parse_year_end_date(value: Any) -> tuple[int, int]:
     return month, day
 
 
+_LINEAGE_WIPE_TABLES = frozenset({"UNION", "EXCEPT", "INTERSECT", "TOPN", "SELECTCOLUMNS", "ADDCOLUMNS", "SUMMARIZE", "CALCULATETABLE"})
 _NONBLANK_TABLES = {"FIRSTNONBLANK", "LASTNONBLANK"}  # one-row tables; the ...VALUE variants are scalars
 _TIME_SET_ARITY = {
     **dict.fromkeys(dax_time_sets.SET_FUNCTIONS, (1, 1)), **dict.fromkeys(dax_time_sets.YEAR_END_FUNCTIONS, (1, 2)),
@@ -9146,6 +9147,19 @@ def evaluate_measures(
         (RE-D, 28,639 live probes). KEEPFILTERS, ALL(key), VALUES(key), FILTER(Table, ..) and non-key columns do not wipe."""
         names: list[str] = []
         already: set[str] = set()  # tables a clearing modifier of this CALCULATE already empties of filters
+
+        def add_held_key_tables(name: str) -> None:
+            # live Power BI (iteration 84, critic): a table held in a VAR is plain data once it is a filter, so it replaces the date key
+            # like TREATAS onto it, whatever function made it (ALL(key) in a VAR wipes, ALL(key) written inline does not)
+            held = variables.get(name)
+            held = held() if held is not None else None
+            if isinstance(held, _TableValue):
+                add_lineage_key_tables(held[0])
+
+        def add_lineage_key_tables(context: dict[str, Any]) -> None:
+            for lineage_table, lineage_column in context.get("lineage", {}).values():
+                if lineage_table["name"].casefold() not in already and lineage_table["name"] not in names and is_date_key(lineage_table, lineage_column):
+                    names.append(str(lineage_table["name"]))
         for argument in arguments[1:]:
             if argument[0] == "call" and argument[1] in {"REMOVEFILTERS", "ALL", "ALLNOBLANKROW"} and argument[2] and argument[2][0][0] == "table":
                 try:
@@ -9171,13 +9185,26 @@ def evaluate_measures(
                     references = [base[2][0]]
                 elif base[0] == "table_call" and base[1] == "VALUES" and base[2][0] == "reference":
                     references = [base[2]]  # live Power BI (iteration 84): FILTER(VALUES(key), ..) replaces the key like FILTER(ALL(key), ..)
-            elif node[0] == "table_call" and node[1] == "VALUES" and node[2][0] == "reference":
-                references = [node[2]]  # live Power BI (iteration 84): VALUES(key) as a filter replaces the key like a Boolean test of it
+                elif base[0] == "var":
+                    add_held_key_tables(base[1])
+            elif node[0] == "table_call" and node[1] in {"VALUES", "DISTINCT"} and node[2][0] == "reference":
+                references = [node[2]]  # live Power BI (iteration 84): VALUES(key) / DISTINCT(key) as a filter replaces the key like a Boolean test of it
             elif (
                 node[0] == "call" and node[1] == "CALCULATETABLE" and node[2] and node[2][0][0] == "table_call"
                 and node[2][0][1] == "VALUES" and node[2][0][2][0] == "reference"
             ):
                 references = [node[2][0][2]]
+            elif node[0] == "var":
+                add_held_key_tables(node[1])
+            elif node[0] == "call" and node[1] == "CALCULATETABLE" and node[2] and node[2][0][0] == "var":
+                add_held_key_tables(node[2][0][1])
+            elif node[0] == "call" and node[1] in _LINEAGE_WIPE_TABLES:
+                # live Power BI (iteration 84, critic): a computed table over the date key (UNION / EXCEPT of date sets, TOPN, SELECTCOLUMNS ..)
+                # replaces the key like TREATAS onto it
+                try:
+                    add_lineage_key_tables(table_argument_value(node)[0])
+                except MeasureError:
+                    pass  # the filter itself reports its error when it is evaluated
             elif node[0] != "call" or node[1] in {"NOT", "AND", "OR"}:
                 references = list(_direct_column_references(node))
             for reference in references:
@@ -9290,6 +9317,10 @@ def evaluate_measures(
                 keep, node = False, argument
                 while node[:2] == ("call", "KEEPFILTERS") and len(node[2]) == 1:
                     keep, node = True, node[2][0]
+                if keep and node[0] == "call" and node[1] in {"ALL", "ALLNOBLANKROW", "REMOVEFILTERS", "ALLEXCEPT", "ALLSELECTED"}:
+                    if node[1] == "ALL" and node[2]:
+                        continue  # live Power BI (iteration 84, critic): KEEPFILTERS(ALL(x)) intersects with every value, so it keeps the filters as they are
+                    raise MeasureError(f"KEEPFILTERS over {node[1]} is not supported in the local engine.")
                 if node[0] == "call" and node[1] in {"ALL", "ALLNOBLANKROW", "REMOVEFILTERS", "ALLEXCEPT", "ALLSELECTED"}:
                     clearing.append(node)
                 elif _is_late_time_set(node):
@@ -9375,6 +9406,14 @@ def evaluate_measures(
                 for table_id in open_ids:
                     body = (lambda inner=body, name=evaluation_contexts_by_id[table_id]["name"]: evaluate_with_filter_clear(
                         ("thunk", inner), ("call", "REMOVEFILTERS", (("table", name),)), "REMOVEFILTERS"))
+                if table_filters_present:
+                    def counted(inner: Callable[[], Any] = body) -> Any:
+                        full_table_filters[0] += 1  # ISCROSSFILTERED still sees a table filter in Power BI that keeps every row; the local engine does not
+                        try:
+                            return inner()
+                        finally:
+                            full_table_filters[0] -= 1
+                    return counted()
                 return body()
 
             def clear_then_apply(index: int) -> Any:
@@ -9407,6 +9446,7 @@ def evaluate_measures(
                 row_stack.pop()
 
     variables: dict[str, Any] = {}
+    full_table_filters = [0]  # CALCULATE table filters that keep every row of their table (see ISCROSSFILTERED)
     variable_kinds: dict[str, str] = {}  # static kind of each VAR in scope (see branch_kind)
 
     def evaluate_let(
@@ -9586,11 +9626,14 @@ def evaluate_measures(
         )
         if function == "ISINSCOPE":
             return on_axis
+        in_shape = any(column in shape["active"] for shape in _context_shapes(current)) if column is not None else bool(_context_shapes(current))
         if function == "ISFILTERED":
             if column is None:
-                return bool(current.get("filter_column_rows"))
-            return filtered_rows is not None or on_axis
+                return bool(current.get("filter_column_rows")) or in_shape  # live Power BI: a FILTER(table, ..) argument filters every column of it
+            return filtered_rows is not None or on_axis or in_shape
         if function == "HASONEFILTER":
+            if in_shape and filtered_rows is None:
+                raise MeasureError("HASONEFILTER over a column filtered by a FILTER table is not supported in the local engine.")
             if column is None or filtered_rows is None:
                 return False
             return len({
@@ -9599,7 +9642,10 @@ def evaluate_measures(
                 for v in [row.get(column)]
             }) == 1
         if function == "ISCROSSFILTERED":
-            return bool(current.get("filter_column_rows")) or len(rows_by_table_id[context["id"]]) < len(context["rows"])
+            crossfiltered = bool(current.get("filter_column_rows")) or len(rows_by_table_id[context["id"]]) < len(context["rows"])
+            if not crossfiltered and full_table_filters[0]:
+                raise MeasureError("ISCROSSFILTERED under a table filter that keeps every row of its table is not supported.")
+            return crossfiltered
         raise MeasureError(f"Function {function} is not supported by the local DAX engine.")
 
     def evaluate_rank_function(
