@@ -579,6 +579,9 @@ def _validate_time_set_call(function: str, arguments: list[tuple[Any, ...]]) -> 
         raise MeasureError(f"{function} has the wrong number of arguments.")
     if arguments[0][0] in {"number", "string", "boolean", "blank", "unary", "binary", "arithmetic"}:
         raise MeasureError(f"{function} needs a date column or a table expression of dates.")
+    if function == "DATESBETWEEN" and arguments[0][0] != "reference":
+        # live Power BI: "DatesBetween and DatesInPeriod functions are only accepting date column reference as a first argument"
+        raise MeasureError("DATESBETWEEN accepts only a date column reference as its first argument.")
 
 
 def _first_reference(node: Any, held: Callable[[str], Any] | None = None) -> tuple[Any, ...] | None:
