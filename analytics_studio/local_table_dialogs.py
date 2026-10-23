@@ -67,6 +67,7 @@ from analytics_studio.dialog_theme import apply_light_dialog_theme
 from analytics_studio.file_import import MAX_DATA_ROWS, ImportCandidate, lineaged_row
 from analytics_studio.import_preview_dialog import ImportPreviewTableModel
 from analytics_studio.inline_data import parse_pasted_table, source_from_candidate
+from analytics_studio.power_query_step_names import assign_step_names
 from analytics_studio.power_query_m import (
     PowerQueryMEditorDialog,
     PowerQueryMScriptError,
@@ -8044,8 +8045,26 @@ class TransformDataDialog(QDialog):
         if accepted:
             self._edit_selected_step_metadata(index, description=description)
 
+    def _applied_step_names(self) -> dict[int, str]:
+        """Power BI style names for the applied steps, keyed by step index."""
+        table_indexes = [
+            index for index, step in enumerate(self._steps)
+            if step["op"] != "m_sparse_boundary_helper"
+        ]
+        names = assign_step_names(
+            [self._steps[index] for index in table_indexes],
+            custom_names=[
+                str(self._step_metadata[index].get("name", "")).strip()
+                if index < len(self._step_metadata) else ""
+                for index in table_indexes
+            ],
+            reserved=["Source"],
+        )
+        return dict(zip(table_indexes, names))
+
     def _render_steps(self) -> None:
         self.step_list.clear()
+        applied_names = self._applied_step_names()
         for index, step in enumerate(self._steps):
             op = (
                 "Count Rows"
@@ -8222,7 +8241,9 @@ class TransformDataDialog(QDialog):
             metadata = self._step_metadata[index] if index < len(self._step_metadata) else {}
             custom_name = str(metadata.get("name", "")).strip()
             description = str(metadata.get("description", "")).strip()
-            item = QListWidgetItem(custom_name or default_label)
+            item = QListWidgetItem(
+                applied_names.get(index) or custom_name or default_label
+            )
             item.setToolTip(
                 f"{description}\n\n{default_label}" if description else default_label
             )
@@ -8919,6 +8940,10 @@ class TransformDataDialog(QDialog):
                 source_query_names=source_query_names,
                 query_sources=query_sources,
                 source_column_types=active_state.get("source_column_types", {}),
+                step_names=[
+                    str(item.get("name", "")).strip() or None
+                    for item in self._step_metadata
+                ],
             )
         except (PowerQueryMScriptError, TransformationError) as exc:
             self._show_error(str(exc))

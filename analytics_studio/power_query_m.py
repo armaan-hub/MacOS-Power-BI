@@ -13,11 +13,13 @@ import unicodedata
 from decimal import Decimal, DecimalException
 from typing import Any
 
+from PySide6.QtCore import QTimer
 from PySide6.QtWidgets import (
     QDialog,
     QDialogButtonBox,
     QHBoxLayout,
     QLabel,
+    QMessageBox,
     QPushButton,
     QPlainTextEdit,
     QTableView,
@@ -28,6 +30,7 @@ from PySide6.QtWidgets import (
 from analytics_studio.file_import import MAX_DATA_ROWS, ImportCandidate
 from analytics_studio.dialog_theme import apply_light_dialog_theme
 from analytics_studio.import_preview_dialog import ImportPreviewTableModel
+from analytics_studio.m_code_editor import MCodeEditor
 from analytics_studio.power_query_expression import (
     ExpressionError,
     compile_expression,
@@ -40,17 +43,26 @@ from analytics_studio.transformations import (
     column_types_after_steps,
     validate_steps,
 )
+from analytics_studio.power_query_step_names import assign_step_names
 from analytics_studio.query_engine import QueryError, append_candidates
 
 
 MAX_M_SCRIPT_LENGTH = 32_000
 _IDENTIFIER = re.compile(r"[A-Za-z_][A-Za-z0-9_]*\Z")
 _CALL = re.compile(r"([A-Za-z_][A-Za-z0-9_.]*)\s*\((.*)\)\Z", re.DOTALL)
+_LIVE_EVALUATION_ROWS = 5000
 _M_LOCALE_TYPES = {"whole_number", "decimal_number", "date", "datetime", "time"}
 
 
 class PowerQueryMScriptError(ValueError):
-    """Invalid or unsupported local Power Query M subset script."""
+    """Invalid or unsupported local Power Query M subset script.
+
+    ``line`` and ``column`` (1-based) locate the problem in the script text when
+    the parser can tell; otherwise they are ``None``.
+    """
+
+    line: int | None = None
+    column: int | None = None
 
 
 def _m_column_types_after_steps(
@@ -89,6 +101,65 @@ def parse_m_query_script(
     query_functions: list[dict[str, Any]] | None = None,
     initial_column_types: dict[str, str] | None = None,
 ) -> tuple[list[str] | None, list[dict[str, Any]]]:
+    """Parse a local query (errors carry ``line``/``column`` when locatable).
+
+    See ``_parse_m_query_script`` for the supported form."""
+    trace: list[tuple[Any, ...]] = [("start",)]
+    try:
+        return _parse_m_query_script(
+            script, query_name,
+            parameter_names=parameter_names,
+            query_functions=query_functions,
+            initial_column_types=initial_column_types,
+            trace=trace,
+        )
+    except PowerQueryMScriptError as exc:
+        where = trace[0] if trace else None
+        if exc.line is None and where is not None and isinstance(script, str):
+            exc.line, exc.column = _locate_m_error(script, where)
+        raise
+
+
+def _locate_m_error(script: str, where: tuple[Any, ...]) -> tuple[int | None, int | None]:
+    """Map a parser failure site to a 1-based (line, column) in the original text."""
+    masked = _mask_line_comments(script)
+
+    def position(offset: int) -> tuple[int, int]:
+        offset = max(0, min(offset, len(script)))
+        line = script.count("\n", 0, offset) + 1
+        return line, offset - (script.rfind("\n", 0, offset) + 1) + 1
+
+    def first_content(offset: int) -> int:
+        while offset < len(masked) and masked[offset].isspace():
+            offset += 1
+        return offset
+
+    start = first_content(0)
+    if where[0] == "start":
+        return position(start)
+    body_start = start + 3
+    in_at = _find_last_keyword(masked[body_start:], "in")
+    if in_at < 0:
+        return position(len(script.rstrip()))
+    in_abs = body_start + in_at
+    if where[0] == "in":
+        return position(first_content(in_abs + 2))
+    if where[0] == "binding":
+        spans = _let_binding_spans(masked[body_start:in_abs])
+        if 0 <= where[1] < len(spans):
+            return position(first_content(body_start + spans[where[1]][0]))
+    return None, None
+
+
+def _parse_m_query_script(
+    script: str,
+    query_name: str,
+    *,
+    parameter_names: set[str] | None = None,
+    query_functions: list[dict[str, Any]] | None = None,
+    initial_column_types: dict[str, str] | None = None,
+    trace: list[tuple[Any, ...]] | None = None,
+) -> tuple[list[str] | None, list[dict[str, Any]]]:
     """Parse a local query and return optional Append source names plus its steps.
 
     Ordinary table queries keep their project-managed source and return
@@ -106,6 +177,8 @@ def parse_m_query_script(
         len(clean_script) > 3 and clean_script[3].isalnum()
     ):
         raise PowerQueryMScriptError("A local M query must start with let and finish with in.")
+    if trace is not None:
+        trace[:] = [("in",)]
     body = clean_script[3:].strip()
     in_position = _find_last_keyword(body, "in")
     if in_position < 0:
@@ -136,6 +209,8 @@ def parse_m_query_script(
     previous_name = ""
     source_query_names: list[str] | None = None
     for index, binding in enumerate(bindings):
+        if trace is not None:
+            trace[:] = [("binding", index)]
         equals_at = _find_top_level_character(binding, "=")
         if equals_at < 0:
             raise PowerQueryMScriptError(f"Step {index + 1} must use Name = expression.")
@@ -215,8 +290,12 @@ def parse_m_query_script(
         )
         previous_name = name
 
+    if trace is not None:
+        trace[:] = [("in",)]
     if output_name.casefold() != previous_name.casefold():
         raise PowerQueryMScriptError("The in clause must return the last step in this linear query.")
+    if trace is not None:
+        trace[:] = []
     try:
         validated_steps = validate_steps(parsed_steps)
         _validate_m_text_inputs(
@@ -265,8 +344,13 @@ def steps_to_m_script(
     query_functions: list[dict[str, Any]] | None = None,
     source_query_names: list[str] | None = None,
     initial_column_types: dict[str, str] | None = None,
+    step_names: list[str | None] | None = None,
 ) -> str:
     """Render supported saved steps as editable linear M code.
+
+    Each step is bound to a Power BI style name ("Removed Columns",
+    "Removed Columns1", ...). ``step_names`` optionally supplies the names the
+    user gave the steps in the Applied Steps pane (aligned with ``steps``).
 
     ``source_query_names`` emits a bounded two-query ``Table.Combine`` source
     for saved Append queries. Other query source connectors remain project
@@ -336,12 +420,25 @@ def steps_to_m_script(
             + _sparse_boundary_helper_definition()
         )
     previous = "Source"
+    table_steps = [
+        (index, step) for index, step in enumerate(validated)
+        if step["op"] != "m_sparse_boundary_helper"
+    ]
+    custom_names = [
+        step_names[index] if step_names is not None and index < len(step_names) else None
+        for index, _step in table_steps
+    ]
+    generated_names = assign_step_names(
+        [step for _index, step in table_steps],
+        custom_names=custom_names,
+        reserved=[*reserved_names, sparse_boundary_helper_name],
+    )
     table_step_number = 0
     for index, step in enumerate(validated):
         if step["op"] == "m_sparse_boundary_helper":
             continue
+        step_name = generated_names[table_step_number]
         table_step_number += 1
-        step_name = f"Step {table_step_number}"
         binding = _m_quoted_name(step_name)
         input_types = _m_column_types_after_steps(
             [
@@ -1040,6 +1137,8 @@ def _parse_table_call(
         _expect_count(function, arguments, 2)
         column = _parse_string(arguments[1])
         return [_parse_split_to_rows(arguments[0], previous_name, column)]
+    if not function.startswith("Table."):
+        raise PowerQueryMScriptError(f"{function} is not in the supported local M subset.")
     if not arguments or _parse_name(arguments[0].strip()).casefold() != previous_name.casefold():
         raise PowerQueryMScriptError("Each Table.* step must use the preceding step as its input.")
     args = [item.strip() for item in arguments[1:]]
@@ -3489,7 +3588,12 @@ def _split_top_level(value: str, separator: str) -> list[str]:
 
 def _split_let_bindings(value: str) -> list[str]:
     """Split let bindings while keeping commas inside nested let expressions."""
-    pieces: list[str] = []
+    return [value[start:end] for start, end in _let_binding_spans(value)]
+
+
+def _let_binding_spans(value: str) -> list[tuple[int, int]]:
+    """Return the (start, end) offsets of each top-level let binding."""
+    pieces: list[tuple[int, int]] = []
     start = 0
     quoted = False
     paren = brace = bracket = nested_let = 0
@@ -3542,10 +3646,10 @@ def _split_let_bindings(value: str) -> list[str]:
         elif (
             character == "," and paren == brace == bracket == nested_let == 0
         ):
-            pieces.append(value[start:index])
+            pieces.append((start, index))
             start = index + 1
         index += 1
-    pieces.append(value[start:])
+    pieces.append((start, len(value)))
     return pieces
 
 
@@ -3642,6 +3746,7 @@ class PowerQueryMEditorDialog(QDialog):
         source_query_names: list[str] | None = None,
         query_sources: list[dict[str, Any]] | None = None,
         source_column_types: dict[str, str] | None = None,
+        step_names: list[str | None] | None = None,
     ) -> None:
         super().__init__(parent)
         apply_light_dialog_theme(self)
@@ -3687,16 +3792,23 @@ class PowerQueryMEditorDialog(QDialog):
         self._candidate: ImportCandidate | None = None
         self._preview_source_candidate: ImportCandidate | None = None
         self._previewed_script: str | None = None
-        self.setWindowTitle("Advanced Editor · Power Query M subset")
+        self.setWindowTitle("Advanced Editor")
         self.setMinimumSize(680, 500)
         self.resize(900, 650)
+        self._rows_deferred = len(source_candidate.rows) > _LIVE_EVALUATION_ROWS
 
         layout = QVBoxLayout(self)
-        title = QLabel("Power Query M Advanced Editor")
-        title.setStyleSheet("font-size: 18px; font-weight: 600; color: #273b49;")
-        layout.addWidget(title)
-        note = QLabel(
-            "Edit a let … in query for the current table. The bounded local subset includes "
+        header = QHBoxLayout()
+        self.query_name_label = QLabel(query_name)
+        self.query_name_label.setObjectName("powerQueryMQueryName")
+        self.query_name_label.setStyleSheet("font-size: 16px; font-weight: 600; color: #273b49;")
+        header.addWidget(self.query_name_label)
+        header.addStretch(1)
+        self.help_label = QLabel("Supported M subset")
+        self.help_label.setObjectName("powerQueryMHelp")
+        self.help_label.setStyleSheet("color: #526477;")
+        help_text = (
+            "Edit a let ... in query for the current table. The bounded local subset includes "
             "Table.SelectRows, column selection/rename/reorder, delimiter extract/split/merge, "
             "Table.Group, Pivot and Unpivot, Table.Range, RemoveLastN and AlternateRows, sorting, "
             "duplicate handling, type and text transforms, custom columns, row windows, headers, "
@@ -3704,20 +3816,16 @@ class PowerQueryMEditorDialog(QDialog):
             "It is not the Microsoft Mashup runtime; source connections stay managed by the project."
         )
         if self._source_query_names is not None:
-            note.setText(
-                note.text()
-                + " This Append query starts with Table.Combine over its two saved source queries; "
+            help_text += (
+                " This Append query starts with Table.Combine over its two saved source queries; "
                 "use Home → Append Queries to change those inputs."
             )
-        note.setWordWrap(True)
-        note.setStyleSheet("color: #526477;")
-        layout.addWidget(note)
+        self.help_label.setToolTip(help_text)
+        header.addWidget(self.help_label)
+        layout.addLayout(header)
 
-        self.editor = QPlainTextEdit()
+        self.editor = MCodeEditor()
         self.editor.setObjectName("powerQueryMEditor")
-        self.editor.setLineWrapMode(QPlainTextEdit.LineWrapMode.NoWrap)
-        self.editor.setTabStopDistance(28)
-        self.editor.setStyleSheet("font-family: monospace; font-size: 12px;")
         try:
             generated_script = steps_to_m_script(
                 steps, query_name,
@@ -3725,6 +3833,7 @@ class PowerQueryMEditorDialog(QDialog):
                 query_functions=self._query_functions,
                 source_query_names=self._source_query_names,
                 initial_column_types=self._source_column_types,
+                step_names=step_names,
             )
         except (PowerQueryMScriptError, TransformationError) as exc:
             raise PowerQueryMScriptError(
@@ -3738,41 +3847,50 @@ class PowerQueryMEditorDialog(QDialog):
             initial_column_types=self._source_column_types,
         ):
             initial_script = generated_script
+        self._initial_text = initial_script
         self.editor.setPlainText(initial_script)
+        self.editor.document().clearUndoRedoStacks()
         layout.addWidget(self.editor, 2)
+        self.line_number_area = self.editor.line_number_area
 
-        self.error_label = QLabel()
-        self.error_label.setObjectName("powerQueryMError")
-        self.error_label.setWordWrap(True)
-        self.error_label.setStyleSheet("color: #a4262c;")
-        self.error_label.setVisible(False)
-        layout.addWidget(self.error_label)
+        self.status_label = QLabel()
+        self.status_label.setObjectName("powerQueryMStatus")
+        self.status_label.setWordWrap(True)
+        self.error_label = self.status_label  # historical name used by callers
+        layout.addWidget(self.status_label)
 
         self.preview = QTableView()
         self.preview.setObjectName("powerQueryMPreview")
-        self.preview.setMinimumHeight(140)
+        self.preview.setMinimumHeight(120)
         self.preview.setAlternatingRowColors(True)
         self.preview.horizontalHeader().setStretchLastSection(True)
         self.preview.setModel(ImportPreviewTableModel(self.preview))
         layout.addWidget(self.preview, 1)
 
         footer = QHBoxLayout()
-        self.preview_button = QPushButton("Preview query")
-        self.preview_button.setObjectName("previewPowerQueryMButton")
-        footer.addWidget(self.preview_button)
         footer.addStretch(1)
         self.buttons = QDialogButtonBox(
-            QDialogButtonBox.StandardButton.Cancel | QDialogButtonBox.StandardButton.Apply,
+            QDialogButtonBox.StandardButton.Ok | QDialogButtonBox.StandardButton.Cancel,
             parent=self,
         )
-        self.apply_button = self.buttons.button(QDialogButtonBox.StandardButton.Apply)
-        self.apply_button.setText("Apply query")
+        self.done_button = self.buttons.button(QDialogButtonBox.StandardButton.Ok)
+        self.done_button.setText("Done")
+        self.done_button.setObjectName("powerQueryMDoneButton")
+        self.done_button.setDefault(True)
+        self.apply_button = self.done_button  # historical name used by callers
+        self.cancel_button = self.buttons.button(QDialogButtonBox.StandardButton.Cancel)
+        self.cancel_button.setText("Cancel")
+        self.cancel_button.setObjectName("powerQueryMCancelButton")
         footer.addWidget(self.buttons)
         layout.addLayout(footer)
-        self.preview_button.clicked.connect(self._preview_query)
-        self.apply_button.clicked.connect(self._accept_query)
-        self.buttons.rejected.connect(self.reject)
-        self.editor.textChanged.connect(self._invalidate_preview)
+        self.done_button.clicked.connect(self._accept_query)
+        self.cancel_button.clicked.connect(self.reject)
+
+        self._evaluation_timer = QTimer(self)
+        self._evaluation_timer.setSingleShot(True)
+        self._evaluation_timer.setInterval(300)
+        self._evaluation_timer.timeout.connect(self._preview_query)
+        self.editor.textChanged.connect(self._on_text_changed)
         self._preview_query()
 
     @property
@@ -3800,8 +3918,7 @@ class PowerQueryMEditorDialog(QDialog):
             else None
         )
 
-    def _invalidate_preview(self) -> None:
-        """Drop the cached result as soon as the script stops matching it."""
+    def _clear_result(self) -> None:
         self._steps = None
         self._candidate = None
         self._preview_source_candidate = None
@@ -3809,27 +3926,58 @@ class PowerQueryMEditorDialog(QDialog):
         model = self.preview.model()
         if isinstance(model, ImportPreviewTableModel):
             model.set_candidate(None)
-        self.apply_button.setEnabled(False)
-        self.error_label.setText("Preview the current query before applying it.")
-        self.error_label.setVisible(True)
 
-    def _preview_query(self) -> None:
-        script = self.editor.toPlainText()
-        self._steps = None
-        self._candidate = None
-        self._preview_source_candidate = None
-        self._previewed_script = None
-        self.apply_button.setEnabled(False)
-        model = self.preview.model()
-        if isinstance(model, ImportPreviewTableModel):
-            model.set_candidate(None)
+    def _set_status(self, message: str, *, ok: bool) -> None:
+        self.status_label.setText(message)
+        self.status_label.setStyleSheet(
+            "color: #1a7f37;" if ok else "color: #a4262c;"
+        )
+        self.status_label.setVisible(True)
+
+    def is_edited(self) -> bool:
+        return self.editor.toPlainText() != self._initial_text
+
+    def _on_text_changed(self) -> None:
+        """Validate the text on every edit; evaluate large inputs after a pause."""
+        self._evaluation_timer.stop()
+        self._clear_result()
+        self.done_button.setEnabled(False)
+        if self._rows_deferred:
+            if self._parse_current() is not None:
+                self._evaluation_timer.start()
+            return
+        self._preview_query()
+
+    def _parse_current(self) -> tuple[list[str] | None, list[dict[str, Any]]] | None:
+        """Syntax-check the text; show the error with its line and column."""
         try:
-            source_names, steps = parse_m_query_script(
-                script, self._query_name,
+            return parse_m_query_script(
+                self.editor.toPlainText(), self._query_name,
                 parameter_names=self._parameter_names,
                 query_functions=self._query_functions,
                 initial_column_types=self._source_column_types,
             )
+        except (PowerQueryMScriptError, TransformationError) as exc:
+            message = str(exc)
+            line = getattr(exc, "line", None)
+            column = getattr(exc, "column", None)
+            if line is not None and column is not None:
+                message += f" (line {line}, column {column})"
+            self._set_status(message, ok=False)
+            self.done_button.setEnabled(False)
+            return None
+
+    def _preview_query(self) -> None:
+        """Parse and evaluate the current text, updating the status and preview."""
+        self._evaluation_timer.stop()
+        script = self.editor.toPlainText()
+        self._clear_result()
+        self.done_button.setEnabled(False)
+        parsed = self._parse_current()
+        if parsed is None:
+            return
+        source_names, steps = parsed
+        try:
             if self._source_query_names is not None:
                 if source_names is None:
                     raise PowerQueryMScriptError(
@@ -3871,31 +4019,40 @@ class PowerQueryMEditorDialog(QDialog):
                 source_candidate, steps, parameters=self._parameters
             )
         except (PowerQueryMScriptError, TransformationError) as exc:
-            self.error_label.setText(str(exc))
-            self.error_label.setVisible(True)
+            self._set_status(str(exc), ok=False)
             return
         self._steps = steps
         self._candidate = candidate
         self._preview_source_candidate = source_candidate
         self._previewed_script = script
+        model = self.preview.model()
         if isinstance(model, ImportPreviewTableModel):
             model.set_candidate(candidate)
-        self.error_label.clear()
-        self.error_label.setVisible(False)
-        self.apply_button.setEnabled(True)
+        self._set_status("✓ No syntax errors have been detected.", ok=True)
+        self.done_button.setEnabled(True)
 
     def _accept_query(self) -> None:
+        """Done: validate the current text and apply it, or explain why not."""
         self._preview_query()
         if (
             self._steps is None
             or self._candidate is None
             or self._previewed_script != self.editor.toPlainText()
         ):
-            if not self.error_label.text():
-                self.error_label.setText("Preview the current query successfully before applying it.")
-                self.error_label.setVisible(True)
             return
         super().accept()
+
+    def reject(self) -> None:
+        if self.is_edited() and self.result() != QDialog.DialogCode.Accepted:
+            answer = QMessageBox.question(
+                self, "Discard changes?",
+                "Discard changes?\nYour edits to this query will be lost.",
+                QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
+                QMessageBox.StandardButton.No,
+            )
+            if answer != QMessageBox.StandardButton.Yes:
+                return
+        super().reject()
 
 
 __all__ = [

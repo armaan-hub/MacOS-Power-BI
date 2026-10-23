@@ -3072,7 +3072,7 @@ in
     Filtered = Table.SelectRows(Source, each [Region] = "East")
 in
     Filtered''')
-        dialog.preview_button.click()
+        # No separate Preview step: the text validates and previews as it changes.
         self.assertTrue(dialog.apply_button.isEnabled())
         self.assertEqual(dialog.preview.model().rowCount(), 1)
 
