@@ -1648,7 +1648,7 @@ def _is_general_table_filter(node: Any) -> bool:
     if node[0] == "var":
         return True
     return node[0] == "call" and (
-        node[1] in _TABLE_FUNCTION_ARITY or node[1] in {"FILTER", "GENERATESERIES", "ROW"}
+        node[1] in _TABLE_FUNCTION_ARITY or node[1] in {"FILTER", "GENERATESERIES", "ROW"} or node[1] in _TIME_FILTER_FUNCTIONS
     )
 
 
@@ -1672,6 +1672,17 @@ def _general_calculate_filters_valid(filters: tuple[tuple[Any, ...], ...]) -> bo
 
 
 _RELATIONSHIP_MODIFIERS = {"USERELATIONSHIP", "CROSSFILTER"}
+
+
+def _time_filters_beside_general_filters(arguments: tuple[tuple[Any, ...], ...]) -> bool:
+    """CALCULATE(e, <date sets>, <any Boolean / table / clearing filters>): live Power BI evaluates every filter in the outer context,
+    so a date set may sit beside FILTER(ALL(T), ..), ALL(T) and column tests in any order."""
+    filters = arguments[1:]
+    return any(a[0] == "call" and a[1] in _TIME_FILTER_FUNCTIONS for a in filters) and _general_calculate_filters_valid(
+        tuple(a for a in filters if not (a[0] == "call" and a[1] in _TIME_FILTER_FUNCTIONS | _RELATIONSHIP_MODIFIERS))
+    )
+
+
 _MIX_MODIFIERS = _RELATIONSHIP_MODIFIERS | {"ALLSELECTED"}
 
 
@@ -1778,6 +1789,8 @@ def _legacy_calculate_filters_valid(arguments: tuple[tuple[Any, ...], ...]) -> N
     if contained_filter_clear:
         if _validate_mixed_filter_clear_calculate(arguments):
             return
+        if not valid_filter_clear and _time_filters_beside_general_filters(arguments):
+            return
         if not valid_filter_clear:
             function = sorted(contained_filter_clear)[0]
             raise MeasureError(
@@ -1796,6 +1809,8 @@ def _legacy_calculate_filters_valid(arguments: tuple[tuple[Any, ...], ...]) -> N
         _validate_table_filter_call(arguments[1])
         return
     if any(_contains_function_call(argument, "FILTER") for argument in arguments[1:]):
+        if _time_filters_beside_general_filters(arguments):
+            return
         raise MeasureError(
             "A table-valued FILTER must be the only CALCULATE filter argument."
         )
@@ -2011,6 +2026,7 @@ class _Parser:
         node = self._expression()
         if self.index != len(self.tokens):
             raise MeasureError(f"Unexpected token {self.tokens[self.index].value!r}.")
+        node = _rewrite_total_td(node)
         _validate_literal_positions(node)
         return node
 
@@ -2641,7 +2657,7 @@ class _Parser:
                             predicate, _keep = _calculate_filter_argument(filter_argument)
                             _calculate_boolean_filter_column(predicate)
                 except MeasureError:
-                    if not _general_calculate_filters_valid(tuple(arguments[1:])) and not _modifier_mix_filters_valid(tuple(arguments[1:])):
+                    if not _general_calculate_filters_valid(tuple(arguments[1:])) and not _modifier_mix_filters_valid(tuple(arguments[1:])) and not _time_filters_beside_general_filters(tuple(arguments)):
                         raise
             return ("call", function, tuple(arguments))
         raise MeasureError(f"Unexpected token {token.value!r}; expected a number, measure, or function.")
@@ -2695,7 +2711,7 @@ def _rewrite_total_td(node: Any, filter_position: bool = False) -> Any:
 
 def parse_expression(expression: str) -> tuple[Any, ...]:
     """Parse one supported DAX expression into a safe internal tree."""
-    return _rewrite_total_td(_Parser(tokenize(expression)).parse())
+    return _Parser(tokenize(expression)).parse()
 
 
 def _contains_table_call(node: Any) -> bool:
@@ -10222,6 +10238,11 @@ def evaluate_measures(
                 raise
             except MeasureError as legacy_error:
                 # a shape the older CALCULATE paths refuse: Power BI accepts it, so evaluate it with the general path
+                if _time_filters_beside_general_filters(tuple(arguments)) and "per-column filter context" not in str(legacy_error):
+                    # the date sets become table filters (evaluated in the outer context like every filter); a date key replaced
+                    # by a date set first removes the other outer filters of its table
+                    wipe_arguments = tuple(("call", "REMOVEFILTERS", (("table", name),)) for name in date_key_wipe_tables(arguments))
+                    return evaluate_with_general_filters(arguments[0], (*arguments[1:], *wipe_arguments))
                 if not _general_calculate_filters_valid(tuple(arguments[1:])):
                     raise
                 if "per-column filter context" in str(legacy_error):
