@@ -1033,7 +1033,7 @@ Item {
                                                 Accessible.description: "Open the DAX editor with this measure's name and expression."
                                                 Layout.preferredWidth: 48
                                                 Layout.preferredHeight: 24
-                                                onClicked: root.appController.editMeasure(String(modelData.name))
+                                                onClicked: root.appController.formulaBar.beginEditMeasure(String(modelData.name))
                                             }
                                             Button {
                                                 objectName: "deleteDaxMeasureButton"
