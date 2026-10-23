@@ -9786,9 +9786,9 @@ def evaluate_measures(
                 shifted_dates = set()
         return date_table, actual_date_column, shifted_dates
 
-    def refuse_date_number_mix(first: tuple[Any, ...], second: tuple[Any, ...]) -> None:
+    def date_number_mix(first: tuple[Any, ...], second: tuple[Any, ...]) -> bool:
         """Live Power BI turns a date mixed with a number (MAX(DATE(..), 5), IF(c, DATE(..), 5)) into a number; the local engine
-        would keep the date, so the mix is refused."""
+        would keep the date, so a mix whose result is the date is refused (a number result is already right)."""
         def is_date(node: tuple[Any, ...]) -> bool:
             if node[0] == "call" and node[1] in {"DATE", "EDATE", "EOMONTH", "TODAY", "NOW", "DATEVALUE"}:
                 return True
@@ -9803,7 +9803,10 @@ def evaluate_measures(
         def is_number(node: tuple[Any, ...]) -> bool:
             return node[0] == "number" or (node[0] == "unary" and node[2][0] == "number")
 
-        if (is_date(first) and is_number(second)) or (is_number(first) and is_date(second)):
+        return (is_date(first) and is_number(second)) or (is_number(first) and is_date(second))
+
+    def refuse_date_result(mixed: bool, value: Any) -> None:
+        if mixed and dax_dates.is_date(value):
             raise MeasureError("A date mixed with a number in one result is not supported in the local engine.")
 
     def is_date_aggregate(node: tuple[Any, ...]) -> bool:
@@ -10454,8 +10457,7 @@ def evaluate_measures(
                 arguments[0], date_table, actual_date_column, period_dates
             )
         if function == "IF":
-            if len(arguments) > 2:
-                refuse_date_number_mix(arguments[1], arguments[2])
+            mixed_branches = len(arguments) > 2 and date_number_mix(arguments[1], arguments[2])
             chosen = arguments[1] if as_boolean(_consume_infinity(lambda: evaluate(
                 arguments[0], row_context, allow_text=allow_text,
                 allow_boolean=allow_boolean,
@@ -10463,6 +10465,7 @@ def evaluate_measures(
             value = None if chosen is None else evaluate(
                 chosen, row_context, allow_text=allow_text, allow_boolean=allow_boolean,
             )
+            refuse_date_result(mixed_branches, value)
             if value is None and bool_join([branch_kind(branch, row_context) for branch in arguments[1:]]):
                 return False  # a Boolean result has no blank: Power BI answers FALSE
             return value
@@ -10707,7 +10710,7 @@ def evaluate_measures(
                 raise MeasureError("SELECTEDVALUE supports text, number and True/False columns in the local engine.")
             return str(only)
         if function in {"MIN", "MAX"} and len(arguments) == 2:
-            refuse_date_number_mix(arguments[0], arguments[1])
+            mixed_pair = date_number_mix(arguments[0], arguments[1])
             first = evaluate(arguments[0], row_context, allow_text=True)
             second = evaluate(arguments[1], row_context, allow_text=True)
             for operand in (first, second):
@@ -10719,7 +10722,9 @@ def evaluate_measures(
                 return second
             larger = dax_typed.compare(">", first, second)
             smaller = dax_typed.compare("<", first, second)
-            return (first if larger else second) if function == "MAX" else (first if smaller else second)
+            picked = (first if larger else second) if function == "MAX" else (first if smaller else second)
+            refuse_date_result(mixed_pair, picked)
+            return picked
         reference = arguments[0]
         if reference[0] != "reference" or len(reference) < 3:  # a table or other non-column argument is not a scalar source
             raise MeasureError(f"{function} needs a column reference in the local engine.")
