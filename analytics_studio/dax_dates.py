@@ -108,10 +108,12 @@ def _make_date(year: object, month: object, day: object) -> DaxDateTime:
     m = dax_typed.whole(month, "DATE")
     d = dax_typed.whole(day, "DATE")
     failure = "An argument of function 'DATE' has the wrong data type or the result is too large or too small."
-    if 0 <= y < 30:
-        y += 2000  # two-digit years: 0-29 are 20xx, 30-99 are 19xx
-    elif 30 <= y < 100:
+    if 0 <= y < 50:
+        y += 2000  # two-digit years (live Power BI 2.157): 0-49 are 20xx, 50-99 are 19xx
+    elif 50 <= y < 100:
         y += 1900
+    elif -1800 <= y < 0:
+        y += 1900  # a negative year counts back from 1900 (DATE(-5,1,1) is 1895)
     total = y * 12 + (m - 1)
     y, m = divmod(total, 12)
     m += 1
