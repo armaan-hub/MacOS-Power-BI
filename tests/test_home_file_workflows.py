@@ -1445,6 +1445,12 @@ in
             for index in range(dialog.operation_combo.count())
         }
         self.assertEqual(set(dialog.ribbon_command_buttons), operations)
+        direct_operations = (
+            dialog._SELECTION_OPERATIONS_PER_COLUMN
+            | dialog._SELECTION_OPERATIONS_COLUMN_LIST
+            | dialog._PARAMETERLESS_OPERATIONS
+            | {"remove_duplicates"}
+        )
 
         for operation, button in dialog.ribbon_command_buttons.items():
             with self.subTest(operation=operation):
@@ -1470,9 +1476,27 @@ in
                             dialog.operation_combo.currentData(), previous_operation
                         )
                         self.assertEqual(dialog.step_list.count(), 0)
+                    elif operation == "conditional_column":
+                        button.click()
+                        self.assertIsNotNone(dialog._conditional_dialog)
+                        dialog._conditional_dialog.reject()
+                    elif operation in direct_operations:
+                        # Power BI applies these immediately from the selected column.
+                        fresh = TransformDataDialog(raw)
+                        fresh.preview.selectColumn(1)
+                        fresh.preview.setCurrentIndex(fresh.preview.model().index(0, 1))
+                        fresh.ribbon_command_buttons[operation].click()
+                        self.assertEqual(len(fresh._steps), 1)
+                        self.assertEqual(fresh._steps[0]["op"], operation)
+                        self.assertTrue(fresh.operation_settings_panel.isHidden())
+                        fresh.deleteLater()
                     else:
                         button.click()
+                        parameter_dialog = dialog._operation_dialog
+                        self.assertIsNotNone(parameter_dialog)
                         self.assertEqual(dialog.operation_combo.currentData(), operation)
+                        self.assertEqual(dialog.step_list.count(), 0)
+                        parameter_dialog.reject()
 
         dialog.ribbon_tabs.setCurrentIndex(3)
         schema_button = next(
@@ -1488,7 +1512,8 @@ in
 
         dialog.preview.setCurrentIndex(dialog.preview.model().index(0, 1))
         dialog.ribbon_command_buttons["uppercase_text"].click()
-        self.assertEqual(dialog.column_combo.currentText(), "Revenue")
+        self.assertEqual(dialog._steps[-1], {"op": "uppercase_text", "column": "Revenue"})
+        self.assertTrue(dialog.operation_settings_panel.isHidden())
 
         preview_toggle = next(
             button for button in dialog.ribbon_tabs.currentWidget().findChildren(QToolButton)
@@ -1514,14 +1539,20 @@ in
             dialog.advanced_editor_button.click()
             open_editor.assert_called_once_with()
 
+        dialog.preview.setCurrentIndex(dialog.preview.model().index(0, 1))
         dialog.ribbon_command_buttons["trim_text"].click()
+        self.assertEqual(dialog._steps[-1], {"op": "trim_text", "column": "Revenue"})
+        # The Tools tab's Add Step still adds a step from the settings form.
+        dialog.step_list.setCurrentRow(-1)
+        dialog.operation_combo.setCurrentIndex(dialog.operation_combo.findData("lowercase_text"))
+        dialog.column_combo.setCurrentText("Revenue")
         dialog.ribbon_tabs.setCurrentIndex(4)
         add_step = next(
             button for button in dialog.ribbon_tabs.currentWidget().findChildren(QToolButton)
             if " ".join(button.text().split()).casefold() == "add step"
         )
         add_step.click()
-        self.assertEqual(dialog._steps[-1], {"op": "trim_text", "column": "Revenue"})
+        self.assertEqual(dialog._steps[-1], {"op": "lowercase_text", "column": "Revenue"})
 
     def test_power_query_count_rows_applies_saves_reopens_and_refreshes(self) -> None:
         source = self.root / "sales.csv"

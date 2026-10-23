@@ -112,7 +112,11 @@ def power_bi(expressions: list[str], port_: str, chunk: int = 250) -> list[str]:
         f"\n$ex=[Text.Encoding]::UTF8.GetString([Convert]::FromBase64String('{payload}')) | ConvertFrom-Json\n"
         "foreach($e in $ex){ 'R|' + (Run ('EVALUATE ROW(\"v\", ' + $e + ')')) }\n$c.Close()"
     )
-    return [line[2:] for line in guest(script).splitlines() if line.startswith("R|")]
+    for _attempt in range(3):  # the guest sometimes returns nothing for a chunk; never let that shift the answers
+        answers = [line[2:] for line in guest(script).splitlines() if line.startswith("R|")]
+        if len(answers) == len(expressions):
+            return answers
+    raise RuntimeError(f"Power BI returned {len(answers)} answers for {len(expressions)} expressions after 3 tries")
 
 
 def local(expression: str) -> str:
