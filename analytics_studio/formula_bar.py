@@ -27,6 +27,7 @@ FORMULA_HELP = (
 
 class FormulaBarController(QObject):
     changed = Signal()
+    revisionChanged = Signal()  # the text was replaced from Python: the editor must reload it
     committed = Signal(str, str)  # kind ("measure" | "column"), name
 
     def __init__(self, studio: "StudioController") -> None:
@@ -43,6 +44,8 @@ class FormulaBarController(QObject):
         self._revision = 0
         self._home_table_id = ""
         self._last_binding = ""
+        self._focus_requested = True
+        studio.stateChanged.connect(self.changed)
 
     # ------------------------------------------------------------------ properties
 
@@ -87,10 +90,19 @@ class FormulaBarController(QObject):
     def selectionEnd(self) -> int:  # noqa: N802
         return self._selection[1]
 
-    @Property(int, notify=changed)
+    @Property(int, notify=revisionChanged)
     def textRevision(self) -> int:  # noqa: N802
         """Bumped whenever the text was replaced from Python so the editor reloads it."""
         return self._revision
+
+    @Property(bool, notify=changed)
+    def focusRequested(self) -> bool:  # noqa: N802
+        """False when the formula was only shown for the selected field (the editor keeps no focus)."""
+        return self._focus_requested
+
+    @Property(str, notify=changed)
+    def activeTableName(self) -> str:  # noqa: N802
+        return self._studio._active_model_table_name() if self._studio.sourceLoaded else ""
 
     @Property(str, notify=changed)
     def lastBinding(self) -> str:  # noqa: N802
@@ -116,7 +128,8 @@ class FormulaBarController(QObject):
         ), None)
 
     def _open(self, mode: str, text: str, *, is_new: bool, original: str,
-              selection: tuple[int, int], home_table_id: str) -> None:
+              selection: tuple[int, int], home_table_id: str, focus: bool = True) -> None:
+        self._focus_requested = focus
         self._active = True
         self._mode = mode
         self._is_new = is_new
@@ -127,6 +140,7 @@ class FormulaBarController(QObject):
         self._selection = selection
         self._home_table_id = home_table_id
         self._revision += 1
+        self.revisionChanged.emit()
         self.changed.emit()
 
     def _close(self) -> None:
@@ -138,6 +152,7 @@ class FormulaBarController(QObject):
         self._error = ""
         self._selection = (0, 0)
         self._revision += 1
+        self.revisionChanged.emit()
         self.changed.emit()
 
     def _unique_name(self, base: str, taken: list[str]) -> str:
@@ -186,7 +201,25 @@ class FormulaBarController(QObject):
         return True
 
     @Slot(str, result=bool)
-    def beginEditMeasure(self, measure_name: str) -> bool:  # noqa: N802
+    def previewMeasure(self, measure_name: str) -> bool:  # noqa: N802
+        """Show a selected measure's formula without taking keyboard focus."""
+        return self.beginEditMeasure(measure_name, focus=False)
+
+    @Slot(str, result=bool)
+    def previewColumn(self, column_name: str) -> bool:  # noqa: N802
+        return self.beginEditColumn(column_name, focus=False)
+
+    @Slot(str, result=bool)
+    def isCalculatedColumn(self, column_name: str) -> bool:  # noqa: N802
+        studio = self._studio
+        table = studio._model_table_for_source(studio._project, studio._active_source_id or "")
+        return any(
+            str(item.get("name", "")).casefold() == str(column_name).casefold()
+            for item in (table or {}).get("calculated_columns", [])
+        )
+
+    @Slot(str, result=bool)
+    def beginEditMeasure(self, measure_name: str, focus: bool = True) -> bool:  # noqa: N802
         studio = self._studio
         measure = next((
             item for item in studio._project.get("model", {}).get("measures", [])
@@ -198,12 +231,12 @@ class FormulaBarController(QObject):
         name = str(measure["name"])
         text = f"{name} = {measure['expression']}"
         self._open("measure", text, is_new=False, original=name,
-                   selection=(len(text), len(text)),
+                   selection=(len(text), len(text)), focus=focus,
                    home_table_id=str(measure.get("home_table_id") or studio._active_model_table_id()))
         return True
 
     @Slot(str, result=bool)
-    def beginEditColumn(self, column_name: str) -> bool:  # noqa: N802
+    def beginEditColumn(self, column_name: str, focus: bool = True) -> bool:  # noqa: N802
         studio = self._studio
         table = studio._model_table_for_source(studio._project, studio._active_source_id or "")
         column = next((
@@ -214,7 +247,8 @@ class FormulaBarController(QObject):
             return False
         text = f"{column['name']} = {column['expression']}"
         self._open("column", text, is_new=False, original=str(column["name"]),
-                   selection=(len(text), len(text)), home_table_id=studio._active_model_table_id())
+                   selection=(len(text), len(text)), home_table_id=studio._active_model_table_id(),
+                   focus=focus)
         return True
 
     # ------------------------------------------------------------------ editing
@@ -241,6 +275,7 @@ class FormulaBarController(QObject):
         )
         self._error = ""
         self._revision += 1
+        self.revisionChanged.emit()
         self.changed.emit()
 
     @Slot(str)

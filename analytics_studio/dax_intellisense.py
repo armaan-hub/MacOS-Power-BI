@@ -180,7 +180,7 @@ def _function_item(name: str, start: int, end: int) -> dict[str, Any]:
 
 
 def _column_item(column: dict[str, Any], table_name: str, insert: str, start: int, end: int) -> dict[str, Any]:
-    kind = str(column.get("type") or "text")
+    kind = str(column.get("type") or "text").replace("_", " ")
     return {
         "label": str(column["name"]),
         "kind": "column",

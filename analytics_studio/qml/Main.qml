@@ -442,7 +442,36 @@ ApplicationWindow {
         }
     }
 
-    readonly property var ribbonTabs: ["File", "Home", "Insert", "Modeling", "View", "Optimize", "Help"]
+    readonly property var ribbonTabs: ["File", "Home", "Insert", "Modeling", "View", "Optimize", "Help", "Table tools", "Measure tools"]
+    // Contextual tabs: Table tools in Data view (or while a column is being written), Measure
+    // tools while a measure is selected in the Data pane or being written in the formula bar.
+    readonly property bool formulaBarActive: mainWindow.studioController.formulaBar.active
+    readonly property string formulaBarMode: mainWindow.studioController.formulaBar.mode
+    readonly property bool measureToolsVisible: mainWindow.studioController.sourceLoaded
+            && ((formulaBarActive && formulaBarMode === "measure")
+                || (!formulaBarActive && mainWindow.studioController.currentView === "Data"
+                    && measureNameForBinding(selectedFieldBinding) !== ""))
+    readonly property bool tableToolsVisible: mainWindow.studioController.sourceLoaded
+            && (mainWindow.studioController.currentView === "Data" || (formulaBarActive && formulaBarMode === "column"))
+    readonly property var visibleRibbonTabs: {
+        const tabs = ["File", "Home", "Insert", "Modeling", "View", "Optimize", "Help"]
+        if (tableToolsVisible)
+            tabs.push("Table tools")
+        if (measureToolsVisible)
+            tabs.push("Measure tools")
+        return tabs
+    }
+    onVisibleRibbonTabsChanged: {
+        if (visibleRibbonTabs.indexOf(ribbonTabName) < 0)
+            ribbonTabName = "Home"
+    }
+    onFormulaBarActiveChanged: {
+        // The mode property updates right after `active`, so read it on the next turn.
+        Qt.callLater(function() {
+            if (mainWindow.formulaBarActive)
+                mainWindow.ribbonTabName = mainWindow.formulaBarMode === "measure" ? "Measure tools" : "Table tools"
+        })
+    }
     readonly property var dataHomeGroups: [
         { title: "Data", actions: [
             { label: "Get data", visibleLabel: "Get data", width: 48, iconName: "getData", commandId: "data.openPicker", splitGetData: true, description: "Choose a connector from the full data source picker." },
@@ -645,6 +674,31 @@ ApplicationWindow {
             { title: "Tools", actions: [
                 { label: "Examples", visibleLabel: "Examples", iconName: "table", commandId: "disabled.examples", available: false, description: "Example projects are not available in this release." }
             ]}
+        ]},
+        { groups: [
+            { title: "Structure", kind: "tableStructure", actions: [] },
+            { title: "Calendars", actions: [
+                { label: "New calendar table", visibleLabel: "New calendar\ntable", width: 52, iconName: "calendar", commandId: "model.newCalendarTable", description: "Generate a saved, contiguous calendar table from dates or the model's date columns." },
+                { label: "Mark as date table", visibleLabel: "Mark as\ndate table", width: 48, iconName: "calendar", commandId: "model.markDateTable", description: "Mark or unmark a loaded Date or DateTime column as a date table." }
+            ]},
+            { title: "Relationships", actions: [
+                { label: "Manage relationships", visibleLabel: "Manage\nrelationships", width: 72, iconName: "relationship", commandId: "model.manageRelationships", description: "Create, edit, or remove relationships between loaded model tables." }
+            ]},
+            { title: "Calculations", actions: [
+                { label: "New measure", visibleLabel: "New\nmeasure", width: 46, iconName: "measure", commandId: "data.newMeasure", description: "Create a measure in the formula bar." },
+                { label: "Quick measure", visibleLabel: "Quick\nmeasure", width: 46, iconName: "quickMeasure", commandId: "data.quickMeasure", description: "Create a sum, average, or count measure for a selected field." },
+                { label: "New column", visibleLabel: "New\ncolumn", width: 46, iconName: "column", commandId: "model.newCalculatedColumn", description: "Create a calculated column in the formula bar." },
+                { label: "New table", visibleLabel: "New\ntable", width: 46, iconName: "tableAdd", commandId: "model.newCalculatedTable", description: "Create a DISTINCT calculated table from a loaded model column." }
+            ]}
+        ]},
+        { groups: [
+            { title: "Structure", kind: "measureStructure", actions: [] },
+            { title: "Formatting", kind: "measureFormatting", actions: [] },
+            { title: "Properties", kind: "measureProperties", actions: [] },
+            { title: "Calculations", actions: [
+                { label: "New measure", visibleLabel: "New\nmeasure", width: 46, iconName: "measure", commandId: "data.newMeasure", description: "Create a measure in the formula bar." },
+                { label: "Quick measure", visibleLabel: "Quick\nmeasure", width: 46, iconName: "quickMeasure", commandId: "data.quickMeasure", description: "Create a sum, average, or count measure for a selected field." }
+            ]}
         ]}
     ]
 
@@ -674,6 +728,9 @@ ApplicationWindow {
             if (mainWindow.lastWorkspaceView !== viewName) {
                 mainWindow.lastWorkspaceView = viewName
                 mainWindow.selectRibbonForView(viewName)
+                const bar = mainWindow.studioController.formulaBar
+                if (viewName !== "Data" && bar.active && !bar.isNew && !bar.dirty)
+                    bar.cancel()
             }
         }
         function onFieldQueryChanged(query) {
@@ -681,6 +738,81 @@ ApplicationWindow {
         }
         function onActiveSourceReady() {
             mainWindow.dataPaneExpanded = true
+        }
+    }
+
+    // Selecting a measure or calculated column in the Data view shows its formula in the formula
+    // bar (like Power BI); selecting anything else closes a formula that was only being shown.
+    function syncFormulaBarToSelection() {
+        const controller = mainWindow.studioController
+        if (controller.currentView !== "Data" || !controller.sourceLoaded)
+            return
+        const bar = controller.formulaBar
+        if (bar.active && bar.dirty)
+            return
+        const measure = mainWindow.measureNameForBinding(mainWindow.selectedFieldBinding)
+        if (measure !== "") {
+            bar.previewMeasure(measure)
+            return
+        }
+        if (mainWindow.selectedFieldBinding !== "" && bar.isCalculatedColumn(mainWindow.selectedFieldBinding)) {
+            bar.previewColumn(mainWindow.selectedFieldBinding)
+            return
+        }
+        if (bar.active && !bar.isNew)
+            bar.cancel()
+    }
+    onSelectedFieldBindingChanged: Qt.callLater(mainWindow.syncFormulaBarToSelection)
+
+    // Right-click menu on a field in the Data pane: author or edit DAX with the formula bar.
+    Menu {
+        id: fieldContextMenu
+        objectName: "fieldContextMenu"
+        property string binding: ""
+        readonly property string measureName: mainWindow.measureNameForBinding(binding)
+        readonly property bool calculatedColumn: binding !== "" && measureName === ""
+                && mainWindow.studioController.formulaBar.isCalculatedColumn(binding)
+        MenuItem {
+            objectName: "fieldMenuNewMeasure"
+            text: "New measure"
+            enabled: mainWindow.studioController.sourceLoaded
+            onTriggered: mainWindow.runCommand("data.newMeasure")
+        }
+        MenuItem {
+            objectName: "fieldMenuNewColumn"
+            text: "New column"
+            enabled: mainWindow.studioController.sourceLoaded
+            onTriggered: mainWindow.runCommand("model.newCalculatedColumn")
+        }
+        MenuItem {
+            objectName: "fieldMenuEditMeasure"
+            text: "Edit measure"
+            visible: fieldContextMenu.measureName !== ""
+            height: visible ? implicitHeight : 0
+            onTriggered: mainWindow.studioController.formulaBar.beginEditMeasure(fieldContextMenu.measureName)
+        }
+        MenuItem {
+            objectName: "fieldMenuEditColumn"
+            text: "Edit column"
+            visible: fieldContextMenu.calculatedColumn
+            height: visible ? implicitHeight : 0
+            onTriggered: mainWindow.studioController.formulaBar.beginEditColumn(fieldContextMenu.binding)
+        }
+        MenuItem {
+            objectName: "fieldMenuDeleteMeasure"
+            text: "Delete measure"
+            visible: fieldContextMenu.measureName !== ""
+            height: visible ? implicitHeight : 0
+            onTriggered: mainWindow.studioController.deleteMeasure(fieldContextMenu.measureName)
+        }
+    }
+
+    Connections {
+        target: mainWindow.studioController.formulaBar
+        function onCommitted(kind, name) {
+            mainWindow.expandedMeasureName = ""
+            mainWindow.selectedFieldBinding = mainWindow.studioController.formulaBar.lastBinding
+            Qt.callLater(mainWindow.syncFormulaBarToSelection)
         }
     }
 
@@ -994,6 +1126,7 @@ ApplicationWindow {
         property string caption: ""
         property var commands: []
         property bool compact: false
+        property string kind: ""
         signal invoked(string commandId, var sourceItem)
         signal dropdownInvoked(string commandId, var sourceItem)
         implicitWidth: groupRow.implicitWidth + (compact ? 4 : 10)
@@ -1009,6 +1142,15 @@ ApplicationWindow {
             anchors.topMargin: 2
             anchors.bottomMargin: 14
             spacing: ribbonGroup.compact ? 1 : 2
+            ToolsRibbonControls {
+                kind: ribbonGroup.kind
+                studio: mainWindow.studioController
+                selectedBinding: mainWindow.selectedFieldBinding
+                visible: ribbonGroup.kind !== ""
+                Layout.alignment: Qt.AlignTop
+                Layout.preferredWidth: visible ? implicitWidth : 0
+                Layout.preferredHeight: visible ? implicitHeight : 0
+            }
             Repeater {
                 model: ribbonGroup.commands
                 delegate: RibbonCommand {
@@ -1186,7 +1328,7 @@ ApplicationWindow {
                 anchors.rightMargin: 9
                 spacing: 0
                 Repeater {
-                    model: mainWindow.ribbonTabs
+                    model: mainWindow.visibleRibbonTabs
                     delegate: Button {
                         required property int index
                         required property var modelData
@@ -1203,7 +1345,8 @@ ApplicationWindow {
                             text: String(modelData)
                             horizontalAlignment: Text.AlignHCenter
                             verticalAlignment: Text.AlignVCenter
-                            color: mainWindow.ribbonTabName === String(modelData) ? "#263a49" : "#52616e"
+                            color: mainWindow.ribbonTabName === String(modelData) ? "#263a49"
+                                   : (String(modelData).indexOf(" tools") > 0 ? "#107c71" : "#52616e")
                             font.pixelSize: 11
                             font.weight: mainWindow.ribbonTabName === String(modelData) ? Font.DemiBold : Font.Normal
                         }
@@ -1285,6 +1428,7 @@ ApplicationWindow {
                                     required property var modelData
                                     caption: String(modelData.title || "")
                                     commands: modelData.actions || []
+                                    kind: String(modelData.kind || "")
                                     compact: Boolean(modelData.compact)
                                     onInvoked: function(id, sourceItem) { mainWindow.handleRibbonAction(id, sourceItem) }
                                     onDropdownInvoked: function(id, sourceItem) { mainWindow.handleRibbonDropdown(id, sourceItem) }
@@ -1405,6 +1549,15 @@ ApplicationWindow {
                 }
             }
 
+            ColumnLayout {
+                id: workspaceColumn
+                Layout.fillWidth: true
+                Layout.fillHeight: true
+                spacing: 0
+                FormulaBar {
+                    id: formulaBar
+                    bar: mainWindow.studioController.formulaBar
+                }
             StackLayout {
                 id: viewStack
                 Layout.fillWidth: true
@@ -2212,6 +2365,14 @@ ApplicationWindow {
                                         hoverEnabled: true
                                         focusPolicy: Qt.StrongFocus
                                         Accessible.name: "Select " + displayName
+                                        TapHandler {
+                                            acceptedButtons: Qt.RightButton
+                                            onTapped: {
+                                                mainWindow.selectedFieldBinding = bindingName
+                                                fieldContextMenu.binding = bindingName
+                                                fieldContextMenu.popup()
+                                            }
+                                        }
                                         Accessible.description: daxName !== ""
                                                 ? "Select this measure to inspect its saved DAX expression."
                                                 : "Select this field to inspect its column profile and type."
@@ -2274,7 +2435,7 @@ ApplicationWindow {
                                         Layout.preferredHeight: 23
                                         text: "Edit DAX"
                                         Accessible.name: "Edit DAX measure " + daxName
-                                        onClicked: mainWindow.studioController.editMeasure(daxName)
+                                        onClicked: mainWindow.studioController.formulaBar.beginEditMeasure(daxName)
                                     }
                                 }
                                 Text {
@@ -2442,6 +2603,8 @@ ApplicationWindow {
                         }
                     }
                 }
+            }
+
             }
 
             Rectangle {
@@ -4336,6 +4499,14 @@ ApplicationWindow {
                                             hoverEnabled: true
                                             focusPolicy: Qt.StrongFocus
                                             Accessible.name: "Select " + displayName
+                                            TapHandler {
+                                                acceptedButtons: Qt.RightButton
+                                                onTapped: {
+                                                    mainWindow.selectedFieldBinding = bindingName
+                                                    fieldContextMenu.binding = bindingName
+                                                    fieldContextMenu.popup()
+                                                }
+                                            }
                                             Accessible.description: daxName !== ""
                                                     ? "Select this measure to inspect its saved DAX expression."
                                                     : "Select this field. Use Add to visual to place it in a field well."
@@ -4472,7 +4643,7 @@ ApplicationWindow {
                                         Layout.preferredHeight: 22
                                         text: "Edit DAX"
                                         Accessible.name: "Edit DAX measure " + daxName
-                                        onClicked: mainWindow.studioController.editMeasure(daxName)
+                                        onClicked: mainWindow.studioController.formulaBar.beginEditMeasure(daxName)
                                         }
                                     }
                                     Text {
