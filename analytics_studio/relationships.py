@@ -176,16 +176,18 @@ def propagate_relationship_filters(
         key=lambda item: str(tables_by_id[item].get("name", item)).casefold(),
     ):
         paths_by_target: dict[str, tuple[str, ...]] = {root_id: (root_id,)}
-        paths = deque([(root_id, (root_id,))])
+        paths = deque([(root_id, (root_id,), False)])
         while paths:
-            source_id, path = paths.popleft()
+            source_id, path, bidirectional_hop = paths.popleft()
             for edge in edges_by_source.get(source_id, []):
                 target_id = edge[0]
                 if target_id in path:
                     continue
                 next_path = (*path, target_id)
+                next_bidirectional = bidirectional_hop or edge[5] == "many"  # an edge from the many side exists only on a both-way link
                 previous_path = paths_by_target.get(target_id)
-                if previous_path is not None and len(next_path) > len(previous_path):
+                if previous_path is not None and len(next_path) > len(previous_path) and next_bidirectional:
+                    # only a longer route through a both-way link was measured live; a one-way second route stays refused
                     ignored_edges.add((source_id, target_id))
                     continue
                 if previous_path is not None:
@@ -204,7 +206,7 @@ def propagate_relationship_filters(
                     )
                 paths_by_target[target_id] = next_path
                 tree_edges.add((source_id, target_id))
-                paths.append((target_id, next_path))
+                paths.append((target_id, next_path, next_bidirectional))
     ignored_edges -= tree_edges
 
     constrained = deque(filter_roots)
