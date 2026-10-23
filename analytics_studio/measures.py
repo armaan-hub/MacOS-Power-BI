@@ -3914,12 +3914,83 @@ def evaluate_measures(
             return False  # rows supplied by a visual or slicer without per-column provenance: a selection never includes the blank
         return all(blank_allowed.get(column, False) for column in context.get("filter_column_rows", {}))
 
+    shadowed_cache: list[frozenset[str]] = []
+
+    def shadowed_measure_keys() -> frozenset[str]:
+        """Lower-case names of the measures that share their name with a column of their own table."""
+        if not shadowed_cache:
+            keys = set()
+            for definition in definitions:
+                home = contexts_by_id.get(str(definition.get("home_table_id") or ""))
+                if home is not None and definition["name"].casefold() in {str(header).casefold() for header in home["headers"]}:
+                    keys.add(definition["name"].casefold())
+            shadowed_cache.append(frozenset(keys))
+        return shadowed_cache[0]
+
+    one_to_one_unmatched_cache: dict[str, tuple[frozenset[int], bool]] = {}
+
+    def one_to_one_unmatched(table_id: str) -> tuple[frozenset[int], bool]:
+        """(rows of this table with no partner across a one-to-one relationship, whether the table at the other end has such rows)."""
+        if table_id not in one_to_one_unmatched_cache:
+            own: set[int] = set()
+            other_has = False
+            for relationship in relationship_definitions:
+                if not isinstance(relationship, dict) or relationship.get("cardinality") != "one_to_one":
+                    continue
+                ends = {
+                    str(relationship.get("from_table_id")): str(relationship.get("from_column")),
+                    str(relationship.get("to_table_id")): str(relationship.get("to_column")),
+                }
+                if table_id not in ends or len(ends) != 2:
+                    continue
+                other_id = next(identifier for identifier in ends if identifier != table_id)
+                if other_id not in contexts_by_id:
+                    continue
+
+                def keys(identifier: str) -> list[Any]:
+                    context = contexts_by_id[identifier]
+                    return [cell_key(ascii_fold(v) if isinstance(v, str) else v) for v in (
+                        typed_cell(context, ends[identifier], row.get(ends[identifier])) for row in context["rows"])]
+
+                mine, theirs = keys(table_id), keys(other_id)
+                blank = cell_key(None)
+                present_theirs, present_mine = set(theirs) - {blank}, set(mine) - {blank}
+                own |= {index for index, key in enumerate(mine) if key == blank or key not in present_theirs}
+                other_has = other_has or any(key == blank or key not in present_mine for key in theirs)
+            one_to_one_unmatched_cache[table_id] = (frozenset(own), other_has)
+        return one_to_one_unmatched_cache[table_id]
+
+    def refuse_one_to_one_unmatched(tables: list[dict[str, Any]], filter_table_ids: set[Any]) -> None:
+        """Live Power BI (iteration 84, critic; 89 probes on ZM): a filter on a table of a one-to-one relationship whose rows do not all
+        have a partner reaches the unmatched rows of the other table in a way not modelled here (CALCULATE(COUNTROWS(W), U[K]<>"k1") is 3,
+        not 2), so a filter that keeps an unmatched row, or admits the blank member while the other table has unmatched rows, is refused."""
+        for table in tables:
+            table_id = str(table.get("id"))
+            if table.get("id") not in filter_table_ids:
+                continue
+            own, other_has = one_to_one_unmatched(table_id)
+            if not own and not other_has:
+                continue
+            visible: Any = None
+            for rows in table.get("filter_column_rows", {}).values():
+                visible = frozenset(rows) if visible is None else visible & frozenset(rows)
+            if "filter_table_rows" in table:
+                held = frozenset(table["filter_table_rows"])
+                visible = held if visible is None else visible & held
+            if visible is None:
+                continue
+            blank_allowed = table.get("filter_column_blank_allowed", {})
+            admits_blank = bool(table.get("filter_column_rows")) and all(blank_allowed.get(column, False) for column in table["filter_column_rows"])
+            if (visible & own) or (admits_blank and other_has):
+                raise MeasureError("A filter that reaches rows without a partner in a one-to-one relationship is not supported in the local engine.")
+
     def propagate_relationship_filters(
         tables: list[dict[str, Any]], relationships: list[dict[str, Any]], filter_table_ids: Any,
         ignore_exclusions: Iterable[str] = (),
     ) -> dict[str, list[dict[str, Any]]]:
         """Relationship propagation that also carries the virtual blank member: fact rows whose key has no match in a
         one-side table stay while that table's own filters still select its blank member."""
+        refuse_one_to_one_unmatched(tables, set(filter_table_ids))
         ignored = set(ignore_exclusions)
         excluded = {table_id for table_id in unknown_member_exclusions if table_id in unknown_member_ids and table_id not in ignored}
         filter_table_ids = set(filter_table_ids) | excluded  # ALLNOBLANKROW leaves no filter on its table, only the missing blank member
@@ -9190,6 +9261,11 @@ def evaluate_measures(
                     references = [base[2]]  # live Power BI (iteration 84): FILTER(VALUES(key), ..) replaces the key like FILTER(ALL(key), ..)
                 elif base[0] == "var":
                     add_held_key_tables(base[1])
+                elif base[0] == "call" and (base[1] in dax_time_sets.SET_FUNCTIONS or base[1] in _TIME_FILTER_FUNCTIONS or base[1] in _LINEAGE_WIPE_TABLES):
+                    try:  # FILTER over a date set or a computed date table replaces the key like FILTER(ALL(key), ..)
+                        add_lineage_key_tables(table_argument_value(base)[0])
+                    except MeasureError:
+                        pass
             elif node[0] == "table_call" and node[1] in {"VALUES", "DISTINCT"} and node[2][0] == "reference":
                 references = [node[2]]  # live Power BI (iteration 84): VALUES(key) / DISTINCT(key) as a filter replaces the key like a Boolean test of it
             elif (
@@ -10402,6 +10478,10 @@ def evaluate_measures(
             _, table, name = node
             measure_key = name.casefold()
             if measure_key in by_name:
+                if not table and measure_key in shadowed_measure_keys():
+                    # live Power BI (iteration 84, critic): [Name] binds to the column when the measure's own table has a column of that name
+                    # (SUMX(Fact,[Qty]) is the column sum, a bare [Qty] is an error), so the local engine does not guess
+                    raise MeasureError(f"[{name}] is both a measure and a column of its table; the reference is ambiguous in the local engine.")
                 if row_context is not None:
                     return with_column_filters(all_row_context_filters(row_context), lambda: evaluate(node), True)
                 return resolve(measure_key)
@@ -10493,7 +10573,7 @@ def evaluate_measures(
             if node[1] in {"+", "-"} and result is not None and (
                 dax_dates.is_date(left) or dax_dates.is_date(right)
             ):
-                if node[1] == "-" and not dax_dates.is_date(left) and (node[2][0] in {"number", "blank"} or (node[2][0] == "call" and node[2][1] == "INT")):
+                if node[1] == "-" and not dax_dates.is_date(left) and (node[2][0] in {"number", "blank"} or (node[2][0] == "unary" and node[2][2][0] == "number") or (node[2][0] == "call" and node[2][1] == "INT")):
                     return result  # live Power BI: a number literal minus a date is a plain number (other lefts may be dates the evaluator lost the type of)
                 return dax_dates.DaxDateTime(dax_dates.tick_round(result))
             return result
@@ -11013,6 +11093,7 @@ def evaluate_measures(
                 value, failed = None, True
             if failed:
                 value = evaluate(arguments[1], row_context, allow_text=allow_text, allow_boolean=allow_boolean)
+            refuse_date_beside_number(arguments[:2], value)
             if value is None and bool_join([branch_kind(arguments[0], row_context), branch_kind(arguments[1], row_context)]):
                 return False
             return value
@@ -11245,6 +11326,7 @@ def evaluate_measures(
             smaller = dax_typed.compare("<", first, second)
             picked = (first if larger else second) if function == "MAX" else (first if smaller else second)
             refuse_date_result(mixed_pair, picked)
+            refuse_date_beside_number(arguments[:2], picked)
             return picked
         reference = arguments[0]
         if reference[0] != "reference" or len(reference) < 3:  # a table or other non-column argument is not a scalar source
