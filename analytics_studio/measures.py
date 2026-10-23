@@ -10192,7 +10192,8 @@ def evaluate_measures(
                 )) is not None
             ]
             if not visible_dates:
-                return Decimal(0)
+                # live Power BI: an empty date set evaluates the expression in the empty-date context (BLANK for SUM, 1 for 1)
+                return evaluate_with_date_values(arguments[0], date_table, actual_date_column, set())
             end_date = max(visible_dates)
             if function == "TOTALQTD":
                 quarter_start_month = ((end_date.month - 1) // 3) * 3 + 1
