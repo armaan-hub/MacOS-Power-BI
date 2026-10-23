@@ -128,6 +128,8 @@ def parse_year_end_value(value: Any, today: date | None = None) -> tuple[int, in
 
 def _year_end_of(year: int, year_end: tuple[int, int]) -> date:
     month, day = year_end
+    if (month, day) == (2, 29) and monthrange(year, 2)[1] == 28:
+        return date(year, 3, 1)  # a Feb 29 year end rolls over to Mar 1 in a common year (live Power BI)
     return date(year, month, min(day, monthrange(year, month)[1]))
 
 

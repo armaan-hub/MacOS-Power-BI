@@ -584,7 +584,7 @@ class HomeFileWorkflowTests(unittest.TestCase):
             patch.object(controller, "load_sample_data") as sample,
             patch.object(controller, "transform_data_dialog") as transform,
             patch.object(controller, "power_query_m_editor_dialog") as power_query_m,
-            patch.object(controller, "new_measure_dialog") as new_measure,
+            patch.object(controller.formulaBar, "beginNewMeasure") as new_measure,
             patch.object(controller, "quick_measure_dialog") as quick_measure,
             patch.object(controller, "export_data_dialog") as export,
         ):
@@ -728,7 +728,7 @@ class HomeFileWorkflowTests(unittest.TestCase):
         self.assertFalse(window.commandAvailable("data.appendQueries"))
         self.assertFalse(window.commandAvailable("data.mergeQueries"))
         self.assertEqual(window.commandUnavailableReason("data.transform"), "")
-        with patch.object(controller, "new_measure_dialog") as new_measure:
+        with patch.object(controller.formulaBar, "beginNewMeasure") as new_measure:
             window.runCommand("data.newMeasure")
         new_measure.assert_called_once_with()
         with patch.object(controller, "power_query_m_editor_dialog") as m_editor:
@@ -1068,7 +1068,7 @@ in
         self.assertIsNotNone(dax_button)
         self.assertTrue(dax_button.property("enabled"))
 
-        with patch.object(controller, "new_measure_dialog") as new_measure:
+        with patch.object(controller.formulaBar, "beginNewMeasure") as new_measure:
             dax_button.click()
         new_measure.assert_called_once_with()
 
@@ -1080,9 +1080,13 @@ in
         delete_button = measure_delegate.findChild(QObject, "deleteDaxMeasureButton")
         self.assertIsNotNone(edit_button)
         self.assertIsNotNone(delete_button)
-        with patch.object(controller, "editMeasure", return_value=True) as edit_measure:
-            edit_button.click()
-        edit_measure.assert_called_once_with("Revenue total")
+        edit_button.click()
+        # The Edit button now opens the measure in the formula bar (the old dialog is gone from this flow).
+        self.assertTrue(controller.formulaBar.active)
+        self.assertEqual(controller.formulaBar.mode, "measure")
+        self.assertFalse(controller.formulaBar.isNew)
+        self.assertTrue(controller.formulaBar.text.startswith("Revenue total = "))
+        controller.formulaBar.cancel()
         with (
             patch("analytics_studio.controller.QMessageBox.question", return_value=QMessageBox.StandardButton.Yes),
             patch.object(controller, "remove_measure", return_value=True) as remove_measure,
@@ -1116,28 +1120,18 @@ in
         self.assertIsNotNone(dax_button)
         assert dax_button is not None
 
-        measures = iter((
+        # The Model view button opens the formula bar (not the old dialog); commit through it.
+        for measure_name, function, expected in (
             ("Highest revenue", "MAXX", "20"),
             ("Lowest revenue", "MINX", "12"),
-        ))
-
-        def accept_extreme(dialog: MeasureDialog) -> int:
-            measure_name, function, expected = next(measures)
-            expression = f"{function}('sales', [Revenue])"
-            dialog.name_edit.setText(measure_name)
-            dialog.expression_edit.setPlainText(expression)
-            dialog.preview_button.click()
-            self.assertEqual(
-                dialog.preview_label.text(),
-                f"Current report-context result: {expected}",
-            )
-            dialog.save_button.click()
-            self.assertEqual(dialog.result(), QDialog.DialogCode.Accepted)
-            return dialog.result()
-
-        with patch.object(MeasureDialog, "exec", new=accept_extreme):
+        ):
             dax_button.click()
-            dax_button.click()
+            self.assertTrue(controller.formulaBar.active)
+            controller.formulaBar.setText(f"{measure_name} = {function}('sales', [Revenue])")
+            self.assertEqual(controller.formulaBar.validate(), "")
+            self.assertTrue(controller.formulaBar.commit(), controller.formulaBar.error)
+            saved = next(m for m in controller.modelMeasures if m["name"] == measure_name)
+            self.assertEqual(saved["value"], expected)
 
         saved_measures = {
             measure["name"]: measure for measure in controller.modelMeasures
@@ -1451,6 +1445,12 @@ in
             for index in range(dialog.operation_combo.count())
         }
         self.assertEqual(set(dialog.ribbon_command_buttons), operations)
+        direct_operations = (
+            dialog._SELECTION_OPERATIONS_PER_COLUMN
+            | dialog._SELECTION_OPERATIONS_COLUMN_LIST
+            | dialog._PARAMETERLESS_OPERATIONS
+            | {"remove_duplicates"}
+        )
 
         for operation, button in dialog.ribbon_command_buttons.items():
             with self.subTest(operation=operation):
@@ -1476,9 +1476,27 @@ in
                             dialog.operation_combo.currentData(), previous_operation
                         )
                         self.assertEqual(dialog.step_list.count(), 0)
+                    elif operation == "conditional_column":
+                        button.click()
+                        self.assertIsNotNone(dialog._conditional_dialog)
+                        dialog._conditional_dialog.reject()
+                    elif operation in direct_operations:
+                        # Power BI applies these immediately from the selected column.
+                        fresh = TransformDataDialog(raw)
+                        fresh.preview.selectColumn(1)
+                        fresh.preview.setCurrentIndex(fresh.preview.model().index(0, 1))
+                        fresh.ribbon_command_buttons[operation].click()
+                        self.assertEqual(len(fresh._steps), 1)
+                        self.assertEqual(fresh._steps[0]["op"], operation)
+                        self.assertTrue(fresh.operation_settings_panel.isHidden())
+                        fresh.deleteLater()
                     else:
                         button.click()
+                        parameter_dialog = dialog._operation_dialog
+                        self.assertIsNotNone(parameter_dialog)
                         self.assertEqual(dialog.operation_combo.currentData(), operation)
+                        self.assertEqual(dialog.step_list.count(), 0)
+                        parameter_dialog.reject()
 
         dialog.ribbon_tabs.setCurrentIndex(3)
         schema_button = next(
@@ -1494,7 +1512,8 @@ in
 
         dialog.preview.setCurrentIndex(dialog.preview.model().index(0, 1))
         dialog.ribbon_command_buttons["uppercase_text"].click()
-        self.assertEqual(dialog.column_combo.currentText(), "Revenue")
+        self.assertEqual(dialog._steps[-1], {"op": "uppercase_text", "column": "Revenue"})
+        self.assertTrue(dialog.operation_settings_panel.isHidden())
 
         preview_toggle = next(
             button for button in dialog.ribbon_tabs.currentWidget().findChildren(QToolButton)
@@ -1520,14 +1539,20 @@ in
             dialog.advanced_editor_button.click()
             open_editor.assert_called_once_with()
 
+        dialog.preview.setCurrentIndex(dialog.preview.model().index(0, 1))
         dialog.ribbon_command_buttons["trim_text"].click()
+        self.assertEqual(dialog._steps[-1], {"op": "trim_text", "column": "Revenue"})
+        # The Tools tab's Add Step still adds a step from the settings form.
+        dialog.step_list.setCurrentRow(-1)
+        dialog.operation_combo.setCurrentIndex(dialog.operation_combo.findData("lowercase_text"))
+        dialog.column_combo.setCurrentText("Revenue")
         dialog.ribbon_tabs.setCurrentIndex(4)
         add_step = next(
             button for button in dialog.ribbon_tabs.currentWidget().findChildren(QToolButton)
             if " ".join(button.text().split()).casefold() == "add step"
         )
         add_step.click()
-        self.assertEqual(dialog._steps[-1], {"op": "trim_text", "column": "Revenue"})
+        self.assertEqual(dialog._steps[-1], {"op": "lowercase_text", "column": "Revenue"})
 
     def test_power_query_count_rows_applies_saves_reopens_and_refreshes(self) -> None:
         source = self.root / "sales.csv"

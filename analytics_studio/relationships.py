@@ -61,6 +61,7 @@ def propagate_relationship_filters(
     relationships: list[dict[str, Any]],
     filter_table_ids: set[str],
     unknown_selected: dict[str, bool] | None = None,
+    diagnostics: dict[str, set[str]] | None = None,
 ) -> dict[str, list[dict[str, Any]]]:
     """Propagate explicitly filtered rows across active, loaded relationships.
 
@@ -167,20 +168,31 @@ def propagate_relationship_filters(
             add_edge(to_id, to_column, from_id, from_column, to_role)
 
     filter_roots = {table_id for table_id in filter_table_ids if table_id in tables_by_id}
+    # live Power BI (iteration 84, ZS model): a filter reaches each table by its SHORTEST path; a longer second path to a table the
+    # first one already reached is ignored (no error, no second filter).  Two paths of the same length stay refused.
+    tree_edges: set[tuple[str, str]] = set()
+    ignored_edges: set[tuple[str, str]] = set()
     for root_id in sorted(
         filter_roots,
         key=lambda item: str(tables_by_id[item].get("name", item)).casefold(),
     ):
         paths_by_target: dict[str, tuple[str, ...]] = {root_id: (root_id,)}
-        paths = deque([(root_id, (root_id,))])
+        paths = deque([(root_id, (root_id,), False)])
         while paths:
-            source_id, path = paths.popleft()
+            source_id, path, bidirectional_hop = paths.popleft()
             for edge in edges_by_source.get(source_id, []):
                 target_id = edge[0]
                 if target_id in path:
                     continue
                 next_path = (*path, target_id)
+                next_bidirectional = bidirectional_hop or edge[5] == "many"  # an edge from the many side exists only on a both-way link
                 previous_path = paths_by_target.get(target_id)
+                if previous_path is not None and len(next_path) > len(previous_path) and next_bidirectional:
+                    # only a longer route through a both-way link was measured live; a one-way second route stays refused
+                    ignored_edges.add((source_id, target_id))
+                    if diagnostics is not None:  # the tables on the route that was cut: their rows under a row pin are not measured
+                        diagnostics.setdefault("longer_route_tables", set()).update(next_path[1:-1])
+                    continue
                 if previous_path is not None:
                     def describe_path(table_path: tuple[str, ...]) -> str:
                         return " → ".join(
@@ -196,7 +208,26 @@ def propagate_relationship_filters(
                         "Remove or deactivate one relationship path."
                     )
                 paths_by_target[target_id] = next_path
-                paths.append((target_id, next_path))
+                tree_edges.add((source_id, target_id))
+                paths.append((target_id, next_path, next_bidirectional))
+    had_longer_route = bool(ignored_edges)
+    ignored_edges -= tree_edges
+    if had_longer_route and len(filter_roots) > 1:
+        # live Power BI: with ambiguous routes every filtered table pushes ITS OWN filter along its shortest routes; what each
+        # filter leaves on a table is intersected (a table narrowed by another filter's detour does not push that narrowing on)
+        per_root = [
+            propagate_relationship_filters(tables, relationships, {root_id}, unknown_selected)
+            for root_id in sorted(filter_roots)
+        ]
+        merged: dict[str, list[dict[str, Any]]] = {}
+        for table_id, table in tables_by_id.items():
+            keep = {id(row) for row in per_root[0][table_id]}
+            for result in per_root[1:]:
+                keep &= {id(row) for row in result[table_id]}
+            merged[table_id] = [row for row in table["rows"] if id(row) in keep] if len(keep) != len(table["rows"]) or any(
+                len(result[table_id]) != len(table["rows"]) for result in per_root
+            ) else list(table["rows"])
+        return merged
 
     constrained = deque(filter_roots)
     constrained_ids = set(constrained)
@@ -217,6 +248,8 @@ def propagate_relationship_filters(
     while constrained:
         source_id = constrained.popleft()
         for target_id, source_column, target_column, source_type, target_type, source_role in edges_by_source.get(source_id, []):
+            if (source_id, target_id) in ignored_edges:
+                continue  # a longer second path to a table the shortest path already filtered
             if source_id not in filter_roots and narrowed_by[source_id] <= {target_id}:
                 continue  # live Power BI: no round trip - a table only filtered by its neighbour does not filter that neighbour back
             narrowed_by[target_id].add(source_id)

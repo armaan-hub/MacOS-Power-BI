@@ -332,6 +332,7 @@ _TYPED_RESULT_CATEGORY = {
 # Keep them in the editor picker so the visible catalog matches what the local
 # evaluator can recognize.
 DAX_FUNCTION_NAMES = tuple(sorted(_FUNCTIONS | {"BLANK", "DISTINCT", "FALSE", "TRUE", "VALUES"}))
+_MAX_DATE_SERIAL = dax_dates.from_datetime(datetime(9999, 12, 31, 23, 59, 59))
 _TIME_FILTER_FUNCTIONS = {
     "DATEADD", "SAMEPERIODLASTYEAR", "PREVIOUSYEAR", "PREVIOUSQUARTER",
     "PREVIOUSMONTH", "PREVIOUSDAY", "NEXTYEAR", "NEXTQUARTER", "NEXTMONTH", "NEXTDAY",
@@ -509,15 +510,47 @@ def rename_table_references(expression: str, old_name: str, new_name: str) -> st
     return "".join(output)
 
 
+_MONTH_NAMES = {name: index for index, name in enumerate(
+    ("january", "february", "march", "april", "may", "june", "july", "august", "september", "october", "november", "december"), 1)}
+
+
+def _year_end_reference_year() -> int:
+    """The year Power BI validates a year-end text against (the machine's current year)."""
+    return date.today().year
+
+
 def _parse_year_end_date(value: Any) -> tuple[int, int]:
-    """Validate the local evaluator's invariant numeric M/D year-end subset."""
+    """The month and day of a year-end text, as Power BI reads them (iteration 84, live): "6/30", "06-30", "6/30/2024" (the year
+    is ignored), "June 30", "Jun 30", "30 Jun" and "30/6" (day first when the first number is above 12)."""
     if not isinstance(value, str):
         raise MeasureError('year_end_date must use month/day, such as "6/30".')
-    match = re.fullmatch(r"\s*([0-9]{1,2})/([0-9]{1,2})\s*", value)
-    if match is None:
-        raise MeasureError('year_end_date must use month/day, such as "6/30".')
-    month, day = (int(part) for part in match.groups())
-    if not 1 <= month <= 12 or not 1 <= day <= monthrange(2000, month)[1]:
+    text = value.strip()
+    month = day = None
+    numbers = re.fullmatch(r"([0-9]{1,2})[/-]([0-9]{1,2})(?:[/-]([0-9]{1,4}))?", text)
+    named = re.fullmatch(r"([A-Za-z]{3,9})\.?[ -]+([0-9]{1,2})", text)
+    named_last = re.fullmatch(r"([0-9]{1,2})[ -]+([A-Za-z]{3,9})\.?", text)
+    if numbers is not None:
+        first, second = int(numbers.group(1)), int(numbers.group(2))
+        month, day = (second, first) if first > 12 and second <= 12 else (first, second)
+        if not (1 <= month <= 12 and 1 <= day <= monthrange(_year_end_reference_year(), month)[1]):
+            # live Power BI reads text like an OLE date: a month/day that does not exist this year falls back to day/month,
+            # then month/year and year/month with the 1st ("2/29" is Feb 1 in a common year, "6/31" is Jun 1)
+            if 1 <= second <= 12 and 1 <= first <= monthrange(_year_end_reference_year(), second)[1]:
+                month, day = second, first
+            elif 1 <= first <= 12 and second >= 0:
+                month, day = first, 1
+            elif 1 <= second <= 12 and first >= 0:
+                month, day = second, 1
+    else:
+        match = named or named_last
+        if match is None:
+            raise MeasureError('year_end_date must use month/day, such as "6/30".')
+        name, number = (match.group(1), match.group(2)) if named else (match.group(2), match.group(1))
+        candidates = [index for full, index in _MONTH_NAMES.items() if full.startswith(name.casefold()) and len(name) >= 3]
+        if len(candidates) != 1:
+            raise MeasureError('year_end_date must use month/day, such as "6/30".')
+        month, day = candidates[0], int(number)
+    if not 1 <= month <= 12 or not 1 <= day <= monthrange(_year_end_reference_year() if numbers is not None else 2000, month)[1]:
         raise MeasureError('year_end_date must be a valid month/day, such as "6/30".')
     return month, day
 
@@ -538,7 +571,7 @@ def _validate_time_set_call(function: str, arguments: list[tuple[Any, ...]]) -> 
         raise MeasureError(f"{function} needs a date column or a table expression of dates.")
 
 
-def _first_reference(node: Any) -> tuple[Any, ...] | None:
+def _first_reference(node: Any, held: Callable[[str], Any] | None = None) -> tuple[Any, ...] | None:
     """The column reference at the bottom of the first-argument chain of a date-set call (ENDOFMONTH(PREVIOUSMONTH(Date)),
     LASTDATE(CALCULATETABLE(VALUES(Date), ..)), FIRSTDATE(FILTER(ALL(Date), ..)))."""
     for _step in range(64):
@@ -546,7 +579,9 @@ def _first_reference(node: Any) -> tuple[Any, ...] | None:
             return None
         if node[0] == "reference":
             return node
-        if node[0] == "table_call":
+        if node[0] == "var" and held is not None:
+            node = held(node[1])  # a VAR holding a date set: the column it came from
+        elif node[0] == "table_call":
             node = node[2]
         elif node[0] == "call" and node[2]:
             node = node[2][0]
@@ -570,12 +605,27 @@ def _legacy_time_shape(node: tuple[Any, ...]) -> bool:
 def _is_late_time_set(node: Any) -> bool:
     """Live Power BI: a date-set call whose first argument is, through any chain of date-set calls, a bare column reads that
     column AFTER the row-to-filter transition of the CALCULATE (everything else in the filter arguments is read before it)."""
+    if not (isinstance(node, tuple) and len(node) == 3 and node[0] == "call" and node[1] in dax_time_sets.SET_FUNCTIONS and node[2]):
+        return False
     for _step in range(64):
-        if not (isinstance(node, tuple) and len(node) == 3 and node[0] == "call" and node[1] in dax_time_sets.SET_FUNCTIONS and node[2]):
+        if not (isinstance(node, tuple) and len(node) == 3 and node[0] == "call" and node[2]
+                and (node[1] in dax_time_sets.SET_FUNCTIONS or node[1] in _NONBLANK_TABLES)):
             return False
         node = node[2][0]
         if node[0] == "reference":
             return True
+    return False
+
+
+def _late_chain_reads_data_expression(node: Any) -> bool:
+    """A FIRSTNONBLANK / LASTNONBLANK inside a late date-set chain whose expression is not a constant: its expression would be read
+    before the transition in Power BI, which the chain does not do here."""
+    for _step in range(64):
+        if not (isinstance(node, tuple) and len(node) == 3 and node[0] == "call" and node[2]):
+            return False
+        if node[1] in _NONBLANK_TABLES and node[2][1][0] not in {"number", "string", "boolean", "blank"}:
+            return True
+        node = node[2][0]
     return False
 
 
@@ -592,6 +642,35 @@ def _new_route_time_set(node: Any) -> bool:
         isinstance(node, tuple) and len(node) == 3 and node[0] == "call" and node[1] in dax_time_sets.SET_FUNCTIONS
         and (node[1] not in _TIME_FILTER_FUNCTIONS or not _legacy_time_shape(node))
     )
+
+
+def _check_set_iterator_body(table: tuple[Any, ...], body: tuple[Any, ...]) -> None:
+    """Live Power BI: an iterator over a date set (or FIRSTNONBLANK ..) reads only the set's own column; any other qualified column in
+    the body is an error at compile time, also when the set turns out to be empty."""
+    if not (table[0] == "call" and (table[1] in dax_time_sets.SET_FUNCTIONS or table[1] in _NONBLANK_TABLES)):
+        return
+    bottom = _first_reference(table)
+    if bottom is None or not bottom[1]:
+        return
+    for reference in _direct_column_references(body):
+        if reference[1] and (reference[1].casefold(), reference[2].casefold()) != (bottom[1].casefold(), bottom[2].casefold()):
+            raise MeasureError("The iterated date set has one column; the expression reads another column.")
+
+
+def _check_single_column_filter(table: tuple[Any, ...], predicate: tuple[Any, ...]) -> None:
+    """FILTER(VALUES(T[c]), ..) and FILTER(ALL(T[c]), ..) hold one column: Power BI rejects a predicate that reads another qualified
+    column at compile time, also when the filtered table is empty."""
+    if table[0] == "table_call" and table[2][0] == "reference":
+        column = table[2]
+    elif table[0] == "call" and table[1] in {"ALL", "ALLNOBLANKROW"} and len(table[2]) == 1 and table[2][0][0] == "reference":
+        column = table[2][0]
+    else:
+        return
+    if not column[1]:
+        return
+    for reference in _direct_column_references(predicate):
+        if reference[1] and (reference[1].casefold(), reference[2].casefold()) != (column[1].casefold(), column[2].casefold()):
+            raise MeasureError("A FILTER over one column cannot read another column in its condition.")
 
 
 def _balance_call(function: str, arguments: list[tuple[Any, ...]]) -> tuple[Any, ...]:
@@ -1191,6 +1270,8 @@ def _is_all_table_value_argument(node: Any) -> bool:
         return True
     if node[0] == "call" and node[1] in {"GENERATESERIES", "ROW"}:
         return True
+    if node[0] == "call" and node[1] in _TIME_FILTER_FUNCTIONS:
+        return True  # a date set is a one-column table (live Power BI)
     if node[0] == "call" and node[1] == "FILTER":
         try:
             _validate_table_filter_call(node, allow_all_base=True)
@@ -1273,7 +1354,14 @@ def _has_supported_all_usage(
             "PREVIOUSMONTH", "DATESYTD", "DATESQTD", "DATESMTD",
             "DATESBETWEEN", "DATESINPERIOD",
         }:
-            return False
+            # live Power BI (iteration 84): a date set is a normal CALCULATE filter at any depth (inside SUMX / MAXX / ... too)
+            # and a table wherever a table is taken (COUNTROWS, MAXX, ...)
+            if not (parent_function in {"CALCULATE", "CALCULATETABLE"} and argument_index >= 1) and not _table_position(parent_function, argument_index):
+                return False
+            return all(
+                _has_supported_all_usage(argument, function, index, len(arguments))
+                for index, argument in enumerate(arguments)
+            )
         if function == "FILTER":
             if _table_position(parent_function, argument_index):
                 return _is_all_table_value_argument(node) and all(
@@ -1719,7 +1807,7 @@ def _is_general_table_filter(node: Any) -> bool:
         return True
     return node[0] == "call" and (
         node[1] in _TABLE_FUNCTION_ARITY or node[1] in dax_time_sets.SET_FUNCTIONS or node[1] in _NONBLANK_TABLES
-        or node[1] in {"FILTER", "GENERATESERIES", "ROW"}
+        or node[1] in {"FILTER", "GENERATESERIES", "ROW"} or node[1] in _TIME_FILTER_FUNCTIONS
     )
 
 
@@ -1747,6 +1835,17 @@ def _general_calculate_filters_valid(filters: tuple[tuple[Any, ...], ...], legac
 
 
 _RELATIONSHIP_MODIFIERS = {"USERELATIONSHIP", "CROSSFILTER"}
+
+
+def _time_filters_beside_general_filters(arguments: tuple[tuple[Any, ...], ...]) -> bool:
+    """CALCULATE(e, <date sets>, <any Boolean / table / clearing filters>): live Power BI evaluates every filter in the outer context,
+    so a date set may sit beside FILTER(ALL(T), ..), ALL(T) and column tests in any order."""
+    filters = arguments[1:]
+    return any(a[0] == "call" and a[1] in _TIME_FILTER_FUNCTIONS for a in filters) and _general_calculate_filters_valid(
+        tuple(a for a in filters if not (a[0] == "call" and a[1] in _TIME_FILTER_FUNCTIONS | _RELATIONSHIP_MODIFIERS))
+    )
+
+
 _MIX_MODIFIERS = _RELATIONSHIP_MODIFIERS | {"ALLSELECTED"}
 
 
@@ -1857,6 +1956,8 @@ def _legacy_calculate_filters_valid(arguments: tuple[tuple[Any, ...], ...]) -> N
     if contained_filter_clear:
         if _validate_mixed_filter_clear_calculate(arguments):
             return
+        if not valid_filter_clear and _time_filters_beside_general_filters(arguments):
+            return
         if not valid_filter_clear:
             function = sorted(contained_filter_clear)[0]
             raise MeasureError(
@@ -1875,6 +1976,8 @@ def _legacy_calculate_filters_valid(arguments: tuple[tuple[Any, ...], ...]) -> N
         _validate_table_filter_call(arguments[1])
         return
     if any(_contains_function_call(argument, "FILTER") for argument in arguments[1:]):
+        if _time_filters_beside_general_filters(arguments):
+            return
         raise MeasureError(
             "A table-valued FILTER must be the only CALCULATE filter argument."
         )
@@ -1936,6 +2039,12 @@ def _validate_literal_positions(
                     _table_position(function, index) and _is_all_table_value_argument(argument)
                 ):
                     continue  # a table expression, an omitted argument or an ASC/DESC/SKIP/DENSE keyword
+                _validate_literal_positions(argument, allow_blank=True)
+            return
+        if function in dax_time_sets.SET_FUNCTIONS or function in _NONBLANK_TABLES or function in {"FIRSTNONBLANKVALUE", "LASTNONBLANKVALUE"}:
+            for index, argument in enumerate(arguments):
+                if index == 0 and _is_all_table_value_argument(argument):
+                    continue  # a column or table expression of dates
                 _validate_literal_positions(argument, allow_blank=True)
             return
         if function == "CONCATENATEX":
@@ -2092,6 +2201,7 @@ class _Parser:
         node = self._expression()
         if self.index != len(self.tokens):
             raise MeasureError(f"Unexpected token {self.tokens[self.index].value!r}.")
+        node = _rewrite_total_td(node)
         _validate_literal_positions(node)
         return node
 
@@ -2436,31 +2546,27 @@ class _Parser:
                 raise MeasureError(
                     "RELATED needs one fully qualified column reference, such as RELATED('Products'[Unit Price])."
                 )
-            elif function == "TOTALYTD":
-                date_argument_is_valid = (
-                    len(arguments) >= 2 and arguments[1][0] == "reference"
-                )
-                default_year = len(arguments) == 2 and date_argument_is_valid
-                fiscal_year = (
-                    len(arguments) == 4
-                    and date_argument_is_valid
-                    and arguments[2][0] == "omitted"
-                    and arguments[3][0] == "string"
-                )
-                if not (default_year or fiscal_year):
+            elif function in {"TOTALYTD", "TOTALQTD", "TOTALMTD"}:
+                if any(argument[0] == "omitted" for argument in arguments):
+                    # live Power BI: an empty argument is an error, TOTALYTD(e, d, , "6/30") included
+                    omitted_at = next(index for index, argument in enumerate(arguments) if argument[0] == "omitted") + 1
+                    raise MeasureError(f"Argument '{omitted_at}' in {function} function is required.")
+                year_end = None
+                rest = list(arguments[2:])
+                if function == "TOTALYTD" and len(rest) in {1, 2} and rest[-1][0] == "string":
+                    year_end = rest.pop()
+                if (
+                    len(arguments) < 2 or arguments[1][0] != "reference" or len(rest) > 1
+                    or (rest and rest[0][0] == "string") or (function != "TOTALYTD" and len(arguments) > 3)
+                ):
                     raise MeasureError(
-                        'TOTALYTD needs an expression and marked date-column reference; '
-                        'fiscal year end uses TOTALYTD(expression, date, , "M/D"). '
-                        "Filter expressions are not supported."
+                        f"{function} needs an expression, a date column reference and an optional filter"
+                        + (' and a "M/D" year end.' if function == "TOTALYTD" else ".")
                     )
-                if fiscal_year:
-                    _parse_year_end_date(arguments[3][1])
-            elif function in {"TOTALQTD", "TOTALMTD"}:
-                if len(arguments) != 2 or arguments[1][0] != "reference":
-                    raise MeasureError(
-                        f"{function} needs an expression and marked date-column reference. "
-                        "Filter expressions are not supported."
-                    )
+                if year_end is not None:
+                    _parse_year_end_date(year_end[1])
+                if rest and not _general_calculate_filters_valid((rest[0],)):
+                    raise MeasureError(f"{function} needs an expression and marked date-column reference. Filter expressions are not supported unless they are Boolean or table filters.")
             elif function == "DATESYTD":
                 valid_arguments = (
                     len(arguments) == 1 and arguments[0][0] == "reference"
@@ -2490,38 +2596,28 @@ class _Parser:
                 valid_arguments = (
                     len(arguments) == 3
                     and arguments[0][0] == "reference"
-                    and arguments[1][0] in {"string", "blank"}
-                    and arguments[2][0] in {"string", "blank"}
+                    and arguments[1][0] not in {"table", "omitted", "boolean"}
+                    and arguments[2][0] not in {"table", "omitted", "boolean"}
                 )
                 if not valid_arguments:
                     raise MeasureError(
-                        'DATESBETWEEN needs a marked date-column reference and ISO '
-                        'date or BLANK() start/end bounds.'
+                        'DATESBETWEEN needs a marked date-column reference and date, ISO '
+                        'date text or BLANK() start/end bounds.'
                     )
             elif function == "DATESINPERIOD":
-                interval_node = arguments[2] if len(arguments) == 4 else ()
-                numeric_interval = (
-                    interval_node[0] == "number"
-                    or (
-                        interval_node[0] == "unary"
-                        and interval_node[1] in {"+", "-"}
-                        and interval_node[2][0] == "number"
-                    )
-                ) if interval_node else False
                 valid_interval = (
                     len(arguments) == 4
                     and arguments[0][0] == "reference"
-                    and arguments[1][0] == "string"
-                    and numeric_interval
+                    and arguments[1][0] not in {"table", "omitted", "boolean"}
+                    and arguments[2][0] not in {"table", "omitted", "boolean", "string"}
                     and arguments[3][0] == "table"
                     and str(arguments[3][1]).upper()
                     in {"DAY", "MONTH", "QUARTER", "YEAR"}
                 )
                 if not valid_interval:
                     raise MeasureError(
-                        "DATESINPERIOD needs a marked date-column reference, an ISO "
-                        "date string, an integer interval count, and DAY, MONTH, "
-                        "QUARTER, or YEAR."
+                        "DATESINPERIOD needs a marked date-column reference, a start date, "
+                        "an interval count, and DAY, MONTH, QUARTER, or YEAR."
                     )
             elif function == "DATEADD":
                 valid_interval = (
@@ -2742,8 +2838,12 @@ class _Parser:
                             predicate, _keep = _calculate_filter_argument(filter_argument)
                             _calculate_boolean_filter_column(predicate)
                 except MeasureError:
-                    if not _general_calculate_filters_valid(tuple(arguments[1:]), True) and not _modifier_mix_filters_valid(tuple(arguments[1:])):
+                    if not _general_calculate_filters_valid(tuple(arguments[1:]), True) and not _modifier_mix_filters_valid(tuple(arguments[1:])) and not _time_filters_beside_general_filters(tuple(arguments)):
                         raise
+            if (function in _ALL_ITERATORS or function == "CONCATENATEX") and len(arguments) >= 2:
+                _check_set_iterator_body(arguments[0], arguments[1])
+            if function == "FILTER" and len(arguments) == 2:
+                _check_single_column_filter(arguments[0], arguments[1])
             return ("call", function, tuple(arguments))
         raise MeasureError(f"Unexpected token {token.value!r}; expected a number, measure, or function.")
 
@@ -2761,6 +2861,37 @@ class _Parser:
         token = self._take()
         if token.kind != kind:
             raise MeasureError(f"Expected {kind!r}, found {token.value!r}.")
+
+
+_TOTAL_TO_DATES = {"TOTALYTD": "DATESYTD", "TOTALQTD": "DATESQTD", "TOTALMTD": "DATESMTD"}
+
+
+def _rewrite_total_td(node: Any, filter_position: bool = False) -> Any:
+    """TOTALYTD(e, d [, filter] [, year_end]) is CALCULATE(e, DATESYTD(d [, year_end]) [, filter]) (live Power BI, 567 of 567
+    pairs); TOTALQTD / TOTALMTD take no year end.  An omitted argument, a year end that is not a text literal or a filter in
+    the CALCULATE filter list keeps the original call, which the validators refuse."""
+    if isinstance(node, list):
+        return [_rewrite_total_td(item) for item in node]
+    if not isinstance(node, tuple) or not node:
+        return node
+    if node[0] == "call":
+        function, arguments = node[1], node[2]
+        in_filters = function in {"CALCULATE", "CALCULATETABLE"}
+        new_arguments = tuple(_rewrite_total_td(argument, in_filters and index >= 1) for index, argument in enumerate(arguments))
+        rewritten = (node[0], function, new_arguments, *node[3:])
+        if function in _TOTAL_TO_DATES and not filter_position and 2 <= len(new_arguments) <= 4:
+            expression, dates, rest = new_arguments[0], new_arguments[1], list(new_arguments[2:])
+            if dates[0] != "reference" or any(item[0] == "omitted" for item in new_arguments):
+                return rewritten
+            year_end = None
+            if function == "TOTALYTD" and rest and rest[-1][0] == "string" and (len(rest) == 2 or len(rest) == 1):
+                year_end = rest.pop()
+            if len(rest) > 1 or (rest and rest[0][0] == "string") or (function != "TOTALYTD" and len(new_arguments) > 3):
+                return rewritten
+            date_set = ("call", _TOTAL_TO_DATES[function], (dates,) if year_end is None else (dates, year_end))
+            return ("call", "CALCULATE", (expression, date_set, *rest))
+        return rewritten
+    return tuple(_rewrite_total_td(child) if isinstance(child, (tuple, list)) else child for child in node)
 
 
 def parse_expression(expression: str) -> tuple[Any, ...]:
@@ -3267,100 +3398,118 @@ def _parse_measure_date(value: Any, column: str, row_index: int) -> date | None:
         ) from exc
 
 
+def _shift_date(value: date, intervals: int, unit: str, keep_month_end: bool = False) -> date:
+    """value moved by whole months / quarters / years (days for DAY); the day is clamped to the target month, and with
+    keep_month_end the last day of a month stays the last day of the target month (live DATESINPERIOD)."""
+    if unit == "DAY":
+        try:
+            return value + timedelta(days=intervals)
+        except OverflowError as exc:
+            raise MeasureError("DATEADD shifted dates outside the supported date range.") from exc
+    target_index = value.year * 12 + value.month - 1 + intervals * {"MONTH": 1, "QUARTER": 3, "YEAR": 12}[unit]
+    target_year, zero_based_month = divmod(target_index, 12)
+    target_month = zero_based_month + 1
+    if not 1 <= target_year <= 9999:
+        raise MeasureError("DATEADD shifted dates outside the supported date range.")
+    last = monthrange(target_year, target_month)[1]
+    if keep_month_end and value.day == monthrange(value.year, value.month)[1]:
+        return date(target_year, target_month, last)
+    return date(target_year, target_month, min(value.day, last))
+
+
+def _scalar_day(value: Any, function: str) -> date | None:
+    """A date-set bound as a calendar day: BLANK is None, a date or number is truncated to its day, text is an ISO / date text."""
+    if value is None:
+        return None
+    if isinstance(value, bool):
+        raise MeasureError(f"{function} needs a date value.")
+    if isinstance(value, str):
+        text = value.strip()
+        try:
+            return date.fromisoformat(text)
+        except ValueError:
+            try:
+                value = dax_dates.parse_date_text(text)
+            except Exception as exc:
+                raise MeasureError(f"{function} needs a date value.") from exc
+    if not isinstance(value, Decimal) or not value.is_finite():
+        raise MeasureError(f"{function} needs a date value.")
+    try:
+        return dax_dates.to_datetime(value.to_integral_value(rounding=ROUND_FLOOR), ROUND_FLOOR).date()
+    except (OverflowError, ValueError, MeasureError) as exc:
+        raise MeasureError(f"{function} needs a date inside the supported range.") from exc
+
+
+def _scalar_count(value: Any) -> int:
+    """number_of_intervals: BLANK and 0 are no period, text numbers are coerced, halves round away from zero."""
+    if value is None:
+        return 0
+    if isinstance(value, str):
+        try:
+            value = Decimal(value.strip())
+        except DecimalException as exc:
+            raise MeasureError("number_of_intervals must be a number.") from exc
+    if isinstance(value, bool) or not isinstance(value, Decimal) or not value.is_finite():
+        raise MeasureError("number_of_intervals must be a number.")
+    rounded = int(value.to_integral_value(rounding=ROUND_HALF_UP))  # ROUND_HALF_UP rounds halves away from zero
+    if abs(rounded) > 3_652_059:
+        raise MeasureError("number_of_intervals is outside the supported range.")
+    return rounded
+
+
+def _gap_free(dates: Iterable[date]) -> bool:
+    values = sorted(set(dates))
+    return bool(values) and (values[-1] - values[0]).days + 1 == len(values)
+
+
 def _dateadd_dates(
-    selected_dates: Iterable[date], intervals: int, interval: str
+    selected_dates: Iterable[date], intervals: int, interval: str, available_dates: Iterable[date] | None = None
 ) -> set[date]:
-    """Shift a contiguous classic date-column selection by DATEADD intervals."""
+    """Shift a date-column selection by DATEADD intervals (live Power BI 2.157, 728 of 728 probes).
+
+    A contiguous selection becomes the whole range from the shifted first day to the shifted last day, the last day moved to the
+    end of its month when the selection has several days and ends on its month end (QUARTER and YEAR too). A selection that is not
+    contiguous is shifted day by day when the date column is unique and gap free (available_dates), otherwise refused."""
     source_dates = sorted(set(selected_dates))
     unit = interval.upper()
     if unit not in {"YEAR", "QUARTER", "MONTH", "DAY"}:
         raise MeasureError("DATEADD date-column intervals support YEAR, QUARTER, MONTH, or DAY.")
     if not source_dates:
         return set()
-    if (
-        len(source_dates) > 1
-        and (source_dates[-1] - source_dates[0]).days + 1 != len(source_dates)
-    ):
-        raise MeasureError(
-            "DATEADD requires the current date-column selection to be contiguous."
-        )
-
-    if unit == "DAY":
-        try:
-            return {value + timedelta(days=intervals) for value in source_dates}
-        except OverflowError as exc:
-            raise MeasureError("DATEADD shifted dates outside the supported date range.") from exc
-
-    month_shift = intervals * {"MONTH": 1, "QUARTER": 3, "YEAR": 12}[unit]
-
-    def shift_month(value: date) -> date:
-        target_index = value.year * 12 + value.month - 1 + month_shift
-        target_year, zero_based_month = divmod(target_index, 12)
-        target_month = zero_based_month + 1
-        if not 1 <= target_year <= 9999:
-            raise MeasureError("DATEADD shifted dates outside the supported date range.")
-        target_day = min(value.day, monthrange(target_year, target_month)[1])
-        return date(target_year, target_month, target_day)
-
+    contiguous = len(source_dates) == 1 or _gap_free(source_dates)
     try:
-        shifted = {shift_month(value) for value in source_dates}
+        if not contiguous:
+            if available_dates is None or not _gap_free(available_dates):
+                raise MeasureError("DATEADD requires the current date-column selection to be contiguous.")
+            runs: list[list[date]] = [[source_dates[0]]]
+            for value in source_dates[1:]:
+                if (value - runs[-1][-1]).days == 1:
+                    runs[-1].append(value)
+                else:
+                    runs.append([value])
+            result: set[date] = set()
+            for run in runs:
+                result |= _dateadd_dates(run, intervals, interval)
+            return result
+        if unit == "DAY":
+            return {_shift_date(value, intervals, unit) for value in source_dates}
+        first = _shift_date(source_dates[0], intervals, unit)
+        last = _shift_date(source_dates[-1], intervals, unit)
+        if len(source_dates) > 1 and source_dates[-1].day == monthrange(source_dates[-1].year, source_dates[-1].month)[1]:
+            last = date(last.year, last.month, monthrange(last.year, last.month)[1])
+        return {first + timedelta(days=offset) for offset in range((last - first).days + 1)}
+    except MeasureError:
+        raise
     except (OverflowError, ValueError) as exc:
         raise MeasureError("DATEADD shifted dates outside the supported date range.") from exc
 
-    # Classic date-column syntax extends to month end when the selection
-    # includes the final two days of its source month.
-    if unit == "MONTH" and len(source_dates) >= 2:
-        source_end = source_dates[-1]
-        source_month_end = monthrange(source_end.year, source_end.month)[1]
-        if (
-            source_end.day == source_month_end
-            and source_dates[-2] == source_end - timedelta(days=1)
-        ):
-            shifted_end = shift_month(source_end)
-            destination_end = date(
-                shifted_end.year,
-                shifted_end.month,
-                monthrange(shifted_end.year, shifted_end.month)[1],
-            )
-            if shifted_end < destination_end:
-                for offset in range(1, (destination_end - shifted_end).days + 1):
-                    shifted.add(shifted_end + timedelta(days=offset))
-    return shifted
 
-
-def _sameperiodlastyear_dates(selected_dates: Iterable[date]) -> set[date]:
-    """Shift a classic date-column selection one year back with leap extension."""
-    source_dates = sorted(set(selected_dates))
-    if len(source_dates) > 1 and (source_dates[-1] - source_dates[0]).days + 1 != len(source_dates):
-        raise MeasureError(
-            "SAMEPERIODLASTYEAR requires the current date-column selection to be contiguous."
-        )
-    shifted = _dateadd_dates(source_dates, -1, "YEAR")
-    if len(source_dates) < 2:
-        return shifted
-
-    source_end = source_dates[-1]
-    source_month_end = monthrange(source_end.year, source_end.month)[1]
-    if (
-        source_end.day != source_month_end
-        or source_dates[-2] != source_end - timedelta(days=1)
-    ):
-        return shifted
-
-    shifted_end = date(
-        source_end.year - 1,
-        source_end.month,
-        min(source_end.day, monthrange(source_end.year - 1, source_end.month)[1]),
-    )
-    destination_end = date(
-        shifted_end.year,
-        shifted_end.month,
-        monthrange(shifted_end.year, shifted_end.month)[1],
-    )
-    if shifted_end < destination_end:
-        for offset in range(1, (destination_end - shifted_end).days + 1):
-            shifted.add(shifted_end + timedelta(days=offset))
-    return shifted
+def _sameperiodlastyear_dates(selected_dates: Iterable[date], available_dates: Iterable[date] | None = None) -> set[date]:
+    """SAMEPERIODLASTYEAR is DATEADD(-1, YEAR) (live Power BI: 43 of 43 contexts, the leap day included)."""
+    try:
+        return _dateadd_dates(selected_dates, -1, "YEAR", available_dates)
+    except MeasureError as error:
+        raise MeasureError(str(error).replace("DATEADD", "SAMEPERIODLASTYEAR")) from error
 
 
 # Functions and operators whose arguments are evaluated in the caller's context: a bare column below them still has no row context.
@@ -4288,6 +4437,22 @@ def evaluate_measures(
             if shadowed_rows is not None:
                 source_rows = shadowed_rows
             elif function == "ALLSELECTED" and allselected_rows is not None:
+                own_state = evaluation_contexts_by_id.get(source_context["id"], source_context)
+                if (
+                    source_context["id"] not in unknown_member_ids
+                    and len(source_rows) != len(source_context["rows"])
+                    and not own_state.get("filter_column_rows") and not own_state.get("filter_table_rows") and not _context_shapes(own_state)
+                    and "filter_rows" not in own_state
+                    and any(
+                        root != source_context["id"] and not any(
+                            isinstance(link, dict) and link.get("is_active") and {link.get("from_table_id"), link.get("to_table_id")} == {root, source_context["id"]}
+                            for link in relationship_definitions
+                        )
+                        for root in evaluation_filter_ids
+                    )
+                ):  # a filter on a directly related table was measured (saved answer: ALLSELECTED(Dim[Cat]) under Fact[Id]<=7); one two links away was not
+                    # live Power BI (ZB): ALLSELECTED(Dim[Prod]) lists all 5 products although a both-way link narrowed the table to 3
+                    raise MeasureError("ALLSELECTED over a column that only another table's both-way filter narrows is not supported in the local engine.")
                 if add_unknown_member:
                     source_rows.append({header: None for header in source_context["headers"]})
             elif function == "ALLSELECTED":
@@ -4315,6 +4480,11 @@ def evaluate_measures(
                     {header.casefold() for header in source_context["headers"]},
                     True,
                 )
+                if function == "ALL" and len(source_rows) != len(source_context["rows"]) and source_context["id"] not in unknown_member_ids:
+                    # live Power BI: ALL(column) returns every value of the column, also those a both-way relationship of another
+                    # table's filter would hide (ZB: 5 products under Year=2023, not 3).  A table with an unknown member keeps the
+                    # older, separately measured rule (Iteration 83: the member and the keys follow the both-way child filters).
+                    source_rows = list(source_context["rows"])
                 if function == "ALL" and unknown_member_passes_remaining_filters(
                     source_context,
                     contexts_after_clear,
@@ -5868,14 +6038,7 @@ def evaluate_measures(
         return base, base_column, visible, universe, raw_by_date
 
     def date_bound(node: tuple[Any, ...], function: str) -> date | None:
-        value = in_row_expression(lambda: evaluate(node, None, allow_text=True))
-        if value is None:
-            return None
-        if isinstance(value, dax_dates.DaxDateTime):
-            return dax_dates.to_datetime(value).date()
-        if isinstance(value, str):
-            return _parse_iso_date_literal(value, function)
-        raise MeasureError(f"{function} needs date values as start and end.")
+        return _scalar_day(in_row_expression(lambda: evaluate(node, None, allow_text=True)), function)
 
     def date_set_table(node: tuple[Any, ...]) -> tuple[dict[str, Any], list[dict[str, Any]]]:
         """FIRSTDATE .. DATESBETWEEN as a one-column table with the lineage of the date column (live Power BI, iteration 84)."""
@@ -5887,10 +6050,16 @@ def evaluate_measures(
         elif function in dax_time_sets.YEAR_END_FUNCTIONS:
             year_end = constant_year_end(arguments[1] if len(arguments) == 2 else None)
         base, column, visible, universe, raw_by_date = date_column_source(arguments[0], function)
+        if year_end == (2, 28) and function in {"NEXTYEAR", "PREVIOUSYEAR"} and visible:
+            anchor = max(visible) if function == "NEXTYEAR" else min(visible)
+            if (anchor.month, anchor.day) >= (2, 27) and (anchor.month, anchor.day) <= (3, 2):
+                # open item of the live comparison: around a leap day Power BI starts the fiscal year on Feb 29
+                raise MeasureError(f"{function} with a February 28 year end is not supported near a leap day in the local engine.")
         chosen = dax_time_sets.date_set(function, visible, universe, year_end, bounds)
         single = dict(base)
         single["headers"] = [column]
         single["lineage"] = {column: (base, column)}
+        single["single_column_set"] = True
         return single, [{column: raw_by_date[day]} for day in chosen]
 
     def nonblank_candidates(function: str, source: tuple[Any, ...]) -> tuple[dict[str, Any], str, bool, list[tuple[Any, Any]]]:
@@ -5956,7 +6125,21 @@ def evaluate_measures(
         single = dict(base)
         single["headers"] = [column]
         single["lineage"] = {column: (base, column)}
+        single["single_column_set"] = True
         return single, ([] if raw is None else [{column: raw}])
+
+    def refuse_foreign_columns_of_empty_set(context: dict[str, Any], expression: tuple[Any, ...]) -> None:
+        """Power BI rejects an iterator body that reads a column other than the one a date set holds, also when the set is empty
+        (live: MAXX(NEXTDAY(Fact[Dt]), Fact[Ship]) and MAXX(set, Cal[Date]) are errors)."""
+        if not context.get("single_column_set"):
+            return
+        lineage = next(iter(context.get("lineage", {}).values()), None)
+        for reference in _direct_column_references(expression):
+            if not reference[1]:
+                continue
+            table, column = resolve_table(reference[1], reference[2])
+            if lineage is None or table["id"] != lineage[0]["id"] or column.casefold() != lineage[1].casefold():
+                raise MeasureError("The iterated date set has one column; the expression reads another column.")
 
     def single_value_of(table: tuple[dict[str, Any], list[dict[str, Any]]]) -> Any:
         """A table in a place that wants one value: one row and one column is that value, no rows is BLANK, more is an error."""
@@ -6004,6 +6187,16 @@ def evaluate_measures(
             return argument[1]
         if argument[0] == "call" and argument[1] in _TABLE_FUNCTION_ARITY:
             return table_function_value(argument)
+        if argument[0] == "call" and argument[1] in _TIME_FILTER_FUNCTIONS:
+            date_table, date_column, days = time_filter_dates(argument)
+            days = days & {  # a date set holds only days the column has
+                parsed for index, row in enumerate(date_table["rows"], 1)
+                if (parsed := _parse_measure_date(row.get(date_column), date_column, index)) is not None
+            }
+            return derived_table(
+                [date_column], [{date_column: dax_dates.from_datetime(day)} for day in sorted(days)],
+                {date_column: (date_table, date_column)}, {date_column: "date"},
+            )
         if argument[0] == "var":
             held = variables[argument[1]]()
             if not isinstance(held, _TableValue):
@@ -8794,18 +8987,35 @@ def evaluate_measures(
                     ))
         return filters
 
+    _TIME_SCALAR_POSITIONS = {"DATESINPERIOD": (1, 2), "DATESBETWEEN": (1, 2), "DATEADD": (1,), "PARALLELPERIOD": (1,)}
+
     def preevaluate_time_scalars(node: tuple[Any, ...]) -> tuple[Any, ...]:
+        """The start / bound / count of a date-set function is a scalar evaluated in the context CALCULATE is written in, before
+        its sibling filters and before the row transition (live Power BI: a bare MAX(Cal[Date]) sees no pin, CALCULATE(MAX(..)) does)."""
+        arguments = list(node[2])
+        for position in _TIME_SCALAR_POSITIONS[node[1]]:
+            if position >= len(arguments):
+                continue
+            argument = arguments[position]
+            if argument[0] in {"number", "string", "blank", "thunk"} or (argument[0] == "unary" and argument[2][0] == "number"):
+                continue
+            try:
+                # with the row context of the enclosing iterator: an explicit CALCULATE in the start transitions the row
+                value = evaluate(argument, row_stack[-1] if row_stack else None, allow_text=True, allow_boolean=True)
+            except (MeasureError, _DivisionError):
+                continue  # left for the date-set code to report
+            arguments[position] = ("thunk", lambda value=value: value)
+        return (node[0], node[1], tuple(arguments))
+
+    def preevaluate_set_chain(node: tuple[Any, ...]) -> tuple[Any, ...]:
         """The bounds of a DATESBETWEEN in a CALCULATE filter are read in the outer context, also when the date column itself is
         read after the transition (live Power BI, iteration 84)."""
         if not (node[0] == "call" and node[1] in dax_time_sets.SET_FUNCTIONS and node[2]):
             return node
         arguments = list(node[2])
-        arguments[0] = preevaluate_time_scalars(arguments[0])
-        if node[1] == "DATESBETWEEN" and len(arguments) == 3:
-            for position in (1, 2):
-                value = in_row_expression(lambda argument=arguments[position]: evaluate(argument, None, allow_text=True))
-                arguments[position] = ("blank",) if value is None else ("thunk", lambda value=value: value)
-        return ("call", node[1], tuple(arguments))
+        arguments[0] = preevaluate_set_chain(arguments[0])
+        rebuilt = ("call", node[1], tuple(arguments))
+        return preevaluate_time_scalars(rebuilt) if node[1] in _TIME_SCALAR_POSITIONS else rebuilt
 
     def preevaluate_filter_scalars(node: tuple[Any, ...]) -> tuple[Any, ...]:
         """Evaluate, once in the outer context, the right-hand side of a `column <op> scalar` Boolean filter (Power BI
@@ -8870,11 +9080,13 @@ def evaluate_measures(
                 return node[:side_index] + (literal,) + node[side_index + 1:]
             return node
         if node[0] == "call" and node[1] in dax_time_sets.SET_FUNCTIONS:
-            return preevaluate_time_scalars(node)
+            return preevaluate_set_chain(node)
         if node[0] == "logical":
             return (node[0], node[1], preevaluate_filter_scalars(node[2]), preevaluate_filter_scalars(node[3]))
         if node[0] == "call" and node[1] in {"AND", "OR", "NOT", "KEEPFILTERS"}:
             return (node[0], node[1], tuple(preevaluate_filter_scalars(argument) for argument in node[2]))
+        if node[0] == "call" and node[1] in _TIME_SCALAR_POSITIONS:
+            return preevaluate_time_scalars(node)
         return node
 
     def _is_text_selectedvalue_against_number(side: tuple[Any, ...], other: tuple[Any, ...]) -> bool:
@@ -8930,7 +9142,7 @@ def evaluate_measures(
                 continue
             references: list[tuple[Any, ...]] = []
             if node[0] == "call" and node[1] in dax_time_sets.SET_FUNCTIONS:
-                found = _first_reference(node)
+                found = _first_reference(node, variable_nodes.get)
                 references = [] if found is None else [found]
             elif node[0] == "call" and node[1] in _TIME_FILTER_FUNCTIONS:
                 references = [item for item in node[2][:1] if item[0] == "reference"]
@@ -8940,6 +9152,15 @@ def evaluate_measures(
                 base = node[2][0]
                 if base[0] == "call" and base[1] == "ALL" and len(base[2]) == 1 and base[2][0][0] == "reference":
                     references = [base[2][0]]
+                elif base[0] == "table_call" and base[1] == "VALUES" and base[2][0] == "reference":
+                    references = [base[2]]  # live Power BI (iteration 84): FILTER(VALUES(key), ..) replaces the key like FILTER(ALL(key), ..)
+            elif node[0] == "table_call" and node[1] == "VALUES" and node[2][0] == "reference":
+                references = [node[2]]  # live Power BI (iteration 84): VALUES(key) as a filter replaces the key like a Boolean test of it
+            elif (
+                node[0] == "call" and node[1] == "CALCULATETABLE" and node[2] and node[2][0][0] == "table_call"
+                and node[2][0][1] == "VALUES" and node[2][0][2][0] == "reference"
+            ):
+                references = [node[2][0][2]]
             elif node[0] != "call" or node[1] in {"NOT", "AND", "OR"}:
                 references = list(_direct_column_references(node))
             for reference in references:
@@ -9055,6 +9276,8 @@ def evaluate_measures(
                 if node[0] == "call" and node[1] in {"ALL", "ALLNOBLANKROW", "REMOVEFILTERS", "ALLEXCEPT", "ALLSELECTED"}:
                     clearing.append(node)
                 elif _is_late_time_set(node):
+                    if row_context is not None and _late_chain_reads_data_expression(node):
+                        raise MeasureError("A FIRSTNONBLANK inside a date set under a row context is not supported in the local engine.")
                     late_sets.append((keep, node))
                     table_filters_present = True
                 elif _is_late_nonblank(node):
@@ -9724,6 +9947,333 @@ def evaluate_measures(
                     pass
         return references_variable(left, name) or references_variable(right, name)
 
+    def time_filter_dates(date_filter: tuple[Any, ...]) -> tuple[dict[str, Any], str, set[date]]:
+        """The days a date-set function selects in the current context: (date table, date column, days)."""
+        date_filter_function = date_filter[1]
+        date_filter_arguments = date_filter[2]
+        date_reference = date_filter_arguments[0]
+        date_table, actual_date_column = resolve_table(
+            date_reference[1], date_reference[2]
+        )
+        if str(date_table["column_types"].get(actual_date_column, "")) not in {"date", "datetime"}:
+            # live Power BI: any Date / DateTime column works, a fact table's Dt included (no marked date table is needed)
+            raise MeasureError(
+                f"{date_filter_function} needs a Date or DateTime column."
+            )
+        visible_dates = [
+            parsed_date
+            for row_index, row in enumerate(
+                rows_by_table_id[date_table["id"]], 1
+            )
+            if (parsed_date := _parse_measure_date(
+                row.get(actual_date_column), actual_date_column, row_index
+            )) is not None
+        ]
+        if date_filter_function == "DATEADD":
+            interval_value = _scalar_count(evaluate(date_filter_arguments[1]))  # live Power BI rounds a fractional count half away from zero
+            shifted_dates = _dateadd_dates(
+                visible_dates,
+                interval_value,
+                str(date_filter_arguments[2][1]),
+                [d for i, r in enumerate(date_table["rows"], 1) if (d := _parse_measure_date(r.get(actual_date_column), actual_date_column, i)) is not None],
+            )
+        elif date_filter_function == "SAMEPERIODLASTYEAR":
+            shifted_dates = _sameperiodlastyear_dates(
+                visible_dates,
+                [d for i, r in enumerate(date_table["rows"], 1) if (d := _parse_measure_date(r.get(actual_date_column), actual_date_column, i)) is not None],
+            )
+        elif date_filter_function == "PREVIOUSYEAR":
+            year_end = (
+                _parse_year_end_date(date_filter_arguments[1][1])
+                if len(date_filter_arguments) == 2
+                else (12, 31)
+            )
+            if year_end == (2, 28):
+                # open item of the live comparison: with a leap day in the selection Power BI starts the fiscal year on Feb 29
+                raise MeasureError(f"{date_filter_function} with a February 28 year end is not supported in the local engine.")
+            available_dates = [
+                parsed_date
+                for row_index, row in enumerate(date_table["rows"], 1)
+                if (parsed_date := _parse_measure_date(
+                    row.get(actual_date_column), actual_date_column, row_index
+                )) is not None
+            ]
+            shifted_dates = _previousyear_dates(
+                visible_dates, available_dates, year_end
+            )
+        elif date_filter_function == "PREVIOUSQUARTER":
+            available_dates = [
+                parsed_date
+                for row_index, row in enumerate(date_table["rows"], 1)
+                if (parsed_date := _parse_measure_date(
+                    row.get(actual_date_column), actual_date_column, row_index
+                )) is not None
+            ]
+            shifted_dates = _previousquarter_dates(
+                visible_dates, available_dates
+            )
+        elif date_filter_function == "PREVIOUSMONTH":
+            available_dates = [
+                parsed_date
+                for row_index, row in enumerate(date_table["rows"], 1)
+                if (parsed_date := _parse_measure_date(
+                    row.get(actual_date_column), actual_date_column, row_index
+                )) is not None
+            ]
+            shifted_dates = _previousmonth_dates(
+                visible_dates, available_dates
+            )
+        elif date_filter_function == "PREVIOUSDAY":
+            available_dates = [
+                parsed_date
+                for row_index, row in enumerate(date_table["rows"], 1)
+                if (parsed_date := _parse_measure_date(
+                    row.get(actual_date_column), actual_date_column, row_index
+                )) is not None
+            ]
+            shifted_dates = _previousday_dates(
+                visible_dates, available_dates
+            )
+        elif date_filter_function == "NEXTDAY":
+            available_dates = [
+                parsed_date
+                for row_index, row in enumerate(date_table["rows"], 1)
+                if (parsed_date := _parse_measure_date(
+                    row.get(actual_date_column), actual_date_column, row_index
+                )) is not None
+            ]
+            shifted_dates = _nextday_dates(
+                visible_dates, available_dates
+            )
+        elif date_filter_function == "NEXTMONTH":
+            available_dates = [
+                parsed_date
+                for row_index, row in enumerate(date_table["rows"], 1)
+                if (parsed_date := _parse_measure_date(
+                    row.get(actual_date_column), actual_date_column, row_index
+                )) is not None
+            ]
+            shifted_dates = _nextmonth_dates(
+                visible_dates, available_dates
+            )
+        elif date_filter_function == "NEXTQUARTER":
+            available_dates = [
+                parsed_date
+                for row_index, row in enumerate(date_table["rows"], 1)
+                if (parsed_date := _parse_measure_date(
+                    row.get(actual_date_column), actual_date_column, row_index
+                )) is not None
+            ]
+            shifted_dates = _nextquarter_dates(
+                visible_dates, available_dates
+            )
+        elif date_filter_function == "NEXTYEAR":
+            year_end = (
+                _parse_year_end_date(date_filter_arguments[1][1])
+                if len(date_filter_arguments) == 2
+                else (12, 31)
+            )
+            if year_end == (2, 28):
+                # open item of the live comparison: with a leap day in the selection Power BI starts the fiscal year on Feb 29
+                raise MeasureError(f"{date_filter_function} with a February 28 year end is not supported in the local engine.")
+            available_dates = [
+                parsed_date
+                for row_index, row in enumerate(date_table["rows"], 1)
+                if (parsed_date := _parse_measure_date(
+                    row.get(actual_date_column), actual_date_column, row_index
+                )) is not None
+            ]
+            shifted_dates = _nextyear_dates(
+                visible_dates, available_dates, year_end
+            )
+        elif date_filter_function == "PARALLELPERIOD":
+            interval_value = _scalar_count(evaluate(date_filter_arguments[1]))
+            available_dates = [
+                parsed_date
+                for row_index, row in enumerate(date_table["rows"], 1)
+                if (parsed_date := _parse_measure_date(
+                    row.get(actual_date_column), actual_date_column, row_index
+                )) is not None
+            ]
+            shifted_dates = _parallelperiod_dates(
+                visible_dates, available_dates, interval_value, str(date_filter_arguments[2][1])
+            )
+        elif date_filter_function == "DATESQTD":
+            shifted_dates = set()
+            if visible_dates:
+                end_date = max(visible_dates)
+                quarter_start_month = ((end_date.month - 1) // 3) * 3 + 1
+                start_date = date(end_date.year, quarter_start_month, 1)
+                shifted_dates = {
+                    parsed_date
+                    for row_index, row in enumerate(date_table["rows"], 1)
+                    if (parsed_date := _parse_measure_date(
+                        row.get(actual_date_column), actual_date_column, row_index
+                    )) is not None and start_date <= parsed_date <= end_date
+                }
+        elif date_filter_function == "DATESMTD":
+            shifted_dates = set()
+            if visible_dates:
+                end_date = max(visible_dates)
+                start_date = date(end_date.year, end_date.month, 1)
+                shifted_dates = {
+                    parsed_date
+                    for row_index, row in enumerate(date_table["rows"], 1)
+                    if (parsed_date := _parse_measure_date(
+                        row.get(actual_date_column), actual_date_column, row_index
+                    )) is not None and start_date <= parsed_date <= end_date
+                }
+        elif date_filter_function == "DATESBETWEEN":
+            available_dates = [
+                parsed_date
+                for row_index, row in enumerate(date_table["rows"], 1)
+                if (parsed_date := _parse_measure_date(
+                    row.get(actual_date_column), actual_date_column, row_index
+                )) is not None
+            ]
+            shifted_dates = set()
+            if available_dates:
+                start_date = _scalar_day(evaluate(date_filter_arguments[1]), "DATESBETWEEN")
+                end_date = _scalar_day(evaluate(date_filter_arguments[2]), "DATESBETWEEN")
+                start_date = min(available_dates) if start_date is None else start_date  # BLANK is an open end
+                end_date = max(available_dates) if end_date is None else end_date
+                if start_date <= end_date:
+                    shifted_dates = {
+                        value for value in available_dates
+                        if start_date <= value <= end_date
+                    }
+        elif date_filter_function == "DATESINPERIOD":
+            available_dates = [
+                parsed_date
+                for row_index, row in enumerate(date_table["rows"], 1)
+                if (parsed_date := _parse_measure_date(
+                    row.get(actual_date_column), actual_date_column, row_index
+                )) is not None
+            ]
+            interval = str(date_filter_arguments[3][1]).upper()
+            count = _scalar_count(evaluate(date_filter_arguments[2]))
+            start_date = _scalar_day(evaluate(date_filter_arguments[1]), "DATESINPERIOD")
+            shifted_dates = set()
+            if available_dates and count:
+                if start_date is None or start_date < min(available_dates):
+                    start_date = min(available_dates)
+                if start_date <= max(available_dates):
+                    # live Power BI (903 of 903 probes): the last day of a month stays the last day of the target month
+                    boundary = _shift_date(start_date, count, interval, keep_month_end=True)
+                    if count < 0:
+                        shifted_dates = {value for value in available_dates if boundary < value <= start_date}
+                    else:
+                        shifted_dates = {value for value in available_dates if start_date <= value < boundary}
+        else:
+            shifted_dates = set()
+        if date_filter_function == "DATESYTD":
+            if visible_dates:
+                date_argument = (
+                    _parse_year_end_date(date_filter_arguments[1][1])
+                    if len(date_filter_arguments) == 2
+                    else (12, 31)
+                )
+                end_date = max(visible_dates)
+                start_date = _year_to_date_start(end_date, date_argument)
+                shifted_dates = {
+                    parsed_date
+                    for row_index, row in enumerate(
+                        date_table["rows"], 1
+                    )
+                    if (parsed_date := _parse_measure_date(
+                        row.get(actual_date_column), actual_date_column, row_index
+                    )) is not None and start_date <= parsed_date <= end_date
+                }
+            else:
+                shifted_dates = set()
+        return date_table, actual_date_column, shifted_dates
+
+    def date_number_mix(first: tuple[Any, ...], second: tuple[Any, ...]) -> bool:
+        """Live Power BI turns a date mixed with a number (MAX(DATE(..), 5), IF(c, DATE(..), 5)) into a number; the local engine
+        would keep the date, so a mix whose result is the date is refused (a number result is already right)."""
+        def is_date(node: tuple[Any, ...]) -> bool:
+            if node[0] == "call" and node[1] in {"DATE", "EDATE", "EOMONTH", "TODAY", "NOW", "DATEVALUE"}:
+                return True
+            if node[0] == "reference" and node[1]:
+                try:
+                    context, column = resolve_table(node[1], node[2])
+                except MeasureError:
+                    return False
+                return str(context.get("column_types", {}).get(column, "")).casefold() in {"date", "datetime"}
+            return is_date_aggregate(node)
+
+        def is_number(node: tuple[Any, ...]) -> bool:
+            return node[0] == "number" or (node[0] == "unary" and node[2][0] == "number")
+
+        return (is_date(first) and is_number(second)) or (is_number(first) and is_date(second))
+
+    def refuse_date_result(mixed: bool, value: Any) -> None:
+        if mixed and dax_dates.is_date(value) and not row_stack:  # inside an iterator the key or branch value is only compared (locked answers)
+            raise MeasureError("A date mixed with a number in one result is not supported in the local engine.")
+
+    def is_date_aggregate(node: tuple[Any, ...]) -> bool:
+        """MAX / MIN / MAXX / MINX of a Date column (possibly inside CALCULATE): empty, they give a typed BLANK date."""
+        if node[0] != "call":
+            return False
+        function, arguments = node[1], node[2]
+        reference = None
+        if function in dax_time_sets.SET_FUNCTIONS:
+            return True  # a date set is a table of dates; one value of it is a date, or a typed BLANK date
+        if function in _NONBLANK_TABLES and arguments:
+            reference = _first_reference(arguments[0])
+        elif function in {"MAX", "MIN"} and len(arguments) == 1:
+            reference = arguments[0]
+        elif function in {"MAXX", "MINX"} and len(arguments) == 2:
+            reference = arguments[1]
+        elif function == "CALCULATE" and arguments:
+            return is_date_aggregate(arguments[0])
+        if reference is None or reference[0] != "reference" or not reference[1]:
+            return False
+        try:
+            context, column = resolve_table(reference[1], reference[2])
+        except MeasureError:
+            return False
+        return str(context.get("column_types", {}).get(column, "")).casefold() in {"date", "datetime"}
+
+    ambiguous_pin_cache: dict[Any, frozenset[str]] = {}
+
+    def refuse_ambiguous_row_pin(arguments: tuple[tuple[Any, ...], ...], row_context: tuple[dict[str, Any], dict[str, Any], int]) -> None:
+        """A fact row pins its dimension, calendar and the fact itself at once.  When a second, longer route runs from one pinned
+        table to another through a both-way link (ZS: Cal -> Fact2 -> Dim), live Power BI answers for the tables on that route in a
+        way not yet modelled (SUMX(Fact, CALCULATE(COUNTROWS(Dim))): 8, ours 1), so reading those tables there is refused."""
+        iterated = row_context[0]
+        if iterated.get("derived") or iterated["id"] not in contexts_by_id:
+            return
+        pinned = tuple(sorted(all_row_context_filters(row_context)))
+        if len(pinned) < 2:
+            return
+        key = (pinned, tuple(sorted(evaluation_filter_ids)), id(relationship_definitions))
+        unsafe = ambiguous_pin_cache.get(key)
+        if unsafe is None:
+            found: dict[str, set[str]] = {}
+            try:
+                _propagate_relationship_filters(
+                    list(evaluation_contexts_by_id.values()), relationship_definitions,
+                    set(pinned) | set(evaluation_filter_ids), None, found,
+                )
+            except RelationshipError:
+                found = {}
+            unsafe = ambiguous_pin_cache[key] = frozenset(found.get("longer_route_tables", ()))
+        if not unsafe:
+            return
+        read = set()
+        for argument in arguments:
+            ids = expression_table_ids(argument)
+            if ids is None:
+                read = set(unsafe)
+                break
+            read |= ids
+        if read & unsafe:
+            raise MeasureError(
+                "A row of a table with two routes to the same table (a both-way link) filters that table in a way "
+                "not supported in the local engine."
+            )
+
     def evaluate(
         node: tuple[Any, ...],
         row_context: tuple[dict[str, Any], dict[str, Any], int] | None = None,
@@ -9843,6 +10393,12 @@ def evaluate_measures(
                 return _power(
                     None if left is None else as_number(left), None if right is None else as_number(right)
                 )
+            if node[1] in {"+", "-"} and (left is None) != (right is None):
+                # live Power BI: MAX / MIN of an empty date column is a typed BLANK date, which counts as day zero in + and -
+                if left is None and is_date_aggregate(node[2]):
+                    left = dax_dates.DaxDateTime(Decimal(0))
+                elif right is None and node[1] == "+" and is_date_aggregate(node[3]):
+                    right = dax_dates.DaxDateTime(Decimal(0))
             result = _binary_value(
                 node[1],
                 None if left is None else as_number(left),
@@ -9851,6 +10407,8 @@ def evaluate_measures(
             if node[1] in {"+", "-"} and result is not None and (
                 dax_dates.is_date(left) or dax_dates.is_date(right)
             ):
+                if node[1] == "-" and not dax_dates.is_date(left) and node[2][0] in {"number", "blank"}:
+                    return result  # live Power BI: a number literal minus a date is a plain number (other lefts may be dates the evaluator lost the type of)
                 return dax_dates.DaxDateTime(result)
             return result
         if kind == "logical":
@@ -9921,6 +10479,8 @@ def evaluate_measures(
             return related_value(arguments[0], row_context)
         if function in {"SUMX", "AVERAGEX", "MAXX", "MINX"} or function in dax_math.STAT_ITERATORS:
             context, iteration_rows = table_argument_value(arguments[0])
+            if not iteration_rows:
+                refuse_foreign_columns_of_empty_set(context, arguments[1])
             if function in {"MAXX", "MINX"}:
                 validation_row = iteration_rows[0] if iteration_rows else {}
                 result_category = iterator_expression_category(
@@ -9963,10 +10523,12 @@ def evaluate_measures(
                 total = dax_typed.QUIET.add(total, value)
             result = total if function == "SUMX" else dax_typed.QUIET.divide(total, Decimal(len(values)))
             if function == "SUMX" and not has_number_branch(arguments[1]) and all(isinstance(value, dax_dates.DaxDateTime) for value in values) and result.is_finite():
-                return dax_dates.DaxDateTime(result)  # live Power BI: SUMX over dates is a date, AVERAGEX over dates is a plain number
+                return dax_dates.DaxDateTime(min(result, _MAX_DATE_SERIAL))  # live Power BI: a sum of dates saturates at 12/31/9999 23:59:59  # live Power BI: SUMX over dates is a date, AVERAGEX over dates is a plain number
             return result
         if function in {"COUNTX", "COUNTAX"}:
             context, iteration_rows = table_argument_value(arguments[0])
+            if not iteration_rows:
+                refuse_foreign_columns_of_empty_set(context, arguments[1])
             validation_row = iteration_rows[0] if iteration_rows else {}
             iterator_expression_category(
                 arguments[1], (context, validation_row, 1)
@@ -9995,7 +10557,14 @@ def evaluate_measures(
                     arguments = (*arguments, *(("call", "REMOVEFILTERS", (("table", name),)) for name in wipes))
                 node = (node[0], function, arguments)
             if row_context is not None:
+                refuse_ambiguous_row_pin(arguments, row_context)
                 if len(arguments) > 1 and _general_calculate_filters_valid(tuple(arguments[1:])):
+                    return evaluate_with_general_filters(arguments[0], tuple(arguments[1:]), row_context)
+                if len(arguments) > 2 and any(a[0] == "call" and a[1] in _RELATIONSHIP_MODIFIERS for a in arguments[1:]) and _general_calculate_filters_valid(
+                    tuple(a for a in arguments[1:] if not (a[0] == "call" and a[1] in _RELATIONSHIP_MODIFIERS))
+                ):
+                    # live Power BI: the filter arguments are evaluated BEFORE the row transition, whatever USERELATIONSHIP / CROSSFILTER
+                    # they sit beside (FILTER(Cal, ..) is the whole calendar, not the day the fact row pins)
                     return evaluate_with_general_filters(arguments[0], tuple(arguments[1:]), row_context)
                 return with_column_filters(all_row_context_filters(row_context), lambda: without_row_contexts(lambda: evaluate(node)), True)
             if len(arguments) == 1:
@@ -10168,263 +10737,7 @@ def evaluate_measures(
 
                 extra_date_filters = {}
                 for date_filter in time_filters:
-                    date_filter_function = date_filter[1]
-                    date_filter_arguments = date_filter[2]
-                    date_reference = date_filter_arguments[0]
-                    date_table, actual_date_column = resolve_table(
-                        date_reference[1], date_reference[2]
-                    )
-                    if (
-                        date_table["date_column"].casefold() != actual_date_column.casefold()
-                        or str(date_table["column_types"].get(actual_date_column, ""))
-                        not in {"date", "datetime"}
-                    ):
-                        raise MeasureError(
-                            f"{date_filter_function} needs the marked Date or DateTime column of a date table."
-                        )
-                    visible_dates = [
-                        parsed_date
-                        for row_index, row in enumerate(
-                            rows_by_table_id[date_table["id"]], 1
-                        )
-                        if (parsed_date := _parse_measure_date(
-                            row.get(actual_date_column), actual_date_column, row_index
-                        )) is not None
-                    ]
-                    if date_filter_function == "DATEADD":
-                        interval_value = as_number(evaluate(date_filter_arguments[1]))
-                        if interval_value != interval_value.to_integral_value():
-                            raise MeasureError("DATEADD number_of_intervals must be a whole number.")
-                        if abs(interval_value) > Decimal(3_652_059):
-                            raise MeasureError("DATEADD number_of_intervals is outside the supported range.")
-                        shifted_dates = _dateadd_dates(
-                            visible_dates,
-                            int(interval_value),
-                            str(date_filter_arguments[2][1]),
-                        )
-                    elif date_filter_function == "SAMEPERIODLASTYEAR":
-                        shifted_dates = _sameperiodlastyear_dates(visible_dates)
-                    elif date_filter_function == "PREVIOUSYEAR":
-                        year_end = (
-                            _parse_year_end_date(date_filter_arguments[1][1])
-                            if len(date_filter_arguments) == 2
-                            else (12, 31)
-                        )
-                        available_dates = [
-                            parsed_date
-                            for row_index, row in enumerate(date_table["rows"], 1)
-                            if (parsed_date := _parse_measure_date(
-                                row.get(actual_date_column), actual_date_column, row_index
-                            )) is not None
-                        ]
-                        shifted_dates = _previousyear_dates(
-                            visible_dates, available_dates, year_end
-                        )
-                    elif date_filter_function == "PREVIOUSQUARTER":
-                        available_dates = [
-                            parsed_date
-                            for row_index, row in enumerate(date_table["rows"], 1)
-                            if (parsed_date := _parse_measure_date(
-                                row.get(actual_date_column), actual_date_column, row_index
-                            )) is not None
-                        ]
-                        shifted_dates = _previousquarter_dates(
-                            visible_dates, available_dates
-                        )
-                    elif date_filter_function == "PREVIOUSMONTH":
-                        available_dates = [
-                            parsed_date
-                            for row_index, row in enumerate(date_table["rows"], 1)
-                            if (parsed_date := _parse_measure_date(
-                                row.get(actual_date_column), actual_date_column, row_index
-                            )) is not None
-                        ]
-                        shifted_dates = _previousmonth_dates(
-                            visible_dates, available_dates
-                        )
-                    elif date_filter_function == "PREVIOUSDAY":
-                        available_dates = [
-                            parsed_date
-                            for row_index, row in enumerate(date_table["rows"], 1)
-                            if (parsed_date := _parse_measure_date(
-                                row.get(actual_date_column), actual_date_column, row_index
-                            )) is not None
-                        ]
-                        shifted_dates = _previousday_dates(
-                            visible_dates, available_dates
-                        )
-                    elif date_filter_function == "NEXTDAY":
-                        available_dates = [
-                            parsed_date
-                            for row_index, row in enumerate(date_table["rows"], 1)
-                            if (parsed_date := _parse_measure_date(
-                                row.get(actual_date_column), actual_date_column, row_index
-                            )) is not None
-                        ]
-                        shifted_dates = _nextday_dates(
-                            visible_dates, available_dates
-                        )
-                    elif date_filter_function == "NEXTMONTH":
-                        available_dates = [
-                            parsed_date
-                            for row_index, row in enumerate(date_table["rows"], 1)
-                            if (parsed_date := _parse_measure_date(
-                                row.get(actual_date_column), actual_date_column, row_index
-                            )) is not None
-                        ]
-                        shifted_dates = _nextmonth_dates(
-                            visible_dates, available_dates
-                        )
-                    elif date_filter_function == "NEXTQUARTER":
-                        available_dates = [
-                            parsed_date
-                            for row_index, row in enumerate(date_table["rows"], 1)
-                            if (parsed_date := _parse_measure_date(
-                                row.get(actual_date_column), actual_date_column, row_index
-                            )) is not None
-                        ]
-                        shifted_dates = _nextquarter_dates(
-                            visible_dates, available_dates
-                        )
-                    elif date_filter_function == "NEXTYEAR":
-                        year_end = (
-                            _parse_year_end_date(date_filter_arguments[1][1])
-                            if len(date_filter_arguments) == 2
-                            else (12, 31)
-                        )
-                        available_dates = [
-                            parsed_date
-                            for row_index, row in enumerate(date_table["rows"], 1)
-                            if (parsed_date := _parse_measure_date(
-                                row.get(actual_date_column), actual_date_column, row_index
-                            )) is not None
-                        ]
-                        shifted_dates = _nextyear_dates(
-                            visible_dates, available_dates, year_end
-                        )
-                    elif date_filter_function == "PARALLELPERIOD":
-                        interval_value = as_number(evaluate(date_filter_arguments[1]))
-                        if interval_value != interval_value.to_integral_value():
-                            raise MeasureError("PARALLELPERIOD number_of_intervals must be a whole number.")
-                        if abs(interval_value) > Decimal(3_652_059):
-                            raise MeasureError("PARALLELPERIOD number_of_intervals is outside the supported range.")
-                        available_dates = [
-                            parsed_date
-                            for row_index, row in enumerate(date_table["rows"], 1)
-                            if (parsed_date := _parse_measure_date(
-                                row.get(actual_date_column), actual_date_column, row_index
-                            )) is not None
-                        ]
-                        shifted_dates = _parallelperiod_dates(
-                            visible_dates, available_dates, int(interval_value), str(date_filter_arguments[2][1])
-                        )
-                    elif date_filter_function == "DATESQTD":
-                        shifted_dates = set()
-                        if visible_dates:
-                            end_date = max(visible_dates)
-                            quarter_start_month = ((end_date.month - 1) // 3) * 3 + 1
-                            start_date = date(end_date.year, quarter_start_month, 1)
-                            shifted_dates = {
-                                parsed_date
-                                for row_index, row in enumerate(date_table["rows"], 1)
-                                if (parsed_date := _parse_measure_date(
-                                    row.get(actual_date_column), actual_date_column, row_index
-                                )) is not None and start_date <= parsed_date <= end_date
-                            }
-                    elif date_filter_function == "DATESMTD":
-                        shifted_dates = set()
-                        if visible_dates:
-                            end_date = max(visible_dates)
-                            start_date = date(end_date.year, end_date.month, 1)
-                            shifted_dates = {
-                                parsed_date
-                                for row_index, row in enumerate(date_table["rows"], 1)
-                                if (parsed_date := _parse_measure_date(
-                                    row.get(actual_date_column), actual_date_column, row_index
-                                )) is not None and start_date <= parsed_date <= end_date
-                            }
-                    elif date_filter_function == "DATESBETWEEN":
-                        available_dates = [
-                            parsed_date
-                            for row_index, row in enumerate(date_table["rows"], 1)
-                            if (parsed_date := _parse_measure_date(
-                                row.get(actual_date_column), actual_date_column, row_index
-                            )) is not None
-                        ]
-                        shifted_dates = set()
-                        if available_dates:
-                            start_bound, end_bound = date_filter_arguments[1:]
-                            start_date = (
-                                min(available_dates)
-                                if start_bound[0] == "blank"
-                                else _parse_iso_date_literal(start_bound[1], "DATESBETWEEN")
-                            )
-                            end_date = (
-                                max(available_dates)
-                                if end_bound[0] == "blank"
-                                else _parse_iso_date_literal(end_bound[1], "DATESBETWEEN")
-                            )
-                            if start_date <= end_date:
-                                shifted_dates = {
-                                    value for value in available_dates
-                                    if start_date <= value <= end_date
-                                }
-                    elif date_filter_function == "DATESINPERIOD":
-                        start_date = _parse_iso_date_literal(
-                            date_filter_arguments[1][1], "DATESINPERIOD"
-                        )
-                        interval_value = as_number(evaluate(date_filter_arguments[2]))
-                        if interval_value != interval_value.to_integral_value():
-                            raise MeasureError(
-                                "DATESINPERIOD number_of_intervals must be a whole number."
-                            )
-                        if abs(interval_value) > Decimal(3_652_059):
-                            raise MeasureError(
-                                "DATESINPERIOD number_of_intervals is outside the supported range."
-                            )
-                        interval = str(date_filter_arguments[3][1])
-                        shifted_boundary = next(iter(_dateadd_dates(
-                            [start_date], int(interval_value), interval
-                        )))
-                        available_dates = [
-                            parsed_date
-                            for row_index, row in enumerate(date_table["rows"], 1)
-                            if (parsed_date := _parse_measure_date(
-                                row.get(actual_date_column), actual_date_column, row_index
-                            )) is not None
-                        ]
-                        if interval_value < 0:
-                            shifted_dates = {
-                                value for value in available_dates
-                                if shifted_boundary < value <= start_date
-                            }
-                        else:
-                            shifted_dates = {
-                                value for value in available_dates
-                                if start_date <= value < shifted_boundary
-                            }
-                    else:
-                        shifted_dates = set()
-                    if date_filter_function == "DATESYTD":
-                        if visible_dates:
-                            date_argument = (
-                                _parse_year_end_date(date_filter_arguments[1][1])
-                                if len(date_filter_arguments) == 2
-                                else (12, 31)
-                            )
-                            end_date = max(visible_dates)
-                            start_date = _year_to_date_start(end_date, date_argument)
-                            shifted_dates = {
-                                parsed_date
-                                for row_index, row in enumerate(
-                                    date_table["rows"], 1
-                                )
-                                if (parsed_date := _parse_measure_date(
-                                    row.get(actual_date_column), actual_date_column, row_index
-                                )) is not None and start_date <= parsed_date <= end_date
-                            }
-                        else:
-                            shifted_dates = set()
+                    date_table, actual_date_column, shifted_dates = time_filter_dates(date_filter)
                     period_indexes = frozenset(
                         row_index
                         for row_index, row in enumerate(date_table["rows"])
@@ -10433,6 +10746,8 @@ def evaluate_measures(
                         )) is not None and parsed_date in shifted_dates
                     )
                     key = (date_table["id"], actual_date_column.casefold())
+                    if key in extra_date_filters:
+                        period_indexes = period_indexes & extra_date_filters[key][2]  # two date sets on one column intersect
                     extra_date_filters[key] = (date_table, actual_date_column, period_indexes)
 
                 if mixed_filter_clear is not None:
@@ -10458,6 +10773,11 @@ def evaluate_measures(
                 raise
             except MeasureError as legacy_error:
                 # a shape the older CALCULATE paths refuse: Power BI accepts it, so evaluate it with the general path
+                if _time_filters_beside_general_filters(tuple(arguments)) and "per-column filter context" not in str(legacy_error):
+                    # the date sets become table filters (evaluated in the outer context like every filter); a date key replaced
+                    # by a date set first removes the other outer filters of its table
+                    wipe_arguments = tuple(("call", "REMOVEFILTERS", (("table", name),)) for name in date_key_wipe_tables(arguments))
+                    return evaluate_with_general_filters(arguments[0], (*arguments[1:], *wipe_arguments))
                 if not _general_calculate_filters_valid(tuple(arguments[1:]), True):
                     raise
                 if "per-column filter context" in str(legacy_error):
@@ -10527,7 +10847,8 @@ def evaluate_measures(
                 )) is not None
             ]
             if not visible_dates:
-                return Decimal(0)
+                # live Power BI: an empty date set evaluates the expression in the empty-date context (BLANK for SUM, 1 for 1)
+                return evaluate_with_date_values(arguments[0], date_table, actual_date_column, set())
             end_date = max(visible_dates)
             if function == "TOTALQTD":
                 quarter_start_month = ((end_date.month - 1) // 3) * 3 + 1
@@ -10554,6 +10875,7 @@ def evaluate_measures(
                 arguments[0], date_table, actual_date_column, period_dates
             )
         if function == "IF":
+            mixed_branches = len(arguments) > 2 and date_number_mix(arguments[1], arguments[2])
             chosen = arguments[1] if as_boolean(_consume_infinity(lambda: evaluate(
                 arguments[0], row_context, allow_text=allow_text,
                 allow_boolean=allow_boolean,
@@ -10561,6 +10883,7 @@ def evaluate_measures(
             value = None if chosen is None else evaluate(
                 chosen, row_context, allow_text=allow_text, allow_boolean=allow_boolean,
             )
+            refuse_date_result(mixed_branches, value)
             if value is None and bool_join([branch_kind(branch, row_context) for branch in arguments[1:]]):
                 return False  # a Boolean result has no blank: Power BI answers FALSE
             return value
@@ -10805,6 +11128,7 @@ def evaluate_measures(
                 raise MeasureError("SELECTEDVALUE supports text, number and True/False columns in the local engine.")
             return str(only)
         if function in {"MIN", "MAX"} and len(arguments) == 2:
+            mixed_pair = date_number_mix(arguments[0], arguments[1])
             first = evaluate(arguments[0], row_context, allow_text=True)
             second = evaluate(arguments[1], row_context, allow_text=True)
             for operand in (first, second):
@@ -10816,7 +11140,9 @@ def evaluate_measures(
                 return second
             larger = dax_typed.compare(">", first, second)
             smaller = dax_typed.compare("<", first, second)
-            return (first if larger else second) if function == "MAX" else (first if smaller else second)
+            picked = (first if larger else second) if function == "MAX" else (first if smaller else second)
+            refuse_date_result(mixed_pair, picked)
+            return picked
         reference = arguments[0]
         if reference[0] != "reference" or len(reference) < 3:  # a table or other non-column argument is not a scalar source
             raise MeasureError(f"{function} needs a column reference in the local engine.")

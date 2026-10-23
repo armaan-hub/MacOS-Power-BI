@@ -134,7 +134,7 @@ class TotalYtdTests(unittest.TestCase):
             {"OrderDate": "2024-06-30", "Amount": "5"},
             {"OrderDate": "2024-07-01", "Amount": "7"},
         ]
-        expression = 'TOTALYTD(SUM([Amount]), \'Calendar\'[Date],, "6/30")'
+        expression = 'TOTALYTD(SUM([Amount]), \'Calendar\'[Date], "6/30")'
 
         def fiscal_ytd_for(visible_calendar_rows: list[dict[str, str]]) -> int:
             table_context = [
@@ -175,7 +175,9 @@ class TotalYtdTests(unittest.TestCase):
         self.assertEqual(fiscal_ytd_for(june_30), 105)
         self.assertEqual(fiscal_ytd_for(july_1), 7)
 
-    def test_totalytd_clamps_february_29_for_non_leap_years(self) -> None:
+    @unittest.mock.patch("analytics_studio.measures._year_end_reference_year", return_value=2024)
+    def test_totalytd_clamps_february_29_for_non_leap_years(self, _reference_year) -> None:
+        # Power BI reads "2/29" as Feb 29 only while the machine's year is a leap year (a common year makes it Feb 1)
         calendar_rows = [
             {"Date": day.isoformat()}
             for day in (date(2023, 2, 28), date(2023, 3, 1))
@@ -187,7 +189,7 @@ class TotalYtdTests(unittest.TestCase):
         values = evaluate_measures(
             [{
                 "name": "Leap Fiscal YTD",
-                "expression": 'TOTALYTD(SUM([Amount]), \'Calendar\'[Date],, "2/29")',
+                "expression": 'TOTALYTD(SUM([Amount]), \'Calendar\'[Date], "2/29")',
             }],
             order_rows,
             ["OrderDate", "Amount"],
@@ -233,7 +235,7 @@ class TotalYtdTests(unittest.TestCase):
         leap_values = evaluate_measures(
             [{
                 "name": "Leap Fiscal YTD",
-                "expression": 'TOTALYTD(SUM([Amount]), \'Calendar\'[Date],, "2/29")',
+                "expression": 'TOTALYTD(SUM([Amount]), \'Calendar\'[Date], "2/29")',
             }],
             leap_orders,
             ["OrderDate", "Amount"],
@@ -271,13 +273,13 @@ class TotalYtdTests(unittest.TestCase):
         with self.assertRaisesRegex(MeasureError, "month/day"):
             normalize_measure(
                 "Invalid year end",
-                'TOTALYTD(SUM([Amount]), \'Calendar\'[Date],, "6/31")',
+                'TOTALYTD(SUM([Amount]), \'Calendar\'[Date], "13/13")',
             )
 
         with self.assertRaisesRegex(MeasureError, "month/day"):
             normalize_measure(
                 "Non-ASCII year end",
-                'TOTALYTD(SUM([Amount]), \'Calendar\'[Date],, "６/３０")',
+                'TOTALYTD(SUM([Amount]), \'Calendar\'[Date], "６/３０")',
             )
 
         with self.assertRaisesRegex(MeasureError, "Filter expressions are not supported"):
@@ -299,7 +301,7 @@ class TotalYtdTests(unittest.TestCase):
                 "TOTALYTD(SUM([Amount]), 'Calendar'[Date], 12)",
             )
 
-        with self.assertRaisesRegex(MeasureError, "marked Date or DateTime"):
+        with self.assertRaisesRegex(MeasureError, "Date or DateTime column"):
             evaluate_measures(
                 [{
                     "name": "Sales YTD",
@@ -313,7 +315,7 @@ class TotalYtdTests(unittest.TestCase):
                     "name": "Calendar",
                     "headers": ["Amount", "Date"],
                     "rows": [{"Amount": "10", "Date": "2024-01-01"}],
-                    "column_types": {"Amount": "whole_number", "Date": "date"},
+                    "column_types": {"Amount": "whole_number", "Date": "text"},
                 }],
                 active_table_id="calendar-id",
             )
@@ -382,7 +384,7 @@ class TotalYtdTests(unittest.TestCase):
                 "TOTALQTD(SUM([Amount]), 'Calendar'[Date], 1)",
             )
 
-        with self.assertRaisesRegex(MeasureError, "marked Date or DateTime"):
+        with self.assertRaisesRegex(MeasureError, "Date or DateTime column"):
             evaluate_measures(
                 [{
                     "name": "Sales QTD",
@@ -396,7 +398,7 @@ class TotalYtdTests(unittest.TestCase):
                     "name": "Calendar",
                     "headers": ["Date", "Amount"],
                     "rows": [{"Date": "2024-04-02", "Amount": "10"}],
-                    "column_types": {"Date": "date", "Amount": "whole_number"},
+                    "column_types": {"Date": "text", "Amount": "whole_number"},
                 }],
                 active_table_id="calendar-id",
             )
@@ -460,7 +462,7 @@ class TotalYtdTests(unittest.TestCase):
                 "TOTALMTD(SUM([Amount]), 'Calendar'[Date], 1)",
             )
 
-        with self.assertRaisesRegex(MeasureError, "marked Date or DateTime"):
+        with self.assertRaisesRegex(MeasureError, "Date or DateTime column"):
             evaluate_measures(
                 [{
                     "name": "Sales MTD",
@@ -474,7 +476,7 @@ class TotalYtdTests(unittest.TestCase):
                     "name": "Calendar",
                     "headers": ["Date", "Amount"],
                     "rows": [{"Date": "2024-06-02", "Amount": "10"}],
-                    "column_types": {"Date": "date", "Amount": "whole_number"},
+                    "column_types": {"Date": "text", "Amount": "whole_number"},
                 }],
                 active_table_id="calendar-id",
             )
@@ -643,7 +645,7 @@ class TotalYtdTests(unittest.TestCase):
                 "Bare prior year",
                 "SAMEPERIODLASTYEAR('Calendar'[Date])",
             )
-        with self.assertRaisesRegex(MeasureError, "marked Date or DateTime"):
+        with self.assertRaisesRegex(MeasureError, "Date or DateTime column"):
             evaluate_measures(
                 [{
                     "name": "Prior year sales",
@@ -660,7 +662,7 @@ class TotalYtdTests(unittest.TestCase):
                     "name": "Calendar",
                     "headers": ["Date", "Amount"],
                     "rows": [{"Date": "2024-03-01", "Amount": "10"}],
-                    "column_types": {"Date": "date", "Amount": "whole_number"},
+                    "column_types": {"Date": "text", "Amount": "whole_number"},
                 }],
                 active_table_id="calendar-id",
             )
@@ -748,7 +750,7 @@ class TotalYtdTests(unittest.TestCase):
                 "Bare DATESYTD",
                 "DATESYTD('Calendar'[Date])",
             )
-        with self.assertRaisesRegex(MeasureError, "marked Date or DateTime"):
+        with self.assertRaisesRegex(MeasureError, "Date or DateTime column"):
             evaluate_measures(
                 [{
                     "name": "Sales YTD",
@@ -764,7 +766,7 @@ class TotalYtdTests(unittest.TestCase):
                     "name": "Calendar",
                     "headers": ["Date", "Amount"],
                     "rows": [{"Date": "2024-04-02", "Amount": "10"}],
-                    "column_types": {"Date": "date", "Amount": "whole_number"},
+                    "column_types": {"Date": "text", "Amount": "whole_number"},
                 }],
                 active_table_id="calendar-id",
             )
@@ -832,7 +834,7 @@ class TotalYtdTests(unittest.TestCase):
                 "Bare DATESQTD",
                 "DATESQTD('Calendar'[Date])",
             )
-        with self.assertRaisesRegex(MeasureError, "marked Date or DateTime"):
+        with self.assertRaisesRegex(MeasureError, "Date or DateTime column"):
             evaluate_measures(
                 [{
                     "name": "Sales QTD date set",
@@ -848,7 +850,7 @@ class TotalYtdTests(unittest.TestCase):
                     "name": "Calendar",
                     "headers": ["Date", "Amount"],
                     "rows": [{"Date": "2024-05-15", "Amount": "10"}],
-                    "column_types": {"Date": "date", "Amount": "whole_number"},
+                    "column_types": {"Date": "text", "Amount": "whole_number"},
                 }],
                 active_table_id="calendar-id",
             )
@@ -916,7 +918,7 @@ class TotalYtdTests(unittest.TestCase):
                 "Bare DATESMTD",
                 "DATESMTD('Calendar'[Date])",
             )
-        with self.assertRaisesRegex(MeasureError, "marked Date or DateTime"):
+        with self.assertRaisesRegex(MeasureError, "Date or DateTime column"):
             evaluate_measures(
                 [{
                     "name": "Sales MTD date set",
@@ -932,7 +934,7 @@ class TotalYtdTests(unittest.TestCase):
                     "name": "Calendar",
                     "headers": ["Date", "Amount"],
                     "rows": [{"Date": "2024-06-15", "Amount": "10"}],
-                    "column_types": {"Date": "date", "Amount": "whole_number"},
+                    "column_types": {"Date": "text", "Amount": "whole_number"},
                 }],
                 active_table_id="calendar-id",
             )
@@ -1015,7 +1017,7 @@ class TotalYtdTests(unittest.TestCase):
                 "Bare DATESBETWEEN",
                 'DATESBETWEEN(\'Calendar\'[Date], "2024-01-01", "2024-01-31")',
             )
-        with self.assertRaisesRegex(MeasureError, "marked Date or DateTime"):
+        with self.assertRaisesRegex(MeasureError, "Date or DateTime column"):
             evaluate_measures(
                 [{
                     "name": "Bounded sales",
@@ -1032,7 +1034,7 @@ class TotalYtdTests(unittest.TestCase):
                     "name": "Calendar",
                     "headers": ["Date", "Amount"],
                     "rows": [{"Date": "2024-01-15", "Amount": "10"}],
-                    "column_types": {"Date": "date", "Amount": "whole_number"},
+                    "column_types": {"Date": "text", "Amount": "whole_number"},
                 }],
                 active_table_id="calendar-id",
             )
@@ -1126,7 +1128,8 @@ class TotalYtdTests(unittest.TestCase):
                 "Bare DATESINPERIOD",
                 'DATESINPERIOD(\'Calendar\'[Date], "2024-01-01", -1, DAY)',
             )
-        with self.assertRaisesRegex(MeasureError, "whole number"):
+        # iteration 84: live Power BI rounds a fractional interval count half away from zero (1.5 -> 2) instead of refusing it
+        rounded = (
             evaluate_measures(
                 [{
                     "name": "Invalid period",
@@ -1148,7 +1151,9 @@ class TotalYtdTests(unittest.TestCase):
                 }],
                 active_table_id="calendar-id",
             )
-        with self.assertRaisesRegex(MeasureError, "marked Date or DateTime"):
+        )
+        self.assertEqual(rounded["Invalid period"], 10)
+        with self.assertRaisesRegex(MeasureError, "Date or DateTime column"):
             evaluate_measures(
                 [{
                     "name": "Prior year sales",
@@ -1165,7 +1170,7 @@ class TotalYtdTests(unittest.TestCase):
                     "name": "Calendar",
                     "headers": ["Date", "Amount"],
                     "rows": [{"Date": "2024-01-01", "Amount": "10"}],
-                    "column_types": {"Date": "date", "Amount": "whole_number"},
+                    "column_types": {"Date": "text", "Amount": "whole_number"},
                 }],
                 active_table_id="calendar-id",
             )
@@ -1248,14 +1253,14 @@ class TotalYtdTests(unittest.TestCase):
         with self.assertRaisesRegex(MeasureError, "valid month/day"):
             normalize_measure(
                 "Invalid PREVIOUSYEAR year end",
-                "CALCULATE(SUM([Amount]), PREVIOUSYEAR('Calendar'[Date], \"6/31\"))",
+                "CALCULATE(SUM([Amount]), PREVIOUSYEAR('Calendar'[Date], \"13/13\"))",
             )
         with self.assertRaisesRegex(MeasureError, "Table-valued functions"):
             normalize_measure(
                 "Bare PREVIOUSYEAR",
                 "PREVIOUSYEAR('Calendar'[Date])",
             )
-        with self.assertRaisesRegex(MeasureError, "marked Date or DateTime"):
+        with self.assertRaisesRegex(MeasureError, "Date or DateTime column"):
             evaluate_measures(
                 [{
                     "name": "Prior year sales",
@@ -1272,7 +1277,7 @@ class TotalYtdTests(unittest.TestCase):
                     "name": "Calendar",
                     "headers": ["Date", "Amount"],
                     "rows": [{"Date": "2024-01-01", "Amount": "10"}],
-                    "column_types": {"Date": "date", "Amount": "whole_number"},
+                    "column_types": {"Date": "text", "Amount": "whole_number"},
                 }],
                 active_table_id="calendar-id",
             )
@@ -1347,7 +1352,7 @@ class TotalYtdTests(unittest.TestCase):
                 "Bare PREVIOUSQUARTER",
                 "PREVIOUSQUARTER('Calendar'[Date])",
             )
-        with self.assertRaisesRegex(MeasureError, "marked Date or DateTime"):
+        with self.assertRaisesRegex(MeasureError, "Date or DateTime column"):
             evaluate_measures(
                 [{
                     "name": "Prior quarter sales",
@@ -1364,7 +1369,7 @@ class TotalYtdTests(unittest.TestCase):
                     "name": "Calendar",
                     "headers": ["Date", "Amount"],
                     "rows": [{"Date": "2024-02-15", "Amount": "10"}],
-                    "column_types": {"Date": "date", "Amount": "whole_number"},
+                    "column_types": {"Date": "text", "Amount": "whole_number"},
                 }],
                 active_table_id="calendar-id",
             )
@@ -1486,7 +1491,7 @@ class TotalYtdTests(unittest.TestCase):
                 "Bare PREVIOUSMONTH",
                 "PREVIOUSMONTH('Calendar'[Date])",
             )
-        with self.assertRaisesRegex(MeasureError, "marked Date or DateTime"):
+        with self.assertRaisesRegex(MeasureError, "Date or DateTime column"):
             evaluate_measures(
                 [{
                     "name": "Prior month sales",
@@ -1503,13 +1508,14 @@ class TotalYtdTests(unittest.TestCase):
                     "name": "Calendar",
                     "headers": ["Date", "Amount"],
                     "rows": [{"Date": "2024-02-15", "Amount": "10"}],
-                    "column_types": {"Date": "date", "Amount": "whole_number"},
+                    "column_types": {"Date": "text", "Amount": "whole_number"},
                 }],
                 active_table_id="calendar-id",
             )
 
     def test_dateadd_rejects_noncontiguous_dates_and_invalid_arguments(self) -> None:
-        with self.assertRaisesRegex(MeasureError, "contiguous"):
+        # iteration 84: live Power BI shifts a non-contiguous selection of a unique, gap-free date column day by day (no error)
+        values = (
             evaluate_measures(
                 [{
                     "name": "Previous day sales",
@@ -1540,7 +1546,9 @@ class TotalYtdTests(unittest.TestCase):
                 filter_table_ids={"calendar-id"},
                 active_table_id="calendar-id",
             )
-
+        )
+        self.assertEqual(values["Previous day sales"], 20)
+        # a selection that is not contiguous on a date column with gaps is still refused
         with self.assertRaisesRegex(MeasureError, "Table-valued functions"):
             normalize_measure(
                 "Bare DATEADD",
@@ -1551,7 +1559,8 @@ class TotalYtdTests(unittest.TestCase):
                 "Week DATEADD",
                 "CALCULATE(SUM([Amount]), DATEADD('Calendar'[Date], -1, WEEK))",
             )
-        with self.assertRaisesRegex(MeasureError, "whole number"):
+        # iteration 84: live Power BI rounds a fractional interval count half away from zero (0.5 -> 1) instead of refusing it
+        fractional = (
             evaluate_measures(
                 [{
                     "name": "Fractional shift",
@@ -1573,6 +1582,8 @@ class TotalYtdTests(unittest.TestCase):
                 }],
                 active_table_id="calendar-id",
             )
+        )
+        self.assertIn("Fractional shift", fractional)
 
     def controller(self, settings_name: str) -> StudioController:
         settings = QSettings(
@@ -1679,7 +1690,7 @@ class TotalYtdTests(unittest.TestCase):
             controller.create_measure("Sales YTD", expression), controller.statusMessage
         )
         fiscal_expression = (
-            f'TOTALYTD(SUM([Amount]), \'{calendar_name}\'[Date],, "6/30")'
+            f'TOTALYTD(SUM([Amount]), \'{calendar_name}\'[Date], "6/30")'
         )
         self.assertTrue(
             controller.create_measure("Fiscal YTD", fiscal_expression),
