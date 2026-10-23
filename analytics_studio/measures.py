@@ -6255,8 +6255,9 @@ def evaluate_measures(
                 raise MeasureRuntimeError("GenerateSeries function cannot have an IncrementValue less than or equal to zero.")
             series: list[dict[str, Any]] = []
             current = start
+            dated = dax_dates.is_date(start) or dax_dates.is_date(stop)  # live Power BI: a series between two dates holds dates
             while current <= stop and len(series) < 1_000_000:
-                series.append({"Value": current})
+                series.append({"Value": dax_dates.DaxDateTime(current) if dated else current})
                 current += step
             return derived_table(["Value"], series)
         if argument[0] == "call" and argument[1] == "ROW":
@@ -10286,6 +10287,14 @@ def evaluate_measures(
         if mixed and dax_dates.is_date(value) and not row_stack:  # inside an iterator the key or branch value is only compared (locked answers)
             raise MeasureError("A date mixed with a number in one result is not supported in the local engine.")
 
+    def refuse_date_beside_number(branches: Any, value: Any) -> None:
+        """Live Power BI: IF / SWITCH / COALESCE with a number literal in one result branch give a number whichever branch runs, so a
+        date result beside a number literal is refused (the local engine keeps the date type of the branch it ran)."""
+        if dax_dates.is_date(value) and not row_stack and any(
+            isinstance(branch, tuple) and (branch[0] == "number" or (branch[0] == "unary" and branch[2][0] == "number")) for branch in branches
+        ):
+            raise MeasureError("A date mixed with a number in one result is not supported in the local engine.")
+
     def is_date_aggregate(node: tuple[Any, ...]) -> bool:
         """MAX / MIN / MAXX / MINX of a Date column (possibly inside CALCULATE): empty, they give a typed BLANK date."""
         if node[0] != "call":
@@ -10298,6 +10307,8 @@ def evaluate_measures(
             reference = _first_reference(arguments[0])
         elif function in {"MAX", "MIN"} and len(arguments) == 1:
             reference = arguments[0]
+        elif function == "SELECTEDVALUE" and arguments:
+            reference = arguments[0]  # SELECTEDVALUE of a date column with no single selection is a typed BLANK date as well
         elif function in {"MAXX", "MINX"} and len(arguments) == 2:
             reference = arguments[1]
         elif function == "CALCULATE" and arguments:
@@ -10482,9 +10493,9 @@ def evaluate_measures(
             if node[1] in {"+", "-"} and result is not None and (
                 dax_dates.is_date(left) or dax_dates.is_date(right)
             ):
-                if node[1] == "-" and not dax_dates.is_date(left) and node[2][0] in {"number", "blank"}:
+                if node[1] == "-" and not dax_dates.is_date(left) and (node[2][0] in {"number", "blank"} or (node[2][0] == "call" and node[2][1] == "INT")):
                     return result  # live Power BI: a number literal minus a date is a plain number (other lefts may be dates the evaluator lost the type of)
-                return dax_dates.DaxDateTime(result)
+                return dax_dates.DaxDateTime(dax_dates.tick_round(result))
             return result
         if kind == "logical":
             return _eager_logical(
@@ -10578,6 +10589,9 @@ def evaluate_measures(
                 elif function in {"MEDIANX", "PERCENTILEX.INC", "PERCENTILEX.EXC"}:
                     values.append(Decimal(0))  # these three count a blank result as zero
             if function in dax_math.STAT_ITERATORS:
+                if any(isinstance(value, dax_dates.DaxDateTime) for value in values):
+                    # live Power BI (iteration 84, critic): "MEDIANX does not support expressions of type string/Boolean/date"
+                    raise MeasureError(f"{function} does not support expressions of type date.")
                 percentile = (
                     dax_typed.to_number(evaluate(arguments[2], row_context)) if function.startswith("PERCENTILEX") else None
                 )
@@ -10970,6 +10984,7 @@ def evaluate_measures(
                 chosen, row_context, allow_text=allow_text, allow_boolean=allow_boolean,
             )
             refuse_date_result(mixed_branches, value)
+            refuse_date_beside_number(arguments[1:3], value)
             if value is None and bool_join([branch_kind(branch, row_context) for branch in arguments[1:]]):
                 return False  # a Boolean result has no blank: Power BI answers FALSE
             return value
@@ -11038,6 +11053,7 @@ def evaluate_measures(
                 level_bool.reverse()
                 if level_bool[matched_level]:
                     return False
+            refuse_date_beside_number([*remaining[1::2], *([] if fallback is None else [fallback])], value)
             return value
         if function in {"AND", "OR"}:
             return _eager_logical(
@@ -11105,6 +11121,7 @@ def evaluate_measures(
                     raise _HardError(str(error)) from error
                 if not found and value is not None:
                     result, found = value, True
+            refuse_date_beside_number(arguments, result)
             return result
         if function == "DIVIDE":
             numerator_value = evaluate(arguments[0], row_context)
