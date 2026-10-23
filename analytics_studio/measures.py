@@ -510,49 +510,15 @@ def rename_table_references(expression: str, old_name: str, new_name: str) -> st
     return "".join(output)
 
 
-_MONTH_NAMES = {name: index for index, name in enumerate(
-    ("january", "february", "march", "april", "may", "june", "july", "august", "september", "october", "november", "december"), 1)}
-
-
-def _year_end_reference_year() -> int:
-    """The year Power BI validates a year-end text against (the machine's current year)."""
-    return date.today().year
-
-
 def _parse_year_end_date(value: Any) -> tuple[int, int]:
-    """The month and day of a year-end text, as Power BI reads them (iteration 84, live): "6/30", "06-30", "6/30/2024" (the year
-    is ignored), "June 30", "Jun 30", "30 Jun" and "30/6" (day first when the first number is above 12)."""
+    """The month and day of a year-end text, as Power BI reads them (iteration 84, live): the one parser of dax_time_sets, shared with
+    STARTOFYEAR / ENDOFYEAR / NEXTYEAR, so the same text gives the same year end in TOTALYTD and in the date sets."""
     if not isinstance(value, str):
         raise MeasureError('year_end_date must use month/day, such as "6/30".')
-    text = value.strip()
-    month = day = None
-    numbers = re.fullmatch(r"([0-9]{1,2})[/-]([0-9]{1,2})(?:[/-]([0-9]{1,4}))?", text)
-    named = re.fullmatch(r"([A-Za-z]{3,9})\.?[ -]+([0-9]{1,2})", text)
-    named_last = re.fullmatch(r"([0-9]{1,2})[ -]+([A-Za-z]{3,9})\.?", text)
-    if numbers is not None:
-        first, second = int(numbers.group(1)), int(numbers.group(2))
-        month, day = (second, first) if first > 12 and second <= 12 else (first, second)
-        if not (1 <= month <= 12 and 1 <= day <= monthrange(_year_end_reference_year(), month)[1]):
-            # live Power BI reads text like an OLE date: a month/day that does not exist this year falls back to day/month,
-            # then month/year and year/month with the 1st ("2/29" is Feb 1 in a common year, "6/31" is Jun 1)
-            if 1 <= second <= 12 and 1 <= first <= monthrange(_year_end_reference_year(), second)[1]:
-                month, day = second, first
-            elif 1 <= first <= 12 and second >= 0:
-                month, day = first, 1
-            elif 1 <= second <= 12 and first >= 0:
-                month, day = second, 1
-    else:
-        match = named or named_last
-        if match is None:
-            raise MeasureError('year_end_date must use month/day, such as "6/30".')
-        name, number = (match.group(1), match.group(2)) if named else (match.group(2), match.group(1))
-        candidates = [index for full, index in _MONTH_NAMES.items() if full.startswith(name.casefold()) and len(name) >= 3]
-        if len(candidates) != 1:
-            raise MeasureError('year_end_date must use month/day, such as "6/30".')
-        month, day = candidates[0], int(number)
-    if not 1 <= month <= 12 or not 1 <= day <= monthrange(_year_end_reference_year() if numbers is not None else 2000, month)[1]:
-        raise MeasureError('year_end_date must be a valid month/day, such as "6/30".')
-    return month, day
+    try:
+        return dax_time_sets.parse_year_end_text(value)
+    except dax_time_sets.TimeSetError as error:
+        raise MeasureError('year_end_date must be a valid month/day, such as "6/30".') from error
 
 
 _LINEAGE_WIPE_TABLES = frozenset({"UNION", "EXCEPT", "INTERSECT", "TOPN", "SELECTCOLUMNS", "ADDCOLUMNS", "SUMMARIZE", "CALCULATETABLE"})
@@ -661,7 +627,9 @@ def _new_route_time_set(node: Any) -> bool:
 def _check_set_iterator_body(table: tuple[Any, ...], body: tuple[Any, ...]) -> None:
     """Live Power BI: an iterator over a date set (or FIRSTNONBLANK ..) reads only the set's own column; any other qualified column in
     the body is an error at compile time, also when the set turns out to be empty."""
-    if not (table[0] == "call" and (table[1] in dax_time_sets.SET_FUNCTIONS or table[1] in _NONBLANK_TABLES)):
+    if not (table[0] == "call" and (table[1] in dax_time_sets.SET_FUNCTIONS or table[1] in _NONBLANK_TABLES or table[1] in _TIME_FILTER_FUNCTIONS
+                                   or (table[1] in {"UNION", "EXCEPT", "INTERSECT"} and table[2] and table[2][0][0] == "call"
+                                       and (table[2][0][1] in dax_time_sets.SET_FUNCTIONS or table[2][0][1] in _TIME_FILTER_FUNCTIONS)))):
         return
     bottom = _first_reference(table)
     if bottom is None or not bottom[1]:
@@ -727,21 +695,11 @@ def _parse_iso_date_literal(value: Any, function: str) -> date:
 
 def _year_to_date_start(end_date: date, year_end: tuple[int, int]) -> date:
     """Return the first day of the calendar or fiscal year containing end_date."""
-    year_end_month, year_end_day = year_end
-    current_year_end = date(
-        end_date.year,
-        year_end_month,
-        min(year_end_day, monthrange(end_date.year, year_end_month)[1]),
-    )
+    current_year_end = dax_time_sets._year_end_of(end_date.year, year_end)  # a Feb 29 year end is Mar 1 in a common year (live Power BI)
     if end_date > current_year_end:
         return current_year_end + timedelta(days=1)
     if end_date.year > date.min.year:
-        prior_year_end = date(
-            end_date.year - 1,
-            year_end_month,
-            min(year_end_day, monthrange(end_date.year - 1, year_end_month)[1]),
-        )
-        return prior_year_end + timedelta(days=1)
+        return dax_time_sets._year_end_of(end_date.year - 1, year_end) + timedelta(days=1)
     return date.min
 
 
@@ -2858,8 +2816,12 @@ class _Parser:
                 except MeasureError:
                     if not _general_calculate_filters_valid(tuple(arguments[1:])) and not _modifier_mix_filters_valid(tuple(arguments[1:])) and not _time_filters_beside_general_filters(tuple(arguments)):
                         raise
-            if (function in _ALL_ITERATORS or function == "CONCATENATEX") and len(arguments) >= 2:
-                _check_set_iterator_body(arguments[0], arguments[1])
+            if (function in _ALL_ITERATORS or function == "CONCATENATEX" or function == "FILTER") and len(arguments) >= 2:
+                _check_set_iterator_body(arguments[0], arguments[1])  # live Power BI: FILTER(date set, ..) reads only the set's own column too
+            if function in {"UNION", "EXCEPT", "INTERSECT", "CROSSJOIN"} and any(argument[0] == "reference" for argument in arguments):
+                # live Power BI (iteration 84, critic): a bare column where a table is expected is a compile-time error
+                # ("A single value for column .. cannot be determined"), also in a branch that is never run
+                raise MeasureError(f"{function} needs table expressions; a column reference has no single value.")
             if function == "FILTER" and len(arguments) == 2:
                 _check_single_column_filter(arguments[0], arguments[1])
             return ("call", function, tuple(arguments))
@@ -5205,7 +5167,9 @@ def evaluate_measures(
                 projected.append([{h: row[o] for h, o in zip(headers, other)} for row in rows])
             if function == "UNION":
                 output = [row for rows in projected for row in rows]
-                same_lineage = all(base_lineage(c) == base_lineage(first_context) for c, _ in typed_tables)
+                def lineage_ids(context: dict[str, Any]) -> dict[str, tuple[Any, str]]:  # the same source column, whatever copy of its table holds it
+                    return {header: (table["id"], column.casefold()) for header, (table, column) in base_lineage(context).items()}
+                same_lineage = all(lineage_ids(c) == lineage_ids(first_context) for c, _ in typed_tables)
                 return derived_table(headers, output, base_lineage(first_context) if same_lineage else None, first_context.get("column_types"))
             right_keys = {row_key(row[h] for h in headers) for row in projected[1]}
             keep = (lambda key: key not in right_keys) if function == "EXCEPT" else (lambda key: key in right_keys)
@@ -10615,7 +10579,18 @@ def evaluate_measures(
                 if wipes and any(a[0] == "call" and a[1] in _TIME_FILTER_FUNCTIONS for a in arguments[1:]) and not any(
                     _new_route_time_set(a) for a in arguments[1:]
                 ):
-                    wipes = []  # the date sets are computed in this context, then evaluate_with_date_values clears the table when it applies them
+                    # the date sets are computed in this context, then evaluate_with_date_values clears the table when it applies them: only
+                    # for the key column the set itself reads (a set over a fact date column leaves the calendar to the other filters)
+                    handled: set[str] = set()
+                    for item in arguments[1:]:
+                        if item[0] == "call" and item[1] in _TIME_FILTER_FUNCTIONS and item[2] and item[2][0][0] == "reference":
+                            try:
+                                item_table, item_column = resolve_table(item[2][0][1], item[2][0][2])
+                            except MeasureError:
+                                continue
+                            if is_date_key(item_table, item_column):
+                                handled.add(str(item_table["name"]))
+                    wipes = [name for name in wipes if name not in handled]
                 if wipes:  # live Power BI: replacing a date key column first removes the other filters of its table
                     arguments = (*arguments, *(("call", "REMOVEFILTERS", (("table", name),)) for name in wipes))
                 node = (node[0], function, arguments)
