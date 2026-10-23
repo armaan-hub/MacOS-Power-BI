@@ -4273,7 +4273,14 @@ def evaluate_measures(
                     and len(source_rows) != len(source_context["rows"])
                     and not own_state.get("filter_column_rows") and not own_state.get("filter_table_rows") and not _context_shapes(own_state)
                     and "filter_rows" not in own_state
-                ):
+                    and any(
+                        root != source_context["id"] and not any(
+                            isinstance(link, dict) and link.get("is_active") and {link.get("from_table_id"), link.get("to_table_id")} == {root, source_context["id"]}
+                            for link in relationship_definitions
+                        )
+                        for root in evaluation_filter_ids
+                    )
+                ):  # a filter on a directly related table was measured (saved answer: ALLSELECTED(Dim[Cat]) under Fact[Id]<=7); one two links away was not
                     # live Power BI (ZB): ALLSELECTED(Dim[Prod]) lists all 5 products although a both-way link narrowed the table to 3
                     raise MeasureError("ALLSELECTED over a column that only another table's both-way filter narrows is not supported in the local engine.")
                 if add_unknown_member:
@@ -9806,7 +9813,7 @@ def evaluate_measures(
         return (is_date(first) and is_number(second)) or (is_number(first) and is_date(second))
 
     def refuse_date_result(mixed: bool, value: Any) -> None:
-        if mixed and dax_dates.is_date(value):
+        if mixed and dax_dates.is_date(value) and not row_stack:  # inside an iterator the key or branch value is only compared (locked answers)
             raise MeasureError("A date mixed with a number in one result is not supported in the local engine.")
 
     def is_date_aggregate(node: tuple[Any, ...]) -> bool:
