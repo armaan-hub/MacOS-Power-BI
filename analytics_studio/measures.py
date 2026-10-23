@@ -1770,6 +1770,10 @@ def _validate_general_filter_literals(node: tuple[Any, ...]) -> None:
 
 def _legacy_calculate_filters_valid(arguments: tuple[tuple[Any, ...], ...]) -> None:
     """The CALCULATE filter shapes the local engine has always supported; raises MeasureError for any other."""
+    if any(_new_route_time_set(argument) or (
+        isinstance(argument, tuple) and argument[:1] == ("call",) and argument[1] in dax_time_sets.SET_FUNCTIONS - _TIME_FILTER_FUNCTIONS
+    ) for argument in arguments[1:]):
+        raise MeasureError("This date set is evaluated by the general CALCULATE path.")
     contains_userelationship = any(
         _contains_function_call(argument, "USERELATIONSHIP")
         for argument in arguments[1:]
@@ -1868,6 +1872,8 @@ def _legacy_calculate_filters_valid(arguments: tuple[tuple[Any, ...], ...]) -> N
             "A table-valued FILTER must be the only CALCULATE filter argument."
         )
     for filter_argument in arguments[1:]:
+        if _new_route_time_set(filter_argument) or (filter_argument[0] == "call" and filter_argument[1] in dax_time_sets.SET_FUNCTIONS - _TIME_FILTER_FUNCTIONS):
+            raise MeasureError("This date set is evaluated by the general CALCULATE path.")
         if filter_argument[0] == "call" and filter_argument[1] in _TIME_FILTER_FUNCTIONS:
             _validate_literal_positions(filter_argument)
         else:
@@ -6658,6 +6664,7 @@ def evaluate_measures(
                 "TOTALYTD", "TOTALQTD", "TOTALMTD",
             }:
                 numeric_argument_indexes: set[int] = set()
+                date_extreme = False
                 if function in {"SUM", "AVERAGE", "MIN", "MAX", "COUNT", "ABS", "MEDIAN", "PRODUCT"}:
                     numeric_argument_indexes.add(0)
                 elif function == "DIVIDE":
@@ -6687,10 +6694,15 @@ def evaluate_measures(
                         argument_index in numeric_argument_indexes
                         and argument_category not in {"numeric", "blank"}
                     ):
+                        if function in {"MIN", "MAX"} and argument_category == "date/time" and aggregate_column:
+                            date_extreme = True  # the latest / earliest date of a column is a date (live Power BI)
+                            continue
+                        if function == "AVERAGE" and argument_category == "date/time" and aggregate_column:
+                            continue  # the average of a date column is a plain number
                         raise MeasureError(
                             f"Iterator {function} argument {argument_index + 1} needs a numeric expression."
                         )
-                return "numeric"
+                return "date/time" if date_extreme else "numeric"
         raise MeasureError(
             "Iterator comparison expression has an unsupported or unverifiable local data type."
         )
@@ -9701,6 +9713,10 @@ def evaluate_measures(
         if kind == "var":
             held = variables[node[1]]()
             if isinstance(held, _TableValue):
+                if variable_nodes.get(node[1], (None,))[0] == "call" and variable_nodes[node[1]][1] in (
+                    dax_time_sets.SET_FUNCTIONS | _NONBLANK_TABLES
+                ):
+                    return single_value_of((held[0], held[1]))  # a date set holds one date (or none) where one value is wanted
                 raise MeasureError("A table variable cannot be used where a single value is expected.")
             return held
         if kind == "let":
