@@ -93,6 +93,7 @@ from analytics_studio.power_query_m import (
 )
 from analytics_studio.measure_dialog import MeasureDialog
 from analytics_studio.calculated_column_dialog import CalculatedColumnDialog
+from analytics_studio.formula_bar import FormulaBarController
 from analytics_studio import dax_dates
 from analytics_studio.measures import (
     MAX_MEASURES,
@@ -101,6 +102,7 @@ from analytics_studio.measures import (
     evaluate_calculated_table,
     evaluate_calculated_columns,
     evaluate_measures,
+    normalize_calculated_column,
     normalize_measure,
     rename_table_references,
     tokenize,
@@ -1897,6 +1899,7 @@ class StudioController(QObject):
 
     def __init__(self, parent: QObject | None = None, settings: QSettings | None = None) -> None:
         super().__init__(parent)
+        self._formula_bar = FormulaBarController(self)
         self._project = new_project()
         self._project_path: Path | None = None
         self._recovered_from_backup = False
@@ -2289,6 +2292,11 @@ class StudioController(QObject):
     @Property(str, notify=stateChanged)
     def sourceIconName(self) -> str:  # noqa: N802
         return "table" if self._active_source_kind in {"inline", "query", "sql_server", "odata", "web"} else (self._active_source_kind or "csv")
+
+    @Property(QObject, constant=True)
+    def formulaBar(self) -> QObject:  # noqa: N802
+        """The Power BI style formula bar that authors measures and calculated columns."""
+        return self._formula_bar
 
     @Property(bool, notify=stateChanged)
     def sourceLoaded(self) -> bool:  # noqa: N802
@@ -4248,8 +4256,8 @@ class StudioController(QObject):
             "newCalculatedTable": self.calculated_table_dialog,
             "newCalendarTable": self.calendar_table_dialog,
             "markDateTable": self.mark_date_table_dialog,
-            "newMeasure": self.new_measure_dialog,
-            "newCalculatedColumn": self.calculated_column_dialog,
+            "newMeasure": lambda: self._formula_bar.beginNewMeasure(),
+            "newCalculatedColumn": lambda: self._formula_bar.beginNewColumn(),
             "quickMeasure": self.quick_measure_dialog,
             "manageRelationships": self.manage_relationships,
             "exportData": self.export_data_dialog,
@@ -7840,6 +7848,11 @@ class StudioController(QObject):
                 parameters=current_parameters,
                 query_functions=self._project.get("query_functions", []),
                 source_column_types=source_column_types,
+                step_names=[
+                    str(item.get("name", "")).strip() or None
+                    for item in source.get("step_metadata", [])
+                    if isinstance(item, dict)
+                ],
             )
         except (OSError, ValueError) as exc:
             self._set_status(f"Could not open Power Query M editor: {exc}")
@@ -8063,65 +8076,108 @@ class StudioController(QObject):
         if dialog.exec() != QDialog.DialogCode.Accepted:
             return False
 
-        next_project = deepcopy(self._project)
-        next_table = self._model_table_for_source(next_project, source_id)
-        if next_table is None:
-            self._set_status("The active model table is unavailable.")
-            return False
-        current = list(next_table.get("calculated_columns", []))
         if dialog.action == "delete":
-            current = [
-                item for item in current
-                if item["name"].casefold() != dialog.original_name.casefold()
-            ]
+            definition = None
         else:
             definition = dialog.column
             if definition is None:
                 return False
-            replaced = False
-            updated = []
-            for item in current:
-                if item["name"].casefold() == dialog.original_name.casefold():
-                    updated.append(definition)
-                    replaced = True
-                else:
-                    updated.append(item)
-            current = updated if replaced else [*current, definition]
-
         try:
-            next_table["calculated_columns"] = validate_calculated_columns(current)
-            raw_candidate = self._raw_candidate_for_source(source)
-            query_candidate = apply_transformations(
-                raw_candidate, source.get("transform_steps", []),
-                parameters=parameter_values(self._project.get("query_parameters", []), self._project.get("query_functions", [])),
+            plan = self._plan_calculated_column_change(
+                source_id, dialog.action, dialog.original_name, definition
             )
-            persisted_types = next_table.get("column_types", {})
-            initial_types = (
-                dict(persisted_types)
-                if isinstance(persisted_types, dict) and persisted_types
-                else infer_column_types(raw_candidate.headers, raw_candidate.rows)
-            )
-            base_types = column_types_after_steps(
-                raw_candidate.headers,
-                source.get("transform_steps", []),
-                initial_types=initial_types,
-                output_headers=query_candidate.headers,
-            )
-            calculated_candidate, calculated_types = self._apply_calculated_columns(
-                source_id,
-                _model_candidate_with_format_errors_as_blank(query_candidate),
-                project=next_project,
-                column_types=base_types,
-            )
-            next_table["column_types"] = {**base_types, **calculated_types}
-            next_project = validate_project(next_project)
         except (
             MeasureError, ProjectFileError, QueryError, OSError, TypeError, ValueError
         ) as exc:
             self._set_status(f"Could not update calculated column: {exc}")
             QMessageBox.warning(None, "Could not update calculated column", str(exc))
             return False
+        if plan is None:
+            self._set_status("The active model table is unavailable.")
+            return False
+        self._apply_calculated_column_plan(source_id, plan)
+        action_label = "Removed" if dialog.action == "delete" else "Saved"
+        self._set_status(f"{action_label} calculated column on {table['name']}")
+        return True
 
+    def _plan_calculated_column_change(
+        self,
+        source_id: str,
+        action: str,
+        original_name: str,
+        definition: dict[str, str] | None,
+    ) -> tuple[dict[str, Any], Any, Any] | None:
+        """Build (without applying) the project after saving or deleting a calculated column.
+
+        Returns ``None`` when the model table is unavailable and raises the engine's own
+        error when the formula does not bind, so callers can validate a draft safely.
+        """
+        source = next((
+            item for item in self._project.get("data_sources", [])
+            if item.get("id") == source_id
+        ), None)
+        next_project = deepcopy(self._project)
+        next_table = self._model_table_for_source(next_project, source_id)
+        if next_table is None or source is None:
+            return None
+        current = list(next_table.get("calculated_columns", []))
+        if action == "delete":
+            current = [
+                item for item in current
+                if item["name"].casefold() != original_name.casefold()
+            ]
+        else:
+            if definition is None:
+                return None
+            duplicate = next((
+                item["name"] for item in current
+                if item["name"].casefold() == definition["name"].casefold()
+                and item["name"].casefold() != original_name.casefold()
+            ), None)
+            if duplicate:
+                raise MeasureError(f"A calculated column named {duplicate!r} already exists.")
+            replaced = False
+            updated = []
+            for item in current:
+                if item["name"].casefold() == original_name.casefold():
+                    updated.append(definition)
+                    replaced = True
+                else:
+                    updated.append(item)
+            current = updated if replaced else [*current, definition]
+
+        next_table["calculated_columns"] = validate_calculated_columns(current)
+        raw_candidate = self._raw_candidate_for_source(source)
+        query_candidate = apply_transformations(
+            raw_candidate, source.get("transform_steps", []),
+            parameters=parameter_values(self._project.get("query_parameters", []), self._project.get("query_functions", [])),
+        )
+        persisted_types = next_table.get("column_types", {})
+        initial_types = (
+            dict(persisted_types)
+            if isinstance(persisted_types, dict) and persisted_types
+            else infer_column_types(raw_candidate.headers, raw_candidate.rows)
+        )
+        base_types = column_types_after_steps(
+            raw_candidate.headers,
+            source.get("transform_steps", []),
+            initial_types=initial_types,
+            output_headers=query_candidate.headers,
+        )
+        calculated_candidate, calculated_types = self._apply_calculated_columns(
+            source_id,
+            _model_candidate_with_format_errors_as_blank(query_candidate),
+            project=next_project,
+            column_types=base_types,
+        )
+        next_table["column_types"] = {**base_types, **calculated_types}
+        next_project = validate_project(next_project)
+        return next_project, query_candidate, calculated_candidate
+
+    def _apply_calculated_column_plan(
+        self, source_id: str, plan: tuple[dict[str, Any], Any, Any]
+    ) -> None:
+        next_project, query_candidate, calculated_candidate = plan
         self._project = next_project
         self._loaded_candidates[source_id] = calculated_candidate
         self._query_candidates[source_id] = query_candidate
@@ -8131,9 +8187,47 @@ class StudioController(QObject):
         self._refresh_model_view()
         self._refresh_report()
         self.stateChanged.emit()
-        action_label = "Removed" if dialog.action == "delete" else "Saved"
-        self._set_status(f"{action_label} calculated column on {table['name']}")
-        return True
+
+    def validate_calculated_column(
+        self, name: str, expression: str, original_name: str = ""
+    ) -> str:
+        """Dry-run a calculated column; return the engine's error text, or "" when it binds."""
+        source_id = self._active_source_id
+        if not self.sourceLoaded or source_id is None:
+            return "Load a table before creating a calculated column."
+        try:
+            definition = normalize_calculated_column(name, expression)
+            plan = self._plan_calculated_column_change(
+                source_id, "save", original_name, definition
+            )
+        except (
+            MeasureError, ProjectFileError, QueryError, OSError, TypeError, ValueError
+        ) as exc:
+            return str(exc)
+        return "" if plan is not None else "The active model table is unavailable."
+
+    def save_calculated_column(
+        self, name: str, expression: str, original_name: str = ""
+    ) -> str:
+        """Add or replace a calculated column on the active table; "" on success, else the error."""
+        source_id = self._active_source_id
+        if not self.sourceLoaded or source_id is None:
+            return "Load a table before creating a calculated column."
+        try:
+            definition = normalize_calculated_column(name, expression)
+            plan = self._plan_calculated_column_change(
+                source_id, "save", original_name, definition
+            )
+        except (
+            MeasureError, ProjectFileError, QueryError, OSError, TypeError, ValueError
+        ) as exc:
+            self._set_status(f"Could not update calculated column: {exc}")
+            return str(exc)
+        if plan is None:
+            return "The active model table is unavailable."
+        self._apply_calculated_column_plan(source_id, plan)
+        self._set_status(f"Saved calculated column on {self._active_model_table_name()}")
+        return ""
 
     def _measure_dialog(self, *, quick: bool) -> bool:
         if not self.sourceLoaded:

@@ -214,7 +214,7 @@ class QueryFunctionDefinitionTests(unittest.TestCase):
         self.assertIn(
             "NormalizeName = (Value as nullable text) as nullable text =>", lines[2]
         )
-        self.assertIn('#"Step 1" = Table.AddColumn', lines[4])
+        self.assertIn('#"Added Custom" = Table.AddColumn', lines[4])
         self.assertIn("each DoubleAmount(Number.From([Amount])), type number)", lines[5])
         parsed = parse_m_script(
             script, "Sales", query_functions=self.functions
