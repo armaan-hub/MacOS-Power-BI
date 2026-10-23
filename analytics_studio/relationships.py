@@ -61,6 +61,7 @@ def propagate_relationship_filters(
     relationships: list[dict[str, Any]],
     filter_table_ids: set[str],
     unknown_selected: dict[str, bool] | None = None,
+    diagnostics: dict[str, set[str]] | None = None,
 ) -> dict[str, list[dict[str, Any]]]:
     """Propagate explicitly filtered rows across active, loaded relationships.
 
@@ -189,6 +190,8 @@ def propagate_relationship_filters(
                 if previous_path is not None and len(next_path) > len(previous_path) and next_bidirectional:
                     # only a longer route through a both-way link was measured live; a one-way second route stays refused
                     ignored_edges.add((source_id, target_id))
+                    if diagnostics is not None:  # the tables on the route that was cut: their rows under a row pin are not measured
+                        diagnostics.setdefault("longer_route_tables", set()).update(next_path[1:-1])
                     continue
                 if previous_path is not None:
                     def describe_path(table_path: tuple[str, ...]) -> str:

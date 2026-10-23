@@ -4267,6 +4267,15 @@ def evaluate_measures(
             if shadowed_rows is not None:
                 source_rows = shadowed_rows
             elif function == "ALLSELECTED" and allselected_rows is not None:
+                own_state = evaluation_contexts_by_id.get(source_context["id"], source_context)
+                if (
+                    source_context["id"] not in unknown_member_ids
+                    and len(source_rows) != len(source_context["rows"])
+                    and not own_state.get("filter_column_rows") and not own_state.get("filter_table_rows") and not _context_shapes(own_state)
+                    and "filter_rows" not in own_state
+                ):
+                    # live Power BI (ZB): ALLSELECTED(Dim[Prod]) lists all 5 products although a both-way link narrowed the table to 3
+                    raise MeasureError("ALLSELECTED over a column that only another table's both-way filter narrows is not supported in the local engine.")
                 if add_unknown_member:
                     source_rows.append({header: None for header in source_context["headers"]})
             elif function == "ALLSELECTED":
@@ -9577,6 +9586,9 @@ def evaluate_measures(
                 if len(date_filter_arguments) == 2
                 else (12, 31)
             )
+            if year_end == (2, 28):
+                # open item of the live comparison: with a leap day in the selection Power BI starts the fiscal year on Feb 29
+                raise MeasureError(f"{date_filter_function} with a February 28 year end is not supported in the local engine.")
             available_dates = [
                 parsed_date
                 for row_index, row in enumerate(date_table["rows"], 1)
@@ -9659,6 +9671,9 @@ def evaluate_measures(
                 if len(date_filter_arguments) == 2
                 else (12, 31)
             )
+            if year_end == (2, 28):
+                # open item of the live comparison: with a leap day in the selection Power BI starts the fiscal year on Feb 29
+                raise MeasureError(f"{date_filter_function} with a February 28 year end is not supported in the local engine.")
             available_dates = [
                 parsed_date
                 for row_index, row in enumerate(date_table["rows"], 1)
@@ -9771,6 +9786,26 @@ def evaluate_measures(
                 shifted_dates = set()
         return date_table, actual_date_column, shifted_dates
 
+    def refuse_date_number_mix(first: tuple[Any, ...], second: tuple[Any, ...]) -> None:
+        """Live Power BI turns a date mixed with a number (MAX(DATE(..), 5), IF(c, DATE(..), 5)) into a number; the local engine
+        would keep the date, so the mix is refused."""
+        def is_date(node: tuple[Any, ...]) -> bool:
+            if node[0] == "call" and node[1] in {"DATE", "EDATE", "EOMONTH", "TODAY", "NOW", "DATEVALUE"}:
+                return True
+            if node[0] == "reference" and node[1]:
+                try:
+                    context, column = resolve_table(node[1], node[2])
+                except MeasureError:
+                    return False
+                return str(context.get("column_types", {}).get(column, "")).casefold() in {"date", "datetime"}
+            return is_date_aggregate(node)
+
+        def is_number(node: tuple[Any, ...]) -> bool:
+            return node[0] == "number" or (node[0] == "unary" and node[2][0] == "number")
+
+        if (is_date(first) and is_number(second)) or (is_number(first) and is_date(second)):
+            raise MeasureError("A date mixed with a number in one result is not supported in the local engine.")
+
     def is_date_aggregate(node: tuple[Any, ...]) -> bool:
         """MAX / MIN / MAXX / MINX of a Date column (possibly inside CALCULATE): empty, they give a typed BLANK date."""
         if node[0] != "call":
@@ -9790,6 +9825,45 @@ def evaluate_measures(
         except MeasureError:
             return False
         return str(context.get("column_types", {}).get(column, "")).casefold() in {"date", "datetime"}
+
+    ambiguous_pin_cache: dict[Any, frozenset[str]] = {}
+
+    def refuse_ambiguous_row_pin(arguments: tuple[tuple[Any, ...], ...], row_context: tuple[dict[str, Any], dict[str, Any], int]) -> None:
+        """A fact row pins its dimension, calendar and the fact itself at once.  When a second, longer route runs from one pinned
+        table to another through a both-way link (ZS: Cal -> Fact2 -> Dim), live Power BI answers for the tables on that route in a
+        way not yet modelled (SUMX(Fact, CALCULATE(COUNTROWS(Dim))): 8, ours 1), so reading those tables there is refused."""
+        iterated = row_context[0]
+        if iterated.get("derived") or iterated["id"] not in contexts_by_id:
+            return
+        pinned = tuple(sorted(all_row_context_filters(row_context)))
+        if len(pinned) < 2:
+            return
+        key = (pinned, tuple(sorted(evaluation_filter_ids)), id(relationship_definitions))
+        unsafe = ambiguous_pin_cache.get(key)
+        if unsafe is None:
+            found: dict[str, set[str]] = {}
+            try:
+                _propagate_relationship_filters(
+                    list(evaluation_contexts_by_id.values()), relationship_definitions,
+                    set(pinned) | set(evaluation_filter_ids), None, found,
+                )
+            except RelationshipError:
+                found = {}
+            unsafe = ambiguous_pin_cache[key] = frozenset(found.get("longer_route_tables", ()))
+        if not unsafe:
+            return
+        read = set()
+        for argument in arguments:
+            ids = expression_table_ids(argument)
+            if ids is None:
+                read = set(unsafe)
+                break
+            read |= ids
+        if read & unsafe:
+            raise MeasureError(
+                "A row of a table with two routes to the same table (a both-way link) filters that table in a way "
+                "not supported in the local engine."
+            )
 
     def evaluate(
         node: tuple[Any, ...],
@@ -10064,6 +10138,7 @@ def evaluate_measures(
                     arguments = (*arguments, *(("call", "REMOVEFILTERS", (("table", name),)) for name in wipes))
                 node = (node[0], function, arguments)
             if row_context is not None:
+                refuse_ambiguous_row_pin(arguments, row_context)
                 if len(arguments) > 1 and _general_calculate_filters_valid(tuple(arguments[1:])):
                     return evaluate_with_general_filters(arguments[0], tuple(arguments[1:]), row_context)
                 if len(arguments) > 2 and any(a[0] == "call" and a[1] in _RELATIONSHIP_MODIFIERS for a in arguments[1:]) and _general_calculate_filters_valid(
@@ -10252,6 +10327,8 @@ def evaluate_measures(
                         )) is not None and parsed_date in shifted_dates
                     )
                     key = (date_table["id"], actual_date_column.casefold())
+                    if key in extra_date_filters:
+                        period_indexes = period_indexes & extra_date_filters[key][2]  # two date sets on one column intersect
                     extra_date_filters[key] = (date_table, actual_date_column, period_indexes)
 
                 if mixed_filter_clear is not None:
@@ -10377,6 +10454,8 @@ def evaluate_measures(
                 arguments[0], date_table, actual_date_column, period_dates
             )
         if function == "IF":
+            if len(arguments) > 2:
+                refuse_date_number_mix(arguments[1], arguments[2])
             chosen = arguments[1] if as_boolean(_consume_infinity(lambda: evaluate(
                 arguments[0], row_context, allow_text=allow_text,
                 allow_boolean=allow_boolean,
@@ -10628,6 +10707,7 @@ def evaluate_measures(
                 raise MeasureError("SELECTEDVALUE supports text, number and True/False columns in the local engine.")
             return str(only)
         if function in {"MIN", "MAX"} and len(arguments) == 2:
+            refuse_date_number_mix(arguments[0], arguments[1])
             first = evaluate(arguments[0], row_context, allow_text=True)
             second = evaluate(arguments[1], row_context, allow_text=True)
             for operand in (first, second):

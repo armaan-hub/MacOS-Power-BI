@@ -3,7 +3,7 @@ USERELATIONSHIP + FILTER(Cal), empty date sets, ZS shortest path.  Expected valu
 (Thinker A/B probe reports of iteration 84) on the Critic-3 models ZO / ZB / ZS.
 
 Every fixture item carries `expect`: "match" (the Power BI answer is reproduced), "gap" (we still refuse; the test only checks that
-we never answer differently) or "known-difference" (a documented remaining difference, listed in KNOWN_DIFFERENCES)."""
+we never answer differently) or "known-difference" (none remain: shapes we cannot answer like Power BI are refused)."""
 from __future__ import annotations
 
 import json
@@ -15,13 +15,6 @@ from tests.critic3_models import ours_for
 from tools.parity_check import status
 
 ITEMS = json.loads((Path(__file__).parent / "fixtures_iter84_time_intel.json").read_text())["items"]
-
-# Documented differences from Power BI that are not fixed yet (kept out of the match assertions, never silently dropped).
-KNOWN_DIFFERENCES = {
-    "typed blank date in MAX(date, 5) / IF(c, date, 5): Power BI mixes to a number",
-    "SUMX(ZS_Fact, CALCULATE(COUNTROWS(ZS_Dim))): fact-row transition through ambiguous routes (Power BI 8, ours 1)",
-}
-
 
 def answer(item: dict) -> str:
     try:
@@ -108,10 +101,9 @@ class Iteration84Tests(unittest.TestCase):
     def test_guard_sample_still_matches(self) -> None:
         self.check("GUARD")
 
-    def test_known_differences_are_listed(self) -> None:
-        listed = [item for item in ITEMS if item["expect"] == "known-difference"]
-        self.assertEqual(4, len(listed), "a documented difference changed: update KNOWN_DIFFERENCES and the report")
-        self.assertTrue(KNOWN_DIFFERENCES)
+    def test_no_known_differences_remain(self) -> None:
+        """Every remaining difference is a refusal (tests/test_iteration84_refusals.py guards the ones that used to answer)."""
+        self.assertEqual([], [item for item in ITEMS if item["expect"] == "known-difference"])
 
 
 class DatesInPeriodWindowTests(unittest.TestCase):

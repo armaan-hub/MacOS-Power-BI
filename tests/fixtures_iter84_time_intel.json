@@ -13733,7 +13733,7 @@
 "model": "ZS",
 "expr": "SUMX(ZS_Fact,CALCULATE(SUM(ZS_Fact[Amt]),FILTER(ZS_Dim,ZS_Dim[Cat]=\"A\"),ZS_Cal[Year]=2024))",
 "powerbi": "55",
-"expect": "match"
+"expect": "gap"
 },
 {
 "cluster": "ZS",
@@ -13754,7 +13754,7 @@
 "model": "ZS",
 "expr": "SUMX(ZS_Fact,CALCULATE(SUM(ZS_Fact[Amt]),FILTER(ZS_Dim,ZS_Dim[Prod]=\"P1\"),ZS_Cal[Year]=2024))",
 "powerbi": "15",
-"expect": "match"
+"expect": "gap"
 },
 {
 "cluster": "G4",
@@ -24898,14 +24898,14 @@
 "model": "ZS",
 "expr": "SUMX(ZS_Fact2,CALCULATE(SUM(ZS_Fact2[Amt]),DATESYTD(ZS_Cal[Date])))",
 "powerbi": "31",
-"expect": "match"
+"expect": "gap"
 },
 {
 "cluster": "GATE",
 "model": "ZS",
 "expr": "SUMX(ZS_Fact,CALCULATE(SUM(ZS_Fact2[Amt]),DATESYTD(ZS_Cal[Date])))",
 "powerbi": "1",
-"expect": "match"
+"expect": "gap"
 },
 {
 "cluster": "GATE",
@@ -24933,7 +24933,7 @@
 "model": "ZS",
 "expr": "SUMX(ZS_Fact,CALCULATE(COUNTROWS(ZS_Fact2)))",
 "powerbi": "1",
-"expect": "match"
+"expect": "gap"
 },
 {
 "cluster": "ZS",
@@ -24947,7 +24947,7 @@
 "model": "ZS",
 "expr": "SUMX(ZS_Fact,CALCULATE(COUNTROWS(ZS_Dim)))",
 "powerbi": "8",
-"expect": "known-difference"
+"expect": "gap"
 },
 {
 "cluster": "G4",
@@ -33613,21 +33613,21 @@
 "model": "ZO",
 "expr": "MAX(DATE(2023,1,1),5)",
 "powerbi": "44927",
-"expect": "known-difference"
+"expect": "gap"
 },
 {
 "cluster": "F",
 "model": "ZO",
 "expr": "MAX(5,DATE(2023,1,1))",
 "powerbi": "44927",
-"expect": "known-difference"
+"expect": "gap"
 },
 {
 "cluster": "F",
 "model": "ZO",
 "expr": "IF(TRUE(),DATE(2023,1,1),5)",
 "powerbi": "44927",
-"expect": "known-difference"
+"expect": "gap"
 },
 {
 "cluster": "F",
