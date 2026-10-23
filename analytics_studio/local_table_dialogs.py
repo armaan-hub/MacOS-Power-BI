@@ -72,7 +72,7 @@ from analytics_studio.dialog_theme import apply_light_dialog_theme
 from analytics_studio.file_import import MAX_DATA_ROWS, ImportCandidate, lineaged_row
 from analytics_studio.import_preview_dialog import ImportPreviewTableModel
 from analytics_studio.inline_data import parse_pasted_table, source_from_candidate
-from analytics_studio.power_query_step_names import assign_step_names
+from analytics_studio.power_query_step_names import assign_step_names, is_known_power_bi_step
 from analytics_studio.power_query_m import (
     PowerQueryMEditorDialog,
     PowerQueryMScriptError,
@@ -5312,57 +5312,6 @@ class TransformDataDialog(QDialog):
 
     # Power BI applies parameterless commands immediately and opens a dialog with
     # OK / Cancel for commands that need input. These sets drive that split.
-    _POWER_BI_STEP_NAMES: dict[str, str] = {
-        "remove_column": "Removed Columns",
-        "keep_columns": "Removed Other Columns",
-        "rename_column": "Renamed Columns",
-        "reorder_columns": "Reordered Columns",
-        "filter_rows": "Filtered Rows",
-        "filter_rows_advanced": "Filtered Rows",
-        "sort_rows": "Sorted Rows",
-        "sort_rows_by_columns": "Sorted Rows",
-        "convert_type": "Changed Type",
-        "convert_type_using_locale": "Changed Type with Locale",
-        "replace_value": "Replaced Value",
-        "extract_text_between_delimiters": "Extracted Text Between Delimiters",
-        "split_column": "Split Column by Delimiter",
-        "split_column_by_each_delimiter": "Split Column by Delimiter",
-        "split_column_to_rows": "Split Column by Delimiter",
-        "split_column_by_positions": "Split Column by Positions",
-        "merge_columns": "Merged Columns",
-        "fill_down": "Filled Down",
-        "fill_up": "Filled Up",
-        "duplicate_column": "Duplicated Column",
-        "add_index_column": "Added Index",
-        "group_by": "Grouped Rows",
-        "unpivot_columns": "Unpivoted Columns",
-        "unpivot_other_columns": "Unpivoted Other Columns",
-        "pivot_column": "Pivoted Column",
-        "add_custom_column": "Added Custom",
-        "conditional_column": "Added Conditional Column",
-        "trim_text": "Trimmed Text",
-        "clean_text": "Cleaned Text",
-        "lowercase_text": "Lowercased Text",
-        "uppercase_text": "Uppercased Text",
-        "proper_case_text": "Capitalized Each Word",
-        "reverse_text": "Reversed Text",
-        "remove_duplicates": "Removed Duplicates",
-        "keep_duplicates": "Kept Duplicates",
-        "remove_blank_rows": "Removed Blank Rows",
-        "remove_rows_with_errors": "Removed Errors",
-        "count_rows": "Counted Rows",
-        "remove_top_rows": "Removed Top Rows",
-        "remove_bottom_rows": "Removed Bottom Rows",
-        "remove_sparse_top_rows": "Removed Top Rows",
-        "remove_sparse_bottom_rows": "Removed Bottom Rows",
-        "keep_top_rows": "Kept First Rows",
-        "keep_bottom_rows": "Kept Last Rows",
-        "keep_range_rows": "Kept Range of Rows",
-        "remove_alternate_rows": "Removed Alternate Rows",
-        "promote_headers": "Promoted Headers",
-        "demote_headers": "Demoted Headers",
-        "transpose_table": "Transposed Table",
-    }
     _OPERATION_DIALOG_TITLES: dict[str, str] = {
         "rename_column": "Rename Column",
         "keep_columns": "Choose Columns",
@@ -5405,23 +5354,14 @@ class TransformDataDialog(QDialog):
     })
 
     def _power_bi_step_name(self, step: dict[str, Any]) -> str:
-        """Return Power BI's default name for ``step`` (``Removed Columns1`` when taken)."""
-        op = str(step.get("op", ""))
-        if op == "extract_text_by_delimiter":
-            side = str(step.get("side", "")).strip().title()
-            base = f"Extracted Text {side} Delimiter" if side else ""
-        else:
-            base = self._POWER_BI_STEP_NAMES.get(op, "")
-        if not base:
+        """Return Power BI's default name for the newest step (``Removed Columns1`` when taken).
+
+        ``step`` is already the last item of ``self._steps``; the shared naming
+        module numbers repeats the same way the generated M does.
+        """
+        if not is_known_power_bi_step(step) or not self._steps:
             return ""
-        taken = {
-            self.step_list.item(index).text() for index in range(self.step_list.count())
-        }
-        candidate, suffix = base, 0
-        while candidate in taken:
-            suffix += 1
-            candidate = f"{base}{suffix}"
-        return candidate
+        return self._applied_step_names().get(len(self._steps) - 1, "")
 
     def _selected_preview_columns(self) -> list[str]:
         """Column names selected in the preview grid, left to right (current cell if none)."""
@@ -9255,6 +9195,17 @@ class TransformDataDialog(QDialog):
         )
         return dict(zip(table_indexes, names))
 
+    def _step_names_for(self, steps: list[dict[str, Any]]) -> list[str | None]:
+        """Applied-step names for ``steps`` (a slice of ``self._steps``), by identity."""
+        by_identity = {
+            id(step): name
+            for step, name in (
+                (self._steps[index], name)
+                for index, name in self._applied_step_names().items()
+            )
+        }
+        return [by_identity.get(id(step)) for step in steps]
+
     def _render_steps(self) -> None:
         self.step_list.clear()
         applied_names = self._applied_step_names()
@@ -9656,6 +9607,7 @@ class TransformDataDialog(QDialog):
                 initial_column_types=self._query_states.get(
                     self._active_query_id, {}
                 ).get("source_column_types", {}),
+                step_names=self._step_names_for(current_steps),
             )
         except (IndexError, ValueError, PowerQueryMScriptError, TransformationError) as exc:
             self.formula_bar.clear()
@@ -9709,6 +9661,7 @@ class TransformDataDialog(QDialog):
                 initial_column_types=self._query_states.get(
                     self._active_query_id, {}
                 ).get("source_column_types", {}),
+                step_names=self._step_names_for(self._steps),
             )
             parsed_prefix = parse_m_script(
                 edited_script, self._query_name,
@@ -10133,10 +10086,7 @@ class TransformDataDialog(QDialog):
                 source_query_names=source_query_names,
                 query_sources=query_sources,
                 source_column_types=active_state.get("source_column_types", {}),
-                step_names=[
-                    str(item.get("name", "")).strip() or None
-                    for item in self._step_metadata
-                ],
+                step_names=self._step_names_for(self._steps),
             )
         except (PowerQueryMScriptError, TransformationError) as exc:
             self._show_error(str(exc))

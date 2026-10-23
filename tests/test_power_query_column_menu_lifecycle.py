@@ -196,7 +196,7 @@ class ColumnMenuTests(unittest.TestCase):
         self.assertEqual([row["Region"] for row in dialog._preview_candidate.rows],
                          ["East", "West", "East"])
         script = steps_to_m_script(dialog._steps, "Sales")
-        self.assertIn('([#"Region"] <> null and [#"Region"] <> "")', script)
+        self.assertIn('([Region] <> null and [Region] <> "")', script)
         self.assertTrue(m_script_matches_steps(script, "Sales", dialog._steps))
         self.assertEqual(parse_m_script(script, "Sales"), dialog._steps)
         self.assertTrue(dialog.preview_header._profiles[0]["filter_active"])

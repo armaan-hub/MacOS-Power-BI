@@ -286,8 +286,10 @@ class PowerQueryDirectApplyTests(unittest.TestCase):
         )
         formula = dialog.formula_bar.text()
         self.assertTrue(formula.startswith('Table.AddColumn(#"'), formula)
-        self.assertIn('"Size", each if [#"Column1"] = 5 then', formula)
-        self.assertIn('else if [#"Column1"] > 5 then', formula)
+        # Power BI style: bare field names, bare text literal results.
+        self.assertIn('"Size", each if [Column1] = 5 then "five"', formula)
+        self.assertIn('else if [Column1] > 5 then', formula)
+        self.assertNotIn("Text.From", formula)
         self.assertIsNone(dialog._conditional_dialog)
         self.assertTrue(dialog.operation_settings_panel.isHidden())
 

@@ -46,7 +46,7 @@ _STEP_NAMES: dict[str, str] = {
     "split_column": "Split Column by Delimiter",
     "split_column_by_each_delimiter": "Split Column by Delimiter",
     "split_column_to_rows": "Split Column by Delimiter",
-    "split_column_by_positions": "Split Column by Position",
+    "split_column_by_positions": "Split Column by Positions",
     "merge_columns": "Merged Columns",
     "trim_text": "Trimmed Text",
     "clean_text": "Cleaned Text",
@@ -75,6 +75,11 @@ def power_bi_step_name(step: dict[str, Any]) -> str:
         if side == "after":
             return "Extracted Text After Delimiter"
     return _STEP_NAMES.get(op, "Changed Step")
+
+
+def is_known_power_bi_step(step: dict[str, Any]) -> bool:
+    """Whether Power BI has a default step name for this operation."""
+    return str(step.get("op", "")) in _STEP_NAMES
 
 
 def assign_step_names(

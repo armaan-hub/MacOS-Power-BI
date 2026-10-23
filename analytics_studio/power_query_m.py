@@ -13,7 +13,7 @@ import unicodedata
 from decimal import Decimal, DecimalException
 from typing import Any
 
-from PySide6.QtCore import QTimer
+from PySide6.QtCore import Qt, QTimer
 from PySide6.QtWidgets import (
     QDialog,
     QDialogButtonBox,
@@ -456,6 +456,22 @@ def steps_to_m_script(
     return "let\n" + ",\n".join(bindings) + f"\nin\n    {previous}"
 
 
+def _prefix_step_names(
+    steps: list[dict[str, Any]],
+    prefix: list[dict[str, Any]],
+    step_names: list[str | None] | None,
+) -> list[str | None] | None:
+    """Align ``step_names`` (one per ``steps`` item) with a prefix that dropped helpers."""
+    if step_names is None:
+        return None
+    kept = [
+        step_names[index] if index < len(step_names) else None
+        for index, step in enumerate(steps)
+        if step["op"] != "m_sparse_boundary_helper" or step in prefix
+    ]
+    return kept[: len(prefix)]
+
+
 def step_expression_to_m(
     steps: list[dict[str, Any]],
     query_name: str,
@@ -464,6 +480,7 @@ def step_expression_to_m(
     parameter_names: set[str] | None = None,
     query_functions: list[dict[str, Any]] | None = None,
     initial_column_types: dict[str, str] | None = None,
+    step_names: list[str | None] | None = None,
 ) -> str:
     """Return one generated table expression without assuming it fits on one line."""
     validated = validate_steps(
@@ -492,6 +509,7 @@ def step_expression_to_m(
         parameter_names=parameter_names,
         query_functions=query_functions,
         initial_column_types=initial_column_types,
+        step_names=_prefix_step_names(validated, prefix, step_names),
     )
     bindings, _output_name = _generated_bindings(script)
     from analytics_studio.query_functions import function_references
@@ -529,6 +547,7 @@ def replace_step_expression_in_m(
     parameter_names: set[str] | None = None,
     query_functions: list[dict[str, Any]] | None = None,
     initial_column_types: dict[str, str] | None = None,
+    step_names: list[str | None] | None = None,
 ) -> str:
     """Render a generated query with one selected step expression replaced."""
     validated = validate_steps(
@@ -549,6 +568,7 @@ def replace_step_expression_in_m(
             parameter_names=parameter_names,
             query_functions=query_functions,
             initial_column_types=initial_column_types,
+            step_names=step_names,
         )
     prefix = validated[: index + 1]
     if (
@@ -566,6 +586,7 @@ def replace_step_expression_in_m(
         parameter_names=parameter_names,
         query_functions=query_functions,
         initial_column_types=initial_column_types,
+        step_names=_prefix_step_names(validated, prefix, step_names),
     )
     bindings, output_name = _generated_bindings(script)
     from analytics_studio.query_functions import function_references
@@ -1777,8 +1798,13 @@ def _m_conditional_column_call(
         return f"(if {_m_field(column)} = null then {null_result} else {result})"
 
     def output(value: str, kind: str) -> str:
-        raw = _m_field(value) if kind == "column" else _m_string(value)
-        return f"Text.From({raw})"
+        # Power BI writes a text literal bare ("five"); a column is bare only
+        # when it is already text, otherwise it needs Text.From for the text result.
+        if kind != "column":
+            return _m_string(value)
+        if _m_conditional_column_type(input_column_types, value) == "text":
+            return _m_field(value)
+        return f"Text.From({_m_field(value)})"
 
     expression = output(step["else_value"], step["else_kind"])
     for clause in reversed(step["clauses"]):
@@ -3728,6 +3754,9 @@ def _m_string_list(values: list[str]) -> str:
 
 
 def _m_field(value: str) -> str:
+    """Field reference; Power BI writes ``[Region]`` and quotes only unusual names."""
+    if _IDENTIFIER.fullmatch(value):
+        return "[" + value + "]"
     return "[" + _m_quoted_name(value) + "]"
 
 
@@ -3884,7 +3913,7 @@ class PowerQueryMEditorDialog(QDialog):
         footer.addWidget(self.buttons)
         layout.addLayout(footer)
         self.done_button.clicked.connect(self._accept_query)
-        self.cancel_button.clicked.connect(self.reject)
+        self.cancel_button.clicked.connect(self.request_cancel)
 
         self._evaluation_timer = QTimer(self)
         self._evaluation_timer.setSingleShot(True)
@@ -4042,17 +4071,34 @@ class PowerQueryMEditorDialog(QDialog):
             return
         super().accept()
 
-    def reject(self) -> None:
-        if self.is_edited() and self.result() != QDialog.DialogCode.Accepted:
-            answer = QMessageBox.question(
-                self, "Discard changes?",
-                "Discard changes?\nYour edits to this query will be lost.",
-                QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
-                QMessageBox.StandardButton.No,
-            )
-            if answer != QMessageBox.StandardButton.Yes:
-                return
-        super().reject()
+    def _confirm_discard(self) -> bool:
+        """Ask before throwing away edits; True when it is fine to close."""
+        if not self.is_edited():
+            return True
+        answer = QMessageBox.question(
+            self, "Discard changes?",
+            "Discard changes?\nYour edits to this query will be lost.",
+            QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
+            QMessageBox.StandardButton.No,
+        )
+        return answer == QMessageBox.StandardButton.Yes
+
+    def request_cancel(self) -> None:
+        """Cancel as the user asks for it (button, Esc): confirm only if edited."""
+        if self._confirm_discard():
+            self.reject()
+
+    def keyPressEvent(self, event) -> None:  # noqa: N802 - Qt override
+        if event.key() == Qt.Key.Key_Escape:
+            self.request_cancel()
+            return
+        super().keyPressEvent(event)
+
+    def closeEvent(self, event) -> None:  # noqa: N802 - Qt override
+        if self.result() != QDialog.DialogCode.Accepted and not self._confirm_discard():
+            event.ignore()
+            return
+        super().closeEvent(event)
 
 
 __all__ = [

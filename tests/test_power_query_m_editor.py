@@ -594,10 +594,10 @@ in
         script = steps_to_m_script([step], "Sales Data")
         parsed = parse_m_script(script, "Sales Data")
 
-        self.assertIn('([#"Region"] = "East" and (if [#"Revenue"] = null', script)
-        self.assertIn('if [#"Customer"] = null or [#"Customer"] = "" then false', script)
-        self.assertIn('Number.From([#"Revenue"]) > 11', script)
-        self.assertIn(' or [#"Revenue"] = "20"', script)
+        self.assertIn('([Region] = "East" and (if [Revenue] = null', script)
+        self.assertIn('if [Customer] = null or [Customer] = "" then false', script)
+        self.assertIn('Number.From([Revenue]) > 11', script)
+        self.assertIn(' or [Revenue] = "20"', script)
         self.assertEqual(parsed, [step])
         self.assertEqual(m_compatibility_issues([step]), [])
         self.assertEqual(
@@ -673,7 +673,7 @@ in
         script = steps_to_m_script([step], "Values")
         parsed = parse_m_script(script, "Values")
 
-        self.assertIn('[#"Value"] = null', script)
+        self.assertIn('[Value] = null', script)
         self.assertEqual(m_compatibility_issues([step]), [])
         self.assertEqual(parsed, [step])
         self.assertEqual(
@@ -704,8 +704,8 @@ in
         script = steps_to_m_script([step], "Sales Data")
         parsed = parse_m_script(script, "Sales Data")
 
-        self.assertIn('if [#"Amount"] = null or [#"Amount"] = "" then false', script)
-        self.assertIn('Number.From([#"Amount"]) > 15', script)
+        self.assertIn('if [Amount] = null or [Amount] = "" then false', script)
+        self.assertIn('Number.From([Amount]) > 15', script)
         self.assertEqual(parsed, [step])
         self.assertEqual(m_compatibility_issues([step]), [])
         self.assertEqual(
@@ -752,7 +752,7 @@ in
         self.assertEqual(m_compatibility_issues([step]), [])
         self.assertEqual(parsed, [step])
         self.assertIn(
-            'if [#"Customer"] = null then true else not Text.Contains', script
+            'if [Customer] = null then true else not Text.Contains', script
         )
         self.assertEqual(
             apply_transformations(source, parsed),
@@ -776,7 +776,7 @@ in
 
         self.assertEqual(steps[1]["op"], "conditional_column")
         self.assertEqual(steps[1]["clauses"][0]["operator"], "greater_than")
-        self.assertIn('[#"Revenue"] > 15', generated)
+        self.assertIn('[Revenue] > 15', generated)
         self.assertEqual(parse_m_script(generated, "Sales Data"), steps)
         self.assertEqual(m_compatibility_issues(steps), [])
         self.assertEqual(
@@ -2013,7 +2013,7 @@ in
             "Table.PromoteHeaders(", step_expression_to_m(parsed, "Sales Data", 3)
         )
         replaced = replace_step_expression_in_m(
-            parsed, "Sales Data", 3, 'Table.DemoteHeaders(#"Step 2")'
+            parsed, "Sales Data", 3, 'Table.DemoteHeaders(#"Removed Top Rows")'
         )
         self.assertEqual(
             parse_m_script(replaced, "Sales Data")[-1], {"op": "demote_headers"}
