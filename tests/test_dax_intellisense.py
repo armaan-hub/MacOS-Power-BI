@@ -223,6 +223,12 @@ class SignatureHelpTests(unittest.TestCase):
         self.assertEqual(hint["function"], "DATESWTD")
         self.assertFalse(hint["supported"])
 
+    def test_hint_stays_while_typing_inside_a_column_or_table_reference(self) -> None:
+        self.assertEqual(signature_help("SUM(T[Q", 7)["function"], "SUM")
+        self.assertEqual(signature_help("SUM('Sales Data'[Q", 18)["function"], "SUM")
+        hint = signature_help("CALCULATE(SUM(T[Y]), T[Q", 24)
+        self.assertEqual((hint["function"], hint["activeParameter"]), ("CALCULATE", 1))
+
     def test_unknown_function_names_give_no_hint(self) -> None:
         self.assertIsNone(signature_help("MyFunction(", 11))
 

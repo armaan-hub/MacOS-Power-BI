@@ -348,6 +348,50 @@ class FormulaBarWindowTests(unittest.TestCase):
         self.assertEqual(self.bar.mode, "measure")
         self.assertTrue(self.bar.isNew)
 
+    def click_item(self, item: QObject) -> None:
+        from PySide6.QtCore import QPointF
+        center = item.mapToScene(QPointF(item.width() / 2, item.height() / 2)).toPoint()
+        QTest.mouseClick(self.window, Qt.MouseButton.LeftButton, Qt.KeyboardModifier.NoModifier, center)
+        self.process()
+
+    def test_clicking_the_real_ribbon_buttons_opens_the_bar_and_the_quick_measure_dialog(self) -> None:
+        from unittest.mock import patch
+        self.window.setProperty("ribbonTabName", "Table tools")
+        self.process()
+        self.click_item(self.child("ribbonCommand_data.newMeasure"))
+        self.assertTrue(self.bar.active)
+        self.assertEqual(self.bar.mode, "measure")
+        self.assertEqual(self.window.property("ribbonTabName"), "Measure tools")
+        self.bar.cancel()
+        self.window.setProperty("ribbonTabName", "Table tools")
+        self.process()
+        self.click_item(self.child("ribbonCommand_model.newCalculatedColumn"))
+        self.assertTrue(self.bar.active)
+        self.assertEqual(self.bar.mode, "column")
+        self.bar.cancel()
+        self.window.setProperty("ribbonTabName", "Table tools")
+        self.process()
+        with patch.object(self.controller, "quick_measure_dialog") as quick:
+            self.click_item(self.child("ribbonCommand_data.quickMeasure"))
+        quick.assert_called_once_with()
+
+    def test_clicking_a_completion_row_accepts_it_and_the_hint_shows_with_the_list(self) -> None:
+        self.open_measure()
+        self.type_formula("Total qty", "SUM(Orders[Q")
+        self.assertTrue(self.popup_open())
+        self.assertTrue(self.child("formulaBarSignaturePopup").property("opened"),
+                        "the SUM(ColumnName) hint stays up while the column list is open")
+        self.click_item(self.child("formulaBarCompletionItem_Quantity"))
+        self.assertEqual(self.child("formulaBarEditor").property("text"), "Total qty = SUM(Orders[Quantity]")
+        self.assertFalse(self.popup_open())
+
+    def test_parse_error_banner_has_the_engine_message(self) -> None:
+        self.open_measure()
+        self.type_formula("Bad", "SUM(")
+        self.key(Qt.Key.Key_Return)
+        self.assertIn("ends unexpectedly", self.banner_text())
+        self.assertIsNone(self.measure("Bad"))
+
     def test_quick_measure_stays_enabled_because_its_engine_exists(self) -> None:
         self.assertTrue(self.window.commandAvailable("data.quickMeasure"))
 

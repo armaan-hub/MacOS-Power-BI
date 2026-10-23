@@ -183,6 +183,7 @@ def _column_item(column: dict[str, Any], table_name: str, insert: str, start: in
     kind = str(column.get("type") or "text").replace("_", " ")
     return {
         "label": str(column["name"]),
+        "display": f"{table_name}[{column['name']}]",
         "kind": "column",
         "detail": f"Column · {kind} · {table_name}",
         "insertText": insert,
@@ -324,7 +325,7 @@ def _complete_identifier(
 def signature_help(expression: str, caret: int, model: dict[str, Any] | None = None) -> dict[str, Any] | None:
     """The innermost known function call around the caret, with the active parameter."""
     scan = _scan(expression, max(0, min(caret, len(expression))))
-    if scan.state != "normal":
+    if scan.state in {"string", "comment"}:
         return None
     for group in reversed(scan.stack):
         name = group["function"] if group["kind"] == "(" else None

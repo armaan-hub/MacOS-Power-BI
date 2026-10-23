@@ -53,6 +53,7 @@ Item {
 
     Button {
         id: button
+        objectName: "ribbonCommand_" + root.commandId
         anchors.fill: parent
         visible: !root.splitGetData
         enabled: root.available

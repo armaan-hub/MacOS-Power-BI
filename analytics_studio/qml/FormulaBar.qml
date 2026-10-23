@@ -64,16 +64,14 @@ Rectangle {
         root.completionIndex = 0
         const hint = root.bar.signature(editor.text, editor.cursorPosition)
         root.signatureHint = hint
-        if (items.length > 0) {
-            signaturePopup.close()
+        if (items.length > 0)
             completionPopup.open()
-        } else {
+        else
             completionPopup.close()
-            if (hint && hint.function)
-                signaturePopup.open()
-            else
-                signaturePopup.close()
-        }
+        if (hint && hint.function)
+            signaturePopup.open()
+        else
+            signaturePopup.close()
     }
 
     function afterEdit() {
@@ -413,7 +411,7 @@ Rectangle {
                         }
                         Text {
                             Layout.fillWidth: true
-                            text: modelData.label
+                            text: modelData.display !== undefined ? modelData.display : modelData.label
                             color: modelData.supported ? "#1f2a33" : "#9aa3a9"
                             font.pixelSize: 12
                             font.italic: !modelData.supported
@@ -428,7 +426,7 @@ Rectangle {
                             Layout.maximumWidth: 170
                         }
                         Text {
-                            visible: modelData.doc !== ""
+                            visible: modelData.doc !== "" && itemRow.selected
                             text: "›"
                             color: "#5f6b73"
                             font.pixelSize: 14
@@ -475,7 +473,7 @@ Rectangle {
         objectName: "formulaBarSignaturePopup"
         parent: editor
         x: Math.min(editor.cursorRectangle.x, Math.max(0, editorFlick.width - width))
-        y: editor.cursorRectangle.y + editor.cursorRectangle.height + 2
+        y: editor.cursorRectangle.y - height - 4
         padding: 6
         focus: false
         modal: false
