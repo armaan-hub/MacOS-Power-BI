@@ -1176,7 +1176,13 @@ def _has_supported_all_usage(
             "PREVIOUSMONTH", "DATESYTD", "DATESQTD", "DATESMTD",
             "DATESBETWEEN", "DATESINPERIOD",
         }:
-            return False
+            # live Power BI (iteration 84): a date set is a normal CALCULATE filter at any depth (inside SUMX / MAXX / ... too)
+            if parent_function not in {"CALCULATE", "CALCULATETABLE"} or argument_index < 1:
+                return False
+            return all(
+                _has_supported_all_usage(argument, function, index, len(arguments))
+                for index, argument in enumerate(arguments)
+            )
         if function == "FILTER":
             if _table_position(parent_function, argument_index):
                 return _is_all_table_value_argument(node) and all(
@@ -2322,31 +2328,27 @@ class _Parser:
                 raise MeasureError(
                     "RELATED needs one fully qualified column reference, such as RELATED('Products'[Unit Price])."
                 )
-            elif function == "TOTALYTD":
-                date_argument_is_valid = (
-                    len(arguments) >= 2 and arguments[1][0] == "reference"
-                )
-                default_year = len(arguments) == 2 and date_argument_is_valid
-                fiscal_year = (
-                    len(arguments) == 4
-                    and date_argument_is_valid
-                    and arguments[2][0] == "omitted"
-                    and arguments[3][0] == "string"
-                )
-                if not (default_year or fiscal_year):
+            elif function in {"TOTALYTD", "TOTALQTD", "TOTALMTD"}:
+                if any(argument[0] == "omitted" for argument in arguments):
+                    # live Power BI: an empty argument is an error, TOTALYTD(e, d, , "6/30") included
+                    omitted_at = next(index for index, argument in enumerate(arguments) if argument[0] == "omitted") + 1
+                    raise MeasureError(f"Argument '{omitted_at}' in {function} function is required.")
+                year_end = None
+                rest = list(arguments[2:])
+                if function == "TOTALYTD" and len(rest) in {1, 2} and rest[-1][0] == "string":
+                    year_end = rest.pop()
+                if (
+                    len(arguments) < 2 or arguments[1][0] != "reference" or len(rest) > 1
+                    or (rest and rest[0][0] == "string") or (function != "TOTALYTD" and len(arguments) > 3)
+                ):
                     raise MeasureError(
-                        'TOTALYTD needs an expression and marked date-column reference; '
-                        'fiscal year end uses TOTALYTD(expression, date, , "M/D"). '
-                        "Filter expressions are not supported."
+                        f"{function} needs an expression, a date column reference and an optional filter"
+                        + (' and a "M/D" year end.' if function == "TOTALYTD" else ".")
                     )
-                if fiscal_year:
-                    _parse_year_end_date(arguments[3][1])
-            elif function in {"TOTALQTD", "TOTALMTD"}:
-                if len(arguments) != 2 or arguments[1][0] != "reference":
-                    raise MeasureError(
-                        f"{function} needs an expression and marked date-column reference. "
-                        "Filter expressions are not supported."
-                    )
+                if year_end is not None:
+                    _parse_year_end_date(year_end[1])
+                if rest and not _general_calculate_filters_valid((rest[0],)):
+                    raise MeasureError(f"{function} filter argument must be a Boolean or table filter expression.")
             elif function == "DATESYTD":
                 valid_arguments = (
                     len(arguments) == 1 and arguments[0][0] == "reference"
@@ -2649,9 +2651,40 @@ class _Parser:
             raise MeasureError(f"Expected {kind!r}, found {token.value!r}.")
 
 
+_TOTAL_TO_DATES = {"TOTALYTD": "DATESYTD", "TOTALQTD": "DATESQTD", "TOTALMTD": "DATESMTD"}
+
+
+def _rewrite_total_td(node: Any, filter_position: bool = False) -> Any:
+    """TOTALYTD(e, d [, filter] [, year_end]) is CALCULATE(e, DATESYTD(d [, year_end]) [, filter]) (live Power BI, 567 of 567
+    pairs); TOTALQTD / TOTALMTD take no year end.  An omitted argument, a year end that is not a text literal or a filter in
+    the CALCULATE filter list keeps the original call, which the validators refuse."""
+    if isinstance(node, list):
+        return [_rewrite_total_td(item) for item in node]
+    if not isinstance(node, tuple) or not node:
+        return node
+    if node[0] == "call":
+        function, arguments = node[1], node[2]
+        in_filters = function in {"CALCULATE", "CALCULATETABLE"}
+        new_arguments = tuple(_rewrite_total_td(argument, in_filters and index >= 1) for index, argument in enumerate(arguments))
+        rewritten = (node[0], function, new_arguments, *node[3:])
+        if function in _TOTAL_TO_DATES and not filter_position and 2 <= len(new_arguments) <= 4:
+            expression, dates, rest = new_arguments[0], new_arguments[1], list(new_arguments[2:])
+            if dates[0] != "reference" or any(item[0] == "omitted" for item in new_arguments):
+                return rewritten
+            year_end = None
+            if function == "TOTALYTD" and rest and rest[-1][0] == "string" and (len(rest) == 2 or len(rest) == 1):
+                year_end = rest.pop()
+            if len(rest) > 1 or (rest and rest[0][0] == "string") or (function != "TOTALYTD" and len(new_arguments) > 3):
+                return rewritten
+            date_set = ("call", _TOTAL_TO_DATES[function], (dates,) if year_end is None else (dates, year_end))
+            return ("call", "CALCULATE", (expression, date_set, *rest))
+        return rewritten
+    return tuple(_rewrite_total_td(child) if isinstance(child, (tuple, list)) else child for child in node)
+
+
 def parse_expression(expression: str) -> tuple[Any, ...]:
     """Parse one supported DAX expression into a safe internal tree."""
-    return _Parser(tokenize(expression)).parse()
+    return _rewrite_total_td(_Parser(tokenize(expression)).parse())
 
 
 def _contains_table_call(node: Any) -> bool:
@@ -3196,7 +3229,16 @@ def _dateadd_dates(
         if not contiguous:
             if available_dates is None or not _gap_free(available_dates):
                 raise MeasureError("DATEADD requires the current date-column selection to be contiguous.")
-            return {_shift_date(value, intervals, unit) for value in source_dates}
+            runs: list[list[date]] = [[source_dates[0]]]
+            for value in source_dates[1:]:
+                if (value - runs[-1][-1]).days == 1:
+                    runs[-1].append(value)
+                else:
+                    runs.append([value])
+            result: set[date] = set()
+            for run in runs:
+                result |= _dateadd_dates(run, intervals, interval)
+            return result
         if unit == "DAY":
             return {_shift_date(value, intervals, unit) for value in source_dates}
         first = _shift_date(source_dates[0], intervals, unit)
