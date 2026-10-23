@@ -207,7 +207,24 @@ def propagate_relationship_filters(
                 paths_by_target[target_id] = next_path
                 tree_edges.add((source_id, target_id))
                 paths.append((target_id, next_path, next_bidirectional))
+    had_longer_route = bool(ignored_edges)
     ignored_edges -= tree_edges
+    if had_longer_route and len(filter_roots) > 1:
+        # live Power BI: with ambiguous routes every filtered table pushes ITS OWN filter along its shortest routes; what each
+        # filter leaves on a table is intersected (a table narrowed by another filter's detour does not push that narrowing on)
+        per_root = [
+            propagate_relationship_filters(tables, relationships, {root_id}, unknown_selected)
+            for root_id in sorted(filter_roots)
+        ]
+        merged: dict[str, list[dict[str, Any]]] = {}
+        for table_id, table in tables_by_id.items():
+            keep = {id(row) for row in per_root[0][table_id]}
+            for result in per_root[1:]:
+                keep &= {id(row) for row in result[table_id]}
+            merged[table_id] = [row for row in table["rows"] if id(row) in keep] if len(keep) != len(table["rows"]) or any(
+                len(result[table_id]) != len(table["rows"]) for result in per_root
+            ) else list(table["rows"])
+        return merged
 
     constrained = deque(filter_roots)
     constrained_ids = set(constrained)

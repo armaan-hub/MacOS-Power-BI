@@ -508,14 +508,32 @@ def rename_table_references(expression: str, old_name: str, new_name: str) -> st
     return "".join(output)
 
 
+_MONTH_NAMES = {name: index for index, name in enumerate(
+    ("january", "february", "march", "april", "may", "june", "july", "august", "september", "october", "november", "december"), 1)}
+
+
 def _parse_year_end_date(value: Any) -> tuple[int, int]:
-    """Validate the local evaluator's invariant numeric M/D year-end subset."""
+    """The month and day of a year-end text, as Power BI reads them (iteration 84, live): "6/30", "06-30", "6/30/2024" (the year
+    is ignored), "June 30", "Jun 30", "30 Jun" and "30/6" (day first when the first number is above 12)."""
     if not isinstance(value, str):
         raise MeasureError('year_end_date must use month/day, such as "6/30".')
-    match = re.fullmatch(r"\s*([0-9]{1,2})/([0-9]{1,2})\s*", value)
-    if match is None:
-        raise MeasureError('year_end_date must use month/day, such as "6/30".')
-    month, day = (int(part) for part in match.groups())
+    text = value.strip()
+    month = day = None
+    numbers = re.fullmatch(r"([0-9]{1,2})[/-]([0-9]{1,2})(?:[/-]([0-9]{1,4}))?", text)
+    named = re.fullmatch(r"([A-Za-z]{3,9})\.?[ -]+([0-9]{1,2})", text)
+    named_last = re.fullmatch(r"([0-9]{1,2})[ -]+([A-Za-z]{3,9})\.?", text)
+    if numbers is not None:
+        first, second = int(numbers.group(1)), int(numbers.group(2))
+        month, day = (second, first) if first > 12 and second <= 12 else (first, second)
+    else:
+        match = named or named_last
+        if match is None:
+            raise MeasureError('year_end_date must use month/day, such as "6/30".')
+        name, number = (match.group(1), match.group(2)) if named else (match.group(2), match.group(1))
+        candidates = [index for full, index in _MONTH_NAMES.items() if full.startswith(name.casefold()) and len(name) >= 3]
+        if len(candidates) != 1:
+            raise MeasureError('year_end_date must use month/day, such as "6/30".')
+        month, day = candidates[0], int(number)
     if not 1 <= month <= 12 or not 1 <= day <= monthrange(2000, month)[1]:
         raise MeasureError('year_end_date must be a valid month/day, such as "6/30".')
     return month, day
@@ -9847,6 +9865,8 @@ def evaluate_measures(
             if node[1] in {"+", "-"} and result is not None and (
                 dax_dates.is_date(left) or dax_dates.is_date(right)
             ):
+                if node[1] == "-" and not dax_dates.is_date(left):
+                    return result  # live Power BI: a number minus a date is a plain number
                 return dax_dates.DaxDateTime(result)
             return result
         if kind == "logical":
