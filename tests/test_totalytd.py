@@ -1509,7 +1509,8 @@ class TotalYtdTests(unittest.TestCase):
             )
 
     def test_dateadd_rejects_noncontiguous_dates_and_invalid_arguments(self) -> None:
-        with self.assertRaisesRegex(MeasureError, "contiguous"):
+        # iteration 84: live Power BI shifts a non-contiguous selection of a unique, gap-free date column day by day (no error)
+        values = (
             evaluate_measures(
                 [{
                     "name": "Previous day sales",
@@ -1540,7 +1541,9 @@ class TotalYtdTests(unittest.TestCase):
                 filter_table_ids={"calendar-id"},
                 active_table_id="calendar-id",
             )
-
+        )
+        self.assertEqual(values["Previous day sales"], 20)
+        # a selection that is not contiguous on a date column with gaps is still refused
         with self.assertRaisesRegex(MeasureError, "Table-valued functions"):
             normalize_measure(
                 "Bare DATEADD",

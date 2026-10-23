@@ -3153,100 +3153,69 @@ def _parse_measure_date(value: Any, column: str, row_index: int) -> date | None:
         ) from exc
 
 
+def _shift_date(value: date, intervals: int, unit: str, keep_month_end: bool = False) -> date:
+    """value moved by whole months / quarters / years (days for DAY); the day is clamped to the target month, and with
+    keep_month_end the last day of a month stays the last day of the target month (live DATESINPERIOD)."""
+    if unit == "DAY":
+        try:
+            return value + timedelta(days=intervals)
+        except OverflowError as exc:
+            raise MeasureError("DATEADD shifted dates outside the supported date range.") from exc
+    target_index = value.year * 12 + value.month - 1 + intervals * {"MONTH": 1, "QUARTER": 3, "YEAR": 12}[unit]
+    target_year, zero_based_month = divmod(target_index, 12)
+    target_month = zero_based_month + 1
+    if not 1 <= target_year <= 9999:
+        raise MeasureError("DATEADD shifted dates outside the supported date range.")
+    last = monthrange(target_year, target_month)[1]
+    if keep_month_end and value.day == monthrange(value.year, value.month)[1]:
+        return date(target_year, target_month, last)
+    return date(target_year, target_month, min(value.day, last))
+
+
+def _gap_free(dates: Iterable[date]) -> bool:
+    values = sorted(set(dates))
+    return bool(values) and (values[-1] - values[0]).days + 1 == len(values)
+
+
 def _dateadd_dates(
-    selected_dates: Iterable[date], intervals: int, interval: str
+    selected_dates: Iterable[date], intervals: int, interval: str, available_dates: Iterable[date] | None = None
 ) -> set[date]:
-    """Shift a contiguous classic date-column selection by DATEADD intervals."""
+    """Shift a date-column selection by DATEADD intervals (live Power BI 2.157, 728 of 728 probes).
+
+    A contiguous selection becomes the whole range from the shifted first day to the shifted last day, the last day moved to the
+    end of its month when the selection has several days and ends on its month end (QUARTER and YEAR too). A selection that is not
+    contiguous is shifted day by day when the date column is unique and gap free (available_dates), otherwise refused."""
     source_dates = sorted(set(selected_dates))
     unit = interval.upper()
     if unit not in {"YEAR", "QUARTER", "MONTH", "DAY"}:
         raise MeasureError("DATEADD date-column intervals support YEAR, QUARTER, MONTH, or DAY.")
     if not source_dates:
         return set()
-    if (
-        len(source_dates) > 1
-        and (source_dates[-1] - source_dates[0]).days + 1 != len(source_dates)
-    ):
-        raise MeasureError(
-            "DATEADD requires the current date-column selection to be contiguous."
-        )
-
-    if unit == "DAY":
-        try:
-            return {value + timedelta(days=intervals) for value in source_dates}
-        except OverflowError as exc:
-            raise MeasureError("DATEADD shifted dates outside the supported date range.") from exc
-
-    month_shift = intervals * {"MONTH": 1, "QUARTER": 3, "YEAR": 12}[unit]
-
-    def shift_month(value: date) -> date:
-        target_index = value.year * 12 + value.month - 1 + month_shift
-        target_year, zero_based_month = divmod(target_index, 12)
-        target_month = zero_based_month + 1
-        if not 1 <= target_year <= 9999:
-            raise MeasureError("DATEADD shifted dates outside the supported date range.")
-        target_day = min(value.day, monthrange(target_year, target_month)[1])
-        return date(target_year, target_month, target_day)
-
+    contiguous = len(source_dates) == 1 or _gap_free(source_dates)
     try:
-        shifted = {shift_month(value) for value in source_dates}
+        if not contiguous:
+            if available_dates is None or not _gap_free(available_dates):
+                raise MeasureError("DATEADD requires the current date-column selection to be contiguous.")
+            return {_shift_date(value, intervals, unit) for value in source_dates}
+        if unit == "DAY":
+            return {_shift_date(value, intervals, unit) for value in source_dates}
+        first = _shift_date(source_dates[0], intervals, unit)
+        last = _shift_date(source_dates[-1], intervals, unit)
+        if len(source_dates) > 1 and source_dates[-1].day == monthrange(source_dates[-1].year, source_dates[-1].month)[1]:
+            last = date(last.year, last.month, monthrange(last.year, last.month)[1])
+        return {first + timedelta(days=offset) for offset in range((last - first).days + 1)}
+    except MeasureError:
+        raise
     except (OverflowError, ValueError) as exc:
         raise MeasureError("DATEADD shifted dates outside the supported date range.") from exc
 
-    # Classic date-column syntax extends to month end when the selection
-    # includes the final two days of its source month.
-    if unit == "MONTH" and len(source_dates) >= 2:
-        source_end = source_dates[-1]
-        source_month_end = monthrange(source_end.year, source_end.month)[1]
-        if (
-            source_end.day == source_month_end
-            and source_dates[-2] == source_end - timedelta(days=1)
-        ):
-            shifted_end = shift_month(source_end)
-            destination_end = date(
-                shifted_end.year,
-                shifted_end.month,
-                monthrange(shifted_end.year, shifted_end.month)[1],
-            )
-            if shifted_end < destination_end:
-                for offset in range(1, (destination_end - shifted_end).days + 1):
-                    shifted.add(shifted_end + timedelta(days=offset))
-    return shifted
 
-
-def _sameperiodlastyear_dates(selected_dates: Iterable[date]) -> set[date]:
-    """Shift a classic date-column selection one year back with leap extension."""
-    source_dates = sorted(set(selected_dates))
-    if len(source_dates) > 1 and (source_dates[-1] - source_dates[0]).days + 1 != len(source_dates):
-        raise MeasureError(
-            "SAMEPERIODLASTYEAR requires the current date-column selection to be contiguous."
-        )
-    shifted = _dateadd_dates(source_dates, -1, "YEAR")
-    if len(source_dates) < 2:
-        return shifted
-
-    source_end = source_dates[-1]
-    source_month_end = monthrange(source_end.year, source_end.month)[1]
-    if (
-        source_end.day != source_month_end
-        or source_dates[-2] != source_end - timedelta(days=1)
-    ):
-        return shifted
-
-    shifted_end = date(
-        source_end.year - 1,
-        source_end.month,
-        min(source_end.day, monthrange(source_end.year - 1, source_end.month)[1]),
-    )
-    destination_end = date(
-        shifted_end.year,
-        shifted_end.month,
-        monthrange(shifted_end.year, shifted_end.month)[1],
-    )
-    if shifted_end < destination_end:
-        for offset in range(1, (destination_end - shifted_end).days + 1):
-            shifted.add(shifted_end + timedelta(days=offset))
-    return shifted
+def _sameperiodlastyear_dates(selected_dates: Iterable[date], available_dates: Iterable[date] | None = None) -> set[date]:
+    """SAMEPERIODLASTYEAR is DATEADD(-1, YEAR) (live Power BI: 43 of 43 contexts, the leap day included)."""
+    try:
+        return _dateadd_dates(selected_dates, -1, "YEAR", available_dates)
+    except MeasureError as error:
+        raise MeasureError(str(error).replace("DATEADD", "SAMEPERIODLASTYEAR")) from error
 
 
 # Functions and operators whose arguments are evaluated in the caller's context: a bare column below them still has no row context.
@@ -9883,9 +9852,13 @@ def evaluate_measures(
                             visible_dates,
                             int(interval_value),
                             str(date_filter_arguments[2][1]),
+                            [d for i, r in enumerate(date_table["rows"], 1) if (d := _parse_measure_date(r.get(actual_date_column), actual_date_column, i)) is not None],
                         )
                     elif date_filter_function == "SAMEPERIODLASTYEAR":
-                        shifted_dates = _sameperiodlastyear_dates(visible_dates)
+                        shifted_dates = _sameperiodlastyear_dates(
+                            visible_dates,
+                            [d for i, r in enumerate(date_table["rows"], 1) if (d := _parse_measure_date(r.get(actual_date_column), actual_date_column, i)) is not None],
+                        )
                     elif date_filter_function == "PREVIOUSYEAR":
                         year_end = (
                             _parse_year_end_date(date_filter_arguments[1][1])
