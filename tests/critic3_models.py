@@ -158,10 +158,10 @@ def ours_for(model: str, expression: str) -> str:
             measures + [{"name": "P__", "expression": expression, "home_table_id": home}], LOCAL_ROWS, HEADERS, "Facts",
             measure_names=["P__"], table_context=tables, relationships=relationships, active_table_id="facts",
         )["P__"]
+        if isinstance(value, dax_dates.DaxDateTime):
+            return dax_dates.oracle_text(value)
     except MeasureError as error:
         return f"LOCAL-REJECT:{error}"
     except Exception as error:  # an evaluator crash is a failure of its own
         return f"LOCAL-CRASH:{type(error).__name__}:{error}"
-    if isinstance(value, dax_dates.DaxDateTime):
-        return dax_dates.oracle_text(value)
     return "BLANK" if value is None else str(value)

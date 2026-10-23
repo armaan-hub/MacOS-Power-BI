@@ -325,6 +325,16 @@ DAX_FUNCTION_TEMPLATES: dict[str, tuple[str, str | None]] = {
     "DIVIDE": ("DIVIDE(numerator, denominator)", "numerator"),
     "FALSE": ("FALSE()", None),
     "FILTER": ("FILTER('Table', condition)", "'Table'"),
+    "FIRSTDATE": ("FIRSTDATE('Calendar'[Date])", "'Calendar'[Date]"),
+    "LASTDATE": ("LASTDATE('Calendar'[Date])", "'Calendar'[Date]"),
+    **{
+        f"{edge}OF{unit}": (f"{edge}OF{unit}('Calendar'[Date])", "'Calendar'[Date]")
+        for edge in ("START", "END") for unit in ("MONTH", "QUARTER", "YEAR")
+    },
+    **{
+        f"{way}BALANCE{unit}": (f"{way}BALANCE{unit}(expression, 'Calendar'[Date])", "expression")
+        for way in ("OPENING", "CLOSING") for unit in ("MONTH", "QUARTER", "YEAR")
+    },
     "IF": ("IF(condition, value_if_true, value_if_false)", "condition"),
     "KEEPFILTERS": ("KEEPFILTERS(filter)", "filter"),
     "MAX": ("MAX([Column])", "[Column]"),

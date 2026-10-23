@@ -53,7 +53,7 @@ from analytics_studio.relationships import (
     relationship_filter_directions,
     unknown_member_table_ids,
 )
-from analytics_studio import dax_dates, dax_ext, dax_format, dax_iteration_order, dax_math, dax_order, dax_typed
+from analytics_studio import dax_dates, dax_ext, dax_format, dax_iteration_order, dax_math, dax_order, dax_time_sets, dax_typed
 from analytics_studio.power_query_values import ascii_fold, cell_key, cell_to_text, is_cell_error
 
 
@@ -297,8 +297,9 @@ _RANK_ARITY = {
 _WINDOW_SCALARS = {"RANK", "ROWNUMBER"}
 _FUNCTIONS |= {"ORDERBY", "PARTITIONBY", "MATCHBY"}
 _FUNCTIONS |= set(_TABLE_FUNCTION_ARITY) | set(_RANK_ARITY)
+_FUNCTIONS |= dax_time_sets.SET_FUNCTIONS | dax_time_sets.BALANCES  # date sets and balances (iteration 84)
 _FUNCTIONS.add("RELATEDTABLE")
-_TABLE_FIRST_PARENTS = _ALL_ITERATORS | {
+_TABLE_FIRST_PARENTS = _ALL_ITERATORS | dax_time_sets.SET_FUNCTIONS | {"FIRSTNONBLANK", "LASTNONBLANK", "FIRSTNONBLANKVALUE", "LASTNONBLANKVALUE"} | {
     "COUNTROWS", "CONCATENATEX", "ISEMPTY", "CONTAINS", "CONTAINSROW", "ADDCOLUMNS", "SELECTCOLUMNS", "SUMMARIZE",
     "FILTER", "RANKX", "CALCULATETABLE", "DISTINCT", "VALUES", "FILTERS",
 }
@@ -552,6 +553,153 @@ def _parse_year_end_date(value: Any) -> tuple[int, int]:
     if not 1 <= month <= 12 or not 1 <= day <= monthrange(_year_end_reference_year() if numbers is not None else 2000, month)[1]:
         raise MeasureError('year_end_date must be a valid month/day, such as "6/30".')
     return month, day
+
+
+_NONBLANK_TABLES = {"FIRSTNONBLANK", "LASTNONBLANK"}  # one-row tables; the ...VALUE variants are scalars
+_TIME_SET_ARITY = {
+    **dict.fromkeys(dax_time_sets.SET_FUNCTIONS, (1, 1)), **dict.fromkeys(dax_time_sets.YEAR_END_FUNCTIONS, (1, 2)),
+    "DATESBETWEEN": (3, 3),
+}
+
+
+def _time_set_call_is_new_form(function: str, arguments: list[tuple[Any, ...]]) -> bool:
+    """The functions of iteration 84 and the table / nested forms of the older ones are checked by _validate_time_set_call; the older
+    functions keep their long-standing messages for the shapes they always refused (wrong arity, a non-column argument)."""
+    if function not in _TIME_FILTER_FUNCTIONS:
+        return True
+    if function in dax_time_sets.YEAR_END_FUNCTIONS and len(arguments) == 2 and arguments[0][0] == "reference" and arguments[1][0] in {"number", "unary", "boolean", "blank"}:
+        return True  # a year end given as a date serial (630 is Sep 21), TRUE() or BLANK()
+    return bool(arguments) and arguments[0][0] in {"call", "table_call", "var"} and _TIME_SET_ARITY[function][0] <= len(arguments) <= _TIME_SET_ARITY[function][1]
+
+
+def _validate_time_set_call(function: str, arguments: list[tuple[Any, ...]]) -> None:
+    """Arity and argument kinds of the date-set functions (iteration 84); the date argument is a column or a table expression."""
+    low, high = _TIME_SET_ARITY[function]
+    if not low <= len(arguments) <= high or any(argument[0] == "omitted" for argument in arguments):
+        raise MeasureError(f"{function} has the wrong number of arguments.")
+    if arguments[0][0] in {"number", "string", "boolean", "blank", "unary", "binary", "arithmetic"}:
+        raise MeasureError(f"{function} needs a date column or a table expression of dates.")
+
+
+def _first_reference(node: Any, held: Callable[[str], Any] | None = None) -> tuple[Any, ...] | None:
+    """The column reference at the bottom of the first-argument chain of a date-set call (ENDOFMONTH(PREVIOUSMONTH(Date)),
+    LASTDATE(CALCULATETABLE(VALUES(Date), ..)), FIRSTDATE(FILTER(ALL(Date), ..)))."""
+    for _step in range(64):
+        if not isinstance(node, tuple) or not node:
+            return None
+        if node[0] == "reference":
+            return node
+        if node[0] == "var" and held is not None:
+            node = held(node[1])  # a VAR holding a date set: the column it came from
+        elif node[0] == "table_call":
+            node = node[2]
+        elif node[0] == "call" and node[2]:
+            node = node[2][0]
+        else:
+            return None
+    return None
+
+
+def _legacy_time_shape(node: tuple[Any, ...]) -> bool:
+    """A time-intelligence filter in the form the long-standing CALCULATE ladder handles: a column reference and constant arguments."""
+    function, arguments = node[1], node[2]
+    if function not in _TIME_FILTER_FUNCTIONS or not arguments or arguments[0][0] != "reference":
+        return False
+    if function in {"PREVIOUSYEAR", "NEXTYEAR", "DATESYTD"}:
+        return len(arguments) == 1 or (len(arguments) == 2 and arguments[1][0] == "string")
+    if function == "DATESBETWEEN":
+        return len(arguments) == 3 and arguments[1][0] in {"string", "blank"} and arguments[2][0] in {"string", "blank"}
+    return len(arguments) == 1 or function not in dax_time_sets.SET_FUNCTIONS
+
+
+def _is_late_time_set(node: Any) -> bool:
+    """Live Power BI: a date-set call whose first argument is, through any chain of date-set calls, a bare column reads that
+    column AFTER the row-to-filter transition of the CALCULATE (everything else in the filter arguments is read before it)."""
+    if not (isinstance(node, tuple) and len(node) == 3 and node[0] == "call" and node[1] in dax_time_sets.SET_FUNCTIONS and node[2]):
+        return False
+    for _step in range(64):
+        if not (isinstance(node, tuple) and len(node) == 3 and node[0] == "call" and node[2]
+                and (node[1] in dax_time_sets.SET_FUNCTIONS or node[1] in _NONBLANK_TABLES)):
+            return False
+        node = node[2][0]
+        if node[0] == "reference":
+            return True
+    return False
+
+
+def _late_chain_reads_data_expression(node: Any) -> bool:
+    """A FIRSTNONBLANK / LASTNONBLANK inside a late date-set chain whose expression is not a constant: its expression would be read
+    before the transition in Power BI, which the chain does not do here."""
+    for _step in range(64):
+        if not (isinstance(node, tuple) and len(node) == 3 and node[0] == "call" and node[2]):
+            return False
+        if node[1] in _NONBLANK_TABLES and node[2][1][0] not in {"number", "string", "boolean", "blank"}:
+            return True
+        node = node[2][0]
+    return False
+
+
+def _is_late_nonblank(node: Any) -> bool:
+    return (
+        isinstance(node, tuple) and len(node) == 3 and node[0] == "call" and node[1] in _NONBLANK_TABLES
+        and bool(node[2]) and node[2][0][0] == "reference"
+    )
+
+
+def _new_route_time_set(node: Any) -> bool:
+    """A date-set call the table path evaluates (everything the old ladder does not take)."""
+    return (
+        isinstance(node, tuple) and len(node) == 3 and node[0] == "call" and node[1] in dax_time_sets.SET_FUNCTIONS
+        and (node[1] not in _TIME_FILTER_FUNCTIONS or not _legacy_time_shape(node))
+    )
+
+
+def _check_set_iterator_body(table: tuple[Any, ...], body: tuple[Any, ...]) -> None:
+    """Live Power BI: an iterator over a date set (or FIRSTNONBLANK ..) reads only the set's own column; any other qualified column in
+    the body is an error at compile time, also when the set turns out to be empty."""
+    if not (table[0] == "call" and (table[1] in dax_time_sets.SET_FUNCTIONS or table[1] in _NONBLANK_TABLES)):
+        return
+    bottom = _first_reference(table)
+    if bottom is None or not bottom[1]:
+        return
+    for reference in _direct_column_references(body):
+        if reference[1] and (reference[1].casefold(), reference[2].casefold()) != (bottom[1].casefold(), bottom[2].casefold()):
+            raise MeasureError("The iterated date set has one column; the expression reads another column.")
+
+
+def _check_single_column_filter(table: tuple[Any, ...], predicate: tuple[Any, ...]) -> None:
+    """FILTER(VALUES(T[c]), ..) and FILTER(ALL(T[c]), ..) hold one column: Power BI rejects a predicate that reads another qualified
+    column at compile time, also when the filtered table is empty."""
+    if table[0] == "table_call" and table[2][0] == "reference":
+        column = table[2]
+    elif table[0] == "call" and table[1] in {"ALL", "ALLNOBLANKROW"} and len(table[2]) == 1 and table[2][0][0] == "reference":
+        column = table[2][0]
+    else:
+        return
+    if not column[1]:
+        return
+    for reference in _direct_column_references(predicate):
+        if reference[1] and (reference[1].casefold(), reference[2].casefold()) != (column[1].casefold(), column[2].casefold()):
+            raise MeasureError("A FILTER over one column cannot read another column in its condition.")
+
+
+def _balance_call(function: str, arguments: list[tuple[Any, ...]]) -> tuple[Any, ...]:
+    """OPENINGBALANCEx(e, d, f) is CALCULATE(e, PREVIOUSDAY(STARTOFx(d)), f); CLOSINGBALANCEx(e, d, f) is CALCULATE(e, ENDOFx(d), f)
+    (live Power BI: 800 random probes). The YEAR forms take the year end as the fourth argument."""
+    unit = next(candidate for candidate in ("MONTH", "QUARTER", "YEAR") if function.endswith(candidate))
+    if not 2 <= len(arguments) <= (4 if unit == "YEAR" else 3) or any(argument[0] == "omitted" for argument in arguments[:2]):
+        raise MeasureError(f"{function} has the wrong number of arguments.")
+    if len(arguments) > 2 and arguments[2][0] == "omitted":
+        raise MeasureError(f"Argument '3' of {function} is required.")
+    if len(arguments) == 4 and arguments[3][0] == "omitted":
+        raise MeasureError(f"{function} has the wrong number of arguments.")
+    if arguments[1][0] in {"number", "string", "boolean", "blank"}:
+        raise MeasureError(f"{function} needs a date column or a table expression of dates.")
+    edge = ("call", ("START" if function.startswith("OPENING") else "END") + "OF" + unit,
+            (arguments[1],) + ((arguments[3],) if len(arguments) == 4 else ()))
+    if function.startswith("OPENING"):
+        edge = ("call", "PREVIOUSDAY", (edge,))
+    return ("call", "CALCULATE", (arguments[0], edge) + ((arguments[2],) if len(arguments) > 2 else ()))
 
 
 def _parse_iso_date_literal(value: Any, function: str) -> date:
@@ -1140,7 +1288,7 @@ def _is_all_table_value_argument(node: Any) -> bool:
             return True
         except MeasureError:
             return len(node[2]) == 2 and _is_all_table_value_argument(node[2][0])
-    if node[0] == "call" and node[1] in _TABLE_FUNCTION_ARITY:
+    if node[0] == "call" and (node[1] in _TABLE_FUNCTION_ARITY or node[1] in dax_time_sets.SET_FUNCTIONS or node[1] in _NONBLANK_TABLES):
         return True
     if node[0] == "call" and node[1] == "ALLEXCEPT":
         try:
@@ -1197,6 +1345,13 @@ def _has_supported_all_usage(
         return _has_supported_all_usage(node[2])
     if node[0] == "call":
         function, arguments = node[1], node[2]
+        if function in _TIME_FILTER_FUNCTIONS and _legacy_time_shape(node) and not _table_position(parent_function, argument_index):
+            return False  # a plain PREVIOUSMONTH(Date) as a value stays refused, as it always was
+        if function in dax_time_sets.SET_FUNCTIONS or function in _NONBLANK_TABLES:  # a table or, where one value is wanted, that value
+            return all(
+                _has_supported_all_usage(argument, function, index, len(arguments))
+                for index, argument in enumerate(arguments)
+            )
         if function in _TABLE_FUNCTION_ARITY:
             if not _table_position(parent_function, argument_index) and not (
                 function == "CALCULATETABLE" and parent_function in {"CALCULATE", "CALCULATETABLE"}
@@ -1663,19 +1818,26 @@ def _is_general_table_filter(node: Any) -> bool:
     if node[0] == "var":
         return True
     return node[0] == "call" and (
-        node[1] in _TABLE_FUNCTION_ARITY or node[1] in {"FILTER", "GENERATESERIES", "ROW"} or node[1] in _TIME_FILTER_FUNCTIONS
+        node[1] in _TABLE_FUNCTION_ARITY or node[1] in dax_time_sets.SET_FUNCTIONS or node[1] in _NONBLANK_TABLES
+        or node[1] in {"FILTER", "GENERATESERIES", "ROW"} or node[1] in _TIME_FILTER_FUNCTIONS
     )
 
 
-def _general_calculate_filters_valid(filters: tuple[tuple[Any, ...], ...]) -> bool:
+def _general_calculate_filters_valid(filters: tuple[tuple[Any, ...], ...], legacy_sets_ok: bool = False) -> bool:
     """Whether every CALCULATE filter argument has a shape the general (any table or Boolean expression) path evaluates."""
+    # date sets: the old ladder keeps a CALCULATE whose time functions all have its own shape; one other date set sends all of them here
+    general_time_sets = legacy_sets_ok or any(_new_route_time_set(item) for item in filters)
     for node in filters:
+        wrapped = False
         while isinstance(node, tuple) and node[:2] == ("call", "KEEPFILTERS") and len(node[2]) == 1:
             node = node[2][0]
+            wrapped = True
         if not isinstance(node, tuple) or not node:
             return False
         if node[0] == "call" and node[1] in _GENERAL_CLEAR_FUNCTIONS:
             continue
+        if node[0] == "call" and node[1] in dax_time_sets.SET_FUNCTIONS and (general_time_sets or wrapped or _new_route_time_set(node)):
+            continue  # date sets are tables with the lineage of their column (iteration 84)
         if node[0] == "call" and node[1] in _TIME_FILTER_FUNCTIONS | {"USERELATIONSHIP", "CROSSFILTER", "ALLSELECTED"}:
             return False  # these keep their dedicated paths
         if _is_general_table_filter(node):
@@ -1728,6 +1890,10 @@ def _validate_general_filter_literals(node: tuple[Any, ...]) -> None:
 
 def _legacy_calculate_filters_valid(arguments: tuple[tuple[Any, ...], ...]) -> None:
     """The CALCULATE filter shapes the local engine has always supported; raises MeasureError for any other."""
+    if any(_new_route_time_set(argument) or (
+        isinstance(argument, tuple) and argument[:1] == ("call",) and argument[1] in dax_time_sets.SET_FUNCTIONS - _TIME_FILTER_FUNCTIONS
+    ) for argument in arguments[1:]):
+        raise MeasureError("This date set is evaluated by the general CALCULATE path.")
     contains_userelationship = any(
         _contains_function_call(argument, "USERELATIONSHIP")
         for argument in arguments[1:]
@@ -1830,6 +1996,8 @@ def _legacy_calculate_filters_valid(arguments: tuple[tuple[Any, ...], ...]) -> N
             "A table-valued FILTER must be the only CALCULATE filter argument."
         )
     for filter_argument in arguments[1:]:
+        if _new_route_time_set(filter_argument) or (filter_argument[0] == "call" and filter_argument[1] in dax_time_sets.SET_FUNCTIONS - _TIME_FILTER_FUNCTIONS):
+            raise MeasureError("This date set is evaluated by the general CALCULATE path.")
         if filter_argument[0] == "call" and filter_argument[1] in _TIME_FILTER_FUNCTIONS:
             _validate_literal_positions(filter_argument)
         else:
@@ -1885,6 +2053,12 @@ def _validate_literal_positions(
                     _table_position(function, index) and _is_all_table_value_argument(argument)
                 ):
                     continue  # a table expression, an omitted argument or an ASC/DESC/SKIP/DENSE keyword
+                _validate_literal_positions(argument, allow_blank=True)
+            return
+        if (function in dax_time_sets.SET_FUNCTIONS and not (function in _TIME_FILTER_FUNCTIONS and _legacy_time_shape(node))) or function in _NONBLANK_TABLES or function in {"FIRSTNONBLANKVALUE", "LASTNONBLANKVALUE"}:
+            for index, argument in enumerate(arguments):
+                if index == 0 and _is_all_table_value_argument(argument):
+                    continue  # a column or table expression of dates
                 _validate_literal_positions(argument, allow_blank=True)
             return
         if function == "CONCATENATEX":
@@ -2260,7 +2434,11 @@ class _Parser:
                 if len(arguments) != 1 or arguments[0][0] != "table":
                     raise MeasureError("RELATEDTABLE needs one table, such as RELATEDTABLE('Sales').")
                 return ("call", "CALCULATETABLE", (arguments[0],))
-            if function in dax_math.STAT_PERCENTILE_COLUMN:
+            if function in dax_time_sets.BALANCES:
+                return _balance_call(function, arguments)
+            if function in dax_time_sets.SET_FUNCTIONS and _time_set_call_is_new_form(function, arguments):
+                _validate_time_set_call(function, arguments)
+            elif function in dax_math.STAT_PERCENTILE_COLUMN:
                 if len(arguments) != 2 or arguments[0][0] != "reference":
                     raise MeasureError(f"{function} needs a column reference and a percentile between 0 and 1.")
             elif function in {
@@ -2319,7 +2497,9 @@ class _Parser:
                 and all(argument[0] != "omitted" for argument in arguments)
             ):
                 raise MeasureError(f"{function} has the wrong number of arguments.")
-            elif function in {"FIRSTNONBLANK", "LASTNONBLANK", "FIRSTNONBLANKVALUE", "LASTNONBLANKVALUE"} and arguments[0][0] != "reference":
+            elif function in {"FIRSTNONBLANK", "LASTNONBLANK", "FIRSTNONBLANKVALUE", "LASTNONBLANKVALUE"} and arguments[0][0] in {
+                "number", "string", "boolean", "blank", "unary", "binary",
+            }:
                 raise MeasureError(f"{function} needs a column reference and an expression.")
             elif function == "ROW" and len(arguments) % 2:
                 raise MeasureError("ROW needs pairs of a column name and an expression.")
@@ -2674,6 +2854,10 @@ class _Parser:
                 except MeasureError:
                     if not _general_calculate_filters_valid(tuple(arguments[1:])) and not _modifier_mix_filters_valid(tuple(arguments[1:])) and not _time_filters_beside_general_filters(tuple(arguments)):
                         raise
+            if (function in _ALL_ITERATORS or function == "CONCATENATEX") and len(arguments) >= 2:
+                _check_set_iterator_body(arguments[0], arguments[1])
+            if function == "FILTER" and len(arguments) == 2:
+                _check_single_column_filter(arguments[0], arguments[1])
             return ("call", function, tuple(arguments))
         raise MeasureError(f"Unexpected token {token.value!r}; expected a number, measure, or function.")
 
@@ -5798,6 +5982,192 @@ def evaluate_measures(
             rows = dictionary_ordered_rows(argument, context, rows, [("reference", "", h) for h in context["headers"] if h in lineage])
         return context, rows
 
+    def cell_to_date(context: dict[str, Any], header: str, value: Any) -> date | None:
+        """A cell of a date column (loaded text or a typed DateTime) as a calendar date; blank is None."""
+        if value is None:
+            return None
+        if isinstance(value, dax_dates.DaxDateTime):
+            return dax_dates.to_datetime(value).date()
+        if isinstance(value, (Decimal, bool)):
+            raise MeasureError("Time-intelligence functions need a column or table of dates.")
+        return _parse_measure_date(value, header, 0)
+
+    def constant_year_end(node: tuple[Any, ...] | None) -> tuple[int, int]:
+        """The optional year-end argument: a constant only (Power BI refuses an expression), read like an OLE date."""
+        if node is None or node[0] == "blank":
+            return dax_time_sets.DEFAULT_YEAR_END
+        if node[0] in {"string", "number", "boolean"}:
+            value = node[1]
+        elif node[0] == "unary" and node[1] in {"+", "-"} and node[2][0] == "number":
+            value = node[2][1] if node[1] == "+" else -node[2][1]
+        else:
+            raise MeasureError("Only constant date value is allowed as a year end date argument.")
+        try:
+            return dax_time_sets.parse_year_end_value(value)
+        except dax_time_sets.TimeSetError as error:
+            raise MeasureError(str(error)) from error
+
+    def date_column_source(source: tuple[Any, ...], function: str) -> tuple[dict[str, Any], str, list[date], list[date], dict[date, Any]]:
+        """(base table, column, V, U, raw cell of each date) of the dates a time function was given.
+
+        V: the dates visible now (the column's visible rows, or the dates of the table expression); U: every date of the column."""
+        if source[0] == "reference":
+            context, column = resolve_table(source[1], source[2])
+            visible_rows: list[dict[str, Any]] | Iterable[dict[str, Any]] = rows_by_table_id[context["id"]]
+            base, base_column, viewed = context, column, True
+        else:
+            if source[0] == "call" and source[1] in {"DATE", "TIME", "TODAY", "NOW", "MAX", "MIN", "EDATE", "EOMONTH"}:
+                raise MeasureError(f"{function} needs a column of dates, not a single date value.")
+            table_context, visible_rows = table_argument_value(source)
+            if len(table_context["headers"]) != 1:
+                raise MeasureError(f"{function} needs a table with one column of dates.")
+            header = table_context["headers"][0]
+            link = (table_context.get("lineage") or {}).get(header)
+            if link is None and not table_context.get("derived"):
+                link = (table_context, header)
+            if link is None:
+                raise MeasureError(f"{function} needs dates that come from a column of the model.")
+            base, base_column, viewed = contexts_by_id.get(link[0]["id"], link[0]), link[1], False
+            visible_rows = [{base_column: row.get(header)} for row in visible_rows]
+            table_context = {**table_context, "headers": [base_column]}
+        if str(base.get("column_types", {}).get(base_column, "")).casefold() not in {"date", "datetime"}:
+            raise MeasureError(f"{function} needs a Date or DateTime column.")
+        raw_by_date: dict[date, Any] = {}
+        universe: list[date] = []
+        for row_index, row in enumerate(base["rows"], 1):
+            day = cell_to_date(base, base_column, row.get(base_column))
+            if day is not None and day not in raw_by_date:
+                raw_by_date[day] = row.get(base_column)
+                universe.append(day)
+        visible: list[date] = []
+        seen_days: set[date] = set()
+        for row in visible_rows:
+            day = cell_to_date(base, base_column, row.get(base_column))
+            if day is not None and day not in seen_days:
+                seen_days.add(day)
+                visible.append(day)
+        for day in visible:
+            if day not in raw_by_date:  # a date of a derived table that the column does not hold
+                raise MeasureError(f"{function} needs dates that come from the column of the model.")
+        return base, base_column, visible, universe, raw_by_date
+
+    def date_bound(node: tuple[Any, ...], function: str) -> date | None:
+        return _scalar_day(in_row_expression(lambda: evaluate(node, None, allow_text=True)), function)
+
+    def date_set_table(node: tuple[Any, ...]) -> tuple[dict[str, Any], list[dict[str, Any]]]:
+        """FIRSTDATE .. DATESBETWEEN as a one-column table with the lineage of the date column (live Power BI, iteration 84)."""
+        function, arguments = node[1], node[2]
+        year_end = dax_time_sets.DEFAULT_YEAR_END
+        bounds: tuple[date | None, date | None] = (None, None)
+        if function == "DATESBETWEEN":
+            bounds = (date_bound(arguments[1], function), date_bound(arguments[2], function))
+        elif function in dax_time_sets.YEAR_END_FUNCTIONS:
+            year_end = constant_year_end(arguments[1] if len(arguments) == 2 else None)
+        base, column, visible, universe, raw_by_date = date_column_source(arguments[0], function)
+        if year_end == (2, 28) and function in {"NEXTYEAR", "PREVIOUSYEAR"} and visible:
+            anchor = max(visible) if function == "NEXTYEAR" else min(visible)
+            if (anchor.month, anchor.day) >= (2, 27) and (anchor.month, anchor.day) <= (3, 2):
+                # open item of the live comparison: around a leap day Power BI starts the fiscal year on Feb 29
+                raise MeasureError(f"{function} with a February 28 year end is not supported near a leap day in the local engine.")
+        chosen = dax_time_sets.date_set(function, visible, universe, year_end, bounds)
+        single = dict(base)
+        single["headers"] = [column]
+        single["lineage"] = {column: (base, column)}
+        single["single_column_set"] = True
+        return single, [{column: raw_by_date[day]} for day in chosen]
+
+    def nonblank_candidates(function: str, source: tuple[Any, ...]) -> tuple[dict[str, Any], str, bool, list[tuple[Any, Any]]]:
+        """(base table, column, typed cells?, [(raw cell, value)]) the distinct non-blank values of the column visible now, ascending
+        (FIRST) or descending (LAST)."""
+        derived_source = False
+        if source[0] == "reference":
+            base, column = resolve_table(source[1], source[2])
+            rows = rows_by_table_id[base["id"]]
+        else:
+            table_context, table_rows = table_argument_value(source)
+            if len(table_context["headers"]) != 1:
+                raise MeasureError(f"{function} needs a table with one column.")
+            header = table_context["headers"][0]
+            link = (table_context.get("lineage") or {}).get(header)
+            if link is None and not table_context.get("derived"):
+                link = (table_context, header)
+            if link is None:
+                raise MeasureError(f"{function} needs values that come from a column of the model.")
+            base, column = contexts_by_id.get(link[0]["id"], link[0]), link[1]
+            derived_source = bool(table_context.get("derived"))
+            rows = [{column: row.get(header)} for row in table_rows]
+        distinct: dict[Any, tuple[Any, Any]] = {}
+        for source_row in rows:
+            raw = source_row.get(column)
+            if raw is None:
+                continue
+            typed = raw if derived_source else typed_cell(base, column, raw)
+            distinct.setdefault(cell_key(ascii_fold(typed) if isinstance(typed, str) else typed), (raw, typed))
+        ordered = sorted(distinct.values(), key=lambda pair: column_order_key(pair[1]), reverse=function.startswith("LAST"))
+        return base, column, derived_source, ordered
+
+    def nonblank_pick(
+        function: str, arguments: tuple[tuple[Any, ...], ...],
+        candidates: tuple[dict[str, Any], str, bool, list[tuple[Any, Any]]] | None = None,
+    ) -> tuple[dict[str, Any], str, Any, Any]:
+        """FIRSTNONBLANK / LASTNONBLANK(+VALUE): (base table, column, raw cell, value of the expression) of the first candidate whose
+        expression is not blank; the cell is None when there is none.
+
+        The plain variants evaluate the expression without a row-to-filter transition (only a CALCULATE inside it transitions); the
+        ...VALUE variants evaluate it with the transition (live Power BI, iteration 84)."""
+        base, column, derived_source, ordered = candidates or nonblank_candidates(function, arguments[0])
+        single = dict(base)
+        single["headers"] = [column]
+        single["lineage"] = {column: (base, column)}
+        with_value = function.endswith("VALUE")
+        for raw, _typed in ordered:
+            row = {column: _typed if derived_source else raw}
+            if with_value:
+                result = evaluate_with_context_transition(arguments[1], single, row)
+            else:
+                result = None
+                for frame in iterate_rows(single, [row]):
+                    result = in_row_expression(lambda frame=frame: evaluate(arguments[1], frame, allow_text=True))
+            if result is not None:
+                return base, column, raw, result
+        return base, column, None, None
+
+    def nonblank_table(
+        node: tuple[Any, ...], candidates: tuple[dict[str, Any], str, bool, list[tuple[Any, Any]]] | None = None,
+    ) -> tuple[dict[str, Any], list[dict[str, Any]]]:
+        base, column, raw, _value = nonblank_pick(node[1], node[2], candidates)
+        single = dict(base)
+        single["headers"] = [column]
+        single["lineage"] = {column: (base, column)}
+        single["single_column_set"] = True
+        return single, ([] if raw is None else [{column: raw}])
+
+    def refuse_foreign_columns_of_empty_set(context: dict[str, Any], expression: tuple[Any, ...]) -> None:
+        """Power BI rejects an iterator body that reads a column other than the one a date set holds, also when the set is empty
+        (live: MAXX(NEXTDAY(Fact[Dt]), Fact[Ship]) and MAXX(set, Cal[Date]) are errors)."""
+        if not context.get("single_column_set"):
+            return
+        lineage = next(iter(context.get("lineage", {}).values()), None)
+        for reference in _direct_column_references(expression):
+            if not reference[1]:
+                continue
+            table, column = resolve_table(reference[1], reference[2])
+            if lineage is None or table["id"] != lineage[0]["id"] or column.casefold() != lineage[1].casefold():
+                raise MeasureError("The iterated date set has one column; the expression reads another column.")
+
+    def single_value_of(table: tuple[dict[str, Any], list[dict[str, Any]]]) -> Any:
+        """A table in a place that wants one value: one row and one column is that value, no rows is BLANK, more is an error."""
+        context, rows = table
+        if len(context["headers"]) != 1:
+            raise MeasureError("A table with several columns was supplied where a single value was expected.")
+        if len(rows) > 1:
+            raise MeasureRuntimeError("A table of multiple values was supplied where a single value was expected.")
+        if not rows:
+            return None
+        header = context["headers"][0]
+        value = rows[0].get(header)
+        return value if context.get("derived") else typed_cell(context, header, value)
+
     def table_argument_value(
         argument: tuple[Any, ...],
         include_unknown: bool = False,
@@ -5823,6 +6193,12 @@ def evaluate_measures(
                     {header: None for header in current_context["headers"]},
                 ]
             return context, table_rows
+        if argument[0] == "call" and argument[1] in dax_time_sets.SET_FUNCTIONS:
+            return date_set_table(argument)
+        if argument[0] == "call" and argument[1] in {"FIRSTNONBLANK", "LASTNONBLANK"}:
+            return nonblank_table(argument)
+        if argument[0] == "tablevalue":  # a table already computed (see evaluate_with_general_filters)
+            return argument[1]
         if argument[0] == "call" and argument[1] in _TABLE_FUNCTION_ARITY:
             return table_function_value(argument)
         if argument[0] == "call" and argument[1] in _TIME_FILTER_FUNCTIONS:
@@ -6513,6 +6889,7 @@ def evaluate_measures(
                 "TOTALYTD", "TOTALQTD", "TOTALMTD",
             }:
                 numeric_argument_indexes: set[int] = set()
+                date_extreme = False
                 if function in {"SUM", "AVERAGE", "MIN", "MAX", "COUNT", "ABS", "MEDIAN", "PRODUCT"}:
                     numeric_argument_indexes.add(0)
                 elif function == "DIVIDE":
@@ -6542,10 +6919,15 @@ def evaluate_measures(
                         argument_index in numeric_argument_indexes
                         and argument_category not in {"numeric", "blank"}
                     ):
+                        if function in {"MIN", "MAX"} and argument_category == "date/time" and aggregate_column:
+                            date_extreme = True  # the latest / earliest date of a column is a date (live Power BI)
+                            continue
+                        if function == "AVERAGE" and argument_category == "date/time" and aggregate_column:
+                            continue  # the average of a date column is a plain number
                         raise MeasureError(
                             f"Iterator {function} argument {argument_index + 1} needs a numeric expression."
                         )
-                return "numeric"
+                return "date/time" if date_extreme else "numeric"
         raise MeasureError(
             "Iterator comparison expression has an unsupported or unverifiable local data type."
         )
@@ -8639,6 +9021,16 @@ def evaluate_measures(
             arguments[position] = ("thunk", lambda value=value: value)
         return (node[0], node[1], tuple(arguments))
 
+    def preevaluate_set_chain(node: tuple[Any, ...]) -> tuple[Any, ...]:
+        """The bounds of a DATESBETWEEN in a CALCULATE filter are read in the outer context, also when the date column itself is
+        read after the transition (live Power BI, iteration 84)."""
+        if not (node[0] == "call" and node[1] in dax_time_sets.SET_FUNCTIONS and node[2]):
+            return node
+        arguments = list(node[2])
+        arguments[0] = preevaluate_set_chain(arguments[0])
+        rebuilt = ("call", node[1], tuple(arguments))
+        return preevaluate_time_scalars(rebuilt) if node[1] in _TIME_SCALAR_POSITIONS else rebuilt
+
     def preevaluate_filter_scalars(node: tuple[Any, ...]) -> tuple[Any, ...]:
         """Evaluate, once in the outer context, the right-hand side of a `column <op> scalar` Boolean filter (Power BI
         evaluates it before the filter is applied; inside the per-row test a CALCULATETABLE would transition the test's
@@ -8701,6 +9093,8 @@ def evaluate_measures(
                     return node
                 return node[:side_index] + (literal,) + node[side_index + 1:]
             return node
+        if node[0] == "call" and node[1] in dax_time_sets.SET_FUNCTIONS:
+            return preevaluate_set_chain(node)
         if node[0] == "logical":
             return (node[0], node[1], preevaluate_filter_scalars(node[2]), preevaluate_filter_scalars(node[3]))
         if node[0] == "call" and node[1] in {"AND", "OR", "NOT", "KEEPFILTERS"}:
@@ -8761,7 +9155,10 @@ def evaluate_measures(
             if node[0] == "call" and node[1] == "KEEPFILTERS":
                 continue
             references: list[tuple[Any, ...]] = []
-            if node[0] == "call" and node[1] in _TIME_FILTER_FUNCTIONS:
+            if node[0] == "call" and node[1] in dax_time_sets.SET_FUNCTIONS:
+                found = _first_reference(node, variable_nodes.get)
+                references = [] if found is None else [found]
+            elif node[0] == "call" and node[1] in _TIME_FILTER_FUNCTIONS:
                 references = [item for item in node[2][:1] if item[0] == "reference"]
             elif node[0] == "call" and node[1] == "TREATAS":
                 references = [item for item in node[2][1:] if item[0] == "reference"]
@@ -8884,12 +9281,22 @@ def evaluate_measures(
             clearing: list[tuple[Any, ...]] = []
             additions: list[tuple[bool, dict[str, tuple[dict[str, Any], dict[str, frozenset[int]], list[dict[str, Any]]]]]] = []
             table_filters_present = False
+            late_sets: list[tuple[bool, tuple[Any, ...]]] = []
+            late_nonblank: list[tuple[bool, tuple[Any, ...]]] = []
             for argument in filter_arguments:  # every filter is evaluated in the original filter context
                 keep, node = False, argument
                 while node[:2] == ("call", "KEEPFILTERS") and len(node[2]) == 1:
                     keep, node = True, node[2][0]
                 if node[0] == "call" and node[1] in {"ALL", "ALLNOBLANKROW", "REMOVEFILTERS", "ALLEXCEPT", "ALLSELECTED"}:
                     clearing.append(node)
+                elif _is_late_time_set(node):
+                    if row_context is not None and _late_chain_reads_data_expression(node):
+                        raise MeasureError("A FIRSTNONBLANK inside a date set under a row context is not supported in the local engine.")
+                    late_sets.append((keep, node))
+                    table_filters_present = True
+                elif _is_late_nonblank(node):
+                    late_nonblank.append((keep, node))
+                    table_filters_present = True
                 elif _is_general_table_filter(node):
                     additions.append((keep, general_table_filter_sets(node)))
                     table_filters_present = True
@@ -8975,9 +9382,23 @@ def evaluate_measures(
                     return evaluate_with_allselected(("thunk", lambda: clear_then_apply(index + 1)), modifier)
                 return evaluate_with_filter_clear(("thunk", lambda: clear_then_apply(index + 1)), modifier, modifier[1])
 
+            for keep, node in late_nonblank:
+                # FIRSTNONBLANK(column, expression): the candidates are the column's values after the transition, the expression
+                # is read before it (live Power BI, iteration 84)
+                candidates = (
+                    with_column_filters(transition, lambda node=node: nonblank_candidates(node[1], node[2][0]), True)
+                    if transition else nonblank_candidates(node[1], node[2][0])
+                )
+                additions.append((keep, general_table_filter_sets(("tablevalue", nonblank_table(node, candidates)))))
+
+            def read_late_sets() -> Any:
+                for keep, node in late_sets:  # a date column handed to a time function is read after the transition
+                    additions.append((keep, general_table_filter_sets(node)))
+                return clear_then_apply(0)
+
             if transition:
-                return with_column_filters(transition, lambda: clear_then_apply(0), True)
-            return clear_then_apply(0)
+                return with_column_filters(transition, read_late_sets, True)
+            return read_late_sets()
         finally:
             if pushed:
                 row_stack.pop()
@@ -9148,22 +9569,10 @@ def evaluate_measures(
                 raise MeasureRuntimeError("A table of multiple values was supplied where a single value was expected.")
             return next(iter(found.values())) if found else alternate
         if function in {"FIRSTNONBLANK", "LASTNONBLANK", "FIRSTNONBLANKVALUE", "LASTNONBLANKVALUE"}:
-            context, column = resolve_table(arguments[0][1], arguments[0][2])
-            distinct: dict[Any, Any] = {}
-            for source_row in rows_by_table_id[context["id"]]:
-                raw = source_row.get(column)
-                if raw is None:
-                    continue
-                typed = typed_cell(context, column, raw)
-                distinct.setdefault(cell_key(ascii_fold(typed) if isinstance(typed, str) else typed), (raw, typed))
-            ordered = sorted(distinct.values(), key=lambda pair: column_order_key(pair[1]), reverse=function.startswith("LAST"))
-            single = dict(context)
-            single["headers"] = [column]
-            for raw, typed in ordered:
-                result = evaluate_with_context_transition(arguments[1], single, {column: raw})
-                if result is not None:
-                    return result if function.endswith("VALUE") else typed
-            return None
+            base, column, raw, value = nonblank_pick(function, arguments)
+            if function.endswith("VALUE"):
+                return value
+            return None if raw is None else typed_cell(base, column, raw)
         # filter-context questions
         context, column, filtered_rows = filter_state(arguments[0])
         current = evaluation_contexts_by_id.get(context["id"], context)
@@ -9822,7 +10231,11 @@ def evaluate_measures(
             return False
         function, arguments = node[1], node[2]
         reference = None
-        if function in {"MAX", "MIN"} and len(arguments) == 1:
+        if function in dax_time_sets.SET_FUNCTIONS:
+            return True  # a date set is a table of dates; one value of it is a date, or a typed BLANK date
+        if function in _NONBLANK_TABLES and arguments:
+            reference = _first_reference(arguments[0])
+        elif function in {"MAX", "MIN"} and len(arguments) == 1:
             reference = arguments[0]
         elif function in {"MAXX", "MINX"} and len(arguments) == 2:
             reference = arguments[1]
@@ -9895,6 +10308,10 @@ def evaluate_measures(
         if kind == "var":
             held = variables[node[1]]()
             if isinstance(held, _TableValue):
+                if variable_nodes.get(node[1], (None,))[0] == "call" and variable_nodes[node[1]][1] in (
+                    dax_time_sets.SET_FUNCTIONS | _NONBLANK_TABLES
+                ):
+                    return single_value_of((held[0], held[1]))  # a date set holds one date (or none) where one value is wanted
                 raise MeasureError("A table variable cannot be used where a single value is expected.")
             return held
         if kind == "let":
@@ -10076,6 +10493,8 @@ def evaluate_measures(
             return related_value(arguments[0], row_context)
         if function in {"SUMX", "AVERAGEX", "MAXX", "MINX"} or function in dax_math.STAT_ITERATORS:
             context, iteration_rows = table_argument_value(arguments[0])
+            if not iteration_rows:
+                refuse_foreign_columns_of_empty_set(context, arguments[1])
             if function in {"MAXX", "MINX"}:
                 validation_row = iteration_rows[0] if iteration_rows else {}
                 result_category = iterator_expression_category(
@@ -10122,6 +10541,8 @@ def evaluate_measures(
             return result
         if function in {"COUNTX", "COUNTAX"}:
             context, iteration_rows = table_argument_value(arguments[0])
+            if not iteration_rows:
+                refuse_foreign_columns_of_empty_set(context, arguments[1])
             validation_row = iteration_rows[0] if iteration_rows else {}
             iterator_expression_category(
                 arguments[1], (context, validation_row, 1)
@@ -10142,7 +10563,9 @@ def evaluate_measures(
             if len(arguments) > 1:
                 arguments = preevaluate_calculate_boolean_filters(arguments, row_context)
                 wipes = date_key_wipe_tables(arguments)
-                if wipes and any(a[0] == "call" and a[1] in _TIME_FILTER_FUNCTIONS for a in arguments[1:]):
+                if wipes and any(a[0] == "call" and a[1] in _TIME_FILTER_FUNCTIONS for a in arguments[1:]) and not any(
+                    _new_route_time_set(a) for a in arguments[1:]
+                ):
                     wipes = []  # the date sets are computed in this context, then evaluate_with_date_values clears the table when it applies them
                 if wipes:  # live Power BI: replacing a date key column first removes the other filters of its table
                     arguments = (*arguments, *(("call", "REMOVEFILTERS", (("table", name),)) for name in wipes))
@@ -10369,7 +10792,7 @@ def evaluate_measures(
                     # by a date set first removes the other outer filters of its table
                     wipe_arguments = tuple(("call", "REMOVEFILTERS", (("table", name),)) for name in date_key_wipe_tables(arguments))
                     return evaluate_with_general_filters(arguments[0], (*arguments[1:], *wipe_arguments))
-                if not _general_calculate_filters_valid(tuple(arguments[1:])):
+                if not _general_calculate_filters_valid(tuple(arguments[1:]), True):
                     raise
                 if "per-column filter context" in str(legacy_error):
                     # A saved filter without per-column information cannot say which columns it covers, so a
@@ -10379,6 +10802,8 @@ def evaluate_measures(
                     return evaluate_with_general_filters(arguments[0], tuple(arguments[1:]))
                 except MeasureError:
                     raise legacy_error from None
+        if function in dax_time_sets.SET_FUNCTIONS:
+            return single_value_of(date_set_table(node))
         if function == "DATEADD":
             raise MeasureError(
                 "DATEADD returns a date table; use it as a DATEADD filter in CALCULATE."
