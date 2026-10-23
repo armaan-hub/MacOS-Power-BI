@@ -5982,6 +5982,11 @@ def evaluate_measures(
         if source[0] == "reference":
             context, column = resolve_table(source[1], source[2])
             visible_rows: list[dict[str, Any]] | Iterable[dict[str, Any]] = rows_by_table_id[context["id"]]
+            row_filters = all_row_context_filters(None) if row_stack else {}
+            if row_filters:
+                # live Power BI (iteration 84, critic): inside an iterator the row of the iterated table filters a bare date column, like
+                # the transition of a CALCULATE around the date set does
+                visible_rows = with_column_filters(row_filters, lambda: list(rows_by_table_id[context["id"]]), True)
             base, base_column, viewed = context, column, True
         else:
             if source[0] == "call" and source[1] in {"DATE", "TIME", "TODAY", "NOW", "MAX", "MIN", "EDATE", "EOMONTH"}:
@@ -6050,7 +6055,8 @@ def evaluate_measures(
         derived_source = False
         if source[0] == "reference":
             base, column = resolve_table(source[1], source[2])
-            rows = rows_by_table_id[base["id"]]
+            row_filters = all_row_context_filters(None) if row_stack else {}  # the row of an enclosing iterator filters the column (see date_column_source)
+            rows = with_column_filters(row_filters, lambda: list(rows_by_table_id[base["id"]]), True) if row_filters else rows_by_table_id[base["id"]]
         else:
             table_context, table_rows = table_argument_value(source)
             if len(table_context["headers"]) != 1:
@@ -9987,11 +9993,13 @@ def evaluate_measures(
             raise MeasureError(
                 f"{date_filter_function} needs a Date or DateTime column."
             )
+        row_filters = all_row_context_filters(None) if row_stack else {}  # inside an iterator the row filters the date column (see date_column_source)
+        visible_rows = (
+            with_column_filters(row_filters, lambda: list(rows_by_table_id[date_table["id"]]), True) if row_filters else rows_by_table_id[date_table["id"]]
+        )
         visible_dates = [
             parsed_date
-            for row_index, row in enumerate(
-                rows_by_table_id[date_table["id"]], 1
-            )
+            for row_index, row in enumerate(visible_rows, 1)
             if (parsed_date := _parse_measure_date(
                 row.get(actual_date_column), actual_date_column, row_index
             )) is not None
