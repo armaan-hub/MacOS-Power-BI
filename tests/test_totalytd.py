@@ -175,7 +175,9 @@ class TotalYtdTests(unittest.TestCase):
         self.assertEqual(fiscal_ytd_for(june_30), 105)
         self.assertEqual(fiscal_ytd_for(july_1), 7)
 
-    def test_totalytd_clamps_february_29_for_non_leap_years(self) -> None:
+    @unittest.mock.patch("analytics_studio.measures._year_end_reference_year", return_value=2024)
+    def test_totalytd_clamps_february_29_for_non_leap_years(self, _reference_year) -> None:
+        # Power BI reads "2/29" as Feb 29 only while the machine's year is a leap year (a common year makes it Feb 1)
         calendar_rows = [
             {"Date": day.isoformat()}
             for day in (date(2023, 2, 28), date(2023, 3, 1))
@@ -271,7 +273,7 @@ class TotalYtdTests(unittest.TestCase):
         with self.assertRaisesRegex(MeasureError, "month/day"):
             normalize_measure(
                 "Invalid year end",
-                'TOTALYTD(SUM([Amount]), \'Calendar\'[Date], "6/31")',
+                'TOTALYTD(SUM([Amount]), \'Calendar\'[Date], "13/13")',
             )
 
         with self.assertRaisesRegex(MeasureError, "month/day"):
@@ -1251,7 +1253,7 @@ class TotalYtdTests(unittest.TestCase):
         with self.assertRaisesRegex(MeasureError, "valid month/day"):
             normalize_measure(
                 "Invalid PREVIOUSYEAR year end",
-                "CALCULATE(SUM([Amount]), PREVIOUSYEAR('Calendar'[Date], \"6/31\"))",
+                "CALCULATE(SUM([Amount]), PREVIOUSYEAR('Calendar'[Date], \"13/13\"))",
             )
         with self.assertRaisesRegex(MeasureError, "Table-valued functions"):
             normalize_measure(

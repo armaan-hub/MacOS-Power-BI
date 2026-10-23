@@ -512,6 +512,11 @@ _MONTH_NAMES = {name: index for index, name in enumerate(
     ("january", "february", "march", "april", "may", "june", "july", "august", "september", "october", "november", "december"), 1)}
 
 
+def _year_end_reference_year() -> int:
+    """The year Power BI validates a year-end text against (the machine's current year)."""
+    return date.today().year
+
+
 def _parse_year_end_date(value: Any) -> tuple[int, int]:
     """The month and day of a year-end text, as Power BI reads them (iteration 84, live): "6/30", "06-30", "6/30/2024" (the year
     is ignored), "June 30", "Jun 30", "30 Jun" and "30/6" (day first when the first number is above 12)."""
@@ -525,6 +530,15 @@ def _parse_year_end_date(value: Any) -> tuple[int, int]:
     if numbers is not None:
         first, second = int(numbers.group(1)), int(numbers.group(2))
         month, day = (second, first) if first > 12 and second <= 12 else (first, second)
+        if not (1 <= month <= 12 and 1 <= day <= monthrange(_year_end_reference_year(), month)[1]):
+            # live Power BI reads text like an OLE date: a month/day that does not exist this year falls back to day/month,
+            # then month/year and year/month with the 1st ("2/29" is Feb 1 in a common year, "6/31" is Jun 1)
+            if 1 <= second <= 12 and 1 <= first <= monthrange(_year_end_reference_year(), second)[1]:
+                month, day = second, first
+            elif 1 <= first <= 12 and second >= 0:
+                month, day = first, 1
+            elif 1 <= second <= 12 and first >= 0:
+                month, day = second, 1
     else:
         match = named or named_last
         if match is None:
@@ -534,7 +548,7 @@ def _parse_year_end_date(value: Any) -> tuple[int, int]:
         if len(candidates) != 1:
             raise MeasureError('year_end_date must use month/day, such as "6/30".')
         month, day = candidates[0], int(number)
-    if not 1 <= month <= 12 or not 1 <= day <= monthrange(2000, month)[1]:
+    if not 1 <= month <= 12 or not 1 <= day <= monthrange(_year_end_reference_year() if numbers is not None else 2000, month)[1]:
         raise MeasureError('year_end_date must be a valid month/day, such as "6/30".')
     return month, day
 
@@ -4279,6 +4293,10 @@ def evaluate_measures(
                     {header.casefold() for header in source_context["headers"]},
                     True,
                 )
+                if function == "ALL" and len(source_rows) != len(source_context["rows"]):
+                    # live Power BI: ALL(column) returns every value of the column, also those a both-way relationship of another
+                    # table's filter would hide (ZB: 5 products under Year=2023, not 3)
+                    source_rows = list(source_context["rows"])
                 if function == "ALL" and unknown_member_passes_remaining_filters(
                     source_context,
                     contexts_after_clear,
@@ -8596,7 +8614,8 @@ def evaluate_measures(
             if argument[0] in {"number", "string", "blank", "thunk"} or (argument[0] == "unary" and argument[2][0] == "number"):
                 continue
             try:
-                value = filter_constant(argument)
+                # with the row context of the enclosing iterator: an explicit CALCULATE in the start transitions the row
+                value = evaluate(argument, row_stack[-1] if row_stack else None, allow_text=True, allow_boolean=True)
             except (MeasureError, _DivisionError):
                 continue  # left for the date-set code to report
             arguments[position] = ("thunk", lambda value=value: value)
