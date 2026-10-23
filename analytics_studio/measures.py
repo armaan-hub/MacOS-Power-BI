@@ -579,6 +579,13 @@ def _is_late_time_set(node: Any) -> bool:
     return False
 
 
+def _is_late_nonblank(node: Any) -> bool:
+    return (
+        isinstance(node, tuple) and len(node) == 3 and node[0] == "call" and node[1] in _NONBLANK_TABLES
+        and bool(node[2]) and node[2][0][0] == "reference"
+    )
+
+
 def _new_route_time_set(node: Any) -> bool:
     """A date-set call the table path evaluates (everything the old ladder does not take)."""
     return (
@@ -5886,14 +5893,9 @@ def evaluate_measures(
         single["lineage"] = {column: (base, column)}
         return single, [{column: raw_by_date[day]} for day in chosen]
 
-    def nonblank_pick(function: str, arguments: tuple[tuple[Any, ...], ...]) -> tuple[dict[str, Any], str, Any, Any]:
-        """FIRSTNONBLANK / LASTNONBLANK(+VALUE): (base table, column, raw cell, value of the expression) of the first candidate whose
-        expression is not blank; the cell is None when there is none.
-
-        Candidates: the distinct non-blank values of the column visible now, ascending (FIRST) or descending (LAST). The plain
-        variants evaluate the expression without a row-to-filter transition (only a CALCULATE inside it transitions); the ...VALUE
-        variants evaluate it with the transition (live Power BI, iteration 84)."""
-        source = arguments[0]
+    def nonblank_candidates(function: str, source: tuple[Any, ...]) -> tuple[dict[str, Any], str, bool, list[tuple[Any, Any]]]:
+        """(base table, column, typed cells?, [(raw cell, value)]) the distinct non-blank values of the column visible now, ascending
+        (FIRST) or descending (LAST)."""
         derived_source = False
         if source[0] == "reference":
             base, column = resolve_table(source[1], source[2])
@@ -5919,6 +5921,18 @@ def evaluate_measures(
             typed = raw if derived_source else typed_cell(base, column, raw)
             distinct.setdefault(cell_key(ascii_fold(typed) if isinstance(typed, str) else typed), (raw, typed))
         ordered = sorted(distinct.values(), key=lambda pair: column_order_key(pair[1]), reverse=function.startswith("LAST"))
+        return base, column, derived_source, ordered
+
+    def nonblank_pick(
+        function: str, arguments: tuple[tuple[Any, ...], ...],
+        candidates: tuple[dict[str, Any], str, bool, list[tuple[Any, Any]]] | None = None,
+    ) -> tuple[dict[str, Any], str, Any, Any]:
+        """FIRSTNONBLANK / LASTNONBLANK(+VALUE): (base table, column, raw cell, value of the expression) of the first candidate whose
+        expression is not blank; the cell is None when there is none.
+
+        The plain variants evaluate the expression without a row-to-filter transition (only a CALCULATE inside it transitions); the
+        ...VALUE variants evaluate it with the transition (live Power BI, iteration 84)."""
+        base, column, derived_source, ordered = candidates or nonblank_candidates(function, arguments[0])
         single = dict(base)
         single["headers"] = [column]
         single["lineage"] = {column: (base, column)}
@@ -5935,8 +5949,10 @@ def evaluate_measures(
                 return base, column, raw, result
         return base, column, None, None
 
-    def nonblank_table(node: tuple[Any, ...]) -> tuple[dict[str, Any], list[dict[str, Any]]]:
-        base, column, raw, _value = nonblank_pick(node[1], node[2])
+    def nonblank_table(
+        node: tuple[Any, ...], candidates: tuple[dict[str, Any], str, bool, list[tuple[Any, Any]]] | None = None,
+    ) -> tuple[dict[str, Any], list[dict[str, Any]]]:
+        base, column, raw, _value = nonblank_pick(node[1], node[2], candidates)
         single = dict(base)
         single["headers"] = [column]
         single["lineage"] = {column: (base, column)}
@@ -5984,6 +6000,8 @@ def evaluate_measures(
             return date_set_table(argument)
         if argument[0] == "call" and argument[1] in {"FIRSTNONBLANK", "LASTNONBLANK"}:
             return nonblank_table(argument)
+        if argument[0] == "tablevalue":  # a table already computed (see evaluate_with_general_filters)
+            return argument[1]
         if argument[0] == "call" and argument[1] in _TABLE_FUNCTION_ARITY:
             return table_function_value(argument)
         if argument[0] == "var":
@@ -9029,6 +9047,7 @@ def evaluate_measures(
             additions: list[tuple[bool, dict[str, tuple[dict[str, Any], dict[str, frozenset[int]], list[dict[str, Any]]]]]] = []
             table_filters_present = False
             late_sets: list[tuple[bool, tuple[Any, ...]]] = []
+            late_nonblank: list[tuple[bool, tuple[Any, ...]]] = []
             for argument in filter_arguments:  # every filter is evaluated in the original filter context
                 keep, node = False, argument
                 while node[:2] == ("call", "KEEPFILTERS") and len(node[2]) == 1:
@@ -9037,6 +9056,9 @@ def evaluate_measures(
                     clearing.append(node)
                 elif _is_late_time_set(node):
                     late_sets.append((keep, node))
+                    table_filters_present = True
+                elif _is_late_nonblank(node):
+                    late_nonblank.append((keep, node))
                     table_filters_present = True
                 elif _is_general_table_filter(node):
                     additions.append((keep, general_table_filter_sets(node)))
@@ -9122,6 +9144,15 @@ def evaluate_measures(
                 if modifier[1] == "ALLSELECTED":
                     return evaluate_with_allselected(("thunk", lambda: clear_then_apply(index + 1)), modifier)
                 return evaluate_with_filter_clear(("thunk", lambda: clear_then_apply(index + 1)), modifier, modifier[1])
+
+            for keep, node in late_nonblank:
+                # FIRSTNONBLANK(column, expression): the candidates are the column's values after the transition, the expression
+                # is read before it (live Power BI, iteration 84)
+                candidates = (
+                    with_column_filters(transition, lambda node=node: nonblank_candidates(node[1], node[2][0]), True)
+                    if transition else nonblank_candidates(node[1], node[2][0])
+                )
+                additions.append((keep, general_table_filter_sets(("tablevalue", nonblank_table(node, candidates)))))
 
             def read_late_sets() -> Any:
                 for keep, node in late_sets:  # a date column handed to a time function is read after the transition
