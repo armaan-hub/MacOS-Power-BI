@@ -4294,9 +4294,10 @@ def evaluate_measures(
                     {header.casefold() for header in source_context["headers"]},
                     True,
                 )
-                if function == "ALL" and len(source_rows) != len(source_context["rows"]):
+                if function == "ALL" and len(source_rows) != len(source_context["rows"]) and source_context["id"] not in unknown_member_ids:
                     # live Power BI: ALL(column) returns every value of the column, also those a both-way relationship of another
-                    # table's filter would hide (ZB: 5 products under Year=2023, not 3)
+                    # table's filter would hide (ZB: 5 products under Year=2023, not 3).  A table with an unknown member keeps the
+                    # older, separately measured rule (Iteration 83: the member and the keys follow the both-way child filters).
                     source_rows = list(source_context["rows"])
                 if function == "ALL" and unknown_member_passes_remaining_filters(
                     source_context,
@@ -9558,14 +9559,10 @@ def evaluate_measures(
             )) is not None
         ]
         if date_filter_function == "DATEADD":
-            interval_value = as_number(evaluate(date_filter_arguments[1]))
-            if interval_value != interval_value.to_integral_value():
-                raise MeasureError("DATEADD number_of_intervals must be a whole number.")
-            if abs(interval_value) > Decimal(3_652_059):
-                raise MeasureError("DATEADD number_of_intervals is outside the supported range.")
+            interval_value = _scalar_count(evaluate(date_filter_arguments[1]))  # live Power BI rounds a fractional count half away from zero
             shifted_dates = _dateadd_dates(
                 visible_dates,
-                int(interval_value),
+                interval_value,
                 str(date_filter_arguments[2][1]),
                 [d for i, r in enumerate(date_table["rows"], 1) if (d := _parse_measure_date(r.get(actual_date_column), actual_date_column, i)) is not None],
             )
@@ -9673,11 +9670,7 @@ def evaluate_measures(
                 visible_dates, available_dates, year_end
             )
         elif date_filter_function == "PARALLELPERIOD":
-            interval_value = as_number(evaluate(date_filter_arguments[1]))
-            if interval_value != interval_value.to_integral_value():
-                raise MeasureError("PARALLELPERIOD number_of_intervals must be a whole number.")
-            if abs(interval_value) > Decimal(3_652_059):
-                raise MeasureError("PARALLELPERIOD number_of_intervals is outside the supported range.")
+            interval_value = _scalar_count(evaluate(date_filter_arguments[1]))
             available_dates = [
                 parsed_date
                 for row_index, row in enumerate(date_table["rows"], 1)
@@ -9686,7 +9679,7 @@ def evaluate_measures(
                 )) is not None
             ]
             shifted_dates = _parallelperiod_dates(
-                visible_dates, available_dates, int(interval_value), str(date_filter_arguments[2][1])
+                visible_dates, available_dates, interval_value, str(date_filter_arguments[2][1])
             )
         elif date_filter_function == "DATESQTD":
             shifted_dates = set()
@@ -9927,8 +9920,8 @@ def evaluate_measures(
             if node[1] in {"+", "-"} and result is not None and (
                 dax_dates.is_date(left) or dax_dates.is_date(right)
             ):
-                if node[1] == "-" and not dax_dates.is_date(left):
-                    return result  # live Power BI: a number minus a date is a plain number
+                if node[1] == "-" and not dax_dates.is_date(left) and node[2][0] in {"number", "blank"}:
+                    return result  # live Power BI: a number literal minus a date is a plain number (other lefts may be dates the evaluator lost the type of)
                 return dax_dates.DaxDateTime(result)
             return result
         if kind == "logical":
