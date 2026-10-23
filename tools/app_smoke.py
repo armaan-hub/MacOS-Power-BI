@@ -103,3 +103,7 @@ reopened = StudioController(app, QSettings(str(OUT / "settings2.ini"), QSettings
 print("reopen:", reopened.open_project_path(proj), "| rows:", reopened.rowCount, "| tables:", reopened.modelTables,
       "| measures:", [m["name"] for m in reopened.modelMeasures], "| visuals:", [v["title"] for v in reopened.activeVisualObjects])
 print("card after reopen:", reopened.visualCardData("Total value")["value"])
+
+# Everything is printed; skip Qt's interpreter-shutdown teardown, which can segfault on the live QML items and pop up a macOS crash window.
+sys.stdout.flush(); sys.stderr.flush()
+os._exit(0)
