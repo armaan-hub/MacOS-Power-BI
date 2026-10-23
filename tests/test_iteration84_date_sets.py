@@ -38,6 +38,7 @@ KNOWN_REFUSALS = (
     "Iterator expressions can reference columns from their iterated table only",
     "The iterated date set has one column",
     "A FIRSTNONBLANK inside a date set under a row context is not supported",
+    "Table-valued functions are not supported in measure expressions",  # a bare PREVIOUSMONTH(Date) as a measure: refused since iteration 80
 )
 
 
@@ -57,7 +58,7 @@ class SavedPowerBiAnswers(unittest.TestCase):
         self.check("C04", 0)
 
     def test_c05_next_previous(self) -> None:
-        self.check("C05", 45)
+        self.check("C05", 54)
 
     def test_c07_fact_date_columns(self) -> None:
         self.check("C07", 3)
