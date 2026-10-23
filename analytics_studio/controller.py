@@ -7840,6 +7840,11 @@ class StudioController(QObject):
                 parameters=current_parameters,
                 query_functions=self._project.get("query_functions", []),
                 source_column_types=source_column_types,
+                step_names=[
+                    str(item.get("name", "")).strip() or None
+                    for item in source.get("step_metadata", [])
+                    if isinstance(item, dict)
+                ],
             )
         except (OSError, ValueError) as exc:
             self._set_status(f"Could not open Power Query M editor: {exc}")
