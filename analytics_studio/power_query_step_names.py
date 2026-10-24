@@ -113,3 +113,56 @@ def assign_step_names(
         taken.add(candidate.casefold())
         names.append(candidate)
     return names
+
+
+def carry_step_metadata(
+    old_bindings: list[str],
+    old_ops: list[str],
+    old_metadata: list[dict[str, str]],
+    new_bindings: list[str],
+    new_ops: list[str],
+) -> list[dict[str, str]]:
+    """Follow custom step names/descriptions through a text edit by step identity.
+
+    ``*_bindings`` hold the let-binding name each step had (one per step).  A step keeps its
+    metadata when its binding name is unchanged; a binding renamed in place (the surrounding
+    steps are unchanged) keeps the description and takes the new name.  A step whose operation
+    changed, or that is new, starts empty.  Nothing is ever carried by position alone.
+    """
+    from copy import deepcopy
+    from difflib import SequenceMatcher
+
+    result: list[dict[str, str]] = [{} for _ in new_ops]
+    if (
+        len(old_bindings) != len(old_ops)
+        or len(new_bindings) != len(new_ops)
+        or len(old_metadata) < len(old_ops)
+    ):
+        if old_ops == new_ops and len(old_metadata) >= len(new_ops):
+            return [deepcopy(item) for item in old_metadata[:len(new_ops)]]  # nothing moved
+        return result
+    matcher = SequenceMatcher(
+        None,
+        [name.casefold() for name in old_bindings],
+        [name.casefold() for name in new_bindings],
+        autojunk=False,
+    )
+    for tag, i1, i2, j1, j2 in matcher.get_opcodes():
+        if tag == "equal":
+            pairs = [(i1 + k, j1 + k, False) for k in range(i2 - i1)]
+        elif tag == "replace" and i2 - i1 == j2 - j1:
+            pairs = [(i1 + k, j1 + k, True) for k in range(i2 - i1)]
+        else:
+            continue
+        for old_index, new_index, renamed in pairs:
+            if old_ops[old_index] != new_ops[new_index]:
+                continue
+            item = deepcopy(old_metadata[old_index])
+            if renamed:
+                item.pop("name", None)
+                new_name = new_bindings[new_index]
+                if sum(1 for name in new_bindings if name.casefold() == new_name.casefold()) == 1:
+                    item["name"] = new_name
+            if item:
+                result[new_index] = item
+    return result

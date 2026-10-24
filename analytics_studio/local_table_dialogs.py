@@ -72,7 +72,11 @@ from analytics_studio.dialog_theme import apply_light_dialog_theme
 from analytics_studio.file_import import MAX_DATA_ROWS, ImportCandidate, lineaged_row
 from analytics_studio.import_preview_dialog import ImportPreviewTableModel
 from analytics_studio.inline_data import parse_pasted_table, source_from_candidate
-from analytics_studio.power_query_step_names import assign_step_names, is_known_power_bi_step
+from analytics_studio.power_query_step_names import (
+    assign_step_names,
+    carry_step_metadata,
+    is_known_power_bi_step,
+)
 from analytics_studio.power_query_m import (
     PowerQueryMEditorDialog,
     PowerQueryMScriptError,
@@ -10114,14 +10118,16 @@ class TransformDataDialog(QDialog):
                 if source_query_names is not None:
                     state["m_script_source_names"] = list(source_query_names)
             state["preview_candidate"] = dialog.candidate
-        self._step_metadata = [
-            deepcopy(previous_metadata[index])
-            if index < len(previous_steps)
-            and index < len(previous_metadata)
-            and previous_steps[index].get("op") == step.get("op")
-            else {}
-            for index, step in enumerate(self._steps)
-        ]
+        self._step_metadata = validate_applied_step_metadata(
+            carry_step_metadata(
+                dialog.initial_step_bindings,
+                [str(step.get("op")) for step in previous_steps],
+                previous_metadata,
+                dialog.step_bindings or [],
+                [str(step.get("op")) for step in self._steps],
+            ),
+            len(self._steps),
+        )
         self._preview_candidate = dialog.candidate
         self._render_steps()
         self._refresh_preview()
