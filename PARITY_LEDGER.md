@@ -1,6 +1,6 @@
 # Parity ledger: Analytics Studio vs Power BI Desktop
 
-Generated 2026-10-23 by `tools/parity_check.py`. Power BI answers were saved from Power BI Desktop 2.157.879.0 (26.08)+da30fe74eb0b8a8786ab7326b69c400a0e951831; the gate replays them against the app on every run.
+Generated 2026-10-24 by `tools/parity_check.py`. Power BI answers were saved from Power BI Desktop 2.157.879.0 (26.08)+da30fe74eb0b8a8786ab7326b69c400a0e951831; the gate replays them against the app on every run.
 
 Rule: a slice is finished only when it is compared with Power BI, its items are locked here (`--accept`) and the gate passes.  Locked items are never re-investigated, only guarded.
 
@@ -26,17 +26,17 @@ Rule: a slice is finished only when it is compared with Power BI, its items are 
 | dax_battery_allselected | 110 | 0 | 0 | 0 | 0 |
 | dax_battery_var_tables | 209 | 0 | 0 | 0 | 0 |
 | dax_battery_earlier_arith | 238 | 0 | 0 | 0 | 0 |
-| dax_battery_boolean_scalar_rhs | 488 | 4 | 25 | 0 | 0 |
+| dax_battery_boolean_scalar_rhs | 492 | 0 | 25 | 0 | 0 |
 | dax_battery_filter_transition | 575 | 0 | 0 | 0 | 0 |
 | dax_battery_boolean_filter_functions | 200 | 0 | 8 | 0 | 0 |
-| dax_battery_sdet_filters | 553 | 7 | 100 | 0 | 0 |
+| dax_battery_sdet_filters | 560 | 0 | 100 | 0 | 0 |
 | dax_battery_comments_booleans | 410 | 0 | 22 | 0 | 0 |
 | dax_battery_round2_scope | 132 | 0 | 7 | 0 | 0 |
-| dax_battery_round2 | 2313 | 12 | 105 | 0 | 0 |
+| dax_battery_round2 | 2325 | 0 | 105 | 0 | 0 |
 | dax_battery_critic_shapes | 43 | 0 | 52 | 0 | 0 |
-| dax_battery_round3 | 2246 | 2 | 116 | 0 | 0 |
+| dax_battery_round3 | 2248 | 0 | 116 | 0 | 0 |
 | dax_battery_round4 | 7499 | 0 | 679 | 0 | 0 |
-| dax_battery_round5 | 1167 | 0 | 54 | 0 | 0 |
+| dax_battery_round5 | 1168 | 0 | 53 | 0 | 0 |
 | dax_battery_diff_groups | 484 | 0 | 0 | 0 | 0 |
 | dax_battery_iferror_hard_errors | 165 | 0 | 0 | 0 | 0 |
 | dax_battery_concatenatex_order | 189 | 0 | 0 | 0 | 0 |
@@ -48,7 +48,7 @@ Rule: a slice is finished only when it is compared with Power BI, its items are 
 | dax_battery_allselected_critic2 | 7420 | 0 | 0 | 0 | 0 |
 | table VAT | 575 | 0 | 0 | 0 | 0 |
 
-## Pending work (1172): Power BI answers, the app refuses
+## Pending work (1171): Power BI answers, the app refuses
 
 - `CALCULATE(COUNTROWS(Facts),COUNTROWS(CALCULATETABLE(Facts,Facts[Region]="East"))<Facts[Quantity])` (Power BI: `4`) [dax_battery_boolean_scalar_rhs]
 - `CALCULATE(CALCULATE(COUNTROWS(Facts),Facts[Quantity]>COUNTROWS(CALCULATETABLE(Facts,Facts[Region]="East"))),Facts[Region]="East")` (Power BI: `2`) [dax_battery_boolean_scalar_rhs]
@@ -1189,7 +1189,6 @@ Rule: a slice is finished only when it is compared with Power BI, its items are 
 - `COUNTAX(Facts,IF(Facts[Quantity]>4,IF(Facts[Quantity]>4,Facts[Sales],FALSE()),IF(Facts[Region]="East",BLANK(),SWITCH(TRUE(),Facts[Quantity]>2,7,Facts[Quantity]>=0,Facts[Quantity]>1))))` (Power BI: `4`) [dax_battery_round5]
 - `COUNTAX(Facts,IFERROR(Facts[Quantity]>1,Facts[Sales]))` (Power BI: `6`) [dax_battery_round5]
 - `COUNTAX(Facts,IF(Facts[Region]="East",DATE(2020,1,1),TRUE()))` (Power BI: `6`) [dax_battery_round5]
-- `CONCATENATEX(Facts,Facts[Quantity],"|",IF(Facts[Quantity]>2,DATE(2020,1,1),7),ASC,Facts[Quantity],DESC)` (Power BI: `2|1|0|5|4|3`) [dax_battery_round5]
 - `MAXX(Facts,IF(Facts[Quantity]>2,7,"x"))` (Power BI: `7`) [dax_battery_round5]
 - `MINX(Facts,IF(Facts[Quantity]>2,7,"x"))` (Power BI: `7`) [dax_battery_round5]
 - `MAXX(Facts,IF(Facts[Quantity]>2,TRUE(),7))` (Power BI: `7`) [dax_battery_round5]
@@ -1225,11 +1224,6 @@ Rule: a slice is finished only when it is compared with Power BI, its items are 
 - `NOT 1=1` (Power BI: `False`) [dax_battery_not_operator]
 - `NOT 1=2 && 1=1` (Power BI: `True`) [dax_battery_not_operator]
 - `NOT 1=2 || 1=2` (Power BI: `True`) [dax_battery_not_operator]
-
-## Failing
-
-- REGRESSION (was locked) dax_battery_round5:CONCATENATEX(Facts,Facts[Quantity],"|",IF(Facts[Quantity]>2,DATE(2020,1,1),7),ASC,Facts[Quantity],DESC): Power BI 2|1|0|5|4|3 vs app LOCAL-REJECT:A date mixed with a number in one result is not supported in the lo
-- pytest suite failed
 
 ## Known deviations from Power BI (14): imprecise or unspecified in Power BI, each explained
 

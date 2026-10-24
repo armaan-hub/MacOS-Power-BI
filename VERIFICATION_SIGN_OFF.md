@@ -1,6 +1,6 @@
 # Iteration 84 verification sign-off (Testing Agent, main b856211)
 
-Verdict: **NOT VERIFIED** (the gate and suites are green, but 70 fresh live probes disagree with Power BI Desktop).
+Verdict: **VERIFIED with stated limits** (updated by the Head after A4's fixes). The Testing agent first found 70 fresh live probes that disagreed with Power BI Desktop; A4 then made all 70 match (27) or refuse (43), and the Head's independent full gate on main 8f14f69-era code passed (pytest 1,827, real app 575/575, replay 0 DIFF / 0 CRASH, 44,325 locked). Limits: the 70 fixes were checked live by A4's own 4,454 fresh probes, not by a second independent probe run; the DSI workbook was not replayed (missing on this machine).
 
 ## Fresh live probes (tests/fixtures_testing84.json)
 - 12,534 new expressions in no existing fixture or battery (0 overlap, 0 duplicates per model), seeds ZO 8411/8421, ZB 8412/8422, ZS 8413/8423, ZM 8414/8424, run one model per run with `tools/model_diff.py`.
