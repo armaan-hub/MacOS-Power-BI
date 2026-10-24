@@ -175,7 +175,7 @@ Rectangle {
                         horizontalAlignment: Text.AlignHCenter
                         verticalAlignment: Text.AlignVCenter
                     }
-                    onClicked: root.bar.cancel()
+                    onClicked: root.bar.requestCancel()
                 }
                 Button {
                     objectName: "formulaBarCommit"
@@ -282,7 +282,7 @@ Rectangle {
                                 if (popupOpen)
                                     completionPopup.close()
                                 else
-                                    root.bar.cancel()
+                                    root.bar.requestCancel()
                                 event.accepted = true
                             } else if (event.key === Qt.Key_Return || event.key === Qt.Key_Enter) {
                                 if (popupOpen) {

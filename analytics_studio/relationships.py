@@ -62,6 +62,8 @@ def propagate_relationship_filters(
     filter_table_ids: set[str],
     unknown_selected: dict[str, bool] | None = None,
     diagnostics: dict[str, set[str]] | None = None,
+    peer_blank: set[str] | None = None,
+    many_blank: set[str] | None = None,
 ) -> dict[str, list[dict[str, Any]]]:
     """Propagate explicitly filtered rows across active, loaded relationships.
 
@@ -70,7 +72,14 @@ def propagate_relationship_filters(
     side of the relationship whose key has no match in the one-side table are reached through that member (live Power BI:
     CALCULATE(SUM(Fact[Amt]), Dim[Cat] <> "A") keeps the facts of unknown products). A filtered table missing from the
     mapping, or mapped to True, selects it; a table narrowed by another table's filter keeps it only while a visible row of
-    that table is such an orphan."""
+    that table is such an orphan.
+
+    peer_blank: filtered tables whose blank member was reached only as the partner of an orphan row of a one-to-one table (a row context
+    of W[k5] with no partner in U selects U's blank member).  Live Power BI (iteration 84, testing agent): that member shows the partner's
+    orphan rows but not the rows of a many-side table whose key has no match in it (SUMX(W, CALCULATE(COUNTROWS(F))) is BLANK for k5).
+
+    many_blank: filtered tables whose blank member was reached from a row of a many-side table whose key has no match in them (a fact row with
+    an unknown key).  That member does not show the orphan rows of the table's one-to-one partner (SUMX(F, CALCULATE(COUNTROWS(W))) is 4, not 5)."""
     tables_by_id: dict[str, dict[str, Any]] = {}
     rows_by_id: dict[str, list[dict[str, Any]]] = {}
     for table in tables:
@@ -217,7 +226,7 @@ def propagate_relationship_filters(
         # live Power BI: with ambiguous routes every filtered table pushes ITS OWN filter along its shortest routes; what each
         # filter leaves on a table is intersected (a table narrowed by another filter's detour does not push that narrowing on)
         per_root = [
-            propagate_relationship_filters(tables, relationships, {root_id}, unknown_selected)
+            propagate_relationship_filters(tables, relationships, {root_id}, unknown_selected, peer_blank=peer_blank, many_blank=many_blank)
             for root_id in sorted(filter_roots)
         ]
         merged: dict[str, list[dict[str, Any]]] = {}
@@ -259,7 +268,10 @@ def propagate_relationship_filters(
                 for row in rows_by_id[source_id]
             }
             current_target_rows = rows_by_id[target_id]
-            if source_role in {"one", "peer1"} and unknown_state.get(source_id, True):
+            source_unknown = unknown_state.get(source_id, True) and not (
+                (source_role == "one" and source_id in (peer_blank or ())) or (source_role == "peer1" and source_id in (many_blank or ()))
+            )
+            if source_role in {"one", "peer1"} and source_unknown:
                 known = all_keys(source_id, source_column, source_type)
                 filtered_target_rows = [
                     row for row in current_target_rows
@@ -275,7 +287,7 @@ def propagate_relationship_filters(
                 rows_by_id[target_id] = filtered_target_rows
             if source_role in {"one", "peer1"}:  # the blank member of the filtered table relates to the blank member of its source only
                 before = unknown_state.get(target_id, True)
-                after = before and unknown_state.get(source_id, True)
+                after = before and source_unknown
                 if source_role == "peer1" and before and not after and target_id in filter_roots:
                     # one-to-one ends are peers: the blank member of the partner also stays while a visible row of the source has no match in it
                     # (live Power BI, iteration 84: CALCULATE(COUNTROWS(DISTINCT(F[Id])), U[K]="k4", W[Y]<>"y3") counts the F row of U's orphan k4)

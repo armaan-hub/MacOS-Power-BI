@@ -66,10 +66,14 @@ class BlankSet(frozenset):
     """Allowed row indexes of one column that also select the virtual blank member (a row of BLANKs) when blank is true."""
 
     blank: bool = False
+    peer: bool = False  # the blank member was reached as the partner of an orphan row of a one-to-one table (it keeps no many-side orphans)
+    many: bool = False  # the blank member was reached from a many-side row with an unknown key (it keeps no one-to-one partner orphans)
 
-    def __new__(cls, rows: Iterable[int] = (), blank: bool = False) -> "BlankSet":
+    def __new__(cls, rows: Iterable[int] = (), blank: bool = False, peer: bool = False, many: bool = False) -> "BlankSet":
         instance = super().__new__(cls, rows)
         instance.blank = blank
+        instance.peer = peer
+        instance.many = many
         return instance
 
 
@@ -1524,6 +1528,56 @@ def _contains_refused_call_outside_x_iterator(node: Any) -> bool:
         if node[1] in _BOOLEAN_FILTER_REFUSED_CALLS:
             return True
     return any(isinstance(child, tuple) and _contains_refused_call_outside_x_iterator(child) for child in node)
+
+
+def _numeric_by_construction(node: Any) -> bool:
+    """A call whose result is a number even when it is BLANK (DIVIDE, SUMX, SUM ...): SWITCH compares its type with the subject's."""
+    return isinstance(node, tuple) and len(node) > 1 and node[0] == "call" and node[1] in {
+        "DIVIDE", "SUMX", "SUM", "AVERAGEX", "AVERAGE", "MAXX", "MINX", "MAX", "MIN", "COUNTX", "COUNTROWS", "COUNT", "DISTINCTCOUNT",
+        "TOTALMTD", "TOTALQTD", "TOTALYTD", "CALCULATE",
+    }
+
+
+_UNTAKEN_BRANCH_ERRORS = (
+    "Iterator expressions can reference columns from their iterated table only",  # live: a single value for the column cannot be determined
+    "cannot validate first",
+    "needs a Date or DateTime column",  # TOTALYTD(.., text column)
+)
+
+
+def _bare_column_as_table(node: Any) -> bool:
+    """Whether TOPN / FILTER / an X-iterator is given a plain column where a table belongs (Power BI: a single value for the column cannot be determined)."""
+    if not isinstance(node, tuple) or not node:
+        return False
+    if node[0] == "call":
+        position = 1 if node[1] == "TOPN" else 0 if node[1] in {"FILTER", "SUMX", "AVERAGEX", "MAXX", "MINX", "COUNTX", "COUNTAX", "CONCATENATEX"} else None
+        if position is not None and len(node[2]) > position and isinstance(node[2][position], tuple) and node[2][position][0] == "reference" and node[2][position][1]:
+            return True
+    children = node if isinstance(node[0], tuple) else node[1:]
+    return any(_bare_column_as_table(child) for child in children if isinstance(child, tuple))
+
+
+def _keepfilters_inside_time_function(node: Any) -> bool:
+    """Whether KEEPFILTERS sits inside a date-set function (PREVIOUSQUARTER(KEEPFILTERS(Cal[Date]))): a Power BI error wherever it is written."""
+    if not isinstance(node, tuple) or not node:
+        return False
+    if node[0] == "call" and node[1] in _TIME_FILTER_FUNCTIONS and any(
+        isinstance(argument, tuple) and argument[:2] == ("call", "KEEPFILTERS") for argument in node[2]
+    ):
+        return True
+    children = node if isinstance(node[0], tuple) else node[1:]
+    return any(_keepfilters_inside_time_function(child) for child in children if isinstance(child, tuple))
+
+
+def _iterator_body_reads_a_table_column(node: Any) -> bool:
+    """Whether an X-iterator anywhere in this expression has a body that reads a column by table name outside an aggregation."""
+    if not isinstance(node, tuple) or not node:
+        return False
+    if node[0] == "call" and node[1] in {"SUMX", "AVERAGEX", "MAXX", "MINX", "COUNTX", "COUNTAX", "CONCATENATEX"} and len(node[2]) >= 2:
+        if any(reference[1] for reference in _direct_column_references(node[2][1])):
+            return True
+    children = node if isinstance(node[0], tuple) else node[1:]
+    return any(_iterator_body_reads_a_table_column(child) for child in children if isinstance(child, tuple))
 
 
 def _iter_reference_nodes(node: Any) -> Iterable[tuple[Any, ...]]:
@@ -4002,6 +4056,42 @@ def evaluate_measures(
             ) and any(one_to_one_unmatched(end)[0] for end in ends):
                 raise MeasureError(f"{what} over a table of a one-to-one relationship with unmatched rows is not supported while it is filtered in the local engine.")
 
+    def refuse_one_to_one_values_iteration(table_node: tuple[Any, ...]) -> None:
+        """Live Power BI (iteration 84, testing agent): SUMX(VALUES(W[Y]), CALCULATE(SUM(F[Amt]))) with the partner U filtered so that one of
+        its rows without a partner in W stays visible adds the blank member of W to the iteration (CALCULATE(.., U[K]="k4") is 16 where
+        COUNTROWS(VALUES(W[Y])) and CONCATENATEX over the same VALUES list no blank).  Which functions list it is not modelled, so this is refused."""
+        if table_node[0] != "table_call" or table_node[1] not in {"VALUES", "DISTINCT"} or not table_node[2]:
+            return
+        source = table_node[2]
+        try:
+            if source[0] == "reference":
+                iterated = resolve_table(source[1], source[2])[0]
+            elif source[0] == "table":
+                iterated = resolve_table_context(str(source[1]))
+            else:
+                return
+        except MeasureError:
+            return
+        for relationship in relationship_definitions:
+            if not isinstance(relationship, dict) or not relationship.get("is_active") or relationship.get("cardinality") != "one_to_one":
+                continue
+            ends = (str(relationship.get("from_table_id")), str(relationship.get("to_table_id")))
+            if iterated["id"] not in ends or len(set(ends)) != 2:
+                continue
+            partner = next(end for end in ends if end != iterated["id"])
+            held = evaluation_contexts_by_id.get(iterated["id"], {})
+            if held.get("filter_column_rows") and not eff_transition.get(iterated["id"]) and all(
+                isinstance(rows, BlankSet) and rows.blank and rows.peer for rows in held["filter_column_rows"].values()
+            ):  # the iterated table was reached through the orphan row of its partner by a table filter (a fact filter FILTER(F, ..))
+                raise MeasureError("Iterating the values of a table of a one-to-one relationship narrowed through its partner's orphan row is not supported in the local engine.")
+            if partner not in evaluation_filter_ids or partner not in contexts_by_id:
+                continue
+            own = one_to_one_unmatched(partner)[0]
+            partner_rows = contexts_by_id[partner]["rows"]
+            orphans = {id(partner_rows[index]) for index in own}
+            if any(id(row) in orphans for row in rows_by_table_id.get(partner, ())):
+                raise MeasureError("Iterating the values of a table of a one-to-one relationship whose filtered partner keeps rows without a partner is not supported in the local engine.")
+
     def refuse_one_to_one_pair_filters(tables: list[dict[str, Any]], filter_table_ids: set[Any]) -> None:
         """Live Power BI (iteration 84, critic; fresh ZM probes): when a filter on one table of a one-to-one relationship keeps only rows that
         have no partner and the filter on the other table keeps real rows and selects its own blank member, which blank members and orphan rows
@@ -4043,7 +4133,17 @@ def evaluate_measures(
             str(table.get("id")): own_unknown_member_selected(table, str(table.get("id")) in ignored)
             for table in tables if table.get("id") in filter_table_ids and table.get("id") in unknown_member_ids
         }
-        return _propagate_relationship_filters(tables, relationships, filter_table_ids, selected)
+        peer_blank = {
+            str(table.get("id")) for table in tables
+            if table.get("id") in filter_table_ids and table.get("filter_column_rows")
+            and all(getattr(rows, "peer", False) for rows in table["filter_column_rows"].values())
+        }
+        many_blank = {
+            str(table.get("id")) for table in tables
+            if table.get("id") in filter_table_ids and table.get("filter_column_rows")
+            and all(getattr(rows, "many", False) for rows in table["filter_column_rows"].values())
+        }
+        return _propagate_relationship_filters(tables, relationships, filter_table_ids, selected, peer_blank=peer_blank, many_blank=many_blank)
 
     try:
         rows_by_table_id = propagate_relationship_filters(
@@ -5125,6 +5225,8 @@ def evaluate_measures(
                     raise MeasureError(f"Function '{function}' cannot add column [{new_name}], as it has the same name as an existing column.")
                 explicit_taken.add(bucket)
                 taken_names.add(new_name.casefold())
+            if not rows:
+                refuse_foreign_columns_of_empty_iteration(context, *expressions)
             lineage = base_lineage(context) if add else {}
             headers = (list(context["headers"]) if add else []) + names
             out_rows: list[dict[str, Any]] = []
@@ -5242,6 +5344,8 @@ def evaluate_measures(
                         descending = order[1] == 0 or order[1] is False  # 0 / FALSE sort descending
                         index += 1
                 keys_spec.append((expression, descending))
+            if not rows:
+                refuse_foreign_columns_of_empty_iteration(context, *(expression for expression, _descending in keys_spec))
             if count <= 0 or not rows:
                 return context, []
             if not keys_spec:  # no order expression: the first n rows, no ties
@@ -6291,9 +6395,32 @@ def evaluate_measures(
         single["single_column_set"] = True
         return single, ([] if raw is None else [{column: raw}])
 
+    def refuse_foreign_columns_of_empty_iteration(context: dict[str, Any], *expressions: tuple[Any, ...]) -> None:
+        """Live Power BI (iteration 84, testing agent; 34 of 12,534 fresh probes): an iterator body that reads a column of a table other than
+        the iterated one is evaluated once without a row even when the iteration is empty, and fails with "a single value for column ...
+        cannot be determined" whenever the filter context holds several values of it (SUMX(FILTER(Cal, FALSE()), Fact[Amt]), the body of a
+        TOPN / FILTER / CONCATENATEX over an empty set, an untaken SWITCH branch).  The local engine only runs a body per row, so an empty
+        iteration would answer BLANK; the same refusal as for a non-empty iteration is raised instead."""
+        lineage = context.get("lineage") or {}
+        headers = {str(header).casefold() for header in context.get("headers", [])}
+        for expression in expressions:
+            for reference in _direct_column_references(expression):
+                if not reference[1]:
+                    continue  # a measure or a column of the iterated table
+                try:
+                    table, column = resolve_table(reference[1], reference[2])
+                except MeasureError:
+                    continue  # the evaluation of a non-empty iteration reports it
+                if table["id"] == context.get("id") and column.casefold() in headers:
+                    continue
+                if any(base["id"] == table["id"] and str(base_column).casefold() == column.casefold() for base, base_column in lineage.values()):
+                    continue
+                raise MeasureError("Iterator expressions can reference columns from their iterated table only.")
+
     def refuse_foreign_columns_of_empty_set(context: dict[str, Any], expression: tuple[Any, ...]) -> None:
         """Power BI rejects an iterator body that reads a column other than the one a date set holds, also when the set is empty
         (live: MAXX(NEXTDAY(Fact[Dt]), Fact[Ship]) and MAXX(set, Cal[Date]) are errors)."""
+        refuse_foreign_columns_of_empty_iteration(context, expression)
         if not context.get("single_column_set"):
             return
         lineage = next(iter(context.get("lineage", {}).values()), None)
@@ -6436,6 +6563,19 @@ def evaluate_measures(
                     unique_rows.append(source_row)
                 return context, unique_rows
             context, actual = resolve_table(source[1], source[2])
+            held = evaluation_contexts_by_id.get(context["id"], {})
+            if argument[1] == "VALUES" and held.get("filter_column_rows") and not eff_transition.get(context["id"]) and any(  # a table with a many-side child
+                isinstance(item, dict) and item.get("is_active") and (
+                    (item.get("cardinality") == "many_to_one" and str(item.get("to_table_id")) == context["id"])
+                    or (item.get("cardinality") == "one_to_many" and str(item.get("from_table_id")) == context["id"])
+                )
+                for item in relationship_definitions
+            ) and all(
+                getattr(rows, "peer", False) and rows.blank for rows in held["filter_column_rows"].values()
+            ):
+                # live Power BI (iteration 84, testing agent): CALCULATE(COUNTROWS(VALUES(U[K])), ALLNOBLANKROW(W)) is 3 where the blank member
+                # reached through W's orphan row would make 4: whether a one-to-one partner lists it is not modelled
+                raise MeasureError("VALUES of a table narrowed through the orphan row of its one-to-one partner is not supported in the local engine.")
             seen: set[tuple[Any, ...]] = set()
             value_rows: list[dict[str, Any]] = []
             for row_index, source_row in enumerate(rows_by_table_id[context["id"]], 1):
@@ -6463,6 +6603,12 @@ def evaluate_measures(
             return single_column, order_distinct_values(context, actual, value_rows) + unknown_row
         if argument[0] == "call" and argument[1] == "ALLEXCEPT":
             kept_context = resolve_table_context(str(argument[2][0][1]))
+            if any(  # live Power BI (iteration 84, testing agent): the blank member of a one-to-one partner is part of this table; not modelled
+                isinstance(item, dict) and item.get("is_active") and item.get("cardinality") == "one_to_one"
+                and kept_context["id"] in {str(item.get("from_table_id")), str(item.get("to_table_id"))}
+                for item in relationship_definitions
+            ):
+                raise MeasureError("ALLEXCEPT over a table of a one-to-one relationship is not supported in the local engine.")
             names_checked = [resolve_table(ref[1], ref[2])[1].casefold() for ref in argument[2][1:]]
             if len(set(names_checked)) != len(names_checked):
                 raise MeasureError("ALLEXCEPT was given the same column more than once.")
@@ -6497,6 +6643,8 @@ def evaluate_measures(
                 compile_table_filter_predicate(predicate, context, comparisons)
             except MeasureError:
                 # any row predicate: evaluate it for each row, with the row on the EARLIER stack
+                if not base_rows:
+                    refuse_foreign_columns_of_empty_iteration(context, predicate)
                 return context, [frame[1] for frame in iterate_rows(context, base_rows, "install") if conjuncts_pass(predicate, frame)]
             return context, [
                 row for position, row in enumerate(base_rows, 1)
@@ -8090,9 +8238,9 @@ def evaluate_measures(
                 )
             pair = tuple(sorted((left_context["id"], right_context["id"])))
             previous_index = table_pair_relationships.get(pair)
-            if previous_index is not None and previous_index != relationship_index:
-                raise MeasureError(
-                    "One CALCULATE call cannot target competing CROSSFILTER links between the same two tables."
+            if previous_index is not None:
+                raise MeasureError(  # live Power BI: a relationship's direction cannot be specified more than once within a single CALCULATE
+                    "One CALCULATE call cannot target the same CROSSFILTER link twice or competing links between the same two tables."
                 )
             table_pair_relationships[pair] = relationship_index
 
@@ -8235,6 +8383,7 @@ def evaluate_measures(
                 not isinstance(relationship, dict)
                 or relationship.get("relationship_version") != 1
                 or not (relationship.get("is_active") or include_inactive)
+                or relationship.get("filter_direction_override") == "none"  # live Power BI: CROSSFILTER(.., NONE) also stops a row context from reaching across
             ):
                 continue
             cardinality = relationship.get("cardinality")
@@ -8267,9 +8416,14 @@ def evaluate_measures(
         None for a table that stays unrestricted: some row points past it (a key with no partner belongs to the unknown
         member, which stays in the expanded table) or every row of it is pointed at."""
         reached: dict[str, frozenset[int] | None] = {}
-        queue: list[tuple[str, Iterable[int] | None]] = [(table_id, allowed)]
+        # (table, listed rows or None while unrestricted, the real rows the filtered rows point at).  A one-to-one partner is reached through
+        # the real rows only, whether or not an unmatched key keeps the table's own blank member (live Power BI, iteration 84 testing agent:
+        # CALCULATE(COUNTROWS(W), FILTER(F, F[Id]<=5)) is 3 and FILTER(F, F[Id]=6) is BLANK: the partner's orphan row is never reached)
+        own_blank = bool(getattr(allowed, "blank", False))  # the filter lists the table's own blank member (ALL(U)): its partner stays whole
+        allowed = list(allowed)
+        queue: list[tuple[str, Iterable[int] | None, Iterable[int] | None, bool]] = [(table_id, allowed, allowed, False)]
         while queue:
-            current_id, rows_here = queue.pop()
+            current_id, rows_here, real_rows, blank_up = queue.pop()
             current = contexts_by_id.get(current_id)
             if current is None:
                 continue
@@ -8277,22 +8431,37 @@ def evaluate_measures(
                 one_context = contexts_by_id.get(one_id)
                 if one_context is None or one_id == table_id or one_id in reached:
                     continue
-                if rows_here is None:
+                peer = any(
+                    isinstance(item, dict) and item.get("is_active") and item.get("cardinality") == "one_to_one"
+                    and {str(item.get("from_table_id")), str(item.get("to_table_id"))} == {current_id, one_id}
+                    for item in relationship_definitions
+                )
+                source_rows = real_rows if peer else rows_here
+                if peer and own_blank and current_id == table_id:
+                    source_rows = None
+                if source_rows is None:
                     reached[one_id] = None
-                    queue.append((one_id, None))
+                    queue.append((one_id, None, None, True))
                     continue
                 index = one_side_value_index(one_context, there_column)
                 found: set[int] = set()
                 unmatched = False
-                for position in rows_here:
+                for position in source_rows:
                     matches = index.get(cell_key(typed_cell(current, here_column, current["rows"][position].get(here_column))))
                     if matches:
                         found |= matches
                     else:
                         unmatched = True
                 # a table every row of which is pointed at needs no filter (nothing to narrow), like one with an unknown member
-                reached[one_id] = None if unmatched or len(found) == len(one_context["rows"]) else frozenset(found)
-                queue.append((one_id, None if unmatched else frozenset(found)))
+                if peer:
+                    full = len(found) == len(one_context["rows"])
+                    # the partner's blank member is listed when a real row has no partner or the table before it listed its own
+                    kept = BlankSet(found, unmatched or blank_up, unmatched and not blank_up) if unmatched or blank_up else frozenset(found)
+                    reached[one_id] = None if full else kept
+                    queue.append((one_id, None if full else kept, frozenset(found), bool(getattr(kept, "blank", False))))
+                else:
+                    reached[one_id] = None if unmatched or len(found) == len(one_context["rows"]) else frozenset(found)
+                    queue.append((one_id, None if unmatched else frozenset(found), frozenset(found), unmatched))
         return reached
 
     def narrow_one_side_tables(
@@ -8313,6 +8482,16 @@ def evaluate_measures(
                 updated_filter_roots.discard(one_id)
                 continue
             target["filter_rows"] = [row for position, row in enumerate(target["rows"]) if position in one_rows]
+            if isinstance(one_rows, BlankSet) and one_rows.blank:
+                # a one-to-one partner of a row without a partner lists its own blank member (live Power BI: the partner's orphan rows stay
+                # visible) and is filtered column by column, so a later filter on one column replaces only that column
+                for state in ("filter_table_rows", "filter_shapes", "filter_column_extra"):
+                    target.pop(state, None)
+                target["filter_column_rows"] = {header: one_rows for header in target["headers"]}
+                target["filter_column_blank_allowed"] = {header: True for header in target["headers"]}
+                target["filter_context_complete"] = True
+                updated_filter_roots.add(one_id)
+                continue
             target["filter_table_rows"] = frozenset(one_rows)  # kept as a set of whole rows, like the filtered table itself
             target.pop("filter_shapes", None)
             target.pop("filter_column_extra", None)
@@ -9024,7 +9203,12 @@ def evaluate_measures(
             key_value = row.get(from_column) if typed else typed_cell(many_context, from_column, row.get(from_column))
             matches = one_side_value_index(one_context, to_column).get(cell_key(key_value))
             if not matches:  # an unmatched key belongs to the unknown member: the one side is filtered to that member only
-                transitioned[one_id] = (one_context, {header: BlankSet((), True) for header in one_context["headers"]})
+                peer = any(
+                    isinstance(item, dict) and item.get("is_active") and item.get("cardinality") == "one_to_one"
+                    and {str(item.get("from_table_id")), str(item.get("to_table_id"))} == {table_id, one_id}
+                    for item in relationship_definitions
+                )
+                transitioned[one_id] = (one_context, {header: BlankSet((), True, peer, not peer) for header in one_context["headers"]})
                 continue
             related_row = one_context["rows"][min(matches)]
             transitioned[one_id] = (one_context, {
@@ -9443,6 +9627,25 @@ def evaluate_measures(
         modifiers run, then the filters replace (or, with KEEPFILTERS, intersect) the filters on their columns.
         USERELATIONSHIP / CROSSFILTER of the same CALCULATE change the relationships only for the expression: the clearing
         modifiers (and the tables they expand to) still read the enclosing context's relationships (tests/test_calculate_modifier_mix.py)."""
+        if contains_allselected_date_column(expression_node) and any(
+            argument[0] == "call" and argument[1] == "FILTER" and argument[2] and (
+                argument[2][0][0] == "table"
+                or (argument[2][0][0] == "call" and argument[2][0][1] == "ALL" and argument[2][0][2] and argument[2][0][2][0][0] == "table")
+            )  # FILTER over a whole table (not over one column of it, which the locked ALLSELECTED shadow batteries measured)
+            for argument in filter_arguments
+        ) and any(
+            argument[0] not in {"call", "var", "table", "thunk"} or (argument[0] == "call" and argument[1] == "KEEPFILTERS")
+            for argument in filter_arguments
+        ):
+            # live Power BI (iteration 84, testing agent): CALCULATETABLE(NEXTMONTH(FIRSTDATE(ALLSELECTED(Cal[Date]))), Cal[MonthNo]=10,
+            # FILTER(ALL(Cal), Cal[Year]=2024)) is 29 days, ours 30: ALLSELECTED sees the table filter but not the Boolean one beside it
+            raise MeasureError("ALLSELECTED inside a CALCULATE that mixes a table-valued FILTER with a Boolean filter is not supported in the local engine.")
+        if contains_allselected_date_column(expression_node) and sum(
+            1 for argument in filter_arguments if argument[0] == "call" and argument[1] == "KEEPFILTERS"
+        ) >= 2:
+            # live Power BI (iteration 84, fix agent; fresh probe): COUNTROWS(DATESYTD(ALLSELECTED(Fact[Dt]))) under ALL(Cal) and two KEEPFILTERS on
+            # Cal[Year] is 4, ours BLANK: what ALLSELECTED keeps of stacked KEEPFILTERS is not modelled
+            raise MeasureError("ALLSELECTED over a date column beside several KEEPFILTERS is not supported in the local engine.")
         relationship_modifiers = tuple(
             argument for argument in filter_arguments if argument[0] == "call" and argument[1] in _RELATIONSHIP_MODIFIERS
         )
@@ -10522,6 +10725,88 @@ def evaluate_measures(
                 "not supported in the local engine."
             )
 
+    balance_running: set[int] = set()
+
+    def contains_allselected_date_column(node: Any) -> bool:
+        """Whether ALLSELECTED over a date column appears anywhere in this expression (the shape the date-set guards are about)."""
+        if not isinstance(node, tuple) or not node:
+            return False
+        if node[0] == "call" and node[1] == "ALLSELECTED" and node[2] and isinstance(node[2][0], tuple) and node[2][0][0] == "reference":
+            try:
+                context, column = resolve_table(node[2][0][1], node[2][0][2])
+            except MeasureError:
+                context = None
+            if context is not None and str(context.get("column_types", {}).get(column, "")).casefold() in {"date", "datetime"}:
+                return True
+        children = node if isinstance(node[0], tuple) else node[1:]
+        return any(contains_allselected_date_column(child) for child in children if isinstance(child, tuple))
+
+    def refuse_opening_balance_over_fact_dates(edge: tuple[Any, ...]) -> None:
+        """Live Power BI (iteration 84, testing agent; 16 of 12,534 fresh probes): OPENINGBALANCEx(e, d) with a date SET d built over a date
+        column that is not the key of a date table (OPENINGBALANCEMONTH(COUNTROWS(Fact), DATESYTD(Fact[Dt])) is 1, and the equivalent
+        CALCULATE(e, PREVIOUSDAY(STARTOFMONTH(d))) is BLANK) answers where the local rewrite finds nothing, so a BLANK is refused here."""
+        dates = edge[2][0][2][0]  # PREVIOUSDAY(STARTOFx(dates, ...))
+        if dates[0] != "call":
+            return
+        def set_sources(node: Any) -> Iterable[tuple[Any, ...]]:
+            """Columns the date set is built on: not the ones a scalar aggregate (MIN(Fact[Dt]) as a bound) only reads."""
+            if not isinstance(node, tuple) or not node:
+                return
+            if node[0] == "reference":
+                yield node
+                return
+            if node[0] == "call" and node[1] in _AGGREGATING_CALLS - {"VALUES", "DISTINCT", "ALL", "ALLSELECTED"}:
+                return
+            for child in (node if isinstance(node[0], tuple) else node[1:]):
+                yield from set_sources(child)
+
+        for reference in set_sources(dates):
+            try:
+                context, column = resolve_table(reference[1], reference[2])
+            except MeasureError:
+                continue
+            if not is_date_key(context, column):
+                raise MeasureError("OPENINGBALANCE over a date set built on a column that does not key a date table is not supported in the local engine.")
+
+    def probe_untaken_branches(branches: list[tuple[Any, ...]], row_context: Any) -> None:
+        """Live Power BI (iteration 84, testing agent): IF and SWITCH validate the branches they do not take, so a construct that is an
+        error there (PREVIOUSQUARTER(KEEPFILTERS(..)), a column of a table other than the iterated one, a text column in TOTALYTD) is an
+        error of the whole expression.  A branch is evaluated for that and its value dropped: a refusal in it is the expression's refusal,
+        a data-dependent error (division, wrong data type) is not raised because Power BI does not report it from a branch it never takes."""
+        for branch in branches:
+            if branch is None or branch[0] in {"number", "string", "boolean", "blank"}:
+                continue
+            if _keepfilters_inside_time_function(branch):
+                raise MeasureError("KEEPFILTERS inside a date-set function is an error in Power BI, also in a branch that is not taken.")
+            if _bare_column_as_table(branch):
+                raise MeasureError("A plain column given where a table belongs is an error in Power BI, also in a branch that is not taken.")
+            try:
+                evaluate(branch, row_context, allow_text=True, allow_boolean=True)
+            except MeasureError as error:
+                if _iterator_body_reads_a_table_column(branch):
+                    # the body is validated before the table it iterates is built, so a data error or a refusal there may hide the real one
+                    raise MeasureError(f"{error} The branch also has an iterator body that reads a column by table name, which the local engine cannot validate first.") from error
+                # otherwise only the errors Power BI measured as raised from a branch that is not taken; every other refusal there is not the expression's
+                if any(marker in str(error) for marker in _UNTAKEN_BRANCH_ERRORS):
+                    raise
+                # the whole branch stopped at a type check before reaching the part Power BI rejects: look at its calls one by one
+                pending = [branch]
+                while pending:
+                    part = pending.pop()
+                    for child in (part if isinstance(part[0], tuple) else part[1:]):
+                        if isinstance(child, tuple) and child:
+                            pending.append(child)
+                    if part[0] == "call" and part is not branch:
+                        try:
+                            evaluate(part, row_context, allow_text=True, allow_boolean=True)
+                        except MeasureError as part_error:
+                            if any(marker in str(part_error) for marker in _UNTAKEN_BRANCH_ERRORS):
+                                raise
+                        except (DecimalException, OverflowError):
+                            pass
+            except (DecimalException, OverflowError):
+                pass
+
     def evaluate(
         node: tuple[Any, ...],
         row_context: tuple[dict[str, Any], dict[str, Any], int] | None = None,
@@ -10730,7 +11015,15 @@ def evaluate_measures(
                 row_context = next((frame for frame in reversed(row_stack[:-1]) if frame[0]["headers"]), None)
             return related_value(arguments[0], row_context)
         if function in {"SUMX", "AVERAGEX", "MAXX", "MINX"} or function in dax_math.STAT_ITERATORS:
-            context, iteration_rows = table_argument_value(arguments[0])
+            try:
+                context, iteration_rows = table_argument_value(arguments[0])
+            except MeasureRuntimeError as error:
+                if any(reference[1] for reference in _direct_column_references(arguments[1])):
+                    # live Power BI: the body is validated before the table is built (MAXX(CALENDAR(later, earlier), Fact[Ship]) reports the
+                    # column of the other table, not the calendar), so what the data error would hide is not known here
+                    raise MeasureError(f"{error} The iterator body also reads a column by table name, which the local engine cannot validate first.") from error
+                raise
+            refuse_one_to_one_values_iteration(arguments[0])
             if not iteration_rows:
                 refuse_foreign_columns_of_empty_set(context, arguments[1])
             if function in {"MAXX", "MINX"}:
@@ -10801,6 +11094,32 @@ def evaluate_measures(
                     count += 1
             return Decimal(count) if count else None
         if function == "CALCULATE":
+            if (
+                len(arguments) > 1 and arguments[0][0] == "call" and arguments[0][1] == "CALCULATE"
+                and any(item[0] == "call" and item[1] == "KEEPFILTERS" for item in arguments[1:])
+                and any(contains_allselected_date_column(item) for item in arguments[0][2][1:])
+            ):
+                # live Power BI (iteration 84, fix agent; fresh probe): CALCULATE(CLOSINGBALANCEYEAR(e, ALLSELECTED(Fact[Dt])), KEEPFILTERS(Cal[Year]=2023))
+                # is BLANK, ours 50: the inner ALLSELECTED sees the outer KEEPFILTERS filter, which the shadow bookkeeping does not carry over
+                raise MeasureError("ALLSELECTED in the filters of a CALCULATE nested under KEEPFILTERS is not supported in the local engine.")
+            if contains_allselected_date_column(arguments[0]) and sum(
+                1 for item in arguments[1:] if item[0] == "call" and item[1] == "KEEPFILTERS"
+            ) >= 2:
+                raise MeasureError("ALLSELECTED over a date column beside several KEEPFILTERS is not supported in the local engine.")
+            opening_edge = next((
+                item for item in arguments[1:]
+                if item[0] == "call" and item[1] == "PREVIOUSDAY" and len(item[2]) == 1 and item[2][0][0] == "call"
+                and item[2][0][1] in {"STARTOFMONTH", "STARTOFQUARTER", "STARTOFYEAR"} and item[2][0][2]
+            ), None)  # the shape OPENINGBALANCEx(e, d) is rewritten to (an explicit PREVIOUSDAY(STARTOFx(d)) filter has it too)
+            if opening_edge is not None and id(node) not in balance_running:
+                balance_running.add(id(node))
+                try:
+                    result = evaluate(node, row_context, allow_text=allow_text, allow_boolean=allow_boolean)
+                finally:
+                    balance_running.discard(id(node))
+                if result is None:
+                    refuse_opening_balance_over_fact_dates(opening_edge)
+                return result
             if len(arguments) > 1:
                 arguments = preevaluate_calculate_boolean_filters(arguments, row_context)
                 wipes = date_key_wipe_tables(arguments)
@@ -11149,6 +11468,7 @@ def evaluate_measures(
             value = None if chosen is None else evaluate(
                 chosen, row_context, allow_text=allow_text, allow_boolean=allow_boolean,
             )
+            probe_untaken_branches([branch for branch in arguments[1:3] if branch is not chosen], row_context)
             refuse_date_result(mixed_branches, value)
             refuse_date_beside_number(arguments[1:3], value)
             if value is None and bool_join([branch_kind(branch, row_context) for branch in arguments[1:]]):
@@ -11200,15 +11520,38 @@ def evaluate_measures(
             remaining = list(arguments[1:])
             fallback = remaining.pop() if len(remaining) % 2 else None
             matched_level = len(remaining) // 2 - 1  # a miss falls through to the last nested IF's else
+            untaken = list(remaining[1::2]) + ([] if fallback is None else [fallback])
             for level, (candidate, result) in enumerate(zip(remaining[::2], remaining[1::2])):
-                if dax_typed.values_match(
-                    subject, _consume_infinity(lambda: evaluate(candidate, row_context))
-                ):
+                candidate_value = _consume_infinity(lambda: evaluate(candidate, row_context))
+                if candidate_value is None and subject is not None and _numeric_by_construction(candidate):
+                    # live Power BI: a BLANK number is still a number, and SWITCH reports a number compared with a True/False or text subject
+                    raise MeasureError("A SWITCH value that is BLANK cannot be type-checked against the subject in the local engine.")
+                if dax_typed.values_match(subject, candidate_value):
                     value = evaluate(result, row_context)
                     matched_level = level
+                    # the candidates after the match and every other result and the fallback are branches Power BI still validates
+                    untaken = list(remaining[2 * level + 2:]) + [
+                        branch for position, branch in enumerate(remaining[1::2]) if position != level
+                    ] + ([] if fallback is None else [fallback])
+                    for later in remaining[2 * level + 2::2]:  # live Power BI: the values of the later candidates must be comparable with the subject
+                        if later[0] in {"number", "string", "boolean", "blank"}:
+                            later_value = later[1] if later[0] != "blank" else None
+                        else:
+                            try:
+                                later_value = evaluate(later, row_context, allow_text=True, allow_boolean=True)
+                            except MeasureError:
+                                continue
+                            if later_value is None and _numeric_by_construction(later) and subject is not None:
+                                raise MeasureError("A later SWITCH value that is BLANK cannot be type-checked against the subject in the local engine.")
+                        if subject is not None and later_value is not None and (
+                            isinstance(subject, bool) != isinstance(later_value, bool) or isinstance(subject, str) != isinstance(later_value, str)
+                        ):
+                            raise MeasureError("SWITCH cannot compare values of different types.")
                     break
             else:
                 value = None if fallback is None else evaluate(fallback, row_context)
+                untaken = list(remaining[1::2])
+            probe_untaken_branches(untaken, row_context)
             if value is None:
                 # SWITCH is nested IFs: each one turns a blank into FALSE when its own branches are Boolean
                 rest = None if fallback is None else branch_kind(fallback, row_context)
@@ -11353,6 +11696,8 @@ def evaluate_measures(
             finally:
                 topn_walk_nodes.pop(id(arguments[0]), None)
             entries = []
+            if not iteration_rows:
+                refuse_foreign_columns_of_empty_iteration(context, *read_nodes)
             iteration_rows = dictionary_ordered_rows(arguments[0], context, iteration_rows, read_nodes)
             def order_value(expression: tuple[Any, ...], inner: tuple[Any, ...]) -> Any:
                 value = evaluate(expression, inner, allow_text=True)

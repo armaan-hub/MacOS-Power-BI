@@ -192,7 +192,15 @@ class FormulaBarWindowTests(unittest.TestCase):
         self.key(Qt.Key.Key_Escape)
         self.assertFalse(self.popup_open())
         self.assertTrue(self.bar.active)
-        self.key(Qt.Key.Key_Escape)
+        from unittest.mock import patch
+        from PySide6.QtWidgets import QMessageBox
+        # the draft is dirty: Escape asks (Save / Discard / Cancel) instead of dropping it; Cancel keeps it, Discard closes the bar
+        with patch("analytics_studio.formula_bar.QMessageBox.question", return_value=QMessageBox.StandardButton.Cancel) as ask:
+            self.key(Qt.Key.Key_Escape)
+        self.assertEqual(ask.call_count, 1)
+        self.assertTrue(self.bar.active)
+        with patch("analytics_studio.formula_bar.QMessageBox.question", return_value=QMessageBox.StandardButton.Discard):
+            self.key(Qt.Key.Key_Escape)
         self.assertFalse(self.bar.active)
         self.assertFalse(self.child("formulaBarRoot").isVisible())
         self.assertEqual(self.controller.modelMeasures, [])
