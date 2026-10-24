@@ -10734,7 +10734,19 @@ def evaluate_measures(
         dates = edge[2][0][2][0]  # PREVIOUSDAY(STARTOFx(dates, ...))
         if dates[0] != "call":
             return
-        for reference in _iter_reference_nodes(dates):
+        def set_sources(node: Any) -> Iterable[tuple[Any, ...]]:
+            """Columns the date set is built on: not the ones a scalar aggregate (MIN(Fact[Dt]) as a bound) only reads."""
+            if not isinstance(node, tuple) or not node:
+                return
+            if node[0] == "reference":
+                yield node
+                return
+            if node[0] == "call" and node[1] in _AGGREGATING_CALLS - {"VALUES", "DISTINCT", "ALL", "ALLSELECTED"}:
+                return
+            for child in (node if isinstance(node[0], tuple) else node[1:]):
+                yield from set_sources(child)
+
+        for reference in set_sources(dates):
             try:
                 context, column = resolve_table(reference[1], reference[2])
             except MeasureError:
