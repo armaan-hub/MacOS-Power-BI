@@ -160,8 +160,9 @@ def propagate_relationship_filters(
             validate_unique_key(to_id, to_column)
         filter_directions = relationship_filter_directions(relationship)
         # the blank member exists on the one side of a one-to-many relationship; one-to-one and many-to-many ends are peers
-        from_role = "one" if cardinality == "one_to_many" else "many" if cardinality == "many_to_one" else "peer"
-        to_role = "one" if cardinality == "many_to_one" else "many" if cardinality == "one_to_many" else "peer"
+        peer_role = "peer1" if cardinality == "one_to_one" else "peer"
+        from_role = "one" if cardinality == "one_to_many" else "many" if cardinality == "many_to_one" else peer_role
+        to_role = "one" if cardinality == "many_to_one" else "many" if cardinality == "one_to_many" else peer_role
         if "from_to" in filter_directions:
             add_edge(from_id, from_column, to_id, to_column, from_role)
         if "to_from" in filter_directions:
@@ -258,7 +259,7 @@ def propagate_relationship_filters(
                 for row in rows_by_id[source_id]
             }
             current_target_rows = rows_by_id[target_id]
-            if source_role == "one" and unknown_state.get(source_id, True):
+            if source_role in {"one", "peer1"} and unknown_state.get(source_id, True):
                 known = all_keys(source_id, source_column, source_type)
                 filtered_target_rows = [
                     row for row in current_target_rows
@@ -272,9 +273,16 @@ def propagate_relationship_filters(
             changed = len(filtered_target_rows) != len(current_target_rows)
             if changed:
                 rows_by_id[target_id] = filtered_target_rows
-            if source_role == "one":  # the blank member of the filtered table relates to the blank member of its source only
+            if source_role in {"one", "peer1"}:  # the blank member of the filtered table relates to the blank member of its source only
                 before = unknown_state.get(target_id, True)
                 after = before and unknown_state.get(source_id, True)
+                if source_role == "peer1" and before and not after and target_id in filter_roots:
+                    # one-to-one ends are peers: the blank member of the partner also stays while a visible row of the source has no match in it
+                    # (live Power BI, iteration 84: CALCULATE(COUNTROWS(DISTINCT(F[Id])), U[K]="k4", W[Y]<>"y3") counts the F row of U's orphan k4)
+                    known = all_keys(target_id, target_column, target_type)
+                    after = any(
+                        _relationship_value_key(row.get(source_column), source_type) not in known for row in rows_by_id[source_id]
+                    )
                 if after != before or target_id not in unknown_state:
                     unknown_state[target_id] = after
                     changed = changed or after != before

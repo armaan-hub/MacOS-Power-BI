@@ -510,51 +510,18 @@ def rename_table_references(expression: str, old_name: str, new_name: str) -> st
     return "".join(output)
 
 
-_MONTH_NAMES = {name: index for index, name in enumerate(
-    ("january", "february", "march", "april", "may", "june", "july", "august", "september", "october", "november", "december"), 1)}
-
-
-def _year_end_reference_year() -> int:
-    """The year Power BI validates a year-end text against (the machine's current year)."""
-    return date.today().year
-
-
 def _parse_year_end_date(value: Any) -> tuple[int, int]:
-    """The month and day of a year-end text, as Power BI reads them (iteration 84, live): "6/30", "06-30", "6/30/2024" (the year
-    is ignored), "June 30", "Jun 30", "30 Jun" and "30/6" (day first when the first number is above 12)."""
+    """The month and day of a year-end text, as Power BI reads them (iteration 84, live): the one parser of dax_time_sets, shared with
+    STARTOFYEAR / ENDOFYEAR / NEXTYEAR, so the same text gives the same year end in TOTALYTD and in the date sets."""
     if not isinstance(value, str):
         raise MeasureError('year_end_date must use month/day, such as "6/30".')
-    text = value.strip()
-    month = day = None
-    numbers = re.fullmatch(r"([0-9]{1,2})[/-]([0-9]{1,2})(?:[/-]([0-9]{1,4}))?", text)
-    named = re.fullmatch(r"([A-Za-z]{3,9})\.?[ -]+([0-9]{1,2})", text)
-    named_last = re.fullmatch(r"([0-9]{1,2})[ -]+([A-Za-z]{3,9})\.?", text)
-    if numbers is not None:
-        first, second = int(numbers.group(1)), int(numbers.group(2))
-        month, day = (second, first) if first > 12 and second <= 12 else (first, second)
-        if not (1 <= month <= 12 and 1 <= day <= monthrange(_year_end_reference_year(), month)[1]):
-            # live Power BI reads text like an OLE date: a month/day that does not exist this year falls back to day/month,
-            # then month/year and year/month with the 1st ("2/29" is Feb 1 in a common year, "6/31" is Jun 1)
-            if 1 <= second <= 12 and 1 <= first <= monthrange(_year_end_reference_year(), second)[1]:
-                month, day = second, first
-            elif 1 <= first <= 12 and second >= 0:
-                month, day = first, 1
-            elif 1 <= second <= 12 and first >= 0:
-                month, day = second, 1
-    else:
-        match = named or named_last
-        if match is None:
-            raise MeasureError('year_end_date must use month/day, such as "6/30".')
-        name, number = (match.group(1), match.group(2)) if named else (match.group(2), match.group(1))
-        candidates = [index for full, index in _MONTH_NAMES.items() if full.startswith(name.casefold()) and len(name) >= 3]
-        if len(candidates) != 1:
-            raise MeasureError('year_end_date must use month/day, such as "6/30".')
-        month, day = candidates[0], int(number)
-    if not 1 <= month <= 12 or not 1 <= day <= monthrange(_year_end_reference_year() if numbers is not None else 2000, month)[1]:
-        raise MeasureError('year_end_date must be a valid month/day, such as "6/30".')
-    return month, day
+    try:
+        return dax_time_sets.parse_year_end_text(value)
+    except dax_time_sets.TimeSetError as error:
+        raise MeasureError('year_end_date must be a valid month/day, such as "6/30".') from error
 
 
+_LINEAGE_WIPE_TABLES = frozenset({"UNION", "EXCEPT", "INTERSECT", "TOPN", "SELECTCOLUMNS", "ADDCOLUMNS", "SUMMARIZE", "CALCULATETABLE"})
 _NONBLANK_TABLES = {"FIRSTNONBLANK", "LASTNONBLANK"}  # one-row tables; the ...VALUE variants are scalars
 _TIME_SET_ARITY = {
     **dict.fromkeys(dax_time_sets.SET_FUNCTIONS, (1, 1)), **dict.fromkeys(dax_time_sets.YEAR_END_FUNCTIONS, (1, 2)),
@@ -579,6 +546,9 @@ def _validate_time_set_call(function: str, arguments: list[tuple[Any, ...]]) -> 
         raise MeasureError(f"{function} has the wrong number of arguments.")
     if arguments[0][0] in {"number", "string", "boolean", "blank", "unary", "binary", "arithmetic"}:
         raise MeasureError(f"{function} needs a date column or a table expression of dates.")
+    if function == "DATESBETWEEN" and arguments[0][0] != "reference":
+        # live Power BI: "DatesBetween and DatesInPeriod functions are only accepting date column reference as a first argument"
+        raise MeasureError("DATESBETWEEN accepts only a date column reference as its first argument.")
 
 
 def _first_reference(node: Any, held: Callable[[str], Any] | None = None) -> tuple[Any, ...] | None:
@@ -657,7 +627,9 @@ def _new_route_time_set(node: Any) -> bool:
 def _check_set_iterator_body(table: tuple[Any, ...], body: tuple[Any, ...]) -> None:
     """Live Power BI: an iterator over a date set (or FIRSTNONBLANK ..) reads only the set's own column; any other qualified column in
     the body is an error at compile time, also when the set turns out to be empty."""
-    if not (table[0] == "call" and (table[1] in dax_time_sets.SET_FUNCTIONS or table[1] in _NONBLANK_TABLES)):
+    if not (table[0] == "call" and (table[1] in dax_time_sets.SET_FUNCTIONS or table[1] in _NONBLANK_TABLES or table[1] in _TIME_FILTER_FUNCTIONS
+                                   or (table[1] in {"UNION", "EXCEPT", "INTERSECT"} and table[2] and table[2][0][0] == "call"
+                                       and (table[2][0][1] in dax_time_sets.SET_FUNCTIONS or table[2][0][1] in _TIME_FILTER_FUNCTIONS)))):
         return
     bottom = _first_reference(table)
     if bottom is None or not bottom[1]:
@@ -723,21 +695,11 @@ def _parse_iso_date_literal(value: Any, function: str) -> date:
 
 def _year_to_date_start(end_date: date, year_end: tuple[int, int]) -> date:
     """Return the first day of the calendar or fiscal year containing end_date."""
-    year_end_month, year_end_day = year_end
-    current_year_end = date(
-        end_date.year,
-        year_end_month,
-        min(year_end_day, monthrange(end_date.year, year_end_month)[1]),
-    )
+    current_year_end = dax_time_sets._year_end_of(end_date.year, year_end)  # a Feb 29 year end is Mar 1 in a common year (live Power BI)
     if end_date > current_year_end:
         return current_year_end + timedelta(days=1)
     if end_date.year > date.min.year:
-        prior_year_end = date(
-            end_date.year - 1,
-            year_end_month,
-            min(year_end_day, monthrange(end_date.year - 1, year_end_month)[1]),
-        )
-        return prior_year_end + timedelta(days=1)
+        return dax_time_sets._year_end_of(end_date.year - 1, year_end) + timedelta(days=1)
     return date.min
 
 
@@ -2854,8 +2816,12 @@ class _Parser:
                 except MeasureError:
                     if not _general_calculate_filters_valid(tuple(arguments[1:])) and not _modifier_mix_filters_valid(tuple(arguments[1:])) and not _time_filters_beside_general_filters(tuple(arguments)):
                         raise
-            if (function in _ALL_ITERATORS or function == "CONCATENATEX") and len(arguments) >= 2:
-                _check_set_iterator_body(arguments[0], arguments[1])
+            if (function in _ALL_ITERATORS or function == "CONCATENATEX" or function == "FILTER") and len(arguments) >= 2:
+                _check_set_iterator_body(arguments[0], arguments[1])  # live Power BI: FILTER(date set, ..) reads only the set's own column too
+            if function in {"UNION", "EXCEPT", "INTERSECT", "CROSSJOIN"} and any(argument[0] == "reference" for argument in arguments):
+                # live Power BI (iteration 84, critic): a bare column where a table is expected is a compile-time error
+                # ("A single value for column .. cannot be determined"), also in a branch that is never run
+                raise MeasureError(f"{function} needs table expressions; a column reference has no single value.")
             if function == "FILTER" and len(arguments) == 2:
                 _check_single_column_filter(arguments[0], arguments[1])
             return ("call", function, tuple(arguments))
@@ -3431,6 +3397,38 @@ def _shift_date(value: date, intervals: int, unit: str, keep_month_end: bool = F
     return date(target_year, target_month, min(value.day, last))
 
 
+def _sparse_period_window(days: set[date], start: date, count: int, unit: str) -> set[date] | None:
+    """DATESINPERIOD month / quarter / year window over a sparse date column (one that is not a full calendar), measured on live Power
+    BI in iteration 84 (13,608 probes on two fact date columns).
+
+    A negative count: when the month of the start date holds no later date of the column the start date stands for the end of its
+    month, so the window is whole months (from the 1st of the month |n|-1 months back); otherwise it is the exact DAX window.
+    0 of 2,268 probes differ.  A positive count has no rule that fits every probe: four readings of the window (exact days, whole
+    months, the exact end taken to the end of its month, with and without that last day) are computed and the answer is given only
+    where they agree (2,058 of 2,268 probes, 0 wrong); None means "refuse"."""
+    boundary = _shift_date(start, count, unit, keep_month_end=True)
+    months = abs(count) * {"MONTH": 1, "QUARTER": 3, "YEAR": 12}[unit]
+
+    def month_end(day: date) -> date:
+        return date(day.year, day.month, monthrange(day.year, day.month)[1])
+
+    if count < 0:
+        exact = {value for value in days if boundary < value <= start}
+        if any(start < value <= month_end(start) for value in days):
+            return exact
+        year, zero_month = divmod(start.year * 12 + start.month - 1 - (months - 1), 12)
+        first = date(year, zero_month + 1, 1) if year >= 1 else date.min
+        return {value for value in days if first <= value <= start}
+    year, zero_month = divmod(start.year * 12 + start.month - 1 + months, 12)
+    readings = [
+        {value for value in days if start <= value < boundary},
+        {value for value in days if start <= value <= (month_end(date(year, zero_month + 1, 1)) if year <= 9999 else date.max)},
+        {value for value in days if start <= value < month_end(boundary)},
+        {value for value in days if start <= value <= month_end(boundary - timedelta(days=1))},
+    ]
+    return readings[0] if all(reading == readings[0] for reading in readings) else None
+
+
 def _scalar_day(value: Any, function: str) -> date | None:
     """A date-set bound as a calendar day: BLANK is None, a date or number is truncated to its day, text is an ISO / date text."""
     if value is None:
@@ -3916,12 +3914,128 @@ def evaluate_measures(
             return False  # rows supplied by a visual or slicer without per-column provenance: a selection never includes the blank
         return all(blank_allowed.get(column, False) for column in context.get("filter_column_rows", {}))
 
+    def typed_cell(context: dict[str, Any], column: str, raw: Any) -> Any:
+        """A loaded cell as the DAX value of its column type (None is blank)."""
+        if raw is None:
+            return None
+        kind = str(context.get("column_types", {}).get(column, "text")).casefold()
+        if kind in {"whole_number", "decimal_number", "decimal", "fixed_decimal", "currency", "number", "int64", "double"}:
+            return raw if isinstance(raw, Decimal) else dax_typed.text_to_number(cell_to_text(raw))
+        if kind in {"date", "datetime"}:
+            return _cell_date_value(raw, column, None)
+        if kind == "boolean":
+            return raw if isinstance(raw, bool) else cell_to_text(raw).strip().casefold() == "true"
+        return raw if isinstance(raw, str) else cell_to_text(raw)
+
+    # What ALLSELECTED sees inside an iterator (tools/parity/dax_battery_allselected_shadow.json): the iterated table's
+    # distinct tuples ("shadow", one component over the columns it came from), the outer filters those columns replace
+    # ("suppressed"), and the filters that are only a context transition ("transition", which it never sees).
+    eff_layers: tuple[_Shadow, ...] = ()
+    eff_suppressed: dict[str, dict[str, Any]] = {}  # table -> casefolded column -> the outer filter object the shadow replaced
+    eff_transition: dict[str, dict[str, tuple[Any, Any]]] = {}  # table -> casefolded column -> (filter a transition set, filter it replaced)
+    eff_group_keys: dict[str, dict[str, Any]] = {}  # SUMMARIZE group keys: table -> casefolded column -> the filter object
+    eff_touched: frozenset[tuple[str, str]] = frozenset()  # (table, column) a CALCULATE modifier has cleared or filtered
+    eff_blocked = False
+    eff_rank_table = False  # evaluating the table argument of RANKX: ALLSELECTED(col) still sees a SUMMARIZE key on its own column
+
+    shadowed_cache: list[frozenset[str]] = []
+
+    def shadowed_measure_keys() -> frozenset[str]:
+        """Lower-case names of the measures that share their name with a column of their own table."""
+        if not shadowed_cache:
+            keys = set()
+            for definition in definitions:
+                home = contexts_by_id.get(str(definition.get("home_table_id") or ""))
+                if home is not None and definition["name"].casefold() in {str(header).casefold() for header in home["headers"]}:
+                    keys.add(definition["name"].casefold())
+            shadowed_cache.append(frozenset(keys))
+        return shadowed_cache[0]
+
+    one_to_one_unmatched_cache: dict[str, tuple[frozenset[int], bool]] = {}
+
+    def one_to_one_unmatched(table_id: str) -> tuple[frozenset[int], bool]:
+        """(rows of this table with no partner across a one-to-one relationship, whether the table at the other end has such rows)."""
+        if table_id not in one_to_one_unmatched_cache:
+            own: set[int] = set()
+            other_has = False
+            for relationship in relationship_definitions:
+                if not isinstance(relationship, dict) or relationship.get("cardinality") != "one_to_one":
+                    continue
+                ends = {
+                    str(relationship.get("from_table_id")): str(relationship.get("from_column")),
+                    str(relationship.get("to_table_id")): str(relationship.get("to_column")),
+                }
+                if table_id not in ends or len(ends) != 2:
+                    continue
+                other_id = next(identifier for identifier in ends if identifier != table_id)
+                if other_id not in contexts_by_id:
+                    continue
+
+                def keys(identifier: str) -> list[Any]:
+                    context = contexts_by_id[identifier]
+                    return [cell_key(ascii_fold(v) if isinstance(v, str) else v) for v in (
+                        typed_cell(context, ends[identifier], row.get(ends[identifier])) for row in context["rows"])]
+
+                mine, theirs = keys(table_id), keys(other_id)
+                blank = cell_key(None)
+                present_theirs, present_mine = set(theirs) - {blank}, set(mine) - {blank}
+                own |= {index for index, key in enumerate(mine) if key == blank or key not in present_theirs}
+                other_has = other_has or any(key == blank or key not in present_mine for key in theirs)
+            one_to_one_unmatched_cache[table_id] = (frozenset(own), other_has)
+        return one_to_one_unmatched_cache[table_id]
+
+    def refuse_one_to_one_blank_reader(table_id: str, what: str, any_filter: bool = False) -> None:
+        """Live Power BI (iteration 84, critic; 6 of 1,033 fresh ZM probes): reading the values of a table of a one-to-one relationship that has
+        unmatched rows, while the pair is filtered, lists the blank members of both ends in a way not modelled here
+        (CALCULATE(SELECTEDVALUE(U[K],"x"), NOT(U[X]="x1"), W[K]=BLANK()) is "x", ours "k4")."""
+        for relationship in relationship_definitions:
+            if not isinstance(relationship, dict) or not relationship.get("is_active") or relationship.get("cardinality") != "one_to_one":
+                continue
+            ends = (str(relationship.get("from_table_id")), str(relationship.get("to_table_id")))
+            if table_id not in ends or len(set(ends)) != 2:
+                continue
+            if any(
+                end in evaluation_filter_ids and not eff_transition.get(end) and not eff_group_keys.get(end) and end in evaluation_contexts_by_id
+                and (any_filter or own_unknown_member_selected(evaluation_contexts_by_id[end]))
+                and not (any_filter and end == table_id)  # ALLSELECTED: only the partner's filter is out of reach (the table's own filter stays)
+                for end in ends
+            ) and any(one_to_one_unmatched(end)[0] for end in ends):
+                raise MeasureError(f"{what} over a table of a one-to-one relationship with unmatched rows is not supported while it is filtered in the local engine.")
+
+    def refuse_one_to_one_pair_filters(tables: list[dict[str, Any]], filter_table_ids: set[Any]) -> None:
+        """Live Power BI (iteration 84, critic; fresh ZM probes): when a filter on one table of a one-to-one relationship keeps only rows that
+        have no partner and the filter on the other table keeps real rows and selects its own blank member, which blank members and orphan rows
+        meet is not modelled here (CALCULATE(DISTINCTCOUNT(F[K]), U[K]<>"k5", W[Y]="y5") is BLANK, ours 1), so that pair is refused."""
+        by_id = {str(table.get("id")): table for table in tables}
+        for relationship in relationship_definitions:
+            if not isinstance(relationship, dict) or not relationship.get("is_active") or relationship.get("cardinality") != "one_to_one":
+                continue
+            ends = (str(relationship.get("from_table_id")), str(relationship.get("to_table_id")))
+            if len(set(ends)) != 2 or any(end not in filter_table_ids or end not in by_id or eff_transition.get(end) for end in ends):
+                continue
+
+            def visible_rows(table: dict[str, Any]) -> Any:
+                visible: Any = None
+                for rows in table.get("filter_column_rows", {}).values():
+                    visible = frozenset(rows) if visible is None else visible & frozenset(rows)
+                if "filter_table_rows" in table:
+                    held = frozenset(table["filter_table_rows"])
+                    visible = held if visible is None else visible & held
+                return visible
+
+            for mine, theirs in (ends, ends[::-1]):
+                own, _other_has = one_to_one_unmatched(mine)
+                kept, partner = visible_rows(by_id[mine]), visible_rows(by_id[theirs])
+                if kept and kept <= own and partner and own_unknown_member_selected(by_id[theirs]):
+                    raise MeasureError("Filters on both tables of a one-to-one relationship are not supported in the local engine.")
+
     def propagate_relationship_filters(
         tables: list[dict[str, Any]], relationships: list[dict[str, Any]], filter_table_ids: Any,
         ignore_exclusions: Iterable[str] = (),
     ) -> dict[str, list[dict[str, Any]]]:
         """Relationship propagation that also carries the virtual blank member: fact rows whose key has no match in a
         one-side table stay while that table's own filters still select its blank member."""
+        refuse_one_to_one_pair_filters(tables, set(filter_table_ids))
         ignored = set(ignore_exclusions)
         excluded = {table_id for table_id in unknown_member_exclusions if table_id in unknown_member_ids and table_id not in ignored}
         filter_table_ids = set(filter_table_ids) | excluded  # ALLNOBLANKROW leaves no filter on its table, only the missing blank member
@@ -4299,7 +4413,32 @@ def evaluate_measures(
             raise MeasureError(
                 f"Could not inspect model relationships: {exc}"
             ) from exc
-        if source_context["id"] not in context_unknown_members:
+        partner_selects_blank = False
+        blank_partner_links: set[int] = set()
+        for relationship in relationship_definitions:
+            # live Power BI (iteration 84, critic): the blank member of a table in a one-to-one relationship is shown while the filter on its
+            # partner selects the partner's own blank member (CALCULATE(COUNTROWS(VALUES(U[X])),W[K]<>"k4",W[K]<>"k5") counts it although the
+            # orphan row W[k5] is filtered out) and is not shown for the kept orphan rows alone (CALCULATE(COUNTROWS(VALUES(U[K])),W[K]="k5") is BLANK)
+            if (
+                isinstance(relationship, dict) and relationship.get("is_active") and relationship.get("cardinality") == "one_to_one"
+                and source_id in {str(relationship.get("from_table_id", "")), str(relationship.get("to_table_id", ""))}
+            ):
+                partner_id = next(
+                    (str(relationship.get(key)) for key in ("from_table_id", "to_table_id") if str(relationship.get(key)) != source_id), None
+                )
+                partner = contexts_by_id.get(partner_id) if partner_id is not None else None
+                direction = "from_to" if partner_id == str(relationship.get("from_table_id", "")) else "to_from"
+                if (
+                    partner is not None and partner_id in independent_filter_roots
+                    and direction in relationship_filter_directions(relationship)
+                    and not eff_transition.get(partner_id)  # a row of an iterator over the partner does show it (SUMX(W, CALCULATE(COUNTROWS(VALUES(U[K])))))
+                ):
+                    if own_unknown_member_selected(partner):
+                        partner_selects_blank = True
+                        blank_partner_links.add(id(relationship))
+                    elif partner_id in unknown_member_ids:
+                        return False
+        if source_context["id"] not in context_unknown_members and not partner_selects_blank:
             return False
 
         reachable_table_ids = set(independent_filter_roots)
@@ -4355,6 +4494,8 @@ def evaluate_measures(
             source_id, source_column = source
             if source_id not in reachable_table_ids:
                 continue
+            if id(relationship) in blank_partner_links:
+                continue  # the partner's filter selects its own blank member: that is what shows this table's blank member
             try:
                 link_unknown_members = unknown_member_table_ids(
                     list(contexts_by_id.values()),
@@ -4424,6 +4565,8 @@ def evaluate_measures(
                     f"{function} column arguments must resolve to one loaded table."
                 )
             output_headers = [column for _context, column in resolved_columns]
+            if function == "ALLSELECTED":
+                refuse_one_to_one_blank_reader(source_context["id"], "ALLSELECTED", True)
             allselected_rows = None
             shadowed_rows = (
                 allselected_rows_for(source_context, output_headers) if function == "ALLSELECTED" and eff_active() else None
@@ -4564,17 +4707,6 @@ def evaluate_measures(
         if row_identity:
             context["row_identity"] = True
         return context, rows
-
-    # What ALLSELECTED sees inside an iterator (tools/parity/dax_battery_allselected_shadow.json): the iterated table's
-    # distinct tuples ("shadow", one component over the columns it came from), the outer filters those columns replace
-    # ("suppressed"), and the filters that are only a context transition ("transition", which it never sees).
-    eff_layers: tuple[_Shadow, ...] = ()
-    eff_suppressed: dict[str, dict[str, Any]] = {}  # table -> casefolded column -> the outer filter object the shadow replaced
-    eff_transition: dict[str, dict[str, tuple[Any, Any]]] = {}  # table -> casefolded column -> (filter a transition set, filter it replaced)
-    eff_group_keys: dict[str, dict[str, Any]] = {}  # SUMMARIZE group keys: table -> casefolded column -> the filter object
-    eff_touched: frozenset[tuple[str, str]] = frozenset()  # (table, column) a CALCULATE modifier has cleared or filtered
-    eff_blocked = False
-    eff_rank_table = False  # evaluating the table argument of RANKX: ALLSELECTED(col) still sees a SUMMARIZE key on its own column
 
     def current_filter(table_id: str, folded: str) -> Any:
         """The row-index set now filtering one column of a table, None when it is not filtered."""
@@ -5201,7 +5333,9 @@ def evaluate_measures(
                 projected.append([{h: row[o] for h, o in zip(headers, other)} for row in rows])
             if function == "UNION":
                 output = [row for rows in projected for row in rows]
-                same_lineage = all(base_lineage(c) == base_lineage(first_context) for c, _ in typed_tables)
+                def lineage_ids(context: dict[str, Any]) -> dict[str, tuple[Any, str]]:  # the same source column, whatever copy of its table holds it
+                    return {header: (table["id"], column.casefold()) for header, (table, column) in base_lineage(context).items()}
+                same_lineage = all(lineage_ids(c) == lineage_ids(first_context) for c, _ in typed_tables)
                 return derived_table(headers, output, base_lineage(first_context) if same_lineage else None, first_context.get("column_types"))
             right_keys = {row_key(row[h] for h in headers) for row in projected[1]}
             keep = (lambda key: key not in right_keys) if function == "EXCEPT" else (lambda key: key in right_keys)
@@ -6014,6 +6148,11 @@ def evaluate_measures(
         if source[0] == "reference":
             context, column = resolve_table(source[1], source[2])
             visible_rows: list[dict[str, Any]] | Iterable[dict[str, Any]] = rows_by_table_id[context["id"]]
+            row_filters = all_row_context_filters(None) if row_stack else {}
+            if row_filters:
+                # live Power BI (iteration 84, critic): inside an iterator the row of the iterated table filters a bare date column, like
+                # the transition of a CALCULATE around the date set does
+                visible_rows = with_column_filters(row_filters, lambda: list(rows_by_table_id[context["id"]]), True)
             base, base_column, viewed = context, column, True
         else:
             if source[0] == "call" and source[1] in {"DATE", "TIME", "TODAY", "NOW", "MAX", "MIN", "EDATE", "EOMONTH"}:
@@ -6082,7 +6221,8 @@ def evaluate_measures(
         derived_source = False
         if source[0] == "reference":
             base, column = resolve_table(source[1], source[2])
-            rows = rows_by_table_id[base["id"]]
+            row_filters = all_row_context_filters(None) if row_stack else {}  # the row of an enclosing iterator filters the column (see date_column_source)
+            rows = with_column_filters(row_filters, lambda: list(rows_by_table_id[base["id"]]), True) if row_filters else rows_by_table_id[base["id"]]
         else:
             table_context, table_rows = table_argument_value(source)
             if len(table_context["headers"]) != 1:
@@ -6120,6 +6260,15 @@ def evaluate_measures(
         single["headers"] = [column]
         single["lineage"] = {column: (base, column)}
         with_value = function.endswith("VALUE")
+        if with_value and any(
+            isinstance(relationship, dict) and relationship.get("is_active") and relationship.get("cardinality") == "one_to_one"
+            and base["id"] in {str(relationship.get("from_table_id", "")), str(relationship.get("to_table_id", ""))}
+            and ({str(relationship.get("from_table_id", "")), str(relationship.get("to_table_id", ""))} - {base["id"]}) & set(evaluation_filter_ids)
+            for relationship in relationship_definitions
+        ):
+            # live Power BI (iteration 84, critic): LASTNONBLANKVALUE over a column of a one-to-one table whose partner is filtered tries the
+            # partner's unmatched rows in a way not modelled here (-1, ours 0)
+            raise MeasureError("FIRSTNONBLANKVALUE / LASTNONBLANKVALUE over a table filtered through a one-to-one relationship is not supported in the local engine.")
         for raw, _typed in ordered:
             row = {column: _typed if derived_source else raw}
             if with_value:
@@ -6249,8 +6398,9 @@ def evaluate_measures(
                 raise MeasureRuntimeError("GenerateSeries function cannot have an IncrementValue less than or equal to zero.")
             series: list[dict[str, Any]] = []
             current = start
+            dated = dax_dates.is_date(start) or dax_dates.is_date(stop)  # live Power BI: a series between two dates holds dates
             while current <= stop and len(series) < 1_000_000:
-                series.append({"Value": current})
+                series.append({"Value": dax_dates.DaxDateTime(current) if dated else current})
                 current += step
             return derived_table(["Value"], series)
         if argument[0] == "call" and argument[1] == "ROW":
@@ -7790,6 +7940,12 @@ def evaluate_measures(
                 )
             relationship_index = matches[0]
             relationship = relationship_definitions[relationship_index]
+            if relationship.get("cardinality") == "one_to_one" and relationship.get("is_active") and any(
+                one_to_one_unmatched(table_id)[0] or one_to_one_unmatched(table_id)[1] for table_id in (left_context["id"], right_context["id"])
+            ):
+                # live Power BI (iteration 84, critic; 15 of 1,033 fresh ZM probes): USERELATIONSHIP over a one-to-one relationship whose tables
+                # have unmatched rows moves the blank members in a way not modelled here (COUNTROWS(W) under U[K]<>"k2" is 3, ours 4)
+                raise MeasureError("USERELATIONSHIP over a one-to-one relationship with unmatched rows is not supported in the local engine.")
             pair = tuple(sorted((left_context["id"], right_context["id"])))
             previous_index = table_pair_relationships.get(pair)
             if previous_index is not None and previous_index != relationship_index:
@@ -9143,6 +9299,19 @@ def evaluate_measures(
         (RE-D, 28,639 live probes). KEEPFILTERS, ALL(key), VALUES(key), FILTER(Table, ..) and non-key columns do not wipe."""
         names: list[str] = []
         already: set[str] = set()  # tables a clearing modifier of this CALCULATE already empties of filters
+
+        def add_held_key_tables(name: str) -> None:
+            # live Power BI (iteration 84, critic): a table held in a VAR is plain data once it is a filter, so it replaces the date key
+            # like TREATAS onto it, whatever function made it (ALL(key) in a VAR wipes, ALL(key) written inline does not)
+            held = variables.get(name)
+            held = held() if held is not None else None
+            if isinstance(held, _TableValue):
+                add_lineage_key_tables(held[0])
+
+        def add_lineage_key_tables(context: dict[str, Any]) -> None:
+            for lineage_table, lineage_column in context.get("lineage", {}).values():
+                if lineage_table["name"].casefold() not in already and lineage_table["name"] not in names and is_date_key(lineage_table, lineage_column):
+                    names.append(str(lineage_table["name"]))
         for argument in arguments[1:]:
             if argument[0] == "call" and argument[1] in {"REMOVEFILTERS", "ALL", "ALLNOBLANKROW"} and argument[2] and argument[2][0][0] == "table":
                 try:
@@ -9168,13 +9337,31 @@ def evaluate_measures(
                     references = [base[2][0]]
                 elif base[0] == "table_call" and base[1] == "VALUES" and base[2][0] == "reference":
                     references = [base[2]]  # live Power BI (iteration 84): FILTER(VALUES(key), ..) replaces the key like FILTER(ALL(key), ..)
-            elif node[0] == "table_call" and node[1] == "VALUES" and node[2][0] == "reference":
-                references = [node[2]]  # live Power BI (iteration 84): VALUES(key) as a filter replaces the key like a Boolean test of it
+                elif base[0] == "var":
+                    add_held_key_tables(base[1])
+                elif base[0] == "call" and (base[1] in dax_time_sets.SET_FUNCTIONS or base[1] in _TIME_FILTER_FUNCTIONS or base[1] in _LINEAGE_WIPE_TABLES):
+                    try:  # FILTER over a date set or a computed date table replaces the key like FILTER(ALL(key), ..)
+                        add_lineage_key_tables(table_argument_value(base)[0])
+                    except MeasureError:
+                        pass
+            elif node[0] == "table_call" and node[1] in {"VALUES", "DISTINCT"} and node[2][0] == "reference":
+                references = [node[2]]  # live Power BI (iteration 84): VALUES(key) / DISTINCT(key) as a filter replaces the key like a Boolean test of it
             elif (
                 node[0] == "call" and node[1] == "CALCULATETABLE" and node[2] and node[2][0][0] == "table_call"
                 and node[2][0][1] == "VALUES" and node[2][0][2][0] == "reference"
             ):
                 references = [node[2][0][2]]
+            elif node[0] == "var":
+                add_held_key_tables(node[1])
+            elif node[0] == "call" and node[1] == "CALCULATETABLE" and node[2] and node[2][0][0] == "var":
+                add_held_key_tables(node[2][0][1])
+            elif node[0] == "call" and node[1] in _LINEAGE_WIPE_TABLES:
+                # live Power BI (iteration 84, critic): a computed table over the date key (UNION / EXCEPT of date sets, TOPN, SELECTCOLUMNS ..)
+                # replaces the key like TREATAS onto it
+                try:
+                    add_lineage_key_tables(table_argument_value(node)[0])
+                except MeasureError:
+                    pass  # the filter itself reports its error when it is evaluated
             elif node[0] != "call" or node[1] in {"NOT", "AND", "OR"}:
                 references = list(_direct_column_references(node))
             for reference in references:
@@ -9287,6 +9474,8 @@ def evaluate_measures(
                 keep, node = False, argument
                 while node[:2] == ("call", "KEEPFILTERS") and len(node[2]) == 1:
                     keep, node = True, node[2][0]
+                if keep and node[0] == "call" and node[1] == "ALL" and node[2]:
+                    continue  # live Power BI (iteration 84, critic): KEEPFILTERS(ALL(x)) intersects with every value, so it keeps the filters as they are
                 if node[0] == "call" and node[1] in {"ALL", "ALLNOBLANKROW", "REMOVEFILTERS", "ALLEXCEPT", "ALLSELECTED"}:
                     clearing.append(node)
                 elif _is_late_time_set(node):
@@ -9372,6 +9561,14 @@ def evaluate_measures(
                 for table_id in open_ids:
                     body = (lambda inner=body, name=evaluation_contexts_by_id[table_id]["name"]: evaluate_with_filter_clear(
                         ("thunk", inner), ("call", "REMOVEFILTERS", (("table", name),)), "REMOVEFILTERS"))
+                if table_filters_present:
+                    def counted(inner: Callable[[], Any] = body) -> Any:
+                        full_table_filters[0] += 1  # ISCROSSFILTERED still sees a table filter in Power BI that keeps every row; the local engine does not
+                        try:
+                            return inner()
+                        finally:
+                            full_table_filters[0] -= 1
+                    return counted()
                 return body()
 
             def clear_then_apply(index: int) -> Any:
@@ -9404,6 +9601,7 @@ def evaluate_measures(
                 row_stack.pop()
 
     variables: dict[str, Any] = {}
+    full_table_filters = [0]  # CALCULATE table filters that keep every row of their table (see ISCROSSFILTERED)
     variable_kinds: dict[str, str] = {}  # static kind of each VAR in scope (see branch_kind)
 
     def evaluate_let(
@@ -9473,19 +9671,6 @@ def evaluate_measures(
         if target == "DATETIME":
             return dax_dates.DaxDateTime(number)
         raise MeasureError(f"CONVERT does not support the type {target}.")
-
-    def typed_cell(context: dict[str, Any], column: str, raw: Any) -> Any:
-        """A loaded cell as the DAX value of its column type (None is blank)."""
-        if raw is None:
-            return None
-        kind = str(context.get("column_types", {}).get(column, "text")).casefold()
-        if kind in {"whole_number", "decimal_number", "decimal", "fixed_decimal", "currency", "number", "int64", "double"}:
-            return raw if isinstance(raw, Decimal) else dax_typed.text_to_number(cell_to_text(raw))
-        if kind in {"date", "datetime"}:
-            return _cell_date_value(raw, column, None)
-        if kind == "boolean":
-            return raw if isinstance(raw, bool) else cell_to_text(raw).strip().casefold() == "true"
-        return raw if isinstance(raw, str) else cell_to_text(raw)
 
     def column_order_key(value: Any) -> Any:
         return dax_typed.text_key(value) if isinstance(value, str) else value
@@ -9583,11 +9768,14 @@ def evaluate_measures(
         )
         if function == "ISINSCOPE":
             return on_axis
+        in_shape = any(column in shape["active"] for shape in _context_shapes(current)) if column is not None else bool(_context_shapes(current))
         if function == "ISFILTERED":
             if column is None:
-                return bool(current.get("filter_column_rows"))
-            return filtered_rows is not None or on_axis
+                return bool(current.get("filter_column_rows")) or in_shape  # live Power BI: a FILTER(table, ..) argument filters every column of it
+            return filtered_rows is not None or on_axis or in_shape
         if function == "HASONEFILTER":
+            if in_shape and filtered_rows is None:
+                raise MeasureError("HASONEFILTER over a column filtered by a FILTER table is not supported in the local engine.")
             if column is None or filtered_rows is None:
                 return False
             return len({
@@ -9596,7 +9784,33 @@ def evaluate_measures(
                 for v in [row.get(column)]
             }) == 1
         if function == "ISCROSSFILTERED":
-            return bool(current.get("filter_column_rows")) or len(rows_by_table_id[context["id"]]) < len(context["rows"])
+            crossfiltered = bool(current.get("filter_column_rows")) or len(rows_by_table_id[context["id"]]) < len(context["rows"])
+            if not crossfiltered:
+                # live Power BI (iteration 84, critic): a filter on another table that reaches this one through an active relationship counts
+                # although it keeps every row (CALCULATE(ISCROSSFILTERED(F), U[K]<>"k0") is TRUE)
+                reached = {
+                    table_id for table_id in evaluation_filter_ids
+                    if table_id != context["id"] and (
+                        evaluation_contexts_by_id.get(table_id, {}).get("filter_column_rows") or "filter_table_rows" in evaluation_contexts_by_id.get(table_id, {})
+                    )
+                }
+                pending = list(reached)
+                while pending:
+                    reached_id = pending.pop()
+                    for relationship in relationship_definitions:
+                        if not isinstance(relationship, dict) or not relationship.get("is_active"):
+                            continue
+                        ends = (str(relationship.get("from_table_id")), str(relationship.get("to_table_id")))
+                        directions = relationship_filter_directions(relationship)
+                        for source_end, target_end, direction in ((ends[0], ends[1], "from_to"), (ends[1], ends[0], "to_from")):
+                            if source_end == reached_id and direction in directions and target_end not in reached:
+                                reached.add(target_end)
+                                pending.append(target_end)
+                if context["id"] in reached:
+                    return True
+            if not crossfiltered and full_table_filters[0]:
+                raise MeasureError("ISCROSSFILTERED under a table filter that keeps every row of its table is not supported.")
+            return crossfiltered
         raise MeasureError(f"Function {function} is not supported by the local DAX engine.")
 
     def evaluate_rank_function(
@@ -9974,11 +10188,13 @@ def evaluate_measures(
             raise MeasureError(
                 f"{date_filter_function} needs a Date or DateTime column."
             )
+        row_filters = all_row_context_filters(None) if row_stack else {}  # inside an iterator the row filters the date column (see date_column_source)
+        visible_rows = (
+            with_column_filters(row_filters, lambda: list(rows_by_table_id[date_table["id"]]), True) if row_filters else rows_by_table_id[date_table["id"]]
+        )
         visible_dates = [
             parsed_date
-            for row_index, row in enumerate(
-                rows_by_table_id[date_table["id"]], 1
-            )
+            for row_index, row in enumerate(visible_rows, 1)
             if (parsed_date := _parse_measure_date(
                 row.get(actual_date_column), actual_date_column, row_index
             )) is not None
@@ -10171,7 +10387,15 @@ def evaluate_measures(
             if available_dates and count:
                 if start_date is None or start_date < min(available_dates):
                     start_date = min(available_dates)
-                if start_date <= max(available_dates):
+                full_calendar = (max(available_dates) - min(available_dates)).days + 1 == len(set(available_dates))
+                if start_date <= max(available_dates) and interval != "DAY" and not full_calendar:
+                    # live Power BI (iteration 84, critic): over a column that is not a full calendar (a fact table's date) a month, quarter or
+                    # year window is not the exact one of DAX (see _sparse_period_window)
+                    window = _sparse_period_window(set(available_dates), start_date, count, interval)
+                    if window is None:
+                        raise MeasureError("DATESINPERIOD over a column that is not a full calendar is not supported when a forward window ends inside a month.")
+                    shifted_dates = window
+                elif start_date <= max(available_dates):
                     # live Power BI (903 of 903 probes): the last day of a month stays the last day of the target month
                     boundary = _shift_date(start_date, count, interval, keep_month_end=True)
                     if count < 0:
@@ -10225,6 +10449,14 @@ def evaluate_measures(
         if mixed and dax_dates.is_date(value) and not row_stack:  # inside an iterator the key or branch value is only compared (locked answers)
             raise MeasureError("A date mixed with a number in one result is not supported in the local engine.")
 
+    def refuse_date_beside_number(branches: Any, value: Any) -> None:
+        """Live Power BI: IF / SWITCH / COALESCE with a number literal in one result branch give a number whichever branch runs, so a
+        date result beside a number literal is refused (the local engine keeps the date type of the branch it ran)."""
+        if dax_dates.is_date(value) and not row_stack and any(
+            isinstance(branch, tuple) and (branch[0] == "number" or (branch[0] == "unary" and branch[2][0] == "number")) for branch in branches
+        ):
+            raise MeasureError("A date mixed with a number in one result is not supported in the local engine.")
+
     def is_date_aggregate(node: tuple[Any, ...]) -> bool:
         """MAX / MIN / MAXX / MINX of a Date column (possibly inside CALCULATE): empty, they give a typed BLANK date."""
         if node[0] != "call":
@@ -10237,6 +10469,8 @@ def evaluate_measures(
             reference = _first_reference(arguments[0])
         elif function in {"MAX", "MIN"} and len(arguments) == 1:
             reference = arguments[0]
+        elif function == "SELECTEDVALUE" and arguments:
+            reference = arguments[0]  # SELECTEDVALUE of a date column with no single selection is a typed BLANK date as well
         elif function in {"MAXX", "MINX"} and len(arguments) == 2:
             reference = arguments[1]
         elif function == "CALCULATE" and arguments:
@@ -10330,6 +10564,10 @@ def evaluate_measures(
             _, table, name = node
             measure_key = name.casefold()
             if measure_key in by_name:
+                if not table and measure_key in shadowed_measure_keys():
+                    # live Power BI (iteration 84, critic): [Name] binds to the column when the measure's own table has a column of that name
+                    # (SUMX(Fact,[Qty]) is the column sum, a bare [Qty] is an error), so the local engine does not guess
+                    raise MeasureError(f"[{name}] is both a measure and a column of its table; the reference is ambiguous in the local engine.")
                 if row_context is not None:
                     return with_column_filters(all_row_context_filters(row_context), lambda: evaluate(node), True)
                 return resolve(measure_key)
@@ -10421,9 +10659,9 @@ def evaluate_measures(
             if node[1] in {"+", "-"} and result is not None and (
                 dax_dates.is_date(left) or dax_dates.is_date(right)
             ):
-                if node[1] == "-" and not dax_dates.is_date(left) and node[2][0] in {"number", "blank"}:
+                if node[1] == "-" and not dax_dates.is_date(left) and (node[2][0] in {"number", "blank"} or (node[2][0] == "unary" and node[2][2][0] == "number") or (node[2][0] == "call" and node[2][1] == "INT")):
                     return result  # live Power BI: a number literal minus a date is a plain number (other lefts may be dates the evaluator lost the type of)
-                return dax_dates.DaxDateTime(result)
+                return dax_dates.DaxDateTime(dax_dates.tick_round(result))
             return result
         if kind == "logical":
             return _eager_logical(
@@ -10517,6 +10755,9 @@ def evaluate_measures(
                 elif function in {"MEDIANX", "PERCENTILEX.INC", "PERCENTILEX.EXC"}:
                     values.append(Decimal(0))  # these three count a blank result as zero
             if function in dax_math.STAT_ITERATORS:
+                if any(isinstance(value, dax_dates.DaxDateTime) for value in values):
+                    # live Power BI (iteration 84, critic): "MEDIANX does not support expressions of type string/Boolean/date"
+                    raise MeasureError(f"{function} does not support expressions of type date.")
                 percentile = (
                     dax_typed.to_number(evaluate(arguments[2], row_context)) if function.startswith("PERCENTILEX") else None
                 )
@@ -10566,7 +10807,18 @@ def evaluate_measures(
                 if wipes and any(a[0] == "call" and a[1] in _TIME_FILTER_FUNCTIONS for a in arguments[1:]) and not any(
                     _new_route_time_set(a) for a in arguments[1:]
                 ):
-                    wipes = []  # the date sets are computed in this context, then evaluate_with_date_values clears the table when it applies them
+                    # the date sets are computed in this context, then evaluate_with_date_values clears the table when it applies them: only
+                    # for the key column the set itself reads (a set over a fact date column leaves the calendar to the other filters)
+                    handled: set[str] = set()
+                    for item in arguments[1:]:
+                        if item[0] == "call" and item[1] in _TIME_FILTER_FUNCTIONS and item[2] and item[2][0][0] == "reference":
+                            try:
+                                item_table, item_column = resolve_table(item[2][0][1], item[2][0][2])
+                            except MeasureError:
+                                continue
+                            if is_date_key(item_table, item_column):
+                                handled.add(str(item_table["name"]))
+                    wipes = [name for name in wipes if name not in handled]
                 if wipes:  # live Power BI: replacing a date key column first removes the other filters of its table
                     arguments = (*arguments, *(("call", "REMOVEFILTERS", (("table", name),)) for name in wipes))
                 node = (node[0], function, arguments)
@@ -10898,6 +11150,7 @@ def evaluate_measures(
                 chosen, row_context, allow_text=allow_text, allow_boolean=allow_boolean,
             )
             refuse_date_result(mixed_branches, value)
+            refuse_date_beside_number(arguments[1:3], value)
             if value is None and bool_join([branch_kind(branch, row_context) for branch in arguments[1:]]):
                 return False  # a Boolean result has no blank: Power BI answers FALSE
             return value
@@ -10926,6 +11179,7 @@ def evaluate_measures(
                 value, failed = None, True
             if failed:
                 value = evaluate(arguments[1], row_context, allow_text=allow_text, allow_boolean=allow_boolean)
+            refuse_date_beside_number(arguments[:2], value)
             if value is None and bool_join([branch_kind(arguments[0], row_context), branch_kind(arguments[1], row_context)]):
                 return False
             return value
@@ -10966,6 +11220,7 @@ def evaluate_measures(
                 level_bool.reverse()
                 if level_bool[matched_level]:
                     return False
+            refuse_date_beside_number([*remaining[1::2], *([] if fallback is None else [fallback])], value)
             return value
         if function in {"AND", "OR"}:
             return _eager_logical(
@@ -11033,6 +11288,7 @@ def evaluate_measures(
                     raise _HardError(str(error)) from error
                 if not found and value is not None:
                     result, found = value, True
+            refuse_date_beside_number(arguments, result)
             return result
         if function == "DIVIDE":
             numerator_value = evaluate(arguments[0], row_context)
@@ -11119,6 +11375,7 @@ def evaluate_measures(
             return delimiter.join(text for _, text in entries) if entries else None
         if function in _COLUMN_SCALAR_ARITY:
             value_context, value_column = resolve_table(arguments[0][1], arguments[0][2])
+            refuse_one_to_one_blank_reader(value_context["id"], function)
             seen_values: dict[tuple[Any, ...], Any] = {}
             for row_index, source_row in enumerate(rows_by_table_id[value_context["id"]], 1):
                 value = source_row.get(value_column)
@@ -11156,6 +11413,7 @@ def evaluate_measures(
             smaller = dax_typed.compare("<", first, second)
             picked = (first if larger else second) if function == "MAX" else (first if smaller else second)
             refuse_date_result(mixed_pair, picked)
+            refuse_date_beside_number(arguments[:2], picked)
             return picked
         reference = arguments[0]
         if reference[0] != "reference" or len(reference) < 3:  # a table or other non-column argument is not a scalar source

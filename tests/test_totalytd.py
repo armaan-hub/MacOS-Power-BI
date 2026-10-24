@@ -15,6 +15,7 @@ from PySide6.QtCore import QSettings
 from PySide6.QtWidgets import QApplication, QDialog
 
 from analytics_studio.controller import StudioController
+from analytics_studio.dax_time_sets import parse_year_end_text as _real_parse_year_end_text
 from analytics_studio.date_table_dialog import DateTableDialog
 from analytics_studio.file_import import parse_file
 from analytics_studio.measures import (
@@ -175,7 +176,10 @@ class TotalYtdTests(unittest.TestCase):
         self.assertEqual(fiscal_ytd_for(june_30), 105)
         self.assertEqual(fiscal_ytd_for(july_1), 7)
 
-    @unittest.mock.patch("analytics_studio.measures._year_end_reference_year", return_value=2024)
+    @unittest.mock.patch(
+        "analytics_studio.dax_time_sets.parse_year_end_text",
+        side_effect=lambda text, today=None: _real_parse_year_end_text(text, today or date(2024, 6, 1)),  # the machine's year is a leap year
+    )
     def test_totalytd_clamps_february_29_for_non_leap_years(self, _reference_year) -> None:
         # Power BI reads "2/29" as Feb 29 only while the machine's year is a leap year (a common year makes it Feb 1)
         calendar_rows = [
@@ -218,7 +222,9 @@ class TotalYtdTests(unittest.TestCase):
             active_table_id="orders-id",
         )
 
-        self.assertEqual(values["Leap Fiscal YTD"], 10)
+        # live Power BI (iteration 84 critic, ZO TOTALYTD "2/29/2024" at 2023-03-15 is 14 days): a Feb 29 year end is Mar 1 in a common
+        # year, so the fiscal year of 2023-03-01 started on Mar 2, 2022 (it was Feb 28 clamped before, which gave 10)
+        self.assertEqual(values["Leap Fiscal YTD"], 15)
 
         leap_start = date(2023, 3, 1)
         leap_end = date(2024, 3, 1)
@@ -267,7 +273,8 @@ class TotalYtdTests(unittest.TestCase):
             active_table_id="orders-id",
         )
 
-        self.assertEqual(leap_values["Leap Fiscal YTD"], 35)
+        # live Power BI: TOTALYTD "2/29/2024" at 2024-02-29 spans 365 days (Mar 2, 2023 on), so the Mar 1, 2023 order (10) is outside
+        self.assertEqual(leap_values["Leap Fiscal YTD"], 25)
 
     def test_totalytd_rejects_invalid_fiscal_dates_and_filter_expressions(self) -> None:
         with self.assertRaisesRegex(MeasureError, "month/day"):
