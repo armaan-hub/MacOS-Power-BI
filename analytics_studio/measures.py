@@ -1530,6 +1530,37 @@ def _contains_refused_call_outside_x_iterator(node: Any) -> bool:
     return any(isinstance(child, tuple) and _contains_refused_call_outside_x_iterator(child) for child in node)
 
 
+_UNTAKEN_BRANCH_ERRORS = (
+    "Iterator expressions can reference columns from their iterated table only",  # live: a single value for the column cannot be determined
+    "cannot validate first",
+    "needs a Date or DateTime column",  # TOTALYTD(.., text column)
+)
+
+
+def _bare_column_as_table(node: Any) -> bool:
+    """Whether TOPN / FILTER / an X-iterator is given a plain column where a table belongs (Power BI: a single value for the column cannot be determined)."""
+    if not isinstance(node, tuple) or not node:
+        return False
+    if node[0] == "call":
+        position = 1 if node[1] == "TOPN" else 0 if node[1] in {"FILTER", "SUMX", "AVERAGEX", "MAXX", "MINX", "COUNTX", "COUNTAX", "CONCATENATEX"} else None
+        if position is not None and len(node[2]) > position and isinstance(node[2][position], tuple) and node[2][position][0] == "reference" and node[2][position][1]:
+            return True
+    children = node if isinstance(node[0], tuple) else node[1:]
+    return any(_bare_column_as_table(child) for child in children if isinstance(child, tuple))
+
+
+def _keepfilters_inside_time_function(node: Any) -> bool:
+    """Whether KEEPFILTERS sits inside a date-set function (PREVIOUSQUARTER(KEEPFILTERS(Cal[Date]))): a Power BI error wherever it is written."""
+    if not isinstance(node, tuple) or not node:
+        return False
+    if node[0] == "call" and node[1] in _TIME_FILTER_FUNCTIONS and any(
+        isinstance(argument, tuple) and argument[:2] == ("call", "KEEPFILTERS") for argument in node[2]
+    ):
+        return True
+    children = node if isinstance(node[0], tuple) else node[1:]
+    return any(_keepfilters_inside_time_function(child) for child in children if isinstance(child, tuple))
+
+
 def _iterator_body_reads_a_table_column(node: Any) -> bool:
     """Whether an X-iterator anywhere in this expression has a body that reads a column by table name outside an aggregation."""
     if not isinstance(node, tuple) or not node:
@@ -9588,8 +9619,12 @@ def evaluate_measures(
         modifiers run, then the filters replace (or, with KEEPFILTERS, intersect) the filters on their columns.
         USERELATIONSHIP / CROSSFILTER of the same CALCULATE change the relationships only for the expression: the clearing
         modifiers (and the tables they expand to) still read the enclosing context's relationships (tests/test_calculate_modifier_mix.py)."""
-        if _contains_function_call(expression_node, "ALLSELECTED") and any(
-            argument[0] == "call" and argument[1] == "FILTER" for argument in filter_arguments
+        if contains_allselected_date_column(expression_node) and any(
+            argument[0] == "call" and argument[1] == "FILTER" and argument[2] and (
+                argument[2][0][0] == "table"
+                or (argument[2][0][0] == "call" and argument[2][0][1] == "ALL" and argument[2][0][2] and argument[2][0][2][0][0] == "table")
+            )  # FILTER over a whole table (not over one column of it, which the locked ALLSELECTED shadow batteries measured)
+            for argument in filter_arguments
         ) and any(
             argument[0] not in {"call", "var", "table", "thunk"} or (argument[0] == "call" and argument[1] == "KEEPFILTERS")
             for argument in filter_arguments
@@ -10678,6 +10713,20 @@ def evaluate_measures(
 
     balance_running: set[int] = set()
 
+    def contains_allselected_date_column(node: Any) -> bool:
+        """Whether ALLSELECTED over a date column appears anywhere in this expression (the shape the date-set guards are about)."""
+        if not isinstance(node, tuple) or not node:
+            return False
+        if node[0] == "call" and node[1] == "ALLSELECTED" and node[2] and isinstance(node[2][0], tuple) and node[2][0][0] == "reference":
+            try:
+                context, column = resolve_table(node[2][0][1], node[2][0][2])
+            except MeasureError:
+                context = None
+            if context is not None and str(context.get("column_types", {}).get(column, "")).casefold() in {"date", "datetime"}:
+                return True
+        children = node if isinstance(node[0], tuple) else node[1:]
+        return any(contains_allselected_date_column(child) for child in children if isinstance(child, tuple))
+
     def refuse_opening_balance_over_fact_dates(edge: tuple[Any, ...]) -> None:
         """Live Power BI (iteration 84, testing agent; 16 of 12,534 fresh probes): OPENINGBALANCEx(e, d) with a date SET d built over a date
         column that is not the key of a date table (OPENINGBALANCEMONTH(COUNTROWS(Fact), DATESYTD(Fact[Dt])) is 1, and the equivalent
@@ -10701,12 +10750,19 @@ def evaluate_measures(
         for branch in branches:
             if branch is None or branch[0] in {"number", "string", "boolean", "blank"}:
                 continue
+            if _keepfilters_inside_time_function(branch):
+                raise MeasureError("KEEPFILTERS inside a date-set function is an error in Power BI, also in a branch that is not taken.")
+            if _bare_column_as_table(branch):
+                raise MeasureError("A plain column given where a table belongs is an error in Power BI, also in a branch that is not taken.")
             try:
                 evaluate(branch, row_context, allow_text=True, allow_boolean=True)
-            except MeasureRuntimeError as error:
+            except MeasureError as error:
                 if _iterator_body_reads_a_table_column(branch):
-                    # the body is validated before the table it iterates is built, so the data error may hide the real one
+                    # the body is validated before the table it iterates is built, so a data error or a refusal there may hide the real one
                     raise MeasureError(f"{error} The branch also has an iterator body that reads a column by table name, which the local engine cannot validate first.") from error
+                # otherwise only the errors Power BI measured as raised from a branch that is not taken; every other refusal there is not the expression's
+                if any(marker in str(error) for marker in _UNTAKEN_BRANCH_ERRORS):
+                    raise
             except (DecimalException, OverflowError):
                 pass
 
@@ -11000,7 +11056,7 @@ def evaluate_measures(
             if (
                 len(arguments) > 1 and arguments[0][0] == "call" and arguments[0][1] == "CALCULATE"
                 and any(item[0] == "call" and item[1] == "KEEPFILTERS" for item in arguments[1:])
-                and any(_contains_function_call(item, "ALLSELECTED") for item in arguments[0][2][1:])
+                and any(contains_allselected_date_column(item) for item in arguments[0][2][1:])
             ):
                 # live Power BI (iteration 84, fix agent; fresh probe): CALCULATE(CLOSINGBALANCEYEAR(e, ALLSELECTED(Fact[Dt])), KEEPFILTERS(Cal[Year]=2023))
                 # is BLANK, ours 50: the inner ALLSELECTED sees the outer KEEPFILTERS filter, which the shadow bookkeeping does not carry over
@@ -11438,7 +11494,7 @@ def evaluate_measures(
                         else:
                             try:
                                 later_value = evaluate(later, row_context, allow_text=True, allow_boolean=True)
-                            except MeasureRuntimeError:
+                            except MeasureError:
                                 continue
                             if later_value is None:
                                 raise MeasureError("A later SWITCH value that is BLANK cannot be type-checked against the subject in the local engine.")

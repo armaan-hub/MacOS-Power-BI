@@ -63,23 +63,23 @@ class DraftGuardTests(unittest.TestCase):
         """Escape and the X button call cancel(): a dirty draft is kept on Cancel, dropped on Discard, committed on Save."""
         self.dirty_draft()
         with self.ask(CANCEL) as ask:
-            self.bar.cancel()
+            self.bar.requestCancel()
         self.assertEqual(ask.call_count, 1)
         self.assertTrue(self.bar.active)
         self.assertEqual(self.bar.text, "Draft = SUM(Orders[Unit price])")
         with self.ask(DISCARD):
-            self.bar.cancel()
+            self.bar.requestCancel()
         self.assertFalse(self.bar.active)
         self.dirty_draft()
         with self.ask(SAVE):
-            self.bar.cancel()
+            self.bar.requestCancel()
         self.assertIn("Draft", [m["name"] for m in self.controller.modelMeasures])
 
     def test_escape_closes_a_clean_bar_without_asking(self) -> None:
         self.assertTrue(self.bar.beginNewMeasure())
         self.assertFalse(self.bar.dirty)
         with self.ask() as ask:
-            self.bar.cancel()
+            self.bar.requestCancel()
         self.assertEqual(ask.call_count, 0)
         self.assertFalse(self.bar.active)
 

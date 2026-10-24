@@ -352,7 +352,13 @@ class FormulaBarController(QObject):
 
     @Slot()
     def cancel(self) -> None:
-        """Escape and the X button: a clean bar closes, a dirty draft asks Save / Discard / Cancel first (never dropped silently)."""
+        """Drop the draft without asking (callers that already know it is clean or are throwing it away)."""
+        if self._active:
+            self._close()
+
+    @Slot()
+    def requestCancel(self) -> None:  # noqa: N802
+        """Escape and the X button typed by the user: a clean bar closes, a dirty draft asks Save / Discard / Cancel first."""
         if not self._active:
             return
         if self.dirty:
