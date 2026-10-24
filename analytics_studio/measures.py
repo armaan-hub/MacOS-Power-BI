@@ -11102,6 +11102,10 @@ def evaluate_measures(
                 # live Power BI (iteration 84, fix agent; fresh probe): CALCULATE(CLOSINGBALANCEYEAR(e, ALLSELECTED(Fact[Dt])), KEEPFILTERS(Cal[Year]=2023))
                 # is BLANK, ours 50: the inner ALLSELECTED sees the outer KEEPFILTERS filter, which the shadow bookkeeping does not carry over
                 raise MeasureError("ALLSELECTED in the filters of a CALCULATE nested under KEEPFILTERS is not supported in the local engine.")
+            if contains_allselected_date_column(arguments[0]) and sum(
+                1 for item in arguments[1:] if item[0] == "call" and item[1] == "KEEPFILTERS"
+            ) >= 2:
+                raise MeasureError("ALLSELECTED over a date column beside several KEEPFILTERS is not supported in the local engine.")
             opening_edge = next((
                 item for item in arguments[1:]
                 if item[0] == "call" and item[1] == "PREVIOUSDAY" and len(item[2]) == 1 and item[2][0][0] == "call"
