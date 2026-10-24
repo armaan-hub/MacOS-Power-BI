@@ -7940,7 +7940,7 @@ def evaluate_measures(
                 )
             relationship_index = matches[0]
             relationship = relationship_definitions[relationship_index]
-            if relationship.get("cardinality") == "one_to_one" and any(
+            if relationship.get("cardinality") == "one_to_one" and relationship.get("is_active") and any(
                 one_to_one_unmatched(table_id)[0] or one_to_one_unmatched(table_id)[1] for table_id in (left_context["id"], right_context["id"])
             ):
                 # live Power BI (iteration 84, critic; 15 of 1,033 fresh ZM probes): USERELATIONSHIP over a one-to-one relationship whose tables
