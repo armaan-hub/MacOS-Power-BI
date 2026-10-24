@@ -3927,6 +3927,17 @@ def evaluate_measures(
             return raw if isinstance(raw, bool) else cell_to_text(raw).strip().casefold() == "true"
         return raw if isinstance(raw, str) else cell_to_text(raw)
 
+    # What ALLSELECTED sees inside an iterator (tools/parity/dax_battery_allselected_shadow.json): the iterated table's
+    # distinct tuples ("shadow", one component over the columns it came from), the outer filters those columns replace
+    # ("suppressed"), and the filters that are only a context transition ("transition", which it never sees).
+    eff_layers: tuple[_Shadow, ...] = ()
+    eff_suppressed: dict[str, dict[str, Any]] = {}  # table -> casefolded column -> the outer filter object the shadow replaced
+    eff_transition: dict[str, dict[str, tuple[Any, Any]]] = {}  # table -> casefolded column -> (filter a transition set, filter it replaced)
+    eff_group_keys: dict[str, dict[str, Any]] = {}  # SUMMARIZE group keys: table -> casefolded column -> the filter object
+    eff_touched: frozenset[tuple[str, str]] = frozenset()  # (table, column) a CALCULATE modifier has cleared or filtered
+    eff_blocked = False
+    eff_rank_table = False  # evaluating the table argument of RANKX: ALLSELECTED(col) still sees a SUMMARIZE key on its own column
+
     shadowed_cache: list[frozenset[str]] = []
 
     def shadowed_measure_keys() -> frozenset[str]:
@@ -4696,17 +4707,6 @@ def evaluate_measures(
         if row_identity:
             context["row_identity"] = True
         return context, rows
-
-    # What ALLSELECTED sees inside an iterator (tools/parity/dax_battery_allselected_shadow.json): the iterated table's
-    # distinct tuples ("shadow", one component over the columns it came from), the outer filters those columns replace
-    # ("suppressed"), and the filters that are only a context transition ("transition", which it never sees).
-    eff_layers: tuple[_Shadow, ...] = ()
-    eff_suppressed: dict[str, dict[str, Any]] = {}  # table -> casefolded column -> the outer filter object the shadow replaced
-    eff_transition: dict[str, dict[str, tuple[Any, Any]]] = {}  # table -> casefolded column -> (filter a transition set, filter it replaced)
-    eff_group_keys: dict[str, dict[str, Any]] = {}  # SUMMARIZE group keys: table -> casefolded column -> the filter object
-    eff_touched: frozenset[tuple[str, str]] = frozenset()  # (table, column) a CALCULATE modifier has cleared or filtered
-    eff_blocked = False
-    eff_rank_table = False  # evaluating the table argument of RANKX: ALLSELECTED(col) still sees a SUMMARIZE key on its own column
 
     def current_filter(table_id: str, folded: str) -> Any:
         """The row-index set now filtering one column of a table, None when it is not filtered."""
