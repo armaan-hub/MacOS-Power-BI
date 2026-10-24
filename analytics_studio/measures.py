@@ -9577,6 +9577,12 @@ def evaluate_measures(
         modifiers run, then the filters replace (or, with KEEPFILTERS, intersect) the filters on their columns.
         USERELATIONSHIP / CROSSFILTER of the same CALCULATE change the relationships only for the expression: the clearing
         modifiers (and the tables they expand to) still read the enclosing context's relationships (tests/test_calculate_modifier_mix.py)."""
+        if _contains_function_call(expression_node, "ALLSELECTED") and any(
+            argument[0] == "call" and argument[1] == "FILTER" for argument in filter_arguments
+        ) and any(argument[0] not in {"call", "var", "table", "thunk"} for argument in filter_arguments):
+            # live Power BI (iteration 84, testing agent): CALCULATETABLE(NEXTMONTH(FIRSTDATE(ALLSELECTED(Cal[Date]))), Cal[MonthNo]=10,
+            # FILTER(ALL(Cal), Cal[Year]=2024)) is 29 days, ours 30: ALLSELECTED sees the table filter but not the Boolean one beside it
+            raise MeasureError("ALLSELECTED inside a CALCULATE that mixes a table-valued FILTER with a Boolean filter is not supported in the local engine.")
         relationship_modifiers = tuple(
             argument for argument in filter_arguments if argument[0] == "call" and argument[1] in _RELATIONSHIP_MODIFIERS
         )
@@ -10656,6 +10662,23 @@ def evaluate_measures(
                 "not supported in the local engine."
             )
 
+    balance_running: set[int] = set()
+
+    def refuse_opening_balance_over_fact_dates(edge: tuple[Any, ...]) -> None:
+        """Live Power BI (iteration 84, testing agent; 16 of 12,534 fresh probes): OPENINGBALANCEx(e, d) with a date SET d built over a date
+        column that is not the key of a date table (OPENINGBALANCEMONTH(COUNTROWS(Fact), DATESYTD(Fact[Dt])) is 1, and the equivalent
+        CALCULATE(e, PREVIOUSDAY(STARTOFMONTH(d))) is BLANK) answers where the local rewrite finds nothing, so a BLANK is refused here."""
+        dates = edge[2][0][2][0]  # PREVIOUSDAY(STARTOFx(dates, ...))
+        if dates[0] != "call":
+            return
+        for reference in _iter_reference_nodes(dates):
+            try:
+                context, column = resolve_table(reference[1], reference[2])
+            except MeasureError:
+                continue
+            if not is_date_key(context, column):
+                raise MeasureError("OPENINGBALANCE over a date set built on a column that does not key a date table is not supported in the local engine.")
+
     def probe_untaken_branches(branches: list[tuple[Any, ...]], row_context: Any) -> None:
         """Live Power BI (iteration 84, testing agent): IF and SWITCH validate the branches they do not take, so a construct that is an
         error there (PREVIOUSQUARTER(KEEPFILTERS(..)), a column of a table other than the iterated one, a text column in TOTALYTD) is an
@@ -10958,6 +10981,20 @@ def evaluate_measures(
                     count += 1
             return Decimal(count) if count else None
         if function == "CALCULATE":
+            opening_edge = next((
+                item for item in arguments[1:]
+                if item[0] == "call" and item[1] == "PREVIOUSDAY" and len(item[2]) == 1 and item[2][0][0] == "call"
+                and item[2][0][1] in {"STARTOFMONTH", "STARTOFQUARTER", "STARTOFYEAR"} and item[2][0][2]
+            ), None)  # the shape OPENINGBALANCEx(e, d) is rewritten to (an explicit PREVIOUSDAY(STARTOFx(d)) filter has it too)
+            if opening_edge is not None and id(node) not in balance_running:
+                balance_running.add(id(node))
+                try:
+                    result = evaluate(node, row_context, allow_text=allow_text, allow_boolean=allow_boolean)
+                finally:
+                    balance_running.discard(id(node))
+                if result is None:
+                    refuse_opening_balance_over_fact_dates(opening_edge)
+                return result
             if len(arguments) > 1:
                 arguments = preevaluate_calculate_boolean_filters(arguments, row_context)
                 wipes = date_key_wipe_tables(arguments)
