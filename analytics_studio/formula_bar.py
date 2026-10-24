@@ -352,8 +352,13 @@ class FormulaBarController(QObject):
 
     @Slot()
     def cancel(self) -> None:
-        if self._active:
-            self._close()
+        """Escape and the X button: a clean bar closes, a dirty draft asks Save / Discard / Cancel first (never dropped silently)."""
+        if not self._active:
+            return
+        if self.dirty:
+            self.confirmDiscardDraft()
+            return
+        self._close()
 
     # ------------------------------------------------------------------ validation / commit
 
