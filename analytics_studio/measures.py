@@ -5175,6 +5175,8 @@ def evaluate_measures(
                     raise MeasureError(f"Function '{function}' cannot add column [{new_name}], as it has the same name as an existing column.")
                 explicit_taken.add(bucket)
                 taken_names.add(new_name.casefold())
+            if not rows:
+                refuse_foreign_columns_of_empty_iteration(context, *expressions)
             lineage = base_lineage(context) if add else {}
             headers = (list(context["headers"]) if add else []) + names
             out_rows: list[dict[str, Any]] = []
@@ -5292,6 +5294,8 @@ def evaluate_measures(
                         descending = order[1] == 0 or order[1] is False  # 0 / FALSE sort descending
                         index += 1
                 keys_spec.append((expression, descending))
+            if not rows:
+                refuse_foreign_columns_of_empty_iteration(context, *(expression for expression, _descending in keys_spec))
             if count <= 0 or not rows:
                 return context, []
             if not keys_spec:  # no order expression: the first n rows, no ties
@@ -6341,9 +6345,32 @@ def evaluate_measures(
         single["single_column_set"] = True
         return single, ([] if raw is None else [{column: raw}])
 
+    def refuse_foreign_columns_of_empty_iteration(context: dict[str, Any], *expressions: tuple[Any, ...]) -> None:
+        """Live Power BI (iteration 84, testing agent; 34 of 12,534 fresh probes): an iterator body that reads a column of a table other than
+        the iterated one is evaluated once without a row even when the iteration is empty, and fails with "a single value for column ...
+        cannot be determined" whenever the filter context holds several values of it (SUMX(FILTER(Cal, FALSE()), Fact[Amt]), the body of a
+        TOPN / FILTER / CONCATENATEX over an empty set, an untaken SWITCH branch).  The local engine only runs a body per row, so an empty
+        iteration would answer BLANK; the same refusal as for a non-empty iteration is raised instead."""
+        lineage = context.get("lineage") or {}
+        headers = {str(header).casefold() for header in context.get("headers", [])}
+        for expression in expressions:
+            for reference in _direct_column_references(expression):
+                if not reference[1]:
+                    continue  # a measure or a column of the iterated table
+                try:
+                    table, column = resolve_table(reference[1], reference[2])
+                except MeasureError:
+                    continue  # the evaluation of a non-empty iteration reports it
+                if table["id"] == context.get("id") and column.casefold() in headers:
+                    continue
+                if any(base["id"] == table["id"] and str(base_column).casefold() == column.casefold() for base, base_column in lineage.values()):
+                    continue
+                raise MeasureError("Iterator expressions can reference columns from their iterated table only.")
+
     def refuse_foreign_columns_of_empty_set(context: dict[str, Any], expression: tuple[Any, ...]) -> None:
         """Power BI rejects an iterator body that reads a column other than the one a date set holds, also when the set is empty
         (live: MAXX(NEXTDAY(Fact[Dt]), Fact[Ship]) and MAXX(set, Cal[Date]) are errors)."""
+        refuse_foreign_columns_of_empty_iteration(context, expression)
         if not context.get("single_column_set"):
             return
         lineage = next(iter(context.get("lineage", {}).values()), None)
@@ -6566,6 +6593,8 @@ def evaluate_measures(
                 compile_table_filter_predicate(predicate, context, comparisons)
             except MeasureError:
                 # any row predicate: evaluate it for each row, with the row on the EARLIER stack
+                if not base_rows:
+                    refuse_foreign_columns_of_empty_iteration(context, predicate)
                 return context, [frame[1] for frame in iterate_rows(context, base_rows, "install") if conjuncts_pass(predicate, frame)]
             return context, [
                 row for position, row in enumerate(base_rows, 1)
@@ -10627,6 +10656,21 @@ def evaluate_measures(
                 "not supported in the local engine."
             )
 
+    def probe_untaken_branches(branches: list[tuple[Any, ...]], row_context: Any) -> None:
+        """Live Power BI (iteration 84, testing agent): IF and SWITCH validate the branches they do not take, so a construct that is an
+        error there (PREVIOUSQUARTER(KEEPFILTERS(..)), a column of a table other than the iterated one, a text column in TOTALYTD) is an
+        error of the whole expression.  A branch is evaluated for that and its value dropped: a refusal in it is the expression's refusal,
+        a data-dependent error (division, wrong data type) is not raised because Power BI does not report it from a branch it never takes."""
+        for branch in branches:
+            if branch is None or branch[0] in {"number", "string", "boolean", "blank"}:
+                continue
+            try:
+                evaluate(branch, row_context, allow_text=True, allow_boolean=True)
+            except MeasureRuntimeError:
+                pass
+            except (DecimalException, OverflowError):
+                pass
+
     def evaluate(
         node: tuple[Any, ...],
         row_context: tuple[dict[str, Any], dict[str, Any], int] | None = None,
@@ -10835,7 +10879,14 @@ def evaluate_measures(
                 row_context = next((frame for frame in reversed(row_stack[:-1]) if frame[0]["headers"]), None)
             return related_value(arguments[0], row_context)
         if function in {"SUMX", "AVERAGEX", "MAXX", "MINX"} or function in dax_math.STAT_ITERATORS:
-            context, iteration_rows = table_argument_value(arguments[0])
+            try:
+                context, iteration_rows = table_argument_value(arguments[0])
+            except MeasureRuntimeError as error:
+                if any(reference[1] for reference in _direct_column_references(arguments[1])):
+                    # live Power BI: the body is validated before the table is built (MAXX(CALENDAR(later, earlier), Fact[Ship]) reports the
+                    # column of the other table, not the calendar), so what the data error would hide is not known here
+                    raise MeasureError(f"{error} The iterator body also reads a column by table name, which the local engine cannot validate first.") from error
+                raise
             refuse_one_to_one_values_iteration(arguments[0])
             if not iteration_rows:
                 refuse_foreign_columns_of_empty_set(context, arguments[1])
@@ -11255,6 +11306,7 @@ def evaluate_measures(
             value = None if chosen is None else evaluate(
                 chosen, row_context, allow_text=allow_text, allow_boolean=allow_boolean,
             )
+            probe_untaken_branches([branch for branch in arguments[1:3] if branch is not chosen], row_context)
             refuse_date_result(mixed_branches, value)
             refuse_date_beside_number(arguments[1:3], value)
             if value is None and bool_join([branch_kind(branch, row_context) for branch in arguments[1:]]):
@@ -11306,15 +11358,22 @@ def evaluate_measures(
             remaining = list(arguments[1:])
             fallback = remaining.pop() if len(remaining) % 2 else None
             matched_level = len(remaining) // 2 - 1  # a miss falls through to the last nested IF's else
+            untaken = list(remaining[1::2]) + ([] if fallback is None else [fallback])
             for level, (candidate, result) in enumerate(zip(remaining[::2], remaining[1::2])):
                 if dax_typed.values_match(
                     subject, _consume_infinity(lambda: evaluate(candidate, row_context))
                 ):
                     value = evaluate(result, row_context)
                     matched_level = level
+                    # the candidates after the match and every other result and the fallback are branches Power BI still validates
+                    untaken = list(remaining[2 * level + 2:]) + [
+                        branch for position, branch in enumerate(remaining[1::2]) if position != level
+                    ] + ([] if fallback is None else [fallback])
                     break
             else:
                 value = None if fallback is None else evaluate(fallback, row_context)
+                untaken = list(remaining[1::2])
+            probe_untaken_branches(untaken, row_context)
             if value is None:
                 # SWITCH is nested IFs: each one turns a blank into FALSE when its own branches are Boolean
                 rest = None if fallback is None else branch_kind(fallback, row_context)
@@ -11459,6 +11518,8 @@ def evaluate_measures(
             finally:
                 topn_walk_nodes.pop(id(arguments[0]), None)
             entries = []
+            if not iteration_rows:
+                refuse_foreign_columns_of_empty_iteration(context, *read_nodes)
             iteration_rows = dictionary_ordered_rows(arguments[0], context, iteration_rows, read_nodes)
             def order_value(expression: tuple[Any, ...], inner: tuple[Any, ...]) -> Any:
                 value = evaluate(expression, inner, allow_text=True)
