@@ -9590,7 +9590,10 @@ def evaluate_measures(
         modifiers (and the tables they expand to) still read the enclosing context's relationships (tests/test_calculate_modifier_mix.py)."""
         if _contains_function_call(expression_node, "ALLSELECTED") and any(
             argument[0] == "call" and argument[1] == "FILTER" for argument in filter_arguments
-        ) and any(argument[0] not in {"call", "var", "table", "thunk"} for argument in filter_arguments):
+        ) and any(
+            argument[0] not in {"call", "var", "table", "thunk"} or (argument[0] == "call" and argument[1] == "KEEPFILTERS")
+            for argument in filter_arguments
+        ):
             # live Power BI (iteration 84, testing agent): CALCULATETABLE(NEXTMONTH(FIRSTDATE(ALLSELECTED(Cal[Date]))), Cal[MonthNo]=10,
             # FILTER(ALL(Cal), Cal[Year]=2024)) is 29 days, ours 30: ALLSELECTED sees the table filter but not the Boolean one beside it
             raise MeasureError("ALLSELECTED inside a CALCULATE that mixes a table-valued FILTER with a Boolean filter is not supported in the local engine.")
@@ -10994,6 +10997,14 @@ def evaluate_measures(
                     count += 1
             return Decimal(count) if count else None
         if function == "CALCULATE":
+            if (
+                len(arguments) > 1 and arguments[0][0] == "call" and arguments[0][1] == "CALCULATE"
+                and any(item[0] == "call" and item[1] == "KEEPFILTERS" for item in arguments[1:])
+                and any(_contains_function_call(item, "ALLSELECTED") for item in arguments[0][2][1:])
+            ):
+                # live Power BI (iteration 84, fix agent; fresh probe): CALCULATE(CLOSINGBALANCEYEAR(e, ALLSELECTED(Fact[Dt])), KEEPFILTERS(Cal[Year]=2023))
+                # is BLANK, ours 50: the inner ALLSELECTED sees the outer KEEPFILTERS filter, which the shadow bookkeeping does not carry over
+                raise MeasureError("ALLSELECTED in the filters of a CALCULATE nested under KEEPFILTERS is not supported in the local engine.")
             opening_edge = next((
                 item for item in arguments[1:]
                 if item[0] == "call" and item[1] == "PREVIOUSDAY" and len(item[2]) == 1 and item[2][0][0] == "call"
@@ -11410,15 +11421,31 @@ def evaluate_measures(
             matched_level = len(remaining) // 2 - 1  # a miss falls through to the last nested IF's else
             untaken = list(remaining[1::2]) + ([] if fallback is None else [fallback])
             for level, (candidate, result) in enumerate(zip(remaining[::2], remaining[1::2])):
-                if dax_typed.values_match(
-                    subject, _consume_infinity(lambda: evaluate(candidate, row_context))
-                ):
+                candidate_value = _consume_infinity(lambda: evaluate(candidate, row_context))
+                if candidate_value is None and subject is not None and candidate[0] != "blank":
+                    # live Power BI: a BLANK number is still a number, and SWITCH reports a number compared with a True/False or text subject
+                    raise MeasureError("A SWITCH value that is BLANK cannot be type-checked against the subject in the local engine.")
+                if dax_typed.values_match(subject, candidate_value):
                     value = evaluate(result, row_context)
                     matched_level = level
                     # the candidates after the match and every other result and the fallback are branches Power BI still validates
                     untaken = list(remaining[2 * level + 2:]) + [
                         branch for position, branch in enumerate(remaining[1::2]) if position != level
                     ] + ([] if fallback is None else [fallback])
+                    for later in remaining[2 * level + 2::2]:  # live Power BI: the values of the later candidates must be comparable with the subject
+                        if later[0] in {"number", "string", "boolean", "blank"}:
+                            later_value = later[1] if later[0] != "blank" else None
+                        else:
+                            try:
+                                later_value = evaluate(later, row_context, allow_text=True, allow_boolean=True)
+                            except MeasureRuntimeError:
+                                continue
+                            if later_value is None:
+                                raise MeasureError("A later SWITCH value that is BLANK cannot be type-checked against the subject in the local engine.")
+                        if subject is not None and later_value is not None and (
+                            isinstance(subject, bool) != isinstance(later_value, bool) or isinstance(subject, str) != isinstance(later_value, str)
+                        ):
+                            raise MeasureError("SWITCH cannot compare values of different types.")
                     break
             else:
                 value = None if fallback is None else evaluate(fallback, row_context)
