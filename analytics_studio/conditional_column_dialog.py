@@ -10,6 +10,7 @@ from __future__ import annotations
 from typing import Any, Callable
 
 from PySide6.QtCore import Qt, Signal
+from PySide6.QtGui import QColor
 from PySide6.QtWidgets import (
     QComboBox,
     QDialog,
@@ -42,6 +43,37 @@ CONDITIONAL_OPERATORS: tuple[tuple[str, str], ...] = (
     ("is less than", "less_than"),
     ("is less than or equal to", "less_than_or_equal"),
 )
+
+
+_MISSING_ROLE = Qt.ItemDataRole.UserRole + 1
+
+
+def _select_column(combo: QComboBox, name: str) -> None:
+    """Select ``name``; one that no longer exists is added as a flagged '(missing)' entry.
+
+    The original name is kept (never silently rebound to the first column) and the dialog
+    refuses to apply until the user picks an existing column.
+    """
+    index = combo.findText(name)
+    if index < 0:
+        combo.insertItem(0, f"{name} (missing)", name)
+        combo.setItemData(0, True, _MISSING_ROLE)
+        combo.setItemData(0, QColor("#a4262c"), Qt.ItemDataRole.ForegroundRole)
+        combo.setItemData(
+            0, f"The column {name!r} no longer exists. Pick an existing column.",
+            Qt.ItemDataRole.ToolTipRole,
+        )
+        index = 0
+    combo.setCurrentIndex(index)
+
+
+def _column_name(combo: QComboBox) -> str:
+    data = combo.currentData()
+    return str(data) if combo.currentData(_MISSING_ROLE) else combo.currentText()
+
+
+def _is_missing(combo: QComboBox) -> bool:
+    return bool(combo.currentData(_MISSING_ROLE))
 
 
 class ValueOrColumnField(QWidget):
@@ -95,16 +127,20 @@ class ValueOrColumnField(QWidget):
         index = self.kind_combo.findData(kind)
         self.kind_combo.setCurrentIndex(max(0, index))
         if kind == "column":
-            column_index = self.column_combo.findText(value)
-            if column_index >= 0:
-                self.column_combo.setCurrentIndex(column_index)
+            _select_column(self.column_combo, value)
         else:
             self.edit.setText(value)
 
     def value(self) -> tuple[str, str]:
         if self.kind_combo.currentData() == "column":
-            return "column", self.column_combo.currentText()
+            return "column", _column_name(self.column_combo)
         return "value", self.edit.text()
+
+    def missing_column(self) -> str | None:
+        """The name of the picked column when it no longer exists."""
+        if self.kind_combo.currentData() == "column" and _is_missing(self.column_combo):
+            return _column_name(self.column_combo)
+        return None
 
 
 class ConditionalClauseRow(QWidget):
@@ -166,11 +202,19 @@ class ConditionalClauseRow(QWidget):
         self.prefix_label.setText("If" if first else "Else If")
         self.remove_button.setVisible(not first)
 
+    def missing_columns(self) -> list[str]:
+        missing = [_column_name(self.column_combo)] if _is_missing(self.column_combo) else []
+        for field in (self.test_value, self.output):
+            name = field.missing_column()
+            if name is not None:
+                missing.append(name)
+        return missing
+
     def clause(self) -> dict[str, str]:
         test_kind, test_value = self.test_value.value()
         output_kind, output = self.output.value()
         return {
-            "column": self.column_combo.currentText(),
+            "column": _column_name(self.column_combo),
             "operator": str(self.operator_combo.currentData()),
             "test_value": test_value,
             "test_value_kind": test_kind,
@@ -179,9 +223,7 @@ class ConditionalClauseRow(QWidget):
         }
 
     def load(self, clause: dict[str, str]) -> None:
-        index = self.column_combo.findText(clause["column"])
-        if index >= 0:
-            self.column_combo.setCurrentIndex(index)
+        _select_column(self.column_combo, clause["column"])
         index = self.operator_combo.findData(clause["operator"])
         if index >= 0:
             self.operator_combo.setCurrentIndex(index)
@@ -279,6 +321,7 @@ class ConditionalColumnDialog(QDialog):
         self.buttons.rejected.connect(self.reject)
         self.add_clause_button.clicked.connect(lambda: self.add_clause())
         self.name_edit.textChanged.connect(self._refresh_state)
+        self.else_output.changed.connect(self._refresh_state)
 
         if initial_step is not None:
             self.name_edit.setText(str(initial_step.get("name", "")))
@@ -320,11 +363,32 @@ class ConditionalColumnDialog(QDialog):
             remaining.set_first(index == 0)
         self._refresh_state()
 
+    def missing_columns(self) -> list[str]:
+        """Columns this step refers to that the table no longer has (in first-use order)."""
+        names: list[str] = []
+        for row in getattr(self, "clause_rows", []):
+            names.extend(row.missing_columns())
+        else_name = self.else_output.missing_column() if hasattr(self, "else_output") else None
+        if else_name is not None:
+            names.append(else_name)
+        return list(dict.fromkeys(names))
+
     def _refresh_state(self, *_args: Any) -> None:
         self.add_clause_button.setEnabled(len(self.clause_rows) < MAX_CONDITIONAL_CLAUSES)
+        missing = self.missing_columns()
+        if missing:
+            self.error_label.setText(
+                "These columns no longer exist: " + ", ".join(missing)
+                + ". Pick an existing column for each (shown in red) before applying."
+            )
+            self.error_label.setVisible(True)
+        elif self.error_label.text().startswith("These columns no longer exist"):
+            self.error_label.setVisible(False)
+            self.error_label.clear()
         self.ok_button.setEnabled(
             bool(self.name_edit.text().strip())
             and bool(self.clause_rows)
+            and not missing
             and all(row.column_combo.currentText() for row in self.clause_rows)
         )
 
@@ -339,6 +403,9 @@ class ConditionalColumnDialog(QDialog):
         }
 
     def _accept_step(self) -> None:
+        if self.missing_columns():
+            self._refresh_state()
+            return
         step = self.step()
         if self._validate_callback is not None:
             error = self._validate_callback(step)
