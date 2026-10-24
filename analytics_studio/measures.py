@@ -3973,12 +3973,58 @@ def evaluate_measures(
             one_to_one_unmatched_cache[table_id] = (frozenset(own), other_has)
         return one_to_one_unmatched_cache[table_id]
 
+    def refuse_one_to_one_blank_reader(table_id: str, what: str, any_filter: bool = False) -> None:
+        """Live Power BI (iteration 84, critic; 6 of 1,033 fresh ZM probes): reading the values of a table of a one-to-one relationship that has
+        unmatched rows, while the pair is filtered, lists the blank members of both ends in a way not modelled here
+        (CALCULATE(SELECTEDVALUE(U[K],"x"), NOT(U[X]="x1"), W[K]=BLANK()) is "x", ours "k4")."""
+        for relationship in relationship_definitions:
+            if not isinstance(relationship, dict) or not relationship.get("is_active") or relationship.get("cardinality") != "one_to_one":
+                continue
+            ends = (str(relationship.get("from_table_id")), str(relationship.get("to_table_id")))
+            if table_id not in ends or len(set(ends)) != 2:
+                continue
+            if any(
+                end in evaluation_filter_ids and not eff_transition.get(end) and not eff_group_keys.get(end) and end in evaluation_contexts_by_id
+                and (any_filter or own_unknown_member_selected(evaluation_contexts_by_id[end]))
+                and not (any_filter and end == table_id)  # ALLSELECTED: only the partner's filter is out of reach (the table's own filter stays)
+                for end in ends
+            ) and any(one_to_one_unmatched(end)[0] for end in ends):
+                raise MeasureError(f"{what} over a table of a one-to-one relationship with unmatched rows is not supported while it is filtered in the local engine.")
+
+    def refuse_one_to_one_pair_filters(tables: list[dict[str, Any]], filter_table_ids: set[Any]) -> None:
+        """Live Power BI (iteration 84, critic; fresh ZM probes): when a filter on one table of a one-to-one relationship keeps only rows that
+        have no partner and the filter on the other table keeps real rows and selects its own blank member, which blank members and orphan rows
+        meet is not modelled here (CALCULATE(DISTINCTCOUNT(F[K]), U[K]<>"k5", W[Y]="y5") is BLANK, ours 1), so that pair is refused."""
+        by_id = {str(table.get("id")): table for table in tables}
+        for relationship in relationship_definitions:
+            if not isinstance(relationship, dict) or not relationship.get("is_active") or relationship.get("cardinality") != "one_to_one":
+                continue
+            ends = (str(relationship.get("from_table_id")), str(relationship.get("to_table_id")))
+            if len(set(ends)) != 2 or any(end not in filter_table_ids or end not in by_id or eff_transition.get(end) for end in ends):
+                continue
+
+            def visible_rows(table: dict[str, Any]) -> Any:
+                visible: Any = None
+                for rows in table.get("filter_column_rows", {}).values():
+                    visible = frozenset(rows) if visible is None else visible & frozenset(rows)
+                if "filter_table_rows" in table:
+                    held = frozenset(table["filter_table_rows"])
+                    visible = held if visible is None else visible & held
+                return visible
+
+            for mine, theirs in (ends, ends[::-1]):
+                own, _other_has = one_to_one_unmatched(mine)
+                kept, partner = visible_rows(by_id[mine]), visible_rows(by_id[theirs])
+                if kept and kept <= own and partner and own_unknown_member_selected(by_id[theirs]):
+                    raise MeasureError("Filters on both tables of a one-to-one relationship are not supported in the local engine.")
+
     def propagate_relationship_filters(
         tables: list[dict[str, Any]], relationships: list[dict[str, Any]], filter_table_ids: Any,
         ignore_exclusions: Iterable[str] = (),
     ) -> dict[str, list[dict[str, Any]]]:
         """Relationship propagation that also carries the virtual blank member: fact rows whose key has no match in a
         one-side table stay while that table's own filters still select its blank member."""
+        refuse_one_to_one_pair_filters(tables, set(filter_table_ids))
         ignored = set(ignore_exclusions)
         excluded = {table_id for table_id in unknown_member_exclusions if table_id in unknown_member_ids and table_id not in ignored}
         filter_table_ids = set(filter_table_ids) | excluded  # ALLNOBLANKROW leaves no filter on its table, only the missing blank member
@@ -4508,6 +4554,8 @@ def evaluate_measures(
                     f"{function} column arguments must resolve to one loaded table."
                 )
             output_headers = [column for _context, column in resolved_columns]
+            if function == "ALLSELECTED":
+                refuse_one_to_one_blank_reader(source_context["id"], "ALLSELECTED", True)
             allselected_rows = None
             shadowed_rows = (
                 allselected_rows_for(source_context, output_headers) if function == "ALLSELECTED" and eff_active() else None
@@ -7892,6 +7940,12 @@ def evaluate_measures(
                 )
             relationship_index = matches[0]
             relationship = relationship_definitions[relationship_index]
+            if relationship.get("cardinality") == "one_to_one" and any(
+                one_to_one_unmatched(table_id)[0] or one_to_one_unmatched(table_id)[1] for table_id in (left_context["id"], right_context["id"])
+            ):
+                # live Power BI (iteration 84, critic; 15 of 1,033 fresh ZM probes): USERELATIONSHIP over a one-to-one relationship whose tables
+                # have unmatched rows moves the blank members in a way not modelled here (COUNTROWS(W) under U[K]<>"k2" is 3, ours 4)
+                raise MeasureError("USERELATIONSHIP over a one-to-one relationship with unmatched rows is not supported in the local engine.")
             pair = tuple(sorted((left_context["id"], right_context["id"])))
             previous_index = table_pair_relationships.get(pair)
             if previous_index is not None and previous_index != relationship_index:
@@ -11321,6 +11375,7 @@ def evaluate_measures(
             return delimiter.join(text for _, text in entries) if entries else None
         if function in _COLUMN_SCALAR_ARITY:
             value_context, value_column = resolve_table(arguments[0][1], arguments[0][2])
+            refuse_one_to_one_blank_reader(value_context["id"], function)
             seen_values: dict[tuple[Any, ...], Any] = {}
             for row_index, source_row in enumerate(rows_by_table_id[value_context["id"]], 1):
                 value = source_row.get(value_column)
