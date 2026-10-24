@@ -1530,6 +1530,17 @@ def _contains_refused_call_outside_x_iterator(node: Any) -> bool:
     return any(isinstance(child, tuple) and _contains_refused_call_outside_x_iterator(child) for child in node)
 
 
+def _iterator_body_reads_a_table_column(node: Any) -> bool:
+    """Whether an X-iterator anywhere in this expression has a body that reads a column by table name outside an aggregation."""
+    if not isinstance(node, tuple) or not node:
+        return False
+    if node[0] == "call" and node[1] in {"SUMX", "AVERAGEX", "MAXX", "MINX", "COUNTX", "COUNTAX", "CONCATENATEX"} and len(node[2]) >= 2:
+        if any(reference[1] for reference in _direct_column_references(node[2][1])):
+            return True
+    children = node if isinstance(node[0], tuple) else node[1:]
+    return any(_iterator_body_reads_a_table_column(child) for child in children if isinstance(child, tuple))
+
+
 def _iter_reference_nodes(node: Any) -> Iterable[tuple[Any, ...]]:
     if not isinstance(node, tuple) or not node:
         return
@@ -10689,8 +10700,10 @@ def evaluate_measures(
                 continue
             try:
                 evaluate(branch, row_context, allow_text=True, allow_boolean=True)
-            except MeasureRuntimeError:
-                pass
+            except MeasureRuntimeError as error:
+                if _iterator_body_reads_a_table_column(branch):
+                    # the body is validated before the table it iterates is built, so the data error may hide the real one
+                    raise MeasureError(f"{error} The branch also has an iterator body that reads a column by table name, which the local engine cannot validate first.") from error
             except (DecimalException, OverflowError):
                 pass
 
