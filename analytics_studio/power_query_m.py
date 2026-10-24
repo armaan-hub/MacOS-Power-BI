@@ -100,10 +100,13 @@ def parse_m_query_script(
     parameter_names: set[str] | None = None,
     query_functions: list[dict[str, Any]] | None = None,
     initial_column_types: dict[str, str] | None = None,
+    step_bindings: list[str] | None = None,
 ) -> tuple[list[str] | None, list[dict[str, Any]]]:
     """Parse a local query (errors carry ``line``/``column`` when locatable).
 
-    See ``_parse_m_query_script`` for the supported form."""
+    ``step_bindings`` (an out-list) receives the let-binding name each returned step came
+    from, so callers can follow a step by identity.  See ``_parse_m_query_script`` for the
+    supported form."""
     trace: list[tuple[Any, ...]] = [("start",)]
     try:
         return _parse_m_query_script(
@@ -112,6 +115,7 @@ def parse_m_query_script(
             query_functions=query_functions,
             initial_column_types=initial_column_types,
             trace=trace,
+            step_bindings=step_bindings,
         )
     except PowerQueryMScriptError as exc:
         where = trace[0] if trace else None
@@ -159,6 +163,7 @@ def _parse_m_query_script(
     query_functions: list[dict[str, Any]] | None = None,
     initial_column_types: dict[str, str] | None = None,
     trace: list[tuple[Any, ...]] | None = None,
+    step_bindings: list[str] | None = None,
 ) -> tuple[list[str] | None, list[dict[str, Any]]]:
     """Parse a local query and return optional Append source names plus its steps.
 
@@ -190,6 +195,7 @@ def _parse_m_query_script(
         raise PowerQueryMScriptError("The let block contains an empty step.")
 
     parsed_steps: list[dict[str, Any]] = []
+    parsed_bindings: list[str] = []
     known_parameters = set(parameter_names or set())
     from analytics_studio.query_functions import (
         QueryFunctionError,
@@ -265,6 +271,7 @@ def _parse_m_query_script(
                 )
             sparse_boundary_helper = name
             parsed_steps.append({"op": "m_sparse_boundary_helper", "name": name})
+            parsed_bindings.append(name)
             continue
         if "=>" in rhs:
             raise PowerQueryMScriptError(
@@ -278,16 +285,16 @@ def _parse_m_query_script(
             ],
             initial_column_types,
         )
-        parsed_steps.extend(
-            _parse_table_call(
-                rhs,
-                previous_name,
-                input_types,
-                parameter_names=known_parameters,
-                query_functions=known_functions,
-                sparse_boundary_helper=sparse_boundary_helper,
-            )
+        produced = _parse_table_call(
+            rhs,
+            previous_name,
+            input_types,
+            parameter_names=known_parameters,
+            query_functions=known_functions,
+            sparse_boundary_helper=sparse_boundary_helper,
         )
+        parsed_steps.extend(produced)
+        parsed_bindings.extend([name] * len(produced))
         previous_name = name
 
     if trace is not None:
@@ -331,6 +338,8 @@ def _parse_m_query_script(
         for step in validated_steps:
             if step["op"] == "add_custom_column":
                 step["expression"] = _unwrap_text_from(step["expression"])
+        if step_bindings is not None:
+            step_bindings[:] = parsed_bindings if len(parsed_bindings) == len(validated_steps) else []
         return source_query_names, validated_steps
     except TransformationError as exc:
         raise PowerQueryMScriptError(str(exc)) from exc
@@ -3518,16 +3527,19 @@ def _parse_quoted(value: str, prefix: str) -> str:
     return "".join(result)
 
 
-def _strip_line_comments(value: str) -> str:
-    result: list[str] = []
+def _comment_spans(value: str) -> list[tuple[int, int, bool, bool]]:
+    """``(start, end, is_block, closed)`` of every M comment outside text and quoted names.
+
+    ``//`` runs to the end of the line (the newline is not part of the span); ``/* ... */`` may
+    span lines and an unclosed one runs to the end of the text.
+    """
+    spans: list[tuple[int, int, bool, bool]] = []
     quoted = False
     index = 0
     while index < len(value):
         char = value[index]
         if char == '"':
-            result.append(char)
             if quoted and index + 1 < len(value) and value[index + 1] == '"':
-                result.append('"')
                 index += 2
                 continue
             quoted = not quoted
@@ -3535,44 +3547,49 @@ def _strip_line_comments(value: str) -> str:
             continue
         if not quoted and value.startswith("//", index):
             end = value.find("\n", index)
-            if end < 0:
-                break
-            result.append("\n")
-            index = end + 1
+            end = len(value) if end < 0 else end
+            spans.append((index, end, False, True))
+            index = end
             continue
-        result.append(char)
+        if not quoted and value.startswith("/*", index):
+            close = value.find("*/", index + 2)
+            if close < 0:
+                spans.append((index, len(value), True, False))
+                break
+            spans.append((index, close + 2, True, True))
+            index = close + 2
+            continue
         index += 1
+    return spans
+
+
+def _strip_line_comments(value: str) -> str:
+    """Remove ``//`` and ``/* */`` comments (a block comment is whitespace in M)."""
+    result: list[str] = []
+    cursor = 0
+    for start, end, is_block, closed in _comment_spans(value):
+        if is_block and not closed:
+            error = PowerQueryMScriptError(
+                "A block comment starting with /* is not closed; add */ to end it."
+            )
+            error.line = value.count("\n", 0, start) + 1
+            error.column = start - (value.rfind("\n", 0, start) + 1) + 1
+            raise error
+        result.append(value[cursor:start])
+        if is_block:
+            result.append(" ")
+        cursor = end
+    result.append(value[cursor:])
     return "".join(result)
 
 
 def _mask_line_comments(value: str) -> str:
-    """Replace line-comment characters with spaces without changing offsets."""
+    """Replace comment characters with spaces without changing offsets (newlines are kept)."""
     result = list(value)
-    quoted = False
-    in_comment = False
-    index = 0
-    while index < len(value):
-        char = value[index]
-        if in_comment:
-            if char == "\n":
-                in_comment = False
-            else:
+    for start, end, _is_block, _closed in _comment_spans(value):
+        for index in range(start, end):
+            if result[index] != "\n":
                 result[index] = " "
-            index += 1
-            continue
-        if char == '"':
-            if quoted and index + 1 < len(value) and value[index + 1] == '"':
-                index += 2
-                continue
-            quoted = not quoted
-            index += 1
-            continue
-        if not quoted and value.startswith("//", index):
-            result[index] = result[index + 1] = " "
-            in_comment = True
-            index += 2
-            continue
-        index += 1
     return "".join(result)
 
 
@@ -3818,6 +3835,8 @@ class PowerQueryMEditorDialog(QDialog):
         )
         self._parameter_names = set(self._parameters)
         self._steps: list[dict[str, Any]] | None = None
+        self._step_bindings: list[str] = []
+        self._parsed_bindings: list[str] = []
         self._candidate: ImportCandidate | None = None
         self._preview_source_candidate: ImportCandidate | None = None
         self._previewed_script: str | None = None
@@ -3921,10 +3940,25 @@ class PowerQueryMEditorDialog(QDialog):
         self._evaluation_timer.timeout.connect(self._preview_query)
         self.editor.textChanged.connect(self._on_text_changed)
         self._preview_query()
+        self._initial_step_bindings = list(self._step_bindings)
+
+    @property
+    def initial_step_bindings(self) -> list[str]:
+        """Binding names of the steps as first shown (to follow steps through an edit)."""
+        return list(self._initial_step_bindings)
 
     @property
     def steps(self) -> list[dict[str, Any]] | None:
         return [dict(step) for step in self._steps] if self._steps is not None and self.result() == QDialog.DialogCode.Accepted else None
+
+    @property
+    def step_bindings(self) -> list[str] | None:
+        """The let-binding name of each applied step (empty when it could not be matched)."""
+        return (
+            list(self._step_bindings)
+            if self._steps is not None and self.result() == QDialog.DialogCode.Accepted
+            else None
+        )
 
     @property
     def candidate(self) -> ImportCandidate | None:
@@ -3980,11 +4014,13 @@ class PowerQueryMEditorDialog(QDialog):
     def _parse_current(self) -> tuple[list[str] | None, list[dict[str, Any]]] | None:
         """Syntax-check the text; show the error with its line and column."""
         try:
+            self._parsed_bindings = []
             return parse_m_query_script(
                 self.editor.toPlainText(), self._query_name,
                 parameter_names=self._parameter_names,
                 query_functions=self._query_functions,
                 initial_column_types=self._source_column_types,
+                step_bindings=self._parsed_bindings,
             )
         except (PowerQueryMScriptError, TransformationError) as exc:
             message = str(exc)
@@ -4051,6 +4087,7 @@ class PowerQueryMEditorDialog(QDialog):
             self._set_status(str(exc), ok=False)
             return
         self._steps = steps
+        self._step_bindings = list(self._parsed_bindings)
         self._candidate = candidate
         self._preview_source_candidate = source_candidate
         self._previewed_script = script

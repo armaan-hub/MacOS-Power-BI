@@ -6422,6 +6422,7 @@ class StudioController(QObject):
         active_source_kind = str(linked_source.get("kind", "")) if linked_source else None
         active_parser_options = dict(linked_source.get("parser_options", {})) if linked_source else {}
 
+        self._formula_bar.reset()
         self._project = candidate
         self._project_path = path
         self._recovered_from_backup = recovered
@@ -13256,6 +13257,8 @@ class StudioController(QObject):
         return stored_path
 
     def _confirm_replace_project(self) -> bool:
+        if not self._formula_bar.confirmDiscardDraft():
+            return False
         if not self._dirty:
             return True
         answer = QMessageBox.question(
@@ -13272,6 +13275,7 @@ class StudioController(QObject):
         return answer == QMessageBox.StandardButton.Discard
 
     def _replace_with_new_project(self) -> None:
+        self._formula_bar.reset()
         self._project = new_project()
         self._project_path = None
         self._recovered_from_backup = False

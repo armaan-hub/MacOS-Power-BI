@@ -72,7 +72,11 @@ from analytics_studio.dialog_theme import apply_light_dialog_theme
 from analytics_studio.file_import import MAX_DATA_ROWS, ImportCandidate, lineaged_row
 from analytics_studio.import_preview_dialog import ImportPreviewTableModel
 from analytics_studio.inline_data import parse_pasted_table, source_from_candidate
-from analytics_studio.power_query_step_names import assign_step_names, is_known_power_bi_step
+from analytics_studio.power_query_step_names import (
+    assign_step_names,
+    carry_step_metadata,
+    is_known_power_bi_step,
+)
 from analytics_studio.power_query_m import (
     PowerQueryMEditorDialog,
     PowerQueryMScriptError,
@@ -5374,7 +5378,31 @@ class TransformDataDialog(QDialog):
         columns = sorted({index.column() for index in indexes if index.isValid()})
         return [headers[column] for column in columns if 0 <= column < len(headers)]
 
+    def _confirm_add_step_at_end(self) -> bool:
+        """A ribbon command always adds its step at the end of the query.
+
+        With a middle applied step selected the grid shows that step's output, so the column the
+        user picked may not exist at the end.  Ask before adding (Cancel keeps the selection).
+        """
+        row = self.step_list.currentRow()
+        later = len(self._steps) - 1 - row
+        if row < 0 or later <= 0:
+            return True
+        answer = QMessageBox.question(
+            self,
+            "Add step at the end?",
+            f"The selected step is followed by {later} more "
+            f"step{'s' if later != 1 else ''}. The new step will be added at the end of the "
+            "query, after them, where the column you picked may no longer exist.\n\n"
+            "Add it at the end?",
+            QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
+            QMessageBox.StandardButton.No,
+        )
+        return answer == QMessageBox.StandardButton.Yes
+
     def _select_ribbon_sort(self, direction: str) -> None:
+        if not self._confirm_add_step_at_end():
+            return
         selected = self._selected_preview_columns()
         if self.step_list.currentRow() >= 0:
             self.step_list.setCurrentRow(-1)
@@ -5388,6 +5416,8 @@ class TransformDataDialog(QDialog):
         self._open_operation_dialog("sort_rows", selected, option_value=direction)
 
     def _select_ribbon_data_type(self, data_type: str) -> None:
+        if not self._confirm_add_step_at_end():
+            return
         selected = self._selected_preview_columns()
         if self.step_list.currentRow() >= 0:
             self.step_list.setCurrentRow(-1)
@@ -5403,6 +5433,8 @@ class TransformDataDialog(QDialog):
         self.step_settings_toggle.setChecked(False)
 
     def _select_ribbon_operation(self, operation: str) -> None:
+        if not self._confirm_add_step_at_end():
+            return
         operation_index = self.operation_combo.findData(operation)
         if operation_index < 0:
             self._show_error(
@@ -7084,6 +7116,8 @@ class TransformDataDialog(QDialog):
         return viewport.mapToGlobal(QPoint(x, y))
 
     def _sort_preview_column(self, column: str, direction: str) -> None:
+        if not self._confirm_add_step_at_end():
+            return
         self.step_list.setCurrentRow(-1)
         operation_index = self.operation_combo.findData("sort_rows")
         if operation_index < 0:
@@ -10114,14 +10148,16 @@ class TransformDataDialog(QDialog):
                 if source_query_names is not None:
                     state["m_script_source_names"] = list(source_query_names)
             state["preview_candidate"] = dialog.candidate
-        self._step_metadata = [
-            deepcopy(previous_metadata[index])
-            if index < len(previous_steps)
-            and index < len(previous_metadata)
-            and previous_steps[index].get("op") == step.get("op")
-            else {}
-            for index, step in enumerate(self._steps)
-        ]
+        self._step_metadata = validate_applied_step_metadata(
+            carry_step_metadata(
+                dialog.initial_step_bindings,
+                [str(step.get("op")) for step in previous_steps],
+                previous_metadata,
+                dialog.step_bindings or [],
+                [str(step.get("op")) for step in self._steps],
+            ),
+            len(self._steps),
+        )
         self._preview_candidate = dialog.candidate
         self._render_steps()
         self._refresh_preview()

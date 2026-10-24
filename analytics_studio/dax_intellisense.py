@@ -146,6 +146,11 @@ def _table_by_name(model: dict[str, Any], name: str) -> dict[str, Any] | None:
     return None
 
 
+def _escape_bracket(name: str) -> str:
+    """A name inside ``[...]`` writes a closing bracket twice (``]]``)."""
+    return name.replace("]", "]]")
+
+
 def _rank(prefix: str, label: str) -> int | None:
     """0 for a prefix match, 1 for a contains match, ``None`` for no match."""
     if not prefix:
@@ -183,11 +188,11 @@ def _column_item(column: dict[str, Any], table_name: str, insert: str, start: in
     kind = str(column.get("type") or "text").replace("_", " ")
     return {
         "label": str(column["name"]),
-        "display": f"{table_name}[{column['name']}]",
+        "display": f"{table_name}[{_escape_bracket(str(column['name']))}]",
         "kind": "column",
         "detail": f"Column · {kind} · {table_name}",
         "insertText": insert,
-        "signature": f"{table_name}[{column['name']}]",
+        "signature": f"{table_name}[{_escape_bracket(str(column['name']))}]",
         "doc": "",
         "supported": True,
         "replaceStart": start,
@@ -204,7 +209,7 @@ def _measure_item(measure: dict[str, Any], insert: str, start: int, end: int) ->
         "kind": "measure",
         "detail": detail,
         "insertText": insert,
-        "signature": f"[{measure['name']}]",
+        "signature": f"[{_escape_bracket(str(measure['name']))}]",
         "doc": "",
         "supported": True,
         "replaceStart": start,
@@ -245,7 +250,7 @@ def complete(
 
 
 def _complete_bracket(expression: str, caret: int, open_at: int, model: dict[str, Any]) -> list[dict[str, Any]]:
-    partial = expression[open_at + 1:caret]
+    partial = expression[open_at + 1:caret].replace("]]", "]")
     before = expression[:open_at]
     closed = expression[caret:caret + 1] == "]"
     suffix = "" if closed else "]"
@@ -260,24 +265,25 @@ def _complete_bracket(expression: str, caret: int, open_at: int, model: dict[str
         for column in table.get("columns", []):
             name = str(column["name"])
             rank = _rank(partial, name)
-            if rank is None or "]" in name:
+            if rank is None:
                 continue
             entries.append((rank, name, _column_item(
-                column, str(table["name"]), name + suffix, open_at + 1, caret)))
+                column, str(table["name"]), _escape_bracket(name) + suffix, open_at + 1, caret)))
         return _ordered(entries)
     for measure in model.get("measures", []):
         name = str(measure["name"])
         rank = _rank(partial, name)
-        if rank is not None and "]" not in name:
-            entries.append((rank, name, _measure_item(measure, name + suffix, open_at + 1, caret)))
+        if rank is not None:
+            entries.append((rank, name, _measure_item(
+                measure, _escape_bracket(name) + suffix, open_at + 1, caret)))
     home = _table_by_name(model, str(model.get("home_table") or ""))
     if home is not None:
         for column in home.get("columns", []):
             name = str(column["name"])
             rank = _rank(partial, name)
-            if rank is not None and "]" not in name:
+            if rank is not None:
                 entries.append((rank, name, _column_item(
-                    column, str(home["name"]), name + suffix, open_at + 1, caret)))
+                    column, str(home["name"]), _escape_bracket(name) + suffix, open_at + 1, caret)))
     return _ordered(entries)
 
 
@@ -317,8 +323,9 @@ def _complete_identifier(
     for measure in model.get("measures", []):
         name = str(measure["name"])
         rank = _rank(prefix, name)
-        if rank is not None and "]" not in name:
-            entries.append((rank, name, _measure_item(measure, f"[{name}]", start, caret)))
+        if rank is not None:
+            entries.append((rank, name, _measure_item(
+                measure, f"[{_escape_bracket(name)}]", start, caret)))
     return _ordered(entries)
 
 
@@ -377,9 +384,10 @@ def apply_completion(text: str, item: dict[str, Any]) -> tuple[str, int] | None:
         return None
     start, end = int(item["replaceStart"]), int(item["replaceEnd"])
     caret = start + len(insert)
+    trailing = len(insert) - len(insert.rstrip("]"))
     if (
         item.get("kind") in {"column", "measure"}
-        and not insert.endswith("]")
+        and trailing % 2 == 0  # an odd run ends with the closer (the last ']' of an escaped name pair is not one)
         and text[end:end + 1] == "]"
     ):
         caret += 1  # step over the closing bracket that is already there
