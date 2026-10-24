@@ -3940,6 +3940,39 @@ def evaluate_measures(
             shadowed_cache.append(frozenset(keys))
         return shadowed_cache[0]
 
+    one_to_one_unmatched_cache: dict[str, tuple[frozenset[int], bool]] = {}
+
+    def one_to_one_unmatched(table_id: str) -> tuple[frozenset[int], bool]:
+        """(rows of this table with no partner across a one-to-one relationship, whether the table at the other end has such rows)."""
+        if table_id not in one_to_one_unmatched_cache:
+            own: set[int] = set()
+            other_has = False
+            for relationship in relationship_definitions:
+                if not isinstance(relationship, dict) or relationship.get("cardinality") != "one_to_one":
+                    continue
+                ends = {
+                    str(relationship.get("from_table_id")): str(relationship.get("from_column")),
+                    str(relationship.get("to_table_id")): str(relationship.get("to_column")),
+                }
+                if table_id not in ends or len(ends) != 2:
+                    continue
+                other_id = next(identifier for identifier in ends if identifier != table_id)
+                if other_id not in contexts_by_id:
+                    continue
+
+                def keys(identifier: str) -> list[Any]:
+                    context = contexts_by_id[identifier]
+                    return [cell_key(ascii_fold(v) if isinstance(v, str) else v) for v in (
+                        typed_cell(context, ends[identifier], row.get(ends[identifier])) for row in context["rows"])]
+
+                mine, theirs = keys(table_id), keys(other_id)
+                blank = cell_key(None)
+                present_theirs, present_mine = set(theirs) - {blank}, set(mine) - {blank}
+                own |= {index for index, key in enumerate(mine) if key == blank or key not in present_theirs}
+                other_has = other_has or any(key == blank or key not in present_mine for key in theirs)
+            one_to_one_unmatched_cache[table_id] = (frozenset(own), other_has)
+        return one_to_one_unmatched_cache[table_id]
+
     def propagate_relationship_filters(
         tables: list[dict[str, Any]], relationships: list[dict[str, Any]], filter_table_ids: Any,
         ignore_exclusions: Iterable[str] = (),
@@ -4323,11 +4356,12 @@ def evaluate_measures(
             raise MeasureError(
                 f"Could not inspect model relationships: {exc}"
             ) from exc
-        if source_context["id"] not in context_unknown_members:
-            return False
+        partner_selects_blank = False
+        blank_partner_links: set[int] = set()
         for relationship in relationship_definitions:
-            # live Power BI (iteration 84, critic): the orphan rows of a one-to-one partner that a filter keeps do not show the blank member
-            # of this table (CALCULATE(COUNTROWS(VALUES(U[K])),W[K]="k5") is BLANK); only a filter that selects the partner's own blank member does
+            # live Power BI (iteration 84, critic): the blank member of a table in a one-to-one relationship is shown while the filter on its
+            # partner selects the partner's own blank member (CALCULATE(COUNTROWS(VALUES(U[X])),W[K]<>"k4",W[K]<>"k5") counts it although the
+            # orphan row W[k5] is filtered out) and is not shown for the kept orphan rows alone (CALCULATE(COUNTROWS(VALUES(U[K])),W[K]="k5") is BLANK)
             if (
                 isinstance(relationship, dict) and relationship.get("is_active") and relationship.get("cardinality") == "one_to_one"
                 and source_id in {str(relationship.get("from_table_id", "")), str(relationship.get("to_table_id", ""))}
@@ -4338,12 +4372,17 @@ def evaluate_measures(
                 partner = contexts_by_id.get(partner_id) if partner_id is not None else None
                 direction = "from_to" if partner_id == str(relationship.get("from_table_id", "")) else "to_from"
                 if (
-                    partner is not None and partner_id in independent_filter_roots and partner_id in unknown_member_ids
+                    partner is not None and partner_id in independent_filter_roots
                     and direction in relationship_filter_directions(relationship)
                     and not eff_transition.get(partner_id)  # a row of an iterator over the partner does show it (SUMX(W, CALCULATE(COUNTROWS(VALUES(U[K])))))
-                    and not own_unknown_member_selected(partner)
                 ):
-                    return False
+                    if own_unknown_member_selected(partner):
+                        partner_selects_blank = True
+                        blank_partner_links.add(id(relationship))
+                    elif partner_id in unknown_member_ids:
+                        return False
+        if source_context["id"] not in context_unknown_members and not partner_selects_blank:
+            return False
 
         reachable_table_ids = set(independent_filter_roots)
         filter_edges: dict[str, set[str]] = {}
@@ -4398,6 +4437,8 @@ def evaluate_measures(
             source_id, source_column = source
             if source_id not in reachable_table_ids:
                 continue
+            if id(relationship) in blank_partner_links:
+                continue  # the partner's filter selects its own blank member: that is what shows this table's blank member
             try:
                 link_unknown_members = unknown_member_table_ids(
                     list(contexts_by_id.values()),
@@ -9379,10 +9420,8 @@ def evaluate_measures(
                 keep, node = False, argument
                 while node[:2] == ("call", "KEEPFILTERS") and len(node[2]) == 1:
                     keep, node = True, node[2][0]
-                if keep and node[0] == "call" and node[1] in {"ALL", "ALLNOBLANKROW", "REMOVEFILTERS", "ALLEXCEPT", "ALLSELECTED"}:
-                    if node[1] == "ALL" and node[2]:
-                        continue  # live Power BI (iteration 84, critic): KEEPFILTERS(ALL(x)) intersects with every value, so it keeps the filters as they are
-                    raise MeasureError(f"KEEPFILTERS over {node[1]} is not supported in the local engine.")
+                if keep and node[0] == "call" and node[1] == "ALL" and node[2]:
+                    continue  # live Power BI (iteration 84, critic): KEEPFILTERS(ALL(x)) intersects with every value, so it keeps the filters as they are
                 if node[0] == "call" and node[1] in {"ALL", "ALLNOBLANKROW", "REMOVEFILTERS", "ALLEXCEPT", "ALLSELECTED"}:
                     clearing.append(node)
                 elif _is_late_time_set(node):
@@ -9692,6 +9731,29 @@ def evaluate_measures(
             }) == 1
         if function == "ISCROSSFILTERED":
             crossfiltered = bool(current.get("filter_column_rows")) or len(rows_by_table_id[context["id"]]) < len(context["rows"])
+            if not crossfiltered:
+                # live Power BI (iteration 84, critic): a filter on another table that reaches this one through an active relationship counts
+                # although it keeps every row (CALCULATE(ISCROSSFILTERED(F), U[K]<>"k0") is TRUE)
+                reached = {
+                    table_id for table_id in evaluation_filter_ids
+                    if table_id != context["id"] and (
+                        evaluation_contexts_by_id.get(table_id, {}).get("filter_column_rows") or "filter_table_rows" in evaluation_contexts_by_id.get(table_id, {})
+                    )
+                }
+                pending = list(reached)
+                while pending:
+                    reached_id = pending.pop()
+                    for relationship in relationship_definitions:
+                        if not isinstance(relationship, dict) or not relationship.get("is_active"):
+                            continue
+                        ends = (str(relationship.get("from_table_id")), str(relationship.get("to_table_id")))
+                        directions = relationship_filter_directions(relationship)
+                        for source_end, target_end, direction in ((ends[0], ends[1], "from_to"), (ends[1], ends[0], "to_from")):
+                            if source_end == reached_id and direction in directions and target_end not in reached:
+                                reached.add(target_end)
+                                pending.append(target_end)
+                if context["id"] in reached:
+                    return True
             if not crossfiltered and full_table_filters[0]:
                 raise MeasureError("ISCROSSFILTERED under a table filter that keeps every row of its table is not supported.")
             return crossfiltered
