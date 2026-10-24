@@ -9640,6 +9640,12 @@ def evaluate_measures(
             # live Power BI (iteration 84, testing agent): CALCULATETABLE(NEXTMONTH(FIRSTDATE(ALLSELECTED(Cal[Date]))), Cal[MonthNo]=10,
             # FILTER(ALL(Cal), Cal[Year]=2024)) is 29 days, ours 30: ALLSELECTED sees the table filter but not the Boolean one beside it
             raise MeasureError("ALLSELECTED inside a CALCULATE that mixes a table-valued FILTER with a Boolean filter is not supported in the local engine.")
+        if contains_allselected_date_column(expression_node) and sum(
+            1 for argument in filter_arguments if argument[0] == "call" and argument[1] == "KEEPFILTERS"
+        ) >= 2:
+            # live Power BI (iteration 84, fix agent; fresh probe): COUNTROWS(DATESYTD(ALLSELECTED(Fact[Dt]))) under ALL(Cal) and two KEEPFILTERS on
+            # Cal[Year] is 4, ours BLANK: what ALLSELECTED keeps of stacked KEEPFILTERS is not modelled
+            raise MeasureError("ALLSELECTED over a date column beside several KEEPFILTERS is not supported in the local engine.")
         relationship_modifiers = tuple(
             argument for argument in filter_arguments if argument[0] == "call" and argument[1] in _RELATIONSHIP_MODIFIERS
         )
