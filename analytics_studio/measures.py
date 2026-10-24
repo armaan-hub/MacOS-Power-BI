@@ -4029,6 +4029,11 @@ def evaluate_measures(
             if iterated["id"] not in ends or len(set(ends)) != 2:
                 continue
             partner = next(end for end in ends if end != iterated["id"])
+            held = evaluation_contexts_by_id.get(iterated["id"], {})
+            if held.get("filter_column_rows") and not eff_transition.get(iterated["id"]) and all(
+                isinstance(rows, BlankSet) and rows.blank and rows.peer for rows in held["filter_column_rows"].values()
+            ):  # the iterated table was reached through the orphan row of its partner by a table filter (a fact filter FILTER(F, ..))
+                raise MeasureError("Iterating the values of a table of a one-to-one relationship narrowed through its partner's orphan row is not supported in the local engine.")
             if partner not in evaluation_filter_ids or partner not in contexts_by_id:
                 continue
             own = one_to_one_unmatched(partner)[0]
@@ -6481,6 +6486,19 @@ def evaluate_measures(
                     unique_rows.append(source_row)
                 return context, unique_rows
             context, actual = resolve_table(source[1], source[2])
+            held = evaluation_contexts_by_id.get(context["id"], {})
+            if argument[1] == "VALUES" and held.get("filter_column_rows") and not eff_transition.get(context["id"]) and any(  # a table with a many-side child
+                isinstance(item, dict) and item.get("is_active") and (
+                    (item.get("cardinality") == "many_to_one" and str(item.get("to_table_id")) == context["id"])
+                    or (item.get("cardinality") == "one_to_many" and str(item.get("from_table_id")) == context["id"])
+                )
+                for item in relationship_definitions
+            ) and all(
+                getattr(rows, "peer", False) and rows.blank for rows in held["filter_column_rows"].values()
+            ):
+                # live Power BI (iteration 84, testing agent): CALCULATE(COUNTROWS(VALUES(U[K])), ALLNOBLANKROW(W)) is 3 where the blank member
+                # reached through W's orphan row would make 4: whether a one-to-one partner lists it is not modelled
+                raise MeasureError("VALUES of a table narrowed through the orphan row of its one-to-one partner is not supported in the local engine.")
             seen: set[tuple[Any, ...]] = set()
             value_rows: list[dict[str, Any]] = []
             for row_index, source_row in enumerate(rows_by_table_id[context["id"]], 1):
@@ -6508,6 +6526,12 @@ def evaluate_measures(
             return single_column, order_distinct_values(context, actual, value_rows) + unknown_row
         if argument[0] == "call" and argument[1] == "ALLEXCEPT":
             kept_context = resolve_table_context(str(argument[2][0][1]))
+            if any(  # live Power BI (iteration 84, testing agent): the blank member of a one-to-one partner is part of this table; not modelled
+                isinstance(item, dict) and item.get("is_active") and item.get("cardinality") == "one_to_one"
+                and kept_context["id"] in {str(item.get("from_table_id")), str(item.get("to_table_id"))}
+                for item in relationship_definitions
+            ):
+                raise MeasureError("ALLEXCEPT over a table of a one-to-one relationship is not supported in the local engine.")
             names_checked = [resolve_table(ref[1], ref[2])[1].casefold() for ref in argument[2][1:]]
             if len(set(names_checked)) != len(names_checked):
                 raise MeasureError("ALLEXCEPT was given the same column more than once.")
@@ -8135,9 +8159,9 @@ def evaluate_measures(
                 )
             pair = tuple(sorted((left_context["id"], right_context["id"])))
             previous_index = table_pair_relationships.get(pair)
-            if previous_index is not None and previous_index != relationship_index:
-                raise MeasureError(
-                    "One CALCULATE call cannot target competing CROSSFILTER links between the same two tables."
+            if previous_index is not None:
+                raise MeasureError(  # live Power BI: a relationship's direction cannot be specified more than once within a single CALCULATE
+                    "One CALCULATE call cannot target the same CROSSFILTER link twice or competing links between the same two tables."
                 )
             table_pair_relationships[pair] = relationship_index
 
@@ -8280,6 +8304,7 @@ def evaluate_measures(
                 not isinstance(relationship, dict)
                 or relationship.get("relationship_version") != 1
                 or not (relationship.get("is_active") or include_inactive)
+                or relationship.get("filter_direction_override") == "none"  # live Power BI: CROSSFILTER(.., NONE) also stops a row context from reaching across
             ):
                 continue
             cardinality = relationship.get("cardinality")
@@ -8315,6 +8340,7 @@ def evaluate_measures(
         # (table, listed rows or None while unrestricted, the real rows the filtered rows point at).  A one-to-one partner is reached through
         # the real rows only, whether or not an unmatched key keeps the table's own blank member (live Power BI, iteration 84 testing agent:
         # CALCULATE(COUNTROWS(W), FILTER(F, F[Id]<=5)) is 3 and FILTER(F, F[Id]=6) is BLANK: the partner's orphan row is never reached)
+        own_blank = bool(getattr(allowed, "blank", False))  # the filter lists the table's own blank member (ALL(U)): its partner stays whole
         allowed = list(allowed)
         queue: list[tuple[str, Iterable[int] | None, Iterable[int] | None, bool]] = [(table_id, allowed, allowed, False)]
         while queue:
@@ -8332,6 +8358,8 @@ def evaluate_measures(
                     for item in relationship_definitions
                 )
                 source_rows = real_rows if peer else rows_here
+                if peer and own_blank and current_id == table_id:
+                    source_rows = None
                 if source_rows is None:
                     reached[one_id] = None
                     queue.append((one_id, None, None, True))
