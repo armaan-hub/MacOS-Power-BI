@@ -3914,6 +3914,19 @@ def evaluate_measures(
             return False  # rows supplied by a visual or slicer without per-column provenance: a selection never includes the blank
         return all(blank_allowed.get(column, False) for column in context.get("filter_column_rows", {}))
 
+    def typed_cell(context: dict[str, Any], column: str, raw: Any) -> Any:
+        """A loaded cell as the DAX value of its column type (None is blank)."""
+        if raw is None:
+            return None
+        kind = str(context.get("column_types", {}).get(column, "text")).casefold()
+        if kind in {"whole_number", "decimal_number", "decimal", "fixed_decimal", "currency", "number", "int64", "double"}:
+            return raw if isinstance(raw, Decimal) else dax_typed.text_to_number(cell_to_text(raw))
+        if kind in {"date", "datetime"}:
+            return _cell_date_value(raw, column, None)
+        if kind == "boolean":
+            return raw if isinstance(raw, bool) else cell_to_text(raw).strip().casefold() == "true"
+        return raw if isinstance(raw, str) else cell_to_text(raw)
+
     shadowed_cache: list[frozenset[str]] = []
 
     def shadowed_measure_keys() -> frozenset[str]:
@@ -3927,70 +3940,12 @@ def evaluate_measures(
             shadowed_cache.append(frozenset(keys))
         return shadowed_cache[0]
 
-    one_to_one_unmatched_cache: dict[str, tuple[frozenset[int], bool]] = {}
-
-    def one_to_one_unmatched(table_id: str) -> tuple[frozenset[int], bool]:
-        """(rows of this table with no partner across a one-to-one relationship, whether the table at the other end has such rows)."""
-        if table_id not in one_to_one_unmatched_cache:
-            own: set[int] = set()
-            other_has = False
-            for relationship in relationship_definitions:
-                if not isinstance(relationship, dict) or relationship.get("cardinality") != "one_to_one":
-                    continue
-                ends = {
-                    str(relationship.get("from_table_id")): str(relationship.get("from_column")),
-                    str(relationship.get("to_table_id")): str(relationship.get("to_column")),
-                }
-                if table_id not in ends or len(ends) != 2:
-                    continue
-                other_id = next(identifier for identifier in ends if identifier != table_id)
-                if other_id not in contexts_by_id:
-                    continue
-
-                def keys(identifier: str) -> list[Any]:
-                    context = contexts_by_id[identifier]
-                    return [cell_key(ascii_fold(v) if isinstance(v, str) else v) for v in (
-                        typed_cell(context, ends[identifier], row.get(ends[identifier])) for row in context["rows"])]
-
-                mine, theirs = keys(table_id), keys(other_id)
-                blank = cell_key(None)
-                present_theirs, present_mine = set(theirs) - {blank}, set(mine) - {blank}
-                own |= {index for index, key in enumerate(mine) if key == blank or key not in present_theirs}
-                other_has = other_has or any(key == blank or key not in present_mine for key in theirs)
-            one_to_one_unmatched_cache[table_id] = (frozenset(own), other_has)
-        return one_to_one_unmatched_cache[table_id]
-
-    def refuse_one_to_one_unmatched(tables: list[dict[str, Any]], filter_table_ids: set[Any]) -> None:
-        """Live Power BI (iteration 84, critic; 89 probes on ZM): a filter on a table of a one-to-one relationship whose rows do not all
-        have a partner reaches the unmatched rows of the other table in a way not modelled here (CALCULATE(COUNTROWS(W), U[K]<>"k1") is 3,
-        not 2), so a filter that keeps an unmatched row, or admits the blank member while the other table has unmatched rows, is refused."""
-        for table in tables:
-            table_id = str(table.get("id"))
-            if table.get("id") not in filter_table_ids:
-                continue
-            own, other_has = one_to_one_unmatched(table_id)
-            if not own and not other_has:
-                continue
-            visible: Any = None
-            for rows in table.get("filter_column_rows", {}).values():
-                visible = frozenset(rows) if visible is None else visible & frozenset(rows)
-            if "filter_table_rows" in table:
-                held = frozenset(table["filter_table_rows"])
-                visible = held if visible is None else visible & held
-            if visible is None:
-                continue
-            blank_allowed = table.get("filter_column_blank_allowed", {})
-            admits_blank = bool(table.get("filter_column_rows")) and all(blank_allowed.get(column, False) for column in table["filter_column_rows"])
-            if (visible & own) or (admits_blank and other_has):
-                raise MeasureError("A filter that reaches rows without a partner in a one-to-one relationship is not supported in the local engine.")
-
     def propagate_relationship_filters(
         tables: list[dict[str, Any]], relationships: list[dict[str, Any]], filter_table_ids: Any,
         ignore_exclusions: Iterable[str] = (),
     ) -> dict[str, list[dict[str, Any]]]:
         """Relationship propagation that also carries the virtual blank member: fact rows whose key has no match in a
         one-side table stay while that table's own filters still select its blank member."""
-        refuse_one_to_one_unmatched(tables, set(filter_table_ids))
         ignored = set(ignore_exclusions)
         excluded = {table_id for table_id in unknown_member_exclusions if table_id in unknown_member_ids and table_id not in ignored}
         filter_table_ids = set(filter_table_ids) | excluded  # ALLNOBLANKROW leaves no filter on its table, only the missing blank member
@@ -4370,6 +4325,25 @@ def evaluate_measures(
             ) from exc
         if source_context["id"] not in context_unknown_members:
             return False
+        for relationship in relationship_definitions:
+            # live Power BI (iteration 84, critic): the orphan rows of a one-to-one partner that a filter keeps do not show the blank member
+            # of this table (CALCULATE(COUNTROWS(VALUES(U[K])),W[K]="k5") is BLANK); only a filter that selects the partner's own blank member does
+            if (
+                isinstance(relationship, dict) and relationship.get("is_active") and relationship.get("cardinality") == "one_to_one"
+                and source_id in {str(relationship.get("from_table_id", "")), str(relationship.get("to_table_id", ""))}
+            ):
+                partner_id = next(
+                    (str(relationship.get(key)) for key in ("from_table_id", "to_table_id") if str(relationship.get(key)) != source_id), None
+                )
+                partner = contexts_by_id.get(partner_id) if partner_id is not None else None
+                direction = "from_to" if partner_id == str(relationship.get("from_table_id", "")) else "to_from"
+                if (
+                    partner is not None and partner_id in independent_filter_roots and partner_id in unknown_member_ids
+                    and direction in relationship_filter_directions(relationship)
+                    and not eff_transition.get(partner_id)  # a row of an iterator over the partner does show it (SUMX(W, CALCULATE(COUNTROWS(VALUES(U[K])))))
+                    and not own_unknown_member_selected(partner)
+                ):
+                    return False
 
         reachable_table_ids = set(independent_filter_roots)
         filter_edges: dict[str, set[str]] = {}
@@ -6197,6 +6171,15 @@ def evaluate_measures(
         single["headers"] = [column]
         single["lineage"] = {column: (base, column)}
         with_value = function.endswith("VALUE")
+        if with_value and any(
+            isinstance(relationship, dict) and relationship.get("is_active") and relationship.get("cardinality") == "one_to_one"
+            and base["id"] in {str(relationship.get("from_table_id", "")), str(relationship.get("to_table_id", ""))}
+            and ({str(relationship.get("from_table_id", "")), str(relationship.get("to_table_id", ""))} - {base["id"]}) & set(evaluation_filter_ids)
+            for relationship in relationship_definitions
+        ):
+            # live Power BI (iteration 84, critic): LASTNONBLANKVALUE over a column of a one-to-one table whose partner is filtered tries the
+            # partner's unmatched rows in a way not modelled here (-1, ours 0)
+            raise MeasureError("FIRSTNONBLANKVALUE / LASTNONBLANKVALUE over a table filtered through a one-to-one relationship is not supported in the local engine.")
         for raw, _typed in ordered:
             row = {column: _typed if derived_source else raw}
             if with_value:
@@ -9595,19 +9578,6 @@ def evaluate_measures(
         if target == "DATETIME":
             return dax_dates.DaxDateTime(number)
         raise MeasureError(f"CONVERT does not support the type {target}.")
-
-    def typed_cell(context: dict[str, Any], column: str, raw: Any) -> Any:
-        """A loaded cell as the DAX value of its column type (None is blank)."""
-        if raw is None:
-            return None
-        kind = str(context.get("column_types", {}).get(column, "text")).casefold()
-        if kind in {"whole_number", "decimal_number", "decimal", "fixed_decimal", "currency", "number", "int64", "double"}:
-            return raw if isinstance(raw, Decimal) else dax_typed.text_to_number(cell_to_text(raw))
-        if kind in {"date", "datetime"}:
-            return _cell_date_value(raw, column, None)
-        if kind == "boolean":
-            return raw if isinstance(raw, bool) else cell_to_text(raw).strip().casefold() == "true"
-        return raw if isinstance(raw, str) else cell_to_text(raw)
 
     def column_order_key(value: Any) -> Any:
         return dax_typed.text_key(value) if isinstance(value, str) else value

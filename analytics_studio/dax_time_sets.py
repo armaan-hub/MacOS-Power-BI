@@ -58,27 +58,27 @@ def parse_year_end_text(text: str, today: date | None = None) -> tuple[int, int]
     raw = text.strip()
     if not raw:
         raise TimeSetError("Type mismatch.")
-    named = re.fullmatch(r"([A-Za-z]+)[\s\-.,/]*(\d{1,2})(?:[\s\-.,/]+(\d{2,4}))?", raw)
+    named = re.fullmatch(r"([A-Za-z]+)[\s\-.,/]*(\d{1,2})(?:[\s\-.,/]+(\d{2,4}))?", raw, re.ASCII)
     if named and named.group(1).casefold() in _MONTHS:
         month, day = _MONTHS[named.group(1).casefold()], int(named.group(2))
         if _valid(month, day, year_now if named.group(3) is None else _two_digit_year(int(named.group(3)))):
             return month, day
         raise TimeSetError("Type mismatch.")
-    named = re.fullmatch(r"(\d{1,2})[\s\-.,/]*([A-Za-z]+)(?:[\s\-.,/]+(\d{2,4}))?", raw)
+    named = re.fullmatch(r"(\d{1,2})[\s\-.,/]*([A-Za-z]+)(?:[\s\-.,/]+(\d{2,4}))?", raw, re.ASCII)
     if named and named.group(2).casefold() in _MONTHS:
         month, day = _MONTHS[named.group(2).casefold()], int(named.group(1))
         if _valid(month, day, year_now if named.group(3) is None else _two_digit_year(int(named.group(3)))):
             return month, day
         raise TimeSetError("Type mismatch.")
-    if re.fullmatch(r"\d{1,2}\.\d{1,2}", raw):
+    if re.fullmatch(r"\d{1,2}\.\d{1,2}", raw, re.ASCII):
         return 12, 30  # read as a time of day: the date part is 12/30/1899
-    iso = re.fullmatch(r"(\d{4})-(\d{1,2})-(\d{1,2})", raw)
+    iso = re.fullmatch(r"(\d{4})-(\d{1,2})-(\d{1,2})", raw, re.ASCII)
     if iso:
         year, month, day = (int(part) for part in iso.groups())
         if _valid(month, day, year):
             return month, day
         raise TimeSetError("Type mismatch.")
-    parts = re.fullmatch(r"(\d{1,4})[/\-\s](\d{1,4})(?:[/\-\s](\d{1,4}))?", raw)
+    parts = re.fullmatch(r"(\d{1,4})[/\-\s](\d{1,4})(?:[/\-\s](\d{1,4}))?", raw, re.ASCII)
     if parts is None:
         raise TimeSetError("Type mismatch.")
     first, second = int(parts.group(1)), int(parts.group(2))
