@@ -66,10 +66,14 @@ class BlankSet(frozenset):
     """Allowed row indexes of one column that also select the virtual blank member (a row of BLANKs) when blank is true."""
 
     blank: bool = False
+    peer: bool = False  # the blank member was reached as the partner of an orphan row of a one-to-one table (it keeps no many-side orphans)
+    many: bool = False  # the blank member was reached from a many-side row with an unknown key (it keeps no one-to-one partner orphans)
 
-    def __new__(cls, rows: Iterable[int] = (), blank: bool = False) -> "BlankSet":
+    def __new__(cls, rows: Iterable[int] = (), blank: bool = False, peer: bool = False, many: bool = False) -> "BlankSet":
         instance = super().__new__(cls, rows)
         instance.blank = blank
+        instance.peer = peer
+        instance.many = many
         return instance
 
 
@@ -4002,6 +4006,37 @@ def evaluate_measures(
             ) and any(one_to_one_unmatched(end)[0] for end in ends):
                 raise MeasureError(f"{what} over a table of a one-to-one relationship with unmatched rows is not supported while it is filtered in the local engine.")
 
+    def refuse_one_to_one_values_iteration(table_node: tuple[Any, ...]) -> None:
+        """Live Power BI (iteration 84, testing agent): SUMX(VALUES(W[Y]), CALCULATE(SUM(F[Amt]))) with the partner U filtered so that one of
+        its rows without a partner in W stays visible adds the blank member of W to the iteration (CALCULATE(.., U[K]="k4") is 16 where
+        COUNTROWS(VALUES(W[Y])) and CONCATENATEX over the same VALUES list no blank).  Which functions list it is not modelled, so this is refused."""
+        if table_node[0] != "table_call" or table_node[1] not in {"VALUES", "DISTINCT"} or not table_node[2]:
+            return
+        source = table_node[2]
+        try:
+            if source[0] == "reference":
+                iterated = resolve_table(source[1], source[2])[0]
+            elif source[0] == "table":
+                iterated = resolve_table_context(str(source[1]))
+            else:
+                return
+        except MeasureError:
+            return
+        for relationship in relationship_definitions:
+            if not isinstance(relationship, dict) or not relationship.get("is_active") or relationship.get("cardinality") != "one_to_one":
+                continue
+            ends = (str(relationship.get("from_table_id")), str(relationship.get("to_table_id")))
+            if iterated["id"] not in ends or len(set(ends)) != 2:
+                continue
+            partner = next(end for end in ends if end != iterated["id"])
+            if partner not in evaluation_filter_ids or partner not in contexts_by_id:
+                continue
+            own = one_to_one_unmatched(partner)[0]
+            partner_rows = contexts_by_id[partner]["rows"]
+            orphans = {id(partner_rows[index]) for index in own}
+            if any(id(row) in orphans for row in rows_by_table_id.get(partner, ())):
+                raise MeasureError("Iterating the values of a table of a one-to-one relationship whose filtered partner keeps rows without a partner is not supported in the local engine.")
+
     def refuse_one_to_one_pair_filters(tables: list[dict[str, Any]], filter_table_ids: set[Any]) -> None:
         """Live Power BI (iteration 84, critic; fresh ZM probes): when a filter on one table of a one-to-one relationship keeps only rows that
         have no partner and the filter on the other table keeps real rows and selects its own blank member, which blank members and orphan rows
@@ -4043,7 +4078,17 @@ def evaluate_measures(
             str(table.get("id")): own_unknown_member_selected(table, str(table.get("id")) in ignored)
             for table in tables if table.get("id") in filter_table_ids and table.get("id") in unknown_member_ids
         }
-        return _propagate_relationship_filters(tables, relationships, filter_table_ids, selected)
+        peer_blank = {
+            str(table.get("id")) for table in tables
+            if table.get("id") in filter_table_ids and table.get("filter_column_rows")
+            and all(getattr(rows, "peer", False) for rows in table["filter_column_rows"].values())
+        }
+        many_blank = {
+            str(table.get("id")) for table in tables
+            if table.get("id") in filter_table_ids and table.get("filter_column_rows")
+            and all(getattr(rows, "many", False) for rows in table["filter_column_rows"].values())
+        }
+        return _propagate_relationship_filters(tables, relationships, filter_table_ids, selected, peer_blank=peer_blank, many_blank=many_blank)
 
     try:
         rows_by_table_id = propagate_relationship_filters(
@@ -8267,9 +8312,13 @@ def evaluate_measures(
         None for a table that stays unrestricted: some row points past it (a key with no partner belongs to the unknown
         member, which stays in the expanded table) or every row of it is pointed at."""
         reached: dict[str, frozenset[int] | None] = {}
-        queue: list[tuple[str, Iterable[int] | None]] = [(table_id, allowed)]
+        # (table, listed rows or None while unrestricted, the real rows the filtered rows point at).  A one-to-one partner is reached through
+        # the real rows only, whether or not an unmatched key keeps the table's own blank member (live Power BI, iteration 84 testing agent:
+        # CALCULATE(COUNTROWS(W), FILTER(F, F[Id]<=5)) is 3 and FILTER(F, F[Id]=6) is BLANK: the partner's orphan row is never reached)
+        allowed = list(allowed)
+        queue: list[tuple[str, Iterable[int] | None, Iterable[int] | None, bool]] = [(table_id, allowed, allowed, False)]
         while queue:
-            current_id, rows_here = queue.pop()
+            current_id, rows_here, real_rows, blank_up = queue.pop()
             current = contexts_by_id.get(current_id)
             if current is None:
                 continue
@@ -8277,22 +8326,35 @@ def evaluate_measures(
                 one_context = contexts_by_id.get(one_id)
                 if one_context is None or one_id == table_id or one_id in reached:
                     continue
-                if rows_here is None:
+                peer = any(
+                    isinstance(item, dict) and item.get("is_active") and item.get("cardinality") == "one_to_one"
+                    and {str(item.get("from_table_id")), str(item.get("to_table_id"))} == {current_id, one_id}
+                    for item in relationship_definitions
+                )
+                source_rows = real_rows if peer else rows_here
+                if source_rows is None:
                     reached[one_id] = None
-                    queue.append((one_id, None))
+                    queue.append((one_id, None, None, True))
                     continue
                 index = one_side_value_index(one_context, there_column)
                 found: set[int] = set()
                 unmatched = False
-                for position in rows_here:
+                for position in source_rows:
                     matches = index.get(cell_key(typed_cell(current, here_column, current["rows"][position].get(here_column))))
                     if matches:
                         found |= matches
                     else:
                         unmatched = True
                 # a table every row of which is pointed at needs no filter (nothing to narrow), like one with an unknown member
-                reached[one_id] = None if unmatched or len(found) == len(one_context["rows"]) else frozenset(found)
-                queue.append((one_id, None if unmatched else frozenset(found)))
+                if peer:
+                    full = len(found) == len(one_context["rows"])
+                    # the partner's blank member is listed when a real row has no partner or the table before it listed its own
+                    kept = BlankSet(found, unmatched or blank_up, unmatched and not blank_up) if unmatched or blank_up else frozenset(found)
+                    reached[one_id] = None if full else kept
+                    queue.append((one_id, None if full else kept, frozenset(found), bool(getattr(kept, "blank", False))))
+                else:
+                    reached[one_id] = None if unmatched or len(found) == len(one_context["rows"]) else frozenset(found)
+                    queue.append((one_id, None if unmatched else frozenset(found), frozenset(found), unmatched))
         return reached
 
     def narrow_one_side_tables(
@@ -8313,6 +8375,16 @@ def evaluate_measures(
                 updated_filter_roots.discard(one_id)
                 continue
             target["filter_rows"] = [row for position, row in enumerate(target["rows"]) if position in one_rows]
+            if isinstance(one_rows, BlankSet) and one_rows.blank:
+                # a one-to-one partner of a row without a partner lists its own blank member (live Power BI: the partner's orphan rows stay
+                # visible) and is filtered column by column, so a later filter on one column replaces only that column
+                for state in ("filter_table_rows", "filter_shapes", "filter_column_extra"):
+                    target.pop(state, None)
+                target["filter_column_rows"] = {header: one_rows for header in target["headers"]}
+                target["filter_column_blank_allowed"] = {header: True for header in target["headers"]}
+                target["filter_context_complete"] = True
+                updated_filter_roots.add(one_id)
+                continue
             target["filter_table_rows"] = frozenset(one_rows)  # kept as a set of whole rows, like the filtered table itself
             target.pop("filter_shapes", None)
             target.pop("filter_column_extra", None)
@@ -9024,7 +9096,12 @@ def evaluate_measures(
             key_value = row.get(from_column) if typed else typed_cell(many_context, from_column, row.get(from_column))
             matches = one_side_value_index(one_context, to_column).get(cell_key(key_value))
             if not matches:  # an unmatched key belongs to the unknown member: the one side is filtered to that member only
-                transitioned[one_id] = (one_context, {header: BlankSet((), True) for header in one_context["headers"]})
+                peer = any(
+                    isinstance(item, dict) and item.get("is_active") and item.get("cardinality") == "one_to_one"
+                    and {str(item.get("from_table_id")), str(item.get("to_table_id"))} == {table_id, one_id}
+                    for item in relationship_definitions
+                )
+                transitioned[one_id] = (one_context, {header: BlankSet((), True, peer, not peer) for header in one_context["headers"]})
                 continue
             related_row = one_context["rows"][min(matches)]
             transitioned[one_id] = (one_context, {
@@ -10731,6 +10808,7 @@ def evaluate_measures(
             return related_value(arguments[0], row_context)
         if function in {"SUMX", "AVERAGEX", "MAXX", "MINX"} or function in dax_math.STAT_ITERATORS:
             context, iteration_rows = table_argument_value(arguments[0])
+            refuse_one_to_one_values_iteration(arguments[0])
             if not iteration_rows:
                 refuse_foreign_columns_of_empty_set(context, arguments[1])
             if function in {"MAXX", "MINX"}:
