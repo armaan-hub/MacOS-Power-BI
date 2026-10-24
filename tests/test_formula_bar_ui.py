@@ -51,6 +51,7 @@ class FormulaBarWindowTests(unittest.TestCase):
 
     def tearDown(self) -> None:
         self.controller._dirty = False
+        self.bar.cancel()  # closing the window now asks about an unsaved draft
         self.window.close()
         self.window.deleteLater()
         self.component.deleteLater()
@@ -391,6 +392,36 @@ class FormulaBarWindowTests(unittest.TestCase):
         self.key(Qt.Key.Key_Return)
         self.assertIn("ends unexpectedly", self.banner_text())
         self.assertIsNone(self.measure("Bad"))
+
+    def test_closing_the_window_with_an_unsaved_draft_asks_and_cancel_keeps_it(self) -> None:
+        from unittest.mock import patch
+        from PySide6.QtWidgets import QMessageBox
+
+        self.open_measure()
+        self.type_formula("Draft", "SUM(Orders[Quantity])")
+        self.assertTrue(self.bar.dirty)
+        with patch.object(QMessageBox, "question",
+                          return_value=QMessageBox.StandardButton.Cancel) as ask:
+            self.window.close()
+            self.process()
+        self.assertEqual(ask.call_count, 1)
+        self.assertTrue(self.window.isVisible())
+        self.assertTrue(self.bar.dirty)
+        self.assertEqual(self.bar.text, "Draft = SUM(Orders[Quantity])")
+
+    def test_editing_another_measure_with_an_unsaved_draft_asks_first(self) -> None:
+        from unittest.mock import patch
+        from PySide6.QtWidgets import QMessageBox
+
+        self.assertTrue(self.controller.create_measure("Other", "SUM(Orders[Quantity])"))
+        self.open_measure()
+        self.type_formula("Draft", "SUM(Orders[Quantity])")
+        with patch.object(QMessageBox, "question",
+                          return_value=QMessageBox.StandardButton.Cancel) as ask:
+            self.window.runCommand("data.newMeasure")
+            self.assertFalse(self.bar.beginEditMeasure("Other"))
+        self.assertEqual(ask.call_count, 2)
+        self.assertEqual(self.bar.text, "Draft = SUM(Orders[Quantity])")
 
     def test_quick_measure_stays_enabled_because_its_engine_exists(self) -> None:
         self.assertTrue(self.window.commandAvailable("data.quickMeasure"))

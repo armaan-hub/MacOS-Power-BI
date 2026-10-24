@@ -13,6 +13,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Any
 
 from PySide6.QtCore import Property, QObject, Signal, Slot
+from PySide6.QtWidgets import QMessageBox
 
 from analytics_studio import dax_intellisense
 from analytics_studio.measures import MeasureError
@@ -143,6 +144,38 @@ class FormulaBarController(QObject):
         self.revisionChanged.emit()
         self.changed.emit()
 
+    @Slot(result=bool)
+    def confirmDiscardDraft(self) -> bool:  # noqa: N802
+        """True when it is safe to replace the bar: it is clean, or the user saved / discarded it.
+
+        A dirty draft is never dropped silently (Power BI asks too): Save commits it (a draft the
+        engine rejects stays open with its error), Discard drops it, Cancel keeps it.
+        """
+        if not self.dirty:
+            return True
+        what = "column" if self._mode == "column" else "measure"
+        answer = QMessageBox.question(
+            None,
+            "Unsaved formula",
+            f"The {what} formula in the formula bar has not been saved. Save it before continuing?",
+            QMessageBox.StandardButton.Save
+            | QMessageBox.StandardButton.Discard
+            | QMessageBox.StandardButton.Cancel,
+            QMessageBox.StandardButton.Save,
+        )
+        if answer == QMessageBox.StandardButton.Save:
+            return self.commit()
+        if answer == QMessageBox.StandardButton.Discard:
+            self._close()
+            return True
+        self._studio._set_status("Finish or discard the formula in the formula bar first.")
+        return False
+
+    def reset(self) -> None:
+        """Drop the draft without asking (the project it belonged to is gone)."""
+        if self._active or self._text:
+            self._close()
+
     def _close(self) -> None:
         self._active = False
         self._mode = ""
@@ -176,6 +209,12 @@ class FormulaBarController(QObject):
             return None
         return parts[0], self._text[parts[1]:]
 
+    def _may_replace(self, focus: bool) -> bool:
+        """A preview (shown for the selected field) never touches a dirty draft; a real edit asks."""
+        if not focus:
+            return not self.dirty
+        return self.confirmDiscardDraft()
+
     # ------------------------------------------------------------------ opening
 
     @Slot(result=bool)
@@ -183,6 +222,8 @@ class FormulaBarController(QObject):
         studio = self._studio
         if not studio.sourceLoaded:
             studio._set_status("Import a table before creating a measure.")
+            return False
+        if not self.confirmDiscardDraft():
             return False
         name = self._unique_name("Measure", self._measure_names())
         self._open("measure", f"{name} = ", is_new=True, original="",
@@ -194,6 +235,8 @@ class FormulaBarController(QObject):
         studio = self._studio
         if not studio.sourceLoaded:
             studio._set_status("Load a table before creating a calculated column.")
+            return False
+        if not self.confirmDiscardDraft():
             return False
         name = self._unique_name("Column", self._column_names())
         self._open("column", f"{name} = ", is_new=True, original="",
@@ -228,6 +271,8 @@ class FormulaBarController(QObject):
         if measure is None:
             studio._set_status(f"Measure {measure_name!r} no longer exists.")
             return False
+        if not self._may_replace(focus):
+            return False
         name = str(measure["name"])
         text = f"{name} = {measure['expression']}"
         self._open("measure", text, is_new=False, original=name,
@@ -244,6 +289,8 @@ class FormulaBarController(QObject):
             if str(item.get("name", "")).casefold() == str(column_name).casefold()
         ), None)
         if column is None:
+            return False
+        if not self._may_replace(focus):
             return False
         text = f"{column['name']} = {column['expression']}"
         self._open("column", text, is_new=False, original=str(column["name"]),
@@ -270,6 +317,10 @@ class FormulaBarController(QObject):
             return
         parts = dax_intellisense.formula_parts(self._text)
         new_name = str(name).strip() or (parts[0] if parts else "")
+        if "=" in new_name:
+            self._error = "A name cannot contain an equals sign."
+            self.changed.emit()
+            return
         self._text = (
             f"{new_name} {self._text[parts[1]:]}" if parts else f"{new_name} = "
         )
@@ -295,7 +346,7 @@ class FormulaBarController(QObject):
             ):
                 self._home_table_id = str(table_id)
                 self.changed.emit()
-                return
+            return
         self._home_table_id = str(table_id)
         self.changed.emit()
 
