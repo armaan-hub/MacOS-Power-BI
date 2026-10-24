@@ -1530,6 +1530,14 @@ def _contains_refused_call_outside_x_iterator(node: Any) -> bool:
     return any(isinstance(child, tuple) and _contains_refused_call_outside_x_iterator(child) for child in node)
 
 
+def _numeric_by_construction(node: Any) -> bool:
+    """A call whose result is a number even when it is BLANK (DIVIDE, SUMX, SUM ...): SWITCH compares its type with the subject's."""
+    return isinstance(node, tuple) and len(node) > 1 and node[0] == "call" and node[1] in {
+        "DIVIDE", "SUMX", "SUM", "AVERAGEX", "AVERAGE", "MAXX", "MINX", "MAX", "MIN", "COUNTX", "COUNTROWS", "COUNT", "DISTINCTCOUNT",
+        "TOTALMTD", "TOTALQTD", "TOTALYTD", "CALCULATE",
+    }
+
+
 _UNTAKEN_BRANCH_ERRORS = (
     "Iterator expressions can reference columns from their iterated table only",  # live: a single value for the column cannot be determined
     "cannot validate first",
@@ -11490,7 +11498,7 @@ def evaluate_measures(
             untaken = list(remaining[1::2]) + ([] if fallback is None else [fallback])
             for level, (candidate, result) in enumerate(zip(remaining[::2], remaining[1::2])):
                 candidate_value = _consume_infinity(lambda: evaluate(candidate, row_context))
-                if candidate_value is None and subject is not None and candidate[0] != "blank":
+                if candidate_value is None and subject is not None and _numeric_by_construction(candidate):
                     # live Power BI: a BLANK number is still a number, and SWITCH reports a number compared with a True/False or text subject
                     raise MeasureError("A SWITCH value that is BLANK cannot be type-checked against the subject in the local engine.")
                 if dax_typed.values_match(subject, candidate_value):
@@ -11508,7 +11516,7 @@ def evaluate_measures(
                                 later_value = evaluate(later, row_context, allow_text=True, allow_boolean=True)
                             except MeasureError:
                                 continue
-                            if later_value is None:
+                            if later_value is None and _numeric_by_construction(later) and subject is not None:
                                 raise MeasureError("A later SWITCH value that is BLANK cannot be type-checked against the subject in the local engine.")
                         if subject is not None and later_value is not None and (
                             isinstance(subject, bool) != isinstance(later_value, bool) or isinstance(subject, str) != isinstance(later_value, str)
