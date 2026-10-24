@@ -15,6 +15,7 @@ import re
 from analytics_studio import dax_typed
 
 EPOCH = datetime(1899, 12, 30)
+NEAREST_SECOND = "nearest-second"
 _SECONDS_PER_DAY = Decimal(86400)
 _MONTHS = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October",
            "November", "December"]
@@ -39,27 +40,52 @@ def to_datetime(serial: Decimal, rounding: str = ROUND_HALF_UP) -> datetime:
     if not serial.is_finite():
         raise dax_typed._error("An argument has the wrong data type or the result is too large or too small.")
     days = serial.to_integral_value(rounding=ROUND_FLOOR)
+    if serial < 0 and serial != days:
+        # live Power BI counts the time of day of a serial before day zero forward from the day it follows (OLE) and rounds it in a
+        # way that is not modelled here (iteration 84, 800 probes): refused rather than guessed
+        raise dax_typed._error("A time of day before December 30, 1899 is not supported in the local engine.")
     scaled = (serial - days) * _SECONDS_PER_DAY
-    if rounding == ROUND_FLOOR:
-        scaled += Decimal("0.00001")  # a repeating-decimal time of day such as TIME(1,2,3) must not fall to the second before
-    seconds = scaled.quantize(Decimal(1), rounding=rounding)
+    if rounding == ROUND_DOWN:
+        seconds = scaled.quantize(Decimal(1), rounding=ROUND_DOWN)
+    elif rounding == NEAREST_SECOND:  # live Power BI: WEEKDAY / WEEKNUM take the day of the time of day rounded to the nearest second
+        seconds = scaled.quantize(Decimal(1), rounding=ROUND_HALF_UP)
+    else:
+        if serial >= 1_000_000 and abs(scaled - scaled.quantize(Decimal(1), rounding=ROUND_HALF_UP)) > Decimal("0.0001"):
+            # live Power BI: far from day zero (years after 4700) the fraction of a second is not reproduced by the local engine
+            # (SECOND(DATE(9999,12,31)+0.0001) is 7 there), so only whole seconds are answered
+            raise dax_typed._error("A date with a fraction of a second so far from 1899 is not supported in the local engine.")
+        # live Power BI: the time of day is held in ticks of 1/300 s (rounded to the nearest tick) and shown without its fraction of a second
+        ticks = (scaled * 300).quantize(Decimal(1), rounding=ROUND_HALF_UP)
+        seconds = ticks // 300
     try:
-        return EPOCH + timedelta(days=int(days), seconds=float(seconds))
+        moment = EPOCH + timedelta(days=int(days), seconds=int(seconds))
     except OverflowError as exc:
         raise dax_typed._error("A date is outside the supported range.") from exc
+    if moment.year < 100:
+        raise dax_typed._error("A date before January 1, 100 is not supported.")  # Power BI clamps such results to 01/01/0100
+    return moment
+
+
+def tick_round(serial: Decimal) -> Decimal:
+    """A date value as Power BI holds it: the time of day rounded to the nearest tick of 1/300 s (INT(DATE(2024,2,29)+0.99999999) is
+    45352, live iteration 84)."""
+    if not serial.is_finite() or serial == serial.to_integral_value():
+        return serial
+    return (serial * 25_920_000).quantize(Decimal(1), rounding=ROUND_HALF_UP) / 25_920_000
 
 
 def is_date(value: object) -> bool:
     return isinstance(value, DaxDateTime)
 
 
-def date_text(value: Decimal) -> str:
-    """The text of a date in a concatenation: M/d/yyyy, plus h:mm:ss AM/PM when there is a time of day."""
-    moment = to_datetime(value)
+def date_text(value: Decimal, pad_year: bool = False) -> str:
+    """The text of a date in a concatenation: M/d/yyyy, plus h:mm:ss AM/PM when there is a time of day (FORMAT "General Date" pads the
+    year to four digits, a concatenation does not: live Power BI, 1/1/0100 and 1/1/100)."""
+    moment = to_datetime(value, NEAREST_SECOND)  # live Power BI: the text of a date shows the time of day rounded to the nearest second
     time_text = f"{moment.hour % 12 or 12}:{moment.minute:02d}:{moment.second:02d} {'AM' if moment.hour < 12 else 'PM'}"
     if (moment.year, moment.month, moment.day) == (1899, 12, 30):
         return time_text  # day zero is a time of day only
-    text = f"{moment.month}/{moment.day}/{moment.year}"
+    text = f"{moment.month}/{moment.day}/{moment.year:04d}" if pad_year else f"{moment.month}/{moment.day}/{moment.year}"
     if moment.hour or moment.minute or moment.second:
         text += " " + time_text
     return text
@@ -73,7 +99,7 @@ def oracle_text(value: Decimal) -> str:
 # ---------------------------------------------------------------------------------------------- parsing
 
 _TEXT_DATE_FORMATS = (
-    "%Y-%m-%d", "%Y-%m-%d %H:%M", "%Y-%m-%d %H:%M:%S", "%m/%d/%Y %H:%M", "%m/%d/%Y %I:%M %p", "%Y-%m-%dT%H:%M:%S", "%Y/%m/%d", "%m/%d/%Y", "%m/%d/%Y %H:%M:%S",
+    "%Y-%m-%d", "%Y-%m-%d %H:%M", "%Y-%m-%d %H:%M:%S", "%m/%d/%Y %H:%M", "%m/%d/%Y %I:%M %p", "%Y/%m/%d", "%m/%d/%Y", "%m/%d/%Y %H:%M:%S",
     "%m/%d/%Y %I:%M:%S %p", "%m/%d/%y", "%B %d, %Y", "%b %d, %Y", "%d %B %Y", "%d %b %Y", "%B %d %Y", "%d-%b-%Y",
     "%d-%b-%y", "%d-%B-%Y", "%d/%m/%Y",
 )
@@ -83,9 +109,18 @@ def parse_date_text(text: str) -> DaxDateTime:
     cleaned = " ".join(text.split())
     for pattern in _TEXT_DATE_FORMATS:
         try:
-            return from_datetime(datetime.strptime(cleaned, pattern))
+            parsed = datetime.strptime(cleaned, pattern)
         except ValueError:
             continue
+        # live Power BI (iteration 84, critic): a year below 100 is a two-digit year, 00-49 are 20xx and 50-99 are 19xx
+        # ("1/1/50" is 1950, "1/1/0001" is 2001); strptime reads %y with the pivot at 69
+        two_digit = parsed.year % 100 if "%y" in pattern else parsed.year if parsed.year < 100 else None
+        if two_digit is not None:
+            try:
+                parsed = parsed.replace(year=(2000 if two_digit < 50 else 1900) + two_digit)
+            except ValueError as error:
+                raise dax_typed._error(f"Cannot convert value '{text}' of type Text to type Date.") from error
+        return from_datetime(parsed)
     raise dax_typed._error(f"Cannot convert value '{text}' of type Text to type Date.")
 
 
@@ -117,12 +152,39 @@ def _make_date(year: object, month: object, day: object) -> DaxDateTime:
     total = y * 12 + (m - 1)
     y, m = divmod(total, 12)
     m += 1
-    if y < 1 or y > 9999 or d == 0:
+    if y < 1 or y > 9999 or d == 0 or (y, m, d) == (1900, 2, 29):  # live Power BI: the fake leap day of 1900 is an error
         raise dax_typed._error(failure)
     try:
         return from_datetime(datetime(y, m, 1) + timedelta(days=d - 1))
     except OverflowError as exc:
         raise dax_typed._error(failure) from exc
+
+
+_TIME_TEXT = re.compile(r"(?i)(?:(?P<date>\d{4}-\d{1,2}-\d{1,2}|\d{1,2}/\d{1,2}/\d{2,4})\s+)?(?P<h>\d{1,2})[:.](?P<m>\d{1,2})(?::(?P<s>\d{1,2}))?(?:\s*(?P<ap>[ap])m?)?")
+
+
+def _time_value(text: str) -> DaxDateTime:
+    """TIMEVALUE as Power BI reads it (iteration 84, live): h:m[:s] or h.m with an optional A / P / AM / PM and an optional date in front;
+    an hour above 23, a minute or second above 59, a sign, a fraction of a second or any other text is an error."""
+    failure = dax_typed._error(f"Cannot convert value '{text}' of type Text to type Date.")
+    found = _TIME_TEXT.fullmatch(text.strip())
+    if found is None:
+        raise failure
+    hour, minute, second = int(found.group("h")), int(found.group("m")), int(found.group("s") or 0)
+    if hour > 23 or minute > 59 or second > 59:
+        raise failure
+    if found.group("date"):
+        try:
+            parse_date_text(found.group("date"))
+        except Exception as error:
+            raise failure from error
+    meridiem = found.group("ap")
+    if meridiem:
+        if meridiem.lower() == "a":
+            hour = 0 if hour == 12 else hour
+        elif hour < 12:
+            hour += 12
+    return DaxDateTime(Decimal(hour * 3600 + minute * 60 + second) / _SECONDS_PER_DAY)
 
 
 def _weekday_index(moment: datetime, week_start: int) -> int:
@@ -144,6 +206,8 @@ def _weekday(moment: datetime, kind: int) -> int:
 
 def _weeknum(moment: datetime, kind: int) -> int:
     if kind == 21:
+        if moment.year < 1753:
+            raise dax_typed._error("ISO week numbers before 1753 are not supported in the local engine.")  # live: WEEKNUM(DATE(100,1,1),21) is 52, not 53
         return moment.isocalendar()[1]
     week_start = {1: 6, 2: 0}.get(kind, kind - 11 if 11 <= kind <= 17 else None)
     if week_start is None:
@@ -191,8 +255,11 @@ def date_function(function: str, args: list[object], interval: str | None = None
         if all(value is None for value in args):
             return None
         hours, minutes, seconds = (dax_typed.whole(value, "TIME") for value in args)
-        total = (hours * 3600 + minutes * 60 + seconds) % 86400
-        return DaxDateTime(Decimal(total) / _SECONDS_PER_DAY)
+        total = hours * 3600 + minutes * 60 + seconds
+        if total < 0 or any(not -32768 <= part <= 32767 for part in (hours, minutes, seconds)):
+            # live Power BI (iteration 84, critic; 416 probes): an argument outside a signed 16-bit number, or a negative total, is an error
+            raise dax_typed._error("An argument of function 'TIME' has the wrong data type or the result is too large or too small.")
+        return DaxDateTime(Decimal(total % 86400) / _SECONDS_PER_DAY)
     if function == "DATEVALUE":
         if args[0] is None:
             return None
@@ -200,19 +267,13 @@ def date_function(function: str, args: list[object], interval: str | None = None
     if function == "TIMEVALUE":
         if args[0] is None:
             return None
-        found = re.search(r"(\d{1,2}):(\d{2})(?::(\d{2}))?\s*([AaPp][Mm])?", dax_typed.to_text(args[0]))
-        if found is None:
-            raise dax_typed._error(f"Cannot convert value '{args[0]}' of type Text to type Date.")
-        hour, minute, second = int(found.group(1)), int(found.group(2)), int(found.group(3) or 0)
-        if found.group(4):
-            hour = hour % 12 + (12 if found.group(4).upper() == "PM" else 0)
-        return DaxDateTime(Decimal(hour * 3600 + minute * 60 + second) / _SECONDS_PER_DAY)
+        return _time_value(dax_typed.to_text(args[0]))
     if function == "DATEDIFF":
         start, end = _moment(args[0], ROUND_DOWN), _moment(args[1], ROUND_DOWN)
         if start is None or end is None:
             return None
         return _datediff(start, end, str(interval))
-    moment = _moment(args[0], ROUND_FLOOR if function in {"HOUR", "MINUTE", "SECOND"} else ROUND_HALF_UP)
+    moment = _moment(args[0], ROUND_FLOOR if function in {"HOUR", "MINUTE", "SECOND"} else NEAREST_SECOND if function in {"WEEKDAY", "WEEKNUM"} else ROUND_HALF_UP)
     if moment is None:
         return None
     if function == "YEAR":
@@ -254,8 +315,8 @@ _NAMED_DATE_FORMATS = {
 def format_date(value: Decimal, pattern: str) -> str:
     key = pattern.strip().casefold()
     if key in {"", "general date"}:
-        return date_text(value)
-    moment = to_datetime(value)
+        return date_text(value, pad_year=key == "general date")
+    moment = to_datetime(value, NEAREST_SECOND)
     named = _NAMED_DATE_FORMATS.get(key)
     if named is not None:
         if key == "long time":
@@ -306,7 +367,7 @@ def _render_date_pattern(moment: datetime, pattern: str) -> str:
             output.append(text)
         elif kind == "ampm":
             suffix = "AM" if moment.hour < 12 else "PM"
-            shown = suffix if "/" in text and len(text) == 5 else suffix[0]
+            shown = suffix if (("/" in text and len(text) == 5) or len(text) == 4) else suffix[0]
             output.append(shown if text[0].isupper() else shown.lower())
         else:
             output.append(_date_field(moment, text, tokens, index, has_ampm))
@@ -332,6 +393,9 @@ def _date_tokens(pattern: str) -> list[tuple[str, str]]:
         elif pattern[index:index + 5].upper() == "AM/PM":
             tokens.append(("ampm", pattern[index:index + 5]))
             index += 5
+        elif pattern[index:index + 4].upper() == "AMPM":
+            tokens.append(("ampm", pattern[index:index + 4]))
+            index += 4
         elif pattern[index:index + 3].upper() == "A/P":
             tokens.append(("ampm", pattern[index:index + 3]))
             index += 3
@@ -395,7 +459,7 @@ def _date_field(moment: datetime, token: str, tokens: list[tuple[str, str]], ind
         return f"{moment.year:04d}"
     if lower == "h":
         hour = moment.hour
-        if has_ampm and letter == "h":
+        if has_ampm and (letter == "h" or any(text.upper() == "AMPM" for kind, text in tokens if kind == "ampm")):  # live: "H AMPM" is "6 PM"
             hour = hour % 12 or 12
         return f"{hour:0{width}d}" if width > 1 else str(hour)
     if lower == "n":
