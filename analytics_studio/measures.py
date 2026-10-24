@@ -10783,6 +10783,21 @@ def evaluate_measures(
                 # otherwise only the errors Power BI measured as raised from a branch that is not taken; every other refusal there is not the expression's
                 if any(marker in str(error) for marker in _UNTAKEN_BRANCH_ERRORS):
                     raise
+                # the whole branch stopped at a type check before reaching the part Power BI rejects: look at its calls one by one
+                pending = [branch]
+                while pending:
+                    part = pending.pop()
+                    for child in (part if isinstance(part[0], tuple) else part[1:]):
+                        if isinstance(child, tuple) and child:
+                            pending.append(child)
+                    if part[0] == "call" and part is not branch:
+                        try:
+                            evaluate(part, row_context, allow_text=True, allow_boolean=True)
+                        except MeasureError as part_error:
+                            if any(marker in str(part_error) for marker in _UNTAKEN_BRANCH_ERRORS):
+                                raise
+                        except (DecimalException, OverflowError):
+                            pass
             except (DecimalException, OverflowError):
                 pass
 
