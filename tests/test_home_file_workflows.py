@@ -1444,7 +1444,9 @@ in
             str(dialog.operation_combo.itemData(index))
             for index in range(dialog.operation_combo.count())
         }
-        self.assertEqual(set(dialog.ribbon_command_buttons), operations)
+        # Power BI Desktop has no Sparse Top / Sparse Bottom buttons (the operations stay in the form).
+        sparse = {"remove_sparse_top_rows", "remove_sparse_bottom_rows"}
+        self.assertEqual(set(dialog.ribbon_command_buttons), operations - sparse)
         direct_operations = (
             dialog._SELECTION_OPERATIONS_PER_COLUMN
             | dialog._SELECTION_OPERATIONS_COLUMN_LIST

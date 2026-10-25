@@ -2797,27 +2797,12 @@ in
             apply_transformations(source, dialog._steps),
         )
 
+        self.assertEqual(dialog._preview_candidate.row_count, 1)
+        # Power BI Desktop has no Sparse Top / Sparse Bottom ribbon buttons: the operations stay
+        # reachable from the step form and the M editor only.
         ribbon_dialog = TransformDataDialog(source, query_name="Sales Data")
-        self.assertIn("remove_sparse_top_rows", ribbon_dialog.ribbon_command_buttons)
-        self.assertIn("remove_sparse_bottom_rows", ribbon_dialog.ribbon_command_buttons)
-        for operation, label, edge in (
-            ("remove_sparse_top_rows", "Sparse Top", "top"),
-            ("remove_sparse_bottom_rows", "Sparse Bottom", "bottom"),
-        ):
-            button = ribbon_dialog.ribbon_command_buttons[operation]
-            self.assertEqual(button.text(), label)
-            self.assertEqual(
-                button.toolTip(),
-                f"Remove consecutive {edge} rows with at most one nonblank cell; "
-                "stop at the first row with two or more nonblank cells or a cell error.",
-            )
-        ribbon_dialog.ribbon_command_buttons["remove_sparse_bottom_rows"].click()
-        self.assertEqual(
-            ribbon_dialog._steps, [{"op": "remove_sparse_bottom_rows"}]
-        )
-        ribbon_dialog.ribbon_command_buttons["remove_sparse_top_rows"].click()
-        self.assertEqual(ribbon_dialog._steps, expected_steps)
-        self.assertEqual(ribbon_dialog._preview_candidate.row_count, 1)
+        self.assertNotIn("remove_sparse_top_rows", ribbon_dialog.ribbon_command_buttons)
+        self.assertNotIn("remove_sparse_bottom_rows", ribbon_dialog.ribbon_command_buttons)
 
     def test_each_declared_m_step_round_trips_and_replays_like_native_transform(self) -> None:
         cases = [
