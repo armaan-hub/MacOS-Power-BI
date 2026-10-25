@@ -145,6 +145,8 @@ def same(pbi: str, loc: str) -> bool:
         a, b = Decimal(pbi), Decimal(loc)
     except InvalidOperation:
         return pbi.lower() == loc.lower() and pbi in ("True", "False")
+    if not a.is_finite() or not b.is_finite():
+        return False  # NaN / Infinity are equal only as the same text (checked above); subtracting them raises or hides a sign difference
     return abs(a - b) <= Decimal("1e-9") * max(Decimal(1), abs(a))
 
 

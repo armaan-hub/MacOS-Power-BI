@@ -1,0 +1,258 @@
+[
+ {
+  "expr": "COUNTX(Facts,Facts[Quantity]/Facts[Quantity])",
+  "powerbi": "5"
+ },
+ {
+  "expr": "COUNTAX(Facts,Facts[Quantity]/Facts[Quantity])",
+  "powerbi": "5"
+ },
+ {
+  "expr": "COUNTX(Facts,0/Facts[Quantity])",
+  "powerbi": "5"
+ },
+ {
+  "expr": "COUNTAX(Facts,0/Facts[Quantity])",
+  "powerbi": "5"
+ },
+ {
+  "expr": "COUNTX(Facts,Facts[Quantity]/0)",
+  "powerbi": "5"
+ },
+ {
+  "expr": "COUNTAX(Facts,Facts[Quantity]/0)",
+  "powerbi": "5"
+ },
+ {
+  "expr": "COUNTX(Facts,0/0)",
+  "powerbi": "0"
+ },
+ {
+  "expr": "COUNTAX(Facts,0/0)",
+  "powerbi": "0"
+ },
+ {
+  "expr": "COUNTX(Facts,1/0)",
+  "powerbi": "6"
+ },
+ {
+  "expr": "COUNTAX(Facts,1/0)",
+  "powerbi": "6"
+ },
+ {
+  "expr": "MAXX(Facts,Facts[Quantity]/Facts[Quantity])",
+  "powerbi": "1"
+ },
+ {
+  "expr": "MINX(Facts,Facts[Quantity]/Facts[Quantity])",
+  "powerbi": "1"
+ },
+ {
+  "expr": "SUMX(Facts,Facts[Quantity]/Facts[Quantity])",
+  "powerbi": "NaN"
+ },
+ {
+  "expr": "AVERAGEX(Facts,Facts[Quantity]/Facts[Quantity])",
+  "powerbi": "NaN"
+ },
+ {
+  "expr": "MAXX(Facts,1/0)",
+  "powerbi": "Infinity"
+ },
+ {
+  "expr": "MINX(Facts,0/0)",
+  "powerbi": "BLANK"
+ },
+ {
+  "expr": "COUNTX(Facts,IF(Facts[Quantity]=0,0/0,1))",
+  "powerbi": "5"
+ },
+ {
+  "expr": "COUNTX(Facts,IF(Facts[Quantity]=0,1/0,1))",
+  "powerbi": "6"
+ },
+ {
+  "expr": "COUNTAX(Facts,IF(Facts[Quantity]=0,0/0,1))",
+  "powerbi": "5"
+ },
+ {
+  "expr": "COUNTAX(Facts,IF(Facts[Quantity]=0,1/0,1))",
+  "powerbi": "6"
+ },
+ {
+  "expr": "COUNTX(Facts,IF(Facts[Quantity]<3,0/0))",
+  "powerbi": "0"
+ },
+ {
+  "expr": "COUNTAX(Facts,IF(Facts[Quantity]<3,0/0))",
+  "powerbi": "0"
+ },
+ {
+  "expr": "COUNTX(Facts,IF(Facts[Quantity]<3,0/0,\"x\"))",
+  "powerbi": "3"
+ },
+ {
+  "expr": "COUNTAX(Facts,IF(Facts[Quantity]<3,0/0,\"x\"))",
+  "powerbi": "6"
+ },
+ {
+  "expr": "COUNTX(Facts,IF(Facts[Quantity]<3,0/0,1/0))",
+  "powerbi": "3"
+ },
+ {
+  "expr": "COUNTAX(Facts,IF(Facts[Quantity]<3,0/0,1/0))",
+  "powerbi": "3"
+ },
+ {
+  "expr": "COUNTX(Facts,IF(Facts[Quantity]<3,0/0,BLANK()))",
+  "powerbi": "0"
+ },
+ {
+  "expr": "COUNTAX(Facts,IF(Facts[Quantity]<3,0/0,BLANK()))",
+  "powerbi": "0"
+ },
+ {
+  "expr": "COUNTX(Facts,IF(Facts[Quantity]<0,0/0))",
+  "powerbi": "BLANK"
+ },
+ {
+  "expr": "COUNTAX(Facts,IF(Facts[Quantity]<0,0/0))",
+  "powerbi": "BLANK"
+ },
+ {
+  "expr": "COUNTX(Facts,IF(Facts[Quantity]<3,0/0,7))",
+  "powerbi": "3"
+ },
+ {
+  "expr": "COUNTAX(Facts,IF(Facts[Quantity]<3,0/0,7))",
+  "powerbi": "3"
+ },
+ {
+  "expr": "COUNTX(Facts,IF(Facts[Quantity]<3,0/0,Facts[Sales]))",
+  "powerbi": "2"
+ },
+ {
+  "expr": "COUNTAX(Facts,Facts[Sales]/Facts[Quantity])",
+  "powerbi": "4"
+ },
+ {
+  "expr": "COUNTX(Facts,Facts[Sales]/Facts[Quantity])",
+  "powerbi": "4"
+ },
+ {
+  "expr": "COUNTX(Facts,Facts[Quantity]/Facts[Quantity]+1)",
+  "powerbi": "5"
+ },
+ {
+  "expr": "COUNTX(Facts,DIVIDE(Facts[Quantity],Facts[Quantity]))",
+  "powerbi": "5"
+ },
+ {
+  "expr": "COUNTX(Facts,Facts[Quantity]/Facts[Quantity]*0)",
+  "powerbi": "6"
+ },
+ {
+  "expr": "COUNTX(Facts,-(Facts[Quantity]/Facts[Quantity]))",
+  "powerbi": "5"
+ },
+ {
+  "expr": "SUMX(Facts,Facts[Quantity]/Facts[Quantity]*0)",
+  "powerbi": "0"
+ },
+ {
+  "expr": "SUMX(Facts,0*(Facts[Quantity]/Facts[Quantity]))",
+  "powerbi": "0"
+ },
+ {
+  "expr": "SUMX(Facts,Facts[Quantity]/Facts[Quantity]*1)",
+  "powerbi": "NaN"
+ },
+ {
+  "expr": "SUMX(Facts,1/0*0)",
+  "powerbi": "NaN"
+ },
+ {
+  "expr": "COUNTX(Facts,1/0*0)",
+  "powerbi": "0"
+ },
+ {
+  "expr": "COUNTX(Facts,0*(Facts[Quantity]/Facts[Quantity]))",
+  "powerbi": "6"
+ },
+ {
+  "expr": "COUNTX(Facts,Facts[Quantity]/Facts[Quantity]*Facts[Quantity])",
+  "powerbi": "5"
+ },
+ {
+  "expr": "COUNTX(Facts,Facts[Quantity]/Facts[Quantity]*Facts[Sales]*0)",
+  "powerbi": "4"
+ },
+ {
+  "expr": "MAXX(Facts,Facts[Quantity]/Facts[Quantity]*0)",
+  "powerbi": "0"
+ },
+ {
+  "expr": "COUNTX(Facts,(Facts[Quantity]/Facts[Quantity])*0.0)",
+  "powerbi": "6"
+ },
+ {
+  "expr": "COUNTX(Facts,(Facts[Quantity]/Facts[Quantity])*(1-1))",
+  "powerbi": "6"
+ },
+ {
+  "expr": "COUNTX(Facts,(Facts[Quantity]/Facts[Quantity])*Facts[Quantity]*0)",
+  "powerbi": "6"
+ },
+ {
+  "expr": "COUNTX(Facts,(Facts[Quantity]/Facts[Quantity])*(Facts[Quantity]-Facts[Quantity]))",
+  "powerbi": "5"
+ },
+ {
+  "expr": "COUNTX(Facts,(Facts[Quantity]/Facts[Quantity])^0)",
+  "powerbi": "6"
+ },
+ {
+  "expr": "SUMX(Facts,(Facts[Quantity]/Facts[Quantity])^0)",
+  "powerbi": "6"
+ },
+ {
+  "expr": "COUNTX(Facts,(Facts[Quantity]/Facts[Quantity])-(Facts[Quantity]/Facts[Quantity]))",
+  "powerbi": "5"
+ },
+ {
+  "expr": "COUNTX(Facts,(Facts[Quantity]/Facts[Quantity])*2)",
+  "powerbi": "5"
+ },
+ {
+  "expr": "COUNTX(Facts,(Facts[Quantity]/Facts[Quantity])/2)",
+  "powerbi": "5"
+ },
+ {
+  "expr": "COUNTX(Facts,2/(Facts[Quantity]/Facts[Quantity]))",
+  "powerbi": "5"
+ },
+ {
+  "expr": "COUNTX(Facts,(Facts[Quantity]/Facts[Quantity])+Facts[Sales])",
+  "powerbi": "5"
+ },
+ {
+  "expr": "COUNTX(Facts,ABS(Facts[Quantity]/Facts[Quantity]))",
+  "powerbi": "5"
+ },
+ {
+  "expr": "COUNTX(Facts,IF(Facts[Quantity]/Facts[Quantity]>0,1,2))",
+  "powerbi": "6"
+ },
+ {
+  "expr": "COUNTX(Facts,COALESCE(Facts[Quantity]/Facts[Quantity],7))",
+  "powerbi": "5"
+ },
+ {
+  "expr": "COUNTX(Facts,IFERROR(Facts[Quantity]/Facts[Quantity],7))",
+  "powerbi": "6"
+ },
+ {
+  "expr": "COUNTX(Facts,MAX(Facts[Quantity]/Facts[Quantity],0))",
+  "powerbi": "5"
+ }
+]
