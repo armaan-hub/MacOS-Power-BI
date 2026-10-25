@@ -53,7 +53,7 @@ from analytics_studio.relationships import (
     relationship_filter_directions,
     unknown_member_table_ids,
 )
-from analytics_studio import dax_dates, dax_ext, dax_format, dax_iteration_order, dax_math, dax_order, dax_time_sets, dax_typed
+from analytics_studio import dax_ct_filters, dax_dates, dax_ext, dax_format, dax_iteration_order, dax_math, dax_order, dax_time_sets, dax_typed
 from analytics_studio.power_query_values import ascii_fold, cell_key, cell_to_text, is_cell_error
 
 
@@ -91,6 +91,10 @@ class MeasureRuntimeError(MeasureError):
 
 class _DivisionError(MeasureRuntimeError):
     """x/0 or x/BLANK(): Infinity or NaN in Power BI, an error for IFERROR."""
+
+
+class _CalculateTableFilterRefusal(MeasureError):
+    """A CALCULATETABLE in a Boolean filter whose hoist-or-transition reading was not established (see dax_ct_filters)."""
 
 
 class _HardError(MeasureError):
@@ -1511,6 +1515,33 @@ def _contains_transition_call(node: Any) -> bool:
     return any(isinstance(child, tuple) and _contains_transition_call(child) for child in node)
 
 
+def _constant_number(node: Any) -> Decimal | None:
+    """The value of an expression made of number literals and + - * only, else None."""
+    if not isinstance(node, tuple) or not node:
+        return None
+    if node[0] == "number":
+        return node[1]
+    if node[0] == "unary" and node[1] in {"+", "-"}:
+        value = _constant_number(node[2])
+        return None if value is None else (value if node[1] == "+" else -value)
+    if node[0] == "binary" and node[1] in {"+", "-", "*"}:
+        left, right = _constant_number(node[2]), _constant_number(node[3])
+        if left is None or right is None:
+            return None
+        return left + right if node[1] == "+" else left - right if node[1] == "-" else left * right
+    return None
+
+
+def _multiplies_by_constant_zero(node: Any) -> bool:
+    """x * 0, 0 * x, x * (1 - 1)...  Power BI folds such a product to 0 when it can (live probes, iteration 86: SUMX(Facts, Quantity / Quantity * 0) is 0, the
+    0/0 row is not NaN), and does not when a column may be blank; the local engine keeps NaN, so a NaN beside such a product is refused."""
+    if not isinstance(node, tuple) or not node:
+        return False
+    if node[0] == "binary" and node[1] == "*" and (_constant_number(node[2]) == 0 or _constant_number(node[3]) == 0):
+        return True
+    return any(_multiplies_by_constant_zero(child) for child in node if isinstance(child, tuple))
+
+
 def _calculatetable_hoistable(node: Any) -> bool:
     """Every CALCULATETABLE in this scalar has only plain Boolean filters: Power BI evaluates such a scalar once in the
     outer context. With no filter, or with ALL/REMOVEFILTERS/KEEPFILTERS/... it transitions the row instead
@@ -1521,6 +1552,8 @@ def _calculatetable_hoistable(node: Any) -> bool:
         filters = node[2][1:]
         if not filters or any(not (isinstance(f, tuple) and f and f[0] in {"comparison", "logical"}) for f in filters):
             return False
+        if any(_contains_function_call(child, "CALCULATETABLE") for child in node[2] if isinstance(child, tuple)):
+            return False  # iteration 86 (live probes): CALCULATETABLE(CALCULATETABLE(Facts, Sales>0), Note="Paid") is not the once-evaluated scalar the hoist assumes
     return all(_calculatetable_hoistable(child) for child in node if isinstance(child, tuple))
 
 
@@ -7076,10 +7109,10 @@ def evaluate_measures(
             return "unknown"
         if kind in {"unary", "binary"}:
             operands = expression[2:] if kind == "binary" else (expression[2],)
+            operand_categories = [iterator_expression_category(operand, row_context) for operand in operands]
             if any(
-                iterator_expression_category(operand, row_context)
-                not in {"numeric", "blank"}
-                for operand in operands
+                category not in {"numeric", "blank", "boolean"}  # live Power BI (iteration 86): TRUE is 1 and FALSE is 0 in + - * and unary minus
+                for category in operand_categories
             ):
                 raise MeasureError(
                     "Iterator arithmetic comparisons need numeric operands."
@@ -7253,6 +7286,7 @@ def evaluate_measures(
                     if (
                         argument_index in numeric_argument_indexes
                         and argument_category not in {"numeric", "blank"}
+                        and not (function in {"ABS", "INT"} and argument_category == "boolean")  # live Power BI: ABS(TRUE) and INT(TRUE) are 1
                     ):
                         if function in {"MIN", "MAX"} and argument_category == "date/time" and aggregate_column:
                             date_extreme = True  # the latest / earliest date of a column is a date (live Power BI)
@@ -9420,7 +9454,7 @@ def evaluate_measures(
                 and any(True for _ in _direct_column_references(left)) and not _contains_function_call(left, "CALCULATETABLE")
                 and not any(True for _ in _direct_column_references(right)) and _calculatetable_hoistable(right)
             ):
-                raise MeasureError("A CALCULATETABLE inside a True/False filter is supported only on the right of a comparison at the top level, with Boolean filters.")
+                raise _CalculateTableFilterRefusal("A CALCULATETABLE inside a True/False filter is supported only on the right of a comparison at the top level, with Boolean filters.")
         if node[0] == "comparison" and len(node) == 4:
             for operand in (node[2], node[3]):
                 transitions = _contains_transition_call(operand) or any(
@@ -9429,7 +9463,7 @@ def evaluate_measures(
                 if operand[0] != "reference" and transitions and any(True for _ in _direct_column_references(operand)):
                     # a column mixed with a value that transitions rows, in one operand: Power BI treats that value as a
                     # constant, but only a whole operand is hoisted here (tools/parity/dax_battery_critic_shapes.json)
-                    raise MeasureError("A True/False filter cannot mix a column and a CALCULATE-based value in one operand in this local subset.")
+                    raise _CalculateTableFilterRefusal("A True/False filter cannot mix a column and a CALCULATE-based value in one operand in this local subset.")
             for side_index, other_index in ((3, 2), (2, 3)):
                 side, other = node[side_index], node[other_index]
                 if side[0] in {"number", "string", "boolean", "blank", "reference"} or not any(True for _ in _direct_column_references(other)):
@@ -9595,6 +9629,83 @@ def evaluate_measures(
                     names.append(name)
         return names
 
+    def _table_names_of(node: Any, names: set[str]) -> bool:
+        """Collect the (case-folded) table names a filter and its scalars read; False when one cannot be named."""
+        if not isinstance(node, tuple) or not node:
+            return True
+        if node[0] == "table":
+            names.add(str(node[1]).casefold())
+        elif node[0] == "reference":
+            if not node[1]:
+                return False
+            names.add(str(node[1]).casefold())
+        return all(_table_names_of(child, names) for child in node if isinstance(child, tuple))
+
+    def plan_calculatetable_filter(argument: tuple[Any, ...]) -> tuple[bool, tuple[Any, ...]] | None:
+        """A CALCULATETABLE in a Boolean filter that the older rule (a hoistable scalar on the right) refused: apply the hoist-or-transition rule
+        Power BI showed (analytics_studio/dax_ct_filters.py), or return None to keep refusing. Only for a filter written at the top level."""
+        if row_stack or current_context != 0:
+            return None
+        planned = dax_ct_filters.plan(argument, _direct_column_references)
+        if planned is None:
+            return None
+        if _contains_refused_call_outside_x_iterator(argument):
+            raise MeasureError("CALCULATE and FILTER cannot be used inside a True/False filter expression.")
+        names: set[str] = set()
+        if not _table_names_of(argument, names) or len(names) != 1:
+            return None  # the rule was established on one table; a second table reads relationships Power BI was not asked about
+        replacements: dict[int, tuple[Any, ...]] = {}
+        for scalar in planned.hoisted:
+            try:
+                value = filter_constant(scalar)
+            except MeasureError:
+                return None  # an error inside the scalar: left to the paths that report it
+            if value is None:
+                replacements[id(scalar)] = ("blank",)
+            elif isinstance(value, bool):
+                replacements[id(scalar)] = ("boolean", value)
+            elif isinstance(value, Decimal):
+                replacements[id(scalar)] = ("number", value)
+            elif isinstance(value, str):
+                replacements[id(scalar)] = ("string", value)
+            else:
+                return None
+
+        def substitute(node: Any) -> Any:
+            if not isinstance(node, tuple) or not node:
+                return node
+            if id(node) in replacements:
+                return replacements[id(node)]
+            return tuple(substitute(child) if isinstance(child, tuple) else child for child in node)
+
+        if planned.mode == dax_ct_filters.HOIST:
+            return True, substitute(argument)  # the scalars are constants now: the older single-column path takes it from here
+        try:
+            for reference in planned.columns:
+                resolve_table(reference[1], reference[2])
+        except MeasureError:
+            return None
+        core = dax_ct_filters.core_of(argument)
+        filtered = ("call", "FILTER", (("call", "ALL", tuple(planned.columns)), substitute(core)))
+        probe = argument
+        while probe is not core:  # KEEPFILTERS(..) stays around the table filter
+            filtered = ("call", "KEEPFILTERS", (filtered,))
+            probe = probe[2][0]
+        return False, filtered  # a table filter now: nothing left to pre-evaluate
+
+    def preevaluate_calculate_boolean_filter(argument: tuple[Any, ...]) -> tuple[Any, ...]:
+        # the rule of dax_ct_filters first: it also fixes shapes the older path answered without refusing (a CALCULATE-carrying X-iterator
+        # on the left of the comparison was evaluated per row there, where Power BI evaluates it once)
+        planned = plan_calculatetable_filter(argument) if dax_ct_filters.has_calculatetable(argument) else None
+        if planned is not None:
+            again, replaced = planned
+            return preevaluate_filter_scalars(replaced) if again else replaced
+        if dax_ct_filters.has_nested_transition_scalar(argument, _direct_column_references):
+            # fresh live probes: an X-iterator over CALCULATE(CALCULATE(..)) beside a column was answered per row by the older path; Power BI
+            # answered differently in 6 of 6 (CALCULATE(COUNTROWS(Facts), MAXX(ALL(Facts[Region]), CALCULATE(CALCULATE(..))) <= Facts[Quantity]))
+            raise _CalculateTableFilterRefusal("Nested CALCULATE inside a scalar next to a column of a True/False filter is not supported in the local engine.")
+        return preevaluate_filter_scalars(argument)
+
     def preevaluate_calculate_boolean_filters(
         arguments: tuple[tuple[Any, ...], ...],
         row_context: tuple[dict[str, Any], dict[str, Any], int] | None,
@@ -9604,7 +9715,7 @@ def evaluate_measures(
         if pushed:
             row_stack.append(row_context)  # type: ignore[arg-type]
         try:
-            return (arguments[0], *(in_row_expression(lambda argument=argument: preevaluate_filter_scalars(argument)) for argument in arguments[1:]))
+            return (arguments[0], *(in_row_expression(lambda argument=argument: preevaluate_calculate_boolean_filter(argument)) for argument in arguments[1:]))
         finally:
             if pushed:
                 row_stack.pop()
@@ -11090,6 +11201,8 @@ def evaluate_measures(
                     values.append(result if text_extreme and isinstance(result, str) else as_number(result))
                 elif function in {"MEDIANX", "PERCENTILEX.INC", "PERCENTILEX.EXC"}:
                     values.append(Decimal(0))  # these three count a blank result as zero
+            if function in {"SUMX", "AVERAGEX"} and _multiplies_by_constant_zero(arguments[1]) and any(isinstance(value, Decimal) and value.is_nan() for value in values):
+                raise MeasureError(f"{function} over a NaN beside a product with a constant zero is not supported in the local engine (Power BI may fold it to 0).")
             if function in dax_math.STAT_ITERATORS:
                 if any(isinstance(value, dax_dates.DaxDateTime) for value in values):
                     # live Power BI (iteration 84, critic): "MEDIANX does not support expressions of type string/Boolean/date"
@@ -11127,6 +11240,7 @@ def evaluate_measures(
                 arguments[1], (context, validation_row, 1)
             )
             count = 0
+            saw_nan = False
             for frame in iterate_rows(context, iteration_rows, "install"):
                 result = in_row_expression(lambda frame=frame: evaluate(
                     arguments[1], frame, allow_text=True
@@ -11135,9 +11249,14 @@ def evaluate_measures(
                     continue
                 if function == "COUNTX" and isinstance(result, bool):
                     raise MeasureError("The function COUNTX cannot work with values of type Boolean.")
+                if isinstance(result, Decimal) and result.is_nan():
+                    saw_nan = True  # live Power BI (iteration 86): 0/0 is not counted by COUNTX or COUNTAX (Infinity is), yet it is not blank
+                    continue
                 if isinstance(result, (Decimal, bool, str)):
                     count += 1
-            return Decimal(count) if count else None
+            if saw_nan and _multiplies_by_constant_zero(arguments[1]):
+                raise MeasureError(f"{function} over a NaN beside a product with a constant zero is not supported in the local engine (Power BI may fold it to 0).")
+            return Decimal(count) if count or saw_nan else None
         if function == "CALCULATE":
             if (
                 len(arguments) > 1 and arguments[0][0] == "call" and arguments[0][1] == "CALCULATE"

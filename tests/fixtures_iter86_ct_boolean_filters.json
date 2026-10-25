@@ -1,0 +1,1022 @@
+[
+ {
+  "expr": "CALCULATE(COUNTROWS(Facts),COUNTROWS(CALCULATETABLE(Facts,Facts[Region]=\"East\"))<Facts[Quantity])",
+  "powerbi": "4",
+  "group": "dax_battery_boolean_scalar_rhs",
+  "mode": "T"
+ },
+ {
+  "expr": "CALCULATE(COUNTROWS(Facts),MAXX(CALCULATETABLE(VALUES(Facts[Quantity]),Facts[Region]=\"East\"),Facts[Quantity])<Facts[Quantity])",
+  "powerbi": "BLANK",
+  "group": "dax_battery_boolean_scalar_rhs",
+  "mode": "H"
+ },
+ {
+  "expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]>COUNTROWS(CALCULATETABLE(Facts,ALL(Facts[Quantity]))))",
+  "powerbi": "BLANK",
+  "group": "dax_battery_boolean_scalar_rhs",
+  "mode": "T"
+ },
+ {
+  "expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]<=COUNTROWS(CALCULATETABLE(Facts,ALL(Facts[Quantity]))))",
+  "powerbi": "6",
+  "group": "dax_battery_boolean_scalar_rhs",
+  "mode": "T"
+ },
+ {
+  "expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]=COUNTROWS(CALCULATETABLE(Facts,ALL(Facts[Quantity]))))",
+  "powerbi": "BLANK",
+  "group": "dax_battery_boolean_scalar_rhs",
+  "mode": "T"
+ },
+ {
+  "expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]<>COUNTROWS(CALCULATETABLE(Facts,ALL(Facts[Quantity]))))",
+  "powerbi": "6",
+  "group": "dax_battery_boolean_scalar_rhs",
+  "mode": "T"
+ },
+ {
+  "expr": "CALCULATE(COUNTROWS(Facts),Facts[Region]=\"East\",Facts[Quantity]>COUNTROWS(CALCULATETABLE(Facts,ALL(Facts[Quantity]))))",
+  "powerbi": "BLANK",
+  "group": "dax_battery_boolean_scalar_rhs",
+  "mode": "T"
+ },
+ {
+  "expr": "CALCULATE(COUNTROWS(Facts),KEEPFILTERS(Facts[Quantity]>COUNTROWS(CALCULATETABLE(Facts,ALL(Facts[Quantity])))))",
+  "powerbi": "BLANK",
+  "group": "dax_battery_boolean_scalar_rhs",
+  "mode": "T"
+ },
+ {
+  "expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]<5,Facts[Quantity]>COUNTROWS(CALCULATETABLE(Facts,ALL(Facts[Quantity]))))",
+  "powerbi": "BLANK",
+  "group": "dax_battery_boolean_scalar_rhs",
+  "mode": "T"
+ },
+ {
+  "expr": "CALCULATE(SUM(Facts[Sales]),Facts[Quantity]>=COUNTROWS(CALCULATETABLE(Facts,ALL(Facts[Quantity]))))",
+  "powerbi": "BLANK",
+  "group": "dax_battery_boolean_scalar_rhs",
+  "mode": "T"
+ },
+ {
+  "expr": "CALCULATE(COUNTROWS(Facts),COUNTROWS(CALCULATETABLE(Facts,ALL(Facts[Quantity])))<Facts[Quantity])",
+  "powerbi": "BLANK",
+  "group": "dax_battery_boolean_scalar_rhs",
+  "mode": "T"
+ },
+ {
+  "expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]*2>COUNTROWS(CALCULATETABLE(Facts,ALL(Facts[Quantity])))+1)",
+  "powerbi": "2",
+  "group": "dax_battery_boolean_scalar_rhs",
+  "mode": "T"
+ },
+ {
+  "expr": "CALCULATE(COUNTROWS(Facts),ALL(Facts[Quantity]),Facts[Quantity]>COUNTROWS(CALCULATETABLE(Facts,ALL(Facts[Quantity]))))",
+  "powerbi": "BLANK",
+  "group": "dax_battery_boolean_scalar_rhs",
+  "mode": "T"
+ },
+ {
+  "expr": "CALCULATE(CALCULATE(COUNTROWS(Facts),Facts[Region]=\"East\"),Facts[Quantity]>COUNTROWS(CALCULATETABLE(Facts,ALL(Facts[Quantity]))))",
+  "powerbi": "BLANK",
+  "group": "dax_battery_boolean_scalar_rhs",
+  "mode": "T"
+ },
+ {
+  "expr": "CALCULATE(COUNTROWS(Facts),COUNTROWS(CALCULATETABLE(VALUES(Facts[Quantity]),Facts[Region]=\"West\"))<Facts[Quantity])",
+  "powerbi": "5",
+  "group": "dax_battery_boolean_scalar_rhs",
+  "mode": "T"
+ },
+ {
+  "expr": "CALCULATE(COUNTROWS(Facts),COUNTROWS(CALCULATETABLE(Facts,Facts[Quantity]>2))<Facts[Quantity])",
+  "powerbi": "2",
+  "group": "dax_battery_boolean_scalar_rhs",
+  "mode": "T"
+ },
+ {
+  "expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]>COUNTROWS(RELATEDTABLE(Facts)))",
+  "powerbi": "4",
+  "group": "dax_battery_boolean_filter_functions",
+  "mode": "T"
+ },
+ {
+  "expr": "CALCULATE(COUNTROWS(Facts),KEEPFILTERS(Facts[Quantity]>COUNTROWS(RELATEDTABLE(Facts))))",
+  "powerbi": "4",
+  "group": "dax_battery_boolean_filter_functions",
+  "mode": "T"
+ },
+ {
+  "expr": "CALCULATE(COUNTROWS(Facts),COUNTROWS(CALCULATETABLE(Facts,Facts[Region]=\"East\"))<Facts[Quantity])",
+  "powerbi": "4",
+  "group": "dax_battery_sdet_filters",
+  "mode": "T"
+ },
+ {
+  "expr": "CALCULATE(COUNTROWS(Facts),COUNTROWS(CALCULATETABLE(Facts,Facts[Region]=\"East\"))=Facts[Quantity])",
+  "powerbi": "2",
+  "group": "dax_battery_sdet_filters",
+  "mode": "T"
+ },
+ {
+  "expr": "CALCULATE(COUNTROWS(Facts),Facts[Region]=\"East\",Facts[Quantity]>COUNTROWS(CALCULATETABLE(Facts,ALL(Facts))))",
+  "powerbi": "BLANK",
+  "group": "dax_battery_sdet_filters",
+  "mode": "T"
+ },
+ {
+  "expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]+COUNTROWS(CALCULATETABLE(Facts,Facts[Region]=\"East\"))>5)",
+  "powerbi": "3",
+  "group": "dax_battery_sdet_filters",
+  "mode": "H"
+ },
+ {
+  "expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]>MAXX(CALCULATETABLE(Facts,Facts[Region]=\"East\"),Facts[Quantity])-Facts[Quantity])",
+  "powerbi": "3",
+  "group": "dax_battery_sdet_filters",
+  "mode": "H"
+ },
+ {
+  "expr": "CALCULATE(COUNTROWS(Facts),Facts[Region]=\"North\" || MAXX(CALCULATETABLE(Facts,Facts[Region]=\"East\"),Facts[Quantity])<Facts[Quantity])",
+  "powerbi": "1",
+  "group": "dax_battery_sdet_filters",
+  "mode": "H"
+ },
+ {
+  "expr": "CALCULATE(COUNTROWS(Facts),NOT(MAXX(CALCULATETABLE(Facts,Facts[Region]=\"East\"),Facts[Quantity])<Facts[Quantity]))",
+  "powerbi": "6",
+  "group": "dax_battery_sdet_filters",
+  "mode": "H"
+ },
+ {
+  "expr": "CALCULATE(COUNTROWS(Facts),KEEPFILTERS(MAXX(CALCULATETABLE(Facts,Facts[Region]=\"East\"),Facts[Quantity])<Facts[Quantity]))",
+  "powerbi": "BLANK",
+  "group": "dax_battery_sdet_filters",
+  "mode": "H"
+ },
+ {
+  "expr": "CALCULATE(COUNTROWS(Facts),KEEPFILTERS(MAXX(CALCULATETABLE(Facts,Facts[Region]=\"East\"),Facts[Quantity])>Facts[Quantity]))",
+  "powerbi": "5",
+  "group": "dax_battery_sdet_filters",
+  "mode": "H"
+ },
+ {
+  "expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]+COUNTROWS(CALCULATETABLE(Facts))>5)",
+  "powerbi": "1",
+  "group": "dax_battery_sdet_filters",
+  "mode": "T"
+ },
+ {
+  "expr": "CALCULATE(COUNTROWS(Facts),COUNTROWS(CALCULATETABLE(Facts,Facts[Region]=\"East\"))+Facts[Quantity]>5)",
+  "powerbi": "1",
+  "group": "dax_battery_sdet_filters",
+  "mode": "T"
+ },
+ {
+  "expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]-COUNTROWS(CALCULATETABLE(Facts,Facts[Region]=\"East\"))>1)",
+  "powerbi": "1",
+  "group": "dax_battery_sdet_filters",
+  "mode": "H"
+ },
+ {
+  "expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]*COUNTROWS(CALCULATETABLE(Facts,Facts[Region]=\"East\"))>5)",
+  "powerbi": "4",
+  "group": "dax_battery_sdet_filters",
+  "mode": "H"
+ },
+ {
+  "expr": "CALCULATE(COUNTROWS(Facts),ABS(Facts[Quantity]-COUNTROWS(CALCULATETABLE(Facts,Facts[Region]=\"East\")))>1)",
+  "powerbi": "3",
+  "group": "dax_battery_sdet_filters",
+  "mode": "H"
+ },
+ {
+  "expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]+MAXX(CALCULATETABLE(Facts,Facts[Region]=\"East\"),Facts[Quantity])>7)",
+  "powerbi": "3",
+  "group": "dax_battery_sdet_filters",
+  "mode": "H"
+ },
+ {
+  "expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]+SUMX(CALCULATETABLE(Facts,Facts[Region]=\"East\"),Facts[Quantity])>9)",
+  "powerbi": "4",
+  "group": "dax_battery_sdet_filters",
+  "mode": "H"
+ },
+ {
+  "expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]+AVERAGEX(CALCULATETABLE(Facts,Facts[Region]=\"East\"),Facts[Quantity])>5)",
+  "powerbi": "3",
+  "group": "dax_battery_sdet_filters",
+  "mode": "H"
+ },
+ {
+  "expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]>IF(Facts[Region]=\"East\",MAXX(CALCULATETABLE(Facts,Facts[Region]=\"East\"),Facts[Quantity]),0))",
+  "powerbi": "2",
+  "group": "dax_battery_sdet_filters",
+  "mode": "H"
+ },
+ {
+  "expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]>IF(Facts[Region]=\"East\",COUNTROWS(CALCULATETABLE(Facts,Facts[Region]=\"East\")),0))",
+  "powerbi": "3",
+  "group": "dax_battery_sdet_filters",
+  "mode": "H"
+ },
+ {
+  "expr": "CALCULATE(COUNTROWS(Facts),IF(Facts[Region]=\"East\",COUNTROWS(CALCULATETABLE(Facts,Facts[Region]=\"East\")),0)>2)",
+  "powerbi": "3",
+  "group": "dax_battery_sdet_filters",
+  "mode": "H"
+ },
+ {
+  "expr": "CALCULATE(COUNTROWS(Facts),Facts[Region]=\"East\" && Facts[Quantity]+COUNTROWS(CALCULATETABLE(Facts,Facts[Region]=\"East\"))>5)",
+  "powerbi": "1",
+  "group": "dax_battery_sdet_filters",
+  "mode": "H"
+ },
+ {
+  "expr": "CALCULATE(COUNTROWS(Facts),Facts[Region]=\"East\" || Facts[Quantity]+COUNTROWS(CALCULATETABLE(Facts,Facts[Region]=\"East\"))>5)",
+  "powerbi": "5",
+  "group": "dax_battery_sdet_filters",
+  "mode": "H"
+ },
+ {
+  "expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]+COUNTROWS(CALCULATETABLE(Facts,Facts[Region]=\"East\"))>5,Facts[Region]=\"East\")",
+  "powerbi": "1",
+  "group": "dax_battery_sdet_filters",
+  "mode": "H"
+ },
+ {
+  "expr": "CALCULATE(COUNTROWS(Facts),Facts[Sales]+Facts[Quantity]>MAXX(CALCULATETABLE(Facts,Facts[Region]=\"East\"),Facts[Quantity])-Facts[Quantity])",
+  "powerbi": "4",
+  "group": "dax_battery_sdet_filters",
+  "mode": "H"
+ },
+ {
+  "expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]>Facts[Quantity]-MAXX(CALCULATETABLE(Facts,Facts[Region]=\"East\"),Facts[Quantity]))",
+  "powerbi": "6",
+  "group": "dax_battery_sdet_filters",
+  "mode": "H"
+ },
+ {
+  "expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]-MAXX(CALCULATETABLE(Facts,Facts[Region]=\"East\"),Facts[Quantity])>-3)",
+  "powerbi": "3",
+  "group": "dax_battery_sdet_filters",
+  "mode": "H"
+ },
+ {
+  "expr": "CALCULATE(COUNTROWS(Facts),MAXX(CALCULATETABLE(Facts,Facts[Region]=\"East\"),Facts[Quantity])-Facts[Quantity]>2)",
+  "powerbi": "3",
+  "group": "dax_battery_sdet_filters",
+  "mode": "H"
+ },
+ {
+  "expr": "CALCULATE(COUNTROWS(Facts),MAXX(CALCULATETABLE(Facts,Facts[Region]=\"East\"),Facts[Quantity])>Facts[Quantity]+1)",
+  "powerbi": "4",
+  "group": "dax_battery_sdet_filters",
+  "mode": "H"
+ },
+ {
+  "expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]>MAXX(CALCULATETABLE(Facts,Facts[Region]=\"East\"),Facts[Quantity])/2+Facts[Quantity]/2)",
+  "powerbi": "BLANK",
+  "group": "dax_battery_sdet_filters",
+  "mode": "H"
+ },
+ {
+  "expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]<COUNTROWS(CALCULATETABLE(Facts)))",
+  "powerbi": "1",
+  "group": "dax_battery_sdet_filters",
+  "mode": "T"
+ },
+ {
+  "expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]<COUNTROWS(CALCULATETABLE(Facts,ALL(Facts[Quantity]))))",
+  "powerbi": "6",
+  "group": "dax_battery_sdet_filters",
+  "mode": "T"
+ },
+ {
+  "expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]+COUNTROWS(CALCULATETABLE(Facts))>0)",
+  "powerbi": "6",
+  "group": "dax_battery_sdet_filters",
+  "mode": "T"
+ },
+ {
+  "expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]+COUNTROWS(CALCULATETABLE(Facts))>1)",
+  "powerbi": "5",
+  "group": "dax_battery_sdet_filters",
+  "mode": "T"
+ },
+ {
+  "expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]+COUNTROWS(CALCULATETABLE(Facts,Facts[Quantity]>=0))>5)",
+  "powerbi": "6",
+  "group": "dax_battery_sdet_filters",
+  "mode": "H"
+ },
+ {
+  "expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]+COUNTROWS(CALCULATETABLE(Facts,Facts[Region]=\"East\"))>3)",
+  "powerbi": "5",
+  "group": "dax_battery_sdet_filters",
+  "mode": "H"
+ },
+ {
+  "expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]+COUNTROWS(CALCULATETABLE(Facts,Facts[Region]=\"East\"))>4)",
+  "powerbi": "4",
+  "group": "dax_battery_sdet_filters",
+  "mode": "H"
+ },
+ {
+  "expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]+COUNTROWS(CALCULATETABLE(Facts,Facts[Region]=\"East\"))>7)",
+  "powerbi": "1",
+  "group": "dax_battery_sdet_filters",
+  "mode": "H"
+ },
+ {
+  "expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]+COUNTROWS(CALCULATETABLE(Facts,Facts[Region]=\"East\"))>8)",
+  "powerbi": "BLANK",
+  "group": "dax_battery_sdet_filters",
+  "mode": "H"
+ },
+ {
+  "expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]+COUNTROWS(CALCULATETABLE(Facts,Facts[Region]=\"East\"))>9)",
+  "powerbi": "BLANK",
+  "group": "dax_battery_sdet_filters",
+  "mode": "H"
+ },
+ {
+  "expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]+COUNTROWS(CALCULATETABLE(Facts,Facts[Region]=\"East\"))<2)",
+  "powerbi": "BLANK",
+  "group": "dax_battery_sdet_filters",
+  "mode": "H"
+ },
+ {
+  "expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]+MAXX(CALCULATETABLE(Facts,Facts[Region]=\"East\"),Facts[Quantity])>8)",
+  "powerbi": "2",
+  "group": "dax_battery_sdet_filters",
+  "mode": "H"
+ },
+ {
+  "expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]+MAXX(CALCULATETABLE(Facts,Facts[Region]=\"East\"),Facts[Quantity])>9)",
+  "powerbi": "1",
+  "group": "dax_battery_sdet_filters",
+  "mode": "H"
+ },
+ {
+  "expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]+MAXX(CALCULATETABLE(Facts,Facts[Region]=\"East\"),Facts[Quantity])>10)",
+  "powerbi": "BLANK",
+  "group": "dax_battery_sdet_filters",
+  "mode": "H"
+ },
+ {
+  "expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]+MAXX(CALCULATETABLE(Facts,Facts[Region]=\"East\"),Facts[Quantity])>5)",
+  "powerbi": "5",
+  "group": "dax_battery_sdet_filters",
+  "mode": "H"
+ },
+ {
+  "expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]<COUNTROWS(CALCULATETABLE(Facts,ALL(Facts[Region]))))",
+  "powerbi": "1",
+  "group": "dax_battery_sdet_filters",
+  "mode": "T"
+ },
+ {
+  "expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]<COUNTROWS(CALCULATETABLE(Facts,REMOVEFILTERS(Facts[Region]))))",
+  "powerbi": "1",
+  "group": "dax_battery_sdet_filters",
+  "mode": "T"
+ },
+ {
+  "expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]<COUNTROWS(CALCULATETABLE(Facts,ALLEXCEPT(Facts,Facts[Quantity]))))",
+  "powerbi": "1",
+  "group": "dax_battery_sdet_filters",
+  "mode": "T"
+ },
+ {
+  "expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]<COUNTROWS(CALCULATETABLE(Facts,ALL(Facts))))",
+  "powerbi": "6",
+  "group": "dax_battery_sdet_filters",
+  "mode": "T"
+ },
+ {
+  "expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]<COUNTROWS(CALCULATETABLE(VALUES(Facts[Region]))))",
+  "powerbi": "1",
+  "group": "dax_battery_sdet_filters",
+  "mode": "T"
+ },
+ {
+  "expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]<COUNTROWS(CALCULATETABLE(ALL(Facts))))",
+  "powerbi": "6",
+  "group": "dax_battery_sdet_filters",
+  "mode": "T"
+ },
+ {
+  "expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]<MAXX(CALCULATETABLE(Facts),Facts[Quantity])-3)",
+  "powerbi": "2",
+  "group": "dax_battery_sdet_filters",
+  "mode": "H"
+ },
+ {
+  "expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]<MAXX(CALCULATETABLE(Facts),Facts[Quantity]))",
+  "powerbi": "5",
+  "group": "dax_battery_sdet_filters",
+  "mode": "H"
+ },
+ {
+  "expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]<SUMX(CALCULATETABLE(Facts),1))",
+  "powerbi": "6",
+  "group": "dax_battery_sdet_filters",
+  "mode": "H"
+ },
+ {
+  "expr": "CALCULATE(COUNTROWS(Facts),Facts[Region]<>BLANK(),Facts[Quantity]<COUNTROWS(CALCULATETABLE(Facts)))",
+  "powerbi": "1",
+  "group": "dax_battery_sdet_filters",
+  "mode": "T"
+ },
+ {
+  "expr": "CALCULATE(COUNTROWS(Facts),Facts[Region]=\"East\",Facts[Quantity]<COUNTROWS(CALCULATETABLE(Facts)))",
+  "powerbi": "BLANK",
+  "group": "dax_battery_sdet_filters",
+  "mode": "T"
+ },
+ {
+  "expr": "CALCULATE(COUNTROWS(Facts),Facts[Sales]<COUNTROWS(CALCULATETABLE(Facts)))",
+  "powerbi": "3",
+  "group": "dax_battery_sdet_filters",
+  "mode": "T"
+ },
+ {
+  "expr": "CALCULATE(COUNTROWS(Facts),Facts[Region]<>CONCATENATEX(CALCULATETABLE(Facts),Facts[Region],\"\"))",
+  "powerbi": "6",
+  "group": "dax_battery_sdet_filters",
+  "mode": "H"
+ },
+ {
+  "expr": "CALCULATE(COUNTROWS(Facts),Facts[Region]=MINX(CALCULATETABLE(Facts),Facts[Region]))",
+  "powerbi": "3",
+  "group": "dax_battery_sdet_filters",
+  "mode": "H"
+ },
+ {
+  "expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]<MAXX(CALCULATETABLE(Facts,ALL(Facts[Region])),Facts[Quantity]))",
+  "powerbi": "5",
+  "group": "dax_battery_sdet_filters",
+  "mode": "H"
+ },
+ {
+  "expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]<MAXX(CALCULATETABLE(Facts,KEEPFILTERS(Facts[Region]=\"East\")),Facts[Quantity]))",
+  "powerbi": "5",
+  "group": "dax_battery_sdet_filters",
+  "mode": "H"
+ },
+ {
+  "expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]<MAXX(CALCULATETABLE(VALUES(Facts[Quantity])),Facts[Quantity]))",
+  "powerbi": "5",
+  "group": "dax_battery_sdet_filters",
+  "mode": "H"
+ },
+ {
+  "expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]<COUNTX(CALCULATETABLE(Facts),Facts[Quantity]))",
+  "powerbi": "6",
+  "group": "dax_battery_sdet_filters",
+  "mode": "H"
+ },
+ {
+  "expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]<COUNTX(CALCULATETABLE(Facts,ALL(Facts[Region])),Facts[Sales]))",
+  "powerbi": "5",
+  "group": "dax_battery_sdet_filters",
+  "mode": "H"
+ },
+ {
+  "expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]<SUMX(CALCULATETABLE(Facts,ALL(Facts[Region])),1))",
+  "powerbi": "6",
+  "group": "dax_battery_sdet_filters",
+  "mode": "H"
+ },
+ {
+  "expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]<AVERAGEX(CALCULATETABLE(Facts,ALL(Facts[Region])),Facts[Quantity]))",
+  "powerbi": "3",
+  "group": "dax_battery_sdet_filters",
+  "mode": "H"
+ },
+ {
+  "expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]<COUNTROWS(CALCULATETABLE(Facts,ALL(Facts[Region]),Facts[Note]=\"Paid\")))",
+  "powerbi": "3",
+  "group": "dax_battery_sdet_filters",
+  "mode": "H"
+ },
+ {
+  "expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]>COUNTROWS(CALCULATETABLE(Facts)))",
+  "powerbi": "4",
+  "group": "dax_battery_round2",
+  "mode": "T"
+ },
+ {
+  "expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]>COUNTX(CALCULATETABLE(Facts),1))",
+  "powerbi": "BLANK",
+  "group": "dax_battery_round2",
+  "mode": "H"
+ },
+ {
+  "expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]<COUNTROWS(CALCULATETABLE(Facts))+COUNTROWS(CALCULATETABLE(Facts)))",
+  "powerbi": "2",
+  "group": "dax_battery_round2",
+  "mode": "T"
+ },
+ {
+  "expr": "CALCULATE(COUNTROWS(Facts),COUNTROWS(CALCULATETABLE(Facts))>Facts[Quantity])",
+  "powerbi": "1",
+  "group": "dax_battery_round2",
+  "mode": "T"
+ },
+ {
+  "expr": "CALCULATE(COUNTROWS(Facts),COUNTROWS(CALCULATETABLE(Facts))-1<Facts[Quantity])",
+  "powerbi": "5",
+  "group": "dax_battery_round2",
+  "mode": "T"
+ },
+ {
+  "expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]>SUMX(VALUES(Facts[Region]),COUNTROWS(CALCULATETABLE(Facts))))",
+  "powerbi": "BLANK",
+  "group": "dax_battery_round2",
+  "mode": "H"
+ },
+ {
+  "expr": "CALCULATE(COUNTROWS(Facts),KEEPFILTERS(Facts[Quantity]>COUNTROWS(CALCULATETABLE(Facts))))",
+  "powerbi": "4",
+  "group": "dax_battery_round2",
+  "mode": "T"
+ },
+ {
+  "expr": "CALCULATE(COUNTROWS(Facts),NOT(Facts[Quantity]>COUNTROWS(CALCULATETABLE(Facts))))",
+  "powerbi": "2",
+  "group": "dax_battery_round2",
+  "mode": "T"
+ },
+ {
+  "expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]>COUNTROWS(CALCULATETABLE(Facts))||Facts[Region]=\"East\")",
+  "powerbi": "5",
+  "group": "dax_battery_round2",
+  "mode": "T"
+ },
+ {
+  "expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]>COUNTROWS(CALCULATETABLE(VALUES(Facts[Region]),NOT(Facts[Region]=\"East\"))))",
+  "powerbi": "3",
+  "group": "dax_battery_round2",
+  "mode": "H"
+ },
+ {
+  "expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]>COUNTROWS(CALCULATETABLE(Facts,ALL(Facts[Region]))))",
+  "powerbi": "4",
+  "group": "dax_battery_round2",
+  "mode": "T"
+ },
+ {
+  "expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]>COUNTROWS(CALCULATETABLE(Facts,REMOVEFILTERS(Facts[Region]))))",
+  "powerbi": "4",
+  "group": "dax_battery_round2",
+  "mode": "T"
+ },
+ {
+  "expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]>COUNTROWS(CALCULATETABLE(Facts,ALLEXCEPT(Facts,Facts[Region]))))",
+  "powerbi": "BLANK",
+  "group": "dax_battery_round2",
+  "mode": "T"
+ },
+ {
+  "expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]*0+MAXX(CALCULATETABLE(Facts,Facts[Region]=\"East\"),Facts[Quantity])>3)",
+  "powerbi": "6",
+  "group": "dax_battery_critic_shapes",
+  "mode": "H"
+ },
+ {
+  "expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]*0+MAXX(CALCULATETABLE(Facts,Facts[Region]=\"East\"),Facts[Quantity])<=3)",
+  "powerbi": "BLANK",
+  "group": "dax_battery_critic_shapes",
+  "mode": "H"
+ },
+ {
+  "expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]*0+COUNTROWS(CALCULATETABLE(Facts,Facts[Region]=\"East\"))>3)",
+  "powerbi": "BLANK",
+  "group": "dax_battery_critic_shapes",
+  "mode": "H"
+ },
+ {
+  "expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]*0+COUNTROWS(CALCULATETABLE(Facts,Facts[Region]=\"East\"))<=3)",
+  "powerbi": "6",
+  "group": "dax_battery_critic_shapes",
+  "mode": "H"
+ },
+ {
+  "expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]*1+MAXX(CALCULATETABLE(Facts,Facts[Region]=\"East\"),Facts[Quantity])>3)",
+  "powerbi": "6",
+  "group": "dax_battery_critic_shapes",
+  "mode": "H"
+ },
+ {
+  "expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]*1+MAXX(CALCULATETABLE(Facts,Facts[Region]=\"East\"),Facts[Quantity])<=3)",
+  "powerbi": "BLANK",
+  "group": "dax_battery_critic_shapes",
+  "mode": "H"
+ },
+ {
+  "expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]*1+COUNTROWS(CALCULATETABLE(Facts,Facts[Region]=\"East\"))>3)",
+  "powerbi": "5",
+  "group": "dax_battery_critic_shapes",
+  "mode": "H"
+ },
+ {
+  "expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]*1+COUNTROWS(CALCULATETABLE(Facts,Facts[Region]=\"East\"))<=3)",
+  "powerbi": "1",
+  "group": "dax_battery_critic_shapes",
+  "mode": "H"
+ },
+ {
+  "expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]+MAXX(CALCULATETABLE(Facts,Facts[Region]=\"East\"),Facts[Quantity])>3)",
+  "powerbi": "6",
+  "group": "dax_battery_critic_shapes",
+  "mode": "H"
+ },
+ {
+  "expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]+MAXX(CALCULATETABLE(Facts,Facts[Region]=\"East\"),Facts[Quantity])<=3)",
+  "powerbi": "BLANK",
+  "group": "dax_battery_critic_shapes",
+  "mode": "H"
+ },
+ {
+  "expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]+COUNTROWS(CALCULATETABLE(Facts,Facts[Region]=\"East\"))>3)",
+  "powerbi": "5",
+  "group": "dax_battery_critic_shapes",
+  "mode": "H"
+ },
+ {
+  "expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]+COUNTROWS(CALCULATETABLE(Facts,Facts[Region]=\"East\"))<=3)",
+  "powerbi": "1",
+  "group": "dax_battery_critic_shapes",
+  "mode": "H"
+ },
+ {
+  "expr": "CALCULATE(COUNTROWS(Facts),0*Facts[Quantity]+MAXX(CALCULATETABLE(Facts,Facts[Region]=\"East\"),Facts[Quantity])>3)",
+  "powerbi": "6",
+  "group": "dax_battery_critic_shapes",
+  "mode": "H"
+ },
+ {
+  "expr": "CALCULATE(COUNTROWS(Facts),0*Facts[Quantity]+MAXX(CALCULATETABLE(Facts,Facts[Region]=\"East\"),Facts[Quantity])<=3)",
+  "powerbi": "BLANK",
+  "group": "dax_battery_critic_shapes",
+  "mode": "H"
+ },
+ {
+  "expr": "CALCULATE(COUNTROWS(Facts),0*Facts[Quantity]+COUNTROWS(CALCULATETABLE(Facts,Facts[Region]=\"East\"))>3)",
+  "powerbi": "BLANK",
+  "group": "dax_battery_critic_shapes",
+  "mode": "H"
+ },
+ {
+  "expr": "CALCULATE(COUNTROWS(Facts),0*Facts[Quantity]+COUNTROWS(CALCULATETABLE(Facts,Facts[Region]=\"East\"))<=3)",
+  "powerbi": "6",
+  "group": "dax_battery_critic_shapes",
+  "mode": "H"
+ },
+ {
+  "expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]*2-MAXX(CALCULATETABLE(Facts,Facts[Region]=\"East\"),Facts[Quantity])>3)",
+  "powerbi": "1",
+  "group": "dax_battery_critic_shapes",
+  "mode": "H"
+ },
+ {
+  "expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]*2-MAXX(CALCULATETABLE(Facts,Facts[Region]=\"East\"),Facts[Quantity])<=3)",
+  "powerbi": "5",
+  "group": "dax_battery_critic_shapes",
+  "mode": "H"
+ },
+ {
+  "expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]*2-COUNTROWS(CALCULATETABLE(Facts,Facts[Region]=\"East\"))>3)",
+  "powerbi": "2",
+  "group": "dax_battery_critic_shapes",
+  "mode": "H"
+ },
+ {
+  "expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]*2-COUNTROWS(CALCULATETABLE(Facts,Facts[Region]=\"East\"))<=3)",
+  "powerbi": "4",
+  "group": "dax_battery_critic_shapes",
+  "mode": "H"
+ },
+ {
+  "expr": "CALCULATE(COUNTROWS(Facts),ABS(Facts[Quantity])+MAXX(CALCULATETABLE(Facts,Facts[Region]=\"East\"),Facts[Quantity])>3)",
+  "powerbi": "6",
+  "group": "dax_battery_critic_shapes",
+  "mode": "H"
+ },
+ {
+  "expr": "CALCULATE(COUNTROWS(Facts),ABS(Facts[Quantity])+MAXX(CALCULATETABLE(Facts,Facts[Region]=\"East\"),Facts[Quantity])<=3)",
+  "powerbi": "BLANK",
+  "group": "dax_battery_critic_shapes",
+  "mode": "H"
+ },
+ {
+  "expr": "CALCULATE(COUNTROWS(Facts),ABS(Facts[Quantity])+COUNTROWS(CALCULATETABLE(Facts,Facts[Region]=\"East\"))>3)",
+  "powerbi": "5",
+  "group": "dax_battery_critic_shapes",
+  "mode": "H"
+ },
+ {
+  "expr": "CALCULATE(COUNTROWS(Facts),ABS(Facts[Quantity])+COUNTROWS(CALCULATETABLE(Facts,Facts[Region]=\"East\"))<=3)",
+  "powerbi": "1",
+  "group": "dax_battery_critic_shapes",
+  "mode": "H"
+ },
+ {
+  "expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]>MAXX(CALCULATETABLE(Facts,Facts[Region]=\"West\"),Facts[Quantity])+Facts[Quantity])",
+  "powerbi": "BLANK",
+  "group": "dax_battery_critic_shapes",
+  "mode": "H"
+ },
+ {
+  "expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]*COUNTROWS(CALCULATETABLE(Facts,Facts[Region]=\"East\"))>8)",
+  "powerbi": "3",
+  "group": "dax_battery_round3",
+  "mode": "H"
+ },
+ {
+  "expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]*COUNTROWS(CALCULATETABLE(Facts,Facts[Region]=\"East\"))<8)",
+  "powerbi": "3",
+  "group": "dax_battery_round3",
+  "mode": "H"
+ },
+ {
+  "expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]*COUNTROWS(CALCULATETABLE(Facts,Facts[Region]=\"East\"))=8)",
+  "powerbi": "BLANK",
+  "group": "dax_battery_round3",
+  "mode": "H"
+ },
+ {
+  "expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]*COUNTROWS(CALCULATETABLE(Facts,Facts[Region]=\"East\"))>=8)",
+  "powerbi": "3",
+  "group": "dax_battery_round3",
+  "mode": "H"
+ },
+ {
+  "expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]*COUNTROWS(CALCULATETABLE(Facts,Facts[Region]=\"East\"))<=8)",
+  "powerbi": "3",
+  "group": "dax_battery_round3",
+  "mode": "H"
+ },
+ {
+  "expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]*COUNTROWS(CALCULATETABLE(Facts,Facts[Region]=\"East\"))<>8)",
+  "powerbi": "6",
+  "group": "dax_battery_round3",
+  "mode": "H"
+ },
+ {
+  "expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]+SUMX(CALCULATETABLE(Facts),Facts[Quantity])>8)",
+  "powerbi": "6",
+  "group": "dax_battery_round3",
+  "mode": "H"
+ },
+ {
+  "expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]+SUMX(CALCULATETABLE(Facts),Facts[Quantity])<8)",
+  "powerbi": "BLANK",
+  "group": "dax_battery_round3",
+  "mode": "H"
+ },
+ {
+  "expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]+SUMX(CALCULATETABLE(Facts),Facts[Quantity])=8)",
+  "powerbi": "BLANK",
+  "group": "dax_battery_round3",
+  "mode": "H"
+ },
+ {
+  "expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]+SUMX(CALCULATETABLE(Facts),Facts[Quantity])>=8)",
+  "powerbi": "6",
+  "group": "dax_battery_round3",
+  "mode": "H"
+ },
+ {
+  "expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]+SUMX(CALCULATETABLE(Facts),Facts[Quantity])<=8)",
+  "powerbi": "BLANK",
+  "group": "dax_battery_round3",
+  "mode": "H"
+ },
+ {
+  "expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]+SUMX(CALCULATETABLE(Facts),Facts[Quantity])<>8)",
+  "powerbi": "6",
+  "group": "dax_battery_round3",
+  "mode": "H"
+ },
+ {
+  "expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]+COUNTROWS(CALCULATETABLE(Facts,Facts[Region]=\"East\"))>7)",
+  "powerbi": "1",
+  "group": "dax_battery_round3",
+  "mode": "H"
+ },
+ {
+  "expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]+COUNTROWS(CALCULATETABLE(Facts))>7)",
+  "powerbi": "BLANK",
+  "group": "dax_battery_round3",
+  "mode": "T"
+ },
+ {
+  "expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]>COUNTROWS(CALCULATETABLE(Facts))-1)",
+  "powerbi": "5",
+  "group": "dax_battery_round3",
+  "mode": "T"
+ },
+ {
+  "expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]+COUNTROWS(CALCULATETABLE(Facts,ALL(Facts)))>7)",
+  "powerbi": "4",
+  "group": "dax_battery_round3",
+  "mode": "T"
+ },
+ {
+  "expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]>COUNTROWS(CALCULATETABLE(Facts,ALL(Facts)))-1)",
+  "powerbi": "BLANK",
+  "group": "dax_battery_round3",
+  "mode": "T"
+ },
+ {
+  "expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]>COUNTROWS(RELATEDTABLE(Facts))-1)",
+  "powerbi": "5",
+  "group": "dax_battery_round3",
+  "mode": "T"
+ },
+ {
+  "expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]+COUNTROWS(RELATEDTABLE(Facts))>5)",
+  "powerbi": "1",
+  "group": "dax_battery_round3",
+  "mode": "T"
+ },
+ {
+  "expr": "COUNTROWS(CALCULATETABLE(Facts,Facts[Quantity]>COUNTROWS(CALCULATETABLE(Facts))))",
+  "powerbi": "4",
+  "group": "dax_battery_round3",
+  "mode": "T"
+ },
+ {
+  "expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]<COUNTROWS(DISTINCT(CALCULATETABLE(Facts))))",
+  "powerbi": "1",
+  "group": "dax_battery_sdet_filters",
+  "mode": "?"
+ },
+ {
+  "expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]<COUNTROWS(DISTINCT(CALCULATETABLE(VALUES(Facts[Region])))))",
+  "powerbi": "1",
+  "group": "dax_battery_sdet_filters",
+  "mode": "?"
+ },
+ {
+  "expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]*0+SUMX(VALUES(Facts[Region]),CALCULATE(SUM(Facts[Quantity])))>3)",
+  "powerbi": "6",
+  "group": "dax_battery_critic_shapes",
+  "mode": "?"
+ },
+ {
+  "expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]*0+SUMX(VALUES(Facts[Region]),CALCULATE(SUM(Facts[Quantity])))<=3)",
+  "powerbi": "BLANK",
+  "group": "dax_battery_critic_shapes",
+  "mode": "?"
+ },
+ {
+  "expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]*0+SUMX(Facts,CALCULATE(SUM(Facts[Quantity])))>3)",
+  "powerbi": "6",
+  "group": "dax_battery_critic_shapes",
+  "mode": "?"
+ },
+ {
+  "expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]*0+SUMX(Facts,CALCULATE(SUM(Facts[Quantity])))<=3)",
+  "powerbi": "BLANK",
+  "group": "dax_battery_critic_shapes",
+  "mode": "?"
+ },
+ {
+  "expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]*1+SUMX(VALUES(Facts[Region]),CALCULATE(SUM(Facts[Quantity])))>3)",
+  "powerbi": "6",
+  "group": "dax_battery_critic_shapes",
+  "mode": "?"
+ },
+ {
+  "expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]*1+SUMX(VALUES(Facts[Region]),CALCULATE(SUM(Facts[Quantity])))<=3)",
+  "powerbi": "BLANK",
+  "group": "dax_battery_critic_shapes",
+  "mode": "?"
+ },
+ {
+  "expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]*1+SUMX(Facts,CALCULATE(SUM(Facts[Quantity])))>3)",
+  "powerbi": "6",
+  "group": "dax_battery_critic_shapes",
+  "mode": "?"
+ },
+ {
+  "expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]*1+SUMX(Facts,CALCULATE(SUM(Facts[Quantity])))<=3)",
+  "powerbi": "BLANK",
+  "group": "dax_battery_critic_shapes",
+  "mode": "?"
+ },
+ {
+  "expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]+SUMX(VALUES(Facts[Region]),CALCULATE(SUM(Facts[Quantity])))>3)",
+  "powerbi": "6",
+  "group": "dax_battery_critic_shapes",
+  "mode": "?"
+ },
+ {
+  "expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]+SUMX(VALUES(Facts[Region]),CALCULATE(SUM(Facts[Quantity])))<=3)",
+  "powerbi": "BLANK",
+  "group": "dax_battery_critic_shapes",
+  "mode": "?"
+ },
+ {
+  "expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]+SUMX(Facts,CALCULATE(SUM(Facts[Quantity])))>3)",
+  "powerbi": "6",
+  "group": "dax_battery_critic_shapes",
+  "mode": "?"
+ },
+ {
+  "expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]+SUMX(Facts,CALCULATE(SUM(Facts[Quantity])))<=3)",
+  "powerbi": "BLANK",
+  "group": "dax_battery_critic_shapes",
+  "mode": "?"
+ },
+ {
+  "expr": "CALCULATE(COUNTROWS(Facts),0*Facts[Quantity]+SUMX(VALUES(Facts[Region]),CALCULATE(SUM(Facts[Quantity])))>3)",
+  "powerbi": "6",
+  "group": "dax_battery_critic_shapes",
+  "mode": "?"
+ },
+ {
+  "expr": "CALCULATE(COUNTROWS(Facts),0*Facts[Quantity]+SUMX(VALUES(Facts[Region]),CALCULATE(SUM(Facts[Quantity])))<=3)",
+  "powerbi": "BLANK",
+  "group": "dax_battery_critic_shapes",
+  "mode": "?"
+ },
+ {
+  "expr": "CALCULATE(COUNTROWS(Facts),0*Facts[Quantity]+SUMX(Facts,CALCULATE(SUM(Facts[Quantity])))>3)",
+  "powerbi": "6",
+  "group": "dax_battery_critic_shapes",
+  "mode": "?"
+ },
+ {
+  "expr": "CALCULATE(COUNTROWS(Facts),0*Facts[Quantity]+SUMX(Facts,CALCULATE(SUM(Facts[Quantity])))<=3)",
+  "powerbi": "BLANK",
+  "group": "dax_battery_critic_shapes",
+  "mode": "?"
+ },
+ {
+  "expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]*2-SUMX(VALUES(Facts[Region]),CALCULATE(SUM(Facts[Quantity])))>3)",
+  "powerbi": "BLANK",
+  "group": "dax_battery_critic_shapes",
+  "mode": "?"
+ },
+ {
+  "expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]*2-SUMX(VALUES(Facts[Region]),CALCULATE(SUM(Facts[Quantity])))<=3)",
+  "powerbi": "6",
+  "group": "dax_battery_critic_shapes",
+  "mode": "?"
+ },
+ {
+  "expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]*2-SUMX(Facts,CALCULATE(SUM(Facts[Quantity])))>3)",
+  "powerbi": "BLANK",
+  "group": "dax_battery_critic_shapes",
+  "mode": "?"
+ },
+ {
+  "expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]*2-SUMX(Facts,CALCULATE(SUM(Facts[Quantity])))<=3)",
+  "powerbi": "6",
+  "group": "dax_battery_critic_shapes",
+  "mode": "?"
+ },
+ {
+  "expr": "CALCULATE(COUNTROWS(Facts),ABS(Facts[Quantity])+SUMX(VALUES(Facts[Region]),CALCULATE(SUM(Facts[Quantity])))>3)",
+  "powerbi": "6",
+  "group": "dax_battery_critic_shapes",
+  "mode": "?"
+ },
+ {
+  "expr": "CALCULATE(COUNTROWS(Facts),ABS(Facts[Quantity])+SUMX(VALUES(Facts[Region]),CALCULATE(SUM(Facts[Quantity])))<=3)",
+  "powerbi": "BLANK",
+  "group": "dax_battery_critic_shapes",
+  "mode": "?"
+ },
+ {
+  "expr": "CALCULATE(COUNTROWS(Facts),ABS(Facts[Quantity])+SUMX(Facts,CALCULATE(SUM(Facts[Quantity])))>3)",
+  "powerbi": "6",
+  "group": "dax_battery_critic_shapes",
+  "mode": "?"
+ },
+ {
+  "expr": "CALCULATE(COUNTROWS(Facts),ABS(Facts[Quantity])+SUMX(Facts,CALCULATE(SUM(Facts[Quantity])))<=3)",
+  "powerbi": "BLANK",
+  "group": "dax_battery_critic_shapes",
+  "mode": "?"
+ },
+ {
+  "expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]+SUMX(Facts,CALCULATE(SUM(Facts[Quantity])))>16)",
+  "powerbi": "4",
+  "group": "dax_battery_round3",
+  "mode": "?"
+ },
+ {
+  "expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]+SUMX(ALL(Facts[Region]),CALCULATE(SUM(Facts[Quantity])))>16)",
+  "powerbi": "4",
+  "group": "dax_battery_round3",
+  "mode": "?"
+ }
+]

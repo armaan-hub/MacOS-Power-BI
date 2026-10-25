@@ -1,0 +1,127 @@
+[
+ {
+  "expr": "COUNTX(Facts,(Facts[Quantity]>1)*1)",
+  "powerbi": "6",
+  "group": "dax_battery_comments_booleans"
+ },
+ {
+  "expr": "COUNTX(Facts,(Facts[Quantity]>1)+0)",
+  "powerbi": "6",
+  "group": "dax_battery_comments_booleans"
+ },
+ {
+  "expr": "COUNTX(Facts,INT(Facts[Quantity]>1))",
+  "powerbi": "6",
+  "group": "dax_battery_comments_booleans"
+ },
+ {
+  "expr": "COUNTX(Facts,-(Facts[Quantity]>1))",
+  "powerbi": "6",
+  "group": "dax_battery_comments_booleans"
+ },
+ {
+  "expr": "COUNTX(Facts,ABS(Facts[Quantity]>1))",
+  "powerbi": "6",
+  "group": "dax_battery_comments_booleans"
+ },
+ {
+  "expr": "COUNTAX(Facts,(Facts[Quantity]>1)*1)",
+  "powerbi": "6",
+  "group": "dax_battery_comments_booleans"
+ },
+ {
+  "expr": "COUNTAX(Facts,(Facts[Quantity]>1)+0)",
+  "powerbi": "6",
+  "group": "dax_battery_comments_booleans"
+ },
+ {
+  "expr": "COUNTAX(Facts,INT(Facts[Quantity]>1))",
+  "powerbi": "6",
+  "group": "dax_battery_comments_booleans"
+ },
+ {
+  "expr": "COUNTAX(Facts,-(Facts[Quantity]>1))",
+  "powerbi": "6",
+  "group": "dax_battery_comments_booleans"
+ },
+ {
+  "expr": "COUNTAX(Facts,ABS(Facts[Quantity]>1))",
+  "powerbi": "6",
+  "group": "dax_battery_comments_booleans"
+ },
+ {
+  "expr": "MAXX(Facts,(Facts[Quantity]>1)*1)",
+  "powerbi": "1",
+  "group": "dax_battery_comments_booleans"
+ },
+ {
+  "expr": "MAXX(Facts,(Facts[Quantity]>1)+0)",
+  "powerbi": "1",
+  "group": "dax_battery_comments_booleans"
+ },
+ {
+  "expr": "MAXX(Facts,INT(Facts[Quantity]>1))",
+  "powerbi": "1",
+  "group": "dax_battery_comments_booleans"
+ },
+ {
+  "expr": "MAXX(Facts,-(Facts[Quantity]>1))",
+  "powerbi": "0",
+  "group": "dax_battery_comments_booleans"
+ },
+ {
+  "expr": "MAXX(Facts,ABS(Facts[Quantity]>1))",
+  "powerbi": "1",
+  "group": "dax_battery_comments_booleans"
+ },
+ {
+  "expr": "MINX(Facts,(Facts[Quantity]>1)*1)",
+  "powerbi": "0",
+  "group": "dax_battery_comments_booleans"
+ },
+ {
+  "expr": "MINX(Facts,(Facts[Quantity]>1)+0)",
+  "powerbi": "0",
+  "group": "dax_battery_comments_booleans"
+ },
+ {
+  "expr": "MINX(Facts,INT(Facts[Quantity]>1))",
+  "powerbi": "0",
+  "group": "dax_battery_comments_booleans"
+ },
+ {
+  "expr": "MINX(Facts,-(Facts[Quantity]>1))",
+  "powerbi": "-1",
+  "group": "dax_battery_comments_booleans"
+ },
+ {
+  "expr": "MINX(Facts,ABS(Facts[Quantity]>1))",
+  "powerbi": "0",
+  "group": "dax_battery_comments_booleans"
+ },
+ {
+  "expr": "COUNTX(ADDCOLUMNS(Facts,\"f\",Facts[Quantity]>1),[f]*1)",
+  "powerbi": "6",
+  "group": "dax_battery_round2_scope"
+ },
+ {
+  "expr": "COUNTAX(ADDCOLUMNS(Facts,\"f\",Facts[Quantity]>1),[f]*1)",
+  "powerbi": "6",
+  "group": "dax_battery_round2_scope"
+ },
+ {
+  "expr": "MAXX(ADDCOLUMNS(Facts,\"f\",Facts[Quantity]>1),[f]*1)",
+  "powerbi": "1",
+  "group": "dax_battery_round2_scope"
+ },
+ {
+  "expr": "MINX(ADDCOLUMNS(Facts,\"f\",Facts[Quantity]>1),[f]*1)",
+  "powerbi": "0",
+  "group": "dax_battery_round2_scope"
+ },
+ {
+  "expr": "COUNTAX(Facts,IF(Facts[Quantity]>99,+(Facts[Quantity]>1)))",
+  "powerbi": "6",
+  "group": "dax_battery_round3"
+ }
+]
