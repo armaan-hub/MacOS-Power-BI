@@ -5187,6 +5187,30 @@ def evaluate_measures(
         return with_column_filters(own, lambda: with_column_filters(hidden_keys, lambda: with_column_filters(
             hidden, lambda: with_column_filters(visible, lambda: evaluate(expression), False), True), True), "keys")
 
+    def is_variant_column_expression(expression: tuple[Any, ...], frame: Any, inherited: Iterable[str]) -> bool:
+        """Whether a column added by ADDCOLUMNS / SELECTCOLUMNS is a Variant in Power BI: an IF / SWITCH / COALESCE / IFERROR whose
+        branches differ in type (text beside a number, a True/False beside a number ...), or one that reads such a column.  The type
+        is that of the branches, not of the values the rows happen to hold (live probes, iteration 85)."""
+        if any(str(reference[2]).casefold() in inherited for reference in _iter_reference_nodes(expression) if len(reference) > 2):
+            return True
+        if expression[0] != "call" or expression[1] not in {"IF", "SWITCH", "COALESCE", "IFERROR"}:
+            return False
+        try:
+            if expression[1] == "COALESCE":  # the category of a COALESCE is that of its first argument; every argument counts here
+                merge_branch_categories([iterator_expression_category(argument, frame) for argument in expression[2]], "COALESCE")
+            else:
+                iterator_expression_category(expression, frame)
+        except MeasureError as error:
+            return "matching local data types" in str(error) or "same local data type" in str(error)
+        return False
+
+    def refuse_variant_aggregation(function: str, context: dict[str, Any], expression: tuple[Any, ...]) -> None:
+        """MAXX / MINX / SUMX / AVERAGEX / COUNTX over a Variant column read only its numbers (live Power BI, iteration 85); the local
+        engine reads the values of the rows instead, which gave wrong answers, so it refuses."""
+        variant = context.get("variant_columns")
+        if variant and any(str(reference[2]).casefold() in variant for reference in _iter_reference_nodes(expression) if len(reference) > 2):
+            raise MeasureError(f"{function} over a column whose branches have different types is not supported in the local engine.")
+
     def table_function_rows(argument: tuple[Any, ...]) -> tuple[dict[str, Any], list[dict[str, Any]]]:
         nonlocal eff_touched
         function, arguments = argument[1], argument[2]
@@ -5252,6 +5276,13 @@ def evaluate_measures(
             selected_context, selected_rows = derived_table(
                 headers, out_rows, lineage, {k: v for k, v in types.items() if k in headers}, row_identity=add and not context.get("derived", False) or add and bool(context.get("row_identity")),
             )
+            variant_columns = set(context.get("variant_columns", ())) if add else set()
+            if rows:
+                for name, expression in zip(names, expressions):
+                    if is_variant_column_expression(expression, (context, rows[0], 1), context.get("variant_columns", ())):
+                        variant_columns.add(name.casefold())
+            if variant_columns:
+                selected_context["variant_columns"] = frozenset(variant_columns)
             if not add:  # the walk order of a selected column is that of the columns it was computed from
                 selected_context["selected_columns"] = True
                 selected_context["order_source"] = (context, {id(out): source for out, source in zip(out_rows, source_rows)})
@@ -11024,6 +11055,10 @@ def evaluate_measures(
                     raise MeasureError(f"{error} The iterator body also reads a column by table name, which the local engine cannot validate first.") from error
                 raise
             refuse_one_to_one_values_iteration(arguments[0])
+            refuse_variant_aggregation(function, context, arguments[1])
+            # live Power BI (iteration 85): SUMX / AVERAGEX of an IF / SWITCH whose branches differ in type read only its numbers; a row that
+            # yields text counts for nothing (never the number the text happens to spell, FORMAT(1,"00") is not 1), so those rows are refused
+            mixed_branches = bool(iteration_rows) and function not in {"MAXX", "MINX"} and is_variant_column_expression(arguments[1], (context, iteration_rows[0], 1), ())
             if not iteration_rows:
                 refuse_foreign_columns_of_empty_set(context, arguments[1])
             if function in {"MAXX", "MINX"}:
@@ -11043,6 +11078,8 @@ def evaluate_measures(
                     raise MeasureError(f"The function {function} cannot work with values of type Boolean.")
                 if isinstance(result, str) and arguments[1][0] == "reference" and function not in {"MAXX", "MINX"}:
                     raise MeasureError(f"The function {function} cannot work with values of type String.")  # a text column, even of digits
+                if isinstance(result, str) and mixed_branches:
+                    raise MeasureError(f"{function} over text from an expression whose branches have different types is not supported in the local engine.")
                 if result is not None:
                     values.append(result if text_extreme and isinstance(result, str) else as_number(result))
                 elif function in {"MEDIANX", "PERCENTILEX.INC", "PERCENTILEX.EXC"}:
@@ -11075,6 +11112,8 @@ def evaluate_measures(
             return result
         if function in {"COUNTX", "COUNTAX"}:
             context, iteration_rows = table_argument_value(arguments[0])
+            if function == "COUNTX":
+                refuse_variant_aggregation(function, context, arguments[1])
             if not iteration_rows:
                 refuse_foreign_columns_of_empty_set(context, arguments[1])
             validation_row = iteration_rows[0] if iteration_rows else {}
@@ -11516,18 +11555,18 @@ def evaluate_measures(
         if function in _RANK_ARITY:
             return evaluate_rank_function(function, arguments, row_context)
         if function == "SWITCH":
-            subject = _consume_infinity(lambda: evaluate(arguments[0], row_context))
+            subject = _consume_infinity(lambda: evaluate(arguments[0], row_context, allow_text=True, allow_boolean=allow_boolean))
             remaining = list(arguments[1:])
             fallback = remaining.pop() if len(remaining) % 2 else None
             matched_level = len(remaining) // 2 - 1  # a miss falls through to the last nested IF's else
             untaken = list(remaining[1::2]) + ([] if fallback is None else [fallback])
             for level, (candidate, result) in enumerate(zip(remaining[::2], remaining[1::2])):
-                candidate_value = _consume_infinity(lambda: evaluate(candidate, row_context))
+                candidate_value = _consume_infinity(lambda: evaluate(candidate, row_context, allow_text=True, allow_boolean=allow_boolean))
                 if candidate_value is None and subject is not None and _numeric_by_construction(candidate):
                     # live Power BI: a BLANK number is still a number, and SWITCH reports a number compared with a True/False or text subject
                     raise MeasureError("A SWITCH value that is BLANK cannot be type-checked against the subject in the local engine.")
                 if dax_typed.values_match(subject, candidate_value):
-                    value = evaluate(result, row_context)
+                    value = evaluate(result, row_context, allow_text=allow_text, allow_boolean=allow_boolean)
                     matched_level = level
                     # the candidates after the match and every other result and the fallback are branches Power BI still validates
                     untaken = list(remaining[2 * level + 2:]) + [
@@ -11549,7 +11588,7 @@ def evaluate_measures(
                             raise MeasureError("SWITCH cannot compare values of different types.")
                     break
             else:
-                value = None if fallback is None else evaluate(fallback, row_context)
+                value = None if fallback is None else evaluate(fallback, row_context, allow_text=allow_text, allow_boolean=allow_boolean)
                 untaken = list(remaining[1::2])
             probe_untaken_branches(untaken, row_context)
             if value is None:

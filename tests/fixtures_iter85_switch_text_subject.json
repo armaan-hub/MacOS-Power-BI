@@ -1,0 +1,3087 @@
+[
+{
+"expr": "COUNTROWS(FILTER(Facts,SWITCH(Facts[Region],\"East\",Facts[Quantity]>1)))",
+"powerbi": "2",
+"group": "dax_battery_round3"
+},
+{
+"expr": "COUNTAX(Facts,SWITCH(Facts[Region],\"East\",Facts[Quantity]>1))",
+"powerbi": "6",
+"group": "dax_battery_round3"
+},
+{
+"expr": "SUMX(Facts,IF(SWITCH(Facts[Region],\"East\",Facts[Quantity]>1),1,0))",
+"powerbi": "2",
+"group": "dax_battery_round3"
+},
+{
+"expr": "CALCULATE(COUNTROWS(Facts),FILTER(ALL(Facts),SWITCH(Facts[Region],\"East\",Facts[Quantity]>1)))",
+"powerbi": "2",
+"group": "dax_battery_round3"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Region],\"East\",Facts[Quantity]>1),\",\",Facts[Quantity])",
+"powerbi": "FALSE,FALSE,TRUE,FALSE,FALSE,TRUE",
+"group": "dax_battery_round3"
+},
+{
+"expr": "COUNTROWS(FILTER(Facts,NOT(SWITCH(Facts[Region],\"East\",Facts[Quantity]>1))))",
+"powerbi": "4",
+"group": "dax_battery_round3"
+},
+{
+"expr": "SUMX(Facts,IF(ISBLANK(SWITCH(Facts[Region],\"East\",Facts[Quantity]>1)),1,0))",
+"powerbi": "0",
+"group": "dax_battery_round3"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Quantity],1,Facts[Quantity]>2,Facts[Note]),\"|\",Facts[Quantity])",
+"powerbi": "Paid|FALSE|Paid||Late|",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Quantity],1,BLANK(),Facts[Note]),\"|\",Facts[Quantity])",
+"powerbi": "Paid||Paid||Late|",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Quantity],1,Facts[Sales],Facts[Note]),\"|\",Facts[Quantity])",
+"powerbi": "Paid|-1.5|Paid||Late|",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Quantity],1,1,Facts[Note]),\"|\",Facts[Quantity])",
+"powerbi": "Paid|1|Paid||Late|",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Quantity],1,Facts[Note]),\"|\",Facts[Quantity])",
+"powerbi": "|Paid||||",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Quantity],1,Facts[Note],Facts[Quantity]>2),\"|\",Facts[Quantity])",
+"powerbi": "FALSE|Paid|FALSE|TRUE|TRUE|TRUE",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Quantity],1,Facts[Note],BLANK()),\"|\",Facts[Quantity])",
+"powerbi": "|Paid||||",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Quantity],1,Facts[Note],Facts[Sales]),\"|\",Facts[Quantity])",
+"powerbi": "0|Paid|10.5|20||2.5",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Quantity],1,Facts[Note],1),\"|\",Facts[Quantity])",
+"powerbi": "1|Paid|1|1|1|1",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Quantity],1,Facts[Note],Facts[Note]),\"|\",Facts[Quantity])",
+"powerbi": "Paid|Paid|Paid||Late|",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Quantity],1,Facts[Note],ISBLANK(Facts[Note])),\"|\",Facts[Quantity])",
+"powerbi": "FALSE|Paid|FALSE|TRUE|FALSE|TRUE",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Quantity],1,Facts[Note],CALCULATE(SUM(Facts[Sales]),Facts[Region]=\"Nowhere\")),\"|\",Facts[Quantity])",
+"powerbi": "|Paid||||",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Quantity],1,Facts[Note],TRUE()),\"|\",Facts[Quantity])",
+"powerbi": "TRUE|Paid|TRUE|TRUE|TRUE|TRUE",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Quantity],1,Facts[Note],FALSE()),\"|\",Facts[Quantity])",
+"powerbi": "FALSE|Paid|FALSE|FALSE|FALSE|FALSE",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Quantity],1,ISBLANK(Facts[Note]),Facts[Note]),\"|\",Facts[Quantity])",
+"powerbi": "Paid|FALSE|Paid||Late|",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Quantity],1,CALCULATE(SUM(Facts[Sales]),Facts[Region]=\"Nowhere\"),Facts[Note]),\"|\",Facts[Quantity])",
+"powerbi": "Paid||Paid||Late|",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Quantity],1,Facts[Region]=\"East\",Facts[Note]),\"|\",Facts[Quantity])",
+"powerbi": "Paid|TRUE|Paid||Late|",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Quantity],1,TRUE(),Facts[Note]),\"|\",Facts[Quantity])",
+"powerbi": "Paid|TRUE|Paid||Late|",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Quantity],1,FALSE(),Facts[Note]),\"|\",Facts[Quantity])",
+"powerbi": "Paid|FALSE|Paid||Late|",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Quantity]+0,1,Facts[Quantity]>2,Facts[Note]),\"|\",Facts[Quantity])",
+"powerbi": "Paid|FALSE|Paid||Late|",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Quantity]+0,1,BLANK(),Facts[Note]),\"|\",Facts[Quantity])",
+"powerbi": "Paid||Paid||Late|",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Quantity]+0,1,Facts[Sales],Facts[Note]),\"|\",Facts[Quantity])",
+"powerbi": "Paid|-1.5|Paid||Late|",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Quantity]+0,1,1,Facts[Note]),\"|\",Facts[Quantity])",
+"powerbi": "Paid|1|Paid||Late|",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Quantity]+0,1,Facts[Note]),\"|\",Facts[Quantity])",
+"powerbi": "|Paid||||",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Quantity]+0,1,Facts[Note],Facts[Quantity]>2),\"|\",Facts[Quantity])",
+"powerbi": "FALSE|Paid|FALSE|TRUE|TRUE|TRUE",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Quantity]+0,1,Facts[Note],BLANK()),\"|\",Facts[Quantity])",
+"powerbi": "|Paid||||",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Quantity]+0,1,Facts[Note],Facts[Sales]),\"|\",Facts[Quantity])",
+"powerbi": "0|Paid|10.5|20||2.5",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Quantity]+0,1,Facts[Note],1),\"|\",Facts[Quantity])",
+"powerbi": "1|Paid|1|1|1|1",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Quantity]+0,1,Facts[Note],Facts[Note]),\"|\",Facts[Quantity])",
+"powerbi": "Paid|Paid|Paid||Late|",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Quantity]+0,1,Facts[Note],ISBLANK(Facts[Note])),\"|\",Facts[Quantity])",
+"powerbi": "FALSE|Paid|FALSE|TRUE|FALSE|TRUE",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Quantity]+0,1,Facts[Note],CALCULATE(SUM(Facts[Sales]),Facts[Region]=\"Nowhere\")),\"|\",Facts[Quantity])",
+"powerbi": "|Paid||||",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Quantity]+0,1,Facts[Note],TRUE()),\"|\",Facts[Quantity])",
+"powerbi": "TRUE|Paid|TRUE|TRUE|TRUE|TRUE",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Quantity]+0,1,Facts[Note],FALSE()),\"|\",Facts[Quantity])",
+"powerbi": "FALSE|Paid|FALSE|FALSE|FALSE|FALSE",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Quantity]+0,1,ISBLANK(Facts[Note]),Facts[Note]),\"|\",Facts[Quantity])",
+"powerbi": "Paid|FALSE|Paid||Late|",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Quantity]+0,1,CALCULATE(SUM(Facts[Sales]),Facts[Region]=\"Nowhere\"),Facts[Note]),\"|\",Facts[Quantity])",
+"powerbi": "Paid||Paid||Late|",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Quantity]+0,1,Facts[Region]=\"East\",Facts[Note]),\"|\",Facts[Quantity])",
+"powerbi": "Paid|TRUE|Paid||Late|",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Quantity]+0,1,TRUE(),Facts[Note]),\"|\",Facts[Quantity])",
+"powerbi": "Paid|TRUE|Paid||Late|",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Quantity]+0,1,FALSE(),Facts[Note]),\"|\",Facts[Quantity])",
+"powerbi": "Paid|FALSE|Paid||Late|",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Region],\"East\",Facts[Quantity]>2),\"|\",Facts[Quantity])",
+"powerbi": "FALSE|FALSE|FALSE|FALSE|FALSE|TRUE",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Region],\"East\",Facts[Quantity]>2,Facts[Quantity]>2),\"|\",Facts[Quantity])",
+"powerbi": "FALSE|FALSE|FALSE|TRUE|TRUE|TRUE",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Region],\"East\",Facts[Quantity]>2,BLANK()),\"|\",Facts[Quantity])",
+"powerbi": "FALSE|FALSE|FALSE|FALSE|FALSE|TRUE",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Region],\"East\",Facts[Quantity]>2,Facts[Sales]),\"|\",Facts[Quantity])",
+"powerbi": "0|FALSE|FALSE|20||TRUE",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Region],\"East\",Facts[Quantity]>2,1),\"|\",Facts[Quantity])",
+"powerbi": "1|FALSE|FALSE|1|1|TRUE",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Region],\"East\",Facts[Quantity]>2,Facts[Note]),\"|\",Facts[Quantity])",
+"powerbi": "Paid|FALSE|FALSE||Late|TRUE",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Region],\"East\",Facts[Quantity]>2,ISBLANK(Facts[Note])),\"|\",Facts[Quantity])",
+"powerbi": "FALSE|FALSE|FALSE|TRUE|FALSE|TRUE",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Region],\"East\",Facts[Quantity]>2,CALCULATE(SUM(Facts[Sales]),Facts[Region]=\"Nowhere\")),\"|\",Facts[Quantity])",
+"powerbi": "|FALSE|FALSE|||TRUE",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Region],\"East\",Facts[Quantity]>2,TRUE()),\"|\",Facts[Quantity])",
+"powerbi": "TRUE|FALSE|FALSE|TRUE|TRUE|TRUE",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Region],\"East\",Facts[Quantity]>2,FALSE()),\"|\",Facts[Quantity])",
+"powerbi": "FALSE|FALSE|FALSE|FALSE|FALSE|TRUE",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Region],\"East\",BLANK()),\"|\",Facts[Quantity])",
+"powerbi": "|||||",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Region],\"East\",BLANK(),Facts[Quantity]>2),\"|\",Facts[Quantity])",
+"powerbi": "FALSE|FALSE|FALSE|TRUE|TRUE|FALSE",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Region],\"East\",BLANK(),BLANK()),\"|\",Facts[Quantity])",
+"powerbi": "|||||",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Region],\"East\",BLANK(),Facts[Sales]),\"|\",Facts[Quantity])",
+"powerbi": "0|||20||",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Region],\"East\",BLANK(),1),\"|\",Facts[Quantity])",
+"powerbi": "1|||1|1|",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Region],\"East\",BLANK(),Facts[Note]),\"|\",Facts[Quantity])",
+"powerbi": "Paid||||Late|",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Region],\"East\",BLANK(),ISBLANK(Facts[Note])),\"|\",Facts[Quantity])",
+"powerbi": "FALSE|FALSE|FALSE|TRUE|FALSE|FALSE",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Region],\"East\",BLANK(),CALCULATE(SUM(Facts[Sales]),Facts[Region]=\"Nowhere\")),\"|\",Facts[Quantity])",
+"powerbi": "|||||",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Region],\"East\",BLANK(),TRUE()),\"|\",Facts[Quantity])",
+"powerbi": "TRUE|FALSE|FALSE|TRUE|TRUE|FALSE",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Region],\"East\",BLANK(),FALSE()),\"|\",Facts[Quantity])",
+"powerbi": "FALSE|FALSE|FALSE|FALSE|FALSE|FALSE",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Region],\"East\",Facts[Sales]),\"|\",Facts[Quantity])",
+"powerbi": "|-1.5|10.5|||2.5",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Region],\"East\",Facts[Sales],Facts[Quantity]>2),\"|\",Facts[Quantity])",
+"powerbi": "FALSE|-1.5|10.5|TRUE|TRUE|2.5",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Region],\"East\",Facts[Sales],BLANK()),\"|\",Facts[Quantity])",
+"powerbi": "|-1.5|10.5|||2.5",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Region],\"East\",Facts[Sales],Facts[Sales]),\"|\",Facts[Quantity])",
+"powerbi": "0|-1.5|10.5|20||2.5",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Region],\"East\",Facts[Sales],1),\"|\",Facts[Quantity])",
+"powerbi": "1|-1.5|10.5|1|1|2.5",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Region],\"East\",Facts[Sales],Facts[Note]),\"|\",Facts[Quantity])",
+"powerbi": "Paid|-1.5|10.5||Late|2.5",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Region],\"East\",Facts[Sales],ISBLANK(Facts[Note])),\"|\",Facts[Quantity])",
+"powerbi": "FALSE|-1.5|10.5|TRUE|FALSE|2.5",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Region],\"East\",Facts[Sales],CALCULATE(SUM(Facts[Sales]),Facts[Region]=\"Nowhere\")),\"|\",Facts[Quantity])",
+"powerbi": "|-1.5|10.5|||2.5",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Region],\"East\",Facts[Sales],TRUE()),\"|\",Facts[Quantity])",
+"powerbi": "TRUE|-1.5|10.5|TRUE|TRUE|2.5",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Region],\"East\",Facts[Sales],FALSE()),\"|\",Facts[Quantity])",
+"powerbi": "FALSE|-1.5|10.5|FALSE|FALSE|2.5",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Region],\"East\",1),\"|\",Facts[Quantity])",
+"powerbi": "|1|1|||1",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Region],\"East\",1,Facts[Quantity]>2),\"|\",Facts[Quantity])",
+"powerbi": "FALSE|1|1|TRUE|TRUE|1",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Region],\"East\",1,BLANK()),\"|\",Facts[Quantity])",
+"powerbi": "|1|1|||1",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Region],\"East\",1,Facts[Sales]),\"|\",Facts[Quantity])",
+"powerbi": "0|1|1|20||1",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Region],\"East\",1,1),\"|\",Facts[Quantity])",
+"powerbi": "1|1|1|1|1|1",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Region],\"East\",1,Facts[Note]),\"|\",Facts[Quantity])",
+"powerbi": "Paid|1|1||Late|1",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Region],\"East\",1,ISBLANK(Facts[Note])),\"|\",Facts[Quantity])",
+"powerbi": "FALSE|1|1|TRUE|FALSE|1",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Region],\"East\",1,CALCULATE(SUM(Facts[Sales]),Facts[Region]=\"Nowhere\")),\"|\",Facts[Quantity])",
+"powerbi": "|1|1|||1",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Region],\"East\",1,TRUE()),\"|\",Facts[Quantity])",
+"powerbi": "TRUE|1|1|TRUE|TRUE|1",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Region],\"East\",1,FALSE()),\"|\",Facts[Quantity])",
+"powerbi": "FALSE|1|1|FALSE|FALSE|1",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Region],\"East\",Facts[Note]),\"|\",Facts[Quantity])",
+"powerbi": "|Paid|Paid|||",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Region],\"East\",Facts[Note],Facts[Quantity]>2),\"|\",Facts[Quantity])",
+"powerbi": "FALSE|Paid|Paid|TRUE|TRUE|",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Region],\"East\",Facts[Note],BLANK()),\"|\",Facts[Quantity])",
+"powerbi": "|Paid|Paid|||",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Region],\"East\",Facts[Note],Facts[Sales]),\"|\",Facts[Quantity])",
+"powerbi": "0|Paid|Paid|20||",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Region],\"East\",Facts[Note],1),\"|\",Facts[Quantity])",
+"powerbi": "1|Paid|Paid|1|1|",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Region],\"East\",Facts[Note],Facts[Note]),\"|\",Facts[Quantity])",
+"powerbi": "Paid|Paid|Paid||Late|",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Region],\"East\",Facts[Note],ISBLANK(Facts[Note])),\"|\",Facts[Quantity])",
+"powerbi": "FALSE|Paid|Paid|TRUE|FALSE|",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Region],\"East\",Facts[Note],CALCULATE(SUM(Facts[Sales]),Facts[Region]=\"Nowhere\")),\"|\",Facts[Quantity])",
+"powerbi": "|Paid|Paid|||",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Region],\"East\",Facts[Note],TRUE()),\"|\",Facts[Quantity])",
+"powerbi": "TRUE|Paid|Paid|TRUE|TRUE|",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Region],\"East\",Facts[Note],FALSE()),\"|\",Facts[Quantity])",
+"powerbi": "FALSE|Paid|Paid|FALSE|FALSE|",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Region],\"East\",ISBLANK(Facts[Note])),\"|\",Facts[Quantity])",
+"powerbi": "FALSE|FALSE|FALSE|FALSE|FALSE|TRUE",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Region],\"East\",ISBLANK(Facts[Note]),Facts[Quantity]>2),\"|\",Facts[Quantity])",
+"powerbi": "FALSE|FALSE|FALSE|TRUE|TRUE|TRUE",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Region],\"East\",ISBLANK(Facts[Note]),BLANK()),\"|\",Facts[Quantity])",
+"powerbi": "FALSE|FALSE|FALSE|FALSE|FALSE|TRUE",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Region],\"East\",ISBLANK(Facts[Note]),Facts[Sales]),\"|\",Facts[Quantity])",
+"powerbi": "0|FALSE|FALSE|20||TRUE",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Region],\"East\",ISBLANK(Facts[Note]),1),\"|\",Facts[Quantity])",
+"powerbi": "1|FALSE|FALSE|1|1|TRUE",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Region],\"East\",ISBLANK(Facts[Note]),Facts[Note]),\"|\",Facts[Quantity])",
+"powerbi": "Paid|FALSE|FALSE||Late|TRUE",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Region],\"East\",ISBLANK(Facts[Note]),ISBLANK(Facts[Note])),\"|\",Facts[Quantity])",
+"powerbi": "FALSE|FALSE|FALSE|TRUE|FALSE|TRUE",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Region],\"East\",ISBLANK(Facts[Note]),CALCULATE(SUM(Facts[Sales]),Facts[Region]=\"Nowhere\")),\"|\",Facts[Quantity])",
+"powerbi": "|FALSE|FALSE|||TRUE",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Region],\"East\",ISBLANK(Facts[Note]),TRUE()),\"|\",Facts[Quantity])",
+"powerbi": "TRUE|FALSE|FALSE|TRUE|TRUE|TRUE",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Region],\"East\",ISBLANK(Facts[Note]),FALSE()),\"|\",Facts[Quantity])",
+"powerbi": "FALSE|FALSE|FALSE|FALSE|FALSE|TRUE",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Region],\"East\",CALCULATE(SUM(Facts[Sales]),Facts[Region]=\"Nowhere\")),\"|\",Facts[Quantity])",
+"powerbi": "|||||",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Region],\"East\",CALCULATE(SUM(Facts[Sales]),Facts[Region]=\"Nowhere\"),Facts[Quantity]>2),\"|\",Facts[Quantity])",
+"powerbi": "FALSE|||TRUE|TRUE|",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Region],\"East\",CALCULATE(SUM(Facts[Sales]),Facts[Region]=\"Nowhere\"),BLANK()),\"|\",Facts[Quantity])",
+"powerbi": "|||||",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Region],\"East\",CALCULATE(SUM(Facts[Sales]),Facts[Region]=\"Nowhere\"),Facts[Sales]),\"|\",Facts[Quantity])",
+"powerbi": "0|||20||",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Region],\"East\",CALCULATE(SUM(Facts[Sales]),Facts[Region]=\"Nowhere\"),1),\"|\",Facts[Quantity])",
+"powerbi": "1|||1|1|",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Region],\"East\",CALCULATE(SUM(Facts[Sales]),Facts[Region]=\"Nowhere\"),Facts[Note]),\"|\",Facts[Quantity])",
+"powerbi": "Paid||||Late|",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Region],\"East\",CALCULATE(SUM(Facts[Sales]),Facts[Region]=\"Nowhere\"),ISBLANK(Facts[Note])),\"|\",Facts[Quantity])",
+"powerbi": "FALSE|||TRUE|FALSE|",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Region],\"East\",CALCULATE(SUM(Facts[Sales]),Facts[Region]=\"Nowhere\"),CALCULATE(SUM(Facts[Sales]),Facts[Region]=\"Nowhere\")),\"|\",Facts[Quantity])",
+"powerbi": "|||||",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Region],\"East\",CALCULATE(SUM(Facts[Sales]),Facts[Region]=\"Nowhere\"),TRUE()),\"|\",Facts[Quantity])",
+"powerbi": "TRUE|||TRUE|TRUE|",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Region],\"East\",CALCULATE(SUM(Facts[Sales]),Facts[Region]=\"Nowhere\"),FALSE()),\"|\",Facts[Quantity])",
+"powerbi": "FALSE|||FALSE|FALSE|",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Region],\"East\",Facts[Region]=\"East\"),\"|\",Facts[Quantity])",
+"powerbi": "FALSE|TRUE|TRUE|FALSE|FALSE|TRUE",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Region],\"East\",Facts[Region]=\"East\",Facts[Quantity]>2),\"|\",Facts[Quantity])",
+"powerbi": "FALSE|TRUE|TRUE|TRUE|TRUE|TRUE",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Region],\"East\",Facts[Region]=\"East\",BLANK()),\"|\",Facts[Quantity])",
+"powerbi": "FALSE|TRUE|TRUE|FALSE|FALSE|TRUE",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Region],\"East\",Facts[Region]=\"East\",Facts[Sales]),\"|\",Facts[Quantity])",
+"powerbi": "0|TRUE|TRUE|20||TRUE",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Region],\"East\",Facts[Region]=\"East\",1),\"|\",Facts[Quantity])",
+"powerbi": "1|TRUE|TRUE|1|1|TRUE",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Region],\"East\",Facts[Region]=\"East\",Facts[Note]),\"|\",Facts[Quantity])",
+"powerbi": "Paid|TRUE|TRUE||Late|TRUE",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Region],\"East\",Facts[Region]=\"East\",ISBLANK(Facts[Note])),\"|\",Facts[Quantity])",
+"powerbi": "FALSE|TRUE|TRUE|TRUE|FALSE|TRUE",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Region],\"East\",Facts[Region]=\"East\",CALCULATE(SUM(Facts[Sales]),Facts[Region]=\"Nowhere\")),\"|\",Facts[Quantity])",
+"powerbi": "|TRUE|TRUE|||TRUE",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Region],\"East\",Facts[Region]=\"East\",TRUE()),\"|\",Facts[Quantity])",
+"powerbi": "TRUE|TRUE|TRUE|TRUE|TRUE|TRUE",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Region],\"East\",Facts[Region]=\"East\",FALSE()),\"|\",Facts[Quantity])",
+"powerbi": "FALSE|TRUE|TRUE|FALSE|FALSE|TRUE",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Region],\"East\",TRUE()),\"|\",Facts[Quantity])",
+"powerbi": "FALSE|TRUE|TRUE|FALSE|FALSE|TRUE",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Region],\"East\",TRUE(),Facts[Quantity]>2),\"|\",Facts[Quantity])",
+"powerbi": "FALSE|TRUE|TRUE|TRUE|TRUE|TRUE",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Region],\"East\",TRUE(),BLANK()),\"|\",Facts[Quantity])",
+"powerbi": "FALSE|TRUE|TRUE|FALSE|FALSE|TRUE",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Region],\"East\",TRUE(),Facts[Sales]),\"|\",Facts[Quantity])",
+"powerbi": "0|TRUE|TRUE|20||TRUE",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Region],\"East\",TRUE(),1),\"|\",Facts[Quantity])",
+"powerbi": "1|TRUE|TRUE|1|1|TRUE",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Region],\"East\",TRUE(),Facts[Note]),\"|\",Facts[Quantity])",
+"powerbi": "Paid|TRUE|TRUE||Late|TRUE",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Region],\"East\",TRUE(),ISBLANK(Facts[Note])),\"|\",Facts[Quantity])",
+"powerbi": "FALSE|TRUE|TRUE|TRUE|FALSE|TRUE",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Region],\"East\",TRUE(),CALCULATE(SUM(Facts[Sales]),Facts[Region]=\"Nowhere\")),\"|\",Facts[Quantity])",
+"powerbi": "|TRUE|TRUE|||TRUE",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Region],\"East\",TRUE(),TRUE()),\"|\",Facts[Quantity])",
+"powerbi": "TRUE|TRUE|TRUE|TRUE|TRUE|TRUE",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Region],\"East\",TRUE(),FALSE()),\"|\",Facts[Quantity])",
+"powerbi": "FALSE|TRUE|TRUE|FALSE|FALSE|TRUE",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Region],\"East\",FALSE()),\"|\",Facts[Quantity])",
+"powerbi": "FALSE|FALSE|FALSE|FALSE|FALSE|FALSE",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Region],\"East\",FALSE(),Facts[Quantity]>2),\"|\",Facts[Quantity])",
+"powerbi": "FALSE|FALSE|FALSE|TRUE|TRUE|FALSE",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Region],\"East\",FALSE(),BLANK()),\"|\",Facts[Quantity])",
+"powerbi": "FALSE|FALSE|FALSE|FALSE|FALSE|FALSE",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Region],\"East\",FALSE(),Facts[Sales]),\"|\",Facts[Quantity])",
+"powerbi": "0|FALSE|FALSE|20||FALSE",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Region],\"East\",FALSE(),1),\"|\",Facts[Quantity])",
+"powerbi": "1|FALSE|FALSE|1|1|FALSE",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Region],\"East\",FALSE(),Facts[Note]),\"|\",Facts[Quantity])",
+"powerbi": "Paid|FALSE|FALSE||Late|FALSE",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Region],\"East\",FALSE(),ISBLANK(Facts[Note])),\"|\",Facts[Quantity])",
+"powerbi": "FALSE|FALSE|FALSE|TRUE|FALSE|FALSE",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Region],\"East\",FALSE(),CALCULATE(SUM(Facts[Sales]),Facts[Region]=\"Nowhere\")),\"|\",Facts[Quantity])",
+"powerbi": "|FALSE|FALSE|||FALSE",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Region],\"East\",FALSE(),TRUE()),\"|\",Facts[Quantity])",
+"powerbi": "TRUE|FALSE|FALSE|TRUE|TRUE|FALSE",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Region],\"East\",FALSE(),FALSE()),\"|\",Facts[Quantity])",
+"powerbi": "FALSE|FALSE|FALSE|FALSE|FALSE|FALSE",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Region],\"East\",Facts[Quantity]>2,\"West\",Facts[Quantity]>2),\"|\",Facts[Quantity])",
+"powerbi": "FALSE|FALSE|FALSE|TRUE|FALSE|TRUE",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Region],\"East\",Facts[Quantity]>2,\"West\",BLANK()),\"|\",Facts[Quantity])",
+"powerbi": "|FALSE|FALSE|||TRUE",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Region],\"East\",Facts[Quantity]>2,\"West\",Facts[Sales]),\"|\",Facts[Quantity])",
+"powerbi": "0|FALSE|FALSE|20||TRUE",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Region],\"East\",Facts[Quantity]>2,\"West\",1),\"|\",Facts[Quantity])",
+"powerbi": "1|FALSE|FALSE|1||TRUE",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Region],\"East\",Facts[Quantity]>2,\"West\",CALCULATE(SUM(Facts[Sales]),Facts[Region]=\"Nowhere\")),\"|\",Facts[Quantity])",
+"powerbi": "|FALSE|FALSE|||TRUE",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Region],\"East\",Facts[Quantity]>2,\"West\",TRUE()),\"|\",Facts[Quantity])",
+"powerbi": "TRUE|FALSE|FALSE|TRUE|FALSE|TRUE",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Region],\"East\",Facts[Quantity]>2,\"West\",Facts[Region]=\"East\"),\"|\",Facts[Quantity])",
+"powerbi": "FALSE|FALSE|FALSE|FALSE|FALSE|TRUE",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Region],\"East\",BLANK(),\"West\",Facts[Quantity]>2),\"|\",Facts[Quantity])",
+"powerbi": "FALSE|FALSE|FALSE|TRUE|FALSE|FALSE",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Region],\"East\",BLANK(),\"West\",BLANK()),\"|\",Facts[Quantity])",
+"powerbi": "|||||",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Region],\"East\",BLANK(),\"West\",Facts[Sales]),\"|\",Facts[Quantity])",
+"powerbi": "0|||20||",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Region],\"East\",BLANK(),\"West\",1),\"|\",Facts[Quantity])",
+"powerbi": "1|||1||",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Region],\"East\",BLANK(),\"West\",CALCULATE(SUM(Facts[Sales]),Facts[Region]=\"Nowhere\")),\"|\",Facts[Quantity])",
+"powerbi": "|||||",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Region],\"East\",BLANK(),\"West\",TRUE()),\"|\",Facts[Quantity])",
+"powerbi": "TRUE|FALSE|FALSE|TRUE|FALSE|FALSE",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Region],\"East\",BLANK(),\"West\",Facts[Region]=\"East\"),\"|\",Facts[Quantity])",
+"powerbi": "FALSE|FALSE|FALSE|FALSE|FALSE|FALSE",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Region],\"East\",Facts[Sales],\"West\",Facts[Quantity]>2),\"|\",Facts[Quantity])",
+"powerbi": "FALSE|-1.5|10.5|TRUE|FALSE|2.5",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Region],\"East\",Facts[Sales],\"West\",BLANK()),\"|\",Facts[Quantity])",
+"powerbi": "|-1.5|10.5|||2.5",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Region],\"East\",Facts[Sales],\"West\",Facts[Sales]),\"|\",Facts[Quantity])",
+"powerbi": "0|-1.5|10.5|20||2.5",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Region],\"East\",Facts[Sales],\"West\",1),\"|\",Facts[Quantity])",
+"powerbi": "1|-1.5|10.5|1||2.5",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Region],\"East\",Facts[Sales],\"West\",CALCULATE(SUM(Facts[Sales]),Facts[Region]=\"Nowhere\")),\"|\",Facts[Quantity])",
+"powerbi": "|-1.5|10.5|||2.5",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Region],\"East\",Facts[Sales],\"West\",TRUE()),\"|\",Facts[Quantity])",
+"powerbi": "TRUE|-1.5|10.5|TRUE|FALSE|2.5",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Region],\"East\",Facts[Sales],\"West\",Facts[Region]=\"East\"),\"|\",Facts[Quantity])",
+"powerbi": "FALSE|-1.5|10.5|FALSE|FALSE|2.5",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Region],\"East\",1,\"West\",Facts[Quantity]>2),\"|\",Facts[Quantity])",
+"powerbi": "FALSE|1|1|TRUE|FALSE|1",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Region],\"East\",1,\"West\",BLANK()),\"|\",Facts[Quantity])",
+"powerbi": "|1|1|||1",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Region],\"East\",1,\"West\",Facts[Sales]),\"|\",Facts[Quantity])",
+"powerbi": "0|1|1|20||1",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Region],\"East\",1,\"West\",1),\"|\",Facts[Quantity])",
+"powerbi": "1|1|1|1||1",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Region],\"East\",1,\"West\",CALCULATE(SUM(Facts[Sales]),Facts[Region]=\"Nowhere\")),\"|\",Facts[Quantity])",
+"powerbi": "|1|1|||1",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Region],\"East\",1,\"West\",TRUE()),\"|\",Facts[Quantity])",
+"powerbi": "TRUE|1|1|TRUE|FALSE|1",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Region],\"East\",1,\"West\",Facts[Region]=\"East\"),\"|\",Facts[Quantity])",
+"powerbi": "FALSE|1|1|FALSE|FALSE|1",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Region],\"East\",CALCULATE(SUM(Facts[Sales]),Facts[Region]=\"Nowhere\"),\"West\",Facts[Quantity]>2),\"|\",Facts[Quantity])",
+"powerbi": "FALSE|||TRUE|FALSE|",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Region],\"East\",CALCULATE(SUM(Facts[Sales]),Facts[Region]=\"Nowhere\"),\"West\",BLANK()),\"|\",Facts[Quantity])",
+"powerbi": "|||||",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Region],\"East\",CALCULATE(SUM(Facts[Sales]),Facts[Region]=\"Nowhere\"),\"West\",Facts[Sales]),\"|\",Facts[Quantity])",
+"powerbi": "0|||20||",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Region],\"East\",CALCULATE(SUM(Facts[Sales]),Facts[Region]=\"Nowhere\"),\"West\",1),\"|\",Facts[Quantity])",
+"powerbi": "1|||1||",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Region],\"East\",CALCULATE(SUM(Facts[Sales]),Facts[Region]=\"Nowhere\"),\"West\",CALCULATE(SUM(Facts[Sales]),Facts[Region]=\"Nowhere\")),\"|\",Facts[Quantity])",
+"powerbi": "|||||",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Region],\"East\",CALCULATE(SUM(Facts[Sales]),Facts[Region]=\"Nowhere\"),\"West\",TRUE()),\"|\",Facts[Quantity])",
+"powerbi": "TRUE|||TRUE|FALSE|",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Region],\"East\",CALCULATE(SUM(Facts[Sales]),Facts[Region]=\"Nowhere\"),\"West\",Facts[Region]=\"East\"),\"|\",Facts[Quantity])",
+"powerbi": "FALSE|||FALSE|FALSE|",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Region],\"East\",TRUE(),\"West\",Facts[Quantity]>2),\"|\",Facts[Quantity])",
+"powerbi": "FALSE|TRUE|TRUE|TRUE|FALSE|TRUE",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Region],\"East\",TRUE(),\"West\",BLANK()),\"|\",Facts[Quantity])",
+"powerbi": "|TRUE|TRUE|||TRUE",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Region],\"East\",TRUE(),\"West\",Facts[Sales]),\"|\",Facts[Quantity])",
+"powerbi": "0|TRUE|TRUE|20||TRUE",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Region],\"East\",TRUE(),\"West\",1),\"|\",Facts[Quantity])",
+"powerbi": "1|TRUE|TRUE|1||TRUE",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Region],\"East\",TRUE(),\"West\",CALCULATE(SUM(Facts[Sales]),Facts[Region]=\"Nowhere\")),\"|\",Facts[Quantity])",
+"powerbi": "|TRUE|TRUE|||TRUE",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Region],\"East\",TRUE(),\"West\",TRUE()),\"|\",Facts[Quantity])",
+"powerbi": "TRUE|TRUE|TRUE|TRUE|FALSE|TRUE",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Region],\"East\",TRUE(),\"West\",Facts[Region]=\"East\"),\"|\",Facts[Quantity])",
+"powerbi": "FALSE|TRUE|TRUE|FALSE|FALSE|TRUE",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Region],\"East\",ISBLANK(Facts[Note]),\"West\",Facts[Quantity]>2),\"|\",Facts[Quantity])",
+"powerbi": "FALSE|FALSE|FALSE|TRUE|FALSE|TRUE",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Region],\"East\",ISBLANK(Facts[Note]),\"West\",BLANK()),\"|\",Facts[Quantity])",
+"powerbi": "|FALSE|FALSE|||TRUE",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Region],\"East\",ISBLANK(Facts[Note]),\"West\",Facts[Sales]),\"|\",Facts[Quantity])",
+"powerbi": "0|FALSE|FALSE|20||TRUE",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Region],\"East\",ISBLANK(Facts[Note]),\"West\",1),\"|\",Facts[Quantity])",
+"powerbi": "1|FALSE|FALSE|1||TRUE",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Region],\"East\",ISBLANK(Facts[Note]),\"West\",CALCULATE(SUM(Facts[Sales]),Facts[Region]=\"Nowhere\")),\"|\",Facts[Quantity])",
+"powerbi": "|FALSE|FALSE|||TRUE",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Region],\"East\",ISBLANK(Facts[Note]),\"West\",TRUE()),\"|\",Facts[Quantity])",
+"powerbi": "TRUE|FALSE|FALSE|TRUE|FALSE|TRUE",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Region],\"East\",ISBLANK(Facts[Note]),\"West\",Facts[Region]=\"East\"),\"|\",Facts[Quantity])",
+"powerbi": "FALSE|FALSE|FALSE|FALSE|FALSE|TRUE",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Region],\"East\",1,\"West\",Facts[Quantity]>2,Facts[Sales]),\"|\",Facts[Quantity])",
+"powerbi": "FALSE|1|1|TRUE||1",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Region],\"East\",TRUE(),\"West\",Facts[Region]=\"East\",FALSE()),\"|\",Facts[Quantity])",
+"powerbi": "FALSE|TRUE|TRUE|FALSE|FALSE|TRUE",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Region],\"East\",Facts[Region]=\"East\",\"West\",Facts[Sales],1),\"|\",Facts[Quantity])",
+"powerbi": "0|TRUE|TRUE|20|1|TRUE",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Region],\"East\",1,\"West\",BLANK(),TRUE()),\"|\",Facts[Quantity])",
+"powerbi": "FALSE|1|1|FALSE|TRUE|1",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Region],\"East\",Facts[Region]=\"East\",\"West\",Facts[Region]=\"East\",FALSE()),\"|\",Facts[Quantity])",
+"powerbi": "FALSE|TRUE|TRUE|FALSE|FALSE|TRUE",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Region],\"East\",TRUE(),\"West\",Facts[Sales],BLANK()),\"|\",Facts[Quantity])",
+"powerbi": "0|TRUE|TRUE|20||TRUE",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Region],\"East\",Facts[Sales],\"West\",Facts[Quantity]>2,BLANK()),\"|\",Facts[Quantity])",
+"powerbi": "FALSE|-1.5|10.5|TRUE|FALSE|2.5",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Region],\"East\",CALCULATE(SUM(Facts[Sales]),Facts[Region]=\"Nowhere\"),\"West\",Facts[Sales],BLANK()),\"|\",Facts[Quantity])",
+"powerbi": "0|||20||",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Region],\"East\",CALCULATE(SUM(Facts[Sales]),Facts[Region]=\"Nowhere\"),\"West\",Facts[Sales],FALSE()),\"|\",Facts[Quantity])",
+"powerbi": "0|||20|FALSE|",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Region],\"East\",ISBLANK(Facts[Note]),\"West\",BLANK(),TRUE()),\"|\",Facts[Quantity])",
+"powerbi": "FALSE|FALSE|FALSE|FALSE|TRUE|TRUE",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Region],\"East\",1,\"West\",Facts[Quantity]>2,Facts[Quantity]>2),\"|\",Facts[Quantity])",
+"powerbi": "FALSE|1|1|TRUE|TRUE|1",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Region],\"East\",CALCULATE(SUM(Facts[Sales]),Facts[Region]=\"Nowhere\"),\"West\",1,1),\"|\",Facts[Quantity])",
+"powerbi": "1|||1|1|",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Region],\"East\",CALCULATE(SUM(Facts[Sales]),Facts[Region]=\"Nowhere\"),\"West\",TRUE(),Facts[Quantity]>2),\"|\",Facts[Quantity])",
+"powerbi": "TRUE|||TRUE|TRUE|",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Region],\"East\",BLANK(),\"West\",CALCULATE(SUM(Facts[Sales]),Facts[Region]=\"Nowhere\"),TRUE()),\"|\",Facts[Quantity])",
+"powerbi": "||||TRUE|",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Region],\"East\",Facts[Sales],\"West\",1,Facts[Quantity]>2),\"|\",Facts[Quantity])",
+"powerbi": "1|-1.5|10.5|1|TRUE|2.5",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Region],\"East\",1,\"West\",BLANK(),Facts[Sales]),\"|\",Facts[Quantity])",
+"powerbi": "|1|1|||1",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Region],\"East\",Facts[Sales],\"West\",CALCULATE(SUM(Facts[Sales]),Facts[Region]=\"Nowhere\"),FALSE()),\"|\",Facts[Quantity])",
+"powerbi": "|-1.5|10.5||FALSE|2.5",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Region],\"East\",Facts[Quantity]>2,\"West\",1,BLANK()),\"|\",Facts[Quantity])",
+"powerbi": "1|FALSE|FALSE|1||TRUE",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Region],\"East\",Facts[Quantity]>2,\"West\",TRUE(),FALSE()),\"|\",Facts[Quantity])",
+"powerbi": "TRUE|FALSE|FALSE|TRUE|FALSE|TRUE",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Region],\"East\",Facts[Quantity]>2,\"West\",1,Facts[Sales]),\"|\",Facts[Quantity])",
+"powerbi": "1|FALSE|FALSE|1||TRUE",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Region],\"East\",CALCULATE(SUM(Facts[Sales]),Facts[Region]=\"Nowhere\"),\"West\",TRUE(),TRUE()),\"|\",Facts[Quantity])",
+"powerbi": "TRUE|||TRUE|TRUE|",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Region],\"East\",ISBLANK(Facts[Note]),\"West\",1,TRUE()),\"|\",Facts[Quantity])",
+"powerbi": "1|FALSE|FALSE|1|TRUE|TRUE",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Region],\"East\",Facts[Sales],\"West\",Facts[Region]=\"East\",1),\"|\",Facts[Quantity])",
+"powerbi": "FALSE|-1.5|10.5|FALSE|1|2.5",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Region],\"East\",TRUE(),\"West\",Facts[Sales],FALSE()),\"|\",Facts[Quantity])",
+"powerbi": "0|TRUE|TRUE|20|FALSE|TRUE",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Region],\"East\",TRUE(),\"West\",CALCULATE(SUM(Facts[Sales]),Facts[Region]=\"Nowhere\"),Facts[Quantity]>2),\"|\",Facts[Quantity])",
+"powerbi": "|TRUE|TRUE||TRUE|TRUE",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Note],\"Paid\",Facts[Quantity]>2),\"|\",Facts[Quantity])",
+"powerbi": "FALSE|FALSE|FALSE|FALSE|FALSE|FALSE",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Note],\"Paid\",Facts[Quantity]>2,Facts[Quantity]>2),\"|\",Facts[Quantity])",
+"powerbi": "FALSE|FALSE|FALSE|TRUE|TRUE|TRUE",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Note],\"Paid\",Facts[Quantity]>2,BLANK()),\"|\",Facts[Quantity])",
+"powerbi": "FALSE|FALSE|FALSE|FALSE|FALSE|FALSE",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Note],\"Paid\",Facts[Quantity]>2,Facts[Sales]),\"|\",Facts[Quantity])",
+"powerbi": "FALSE|FALSE|FALSE|20||2.5",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Note],\"Paid\",Facts[Quantity]>2,1),\"|\",Facts[Quantity])",
+"powerbi": "FALSE|FALSE|FALSE|1|1|1",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Note],\"Paid\",Facts[Quantity]>2,Facts[Note]),\"|\",Facts[Quantity])",
+"powerbi": "FALSE|FALSE|FALSE||Late|",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Note],\"Paid\",Facts[Quantity]>2,ISBLANK(Facts[Note])),\"|\",Facts[Quantity])",
+"powerbi": "FALSE|FALSE|FALSE|TRUE|FALSE|TRUE",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Note],\"Paid\",Facts[Quantity]>2,CALCULATE(SUM(Facts[Sales]),Facts[Region]=\"Nowhere\")),\"|\",Facts[Quantity])",
+"powerbi": "FALSE|FALSE|FALSE|||",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Note],\"Paid\",Facts[Quantity]>2,TRUE()),\"|\",Facts[Quantity])",
+"powerbi": "FALSE|FALSE|FALSE|TRUE|TRUE|TRUE",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Note],\"Paid\",Facts[Quantity]>2,FALSE()),\"|\",Facts[Quantity])",
+"powerbi": "FALSE|FALSE|FALSE|FALSE|FALSE|FALSE",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Note],\"Paid\",BLANK()),\"|\",Facts[Quantity])",
+"powerbi": "|||||",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Note],\"Paid\",BLANK(),Facts[Quantity]>2),\"|\",Facts[Quantity])",
+"powerbi": "FALSE|FALSE|FALSE|TRUE|TRUE|TRUE",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Note],\"Paid\",BLANK(),BLANK()),\"|\",Facts[Quantity])",
+"powerbi": "|||||",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Note],\"Paid\",BLANK(),Facts[Sales]),\"|\",Facts[Quantity])",
+"powerbi": "|||20||2.5",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Note],\"Paid\",BLANK(),1),\"|\",Facts[Quantity])",
+"powerbi": "|||1|1|1",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Note],\"Paid\",BLANK(),Facts[Note]),\"|\",Facts[Quantity])",
+"powerbi": "||||Late|",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Note],\"Paid\",BLANK(),ISBLANK(Facts[Note])),\"|\",Facts[Quantity])",
+"powerbi": "FALSE|FALSE|FALSE|TRUE|FALSE|TRUE",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Note],\"Paid\",BLANK(),CALCULATE(SUM(Facts[Sales]),Facts[Region]=\"Nowhere\")),\"|\",Facts[Quantity])",
+"powerbi": "|||||",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Note],\"Paid\",BLANK(),TRUE()),\"|\",Facts[Quantity])",
+"powerbi": "FALSE|FALSE|FALSE|TRUE|TRUE|TRUE",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Note],\"Paid\",BLANK(),FALSE()),\"|\",Facts[Quantity])",
+"powerbi": "FALSE|FALSE|FALSE|FALSE|FALSE|FALSE",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Note],\"Paid\",Facts[Sales]),\"|\",Facts[Quantity])",
+"powerbi": "0|-1.5|10.5|||",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Note],\"Paid\",Facts[Sales],Facts[Quantity]>2),\"|\",Facts[Quantity])",
+"powerbi": "0|-1.5|10.5|TRUE|TRUE|TRUE",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Note],\"Paid\",Facts[Sales],BLANK()),\"|\",Facts[Quantity])",
+"powerbi": "0|-1.5|10.5|||",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Note],\"Paid\",Facts[Sales],Facts[Sales]),\"|\",Facts[Quantity])",
+"powerbi": "0|-1.5|10.5|20||2.5",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Note],\"Paid\",Facts[Sales],1),\"|\",Facts[Quantity])",
+"powerbi": "0|-1.5|10.5|1|1|1",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Note],\"Paid\",Facts[Sales],Facts[Note]),\"|\",Facts[Quantity])",
+"powerbi": "0|-1.5|10.5||Late|",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Note],\"Paid\",Facts[Sales],ISBLANK(Facts[Note])),\"|\",Facts[Quantity])",
+"powerbi": "0|-1.5|10.5|TRUE|FALSE|TRUE",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Note],\"Paid\",Facts[Sales],CALCULATE(SUM(Facts[Sales]),Facts[Region]=\"Nowhere\")),\"|\",Facts[Quantity])",
+"powerbi": "0|-1.5|10.5|||",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Note],\"Paid\",Facts[Sales],TRUE()),\"|\",Facts[Quantity])",
+"powerbi": "0|-1.5|10.5|TRUE|TRUE|TRUE",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Note],\"Paid\",Facts[Sales],FALSE()),\"|\",Facts[Quantity])",
+"powerbi": "0|-1.5|10.5|FALSE|FALSE|FALSE",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Note],\"Paid\",1),\"|\",Facts[Quantity])",
+"powerbi": "1|1|1|||",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Note],\"Paid\",1,Facts[Quantity]>2),\"|\",Facts[Quantity])",
+"powerbi": "1|1|1|TRUE|TRUE|TRUE",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Note],\"Paid\",1,BLANK()),\"|\",Facts[Quantity])",
+"powerbi": "1|1|1|||",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Note],\"Paid\",1,Facts[Sales]),\"|\",Facts[Quantity])",
+"powerbi": "1|1|1|20||2.5",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Note],\"Paid\",1,1),\"|\",Facts[Quantity])",
+"powerbi": "1|1|1|1|1|1",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Note],\"Paid\",1,Facts[Note]),\"|\",Facts[Quantity])",
+"powerbi": "1|1|1||Late|",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Note],\"Paid\",1,ISBLANK(Facts[Note])),\"|\",Facts[Quantity])",
+"powerbi": "1|1|1|TRUE|FALSE|TRUE",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Note],\"Paid\",1,CALCULATE(SUM(Facts[Sales]),Facts[Region]=\"Nowhere\")),\"|\",Facts[Quantity])",
+"powerbi": "1|1|1|||",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Note],\"Paid\",1,TRUE()),\"|\",Facts[Quantity])",
+"powerbi": "1|1|1|TRUE|TRUE|TRUE",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Note],\"Paid\",1,FALSE()),\"|\",Facts[Quantity])",
+"powerbi": "1|1|1|FALSE|FALSE|FALSE",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Note],\"Paid\",Facts[Note]),\"|\",Facts[Quantity])",
+"powerbi": "Paid|Paid|Paid|||",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Note],\"Paid\",Facts[Note],Facts[Quantity]>2),\"|\",Facts[Quantity])",
+"powerbi": "Paid|Paid|Paid|TRUE|TRUE|TRUE",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Note],\"Paid\",Facts[Note],BLANK()),\"|\",Facts[Quantity])",
+"powerbi": "Paid|Paid|Paid|||",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Note],\"Paid\",Facts[Note],Facts[Sales]),\"|\",Facts[Quantity])",
+"powerbi": "Paid|Paid|Paid|20||2.5",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Note],\"Paid\",Facts[Note],1),\"|\",Facts[Quantity])",
+"powerbi": "Paid|Paid|Paid|1|1|1",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Note],\"Paid\",Facts[Note],Facts[Note]),\"|\",Facts[Quantity])",
+"powerbi": "Paid|Paid|Paid||Late|",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Note],\"Paid\",Facts[Note],ISBLANK(Facts[Note])),\"|\",Facts[Quantity])",
+"powerbi": "Paid|Paid|Paid|TRUE|FALSE|TRUE",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Note],\"Paid\",Facts[Note],CALCULATE(SUM(Facts[Sales]),Facts[Region]=\"Nowhere\")),\"|\",Facts[Quantity])",
+"powerbi": "Paid|Paid|Paid|||",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Note],\"Paid\",Facts[Note],TRUE()),\"|\",Facts[Quantity])",
+"powerbi": "Paid|Paid|Paid|TRUE|TRUE|TRUE",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Note],\"Paid\",Facts[Note],FALSE()),\"|\",Facts[Quantity])",
+"powerbi": "Paid|Paid|Paid|FALSE|FALSE|FALSE",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Note],\"Paid\",ISBLANK(Facts[Note])),\"|\",Facts[Quantity])",
+"powerbi": "FALSE|FALSE|FALSE|FALSE|FALSE|FALSE",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Note],\"Paid\",ISBLANK(Facts[Note]),Facts[Quantity]>2),\"|\",Facts[Quantity])",
+"powerbi": "FALSE|FALSE|FALSE|TRUE|TRUE|TRUE",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Note],\"Paid\",ISBLANK(Facts[Note]),BLANK()),\"|\",Facts[Quantity])",
+"powerbi": "FALSE|FALSE|FALSE|FALSE|FALSE|FALSE",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Note],\"Paid\",ISBLANK(Facts[Note]),Facts[Sales]),\"|\",Facts[Quantity])",
+"powerbi": "FALSE|FALSE|FALSE|20||2.5",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Note],\"Paid\",ISBLANK(Facts[Note]),1),\"|\",Facts[Quantity])",
+"powerbi": "FALSE|FALSE|FALSE|1|1|1",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Note],\"Paid\",ISBLANK(Facts[Note]),Facts[Note]),\"|\",Facts[Quantity])",
+"powerbi": "FALSE|FALSE|FALSE||Late|",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Note],\"Paid\",ISBLANK(Facts[Note]),ISBLANK(Facts[Note])),\"|\",Facts[Quantity])",
+"powerbi": "FALSE|FALSE|FALSE|TRUE|FALSE|TRUE",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Note],\"Paid\",ISBLANK(Facts[Note]),CALCULATE(SUM(Facts[Sales]),Facts[Region]=\"Nowhere\")),\"|\",Facts[Quantity])",
+"powerbi": "FALSE|FALSE|FALSE|||",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Note],\"Paid\",ISBLANK(Facts[Note]),TRUE()),\"|\",Facts[Quantity])",
+"powerbi": "FALSE|FALSE|FALSE|TRUE|TRUE|TRUE",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Note],\"Paid\",ISBLANK(Facts[Note]),FALSE()),\"|\",Facts[Quantity])",
+"powerbi": "FALSE|FALSE|FALSE|FALSE|FALSE|FALSE",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Note],\"Paid\",CALCULATE(SUM(Facts[Sales]),Facts[Region]=\"Nowhere\")),\"|\",Facts[Quantity])",
+"powerbi": "|||||",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Note],\"Paid\",CALCULATE(SUM(Facts[Sales]),Facts[Region]=\"Nowhere\"),Facts[Quantity]>2),\"|\",Facts[Quantity])",
+"powerbi": "|||TRUE|TRUE|TRUE",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Note],\"Paid\",CALCULATE(SUM(Facts[Sales]),Facts[Region]=\"Nowhere\"),BLANK()),\"|\",Facts[Quantity])",
+"powerbi": "|||||",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Note],\"Paid\",CALCULATE(SUM(Facts[Sales]),Facts[Region]=\"Nowhere\"),Facts[Sales]),\"|\",Facts[Quantity])",
+"powerbi": "|||20||2.5",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Note],\"Paid\",CALCULATE(SUM(Facts[Sales]),Facts[Region]=\"Nowhere\"),1),\"|\",Facts[Quantity])",
+"powerbi": "|||1|1|1",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Note],\"Paid\",CALCULATE(SUM(Facts[Sales]),Facts[Region]=\"Nowhere\"),Facts[Note]),\"|\",Facts[Quantity])",
+"powerbi": "||||Late|",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Note],\"Paid\",CALCULATE(SUM(Facts[Sales]),Facts[Region]=\"Nowhere\"),ISBLANK(Facts[Note])),\"|\",Facts[Quantity])",
+"powerbi": "|||TRUE|FALSE|TRUE",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Note],\"Paid\",CALCULATE(SUM(Facts[Sales]),Facts[Region]=\"Nowhere\"),CALCULATE(SUM(Facts[Sales]),Facts[Region]=\"Nowhere\")),\"|\",Facts[Quantity])",
+"powerbi": "|||||",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Note],\"Paid\",CALCULATE(SUM(Facts[Sales]),Facts[Region]=\"Nowhere\"),TRUE()),\"|\",Facts[Quantity])",
+"powerbi": "|||TRUE|TRUE|TRUE",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Note],\"Paid\",CALCULATE(SUM(Facts[Sales]),Facts[Region]=\"Nowhere\"),FALSE()),\"|\",Facts[Quantity])",
+"powerbi": "|||FALSE|FALSE|FALSE",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Note],\"Paid\",Facts[Region]=\"East\"),\"|\",Facts[Quantity])",
+"powerbi": "FALSE|TRUE|TRUE|FALSE|FALSE|FALSE",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Note],\"Paid\",Facts[Region]=\"East\",Facts[Quantity]>2),\"|\",Facts[Quantity])",
+"powerbi": "FALSE|TRUE|TRUE|TRUE|TRUE|TRUE",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Note],\"Paid\",Facts[Region]=\"East\",BLANK()),\"|\",Facts[Quantity])",
+"powerbi": "FALSE|TRUE|TRUE|FALSE|FALSE|FALSE",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Note],\"Paid\",Facts[Region]=\"East\",Facts[Sales]),\"|\",Facts[Quantity])",
+"powerbi": "FALSE|TRUE|TRUE|20||2.5",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Note],\"Paid\",Facts[Region]=\"East\",1),\"|\",Facts[Quantity])",
+"powerbi": "FALSE|TRUE|TRUE|1|1|1",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Note],\"Paid\",Facts[Region]=\"East\",Facts[Note]),\"|\",Facts[Quantity])",
+"powerbi": "FALSE|TRUE|TRUE||Late|",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Note],\"Paid\",Facts[Region]=\"East\",ISBLANK(Facts[Note])),\"|\",Facts[Quantity])",
+"powerbi": "FALSE|TRUE|TRUE|TRUE|FALSE|TRUE",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Note],\"Paid\",Facts[Region]=\"East\",CALCULATE(SUM(Facts[Sales]),Facts[Region]=\"Nowhere\")),\"|\",Facts[Quantity])",
+"powerbi": "FALSE|TRUE|TRUE|||",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Note],\"Paid\",Facts[Region]=\"East\",TRUE()),\"|\",Facts[Quantity])",
+"powerbi": "FALSE|TRUE|TRUE|TRUE|TRUE|TRUE",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Note],\"Paid\",Facts[Region]=\"East\",FALSE()),\"|\",Facts[Quantity])",
+"powerbi": "FALSE|TRUE|TRUE|FALSE|FALSE|FALSE",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Note],\"Paid\",TRUE()),\"|\",Facts[Quantity])",
+"powerbi": "TRUE|TRUE|TRUE|FALSE|FALSE|FALSE",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Note],\"Paid\",TRUE(),Facts[Quantity]>2),\"|\",Facts[Quantity])",
+"powerbi": "TRUE|TRUE|TRUE|TRUE|TRUE|TRUE",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Note],\"Paid\",TRUE(),BLANK()),\"|\",Facts[Quantity])",
+"powerbi": "TRUE|TRUE|TRUE|FALSE|FALSE|FALSE",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Note],\"Paid\",TRUE(),Facts[Sales]),\"|\",Facts[Quantity])",
+"powerbi": "TRUE|TRUE|TRUE|20||2.5",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Note],\"Paid\",TRUE(),1),\"|\",Facts[Quantity])",
+"powerbi": "TRUE|TRUE|TRUE|1|1|1",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Note],\"Paid\",TRUE(),Facts[Note]),\"|\",Facts[Quantity])",
+"powerbi": "TRUE|TRUE|TRUE||Late|",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Note],\"Paid\",TRUE(),ISBLANK(Facts[Note])),\"|\",Facts[Quantity])",
+"powerbi": "TRUE|TRUE|TRUE|TRUE|FALSE|TRUE",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Note],\"Paid\",TRUE(),CALCULATE(SUM(Facts[Sales]),Facts[Region]=\"Nowhere\")),\"|\",Facts[Quantity])",
+"powerbi": "TRUE|TRUE|TRUE|||",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Note],\"Paid\",TRUE(),TRUE()),\"|\",Facts[Quantity])",
+"powerbi": "TRUE|TRUE|TRUE|TRUE|TRUE|TRUE",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Note],\"Paid\",TRUE(),FALSE()),\"|\",Facts[Quantity])",
+"powerbi": "TRUE|TRUE|TRUE|FALSE|FALSE|FALSE",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Note],\"Paid\",FALSE()),\"|\",Facts[Quantity])",
+"powerbi": "FALSE|FALSE|FALSE|FALSE|FALSE|FALSE",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Note],\"Paid\",FALSE(),Facts[Quantity]>2),\"|\",Facts[Quantity])",
+"powerbi": "FALSE|FALSE|FALSE|TRUE|TRUE|TRUE",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Note],\"Paid\",FALSE(),BLANK()),\"|\",Facts[Quantity])",
+"powerbi": "FALSE|FALSE|FALSE|FALSE|FALSE|FALSE",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Note],\"Paid\",FALSE(),Facts[Sales]),\"|\",Facts[Quantity])",
+"powerbi": "FALSE|FALSE|FALSE|20||2.5",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Note],\"Paid\",FALSE(),1),\"|\",Facts[Quantity])",
+"powerbi": "FALSE|FALSE|FALSE|1|1|1",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Note],\"Paid\",FALSE(),Facts[Note]),\"|\",Facts[Quantity])",
+"powerbi": "FALSE|FALSE|FALSE||Late|",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Note],\"Paid\",FALSE(),ISBLANK(Facts[Note])),\"|\",Facts[Quantity])",
+"powerbi": "FALSE|FALSE|FALSE|TRUE|FALSE|TRUE",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Note],\"Paid\",FALSE(),CALCULATE(SUM(Facts[Sales]),Facts[Region]=\"Nowhere\")),\"|\",Facts[Quantity])",
+"powerbi": "FALSE|FALSE|FALSE|||",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Note],\"Paid\",FALSE(),TRUE()),\"|\",Facts[Quantity])",
+"powerbi": "FALSE|FALSE|FALSE|TRUE|TRUE|TRUE",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Note],\"Paid\",FALSE(),FALSE()),\"|\",Facts[Quantity])",
+"powerbi": "FALSE|FALSE|FALSE|FALSE|FALSE|FALSE",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Note],\"Paid\",Facts[Quantity]>2,\"Late\",Facts[Quantity]>2),\"|\",Facts[Quantity])",
+"powerbi": "FALSE|FALSE|FALSE|FALSE|TRUE|FALSE",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Note],\"Paid\",Facts[Quantity]>2,\"Late\",BLANK()),\"|\",Facts[Quantity])",
+"powerbi": "FALSE|FALSE|FALSE|||",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Note],\"Paid\",Facts[Quantity]>2,\"Late\",Facts[Sales]),\"|\",Facts[Quantity])",
+"powerbi": "FALSE|FALSE|FALSE|||",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Note],\"Paid\",Facts[Quantity]>2,\"Late\",1),\"|\",Facts[Quantity])",
+"powerbi": "FALSE|FALSE|FALSE||1|",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Note],\"Paid\",Facts[Quantity]>2,\"Late\",CALCULATE(SUM(Facts[Sales]),Facts[Region]=\"Nowhere\")),\"|\",Facts[Quantity])",
+"powerbi": "FALSE|FALSE|FALSE|||",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Note],\"Paid\",Facts[Quantity]>2,\"Late\",TRUE()),\"|\",Facts[Quantity])",
+"powerbi": "FALSE|FALSE|FALSE|FALSE|TRUE|FALSE",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Note],\"Paid\",Facts[Quantity]>2,\"Late\",Facts[Region]=\"East\"),\"|\",Facts[Quantity])",
+"powerbi": "FALSE|FALSE|FALSE|FALSE|FALSE|FALSE",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Note],\"Paid\",BLANK(),\"Late\",Facts[Quantity]>2),\"|\",Facts[Quantity])",
+"powerbi": "FALSE|FALSE|FALSE|FALSE|TRUE|FALSE",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Note],\"Paid\",BLANK(),\"Late\",BLANK()),\"|\",Facts[Quantity])",
+"powerbi": "|||||",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Note],\"Paid\",BLANK(),\"Late\",Facts[Sales]),\"|\",Facts[Quantity])",
+"powerbi": "|||||",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Note],\"Paid\",BLANK(),\"Late\",1),\"|\",Facts[Quantity])",
+"powerbi": "||||1|",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Note],\"Paid\",BLANK(),\"Late\",CALCULATE(SUM(Facts[Sales]),Facts[Region]=\"Nowhere\")),\"|\",Facts[Quantity])",
+"powerbi": "|||||",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Note],\"Paid\",BLANK(),\"Late\",TRUE()),\"|\",Facts[Quantity])",
+"powerbi": "FALSE|FALSE|FALSE|FALSE|TRUE|FALSE",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Note],\"Paid\",BLANK(),\"Late\",Facts[Region]=\"East\"),\"|\",Facts[Quantity])",
+"powerbi": "FALSE|FALSE|FALSE|FALSE|FALSE|FALSE",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Note],\"Paid\",Facts[Sales],\"Late\",Facts[Quantity]>2),\"|\",Facts[Quantity])",
+"powerbi": "0|-1.5|10.5|FALSE|TRUE|FALSE",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Note],\"Paid\",Facts[Sales],\"Late\",BLANK()),\"|\",Facts[Quantity])",
+"powerbi": "0|-1.5|10.5|||",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Note],\"Paid\",Facts[Sales],\"Late\",Facts[Sales]),\"|\",Facts[Quantity])",
+"powerbi": "0|-1.5|10.5|||",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Note],\"Paid\",Facts[Sales],\"Late\",1),\"|\",Facts[Quantity])",
+"powerbi": "0|-1.5|10.5||1|",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Note],\"Paid\",Facts[Sales],\"Late\",CALCULATE(SUM(Facts[Sales]),Facts[Region]=\"Nowhere\")),\"|\",Facts[Quantity])",
+"powerbi": "0|-1.5|10.5|||",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Note],\"Paid\",Facts[Sales],\"Late\",TRUE()),\"|\",Facts[Quantity])",
+"powerbi": "0|-1.5|10.5|FALSE|TRUE|FALSE",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Note],\"Paid\",Facts[Sales],\"Late\",Facts[Region]=\"East\"),\"|\",Facts[Quantity])",
+"powerbi": "0|-1.5|10.5|FALSE|FALSE|FALSE",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Note],\"Paid\",1,\"Late\",Facts[Quantity]>2),\"|\",Facts[Quantity])",
+"powerbi": "1|1|1|FALSE|TRUE|FALSE",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Note],\"Paid\",1,\"Late\",BLANK()),\"|\",Facts[Quantity])",
+"powerbi": "1|1|1|||",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Note],\"Paid\",1,\"Late\",Facts[Sales]),\"|\",Facts[Quantity])",
+"powerbi": "1|1|1|||",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Note],\"Paid\",1,\"Late\",1),\"|\",Facts[Quantity])",
+"powerbi": "1|1|1||1|",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Note],\"Paid\",1,\"Late\",CALCULATE(SUM(Facts[Sales]),Facts[Region]=\"Nowhere\")),\"|\",Facts[Quantity])",
+"powerbi": "1|1|1|||",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Note],\"Paid\",1,\"Late\",TRUE()),\"|\",Facts[Quantity])",
+"powerbi": "1|1|1|FALSE|TRUE|FALSE",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Note],\"Paid\",1,\"Late\",Facts[Region]=\"East\"),\"|\",Facts[Quantity])",
+"powerbi": "1|1|1|FALSE|FALSE|FALSE",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Note],\"Paid\",CALCULATE(SUM(Facts[Sales]),Facts[Region]=\"Nowhere\"),\"Late\",Facts[Quantity]>2),\"|\",Facts[Quantity])",
+"powerbi": "|||FALSE|TRUE|FALSE",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Note],\"Paid\",CALCULATE(SUM(Facts[Sales]),Facts[Region]=\"Nowhere\"),\"Late\",BLANK()),\"|\",Facts[Quantity])",
+"powerbi": "|||||",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Note],\"Paid\",CALCULATE(SUM(Facts[Sales]),Facts[Region]=\"Nowhere\"),\"Late\",Facts[Sales]),\"|\",Facts[Quantity])",
+"powerbi": "|||||",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Note],\"Paid\",CALCULATE(SUM(Facts[Sales]),Facts[Region]=\"Nowhere\"),\"Late\",1),\"|\",Facts[Quantity])",
+"powerbi": "||||1|",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Note],\"Paid\",CALCULATE(SUM(Facts[Sales]),Facts[Region]=\"Nowhere\"),\"Late\",CALCULATE(SUM(Facts[Sales]),Facts[Region]=\"Nowhere\")),\"|\",Facts[Quantity])",
+"powerbi": "|||||",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Note],\"Paid\",CALCULATE(SUM(Facts[Sales]),Facts[Region]=\"Nowhere\"),\"Late\",TRUE()),\"|\",Facts[Quantity])",
+"powerbi": "|||FALSE|TRUE|FALSE",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Note],\"Paid\",CALCULATE(SUM(Facts[Sales]),Facts[Region]=\"Nowhere\"),\"Late\",Facts[Region]=\"East\"),\"|\",Facts[Quantity])",
+"powerbi": "|||FALSE|FALSE|FALSE",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Note],\"Paid\",TRUE(),\"Late\",Facts[Quantity]>2),\"|\",Facts[Quantity])",
+"powerbi": "TRUE|TRUE|TRUE|FALSE|TRUE|FALSE",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Note],\"Paid\",TRUE(),\"Late\",BLANK()),\"|\",Facts[Quantity])",
+"powerbi": "TRUE|TRUE|TRUE|||",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Note],\"Paid\",TRUE(),\"Late\",Facts[Sales]),\"|\",Facts[Quantity])",
+"powerbi": "TRUE|TRUE|TRUE|||",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Note],\"Paid\",TRUE(),\"Late\",1),\"|\",Facts[Quantity])",
+"powerbi": "TRUE|TRUE|TRUE||1|",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Note],\"Paid\",TRUE(),\"Late\",CALCULATE(SUM(Facts[Sales]),Facts[Region]=\"Nowhere\")),\"|\",Facts[Quantity])",
+"powerbi": "TRUE|TRUE|TRUE|||",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Note],\"Paid\",TRUE(),\"Late\",TRUE()),\"|\",Facts[Quantity])",
+"powerbi": "TRUE|TRUE|TRUE|FALSE|TRUE|FALSE",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Note],\"Paid\",TRUE(),\"Late\",Facts[Region]=\"East\"),\"|\",Facts[Quantity])",
+"powerbi": "TRUE|TRUE|TRUE|FALSE|FALSE|FALSE",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Note],\"Paid\",ISBLANK(Facts[Note]),\"Late\",Facts[Quantity]>2),\"|\",Facts[Quantity])",
+"powerbi": "FALSE|FALSE|FALSE|FALSE|TRUE|FALSE",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Note],\"Paid\",ISBLANK(Facts[Note]),\"Late\",BLANK()),\"|\",Facts[Quantity])",
+"powerbi": "FALSE|FALSE|FALSE|||",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Note],\"Paid\",ISBLANK(Facts[Note]),\"Late\",Facts[Sales]),\"|\",Facts[Quantity])",
+"powerbi": "FALSE|FALSE|FALSE|||",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Note],\"Paid\",ISBLANK(Facts[Note]),\"Late\",1),\"|\",Facts[Quantity])",
+"powerbi": "FALSE|FALSE|FALSE||1|",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Note],\"Paid\",ISBLANK(Facts[Note]),\"Late\",CALCULATE(SUM(Facts[Sales]),Facts[Region]=\"Nowhere\")),\"|\",Facts[Quantity])",
+"powerbi": "FALSE|FALSE|FALSE|||",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Note],\"Paid\",ISBLANK(Facts[Note]),\"Late\",TRUE()),\"|\",Facts[Quantity])",
+"powerbi": "FALSE|FALSE|FALSE|FALSE|TRUE|FALSE",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Note],\"Paid\",ISBLANK(Facts[Note]),\"Late\",Facts[Region]=\"East\"),\"|\",Facts[Quantity])",
+"powerbi": "FALSE|FALSE|FALSE|FALSE|FALSE|FALSE",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Note],\"Paid\",ISBLANK(Facts[Note]),\"Late\",TRUE(),Facts[Sales]),\"|\",Facts[Quantity])",
+"powerbi": "FALSE|FALSE|FALSE|20|TRUE|2.5",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Note],\"Paid\",CALCULATE(SUM(Facts[Sales]),Facts[Region]=\"Nowhere\"),\"Late\",Facts[Region]=\"East\",1),\"|\",Facts[Quantity])",
+"powerbi": "|||1|FALSE|1",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Note],\"Paid\",Facts[Region]=\"East\",\"Late\",Facts[Sales],BLANK()),\"|\",Facts[Quantity])",
+"powerbi": "FALSE|TRUE|TRUE|||",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Note],\"Paid\",1,\"Late\",CALCULATE(SUM(Facts[Sales]),Facts[Region]=\"Nowhere\"),Facts[Quantity]>2),\"|\",Facts[Quantity])",
+"powerbi": "1|1|1|TRUE||TRUE",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Note],\"Paid\",BLANK(),\"Late\",1,CALCULATE(SUM(Facts[Sales]),Facts[Region]=\"Nowhere\")),\"|\",Facts[Quantity])",
+"powerbi": "||||1|",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Note],\"Paid\",Facts[Region]=\"East\",\"Late\",Facts[Quantity]>2,BLANK()),\"|\",Facts[Quantity])",
+"powerbi": "FALSE|TRUE|TRUE|FALSE|TRUE|FALSE",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Note],\"Paid\",Facts[Sales],\"Late\",Facts[Quantity]>2,Facts[Sales]),\"|\",Facts[Quantity])",
+"powerbi": "0|-1.5|10.5|20|TRUE|2.5",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Note],\"Paid\",Facts[Quantity]>2,\"Late\",CALCULATE(SUM(Facts[Sales]),Facts[Region]=\"Nowhere\"),FALSE()),\"|\",Facts[Quantity])",
+"powerbi": "FALSE|FALSE|FALSE|FALSE||FALSE",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Note],\"Paid\",CALCULATE(SUM(Facts[Sales]),Facts[Region]=\"Nowhere\"),\"Late\",Facts[Sales],BLANK()),\"|\",Facts[Quantity])",
+"powerbi": "|||||",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Note],\"Paid\",Facts[Sales],\"Late\",Facts[Quantity]>2,TRUE()),\"|\",Facts[Quantity])",
+"powerbi": "0|-1.5|10.5|TRUE|TRUE|TRUE",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Note],\"Paid\",ISBLANK(Facts[Note]),\"Late\",CALCULATE(SUM(Facts[Sales]),Facts[Region]=\"Nowhere\"),1),\"|\",Facts[Quantity])",
+"powerbi": "FALSE|FALSE|FALSE|1||1",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Note],\"Paid\",ISBLANK(Facts[Note]),\"Late\",CALCULATE(SUM(Facts[Sales]),Facts[Region]=\"Nowhere\"),BLANK()),\"|\",Facts[Quantity])",
+"powerbi": "FALSE|FALSE|FALSE|||",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Note],\"Paid\",CALCULATE(SUM(Facts[Sales]),Facts[Region]=\"Nowhere\"),\"Late\",CALCULATE(SUM(Facts[Sales]),Facts[Region]=\"Nowhere\"),BLANK()),\"|\",Facts[Quantity])",
+"powerbi": "|||||",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Note],\"Paid\",Facts[Sales],\"Late\",Facts[Region]=\"East\",BLANK()),\"|\",Facts[Quantity])",
+"powerbi": "0|-1.5|10.5|FALSE|FALSE|FALSE",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Note],\"Paid\",BLANK(),\"Late\",Facts[Region]=\"East\",1),\"|\",Facts[Quantity])",
+"powerbi": "|||1|FALSE|1",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Note],\"Paid\",1,\"Late\",TRUE(),Facts[Quantity]>2),\"|\",Facts[Quantity])",
+"powerbi": "1|1|1|TRUE|TRUE|TRUE",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Note],\"Paid\",CALCULATE(SUM(Facts[Sales]),Facts[Region]=\"Nowhere\"),\"Late\",1,FALSE()),\"|\",Facts[Quantity])",
+"powerbi": "|||FALSE|1|FALSE",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Note],\"Paid\",Facts[Region]=\"East\",\"Late\",TRUE(),CALCULATE(SUM(Facts[Sales]),Facts[Region]=\"Nowhere\")),\"|\",Facts[Quantity])",
+"powerbi": "FALSE|TRUE|TRUE||TRUE|",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Note],\"Paid\",ISBLANK(Facts[Note]),\"Late\",BLANK(),Facts[Quantity]>2),\"|\",Facts[Quantity])",
+"powerbi": "FALSE|FALSE|FALSE|TRUE|FALSE|TRUE",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Note],\"Paid\",1,\"Late\",Facts[Sales],1),\"|\",Facts[Quantity])",
+"powerbi": "1|1|1|1||1",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Note],\"Paid\",ISBLANK(Facts[Note]),\"Late\",CALCULATE(SUM(Facts[Sales]),Facts[Region]=\"Nowhere\"),Facts[Sales]),\"|\",Facts[Quantity])",
+"powerbi": "FALSE|FALSE|FALSE|20||2.5",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Note],\"Paid\",TRUE(),\"Late\",TRUE(),TRUE()),\"|\",Facts[Quantity])",
+"powerbi": "TRUE|TRUE|TRUE|TRUE|TRUE|TRUE",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Note],\"Paid\",Facts[Sales],\"Late\",Facts[Quantity]>2,1),\"|\",Facts[Quantity])",
+"powerbi": "0|-1.5|10.5|1|TRUE|1",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Note],\"Paid\",1,\"Late\",Facts[Sales],CALCULATE(SUM(Facts[Sales]),Facts[Region]=\"Nowhere\")),\"|\",Facts[Quantity])",
+"powerbi": "1|1|1|||",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Note],\"Paid\",BLANK(),\"Late\",Facts[Quantity]>2,Facts[Sales]),\"|\",Facts[Quantity])",
+"powerbi": "|||20|TRUE|2.5",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Sales],10.5,Facts[Quantity]>2,Facts[Note]),\"|\",Facts[Quantity])",
+"powerbi": "Paid|Paid|FALSE||Late|",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Sales],10.5,BLANK(),Facts[Note]),\"|\",Facts[Quantity])",
+"powerbi": "Paid|Paid|||Late|",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Sales],10.5,Facts[Sales],Facts[Note]),\"|\",Facts[Quantity])",
+"powerbi": "Paid|Paid|10.5||Late|",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Sales],10.5,1,Facts[Note]),\"|\",Facts[Quantity])",
+"powerbi": "Paid|Paid|1||Late|",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Sales],10.5,Facts[Note]),\"|\",Facts[Quantity])",
+"powerbi": "||Paid|||",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Sales],10.5,Facts[Note],Facts[Quantity]>2),\"|\",Facts[Quantity])",
+"powerbi": "FALSE|FALSE|Paid|TRUE|TRUE|TRUE",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Sales],10.5,Facts[Note],BLANK()),\"|\",Facts[Quantity])",
+"powerbi": "||Paid|||",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Sales],10.5,Facts[Note],Facts[Sales]),\"|\",Facts[Quantity])",
+"powerbi": "0|-1.5|Paid|20||2.5",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Sales],10.5,Facts[Note],1),\"|\",Facts[Quantity])",
+"powerbi": "1|1|Paid|1|1|1",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Sales],10.5,Facts[Note],Facts[Note]),\"|\",Facts[Quantity])",
+"powerbi": "Paid|Paid|Paid||Late|",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Sales],10.5,Facts[Note],ISBLANK(Facts[Note])),\"|\",Facts[Quantity])",
+"powerbi": "FALSE|FALSE|Paid|TRUE|FALSE|TRUE",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Sales],10.5,Facts[Note],CALCULATE(SUM(Facts[Sales]),Facts[Region]=\"Nowhere\")),\"|\",Facts[Quantity])",
+"powerbi": "||Paid|||",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Sales],10.5,Facts[Note],TRUE()),\"|\",Facts[Quantity])",
+"powerbi": "TRUE|TRUE|Paid|TRUE|TRUE|TRUE",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Sales],10.5,Facts[Note],FALSE()),\"|\",Facts[Quantity])",
+"powerbi": "FALSE|FALSE|Paid|FALSE|FALSE|FALSE",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Sales],10.5,ISBLANK(Facts[Note]),Facts[Note]),\"|\",Facts[Quantity])",
+"powerbi": "Paid|Paid|FALSE||Late|",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Sales],10.5,CALCULATE(SUM(Facts[Sales]),Facts[Region]=\"Nowhere\"),Facts[Note]),\"|\",Facts[Quantity])",
+"powerbi": "Paid|Paid|||Late|",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Sales],10.5,Facts[Region]=\"East\",Facts[Note]),\"|\",Facts[Quantity])",
+"powerbi": "Paid|Paid|TRUE||Late|",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Sales],10.5,TRUE(),Facts[Note]),\"|\",Facts[Quantity])",
+"powerbi": "Paid|Paid|TRUE||Late|",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Sales],10.5,FALSE(),Facts[Note]),\"|\",Facts[Quantity])",
+"powerbi": "Paid|Paid|FALSE||Late|",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(TRUE(),TRUE(),Facts[Note]),\"|\",Facts[Quantity])",
+"powerbi": "Paid|Paid|Paid||Late|",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(TRUE(),TRUE(),Facts[Note],Facts[Quantity]>2),\"|\",Facts[Quantity])",
+"powerbi": "Paid|Paid|Paid||Late|",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(TRUE(),TRUE(),Facts[Note],BLANK()),\"|\",Facts[Quantity])",
+"powerbi": "Paid|Paid|Paid||Late|",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(TRUE(),TRUE(),Facts[Note],Facts[Sales]),\"|\",Facts[Quantity])",
+"powerbi": "Paid|Paid|Paid||Late|",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(TRUE(),TRUE(),Facts[Note],1),\"|\",Facts[Quantity])",
+"powerbi": "Paid|Paid|Paid||Late|",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(TRUE(),TRUE(),Facts[Note],Facts[Note]),\"|\",Facts[Quantity])",
+"powerbi": "Paid|Paid|Paid||Late|",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(TRUE(),TRUE(),Facts[Note],ISBLANK(Facts[Note])),\"|\",Facts[Quantity])",
+"powerbi": "Paid|Paid|Paid||Late|",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(TRUE(),TRUE(),Facts[Note],CALCULATE(SUM(Facts[Sales]),Facts[Region]=\"Nowhere\")),\"|\",Facts[Quantity])",
+"powerbi": "Paid|Paid|Paid||Late|",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(TRUE(),TRUE(),Facts[Note],TRUE()),\"|\",Facts[Quantity])",
+"powerbi": "Paid|Paid|Paid||Late|",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(TRUE(),TRUE(),Facts[Note],FALSE()),\"|\",Facts[Quantity])",
+"powerbi": "Paid|Paid|Paid||Late|",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Region],\"East\",Facts[Region]=\"East\",\"West\",BLANK()),\"|\",Facts[Quantity])",
+"powerbi": "|TRUE|TRUE|||TRUE",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Region],\"East\",Facts[Region]=\"East\",\"West\",Facts[Region]=\"East\"),\"|\",Facts[Quantity])",
+"powerbi": "FALSE|TRUE|TRUE|FALSE|FALSE|TRUE",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Region],\"East\",Facts[Region]=\"East\",Facts[Region]=\"East\"),\"|\",Facts[Quantity])",
+"powerbi": "FALSE|TRUE|TRUE|FALSE|FALSE|TRUE",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Region],\"East\",Facts[Note]>\"M\"),\"|\",Facts[Quantity])",
+"powerbi": "FALSE|TRUE|TRUE|FALSE|FALSE|FALSE",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Region],\"East\",Facts[Note]>\"M\",\"West\",BLANK()),\"|\",Facts[Quantity])",
+"powerbi": "|TRUE|TRUE|||FALSE",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Region],\"East\",Facts[Note]>\"M\",\"West\",Facts[Note]>\"M\"),\"|\",Facts[Quantity])",
+"powerbi": "TRUE|TRUE|TRUE|FALSE|FALSE|FALSE",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Region],\"East\",BLANK(),\"West\",Facts[Note]>\"M\"),\"|\",Facts[Quantity])",
+"powerbi": "TRUE|FALSE|FALSE|FALSE|FALSE|FALSE",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Region],\"East\",Facts[Note]>\"M\",Facts[Note]>\"M\"),\"|\",Facts[Quantity])",
+"powerbi": "TRUE|TRUE|TRUE|FALSE|FALSE|FALSE",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Region],\"East\",Facts[Note]>\"M\",BLANK()),\"|\",Facts[Quantity])",
+"powerbi": "FALSE|TRUE|TRUE|FALSE|FALSE|FALSE",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Region],\"East\",Facts[Region]<Facts[Note]),\"|\",Facts[Quantity])",
+"powerbi": "FALSE|TRUE|TRUE|FALSE|FALSE|FALSE",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Region],\"East\",Facts[Region]<Facts[Note],\"West\",BLANK()),\"|\",Facts[Quantity])",
+"powerbi": "|TRUE|TRUE|||FALSE",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Region],\"East\",Facts[Region]<Facts[Note],\"West\",Facts[Region]<Facts[Note]),\"|\",Facts[Quantity])",
+"powerbi": "FALSE|TRUE|TRUE|FALSE|FALSE|FALSE",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Region],\"East\",BLANK(),\"West\",Facts[Region]<Facts[Note]),\"|\",Facts[Quantity])",
+"powerbi": "FALSE|FALSE|FALSE|FALSE|FALSE|FALSE",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Region],\"East\",Facts[Region]<Facts[Note],Facts[Region]<Facts[Note]),\"|\",Facts[Quantity])",
+"powerbi": "FALSE|TRUE|TRUE|FALSE|FALSE|FALSE",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Region],\"East\",Facts[Region]<Facts[Note],BLANK()),\"|\",Facts[Quantity])",
+"powerbi": "FALSE|TRUE|TRUE|FALSE|FALSE|FALSE",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Region],\"East\",DATE(2020,1,1)<DATE(2020,1,2)),\"|\",Facts[Quantity])",
+"powerbi": "FALSE|TRUE|TRUE|FALSE|FALSE|TRUE",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Region],\"East\",DATE(2020,1,1)<DATE(2020,1,2),\"West\",BLANK()),\"|\",Facts[Quantity])",
+"powerbi": "|TRUE|TRUE|||TRUE",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Region],\"East\",DATE(2020,1,1)<DATE(2020,1,2),\"West\",DATE(2020,1,1)<DATE(2020,1,2)),\"|\",Facts[Quantity])",
+"powerbi": "TRUE|TRUE|TRUE|TRUE|FALSE|TRUE",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Region],\"East\",BLANK(),\"West\",DATE(2020,1,1)<DATE(2020,1,2)),\"|\",Facts[Quantity])",
+"powerbi": "TRUE|FALSE|FALSE|TRUE|FALSE|FALSE",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Region],\"East\",DATE(2020,1,1)<DATE(2020,1,2),DATE(2020,1,1)<DATE(2020,1,2)),\"|\",Facts[Quantity])",
+"powerbi": "TRUE|TRUE|TRUE|TRUE|TRUE|TRUE",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Region],\"East\",DATE(2020,1,1)<DATE(2020,1,2),BLANK()),\"|\",Facts[Quantity])",
+"powerbi": "FALSE|TRUE|TRUE|FALSE|FALSE|TRUE",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Region],\"East\",DIVIDE(Facts[Sales],Facts[Quantity])>1),\"|\",Facts[Quantity])",
+"powerbi": "FALSE|FALSE|TRUE|FALSE|FALSE|FALSE",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Region],\"East\",DIVIDE(Facts[Sales],Facts[Quantity])>1,\"West\",BLANK()),\"|\",Facts[Quantity])",
+"powerbi": "|FALSE|TRUE|||FALSE",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Region],\"East\",DIVIDE(Facts[Sales],Facts[Quantity])>1,\"West\",DIVIDE(Facts[Sales],Facts[Quantity])>1),\"|\",Facts[Quantity])",
+"powerbi": "FALSE|FALSE|TRUE|TRUE|FALSE|FALSE",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Region],\"East\",BLANK(),\"West\",DIVIDE(Facts[Sales],Facts[Quantity])>1),\"|\",Facts[Quantity])",
+"powerbi": "FALSE|FALSE|FALSE|TRUE|FALSE|FALSE",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Region],\"East\",DIVIDE(Facts[Sales],Facts[Quantity])>1,DIVIDE(Facts[Sales],Facts[Quantity])>1),\"|\",Facts[Quantity])",
+"powerbi": "FALSE|FALSE|TRUE|TRUE|FALSE|FALSE",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Region],\"East\",DIVIDE(Facts[Sales],Facts[Quantity])>1,BLANK()),\"|\",Facts[Quantity])",
+"powerbi": "FALSE|FALSE|TRUE|FALSE|FALSE|FALSE",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Region],\"East\",ISBLANK(Facts[Sales])),\"|\",Facts[Quantity])",
+"powerbi": "FALSE|FALSE|FALSE|FALSE|FALSE|FALSE",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Region],\"East\",ISBLANK(Facts[Sales]),\"West\",BLANK()),\"|\",Facts[Quantity])",
+"powerbi": "|FALSE|FALSE|||FALSE",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Region],\"East\",ISBLANK(Facts[Sales]),\"West\",ISBLANK(Facts[Sales])),\"|\",Facts[Quantity])",
+"powerbi": "FALSE|FALSE|FALSE|FALSE|FALSE|FALSE",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Region],\"East\",BLANK(),\"West\",ISBLANK(Facts[Sales])),\"|\",Facts[Quantity])",
+"powerbi": "FALSE|FALSE|FALSE|FALSE|FALSE|FALSE",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Region],\"East\",ISBLANK(Facts[Sales]),ISBLANK(Facts[Sales])),\"|\",Facts[Quantity])",
+"powerbi": "FALSE|FALSE|FALSE|FALSE|TRUE|FALSE",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Region],\"East\",ISBLANK(Facts[Sales]),BLANK()),\"|\",Facts[Quantity])",
+"powerbi": "FALSE|FALSE|FALSE|FALSE|FALSE|FALSE",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Region],\"East\",CONTAINSSTRING(Facts[Region],\"s\")),\"|\",Facts[Quantity])",
+"powerbi": "FALSE|TRUE|TRUE|FALSE|FALSE|TRUE",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Region],\"East\",CONTAINSSTRING(Facts[Region],\"s\"),\"West\",BLANK()),\"|\",Facts[Quantity])",
+"powerbi": "|TRUE|TRUE|||TRUE",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Region],\"East\",CONTAINSSTRING(Facts[Region],\"s\"),\"West\",CONTAINSSTRING(Facts[Region],\"s\")),\"|\",Facts[Quantity])",
+"powerbi": "TRUE|TRUE|TRUE|TRUE|FALSE|TRUE",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Region],\"East\",BLANK(),\"West\",CONTAINSSTRING(Facts[Region],\"s\")),\"|\",Facts[Quantity])",
+"powerbi": "TRUE|FALSE|FALSE|TRUE|FALSE|FALSE",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Region],\"East\",CONTAINSSTRING(Facts[Region],\"s\"),CONTAINSSTRING(Facts[Region],\"s\")),\"|\",Facts[Quantity])",
+"powerbi": "TRUE|TRUE|TRUE|TRUE|FALSE|TRUE",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Region],\"East\",CONTAINSSTRING(Facts[Region],\"s\"),BLANK()),\"|\",Facts[Quantity])",
+"powerbi": "FALSE|TRUE|TRUE|FALSE|FALSE|TRUE",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Region],\"East\",ISONORAFTER(Facts[Quantity],2)),\"|\",Facts[Quantity])",
+"powerbi": "FALSE|FALSE|TRUE|FALSE|FALSE|TRUE",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Region],\"East\",ISONORAFTER(Facts[Quantity],2),\"West\",BLANK()),\"|\",Facts[Quantity])",
+"powerbi": "|FALSE|TRUE|||TRUE",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Region],\"East\",ISONORAFTER(Facts[Quantity],2),\"West\",ISONORAFTER(Facts[Quantity],2)),\"|\",Facts[Quantity])",
+"powerbi": "FALSE|FALSE|TRUE|TRUE|FALSE|TRUE",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Region],\"East\",BLANK(),\"West\",ISONORAFTER(Facts[Quantity],2)),\"|\",Facts[Quantity])",
+"powerbi": "FALSE|FALSE|FALSE|TRUE|FALSE|FALSE",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Region],\"East\",ISONORAFTER(Facts[Quantity],2),ISONORAFTER(Facts[Quantity],2)),\"|\",Facts[Quantity])",
+"powerbi": "FALSE|FALSE|TRUE|TRUE|TRUE|TRUE",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Region],\"East\",ISONORAFTER(Facts[Quantity],2),BLANK()),\"|\",Facts[Quantity])",
+"powerbi": "FALSE|FALSE|TRUE|FALSE|FALSE|TRUE",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Region],\"East\",EXACT(Facts[Region],\"east\")),\"|\",Facts[Quantity])",
+"powerbi": "FALSE|FALSE|FALSE|FALSE|FALSE|FALSE",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Region],\"East\",EXACT(Facts[Region],\"east\"),\"West\",BLANK()),\"|\",Facts[Quantity])",
+"powerbi": "|FALSE|FALSE|||FALSE",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Region],\"East\",EXACT(Facts[Region],\"east\"),\"West\",EXACT(Facts[Region],\"east\")),\"|\",Facts[Quantity])",
+"powerbi": "FALSE|FALSE|FALSE|FALSE|FALSE|FALSE",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Region],\"East\",BLANK(),\"West\",EXACT(Facts[Region],\"east\")),\"|\",Facts[Quantity])",
+"powerbi": "FALSE|FALSE|FALSE|FALSE|FALSE|FALSE",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Region],\"East\",EXACT(Facts[Region],\"east\"),EXACT(Facts[Region],\"east\")),\"|\",Facts[Quantity])",
+"powerbi": "FALSE|FALSE|FALSE|FALSE|FALSE|FALSE",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Region],\"East\",EXACT(Facts[Region],\"east\"),BLANK()),\"|\",Facts[Quantity])",
+"powerbi": "FALSE|FALSE|FALSE|FALSE|FALSE|FALSE",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Region],\"East\",Facts[Region]=Facts[Note]),\"|\",Facts[Quantity])",
+"powerbi": "FALSE|FALSE|FALSE|FALSE|FALSE|FALSE",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Region],\"East\",Facts[Region]=Facts[Note],\"West\",BLANK()),\"|\",Facts[Quantity])",
+"powerbi": "|FALSE|FALSE|||FALSE",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Region],\"East\",Facts[Region]=Facts[Note],\"West\",Facts[Region]=Facts[Note]),\"|\",Facts[Quantity])",
+"powerbi": "FALSE|FALSE|FALSE|FALSE|FALSE|FALSE",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Region],\"East\",BLANK(),\"West\",Facts[Region]=Facts[Note]),\"|\",Facts[Quantity])",
+"powerbi": "FALSE|FALSE|FALSE|FALSE|FALSE|FALSE",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Region],\"East\",Facts[Region]=Facts[Note],Facts[Region]=Facts[Note]),\"|\",Facts[Quantity])",
+"powerbi": "FALSE|FALSE|FALSE|FALSE|FALSE|FALSE",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Region],\"East\",Facts[Region]=Facts[Note],BLANK()),\"|\",Facts[Quantity])",
+"powerbi": "FALSE|FALSE|FALSE|FALSE|FALSE|FALSE",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Region],\"East\",1<>2),\"|\",Facts[Quantity])",
+"powerbi": "FALSE|TRUE|TRUE|FALSE|FALSE|TRUE",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Region],\"East\",1<>2,\"West\",BLANK()),\"|\",Facts[Quantity])",
+"powerbi": "|TRUE|TRUE|||TRUE",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Region],\"East\",1<>2,\"West\",1<>2),\"|\",Facts[Quantity])",
+"powerbi": "TRUE|TRUE|TRUE|TRUE|FALSE|TRUE",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Region],\"East\",BLANK(),\"West\",1<>2),\"|\",Facts[Quantity])",
+"powerbi": "TRUE|FALSE|FALSE|TRUE|FALSE|FALSE",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Region],\"East\",1<>2,1<>2),\"|\",Facts[Quantity])",
+"powerbi": "TRUE|TRUE|TRUE|TRUE|TRUE|TRUE",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Region],\"East\",1<>2,BLANK()),\"|\",Facts[Quantity])",
+"powerbi": "FALSE|TRUE|TRUE|FALSE|FALSE|TRUE",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Note],\"Paid\",Facts[Region]=\"East\",\"Late\",BLANK()),\"|\",Facts[Quantity])",
+"powerbi": "FALSE|TRUE|TRUE|||",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Note],\"Paid\",Facts[Region]=\"East\",\"Late\",Facts[Region]=\"East\"),\"|\",Facts[Quantity])",
+"powerbi": "FALSE|TRUE|TRUE|FALSE|FALSE|FALSE",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Note],\"Paid\",Facts[Region]=\"East\",Facts[Region]=\"East\"),\"|\",Facts[Quantity])",
+"powerbi": "FALSE|TRUE|TRUE|FALSE|FALSE|TRUE",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Note],\"Paid\",Facts[Note]>\"M\"),\"|\",Facts[Quantity])",
+"powerbi": "TRUE|TRUE|TRUE|FALSE|FALSE|FALSE",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Note],\"Paid\",Facts[Note]>\"M\",\"Late\",BLANK()),\"|\",Facts[Quantity])",
+"powerbi": "TRUE|TRUE|TRUE|||",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Note],\"Paid\",Facts[Note]>\"M\",\"Late\",Facts[Note]>\"M\"),\"|\",Facts[Quantity])",
+"powerbi": "TRUE|TRUE|TRUE|FALSE|FALSE|FALSE",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Note],\"Paid\",BLANK(),\"Late\",Facts[Note]>\"M\"),\"|\",Facts[Quantity])",
+"powerbi": "FALSE|FALSE|FALSE|FALSE|FALSE|FALSE",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Note],\"Paid\",Facts[Note]>\"M\",Facts[Note]>\"M\"),\"|\",Facts[Quantity])",
+"powerbi": "TRUE|TRUE|TRUE|FALSE|FALSE|FALSE",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Note],\"Paid\",Facts[Note]>\"M\",BLANK()),\"|\",Facts[Quantity])",
+"powerbi": "TRUE|TRUE|TRUE|FALSE|FALSE|FALSE",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Note],\"Paid\",Facts[Region]<Facts[Note]),\"|\",Facts[Quantity])",
+"powerbi": "FALSE|TRUE|TRUE|FALSE|FALSE|FALSE",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Note],\"Paid\",Facts[Region]<Facts[Note],\"Late\",BLANK()),\"|\",Facts[Quantity])",
+"powerbi": "FALSE|TRUE|TRUE|||",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Note],\"Paid\",Facts[Region]<Facts[Note],\"Late\",Facts[Region]<Facts[Note]),\"|\",Facts[Quantity])",
+"powerbi": "FALSE|TRUE|TRUE|FALSE|FALSE|FALSE",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Note],\"Paid\",BLANK(),\"Late\",Facts[Region]<Facts[Note]),\"|\",Facts[Quantity])",
+"powerbi": "FALSE|FALSE|FALSE|FALSE|FALSE|FALSE",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Note],\"Paid\",Facts[Region]<Facts[Note],Facts[Region]<Facts[Note]),\"|\",Facts[Quantity])",
+"powerbi": "FALSE|TRUE|TRUE|FALSE|FALSE|FALSE",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Note],\"Paid\",Facts[Region]<Facts[Note],BLANK()),\"|\",Facts[Quantity])",
+"powerbi": "FALSE|TRUE|TRUE|FALSE|FALSE|FALSE",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Note],\"Paid\",DATE(2020,1,1)<DATE(2020,1,2)),\"|\",Facts[Quantity])",
+"powerbi": "TRUE|TRUE|TRUE|FALSE|FALSE|FALSE",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Note],\"Paid\",DATE(2020,1,1)<DATE(2020,1,2),\"Late\",BLANK()),\"|\",Facts[Quantity])",
+"powerbi": "TRUE|TRUE|TRUE|||",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Note],\"Paid\",DATE(2020,1,1)<DATE(2020,1,2),\"Late\",DATE(2020,1,1)<DATE(2020,1,2)),\"|\",Facts[Quantity])",
+"powerbi": "TRUE|TRUE|TRUE|FALSE|TRUE|FALSE",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Note],\"Paid\",BLANK(),\"Late\",DATE(2020,1,1)<DATE(2020,1,2)),\"|\",Facts[Quantity])",
+"powerbi": "FALSE|FALSE|FALSE|FALSE|TRUE|FALSE",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Note],\"Paid\",DATE(2020,1,1)<DATE(2020,1,2),DATE(2020,1,1)<DATE(2020,1,2)),\"|\",Facts[Quantity])",
+"powerbi": "TRUE|TRUE|TRUE|TRUE|TRUE|TRUE",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Note],\"Paid\",DATE(2020,1,1)<DATE(2020,1,2),BLANK()),\"|\",Facts[Quantity])",
+"powerbi": "TRUE|TRUE|TRUE|FALSE|FALSE|FALSE",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Note],\"Paid\",DIVIDE(Facts[Sales],Facts[Quantity])>1),\"|\",Facts[Quantity])",
+"powerbi": "FALSE|FALSE|TRUE|FALSE|FALSE|FALSE",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Note],\"Paid\",DIVIDE(Facts[Sales],Facts[Quantity])>1,\"Late\",BLANK()),\"|\",Facts[Quantity])",
+"powerbi": "FALSE|FALSE|TRUE|||",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Note],\"Paid\",DIVIDE(Facts[Sales],Facts[Quantity])>1,\"Late\",DIVIDE(Facts[Sales],Facts[Quantity])>1),\"|\",Facts[Quantity])",
+"powerbi": "FALSE|FALSE|TRUE|FALSE|FALSE|FALSE",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Note],\"Paid\",BLANK(),\"Late\",DIVIDE(Facts[Sales],Facts[Quantity])>1),\"|\",Facts[Quantity])",
+"powerbi": "FALSE|FALSE|FALSE|FALSE|FALSE|FALSE",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Note],\"Paid\",DIVIDE(Facts[Sales],Facts[Quantity])>1,DIVIDE(Facts[Sales],Facts[Quantity])>1),\"|\",Facts[Quantity])",
+"powerbi": "FALSE|FALSE|TRUE|TRUE|FALSE|FALSE",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Note],\"Paid\",DIVIDE(Facts[Sales],Facts[Quantity])>1,BLANK()),\"|\",Facts[Quantity])",
+"powerbi": "FALSE|FALSE|TRUE|FALSE|FALSE|FALSE",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Note],\"Paid\",ISBLANK(Facts[Sales])),\"|\",Facts[Quantity])",
+"powerbi": "FALSE|FALSE|FALSE|FALSE|FALSE|FALSE",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Note],\"Paid\",ISBLANK(Facts[Sales]),\"Late\",BLANK()),\"|\",Facts[Quantity])",
+"powerbi": "FALSE|FALSE|FALSE|||",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Note],\"Paid\",ISBLANK(Facts[Sales]),\"Late\",ISBLANK(Facts[Sales])),\"|\",Facts[Quantity])",
+"powerbi": "FALSE|FALSE|FALSE|FALSE|TRUE|FALSE",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Note],\"Paid\",BLANK(),\"Late\",ISBLANK(Facts[Sales])),\"|\",Facts[Quantity])",
+"powerbi": "FALSE|FALSE|FALSE|FALSE|TRUE|FALSE",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Note],\"Paid\",ISBLANK(Facts[Sales]),ISBLANK(Facts[Sales])),\"|\",Facts[Quantity])",
+"powerbi": "FALSE|FALSE|FALSE|FALSE|TRUE|FALSE",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Note],\"Paid\",ISBLANK(Facts[Sales]),BLANK()),\"|\",Facts[Quantity])",
+"powerbi": "FALSE|FALSE|FALSE|FALSE|FALSE|FALSE",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Note],\"Paid\",CONTAINSSTRING(Facts[Region],\"s\")),\"|\",Facts[Quantity])",
+"powerbi": "TRUE|TRUE|TRUE|FALSE|FALSE|FALSE",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Note],\"Paid\",CONTAINSSTRING(Facts[Region],\"s\"),\"Late\",BLANK()),\"|\",Facts[Quantity])",
+"powerbi": "TRUE|TRUE|TRUE|||",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Note],\"Paid\",CONTAINSSTRING(Facts[Region],\"s\"),\"Late\",CONTAINSSTRING(Facts[Region],\"s\")),\"|\",Facts[Quantity])",
+"powerbi": "TRUE|TRUE|TRUE|FALSE|FALSE|FALSE",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Note],\"Paid\",BLANK(),\"Late\",CONTAINSSTRING(Facts[Region],\"s\")),\"|\",Facts[Quantity])",
+"powerbi": "FALSE|FALSE|FALSE|FALSE|FALSE|FALSE",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Note],\"Paid\",CONTAINSSTRING(Facts[Region],\"s\"),CONTAINSSTRING(Facts[Region],\"s\")),\"|\",Facts[Quantity])",
+"powerbi": "TRUE|TRUE|TRUE|TRUE|FALSE|TRUE",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Note],\"Paid\",CONTAINSSTRING(Facts[Region],\"s\"),BLANK()),\"|\",Facts[Quantity])",
+"powerbi": "TRUE|TRUE|TRUE|FALSE|FALSE|FALSE",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Note],\"Paid\",ISONORAFTER(Facts[Quantity],2)),\"|\",Facts[Quantity])",
+"powerbi": "FALSE|FALSE|TRUE|FALSE|FALSE|FALSE",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Note],\"Paid\",ISONORAFTER(Facts[Quantity],2),\"Late\",BLANK()),\"|\",Facts[Quantity])",
+"powerbi": "FALSE|FALSE|TRUE|||",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Note],\"Paid\",ISONORAFTER(Facts[Quantity],2),\"Late\",ISONORAFTER(Facts[Quantity],2)),\"|\",Facts[Quantity])",
+"powerbi": "FALSE|FALSE|TRUE|FALSE|TRUE|FALSE",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Note],\"Paid\",BLANK(),\"Late\",ISONORAFTER(Facts[Quantity],2)),\"|\",Facts[Quantity])",
+"powerbi": "FALSE|FALSE|FALSE|FALSE|TRUE|FALSE",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Note],\"Paid\",ISONORAFTER(Facts[Quantity],2),ISONORAFTER(Facts[Quantity],2)),\"|\",Facts[Quantity])",
+"powerbi": "FALSE|FALSE|TRUE|TRUE|TRUE|TRUE",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Note],\"Paid\",ISONORAFTER(Facts[Quantity],2),BLANK()),\"|\",Facts[Quantity])",
+"powerbi": "FALSE|FALSE|TRUE|FALSE|FALSE|FALSE",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Note],\"Paid\",EXACT(Facts[Region],\"east\")),\"|\",Facts[Quantity])",
+"powerbi": "FALSE|FALSE|FALSE|FALSE|FALSE|FALSE",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Note],\"Paid\",EXACT(Facts[Region],\"east\"),\"Late\",BLANK()),\"|\",Facts[Quantity])",
+"powerbi": "FALSE|FALSE|FALSE|||",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Note],\"Paid\",EXACT(Facts[Region],\"east\"),\"Late\",EXACT(Facts[Region],\"east\")),\"|\",Facts[Quantity])",
+"powerbi": "FALSE|FALSE|FALSE|FALSE|FALSE|FALSE",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Note],\"Paid\",BLANK(),\"Late\",EXACT(Facts[Region],\"east\")),\"|\",Facts[Quantity])",
+"powerbi": "FALSE|FALSE|FALSE|FALSE|FALSE|FALSE",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Note],\"Paid\",EXACT(Facts[Region],\"east\"),EXACT(Facts[Region],\"east\")),\"|\",Facts[Quantity])",
+"powerbi": "FALSE|FALSE|FALSE|FALSE|FALSE|FALSE",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Note],\"Paid\",EXACT(Facts[Region],\"east\"),BLANK()),\"|\",Facts[Quantity])",
+"powerbi": "FALSE|FALSE|FALSE|FALSE|FALSE|FALSE",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Note],\"Paid\",Facts[Region]=Facts[Note]),\"|\",Facts[Quantity])",
+"powerbi": "FALSE|FALSE|FALSE|FALSE|FALSE|FALSE",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Note],\"Paid\",Facts[Region]=Facts[Note],\"Late\",BLANK()),\"|\",Facts[Quantity])",
+"powerbi": "FALSE|FALSE|FALSE|||",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Note],\"Paid\",Facts[Region]=Facts[Note],\"Late\",Facts[Region]=Facts[Note]),\"|\",Facts[Quantity])",
+"powerbi": "FALSE|FALSE|FALSE|FALSE|FALSE|FALSE",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Note],\"Paid\",BLANK(),\"Late\",Facts[Region]=Facts[Note]),\"|\",Facts[Quantity])",
+"powerbi": "FALSE|FALSE|FALSE|FALSE|FALSE|FALSE",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Note],\"Paid\",Facts[Region]=Facts[Note],Facts[Region]=Facts[Note]),\"|\",Facts[Quantity])",
+"powerbi": "FALSE|FALSE|FALSE|FALSE|FALSE|FALSE",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Note],\"Paid\",Facts[Region]=Facts[Note],BLANK()),\"|\",Facts[Quantity])",
+"powerbi": "FALSE|FALSE|FALSE|FALSE|FALSE|FALSE",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Note],\"Paid\",1<>2),\"|\",Facts[Quantity])",
+"powerbi": "TRUE|TRUE|TRUE|FALSE|FALSE|FALSE",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Note],\"Paid\",1<>2,\"Late\",BLANK()),\"|\",Facts[Quantity])",
+"powerbi": "TRUE|TRUE|TRUE|||",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Note],\"Paid\",1<>2,\"Late\",1<>2),\"|\",Facts[Quantity])",
+"powerbi": "TRUE|TRUE|TRUE|FALSE|TRUE|FALSE",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Note],\"Paid\",BLANK(),\"Late\",1<>2),\"|\",Facts[Quantity])",
+"powerbi": "FALSE|FALSE|FALSE|FALSE|TRUE|FALSE",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Note],\"Paid\",1<>2,1<>2),\"|\",Facts[Quantity])",
+"powerbi": "TRUE|TRUE|TRUE|TRUE|TRUE|TRUE",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Note],\"Paid\",1<>2,BLANK()),\"|\",Facts[Quantity])",
+"powerbi": "TRUE|TRUE|TRUE|FALSE|FALSE|FALSE",
+"group": "dax_battery_round4"
+},
+{
+"expr": "COUNTAX(Facts,SWITCH(Facts[Region],\"East\",1))",
+"powerbi": "3",
+"group": "dax_battery_round4"
+},
+{
+"expr": "COUNTX(Facts,SWITCH(Facts[Region],\"East\",1))",
+"powerbi": "3",
+"group": "dax_battery_round4"
+},
+{
+"expr": "MAXX(Facts,SWITCH(Facts[Region],\"East\",1))",
+"powerbi": "1",
+"group": "dax_battery_round4"
+},
+{
+"expr": "SUMX(Facts,SWITCH(Facts[Region],\"East\",1))",
+"powerbi": "3",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Region],\"East\",1,\"West\",2),\"|\",Facts[Quantity])",
+"powerbi": "2|1|1|2||1",
+"group": "dax_battery_round4"
+},
+{
+"expr": "COUNTAX(Facts,SWITCH(Facts[Region],\"East\",1,\"West\",2))",
+"powerbi": "5",
+"group": "dax_battery_round4"
+},
+{
+"expr": "COUNTX(Facts,SWITCH(Facts[Region],\"East\",1,\"West\",2))",
+"powerbi": "5",
+"group": "dax_battery_round4"
+},
+{
+"expr": "MAXX(Facts,SWITCH(Facts[Region],\"East\",1,\"West\",2))",
+"powerbi": "2",
+"group": "dax_battery_round4"
+},
+{
+"expr": "SUMX(Facts,SWITCH(Facts[Region],\"East\",1,\"West\",2))",
+"powerbi": "7",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Region],\"East\",1,\"West\",2,3),\"|\",Facts[Quantity])",
+"powerbi": "2|1|1|2|3|1",
+"group": "dax_battery_round4"
+},
+{
+"expr": "COUNTAX(Facts,SWITCH(Facts[Region],\"East\",1,\"West\",2,3))",
+"powerbi": "6",
+"group": "dax_battery_round4"
+},
+{
+"expr": "COUNTX(Facts,SWITCH(Facts[Region],\"East\",1,\"West\",2,3))",
+"powerbi": "6",
+"group": "dax_battery_round4"
+},
+{
+"expr": "MAXX(Facts,SWITCH(Facts[Region],\"East\",1,\"West\",2,3))",
+"powerbi": "3",
+"group": "dax_battery_round4"
+},
+{
+"expr": "SUMX(Facts,SWITCH(Facts[Region],\"East\",1,\"West\",2,3))",
+"powerbi": "10",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Region],\"East\",\"a\"),\"|\",Facts[Quantity])",
+"powerbi": "|a|a|||a",
+"group": "dax_battery_round4"
+},
+{
+"expr": "COUNTAX(Facts,SWITCH(Facts[Region],\"East\",\"a\"))",
+"powerbi": "3",
+"group": "dax_battery_round4"
+},
+{
+"expr": "COUNTX(Facts,SWITCH(Facts[Region],\"East\",\"a\"))",
+"powerbi": "3",
+"group": "dax_battery_round4"
+},
+{
+"expr": "MAXX(Facts,SWITCH(Facts[Region],\"East\",\"a\"))",
+"powerbi": "a",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Region],\"East\",\"a\",\"West\",\"b\",\"c\"),\"|\",Facts[Quantity])",
+"powerbi": "b|a|a|b|c|a",
+"group": "dax_battery_round4"
+},
+{
+"expr": "COUNTAX(Facts,SWITCH(Facts[Region],\"East\",\"a\",\"West\",\"b\",\"c\"))",
+"powerbi": "6",
+"group": "dax_battery_round4"
+},
+{
+"expr": "COUNTX(Facts,SWITCH(Facts[Region],\"East\",\"a\",\"West\",\"b\",\"c\"))",
+"powerbi": "6",
+"group": "dax_battery_round4"
+},
+{
+"expr": "MAXX(Facts,SWITCH(Facts[Region],\"East\",\"a\",\"West\",\"b\",\"c\"))",
+"powerbi": "c",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Note],\"Paid\",1,0),\"|\",Facts[Quantity])",
+"powerbi": "1|1|1|0|0|0",
+"group": "dax_battery_round4"
+},
+{
+"expr": "COUNTAX(Facts,SWITCH(Facts[Note],\"Paid\",1,0))",
+"powerbi": "6",
+"group": "dax_battery_round4"
+},
+{
+"expr": "COUNTX(Facts,SWITCH(Facts[Note],\"Paid\",1,0))",
+"powerbi": "6",
+"group": "dax_battery_round4"
+},
+{
+"expr": "MAXX(Facts,SWITCH(Facts[Note],\"Paid\",1,0))",
+"powerbi": "1",
+"group": "dax_battery_round4"
+},
+{
+"expr": "SUMX(Facts,SWITCH(Facts[Note],\"Paid\",1,0))",
+"powerbi": "3",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Note],\"Paid\",Facts[Quantity],0),\"|\",Facts[Quantity])",
+"powerbi": "0|1|2|0|0|0",
+"group": "dax_battery_round4"
+},
+{
+"expr": "COUNTAX(Facts,SWITCH(Facts[Note],\"Paid\",Facts[Quantity],0))",
+"powerbi": "6",
+"group": "dax_battery_round4"
+},
+{
+"expr": "COUNTX(Facts,SWITCH(Facts[Note],\"Paid\",Facts[Quantity],0))",
+"powerbi": "6",
+"group": "dax_battery_round4"
+},
+{
+"expr": "MAXX(Facts,SWITCH(Facts[Note],\"Paid\",Facts[Quantity],0))",
+"powerbi": "2",
+"group": "dax_battery_round4"
+},
+{
+"expr": "SUMX(Facts,SWITCH(Facts[Note],\"Paid\",Facts[Quantity],0))",
+"powerbi": "3",
+"group": "dax_battery_round4"
+},
+{
+"expr": "COUNTAX(Facts,SWITCH(Facts[Region],\"East\",Facts[Quantity]>2))",
+"powerbi": "6",
+"group": "dax_battery_round4"
+},
+{
+"expr": "COUNTAX(Facts,SWITCH(Facts[Region],\"East\",TRUE()))",
+"powerbi": "6",
+"group": "dax_battery_round4"
+},
+{
+"expr": "COUNTAX(Facts,SWITCH(Facts[Region],\"East\",BLANK()))",
+"powerbi": "BLANK",
+"group": "dax_battery_round4"
+},
+{
+"expr": "COUNTX(Facts,SWITCH(Facts[Region],\"East\",BLANK()))",
+"powerbi": "BLANK",
+"group": "dax_battery_round4"
+},
+{
+"expr": "MAXX(Facts,SWITCH(Facts[Region],\"East\",BLANK()))",
+"powerbi": "BLANK",
+"group": "dax_battery_round4"
+},
+{
+"expr": "SUMX(Facts,SWITCH(Facts[Region],\"East\",BLANK()))",
+"powerbi": "BLANK",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Region],\"East\",Facts[Region]),\"|\",Facts[Quantity])",
+"powerbi": "|East|East|||East",
+"group": "dax_battery_round4"
+},
+{
+"expr": "COUNTAX(Facts,SWITCH(Facts[Region],\"East\",Facts[Region]))",
+"powerbi": "3",
+"group": "dax_battery_round4"
+},
+{
+"expr": "COUNTX(Facts,SWITCH(Facts[Region],\"East\",Facts[Region]))",
+"powerbi": "3",
+"group": "dax_battery_round4"
+},
+{
+"expr": "MAXX(Facts,SWITCH(Facts[Region],\"East\",Facts[Region]))",
+"powerbi": "East",
+"group": "dax_battery_round4"
+},
+{
+"expr": "COUNTAX(Facts,SWITCH(Facts[Region],\"East\",Facts[Sales]))",
+"powerbi": "3",
+"group": "dax_battery_round4"
+},
+{
+"expr": "COUNTX(Facts,SWITCH(Facts[Region],\"East\",Facts[Sales]))",
+"powerbi": "3",
+"group": "dax_battery_round4"
+},
+{
+"expr": "MAXX(Facts,SWITCH(Facts[Region],\"East\",Facts[Sales]))",
+"powerbi": "10.5",
+"group": "dax_battery_round4"
+},
+{
+"expr": "SUMX(Facts,SWITCH(Facts[Region],\"East\",Facts[Sales]))",
+"powerbi": "11.5",
+"group": "dax_battery_round4"
+},
+{
+"expr": "COUNTAX(Facts,SWITCH(Facts[Region],\"East\",Facts[Note]))",
+"powerbi": "2",
+"group": "dax_battery_round4"
+},
+{
+"expr": "COUNTX(Facts,SWITCH(Facts[Region],\"East\",Facts[Note]))",
+"powerbi": "2",
+"group": "dax_battery_round4"
+},
+{
+"expr": "MAXX(Facts,SWITCH(Facts[Region],\"East\",Facts[Note]))",
+"powerbi": "Paid",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Region],Facts[Region],1),\"|\",Facts[Quantity])",
+"powerbi": "1|1|1|1|1|1",
+"group": "dax_battery_round4"
+},
+{
+"expr": "COUNTAX(Facts,SWITCH(Facts[Region],Facts[Region],1))",
+"powerbi": "6",
+"group": "dax_battery_round4"
+},
+{
+"expr": "COUNTX(Facts,SWITCH(Facts[Region],Facts[Region],1))",
+"powerbi": "6",
+"group": "dax_battery_round4"
+},
+{
+"expr": "MAXX(Facts,SWITCH(Facts[Region],Facts[Region],1))",
+"powerbi": "1",
+"group": "dax_battery_round4"
+},
+{
+"expr": "SUMX(Facts,SWITCH(Facts[Region],Facts[Region],1))",
+"powerbi": "6",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Region],Facts[Note],1),\"|\",Facts[Quantity])",
+"powerbi": "|||||",
+"group": "dax_battery_round4"
+},
+{
+"expr": "COUNTAX(Facts,SWITCH(Facts[Region],Facts[Note],1))",
+"powerbi": "BLANK",
+"group": "dax_battery_round4"
+},
+{
+"expr": "COUNTX(Facts,SWITCH(Facts[Region],Facts[Note],1))",
+"powerbi": "BLANK",
+"group": "dax_battery_round4"
+},
+{
+"expr": "MAXX(Facts,SWITCH(Facts[Region],Facts[Note],1))",
+"powerbi": "BLANK",
+"group": "dax_battery_round4"
+},
+{
+"expr": "SUMX(Facts,SWITCH(Facts[Region],Facts[Note],1))",
+"powerbi": "BLANK",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Note],BLANK(),1,2),\"|\",Facts[Quantity])",
+"powerbi": "2|2|2|1|2|1",
+"group": "dax_battery_round4"
+},
+{
+"expr": "COUNTAX(Facts,SWITCH(Facts[Note],BLANK(),1,2))",
+"powerbi": "6",
+"group": "dax_battery_round4"
+},
+{
+"expr": "COUNTX(Facts,SWITCH(Facts[Note],BLANK(),1,2))",
+"powerbi": "6",
+"group": "dax_battery_round4"
+},
+{
+"expr": "MAXX(Facts,SWITCH(Facts[Note],BLANK(),1,2))",
+"powerbi": "2",
+"group": "dax_battery_round4"
+},
+{
+"expr": "SUMX(Facts,SWITCH(Facts[Note],BLANK(),1,2))",
+"powerbi": "10",
+"group": "dax_battery_round4"
+},
+{
+"expr": "CONCATENATEX(Facts,SWITCH(Facts[Note],\"\",1,2),\"|\",Facts[Quantity])",
+"powerbi": "2|2|2|2|2|2",
+"group": "dax_battery_round4"
+},
+{
+"expr": "COUNTAX(Facts,SWITCH(Facts[Note],\"\",1,2))",
+"powerbi": "6",
+"group": "dax_battery_round4"
+},
+{
+"expr": "COUNTX(Facts,SWITCH(Facts[Note],\"\",1,2))",
+"powerbi": "6",
+"group": "dax_battery_round4"
+},
+{
+"expr": "MAXX(Facts,SWITCH(Facts[Note],\"\",1,2))",
+"powerbi": "2",
+"group": "dax_battery_round4"
+},
+{
+"expr": "SUMX(Facts,SWITCH(Facts[Note],\"\",1,2))",
+"powerbi": "12",
+"group": "dax_battery_round4"
+}
+]
