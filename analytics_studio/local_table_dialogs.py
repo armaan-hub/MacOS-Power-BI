@@ -106,6 +106,7 @@ from analytics_studio.query_functions import (
 )
 from analytics_studio.measures import (
     MeasureError,
+    escape_bracket_name,
     evaluate_calculated_table,
     normalize_calculated_table_expression,
 )
@@ -1759,7 +1760,7 @@ class CalculatedTableDialog(QDialog):
             return
         source_name = str(table.get("name", ""))
         escaped_table = source_name.replace("'", "''")
-        expression = f"DISTINCT('{escaped_table}'[{column}])"
+        expression = f"DISTINCT('{escaped_table}'[{escape_bracket_name(column)}])"
         self.expression_edit.setText(expression)
         try:
             definition = normalize_calculated_table_expression(

@@ -31,6 +31,7 @@ from PySide6.QtWidgets import (
 from analytics_studio.measures import (
     DAX_FUNCTION_NAMES,
     MeasureError,
+    escape_bracket_name,
     normalize_measure,
 )
 from analytics_studio.dialog_theme import apply_light_dialog_theme
@@ -47,6 +48,9 @@ def _dax_lexical_state(expression: str, position: int) -> tuple[bool, list[list[
         character = expression[index]
         if in_column:
             if character == "]":
+                if index + 1 < position and expression[index + 1] == "]":
+                    index += 2  # a doubled ']' is one ']' of the name
+                    continue
                 in_column = False
             index += 1
             continue
@@ -148,6 +152,9 @@ def _dax_reference_completion_context(
             # the column reference. An apostrophe here is a legal column-name
             # character, not the start of a quoted table name.
             if character == "]":
+                if index + 1 < position and expression[index + 1] == "]":
+                    index += 2  # a doubled ']' is one ']' of the name
+                    continue
                 open_bracket = -1
             index += 1
             continue
@@ -203,6 +210,8 @@ def _dax_reference_completion_context(
 
     start = open_bracket + 1
     end = expression.find("]", position)
+    while end >= 0 and expression.startswith("]]", end):
+        end = expression.find("]", end + 2)  # a doubled ']' belongs to the name
     if end < 0:
         end = len(expression)
         for offset in range(position, len(expression)):
@@ -211,17 +220,17 @@ def _dax_reference_completion_context(
                 break
     has_closing_bracket = end < len(expression) and expression[end] == "]"
     return (
-        "reference", expression[start:position], start, end, table_name,
+        "reference", expression[start:position].replace("]]", "]"), start, end, table_name,
         has_closing_bracket,
     )
 
 
 def _dax_field_reference_parts(reference: str) -> tuple[str, str] | None:
     """Read table and column names from the editor's canonical DAX reference."""
-    match = re.fullmatch(r"'((?:''|[^'])*)'\[([^\]]+)\]", reference)
+    match = re.fullmatch(r"'((?:''|[^'])*)'\[((?:[^\]]|\]\])+)\]", reference)
     if match is None:
         return None
-    return match.group(1).replace("''", "'"), match.group(2)
+    return match.group(1).replace("''", "'"), match.group(2).replace("]]", "]")
 
 
 _DAX_COLUMN_ARGUMENT_FUNCTIONS = {
@@ -270,6 +279,9 @@ def _template_arguments(template: str) -> list[str]:
                 quote = None
         elif in_column:
             if character == "]":
+                if index + 1 < len(body) and body[index + 1] == "]":
+                    index += 2  # a doubled ']' is one ']' of the name
+                    continue
                 in_column = False
         elif character in {"'", '"'}:
             quote = character
@@ -780,7 +792,7 @@ class MeasureDialog(QDialog):
             self.measure_combo = self._search_combo("Search saved measures")
             self.measure_combo.setObjectName("daxMeasurePicker")
             for measure_name in self._measure_references:
-                self.measure_combo.addItem(measure_name, f"[{measure_name}]")
+                self.measure_combo.addItem(measure_name, f"[{escape_bracket_name(measure_name)}]")
             self.measure_combo.setCurrentIndex(-1)
             self.insert_measure_button = QPushButton("Insert measure")
             self.insert_measure_button.setObjectName("insertDaxMeasureButton")
@@ -972,7 +984,9 @@ class MeasureDialog(QDialog):
                 if key in seen or not key.startswith(prefix_key):
                     continue
                 seen.add(key)
-                display = str(label).rsplit("[", 1)[0]
+                label_text = str(label)
+                suffix = f"[{parts[1]}]"  # the column may itself contain '[' or ']'
+                display = label_text[:-len(suffix)] if label_text.endswith(suffix) else label_text.rsplit("[", 1)[0]
                 rows.append((
                     "table", display, candidate,
                     f"Complete the loaded table name {candidate!r}.",
@@ -1079,9 +1093,9 @@ class MeasureDialog(QDialog):
                 return
             _context_kind, _prefix, start, end, _table_name, has_closer = context
             if context_kind == "argument":
-                insertion = f"[{value}]"
+                insertion = f"[{escape_bracket_name(value)}]"
             else:
-                insertion = value.replace("'", "''") if kind == "table" else value
+                insertion = value.replace("'", "''") if kind == "table" else escape_bracket_name(value)
             if not has_closer and context_kind != "argument":
                 insertion += "'" if kind == "table" else "]"
             cursor = self.expression_edit.textCursor()
@@ -1338,11 +1352,9 @@ class MeasureDialog(QDialog):
             column = self.column_combo.currentText()
             if not column:
                 raise MeasureError("Choose a column for the quick measure.")
-            if "]" in column:
-                raise MeasureError("Column names containing ']' are not supported in this DAX subset.")
             function = str(self.function_combo.currentData())
             escaped_table = self._quick_table_name.replace("'", "''")
-            expression = f"{function}('{escaped_table}'[{column}])"
+            expression = f"{function}('{escaped_table}'[{escape_bracket_name(column)}])"
         else:
             expression = self.expression_edit.toPlainText()
         measure = normalize_measure(

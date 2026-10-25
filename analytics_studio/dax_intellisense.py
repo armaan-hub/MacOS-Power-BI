@@ -146,9 +146,7 @@ def _table_by_name(model: dict[str, Any], name: str) -> dict[str, Any] | None:
     return None
 
 
-def _escape_bracket(name: str) -> str:
-    """A name inside ``[...]`` writes a closing bracket twice (``]]``)."""
-    return name.replace("]", "]]")
+_escape_bracket = _measures.escape_bracket_name  # a name inside ``[...]`` writes a closing bracket twice (``]]``)
 
 
 def _rank(prefix: str, label: str) -> int | None:

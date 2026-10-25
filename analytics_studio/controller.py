@@ -103,6 +103,7 @@ from analytics_studio.measures import (
     evaluate_calculated_columns,
     evaluate_measures,
     normalize_calculated_column,
+    escape_bracket_name,
     normalize_measure,
     rename_table_references,
     tokenize,
@@ -8323,13 +8324,12 @@ class StudioController(QObject):
             display_name = str(table.get("displayName", table_name))
             for raw_column in table.get("headers", []):
                 column = str(raw_column)
-                # The current DAX tokenizer does not yet accept escaped closing
-                # brackets in column identifiers; hide references it cannot bind.
-                if not column or "]" in column or "\n" in column or "\r" in column:
+                # A closing bracket in a column name is written twice in DAX ([Net]] Sales]).
+                if not column or "\n" in column or "\r" in column:
                     continue
                 references.append((
                     f"{display_name}[{column}]",
-                    f"'{escaped_table}'[{column}]",
+                    f"'{escaped_table}'[{escape_bracket_name(column)}]",
                 ))
         return references
 
