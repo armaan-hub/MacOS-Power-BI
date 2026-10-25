@@ -78,20 +78,25 @@ class CalculateTableInBooleanFilter(unittest.TestCase):
         self.assertEqual(h, _plan('CALCULATE(1,Facts[Region]<>"North"&&COUNTROWS(CALCULATETABLE(Facts,Facts[Region]="East"))<Facts[Quantity])')[0][0])
         # shapes whose Power BI answer was not established are not planned: KEEPFILTERS / ALLSELECTED / FILTER among the filters, nested
         # CALCULATETABLE, and scalars of different readings in one filter
-        self.assertIsNone(_plan('CALCULATE(1,Facts[Quantity]>COUNTROWS(CALCULATETABLE(Facts,KEEPFILTERS(Facts[Region]="East"))))')[0])
+        # iteration 88 (12,500 fresh probes): KEEPFILTERS(test) reads like the plain test, and the columns inside the CALCULATETABLE tests are cleared
+        # with the filter column (the plan carries them as extra_columns)
+        planned = _plan('CALCULATE(1,Facts[Quantity]>COUNTROWS(CALCULATETABLE(Facts,KEEPFILTERS(Facts[Region]="East"))))')[0]
+        self.assertEqual(t, planned.mode)
+        self.assertEqual([("reference", "Facts", "Region")], list(planned.extra_columns))
         self.assertIsNone(_plan("CALCULATE(1,Facts[Quantity]>COUNTROWS(CALCULATETABLE(Facts,ALLSELECTED(Facts[Quantity]))))")[0])
         self.assertIsNone(_plan('CALCULATE(1,Facts[Quantity]>COUNTROWS(CALCULATETABLE(CALCULATETABLE(Facts,Facts[Region]="East"),Facts[Note]="Paid")))')[0])
         self.assertIsNone(_plan("CALCULATE(1,Facts[Quantity]=COUNTROWS(CALCULATETABLE(Facts,ALL(Facts[Quantity])))+COUNTROWS(CALCULATETABLE(Facts,NOT(Facts[Region]=\"East\"))))")[0])
         self.assertIsNone(_plan("CALCULATE(1,Facts[Quantity]>ABS(COUNTROWS(CALCULATETABLE(Facts))))")[0])
         self.assertIsNone(_plan("CALCULATE(1,Facts[Quantity]<IF(ISEMPTY(CALCULATETABLE(Facts,Facts[Region]=\"East\")),1,4))")[0])
 
-    def test_rows_outside_the_rule_are_still_refused_not_guessed(self) -> None:
-        for expr in (
-            # inside an iterator row context, or under a CALCULATE that already filters: both read differently in Power BI
-            'SUMX(Facts,CALCULATE(COUNTROWS(Facts),Facts[Quantity]>COUNTROWS(CALCULATETABLE(Facts,Facts[Region]="East"))))',
-            'CALCULATE(CALCULATE(COUNTROWS(Facts),Facts[Quantity]>COUNTROWS(CALCULATETABLE(Facts,Facts[Region]="East"))),Facts[Region]="East")',
-        ):
-            self.assertTrue(dax.local(expr).startswith("LOCAL-REJECT"), expr)
+    def test_row_contexts_are_answered_and_several_scalars_stay_refused(self) -> None:
+        # iteration 88 (live Power BI): inside an iterator row context and under a CALCULATE that already filters the scalar is read the same way
+        self.assertEqual("4", dax.local('SUMX(Facts,CALCULATE(COUNTROWS(Facts),Facts[Quantity]>COUNTROWS(CALCULATETABLE(Facts,Facts[Region]="East"))))'))
+        self.assertEqual("2", dax.local('CALCULATE(CALCULATE(COUNTROWS(Facts),Facts[Quantity]>COUNTROWS(CALCULATETABLE(Facts,Facts[Region]="East"))),Facts[Region]="East")'))
+        # several scalars in one filter inside a row context are not established
+        self.assertTrue(dax.local(
+            'SUMX(Facts,CALCULATE(COUNTROWS(Facts),Facts[Quantity]>COUNTROWS(CALCULATETABLE(Facts,Facts[Region]="East"))+COUNTROWS(CALCULATETABLE(Facts,Facts[Note]="Paid"))))'
+        ).startswith("LOCAL-REJECT"))
 
 
 if __name__ == "__main__":

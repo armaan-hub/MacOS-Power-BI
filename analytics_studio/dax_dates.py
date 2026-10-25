@@ -187,6 +187,37 @@ def _time_value(text: str) -> DaxDateTime:
     return DaxDateTime(Decimal(hour * 3600 + minute * 60 + second) / _SECONDS_PER_DAY)
 
 
+_CLOCK_TEXT = re.compile(r"\s*([0-9]{1,2})(?::([0-9]{1,2})(?::([0-9]{1,2}))?)?\s*([AaPp][Mm])?\s*")
+
+
+def _clock_text(text: str) -> tuple[int, int, int] | None:
+    """Time-only text for HOUR / MINUTE / SECOND (iteration 88, live): H:MM or H:MM:SS with an optional AM / PM, or H AM / H PM;
+    PM adds 12 below noon, 12 AM is hour 0, an hour above 12 with PM is kept as written. Anything else (hour 24, minute or second
+    above 59, dots, fractions, other spellings) is not decided here and goes the old way."""
+    found = _CLOCK_TEXT.fullmatch(text)
+    if found is None:
+        return None
+    hour_text, minute_text, second_text, meridiem = found.groups()
+    if minute_text is None and meridiem is None:
+        return None
+    hour, minute, second = int(hour_text), int(minute_text or 0), int(second_text or 0)
+    if hour > 23 or minute > 59 or second > 59:
+        return None
+    if meridiem:
+        pm = meridiem[0] in "Pp"
+        if hour == 0:
+            if pm or minute_text is None:
+                return None
+        elif hour > 12:
+            if not pm:
+                return None
+        elif pm and hour < 12:
+            hour += 12
+        elif not pm and hour == 12:
+            hour = 0
+    return hour, minute, second
+
+
 def _weekday_index(moment: datetime, week_start: int) -> int:
     """0 for the first day of the week; week_start is 0 for Monday."""
     return (moment.weekday() - week_start) % 7
@@ -273,6 +304,10 @@ def date_function(function: str, args: list[object], interval: str | None = None
         if start is None or end is None:
             return None
         return _datediff(start, end, str(interval))
+    if function in {"HOUR", "MINUTE", "SECOND"} and isinstance(args[0], str):
+        clock = _clock_text(args[0])
+        if clock is not None:
+            return Decimal(clock[("HOUR", "MINUTE", "SECOND").index(function)])
     moment = _moment(args[0], ROUND_FLOOR if function in {"HOUR", "MINUTE", "SECOND"} else NEAREST_SECOND if function in {"WEEKDAY", "WEEKNUM"} else ROUND_HALF_UP)
     if moment is None:
         return None

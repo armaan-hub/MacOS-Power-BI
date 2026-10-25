@@ -79,9 +79,10 @@ class ScalarMathTests(unittest.TestCase):
                 with self.assertRaisesRegex(MeasureError, message):
                     measure(expression)
 
-    def test_trunc_digits_must_be_a_whole_number(self) -> None:
-        with self.assertRaisesRegex(MeasureError, "TRUNC digits"):
-            measure("TRUNC(1.2345, 1.5)")
+    def test_trunc_fractional_digits_round_like_round(self) -> None:
+        # live Power BI (iteration 88): TRUNC(1234.567, 1.5) is 1234.56, TRUNC(1234.567, 1.1) is 1234.5
+        self.assertEqual(Decimal("1.23"), measure("TRUNC(1.2345, 1.5)"))
+        self.assertEqual(Decimal("1.2"), measure("TRUNC(1.2345, 1.1)"))
 
     def test_literal_blank_arguments_follow_power_bi(self) -> None:
         # Power BI 2.157.879.0: INT/TRUNC/SIGN/SQRT/MOD/POWER of BLANK() is BLANK,

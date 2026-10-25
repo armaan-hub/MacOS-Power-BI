@@ -76,17 +76,25 @@ def _filter_kind(argument: tuple[Any, ...]) -> str | None:
             return "test"
         if argument[1] in _PLAIN_MODIFIERS:
             return "plain"
-    return None  # KEEPFILTERS among them is refused too: it intersects the row's own filter, and which columns that row holds was not established
+        if argument[1] == "KEEPFILTERS" and len(argument[2]) == 1:
+            inner = argument[2][0]
+            if inner[0] in _BOOLEAN_TESTS or (inner[0] == "call" and inner[1] in _BOOLEAN_FILTER_CALLS):
+                return "keep"  # iteration 88: a KEEPFILTERS(test) does not hoist (it intersects the row's own filter) but its columns are still picked
+    return None  # KEEPFILTERS of anything but a Boolean test, FILTER(..), ALLSELECTED ...: not established
 
 
-def _scalar_mode(scalar: tuple[Any, ...], scalar_first: bool) -> tuple[str, bool] | None:
-    """(mode, whether the position of the scalar in the comparison decided it)."""
+X_KIND = "x-iterator"
+COUNT_KIND = "count"
+
+
+def _scalar_mode(scalar: tuple[Any, ...], scalar_first: bool) -> tuple[str, bool, str] | None:
+    """(mode, whether the position of the scalar in the comparison decided it, the kind of the scalar)."""
     inside: list[tuple[Any, ...]] = []
     _calculatetables(scalar, inside)
     if len(inside) != 1:
         return None
     if scalar[0] == "call" and scalar[1] in X_ITERATORS:
-        return HOIST, False
+        return HOIST, False, X_KIND
     if not (scalar[0] == "call" and scalar[1] == "COUNTROWS" and len(scalar[2]) == 1):
         return None
     table = scalar[2][0]
@@ -106,8 +114,8 @@ def _scalar_mode(scalar: tuple[Any, ...], scalar_first: bool) -> tuple[str, bool
                 return None
             kinds.append(kind)
     if "test" not in kinds:
-        return TRANSITION, False
-    return (TRANSITION if scalar_first else HOIST), True
+        return TRANSITION, False, COUNT_KIND
+    return (TRANSITION if scalar_first else HOIST), True, COUNT_KIND
 
 
 def _leaves(node: Any, direct_columns: Callable[[Any], Iterable[Any]], out: list[tuple[str, tuple[Any, ...]]]) -> None:
@@ -170,6 +178,33 @@ class Plan(NamedTuple):
     mode: str  # HOIST: every scalar is a constant of the filter; TRANSITION: FILTER(ALL(columns), test) with the `hoisted` scalars as constants
     hoisted: list[tuple[Any, ...]]  # scalar nodes to evaluate once, in the context the filter is written in
     columns: list[tuple[Any, ...]]  # distinct column references of the filter, in the order they are read
+    counted: bool = False  # HOIST of the one COUNTROWS(CALCULATETABLE(..)) scalar of the filter (iteration 88): read with the filter's columns cleared
+    scalars: int = 1  # how many CALCULATETABLE-carrying scalars the filter has
+    extra_columns: tuple[tuple[Any, ...], ...] = ()  # columns the hoisted COUNTROWS(CALCULATETABLE(..)) scalars filter by, the filter replaces them too
+
+
+def test_columns(scalar: tuple[Any, ...]) -> list[tuple[Any, ...]]:
+    """The column references in the Boolean tests among the filters of the CALCULATETABLE of a COUNTROWS(CALCULATETABLE(..)) scalar."""
+    found: list[tuple[Any, ...]] = []
+
+    def walk(node: Any) -> None:
+        if not isinstance(node, tuple) or not node:
+            return
+        if node[0] == "reference":
+            if not any(node[1:] == other[1:] for other in found):
+                found.append(node)
+            return
+        for child in node:
+            if isinstance(child, tuple):
+                walk(child)
+
+    tables: list[tuple[Any, ...]] = []
+    _calculatetables(scalar, tables)
+    for calculatetable in tables:
+        for argument in calculatetable[2][1:]:
+            if _filter_kind(argument) in {"test", "keep"}:
+                walk(argument)
+    return found
 
 
 def plan(argument: tuple[Any, ...], direct_columns: Callable[[Any], Iterable[Any]]) -> Plan | None:
@@ -194,12 +229,13 @@ def plan(argument: tuple[Any, ...], direct_columns: Callable[[Any], Iterable[Any
     # what the whole filter reads first decides, not the comparison the scalar sits in (fresh probes: Region <> "North" && COUNTROWS(..) - Quantity < 3)
     scalar_first = leaves[0][0] == "scalar"
     hoisted: list[tuple[Any, ...]] = []
+    kinds: set[str] = set()
     transitions = 0
     for scalar in scalars:
         decided = _scalar_mode(scalar, scalar_first)
         if decided is None:
             return None
-        mode, by_position = decided
+        mode, by_position, kind = decided
         if by_position and scalar_first:
             # the position rule is established when the filter starts with the scalar, or when it starts with a column; with several
             # comparisons it was only seen starting with a column
@@ -209,12 +245,42 @@ def plan(argument: tuple[Any, ...], direct_columns: Callable[[Any], Iterable[Any
                 return None
         if mode == HOIST:
             hoisted.append(scalar)
+            kinds.add(kind)
         else:
             transitions += 1
     if hoisted and transitions:
         return None  # one scalar hoists and another transitions: a fresh probe (ABS(Quantity) = COUNTROWS(.. ALL(Quantity)) + COUNTROWS(.. NOT(Region = "East"))) disagreed
+    if len(kinds) > 1:
+        return None  # an X-iterator and a COUNTROWS(CALCULATETABLE(..)) in one hoisted filter: read differently, not probed together
     distinct: list[tuple[Any, ...]] = []
     for reference in columns:
         if not any(reference[1:] == other[1:] for other in distinct):
             distinct.append(reference)
-    return Plan(HOIST if not transitions else TRANSITION, hoisted, distinct)
+    if len(scalars) > 1 and any(_has_keepfilters(scalar) for scalar in scalars):
+        return None  # KEEPFILTERS(test) beside another scalar: only probed alone
+    if hoisted and kinds == {COUNT_KIND} and len(scalars) == 1:
+        extra: list[tuple[Any, ...]] = []
+        for scalar in hoisted:
+            for reference in test_columns(scalar):
+                if not any(reference[1:] == other[1:] for other in distinct + extra):
+                    extra.append(reference)
+        return Plan(HOIST, hoisted, distinct, counted=True, extra_columns=tuple(extra))
+    if transitions and len(scalars) == 1 and not scalar_first and _is_count_scalar(scalars[0]):
+        # a transition read with the column first (only KEEPFILTERS(test)s among the filters, or none): the filter is FILTER(ALL(Q, the columns
+        # of those tests), ..); with the scalar first only the filtered column is iterated (live probes, iteration 88)
+        extra = []
+        for reference in test_columns(scalars[0]):
+            if not any(reference[1:] == other[1:] for other in distinct + extra):
+                extra.append(reference)
+        return Plan(TRANSITION, hoisted, distinct, scalars=1, extra_columns=tuple(extra))
+    return Plan(HOIST if not transitions else TRANSITION, hoisted, distinct, scalars=len(scalars))
+
+
+def _is_count_scalar(scalar: tuple[Any, ...]) -> bool:
+    return scalar[0] == "call" and scalar[1] == "COUNTROWS"
+
+
+def _has_keepfilters(scalar: tuple[Any, ...]) -> bool:
+    tables: list[tuple[Any, ...]] = []
+    _calculatetables(scalar, tables)
+    return any(_filter_kind(argument) == "keep" for calculatetable in tables for argument in calculatetable[2][1:])

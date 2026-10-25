@@ -366,11 +366,11 @@ _TOKEN_PATTERN = re.compile(
     r"|(?P<number>(?:\d+(?:\.\d*)?|\.\d+)(?:[eE][+-]?\d+)?)"
     r'|(?P<string>"(?:[^"]|"")*")'
     r"|(?P<identifier>[A-Za-z_][A-Za-z0-9_]*(?:\.(?:[A-Za-z][A-Za-z0-9_]*|2T\b))*)"
-    r"|(?P<operator><>|<=|>=|&&|\|\||[(){}+\-*/,=<>&^])"
+    r"|(?P<operator><>|<=|>=|==|&&|\|\||[(){}+\-*/,=<>&^])"
 )
 _FORMULA_ASSIGNMENT = re.compile(
     r"^\s*(?:\[(?P<bracketed>(?:[^\]\r\n]|\]\])+)\]|"
-    r"(?P<plain>(?!VAR\b)(?!\d+\s*=)[A-Za-z_][^()\[\],<>!+=*/&^\"\r\n]*?))\s*=\s*(?![=<>])"
+    r"(?P<plain>(?!VAR\b)(?!\d+\s*=)(?!NOT\s+[\d\"'+\-.])[A-Za-z_][^()\[\],<>!+=*/&^\"\r\n]*?))\s*=\s*(?![=<>])"
 )
 
 
@@ -411,6 +411,30 @@ def _comment_end(expression: str, position: int) -> int | None:
     raise MeasureError("A /* comment is not closed.")
 
 
+_BRACKET_NAME = re.compile(r"\[(?:[^\]]|\]\])+\]")
+
+
+def _reference_after_comments(expression: str, position: int) -> tuple[str, int] | None:
+    """When only blanks and at least one comment separate `position` from a `[column]`, that bracketed name and where it ends."""
+    cursor, skipped_comment = position, False
+    while cursor < len(expression):
+        if expression[cursor] in _DAX_WHITESPACE:
+            cursor += 1
+            continue
+        try:
+            comment_end = _comment_end(expression, cursor)
+        except MeasureError:
+            return None
+        if comment_end is None:
+            break
+        skipped_comment = True
+        cursor = comment_end
+    if not skipped_comment or cursor >= len(expression) or expression[cursor] != "[":
+        return None
+    match = _BRACKET_NAME.match(expression, cursor)
+    return None if match is None else (match.group(), match.end())
+
+
 def tokenize(expression: str) -> list[Token]:
     if not isinstance(expression, str) or not expression.strip():
         raise MeasureError("Enter a DAX expression.")
@@ -431,6 +455,18 @@ def tokenize(expression: str) -> list[Token]:
             raise MeasureError(f"Unsupported character at position {position + 1}.")
         kind = match.lastgroup or ""
         value = match.group()
+        if kind in {"identifier", "table_name"}:
+            joined = _reference_after_comments(expression, match.end())
+            if joined is not None and not (kind == "identifier" and value.upper() == "NOT"):
+                # live Power BI (iteration 88): comments between a table name and its [column] are skipped like blanks (Facts/*c*/[Quantity])
+                column_text, end = joined
+                table_text = value[1:-1].replace("''", "'") if kind == "table_name" else value
+                column = column_text[1:-1].replace("]]", "]")
+                if not column.strip():
+                    raise MeasureError("A column reference cannot be empty.")
+                tokens.append(Token("reference", f"{table_text}\0{column}"))
+                position = end
+                continue
         if kind == "table_name":
             tokens.append(Token("table", value[1:-1].replace("''", "'")))
         elif kind in {"ref", "table_ref"}:
@@ -1640,6 +1676,55 @@ def _multiplies_by_constant_zero(node: Any) -> bool:
     return any(_multiplies_by_constant_zero(child) for child in node if isinstance(child, tuple))
 
 
+_SAMPLE_STATISTICS = frozenset({"STDEV.S", "VAR.S", "STDEVX.S", "VARX.S"})
+
+
+def _is_sample_statistic(node: Any) -> bool:
+    """The measure is STDEV.S / VAR.S / STDEVX.S / VARX.S itself, or CALCULATE of one."""
+    if not (isinstance(node, tuple) and node and node[0] == "call"):
+        return False
+    if node[1] in _SAMPLE_STATISTICS:
+        return True
+    return node[1] == "CALCULATE" and bool(node[2]) and _is_sample_statistic(node[2][0])
+
+
+_FRAME_FUNCTIONS = frozenset({
+    "SUMX", "AVERAGEX", "MAXX", "MINX", "COUNTX", "COUNTAX", "CONCATENATEX", "PRODUCTX", "MEDIANX", "FILTER", "ADDCOLUMNS", "SELECTCOLUMNS", "TOPN", "RANKX",
+    "GENERATE", "GENERATEALL", "SUMMARIZE", "GEOMEANX", "STDEVX.S", "STDEVX.P", "VARX.S", "VARX.P", "PERCENTILEX.INC", "PERCENTILEX.EXC",
+})
+
+
+def _earlier_too_deep(node: Any, frames: int) -> bool:
+    """Whether an EARLIER(col, n) / EARLIEST(col) in this expression has fewer than the row contexts it needs, when `frames` row contexts are open
+    around it (the body of a nested iterator opens one more).  Iterators the walk does not know leave a deeper stack than counted, never a shallower."""
+    if not isinstance(node, tuple) or not node:
+        return False
+    if node[0] == "call" and node[1] in {"EARLIER", "EARLIEST"} and node[2]:
+        depth = 1
+        if node[1] == "EARLIER" and len(node[2]) > 1 and node[2][1][0] == "number":
+            depth = int(node[2][1][1])
+        return frames <= depth if node[1] == "EARLIER" else frames < 2
+    if node[0] == "call" and node[1] in _FRAME_FUNCTIONS and node[2]:
+        return _earlier_too_deep(node[2][0], frames) or any(_earlier_too_deep(argument, frames + 1) for argument in node[2][1:])
+    return any(_earlier_too_deep(child, frames) for child in node if isinstance(child, tuple))
+
+
+def _earlier_unreadable(node: Any, frames: list[Any], holds: Callable[[Any, str, str], bool]) -> bool:
+    """Whether an EARLIER / EARLIEST directly in this expression (not inside a nested iterator) reads a column that no row context it reaches holds;
+    `frames` are the open row contexts, the last (None) the iteration the expression is the body of."""
+    if not isinstance(node, tuple) or not node:
+        return False
+    if node[0] == "call" and node[1] in {"EARLIER", "EARLIEST"} and node[2] and node[2][0][0] == "reference":
+        depth = 1
+        if node[1] == "EARLIER" and len(node[2]) > 1 and node[2][1][0] == "number":
+            depth = int(node[2][1][1])
+        remaining = frames[:1] if node[1] == "EARLIEST" else frames[:-depth] if depth >= 1 else []
+        return bool(remaining) and not any(frame is not None and holds(frame, node[2][0][1], node[2][0][2]) for frame in remaining)
+    if node[0] == "call" and node[1] in _FRAME_FUNCTIONS:
+        return False  # a nested iterator opens another row context: not followed
+    return any(_earlier_unreadable(child, frames, holds) for child in node if isinstance(child, tuple))
+
+
 def _calculatetable_hoistable(node: Any) -> bool:
     """Every CALCULATETABLE in this scalar has only plain Boolean filters: Power BI evaluates such a scalar once in the
     outer context. With no filter, or with ALL/REMOVEFILTERS/KEEPFILTERS/... it transitions the row instead
@@ -1679,6 +1764,7 @@ _UNTAKEN_BRANCH_ERRORS = (
     "Iterator expressions can reference columns from their iterated table only",  # live: a single value for the column cannot be determined
     "cannot validate first",
     "needs a Date or DateTime column",  # TOTALYTD(.., text column)
+    "does not exist in table",  # iteration 88: a column of the model that the derived table iterated by VALUES / DISTINCT / SUMMARIZE does not hold (live: the same error)
 )
 
 
@@ -1883,8 +1969,14 @@ def _scalar_math_value(function: str, values: list[Decimal | None]) -> Decimal |
         return first.sqrt()
     # TRUNC(number[, digits])
     digits = values[1] if len(values) > 1 and values[1] is not None else Decimal(0)
-    if digits != digits.to_integral_value() or abs(digits) > 28:
-        raise MeasureRuntimeError("TRUNC digits must be a whole number from -28 to 28.")
+    if digits.is_finite():
+        digits = digits.to_integral_value(rounding=ROUND_HALF_UP)  # live Power BI (iteration 88): fractional digits round like ROUND's (1.9 is 2, 1.1 is 1)
+    if not digits.is_finite():
+        raise MeasureRuntimeError("TRUNC digits must be a number.")
+    if digits > 28:
+        return first  # live Power BI (iteration 88): nothing is left to cut (digits 29 and 100 give the number itself)
+    if digits < -28:
+        return Decimal(0)
     with localcontext() as exact:
         exact.prec = _EXACT_PRECISION  # quantize must hold every kept digit
         return first.quantize(Decimal(1).scaleb(-int(digits)), rounding=ROUND_DOWN)
@@ -2308,7 +2400,7 @@ def _validate_literal_positions(
         if not _is_all_table_value_argument(node[2]):
             _validate_literal_positions(node[2], allow_blank=True)
         return
-    operand_blank = allow_blank or kind in {"unary", "binary", "comparison", "logical", "concat", "in", "tableconstructor", "tuple"}
+    operand_blank = allow_blank or kind in {"unary", "binary", "comparison", "logical", "concat", "in", "tableconstructor", "tuple", "strict_equal"}
     for child in node[1:]:
         if isinstance(child, tuple) and child:
             _validate_literal_positions(child, allow_blank=operand_blank)
@@ -2448,10 +2540,11 @@ class _Parser:
                 # {} alone is an empty table, but Power BI rejects it as the right side of IN
                 raise MeasureError("IN needs a table or at least one value; an empty table constructor {} is not accepted.")
             return _membership(node, members)
-        if self._peek() in {"=", "<>", "<", "<=", ">", ">="}:
-            while self._peek() in {"=", "<>", "<", "<=", ">", ">="}:  # a < b < c reads (a < b) < c
+        if self._peek() in {"=", "==", "<>", "<", "<=", ">", ">="}:
+            while self._peek() in {"=", "==", "<>", "<", "<=", ">", ">="}:  # a < b < c reads (a < b) < c
                 operator = self._take().kind
-                node = ("comparison", operator, node, self._concatenation())
+                right = self._concatenation()
+                node = ("strict_equal", node, right) if operator == "==" else ("comparison", operator, node, right)
         return node
 
     def _concatenation(self) -> tuple[Any, ...]:
@@ -2583,6 +2676,10 @@ class _Parser:
                         arguments.append(("omitted",))
                         break
             self._expect(")")
+            if function in dax_math.STAT_PERCENTILE_COLUMN and len(arguments) == 2 and arguments[1][0] == "blank":
+                arguments[1] = ("number", Decimal(0))  # live Power BI (iteration 88): a BLANK() percentile is 0 (PERCENTILE.EXC of 0 is an error)
+            if function in {"PERCENTILEX.INC", "PERCENTILEX.EXC"} and len(arguments) == 3 and arguments[2][0] == "blank":
+                arguments[2] = ("number", Decimal(0))
             if function == "RELATEDTABLE":  # CALCULATETABLE(table): the row context of the enclosing iterator becomes the filter
                 if len(arguments) != 1 or arguments[0][0] != "table":
                     raise MeasureError("RELATEDTABLE needs one table, such as RELATEDTABLE('Sales').")
@@ -3720,7 +3817,7 @@ _ROW_CONTEXT_FREE_CALLS = {
     "IF", "SWITCH", "COALESCE", "IFERROR", "AND", "OR", "NOT", "ISBLANK", "ABS", "EXACT",
     "UPPER", "LOWER", "LEN", "TRIM", "ROUND", "INT",
 }
-_ROW_CONTEXT_FREE_NODES = {"binary", "comparison", "logical", "unary", "concat", "in", "let", "tableconstructor"}
+_ROW_CONTEXT_FREE_NODES = {"binary", "comparison", "logical", "unary", "concat", "in", "let", "tableconstructor", "strict_equal"}
 
 
 def _bare_column_outside_row_context(node: Any, columns: dict[str, set[str]]) -> tuple[str, str] | None:
@@ -3808,7 +3905,7 @@ def _static_type(node: Any, columns: dict[str, dict[str, str]], variables: dict[
         return "text"
     if kind == "boolean":
         return "boolean"
-    if kind in {"comparison", "logical", "in"}:
+    if kind in {"comparison", "logical", "in", "strict_equal"}:
         return "boolean"
     if kind == "unary" and node[1] == "+" and _static_type(node[2], columns, variables) == "boolean":
         return "boolean"  # unary plus leaves a True/False a True/False (live Power BI, iteration 87)
@@ -5037,6 +5134,43 @@ def evaluate_measures(
             selected_iteration_depth -= selected
             pop_shadow(saved_state)
 
+    def column_in_row_context(frame: tuple[dict[str, Any], dict[str, Any], int], table: str, name: str) -> bool:
+        """Whether this row context holds the column (the rules a column reference follows in the innermost row context)."""
+        context = frame[0]
+        if not context.get("headers"):
+            return False  # the empty row context a constant filter is evaluated in
+        value_table = resolve_table_context(table) if table else context
+        if table and value_table["id"] != context["id"]:
+            if context.get("selected_columns"):
+                return False  # live Power BI: T[col] is not found among the renamed columns of SELECTCOLUMNS
+            lineage = context.get("lineage") or {}
+            name = next((
+                header for header, (base, column) in lineage.items()
+                if base["id"] == value_table["id"] and column.casefold() == name.casefold()
+            ), "")
+            value_table = context
+        if value_table["id"] != context["id"]:
+            return False
+        return any(str(header).casefold() == name.casefold() for header in context["headers"])
+
+    outer_row_reads = [0]  # how many column reads were answered by an enclosing row context (the walk order of such an iteration is not modelled)
+
+    def enclosing_row_context_for(
+        row_context: tuple[dict[str, Any], dict[str, Any], int], table: str, name: str, count: bool = True,
+    ) -> tuple[dict[str, Any], dict[str, Any], int]:
+        """Iteration 88 (live Power BI, nested iterators): a column the innermost row context does not hold is read from the nearest enclosing
+        row context that does (SUMX(Facts, SUMX(ROW("a", 1), Facts[Quantity])) is the sum of Quantity per outer row).  The innermost row
+        context keeps winning; with no enclosing one the reference is refused as before."""
+        if row_context[0].get("boolean_filter") or column_in_row_context(row_context, table, name):
+            return row_context
+        for frame in reversed(row_stack):
+            if frame[1] is row_context[1] or frame[0] is row_context[0] or frame[0].get("boolean_filter"):
+                continue  # the implicit iteration of a Boolean filter is no row context of the query
+            if column_in_row_context(frame, table, name):
+                outer_row_reads[0] += count
+                return frame
+        return row_context
+
     def typed_row(context: dict[str, Any], row: dict[str, Any]) -> dict[str, Any]:
         """A row of a loaded or derived table with every cell as a DAX value."""
         if context.get("derived"):
@@ -5544,12 +5678,15 @@ def evaluate_measures(
 
             def score_rows(source_rows: list[dict[str, Any]]) -> list[tuple[list[Any], dict[str, Any]]]:
                 found = []
+                outer_reads_before = outer_row_reads[0]
                 for frame in iterate_rows(context, source_rows, "install"):
                     keys = []
                     for expression, descending in keys_spec:
                         value = in_row_expression(lambda expression=expression, frame=frame: evaluate(expression, frame, allow_text=True))
                         keys.append(value)
                     found.append((keys, frame[1]))
+                if outer_row_reads[0] != outer_reads_before:
+                    raise MeasureError("The tie order of a TOPN whose ORDER BY reads an enclosing row context is not modelled in the local engine.")
                 return found
 
             def sort_scored(found: list[tuple[list[Any], dict[str, Any]]]) -> list[tuple[list[Any], dict[str, Any]]]:
@@ -5558,7 +5695,8 @@ def evaluate_measures(
                     sample = next((item[0][position] for item in found if item[0][position] is not None), None)
                     blank = dax_typed._blank_like(sample) if sample is not None else Decimal(0)
                     ranked.sort(
-                        key=lambda item, p=position, blank=blank: column_order_key(blank if item[0][p] is None else item[0][p]),
+                        # live Power BI (iteration 88): a BLANK ranks below the zero (or the empty text) it compares equal to
+                        key=lambda item, p=position, blank=blank: (column_order_key(blank if item[0][p] is None else item[0][p]), item[0][p] is not None),
                         reverse=keys_spec[position][1],
                     )
                 return ranked
@@ -6159,6 +6297,10 @@ def evaluate_measures(
                     )
                 if constraint:
                     constraints.append(constraint)
+            if len(constraints) > 1:
+                # live Power BI (iteration 88, fresh probes): under two row contexts of the relation's table (SUMX(Facts, SUMX(VALUES(Region), OFFSET(..))))
+                # the answer is not the intersection of both; which of them Power BI reads was not established
+                raise MeasureError(f"{function} under several row contexts of its relation's table is not supported in the local engine.")
             visible[table_id] = {
                 row_key(typed_cell(base_context, column_name, vrow.get(column_name)) for _h, column_name in pairs)
                 for vrow in rows_by_table_id[table_id]
@@ -6584,6 +6726,122 @@ def evaluate_measures(
         single["single_column_set"] = True
         return single, ([] if raw is None else [{column: raw}])
 
+    _SCALAR_PASS_CALLS = frozenset({"IF", "SWITCH", "IFERROR", "COALESCE", "ABS", "ROUND", "INT", "AND", "OR", "NOT", "ISBLANK", "DIVIDE"})
+    _NESTED_BODY_ITERATORS = frozenset({"SUMX", "AVERAGEX", "MAXX", "MINX", "COUNTX", "COUNTAX", "CONCATENATEX", "FILTER"})
+
+    def static_table_columns(node: Any) -> set[tuple[str, str]] | None:
+        """The (table id, column) pairs the rows of a table expression hold, or None when that is not known without evaluating it."""
+        try:
+            if node[0] == "table":
+                held = resolve_table_context(str(node[1]))
+                return {(held["id"], str(header).casefold()) for header in held["headers"]}
+            if node[0] == "table_call" and node[1] in {"VALUES", "DISTINCT"} and len(node) == 3:
+                if node[2][0] == "reference":
+                    held, column = resolve_table(node[2][1], node[2][2])
+                    return {(held["id"], column.casefold())}
+                return static_table_columns(node[2])
+            if node[0] == "call" and node[2]:
+                name, arguments = node[1], node[2]
+                if name in {"VALUES", "DISTINCT", "ALL", "ALLNOBLANKROW", "ALLSELECTED"}:
+                    if all(argument[0] == "reference" for argument in arguments):
+                        found = set()
+                        for argument in arguments:
+                            held, column = resolve_table(argument[1], argument[2])
+                            found.add((held["id"], column.casefold()))
+                        return found
+                    if len(arguments) == 1:
+                        return static_table_columns(arguments[0])
+                if name == "ROW":
+                    return set()  # named columns only: no column of a model table
+                if name in {"FILTER", "CALCULATETABLE", "ADDCOLUMNS"}:
+                    return static_table_columns(arguments[0])
+                if name == "TOPN" and len(arguments) > 1:
+                    return static_table_columns(arguments[1])
+        except MeasureError:
+            return None
+        return None
+
+    def earlier_unreadable_deep(node: Any, frames: list[Any]) -> bool:
+        """Like `_earlier_unreadable`, but follows the iterators nested in the body: each opens a row context holding the columns of its table (None
+        when those are not known statically, which proves nothing).  An EARLIER / EARLIEST of a bare [name] (an alias, never a table column) is
+        an error in Power BI wherever it stands."""
+        if not isinstance(node, tuple) or not node:
+            return False
+        if node[0] == "call" and node[1] in {"EARLIER", "EARLIEST"} and node[2] and node[2][0][0] == "reference":
+            reference = node[2][0]
+            if not reference[1]:
+                return True
+            depth = 1
+            if node[1] == "EARLIER" and len(node[2]) > 1 and node[2][1][0] == "number":
+                depth = int(node[2][1][1])
+            remaining = frames[:1] if node[1] == "EARLIEST" else frames[:-depth] if depth >= 1 else []
+            if not remaining:
+                return False
+            try:
+                held, column = resolve_table(reference[1], reference[2])
+            except MeasureError:
+                return False
+            for holder in remaining:
+                if holder is None:
+                    continue
+                if isinstance(holder, tuple) and holder[0] == "frame":
+                    if column_in_row_context(holder[1], reference[1], reference[2]):
+                        return False
+                elif isinstance(holder, tuple) and holder[0] == "columns":
+                    if (held["id"], column.casefold()) in holder[1]:
+                        return False
+                else:
+                    return False  # a row context whose columns are not known
+            return True
+        if node[0] == "call" and node[1] in _NESTED_BODY_ITERATORS and node[2]:
+            columns = static_table_columns(node[2][0])
+            holder: Any = ("columns", columns) if columns is not None else "unknown"
+            return any(earlier_unreadable_deep(argument, [*frames, holder]) for argument in node[2][1:])
+        if node[0] in {"table", "table_call"}:
+            return False
+        return any(earlier_unreadable_deep(child, frames) for child in node if isinstance(child, tuple))
+
+    def unreachable_foreign_reference(
+        node: Any, readable: Callable[[str, str], bool], extra: frozenset[tuple[str, str]], is_alias: Callable[[str], bool],
+    ) -> None:
+        """Iteration 88 (live Power BI, fresh nested-iterator probes): the body of an iteration that has no rows is still validated, including the
+        bodies of the iterators nested in it: a column of a table the nested iteration does not hold and no enclosing row context holds is an error
+        there too (the local engine would answer BLANK because the nested body never runs).  Only scalar positions and nested iterators whose
+        table's columns are known statically are followed."""
+        if not isinstance(node, tuple) or not node:
+            return
+        if node[0] == "reference":
+            if not node[1]:
+                if not extra and is_alias(node[2]):
+                    # live Power BI (fresh probes): [alias] of a SELECTCOLUMNS / ADDCOLUMNS row context read in the body of an iteration with no rows
+                    # is an error; the answer for a non-empty one is not modelled here
+                    raise MeasureError("An alias column read in the body of an empty iteration is not supported in the local engine.")
+                return
+            try:
+                held, column = resolve_table(node[1], node[2])
+            except MeasureError:
+                return
+            if (held["id"], column.casefold()) in extra or readable(node[1], node[2]):
+                return
+            raise MeasureError("Iterator expressions can reference columns from their iterated table only.")
+        if node[0] == "call":
+            name, arguments = node[1], node[2]
+            if name in _NESTED_BODY_ITERATORS and arguments:
+                columns = static_table_columns(arguments[0])
+                if columns is not None:
+                    for argument in arguments[1:]:
+                        unreachable_foreign_reference(argument, readable, extra | frozenset(columns), is_alias)
+                return
+            if name in _SCALAR_PASS_CALLS:
+                for argument in arguments:
+                    unreachable_foreign_reference(argument, readable, extra, is_alias)
+            return
+        if node[0] in {"table", "number", "string", "boolean", "blank", "table_call"}:
+            return
+        for child in node[1:]:
+            if isinstance(child, tuple):
+                unreachable_foreign_reference(child, readable, extra, is_alias)
+
     def refuse_foreign_columns_of_empty_iteration(context: dict[str, Any], *expressions: tuple[Any, ...]) -> None:
         """Live Power BI (iteration 84, testing agent; 34 of 12,534 fresh probes): an iterator body that reads a column of a table other than
         the iterated one is evaluated once without a row even when the iteration is empty, and fails with "a single value for column ...
@@ -6593,6 +6851,14 @@ def evaluate_measures(
         lineage = context.get("lineage") or {}
         headers = {str(header).casefold() for header in context.get("headers", [])}
         for expression in expressions:
+            if (
+                _earlier_unreadable(expression, [*row_stack, None], column_in_row_context)
+                or _earlier_too_deep(expression, len(row_stack) + 1)
+                or earlier_unreadable_deep(expression, [*(("frame", frame) for frame in row_stack), None])
+            ):
+                # live Power BI (iteration 88, fresh probes): EARLIER / EARLIEST is validated against the row contexts around the iteration also when it
+                # has no rows (an error when too few); the local engine would answer BLANK without running the body
+                raise MeasureRuntimeError("EARLIER/EARLIEST refers to an earlier row context which doesn't exist.")
             for reference in _direct_column_references(expression):
                 if not reference[1]:
                     continue  # a measure or a column of the iterated table
@@ -6604,7 +6870,27 @@ def evaluate_measures(
                     continue
                 if any(base["id"] == table["id"] and str(base_column).casefold() == column.casefold() for base, base_column in lineage.values()):
                     continue
+                if any(column_in_row_context(frame, reference[1], reference[2]) for frame in row_stack if not frame[0].get("boolean_filter")):
+                    continue  # an enclosing row context holds the column (iteration 88): its one value is read
                 raise MeasureError("Iterator expressions can reference columns from their iterated table only.")
+
+            def alias_of_enclosing_frame(name: str) -> bool:
+                if name.casefold() in headers:
+                    return False
+                return any(
+                    frame[0].get("derived") and any(str(header).casefold() == name.casefold() for header in frame[0].get("headers", []))
+                    for frame in row_stack if not frame[0].get("boolean_filter")
+                )
+
+            def readable(table_name: str, column_name: str) -> bool:
+                held, column = resolve_table(table_name, column_name)
+                if held["id"] == context.get("id") and column.casefold() in headers:
+                    return True
+                if any(base["id"] == held["id"] and str(base_column).casefold() == column.casefold() for base, base_column in lineage.values()):
+                    return True
+                return any(column_in_row_context(frame, table_name, column_name) for frame in row_stack if not frame[0].get("boolean_filter"))
+
+            unreachable_foreign_reference(expression, readable, frozenset(), alias_of_enclosing_frame)
 
     def refuse_foreign_columns_of_empty_set(context: dict[str, Any], expression: tuple[Any, ...]) -> None:
         """Power BI rejects an iterator body that reads a column other than the one a date set holds, also when the set is empty
@@ -6874,6 +7160,7 @@ def evaluate_measures(
     ) -> str:
         if row_context is None:
             return "unknown"
+        row_context = enclosing_row_context_for(row_context, reference[1], reference[2], False)
         iterated_table = row_context[0]
         reference_table = (
             resolve_table_context(reference[1])
@@ -7377,7 +7664,14 @@ def evaluate_measures(
                     iterator_expression_category(argument, row_context)
                 return "table"
             if function in _ALL_ITERATORS:
-                iterated_table, iteration_rows = table_argument_value(expression[2][0])
+                pushed_outer = row_context is not None and (not row_stack or row_stack[-1][1] is not row_context[1])
+                if pushed_outer:
+                    row_stack.append(row_context)  # type: ignore[arg-type]  # the table of a nested iterator may read a column of this row (iteration 88)
+                try:
+                    iterated_table, iteration_rows = table_argument_value(expression[2][0])
+                finally:
+                    if pushed_outer:
+                        row_stack.pop()
                 validation_row = iteration_rows[0] if iteration_rows else {}
                 result_category = iterator_expression_category(
                     expression[2][1], (iterated_table, validation_row, 1)
@@ -9905,11 +10199,11 @@ def evaluate_measures(
     def plan_calculatetable_filter(argument: tuple[Any, ...]) -> tuple[bool, tuple[Any, ...]] | None:
         """A CALCULATETABLE in a Boolean filter that the older rule (a hoistable scalar on the right) refused: apply the hoist-or-transition rule
         Power BI showed (analytics_studio/dax_ct_filters.py), or return None to keep refusing. Only for a filter written at the top level."""
-        if row_stack or current_context != 0:
-            return None
         planned = dax_ct_filters.plan(argument, _direct_column_references)
         if planned is None:
             return None
+        if planned.scalars > 1 and (row_stack or current_context != 0):
+            return None  # iteration 88 (fresh live probes): two such scalars in one filter, inside an iterator or under an outer CALCULATE, read differently
         if _contains_refused_call_outside_x_iterator(argument):
             raise MeasureError("CALCULATE and FILTER cannot be used inside a True/False filter expression.")
         names: set[str] = set()
@@ -9918,7 +10212,15 @@ def evaluate_measures(
         replacements: dict[int, tuple[Any, ...]] = {}
         for scalar in planned.hoisted:
             try:
-                value = filter_constant(scalar)
+                if planned.counted:
+                    # iteration 88 (live probes, also inside iterators and under an outer CALCULATE): the COUNTROWS(CALCULATETABLE(..)) is read with the
+                    # filters of every column the filter replaces (its own and those its CALCULATETABLE tests) removed
+                    value = evaluate(
+                        ("call", "CALCULATE", (scalar, ("call", "ALL", (*planned.columns, *planned.extra_columns)))),
+                        row_stack[-1] if row_stack else None, allow_text=True, allow_boolean=True,
+                    )
+                else:
+                    value = filter_constant(scalar)
             except MeasureError:
                 return None  # an error inside the scalar: left to the paths that report it
             if value is None:
@@ -9939,15 +10241,16 @@ def evaluate_measures(
                 return replacements[id(node)]
             return tuple(substitute(child) if isinstance(child, tuple) else child for child in node)
 
-        if planned.mode == dax_ct_filters.HOIST:
+        if planned.mode == dax_ct_filters.HOIST and not planned.counted:
             return True, substitute(argument)  # the scalars are constants now: the older single-column path takes it from here
+        all_columns = (*planned.columns, *planned.extra_columns)
         try:
-            for reference in planned.columns:
+            for reference in all_columns:
                 resolve_table(reference[1], reference[2])
         except MeasureError:
             return None
         core = dax_ct_filters.core_of(argument)
-        filtered = ("call", "FILTER", (("call", "ALL", tuple(planned.columns)), substitute(core)))
+        filtered = ("call", "FILTER", (("call", "ALL", tuple(all_columns)), substitute(core)))
         probe = argument
         while probe is not core:  # KEEPFILTERS(..) stays around the table filter
             filtered = ("call", "KEEPFILTERS", (filtered,))
@@ -10450,12 +10753,15 @@ def evaluate_measures(
                     ), header)
                 return header
 
-            # the row contexts that hold this column, from the innermost out; EARLIER skips the innermost one
-            holders = [frame for frame in reversed(row_stack) if column_in(frame[0]) is not None]
+            # iteration 88 (live Power BI, 30 probes on nested iterators): EARLIER(col, n) drops the n innermost row contexts, whatever tables they
+            # iterate, and reads the column from the nearest one that is left and holds it; EARLIEST keeps the outermost row context alone
+            # (an error when it does not hold the column).  The old rule counted only the row contexts that hold the column.
+            stack = list(row_stack)
             if function == "EARLIEST":
-                frame = holders[-1] if len(holders) > 1 else None  # one row context only: Power BI errors
+                remaining = stack[:1] if len(stack) > 1 else []
             else:
-                frame = holders[depth] if depth >= 1 and len(holders) > depth else None
+                remaining = stack[:-depth] if depth >= 1 and len(stack) > depth else []
+            frame = next((f for f in reversed(remaining) if column_in_row_context(f, reference[1], reference[2])), None)
             if frame is None:
                 if not any(column_in(f[0]) is not None for f in row_stack):
                     raise MeasureError(f"Column {reference[2]!r} does not exist in the earlier row context.")
@@ -10544,7 +10850,8 @@ def evaluate_measures(
         if function == "ISO.CEILING":
             return _scalar_math("CEILING", [
                 None if values[0] is None else as_number(values[0]),
-                Decimal(1) if len(values) < 2 or values[1] is None else as_number(values[1]),
+                # live Power BI (iteration 88): the sign of the significance is ignored, an omitted one is 1 and a BLANK one is 0
+                Decimal(1) if len(values) < 2 else Decimal(0) if values[1] is None else abs(as_number(values[1])),
             ])
         if function in dax_ext.ARITY:
             return dax_ext.call(function, values)
@@ -11216,6 +11523,58 @@ def evaluate_measures(
             except (DecimalException, OverflowError):
                 pass
 
+    def strict_equal_value(node: tuple[Any, ...], row_context: tuple[dict[str, Any], dict[str, Any], int] | None) -> bool:
+        """a == b (iteration 88, live Power BI, 361 operand pairs and 72 more probes): the operands must have the same type (number, text or
+        True/False; a mismatch is an error); a BLANK equals only a BLANK of its own or of a compatible type, never 0, "" or FALSE, except that a
+        True/False-typed BLANK is FALSE; text ignores case like =.  Dates, error values (Infinity, NaN) and computed fractions are refused."""
+        column_types = {
+            str(ctx.get("name", "")).casefold(): {str(h).casefold(): str(ctx.get("column_types", {}).get(h, "")).casefold() for h in ctx.get("headers", [])}
+            for ctx in contexts_by_id.values()
+        }
+        resolved = []
+        for operand in (node[1], node[2]):
+            is_blank_literal = operand == ("blank",)
+            value = evaluate(operand, row_context, allow_text=True, allow_boolean=True)
+            static = None if is_blank_literal else _static_type(operand, column_types, {})
+            if isinstance(value, bool):
+                actual = "boolean"
+            elif isinstance(value, str):
+                actual = "text"
+            elif isinstance(value, Decimal):
+                actual = "number"
+                if not value.is_finite():
+                    raise MeasureError("== over Infinity or NaN is not supported in the local engine.")
+                if value != value.to_integral_value() and operand[0] not in {"number", "reference"}:
+                    raise MeasureError("== over a computed fraction is not exact in the local engine (Power BI compares doubles).")
+            elif value is None:
+                if is_blank_literal:
+                    actual = "blank"
+                elif static in {"number", "text", "boolean"}:
+                    actual = static
+                else:
+                    raise MeasureError("== needs operands of a known type in the local engine.")
+            else:
+                raise MeasureError("== over dates is not supported in the local engine.")
+            if static in {"number", "text", "boolean"} and actual not in {"blank", static}:
+                raise MeasureError("== over operands whose type the local engine cannot establish is not supported.")
+            if actual == "boolean" and value is None:
+                value = False  # a True/False-typed BLANK is FALSE
+            resolved.append((value, actual))
+        (left, left_type), (right, right_type) = resolved
+        known = {kind for kind in (left_type, right_type) if kind != "blank"}
+        if len(known) > 1:
+            raise MeasureError(
+                f"DAX comparison operations do not support comparing values of type {left_type} with values of type {right_type}. "
+                "Consider using the VALUE or FORMAT function to convert one of the values."
+            )
+        if left is None or right is None:
+            return left is None and right is None
+        if isinstance(left, str):
+            if not (left.isascii() and right.isascii()):
+                raise MeasureError("== over text with non-ASCII characters is not supported in the local engine (Power BI also folds width and accents).")
+            return bool(dax_typed.compare("=", left, right))
+        return left == right
+
     def evaluate(
         node: tuple[Any, ...],
         row_context: tuple[dict[str, Any], dict[str, Any], int] | None = None,
@@ -11266,6 +11625,7 @@ def evaluate_measures(
                     return with_column_filters(all_row_context_filters(row_context), lambda: evaluate(node), True)
                 return resolve(measure_key)
             if row_context is not None:
+                row_context = enclosing_row_context_for(row_context, table, name)
                 iterated_table, row, row_index = row_context
                 value_table = resolve_table_context(table) if table else iterated_table
                 lineage = iterated_table.get("lineage")
@@ -11274,6 +11634,8 @@ def evaluate_measures(
                         header for header, (base, column) in lineage.items()
                         if base["id"] == value_table["id"] and column.casefold() == name.casefold()
                     ), None)
+                    if mapped is not None and iterated_table.get("selected_columns") and mapped.casefold() != name.casefold():
+                        mapped = None  # live Power BI (iteration 88): T[col] is not found among the renamed columns of SELECTCOLUMNS (an error)
                     if mapped is not None:
                         name, value_table = mapped, iterated_table
                 if value_table["id"] != iterated_table["id"]:
@@ -11387,6 +11749,8 @@ def evaluate_measures(
                 )
                 for row in rows
             )
+        if kind == "strict_equal":
+            return strict_equal_value(node, row_context)
         if kind == "comparison":
             compare_text = False
             compare_boolean = False
@@ -12198,9 +12562,24 @@ def evaluate_measures(
                         return ""  # an empty text is not a BLANK: Power BI orders BLANK before it
                 return value
 
+            outer_reads_before = outer_row_reads[0]
             for inner in iterate_rows(context, iteration_rows, "clear"):
                 text = dax_typed.to_text(evaluate(arguments[1], inner, allow_text=True))
                 entries.append(([order_value(expression, inner) for expression, _d in order_spec], text))
+            if (
+                outer_row_reads[0] != outer_reads_before
+                or _contains_function_call(arguments[1], "OFFSET")  # relative to the current row: its order decides the text
+                or (
+                    _contains_function_call(arguments[1], "CALCULATE") and len({text for _key, text in entries}) > 1 and context.get("selected_columns")
+                    and any(_contains_function_call(arguments[1], iterator) for iterator in ("SUMX", "AVERAGEX", "MINX", "MAXX", "COUNTX", "COUNTAX"))
+                )
+                or (_contains_function_call(arguments[1], "CALCULATETABLE") and len({text for _key, text in entries}) > 1 and arguments[0][0] == "table")  # the transition order of a table in the body is not measured
+            ) and (
+                not order_spec or len({row_key(item[0]) for item in entries}) != len(entries)
+            ):
+                # live Power BI (iteration 88): the walk order of an expression that reads a column of an enclosing row context through a nested iterator
+                # differs from the one the local engine uses; only a total ORDER BY makes the text independent of it
+                raise MeasureError("The order of a CONCATENATEX whose expression reads an enclosing row context is not modelled in the local engine.")
             for key_index in range(len(order_spec) - 1, -1, -1):
                 column_keys = blank_aware_keys([item[0][key_index] for item in entries])
                 try:
@@ -12319,6 +12698,26 @@ def evaluate_measures(
                 if not texts:
                     return None
                 return (max if function == "MAX" else min)(texts, key=dax_typed.text_key)
+        if function in {"AVERAGEA", "MAXA", "MINA"}:
+            a_context, a_column = resolve_table(reference[1], reference[2])
+            a_type = str(a_context.get("column_types", {}).get(a_column, "")).casefold()
+            if a_type in {"text", "boolean"}:
+                # live Power BI (iteration 88): AVERAGEA / MAXA / MINA of a text column count every text, "5" and "TRUE" too, as 0 and leave out BLANKs;
+                # True / False count as 1 / 0; with nothing left the result is BLANK
+                counted = []
+                for row_index, row in enumerate(rows_by_table_id[a_context["id"]], 1):
+                    cell = row.get(a_column)
+                    _reject_power_query_error(cell, a_column, row_index)
+                    if cell is None:
+                        continue
+                    if a_type == "text":
+                        counted.append(Decimal(0))
+                    else:
+                        spelled = cell_to_text(cell).strip().casefold()
+                        if spelled not in {"true", "false"}:
+                            raise MeasureError(f"Column {a_column!r} contains a value that is not True or False at row {row_index}.")
+                        counted.append(Decimal(1 if spelled == "true" else 0))
+                return dax_math.statistic(function, counted, None) if counted else None
         values = numeric_values(reference[2], reference[1])
         if function in dax_math.STAT_COLUMN_FUNCTIONS or function in dax_math.STAT_PERCENTILE_COLUMN:
             stat_context, stat_column = resolve_table(reference[1], reference[2])
@@ -12372,6 +12771,13 @@ def evaluate_measures(
             value = evaluate(parsed[key])
         except (DecimalException, OverflowError) as exc:
             raise MeasureError(f"Measure {by_name[key]['name']!r} is outside the supported numeric range.") from exc
+        except MeasureRuntimeError as exc:
+            # live Power BI (iteration 88): STDEV.S / VAR.S (and the X forms) of fewer than two values are NaN, not an error.  Only a measure that is
+            # that statistic itself (also under CALCULATE) shows NaN; inside any other expression Power BI treats the NaN differently per function.
+            if getattr(exc, "sample_statistic_nan", False) and len(resolving) == 1 and _is_sample_statistic(parsed[key]):
+                value = Decimal("NaN")
+            else:
+                raise
         finally:
             variables.update(outer_variables)
             current_home_table_id = previous_home_table_id
