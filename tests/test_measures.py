@@ -790,7 +790,7 @@ class MeasureTests(unittest.TestCase):
             'COUNTX(\'Sales data\', IF(COUNTROWS(FILTER(\'Sales data\', [Note] > 0)) > 0, "x", BLANK()))',
             'COUNTX(\'Sales data\', IF(AND([Note], TRUE()) = TRUE(), "x", BLANK()))',
             'COUNTX(\'Sales data\', IF(AND(IF([Note], TRUE(), FALSE()), TRUE()) = TRUE(), "x", BLANK()))',
-            'COUNTX(\'Sales data\', IF([Sales], "x", BLANK()))',
+            # iteration 87: IF([Sales], "x", BLANK()) is no longer rejected, a number is a valid condition (non-zero is True; live Power BI)
             'COUNTX(\'Sales data\', IF(AND(ABS([Note]), TRUE()), "x", BLANK()))',
             'COUNTX(\'Sales data\', IF(ABS([Note]) > 0, "x", BLANK()))',
             'COUNTX(\'Sales data\', ABS([Note]))',
@@ -879,11 +879,15 @@ class MeasureTests(unittest.TestCase):
             "rows": [],
             "column_types": {"Sales": "whole_number", "Note": "text"},
         }]
-        with self.assertRaises(MeasureError):
-            evaluate_measures([{
-                "name": "Invalid numeric IF condition on empty table",
-                "expression": 'COUNTX(\'Sales data\', IF([Sales], "x", BLANK()))',
-            }], [], self.headers, "Sales data", table_context=empty_table_context)
+        # iteration 87: a number is a valid IF condition (live Power BI: non-zero is True), so an empty table is simply BLANK
+        self.assertIsNone(evaluate_measures([{
+            "name": "Numeric IF condition on empty table",
+            "expression": 'COUNTX(\'Sales data\', IF([Sales], "x", BLANK()))',
+        }], [], self.headers, "Sales data", table_context=empty_table_context)["Numeric IF condition on empty table"])
+        self.assertEqual(evaluate_measures([{
+            "name": "Numeric IF condition",
+            "expression": 'COUNTX(\'Sales data\', IF([Sales], "x", BLANK()))',
+        }], rows, self.headers, "Sales data", table_context=[{**empty_table_context[0], "rows": rows}])["Numeric IF condition"], Decimal(2))
 
     def test_abs_and_round_use_safe_decimal_evaluation_and_dax_half_away_rounding(self) -> None:
         result = evaluate_measures([
@@ -1081,7 +1085,8 @@ class MeasureTests(unittest.TestCase):
         for expression in (
             "MAXX('Sales data', [Mixed])",  # [Note] is text: the largest text is a valid result (tests/test_related_values.py)
             "MAXX('Sales data', TRUE())",
-            "MINX('Sales data', IF([Quantity] > 0, [Quantity], TRUE()))",
+            # iteration 87: MINX('Sales data', IF([Quantity] > 0, [Quantity], TRUE())) is no longer here: live Power BI reads only the numbers of such a
+            # Variant (it answers 3 on Facts, not an error); tests/test_iteration87_variant_iterators.py holds those answers
         ):
             with self.subTest(expression=expression):
                 with self.assertRaises(MeasureError):

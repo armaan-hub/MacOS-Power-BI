@@ -327,6 +327,13 @@ def _table_position(parent_function: str, argument_index: int) -> bool:
         or parent_function in _TABLE_ANY_PARENTS
         or (parent_function == "TOPN" and argument_index == 1)
     )
+
+
+_TABLE_BUILDING_CALLS = frozenset({
+    "UNION", "CROSSJOIN", "GENERATESERIES", "TREATAS", "NATURALINNERJOIN", "NATURALLEFTOUTERJOIN", "GENERATE", "GENERATEALL", "DATATABLE", "CALENDAR",
+    "DISTINCT", "VALUES", "ROW", "CALENDARAUTO",
+})
+_BOOLEAN_INFO_CALLS = frozenset({"CONTAINS", "CONTAINSROW", "ISEMPTY", "ISFILTERED", "ISINSCOPE", "HASONEFILTER", "ISCROSSFILTERED"})
 _TYPED_RESULT_CATEGORY = {
     **dict.fromkeys(
         ["CONCATENATE", "UPPER", "LOWER", "TRIM", "LEFT", "RIGHT", "MID", "SUBSTITUTE", "REPLACE", "REPT", "FIXED", "FORMAT", "UNICHAR"],
@@ -1491,13 +1498,104 @@ def _direct_column_references(node: Any) -> Iterable[tuple[Any, ...]]:
             yield from _direct_column_references(child)
 
 
+def _tested_operands_and_results(node: Any) -> tuple[list[Any], list[Any]]:
+    """For an IF / SWITCH / IFERROR / COALESCE call: the operands it tests, and the operands it can return."""
+    name, args = node[1], list(node[2])
+    if name == "IF":
+        return args[:1], args[1:]
+    if name == "SWITCH":
+        remaining = args[1:]
+        fallback = [remaining.pop()] if len(remaining) % 2 else []
+        return [args[0], *remaining[::2]], [*remaining[1::2], *fallback]
+    if name == "IFERROR":
+        return args[:1], args
+    return args[:-1], args  # COALESCE
+
+
+_CANNOT_RAISE_CALLS = frozenset({
+    "TRUE", "FALSE", "BLANK", "ISBLANK", "UPPER", "LOWER", "LEN", "ABS", "NOT", "AND", "OR", "COUNTROWS", "SUM", "MAX", "MIN", "COUNT", "SELECTEDVALUE", "DATE",
+    "IF", "SWITCH", "IFERROR", "COALESCE", "FORMAT", "EDATE", "CALCULATE",
+})
+
+
+def _cannot_raise(node: Any) -> bool:
+    """An expression made only of literals, columns and functions that never raise an error on a row (so evaluating it eagerly is harmless)."""
+    if not isinstance(node, tuple) or not node:
+        return True
+    if node[0] in {"number", "string", "boolean", "blank", "reference"}:
+        return True
+    if node[0] in {"comparison", "logical", "binary", "unary", "concat"}:
+        return all(_cannot_raise(child) for child in node[1:] if isinstance(child, tuple))
+    if node[0] == "call" and node[1] in _CANNOT_RAISE_CALLS:
+        return all(_cannot_raise(child) for child in node[2] if isinstance(child, tuple))
+    return False
+
+
+def _has_false_only_if(node: Any) -> bool:
+    """IF(condition, FALSE()) anywhere inside: Power BI folds it to FALSE, which COUNTX counts under an IFERROR (live probes, iteration 87)."""
+    if not isinstance(node, tuple) or not node:
+        return False
+    if node[:1] == ("call",) and node[1] == "IF" and len(node[2]) == 2 and node[2][1] == ("boolean", False):
+        return True
+    return any(_has_false_only_if(child) for child in node if isinstance(child, tuple))
+
+
+def _statistic_with_arithmetic(node: Any) -> bool:
+    """A statistical function (GEOMEAN, VAR.P, STDEV.S, PERCENTILE.INC ...) and arithmetic (+ - * / ^, unary minus) in the same expression.  Power BI
+    computes the statistic as a double: shown with 15 digits and a signed zero, and combined with BLANK in ways the local decimals do not follow
+    (live probes, iteration 87), so an iterator body that mixes the two is refused."""
+    found_statistic = found_arithmetic = False
+    stack = [node]
+    while stack:
+        item = stack.pop()
+        if not isinstance(item, tuple) or not item:
+            continue
+        if item[0] in {"binary", "unary"}:
+            found_arithmetic = True
+        if item[:1] == ("call",) and (item[1] in dax_math.STAT_COLUMN_FUNCTIONS or item[1] in dax_math.STAT_PERCENTILE_COLUMN):
+            found_statistic = True
+        stack.extend(child for child in item if isinstance(child, tuple))
+    return found_statistic and found_arithmetic
+
+
+def _coalesce_with_failing_argument(node: Any) -> bool:
+    """A COALESCE anywhere in this expression with an argument other than the last that can raise an error (VALUE of text, ...): Power BI evaluates
+    those arguments in an order the local engine does not reproduce (live probes, iteration 87), so the error may or may not surface."""
+    if not isinstance(node, tuple) or not node:
+        return False
+    if node[:1] == ("call",) and node[1] == "COALESCE" and len(node[2]) >= 2 and not all(_cannot_raise(argument) for argument in node[2][:-1]):
+        return True
+    return any(_coalesce_with_failing_argument(child) for child in node if isinstance(child, tuple))
+
+
+def _spine_has_coalesce(node: Any) -> bool:
+    """A COALESCE with two or more arguments on the result spine (the IF / SWITCH / IFERROR / COALESCE branches that can be returned)."""
+    if not isinstance(node, tuple) or node[:1] != ("call",) or node[1] not in {"IF", "SWITCH", "IFERROR", "COALESCE"}:
+        return False
+    if node[1] == "COALESCE" and len(node[2]) >= 2:
+        return True
+    return any(_spine_has_coalesce(result) for result in _tested_operands_and_results(node)[1])
+
+
+def _conditional_is_constant(node: Any) -> bool:
+    """Some IF / SWITCH / IFERROR / COALESCE on the result spine of this expression tests nothing that reads a column.  Power BI treats such a
+    conditional like any other for the types of its branches, except that COUNTX then counts the True/False values it returns (live probes,
+    iteration 87: COUNTX(Facts, IF(TRUE(), TRUE(), 7)) is 6, with a row-dependent condition 3)."""
+    if not isinstance(node, tuple) or node[:1] != ("call",) or node[1] not in {"IF", "SWITCH", "IFERROR", "COALESCE"}:
+        return False
+    tested, results = _tested_operands_and_results(node)
+    if not any(next(iter(_direct_column_references(operand)), None) is not None for operand in tested):
+        return True
+    return any(_conditional_is_constant(result) for result in results)
+
+
 # Power BI: "A function 'X' has been used in a True/False expression that is used as a table filter expression".
 # Verified against 15 functions in tools/parity/dax_battery_boolean_filter_functions.json: the error applies only
 # outside an X-iterator (SUMX(TOPN(..),1), SUMX(..,CALCULATE(..)) and SUMX(FILTER(..),1) are all accepted).
 _BOOLEAN_FILTER_REFUSED_CALLS = frozenset({
     "CALCULATE", "FILTER", "TOPN", "SELECTCOLUMNS", "LOOKUPVALUE", "ADDCOLUMNS", "SUMMARIZE", "SUMMARIZECOLUMNS",
     "GROUPBY", "EXCEPT", "INTERSECT", "ROW", "SAMPLE", "TOPNSKIP", "RANKX", "FIRSTNONBLANK", "LASTNONBLANK",
-    "OFFSET", "WINDOW", "INDEX", "RANK", "ROWNUMBER",
+    "OFFSET", "WINDOW", "INDEX", "RANK", "ROWNUMBER", "CONTAINS",  # CONTAINS: live probes, iteration 87 (also inside IF and arithmetic)
 })
 _BOOLEAN_FILTER_X_ITERATORS = frozenset({"SUMX", "AVERAGEX", "MAXX", "MINX", "COUNTX", "COUNTAX", "CONCATENATEX", *dax_math.STAT_ITERATORS})
 
@@ -3712,6 +3810,8 @@ def _static_type(node: Any, columns: dict[str, dict[str, str]], variables: dict[
         return "boolean"
     if kind in {"comparison", "logical", "in"}:
         return "boolean"
+    if kind == "unary" and node[1] == "+" and _static_type(node[2], columns, variables) == "boolean":
+        return "boolean"  # unary plus leaves a True/False a True/False (live Power BI, iteration 87)
     if kind in {"binary", "unary"}:
         return "number"
     if kind == "concat":
@@ -5312,16 +5412,35 @@ def evaluate_measures(
                         lineage[name] = (link_context, link_column)
                 out_rows.append(row)
             types = dict(context.get("column_types", {})) if add else {}
+            variant_columns = set(context.get("variant_columns", ())) if add else set()
+            variant_date_columns = set(context.get("variant_date_columns", ())) if add else set()
+            column_kinds: dict[str, str | None] = {}
+            if rows:
+                for name, expression in zip(names, expressions):
+                    column_kinds[name] = iterator_body_kind(expression, (context, rows[0], 1))
+                    if column_kinds[name] == "numdate":
+                        # live Power BI (iteration 87): numbers beside dates make a number column, its dates are plain numbers
+                        for out_row in out_rows:
+                            if isinstance(out_row.get(name), dax_dates.DaxDateTime):
+                                out_row[name] = Decimal(out_row[name])
+            static_types = {"variant": "any", "variant_dates": "any", "text": "text", "bool": "boolean", "number": "decimal_number", "numdate": "decimal_number", "date": "date"}
+            types.update({name: static_types[kind] for name, kind in column_kinds.items() if kind in static_types})  # the type of the branches, not of the values the rows hold
             selected_context, selected_rows = derived_table(
                 headers, out_rows, lineage, {k: v for k, v in types.items() if k in headers}, row_identity=add and not context.get("derived", False) or add and bool(context.get("row_identity")),
             )
-            variant_columns = set(context.get("variant_columns", ())) if add else set()
             if rows:
                 for name, expression in zip(names, expressions):
-                    if is_variant_column_expression(expression, (context, rows[0], 1), context.get("variant_columns", ())):
+                    kind = column_kinds[name]
+                    if kind in {"variant", "variant_dates"}:
+                        variant_columns.add(name.casefold())
+                        if kind == "variant_dates":
+                            variant_date_columns.add(name.casefold())
+                    elif kind != "numdate" and is_variant_column_expression(expression, (context, rows[0], 1), context.get("variant_columns", ())):
                         variant_columns.add(name.casefold())
             if variant_columns:
                 selected_context["variant_columns"] = frozenset(variant_columns)
+            if variant_date_columns:
+                selected_context["variant_date_columns"] = frozenset(variant_date_columns)
             if not add:  # the walk order of a selected column is that of the columns it was computed from
                 selected_context["selected_columns"] = True
                 selected_context["order_source"] = (context, {id(out): source for out, source in zip(out_rows, source_rows)})
@@ -7097,6 +7216,11 @@ def evaluate_measures(
             for operand in expression[1:]:
                 iterator_expression_category(operand, row_context)
             return "text"
+        if kind == "in":  # x IN {..} / (a, b) IN table: a True/False; the evaluator checks the table side
+            probe = expression[1]
+            for member in (probe[1] if probe[0] == "tuple" else (probe,)):
+                iterator_expression_category(member, row_context)
+            return "boolean"
         if kind == "var":
             try:
                 held = variables[expression[1]]()
@@ -7110,6 +7234,8 @@ def evaluate_measures(
         if kind in {"unary", "binary"}:
             operands = expression[2:] if kind == "binary" else (expression[2],)
             operand_categories = [iterator_expression_category(operand, row_context) for operand in operands]
+            if kind == "unary" and expression[1] == "+" and operand_categories == ["boolean"]:
+                return "boolean"  # live Power BI (iteration 87): unary plus leaves a True/False a True/False
             if any(
                 category not in {"numeric", "blank", "boolean"}  # live Power BI (iteration 86): TRUE is 1 and FALSE is 0 in + - * and unary minus
                 for category in operand_categories
@@ -7124,7 +7250,7 @@ def evaluate_measures(
                 iterator_expression_category(expression[3], row_context),
             )
             if any(
-                category not in {"boolean", "blank"}
+                category not in {"boolean", "blank", "numeric"}  # live Power BI (iteration 87): a number is True unless it is zero
                 for category in operand_categories
             ):
                 raise MeasureError(
@@ -7144,8 +7270,24 @@ def evaluate_measures(
                 return _TYPED_RESULT_CATEGORY.get(function, "numeric")
             if function == "CALCULATE" and expression[2]:
                 return iterator_expression_category(expression[2][0], row_context)
+            if function in {"LOOKUPVALUE", "SELECTEDVALUE"} and expression[2] and expression[2][0][0] == "reference":
+                # typed as the column it reads; a SELECTEDVALUE alternate of another type makes it a Variant, which is not typed here
+                column_category = iterator_model_reference_category(expression[2][0], row_context)
+                if function == "SELECTEDVALUE" and len(expression[2]) == 2 and iterator_expression_category(expression[2][1], row_context) not in {column_category, "blank"}:
+                    return "unknown"
+                return column_category
             if function in _COLUMN_SCALAR_ARITY:
                 return "boolean" if function == "HASONEVALUE" else "unknown"
+            if function in _BOOLEAN_INFO_CALLS:
+                return "boolean"  # live Power BI (iteration 87): a True/False whatever its arguments (the evaluator checks those)
+            if function in dax_math.STAT_COLUMN_FUNCTIONS or function in dax_math.STAT_PERCENTILE_COLUMN:
+                return "numeric"
+            if function == "COUNTROWS" and len(expression[2]) == 1 and (
+                expression[2][0][0] == "tableconstructor" or (expression[2][0][0] == "call" and expression[2][0][1] in _TABLE_BUILDING_CALLS)
+            ):
+                return "numeric"  # the rows of a table built from constants and columns; FILTER and the like are validated further down
+            if function == "CONCATENATEX":
+                return "text"
             if function in {"RANKX", "RANK.EQ", "RANK", "ROWNUMBER"}:
                 return "numeric"
             if function == "COALESCE" and expression[2]:
@@ -7181,7 +7323,7 @@ def evaluate_measures(
                     for argument in expression[2]
                 )
                 if any(
-                    category not in {"boolean", "blank"}
+                    category not in {"boolean", "blank", "numeric"}
                     for category in operand_categories
                 ):
                     raise MeasureError(
@@ -7192,7 +7334,7 @@ def evaluate_measures(
                 condition_category = iterator_expression_category(
                     expression[2][0], row_context
                 )
-                if condition_category not in {"boolean", "blank"}:
+                if condition_category not in {"boolean", "blank", "numeric"}:  # a number is True unless it is zero (live Power BI, iteration 87)
                     raise MeasureError(
                         "Iterator IF conditions need a Boolean expression."
                     )
@@ -7306,8 +7448,16 @@ def evaluate_measures(
         row_context: tuple[dict[str, Any], dict[str, Any], int] | None,
     ) -> str:
         operator, left_expression, right_expression = comparison[1:4]  # a 5th item marks an IN comparison
+        variant = row_context[0].get("variant_columns") if row_context is not None else None
+        if variant and any(
+            str(reference[2]).casefold() in variant for operand in (left_expression, right_expression)
+            for reference in _iter_reference_nodes(operand) if len(reference) > 2
+        ):
+            raise MeasureError("A comparison with a column whose branches have different types is not supported in the local engine.")
         left_category = iterator_expression_category(left_expression, row_context)
         right_category = iterator_expression_category(right_expression, row_context)
+        if left_expression == ("blank",) and right_expression == ("blank",):
+            return "numeric"  # BLANK() = BLANK() is True (live Power BI, iteration 87)
         if left_category == "date/time":  # dates are compared as day numbers
             left_category = "numeric"
         if right_category == "date/time":
@@ -7325,6 +7475,117 @@ def evaluate_measures(
                 "Iterator comparisons need matching local data types."
             )
         return left_category
+
+    numdate_nodes: list[bool] = []
+    variant_coalesce_arguments: list[tuple[Any, ...]] = []
+
+    def merge_value_types(parts: list[tuple[str, bool]]) -> tuple[str, bool]:
+        """The static type of an IF / SWITCH / IFERROR / COALESCE whose result branches have these (type, is the literal BLANK()) types.
+
+        Live Power BI (iteration 87): a literal BLANK() takes the type of the other branches, but an IF / SWITCH whose branches are all blank
+        is itself typed as a number.  Branches that are all numbers, or all dates, keep that type; numbers beside dates make a number;
+        any other mix (text beside a number, a True/False beside a number or text, text beside a date ...) makes a Variant."""
+        kinds: set[str] = set()
+        for value_type, literal_blank in parts:
+            if value_type == "blank":
+                if literal_blank:
+                    continue
+                value_type = "number"
+            kinds.add(value_type)
+        if not kinds:
+            return "blank", False
+        if len(kinds) == 1:
+            return next(iter(kinds)), False
+        if kinds <= {"number", "date", "numdate"}:
+            numdate_nodes.append(True)
+            return "numdate", False  # a number type that includes dates: its dates are plain numbers
+        return "variant", False
+
+    def body_value_type(expression: tuple[Any, ...], row_context: tuple[dict[str, Any], dict[str, Any], int] | None) -> tuple[str, bool]:
+        """Static type of an iterator body that is an IF / SWITCH / IFERROR / COALESCE: number, numdate, date, text, bool, blank or variant
+        (the second item says the expression is the literal BLANK()).  Raises MeasureError when a branch cannot be typed with certainty."""
+        if expression == ("blank",):
+            return "blank", True
+        if expression[0] == "call" and expression[1] in {"IF", "SWITCH", "IFERROR", "COALESCE"}:
+            name, args = expression[1], expression[2]
+            if name == "IF" and len(args) in {2, 3}:
+                if iterator_expression_category(args[0], row_context) not in {"boolean", "blank", "numeric"}:
+                    raise MeasureError("Iterator IF conditions need a Boolean expression.")
+                parts = [body_value_type(branch, row_context) for branch in args[1:]]
+                if len(args) == 2:
+                    parts.append(("blank", True))
+                return merge_value_types(parts)
+            if name == "IFERROR" and len(args) == 2:
+                return merge_value_types([body_value_type(branch, row_context) for branch in args])
+            if name == "COALESCE" and len(args) >= 2:
+                parts = [body_value_type(branch, row_context) for branch in args]
+                accumulated = parts[-1]
+                for part in reversed(parts[:-1]):  # live Power BI (iteration 87): COALESCE(a, b, c) is typed as COALESCE(a, COALESCE(b, c))
+                    accumulated = merge_value_types([part, accumulated])
+                if accumulated[0] in {"variant", "numdate"}:
+                    variant_coalesce_arguments.extend(args[1:])
+                return accumulated
+            if name == "SWITCH" and len(args) >= 3:
+                subject_category = iterator_expression_category(args[0], row_context)
+                remaining = list(args[1:])
+                fallback = remaining.pop() if len(remaining) % 2 else None
+                for candidate in remaining[::2]:
+                    candidate_category = iterator_expression_category(candidate, row_context)
+                    if "blank" not in {subject_category, candidate_category} and subject_category != candidate_category:
+                        raise MeasureError("Iterator SWITCH values need the same local data type as the expression.")
+                accumulated = body_value_type(fallback, row_context) if fallback is not None else ("blank", True)
+                for result in reversed(remaining[1::2]):  # Power BI types SWITCH as IFs nested from the right
+                    accumulated = merge_value_types([body_value_type(result, row_context), accumulated])
+                return accumulated
+            raise MeasureError(f"{name} with this number of arguments is not typed by the local engine.")
+        if expression[0] == "reference":
+            variant = row_context[0].get("variant_columns") if row_context is not None else None
+            if variant and str(expression[2]).casefold() in variant:
+                if str(expression[2]).casefold() in row_context[0].get("variant_date_columns", ()):
+                    numdate_nodes.append(True)
+                return "variant", False
+        if expression[0] == "call" and (
+            expression[1] == "SELECTEDVALUE" or expression[1] in {"MIN", "MAX"}
+        ) and len(expression[2]) == 1 and expression[2][0][0] == "reference":
+            # typed as its column (SELECTEDVALUE is BLANK() when several values are selected; the latest / earliest / largest / smallest of a column)
+            category = iterator_model_reference_category(expression[2][0], row_context)
+        else:
+            category = iterator_expression_category(expression, row_context)
+        if category == "blank" and expression[0] == "call":
+            return "blank", False  # CALCULATE(BLANK()) and the like: a blank that is computed, not the literal
+        mapped = {"numeric": "number", "text": "text", "boolean": "bool", "date/time": "date"}.get(category)
+        if mapped is None:
+            raise MeasureError("The type of this branch is not known to the local engine.")
+        return mapped, False
+
+    def iterator_body_kind(expression: tuple[Any, ...], row_context: tuple[dict[str, Any], dict[str, Any], int] | None) -> str | None:
+        """"variant" / "numdate" for an iterator body whose IF / SWITCH / IFERROR / COALESCE branches differ in type (or that reads a
+        Variant column), the type itself ("number", "date", "text", "bool", "blank") for any other conditional, None when it is not one or its
+        type cannot be established (the older rules apply)."""
+        if expression[0] == "reference":
+            variant = row_context[0].get("variant_columns") if row_context is not None else None
+            if variant and str(expression[2]).casefold() in variant:
+                return "variant_dates" if str(expression[2]).casefold() in row_context[0].get("variant_date_columns", ()) else "variant"
+            return None
+        if expression[0] != "call" or expression[1] not in {"IF", "SWITCH", "IFERROR", "COALESCE"}:
+            return None
+        numdate_nodes.clear()
+        variant_coalesce_arguments.clear()
+        try:
+            value_type, _ = body_value_type(expression, row_context)
+        except MeasureError:
+            if _spine_has_coalesce(expression):
+                # the older rules type a COALESCE by its first argument only, which gives wrong answers when the others differ in type
+                raise MeasureError("COALESCE with branches whose types the local engine cannot establish is not supported in iterator bodies.")
+            return None
+        if variant_coalesce_arguments and not all(_cannot_raise(argument) for argument in variant_coalesce_arguments):
+            # live Power BI: a COALESCE of mixed types evaluates all its arguments, so an error in a later one (VALUE("East")) is not skipped
+            raise MeasureError("COALESCE of mixed types with an argument that can fail is not supported in the local engine.")
+        if value_type == "variant" and numdate_nodes:
+            kind = "variant_dates"  # live Power BI: a number-and-date branch inside a Variant turns its dates into plain numbers first
+        else:
+            kind = value_type
+        return kind
 
     def evaluate_with_date_values(
         expression: tuple[Any, ...],
@@ -11064,7 +11325,7 @@ def evaluate_measures(
                 return number
             raise MeasureError(f"{name!r} is a column reference; use an aggregation such as SUM([{escape_bracket_name(name)}]).")
         if kind == "unary":
-            operand = evaluate(node[2], row_context)
+            operand = evaluate(node[2], row_context, allow_boolean=allow_boolean and node[1] == "+")
             if operand is None:
                 return None
             if node[1] == "+" and isinstance(operand, bool):
@@ -11172,13 +11433,35 @@ def evaluate_measures(
                     raise MeasureError(f"{error} The iterator body also reads a column by table name, which the local engine cannot validate first.") from error
                 raise
             refuse_one_to_one_values_iteration(arguments[0])
-            refuse_variant_aggregation(function, context, arguments[1])
-            # live Power BI (iteration 85): SUMX / AVERAGEX of an IF / SWITCH whose branches differ in type read only its numbers; a row that
-            # yields text counts for nothing (never the number the text happens to spell, FORMAT(1,"00") is not 1), so those rows are refused
-            mixed_branches = bool(iteration_rows) and function not in {"MAXX", "MINX"} and is_variant_column_expression(arguments[1], (context, iteration_rows[0], 1), ())
+            if iteration_rows and function in {"SUMX", "AVERAGEX", "MAXX", "MINX"} and _coalesce_with_failing_argument(arguments[1]):
+                raise MeasureError("A COALESCE whose earlier argument can fail is evaluated in an order the local engine does not reproduce.")
+            if iteration_rows and function in {"SUMX", "AVERAGEX", "MAXX", "MINX"} and _statistic_with_arithmetic(arguments[1]):
+                raise MeasureError("A statistical function beside arithmetic in an iterator body is not exact in the local engine.")
+            # live Power BI (iteration 87): SUMX / AVERAGEX / MAXX / MINX over a body whose IF / SWITCH / IFERROR / COALESCE branches differ in
+            # type (a Variant) read only the numbers and dates it returns; text and True/False rows count for nothing (never the number a text
+            # happens to spell).  Numbers beside dates, without text or True/False, are one number type: its dates are plain numbers.
+            body_kind = iterator_body_kind(arguments[1], (context, iteration_rows[0] if iteration_rows else {}, 1)) if function in {"SUMX", "AVERAGEX", "MAXX", "MINX"} else None
+            if body_kind is None and function in {"SUMX", "AVERAGEX"} and (
+                (arguments[1][0] == "reference" and context.get("derived")) or (arguments[1][0] == "call" and arguments[1][1] in {"MAXX", "MINX", "CONCATENATEX", "FORMAT", "CALCULATE"})
+            ):
+                try:
+                    column_category = iterator_expression_category(arguments[1], (context, iteration_rows[0] if iteration_rows else {}, 1))
+                except MeasureError:
+                    column_category = ""
+                body_kind = {"text": "text", "boolean": "bool"}.get(column_category)
+            if body_kind in {"text", "bool"} and function in {"SUMX", "AVERAGEX"}:
+                raise MeasureError(f"The function {function} cannot work with values of type {'String' if body_kind == 'text' else 'Boolean'}.")
+            if body_kind == "variant_dates" and function != "AVERAGEX":
+                raise MeasureError(f"{function} over a Variant that holds a number type with dates inside is not supported in the local engine.")
+            variant_body, number_dates = body_kind in {"variant", "variant_dates"}, body_kind == "numdate"
+            if not variant_body:
+                refuse_variant_aggregation(function, context, arguments[1])
+            mixed_branches = bool(iteration_rows) and function not in {"MAXX", "MINX"} and body_kind is None and is_variant_column_expression(arguments[1], (context, iteration_rows[0], 1), ())
             if not iteration_rows:
                 refuse_foreign_columns_of_empty_set(context, arguments[1])
-            if function in {"MAXX", "MINX"}:
+            if function in {"MAXX", "MINX"} and body_kind in {"variant", "variant_dates", "numdate"}:
+                result_category = "numeric"
+            elif function in {"MAXX", "MINX"}:
                 validation_row = iteration_rows[0] if iteration_rows else {}
                 result_category = iterator_expression_category(
                     arguments[1], (context, validation_row, 1)
@@ -11190,7 +11473,13 @@ def evaluate_measures(
             text_extreme = function in {"MAXX", "MINX"} and result_category == "text"
             values: list[Decimal] = []
             for frame in iterate_rows(context, iteration_rows, "install"):
-                result = in_row_expression(lambda frame=frame: evaluate(arguments[1], frame, allow_text=text_extreme))
+                result = in_row_expression(lambda frame=frame: evaluate(arguments[1], frame, allow_text=text_extreme or variant_body))
+                if variant_body and isinstance(result, (bool, str)):
+                    continue
+                if variant_body and isinstance(result, Decimal) and not result.is_finite():
+                    raise MeasureError(f"{function} over a Variant that returns Infinity or NaN is not supported in the local engine.")
+                if number_dates and isinstance(result, dax_dates.DaxDateTime):
+                    result = Decimal(result)
                 if isinstance(result, bool) and function not in {"MAXX", "MINX"}:
                     raise MeasureError(f"The function {function} cannot work with values of type Boolean.")
                 if isinstance(result, str) and arguments[1][0] == "reference" and function not in {"MAXX", "MINX"}:
@@ -11214,31 +11503,59 @@ def evaluate_measures(
             if text_extreme:  # the largest or smallest text, compared without regard to case
                 if not values:  # Power BI's BLANK here is a text BLANK (comparing it with a number is an error); BLANK has no type here
                     raise MeasureError(f"{function} of text found no value, and a text BLANK is not modelled by the local DAX engine.")
-                return (max if function == "MAXX" else min)(values, key=dax_typed.text_key)
+                winner = (max if function == "MAXX" else min)(values, key=dax_typed.text_key)
+                if any(value != winner and dax_typed.text_key(value) == dax_typed.text_key(winner) for value in values):
+                    # live Power BI (iteration 87): of two texts that differ only in case, MAXX / MINX return one that the local engine cannot predict
+                    raise MeasureError(f"{function} found texts that differ only in case at the extreme: which one Power BI returns is not modelled by the local engine.")
+                return winner
             if function in {"MAXX", "MINX"}:
                 ordered = [value for value in values if not value.is_nan()]
                 if not ordered:
                     return None  # NaN results are ignored; only NaN gives blank
-                return max(ordered) if function == "MAXX" else min(ordered)
+                extreme = max(ordered) if function == "MAXX" else min(ordered)
+                if variant_body and any(value == extreme and isinstance(value, dax_dates.DaxDateTime) != isinstance(extreme, dax_dates.DaxDateTime) for value in ordered):
+                    raise MeasureError(f"{function} over a Variant found a date and a number of the same value at the extreme: which one Power BI returns is not modelled.")
+                if extreme.is_infinite() and (extreme > 0) == (function == "MINX"):
+                    return None  # live Power BI (iteration 87): MINX of nothing but +Infinity and MAXX of nothing but -Infinity are BLANK
+                return extreme
             if not values:
                 return None
             total = Decimal(0)
             for value in values:
                 total = dax_typed.QUIET.add(total, value)
             result = total if function == "SUMX" else dax_typed.QUIET.divide(total, Decimal(len(values)))
-            if function == "SUMX" and not has_number_branch(arguments[1]) and all(isinstance(value, dax_dates.DaxDateTime) for value in values) and result.is_finite():
+            date_sum = any(isinstance(value, dax_dates.DaxDateTime) for value in values) if variant_body else (
+                not number_dates and not has_number_branch(arguments[1]) and all(isinstance(value, dax_dates.DaxDateTime) for value in values))
+            if (
+                function == "SUMX" and not variant_body and not number_dates and not has_number_branch(arguments[1])
+                and any(isinstance(value, dax_dates.DaxDateTime) for value in values) and not date_sum
+            ):
+                # live Power BI (iteration 87): [date] + 1 over rows that are BLANK for the date still sums to a date; the type is that of the
+                # expression, which the local values (a plain 1 for the BLANK rows) no longer show
+                raise MeasureError("SUMX over a mix of dates and plain numbers is not typed by the local engine.")
+            if function == "SUMX" and date_sum and result.is_finite():
                 return dax_dates.DaxDateTime(min(result, _MAX_DATE_SERIAL))  # live Power BI: a sum of dates saturates at 12/31/9999 23:59:59  # live Power BI: SUMX over dates is a date, AVERAGEX over dates is a plain number
             return result
         if function in {"COUNTX", "COUNTAX"}:
             context, iteration_rows = table_argument_value(arguments[0])
-            if function == "COUNTX":
+            validation_row = iteration_rows[0] if iteration_rows else {}
+            if iteration_rows and _coalesce_with_failing_argument(arguments[1]):
+                raise MeasureError("A COALESCE whose earlier argument can fail is evaluated in an order the local engine does not reproduce.")
+            if iteration_rows and _statistic_with_arithmetic(arguments[1]):
+                raise MeasureError("A statistical function beside arithmetic in an iterator body is not exact in the local engine.")
+            # live Power BI (iteration 87): over a body whose IF / SWITCH / IFERROR / COALESCE branches differ in type (a Variant) COUNTX counts
+            # only its numbers and dates, COUNTAX every row that is not BLANK
+            count_kind = iterator_body_kind(arguments[1], (context, validation_row, 1))
+            variant_body = count_kind in {"variant", "variant_dates"}
+            constant_variant = function == "COUNTX" and variant_body and (_conditional_is_constant(arguments[1]) or _has_false_only_if(arguments[1]))
+            if function == "COUNTX" and not variant_body:
                 refuse_variant_aggregation(function, context, arguments[1])
             if not iteration_rows:
                 refuse_foreign_columns_of_empty_set(context, arguments[1])
-            validation_row = iteration_rows[0] if iteration_rows else {}
-            iterator_expression_category(
-                arguments[1], (context, validation_row, 1)
-            )
+            if not variant_body and count_kind != "numdate":
+                iterator_expression_category(
+                    arguments[1], (context, validation_row, 1)
+                )
             count = 0
             saw_nan = False
             for frame in iterate_rows(context, iteration_rows, "install"):
@@ -11247,6 +11564,13 @@ def evaluate_measures(
                 ))
                 if result is None:
                     continue
+                if function == "COUNTX" and variant_body and isinstance(result, bool) and constant_variant:
+                    # live Power BI: COUNTX(Facts, IF(TRUE(), TRUE(), 7)) is 6, yet 3 when the condition depends on the row: not modelled
+                    raise MeasureError("COUNTX over a Variant that returns a True/False under a condition that does not depend on the row is not supported in the local engine.")
+                if function == "COUNTX" and variant_body and isinstance(result, (bool, str)):
+                    continue
+                if variant_body and isinstance(result, Decimal) and not result.is_finite():
+                    raise MeasureError(f"{function} over a Variant that returns Infinity or NaN is not supported in the local engine.")
                 if function == "COUNTX" and isinstance(result, bool):
                     raise MeasureError("The function COUNTX cannot work with values of type Boolean.")
                 if isinstance(result, Decimal) and result.is_nan():
@@ -11775,8 +12099,8 @@ def evaluate_measures(
                     break
                 if not eager and not plan_constant(argument):
                     eager = True
-                elif eager and found and row_context is not None and reads_row(argument):
-                    continue  # a tail that reads the row is only evaluated when it is reached
+                elif eager and found and row_context is not None and reads_row(argument) and argument is arguments[-1]:
+                    continue  # a last argument that reads the row is only evaluated when it is reached (live Power BI, iteration 87: an earlier one is always evaluated)
                 elif eager and found and plan_constant(argument):
                     try:
                         settled = evaluate(argument, row_context, allow_text=True, allow_boolean=True)
@@ -11790,8 +12114,8 @@ def evaluate_measures(
                         allow_boolean=allow_boolean,
                     )
                 except MeasureRuntimeError as error:
-                    if isinstance(error, _DivisionError) or (row_context is not None and reads_row(argument)):
-                        raise  # an error from a lazily evaluated, row-dependent argument is an ordinary one
+                    if isinstance(error, _DivisionError) or (row_context is not None and reads_row(argument) and argument is arguments[-1]):
+                        raise  # an error from the last, lazily evaluated, row-dependent argument is an ordinary one (live Power BI, iteration 87: one in an earlier argument is not)
                     raise _HardError(str(error)) from error
                 if not found and value is not None:
                     result, found = value, True
@@ -11836,6 +12160,9 @@ def evaluate_measures(
             quantum = Decimal(1).scaleb(-int(precision))
             return value.quantize(quantum, rounding=ROUND_HALF_UP)
         if function == "CONCATENATEX":
+            if _statistic_with_arithmetic(arguments[1]):
+                # live Power BI (iteration 87): a statistic in arithmetic is a double, shown with 15 digits and a signed zero; the local decimals differ in the last digit
+                raise MeasureError("CONCATENATEX of arithmetic with a statistical function is not exact in the local engine.")
             delimiter = "" if len(arguments) < 3 else dax_typed.to_text(evaluate(arguments[2], row_context, allow_text=True))
             order_spec: list[tuple[Any, bool]] = []  # (expression, descending); ASC is the default here
             position = 3
