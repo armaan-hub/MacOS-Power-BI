@@ -1,0 +1,822 @@
+[
+{
+"expr": "COUNTAX(Facts,Facts[Quantity] IN {1,2})",
+"powerbi": "6",
+"group": "dax_battery_comments_booleans"
+},
+{
+"expr": "COUNTAX(Facts,Facts[Quantity]>1 && 1)",
+"powerbi": "6",
+"group": "dax_battery_comments_booleans"
+},
+{
+"expr": "CALCULATE(COUNTROWS(Facts),COUNTROWS(CROSSJOIN(VALUES(Facts[Region]),VALUES(Facts[Note])))-1<Facts[Quantity])",
+"powerbi": "BLANK",
+"group": "dax_battery_round2"
+},
+{
+"expr": "CALCULATE(COUNTROWS(Facts),COUNTROWS(CROSSJOIN(VALUES(Facts[Region]),VALUES(Facts[Note])))>Facts[Quantity])",
+"powerbi": "6",
+"group": "dax_battery_round2"
+},
+{
+"expr": "CALCULATE(COUNTROWS(Facts),COUNTROWS(UNION(VALUES(Facts[Region]),VALUES(Facts[Region])))-1<Facts[Quantity])",
+"powerbi": "BLANK",
+"group": "dax_battery_round2"
+},
+{
+"expr": "CALCULATE(COUNTROWS(Facts),COUNTROWS(UNION(VALUES(Facts[Region]),VALUES(Facts[Region])))>Facts[Quantity])",
+"powerbi": "6",
+"group": "dax_battery_round2"
+},
+{
+"expr": "COUNTAX(Facts,Facts[Region] IN {\"East\",\"West\"})",
+"powerbi": "6",
+"group": "dax_battery_round2"
+},
+{
+"expr": "COUNTAX(Facts,IF(Facts[Quantity]>2,TRUE(),0))",
+"powerbi": "6",
+"group": "dax_battery_round2"
+},
+{
+"expr": "COUNTAX(Facts,IF(Facts[Quantity]>2,TRUE(),1))",
+"powerbi": "6",
+"group": "dax_battery_round2"
+},
+{
+"expr": "ISBLANK(BLANK()=BLANK())",
+"powerbi": "False",
+"group": "dax_battery_round2"
+},
+{
+"expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]+COUNTROWS(CALENDAR(DATE(2020,1,1),DATE(2020,1,3)))>5)",
+"powerbi": "3",
+"group": "dax_battery_round3"
+},
+{
+"expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]+COUNTROWS(CROSSJOIN(VALUES(Facts[Region]),VALUES(Facts[Quantity])))>7)",
+"powerbi": "6",
+"group": "dax_battery_round3"
+},
+{
+"expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]+COUNTROWS(DATATABLE(\"a\",INTEGER,{{1},{2}}))>7)",
+"powerbi": "BLANK",
+"group": "dax_battery_round3"
+},
+{
+"expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]+COUNTROWS(GENERATE(VALUES(Facts[Region]),VALUES(Facts[Quantity])))>5)",
+"powerbi": "6",
+"group": "dax_battery_round3"
+},
+{
+"expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]+COUNTROWS(GENERATEALL(VALUES(Facts[Region]),VALUES(Facts[Quantity])))>5)",
+"powerbi": "6",
+"group": "dax_battery_round3"
+},
+{
+"expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]+COUNTROWS(GENERATESERIES(1,3))>7)",
+"powerbi": "1",
+"group": "dax_battery_round3"
+},
+{
+"expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]+COUNTROWS(NATURALINNERJOIN(Facts,Facts))>7)",
+"powerbi": "4",
+"group": "dax_battery_round3"
+},
+{
+"expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]+COUNTROWS(NATURALLEFTOUTERJOIN(Facts,Facts))>5)",
+"powerbi": "6",
+"group": "dax_battery_round3"
+},
+{
+"expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]+COUNTROWS(TREATAS({\"East\"},Facts[Region]))>5)",
+"powerbi": "1",
+"group": "dax_battery_round3"
+},
+{
+"expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]+COUNTROWS(TREATAS({1,2},Facts[Quantity]))>7)",
+"powerbi": "BLANK",
+"group": "dax_battery_round3"
+},
+{
+"expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]+COUNTROWS(UNION(Facts,Facts))>5)",
+"powerbi": "6",
+"group": "dax_battery_round3"
+},
+{
+"expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]+COUNTROWS(UNION(Facts,Facts))>7)",
+"powerbi": "6",
+"group": "dax_battery_round3"
+},
+{
+"expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]+COUNTROWS(UNION({1},{2}))>7)",
+"powerbi": "BLANK",
+"group": "dax_battery_round3"
+},
+{
+"expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]+COUNTROWS({1,2,3})>7)",
+"powerbi": "1",
+"group": "dax_battery_round3"
+},
+{
+"expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]+GEOMEAN(Facts[Quantity])>3)",
+"powerbi": "2",
+"group": "dax_battery_round3"
+},
+{
+"expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]+SELECTEDVALUE(Facts[Quantity],0)<8)",
+"powerbi": "6",
+"group": "dax_battery_round3"
+},
+{
+"expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]+SELECTEDVALUE(Facts[Quantity],0)<=8)",
+"powerbi": "6",
+"group": "dax_battery_round3"
+},
+{
+"expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]+SELECTEDVALUE(Facts[Quantity],0)<=SELECTEDVALUE(Facts[Quantity],0)+2)",
+"powerbi": "3",
+"group": "dax_battery_round3"
+},
+{
+"expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]+SELECTEDVALUE(Facts[Quantity],0)<>8)",
+"powerbi": "6",
+"group": "dax_battery_round3"
+},
+{
+"expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]+SELECTEDVALUE(Facts[Quantity],0)<>SELECTEDVALUE(Facts[Quantity],0)+2)",
+"powerbi": "5",
+"group": "dax_battery_round3"
+},
+{
+"expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]+SELECTEDVALUE(Facts[Quantity],0)<SELECTEDVALUE(Facts[Quantity],0)+2)",
+"powerbi": "2",
+"group": "dax_battery_round3"
+},
+{
+"expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]+SELECTEDVALUE(Facts[Quantity],0)=8)",
+"powerbi": "BLANK",
+"group": "dax_battery_round3"
+},
+{
+"expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]+SELECTEDVALUE(Facts[Quantity],0)=SELECTEDVALUE(Facts[Quantity],0)+2)",
+"powerbi": "1",
+"group": "dax_battery_round3"
+},
+{
+"expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]+SELECTEDVALUE(Facts[Quantity],0)>8)",
+"powerbi": "BLANK",
+"group": "dax_battery_round3"
+},
+{
+"expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]+SELECTEDVALUE(Facts[Quantity],0)>=8)",
+"powerbi": "BLANK",
+"group": "dax_battery_round3"
+},
+{
+"expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]+SELECTEDVALUE(Facts[Quantity],0)>=SELECTEDVALUE(Facts[Quantity],0)+2)",
+"powerbi": "4",
+"group": "dax_battery_round3"
+},
+{
+"expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]+SELECTEDVALUE(Facts[Quantity],0)>SELECTEDVALUE(Facts[Quantity],0)+2)",
+"powerbi": "3",
+"group": "dax_battery_round3"
+},
+{
+"expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]+STDEV.P(Facts[Quantity])>3)",
+"powerbi": "4",
+"group": "dax_battery_round3"
+},
+{
+"expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]+VALUE(CONCATENATEX(Facts,Facts[Quantity]))>3)",
+"powerbi": "6",
+"group": "dax_battery_round3"
+},
+{
+"expr": "CALCULATE(COUNTROWS(Facts),SELECTEDVALUE(Facts[Quantity],0)+2<Facts[Quantity]+SELECTEDVALUE(Facts[Quantity],0))",
+"powerbi": "3",
+"group": "dax_battery_round3"
+},
+{
+"expr": "CALCULATE(COUNTROWS(Facts),SELECTEDVALUE(Facts[Quantity],0)+2>=Facts[Quantity]+SELECTEDVALUE(Facts[Quantity],0))",
+"powerbi": "3",
+"group": "dax_battery_round3"
+},
+{
+"expr": "COUNTAX(Facts,Facts[Quantity] IN {1,2})",
+"powerbi": "6",
+"group": "dax_battery_round3"
+},
+{
+"expr": "COUNTAX(Facts,IF(Facts[Quantity]>3,Facts[Quantity]>4,\"x\"))",
+"powerbi": "6",
+"group": "dax_battery_round3"
+},
+{
+"expr": "COUNTAX(Facts,IF(Facts[Quantity]>99,AND(Facts[Quantity],1)))",
+"powerbi": "6",
+"group": "dax_battery_round3"
+},
+{
+"expr": "COUNTAX(Facts,IF(Facts[Quantity]>99,BLANK()=BLANK()))",
+"powerbi": "6",
+"group": "dax_battery_round3"
+},
+{
+"expr": "COUNTAX(Facts,IF(Facts[Quantity]>99,CONTAINS(Facts,Facts[Region],\"East\")))",
+"powerbi": "6",
+"group": "dax_battery_round3"
+},
+{
+"expr": "COUNTAX(Facts,IF(Facts[Quantity]>99,CONTAINSROW({1,2},Facts[Quantity])))",
+"powerbi": "6",
+"group": "dax_battery_round3"
+},
+{
+"expr": "COUNTAX(Facts,IF(Facts[Quantity]>99,Facts[Quantity] IN VALUES(Facts[Quantity])))",
+"powerbi": "6",
+"group": "dax_battery_round3"
+},
+{
+"expr": "COUNTAX(Facts,IF(Facts[Quantity]>99,Facts[Quantity] IN {1,2}))",
+"powerbi": "6",
+"group": "dax_battery_round3"
+},
+{
+"expr": "COUNTAX(Facts,IF(Facts[Quantity]>99,Facts[Quantity]>1 && 1))",
+"powerbi": "6",
+"group": "dax_battery_round3"
+},
+{
+"expr": "COUNTAX(Facts,IF(Facts[Quantity]>99,Facts[Region] IN {\"East\"}))",
+"powerbi": "6",
+"group": "dax_battery_round3"
+},
+{
+"expr": "COUNTAX(Facts,IF(Facts[Quantity]>99,HASONEFILTER(Facts[Region])))",
+"powerbi": "6",
+"group": "dax_battery_round3"
+},
+{
+"expr": "COUNTAX(Facts,IF(Facts[Quantity]>99,ISCROSSFILTERED(Facts[Region])))",
+"powerbi": "6",
+"group": "dax_battery_round3"
+},
+{
+"expr": "COUNTAX(Facts,IF(Facts[Quantity]>99,ISEMPTY(FILTER(Facts,Facts[Quantity]>Facts[Quantity]))))",
+"powerbi": "6",
+"group": "dax_battery_round3"
+},
+{
+"expr": "COUNTAX(Facts,IF(Facts[Quantity]>99,ISFILTERED(Facts[Region])))",
+"powerbi": "6",
+"group": "dax_battery_round3"
+},
+{
+"expr": "COUNTAX(Facts,IF(Facts[Quantity]>99,ISINSCOPE(Facts[Region])))",
+"powerbi": "6",
+"group": "dax_battery_round3"
+},
+{
+"expr": "COUNTAX(Facts,IF(Facts[Quantity]>99,LOOKUPVALUE(Facts[Quantity],Facts[Region],\"North\")>3))",
+"powerbi": "6",
+"group": "dax_battery_round3"
+},
+{
+"expr": "COUNTAX(Facts,IF(Facts[Quantity]>99,NOT(Facts[Quantity])))",
+"powerbi": "6",
+"group": "dax_battery_round3"
+},
+{
+"expr": "COUNTAX(Facts,IF(Facts[Quantity]>99,SUM(Facts[Quantity]) IN {15}))",
+"powerbi": "6",
+"group": "dax_battery_round3"
+},
+{
+"expr": "COUNTROWS(FILTER(Facts,IF(Facts[Quantity]>99,+(Facts[Quantity]>1))=FALSE()))",
+"powerbi": "6",
+"group": "dax_battery_round3"
+},
+{
+"expr": "COUNTROWS(FILTER(Facts,IF(Facts[Quantity]>99,AND(Facts[Quantity],1))=FALSE()))",
+"powerbi": "6",
+"group": "dax_battery_round3"
+},
+{
+"expr": "COUNTROWS(FILTER(Facts,IF(Facts[Quantity]>99,BLANK()=BLANK())=FALSE()))",
+"powerbi": "6",
+"group": "dax_battery_round3"
+},
+{
+"expr": "COUNTROWS(FILTER(Facts,IF(Facts[Quantity]>99,CONTAINS(Facts,Facts[Region],\"East\"))=FALSE()))",
+"powerbi": "6",
+"group": "dax_battery_round3"
+},
+{
+"expr": "COUNTROWS(FILTER(Facts,IF(Facts[Quantity]>99,CONTAINSROW({1,2},Facts[Quantity]))=FALSE()))",
+"powerbi": "6",
+"group": "dax_battery_round3"
+},
+{
+"expr": "COUNTROWS(FILTER(Facts,IF(Facts[Quantity]>99,Facts[Quantity] IN VALUES(Facts[Quantity]))=FALSE()))",
+"powerbi": "6",
+"group": "dax_battery_round3"
+},
+{
+"expr": "COUNTROWS(FILTER(Facts,IF(Facts[Quantity]>99,Facts[Quantity] IN {1,2})=FALSE()))",
+"powerbi": "6",
+"group": "dax_battery_round3"
+},
+{
+"expr": "COUNTROWS(FILTER(Facts,IF(Facts[Quantity]>99,Facts[Quantity]>1 && 1)=FALSE()))",
+"powerbi": "6",
+"group": "dax_battery_round3"
+},
+{
+"expr": "COUNTROWS(FILTER(Facts,IF(Facts[Quantity]>99,Facts[Region] IN {\"East\"})=FALSE()))",
+"powerbi": "6",
+"group": "dax_battery_round3"
+},
+{
+"expr": "COUNTROWS(FILTER(Facts,IF(Facts[Quantity]>99,HASONEFILTER(Facts[Region]))=FALSE()))",
+"powerbi": "6",
+"group": "dax_battery_round3"
+},
+{
+"expr": "COUNTROWS(FILTER(Facts,IF(Facts[Quantity]>99,ISCROSSFILTERED(Facts[Region]))=FALSE()))",
+"powerbi": "6",
+"group": "dax_battery_round3"
+},
+{
+"expr": "COUNTROWS(FILTER(Facts,IF(Facts[Quantity]>99,ISEMPTY(FILTER(Facts,Facts[Quantity]>Facts[Quantity])))=FALSE()))",
+"powerbi": "6",
+"group": "dax_battery_round3"
+},
+{
+"expr": "COUNTROWS(FILTER(Facts,IF(Facts[Quantity]>99,ISFILTERED(Facts[Region]))=FALSE()))",
+"powerbi": "6",
+"group": "dax_battery_round3"
+},
+{
+"expr": "COUNTROWS(FILTER(Facts,IF(Facts[Quantity]>99,ISINSCOPE(Facts[Region]))=FALSE()))",
+"powerbi": "6",
+"group": "dax_battery_round3"
+},
+{
+"expr": "COUNTROWS(FILTER(Facts,IF(Facts[Quantity]>99,LOOKUPVALUE(Facts[Quantity],Facts[Region],\"North\")>3)=FALSE()))",
+"powerbi": "6",
+"group": "dax_battery_round3"
+},
+{
+"expr": "COUNTROWS(FILTER(Facts,IF(Facts[Quantity]>99,NOT(Facts[Quantity]))=FALSE()))",
+"powerbi": "6",
+"group": "dax_battery_round3"
+},
+{
+"expr": "COUNTROWS(FILTER(Facts,IF(Facts[Quantity]>99,SUM(Facts[Quantity]) IN {15})=FALSE()))",
+"powerbi": "6",
+"group": "dax_battery_round3"
+},
+{
+"expr": "COUNTX(Facts,IF(Facts[Quantity]>3,Facts[Quantity]>4,\"x\"))",
+"powerbi": "BLANK",
+"group": "dax_battery_round3"
+},
+{
+"expr": "MAXX(Facts,IF(Facts[Quantity]>3,Facts[Quantity]>4,\"x\"))",
+"powerbi": "BLANK",
+"group": "dax_battery_round3"
+},
+{
+"expr": "COUNTAX(ADDCOLUMNS(Facts,\"b\",Facts[Quantity]>1),IF(Facts[Quantity]>2,1,[b]))",
+"powerbi": "6",
+"group": "dax_battery_round4"
+},
+{
+"expr": "COUNTAX(ADDCOLUMNS(Facts,\"b\",Facts[Quantity]>1),IF(Facts[Quantity]>2,[b],\"x\"))",
+"powerbi": "6",
+"group": "dax_battery_round4"
+},
+{
+"expr": "COUNTAX(ADDCOLUMNS(Facts,\"b\",Facts[Quantity]>1),IF(Facts[Quantity]>2,[b],1))",
+"powerbi": "6",
+"group": "dax_battery_round4"
+},
+{
+"expr": "COUNTAX(ADDCOLUMNS(Facts,\"b\",Facts[Quantity]>1),IF(Facts[Quantity]>2,[b],Facts[Sales]))",
+"powerbi": "6",
+"group": "dax_battery_round4"
+},
+{
+"expr": "COUNTAX(ADDCOLUMNS(Facts,\"b\",Facts[Quantity]>1),IFERROR(IF(Facts[Quantity]>2,[b]),5))",
+"powerbi": "6",
+"group": "dax_battery_round4"
+},
+{
+"expr": "COUNTAX(ADDCOLUMNS(Facts,\"b\",IF(Facts[Quantity]>2,TRUE())),IF(Facts[Quantity]>2,1,[b]))",
+"powerbi": "6",
+"group": "dax_battery_round4"
+},
+{
+"expr": "COUNTAX(ADDCOLUMNS(Facts,\"b\",IF(Facts[Quantity]>2,TRUE())),IF(Facts[Quantity]>2,[b],\"x\"))",
+"powerbi": "6",
+"group": "dax_battery_round4"
+},
+{
+"expr": "COUNTAX(ADDCOLUMNS(Facts,\"b\",IF(Facts[Quantity]>2,TRUE())),IF(Facts[Quantity]>2,[b],1))",
+"powerbi": "6",
+"group": "dax_battery_round4"
+},
+{
+"expr": "COUNTAX(ADDCOLUMNS(Facts,\"b\",IF(Facts[Quantity]>2,TRUE())),IF(Facts[Quantity]>2,[b],Facts[Sales]))",
+"powerbi": "6",
+"group": "dax_battery_round4"
+},
+{
+"expr": "COUNTAX(ADDCOLUMNS(Facts,\"b\",IF(Facts[Quantity]>2,TRUE())),IFERROR(IF(Facts[Quantity]>2,[b]),5))",
+"powerbi": "6",
+"group": "dax_battery_round4"
+},
+{
+"expr": "COUNTAX(ADDCOLUMNS(Facts,\"b\",ISBLANK(Facts[Sales])),IF(Facts[Quantity]>2,1,[b]))",
+"powerbi": "6",
+"group": "dax_battery_round4"
+},
+{
+"expr": "COUNTAX(ADDCOLUMNS(Facts,\"b\",ISBLANK(Facts[Sales])),IF(Facts[Quantity]>2,[b],\"x\"))",
+"powerbi": "6",
+"group": "dax_battery_round4"
+},
+{
+"expr": "COUNTAX(ADDCOLUMNS(Facts,\"b\",ISBLANK(Facts[Sales])),IF(Facts[Quantity]>2,[b],1))",
+"powerbi": "6",
+"group": "dax_battery_round4"
+},
+{
+"expr": "COUNTAX(ADDCOLUMNS(Facts,\"b\",ISBLANK(Facts[Sales])),IF(Facts[Quantity]>2,[b],Facts[Sales]))",
+"powerbi": "6",
+"group": "dax_battery_round4"
+},
+{
+"expr": "COUNTAX(ADDCOLUMNS(Facts,\"b\",ISBLANK(Facts[Sales])),IFERROR(IF(Facts[Quantity]>2,[b]),5))",
+"powerbi": "6",
+"group": "dax_battery_round4"
+},
+{
+"expr": "COUNTAX(ADDCOLUMNS(Facts,\"b\",TRUE()),IF(Facts[Quantity]>2,1,[b]))",
+"powerbi": "6",
+"group": "dax_battery_round4"
+},
+{
+"expr": "COUNTAX(ADDCOLUMNS(Facts,\"b\",TRUE()),IF(Facts[Quantity]>2,[b],\"x\"))",
+"powerbi": "6",
+"group": "dax_battery_round4"
+},
+{
+"expr": "COUNTAX(ADDCOLUMNS(Facts,\"b\",TRUE()),IF(Facts[Quantity]>2,[b],1))",
+"powerbi": "6",
+"group": "dax_battery_round4"
+},
+{
+"expr": "COUNTAX(ADDCOLUMNS(Facts,\"b\",TRUE()),IF(Facts[Quantity]>2,[b],Facts[Sales]))",
+"powerbi": "6",
+"group": "dax_battery_round4"
+},
+{
+"expr": "COUNTAX(ADDCOLUMNS(Facts,\"b\",TRUE()),IFERROR(IF(Facts[Quantity]>2,[b]),5))",
+"powerbi": "6",
+"group": "dax_battery_round4"
+},
+{
+"expr": "COUNTAX(ADDCOLUMNS(VALUES(Facts[Quantity]),\"b\",Facts[Quantity]>1),IF(Facts[Quantity]>2,1,[b]))",
+"powerbi": "6",
+"group": "dax_battery_round4"
+},
+{
+"expr": "COUNTAX(ADDCOLUMNS(VALUES(Facts[Quantity]),\"b\",Facts[Quantity]>1),IF(Facts[Quantity]>2,[b],\"x\"))",
+"powerbi": "6",
+"group": "dax_battery_round4"
+},
+{
+"expr": "COUNTAX(ADDCOLUMNS(VALUES(Facts[Quantity]),\"b\",Facts[Quantity]>1),IF(Facts[Quantity]>2,[b],1))",
+"powerbi": "6",
+"group": "dax_battery_round4"
+},
+{
+"expr": "COUNTAX(ADDCOLUMNS(VALUES(Facts[Quantity]),\"b\",Facts[Quantity]>1),IFERROR(IF(Facts[Quantity]>2,[b]),5))",
+"powerbi": "6",
+"group": "dax_battery_round4"
+},
+{
+"expr": "COUNTAX(Facts,IF(Facts[Quantity]>2,CONTAINS(Facts,Facts[Quantity],Facts[Quantity])))",
+"powerbi": "6",
+"group": "dax_battery_round4"
+},
+{
+"expr": "COUNTAX(Facts,IF(Facts[Quantity]>2,CONTAINSROW({1,2},Facts[Quantity])))",
+"powerbi": "6",
+"group": "dax_battery_round4"
+},
+{
+"expr": "COUNTAX(Facts,IF(Facts[Quantity]>2,Facts[Quantity] IN {1,2}))",
+"powerbi": "6",
+"group": "dax_battery_round4"
+},
+{
+"expr": "COUNTAX(Facts,IF(Facts[Quantity]>2,Facts[Region] IN {\"East\",\"West\"}))",
+"powerbi": "6",
+"group": "dax_battery_round4"
+},
+{
+"expr": "COUNTAX(Facts,IF(Facts[Quantity]>2,HASONEFILTER(Facts[Region])))",
+"powerbi": "6",
+"group": "dax_battery_round4"
+},
+{
+"expr": "COUNTAX(Facts,IF(Facts[Quantity]>2,ISCROSSFILTERED(Facts[Region])))",
+"powerbi": "6",
+"group": "dax_battery_round4"
+},
+{
+"expr": "COUNTAX(Facts,IF(Facts[Quantity]>2,ISEMPTY(FILTER(Facts,Facts[Quantity]>1))))",
+"powerbi": "6",
+"group": "dax_battery_round4"
+},
+{
+"expr": "COUNTAX(Facts,IF(Facts[Quantity]>2,ISEMPTY(FILTER(Facts,Facts[Quantity]>10))))",
+"powerbi": "6",
+"group": "dax_battery_round4"
+},
+{
+"expr": "COUNTAX(Facts,IF(Facts[Quantity]>2,ISFILTERED(Facts[Region])))",
+"powerbi": "6",
+"group": "dax_battery_round4"
+},
+{
+"expr": "COUNTAX(Facts,IF(Facts[Quantity]>2,ISINSCOPE(Facts[Region])))",
+"powerbi": "6",
+"group": "dax_battery_round4"
+},
+{
+"expr": "COUNTAX(SELECTCOLUMNS(Facts,\"q\",Facts[Quantity],\"b\",Facts[Quantity]>1),IF([q]>2,1,[b]))",
+"powerbi": "6",
+"group": "dax_battery_round4"
+},
+{
+"expr": "COUNTAX(SELECTCOLUMNS(Facts,\"q\",Facts[Quantity],\"b\",Facts[Quantity]>1),IF([q]>2,[b],\"x\"))",
+"powerbi": "6",
+"group": "dax_battery_round4"
+},
+{
+"expr": "COUNTAX(SELECTCOLUMNS(Facts,\"q\",Facts[Quantity],\"b\",Facts[Quantity]>1),IF([q]>2,[b],1))",
+"powerbi": "6",
+"group": "dax_battery_round4"
+},
+{
+"expr": "COUNTAX(SELECTCOLUMNS(Facts,\"q\",Facts[Quantity],\"b\",Facts[Quantity]>1),IFERROR(IF([q]>2,[b]),5))",
+"powerbi": "6",
+"group": "dax_battery_round4"
+},
+{
+"expr": "COUNTX(Facts,SWITCH(Facts[Region]=\"East\",TRUE(),Facts[Quantity]>2,FALSE(),BLANK()))",
+"powerbi": "BLANK",
+"group": "dax_battery_round4"
+},
+{
+"expr": "COUNTAX(ADDCOLUMNS(Facts,\"b\",Facts[Quantity]>2,\"c\",Facts[Sales]>1),IF([b],[c],1))",
+"powerbi": "6",
+"group": "dax_battery_round5"
+},
+{
+"expr": "COUNTAX(ADDCOLUMNS(Facts,\"b\",Facts[Quantity]>2,\"c\",Facts[Sales]>1),IF([c],[b],\"s\"))",
+"powerbi": "6",
+"group": "dax_battery_round5"
+},
+{
+"expr": "COUNTAX(ADDCOLUMNS(Facts,\"b\",Facts[Quantity]>2,\"c\",Facts[Sales]>1),IFERROR(1/0,IF([b],[c])))",
+"powerbi": "6",
+"group": "dax_battery_round5"
+},
+{
+"expr": "COUNTAX(Facts,IF(Facts[Quantity]>2,FALSE(),IF(Facts[Quantity]>4,Facts[Quantity]>1,7)))",
+"powerbi": "6",
+"group": "dax_battery_round5"
+},
+{
+"expr": "COUNTAX(Facts,IF(Facts[Quantity]>2,IF(Facts[Region]=\"East\",FALSE()),SWITCH(TRUE(),Facts[Quantity]>4,DATE(2020,1,1),Facts[Quantity]<0,\"x\")))",
+"powerbi": "3",
+"group": "dax_battery_round5"
+},
+{
+"expr": "COUNTAX(Facts,IF(Facts[Quantity]>4,COALESCE(Facts[Sales],BLANK()),SWITCH(Facts[Quantity],2,BLANK(),0,TRUE(),COALESCE(Facts[Sales],BLANK()))))",
+"powerbi": "4",
+"group": "dax_battery_round5"
+},
+{
+"expr": "COUNTAX(Facts,IF(Facts[Quantity]>4,IF(Facts[Quantity]>4,Facts[Sales],FALSE()),IF(Facts[Region]=\"East\",BLANK(),SWITCH(TRUE(),Facts[Quantity]>2,7,Facts[Quantity]>=0,Facts[Quantity]>1))))",
+"powerbi": "4",
+"group": "dax_battery_round5"
+},
+{
+"expr": "COUNTAX(Facts,IF(Facts[Quantity]>4,IFERROR(IF(Facts[Quantity]>=0,TRUE()),FALSE()),SWITCH(TRUE(),Facts[Sales]>1,FALSE(),Facts[Quantity]>2,SELECTEDVALUE(Facts[Region]),SWITCH(TRUE(),Facts[Quantity]>=0,DATE(2020,1,1),Facts[Quantity]<0,SELECTEDVALUE(Facts[Region])))))",
+"powerbi": "5",
+"group": "dax_battery_round5"
+},
+{
+"expr": "COUNTAX(Facts,IF(Facts[Quantity]>4,SELECTEDVALUE(Facts[Region]),TRUE()))",
+"powerbi": "5",
+"group": "dax_battery_round5"
+},
+{
+"expr": "COUNTAX(Facts,IF(Facts[Quantity]>=0,IFERROR(Facts[Quantity]>1,BLANK()),IF(Facts[Region]=\"East\",FALSE(),SELECTEDVALUE(Facts[Region]))))",
+"powerbi": "6",
+"group": "dax_battery_round5"
+},
+{
+"expr": "COUNTAX(Facts,IF(Facts[Region]=\"East\",DATE(2020,1,1),TRUE()))",
+"powerbi": "6",
+"group": "dax_battery_round5"
+},
+{
+"expr": "COUNTAX(Facts,IF(Facts[Sales]>1,Facts[Sales],TRUE()))",
+"powerbi": "6",
+"group": "dax_battery_round5"
+},
+{
+"expr": "COUNTAX(Facts,IFERROR(Facts[Quantity]/(Facts[Quantity]-2)>0,IF(Facts[Quantity]>3,1)))",
+"powerbi": "6",
+"group": "dax_battery_round5"
+},
+{
+"expr": "COUNTAX(Facts,IFERROR(Facts[Quantity]/(Facts[Quantity]-2)>0,IF(Facts[Quantity]>3,1,BLANK())))",
+"powerbi": "6",
+"group": "dax_battery_round5"
+},
+{
+"expr": "COUNTAX(Facts,IFERROR(Facts[Quantity]>1,Facts[Sales]))",
+"powerbi": "6",
+"group": "dax_battery_round5"
+},
+{
+"expr": "COUNTAX(Facts,IFERROR(IF(Facts[Sales]>1,TRUE()),IF(Facts[Quantity]>=0,Facts[Sales],TRUE())))",
+"powerbi": "6",
+"group": "dax_battery_round5"
+},
+{
+"expr": "COUNTAX(Facts,IFERROR(VALUE(Facts[Region])>1,\"a\"))",
+"powerbi": "6",
+"group": "dax_battery_round5"
+},
+{
+"expr": "COUNTAX(Facts,IFERROR(VALUE(Facts[Region])>1,1))",
+"powerbi": "6",
+"group": "dax_battery_round5"
+},
+{
+"expr": "COUNTAX(Facts,SWITCH(TRUE(),Facts[Quantity]>2,COALESCE(FALSE(),Facts[Quantity]>1),Facts[Quantity]>2,DATE(2020,1,1),BLANK()))",
+"powerbi": "3",
+"group": "dax_battery_round5"
+},
+{
+"expr": "COUNTAX(Facts,SWITCH(TRUE(),Facts[Sales]>1,DATE(2020,1,1),Facts[Quantity]>4,IF(Facts[Quantity]>=0,7,BLANK())))",
+"powerbi": "3",
+"group": "dax_battery_round5"
+},
+{
+"expr": "COUNTX(ADDCOLUMNS(Facts,\"b\",Facts[Quantity]>2,\"c\",Facts[Sales]>1),IF([b],IF([c],BLANK()),[b]))",
+"powerbi": "BLANK",
+"group": "dax_battery_round5"
+},
+{
+"expr": "COUNTX(ADDCOLUMNS(Facts,\"b\",Facts[Quantity]>2,\"c\",Facts[Sales]>1),IF([b],IF([c],BLANK(),BLANK()),[b]))",
+"powerbi": "BLANK",
+"group": "dax_battery_round5"
+},
+{
+"expr": "COUNTX(ADDCOLUMNS(Facts,\"b\",Facts[Quantity]>2,\"c\",Facts[Sales]>1),IF([b],[c],1))",
+"powerbi": "3",
+"group": "dax_battery_round5"
+},
+{
+"expr": "COUNTX(ADDCOLUMNS(Facts,\"b\",Facts[Quantity]>2,\"c\",Facts[Sales]>1),IF([c],[b],\"s\"))",
+"powerbi": "BLANK",
+"group": "dax_battery_round5"
+},
+{
+"expr": "COUNTX(Facts,COALESCE(IF(Facts[Region]=\"East\",\"x\",FALSE()),IF(Facts[Quantity]>2,7,7)))",
+"powerbi": "BLANK",
+"group": "dax_battery_round5"
+},
+{
+"expr": "COUNTX(Facts,IF(Facts[Quantity]<0,TRUE(),\"x\"))",
+"powerbi": "BLANK",
+"group": "dax_battery_round5"
+},
+{
+"expr": "COUNTX(Facts,IF(Facts[Quantity]>2,SWITCH(TRUE(),Facts[Quantity]>2,SWITCH(Facts[Quantity],1,BLANK(),4,CALCULATE(COUNTROWS(Facts)>3),7),Facts[Quantity]>4,IF(Facts[Quantity]>2,CALCULATE(BLANK()),ISBLANK(Facts[Sales]))),IF(Facts[Quantity]<0,IF(Facts[Quantity]>=0,TRUE(),DATE(2020,1,1)),SELECTEDVALUE(Facts[Region]))))",
+"powerbi": "2",
+"group": "dax_battery_round5"
+},
+{
+"expr": "COUNTX(Facts,IF(Facts[Quantity]>4,Facts[Note]=\"\",7))",
+"powerbi": "5",
+"group": "dax_battery_round5"
+},
+{
+"expr": "COUNTX(Facts,IF(Facts[Quantity]>4,IF(Facts[Quantity]>4,FALSE(),7),SWITCH(Facts[Quantity],5,Facts[Quantity]>1,0,COALESCE(Facts[Sales],BLANK()),7)))",
+"powerbi": "5",
+"group": "dax_battery_round5"
+},
+{
+"expr": "COUNTX(Facts,IF(Facts[Quantity]>4,IF(Facts[Quantity]>4,Facts[Note]=\"\",TRUE()),IF(Facts[Region]=\"East\",CALCULATE(BLANK()))))",
+"powerbi": "BLANK",
+"group": "dax_battery_round5"
+},
+{
+"expr": "COUNTX(Facts,IFERROR(Facts[Sales]>1,IF(Facts[Quantity]>4,7)))",
+"powerbi": "BLANK",
+"group": "dax_battery_round5"
+},
+{
+"expr": "COUNTX(Facts,IFERROR(VALUE(Facts[Region])>1,\"a\"))",
+"powerbi": "BLANK",
+"group": "dax_battery_round5"
+},
+{
+"expr": "COUNTX(Facts,IFERROR(VALUE(Facts[Region])>1,1))",
+"powerbi": "6",
+"group": "dax_battery_round5"
+},
+{
+"expr": "COUNTX(Facts,SWITCH(Facts[Quantity],1,TRUE(),0,IF(Facts[Region]=\"East\",BLANK())))",
+"powerbi": "BLANK",
+"group": "dax_battery_round5"
+},
+{
+"expr": "COUNTX(Facts,SWITCH(TRUE(),Facts[Quantity]>=0,7,Facts[Quantity]<0,Facts[Quantity]>1))",
+"powerbi": "6",
+"group": "dax_battery_round5"
+},
+{
+"expr": "MAXX(Facts,IF(Facts[Quantity]>2,7,\"x\"))",
+"powerbi": "7",
+"group": "dax_battery_round5"
+},
+{
+"expr": "MAXX(Facts,IF(Facts[Quantity]>2,TRUE(),\"x\"))",
+"powerbi": "BLANK",
+"group": "dax_battery_round5"
+},
+{
+"expr": "MAXX(Facts,IF(Facts[Quantity]>2,TRUE(),7))",
+"powerbi": "7",
+"group": "dax_battery_round5"
+},
+{
+"expr": "MINX(Facts,IF(Facts[Quantity]>2,7,\"x\"))",
+"powerbi": "7",
+"group": "dax_battery_round5"
+},
+{
+"expr": "SUMX(Facts,IFERROR(VALUE(Facts[Region])>1,\"a\"))",
+"powerbi": "BLANK",
+"group": "dax_battery_round5"
+},
+{
+"expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]<AVERAGEA(Facts[Quantity]))",
+"powerbi": "3",
+"group": "dax_battery_sdet_filters"
+},
+{
+"expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]<GEOMEAN(Facts[Quantity]))",
+"powerbi": "BLANK",
+"group": "dax_battery_sdet_filters"
+},
+{
+"expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]<MINA(Facts[Quantity])+2)",
+"powerbi": "2",
+"group": "dax_battery_sdet_filters"
+},
+{
+"expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]<PERCENTILE.INC(Facts[Quantity],0.5))",
+"powerbi": "3",
+"group": "dax_battery_sdet_filters"
+},
+{
+"expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]<STDEV.S(Facts[Quantity]))",
+"powerbi": "2",
+"group": "dax_battery_sdet_filters"
+},
+{
+"expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]<VAR.P(Facts[Quantity])/2)",
+"powerbi": "2",
+"group": "dax_battery_sdet_filters"
+},
+{
+"expr": "COUNTROWS(FILTER(Facts,CONCATENATEX(CALCULATETABLE(Facts,ALL(Facts),Facts[Quantity]>Facts[Quantity]),Facts[Quantity],\",\")=\"5\"))",
+"powerbi": "BLANK",
+"group": "dax_battery_sdet_filters"
+}
+]

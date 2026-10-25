@@ -6,7 +6,8 @@ SWITCH subject was a text column ("Column 'Region' contains a non-numeric value"
 fixtures_iter85_fresh.json: new live probes written for the fix (never in any battery).  Every row must match Power BI or be refused:
 a wrong answer is worse than a refusal.  The variant-column rows pin the other half of the change: ADDCOLUMNS(.., "v", IF/SWITCH with a
 text branch beside a number branch) makes a Variant column in Power BI whose MAXX / MINX / SUMX / AVERAGEX / COUNTX read only the numbers;
-the local engine used to answer them from the values of the rows (wrong or crashing), so they are refused."""
+the local engine used to answer them from the values of the rows (wrong or crashing), so they were refused; iteration 87 answers them (see
+tests/test_iteration87_variant_iterators.py)."""
 from __future__ import annotations
 
 import json
@@ -49,12 +50,17 @@ class SwitchTextSubject(unittest.TestCase):
         self.assertEqual("FALSE|Paid|FALSE|TRUE|FALSE|TRUE",
                          facts('CONCATENATEX(Facts,SWITCH(Facts[Quantity]+0,1,Facts[Note],ISBLANK(Facts[Note])),"|",Facts[Quantity])'))
 
-    def test_variant_column_aggregates_are_refused_not_guessed(self) -> None:
-        for aggregate in ("MAXX", "MINX", "COUNTX", "SUMX", "AVERAGEX"):
-            for column in ('SWITCH(Facts[Quantity],9,0,"a")', 'IF(Facts[Quantity]>2,Facts[Sales],Facts[Region]&"!")',
-                           'SWITCH(Facts[Note],"zz",Facts[Sales],Facts[Region])'):
+    def test_variant_column_aggregates_match_power_bi_or_are_refused(self) -> None:
+        """Iteration 85 refused these; iteration 87 found the rule (they read only the numbers of the column) and answers them. Live Power BI answers."""
+        columns = ('SWITCH(Facts[Quantity],9,0,"a")', 'IF(Facts[Quantity]>2,Facts[Sales],Facts[Region]&"!")', 'SWITCH(Facts[Note],"zz",Facts[Sales],Facts[Region])')
+        powerbi = {
+            "MAXX": ("BLANK", "20", "BLANK"), "MINX": ("BLANK", "2.5", "BLANK"), "COUNTX": ("BLANK", "2", "BLANK"),
+            "SUMX": ("BLANK", "22.5", "BLANK"), "AVERAGEX": ("BLANK", "11.25", "BLANK"), "COUNTAX": ("6", "5", "6"),
+        }
+        for aggregate, answers in powerbi.items():
+            for column, expected in zip(columns, answers):
                 answer = dax.local(f'{aggregate}(ADDCOLUMNS(Facts,"v",{column}),[v])')
-                self.assertTrue(answer.startswith("LOCAL-REJECT"), f"{aggregate} over {column}: {answer}")
+                self.assertTrue(answer.startswith("LOCAL-REJECT") or answer == expected, f"{aggregate} over {column}: {answer} (Power BI {expected})")
 
 
 if __name__ == "__main__":
