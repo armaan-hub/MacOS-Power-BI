@@ -349,18 +349,23 @@ _CROSSFILTER_DIRECTIONS = {
     "ONEWAY_RIGHTFILTERSLEFT",
 }
 _TOKEN_PATTERN = re.compile(
-    r"(?P<table_ref>'(?:[^']|'')+'\s*\[[^\]]+\]|[A-Za-z_][A-Za-z0-9_]*\s*\[[^\]]+\])"
+    r"(?P<table_ref>'(?:[^']|'')+'\s*\[(?:[^\]]|\]\])+\]|[A-Za-z_][A-Za-z0-9_]*\s*\[(?:[^\]]|\]\])+\])"
     r"|(?P<table_name>'(?:[^']|'')+')"
-    r"|(?P<ref>\[[^\]\r\n]+\])"
+    r"|(?P<ref>\[(?:[^\]\r\n]|\]\])+\])"
     r"|(?P<number>(?:\d+(?:\.\d*)?|\.\d+)(?:[eE][+-]?\d+)?)"
     r'|(?P<string>"(?:[^"]|"")*")'
     r"|(?P<identifier>[A-Za-z_][A-Za-z0-9_]*(?:\.(?:[A-Za-z][A-Za-z0-9_]*|2T\b))*)"
     r"|(?P<operator><>|<=|>=|&&|\|\||[(){}+\-*/,=<>&^])"
 )
 _FORMULA_ASSIGNMENT = re.compile(
-    r"^\s*(?:\[(?P<bracketed>[^\]\r\n]+)\]|"
+    r"^\s*(?:\[(?P<bracketed>(?:[^\]\r\n]|\]\])+)\]|"
     r"(?P<plain>(?!VAR\b)(?!\d+\s*=)[A-Za-z_][^()\[\],<>!+=*/&^\"\r\n]*?))\s*=\s*(?![=<>])"
 )
+
+
+def escape_bracket_name(name: str) -> str:
+    """The text between the brackets of ``[name]``: a closing bracket in the name is written twice (``]]``)."""
+    return name.replace("]", "]]")
 
 
 @dataclass(frozen=True)
@@ -418,7 +423,8 @@ def tokenize(expression: str) -> list[Token]:
         if kind == "table_name":
             tokens.append(Token("table", value[1:-1].replace("''", "'")))
         elif kind in {"ref", "table_ref"}:
-            column = value.rsplit("[", 1)[1][:-1]  # kept exactly as written: Power BI does not trim [ Quantity ]
+            # kept exactly as written (Power BI does not trim [ Quantity ]); a doubled ']' is one ']' of the name
+            column = value[_qualified_column_start(value) + 1:-1].replace("]]", "]")
             if not column.strip():
                 raise MeasureError("A column reference cannot be empty.")
             table = _qualified_table_name(value) if kind == "table_ref" else ""
@@ -3012,8 +3018,6 @@ def normalize_calculated_table_expression(
         actual = columns_by_key.get(reference[2].casefold())
         if actual is None:
             raise MeasureError(f"Column {reference[2]!r} does not exist in {source_table!r}.")
-        if "]" in actual:
-            raise MeasureError("Column names containing ']' are not supported in this DAX subset.")
         return {"expression": clean_expression, "source_table": source_table.strip(), "column": actual}
     return {
         "expression": clean_expression,
@@ -3310,7 +3314,7 @@ def normalize_measure(
     if not isinstance(name, str) or not name.strip():
         raise MeasureError("Enter a measure name.")
     clean_name = name.strip()
-    if len(clean_name) > 120 or any(char in clean_name for char in "[]\r\n"):
+    if len(clean_name) > 120 or any(char in clean_name for char in "[\r\n"):
         raise MeasureError("Measure names must be 1–120 characters and cannot contain brackets or line breaks.")
     if not isinstance(expression, str):
         raise MeasureError("A measure expression must be text.")
@@ -3318,7 +3322,9 @@ def normalize_measure(
     # Accept a complete DAX assignment in the expression box as a convenience.
     assignment = _FORMULA_ASSIGNMENT.match(clean_expression)
     if assignment is not None:
-        assignment_name = (assignment.group("bracketed") or assignment.group("plain") or "").strip()
+        assignment_name = (
+            (assignment.group("bracketed") or "").replace("]]", "]") or assignment.group("plain") or ""
+        ).strip()
         assigned_expression = clean_expression[assignment.end():].strip()
         if not assignment_name or not assigned_expression:
             raise MeasureError("Use the form Measure Name = expression.")
@@ -10852,7 +10858,7 @@ def evaluate_measures(
                 if not table and measure_key in shadowed_measure_keys():
                     # live Power BI (iteration 84, critic): [Name] binds to the column when the measure's own table has a column of that name
                     # (SUMX(Fact,[Qty]) is the column sum, a bare [Qty] is an error), so the local engine does not guess
-                    raise MeasureError(f"[{name}] is both a measure and a column of its table; the reference is ambiguous in the local engine.")
+                    raise MeasureError(f"[{escape_bracket_name(name)}] is both a measure and a column of its table; the reference is ambiguous in the local engine.")
                 if row_context is not None:
                     return with_column_filters(all_row_context_filters(row_context), lambda: evaluate(node), True)
                 return resolve(measure_key)
@@ -10914,7 +10920,7 @@ def evaluate_measures(
                 if not number.is_finite():
                     raise MeasureError(f"Column {actual!r} contains a non-finite number.")
                 return number
-            raise MeasureError(f"{name!r} is a column reference; use an aggregation such as SUM([{name}]).")
+            raise MeasureError(f"{name!r} is a column reference; use an aggregation such as SUM([{escape_bracket_name(name)}]).")
         if kind == "unary":
             operand = evaluate(node[2], row_context)
             if operand is None:
