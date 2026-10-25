@@ -144,7 +144,7 @@ class RibbonLayoutTests(unittest.TestCase):
                 continue
             button.menu().aboutToShow.emit()
             labels = [a.text() for a in button.menu().actions()]
-            self.assertEqual(labels, ["Keep Rows", "Remove Rows", "Sparse Top", "Sparse Bottom"])
+            self.assertEqual(labels, ["Keep Rows", "Remove Rows"])
             real = self.dialog.ribbon_command_buttons["remove_top_rows"]
             clicked: list[bool] = []
             real.clicked.connect(lambda *_: clicked.append(True))
@@ -153,6 +153,15 @@ class RibbonLayoutTests(unittest.TestCase):
             break
         else:
             self.skipTest("Reduce Rows was not collapsed at 900px")
+
+    def test_no_sparse_row_buttons_in_the_ribbon(self) -> None:
+        # Power BI Desktop has no Sparse Top / Sparse Bottom commands; the ops stay for saved queries.
+        for operation in ("remove_sparse_top_rows", "remove_sparse_bottom_rows"):
+            self.assertNotIn(operation, self.dialog.ribbon_command_buttons)
+        texts = [b.text().strip() for b in self.dialog.findChildren(QToolButton)]
+        self.assertFalse([t for t in texts if "Sparse" in t])
+        self.assertGreaterEqual(self.dialog.operation_combo.findData("remove_sparse_top_rows"), 0)
+        self.assertGreaterEqual(self.dialog.operation_combo.findData("remove_sparse_bottom_rows"), 0)
 
     def test_widening_the_window_restores_the_full_groups(self) -> None:
         page = self.show_page(0, 900)

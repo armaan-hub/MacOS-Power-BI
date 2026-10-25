@@ -2950,6 +2950,8 @@ class TransformDataDialog(QDialog):
         }
         self._deleted_query_ids: set[str] = set()
         self._operation_dialog: QDialog | None = None
+        # Index at which the in-flight ribbon command inserts its step (None = append at the end).
+        self._insert_at: int | None = None
         self._conditional_dialog: QDialog | None = None
         self._query_parameters = validate_query_parameters(
             deepcopy(query_parameters or [])
@@ -4208,18 +4210,6 @@ class TransformDataDialog(QDialog):
             ("Reduce Rows", [
                 command("Keep Rows", "keep_top_rows", "Keep the first N rows.", size="medium", slot=(0, 0, 3, 1), width=47),
                 command("Remove Rows", "remove_top_rows", "Remove the first N rows.", size="medium", slot=(0, 1, 3, 1), width=47),
-                command(
-                    "Sparse Top", "remove_sparse_top_rows",
-                    "Remove consecutive top rows with at most one nonblank cell; "
-                    "stop at the first row with two or more nonblank cells or a cell error.",
-                    size="small", slot=(0, 2, 1, 1), width=104,
-                ),
-                command(
-                    "Sparse Bottom", "remove_sparse_bottom_rows",
-                    "Remove consecutive bottom rows with at most one nonblank cell; "
-                    "stop at the first row with two or more nonblank cells or a cell error.",
-                    size="small", slot=(1, 2, 1, 1), width=104,
-                ),
             ], "office"),
             ("Sort", [
                 action(
@@ -4381,18 +4371,6 @@ class TransformDataDialog(QDialog):
                 command("Remove Error Rows", "remove_rows_with_errors", "Remove rows with an error in any column.", slot=(3, 1, 1, 1)),
                 command("Sort Rows", "sort_rows", "Sort the selected column ascending or descending.", slot=(0, 2, 1, 1)),
                 command("Sort by Columns", "sort_rows_by_columns", "Set multiple column sort priorities.", slot=(1, 2, 1, 1)),
-                command(
-                    "Sparse Top", "remove_sparse_top_rows",
-                    "Remove consecutive top rows with at most one nonblank cell; "
-                    "stop at the first row with two or more nonblank cells or a cell error.",
-                    slot=(2, 2, 1, 1),
-                ),
-                command(
-                    "Sparse Bottom", "remove_sparse_bottom_rows",
-                    "Remove consecutive bottom rows with at most one nonblank cell; "
-                    "stop at the first row with two or more nonblank cells or a cell error.",
-                    slot=(3, 2, 1, 1),
-                ),
             ], "office"),
         ]
         add_column_groups = [
@@ -5357,16 +5335,6 @@ class TransformDataDialog(QDialog):
         "remove_blank_rows", "remove_rows_with_errors",
     })
 
-    def _power_bi_step_name(self, step: dict[str, Any]) -> str:
-        """Return Power BI's default name for the newest step (``Removed Columns1`` when taken).
-
-        ``step`` is already the last item of ``self._steps``; the shared naming
-        module numbers repeats the same way the generated M does.
-        """
-        if not is_known_power_bi_step(step) or not self._steps:
-            return ""
-        return self._applied_step_names().get(len(self._steps) - 1, "")
-
     def _selected_preview_columns(self) -> list[str]:
         """Column names selected in the preview grid, left to right (current cell if none)."""
         headers = self._selected_preview_candidate().headers
@@ -5378,85 +5346,153 @@ class TransformDataDialog(QDialog):
         columns = sorted({index.column() for index in indexes if index.isValid()})
         return [headers[column] for column in columns if 0 <= column < len(headers)]
 
-    def _confirm_add_step_at_end(self) -> bool:
-        """A ribbon command always adds its step at the end of the query.
+    def _confirm_insert_step(self) -> bool:
+        """Start a ribbon command: with a middle applied step selected, ask "Insert step".
 
-        With a middle applied step selected the grid shows that step's output, so the column the
-        user picked may not exist at the end.  Ask before adding (Cancel keeps the selection).
+        Like Power BI, Insert places the new step directly after the selected step (the grid shows
+        that step's output, so the column the user picked exists there) and Cancel changes nothing.
+        The position is held in ``_insert_at`` until the command finishes (``_finish_insert``).
         """
+        self._insert_at = None
         row = self.step_list.currentRow()
         later = len(self._steps) - 1 - row
         if row < 0 or later <= 0:
             return True
-        answer = QMessageBox.question(
-            self,
-            "Add step at the end?",
-            f"The selected step is followed by {later} more "
-            f"step{'s' if later != 1 else ''}. The new step will be added at the end of the "
-            "query, after them, where the column you picked may no longer exist.\n\n"
-            "Add it at the end?",
-            QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
-            QMessageBox.StandardButton.No,
+        box = QDialog(self)
+        box.setObjectName("powerQueryInsertStepPrompt")
+        box.setWindowTitle("Insert step")
+        box.setModal(True)
+        box.setMinimumWidth(420)
+        layout = QVBoxLayout(box)
+        message = QLabel(
+            f"Insert step: the selected step is followed by {later} more "
+            f"step{'s' if later != 1 else ''}; inserting here may affect "
+            f"{'them' if later != 1 else 'it'}."
         )
-        return answer == QMessageBox.StandardButton.Yes
+        message.setObjectName("powerQueryInsertStepMessage")
+        message.setWordWrap(True)
+        layout.addWidget(message)
+        buttons = QDialogButtonBox(box)
+        insert_button = buttons.addButton("Insert", QDialogButtonBox.ButtonRole.AcceptRole)
+        cancel_button = buttons.addButton("Cancel", QDialogButtonBox.ButtonRole.RejectRole)
+        insert_button.setAutoDefault(False)
+        cancel_button.setAutoDefault(True)
+        cancel_button.setDefault(True)
+        buttons.accepted.connect(box.accept)
+        buttons.rejected.connect(box.reject)
+        layout.addWidget(buttons)
+        cancel_button.setFocus()
+        if box.exec() != QDialog.DialogCode.Accepted:
+            return False
+        self._insert_at = row + 1
+        return True
+
+    def _insert_position(self) -> int:
+        """Where the next added step goes: the pending insert point, else the end."""
+        at = self._insert_at
+        if at is not None and 0 <= at <= len(self._steps):
+            return at
+        return len(self._steps)
+
+    def _editor_base_candidate(self) -> ImportCandidate:
+        """The table the step form works on: the selected step's input, else the insert point's."""
+        row = self.step_list.currentRow()
+        if 0 <= row < len(self._steps):
+            upto = row
+        else:
+            upto = self._insert_position()
+        if upto < len(self._steps):
+            return apply_transformations(
+                self._source_candidate, self._steps[:upto],
+                parameters=self._parameter_values(),
+            )
+        return self._preview_candidate
+
+    def _finish_insert(self, added: bool, prior_row: int) -> None:
+        """End of a synchronous ribbon command: drop the insert point, restore a rejected insert."""
+        inserting = self._insert_at is not None
+        self._insert_at = None
+        if added or not inserting:
+            return
+        message = self.error_label.text() if self.error_label.isVisible() else ""
+        self._reselect_step(prior_row)
+        if message:
+            self._show_error(message)
 
     def _select_ribbon_sort(self, direction: str) -> None:
-        if not self._confirm_add_step_at_end():
-            return
-        selected = self._selected_preview_columns()
-        if self.step_list.currentRow() >= 0:
-            self.step_list.setCurrentRow(-1)
-        if selected:
-            if self._add_step(
-                {"op": "sort_rows", "column": selected[0], "direction": direction},
-                power_bi_name=True,
-            ):
-                self.step_settings_toggle.setChecked(False)
-            return
-        self._open_operation_dialog("sort_rows", selected, option_value=direction)
-
-    def _select_ribbon_data_type(self, data_type: str) -> None:
-        if not self._confirm_add_step_at_end():
-            return
-        selected = self._selected_preview_columns()
-        if self.step_list.currentRow() >= 0:
-            self.step_list.setCurrentRow(-1)
-        if not selected:
-            self._open_operation_dialog("convert_type", selected, option_value=data_type)
-            return
-        for column in selected:
-            if not self._add_step(
-                {"op": "convert_type", "column": column, "type": data_type},
-                power_bi_name=True,
-            ):
-                return
-        self.step_settings_toggle.setChecked(False)
-
-    def _select_ribbon_operation(self, operation: str) -> None:
-        if not self._confirm_add_step_at_end():
-            return
-        operation_index = self.operation_combo.findData(operation)
-        if operation_index < 0:
-            self._show_error(
-                f"The {operation.replace('_', ' ').title()} command is not available in this editor."
-            )
-            return
-        if operation == "conditional_column":
-            self._open_conditional_dialog(prior_row=self.step_list.currentRow())
-            return
-        if operation == "add_custom_column":
-            if self.step_list.currentRow() >= 0:
-                self.step_list.setCurrentRow(-1)
-            self.operation_combo.setCurrentIndex(operation_index)
-            self._configure_editor()
-            if not self._launch_custom_column_dialog():
-                self._restore_non_custom_operation()
+        if not self._confirm_insert_step():
             return
         selected = self._selected_preview_columns()
         prior_row = self.step_list.currentRow()
         if prior_row >= 0:
             self.step_list.setCurrentRow(-1)
+        if selected:
+            added = self._add_step(
+                {"op": "sort_rows", "column": selected[0], "direction": direction},
+                power_bi_name=True,
+            )
+            self._finish_insert(added, prior_row)
+            if added:
+                self.step_settings_toggle.setChecked(False)
+            return
+        self._open_operation_dialog(
+            "sort_rows", selected, option_value=direction, prior_row=prior_row
+        )
+
+    def _select_ribbon_data_type(self, data_type: str) -> None:
+        if not self._confirm_insert_step():
+            return
+        selected = self._selected_preview_columns()
+        prior_row = self.step_list.currentRow()
+        if prior_row >= 0:
+            self.step_list.setCurrentRow(-1)
+        if not selected:
+            self._open_operation_dialog(
+                "convert_type", selected, option_value=data_type, prior_row=prior_row
+            )
+            return
+        added = False
+        for column in selected:
+            added = self._add_step(
+                {"op": "convert_type", "column": column, "type": data_type},
+                power_bi_name=True,
+            )
+            if not added:
+                break
+        self._finish_insert(added, prior_row)
+        if added:
+            self.step_settings_toggle.setChecked(False)
+
+    def _select_ribbon_operation(self, operation: str) -> None:
+        if not self._confirm_insert_step():
+            return
+        operation_index = self.operation_combo.findData(operation)
+        if operation_index < 0:
+            self._insert_at = None
+            self._show_error(
+                f"The {operation.replace('_', ' ').title()} command is not available in this editor."
+            )
+            return
+        prior_row = self.step_list.currentRow()
+        if operation == "conditional_column":
+            self._open_conditional_dialog(prior_row=prior_row)
+            return
+        if operation == "add_custom_column":
+            if prior_row >= 0:
+                self.step_list.setCurrentRow(-1)
+            self.operation_combo.setCurrentIndex(operation_index)
+            self._configure_editor()
+            before = len(self._steps)
+            if not self._launch_custom_column_dialog():
+                self._restore_non_custom_operation()
+            self._finish_insert(len(self._steps) > before, prior_row)
+            return
+        selected = self._selected_preview_columns()
+        if prior_row >= 0:
+            self.step_list.setCurrentRow(-1)
+        before = len(self._steps)
         if self._apply_direct_operation(operation, selected):
+            self._finish_insert(len(self._steps) > before, prior_row)
             return
         self._open_operation_dialog(operation, selected, prior_row=prior_row)
 
@@ -5468,7 +5504,7 @@ class TransformDataDialog(QDialog):
             if not selected:
                 self._show_error("Select a column in the preview first.")
                 return True
-            taken = set(self._preview_candidate.headers)
+            taken = set(self._editor_base_candidate().headers)
             steps = []
             for column in selected:
                 step: dict[str, Any] = {"op": operation, "column": column}
@@ -5517,7 +5553,9 @@ class TransformDataDialog(QDialog):
         prior_row: int = -1,
     ) -> None:
         """Show the command's settings in a modal OK / Cancel dialog (nothing applies until OK)."""
+        insert_at = self._insert_at
         self._close_operation_dialog()
+        self._insert_at = insert_at
         operation_index = self.operation_combo.findData(operation)
         self.operation_combo.setCurrentIndex(operation_index)
         self._configure_editor()
@@ -5589,6 +5627,7 @@ class TransformDataDialog(QDialog):
             self.operation_settings_panel.setVisible(False)
             if self._operation_dialog is sub:
                 self._operation_dialog = None
+            self._insert_at = None
             if _result != QDialog.DialogCode.Accepted.value:
                 self._reselect_step(prior_row)
             sub.deleteLater()
@@ -5603,7 +5642,7 @@ class TransformDataDialog(QDialog):
         def validate(step: dict[str, Any]) -> str | None:
             next_steps = deepcopy(self._steps)
             if editing_index is None:
-                next_steps.append(step)
+                next_steps.insert(self._insert_position(), step)
             else:
                 if not 0 <= editing_index < len(next_steps):
                     return "The selected conditional-column step is no longer available."
@@ -5628,14 +5667,17 @@ class TransformDataDialog(QDialog):
     def _open_conditional_dialog(
         self, editing_index: int | None = None, *, prior_row: int = -1
     ) -> None:
-        """Power BI's Add Conditional Column dialog; OK appends (or updates) the step."""
+        """Power BI's Add Conditional Column dialog; OK inserts (or updates) the step."""
+        insert_at = self._insert_at
         self._close_operation_dialog()
+        self._insert_at = insert_at
         selected = self._selected_preview_columns()
         if editing_index is None and self.step_list.currentRow() >= 0:
             self.step_list.setCurrentRow(-1)
         try:
             base = self._custom_column_base(editing_index)
         except TransformationError as exc:
+            self._insert_at = None
             self._show_error(str(exc))
             return
         existing = (
@@ -5664,6 +5706,7 @@ class TransformDataDialog(QDialog):
         def finished(_result: int = 0) -> None:
             if self._conditional_dialog is sub:
                 self._conditional_dialog = None
+            self._insert_at = None
             if _result != QDialog.DialogCode.Accepted.value:
                 self._reselect_step(prior_row)
             sub.deleteLater()
@@ -5700,7 +5743,10 @@ class TransformDataDialog(QDialog):
         return True
 
     def _custom_column_base(self, editing_index: int | None) -> ImportCandidate:
-        steps = self._steps[:editing_index] if editing_index is not None else self._steps
+        steps = (
+            self._steps[:editing_index] if editing_index is not None
+            else self._steps[:self._insert_position()]
+        )
         return apply_transformations(
             self._source_candidate, steps, parameters=self._parameter_values()
         )
@@ -5716,7 +5762,7 @@ class TransformDataDialog(QDialog):
         }
         next_steps = deepcopy(self._steps)
         if editing_index is None:
-            next_steps.append(step)
+            next_steps.insert(self._insert_position(), step)
         else:
             if not 0 <= editing_index < len(next_steps):
                 return "The selected custom-column step is no longer available."
@@ -7116,17 +7162,19 @@ class TransformDataDialog(QDialog):
         return viewport.mapToGlobal(QPoint(x, y))
 
     def _sort_preview_column(self, column: str, direction: str) -> None:
-        if not self._confirm_add_step_at_end():
+        if not self._confirm_insert_step():
             return
+        prior_row = self.step_list.currentRow()
         self.step_list.setCurrentRow(-1)
         operation_index = self.operation_combo.findData("sort_rows")
         if operation_index < 0:
+            self._insert_at = None
             return
         self.operation_combo.setCurrentIndex(operation_index)
         self.column_combo.setCurrentIndex(self.column_combo.findText(column))
         self.step_settings_toggle.setChecked(True)
         self._set_combo_data(self.option_combo, direction)
-        self._add_step()
+        self._finish_insert(self._add_step(), prior_row)
 
     def _remove_empty_column_values(self, column: str) -> None:
         self._insert_step_after_selection({
@@ -7417,15 +7465,7 @@ class TransformDataDialog(QDialog):
             self.step_settings_toggle.setChecked(True)
         op = str(self.operation_combo.currentData())
         selected_index = self.step_list.currentRow()
-        base_candidate = (
-            apply_transformations(
-                self._source_candidate,
-                self._steps[:selected_index],
-                parameters=self._parameter_values(),
-            )
-            if 0 <= selected_index < len(self._steps)
-            else self._preview_candidate
-        )
+        base_candidate = self._editor_base_candidate()
         self.column_combo.clear()
         self.column_combo.addItems(base_candidate.headers)
         self.pivot_value_column_combo.clear()
@@ -8917,42 +8957,73 @@ class TransformDataDialog(QDialog):
         *,
         power_bi_name: bool = False,
     ) -> bool:
-        """Append a step built from the form (or the explicit ``step``); True on success."""
+        """Add a step built from the form (or the explicit ``step``); True on success.
+
+        It goes at the end, or at the pending insert point of a ribbon command run with a middle
+        step selected (the whole new list is validated and replayed; a failure changes nothing).
+        """
+        at = self._insert_position()
         try:
             new_step = step if step is not None else self._create_step()
-            next_steps = validate_steps([*self._steps, new_step])
+            next_steps = validate_steps(
+                [*self._steps[:at], new_step, *self._steps[at:]]
+            )
             transformed = apply_transformations(
                 self._source_candidate, next_steps,
                 parameters=self._parameter_values(),
             )
+            next_metadata = validate_applied_step_metadata(
+                deepcopy(self._step_metadata), len(self._steps)
+            ) if at < len(self._steps) else list(self._step_metadata)
         except TransformationError as exc:
             self._show_error(str(exc))
             return False
-        self._steps = next_steps
-        step_name = self._power_bi_step_name(next_steps[-1]) if power_bi_name else ""
-        self._step_metadata.append({"name": step_name} if step_name else {})
+        next_metadata.insert(at, {})
+        self._steps, self._step_metadata = next_steps, next_metadata
+        step_name = (
+            self._applied_step_names().get(at, "")
+            if power_bi_name and is_known_power_bi_step(next_steps[at]) else ""
+        )
+        if step_name:
+            self._step_metadata[at] = {"name": step_name}
         self._preview_candidate = transformed
+        if self._insert_at is not None:
+            self._insert_at = at + 1
         self._render_steps()
         self._refresh_preview()
         self._configure_editor()
-        self.step_list.setCurrentRow(self.step_list.count() - 1)
+        self.step_list.setCurrentRow(at)
         self._clear_error()
         return True
 
     def _detect_data_types(self) -> None:
         """Add explicit conversion steps for columns with safe inferred types."""
-        state = self._query_states.get(self._active_query_id, {})
+        if not self._confirm_insert_step():
+            return
         try:
+            self._detect_data_types_at(self._insert_position())
+        finally:
+            self._insert_at = None
+
+    def _detect_data_types_at(self, at: int) -> None:
+        """Detect on the table as it is before step ``at`` and insert the conversions there."""
+        state = self._query_states.get(self._active_query_id, {})
+        inserting = at < len(self._steps)
+        try:
+            base = (
+                apply_transformations(
+                    self._source_candidate, self._steps[:at],
+                    parameters=self._parameter_values(),
+                )
+                if inserting else self._preview_candidate
+            )
             current_types = column_types_after_steps(
                 self._source_candidate.headers,
-                self._steps,
-                output_headers=self._preview_candidate.headers,
+                self._steps[:at],
+                output_headers=base.headers,
                 initial_types=state.get("source_column_types", {}),
             )
-            detected_types = infer_column_types(
-                self._preview_candidate.headers,
-                self._preview_candidate.rows,
-            )
+            detected_types = infer_column_types(base.headers, base.rows)
             detected_steps = [
                 {"op": "convert_type", "column": column, "type": type_name}
                 for column, type_name in detected_types.items()
@@ -8964,21 +9035,32 @@ class TransformDataDialog(QDialog):
                 self.error_label.setText("No additional columns have a safe supported type to apply.")
                 self.error_label.setVisible(True)
                 return
-            next_steps = validate_steps([*self._steps, *detected_steps])
+            next_steps = validate_steps(
+                [*self._steps[:at], *detected_steps, *self._steps[at:]]
+            )
             transformed = apply_transformations(
                 self._source_candidate, next_steps,
                 parameters=self._parameter_values(),
+            )
+            next_metadata = (
+                validate_applied_step_metadata(
+                    deepcopy(self._step_metadata), len(self._steps)
+                )
+                if inserting else list(self._step_metadata)
             )
         except (TransformationError, ValueError) as exc:
             self._show_error(str(exc))
             return
 
+        next_metadata[at:at] = [{} for _ in detected_steps]
         self._steps = next_steps
-        self._step_metadata.extend({} for _ in detected_steps)
+        self._step_metadata = next_metadata
         self._preview_candidate = transformed
         self._render_steps()
         self._refresh_preview()
         self._configure_editor()
+        if inserting:
+            self.step_list.setCurrentRow(at + len(detected_steps) - 1)
         self._save_active_query_state()
         self._clear_error()
 
