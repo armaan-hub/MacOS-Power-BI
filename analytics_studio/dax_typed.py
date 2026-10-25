@@ -142,17 +142,31 @@ def to_number(value: object) -> Decimal:
     return value  # type: ignore[return-value]
 
 
+_BOOLEAN_NUMBER_TEXT = re.compile(r"[+-]?(?:[0-9][0-9,]*\.?[0-9]*|\.[0-9]+)(?:[eE][+-]?[0-9]+)?")
+
+
 def to_boolean(value: object) -> bool:
     if value is None:
         return False
     if isinstance(value, bool):
         return value
     if isinstance(value, str):
+        # live Power BI (iteration 88, 34 texts x IF / NOT / AND): "" is FALSE, TRUE / FALSE in any case, and a number spelled in text is TRUE unless
+        # it is zero; anything else (" TRUE", "T", "yes", "  ", "0x1", "TRUE()") is an error
+        if value == "":
+            return False
+        folded = value.casefold()
+        if folded in {"true", "false"}:
+            return folded == "true"
+        spelled = value.strip(" ")
+        if _BOOLEAN_NUMBER_TEXT.fullmatch(spelled):
+            return Decimal(spelled.replace(",", "")) != 0
         raise _error(f"Cannot convert value '{value}' of type Text to type True/False.")
     return value != 0  # type: ignore[operator]
 
 
 _ASTRAL = re.compile("[\U00010000-\U0010ffff]")
+_WIDTH_FORMS = re.compile("[\uff00-\uffef]")
 
 
 def text_key(text: str) -> str:
@@ -179,6 +193,11 @@ def compare(operator: str, left: object, right: object) -> bool:
             f"{type_name(left)} with values of type {type_name(right)}."
         )
     if isinstance(left, str):
+        if _WIDTH_FORMS.search(left) or _WIDTH_FORMS.search(right):  # type: ignore[arg-type]
+            # live Power BI (iteration 88): text comparison ignores the width of a character ("ａ" = "a" is True); that fold is not modelled
+            from .measures import MeasureError  # imported late: measures imports this module
+
+            raise MeasureError("Comparing text with full-width or half-width forms is not supported in the local engine.")
         a, b = text_key(left), text_key(right)  # type: ignore[arg-type]
     elif isinstance(left, bool):
         a, b = int(left), int(right)  # type: ignore[arg-type]

@@ -256,7 +256,9 @@ def statistic(function: str, values: list[Decimal], k: Decimal | None = None) ->
     if name in {"VAR.S", "VAR.P", "STDEV.S", "STDEV.P"}:
         sample = name.endswith(".S")
         if sample and count < 2:
-            raise dax_typed._error(f"Division by zero has occurred when evaluating function '{function}'.")
+            error = dax_typed._error(f"Division by zero has occurred when evaluating function '{function}'.")
+            error.sample_statistic_nan = True  # NaN in Power BI (iteration 88); see the measure-level handling in measures.resolve
+            raise error
         mean = sum(values, Decimal(0)) / count
         variance = sum(((value - mean) ** 2 for value in values), Decimal(0)) / (count - 1 if sample else count)
         return variance if name.startswith("VAR") else variance.sqrt()
