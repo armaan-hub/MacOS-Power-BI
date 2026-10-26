@@ -1,0 +1,882 @@
+{
+ "powerbi_version": "2.157.879.0 (26.08)+da30fe74eb0b8a8786ab7326b69c400a0e951831",
+ "frozen": "2026-10-26",
+ "items": [
+  {
+   "expr": "TOCSV(LINESTX(DATATABLE(\"x\",DOUBLE,\"y\",DOUBLE,\"z\",DOUBLE,{{1,2,1},{2,4.1,3},{3,5.9,2},{4,8.2,5},{5,9.8,4}}),[y],[x]))",
+   "powerbi": "[Slope1],[Intercept],[StandardErrorSlope1],[StandardErrorIntercept],[CoefficientOfDetermination],[StandardError],[FStatistic],[DegreesOfFreedom],[RegressionSumOfSquares],[ResidualSumOfSquares]\n1.97,8.99999999999999E-02,5.50757054728609E-02,0.182665450117603,0.997660668380463,0.174164673034841,1279.41758241759,3,38.809,9.09999999999994E-02"
+  },
+  {
+   "expr": "MAXX(LINESTX(DATATABLE(\"x\",DOUBLE,\"y\",DOUBLE,\"z\",DOUBLE,{{1,2,1},{2,4.1,3},{3,5.9,2},{4,8.2,5},{5,9.8,4}}),[y],[x]),[Slope1])",
+   "powerbi": "1.97"
+  },
+  {
+   "expr": "MAXX(LINESTX(DATATABLE(\"x\",DOUBLE,\"y\",DOUBLE,\"z\",DOUBLE,{{1,2,1},{2,4.1,3},{3,5.9,2},{4,8.2,5},{5,9.8,4}}),[y],[x]),[Slope2])",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 135) Column 'Slope2' cannot be found or may not be used in this expression.\""
+  },
+  {
+   "expr": "MAXX(LINESTX(DATATABLE(\"x\",DOUBLE,\"y\",DOUBLE,\"z\",DOUBLE,{{1,2,1},{2,4.1,3},{3,5.9,2},{4,8.2,5},{5,9.8,4}}),[y],[x]),[Intercept])",
+   "powerbi": "0.0899999999999999"
+  },
+  {
+   "expr": "MAXX(LINESTX(DATATABLE(\"x\",DOUBLE,\"y\",DOUBLE,\"z\",DOUBLE,{{1,2,1},{2,4.1,3},{3,5.9,2},{4,8.2,5},{5,9.8,4}}),[y],[x]),[StandardErrorSlope1])",
+   "powerbi": "0.0550757054728609"
+  },
+  {
+   "expr": "MAXX(LINESTX(DATATABLE(\"x\",DOUBLE,\"y\",DOUBLE,\"z\",DOUBLE,{{1,2,1},{2,4.1,3},{3,5.9,2},{4,8.2,5},{5,9.8,4}}),[y],[x]),[StandardErrorSlope2])",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 135) Column 'StandardErrorSlope2' cannot be found or may not be used in this expression.\""
+  },
+  {
+   "expr": "MAXX(LINESTX(DATATABLE(\"x\",DOUBLE,\"y\",DOUBLE,\"z\",DOUBLE,{{1,2,1},{2,4.1,3},{3,5.9,2},{4,8.2,5},{5,9.8,4}}),[y],[x]),[StandardErrorIntercept])",
+   "powerbi": "0.182665450117603"
+  },
+  {
+   "expr": "MAXX(LINESTX(DATATABLE(\"x\",DOUBLE,\"y\",DOUBLE,\"z\",DOUBLE,{{1,2,1},{2,4.1,3},{3,5.9,2},{4,8.2,5},{5,9.8,4}}),[y],[x]),[CoefficientOfDetermination])",
+   "powerbi": "0.997660668380463"
+  },
+  {
+   "expr": "MAXX(LINESTX(DATATABLE(\"x\",DOUBLE,\"y\",DOUBLE,\"z\",DOUBLE,{{1,2,1},{2,4.1,3},{3,5.9,2},{4,8.2,5},{5,9.8,4}}),[y],[x]),[StandardError])",
+   "powerbi": "0.174164673034841"
+  },
+  {
+   "expr": "MAXX(LINESTX(DATATABLE(\"x\",DOUBLE,\"y\",DOUBLE,\"z\",DOUBLE,{{1,2,1},{2,4.1,3},{3,5.9,2},{4,8.2,5},{5,9.8,4}}),[y],[x]),[FStatistic])",
+   "powerbi": "1279.41758241759"
+  },
+  {
+   "expr": "MAXX(LINESTX(DATATABLE(\"x\",DOUBLE,\"y\",DOUBLE,\"z\",DOUBLE,{{1,2,1},{2,4.1,3},{3,5.9,2},{4,8.2,5},{5,9.8,4}}),[y],[x]),[DegreesOfFreedom])",
+   "powerbi": "3"
+  },
+  {
+   "expr": "MAXX(LINESTX(DATATABLE(\"x\",DOUBLE,\"y\",DOUBLE,\"z\",DOUBLE,{{1,2,1},{2,4.1,3},{3,5.9,2},{4,8.2,5},{5,9.8,4}}),[y],[x]),[RegressionSumOfSquares])",
+   "powerbi": "38.809"
+  },
+  {
+   "expr": "MAXX(LINESTX(DATATABLE(\"x\",DOUBLE,\"y\",DOUBLE,\"z\",DOUBLE,{{1,2,1},{2,4.1,3},{3,5.9,2},{4,8.2,5},{5,9.8,4}}),[y],[x]),[ResidualSumOfSquares])",
+   "powerbi": "0.0909999999999994"
+  },
+  {
+   "expr": "TOCSV(LINESTX(DATATABLE(\"x\",DOUBLE,\"y\",DOUBLE,\"z\",DOUBLE,{{1,2,1},{2,4.1,3},{3,5.9,2},{4,8.2,5},{5,9.8,4}}),[y],[x],[z]))",
+   "powerbi": "[Slope1],[Slope2],[Intercept],[StandardErrorSlope1],[StandardErrorSlope2],[StandardErrorIntercept],[CoefficientOfDetermination],[StandardError],[FStatistic],[DegreesOfFreedom],[RegressionSumOfSquares],[ResidualSumOfSquares]\n1.85,0.15,4.44089209850063E-16,3.72677996249961E-02,3.72677996249961E-02,7.74596669241475E-02,0.99974293059126,0.070710678118654,3889.00000000008,2,38.89,9.9999999999998E-03"
+  },
+  {
+   "expr": "MAXX(LINESTX(DATATABLE(\"x\",DOUBLE,\"y\",DOUBLE,\"z\",DOUBLE,{{1,2,1},{2,4.1,3},{3,5.9,2},{4,8.2,5},{5,9.8,4}}),[y],[x],[z]),[Slope1])",
+   "powerbi": "1.85"
+  },
+  {
+   "expr": "MAXX(LINESTX(DATATABLE(\"x\",DOUBLE,\"y\",DOUBLE,\"z\",DOUBLE,{{1,2,1},{2,4.1,3},{3,5.9,2},{4,8.2,5},{5,9.8,4}}),[y],[x],[z]),[Slope2])",
+   "powerbi": "0.15"
+  },
+  {
+   "expr": "MAXX(LINESTX(DATATABLE(\"x\",DOUBLE,\"y\",DOUBLE,\"z\",DOUBLE,{{1,2,1},{2,4.1,3},{3,5.9,2},{4,8.2,5},{5,9.8,4}}),[y],[x],[z]),[Intercept])",
+   "powerbi": "4.44089209850063E-16"
+  },
+  {
+   "expr": "MAXX(LINESTX(DATATABLE(\"x\",DOUBLE,\"y\",DOUBLE,\"z\",DOUBLE,{{1,2,1},{2,4.1,3},{3,5.9,2},{4,8.2,5},{5,9.8,4}}),[y],[x],[z]),[StandardErrorSlope1])",
+   "powerbi": "0.0372677996249961"
+  },
+  {
+   "expr": "MAXX(LINESTX(DATATABLE(\"x\",DOUBLE,\"y\",DOUBLE,\"z\",DOUBLE,{{1,2,1},{2,4.1,3},{3,5.9,2},{4,8.2,5},{5,9.8,4}}),[y],[x],[z]),[StandardErrorSlope2])",
+   "powerbi": "0.0372677996249961"
+  },
+  {
+   "expr": "MAXX(LINESTX(DATATABLE(\"x\",DOUBLE,\"y\",DOUBLE,\"z\",DOUBLE,{{1,2,1},{2,4.1,3},{3,5.9,2},{4,8.2,5},{5,9.8,4}}),[y],[x],[z]),[StandardErrorIntercept])",
+   "powerbi": "0.0774596669241475"
+  },
+  {
+   "expr": "MAXX(LINESTX(DATATABLE(\"x\",DOUBLE,\"y\",DOUBLE,\"z\",DOUBLE,{{1,2,1},{2,4.1,3},{3,5.9,2},{4,8.2,5},{5,9.8,4}}),[y],[x],[z]),[CoefficientOfDetermination])",
+   "powerbi": "0.99974293059126"
+  },
+  {
+   "expr": "MAXX(LINESTX(DATATABLE(\"x\",DOUBLE,\"y\",DOUBLE,\"z\",DOUBLE,{{1,2,1},{2,4.1,3},{3,5.9,2},{4,8.2,5},{5,9.8,4}}),[y],[x],[z]),[StandardError])",
+   "powerbi": "0.070710678118654"
+  },
+  {
+   "expr": "MAXX(LINESTX(DATATABLE(\"x\",DOUBLE,\"y\",DOUBLE,\"z\",DOUBLE,{{1,2,1},{2,4.1,3},{3,5.9,2},{4,8.2,5},{5,9.8,4}}),[y],[x],[z]),[FStatistic])",
+   "powerbi": "3889.00000000008"
+  },
+  {
+   "expr": "MAXX(LINESTX(DATATABLE(\"x\",DOUBLE,\"y\",DOUBLE,\"z\",DOUBLE,{{1,2,1},{2,4.1,3},{3,5.9,2},{4,8.2,5},{5,9.8,4}}),[y],[x],[z]),[DegreesOfFreedom])",
+   "powerbi": "2"
+  },
+  {
+   "expr": "MAXX(LINESTX(DATATABLE(\"x\",DOUBLE,\"y\",DOUBLE,\"z\",DOUBLE,{{1,2,1},{2,4.1,3},{3,5.9,2},{4,8.2,5},{5,9.8,4}}),[y],[x],[z]),[RegressionSumOfSquares])",
+   "powerbi": "38.89"
+  },
+  {
+   "expr": "MAXX(LINESTX(DATATABLE(\"x\",DOUBLE,\"y\",DOUBLE,\"z\",DOUBLE,{{1,2,1},{2,4.1,3},{3,5.9,2},{4,8.2,5},{5,9.8,4}}),[y],[x],[z]),[ResidualSumOfSquares])",
+   "powerbi": "0.0099999999999998"
+  },
+  {
+   "expr": "TOCSV(LINESTX(DATATABLE(\"x\",DOUBLE,\"y\",DOUBLE,\"z\",DOUBLE,{{1,2,1},{2,4.1,3},{3,5.9,2},{4,8.2,5},{5,9.8,4}}),[y],[x],FALSE()))",
+   "powerbi": "[Slope1],[StandardErrorSlope1],[CoefficientOfDetermination],[StandardError],[FStatistic],[DegreesOfFreedom],[RegressionSumOfSquares],[ResidualSumOfSquares]\n1.99454545454545,2.11449151811145E-02,0.999550645790938,0.156814887975947,8897.66358595201,4,218.801636363636,9.83636363636356E-02"
+  },
+  {
+   "expr": "MAXX(LINESTX(DATATABLE(\"x\",DOUBLE,\"y\",DOUBLE,\"z\",DOUBLE,{{1,2,1},{2,4.1,3},{3,5.9,2},{4,8.2,5},{5,9.8,4}}),[y],[x],FALSE()),[Slope1])",
+   "powerbi": "1.99454545454545"
+  },
+  {
+   "expr": "MAXX(LINESTX(DATATABLE(\"x\",DOUBLE,\"y\",DOUBLE,\"z\",DOUBLE,{{1,2,1},{2,4.1,3},{3,5.9,2},{4,8.2,5},{5,9.8,4}}),[y],[x],FALSE()),[Slope2])",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 143) Column 'Slope2' cannot be found or may not be used in this expression.\""
+  },
+  {
+   "expr": "MAXX(LINESTX(DATATABLE(\"x\",DOUBLE,\"y\",DOUBLE,\"z\",DOUBLE,{{1,2,1},{2,4.1,3},{3,5.9,2},{4,8.2,5},{5,9.8,4}}),[y],[x],FALSE()),[Intercept])",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 143) Column 'Intercept' cannot be found or may not be used in this expression.\""
+  },
+  {
+   "expr": "MAXX(LINESTX(DATATABLE(\"x\",DOUBLE,\"y\",DOUBLE,\"z\",DOUBLE,{{1,2,1},{2,4.1,3},{3,5.9,2},{4,8.2,5},{5,9.8,4}}),[y],[x],FALSE()),[StandardErrorSlope1])",
+   "powerbi": "0.0211449151811145"
+  },
+  {
+   "expr": "MAXX(LINESTX(DATATABLE(\"x\",DOUBLE,\"y\",DOUBLE,\"z\",DOUBLE,{{1,2,1},{2,4.1,3},{3,5.9,2},{4,8.2,5},{5,9.8,4}}),[y],[x],FALSE()),[StandardErrorSlope2])",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 143) Column 'StandardErrorSlope2' cannot be found or may not be used in this expression.\""
+  },
+  {
+   "expr": "MAXX(LINESTX(DATATABLE(\"x\",DOUBLE,\"y\",DOUBLE,\"z\",DOUBLE,{{1,2,1},{2,4.1,3},{3,5.9,2},{4,8.2,5},{5,9.8,4}}),[y],[x],FALSE()),[StandardErrorIntercept])",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 143) Column 'StandardErrorIntercept' cannot be found or may not be used in this expression.\""
+  },
+  {
+   "expr": "MAXX(LINESTX(DATATABLE(\"x\",DOUBLE,\"y\",DOUBLE,\"z\",DOUBLE,{{1,2,1},{2,4.1,3},{3,5.9,2},{4,8.2,5},{5,9.8,4}}),[y],[x],FALSE()),[CoefficientOfDetermination])",
+   "powerbi": "0.999550645790938"
+  },
+  {
+   "expr": "MAXX(LINESTX(DATATABLE(\"x\",DOUBLE,\"y\",DOUBLE,\"z\",DOUBLE,{{1,2,1},{2,4.1,3},{3,5.9,2},{4,8.2,5},{5,9.8,4}}),[y],[x],FALSE()),[StandardError])",
+   "powerbi": "0.156814887975947"
+  },
+  {
+   "expr": "MAXX(LINESTX(DATATABLE(\"x\",DOUBLE,\"y\",DOUBLE,\"z\",DOUBLE,{{1,2,1},{2,4.1,3},{3,5.9,2},{4,8.2,5},{5,9.8,4}}),[y],[x],FALSE()),[FStatistic])",
+   "powerbi": "8897.66358595201"
+  },
+  {
+   "expr": "MAXX(LINESTX(DATATABLE(\"x\",DOUBLE,\"y\",DOUBLE,\"z\",DOUBLE,{{1,2,1},{2,4.1,3},{3,5.9,2},{4,8.2,5},{5,9.8,4}}),[y],[x],FALSE()),[DegreesOfFreedom])",
+   "powerbi": "4"
+  },
+  {
+   "expr": "MAXX(LINESTX(DATATABLE(\"x\",DOUBLE,\"y\",DOUBLE,\"z\",DOUBLE,{{1,2,1},{2,4.1,3},{3,5.9,2},{4,8.2,5},{5,9.8,4}}),[y],[x],FALSE()),[RegressionSumOfSquares])",
+   "powerbi": "218.801636363636"
+  },
+  {
+   "expr": "MAXX(LINESTX(DATATABLE(\"x\",DOUBLE,\"y\",DOUBLE,\"z\",DOUBLE,{{1,2,1},{2,4.1,3},{3,5.9,2},{4,8.2,5},{5,9.8,4}}),[y],[x],FALSE()),[ResidualSumOfSquares])",
+   "powerbi": "0.0983636363636356"
+  },
+  {
+   "expr": "TOCSV(LINESTX(DATATABLE(\"x\",DOUBLE,\"y\",DOUBLE,\"z\",DOUBLE,{{1,2,1},{2,4.1,3},{3,5.9,2},{4,8.2,5},{5,9.8,4}}),[y],[x],[z],FALSE()))",
+   "powerbi": "[Slope1],[Slope2],[StandardErrorSlope1],[StandardErrorSlope2],[CoefficientOfDetermination],[StandardError],[FStatistic],[DegreesOfFreedom],[RegressionSumOfSquares],[ResidualSumOfSquares]\n1.85,0.149999999999999,2.91335791158374E-02,2.91335791158374E-02,0.999954317039744,5.77350269189622E-02,32833.5000000004,3,218.89,9.99999999999989E-03"
+  },
+  {
+   "expr": "MAXX(LINESTX(DATATABLE(\"x\",DOUBLE,\"y\",DOUBLE,\"z\",DOUBLE,{{1,2,1},{2,4.1,3},{3,5.9,2},{4,8.2,5},{5,9.8,4}}),[y],[x],[z],FALSE()),[Slope1])",
+   "powerbi": "1.85"
+  },
+  {
+   "expr": "MAXX(LINESTX(DATATABLE(\"x\",DOUBLE,\"y\",DOUBLE,\"z\",DOUBLE,{{1,2,1},{2,4.1,3},{3,5.9,2},{4,8.2,5},{5,9.8,4}}),[y],[x],[z],FALSE()),[Slope2])",
+   "powerbi": "0.149999999999999"
+  },
+  {
+   "expr": "MAXX(LINESTX(DATATABLE(\"x\",DOUBLE,\"y\",DOUBLE,\"z\",DOUBLE,{{1,2,1},{2,4.1,3},{3,5.9,2},{4,8.2,5},{5,9.8,4}}),[y],[x],[z],FALSE()),[Intercept])",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 147) Column 'Intercept' cannot be found or may not be used in this expression.\""
+  },
+  {
+   "expr": "MAXX(LINESTX(DATATABLE(\"x\",DOUBLE,\"y\",DOUBLE,\"z\",DOUBLE,{{1,2,1},{2,4.1,3},{3,5.9,2},{4,8.2,5},{5,9.8,4}}),[y],[x],[z],FALSE()),[StandardErrorSlope1])",
+   "powerbi": "0.0291335791158374"
+  },
+  {
+   "expr": "MAXX(LINESTX(DATATABLE(\"x\",DOUBLE,\"y\",DOUBLE,\"z\",DOUBLE,{{1,2,1},{2,4.1,3},{3,5.9,2},{4,8.2,5},{5,9.8,4}}),[y],[x],[z],FALSE()),[StandardErrorSlope2])",
+   "powerbi": "0.0291335791158374"
+  },
+  {
+   "expr": "MAXX(LINESTX(DATATABLE(\"x\",DOUBLE,\"y\",DOUBLE,\"z\",DOUBLE,{{1,2,1},{2,4.1,3},{3,5.9,2},{4,8.2,5},{5,9.8,4}}),[y],[x],[z],FALSE()),[StandardErrorIntercept])",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 147) Column 'StandardErrorIntercept' cannot be found or may not be used in this expression.\""
+  },
+  {
+   "expr": "MAXX(LINESTX(DATATABLE(\"x\",DOUBLE,\"y\",DOUBLE,\"z\",DOUBLE,{{1,2,1},{2,4.1,3},{3,5.9,2},{4,8.2,5},{5,9.8,4}}),[y],[x],[z],FALSE()),[CoefficientOfDetermination])",
+   "powerbi": "0.999954317039744"
+  },
+  {
+   "expr": "MAXX(LINESTX(DATATABLE(\"x\",DOUBLE,\"y\",DOUBLE,\"z\",DOUBLE,{{1,2,1},{2,4.1,3},{3,5.9,2},{4,8.2,5},{5,9.8,4}}),[y],[x],[z],FALSE()),[StandardError])",
+   "powerbi": "0.0577350269189622"
+  },
+  {
+   "expr": "MAXX(LINESTX(DATATABLE(\"x\",DOUBLE,\"y\",DOUBLE,\"z\",DOUBLE,{{1,2,1},{2,4.1,3},{3,5.9,2},{4,8.2,5},{5,9.8,4}}),[y],[x],[z],FALSE()),[FStatistic])",
+   "powerbi": "32833.5000000004"
+  },
+  {
+   "expr": "MAXX(LINESTX(DATATABLE(\"x\",DOUBLE,\"y\",DOUBLE,\"z\",DOUBLE,{{1,2,1},{2,4.1,3},{3,5.9,2},{4,8.2,5},{5,9.8,4}}),[y],[x],[z],FALSE()),[DegreesOfFreedom])",
+   "powerbi": "3"
+  },
+  {
+   "expr": "MAXX(LINESTX(DATATABLE(\"x\",DOUBLE,\"y\",DOUBLE,\"z\",DOUBLE,{{1,2,1},{2,4.1,3},{3,5.9,2},{4,8.2,5},{5,9.8,4}}),[y],[x],[z],FALSE()),[RegressionSumOfSquares])",
+   "powerbi": "218.89"
+  },
+  {
+   "expr": "MAXX(LINESTX(DATATABLE(\"x\",DOUBLE,\"y\",DOUBLE,\"z\",DOUBLE,{{1,2,1},{2,4.1,3},{3,5.9,2},{4,8.2,5},{5,9.8,4}}),[y],[x],[z],FALSE()),[ResidualSumOfSquares])",
+   "powerbi": "0.00999999999999989"
+  },
+  {
+   "expr": "TOCSV(LINESTX(DATATABLE(\"x\",DOUBLE,\"y\",DOUBLE,\"z\",DOUBLE,{{1,2,1},{2,4.1,3},{3,5.9,2},{4,8.2,5},{5,9.8,4}}),[y],[x],TRUE()))",
+   "powerbi": "[Slope1],[Intercept],[StandardErrorSlope1],[StandardErrorIntercept],[CoefficientOfDetermination],[StandardError],[FStatistic],[DegreesOfFreedom],[RegressionSumOfSquares],[ResidualSumOfSquares]\n1.97,8.99999999999999E-02,5.50757054728609E-02,0.182665450117603,0.997660668380463,0.174164673034841,1279.41758241759,3,38.809,9.09999999999994E-02"
+  },
+  {
+   "expr": "MAXX(LINESTX(DATATABLE(\"x\",DOUBLE,\"y\",DOUBLE,\"z\",DOUBLE,{{1,2,1},{2,4.1,3},{3,5.9,2},{4,8.2,5},{5,9.8,4}}),[y],[x],TRUE()),[Slope1])",
+   "powerbi": "1.97"
+  },
+  {
+   "expr": "MAXX(LINESTX(DATATABLE(\"x\",DOUBLE,\"y\",DOUBLE,\"z\",DOUBLE,{{1,2,1},{2,4.1,3},{3,5.9,2},{4,8.2,5},{5,9.8,4}}),[y],[x],TRUE()),[Slope2])",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 142) Column 'Slope2' cannot be found or may not be used in this expression.\""
+  },
+  {
+   "expr": "MAXX(LINESTX(DATATABLE(\"x\",DOUBLE,\"y\",DOUBLE,\"z\",DOUBLE,{{1,2,1},{2,4.1,3},{3,5.9,2},{4,8.2,5},{5,9.8,4}}),[y],[x],TRUE()),[Intercept])",
+   "powerbi": "0.0899999999999999"
+  },
+  {
+   "expr": "MAXX(LINESTX(DATATABLE(\"x\",DOUBLE,\"y\",DOUBLE,\"z\",DOUBLE,{{1,2,1},{2,4.1,3},{3,5.9,2},{4,8.2,5},{5,9.8,4}}),[y],[x],TRUE()),[StandardErrorSlope1])",
+   "powerbi": "0.0550757054728609"
+  },
+  {
+   "expr": "MAXX(LINESTX(DATATABLE(\"x\",DOUBLE,\"y\",DOUBLE,\"z\",DOUBLE,{{1,2,1},{2,4.1,3},{3,5.9,2},{4,8.2,5},{5,9.8,4}}),[y],[x],TRUE()),[StandardErrorSlope2])",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 142) Column 'StandardErrorSlope2' cannot be found or may not be used in this expression.\""
+  },
+  {
+   "expr": "MAXX(LINESTX(DATATABLE(\"x\",DOUBLE,\"y\",DOUBLE,\"z\",DOUBLE,{{1,2,1},{2,4.1,3},{3,5.9,2},{4,8.2,5},{5,9.8,4}}),[y],[x],TRUE()),[StandardErrorIntercept])",
+   "powerbi": "0.182665450117603"
+  },
+  {
+   "expr": "MAXX(LINESTX(DATATABLE(\"x\",DOUBLE,\"y\",DOUBLE,\"z\",DOUBLE,{{1,2,1},{2,4.1,3},{3,5.9,2},{4,8.2,5},{5,9.8,4}}),[y],[x],TRUE()),[CoefficientOfDetermination])",
+   "powerbi": "0.997660668380463"
+  },
+  {
+   "expr": "MAXX(LINESTX(DATATABLE(\"x\",DOUBLE,\"y\",DOUBLE,\"z\",DOUBLE,{{1,2,1},{2,4.1,3},{3,5.9,2},{4,8.2,5},{5,9.8,4}}),[y],[x],TRUE()),[StandardError])",
+   "powerbi": "0.174164673034841"
+  },
+  {
+   "expr": "MAXX(LINESTX(DATATABLE(\"x\",DOUBLE,\"y\",DOUBLE,\"z\",DOUBLE,{{1,2,1},{2,4.1,3},{3,5.9,2},{4,8.2,5},{5,9.8,4}}),[y],[x],TRUE()),[FStatistic])",
+   "powerbi": "1279.41758241759"
+  },
+  {
+   "expr": "MAXX(LINESTX(DATATABLE(\"x\",DOUBLE,\"y\",DOUBLE,\"z\",DOUBLE,{{1,2,1},{2,4.1,3},{3,5.9,2},{4,8.2,5},{5,9.8,4}}),[y],[x],TRUE()),[DegreesOfFreedom])",
+   "powerbi": "3"
+  },
+  {
+   "expr": "MAXX(LINESTX(DATATABLE(\"x\",DOUBLE,\"y\",DOUBLE,\"z\",DOUBLE,{{1,2,1},{2,4.1,3},{3,5.9,2},{4,8.2,5},{5,9.8,4}}),[y],[x],TRUE()),[RegressionSumOfSquares])",
+   "powerbi": "38.809"
+  },
+  {
+   "expr": "MAXX(LINESTX(DATATABLE(\"x\",DOUBLE,\"y\",DOUBLE,\"z\",DOUBLE,{{1,2,1},{2,4.1,3},{3,5.9,2},{4,8.2,5},{5,9.8,4}}),[y],[x],TRUE()),[ResidualSumOfSquares])",
+   "powerbi": "0.0909999999999994"
+  },
+  {
+   "expr": "TOCSV(LINESTX(DATATABLE(\"x\",DOUBLE,\"y\",DOUBLE,\"z\",DOUBLE,\"w\",DOUBLE,{{1,3,1,7},{2,5.2,3,1},{3,6.9,2,8},{4,9.1,5,3},{5,11.2,4,9},{6,12.8,7,2},{7,15.3,6,5}}),[y],[x]))",
+   "powerbi": "[Slope1],[Intercept],[StandardErrorSlope1],[StandardErrorIntercept],[CoefficientOfDetermination],[StandardError],[FStatistic],[DegreesOfFreedom],[RegressionSumOfSquares],[ResidualSumOfSquares]\n2.01428571428571,1.01428571428571,3.67006645104718E-02,0.164130361329658,0.998342874359747,0.194201662491045,3012.27272727273,5,113.605714285714,0.188571428571429"
+  },
+  {
+   "expr": "MAXX(LINESTX(DATATABLE(\"x\",DOUBLE,\"y\",DOUBLE,\"z\",DOUBLE,\"w\",DOUBLE,{{1,3,1,7},{2,5.2,3,1},{3,6.9,2,8},{4,9.1,5,3},{5,11.2,4,9},{6,12.8,7,2},{7,15.3,6,5}}),[y],[x]),[Slope1])",
+   "powerbi": "2.01428571428571"
+  },
+  {
+   "expr": "MAXX(LINESTX(DATATABLE(\"x\",DOUBLE,\"y\",DOUBLE,\"z\",DOUBLE,\"w\",DOUBLE,{{1,3,1,7},{2,5.2,3,1},{3,6.9,2,8},{4,9.1,5,3},{5,11.2,4,9},{6,12.8,7,2},{7,15.3,6,5}}),[y],[x]),[Slope2])",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 183) Column 'Slope2' cannot be found or may not be used in this expression.\""
+  },
+  {
+   "expr": "MAXX(LINESTX(DATATABLE(\"x\",DOUBLE,\"y\",DOUBLE,\"z\",DOUBLE,\"w\",DOUBLE,{{1,3,1,7},{2,5.2,3,1},{3,6.9,2,8},{4,9.1,5,3},{5,11.2,4,9},{6,12.8,7,2},{7,15.3,6,5}}),[y],[x]),[Slope3])",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 183) Column 'Slope3' cannot be found or may not be used in this expression.\""
+  },
+  {
+   "expr": "MAXX(LINESTX(DATATABLE(\"x\",DOUBLE,\"y\",DOUBLE,\"z\",DOUBLE,\"w\",DOUBLE,{{1,3,1,7},{2,5.2,3,1},{3,6.9,2,8},{4,9.1,5,3},{5,11.2,4,9},{6,12.8,7,2},{7,15.3,6,5}}),[y],[x]),[Intercept])",
+   "powerbi": "1.01428571428571"
+  },
+  {
+   "expr": "MAXX(LINESTX(DATATABLE(\"x\",DOUBLE,\"y\",DOUBLE,\"z\",DOUBLE,\"w\",DOUBLE,{{1,3,1,7},{2,5.2,3,1},{3,6.9,2,8},{4,9.1,5,3},{5,11.2,4,9},{6,12.8,7,2},{7,15.3,6,5}}),[y],[x]),[StandardErrorSlope1])",
+   "powerbi": "0.0367006645104718"
+  },
+  {
+   "expr": "MAXX(LINESTX(DATATABLE(\"x\",DOUBLE,\"y\",DOUBLE,\"z\",DOUBLE,\"w\",DOUBLE,{{1,3,1,7},{2,5.2,3,1},{3,6.9,2,8},{4,9.1,5,3},{5,11.2,4,9},{6,12.8,7,2},{7,15.3,6,5}}),[y],[x]),[StandardErrorSlope2])",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 183) Column 'StandardErrorSlope2' cannot be found or may not be used in this expression.\""
+  },
+  {
+   "expr": "MAXX(LINESTX(DATATABLE(\"x\",DOUBLE,\"y\",DOUBLE,\"z\",DOUBLE,\"w\",DOUBLE,{{1,3,1,7},{2,5.2,3,1},{3,6.9,2,8},{4,9.1,5,3},{5,11.2,4,9},{6,12.8,7,2},{7,15.3,6,5}}),[y],[x]),[StandardErrorSlope3])",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 183) Column 'StandardErrorSlope3' cannot be found or may not be used in this expression.\""
+  },
+  {
+   "expr": "MAXX(LINESTX(DATATABLE(\"x\",DOUBLE,\"y\",DOUBLE,\"z\",DOUBLE,\"w\",DOUBLE,{{1,3,1,7},{2,5.2,3,1},{3,6.9,2,8},{4,9.1,5,3},{5,11.2,4,9},{6,12.8,7,2},{7,15.3,6,5}}),[y],[x]),[StandardErrorIntercept])",
+   "powerbi": "0.164130361329658"
+  },
+  {
+   "expr": "MAXX(LINESTX(DATATABLE(\"x\",DOUBLE,\"y\",DOUBLE,\"z\",DOUBLE,\"w\",DOUBLE,{{1,3,1,7},{2,5.2,3,1},{3,6.9,2,8},{4,9.1,5,3},{5,11.2,4,9},{6,12.8,7,2},{7,15.3,6,5}}),[y],[x]),[CoefficientOfDetermination])",
+   "powerbi": "0.998342874359747"
+  },
+  {
+   "expr": "MAXX(LINESTX(DATATABLE(\"x\",DOUBLE,\"y\",DOUBLE,\"z\",DOUBLE,\"w\",DOUBLE,{{1,3,1,7},{2,5.2,3,1},{3,6.9,2,8},{4,9.1,5,3},{5,11.2,4,9},{6,12.8,7,2},{7,15.3,6,5}}),[y],[x]),[StandardError])",
+   "powerbi": "0.194201662491045"
+  },
+  {
+   "expr": "MAXX(LINESTX(DATATABLE(\"x\",DOUBLE,\"y\",DOUBLE,\"z\",DOUBLE,\"w\",DOUBLE,{{1,3,1,7},{2,5.2,3,1},{3,6.9,2,8},{4,9.1,5,3},{5,11.2,4,9},{6,12.8,7,2},{7,15.3,6,5}}),[y],[x]),[FStatistic])",
+   "powerbi": "3012.27272727273"
+  },
+  {
+   "expr": "MAXX(LINESTX(DATATABLE(\"x\",DOUBLE,\"y\",DOUBLE,\"z\",DOUBLE,\"w\",DOUBLE,{{1,3,1,7},{2,5.2,3,1},{3,6.9,2,8},{4,9.1,5,3},{5,11.2,4,9},{6,12.8,7,2},{7,15.3,6,5}}),[y],[x]),[DegreesOfFreedom])",
+   "powerbi": "5"
+  },
+  {
+   "expr": "MAXX(LINESTX(DATATABLE(\"x\",DOUBLE,\"y\",DOUBLE,\"z\",DOUBLE,\"w\",DOUBLE,{{1,3,1,7},{2,5.2,3,1},{3,6.9,2,8},{4,9.1,5,3},{5,11.2,4,9},{6,12.8,7,2},{7,15.3,6,5}}),[y],[x]),[RegressionSumOfSquares])",
+   "powerbi": "113.605714285714"
+  },
+  {
+   "expr": "MAXX(LINESTX(DATATABLE(\"x\",DOUBLE,\"y\",DOUBLE,\"z\",DOUBLE,\"w\",DOUBLE,{{1,3,1,7},{2,5.2,3,1},{3,6.9,2,8},{4,9.1,5,3},{5,11.2,4,9},{6,12.8,7,2},{7,15.3,6,5}}),[y],[x]),[ResidualSumOfSquares])",
+   "powerbi": "0.188571428571429"
+  },
+  {
+   "expr": "TOCSV(LINESTX(DATATABLE(\"x\",DOUBLE,\"y\",DOUBLE,\"z\",DOUBLE,\"w\",DOUBLE,{{1,3,1,7},{2,5.2,3,1},{3,6.9,2,8},{4,9.1,5,3},{5,11.2,4,9},{6,12.8,7,2},{7,15.3,6,5}}),[y],[x],[z]))",
+   "powerbi": "[Slope1],[Slope2],[Intercept],[StandardErrorSlope1],[StandardErrorSlope2],[StandardErrorIntercept],[CoefficientOfDetermination],[StandardError],[FStatistic],[DegreesOfFreedom],[RegressionSumOfSquares],[ResidualSumOfSquares]\n2.05471698113208,-4.52830188679243E-02,1.03369272237197,8.82567212341623E-02,8.82567212341623E-02,0.181727338206772,0.99844520115743,0.210313589503672,1284.34003656307,4,113.617358490566,0.176927223719677"
+  },
+  {
+   "expr": "MAXX(LINESTX(DATATABLE(\"x\",DOUBLE,\"y\",DOUBLE,\"z\",DOUBLE,\"w\",DOUBLE,{{1,3,1,7},{2,5.2,3,1},{3,6.9,2,8},{4,9.1,5,3},{5,11.2,4,9},{6,12.8,7,2},{7,15.3,6,5}}),[y],[x],[z]),[Slope1])",
+   "powerbi": "2.05471698113208"
+  },
+  {
+   "expr": "MAXX(LINESTX(DATATABLE(\"x\",DOUBLE,\"y\",DOUBLE,\"z\",DOUBLE,\"w\",DOUBLE,{{1,3,1,7},{2,5.2,3,1},{3,6.9,2,8},{4,9.1,5,3},{5,11.2,4,9},{6,12.8,7,2},{7,15.3,6,5}}),[y],[x],[z]),[Slope2])",
+   "powerbi": "-0.0452830188679243"
+  },
+  {
+   "expr": "MAXX(LINESTX(DATATABLE(\"x\",DOUBLE,\"y\",DOUBLE,\"z\",DOUBLE,\"w\",DOUBLE,{{1,3,1,7},{2,5.2,3,1},{3,6.9,2,8},{4,9.1,5,3},{5,11.2,4,9},{6,12.8,7,2},{7,15.3,6,5}}),[y],[x],[z]),[Slope3])",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 187) Column 'Slope3' cannot be found or may not be used in this expression.\""
+  },
+  {
+   "expr": "MAXX(LINESTX(DATATABLE(\"x\",DOUBLE,\"y\",DOUBLE,\"z\",DOUBLE,\"w\",DOUBLE,{{1,3,1,7},{2,5.2,3,1},{3,6.9,2,8},{4,9.1,5,3},{5,11.2,4,9},{6,12.8,7,2},{7,15.3,6,5}}),[y],[x],[z]),[Intercept])",
+   "powerbi": "1.03369272237197"
+  },
+  {
+   "expr": "MAXX(LINESTX(DATATABLE(\"x\",DOUBLE,\"y\",DOUBLE,\"z\",DOUBLE,\"w\",DOUBLE,{{1,3,1,7},{2,5.2,3,1},{3,6.9,2,8},{4,9.1,5,3},{5,11.2,4,9},{6,12.8,7,2},{7,15.3,6,5}}),[y],[x],[z]),[StandardErrorSlope1])",
+   "powerbi": "0.0882567212341623"
+  },
+  {
+   "expr": "MAXX(LINESTX(DATATABLE(\"x\",DOUBLE,\"y\",DOUBLE,\"z\",DOUBLE,\"w\",DOUBLE,{{1,3,1,7},{2,5.2,3,1},{3,6.9,2,8},{4,9.1,5,3},{5,11.2,4,9},{6,12.8,7,2},{7,15.3,6,5}}),[y],[x],[z]),[StandardErrorSlope2])",
+   "powerbi": "0.0882567212341623"
+  },
+  {
+   "expr": "MAXX(LINESTX(DATATABLE(\"x\",DOUBLE,\"y\",DOUBLE,\"z\",DOUBLE,\"w\",DOUBLE,{{1,3,1,7},{2,5.2,3,1},{3,6.9,2,8},{4,9.1,5,3},{5,11.2,4,9},{6,12.8,7,2},{7,15.3,6,5}}),[y],[x],[z]),[StandardErrorSlope3])",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 187) Column 'StandardErrorSlope3' cannot be found or may not be used in this expression.\""
+  },
+  {
+   "expr": "MAXX(LINESTX(DATATABLE(\"x\",DOUBLE,\"y\",DOUBLE,\"z\",DOUBLE,\"w\",DOUBLE,{{1,3,1,7},{2,5.2,3,1},{3,6.9,2,8},{4,9.1,5,3},{5,11.2,4,9},{6,12.8,7,2},{7,15.3,6,5}}),[y],[x],[z]),[StandardErrorIntercept])",
+   "powerbi": "0.181727338206772"
+  },
+  {
+   "expr": "MAXX(LINESTX(DATATABLE(\"x\",DOUBLE,\"y\",DOUBLE,\"z\",DOUBLE,\"w\",DOUBLE,{{1,3,1,7},{2,5.2,3,1},{3,6.9,2,8},{4,9.1,5,3},{5,11.2,4,9},{6,12.8,7,2},{7,15.3,6,5}}),[y],[x],[z]),[CoefficientOfDetermination])",
+   "powerbi": "0.99844520115743"
+  },
+  {
+   "expr": "MAXX(LINESTX(DATATABLE(\"x\",DOUBLE,\"y\",DOUBLE,\"z\",DOUBLE,\"w\",DOUBLE,{{1,3,1,7},{2,5.2,3,1},{3,6.9,2,8},{4,9.1,5,3},{5,11.2,4,9},{6,12.8,7,2},{7,15.3,6,5}}),[y],[x],[z]),[StandardError])",
+   "powerbi": "0.210313589503672"
+  },
+  {
+   "expr": "MAXX(LINESTX(DATATABLE(\"x\",DOUBLE,\"y\",DOUBLE,\"z\",DOUBLE,\"w\",DOUBLE,{{1,3,1,7},{2,5.2,3,1},{3,6.9,2,8},{4,9.1,5,3},{5,11.2,4,9},{6,12.8,7,2},{7,15.3,6,5}}),[y],[x],[z]),[FStatistic])",
+   "powerbi": "1284.34003656307"
+  },
+  {
+   "expr": "MAXX(LINESTX(DATATABLE(\"x\",DOUBLE,\"y\",DOUBLE,\"z\",DOUBLE,\"w\",DOUBLE,{{1,3,1,7},{2,5.2,3,1},{3,6.9,2,8},{4,9.1,5,3},{5,11.2,4,9},{6,12.8,7,2},{7,15.3,6,5}}),[y],[x],[z]),[DegreesOfFreedom])",
+   "powerbi": "4"
+  },
+  {
+   "expr": "MAXX(LINESTX(DATATABLE(\"x\",DOUBLE,\"y\",DOUBLE,\"z\",DOUBLE,\"w\",DOUBLE,{{1,3,1,7},{2,5.2,3,1},{3,6.9,2,8},{4,9.1,5,3},{5,11.2,4,9},{6,12.8,7,2},{7,15.3,6,5}}),[y],[x],[z]),[RegressionSumOfSquares])",
+   "powerbi": "113.617358490566"
+  },
+  {
+   "expr": "MAXX(LINESTX(DATATABLE(\"x\",DOUBLE,\"y\",DOUBLE,\"z\",DOUBLE,\"w\",DOUBLE,{{1,3,1,7},{2,5.2,3,1},{3,6.9,2,8},{4,9.1,5,3},{5,11.2,4,9},{6,12.8,7,2},{7,15.3,6,5}}),[y],[x],[z]),[ResidualSumOfSquares])",
+   "powerbi": "0.176927223719677"
+  },
+  {
+   "expr": "TOCSV(LINESTX(DATATABLE(\"x\",DOUBLE,\"y\",DOUBLE,\"z\",DOUBLE,\"w\",DOUBLE,{{1,3,1,7},{2,5.2,3,1},{3,6.9,2,8},{4,9.1,5,3},{5,11.2,4,9},{6,12.8,7,2},{7,15.3,6,5}}),[y],[x],FALSE()))",
+   "powerbi": "[Slope1],[StandardErrorSlope1],[CoefficientOfDetermination],[StandardError],[FStatistic],[DegreesOfFreedom],[RegressionSumOfSquares],[ResidualSumOfSquares]\n2.21714285714286,0.044035390838035,0.997638755718283,0.521033770955578,2535.03315207859,6,688.201142857143,1.62885714285714"
+  },
+  {
+   "expr": "MAXX(LINESTX(DATATABLE(\"x\",DOUBLE,\"y\",DOUBLE,\"z\",DOUBLE,\"w\",DOUBLE,{{1,3,1,7},{2,5.2,3,1},{3,6.9,2,8},{4,9.1,5,3},{5,11.2,4,9},{6,12.8,7,2},{7,15.3,6,5}}),[y],[x],FALSE()),[Slope1])",
+   "powerbi": "2.21714285714286"
+  },
+  {
+   "expr": "MAXX(LINESTX(DATATABLE(\"x\",DOUBLE,\"y\",DOUBLE,\"z\",DOUBLE,\"w\",DOUBLE,{{1,3,1,7},{2,5.2,3,1},{3,6.9,2,8},{4,9.1,5,3},{5,11.2,4,9},{6,12.8,7,2},{7,15.3,6,5}}),[y],[x],FALSE()),[Slope2])",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 191) Column 'Slope2' cannot be found or may not be used in this expression.\""
+  },
+  {
+   "expr": "MAXX(LINESTX(DATATABLE(\"x\",DOUBLE,\"y\",DOUBLE,\"z\",DOUBLE,\"w\",DOUBLE,{{1,3,1,7},{2,5.2,3,1},{3,6.9,2,8},{4,9.1,5,3},{5,11.2,4,9},{6,12.8,7,2},{7,15.3,6,5}}),[y],[x],FALSE()),[Slope3])",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 191) Column 'Slope3' cannot be found or may not be used in this expression.\""
+  },
+  {
+   "expr": "MAXX(LINESTX(DATATABLE(\"x\",DOUBLE,\"y\",DOUBLE,\"z\",DOUBLE,\"w\",DOUBLE,{{1,3,1,7},{2,5.2,3,1},{3,6.9,2,8},{4,9.1,5,3},{5,11.2,4,9},{6,12.8,7,2},{7,15.3,6,5}}),[y],[x],FALSE()),[Intercept])",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 191) Column 'Intercept' cannot be found or may not be used in this expression.\""
+  },
+  {
+   "expr": "MAXX(LINESTX(DATATABLE(\"x\",DOUBLE,\"y\",DOUBLE,\"z\",DOUBLE,\"w\",DOUBLE,{{1,3,1,7},{2,5.2,3,1},{3,6.9,2,8},{4,9.1,5,3},{5,11.2,4,9},{6,12.8,7,2},{7,15.3,6,5}}),[y],[x],FALSE()),[StandardErrorSlope1])",
+   "powerbi": "0.044035390838035"
+  },
+  {
+   "expr": "MAXX(LINESTX(DATATABLE(\"x\",DOUBLE,\"y\",DOUBLE,\"z\",DOUBLE,\"w\",DOUBLE,{{1,3,1,7},{2,5.2,3,1},{3,6.9,2,8},{4,9.1,5,3},{5,11.2,4,9},{6,12.8,7,2},{7,15.3,6,5}}),[y],[x],FALSE()),[StandardErrorSlope2])",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 191) Column 'StandardErrorSlope2' cannot be found or may not be used in this expression.\""
+  },
+  {
+   "expr": "MAXX(LINESTX(DATATABLE(\"x\",DOUBLE,\"y\",DOUBLE,\"z\",DOUBLE,\"w\",DOUBLE,{{1,3,1,7},{2,5.2,3,1},{3,6.9,2,8},{4,9.1,5,3},{5,11.2,4,9},{6,12.8,7,2},{7,15.3,6,5}}),[y],[x],FALSE()),[StandardErrorSlope3])",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 191) Column 'StandardErrorSlope3' cannot be found or may not be used in this expression.\""
+  },
+  {
+   "expr": "MAXX(LINESTX(DATATABLE(\"x\",DOUBLE,\"y\",DOUBLE,\"z\",DOUBLE,\"w\",DOUBLE,{{1,3,1,7},{2,5.2,3,1},{3,6.9,2,8},{4,9.1,5,3},{5,11.2,4,9},{6,12.8,7,2},{7,15.3,6,5}}),[y],[x],FALSE()),[StandardErrorIntercept])",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 191) Column 'StandardErrorIntercept' cannot be found or may not be used in this expression.\""
+  },
+  {
+   "expr": "MAXX(LINESTX(DATATABLE(\"x\",DOUBLE,\"y\",DOUBLE,\"z\",DOUBLE,\"w\",DOUBLE,{{1,3,1,7},{2,5.2,3,1},{3,6.9,2,8},{4,9.1,5,3},{5,11.2,4,9},{6,12.8,7,2},{7,15.3,6,5}}),[y],[x],FALSE()),[CoefficientOfDetermination])",
+   "powerbi": "0.997638755718283"
+  },
+  {
+   "expr": "MAXX(LINESTX(DATATABLE(\"x\",DOUBLE,\"y\",DOUBLE,\"z\",DOUBLE,\"w\",DOUBLE,{{1,3,1,7},{2,5.2,3,1},{3,6.9,2,8},{4,9.1,5,3},{5,11.2,4,9},{6,12.8,7,2},{7,15.3,6,5}}),[y],[x],FALSE()),[StandardError])",
+   "powerbi": "0.521033770955578"
+  },
+  {
+   "expr": "MAXX(LINESTX(DATATABLE(\"x\",DOUBLE,\"y\",DOUBLE,\"z\",DOUBLE,\"w\",DOUBLE,{{1,3,1,7},{2,5.2,3,1},{3,6.9,2,8},{4,9.1,5,3},{5,11.2,4,9},{6,12.8,7,2},{7,15.3,6,5}}),[y],[x],FALSE()),[FStatistic])",
+   "powerbi": "2535.03315207859"
+  },
+  {
+   "expr": "MAXX(LINESTX(DATATABLE(\"x\",DOUBLE,\"y\",DOUBLE,\"z\",DOUBLE,\"w\",DOUBLE,{{1,3,1,7},{2,5.2,3,1},{3,6.9,2,8},{4,9.1,5,3},{5,11.2,4,9},{6,12.8,7,2},{7,15.3,6,5}}),[y],[x],FALSE()),[DegreesOfFreedom])",
+   "powerbi": "6"
+  },
+  {
+   "expr": "MAXX(LINESTX(DATATABLE(\"x\",DOUBLE,\"y\",DOUBLE,\"z\",DOUBLE,\"w\",DOUBLE,{{1,3,1,7},{2,5.2,3,1},{3,6.9,2,8},{4,9.1,5,3},{5,11.2,4,9},{6,12.8,7,2},{7,15.3,6,5}}),[y],[x],FALSE()),[RegressionSumOfSquares])",
+   "powerbi": "688.201142857143"
+  },
+  {
+   "expr": "MAXX(LINESTX(DATATABLE(\"x\",DOUBLE,\"y\",DOUBLE,\"z\",DOUBLE,\"w\",DOUBLE,{{1,3,1,7},{2,5.2,3,1},{3,6.9,2,8},{4,9.1,5,3},{5,11.2,4,9},{6,12.8,7,2},{7,15.3,6,5}}),[y],[x],FALSE()),[ResidualSumOfSquares])",
+   "powerbi": "1.62885714285714"
+  },
+  {
+   "expr": "TOCSV(LINESTX(DATATABLE(\"x\",DOUBLE,\"y\",DOUBLE,\"z\",DOUBLE,\"w\",DOUBLE,{{1,3,1,7},{2,5.2,3,1},{3,6.9,2,8},{4,9.1,5,3},{5,11.2,4,9},{6,12.8,7,2},{7,15.3,6,5}}),[y],[x],[z],FALSE()))",
+   "powerbi": "[Slope1],[Slope2],[StandardErrorSlope1],[StandardErrorSlope2],[CoefficientOfDetermination],[StandardError],[FStatistic],[DegreesOfFreedom],[RegressionSumOfSquares],[ResidualSumOfSquares]\n2.15920577617328,5.92057761732855E-02,0.232770720620969,0.232770720620969,0.997668917644179,0.567106787389508,1069.9631816447,5,688.221949458484,1.60805054151624"
+  },
+  {
+   "expr": "MAXX(LINESTX(DATATABLE(\"x\",DOUBLE,\"y\",DOUBLE,\"z\",DOUBLE,\"w\",DOUBLE,{{1,3,1,7},{2,5.2,3,1},{3,6.9,2,8},{4,9.1,5,3},{5,11.2,4,9},{6,12.8,7,2},{7,15.3,6,5}}),[y],[x],[z],FALSE()),[Slope1])",
+   "powerbi": "2.15920577617328"
+  },
+  {
+   "expr": "MAXX(LINESTX(DATATABLE(\"x\",DOUBLE,\"y\",DOUBLE,\"z\",DOUBLE,\"w\",DOUBLE,{{1,3,1,7},{2,5.2,3,1},{3,6.9,2,8},{4,9.1,5,3},{5,11.2,4,9},{6,12.8,7,2},{7,15.3,6,5}}),[y],[x],[z],FALSE()),[Slope2])",
+   "powerbi": "0.0592057761732855"
+  },
+  {
+   "expr": "MAXX(LINESTX(DATATABLE(\"x\",DOUBLE,\"y\",DOUBLE,\"z\",DOUBLE,\"w\",DOUBLE,{{1,3,1,7},{2,5.2,3,1},{3,6.9,2,8},{4,9.1,5,3},{5,11.2,4,9},{6,12.8,7,2},{7,15.3,6,5}}),[y],[x],[z],FALSE()),[Slope3])",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 195) Column 'Slope3' cannot be found or may not be used in this expression.\""
+  },
+  {
+   "expr": "MAXX(LINESTX(DATATABLE(\"x\",DOUBLE,\"y\",DOUBLE,\"z\",DOUBLE,\"w\",DOUBLE,{{1,3,1,7},{2,5.2,3,1},{3,6.9,2,8},{4,9.1,5,3},{5,11.2,4,9},{6,12.8,7,2},{7,15.3,6,5}}),[y],[x],[z],FALSE()),[Intercept])",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 195) Column 'Intercept' cannot be found or may not be used in this expression.\""
+  },
+  {
+   "expr": "MAXX(LINESTX(DATATABLE(\"x\",DOUBLE,\"y\",DOUBLE,\"z\",DOUBLE,\"w\",DOUBLE,{{1,3,1,7},{2,5.2,3,1},{3,6.9,2,8},{4,9.1,5,3},{5,11.2,4,9},{6,12.8,7,2},{7,15.3,6,5}}),[y],[x],[z],FALSE()),[StandardErrorSlope1])",
+   "powerbi": "0.232770720620969"
+  },
+  {
+   "expr": "MAXX(LINESTX(DATATABLE(\"x\",DOUBLE,\"y\",DOUBLE,\"z\",DOUBLE,\"w\",DOUBLE,{{1,3,1,7},{2,5.2,3,1},{3,6.9,2,8},{4,9.1,5,3},{5,11.2,4,9},{6,12.8,7,2},{7,15.3,6,5}}),[y],[x],[z],FALSE()),[StandardErrorSlope2])",
+   "powerbi": "0.232770720620969"
+  },
+  {
+   "expr": "MAXX(LINESTX(DATATABLE(\"x\",DOUBLE,\"y\",DOUBLE,\"z\",DOUBLE,\"w\",DOUBLE,{{1,3,1,7},{2,5.2,3,1},{3,6.9,2,8},{4,9.1,5,3},{5,11.2,4,9},{6,12.8,7,2},{7,15.3,6,5}}),[y],[x],[z],FALSE()),[StandardErrorSlope3])",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 195) Column 'StandardErrorSlope3' cannot be found or may not be used in this expression.\""
+  },
+  {
+   "expr": "MAXX(LINESTX(DATATABLE(\"x\",DOUBLE,\"y\",DOUBLE,\"z\",DOUBLE,\"w\",DOUBLE,{{1,3,1,7},{2,5.2,3,1},{3,6.9,2,8},{4,9.1,5,3},{5,11.2,4,9},{6,12.8,7,2},{7,15.3,6,5}}),[y],[x],[z],FALSE()),[StandardErrorIntercept])",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 195) Column 'StandardErrorIntercept' cannot be found or may not be used in this expression.\""
+  },
+  {
+   "expr": "MAXX(LINESTX(DATATABLE(\"x\",DOUBLE,\"y\",DOUBLE,\"z\",DOUBLE,\"w\",DOUBLE,{{1,3,1,7},{2,5.2,3,1},{3,6.9,2,8},{4,9.1,5,3},{5,11.2,4,9},{6,12.8,7,2},{7,15.3,6,5}}),[y],[x],[z],FALSE()),[CoefficientOfDetermination])",
+   "powerbi": "0.997668917644179"
+  },
+  {
+   "expr": "MAXX(LINESTX(DATATABLE(\"x\",DOUBLE,\"y\",DOUBLE,\"z\",DOUBLE,\"w\",DOUBLE,{{1,3,1,7},{2,5.2,3,1},{3,6.9,2,8},{4,9.1,5,3},{5,11.2,4,9},{6,12.8,7,2},{7,15.3,6,5}}),[y],[x],[z],FALSE()),[StandardError])",
+   "powerbi": "0.567106787389508"
+  },
+  {
+   "expr": "MAXX(LINESTX(DATATABLE(\"x\",DOUBLE,\"y\",DOUBLE,\"z\",DOUBLE,\"w\",DOUBLE,{{1,3,1,7},{2,5.2,3,1},{3,6.9,2,8},{4,9.1,5,3},{5,11.2,4,9},{6,12.8,7,2},{7,15.3,6,5}}),[y],[x],[z],FALSE()),[FStatistic])",
+   "powerbi": "1069.9631816447"
+  },
+  {
+   "expr": "MAXX(LINESTX(DATATABLE(\"x\",DOUBLE,\"y\",DOUBLE,\"z\",DOUBLE,\"w\",DOUBLE,{{1,3,1,7},{2,5.2,3,1},{3,6.9,2,8},{4,9.1,5,3},{5,11.2,4,9},{6,12.8,7,2},{7,15.3,6,5}}),[y],[x],[z],FALSE()),[DegreesOfFreedom])",
+   "powerbi": "5"
+  },
+  {
+   "expr": "MAXX(LINESTX(DATATABLE(\"x\",DOUBLE,\"y\",DOUBLE,\"z\",DOUBLE,\"w\",DOUBLE,{{1,3,1,7},{2,5.2,3,1},{3,6.9,2,8},{4,9.1,5,3},{5,11.2,4,9},{6,12.8,7,2},{7,15.3,6,5}}),[y],[x],[z],FALSE()),[RegressionSumOfSquares])",
+   "powerbi": "688.221949458484"
+  },
+  {
+   "expr": "MAXX(LINESTX(DATATABLE(\"x\",DOUBLE,\"y\",DOUBLE,\"z\",DOUBLE,\"w\",DOUBLE,{{1,3,1,7},{2,5.2,3,1},{3,6.9,2,8},{4,9.1,5,3},{5,11.2,4,9},{6,12.8,7,2},{7,15.3,6,5}}),[y],[x],[z],FALSE()),[ResidualSumOfSquares])",
+   "powerbi": "1.60805054151624"
+  },
+  {
+   "expr": "TOCSV(LINESTX(DATATABLE(\"x\",DOUBLE,\"y\",DOUBLE,\"z\",DOUBLE,\"w\",DOUBLE,{{1,3,1,7},{2,5.2,3,1},{3,6.9,2,8},{4,9.1,5,3},{5,11.2,4,9},{6,12.8,7,2},{7,15.3,6,5}}),[y],[x],TRUE()))",
+   "powerbi": "[Slope1],[Intercept],[StandardErrorSlope1],[StandardErrorIntercept],[CoefficientOfDetermination],[StandardError],[FStatistic],[DegreesOfFreedom],[RegressionSumOfSquares],[ResidualSumOfSquares]\n2.01428571428571,1.01428571428571,3.67006645104718E-02,0.164130361329658,0.998342874359747,0.194201662491045,3012.27272727273,5,113.605714285714,0.188571428571429"
+  },
+  {
+   "expr": "MAXX(LINESTX(DATATABLE(\"x\",DOUBLE,\"y\",DOUBLE,\"z\",DOUBLE,\"w\",DOUBLE,{{1,3,1,7},{2,5.2,3,1},{3,6.9,2,8},{4,9.1,5,3},{5,11.2,4,9},{6,12.8,7,2},{7,15.3,6,5}}),[y],[x],TRUE()),[Slope1])",
+   "powerbi": "2.01428571428571"
+  },
+  {
+   "expr": "MAXX(LINESTX(DATATABLE(\"x\",DOUBLE,\"y\",DOUBLE,\"z\",DOUBLE,\"w\",DOUBLE,{{1,3,1,7},{2,5.2,3,1},{3,6.9,2,8},{4,9.1,5,3},{5,11.2,4,9},{6,12.8,7,2},{7,15.3,6,5}}),[y],[x],TRUE()),[Slope2])",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 190) Column 'Slope2' cannot be found or may not be used in this expression.\""
+  },
+  {
+   "expr": "MAXX(LINESTX(DATATABLE(\"x\",DOUBLE,\"y\",DOUBLE,\"z\",DOUBLE,\"w\",DOUBLE,{{1,3,1,7},{2,5.2,3,1},{3,6.9,2,8},{4,9.1,5,3},{5,11.2,4,9},{6,12.8,7,2},{7,15.3,6,5}}),[y],[x],TRUE()),[Slope3])",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 190) Column 'Slope3' cannot be found or may not be used in this expression.\""
+  },
+  {
+   "expr": "MAXX(LINESTX(DATATABLE(\"x\",DOUBLE,\"y\",DOUBLE,\"z\",DOUBLE,\"w\",DOUBLE,{{1,3,1,7},{2,5.2,3,1},{3,6.9,2,8},{4,9.1,5,3},{5,11.2,4,9},{6,12.8,7,2},{7,15.3,6,5}}),[y],[x],TRUE()),[Intercept])",
+   "powerbi": "1.01428571428571"
+  },
+  {
+   "expr": "MAXX(LINESTX(DATATABLE(\"x\",DOUBLE,\"y\",DOUBLE,\"z\",DOUBLE,\"w\",DOUBLE,{{1,3,1,7},{2,5.2,3,1},{3,6.9,2,8},{4,9.1,5,3},{5,11.2,4,9},{6,12.8,7,2},{7,15.3,6,5}}),[y],[x],TRUE()),[StandardErrorSlope1])",
+   "powerbi": "0.0367006645104718"
+  },
+  {
+   "expr": "MAXX(LINESTX(DATATABLE(\"x\",DOUBLE,\"y\",DOUBLE,\"z\",DOUBLE,\"w\",DOUBLE,{{1,3,1,7},{2,5.2,3,1},{3,6.9,2,8},{4,9.1,5,3},{5,11.2,4,9},{6,12.8,7,2},{7,15.3,6,5}}),[y],[x],TRUE()),[StandardErrorSlope2])",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 190) Column 'StandardErrorSlope2' cannot be found or may not be used in this expression.\""
+  },
+  {
+   "expr": "MAXX(LINESTX(DATATABLE(\"x\",DOUBLE,\"y\",DOUBLE,\"z\",DOUBLE,\"w\",DOUBLE,{{1,3,1,7},{2,5.2,3,1},{3,6.9,2,8},{4,9.1,5,3},{5,11.2,4,9},{6,12.8,7,2},{7,15.3,6,5}}),[y],[x],TRUE()),[StandardErrorSlope3])",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 190) Column 'StandardErrorSlope3' cannot be found or may not be used in this expression.\""
+  },
+  {
+   "expr": "MAXX(LINESTX(DATATABLE(\"x\",DOUBLE,\"y\",DOUBLE,\"z\",DOUBLE,\"w\",DOUBLE,{{1,3,1,7},{2,5.2,3,1},{3,6.9,2,8},{4,9.1,5,3},{5,11.2,4,9},{6,12.8,7,2},{7,15.3,6,5}}),[y],[x],TRUE()),[StandardErrorIntercept])",
+   "powerbi": "0.164130361329658"
+  },
+  {
+   "expr": "MAXX(LINESTX(DATATABLE(\"x\",DOUBLE,\"y\",DOUBLE,\"z\",DOUBLE,\"w\",DOUBLE,{{1,3,1,7},{2,5.2,3,1},{3,6.9,2,8},{4,9.1,5,3},{5,11.2,4,9},{6,12.8,7,2},{7,15.3,6,5}}),[y],[x],TRUE()),[CoefficientOfDetermination])",
+   "powerbi": "0.998342874359747"
+  },
+  {
+   "expr": "MAXX(LINESTX(DATATABLE(\"x\",DOUBLE,\"y\",DOUBLE,\"z\",DOUBLE,\"w\",DOUBLE,{{1,3,1,7},{2,5.2,3,1},{3,6.9,2,8},{4,9.1,5,3},{5,11.2,4,9},{6,12.8,7,2},{7,15.3,6,5}}),[y],[x],TRUE()),[StandardError])",
+   "powerbi": "0.194201662491045"
+  },
+  {
+   "expr": "MAXX(LINESTX(DATATABLE(\"x\",DOUBLE,\"y\",DOUBLE,\"z\",DOUBLE,\"w\",DOUBLE,{{1,3,1,7},{2,5.2,3,1},{3,6.9,2,8},{4,9.1,5,3},{5,11.2,4,9},{6,12.8,7,2},{7,15.3,6,5}}),[y],[x],TRUE()),[FStatistic])",
+   "powerbi": "3012.27272727273"
+  },
+  {
+   "expr": "MAXX(LINESTX(DATATABLE(\"x\",DOUBLE,\"y\",DOUBLE,\"z\",DOUBLE,\"w\",DOUBLE,{{1,3,1,7},{2,5.2,3,1},{3,6.9,2,8},{4,9.1,5,3},{5,11.2,4,9},{6,12.8,7,2},{7,15.3,6,5}}),[y],[x],TRUE()),[DegreesOfFreedom])",
+   "powerbi": "5"
+  },
+  {
+   "expr": "MAXX(LINESTX(DATATABLE(\"x\",DOUBLE,\"y\",DOUBLE,\"z\",DOUBLE,\"w\",DOUBLE,{{1,3,1,7},{2,5.2,3,1},{3,6.9,2,8},{4,9.1,5,3},{5,11.2,4,9},{6,12.8,7,2},{7,15.3,6,5}}),[y],[x],TRUE()),[RegressionSumOfSquares])",
+   "powerbi": "113.605714285714"
+  },
+  {
+   "expr": "MAXX(LINESTX(DATATABLE(\"x\",DOUBLE,\"y\",DOUBLE,\"z\",DOUBLE,\"w\",DOUBLE,{{1,3,1,7},{2,5.2,3,1},{3,6.9,2,8},{4,9.1,5,3},{5,11.2,4,9},{6,12.8,7,2},{7,15.3,6,5}}),[y],[x],TRUE()),[ResidualSumOfSquares])",
+   "powerbi": "0.188571428571429"
+  },
+  {
+   "expr": "TOCSV(LINESTX(DATATABLE(\"x\",DOUBLE,\"y\",DOUBLE,\"z\",DOUBLE,\"w\",DOUBLE,{{1,3,1,7},{2,5.2,3,1},{3,6.9,2,8},{4,9.1,5,3},{5,11.2,4,9},{6,12.8,7,2},{7,15.3,6,5}}),[y],[x],[z],[w]))",
+   "powerbi": "[Slope1],[Slope2],[Slope3],[Intercept],[StandardErrorSlope1],[StandardErrorSlope2],[StandardErrorSlope3],[StandardErrorIntercept],[CoefficientOfDetermination],[StandardError],[FStatistic],[DegreesOfFreedom],[RegressionSumOfSquares],[ResidualSumOfSquares]\n2.19088785046729,-0.204439252336448,-5.53738317757009E-02,1.40250333778371,0.188121093645157,0.212726739146336,6.67474043609174E-02,0.483169242855444,0.998735332959764,0.219021979498264,789.721959365431,3,113.650373831776,0.143911882510014"
+  },
+  {
+   "expr": "MAXX(LINESTX(DATATABLE(\"x\",DOUBLE,\"y\",DOUBLE,\"z\",DOUBLE,\"w\",DOUBLE,{{1,3,1,7},{2,5.2,3,1},{3,6.9,2,8},{4,9.1,5,3},{5,11.2,4,9},{6,12.8,7,2},{7,15.3,6,5}}),[y],[x],[z],[w]),[Slope3])",
+   "powerbi": "-0.0553738317757009"
+  },
+  {
+   "expr": "MAXX(LINESTX(DATATABLE(\"x\",DOUBLE,\"y\",DOUBLE,\"z\",DOUBLE,\"w\",DOUBLE,{{1,3,1,7},{2,5.2,3,1},{3,6.9,2,8},{4,9.1,5,3},{5,11.2,4,9},{6,12.8,7,2},{7,15.3,6,5}}),[y],[x],[z],[w]),[RegressionSumOfSquares])",
+   "powerbi": "113.650373831776"
+  },
+  {
+   "expr": "MAXX(LINESTX(DATATABLE(\"x\",DOUBLE,\"y\",DOUBLE,\"z\",DOUBLE,\"w\",DOUBLE,{{1,3,1,7},{2,5.2,3,1},{3,6.9,2,8},{4,9.1,5,3},{5,11.2,4,9},{6,12.8,7,2},{7,15.3,6,5}}),[y],[x],[z],[w]),[StandardErrorSlope3])",
+   "powerbi": "0.0667474043609174"
+  },
+  {
+   "expr": "TOCSV(LINEST(Facts[Quantity],Facts[Sales]))",
+   "powerbi": "[Slope1],[Intercept],[StandardErrorSlope1],[StandardErrorIntercept],[CoefficientOfDetermination],[StandardError],[FStatistic],[DegreesOfFreedom],[RegressionSumOfSquares],[ResidualSumOfSquares]\n3.74955783516095E-02,2.30314821365405,0.109677417431646,1.01981323823361,2.83895093233614E-02,2.06174583707844,0.116876092202713,4,0.496816413158825,17.0031835868412"
+  },
+  {
+   "expr": "TOCSV(LINEST(Facts[Quantity],Facts[Sales],Facts[Quantity]))",
+   "powerbi": "[Slope1],[Slope2],[Intercept],[StandardErrorSlope1],[StandardErrorSlope2],[StandardErrorIntercept],[CoefficientOfDetermination],[StandardError],[FStatistic],[DegreesOfFreedom],[RegressionSumOfSquares],[ResidualSumOfSquares]\n5.90598472053105E-18,1,4.44089209850063E-16,2.39665881415884E-17,1.07697370321686E-16,3.31325981971234E-16,1,4.44089209850063E-16,4.4367771007988E+31,3,17.5,5.91645678915759E-31"
+  },
+  {
+   "expr": "TOCSV(LINEST(Facts[Quantity],Facts[Sales],FALSE()))",
+   "powerbi": "[Slope1],[StandardErrorSlope1],[CoefficientOfDetermination],[StandardError],[FStatistic],[DegreesOfFreedom],[RegressionSumOfSquares],[ResidualSumOfSquares]\n0.177349397590361,0.122123943237907,0.29665717415115,2.78150518323036,2.10890879417957,5,16.3161445783133,38.6838554216867"
+  },
+  {
+   "expr": "TOCSV(LINEST(Facts[Quantity],Facts[Quantity]))",
+   "powerbi": "[Slope1],[Intercept],[StandardErrorSlope1],[StandardErrorIntercept],[CoefficientOfDetermination],[StandardError],[FStatistic],[DegreesOfFreedom],[RegressionSumOfSquares],[ResidualSumOfSquares]\n1,-4.44089209850063E-16,1.21799684846742E-16,3.68766858955201E-16,1,5.09524637778586E-16,6.74074147064981E+31,4,17.5,1.0384614260136E-30"
+  },
+  {
+   "expr": "TOCSV(LINEST(Facts[Sales],Facts[Quantity]))",
+   "powerbi": "[Slope1],[Intercept],[StandardErrorSlope1],[StandardErrorIntercept],[CoefficientOfDetermination],[StandardError],[FStatistic],[DegreesOfFreedom],[RegressionSumOfSquares],[ResidualSumOfSquares]\n0.757142857142857,3.35714285714286,2.21470042199474,6.70533851687223,2.83895093233617E-02,9.26475656915573,0.116876092202714,4,10.032142857143,343.342857142857"
+  },
+  {
+   "expr": "TOCSV(LINEST(Facts[Quantity]))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 25) Too few arguments were passed to the LINEST function. The minimum argument count for the function is 2.\""
+  },
+  {
+   "expr": "TOCSV(LINEST())",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 25) Too few arguments were passed to the LINEST function. The minimum argument count for the function is 2.\""
+  },
+  {
+   "expr": "TOCSV(LINEST(Facts[Quantity],Facts[Quantity]*2))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 48) The LINEST function only accepts a column reference as the argument number 2.\""
+  },
+  {
+   "expr": "TOCSV(LINEST(Facts[Quantity],Facts[Sales],TRUE()))",
+   "powerbi": "[Slope1],[Intercept],[StandardErrorSlope1],[StandardErrorIntercept],[CoefficientOfDetermination],[StandardError],[FStatistic],[DegreesOfFreedom],[RegressionSumOfSquares],[ResidualSumOfSquares]\n3.74955783516095E-02,2.30314821365405,0.109677417431646,1.01981323823361,2.83895093233614E-02,2.06174583707844,0.116876092202713,4,0.496816413158825,17.0031835868412"
+  },
+  {
+   "expr": "TOCSV(LINEST(Facts[Quantity],Facts[Sales],FALSE(),TRUE()))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 61) The LINEST function only accepts a column reference as the argument number 3.\""
+  },
+  {
+   "expr": "TOCSV(LINEST(Facts[Quantity],Facts[Sales],Facts[Quantity],FALSE()))",
+   "powerbi": "[Slope1],[Slope2],[StandardErrorSlope1],[StandardErrorSlope2],[CoefficientOfDetermination],[StandardError],[FStatistic],[DegreesOfFreedom],[RegressionSumOfSquares],[ResidualSumOfSquares]\n7.79921975817575E-17,1,3.33890923927598E-17,1.02542127560854E-16,1,6.37774571658814E-16,6.76080320121722E+31,4,55,1.62702561701834E-30"
+  },
+  {
+   "expr": "MAXX(LINEST(Facts[Quantity],Facts[Sales]),[Slope1])",
+   "powerbi": "0.0374955783516095"
+  },
+  {
+   "expr": "MAXX(LINEST(Facts[Sales],Facts[Quantity]),[Slope1])",
+   "powerbi": "0.757142857142857"
+  },
+  {
+   "expr": "MAXX(LINEST(Facts[Sales],Facts[Quantity],FALSE()),[Slope1])",
+   "powerbi": "1.67272727272727"
+  },
+  {
+   "expr": "MAXX(LINEST(Facts[Quantity],Facts[Sales]),[Intercept])",
+   "powerbi": "2.30314821365405"
+  },
+  {
+   "expr": "MAXX(LINEST(Facts[Sales],Facts[Quantity]),[Intercept])",
+   "powerbi": "3.35714285714286"
+  },
+  {
+   "expr": "MAXX(LINEST(Facts[Sales],Facts[Quantity],FALSE()),[Intercept])",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 69) Column 'Intercept' cannot be found or may not be used in this expression.\""
+  },
+  {
+   "expr": "MAXX(LINEST(Facts[Quantity],Facts[Sales]),[StandardErrorSlope1])",
+   "powerbi": "0.109677417431646"
+  },
+  {
+   "expr": "MAXX(LINEST(Facts[Sales],Facts[Quantity]),[StandardErrorSlope1])",
+   "powerbi": "2.21470042199474"
+  },
+  {
+   "expr": "MAXX(LINEST(Facts[Sales],Facts[Quantity],FALSE()),[StandardErrorSlope1])",
+   "powerbi": "1.15185082826663"
+  },
+  {
+   "expr": "MAXX(LINEST(Facts[Quantity],Facts[Sales]),[StandardErrorIntercept])",
+   "powerbi": "1.01981323823361"
+  },
+  {
+   "expr": "MAXX(LINEST(Facts[Sales],Facts[Quantity]),[StandardErrorIntercept])",
+   "powerbi": "6.70533851687223"
+  },
+  {
+   "expr": "MAXX(LINEST(Facts[Sales],Facts[Quantity],FALSE()),[StandardErrorIntercept])",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 69) Column 'StandardErrorIntercept' cannot be found or may not be used in this expression.\""
+  },
+  {
+   "expr": "MAXX(LINEST(Facts[Quantity],Facts[Sales]),[CoefficientOfDetermination])",
+   "powerbi": "0.0283895093233614"
+  },
+  {
+   "expr": "MAXX(LINEST(Facts[Sales],Facts[Quantity]),[CoefficientOfDetermination])",
+   "powerbi": "0.0283895093233617"
+  },
+  {
+   "expr": "MAXX(LINEST(Facts[Sales],Facts[Quantity],FALSE()),[CoefficientOfDetermination])",
+   "powerbi": "0.29665717415115"
+  },
+  {
+   "expr": "MAXX(LINEST(Facts[Quantity],Facts[Sales]),[StandardError])",
+   "powerbi": "2.06174583707844"
+  },
+  {
+   "expr": "MAXX(LINEST(Facts[Sales],Facts[Quantity]),[StandardError])",
+   "powerbi": "9.26475656915573"
+  },
+  {
+   "expr": "MAXX(LINEST(Facts[Sales],Facts[Quantity],FALSE()),[StandardError])",
+   "powerbi": "8.54235436995084"
+  },
+  {
+   "expr": "MAXX(LINEST(Facts[Quantity],Facts[Sales]),[FStatistic])",
+   "powerbi": "0.116876092202713"
+  },
+  {
+   "expr": "MAXX(LINEST(Facts[Sales],Facts[Quantity]),[FStatistic])",
+   "powerbi": "0.116876092202714"
+  },
+  {
+   "expr": "MAXX(LINEST(Facts[Sales],Facts[Quantity],FALSE()),[FStatistic])",
+   "powerbi": "2.10890879417957"
+  },
+  {
+   "expr": "MAXX(LINEST(Facts[Quantity],Facts[Sales]),[DegreesOfFreedom])",
+   "powerbi": "4"
+  },
+  {
+   "expr": "MAXX(LINEST(Facts[Sales],Facts[Quantity]),[DegreesOfFreedom])",
+   "powerbi": "4"
+  },
+  {
+   "expr": "MAXX(LINEST(Facts[Sales],Facts[Quantity],FALSE()),[DegreesOfFreedom])",
+   "powerbi": "5"
+  },
+  {
+   "expr": "MAXX(LINEST(Facts[Quantity],Facts[Sales]),[RegressionSumOfSquares])",
+   "powerbi": "0.496816413158825"
+  },
+  {
+   "expr": "MAXX(LINEST(Facts[Sales],Facts[Quantity]),[RegressionSumOfSquares])",
+   "powerbi": "10.032142857143"
+  },
+  {
+   "expr": "MAXX(LINEST(Facts[Sales],Facts[Quantity],FALSE()),[RegressionSumOfSquares])",
+   "powerbi": "153.890909090909"
+  },
+  {
+   "expr": "MAXX(LINEST(Facts[Quantity],Facts[Sales]),[ResidualSumOfSquares])",
+   "powerbi": "17.0031835868412"
+  },
+  {
+   "expr": "MAXX(LINEST(Facts[Sales],Facts[Quantity]),[ResidualSumOfSquares])",
+   "powerbi": "343.342857142857"
+  },
+  {
+   "expr": "MAXX(LINEST(Facts[Sales],Facts[Quantity],FALSE()),[ResidualSumOfSquares])",
+   "powerbi": "364.859090909091"
+  },
+  {
+   "expr": "MAXX(LINEST(Facts[Quantity],Facts[Sales]),[Nope])",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 61) Column 'Nope' cannot be found or may not be used in this expression.\""
+  },
+  {
+   "expr": "MAXX(LINEST(Facts[Sales],Facts[Quantity]),[Nope])",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 61) Column 'Nope' cannot be found or may not be used in this expression.\""
+  },
+  {
+   "expr": "MAXX(LINEST(Facts[Sales],Facts[Quantity],FALSE()),[Nope])",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 69) Column 'Nope' cannot be found or may not be used in this expression.\""
+  },
+  {
+   "expr": "TOCSV(LINESTX(DATATABLE(\"x\",DOUBLE,\"y\",DOUBLE,{{1,2},{2,4},{3,6}}),[y],[x]))",
+   "powerbi": "[Slope1],[Intercept],[StandardErrorSlope1],[StandardErrorIntercept],[CoefficientOfDetermination],[StandardError],[FStatistic],[DegreesOfFreedom],[RegressionSumOfSquares],[ResidualSumOfSquares]\n2,0,0,0,1,0,inf,1,8,0"
+  },
+  {
+   "expr": "TOCSV(LINESTX(DATATABLE(\"x\",DOUBLE,\"y\",DOUBLE,{{1,2},{2,4},{3,6}}),[y],[x],FALSE()))",
+   "powerbi": "[Slope1],[StandardErrorSlope1],[CoefficientOfDetermination],[StandardError],[FStatistic],[DegreesOfFreedom],[RegressionSumOfSquares],[ResidualSumOfSquares]\n2,3.75323885183806E-16,1,1.40433338743068E-15,2.83953734451123E+31,2,56,3.94430452610506E-30"
+  },
+  {
+   "expr": "TOCSV(LINESTX(DATATABLE(\"x\",DOUBLE,\"y\",DOUBLE,{{1,2}}),[y],[x]))",
+   "powerbi": "[Slope1],[Intercept],[StandardErrorSlope1],[StandardErrorIntercept],[CoefficientOfDetermination],[StandardError],[FStatistic],[DegreesOfFreedom],[RegressionSumOfSquares],[ResidualSumOfSquares]\n0,2,0,0,1,0,inf,0,0,0"
+  },
+  {
+   "expr": "TOCSV(LINESTX(DATATABLE(\"x\",DOUBLE,\"y\",DOUBLE,{{1,2}}),[y],[x],FALSE()))",
+   "powerbi": "[Slope1],[StandardErrorSlope1],[CoefficientOfDetermination],[StandardError],[FStatistic],[DegreesOfFreedom],[RegressionSumOfSquares],[ResidualSumOfSquares]\n2,0,1,0,inf,0,4,0"
+  },
+  {
+   "expr": "TOCSV(LINESTX(DATATABLE(\"x\",DOUBLE,\"y\",DOUBLE,{{1,2},{1,3}}),[y],[x]))",
+   "powerbi": "[Slope1],[Intercept],[StandardErrorSlope1],[StandardErrorIntercept],[CoefficientOfDetermination],[StandardError],[FStatistic],[DegreesOfFreedom],[RegressionSumOfSquares],[ResidualSumOfSquares]\n0,2.5,0,0.5,2.22044604925031E-16,0.707106781186547,0,1,1.11022302462516E-16,0.5"
+  },
+  {
+   "expr": "TOCSV(LINESTX(DATATABLE(\"x\",DOUBLE,\"y\",DOUBLE,{{1,2},{1,3}}),[y],[x],FALSE()))",
+   "powerbi": "[Slope1],[StandardErrorSlope1],[CoefficientOfDetermination],[StandardError],[FStatistic],[DegreesOfFreedom],[RegressionSumOfSquares],[ResidualSumOfSquares]\n2.5,0.5,0.961538461538462,0.707106781186547,25,1,12.5,0.5"
+  },
+  {
+   "expr": "TOCSV(LINESTX(DATATABLE(\"x\",DOUBLE,\"y\",DOUBLE,{{1,2},{2,3}}),[y],[x]))",
+   "powerbi": "[Slope1],[Intercept],[StandardErrorSlope1],[StandardErrorIntercept],[CoefficientOfDetermination],[StandardError],[FStatistic],[DegreesOfFreedom],[RegressionSumOfSquares],[ResidualSumOfSquares]\n1,1,0,0,1,0,inf,0,0.5,0"
+  },
+  {
+   "expr": "TOCSV(LINESTX(DATATABLE(\"x\",DOUBLE,\"y\",DOUBLE,{{1,2},{2,3}}),[y],[x],FALSE()))",
+   "powerbi": "[Slope1],[StandardErrorSlope1],[CoefficientOfDetermination],[StandardError],[FStatistic],[DegreesOfFreedom],[RegressionSumOfSquares],[ResidualSumOfSquares]\n1.6,0.2,0.984615384615385,0.447213595499958,64,1,12.8,0.2"
+  },
+  {
+   "expr": "TOCSV(LINESTX(DATATABLE(\"x\",DOUBLE,\"y\",DOUBLE,{{1,5},{2,5},{3,5}}),[y],[x]))",
+   "powerbi": "[Slope1],[Intercept],[StandardErrorSlope1],[StandardErrorIntercept],[CoefficientOfDetermination],[StandardError],[FStatistic],[DegreesOfFreedom],[RegressionSumOfSquares],[ResidualSumOfSquares]\n-0,5,0,0,1,0,inf,1,0,0"
+  },
+  {
+   "expr": "TOCSV(LINESTX(DATATABLE(\"x\",DOUBLE,\"y\",DOUBLE,{{1,5},{2,5},{3,5}}),[y],[x],FALSE()))",
+   "powerbi": "[Slope1],[StandardErrorSlope1],[CoefficientOfDetermination],[StandardError],[FStatistic],[DegreesOfFreedom],[RegressionSumOfSquares],[ResidualSumOfSquares]\n2.14285714285714,0.618589574131742,0.857142857142857,2.31455024943138,12,2,64.2857142857143,10.7142857142857"
+  },
+  {
+   "expr": "TOCSV(LINESTX(DATATABLE(\"x\",DOUBLE,\"y\",DOUBLE,{{1,2},{2,4},{3,7},{4,8}}),[y],[x]))",
+   "powerbi": "[Slope1],[Intercept],[StandardErrorSlope1],[StandardErrorIntercept],[CoefficientOfDetermination],[StandardError],[FStatistic],[DegreesOfFreedom],[RegressionSumOfSquares],[ResidualSumOfSquares]\n2.1,8.88178419700125E-16,0.264575131106459,0.724568837309472,0.969230769230769,0.591607978309961,63,2,22.05,0.7"
+  },
+  {
+   "expr": "TOCSV(LINESTX(DATATABLE(\"x\",DOUBLE,\"y\",DOUBLE,{{1,2},{2,4},{3,7},{4,8}}),[y],[x],FALSE()))",
+   "powerbi": "[Slope1],[StandardErrorSlope1],[CoefficientOfDetermination],[StandardError],[FStatistic],[DegreesOfFreedom],[RegressionSumOfSquares],[ResidualSumOfSquares]\n2.1,8.81917103688197E-02,0.994736842105263,0.483045891539648,567,3,132.3,0.7"
+  },
+  {
+   "expr": "TOCSV(LINESTX(DATATABLE(\"x\",DOUBLE,\"y\",DOUBLE,{{1,2},{2,4},{3,6},{4,8.0000001}}),[y],[x]))",
+   "powerbi": "[Slope1],[Intercept],[StandardErrorSlope1],[StandardErrorIntercept],[CoefficientOfDetermination],[StandardError],[FStatistic],[DegreesOfFreedom],[RegressionSumOfSquares],[ResidualSumOfSquares]\n2.00000003,-5.00000005843049E-08,1.73205079857408E-08,4.74341646561931E-08,1,3.87298332609445E-08,1.33333338718173E+16,2,20.0000006,2.99999996884112E-15"
+  },
+  {
+   "expr": "TOCSV(LINESTX(DATATABLE(\"x\",DOUBLE,\"y\",DOUBLE,{{1,2},{2,4},{3,6},{4,8.0000001}}),[y],[x],FALSE()))",
+   "powerbi": "[Slope1],[StandardErrorSlope1],[CoefficientOfDetermination],[StandardError],[FStatistic],[DegreesOfFreedom],[RegressionSumOfSquares],[ResidualSumOfSquares]\n2.00000001333333,7.20082294401187E-09,1,3.94405315903606E-08,7.71428593331334E+16,3,120.0000016,4.6666665963907E-15"
+  },
+  {
+   "expr": "TOCSV(LINESTX(FILTER(DATATABLE(\"x\",DOUBLE,\"y\",DOUBLE,\"z\",DOUBLE,{{1,2,1},{2,4.1,3},{3,5.9,2},{4,8.2,5},{5,9.8,4}}),[x]>10),[y],[x]))",
+   "powerbi": "[Slope1],[Intercept],[StandardErrorSlope1],[StandardErrorIntercept],[CoefficientOfDetermination],[StandardError],[FStatistic],[DegreesOfFreedom],[RegressionSumOfSquares],[ResidualSumOfSquares]\n"
+  },
+  {
+   "expr": "TOCSV(LINESTX(Facts,Facts[Quantity],Facts[Sales]))",
+   "powerbi": "[Slope1],[Intercept],[StandardErrorSlope1],[StandardErrorIntercept],[CoefficientOfDetermination],[StandardError],[FStatistic],[DegreesOfFreedom],[RegressionSumOfSquares],[ResidualSumOfSquares]\n3.74955783516095E-02,2.30314821365405,0.109677417431646,1.01981323823361,2.83895093233614E-02,2.06174583707844,0.116876092202713,4,0.496816413158825,17.0031835868412"
+  },
+  {
+   "expr": "TOCSV(LINESTX(Facts,Facts[Quantity],Facts[Sales],Facts[Quantity]*2))",
+   "powerbi": "[Slope1],[Slope2],[Intercept],[StandardErrorSlope1],[StandardErrorSlope2],[StandardErrorIntercept],[CoefficientOfDetermination],[StandardError],[FStatistic],[DegreesOfFreedom],[RegressionSumOfSquares],[ResidualSumOfSquares]\n5.90598472053105E-18,0.5,4.44089209850063E-16,2.39665881415884E-17,5.38486851608429E-17,3.31325981971234E-16,1,4.44089209850063E-16,4.4367771007988E+31,3,17.5,5.91645678915759E-31"
+  },
+  {
+   "expr": "TOCSV(LINESTX(Facts,Facts[Quantity],Facts[Region]))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 55) Cannot convert value 'East' of type Text to type Number.\""
+  },
+  {
+   "expr": "TOCSV(LINESTX(Facts,Facts[Region],Facts[Quantity]))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 39) Cannot convert value 'East' of type Text to type Number.\""
+  },
+  {
+   "expr": "COUNTROWS(LINESTX(Facts,Facts[Quantity],Facts[Sales]))",
+   "powerbi": "1"
+  },
+  {
+   "expr": "COUNTROWS(LINEST(Facts[Quantity],Facts[Sales]))",
+   "powerbi": "1"
+  },
+  {
+   "expr": "COUNTROWS(LINEST(Facts[Quantity],Facts[Sales],FALSE()))",
+   "powerbi": "1"
+  },
+  {
+   "expr": "TOCSV(LINESTX(Facts,Facts[Quantity],Facts[Sales]),1,\";\",FALSE())",
+   "powerbi": "3.74955783516095E-02;2.30314821365405;0.109677417431646;1.01981323823361;2.83895093233614E-02;2.06174583707844;0.116876092202713;4;0.496816413158825;17.0031835868412"
+  },
+  {
+   "expr": "LEN(TOCSV(LINESTX(Facts,Facts[Quantity],Facts[Sales])))",
+   "powerbi": "358"
+  },
+  {
+   "expr": "CALCULATE(MAXX(LINESTX(Facts,Facts[Quantity],Facts[Sales]),[Slope1]),Facts[Region]=\"East\")",
+   "powerbi": "0.0178571428571428"
+  },
+  {
+   "expr": "CALCULATE(MAXX(LINEST(Facts[Quantity],Facts[Sales]),[Slope1]),Facts[Region]=\"East\")",
+   "powerbi": "0.0178571428571428"
+  },
+  {
+   "expr": "CALCULATE(MAXX(LINEST(Facts[Quantity],Facts[Sales]),[Slope1]),Facts[Quantity]>1)",
+   "powerbi": "-0.09007164790174"
+  },
+  {
+   "expr": "MAXX(LINESTX(Facts,Facts[Quantity],Facts[Sales]),[Slope1]*2)",
+   "powerbi": "0.074991156703219"
+  },
+  {
+   "expr": "MAXX(LINESTX(Facts,Facts[Quantity],Facts[Sales]),[Slope1])+1",
+   "powerbi": "1.03749557835161"
+  },
+  {
+   "expr": "SUMX(LINESTX(Facts,Facts[Quantity],Facts[Sales]),[DegreesOfFreedom])",
+   "powerbi": "4"
+  },
+  {
+   "expr": "ROUND(MAXX(LINESTX(Facts,Facts[Quantity],Facts[Sales]),[Slope1]),4)",
+   "powerbi": "0.0375"
+  }
+ ]
+}

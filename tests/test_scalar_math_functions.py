@@ -96,8 +96,7 @@ class ScalarMathTests(unittest.TestCase):
         self.assertEqual(measure("COALESCE(INT(BLANK()), 9)"), Decimal(9))
         with self.assertRaisesRegex(MeasureError, "MOD"):  # Power BI: division by zero
             measure("MOD(7, BLANK())")
-        with self.assertRaisesRegex(MeasureError, "LN"):  # Power BI returns -Infinity
-            measure("LN(BLANK())")
+        self.assertEqual(measure("LN(BLANK())"), Decimal("-Infinity"))  # Power BI returns -Infinity
 
     def test_large_operands_keep_every_digit(self) -> None:
         self.assertEqual(measure("TRUNC(5.5, 28)"), Decimal("5.5"))

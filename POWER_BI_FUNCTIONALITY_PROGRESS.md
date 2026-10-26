@@ -1,10 +1,14 @@
 # Power BI Functionality Progress
 
-**Status date:** 2026-10-21
+**Status date:** 2026-10-26
 
 **Master roadmap:** [POWER_BI_FUNCTIONALITY_ROADMAP.md](</Users/armaan/Power BI tool/POWER_BI_FUNCTIONALITY_ROADMAP.md>)
 
 **Cumulative completed-work log:** [POWER_BI_FUNCTIONALITY_WORK_LOG.md](POWER_BI_FUNCTIONALITY_WORK_LOG.md)
+
+## Latest status
+
+**Latest status (2026-10-26, after Iteration 89 research).** The DAX engine work is at Iteration 88/89 (the notes below stop earlier). Parity gate on `antigravity/scalar-gaps-1`: pytest 1,919 passed, real app 575/575, saved Power BI answers 45,516 replayed with 0 differ and 0 crash, 45,426 locked (45,607 after the Task 1 lock and the new batteries). A read-only study of the live Power BI Desktop 2.157.879.0 found 470 DAX functions, 137 of which the app does not yet recognise (72 are `INFO.*`). Six new batteries (XNPV, small scalar functions, type tests, TOCSV/TOJSON, LINEST, table functions) were saved: the replay now covers 46,706 answers with 0 differ, 0 crash, and 1,079 pending items that form the work list. Work is split between two agents (Antigravity writes feature code, Claude plans/tests/fixes); plans for Tasks 2 to 8 are in `docs/plans/` and the board is `HANDOFF.md`. Parked: `XIRR` (Power BI's solver stops early, algorithm research needed), week time-intelligence functions (need calendar model objects), visual calculations, `INFO.*`.
 
 ## Overall status
 

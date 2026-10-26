@@ -110,10 +110,11 @@ def power_bi(expressions: list[str], port_: str, chunk: int = 250) -> list[str]:
     payload = base64.b64encode(json.dumps(expressions).encode()).decode()
     script = PS_HEAD.replace("__PORT__", port_) + (
         f"\n$ex=[Text.Encoding]::UTF8.GetString([Convert]::FromBase64String('{payload}')) | ConvertFrom-Json\n"
-        "foreach($e in $ex){ 'R|' + (Run ('EVALUATE ROW(\"v\", ' + $e + ')')) }\n$c.Close()"
+        "foreach($e in $ex){ 'R|' + [Convert]::ToBase64String([Text.Encoding]::UTF8.GetBytes((Run ('EVALUATE ROW(\"v\", ' + $e + ')')))) }\n$c.Close()"
     )
     for _attempt in range(3):  # the guest sometimes returns nothing for a chunk; never let that shift the answers
-        answers = [line[2:] for line in guest(script).splitlines() if line.startswith("R|")]
+        # every answer travels as base64, so a multi-line answer (TOCSV, TOJSON) is kept whole instead of cut at its first line
+        answers = [base64.b64decode(line[2:].strip()).decode("utf-8") for line in guest(script).splitlines() if line.startswith("R|")]
         if len(answers) == len(expressions):
             return answers
     raise RuntimeError(f"Power BI returned {len(answers)} answers for {len(expressions)} expressions after 3 tries")

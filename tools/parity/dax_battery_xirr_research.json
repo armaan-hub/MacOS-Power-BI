@@ -1,0 +1,178 @@
+{
+ "powerbi_version": "2.157.879.0 (26.08)+da30fe74eb0b8a8786ab7326b69c400a0e951831",
+ "frozen": "2026-10-26",
+ "items": [
+  {
+   "expr": "XIRR(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-1000,0},{300,365},{400,730},{500,1095}}),\"d\",DATE(2020,1,1)+[n]),[v],[d])",
+   "powerbi": "0.0889633923768998"
+  },
+  {
+   "expr": "XIRR(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-1000,0},{300,365},{400,730},{500,1095}}),\"d\",DATE(2020,1,1)+[n]),[v],[d],0.1)",
+   "powerbi": "0.0889633923768998"
+  },
+  {
+   "expr": "XIRR(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-1000,0},{300,365},{400,730},{500,1095}}),\"d\",DATE(2020,1,1)+[n]),[v],[d],-0.5)",
+   "powerbi": "0.0889633968472481"
+  },
+  {
+   "expr": "XIRR(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-1000,0},{300,365},{400,730},{500,1095}}),\"d\",DATE(2020,1,1)+[n]),[v],[d],0.9)",
+   "powerbi": "0.0889633934944873"
+  },
+  {
+   "expr": "XIRR(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-1000,0},{300,365},{400,730},{500,1095}}),\"d\",DATE(2020,1,1)+[n]),[v],[d],BLANK())",
+   "powerbi": "0.0889633923768998"
+  },
+  {
+   "expr": "XIRR(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-1000,0},{300,365},{400,730},{500,1095}}),\"d\",DATE(2020,1,1)+[n]),[v],[d],0)",
+   "powerbi": "0.0889633968472481"
+  },
+  {
+   "expr": "XIRR(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-1000,0},{300,365},{400,730},{500,1095}}),\"d\",DATE(2020,1,1)+[n]),[v],[d],-1)",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 19) The Guess argument to the XIRR function must be greater than -1.\""
+  },
+  {
+   "expr": "XIRR(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-1000,0},{300,365},{400,730},{500,1095}}),\"d\",DATE(2020,1,1)+[n]),[v],[d],1000)",
+   "powerbi": "0.088963392048754"
+  },
+  {
+   "expr": "XIRR(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-1000,0},{300,365},{400,730},{500,1095}}),\"d\",DATE(2020,1,1)+[n]),[v],[d],\"a\")",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 144) Cannot convert value 'a' of type Text to type Number.\""
+  },
+  {
+   "expr": "XIRR(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-100,0},{110,365}}),\"d\",DATE(2020,1,1)+[n]),[v],[d])",
+   "powerbi": "0.100000008195639"
+  },
+  {
+   "expr": "XIRR(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-100,0},{100,365}}),\"d\",DATE(2020,1,1)+[n]),[v],[d])",
+   "powerbi": "-2.98023217215615E-09"
+  },
+  {
+   "expr": "XIRR(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-100,0},{50,365}}),\"d\",DATE(2020,1,1)+[n]),[v],[d])",
+   "powerbi": "-0.500000001490116"
+  },
+  {
+   "expr": "XIRR(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{100,0},{100,365}}),\"d\",DATE(2020,1,1)+[n]),[v],[d])",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 19) The XIRR function couldn't find a solution.\""
+  },
+  {
+   "expr": "XIRR(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{100,0},{100,365}}),\"d\",DATE(2020,1,1)+[n]),[v],[d],0.1,99)",
+   "powerbi": "99"
+  },
+  {
+   "expr": "XIRR(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{100,0},{100,365}}),\"d\",DATE(2020,1,1)+[n]),[v],[d],BLANK(),99)",
+   "powerbi": "99"
+  },
+  {
+   "expr": "XIRR(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{100,0},{100,365}}),\"d\",DATE(2020,1,1)+[n]),[v],[d],0.1,\"x\")",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 125) Cannot convert value 'x' of type Text to type Number.\""
+  },
+  {
+   "expr": "XIRR(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{100,0},{100,365}}),\"d\",DATE(2020,1,1)+[n]),[v],[d],0.1,BLANK())",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "XIRR(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-1000,0},{300,365},{400,730},{500,1095}}),\"d\",DATE(2020,1,1)+[n]),[v],[d],0.1,99)",
+   "powerbi": "0.0889633923768998"
+  },
+  {
+   "expr": "XIRR(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-100,0}}),\"d\",DATE(2020,1,1)+[n]),[v],[d])",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 19) There isn't a valid result for the XIRR function for the given values.\""
+  },
+  {
+   "expr": "XIRR(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{0,0},{0,365}}),\"d\",DATE(2020,1,1)+[n]),[v],[d])",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 19) The XIRR function couldn't find a solution.\""
+  },
+  {
+   "expr": "XIRR(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{110,365},{-100,0}}),\"d\",DATE(2020,1,1)+[n]),[v],[d])",
+   "powerbi": "0.100000008195639"
+  },
+  {
+   "expr": "XIRR(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-100,365},{110,0}}),\"d\",DATE(2020,1,1)+[n]),[v],[d])",
+   "powerbi": "-0.0909090921282767"
+  },
+  {
+   "expr": "XIRR(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-100,0},{250,365},{-150,730},{100,1095}}),\"d\",DATE(2020,1,1)+[n]),[v],[d])",
+   "powerbi": "1.00000001043081"
+  },
+  {
+   "expr": "XIRR(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-100,0},{300,30}}),\"d\",DATE(2020,1,1)+[n]),[v],[d])",
+   "powerbi": "638226.137109375"
+  },
+  {
+   "expr": "XIRR(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-100,0},{110,365}}),\"d\",DATE(2020,1,1)+[n]),[v],[d]+0.5)",
+   "powerbi": "0.100000008195639"
+  },
+  {
+   "expr": "XIRR(FILTER(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-1000,0},{300,365},{400,730},{500,1095}}),\"d\",DATE(2020,1,1)+[n]),[v]>10000),[v],[d])",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 19) A result for XIRR couldn't be determined because the Values and Dates arguments are empty.\""
+  },
+  {
+   "expr": "XIRR(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-1000,0},{300,365},{400,730},{500,1095}}),\"d\",DATE(2020,1,1)+[n]),IF([n]=365,BLANK(),[v]),[d])",
+   "powerbi": "-0.0403113499283789"
+  },
+  {
+   "expr": "XIRR(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-1000,0},{300,365},{400,730},{500,1095}}),\"d\",DATE(2020,1,1)+[n]),[v],IF([n]=365,BLANK(),[d]))",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 19) One or more values for the Dates argument passed to XIRR is blank.\""
+  },
+  {
+   "expr": "XIRR(Facts,Facts[Sales],DATE(2020,1,1)+Facts[Quantity]*100)",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 19) The XIRR function couldn't find a solution.\""
+  },
+  {
+   "expr": "XIRR(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-1000,0},{300,365},{400,730},{500,1095}}),\"d\",DATE(2020,1,1)+[n]),[v])",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 19) Too few arguments were passed to the XIRR function. The minimum argument count for the function is 3.\""
+  },
+  {
+   "expr": "XIRR(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-1000,0},{300,365},{400,730},{500,1095}}),\"d\",DATE(2020,1,1)+[n]))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 19) Too few arguments were passed to the XIRR function. The minimum argument count for the function is 3.\""
+  },
+  {
+   "expr": "XIRR(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-100,0},{110,365}}),\"d\",DATE(2020,1,1)+[n]),[v],[d],0.1,99,5)",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 129) Too many arguments were passed to the XIRR function. The maximum argument count for the function is 5.\""
+  },
+  {
+   "expr": "XIRR(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-100,0},{100,0}}),\"d\",DATE(2020,1,1)+[n]),[v],[d])",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 19) There isn't a valid result for the XIRR function for the given values.\""
+  },
+  {
+   "expr": "XIRR(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-1000,0},{500,365},{500,730},{200,1095}}),\"d\",DATE(2020,1,1)+[n]),[v],[d])",
+   "powerbi": "0.111635159701108"
+  },
+  {
+   "expr": "XIRR(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-1000,0},{500,365},{500,730},{200,1095}}),\"d\",DATE(2020,1,1)+[n]),[v],[d],0.2)",
+   "powerbi": "0.11163515150547"
+  },
+  {
+   "expr": "XIRR(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-100,0},{60,180},{60,360}}),\"d\",DATE(2020,1,1)+[n]),[v],[d])",
+   "powerbi": "0.282765766233206"
+  },
+  {
+   "expr": "XIRR(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-100,0},{60,180},{60,360}}),\"d\",DATE(2020,1,1)+[n]),[v],[d],0.2)",
+   "powerbi": "0.282765763998031"
+  },
+  {
+   "expr": "XIRR(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-1000,0},{1100,30}}),\"d\",DATE(2020,1,1)+[n]),[v],[d])",
+   "powerbi": "2.18868049234152"
+  },
+  {
+   "expr": "XIRR(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-1000,0},{1100,30}}),\"d\",DATE(2020,1,1)+[n]),[v],[d],0.2)",
+   "powerbi": "2.18868049383163"
+  },
+  {
+   "expr": "XIRR(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-1000,0},{300,90},{400,180},{500,270},{600,360}}),\"d\",DATE(2020,1,1)+[n]),[v],[d])",
+   "powerbi": "1.46291736662388"
+  },
+  {
+   "expr": "XIRR(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-1000,0},{300,90},{400,180},{500,270},{600,360}}),\"d\",DATE(2020,1,1)+[n]),[v],[d],0.2)",
+   "powerbi": "1.46291736364365"
+  },
+  {
+   "expr": "XIRR(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-100,0},{-100,100},{250,365}}),\"d\",DATE(2020,1,1)+[n]),[v],[d])",
+   "powerbi": "0.294132428616285"
+  },
+  {
+   "expr": "XIRR(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-100,0},{-100,100},{250,365}}),\"d\",DATE(2020,1,1)+[n]),[v],[d],0.2)",
+   "powerbi": "0.294132429361343"
+  }
+ ]
+}

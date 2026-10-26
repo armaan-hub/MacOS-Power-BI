@@ -435,6 +435,30 @@ def _reference_after_comments(expression: str, position: int) -> tuple[str, int]
     return None if match is None else (match.group(), match.end())
 
 
+def _blank_with_comment_end(expression: str, position: int) -> int | None:
+    """When BLANK( is followed by comments before ), return position after ) else None."""
+    cursor = position
+    while cursor < len(expression) and expression[cursor] in _DAX_WHITESPACE:
+        cursor += 1
+    if cursor >= len(expression) or expression[cursor] != "(":
+        return None
+    cursor += 1
+    had_comment = False
+    while cursor < len(expression):
+        if expression[cursor] in _DAX_WHITESPACE:
+            cursor += 1
+            continue
+        comment_end = _comment_end(expression, cursor)
+        if comment_end is not None:
+            had_comment = True
+            cursor = comment_end
+            continue
+        if expression[cursor] == ")" and had_comment:
+            return cursor + 1
+        break
+    return None
+
+
 def tokenize(expression: str) -> list[Token]:
     if not isinstance(expression, str) or not expression.strip():
         raise MeasureError("Enter a DAX expression.")
@@ -456,6 +480,12 @@ def tokenize(expression: str) -> list[Token]:
         kind = match.lastgroup or ""
         value = match.group()
         if kind in {"identifier", "table_name"}:
+            if kind == "identifier" and value.upper() == "BLANK":
+                blank_comment_end = _blank_with_comment_end(expression, match.end())
+                if blank_comment_end is not None:
+                    tokens.append(Token("blank_comment", "BLANK"))
+                    position = blank_comment_end
+                    continue
             joined = _reference_after_comments(expression, match.end())
             if joined is not None and not (kind == "identifier" and value.upper() == "NOT"):
                 # live Power BI (iteration 88): comments between a table name and its [column] are skipped like blanks (Facts/*c*/[Quantity])
@@ -1832,8 +1862,12 @@ def _validate_relationship_modifier_filters(
 
 
 def _is_divide_alternate_constant(node: tuple[Any, ...]) -> bool:
-    """DIVIDE accepts a numeric literal or BLANK() as its alternate result."""
+    """DIVIDE accepts a numeric literal, non-empty string, TRUE(), or BLANK() as its alternate result."""
     if node[0] in {"number", "blank"}:
+        return True
+    if node[0] == "string" and bool(node[1]):
+        return True
+    if node[0] == "boolean" and node[1] is True:
         return True
     return (
         node[0] == "unary"
@@ -1896,9 +1930,11 @@ def _scalar_math_value(function: str, values: list[Decimal | None]) -> Decimal |
     if function == "EXP":
         return (first or Decimal(0)).exp()
     if function == "LN":
-        if first is None or first <= 0:
+        if first is None:
+            return Decimal("-Infinity")
+        if first <= 0:
             error = MeasureRuntimeError("LN needs a number greater than zero.")
-            error.infinity = first is None  # LN(BLANK()) is -Infinity, an error value
+            error.infinity = False
             raise error
         return first.ln()
     if function == "POWER":
@@ -2256,7 +2292,7 @@ def _validate_literal_positions(
 ) -> None:
     """Keep literals in time-intelligence syntax or validated CALCULATE filters."""
     kind = node[0]
-    if kind in {"string", "var"}:
+    if kind in {"string", "var", "boolean"}:
         return
     if kind == "let":
         for _name, value in node[1]:
@@ -2269,6 +2305,8 @@ def _validate_literal_positions(
         if allow_blank:
             return
         raise MeasureError("BLANK() is supported only in explicitly allowed argument positions.")
+    if kind == "blank_comment":
+        return
     if kind == "omitted":
         raise MeasureError("Only TOTALYTD's optional filter argument can be omitted.")
     if kind == "call":
@@ -2282,7 +2320,7 @@ def _validate_literal_positions(
                     raise MeasureError(
                         "DIVIDE alternate result must be a constant numeric value or BLANK()."
                     )
-                if arguments[2][0] != "blank":
+                if arguments[2][0] not in {"blank", "string", "boolean"}:
                     _validate_literal_positions(arguments[2])
             return
         if function in _SCALAR_MATH_ARITY:
@@ -2626,13 +2664,15 @@ class _Parser:
                     break
                 self._take()
             self._expect("}")
-            widths = {len(item[1]) if item[0] == "tuple" else 0 for item in items}
+            widths = {len(item[1]) if item[0] in {"tuple", "tableconstructor"} else 0 for item in items}
             if len(widths) > 1:
                 raise MeasureError("All rows of a table constructor must have the same number of values.")
             return ("tableconstructor", tuple(items))
         if token.kind == "reference":
             table, column = token.value.split("\0", 1)
             return ("reference", table, column)
+        if token.kind == "blank_comment":
+            return ("blank_comment",)
         if token.kind == "table":
             return ("table", token.value)
         if token.kind == "identifier":
@@ -6975,9 +7015,9 @@ def evaluate_measures(
             return derived_table(["Value"], [])
         if argument[0] == "tableconstructor":
             items = argument[1]
-            width = len(items[0][1]) if items[0][0] == "tuple" else 1
+            width = len(items[0][1]) if items and items[0][0] in {"tuple", "tableconstructor"} else 1
             records = [
-                [evaluate(member, None, allow_text=True) for member in (item[1] if item[0] == "tuple" else (item,))]
+                [evaluate(member, None, allow_text=True) for member in (item[1] if item[0] in {"tuple", "tableconstructor"} else (item,))]
                 for item in items
             ]
             for column in range(width):  # mixed types become text, Boolean with numbers become numbers
@@ -6990,7 +7030,7 @@ def evaluate_measures(
                     for record in records:
                         if isinstance(record[column], bool):
                             record[column] = Decimal(int(record[column]))
-            names = ["Value"] if width == 1 and items[0][0] != "tuple" else [f"Value{column + 1}" for column in range(width)]
+            names = ["Value"] if width == 1 and (not items or items[0][0] != "tuple") else [f"Value{column + 1}" for column in range(width)]
             return derived_table(names, [dict(zip(names, record)) for record in records])
         if argument[0] == "call" and argument[1] == "GENERATESERIES":
             start = dax_typed.to_number(in_row_expression(lambda: evaluate(argument[2][0])))
@@ -8000,7 +8040,7 @@ def evaluate_measures(
         kind = node[0]
         if kind in {"number", "string", "boolean"}:
             return node[1]
-        if kind == "blank":
+        if kind in {"blank", "blank_comment"}:
             return None
         # the value depends on the filter context, the enclosing row contexts (EARLIER) and the VARs in scope
         frames = tuple(frame[1] for frame in row_stack)
@@ -11588,7 +11628,7 @@ def evaluate_measures(
             return node[1]
         if kind == "string":
             return node[1]
-        if kind == "blank":
+        if kind in {"blank", "blank_comment"}:
             return None
         if kind == "boolean":
             return node[1]
@@ -12502,9 +12542,15 @@ def evaluate_measures(
             )
             if denominator == 0:
                 if len(arguments) == 3:
-                    alternate = evaluate(arguments[2], row_context)
-                    return None if alternate is None else as_number(alternate)
+                    alternate = evaluate(arguments[2], row_context, allow_text=True, allow_boolean=True)
+                    if alternate is None or isinstance(alternate, (str, bool)):
+                        return alternate
+                    return as_number(alternate)
                 return None
+            if len(arguments) == 3 and arguments[2][0] in {"string", "boolean"}:
+                raise MeasureError(
+                    "DIVIDE with text or Boolean alternate result and non-zero denominator is not supported in the local engine."
+                )
             return numerator / denominator
         if function == "ABS":
             value = evaluate(arguments[0], row_context)
@@ -12753,6 +12799,29 @@ def evaluate_measures(
         if function == "MIN": return min(values)
         return max(values)
 
+    def _single_cell_numeric_table_value(node: tuple[Any, ...]) -> Decimal | None:
+        """When a single-cell table (ROW, {{...}}, DATATABLE) is the whole measure expression and holds a number."""
+        if not isinstance(node, tuple) or not node:
+            return None
+        is_row = node[0] == "call" and node[1] == "ROW"
+        is_datatable = node[0] == "call" and node[1] == "DATATABLE"
+        is_nested_tc = (
+            node[0] == "tableconstructor"
+            and len(node[1]) == 1
+            and isinstance(node[1][0], tuple)
+            and bool(node[1][0])
+            and node[1][0][0] == "tableconstructor"
+        )
+        if not (is_row or is_datatable or is_nested_tc):
+            return None
+        try:
+            val = single_value_of(table_argument_value(node))
+        except Exception:
+            return None
+        if isinstance(val, (int, Decimal)) and not isinstance(val, bool):
+            return Decimal(val)
+        return None
+
     def resolve(key: str) -> Decimal | bool | str | None:
         nonlocal current_home_table_id
         cache_key = (key, current_context)
@@ -12768,7 +12837,11 @@ def evaluate_measures(
         outer_variables = dict(variables)
         variables.clear()
         try:
-            value = evaluate(parsed[key])
+            single_numeric = _single_cell_numeric_table_value(parsed[key])
+            if single_numeric is not None:
+                value = single_numeric
+            else:
+                value = evaluate(parsed[key])
         except (DecimalException, OverflowError) as exc:
             raise MeasureError(f"Measure {by_name[key]['name']!r} is outside the supported numeric range.") from exc
         except MeasureRuntimeError as exc:

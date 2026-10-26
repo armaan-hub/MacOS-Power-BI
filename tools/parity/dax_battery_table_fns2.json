@@ -1,0 +1,670 @@
+{
+ "powerbi_version": "2.157.879.0 (26.08)+da30fe74eb0b8a8786ab7326b69c400a0e951831",
+ "frozen": "2026-10-26",
+ "items": [
+  {
+   "expr": "TOCSV(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],\"s\",SUM(Facts[Quantity])),\"i\",VALUES(Facts[Region]),Facts[Region]))",
+   "powerbi": "[s],[i]\n8,2\n3,0\n4,1"
+  },
+  {
+   "expr": "COUNTROWS(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],\"s\",SUM(Facts[Quantity])),\"i\",VALUES(Facts[Region]),Facts[Region]))",
+   "powerbi": "3"
+  },
+  {
+   "expr": "SUMX(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],\"s\",SUM(Facts[Quantity])),\"i\",VALUES(Facts[Region]),Facts[Region]),[i])",
+   "powerbi": "3"
+  },
+  {
+   "expr": "TOCSV(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],\"s\",SUM(Facts[Quantity])),\"i\",VALUES(Facts[Region]),Facts[Region],ASC))",
+   "powerbi": "[s],[i]\n8,0\n3,2\n4,1"
+  },
+  {
+   "expr": "COUNTROWS(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],\"s\",SUM(Facts[Quantity])),\"i\",VALUES(Facts[Region]),Facts[Region],ASC))",
+   "powerbi": "3"
+  },
+  {
+   "expr": "SUMX(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],\"s\",SUM(Facts[Quantity])),\"i\",VALUES(Facts[Region]),Facts[Region],ASC),[i])",
+   "powerbi": "3"
+  },
+  {
+   "expr": "TOCSV(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],\"s\",SUM(Facts[Quantity])),\"i\",VALUES(Facts[Region]),Facts[Region],DESC))",
+   "powerbi": "[s],[i]\n8,2\n3,0\n4,1"
+  },
+  {
+   "expr": "COUNTROWS(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],\"s\",SUM(Facts[Quantity])),\"i\",VALUES(Facts[Region]),Facts[Region],DESC))",
+   "powerbi": "3"
+  },
+  {
+   "expr": "SUMX(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],\"s\",SUM(Facts[Quantity])),\"i\",VALUES(Facts[Region]),Facts[Region],DESC),[i])",
+   "powerbi": "3"
+  },
+  {
+   "expr": "TOCSV(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],\"s\",SUM(Facts[Quantity])),\"i\",FILTER(VALUES(Facts[Region]),Facts[Region]<>\"East\"),Facts[Region]))",
+   "powerbi": "[s],[i]\n3,0\n4,1"
+  },
+  {
+   "expr": "COUNTROWS(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],\"s\",SUM(Facts[Quantity])),\"i\",FILTER(VALUES(Facts[Region]),Facts[Region]<>\"East\"),Facts[Region]))",
+   "powerbi": "2"
+  },
+  {
+   "expr": "SUMX(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],\"s\",SUM(Facts[Quantity])),\"i\",FILTER(VALUES(Facts[Region]),Facts[Region]<>\"East\"),Facts[Region]),[i])",
+   "powerbi": "1"
+  },
+  {
+   "expr": "TOCSV(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],\"s\",SUM(Facts[Quantity])),\"i\",SUMMARIZE(Facts,Facts[Region],Facts[Note]),Facts[Region],ASC,Facts[Note],DESC))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 25) Function SubstituteWithIndex() detected more than one row in the index table matching to the current row of the original table. Consider changing input table expressions to change join columns.\""
+  },
+  {
+   "expr": "COUNTROWS(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],\"s\",SUM(Facts[Quantity])),\"i\",SUMMARIZE(Facts,Facts[Region],Facts[Note]),Facts[Region],ASC,Facts[Note],DESC))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 29) Function SubstituteWithIndex() detected more than one row in the index table matching to the current row of the original table. Consider changing input table expressions to change join columns.\""
+  },
+  {
+   "expr": "SUMX(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],\"s\",SUM(Facts[Quantity])),\"i\",SUMMARIZE(Facts,Facts[Region],Facts[Note]),Facts[Region],ASC,Facts[Note],DESC),[i])",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 24) Function SubstituteWithIndex() detected more than one row in the index table matching to the current row of the original table. Consider changing input table expressions to change join columns.\""
+  },
+  {
+   "expr": "TOCSV(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],\"s\",SUM(Facts[Quantity])),\"i\",SUMMARIZE(Facts,Facts[Region],Facts[Note]),Facts[Region],Facts[Note]))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 162) Unexpected value for ORDER argument in function. Use 0/FALSE/DESC for descending order or 1/TRUE/ASC for ascending order.\""
+  },
+  {
+   "expr": "COUNTROWS(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],\"s\",SUM(Facts[Quantity])),\"i\",SUMMARIZE(Facts,Facts[Region],Facts[Note]),Facts[Region],Facts[Note]))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 166) Unexpected value for ORDER argument in function. Use 0/FALSE/DESC for descending order or 1/TRUE/ASC for ascending order.\""
+  },
+  {
+   "expr": "SUMX(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],\"s\",SUM(Facts[Quantity])),\"i\",SUMMARIZE(Facts,Facts[Region],Facts[Note]),Facts[Region],Facts[Note]),[i])",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 161) Unexpected value for ORDER argument in function. Use 0/FALSE/DESC for descending order or 1/TRUE/ASC for ascending order.\""
+  },
+  {
+   "expr": "TOCSV(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],\"s\",SUM(Facts[Quantity])),\"i\",VALUES(Facts[Quantity]),Facts[Quantity]))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 25) Function SubstituteWithIndex() is not able to detect common columns between its operands that could be used for join.\""
+  },
+  {
+   "expr": "COUNTROWS(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],\"s\",SUM(Facts[Quantity])),\"i\",VALUES(Facts[Quantity]),Facts[Quantity]))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 29) Function SubstituteWithIndex() is not able to detect common columns between its operands that could be used for join.\""
+  },
+  {
+   "expr": "SUMX(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],\"s\",SUM(Facts[Quantity])),\"i\",VALUES(Facts[Quantity]),Facts[Quantity]),[i])",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 24) Function SubstituteWithIndex() is not able to detect common columns between its operands that could be used for join.\""
+  },
+  {
+   "expr": "TOCSV(SUBSTITUTEWITHINDEX(VALUES(Facts[Region]),\"i\",VALUES(Facts[Region]),Facts[Region]))",
+   "powerbi": "[i]\n2\n0\n1"
+  },
+  {
+   "expr": "COUNTROWS(SUBSTITUTEWITHINDEX(VALUES(Facts[Region]),\"i\",VALUES(Facts[Region]),Facts[Region]))",
+   "powerbi": "3"
+  },
+  {
+   "expr": "SUMX(SUBSTITUTEWITHINDEX(VALUES(Facts[Region]),\"i\",VALUES(Facts[Region]),Facts[Region]),[i])",
+   "powerbi": "3"
+  },
+  {
+   "expr": "TOCSV(SUBSTITUTEWITHINDEX(VALUES(Facts[Region]),\"i\",VALUES(Facts[Region]),Facts[Region],ASC))",
+   "powerbi": "[i]\n0\n2\n1"
+  },
+  {
+   "expr": "COUNTROWS(SUBSTITUTEWITHINDEX(VALUES(Facts[Region]),\"i\",VALUES(Facts[Region]),Facts[Region],ASC))",
+   "powerbi": "3"
+  },
+  {
+   "expr": "SUMX(SUBSTITUTEWITHINDEX(VALUES(Facts[Region]),\"i\",VALUES(Facts[Region]),Facts[Region],ASC),[i])",
+   "powerbi": "3"
+  },
+  {
+   "expr": "TOCSV(SUBSTITUTEWITHINDEX(VALUES(Facts[Region]),\"i\",VALUES(Facts[Region]),Facts[Region],DESC))",
+   "powerbi": "[i]\n2\n0\n1"
+  },
+  {
+   "expr": "COUNTROWS(SUBSTITUTEWITHINDEX(VALUES(Facts[Region]),\"i\",VALUES(Facts[Region]),Facts[Region],DESC))",
+   "powerbi": "3"
+  },
+  {
+   "expr": "SUMX(SUBSTITUTEWITHINDEX(VALUES(Facts[Region]),\"i\",VALUES(Facts[Region]),Facts[Region],DESC),[i])",
+   "powerbi": "3"
+  },
+  {
+   "expr": "TOCSV(SUBSTITUTEWITHINDEX(VALUES(Facts[Region]),\"i\",FILTER(VALUES(Facts[Region]),Facts[Region]<>\"East\"),Facts[Region]))",
+   "powerbi": "[i]\n0\n1"
+  },
+  {
+   "expr": "COUNTROWS(SUBSTITUTEWITHINDEX(VALUES(Facts[Region]),\"i\",FILTER(VALUES(Facts[Region]),Facts[Region]<>\"East\"),Facts[Region]))",
+   "powerbi": "2"
+  },
+  {
+   "expr": "SUMX(SUBSTITUTEWITHINDEX(VALUES(Facts[Region]),\"i\",FILTER(VALUES(Facts[Region]),Facts[Region]<>\"East\"),Facts[Region]),[i])",
+   "powerbi": "1"
+  },
+  {
+   "expr": "TOCSV(SUBSTITUTEWITHINDEX(VALUES(Facts[Region]),\"i\",SUMMARIZE(Facts,Facts[Region],Facts[Note]),Facts[Region],ASC,Facts[Note],DESC))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 25) Function SubstituteWithIndex() detected more than one row in the index table matching to the current row of the original table. Consider changing input table expressions to change join columns.\""
+  },
+  {
+   "expr": "COUNTROWS(SUBSTITUTEWITHINDEX(VALUES(Facts[Region]),\"i\",SUMMARIZE(Facts,Facts[Region],Facts[Note]),Facts[Region],ASC,Facts[Note],DESC))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 29) Function SubstituteWithIndex() detected more than one row in the index table matching to the current row of the original table. Consider changing input table expressions to change join columns.\""
+  },
+  {
+   "expr": "SUMX(SUBSTITUTEWITHINDEX(VALUES(Facts[Region]),\"i\",SUMMARIZE(Facts,Facts[Region],Facts[Note]),Facts[Region],ASC,Facts[Note],DESC),[i])",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 24) Function SubstituteWithIndex() detected more than one row in the index table matching to the current row of the original table. Consider changing input table expressions to change join columns.\""
+  },
+  {
+   "expr": "TOCSV(SUBSTITUTEWITHINDEX(VALUES(Facts[Region]),\"i\",SUMMARIZE(Facts,Facts[Region],Facts[Note]),Facts[Region],Facts[Note]))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 128) Unexpected value for ORDER argument in function. Use 0/FALSE/DESC for descending order or 1/TRUE/ASC for ascending order.\""
+  },
+  {
+   "expr": "COUNTROWS(SUBSTITUTEWITHINDEX(VALUES(Facts[Region]),\"i\",SUMMARIZE(Facts,Facts[Region],Facts[Note]),Facts[Region],Facts[Note]))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 132) Unexpected value for ORDER argument in function. Use 0/FALSE/DESC for descending order or 1/TRUE/ASC for ascending order.\""
+  },
+  {
+   "expr": "SUMX(SUBSTITUTEWITHINDEX(VALUES(Facts[Region]),\"i\",SUMMARIZE(Facts,Facts[Region],Facts[Note]),Facts[Region],Facts[Note]),[i])",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 127) Unexpected value for ORDER argument in function. Use 0/FALSE/DESC for descending order or 1/TRUE/ASC for ascending order.\""
+  },
+  {
+   "expr": "TOCSV(SUBSTITUTEWITHINDEX(VALUES(Facts[Region]),\"i\",VALUES(Facts[Quantity]),Facts[Quantity]))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 25) Function SubstituteWithIndex() is not able to detect common columns between its operands that could be used for join.\""
+  },
+  {
+   "expr": "COUNTROWS(SUBSTITUTEWITHINDEX(VALUES(Facts[Region]),\"i\",VALUES(Facts[Quantity]),Facts[Quantity]))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 29) Function SubstituteWithIndex() is not able to detect common columns between its operands that could be used for join.\""
+  },
+  {
+   "expr": "SUMX(SUBSTITUTEWITHINDEX(VALUES(Facts[Region]),\"i\",VALUES(Facts[Quantity]),Facts[Quantity]),[i])",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 24) Function SubstituteWithIndex() is not able to detect common columns between its operands that could be used for join.\""
+  },
+  {
+   "expr": "TOCSV(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],Facts[Note],\"s\",SUM(Facts[Quantity])),\"i\",VALUES(Facts[Region]),Facts[Region]))",
+   "powerbi": "'Facts'[Note],[s],[i]\n,5,2\n,3,0\nPaid,3,2\nPaid,0,0\nLate,4,1"
+  },
+  {
+   "expr": "COUNTROWS(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],Facts[Note],\"s\",SUM(Facts[Quantity])),\"i\",VALUES(Facts[Region]),Facts[Region]))",
+   "powerbi": "5"
+  },
+  {
+   "expr": "SUMX(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],Facts[Note],\"s\",SUM(Facts[Quantity])),\"i\",VALUES(Facts[Region]),Facts[Region]),[i])",
+   "powerbi": "5"
+  },
+  {
+   "expr": "TOCSV(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],Facts[Note],\"s\",SUM(Facts[Quantity])),\"i\",VALUES(Facts[Region]),Facts[Region],ASC))",
+   "powerbi": "'Facts'[Note],[s],[i]\n,5,0\n,3,2\nPaid,3,0\nPaid,0,2\nLate,4,1"
+  },
+  {
+   "expr": "COUNTROWS(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],Facts[Note],\"s\",SUM(Facts[Quantity])),\"i\",VALUES(Facts[Region]),Facts[Region],ASC))",
+   "powerbi": "5"
+  },
+  {
+   "expr": "SUMX(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],Facts[Note],\"s\",SUM(Facts[Quantity])),\"i\",VALUES(Facts[Region]),Facts[Region],ASC),[i])",
+   "powerbi": "5"
+  },
+  {
+   "expr": "TOCSV(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],Facts[Note],\"s\",SUM(Facts[Quantity])),\"i\",VALUES(Facts[Region]),Facts[Region],DESC))",
+   "powerbi": "'Facts'[Note],[s],[i]\n,5,2\n,3,0\nPaid,3,2\nPaid,0,0\nLate,4,1"
+  },
+  {
+   "expr": "COUNTROWS(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],Facts[Note],\"s\",SUM(Facts[Quantity])),\"i\",VALUES(Facts[Region]),Facts[Region],DESC))",
+   "powerbi": "5"
+  },
+  {
+   "expr": "SUMX(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],Facts[Note],\"s\",SUM(Facts[Quantity])),\"i\",VALUES(Facts[Region]),Facts[Region],DESC),[i])",
+   "powerbi": "5"
+  },
+  {
+   "expr": "TOCSV(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],Facts[Note],\"s\",SUM(Facts[Quantity])),\"i\",FILTER(VALUES(Facts[Region]),Facts[Region]<>\"East\"),Facts[Region]))",
+   "powerbi": "'Facts'[Note],[s],[i]\n,3,0\nPaid,0,0\nLate,4,1"
+  },
+  {
+   "expr": "COUNTROWS(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],Facts[Note],\"s\",SUM(Facts[Quantity])),\"i\",FILTER(VALUES(Facts[Region]),Facts[Region]<>\"East\"),Facts[Region]))",
+   "powerbi": "3"
+  },
+  {
+   "expr": "SUMX(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],Facts[Note],\"s\",SUM(Facts[Quantity])),\"i\",FILTER(VALUES(Facts[Region]),Facts[Region]<>\"East\"),Facts[Region]),[i])",
+   "powerbi": "1"
+  },
+  {
+   "expr": "TOCSV(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],Facts[Note],\"s\",SUM(Facts[Quantity])),\"i\",SUMMARIZE(Facts,Facts[Region],Facts[Note]),Facts[Region],ASC,Facts[Note],DESC))",
+   "powerbi": "[s],[i]\n5,1\n3,4\n3,0\n0,3\n4,2"
+  },
+  {
+   "expr": "COUNTROWS(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],Facts[Note],\"s\",SUM(Facts[Quantity])),\"i\",SUMMARIZE(Facts,Facts[Region],Facts[Note]),Facts[Region],ASC,Facts[Note],DESC))",
+   "powerbi": "5"
+  },
+  {
+   "expr": "SUMX(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],Facts[Note],\"s\",SUM(Facts[Quantity])),\"i\",SUMMARIZE(Facts,Facts[Region],Facts[Note]),Facts[Region],ASC,Facts[Note],DESC),[i])",
+   "powerbi": "10"
+  },
+  {
+   "expr": "TOCSV(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],Facts[Note],\"s\",SUM(Facts[Quantity])),\"i\",SUMMARIZE(Facts,Facts[Region],Facts[Note]),Facts[Region],Facts[Note]))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 174) Unexpected value for ORDER argument in function. Use 0/FALSE/DESC for descending order or 1/TRUE/ASC for ascending order.\""
+  },
+  {
+   "expr": "COUNTROWS(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],Facts[Note],\"s\",SUM(Facts[Quantity])),\"i\",SUMMARIZE(Facts,Facts[Region],Facts[Note]),Facts[Region],Facts[Note]))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 178) Unexpected value for ORDER argument in function. Use 0/FALSE/DESC for descending order or 1/TRUE/ASC for ascending order.\""
+  },
+  {
+   "expr": "SUMX(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],Facts[Note],\"s\",SUM(Facts[Quantity])),\"i\",SUMMARIZE(Facts,Facts[Region],Facts[Note]),Facts[Region],Facts[Note]),[i])",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 173) Unexpected value for ORDER argument in function. Use 0/FALSE/DESC for descending order or 1/TRUE/ASC for ascending order.\""
+  },
+  {
+   "expr": "TOCSV(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],Facts[Note],\"s\",SUM(Facts[Quantity])),\"i\",VALUES(Facts[Quantity]),Facts[Quantity]))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 25) Function SubstituteWithIndex() is not able to detect common columns between its operands that could be used for join.\""
+  },
+  {
+   "expr": "COUNTROWS(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],Facts[Note],\"s\",SUM(Facts[Quantity])),\"i\",VALUES(Facts[Quantity]),Facts[Quantity]))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 29) Function SubstituteWithIndex() is not able to detect common columns between its operands that could be used for join.\""
+  },
+  {
+   "expr": "SUMX(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],Facts[Note],\"s\",SUM(Facts[Quantity])),\"i\",VALUES(Facts[Quantity]),Facts[Quantity]),[i])",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 24) Function SubstituteWithIndex() is not able to detect common columns between its operands that could be used for join.\""
+  },
+  {
+   "expr": "SUMX(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],\"s\",SUM(Facts[Quantity])),\"i\",VALUES(Facts[Region]),Facts[Region]),[s])",
+   "powerbi": "15"
+  },
+  {
+   "expr": "SUMX(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],\"s\",SUM(Facts[Quantity])),\"i\",VALUES(Facts[Region]),Facts[Region]),[s]*[i])",
+   "powerbi": "20"
+  },
+  {
+   "expr": "MAXX(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],\"s\",SUM(Facts[Quantity])),\"i\",VALUES(Facts[Region]),Facts[Region],DESC),[i])",
+   "powerbi": "2"
+  },
+  {
+   "expr": "SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],\"s\",SUM(Facts[Quantity])),\"i\",VALUES(Facts[Region]),Facts[Region])",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 19) The expression refers to multiple columns. Multiple columns cannot be converted to a scalar value.\""
+  },
+  {
+   "expr": "COUNTROWS(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],\"s\",SUM(Facts[Quantity])),\"i\",VALUES(Facts[Region])))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 29) Too few arguments were passed to the SUBSTITUTEWITHINDEX function. The minimum argument count for the function is 4.\""
+  },
+  {
+   "expr": "COUNTROWS(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],\"s\",SUM(Facts[Quantity])),\"i\",VALUES(Facts[Region]),Facts[Quantity]))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 131) A single value for column 'Quantity' in table 'Facts' cannot be determined. This can happen when a measure or function formula refers to a column that contains many values without specifying an aggregation such as min, max, count, or sum to get a single result.\""
+  },
+  {
+   "expr": "COUNTROWS(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],\"s\",SUM(Facts[Quantity])),\"s\",VALUES(Facts[Region]),Facts[Region]))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 29) Function 'SUBSTITUTEWITHINDEX' cannot add column [s] since it already exists.\""
+  },
+  {
+   "expr": "COUNTROWS(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],\"s\",SUM(Facts[Quantity])),\"i\",SUMMARIZE(Facts,Facts[Region],\"s\",SUM(Facts[Quantity])),Facts[Region]))",
+   "powerbi": "3"
+  },
+  {
+   "expr": "COUNTROWS(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],\"s\",SUM(Facts[Quantity])),\"i\",ALL(Facts[Region]),Facts[Region]))",
+   "powerbi": "3"
+  },
+  {
+   "expr": "COUNTROWS(SUBSTITUTEWITHINDEX(FILTER(Facts,TRUE()),\"i\",VALUES(Facts[Region]),Facts[Region]))",
+   "powerbi": "6"
+  },
+  {
+   "expr": "COUNTROWS(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],\"s\",SUM(Facts[Quantity])),\"i\",FILTER(VALUES(Facts[Region]),FALSE()),Facts[Region]))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "TOCSV(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],\"s\",SUM(Facts[Quantity])),\"i\",FILTER(VALUES(Facts[Region]),FALSE()),Facts[Region]))",
+   "powerbi": "[s],[i]\n"
+  },
+  {
+   "expr": "COUNTROWS(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],\"s\",SUM(Facts[Quantity])),\"i\",VALUES(Facts[Region]),Facts[Region],1))",
+   "powerbi": "3"
+  },
+  {
+   "expr": "COUNTROWS(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],\"s\",SUM(Facts[Quantity])),\"i\",VALUES(Facts[Region]),Facts[Region],-1))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 145) Unexpected value for ORDER argument in function. Use 0/FALSE/DESC for descending order or 1/TRUE/ASC for ascending order.\""
+  },
+  {
+   "expr": "COUNTROWS(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],\"s\",SUM(Facts[Quantity])),\"i\",VALUES(Facts[Region]),Facts[Region],TRUE()))",
+   "powerbi": "3"
+  },
+  {
+   "expr": "COUNTROWS(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],\"s\",SUM(Facts[Quantity])),1,VALUES(Facts[Region]),Facts[Region]))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 105) Function SUBSTITUTEWITHINDEX expects a column name as argument number 2.\""
+  },
+  {
+   "expr": "COUNTROWS(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],\"s\",SUM(Facts[Quantity])),\"\",VALUES(Facts[Region]),Facts[Region]))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 105) Function SUBSTITUTEWITHINDEX expects a column name as argument number 2.\""
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],\"s\",SUM(Facts[Quantity])),\"i\",VALUES(Facts[Region]),Facts[Region])),Facts[Region]=\"East\")",
+   "powerbi": "1"
+  },
+  {
+   "expr": "COUNTROWS(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],\"s\",SUM(Facts[Quantity])),\"i\",CALCULATETABLE(VALUES(Facts[Region]),Facts[Quantity]>2),Facts[Region]))",
+   "powerbi": "3"
+  },
+  {
+   "expr": "TOCSV(ADDMISSINGITEMS(Facts[Region],SUMMARIZECOLUMNS(Facts[Region],FILTER(ALL(Facts),Facts[Quantity]>3),\"s\",SUM(Facts[Quantity])),Facts[Region]))",
+   "powerbi": "'Facts'[Region],[s]\nEast,5\nNorth,4\nWest,"
+  },
+  {
+   "expr": "COUNTROWS(ADDMISSINGITEMS(Facts[Region],SUMMARIZECOLUMNS(Facts[Region],FILTER(ALL(Facts),Facts[Quantity]>3),\"s\",SUM(Facts[Quantity])),Facts[Region]))",
+   "powerbi": "3"
+  },
+  {
+   "expr": "SUMX(ADDMISSINGITEMS(Facts[Region],SUMMARIZECOLUMNS(Facts[Region],FILTER(ALL(Facts),Facts[Quantity]>3),\"s\",SUM(Facts[Quantity])),Facts[Region]),[s])",
+   "powerbi": "9"
+  },
+  {
+   "expr": "SUMX(ADDMISSINGITEMS(Facts[Region],SUMMARIZECOLUMNS(Facts[Region],FILTER(ALL(Facts),Facts[Quantity]>3),\"s\",SUM(Facts[Quantity])),Facts[Region]),1)",
+   "powerbi": "3"
+  },
+  {
+   "expr": "TOCSV(ADDMISSINGITEMS(Facts[Region],SUMMARIZECOLUMNS(Facts[Region],\"s\",SUM(Facts[Sales])),Facts[Region]))",
+   "powerbi": "'Facts'[Region],[s]\nEast,11.5\nWest,20\nNorth,"
+  },
+  {
+   "expr": "COUNTROWS(ADDMISSINGITEMS(Facts[Region],SUMMARIZECOLUMNS(Facts[Region],\"s\",SUM(Facts[Sales])),Facts[Region]))",
+   "powerbi": "3"
+  },
+  {
+   "expr": "SUMX(ADDMISSINGITEMS(Facts[Region],SUMMARIZECOLUMNS(Facts[Region],\"s\",SUM(Facts[Sales])),Facts[Region]),[s])",
+   "powerbi": "31.5"
+  },
+  {
+   "expr": "SUMX(ADDMISSINGITEMS(Facts[Region],SUMMARIZECOLUMNS(Facts[Region],\"s\",SUM(Facts[Sales])),Facts[Region]),1)",
+   "powerbi": "3"
+  },
+  {
+   "expr": "TOCSV(ADDMISSINGITEMS(Facts[Region],VALUES(Facts[Region]),Facts[Region]))",
+   "powerbi": "'Facts'[Region]\nEast\nWest\nNorth"
+  },
+  {
+   "expr": "COUNTROWS(ADDMISSINGITEMS(Facts[Region],VALUES(Facts[Region]),Facts[Region]))",
+   "powerbi": "3"
+  },
+  {
+   "expr": "SUMX(ADDMISSINGITEMS(Facts[Region],VALUES(Facts[Region]),Facts[Region]),1)",
+   "powerbi": "3"
+  },
+  {
+   "expr": "TOCSV(ADDMISSINGITEMS(Facts[Region],SUMMARIZECOLUMNS(Facts[Region],FILTER(ALL(Facts),Facts[Quantity]>100),\"s\",SUM(Facts[Quantity])),Facts[Region]))",
+   "powerbi": "'Facts'[Region],[s]\nEast,\nWest,\nNorth,"
+  },
+  {
+   "expr": "COUNTROWS(ADDMISSINGITEMS(Facts[Region],SUMMARIZECOLUMNS(Facts[Region],FILTER(ALL(Facts),Facts[Quantity]>100),\"s\",SUM(Facts[Quantity])),Facts[Region]))",
+   "powerbi": "3"
+  },
+  {
+   "expr": "SUMX(ADDMISSINGITEMS(Facts[Region],SUMMARIZECOLUMNS(Facts[Region],FILTER(ALL(Facts),Facts[Quantity]>100),\"s\",SUM(Facts[Quantity])),Facts[Region]),[s])",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "SUMX(ADDMISSINGITEMS(Facts[Region],SUMMARIZECOLUMNS(Facts[Region],FILTER(ALL(Facts),Facts[Quantity]>100),\"s\",SUM(Facts[Quantity])),Facts[Region]),1)",
+   "powerbi": "3"
+  },
+  {
+   "expr": "TOCSV(ADDMISSINGITEMS(Facts[Region],SUMMARIZECOLUMNS(Facts[Region],FILTER(ALL(Facts),Facts[Quantity]>3),\"s\",SUM(Facts[Quantity]),\"c\",COUNTROWS(Facts)),Facts[Region]))",
+   "powerbi": "'Facts'[Region],[s],[c]\nEast,5,1\nNorth,4,1\nWest,,"
+  },
+  {
+   "expr": "COUNTROWS(ADDMISSINGITEMS(Facts[Region],SUMMARIZECOLUMNS(Facts[Region],FILTER(ALL(Facts),Facts[Quantity]>3),\"s\",SUM(Facts[Quantity]),\"c\",COUNTROWS(Facts)),Facts[Region]))",
+   "powerbi": "3"
+  },
+  {
+   "expr": "SUMX(ADDMISSINGITEMS(Facts[Region],SUMMARIZECOLUMNS(Facts[Region],FILTER(ALL(Facts),Facts[Quantity]>3),\"s\",SUM(Facts[Quantity]),\"c\",COUNTROWS(Facts)),Facts[Region]),[s])",
+   "powerbi": "9"
+  },
+  {
+   "expr": "SUMX(ADDMISSINGITEMS(Facts[Region],SUMMARIZECOLUMNS(Facts[Region],FILTER(ALL(Facts),Facts[Quantity]>3),\"s\",SUM(Facts[Quantity]),\"c\",COUNTROWS(Facts)),Facts[Region]),1)",
+   "powerbi": "3"
+  },
+  {
+   "expr": "TOCSV(ADDMISSINGITEMS(Facts[Region],Facts[Note],SUMMARIZECOLUMNS(Facts[Region],Facts[Note],FILTER(ALL(Facts),Facts[Quantity]>3),\"s\",SUM(Facts[Quantity])),Facts[Region],Facts[Note]))",
+   "powerbi": "'Facts'[Region],'Facts'[Note],[s]\nEast,,5\nNorth,Late,4\nWest,,\nEast,Paid,\nWest,Paid,"
+  },
+  {
+   "expr": "COUNTROWS(ADDMISSINGITEMS(Facts[Region],Facts[Note],SUMMARIZECOLUMNS(Facts[Region],Facts[Note],FILTER(ALL(Facts),Facts[Quantity]>3),\"s\",SUM(Facts[Quantity])),Facts[Region],Facts[Note]))",
+   "powerbi": "5"
+  },
+  {
+   "expr": "SUMX(ADDMISSINGITEMS(Facts[Region],Facts[Note],SUMMARIZECOLUMNS(Facts[Region],Facts[Note],FILTER(ALL(Facts),Facts[Quantity]>3),\"s\",SUM(Facts[Quantity])),Facts[Region],Facts[Note]),[s])",
+   "powerbi": "9"
+  },
+  {
+   "expr": "SUMX(ADDMISSINGITEMS(Facts[Region],Facts[Note],SUMMARIZECOLUMNS(Facts[Region],Facts[Note],FILTER(ALL(Facts),Facts[Quantity]>3),\"s\",SUM(Facts[Quantity])),Facts[Region],Facts[Note]),1)",
+   "powerbi": "5"
+  },
+  {
+   "expr": "TOCSV(ADDMISSINGITEMS(Facts[Region],SUMMARIZECOLUMNS(Facts[Region],Facts[Note],FILTER(ALL(Facts),Facts[Quantity]>3),\"s\",SUM(Facts[Quantity])),Facts[Region],Facts[Note]))",
+   "powerbi": "'Facts'[Region],'Facts'[Note],[s]\nEast,,5\nNorth,Late,4\nWest,,"
+  },
+  {
+   "expr": "COUNTROWS(ADDMISSINGITEMS(Facts[Region],SUMMARIZECOLUMNS(Facts[Region],Facts[Note],FILTER(ALL(Facts),Facts[Quantity]>3),\"s\",SUM(Facts[Quantity])),Facts[Region],Facts[Note]))",
+   "powerbi": "3"
+  },
+  {
+   "expr": "SUMX(ADDMISSINGITEMS(Facts[Region],SUMMARIZECOLUMNS(Facts[Region],Facts[Note],FILTER(ALL(Facts),Facts[Quantity]>3),\"s\",SUM(Facts[Quantity])),Facts[Region],Facts[Note]),[s])",
+   "powerbi": "9"
+  },
+  {
+   "expr": "SUMX(ADDMISSINGITEMS(Facts[Region],SUMMARIZECOLUMNS(Facts[Region],Facts[Note],FILTER(ALL(Facts),Facts[Quantity]>3),\"s\",SUM(Facts[Quantity])),Facts[Region],Facts[Note]),1)",
+   "powerbi": "3"
+  },
+  {
+   "expr": "TOCSV(ADDMISSINGITEMS(Facts[Region],SUMMARIZECOLUMNS(Facts[Region],FILTER(ALL(Facts),Facts[Quantity]>3),\"s\",SUM(Facts[Quantity])),Facts[Region],Facts[Note]))",
+   "powerbi": "'Facts'[Region],[s]\nEast,5\nNorth,4\nWest,"
+  },
+  {
+   "expr": "COUNTROWS(ADDMISSINGITEMS(Facts[Region],SUMMARIZECOLUMNS(Facts[Region],FILTER(ALL(Facts),Facts[Quantity]>3),\"s\",SUM(Facts[Quantity])),Facts[Region],Facts[Note]))",
+   "powerbi": "3"
+  },
+  {
+   "expr": "SUMX(ADDMISSINGITEMS(Facts[Region],SUMMARIZECOLUMNS(Facts[Region],FILTER(ALL(Facts),Facts[Quantity]>3),\"s\",SUM(Facts[Quantity])),Facts[Region],Facts[Note]),[s])",
+   "powerbi": "9"
+  },
+  {
+   "expr": "SUMX(ADDMISSINGITEMS(Facts[Region],SUMMARIZECOLUMNS(Facts[Region],FILTER(ALL(Facts),Facts[Quantity]>3),\"s\",SUM(Facts[Quantity])),Facts[Region],Facts[Note]),1)",
+   "powerbi": "3"
+  },
+  {
+   "expr": "TOCSV(ADDMISSINGITEMS(Facts[Region],SUMMARIZECOLUMNS(Facts[Region],FILTER(ALL(Facts),Facts[Quantity]>3),\"s\",SUM(Facts[Quantity])),Facts[Note]))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 41) ShowAll column of ADDMISSINGITEMS function is not found as GroupBy column in argument number 1.\""
+  },
+  {
+   "expr": "COUNTROWS(ADDMISSINGITEMS(Facts[Region],SUMMARIZECOLUMNS(Facts[Region],FILTER(ALL(Facts),Facts[Quantity]>3),\"s\",SUM(Facts[Quantity])),Facts[Note]))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 45) ShowAll column of ADDMISSINGITEMS function is not found as GroupBy column in argument number 1.\""
+  },
+  {
+   "expr": "SUMX(ADDMISSINGITEMS(Facts[Region],SUMMARIZECOLUMNS(Facts[Region],FILTER(ALL(Facts),Facts[Quantity]>3),\"s\",SUM(Facts[Quantity])),Facts[Note]),[s])",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 40) ShowAll column of ADDMISSINGITEMS function is not found as GroupBy column in argument number 1.\""
+  },
+  {
+   "expr": "SUMX(ADDMISSINGITEMS(Facts[Region],SUMMARIZECOLUMNS(Facts[Region],FILTER(ALL(Facts),Facts[Quantity]>3),\"s\",SUM(Facts[Quantity])),Facts[Note]),1)",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 40) ShowAll column of ADDMISSINGITEMS function is not found as GroupBy column in argument number 1.\""
+  },
+  {
+   "expr": "TOCSV(ADDMISSINGITEMS(Facts[Quantity],SUMMARIZECOLUMNS(Facts[Quantity],FILTER(ALL(Facts),Facts[Region]=\"East\"),\"s\",SUM(Facts[Sales])),Facts[Quantity]))",
+   "powerbi": "'Facts'[Quantity],[s]\n1,-1.5\n2,10.5\n5,2.5\n0,\n3,\n4,"
+  },
+  {
+   "expr": "COUNTROWS(ADDMISSINGITEMS(Facts[Quantity],SUMMARIZECOLUMNS(Facts[Quantity],FILTER(ALL(Facts),Facts[Region]=\"East\"),\"s\",SUM(Facts[Sales])),Facts[Quantity]))",
+   "powerbi": "6"
+  },
+  {
+   "expr": "SUMX(ADDMISSINGITEMS(Facts[Quantity],SUMMARIZECOLUMNS(Facts[Quantity],FILTER(ALL(Facts),Facts[Region]=\"East\"),\"s\",SUM(Facts[Sales])),Facts[Quantity]),[s])",
+   "powerbi": "11.5"
+  },
+  {
+   "expr": "SUMX(ADDMISSINGITEMS(Facts[Quantity],SUMMARIZECOLUMNS(Facts[Quantity],FILTER(ALL(Facts),Facts[Region]=\"East\"),\"s\",SUM(Facts[Sales])),Facts[Quantity]),1)",
+   "powerbi": "6"
+  },
+  {
+   "expr": "TOCSV(ADDMISSINGITEMS(Facts[Region],ADDCOLUMNS(VALUES(Facts[Region]),\"s\",CALCULATE(SUM(Facts[Quantity]))),Facts[Region]))",
+   "powerbi": "'Facts'[Region],[s]\nEast,8\nWest,3\nNorth,4"
+  },
+  {
+   "expr": "COUNTROWS(ADDMISSINGITEMS(Facts[Region],ADDCOLUMNS(VALUES(Facts[Region]),\"s\",CALCULATE(SUM(Facts[Quantity]))),Facts[Region]))",
+   "powerbi": "3"
+  },
+  {
+   "expr": "SUMX(ADDMISSINGITEMS(Facts[Region],ADDCOLUMNS(VALUES(Facts[Region]),\"s\",CALCULATE(SUM(Facts[Quantity]))),Facts[Region]),[s])",
+   "powerbi": "15"
+  },
+  {
+   "expr": "SUMX(ADDMISSINGITEMS(Facts[Region],ADDCOLUMNS(VALUES(Facts[Region]),\"s\",CALCULATE(SUM(Facts[Quantity]))),Facts[Region]),1)",
+   "powerbi": "3"
+  },
+  {
+   "expr": "TOCSV(ADDMISSINGITEMS(Facts[Region],SUMMARIZE(Facts,Facts[Region],\"s\",SUM(Facts[Quantity])),Facts[Region]))",
+   "powerbi": "'Facts'[Region],[s]\nEast,8\nWest,3\nNorth,4"
+  },
+  {
+   "expr": "COUNTROWS(ADDMISSINGITEMS(Facts[Region],SUMMARIZE(Facts,Facts[Region],\"s\",SUM(Facts[Quantity])),Facts[Region]))",
+   "powerbi": "3"
+  },
+  {
+   "expr": "SUMX(ADDMISSINGITEMS(Facts[Region],SUMMARIZE(Facts,Facts[Region],\"s\",SUM(Facts[Quantity])),Facts[Region]),[s])",
+   "powerbi": "15"
+  },
+  {
+   "expr": "SUMX(ADDMISSINGITEMS(Facts[Region],SUMMARIZE(Facts,Facts[Region],\"s\",SUM(Facts[Quantity])),Facts[Region]),1)",
+   "powerbi": "3"
+  },
+  {
+   "expr": "COUNTROWS(ADDMISSINGITEMS(Facts[Region],SUMMARIZECOLUMNS(Facts[Region],FILTER(ALL(Facts),Facts[Quantity]>3),\"s\",SUM(Facts[Quantity])),Facts[Region],FILTER(Facts,Facts[Quantity]>3)))",
+   "powerbi": "2"
+  },
+  {
+   "expr": "COUNTROWS(ADDMISSINGITEMS(Facts[Region],SUMMARIZECOLUMNS(Facts[Region],FILTER(ALL(Facts),Facts[Quantity]>3),\"s\",SUM(Facts[Quantity])),Facts[Region],ALL(Facts)))",
+   "powerbi": "3"
+  },
+  {
+   "expr": "COUNTROWS(ADDMISSINGITEMS(Facts[Region],SUMMARIZECOLUMNS(Facts[Region],FILTER(ALL(Facts),Facts[Quantity]>3),\"s\",SUM(Facts[Quantity])),Facts[Region],FILTER(Facts,FALSE())))",
+   "powerbi": "2"
+  },
+  {
+   "expr": "TOCSV(ADDMISSINGITEMS(Facts[Region],SUMMARIZECOLUMNS(Facts[Region],FILTER(ALL(Facts),Facts[Quantity]>3),\"s\",SUM(Facts[Quantity])),Facts[Region],FILTER(Facts,FALSE())))",
+   "powerbi": "'Facts'[Region],[s]\nEast,5\nNorth,4"
+  },
+  {
+   "expr": "COUNTROWS(ADDMISSINGITEMS(SUMMARIZECOLUMNS(Facts[Region],FILTER(ALL(Facts),Facts[Quantity]>3),\"s\",SUM(Facts[Quantity])),Facts[Region]))",
+   "powerbi": "2"
+  },
+  {
+   "expr": "COUNTROWS(ADDMISSINGITEMS(Facts[Region],SUMMARIZECOLUMNS(Facts[Region],FILTER(ALL(Facts),Facts[Quantity]>3),\"s\",SUM(Facts[Quantity]))))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 45) ShowAll column of ADDMISSINGITEMS function is not found as GroupBy column in argument number 1.\""
+  },
+  {
+   "expr": "COUNTROWS(ADDMISSINGITEMS(Facts[Region]))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 29) ADDMISSINGITEMS function expects a table in argument number 2.\""
+  },
+  {
+   "expr": "COUNTROWS(ADDMISSINGITEMS(Facts[Region],Facts[Note],SUMMARIZECOLUMNS(Facts[Region],FILTER(ALL(Facts),Facts[Quantity]>3),\"s\",SUM(Facts[Quantity])),Facts[Region]))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 59) ShowAll column of ADDMISSINGITEMS function is not found as GroupBy column in argument number 2.\""
+  },
+  {
+   "expr": "COUNTROWS(ADDMISSINGITEMS(Facts[Region],\"a\",SUMMARIZECOLUMNS(Facts[Region],FILTER(ALL(Facts),Facts[Quantity]>3),\"s\",SUM(Facts[Quantity])),Facts[Region]))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 59) The function expects a table expression for argument '2', but a string or numeric expression was used.\""
+  },
+  {
+   "expr": "COUNTROWS(ADDMISSINGITEMS(1,SUMMARIZECOLUMNS(Facts[Region],FILTER(ALL(Facts),Facts[Quantity]>3),\"s\",SUM(Facts[Quantity])),Facts[Region]))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 45) The function expects a table expression for argument '1', but a string or numeric expression was used.\""
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(ADDMISSINGITEMS(Facts[Region],SUMMARIZECOLUMNS(Facts[Region],FILTER(ALL(Facts),Facts[Quantity]>3),\"s\",SUM(Facts[Quantity])),Facts[Region])),Facts[Region]=\"East\")",
+   "powerbi": "2"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(ADDMISSINGITEMS(Facts[Region],SUMMARIZECOLUMNS(Facts[Region],\"s\",SUM(Facts[Quantity])),Facts[Region])),Facts[Quantity]>3)",
+   "powerbi": "2"
+  },
+  {
+   "expr": "MAXX(ADDMISSINGITEMS(Facts[Region],VALUES(Facts[Region]),Facts[Region]),1)",
+   "powerbi": "1"
+  },
+  {
+   "expr": "COUNTX(ADDMISSINGITEMS(Facts[Region],VALUES(Facts[Region]),Facts[Region]),1)",
+   "powerbi": "3"
+  },
+  {
+   "expr": "SUMX(KEEPFILTERS(VALUES(Facts[Region])),1)",
+   "powerbi": "3"
+  },
+  {
+   "expr": "MAXX(KEEPFILTERS(VALUES(Facts[Region])),1)",
+   "powerbi": "1"
+  },
+  {
+   "expr": "COUNTX(KEEPFILTERS(VALUES(Facts[Region])),1)",
+   "powerbi": "3"
+  },
+  {
+   "expr": "COUNTROWS(KEEPFILTERS(VALUES(Facts[Region])))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 29) KEEPFILTERS function can only be used as a top level filter argument of CALCULATE and CALCULATETABLE or with a table argument of a function performing a table scan.\""
+  },
+  {
+   "expr": "TOCSV(SUMMARIZECOLUMNS(ROLLUPADDISSUBTOTAL(Facts[Region],\"sub\"),\"s\",SUM(Facts[Quantity])))",
+   "powerbi": "'Facts'[Region],[sub],[s]\nEast,FALSE,8\nWest,FALSE,3\nNorth,FALSE,4\n,TRUE,15"
+  },
+  {
+   "expr": "COUNTROWS(SUMMARIZECOLUMNS(ROLLUPADDISSUBTOTAL(Facts[Region],\"sub\"),\"s\",SUM(Facts[Quantity])))",
+   "powerbi": "4"
+  },
+  {
+   "expr": "TOCSV(SUMMARIZECOLUMNS(ROLLUPADDISSUBTOTAL(Facts[Region],\"a\",Facts[Note],\"b\"),\"s\",SUM(Facts[Quantity])))",
+   "powerbi": "'Facts'[Region],'Facts'[Note],[a],[b],[s]\nEast,,FALSE,FALSE,5\nWest,,FALSE,FALSE,3\nEast,Paid,FALSE,FALSE,3\nWest,Paid,FALSE,FALSE,0\nNorth,Late,FALSE,FALSE,4\nEast,,FALSE,TRUE,8\nWest,,FALSE,TRUE,3\nNorth,,FALSE,TRUE,4\n,,TRUE,TRUE,15"
+  },
+  {
+   "expr": "TOCSV(SUMMARIZE(Facts,ROLLUP(Facts[Region]),\"s\",SUM(Facts[Quantity])))",
+   "powerbi": "'Facts'[Region],[s]\nEast,8\nWest,3\nNorth,4\n,15"
+  },
+  {
+   "expr": "TOCSV(SUMMARIZE(Facts,ROLLUP(Facts[Region],Facts[Note]),\"s\",SUM(Facts[Quantity])))",
+   "powerbi": "'Facts'[Region],'Facts'[Note],[s]\nEast,,5\nWest,,3\nEast,Paid,3\nWest,Paid,0\nNorth,Late,4\nEast,,8\nWest,,3\nNorth,,4\n,,15"
+  },
+  {
+   "expr": "TOCSV(SUMMARIZE(Facts,Facts[Region],ROLLUP(Facts[Note]),\"s\",SUM(Facts[Quantity])))",
+   "powerbi": "'Facts'[Region],'Facts'[Note],[s]\nEast,,5\nWest,,3\nEast,Paid,3\nWest,Paid,0\nNorth,Late,4\nEast,,8\nWest,,3\nNorth,,4"
+  },
+  {
+   "expr": "TOCSV(SUMMARIZE(Facts,ROLLUPGROUP(Facts[Region],Facts[Note]),\"s\",SUM(Facts[Quantity])))",
+   "powerbi": "'Facts'[Region],'Facts'[Note],[s]\nEast,,5\nWest,,3\nEast,Paid,3\nWest,Paid,0\nNorth,Late,4\nEast,,8\nWest,,3\nNorth,,4\n,,15"
+  },
+  {
+   "expr": "TOCSV(SUMMARIZE(Facts,ROLLUP(ROLLUPGROUP(Facts[Region],Facts[Note])),\"s\",SUM(Facts[Quantity])))",
+   "powerbi": "'Facts'[Region],'Facts'[Note],[s]\nEast,,5\nWest,,3\nEast,Paid,3\nWest,Paid,0\nNorth,Late,4\n,,15"
+  },
+  {
+   "expr": "TOCSV(SUMMARIZE(Facts,ROLLUP(Facts[Region]),\"s\",SUM(Facts[Quantity]),\"x\",ISSUBTOTAL(Facts[Region])))",
+   "powerbi": "'Facts'[Region],[s],[x]\nEast,8,FALSE\nWest,3,FALSE\nNorth,4,FALSE\n,15,TRUE"
+  },
+  {
+   "expr": "TOCSV(SUMMARIZE(Facts,ROLLUP(Facts[Region],Facts[Note]),\"x\",ISSUBTOTAL(Facts[Region]),\"y\",ISSUBTOTAL(Facts[Note])))",
+   "powerbi": "'Facts'[Region],'Facts'[Note],[x],[y]\nEast,,FALSE,FALSE\nWest,,FALSE,FALSE\nEast,Paid,FALSE,FALSE\nWest,Paid,FALSE,FALSE\nNorth,Late,FALSE,FALSE\nEast,,FALSE,TRUE\nWest,,FALSE,TRUE\nNorth,,FALSE,TRUE\n,,TRUE,TRUE"
+  },
+  {
+   "expr": "TOCSV(SUMMARIZE(Facts,Facts[Region],ROLLUPGROUP(Facts[Note]),\"s\",SUM(Facts[Quantity])))",
+   "powerbi": "'Facts'[Region],'Facts'[Note],[s]\nEast,,5\nWest,,3\nEast,Paid,3\nWest,Paid,0\nNorth,Late,4\nEast,,8\nWest,,3\nNorth,,4"
+  },
+  {
+   "expr": "TOCSV(SUMMARIZECOLUMNS(Facts[Region],ROLLUPADDISSUBTOTAL(Facts[Note],\"sub\"),\"s\",SUM(Facts[Quantity])))",
+   "powerbi": "'Facts'[Region],'Facts'[Note],[sub],[s]\nEast,,FALSE,5\nWest,,FALSE,3\nEast,Paid,FALSE,3\nWest,Paid,FALSE,0\nNorth,Late,FALSE,4\nEast,,TRUE,8\nWest,,TRUE,3\nNorth,,TRUE,4"
+  },
+  {
+   "expr": "TOCSV(SUMMARIZECOLUMNS(ROLLUPADDISSUBTOTAL(ROLLUPGROUP(Facts[Region],Facts[Note]),\"sub\"),\"s\",SUM(Facts[Quantity])))",
+   "powerbi": "'Facts'[Region],'Facts'[Note],[sub],[s]\nEast,,FALSE,5\nWest,,FALSE,3\nEast,Paid,FALSE,3\nWest,Paid,FALSE,0\nNorth,Late,FALSE,4\n,,TRUE,15"
+  },
+  {
+   "expr": "TOCSV(SUMMARIZECOLUMNS(ROLLUPGROUP(Facts[Region],Facts[Note]),\"s\",SUM(Facts[Quantity])))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 42) ROLLUPGROUP function can only be used in the ROLLUP function.\""
+  },
+  {
+   "expr": "TOCSV(SUMMARIZECOLUMNS(ROLLUPADDISSUBTOTAL(Facts[Region],\"sub\"),FILTER(ALL(Facts),Facts[Quantity]>2),\"s\",SUM(Facts[Quantity])))",
+   "powerbi": "'Facts'[Region],[sub],[s]\nEast,FALSE,5\nWest,FALSE,3\nNorth,FALSE,4\n,TRUE,12"
+  },
+  {
+   "expr": "TOCSV(SUMMARIZE(Facts,ROLLUP(Facts[Region]),\"s\",SUM(Facts[Quantity]),\"c\",COUNTROWS(Facts)))",
+   "powerbi": "'Facts'[Region],[s],[c]\nEast,8,3\nWest,3,2\nNorth,4,1\n,15,6"
+  },
+  {
+   "expr": "TOCSV(SUMMARIZE(Facts,ROLLUP(Facts[Region]),\"s\",SUM(Facts[Sales])))",
+   "powerbi": "'Facts'[Region],[s]\nEast,11.5\nWest,20\nNorth,\n,31.5"
+  },
+  {
+   "expr": "COUNTROWS(SUMMARIZE(Facts,ROLLUP(Facts[Region])))",
+   "powerbi": "2"
+  },
+  {
+   "expr": "COUNTROWS(SUMMARIZE(Facts,ROLLUP(Facts[Region],Facts[Note])))",
+   "powerbi": "3"
+  }
+ ]
+}

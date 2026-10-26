@@ -1,7 +1,7 @@
 {
  "powerbi_version": "2.157.879.0 (26.08)+da30fe74eb0b8a8786ab7326b69c400a0e951831",
  "frozen": "2026-10-22",
- "note": "Probes written by an independent tester agent (round 2); asked of Power BI Desktop 2.157.879.0 in chunks of 10 with retries. Matches and honest refusals only; the differences are in pending/dax_battery_round2_findings.json.",
+ "note": "Probes written by an independent tester agent (round 2); asked of Power BI Desktop 2.157.879.0 in chunks of 10 with retries. Matches and honest refusals only; the differences are in pending/dax_battery_round2_findings.json. | 2026-10-26: the 6 TOCSV/TOJSON answers re-asked with the multi-line reader (they were cut to their first line).",
  "items": [
   {
    "expr": "SUM(Facts[Sales])",
@@ -8717,23 +8717,23 @@
   },
   {
    "expr": "TOCSV(ROW(\"a\",1))",
-   "powerbi": "[a]"
+   "powerbi": "[a]\n1"
   },
   {
    "expr": "TOCSV(ROW(\"a\",1,\"b\",\"x\"),0)",
-   "powerbi": "[a],[b]"
+   "powerbi": "[a],[b]\n"
   },
   {
    "expr": "TOCSV(ROW(\"a\",1),5,\",\")",
-   "powerbi": "[a]"
+   "powerbi": "[a]\n1"
   },
   {
    "expr": "TOJSON(ROW(\"a\",1))",
-   "powerbi": "{"
+   "powerbi": "{\n\t\"header\": [\"[a]\"],\n\t\"rowCount\": 1,\n\t\"data\": [\n\t\t[1]\n\t]\n}"
   },
   {
    "expr": "TOJSON(ROW(\"a\",1,\"b\",\"x\"))",
-   "powerbi": "{"
+   "powerbi": "{\n\t\"header\": [\"[a]\", \"[b]\"],\n\t\"rowCount\": 1,\n\t\"data\": [\n\t\t[1, \"x\"]\n\t]\n}"
   },
   {
    "expr": "LEN(TOJSON(Facts))",
@@ -8741,7 +8741,7 @@
   },
   {
    "expr": "TOCSV(DATATABLE(\"a\",INTEGER,\"b\",STRING,{{1,\"x\"},{2,\"y,z\"}}),5,\";\")",
-   "powerbi": "[a];[b]"
+   "powerbi": "[a];[b]\n1;x\n2;y,z"
   },
   {
    "expr": "TOJSON(DATATABLE(\"a\",STRING,{{\"q\\\"uote\"}}))",

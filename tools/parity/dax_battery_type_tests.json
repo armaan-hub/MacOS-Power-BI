@@ -1,0 +1,1490 @@
+{
+ "powerbi_version": "2.157.879.0 (26.08)+da30fe74eb0b8a8786ab7326b69c400a0e951831",
+ "frozen": "2026-10-26",
+ "items": [
+  {
+   "expr": "ISINTEGER(1)",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISINTEGER(1.5)",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISINTEGER(\"a\")",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISINTEGER(TRUE())",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISINTEGER(BLANK())",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISINTEGER(CURRENCY(1))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISINTEGER(DATE(2020,1,1))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISINTEGER(1/2)",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISINTEGER(2/1)",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISINTEGER(SUM(Facts[Sales]))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISINTEGER(SUM(Facts[Quantity]))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISINTEGER(COUNTROWS(Facts))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISINTEGER(AVERAGE(Facts[Quantity]))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISINTEGER(INT(2.5))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISINTEGER(ROUND(2.5,0))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISINTEGER(POWER(2,2))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISINTEGER(SQRT(4))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISINTEGER(1000000000000)",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISINTEGER(0.1+0.2)",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISINTEGER(1E0)",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISINTEGER(MAX(Facts[Quantity]))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISINTEGER(MAX(Facts[Sales]))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISINTEGER(MIN(Facts[Quantity]))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISINTEGER(COUNT(Facts[Sales]))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISINTEGER(DISTINCTCOUNT(Facts[Region]))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISINTEGER(AVERAGE(Facts[Sales]))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISINTEGER(DIVIDE(1,2))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISINTEGER(DIVIDE(4,2))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISINTEGER(1+1)",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISINTEGER(1+1.5)",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISINTEGER(2*3)",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISINTEGER(2*0.5)",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISINTEGER(-1)",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISINTEGER(ABS(-1))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISINTEGER(MOD(7,3))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISINTEGER(FLOOR(2.5,1))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISINTEGER(CEILING(2.5,1))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISINTEGER(TRUNC(2.5))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISINTEGER(LEN(\"abc\"))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISINTEGER(YEAR(DATE(2020,1,1)))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISINTEGER(VALUE(\"5\"))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISINTEGER(SUM(Facts[Quantity])+1)",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISINTEGER(SUM(Facts[Quantity])/1)",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISINTEGER(SUM(Facts[Quantity])*1.0)",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISINTEGER(CURRENCY(1)+1)",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISINTEGER(CURRENCY(1)*2)",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISINTEGER(CURRENCY(1)+1.5)",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISINTEGER(CURRENCY(1)/2)",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISINTEGER(FIXED(1))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISINTEGER(ROUND(CURRENCY(1.234),1))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISINTEGER(1=1)",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISINTEGER(\"1\")",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISINTEGER(1E15)",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISINTEGER(9223372036854775807)",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISINTEGER(9223372036854775808)",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISINTEGER(-9223372036854775808)",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISINTEGER(1E19)",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISINTEGER(CALCULATE(SUM(Facts[Quantity]),Facts[Region]=\"Nope\"))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISINTEGER(SUM(Facts[Sales])*CURRENCY(1))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISINT64(1)",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISINT64(1.5)",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISINT64(\"a\")",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISINT64(TRUE())",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISINT64(BLANK())",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISINT64(CURRENCY(1))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISINT64(DATE(2020,1,1))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISINT64(1/2)",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISINT64(2/1)",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISINT64(SUM(Facts[Sales]))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISINT64(SUM(Facts[Quantity]))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISINT64(COUNTROWS(Facts))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISINT64(AVERAGE(Facts[Quantity]))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISINT64(INT(2.5))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISINT64(ROUND(2.5,0))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISINT64(POWER(2,2))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISINT64(SQRT(4))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISINT64(1000000000000)",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISINT64(0.1+0.2)",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISINT64(1E0)",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISINT64(MAX(Facts[Quantity]))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISINT64(MAX(Facts[Sales]))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISINT64(MIN(Facts[Quantity]))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISINT64(COUNT(Facts[Sales]))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISINT64(DISTINCTCOUNT(Facts[Region]))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISINT64(AVERAGE(Facts[Sales]))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISINT64(DIVIDE(1,2))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISINT64(DIVIDE(4,2))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISINT64(1+1)",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISINT64(1+1.5)",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISINT64(2*3)",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISINT64(2*0.5)",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISINT64(-1)",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISINT64(ABS(-1))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISINT64(MOD(7,3))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISINT64(FLOOR(2.5,1))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISINT64(CEILING(2.5,1))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISINT64(TRUNC(2.5))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISINT64(LEN(\"abc\"))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISINT64(YEAR(DATE(2020,1,1)))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISINT64(VALUE(\"5\"))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISINT64(SUM(Facts[Quantity])+1)",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISINT64(SUM(Facts[Quantity])/1)",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISINT64(SUM(Facts[Quantity])*1.0)",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISINT64(CURRENCY(1)+1)",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISINT64(CURRENCY(1)*2)",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISINT64(CURRENCY(1)+1.5)",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISINT64(CURRENCY(1)/2)",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISINT64(FIXED(1))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISINT64(ROUND(CURRENCY(1.234),1))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISINT64(1=1)",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISINT64(\"1\")",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISINT64(1E15)",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISINT64(9223372036854775807)",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISINT64(9223372036854775808)",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISINT64(-9223372036854775808)",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISINT64(1E19)",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISINT64(CALCULATE(SUM(Facts[Quantity]),Facts[Region]=\"Nope\"))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISINT64(SUM(Facts[Sales])*CURRENCY(1))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISDOUBLE(1)",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISDOUBLE(1.5)",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISDOUBLE(\"a\")",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISDOUBLE(TRUE())",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISDOUBLE(BLANK())",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISDOUBLE(CURRENCY(1))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISDOUBLE(DATE(2020,1,1))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISDOUBLE(1/2)",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISDOUBLE(2/1)",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISDOUBLE(SUM(Facts[Sales]))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISDOUBLE(SUM(Facts[Quantity]))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISDOUBLE(COUNTROWS(Facts))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISDOUBLE(AVERAGE(Facts[Quantity]))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISDOUBLE(INT(2.5))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISDOUBLE(ROUND(2.5,0))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISDOUBLE(POWER(2,2))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISDOUBLE(SQRT(4))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISDOUBLE(1000000000000)",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISDOUBLE(0.1+0.2)",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISDOUBLE(1E0)",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISDOUBLE(MAX(Facts[Quantity]))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISDOUBLE(MAX(Facts[Sales]))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISDOUBLE(MIN(Facts[Quantity]))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISDOUBLE(COUNT(Facts[Sales]))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISDOUBLE(DISTINCTCOUNT(Facts[Region]))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISDOUBLE(AVERAGE(Facts[Sales]))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISDOUBLE(DIVIDE(1,2))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISDOUBLE(DIVIDE(4,2))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISDOUBLE(1+1)",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISDOUBLE(1+1.5)",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISDOUBLE(2*3)",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISDOUBLE(2*0.5)",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISDOUBLE(-1)",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISDOUBLE(ABS(-1))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISDOUBLE(MOD(7,3))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISDOUBLE(FLOOR(2.5,1))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISDOUBLE(CEILING(2.5,1))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISDOUBLE(TRUNC(2.5))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISDOUBLE(LEN(\"abc\"))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISDOUBLE(YEAR(DATE(2020,1,1)))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISDOUBLE(VALUE(\"5\"))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISDOUBLE(SUM(Facts[Quantity])+1)",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISDOUBLE(SUM(Facts[Quantity])/1)",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISDOUBLE(SUM(Facts[Quantity])*1.0)",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISDOUBLE(CURRENCY(1)+1)",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISDOUBLE(CURRENCY(1)*2)",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISDOUBLE(CURRENCY(1)+1.5)",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISDOUBLE(CURRENCY(1)/2)",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISDOUBLE(FIXED(1))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISDOUBLE(ROUND(CURRENCY(1.234),1))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISDOUBLE(1=1)",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISDOUBLE(\"1\")",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISDOUBLE(1E15)",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISDOUBLE(9223372036854775807)",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISDOUBLE(9223372036854775808)",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISDOUBLE(-9223372036854775808)",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISDOUBLE(1E19)",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISDOUBLE(CALCULATE(SUM(Facts[Quantity]),Facts[Region]=\"Nope\"))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISDOUBLE(SUM(Facts[Sales])*CURRENCY(1))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISDECIMAL(1)",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISDECIMAL(1.5)",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISDECIMAL(\"a\")",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISDECIMAL(TRUE())",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISDECIMAL(BLANK())",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISDECIMAL(CURRENCY(1))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISDECIMAL(DATE(2020,1,1))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISDECIMAL(1/2)",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISDECIMAL(2/1)",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISDECIMAL(SUM(Facts[Sales]))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISDECIMAL(SUM(Facts[Quantity]))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISDECIMAL(COUNTROWS(Facts))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISDECIMAL(AVERAGE(Facts[Quantity]))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISDECIMAL(INT(2.5))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISDECIMAL(ROUND(2.5,0))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISDECIMAL(POWER(2,2))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISDECIMAL(SQRT(4))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISDECIMAL(1000000000000)",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISDECIMAL(0.1+0.2)",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISDECIMAL(1E0)",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISDECIMAL(MAX(Facts[Quantity]))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISDECIMAL(MAX(Facts[Sales]))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISDECIMAL(MIN(Facts[Quantity]))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISDECIMAL(COUNT(Facts[Sales]))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISDECIMAL(DISTINCTCOUNT(Facts[Region]))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISDECIMAL(AVERAGE(Facts[Sales]))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISDECIMAL(DIVIDE(1,2))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISDECIMAL(DIVIDE(4,2))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISDECIMAL(1+1)",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISDECIMAL(1+1.5)",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISDECIMAL(2*3)",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISDECIMAL(2*0.5)",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISDECIMAL(-1)",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISDECIMAL(ABS(-1))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISDECIMAL(MOD(7,3))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISDECIMAL(FLOOR(2.5,1))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISDECIMAL(CEILING(2.5,1))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISDECIMAL(TRUNC(2.5))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISDECIMAL(LEN(\"abc\"))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISDECIMAL(YEAR(DATE(2020,1,1)))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISDECIMAL(VALUE(\"5\"))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISDECIMAL(SUM(Facts[Quantity])+1)",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISDECIMAL(SUM(Facts[Quantity])/1)",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISDECIMAL(SUM(Facts[Quantity])*1.0)",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISDECIMAL(CURRENCY(1)+1)",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISDECIMAL(CURRENCY(1)*2)",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISDECIMAL(CURRENCY(1)+1.5)",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISDECIMAL(CURRENCY(1)/2)",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISDECIMAL(FIXED(1))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISDECIMAL(ROUND(CURRENCY(1.234),1))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISDECIMAL(1=1)",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISDECIMAL(\"1\")",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISDECIMAL(1E15)",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISDECIMAL(9223372036854775807)",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISDECIMAL(9223372036854775808)",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISDECIMAL(-9223372036854775808)",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISDECIMAL(1E19)",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISDECIMAL(CALCULATE(SUM(Facts[Quantity]),Facts[Region]=\"Nope\"))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISDECIMAL(SUM(Facts[Sales])*CURRENCY(1))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISCURRENCY(1)",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISCURRENCY(1.5)",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISCURRENCY(\"a\")",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISCURRENCY(TRUE())",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISCURRENCY(BLANK())",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISCURRENCY(CURRENCY(1))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISCURRENCY(DATE(2020,1,1))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISCURRENCY(1/2)",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISCURRENCY(2/1)",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISCURRENCY(SUM(Facts[Sales]))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISCURRENCY(SUM(Facts[Quantity]))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISCURRENCY(COUNTROWS(Facts))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISCURRENCY(AVERAGE(Facts[Quantity]))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISCURRENCY(INT(2.5))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISCURRENCY(ROUND(2.5,0))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISCURRENCY(POWER(2,2))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISCURRENCY(SQRT(4))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISCURRENCY(1000000000000)",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISCURRENCY(0.1+0.2)",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISCURRENCY(1E0)",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISCURRENCY(MAX(Facts[Quantity]))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISCURRENCY(MAX(Facts[Sales]))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISCURRENCY(MIN(Facts[Quantity]))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISCURRENCY(COUNT(Facts[Sales]))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISCURRENCY(DISTINCTCOUNT(Facts[Region]))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISCURRENCY(AVERAGE(Facts[Sales]))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISCURRENCY(DIVIDE(1,2))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISCURRENCY(DIVIDE(4,2))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISCURRENCY(1+1)",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISCURRENCY(1+1.5)",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISCURRENCY(2*3)",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISCURRENCY(2*0.5)",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISCURRENCY(-1)",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISCURRENCY(ABS(-1))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISCURRENCY(MOD(7,3))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISCURRENCY(FLOOR(2.5,1))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISCURRENCY(CEILING(2.5,1))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISCURRENCY(TRUNC(2.5))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISCURRENCY(LEN(\"abc\"))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISCURRENCY(YEAR(DATE(2020,1,1)))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISCURRENCY(VALUE(\"5\"))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISCURRENCY(SUM(Facts[Quantity])+1)",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISCURRENCY(SUM(Facts[Quantity])/1)",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISCURRENCY(SUM(Facts[Quantity])*1.0)",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISCURRENCY(CURRENCY(1)+1)",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISCURRENCY(CURRENCY(1)*2)",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISCURRENCY(CURRENCY(1)+1.5)",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISCURRENCY(CURRENCY(1)/2)",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISCURRENCY(FIXED(1))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISCURRENCY(ROUND(CURRENCY(1.234),1))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISCURRENCY(1=1)",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISCURRENCY(\"1\")",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISCURRENCY(1E15)",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISCURRENCY(9223372036854775807)",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISCURRENCY(9223372036854775808)",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISCURRENCY(-9223372036854775808)",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISCURRENCY(1E19)",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISCURRENCY(CALCULATE(SUM(Facts[Quantity]),Facts[Region]=\"Nope\"))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISCURRENCY(SUM(Facts[Sales])*CURRENCY(1))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISINTEGER()",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 19) Too few arguments were passed to the ISINTEGER function. The minimum argument count for the function is 1.\""
+  },
+  {
+   "expr": "ISINTEGER(1,2)",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 31) Too many arguments were passed to the ISINTEGER function. The maximum argument count for the function is 1.\""
+  },
+  {
+   "expr": "ISDOUBLE()",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 19) Too few arguments were passed to the ISDOUBLE function. The minimum argument count for the function is 1.\""
+  },
+  {
+   "expr": "ISDECIMAL(1,2)",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 31) Too many arguments were passed to the ISDECIMAL function. The maximum argument count for the function is 1.\""
+  },
+  {
+   "expr": "ISCURRENCY()",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 19) Too few arguments were passed to the ISCURRENCY function. The minimum argument count for the function is 1.\""
+  },
+  {
+   "expr": "ISINT64(1,2)",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 29) Too many arguments were passed to the ISINT64 function. The maximum argument count for the function is 1.\""
+  },
+  {
+   "expr": "ISINTEGER(Facts)",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 29) The expression refers to multiple columns. Multiple columns cannot be converted to a scalar value.\""
+  },
+  {
+   "expr": "ISINTEGER(Facts[Quantity])",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 29) A single value for column 'Quantity' in table 'Facts' cannot be determined. This can happen when a measure or function formula refers to a column that contains many values without specifying an aggregation such as min, max, count, or sum to get a single result.\""
+  },
+  {
+   "expr": "ISDOUBLE(Facts[Sales])",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 28) A single value for column 'Sales' in table 'Facts' cannot be determined. This can happen when a measure or function formula refers to a column that contains many values without specifying an aggregation such as min, max, count, or sum to get a single result.\""
+  },
+  {
+   "expr": "SUMX(Facts,IF(ISINTEGER(Facts[Sales]),1,0))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "SUMX(Facts,IF(ISINTEGER(Facts[Quantity]),1,0))",
+   "powerbi": "6"
+  },
+  {
+   "expr": "SUMX(Facts,IF(ISINTEGER(Facts[Region]),1,0))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "SUMX(Facts,IF(ISINTEGER(Facts[Quantity]+1),1,0))",
+   "powerbi": "6"
+  },
+  {
+   "expr": "SUMX(Facts,IF(ISINTEGER(Facts[Quantity]*0.5),1,0))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "SUMX(Facts,IF(ISDOUBLE(Facts[Sales]),1,0))",
+   "powerbi": "5"
+  },
+  {
+   "expr": "SUMX(Facts,IF(ISDOUBLE(Facts[Quantity]),1,0))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "SUMX(Facts,IF(ISDOUBLE(Facts[Region]),1,0))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "SUMX(Facts,IF(ISDOUBLE(Facts[Quantity]+1),1,0))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "SUMX(Facts,IF(ISDOUBLE(Facts[Quantity]*0.5),1,0))",
+   "powerbi": "6"
+  },
+  {
+   "expr": "SUMX(Facts,IF(ISDECIMAL(Facts[Sales]),1,0))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "SUMX(Facts,IF(ISDECIMAL(Facts[Quantity]),1,0))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "SUMX(Facts,IF(ISDECIMAL(Facts[Region]),1,0))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "SUMX(Facts,IF(ISDECIMAL(Facts[Quantity]+1),1,0))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "SUMX(Facts,IF(ISDECIMAL(Facts[Quantity]*0.5),1,0))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "SUMX(Facts,IF(ISCURRENCY(Facts[Sales]),1,0))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "SUMX(Facts,IF(ISCURRENCY(Facts[Quantity]),1,0))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "SUMX(Facts,IF(ISCURRENCY(Facts[Region]),1,0))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "SUMX(Facts,IF(ISCURRENCY(Facts[Quantity]+1),1,0))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "SUMX(Facts,IF(ISCURRENCY(Facts[Quantity]*0.5),1,0))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "SUMX(Facts,IF(ISINT64(Facts[Sales]),1,0))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "SUMX(Facts,IF(ISINT64(Facts[Quantity]),1,0))",
+   "powerbi": "6"
+  },
+  {
+   "expr": "SUMX(Facts,IF(ISINT64(Facts[Region]),1,0))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "SUMX(Facts,IF(ISINT64(Facts[Quantity]+1),1,0))",
+   "powerbi": "6"
+  },
+  {
+   "expr": "SUMX(Facts,IF(ISINT64(Facts[Quantity]*0.5),1,0))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "ISINTEGER(1)+0",
+   "powerbi": "1"
+  },
+  {
+   "expr": "ISINTEGER(TRUE())+0",
+   "powerbi": "0"
+  },
+  {
+   "expr": "ISINTEGER(BLANK())&\"x\"",
+   "powerbi": "FALSEx"
+  },
+  {
+   "expr": "IF(ISINTEGER(1),\"i\",\"n\")",
+   "powerbi": "i"
+  },
+  {
+   "expr": "NOT ISINTEGER(1.5)",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISINTEGER(1) && ISDOUBLE(1.5)",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISINTEGER(ISINTEGER(1))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISINTEGER(LEN(\"abc\")+1)",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISINTEGER(IF(TRUE(),1,2.5))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISINTEGER(IF(FALSE(),1,2.5))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISINTEGER(IF(TRUE(),1))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISINTEGER(SWITCH(1,1,2,3))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISINTEGER(COALESCE(BLANK(),1))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISDOUBLE(COALESCE(BLANK(),1.5))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISINTEGER(MAXX(Facts,Facts[Quantity]))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISDOUBLE(SUMX(Facts,Facts[Sales]))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISINTEGER(SUMX(Facts,Facts[Quantity]))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISINTEGER(COUNTROWS(Facts)/2)",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISINTEGER(COUNTROWS(Facts)*2)",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISINTEGER(COUNTROWS(Facts)-1)",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISINTEGER(INT(SUM(Facts[Sales])))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISINTEGER(ROUNDUP(2.1,0))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISINTEGER(ROUNDDOWN(2.9,0))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISINTEGER(SIGN(-3))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISINTEGER(POWER(2,3))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISINTEGER(RANDBETWEEN(1,1))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISINTEGER(DATEDIFF(DATE(2020,1,1),DATE(2020,1,3),DAY))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISINTEGER(MONTH(DATE(2020,5,1)))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISINTEGER(WEEKDAY(DATE(2020,5,1)))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISINTEGER(FIND(\"a\",\"bca\"))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISINTEGER(SEARCH(\"a\",\"bca\"))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISINTEGER(UNICODE(\"A\"))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISINTEGER(EXACT(\"a\",\"a\"))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISINTEGER(GCD(4,6))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISINTEGER(LCM(4,6))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISINTEGER(FACT(3))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISINTEGER(COMBIN(5,2))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISINTEGER(QUOTIENT(7,2))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISINTEGER(EVEN(3))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISINTEGER(ODD(2))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISINTEGER(MROUND(7,5))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISINTEGER(RANKX(ALL(Facts[Quantity]),1))",
+   "powerbi": "True"
+  }
+ ]
+}

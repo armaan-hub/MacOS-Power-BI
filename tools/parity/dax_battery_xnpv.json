@@ -1,0 +1,434 @@
+{
+ "powerbi_version": "2.157.879.0 (26.08)+da30fe74eb0b8a8786ab7326b69c400a0e951831",
+ "frozen": "2026-10-26",
+ "items": [
+  {
+   "expr": "XNPV(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-1000,0},{300,365},{400,730},{500,1095}}),\"d\",DATE(2020,1,1)+[n]),[v],[d],0.1)",
+   "powerbi": "-21.0368144252443"
+  },
+  {
+   "expr": "XNPV(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-1000,0},{300,365},{400,730},{500,1095}}),\"d\",DATE(2020,1,1)+[n]),[v],[d],0)",
+   "powerbi": "200"
+  },
+  {
+   "expr": "XNPV(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-1000,0},{300,365},{400,730},{500,1095}}),\"d\",DATE(2020,1,1)+[n]),[v],[d],-0.5)",
+   "powerbi": "5200"
+  },
+  {
+   "expr": "XNPV(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-1000,0},{300,365},{400,730},{500,1095}}),\"d\",DATE(2020,1,1)+[n]),[v],[d],1)",
+   "powerbi": "-687.5"
+  },
+  {
+   "expr": "XNPV(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-1000,0},{300,365},{400,730},{500,1095}}),\"d\",DATE(2020,1,1)+[n]),[v],[d],0.05)",
+   "powerbi": "80.4448763632437"
+  },
+  {
+   "expr": "XNPV(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-1000,0},{300,365},{400,730},{500,1095}}),\"d\",DATE(2020,1,1)+[n]),[v],[d],0.000001)",
+   "powerbi": "199.9974000045"
+  },
+  {
+   "expr": "XNPV(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-1000,0},{300,365},{400,730},{500,1095}}),\"d\",DATE(2020,1,1)+[n]),[v],[d],-0.99)",
+   "powerbi": "504028999.999999"
+  },
+  {
+   "expr": "XNPV(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-1000,0},{300,365},{400,730},{500,1095}}),\"d\",DATE(2020,1,1)+[n]),[v],[d],-1)",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 19) The Rate argument to the XNPV function must be greater than -1.\""
+  },
+  {
+   "expr": "XNPV(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-1000,0},{300,365},{400,730},{500,1095}}),\"d\",DATE(2020,1,1)+[n]),[v],[d],BLANK())",
+   "powerbi": "200"
+  },
+  {
+   "expr": "XNPV(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-1000,0},{300,365},{400,730},{500,1095}}),\"d\",DATE(2020,1,1)+[n]),[v],[d],\"a\")",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 144) Cannot convert value 'a' of type Text to type Number.\""
+  },
+  {
+   "expr": "XNPV(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-1000,0},{300,365},{400,730},{500,1095}}),\"d\",DATE(2020,1,1)+[n]),[v],[d],10)",
+   "powerbi": "-969.045830202855"
+  },
+  {
+   "expr": "XNPV(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{100,0}}),\"d\",DATE(2020,1,1)+[n]),[v],[d],0.1)",
+   "powerbi": "100"
+  },
+  {
+   "expr": "XNPV(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{0,0},{0,10}}),\"d\",DATE(2020,1,1)+[n]),[v],[d],0.1)",
+   "powerbi": "0"
+  },
+  {
+   "expr": "XNPV(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{100,365},{-1000,0},{300,730}}),\"d\",DATE(2020,1,1)+[n]),[v],[d],0.1)",
+   "powerbi": "-661.157024793388"
+  },
+  {
+   "expr": "XNPV(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-100,0},{50,0},{60,365}}),\"d\",DATE(2020,1,1)+[n]),[v],[d],0.1)",
+   "powerbi": "4.54545454545454"
+  },
+  {
+   "expr": "XNPV(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-100,365},{50,0},{70,730}}),\"d\",DATE(2020,1,1)+[n]),[v],[d],0.1)",
+   "powerbi": "16.9421487603306"
+  },
+  {
+   "expr": "XNPV(FILTER(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-1000,0},{300,365},{400,730},{500,1095}}),\"d\",DATE(2020,1,1)+[n]),[v]>10000),[v],[d],0.1)",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "XNPV(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-1000,0},{300,365},{400,730},{500,1095}}),\"d\",DATE(2020,1,1)+[n]),[v],[d])",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 19) Too few arguments were passed to the XNPV function. The minimum argument count for the function is 4.\""
+  },
+  {
+   "expr": "XNPV(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-1000,0},{300,365},{400,730},{500,1095}}),\"d\",DATE(2020,1,1)+[n]),[v],[d],0.1,5)",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 148) Too many arguments were passed to the XNPV function. The maximum argument count for the function is 4.\""
+  },
+  {
+   "expr": "XNPV(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-1000,0},{300,365},{400,730},{500,1095}}),\"d\",DATE(2020,1,1)+[n]),[v])",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 19) Too few arguments were passed to the XNPV function. The minimum argument count for the function is 4.\""
+  },
+  {
+   "expr": "XNPV(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-1000,0},{300,365},{400,730},{500,1095}}),\"d\",DATE(2020,1,1)+[n]),IF([n]=365,BLANK(),[v]),[d],0.1)",
+   "powerbi": "-293.764087152517"
+  },
+  {
+   "expr": "XNPV(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-1000,0},{300,365},{400,730},{500,1095}}),\"d\",DATE(2020,1,1)+[n]),[v],IF([n]=365,BLANK(),[d]),0.1)",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 19) One or more values for the Dates argument passed to XNPV is blank.\""
+  },
+  {
+   "expr": "XNPV(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-1000,0},{300,365},{400,730},{500,1095}}),\"d\",DATE(2020,1,1)+[n]),[v],[d]+0.5,0.1)",
+   "powerbi": "-21.0368144252443"
+  },
+  {
+   "expr": "XNPV(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-1000,0},{300,365},{400,730},{500,1095}}),\"d\",DATE(2020,1,1)+[n]),[v],[n],0.1)",
+   "powerbi": "-21.0368144252443"
+  },
+  {
+   "expr": "XNPV(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-1000,0},{300,365},{400,730},{500,1095}}),\"d\",DATE(2020,1,1)+[n]),\"a\",[d],0.1)",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 136) XNPV does not support expressions of type string/Boolean/date for the Values argument.\""
+  },
+  {
+   "expr": "XNPV(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-1000,0},{300,365},{400,730},{500,1095}}),\"d\",DATE(2020,1,1)+[n]),[v],\"a\",0.1)",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 140) Cannot convert value 'a' of type Text to type Date.\""
+  },
+  {
+   "expr": "XNPV(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-1000,0},{300,365},{400,730},{500,1095}}),\"d\",DATE(2020,1,1)+[n]),[v],[d],0.1)+1",
+   "powerbi": "-20.0368144252443"
+  },
+  {
+   "expr": "XNPV(Facts,Facts[Sales],DATE(2020,1,1)+Facts[Quantity]*100,0.1)",
+   "powerbi": "29.1914328751001"
+  },
+  {
+   "expr": "XNPV(Facts,Facts[Quantity],DATE(2020,1,1)+Facts[Quantity]*100,0.1)",
+   "powerbi": "13.6377065637152"
+  },
+  {
+   "expr": "XNPV(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-100,0},{100,0}}),\"d\",DATE(2020,1,1)+[n]),[v],[d],0.1)",
+   "powerbi": "0"
+  },
+  {
+   "expr": "XNPV(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-100,0},{110,365}}),\"d\",DATE(2020,1,1)+[n]),[v],[d],0.1)",
+   "powerbi": "-1.4210854715202E-14"
+  },
+  {
+   "expr": "XNPV(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-100,0},{110,366}}),\"d\",DATE(2020,1,1)+[n]),[v],[d],0.1)",
+   "powerbi": "-0.0261089690438894"
+  },
+  {
+   "expr": "XNPV(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-100,0},{110,1}}),\"d\",DATE(2020,1,1)+[n]),[v],[d],0.1)",
+   "powerbi": "9.97128013405172"
+  },
+  {
+   "expr": "XNPV(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-500,0},{100,100},{100,200},{100,300},{300,400}}),\"d\",DATE(2020,1,1)+[n]),[v],[d],0.1)",
+   "powerbi": "55.0454597686767"
+  },
+  {
+   "expr": "XNPV(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-500,0},{100,100},{100,200},{100,300},{300,400}}),\"d\",DATE(2020,1,1)+[n]),[v],[d],0.08)",
+   "powerbi": "63.3899073663594"
+  },
+  {
+   "expr": "XNPV(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-500,0},{100,100},{100,200},{100,300},{300,400}}),\"d\",DATE(2020,1,1)+[n]),[v],[d],0)",
+   "powerbi": "100"
+  },
+  {
+   "expr": "XNPV(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-500,0},{100,100},{100,200},{100,300},{300,400}}),\"d\",DATE(2020,1,1)+[n]),[v],[d],0.5)",
+   "powerbi": "-66.4045003202982"
+  },
+  {
+   "expr": "XNPV(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{1000,0},{-300,100},{-300,200},{-300,300}}),\"d\",DATE(2020,1,1)+[n]),[v],[d],0.1)",
+   "powerbi": "145.601869786915"
+  },
+  {
+   "expr": "XNPV(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{1000,0},{-300,100},{-300,200},{-300,300}}),\"d\",DATE(2020,1,1)+[n]),[v],[d],0.08)",
+   "powerbi": "137.036393058793"
+  },
+  {
+   "expr": "XNPV(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{1000,0},{-300,100},{-300,200},{-300,300}}),\"d\",DATE(2020,1,1)+[n]),[v],[d],0)",
+   "powerbi": "100"
+  },
+  {
+   "expr": "XNPV(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{1000,0},{-300,100},{-300,200},{-300,300}}),\"d\",DATE(2020,1,1)+[n]),[v],[d],0.5)",
+   "powerbi": "276.333052085749"
+  },
+  {
+   "expr": "XNPV(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-100,0},{-100,365}}),\"d\",DATE(2020,1,1)+[n]),[v],[d],0.1)",
+   "powerbi": "-190.909090909091"
+  },
+  {
+   "expr": "XNPV(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-100,0},{-100,365}}),\"d\",DATE(2020,1,1)+[n]),[v],[d],0.08)",
+   "powerbi": "-192.592592592593"
+  },
+  {
+   "expr": "XNPV(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-100,0},{-100,365}}),\"d\",DATE(2020,1,1)+[n]),[v],[d],0)",
+   "powerbi": "-200"
+  },
+  {
+   "expr": "XNPV(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-100,0},{-100,365}}),\"d\",DATE(2020,1,1)+[n]),[v],[d],0.5)",
+   "powerbi": "-166.666666666667"
+  },
+  {
+   "expr": "XNPV(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{100,0},{100,365}}),\"d\",DATE(2020,1,1)+[n]),[v],[d],0.1)",
+   "powerbi": "190.909090909091"
+  },
+  {
+   "expr": "XNPV(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{100,0},{100,365}}),\"d\",DATE(2020,1,1)+[n]),[v],[d],0.08)",
+   "powerbi": "192.592592592593"
+  },
+  {
+   "expr": "XNPV(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{100,0},{100,365}}),\"d\",DATE(2020,1,1)+[n]),[v],[d],0)",
+   "powerbi": "200"
+  },
+  {
+   "expr": "XNPV(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{100,0},{100,365}}),\"d\",DATE(2020,1,1)+[n]),[v],[d],0.5)",
+   "powerbi": "166.666666666667"
+  },
+  {
+   "expr": "XNPV(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-100,10},{110,0}}),\"d\",DATE(2020,1,1)+[n]),[v],[d],0.1)",
+   "powerbi": "10.2607831486972"
+  },
+  {
+   "expr": "XNPV(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-100,10},{110,0}}),\"d\",DATE(2020,1,1)+[n]),[v],[d],0.08)",
+   "powerbi": "10.2106300304679"
+  },
+  {
+   "expr": "XNPV(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-100,10},{110,0}}),\"d\",DATE(2020,1,1)+[n]),[v],[d],0)",
+   "powerbi": "10"
+  },
+  {
+   "expr": "XNPV(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-100,10},{110,0}}),\"d\",DATE(2020,1,1)+[n]),[v],[d],0.5)",
+   "powerbi": "11.1047160071855"
+  },
+  {
+   "expr": "XNPV(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{5,0},{5,0},{5,0}}),\"d\",DATE(2020,1,1)+[n]),[v],[d],0.1)",
+   "powerbi": "15"
+  },
+  {
+   "expr": "XNPV(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{5,0},{5,0},{5,0}}),\"d\",DATE(2020,1,1)+[n]),[v],[d],0.08)",
+   "powerbi": "15"
+  },
+  {
+   "expr": "XNPV(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{5,0},{5,0},{5,0}}),\"d\",DATE(2020,1,1)+[n]),[v],[d],0)",
+   "powerbi": "15"
+  },
+  {
+   "expr": "XNPV(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{5,0},{5,0},{5,0}}),\"d\",DATE(2020,1,1)+[n]),[v],[d],0.5)",
+   "powerbi": "15"
+  },
+  {
+   "expr": "XNPV(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-1000,0},{250,90},{250,180},{250,270},{250,360}}),\"d\",DATE(2020,1,1)+[n]),[v],[d],0.1)",
+   "powerbi": "-56.734688746053"
+  },
+  {
+   "expr": "XNPV(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-1000,0},{250,90},{250,180},{250,270},{250,360}}),\"d\",DATE(2020,1,1)+[n]),[v],[d],0.08)",
+   "powerbi": "-46.1193091152845"
+  },
+  {
+   "expr": "XNPV(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-1000,0},{250,90},{250,180},{250,270},{250,360}}),\"d\",DATE(2020,1,1)+[n]),[v],[d],0)",
+   "powerbi": "0"
+  },
+  {
+   "expr": "XNPV(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-1000,0},{250,90},{250,180},{250,270},{250,360}}),\"d\",DATE(2020,1,1)+[n]),[v],[d],0.5)",
+   "powerbi": "-216.281873634291"
+  },
+  {
+   "expr": "XNPV(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-100,0},{110,366},{5,10000}}),\"d\",DATE(2020,1,1)+[n]),[v],[d],0.1)",
+   "powerbi": "0.341108924978944"
+  },
+  {
+   "expr": "XNPV(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-100,0},{110,366},{5,10000}}),\"d\",DATE(2020,1,1)+[n]),[v],[d],0.08)",
+   "powerbi": "2.43746507256059"
+  },
+  {
+   "expr": "XNPV(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-100,0},{110,366},{5,10000}}),\"d\",DATE(2020,1,1)+[n]),[v],[d],0)",
+   "powerbi": "15"
+  },
+  {
+   "expr": "XNPV(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-100,0},{110,366},{5,10000}}),\"d\",DATE(2020,1,1)+[n]),[v],[d],0.5)",
+   "powerbi": "-26.7480098334115"
+  },
+  {
+   "expr": "XNPV(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-100,0},{0,5},{110,365}}),\"d\",DATE(2020,1,1)+[n]),[v],[d],0.1)",
+   "powerbi": "-1.4210854715202E-14"
+  },
+  {
+   "expr": "XNPV(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-100,0},{0,5},{110,365}}),\"d\",DATE(2020,1,1)+[n]),[v],[d],0.08)",
+   "powerbi": "1.85185185185185"
+  },
+  {
+   "expr": "XNPV(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-100,0},{0,5},{110,365}}),\"d\",DATE(2020,1,1)+[n]),[v],[d],0)",
+   "powerbi": "10"
+  },
+  {
+   "expr": "XNPV(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-100,0},{0,5},{110,365}}),\"d\",DATE(2020,1,1)+[n]),[v],[d],0.5)",
+   "powerbi": "-26.6666666666667"
+  },
+  {
+   "expr": "XNPV(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-1000,0},{300,365},{400,730},{500,1095}}),\"d\",DATE(2020,1,1)+[n]),[v],[d],0.1)*2",
+   "powerbi": "-42.0736288504886"
+  },
+  {
+   "expr": "ROUND(XNPV(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-1000,0},{300,365},{400,730},{500,1095}}),\"d\",DATE(2020,1,1)+[n]),[v],[d],0.1),2)",
+   "powerbi": "-21.04"
+  },
+  {
+   "expr": "IF(XNPV(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-1000,0},{300,365},{400,730},{500,1095}}),\"d\",DATE(2020,1,1)+[n]),[v],[d],0.1)<0,\"neg\",\"pos\")",
+   "powerbi": "neg"
+  },
+  {
+   "expr": "XNPV(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-1000,0},{300,365},{400,730},{500,1095}}),\"d\",DATE(2020,1,1)+[n]),[v]*2,[d],0.1)",
+   "powerbi": "-42.0736288504886"
+  },
+  {
+   "expr": "XNPV(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-1000,0},{300,365},{400,730},{500,1095}}),\"d\",DATE(2020,1,1)+[n]),-[v],[d],0.1)",
+   "powerbi": "21.0368144252443"
+  },
+  {
+   "expr": "XNPV(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-1000,0},{300,365},{400,730},{500,1095}}),\"d\",DATE(2020,1,1)+[n]),[v],[d],0.1+0.05)",
+   "powerbi": "-107.9148516479"
+  },
+  {
+   "expr": "XNPV(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-1000,0},{300,365},{400,730},{500,1095}}),\"d\",DATE(2020,1,1)+[n]),[v],[d],1/3)",
+   "powerbi": "-339.0625"
+  },
+  {
+   "expr": "XNPV(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-1000,0},{300,365},{400,730},{500,1095}}),\"d\",DATE(2020,1,1)+[n]),[v],[d]-30,0.1)",
+   "powerbi": "-21.0368144252443"
+  },
+  {
+   "expr": "XNPV(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-1000,0},{300,365},{400,730},{500,1095}}),\"d\",DATE(2020,1,1)+[n]),[v],[d],-0.9999)",
+   "powerbi": "500040002999165"
+  },
+  {
+   "expr": "XNPV(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-1000,0},{300,365},{400,730},{500,1095}}),\"d\",DATE(2020,1,1)+[n]),[v],[d],1E-10)",
+   "powerbi": "199.99999974"
+  },
+  {
+   "expr": "XNPV(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-1000,0},{300,365},{400,730},{500,1095}}),\"d\",DATE(2020,1,1)+[n]),[v],[d],1000000)",
+   "powerbi": "-999.9996999999"
+  },
+  {
+   "expr": "XNPV(FILTER(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-1000,0},{300,365},{400,730},{500,1095}}),\"d\",DATE(2020,1,1)+[n]),[n]>0),[v],[d],0.1)",
+   "powerbi": "1076.85950413223"
+  },
+  {
+   "expr": "XNPV(TOPN(2,ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-1000,0},{300,365},{400,730},{500,1095}}),\"d\",DATE(2020,1,1)+[n]),[v],ASC),[v],[d],0.1)",
+   "powerbi": "-727.272727272727"
+  },
+  {
+   "expr": "XNPV(Facts,Facts[Quantity],DATE(2020,1,1)+Facts[Quantity]*30,0.05)",
+   "powerbi": "14.7812403957775"
+  },
+  {
+   "expr": "XNPV(Facts,Facts[Sales],DATE(2020,1,1)+Facts[Quantity]*30,0.05)",
+   "powerbi": "31.1333316473144"
+  },
+  {
+   "expr": "XNPV(Facts,Facts[Sales],DATE(2020,1,1),0.05)",
+   "powerbi": "31.5"
+  },
+  {
+   "expr": "XNPV(Facts,Facts[Quantity],DATE(2020,1,1)+Facts[Quantity]*30,Facts[Quantity])",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 80) A single value for column 'Quantity' in table 'Facts' cannot be determined. This can happen when a measure or function formula refers to a column that contains many values without specifying an aggregation such as min, max, count, or sum to get a single result.\""
+  },
+  {
+   "expr": "XNPV(Facts,Facts[Region],DATE(2020,1,1),0.1)",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 30) XNPV does not support expressions of type string/Boolean/date for the Values argument.\""
+  },
+  {
+   "expr": "XNPV(Facts,Facts[Quantity],Facts[Region],0.1)",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 46) Cannot convert value 'East' of type Text to type Date.\""
+  },
+  {
+   "expr": "XNPV(VALUES(Facts[Quantity]),Facts[Quantity],DATE(2020,1,1)+Facts[Quantity],0.1)",
+   "powerbi": "14.9856458600632"
+  },
+  {
+   "expr": "XNPV(Facts,Facts[Quantity],DATE(2020,1,1)+Facts[Quantity],0.1)",
+   "powerbi": "14.9856458600632"
+  },
+  {
+   "expr": "XNPV(Facts,Facts[Quantity],DATE(2020,1,1)+Facts[Quantity],0)",
+   "powerbi": "15"
+  },
+  {
+   "expr": "XNPV(ALL(Facts),Facts[Quantity],DATE(2020,1,1)+Facts[Quantity],0.1)",
+   "powerbi": "14.9856458600632"
+  },
+  {
+   "expr": "CALCULATE(XNPV(Facts,Facts[Quantity],DATE(2020,1,1)+Facts[Quantity],0.1),Facts[Region]=\"East\")",
+   "powerbi": "7.99425807148921"
+  },
+  {
+   "expr": "XNPV(CALCULATETABLE(Facts,Facts[Region]=\"East\"),Facts[Quantity],DATE(2020,1,1)+Facts[Quantity]*10,0.1)",
+   "powerbi": "7.94283137636377"
+  },
+  {
+   "expr": "XNPV(Facts,SUM(Facts[Quantity]),DATE(2020,1,1)+Facts[Quantity],0.1)",
+   "powerbi": "89.9412752659951"
+  },
+  {
+   "expr": "XNPV(Facts,1,DATE(2020,1,1)+Facts[Quantity],0.1)",
+   "powerbi": "5.99608501773301"
+  },
+  {
+   "expr": "XNPV(Facts,Facts[Quantity],DATE(2020,1,1)+Facts[Quantity],BLANK())",
+   "powerbi": "15"
+  },
+  {
+   "expr": "XNPV(Facts,Facts[Quantity],DATE(2020,1,1)+Facts[Quantity],SUM(Facts[Quantity])/100)",
+   "powerbi": "14.978956466838"
+  },
+  {
+   "expr": "XNPV(Facts,Facts[Quantity],DATE(2020,1,1)+Facts[Quantity],\"0.1\")",
+   "powerbi": "14.9856458600632"
+  },
+  {
+   "expr": "XNPV(Facts,Facts[Quantity],DATE(2020,1,1)+Facts[Quantity],TRUE())",
+   "powerbi": "14.8959577613853"
+  },
+  {
+   "expr": "XNPV(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-1000,0},{300,365},{400,730},{500,1095}}),\"d\",DATE(2020,1,1)+[n]),[v],[d],0.1,1)",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 148) Too many arguments were passed to the XNPV function. The maximum argument count for the function is 4.\""
+  },
+  {
+   "expr": "XNPV()",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 19) Too few arguments were passed to the XNPV function. The minimum argument count for the function is 4.\""
+  },
+  {
+   "expr": "XNPV(1,2,3,4)",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 19) The XNPV function expects a table expression for argument '1', but a string or numeric expression was used.\""
+  },
+  {
+   "expr": "XNPV(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-1000,0},{300,365},{400,730},{500,1095}}),\"d\",DATE(2020,1,1)+[n]),[v],TRUE(),0.1)",
+   "powerbi": "200"
+  },
+  {
+   "expr": "XNPV(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-1000,0},{300,365},{400,730},{500,1095}}),\"d\",DATE(2020,1,1)+[n]),[v],DATE(1899,12,31)+[n],0.1)",
+   "powerbi": "-21.0368144252443"
+  },
+  {
+   "expr": "XNPV(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-1000,0},{300,365},{400,730},{500,1095}}),\"d\",DATE(2020,1,1)+[n]),[v],DATE(1900,1,1)+[n],0.1)",
+   "powerbi": "-21.0368144252443"
+  },
+  {
+   "expr": "XNPV(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-1000,0},{300,365},{400,730},{500,1095}}),\"d\",DATE(2020,1,1)+[n]),[v],DATE(9999,1,1)+[n]*0,0.1)",
+   "powerbi": "200"
+  }
+ ]
+}

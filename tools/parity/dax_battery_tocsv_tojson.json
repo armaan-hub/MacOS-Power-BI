@@ -1,0 +1,746 @@
+{
+ "powerbi_version": "2.157.879.0 (26.08)+da30fe74eb0b8a8786ab7326b69c400a0e951831",
+ "frozen": "2026-10-26",
+ "items": [
+  {
+   "expr": "LEN(TOCSV(Facts))",
+   "powerbi": "147"
+  },
+  {
+   "expr": "TOCSV(ROW(\"a\",1))",
+   "powerbi": "[a]\n1"
+  },
+  {
+   "expr": "TOCSV(ROW(\"a\",1,\"b\",\"x\"),0)",
+   "powerbi": "[a],[b]\n"
+  },
+  {
+   "expr": "TOCSV(ROW(\"a\",1),5,\",\")",
+   "powerbi": "[a]\n1"
+  },
+  {
+   "expr": "TOJSON(ROW(\"a\",1))",
+   "powerbi": "{\n\t\"header\": [\"[a]\"],\n\t\"rowCount\": 1,\n\t\"data\": [\n\t\t[1]\n\t]\n}"
+  },
+  {
+   "expr": "TOJSON(ROW(\"a\",1,\"b\",\"x\"))",
+   "powerbi": "{\n\t\"header\": [\"[a]\", \"[b]\"],\n\t\"rowCount\": 1,\n\t\"data\": [\n\t\t[1, \"x\"]\n\t]\n}"
+  },
+  {
+   "expr": "LEN(TOJSON(Facts))",
+   "powerbi": "289"
+  },
+  {
+   "expr": "TOCSV(DATATABLE(\"a\",INTEGER,\"b\",STRING,{{1,\"x\"},{2,\"y,z\"}}),5,\";\")",
+   "powerbi": "[a];[b]\n1;x\n2;y,z"
+  },
+  {
+   "expr": "TOJSON(DATATABLE(\"a\",STRING,{{\"q\\\"uote\"}}))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 53) The syntax for 'uote' is incorrect. (EVALUATE ROW(\"v\", TOJSON(DATATABLE(\"a\",STRING,{{\"q\\\"uote\"}})))).\""
+  },
+  {
+   "expr": "TOCSV(ROW(\"a\",1,\"b\",\"x\"))",
+   "powerbi": "[a],[b]\n1,x"
+  },
+  {
+   "expr": "TOCSV(ROW(\"a\",1),5)",
+   "powerbi": "[a]\n1"
+  },
+  {
+   "expr": "TOCSV(ROW(\"a\",1),5,\";\")",
+   "powerbi": "[a]\n1"
+  },
+  {
+   "expr": "TOCSV(ROW(\"a\",1),5,\";\",FALSE())",
+   "powerbi": "1"
+  },
+  {
+   "expr": "TOCSV(ROW(\"a\",1),5,\";\",TRUE())",
+   "powerbi": "[a]\n1"
+  },
+  {
+   "expr": "TOCSV(ROW(\"a\",1),0)",
+   "powerbi": "[a]\n"
+  },
+  {
+   "expr": "TOCSV(ROW(\"a\",1),-1)",
+   "powerbi": "[a]\n1"
+  },
+  {
+   "expr": "TOCSV(ROW(\"a\",1),1.5)",
+   "powerbi": "[a]\n1"
+  },
+  {
+   "expr": "TOCSV(ROW(\"a\",1),BLANK())",
+   "powerbi": "[a]\n"
+  },
+  {
+   "expr": "TOCSV(ROW(\"a\",1),5,BLANK())",
+   "powerbi": "\"[a]\"\n\"1\""
+  },
+  {
+   "expr": "TOCSV(ROW(\"a\",1),5,\"\")",
+   "powerbi": "\"[a]\"\n\"1\""
+  },
+  {
+   "expr": "TOCSV(ROW(\"a\",1,\"b\",2),5,\"||\")",
+   "powerbi": "[a]||[b]\n1||2"
+  },
+  {
+   "expr": "TOCSV(ROW(\"a\",1,\"b\",2),5,\"tab\")",
+   "powerbi": "[a]tab[b]\n1tab2"
+  },
+  {
+   "expr": "TOCSV(Facts)",
+   "powerbi": "'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Note]\n10.5,2,East,Paid\n20,3,West,\n-1.5,1,East,Paid\n,4,North,Late\n0,0,West,Paid\n2.5,5,East,"
+  },
+  {
+   "expr": "TOCSV(Facts,2)",
+   "powerbi": "'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Note]\n10.5,2,East,Paid\n20,3,West,"
+  },
+  {
+   "expr": "TOCSV(Facts,2,\";\",FALSE())",
+   "powerbi": "10.5;2;East;Paid\n20;3;West;"
+  },
+  {
+   "expr": "TOCSV(VALUES(Facts[Region]))",
+   "powerbi": "'Facts'[Region]\nEast\nWest\nNorth"
+  },
+  {
+   "expr": "TOCSV(VALUES(Facts[Region]),1)",
+   "powerbi": "'Facts'[Region]\nEast"
+  },
+  {
+   "expr": "TOCSV(ROW(\"a\",\"x,y\",\"b\",\"say \"\"hi\"\"\",\"c\",\"l1\"&UNICHAR(10)&\"l2\"))",
+   "powerbi": "[a],[b],[c]\n\"x,y\",\"say \"\"hi\"\"\",\"l1\nl2\""
+  },
+  {
+   "expr": "TOCSV(ROW(\"a\",BLANK(),\"b\",\"\"))",
+   "powerbi": "[a],[b]\n,"
+  },
+  {
+   "expr": "TOCSV(ROW(\"a\",TRUE(),\"b\",1.5,\"c\",DATE(2020,1,2),\"d\",CURRENCY(2.25)))",
+   "powerbi": "[a],[b],[c],[d]\nTRUE,1.5,1/2/2020,2.25"
+  },
+  {
+   "expr": "TOCSV(ROW(\"a\",1/3))",
+   "powerbi": "[a]\n0.333333333333333"
+  },
+  {
+   "expr": "TOCSV(ROW(\"a\",1000000000000000000))",
+   "powerbi": "[a]\n1000000000000000000"
+  },
+  {
+   "expr": "TOCSV(ROW(\"a\",-0.0))",
+   "powerbi": "[a]\n-0"
+  },
+  {
+   "expr": "TOCSV(ROW(\"a\",1E20))",
+   "powerbi": "[a]\n1E+20"
+  },
+  {
+   "expr": "TOCSV(FILTER(Facts,FALSE()))",
+   "powerbi": "'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Note]\n"
+  },
+  {
+   "expr": "TOCSV(ROW(\"a b\",1))",
+   "powerbi": "[a b]\n1"
+  },
+  {
+   "expr": "TOCSV(DATATABLE(\"a\",INTEGER,\"b\",STRING,{{1,\"x\"},{2,\"y,z\"}}))",
+   "powerbi": "[a],[b]\n1,x\n2,\"y,z\""
+  },
+  {
+   "expr": "TOCSV(SELECTCOLUMNS(Facts,\"Region\",Facts[Region],\"Q\",Facts[Quantity]),3)",
+   "powerbi": "[Region],[Q]\nEast,2\nWest,3\nEast,1"
+  },
+  {
+   "expr": "TOCSV(TOPN(2,Facts,Facts[Quantity]))",
+   "powerbi": "'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Note]\n,4,North,Late\n2.5,5,East,"
+  },
+  {
+   "expr": "TOCSV(ROW(\"a\",1))&\"|\"",
+   "powerbi": "[a]\n1|"
+  },
+  {
+   "expr": "TOJSON(ROW(\"a\",1),0)",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "TOJSON(ROW(\"a\",1),5)",
+   "powerbi": "{\n\t\"header\": [\"[a]\"],\n\t\"rowCount\": 1,\n\t\"data\": [\n\t\t[1]\n\t]\n}"
+  },
+  {
+   "expr": "TOJSON(ROW(\"a\",1),5,TRUE())",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 39) Too many arguments were passed to the TOJSON function. The maximum argument count for the function is 2.\""
+  },
+  {
+   "expr": "TOJSON(ROW(\"a\",1),5,FALSE())",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 39) Too many arguments were passed to the TOJSON function. The maximum argument count for the function is 2.\""
+  },
+  {
+   "expr": "TOJSON(Facts)",
+   "powerbi": "{\n\t\"header\": [\"'Facts'[Sales]\", \"'Facts'[Quantity]\", \"'Facts'[Region]\", \"'Facts'[Note]\"],\n\t\"rowCount\": 6,\n\t\"data\": [\n\t\t[10.5, 2, \"East\", \"Paid\"],\n\t\t[20.0, 3, \"West\", null],\n\t\t[-1.5, 1, \"East\", \"Paid\"],\n\t\t[null, 4, \"North\", \"Late\"],\n\t\t[0.0, 0, \"West\", \"Paid\"],\n\t\t[2.5, 5, \"East\", null]\n\t]\n}"
+  },
+  {
+   "expr": "TOJSON(Facts,2)",
+   "powerbi": "{\n\t\"header\": [\"'Facts'[Sales]\", \"'Facts'[Quantity]\", \"'Facts'[Region]\", \"'Facts'[Note]\"],\n\t\"rowCount\": 6,\n\t\"data\": [\n\t\t[10.5, 2, \"East\", \"Paid\"],\n\t\t[20.0, 3, \"West\", null]\n\t]\n}"
+  },
+  {
+   "expr": "TOJSON(VALUES(Facts[Region]))",
+   "powerbi": "{\n\t\"header\": [\"'Facts'[Region]\"],\n\t\"rowCount\": 3,\n\t\"data\": [\n\t\t[\"East\"],\n\t\t[\"West\"],\n\t\t[\"North\"]\n\t]\n}"
+  },
+  {
+   "expr": "TOJSON(ROW(\"a\",BLANK(),\"b\",\"\"))",
+   "powerbi": "{\n\t\"header\": [\"[a]\", \"[b]\"],\n\t\"rowCount\": 1,\n\t\"data\": [\n\t\t[null, \"\"]\n\t]\n}"
+  },
+  {
+   "expr": "TOJSON(ROW(\"a\",TRUE(),\"b\",1.5,\"c\",DATE(2020,1,2),\"d\",CURRENCY(2.25)))",
+   "powerbi": "{\n\t\"header\": [\"[a]\", \"[b]\", \"[c]\", \"[d]\"],\n\t\"rowCount\": 1,\n\t\"data\": [\n\t\t[true, 1.5, \"2020-01-02T00:00:00\", 2.25]\n\t]\n}"
+  },
+  {
+   "expr": "TOJSON(ROW(\"a\",1/3))",
+   "powerbi": "{\n\t\"header\": [\"[a]\"],\n\t\"rowCount\": 1,\n\t\"data\": [\n\t\t[0.3333]\n\t]\n}"
+  },
+  {
+   "expr": "TOJSON(ROW(\"a\",\"q\"\"uote\",\"b\",\"new\"&UNICHAR(10)&\"line\",\"c\",\"\\\"))",
+   "powerbi": "{\n\t\"header\": [\"[a]\", \"[b]\", \"[c]\"],\n\t\"rowCount\": 1,\n\t\"data\": [\n\t\t[\"q\\\"uote\", \"new\\nline\", \"\\\\\"]\n\t]\n}"
+  },
+  {
+   "expr": "TOJSON(FILTER(Facts,FALSE()))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "TOJSON(ROW(\"a\",1000000000000000000))",
+   "powerbi": "{\n\t\"header\": [\"[a]\"],\n\t\"rowCount\": 1,\n\t\"data\": [\n\t\t[1000000000000000000]\n\t]\n}"
+  },
+  {
+   "expr": "TOJSON(ROW(\"a\",1E20))",
+   "powerbi": "{\n\t\"header\": [\"[a]\"],\n\t\"rowCount\": 1,\n\t\"data\": [\n\t\t[100000000000000000000.0]\n\t]\n}"
+  },
+  {
+   "expr": "LEN(TOJSON(ROW(\"a\",1)))",
+   "powerbi": "59"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]>TOCSV(Facts))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 62) A function 'TOCSV' has been used in a True/False expression that is used as a table filter expression. This is not allowed.\""
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]>LEN(TOJSON(Facts)))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 66) A function 'TOJSON' has been used in a True/False expression that is used as a table filter expression. This is not allowed.\""
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]>LEN(TOCSV(Facts)))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 66) A function 'TOCSV' has been used in a True/False expression that is used as a table filter expression. This is not allowed.\""
+  },
+  {
+   "expr": "TOCSV(ROW(\"a\",1),5,\";\",1)",
+   "powerbi": "[a]\n1"
+  },
+  {
+   "expr": "TOCSV(ROW(\"a\",1),5,\";\",0)",
+   "powerbi": "1"
+  },
+  {
+   "expr": "TOCSV(ROW(\"a\",1),5,\";\",BLANK())",
+   "powerbi": "1"
+  },
+  {
+   "expr": "TOCSV(ROW(\"a\",1),5,\";\",\"x\")",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 42) Cannot convert value 'x' of type Text to type True/False.\""
+  },
+  {
+   "expr": "TOCSV(ROW(\"a\",1),\"2\")",
+   "powerbi": "[a]\n1"
+  },
+  {
+   "expr": "TOCSV(ROW(\"a\",1),\"x\")",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"The following system error occurred: Type mismatch. \""
+  },
+  {
+   "expr": "TOCSV(ROW(\"a\",1),TRUE())",
+   "powerbi": "[a]\n1"
+  },
+  {
+   "expr": "TOCSV(ROW(\"a\",1),2,TRUE())",
+   "powerbi": "[a]\n1"
+  },
+  {
+   "expr": "TOCSV(ROW(\"a\",1),2,1)",
+   "powerbi": "[a]\n\"1\""
+  },
+  {
+   "expr": "TOCSV(ROW(\"a\",1),2,\";;;\")",
+   "powerbi": "[a]\n1"
+  },
+  {
+   "expr": "TOCSV(ROW(\"a\",1),5,\",\",FALSE())",
+   "powerbi": "1"
+  },
+  {
+   "expr": "TOCSV(ROW(\"a\",1),5,\"\"\"\")",
+   "powerbi": "[a]\n1"
+  },
+  {
+   "expr": "TOCSV(ROW(\"a\",1,\"b\",2),5,\"\"\"\")",
+   "powerbi": "[a]\"[b]\n1\"2"
+  },
+  {
+   "expr": "TOCSV(ROW(\"a\",\"x\"\"y\"),5,\"\"\"\")",
+   "powerbi": "[a]\n\"x\"\"y\""
+  },
+  {
+   "expr": "TOCSV(ROW(\"a\",\"x;y\"),5,\";\")",
+   "powerbi": "[a]\n\"x;y\""
+  },
+  {
+   "expr": "TOCSV(ROW(\"a\",\"x\"&UNICHAR(13)&\"y\"))",
+   "powerbi": "[a]\nx\ry"
+  },
+  {
+   "expr": "TOCSV(ROW(\"a\",\" x \"))",
+   "powerbi": "[a]\n x "
+  },
+  {
+   "expr": "TOCSV(ROW(\"a\",\"x\"&UNICHAR(9)&\"y\"))",
+   "powerbi": "[a]\nx\ty"
+  },
+  {
+   "expr": "TOCSV(ROW(\"a\",\"\u00e9\u20ac\ud83d\ude00\"))",
+   "powerbi": "[a]\n\u00e9\u20ac\ud83d\ude00"
+  },
+  {
+   "expr": "TOCSV(ROW(\"a\",1.10))",
+   "powerbi": "[a]\n1.1"
+  },
+  {
+   "expr": "TOCSV(ROW(\"a\",0.1+0.2))",
+   "powerbi": "[a]\n0.3"
+  },
+  {
+   "expr": "TOCSV(ROW(\"a\",100000000000000))",
+   "powerbi": "[a]\n100000000000000"
+  },
+  {
+   "expr": "TOCSV(ROW(\"a\",123456789.123456789))",
+   "powerbi": "[a]\n123456789.123457"
+  },
+  {
+   "expr": "TOCSV(ROW(\"a\",0.000001))",
+   "powerbi": "[a]\n0.000001"
+  },
+  {
+   "expr": "TOCSV(ROW(\"a\",0.0000001))",
+   "powerbi": "[a]\n0.0000001"
+  },
+  {
+   "expr": "TOCSV(ROW(\"a\",1E-10))",
+   "powerbi": "[a]\n0.0000000001"
+  },
+  {
+   "expr": "TOCSV(ROW(\"a\",-1.5E300))",
+   "powerbi": "[a]\n-1.5E+300"
+  },
+  {
+   "expr": "TOCSV(ROW(\"a\",1/0))",
+   "powerbi": "[a]\ninf"
+  },
+  {
+   "expr": "TOCSV(ROW(\"a\",-1/0))",
+   "powerbi": "[a]\n-inf"
+  },
+  {
+   "expr": "TOCSV(ROW(\"a\",0/0))",
+   "powerbi": "[a]\n-nan(ind)"
+  },
+  {
+   "expr": "TOCSV(ROW(\"a\",DATE(2020,1,2)+TIME(3,4,5)))",
+   "powerbi": "[a]\n1/2/2020 3:04:05 AM"
+  },
+  {
+   "expr": "TOCSV(ROW(\"a\",DATE(2020,12,31)))",
+   "powerbi": "[a]\n12/31/2020"
+  },
+  {
+   "expr": "TOCSV(ROW(\"a\",TIME(3,4,5)))",
+   "powerbi": "[a]\n3:04:05 AM"
+  },
+  {
+   "expr": "TOCSV(ROW(\"a\",CURRENCY(1)))",
+   "powerbi": "[a]\n1"
+  },
+  {
+   "expr": "TOCSV(ROW(\"a\",CURRENCY(1.5)))",
+   "powerbi": "[a]\n1.5"
+  },
+  {
+   "expr": "TOCSV(ROW(\"a\",CURRENCY(1234.5678)))",
+   "powerbi": "[a]\n1234.5678"
+  },
+  {
+   "expr": "TOCSV(ROW(\"a\",TRUE(),\"b\",FALSE()))",
+   "powerbi": "[a],[b]\nTRUE,FALSE"
+  },
+  {
+   "expr": "TOCSV(ROW(\"a\",BLANK(),\"b\",BLANK()))",
+   "powerbi": "[a],[b]\n,"
+  },
+  {
+   "expr": "TOCSV(ROW(\"a\",\"\"))",
+   "powerbi": "[a]\n"
+  },
+  {
+   "expr": "TOCSV(ROW(\"a\",\"\",\"b\",\"\"))",
+   "powerbi": "[a],[b]\n,"
+  },
+  {
+   "expr": "TOCSV(ROW(\"a\",1),2,\";\",TRUE())",
+   "powerbi": "[a]\n1"
+  },
+  {
+   "expr": "TOCSV({1,2,3})",
+   "powerbi": "[Value]\n1\n2\n3"
+  },
+  {
+   "expr": "TOCSV({1,2,3},2)",
+   "powerbi": "[Value]\n1\n2"
+  },
+  {
+   "expr": "TOCSV({(1,\"a\"),(2,\"b\")})",
+   "powerbi": "[Value1],[Value2]\n1,a\n2,b"
+  },
+  {
+   "expr": "TOCSV(GENERATESERIES(1,3))",
+   "powerbi": "[Value]\n1\n2\n3"
+  },
+  {
+   "expr": "TOCSV(GENERATESERIES(1,3,1.5))",
+   "powerbi": "[Value]\n1\n2.5"
+  },
+  {
+   "expr": "TOCSV(CALENDAR(DATE(2020,1,1),DATE(2020,1,3)))",
+   "powerbi": "[Date]\n1/1/2020\n1/2/2020\n1/3/2020"
+  },
+  {
+   "expr": "TOCSV(TOPN(2,VALUES(Facts[Quantity]),Facts[Quantity]))",
+   "powerbi": "'Facts'[Quantity]\n4\n5"
+  },
+  {
+   "expr": "TOCSV(DISTINCT(Facts[Region]))",
+   "powerbi": "'Facts'[Region]\nEast\nWest\nNorth"
+  },
+  {
+   "expr": "TOCSV(ALL(Facts[Region]))",
+   "powerbi": "'Facts'[Region]\nEast\nWest\nNorth"
+  },
+  {
+   "expr": "TOCSV(SUMMARIZE(Facts,Facts[Region],\"s\",SUM(Facts[Quantity])))",
+   "powerbi": "'Facts'[Region],[s]\nEast,8\nWest,3\nNorth,4"
+  },
+  {
+   "expr": "TOCSV(ADDCOLUMNS(VALUES(Facts[Region]),\"n\",COUNTROWS(Facts)))",
+   "powerbi": "'Facts'[Region],[n]\nEast,6\nWest,6\nNorth,6"
+  },
+  {
+   "expr": "TOCSV(SELECTCOLUMNS(Facts,\"A\",Facts[Sales]))",
+   "powerbi": "[A]\n10.5\n20\n-1.5\n\n0\n2.5"
+  },
+  {
+   "expr": "TOCSV(SELECTCOLUMNS(Facts,\"A\",Facts[Sales]),0)",
+   "powerbi": "[A]\n"
+  },
+  {
+   "expr": "TOCSV(SELECTCOLUMNS(Facts,\"A\",Facts[Sales]),100)",
+   "powerbi": "[A]\n10.5\n20\n-1.5\n\n0\n2.5"
+  },
+  {
+   "expr": "TOCSV(SELECTCOLUMNS(Facts,\"A\",Facts[Sales]),1,\"|\")",
+   "powerbi": "[A]\n10.5"
+  },
+  {
+   "expr": "TOCSV(CROSSJOIN(VALUES(Facts[Region]),VALUES(Facts[Note])))",
+   "powerbi": "'Facts'[Region],'Facts'[Note]\nEast,\nWest,\nNorth,\nEast,Paid\nWest,Paid\nNorth,Paid\nEast,Late\nWest,Late\nNorth,Late"
+  },
+  {
+   "expr": "TOCSV(UNION(ROW(\"a\",1),ROW(\"a\",2)))",
+   "powerbi": "[a]\n1\n2"
+  },
+  {
+   "expr": "TOCSV(ROW(\"a\",1),2)&TOCSV(ROW(\"a\",2),2)",
+   "powerbi": "[a]\n1[a]\n2"
+  },
+  {
+   "expr": "LEN(TOCSV(ROW(\"a\",1)))",
+   "powerbi": "5"
+  },
+  {
+   "expr": "LEFT(TOCSV(Facts),10)",
+   "powerbi": "'Facts'[Sa"
+  },
+  {
+   "expr": "SUBSTITUTE(TOCSV(ROW(\"a\",1)),UNICHAR(10),\"|\")",
+   "powerbi": "[a]|1"
+  },
+  {
+   "expr": "TOCSV(ROW(\"a\",1,\"a\",2))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 25) Function 'ROW' cannot add column [a], as it has the same name with an existing column.\""
+  },
+  {
+   "expr": "TOCSV(ROW(\"[a]\",1))",
+   "powerbi": "[[a]]]\n1"
+  },
+  {
+   "expr": "TOCSV(ROW(\"a,b\",1))",
+   "powerbi": "\"[a,b]\"\n1"
+  },
+  {
+   "expr": "TOCSV(ROW(\"a\"&UNICHAR(10)&\"b\",1))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 29) Function ROW expects a column name as argument number 1.\""
+  },
+  {
+   "expr": "TOCSV(ROW(\"\u00e9\",1))",
+   "powerbi": "[\u00e9]\n1"
+  },
+  {
+   "expr": "TOCSV(ROW(\"\",1))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 29) The new column name can only be a constant non-empty string.\""
+  },
+  {
+   "expr": "TOCSV()",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 19) Too few arguments were passed to the TOCSV function. The minimum argument count for the function is 1.\""
+  },
+  {
+   "expr": "TOCSV(1)",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 19) The TOCSV function expects a table expression for argument '1', but a string or numeric expression was used.\""
+  },
+  {
+   "expr": "TOCSV(\"a\")",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 19) The TOCSV function expects a table expression for argument '1', but a string or numeric expression was used.\""
+  },
+  {
+   "expr": "TOCSV(Facts[Sales])",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 25) A single value for column 'Sales' in table 'Facts' cannot be determined. This can happen when a measure or function formula refers to a column that contains many values without specifying an aggregation such as min, max, count, or sum to get a single result.\""
+  },
+  {
+   "expr": "TOCSV(Facts,1,2,3,4)",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 37) Too many arguments were passed to the TOCSV function. The maximum argument count for the function is 4.\""
+  },
+  {
+   "expr": "TOCSV(Facts,-1)",
+   "powerbi": "'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Note]\n10.5,2,East,Paid\n20,3,West,\n-1.5,1,East,Paid\n,4,North,Late\n0,0,West,Paid\n2.5,5,East,"
+  },
+  {
+   "expr": "TOCSV(Facts,1000)",
+   "powerbi": "'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Note]\n10.5,2,East,Paid\n20,3,West,\n-1.5,1,East,Paid\n,4,North,Late\n0,0,West,Paid\n2.5,5,East,"
+  },
+  {
+   "expr": "TOCSV(Facts,1E10)",
+   "powerbi": "'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Note]\n10.5,2,East,Paid\n20,3,West,\n-1.5,1,East,Paid\n,4,North,Late\n0,0,West,Paid\n2.5,5,East,"
+  },
+  {
+   "expr": "TOJSON(ROW(\"a\",1),1)",
+   "powerbi": "{\n\t\"header\": [\"[a]\"],\n\t\"rowCount\": 1,\n\t\"data\": [\n\t\t[1]\n\t]\n}"
+  },
+  {
+   "expr": "TOJSON(ROW(\"a\",1),-1)",
+   "powerbi": "{\n\t\"header\": [\"[a]\"],\n\t\"rowCount\": 1,\n\t\"data\": [\n\t\t[1]\n\t]\n}"
+  },
+  {
+   "expr": "TOJSON(ROW(\"a\",1),1.5)",
+   "powerbi": "{\n\t\"header\": [\"[a]\"],\n\t\"rowCount\": 1,\n\t\"data\": [\n\t\t[1]\n\t]\n}"
+  },
+  {
+   "expr": "TOJSON(ROW(\"a\",1),BLANK())",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "TOJSON(ROW(\"a\",1),\"2\")",
+   "powerbi": "{\n\t\"header\": [\"[a]\"],\n\t\"rowCount\": 1,\n\t\"data\": [\n\t\t[1]\n\t]\n}"
+  },
+  {
+   "expr": "TOJSON(ROW(\"a\",1),TRUE())",
+   "powerbi": "{\n\t\"header\": [\"[a]\"],\n\t\"rowCount\": 1,\n\t\"data\": [\n\t\t[1]\n\t]\n}"
+  },
+  {
+   "expr": "TOJSON({1,2,3})",
+   "powerbi": "{\n\t\"header\": [\"[Value]\"],\n\t\"rowCount\": 3,\n\t\"data\": [\n\t\t[1],\n\t\t[2],\n\t\t[3]\n\t]\n}"
+  },
+  {
+   "expr": "TOJSON({(1,\"a\"),(2,\"b\")})",
+   "powerbi": "{\n\t\"header\": [\"[Value1]\", \"[Value2]\"],\n\t\"rowCount\": 2,\n\t\"data\": [\n\t\t[1, \"a\"],\n\t\t[2, \"b\"]\n\t]\n}"
+  },
+  {
+   "expr": "TOJSON(GENERATESERIES(1,3))",
+   "powerbi": "{\n\t\"header\": [\"[Value]\"],\n\t\"rowCount\": 3,\n\t\"data\": [\n\t\t[1],\n\t\t[2],\n\t\t[3]\n\t]\n}"
+  },
+  {
+   "expr": "TOJSON(CALENDAR(DATE(2020,1,1),DATE(2020,1,3)))",
+   "powerbi": "{\n\t\"header\": [\"[Date]\"],\n\t\"rowCount\": 3,\n\t\"data\": [\n\t\t[\"2020-01-01T00:00:00\"],\n\t\t[\"2020-01-02T00:00:00\"],\n\t\t[\"2020-01-03T00:00:00\"]\n\t]\n}"
+  },
+  {
+   "expr": "TOJSON(SUMMARIZE(Facts,Facts[Region],\"s\",SUM(Facts[Quantity])))",
+   "powerbi": "{\n\t\"header\": [\"'Facts'[Region]\", \"[s]\"],\n\t\"rowCount\": 3,\n\t\"data\": [\n\t\t[\"East\", 8],\n\t\t[\"West\", 3],\n\t\t[\"North\", 4]\n\t]\n}"
+  },
+  {
+   "expr": "TOJSON(SELECTCOLUMNS(Facts,\"A\",Facts[Sales]))",
+   "powerbi": "{\n\t\"header\": [\"[A]\"],\n\t\"rowCount\": 6,\n\t\"data\": [\n\t\t[10.5],\n\t\t[20.0],\n\t\t[-1.5],\n\t\t[null],\n\t\t[0.0],\n\t\t[2.5]\n\t]\n}"
+  },
+  {
+   "expr": "TOJSON(SELECTCOLUMNS(Facts,\"A\",Facts[Sales]),2)",
+   "powerbi": "{\n\t\"header\": [\"[A]\"],\n\t\"rowCount\": 6,\n\t\"data\": [\n\t\t[10.5],\n\t\t[20.0]\n\t]\n}"
+  },
+  {
+   "expr": "TOJSON(TOPN(2,Facts,Facts[Quantity]))",
+   "powerbi": "{\n\t\"header\": [\"'Facts'[Sales]\", \"'Facts'[Quantity]\", \"'Facts'[Region]\", \"'Facts'[Note]\"],\n\t\"rowCount\": 2,\n\t\"data\": [\n\t\t[null, 4, \"North\", \"Late\"],\n\t\t[2.5, 5, \"East\", null]\n\t]\n}"
+  },
+  {
+   "expr": "TOJSON(ROW(\"a\",0.1+0.2))",
+   "powerbi": "{\n\t\"header\": [\"[a]\"],\n\t\"rowCount\": 1,\n\t\"data\": [\n\t\t[0.3]\n\t]\n}"
+  },
+  {
+   "expr": "TOJSON(ROW(\"a\",1.10))",
+   "powerbi": "{\n\t\"header\": [\"[a]\"],\n\t\"rowCount\": 1,\n\t\"data\": [\n\t\t[1.1]\n\t]\n}"
+  },
+  {
+   "expr": "TOJSON(ROW(\"a\",100000000000000))",
+   "powerbi": "{\n\t\"header\": [\"[a]\"],\n\t\"rowCount\": 1,\n\t\"data\": [\n\t\t[100000000000000]\n\t]\n}"
+  },
+  {
+   "expr": "TOJSON(ROW(\"a\",123456789.123456789))",
+   "powerbi": "{\n\t\"header\": [\"[a]\"],\n\t\"rowCount\": 1,\n\t\"data\": [\n\t\t[123456789.1234]\n\t]\n}"
+  },
+  {
+   "expr": "TOJSON(ROW(\"a\",0.000001))",
+   "powerbi": "{\n\t\"header\": [\"[a]\"],\n\t\"rowCount\": 1,\n\t\"data\": [\n\t\t[0.0]\n\t]\n}"
+  },
+  {
+   "expr": "TOJSON(ROW(\"a\",0.0000001))",
+   "powerbi": "{\n\t\"header\": [\"[a]\"],\n\t\"rowCount\": 1,\n\t\"data\": [\n\t\t[0.0]\n\t]\n}"
+  },
+  {
+   "expr": "TOJSON(ROW(\"a\",1E-10))",
+   "powerbi": "{\n\t\"header\": [\"[a]\"],\n\t\"rowCount\": 1,\n\t\"data\": [\n\t\t[0.0]\n\t]\n}"
+  },
+  {
+   "expr": "TOJSON(ROW(\"a\",-1.5E300))",
+   "powerbi": "{\n\t\"header\": [\"[a]\"],\n\t\"rowCount\": 1,\n\t\"data\": [\n\t\t[-1.5e300]\n\t]\n}"
+  },
+  {
+   "expr": "TOJSON(ROW(\"a\",1/0))",
+   "powerbi": "{\n\t\"header\": [\"[a]\"],\n\t\"rowCount\": 1,\n\t\"data\": [\n\t\t[]\n\t]\n}"
+  },
+  {
+   "expr": "TOJSON(ROW(\"a\",0/0))",
+   "powerbi": "{\n\t\"header\": [\"[a]\"],\n\t\"rowCount\": 1,\n\t\"data\": [\n\t\t[]\n\t]\n}"
+  },
+  {
+   "expr": "TOJSON(ROW(\"a\",2/3))",
+   "powerbi": "{\n\t\"header\": [\"[a]\"],\n\t\"rowCount\": 1,\n\t\"data\": [\n\t\t[0.6666]\n\t]\n}"
+  },
+  {
+   "expr": "TOJSON(ROW(\"a\",12345.6789))",
+   "powerbi": "{\n\t\"header\": [\"[a]\"],\n\t\"rowCount\": 1,\n\t\"data\": [\n\t\t[12345.6789]\n\t]\n}"
+  },
+  {
+   "expr": "TOJSON(ROW(\"a\",1234567.891234))",
+   "powerbi": "{\n\t\"header\": [\"[a]\"],\n\t\"rowCount\": 1,\n\t\"data\": [\n\t\t[1234567.8912]\n\t]\n}"
+  },
+  {
+   "expr": "TOJSON(ROW(\"a\",CURRENCY(1234.5678)))",
+   "powerbi": "{\n\t\"header\": [\"[a]\"],\n\t\"rowCount\": 1,\n\t\"data\": [\n\t\t[1234.5678]\n\t]\n}"
+  },
+  {
+   "expr": "TOJSON(ROW(\"a\",CURRENCY(1)))",
+   "powerbi": "{\n\t\"header\": [\"[a]\"],\n\t\"rowCount\": 1,\n\t\"data\": [\n\t\t[1.0]\n\t]\n}"
+  },
+  {
+   "expr": "TOJSON(ROW(\"a\",DATE(2020,1,2)+TIME(3,4,5)))",
+   "powerbi": "{\n\t\"header\": [\"[a]\"],\n\t\"rowCount\": 1,\n\t\"data\": [\n\t\t[\"2020-01-02T03:04:05\"]\n\t]\n}"
+  },
+  {
+   "expr": "TOJSON(ROW(\"a\",TIME(3,4,5)))",
+   "powerbi": "{\n\t\"header\": [\"[a]\"],\n\t\"rowCount\": 1,\n\t\"data\": [\n\t\t[\"1899-12-30T03:04:05\"]\n\t]\n}"
+  },
+  {
+   "expr": "TOJSON(ROW(\"a\",TRUE(),\"b\",FALSE()))",
+   "powerbi": "{\n\t\"header\": [\"[a]\", \"[b]\"],\n\t\"rowCount\": 1,\n\t\"data\": [\n\t\t[true, false]\n\t]\n}"
+  },
+  {
+   "expr": "TOJSON(ROW(\"a\",\"\"))",
+   "powerbi": "{\n\t\"header\": [\"[a]\"],\n\t\"rowCount\": 1,\n\t\"data\": [\n\t\t[\"\"]\n\t]\n}"
+  },
+  {
+   "expr": "TOJSON(ROW(\"a\",\"\u00e9\u20ac\ud83d\ude00\"))",
+   "powerbi": "{\n\t\"header\": [\"[a]\"],\n\t\"rowCount\": 1,\n\t\"data\": [\n\t\t[\"\u00e9\u20ac\ud83d\ude00\"]\n\t]\n}"
+  },
+  {
+   "expr": "TOJSON(ROW(\"a\",\"x\"&UNICHAR(9)&\"y\"))",
+   "powerbi": "{\n\t\"header\": [\"[a]\"],\n\t\"rowCount\": 1,\n\t\"data\": [\n\t\t[\"x\\ty\"]\n\t]\n}"
+  },
+  {
+   "expr": "TOJSON(ROW(\"a\",\"x\"&UNICHAR(13)&\"y\"))",
+   "powerbi": "{\n\t\"header\": [\"[a]\"],\n\t\"rowCount\": 1,\n\t\"data\": [\n\t\t[\"x\\ry\"]\n\t]\n}"
+  },
+  {
+   "expr": "TOJSON(ROW(\"a\",\"<>&\"))",
+   "powerbi": "{\n\t\"header\": [\"[a]\"],\n\t\"rowCount\": 1,\n\t\"data\": [\n\t\t[\"<>&\"]\n\t]\n}"
+  },
+  {
+   "expr": "TOJSON(ROW(\"a\",\"/\"))",
+   "powerbi": "{\n\t\"header\": [\"[a]\"],\n\t\"rowCount\": 1,\n\t\"data\": [\n\t\t[\"/\"]\n\t]\n}"
+  },
+  {
+   "expr": "TOJSON(ROW(\"a\",UNICHAR(1)))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 34) Function 'UNICHAR' does not return invalid XML characters.\""
+  },
+  {
+   "expr": "TOJSON(ROW(\"a\",1,\"a\",2))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 26) Function 'ROW' cannot add column [a], as it has the same name with an existing column.\""
+  },
+  {
+   "expr": "TOJSON(ROW(\"a b\",1))",
+   "powerbi": "{\n\t\"header\": [\"[a b]\"],\n\t\"rowCount\": 1,\n\t\"data\": [\n\t\t[1]\n\t]\n}"
+  },
+  {
+   "expr": "TOJSON(ROW(\"a\"\"b\",1))",
+   "powerbi": "{\n\t\"header\": [\"[a\\\"b]\"],\n\t\"rowCount\": 1,\n\t\"data\": [\n\t\t[1]\n\t]\n}"
+  },
+  {
+   "expr": "TOJSON(ROW(\"\u00e9\",1))",
+   "powerbi": "{\n\t\"header\": [\"[\u00e9]\"],\n\t\"rowCount\": 1,\n\t\"data\": [\n\t\t[1]\n\t]\n}"
+  },
+  {
+   "expr": "TOJSON()",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 19) Too few arguments were passed to the TOJSON function. The minimum argument count for the function is 1.\""
+  },
+  {
+   "expr": "TOJSON(1)",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 19) The TOJSON function expects a table expression for argument '1', but a string or numeric expression was used.\""
+  },
+  {
+   "expr": "TOJSON(Facts[Sales])",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 26) A single value for column 'Sales' in table 'Facts' cannot be determined. This can happen when a measure or function formula refers to a column that contains many values without specifying an aggregation such as min, max, count, or sum to get a single result.\""
+  },
+  {
+   "expr": "TOJSON(Facts,1,2)",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 34) Too many arguments were passed to the TOJSON function. The maximum argument count for the function is 2.\""
+  },
+  {
+   "expr": "TOJSON(Facts,1000)",
+   "powerbi": "{\n\t\"header\": [\"'Facts'[Sales]\", \"'Facts'[Quantity]\", \"'Facts'[Region]\", \"'Facts'[Note]\"],\n\t\"rowCount\": 6,\n\t\"data\": [\n\t\t[10.5, 2, \"East\", \"Paid\"],\n\t\t[20.0, 3, \"West\", null],\n\t\t[-1.5, 1, \"East\", \"Paid\"],\n\t\t[null, 4, \"North\", \"Late\"],\n\t\t[0.0, 0, \"West\", \"Paid\"],\n\t\t[2.5, 5, \"East\", null]\n\t]\n}"
+  },
+  {
+   "expr": "LEN(TOJSON(VALUES(Facts[Region])))",
+   "powerbi": "101"
+  },
+  {
+   "expr": "LEFT(TOJSON(Facts),12)",
+   "powerbi": "{\n\t\"header\":"
+  },
+  {
+   "expr": "COUNTROWS(TOJSON(Facts))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 19) The COUNTROWS function expects a table expression for argument '1', but a string or numeric expression was used.\""
+  }
+ ]
+}

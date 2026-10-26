@@ -1,0 +1,574 @@
+{
+ "powerbi_version": "2.157.879.0 (26.08)+da30fe74eb0b8a8786ab7326b69c400a0e951831",
+ "frozen": "2026-10-26",
+ "items": [
+  {
+   "expr": "IF.EAGER(TRUE(),1,2)",
+   "powerbi": "1"
+  },
+  {
+   "expr": "IF.EAGER(FALSE(),1,\"a\")",
+   "powerbi": "a"
+  },
+  {
+   "expr": "IF.EAGER(TRUE(),1/0,2)",
+   "powerbi": "Infinity"
+  },
+  {
+   "expr": "IF.EAGER(FALSE(),1/0,2)",
+   "powerbi": "2"
+  },
+  {
+   "expr": "IF.EAGER(TRUE(),1)",
+   "powerbi": "1"
+  },
+  {
+   "expr": "IF.EAGER(FALSE(),1)",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "IF.EAGER(BLANK(),1,2)",
+   "powerbi": "2"
+  },
+  {
+   "expr": "IF.EAGER(1,2,3)",
+   "powerbi": "2"
+  },
+  {
+   "expr": "IF.EAGER(\"a\",1,2)",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 28) Cannot convert value 'a' of type Text to type True/False.\""
+  },
+  {
+   "expr": "IF.EAGER(0,1,2)",
+   "powerbi": "2"
+  },
+  {
+   "expr": "IF.EAGER()",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 19) Too few arguments were passed to the IF.EAGER function. The minimum argument count for the function is 2.\""
+  },
+  {
+   "expr": "IF.EAGER(TRUE())",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 19) Too few arguments were passed to the IF.EAGER function. The minimum argument count for the function is 2.\""
+  },
+  {
+   "expr": "ERROR(\"x\")",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 19) x\""
+  },
+  {
+   "expr": "ERROR()",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 19) Too few arguments were passed to the ERROR function. The minimum argument count for the function is 1.\""
+  },
+  {
+   "expr": "ERROR(1)",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 19) The function 'ERROR' expects its argument number 1 to be constant.\""
+  },
+  {
+   "expr": "IFERROR(ERROR(\"x\"),5)",
+   "powerbi": "5"
+  },
+  {
+   "expr": "IF(TRUE(),1,ERROR(\"x\"))",
+   "powerbi": "1"
+  },
+  {
+   "expr": "IF(FALSE(),1,ERROR(\"x\"))",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 32) x\""
+  },
+  {
+   "expr": "ERROR(BLANK())",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 19) The function 'ERROR' expects its argument number 1 to be constant.\""
+  },
+  {
+   "expr": "ISERROR(ERROR(\"x\"))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ERROR(\"a\")&\"b\"",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 19) a\""
+  },
+  {
+   "expr": "IFERROR(ERROR(\"\"),5)",
+   "powerbi": "5"
+  },
+  {
+   "expr": "ERROR(TRUE())",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 19) The function 'ERROR' expects its argument number 1 to be constant.\""
+  },
+  {
+   "expr": "CUSTOMDATA()",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "NAMEOF(Facts[Sales])",
+   "powerbi": "'Facts'[Sales]"
+  },
+  {
+   "expr": "NAMEOF(Facts)",
+   "powerbi": "'Facts'"
+  },
+  {
+   "expr": "TABLEOF(Facts[Sales])",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 19) The expression refers to multiple columns. Multiple columns cannot be converted to a scalar value.\""
+  },
+  {
+   "expr": "COUNTROWS(TABLEOF(Facts[Sales]))",
+   "powerbi": "6"
+  },
+  {
+   "expr": "ISAFTER(2,1)",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISAFTER(1,2)",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISAFTER(1,1)",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISAFTER(2,1,DESC)",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISAFTER(1,2,DESC)",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISAFTER(\"b\",\"a\")",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISAFTER(BLANK(),1)",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISAFTER(1,BLANK())",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISAFTER(1,1,ASC,2,1)",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISAFTER(1,1,ASC,1,2)",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISAFTER(1,1,DESC,2,1)",
+   "powerbi": "True"
+  },
+  {
+   "expr": "EVALUATEANDLOG(3)",
+   "powerbi": "3"
+  },
+  {
+   "expr": "EVALUATEANDLOG(1+1,\"lbl\")",
+   "powerbi": "2"
+  },
+  {
+   "expr": "EVALUATEANDLOG(BLANK())",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "EVALUATEANDLOG(\"a\")",
+   "powerbi": "a"
+  },
+  {
+   "expr": "COUNTROWS(EVALUATEANDLOG(Facts))",
+   "powerbi": "6"
+  },
+  {
+   "expr": "SUM(Facts[Quantity])+EVALUATEANDLOG(1)",
+   "powerbi": "16"
+  },
+  {
+   "expr": "EVALUATEANDLOG()",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 19) Too few arguments were passed to the EVALUATEANDLOG function. The minimum argument count for the function is 1.\""
+  },
+  {
+   "expr": "EVALUATEANDLOG(1,\"a\",5)",
+   "powerbi": "1"
+  },
+  {
+   "expr": "EVALUATEANDLOG(1,\"a\",1000)",
+   "powerbi": "1"
+  },
+  {
+   "expr": "NAMEOF(Facts[Quantity])",
+   "powerbi": "'Facts'[Quantity]"
+  },
+  {
+   "expr": "NAMEOF(SUM(Facts[Quantity]))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 19) Only measure or fully-qualified column or table or calendar references are allowed in NAMEOF function.\""
+  },
+  {
+   "expr": "NAMEOF(1)",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 19) Only measure or fully-qualified column or table or calendar references are allowed in NAMEOF function.\""
+  },
+  {
+   "expr": "NAMEOF([nothing])",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 19) Only measure or fully-qualified column or table or calendar references are allowed in NAMEOF function.\""
+  },
+  {
+   "expr": "NAMEOF(Facts[Nope])",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 26) Column 'Nope' in table 'Facts' cannot be found or may not be used in this expression.\""
+  },
+  {
+   "expr": "NAMEOF(Cal)",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 19) Only measure or fully-qualified column or table or calendar references are allowed in NAMEOF function.\""
+  },
+  {
+   "expr": "NAMEOF(Cal[Date])",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 26) Cannot find table 'Cal'.\""
+  },
+  {
+   "expr": "TABLEOF(Facts)",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 19) The TABLEOF function only accepts a column reference, measure reference, or calendar reference as the argument number 1.\""
+  },
+  {
+   "expr": "TABLEOF(Cal[Date])",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 27) Cannot find table 'Cal'.\""
+  },
+  {
+   "expr": "TABLEOF(1)",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 19) The TABLEOF function only accepts a column reference, measure reference, or calendar reference as the argument number 1.\""
+  },
+  {
+   "expr": "TABLEOF(Facts[Sales],Facts[Region])",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 40) Too many arguments were passed to the TABLEOF function. The maximum argument count for the function is 1.\""
+  },
+  {
+   "expr": "COUNTROWS(ALLCROSSFILTERED(Facts))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 29) ALLCROSSFILTERED function cannot be used as a table expression. It can appear only as a filter in CALCULATE.\""
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(Facts),ALLCROSSFILTERED(Facts))",
+   "powerbi": "6"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(Facts),Facts[Region]=\"East\",ALLCROSSFILTERED(Facts))",
+   "powerbi": "3"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(Facts),ALLCROSSFILTERED(Facts[Region]))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 63) A single value for column 'Region' in table 'Facts' cannot be determined. This can happen when a measure or function formula refers to a column that contains many values without specifying an aggregation such as min, max, count, or sum to get a single result.\""
+  },
+  {
+   "expr": "IF.EAGER(TRUE(),1,ERROR(\"x\"))",
+   "powerbi": "1"
+  },
+  {
+   "expr": "IF.EAGER(FALSE(),ERROR(\"x\"),2)",
+   "powerbi": "2"
+  },
+  {
+   "expr": "IF(FALSE(),ERROR(\"x\"),2)",
+   "powerbi": "2"
+  },
+  {
+   "expr": "IF.EAGER(TRUE(),1,1/0)",
+   "powerbi": "1"
+  },
+  {
+   "expr": "IF.EAGER(TRUE(),1,SQRT(-1))",
+   "powerbi": "1"
+  },
+  {
+   "expr": "IF.EAGER(TRUE(),1,VALUE(\"x\"))",
+   "powerbi": "1"
+  },
+  {
+   "expr": "IFERROR(IF.EAGER(TRUE(),1,ERROR(\"x\")),9)",
+   "powerbi": "1"
+  },
+  {
+   "expr": "IF.EAGER(TRUE(),1,2,3)",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 39) Too many arguments were passed to the IF.EAGER function. The maximum argument count for the function is 3.\""
+  },
+  {
+   "expr": "IF.EAGER(Facts[Region]=\"East\",1,2)",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 28) A single value for column 'Region' in table 'Facts' cannot be determined. This can happen when a measure or function formula refers to a column that contains many values without specifying an aggregation such as min, max, count, or sum to get a single result.\""
+  },
+  {
+   "expr": "SUMX(Facts,IF.EAGER(Facts[Quantity]>2,1,0))",
+   "powerbi": "3"
+  },
+  {
+   "expr": "IF.EAGER(TRUE(),\"a\",1)",
+   "powerbi": "a"
+  },
+  {
+   "expr": "IF.EAGER(FALSE(),\"a\",1)",
+   "powerbi": "1"
+  },
+  {
+   "expr": "IF.EAGER(TRUE(),1,\"a\")",
+   "powerbi": "1"
+  },
+  {
+   "expr": "IF.EAGER(TRUE(),BLANK(),1)",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "IF.EAGER(TRUE(),Facts,2)",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 35) The expression refers to multiple columns. Multiple columns cannot be converted to a scalar value.\""
+  },
+  {
+   "expr": "IF.EAGER(NOT TRUE(),1)",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "ERROR(\"\")",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 19) \""
+  },
+  {
+   "expr": "ERROR(\"x\"&\"y\")",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 19) The function 'ERROR' expects its argument number 1 to be constant.\""
+  },
+  {
+   "expr": "ERROR(UNICHAR(65))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 19) The function 'ERROR' expects its argument number 1 to be constant.\""
+  },
+  {
+   "expr": "IFERROR(ERROR(\"a\"),ERROR(\"b\"))",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 38) b\""
+  },
+  {
+   "expr": "IFERROR(1,ERROR(\"b\"))",
+   "powerbi": "1"
+  },
+  {
+   "expr": "ISERROR(ERROR(\"a\"))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "IFERROR(ERROR(\"a\")+1,0)",
+   "powerbi": "0"
+  },
+  {
+   "expr": "SUMX(Facts,IF(Facts[Quantity]>10,ERROR(\"big\"),1))",
+   "powerbi": "6"
+  },
+  {
+   "expr": "SUMX(Facts,IF(Facts[Quantity]>2,ERROR(\"big\"),1))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 51) big\""
+  },
+  {
+   "expr": "ERROR(\"a\",1)",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 29) Too many arguments were passed to the ERROR function. The maximum argument count for the function is 1.\""
+  },
+  {
+   "expr": "ISBLANK(IFERROR(ERROR(\"a\"),BLANK()))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "COALESCE(ERROR(\"x\"),1)",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 28) x\""
+  },
+  {
+   "expr": "CUSTOMDATA()&\"x\"",
+   "powerbi": "x"
+  },
+  {
+   "expr": "ISBLANK(CUSTOMDATA())",
+   "powerbi": "True"
+  },
+  {
+   "expr": "LEN(CUSTOMDATA())",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "CUSTOMDATA(1)",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 30) Too many arguments were passed to the CUSTOMDATA function. The maximum argument count for the function is 0.\""
+  },
+  {
+   "expr": "IF.EAGER(TRUE(),1,2)+IF.EAGER(FALSE(),1,2)",
+   "powerbi": "3"
+  },
+  {
+   "expr": "ISAFTER(2,1)=TRUE()",
+   "powerbi": "True"
+  },
+  {
+   "expr": "IF(ISAFTER(3,2),\"after\",\"not\")",
+   "powerbi": "after"
+  },
+  {
+   "expr": "ISAFTER(\"a\",\"B\")",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISAFTER(\"B\",\"a\")",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISAFTER(DATE(2020,1,2),DATE(2020,1,1))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISAFTER(TRUE(),FALSE())",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISAFTER(1,\"a\")",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 19) DAX comparison operations do not support comparing values of type Integer with values of type Text. Consider using the VALUE or FORMAT function to convert one of the values.\""
+  },
+  {
+   "expr": "ISAFTER(2,1,ASC)",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISAFTER(1,1,ASC,3,2)",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISAFTER(1,1,ASC,2,2)",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISAFTER(1,1,DESC,1,2)",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISAFTER(1,1,ASC,2)",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 19) IsOnOrAfter() function contains a scalar expression to compare without a value to compare against.\""
+  },
+  {
+   "expr": "ISAFTER(BLANK(),BLANK())",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISAFTER(BLANK(),-1)",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISAFTER(-1,BLANK())",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISAFTER(BLANK(),0)",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISAFTER(0,BLANK())",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISAFTER(BLANK(),\"\")",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISAFTER(\"\",BLANK())",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISAFTER(1/0,1)",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISAFTER(1,1/0)",
+   "powerbi": "False"
+  },
+  {
+   "expr": "EVALUATEANDLOG(1)+EVALUATEANDLOG(2)",
+   "powerbi": "3"
+  },
+  {
+   "expr": "EVALUATEANDLOG(Facts[Quantity])",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 34) A single value for column 'Quantity' in table 'Facts' cannot be determined. This can happen when a measure or function formula refers to a column that contains many values without specifying an aggregation such as min, max, count, or sum to get a single result.\""
+  },
+  {
+   "expr": "SUMX(Facts,EVALUATEANDLOG(Facts[Quantity]))",
+   "powerbi": "15"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]>EVALUATEANDLOG(3))",
+   "powerbi": "2"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]>EVALUATEANDLOG(SUM(Facts[Quantity])/6))",
+   "powerbi": "3"
+  },
+  {
+   "expr": "EVALUATEANDLOG(1/0)",
+   "powerbi": "Infinity"
+  },
+  {
+   "expr": "EVALUATEANDLOG(ERROR(\"x\"))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 34) x\""
+  },
+  {
+   "expr": "IFERROR(EVALUATEANDLOG(ERROR(\"x\")),5)",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 42) x\""
+  },
+  {
+   "expr": "EVALUATEANDLOG(TRUE())",
+   "powerbi": "True"
+  },
+  {
+   "expr": "EVALUATEANDLOG(DATE(2020,1,1))=DATE(2020,1,1)",
+   "powerbi": "True"
+  },
+  {
+   "expr": "LEN(EVALUATEANDLOG(\"abc\",\"label\"))",
+   "powerbi": "3"
+  },
+  {
+   "expr": "COUNTROWS(EVALUATEANDLOG(VALUES(Facts[Region])))",
+   "powerbi": "3"
+  },
+  {
+   "expr": "COUNTROWS(EVALUATEANDLOG(Facts,\"t\",2))",
+   "powerbi": "6"
+  },
+  {
+   "expr": "SUMX(EVALUATEANDLOG(Facts),Facts[Quantity])",
+   "powerbi": "15"
+  },
+  {
+   "expr": "NAMEOF(Facts[Region])",
+   "powerbi": "'Facts'[Region]"
+  },
+  {
+   "expr": "NAMEOF(Facts[Sales])&\"x\"",
+   "powerbi": "'Facts'[Sales]x"
+  },
+  {
+   "expr": "LEN(NAMEOF(Facts))",
+   "powerbi": "7"
+  },
+  {
+   "expr": "NAMEOF(Facts[Note])=NAMEOF(Facts[Note])",
+   "powerbi": "True"
+  },
+  {
+   "expr": "NAMEOF(Facts[Quantity],1)",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 42) Valid arguments for component are TABLE, COLUMN, MEASURE, CALENDAR, FULL, SELF, and PARENT.\""
+  },
+  {
+   "expr": "NAMEOF()",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 19) Too few arguments were passed to the NAMEOF function. The minimum argument count for the function is 1.\""
+  },
+  {
+   "expr": "TABLEOF(Facts[Quantity])",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 19) The expression refers to multiple columns. Multiple columns cannot be converted to a scalar value.\""
+  },
+  {
+   "expr": "COUNTROWS(TABLEOF(Facts[Region]))",
+   "powerbi": "6"
+  },
+  {
+   "expr": "SUMX(TABLEOF(Facts[Quantity]),Facts[Quantity])",
+   "powerbi": "15"
+  },
+  {
+   "expr": "COUNTROWS(TABLEOF(Facts[Sales]))+1",
+   "powerbi": "7"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(TABLEOF(Facts[Quantity]),Facts[Quantity]>2))",
+   "powerbi": "3"
+  }
+ ]
+}
