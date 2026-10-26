@@ -1,0 +1,366 @@
+{
+ "powerbi_version": "2.157.879.0 (26.08)+da30fe74eb0b8a8786ab7326b69c400a0e951831",
+ "frozen": "2026-10-26",
+ "items": [
+  {
+   "expr": "1*VAR y=2 RETURN y",
+   "powerbi": "2"
+  },
+  {
+   "expr": "6/VAR y=2 RETURN y",
+   "powerbi": "3"
+  },
+  {
+   "expr": "5-VAR y=2 RETURN y",
+   "powerbi": "3"
+  },
+  {
+   "expr": "1+VAR y=2 RETURN y+1",
+   "powerbi": "4"
+  },
+  {
+   "expr": "VAR x=1 RETURN x+VAR y=2 RETURN y+x",
+   "powerbi": "4"
+  },
+  {
+   "expr": "VAR x=1 RETURN VAR x=x+1 RETURN x",
+   "powerbi": "2"
+  },
+  {
+   "expr": "VAR x=1 RETURN VAR y=2 RETURN VAR x=3 RETURN x+y",
+   "powerbi": "5"
+  },
+  {
+   "expr": "VAR x=1 RETURN (VAR x=2 RETURN x)+x",
+   "powerbi": "3"
+  },
+  {
+   "expr": "VAR x=1 RETURN x*VAR x=5 RETURN x",
+   "powerbi": "5"
+  },
+  {
+   "expr": "VAR x=1 RETURN x-VAR x=5 RETURN x+x",
+   "powerbi": "-9"
+  },
+  {
+   "expr": "1>VAR y=2 RETURN y",
+   "powerbi": "False"
+  },
+  {
+   "expr": "1=VAR y=2 RETURN y",
+   "powerbi": "False"
+  },
+  {
+   "expr": "\"a\"&VAR y=\"b\" RETURN y",
+   "powerbi": "ab"
+  },
+  {
+   "expr": "1+(VAR y=2 RETURN y)",
+   "powerbi": "3"
+  },
+  {
+   "expr": "VAR x=1 VAR x=2 RETURN x",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 33) Variable 'x' cannot be created because a table or variable with the same name already exists.\""
+  },
+  {
+   "expr": "VAR x=1 RETURN VAR y=2 VAR y=3 RETURN y",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 48) Variable 'y' cannot be created because a table or variable with the same name already exists.\""
+  },
+  {
+   "expr": "VAR t=Facts RETURN COUNTROWS(t)+1",
+   "powerbi": "7"
+  },
+  {
+   "expr": "VAR t=Facts RETURN COUNTROWS(t)*2",
+   "powerbi": "12"
+  },
+  {
+   "expr": "VAR t=Facts VAR u=2 RETURN COUNTROWS(t)+u",
+   "powerbi": "8"
+  },
+  {
+   "expr": "VAR t=Facts RETURN COUNTROWS(t)+COUNTROWS(t)",
+   "powerbi": "12"
+  },
+  {
+   "expr": "VAR t=Facts RETURN CALCULATE(COUNTROWS(t),Facts[Quantity]>2)",
+   "powerbi": "6"
+  },
+  {
+   "expr": "VAR t=Facts RETURN COUNTROWS(DISTINCT(t))",
+   "powerbi": "6"
+  },
+  {
+   "expr": "VAR t=Facts RETURN COUNTROWS(t)=6",
+   "powerbi": "True"
+  },
+  {
+   "expr": "VAR t=Facts RETURN IF(COUNTROWS(t)>1,1,2)",
+   "powerbi": "1"
+  },
+  {
+   "expr": "VAR t=Facts RETURN SUMX(t,Facts[Quantity])",
+   "powerbi": "15"
+  },
+  {
+   "expr": "VAR t=Facts RETURN COUNTROWS(ALL(t))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 48) The ALL function expects a table reference for argument '1', but a table expression was used.\""
+  },
+  {
+   "expr": "VAR t=Facts RETURN COUNTROWS(FILTER(t,Facts[Quantity]>2))",
+   "powerbi": "3"
+  },
+  {
+   "expr": "VAR t=Facts RETURN COUNTROWS(VALUES(t))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 48) The VALUES function expects a column reference expression or a table reference expression for argument '1'.\""
+  },
+  {
+   "expr": "VAR t=Facts RETURN COUNTROWS(t)",
+   "powerbi": "6"
+  },
+  {
+   "expr": "VAR t=Facts RETURN t",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 19) The expression refers to multiple columns. Multiple columns cannot be converted to a scalar value.\""
+  },
+  {
+   "expr": "VAR t=Region RETURN COUNTROWS(t)",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 25) Failed to resolve name 'Region'. It is not a valid table, variable, or function name.\""
+  },
+  {
+   "expr": "VAR t=Nope RETURN COUNTROWS(t)",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 25) Failed to resolve name 'Nope'. It is not a valid table, variable, or function name.\""
+  },
+  {
+   "expr": "VAR t=Facts VAR t=Facts RETURN COUNTROWS(t)",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 37) Variable 't' cannot be created because a table or variable with the same name already exists.\""
+  },
+  {
+   "expr": "VAR t=Facts RETURN VAR t=2 RETURN t",
+   "powerbi": "2"
+  },
+  {
+   "expr": "VAR t=Facts RETURN VAR t=2 RETURN COUNTROWS(Facts)+t",
+   "powerbi": "8"
+  },
+  {
+   "expr": "VAR t=Facts VAR u=t RETURN COUNTROWS(u)",
+   "powerbi": "6"
+  },
+  {
+   "expr": "VAR a = 1 // x\rRETURN a+1",
+   "powerbi": "2"
+  },
+  {
+   "expr": "VAR a = 1 // x\r\nRETURN a",
+   "powerbi": "1"
+  },
+  {
+   "expr": "VAR a = 1 /* x */\rRETURN a",
+   "powerbi": "1"
+  },
+  {
+   "expr": "VAR a = 1 // x\rVAR b = 2 -- y\rRETURN a+b",
+   "powerbi": "3"
+  },
+  {
+   "expr": "1 // x\r+1",
+   "powerbi": "2"
+  },
+  {
+   "expr": "1 -- x\r+1",
+   "powerbi": "2"
+  },
+  {
+   "expr": "1 // x\r",
+   "powerbi": "1"
+  },
+  {
+   "expr": "1 // x\r\n+1",
+   "powerbi": "2"
+  },
+  {
+   "expr": "1 // x\n+1",
+   "powerbi": "2"
+  },
+  {
+   "expr": "1 // x\r\r+1",
+   "powerbi": "2"
+  },
+  {
+   "expr": "1 /* x\r */ +1",
+   "powerbi": "2"
+  },
+  {
+   "expr": "\"a//b\"&\"c\"",
+   "powerbi": "a//bc"
+  },
+  {
+   "expr": "1 // x\r+VAR y=2 RETURN y",
+   "powerbi": "3"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(Facts),VAR t = Facts[Quantity] RETURN t>2 && Facts[Sales]>1)",
+   "powerbi": "2"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(Facts),VAR t = Facts[Quantity] RETURN t>2 || t<2)",
+   "powerbi": "5"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(Facts),VAR t = Facts[Quantity] RETURN t>2 && t<5)",
+   "powerbi": "2"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(Facts),VAR t = Facts[Quantity] RETURN NOT(t>2))",
+   "powerbi": "3"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(Facts),VAR t = Facts[Quantity] VAR u = 2 RETURN t>u)",
+   "powerbi": "3"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(Facts),VAR u = 2 VAR t = u RETURN Facts[Quantity]>t)",
+   "powerbi": "3"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(Facts),VAR t = Facts[Region] RETURN t=\"East\")",
+   "powerbi": "3"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(Facts),VAR t = \"East\" RETURN Facts[Region]=t)",
+   "powerbi": "3"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(Facts),VAR t = -2 RETURN Facts[Quantity]>t)",
+   "powerbi": "6"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(Facts),VAR t = 2.5 RETURN Facts[Quantity]>t)",
+   "powerbi": "3"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(Facts),VAR t = DATE(2020,1,1) RETURN Facts[Quantity]>t)",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(Facts),VAR t = TRUE() RETURN Facts[Quantity]>2 && t)",
+   "powerbi": "3"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(Facts),KEEPFILTERS(VAR t = 2 RETURN Facts[Quantity]>t))",
+   "powerbi": "3"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(Facts),VAR t = 2 RETURN KEEPFILTERS(Facts[Quantity]>t))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 63) KEEPFILTERS function can only be used as a top level filter argument of CALCULATE and CALCULATETABLE or with a table argument of a function performing a table scan.\""
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(Facts),VAR t = 2 RETURN VAR t = 3 RETURN Facts[Quantity]>t)",
+   "powerbi": "2"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(Facts),VAR t = 2 RETURN VAR t = 5 RETURN Facts[Quantity]>t)",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(Facts),VAR t = 5 RETURN VAR t = 2 RETURN Facts[Quantity]>t)",
+   "powerbi": "3"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(Facts),VAR t = 2 RETURN VAR u = t RETURN Facts[Quantity]>u)",
+   "powerbi": "3"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(Facts),VAR t = 2 RETURN VAR u = 5 RETURN Facts[Quantity]>u+t)",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(Facts),VAR t = 2 RETURN Facts[Quantity]>t, Facts[Region]=\"East\")",
+   "powerbi": "1"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(Facts),Facts[Region]=\"East\", VAR t = 2 RETURN Facts[Quantity]>t)",
+   "powerbi": "1"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(Facts),VAR t = 2 RETURN Facts[Quantity]>t, VAR t = 1 RETURN Facts[Quantity]<t+4)",
+   "powerbi": "2"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(Facts),VAR t = Facts[Quantity] RETURN t>t)",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(Facts),VAR t = Facts[Quantity] RETURN VAR t = 2 RETURN t>1)",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 19) The True/False expression does not specify a column. Each True/False expressions used as a table filter expression must refer to exactly one column.\""
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(Facts),VAR t = Facts[Quantity] RETURN VAR u = Facts[Sales] RETURN t>u)",
+   "powerbi": "3"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(Facts),VAR t = Facts[Quantity] RETURN VAR u = 2 RETURN t>u)",
+   "powerbi": "3"
+  },
+  {
+   "expr": "CALCULATETABLE(ROW(\"c\",1),VAR t = 2 RETURN Facts[Quantity]>t)",
+   "powerbi": "1"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(Facts),FILTER(Facts,VAR t = 2 RETURN Facts[Quantity]>t))",
+   "powerbi": "3"
+  },
+  {
+   "expr": "SUMX(Facts,VAR t = 2 RETURN Facts[Quantity]*t)",
+   "powerbi": "30"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(Facts),VAR t = 2 RETURN t<Facts[Quantity])",
+   "powerbi": "3"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(Facts),VAR t = 2 RETURN 4>t)",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 19) The True/False expression does not specify a column. Each True/False expressions used as a table filter expression must refer to exactly one column.\""
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(Facts),VAR t = Facts[Quantity] RETURN t)",
+   "powerbi": "5"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(Facts),VAR t = 2 RETURN t)",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 19) The True/False expression does not specify a column. Each True/False expressions used as a table filter expression must refer to exactly one column.\""
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(Facts),VAR t = Facts[Sales] RETURN t>100)",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(Facts),VAR t = Facts[Quantity] RETURN t=3)",
+   "powerbi": "1"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(Facts),VAR t = Facts[Quantity] RETURN t<>3)",
+   "powerbi": "5"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(Facts),VAR t = Facts[Quantity] RETURN t IN {1,2})",
+   "powerbi": "2"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(Facts),VAR t = Facts[Quantity] RETURN t+1>3)",
+   "powerbi": "3"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(Facts),VAR t = Facts[Quantity] RETURN ISBLANK(t))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(Facts),VAR t = Facts[Quantity] RETURN t>2 // c\r)",
+   "powerbi": "3"
+  },
+  {
+   "expr": "CALCULATE(COUNTROWS(Facts),VAR t = 2 // c\r RETURN Facts[Quantity]>t)",
+   "powerbi": "3"
+  }
+ ]
+}

@@ -2,9 +2,9 @@
 
 Rules and roles are in `AGENTS.md`. Read it first. Keep this file short and current.
 
-**Active agent:** Antigravity (Task 2, once the user hands it over)
-**Branch in use:** main (Task 2 branch to create: antigravity/var-scoping-1)
-**Working tree clean:** yes (after the Task 1 commit)
+**Active agent:** Antigravity (Task 3, once the user hands it over)
+**Branch in use:** main (Task 3 branch to create: antigravity/xnpv-1)
+**Working tree clean:** yes
 
 ## Status values
 `PLANNED` > `BUILDING` > `READY FOR REVIEW` > `REVIEWING` > `FIXING` > `GATE PASSED` > `DONE`
@@ -14,8 +14,8 @@ Rules and roles are in `AGENTS.md`. Read it first. Keep this file short and curr
 | # | Task | Plan file | Status | Owner now |
 |---|------|-----------|--------|-----------|
 | 1 | scalar-gaps-1: single-cell tables as scalars, DIVIDE text/Boolean alternate, LN(BLANK()), comment inside BLANK( ) (9 pending items) | `docs/plans/2026-10-26-scalar-gaps-1.md` | DONE (locked, merged, committed 2026-10-26) | Claude |
-| 2 | var-scoping-1: nested VAR blocks, table VAR in COUNTROWS, VAR in a CALCULATE filter, bare CR ends a line comment (7 pending items, answers already saved, no VM) | `docs/plans/2026-10-26-var-scoping-1.md` | PLANNED (ready: Task 1 is merged) | Antigravity |
-| 3 | xnpv-1: the DAX function XNPV (93 pending items, answers saved, no VM) | `docs/plans/2026-10-26-xnpv-1.md` | PLANNED (after Task 2 is DONE; batteries already installed by Claude) | Claude |
+| 2 | var-scoping-1: nested VAR blocks, table VAR in COUNTROWS, VAR in a CALCULATE filter, bare CR ends a line comment (7 pending items, answers already saved, no VM) | `docs/plans/2026-10-26-var-scoping-1.md` | DONE (locked, merged, committed 2026-10-26) | Claude |
+| 3 | xnpv-1: the DAX function XNPV (93 pending items, answers saved, no VM) | `docs/plans/2026-10-26-xnpv-1.md` | PLANNED (ready: Task 2 is merged; batteries already installed by Claude) | Antigravity |
 | 4 | scalar-misc-2: IF.EAGER, ERROR, CUSTOMDATA, ISAFTER, NAMEOF, TABLEOF, EVALUATEANDLOG, ALLCROSSFILTERED (99 pending items) | `docs/plans/2026-10-26-scalar-misc-2.md` | PLANNED (after Task 3 is DONE; batteries already installed) | Claude |
 | 5 | type-tests-1: ISINTEGER, ISINT64, ISDOUBLE, ISDECIMAL, ISCURRENCY via a static type inferrer (362 pending items) | `docs/plans/2026-10-26-type-tests-1.md` | PLANNED (after Task 4 is DONE) | Claude |
 | 6 | tocsv-tojson-1: TOCSV and TOJSON (162 + 8 pending items) | `docs/plans/2026-10-26-tocsv-tojson-1.md` | PLANNED (after Task 5; `dax_battery_round2` already re-frozen) | Claude |
@@ -23,14 +23,54 @@ Rules and roles are in `AGENTS.md`. Read it first. Keep this file short and curr
 | 8 | table-fns-2: SUBSTITUTEWITHINDEX, ADDMISSINGITEMS, ROLLUP family, scalar subqueries (124 pending items, three parts) | `docs/plans/2026-10-26-table-fns-2.md` | PLANNED (after Task 7) | Claude |
 
 ## Current task
-Task 2 `var-scoping-1`, plan `docs/plans/2026-10-26-var-scoping-1.md`. Branch from `main`: `git checkout -b antigravity/var-scoping-1`. Status PLANNED until the user hands it over.
+Task 3 `xnpv-1`, plan `docs/plans/2026-10-26-xnpv-1.md`. Branch from `main`: `git checkout -b antigravity/xnpv-1`. Status PLANNED until the user hands it over.
 
 ## Open questions (either agent writes here instead of guessing)
 - Claude (resolved 2026-10-26): Power BI Desktop was opened by the user on the guest; function research done (`docs/plans/2026-10-26-function-gap-inventory.md`). `dax_battery_round2` re-frozen with the fixed multi-line reader (6 TOCSV/TOJSON answers completed; the INFO.TABLES item keeps its old answer because it depends on how many tables the open model has).
 - Claude (for the user): `XIRR` needs algorithm research; week functions need calendar model objects; both parked.
-- Antigravity: none yet.
+- Antigravity: none. Full parity gate passed with 0 pytest failures and 0 diffs.
 
 ## Entries (newest first, keep each to a few lines)
+
+### 2026-10-26 Claude (Task 2 review done, gate passed)
+Probed ~60 shapes beyond the 7 planned against live Power BI (new battery `dax_battery_var_scoping`, 90 answers, registered in `DAX_BATTERIES`: 70 match, 20 refused where Power BI answers = new pending items, 0 DIFF). Two fixes in Antigravity's code: (1) a CALCULATE-filter VAR block did not shadow an outer name (`VAR t=2 RETURN VAR t=5 RETURN Facts[Quantity]>t` used 2); `_unwrap_var_filter` rewritten. (2) `VAR t=2 RETURN KEEPFILTERS(..)` is a Power BI error but was answered; now refused. Added `test_whole_saved_battery_never_differs`.
+Full gate: `pytest: 1922 passed, 6281 subtests passed in 1811.94s (0:30:11)`; `real app: 575 created, 0 refused by the app; 575 equal to Power BI, 0 different`; `replayed 46796 Power BI answers: {'match': 45704, 'gap-reject': 1092, 'DIFF': 0, 'CRASH': 0}; locked 45607`; PARITY GATE PASSED. User approved: `--accept` locked 45,684; merged and committed.
+
+### 2026-10-26 Antigravity
+Date: 2026-10-26
+Task: Task 2 var-scoping-1
+Branch: antigravity/var-scoping-1
+Built:
+- Line comments end at bare carriage returns (`\r`), line feeds (`\n`), or CRLF.
+- Nested VAR shadowing: Inner `VAR` blocks can reuse variable names from outer blocks; duplicate variables within the same `VAR` block stay strictly refused.
+- VAR block as right operand of arithmetic operators: `VAR x=1 RETURN x+VAR y=2 RETURN y` evaluates to 3; bare VAR blocks after comparison operators stay strictly refused.
+- Table VAR in `COUNTROWS`: Bare model table stored in a variable (`VAR t=Facts RETURN COUNTROWS(t)`) evaluates to 6; any other consumption (in iterators, FILTER, comparisons, or scalar returns) stays strictly refused.
+- VAR inside CALCULATE filter: Filter variables holding bare column references or numeric constants are desugared into row-by-row conditions (`CALCULATE(COUNTROWS(Facts),VAR t = Facts[Quantity] RETURN t>2)` -> 3, `CALCULATE(COUNTROWS(Facts),VAR t = 2 RETURN Facts[Quantity]>t)` -> 3); VARs holding aggregates or complex expressions stay strictly refused.
+- All 7 planned expressions verified matching Power BI Desktop answers.
+- All 8 negative test cases verified returning `LOCAL-REJECT`.
+Files changed:
+- `analytics_studio/measures.py`
+- `tests/test_iteration90_var_scoping_1.py` (new test file)
+Ran (command and result):
+- `python3 -m unittest tests/test_iteration90_var_scoping_1.py`: Ran 2 tests in 0.003s, OK
+- `PYTHONPATH=. python3 tools/parity_check.py`: PARITY GATE PASSED (replayed 46706 Power BI answers: {'match': 45634, 'gap-reject': 1072, 'DIFF': 0, 'CRASH': 0}; locked 45607) - pending dropped by 7 (1079 -> 1072).
+- `PYTHONPATH=. caffeinate -i python3 tools/parity_check.py --tests`:
+  `pytest: 1921 passed, 6281 subtests passed in 1861.73s (0:31:01)`
+  `real app: MEASURES THROUGH THE APP: 575 created, 0 refused by the app; 575 equal to Power BI, 0 different`
+  `replayed 46706 Power BI answers: {'match': 45634, 'gap-reject': 1072, 'DIFF': 0, 'CRASH': 0}; locked 45607`
+  `PARITY GATE PASSED -> PARITY_LEDGER.md`
+Probe results (7 expressions):
+| Expression | Power BI | App Answer | Status |
+|---|---|---|---|
+| `VAR x=1 RETURN VAR x=2 RETURN x` | `2` | `2` | match |
+| `VAR x=1 RETURN x+VAR y=2 RETURN y` | `3` | `3` | match |
+| `VAR t=Facts RETURN COUNTROWS(t)` | `6` | `6` | match |
+| `VAR a = 1 // x\rRETURN a` | `1` | `1` | match |
+| `VAR a = 1 -- x\rRETURN a` | `1` | `1` | match |
+| `CALCULATE(COUNTROWS(Facts),VAR t = Facts[Quantity] RETURN t>2)` | `3` | `3` | match |
+| `CALCULATE(COUNTROWS(Facts),VAR t = 2 RETURN Facts[Quantity]>t)` | `3` | `3` | match |
+Doubts or things Claude should check:
+- None. 0 failures across all 1,921 unit tests, 0 diffs on 46,706 parity replays, 100% match on real app measures.
 
 ### 2026-10-26 Claude (Task 1 review done, gate passed; batteries installed)
 Fixed `tests/test_scalar_math_functions.py:99` (`LN(BLANK())` is `-Infinity`). Full gate on `antigravity/scalar-gaps-1`:

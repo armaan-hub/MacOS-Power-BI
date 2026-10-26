@@ -392,8 +392,15 @@ def _comment_end(expression: str, position: int) -> int | None:
     """Where the DAX comment that starts at `position` ends, or None when none starts there. Line comments (// and --)
     run to the end of the line; block comments nest (Power BI: `5 /* /* */ */ + 1` is 6, `5 /* /* */ + 1` is an error)."""
     if expression.startswith(("//", "--"), position):
-        end_of_line = expression.find("\n", position)
-        return len(expression) if end_of_line < 0 else end_of_line
+        cr = expression.find("\r", position)
+        lf = expression.find("\n", position)
+        if cr >= 0 and lf >= 0:
+            return min(cr, lf)
+        if cr >= 0:
+            return cr
+        if lf >= 0:
+            return lf
+        return len(expression)
     if not expression.startswith("/*", position):
         return None
     depth, cursor = 0, position
@@ -979,13 +986,55 @@ def _parallelperiod_dates(
     return {value for value in available_dates if start <= value <= end}
 
 
+def _is_var_filter_constant(node: Any) -> bool:
+    if not isinstance(node, tuple) or not node:
+        return False
+    if node[0] == "number":
+        return True
+    if node[0] == "unary" and node[1] in {"+", "-"} and len(node) >= 3 and node[2][0] == "number":
+        return True
+    return False
+
+
+def _unwrap_var_filter(node: tuple[Any, ...], outer: dict[str, tuple[Any, ...]] | None = None) -> tuple[Any, ...]:
+    """Replace the variables of a VAR block inside a CALCULATE filter by what they hold (a bare column reference or a
+    numeric constant). An inner block may reuse an outer name: the inner value wins inside the inner block only."""
+    if not isinstance(node, tuple) or not node or node[0] != "let":
+        return node
+    bindings, body = node[1], node[2]
+    env: dict[str, tuple[Any, ...]] = dict(outer or {})
+    for name, value in bindings:
+        if not (isinstance(value, tuple) and bool(value) and (value[0] == "reference" or _is_var_filter_constant(value))):
+            raise MeasureError("CALCULATE filters must be column comparisons joined with AND, OR, or NOT.")
+        env[name] = value
+    if isinstance(body, tuple) and body and body[0] == "let":
+        return _unwrap_var_filter(body, env)
+
+    def _subst(n: Any) -> Any:
+        if not isinstance(n, tuple) or not n:
+            return n
+        if n[0] == "let":
+            raise MeasureError("CALCULATE filters must be column comparisons joined with AND, OR, or NOT.")
+        if n[0] == "var" and n[1] in env:
+            return env[n[1]]
+        return tuple(_subst(child) for child in n)
+
+    return _subst(body)
+
+
 def _calculate_filter_argument(node: tuple[Any, ...]) -> tuple[tuple[Any, ...], bool]:
-    """Unwrap the one supported CALCULATE filter modifier."""
+    """Unwrap the one supported CALCULATE filter modifier and optional VAR bindings."""
+    keep = False
     if node[0] == "call" and node[1] == "KEEPFILTERS":
         if len(node[2]) != 1:
             raise MeasureError("KEEPFILTERS needs one Boolean filter expression.")
-        return node[2][0], True
-    return node, False
+        node, keep = node[2][0], True
+    if node[0] == "let":
+        node = _unwrap_var_filter(node)
+        if node[0] == "call" and node[1] == "KEEPFILTERS":
+            # live: a VAR block whose RETURN is KEEPFILTERS(..) is an error (KEEPFILTERS(VAR .. RETURN ..) is fine)
+            raise MeasureError("CALCULATE filters must be column comparisons joined with AND, OR, or NOT.")
+    return node, keep
 
 
 _FILTER_AGGREGATES = {
@@ -1795,6 +1844,8 @@ _UNTAKEN_BRANCH_ERRORS = (
     "cannot validate first",
     "needs a Date or DateTime column",  # TOTALYTD(.., text column)
     "does not exist in table",  # iteration 88: a column of the model that the derived table iterated by VALUES / DISTINCT / SUMMARIZE does not hold (live: the same error)
+    "A table variable cannot be used where a single value is expected.",
+    "A bare table variable is supported only as the direct argument to COUNTROWS.",
 )
 
 
@@ -2491,6 +2542,7 @@ class _Parser:
         self.tokens = tokens
         self.index = 0
         self.variables: list[str] = []
+        self._in_var_binding: bool = False
 
     def parse(self) -> tuple[Any, ...]:
         if not self.tokens:
@@ -2518,17 +2570,23 @@ class _Parser:
         """VAR name = expression ... RETURN expression."""
         declared = len(self.variables)
         bindings: list[tuple[str, tuple[Any, ...]]] = []
+        block_names: set[str] = set()
         while self._is_keyword("VAR"):
             self._take()
             name = self._take()
             if name.kind != "identifier" or name.value in _FUNCTIONS or name.value in {"VAR", "RETURN", "TRUE", "FALSE", "BLANK"}:
                 raise MeasureError(f"{name.value!r} is not a valid variable name.")
-            if name.value in self.variables:
+            if name.value in block_names:
                 raise MeasureError(
                     f"Variable {name.value.lower()!r} cannot be created because a variable with the same name already exists."
                 )
+            block_names.add(name.value)
             self._expect("=")
-            value = self._logical_or()
+            self._in_var_binding = True
+            try:
+                value = self._logical_or()
+            finally:
+                self._in_var_binding = False
             bindings.append((name.value, value))
             self.variables.append(name.value)
         if not self._is_keyword("RETURN"):
@@ -2596,14 +2654,16 @@ class _Parser:
         node = self._term()
         while self._peek() in {"+", "-"}:
             operator = self._take().kind
-            node = ("binary", operator, node, self._term())
+            right = self._variables() if self._is_keyword("VAR") else self._term()
+            node = ("binary", operator, node, right)
         return node
 
     def _term(self) -> tuple[Any, ...]:
         node = self._unary()
         while self._peek() in {"*", "/"}:
             operator = self._take().kind
-            node = ("binary", operator, node, self._unary())
+            right = self._variables() if self._is_keyword("VAR") else self._unary()
+            node = ("binary", operator, node, right)
         return node
 
     def _unary(self) -> tuple[Any, ...]:
@@ -2696,7 +2756,7 @@ class _Parser:
                     raise MeasureError(f"{function} needs one source column reference or table.")
                 return ("table_call", function, argument)
             if function not in _FUNCTIONS:
-                if self._peek() in {",", ")"}:
+                if self._peek() in {",", ")"} or (self._in_var_binding and (self._is_keyword("RETURN") or self._is_keyword("VAR"))):
                     return ("table", function)
                 raise MeasureError(f"Function {function} is not supported by the local DAX engine.")
             if self._peek() in {",", ")"}:
@@ -5835,6 +5895,7 @@ def evaluate_measures(
 
     group_stack: list[tuple[dict[str, Any], list[dict[str, Any]]]] = []
     counting_rows: list[bool] = []  # non-empty while COUNTROWS evaluates its table argument
+    direct_counting_table_vars: list[str] = []
     _COLUMN_NUMBER_TYPES = {"whole_number", "decimal_number", "decimal", "fixed_decimal", "currency", "number", "int64", "double"}
 
     def order_arguments(arguments: tuple[tuple[Any, ...], ...]) -> list[tuple[Any, bool]]:
@@ -7006,6 +7067,9 @@ def evaluate_measures(
             held = variables[argument[1]]()
             if not isinstance(held, _TableValue):
                 raise MeasureError("This variable does not hold a table.")
+            if variable_nodes.get(argument[1], (None,))[0] == "table":
+                if not direct_counting_table_vars or direct_counting_table_vars[-1] != argument[1]:
+                    raise MeasureError("A bare table variable is supported only as the direct argument to COUNTROWS.")
             return held[0], held[1]
         if argument[0] == "call" and argument[1] == "CURRENTGROUP":
             if not group_stack:
@@ -12485,6 +12549,9 @@ def evaluate_measures(
             lazy_columns = arguments[0][0] == "call" and arguments[0][1] in {"ADDCOLUMNS", "SELECTCOLUMNS"}
             if lazy_columns:
                 lazy_column_calls.append(arguments[0])
+            direct_var_table = arguments[0][0] == "var"
+            if direct_var_table:
+                direct_counting_table_vars.append(arguments[0][1])
             try:
                 _context, table_rows = table_argument_value(arguments[0])
             finally:
@@ -12492,6 +12559,8 @@ def evaluate_measures(
                     counting_rows.pop()
                 if lazy_columns:
                     lazy_column_calls.pop()
+                if direct_var_table:
+                    direct_counting_table_vars.pop()
             return Decimal(len(table_rows)) if table_rows else None
         if function == "COALESCE":
             # Power BI stops at the first non-blank plan-time constant. From the first data-dependent argument on it also

@@ -32,9 +32,9 @@ Rule: a slice is finished only when it is compared with Power BI, its items are 
 | dax_battery_sdet_filters | 655 | 0 | 5 | 0 | 0 |
 | dax_battery_comments_booleans | 432 | 0 | 0 | 0 | 0 |
 | dax_battery_round2_scope | 139 | 0 | 0 | 0 | 0 |
-| dax_battery_round2 | 2402 | 0 | 28 | 0 | 0 |
+| dax_battery_round2 | 2405 | 0 | 25 | 0 | 0 |
 | dax_battery_critic_shapes | 95 | 0 | 0 | 0 | 0 |
-| dax_battery_round3 | 2352 | 0 | 12 | 0 | 0 |
+| dax_battery_round3 | 2356 | 0 | 8 | 0 | 0 |
 | dax_battery_round4 | 8172 | 0 | 6 | 0 | 0 |
 | dax_battery_round5 | 1217 | 0 | 4 | 0 | 0 |
 | dax_battery_diff_groups | 484 | 0 | 0 | 0 | 0 |
@@ -52,9 +52,10 @@ Rule: a slice is finished only when it is compared with Power BI, its items are 
 | dax_battery_tocsv_tojson | 23 | 0 | 162 | 0 | 0 |
 | dax_battery_linest | 41 | 0 | 178 | 0 | 0 |
 | dax_battery_table_fns2 | 42 | 0 | 124 | 0 | 0 |
+| dax_battery_var_scoping | 70 | 0 | 20 | 0 | 0 |
 | table VAT | 575 | 0 | 0 | 0 | 0 |
 
-## Pending work (1079): Power BI answers, the app refuses
+## Pending work (1092): Power BI answers, the app refuses
 
 - `CALCULATE(COUNTROWS(Facts),Facts[Quantity]>SUMX(KEEPFILTERS(VALUES(Facts[Region])),1))` (Power BI: `2`) [dax_battery_boolean_filter_functions]
 - `CALCULATE(COUNTROWS(Facts),Facts[Quantity]>MAXX(KEEPFILTERS(VALUES(Facts[Region])),1))` (Power BI: `4`) [dax_battery_boolean_filter_functions]
@@ -83,9 +84,6 @@ Rule: a slice is finished only when it is compared with Power BI, its items are 
 - `CALCULATE(COUNTROWS(Facts),Facts[Quantity]>COUNTROWS(CALCULATETABLE(VALUES(Facts[Region]),VAR x="East" RETURN Facts[Region]=x)))` (Power BI: `4`) [dax_battery_round2]
 - `CALCULATE(COUNTROWS(Facts),Facts[Quantity]>EVALUATEANDLOG(3))` (Power BI: `2`) [dax_battery_round2]
 - `CALCULATE(COUNTROWS(Facts),Facts[Quantity]>COUNTROWS(INFO.TABLES()))` (Power BI: `BLANK`) [dax_battery_round2]
-- `VAR x=1 RETURN VAR x=2 RETURN x` (Power BI: `2`) [dax_battery_round2]
-- `VAR x=1 RETURN x+VAR y=2 RETURN y` (Power BI: `3`) [dax_battery_round2]
-- `VAR t=Facts RETURN COUNTROWS(t)` (Power BI: `6`) [dax_battery_round2]
 - `LEN(TOCSV(Facts))` (Power BI: `147`) [dax_battery_round2]
 - `TOCSV(ROW("a",1))` (Power BI: `[a]
 1`) [dax_battery_round2]
@@ -110,10 +108,6 @@ Rule: a slice is finished only when it is compared with Power BI, its items are 
 1;x
 2;y,z`) [dax_battery_round2]
 - `CONCATENATEX(ADDCOLUMNS(ALL(Facts[Quantity]),"n",INDEX(1,ALL(Facts[Quantity]),ORDERBY(Facts[Quantity]))),[n],",",Facts[Quantity])` (Power BI: `0,0,0,0,0,0`) [dax_battery_round2]
-- `VAR a = 1 // xRETURN a` (Power BI: `1`) [dax_battery_round3]
-- `VAR a = 1 -- xRETURN a` (Power BI: `1`) [dax_battery_round3]
-- `CALCULATE(COUNTROWS(Facts),VAR t = Facts[Quantity] RETURN t>2)` (Power BI: `3`) [dax_battery_round3]
-- `CALCULATE(COUNTROWS(Facts),VAR t = 2 RETURN Facts[Quantity]>t)` (Power BI: `3`) [dax_battery_round3]
 - `CALCULATE(COUNTROWS(Facts),Facts[Quantity]+CONCATENATEX(Facts,Facts[Quantity])>3)` (Power BI: `6`) [dax_battery_round3]
 - `CALCULATE(COUNTROWS(Facts),Facts[Quantity]>COUNTROWS(SUBSTITUTEWITHINDEX(VALUES(Facts[Region]),"i",VALUES(Facts[Region]),Facts[Region]))-1)` (Power BI: `3`) [dax_battery_round3]
 - `CALCULATE(COUNTROWS(Facts),Facts[Quantity]+COUNTROWS(SUBSTITUTEWITHINDEX(VALUES(Facts[Region]),"i",VALUES(Facts[Region]),Facts[Region]))>5)` (Power BI: `3`) [dax_battery_round3]
@@ -1650,6 +1644,26 @@ North,
 ,31.5`) [dax_battery_table_fns2]
 - `COUNTROWS(SUMMARIZE(Facts,ROLLUP(Facts[Region])))` (Power BI: `2`) [dax_battery_table_fns2]
 - `COUNTROWS(SUMMARIZE(Facts,ROLLUP(Facts[Region],Facts[Note])))` (Power BI: `3`) [dax_battery_table_fns2]
+- `1>VAR y=2 RETURN y` (Power BI: `False`) [dax_battery_var_scoping]
+- `1=VAR y=2 RETURN y` (Power BI: `False`) [dax_battery_var_scoping]
+- `"a"&VAR y="b" RETURN y` (Power BI: `ab`) [dax_battery_var_scoping]
+- `VAR t=Facts RETURN COUNTROWS(DISTINCT(t))` (Power BI: `6`) [dax_battery_var_scoping]
+- `VAR t=Facts RETURN SUMX(t,Facts[Quantity])` (Power BI: `15`) [dax_battery_var_scoping]
+- `VAR t=Facts RETURN COUNTROWS(FILTER(t,Facts[Quantity]>2))` (Power BI: `3`) [dax_battery_var_scoping]
+- `VAR t=Facts VAR u=t RETURN COUNTROWS(u)` (Power BI: `6`) [dax_battery_var_scoping]
+- `CALCULATE(COUNTROWS(Facts),VAR t = Facts[Quantity] RETURN t>2 && Facts[Sales]>1)` (Power BI: `2`) [dax_battery_var_scoping]
+- `CALCULATE(COUNTROWS(Facts),VAR u = 2 VAR t = u RETURN Facts[Quantity]>t)` (Power BI: `3`) [dax_battery_var_scoping]
+- `CALCULATE(COUNTROWS(Facts),VAR t = "East" RETURN Facts[Region]=t)` (Power BI: `3`) [dax_battery_var_scoping]
+- `CALCULATE(COUNTROWS(Facts),VAR t = DATE(2020,1,1) RETURN Facts[Quantity]>t)` (Power BI: `BLANK`) [dax_battery_var_scoping]
+- `CALCULATE(COUNTROWS(Facts),VAR t = TRUE() RETURN Facts[Quantity]>2 && t)` (Power BI: `3`) [dax_battery_var_scoping]
+- `CALCULATE(COUNTROWS(Facts),VAR t = 2 RETURN VAR u = t RETURN Facts[Quantity]>u)` (Power BI: `3`) [dax_battery_var_scoping]
+- `CALCULATE(COUNTROWS(Facts),VAR t = Facts[Quantity] RETURN t>t)` (Power BI: `BLANK`) [dax_battery_var_scoping]
+- `CALCULATE(COUNTROWS(Facts),VAR t = Facts[Quantity] RETURN VAR u = Facts[Sales] RETURN t>u)` (Power BI: `3`) [dax_battery_var_scoping]
+- `CALCULATETABLE(ROW("c",1),VAR t = 2 RETURN Facts[Quantity]>t)` (Power BI: `1`) [dax_battery_var_scoping]
+- `CALCULATE(COUNTROWS(Facts),VAR t = Facts[Quantity] RETURN t)` (Power BI: `5`) [dax_battery_var_scoping]
+- `CALCULATE(COUNTROWS(Facts),VAR t = Facts[Quantity] RETURN t IN {1,2})` (Power BI: `2`) [dax_battery_var_scoping]
+- `CALCULATE(COUNTROWS(Facts),VAR t = Facts[Quantity] RETURN t+1>3)` (Power BI: `3`) [dax_battery_var_scoping]
+- `CALCULATE(COUNTROWS(Facts),VAR t = Facts[Quantity] RETURN ISBLANK(t))` (Power BI: `BLANK`) [dax_battery_var_scoping]
 
 ## Known deviations from Power BI (14): imprecise or unspecified in Power BI, each explained
 
