@@ -1,6 +1,6 @@
 # Parity ledger: Analytics Studio vs Power BI Desktop
 
-Generated 2026-10-25 by `tools/parity_check.py`. Power BI answers were saved from Power BI Desktop 2.157.879.0 (26.08)+da30fe74eb0b8a8786ab7326b69c400a0e951831; the gate replays them against the app on every run.
+Generated 2026-10-26 by `tools/parity_check.py`. Power BI answers were saved from Power BI Desktop 2.157.879.0 (26.08)+da30fe74eb0b8a8786ab7326b69c400a0e951831; the gate replays them against the app on every run.
 
 Rule: a slice is finished only when it is compared with Power BI, its items are locked here (`--accept`) and the gate passes.  Locked items are never re-investigated, only guarded.
 
