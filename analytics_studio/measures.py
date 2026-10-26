@@ -182,7 +182,7 @@ _ROW_SHIELDING_CALLS = frozenset({
 })
 _ITERATOR_CALLS = frozenset({
     "SUMX", "AVERAGEX", "MAXX", "MINX", "COUNTX", "COUNTAX", "PRODUCTX", "MEDIANX", "CONCATENATEX", "FILTER", "ADDCOLUMNS",
-    "SELECTCOLUMNS", "TOPN", "GENERATE", "GENERATEALL", "RANKX", "SUMMARIZE", "GROUPBY",
+    "SELECTCOLUMNS", "TOPN", "GENERATE", "GENERATEALL", "RANKX", "SUMMARIZE", "GROUPBY", "XNPV",
 })
 
 
@@ -274,7 +274,7 @@ _DATE_FUNCTIONS = {
     "EDATE", "DATEDIFF", "DATEVALUE", "TIMEVALUE", "TODAY", "NOW",
 }
 _COLUMN_SCALAR_ARITY = {"SELECTEDVALUE": (1, 2), "HASONEVALUE": (1, 1)}
-_FUNCTIONS |= set(_COLUMN_SCALAR_ARITY) | {"CONCATENATEX"}
+_FUNCTIONS |= set(_COLUMN_SCALAR_ARITY) | {"CONCATENATEX", "XNPV"}
 # Lookup, membership, filter-context and table-constructor functions (min, max arguments; None is unbounded).
 _LOOKUP_ARITY = {
     "CONTAINS": (3, None), "CONTAINSROW": (2, None), "LOOKUPVALUE": (3, None), "ISEMPTY": (1, 1),
@@ -308,7 +308,7 @@ _FUNCTIONS |= set(_TABLE_FUNCTION_ARITY) | set(_RANK_ARITY)
 _FUNCTIONS |= dax_time_sets.SET_FUNCTIONS | dax_time_sets.BALANCES  # date sets and balances (iteration 84)
 _FUNCTIONS.add("RELATEDTABLE")
 _TABLE_FIRST_PARENTS = _ALL_ITERATORS | dax_time_sets.SET_FUNCTIONS | {"FIRSTNONBLANK", "LASTNONBLANK", "FIRSTNONBLANKVALUE", "LASTNONBLANKVALUE"} | {
-    "COUNTROWS", "CONCATENATEX", "ISEMPTY", "CONTAINS", "CONTAINSROW", "ADDCOLUMNS", "SELECTCOLUMNS", "SUMMARIZE",
+    "COUNTROWS", "CONCATENATEX", "XNPV", "ISEMPTY", "CONTAINS", "CONTAINSROW", "ADDCOLUMNS", "SELECTCOLUMNS", "SUMMARIZE",
     "FILTER", "RANKX", "CALCULATETABLE", "DISTINCT", "VALUES", "FILTERS",
 }
 _TABLE_ANY_PARENTS = {
@@ -1591,7 +1591,7 @@ def _has_membership_in_computed_table(node: Any) -> bool:
 _AGGREGATING_CALLS = {
     "SUM", "AVERAGE", "MIN", "MAX", "COUNT", "COUNTA", "COUNTBLANK", "DISTINCTCOUNT", "DISTINCTCOUNTNOBLANK", "MEDIAN",
     "PRODUCT", "COUNTROWS", "SUMX", "AVERAGEX", "MAXX", "MINX", "COUNTX", "COUNTAX", "CALCULATE", "SELECTEDVALUE",
-    "LOOKUPVALUE", "FIRSTNONBLANK", "LASTNONBLANK", "RANKX", "CONCATENATEX", "VALUES", "DISTINCT", "ALL",
+    "LOOKUPVALUE", "FIRSTNONBLANK", "LASTNONBLANK", "RANKX", "CONCATENATEX", "XNPV", "VALUES", "DISTINCT", "ALL",
     "ISFILTERED", "HASONEVALUE", "HASONEFILTER", "ISCROSSFILTERED", "ISINSCOPE", *dax_math.STAT_ITERATORS,
 }
 
@@ -1712,7 +1712,7 @@ _BOOLEAN_FILTER_REFUSED_CALLS = frozenset({
     "GROUPBY", "EXCEPT", "INTERSECT", "ROW", "SAMPLE", "TOPNSKIP", "RANKX", "FIRSTNONBLANK", "LASTNONBLANK",
     "OFFSET", "WINDOW", "INDEX", "RANK", "ROWNUMBER", "CONTAINS",  # CONTAINS: live probes, iteration 87 (also inside IF and arithmetic)
 })
-_BOOLEAN_FILTER_X_ITERATORS = frozenset({"SUMX", "AVERAGEX", "MAXX", "MINX", "COUNTX", "COUNTAX", "CONCATENATEX", *dax_math.STAT_ITERATORS})
+_BOOLEAN_FILTER_X_ITERATORS = frozenset({"SUMX", "AVERAGEX", "MAXX", "MINX", "COUNTX", "COUNTAX", "CONCATENATEX", "XNPV", *dax_math.STAT_ITERATORS})
 
 
 _BOOLEAN_RESULT_CALLS = frozenset({'AND','OR','NOT','ISBLANK','ISEMPTY','ISFILTERED','ISINSCOPE','HASONEFILTER','ISCROSSFILTERED','HASONEVALUE','CONTAINS','CONTAINSROW','CONTAINSSTRING','ISNUMBER','ISTEXT','ISLOGICAL','ISNONTEXT','ISERROR','ISEVEN','ISODD','EXACT','ISSUBTOTAL'})
@@ -1769,7 +1769,7 @@ def _is_sample_statistic(node: Any) -> bool:
 
 _FRAME_FUNCTIONS = frozenset({
     "SUMX", "AVERAGEX", "MAXX", "MINX", "COUNTX", "COUNTAX", "CONCATENATEX", "PRODUCTX", "MEDIANX", "FILTER", "ADDCOLUMNS", "SELECTCOLUMNS", "TOPN", "RANKX",
-    "GENERATE", "GENERATEALL", "SUMMARIZE", "GEOMEANX", "STDEVX.S", "STDEVX.P", "VARX.S", "VARX.P", "PERCENTILEX.INC", "PERCENTILEX.EXC",
+    "GENERATE", "GENERATEALL", "SUMMARIZE", "GEOMEANX", "STDEVX.S", "STDEVX.P", "VARX.S", "VARX.P", "PERCENTILEX.INC", "PERCENTILEX.EXC", "XNPV",
 })
 
 
@@ -1784,6 +1784,13 @@ def _earlier_too_deep(node: Any, frames: int) -> bool:
             depth = int(node[2][1][1])
         return frames <= depth if node[1] == "EARLIER" else frames < 2
     if node[0] == "call" and node[1] in _FRAME_FUNCTIONS and node[2]:
+        if node[1] == "XNPV" and len(node[2]) == 4:
+            return (
+                _earlier_too_deep(node[2][0], frames)
+                or _earlier_too_deep(node[2][1], frames + 1)
+                or _earlier_too_deep(node[2][2], frames + 1)
+                or _earlier_too_deep(node[2][3], frames)
+            )
         return _earlier_too_deep(node[2][0], frames) or any(_earlier_too_deep(argument, frames + 1) for argument in node[2][1:])
     return any(_earlier_too_deep(child, frames) for child in node if isinstance(child, tuple))
 
@@ -1846,7 +1853,22 @@ _UNTAKEN_BRANCH_ERRORS = (
     "does not exist in table",  # iteration 88: a column of the model that the derived table iterated by VALUES / DISTINCT / SUMMARIZE does not hold (live: the same error)
     "A table variable cannot be used where a single value is expected.",
     "A bare table variable is supported only as the direct argument to COUNTROWS.",
+    "XNPV does not support expressions of type string/Boolean/date for the Values argument.",  # iteration 91: a compile-time type error
+    "The Rate argument to the XNPV function needs a single value",  # iteration 91: a bare column as the rate is a compile-time error
 )
+
+
+def _calls_function(node: Any, name: str) -> bool:
+    """Whether a call to ``name`` appears anywhere inside the expression tree."""
+    if not isinstance(node, tuple) or not node:
+        return False
+    if node[0] == "call" and node[1] == name:
+        return True
+    children = node if isinstance(node[0], tuple) else node[1:]
+    return any(_calls_function(child, name) for child in children if isinstance(child, tuple))
+
+
+_XNPV_LAST_DAY = 2958465  # 9999-12-31: Power BI answers erratically for later dates (probed in iteration 91), so the local engine refuses them
 
 
 def _bare_column_as_table(node: Any) -> bool:
@@ -2395,7 +2417,7 @@ def _validate_literal_positions(
                     continue  # a column or table expression of dates
                 _validate_literal_positions(argument, allow_blank=True)
             return
-        if function == "CONCATENATEX":
+        if function in {"CONCATENATEX", "XNPV"}:
             for argument in arguments[1:]:
                 if argument[0] != "table":  # ASC / DESC
                     _validate_literal_positions(argument, allow_blank=True)
@@ -2829,6 +2851,15 @@ class _Parser:
                 raise MeasureError(
                     "CONCATENATEX needs a table, an expression, and optional delimiter and order arguments."
                 )
+            elif function == "XNPV":
+                if len(arguments) < 4:
+                    raise MeasureError("Too few arguments were passed to the XNPV function. The minimum argument count for the function is 4.")
+                if len(arguments) > 4:
+                    raise MeasureError("Too many arguments were passed to the XNPV function. The maximum argument count for the function is 4.")
+                if not _is_all_table_value_argument(arguments[0]):
+                    raise MeasureError("The XNPV function expects a table expression for argument '1', but a string or numeric expression was used.")
+                if any(argument[0] == "omitted" for argument in arguments):
+                    raise MeasureError("The XNPV function does not accept omitted arguments.")
             elif function in _TABLE_FUNCTION_ARITY and not (
                 _TABLE_FUNCTION_ARITY[function][0] <= len(arguments)
                 and (_TABLE_FUNCTION_ARITY[function][1] is None or len(arguments) <= _TABLE_FUNCTION_ARITY[function][1])
@@ -3204,8 +3235,10 @@ class _Parser:
                 except MeasureError:
                     if not _general_calculate_filters_valid(tuple(arguments[1:])) and not _modifier_mix_filters_valid(tuple(arguments[1:])) and not _time_filters_beside_general_filters(tuple(arguments)):
                         raise
-            if (function in _ALL_ITERATORS or function == "CONCATENATEX" or function == "FILTER") and len(arguments) >= 2:
+            if (function in _ALL_ITERATORS or function in {"CONCATENATEX", "XNPV"} or function == "FILTER") and len(arguments) >= 2:
                 _check_set_iterator_body(arguments[0], arguments[1])  # live Power BI: FILTER(date set, ..) reads only the set's own column too
+                if function == "XNPV" and len(arguments) >= 3:
+                    _check_set_iterator_body(arguments[0], arguments[2])
             if function in {"UNION", "EXCEPT", "INTERSECT", "CROSSJOIN"} and any(argument[0] == "reference" for argument in arguments):
                 # live Power BI (iteration 84, critic): a bare column where a table is expected is a compile-time error
                 # ("A single value for column .. cannot be determined"), also in a branch that is never run
@@ -6828,7 +6861,7 @@ def evaluate_measures(
         return single, ([] if raw is None else [{column: raw}])
 
     _SCALAR_PASS_CALLS = frozenset({"IF", "SWITCH", "IFERROR", "COALESCE", "ABS", "ROUND", "INT", "AND", "OR", "NOT", "ISBLANK", "DIVIDE"})
-    _NESTED_BODY_ITERATORS = frozenset({"SUMX", "AVERAGEX", "MAXX", "MINX", "COUNTX", "COUNTAX", "CONCATENATEX", "FILTER"})
+    _NESTED_BODY_ITERATORS = frozenset({"SUMX", "AVERAGEX", "MAXX", "MINX", "COUNTX", "COUNTAX", "CONCATENATEX", "FILTER", "XNPV"})
 
     def static_table_columns(node: Any) -> set[tuple[str, str]] | None:
         """The (table id, column) pairs the rows of a table expression hold, or None when that is not known without evaluating it."""
@@ -7679,7 +7712,7 @@ def evaluate_measures(
                 return "numeric"  # the rows of a table built from constants and columns; FILTER and the like are validated further down
             if function == "CONCATENATEX":
                 return "text"
-            if function in {"RANKX", "RANK.EQ", "RANK", "ROWNUMBER"}:
+            if function in {"RANKX", "RANK.EQ", "RANK", "ROWNUMBER", "XNPV"}:
                 return "numeric"
             if function == "COALESCE" and expression[2]:
                 return iterator_expression_category(expression[2][0], row_context)
@@ -11118,6 +11151,13 @@ def evaluate_measures(
             if function in _ROW_SHIELDING_CALLS:
                 return any(reads_row(argument, True, seen) for argument in arguments)
             if function in _ITERATOR_CALLS and arguments:
+                if function == "XNPV" and len(arguments) == 4:
+                    return (
+                        reads_row(arguments[0], shielded, seen)
+                        or reads_row(arguments[1], True, seen)
+                        or reads_row(arguments[2], True, seen)
+                        or reads_row(arguments[3], shielded, seen)
+                    )
                 return reads_row(arguments[0], shielded, seen) or any(reads_row(argument, True, seen) for argument in arguments[1:])
         return any(reads_row(item, shielded, seen) for item in node if isinstance(item, tuple))
 
@@ -12455,6 +12495,8 @@ def evaluate_measures(
                 value, failed = None, True
             if failed:
                 value = evaluate(arguments[1], row_context, allow_text=allow_text, allow_boolean=allow_boolean)
+            else:
+                probe_untaken_branches([arguments[1]], row_context)  # live Power BI (iteration 91): a compile-time error in the unused argument is raised too
             refuse_date_beside_number(arguments[:2], value)
             if value is None and bool_join([branch_kind(arguments[0], row_context), branch_kind(arguments[1], row_context)]):
                 return False
@@ -12567,9 +12609,11 @@ def evaluate_measures(
             # evaluates the arguments after it that do not read the current row (so their errors surface); one that reads the
             # row stays lazy. An error leaving a COALESCE cannot be caught by IFERROR or ISERROR, whichever argument it is.
             result, found, eager = None, False, False
+            reached: list[tuple[Any, ...]] = []
             for argument in arguments:
                 if found and not eager:
                     break
+                reached.append(argument)
                 if not eager and not plan_constant(argument):
                     eager = True
                 elif eager and found and row_context is not None and reads_row(argument) and argument is arguments[-1]:
@@ -12592,6 +12636,7 @@ def evaluate_measures(
                     raise _HardError(str(error)) from error
                 if not found and value is not None:
                     result, found = value, True
+            probe_untaken_branches([argument for argument in arguments if not any(argument is seen for seen in reached)], row_context)  # live Power BI (iteration 91): compile-time errors in arguments after the answer are raised too
             refuse_date_beside_number(arguments, result)
             return result
         if function == "DIVIDE":
@@ -12638,6 +12683,112 @@ def evaluate_measures(
                 raise MeasureError("ROUND digits must be a whole number from -28 to 28.")
             quantum = Decimal(1).scaleb(-int(precision))
             return value.quantize(quantum, rounding=ROUND_HALF_UP)
+        if function == "XNPV":
+            try:
+                rate_raw = evaluate(arguments[3], row_context, allow_text=True, allow_boolean=True)
+            except MeasureError as error:
+                if "is a column reference" in str(error):
+                    raise MeasureError("The Rate argument to the XNPV function needs a single value; a bare column cannot give one.") from error
+                raise
+            if rate_raw is None:
+                rate = 0.0
+            elif isinstance(rate_raw, bool):
+                rate = 1.0 if rate_raw else 0.0
+            elif isinstance(rate_raw, str):
+                try:
+                    rate = float(dax_typed.text_to_number(rate_raw))
+                except Exception as exc:
+                    raise MeasureError(f"Cannot convert value '{rate_raw}' of type Text to type Number.") from exc
+            elif isinstance(rate_raw, (int, float, Decimal)) and not isinstance(rate_raw, dax_dates.DaxDateTime):
+                rate = float(rate_raw)
+            else:
+                raise MeasureError("The Rate argument to the XNPV function must be a number.")
+            if rate <= -1.0 or math.isnan(rate) or math.isinf(rate):
+                raise MeasureError("The Rate argument to the XNPV function must be greater than -1.")
+
+            read_nodes = [arguments[1], arguments[2]]
+            topn_walk_nodes[id(arguments[0])] = read_nodes
+            try:
+                context, iteration_rows = table_argument_value(arguments[0])
+            finally:
+                topn_walk_nodes.pop(id(arguments[0]), None)
+
+            probe_frame = (context, iteration_rows[0] if iteration_rows else {}, 1)
+            try:
+                values_kind = iterator_body_kind(arguments[1], probe_frame)
+            except MeasureError:
+                values_kind = None
+            if values_kind in {"text", "bool", "date"}:
+                # live Power BI (iteration 91): the type of the Values expression is checked when the query is compiled, not per row
+                raise MeasureError("XNPV does not support expressions of type string/Boolean/date for the Values argument.")
+            currency_values = _calls_function(arguments[1], "CURRENCY")
+            for reference in _iter_reference_nodes(arguments[1]):
+                try:
+                    currency_values = currency_values or str(iterator_reference_type(reference, probe_frame)).casefold() in {"currency", "fixed_decimal"}
+                except MeasureError:
+                    pass  # a column outside the iterated table is validated further down
+            if currency_values:
+                raise MeasureError("XNPV over Currency values returns a Currency result, which the local engine does not model.")
+
+            if not iteration_rows:
+                refuse_foreign_columns_of_empty_iteration(context, arguments[1], arguments[2])
+                return None
+
+            row_data: list[tuple[float | None, int]] = []
+            all_dates: list[int] = []
+            for frame in iterate_rows(context, iteration_rows, "install"):
+                val = in_row_expression(lambda frame=frame: evaluate(arguments[1], frame, allow_text=True, allow_boolean=True))
+                if val is None:
+                    v = None
+                elif isinstance(val, (str, bool, dax_dates.DaxDateTime)):
+                    raise MeasureError("XNPV does not support expressions of type string/Boolean/date for the Values argument.")
+                elif isinstance(val, (int, float, Decimal)):
+                    v = float(val)
+                    if math.isnan(v) or math.isinf(v):
+                        raise MeasureError("An argument of function 'XNPV' has the wrong data type or the result is too large or too small.")
+                else:
+                    raise MeasureError("XNPV does not support expressions of type string/Boolean/date for the Values argument.")
+
+                d_val = in_row_expression(lambda frame=frame: evaluate(arguments[2], frame, allow_text=True, allow_boolean=True))
+                if d_val is None:
+                    raise MeasureError("One or more values for the Dates argument passed to XNPV is blank.")
+                elif isinstance(d_val, str):
+                    raise MeasureError(f"Cannot convert value '{d_val}' of type Text to type Date.")
+                elif isinstance(d_val, bool):
+                    day = 1 if d_val else 0
+                elif isinstance(d_val, (int, float, Decimal)):
+                    d_float = float(d_val)
+                    if math.isnan(d_float) or math.isinf(d_float):
+                        raise MeasureError("An argument of function 'XNPV' has the wrong data type or the result is too large or too small.")
+                    day = math.floor(d_float)
+                    if day > _XNPV_LAST_DAY:
+                        raise MeasureError("XNPV dates after 9999-12-31 are not supported in the local engine.")
+                else:
+                    raise MeasureError("An argument of function 'XNPV' has the wrong data type or has an invalid value.")
+
+                all_dates.append(day)
+                row_data.append((v, day))
+
+            non_blank_values = [v for v, _ in row_data if v is not None]
+            if not non_blank_values:
+                return None
+
+            earliest_date = min(all_dates)
+            total = 0.0
+            for v, day in row_data:
+                if v is None:
+                    continue
+                days_diff = day - earliest_date
+                if rate == 0.0 or days_diff == 0:
+                    total += v
+                else:
+                    total += v / ((1.0 + rate) ** (days_diff / 365.0))
+
+            if math.isnan(total) or math.isinf(total):
+                raise MeasureError("The result of XNPV is not a finite number.")
+            if total == 0.0:
+                return Decimal(0)
+            return Decimal(int(total)) if total.is_integer() else Decimal(repr(total))
         if function == "CONCATENATEX":
             if _statistic_with_arithmetic(arguments[1]):
                 # live Power BI (iteration 87): a statistic in arithmetic is a double, shown with 15 digits and a signed zero; the local decimals differ in the last digit
