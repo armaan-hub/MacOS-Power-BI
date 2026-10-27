@@ -17,4 +17,6 @@ when it is completed, and from then on it is re-tested on every change so it nev
 - `PARITY_LEDGER.md` is the status board (locked / pending / differs). Pending items are the work list.
 - Test data: `tests/Data/Vat File -Aug 2026.xlsx`, sheet `VAT 5%`, header row 12.
 - Use only the iPad (Parallels guest) screen for Power BI; never the main Mac screen; never save the Power BI project.
+- Every review of Antigravity's work must also test the new functions in the actual app (real Analytics Studio, via the measure path, offscreen) and
+  check the same expressions against Power BI Desktop on the iPad (Parallels guest) screen, and say so in the review summary (set by the user 2026-10-27).
 - After each iteration remind the user to run `/compact`.

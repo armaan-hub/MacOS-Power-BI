@@ -37,6 +37,7 @@ Only one agent works at a time. `HANDOFF.md` has an "Active agent" line. Read it
 - **Gate.** Before and after any code change run `PYTHONPATH=. python tools/parity_check.py --tests`. It must say PARITY GATE PASSED. Never report "done" without the gate output.
 - **Never touch:** saved Power BI answers, `PARITY_LEDGER.md`, `tools/parity_check.py`, `DAX_COMPATIBILITY_CONTRACT.md`, existing tests. These are Claude's, with the user's approval.
 - **Native desktop app only.** Analytics Studio is a standalone native desktop app with a 1:1 Power BI Desktop UI and behavior. Do not build a web or browser tool.
+- **Real-app test (Claude, every review).** Test each new feature in the actual app (create it as a measure through the app, offscreen) and compare with Power BI on the iPad screen; report it.
 - **Power BI screen.** Use only the iPad (Parallels guest) screen for Power BI. Never the main Mac screen. Never save the Power BI project. Never pop windows or send keystrokes on the user's screen without the user's OK.
 - **Test data.** `tests/Data/Vat File -Aug 2026.xlsx`, sheet `VAT 5%`, header row 12.
 - **Long gates.** Run unattended gates under `caffeinate`. Judge stalls by CPU time, not wall time.

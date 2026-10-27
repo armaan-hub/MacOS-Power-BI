@@ -108,6 +108,7 @@ _PLAN_CONSTANT_CALLS = frozenset({
     "BLANK", "TRUE", "FALSE", "PI", "SQRT", "VALUE", "LEN", "ABS", "DATE", "ISBLANK", "ISNUMBER", "ISTEXT", "ISLOGICAL",
     "ISNONTEXT", "DIVIDE", "NOT", "AND", "OR", "IF", "ROUND", "INT", "LN", "EXP", "POWER", "UPPER", "LOWER", "LEFT", "RIGHT",
     "MID", "CONCATENATE", "DATEVALUE", "MAX", "MIN", "TIME", "YEAR", "MONTH", "DAY", "SIGN", "MOD", "FIXED", "TRIM",
+    "ISINTEGER", "ISINT64", "ISDOUBLE", "ISDECIMAL", "ISCURRENCY",
 })
 
 
@@ -263,6 +264,7 @@ _TYPED_ARITY = {
     "MINUTE": (1, 1), "SECOND": (1, 1), "QUARTER": (1, 1), "WEEKDAY": (1, 2), "WEEKNUM": (1, 2),
     "EOMONTH": (2, 2), "EDATE": (2, 2), "DATEDIFF": (3, 3), "DATEVALUE": (1, 1), "TIMEVALUE": (1, 1),
     "TODAY": (0, 0), "NOW": (0, 0), "CONVERT": (2, 2),
+    "ISINTEGER": (1, 1), "ISINT64": (1, 1), "ISDOUBLE": (1, 1), "ISDECIMAL": (1, 1), "ISCURRENCY": (1, 1),
 }
 _TYPED_ARITY.update(dax_math.MATH_ARITY)
 _TYPED_ARITY["ISO.CEILING"] = (1, 2)
@@ -345,7 +347,7 @@ _TYPED_RESULT_CATEGORY = {
         ["CONCATENATE", "UPPER", "LOWER", "TRIM", "LEFT", "RIGHT", "MID", "SUBSTITUTE", "REPLACE", "REPT", "FIXED", "FORMAT", "UNICHAR"],
         "text",
     ),
-    **dict.fromkeys(["EXACT", "ISERROR", "ISNUMBER", "ISTEXT", "ISNONTEXT", "ISLOGICAL", "ISEVEN", "ISODD"], "boolean"),
+    **dict.fromkeys(["EXACT", "ISERROR", "ISNUMBER", "ISTEXT", "ISNONTEXT", "ISLOGICAL", "ISEVEN", "ISODD", "ISINTEGER", "ISINT64", "ISDOUBLE", "ISDECIMAL", "ISCURRENCY"], "boolean"),
     **dict.fromkeys(["DATE", "TIME", "EOMONTH", "EDATE", "DATEVALUE", "TIMEVALUE", "TODAY", "NOW"], "date/time"),
     **dax_ext.CATEGORY,
 }
@@ -1728,7 +1730,7 @@ _BOOLEAN_FILTER_REFUSED_CALLS = frozenset({
 _BOOLEAN_FILTER_X_ITERATORS = frozenset({"SUMX", "AVERAGEX", "MAXX", "MINX", "COUNTX", "COUNTAX", "CONCATENATEX", "XNPV", *dax_math.STAT_ITERATORS})
 
 
-_BOOLEAN_RESULT_CALLS = frozenset({'AND','OR','NOT','ISBLANK','ISEMPTY','ISFILTERED','ISINSCOPE','HASONEFILTER','ISCROSSFILTERED','HASONEVALUE','CONTAINS','CONTAINSROW','CONTAINSSTRING','ISNUMBER','ISTEXT','ISLOGICAL','ISNONTEXT','ISERROR','ISEVEN','ISODD','EXACT','ISSUBTOTAL'})
+_BOOLEAN_RESULT_CALLS = frozenset({'AND','OR','NOT','ISBLANK','ISEMPTY','ISFILTERED','ISINSCOPE','HASONEFILTER','ISCROSSFILTERED','HASONEVALUE','CONTAINS','CONTAINSROW','CONTAINSSTRING','ISNUMBER','ISTEXT','ISLOGICAL','ISNONTEXT','ISERROR','ISEVEN','ISODD','EXACT','ISSUBTOTAL','ISINTEGER','ISINT64','ISDOUBLE','ISDECIMAL','ISCURRENCY'})
 _TRANSITION_CALLS = frozenset({"CALCULATE", "CALCULATETABLE"})
 
 
@@ -2740,7 +2742,7 @@ class _Parser:
                 raise MeasureError(f"Invalid numeric literal {token.value!r}.") from exc
             if not value.is_finite():
                 raise MeasureError("Numeric literals must be finite.")
-            return ("number", value)
+            return ("number", value, token.value)
         if token.kind == "string":
             return ("string", token.value)
         if token.kind == "(":
@@ -4032,6 +4034,7 @@ def _sameperiodlastyear_dates(selected_dates: Iterable[date], available_dates: I
 _ROW_CONTEXT_FREE_CALLS = {
     "IF", "SWITCH", "COALESCE", "IFERROR", "AND", "OR", "NOT", "ISBLANK", "ABS", "EXACT",
     "UPPER", "LOWER", "LEN", "TRIM", "ROUND", "INT",
+    "ISINTEGER", "ISINT64", "ISDOUBLE", "ISDECIMAL", "ISCURRENCY",
 }
 _ROW_CONTEXT_FREE_NODES = {"binary", "comparison", "logical", "unary", "concat", "in", "let", "tableconstructor", "strict_equal"}
 
@@ -4104,7 +4107,307 @@ def _reject_bare_columns_without_row_context(
 
 _NUMBER_COLUMN_TYPES = {"whole_number", "decimal_number", "decimal", "fixed_decimal", "currency", "number", "int64", "double"}
 _TEXT_FUNCTIONS = {"UPPER", "LOWER", "TRIM", "LEFT", "RIGHT", "MID", "CONCATENATE", "FORMAT", "SUBSTITUTE", "REPT", "FIXED", "NAMEOF", "CUSTOMDATA"}
-_BOOLEAN_FUNCTIONS = {"AND", "OR", "NOT", "ISBLANK", "EXACT", "ISNUMBER", "ISTEXT", "ISERROR", "CONTAINSROW", "CONTAINS"}
+_BOOLEAN_FUNCTIONS = {
+    "AND", "OR", "NOT", "ISBLANK", "EXACT", "ISNUMBER", "ISTEXT", "ISERROR", "CONTAINSROW", "CONTAINS",
+    "ISINTEGER", "ISINT64", "ISDOUBLE", "ISDECIMAL", "ISCURRENCY",
+}
+
+
+_STATIC_ALWAYS_DOUBLE = frozenset({
+    "POWER", "SQRT", "EXP", "LN", "LOG", "LOG10", "PI",
+    "COMBIN", "FACT", "AVERAGE", "VALUE",
+    "SIN", "COS", "TAN", "ASIN", "DEGREES", "RADIANS", "MEDIAN", "MEDIANX", "PERCENTILE.INC", "PERCENTILEX.INC",
+    "STDEV.S", "VAR.S", "GEOMEAN", "PRODUCT", "PRODUCTX", "XNPV",
+})
+
+_STATIC_ALWAYS_INT64 = frozenset({
+    "COUNT", "COUNTA", "COUNTROWS", "COUNTBLANK", "DISTINCTCOUNT", "DISTINCTCOUNTNOBLANK",
+    "LEN", "YEAR", "MONTH", "DAY", "HOUR", "MINUTE", "SECOND", "QUARTER", "WEEKDAY", "WEEKNUM",
+    "DATEDIFF", "FIND", "SEARCH", "UNICODE", "GCD", "LCM", "QUOTIENT",
+    "RANDBETWEEN", "RANKX", "RANK", "ROWNUMBER", "SIGN", "COUNTX", "COUNTAX"
+})
+
+
+def _unify_numeric_types(types: list[str | None]) -> str | None:
+    """Result type of branches / arguments that Power BI unifies (blank branches are ignored); None when unsure."""
+    kinds = {t for t in types if t != "blank"}
+    if not kinds:
+        return "int64"
+    if None in kinds or not kinds <= {"int64", "double", "currency"}:
+        return None
+    if kinds == {"int64"}:
+        return "int64"
+    if "double" in kinds:
+        return "double"
+    return "currency"
+
+_STATIC_TEXT_FUNCTIONS = frozenset({
+    "CONCATENATE", "UPPER", "LOWER", "TRIM", "LEFT", "RIGHT", "MID", "SUBSTITUTE", "REPLACE", "REPT",
+    "UNICHAR", "FORMAT", "NAMEOF", "CUSTOMDATA", "FIXED"
+})
+
+_STATIC_BOOL_FUNCTIONS = frozenset({
+    "AND", "OR", "NOT", "ISBLANK", "EXACT", "ISNUMBER", "ISTEXT", "ISNONTEXT", "ISLOGICAL", "ISERROR",
+    "CONTAINS", "CONTAINSROW", "ISEMPTY", "ISFILTERED", "ISCROSSFILTERED", "HASONEFILTER", "ISINSCOPE",
+    "HASONEVALUE", "ISINTEGER", "ISINT64", "ISDOUBLE", "ISDECIMAL", "ISCURRENCY", "TRUE", "FALSE"
+})
+
+_STATIC_DATE_FUNCTIONS = frozenset({
+    "DATE", "TIME", "EOMONTH", "EDATE", "DATEVALUE", "TIMEVALUE", "TODAY", "NOW"
+})
+
+
+def _normalize_model_column_types(model: Any) -> dict[str, dict[str, str]]:
+    if not model:
+        return {}
+    if isinstance(model, dict):
+        if "column_types" in model and isinstance(model["column_types"], dict):
+            name = str(model.get("name", "facts")).casefold()
+            types = {str(k).casefold(): str(v).casefold() for k, v in model["column_types"].items()}
+            return {name: types}
+        res: dict[str, dict[str, str]] = {}
+        for k, v in model.items():
+            if isinstance(v, dict):
+                res[str(k).casefold()] = {str(ck).casefold(): str(cv).casefold() for ck, cv in v.items()}
+            elif isinstance(v, str):
+                res.setdefault("facts", {})[str(k).casefold()] = v.casefold()
+        return res
+    if isinstance(model, (list, tuple)):
+        res = {}
+        for item in model:
+            if isinstance(item, dict) and "column_types" in item and isinstance(item["column_types"], dict):
+                name = str(item.get("name", "")).casefold()
+                res[name] = {str(k).casefold(): str(v).casefold() for k, v in item["column_types"].items()}
+        return res
+    if hasattr(model, "tables"):
+        res = {}
+        for t in getattr(model, "tables", []):
+            name = str(getattr(t, "name", "")).casefold()
+            col_types = getattr(t, "column_types", {})
+            if isinstance(col_types, dict):
+                res[name] = {str(k).casefold(): str(v).casefold() for k, v in col_types.items()}
+        return res
+    return {}
+
+
+def _static_numeric_type(
+    node: Any,
+    model: Any = None,
+    variables: dict[str, str | None] | None = None,
+) -> str | None:
+    """Infer static DAX numeric/data type: "int64" | "double" | "currency" | "decimal" | "bool" | "text" | "datetime" | "blank" | None."""
+    if not isinstance(node, tuple) or not node:
+        return None
+    columns = _normalize_model_column_types(model) if not isinstance(model, dict) or any(isinstance(v, str) for v in model.values()) or "column_types" in model else model
+    variables = {} if variables is None else variables
+    kind = node[0]
+    if kind == "number":
+        if len(node) > 2 and isinstance(node[2], str):
+            lit = node[2]
+            if "." in lit or "e" in lit.lower():
+                return "double"
+            try:
+                if int(lit) > 9223372036854775807:
+                    return "double"
+                return "int64"
+            except ValueError:
+                return "double"
+        val = node[1]
+        if val != val.to_integral_value() or val.as_tuple().exponent < 0 or val > Decimal(9223372036854775807):
+            return "double"
+        return "int64"
+    if kind == "string":
+        return "text"
+    if kind == "boolean":
+        return "bool"
+    if kind in {"blank", "blank_comment"}:
+        return "blank"
+    if kind in {"comparison", "logical", "in", "strict_equal"}:
+        return "bool"
+    if kind == "concat":
+        return "text"
+    if kind == "var":
+        return variables.get(str(node[1]))
+    if kind == "let":
+        scope = dict(variables)
+        for name, value in node[1]:
+            scope[str(name)] = _static_numeric_type(value, columns, scope)
+        return _static_numeric_type(node[2], columns, scope)
+    if kind == "reference":
+        table = (node[1] or "").casefold()
+        col = str(node[2]).casefold()
+        raw_type = None
+        if table:
+            raw_type = columns.get(table, {}).get(col)
+        else:
+            for tbl_types in columns.values():
+                if col in tbl_types:
+                    raw_type = tbl_types[col]
+                    break
+        if not raw_type:
+            return None
+        raw = raw_type.casefold()
+        if raw in {"whole_number", "integer", "int64", "int"}:
+            return "int64"
+        if raw in {"decimal_number", "double", "float", "number"}:
+            return "double"
+        if raw in {"currency", "fixed_decimal", "decimal"}:
+            return "currency"
+        if raw in {"text", "string"}:
+            return "text"
+        if raw in {"boolean", "true_false", "bool"}:
+            return "bool"
+        if raw in {"date", "datetime", "time"}:
+            return "datetime"
+        return None
+    if kind == "unary":
+        op, child = node[1], node[2]
+        t = _static_numeric_type(child, columns, variables)
+        if op in {"+", "-"}:
+            if t in {"int64", "double", "currency"}:
+                return t
+            return None
+        if op == "not":
+            return "bool"
+        return None
+    if kind == "binary":
+        op, left, right = node[1], node[2], node[3]
+        lt = _static_numeric_type(left, columns, variables)
+        rt = _static_numeric_type(right, columns, variables)
+        if op in {"+", "-"}:
+            if lt == "int64" and rt == "int64":
+                return "int64"
+            if "double" in (lt, rt) and lt in {"int64", "double", "currency"} and rt in {"int64", "double", "currency"}:
+                return "double"
+            if lt == "currency" and rt in {"currency", "int64"}:
+                return "currency"
+            if rt == "currency" and lt in {"currency", "int64"}:
+                return "currency"
+            return None
+        if op == "*":
+            if lt == "int64" and rt == "int64":
+                return "int64"
+            if lt == "currency" and rt == "currency":
+                return "double"
+            if "currency" in (lt, rt) and lt in {"int64", "double", "currency"} and rt in {"int64", "double", "currency"}:
+                return "currency"
+            if "double" in (lt, rt) and lt in {"int64", "double"} and rt in {"int64", "double"}:
+                return "double"
+            return None
+        if op == "/":
+            if lt == "currency" and rt in {"int64", "double"}:
+                return "currency"
+            if lt in {"int64", "double", "currency"} and rt in {"int64", "double", "currency"}:
+                return "double"
+            return None
+        if op == "^":
+            return "double"
+        return None
+    if kind != "call":
+        return None
+    fn, args = node[1], node[2]
+    if fn in _STATIC_ALWAYS_DOUBLE:
+        return "double"
+    if fn in _STATIC_ALWAYS_INT64:
+        return "int64"
+    if fn in _STATIC_TEXT_FUNCTIONS:
+        return "text"
+    if fn in _STATIC_BOOL_FUNCTIONS:
+        return "bool"
+    if fn in _STATIC_DATE_FUNCTIONS:
+        return "datetime"
+    if fn == "BLANK":
+        return "blank"
+    if fn == "CURRENCY":
+        return "currency"
+    if fn == "CONVERT" and len(args) == 2:
+        kw = str(args[1][1]).upper() if args[1][0] == "table" else ""
+        if kw in {"INTEGER", "INT64"}:
+            return "int64"
+        if kw in {"DOUBLE"}:
+            return "double"
+        if kw in {"CURRENCY", "DECIMAL"}:
+            return "currency"
+        if kw in {"BOOLEAN"}:
+            return "bool"
+        if kw in {"STRING"}:
+            return "text"
+        if kw in {"DATETIME"}:
+            return "datetime"
+        return None
+    if fn in {"ROUND", "ROUNDUP", "ROUNDDOWN", "TRUNC"}:
+        at = _static_numeric_type(args[0], columns, variables) if args else None
+        if at in {"int64", "double", "currency"}:
+            return at
+        return "int64" if at == "bool" else None
+    if fn == "INT":
+        at = _static_numeric_type(args[0], columns, variables) if args else None
+        if at == "currency":
+            return "currency"
+        return "int64" if at in {"int64", "double", "text", "bool"} else None
+    if fn in {"EVEN", "ODD"}:
+        at = _static_numeric_type(args[0], columns, variables) if args else None
+        return at if at in {"int64", "double", "currency"} else None
+    if fn == "ABS":
+        at = _static_numeric_type(args[0], columns, variables) if args else None
+        if at in {"int64", "double", "currency"}:
+            return at
+        return {"bool": "int64", "text": "double"}.get(at or "")
+    if fn in {"FLOOR", "CEILING", "MROUND", "MOD"}:
+        if len(args) != 2:
+            return None
+        lt = _static_numeric_type(args[0], columns, variables)
+        rt = _static_numeric_type(args[1], columns, variables)
+        if lt not in {"int64", "double", "currency"} or rt not in {"int64", "double", "currency"}:
+            return None
+        if "currency" in (lt, rt):
+            return "currency" if {lt, rt} <= {"currency", "int64"} else None
+        if fn == "MOD":
+            return "int64" if (lt, rt) == ("int64", "int64") else "double"
+        return rt
+    if fn == "DIVIDE":
+        if len(args) < 2:
+            return None
+        quotient = _static_numeric_type(("binary", "/", args[0], args[1]), columns, variables)
+        if len(args) == 2:
+            return quotient
+        alt = _static_numeric_type(args[2], columns, variables)
+        if quotient is None or alt not in {"int64", "double", "currency", "blank", "bool", "datetime"}:
+            return None
+        return "currency" if quotient == "currency" else "double"
+    if fn in {"MAX", "MIN"} and len(args) == 2:
+        return _unify_numeric_types([_static_numeric_type(a, columns, variables) for a in args])
+    if fn in {"SUM", "MIN", "MAX"}:
+        if args:
+            return _static_numeric_type(args[0], columns, variables)
+        return None
+    if fn == "AVERAGEX":
+        if len(args) >= 2 and _static_numeric_type(args[1], columns, variables) == "currency":
+            return "currency"
+        return "double"
+    if fn in {"SUMX", "MAXX", "MINX"}:
+        if len(args) >= 2:
+            return _static_numeric_type(args[1], columns, variables)
+        return None
+    if fn == "CALCULATE":
+        if args:
+            return _static_numeric_type(args[0], columns, variables)
+        return None
+    if fn in {"IF", "IF.EAGER", "COALESCE", "SWITCH", "IFERROR"}:
+        if fn in {"IF", "IF.EAGER"}:
+            res_nodes = list(args[1:])
+        elif fn == "SWITCH":
+            res_nodes = [args[i] for i in range(2, len(args), 2)]
+            if len(args) >= 4 and len(args) % 2 == 0:
+                res_nodes.append(args[-1])
+        else:
+            res_nodes = list(args)
+        types = [_static_numeric_type(r, columns, variables) for r in res_nodes]
+        known = {t for t in types if t != "blank"}
+        if len(known) == 1 and None not in known:
+            return known.pop()
+        return _unify_numeric_types(types)
+    return None
 
 
 def _static_type(node: Any, columns: dict[str, dict[str, str]], variables: dict[str, str | None]) -> str | None:
@@ -4212,6 +4515,11 @@ def _reject_mismatched_comparison_types(node: Any, columns: dict[str, dict[str, 
             if arg[0] == "table":
                 if columns and str(arg[1]).casefold() not in columns:
                     raise MeasureError("Only measure or fully-qualified column or table or calendar references are allowed in NAMEOF function.")
+        elif function in {"ISINTEGER", "ISINT64", "ISDOUBLE", "ISDECIMAL", "ISCURRENCY"}:
+            if arguments:
+                st = _static_numeric_type(arguments[0], columns, variables)
+                if st is None:
+                    raise MeasureError(f"Cannot determine static type for function {function}.")
         elif function in {"ISONORAFTER", "ISAFTER"}:
             for i in range(0, len(arguments) - 1, 3):
                 left_t = _static_type(arguments[i], columns, variables)
@@ -11108,6 +11416,25 @@ def evaluate_measures(
             return not isinstance(values[0], str)
         if function == "ISLOGICAL":
             return isinstance(values[0], bool)
+        if function in {"ISINTEGER", "ISINT64", "ISDOUBLE", "ISDECIMAL", "ISCURRENCY"}:
+            column_types = {
+                str(ctx.get("name", "")).casefold(): {
+                    str(h).casefold(): str(ctx.get("column_types", {}).get(h, "")).casefold()
+                    for h in ctx.get("headers", [])
+                }
+                for ctx in contexts_by_id.values()
+            }
+            static_t = _static_numeric_type(arguments[0], column_types, {})
+            if static_t is None:
+                raise MeasureError(f"Cannot determine static type for function {function}.")
+            if values[0] is None:
+                return False
+            if function in {"ISINTEGER", "ISINT64"}:
+                return static_t == "int64"
+            if function == "ISDOUBLE":
+                return static_t == "double"
+            if function in {"ISDECIMAL", "ISCURRENCY"}:
+                return static_t in {"currency", "decimal"}
         if function == "FORMAT":
             return dax_format.format_value(values[0], values[1])
         return dax_typed.text_function(function, values)
