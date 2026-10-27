@@ -446,6 +446,14 @@ DAX_FUNCTION_TEMPLATES.update({
     "WEEKDAY": ("WEEKDAY(date)", "date"),
     "WEEKNUM": ("WEEKNUM(date)", "date"),
     "YEAR": ("YEAR(date)", "date"),
+    "IF.EAGER": ("IF.EAGER(condition, value_if_true, value_if_false)", "condition"),
+    "ERROR": ('ERROR("message")', '"message"'),
+    "CUSTOMDATA": ("CUSTOMDATA()", None),
+    "ISAFTER": ("ISAFTER(val1, val2, order)", "val1"),
+    "NAMEOF": ("NAMEOF('Table'[Column])", "'Table'[Column]"),
+    "TABLEOF": ("TABLEOF('Table'[Column])", "'Table'[Column]"),
+    "EVALUATEANDLOG": ("EVALUATEANDLOG(value)", "value"),
+    "ALLCROSSFILTERED": ("ALLCROSSFILTERED('Table')", "'Table'"),
 })
 
 

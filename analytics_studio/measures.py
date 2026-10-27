@@ -173,12 +173,12 @@ class _Shadow:
 _NEVER_CONSTANT_CALLS = frozenset({
     "RAND", "RANDBETWEEN", "EVALUATEANDLOG", "CALCULATE", "CALCULATETABLE", "FILTER", "ADDCOLUMNS", "SELECTCOLUMNS", "SUMMARIZE",
     "SUMMARIZECOLUMNS", "TOPN", "VALUES", "DISTINCT", "ALL", "ALLSELECTED", "ALLEXCEPT", "LOOKUPVALUE", "CONTAINS", "CONTAINSROW",
-    "FIRSTNONBLANK", "LASTNONBLANK", "ISEMPTY", "RELATED", "RELATEDTABLE", "USERELATIONSHIP", "ROW", "GENERATESERIES",
+    "FIRSTNONBLANK", "LASTNONBLANK", "ISEMPTY", "RELATED", "RELATEDTABLE", "USERELATIONSHIP", "ROW", "GENERATESERIES", "ERROR",
 })
 _ROW_SHIELDING_CALLS = frozenset({
     "SUM", "AVERAGE", "MIN", "MAX", "COUNT", "COUNTA", "COUNTBLANK", "DISTINCTCOUNT", "DISTINCTCOUNTNOBLANK", "MEDIAN", "PRODUCT",
     "VALUES", "DISTINCT", "ALL", "ALLNOBLANKROW", "ALLEXCEPT", "ALLSELECTED", "REMOVEFILTERS", "ISFILTERED", "ISCROSSFILTERED",
-    "ISINSCOPE", "HASONEVALUE", "SELECTEDVALUE", "KEEPFILTERS", "STDEV.S", "STDEV.P", "VAR.S", "VAR.P",
+    "ISINSCOPE", "HASONEVALUE", "SELECTEDVALUE", "KEEPFILTERS", "STDEV.S", "STDEV.P", "VAR.S", "VAR.P", "NAMEOF", "TABLEOF", "ALLCROSSFILTERED",
 })
 _ITERATOR_CALLS = frozenset({
     "SUMX", "AVERAGEX", "MAXX", "MINX", "COUNTX", "COUNTAX", "PRODUCTX", "MEDIANX", "CONCATENATEX", "FILTER", "ADDCOLUMNS",
@@ -274,7 +274,12 @@ _DATE_FUNCTIONS = {
     "EDATE", "DATEDIFF", "DATEVALUE", "TIMEVALUE", "TODAY", "NOW",
 }
 _COLUMN_SCALAR_ARITY = {"SELECTEDVALUE": (1, 2), "HASONEVALUE": (1, 1)}
-_FUNCTIONS |= set(_COLUMN_SCALAR_ARITY) | {"CONCATENATEX", "XNPV"}
+_ROW_ORDER_FUNCTIONS = frozenset({
+    "CONCATENATEX", "TOPN", "TOPNSKIP", "INDEX", "OFFSET", "WINDOW", "FIRSTNONBLANK", "LASTNONBLANK", "RANKX", "GENERATE", "GENERATEALL",
+})
+_FUNCTIONS |= set(_COLUMN_SCALAR_ARITY) | {
+    "CONCATENATEX", "XNPV", "IF.EAGER", "ERROR", "CUSTOMDATA", "NAMEOF", "EVALUATEANDLOG", "ALLCROSSFILTERED",
+}
 # Lookup, membership, filter-context and table-constructor functions (min, max arguments; None is unbounded).
 _LOOKUP_ARITY = {
     "CONTAINS": (3, None), "CONTAINSROW": (2, None), "LOOKUPVALUE": (3, None), "ISEMPTY": (1, 1),
@@ -291,7 +296,7 @@ _TABLE_FUNCTION_ARITY = {
     "SUMMARIZECOLUMNS": (1, None), "GROUPBY": (2, None), "TREATAS": (2, None), "NATURALINNERJOIN": (2, 2),
     "NATURALLEFTOUTERJOIN": (2, 2), "SAMPLE": (3, None), "GENERATE": (2, 2), "GENERATEALL": (2, 2),
     "DATATABLE": (3, None), "CALENDAR": (2, 2), "TOPNSKIP": (3, None), "FILTERS": (1, 1),
-    "INDEX": (1, 7), "OFFSET": (1, 7), "WINDOW": (2, 10),
+    "INDEX": (1, 7), "OFFSET": (1, 7), "WINDOW": (2, 10), "TABLEOF": (1, 1),
 }
 # only meaningful inside SUMMARIZECOLUMNS (IGNORE, NONVISUAL) and GROUPBY (CURRENTGROUP); elsewhere they raise
 _FUNCTIONS |= {"IGNORE", "NONVISUAL", "CURRENTGROUP"}
@@ -326,6 +331,7 @@ def _table_position(parent_function: str, argument_index: int) -> bool:
         or (parent_function == "TOPNSKIP" and argument_index == 2)
         or parent_function in _TABLE_ANY_PARENTS
         or (parent_function == "TOPN" and argument_index == 1)
+        or (parent_function == "EVALUATEANDLOG" and argument_index == 0)
     )
 
 
@@ -1188,6 +1194,10 @@ def _validate_table_filter_call(
 def _validate_filter_clear_call(node: tuple[Any, ...], function: str) -> None:
     """Validate the local table-or-columns forms of filter-clearing functions."""
     arguments = node[2]
+    if function == "ALLCROSSFILTERED":
+        if len(arguments) != 1 or arguments[0][0] != "table":
+            raise MeasureError("ALLCROSSFILTERED needs one table expression.")
+        return
     if not arguments:
         return
     if len(arguments) == 1 and arguments[0][0] == "table":
@@ -1214,7 +1224,7 @@ def _validate_mixed_filter_clear_calculate(
         for index, argument in enumerate(arguments[1:], start=1)
         if argument[0] == "call"
         and argument[1] in {
-            "REMOVEFILTERS", "ALL", "ALLNOBLANKROW", "ALLEXCEPT", "ALLSELECTED",
+            "REMOVEFILTERS", "ALL", "ALLNOBLANKROW", "ALLEXCEPT", "ALLSELECTED", "ALLCROSSFILTERED",
         }
     ]
     if len(modifiers) != 1:
@@ -1223,7 +1233,7 @@ def _validate_mixed_filter_clear_calculate(
     modifier_index, modifier = modifiers[0]
     function = modifier[1]
     if function not in {
-        "REMOVEFILTERS", "ALL", "ALLNOBLANKROW", "ALLEXCEPT", "ALLSELECTED",
+        "REMOVEFILTERS", "ALL", "ALLNOBLANKROW", "ALLEXCEPT", "ALLSELECTED", "ALLCROSSFILTERED",
     }:
         return False
     if function == "ALLEXCEPT":
@@ -1351,7 +1361,7 @@ def _membership(value: tuple[Any, ...], table: tuple[Any, ...]) -> tuple[Any, ..
 def _mixes_table_and_scalar_branches(function: str, arguments: tuple[Any, ...] | list[Any]) -> bool:
     """IF / SWITCH with a table (CALCULATETABLE, RELATEDTABLE, TOPN...) in one result branch and a scalar (or the implicit
     BLANK) in another: Power BI refuses it when the expression is compiled, even when the branch is never evaluated."""
-    if function == "IF":
+    if function in {"IF", "IF.EAGER"}:
         branches = list(arguments[1:3]) + [("blank",)] * (3 - len(arguments))
     elif len(arguments) % 2 == 0:  # SWITCH(expression, value, result, ..., default)
         branches = list(arguments[2:-1:2]) + [arguments[-1]]
@@ -1378,6 +1388,8 @@ def _is_all_table_value_argument(node: Any) -> bool:
         return True
     if node[0] == "call" and node[1] in {"GENERATESERIES", "ROW"}:
         return True
+    if node[0] == "call" and node[1] == "EVALUATEANDLOG" and node[2]:
+        return _is_all_table_value_argument(node[2][0])
     if node[0] == "call" and node[1] in _TIME_FILTER_FUNCTIONS:
         return True  # a date set is a one-column table (live Power BI)
     if node[0] == "call" and node[1] == "FILTER":
@@ -1711,6 +1723,7 @@ _BOOLEAN_FILTER_REFUSED_CALLS = frozenset({
     "CALCULATE", "FILTER", "TOPN", "SELECTCOLUMNS", "LOOKUPVALUE", "ADDCOLUMNS", "SUMMARIZE", "SUMMARIZECOLUMNS",
     "GROUPBY", "EXCEPT", "INTERSECT", "ROW", "SAMPLE", "TOPNSKIP", "RANKX", "FIRSTNONBLANK", "LASTNONBLANK",
     "OFFSET", "WINDOW", "INDEX", "RANK", "ROWNUMBER", "CONTAINS",  # CONTAINS: live probes, iteration 87 (also inside IF and arithmetic)
+    "TABLEOF", "ALLCROSSFILTERED",
 })
 _BOOLEAN_FILTER_X_ITERATORS = frozenset({"SUMX", "AVERAGEX", "MAXX", "MINX", "COUNTX", "COUNTAX", "CONCATENATEX", "XNPV", *dax_math.STAT_ITERATORS})
 
@@ -1835,6 +1848,8 @@ def _contains_refused_call_outside_x_iterator(node: Any) -> bool:
             return False
         if node[1] in _BOOLEAN_FILTER_REFUSED_CALLS:
             return True
+        if node[1] == "EVALUATEANDLOG" and len(node[2]) > 0 and _is_all_table_value_argument(node[2][0]):
+            return True
     return any(isinstance(child, tuple) and _contains_refused_call_outside_x_iterator(child) for child in node)
 
 
@@ -1855,6 +1870,8 @@ _UNTAKEN_BRANCH_ERRORS = (
     "A bare table variable is supported only as the direct argument to COUNTROWS.",
     "XNPV does not support expressions of type string/Boolean/date for the Values argument.",  # iteration 91: a compile-time type error
     "The Rate argument to the XNPV function needs a single value",  # iteration 91: a bare column as the rate is a compile-time error
+    "Unexpected value for ORDER argument in ISAFTER function.",  # iteration 92: a bad ORDER value is a compile-time error
+    "Unexpected value for ORDER argument in ISONORAFTER function.",
 )
 
 
@@ -2159,7 +2176,7 @@ def _is_abs_of_blank(node: tuple[Any, ...]) -> bool:
     )
 
 
-_GENERAL_CLEAR_FUNCTIONS = {"ALL", "ALLNOBLANKROW", "REMOVEFILTERS", "ALLEXCEPT"}
+_GENERAL_CLEAR_FUNCTIONS = {"ALL", "ALLNOBLANKROW", "REMOVEFILTERS", "ALLEXCEPT", "ALLCROSSFILTERED"}
 _GENERAL_BOOLEAN_CALLS = {"AND", "OR", "NOT", "ISBLANK", "CONTAINSSTRING", "CONTAINSSTRINGEXACT", "ISNUMBER", "ISTEXT", "CONTAINS"}
 
 
@@ -2311,11 +2328,11 @@ def _legacy_calculate_filters_valid(arguments: tuple[tuple[Any, ...], ...]) -> N
     valid_filter_clear = (
         len(arguments) == 2
         and arguments[1][0] == "call"
-        and arguments[1][1] in {"REMOVEFILTERS", "ALL", "ALLNOBLANKROW", "ALLEXCEPT", "ALLSELECTED"}
+        and arguments[1][1] in {"REMOVEFILTERS", "ALL", "ALLNOBLANKROW", "ALLEXCEPT", "ALLSELECTED", "ALLCROSSFILTERED"}
     )
     contained_filter_clear = {
         function
-        for function in {"REMOVEFILTERS", "ALL", "ALLNOBLANKROW", "ALLEXCEPT", "ALLSELECTED"}
+        for function in {"REMOVEFILTERS", "ALL", "ALLNOBLANKROW", "ALLEXCEPT", "ALLSELECTED", "ALLCROSSFILTERED"}
         if any(
             _contains_function_call(argument, function)
             for argument in arguments[1:]
@@ -2422,13 +2439,15 @@ def _validate_literal_positions(
                 if argument[0] != "table":  # ASC / DESC
                     _validate_literal_positions(argument, allow_blank=True)
             return
-        if function in {"IF", "ISBLANK", "IFERROR", "SWITCH", "ABS", "AND", "OR", "NOT", "SELECTEDVALUE"} or function in _TYPED_ARITY or function in _LOOKUP_ARITY or (
+        if function in {"IF", "IF.EAGER", "ISBLANK", "IFERROR", "SWITCH", "ABS", "AND", "OR", "NOT", "SELECTEDVALUE", "ERROR", "CUSTOMDATA", "EVALUATEANDLOG"} or function in _TYPED_ARITY or function in _LOOKUP_ARITY or (
             function in {"MIN", "MAX"} and len(arguments) == 2
         ):
             for index, argument in enumerate(arguments):
                 if function in {"ISEMPTY", "CONTAINS", "CONTAINSROW"} and index == 0 and _is_all_table_value_argument(argument):
                     continue  # a table expression, checked where it is evaluated
                 _validate_literal_positions(argument, allow_blank=True)
+            return
+        if function in {"NAMEOF", "TABLEOF"}:
             return
         if function == "COALESCE":
             for argument in arguments:
@@ -2477,9 +2496,9 @@ def _validate_literal_positions(
             raise MeasureError(
                 "CROSSFILTER is supported only as a CALCULATE filter modifier."
             )
-        if function == "REMOVEFILTERS":
+        if function in {"REMOVEFILTERS", "ALLCROSSFILTERED"}:
             raise MeasureError(
-                "REMOVEFILTERS is supported only as a CALCULATE filter modifier."
+                f"{function} is supported only as a CALCULATE filter modifier."
             )
         if function in {"ALL", "ALLNOBLANKROW", "ALLEXCEPT", "ALLSELECTED"}:
             raise MeasureError(
@@ -2808,6 +2827,9 @@ class _Parser:
                 return ("call", "CALCULATETABLE", (arguments[0],))
             if function in dax_time_sets.BALANCES:
                 return _balance_call(function, arguments)
+            if function in _ROW_ORDER_FUNCTIONS and any(_contains_function_call(argument, "TABLEOF") for argument in arguments):
+                # live Power BI (iteration 92): TABLEOF hands the rows over in the engine's own order, not the table's (CONCATENATEX gave East,East,East,West,West,North for a table stored East,West,East,North,West,East)
+                raise MeasureError(f"{function} over TABLEOF depends on the row order, which is not modelled in the local engine.")
             if function in dax_time_sets.SET_FUNCTIONS and _time_set_call_is_new_form(function, arguments):
                 _validate_time_set_call(function, arguments)
             elif function in dax_math.STAT_PERCENTILE_COLUMN:
@@ -2825,6 +2847,8 @@ class _Parser:
                 len(arguments) > 1
                 or (arguments and not _is_all_table_value_argument(arguments[0]))
             ):
+                if arguments and arguments[0][0] == "call" and arguments[0][1] == "ALLCROSSFILTERED":
+                    raise MeasureError("ALLCROSSFILTERED function cannot be used as a table expression. It can appear only as a filter in CALCULATE.")
                 raise MeasureError(
                     "COUNTROWS needs no argument or one loaded table/ALL table expression."
                 )
@@ -2860,6 +2884,60 @@ class _Parser:
                     raise MeasureError("The XNPV function expects a table expression for argument '1', but a string or numeric expression was used.")
                 if any(argument[0] == "omitted" for argument in arguments):
                     raise MeasureError("The XNPV function does not accept omitted arguments.")
+            elif function == "IF.EAGER":
+                if len(arguments) < 2:
+                    raise MeasureError("Too few arguments were passed to the IF.EAGER function. The minimum argument count for the function is 2.")
+                if len(arguments) > 3:
+                    raise MeasureError("Too many arguments were passed to the IF.EAGER function. The maximum argument count for the function is 3.")
+                if any(_is_all_table_value_argument(arg) or _is_coalesce_table_argument(arg) for arg in arguments[1:]):
+                    raise MeasureError("The expression refers to multiple columns. Multiple columns cannot be converted to a scalar value.")
+            elif function == "ERROR":
+                if len(arguments) < 1:
+                    raise MeasureError("Too few arguments were passed to the ERROR function. The minimum argument count for the function is 1.")
+                if len(arguments) > 1:
+                    raise MeasureError("Too many arguments were passed to the ERROR function. The maximum argument count for the function is 1.")
+                if arguments[0][0] != "string":
+                    raise MeasureError("The function 'ERROR' expects its argument number 1 to be constant.")
+            elif function == "CUSTOMDATA":
+                if len(arguments) > 0:
+                    raise MeasureError("Too many arguments were passed to the CUSTOMDATA function. The maximum argument count for the function is 0.")
+            elif function == "NAMEOF":
+                if len(arguments) < 1:
+                    raise MeasureError("Too few arguments were passed to the NAMEOF function. The minimum argument count for the function is 1.")
+                if len(arguments) > 1:
+                    raise MeasureError("Valid arguments for component are TABLE, COLUMN, MEASURE, CALENDAR, FULL, SELF, and PARENT.")
+                arg = arguments[0]
+                if arg[0] not in {"reference", "table"} or (arg[0] == "reference" and not arg[1]):
+                    raise MeasureError("Only measure or fully-qualified column or table or calendar references are allowed in NAMEOF function.")
+            elif function == "TABLEOF":
+                if len(arguments) < 1:
+                    raise MeasureError("Too few arguments were passed to the TABLEOF function. The minimum argument count for the function is 1.")
+                if len(arguments) > 1:
+                    raise MeasureError("Too many arguments were passed to the TABLEOF function. The maximum argument count for the function is 1.")
+                arg = arguments[0]
+                if arg[0] != "reference" or not arg[1]:
+                    raise MeasureError("The TABLEOF function only accepts a column reference, measure reference, or calendar reference as the argument number 1.")
+            elif function == "EVALUATEANDLOG":
+                if len(arguments) < 1:
+                    raise MeasureError("Too few arguments were passed to the EVALUATEANDLOG function. The minimum argument count for the function is 1.")
+                if len(arguments) > 3:
+                    raise MeasureError("Too many arguments were passed to the EVALUATEANDLOG function. The maximum argument count for the function is 3.")
+            elif function == "ALLCROSSFILTERED":
+                if len(arguments) != 1:
+                    raise MeasureError("ALLCROSSFILTERED needs one table expression.")
+                if arguments[0][0] == "reference":
+                    raise MeasureError(
+                        f"A single value for column '{arguments[0][2]}' in table '{arguments[0][1]}' cannot be determined. "
+                        "This can happen when a measure or function formula refers to a column that contains many values "
+                        "without specifying an aggregation such as min, max, count, or sum to get a single result."
+                    )
+                if arguments[0][0] != "table":
+                    raise MeasureError("ALLCROSSFILTERED needs one table expression.")
+            elif function in {"ISONORAFTER", "ISAFTER"}:
+                if len(arguments) < 2:
+                    raise MeasureError(f"Too few arguments were passed to the {function} function. The minimum argument count for the function is 2.")
+                if len(arguments) % 3 == 1:
+                    raise MeasureError("IsOnOrAfter() function contains a scalar expression to compare without a value to compare against.")
             elif function in _TABLE_FUNCTION_ARITY and not (
                 _TABLE_FUNCTION_ARITY[function][0] <= len(arguments)
                 and (_TABLE_FUNCTION_ARITY[function][1] is None or len(arguments) <= _TABLE_FUNCTION_ARITY[function][1])
@@ -3183,10 +3261,15 @@ class _Parser:
                         and arguments[1][0] == "call"
                         and arguments[1][1] == "ALLSELECTED"
                     )
+                    valid_allcrossfiltered = (
+                        len(arguments) == 2
+                        and arguments[1][0] == "call"
+                        and arguments[1][1] == "ALLCROSSFILTERED"
+                    )
                     contains_filter_clear = {
                         clear_function
                         for clear_function in {
-                            "REMOVEFILTERS", "ALL", "ALLNOBLANKROW", "ALLEXCEPT", "ALLSELECTED"
+                            "REMOVEFILTERS", "ALL", "ALLNOBLANKROW", "ALLEXCEPT", "ALLSELECTED", "ALLCROSSFILTERED"
                         }
                         if any(
                             _contains_function_call(argument, clear_function)
@@ -3198,13 +3281,13 @@ class _Parser:
                     ):
                         return ("call", function, tuple(arguments))
                     if contains_filter_clear and not (
-                        valid_removefilters or valid_all or valid_allnoblankrow or valid_allexcept or valid_allselected
+                        valid_removefilters or valid_all or valid_allnoblankrow or valid_allexcept or valid_allselected or valid_allcrossfiltered
                     ):
                         clear_function = sorted(contains_filter_clear)[0]
                         raise MeasureError(
                             f"{clear_function} must be the only CALCULATE filter argument in this local subset."
                         )
-                    if valid_removefilters or valid_all or valid_allnoblankrow or valid_allexcept or valid_allselected:
+                    if valid_removefilters or valid_all or valid_allnoblankrow or valid_allexcept or valid_allselected or valid_allcrossfiltered:
                         if valid_allexcept:
                             _validate_allexcept_call(arguments[1])
                         else:
@@ -4020,7 +4103,7 @@ def _reject_bare_columns_without_row_context(
 
 
 _NUMBER_COLUMN_TYPES = {"whole_number", "decimal_number", "decimal", "fixed_decimal", "currency", "number", "int64", "double"}
-_TEXT_FUNCTIONS = {"UPPER", "LOWER", "TRIM", "LEFT", "RIGHT", "MID", "CONCATENATE", "FORMAT", "SUBSTITUTE", "REPT", "FIXED"}
+_TEXT_FUNCTIONS = {"UPPER", "LOWER", "TRIM", "LEFT", "RIGHT", "MID", "CONCATENATE", "FORMAT", "SUBSTITUTE", "REPT", "FIXED", "NAMEOF", "CUSTOMDATA"}
 _BOOLEAN_FUNCTIONS = {"AND", "OR", "NOT", "ISBLANK", "EXACT", "ISNUMBER", "ISTEXT", "ISERROR", "CONTAINSROW", "CONTAINS"}
 
 
@@ -4073,8 +4156,8 @@ def _static_type(node: Any, columns: dict[str, dict[str, str]], variables: dict[
         return "text"
     if function in _BOOLEAN_FUNCTIONS:
         return "boolean"
-    if function in {"IF", "COALESCE", "IFERROR", "SWITCH"}:
-        if function == "IF":
+    if function in {"IF", "IF.EAGER", "COALESCE", "IFERROR", "SWITCH"}:
+        if function in {"IF", "IF.EAGER"}:
             results = list(arguments[1:])
         elif function == "SWITCH":
             results = [arguments[index] for index in range(2, len(arguments), 2)]
@@ -4122,6 +4205,24 @@ def _reject_mismatched_comparison_types(node: Any, columns: dict[str, dict[str, 
             raise MeasureError(f"The function {function} cannot work with values of type String.")
         elif function in {"MIN", "MAX"} and len(arguments) == 2 and all(_static_type(argument, columns, variables) == "boolean" for argument in arguments):
             raise MeasureError("Min or Max of booleans are not currently supported.")
+        elif function in {"MIN", "MAX"} and len(arguments) == 2 and {_static_type(argument, columns, variables) for argument in arguments} == {"text", "number"}:
+            raise MeasureError(f"The function {function} cannot compare text with a number.")
+        elif function == "NAMEOF":
+            arg = arguments[0]
+            if arg[0] == "table":
+                if columns and str(arg[1]).casefold() not in columns:
+                    raise MeasureError("Only measure or fully-qualified column or table or calendar references are allowed in NAMEOF function.")
+        elif function in {"ISONORAFTER", "ISAFTER"}:
+            for i in range(0, len(arguments) - 1, 3):
+                left_t = _static_type(arguments[i], columns, variables)
+                right_t = _static_type(arguments[i + 1], columns, variables)
+                if left_t and right_t and left_t != right_t:
+                    t1 = "Integer" if left_t == "number" else ("Text" if left_t == "text" else "True/False")
+                    t2 = "Integer" if right_t == "number" else ("Text" if right_t == "text" else "True/False")
+                    raise MeasureError(
+                        f"DAX comparison operations do not support comparing values of type {t1} with values of type {t2}. "
+                        "Consider using the VALUE or FORMAT function to convert one of the values."
+                    )
     if node[0] == "comparison":
         left, right = _static_type(node[2], columns, variables), _static_type(node[3], columns, variables)
         if left and right and left != right:
@@ -5620,6 +5721,9 @@ def evaluate_measures(
     def table_function_rows(argument: tuple[Any, ...]) -> tuple[dict[str, Any], list[dict[str, Any]]]:
         nonlocal eff_touched
         function, arguments = argument[1], argument[2]
+        if function == "TABLEOF":
+            context = resolve_table_context(arguments[0][1])
+            return context, list(rows_by_table_id[context["id"]])
         if function in {"ADDCOLUMNS", "SELECTCOLUMNS"}:
             context, rows = table_argument_value(arguments[0])
             implicit_flags: list[bool] = []
@@ -7080,6 +7184,8 @@ def evaluate_measures(
             return context, table_rows
         if argument[0] == "call" and argument[1] in dax_time_sets.SET_FUNCTIONS:
             return date_set_table(argument)
+        if argument[0] == "call" and argument[1] == "EVALUATEANDLOG":
+            return table_argument_value(argument[2][0], include_unknown=include_unknown)
         if argument[0] == "call" and argument[1] in {"FIRSTNONBLANK", "LASTNONBLANK"}:
             return nonblank_table(argument)
         if argument[0] == "tablevalue":  # a table already computed (see evaluate_with_general_filters)
@@ -10965,7 +11071,7 @@ def evaluate_measures(
             except (MeasureRuntimeError, DecimalException, OverflowError):
                 return True
             return dax_typed.is_non_finite(value)
-        if function == "ISONORAFTER":  # ASC / DESC after each (value, comparand) pair become Booleans
+        if function in {"ISONORAFTER", "ISAFTER"}:  # ASC / DESC after each (value, comparand) pair become Booleans
             arguments = tuple(
                 ("boolean", dax_order.ORDER_KEYWORDS[str(argument[1]).upper()])
                 if index % 3 == 2 and argument[0] == "table" and str(argument[1]).upper() in dax_order.ORDER_KEYWORDS
@@ -12228,7 +12334,7 @@ def evaluate_measures(
                     for index, argument in enumerate(arguments[1:], start=1)
                     if argument[0] == "call"
                     and argument[1] in {
-                        "REMOVEFILTERS", "ALL", "ALLNOBLANKROW", "ALLEXCEPT",
+                        "REMOVEFILTERS", "ALL", "ALLNOBLANKROW", "ALLEXCEPT", "ALLCROSSFILTERED",
                     }
                 ]
                 if len(arguments) > 2 and len(mixed_clear_modifiers) == 1:
@@ -12269,7 +12375,7 @@ def evaluate_measures(
                     len(arguments) == 2
                     and arguments[1][0] == "call"
                     and arguments[1][1]
-                    in {"REMOVEFILTERS", "ALL", "ALLNOBLANKROW", "ALLEXCEPT"}
+                    in {"REMOVEFILTERS", "ALL", "ALLNOBLANKROW", "ALLEXCEPT", "ALLCROSSFILTERED"}
                 ):
                     return evaluate_with_filter_clear(
                         arguments[0], arguments[1], arguments[1][1]
@@ -12455,21 +12561,67 @@ def evaluate_measures(
             return evaluate_with_date_values(
                 arguments[0], date_table, actual_date_column, period_dates
             )
-        if function == "IF":
+        if function in {"IF", "IF.EAGER"}:
             mixed_branches = len(arguments) > 2 and date_number_mix(arguments[1], arguments[2])
             chosen = arguments[1] if as_boolean(_consume_infinity(lambda: evaluate(
                 arguments[0], row_context, allow_text=allow_text,
                 allow_boolean=allow_boolean,
             ))) else (arguments[2] if len(arguments) > 2 else None)  # IF without a false value returns blank
-            value = None if chosen is None else evaluate(
-                chosen, row_context, allow_text=allow_text, allow_boolean=allow_boolean,
-            )
-            probe_untaken_branches([branch for branch in arguments[1:3] if branch is not chosen], row_context)
+            try:
+                value = None if chosen is None else evaluate(
+                    chosen, row_context, allow_text=allow_text, allow_boolean=allow_boolean,
+                )
+            except _DivisionError:
+                raise
+            except MeasureRuntimeError as error:
+                if function == "IF.EAGER":
+                    raise _HardError(str(error)) from error  # live Power BI (iteration 92): an error out of IF.EAGER is thrown, IFERROR cannot catch it
+                raise
+            untaken = [branch for branch in arguments[1:3] if branch is not chosen]
+            if function == "IF.EAGER" and row_context is not None:
+                for branch in untaken:  # live Power BI (iteration 92): inside a row expression both branches are evaluated and an error in either is thrown
+                    try:
+                        evaluate(branch, row_context, allow_text=True, allow_boolean=True)
+                    except _DivisionError:
+                        pass
+                    except MeasureRuntimeError as error:
+                        raise _HardError(str(error)) from error
+            probe_untaken_branches(untaken, row_context)
             refuse_date_result(mixed_branches, value)
             refuse_date_beside_number(arguments[1:3], value)
             if value is None and bool_join([branch_kind(branch, row_context) for branch in arguments[1:]]):
                 return False  # a Boolean result has no blank: Power BI answers FALSE
             return value
+        if function == "ERROR":
+            raise MeasureRuntimeError(arguments[0][1])
+        if function == "CUSTOMDATA":
+            return None
+        if function == "NAMEOF":
+            arg = arguments[0]
+            if arg[0] == "reference":
+                context, col = resolve_table(arg[1], arg[2])
+                return f"'{context['name']}'[{col}]"
+            if arg[0] == "table":
+                context = resolve_table_context(arg[1])
+                return f"'{context['name']}'"
+            raise MeasureError("Only measure or fully-qualified column or table or calendar references are allowed in NAMEOF function.")
+        if function == "TABLEOF":
+            raise MeasureError("The expression refers to multiple columns. Multiple columns cannot be converted to a scalar value.")
+        if function == "EVALUATEANDLOG":
+            for extra in arguments[1:]:  # live Power BI (iteration 92): the label and the row limit are never evaluated, but a bare column or table there is a compile-time error
+                if extra[0] == "omitted":
+                    continue
+                try:
+                    evaluate(extra, row_context, allow_text=True, allow_boolean=True)
+                except MeasureError as error:
+                    if "is a column reference" in str(error) or "table name" in str(error).casefold():
+                        raise
+            try:
+                return evaluate(arguments[0], row_context, allow_text=allow_text, allow_boolean=allow_boolean)
+            except MeasureRuntimeError as error:
+                raise _HardError(str(error)) from error
+        if function == "ALLCROSSFILTERED":
+            raise MeasureError("ALLCROSSFILTERED function cannot be used as a table expression. It can appear only as a filter in CALCULATE.")
         if function == "ISBLANK":
             try:
                 return _consume_infinity(

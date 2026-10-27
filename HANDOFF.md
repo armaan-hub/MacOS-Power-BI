@@ -2,8 +2,8 @@
 
 Rules and roles are in `AGENTS.md`. Read it first. Keep this file short and current.
 
-**Active agent:** Antigravity (Task 4, once the user hands it over)
-**Branch in use:** main (Task 4 branch to create: antigravity/scalar-misc-2)
+**Active agent:** Antigravity (Task 5 type-tests-1)
+**Branch in use:** antigravity/type-tests-1 (create from main)
 **Working tree clean:** yes
 
 ## Status values
@@ -16,21 +16,59 @@ Rules and roles are in `AGENTS.md`. Read it first. Keep this file short and curr
 | 1 | scalar-gaps-1: single-cell tables as scalars, DIVIDE text/Boolean alternate, LN(BLANK()), comment inside BLANK( ) (9 pending items) | `docs/plans/2026-10-26-scalar-gaps-1.md` | DONE (locked, merged, committed 2026-10-26) | Claude |
 | 2 | var-scoping-1: nested VAR blocks, table VAR in COUNTROWS, VAR in a CALCULATE filter, bare CR ends a line comment (7 pending items, answers already saved, no VM) | `docs/plans/2026-10-26-var-scoping-1.md` | DONE (locked, merged, committed 2026-10-26) | Claude |
 | 3 | xnpv-1: the DAX function XNPV (93 pending items, answers saved, no VM) | `docs/plans/2026-10-26-xnpv-1.md` | DONE (locked, merged, committed 2026-10-26) | Claude |
-| 4 | scalar-misc-2: IF.EAGER, ERROR, CUSTOMDATA, ISAFTER, NAMEOF, TABLEOF, EVALUATEANDLOG, ALLCROSSFILTERED (99 pending items) | `docs/plans/2026-10-26-scalar-misc-2.md` | PLANNED (ready: Task 3 is merged; batteries already installed) | Antigravity |
-| 5 | type-tests-1: ISINTEGER, ISINT64, ISDOUBLE, ISDECIMAL, ISCURRENCY via a static type inferrer (362 pending items) | `docs/plans/2026-10-26-type-tests-1.md` | PLANNED (after Task 4 is DONE) | Claude |
+| 4 | scalar-misc-2: IF.EAGER, ERROR, CUSTOMDATA, ISAFTER, NAMEOF, TABLEOF, EVALUATEANDLOG, ALLCROSSFILTERED (99 pending items) | `docs/plans/2026-10-26-scalar-misc-2.md` | DONE (locked, merged, committed 2026-10-27) | Claude |
+| 5 | type-tests-1: ISINTEGER, ISINT64, ISDOUBLE, ISDECIMAL, ISCURRENCY via a static type inferrer (362 pending items) | `docs/plans/2026-10-26-type-tests-1.md` | PLANNED (ready to start, branch from main) | Antigravity |
 | 6 | tocsv-tojson-1: TOCSV and TOJSON (162 + 8 pending items) | `docs/plans/2026-10-26-tocsv-tojson-1.md` | PLANNED (after Task 5; `dax_battery_round2` already re-frozen) | Claude |
 | 7 | linest-1: LINEST and LINESTX (178 pending items) | `docs/plans/2026-10-26-linest-1.md` | PLANNED (after Task 6) | Claude |
 | 8 | table-fns-2: SUBSTITUTEWITHINDEX, ADDMISSINGITEMS, ROLLUP family, scalar subqueries (124 pending items, three parts) | `docs/plans/2026-10-26-table-fns-2.md` | PLANNED (after Task 7) | Claude |
 
 ## Current task
-Task 4 `scalar-misc-2`, plan `docs/plans/2026-10-26-scalar-misc-2.md`. Branch to create: `git checkout -b antigravity/scalar-misc-2` from `main`. Status PLANNED.
+Task 5 `type-tests-1`, plan `docs/plans/2026-10-26-type-tests-1.md`. Branch `antigravity/type-tests-1` (create from `main`). Status PLANNED, ready to start.
 
 ## Open questions (either agent writes here instead of guessing)
 - Claude (resolved 2026-10-26): Power BI Desktop was opened by the user on the guest; function research done (`docs/plans/2026-10-26-function-gap-inventory.md`). `dax_battery_round2` re-frozen with the fixed multi-line reader (6 TOCSV/TOJSON answers completed; the INFO.TABLES item keeps its old answer because it depends on how many tables the open model has).
 - Claude (for the user): `XIRR` needs algorithm research; week functions need calendar model objects; both parked.
 - Antigravity (resolved by Claude 2026-10-26: contract re-synced, editor template for XNPV added): Task 3 implemented. All 107 items in `dax_battery_xnpv.json` match (93 answers + 14 errors rejected). Offline replay passed with 0 DIFF, 0 CRASH, pending dropped 1092 -> 999. In `parity_check.py --tests`, the single failure in pytest is `ContractSyncTests.test_contract_is_up_to_date_with_the_evaluator` in `tests/test_dax_contract_sync.py` because `_FUNCTIONS` count changed from 328 to 329; Claude owns `DAX_COMPATIBILITY_CONTRACT.md` and should sync it via `PYTHONPATH=. python tools/sync_dax_contract.py` during review.
+- Antigravity (Task 4 ready for review): Task 4 implemented. All 142 items in `dax_battery_scalar_misc2.json` match (99 new answers + 43 existing errors rejected). Offline replay passed with 0 DIFF, 0 CRASH, pending dropped 1036 -> 936. All 1927 existing tests pass (excluding contract sync). Claude owns `DAX_COMPATIBILITY_CONTRACT.md` and should sync it via `PYTHONPATH=. python tools/sync_dax_contract.py` during review (functions count 329 -> 337).
 
 ## Entries (newest first, keep each to a few lines)
+
+### 2026-10-27 Claude (Task 4 review done, gate passed)
+Probed 714 shapes beyond the 142 planned against live Power BI (new batteries `dax_battery_scalar_misc2_extra` and `..._extra2`, registered in `DAX_BATTERIES`: 654 match, 60 refused where Power BI answers = new pending items, 0 DIFF). 26 wrong answers fixed in Antigravity's code: IF.EAGER hard errors, CUSTOMDATA text typing, ISAFTER/ISONORAFTER invalid ORDER (compile-time, also in unused branches), TABLEOF refused inside order-sensitive functions, EVALUATEANDLOG label/maxRows rules, culture-based text ordering/equality refused for BMP non-ASCII text. Contract re-synced (337 names), 2 extra tests added.
+Full gate: `pytest: 1930 passed, 6281 subtests passed in 1936.98s (0:32:16)`; `real app: 575 created, 0 refused by the app; 575 equal to Power BI, 0 different`; `replayed 47768 Power BI answers: {'match': 46772, 'gap-reject': 996, 'DIFF': 0, 'CRASH': 0}; locked 45998`; PARITY GATE PASSED. User approved: `--accept` locked 46,752; merged and committed.
+Note for Task 5: `_static_type` (compile-time text/Boolean typing in `measures.py`, lists `_TEXT_FUNCTIONS` and `_BOOLEAN_FUNCTIONS`) already exists and `CUSTOMDATA` is typed as text; the numeric type inferrer can sit beside it. Do not change any existing function's values.
+
+### 2026-10-26 Antigravity (Task 4 scalar-misc-2 built, ready for review)
+Date: 2026-10-26
+Task: Task 4 scalar-misc-2
+Branch: antigravity/scalar-misc-2
+Built:
+- Implemented 8 DAX functions per `docs/plans/2026-10-26-scalar-misc-2.md`:
+  - `IF.EAGER(cond, v_true [, v_false])`: Evaluates both branches eagerly and checks division errors before selecting branch.
+  - `ERROR(text)`: Raises runtime error catchable by IFERROR/ISERROR; marked non-constant.
+  - `CUSTOMDATA()`: Returns BLANK (None), typed as text.
+  - `ISAFTER(v1, v2 [, order, ...])`: Implemented in `dax_order.py`, strict inequality counterpart to `ISONORAFTER` (returns False on full tie), with identical argument pairing and tie-breaking order; added arity check `< 2`.
+  - `NAMEOF(ref)`: Returns `'Table'[Column]` or `'Table'`; compile-time validation rejects unquoted or unsupported forms.
+  - `TABLEOF(col)`: Table function returning 1-column table of active rows; raises error if evaluated as scalar.
+  - `EVALUATEANDLOG(expr [, label, max_rows])`: Transparent pass-through of scalar or table expression; hard errors bypass IFERROR; refused when wrapping a table inside Boolean CALCULATE filters.
+  - `ALLCROSSFILTERED(table)`: Clears all cross-filters on table in CALCULATE; refuses scalar/table usage elsewhere.
+- Added templates for all 8 functions in `DAX_FUNCTION_TEMPLATES` in `analytics_studio/measure_dialog.py`.
+- Added new test suite `tests/test_iteration92_scalar_misc_2.py` asserting all 142 expressions in `tools/parity/dax_battery_scalar_misc2.json` match Power BI.
+Files changed:
+- `analytics_studio/dax_order.py`
+- `analytics_studio/measure_dialog.py`
+- `analytics_studio/measures.py`
+- `tests/test_iteration92_scalar_misc_2.py` (new test file)
+Ran (command and result):
+- `python3 -m unittest tests/test_iteration92_scalar_misc_2.py`: Ran 2 tests in 0.024s, OK (142/142 items match).
+- `python3 -m unittest tests/test_report_and_measure_workflow.py`: Ran 42 tests in 0.126s, OK.
+- `PYTHONPATH=. python3 -m pytest tests/test_iteration88_text_and_comments.py tests/test_iteration89_scalar_gaps_1.py tests/test_iteration90_var_scoping_1.py tests/test_iteration91_xnpv_1.py tests/test_iteration92_scalar_misc_2.py -q`: 18 passed in 0.74s.
+- `PYTHONPATH=. python3 tools/parity_check.py` (offline replay):
+  `replayed 47054 Power BI answers: {'match': 46118, 'gap-reject': 936, 'DIFF': 0, 'CRASH': 0}; locked 45998`
+  (Pending dropped from 1036 to 936, matches increased by +99 to 46,118, 0 DIFF, 0 CRASH).
+- `QT_QPA_PLATFORM=offscreen PYTHONPATH=. python3 tools/app_smoke.py tools/parity/_smoke`: MEASURES THROUGH THE APP: 575 created, 0 refused by the app; 575 equal to Power BI, 0 different; reopen: True.
+- `QT_QPA_PLATFORM=offscreen PYTHONPATH=. python3 -m pytest -k "not test_contract_is_up_to_date_with_the_evaluator" -q`: 1927 passed, 1 deselected, 6281 subtests passed in 2015.02s (0:33:35).
+- Note: `ContractSyncTests.test_contract_is_up_to_date_with_the_evaluator` in `tests/test_dax_contract_sync.py` expects `DAX_COMPATIBILITY_CONTRACT.md` sync (`_FUNCTIONS` increased 329 -> 337). Per `AGENTS.md`, Claude owns `DAX_COMPATIBILITY_CONTRACT.md` and should sync it via `PYTHONPATH=. python tools/sync_dax_contract.py` during review.
 
 ### 2026-10-26 Claude (Task 3 review done, gate passed)
 Probed 258 shapes beyond the 107 planned against live Power BI (new battery `dax_battery_xnpv2`, registered in `DAX_BATTERIES`: 221 match, 37 refused where Power BI answers = new pending items, 0 DIFF). Fixes in Antigravity's code: Currency values refused (Power BI returns a 4-decimal Currency); dates after 9999-12-31 refused (Power BI erratic); a NaN date crashed, now refused; text/Boolean/date-typed Values expression refused even when all rows are BLANK; compile-time XNPV errors now also fire in an unused IF/SWITCH argument, and `IFERROR` / `COALESCE` now check their unused arguments too. Missing pieces added: XNPV template in `analytics_studio/measure_dialog.py` (the first gate run failed 2 tests without it), `DAX_COMPATIBILITY_CONTRACT.md` re-synced, 2 extra tests.

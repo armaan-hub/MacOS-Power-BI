@@ -10,21 +10,29 @@ from decimal import Decimal
 
 from analytics_studio import dax_typed
 
-ARITY: dict[str, tuple[int, int]] = {"ISONORAFTER": (2, 1_000)}
-CATEGORY = {"ISONORAFTER": "boolean"}
+ARITY: dict[str, tuple[int, int]] = {
+    "ISONORAFTER": (2, 1_000),
+    "ISAFTER": (2, 1_000),
+}
+CATEGORY = {
+    "ISONORAFTER": "boolean",
+    "ISAFTER": "boolean",
+}
 ORDER_KEYWORDS = {"ASC": True, "DESC": False}
-_ORDER_ERROR = (
-    "Unexpected value for ORDER argument in ISONORAFTER function. "
-    "Use 0/FALSE/DESC for descending order or 1/TRUE/ASC for ascending order."
-)
 
 
-def _ascending(value: object) -> bool:
+def _ascending(value: object, function: str = "ISONORAFTER") -> bool:
     if isinstance(value, bool):
         return value
     if isinstance(value, Decimal) and value in (0, 1):
         return value == 1
-    raise dax_typed._error(_ORDER_ERROR)
+    from .measures import _HardError  # imported late: measures imports this module
+
+    # live Power BI (iteration 92): a bad ORDER value is thrown, IFERROR cannot catch it
+    raise _HardError(
+        f"Unexpected value for ORDER argument in {function} function. "
+        "Use 0/FALSE/DESC for descending order or 1/TRUE/ASC for ascending order."
+    )
 
 
 def _compare(left: object, right: object) -> int:
@@ -46,10 +54,10 @@ def _compare(left: object, right: object) -> int:
 def call(function: str, args: list[object]) -> object:
     if len(args) % 3 == 1:  # a comparison value with nothing to compare against
         raise dax_typed._error("IsOnOrAfter() function contains a scalar expression to compare without a value to compare against.")
-    orders = [_ascending(args[index]) for index in range(2, len(args), 3)]  # every ORDER is checked before any comparison
+    orders = [_ascending(args[index], function) for index in range(2, len(args), 3)]  # every ORDER is checked before any comparison
     for position, index in enumerate(range(0, len(args), 3)):
         ascending = orders[position] if position < len(orders) else True
         order = _compare(args[index], args[index + 1]) * (1 if ascending else -1)
         if order:
             return order > 0
-    return True
+    return function == "ISONORAFTER"

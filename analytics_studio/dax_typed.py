@@ -9,6 +9,7 @@ from __future__ import annotations
 
 from decimal import Context, Decimal, InvalidOperation, ROUND_HALF_EVEN, ROUND_HALF_UP
 import re
+import unicodedata
 
 # Decimal arithmetic that yields NaN/Infinity instead of raising, like IEEE doubles.
 QUIET = Context(prec=28, rounding=ROUND_HALF_EVEN, traps=[])
@@ -179,6 +180,18 @@ def text_key(text: str) -> str:
     return "".join(c if ord(c) > 0xFFFF else c.casefold() for c in text)
 
 
+_CULTURE_CHARS = re.compile("[\u0080-\ud7ff\ue000-\uffff]")
+
+
+def _has_culture_chars(text: str) -> bool:
+    """A non-ASCII character of the basic plane (surrogate halves and emoji are ordered by code unit and stay modelled)."""
+    return not text.isascii() and _CULTURE_CHARS.search(text) is not None
+
+
+def _strong_key(text: str) -> str:
+    return unicodedata.normalize("NFKC", text).casefold().replace("æ", "ae").replace("œ", "oe")
+
+
 def compare(operator: str, left: object, right: object) -> bool:
     """DAX comparison: blank takes the other side's type, text ignores case, mixed types are an error."""
     if left is None and right is None:
@@ -198,7 +211,18 @@ def compare(operator: str, left: object, right: object) -> bool:
             from .measures import MeasureError  # imported late: measures imports this module
 
             raise MeasureError("Comparing text with full-width or half-width forms is not supported in the local engine.")
+        if operator in {"<", "<=", ">", ">="} and (_has_culture_chars(left) or _has_culture_chars(right)):  # type: ignore[arg-type]
+            # live Power BI (iteration 92): text is ordered by the culture, not by code point ("ä" < "z", "ñ" < "o", "ab" < "aä"); that order is not modelled
+            from .measures import MeasureError  # imported late: measures imports this module
+
+            raise MeasureError("Ordering text with non-ASCII characters is not supported in the local engine.")
         a, b = text_key(left), text_key(right)  # type: ignore[arg-type]
+        if operator in {"=", "<>"} and (_has_culture_chars(left) or _has_culture_chars(right)):  # type: ignore[arg-type]
+            # live Power BI (iteration 92): canonically equivalent and expanded forms are equal ("a" + U+0308 = "ä", "æ" = "ae", "ǆ" = "dž"); refuse when that would change the answer
+            from .measures import MeasureError  # imported late: measures imports this module
+
+            if (a == b) != (_strong_key(left) == _strong_key(right)):  # type: ignore[arg-type]
+                raise MeasureError("Comparing text that differs only in composed, decomposed or expanded characters is not supported in the local engine.")
     elif isinstance(left, bool):
         a, b = int(left), int(right)  # type: ignore[arg-type]
     else:
