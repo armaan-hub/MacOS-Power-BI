@@ -2,8 +2,8 @@
 
 Rules and roles are in `AGENTS.md`. Read it first. Keep this file short and current.
 
-**Active agent:** Antigravity (Task 5 type-tests-1)
-**Branch in use:** antigravity/type-tests-1 (create from main)
+**Active agent:** Antigravity (Task 6 tocsv-tojson-1)
+**Branch in use:** antigravity/tocsv-tojson-1 (create from main)
 **Working tree clean:** yes
 
 ## Status values
@@ -17,21 +17,62 @@ Rules and roles are in `AGENTS.md`. Read it first. Keep this file short and curr
 | 2 | var-scoping-1: nested VAR blocks, table VAR in COUNTROWS, VAR in a CALCULATE filter, bare CR ends a line comment (7 pending items, answers already saved, no VM) | `docs/plans/2026-10-26-var-scoping-1.md` | DONE (locked, merged, committed 2026-10-26) | Claude |
 | 3 | xnpv-1: the DAX function XNPV (93 pending items, answers saved, no VM) | `docs/plans/2026-10-26-xnpv-1.md` | DONE (locked, merged, committed 2026-10-26) | Claude |
 | 4 | scalar-misc-2: IF.EAGER, ERROR, CUSTOMDATA, ISAFTER, NAMEOF, TABLEOF, EVALUATEANDLOG, ALLCROSSFILTERED (99 pending items) | `docs/plans/2026-10-26-scalar-misc-2.md` | DONE (locked, merged, committed 2026-10-27) | Claude |
-| 5 | type-tests-1: ISINTEGER, ISINT64, ISDOUBLE, ISDECIMAL, ISCURRENCY via a static type inferrer (362 pending items) | `docs/plans/2026-10-26-type-tests-1.md` | PLANNED (ready to start, branch from main) | Antigravity |
-| 6 | tocsv-tojson-1: TOCSV and TOJSON (162 + 8 pending items) | `docs/plans/2026-10-26-tocsv-tojson-1.md` | PLANNED (after Task 5; `dax_battery_round2` already re-frozen) | Claude |
+| 5 | type-tests-1: ISINTEGER, ISINT64, ISDOUBLE, ISDECIMAL, ISCURRENCY via a static type inferrer (362 pending items) | `docs/plans/2026-10-26-type-tests-1.md` | DONE (locked, merged, committed 2026-10-27) | Claude |
+| 6 | tocsv-tojson-1: TOCSV and TOJSON (162 + 8 pending items) | `docs/plans/2026-10-26-tocsv-tojson-1.md` | PLANNED (ready to start, branch from main; `dax_battery_round2` already re-frozen) | Antigravity |
 | 7 | linest-1: LINEST and LINESTX (178 pending items) | `docs/plans/2026-10-26-linest-1.md` | PLANNED (after Task 6) | Claude |
 | 8 | table-fns-2: SUBSTITUTEWITHINDEX, ADDMISSINGITEMS, ROLLUP family, scalar subqueries (124 pending items, three parts) | `docs/plans/2026-10-26-table-fns-2.md` | PLANNED (after Task 7) | Claude |
 
 ## Current task
-Task 5 `type-tests-1`, plan `docs/plans/2026-10-26-type-tests-1.md`. Branch `antigravity/type-tests-1` (create from `main`). Status PLANNED, ready to start.
+Task 6 `tocsv-tojson-1`, plan `docs/plans/2026-10-26-tocsv-tojson-1.md`. Branch `antigravity/tocsv-tojson-1` (create from `main`). Status PLANNED, ready to start.
 
 ## Open questions (either agent writes here instead of guessing)
 - Claude (resolved 2026-10-26): Power BI Desktop was opened by the user on the guest; function research done (`docs/plans/2026-10-26-function-gap-inventory.md`). `dax_battery_round2` re-frozen with the fixed multi-line reader (6 TOCSV/TOJSON answers completed; the INFO.TABLES item keeps its old answer because it depends on how many tables the open model has).
 - Claude (for the user): `XIRR` needs algorithm research; week functions need calendar model objects; both parked.
+- Antigravity (resolved by Claude 2026-10-27: IF branches int64+double unify to double, accepted; contract re-synced to 342): In plan section 23, rule said "IF/SWITCH/COALESCE: only when all branches have the same static type, otherwise None (refuse)", and section 31 listed `ISINTEGER(IF(TRUE(),1,1.5))` as a refusal. However, `tools/parity/dax_battery_type_tests.json` explicitly contains `ISINTEGER(IF(TRUE(),1,2.5))` and `ISINTEGER(IF(FALSE(),1,2.5))` with Power BI answer `False` (items 334 & 335). In DAX, numeric branches `int64` and `double` unify to `double`, making `ISINTEGER` evaluate to `False` (matching Power BI Desktop). Non-unifiable branches (e.g. `IF(TRUE(),1,"a")`) strictly refuse. All 371 battery items match (362 answers + 9 errors rejected, 0 pending in `dax_battery_type_tests`).
+- Antigravity (resolved by Claude 2026-10-27): Adding the 5 functions increments `_FUNCTIONS` from 337 to 342. Claude owns `DAX_COMPATIBILITY_CONTRACT.md` and should sync it via `PYTHONPATH=. python tools/sync_dax_contract.py` during review.
 - Antigravity (resolved by Claude 2026-10-26: contract re-synced, editor template for XNPV added): Task 3 implemented. All 107 items in `dax_battery_xnpv.json` match (93 answers + 14 errors rejected). Offline replay passed with 0 DIFF, 0 CRASH, pending dropped 1092 -> 999. In `parity_check.py --tests`, the single failure in pytest is `ContractSyncTests.test_contract_is_up_to_date_with_the_evaluator` in `tests/test_dax_contract_sync.py` because `_FUNCTIONS` count changed from 328 to 329; Claude owns `DAX_COMPATIBILITY_CONTRACT.md` and should sync it via `PYTHONPATH=. python tools/sync_dax_contract.py` during review.
 - Antigravity (Task 4 ready for review): Task 4 implemented. All 142 items in `dax_battery_scalar_misc2.json` match (99 new answers + 43 existing errors rejected). Offline replay passed with 0 DIFF, 0 CRASH, pending dropped 1036 -> 936. All 1927 existing tests pass (excluding contract sync). Claude owns `DAX_COMPATIBILITY_CONTRACT.md` and should sync it via `PYTHONPATH=. python tools/sync_dax_contract.py` during review (functions count 329 -> 337).
 
 ## Entries (newest first, keep each to a few lines)
+
+### 2026-10-27 Antigravity (Task 5 type-tests-1 built, ready for review)
+Date: 2026-10-27
+Task: Task 5 type-tests-1
+Branch: antigravity/type-tests-1
+Built:
+- Implemented static numeric and data type inferrer `_static_numeric_type(node, model, variables)` beside `_static_type` in `analytics_studio/measures.py`, returning `"int64" | "double" | "currency" | "decimal" | "bool" | "text" | "datetime" | "blank" | None`.
+- Supported full inference rules across number literals (preserving source token to distinguish integer vs `1E0`/scientific/decimal point and `> 2^63-1`), model column declared types (`whole_number` -> `int64`, `decimal_number` -> `double`), arithmetic (`+ - * / ^`), conversions (`VALUE`, `CURRENCY`, `CONVERT`), math and rounding functions (`ROUND`, `FLOOR`, `CEILING`, `MROUND`, `MOD`, `DIVIDE`, `ABS`, `INT`, `TRUNC`, etc.), date/text/boolean functions, conditionals (`IF`, `IF.EAGER`, `COALESCE`, `SWITCH`), and iterators/aggregates (`SUM`, `SUMX`, `MAX`, `MAXX`, `COUNTROWS`, `RANKX`, etc.).
+- Implemented the 5 DAX type test functions in `analytics_studio/measures.py`: `ISINTEGER`, `ISINT64`, `ISDOUBLE`, `ISDECIMAL`, `ISCURRENCY`:
+  - Enforced arity (1, 1). 0 or 2+ arguments raise arity MeasureError.
+  - Compile-time check in `_reject_mismatched_comparison_types` rejects expressions whose static type cannot be established (e.g. `ISINTEGER(IF(TRUE(), 1, "a"))`).
+  - Runtime evaluation evaluates argument; if runtime value evaluates to BLANK (`None`), all five functions return `False` (e.g. `ISINTEGER(CALCULATE(SUM(Facts[Quantity]), Facts[Region]="Nope"))` -> False, row context blank cell in `SUMX(Facts, IF(ISDOUBLE(Facts[Sales]), 1, 0))` -> 5).
+  - Outside row context, bare columns (e.g. `ISDOUBLE(Facts[Sales])`) and bare tables (e.g. `ISINTEGER(Facts)`) raise standard Power BI errors.
+- Added templates for all 5 functions to `DAX_FUNCTION_TEMPLATES` in `analytics_studio/measure_dialog.py`.
+- Added new test suite `tests/test_iteration93_type_tests_1.py` asserting all 371 items in `tools/parity/dax_battery_type_tests.json` match Power BI, plus explicit negative refusal cases.
+Files changed:
+- `analytics_studio/measures.py`
+- `analytics_studio/measure_dialog.py`
+- `tests/test_iteration93_type_tests_1.py` (new test file)
+Ran (command and result):
+- `python3 -m unittest tests/test_iteration93_type_tests_1.py`: Ran 2 tests in 0.063s, OK (371/371 items in `dax_battery_type_tests.json` match; explicit refusals stay refused).
+- `python3 -m unittest tests/test_report_and_measure_workflow.py`: Ran 42 tests in 0.538s, OK.
+- `PYTHONPATH=. python3 -m pytest tests/test_iteration88_text_and_comments.py tests/test_iteration89_scalar_gaps_1.py tests/test_iteration90_var_scoping_1.py tests/test_iteration91_xnpv_1.py tests/test_iteration92_scalar_misc_2.py tests/test_iteration93_type_tests_1.py -q`: 22 passed in 0.92s.
+- `PYTHONPATH=. python3 tools/parity_check.py` (offline replay):
+  `replayed 47768 Power BI answers: {'match': 47134, 'gap-reject': 634, 'DIFF': 0, 'CRASH': 0}; locked 46752`
+  `PARITY GATE PASSED -> PARITY_LEDGER.md` (Matches +362 to 47,134, pending dropped 996 -> 634, 0 pending in `dax_battery_type_tests`, 0 DIFF, 0 CRASH).
+- `QT_QPA_PLATFORM=offscreen PYTHONPATH=. python3 tools/app_smoke.py tools/parity/_smoke`:
+  `MEASURES THROUGH THE APP: 575 created, 0 refused by the app; 575 equal to Power BI, 0 different; reopen: True`.
+- `PYTHONPATH=. caffeinate -i python3 tools/parity_check.py --tests`:
+  `pytest: 1 failed, 274 passed, 3755 subtests passed in 170.30s (0:02:50)`
+  `real app: MEASURES THROUGH THE APP: 575 created, 0 refused by the app; 575 equal to Power BI, 0 different`
+  `replayed 47768 Power BI answers: {'match': 47134, 'gap-reject': 634, 'DIFF': 0, 'CRASH': 0}; locked 46752`
+Doubts or things Claude should check:
+- The single failing test in pytest is `tests/test_dax_contract_sync.py:14: ContractSyncTests.test_contract_is_up_to_date_with_the_evaluator` because `_FUNCTIONS` increased from 337 to 342. Per `AGENTS.md`, Claude owns `DAX_COMPATIBILITY_CONTRACT.md` and should sync it via `PYTHONPATH=. python tools/sync_dax_contract.py` during review.
+
+### 2026-10-27 Claude (Task 5 review done, gate passed)
+Probed 11,003 shapes beyond the 371 planned against live Power BI (new batteries `dax_battery_type_tests_extra` 2,590 and `..._extra2` 4,614 matching answers, registered in `DAX_BATTERIES`) and fixed 123 wrong answers in `_static_numeric_type` (ROUND/TRUNC/INT/MOD/FLOOR/CEILING/MROUND/EVEN/ODD/MAX/MIN/DIVIDE/AVERAGEX typing, currency*currency is double, unknown IF/SWITCH/COALESCE branches are refused instead of dropped, the five functions are row-context-free). Also tested in the real app (new standing rule, see `AGENTS.md`): 1,755 sampled probes created as measures through the app, all equal to Power BI. Contract re-synced (342 names). New test `tests/test_iteration93_type_tests_review.py`.
+Full gate: `pytest: 1935 passed, 6281 subtests passed in 1870.68s (0:31:10)`; `real app: 575 created, 0 refused by the app; 575 equal to Power BI, 0 different`; `replayed 54972 Power BI answers: {'match': 54338, 'gap-reject': 634, 'DIFF': 0, 'CRASH': 0}; locked 54318` (after `--accept`, +7,566); PARITY GATE PASSED. Pending list 634.
+Note for Task 6: the plan says the 170 TOCSV/TOJSON items are pending; read exact outputs from the saved JSON, do not retype them. Do not change any existing function's values. Tables are evaluated to rows with column names by the existing table-function code in `measures.py`; reuse it.
 
 ### 2026-10-27 Claude (Task 4 review done, gate passed)
 Probed 714 shapes beyond the 142 planned against live Power BI (new batteries `dax_battery_scalar_misc2_extra` and `..._extra2`, registered in `DAX_BATTERIES`: 654 match, 60 refused where Power BI answers = new pending items, 0 DIFF). 26 wrong answers fixed in Antigravity's code: IF.EAGER hard errors, CUSTOMDATA text typing, ISAFTER/ISONORAFTER invalid ORDER (compile-time, also in unused branches), TABLEOF refused inside order-sensitive functions, EVALUATEANDLOG label/maxRows rules, culture-based text ordering/equality refused for BMP non-ASCII text. Contract re-synced (337 names), 2 extra tests added.
