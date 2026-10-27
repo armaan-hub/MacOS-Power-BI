@@ -33,12 +33,13 @@ The module parses into a tiny AST and never evaluates user text as Python.
 from __future__ import annotations
 
 from calendar import monthrange
+import json
 import math
 import getpass
 from collections import Counter
 from dataclasses import dataclass
 from decimal import (
-    Decimal, DecimalException, ROUND_CEILING, ROUND_DOWN, ROUND_FLOOR, ROUND_HALF_UP,
+    Decimal, DecimalException, ROUND_CEILING, ROUND_DOWN, ROUND_FLOOR, ROUND_HALF_EVEN, ROUND_HALF_UP,
     localcontext,
 )
 from datetime import date, datetime, time, timedelta
@@ -281,6 +282,7 @@ _ROW_ORDER_FUNCTIONS = frozenset({
 })
 _FUNCTIONS |= set(_COLUMN_SCALAR_ARITY) | {
     "CONCATENATEX", "XNPV", "IF.EAGER", "ERROR", "CUSTOMDATA", "NAMEOF", "EVALUATEANDLOG", "ALLCROSSFILTERED",
+    "TOCSV", "TOJSON",
 }
 # Lookup, membership, filter-context and table-constructor functions (min, max arguments; None is unbounded).
 _LOOKUP_ARITY = {
@@ -316,7 +318,7 @@ _FUNCTIONS |= dax_time_sets.SET_FUNCTIONS | dax_time_sets.BALANCES  # date sets 
 _FUNCTIONS.add("RELATEDTABLE")
 _TABLE_FIRST_PARENTS = _ALL_ITERATORS | dax_time_sets.SET_FUNCTIONS | {"FIRSTNONBLANK", "LASTNONBLANK", "FIRSTNONBLANKVALUE", "LASTNONBLANKVALUE"} | {
     "COUNTROWS", "CONCATENATEX", "XNPV", "ISEMPTY", "CONTAINS", "CONTAINSROW", "ADDCOLUMNS", "SELECTCOLUMNS", "SUMMARIZE",
-    "FILTER", "RANKX", "CALCULATETABLE", "DISTINCT", "VALUES", "FILTERS",
+    "FILTER", "RANKX", "CALCULATETABLE", "DISTINCT", "VALUES", "FILTERS", "TOCSV", "TOJSON",
 }
 _TABLE_ANY_PARENTS = {
     "UNION", "EXCEPT", "INTERSECT", "CROSSJOIN", "SUMMARIZECOLUMNS", "GROUPBY", "TREATAS", "NATURALINNERJOIN",
@@ -344,7 +346,7 @@ _TABLE_BUILDING_CALLS = frozenset({
 _BOOLEAN_INFO_CALLS = frozenset({"CONTAINS", "CONTAINSROW", "ISEMPTY", "ISFILTERED", "ISINSCOPE", "HASONEFILTER", "ISCROSSFILTERED"})
 _TYPED_RESULT_CATEGORY = {
     **dict.fromkeys(
-        ["CONCATENATE", "UPPER", "LOWER", "TRIM", "LEFT", "RIGHT", "MID", "SUBSTITUTE", "REPLACE", "REPT", "FIXED", "FORMAT", "UNICHAR"],
+        ["CONCATENATE", "UPPER", "LOWER", "TRIM", "LEFT", "RIGHT", "MID", "SUBSTITUTE", "REPLACE", "REPT", "FIXED", "FORMAT", "UNICHAR", "TOCSV", "TOJSON"],
         "text",
     ),
     **dict.fromkeys(["EXACT", "ISERROR", "ISNUMBER", "ISTEXT", "ISNONTEXT", "ISLOGICAL", "ISEVEN", "ISODD", "ISINTEGER", "ISINT64", "ISDOUBLE", "ISDECIMAL", "ISCURRENCY"], "boolean"),
@@ -1725,7 +1727,7 @@ _BOOLEAN_FILTER_REFUSED_CALLS = frozenset({
     "CALCULATE", "FILTER", "TOPN", "SELECTCOLUMNS", "LOOKUPVALUE", "ADDCOLUMNS", "SUMMARIZE", "SUMMARIZECOLUMNS",
     "GROUPBY", "EXCEPT", "INTERSECT", "ROW", "SAMPLE", "TOPNSKIP", "RANKX", "FIRSTNONBLANK", "LASTNONBLANK",
     "OFFSET", "WINDOW", "INDEX", "RANK", "ROWNUMBER", "CONTAINS",  # CONTAINS: live probes, iteration 87 (also inside IF and arithmetic)
-    "TABLEOF", "ALLCROSSFILTERED",
+    "TABLEOF", "ALLCROSSFILTERED", "TOCSV", "TOJSON",
 })
 _BOOLEAN_FILTER_X_ITERATORS = frozenset({"SUMX", "AVERAGEX", "MAXX", "MINX", "COUNTX", "COUNTAX", "CONCATENATEX", "XNPV", *dax_math.STAT_ITERATORS})
 
@@ -2139,6 +2141,288 @@ def _checked_double(result: Decimal) -> Decimal:
     return result
 
 
+def _format_tojson_double(val: Decimal) -> str:
+    """A double cell of TOJSON (live Power BI, iteration 94): the shortest digits that read back as the double, cut (not
+    rounded) after 4 decimals with at least one kept ("0.3", "1.0", "-0.0"); from 1e21 on an exponent form ("1.5e300")."""
+    double = float(val)
+    if abs(double) >= 1e15 and double != int(double):
+        raise MeasureError("A fractional double of 1E15 or more is not modelled in the local engine.")
+    if abs(double) >= 1e21:
+        shortest = repr(double)
+        # live Power BI (728 probes): when the shortest decimal lies (almost) exactly halfway between two doubles (1E23, 7E22, 5.55E21)
+        # it prints the neighbouring double's digits (9.999999999999999e22); those values are refused
+        tie_distance = abs(abs(Decimal(shortest) - Decimal(double)) / Decimal(math.ulp(double)) - Decimal("0.5"))
+        if tie_distance < Decimal("0.003"):
+            raise MeasureError("A double next to a rounding tie prints other digits in Power BI; that is not modelled in the local engine.")
+        mantissa, _, exponent = shortest.partition("e")
+        return f"{mantissa}e{int(exponent)}"  # 1.5e300, 1e21: no plus sign, no padding
+    text = format(Decimal(repr(double)), "f")
+    if text.startswith("-") and not double:
+        text = "-0"
+    whole, _, fraction = text.partition(".")
+    return f"{whole}.{fraction[:4].rstrip('0') or '0'}"
+
+
+# Column types the declared type of a loaded column or the static type of a computed one say something sure about.
+_NUMERIC_KIND_BY_COLUMN_TYPE = {
+    "whole_number": "int64", "int64": "int64", "integer": "int64",
+    "decimal_number": "double", "double": "double",
+    "currency": "currency", "fixed_decimal": "currency",
+}
+_CURRENCY_MAX = Decimal("922337203685477.5807")  # a Currency is an Int64 of ten-thousandths
+_TOCSV_CONSTANT_TABLES = frozenset({"ROW", "DATATABLE", "GENERATESERIES", "CALENDAR", "CALENDARAUTO"})
+_TOCSV_DICTIONARY_TABLES = frozenset({"ALL", "ALLNOBLANKROW", "ALLSELECTED", "ALLEXCEPT"})  # FILTERS (Power BI sorts it) is refused; TREATAS is checked in _tocsv_row_order
+_TOCSV_JOIN_TABLES = frozenset({"EXCEPT", "INTERSECT", "CROSSJOIN", "NATURALINNERJOIN", "NATURALLEFTOUTERJOIN", "GENERATE", "GENERATEALL"})
+_TOCSV_SIGNED_ZERO_CALLS = frozenset({"CEILING", "FLOOR", "ISO.CEILING", "TRUNC", "ROUNDUP", "ROUNDDOWN", "DIVIDE", "POWER", "MOD"})
+
+
+def _tocsv_row_order(node: tuple[Any, ...]) -> str:
+    """How Power BI orders the rows TOCSV / TOJSON print for a table expression (live probes, iteration 94).
+
+    "constant", "dictionary", "grouped": the order the local engine produces already (cells built from constants, the
+    distinct values of a column, the groups of SUMMARIZE). "scan": the rows of a loaded table in storage order, but
+    REVERSED once a filter has removed rows. "scan_forward": ADDCOLUMNS over a whole loaded table (never reversed).
+    "projection": SELECTCOLUMNS of plain columns, "topn": TOPN of a loaded table; both are checked further when the rows are
+    known. Every other table expression raises: its order is not modelled."""
+    kind = node[0]
+    if kind == "table":
+        return "scan"
+    if kind == "tableconstructor":
+        if _tocsv_is_constant(node):  # a member that reads data (SUM(...)) makes Power BI sort the rows
+            return "constant"
+    elif kind == "table_call" and node[1] in {"VALUES", "DISTINCT"}:
+        source = node[2]
+        if source[0] == "table":
+            return "scan" if node[1] == "VALUES" else "dictionary"
+        if source[0] == "reference":
+            return "dictionary"
+    elif kind == "call":
+        function, arguments = node[1], node[2]
+        if function == "EVALUATEANDLOG" and arguments:
+            return _tocsv_row_order(arguments[0])
+        if function == "GENERATESERIES":
+            def adds_exactly(operand: tuple[Any, ...]) -> bool:  # a whole number or a literal a double holds exactly (0.5, 1.5, 0.25)
+                return _static_numeric_type(operand) == "int64" or (operand[0] == "number" and Decimal(float(operand[1])) == operand[1])
+
+            first_type = _static_numeric_type(arguments[0]) if arguments else None
+            if first_type == "datetime" or (arguments and adds_exactly(arguments[0]) and (len(arguments) < 3 or adds_exactly(arguments[2]))):
+                return "constant"  # live Power BI adds a fractional step in a double (0.1, 0.2, then 0.30000000000000004 passes 0.3)
+        elif function in _TOCSV_CONSTANT_TABLES:
+            return "constant"
+        elif function == "TREATAS" and len(arguments) >= 2 and arguments[0][0] == "tableconstructor" and _tocsv_is_constant(arguments[0]):
+            members = [repr(member) for member in arguments[0][1]] if isinstance(arguments[0][1], (list, tuple)) else None
+            if members is not None and len(members) == len(set(members)):
+                return "dictionary"  # live Power BI keeps a repeated member as a repeated row; the local engine would merge them
+        elif function in _TOCSV_DICTIONARY_TABLES:
+            return "dictionary"
+        if function in {"FILTER", "CALCULATETABLE"} and arguments:
+            if arguments[0][0] == "call" and arguments[0][1] in {"ALL", "ALLNOBLANKROW"} and len(arguments[0][2]) == 1 and arguments[0][2][0][0] == "table":
+                return "scan"  # live Power BI: FILTER(ALL(table), condition) comes back in reverse storage order like FILTER(table, condition)
+            base = _tocsv_row_order(arguments[0])
+            if base in {"scan", "constant", "dictionary", "grouped"}:
+                return base
+        elif function == "SUMMARIZE" and not _contains_function_call(node, "CALCULATE") and (
+            arguments[0][0] == "table" or not any(argument[0] == "string" for argument in arguments[1:])
+        ):
+            return "grouped"  # over a FILTER the local engine computes the added columns on the unfiltered rows, so only a bare table is trusted with them  # CALCULATE in a computed column intersects the group's filter in Power BI, not replaces it as the local engine does
+        elif function == "ADDCOLUMNS" and arguments:
+            base = _tocsv_row_order(arguments[0])
+            if base == "scan" and arguments[0][0] == "table":
+                return "scan_forward"
+            if base in {"constant", "dictionary", "grouped", "scan_forward"}:
+                return base
+        elif function == "SELECTCOLUMNS" and len(arguments) >= 3 and len(arguments) % 2 == 1 and arguments[0][0] == "table":
+            references = [(argument[1] or "").casefold() + "\0" + str(argument[2]).casefold() for argument in arguments[2::2] if argument[0] == "reference"]
+            if all(argument[0] == "string" for argument in arguments[1::2]) and len(references) == len(arguments[2::2]) == len(set(references)):
+                return "projection"  # distinct plain columns: selecting one twice makes Power BI group the rows  # columns named in pairs; a constant beside them makes Power BI sort the rows
+        elif function == "TOPN" and len(arguments) == 3 and arguments[0][0] == "number" and arguments[2][0] == "reference":
+            if arguments[1][0] == "table" or (arguments[1][0] == "table_call" and arguments[1][1] == "VALUES" and arguments[1][2][0] == "reference"):
+                return "topn"
+        elif function == "UNION" and arguments and all(_tocsv_row_order(argument) == "constant" for argument in arguments) and not _tocsv_contains_blank(node):
+            return "constant"  # a BLANK() cell makes Power BI read a date or TRUE() beside it as a number
+        elif function in _TOCSV_JOIN_TABLES and arguments and all(_tocsv_row_order(argument) in {"constant", "dictionary", "grouped"} for argument in arguments):
+            return "grouped"
+    raise MeasureError("The row order of this table expression is not modelled in the local engine, so TOCSV / TOJSON refuse it.")
+
+
+def _tocsv_scan_table_node(node: tuple[Any, ...]) -> tuple[tuple[Any, ...], bool]:
+    """(the loaded table a "scan" expression reads, whether it was reached through ALL): a bare table, VALUES of it, or FILTER /
+    CALCULATETABLE over either, or over ALL(table), which ignores the filters around it."""
+    via_all = False
+    while node[0] == "call" and node[1] in {"FILTER", "CALCULATETABLE", "EVALUATEANDLOG"} and node[2]:
+        node = node[2][0]
+    if node[0] == "call" and node[1] in {"ALL", "ALLNOBLANKROW"}:
+        node, via_all = node[2][0], True
+    if node[0] == "table_call" and node[1] == "VALUES":
+        node = node[2]
+    return node, via_all
+
+
+def _tocsv_mentions_column(node: Any) -> bool:
+    if not isinstance(node, tuple):
+        return False
+    if node and node[0] == "reference":
+        return True
+    return any(
+        _tocsv_mentions_column(child) if isinstance(child, tuple) and child and isinstance(child[0], str)
+        else any(_tocsv_mentions_column(item) for item in child) if isinstance(child, (tuple, list)) else False
+        for child in node[1:]
+    )
+
+
+def _tocsv_contains_blank(node: Any) -> bool:
+    if not isinstance(node, tuple):
+        return False
+    if node and node[0] in {"blank", "blank_comment"}:
+        return True
+    return any(
+        _tocsv_contains_blank(child) if isinstance(child, tuple) and child and isinstance(child[0], str)
+        else any(_tocsv_contains_blank(item) for item in child) if isinstance(child, (tuple, list)) else False
+        for child in node[1:]
+    )
+
+
+def _tocsv_scan_filtered(node: tuple[Any, ...]) -> bool:
+    """True when FILTER / CALCULATETABLE around a loaded table apply a real condition (live Power BI, iteration 94: that makes the
+    scan come back reversed even when the condition keeps every row, while FILTER(table, TRUE()) is no filter at all).
+    Conditions this cannot classify raise: their effect on the order is not modelled."""
+    filtered = False
+    while True:
+        if node[0] == "call" and node[1] == "EVALUATEANDLOG" and node[2]:
+            node = node[2][0]
+        elif node[0] == "call" and node[1] == "FILTER" and len(node[2]) == 2:
+            condition = node[2][1]
+            if condition == ("boolean", False) or (condition != ("boolean", True) and _tocsv_mentions_column(condition)):
+                filtered = True
+            elif condition != ("boolean", True):
+                raise MeasureError("The row order of FILTER with a constant condition is not modelled in the local engine.")
+            node = node[2][0]
+        elif node[0] == "call" and node[1] == "CALCULATETABLE" and node[2]:
+            for modifier in node[2][1:]:
+                if modifier[0] in {"comparison", "logical", "in", "not"} or (modifier[0] == "call" and modifier[1] == "NOT"):
+                    filtered = True
+                else:
+                    raise MeasureError("The row order of CALCULATETABLE with this filter argument is not modelled in the local engine.")
+            node = node[2][0]
+        else:
+            return filtered
+
+
+def _literal_double(node: Any) -> float | None:
+    """The double Power BI computes for constant arithmetic on literals (0.1+0.7 is 0.7999999999999999); None for anything else."""
+    if not isinstance(node, tuple) or not node:
+        return None
+    if node[0] == "number":
+        return float(node[1])
+    if node[0] == "unary" and node[1] in {"+", "-"}:
+        operand = _literal_double(node[2])
+        return None if operand is None else -operand if node[1] == "-" else operand
+    if node[0] == "binary" and node[1] in {"+", "-", "*", "/"}:
+        left, right = _literal_double(node[2]), _literal_double(node[3])
+        if left is None or right is None or (node[1] == "/" and right == 0):
+            return None
+        result = left + right if node[1] == "+" else left - right if node[1] == "-" else left * right if node[1] == "*" else left / right
+        return result if math.isfinite(result) else None
+    return None
+
+
+def _tocsv_has_signed_zero_risk(node: Any, allowed: tuple[Any, ...] = ()) -> bool:
+    """True when an arithmetic step in the expression could hand Power BI a negative zero (it prints -0 for a double)
+    that the local decimals carry as 0. `allowed` lists the literal "-0.0" nodes the caller handles itself."""
+    if not isinstance(node, tuple):
+        return False
+    if any(node is item for item in allowed):
+        return False
+    if node and node[0] in {"binary", "unary"}:
+        return True
+    if node and node[0] == "call" and node[1] in _TOCSV_SIGNED_ZERO_CALLS:
+        return True
+    return any(
+        _tocsv_has_signed_zero_risk(child, allowed) if isinstance(child, tuple) else any(_tocsv_has_signed_zero_risk(item, allowed) for item in child)
+        for child in node if isinstance(child, (tuple, list))
+    )
+
+
+_NON_CONSTANT_CALLS = frozenset({
+    "CALCULATE", "CALCULATETABLE", "LOOKUPVALUE", "SELECTEDVALUE", "RELATED", "RELATEDTABLE", "COUNTROWS", "ISBLANK", "USERNAME", "USERPRINCIPALNAME",
+    "NOW", "TODAY", "RAND", "RANDBETWEEN",
+})
+
+
+def _tocsv_is_constant(node: Any, bound: frozenset[str] = frozenset()) -> bool:
+    """True when the expression reads no table, column, measure or the clock: Power BI folds such a delimiter at compile time.
+    A variable counts when it is bound inside the expression itself (VAR d = "," RETURN d)."""
+    if not isinstance(node, tuple) or not node:
+        return True
+    kind = node[0]
+    if kind in {"reference", "table", "table_call", "tablevalue", "tablecapture", "measure", "omitted"}:
+        return False
+    if kind == "var":
+        return str(node[1]) in bound
+    if kind == "let":
+        inner = bound | {str(name) for name, _value in node[1]}
+        return all(_tocsv_is_constant(value, bound) for _name, value in node[1]) and _tocsv_is_constant(node[2], inner)
+    if kind == "call" and (
+        node[1] in _AGGREGATING_CALLS or node[1] in _TABLE_FUNCTION_ARITY or node[1] in _ALL_ITERATORS or node[1] in _NON_CONSTANT_CALLS
+    ):
+        return False
+    return all(
+        _tocsv_is_constant(child, bound) if isinstance(child, tuple) and child and isinstance(child[0], str)
+        else all(_tocsv_is_constant(item, bound) for item in child) if isinstance(child, (tuple, list)) else True
+        for child in node[1:]
+    )
+
+
+def _datatable_cell_is_literal(node: Any) -> bool:
+    """A DATATABLE cell Power BI accepts: a literal (not an expression, not even in parentheses)."""
+    while isinstance(node, tuple) and node and node[0] == "unary" and node[1] in {"+", "-"} and node[2][0] == "number":
+        node = node[2]
+    if not isinstance(node, tuple) or not node:
+        return False
+    if node[0] in {"number", "string", "boolean", "blank", "blank_comment"}:
+        return True
+    return node[0] == "table" and str(node[1]).upper() in {"TRUE", "FALSE"}
+
+
+def _tocsv_max_rows(node: tuple[Any, ...]) -> int:
+    """The row limit a literal second argument of TOCSV / TOJSON stands for (live Power BI, iteration 94).
+
+    Only literals are constants for Power BI: a number, text, TRUE() / FALSE(), BLANK() or a sign in front of a number.
+    A number rounds half away from zero, a text half to even; TRUE() is -1 (every row), BLANK() is 0, a value beyond
+    Int64 is an error. A negative limit means every row."""
+    sign = 1
+    while node[0] == "unary" and node[1] in {"+", "-"}:
+        sign *= -1 if node[1] == "-" else 1
+        node = node[2]
+    if node[0] == "blank" and sign == 1:
+        return 0
+    if node[0] == "boolean" and sign == 1:
+        return -1 if node[1] else 0
+    if node[0] == "number":
+        literal = node[2] if len(node) > 2 and isinstance(node[2], str) else None
+        value = node[1] * sign
+        exact_integer = literal is not None and literal.isdigit()  # an Int64 literal compares exactly, anything else as a double
+        if exact_integer:
+            rounded = value
+        else:
+            double = float(value)
+            if not -(2.0 ** 63) <= double < 2.0 ** 63:
+                raise MeasureError("The following system error occurred: Out of present range. ")
+            if -1 < double < 0:
+                raise MeasureError("A row limit between -1 and 0 is not modelled in the local engine.")  # live Power BI: every row for a loaded table, none for a ROW
+            rounded = Decimal(-1) if double < 0 else Decimal(math.floor(double + 0.5))  # half up on the double: 0.49999999999999994 gives 1
+    elif node[0] == "string" and sign == 1:
+        text = str(node[1]).strip()
+        if not re.fullmatch(r"[+-]?([0-9]+\.?[0-9]*|\.[0-9]+)([eE][+-]?[0-9]+)?", text):
+            raise MeasureError("The following system error occurred: Type mismatch. ")
+        rounded = Decimal(text).to_integral_value(rounding=ROUND_HALF_EVEN)
+    else:
+        raise MeasureError("TOCSV / TOJSON expect a constant as argument number 2.")
+    if not -(2 ** 63) <= rounded < 2 ** 63:
+        raise MeasureError("The following system error occurred: Out of present range. ")
+    return int(rounded)
+
+
 def _power(base: Decimal | None, exponent: Decimal | None) -> Decimal | None:
     """The ^ operator: POWER's rules, BLANK()^n is blank and n^BLANK() is 1."""
     return _scalar_math("POWER", [base, exponent])
@@ -2436,7 +2720,7 @@ def _validate_literal_positions(
                     continue  # a column or table expression of dates
                 _validate_literal_positions(argument, allow_blank=True)
             return
-        if function in {"CONCATENATEX", "XNPV"}:
+        if function in {"CONCATENATEX", "XNPV", "TOCSV", "TOJSON"}:
             for argument in arguments[1:]:
                 if argument[0] != "table":  # ASC / DESC
                     _validate_literal_positions(argument, allow_blank=True)
@@ -2854,6 +3138,24 @@ class _Parser:
                 raise MeasureError(
                     "COUNTROWS needs no argument or one loaded table/ALL table expression."
                 )
+            elif function == "TOCSV":
+                if len(arguments) < 1:
+                    raise MeasureError("Too few arguments were passed to the TOCSV function. The minimum argument count for the function is 1.")
+                if len(arguments) > 4:
+                    raise MeasureError("Too many arguments were passed to the TOCSV function. The maximum argument count for the function is 4.")
+                if not _is_all_table_value_argument(arguments[0]):
+                    raise MeasureError("The TOCSV function expects a table expression for argument '1', but a string or numeric expression was used.")
+                if len(arguments) > 1:
+                    _tocsv_max_rows(arguments[1])
+            elif function == "TOJSON":
+                if len(arguments) < 1:
+                    raise MeasureError("Too few arguments were passed to the TOJSON function. The minimum argument count for the function is 1.")
+                if len(arguments) > 2:
+                    raise MeasureError("Too many arguments were passed to the TOJSON function. The maximum argument count for the function is 2.")
+                if not _is_all_table_value_argument(arguments[0]):
+                    raise MeasureError("The TOJSON function expects a table expression for argument '1', but a string or numeric expression was used.")
+                if len(arguments) > 1:
+                    _tocsv_max_rows(arguments[1])
             elif function == "DIVIDE" and len(arguments) not in {2, 3}:
                 raise MeasureError("DIVIDE needs a numerator, denominator, and optional alternate result.")
             elif function == "COALESCE" and (
@@ -2962,8 +3264,12 @@ class _Parser:
                 "number", "string", "boolean", "blank", "unary", "binary",
             }:
                 raise MeasureError(f"{function} needs a column reference and an expression.")
-            elif function == "ROW" and len(arguments) % 2:
-                raise MeasureError("ROW needs pairs of a column name and an expression.")
+            elif function == "ROW":
+                if len(arguments) % 2:
+                    raise MeasureError("ROW needs pairs of a column name and an expression.")
+                for i in range(0, len(arguments), 2):
+                    if arguments[i][0] not in {"string", "var"}:  # a VAR holding a constant text works in Power BI; its value is checked when ROW is evaluated
+                        raise MeasureError(f"Function ROW expects a column name as argument number {i + 1}.")
             elif function in _COLUMN_SCALAR_ARITY and not (
                 _COLUMN_SCALAR_ARITY[function][0] <= len(arguments) <= _COLUMN_SCALAR_ARITY[function][1]
                 and arguments[0][0] == "reference"
@@ -4106,7 +4412,7 @@ def _reject_bare_columns_without_row_context(
 
 
 _NUMBER_COLUMN_TYPES = {"whole_number", "decimal_number", "decimal", "fixed_decimal", "currency", "number", "int64", "double"}
-_TEXT_FUNCTIONS = {"UPPER", "LOWER", "TRIM", "LEFT", "RIGHT", "MID", "CONCATENATE", "FORMAT", "SUBSTITUTE", "REPT", "FIXED", "NAMEOF", "CUSTOMDATA"}
+_TEXT_FUNCTIONS = {"UPPER", "LOWER", "TRIM", "LEFT", "RIGHT", "MID", "CONCATENATE", "FORMAT", "SUBSTITUTE", "REPT", "FIXED", "NAMEOF", "CUSTOMDATA", "TOCSV", "TOJSON"}
 _BOOLEAN_FUNCTIONS = {
     "AND", "OR", "NOT", "ISBLANK", "EXACT", "ISNUMBER", "ISTEXT", "ISERROR", "CONTAINSROW", "CONTAINS",
     "ISINTEGER", "ISINT64", "ISDOUBLE", "ISDECIMAL", "ISCURRENCY",
@@ -4143,7 +4449,7 @@ def _unify_numeric_types(types: list[str | None]) -> str | None:
 
 _STATIC_TEXT_FUNCTIONS = frozenset({
     "CONCATENATE", "UPPER", "LOWER", "TRIM", "LEFT", "RIGHT", "MID", "SUBSTITUTE", "REPLACE", "REPT",
-    "UNICHAR", "FORMAT", "NAMEOF", "CUSTOMDATA", "FIXED"
+    "UNICHAR", "FORMAT", "NAMEOF", "CUSTOMDATA", "FIXED", "TOCSV", "TOJSON"
 })
 
 _STATIC_BOOL_FUNCTIONS = frozenset({
@@ -5560,8 +5866,12 @@ def evaluate_measures(
         lineage: dict[str, tuple[dict[str, Any], str]] | None = None,
         base_types: dict[str, str] | None = None,
         row_identity: bool = False,
+        certain_types: Iterable[str] = (),
     ) -> tuple[dict[str, Any], list[dict[str, Any]]]:
         """A table built by an expression: its rows hold typed DAX values; lineage names the loaded column each came from.
+
+        certain_types: the columns whose type in base_types is Power BI's own (a stated or statically inferred one); every other
+        type here is a guess from the first value, good enough to compare but not to print a number by (TOCSV / TOJSON).
 
         row_identity: its rows are whole rows of the loaded tables behind its lineage (ADDCOLUMNS, GENERATE, CROSSJOIN keep
         them; SELECTCOLUMNS and SUMMARIZE do not), so a row context on them reaches the tables on the one side too."""
@@ -5579,6 +5889,7 @@ def evaluate_measures(
         context = {
             "id": f"derived-{derived_count}", "name": f"Table {derived_count}", "headers": list(headers),
             "rows": rows, "column_types": column_types, "derived": True,
+            "explicit_types": frozenset(certain_types),
         }
         if lineage is not None:
             context["lineage"] = lineage
@@ -6168,6 +6479,12 @@ def evaluate_measures(
             lineage.update({c: (group[0], group[1]) for c, group in related_groups.items()})
             group_types = {c: context.get("column_types", {}).get(c, "text") for c in group_columns}
             group_types.update({c: group[0].get("column_types", {}).get(group[1], "text") for c, group in related_groups.items()})
+            static_extension_names: set[str] = set()
+            for name, expression in zip(names, expressions):
+                st = _static_numeric_type(expression, table_context, variable_kinds)
+                if st is not None:
+                    group_types[name] = st
+                    static_extension_names.add(name)
             group_context, group_rows = derived_table(list(group_columns), list(groups.values()), lineage, group_types)
             out_rows = []
             saved_shadow, saved_touched = push_shadow(context, rows, "install"), eff_touched  # SUMMARIZE's input table is the shadow
@@ -6189,7 +6506,7 @@ def evaluate_measures(
             finally:
                 pop_shadow(saved_shadow)
                 eff_touched = saved_touched
-            return derived_table(list(group_columns) + names, out_rows, lineage, group_types)
+            return derived_table(list(group_columns) + names, out_rows, lineage, group_types, certain_types=static_extension_names)
         if function == "TOPN":
             count = Decimal(dax_typed.whole(in_row_expression(lambda: evaluate(arguments[0])), "TOPN"))
             context, rows = table_argument_value(arguments[1])
@@ -6703,21 +7020,29 @@ def evaluate_measures(
                     raise MeasureError("DATATABLE column types are INTEGER, DOUBLE, STRING, BOOLEAN, CURRENCY and DATETIME.")
                 kinds.append(str(arguments[i][1]).upper())
             records = []
+            if not last[1]:
+                raise MeasureError("The tuple at index '1' from the table definition of the DATATABLE function appears to be incomplete.")
             for item in last[1]:
-                members = item[1] if item[0] == "tableconstructor" else (item,)
+                # live Power BI (iteration 94): a row is a braced tuple of literals (a number, text, TRUE / FALSE, BLANK(), a sign before a number)
+                members = item[1] if item[0] == "tableconstructor" else None
+                if members is None or not all(_datatable_cell_is_literal(member) for member in members):
+                    raise MeasureError("The tuple of the DATATABLE function does not hold constant values.")
                 if len(members) != len(names):
                     raise MeasureError("Every DATATABLE row needs a value for each column.")
                 def datatable_value(kind: str, value: Any) -> Any:
                     if kind == "DATETIME" and isinstance(value, str):
                         return dax_dates.parse_date_text(value)
-                    return convert_value(value, kind)
+                    converted = convert_value(value, kind)
+                    if kind == "CURRENCY" and isinstance(converted, Decimal) and abs(converted) > _CURRENCY_MAX:
+                        raise MeasureError("The result of a conversion or arithmetic operation is outside the Currency range.")
+                    return converted
 
                 records.append({
                     name: datatable_value(kind, evaluate(member, None, allow_text=True))
                     for name, kind, member in zip(names, kinds, members)
                 })
             types = {n: {"INTEGER": "whole_number", "DOUBLE": "decimal_number", "STRING": "text", "BOOLEAN": "boolean", "CURRENCY": "decimal_number", "DATETIME": "date"}[k] for n, k in zip(names, kinds)}
-            return derived_table(names, records, None, types)
+            return derived_table(names, records, None, types, certain_types=[n for n, k in zip(names, kinds) if k != "CURRENCY"])
         raise MeasureError(f"{function} is not supported by the local DAX engine.")
 
     def blank_aware_keys(values: list[Any]) -> list[tuple[Any, int]]:
@@ -7542,7 +7867,18 @@ def evaluate_measures(
                         if isinstance(record[column], bool):
                             record[column] = Decimal(int(record[column]))
             names = ["Value"] if width == 1 and (not items or items[0][0] != "tuple") else [f"Value{column + 1}" for column in range(width)]
-            return derived_table(names, [dict(zip(names, record)) for record in records])
+            tc_types = {}
+            for col_idx, col_name in enumerate(names):
+                col_vals = [r[col_idx] for r in records if r[col_idx] is not None]
+                col_nodes = [(item[1] if item[0] in {"tuple", "tableconstructor"} else (item,))[col_idx] for item in items]
+                col_kind = _unify_numeric_types([_static_numeric_type(node, table_context, variable_kinds) for node in col_nodes])
+                if col_vals and any(isinstance(v, str) for v in col_vals):
+                    tc_types[col_name] = "text"
+                elif col_vals and all(isinstance(v, bool) for v in col_vals):
+                    tc_types[col_name] = "boolean"
+                elif col_vals and col_kind in {"int64", "double", "currency"} and all(isinstance(v, Decimal) for v in col_vals):
+                    tc_types[col_name] = {"int64": "whole_number", "double": "decimal_number", "currency": "currency"}[col_kind]
+            return derived_table(names, [dict(zip(names, record)) for record in records], base_types=tc_types, certain_types=tc_types)
         if argument[0] == "call" and argument[1] == "GENERATESERIES":
             start = dax_typed.to_number(in_row_expression(lambda: evaluate(argument[2][0])))
             stop = dax_typed.to_number(in_row_expression(lambda: evaluate(argument[2][1])))
@@ -7555,14 +7891,29 @@ def evaluate_measures(
             while current <= stop and len(series) < 1_000_000:
                 series.append({"Value": dax_dates.DaxDateTime(current) if dated else current})
                 current += step
-            return derived_table(["Value"], series)
+            gen_kind = _unify_numeric_types([_static_numeric_type(node, table_context, variable_kinds) for node in (argument[2][0], *argument[2][2:3])])  # the stop value does not type the column
+            gen_types = {"Value": "date"} if dated else {"Value": {"int64": "whole_number", "double": "decimal_number"}[gen_kind]} if gen_kind in {"int64", "double"} else {}
+            return derived_table(["Value"], series, base_types=gen_types, certain_types=gen_types)
         if argument[0] == "call" and argument[1] == "ROW":
             pairs = argument[2]
             names = [str(dax_typed.to_text(evaluate(pairs[i]))) for i in range(0, len(pairs), 2)]
+            name_set = set()
+            for name in names:
+                if not name:
+                    raise MeasureError("The new column name can only be a constant non-empty string.")
+                if name.casefold() in name_set:
+                    raise MeasureError(f"Function 'ROW' cannot add column [{name}], as it has the same name with an existing column.")
+                name_set.add(name.casefold())
             # ROW inside GENERATE / ADDCOLUMNS sees the row of the enclosing iteration (a CALCULATE in it transitions that row)
             enclosing = row_stack[-1] if row_stack else None
             row = in_row_expression(lambda: {name: evaluate(pairs[i + 1], enclosing, allow_text=True) for name, i in zip(names, range(0, len(pairs), 2))})
-            return derived_table(names, [row])
+            norm_map = {"int64": "whole_number", "double": "decimal_number", "currency": "currency", "decimal": "decimal", "bool": "boolean", "text": "text", "datetime": "date"}
+            row_types = {}
+            for name, i in zip(names, range(0, len(pairs), 2)):
+                st = _static_numeric_type(pairs[i + 1], table_context, variable_kinds)
+                if st is not None and st in norm_map:
+                    row_types[name] = norm_map[st]
+            return derived_table(names, [row], base_types=row_types, certain_types=row_types)
         if argument[0] == "table_call":
             source = argument[2]
             if source[0] not in {"table", "reference"}:
@@ -7800,7 +8151,7 @@ def evaluate_measures(
             "currency", "number", "numeric", "int64", "double",
         }:
             return "numeric"
-        if type_name == "boolean":
+        if type_name in {"boolean", "bool"}:
             return "boolean"
         if type_name in {"date", "datetime", "time"}:
             return "date/time"
@@ -8124,7 +8475,7 @@ def evaluate_measures(
                 expression[2][0][0] == "tableconstructor" or (expression[2][0][0] == "call" and expression[2][0][1] in _TABLE_BUILDING_CALLS)
             ):
                 return "numeric"  # the rows of a table built from constants and columns; FILTER and the like are validated further down
-            if function == "CONCATENATEX":
+            if function in {"CONCATENATEX", "TOCSV", "TOJSON"}:
                 return "text"
             if function in {"RANKX", "RANK.EQ", "RANK", "ROWNUMBER", "XNPV"}:
                 return "numeric"
@@ -13268,6 +13619,271 @@ def evaluate_measures(
             if total == 0.0:
                 return Decimal(0)
             return Decimal(int(total)) if total.is_integer() else Decimal(repr(total))
+        if function in {"TOCSV", "TOJSON"}:
+            is_csv = function == "TOCSV"
+            table_node = arguments[0]
+            order_class = _tocsv_row_order(table_node)  # raises for a row order that is not modelled
+            max_rows = _tocsv_max_rows(arguments[1]) if len(arguments) > 1 else 10
+            topn_walk_nodes[id(table_node)] = []
+            try:
+                context, iteration_rows = table_argument_value(table_node)
+            finally:
+                topn_walk_nodes.pop(id(table_node), None)
+            headers = list(context.get("headers", []))
+            if len({h.casefold() for h in headers}) != len(headers):
+                raise MeasureError(f"{function} table contains duplicate column names.")
+            total_row_count = len(iteration_rows)
+
+            def full_row_count(source: tuple[Any, ...]) -> int:
+                base = resolve_table_context(str(source[1]))
+                return len(contexts_by_id.get(base["id"], base)["rows"])
+
+            def has_column_filter(source: tuple[Any, ...]) -> bool:
+                """An outer CALCULATE filter on a column of the table, even one that keeps every row."""
+                base = resolve_table_context(str(source[1]))
+                return bool(evaluation_contexts_by_id.get(base["id"], base).get("filter_column_rows"))
+
+            # The order of the rows (live Power BI, iteration 94): a filtered scan of a loaded table comes back in reverse
+            # storage order after the first `max_rows` rows were cut off; a negative limit keeps the storage order.
+            reverse = False
+            if order_class == "scan":
+                scan_table, via_all = _tocsv_scan_table_node(table_node)
+                reverse = _tocsv_scan_filtered(table_node)
+                if not via_all and not reverse:
+                    removed = total_row_count < full_row_count(scan_table)
+                    if has_column_filter(scan_table) and not removed:
+                        # live Power BI: a predicate that keeps every row (Quantity >= 0) reverses the scan, a set filter that keeps every
+                        # row (VALUES(Region)) does not; the local filter state cannot tell them apart
+                        raise MeasureError("The row order under a filter that keeps every row is not modelled in the local engine.")
+                    reverse = removed
+            elif order_class == "grouped" and total_row_count > 1 and table_node[0] == "call" and table_node[1] == "SUMMARIZE" and table_node[2][0][0] == "table" and has_column_filter(table_node[2][0]) and any(
+                str(link[0].get("column_types", {}).get(link[1])).casefold() in _NUMERIC_KIND_BY_COLUMN_TYPE for link in (context.get("lineage") or {}).values()
+            ):
+                raise MeasureError("The group order of SUMMARIZE over a numeric column under a filter is not modelled in the local engine.")
+            elif order_class == "grouped" and total_row_count > 1:
+                # live Power BI: groups whose computed columns are all BLANK come back in first-seen order, not the sorted order the local engine uses
+                lineage = context.get("lineage") or {}
+                for header in headers:
+                    if header not in lineage and all(row.get(header) is None for row in iteration_rows):
+                        raise MeasureError("The row order of groups whose computed column is all BLANK is not modelled in the local engine.")
+            elif order_class == "projection":
+                if max_rows < 0 or total_row_count != full_row_count(table_node[2][0]) or has_column_filter(table_node[2][0]):
+                    raise MeasureError("The row order of SELECTCOLUMNS over a filtered table or with every row asked for is not modelled in the local engine.")
+            elif order_class == "topn":
+                top_count, source, key = table_node[2]
+                source_context, source_rows = table_argument_value(source)
+                key_header = next((h for h in source_context["headers"] if h.casefold() == str(key[2]).casefold()), None)
+                if source[0] == "table" and (len(source_rows) != full_row_count(source) or has_column_filter(source)):
+                    raise MeasureError("The row order of TOPN over a filtered table is not modelled in the local engine.")
+                if key_header is None or not 1 <= top_count[1] <= len(source_rows) - 2:
+                    raise MeasureError("The row order of this TOPN is not modelled in the local engine.")
+                key_values = [row.get(key_header) if source_context.get("derived") else typed_cell(source_context, key_header, row.get(key_header)) for row in source_rows]
+                if None in key_values or len({row_key([value]) for value in key_values}) != len(key_values):
+                    raise MeasureError("The row order of a TOPN whose order column has ties or BLANKs is not modelled in the local engine.")
+                if source[0] == "table_call" and has_column_filter(("table", source_context["name"])):
+                    raise MeasureError("The row order of TOPN under a filter on its table is not modelled in the local engine.")
+            for header in headers:  # Power BI converts a column that holds numbers with dates, Booleans or text; the local rows keep their own values
+                value_kinds = {
+                    "date" if dax_dates.is_date(value) else "bool" if isinstance(value, bool) else "text" if isinstance(value, str) else "number"
+                    for value in (row.get(header) if context.get("derived") else typed_cell(context, header, row.get(header)) for row in iteration_rows) if value is not None
+                }
+                if len(value_kinds) > 1:
+                    raise MeasureError("A column that holds values of different types is not modelled in the local engine.")
+            if max_rows < 0:
+                shown_rows = list(iteration_rows)
+            else:
+                shown_rows = iteration_rows[:max_rows]
+                if reverse:
+                    shown_rows = shown_rows[::-1]
+
+            def column_kind(header: str) -> str | None:
+                """int64 / double / currency when the type of the column is certain, else None."""
+                if not context.get("derived"):
+                    declared = context.get("column_types", {}).get(header)
+                elif header in context.get("explicit_types", ()):
+                    declared = context.get("column_types", {}).get(header)
+                else:
+                    link = (context.get("lineage") or {}).get(header)
+                    declared = link[0].get("column_types", {}).get(link[1]) if link else None
+                return _NUMERIC_KIND_BY_COLUMN_TYPE.get(str(declared).casefold()) if declared else None
+
+            # A literal -0.0 in ROW is the one signed zero the local decimals can still say; any other arithmetic that might
+            # hand Power BI a negative zero makes a zero double cell uncertain.
+            negative_zero_headers: set[str] = set()
+            negative_zero_literals: list[tuple[Any, ...]] = []
+            if table_node[0] == "call" and table_node[1] == "ROW":
+                pairs = table_node[2]
+                for position in range(1, len(pairs), 2):
+                    expression = pairs[position]
+                    if (
+                        expression[0] == "unary" and expression[1] == "-" and expression[2][0] == "number"
+                        and expression[2][1] == 0 and _static_numeric_type(expression[2]) == "double"
+                    ):
+                        negative_zero_headers.add(headers[position // 2])
+                        negative_zero_literals.append(expression)
+            signed_zero_risk = _tocsv_has_signed_zero_risk(table_node, tuple(negative_zero_literals))
+            # ROW cells that are literals or constant arithmetic on them: the double Power BI holds, and which cells are plain literals
+            double_cells: dict[str, Decimal] = {}
+            literal_headers: set[str] = set()
+            if table_node[0] == "call" and table_node[1] == "ROW":
+                for position in range(1, len(table_node[2]), 2):
+                    expression = table_node[2][position]
+                    if _static_numeric_type(expression, table_context, variable_kinds) == "double":
+                        double_value = _literal_double(expression)
+                        if double_value is not None:
+                            double_cells[headers[position // 2]] = Decimal(repr(double_value))
+                            if expression[0] == "number" or (expression[0] == "unary" and expression[2][0] == "number"):
+                                literal_headers.add(headers[position // 2])
+
+            def zero_cell(header: str, suffix: str) -> str:
+                """The text of a zero number cell; suffix is "" or ".0" (the JSON double form)."""
+                kind = column_kind(header)
+                if header in negative_zero_headers:
+                    return "-0" + suffix
+                if context.get("derived") and kind not in {"int64", "currency"} and signed_zero_risk:
+                    raise MeasureError("A zero that arithmetic produced may be a negative zero in Power BI; that is not modelled in the local engine.")
+                if suffix and kind is None:
+                    raise MeasureError("TOJSON needs to know whether a column is whole numbers or doubles; the local engine does not for this one.")
+                return "0" + (suffix if kind != "int64" else "")
+
+            def header_text(header: str) -> str:
+                if not context.get("derived"):
+                    return f"'{context['name']}'[{escape_bracket_name(header)}]"
+                if context.get("selected_columns"):
+                    return f"[{escape_bracket_name(header)}]"
+                link = (context.get("lineage") or {}).get(header)
+                if link:
+                    return f"'{link[0]['name']}'[{escape_bracket_name(link[1])}]"
+                return f"[{escape_bracket_name(header)}]"
+
+            def cell_value(row: dict[str, Any], header: str) -> Any:
+                value = row.get(header)
+                if header in double_cells and isinstance(value, Decimal) and value.is_finite():
+                    return double_cells[header]  # Power BI added the literals as doubles
+                return value if context.get("derived") else typed_cell(context, header, value)
+
+            def unreliable_double(value: Decimal, header: str) -> bool:
+                """A double the local decimals cannot reproduce digit for digit: a computed one beyond 1E15 (EXP(50), PI()*1E20) or a subnormal."""
+                magnitude = abs(value)
+                if magnitude != 0 and magnitude < Decimal("2.2250738585072014E-308"):
+                    return True
+                computed = context.get("derived") and header not in (context.get("lineage") or {}) and header not in literal_headers
+                return bool(computed and magnitude >= Decimal("1e15") and column_kind(header) in {None, "double"})
+
+            if is_csv:
+                delimiter = ","
+                if len(arguments) > 2:
+                    if arguments[2][0] in {"blank", "blank_comment"} or arguments[2] == ("string", ""):
+                        delimiter = ""  # an empty delimiter quotes every non-empty field; it is an error once two columns need it
+                    else:
+                        if not _tocsv_is_constant(arguments[2]):
+                            raise MeasureError("The delimiter value in the 'TOCSV' function can only be a constant non empty string.")
+                        delimiter_value = evaluate(arguments[2], row_context, allow_text=True, allow_boolean=True)
+                        delimiter = "" if delimiter_value is None else "TRUE" if delimiter_value is True else "FALSE" if delimiter_value is False else dax_typed.to_text(delimiter_value)
+                        if delimiter == "":
+                            raise MeasureError("The delimiter value in the 'TOCSV' function can only be a constant non empty string.")
+                    if delimiter == "" and len(headers) > 1:
+                        raise MeasureError("The delimiter value in the 'TOCSV' function can only be a constant non empty string.")
+                include_headers = True
+                if len(arguments) > 3:
+                    include_value = evaluate(arguments[3], row_context, allow_text=True, allow_boolean=True)
+                    if include_value is None:
+                        include_headers = False
+                    elif isinstance(include_value, bool):
+                        include_headers = include_value
+                    elif isinstance(include_value, Decimal):
+                        include_headers = bool(include_value != 0)
+                    elif isinstance(include_value, str) and include_value.casefold() in {"true", "false"}:
+                        include_headers = include_value.casefold() == "true"
+                    else:
+                        raise MeasureError(f"Cannot convert value '{include_value}' of type Text to type True/False.")
+
+                def csv_field(text: str) -> str:
+                    if text == "":
+                        return ""
+                    if delimiter == "" or delimiter in text or '"' in text or "\n" in text:
+                        return '"' + text.replace('"', '""') + '"'
+                    return text
+
+                def csv_cell(value: Any, header: str) -> str:
+                    if value is None:
+                        return ""
+                    if dax_dates.is_date(value):
+                        return csv_field(dax_dates.date_text(value))
+                    if isinstance(value, bool):
+                        return csv_field("TRUE" if value else "FALSE")
+                    if not isinstance(value, Decimal):
+                        return csv_field(str(value))
+                    if not value.is_finite():
+                        return csv_field(dax_typed.to_text(value))
+                    if value == 0:
+                        return csv_field(zero_cell(header, ""))
+                    if unreliable_double(value, header):
+                        raise MeasureError("A computed double of 1E15 or more, or a subnormal one, prints digits the local engine cannot reproduce.")
+                    kind = column_kind(header)
+                    if kind == "currency":
+                        if abs(value) > _CURRENCY_MAX:
+                            raise MeasureError("The result of a conversion or arithmetic operation is outside the Currency range.")
+                        value = value.quantize(Decimal("0.0001"), rounding=ROUND_HALF_UP)  # a Currency keeps four decimals
+                    if abs(value) >= Decimal("1e15"):
+                        if kind == "double":
+                            return csv_field("%.15G" % float(value))  # 1E+15, 1.23456789012346E+15
+                        if kind not in {"int64", "currency"}:
+                            raise MeasureError("A number of 1E15 or more needs its type to be printed; the local engine does not know it for this column.")
+                    text = dax_typed.to_text(value)
+                    if kind == "double" and "E+15" in text and abs(value) < Decimal("1e15"):
+                        raise MeasureError("A double that rounds up to 1E15 is not modelled in the local engine.")
+                    return csv_field(text)
+
+                lines = [delimiter.join(csv_cell(cell_value(row, h), h) for h in headers) for row in shown_rows]
+                header_line = delimiter.join(csv_field(header_text(h)) for h in headers)
+                if not lines:
+                    return (header_line + "\n") if include_headers else None  # no header and no row is BLANK
+                return header_line + "\n" + "\n".join(lines) if include_headers else "\n".join(lines)
+
+            if max_rows == 0 or total_row_count == 0:
+                return None  # BLANK
+
+            def json_cell(value: Any, header: str) -> str:
+                if value is None:
+                    return "null"
+                if isinstance(value, bool):
+                    return "true" if value else "false"
+                if dax_dates.is_date(value):
+                    scaled = (value - value.to_integral_value(rounding=ROUND_FLOOR)) * 86400
+                    if abs(scaled - scaled.to_integral_value()) > Decimal("0.0017"):
+                        raise MeasureError("A date with a fraction of a second is not modelled in the local engine.")
+                    moment = dax_dates.to_datetime(value)
+                    return f'"{moment.year:04d}-{moment.month:02d}-{moment.day:02d}T{moment.hour:02d}:{moment.minute:02d}:{moment.second:02d}"'
+                if isinstance(value, str):
+                    return json.dumps(value, ensure_ascii=False)
+                if not isinstance(value, Decimal):
+                    return json.dumps(str(value), ensure_ascii=False)
+                if not value.is_finite():
+                    return ""  # Power BI leaves the cell out and keeps its place in the list
+                if value == 0:
+                    return zero_cell(header, ".0")
+                if unreliable_double(value, header):
+                    raise MeasureError("A computed double of 1E15 or more, or a subnormal one, prints digits the local engine cannot reproduce.")
+                kind = column_kind(header)
+                if kind == "currency":
+                    if abs(value) > _CURRENCY_MAX:
+                        raise MeasureError("The result of a conversion or arithmetic operation is outside the Currency range.")
+                    value = value.quantize(Decimal("0.0001"), rounding=ROUND_HALF_UP)  # a Currency keeps four decimals
+                if kind == "int64":
+                    if value != value.to_integral_value():
+                        raise MeasureError("A whole-number column holds a fraction; its type is not certain in the local engine.")
+                    return str(int(value))
+                if kind is None and value == value.to_integral_value():
+                    raise MeasureError("TOJSON needs to know whether a column is whole numbers or doubles; the local engine does not for this one.")
+                return _format_tojson_double(value)
+
+            data_lines = [
+                "\t\t[" + ", ".join(json_cell(cell_value(row, h), h) for h in headers) + "]"
+                for row in shown_rows
+            ]
+            formatted_headers = ", ".join(json.dumps(header_text(h), ensure_ascii=False) for h in headers)
+            return f"{{\n\t\"header\": [{formatted_headers}],\n\t\"rowCount\": {total_row_count},\n\t\"data\": [\n" + ",\n".join(data_lines) + "\n\t]\n}"
         if function == "CONCATENATEX":
             if _statistic_with_arithmetic(arguments[1]):
                 # live Power BI (iteration 87): a statistic in arithmetic is a double, shown with 15 digits and a signed zero; the local decimals differ in the last digit

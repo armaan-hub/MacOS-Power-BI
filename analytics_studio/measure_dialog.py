@@ -459,6 +459,8 @@ DAX_FUNCTION_TEMPLATES.update({
     "TABLEOF": ("TABLEOF('Table'[Column])", "'Table'[Column]"),
     "EVALUATEANDLOG": ("EVALUATEANDLOG(value)", "value"),
     "ALLCROSSFILTERED": ("ALLCROSSFILTERED('Table')", "'Table'"),
+    "TOCSV": ("TOCSV('Table', max_rows, delimiter, include_headers)", "'Table'"),
+    "TOJSON": ("TOJSON('Table', max_rows)", "'Table'"),
 })
 
 
