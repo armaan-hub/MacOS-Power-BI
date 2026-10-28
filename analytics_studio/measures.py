@@ -54,7 +54,7 @@ from analytics_studio.relationships import (
     relationship_filter_directions,
     unknown_member_table_ids,
 )
-from analytics_studio import dax_ct_filters, dax_dates, dax_ext, dax_format, dax_iteration_order, dax_math, dax_order, dax_time_sets, dax_typed
+from analytics_studio import dax_ct_filters, dax_dates, dax_ext, dax_format, dax_iteration_order, dax_linest, dax_math, dax_order, dax_time_sets, dax_typed
 from analytics_studio.power_query_values import ascii_fold, cell_key, cell_to_text, is_cell_error
 
 
@@ -301,12 +301,16 @@ _TABLE_FUNCTION_ARITY = {
     "NATURALLEFTOUTERJOIN": (2, 2), "SAMPLE": (3, None), "GENERATE": (2, 2), "GENERATEALL": (2, 2),
     "DATATABLE": (3, None), "CALENDAR": (2, 2), "TOPNSKIP": (3, None), "FILTERS": (1, 1),
     "INDEX": (1, 7), "OFFSET": (1, 7), "WINDOW": (2, 10), "TABLEOF": (1, 1),
+    "LINEST": (2, None), "LINESTX": (3, None),
+    "SUBSTITUTEWITHINDEX": (4, None),
+    "ADDMISSINGITEMS": (1, None),
 }
 # only meaningful inside SUMMARIZECOLUMNS (IGNORE, NONVISUAL) and GROUPBY (CURRENTGROUP); elsewhere they raise
 _FUNCTIONS |= {"IGNORE", "NONVISUAL", "CURRENTGROUP"}
 _NEW_TABLE_FUNCTIONS = {
     "SUMMARIZECOLUMNS", "GROUPBY", "TREATAS", "NATURALINNERJOIN", "NATURALLEFTOUTERJOIN", "SAMPLE", "GENERATE",
     "GENERATEALL", "DATATABLE", "CALENDAR", "TOPNSKIP", "FILTERS", "INDEX", "OFFSET", "WINDOW",
+    "SUBSTITUTEWITHINDEX", "ADDMISSINGITEMS",
 }
 _RANK_ARITY = {
     "RANKX": (2, 5), "RANK.EQ": (2, 3), "EARLIER": (1, 2), "EARLIEST": (1, 1), "RANK": (0, 7), "ROWNUMBER": (0, 6),
@@ -318,11 +322,13 @@ _FUNCTIONS |= dax_time_sets.SET_FUNCTIONS | dax_time_sets.BALANCES  # date sets 
 _FUNCTIONS.add("RELATEDTABLE")
 _TABLE_FIRST_PARENTS = _ALL_ITERATORS | dax_time_sets.SET_FUNCTIONS | {"FIRSTNONBLANK", "LASTNONBLANK", "FIRSTNONBLANKVALUE", "LASTNONBLANKVALUE"} | {
     "COUNTROWS", "CONCATENATEX", "XNPV", "ISEMPTY", "CONTAINS", "CONTAINSROW", "ADDCOLUMNS", "SELECTCOLUMNS", "SUMMARIZE",
-    "FILTER", "RANKX", "CALCULATETABLE", "DISTINCT", "VALUES", "FILTERS", "TOCSV", "TOJSON",
+    "FILTER", "RANKX", "CALCULATETABLE", "DISTINCT", "VALUES", "FILTERS", "TOCSV", "TOJSON", "LINESTX",
+    "SUBSTITUTEWITHINDEX",
 }
 _TABLE_ANY_PARENTS = {
     "UNION", "EXCEPT", "INTERSECT", "CROSSJOIN", "SUMMARIZECOLUMNS", "GROUPBY", "TREATAS", "NATURALINNERJOIN",
     "NATURALLEFTOUTERJOIN", "GENERATE", "GENERATEALL", "INDEX", "OFFSET", "WINDOW", "RANK", "ROWNUMBER",
+    "ADDMISSINGITEMS",
 }
 
 
@@ -336,6 +342,7 @@ def _table_position(parent_function: str, argument_index: int) -> bool:
         or parent_function in _TABLE_ANY_PARENTS
         or (parent_function == "TOPN" and argument_index == 1)
         or (parent_function == "EVALUATEANDLOG" and argument_index == 0)
+        or (parent_function == "SUBSTITUTEWITHINDEX" and argument_index in {0, 2})
     )
 
 
@@ -1378,6 +1385,26 @@ def _mixes_table_and_scalar_branches(function: str, arguments: tuple[Any, ...] |
     return any(tables) and not all(tables)
 
 
+def _linest_is_const_literal(node: Any) -> bool:
+    """A literal TRUE() or FALSE(): the only last argument Power BI reads as LINEST's const (1=0, NOT(TRUE()) are regressors)."""
+    return isinstance(node, tuple) and (node[0] == "boolean" or (node[0] == "call" and node[1] in {"TRUE", "FALSE"} and not node[2]))
+
+
+def _linest_number(value: Any) -> float:
+    """One LINEST input as Power BI reads it: BLANK is 0, a boolean is 0 or 1, text that is plainly not a number is an error."""
+    if value is None:
+        return 0.0
+    if isinstance(value, bool):
+        return 1.0 if value else 0.0
+    if isinstance(value, (int, float, Decimal)):
+        return float(value)
+    if isinstance(value, str):
+        if re.fullmatch(r"[A-Za-z ]*", value) and value.strip().lower() not in {"inf", "infinity", "nan"}:
+            raise MeasureError(f"Cannot convert value '{value}' of type Text to type Number.")
+        raise MeasureError("Text that Power BI may read as a number in a LINEST argument is not modelled in the local engine.")
+    raise MeasureError("A LINEST argument of this type is not modelled in the local engine.")
+
+
 def _is_all_table_value_argument(node: Any) -> bool:
     """Return whether a node is a supported filter-function table value."""
     if not isinstance(node, tuple) or not node:
@@ -1727,7 +1754,8 @@ _BOOLEAN_FILTER_REFUSED_CALLS = frozenset({
     "CALCULATE", "FILTER", "TOPN", "SELECTCOLUMNS", "LOOKUPVALUE", "ADDCOLUMNS", "SUMMARIZE", "SUMMARIZECOLUMNS",
     "GROUPBY", "EXCEPT", "INTERSECT", "ROW", "SAMPLE", "TOPNSKIP", "RANKX", "FIRSTNONBLANK", "LASTNONBLANK",
     "OFFSET", "WINDOW", "INDEX", "RANK", "ROWNUMBER", "CONTAINS",  # CONTAINS: live probes, iteration 87 (also inside IF and arithmetic)
-    "TABLEOF", "ALLCROSSFILTERED", "TOCSV", "TOJSON",
+    "TABLEOF", "ALLCROSSFILTERED", "TOCSV", "TOJSON", "LINEST", "LINESTX", "SUBSTITUTEWITHINDEX",
+    "ADDMISSINGITEMS",
 })
 _BOOLEAN_FILTER_X_ITERATORS = frozenset({"SUMX", "AVERAGEX", "MAXX", "MINX", "COUNTX", "COUNTAX", "CONCATENATEX", "XNPV", *dax_math.STAT_ITERATORS})
 
@@ -2176,6 +2204,26 @@ _TOCSV_JOIN_TABLES = frozenset({"EXCEPT", "INTERSECT", "CROSSJOIN", "NATURALINNE
 _TOCSV_SIGNED_ZERO_CALLS = frozenset({"CEILING", "FLOOR", "ISO.CEILING", "TRUNC", "ROUNDUP", "ROUNDDOWN", "DIVIDE", "POWER", "MOD"})
 
 
+def _swi_tied_order_known(node: tuple[Any, ...], lookup: Any) -> bool:
+    """True for an index table whose own row order (what breaks ties between equal order values) was checked against Power BI:
+    the distinct values of one column, and FILTER / ADDCOLUMNS / CALCULATETABLE / SUMMARIZE of those."""
+    kind = node[0]
+    if kind == "var":
+        held = lookup(node[1])
+        return held is not None and _swi_tied_order_known(held, lookup)
+    if kind == "table_call" and node[1] in {"VALUES", "DISTINCT"}:
+        return node[2][0] == "reference"
+    if kind == "call":
+        function, arguments = node[1], node[2]
+        if function in {"ALL", "ALLNOBLANKROW"}:
+            return len(arguments) == 1 and arguments[0][0] == "reference"
+        if function in {"FILTER", "ADDCOLUMNS", "CALCULATETABLE"} and arguments:
+            return _swi_tied_order_known(arguments[0], lookup)
+        if function == "SUMMARIZE" and len(arguments) >= 2 and arguments[0][0] == "table":
+            return sum(1 for argument in arguments[1:] if argument[0] == "reference") == 1
+    return False
+
+
 def _tocsv_row_order(node: tuple[Any, ...]) -> str:
     """How Power BI orders the rows TOCSV / TOJSON print for a table expression (live probes, iteration 94).
 
@@ -2214,6 +2262,8 @@ def _tocsv_row_order(node: tuple[Any, ...]) -> str:
             if members is not None and len(members) == len(set(members)):
                 return "dictionary"  # live Power BI keeps a repeated member as a repeated row; the local engine would merge them
         elif function in _TOCSV_DICTIONARY_TABLES:
+            if function != "ALLEXCEPT" and len(arguments) > 1:
+                raise MeasureError("The row order of a table of several columns is not modelled in the local engine, so TOCSV / TOJSON refuse it.")  # Power BI lists their combinations like SUMMARIZE
             return "dictionary"
         if function in {"FILTER", "CALCULATETABLE"} and arguments:
             if arguments[0][0] == "call" and arguments[0][1] in {"ALL", "ALLNOBLANKROW"} and len(arguments[0][2]) == 1 and arguments[0][2][0][0] == "table":
@@ -2231,6 +2281,17 @@ def _tocsv_row_order(node: tuple[Any, ...]) -> str:
                 return "scan_forward"
             if base in {"constant", "dictionary", "grouped", "scan_forward"}:
                 return base
+        elif function == "SUBSTITUTEWITHINDEX" and arguments:
+            base = _tocsv_row_order(arguments[0])
+            if arguments[0][0] == "call" and arguments[0][1] in _TOCSV_DICTIONARY_TABLES and len(arguments[0][2]) != 1:
+                raise MeasureError("The row order of this table expression is not modelled in the local engine, so TOCSV / TOJSON refuse it.")
+            if base in {"constant", "dictionary", "grouped", "scan_forward", "scan"}:
+                return base
+        elif function == "ADDMISSINGITEMS" and arguments:
+            # the table keeps its own row order and the missing rows follow it (live Power BI, iteration 96): only a table whose own order is modelled
+            inner = next((argument for argument in arguments if argument[0] != "reference"), None)
+            if inner is not None and _tocsv_row_order(inner) in {"dictionary", "grouped"}:
+                return "grouped"
         elif function == "SELECTCOLUMNS" and len(arguments) >= 3 and len(arguments) % 2 == 1 and arguments[0][0] == "table":
             references = [(argument[1] or "").casefold() + "\0" + str(argument[2]).casefold() for argument in arguments[2::2] if argument[0] == "reference"]
             if all(argument[0] == "string" for argument in arguments[1::2]) and len(references) == len(arguments[2::2]) == len(set(references)):
@@ -2720,10 +2781,14 @@ def _validate_literal_positions(
                     continue  # a column or table expression of dates
                 _validate_literal_positions(argument, allow_blank=True)
             return
-        if function in {"CONCATENATEX", "XNPV", "TOCSV", "TOJSON"}:
+        if function in {"CONCATENATEX", "XNPV", "TOCSV", "TOJSON", "LINESTX"}:
             for argument in arguments[1:]:
                 if argument[0] != "table":  # ASC / DESC
                     _validate_literal_positions(argument, allow_blank=True)
+            return
+        if function == "LINEST":
+            for argument in arguments:
+                _validate_literal_positions(argument, allow_blank=True)
             return
         if function in {"IF", "IF.EAGER", "ISBLANK", "IFERROR", "SWITCH", "ABS", "AND", "OR", "NOT", "SELECTEDVALUE", "ERROR", "CUSTOMDATA", "EVALUATEANDLOG"} or function in _TYPED_ARITY or function in _LOOKUP_ARITY or (
             function in {"MIN", "MAX"} and len(arguments) == 2
@@ -3156,6 +3221,21 @@ class _Parser:
                     raise MeasureError("The TOJSON function expects a table expression for argument '1', but a string or numeric expression was used.")
                 if len(arguments) > 1:
                     _tocsv_max_rows(arguments[1])
+            elif function == "LINEST":
+                if len(arguments) < 2:
+                    raise MeasureError("Too few arguments were passed to the LINEST function. The minimum argument count for the function is 2.")
+                has_const = len(arguments) > 2 and _linest_is_const_literal(arguments[-1])
+                col_args = arguments[:-1] if has_const else arguments
+                for idx, arg in enumerate(col_args):
+                    if arg[0] != "reference":
+                        raise MeasureError(f"The LINEST function only accepts a column reference as the argument number {idx + 1}.")
+                if len(arguments) > 2 and not has_const and arguments[-1][0] != "reference":
+                    raise MeasureError(f"The LINEST function only accepts a column reference as the argument number {len(arguments)}.")
+            elif function == "LINESTX":
+                if len(arguments) < 3:
+                    raise MeasureError("Too few arguments were passed to the LINESTX function. The minimum argument count for the function is 3.")
+                if not _is_all_table_value_argument(arguments[0]):
+                    raise MeasureError("The LINESTX function expects a table expression for argument '1', but a string or numeric expression was used.")
             elif function == "DIVIDE" and len(arguments) not in {2, 3}:
                 raise MeasureError("DIVIDE needs a numerator, denominator, and optional alternate result.")
             elif function == "COALESCE" and (
@@ -3242,6 +3322,21 @@ class _Parser:
                     raise MeasureError(f"Too few arguments were passed to the {function} function. The minimum argument count for the function is 2.")
                 if len(arguments) % 3 == 1:
                     raise MeasureError("IsOnOrAfter() function contains a scalar expression to compare without a value to compare against.")
+            elif function == "SUBSTITUTEWITHINDEX":
+                if len(arguments) < 4:
+                    raise MeasureError(f"Too few arguments were passed to the {function} function. The minimum argument count for the function is 4.")
+                if arguments[1][0] not in {"string", "var"} or (arguments[1][0] == "string" and not arguments[1][1]):
+                    raise MeasureError(f"Function {function} expects a column name as argument number 2.")
+            elif function == "ADDMISSINGITEMS":
+                if not arguments:
+                    raise MeasureError(f"Too few arguments were passed to the {function} function. The minimum argument count for the function is 1.")
+                chk_i = 0
+                while chk_i < len(arguments) and arguments[chk_i][0] == "reference":
+                    chk_i += 1
+                if chk_i >= len(arguments):
+                    raise MeasureError(f"ADDMISSINGITEMS function expects a table in argument number {chk_i + 1}.")
+                if not _is_all_table_value_argument(arguments[chk_i]):
+                    raise MeasureError(f"The function expects a table expression for argument '{chk_i + 1}', but a string or numeric expression was used.")
             elif function in _TABLE_FUNCTION_ARITY and not (
                 _TABLE_FUNCTION_ARITY[function][0] <= len(arguments)
                 and (_TABLE_FUNCTION_ARITY[function][1] is None or len(arguments) <= _TABLE_FUNCTION_ARITY[function][1])
@@ -6340,6 +6435,31 @@ def evaluate_measures(
     def table_function_rows(argument: tuple[Any, ...]) -> tuple[dict[str, Any], list[dict[str, Any]]]:
         nonlocal eff_touched
         function, arguments = argument[1], argument[2]
+        if function in {"LINEST", "LINESTX"}:
+            const_after = 3 if function == "LINESTX" else 2  # arguments that cannot be the optional const
+            has_const = len(arguments) > const_after and _linest_is_const_literal(arguments[-1])
+            if len(arguments) > const_after and not has_const and arguments[-1][0] == "var":
+                raise MeasureError("Power BI folds a variable holding TRUE() or FALSE() into LINEST's const argument; the local engine does not model that.")
+            const = bool(evaluate(arguments[-1])) if has_const else True
+            if function == "LINEST":
+                expr_args = arguments[:-1] if has_const else arguments
+                if len({resolve_table_context(col[1])["id"] for col in expr_args}) != 1:
+                    raise MeasureError("LINEST columns from different tables are not modelled in the local engine.")
+                src_table_context, iteration_rows = table_argument_value(("table", expr_args[0][1]))
+            else:
+                src_table_context, iteration_rows = table_argument_value(arguments[0])
+                expr_args = arguments[1:-1] if has_const else arguments[1:]
+            y_vals = []
+            x_cols = [[] for _ in expr_args[1:]]
+            for frame in iterate_rows(src_table_context, iteration_rows, "install"):
+                y_vals.append(_linest_number(in_row_expression(lambda frame=frame: evaluate(expr_args[0], frame, allow_text=True, allow_boolean=True))))
+                for i, x_expr in enumerate(expr_args[1:]):
+                    x_cols[i].append(_linest_number(in_row_expression(lambda frame=frame, expr=x_expr: evaluate(expr, frame, allow_text=True, allow_boolean=True))))
+            try:
+                headers, result_rows = dax_linest.solve_linest(y_vals, x_cols, const)
+            except dax_linest.LinestRefused as error:
+                raise MeasureError(str(error)) from error
+            return derived_table(headers, result_rows, lineage=None, base_types={h: "double" for h in headers}, certain_types=headers)
         if function == "TABLEOF":
             context = resolve_table_context(arguments[0][1])
             return context, list(rows_by_table_id[context["id"]])
@@ -6938,6 +7058,297 @@ def evaluate_measures(
         return derived_table(list(left_context["headers"]) + right_headers, output, lineage, {**right_types, **left_context.get("column_types", {})},
                              row_identity=(not left_context.get("derived") or bool(left_context.get("row_identity"))))
 
+    def contains_call(node: Any, names: frozenset[str], seen: tuple[str, ...] = ()) -> bool:
+        """Whether a call to one of `names` sits anywhere in the expression, also inside a VAR it reads."""
+        if isinstance(node, tuple):
+            if len(node) >= 2 and node[0] in {"call", "table_call"} and node[1] in names:
+                return True
+            if len(node) == 2 and node[0] == "var" and node[1] not in seen:
+                held = variable_nodes.get(node[1])
+                return held is not None and contains_call(held, names, (*seen, node[1]))
+        if isinstance(node, (tuple, list)):
+            return any(contains_call(child, names, seen) for child in node if isinstance(child, (tuple, list)))
+        return False
+
+    def drops_join_lineage(node: Any) -> bool:
+        """SELECTCOLUMNS (also under ADDCOLUMNS / FILTER / TOPN or in a VAR) hands Power BI's join no data lineage."""
+        return contains_call(node, frozenset({"SELECTCOLUMNS"}))
+
+    def substitute_with_index(arguments: tuple[tuple[Any, ...], ...]) -> tuple[dict[str, Any], list[dict[str, Any]]]:
+        if len(arguments) < 4:
+            raise MeasureError("Too few arguments were passed to the SUBSTITUTEWITHINDEX function. The minimum argument count for the function is 4.")
+        if arguments[1][0] not in {"string", "var"}:
+            raise MeasureError("Function SUBSTITUTEWITHINDEX expects a column name as argument number 2.")
+        index_col_val = evaluate(arguments[1])
+        if not isinstance(index_col_val, str) or not index_col_val:
+            raise MeasureError("Function SUBSTITUTEWITHINDEX expects a column name as argument number 2.")
+        index_col_name = index_col_val
+
+        if drops_join_lineage(arguments[0]) or drops_join_lineage(arguments[2]):
+            raise MeasureError("Function SubstituteWithIndex() is not able to detect common columns between its operands that could be used for join.")
+        left_context, left_rows = table_argument_value(arguments[0])
+        right_context, right_rows = table_argument_value(arguments[2])
+
+        # Power BI joins on data lineage (the loaded column a column came from), never on the column names
+        left_lineage, right_lineage = base_lineage(left_context), base_lineage(right_context)
+        right_by_source = {(source["id"], column): h for h, (source, column) in right_lineage.items()}
+        common = [(h, right_by_source[(left_lineage[h][0]["id"], left_lineage[h][1])])
+                  for h in left_context["headers"] if h in left_lineage and (left_lineage[h][0]["id"], left_lineage[h][1]) in right_by_source]
+        if not common:
+            raise MeasureError("Function SubstituteWithIndex() is not able to detect common columns between its operands that could be used for join.")
+
+        joined_left, joined_right = {l for l, _r in common}, {r.casefold() for _l, r in common}
+        if any(h not in joined_left and h.casefold() in {r.casefold() for r in right_context["headers"]} and h.casefold() not in joined_right
+               for h in left_context["headers"]):
+            # a same-named column without shared lineage (ADDCOLUMNS "k" on both sides): Power BI's join rule for it is not modelled
+            raise MeasureError("SUBSTITUTEWITHINDEX is not modelled when unrelated columns of the two tables share a name.")
+        left_types = left_context.get("column_types", {})
+        right_types = right_context.get("column_types", {})
+        for l_h, r_h in common:
+            lt = left_types.get(l_h)
+            rt = right_types.get(r_h)
+            if lt and rt:
+                l_num = lt in _COLUMN_NUMBER_TYPES
+                r_num = rt in _COLUMN_NUMBER_TYPES
+                if l_num != r_num or (lt == "date") != (rt == "date") or (lt == "boolean") != (rt == "boolean"):
+                    raise MeasureError("The column data types of the join columns do not match in SUBSTITUTEWITHINDEX.")
+
+        common_left_set = {l.casefold() for l, _r in common}
+        remaining_headers = [h for h in left_context["headers"] if h.casefold() not in common_left_set]
+
+        for h in remaining_headers:
+            bare = h[h.rfind("[") + 1:-1] if (h.endswith("]") and "[" in h) else h
+            if h.casefold() == index_col_name.casefold() or bare.casefold() == index_col_name.casefold():
+                raise MeasureError(f"Function 'SUBSTITUTEWITHINDEX' cannot add column [{index_col_name}] since it already exists.")
+
+        def parse_order_value(node: Any) -> bool:
+            if isinstance(node, tuple) and node:
+                if node[0] == "table" and str(node[1]).upper() in {"ASC", "DESC"}:
+                    return str(node[1]).upper() == "DESC"
+                if node[0] == "boolean":
+                    return not node[1]
+                if node[0] == "number":
+                    if node[1] == 1:
+                        return False
+                    if node[1] == 0:
+                        return True
+                if node[0] == "call" and node[1] in {"TRUE", "FALSE"} and not node[2]:
+                    return node[1] == "FALSE"
+            raise MeasureError("Unexpected value for ORDER argument in function. Use 0/FALSE/DESC for descending order or 1/TRUE/ASC for ascending order.")
+
+        order_args = arguments[3:]
+        keys_spec: list[tuple[Any, bool]] = []
+        i = 0
+        while i < len(order_args):
+            expr = order_args[i]
+            i += 1
+            descending = True
+            if i < len(order_args):
+                order_node = order_args[i]
+                descending = parse_order_value(order_node)
+                i += 1
+            keys_spec.append((expr, descending))
+
+        if not right_rows:
+            refuse_foreign_columns_of_empty_iteration(right_context, *(expression for expression, _d in keys_spec))
+            output_headers = remaining_headers + [index_col_name]
+            lineage = {h: base_lineage(left_context)[h] for h in remaining_headers if h in base_lineage(left_context)}
+            types = {h: left_types.get(h, "text") for h in remaining_headers}
+            types[index_col_name] = "whole_number"
+            return derived_table(output_headers, [], lineage, types, certain_types=[index_col_name])
+
+        found: list[tuple[list[Any], dict[str, Any]]] = []
+        for frame in iterate_rows(right_context, right_rows, "install"):
+            keys = []
+            for expression, _desc in keys_spec:
+                val = in_row_expression(lambda expression=expression, frame=frame: evaluate(expression, frame, allow_text=True))
+                keys.append(val)
+            found.append((keys, frame[1]))
+
+        ranked = list(found)
+        for position in range(len(keys_spec) - 1, -1, -1):
+            sample = next((item[0][position] for item in found if item[0][position] is not None), None)
+            blank = dax_typed._blank_like(sample) if sample is not None else Decimal(0)
+            ranked.sort(
+                key=lambda item, p=position, blank=blank: (column_order_key(blank if item[0][p] is None else item[0][p]), item[0][p] is not None),
+                reverse=keys_spec[position][1],
+            )
+
+        if any(ranked[n][0] == ranked[n + 1][0] for n in range(len(ranked) - 1)) and not _swi_tied_order_known(arguments[2], variable_nodes.get):
+            # rows the order expressions cannot tell apart keep the index table's own row order in Power BI, which is only
+            # modelled for a few table expressions (TOPN, SAMPLE, base tables and several-column tables lay their rows out differently)
+            raise MeasureError("The row order of this index table is not modelled in the local engine, so SUBSTITUTEWITHINDEX refuses tied order values over it.")
+        index_map: dict[tuple[Any, ...], list[int]] = {}
+        for idx, (_keys, row_dict) in enumerate(ranked):
+            typed = typed_row(right_context, row_dict)
+            k = row_key(typed[r] for _l, r in common)
+            index_map.setdefault(k, []).append(idx)
+        if any(len(positions) > 1 for positions in index_map.values()):
+            raise MeasureError(
+                "Function SubstituteWithIndex() detected more than one row in the index table matching to the current row of the original table. "
+                "Consider changing input table expressions to change join columns."
+            )
+
+        output_rows: list[dict[str, Any]] = []
+        for left_row in left_rows:
+            typed_left = typed_row(left_context, left_row)
+            left_k = row_key(typed_left[l] for l, _r in common)
+            matches = index_map.get(left_k)
+            if matches is None:
+                continue
+            if len(matches) > 1:
+                raise MeasureError(
+                    "Function SubstituteWithIndex() detected more than one row in the index table matching to the current row of the original table. "
+                    "Consider changing input table expressions to change join columns."
+                )
+            out_row = {h: typed_left[h] for h in remaining_headers}
+            out_row[index_col_name] = Decimal(matches[0])
+            output_rows.append(out_row)
+
+        output_headers = remaining_headers + [index_col_name]
+        lineage = {h: base_lineage(left_context)[h] for h in remaining_headers if h in base_lineage(left_context)}
+        types = {h: left_types.get(h, "text") for h in remaining_headers}
+        types[index_col_name] = "whole_number"
+        return derived_table(output_headers, output_rows, lineage, types, certain_types=[index_col_name])
+
+    def add_missing_items(arguments: tuple[tuple[Any, ...], ...]) -> tuple[dict[str, Any], list[dict[str, Any]]]:
+        """ADDMISSINGITEMS(showAll..., table, groupBy..., filterTable...) (live Power BI, iteration 96 Part B).
+
+        Power BI completes the table level by level in groupBy order.  A showAll level takes every value of its column that
+        exists in the model beside the values chosen for the earlier levels; any other level takes only the values the table
+        already holds there.  Where a level has no value to take, the columns from there on are BLANK.  The completed
+        combinations the table lacks are appended after its own rows; filterTable arguments filter the model rows the values
+        come from."""
+        i = 0
+        show_nodes: list[tuple[Any, ...]] = []
+        while i < len(arguments) and arguments[i][0] == "reference":
+            show_nodes.append(arguments[i])
+            i += 1
+        if i >= len(arguments):
+            raise MeasureError(f"ADDMISSINGITEMS function expects a table in argument number {i + 1}.")
+        table_node = arguments[i]
+        if not _is_all_table_value_argument(table_node):
+            raise MeasureError(f"The function expects a table expression for argument '{i + 1}', but a string or numeric expression was used.")
+        i += 1
+
+        group_nodes: list[tuple[Any, ...]] = []
+        while i < len(arguments) and arguments[i][0] == "reference":
+            group_nodes.append(arguments[i])
+            i += 1
+        filter_nodes: list[tuple[Any, ...]] = []
+        while i < len(arguments):  # a column after a filter table is an error in Power BI, as is a filter table beside no groupBy column
+            if not _is_all_table_value_argument(arguments[i]):
+                raise MeasureError(f"Function ADDMISSINGITEMS expects a table expression as argument number {i + 1}.")
+            filter_nodes.append(arguments[i])
+            i += 1
+
+        def column_key(node: tuple[Any, ...]) -> tuple[str, str]:
+            context, column = resolve_table(node[1], node[2])
+            return context["id"], column.casefold()
+
+        show_keys = [column_key(node) for node in show_nodes]
+        group_keys = [column_key(node) for node in group_nodes]
+        for position, key in enumerate(show_keys, 1):
+            if key not in group_keys:
+                raise MeasureError(f"ShowAll column of ADDMISSINGITEMS function is not found as GroupBy column in argument number {position}.")
+            if group_keys.count(key) > 1:  # only a showAll column named twice; a repeated plain groupBy column is harmless
+                raise MeasureError(f"The column '{show_nodes[position - 1][2]}' was specified more than once in the 'ADDMISSINGITEMS' function.")
+        if drops_join_lineage(table_node):
+            raise MeasureError("No common join columns detected. The join function 'ADDMISSINGITEMS' requires at-least one common join column.")
+
+        table_context, table_rows = table_argument_value(table_node)
+        if not show_nodes:
+            return table_context, table_rows
+        table_rows = [typed_row(table_context, r) for r in table_rows]  # loaded cells are text; the domain below holds typed values
+
+        headers = list(table_context["headers"])
+        table_lineage = base_lineage(table_context)
+        header_of: dict[tuple[str, str], str] = {}
+        for header in headers:
+            if header in table_lineage:
+                header_of.setdefault((table_lineage[header][0]["id"], table_lineage[header][1].casefold()), header)
+        if any(key not in header_of for key in show_keys):
+            raise MeasureError("A ShowAll column of ADDMISSINGITEMS does not exist in the table expression.")
+
+        levels: list[tuple[tuple[str, str], str, tuple[Any, ...], bool]] = []  # (column key, header of the table, reference, shown in full)
+        for node, key in zip(group_nodes, group_keys):
+            if key in header_of and all(key != level[0] for level in levels):
+                levels.append((key, header_of[key], node, key in show_keys))
+        if len({level[0][0] for level in levels}) != 1:
+            raise MeasureError("ADDMISSINGITEMS over columns of more than one table is not modelled in the local engine.")
+
+        base_name = resolve_table(levels[0][2][1], levels[0][2][2])[0]["name"]
+        width = len(levels)
+
+        def model_rows(count: int) -> list[tuple[Any, ...]]:
+            """The model rows (under the filter tables) grouped by the first `count` groupBy columns, in the order SUMMARIZE lists them."""
+            call = ("call", "SUMMARIZE", (("table", base_name), *(level[2] for level in levels[:count])))
+            if filter_nodes:
+                call = ("call", "CALCULATETABLE", (call, *filter_nodes))
+            context, rows = table_argument_value(call)
+            lineage = base_lineage(context)
+            headers_of = [
+                next((h for h in context["headers"] if h in lineage and (lineage[h][0]["id"], lineage[h][1].casefold()) == level[0]), level[2][2])
+                for level in levels[:count]
+            ]
+            return [tuple(row.get(h) for h in headers_of) for row in rows]
+
+        model_tuples = model_rows(width)
+        table_tuples = [tuple(row.get(level[1]) for level in levels) for row in table_rows]
+
+        def prefix_index(tuples: list[tuple[Any, ...]]) -> list[dict[Any, dict[Any, Any]]]:
+            index: list[dict[Any, dict[Any, Any]]] = [{} for _ in range(width)]
+            for item in tuples:
+                for depth in range(width):
+                    index[depth].setdefault(row_key(item[:depth]), {}).setdefault(row_key([item[depth]]), item[depth])
+            return index
+
+        model_index, table_index = prefix_index(model_tuples), prefix_index(table_tuples)
+
+        def complete(depth: int, prefix: tuple[Any, ...]) -> list[tuple[tuple[Any, ...], int]]:
+            """The completed combinations below `prefix`, each with how many leading values are real (the rest are BLANK placeholders)."""
+            if depth == width:
+                return [(prefix, width)]
+            shown = levels[depth][3]
+            values = list((model_index if shown else table_index)[depth].get(row_key(prefix), {}).values())
+            if not values:
+                return [] if shown or depth == 0 else [(prefix + (None,) * (width - depth), depth)]  # an empty table gives no first-level value to complete
+            completed: list[tuple[tuple[Any, ...], int]] = []
+            for value in values:
+                completed.extend(complete(depth + 1, (*prefix, value)))
+            return completed
+
+        existing_keys = {row_key(item) for item in table_tuples}
+        position_cache: dict[int, dict[Any, int]] = {}
+
+        def model_position(real: int, item: tuple[Any, ...]) -> int:
+            """Where the model rows, grouped by the first `real` groupBy columns, first reach this combination."""
+            if real not in position_cache:
+                position_cache[real] = {}
+                for position, grouped in enumerate(model_tuples if real == width else model_rows(real)):
+                    position_cache[real].setdefault(row_key(grouped[:real]), position)
+            return position_cache[real].get(row_key(item[:real]), len(model_tuples))
+
+        missing: list[tuple[int, int, dict[str, Any]]] = []
+        for item, real in complete(0, ()):
+            key = row_key(item)
+            if key not in existing_keys:
+                existing_keys.add(key)
+                new_row = {h: None for h in headers}
+                for level, value in zip(levels, item):
+                    new_row[level[1]] = value
+                # the added rows follow the order of the model rows grouped by the groupBy columns they hold
+                missing.append((model_position(real, item), len(missing), new_row))
+        missing_rows = [row for _position, _index, row in sorted(missing, key=lambda entry: entry[:2])]
+
+        return derived_table(
+            headers,
+            list(table_rows) + missing_rows,
+            lineage=table_lineage,
+            base_types=table_context.get("column_types", {}),
+            certain_types=table_context.get("explicit_types", ()),
+        )
+
     def new_table_function(function: str, arguments: tuple[tuple[Any, ...], ...]) -> tuple[dict[str, Any], list[dict[str, Any]]]:
         if function == "SUMMARIZECOLUMNS":
             return summarize_columns(arguments)
@@ -6949,6 +7360,10 @@ def evaluate_measures(
             return natural_join(arguments, function == "NATURALLEFTOUTERJOIN")
         if function in {"GENERATE", "GENERATEALL"}:
             return generate(arguments, function == "GENERATEALL")
+        if function == "SUBSTITUTEWITHINDEX":
+            return substitute_with_index(arguments)
+        if function == "ADDMISSINGITEMS":
+            return add_missing_items(arguments)
         if function == "SAMPLE":
             size_value = evaluate(arguments[0])
             if size_value is None:
@@ -7919,6 +8334,13 @@ def evaluate_measures(
             if source[0] not in {"table", "reference"}:
                 if argument[1] != "DISTINCT":
                     raise MeasureError("VALUES needs a column or a table name.")
+                def is_added(node: Any) -> bool:
+                    return isinstance(node, tuple) and len(node) >= 2 and node[0] == "call" and node[1] == "ADDMISSINGITEMS"
+
+                if (is_added(source) or (source[0] == "call" and source[1] == "SUMMARIZE" and source[2] and is_added(source[2][0]))
+                        or (source[0] == "table_call" and source[1] == "DISTINCT" and is_added(source[2]))):
+                    # live Power BI: an error when DISTINCT reads ADDMISSINGITEMS directly (also through SUMMARIZE / DISTINCT); FILTER, ADDCOLUMNS, TOPN, UNION ... around it work
+                    raise MeasureError("DISTINCT of ADDMISSINGITEMS is an error in Power BI.")
                 inner_context, inner_rows = table_argument_value(source)
                 distinct_rows: list[dict[str, Any]] = []
                 seen_inner: set[tuple[Any, ...]] = set()
@@ -13643,6 +14065,13 @@ def evaluate_measures(
                 base = resolve_table_context(str(source[1]))
                 return bool(evaluation_contexts_by_id.get(base["id"], base).get("filter_column_rows"))
 
+            # the table whose groups are listed: ADDMISSINGITEMS keeps its table's order, CALCULATETABLE hands the filter to the SUMMARIZE inside
+            group_source, group_filtered = table_node, False
+            while group_source[0] == "call" and group_source[1] in {"ADDMISSINGITEMS", "CALCULATETABLE"} and group_source[2]:
+                if group_source[1] == "CALCULATETABLE":
+                    group_filtered = True
+                group_source = next((a for a in group_source[2] if a[0] != "reference"), group_source[2][0])
+
             # The order of the rows (live Power BI, iteration 94): a filtered scan of a loaded table comes back in reverse
             # storage order after the first `max_rows` rows were cut off; a negative limit keeps the storage order.
             reverse = False
@@ -13656,11 +14085,13 @@ def evaluate_measures(
                         # row (VALUES(Region)) does not; the local filter state cannot tell them apart
                         raise MeasureError("The row order under a filter that keeps every row is not modelled in the local engine.")
                     reverse = removed
-            elif order_class == "grouped" and total_row_count > 1 and table_node[0] == "call" and table_node[1] == "SUMMARIZE" and table_node[2][0][0] == "table" and has_column_filter(table_node[2][0]) and any(
+            elif order_class == "grouped" and total_row_count > 1 and group_source[0] == "call" and group_source[1] == "SUMMARIZE" and group_source[2][0][0] == "table" and (
+                group_filtered or has_column_filter(group_source[2][0])
+            ) and any(
                 str(link[0].get("column_types", {}).get(link[1])).casefold() in _NUMERIC_KIND_BY_COLUMN_TYPE for link in (context.get("lineage") or {}).values()
             ):
                 raise MeasureError("The group order of SUMMARIZE over a numeric column under a filter is not modelled in the local engine.")
-            elif order_class == "grouped" and total_row_count > 1:
+            elif order_class == "grouped" and total_row_count > 1 and not (table_node[0] == "call" and table_node[1] in {"ADDMISSINGITEMS", "SUBSTITUTEWITHINDEX"}):
                 # live Power BI: groups whose computed columns are all BLANK come back in first-seen order, not the sorted order the local engine uses
                 lineage = context.get("lineage") or {}
                 for header in headers:
