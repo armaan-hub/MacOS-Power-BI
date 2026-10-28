@@ -1,0 +1,742 @@
+{
+ "powerbi_version": "2.157.879.0 (26.08)+da30fe74eb0b8a8786ab7326b69c400a0e951831",
+ "frozen": "2026-10-27",
+ "items": [
+  {
+   "expr": "MAXX(LINEST(Facts[Quantity],Facts[Sales]),[Slope1])",
+   "powerbi": "0.0374955783516095"
+  },
+  {
+   "expr": "CALCULATE(MAXX(LINEST(Facts[Quantity],Facts[Sales]),[Slope1]),Facts[Region]=\"East\")",
+   "powerbi": "0.0178571428571428"
+  },
+  {
+   "expr": "CALCULATE(MAXX(LINEST(Facts[Quantity],Facts[Sales]),[DegreesOfFreedom]),Facts[Region]=\"East\")",
+   "powerbi": "1"
+  },
+  {
+   "expr": "MAXX(LINESTX(FILTER(Facts,Facts[Region]=\"East\"),Facts[Quantity],Facts[Sales]),[DegreesOfFreedom])",
+   "powerbi": "1"
+  },
+  {
+   "expr": "CALCULATE(MAXX(LINESTX(Facts,Facts[Quantity],Facts[Sales]),[DegreesOfFreedom]),Facts[Region]=\"East\")",
+   "powerbi": "1"
+  },
+  {
+   "expr": "MAXX(LINESTX(DATATABLE(\"x\",DOUBLE,\"y\",DOUBLE,{{1,2},{2,4.5},{3,5},{4,9}}),[y],[x]),[Slope1])",
+   "powerbi": "2.15"
+  },
+  {
+   "expr": "MAXX(LINESTX(DATATABLE(\"x\",DOUBLE,\"y\",DOUBLE,{{1,2},{2,4.5},{3,5},{4,9}}),[y],[x]),[RegressionSumOfSquares])",
+   "powerbi": "23.1125"
+  },
+  {
+   "expr": "SUMX(Facts,MAXX(LINEST(Facts[Quantity],Facts[Sales]),[DegreesOfFreedom]))",
+   "powerbi": "24"
+  },
+  {
+   "expr": "MAXX(LINESTX(Facts,Facts[Sales],Facts[Quantity]),[DegreesOfFreedom])",
+   "powerbi": "4"
+  },
+  {
+   "expr": "MAXX(LINESTX(Facts,Facts[Sales],Facts[Quantity]),[Slope1])",
+   "powerbi": "0.757142857142857"
+  },
+  {
+   "expr": "MAXX(LINESTX(Facts,Facts[Quantity],Facts[Quantity]>2),[Slope1])",
+   "powerbi": "3"
+  },
+  {
+   "expr": "MAXX(LINESTX(Facts,Facts[Quantity],Facts[Quantity]>2),[DegreesOfFreedom])",
+   "powerbi": "4"
+  },
+  {
+   "expr": "MAXX(LINESTX(Facts,Facts[Quantity]>2,Facts[Sales]),[Slope1])",
+   "powerbi": "0.0191015210470463"
+  },
+  {
+   "expr": "MAXX(LINESTX(Facts,Facts[Quantity],IF(Facts[Quantity]>2,1,BLANK())),[Slope1])",
+   "powerbi": "3"
+  },
+  {
+   "expr": "MAXX(LINESTX(Facts,Facts[Quantity],IF(Facts[Quantity]>2,1,BLANK())),[DegreesOfFreedom])",
+   "powerbi": "4"
+  },
+  {
+   "expr": "MAXX(LINESTX(Facts,Facts[Quantity],FORMAT(Facts[Sales],\"0.0\")),[Slope1])",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 54) Cannot convert value '' of type Text to type Number.\""
+  },
+  {
+   "expr": "MAXX(LINESTX(Facts,Facts[Quantity],Facts[Note]),[Slope1])",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 54) Cannot convert value 'Paid' of type Text to type Number.\""
+  },
+  {
+   "expr": "MAXX(LINESTX(Facts,Facts[Quantity],Facts[Sales],BLANK()),[Slope1])",
+   "powerbi": "0.0374955783516095"
+  },
+  {
+   "expr": "MAXX(LINESTX(Facts,Facts[Quantity],Facts[Sales],1),[Slope1])",
+   "powerbi": "0.0374955783516095"
+  },
+  {
+   "expr": "MAXX(LINESTX(Facts,Facts[Quantity],Facts[Sales],0),[Slope1])",
+   "powerbi": "0.0374955783516095"
+  },
+  {
+   "expr": "MAXX(LINESTX(Facts,Facts[Quantity],Facts[Sales],1=1),[Slope1])",
+   "powerbi": "0.0374955783516095"
+  },
+  {
+   "expr": "MAXX(LINESTX(Facts,Facts[Quantity],Facts[Sales],FALSE()),[Intercept])",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 76) Column 'Intercept' cannot be found or may not be used in this expression.\""
+  },
+  {
+   "expr": "MAXX(LINESTX(Facts,Facts[Quantity],Facts[Sales],\"x\"),[Slope1])",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 67) Cannot convert value 'x' of type Text to type Number.\""
+  },
+  {
+   "expr": "COUNTROWS(LINESTX(FILTER(Facts,Facts[Quantity]>9),Facts[Quantity],Facts[Sales]))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MAXX(LINESTX(FILTER(Facts,Facts[Quantity]>9),Facts[Quantity],Facts[Sales]),[Slope1])",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MAXX(LINESTX(FILTER(Facts,Facts[Quantity]>3),Facts[Quantity],Facts[Sales]),[Slope1])",
+   "powerbi": "0.4"
+  },
+  {
+   "expr": "MAXX(LINESTX(FILTER(Facts,Facts[Quantity]>3),Facts[Quantity],Facts[Sales]),[DegreesOfFreedom])",
+   "powerbi": "0"
+  },
+  {
+   "expr": "MAXX(LINESTX(FILTER(Facts,Facts[Quantity]>2),Facts[Quantity],Facts[Sales]),[DegreesOfFreedom])",
+   "powerbi": "1"
+  },
+  {
+   "expr": "MAXX(LINESTX(FILTER(Facts,Facts[Quantity]>2),Facts[Quantity],Facts[Sales]),[Slope1])",
+   "powerbi": "-0.0736842105263158"
+  },
+  {
+   "expr": "MAXX(LINESTX(FILTER(Facts,Facts[Quantity]>2),Facts[Quantity],Facts[Sales]),[StandardError])",
+   "powerbi": "0.842927230423524"
+  },
+  {
+   "expr": "MAXX(LINESTX(FILTER(Facts,Facts[Quantity]>2),Facts[Quantity],Facts[Sales]),[CoefficientOfDetermination])",
+   "powerbi": "0.644736842105263"
+  },
+  {
+   "expr": "MAXX(LINESTX(FILTER(Facts,Facts[Quantity]>2),Facts[Quantity],Facts[Sales]),[FStatistic])",
+   "powerbi": "1.81481481481482"
+  },
+  {
+   "expr": "MAXX(LINEST(Facts[Quantity],Facts[Sales],Facts[Region]),[Slope1])",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 60) Cannot convert value 'East' of type Text to type Number.\""
+  },
+  {
+   "expr": "SUMX(LINESTX(Facts,Facts[Quantity],Facts[Sales]),[Slope1])",
+   "powerbi": "0.0374955783516095"
+  },
+  {
+   "expr": "MAXX(LINESTX(Facts,Facts[Quantity],Facts[Sales]),[slope1])",
+   "powerbi": "0.0374955783516095"
+  },
+  {
+   "expr": "MAXX(LINESTX(Facts,Facts[Quantity],Facts[Sales]),[Slope 1])",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 68) Column 'Slope 1' cannot be found or may not be used in this expression.\""
+  },
+  {
+   "expr": "MAXX(LINESTX(Facts,Facts[Quantity],Facts[Sales],TRUE(),TRUE()),[Slope1])",
+   "powerbi": "0.0374955783516095"
+  },
+  {
+   "expr": "MAXX(LINESTX(Facts,Facts[Quantity],Facts[Sales],FALSE(),TRUE()),[Slope1])",
+   "powerbi": "0.0374955783516095"
+  },
+  {
+   "expr": "MAXX(LINESTX(Facts,Facts[Quantity],Facts[Sales],1=0),[Intercept])",
+   "powerbi": "2.30314821365405"
+  },
+  {
+   "expr": "MAXX(LINESTX(Facts,Facts[Quantity],Facts[Sales],1=0),[Slope2])",
+   "powerbi": "0"
+  },
+  {
+   "expr": "MAXX(LINESTX(Facts,Facts[Quantity],Facts[Sales],NOT(TRUE())),[Intercept])",
+   "powerbi": "2.30314821365405"
+  },
+  {
+   "expr": "MAXX(LINESTX(Facts,Facts[Quantity],Facts[Sales],NOT(TRUE())),[Slope2])",
+   "powerbi": "0"
+  },
+  {
+   "expr": "MAXX(LINESTX(Facts,Facts[Quantity],Facts[Sales],Facts[Quantity]>2),[Slope2])",
+   "powerbi": "3.09752321981424"
+  },
+  {
+   "expr": "MAXX(LINESTX(Facts,Facts[Quantity],Facts[Sales],Facts[Quantity]>2),[DegreesOfFreedom])",
+   "powerbi": "3"
+  },
+  {
+   "expr": "MAXX(LINESTX(Facts,Facts[Quantity],Facts[Sales],IF(TRUE(),FALSE())),[Intercept])",
+   "powerbi": "2.30314821365405"
+  },
+  {
+   "expr": "VAR c=FALSE() RETURN MAXX(LINESTX(Facts,Facts[Quantity],Facts[Sales],c),[Intercept])",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 91) Column 'Intercept' cannot be found or may not be used in this expression.\""
+  },
+  {
+   "expr": "VAR c=FALSE() RETURN MAXX(LINESTX(Facts,Facts[Quantity],Facts[Sales],c),[Slope2])",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 91) Column 'Slope2' cannot be found or may not be used in this expression.\""
+  },
+  {
+   "expr": "MAXX(LINESTX(Facts,Facts[Quantity],\"3\"),[Slope1])",
+   "powerbi": "0"
+  },
+  {
+   "expr": "MAXX(LINESTX(Facts,\"3\",Facts[Sales]),[Slope1])",
+   "powerbi": "0"
+  },
+  {
+   "expr": "MAXX(LINESTX(Facts,Facts[Quantity],Facts[Sales],FALSE()),[DegreesOfFreedom])",
+   "powerbi": "5"
+  },
+  {
+   "expr": "MAXX(LINESTX(Facts,Facts[Quantity],Facts[Sales],TRUE()),[DegreesOfFreedom])",
+   "powerbi": "4"
+  },
+  {
+   "expr": "MAXX(LINESTX(Facts,Facts[Quantity],Facts[Sales],1),[DegreesOfFreedom])",
+   "powerbi": "4"
+  },
+  {
+   "expr": "MAXX(LINESTX(Facts,Facts[Quantity],Facts[Sales],1),[Slope2])",
+   "powerbi": "0"
+  },
+  {
+   "expr": "MAXX(LINESTX(Facts,Facts[Quantity],Facts[Sales],1),[Intercept])",
+   "powerbi": "2.30314821365405"
+  },
+  {
+   "expr": "MAXX(LINESTX(Facts,Facts[Quantity],Facts[Sales],FALSE(),TRUE()),[DegreesOfFreedom])",
+   "powerbi": "4"
+  },
+  {
+   "expr": "MAXX(LINESTX(Facts,Facts[Quantity],Facts[Sales],FALSE(),TRUE()),[Slope2])",
+   "powerbi": "0"
+  },
+  {
+   "expr": "MAXX(LINESTX(Facts,Facts[Quantity],Facts[Sales],FALSE(),FALSE()),[Slope2])",
+   "powerbi": "0"
+  },
+  {
+   "expr": "MAXX(LINESTX(Facts,Facts[Quantity],Facts[Sales],FALSE(),FALSE()),[Intercept])",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 84) Column 'Intercept' cannot be found or may not be used in this expression.\""
+  },
+  {
+   "expr": "MAXX(LINESTX(Facts,Facts[Quantity],TRUE()),[Slope1])",
+   "powerbi": "0"
+  },
+  {
+   "expr": "MAXX(LINESTX(Facts,Facts[Quantity],FALSE()),[Slope1])",
+   "powerbi": "0"
+  },
+  {
+   "expr": "MAXX(LINESTX(Facts,Facts[Quantity],Facts[Sales],Facts[Quantity],TRUE()),[Intercept])",
+   "powerbi": "4.44089209850063E-16"
+  },
+  {
+   "expr": "MAXX(LINESTX(Facts,Facts[Quantity],Facts[Sales],Facts[Quantity],FALSE()),[Intercept])",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 92) Column 'Intercept' cannot be found or may not be used in this expression.\""
+  },
+  {
+   "expr": "MAXX(LINESTX(Facts,Facts[Quantity],Facts[Sales],Facts[Quantity],FALSE()),[Slope3])",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 92) Column 'Slope3' cannot be found or may not be used in this expression.\""
+  },
+  {
+   "expr": "ISINT64(MAXX(LINESTX(Facts,Facts[Quantity],Facts[Sales]),[DegreesOfFreedom]))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISDOUBLE(MAXX(LINESTX(Facts,Facts[Quantity],Facts[Sales]),[DegreesOfFreedom]))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISDOUBLE(MAXX(LINESTX(Facts,Facts[Quantity],Facts[Sales]),[Slope1]))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISINT64(MAXX(LINESTX(Facts,Facts[Quantity],Facts[Sales]),[Slope1]))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR c=FALSE() RETURN MAXX(LINEST(Facts[Quantity],Facts[Sales],c),[Slope1])",
+   "powerbi": "0.177349397590361"
+  },
+  {
+   "expr": "VAR c=FALSE() RETURN MAXX(LINEST(Facts[Quantity],Facts[Sales],c),[Intercept])",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 84) Column 'Intercept' cannot be found or may not be used in this expression.\""
+  },
+  {
+   "expr": "MAXX(LINEST(Facts[Quantity],Facts[Sales],1),[Slope1])",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 60) The LINEST function only accepts a column reference as the argument number 3.\""
+  },
+  {
+   "expr": "MAXX(LINEST(Facts[Quantity],Facts[Sales],\"x\"),[Slope1])",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 60) The LINEST function only accepts a column reference as the argument number 3.\""
+  },
+  {
+   "expr": "MAXX(LINESTX(Facts,Facts[Quantity],Facts[Sales],\"1\"),[Slope1])",
+   "powerbi": "0.0374955783516095"
+  },
+  {
+   "expr": "MAXX(LINESTX(Facts,Facts[Quantity],Facts[Sales]*1),[DegreesOfFreedom])",
+   "powerbi": "4"
+  },
+  {
+   "expr": "MAXX(LINESTX(Facts,Facts[Quantity]*1.5,Facts[Sales]),[Slope1])",
+   "powerbi": "0.0562433675274142"
+  },
+  {
+   "expr": "MAXX(LINESTX(Facts,Facts[Quantity],Facts[Sales]/2,Facts[Quantity]*Facts[Quantity]),[Slope3])",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 102) Column 'Slope3' cannot be found or may not be used in this expression.\""
+  },
+  {
+   "expr": "MAXX(LINESTX(Facts,Facts[Quantity],Facts[Sales]/2,Facts[Quantity]*Facts[Quantity]),[StandardErrorSlope2])",
+   "powerbi": "0.0236463841367875"
+  },
+  {
+   "expr": "MAXX(LINESTX(Facts,Facts[Quantity],Facts[Sales]/2,Facts[Quantity]*Facts[Quantity]),[FStatistic])",
+   "powerbi": "31.4627135147408"
+  },
+  {
+   "expr": "MAXX(LINESTX(Facts,Facts[Quantity],Facts[Sales]/2,Facts[Quantity]*Facts[Quantity],FALSE()),[Slope2])",
+   "powerbi": "0.211990866528468"
+  },
+  {
+   "expr": "MAXX(LINESTX(Facts,Facts[Quantity],Facts[Sales]/2,Facts[Quantity]*Facts[Quantity],FALSE()),[RegressionSumOfSquares])",
+   "powerbi": "53.3742934972231"
+  },
+  {
+   "expr": "MAXX(LINESTX(Facts,Facts[Sales],Facts[Quantity],Facts[Quantity]*Facts[Quantity]),[StandardErrorIntercept])",
+   "powerbi": "7.48265568193685"
+  },
+  {
+   "expr": "ISDOUBLE(MAXX(LINESTX(Facts,Facts[Quantity],Facts[Sales]),[Intercept]))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISINT64(MAXX(LINESTX(Facts,Facts[Quantity],Facts[Sales]),[Intercept]))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISDOUBLE(MAXX(LINESTX(Facts,Facts[Quantity],Facts[Sales]),[StandardErrorSlope1]))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISINT64(MAXX(LINESTX(Facts,Facts[Quantity],Facts[Sales]),[StandardErrorSlope1]))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISDOUBLE(MAXX(LINESTX(Facts,Facts[Quantity],Facts[Sales]),[StandardErrorIntercept]))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISINT64(MAXX(LINESTX(Facts,Facts[Quantity],Facts[Sales]),[StandardErrorIntercept]))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISDOUBLE(MAXX(LINESTX(Facts,Facts[Quantity],Facts[Sales]),[CoefficientOfDetermination]))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISINT64(MAXX(LINESTX(Facts,Facts[Quantity],Facts[Sales]),[CoefficientOfDetermination]))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISDOUBLE(MAXX(LINESTX(Facts,Facts[Quantity],Facts[Sales]),[StandardError]))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISINT64(MAXX(LINESTX(Facts,Facts[Quantity],Facts[Sales]),[StandardError]))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISDOUBLE(MAXX(LINESTX(Facts,Facts[Quantity],Facts[Sales]),[FStatistic]))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISINT64(MAXX(LINESTX(Facts,Facts[Quantity],Facts[Sales]),[FStatistic]))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISDOUBLE(MAXX(LINESTX(Facts,Facts[Quantity],Facts[Sales]),[RegressionSumOfSquares]))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISINT64(MAXX(LINESTX(Facts,Facts[Quantity],Facts[Sales]),[RegressionSumOfSquares]))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISDOUBLE(MAXX(LINESTX(Facts,Facts[Quantity],Facts[Sales]),[ResidualSumOfSquares]))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISINT64(MAXX(LINESTX(Facts,Facts[Quantity],Facts[Sales]),[ResidualSumOfSquares]))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISDOUBLE(MAXX(LINEST(Facts[Quantity],Facts[Sales]),[Slope1]))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISINT64(MAXX(LINEST(Facts[Quantity],Facts[Sales]),[Slope1]))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISDOUBLE(MAXX(LINEST(Facts[Quantity],Facts[Sales]),[Intercept]))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISINT64(MAXX(LINEST(Facts[Quantity],Facts[Sales]),[Intercept]))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISDOUBLE(MAXX(LINEST(Facts[Quantity],Facts[Sales]),[StandardErrorSlope1]))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISINT64(MAXX(LINEST(Facts[Quantity],Facts[Sales]),[StandardErrorSlope1]))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISDOUBLE(MAXX(LINEST(Facts[Quantity],Facts[Sales]),[StandardErrorIntercept]))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISINT64(MAXX(LINEST(Facts[Quantity],Facts[Sales]),[StandardErrorIntercept]))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISDOUBLE(MAXX(LINEST(Facts[Quantity],Facts[Sales]),[CoefficientOfDetermination]))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISINT64(MAXX(LINEST(Facts[Quantity],Facts[Sales]),[CoefficientOfDetermination]))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISDOUBLE(MAXX(LINEST(Facts[Quantity],Facts[Sales]),[StandardError]))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISINT64(MAXX(LINEST(Facts[Quantity],Facts[Sales]),[StandardError]))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISDOUBLE(MAXX(LINEST(Facts[Quantity],Facts[Sales]),[FStatistic]))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISINT64(MAXX(LINEST(Facts[Quantity],Facts[Sales]),[FStatistic]))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISDOUBLE(MAXX(LINEST(Facts[Quantity],Facts[Sales]),[DegreesOfFreedom]))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISINT64(MAXX(LINEST(Facts[Quantity],Facts[Sales]),[DegreesOfFreedom]))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISDOUBLE(MAXX(LINEST(Facts[Quantity],Facts[Sales]),[RegressionSumOfSquares]))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISINT64(MAXX(LINEST(Facts[Quantity],Facts[Sales]),[RegressionSumOfSquares]))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISDOUBLE(MAXX(LINEST(Facts[Quantity],Facts[Sales]),[ResidualSumOfSquares]))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISINT64(MAXX(LINEST(Facts[Quantity],Facts[Sales]),[ResidualSumOfSquares]))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISDOUBLE(MAXX(LINEST(Facts[Sales],Facts[Quantity],FALSE()),[Slope1]))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISINT64(MAXX(LINEST(Facts[Sales],Facts[Quantity],FALSE()),[Slope1]))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISDOUBLE(MAXX(LINEST(Facts[Sales],Facts[Quantity],FALSE()),[Intercept]))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 78) Column 'Intercept' cannot be found or may not be used in this expression.\""
+  },
+  {
+   "expr": "ISINT64(MAXX(LINEST(Facts[Sales],Facts[Quantity],FALSE()),[Intercept]))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 77) Column 'Intercept' cannot be found or may not be used in this expression.\""
+  },
+  {
+   "expr": "ISDOUBLE(MAXX(LINEST(Facts[Sales],Facts[Quantity],FALSE()),[StandardErrorSlope1]))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISINT64(MAXX(LINEST(Facts[Sales],Facts[Quantity],FALSE()),[StandardErrorSlope1]))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISDOUBLE(MAXX(LINEST(Facts[Sales],Facts[Quantity],FALSE()),[StandardErrorIntercept]))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 78) Column 'StandardErrorIntercept' cannot be found or may not be used in this expression.\""
+  },
+  {
+   "expr": "ISINT64(MAXX(LINEST(Facts[Sales],Facts[Quantity],FALSE()),[StandardErrorIntercept]))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 77) Column 'StandardErrorIntercept' cannot be found or may not be used in this expression.\""
+  },
+  {
+   "expr": "ISDOUBLE(MAXX(LINEST(Facts[Sales],Facts[Quantity],FALSE()),[CoefficientOfDetermination]))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISINT64(MAXX(LINEST(Facts[Sales],Facts[Quantity],FALSE()),[CoefficientOfDetermination]))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISDOUBLE(MAXX(LINEST(Facts[Sales],Facts[Quantity],FALSE()),[StandardError]))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISINT64(MAXX(LINEST(Facts[Sales],Facts[Quantity],FALSE()),[StandardError]))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISDOUBLE(MAXX(LINEST(Facts[Sales],Facts[Quantity],FALSE()),[FStatistic]))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISINT64(MAXX(LINEST(Facts[Sales],Facts[Quantity],FALSE()),[FStatistic]))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISDOUBLE(MAXX(LINEST(Facts[Sales],Facts[Quantity],FALSE()),[DegreesOfFreedom]))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISINT64(MAXX(LINEST(Facts[Sales],Facts[Quantity],FALSE()),[DegreesOfFreedom]))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISDOUBLE(MAXX(LINEST(Facts[Sales],Facts[Quantity],FALSE()),[RegressionSumOfSquares]))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISINT64(MAXX(LINEST(Facts[Sales],Facts[Quantity],FALSE()),[RegressionSumOfSquares]))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISDOUBLE(MAXX(LINEST(Facts[Sales],Facts[Quantity],FALSE()),[ResidualSumOfSquares]))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISINT64(MAXX(LINEST(Facts[Sales],Facts[Quantity],FALSE()),[ResidualSumOfSquares]))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "MAXX(LINESTX(Facts,Facts[Quantity],FORMAT(Facts[Quantity],\"0\")),[Slope1])",
+   "powerbi": "1"
+  },
+  {
+   "expr": "MAXX(LINESTX(Facts,FORMAT(Facts[Quantity],\"0\"),Facts[Sales]),[Slope1])",
+   "powerbi": "0.0374955783516095"
+  },
+  {
+   "expr": "MAXX(LINESTX(Facts,Facts[Quantity],Facts[Sales],Facts[Quantity]>2,FALSE()),[Slope2])",
+   "powerbi": "3.95714285714286"
+  },
+  {
+   "expr": "MAXX(LINESTX(Facts,Facts[Quantity],Facts[Sales],Facts[Quantity]>2,FALSE()),[Intercept])",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 94) Column 'Intercept' cannot be found or may not be used in this expression.\""
+  },
+  {
+   "expr": "MAXX(LINESTX(Facts,Facts[Quantity],Facts[Sales],Facts[Quantity]>2,TRUE()),[Intercept])",
+   "powerbi": "1.06501547987616"
+  },
+  {
+   "expr": "MAXX(LINESTX(Facts,Facts[Quantity],Facts[Sales],Facts[Quantity]>2,TRUE()),[Slope3])",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 93) Column 'Slope3' cannot be found or may not be used in this expression.\""
+  },
+  {
+   "expr": "MAXX(LINESTX(Facts,Facts[Quantity]>2,Facts[Sales],FALSE()),[Slope1])",
+   "powerbi": "0.0433734939759036"
+  },
+  {
+   "expr": "MAXX(LINESTX(ROW(\"a\",1,\"b\",2),[a],[b]),[Slope1])",
+   "powerbi": "0"
+  },
+  {
+   "expr": "MAXX(LINESTX(GENERATESERIES(1,8),SIN([Value]),[Value]),[Slope1])",
+   "powerbi": "-0.0201199000709245"
+  },
+  {
+   "expr": "MAXX(LINESTX(GENERATESERIES(1,8),SIN([Value]),[Value]),[Intercept])",
+   "powerbi": "0.283425924927363"
+  },
+  {
+   "expr": "MAXX(LINESTX(GENERATESERIES(1,8),SIN([Value]),[Value]),[StandardError])",
+   "powerbi": "0.838747752557943"
+  },
+  {
+   "expr": "MAXX(LINESTX(GENERATESERIES(1,8),SIN([Value]),[Value],FALSE()),[Slope1])",
+   "powerbi": "0.0298964396221396"
+  },
+  {
+   "expr": "MAXX(LINESTX(GENERATESERIES(1,8),SIN([Value]),[Value],[Value]*[Value]),[Slope2])",
+   "powerbi": "0.139140529558547"
+  },
+  {
+   "expr": "MAXX(LINESTX(GENERATESERIES(1,20),LN([Value]),SQRT([Value])),[CoefficientOfDetermination])",
+   "powerbi": "0.957653050405896"
+  },
+  {
+   "expr": "MAXX(LINESTX(GENERATESERIES(1,20),LN([Value]),SQRT([Value])),[FStatistic])",
+   "powerbi": "407.060132371517"
+  },
+  {
+   "expr": "MAXX(LINESTX(GENERATESERIES(1,20),LN([Value]),SQRT([Value])),[DegreesOfFreedom])",
+   "powerbi": "18"
+  },
+  {
+   "expr": "MAXX(LINESTX(CALENDAR(DATE(2020,1,1),DATE(2020,1,10)),[Date],DAY([Date])),[Slope1])",
+   "powerbi": "1"
+  },
+  {
+   "expr": "MAXX(LINESTX(Facts,Facts[Quantity],Facts[Sales],BLANK()),[Slope2])",
+   "powerbi": "0"
+  },
+  {
+   "expr": "MAXX(LINESTX(Facts,Facts[Quantity],Facts[Sales],BLANK()),[DegreesOfFreedom])",
+   "powerbi": "4"
+  },
+  {
+   "expr": "MAXX(LINESTX(Facts,BLANK(),Facts[Sales]),[Slope1])",
+   "powerbi": "0"
+  },
+  {
+   "expr": "MAXX(LINEST(Facts[Quantity],Facts[Sales],Facts[Sales]),[Slope1])",
+   "powerbi": "0.0374955783516095"
+  },
+  {
+   "expr": "MAXX(LINEST(Facts[Quantity],Facts[Sales],Facts[Sales]),[DegreesOfFreedom])",
+   "powerbi": "4"
+  },
+  {
+   "expr": "MAXX(LINEST(Facts[Quantity],Facts[Sales],Facts[Sales]),[Slope2])",
+   "powerbi": "0"
+  },
+  {
+   "expr": "MAXX(LINEST(Facts[Quantity],Facts[Nope]),[Slope1])",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 47) Column 'Nope' in table 'Facts' cannot be found or may not be used in this expression.\""
+  },
+  {
+   "expr": "MAXX(LINEST(Facts[Quantity],Facts[Sales]),[DEGREESOFFREEDOM])",
+   "powerbi": "4"
+  },
+  {
+   "expr": "MAXX(LINEST(Facts[Quantity],Facts[Sales]),[Slope1],[Slope1])",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 19) The 3 argument to the MAXX function contains a flag that is not supported.\""
+  },
+  {
+   "expr": "COUNTROWS(LINEST(Facts[Quantity],Facts[Sales]))",
+   "powerbi": "1"
+  },
+  {
+   "expr": "COUNTROWS(SELECTCOLUMNS(LINEST(Facts[Quantity],Facts[Sales]),\"s\",[Slope1]))",
+   "powerbi": "1"
+  },
+  {
+   "expr": "MAXX(SELECTCOLUMNS(LINEST(Facts[Quantity],Facts[Sales]),\"s\",[Slope1]*2),[s])",
+   "powerbi": "0.074991156703219"
+  },
+  {
+   "expr": "MAXX(FILTER(LINEST(Facts[Quantity],Facts[Sales]),[Slope1]>0),[Slope1])",
+   "powerbi": "0.0374955783516095"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(LINEST(Facts[Quantity],Facts[Sales]),[Slope1]>1))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTROWS(CROSSJOIN(LINEST(Facts[Quantity],Facts[Sales]),LINEST(Facts[Sales],Facts[Quantity])))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 76) Function CROSSJOIN does not allow two columns with the same name ''[Slope1].\""
+  },
+  {
+   "expr": "MAXX(UNION(LINEST(Facts[Quantity],Facts[Sales]),LINEST(Facts[Sales],Facts[Quantity])),[Slope1])",
+   "powerbi": "0.757142857142857"
+  },
+  {
+   "expr": "MINX(UNION(LINEST(Facts[Quantity],Facts[Sales]),LINEST(Facts[Sales],Facts[Quantity])),[Slope1])",
+   "powerbi": "0.0374955783516095"
+  },
+  {
+   "expr": "COUNTROWS(UNION(LINEST(Facts[Quantity],Facts[Sales]),LINEST(Facts[Sales],Facts[Quantity])))",
+   "powerbi": "2"
+  },
+  {
+   "expr": "ISBLANK(MAXX(LINESTX(FILTER(Facts,FALSE()),Facts[Quantity],Facts[Sales]),[Slope1]))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISEMPTY(LINESTX(FILTER(Facts,FALSE()),Facts[Quantity],Facts[Sales]))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISEMPTY(LINESTX(Facts,Facts[Quantity],Facts[Sales]))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "CONTAINS(LINEST(Facts[Quantity],Facts[Sales]),[DegreesOfFreedom],4)",
+   "powerbi": "True"
+  },
+  {
+   "expr": "LOOKUPVALUE(Facts[Region],Facts[Quantity],MAXX(LINESTX(Facts,Facts[Quantity],Facts[Sales]),[DegreesOfFreedom]))",
+   "powerbi": "North"
+  },
+  {
+   "expr": "IF(MAXX(LINEST(Facts[Quantity],Facts[Sales]),[CoefficientOfDetermination])>0.5,\"fit\",\"weak\")",
+   "powerbi": "weak"
+  },
+  {
+   "expr": "FORMAT(MAXX(LINEST(Facts[Quantity],Facts[Sales]),[Slope1]),\"0.0000\")",
+   "powerbi": "0.0375"
+  },
+  {
+   "expr": "ROUND(MAXX(LINEST(Facts[Quantity],Facts[Sales]),[Intercept]),6)",
+   "powerbi": "2.303148"
+  },
+  {
+   "expr": "MAXX(LINEST(Facts[Quantity],Facts[Sales]),[Intercept]+[Slope1]*10)",
+   "powerbi": "2.67810399717014"
+  },
+  {
+   "expr": "MAXX(LINEST(Facts[Quantity],Facts[Sales]),ABS([Slope1])+SQRT([FStatistic]))",
+   "powerbi": "0.379367034022762"
+  },
+  {
+   "expr": "AVERAGEX(LINEST(Facts[Quantity],Facts[Sales]),[Slope1])",
+   "powerbi": "0.0374955783516095"
+  },
+  {
+   "expr": "MAXX(ADDCOLUMNS(LINEST(Facts[Quantity],Facts[Sales]),\"p\",[Intercept]+[Slope1]*20),[p])",
+   "powerbi": "3.05305978068624"
+  },
+  {
+   "expr": "SUMX(ADDCOLUMNS(LINESTX(Facts,Facts[Sales],Facts[Quantity]),\"t\",[Slope1]/[StandardErrorSlope1]),[t])",
+   "powerbi": "0.341871455671152"
+  }
+ ]
+}

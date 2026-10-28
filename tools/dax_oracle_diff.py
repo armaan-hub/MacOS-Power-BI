@@ -43,7 +43,7 @@ FACTS_DAX = "UNION(" + ",".join(_dax_row(r) for r in ROWS) + ")"
 
 PS_HEAD = r"""
 $ProgressPreference='SilentlyContinue'
-$p=Split-Path (Get-Process PBIDesktop).Path
+$p=Split-Path (Get-Process PBIDesktop | Select-Object -First 1).Path
 Add-Type -Path "$p\Microsoft.PowerBI.AdomdClient.dll"
 $c=New-Object Microsoft.AnalysisServices.AdomdClient.AdomdConnection("Data Source=localhost:__PORT__")
 $c.Open()
@@ -72,7 +72,8 @@ def guest(script: str) -> str:
 
 
 def port() -> str:
-    out = guest("(Get-NetTCPConnection -State Listen -OwningProcess (Get-Process msmdsrv).Id | Select -First 1).LocalPort")
+    # always the oldest Power BI instance, so a second project opened later on the guest is never touched
+    out = guest("(Get-NetTCPConnection -State Listen -OwningProcess (Get-Process msmdsrv | Sort-Object StartTime | Select-Object -First 1).Id | Select -First 1).LocalPort")
     return out.strip().splitlines()[-1].strip()
 
 

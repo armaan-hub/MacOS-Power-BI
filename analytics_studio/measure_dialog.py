@@ -461,6 +461,10 @@ DAX_FUNCTION_TEMPLATES.update({
     "ALLCROSSFILTERED": ("ALLCROSSFILTERED('Table')", "'Table'"),
     "TOCSV": ("TOCSV('Table', max_rows, delimiter, include_headers)", "'Table'"),
     "TOJSON": ("TOJSON('Table', max_rows)", "'Table'"),
+    "LINEST": ("LINEST('Table'[ColumnY], 'Table'[ColumnX1])", "'Table'[ColumnY]"),
+    "LINESTX": ("LINESTX('Table', expressionY, expressionX1)", "'Table'"),
+    "SUBSTITUTEWITHINDEX": ("SUBSTITUTEWITHINDEX('Table', \"IndexColumnName\", 'IndexTable', 'Table'[OrderByColumn])", "'Table'"),
+    "ADDMISSINGITEMS": ("ADDMISSINGITEMS('Table'[ShowAllColumn], 'Table', 'Table'[GroupByColumn])", "'Table'[ShowAllColumn]"),
 })
 
 

@@ -26,7 +26,7 @@ def main() -> None:
     with open(LOCK, "w") as lock:
         fcntl.flock(lock, fcntl.LOCK_EX)
         p = dax.port()
-        version = dax.guest("(Get-Item (Get-Process PBIDesktop).Path).VersionInfo.ProductVersion").strip().splitlines()[-1]
+        version = dax.guest("(Get-Item (Get-Process PBIDesktop | Select-Object -First 1).Path).VersionInfo.ProductVersion").strip().splitlines()[-1]
         if use_facts:
             dax.ensure_facts(p)
         try:
