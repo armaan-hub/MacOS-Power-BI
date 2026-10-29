@@ -465,6 +465,11 @@ DAX_FUNCTION_TEMPLATES.update({
     "LINESTX": ("LINESTX('Table', expressionY, expressionX1)", "'Table'"),
     "SUBSTITUTEWITHINDEX": ("SUBSTITUTEWITHINDEX('Table', \"IndexColumnName\", 'IndexTable', 'Table'[OrderByColumn])", "'Table'"),
     "ADDMISSINGITEMS": ("ADDMISSINGITEMS('Table'[ShowAllColumn], 'Table', 'Table'[GroupByColumn])", "'Table'[ShowAllColumn]"),
+    "ROLLUP": ("ROLLUP('Table'[Column1], 'Table'[Column2])", "'Table'[Column1]"),
+    "ROLLUPGROUP": ("ROLLUPGROUP('Table'[Column1], 'Table'[Column2])", "'Table'[Column1]"),
+    "ROLLUPADDISSUBTOTAL": ("ROLLUPADDISSUBTOTAL('Table'[Column1], \"SubtotalName\")", "'Table'[Column1]"),
+    "ROLLUPISSUBTOTAL": ("ROLLUPISSUBTOTAL('Table'[Column1], [SubtotalColumn])", "'Table'[Column1]"),
+    "ISSUBTOTAL": ("ISSUBTOTAL('Table'[Column1])", "'Table'[Column1]"),
 })
 
 

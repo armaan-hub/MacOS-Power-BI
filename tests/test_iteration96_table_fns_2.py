@@ -114,5 +114,53 @@ class TableFns2PartBTest(unittest.TestCase):
             )
 
 
+STAYS_REFUSED_PART_C = [
+    # KEEPFILTERS directly inside COUNTROWS (not a table scan function)
+    'COUNTROWS(KEEPFILTERS(VALUES(Facts[Region])))',
+    # ROLLUPGROUP directly inside SUMMARIZECOLUMNS (not inside ROLLUPADDISSUBTOTAL)
+    'TOCSV(SUMMARIZECOLUMNS(ROLLUPGROUP(Facts[Region],Facts[Note]),"s",SUM(Facts[Quantity])))',
+    # Standalone ROLLUP without SUMMARIZE
+    'COUNTROWS(ROLLUP(Facts[Region]))',
+    'TOCSV(ROLLUP(Facts[Region]))',
+    # Standalone ROLLUPADDISSUBTOTAL without SUMMARIZECOLUMNS
+    'COUNTROWS(ROLLUPADDISSUBTOTAL(Facts[Region],"t"))',
+    'TOCSV(ROLLUPADDISSUBTOTAL(Facts[Region],"t"))',
+    # Standalone ISSUBTOTAL outside SUMMARIZE
+    'IF(FALSE(),ISSUBTOTAL(Facts[Region]))',
+]
+
+
+class TableFns2PartCTest(unittest.TestCase):
+    def test_battery_part_c_items_match(self) -> None:
+        """Every Part C item (ROLLUP family, KEEPFILTERS in iterators) in dax_battery_table_fns2.json must match Power BI."""
+        battery_path = Path(__file__).resolve().parents[1] / "tools" / "parity" / "dax_battery_table_fns2.json"
+        saved = json.loads(battery_path.read_text())
+        c_items = [
+            item for item in saved["items"]
+            if "SUBSTITUTEWITHINDEX" not in item["expr"] and "ADDMISSINGITEMS" not in item["expr"]
+        ]
+        self.assertEqual(len(c_items), 23, f"Expected 23 Part C items, found {len(c_items)}")
+
+        mismatches = []
+        for item in c_items:
+            expr = item["expr"]
+            expected = item["powerbi"]
+            actual = dax.local(expr)
+            st = status(expected, actual)
+            if st != "match":
+                mismatches.append((expr, expected, actual, st))
+        self.assertEqual([], mismatches, f"Mismatches found in Part C: {len(mismatches)} of {len(c_items)}")
+
+    def test_part_c_refusals_stay_refused(self) -> None:
+        """Explicit check for refused negative cases in Part C."""
+        for expr in STAYS_REFUSED_PART_C:
+            res = dax.local(expr)
+            self.assertTrue(
+                res.startswith("LOCAL-REJECT") or res.startswith("ERR:"),
+                f"Expected refusal (LOCAL-REJECT or ERR:) for {expr}, got {res}",
+            )
+
+
 if __name__ == "__main__":
     unittest.main()
+

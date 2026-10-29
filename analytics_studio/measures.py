@@ -306,7 +306,7 @@ _TABLE_FUNCTION_ARITY = {
     "ADDMISSINGITEMS": (1, None),
 }
 # only meaningful inside SUMMARIZECOLUMNS (IGNORE, NONVISUAL) and GROUPBY (CURRENTGROUP); elsewhere they raise
-_FUNCTIONS |= {"IGNORE", "NONVISUAL", "CURRENTGROUP"}
+_FUNCTIONS |= {"IGNORE", "NONVISUAL", "CURRENTGROUP", "ROLLUP", "ROLLUPGROUP", "ROLLUPADDISSUBTOTAL", "ROLLUPISSUBTOTAL", "ISSUBTOTAL"}
 _NEW_TABLE_FUNCTIONS = {
     "SUMMARIZECOLUMNS", "GROUPBY", "TREATAS", "NATURALINNERJOIN", "NATURALLEFTOUTERJOIN", "SAMPLE", "GENERATE",
     "GENERATEALL", "DATATABLE", "CALENDAR", "TOPNSKIP", "FILTERS", "INDEX", "OFFSET", "WINDOW",
@@ -1429,6 +1429,19 @@ def _is_all_table_value_argument(node: Any) -> bool:
             return True
         except MeasureError:
             return len(node[2]) == 2 and _is_all_table_value_argument(node[2][0])
+    if node[0] == "call":
+        if node[1] == "ROLLUP":
+            raise MeasureError("ROLLUP function can only be used on groupBy_ColumnName parameters of the SUMMARIZE function.")
+        if node[1] == "ROLLUPGROUP":
+            raise MeasureError("ROLLUPGROUP function can only be used in the ROLLUP function.")
+        if node[1] == "ROLLUPADDISSUBTOTAL":
+            raise MeasureError("ROLLUPADDISSUBTOTAL function can only be used in the SUMMARIZECOLUMNS function.")
+        if node[1] == "ROLLUPISSUBTOTAL":
+            raise MeasureError("ROLLUPISSUBTOTAL function can only be used in the ADDMISSINGITEMS function.")
+        if node[1] == "ISSUBTOTAL":
+            raise MeasureError("ISSUBTOTAL function can only be used in the SUMMARIZE function.")
+        if node[1] == "KEEPFILTERS" and len(node[2]) == 1:
+            return _is_all_table_value_argument(node[2][0])
     if node[0] == "call" and (node[1] in _TABLE_FUNCTION_ARITY or node[1] in dax_time_sets.SET_FUNCTIONS or node[1] in _NONBLANK_TABLES):
         return True
     if node[0] == "call" and node[1] == "ALLEXCEPT":
@@ -1755,7 +1768,7 @@ _BOOLEAN_FILTER_REFUSED_CALLS = frozenset({
     "GROUPBY", "EXCEPT", "INTERSECT", "ROW", "SAMPLE", "TOPNSKIP", "RANKX", "FIRSTNONBLANK", "LASTNONBLANK",
     "OFFSET", "WINDOW", "INDEX", "RANK", "ROWNUMBER", "CONTAINS",  # CONTAINS: live probes, iteration 87 (also inside IF and arithmetic)
     "TABLEOF", "ALLCROSSFILTERED", "TOCSV", "TOJSON", "LINEST", "LINESTX", "SUBSTITUTEWITHINDEX",
-    "ADDMISSINGITEMS",
+    "ADDMISSINGITEMS", "ROLLUP", "ROLLUPGROUP", "ROLLUPADDISSUBTOTAL", "ROLLUPISSUBTOTAL",
 })
 _BOOLEAN_FILTER_X_ITERATORS = frozenset({"SUMX", "AVERAGEX", "MAXX", "MINX", "COUNTX", "COUNTAX", "CONCATENATEX", "XNPV", *dax_math.STAT_ITERATORS})
 
@@ -2224,6 +2237,127 @@ def _swi_tied_order_known(node: tuple[Any, ...], lookup: Any) -> bool:
     return False
 
 
+def _sc_pure_aggregate(node: Any) -> bool:
+    """An expression Power BI computes in the one grouping query that also builds the subtotals (live Power BI, Part C review): it is
+    BLANK when the aggregates in it are. A plain aggregate of a column, COUNTROWS / an iterator over the plain table (or a FILTER of
+    it), ABS / ROUND / minus of such an aggregate, * and / with a number, and + - * of two of them. x + 1, an IF, a comparison, a
+    text join or a constant is never BLANK for a group without rows and is built another way."""
+    if not isinstance(node, tuple) or not node:
+        return False
+    if node[0] == "unary" and node[1] == "-":
+        return _sc_pure_aggregate(node[2])
+    if node[0] == "binary":
+        left, right = node[2], node[3]
+        if node[1] in {"+", "-"}:
+            return _sc_pure_aggregate(left) and _sc_pure_aggregate(right)
+        if node[1] == "*":
+            return (_sc_pure_aggregate(left) and (_sc_pure_aggregate(right) or right[0] == "number")) or (left[0] == "number" and _sc_pure_aggregate(right))
+        if node[1] == "/":
+            return _sc_pure_aggregate(left) and (_sc_pure_aggregate(right) or right[0] == "number")
+        return False
+    if node[0] != "call":
+        return False
+    name, arguments = node[1], node[2]
+    if name in {"SUM", "COUNT", "MIN", "MAX", "AVERAGE"}:
+        return len(arguments) == 1 and arguments[0][0] == "reference" and bool(arguments[0][1])
+    if name == "COUNTROWS":
+        return len(arguments) == 1 and _rollup_expression_ok(node) and (arguments[0][0] == "table" or arguments[0][1] == "FILTER")
+    if name in {"SUMX", "AVERAGEX", "MAXX", "MINX", "COUNTX"}:
+        if not (_rollup_expression_ok(node) and len(arguments) == 2):
+            return False
+        body = arguments[1]
+        return body[0] == "reference" or (
+            body[0] == "binary" and body[1] == "*" and {body[2][0], body[3][0]} <= {"reference", "number"} and "reference" in {body[2][0], body[3][0]}
+        )
+    if name == "ABS":
+        return len(arguments) == 1 and _sc_pure_aggregate(arguments[0])
+    if name == "ROUND":
+        return len(arguments) == 2 and _sc_pure_aggregate(arguments[0]) and arguments[1][0] == "number"
+    if name == "DIVIDE":
+        return len(arguments) == 2 and _sc_pure_aggregate(arguments[0]) and (_sc_pure_aggregate(arguments[1]) or arguments[1][0] == "number")
+    return False
+
+
+def _sc_rollup_order_rule(expressions: list[Any]) -> str:
+    """How SUMMARIZECOLUMNS orders the subtotal rows of ROLLUPADDISSUBTOTAL (live Power BI, Part C review): "first" lists each
+    subtotal level in the order its combinations first appear in the detail rows (all expressions are aggregates the grouping query
+    computes in one pass); "dictionary" lists each level on its own in dictionary order (no expression, or expressions evaluated per
+    level). Anything that reads the filter state of a group column changes the order of the detail rows too and is refused."""
+    for expression in expressions:
+        if not _rollup_expression_ok(expression) or _contains_function_call(expression, "ISSUBTOTAL"):
+            raise MeasureError("Subtotal rows of SUMMARIZECOLUMNS are modelled only for aggregate expressions (SUM, COUNTROWS, MIN, MAX, AVERAGE ...).")
+        if any(_contains_function_call(expression, name) for name in ("DISTINCTCOUNT", "COUNTA", "COUNTBLANK")):
+            raise MeasureError("The row order of DISTINCTCOUNT / COUNTA / COUNTBLANK beside ROLLUPADDISSUBTOTAL is not modelled in the local engine.")
+        if expression[0] == "call" and expression[1] == "IF" and expression[2] and expression[2][0][0] == "boolean":
+            raise MeasureError("IF with a constant condition beside ROLLUPADDISSUBTOTAL is not modelled in the local engine.")
+    return "first" if any(_sc_pure_aggregate(expression) for expression in expressions) else "dictionary"
+
+
+_ROLLUP_AGGREGATES = frozenset({"SUM", "COUNT", "COUNTA", "COUNTBLANK", "MIN", "MAX", "AVERAGE", "DISTINCTCOUNT"})
+_ROLLUP_ITERATORS = frozenset({"SUMX", "AVERAGEX", "MINX", "MAXX", "COUNTX", "COUNTAX"})
+_ROLLUP_SCALARS = frozenset({"IF", "DIVIDE", "ABS", "ROUND", "NOT", "BLANK", "AND", "OR", "ISSUBTOTAL"})
+
+
+def _rollup_expression_ok(node: Any, in_row: bool = False, in_iterator: bool = False) -> bool:
+    """True for an expression added by SUMMARIZE ... ROLLUP whose subtotal values were measured against live Power BI (Part C review):
+    aggregates of a column, COUNTROWS / iterators over the plain table or a FILTER of it, arithmetic, comparisons and IF over those, and
+    ISSUBTOTAL outside any iterator. An expression that reads the filter state of a group column (SELECTEDVALUE, VALUES, ISINSCOPE,
+    ISFILTERED, HASONEVALUE ...) or a measure is answered differently on subtotal rows and is refused."""
+    if not isinstance(node, tuple) or not node:
+        return False
+    kind = node[0]
+    if kind in {"number", "string", "boolean", "blank"}:
+        return True
+    if kind == "reference":
+        return in_row and bool(node[1])
+    if kind in {"binary", "comparison", "logical"}:
+        return _rollup_expression_ok(node[2], in_row, in_iterator) and _rollup_expression_ok(node[3], in_row, in_iterator)
+    if kind == "concat":
+        return _rollup_expression_ok(node[1], in_row, in_iterator) and _rollup_expression_ok(node[2], in_row, in_iterator)
+    if kind == "unary":
+        return _rollup_expression_ok(node[2], in_row, in_iterator)
+    if kind != "call":
+        return False
+    name, arguments = node[1], node[2]
+
+    def plain_table(table: Any) -> bool:
+        if table[0] == "table":
+            return True
+        return (
+            table[0] == "call" and table[1] == "FILTER" and len(table[2]) == 2 and table[2][0][0] == "table"
+            and _rollup_expression_ok(table[2][1], True, True)
+        )
+
+    if in_iterator:
+        return name in {"IF", "DIVIDE", "ABS", "ROUND", "NOT", "BLANK", "AND", "OR"} and all(_rollup_expression_ok(a, in_row, True) for a in arguments)
+    if name in _ROLLUP_AGGREGATES:
+        return len(arguments) == 1 and arguments[0][0] == "reference" and bool(arguments[0][1])
+    if name == "COUNTROWS":
+        return not arguments or (len(arguments) == 1 and plain_table(arguments[0]))
+    if name in _ROLLUP_ITERATORS:
+        return len(arguments) == 2 and plain_table(arguments[0]) and _rollup_expression_ok(arguments[1], True, True)
+    if name == "ISSUBTOTAL":
+        return len(arguments) == 1 and arguments[0][0] == "reference" and bool(arguments[0][1])
+    if name in _ROLLUP_SCALARS:
+        return all(_rollup_expression_ok(a, in_row, False) for a in arguments)
+    return False
+
+
+def _rollup_issubtotal_columns(node: Any) -> list[str]:
+    """The column names every ISSUBTOTAL call inside the expression names."""
+    found: list[str] = []
+    if isinstance(node, tuple) and node:
+        if node[0] == "call" and node[1] == "ISSUBTOTAL" and node[2] and node[2][0][0] == "reference":
+            found.append(str(node[2][0][2]))
+        for child in node:
+            if isinstance(child, tuple):
+                found.extend(_rollup_issubtotal_columns(child))
+            elif isinstance(child, list):
+                for item in child:
+                    found.extend(_rollup_issubtotal_columns(item))
+    return found
+
+
 def _tocsv_row_order(node: tuple[Any, ...]) -> str:
     """How Power BI orders the rows TOCSV / TOJSON print for a table expression (live probes, iteration 94).
 
@@ -2275,6 +2409,11 @@ def _tocsv_row_order(node: tuple[Any, ...]) -> str:
             arguments[0][0] == "table" or not any(argument[0] == "string" for argument in arguments[1:])
         ):
             return "grouped"  # over a FILTER the local engine computes the added columns on the unfiltered rows, so only a bare table is trusted with them  # CALCULATE in a computed column intersects the group's filter in Power BI, not replaces it as the local engine does
+        elif function == "SUMMARIZECOLUMNS" and any(
+            isinstance(arg, tuple) and arg[0] == "call" and arg[1] == "ROLLUPADDISSUBTOTAL"
+            for arg in arguments
+        ):
+            return "grouped"
         elif function == "ADDCOLUMNS" and arguments:
             base = _tocsv_row_order(arguments[0])
             if base == "scan" and arguments[0][0] == "table":
@@ -2839,6 +2978,16 @@ def _validate_literal_positions(
             )
         if function == "KEEPFILTERS":
             raise MeasureError("KEEPFILTERS is supported only as a CALCULATE filter argument.")
+        if function == "ROLLUP":
+            raise MeasureError("ROLLUP function can only be used on groupBy_ColumnName parameters of the SUMMARIZE function.")
+        if function == "ROLLUPGROUP":
+            raise MeasureError("ROLLUPGROUP function can only be used in the ROLLUP function.")
+        if function == "ROLLUPADDISSUBTOTAL":
+            raise MeasureError("ROLLUPADDISSUBTOTAL function can only be used in the SUMMARIZECOLUMNS function.")
+        if function == "ROLLUPISSUBTOTAL":
+            raise MeasureError("ROLLUPISSUBTOTAL function can only be used in the ADDMISSINGITEMS function.")
+        if function == "ISSUBTOTAL":
+            raise MeasureError("ISSUBTOTAL function can only be used in the SUMMARIZE function.")
         if function == "USERELATIONSHIP":
             raise MeasureError(
                 "USERELATIONSHIP is supported only as a CALCULATE filter modifier."
@@ -3194,20 +3343,25 @@ class _Parser:
                     pass  # MAX(a, b) / MIN(a, b): the scalar form
                 elif len(arguments) != 1 or arguments[0][0] != "reference":
                     raise MeasureError(f"{function} needs one column reference, such as {function}([Amount]).")
-            elif function == "COUNTROWS" and (
-                len(arguments) > 1
-                or (arguments and not _is_all_table_value_argument(arguments[0]))
-            ):
-                if arguments and arguments[0][0] == "call" and arguments[0][1] == "ALLCROSSFILTERED":
-                    raise MeasureError("ALLCROSSFILTERED function cannot be used as a table expression. It can appear only as a filter in CALCULATE.")
-                raise MeasureError(
-                    "COUNTROWS needs no argument or one loaded table/ALL table expression."
-                )
+            elif function == "COUNTROWS":
+                if arguments and arguments[0][0] == "call" and arguments[0][1] == "KEEPFILTERS":
+                    raise MeasureError("KEEPFILTERS function can only be used as a top level filter argument of CALCULATE and CALCULATETABLE or with a table argument of a function performing a table scan.")
+                if (
+                    len(arguments) > 1
+                    or (arguments and not _is_all_table_value_argument(arguments[0]))
+                ):
+                    if arguments and arguments[0][0] == "call" and arguments[0][1] == "ALLCROSSFILTERED":
+                        raise MeasureError("ALLCROSSFILTERED function cannot be used as a table expression. It can appear only as a filter in CALCULATE.")
+                    raise MeasureError(
+                        "COUNTROWS needs no argument or one loaded table/ALL table expression."
+                    )
             elif function == "TOCSV":
                 if len(arguments) < 1:
                     raise MeasureError("Too few arguments were passed to the TOCSV function. The minimum argument count for the function is 1.")
                 if len(arguments) > 4:
                     raise MeasureError("Too many arguments were passed to the TOCSV function. The maximum argument count for the function is 4.")
+                if arguments[0][0] == "call" and arguments[0][1] == "KEEPFILTERS":
+                    raise MeasureError("KEEPFILTERS function can only be used as a top level filter argument of CALCULATE and CALCULATETABLE or with a table argument of a function performing a table scan.")
                 if not _is_all_table_value_argument(arguments[0]):
                     raise MeasureError("The TOCSV function expects a table expression for argument '1', but a string or numeric expression was used.")
                 if len(arguments) > 1:
@@ -3217,6 +3371,8 @@ class _Parser:
                     raise MeasureError("Too few arguments were passed to the TOJSON function. The minimum argument count for the function is 1.")
                 if len(arguments) > 2:
                     raise MeasureError("Too many arguments were passed to the TOJSON function. The maximum argument count for the function is 2.")
+                if arguments[0][0] == "call" and arguments[0][1] == "KEEPFILTERS":
+                    raise MeasureError("KEEPFILTERS function can only be used as a top level filter argument of CALCULATE and CALCULATETABLE or with a table argument of a function performing a table scan.")
                 if not _is_all_table_value_argument(arguments[0]):
                     raise MeasureError("The TOJSON function expects a table expression for argument '1', but a string or numeric expression was used.")
                 if len(arguments) > 1:
@@ -3337,6 +3493,17 @@ class _Parser:
                     raise MeasureError(f"ADDMISSINGITEMS function expects a table in argument number {chk_i + 1}.")
                 if not _is_all_table_value_argument(arguments[chk_i]):
                     raise MeasureError(f"The function expects a table expression for argument '{chk_i + 1}', but a string or numeric expression was used.")
+            elif function in {"ROLLUP", "ROLLUPGROUP"}:
+                if not arguments:
+                    raise MeasureError(f"Too few arguments were passed to the {function} function. The minimum argument count for the function is 1.")
+            elif function == "ISSUBTOTAL":
+                if len(arguments) != 1:
+                    raise MeasureError("Too few arguments were passed to the ISSUBTOTAL function." if len(arguments) < 1 else "Too many arguments were passed to the ISSUBTOTAL function.")
+                if arguments[0][0] != "reference":
+                    raise MeasureError("ISSUBTOTAL needs one column reference.")
+            elif function in {"ROLLUPADDISSUBTOTAL", "ROLLUPISSUBTOTAL"}:
+                if len(arguments) < 2:
+                    raise MeasureError(f"Too few arguments were passed to the {function} function. The minimum argument count for the function is 2.")
             elif function in _TABLE_FUNCTION_ARITY and not (
                 _TABLE_FUNCTION_ARITY[function][0] <= len(arguments)
                 and (_TABLE_FUNCTION_ARITY[function][1] is None or len(arguments) <= _TABLE_FUNCTION_ARITY[function][1])
@@ -6556,11 +6723,16 @@ def evaluate_measures(
                 selected_context["order_source"] = (context, {id(out): source for out, source in zip(out_rows, source_rows)})
             return selected_context, selected_rows
         if function == "SUMMARIZE":
+            summarize_id = id(argument)  # the loop over the group columns below rebinds `argument`
             context, rows = table_argument_value(arguments[0])
             split = next((i for i, a in enumerate(arguments[1:], 1) if a[0] == "string"), len(arguments))
             group_columns = []
             related_groups: dict[str, tuple[dict[str, Any], str, Callable[[dict[str, Any]], Any]]] = {}  # header -> (one-side table, column, reader)
-            for reference in arguments[1:split]:
+            rollup_steps: list[list[str]] = []
+            has_rollup = False
+            rollup_arguments = [a for a in arguments[1:split] if a[0] == "call" and a[1] in {"ROLLUP", "ROLLUPGROUP"}]
+
+            def _resolve_grp_ref(reference: tuple[Any, ...]) -> str:
                 if reference[0] != "reference":
                     raise MeasureError("SUMMARIZE groups by column references in the local engine.")
                 header_by_key = {h.casefold(): h for h in context["headers"]}
@@ -6573,28 +6745,60 @@ def evaluate_measures(
                     related_groups[actual] = related
                 if actual is None:
                     raise MeasureError(f"Column {reference[2]!r} does not exist in the SUMMARIZE table.")
-                group_columns.append(actual)
+                return actual
+
+            for argument in arguments[1:split]:
+                if argument[0] == "reference":
+                    actual = _resolve_grp_ref(argument)
+                    group_columns.append(actual)
+                elif argument[0] == "call" and argument[1] in {"ROLLUP", "ROLLUPGROUP"}:
+                    has_rollup = True
+                    is_rollup = (argument[1] == "ROLLUP")
+                    for subarg in argument[2]:
+                        if subarg[0] == "reference":
+                            actual = _resolve_grp_ref(subarg)
+                            group_columns.append(actual)
+                            rollup_steps.append([actual])
+                        elif is_rollup and subarg[0] == "call" and subarg[1] == "ROLLUPGROUP":
+                            step_cols = []
+                            for r_subarg in subarg[2]:
+                                actual = _resolve_grp_ref(r_subarg)
+                                group_columns.append(actual)
+                                step_cols.append(actual)
+                            rollup_steps.append(step_cols)
+                        else:
+                            raise MeasureError("SUMMARIZE groups by column references in the local engine.")
+                else:
+                    raise MeasureError("SUMMARIZE groups by column references in the local engine.")
+            if len(rollup_arguments) > 1:  # live Power BI (Part C review)
+                raise MeasureError("Function SUMMARIZE does not support more than one group of subtotal columns specified in with the ROLLUP clause.")
+            if has_rollup and len({c.casefold() for c in group_columns}) != len(group_columns):
+                raise MeasureError("A column was specified more than once in the 'SUMMARIZE' function.")
+            if (len(arguments) - split) % 2:
+                raise MeasureError("A column added by the 'SUMMARIZE' function must have the scalar expression specified.")
+
             names = [dax_typed.to_text(evaluate(arguments[i])) for i in range(split, len(arguments), 2)]
             expressions = [arguments[i] for i in range(split + 1, len(arguments), 2)]
+            if has_rollup:
+                for expression in expressions:
+                    if not _rollup_expression_ok(expression):
+                        raise MeasureError(
+                            "Subtotal rows are modelled only for aggregate expressions (SUM, COUNTROWS, MIN, MAX, AVERAGE, "
+                            "DISTINCTCOUNT, SUMX over a table, ISSUBTOTAL ...); an expression that reads the group's filter state is refused."
+                        )
+                    for ref in _rollup_issubtotal_columns(expression):
+                        if ref.casefold() not in {c.casefold() for c in group_columns}:
+                            raise MeasureError(f"A single value for column {ref!r} cannot be determined: it is not a column of the SUMMARIZE groups.")
+                if not names and not (arguments[0][0] == "table" and summarize_id in bare_rollup_allowed):
+                    raise MeasureError("SUMMARIZE with ROLLUP and no added column is modelled only as the argument of COUNTROWS, TOCSV or TOJSON over a table.")
             taken_names = {column.casefold() for column in group_columns}
+            if has_rollup:  # live Power BI (Part C review): a name written like the column ("Facts[Region]") collides with it
+                taken_names |= {f"{context.get('name', '')}[{column}]".casefold() for column in group_columns}
             for name in names:
                 if name.casefold() in taken_names:  # a static error in Power BI, raised even when the rows are never read
                     raise MeasureError(f"Function 'SUMMARIZE' cannot add column [{name}] since it already exists.")
                 taken_names.add(name.casefold())
             full_lineage = base_lineage(context)
-            groups: dict[tuple[Any, ...], dict[str, Any]] = {}
-            source_base = contexts_by_id.get(context["id"]) if not context.get("derived") else None
-            source_positions = {id(r): i for i, r in enumerate(source_base["rows"])} if source_base is not None else {}
-            group_members: dict[tuple[Any, ...], list[int]] = {}  # group -> rows of the summarized loaded table in it
-            for row in rows:
-                typed = typed_row(context, row)
-                if related_groups:
-                    typed = {**typed, **{c: group[2](typed) for c, group in related_groups.items()}}
-                key = row_key(typed[c] for c in group_columns)
-                groups.setdefault(key, {c: typed[c] for c in group_columns})
-                if id(row) in source_positions:
-                    group_members.setdefault(key, []).append(source_positions[id(row)])
-            group_key_of = list(groups)
             lineage = {c: full_lineage[c] for c in group_columns if c in full_lineage}
             lineage.update({c: (group[0], group[1]) for c, group in related_groups.items()})
             group_types = {c: context.get("column_types", {}).get(c, "text") for c in group_columns}
@@ -6605,28 +6809,101 @@ def evaluate_measures(
                 if st is not None:
                     group_types[name] = st
                     static_extension_names.add(name)
-            group_context, group_rows = derived_table(list(group_columns), list(groups.values()), lineage, group_types)
+
+            source_base = contexts_by_id.get(context["id"]) if not context.get("derived") else None
+            source_positions = {id(r): i for i, r in enumerate(source_base["rows"])} if source_base is not None else {}
+            detail_groups: dict[tuple[Any, ...], dict[str, Any]] = {}
+            detail_members: dict[tuple[Any, ...], list[int]] = {}
+            typed_rows: list[dict[str, Any]] = []
+            for row in rows:
+                typed = typed_row(context, row)
+                if related_groups:
+                    typed = {**typed, **{c: group[2](typed) for c, group in related_groups.items()}}
+                typed_rows.append(typed)
+                key = row_key(typed[c] for c in group_columns)
+                detail_groups.setdefault(key, {c: typed[c] for c in group_columns})
+                if id(row) in source_positions:
+                    detail_members.setdefault(key, []).append(source_positions[id(row)])
+            detail_keys = list(detail_groups)
+            if has_rollup and source_base is not None and len(detail_keys) > 1:
+                try:  # the detail rows of a loaded table come in dictionary order (later table column the major key)
+                    profiles = {c: source_profile(source_base, c) for c in group_columns if c in source_base["headers"]}
+                    if len(profiles) == len(group_columns):
+                        major_first = sorted(group_columns, key=lambda c: -source_base["headers"].index(c))
+                        detail_keys.sort(key=lambda k: tuple(profiles[c].key(detail_groups[k][c]) for c in major_first))
+                except Exception:
+                    pass
+            all_group_rows: list[dict[str, Any]] = [detail_groups[k] for k in detail_keys]
+            all_group_members: list[list[int]] = [detail_members.get(k, []) for k in detail_keys]
+            all_group_rolled_up: list[frozenset[str]] = [frozenset() for _ in detail_keys]
+            rollup_level_count = 1
+            if has_rollup and all_group_rows:
+                # live Power BI: SUMMARIZE lists each subtotal level on its own, in the dictionary order of the columns that level keeps
+                levels = [frozenset()]
+                accum: set[str] = set()
+                for step in reversed(rollup_steps):
+                    accum = accum | set(step)
+                    levels.append(frozenset(accum))
+                rollup_level_count = len(levels)
+                for rolled_up in levels[1:]:
+                    kept_columns = [c for c in group_columns if c not in rolled_up]
+                    level_groups: dict[tuple[Any, ...], dict[str, Any]] = {}
+                    level_members: dict[tuple[Any, ...], list[int]] = {}
+                    for row, typed in zip(rows, typed_rows):
+                        key = row_key(typed[c] for c in kept_columns)
+                        level_groups.setdefault(key, {c: (typed[c] if c in kept_columns else None) for c in group_columns})
+                        if id(row) in source_positions:
+                            level_members.setdefault(key, []).append(source_positions[id(row)])
+                    level_keys = list(level_groups)
+                    if source_base is not None and len(level_keys) > 1 and kept_columns:
+                        try:
+                            level_profiles = {c: source_profile(source_base, c) for c in kept_columns if c in source_base["headers"]}
+                            if len(level_profiles) == len(kept_columns):
+                                level_major = sorted(kept_columns, key=lambda c: -source_base["headers"].index(c))
+                                level_keys.sort(key=lambda k: tuple(level_profiles[c].key(level_groups[k][c]) for c in level_major))
+                        except Exception:
+                            pass
+                    for key in level_keys:
+                        all_group_rows.append(level_groups[key])
+                        all_group_members.append(level_members.get(key, []))
+                        all_group_rolled_up.append(rolled_up)
+
+            group_context, _ = derived_table(list(group_columns), all_group_rows, lineage, group_types)
             out_rows = []
             saved_shadow, saved_touched = push_shadow(context, rows, "install"), eff_touched  # SUMMARIZE's input table is the shadow
             try:
-                for group_position, group_row in enumerate(group_rows):
+                for group_position, group_row in enumerate(all_group_rows):
                     row = dict(group_row)
                     eff_touched = frozenset()
-                    members = group_members.get(group_key_of[group_position]) if source_base is not None else None
-                    for name, expression in zip(names, expressions):
-                        if members:
-                            row[name] = summarize_group_value(
-                                expression, group_context, group_row, source_base, members,
-                                {c: g[2].key_column for c, g in related_groups.items() if g[2].key_column},  # type: ignore[attr-defined]
-                                frozenset(g[0]["id"] for c, g in related_groups.items() if group_row.get(c) is None),
-                            )
-                        else:
-                            row[name] = evaluate_with_context_transition(expression, group_context, group_row, keys=True)
+                    members = all_group_members[group_position] if source_base is not None else None
+                    rolled_up = all_group_rolled_up[group_position]
+                    active_subtotal_stack.append(rolled_up)
+                    try:
+                        row_lineage = {c: lineage[c] for c in group_columns if c in lineage and c not in rolled_up}
+                        row_ctx = {
+                            **group_context,
+                            "headers": [c for c in group_columns if c not in rolled_up],
+                            "lineage": row_lineage,
+                        }
+                        for name, expression in zip(names, expressions):
+                            if members is not None:
+                                row[name] = summarize_group_value(
+                                    expression, row_ctx, group_row, source_base, members,
+                                    {c: g[2].key_column for c, g in related_groups.items() if g[2].key_column and c not in rolled_up},
+                                    frozenset(g[0]["id"] for c, g in related_groups.items() if group_row.get(c) is None),
+                                )
+                            else:
+                                row[name] = evaluate_with_context_transition(expression, row_ctx, group_row, keys=True)
+                    finally:
+                        active_subtotal_stack.pop()
                     out_rows.append(row)
             finally:
                 pop_shadow(saved_shadow)
                 eff_touched = saved_touched
-            return derived_table(list(group_columns) + names, out_rows, lineage, group_types, certain_types=static_extension_names)
+            summarized = derived_table(list(group_columns) + names, out_rows, lineage, group_types, certain_types=static_extension_names)
+            if has_rollup and not names:
+                summarized[0]["rollup_level_count"] = rollup_level_count if out_rows else 0
+            return summarized
         if function == "TOPN":
             count = Decimal(dax_typed.whole(in_row_expression(lambda: evaluate(arguments[0])), "TOPN"))
             context, rows = table_argument_value(arguments[1])
@@ -6778,6 +7055,8 @@ def evaluate_measures(
     group_stack: list[tuple[dict[str, Any], list[dict[str, Any]]]] = []
     counting_rows: list[bool] = []  # non-empty while COUNTROWS evaluates its table argument
     direct_counting_table_vars: list[str] = []
+    active_subtotal_stack: list[frozenset[str]] = []
+    bare_rollup_allowed: set[int] = set()  # ids of SUMMARIZE ... ROLLUP nodes (no added column) read directly by COUNTROWS, TOCSV or TOJSON
     _COLUMN_NUMBER_TYPES = {"whole_number", "decimal_number", "decimal", "fixed_decimal", "currency", "number", "int64", "double"}
 
     def order_arguments(arguments: tuple[tuple[Any, ...], ...]) -> list[tuple[Any, bool]]:
@@ -6822,6 +7101,8 @@ def evaluate_measures(
 
     def summarize_columns(arguments: tuple[tuple[Any, ...], ...]) -> tuple[dict[str, Any], list[dict[str, Any]]]:
         references: list[tuple[Any, ...]] = []
+        rollup_pairs: list[tuple[list[tuple[Any, ...]], str]] = []
+        rollup_groups: list[list[tuple[list[tuple[Any, ...]], str]]] = []  # one entry per ROLLUPADDISSUBTOTAL call
         filter_nodes: list[tuple[Any, ...]] = []
         names: list[str] = []
         expressions: list[tuple[Any, ...]] = []
@@ -6831,6 +7112,32 @@ def evaluate_measures(
             if argument[0] == "reference" and argument[1] and not names and not filter_nodes:
                 references.append(argument)
                 index += 1
+            elif argument[0] == "call" and argument[1] == "ROLLUPADDISSUBTOTAL" and not names and not filter_nodes:
+                subargs = argument[2]
+                if len(subargs) < 2 or len(subargs) % 2 != 0:
+                    raise MeasureError("ROLLUPADDISSUBTOTAL expects pairs of column reference and subtotal name.")
+                call_pairs_start = len(rollup_pairs)
+                for pair_i in range(0, len(subargs), 2):
+                    grp_arg = subargs[pair_i]
+                    flag_arg = subargs[pair_i + 1]
+                    if flag_arg[0] != "string" or not flag_arg[1]:
+                        raise MeasureError("ROLLUPADDISSUBTOTAL expects a column name for subtotal flag.")
+                    flag_name = str(flag_arg[1])
+                    if grp_arg[0] == "reference":
+                        references.append(grp_arg)
+                        rollup_pairs.append(([grp_arg], flag_name))
+                    elif grp_arg[0] == "call" and grp_arg[1] == "ROLLUPGROUP":
+                        sub_refs = grp_arg[2]
+                        if not sub_refs or any(sr[0] != "reference" for sr in sub_refs):
+                            raise MeasureError("ROLLUPGROUP expects column references.")
+                        references.extend(sub_refs)
+                        rollup_pairs.append((list(sub_refs), flag_name))
+                    else:
+                        raise MeasureError("ROLLUPADDISSUBTOTAL expects a column reference or ROLLUPGROUP.")
+                rollup_groups.append(rollup_pairs[call_pairs_start:])
+                index += 1
+            elif argument[0] == "call" and argument[1] == "ROLLUPGROUP":
+                raise MeasureError("ROLLUPGROUP function can only be used in the ROLLUP function.")
             elif argument[0] == "string":
                 if index + 1 >= len(arguments):
                     raise MeasureError("SUMMARIZECOLUMNS needs an expression after each column name.")
@@ -6847,6 +7154,11 @@ def evaluate_measures(
         if len({h.casefold() for h in headers}) != len(headers):
             raise MeasureError("A column was specified more than once in the 'SUMMARIZECOLUMNS' function.")
         taken = {h.casefold() for h in headers}
+        subtotal_flag_names = [pair[1] for pair in rollup_pairs]
+        for flag in subtotal_flag_names:
+            if flag.casefold() in taken:
+                raise MeasureError(f"Function 'SUMMARIZECOLUMNS' cannot add column [{flag}], as it has the same name with an existing column.")
+            taken.add(flag.casefold())
         for name in names:
             if name.casefold() in taken:
                 raise MeasureError(f"Function 'SUMMARIZECOLUMNS' cannot add column [{name}], as it has the same name with an existing column.")
@@ -6875,39 +7187,136 @@ def evaluate_measures(
                 target_shapes.extend(shapes)
 
         def compute() -> tuple[dict[str, Any], list[dict[str, Any]]]:
-            by_table: dict[str, tuple[dict[str, Any], list[str]]] = {}
-            for context, column in resolved:
-                by_table.setdefault(context["id"], (context, []))[1].append(column)
-            combos: list[dict[str, Any]] = [{}]
-            for table_id, (context, columns) in by_table.items():
-                seen: dict[tuple[Any, ...], dict[str, Any]] = {}
-                for raw in rows_by_table_id[table_id]:
-                    values = {column: typed_cell(context, column, raw.get(column)) for column in columns}
-                    seen.setdefault(row_key(values[column] for column in columns), values)
-                if (  # the blank member is a group of its own while it is visible
-                    table_id in unknown_member_ids and not unknown_member_hidden(table_id)
-                    and unknown_member_passes_remaining_filters(
-                        evaluation_contexts_by_id.get(table_id, context), evaluation_contexts_by_id, evaluation_filter_ids)
-                ):
-                    seen.setdefault(row_key([None] * len(columns)), {column: None for column in columns})
-                combos = [{**left, **right} for left in combos for right in seen.values()]
             lineage = {column: (context, column) for context, column in resolved}
             types = {column: context.get("column_types", {}).get(column, "text") for context, column in resolved}
+            types.update({flag: "boolean" for flag in subtotal_flag_names})
 
-            def order_key(row: dict[str, Any]) -> tuple[Any, ...]:
-                return tuple((value is not None, column_order_key(value) if value is not None else 0) for value in (row[h] for h in headers))
-            combos.sort(key=order_key)
-            group_context, group_rows = derived_table(list(headers), combos, lineage, types)
-            output = []
-            for group_row in group_rows:
-                row = dict(group_row)
+            if not rollup_pairs:
+                by_table: dict[str, tuple[dict[str, Any], list[str]]] = {}
+                for context, column in resolved:
+                    by_table.setdefault(context["id"], (context, []))[1].append(column)
+                combos: list[dict[str, Any]] = [{}]
+                for table_id, (context, columns) in by_table.items():
+                    seen: dict[tuple[Any, ...], dict[str, Any]] = {}
+                    for raw in rows_by_table_id[table_id]:
+                        values = {column: typed_cell(context, column, raw.get(column)) for column in columns}
+                        seen.setdefault(row_key(values[column] for column in columns), values)
+                    if (  # the blank member is a group of its own while it is visible
+                        table_id in unknown_member_ids and not unknown_member_hidden(table_id)
+                        and unknown_member_passes_remaining_filters(
+                            evaluation_contexts_by_id.get(table_id, context), evaluation_contexts_by_id, evaluation_filter_ids)
+                    ):
+                        seen.setdefault(row_key([None] * len(columns)), {column: None for column in columns})
+                    combos = [{**left, **right} for left in combos for right in seen.values()]
+
+                def order_key(row: dict[str, Any]) -> tuple[Any, ...]:
+                    return tuple((value is not None, column_order_key(value) if value is not None else 0) for value in (row[h] for h in headers))
+                combos.sort(key=order_key)
+                group_context, group_rows = derived_table(list(headers), combos, lineage, types)
+                output = []
+                for group_row in group_rows:
+                    row = dict(group_row)
+                    for name, expression in zip(names, stripped):
+                        row[name] = evaluate_with_context_transition(expression, group_context, group_row)
+                    counted = [row[name] for name, skip in zip(names, ignored) if not skip]
+                    if names and not all(skip for skip in ignored) and all(value is None for value in counted):
+                        continue  # a row whose expressions are all blank is dropped
+                    output.append(row)
+                return derived_table(list(headers) + names, output, lineage, types)
+
+            def detail_combinations() -> list[dict[str, Any]]:
+                by_table_h: dict[str, tuple[dict[str, Any], list[str]]] = {}
+                for context, column in resolved:
+                    by_table_h.setdefault(context["id"], (context, []))[1].append(column)
+                combos_h: list[dict[str, Any]] = [{}]
+                for table_id, (context, columns) in by_table_h.items():
+                    seen_h: dict[tuple[Any, ...], dict[str, Any]] = {}
+                    for raw in rows_by_table_id[table_id]:
+                        values = {column: typed_cell(context, column, raw.get(column)) for column in columns}
+                        seen_h.setdefault(row_key(values[column] for column in columns), values)
+                    if (
+                        table_id in unknown_member_ids and not unknown_member_hidden(table_id)
+                        and unknown_member_passes_remaining_filters(
+                            evaluation_contexts_by_id.get(table_id, context), evaluation_contexts_by_id, evaluation_filter_ids)
+                    ):
+                        seen_h.setdefault(row_key([None] * len(columns)), {column: None for column in columns})
+                    combos_h = [{**left, **right} for left in combos_h for right in seen_h.values()]
+                try:
+                    t_ids = {c["id"] for c, _col in resolved}
+                    if len(t_ids) == 1:
+                        base_t = contexts_by_id.get(next(iter(t_ids)))
+                        if base_t is not None:
+                            profiles = {h: source_profile(base_t, h) for h in headers if h in base_t["headers"]}
+                            if len(profiles) == len(headers):
+                                major_first = sorted(headers, key=lambda h: -base_t["headers"].index(h))
+                                combos_h.sort(key=lambda row: tuple(profiles[h].key(row.get(h)) for h in major_first))
+                                return combos_h
+                except Exception:
+                    pass
+                combos_h.sort(key=lambda row: tuple((value is not None, column_order_key(value) if value is not None else 0) for value in (row.get(h) for h in headers)))
+                return combos_h
+
+            # each ROLLUPADDISSUBTOTAL call is one group whose pairs roll up from the last one; the groups combine as a cube,
+            # the first group varying fastest (live Power BI, Part C review)
+            group_steps = [[([resolve_table(r[1], r[2])[1] for r in cols], flag) for cols, flag in group] for group in rollup_groups]
+            level_counts = [len(group) + 1 for group in group_steps]
+            if any(expression[0] == "call" and expression[1] in {"IGNORE", "NONVISUAL"} for expression in expressions):
+                raise MeasureError("IGNORE and NONVISUAL beside ROLLUPADDISSUBTOTAL are not modelled in the local engine.")
+            order_rule = _sc_rollup_order_rule(list(stripped))
+            detail = detail_combinations()
+            all_headers = headers + subtotal_flag_names
+            output: list[dict[str, Any]] = []
+
+            def emit(level_row: dict[str, Any], kept_h: list[str]) -> bool:
+                row = dict(level_row)
+                row_lineage = {h: lineage[h] for h in kept_h if h in lineage}
+                row_ctx = derived_table(all_headers, [row], row_lineage, types)[0]
                 for name, expression in zip(names, stripped):
-                    row[name] = evaluate_with_context_transition(expression, group_context, group_row)
+                    row[name] = evaluate_with_context_transition(expression, row_ctx, row)
                 counted = [row[name] for name, skip in zip(names, ignored) if not skip]
                 if names and not all(skip for skip in ignored) and all(value is None for value in counted):
-                    continue  # a row whose expressions are all blank is dropped
+                    return False
                 output.append(row)
-            return derived_table(list(headers) + names, output, lineage, types)
+                return True
+
+            if detail:
+                total_levels = 1
+                for count in level_counts:
+                    total_levels *= count
+                source_for_levels = detail
+                for level_index in range(total_levels):
+                    remaining, rolled_cols, rolled_flags = level_index, set(), set()
+                    for steps, count in zip(group_steps, level_counts):
+                        rolled_steps = remaining % count
+                        remaining //= count
+                        for cols, flag in (steps[len(steps) - rolled_steps:] if rolled_steps else []):
+                            rolled_cols.update(cols)
+                            rolled_flags.add(flag)
+                    kept_headers = [h for h in headers if h not in rolled_cols]
+                    level_flags = {flag: flag in rolled_flags for flag in subtotal_flag_names}
+                    if level_index == 0:
+                        survivors = [combo for combo in detail if emit({**combo, **level_flags}, kept_headers)]
+                        if order_rule == "first":
+                            source_for_levels = survivors  # a combination whose expressions are all blank takes no part in the subtotal rows
+                        continue
+                    level_seen: dict[tuple[Any, ...], dict[str, Any]] = {}
+                    for combo in source_for_levels:
+                        level_seen.setdefault(row_key(combo.get(h) for h in kept_headers), {h: (combo.get(h) if h in kept_headers else None) for h in headers})
+                    level_list = list(level_seen.values())
+                    if order_rule == "dictionary" and len(level_list) > 1 and kept_headers:
+                        try:
+                            t_ids2 = {c["id"] for c, col in resolved if col in kept_headers}
+                            base2 = contexts_by_id.get(next(iter(t_ids2))) if len(t_ids2) == 1 else None
+                            if base2 is not None:
+                                profiles2 = {h: source_profile(base2, h) for h in kept_headers if h in base2["headers"]}
+                                if len(profiles2) == len(kept_headers):
+                                    major2 = sorted(kept_headers, key=lambda h: -base2["headers"].index(h))
+                                    level_list.sort(key=lambda row: tuple(profiles2[h].key(row.get(h)) for h in major2))
+                        except Exception:
+                            pass
+                    for level_row in level_list:
+                        emit({**level_row, **level_flags}, kept_headers)
+            return derived_table(all_headers + names, output, lineage, types)
 
         return with_column_filters(added, compute) if added else compute()
 
@@ -8208,6 +8617,7 @@ def evaluate_measures(
     def table_argument_value(
         argument: tuple[Any, ...],
         include_unknown: bool = False,
+        allow_keepfilters: bool = False,
     ) -> tuple[dict[str, Any], list[dict[str, Any]]]:
         if argument[0] == "table":
             context = resolve_table_context(str(argument[1]))
@@ -8230,6 +8640,22 @@ def evaluate_measures(
                     {header: None for header in current_context["headers"]},
                 ]
             return context, table_rows
+        if argument[0] == "call":
+            if argument[1] == "ROLLUP":
+                raise MeasureError("ROLLUP function can only be used on groupBy_ColumnName parameters of the SUMMARIZE function.")
+            if argument[1] == "ROLLUPGROUP":
+                raise MeasureError("ROLLUPGROUP function can only be used in the ROLLUP function.")
+            if argument[1] == "ROLLUPADDISSUBTOTAL":
+                raise MeasureError("ROLLUPADDISSUBTOTAL function can only be used in the SUMMARIZECOLUMNS function.")
+            if argument[1] == "ROLLUPISSUBTOTAL":
+                raise MeasureError("ROLLUPISSUBTOTAL function can only be used in the ADDMISSINGITEMS function.")
+            if argument[1] == "ISSUBTOTAL":
+                raise MeasureError("ISSUBTOTAL function can only be used in the SUMMARIZE function.")
+            if argument[1] == "KEEPFILTERS":
+                if not allow_keepfilters:
+                    raise MeasureError("KEEPFILTERS function can only be used as a top level filter argument of CALCULATE and CALCULATETABLE or with a table argument of a function performing a table scan.")
+                if len(argument[2]) == 1:
+                    return table_argument_value(argument[2][0], include_unknown=include_unknown, allow_keepfilters=True)
         if argument[0] == "call" and argument[1] in dax_time_sets.SET_FUNCTIONS:
             return date_set_table(argument)
         if argument[0] == "call" and argument[1] == "EVALUATEANDLOG":
@@ -8992,7 +9418,7 @@ def evaluate_measures(
                 if pushed_outer:
                     row_stack.append(row_context)  # type: ignore[arg-type]  # the table of a nested iterator may read a column of this row (iteration 88)
                 try:
-                    iterated_table, iteration_rows = table_argument_value(expression[2][0])
+                    iterated_table, iteration_rows = table_argument_value(expression[2][0], allow_keepfilters=True)
                 finally:
                     if pushed_outer:
                         row_stack.pop()
@@ -13139,7 +13565,7 @@ def evaluate_measures(
             return related_value(arguments[0], row_context)
         if function in {"SUMX", "AVERAGEX", "MAXX", "MINX"} or function in dax_math.STAT_ITERATORS:
             try:
-                context, iteration_rows = table_argument_value(arguments[0])
+                context, iteration_rows = table_argument_value(arguments[0], allow_keepfilters=True)
             except MeasureRuntimeError as error:
                 if any(reference[1] for reference in _direct_column_references(arguments[1])):
                     # live Power BI: the body is validated before the table is built (MAXX(CALENDAR(later, earlier), Fact[Ship]) reports the
@@ -13251,7 +13677,7 @@ def evaluate_measures(
                 return dax_dates.DaxDateTime(min(result, _MAX_DATE_SERIAL))  # live Power BI: a sum of dates saturates at 12/31/9999 23:59:59  # live Power BI: SUMX over dates is a date, AVERAGEX over dates is a plain number
             return result
         if function in {"COUNTX", "COUNTAX"}:
-            context, iteration_rows = table_argument_value(arguments[0])
+            context, iteration_rows = table_argument_value(arguments[0], allow_keepfilters=True)
             validation_row = iteration_rows[0] if iteration_rows else {}
             if iteration_rows and _coalesce_with_failing_argument(arguments[1]):
                 raise MeasureError("A COALESCE whose earlier argument can fail is evaluated in an order the local engine does not reproduce.")
@@ -13692,6 +14118,20 @@ def evaluate_measures(
             if value is None and bool_join([branch_kind(branch, row_context) for branch in arguments[1:]]):
                 return False  # a Boolean result has no blank: Power BI answers FALSE
             return value
+        if function == "ISSUBTOTAL":
+            if not active_subtotal_stack:
+                raise MeasureError("ISSUBTOTAL function can only be used in the SUMMARIZE function.")
+            arg = arguments[0]
+            col_name = str(arg[2])
+            return any(c.casefold() == col_name.casefold() for c in active_subtotal_stack[-1])
+        if function == "ROLLUP":
+            raise MeasureError("ROLLUP function can only be used on groupBy_ColumnName parameters of the SUMMARIZE function.")
+        if function == "ROLLUPGROUP":
+            raise MeasureError("ROLLUPGROUP function can only be used in the ROLLUP function.")
+        if function == "ROLLUPADDISSUBTOTAL":
+            raise MeasureError("ROLLUPADDISSUBTOTAL function can only be used in the SUMMARIZECOLUMNS function.")
+        if function == "ROLLUPISSUBTOTAL":
+            raise MeasureError("ROLLUPISSUBTOTAL function can only be used in the ADDMISSINGITEMS function.")
         if function == "ERROR":
             raise MeasureRuntimeError(arguments[0][1])
         if function == "CUSTOMDATA":
@@ -13846,15 +14286,21 @@ def evaluate_measures(
             direct_var_table = arguments[0][0] == "var"
             if direct_var_table:
                 direct_counting_table_vars.append(arguments[0][1])
+            bare_rollup = arguments[0][0] == "call" and arguments[0][1] == "SUMMARIZE"
+            if bare_rollup:
+                bare_rollup_allowed.add(id(arguments[0]))
             try:
                 _context, table_rows = table_argument_value(arguments[0])
             finally:
+                bare_rollup_allowed.discard(id(arguments[0]))
                 if direct_allexcept:
                     counting_rows.pop()
                 if lazy_columns:
                     lazy_column_calls.pop()
                 if direct_var_table:
                     direct_counting_table_vars.pop()
+            if "rollup_level_count" in _context:  # live Power BI: COUNTROWS over a ROLLUP with no added column counts its levels
+                return Decimal(_context["rollup_level_count"]) if _context["rollup_level_count"] else None
             return Decimal(len(table_rows)) if table_rows else None
         if function == "COALESCE":
             # Power BI stops at the first non-blank plan-time constant. From the first data-dependent argument on it also
@@ -13961,7 +14407,7 @@ def evaluate_measures(
             read_nodes = [arguments[1], arguments[2]]
             topn_walk_nodes[id(arguments[0])] = read_nodes
             try:
-                context, iteration_rows = table_argument_value(arguments[0])
+                context, iteration_rows = table_argument_value(arguments[0], allow_keepfilters=True)
             finally:
                 topn_walk_nodes.pop(id(arguments[0]), None)
 
@@ -14047,10 +14493,12 @@ def evaluate_measures(
             order_class = _tocsv_row_order(table_node)  # raises for a row order that is not modelled
             max_rows = _tocsv_max_rows(arguments[1]) if len(arguments) > 1 else 10
             topn_walk_nodes[id(table_node)] = []
+            bare_rollup_allowed.add(id(table_node))
             try:
                 context, iteration_rows = table_argument_value(table_node)
             finally:
                 topn_walk_nodes.pop(id(table_node), None)
+                bare_rollup_allowed.discard(id(table_node))
             headers = list(context.get("headers", []))
             if len({h.casefold() for h in headers}) != len(headers):
                 raise MeasureError(f"{function} table contains duplicate column names.")
@@ -14337,15 +14785,18 @@ def evaluate_measures(
                         position += 1
                 order_spec.append((expression, descending))
             read_nodes = [arguments[1], *(expression for expression, _d in order_spec)]
-            topn_walk_nodes[id(arguments[0])] = read_nodes  # a TOPN argument is walked as this CONCATENATEX reads it
+            walked_table = arguments[0]
+            if walked_table[0] == "call" and walked_table[1] == "KEEPFILTERS" and len(walked_table[2]) == 1:
+                walked_table = walked_table[2][0]  # live Power BI (Part C review): the wrapper does not change the walk order
+            topn_walk_nodes[id(walked_table)] = read_nodes  # a TOPN argument is walked as this CONCATENATEX reads it
             try:
-                context, iteration_rows = table_argument_value(arguments[0])
+                context, iteration_rows = table_argument_value(arguments[0], allow_keepfilters=True)
             finally:
-                topn_walk_nodes.pop(id(arguments[0]), None)
+                topn_walk_nodes.pop(id(walked_table), None)
             entries = []
             if not iteration_rows:
                 refuse_foreign_columns_of_empty_iteration(context, *read_nodes)
-            iteration_rows = dictionary_ordered_rows(arguments[0], context, iteration_rows, read_nodes)
+            iteration_rows = dictionary_ordered_rows(walked_table, context, iteration_rows, read_nodes)
             def order_value(expression: tuple[Any, ...], inner: tuple[Any, ...]) -> Any:
                 value = evaluate(expression, inner, allow_text=True)
                 if value is None and expression[0] == "reference" and not inner[0].get("derived"):
