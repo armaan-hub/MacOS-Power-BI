@@ -60,7 +60,7 @@ class ScalarMisc2Test(unittest.TestCase):
         self.assertEqual([], bad)
 
     def test_review_refusals(self) -> None:
-        """Shapes Power BI throws or orders by culture stay refused."""
+        """Shapes Power BI throws stay refused (the culture-ordered ISAFTER / "a" + U+0308 = "ä" shapes and TABLEOF in CONCATENATEX are answered since Task 10)."""
         for expr in [
             'IFERROR(IF.EAGER(FALSE(),1,ERROR("x")),9)',
             'IFERROR(IF.EAGER(TRUE(),VALUE("x"),2),7)',
@@ -68,12 +68,9 @@ class ScalarMisc2Test(unittest.TestCase):
             "CUSTOMDATA()=0",
             "MAX(CUSTOMDATA(),1)",
             "SUMX(Facts,CUSTOMDATA())",
-            'ISAFTER("\u00e4","z")',
             'IFERROR(ISAFTER(1,1,5,2,1),TRUE())',
             "IF(FALSE(),ISAFTER(1,1,5,2,1),1)",
-            'CONCATENATEX(TABLEOF(Facts[Region]),Facts[Region],",")',
             "EVALUATEANDLOG(1,Facts[Region])",
-            '"a\u0308"="\u00e4"',
         ]:
             self.assertTrue(dax.local(expr).startswith("LOCAL-REJECT"), expr)
 

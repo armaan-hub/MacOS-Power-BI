@@ -7,6 +7,7 @@ are raised as ``MeasureRuntimeError`` so IFERROR can catch them.
 
 from __future__ import annotations
 
+from typing import Callable
 from decimal import Context, Decimal, InvalidOperation, ROUND_HALF_EVEN, ROUND_HALF_UP
 import re
 import unicodedata
@@ -192,6 +193,90 @@ def _strong_key(text: str) -> str:
     return unicodedata.normalize("NFKC", text).casefold().replace("æ", "ae").replace("œ", "oe")
 
 
+_LIGATURE_MAP = {
+    "æ": "ae",
+    "Æ": "AE",
+    "œ": "oe",
+    "Œ": "OE",
+    "ß": "ss",
+    "ẞ": "SS",
+    "ǆ": "dž",
+    "Ǆ": "DŽ",
+    "ǅ": "Dž",
+    "ĳ": "ij",
+    "Ĳ": "IJ",
+}
+
+
+def expand_ligatures(text: str) -> str:
+    for k, v in _LIGATURE_MAP.items():
+        if k in text:
+            text = text.replace(k, v)
+    return text
+
+
+# Live Power BI (Task 10 review, 2026-10-29): accents rank unmarked < acute < grave < dot above < circumflex < diaeresis < caron <
+# breve < macron < tilde < ring < ogonek < cedilla < double acute (the same order for every base letter probed, not code-point order).
+_ACCENT_RANK = {0x301: 1, 0x300: 2, 0x307: 3, 0x302: 4, 0x308: 5, 0x30C: 6, 0x306: 7, 0x304: 8, 0x303: 9, 0x30A: 10, 0x328: 11, 0x327: 12, 0x30B: 13}
+
+
+def _stacked_marks(text: str) -> bool:
+    """Two accents on one letter: Power BI ignores their order ("e" + dot + ring equals "e" + ring + dot), which is not modelled."""
+    previous_mark = False
+    for c in unicodedata.normalize("NFD", text):
+        is_mark = unicodedata.category(c) == "Mn"
+        if is_mark and previous_mark:
+            return True
+        previous_mark = is_mark
+    return False
+
+
+def _decomposed(text: str) -> str:
+    return unicodedata.normalize("NFD", expand_ligatures(text))
+
+
+def is_classifiable_latin(text: str) -> bool:
+    """Text made only of ASCII letters and digits, each letter carrying at most one accent whose rank is known.
+
+    Letters without a canonical decomposition (ł, đ, ø, ð, þ, ı, ŀ, ŉ, ſ, ...) sort as letters of their own, and punctuation or
+    spaces are ordered by the culture (an apostrophe or hyphen counts for almost nothing), so all of those stay refused."""
+    marks = 0
+    for c in _decomposed(text):
+        if c.isascii():
+            if not c.isalnum():
+                return False
+            marks = 0
+        elif ord(c) in _ACCENT_RANK and marks == 0:
+            marks = 1
+        else:
+            return False
+    return True
+
+
+def latin_collation_key(text: str) -> tuple[str, tuple[int, ...]]:
+    """Linguistic order of classifiable text: base letters first (case ignored), then the accents left to right."""
+    base_chars: list[str] = []
+    ranks: list[int] = []
+    for c in _decomposed(text):
+        if c.isascii():
+            base_chars.append(c.casefold())
+            ranks.append(0)
+        else:
+            ranks[-1] = _ACCENT_RANK[ord(c)]
+    return ("".join(base_chars), tuple(ranks))
+
+
+def ordering_key(values: list[str]) -> Callable[[str], object]:
+    """The key that orders these texts: the code-unit order of the case-folded text, or the linguistic order when a non-ASCII letter is there."""
+    if not any(_has_culture_chars(value) for value in values):
+        return text_key
+    if not all(is_classifiable_latin(value) for value in values):
+        from .measures import MeasureError  # imported late: measures imports this module
+
+        raise MeasureError("Ordering text with non-ASCII characters is not supported in the local engine.")
+    return latin_collation_key
+
+
 def compare(operator: str, left: object, right: object) -> bool:
     """DAX comparison: blank takes the other side's type, text ignores case, mixed types are an error."""
     if left is None and right is None:
@@ -211,18 +296,23 @@ def compare(operator: str, left: object, right: object) -> bool:
             from .measures import MeasureError  # imported late: measures imports this module
 
             raise MeasureError("Comparing text with full-width or half-width forms is not supported in the local engine.")
-        if operator in {"<", "<=", ">", ">="} and (_has_culture_chars(left) or _has_culture_chars(right)):  # type: ignore[arg-type]
-            # live Power BI (iteration 92): text is ordered by the culture, not by code point ("ä" < "z", "ñ" < "o", "ab" < "aä"); that order is not modelled
+        has_culture = _has_culture_chars(left) or _has_culture_chars(right)  # type: ignore[arg-type]
+        if has_culture and is_classifiable_latin(left) and is_classifiable_latin(right):  # type: ignore[arg-type]
+            a, b = latin_collation_key(left), latin_collation_key(right)  # type: ignore[arg-type]
+        elif has_culture and operator in {"<", "<=", ">", ">="}:
+            # live Power BI (iteration 92): text is ordered by the culture, not by code point ("ä" < "z", "ñ" < "o", "ab" < "aä"); only accented ASCII letters are modelled
             from .measures import MeasureError  # imported late: measures imports this module
 
             raise MeasureError("Ordering text with non-ASCII characters is not supported in the local engine.")
-        a, b = text_key(left), text_key(right)  # type: ignore[arg-type]
-        if operator in {"=", "<>"} and (_has_culture_chars(left) or _has_culture_chars(right)):  # type: ignore[arg-type]
-            # live Power BI (iteration 92): canonically equivalent and expanded forms are equal ("a" + U+0308 = "ä", "æ" = "ae", "ǆ" = "dž"); refuse when that would change the answer
-            from .measures import MeasureError  # imported late: measures imports this module
+        else:
+            a, b = text_key(left), text_key(right)  # type: ignore[arg-type]
+            if has_culture:
+                # live Power BI (iteration 92): canonically equivalent and expanded forms are equal ("a" + U+0308 = "ä", "æ" = "ae", "ǆ" = "dž"); refuse when that would change the answer
+                from .measures import MeasureError  # imported late: measures imports this module
 
-            if (a == b) != (_strong_key(left) == _strong_key(right)):  # type: ignore[arg-type]
-                raise MeasureError("Comparing text that differs only in composed, decomposed or expanded characters is not supported in the local engine.")
+                if (a == b) != (_strong_key(left) == _strong_key(right)) or any(c.casefold() != c.lower() for c in left + right) or _stacked_marks(left) or _stacked_marks(right):  # type: ignore[operator,arg-type]
+                    # a letter whose case fold joins another letter ("ſ" is not "s" in Power BI) is not modelled either
+                    raise MeasureError("Comparing text that differs only in composed, decomposed or expanded characters is not supported in the local engine.")
     elif isinstance(left, bool):
         a, b = int(left), int(right)  # type: ignore[arg-type]
     else:
