@@ -1,6 +1,6 @@
 # Parity ledger: Analytics Studio vs Power BI Desktop
 
-Generated 2026-10-28 by `tools/parity_check.py`. Power BI answers were saved from Power BI Desktop 2.157.879.0 (26.08)+da30fe74eb0b8a8786ab7326b69c400a0e951831; the gate replays them against the app on every run.
+Generated 2026-10-29 by `tools/parity_check.py`. Power BI answers were saved from Power BI Desktop 2.157.879.0 (26.08)+da30fe74eb0b8a8786ab7326b69c400a0e951831; the gate replays them against the app on every run.
 
 Rule: a slice is finished only when it is compared with Power BI, its items are locked here (`--accept`) and the gate passes.  Locked items are never re-investigated, only guarded.
 
@@ -28,7 +28,7 @@ Rule: a slice is finished only when it is compared with Power BI, its items are 
 | dax_battery_earlier_arith | 238 | 0 | 0 | 0 | 0 |
 | dax_battery_boolean_scalar_rhs | 517 | 0 | 0 | 0 | 0 |
 | dax_battery_filter_transition | 575 | 0 | 0 | 0 | 0 |
-| dax_battery_boolean_filter_functions | 205 | 0 | 3 | 0 | 0 |
+| dax_battery_boolean_filter_functions | 208 | 0 | 0 | 0 | 0 |
 | dax_battery_sdet_filters | 655 | 0 | 5 | 0 | 0 |
 | dax_battery_comments_booleans | 432 | 0 | 0 | 0 | 0 |
 | dax_battery_round2_scope | 139 | 0 | 0 | 0 | 0 |
@@ -61,7 +61,10 @@ Rule: a slice is finished only when it is compared with Power BI, its items are 
 | dax_battery_swi_extra3 | 1093 | 0 | 331 | 0 | 0 |
 | dax_battery_ami_extra | 4494 | 0 | 230 | 0 | 0 |
 | dax_battery_ami_extra2 | 3661 | 0 | 82 | 0 | 0 |
-| dax_battery_table_fns2 | 135 | 0 | 31 | 0 | 0 |
+| dax_battery_rollup_extra | 3243 | 0 | 0 | 0 | 0 |
+| dax_battery_rollup_extra2 | 2431 | 0 | 0 | 0 | 0 |
+| dax_battery_rollup_extra3 | 168 | 0 | 0 | 0 | 0 |
+| dax_battery_table_fns2 | 156 | 0 | 10 | 0 | 0 |
 | dax_battery_var_scoping | 70 | 0 | 20 | 0 | 0 |
 | dax_battery_xnpv2 | 221 | 0 | 37 | 0 | 0 |
 | dax_battery_scalar_misc2_extra | 529 | 0 | 34 | 0 | 0 |
@@ -70,11 +73,8 @@ Rule: a slice is finished only when it is compared with Power BI, its items are 
 | dax_battery_type_tests_extra2 | 4614 | 0 | 0 | 0 | 0 |
 | table VAT | 575 | 0 | 0 | 0 | 0 |
 
-## Pending work (2242): Power BI answers, the app refuses
+## Pending work (2218): Power BI answers, the app refuses
 
-- `CALCULATE(COUNTROWS(Facts),Facts[Quantity]>SUMX(KEEPFILTERS(VALUES(Facts[Region])),1))` (Power BI: `2`) [dax_battery_boolean_filter_functions]
-- `CALCULATE(COUNTROWS(Facts),Facts[Quantity]>MAXX(KEEPFILTERS(VALUES(Facts[Region])),1))` (Power BI: `4`) [dax_battery_boolean_filter_functions]
-- `CALCULATE(COUNTROWS(Facts),Facts[Quantity]>COUNTX(KEEPFILTERS(VALUES(Facts[Region])),1))` (Power BI: `2`) [dax_battery_boolean_filter_functions]
 - `CALCULATE(COUNTROWS(Facts),Facts[Quantity]<FIRSTNONBLANKVALUE(Facts[Quantity],MAX(Facts[Quantity])))` (Power BI: `BLANK`) [dax_battery_sdet_filters]
 - `CALCULATE(COUNTROWS(Facts),Facts[Quantity]<IF(ISEMPTY(CALCULATETABLE(Facts,Facts[Region]="East")),1,4))` (Power BI: `4`) [dax_battery_sdet_filters]
 - `CALCULATE(COUNTROWS(Facts),Facts[Quantity]>VAR x=COUNTROWS(CALCULATETABLE(Facts,Facts[Region]="East")) RETURN x-1)` (Power BI: `3`) [dax_battery_sdet_filters]
@@ -3835,70 +3835,6 @@ West,`) [dax_battery_table_fns2]
 - `TOCSV(ADDMISSINGITEMS(Facts[Region],SUMMARIZECOLUMNS(Facts[Region],FILTER(ALL(Facts),Facts[Quantity]>3),"s",SUM(Facts[Quantity])),Facts[Region],FILTER(Facts,FALSE())))` (Power BI: `'Facts'[Region],[s]
 East,5
 North,4`) [dax_battery_table_fns2]
-- `SUMX(KEEPFILTERS(VALUES(Facts[Region])),1)` (Power BI: `3`) [dax_battery_table_fns2]
-- `MAXX(KEEPFILTERS(VALUES(Facts[Region])),1)` (Power BI: `1`) [dax_battery_table_fns2]
-- `COUNTX(KEEPFILTERS(VALUES(Facts[Region])),1)` (Power BI: `3`) [dax_battery_table_fns2]
-- `TOCSV(SUMMARIZECOLUMNS(ROLLUPADDISSUBTOTAL(Facts[Region],"sub"),"s",SUM(Facts[Quantity])))` (Power BI: `'Facts'[Region],[sub],[s]
-East,FALSE,8
-West,FALSE,3
-North,FA`) [dax_battery_table_fns2]
-- `COUNTROWS(SUMMARIZECOLUMNS(ROLLUPADDISSUBTOTAL(Facts[Region],"sub"),"s",SUM(Facts[Quantity])))` (Power BI: `4`) [dax_battery_table_fns2]
-- `TOCSV(SUMMARIZECOLUMNS(ROLLUPADDISSUBTOTAL(Facts[Region],"a",Facts[Note],"b"),"s",SUM(Facts[Quantity])))` (Power BI: `'Facts'[Region],'Facts'[Note],[a],[b],[s]
-East,,FALSE,FALSE,`) [dax_battery_table_fns2]
-- `TOCSV(SUMMARIZE(Facts,ROLLUP(Facts[Region]),"s",SUM(Facts[Quantity])))` (Power BI: `'Facts'[Region],[s]
-East,8
-West,3
-North,4
-,15`) [dax_battery_table_fns2]
-- `TOCSV(SUMMARIZE(Facts,ROLLUP(Facts[Region],Facts[Note]),"s",SUM(Facts[Quantity])))` (Power BI: `'Facts'[Region],'Facts'[Note],[s]
-East,,5
-West,,3
-East,Paid,`) [dax_battery_table_fns2]
-- `TOCSV(SUMMARIZE(Facts,Facts[Region],ROLLUP(Facts[Note]),"s",SUM(Facts[Quantity])))` (Power BI: `'Facts'[Region],'Facts'[Note],[s]
-East,,5
-West,,3
-East,Paid,`) [dax_battery_table_fns2]
-- `TOCSV(SUMMARIZE(Facts,ROLLUPGROUP(Facts[Region],Facts[Note]),"s",SUM(Facts[Quantity])))` (Power BI: `'Facts'[Region],'Facts'[Note],[s]
-East,,5
-West,,3
-East,Paid,`) [dax_battery_table_fns2]
-- `TOCSV(SUMMARIZE(Facts,ROLLUP(ROLLUPGROUP(Facts[Region],Facts[Note])),"s",SUM(Facts[Quantity])))` (Power BI: `'Facts'[Region],'Facts'[Note],[s]
-East,,5
-West,,3
-East,Paid,`) [dax_battery_table_fns2]
-- `TOCSV(SUMMARIZE(Facts,ROLLUP(Facts[Region]),"s",SUM(Facts[Quantity]),"x",ISSUBTOTAL(Facts[Region])))` (Power BI: `'Facts'[Region],[s],[x]
-East,8,FALSE
-West,3,FALSE
-North,4,FA`) [dax_battery_table_fns2]
-- `TOCSV(SUMMARIZE(Facts,ROLLUP(Facts[Region],Facts[Note]),"x",ISSUBTOTAL(Facts[Region]),"y",ISSUBTOTAL(Facts[Note])))` (Power BI: `'Facts'[Region],'Facts'[Note],[x],[y]
-East,,FALSE,FALSE
-West`) [dax_battery_table_fns2]
-- `TOCSV(SUMMARIZE(Facts,Facts[Region],ROLLUPGROUP(Facts[Note]),"s",SUM(Facts[Quantity])))` (Power BI: `'Facts'[Region],'Facts'[Note],[s]
-East,,5
-West,,3
-East,Paid,`) [dax_battery_table_fns2]
-- `TOCSV(SUMMARIZECOLUMNS(Facts[Region],ROLLUPADDISSUBTOTAL(Facts[Note],"sub"),"s",SUM(Facts[Quantity])))` (Power BI: `'Facts'[Region],'Facts'[Note],[sub],[s]
-East,,FALSE,5
-West,,`) [dax_battery_table_fns2]
-- `TOCSV(SUMMARIZECOLUMNS(ROLLUPADDISSUBTOTAL(ROLLUPGROUP(Facts[Region],Facts[Note]),"sub"),"s",SUM(Facts[Quantity])))` (Power BI: `'Facts'[Region],'Facts'[Note],[sub],[s]
-East,,FALSE,5
-West,,`) [dax_battery_table_fns2]
-- `TOCSV(SUMMARIZECOLUMNS(ROLLUPADDISSUBTOTAL(Facts[Region],"sub"),FILTER(ALL(Facts),Facts[Quantity]>2),"s",SUM(Facts[Quantity])))` (Power BI: `'Facts'[Region],[sub],[s]
-East,FALSE,5
-West,FALSE,3
-North,FA`) [dax_battery_table_fns2]
-- `TOCSV(SUMMARIZE(Facts,ROLLUP(Facts[Region]),"s",SUM(Facts[Quantity]),"c",COUNTROWS(Facts)))` (Power BI: `'Facts'[Region],[s],[c]
-East,8,3
-West,3,2
-North,4,1
-,15,6`) [dax_battery_table_fns2]
-- `TOCSV(SUMMARIZE(Facts,ROLLUP(Facts[Region]),"s",SUM(Facts[Sales])))` (Power BI: `'Facts'[Region],[s]
-East,11.5
-West,20
-North,
-,31.5`) [dax_battery_table_fns2]
-- `COUNTROWS(SUMMARIZE(Facts,ROLLUP(Facts[Region])))` (Power BI: `2`) [dax_battery_table_fns2]
-- `COUNTROWS(SUMMARIZE(Facts,ROLLUP(Facts[Region],Facts[Note])))` (Power BI: `3`) [dax_battery_table_fns2]
 - `1>VAR y=2 RETURN y` (Power BI: `False`) [dax_battery_var_scoping]
 - `1=VAR y=2 RETURN y` (Power BI: `False`) [dax_battery_var_scoping]
 - `"a"&VAR y="b" RETURN y` (Power BI: `ab`) [dax_battery_var_scoping]

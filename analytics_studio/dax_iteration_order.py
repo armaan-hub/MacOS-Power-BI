@@ -64,6 +64,8 @@ def plan(node: Any, bound: Callable[[str], Any] = lambda name: None) -> Plan | N
         name, arguments = node[1], node[2]
     else:
         return None
+    if name == "KEEPFILTERS" and len(arguments) == 1:
+        return plan(arguments[0], bound)  # live Power BI (Part C review): the wrapper does not change the walk order
     if name in {"FILTER", "CALCULATETABLE"}:
         return None if any(_mentions_outer_row(argument) for argument in arguments[1:]) else plan(arguments[0], bound)
     if name == "SELECTCOLUMNS":
@@ -92,6 +94,8 @@ def plan(node: Any, bound: Callable[[str], Any] = lambda name: None) -> Plan | N
             inner.eager.append(arguments[position + 1])
         return inner
     if name == "SUMMARIZE":
+        if any(isinstance(arg, tuple) and arg[0] == "call" and arg[1] in {"ROLLUP", "ROLLUPGROUP"} for arg in arguments[1:]):
+            return None
         return Plan(dedup=True) if plan(arguments[0], bound) is not None else None
     if name in {"VALUES", "ALL", "DISTINCT"}:
         if all(argument[0] == "reference" for argument in arguments):
