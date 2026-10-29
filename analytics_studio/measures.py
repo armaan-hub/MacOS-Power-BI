@@ -1006,35 +1006,39 @@ def _parallelperiod_dates(
 def _is_var_filter_constant(node: Any) -> bool:
     if not isinstance(node, tuple) or not node:
         return False
-    if node[0] == "number":
+    if node[0] in {"number", "string", "boolean", "blank", "blank_comment"}:
         return True
     if node[0] == "unary" and node[1] in {"+", "-"} and len(node) >= 3 and node[2][0] == "number":
+        return True
+    if node[0] == "call" and node[1] in {"DATE", "TIME", "TRUE", "FALSE", "BLANK"}:
         return True
     return False
 
 
 def _unwrap_var_filter(node: tuple[Any, ...], outer: dict[str, tuple[Any, ...]] | None = None) -> tuple[Any, ...]:
-    """Replace the variables of a VAR block inside a CALCULATE filter by what they hold (a bare column reference or a
-    numeric constant). An inner block may reuse an outer name: the inner value wins inside the inner block only."""
+    """Replace the variables of a VAR block inside a CALCULATE filter by what they hold (a column reference,
+    a constant scalar, or another variable). An inner block may reuse an outer name: the inner value wins inside the inner block only."""
     if not isinstance(node, tuple) or not node or node[0] != "let":
         return node
     bindings, body = node[1], node[2]
     env: dict[str, tuple[Any, ...]] = dict(outer or {})
-    for name, value in bindings:
-        if not (isinstance(value, tuple) and bool(value) and (value[0] == "reference" or _is_var_filter_constant(value))):
-            raise MeasureError("CALCULATE filters must be column comparisons joined with AND, OR, or NOT.")
-        env[name] = value
-    if isinstance(body, tuple) and body and body[0] == "let":
-        return _unwrap_var_filter(body, env)
 
     def _subst(n: Any) -> Any:
         if not isinstance(n, tuple) or not n:
             return n
         if n[0] == "let":
-            raise MeasureError("CALCULATE filters must be column comparisons joined with AND, OR, or NOT.")
+            return _unwrap_var_filter(n, env)
         if n[0] == "var" and n[1] in env:
             return env[n[1]]
         return tuple(_subst(child) for child in n)
+
+    for name, value in bindings:
+        value = _subst(value)
+        if not (isinstance(value, tuple) and bool(value) and (
+            value[0] == "reference" or _is_var_filter_constant(value) or _is_held_table_value(value)
+        )):
+            raise MeasureError("CALCULATE filters must be column comparisons joined with AND, OR, or NOT.")
+        env[name] = value
 
     return _subst(body)
 
@@ -1767,10 +1771,57 @@ _BOOLEAN_FILTER_REFUSED_CALLS = frozenset({
     "CALCULATE", "FILTER", "TOPN", "SELECTCOLUMNS", "LOOKUPVALUE", "ADDCOLUMNS", "SUMMARIZE", "SUMMARIZECOLUMNS",
     "GROUPBY", "EXCEPT", "INTERSECT", "ROW", "SAMPLE", "TOPNSKIP", "RANKX", "FIRSTNONBLANK", "LASTNONBLANK",
     "OFFSET", "WINDOW", "INDEX", "RANK", "ROWNUMBER", "CONTAINS",  # CONTAINS: live probes, iteration 87 (also inside IF and arithmetic)
-    "TABLEOF", "ALLCROSSFILTERED", "TOCSV", "TOJSON", "LINEST", "LINESTX", "SUBSTITUTEWITHINDEX",
+    "TABLEOF", "ALLCROSSFILTERED", "TOCSV", "TOJSON", "LINEST", "LINESTX",
     "ADDMISSINGITEMS", "ROLLUP", "ROLLUPGROUP", "ROLLUPADDISSUBTOTAL", "ROLLUPISSUBTOTAL",
 })
 _BOOLEAN_FILTER_X_ITERATORS = frozenset({"SUMX", "AVERAGEX", "MAXX", "MINX", "COUNTX", "COUNTAX", "CONCATENATEX", "XNPV", *dax_math.STAT_ITERATORS})
+
+_VAR_FILTER_DISALLOWED = _BOOLEAN_FILTER_X_ITERATORS | (_FILTER_AGGREGATES - {"COUNTROWS"}) | _BOOLEAN_FILTER_REFUSED_CALLS
+
+
+def _disallowed_fn_in_binding(expr: Any) -> str | None:
+    if not isinstance(expr, tuple) or not expr:
+        return None
+    if expr[0] == "call":
+        if expr[1] in _VAR_FILTER_DISALLOWED:
+            return expr[1]
+        for arg in expr[2]:
+            found = _disallowed_fn_in_binding(arg)
+            if found:
+                return found
+    elif expr[0] in {"binary", "comparison", "logical"}:
+        return _disallowed_fn_in_binding(expr[2]) or _disallowed_fn_in_binding(expr[3])
+    elif expr[0] == "unary":
+        return _disallowed_fn_in_binding(expr[2])
+    elif expr[0] == "let":
+        for _, b_val in expr[1]:
+            found = _disallowed_fn_in_binding(b_val)
+            if found:
+                return found
+        return _disallowed_fn_in_binding(expr[2])
+    return None
+
+
+def _disallowed_function_in_filter_var(expr: Any) -> str | None:
+    """Find any disallowed function inside a True/False filter's variable definitions."""
+    if not isinstance(expr, tuple) or not expr:
+        return None
+    if expr[0] == "let":
+        for _, b_val in expr[1]:
+            found = _disallowed_fn_in_binding(b_val)
+            if found:
+                return found
+        return _disallowed_function_in_filter_var(expr[2])
+    elif expr[0] in {"binary", "comparison", "logical"}:
+        return _disallowed_function_in_filter_var(expr[2]) or _disallowed_function_in_filter_var(expr[3])
+    elif expr[0] == "unary":
+        return _disallowed_function_in_filter_var(expr[2])
+    elif expr[0] == "call":
+        for arg in expr[2]:
+            found = _disallowed_function_in_filter_var(arg)
+            if found:
+                return found
+    return None
 
 
 _BOOLEAN_RESULT_CALLS = frozenset({'AND','OR','NOT','ISBLANK','ISEMPTY','ISFILTERED','ISINSCOPE','HASONEFILTER','ISCROSSFILTERED','HASONEVALUE','CONTAINS','CONTAINSROW','CONTAINSSTRING','ISNUMBER','ISTEXT','ISLOGICAL','ISNONTEXT','ISERROR','ISEVEN','ISODD','EXACT','ISSUBTOTAL','ISINTEGER','ISINT64','ISDOUBLE','ISDECIMAL','ISCURRENCY'})
@@ -2691,6 +2742,13 @@ def _general_calculate_filters_valid(filters: tuple[tuple[Any, ...], ...], legac
             wrapped = True
         if not isinstance(node, tuple) or not node:
             return False
+        if node[0] == "let":
+            try:
+                node = _unwrap_var_filter(node)
+            except MeasureError:
+                return False
+        if not isinstance(node, tuple) or not node:
+            return False
         if node[0] == "call" and node[1] in _GENERAL_CLEAR_FUNCTIONS:
             continue
         if node[0] == "call" and node[1] in dax_time_sets.SET_FUNCTIONS and (general_time_sets or wrapped or _new_route_time_set(node)):
@@ -2741,7 +2799,9 @@ def _modifier_mix_filters_valid(filters: tuple[tuple[Any, ...], ...]) -> bool:
 def _validate_general_filter_literals(node: tuple[Any, ...]) -> None:
     if node[:2] == ("call", "KEEPFILTERS") and len(node[2]) == 1:
         node = node[2][0]
-    if node[0] in {"comparison", "logical", "in", "unary"}:
+    if node[0] == "let":
+        node = _unwrap_var_filter(node)
+    if node[0] in {"comparison", "logical", "in", "unary", "reference"}:
         _validate_literal_positions(node, allow_blank=True)
 
 
@@ -3180,7 +3240,7 @@ class _Parser:
         if self._peek() in {"=", "==", "<>", "<", "<=", ">", ">="}:
             while self._peek() in {"=", "==", "<>", "<", "<=", ">", ">="}:  # a < b < c reads (a < b) < c
                 operator = self._take().kind
-                right = self._concatenation()
+                right = self._variables() if self._is_keyword("VAR") else self._concatenation()
                 node = ("strict_equal", node, right) if operator == "==" else ("comparison", operator, node, right)
         return node
 
@@ -3188,7 +3248,8 @@ class _Parser:
         node = self._arithmetic()
         while self._peek() == "&":
             self._take()
-            node = ("concat", node, self._arithmetic())
+            right = self._variables() if self._is_keyword("VAR") else self._arithmetic()
+            node = ("concat", node, right)
         return node
 
     def _arithmetic(self) -> tuple[Any, ...]:
@@ -3293,7 +3354,7 @@ class _Parser:
                 self._take()
                 argument = self._expression()
                 self._expect(")")
-                if argument[0] not in {"reference", "table", "call", "table_call", "tableconstructor"}:
+                if argument[0] not in {"reference", "table", "call", "table_call", "tableconstructor", "var"}:
                     raise MeasureError(f"{function} needs one source column reference or table.")
                 return ("table_call", function, argument)
             if function not in _FUNCTIONS:
@@ -8177,6 +8238,14 @@ def evaluate_measures(
     topn_walk_nodes: dict[int, list[tuple[Any, ...]]] = {}  # id of a TOPN node -> expressions its CONCATENATEX consumer reads
     lazy_column_calls: list[Any] = []  # ADDCOLUMNS/SELECTCOLUMNS nodes whose columns COUNTROWS never reads
 
+    def _is_bare_table_var(var_name: str) -> tuple[bool, str]:
+        node = variable_nodes.get(var_name)
+        while node and node[0] == "var":
+            node = variable_nodes.get(node[1])
+        if node and node[0] == "table":
+            return True, str(node[1])
+        return False, ""
+
     def in_row_expression(thunk: Any) -> Any:
         """Run a row-level expression: an error it throws cannot be caught by IFERROR or ISERROR."""
         nonlocal iterator_depth
@@ -8680,9 +8749,6 @@ def evaluate_measures(
             held = variables[argument[1]]()
             if not isinstance(held, _TableValue):
                 raise MeasureError("This variable does not hold a table.")
-            if variable_nodes.get(argument[1], (None,))[0] == "table":
-                if not direct_counting_table_vars or direct_counting_table_vars[-1] != argument[1]:
-                    raise MeasureError("A bare table variable is supported only as the direct argument to COUNTROWS.")
             return held[0], held[1]
         if argument[0] == "call" and argument[1] == "CURRENTGROUP":
             if not group_stack:
@@ -8859,6 +8925,15 @@ def evaluate_measures(
             return all_table_value(argument)
         if argument[0] == "call" and argument[1] == "FILTER":
             base, predicate = argument[2]
+            if base[0] == "var":
+                is_bare, tbl_name = _is_bare_table_var(base[1])
+                if is_bare:
+                    col_refs = list(_direct_column_references(predicate))
+                    if not any(
+                        (not r[1] or r[1].casefold() == tbl_name.casefold())
+                        for r in col_refs
+                    ):
+                        raise MeasureError("The filter predicate must reference a column of the filtered table variable.")
             context, base_rows = table_argument_value(base)
             comparisons: dict[int, tuple[str, str, Any, str]] = {}
             try:
@@ -9264,17 +9339,29 @@ def evaluate_measures(
             except MeasureError:
                 return "unknown"
             if held is None:
-                return "blank"
+                return "blank"  # review 2026-10-29: in a FILTER row a text column beside a BLANK variable is fine; only a CALCULATE filter refuses it (see filter_constant)
             return "boolean" if isinstance(held, bool) else "text" if isinstance(held, str) else "numeric"
         if kind == "let":
-            return "unknown"
+            try:
+                held_val = evaluate(expression, row_context, allow_text=True, allow_boolean=True)
+            except Exception:
+                return "unknown"
+            if held_val is None:
+                # live Power BI (review 2026-10-29): a VAR block that returns BLANK() or a variable holding it is typed as a number; a BLANK from an
+                # IF / SWITCH / COALESCE keeps the type of its other branches, which is not known here
+                return "numeric" if expression[2][0] in {"blank", "blank_comment", "var"} or expression[2] == ("call", "BLANK", ()) else "unknown"
+            if isinstance(held_val, str):
+                return "text"
+            if isinstance(held_val, bool):
+                return "boolean"
+            return "numeric"
         if kind in {"unary", "binary"}:
             operands = expression[2:] if kind == "binary" else (expression[2],)
             operand_categories = [iterator_expression_category(operand, row_context) for operand in operands]
             if kind == "unary" and expression[1] == "+" and operand_categories == ["boolean"]:
                 return "boolean"  # live Power BI (iteration 87): unary plus leaves a True/False a True/False
             if any(
-                category not in {"numeric", "blank", "boolean"}  # live Power BI (iteration 86): TRUE is 1 and FALSE is 0 in + - * and unary minus
+                category not in {"numeric", "blank", "boolean", "text"}  # live Power BI (iteration 86): TRUE is 1 and FALSE is 0 in + - * and unary minus
                 for category in operand_categories
             ):
                 raise MeasureError(
@@ -9323,7 +9410,7 @@ def evaluate_measures(
                 expression[2][0][0] == "tableconstructor" or (expression[2][0][0] == "call" and expression[2][0][1] in _TABLE_BUILDING_CALLS)
             ):
                 return "numeric"  # the rows of a table built from constants and columns; FILTER and the like are validated further down
-            if function in {"CONCATENATEX", "TOCSV", "TOJSON"}:
+            if function in {"CONCATENATEX", "TOCSV", "TOJSON", "CUSTOMDATA", "NAMEOF", "UNICHAR"}:
                 return "text"
             if function in {"RANKX", "RANK.EQ", "RANK", "ROWNUMBER", "XNPV"}:
                 return "numeric"
@@ -9453,7 +9540,7 @@ def evaluate_measures(
                 elif function in {"TOTALYTD", "TOTALQTD", "TOTALMTD"}:
                     numeric_argument_indexes.add(0)
                 for argument_index, argument in enumerate(expression[2]):
-                    if argument[0] == "table" or (function == "COUNTROWS" and argument[0] == "table_call"):
+                    if function == "COUNTROWS" or argument[0] in {"table", "table_call"}:
                         continue
                     aggregate_column = (
                         function in {
@@ -9515,6 +9602,10 @@ def evaluate_measures(
                 "Iterator comparison operands have unverifiable local data types."
             )
         if left_category != right_category:
+            if "text" in {left_category, right_category}:
+                raise MeasureError(
+                    "Iterator comparisons need matching local data types: DAX comparison operations do not support comparing values of type Text with values of type Integer."
+                )
             raise MeasureError(
                 "Iterator comparisons need matching local data types."
             )
@@ -9887,6 +9978,10 @@ def evaluate_measures(
         column_type: str,
     ) -> bool:
         left, right = node[2], node[3]
+        scalar = right if left[0] == "reference" else left
+        if column_type == "text":
+            if not (scalar[0] in {"string", "blank", "blank_comment"} or (isinstance(scalar, tuple) and scalar and scalar[0] == "call" and scalar[1] == "BLANK")):
+                raise MeasureError("DAX comparison operations do not support comparing values of type Text with values of type Integer.")
         if left[0] == "reference":
             actual_value = typed_filter_value(
                 row.get(column), column_type, column, row_index
@@ -11625,7 +11720,7 @@ def evaluate_measures(
         for frame in frames:
             iterated_table, row = frame[0], frame[1]
             if not iterated_table.get("headers") or (iterated_table.get("derived") and iterated_table.get("lineage") is None):
-                continue  # the filter-constant placeholder and tables without loaded columns filter nothing
+                continue  # the filter-constant placeholder, boolean filter predicate rows, and tables without loaded columns filter nothing
             for table_id, (base_context, column_rows) in transition_filters(iterated_table, row).items():
                 merged.setdefault(table_id, (base_context, {}))[1].update(column_rows)
         return merged
@@ -11777,6 +11872,11 @@ def evaluate_measures(
                     continue
                 if _contains_refused_call_outside_x_iterator(side):
                     raise MeasureError("CALCULATE and FILTER cannot be used inside a True/False filter expression.")
+                disallowed_fn = _disallowed_function_in_filter_var(side)
+                if disallowed_fn:
+                    raise MeasureError(
+                        f"A function '{disallowed_fn}' has been used in a True/False expression that contains a variable definition and is used as a table filter expression. This is not allowed."
+                    )
                 if side_index == 2:
                     try:
                         filter_constant(side)
@@ -11797,6 +11897,38 @@ def evaluate_measures(
                     raise _HardError(str(error)) from error  # the scalar side is evaluated before the filter; its error is thrown
                 except MeasureError:
                     return node  # leave it to the paths that report the specific error
+
+                if other[0] == "reference":
+                    try:
+                        c_ctx, c_actual = resolve_table(other[1], other[2])
+                        c_type = str(c_ctx.get("column_types", {}).get(c_actual, "text")).casefold()
+                        col_cat = iterator_type_category(c_type)
+                    except MeasureError:
+                        col_cat = "unknown"
+                else:
+                    try:
+                        col_cat = iterator_expression_category(other, None)
+                    except MeasureError:
+                        col_cat = "unknown"
+                if col_cat == "text":
+                    if not isinstance(value, str):
+                        try:
+                            side_cat = iterator_expression_category(side, None)
+                        except MeasureError:
+                            side_cat = "unknown"
+                        if side_cat != "text":
+                            raise MeasureError("Iterator comparisons need matching local data types: DAX comparison operations do not support comparing values of type Text with values of type Integer.")
+                elif col_cat in {"numeric", "int64", "double"}:
+                    if isinstance(value, str):
+                        raise MeasureError("DAX comparison operations do not support comparing values of type Integer with values of type Text.")
+                    if value is None:
+                        try:
+                            side_cat = iterator_expression_category(side, None)
+                        except MeasureError:
+                            side_cat = "unknown"
+                        if side_cat == "text":
+                            raise MeasureError("DAX comparison operations do not support comparing values of type Integer with values of type Text.")
+
                 if value is None:
                     literal: tuple[Any, ...] = ("blank",)
                 elif isinstance(value, bool):
@@ -11956,6 +12088,11 @@ def evaluate_measures(
             return None  # iteration 88 (fresh live probes): two such scalars in one filter, inside an iterator or under an outer CALCULATE, read differently
         if _contains_refused_call_outside_x_iterator(argument):
             raise MeasureError("CALCULATE and FILTER cannot be used inside a True/False filter expression.")
+        disallowed_fn = _disallowed_function_in_filter_var(argument)
+        if disallowed_fn:
+            raise MeasureError(
+                f"A function '{disallowed_fn}' has been used in a True/False expression that contains a variable definition and is used as a table filter expression. This is not allowed."
+            )
         names: set[str] = set()
         if not _table_names_of(argument, names) or len(names) != 1:
             return None  # the rule was established on one table; a second table reads relationships Power BI was not asked about
@@ -12139,6 +12276,8 @@ def evaluate_measures(
                 keep, node = False, argument
                 while node[:2] == ("call", "KEEPFILTERS") and len(node[2]) == 1:
                     keep, node = True, node[2][0]
+                if node[0] == "let":
+                    node = _unwrap_var_filter(node)
                 if keep and node[0] == "call" and node[1] == "ALL" and node[2]:
                     continue  # live Power BI (iteration 84, critic): KEEPFILTERS(ALL(x)) intersects with every value, so it keeps the filters as they are
                 if node[0] == "call" and node[1] in {"ALL", "ALLNOBLANKROW", "REMOVEFILTERS", "ALLEXCEPT", "ALLSELECTED"}:
@@ -12280,13 +12419,20 @@ def evaluate_measures(
         saved_kinds = dict(variable_kinds)
         saved_nodes = dict(variable_nodes)
         failures: dict[str, MeasureError] = {}
+        table_vars: set[str] = set()
         try:
             for name, value_node in node[1]:
                 variable_nodes[name] = value_node
                 variable_kinds[name] = branch_kind(value_node, row_context)
+                if value_node[0] == "var" and value_node[1] in table_vars:
+                    held_table = variables[value_node[1]]()
+                    variables[name] = lambda held_table=held_table: held_table
+                    table_vars.add(name)
+                    continue
                 if value_node[0] != "var" and _is_all_table_value_argument(value_node):
                     held_table = _TableValue(table_argument_value(value_node))
                     variables[name] = lambda held_table=held_table: held_table
+                    table_vars.add(name)
                     continue
                 try:
                     value = evaluate(value_node, row_context, allow_text=True, allow_boolean=allow_boolean)
@@ -13530,13 +13676,26 @@ def evaluate_measures(
         if kind == "comparison":
             compare_text = False
             compare_boolean = False
+            if len(node) == 4 and "let" in (node[2][0], node[3][0]) and not (allow_text or allow_boolean or row_context is not None):
+                # live Power BI (review 2026-10-29): a VAR block beside a comparison has the static type of its RETURN expression, so
+                # "a"<>VAR y=BLANK() RETURN y is an error (Text beside Integer) even though the value is BLANK
+                for side, other in ((node[2], node[3]), (node[3], node[2])):
+                    if side[0] == "let" and iterator_expression_category(side, row_context) == "unknown":
+                        try:
+                            other_category = iterator_expression_category(other, row_context)
+                        except MeasureError:
+                            other_category = "unknown"
+                        if other_category != "numeric":
+                            raise MeasureError("A comparison with a VAR block whose data type is not known to the local engine is not supported.")
+                        return dax_typed.compare(node[1], evaluate(node[2], None), evaluate(node[3], None))
+                iterator_comparison_operand_category(node, row_context)
             if allow_text or allow_boolean or row_context is not None:
                 try:
                     comparison_category = iterator_comparison_operand_category(
                         node, row_context
                     )
-                except MeasureError:
-                    if allow_text:
+                except MeasureError as exc:
+                    if allow_text or "DAX comparison operations do not support comparing" in str(exc):
                         raise
                     comparison_category = ""
                 compare_text = comparison_category == "text"
@@ -13564,6 +13723,15 @@ def evaluate_measures(
                 row_context = next((frame for frame in reversed(row_stack[:-1]) if frame[0]["headers"]), None)
             return related_value(arguments[0], row_context)
         if function in {"SUMX", "AVERAGEX", "MAXX", "MINX"} or function in dax_math.STAT_ITERATORS:
+            if arguments[0][0] == "var":
+                is_bare, tbl_name = _is_bare_table_var(arguments[0][1])
+                if is_bare:
+                    col_refs = list(_direct_column_references(arguments[1]))
+                    if not any(
+                        (not r[1] or r[1].casefold() == tbl_name.casefold())
+                        for r in col_refs
+                    ):
+                        raise MeasureError("The iterator body must reference a column of the iterated table variable.")
             try:
                 context, iteration_rows = table_argument_value(arguments[0], allow_keepfilters=True)
             except MeasureRuntimeError as error:
@@ -13677,6 +13845,15 @@ def evaluate_measures(
                 return dax_dates.DaxDateTime(min(result, _MAX_DATE_SERIAL))  # live Power BI: a sum of dates saturates at 12/31/9999 23:59:59  # live Power BI: SUMX over dates is a date, AVERAGEX over dates is a plain number
             return result
         if function in {"COUNTX", "COUNTAX"}:
+            if arguments[0][0] == "var":
+                is_bare, tbl_name = _is_bare_table_var(arguments[0][1])
+                if is_bare:
+                    col_refs = list(_direct_column_references(arguments[1]))
+                    if not any(
+                        (not r[1] or r[1].casefold() == tbl_name.casefold())
+                        for r in col_refs
+                    ):
+                        raise MeasureError("The iterator body must reference a column of the iterated table variable.")
             context, iteration_rows = table_argument_value(arguments[0], allow_keepfilters=True)
             validation_row = iteration_rows[0] if iteration_rows else {}
             if iteration_rows and _coalesce_with_failing_argument(arguments[1]):
@@ -14788,6 +14965,13 @@ def evaluate_measures(
             walked_table = arguments[0]
             if walked_table[0] == "call" and walked_table[1] == "KEEPFILTERS" and len(walked_table[2]) == 1:
                 walked_table = walked_table[2][0]  # live Power BI (Part C review): the wrapper does not change the walk order
+            held_node = walked_table
+            while held_node[0] == "var" and held_node[1] in variable_nodes:
+                held_node = variable_nodes[held_node[1]]
+            if held_node is not walked_table and held_node[0] == "call" and held_node[1] == "TOPN":
+                # review 2026-10-29: Power BI walks a TOPN held in a variable in the order it walks a TOPN written in place, which depends on
+                # the rows read (see topn_walk_nodes); the variable hides those reads, so the walk order is not reproduced
+                raise MeasureError("CONCATENATEX over a TOPN held in a variable is walked in an order the local engine does not reproduce.")
             topn_walk_nodes[id(walked_table)] = read_nodes  # a TOPN argument is walked as this CONCATENATEX reads it
             try:
                 context, iteration_rows = table_argument_value(arguments[0], allow_keepfilters=True)
@@ -15002,6 +15186,7 @@ def evaluate_measures(
             return None
         is_row = node[0] == "call" and node[1] == "ROW"
         is_datatable = node[0] == "call" and node[1] == "DATATABLE"
+        is_calc_table = node[0] == "call" and node[1] == "CALCULATETABLE"
         is_nested_tc = (
             node[0] == "tableconstructor"
             and len(node[1]) == 1
@@ -15009,7 +15194,7 @@ def evaluate_measures(
             and bool(node[1][0])
             and node[1][0][0] == "tableconstructor"
         )
-        if not (is_row or is_datatable or is_nested_tc):
+        if not (is_row or is_datatable or is_nested_tc or is_calc_table):
             return None
         try:
             val = single_value_of(table_argument_value(node))
