@@ -32,3 +32,53 @@ Rate argument from `ROW("a",0.1)`; very large rates (`1E200`, `1E308` give `-100
 
 ## Not in Task 10
 LINEST / LINESTX (806 items) and SUBSTITUTEWITHINDEX (934 items) extra shapes, ADDMISSINGITEMS over SUMMARIZECOLUMNS/TOPN order (312 items): rules not derivable so far. RANKX/INDEX inside a CALCULATE filter, `INFO.TABLES()`, FIRSTNONBLANKVALUE in a filter, nested CALCULATETABLE in a filter scalar, `IF(TRUE(),1,"a")` beside a text column (about 24 items left from Task 9: `dax_battery_sdet_filters`, `_round2` to `_round5`).
+
+## Review outcome (Claude, 2026-10-29)
+**Verdict:** the first build matched every saved item and was wrong on fresh shapes; Part A is accepted as built, Parts B, C and D were corrected in the review
+(the same pattern as Tasks 7 to 9: the saved items fit, the rules behind them did not). Method: 52,979 fresh answers from Power BI Desktop 2.157.879.0 on the iPad
+guest (headless, nothing on the main screen), none of them in a saved battery, asked on the standard Facts table and on two other Facts tables (A: 9 rows, B: 10 rows,
+rows in other orders), plus 3,600 of them created as measures in the real app (Qt offscreen) and compared with Power BI's answer. Differences of the first build on the
+standard table: Part A 0 of 563 (also 0 on the two other tables); Part B 207 of 2,536 (54 new against `main`, 153 older); Part C 205 + 12 crashes of 1,286; Part D 336 of 5,819.
+After the fixes below every set has 0 differences except the three families listed under "Open".
+
+**Part A (ALLCROSSFILTERED beside other filters), accepted.** It is one more member of the clearing list that `ALL` / `REMOVEFILTERS` use; 563 fresh shapes (every aggregate
+x 25 other filters in both orders, inside SUMX / MAXX / CONCATENATEX, in FILTER predicates, nested CALCULATEs, CALCULATETABLE) match on all three tables.
+
+**Part B, fixed in the review.**
+- `EVALUATEANDLOG(x)` around `REMOVEFILTERS`, `ALLCROSSFILTERED`, `ALLEXCEPT`, `ALLSELECTED` or an `IN` predicate is an error in Power BI ("cannot be used as a table expression",
+  "CONTAINSROW in a table filter"); the first build unwrapped it and answered. Now refused. With a table as first argument a non-constant third argument is an error too.
+- `IF.EAGER`: a bare column outside a row context is an error also in the branch not taken (the static check did not know `IF.EAGER`; it did not know `FORMAT` or the expression of
+  a `CALCULATE` either). A date beside a number of any kind (literal, column, `1/0`, `VALUE("x")`, `CURRENCY`, `COUNTROWS`...) makes the whole `IF` / `IF.EAGER` a number whichever
+  branch is taken, also inside an iterator; the first build did it only at the top level and only for literal numbers. A literal condition (`TRUE()`, `0`, `BLANK()`) folds the other
+  branch away before an unordered walk reads its columns (`CONCATENATEX(Facts,IF.EAGER(TRUE(),Facts[Quantity],Facts[Sales]),"|")` walks `Quantity`).
+- `TABLEOF`: the first build removed the refusal and answered `TOPN(...TABLEOF)` and `UNION(TABLEOF,TABLEOF)` in the wrong order (6 of 6 differ). The order is known only straight under
+  `CONCATENATEX`; anything with more than one row built from `TABLEOF` is refused again, `TOPN(1,TABLEOF(..),key)` stays answered when it keeps one row.
+- `MAXX/MINX(Facts,CUSTOMDATA())`, the 3-argument `EVALUATEANDLOG`, `IFERROR(ERROR(..))`: accepted.
+
+**Part C (XNPV extremes), rebuilt.** The first build fitted the 36 saved items with special cases (a rate above 1E100 gave a zero term, NaN and -Infinity dates gave NaN, an
+Infinity date gave a zero term, Currency values were not rounded). A controlled matrix (498 queries: NaN / Infinity / -Infinity in the values and in the dates, at each row position,
+under seven rates) shows Power BI computes plain IEEE double arithmetic: `v / (1+rate) ^ ((date - earliest) / 365)`, the earliest date being capped at serial 2958465, so a NaN date
+or rate gives NaN unless the rate is 0 (`1 ^ NaN` is 1) or the exponent is 0 (`NaN ^ 0` is 1), an overflowing factor is Infinity (term 0), an underflowing one is 0 (term +-Infinity or NaN).
+The loop is now exactly that (402 of 402 controlled shapes and 1,286 x 3 fresh shapes match). Also refused: Currency values computed with arithmetic (`CURRENCY([v])/3` is rounded to four
+decimals before XNPV reads it: 1733.3335, exact arithmetic 1733.3333) or a non-finite Currency result, and a table constructor with several columns (`[Value1]` cannot be found).
+The two Task 3 refusals that this task was meant to open (NaN / 1E12 / past-9999 dates, Currency) were removed from `tests/test_iteration91_xnpv_1.py` after Power BI answered them.
+
+**Part D (text collation), narrowed.** Accepted rule: ASCII letters and digits with at most one accent of the thirteen measured; base letters first, case ignored, then the accents
+left to right; the expansions `ß`, `æ`, `œ`, `ĳ`, `ǆ`. The first build was wrong on letters with no decomposition (`ł đ ø ð þ ı ŀ ŉ ſ` sort as letters of their own: most of the 336 differences),
+ordered accents by code point (Power BI: acute < grave < dot above < circumflex < diaeresis < caron < breve < macron < tilde < ring < ogonek < cedilla < double acute, measured as a
+13 x 13 matrix on ten base letters, identical for all), treated an apostrophe like a letter (it counts for almost nothing), compared two accents on one letter in order (Power BI: as a set)
+and took `ſ` for `s`. All of these are refused now, as is `MAX` / `MIN` of two texts that differ only in case. 21,424 fresh comparisons (random words, equivalent spellings, case,
+composed against decomposed, ligatures, digits, column and CONCATENATEX / TOPN / MAXX shapes) match.
+
+**Open (older than this task, logged in `HANDOFF.md`; 200 shapes left out of the review batteries):** TOPN with tied sort values (110); `IF` / `IF.EAGER` with a column condition and
+branches of different types in an unordered walk (33); plain `IF` with a date in one branch and a number in the other is a number in Power BI (59 of 59 shapes) but a locked `IF` whose other
+branch is a Variant stays a date, so the rule was applied to `IF.EAGER` only; a date-typed `IF` / `IF.EAGER` result with a BLANK branch used in arithmetic, or averaged with a NaN (a date in
+Power BI, a number here; 57 with the previous family). The error families found with the empty-table probes (1,476 shapes, 120 + 142 wrong answers) became Task 11
+(`docs/plans/2026-10-29-gaps-2.md`, specification saved in `tools/parity/dax_battery_gaps2.json` and `tests/fixtures_gaps2_alt.json`, not yet in the replay list).
+
+**Real app (Qt offscreen, nothing on the screen):** 3,600 of the fresh shapes created as measures through `StudioController.create_measure` (Facts imported from an .xlsx) and the shown
+value compared with Power BI's answer: 29 of 30 differences are date results the app card prints as a serial number (`DATE(2020,1,1)` alone shows the same), the 30th is the open TOPN-ties
+family. Added: batteries `dax_battery_misc3_extra` (6,103 items), `dax_battery_misc3_extra2` (20,909), `tests/fixtures_misc3_alt.json` (6,000 on two other Facts tables), test
+`tests/test_iteration98_scalar_misc_3_review.py`; `tests/test_iteration91_xnpv_1.py` and `tests/test_iteration92_scalar_misc_2.py` no longer list as refused what Task 10 answers.
+**Gate:** pytest 2,005 passed (6,281 subtests) in 0:38:02; real app 575/575; replay 145,168 answers (140,227 match, 4,941 refused), 0 DIFF, 0 CRASH; locked 115,531 before approval
+(`--accept` would lock 140,227).

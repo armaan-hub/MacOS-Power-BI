@@ -64,6 +64,8 @@ def plan(node: Any, bound: Callable[[str], Any] = lambda name: None) -> Plan | N
         name, arguments = node[1], node[2]
     else:
         return None
+    if name == "TABLEOF":
+        return Plan()
     if name == "KEEPFILTERS" and len(arguments) == 1:
         return plan(arguments[0], bound)  # live Power BI (Part C review): the wrapper does not change the walk order
     if name in {"FILTER", "CALCULATETABLE"}:
@@ -117,6 +119,34 @@ def _mentions_outer_row(node: Any) -> bool:
 ALL_COLUMNS = ("", "*")  # a context transition (CALCULATE, a measure) makes every column of the iterated table count
 
 
+def _constant_condition(node: Any) -> bool | None:
+    """True / False for an IF condition written as a literal (TRUE(), FALSE(), a number, BLANK()), else None."""
+    if not isinstance(node, tuple) or not node:
+        return None
+    if node[0] == "boolean":
+        return bool(node[1])
+    if node[0] == "number":
+        return node[1] != 0
+    if node[0] == "blank" or (node[0] == "call" and node[1] == "BLANK" and not node[2]):
+        return False
+    if node[0] == "call" and node[1] in {"TRUE", "FALSE"} and not node[2]:
+        return node[1] == "TRUE"
+    return None
+
+
+def _folded_branch(node: Any) -> tuple[Any, ...] | None:
+    """The branch an IF / IF.EAGER with a literal condition keeps (live Power BI, Task 10 review: the other branch is folded away before
+    the table is walked, so only the columns of the kept branch decide the order); () when the kept branch is the implicit BLANK."""
+    if not (isinstance(node, tuple) and len(node) == 3 and node[0] == "call" and node[1] in {"IF", "IF.EAGER"} and len(node[2]) >= 2):
+        return None
+    folded = _constant_condition(node[2][0])
+    if folded is None:
+        return None
+    if folded:
+        return node[2][1]
+    return node[2][2] if len(node[2]) > 2 else ()
+
+
 def columns_read(
     nodes: Iterable[Any],
     is_foreign_call: Callable[[str], bool],
@@ -140,6 +170,9 @@ def columns_read(
         if kind in _OPAQUE_KINDS - {"table", "tableconstructor"}:
             return False
         if kind == "call":
+            branch = _folded_branch(node)
+            if branch is not None:
+                return inner(branch) if branch else True
             if node[1] in {"EARLIER", "EARLIEST"} and node[2] and node[2][0][0] == "reference":
                 found.append((node[2][0][1], node[2][0][2]))
                 return True
@@ -164,6 +197,9 @@ def columns_read(
         if kind in _OPAQUE_KINDS:
             return False
         if kind == "call":
+            branch = _folded_branch(node)
+            if branch is not None:
+                return walk(branch) if branch else True
             if node[1] in {"CALCULATE", "CALCULATETABLE"}:
                 found.append(ALL_COLUMNS)
                 return True

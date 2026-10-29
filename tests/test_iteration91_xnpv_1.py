@@ -60,11 +60,8 @@ class Xnpv1Test(unittest.TestCase):
     def test_review_refusals(self) -> None:
         """Shapes Power BI answers erratically or in a type the app does not model stay refused."""
         table = 'ADDCOLUMNS(DATATABLE("v",DOUBLE,"n",INTEGER,{{-1000,0},{300,365}}),"d",DATE(2020,1,1)+[n])'
+        # Task 10 (2026-10-29) answers the Currency values, the NaN / 1E12 / past-9999 dates that this review refused: see test_iteration98_scalar_misc_3_review.py
         for expr in [
-            f"XNPV({table},CURRENCY(5),[d],0.1)",
-            f"XNPV({table},[v],0/0,0.1)",
-            f"XNPV({table},[v],1E12,0.1)",
-            f"XNPV({table},[v],2958466,0.1)",
             "XNPV(Facts,IF(Facts[Quantity]>10,\"a\",BLANK()),DATE(2020,1,1),0.1)",
             "IF(FALSE(),XNPV(Facts,Facts[Region],DATE(2020,1,1),0.1),1)",
             "IFERROR(1,XNPV(Facts,Facts[Region],DATE(2020,1,1),0.1))",

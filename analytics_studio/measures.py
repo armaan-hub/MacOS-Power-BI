@@ -2719,6 +2719,8 @@ _GENERAL_BOOLEAN_CALLS = {"AND", "OR", "NOT", "ISBLANK", "CONTAINSSTRING", "CONT
 
 def _is_general_table_filter(node: Any) -> bool:
     """A CALCULATE filter argument that is a table expression (its columns' values become the filter)."""
+    while isinstance(node, tuple) and node and node[0] == "call" and node[1] == "EVALUATEANDLOG" and node[2]:
+        node = node[2][0]
     if not isinstance(node, tuple) or not node:
         return False
     if node[0] in {"table_call", "tableconstructor", "table"}:
@@ -3388,8 +3390,13 @@ class _Parser:
                 return ("call", "CALCULATETABLE", (arguments[0],))
             if function in dax_time_sets.BALANCES:
                 return _balance_call(function, arguments)
-            if function in _ROW_ORDER_FUNCTIONS and any(_contains_function_call(argument, "TABLEOF") for argument in arguments):
-                # live Power BI (iteration 92): TABLEOF hands the rows over in the engine's own order, not the table's (CONCATENATEX gave East,East,East,West,West,North for a table stored East,West,East,North,West,East)
+            if (
+                (function in _ROW_ORDER_FUNCTIONS or function in {"TOCSV", "TOJSON"})
+                and any(_contains_function_call(argument, "TABLEOF") for argument in arguments)
+                and not (function == "TOPN" and len(arguments) > 1 and arguments[1][:2] == ("call", "TABLEOF"))  # TOPN straight over TABLEOF: the rows kept are the same set whatever the walk order
+                and function != "CONCATENATEX"  # checked where the rows are known: more than one row of anything but a bare TABLEOF is refused there
+            ):
+                # live Power BI (iteration 92, Task 10 review): TABLEOF hands the rows over in the engine's own order, not the table's; it is modelled only for CONCATENATEX straight over TABLEOF
                 raise MeasureError(f"{function} over TABLEOF depends on the row order, which is not modelled in the local engine.")
             if function in dax_time_sets.SET_FUNCTIONS and _time_set_call_is_new_form(function, arguments):
                 _validate_time_set_call(function, arguments)
@@ -4661,11 +4668,19 @@ def _sameperiodlastyear_dates(selected_dates: Iterable[date], available_dates: I
 
 # Functions and operators whose arguments are evaluated in the caller's context: a bare column below them still has no row context.
 _ROW_CONTEXT_FREE_CALLS = {
-    "IF", "SWITCH", "COALESCE", "IFERROR", "AND", "OR", "NOT", "ISBLANK", "ABS", "EXACT",
+    "IF", "IF.EAGER", "FORMAT", "SWITCH", "COALESCE", "IFERROR", "AND", "OR", "NOT", "ISBLANK", "ABS", "EXACT",
     "UPPER", "LOWER", "LEN", "TRIM", "ROUND", "INT",
     "ISINTEGER", "ISINT64", "ISDOUBLE", "ISDECIMAL", "ISCURRENCY",
 }
 _ROW_CONTEXT_FREE_NODES = {"binary", "comparison", "logical", "unary", "concat", "in", "let", "tableconstructor", "strict_equal"}
+
+
+def _spells_a_number(text: str) -> bool:
+    try:
+        Decimal(text.strip())
+    except DecimalException:
+        return False
+    return True
 
 
 def _bare_column_outside_row_context(node: Any, columns: dict[str, set[str]]) -> tuple[str, str] | None:
@@ -4685,9 +4700,12 @@ def _bare_column_outside_row_context(node: Any, columns: dict[str, set[str]]) ->
             return table, column
         return None
     if kind == "call":
-        if node[1] not in _ROW_CONTEXT_FREE_CALLS:
+        if node[1] == "CALCULATE" and node[2]:
+            children = node[2][:1]  # the expression keeps the caller's row context (none); the filters are evaluated elsewhere
+        elif node[1] not in _ROW_CONTEXT_FREE_CALLS:
             return None
-        children = node[2]
+        else:
+            children = node[2]
     elif kind == "let":
         children = [value for _name, value in node[1]] + [node[2]]
     elif kind == "in":
@@ -9265,9 +9283,9 @@ def evaluate_measures(
 
     def merge_branch_categories(categories: list[str], function: str) -> str:
         """The common local type of conditional branches; blank branches take the other type."""
-        concrete = {category for category in categories if category != "blank"}
+        concrete = {category for category in categories if category not in {"blank", "error"}}
         if not concrete:
-            return "blank"
+            return "blank" if "blank" in categories else "error"
         if len(concrete) == 1:
             return next(iter(concrete))
         raise MeasureError(
@@ -9412,6 +9430,10 @@ def evaluate_measures(
                 return "numeric"  # the rows of a table built from constants and columns; FILTER and the like are validated further down
             if function in {"CONCATENATEX", "TOCSV", "TOJSON", "CUSTOMDATA", "NAMEOF", "UNICHAR"}:
                 return "text"
+            if function == "ERROR":
+                return "error"
+            if function == "EVALUATEANDLOG" and expression[2]:
+                return iterator_expression_category(expression[2][0], row_context)
             if function in {"RANKX", "RANK.EQ", "RANK", "ROWNUMBER", "XNPV"}:
                 return "numeric"
             if function == "COALESCE" and expression[2]:
@@ -9454,7 +9476,7 @@ def evaluate_measures(
                         "Logical iterator conditions need Boolean operands."
                     )
                 return "boolean"
-            if function == "IF" and len(expression[2]) in {2, 3}:
+            if function in {"IF", "IF.EAGER"} and len(expression[2]) in {2, 3}:
                 condition_category = iterator_expression_category(
                     expression[2][0], row_context
                 )
@@ -12278,9 +12300,15 @@ def evaluate_measures(
                     keep, node = True, node[2][0]
                 if node[0] == "let":
                     node = _unwrap_var_filter(node)
+                wrapped = False
+                while node[0] == "call" and node[1] == "EVALUATEANDLOG" and node[2]:
+                    node, wrapped = node[2][0], True
+                if wrapped and (node[0] == "in" or (node[0] == "call" and node[1] in {"REMOVEFILTERS", "ALLCROSSFILTERED", "ALLEXCEPT", "ALLSELECTED"})):
+                    # live Power BI (Task 10 review): "REMOVEFILTERS / ALLCROSSFILTERED function cannot be used as a table expression" and an IN predicate inside EVALUATEANDLOG (a CONTAINSROW in a table filter) are errors
+                    raise MeasureError("EVALUATEANDLOG wraps a filter modifier or an IN predicate, which Power BI does not accept as a table filter.")
                 if keep and node[0] == "call" and node[1] == "ALL" and node[2]:
                     continue  # live Power BI (iteration 84, critic): KEEPFILTERS(ALL(x)) intersects with every value, so it keeps the filters as they are
-                if node[0] == "call" and node[1] in {"ALL", "ALLNOBLANKROW", "REMOVEFILTERS", "ALLEXCEPT", "ALLSELECTED"}:
+                if node[0] == "call" and node[1] in {"ALL", "ALLNOBLANKROW", "REMOVEFILTERS", "ALLEXCEPT", "ALLSELECTED", "ALLCROSSFILTERED"}:
                     clearing.append(node)
                 elif _is_late_time_set(node):
                     if row_context is not None and _late_chain_reads_data_expression(node):
@@ -13406,6 +13434,33 @@ def evaluate_measures(
             if not is_date_key(context, column):
                 raise MeasureError("OPENINGBALANCE over a date set built on a column that does not key a date table is not supported in the local engine.")
 
+    def eager_branch_kind(branch: tuple[Any, ...], row_context: Any) -> str | None:
+        """"date" or "number" for an IF.EAGER branch (by its value, or by its type when evaluating it is an error), else None."""
+        if branch[0] == "call" and branch[1] in {"IF", "IF.EAGER", "SWITCH", "COALESCE", "IFERROR"}:
+            return None  # the branches of a conditional may differ in type from row to row (a Variant)
+        try:
+            branch_value = evaluate(branch, row_context, allow_text=True, allow_boolean=True)
+        except (MeasureRuntimeError, _DivisionError, DecimalException, OverflowError):
+            try:
+                category = iterator_expression_category(branch, row_context)
+            except MeasureError:
+                return None
+            return {"numeric": "number", "date/time": "date"}.get(category)
+        except MeasureError:
+            return None
+        if dax_dates.is_date(branch_value):
+            return "date"
+        if isinstance(branch_value, str):
+            return "text"
+        if isinstance(branch_value, Decimal):
+            return "number"
+        if branch_value is None:  # a BLANK cell of a column still has the column's type
+            try:
+                return {"numeric": "number", "date/time": "date", "text": "text"}.get(iterator_expression_category(branch, row_context))
+            except MeasureError:
+                return None
+        return None
+
     def probe_untaken_branches(branches: list[tuple[Any, ...]], row_context: Any) -> None:
         """Live Power BI (iteration 84, testing agent): IF and SWITCH validate the branches they do not take, so a construct that is an
         error there (PREVIOUSQUARTER(KEEPFILTERS(..)), a column of a table other than the iterated one, a text column in TOTALYTD) is an
@@ -13809,10 +13864,15 @@ def evaluate_measures(
                 )
                 return dax_math.statistic(function, [value for value in values if value.is_finite()], percentile)
             if text_extreme:  # the largest or smallest text, compared without regard to case
-                if not values:  # Power BI's BLANK here is a text BLANK (comparing it with a number is an error); BLANK has no type here
+                if not values:
+                    if _calls_function(arguments[1], "CUSTOMDATA"):
+                        return None
                     raise MeasureError(f"{function} of text found no value, and a text BLANK is not modelled by the local DAX engine.")
-                winner = (max if function == "MAXX" else min)(values, key=dax_typed.text_key)
-                if any(value != winner and dax_typed.text_key(value) == dax_typed.text_key(winner) for value in values):
+                if (function == "MINX" and "" in values) or (function == "MAXX" and all(value == "" for value in values)):
+                    return ""  # the empty text is the smallest in every collation: no ordering of the other texts is needed
+                order_key = dax_typed.ordering_key(values)
+                winner = (max if function == "MAXX" else min)(values, key=order_key)
+                if any(value != winner and order_key(value) == order_key(winner) for value in values):
                     # live Power BI (iteration 87): of two texts that differ only in case, MAXX / MINX return one that the local engine cannot predict
                     raise MeasureError(f"{function} found texts that differ only in case at the extreme: which one Power BI returns is not modelled by the local engine.")
                 return winner
@@ -14281,7 +14341,7 @@ def evaluate_measures(
                     raise _HardError(str(error)) from error  # live Power BI (iteration 92): an error out of IF.EAGER is thrown, IFERROR cannot catch it
                 raise
             untaken = [branch for branch in arguments[1:3] if branch is not chosen]
-            if function == "IF.EAGER" and row_context is not None:
+            if function == "IF.EAGER" and row_context is not None and any(True for _ in _iter_reference_nodes(arguments[0])):
                 for branch in untaken:  # live Power BI (iteration 92): inside a row expression both branches are evaluated and an error in either is thrown
                     try:
                         evaluate(branch, row_context, allow_text=True, allow_boolean=True)
@@ -14290,8 +14350,22 @@ def evaluate_measures(
                     except MeasureRuntimeError as error:
                         raise _HardError(str(error)) from error
             probe_untaken_branches(untaken, row_context)
-            refuse_date_result(mixed_branches, value)
-            refuse_date_beside_number(arguments[1:3], value)
+            eager_number = False
+            if len(arguments) > 2 and function == "IF.EAGER":
+                # live Power BI (Task 10 review): a date beside a number of any kind makes the whole IF.EAGER a number, whichever branch is taken
+                # (the same holds for IF in the 59 shapes probed, but a locked IF whose other branch is a Variant stays a date: not modelled)
+                branch_kinds = {eager_branch_kind(branch, row_context) for branch in arguments[1:3]}
+                eager_number = branch_kinds == {"date", "number"}
+                if row_context is not None and isinstance(value, str) and branch_kinds & {"date", "number"} and _spells_a_number(value):
+                    # live Power BI (Task 10 review): a text that spells a number, beside a number or date in the other branch, is not a number in AVERAGEX / SUMX (BLANK); the local engine converts it
+                    raise MeasureError("IF.EAGER with a numeric text in one branch and a number or date in the other is not supported in the local engine.")
+            if eager_number:
+                if isinstance(value, Decimal) and not value.is_finite():
+                    raise MeasureError("IF.EAGER with a date in one branch and Infinity or NaN in the other is not supported in the local engine.")
+                value = Decimal(value) if dax_dates.is_date(value) else value
+            else:
+                refuse_date_result(mixed_branches, value)
+                refuse_date_beside_number(arguments[1:3], value)
             if value is None and bool_join([branch_kind(branch, row_context) for branch in arguments[1:]]):
                 return False  # a Boolean result has no blank: Power BI answers FALSE
             return value
@@ -14325,7 +14399,9 @@ def evaluate_measures(
         if function == "TABLEOF":
             raise MeasureError("The expression refers to multiple columns. Multiple columns cannot be converted to a scalar value.")
         if function == "EVALUATEANDLOG":
-            for extra in arguments[1:]:  # live Power BI (iteration 92): the label and the row limit are never evaluated, but a bare column or table there is a compile-time error
+            # live Power BI (Task 10 review): with a table as the first argument the third argument must be a constant too ("expects a constant as argument number 2"); after a scalar it may be a column
+            table_first = _is_all_table_value_argument(arguments[0])
+            for extra in arguments[1:] if table_first else arguments[1:2]:  # live Power BI (iteration 92): the label and the row limit are never evaluated, but a bare column or table on the label is a compile-time error
                 if extra[0] == "omitted":
                     continue
                 try:
@@ -14564,7 +14640,11 @@ def evaluate_measures(
             except MeasureError as error:
                 if "is a column reference" in str(error):
                     raise MeasureError("The Rate argument to the XNPV function needs a single value; a bare column cannot give one.") from error
-                raise
+                try:
+                    t_ctx, t_rows = table_argument_value(arguments[3])
+                    rate_raw = single_value_of((t_ctx, t_rows))
+                except Exception:
+                    raise error
             if rate_raw is None:
                 rate = 0.0
             elif isinstance(rate_raw, bool):
@@ -14573,14 +14653,17 @@ def evaluate_measures(
                 try:
                     rate = float(dax_typed.text_to_number(rate_raw))
                 except Exception as exc:
-                    raise MeasureError(f"Cannot convert value '{rate_raw}' of type Text to type Number.") from exc
-            elif isinstance(rate_raw, (int, float, Decimal)) and not isinstance(rate_raw, dax_dates.DaxDateTime):
+                    raise MeasureRuntimeError(f"Cannot convert value '{rate_raw}' of type Text to type Number.") from exc
+            elif isinstance(rate_raw, (int, float, Decimal)):
                 rate = float(rate_raw)
             else:
                 raise MeasureError("The Rate argument to the XNPV function must be a number.")
-            if rate <= -1.0 or math.isnan(rate) or math.isinf(rate):
-                raise MeasureError("The Rate argument to the XNPV function must be greater than -1.")
+            if rate <= -1.0:
+                raise MeasureRuntimeError("The Rate argument to the XNPV function must be greater than -1.")
 
+            if arguments[0][0] == "tableconstructor" and any(isinstance(row, tuple) and row and row[0] == "tableconstructor" for row in arguments[0][1]):
+                # live Power BI (Task 10 review): "Column 'Value1' cannot be found" for a table constructor with several columns
+                raise MeasureError("XNPV over a table constructor with several columns is not supported in the local engine.")
             read_nodes = [arguments[1], arguments[2]]
             topn_walk_nodes[id(arguments[0])] = read_nodes
             try:
@@ -14593,7 +14676,11 @@ def evaluate_measures(
                 values_kind = iterator_body_kind(arguments[1], probe_frame)
             except MeasureError:
                 values_kind = None
-            if values_kind in {"text", "bool", "date"}:
+            try:
+                values_cat = iterator_expression_category(arguments[1], probe_frame)
+            except MeasureError:
+                values_cat = None
+            if values_kind in {"text", "bool", "date"} or values_cat in {"text", "boolean", "date/time"}:
                 # live Power BI (iteration 91): the type of the Values expression is checked when the query is compiled, not per row
                 raise MeasureError("XNPV does not support expressions of type string/Boolean/date for the Values argument.")
             currency_values = _calls_function(arguments[1], "CURRENCY")
@@ -14602,42 +14689,42 @@ def evaluate_measures(
                     currency_values = currency_values or str(iterator_reference_type(reference, probe_frame)).casefold() in {"currency", "fixed_decimal"}
                 except MeasureError:
                     pass  # a column outside the iterated table is validated further down
-            if currency_values:
-                raise MeasureError("XNPV over Currency values returns a Currency result, which the local engine does not model.")
 
+            if currency_values and arguments[1][0] not in {"reference"} and arguments[1][:2] != ("call", "CURRENCY"):
+                # live Power BI (Task 10 review): Currency arithmetic rounds every value to four decimals before XNPV sees it ("CURRENCY([v])/3" gave 1733.3335, not 1733.3333)
+                raise MeasureError("XNPV over Currency values computed with arithmetic is not supported in the local engine.")
             if not iteration_rows:
                 refuse_foreign_columns_of_empty_iteration(context, arguments[1], arguments[2])
                 return None
 
-            row_data: list[tuple[float | None, int]] = []
-            all_dates: list[int] = []
+            row_data: list[tuple[float | None, float]] = []
+            all_dates: list[float] = []
             for frame in iterate_rows(context, iteration_rows, "install"):
                 val = in_row_expression(lambda frame=frame: evaluate(arguments[1], frame, allow_text=True, allow_boolean=True))
                 if val is None:
                     v = None
                 elif isinstance(val, (str, bool, dax_dates.DaxDateTime)):
-                    raise MeasureError("XNPV does not support expressions of type string/Boolean/date for the Values argument.")
+                    type_name = "Text" if isinstance(val, str) else ("Boolean" if isinstance(val, bool) else "Date")
+                    raise MeasureRuntimeError(f"Cannot convert value '{val}' of type {type_name} to type Numeric.")
                 elif isinstance(val, (int, float, Decimal)):
                     v = float(val)
-                    if math.isnan(v) or math.isinf(v):
-                        raise MeasureError("An argument of function 'XNPV' has the wrong data type or the result is too large or too small.")
                 else:
-                    raise MeasureError("XNPV does not support expressions of type string/Boolean/date for the Values argument.")
+                    raise MeasureRuntimeError(f"Cannot convert value '{val}' to type Numeric.")
 
                 d_val = in_row_expression(lambda frame=frame: evaluate(arguments[2], frame, allow_text=True, allow_boolean=True))
                 if d_val is None:
-                    raise MeasureError("One or more values for the Dates argument passed to XNPV is blank.")
+                    raise MeasureRuntimeError("One or more values for the Dates argument passed to XNPV is blank.")
                 elif isinstance(d_val, str):
-                    raise MeasureError(f"Cannot convert value '{d_val}' of type Text to type Date.")
+                    parsed_dt = dax_dates.parse_date_text(d_val)
+                    if parsed_dt is not None:
+                        day = float(parsed_dt)
+                    else:
+                        raise MeasureRuntimeError(f"Cannot convert value '{d_val}' of type Text to type Date.")
                 elif isinstance(d_val, bool):
-                    day = 1 if d_val else 0
+                    day = 1.0 if d_val else 0.0
                 elif isinstance(d_val, (int, float, Decimal)):
                     d_float = float(d_val)
-                    if math.isnan(d_float) or math.isinf(d_float):
-                        raise MeasureError("An argument of function 'XNPV' has the wrong data type or the result is too large or too small.")
-                    day = math.floor(d_float)
-                    if day > _XNPV_LAST_DAY:
-                        raise MeasureError("XNPV dates after 9999-12-31 are not supported in the local engine.")
+                    day = math.floor(d_float) if math.isfinite(d_float) else d_float
                 else:
                     raise MeasureError("An argument of function 'XNPV' has the wrong data type or has an invalid value.")
 
@@ -14648,22 +14735,39 @@ def evaluate_measures(
             if not non_blank_values:
                 return None
 
-            earliest_date = min(all_dates)
+            # live Power BI (Task 10 review, 498 probes): the arithmetic is plain IEEE double. The reference date is the earliest date, but never
+            # later than 9999-12-31 (serial 2958465); a NaN date makes every term NaN unless the rate is 0 (1 ** NaN is 1)
+            earliest_date = min([2958465.0] + [d for d in all_dates if not math.isnan(d)])
+
             total = 0.0
             for v, day in row_data:
                 if v is None:
                     continue
-                days_diff = day - earliest_date
-                if rate == 0.0 or days_diff == 0:
-                    total += v
+                # IEEE arithmetic like Power BI's double: a denominator that overflows is Infinity, one that underflows is 0 and v / 0 is
+                # +-Infinity or NaN (live Power BI, Task 10 review: rates of 1E300 and -0.999999 with dates 1E10 days apart)
+                try:
+                    denominator = (1.0 + rate) ** ((day - earliest_date) / 365.0)
+                except OverflowError:
+                    denominator = math.inf
+                if denominator == 0.0:
+                    term = math.nan if (v == 0.0 or math.isnan(v)) else math.copysign(math.inf, v)
                 else:
-                    total += v / ((1.0 + rate) ** (days_diff / 365.0))
+                    term = v / denominator
+                total += term
 
-            if math.isnan(total) or math.isinf(total):
-                raise MeasureError("The result of XNPV is not a finite number.")
+            if currency_values and not math.isfinite(total):
+                raise MeasureError("XNPV over Currency values with a result that is not a finite number is not supported in the local engine.")
+            if math.isnan(total):
+                return Decimal("NaN")
+            if math.isinf(total):
+                return Decimal("Infinity") if total > 0 else Decimal("-Infinity")
             if total == 0.0:
-                return Decimal(0)
-            return Decimal(int(total)) if total.is_integer() else Decimal(repr(total))
+                res = Decimal(0)
+            else:
+                res = Decimal(int(total)) if total.is_integer() else Decimal(repr(total))
+            if currency_values:
+                res = res.quantize(Decimal("0.0001"), rounding=ROUND_HALF_UP)
+            return res
         if function in {"TOCSV", "TOJSON"}:
             is_csv = function == "TOCSV"
             table_node = arguments[0]
@@ -14978,6 +15082,9 @@ def evaluate_measures(
             finally:
                 topn_walk_nodes.pop(id(walked_table), None)
             entries = []
+            if len(iteration_rows) > 1 and walked_table[:2] != ("call", "TABLEOF") and _contains_function_call(walked_table, "TABLEOF"):
+                # live Power BI (iteration 92, Task 10 review): TABLEOF hands its rows over in the engine's own order; a TOPN / UNION / FILTER of it keeps no order the local engine knows
+                raise MeasureError("CONCATENATEX over rows built from TABLEOF depends on the row order, which is not modelled in the local engine.")
             if not iteration_rows:
                 refuse_foreign_columns_of_empty_iteration(context, *read_nodes)
             iteration_rows = dictionary_ordered_rows(walked_table, context, iteration_rows, read_nodes)
@@ -15053,6 +15160,9 @@ def evaluate_measures(
                 return second
             larger = dax_typed.compare(">", first, second)
             smaller = dax_typed.compare("<", first, second)
+            if isinstance(first, str) and isinstance(second, str) and first != second and not larger and not smaller:
+                # live Power BI (Task 10 review): of two texts that differ only in case, MAX / MIN return one the local engine cannot predict
+                raise MeasureError(f"{function} found texts that differ only in case: which one Power BI returns is not modelled by the local engine.")
             picked = (first if larger else second) if function == "MAX" else (first if smaller else second)
             refuse_date_result(mixed_pair, picked)
             refuse_date_beside_number(arguments[:2], picked)
@@ -15124,7 +15234,9 @@ def evaluate_measures(
                         texts.append(str(cell))
                 if not texts:
                     return None
-                return (max if function == "MAX" else min)(texts, key=dax_typed.text_key)
+                if (function == "MIN" and "" in texts) or (function == "MAX" and all(text == "" for text in texts)):
+                    return ""  # the empty text is the smallest in every collation
+                return (max if function == "MAX" else min)(texts, key=dax_typed.ordering_key(texts))
         if function in {"AVERAGEA", "MAXA", "MINA"}:
             a_context, a_column = resolve_table(reference[1], reference[2])
             a_type = str(a_context.get("column_types", {}).get(a_column, "")).casefold()
@@ -15182,6 +15294,10 @@ def evaluate_measures(
 
     def _single_cell_numeric_table_value(node: tuple[Any, ...]) -> Decimal | None:
         """When a single-cell table (ROW, {{...}}, DATATABLE) is the whole measure expression and holds a number."""
+        while isinstance(node, tuple) and node and node[0] == "call" and node[1] == "EVALUATEANDLOG" and node[2]:
+            if len(node[2]) > 2 and node[2][2][0] not in {"number", "omitted"}:
+                return None  # a table with a non-constant third argument is an error in Power BI; the general path refuses it
+            node = node[2][0]
         if not isinstance(node, tuple) or not node:
             return None
         is_row = node[0] == "call" and node[1] == "ROW"
