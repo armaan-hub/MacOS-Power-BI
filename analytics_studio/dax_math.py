@@ -252,13 +252,18 @@ def statistic(function: str, values: list[Decimal], k: Decimal | None = None) ->
     if name == "GEOMEAN":
         if any(value == 0 for value in values):
             return Decimal(0)
-        return _double(math.exp(sum(math.log(abs(float(value))) for value in values) / count), function)
+        magnitude = _double(math.exp(sum(math.log(abs(float(value))) for value in values) / count), function)
+        # live Power BI (Task 11 review): the geometric mean of the absolute values, negative when the product is (an odd number of negative values)
+        return -magnitude if sum(1 for value in values if value < 0) % 2 else magnitude
     if name in {"VAR.S", "VAR.P", "STDEV.S", "STDEV.P"}:
         sample = name.endswith(".S")
         if sample and count < 2:
             error = dax_typed._error(f"Division by zero has occurred when evaluating function '{function}'.")
             error.sample_statistic_nan = True  # NaN in Power BI (iteration 88); see the measure-level handling in measures.resolve
             raise error
+        if count > 1 and len(set(values)) == 1 and values[0] != values[0].to_integral_value():
+            # live Power BI (Task 11 review): the spread of one repeated fraction is float noise (8.4E-08), not 0
+            raise dax_typed._error(f"{function} of one repeated fraction carries float noise that the local engine does not reproduce.")
         mean = sum(values, Decimal(0)) / count
         variance = sum(((value - mean) ** 2 for value in values), Decimal(0)) / (count - 1 if sample else count)
         return variance if name.startswith("VAR") else variance.sqrt()
