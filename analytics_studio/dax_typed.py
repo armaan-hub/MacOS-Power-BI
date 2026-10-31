@@ -277,7 +277,7 @@ def ordering_key(values: list[str]) -> Callable[[str], object]:
     return latin_collation_key
 
 
-def compare(operator: str, left: object, right: object) -> bool:
+def compare(operator: str, left: object, right: object, *, allow_variant: bool = False) -> bool:
     """DAX comparison: blank takes the other side's type, text ignores case, mixed types are an error."""
     if left is None and right is None:
         left, right = Decimal(0), Decimal(0)
@@ -286,6 +286,32 @@ def compare(operator: str, left: object, right: object) -> bool:
     elif right is None:
         right = _blank_like(left)
     if isinstance(left, bool) != isinstance(right, bool) or isinstance(left, str) != isinstance(right, str):
+        if allow_variant:
+            # DAX Variant ordering at runtime: Blank < Number < Date < Text < Boolean
+            def _variant_rank(v: object) -> int:
+                if isinstance(v, bool):
+                    return 3
+                if isinstance(v, str):
+                    return 2
+                if isinstance(v, Decimal):
+                    return 1
+                return 0
+
+            l_rank = _variant_rank(left)
+            r_rank = _variant_rank(right)
+            if l_rank != r_rank:
+                if operator in {"=", "=="}:
+                    return False
+                if operator == "<>":
+                    return True
+                if operator == "<":
+                    return l_rank < r_rank
+                if operator == "<=":
+                    return l_rank <= r_rank
+                if operator == ">":
+                    return l_rank > r_rank
+                if operator == ">=":
+                    return l_rank >= r_rank
         raise _error(
             "DAX comparison operations do not support comparing values of type "
             f"{type_name(left)} with values of type {type_name(right)}."
@@ -393,7 +419,11 @@ def text_function(function: str, args: list[object]) -> object:
     if function == "VALUE":
         if first is None:
             return None
-        return Decimal(first) if isinstance(first, Decimal) else text_to_number(to_text(first))
+        if isinstance(first, Decimal):
+            if not first.is_finite():  # live Power BI (Task 12 review): VALUE of Infinity or NaN cannot read the text it prints
+                raise _error(f"Cannot convert value of type Number to type Number: {first} is not a number VALUE can read.")
+            return Decimal(first)
+        return text_to_number(to_text(first))
     if first is None:
         return None
     text = _units(to_text(first))  # Power BI positions and lengths are UTF-16 code units

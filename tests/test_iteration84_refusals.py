@@ -31,9 +31,10 @@ class RefusalTests(unittest.TestCase):
         self.refused("ZB", "CALCULATE(COUNTROWS(ALLSELECTED(ZB_Reg[Reg])),ZB_Cal[Year]=2023)")
 
     def test_date_mixed_with_a_number(self) -> None:
-        self.refused("ZO", "MAX(DATE(2023,1,1),5)")
-        self.refused("ZO", "MAX(5,DATE(2023,1,1))")
-        self.refused("ZO", "IF(TRUE(),DATE(2023,1,1),5)")
+        # live Power BI (Task 13 review): a date beside a number is a number
+        self.assertEqual("44927", ours_for("ZO", "MAX(DATE(2023,1,1),5)"))
+        self.assertEqual("44927", ours_for("ZO", "MAX(5,DATE(2023,1,1))"))
+        self.assertEqual("44927", ours_for("ZO", "IF(TRUE(),DATE(2023,1,1),5)"))
         self.assertFalse(ours_for("ZO", "MAX(DATE(2023,1,1),DATE(2024,1,1))").startswith("LOCAL-REJECT"))
 
 

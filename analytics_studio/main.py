@@ -5,7 +5,7 @@ from __future__ import annotations
 import sys
 from pathlib import Path
 
-from PySide6.QtCore import QTimer, QUrl
+from PySide6.QtCore import QCoreApplication, QEvent, QTimer, QUrl
 from PySide6.QtGui import QFont, QFontDatabase
 from PySide6.QtQml import QQmlApplicationEngine, QQmlComponent
 from PySide6.QtQuickControls2 import QQuickStyle
@@ -51,7 +51,12 @@ def main() -> int:
     else:
         QTimer.singleShot(0, window.requestActivate)
 
-    return app.exec()
+    exit_code = app.exec()
+    # Remove the window while the application still exists.  Left to Python's shutdown, QApplication deletes the controller
+    # first, the window's bindings then update text with no application behind them, and the process ends with a segmentation fault.
+    window.deleteLater()
+    QCoreApplication.sendPostedEvents(window, QEvent.Type.DeferredDelete)
+    return exit_code
 
 
 if __name__ == "__main__":

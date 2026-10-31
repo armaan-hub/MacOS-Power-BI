@@ -49,3 +49,17 @@ the iterator should take it where Power BI does (MAXX / MINX / COUNTAX / COUNTX:
 Non-ASCII text collation (1,456 pending: Greek, Cyrillic, CJK need a measured collation, not a rule), VertiPaq-internal row orders (594 + 300 + 27: INDEX, TOPN ties,
 DISTINCT), LINEST rank-deficient fits (433 + 244 + 20), SUBSTITUTEWITHINDEX shapes (206 + 34 + 23), the typed column of a computed SELECTCOLUMNS column over an
 empty table, `NOW()` and `LASTNONBLANK` walk orders.
+
+## Review outcome (Claude, 2026-10-30)
+Antigravity's build matched 1,160 of the 1,161 spec items, and all 163,762 locked items stayed intact. Part A (VAR after `&&`, `||`, `^`), Part B2 (text BLANK) and Part B3 (text aggregates) held up on fresh shapes, and so did the new Variant comparison ordering (12,000 probes, no difference). Part B1 did not: fresh Power BI probes (about 130,000 answers on four Facts tables, none of them saved before) found 269 distinct wrong answers, nearly all shapes `main` had honestly refused and this build answered wrongly. The mechanism was the one Rule 3 warns about: refusals removed or narrowed without knowing the rule for every shape they had covered.
+
+Measured and fixed:
+- **`&&`, `||`, AND, OR:** a value that decides, on either side, swallows the other side's conversion error. An empty text on the left is False. On the right of an undecided left it displays as BLANK yet ISBLANK is False, so it is refused.
+- **A constant IF over a text column:** `iterator_body_as_scanned`. A condition that reads no row is settled first. IF reduces to the taken bare column beside any other branch; IF.EAGER only beside a literal-like one (`_literal_like_branch`). SWITCH, COALESCE, VAR blocks and EVALUATEANDLOG do not reduce. Whether the reduction happens depends on the scan, and differently for MAXX / MINX and COUNTX (`_scan_class`, 30 table shapes); an outer filter or row stops it unless ALL clears it. SUMX never reduces. Replaces `_active_branch` and `_has_computed_numeric_branch`, which were fitted to the saved items.
+- **Infinity and NaN in a Variant MAXX / MINX:** Infinity counts where a plain number body gives BLANK; nothing but NaN is NaN; NaN beside other numbers depends on the engine's walk (Infinity with a text column in the other branch, NaN with a literal), so it is refused.
+- **A variable in a branch:** `body_value_type` sees through VAR blocks, so text reached through a variable is no longer converted to a number (`SUMX(Facts,VAR v=1 RETURN IF(Facts[Quantity]>2,v,"5"))` was 18, Power BI says 3).
+- **Refused, because the rule is not known:** an AVERAGEX over a Currency beside other number types that does not land on 4 decimals, text in a Variant statistic (PRODUCTX, MEDIANX), a CONCATENATEX whose walk follows column values (`concatenate_walk_is_unmodelled`).
+- **Typed at compile time:** FIRSTNONBLANK and its relatives in the numeric iterators; VALUE of Infinity or NaN is an error.
+- **Real-app bug found by running the unpatched app:** a measure whose result is a date before day zero or past 9999 raised while a card formatted it, which broke every later measure. The evaluator now refuses it (`evaluate_measures`). `main` had this too.
+
+Lessons carried into Task 13: a replay run takes 2 minutes, so run it after every narrowing (a first version of the CONCATENATEX refusal broke 384 locked items, caught before the gate); never run heavy jobs beside the gate; test the real app without the full-precision patch at least once.

@@ -111,11 +111,12 @@ class PendingGaps1ReviewTest(unittest.TestCase):
         self.assertEqual("12", dax.local("VAR t=TOPN(3,Facts,Facts[Quantity]) RETURN SUMX(t,Facts[Quantity])"))
         self.assertEqual("West|North|East", dax.local('CONCATENATEX(TOPN(3,Facts,Facts[Quantity]),Facts[Region],"|")'))
 
+    def test_a_var_block_on_the_right_of_a_logical_operator_or_power(self) -> None:  # refused until Task 12
+        self.assertEqual("True", dax.local("3||VAR y=TRUE() RETURN y||FALSE()"))
+        self.assertEqual("27", dax.local("3^VAR y=2 RETURN y+1"))
+
     def test_valid_shapes_stay_refused(self) -> None:
         for expression in (
-            "3||VAR y=TRUE() RETURN y||FALSE()",  # a VAR block on the right of ||, && and ^ is not parsed
-            "3^VAR y=2 RETURN y+1",
-            "CALCULATE(COUNTROWS(Facts),VAR t = 1+1 RETURN Facts[Quantity]>t)",  # a filter variable holds a column or a constant only
             "VAR t=Facts RETURN SUMX(t,1)",
         ):
             self.assertTrue(dax.local(expression).startswith("LOCAL-REJECT"), expression)
