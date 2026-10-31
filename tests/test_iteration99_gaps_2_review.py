@@ -92,8 +92,12 @@ class Gaps2ReviewTest(unittest.TestCase):
         ):
             self.assertEqual("BLANK", dax.local(answer), answer)
 
-    def test_filter_predicate_of_type_text_is_an_error_also_over_an_empty_table(self) -> None:
-        _refused(self, [f'COUNTROWS(FILTER({EMPTY},"a"))', f'COUNTROWS(FILTER({EMPTY},IF(TRUE(),"a","b")))'])
+    def test_filter_predicate_of_type_text_is_an_error_only_over_a_scan_that_ran(self) -> None:
+        # Task 14 review: FILTER(Facts,FALSE()) runs no scan, so the predicate is never evaluated
+        for empty in (EMPTY, "TOPN(0,Facts)"):
+            self.assertEqual("BLANK", dax.local(f'COUNTROWS(FILTER({empty},"a"))'), empty)
+            self.assertEqual("BLANK", dax.local(f'COUNTROWS(FILTER({empty},IF(TRUE(),"a","b")))'), empty)
+        _refused(self, ['COUNTROWS(FILTER(FILTER(Facts,Facts[Quantity]>100),"a"))', 'COUNTROWS(FILTER(FILTER(Facts,Facts[Quantity]>100),IF(TRUE(),"a","b")))'])
         for answered in (f'COUNTROWS(FILTER({EMPTY},"1"))', f"COUNTROWS(FILTER({EMPTY},Facts[Region]))", f'COUNTROWS(FILTER({EMPTY},IF(Facts[Quantity]>1,"a","b")))'):
             self.assertEqual("BLANK", dax.local(answered), answered)  # text read from a row only fails when a row meets it
 

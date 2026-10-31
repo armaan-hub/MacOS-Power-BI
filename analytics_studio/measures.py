@@ -197,6 +197,18 @@ def logical_conjuncts(node: tuple[Any, ...]) -> list[tuple[Any, ...]]:
     return [node]
 
 
+def _is_pure_logical(node: Any) -> bool:
+    """True when node is a pure logical operator (&&, ||, AND, OR, NOT) which in DAX can never produce BLANK."""
+    if not isinstance(node, tuple) or not node:
+        return False
+    kind = node[0]
+    if kind == "logical":
+        return True
+    if kind == "call" and node[1] in {"AND", "OR", "NOT"}:
+        return True
+    return False
+
+
 def _consume_infinity(thunk: Any) -> Any:
     """Refuse to let an Infinity/NaN flow into a comparison, ISBLANK or SWITCH.
 
@@ -1441,6 +1453,8 @@ def _is_all_table_value_argument(node: Any) -> bool:
         return True
     if node[0] == "var":
         return True  # a VAR holding a table; checked when it is used
+    if node[0] == "let":
+        return _is_all_table_value_argument(node[2])
     if node[0] in {"table_call", "tableconstructor"}:
         return True  # VALUES / DISTINCT of a column or table, or {1, 2, 3}
     if node[0] == "call" and node[1] == "CURRENTGROUP":
@@ -3311,7 +3325,7 @@ class _Parser:
             self._expect("=")
             self._in_var_binding = True
             try:
-                value = self._logical_or()
+                value = self._expression()
             finally:
                 self._in_var_binding = False
             bindings.append((name.value, value))
@@ -5063,7 +5077,7 @@ def _static_numeric_type(
                 return "int64"
             if lt == "currency" and rt == "currency":
                 return "double"
-            if "currency" in (lt, rt) and lt in {"int64", "double", "currency"} and rt in {"int64", "double", "currency"}:
+            if "currency" in (lt, rt) and lt in {"int64", "double", "currency", "bool"} and rt in {"int64", "double", "currency", "bool"}:
                 return "currency"
             if "double" in (lt, rt) and lt in {"int64", "double"} and rt in {"int64", "double"}:
                 return "double"
@@ -5080,6 +5094,8 @@ def _static_numeric_type(
     if kind != "call":
         return None
     fn, args = node[1], node[2]
+    if fn == "XNPV" and len(args) == 4 and _static_numeric_type(args[1], columns, variables) == "currency":
+        return "currency"
     if fn in _STATIC_ALWAYS_DOUBLE:
         return "double"
     if fn in _STATIC_ALWAYS_INT64:
@@ -5161,6 +5177,11 @@ def _static_numeric_type(
         return "double"
     if fn in {"SUMX", "MAXX", "MINX"}:
         if len(args) >= 2:
+            if args[0][0] == "call" and args[0][1] in {"LINEST", "LINESTX"}:
+                # live Power BI (Task 14 review): every LINEST column is a Double, DegreesOfFreedom too; the body keeps its own type (MAXX(LINEST(..),1) is an Integer)
+                from . import dax_linest
+                scope = {**columns, "": {h.casefold(): "double" for h in dax_linest.headers_for(16, True)}}
+                return _static_numeric_type(args[1], scope, variables)
             return _static_numeric_type(args[1], columns, variables)
         return None
     if fn == "CALCULATE":
@@ -6999,13 +7020,32 @@ def evaluate_measures(
             column_kinds: dict[str, str | None] = {}
             if rows:
                 for name, expression in zip(names, expressions):
+                    if id(logical_right_operand(expression)) in logical_blanks and any(out_row.get(name) is None for out_row in out_rows):
+                        refuse_logical_blank_in_a_column(expression, None)
                     column_kinds[name] = iterator_body_kind(expression, (context, rows[0], 1))
+                    if column_kinds[name] is None:
+                        try:
+                            column_kinds[name] = iterator_expression_category(expression, (context, rows[0], 1))
+                        except MeasureError:
+                            pass
                     if column_kinds[name] == "numdate":
                         # live Power BI (iteration 87): numbers beside dates make a number column, its dates are plain numbers
                         for out_row in out_rows:
                             if isinstance(out_row.get(name), dax_dates.DaxDateTime):
                                 out_row[name] = Decimal(out_row[name])
-            static_types = {"variant": "any", "variant_dates": "any", "text": "text", "bool": "boolean", "number": "decimal_number", "numdate": "decimal_number", "date": "date"}
+            else:
+                ghost = ghost_row_of(context)
+                for name, expression in zip(names, expressions):
+                    try:
+                        column_kinds[name] = iterator_body_kind(expression, (context, ghost, 1))
+                    except MeasureError:
+                        pass
+                    if column_kinds[name] is None:
+                        try:
+                            column_kinds[name] = iterator_expression_category(expression, (context, ghost, 1))
+                        except MeasureError:
+                            pass
+            static_types = {"variant": "any", "variant_dates": "any", "text": "text", "bool": "boolean", "boolean": "boolean", "number": "decimal_number", "numeric": "decimal_number", "numdate": "decimal_number", "date": "date", "date/time": "date"}
             types.update({name: static_types[kind] for name, kind in column_kinds.items() if kind in static_types})  # the type of the branches, not of the values the rows hold
             selected_context, selected_rows = derived_table(
                 headers, out_rows, lineage, {k: v for k, v in types.items() if k in headers}, row_identity=add and not context.get("derived", False) or add and bool(context.get("row_identity")),
@@ -7233,6 +7273,8 @@ def evaluate_measures(
                 keys_spec.append((expression, descending))
             if not rows:
                 refuse_foreign_columns_of_empty_iteration(context, *(expression for expression, _descending in keys_spec))
+            if count == -1 and not keys_spec:
+                return context, rows  # live Power BI (Task 14 review): TOPN(-1, table) keeps every row; -5, and -1 with an order, keep none
             if count <= 0 or not rows:
                 return context, []
             if not keys_spec:  # no order expression: the first n rows, no ties
@@ -8858,7 +8900,7 @@ def evaluate_measures(
             if isinstance(child, tuple):
                 unreachable_foreign_reference(child, readable, extra, is_alias)
 
-    def refuse_foreign_columns_of_empty_iteration(context: dict[str, Any], *expressions: tuple[Any, ...], function: str | None = None, typed: bool = False) -> None:
+    def refuse_foreign_columns_of_empty_iteration(context: dict[str, Any], *expressions: tuple[Any, ...], function: str | None = None, typed: bool = False, scan_ran: bool | None = True) -> None:
         """Live Power BI (iteration 84, testing agent; 34 of 12,534 fresh probes): an iterator body that reads a column of a table other than
         the iterated one is evaluated once without a row even when the iteration is empty, and fails with "a single value for column ...
         cannot be determined" whenever the filter context holds several values of it (SUMX(FILTER(Cal, FALSE()), Fact[Amt]), the body of a
@@ -8917,7 +8959,7 @@ def evaluate_measures(
 
             unreachable_foreign_reference(expression, readable, frozenset(), alias_of_enclosing_frame)
 
-        validate_with_ghost_row(context, expressions, function, typed)
+        validate_with_ghost_row(context, expressions, function, typed, scan_ran=scan_ran)
 
     ghost_rows_alive: list[dict[str, Any]] = []  # the id() of a row keys the filter-constant cache: a ghost row must never share it with a later row
 
@@ -8937,7 +8979,17 @@ def evaluate_measures(
             else:
                 base, column = context, header
             if base is None:
-                row[header] = None
+                kind = str(context.get("column_types", {}).get(header, "")).casefold()
+                if kind in {"boolean", "bool"}:
+                    row[header] = True
+                elif kind in {"text", "string"}:
+                    row[header] = "1"
+                elif kind in {"decimal_number", "whole_number", "number", "integer"}:
+                    row[header] = Decimal(1)
+                elif kind == "date":
+                    row[header] = dax_dates.DaxDateTime(Decimal(0))
+                else:
+                    row[header] = None
                 continue
             kind = str(base.get("column_types", {}).get(column, "text")).casefold()
             if kind in {"text", "string", ""}:
@@ -8951,7 +9003,95 @@ def evaluate_measures(
     _EMPTY_BODY_NOT_TEXT = frozenset({"SUMX", "AVERAGEX", "PRODUCTX", "MEDIANX", *dax_math.STAT_ITERATORS})
     _EMPTY_BODY_NOT_DATE = _STATIC_DATE_REFUSING_ITERATORS
 
-    def validate_with_ghost_row(context: dict[str, Any], expressions: tuple[tuple[Any, ...], ...], function: str | None, typed: bool) -> None:
+    def values_of_stored_column(reference: tuple[Any, ...]) -> list[Any]:
+        """The values a column holds in the model, whatever the filters: what the storage engine looks a value up in."""
+        table, column = resolve_table(reference[1], reference[2])
+        rows = rows_by_table_id[table["id"]]
+        return [evaluate(("reference", reference[1], column), (table, row, position), allow_text=True, allow_boolean=True) for position, row in enumerate(rows, 1)]
+
+    def values_a_condition_allows(condition: tuple[Any, ...]) -> tuple[tuple[str, str], list[Any]] | None:
+        """(column, the stored values it can keep) of `column = constant`, `column IN {constants}` and an OR of those; None for any other condition.
+        A BLANK constant or a fraction against a whole-number column is no look-up (live Power BI, Task 14 review: Quantity=1.5 scans, Quantity=100 does not)."""
+        if condition[0] == "logical" and condition[1] == "||":
+            left, right = values_a_condition_allows(condition[2]), values_a_condition_allows(condition[3])
+            if left is None or right is None or left[0] != right[0]:
+                return None
+            return left[0], left[1] + right[1]
+        if condition[0] == "in" and condition[1][0] == "reference" and condition[2][0] == "tableconstructor" and all(item[0] != "tuple" for item in condition[2][1]):
+            reference, constants = condition[1], list(condition[2][1])
+        elif condition[0] in {"comparison", "strict_equal"} and (condition[0] == "strict_equal" or condition[1] == "="):
+            left, right = condition[-2:]
+            reference, constant = (left, right) if left[0] == "reference" else (right, left)
+            if reference[0] != "reference":
+                return None
+            constants = [constant]
+        else:
+            return None
+        if not all(plan_constant(constant) for constant in constants):
+            return None
+        table, column = resolve_table(reference[1], reference[2])
+        whole_column = str(table.get("column_types", {}).get(column, "")).casefold() in {"whole_number", "integer", "int64"}
+        wanted = [evaluate(constant, None, allow_text=True, allow_boolean=True) for constant in constants]
+        if any(value is None or (whole_column and isinstance(value, Decimal) and value != value.to_integral_value()) for value in wanted):
+            return None
+        stored = [value for value in values_of_stored_column(reference) if value is not None]
+        return (table["id"], column.casefold()), [value for value in stored if any(dax_typed.compare("=", value, one) for one in wanted)]
+
+    def plan_finds_no_rows(conditions: Iterable[tuple[Any, ...]]) -> bool | None:
+        """Is the result of these filters known to be empty without a scan?  A constant False, or a column whose stored values hold nothing the filters ask for.
+        None: a condition of a shape not measured."""
+        allowed: dict[tuple[str, str], list[Any]] = {}
+        unknown = False
+        for condition in (conjunct for predicate in conditions for conjunct in logical_conjuncts(predicate)):
+            if plan_constant(condition):
+                try:
+                    if not as_boolean(evaluate(condition, None, allow_text=True, allow_boolean=True)):
+                        return True
+                except (MeasureRuntimeError, _HardError):
+                    unknown = True
+                continue
+            if condition[0] == "comparison" and condition[1] == "<" and condition[2][0] == "reference" and condition[3] == ("string", ""):
+                return True  # no text sorts below the empty text
+            looked_up = values_a_condition_allows(condition)
+            if looked_up is not None:
+                column, values = looked_up
+                kept = values if column not in allowed else [value for value in allowed[column] if any(dax_typed.compare("=", value, other) for other in values)]
+                if not kept:
+                    return True
+                allowed[column] = kept
+            elif condition[0] == "let":
+                unknown = True
+        return None if unknown else False
+
+    def filter_scan_ran(table: tuple[Any, ...]) -> bool | None:
+        """Live Power BI (Task 14 review, 5,100 probes): a FILTER predicate that reads no row is evaluated once before the rows, so over no rows it fails only when
+        the rows came from a scan that really ran.  FILTER, CALCULATETABLE, KEEPFILTERS, SUMMARIZE and DISTINCT pass a stored scan on; a table the formula engine
+        builds (ADDCOLUMNS, SELECTCOLUMNS, TOPN, UNION, INTERSECT, EXCEPT, CROSSJOIN, GENERATE, a VAR block, ...) evaluates no predicate; a plan that already
+        knows there are no rows (plan_finds_no_rows) runs no scan.  None: not measured."""
+        if table[0] == "table":
+            return True
+        if table[0] == "table_call":
+            return filter_scan_ran(table[2]) if table[2][0] not in {"reference", "table"} else True
+        if table[0] in {"tableconstructor", "let"}:
+            return False
+        if table[0] != "call" or not table[2]:
+            return None
+        name, args = table[1], table[2]
+        if name in {"ALL", "ALLSELECTED", "ALLNOBLANKROW"}:
+            return True
+        if name in {"FILTER", "CALCULATETABLE"}:
+            empty = plan_finds_no_rows(args[1:])
+            if empty and (name == "FILTER" or args[0][0] == "table"):
+                return False  # the filters of CALCULATETABLE do not stop a scan nested in its table (live Power BI: FILTER(ALL(Facts),Quantity>100) under Region="Nowhere" fails)
+            below = filter_scan_ran(args[0])
+            return None if empty is None and below is not False else below
+        if name in {"KEEPFILTERS", "SUMMARIZE", "DISTINCT"}:
+            return filter_scan_ran(args[0])
+        if name in {"ADDCOLUMNS", "SELECTCOLUMNS", "TOPN", "EVALUATEANDLOG", "UNION", "INTERSECT", "EXCEPT", "CROSSJOIN", "GENERATE", "GENERATESERIES", "SAMPLE", "NATURALINNERJOIN", "ROW", "DATATABLE"}:
+            return False
+        return None
+
+    def validate_with_ghost_row(context: dict[str, Any], expressions: tuple[tuple[Any, ...], ...], function: str | None, typed: bool, scan_ran: bool | None = True) -> None:
         """Live Power BI (Task 11 review, 38,000 fresh probes on four Facts tables): the expressions of an iterator over a table with no rows are
         resolved and typed all the same.  A name that exists nowhere is an error at any depth (`SUMX(empty, SUMX(Facts,[c]))`, a CALCULATE filter
         inside the body), a table where one value is wanted is an error, and the body of SUMX / AVERAGEX / PRODUCTX / MEDIANX / the statistical
@@ -8966,9 +9106,10 @@ def evaluate_measures(
             try:
                 value = in_row_expression(lambda expression=expression: evaluate(expression, frame, allow_text=True, allow_boolean=True))
             except (MeasureRuntimeError, _HardError) as error:
-                if function == "FILTER" and "A table of multiple values was supplied where a single value was expected" in str(error):
-                    # live Power BI (Task 13 review): an error over FILTER(ALL(Facts),Facts[Quantity]>100), BLANK over FILTER(Facts,FALSE()): refused
-                    raise MeasureError(str(error)) from error
+                if function == "FILTER" and scan_ran is not False and not list(_direct_column_references(expression)):
+                    raise MeasureError(str(error)) from error  # the predicate is evaluated before the rows: see filter_scan_ran
+                if expression[0] == "let" and not list(_direct_column_references(expression)):
+                    raise MeasureError(str(error)) from error  # live Power BI (Task 14 review): SUMX(FILTER(Facts,FALSE()),VAR q=ERROR("x") RETURN q): a VAR that reads no row and that the body needs is evaluated before the rows
                 continue
             except (DecimalException, OverflowError, ZeroDivisionError):
                 continue
@@ -8983,7 +9124,8 @@ def evaluate_measures(
             if typed and function == "FILTER" and isinstance(value, str) and not _spells_boolean_or_number(value) and not list(_direct_column_references(expression)):
                 # live Power BI (Task 11 review): a predicate that is text no True/False can be and reads no column of the row ("a", IF(TRUE(),"a","b"),
                 # MAXX(Facts,Facts[Region])) is an error over some empty tables and BLANK over others; text read from the row itself only fails when a row meets it
-                raise MeasureError(f"Cannot convert value {value!r} of type Text to type True/False.")
+                if scan_ran is not False:
+                    raise MeasureError(f"Cannot convert value {value!r} of type Text to type True/False.")
             if typed and not position and function is not None and (_has_conditional_or_var(expression) or expression[:2] in {("call", "FIRSTNONBLANKVALUE"), ("call", "LASTNONBLANKVALUE")}):
                 value = {"bool": True, "text": "", "date": dax_dates.DaxDateTime(Decimal(0))}.get(conditional_type(expression, frame))  # one type in every branch, also through BLANK()
             elif not typed or position or function is None:
@@ -9031,6 +9173,43 @@ def evaluate_measures(
         include_unknown: bool = False,
         allow_keepfilters: bool = False,
     ) -> tuple[dict[str, Any], list[dict[str, Any]]]:
+        if argument[0] == "let":
+            saved = dict(variables)
+            saved_nodes = dict(variable_nodes)
+            table_vars: set[str] = set()
+            try:
+                for name, value_node in argument[1]:
+                    variable_nodes[name] = value_node
+                    variable_kinds[name] = branch_kind(value_node, None)
+                    if value_node[0] == "var" and value_node[1] in table_vars:
+                        held_table = variables[value_node[1]]()
+                        variables[name] = lambda held_table=held_table: held_table
+                        table_vars.add(name)
+                        continue
+                    if value_node[0] != "var" and _is_all_table_value_argument(value_node):
+                        try:
+                            held_table = _TableValue(table_argument_value(value_node, include_unknown=include_unknown, allow_keepfilters=allow_keepfilters))
+                            variables[name] = lambda held_table=held_table: held_table
+                            table_vars.add(name)
+                            continue
+                        except MeasureError:
+                            pass
+                    try:
+                        value = evaluate(value_node, None, allow_text=True, allow_boolean=True)
+                    except (MeasureRuntimeError, _HardError) as error:
+                        def failed(error: MeasureError = error) -> Any:
+                            if isinstance(error, _DivisionError):
+                                raise error
+                            raise _HardError(str(error)) from error
+                        variables[name] = failed
+                        continue
+                    variables[name] = lambda value=value: value
+                return table_argument_value(argument[2], include_unknown=include_unknown, allow_keepfilters=allow_keepfilters)
+            finally:
+                variables.clear()
+                variables.update(saved)
+                variable_nodes.clear()
+                variable_nodes.update(saved_nodes)
         if argument[0] == "table":
             context = resolve_table_context(str(argument[1]))
             table_rows = rows_by_table_id[context["id"]]
@@ -9103,7 +9282,7 @@ def evaluate_measures(
             items = argument[1]
             width = len(items[0][1]) if items and items[0][0] in {"tuple", "tableconstructor"} else 1
             records = [
-                [evaluate(member, None, allow_text=True) for member in (item[1] if item[0] in {"tuple", "tableconstructor"} else (item,))]
+                [refuse_logical_blank_in_a_column(member, evaluate(member, None, allow_text=True)) for member in (item[1] if item[0] in {"tuple", "tableconstructor"} else (item,))]
                 for item in items
             ]
             for column in range(width):  # mixed types become text, Boolean with numbers become numbers
@@ -9278,6 +9457,9 @@ def evaluate_measures(
                     ):
                         raise MeasureError("The filter predicate must reference a column of the filtered table variable.")
             context, base_rows = table_argument_value(base, allow_keepfilters=True)
+            scan_ran = filter_scan_ran(base) if not base_rows else True
+            if base_rows:
+                refuse_column_no_row_holds(context, base_rows, predicate)  # compiled whatever the rows give: FILTER(SUMMARIZE(Facts,Facts[Region]),Facts[Region]="Nowhere"&&Facts[Quantity]>2)
             comparisons: dict[int, tuple[str, str, Any, str]] = {}
             try:
                 if context.get("derived") or context.get("lineage") is not None:
@@ -9287,8 +9469,12 @@ def evaluate_measures(
             except MeasureError:
                 # any row predicate: evaluate it for each row, with the row on the EARLIER stack
                 if not base_rows:
-                    refuse_foreign_columns_of_empty_iteration(context, predicate, function="FILTER", typed=True)
+                    refuse_foreign_columns_of_empty_iteration(context, predicate, function="FILTER", typed=True, scan_ran=scan_ran)
+                    return context, []
                 return context, [frame[1] for frame in iterate_rows(context, base_rows, "install") if conjuncts_pass(predicate, frame)]
+            if not base_rows:
+                refuse_foreign_columns_of_empty_iteration(context, predicate, function="FILTER", typed=True, scan_ran=scan_ran)
+                return context, []
             return context, [
                 row for position, row in enumerate(base_rows, 1)
                 if table_filter_predicate_matches(predicate, row, position, comparisons)
@@ -9325,7 +9511,7 @@ def evaluate_measures(
     def refuse_column_no_row_holds(context: dict[str, Any], rows: list[dict[str, Any]], body: tuple[Any, ...]) -> None:
         """Every branch of a conditional is compiled, also one no row reaches (live Power BI, Task 13 review): a column the iterated rows do not hold is
         an error whichever branch runs (COUNTX(VALUES(Facts[Region]), IF(LEN("a"), Facts[Region], Facts[Quantity]>2)))."""
-        if not rows or body[0] != "call" or body[1] not in {"IF", "IF.EAGER", "SWITCH", "IFERROR", "COALESCE"}:
+        if not rows or (body[0] != "logical" and (body[0] != "call" or body[1] not in {"IF", "IF.EAGER", "SWITCH", "IFERROR", "COALESCE", "AND", "OR"})):
             return
         row_stack.append((context, rows[0], 1))
         try:
@@ -9335,6 +9521,12 @@ def evaluate_measures(
                 except MeasureError as error:
                     if "does not exist" in str(error) or "single value" in str(error).casefold():
                         raise
+                    if "Iterator expressions can reference columns from their iterated table only" in str(error):
+                        tbl_name = reference[1] or context.get("name") or "Facts"
+                        raise MeasureError(
+                            f"A single value for column '{reference[2]}' in table '{tbl_name}' cannot be determined. "
+                            "This can happen when a measure or function formula refers to a column that contains many values without specifying an aggregation such as min, max, count, or sum to get a single result."
+                        )
         finally:
             row_stack.pop()
 
@@ -9448,26 +9640,65 @@ def evaluate_measures(
         allow_text: bool,
         allow_boolean: bool,
     ) -> bool | None:
-        """&&, ||, AND and OR.  Live Power BI (Task 12 review, 3,192 probes): an empty text is False on the left (""&&TRUE() is False); on the
-        right, where the left does not decide, the result displays as BLANK yet ISBLANK of it is False: refused."""
+        """&&, ||, AND and OR.  Live Power BI (Task 12 and 14 reviews): an empty text is False on the left (""&&TRUE() is False); on the right, where the left
+        does not decide, the result is a BLANK typed True/False: every function reads a BLANK, while ISBLANK, ISLOGICAL and COALESCE go by the type."""
         seen: dict[int, Any] = {}
+        failed: dict[int, MeasureError] = {}
 
         def operand_truth(position: int, operand: tuple[Any, ...]) -> bool:
-            value = _consume_infinity(lambda: evaluate(
-                operand, row_context, allow_text=allow_text, allow_boolean=allow_boolean,
-            ))
-            seen[position] = value
-            return as_boolean(value)
+            try:
+                value = _consume_infinity(lambda: evaluate(
+                    operand, row_context, allow_text=allow_text, allow_boolean=allow_boolean,
+                ))
+                seen[position] = value
+                return as_boolean(value)
+            except (MeasureRuntimeError, _HardError) as error:
+                failed[position] = error
+                raise
 
-        result = _eager_logical(
-            is_and,
-            [lambda: operand_truth(0, left), lambda: operand_truth(1, right)],
-            [left, right],
-            plan_constant,
-        )
-        if result is False and seen.get(1) == "" and 0 in seen and as_boolean(seen[0]) is is_and:
-            raise MeasureError("An empty text on the right of a logical operator gives a value that displays as BLANK yet is not BLANK: not modelled by the local engine.")
+        try:
+            result = _eager_logical(
+                is_and,
+                [lambda: operand_truth(0, left), lambda: operand_truth(1, right)],
+                [left, right],
+                lambda operand: plan_constant(operand) or (operand[0] == "let" and plan_constant(operand[2]) and not any(references_variable(operand[2], name) for name, _bound in operand[1])),
+            )
+        except (MeasureRuntimeError, _HardError):
+            if len(failed) == 2 and right[0] == "let":
+                raise _HardError(str(failed[1])) from failed[1]  # live Power BI (Task 14 review): the error of the VAR block, which IFERROR and ISERROR do not catch
+            raise
+        seen0_needs_right = False
+        if 0 in seen:
+            try:
+                seen0_needs_right = (as_boolean(seen[0]) is is_and)
+            except (MeasureRuntimeError, _HardError):
+                seen0_needs_right = False
+
+        if result is False and (seen.get(1) == "" or (1 in seen and seen[1] is None and typed_true_false(right))) and 0 in seen and seen0_needs_right:
+            logical_blanks.add(id(right))
+            return None  # live Power BI (Task 14 review): a BLANK at run time (LEN, *2, CONVERT, =BLANK() all see one); ISBLANK of the operator is False by its type
         return result
+
+    logical_blanks: set[int] = set()  # the right operands of the logical operators that gave a BLANK
+
+    def logical_right_operand(node: tuple[Any, ...]) -> Any:
+        while node[0] == "var" and node[1] in variable_nodes:
+            node = variable_nodes[node[1]]
+        return node[3] if node[0] == "logical" else node[2][1] if node[0] == "call" and node[1] in {"AND", "OR"} and len(node[2]) == 2 else None
+
+    def refuse_logical_blank_in_a_column(node: tuple[Any, ...], value: Any) -> Any:
+        if value is None and typed_true_false(node):
+            # live Power BI (Task 14 review): the column is True/False and COUNTAX counts this value, which the local engine cannot hold in a table
+            raise MeasureError("A logical operator that gives BLANK in a table column is not modelled by the local engine.")
+        return value
+
+    def typed_true_false(node: tuple[Any, ...]) -> bool:
+        """A logical operator, or a variable that holds one: True/False by its type, whatever BLANK it gives (see logical_operator)."""
+        seen: set[str] = set()
+        while node[0] == "var" and node[1] not in seen and node[1] in variable_nodes:
+            seen.add(node[1])
+            node = variable_nodes[node[1]]
+        return _is_pure_logical(node)
 
     def iterator_reference_type(
         reference: tuple[Any, ...],
@@ -9832,6 +10063,8 @@ def evaluate_measures(
                 iterator_expression_category(member, row_context)
             return "boolean"
         if kind == "var":
+            if expression[1] not in variables:
+                return "unknown"  # a VAR of a nested block whose binding is being typed
             try:
                 held = variables[expression[1]]()
             except MeasureError:
@@ -9843,11 +10076,37 @@ def evaluate_measures(
             try:
                 held_val = evaluate(expression, row_context, allow_text=True, allow_boolean=True)
             except Exception:
-                return "unknown"
+                held_val = None
             if held_val is None:
                 # live Power BI (review 2026-10-29): a VAR block that returns BLANK() or a variable holding it is typed as a number; a BLANK from an
                 # IF / SWITCH / COALESCE keeps the type of its other branches, which is not known here
-                return "numeric" if expression[2][0] in {"blank", "blank_comment", "var"} or expression[2] == ("call", "BLANK", ()) else "unknown"
+                if expression[2][0] == "var":
+                    bound = dict(expression[1]).get(expression[2][1])
+                    if bound is not None and bound[0] == "call" and bound[1] in {"IF", "IF.EAGER"}:
+                        try:
+                            if iterator_expression_category(bound, row_context) == "date/time":
+                                return "date/time"  # live Power BI (Task 14 review): PRODUCTX(Facts,VAR q=IF(FALSE(),DATE(2020,1,1)) RETURN q) is a compile error
+                        except MeasureError:
+                            pass
+                if expression[2][0] in {"blank", "blank_comment", "var"} or expression[2] == ("call", "BLANK", ()):
+                    return "numeric"
+                saved = dict(variables)
+                saved_nodes = dict(variable_nodes)
+                try:
+                    for name, value_node in expression[1]:
+                        variable_nodes[name] = value_node
+                        try:
+                            val = evaluate(value_node, row_context, allow_text=True, allow_boolean=True)
+                        except Exception:
+                            val = None
+                        variables[name] = lambda val=val: val
+                    cat = iterator_expression_category(expression[2], row_context)
+                    return cat if cat != "unknown" else "numeric"
+                finally:
+                    variables.clear()
+                    variables.update(saved)
+                    variable_nodes.clear()
+                    variable_nodes.update(saved_nodes)
             if isinstance(held_val, str):
                 return "text"
             if isinstance(held_val, bool):
@@ -9983,7 +10242,7 @@ def evaluate_measures(
                 branch_categories = [
                     iterator_expression_category(branch, row_context)
                     for branch in expression[2][1:]
-                ]
+                ] + (["blank"] if len(expression[2]) == 2 else [])
                 return merge_branch_categories(branch_categories, "IF")
             if function == "ISBLANK" and len(expression[2]) == 1:
                 iterator_expression_category(expression[2][0], row_context)
@@ -10053,7 +10312,9 @@ def evaluate_measures(
                 numeric_argument_indexes: set[int] = set()
                 date_extreme = False
                 text_extreme = False
-                if function in {"SUM", "AVERAGE", "MIN", "MAX", "COUNT", "ABS", "MEDIAN", "PRODUCT"}:
+                if function in {"MIN", "MAX"}:
+                    numeric_argument_indexes.update(range(len(expression[2])))  # the second argument of MIN(a, b) types the result as well
+                elif function in {"SUM", "AVERAGE", "COUNT", "ABS", "MEDIAN", "PRODUCT"}:
                     numeric_argument_indexes.add(0)
                 elif function == "DIVIDE":
                     numeric_argument_indexes.update(range(len(expression[2])))
@@ -10082,16 +10343,17 @@ def evaluate_measures(
                         argument_index in numeric_argument_indexes
                         and argument_category not in {"numeric", "blank"}
                         and not (function in {"ABS", "INT"} and argument_category == "boolean")  # live Power BI: ABS(TRUE) and INT(TRUE) are 1
+                        and not (function in {"INT", "ABS", "SQRT", "MOD", "ROUND", "TRUNC", "FLOOR", "CEILING", "POWER", "LOG", "LN", "EXP", "SIGN"} and argument_category == "date/time")
                     ):
-                        if function in {"MIN", "MAX"} and argument_category == "date/time" and aggregate_column:
-                            date_extreme = True  # the latest / earliest date of a column is a date (live Power BI)
+                        if function in {"MIN", "MAX"} and argument_category == "date/time":
+                            date_extreme = True  # the latest / earliest date of a column or scalar is a date (live Power BI)
                             continue
-                        if function in {"MIN", "MAX"} and argument_category == "text" and aggregate_column:
-                            text_extreme = True  # MAX / MIN of a text column is a text value
+                        if function in {"MIN", "MAX"} and argument_category == "text":
+                            text_extreme = True  # MAX / MIN of a text column or scalar is a text value
                             continue
                         if function == "AVERAGE" and argument_category == "date/time" and aggregate_column:
                             continue  # the average of a date column is a plain number
-                        raise MeasureError(
+                        raise MeasureRuntimeError(
                             f"Iterator {function} argument {argument_index + 1} needs a numeric expression."
                         )
                 return "text" if text_extreme else ("date/time" if date_extreme else "numeric")
@@ -12870,6 +13132,8 @@ def evaluate_measures(
                         keep, node = keep or not wrapped, node[2][0]  # live Power BI (Task 13 review): inside EVALUATEANDLOG it replaces the filter like a plain one
                         continue
                     if node[0] == "let":
+                        if node[2][:2] == ("call", "CALCULATETABLE") and node[2][2] and node[2][2][0][0] == "var":
+                            raise MeasureError("CALCULATETABLE of a table variable as a CALCULATE filter is not modelled by the local engine.")  # live Power BI (Task 14 review): the held table keeps its rows
                         node = _unwrap_var_filter(node)
                         continue
                     break
@@ -13028,10 +13292,13 @@ def evaluate_measures(
                     table_vars.add(name)
                     continue
                 if value_node[0] != "var" and _is_all_table_value_argument(value_node):
-                    held_table = _TableValue(table_argument_value(value_node))
-                    variables[name] = lambda held_table=held_table: held_table
-                    table_vars.add(name)
-                    continue
+                    try:
+                        held_table = _TableValue(table_argument_value(value_node))
+                        variables[name] = lambda held_table=held_table: held_table
+                        table_vars.add(name)
+                        continue
+                    except MeasureError:
+                        pass
                 try:
                     value = evaluate(value_node, row_context, allow_text=True, allow_boolean=allow_boolean)
                 except (MeasureRuntimeError, _HardError) as error:
@@ -13076,7 +13343,9 @@ def evaluate_measures(
                 raise MeasureRuntimeError("An argument of function 'CONVERT' has the wrong data type or the result is too large or too small.")
             return number.quantize(Decimal(1), rounding=ROUND_HALF_UP)
         if target in {"DOUBLE", "CURRENCY"}:
-            return Decimal(number) if target == "DOUBLE" else number.quantize(Decimal("0.0001"), rounding=ROUND_HALF_UP)
+            if target == "DOUBLE":
+                return Decimal(number)
+            return dax_math.to_currency(number)
         if target == "DATETIME":
             return dax_dates.DaxDateTime(number)
         raise MeasureError(f"CONVERT does not support the type {target}.")
@@ -13358,6 +13627,8 @@ def evaluate_measures(
         if function == "ISNONTEXT":
             return not isinstance(values[0], str)
         if function == "ISLOGICAL":
+            if values[0] is None and typed_true_false(arguments[0]):
+                raise MeasureError("ISLOGICAL of a logical operator that gives BLANK is not modelled by the local engine.")  # live Power BI (Task 14 review): True or False by the operands, rule not found
             return isinstance(values[0], bool)
         if function in {"ISINTEGER", "ISINT64", "ISDOUBLE", "ISDECIMAL", "ISCURRENCY"}:
             column_types = {
@@ -13381,6 +13652,24 @@ def evaluate_measures(
         if function == "FORMAT":
             return dax_format.format_value(values[0], values[1])
         return dax_typed.text_function(function, values)
+
+    static_type_of_nodes: dict[int, str | None] = {}
+
+    def static_type_of(node: tuple[Any, ...]) -> str | None:
+        """The static type of an expression, asked once per node: it does not depend on the row."""
+        if id(node) not in static_type_of_nodes:
+            column_types = {
+                str(ctx.get("name", "")).casefold(): {str(h).casefold(): str(ctx.get("column_types", {}).get(h, "")).casefold() for h in ctx.get("headers", [])}
+                for ctx in contexts_by_id.values()
+            }
+            scope: dict[str, str | None] = {}
+            for name, bound in variable_nodes.items():
+                scope[str(name)] = _static_numeric_type(bound, column_types, scope)
+            static_type_of_nodes[id(node)] = _static_numeric_type(node, column_types, scope)
+        return static_type_of_nodes[id(node)]
+
+    def currency_typed(node: tuple[Any, ...]) -> bool:
+        return static_type_of(node) == "currency"
 
     def plan_constant(node: tuple[Any, ...]) -> bool:
         """True when Power BI knows the value before scanning any row (tools/parity/dax_battery_evaluation_order.json).
@@ -13415,8 +13704,12 @@ def evaluate_measures(
             for operand, is_const in ((left, const_left), (right, const_right)):
                 if is_const:
                     ok, value = value_of(operand)
-                    if ok and as_boolean(value) is is_or:
-                        return True
+                    if ok and value is not None:
+                        try:
+                            if as_boolean(value) is is_or:
+                                return True
+                        except MeasureError:
+                            pass
             return False
 
         def decide(operand: tuple[Any, ...]) -> bool:
@@ -14088,8 +14381,8 @@ def evaluate_measures(
                 raise MeasureError("== over dates is not supported in the local engine.")
             if static in {"number", "text", "boolean"} and actual not in {"blank", static}:
                 raise MeasureError("== over operands whose type the local engine cannot establish is not supported.")
-            if actual == "boolean" and value is None:
-                value = False  # a True/False-typed BLANK is FALSE
+            if actual == "boolean" and value is None and not typed_true_false(operand):
+                value = False  # a True/False-typed BLANK is FALSE (live Power BI, Task 14 review: a logical operator's BLANK stays one)
             resolved.append((value, actual))
         (left, left_type), (right, right_type) = resolved
         known = {kind for kind in (left_type, right_type) if kind != "blank"}
@@ -14252,6 +14545,8 @@ def evaluate_measures(
                 None if left is None else as_number(left),
                 None if right is None else as_number(right),
             )
+            if node[1] in {"*", "/"} and isinstance(result, Decimal) and result.is_finite() and currency_typed(node):
+                result = result.quantize(Decimal("0.0001"), rounding=ROUND_HALF_UP)  # live Power BI (Task 14 review): every step rounds to ten-thousandths, half away from zero
             if node[1] in {"+", "-"} and result is not None and (
                 dax_dates.is_date(left) or dax_dates.is_date(right)
             ):
@@ -14407,6 +14702,15 @@ def evaluate_measures(
                         f"Iterator {function} expression needs a numeric result."
                     )
             text_extreme = function in {"MAXX", "MINX"} and result_category == "text"
+            if body_kind is None and iteration_rows and (function in _EMPTY_BODY_NOT_TEXT or function in _EMPTY_BODY_NOT_DATE):
+                try:
+                    body_category = iterator_expression_category(arguments[1], (context, iteration_rows[0], 1))
+                except MeasureError:
+                    body_category = None
+                if body_category == "text" and function in _EMPTY_BODY_NOT_TEXT:
+                    raise MeasureError(f"The function {function} cannot work with values of type String.")  # live Power BI (Task 14 review): SUMX(Facts,MIN(BLANK(),"a")), whose rows are BLANK
+                if body_category == "date/time" and function in _EMPTY_BODY_NOT_DATE:
+                    raise MeasureError(f"{function} does not support expressions of type date.")
             values: list[Decimal] = []
             blank_results = 0
             for frame in iterate_rows(context, iteration_rows, "install"):
@@ -15011,6 +15315,12 @@ def evaluate_measures(
         if function == "ALLCROSSFILTERED":
             raise MeasureError("ALLCROSSFILTERED function cannot be used as a table expression. It can appear only as a filter in CALCULATE.")
         if function == "ISBLANK":
+            if typed_true_false(arguments[0]):
+                try:
+                    evaluate(arguments[0], row_context, allow_text=True, allow_boolean=allow_boolean)
+                except (MeasureRuntimeError, _HardError):
+                    pass  # an error of a row or of an operand: the operator is typed True/False, so ISBLANK never asks for its value
+                return False
             try:
                 return _consume_infinity(
                     lambda: evaluate(arguments[0], row_context, allow_text=True, allow_boolean=allow_boolean)
@@ -15023,7 +15333,10 @@ def evaluate_measures(
                 own_error = "needs a number" in str(error) or "wrong data type" in str(error)
                 swallowed = own_error or (not any(True for _ in _iter_reference_nodes(argument)) and plan_constant(argument))
                 if isinstance(error, _DivisionError) or not swallowed or (
-                    argument[0] == "call" and argument[1] in {"COALESCE", "IFERROR", "SWITCH", "CALCULATE", "ASIN", "ACOS", "DIVIDE"}
+                    argument[0] == "call" and (
+                        argument[1] in {"COALESCE", "IFERROR", "SWITCH", "CALCULATE", "ASIN", "ACOS", "DIVIDE"}
+                        or argument[1] in _ITERATOR_CALLS
+                    )
                 ):
                     raise
                 return False
@@ -15170,7 +15483,7 @@ def evaluate_measures(
                     if isinstance(error, _DivisionError) or (row_context is not None and reads_row(argument) and argument is arguments[-1]):
                         raise  # an error from the last, lazily evaluated, row-dependent argument is an ordinary one (live Power BI, iteration 87: one in an earlier argument is not)
                     raise _HardError(str(error)) from error
-                if not found and value is not None:
+                if not found and (value is not None or typed_true_false(argument)):
                     result, found = value, True
             probe_untaken_branches([argument for argument in arguments if not any(argument is seen for seen in reached)], row_context)  # live Power BI (iteration 91): compile-time errors in arguments after the answer are raised too
             result = date_as_typed(node, result, row_context)
@@ -15201,7 +15514,10 @@ def evaluate_measures(
                 raise MeasureError(
                     "DIVIDE with text or Boolean alternate result and non-zero denominator is not supported in the local engine."
                 )
-            return numerator / denominator
+            quotient = numerator / denominator
+            if quotient.is_finite() and currency_typed(arguments[0]) and not currency_typed(arguments[1]):
+                return quotient.quantize(Decimal("0.0001"), rounding=ROUND_HALF_UP)  # Currency / number is a Currency, like the operator
+            return quotient
         if function == "ABS":
             value = evaluate(arguments[0], row_context)
             return None if value is None else abs(as_number(value))
@@ -15268,16 +15584,15 @@ def evaluate_measures(
             if values_kind in {"text", "bool", "date"} or values_cat in {"text", "boolean", "date/time"}:
                 # live Power BI (iteration 91): the type of the Values expression is checked when the query is compiled, not per row
                 raise MeasureError("XNPV does not support expressions of type string/Boolean/date for the Values argument.")
-            currency_values = _calls_function(arguments[1], "CURRENCY")
-            for reference in _iter_reference_nodes(arguments[1]):
+            currency_values = currency_typed(arguments[1])  # the type of the expression: Currency + 0.5 and Currency / Currency are Doubles
+            if not currency_values and _calls_function(arguments[1], "CURRENCY") and static_type_of(arguments[1]) is None:
+                raise MeasureError("XNPV over a Currency beside a column of unknown type is not modelled by the local engine.")
+            if arguments[1][0] == "reference":
                 try:
-                    currency_values = currency_values or str(iterator_reference_type(reference, probe_frame)).casefold() in {"currency", "fixed_decimal"}
+                    currency_values = str(iterator_reference_type(arguments[1], probe_frame)).casefold() in {"currency", "fixed_decimal"}
                 except MeasureError:
                     pass  # a column outside the iterated table is validated further down
 
-            if currency_values and arguments[1][0] not in {"reference"} and arguments[1][:2] != ("call", "CURRENCY"):
-                # live Power BI (Task 10 review): Currency arithmetic rounds every value to four decimals before XNPV sees it ("CURRENCY([v])/3" gave 1733.3335, not 1733.3333)
-                raise MeasureError("XNPV over Currency values computed with arithmetic is not supported in the local engine.")
             if not iteration_rows:
                 refuse_foreign_columns_of_empty_iteration(context, arguments[1], arguments[2])
                 return None
@@ -15286,6 +15601,8 @@ def evaluate_measures(
             all_dates: list[float] = []
             for frame in iterate_rows(context, iteration_rows, "install"):
                 val = in_row_expression(lambda frame=frame: evaluate(arguments[1], frame, allow_text=True, allow_boolean=True))
+                if val is None and currency_values:
+                    raise MeasureError("XNPV over a Currency that is BLANK is not modelled by the local engine.")  # live Power BI (Task 14 review): a value of 4.6E14 from six small rows
                 if val is None:
                     v = None
                 elif isinstance(val, (str, bool, dax_dates.DaxDateTime)):
@@ -15351,7 +15668,8 @@ def evaluate_measures(
             else:
                 res = Decimal(int(total)) if total.is_integer() else Decimal(repr(total))
             if currency_values:
-                res = res.quantize(Decimal("0.0001"), rounding=ROUND_HALF_UP)
+                res = Decimal(total * 10000.0).quantize(Decimal(1), rounding=ROUND_HALF_EVEN) / 10000  # live Power BI (Task 14 review): 3.15625 gives 3.1562, -229.14375 gives -229.1438
+                res = res.quantize(Decimal("0.0001"))
             return res
         if function in {"TOCSV", "TOJSON"}:
             is_csv = function == "TOCSV"
@@ -15738,6 +16056,9 @@ def evaluate_measures(
         if function in {"MIN", "MAX"} and len(arguments) == 2:
             first = evaluate(arguments[0], row_context, allow_text=True)
             second = evaluate(arguments[1], row_context, allow_text=True)
+            if (isinstance(first, str) or isinstance(second, str)) and currency_typed(arguments[0 if isinstance(second, str) else 1]):
+                sides = ("Currency", "Text") if isinstance(second, str) else ("Text", "Currency")
+                raise MeasureError(f"Function '{function}' does not support comparing values of type {sides[0]} with values of type {sides[1]}. Consider using the VALUE or FORMAT function to convert one of the values.")
             for operand in (first, second):
                 if isinstance(operand, bool):
                     raise MeasureRuntimeError("Min or Max of booleans are not currently supported.")
@@ -15750,7 +16071,14 @@ def evaluate_measures(
             if isinstance(first, str) and isinstance(second, str) and first != second and not larger and not smaller:
                 # live Power BI (Task 10 review): of two texts that differ only in case, MAX / MIN return one the local engine cannot predict
                 raise MeasureError(f"{function} found texts that differ only in case: which one Power BI returns is not modelled by the local engine.")
-            picked = (first if larger else second) if function == "MAX" else (first if smaller else second)
+            if larger:
+                picked = first if function == "MAX" else second
+            elif smaller:
+                picked = second if function == "MAX" else first
+            elif first == "" or second == "":
+                picked = None if function == "MIN" and None in (first, second) else ""  # live Power BI (Task 14 review): BLANK sorts below the empty text they equal
+            else:
+                picked = first if first is not None else second  # BLANK gives way to 0 and to day zero (-MIN(DATE(1899,12,30),BLANK()) is 0)
             return date_as_typed(node, picked, row_context)
         reference = arguments[0]
         if reference[0] != "reference" or len(reference) < 3:  # a table or other non-column argument is not a scalar source

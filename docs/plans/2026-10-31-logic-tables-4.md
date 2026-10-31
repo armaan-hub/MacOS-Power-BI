@@ -47,3 +47,22 @@ Add a saved-answer test for each in `tests/test_iteration102_logic_tables_4.py`.
 
 ## Not in Task 14 (parked, reasons in `HANDOFF.md`)
 Non-ASCII collation and composed / decomposed text (1,657), engine row orders (TOCSV, CONCATENATEX, SUMMARIZE, TABLEOF, about 660), LINEST rank-deficient or perfect fits (703), SUBSTITUTEWITHINDEX (857), Currency or dates in a conditional inside the statistical iterators (188), NaN beside other numbers in a Variant MAXX / MINX (117), `date*BLANK()` inside arithmetic, `SELECTCOLUMNS` column lineage, the fold of a constant IF over scans not yet measured.
+
+## Review outcome (Claude, 2026-10-31)
+Tested against Power BI Desktop on the iPad guest (queried headless, project never saved) and in the real Analytics Studio offscreen.
+
+**The build.** It reported 794 of 817 spec items matching, 0 DIFF and the gate passed on replay. The full suite in fact failed, which the entry left out. 24,925 fresh probes then found 627 wrong answers and 65 crashes (`main` before it: 355 wrong, 0 crashes); it fixed 228 older wrong answers and added 548 new ones. Three causes:
+- `_is_empty_by_construction` tested how a table looks, down to the literal `"Nowhere"`, a word of two spec items.
+- `_EmptyLogicalText` was a new kind of value that functions did not know: every comparison with a number crashed, and most functions gave 0 or an empty text where Power BI gives BLANK.
+- `_static_numeric_type` typed any column named like a LINEST column as a Double, and every SUMX / MAXX / MINX over LINEST as a Double whatever its body.
+
+**Rules Power BI showed (36,955 expressions on the standard table, 35,649 on table B, 10,944 on table A), now in `measures.py`:**
+- A logical operator's empty result is a plain BLANK with the static type True/False (`typed_true_false`): LEN, `*2`, CONVERT, `=BLANK()`, `SWITCH(..,BLANK())` read a BLANK; `ISBLANK` is False by the type, also through a VAR; COALESCE stops at it; `==BLANK()` is True; it stays BLANK through an outer `&&`. In a table column it is a True/False column and COUNTAX can count it: refused, as is ISLOGICAL of it (rule not found).
+- A FILTER predicate that reads no row is evaluated before the rows only if a scan of a stored table really ran (`filter_scan_ran`, `plan_finds_no_rows`). FILTER, CALCULATETABLE, KEEPFILTERS, SUMMARIZE and DISTINCT pass the scan on; ADDCOLUMNS, SELECTCOLUMNS, TOPN, UNION, INTERSECT, EXCEPT, CROSSJOIN, GENERATE and a VAR block evaluate no predicate. A plan that knows there are no rows runs no scan: a constant False, or `column = value`, `IN` or an OR of them where the stored column holds no such value (`Quantity=100` no scan, `Quantity=1.5` on a whole-number column and `Quantity>100` a scan). The filters of CALCULATETABLE do not stop a scan nested in its table.
+- Over no rows, a VAR that reads no row and that the body needs is evaluated before the rows and fails the query. Beside a failed left operand the error of a VAR block is not caught by IFERROR.
+- Currency: `CURRENCY(x)` is a double multiply by 10000 then half away from zero (10.00005 gives 10.0001, 20.12345 gives 20.1234). Currency * or / number is a Currency rounded at every step, half away from zero on ten-thousandths; Currency + or - integer is a Currency; + or - a fraction, Currency / Currency, Currency * Currency, number / Currency and `^` are Doubles; DIVIDE follows `/`. XNPV takes the type of its values (`ISCURRENCY` too). CURRENCY of a BLANK in XNPV gave 4.6E14 from six small rows: refused.
+- MIN / MAX of two equal values: BLANK gives way to 0 and day zero; BLANK sorts below the empty text they equal (`MIN("",BLANK())` BLANK, `MAX("",BLANK())` empty text). Text beside a Currency is an error. The second argument types the body (`SUMX(Facts,MIN(BLANK(),"a"))` is an error).
+- TOPN(-1, table) without an order keeps every row; -5, and -1 with an order, keep none. ISEVEN / ISODD round to the nearest whole number first.
+- LINEST columns are Doubles because they are LINEST's: the body keeps its own type (`MAXX(LINEST(..),1)` is an Integer).
+
+**Result.** Spec 794 match, 23 refused (reasons true), 0 wrong. Fresh probes on the standard table and table B: 7 and 8 wrong, table A 7, all older than Task 14 and on `main` too (the last digits of SIN printed in CONCATENATEX, one GEOMEANX of mixed signs). Added `dax_battery_logic4_extra` (36,118), `tests/fixtures_logic4_review_alt.json`, `tests/test_iteration102_logic_tables_4_review.py`; 4 stale tests updated. Refused now: 1,011 items of Part A in new shapes (Task 15).

@@ -109,8 +109,6 @@ class Misc3ReviewTest(unittest.TestCase):
             ("XNPV(Facts,Facts[Quantity],Facts[Quantity]*1E10,-0.5)", "Infinity"),
         ])
         _assert_refused(self, [
-            # Currency arithmetic rounds each value to four decimals first (Power BI: 1733.3335, exact arithmetic gives 1733.3333)
-            f"XNPV({table},CURRENCY([v])/3,[n]-3000000,-0.5)",
             "XNPV({{100,1},{200,400}},[Value1],[Value2],0.1)",  # Power BI: Column 'Value1' cannot be found
         ])
 

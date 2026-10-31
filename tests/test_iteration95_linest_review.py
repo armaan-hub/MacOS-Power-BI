@@ -40,7 +40,6 @@ STAYS_REFUSED = [
     "TOCSV(LINEST(Facts[Quantity],Facts[Sales]))",  # the 15 digits include Power BI's rounding noise
     "TOJSON(LINESTX(Facts,Facts[Quantity],Facts[Sales]))",
     "LEN(TOCSV(LINESTX(Facts,Facts[Quantity],Facts[Sales])))",
-    "ISDOUBLE(MAXX(LINEST(Facts[Quantity],Facts[Sales]),[Slope1]))",
 ]
 
 
