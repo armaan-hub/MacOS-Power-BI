@@ -126,9 +126,11 @@ class LogicalOperatorsTest(unittest.TestCase):
         self.assertEqual("True", dax.local('""||TRUE()'))
         self.assertEqual("False", dax.local('""&&""'))
 
-    def test_an_empty_text_on_the_right_of_an_undecided_left_is_refused(self) -> None:
-        # Power BI displays BLANK, yet ISBLANK of it is False
-        _refused(self, ['TRUE()&&""', 'FALSE()||""', 'FALSE()||VAR y="" RETURN y', 'AND(TRUE(),"")', 'OR(BLANK(),"")', '""||""'])
+    def test_an_empty_text_on_the_right_of_an_undecided_left_is_a_blank_typed_true_false(self) -> None:
+        # Task 14 review: every function reads a BLANK, while ISBLANK goes by the type of the operator
+        for expression in ('TRUE()&&""', 'FALSE()||""', 'FALSE()||VAR y="" RETURN y', 'AND(TRUE(),"")', 'OR(BLANK(),"")', '""||""'):
+            self.assertEqual("BLANK", dax.local(expression), expression)
+            self.assertEqual("False", dax.local(f"ISBLANK({expression})"), expression)
         self.assertEqual("True", dax.local('TRUE()||""'))
         self.assertEqual("False", dax.local('FALSE()&&""'))
 

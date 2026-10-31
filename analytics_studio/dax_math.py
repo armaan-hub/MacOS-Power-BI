@@ -107,7 +107,7 @@ def math_function(function: str, args: list[object]) -> object:
         return Decimal(0) if result == 0 else result
     if function in {"ISEVEN", "ISODD"}:
         number = dax_typed.to_number(args[0])
-        remainder = number % 2
+        remainder = int(number.quantize(Decimal(1), rounding=ROUND_HALF_UP)) % 2  # to the nearest whole number first: ISEVEN(2.5) is False, ISEVEN(TIME(6,0,0)) True (live Power BI)
         return (remainder == 0) if function == "ISEVEN" else (remainder != 0)
     if args[0] is None and function in {"EVEN", "ODD"}:
         return Decimal(0) if function == "EVEN" else Decimal(1)
@@ -154,7 +154,7 @@ def math_function(function: str, args: list[object]) -> object:
     if function == "CURRENCY":
         if args[0] is None:
             return None
-        return dax_typed.to_number(args[0]).quantize(Decimal("0.0001"), rounding=ROUND_HALF_UP)
+        return to_currency(dax_typed.to_number(args[0]))
     if function in {"COMBIN", "COMBINA", "PERMUT"}:
         n, k = (_round_half_away(value, function) for value in args)
         if n < 0 or k < 0 or (function != "COMBINA" and k > n) or (function == "COMBINA" and n == 0 and k > 0):
@@ -182,6 +182,13 @@ def math_function(function: str, args: list[object]) -> object:
 
 _MAX_EXACT_INTEGER = 2 ** 53  # GCD and LCM take and return doubles
 _MAX_COMBINATORICS_ARGUMENT = 2147483647
+
+
+def to_currency(number: Decimal) -> Decimal:
+    """Live Power BI (Task 14 review): ten-thousandths as a double multiply, then half away from zero: 10.00005 gives 10.0001, 20.12345 gives 20.1234."""
+    if not number.is_finite() or abs(number) >= Decimal("1E14"):
+        return number.quantize(Decimal("0.0001"), rounding=ROUND_HALF_UP) if number.is_finite() else number
+    return (Decimal(float(number) * 10000.0).quantize(Decimal(1), rounding=ROUND_HALF_UP) / 10000).quantize(Decimal("0.0001"))
 
 
 def _round_half_away(value: Any, function: str) -> int:

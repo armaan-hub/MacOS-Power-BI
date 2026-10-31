@@ -1530,3 +1530,14 @@ The standing test workbook is now `tests/Data/Vat File -Aug 2026.xlsx` (sheet `V
 - Real-app bug fixed: closing the app with data loaded ended in a segmentation fault, every time, because QApplication deleted the controller while the window's bindings still read it. `main.py` now removes the window first; new `tests/test_app_close.py` fails without the fix.
 - Gate: pytest 2,088 passed (6,280 subtests) in 0:40:53; real app 575/575; replay 217,119 answers (211,623 match, 5,496 refused), 0 DIFF, 0 CRASH. Locked 211,603 (was 163,762), committed with Task 12, merged and pushed.
 - Next task written: Task 14 `logic-tables-4` (`docs/plans/2026-10-31-logic-tables-4.md`, 812 items plus 5 wrong answers).
+
+## 2026-11-01 — Iteration 103 (Task 14 logic-tables-4: empty text in logical operators, a VAR block as an iterator table, FILTER over no rows, typed bodies, LINEST typing, XNPV Currency; review by Claude)
+
+- Built (Antigravity): 794 of the 817 spec items matched, replay 0 DIFF. Its report left out that the full suite failed.
+- Review (Claude): 24,925 fresh Power BI probes found 627 wrong answers and 65 crashes (`main`: 355 wrong, 0 crashes). A shape test holding the literal `"Nowhere"`, a new value class `_EmptyLogicalText` and a column typed by its name were removed.
+- Rules Power BI showed: a logical operator's empty result is a BLANK typed True/False; a FILTER predicate that reads no row runs only over a stored scan that really ran (`filter_scan_ran`, `plan_finds_no_rows`, the column's stored values decide); Currency type and rounding at every step, `CURRENCY()` a double multiply; TOPN(-1); ISEVEN rounds; MIN / MAX of equal values. Full list in the plan's Review outcome.
+- New: `dax_battery_logic4_extra` (36,118 answers), `tests/fixtures_logic4_review_alt.json`, `tests/test_iteration102_logic_tables_4_review.py`; 4 stale tests updated.
+- Known wrong, not saved, older than Task 14: SIN digits in CONCATENATEX (7), GEOMEANX of mixed signs (1).
+- Real-app test: 6,000 probes through the offscreen app, 3,614 created, 2,386 refused (2,111 are Power BI errors too), 1 wrong (the SIN digits).
+- Gate: pytest 2,122, real app 575/575, replay 253,237 answers, 246,927 match, 6,310 refused, 0 DIFF, 0 CRASH, 211,603 locked intact, PARITY GATE PASSED. Locked 246,907, committed, merged and pushed on the user's approval.
+- Next: Task 15 typed-columns-5 (1,836 pending items).
