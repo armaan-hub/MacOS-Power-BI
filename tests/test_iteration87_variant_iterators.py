@@ -123,11 +123,11 @@ class VariantIterators(unittest.TestCase):
 
     def test_refusals_kept_on_purpose(self) -> None:
         # a True/False under a condition that tests nothing about the row is counted by COUNTX in Power BI (6), not by a row-dependent one (3)
-        self.assertTrue(local("COUNTX(Facts,IF(TRUE(),TRUE(),7))").startswith("LOCAL-REJECT"))
+        self.assertEqual("6", local("COUNTX(Facts,IF(TRUE(),TRUE(),7))"))
         # of two texts that differ only in case Power BI returns one the local engine cannot predict
         self.assertTrue(local('MAXX(Facts,IF(Facts[Quantity]>2,UPPER(Facts[Region]),Facts[Region]))').startswith("LOCAL-REJECT"))
-        # a Variant that returns Infinity: Power BI errors where the local engine would sum it
-        self.assertTrue(local('SUMX(Facts,IF(Facts[Quantity]=2,Facts[Quantity]/(Facts[Quantity]-2),"x"))').startswith("LOCAL-REJECT"))
+        # a Variant that returns Infinity sums to it (live Power BI, Task 13 review)
+        self.assertEqual("Infinity", local('SUMX(Facts,IF(Facts[Quantity]=2,Facts[Quantity]/(Facts[Quantity]-2),"x"))'))
 
 
 if __name__ == "__main__":

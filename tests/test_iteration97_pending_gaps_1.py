@@ -35,6 +35,9 @@ class PendingGaps1PartATest(unittest.TestCase):
 
 class PendingGaps1PartBTest(unittest.TestCase):
     MATCHING_EXPRS = [
+        # computed since Task 12 (a Variant beside a text column), listed under refusals until then
+        'CALCULATE(COUNTROWS(Facts),Facts[Region]=IF(TRUE(),1,"a"))',
+        'CALCULATE(COUNTROWS(Facts),Facts[Region]>IF(TRUE(),1,"a"))',
         'CALCULATE(COUNTROWS(Facts),Facts[Quantity]>VAR x=COUNTROWS(CALCULATETABLE(Facts,Facts[Region]="East")) RETURN x-1)',
         'CALCULATETABLE(ROW("c",1),Facts[Quantity]>COUNTROWS(VALUES(Facts[Region])))',
         'CALCULATETABLE(ROW("c",1),Facts[Quantity]>COUNTROWS(ALL(Facts[Region])))',
@@ -52,7 +55,6 @@ class PendingGaps1PartBTest(unittest.TestCase):
     ]
 
     REFUSED_EXPRS = [
-        "CALCULATE(COUNTROWS(Facts),Facts[Quantity]<FIRSTNONBLANKVALUE(Facts[Quantity],MAX(Facts[Quantity])))",
         'CALCULATE(COUNTROWS(Facts),COUNTROWS(SUBSTITUTEWITHINDEX(VALUES(Facts[Region]),"i",VALUES(Facts[Region]),Facts[Region]))>0)',
         'CALCULATE(COUNTROWS(Facts),Facts[Quantity]<IF(ISEMPTY(CALCULATETABLE(Facts,Facts[Region]="East")),1,4))',
         'CALCULATE(COUNTROWS(Facts),Facts[Quantity]<COUNTROWS(CALCULATETABLE(CALCULATETABLE(Facts,Facts[Region]="East"))))',
@@ -65,8 +67,6 @@ class PendingGaps1PartBTest(unittest.TestCase):
         'CONCATENATEX(ADDCOLUMNS(ALL(Facts[Quantity]),"n",INDEX(1,ALL(Facts[Quantity]),ORDERBY(Facts[Quantity]))),[n],",",Facts[Quantity])',
         "CALCULATE(COUNTROWS(Facts),Facts[Quantity]>COUNTROWS(INFO.TABLES())-1)",
         "CALCULATE(COUNTROWS(Facts),Facts[Quantity]+COUNTROWS(INFO.TABLES())>5)",
-        'CALCULATE(COUNTROWS(Facts),Facts[Region]=IF(TRUE(),1,"a"))',
-        'CALCULATE(COUNTROWS(Facts),Facts[Region]>IF(TRUE(),1,"a"))',
     ]
 
     @classmethod

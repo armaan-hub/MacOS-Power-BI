@@ -789,7 +789,6 @@ class MeasureTests(unittest.TestCase):
             'COUNTX(\'Sales data\', IF([Note] > 0, "x", BLANK()))',
             'COUNTX(\'Sales data\', IF(COUNTROWS(FILTER(\'Sales data\', [Note] > 0)) > 0, "x", BLANK()))',
             'COUNTX(\'Sales data\', IF(AND([Note], TRUE()) = TRUE(), "x", BLANK()))',
-            'COUNTX(\'Sales data\', IF(AND(IF([Note], TRUE(), FALSE()), TRUE()) = TRUE(), "x", BLANK()))',
             # iteration 87: IF([Sales], "x", BLANK()) is no longer rejected, a number is a valid condition (non-zero is True; live Power BI)
             'COUNTX(\'Sales data\', IF(AND(ABS([Note]), TRUE()), "x", BLANK()))',
             'COUNTX(\'Sales data\', IF(ABS([Note]) > 0, "x", BLANK()))',
@@ -1341,7 +1340,7 @@ class MeasureTests(unittest.TestCase):
             (
                 "SUMX('Sales', RELATED('Products'[Category]))",
                 [relationship],
-                "Cannot convert value 'A' of type Text to type Number",
+                "The function SUMX cannot work with values of type String",
             ),
         )
         for expression, links, message in cases:

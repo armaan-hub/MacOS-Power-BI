@@ -136,7 +136,10 @@ def local(expression: str) -> str:
     except Exception as error:  # surface evaluator crashes as findings, never hide them
         return f"LOCAL-CRASH:{type(error).__name__}:{error}"
     if isinstance(value, dax_dates.DaxDateTime):
-        return dax_dates.oracle_text(value)
+        try:
+            return dax_dates.oracle_text(value)
+        except MeasureError as error:  # a date the local engine refuses to display (before day zero, past 9999)
+            return f"LOCAL-REJECT:{error}"
     return "BLANK" if value is None else str(value)
 
 
