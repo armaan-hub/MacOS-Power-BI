@@ -1,7 +1,7 @@
 # Analytics Studio project rules
 
 ## Two-agent workflow (set by the user 2026-10-26)
-Antigravity writes the new feature code. Claude plans, tests and fixes errors in Antigravity's code. Claude does NOT write
+Antigravity writes the new feature code (until its quota returns on Nov 2, Haiku 5.5 does, as a subagent; see `AGENTS.md`). Claude plans, tests and fixes errors in Antigravity's code. Claude does NOT write
 new feature code until the user explicitly says so (and then only for that task). Full rules: `AGENTS.md`. Message board:
 `HANDOFF.md`. Read both before starting, check the "Active agent" line, update status and entries when stopping.
 
