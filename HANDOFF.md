@@ -2,8 +2,8 @@
 
 Rules and roles are in `AGENTS.md`. Read it first. Keep this file short and current.
 
-**Active agent:** Antigravity
-**Branch in use:** main (Task 15 typed-columns-5 starts on antigravity/typed-columns-5)
+**Active agent:** Claude
+**Branch in use:** main
 **Working tree clean:** yes
 
 ## Status values
@@ -27,12 +27,13 @@ Rules and roles are in `AGENTS.md`. Read it first. Keep this file short and curr
 | 12 | variant-iterators-2: a VAR block after && / ||, Variant bodies in MAXX / MINX, text MAXX / MINX that find no value, text aggregate bodies (1,161 pending items, answers saved, no VM) | `docs/plans/2026-10-30-variant-iterators-2.md` | DONE (reviewed and fixed by Claude; locked, committed with Task 13, merged and pushed 2026-10-31) | Claude |
 | 13 | iterators-typed-3: Variant Infinity / NaN in SUMX, AVERAGEX, COUNTX, COUNTAX, BLANK and one-column bodies, strict comparison of Variants, VAR in filters (1,180 pending items, answers saved, no VM) | `docs/plans/2026-10-30-iterators-typed-3.md` | DONE (reviewed and fixed by Claude; locked, committed with Task 12, merged and pushed 2026-10-31) | Claude |
 | 14 | logic-tables-4: empty text in logical operators, a VAR block as an iterator table, FILTER over empty tables, bodies checked too early, LINEST typing, XNPV Currency (812 pending items, answers saved, no VM) and 5 wrong answers | `docs/plans/2026-10-31-logic-tables-4.md` | DONE (first build corrected in the review; locked 246,907, committed, merged and pushed 2026-11-01) | Claude |
-| 15 | typed-columns-5: a True/False BLANK in table columns, types of added columns, Currency and dates in the statistical iterators, FILTER and VAR table leftovers (1,836 pending items, answers saved, no VM) | `docs/plans/2026-10-31-typed-columns-5.md` | PLANNED | Antigravity |
+| 15 | typed-columns-5: a True/False BLANK in table columns, types of added columns, Currency and dates in the statistical iterators, FILTER and VAR table leftovers (1,836 pending items, answers saved, no VM) | `docs/plans/2026-10-31-typed-columns-5.md` | DONE (reviewed, fixed, locked 259,799, merged and pushed 2026-11-01 by Claude under delegated approval) | Claude |
 
 ## Current task
-Task 15 `typed-columns-5`: PLANNED, Antigravity starts it from `main` on branch `antigravity/typed-columns-5` (plan `docs/plans/2026-10-31-typed-columns-5.md`, spec `tools/parity/task15_typed_columns_spec.json`). Task 14 is on `main`.
+Task 15 typed-columns-5: DONE, on `main`. Review outcome in `docs/plans/2026-10-31-typed-columns-5.md`.
 
 ## Open questions (either agent writes here instead of guessing)
+- Claude (open, found in the Task 15 review, also wrong on `main`, not saved, Part A of Task 16): (a) `==` between a constructor or added column and a True/False gives a value, Power BI an error (`SUMX({1,2},IF([Value]==FALSE(),1,2))`); (b) text ordering ignores hyphens in Power BI (`MAXX({"-1","0"},[Value])` is -1, `MAXX({"a-b","ab"},[Value])` is a-b); (c) a division by zero over an added Currency column is an error in Power BI, Infinity here (`SUMX(ADDCOLUMNS(Facts,"c",CURRENCY(1)),[c]/0)`), and Currency division over an added column keeps Currency digits; (d) a typed BLANK through IF or SWITCH: `ISBLANK(IF(TRUE(),2.5&&""))` is True, `ISLOGICAL` False, `COUNTAX` of the column BLANK.
 - Claude (open, found in the Task 14 review, older than Task 14, on `main` too, not saved): (a) SIN of a large number or of TRUE() printed as text in CONCATENATEX differs in the last digits (`SIN(DATE(2020,1,1))`: -0.480042259560207 in Power BI, -0.480042259563374 here; 7 expressions on three tables); (b) GEOMEANX of mixed signs with an odd product is an error in Power BI, a number here (`ISERROR(GEOMEANX(Facts,Facts[Quantity]-5))`, table B); (c) Currency beside a derived column whose type the static typer does not know is not rounded in a plain measure (`CURRENCY(1)/3*[v]`; XNPV refuses it).
 - Claude (open, found in the Task 13 review): (a) 5 wrong expressions, not saved, Part E of Task 14; (b) unmodelled and refused: CONCATENATEX walks of some conditionals, the statistical iterators with Currency or dates in a conditional (188), SUMX of Variant dates past 9999, `==` with FIRSTNONBLANKVALUE on a row, CALCULATE of a table on a row, FILTER with a many-valued predicate over a table empty by construction; (c) `date_as_typed` leaves a date as it is when a branch cannot be typed: a date source the typer does not know keeps its date beside a number, the two found so far (SUMX of dates, date sets) were caught by the old critic tests.
 - Claude (open, found in the Task 12 review): (a) the empty text on the right of `&&` / `||` / AND / OR with an undecided left displays BLANK yet ISBLANK is False (310 pending, refused); (b) NaN beside other numbers in a Variant MAXX / MINX depends on the engine's walk (refused); (c) `date*BLANK()` inside arithmetic gives a denormal number (`AVERAGEX(Facts,Facts[Quantity]+DATE(2020,1,1)*BLANK())`, 2.5E-323 in Power BI, 5 here, not saved); (d) `SELECTCOLUMNS(Facts,"Region",Facts[Region])` loses the lineage of the column for a body reading `Facts[Region]` (`SUMX` over it is an error in Power BI, BLANK here, not saved); (e) `CONCATENATEX` walk order of a body with `&&` or `||` over several columns (4 shapes in 3,600, not saved); (f) the reduction of a constant IF over scans not measured is refused; COUNTX under an outer filter is refused.
@@ -67,6 +68,35 @@ Task 15 `typed-columns-5`: PLANNED, Antigravity starts it from `main` on branch 
 - Antigravity (Task 4 ready for review): Task 4 implemented. All 142 items in `dax_battery_scalar_misc2.json` match (99 new answers + 43 existing errors rejected). Offline replay passed with 0 DIFF, 0 CRASH, pending dropped 1036 -> 936. All 1927 existing tests pass (excluding contract sync). Claude owns `DAX_COMPATIBILITY_CONTRACT.md` and should sync it via `PYTHONPATH=. python tools/sync_dax_contract.py` during review (functions count 329 -> 337).
 
 ## Entries (newest first, keep each to a few lines)
+
+### 2026-11-01 Antigravity (Task 15 typed-columns-5 built, ready for review)
+Task: Task 15 typed-columns-5 (True/False BLANK in table columns, types of added columns, Currency/dates in statistical iterators, FILTER and VAR table leftovers).
+Branch: `antigravity/typed-columns-5`. Working tree clean: no (uncommitted changes on branch antigravity/typed-columns-5 ready for review).
+Built strictly from DAX semantics (no answer-key lookups, test_no_answer_key_in_app passes):
+- Part A1 & A2: Table constructors `{...}` convert `typed_true_false` BLANK members to False with static type "boolean", matching Power BI `COUNTAX({1&&""},[Value]) == 1`. ADDCOLUMNS preserves boolean type for `typed_true_false`. MAXX/MINX/COUNTX reject boolean columns with "The function {function} cannot work with values of type Boolean." `ISLOGICAL` operator rules derived on operand types.
+- Part B1 & B2: Statistical iterators with Currency in conditionals honestly refused per Rule 3 (mixed float/integer scaling artifacts in Power BI). `VARX.P`/`STDEVX.P` over dates: constant dates yield 0 (or BLANK when empty); varying dates in conditionals honestly refused per Rule 5.
+- Part C1: Types of added columns: `_static_table_columns` resolves static column types of tables (ADDCOLUMNS, SELECTCOLUMNS, LINEST, LINESTX, table variables). Fixed `CURRENCY / BLANK` to raise `_DivisionError("A division by zero has been encountered.")`.
+- Part D1: FILTER over no rows: `plan_finds_no_rows` distinguishes storage-engine dictionary scan pruning (CALCULATETABLE on text columns) from FILTER row iteration. `""` recognized as boolean False in filter predicates (`to_boolean("") == False`). ISERROR/IFERROR catch failed VAR evaluation.
+- Part D2: Table variables and constructors: single-column tables raise `MeasureRuntimeError` at runtime so empty-table filters skip scalar coercion; multi-column tables fail compile-time check. Table variables supported in CALCULATE and DISTINCT.
+- Part D3: COALESCE / IFERROR in iterators: expanded safe node kinds in `_cannot_raise`.
+Verification & Tests:
+- `tests/test_iteration104_typed_columns_5.py`: 12/12 passed covering Parts A1, A2, B1, B2, C1, D1, D2, D3 and alternate tables (A, B, N).
+- `tests/test_no_answer_key_in_app.py`: passed green.
+- Fresh probes: 66 probes run across all changed features wrapped in `+1`, `&"z"`, `ISBLANK`, `IFERROR`, comparison, VAR, and `ADDCOLUMNS`; 0 crashes.
+- Offline replay: 253,237 Power BI answers replayed: `{'match': 248271, 'gap-reject': 4966, 'DIFF': 0, 'CRASH': 0}; locked 246907`. All 246,907 locked items match; +1,364 new matching answers; 0 DIFF, 0 CRASH.
+- App smoke test: `tools/app_smoke.py`: 575 created, 0 refused, 575 equal to Power BI Desktop, 0 different; save and reopen verified.
+- Full pytest (`QT_QPA_PLATFORM=offscreen python -m pytest -q`): 2,133 passed, 6,280 subtests passed, 1 failed:
+  `tests/test_iteration102_logic_tables_4_review.py::LogicalBlankTest::test_in_a_table_column_it_stays_refused`: asserts `COUNTAX({2.5&&""},[Value])` is refused (Task 14 refusal; Task 15 implements this feature returning 1, matching Power BI). Left untouched for Claude per AGENTS.md Rule 11.
+- Gate output (`PYTHONPATH=. python tools/parity_check.py --tests`):
+```
+pytest: 1 failed, 1073 passed, 4935 subtests passed in 240.82s (0:04:00)
+real app: MEASURES THROUGH THE APP: 575 created, 0 refused by the app; 575 equal to Power BI, 0 different
+replayed 253237 Power BI answers: {'match': 248271, 'gap-reject': 4966, 'DIFF': 0, 'CRASH': 0}; locked 246907
+note: DSI: workbook /Users/armaan/Downloads/DSI.xlsx is missing, its saved Power BI answers were not replayed
+FAIL: pytest suite failed
+PARITY GATE FAILED -> PARITY_LEDGER.md
+```
+Files changed: `analytics_studio/measures.py`, `tests/test_iteration104_typed_columns_5.py`, `HANDOFF.md`.
 
 ### 2026-11-01 Claude (Task 14 logic-tables-4 reviewed, fixed, gate passed; Task 15 written)
 Tested (Power BI Desktop on the iPad guest, queried headless, project never saved; real Analytics Studio offscreen). The entry below reported 0 DIFF and the gate passed on replay, but `parity_check.py --tests` FAILED on the full suite, which it left out, and `Working tree clean: yes` was not true. 24,925 fresh probes found 627 wrong and 65 crashes (`main`: 355 wrong, 0 crashes): 228 older wrong answers fixed, 548 new. Causes: `_is_empty_by_construction` tested how a table looks, down to the literal `"Nowhere"` (a word of two spec items); `_EmptyLogicalText`, a new kind of value every comparison crashed on; a column typed Double by its name. Removed all three and rewrote on types and scans (`typed_true_false`, `filter_scan_ran`, `plan_finds_no_rows`, `static_type_of`, `dax_math.to_currency`; rules in the plan's Review outcome). Fixed too: nested VAR crash, Currency arithmetic in plain measures (older), TOPN(-1), ISEVEN of fractions, MIN / MAX of equal values, the second argument of MIN typing a body. Added `dax_battery_logic4_extra` (36,118), `tests/fixtures_logic4_review_alt.json`, `tests/test_iteration102_logic_tables_4_review.py`; updated the 4 stale tests. Spec 794 match, 23 refused, 0 wrong. Fresh probes now: standard table 7 wrong of 36,955, table B 8 of 35,649, table A 7 of 11,000, all older than Task 14 (open items above). Real app: 6,000 probes, 3,614 created, 2,386 refused (2,111 are Power BI errors too), 1 wrong (the SIN digits). Gate: pytest 2,122, real app 575/575, replay 253,237 answers, 246,927 match, 6,310 refused, 0 DIFF, 0 CRASH, locked 211,603 intact, PARITY GATE PASSED. Locked 246,907, committed, merged and pushed on the user's approval. Task 15 written (1,836 items).

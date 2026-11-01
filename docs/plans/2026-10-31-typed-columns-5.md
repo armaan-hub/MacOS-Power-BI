@@ -42,3 +42,21 @@ The rule of Task 14: an empty text on the right of `&&`, `||`, AND, OR with an u
 
 ## Not in Task 15 (parked, reasons in `HANDOFF.md`)
 Non-ASCII collation and composed / decomposed text (1,657), engine row orders (TOCSV, CONCATENATEX, SUMMARIZE, TABLEOF, about 665), LINEST rank-deficient or perfect fits (701), SUBSTITUTEWITHINDEX (857), NaN beside other numbers in a Variant MAXX / MINX (117), `SIN` of a large number or of TRUE() printed in CONCATENATEX (last digits, 7), GEOMEANX of mixed signs, `date*BLANK()` inside arithmetic, `SELECTCOLUMNS` column lineage.
+
+## Review outcome (Claude, 2026-11-01)
+Tested against Power BI Desktop on the iPad guest (queried headless, project never saved) and in the real Analytics Studio offscreen. The user was away; Claude approved the lock under the authority they delegated on 2026-11-01.
+
+**The build.** An honest entry: 1,364 new matches, 0 DIFF, its one failing test named, the failed gate pasted. That is the standard. It still let wrong answers through, because every new rule had been checked on the spec shapes only.
+
+**Method that worked.** Generate far more shapes than needed (44,875 here), answer them with `main` and with the build, and ask Power BI only about the answers that changed. An answer that did not change cannot be a new error. Then give the diff to a fresh reviewer without your conclusions: it found what the probes missed.
+
+**Rules Power BI showed, now in `measures.py`:**
+- A logical operator's BLANK in a constructor is False beside logical values and numbers, and alone (`COUNTAX({1&&""},[Value])` is 1); it stays a BLANK beside a BLANK. Beside a text or a date no rule could be stated (FORMAT fails, COALESCE gives BLANK, a date shows 12:00:00 AM), so it is refused.
+- Through a VAR block or a CALCULATE the same operator gives a plain BLANK, but the column is still True/False (`true_false_column`).
+- A table filter is a table: `VAR m=MAX(Facts[Quantity])>1 RETURN m` stays an error. A VAR holding a CALCULATE is evaluated once, before the FILTER; put into the FILTER it would run per row, so that shape is refused.
+- A constructor of several columns as a scalar fails at compile time, one of several rows at run time. A text constructor is known by its static type.
+- A BLANK operand: `+` and `-` take the other side's type, `*` and `/` read it as an Integer, so `CURRENCY(1)*BLANK()` is a Currency.
+- A table variable is a named table of the type walk (`_TABLE_VARIABLE`, `_static_let_scope`), so a column's type comes from its table on every path, never from a stored column of the same name.
+- One repeated date has no spread. A refusal raises `MeasureError` (`dax_typed.refusal`), which IFERROR does not catch.
+
+**Still refused (521 of 1,836).** A2 ISLOGICAL (198): the rule on the operand types was not found. B1 Currency in a conditional (136), B2 varying dates in VARX / STDEVX (117), D1 (34), D3 (36).

@@ -4,9 +4,9 @@
 **Project status:** In progress; the Power BI parity goal is currently paused.  
 **Latest verified full test run:** 998 tests and 738 subtests passed in Iteration 62. This run predates the unfinished Iteration 63 edits described below.
 
-**Latest status (2026-11-01, after Iteration 103 / Task 14 logic-tables-4, empty text in logical operators, a VAR block as an iterator table, FILTER over no rows, Currency arithmetic, review done, gate passed, locked 246,907, committed, merged and pushed; 246,927 of 253,237 saved answers match, 0 differ; next: Task 15 typed-columns-5, 1,836 items).**
+**Latest status (2026-11-01, after Iteration 104 / Task 15 typed-columns-5, a True/False BLANK in table columns, types of added columns, Currency and dates in the statistical iterators, FILTER and VAR table leftovers, reviewed and shipped by Claude under the user's delegated approval):** gate passed, pytest 2,157, real app 575/575, replay 265,529 answers, 259,819 match, 5,710 refused, 0 DIFF, 0 CRASH, locked 259,799 (was 246,907). Of the 1,836 spec items 1,315 now match and 521 stay honestly refused. Next: Task 16 strict-types-6.**
 
-**Previous status (2026-10-31, after Iteration 102 / Task 13 iterators-typed-3, Variant Infinity / NaN, BLANK and one-column bodies, strict comparison, VAR in filters, review done, gate passed, locked 211,603, committed together with Task 12, merged and pushed; 211,623 of 217,119 saved answers match, 0 differ; a crash on closing the app with data loaded fixed; next: Task 14 logic-tables-4, 817 items).**
+**Previous status (2026-11-01, after Iteration 103 / Task 14 logic-tables-4, empty text in logical operators, a VAR block as an iterator table, FILTER over no rows, Currency arithmetic, review done, gate passed, locked 246,907, committed, merged and pushed; 246,927 of 253,237 saved answers match, 0 differ; next: Task 15 typed-columns-5, 1,836 items).**
 
 **Earlier status (2026-10-30, after Iteration 101 / Task 12 variant-iterators-2, VAR after && / || / ^, Variant MAXX / MINX, text BLANK, text aggregates, review done, gate passed, 163,762 locked intact, 181,345 of 187,448 saved answers match, 0 differ; the lock, commit and merge wait for the user; next: Task 13 iterators-typed-3, 1,180 items).**
 

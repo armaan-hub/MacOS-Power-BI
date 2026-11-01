@@ -59,6 +59,13 @@ def _error(message: str) -> Exception:
     return MeasureRuntimeError(message)
 
 
+def refusal(message: str) -> Exception:
+    """The local engine has no answer: not an error of the expression, so IFERROR must not turn it into a value."""
+    from .measures import MeasureError  # imported late: measures imports this module
+
+    return MeasureError(message)
+
+
 def type_name(value: object) -> str:
     if isinstance(value, bool):
         return "True/False"

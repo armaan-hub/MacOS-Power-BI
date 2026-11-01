@@ -44,8 +44,9 @@ class LogicalBlankTest(unittest.TestCase):
     def test_a_comparison_with_a_number_is_an_error_not_a_crash(self) -> None:
         self.assertTrue(dax.local('(2.5&&"")>0').startswith("LOCAL-REJECT"))
 
-    def test_in_a_table_column_it_stays_refused(self) -> None:
-        for expression in ('COUNTAX({2.5&&""},[Value])', 'MAXX(ADDCOLUMNS(Facts,"q",2.5&&""),[q])', 'ISLOGICAL(2.5&&"")'):
+    def test_in_a_table_column_it_stays_true_false(self) -> None:
+        self.assertEqual("1", dax.local('COUNTAX({2.5&&""},[Value])'))  # live Power BI (Task 15 review): the constructor holds False
+        for expression in ('MAXX(ADDCOLUMNS(Facts,"q",2.5&&""),[q])', 'ISLOGICAL(2.5&&"")'):
             self.assertTrue(dax.local(expression).startswith("LOCAL-REJECT"), expression)
 
     def test_a_row_that_failed_is_not_mistaken_for_it(self) -> None:
