@@ -94,6 +94,10 @@ class _DivisionError(MeasureRuntimeError):
     """x/0 or x/BLANK(): Infinity or NaN in Power BI, an error for IFERROR."""
 
 
+class _CurrencyDivisionError(_DivisionError):
+    """A constant Currency numerator divided by 0 (Part F): Power BI folds it, so ISBLANK reads it as not BLANK."""
+
+
 class _CalculateTableFilterRefusal(MeasureError):
     """A CALCULATETABLE in a Boolean filter whose hoist-or-transition reading was not established (see dax_ct_filters)."""
 
@@ -290,6 +294,82 @@ def _consume_infinity(thunk: Any) -> Any:
             "A division by zero feeds a comparison, ISBLANK or SWITCH; Power BI treats it "
             "as Infinity, which the local engine does not model."
         ) from exc
+
+
+_CURRENCY_INFINITY = object()  # any value but None: ISBLANK of a constant Currency / 0 is False (Part F)
+
+
+def _constant_currency(node: tuple[Any, ...]) -> bool:
+    """Part F: True for a numerator Power BI folds at compile time.
+
+    CURRENCY of a number (or of a minus on one), and + - * of those and numbers, with at least one CURRENCY.
+    """
+
+    def plain_number(part: tuple[Any, ...]) -> bool:
+        if part[0] == "call" and part[1] == "DATE":
+            return all(argument[0] == "number" for argument in part[2])  # a date literal folds as a number does
+        return part[0] == "number" or (part[0] == "unary" and part[1] == "-" and part[2][0] == "number")
+
+    if node[0] == "call" and node[1] == "CURRENCY" and len(node[2]) == 1:
+        return plain_number(node[2][0])
+    if node[0] == "binary" and node[1] in {"+", "-", "*"}:
+        left, right = node[2], node[3]
+        return (
+            (_constant_currency(left) or plain_number(left))
+            and (_constant_currency(right) or plain_number(right))
+            and (_constant_currency(left) or _constant_currency(right))
+        )
+    return False
+
+
+def _constant_arithmetic(node: Any) -> bool:
+    """Numbers, CURRENCY of a number, and + - * / and unary +/- of those: an operand that reads nothing."""
+    if not isinstance(node, tuple) or not node:
+        return False
+    if node[0] == "number":
+        return True
+    if node[0] == "unary" and node[1] in {"+", "-"}:
+        return _constant_arithmetic(node[2])
+    if node[0] == "binary" and node[1] in {"+", "-", "*", "/"}:
+        return _constant_arithmetic(node[2]) and _constant_arithmetic(node[3])
+    if node[0] == "call" and node[1] == "DATE":
+        return all(_constant_arithmetic(argument) for argument in node[2])
+    return node[0] == "call" and node[1] == "CURRENCY" and len(node[2]) == 1 and _constant_arithmetic(node[2][0])
+
+
+def _reaches_currency_division(node: Any) -> bool:
+    """Corrections rule 2: True when ISBLANK's argument reaches a constant Currency division through + - * / and unary minus alone.
+
+    Every other operand on the way must be a constant; the divisor of the division itself may read data.  IF, COALESCE, a VAR or a
+    data-reading operand in between leaves the answer an error, which stays refused as on main.
+    """
+    if not isinstance(node, tuple) or not node:
+        return False
+    if node[0] == "unary" and node[1] == "-":
+        return _reaches_currency_division(node[2])
+    if node[0] == "let":  # VAR z=0 RETURN CURRENCY(1)/z: the VAR holds the divisor; a RETURN that is the VAR itself does not reach the division
+        return _reaches_currency_division(node[2])
+    if node[0] != "binary" or node[1] not in {"+", "-", "*", "/"}:
+        return False
+    if node[1] == "/" and _constant_currency(node[2]):
+        return True
+    return (_reaches_currency_division(node[2]) and _constant_arithmetic(node[3])) or (
+        _reaches_currency_division(node[3]) and _constant_arithmetic(node[2])
+    )
+
+
+def _isblank_consume(thunk: Any, argument: Any) -> bool:
+    """ISBLANK's test of its argument (Part F): only the ISBLANK call uses this; _consume_infinity stays for the rest."""
+    if not _reaches_currency_division(argument):
+        return _consume_infinity(thunk) is None
+
+    def guarded() -> Any:
+        try:
+            return thunk()
+        except _CurrencyDivisionError:
+            return _CURRENCY_INFINITY  # caught before _consume_infinity turns it into a refusal
+
+    return _consume_infinity(guarded) is None
 
 
 @dataclass(frozen=True)
@@ -1985,6 +2065,33 @@ def _scan_class(table: Any, held: Callable[[str], Any]) -> str | None:
     return None
 
 
+_COMPUTED_TABLE_CALLS = frozenset({"ROW", "ADDCOLUMNS", "TOPN", "GENERATESERIES", "CALENDAR", "UNION"})
+
+
+def _computed_rows(table: Any, held: Callable[[str], Any]) -> bool:
+    """Corrections rule 5: True when MAXX / MINX walks rows the formula engine builds (a constructor, ROW, ADDCOLUMNS, SELECTCOLUMNS, TOPN,
+    GENERATESERIES, CALENDAR, UNION, a FILTER of those, and the shapes _scan_class calls a rowset), whose Infinity or NaN body value is the answer.
+    Over a table of stored rows (Facts, VALUES, ALL, DISTINCT, SUMMARIZE, a FILTER of those) such a value is ignored, so the answer is BLANK."""
+    while table is not None and table[0] == "var":
+        table = held(table[1])
+    if table is None:
+        return False
+    if table[0] == "tableconstructor":
+        return True
+    if table[0] != "call":
+        return False
+    if table[1] == "SELECTCOLUMNS" and table[2]:
+        # SELECTCOLUMNS(Facts,"z",1) is built by the formula engine, but one that reads a column (Facts[Quantity]) stays a stored scan (saved answers, typed3_extra)
+        if any(next(iter(_direct_column_references(expression)), None) is not None for expression in table[2][2::2]):
+            return _computed_rows(table[2][0], held)
+        return True
+    if table[1] in _COMPUTED_TABLE_CALLS or _scan_class(table, held) == "rowset":
+        return True
+    if table[1] in {"FILTER", "CALCULATETABLE"} and table[2]:
+        return _computed_rows(table[2][0], held)
+    return False
+
+
 def _stored_scan(table: Any, held: Callable[[str], Any]) -> bool | None:
     """True when an iterator walks rows the storage engine holds (a whole table, with or without a row filter), False for a row set the formula engine
     builds, None when the shape was not measured (live Power BI, Task 13 review: 28 tables by 61 bodies on two Facts tables).  Over a stored scan
@@ -2960,6 +3067,43 @@ def _tocsv_max_rows(node: tuple[Any, ...]) -> int:
 def _power(base: Decimal | None, exponent: Decimal | None) -> Decimal | None:
     """The ^ operator: POWER's rules, BLANK()^n is blank and n^BLANK() is 1."""
     return _scalar_math("POWER", [base, exponent])
+
+
+def _held_runtime_failure(error: MeasureError) -> MeasureError:
+    """Part B: a runtime error, or a used VAR's thrown runtime error, that * and / hold until a BLANK operand decides the result; any other refusal propagates."""
+    if isinstance(error, _HardError) and not isinstance(error.__cause__, MeasureRuntimeError):
+        raise error
+    return error
+
+
+_DATA_READING_CALLS = (_AGGREGATING_CALLS - {"CALCULATE"}) | _ITERATOR_CALLS | {"AND", "OR", "RELATED", "RELATEDTABLE", "LOOKUPVALUE"}
+
+
+def _reads_no_data(node: Any, held: Callable[[str], Any], seen: frozenset[str] = frozenset()) -> bool:
+    """Corrections rule 1: True when an operand reads no data (BLANK(), IF(1=2,1), ABS(BLANK()), CALCULATE(BLANK()), a VAR of those).
+
+    Only such a BLANK cancels an error or a text beside it in * and /.  A column or measure reference, a table, an aggregate or iterator, or a
+    logical operator (a && node, AND, OR) in the subtree, followed through VARs, makes the BLANK one from data, which does not cancel it.
+    """
+    if not isinstance(node, tuple) or not node:
+        return True
+    kind = node[0]
+    if kind in {"reference", "measure", "table", "table_call", "tablevalue", "tablecapture", "tableconstructor", "logical"}:
+        return False
+    if kind == "call" and node[1] in _DATA_READING_CALLS:
+        return False
+    if kind == "let":  # a VAR block inside the operand: its own names are held here
+        own = dict(node[1])
+        outer = held
+        held = lambda name: own.get(name, outer(name))  # noqa: E731
+        return all(_reads_no_data(bound, held, seen) for _, bound in node[1]) and _reads_no_data(node[2], held, seen)
+    if kind == "var":
+        if node[1] in seen:
+            return False
+        bound = held(node[1])
+        return bound is not None and _reads_no_data(bound, held, seen | {node[1]})
+    children = node if isinstance(node[0], tuple) else node[1:]
+    return all(_reads_no_data(child, held, seen) for child in children if isinstance(child, tuple))
 
 
 def _binary_value(operator: str, left: Decimal | None, right: Decimal | None) -> Decimal | None:
@@ -4601,7 +4745,7 @@ def evaluate_calculated_columns(
                     return evaluate(arguments[1], row, row_index)
                 return evaluate(arguments[2], row, row_index) if len(arguments) == 3 else None
             if function == "ISBLANK":
-                return _consume_infinity(lambda: evaluate(arguments[0], row, row_index)) is None
+                return _isblank_consume(lambda: evaluate(arguments[0], row, row_index), arguments[0])
             if function == "IFERROR":
                 try:
                     return evaluate(arguments[0], row, row_index)
@@ -5361,6 +5505,15 @@ def _static_numeric_type(
             if rt == "currency" and lt in {"currency", "int64"}:
                 return "currency"
             return None
+        if op in {"*", "/"} and "datetime" in (lt, rt) and "logical" in (left[0], right[0]):
+            return None  # a logical operator's BLANK beside a date: Power BI still types it Double, but the local value is BLANK, so ISDOUBLE would say False; stay refused as on main
+        if op in {"*", "/"} and (
+            (lt == "datetime" and rt in {"int64", "double", "bool", "blank"})
+            or (rt == "datetime" and lt in {"int64", "double", "bool", "blank"})
+        ):
+            return "double"  # live Power BI (Part A): a date times or divided by a number or True/False is a Double (not a Currency), so NOW()*0+1 is a number
+        if op == "*" and "currency" in (lt, rt) and "datetime" in (lt, rt):
+            return "currency"  # live Power BI (corrections rule 3): ISDOUBLE(DATE(..)*CURRENCY(0)) is False, a date times a Currency is not a Double
         if op == "*":
             if lt == "int64" and rt == "int64":
                 return "int64"
@@ -5383,6 +5536,8 @@ def _static_numeric_type(
     if kind != "call":
         return None
     fn, args = node[1], node[2]
+    if fn == "SELECTEDVALUE" and args and args[0][0] == "reference":
+        return _static_numeric_type(args[0], columns, variables)  # live Power BI (Part A): SELECTEDVALUE of a column has the column's type, so a date stays a date and a number stays a number
     if fn == "XNPV" and len(args) == 4 and _static_numeric_type(args[1], columns, variables) == "currency":
         return "currency"
     if fn in _STATIC_ALWAYS_DOUBLE:
@@ -10635,6 +10790,9 @@ def evaluate_measures(
             if function in _TYPED_ARITY:
                 for argument in expression[2]:
                     iterator_expression_category(argument, row_context)
+                if function == "CONVERT" and len(expression[2]) == 2 and expression[2][1][0] == "table":
+                    # live Power BI (blank-dates-8, Part E): CONVERT(x,STRING) is a text and CONVERT(x,BOOLEAN) a True/False
+                    return {"STRING": "text", "BOOLEAN": "boolean"}.get(str(expression[2][1][1]).upper(), "numeric")
                 return _TYPED_RESULT_CATEGORY.get(function, "numeric")
             if function == "CALCULATE" and expression[2]:
                 return iterator_expression_category(expression[2][0], row_context)
@@ -14209,6 +14367,16 @@ def evaluate_measures(
             return _static_numeric_type(node, cols, scope) == "currency"
         return static_type_of(node) == "currency"
 
+    def left_static_type(node: tuple[Any, ...], row_context: Any = None) -> str | None:
+        """The static type of the left operand of a - with a date on the right, with the row's columns when a row is in scope."""
+        if row_context is not None and isinstance(row_context, tuple) and row_context and isinstance(row_context[0], dict):
+            cols = {**static_scope()[0], "": row_columns(row_context)}
+            scope: dict[str, str | None] = {}
+            for name, bound in variable_nodes.items():
+                scope[str(name)] = _static_numeric_type(bound, cols, scope)
+            return _static_numeric_type(node, cols, scope)
+        return static_type_of(node)
+
     def plan_constant(node: tuple[Any, ...]) -> bool:
         """True when Power BI knows the value before scanning any row (tools/parity/dax_battery_evaluation_order.json).
 
@@ -15081,9 +15249,40 @@ def evaluate_measures(
             value = as_number(operand)
             return value if node[1] == "+" else dax_typed.QUIET.minus(value) if value else Decimal(0)
         if kind == "binary":
-            left = evaluate(node[2], row_context)
-            right = evaluate(node[3], row_context)
+            left_error = right_error = None
+            if node[1] in {"*", "/"}:  # Part B: BLANK makes * BLANK (either side) and / BLANK (left side); the other side's runtime error does not count
+                try:
+                    left = evaluate(node[2], row_context)
+                except (MeasureRuntimeError, _HardError) as error:
+                    left, left_error = None, _held_runtime_failure(error)
+                try:
+                    right = evaluate(node[3], row_context)
+                except (MeasureRuntimeError, _HardError) as error:
+                    right, right_error = None, _held_runtime_failure(error)
+                except MeasureError:
+                    if left_error is not None:
+                        raise left_error  # the left side failed first, as it does without Part B
+                    raise
+                # corrections rule 1: a BLANK cancels the other side's error only when the BLANK operand reads no data
+                right_bad = right_error is not None or isinstance(right, str)  # an error, or a text that cannot be a number
+                left_bad = left_error is not None or isinstance(left, str)
+                blank_left = left is None and left_error is None and (not right_bad or _reads_no_data(node[2], variable_nodes.get))
+                blank_right = right is None and right_error is None and (not left_bad or _reads_no_data(node[3], variable_nodes.get))
+                if blank_left or (node[1] == "*" and blank_right):
+                    return None
+                if left_error is not None:
+                    raise left_error
+                if right_error is not None:
+                    raise right_error
+            else:
+                left = evaluate(node[2], row_context)
+                right = evaluate(node[3], row_context)
+            for operand, value, other, other_error in ((node[2], left, right, right_error), (node[3], right, left, left_error)):
+                if value is None and (operand[0] == "logical" or operand[:2] in {("call", "AND"), ("call", "OR")}) and (other is None or isinstance(other, str) or other_error is not None):
+                    raise dax_typed.refusal("A logical operator's BLANK beside a BLANK, a text or an error in arithmetic is not modelled by the local engine.")  # live Power BI (Task 18 review): the result is not BLANK
             if node[1] == "/" and currency_typed(node[2], row_context) and not currency_typed(node[3], row_context) and (right is None or as_number(right) == 0):
+                if _constant_currency(node[2]):
+                    raise _CurrencyDivisionError("A division by zero has been encountered.")  # Part F
                 raise _DivisionError("A division by zero has been encountered.")
             if node[1] == "^":
                 return _power(
@@ -15105,8 +15304,11 @@ def evaluate_measures(
             if node[1] in {"+", "-"} and result is not None and (
                 dax_dates.is_date(left) or dax_dates.is_date(right)
             ):
-                if node[1] == "-" and not dax_dates.is_date(left) and (node[2][0] in {"number", "blank"} or (node[2][0] == "unary" and node[2][2][0] == "number") or (node[2][0] == "call" and node[2][1] == "INT")):
-                    return result  # live Power BI: a number literal minus a date is a plain number (other lefts may be dates the evaluator lost the type of)
+                left_type = left_static_type(node[2], row_context) if node[1] == "-" and not dax_dates.is_date(left) else None
+                if node[1] == "-" and not dax_dates.is_date(left) and left_type != "datetime" and not (left is None and left_type is None and not _reads_no_data(node[2], variable_nodes.get)):  # live Power BI: X-D, D a date, is a Double unless X has a date type statically (corrections rule 4); a BLANK read from data of unknown type, such as RELATED of an empty date, stays a date
+                    if isinstance(result, Decimal) and result.is_finite():
+                        result = result.to_integral_value() if result == result.to_integral_value() else result.normalize()  # Part A: a currency operand's four decimals are not kept by a number
+                    return result
                 return dax_dates.DaxDateTime(dax_dates.tick_round(result))
             return result
         if kind == "logical":
@@ -15258,8 +15460,8 @@ def evaluate_measures(
                         arguments[1], (context, validation_row, 1)
                     )
                     if result_category not in {"numeric", "blank", "date/time", "text"}:
-                        if result_category == "boolean" and arguments[1][0] == "reference":
-                            raise MeasureError(f"The function {function} cannot work with values of type Boolean.")
+                        if result_category == "boolean" and (arguments[1][0] == "reference" or (arguments[1][0] == "call" and arguments[1][1] == "CONVERT")):
+                            raise MeasureError(f"The function {function} cannot work with values of type Boolean.")  # blank-dates-8 Part E: CONVERT(x,BOOLEAN) too
                         raise MeasureError(
                             f"Iterator {function} expression needs a numeric result."
                         )
@@ -15336,7 +15538,7 @@ def evaluate_measures(
                 return winner
             if function in {"MAXX", "MINX"}:
                 ordered = [value for value in values if not value.is_nan()]
-                row_set = _scan_class(arguments[0], variable_nodes.get) == "rowset"  # live Power BI (Task 13 review): a row set the formula engine builds keeps NaN and Infinity, as a Variant does
+                row_set = _computed_rows(arguments[0], variable_nodes.get)  # live Power BI (Task 13 review, corrections rule 5): a row set the formula engine builds keeps NaN and Infinity, as a Variant does
                 if (variant_body or row_set) and values and not ordered:
                     return Decimal("NaN")  # live Power BI (Task 12 review): over a Variant nothing but NaN is NaN, where a plain number body gives BLANK
                 if (variant_body or row_set) and len(ordered) != len(values):
@@ -15408,7 +15610,8 @@ def evaluate_measures(
                 refuse_foreign_columns_of_empty_set(context, arguments[1], function, typed=not variant_body and count_kind != "numdate")
             if function == "COUNTX" and not iteration_rows:
                 refuse_constructor_over_no_rows(function, arguments[1])
-            if not variant_body and count_kind != "numdate" and (iteration_rows or not _many_row_constructor(arguments[1])):
+            # Part D (blank-dates-8): a COUNTAX body with no column takes its values from the scalar path; COUNTX and column bodies keep the check
+            if (function == "COUNTX" or list(_direct_column_references(arguments[1]))) and not variant_body and count_kind != "numdate" and (iteration_rows or not _many_row_constructor(arguments[1])):
                 cat = iterator_expression_category(
                     arguments[1], (context, validation_row, 1)
                 )
@@ -15909,9 +16112,9 @@ def evaluate_measures(
                     pass  # an error of a row or of an operand: the operator is typed True/False, so ISBLANK never asks for its value
                 return False
             try:
-                return _consume_infinity(
-                    lambda: evaluate(arguments[0], row_context, allow_text=True, allow_boolean=allow_boolean)
-                ) is None
+                return _isblank_consume(
+                    lambda: evaluate(arguments[0], row_context, allow_text=True, allow_boolean=allow_boolean), arguments[0]
+                )
             except MeasureRuntimeError as error:
                 # ponytail: Power BI answers FALSE when the error is the argument function's own (SQRT/LN/LOG domain, UNICHAR, REPT,
                 # EDATE ... "wrong data type") or a conversion of literals, but not when the argument is COALESCE/IFERROR/SWITCH/

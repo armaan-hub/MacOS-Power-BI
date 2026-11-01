@@ -116,7 +116,9 @@ def math_function(function: str, args: list[object]) -> object:
     if function in {"LOG", "LOG10"}:
         number = dax_typed.to_number(args[0])
         base = dax_typed.to_number(args[1]) if len(args) > 1 and args[1] is not None else Decimal(10)
-        if number <= 0 or base <= 0:
+        if args[0] is None and (len(args) == 1 or args[1] is not None):
+            return Decimal("-Infinity")  # LOG(BLANK()) and LOG(BLANK(),b) are -Infinity for any real base, as LN(BLANK()) is; a BLANK base stays an error
+        if number <= 0 or base <= 0 or base.is_infinite():  # an infinite base is an error like a zero base (LOG(1/0,1/0) must not crash); a BLANK number returned above
             error = _fail(function)
             error.infinity = args[0] is None  # LOG(BLANK()) is -Infinity, an error value
             raise error
