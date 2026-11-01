@@ -15,6 +15,8 @@ The user (Armaan) decides what gets built and approves what is finished. Neither
 | Work log, progress, roadmap, summary files | One short entry in `HANDOFF.md` only | Owns and updates all of them |
 | Merge and commit | NEVER | Only when the user approves |
 
+**Temporary roles (set by the user 2026-11-01, until Antigravity's quota returns, about 14:15 on Nov 2).** Haiku 5.5 takes the Builder column and Sonnet 5.5 fixes errors Haiku cannot, both as subagents started by Claude Opus 5.5, one at a time. Every Builder limit applies to them: no `--freeze`, `--accept`, commit, merge or Power BI, no edits to saved answers or existing tests. Opus 5.5 plans and does the full review. Branch: `haiku/<task>`. This does not change the rules below.
+
 If the user explicitly tells Claude to code something, that instruction applies to that task only. Roles then return to the table above.
 
 ## The loop

@@ -1566,3 +1566,17 @@ The standing test workbook is now `tests/Data/Vat File -Aug 2026.xlsx` (sheet `V
 - Gate: pytest 2,203 passed (6,280 subtests) in 0:36:32, real app 575/575, replay 283,593 answers, 276,058 match, 7,535 refused, 0 DIFF, 0 CRASH, PARITY GATE PASSED. Locked 276,038.
 - Spec result: 603 of 836 match, 231 refused, 2 wrong as before.
 - Next: Task 17 small-gaps-7, built by OpenCode (DeepSeek V4.1 Flash Free) while Antigravity has no quota.
+
+## 2026-11-01 — Iteration 106 (Task 17 small-gaps-7: a VAR as a CALCULATE filter, EVALUATEANDLOG around a filter modifier, types of date arithmetic in a constructor, table constructors as an iterator body, a table on a row, a typed BLANK beside a second branch; review by Claude)
+
+- Built (OpenCode, DeepSeek V4.1 Flash Free): most of the plan, until its free limit ran out. Three of its changes broke locked items and were reverted: ROW scalar evaluation, AVERAGEX blank typing and part of Part F. Claude finished the work with the user's go-ahead.
+- Review (Claude): 409,482 probes, 0 crashes. 11,963 answers wrong on `main` are now right, 19,464 refused on `main` now match, none lost. Every one of the 37,060 saved Power BI answers from the review rounds was scored: 0 DIFF. Scoring only the answers that changed from `main` missed answers wrong on both, so the whole set is scored now.
+- Rules Power BI showed: a logical operator's BLANK beside a True/False branch is a plain BLANK at run time. Only a plain `IF` with a direct True/False other branch reads as False for direct ISBLANK and in a constructor. SWITCH and IFERROR give a plain BLANK everywhere. A date beside a real number in a constructor is a number. A constructor over no rows keeps its type.
+- Still refused, no rule found: COALESCE ISDOUBLE items beside a text (7), KEEPFILTERS around logged modifiers, MEDIANX of a table on a row, COALESCE of an operator, CALCULATE table with several values under ALL, `MAXX(Facts,EVALUATEANDLOG(ROW("a",1),"a"))`.
+- Known wrong, not saved, also wrong on `main`: `MAXX(FILTER(Facts,FALSE()),DATE(2020,1,1))+1` gives 1, Power BI 12/31/1899.
+- New: `tests/test_iteration106_small_gaps_7.py`.
+- Real-app test: 6,000 probes through the offscreen app, 4,383 created, 1,617 refused (954 are Power BI errors too), 0 wrong.
+- Gate: pytest 2,232 passed (6,280 subtests) in 0:43:17, real app 575/575, replay 283,593 answers, 276,223 match, 7,370 refused, 0 DIFF, 0 CRASH, PARITY GATE PASSED. Locked 276,203, committed, merged and pushed by Claude under the user's delegated approval.
+- Spec result: 165 of 174 match, 9 refused, 0 wrong, including both Part F items.
+- A Mac restart stopped the first final gate at 14:40; it was rerun from the start.
+- Next: Task 18, with Haiku 5.5 coding, Sonnet 5.5 fixing and Opus 5.5 planning and reviewing until Antigravity's quota returns (about 14:15 on Nov 2).

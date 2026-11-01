@@ -2,8 +2,8 @@
 
 Rules and roles are in `AGENTS.md`. Read it first. Keep this file short and current.
 
-**Active agent:** OpenCode (DeepSeek V4.1 Flash Free, standing in for Antigravity until its quota returns, about 14:15 on Nov 2; "Antigravity" in the rules means OpenCode for now)
-**Branch in use:** opencode/small-gaps-7
+**Active agent:** Claude (Opus 5.5 plans and reviews, Haiku 5.5 codes, Sonnet 5.5 fixes, as subagents, until Antigravity's quota returns, about 14:15 on Nov 2; see `AGENTS.md`)
+**Branch in use:** main
 **Working tree clean:** yes
 
 ## Status values
@@ -29,12 +29,13 @@ Rules and roles are in `AGENTS.md`. Read it first. Keep this file short and curr
 | 14 | logic-tables-4: empty text in logical operators, a VAR block as an iterator table, FILTER over empty tables, bodies checked too early, LINEST typing, XNPV Currency (812 pending items, answers saved, no VM) and 5 wrong answers | `docs/plans/2026-10-31-logic-tables-4.md` | DONE (first build corrected in the review; locked 246,907, committed, merged and pushed 2026-11-01) | Claude |
 | 15 | typed-columns-5: a True/False BLANK in table columns, types of added columns, Currency and dates in the statistical iterators, FILTER and VAR table leftovers (1,836 pending items, answers saved, no VM) | `docs/plans/2026-10-31-typed-columns-5.md` | DONE (reviewed, fixed, locked 259,799, merged and pushed 2026-11-01 by Claude under delegated approval) | Claude |
 | 16 | strict-types-6: wrong answers from the Task 15 review, columns of unknown type, ISLOGICAL, strict comparison, tables as CALCULATE filters (836 items: 51 wrong, 785 pending, answers saved, no VM) | `docs/plans/2026-11-01-strict-types-6.md` | DONE (reviewed; finished by Claude because Antigravity ran out of quota; locked, merged 2026-11-01; 603 of 836 match, 231 refused, 2 still wrong as on `main`) | Claude |
-| 17 | small-gaps-7: a VAR as a CALCULATE filter, EVALUATEANDLOG around a filter modifier, types of date arithmetic in a constructor, table constructors as an iterator body, a table on a row, a typed BLANK beside a second branch (174 items: 172 pending, 2 wrong, answers saved, no VM) | `docs/plans/2026-11-01-small-gaps-7.md` | PLANNED | OpenCode |
+| 17 | small-gaps-7: a VAR as a CALCULATE filter, EVALUATEANDLOG around a filter modifier, types of date arithmetic in a constructor, table constructors as an iterator body, a table on a row, a typed BLANK beside a second branch (174 items: 172 pending, 2 wrong, answers saved, no VM) | `docs/plans/2026-11-01-small-gaps-7.md` | DONE (built by OpenCode until its free limit, finished by Claude; reviewed, locked, merged 2026-11-01; 165 of 174 match, 9 refused, 0 wrong) | Claude |
 
 ## Current task
-Task 17 `small-gaps-7`: OpenCode builds it on branch `opencode/small-gaps-7` from `docs/plans/2026-11-01-small-gaps-7.md`.
+Task 18 is being planned by Claude.
 
 ## Open questions (either agent writes here instead of guessing)
+- Claude (open, found in the Task 17 review, also wrong on `main`, not saved): `MAXX(FILTER(Facts,FALSE()),DATE(2020,1,1))+1` gives 1, Power BI 12/31/1899. Still refused with no rule: COALESCE ISDOUBLE beside a text (7), KEEPFILTERS around logged modifiers, MEDIANX of a table on a row, COALESCE of an operator, CALCULATE table with several values under ALL.
 - Claude (open, found in the Task 15 review, also wrong on `main`, not saved, Part A of Task 16): (a) `==` between a constructor or added column and a True/False gives a value, Power BI an error (`SUMX({1,2},IF([Value]==FALSE(),1,2))`); (b) text ordering ignores hyphens in Power BI (`MAXX({"-1","0"},[Value])` is -1, `MAXX({"a-b","ab"},[Value])` is a-b); (c) a division by zero over an added Currency column is an error in Power BI, Infinity here (`SUMX(ADDCOLUMNS(Facts,"c",CURRENCY(1)),[c]/0)`), and Currency division over an added column keeps Currency digits; (d) a typed BLANK through IF or SWITCH: `ISBLANK(IF(TRUE(),2.5&&""))` is True, `ISLOGICAL` False, `COUNTAX` of the column BLANK.
 - Claude (open, found in the Task 14 review, older than Task 14, on `main` too, not saved): (a) SIN of a large number or of TRUE() printed as text in CONCATENATEX differs in the last digits (`SIN(DATE(2020,1,1))`: -0.480042259560207 in Power BI, -0.480042259563374 here; 7 expressions on three tables); (b) GEOMEANX of mixed signs with an odd product is an error in Power BI, a number here (`ISERROR(GEOMEANX(Facts,Facts[Quantity]-5))`, table B); (c) Currency beside a derived column whose type the static typer does not know is not rounded in a plain measure (`CURRENCY(1)/3*[v]`; XNPV refuses it).
 - Claude (open, found in the Task 13 review): (a) 5 wrong expressions, not saved, Part E of Task 14; (b) unmodelled and refused: CONCATENATEX walks of some conditionals, the statistical iterators with Currency or dates in a conditional (188), SUMX of Variant dates past 9999, `==` with FIRSTNONBLANKVALUE on a row, CALCULATE of a table on a row, FILTER with a many-valued predicate over a table empty by construction; (c) `date_as_typed` leaves a date as it is when a branch cannot be typed: a date source the typer does not know keeps its date beside a number, the two found so far (SUMX of dates, date sets) were caught by the old critic tests.
