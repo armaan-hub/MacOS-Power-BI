@@ -9,8 +9,8 @@ Read first: `AGENTS.md` ("Compute, never look up"). Every rule below was measure
 2,172 items in `tools/parity/task18_blank_dates_spec.json` (fields `part`, `battery`, `expr`, `powerbi`, and `app_answer` or `app_refusal`). 1,421 are wrong today, 751 are refused. The spec is for reading and for the scoring script; the app must never read it. Part names below match the `part` field.
 
 ## Part C (85 refused): LOG of BLANK
-`LOG10(x)`, `LOG(x)` and `LOG(x,b)` with a BLANK `x` are -Infinity, exactly as `LN(BLANK())` already is, with a real base (`LOG(BLANK(),2)`). `ISBLANK` of it is False, `IFERROR` of it takes the alternate, `&"z"` gives `-infz`, `<0` is True, `MAXX` over rows is BLANK, `MINX`, `SUMX`, `AVERAGEX` are -Infinity, `COUNTX` counts the rows.
-A BLANK or zero **base** stays an error: `LOG(2,BLANK())`, `LOG(BLANK(),BLANK())`. `LOG10(0)` and `LOG(0,2)` stay errors. Look at `dax_math.py` line 116 and at `LN` in `measures.py` line 2401.
+`LOG10(x)`, `LOG(x)` and `LOG(x,b)` with a BLANK `x` are -Infinity, exactly as `LN(BLANK())` already is, with any real base (`LOG(BLANK(),2)`, also 1, 0 and -2). `ISBLANK` of it is False, `IFERROR` of it takes the alternate, `&"z"` gives `-infz`, `<0` is True, `MAXX` over rows is BLANK, `MINX`, `SUMX`, `AVERAGEX` are -Infinity, `COUNTX` counts the rows.
+A BLANK **base** stays an error: `LOG(2,BLANK())`, `LOG(BLANK(),BLANK())`. `LOG10(0)` and `LOG(0,2)` stay errors. Look at `dax_math.py` line 116 and at `LN` in `measures.py` line 2401.
 
 ## Part A (647 wrong): a number minus a date is a number
 `COUNTROWS(Facts)-DATE(2020,1,1)` is -43825; the app shows a date in 1780. The result is a date only when the left side has a date type (`DATE`, `TIME`, a VAR holding a date). Otherwise it is a Double: `ISDOUBLE` True, `ISDATETIME` False, `&"z"` gives `-43825z`, and a column of `ADDCOLUMNS` holds the number. `+` is not affected: a number plus a date stays a date. Types come from `_static_numeric_type`, not from the value and not from how the expression looks. When the left side's type is not known statically, keep today's behaviour.
@@ -22,7 +22,7 @@ A BLANK or zero **base** stays an error: `LOG(2,BLANK())`, `LOG(BLANK(),BLANK())
 `COUNTAX(Facts,1&&"")` is BLANK (the operator gives a BLANK), `COUNTAX(Facts,0&&"")` and `COUNTAX(Facts,TRUE()||"")` are 6 (True/False values). `COUNTAX(FILTER(Facts,FALSE()),..)` is BLANK. The value is what the scalar path already gives for the same operator: use it, do not write a second rule.
 
 ## Part F (86 refused): ISBLANK of Currency divided by 0
-`ISBLANK(CURRENCY(1)/0)` is False, also over 0.0, BLANK and a BLANK VAR, and on a row. Only ISBLANK changes: the bare expression, `ISNUMBER` and `+1` stay errors. See `measures.py` line 290.
+`ISBLANK(CURRENCY(1)/0)` is False, also over 0.0, BLANK and a BLANK VAR, and on a row, when the numerator is a **constant** Currency expression, which Power BI folds at compile time: `CURRENCY(1)`, `CURRENCY(1)*2`, `CURRENCY(1)+CURRENCY(2)`. A numerator worked out at run time (`SUMX(Facts,CURRENCY(1))`, `CALCULATE(CURRENCY(1))`, `IF(TRUE(),CURRENCY(1))`, a VAR) is an error in ISBLANK and stays refused. Only ISBLANK changes: the bare expression, `ISNUMBER` and `+1` stay errors. See `measures.py` line 290.
 
 ## Part B (1,134): BLANK in `*` and `/`
 - `*`: if either operand is BLANK the result is BLANK, and the other operand is not converted or checked: `"a"*BLANK()`, `BLANK()*ERROR("x")`, `VALUE("x")*BLANK()` are BLANK.
@@ -42,3 +42,14 @@ A BLANK or zero **base** stays an error: `LOG(2,BLANK())`, `LOG(BLANK(),BLANK())
 5. A refusal raises `MeasureError` (`dax_typed.refusal`), never `MeasureRuntimeError`.
 6. After each Part run the scoring script and the replay (about 2 minutes): `PYTHONPATH=. QT_QPA_PLATFORM=offscreen python tools/parity_check.py`. It must show 0 DIFF, 0 CRASH, `locked 276203`.
 7. Never run `--freeze`, `--accept`, commit, merge, push or Power BI. No global replace on `measures.py`. No edits to existing tests or saved answers: list those in your report. Scratch files go in the scratchpad.
+
+## Corrections from the first review round (measured 2026-11-01, these override the Parts above)
+1. **BLANK in `*` and `/`:** the BLANK cancels an error or a text only when its operand reads no data: `BLANK()`, `IF(1=2,1)`, `SWITCH(1,2,3)`, `BLANK()*2`, `ABS(BLANK())`, `CALCULATE(BLANK())`, a VAR of those. A BLANK from data does not: `COUNTROWS(FILTER(Facts,FALSE()))*ERROR("x")`, `SUMX(FILTER(Facts,FALSE()),1)/"a"`, `MAXX({BLANK()},[Value])*ERROR("x")` and `CALCULATE(SUM(..))*"a"` are errors. A logical operator's BLANK does not either. `SELECTEDVALUE(Facts[Sales])*ERROR("x")` is BLANK; it stays refused here.
+2. **ISBLANK of Currency / 0:** False only when the division is reached by arithmetic alone. Through `IF`, `COALESCE`, a VAR or beside a data-reading operand it is an error, so it stays refused.
+3. **Date times a number:** Double for a number or True/False. Not Double for a Currency.
+4. **X minus a date:** a date only when X has a date type statically. An X of unknown static type is a number: `IF(TRUE(),1,DATE(2020,1,2))-DATE(2020,1,1)`, `IFERROR(DATE(2020,1,2),1)-DATE(2020,1,1)`.
+5. **MAXX and MINX of an Infinity or NaN body:** BLANK over a table of stored rows (`Facts`, `FILTER(Facts,..)`, `VALUES`, `ALL`, `DISTINCT`, `SUMMARIZE`), for -Infinity in MAXX, Infinity in MINX, and NaN in both. Over a computed table (a constructor, `ROW`, `ADDCOLUMNS`, `SELECTCOLUMNS`, `TOPN`, `GENERATESERIES`, `CALENDAR`, `UNION`, `FILTER` of those) the value itself is the answer.
+6. **LOG with an infinite base:** an error, unless the number is BLANK. `LOG(1/0,1/0)` must not crash.
+
+## Review outcome (2026-11-01)
+Shipped as Iteration 107. Corrections 1 and 4 were narrowed further after the plan: a logical operator's BLANK beside a BLANK, text or error is refused, and a BLANK of unknown type read from data stays a date in X minus a date while `-BLANK()` is a number. Fresh review: 58,013 probes on 3 tables, 0 regressions, 1,731 wrong on both, 346 match to refused. Real app 0 wrong. Gate passed, locked 343,798.

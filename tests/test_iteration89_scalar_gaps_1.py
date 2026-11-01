@@ -37,9 +37,6 @@ STAYS_REFUSED = [
     'DIVIDE(1,0,"")',
     'DIVIDE(1,2,"x")',
     'DIVIDE(1,0,DATE(2020,1,1))',
-    'LOG10(BLANK())',
-    'LOG(BLANK())',
-    'LOG(BLANK(),10)',
 ]
 
 

@@ -1580,3 +1580,26 @@ The standing test workbook is now `tests/Data/Vat File -Aug 2026.xlsx` (sheet `V
 - Spec result: 165 of 174 match, 9 refused, 0 wrong, including both Part F items.
 - A Mac restart stopped the first final gate at 14:40; it was rerun from the start.
 - Next: Task 18, with Haiku 5.5 coding, Sonnet 5.5 fixing and Opus 5.5 planning and reviewing until Antigravity's quota returns (about 14:15 on Nov 2).
+
+## 2026-11-01 — Iteration 107 (Task 18 blank-dates-8: a number minus a date, BLANK in `*` and `/`, LOG of BLANK, COUNTAX of a logical operator, CONVERT in MAXX and MINX, ISBLANK of Currency / 0)
+
+**Who did what:** Haiku 5.5 coded Parts C, A, E, D, F and B as subagents, one at a time. Sonnet 5.5 fixed the first review's findings. Claude Opus 5.5 planned, measured the rules in Power BI on the iPad guest, reviewed, fixed the last three rules and shipped under the delegated approval.
+
+**Rules measured in Power BI and now in the engine:**
+- LOG, LOG10 of BLANK are -Infinity for any real base. A BLANK or empty-text base is an error, and an infinite base with a non-BLANK number is an error.
+- X minus a date is a date only if X has a date type statically. A BLANK of unknown type read from data stays a date, `-BLANK()` is a number.
+- `*`: a BLANK on either side cancels the other side's error or text; `/`: only a left BLANK does. Only when the BLANK operand reads no data. A logical operator's BLANK beside a BLANK, text or error is refused, because the result is not BLANK and no rule was found.
+- ISBLANK of Currency / 0 is False only for a constant numerator reached by arithmetic alone; other shapes stay refused.
+- A date times a number or True/False is Double; a date times Currency is not.
+- MAXX and MINX of Infinity or NaN are BLANK over stored rows and the value over computed tables.
+- COUNTAX of a logical operator without column operands, CONVERT to text in MAXX and MINX, CONVERT to Boolean there is an error.
+
+**Review:** every answer scored on three tables against `main` and the build. The first fresh review found 2,599 regressions and 201 refused answers turned wrong: the plan's rules were too broad. After the corrections (section in the plan), 58,013 fresh probes on 3 tables: 24 crashes fixed, 6,476 wrong to right, 23,388 refused to match, 30 wrong to refused, 121,069 stay matching, 20,975 stay refused, 1,731 wrong on both, 346 match to refused (honest refusals: 195 logical BLANK, 108 Currency division, 40 STDEVX noise, 3 other), 0 regressions.
+
+**Tested in the real app and against Power BI on the iPad guest:** the real app through the measure path, offscreen: 575/575 equal, and 6,000 fresh probes, 3,302 created, 2,698 refused (2,075 Power BI errors, 623 safe gaps), 0 wrong. New answers came from Power BI on the iPad guest, headless; the project was not saved.
+
+**Saved:** `tools/parity/dax_battery_blank8_extra.json` (about 75,000 new Power BI answers), `tests/fixtures_blank8_review_alt.json` (tables A and B). No saved Power BI answer was edited. Six stale test lines that expected a refusal of LOG of BLANK were removed, because Power BI gives -Infinity.
+
+**Gate:** PARITY GATE PASSED. pytest 2,272 passed, 6,465 subtests; replay 358,614: 343,818 match, 14,796 refused, 0 DIFF, 0 CRASH; locked 276,203 to 343,798.
+
+**Open:** 1,731 fresh answers wrong on both `main` and the build, listed in `HANDOFF.md`.
