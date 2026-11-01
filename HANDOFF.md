@@ -2,8 +2,8 @@
 
 Rules and roles are in `AGENTS.md`. Read it first. Keep this file short and current.
 
-**Active agent:** Claude
-**Branch in use:** main
+**Active agent:** OpenCode (DeepSeek V4.1 Flash Free, standing in for Antigravity until its quota returns, about 14:15 on Nov 2; "Antigravity" in the rules means OpenCode for now)
+**Branch in use:** opencode/small-gaps-7
 **Working tree clean:** yes
 
 ## Status values
@@ -29,9 +29,10 @@ Rules and roles are in `AGENTS.md`. Read it first. Keep this file short and curr
 | 14 | logic-tables-4: empty text in logical operators, a VAR block as an iterator table, FILTER over empty tables, bodies checked too early, LINEST typing, XNPV Currency (812 pending items, answers saved, no VM) and 5 wrong answers | `docs/plans/2026-10-31-logic-tables-4.md` | DONE (first build corrected in the review; locked 246,907, committed, merged and pushed 2026-11-01) | Claude |
 | 15 | typed-columns-5: a True/False BLANK in table columns, types of added columns, Currency and dates in the statistical iterators, FILTER and VAR table leftovers (1,836 pending items, answers saved, no VM) | `docs/plans/2026-10-31-typed-columns-5.md` | DONE (reviewed, fixed, locked 259,799, merged and pushed 2026-11-01 by Claude under delegated approval) | Claude |
 | 16 | strict-types-6: wrong answers from the Task 15 review, columns of unknown type, ISLOGICAL, strict comparison, tables as CALCULATE filters (836 items: 51 wrong, 785 pending, answers saved, no VM) | `docs/plans/2026-11-01-strict-types-6.md` | DONE (reviewed; finished by Claude because Antigravity ran out of quota; locked, merged 2026-11-01; 603 of 836 match, 231 refused, 2 still wrong as on `main`) | Claude |
+| 17 | small-gaps-7: a VAR as a CALCULATE filter, EVALUATEANDLOG around a filter modifier, types of date arithmetic in a constructor, table constructors as an iterator body, a table on a row, a typed BLANK beside a second branch (174 items: 172 pending, 2 wrong, answers saved, no VM) | `docs/plans/2026-11-01-small-gaps-7.md` | PLANNED | OpenCode |
 
 ## Current task
-Task 16 `strict-types-6` is DONE. Next: Task 17.
+Task 17 `small-gaps-7`: OpenCode builds it on branch `opencode/small-gaps-7` from `docs/plans/2026-11-01-small-gaps-7.md`.
 
 ## Open questions (either agent writes here instead of guessing)
 - Claude (open, found in the Task 15 review, also wrong on `main`, not saved, Part A of Task 16): (a) `==` between a constructor or added column and a True/False gives a value, Power BI an error (`SUMX({1,2},IF([Value]==FALSE(),1,2))`); (b) text ordering ignores hyphens in Power BI (`MAXX({"-1","0"},[Value])` is -1, `MAXX({"a-b","ab"},[Value])` is a-b); (c) a division by zero over an added Currency column is an error in Power BI, Infinity here (`SUMX(ADDCOLUMNS(Facts,"c",CURRENCY(1)),[c]/0)`), and Currency division over an added column keeps Currency digits; (d) a typed BLANK through IF or SWITCH: `ISBLANK(IF(TRUE(),2.5&&""))` is True, `ISLOGICAL` False, `COUNTAX` of the column BLANK.

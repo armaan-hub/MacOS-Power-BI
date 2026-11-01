@@ -1,0 +1,1220 @@
+[
+{
+"part": "A",
+"battery": "dax_battery_typed5_extra",
+"expr": "CALCULATE(COUNTROWS(Facts),VAR t=TREATAS({\"West\"},Facts[Region]) RETURN t)",
+"powerbi": "2",
+"app_refusal": "A variable in a CALCULATE filter cannot reference a column directly."
+},
+{
+"part": "A",
+"battery": "dax_battery_typed5_extra",
+"expr": "CALCULATE(COUNTROWS(Facts),VAR b=Facts[Quantity]>2 RETURN b)",
+"powerbi": "3",
+"app_refusal": "A variable in a CALCULATE filter cannot reference a column directly."
+},
+{
+"part": "A",
+"battery": "dax_battery_typed5_extra",
+"expr": "CALCULATE(COUNTROWS(Facts),VAR b=Facts[Region]=\"West\" RETURN b)",
+"powerbi": "2",
+"app_refusal": "A variable in a CALCULATE filter cannot reference a column directly."
+},
+{
+"part": "A",
+"battery": "dax_battery_typed5_extra",
+"expr": "CALCULATE(COUNTROWS(Facts),VAR b=ISBLANK(Facts[Note]) RETURN b)",
+"powerbi": "2",
+"app_refusal": "A variable in a CALCULATE filter cannot reference a column directly."
+},
+{
+"part": "A",
+"battery": "dax_battery_typed5_extra",
+"expr": "CALCULATE(SUM(Facts[Quantity]),VAR t=TREATAS({\"West\"},Facts[Region]) RETURN t)",
+"powerbi": "3",
+"app_refusal": "A variable in a CALCULATE filter cannot reference a column directly."
+},
+{
+"part": "A",
+"battery": "dax_battery_typed5_extra",
+"expr": "CALCULATE(SUM(Facts[Quantity]),VAR b=Facts[Quantity]>2 RETURN b)",
+"powerbi": "12",
+"app_refusal": "A variable in a CALCULATE filter cannot reference a column directly."
+},
+{
+"part": "A",
+"battery": "dax_battery_typed5_extra",
+"expr": "CALCULATE(SUM(Facts[Quantity]),VAR b=Facts[Region]=\"West\" RETURN b)",
+"powerbi": "3",
+"app_refusal": "A variable in a CALCULATE filter cannot reference a column directly."
+},
+{
+"part": "A",
+"battery": "dax_battery_typed5_extra",
+"expr": "CALCULATE(SUM(Facts[Quantity]),VAR b=ISBLANK(Facts[Note]) RETURN b)",
+"powerbi": "8",
+"app_refusal": "A variable in a CALCULATE filter cannot reference a column directly."
+},
+{
+"part": "A",
+"battery": "dax_battery_typed5_extra",
+"expr": "CALCULATE(COUNTROWS(Facts),VAR t=TREATAS({\"West\"},Facts[Region]) RETURN t,Facts[Region]=\"West\")",
+"powerbi": "2",
+"app_refusal": "A variable in a CALCULATE filter cannot reference a column directly."
+},
+{
+"part": "A",
+"battery": "dax_battery_typed5_extra",
+"expr": "CALCULATE(COUNTROWS(Facts),VAR b=Facts[Quantity]>2 RETURN b,Facts[Region]=\"West\")",
+"powerbi": "1",
+"app_refusal": "A variable in a CALCULATE filter cannot reference a column directly."
+},
+{
+"part": "A",
+"battery": "dax_battery_typed5_extra",
+"expr": "CALCULATE(COUNTROWS(Facts),VAR b=Facts[Region]=\"West\" RETURN b,Facts[Region]=\"West\")",
+"powerbi": "2",
+"app_refusal": "A variable in a CALCULATE filter cannot reference a column directly."
+},
+{
+"part": "A",
+"battery": "dax_battery_typed5_extra",
+"expr": "CALCULATE(COUNTROWS(Facts),VAR b=ISBLANK(Facts[Note]) RETURN b,Facts[Region]=\"West\")",
+"powerbi": "1",
+"app_refusal": "A variable in a CALCULATE filter cannot reference a column directly."
+},
+{
+"part": "A",
+"battery": "dax_battery_typed5_extra",
+"expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]>1,VAR t=TREATAS({\"West\"},Facts[Region]) RETURN t)",
+"powerbi": "1",
+"app_refusal": "A variable in a CALCULATE filter cannot reference a column directly."
+},
+{
+"part": "A",
+"battery": "dax_battery_typed5_extra",
+"expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]>1,VAR b=Facts[Quantity]>2 RETURN b)",
+"powerbi": "3",
+"app_refusal": "A variable in a CALCULATE filter cannot reference a column directly."
+},
+{
+"part": "A",
+"battery": "dax_battery_typed5_extra",
+"expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]>1,VAR b=Facts[Region]=\"West\" RETURN b)",
+"powerbi": "1",
+"app_refusal": "A variable in a CALCULATE filter cannot reference a column directly."
+},
+{
+"part": "A",
+"battery": "dax_battery_typed5_extra",
+"expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]>1,VAR b=ISBLANK(Facts[Note]) RETURN b)",
+"powerbi": "2",
+"app_refusal": "A variable in a CALCULATE filter cannot reference a column directly."
+},
+{
+"part": "A",
+"battery": "dax_battery_typed5_extra",
+"expr": "CALCULATETABLE(ROW(\"a\",COUNTROWS(Facts)),VAR t=TREATAS({\"West\"},Facts[Region]) RETURN t)",
+"powerbi": "2",
+"app_refusal": "A variable in a CALCULATE filter cannot reference a column directly."
+},
+{
+"part": "A",
+"battery": "dax_battery_typed5_extra",
+"expr": "CALCULATETABLE(ROW(\"a\",COUNTROWS(Facts)),VAR b=Facts[Quantity]>2 RETURN b)",
+"powerbi": "3",
+"app_refusal": "A variable in a CALCULATE filter cannot reference a column directly."
+},
+{
+"part": "A",
+"battery": "dax_battery_typed5_extra",
+"expr": "CALCULATETABLE(ROW(\"a\",COUNTROWS(Facts)),VAR b=Facts[Region]=\"West\" RETURN b)",
+"powerbi": "2",
+"app_refusal": "A variable in a CALCULATE filter cannot reference a column directly."
+},
+{
+"part": "A",
+"battery": "dax_battery_typed5_extra",
+"expr": "CALCULATETABLE(ROW(\"a\",COUNTROWS(Facts)),VAR b=ISBLANK(Facts[Note]) RETURN b)",
+"powerbi": "2",
+"app_refusal": "A variable in a CALCULATE filter cannot reference a column directly."
+},
+{
+"part": "A",
+"battery": "dax_battery_typed5_extra",
+"expr": "COUNTROWS(CALCULATETABLE(Facts,VAR t=TREATAS({\"West\"},Facts[Region]) RETURN t))",
+"powerbi": "2",
+"app_refusal": "A variable in a CALCULATE filter cannot reference a column directly."
+},
+{
+"part": "A",
+"battery": "dax_battery_typed5_extra",
+"expr": "COUNTROWS(CALCULATETABLE(Facts,VAR b=Facts[Quantity]>2 RETURN b))",
+"powerbi": "3",
+"app_refusal": "A variable in a CALCULATE filter cannot reference a column directly."
+},
+{
+"part": "A",
+"battery": "dax_battery_typed5_extra",
+"expr": "COUNTROWS(CALCULATETABLE(Facts,VAR b=Facts[Region]=\"West\" RETURN b))",
+"powerbi": "2",
+"app_refusal": "A variable in a CALCULATE filter cannot reference a column directly."
+},
+{
+"part": "A",
+"battery": "dax_battery_typed5_extra",
+"expr": "COUNTROWS(CALCULATETABLE(Facts,VAR b=ISBLANK(Facts[Note]) RETURN b))",
+"powerbi": "2",
+"app_refusal": "A variable in a CALCULATE filter cannot reference a column directly."
+},
+{
+"part": "A",
+"battery": "dax_battery_typed5_extra",
+"expr": "CALCULATE(COUNTROWS(Facts),KEEPFILTERS(VAR t=TREATAS({\"West\"},Facts[Region]) RETURN t))",
+"powerbi": "2",
+"app_refusal": "A variable in a CALCULATE filter cannot reference a column directly."
+},
+{
+"part": "A",
+"battery": "dax_battery_typed5_extra",
+"expr": "CALCULATE(COUNTROWS(Facts),KEEPFILTERS(VAR b=Facts[Quantity]>2 RETURN b))",
+"powerbi": "3",
+"app_refusal": "A variable in a CALCULATE filter cannot reference a column directly."
+},
+{
+"part": "A",
+"battery": "dax_battery_typed5_extra",
+"expr": "CALCULATE(COUNTROWS(Facts),KEEPFILTERS(VAR b=Facts[Region]=\"West\" RETURN b))",
+"powerbi": "2",
+"app_refusal": "A variable in a CALCULATE filter cannot reference a column directly."
+},
+{
+"part": "A",
+"battery": "dax_battery_typed5_extra",
+"expr": "CALCULATE(COUNTROWS(Facts),KEEPFILTERS(VAR b=ISBLANK(Facts[Note]) RETURN b))",
+"powerbi": "2",
+"app_refusal": "A variable in a CALCULATE filter cannot reference a column directly."
+},
+{
+"part": "A",
+"battery": "dax_battery_typed5_extra",
+"expr": "CALCULATE(CALCULATE(COUNTROWS(Facts),VAR t=TREATAS({\"West\"},Facts[Region]) RETURN t),Facts[Region]=\"East\")",
+"powerbi": "2",
+"app_refusal": "A variable in a CALCULATE filter cannot reference a column directly."
+},
+{
+"part": "A",
+"battery": "dax_battery_typed5_extra",
+"expr": "CALCULATE(CALCULATE(COUNTROWS(Facts),VAR b=Facts[Quantity]>2 RETURN b),Facts[Region]=\"East\")",
+"powerbi": "1",
+"app_refusal": "A variable in a CALCULATE filter cannot reference a column directly."
+},
+{
+"part": "A",
+"battery": "dax_battery_typed5_extra",
+"expr": "CALCULATE(CALCULATE(COUNTROWS(Facts),VAR b=Facts[Region]=\"West\" RETURN b),Facts[Region]=\"East\")",
+"powerbi": "2",
+"app_refusal": "A variable in a CALCULATE filter cannot reference a column directly."
+},
+{
+"part": "A",
+"battery": "dax_battery_typed5_extra",
+"expr": "CALCULATE(CALCULATE(COUNTROWS(Facts),VAR b=ISBLANK(Facts[Note]) RETURN b),Facts[Region]=\"East\")",
+"powerbi": "1",
+"app_refusal": "A variable in a CALCULATE filter cannot reference a column directly."
+},
+{
+"part": "A",
+"battery": "dax_battery_typed5_extra",
+"expr": "SUMX(VALUES(Facts[Region]),CALCULATE(COUNTROWS(Facts),VAR t=TREATAS({\"West\"},Facts[Region]) RETURN t))",
+"powerbi": "6",
+"app_refusal": "A variable in a CALCULATE filter cannot reference a column directly."
+},
+{
+"part": "A",
+"battery": "dax_battery_typed5_extra",
+"expr": "SUMX(VALUES(Facts[Region]),CALCULATE(COUNTROWS(Facts),VAR b=Facts[Quantity]>2 RETURN b))",
+"powerbi": "3",
+"app_refusal": "A variable in a CALCULATE filter cannot reference a column directly."
+},
+{
+"part": "A",
+"battery": "dax_battery_typed5_extra",
+"expr": "SUMX(VALUES(Facts[Region]),CALCULATE(COUNTROWS(Facts),VAR b=Facts[Region]=\"West\" RETURN b))",
+"powerbi": "6",
+"app_refusal": "A variable in a CALCULATE filter cannot reference a column directly."
+},
+{
+"part": "A",
+"battery": "dax_battery_typed5_extra",
+"expr": "SUMX(VALUES(Facts[Region]),CALCULATE(COUNTROWS(Facts),VAR b=ISBLANK(Facts[Note]) RETURN b))",
+"powerbi": "2",
+"app_refusal": "A variable in a CALCULATE filter cannot reference a column directly."
+},
+{
+"part": "A",
+"battery": "dax_battery_typed5_extra",
+"expr": "SUMX(Facts,CALCULATE(COUNTROWS(Facts),VAR t=TREATAS({\"West\"},Facts[Region]) RETURN t))",
+"powerbi": "2",
+"app_refusal": "A variable in a CALCULATE filter cannot reference a column directly."
+},
+{
+"part": "A",
+"battery": "dax_battery_typed5_extra",
+"expr": "SUMX(Facts,CALCULATE(COUNTROWS(Facts),VAR b=Facts[Quantity]>2 RETURN b))",
+"powerbi": "3",
+"app_refusal": "A variable in a CALCULATE filter cannot reference a column directly."
+},
+{
+"part": "A",
+"battery": "dax_battery_typed5_extra",
+"expr": "SUMX(Facts,CALCULATE(COUNTROWS(Facts),VAR b=Facts[Region]=\"West\" RETURN b))",
+"powerbi": "2",
+"app_refusal": "A variable in a CALCULATE filter cannot reference a column directly."
+},
+{
+"part": "A",
+"battery": "dax_battery_typed5_extra",
+"expr": "SUMX(Facts,CALCULATE(COUNTROWS(Facts),VAR b=ISBLANK(Facts[Note]) RETURN b))",
+"powerbi": "2",
+"app_refusal": "A variable in a CALCULATE filter cannot reference a column directly."
+},
+{
+"part": "B",
+"battery": "dax_battery_misc3_extra",
+"expr": "CALCULATE(COUNTROWS(Facts),EVALUATEANDLOG(ALLEXCEPT(Facts,Facts[Region])))",
+"powerbi": "6",
+"app_refusal": "EVALUATEANDLOG wraps a filter modifier or an IN predicate, which Power BI does not accept "
+},
+{
+"part": "B",
+"battery": "dax_battery_misc3_extra",
+"expr": "CALCULATE(SUM(Facts[Quantity]),EVALUATEANDLOG(ALLEXCEPT(Facts,Facts[Region])))",
+"powerbi": "15",
+"app_refusal": "EVALUATEANDLOG wraps a filter modifier or an IN predicate, which Power BI does not accept "
+},
+{
+"part": "B",
+"battery": "dax_battery_misc3_extra",
+"expr": "CALCULATE(COUNTROWS(Facts),Facts[Region]=\"East\",EVALUATEANDLOG(ALLEXCEPT(Facts,Facts[Region])))",
+"powerbi": "3",
+"app_refusal": "EVALUATEANDLOG wraps a filter modifier or an IN predicate, which Power BI does not accept "
+},
+{
+"part": "B",
+"battery": "dax_battery_misc3_extra",
+"expr": "CALCULATE(COUNTROWS(Facts),EVALUATEANDLOG(ALLEXCEPT(Facts,Facts[Region])),Facts[Region]=\"East\")",
+"powerbi": "3",
+"app_refusal": "EVALUATEANDLOG wraps a filter modifier or an IN predicate, which Power BI does not accept "
+},
+{
+"part": "B",
+"battery": "dax_battery_misc3_extra",
+"expr": "CALCULATE(SUM(Facts[Quantity]),Facts[Region]=\"East\",EVALUATEANDLOG(ALLEXCEPT(Facts,Facts[Region])))",
+"powerbi": "8",
+"app_refusal": "EVALUATEANDLOG wraps a filter modifier or an IN predicate, which Power BI does not accept "
+},
+{
+"part": "B",
+"battery": "dax_battery_misc3_extra",
+"expr": "CALCULATE(SUM(Facts[Quantity]),EVALUATEANDLOG(ALLEXCEPT(Facts,Facts[Region])),Facts[Region]=\"East\")",
+"powerbi": "8",
+"app_refusal": "EVALUATEANDLOG wraps a filter modifier or an IN predicate, which Power BI does not accept "
+},
+{
+"part": "B",
+"battery": "dax_battery_misc3_extra",
+"expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]>2,EVALUATEANDLOG(ALLEXCEPT(Facts,Facts[Region])))",
+"powerbi": "3",
+"app_refusal": "EVALUATEANDLOG wraps a filter modifier or an IN predicate, which Power BI does not accept "
+},
+{
+"part": "B",
+"battery": "dax_battery_misc3_extra",
+"expr": "CALCULATE(COUNTROWS(Facts),EVALUATEANDLOG(ALLEXCEPT(Facts,Facts[Region])),Facts[Quantity]>2)",
+"powerbi": "3",
+"app_refusal": "EVALUATEANDLOG wraps a filter modifier or an IN predicate, which Power BI does not accept "
+},
+{
+"part": "B",
+"battery": "dax_battery_misc3_extra",
+"expr": "CALCULATE(SUM(Facts[Quantity]),Facts[Quantity]>2,EVALUATEANDLOG(ALLEXCEPT(Facts,Facts[Region])))",
+"powerbi": "12",
+"app_refusal": "EVALUATEANDLOG wraps a filter modifier or an IN predicate, which Power BI does not accept "
+},
+{
+"part": "B",
+"battery": "dax_battery_misc3_extra",
+"expr": "CALCULATE(SUM(Facts[Quantity]),EVALUATEANDLOG(ALLEXCEPT(Facts,Facts[Region])),Facts[Quantity]>2)",
+"powerbi": "12",
+"app_refusal": "EVALUATEANDLOG wraps a filter modifier or an IN predicate, which Power BI does not accept "
+},
+{
+"part": "B",
+"battery": "dax_battery_misc3_extra",
+"expr": "COUNTROWS(CALCULATETABLE(Facts,EVALUATEANDLOG(ALLEXCEPT(Facts,Facts[Region]))))",
+"powerbi": "6",
+"app_refusal": "EVALUATEANDLOG wraps a filter modifier or an IN predicate, which Power BI does not accept "
+},
+{
+"part": "B",
+"battery": "dax_battery_misc3_extra",
+"expr": "CALCULATE(COUNTROWS(Facts),EVALUATEANDLOG(ALLSELECTED(Facts)))",
+"powerbi": "6",
+"app_refusal": "EVALUATEANDLOG wraps a filter modifier or an IN predicate, which Power BI does not accept "
+},
+{
+"part": "B",
+"battery": "dax_battery_misc3_extra",
+"expr": "CALCULATE(SUM(Facts[Quantity]),EVALUATEANDLOG(ALLSELECTED(Facts)))",
+"powerbi": "15",
+"app_refusal": "EVALUATEANDLOG wraps a filter modifier or an IN predicate, which Power BI does not accept "
+},
+{
+"part": "B",
+"battery": "dax_battery_misc3_extra",
+"expr": "CALCULATE(COUNTROWS(Facts),Facts[Region]=\"East\",EVALUATEANDLOG(ALLSELECTED(Facts)))",
+"powerbi": "3",
+"app_refusal": "EVALUATEANDLOG wraps a filter modifier or an IN predicate, which Power BI does not accept "
+},
+{
+"part": "B",
+"battery": "dax_battery_misc3_extra",
+"expr": "CALCULATE(COUNTROWS(Facts),EVALUATEANDLOG(ALLSELECTED(Facts)),Facts[Region]=\"East\")",
+"powerbi": "3",
+"app_refusal": "EVALUATEANDLOG wraps a filter modifier or an IN predicate, which Power BI does not accept "
+},
+{
+"part": "B",
+"battery": "dax_battery_misc3_extra",
+"expr": "CALCULATE(SUM(Facts[Quantity]),Facts[Region]=\"East\",EVALUATEANDLOG(ALLSELECTED(Facts)))",
+"powerbi": "8",
+"app_refusal": "EVALUATEANDLOG wraps a filter modifier or an IN predicate, which Power BI does not accept "
+},
+{
+"part": "B",
+"battery": "dax_battery_misc3_extra",
+"expr": "CALCULATE(SUM(Facts[Quantity]),EVALUATEANDLOG(ALLSELECTED(Facts)),Facts[Region]=\"East\")",
+"powerbi": "8",
+"app_refusal": "EVALUATEANDLOG wraps a filter modifier or an IN predicate, which Power BI does not accept "
+},
+{
+"part": "B",
+"battery": "dax_battery_misc3_extra",
+"expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]>2,EVALUATEANDLOG(ALLSELECTED(Facts)))",
+"powerbi": "3",
+"app_refusal": "EVALUATEANDLOG wraps a filter modifier or an IN predicate, which Power BI does not accept "
+},
+{
+"part": "B",
+"battery": "dax_battery_misc3_extra",
+"expr": "CALCULATE(COUNTROWS(Facts),EVALUATEANDLOG(ALLSELECTED(Facts)),Facts[Quantity]>2)",
+"powerbi": "3",
+"app_refusal": "EVALUATEANDLOG wraps a filter modifier or an IN predicate, which Power BI does not accept "
+},
+{
+"part": "B",
+"battery": "dax_battery_misc3_extra",
+"expr": "CALCULATE(SUM(Facts[Quantity]),Facts[Quantity]>2,EVALUATEANDLOG(ALLSELECTED(Facts)))",
+"powerbi": "12",
+"app_refusal": "EVALUATEANDLOG wraps a filter modifier or an IN predicate, which Power BI does not accept "
+},
+{
+"part": "B",
+"battery": "dax_battery_misc3_extra",
+"expr": "CALCULATE(SUM(Facts[Quantity]),EVALUATEANDLOG(ALLSELECTED(Facts)),Facts[Quantity]>2)",
+"powerbi": "12",
+"app_refusal": "EVALUATEANDLOG wraps a filter modifier or an IN predicate, which Power BI does not accept "
+},
+{
+"part": "B",
+"battery": "dax_battery_misc3_extra",
+"expr": "COUNTROWS(CALCULATETABLE(Facts,EVALUATEANDLOG(ALLSELECTED(Facts))))",
+"powerbi": "6",
+"app_refusal": "EVALUATEANDLOG wraps a filter modifier or an IN predicate, which Power BI does not accept "
+},
+{
+"part": "B",
+"battery": "dax_battery_misc3_extra",
+"expr": "CALCULATE(COUNTROWS(Facts),EVALUATEANDLOG(ALLSELECTED(Facts[Region])))",
+"powerbi": "6",
+"app_refusal": "EVALUATEANDLOG wraps a filter modifier or an IN predicate, which Power BI does not accept "
+},
+{
+"part": "B",
+"battery": "dax_battery_misc3_extra",
+"expr": "CALCULATE(SUM(Facts[Quantity]),EVALUATEANDLOG(ALLSELECTED(Facts[Region])))",
+"powerbi": "15",
+"app_refusal": "EVALUATEANDLOG wraps a filter modifier or an IN predicate, which Power BI does not accept "
+},
+{
+"part": "B",
+"battery": "dax_battery_misc3_extra",
+"expr": "CALCULATE(COUNTROWS(Facts),Facts[Region]=\"East\",EVALUATEANDLOG(ALLSELECTED(Facts[Region])))",
+"powerbi": "3",
+"app_refusal": "EVALUATEANDLOG wraps a filter modifier or an IN predicate, which Power BI does not accept "
+},
+{
+"part": "B",
+"battery": "dax_battery_misc3_extra",
+"expr": "CALCULATE(COUNTROWS(Facts),EVALUATEANDLOG(ALLSELECTED(Facts[Region])),Facts[Region]=\"East\")",
+"powerbi": "3",
+"app_refusal": "EVALUATEANDLOG wraps a filter modifier or an IN predicate, which Power BI does not accept "
+},
+{
+"part": "B",
+"battery": "dax_battery_misc3_extra",
+"expr": "CALCULATE(SUM(Facts[Quantity]),Facts[Region]=\"East\",EVALUATEANDLOG(ALLSELECTED(Facts[Region])))",
+"powerbi": "8",
+"app_refusal": "EVALUATEANDLOG wraps a filter modifier or an IN predicate, which Power BI does not accept "
+},
+{
+"part": "B",
+"battery": "dax_battery_misc3_extra",
+"expr": "CALCULATE(SUM(Facts[Quantity]),EVALUATEANDLOG(ALLSELECTED(Facts[Region])),Facts[Region]=\"East\")",
+"powerbi": "8",
+"app_refusal": "EVALUATEANDLOG wraps a filter modifier or an IN predicate, which Power BI does not accept "
+},
+{
+"part": "B",
+"battery": "dax_battery_misc3_extra",
+"expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]>2,EVALUATEANDLOG(ALLSELECTED(Facts[Region])))",
+"powerbi": "3",
+"app_refusal": "EVALUATEANDLOG wraps a filter modifier or an IN predicate, which Power BI does not accept "
+},
+{
+"part": "B",
+"battery": "dax_battery_misc3_extra",
+"expr": "CALCULATE(COUNTROWS(Facts),EVALUATEANDLOG(ALLSELECTED(Facts[Region])),Facts[Quantity]>2)",
+"powerbi": "3",
+"app_refusal": "EVALUATEANDLOG wraps a filter modifier or an IN predicate, which Power BI does not accept "
+},
+{
+"part": "B",
+"battery": "dax_battery_misc3_extra",
+"expr": "CALCULATE(SUM(Facts[Quantity]),Facts[Quantity]>2,EVALUATEANDLOG(ALLSELECTED(Facts[Region])))",
+"powerbi": "12",
+"app_refusal": "EVALUATEANDLOG wraps a filter modifier or an IN predicate, which Power BI does not accept "
+},
+{
+"part": "B",
+"battery": "dax_battery_misc3_extra",
+"expr": "CALCULATE(SUM(Facts[Quantity]),EVALUATEANDLOG(ALLSELECTED(Facts[Region])),Facts[Quantity]>2)",
+"powerbi": "12",
+"app_refusal": "EVALUATEANDLOG wraps a filter modifier or an IN predicate, which Power BI does not accept "
+},
+{
+"part": "B",
+"battery": "dax_battery_misc3_extra",
+"expr": "COUNTROWS(CALCULATETABLE(Facts,EVALUATEANDLOG(ALLSELECTED(Facts[Region]))))",
+"powerbi": "6",
+"app_refusal": "EVALUATEANDLOG wraps a filter modifier or an IN predicate, which Power BI does not accept "
+},
+{
+"part": "C",
+"battery": "dax_battery_typed5_extra",
+"expr": "ISDOUBLE(MAXX(Facts,COALESCE(AVERAGEX(Facts,DATE(2020,1,1)+Facts[Quantity]),\"a\")))",
+"powerbi": "True",
+"app_refusal": "Cannot determine static type for function ISDOUBLE."
+},
+{
+"part": "C",
+"battery": "dax_battery_typed5_extra",
+"expr": "ISDOUBLE(MAXX(Facts,COALESCE(AVERAGEX(Facts,DATE(2020,1,1)),\"a\")))",
+"powerbi": "True",
+"app_refusal": "Cannot determine static type for function ISDOUBLE."
+},
+{
+"part": "C",
+"battery": "dax_battery_typed5_extra",
+"expr": "ISDOUBLE(MAXX(Facts,COALESCE(AVERAGEX(Facts,MAX(Facts[Quantity])),\"a\")))",
+"powerbi": "True",
+"app_refusal": "Cannot determine static type for function ISDOUBLE."
+},
+{
+"part": "C",
+"battery": "dax_battery_typed5_extra",
+"expr": "ISDOUBLE(MAXX(Facts,COALESCE(AVERAGEX(Facts,CURRENCY(1)),\"a\")))",
+"powerbi": "False",
+"app_refusal": "Cannot determine static type for function ISDOUBLE."
+},
+{
+"part": "C",
+"battery": "dax_battery_typed5_extra",
+"expr": "ISDOUBLE(MAXX(Facts,COALESCE(AVERAGEX(Facts,BLANK()),\"a\")))",
+"powerbi": "False",
+"app_refusal": "Cannot determine static type for function ISDOUBLE."
+},
+{
+"part": "C",
+"battery": "dax_battery_typed5_extra",
+"expr": "ISDOUBLE(MAXX(Facts,COALESCE(AVERAGEX(Facts,Facts[Quantity]),\"a\")))",
+"powerbi": "True",
+"app_refusal": "Cannot determine static type for function ISDOUBLE."
+},
+{
+"part": "C",
+"battery": "dax_battery_typed5_extra",
+"expr": "ISDOUBLE(MAXX(Facts,COALESCE(AVERAGEX(Facts,IF(Facts[Quantity]>1,DATE(2020,1,1))),\"a\")))",
+"powerbi": "True",
+"app_refusal": "Cannot determine static type for function ISDOUBLE."
+},
+{
+"part": "C",
+"battery": "dax_battery_strict6_extra",
+"expr": "ISDOUBLE(MAXX({1-DATE(2020,1,1)},[Value]))",
+"powerbi": "True",
+"app_refusal": "Cannot determine static type for function ISDOUBLE."
+},
+{
+"part": "C",
+"battery": "dax_battery_strict6_extra",
+"expr": "ISDOUBLE(MAXX({CURRENCY(1)+DATE(2020,1,1)},[Value]))",
+"powerbi": "False",
+"app_refusal": "Cannot determine static type for function ISDOUBLE."
+},
+{
+"part": "C",
+"battery": "dax_battery_strict6_extra",
+"expr": "ISDOUBLE(MAXX({DATE(2020,1,1)+CURRENCY(1)},[Value]))",
+"powerbi": "False",
+"app_refusal": "Cannot determine static type for function ISDOUBLE."
+},
+{
+"part": "C",
+"battery": "dax_battery_strict6_extra",
+"expr": "ISDOUBLE(MAXX({1-DATE(2020,1,1),1},[Value]))",
+"powerbi": "True",
+"app_refusal": "Cannot determine static type for function ISDOUBLE."
+},
+{
+"part": "C",
+"battery": "dax_battery_strict6_extra",
+"expr": "ISDOUBLE(MAXX({CURRENCY(1)+DATE(2020,1,1),1},[Value]))",
+"powerbi": "True",
+"app_refusal": "Cannot determine static type for function ISDOUBLE."
+},
+{
+"part": "C",
+"battery": "dax_battery_strict6_extra",
+"expr": "ISDOUBLE(MAXX({DATE(2020,1,1)+CURRENCY(1),1},[Value]))",
+"powerbi": "True",
+"app_refusal": "Cannot determine static type for function ISDOUBLE."
+},
+{
+"part": "C",
+"battery": "dax_battery_strict6_extra",
+"expr": "ISDOUBLE(MAXX({1-DATE(2020,1,1),1.5},[Value]))",
+"powerbi": "True",
+"app_refusal": "Cannot determine static type for function ISDOUBLE."
+},
+{
+"part": "C",
+"battery": "dax_battery_strict6_extra",
+"expr": "ISDOUBLE(MAXX({CURRENCY(1)+DATE(2020,1,1),1.5},[Value]))",
+"powerbi": "True",
+"app_refusal": "Cannot determine static type for function ISDOUBLE."
+},
+{
+"part": "C",
+"battery": "dax_battery_strict6_extra",
+"expr": "ISDOUBLE(MAXX({DATE(2020,1,1)+CURRENCY(1),1.5},[Value]))",
+"powerbi": "True",
+"app_refusal": "Cannot determine static type for function ISDOUBLE."
+},
+{
+"part": "C",
+"battery": "dax_battery_strict6_extra",
+"expr": "ISDOUBLE(MAXX({1-DATE(2020,1,1),CURRENCY(2)},[Value]))",
+"powerbi": "True",
+"app_refusal": "Cannot determine static type for function ISDOUBLE."
+},
+{
+"part": "C",
+"battery": "dax_battery_strict6_extra",
+"expr": "ISDOUBLE(MAXX({CURRENCY(1)+DATE(2020,1,1),CURRENCY(2)},[Value]))",
+"powerbi": "True",
+"app_refusal": "Cannot determine static type for function ISDOUBLE."
+},
+{
+"part": "C",
+"battery": "dax_battery_strict6_extra",
+"expr": "ISDOUBLE(MAXX({DATE(2020,1,1)+CURRENCY(1),CURRENCY(2)},[Value]))",
+"powerbi": "True",
+"app_refusal": "Cannot determine static type for function ISDOUBLE."
+},
+{
+"part": "C",
+"battery": "dax_battery_strict6_extra",
+"expr": "ISINT64(MAXX({1-DATE(2020,1,1)},[Value]))",
+"powerbi": "False",
+"app_refusal": "Cannot determine static type for function ISINTN."
+},
+{
+"part": "C",
+"battery": "dax_battery_strict6_extra",
+"expr": "ISINT64(MAXX({CURRENCY(1)+DATE(2020,1,1)},[Value]))",
+"powerbi": "False",
+"app_refusal": "Cannot determine static type for function ISINTN."
+},
+{
+"part": "C",
+"battery": "dax_battery_strict6_extra",
+"expr": "ISINT64(MAXX({DATE(2020,1,1)+CURRENCY(1)},[Value]))",
+"powerbi": "False",
+"app_refusal": "Cannot determine static type for function ISINTN."
+},
+{
+"part": "C",
+"battery": "dax_battery_strict6_extra",
+"expr": "ISINT64(MAXX({1-DATE(2020,1,1),1},[Value]))",
+"powerbi": "False",
+"app_refusal": "Cannot determine static type for function ISINTN."
+},
+{
+"part": "C",
+"battery": "dax_battery_strict6_extra",
+"expr": "ISINT64(MAXX({CURRENCY(1)+DATE(2020,1,1),1},[Value]))",
+"powerbi": "False",
+"app_refusal": "Cannot determine static type for function ISINTN."
+},
+{
+"part": "C",
+"battery": "dax_battery_strict6_extra",
+"expr": "ISINT64(MAXX({DATE(2020,1,1)+CURRENCY(1),1},[Value]))",
+"powerbi": "False",
+"app_refusal": "Cannot determine static type for function ISINTN."
+},
+{
+"part": "C",
+"battery": "dax_battery_strict6_extra",
+"expr": "ISINT64(MAXX({1-DATE(2020,1,1),1.5},[Value]))",
+"powerbi": "False",
+"app_refusal": "Cannot determine static type for function ISINTN."
+},
+{
+"part": "C",
+"battery": "dax_battery_strict6_extra",
+"expr": "ISINT64(MAXX({CURRENCY(1)+DATE(2020,1,1),1.5},[Value]))",
+"powerbi": "False",
+"app_refusal": "Cannot determine static type for function ISINTN."
+},
+{
+"part": "C",
+"battery": "dax_battery_strict6_extra",
+"expr": "ISINT64(MAXX({DATE(2020,1,1)+CURRENCY(1),1.5},[Value]))",
+"powerbi": "False",
+"app_refusal": "Cannot determine static type for function ISINTN."
+},
+{
+"part": "C",
+"battery": "dax_battery_strict6_extra",
+"expr": "ISINT64(MAXX({1-DATE(2020,1,1),CURRENCY(2)},[Value]))",
+"powerbi": "False",
+"app_refusal": "Cannot determine static type for function ISINTN."
+},
+{
+"part": "C",
+"battery": "dax_battery_strict6_extra",
+"expr": "ISINT64(MAXX({CURRENCY(1)+DATE(2020,1,1),CURRENCY(2)},[Value]))",
+"powerbi": "False",
+"app_refusal": "Cannot determine static type for function ISINTN."
+},
+{
+"part": "C",
+"battery": "dax_battery_strict6_extra",
+"expr": "ISINT64(MAXX({DATE(2020,1,1)+CURRENCY(1),CURRENCY(2)},[Value]))",
+"powerbi": "False",
+"app_refusal": "Cannot determine static type for function ISINTN."
+},
+{
+"part": "C",
+"battery": "dax_battery_strict6_extra",
+"expr": "ISCURRENCY(MAXX({1-DATE(2020,1,1)},[Value]))",
+"powerbi": "False",
+"app_refusal": "Cannot determine static type for function ISCURRENCY."
+},
+{
+"part": "C",
+"battery": "dax_battery_strict6_extra",
+"expr": "ISCURRENCY(MAXX({CURRENCY(1)+DATE(2020,1,1)},[Value]))",
+"powerbi": "False",
+"app_refusal": "Cannot determine static type for function ISCURRENCY."
+},
+{
+"part": "C",
+"battery": "dax_battery_strict6_extra",
+"expr": "ISCURRENCY(MAXX({DATE(2020,1,1)+CURRENCY(1)},[Value]))",
+"powerbi": "False",
+"app_refusal": "Cannot determine static type for function ISCURRENCY."
+},
+{
+"part": "C",
+"battery": "dax_battery_strict6_extra",
+"expr": "ISCURRENCY(MAXX({1-DATE(2020,1,1),1},[Value]))",
+"powerbi": "False",
+"app_refusal": "Cannot determine static type for function ISCURRENCY."
+},
+{
+"part": "C",
+"battery": "dax_battery_strict6_extra",
+"expr": "ISCURRENCY(MAXX({CURRENCY(1)+DATE(2020,1,1),1},[Value]))",
+"powerbi": "False",
+"app_refusal": "Cannot determine static type for function ISCURRENCY."
+},
+{
+"part": "C",
+"battery": "dax_battery_strict6_extra",
+"expr": "ISCURRENCY(MAXX({DATE(2020,1,1)+CURRENCY(1),1},[Value]))",
+"powerbi": "False",
+"app_refusal": "Cannot determine static type for function ISCURRENCY."
+},
+{
+"part": "C",
+"battery": "dax_battery_strict6_extra",
+"expr": "ISCURRENCY(MAXX({1-DATE(2020,1,1),1.5},[Value]))",
+"powerbi": "False",
+"app_refusal": "Cannot determine static type for function ISCURRENCY."
+},
+{
+"part": "C",
+"battery": "dax_battery_strict6_extra",
+"expr": "ISCURRENCY(MAXX({CURRENCY(1)+DATE(2020,1,1),1.5},[Value]))",
+"powerbi": "False",
+"app_refusal": "Cannot determine static type for function ISCURRENCY."
+},
+{
+"part": "C",
+"battery": "dax_battery_strict6_extra",
+"expr": "ISCURRENCY(MAXX({DATE(2020,1,1)+CURRENCY(1),1.5},[Value]))",
+"powerbi": "False",
+"app_refusal": "Cannot determine static type for function ISCURRENCY."
+},
+{
+"part": "C",
+"battery": "dax_battery_strict6_extra",
+"expr": "ISCURRENCY(MAXX({1-DATE(2020,1,1),CURRENCY(2)},[Value]))",
+"powerbi": "False",
+"app_refusal": "Cannot determine static type for function ISCURRENCY."
+},
+{
+"part": "C",
+"battery": "dax_battery_strict6_extra",
+"expr": "ISCURRENCY(MAXX({CURRENCY(1)+DATE(2020,1,1),CURRENCY(2)},[Value]))",
+"powerbi": "False",
+"app_refusal": "Cannot determine static type for function ISCURRENCY."
+},
+{
+"part": "C",
+"battery": "dax_battery_strict6_extra",
+"expr": "ISCURRENCY(MAXX({DATE(2020,1,1)+CURRENCY(1),CURRENCY(2)},[Value]))",
+"powerbi": "False",
+"app_refusal": "Cannot determine static type for function ISCURRENCY."
+},
+{
+"part": "C",
+"battery": "dax_battery_strict6_extra",
+"expr": "ISDECIMAL(MAXX({1-DATE(2020,1,1)},[Value]))",
+"powerbi": "False",
+"app_refusal": "Cannot determine static type for function ISDECIMAL."
+},
+{
+"part": "C",
+"battery": "dax_battery_strict6_extra",
+"expr": "ISDECIMAL(MAXX({CURRENCY(1)+DATE(2020,1,1)},[Value]))",
+"powerbi": "False",
+"app_refusal": "Cannot determine static type for function ISDECIMAL."
+},
+{
+"part": "C",
+"battery": "dax_battery_strict6_extra",
+"expr": "ISDECIMAL(MAXX({DATE(2020,1,1)+CURRENCY(1)},[Value]))",
+"powerbi": "False",
+"app_refusal": "Cannot determine static type for function ISDECIMAL."
+},
+{
+"part": "C",
+"battery": "dax_battery_strict6_extra",
+"expr": "ISDECIMAL(MAXX({1-DATE(2020,1,1),1},[Value]))",
+"powerbi": "False",
+"app_refusal": "Cannot determine static type for function ISDECIMAL."
+},
+{
+"part": "C",
+"battery": "dax_battery_strict6_extra",
+"expr": "ISDECIMAL(MAXX({CURRENCY(1)+DATE(2020,1,1),1},[Value]))",
+"powerbi": "False",
+"app_refusal": "Cannot determine static type for function ISDECIMAL."
+},
+{
+"part": "C",
+"battery": "dax_battery_strict6_extra",
+"expr": "ISDECIMAL(MAXX({DATE(2020,1,1)+CURRENCY(1),1},[Value]))",
+"powerbi": "False",
+"app_refusal": "Cannot determine static type for function ISDECIMAL."
+},
+{
+"part": "C",
+"battery": "dax_battery_strict6_extra",
+"expr": "ISDECIMAL(MAXX({1-DATE(2020,1,1),1.5},[Value]))",
+"powerbi": "False",
+"app_refusal": "Cannot determine static type for function ISDECIMAL."
+},
+{
+"part": "C",
+"battery": "dax_battery_strict6_extra",
+"expr": "ISDECIMAL(MAXX({CURRENCY(1)+DATE(2020,1,1),1.5},[Value]))",
+"powerbi": "False",
+"app_refusal": "Cannot determine static type for function ISDECIMAL."
+},
+{
+"part": "C",
+"battery": "dax_battery_strict6_extra",
+"expr": "ISDECIMAL(MAXX({DATE(2020,1,1)+CURRENCY(1),1.5},[Value]))",
+"powerbi": "False",
+"app_refusal": "Cannot determine static type for function ISDECIMAL."
+},
+{
+"part": "C",
+"battery": "dax_battery_strict6_extra",
+"expr": "ISDECIMAL(MAXX({1-DATE(2020,1,1),CURRENCY(2)},[Value]))",
+"powerbi": "False",
+"app_refusal": "Cannot determine static type for function ISDECIMAL."
+},
+{
+"part": "C",
+"battery": "dax_battery_strict6_extra",
+"expr": "ISDECIMAL(MAXX({CURRENCY(1)+DATE(2020,1,1),CURRENCY(2)},[Value]))",
+"powerbi": "False",
+"app_refusal": "Cannot determine static type for function ISDECIMAL."
+},
+{
+"part": "C",
+"battery": "dax_battery_strict6_extra",
+"expr": "ISDECIMAL(MAXX({DATE(2020,1,1)+CURRENCY(1),CURRENCY(2)},[Value]))",
+"powerbi": "False",
+"app_refusal": "Cannot determine static type for function ISDECIMAL."
+},
+{
+"part": "D",
+"battery": "dax_battery_misc3_extra",
+"expr": "MAXX(Facts,EVALUATEANDLOG(ROW(\"a\",1),\"a\"))",
+"powerbi": "1",
+"app_refusal": "Iterator comparison expression has an unsupported or unverifiable local data type."
+},
+{
+"part": "D",
+"battery": "dax_battery_misc3_extra",
+"expr": "MAXX(Facts,EVALUATEANDLOG({1},\"a\"))",
+"powerbi": "1",
+"app_refusal": "Iterator comparison expression has an unsupported or unverifiable local data type."
+},
+{
+"part": "D",
+"battery": "dax_battery_typed5_extra",
+"expr": "MAXX(FILTER(Facts,FALSE()),{UPPER(\"a\"),UPPER(\"b\")})",
+"powerbi": "BLANK",
+"app_refusal": "Iterator comparison expression has an unsupported or unverifiable local data type."
+},
+{
+"part": "D",
+"battery": "dax_battery_typed5_extra",
+"expr": "COUNTX(FILTER(Facts,FALSE()),{UPPER(\"a\"),UPPER(\"b\")})",
+"powerbi": "BLANK",
+"app_refusal": "Iterator comparison expression has an unsupported or unverifiable local data type."
+},
+{
+"part": "D",
+"battery": "dax_battery_typed5_extra",
+"expr": "MAXX(FILTER(Facts,FALSE()),{\"a\"&\"b\",\"c\"&\"d\"})",
+"powerbi": "BLANK",
+"app_refusal": "Iterator comparison expression has an unsupported or unverifiable local data type."
+},
+{
+"part": "D",
+"battery": "dax_battery_typed5_extra",
+"expr": "COUNTX(FILTER(Facts,FALSE()),{\"a\"&\"b\",\"c\"&\"d\"})",
+"powerbi": "BLANK",
+"app_refusal": "Iterator comparison expression has an unsupported or unverifiable local data type."
+},
+{
+"part": "D",
+"battery": "dax_battery_typed5_extra",
+"expr": "MAXX(FILTER(Facts,FALSE()),{\"a\",\"b\"})",
+"powerbi": "BLANK",
+"app_refusal": "Iterator comparison expression has an unsupported or unverifiable local data type."
+},
+{
+"part": "D",
+"battery": "dax_battery_typed5_extra",
+"expr": "COUNTX(FILTER(Facts,FALSE()),{\"a\",\"b\"})",
+"powerbi": "BLANK",
+"app_refusal": "Iterator comparison expression has an unsupported or unverifiable local data type."
+},
+{
+"part": "D",
+"battery": "dax_battery_typed5_extra",
+"expr": "MAXX(FILTER(Facts,FALSE()),{MAX(Facts[Region]),\"b\"})",
+"powerbi": "BLANK",
+"app_refusal": "Iterator comparison expression has an unsupported or unverifiable local data type."
+},
+{
+"part": "D",
+"battery": "dax_battery_typed5_extra",
+"expr": "COUNTX(FILTER(Facts,FALSE()),{MAX(Facts[Region]),\"b\"})",
+"powerbi": "BLANK",
+"app_refusal": "Iterator comparison expression has an unsupported or unverifiable local data type."
+},
+{
+"part": "D",
+"battery": "dax_battery_typed5_extra",
+"expr": "MAXX(FILTER(Facts,FALSE()),{FORMAT(1,\"0\"),\"b\"})",
+"powerbi": "BLANK",
+"app_refusal": "Iterator comparison expression has an unsupported or unverifiable local data type."
+},
+{
+"part": "D",
+"battery": "dax_battery_typed5_extra",
+"expr": "COUNTX(FILTER(Facts,FALSE()),{FORMAT(1,\"0\"),\"b\"})",
+"powerbi": "BLANK",
+"app_refusal": "Iterator comparison expression has an unsupported or unverifiable local data type."
+},
+{
+"part": "D",
+"battery": "dax_battery_typed5_extra",
+"expr": "MAXX(FILTER(Facts,FALSE()),{\"a\",1})",
+"powerbi": "BLANK",
+"app_refusal": "Iterator comparison expression has an unsupported or unverifiable local data type."
+},
+{
+"part": "D",
+"battery": "dax_battery_typed5_extra",
+"expr": "COUNTX(FILTER(Facts,FALSE()),{\"a\",1})",
+"powerbi": "BLANK",
+"app_refusal": "Iterator comparison expression has an unsupported or unverifiable local data type."
+},
+{
+"part": "D",
+"battery": "dax_battery_typed5_extra",
+"expr": "MAXX(FILTER(Facts,FALSE()),{1,\"a\"})",
+"powerbi": "BLANK",
+"app_refusal": "Iterator comparison expression has an unsupported or unverifiable local data type."
+},
+{
+"part": "D",
+"battery": "dax_battery_typed5_extra",
+"expr": "COUNTX(FILTER(Facts,FALSE()),{1,\"a\"})",
+"powerbi": "BLANK",
+"app_refusal": "Iterator comparison expression has an unsupported or unverifiable local data type."
+},
+{
+"part": "D",
+"battery": "dax_battery_typed5_extra",
+"expr": "MAXX(FILTER(Facts,FALSE()),{1,UPPER(\"a\")})",
+"powerbi": "BLANK",
+"app_refusal": "Iterator comparison expression has an unsupported or unverifiable local data type."
+},
+{
+"part": "D",
+"battery": "dax_battery_typed5_extra",
+"expr": "COUNTX(FILTER(Facts,FALSE()),{1,UPPER(\"a\")})",
+"powerbi": "BLANK",
+"app_refusal": "Iterator comparison expression has an unsupported or unverifiable local data type."
+},
+{
+"part": "D",
+"battery": "dax_battery_typed5_extra",
+"expr": "MAXX(FILTER(Facts,FALSE()),{1,2})",
+"powerbi": "BLANK",
+"app_refusal": "Iterator comparison expression has an unsupported or unverifiable local data type."
+},
+{
+"part": "D",
+"battery": "dax_battery_typed5_extra",
+"expr": "COUNTX(FILTER(Facts,FALSE()),{1,2})",
+"powerbi": "BLANK",
+"app_refusal": "Iterator comparison expression has an unsupported or unverifiable local data type."
+},
+{
+"part": "D",
+"battery": "dax_battery_typed5_extra",
+"expr": "MAXX(FILTER(Facts,FALSE()),{BLANK(),\"a\"})",
+"powerbi": "BLANK",
+"app_refusal": "Iterator comparison expression has an unsupported or unverifiable local data type."
+},
+{
+"part": "D",
+"battery": "dax_battery_typed5_extra",
+"expr": "COUNTX(FILTER(Facts,FALSE()),{BLANK(),\"a\"})",
+"powerbi": "BLANK",
+"app_refusal": "Iterator comparison expression has an unsupported or unverifiable local data type."
+},
+{
+"part": "E",
+"battery": "dax_battery_typed3_extra",
+"expr": "MAXX(ADDCOLUMNS(Facts,\"q\",CALCULATE(DISTINCT(Facts[Region]),Facts[Region]=\"East\")),[q])",
+"powerbi": "East",
+"app_refusal": "CALCULATE of a table on a row is not modelled by the local engine."
+},
+{
+"part": "E",
+"battery": "dax_battery_typed3_extra",
+"expr": "COUNTROWS(FILTER(Facts,CALCULATE(DISTINCT(Facts[Sales]),Facts[Region]=\"East\")))",
+"powerbi": "3",
+"app_refusal": "CALCULATE of a table on a row is not modelled by the local engine."
+},
+{
+"part": "E",
+"battery": "dax_battery_typed3_extra",
+"expr": "SUMX(Facts,IF(CALCULATE(VALUES(Facts[Region]),Facts[Region]=\"East\")=\"East\",1,0))",
+"powerbi": "3",
+"app_refusal": "CALCULATE of a table on a row is not modelled by the local engine."
+},
+{
+"part": "E",
+"battery": "dax_battery_typed3_extra",
+"expr": "MEDIANX(ADDCOLUMNS(Facts,\"z\",1),CALCULATE(DISTINCT(Facts[Sales]),Facts[Region]=\"East\"))",
+"powerbi": "BLANK",
+"app_refusal": "CALCULATE of a table on a row is not modelled by the local engine."
+},
+{
+"part": "E",
+"battery": "dax_battery_typed3_extra",
+"expr": "COUNTROWS(FILTER(ADDCOLUMNS(Facts,\"z\",1),CALCULATE(DISTINCT(Facts[Sales]),Facts[Region]=\"East\")))",
+"powerbi": "3",
+"app_refusal": "CALCULATE of a table on a row is not modelled by the local engine."
+},
+{
+"part": "E",
+"battery": "dax_battery_typed3_extra",
+"expr": "CONCATENATEX(ALL(Facts),1,\"|\",CALCULATE(VALUES(Facts[Note]),Facts[Region]=\"East\"))",
+"powerbi": "1|1|1|1|1|1",
+"app_refusal": "CALCULATE of a table on a row is not modelled by the local engine."
+},
+{
+"part": "E",
+"battery": "dax_battery_typed3_extra",
+"expr": "SUMX(ADDCOLUMNS(FILTER(Facts,Facts[Quantity]>2),\"q\",CALCULATE(VALUES(Facts[Quantity]),Facts[Region]=\"East\")),1)",
+"powerbi": "3",
+"app_refusal": "CALCULATE of a table on a row is not modelled by the local engine."
+},
+{
+"part": "E",
+"battery": "dax_battery_typed3_extra",
+"expr": "COUNTROWS(TOPN(1,FILTER(Facts,Facts[Quantity]>2),CALCULATE(DISTINCT(Facts[Sales]),Facts[Region]=\"East\")))",
+"powerbi": "1",
+"app_refusal": "CALCULATE of a table on a row is not modelled by the local engine."
+},
+{
+"part": "E",
+"battery": "dax_battery_typed3_extra",
+"expr": "SUMX(ADDCOLUMNS(Facts,\"q\",CALCULATE(VALUES(Facts[Note]),Facts[Region]=\"East\")),1)",
+"powerbi": "6",
+"app_refusal": "CALCULATE of a table on a row is not modelled by the local engine."
+},
+{
+"part": "E",
+"battery": "dax_battery_typed3_extra",
+"expr": "COUNTROWS(FILTER(FILTER(Facts,Facts[Region]=\"East\"),CALCULATE(DISTINCT(Facts[Region]),Facts[Region]=\"East\")=\"East\"))",
+"powerbi": "3",
+"app_refusal": "CALCULATE of a table on a row is not modelled by the local engine."
+},
+{
+"part": "E",
+"battery": "dax_battery_typed3_extra",
+"expr": "SUMX(ADDCOLUMNS(ADDCOLUMNS(Facts,\"z\",1),\"q\",CALCULATE(DISTINCT(Facts[Sales]),Facts[Region]=\"East\")),1)",
+"powerbi": "6",
+"app_refusal": "CALCULATE of a table on a row is not modelled by the local engine."
+},
+{
+"part": "E",
+"battery": "dax_battery_typed3_extra",
+"expr": "SUMX(ADDCOLUMNS(FILTER(Facts,Facts[Quantity]>2),\"q\",CALCULATE(VALUES(Facts[Region]),Facts[Region]=\"East\")),1)",
+"powerbi": "3",
+"app_refusal": "CALCULATE of a table on a row is not modelled by the local engine."
+},
+{
+"part": "E",
+"battery": "dax_battery_typed3_extra",
+"expr": "MAXX(ADDCOLUMNS(Facts,\"q\",CALCULATE(VALUES(Facts[Region]),Facts[Region]=\"East\")),[q])",
+"powerbi": "East",
+"app_refusal": "CALCULATE of a table on a row is not modelled by the local engine."
+},
+{
+"part": "E",
+"battery": "dax_battery_typed3_extra",
+"expr": "MAXX(ADDCOLUMNS(CALCULATETABLE(Facts,Facts[Region]=\"East\"),\"q\",CALCULATE(VALUES(Facts[Quantity]),Facts[Region]=\"East\")),[q])",
+"powerbi": "5",
+"app_refusal": "CALCULATE of a table on a row is not modelled by the local engine."
+},
+{
+"part": "E",
+"battery": "dax_battery_typed3_extra",
+"expr": "CONCATENATEX(SELECTCOLUMNS(Facts,\"z\",Facts[Quantity]),1,\"|\",CALCULATE(DISTINCT(Facts[Sales]),Facts[Region]=\"East\"))",
+"powerbi": "1|1|1|1|1|1",
+"app_refusal": "CALCULATE of a table on a row is not modelled by the local engine."
+},
+{
+"part": "E",
+"battery": "dax_battery_typed3_extra",
+"expr": "COUNTROWS(ADDCOLUMNS(FILTER(Facts,Facts[Region]=\"East\"),\"q\",CALCULATE(VALUES(Facts[Region]),Facts[Region]=\"East\")))",
+"powerbi": "3",
+"app_refusal": "CALCULATE of a table on a row is not modelled by the local engine."
+},
+{
+"part": "E",
+"battery": "dax_battery_typed3_extra",
+"expr": "SUMX(ALL(Facts),IF(CALCULATE(DISTINCT(Facts[Region]),Facts[Region]=\"East\")=\"East\",1,0))",
+"powerbi": "3",
+"app_refusal": "CALCULATE of a table on a row is not modelled by the local engine."
+},
+{
+"part": "E",
+"battery": "dax_battery_typed3_extra",
+"expr": "COUNTROWS(FILTER(Facts,CALCULATE(DISTINCT(Facts[Region]),Facts[Region]=\"East\")=\"East\"))",
+"powerbi": "3",
+"app_refusal": "CALCULATE of a table on a row is not modelled by the local engine."
+},
+{
+"part": "E",
+"battery": "dax_battery_typed3_extra",
+"expr": "SUMX(ADDCOLUMNS(FILTER(Facts,Facts[Quantity]>2),\"q\",CALCULATE(DISTINCT(Facts[Region]),Facts[Region]=\"East\")),1)",
+"powerbi": "3",
+"app_refusal": "CALCULATE of a table on a row is not modelled by the local engine."
+},
+{
+"part": "E",
+"battery": "dax_battery_typed3_extra",
+"expr": "SUMX(ADDCOLUMNS(TOPN(2,Facts,Facts[Quantity]),\"q\",CALCULATE(VALUES(Facts[Quantity]),Facts[Region]=\"East\")),1)",
+"powerbi": "2",
+"app_refusal": "CALCULATE of a table on a row is not modelled by the local engine."
+},
+{
+"part": "E",
+"battery": "dax_battery_typed3_extra",
+"expr": "COUNTROWS(TOPN(1,Facts,CALCULATE(VALUES(Facts[Region]),Facts[Region]=\"East\")))",
+"powerbi": "3",
+"app_refusal": "CALCULATE of a table on a row is not modelled by the local engine."
+},
+{
+"part": "E",
+"battery": "dax_battery_typed3_extra",
+"expr": "CONCATENATEX(FILTER(Facts,Facts[Region]=\"East\"),1,\"|\",CALCULATE(VALUES(Facts[Quantity]),Facts[Region]=\"East\"))",
+"powerbi": "1|1|1",
+"app_refusal": "CALCULATE of a table on a row is not modelled by the local engine."
+},
+{
+"part": "F",
+"battery": "review-task15",
+"expr": "COUNTAX(ADDCOLUMNS(Facts,\"q\",IF(TRUE(),2.5&&\"\",FALSE())),[q])",
+"powerbi": "BLANK",
+"app_answer": "6"
+},
+{
+"part": "F",
+"battery": "review-task15",
+"expr": "SUMX(ADDCOLUMNS(Facts,\"q\",IF(TRUE(),2.5&&\"\",FALSE())),IF(ISBLANK([q]),1,2))",
+"powerbi": "6",
+"app_answer": "12"
+}
+]
