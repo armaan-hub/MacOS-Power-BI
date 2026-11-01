@@ -1553,3 +1553,16 @@ The standing test workbook is now `tests/Data/Vat File -Aug 2026.xlsx` (sheet `V
 - Real-app test: 6,000 probes through the offscreen app, 4,524 created, 1,476 refused (1,117 are Power BI errors too), 26 different, all 26 in the known older list.
 - Gate: pytest 2,157 passed (6,280 subtests) in 0:36:54, real app 575/575, replay 265,529 answers, 259,819 match, 5,710 refused, 0 DIFF, 0 CRASH, 246,907 locked intact, PARITY GATE PASSED. Locked 259,799, committed, merged and pushed by Claude under the approval the user delegated on 2026-11-01.
 - Next: Task 16 strict-types-6.
+
+## 2026-11-01 — Iteration 105 (Task 16 strict-types-6: wrong answers from the Task 15 review, columns of unknown type, ISLOGICAL, strict comparison, tables as CALCULATE filters; review by Claude)
+
+- Built (Antigravity): the first entry reported 80 of 80 fresh probes. The first review round found 290 wrong answers on the standard table. Antigravity then ran out of quota, so Claude finished the fixes.
+- Review (Claude): about 250,000 probes on three Facts tables, answered by `main` and by the build; about 28,000 answers changed; about 35,000 questions went to Power BI on the iPad guest, project never saved.
+- Fixed: text order ignores `'` and `-` at primary level; empty text in logical operators folds at compile time except through seven text functions; a logical operator's BLANK through one-branch IF, SWITCH and IFERROR; `==` type checks at compile time; UNION column types; date beside number; a VAR with a transition in a table filter evaluated once; Currency divided by 0 or BLANK in an iterator.
+- Gate failure found late: widening `_is_table_filter_argument` sent tables to the legacy CALCULATE path and changed a refusal on a locked date model. `legacy=True` restores that path. No value changed; 147 probes changed refusal text only.
+- Known wrong, not saved, also wrong on `main` (2 answers, Part F of Task 17): `IF(TRUE(),2.5&&"",FALSE())` in an added column gives False where Power BI gives a BLANK.
+- New: `dax_battery_strict6_extra` (18,064 answers), `tests/fixtures_strict6_review_alt.json`, `tests/test_iteration105_strict_types_6.py`, `tests/test_iteration105_strict_types_6_review.py`; 2 older review tests updated.
+- Real-app test: 6,000 probes through the offscreen app, 5,016 created, 984 refused, 0 wrong; run before the last change, which only altered refusal text.
+- Gate: pytest 2,203 passed (6,280 subtests) in 0:36:32, real app 575/575, replay 283,593 answers, 276,058 match, 7,535 refused, 0 DIFF, 0 CRASH, PARITY GATE PASSED. Locked 276,038.
+- Spec result: 603 of 836 match, 231 refused, 2 wrong as before.
+- Next: Task 17 small-gaps-7, built by OpenCode (DeepSeek V4.1 Flash Free) while Antigravity has no quota.

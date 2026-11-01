@@ -92,12 +92,9 @@ class TypesComeFromTheTableTest(unittest.TestCase):
 
 
 class VariableOfATableFilterTest(unittest.TestCase):
-    def test_a_transition_in_a_variable_is_refused(self) -> None:
-        for expression in (
-            'CALCULATE(COUNTROWS(Facts),VAR m=CALCULATE(MAX(Facts[Quantity])) RETURN FILTER(Facts,Facts[Quantity]=m))',
-            'CALCULATE(COUNTROWS(Facts),VAR c=CALCULATE(COUNTROWS(Facts)) RETURN FILTER(Facts,Facts[Quantity]<c))',
-        ):
-            self.assertTrue(dax.local(expression).startswith("LOCAL-REJECT"), expression)
+    def test_a_transition_in_a_variable_is_evaluated_once(self) -> None:
+        self.assertEqual("1", dax.local('CALCULATE(COUNTROWS(Facts),VAR m=CALCULATE(MAX(Facts[Quantity])) RETURN FILTER(Facts,Facts[Quantity]=m))'))
+        self.assertEqual("6", dax.local('CALCULATE(COUNTROWS(Facts),VAR c=CALCULATE(COUNTROWS(Facts)) RETURN FILTER(Facts,Facts[Quantity]<c))'))
 
     def test_a_variable_without_one_is_read_once(self) -> None:
         self.assertEqual("1", dax.local('CALCULATE(COUNTROWS(Facts),VAR m=MAX(Facts[Quantity]) RETURN FILTER(Facts,Facts[Quantity]=m))'))

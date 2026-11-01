@@ -4,7 +4,7 @@
 **Project status:** In progress; the Power BI parity goal is currently paused.  
 **Latest verified full test run:** 998 tests and 738 subtests passed in Iteration 62. This run predates the unfinished Iteration 63 edits described below.
 
-**Latest status (2026-11-01, after Iteration 104 / Task 15 typed-columns-5, a True/False BLANK in table columns, types of added columns, Currency and dates in the statistical iterators, FILTER and VAR table leftovers, reviewed and shipped by Claude under the user's delegated approval):** gate passed, pytest 2,157, real app 575/575, replay 265,529 answers, 259,819 match, 5,710 refused, 0 DIFF, 0 CRASH, locked 259,799 (was 246,907). Of the 1,836 spec items 1,315 now match and 521 stay honestly refused. Next: Task 16 strict-types-6.**
+**Latest status (2026-11-01, after Iteration 105 / Task 16 strict-types-6, wrong answers from the Task 15 review, columns of unknown type, ISLOGICAL, strict comparison, tables as CALCULATE filters, reviewed, finished and shipped by Claude under the user's delegated approval):** gate passed, pytest 2,203, real app 575/575, replay 283,593 answers, 276,058 match, 7,535 refused, 0 DIFF, 0 CRASH, locked 276,038 (was 259,799). Of the 836 spec items 603 now match, 231 stay honestly refused and 2 are still wrong as they were on `main`. Antigravity ran out of quota, so OpenCode (DeepSeek V4.1 Flash Free) stands in as coder for Task 17.
 
 **Previous status (2026-11-01, after Iteration 103 / Task 14 logic-tables-4, empty text in logical operators, a VAR block as an iterator table, FILTER over no rows, Currency arithmetic, review done, gate passed, locked 246,907, committed, merged and pushed; 246,927 of 253,237 saved answers match, 0 differ; next: Task 15 typed-columns-5, 1,836 items).**
 

@@ -188,6 +188,23 @@ def text_key(text: str) -> str:
     return "".join(c if ord(c) > 0xFFFF else c.casefold() for c in text)
 
 
+_PUNCTUATION_ORDER = {character: rank for rank, character in enumerate(" !\"#$%&()*,./:;?@[\\]^_`{|}~+<=>")}
+_IGNORED_AT_FIRST = {"'": 0, "-": 1}
+
+
+def text_collation_key(text: str) -> tuple[tuple[tuple[int, int], ...], tuple[tuple[int, int], ...], str]:
+    """The linguistic order of ASCII text (live Power BI, Task 16 review, every pair of ASCII punctuation, digits and letters):
+    punctuation, then digits, then letters.  ' and - are ignored at first (a-b is between aa and ac) and only break a tie:
+    the text without them first, then the earlier position, then ' before -, then the longer run."""
+    folded = text_key(text)
+    primary = tuple(
+        (0, _PUNCTUATION_ORDER[c]) if c in _PUNCTUATION_ORDER else (3 if c > "\x7f" else 2 if c.isalpha() else 1 if c.isdigit() else -1, ord(c))
+        for c in folded if c not in _IGNORED_AT_FIRST
+    )
+    secondary = tuple((position, _IGNORED_AT_FIRST[c]) for position, c in enumerate(folded) if c in _IGNORED_AT_FIRST)
+    return (primary, secondary, folded)
+
+
 _CULTURE_CHARS = re.compile("[\u0080-\ud7ff\ue000-\uffff]")
 
 
@@ -274,9 +291,9 @@ def latin_collation_key(text: str) -> tuple[str, tuple[int, ...]]:
 
 
 def ordering_key(values: list[str]) -> Callable[[str], object]:
-    """The key that orders these texts: the code-unit order of the case-folded text, or the linguistic order when a non-ASCII letter is there."""
+    """The key that orders these texts: the linguistic order of ASCII text (text_collation_key), or the one of Latin letters when a non-ASCII letter is there."""
     if not any(_has_culture_chars(value) for value in values):
-        return text_key
+        return text_collation_key
     if not all(is_classifiable_latin(value) for value in values):
         from .measures import MeasureError  # imported late: measures imports this module
 
@@ -338,7 +355,7 @@ def compare(operator: str, left: object, right: object, *, allow_variant: bool =
 
             raise MeasureError("Ordering text with non-ASCII characters is not supported in the local engine.")
         else:
-            a, b = text_key(left), text_key(right)  # type: ignore[arg-type]
+            a, b = (text_key(left), text_key(right)) if operator in {"=", "<>"} else (text_collation_key(left), text_collation_key(right))  # type: ignore[arg-type]
             if has_culture:
                 # live Power BI (iteration 92): canonically equivalent and expanded forms are equal ("a" + U+0308 = "ä", "æ" = "ae", "ǆ" = "dž"); refuse when that would change the answer
                 from .measures import MeasureError  # imported late: measures imports this module

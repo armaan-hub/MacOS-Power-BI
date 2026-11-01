@@ -46,8 +46,8 @@ class LogicalBlankTest(unittest.TestCase):
 
     def test_in_a_table_column_it_stays_true_false(self) -> None:
         self.assertEqual("1", dax.local('COUNTAX({2.5&&""},[Value])'))  # live Power BI (Task 15 review): the constructor holds False
-        for expression in ('MAXX(ADDCOLUMNS(Facts,"q",2.5&&""),[q])', 'ISLOGICAL(2.5&&"")'):
-            self.assertTrue(dax.local(expression).startswith("LOCAL-REJECT"), expression)
+        self.assertEqual("True", dax.local('ISLOGICAL(2.5&&"")'))  # live Power BI (Task 16 review): the empty text is folded when the query compiles
+        self.assertTrue(dax.local('MAXX(ADDCOLUMNS(Facts,"q",2.5&&""),[q])').startswith("LOCAL-REJECT"))
 
     def test_a_row_that_failed_is_not_mistaken_for_it(self) -> None:
         self.assertEqual("6", dax.local('COUNTROWS(ADDCOLUMNS(Facts,"x",Facts[Quantity]>10&&SQRT(-1)>0))'))
