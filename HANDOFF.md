@@ -3,7 +3,7 @@
 Rules and roles are in `AGENTS.md`. Read it first. Keep this file short and current.
 
 **Active agent:** Claude (Opus 5.5 plans and reviews, Haiku 5.5 codes, Sonnet 5.5 fixes, as subagents, until Antigravity's quota returns, about 14:15 on Nov 2; see `AGENTS.md`)
-**Branch in use:** main
+**Branch in use:** haiku/blank-dates-8
 **Working tree clean:** yes
 
 ## Status values
@@ -30,9 +30,10 @@ Rules and roles are in `AGENTS.md`. Read it first. Keep this file short and curr
 | 15 | typed-columns-5: a True/False BLANK in table columns, types of added columns, Currency and dates in the statistical iterators, FILTER and VAR table leftovers (1,836 pending items, answers saved, no VM) | `docs/plans/2026-10-31-typed-columns-5.md` | DONE (reviewed, fixed, locked 259,799, merged and pushed 2026-11-01 by Claude under delegated approval) | Claude |
 | 16 | strict-types-6: wrong answers from the Task 15 review, columns of unknown type, ISLOGICAL, strict comparison, tables as CALCULATE filters (836 items: 51 wrong, 785 pending, answers saved, no VM) | `docs/plans/2026-11-01-strict-types-6.md` | DONE (reviewed; finished by Claude because Antigravity ran out of quota; locked, merged 2026-11-01; 603 of 836 match, 231 refused, 2 still wrong as on `main`) | Claude |
 | 17 | small-gaps-7: a VAR as a CALCULATE filter, EVALUATEANDLOG around a filter modifier, types of date arithmetic in a constructor, table constructors as an iterator body, a table on a row, a typed BLANK beside a second branch (174 items: 172 pending, 2 wrong, answers saved, no VM) | `docs/plans/2026-11-01-small-gaps-7.md` | DONE (built by OpenCode until its free limit, finished by Claude; reviewed, locked, merged 2026-11-01; 165 of 174 match, 9 refused, 0 wrong) | Claude |
+| 18 | blank-dates-8: a number minus a date, BLANK in `*` and `/`, LOG of BLANK, COUNTAX of a logical operator, CONVERT in MAXX, ISBLANK of Currency / 0 (2,172 items: 1,421 wrong, 751 refused, answers measured, no VM) | `docs/plans/2026-11-01-blank-dates-8.md` | BUILDING | Haiku 5.5 |
 
 ## Current task
-Task 18 is being planned by Claude.
+Task 18 `blank-dates-8`: Haiku 5.5 builds it one Part at a time on branch `haiku/blank-dates-8` from `docs/plans/2026-11-01-blank-dates-8.md`.
 
 ## Open questions (either agent writes here instead of guessing)
 - Claude (open, found in the Task 17 review, also wrong on `main`, not saved): `MAXX(FILTER(Facts,FALSE()),DATE(2020,1,1))+1` gives 1, Power BI 12/31/1899. Still refused with no rule: COALESCE ISDOUBLE beside a text (7), KEEPFILTERS around logged modifiers, MEDIANX of a table on a row, COALESCE of an operator, CALCULATE table with several values under ALL.
