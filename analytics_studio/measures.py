@@ -1027,16 +1027,38 @@ def _is_var_filter_constant(node: Any) -> bool:
     return False
 
 
+def _is_table_filter_argument(node: tuple[Any, ...]) -> bool:
+    unwrapped = node
+    bound: dict[str, tuple[Any, ...]] = {}
+    while isinstance(unwrapped, tuple) and unwrapped:
+        if unwrapped[0] == "call" and unwrapped[1] == "KEEPFILTERS" and len(unwrapped[2]) == 1:
+            unwrapped = unwrapped[2][0]
+        elif unwrapped[0] == "let":
+            bound.update({str(name): value for name, value in unwrapped[1]})
+            unwrapped = unwrapped[2]
+        elif unwrapped[0] == "var" and str(unwrapped[1]) in bound:
+            unwrapped = bound.pop(str(unwrapped[1]))  # a VAR is a table when what it holds is one; popped, so a binding is followed once
+        else:
+            break
+    if not isinstance(unwrapped, tuple) or not unwrapped:
+        return False
+    if unwrapped[0] == "call" and unwrapped[1] in {"FILTER", "ALL", "ALLSELECTED", "ALLNOBLANKROW", "ALLEXCEPT"}:
+        return True
+    return unwrapped[0] in {"table", "table_call", "tableconstructor"}
+
+
 def _unwrap_var_filter(node: tuple[Any, ...], outer: dict[str, tuple[Any, ...]] | None = None) -> tuple[Any, ...]:
     """Replace the variables of a VAR block inside a CALCULATE filter by what they hold (a column reference,
     a constant scalar, or another variable). An inner block may reuse an outer name: the inner value wins inside the inner block only."""
     if not isinstance(node, tuple) or not node or node[0] != "let":
         return node
-    disallowed_fn = _disallowed_function_in_filter_var(node)
-    if disallowed_fn:
-        raise MeasureError(
-            f"A function '{disallowed_fn}' has been used in a True/False expression that contains a variable definition and is used as a table filter expression. This is not allowed."
-        )
+    is_table_filter = _is_table_filter_argument(node)
+    if not is_table_filter:
+        disallowed_fn = _disallowed_function_in_filter_var(node)
+        if disallowed_fn:
+            raise MeasureError(
+                f"A function '{disallowed_fn}' has been used in a True/False expression that contains a variable definition and is used as a table filter expression. This is not allowed."
+            )
     bindings, body = node[1], node[2]
     env: dict[str, tuple[Any, ...]] = dict(outer or {})
 
@@ -1050,8 +1072,11 @@ def _unwrap_var_filter(node: tuple[Any, ...], outer: dict[str, tuple[Any, ...]] 
         return tuple(_subst(child) for child in n)
 
     for name, value in bindings:
+        if is_table_filter and (body[:2] != ("var", name) or len(bindings) > 1) and (_contains_function_call(value, "CALCULATE") or _contains_function_call(value, "CALCULATETABLE")):
+            # live Power BI (Task 15 review): CALCULATE(COUNTROWS(Facts),VAR m=CALCULATE(MAX(Facts[Quantity])) RETURN FILTER(Facts,Facts[Quantity]=m)) is 1
+            raise MeasureError("A variable with a context transition in a table filter is not modelled by the local engine.")
         value = _subst(value)
-        if value[0] != "reference" and any(_direct_column_references(value)):
+        if not is_table_filter and value[0] != "reference" and any(_direct_column_references(value)):
             raise MeasureError("A variable in a CALCULATE filter cannot reference a column directly.")
         if value[0] in {"binary", "unary", "concat"} and any(isinstance(part, tuple) and part and (part[0] == "table" or (part[0] == "call" and part[1] in {"ALL", "FILTER", "CALCULATETABLE"} and not (len(part[2]) == 1 and part[2][0][0] == "reference"))) for part in value[1:]):
             raise MeasureError("The expression refers to multiple columns. Multiple columns cannot be converted to a scalar value.")  # live Power BI (Task 13 review)
@@ -1725,16 +1750,21 @@ def _tested_operands_and_results(node: Any) -> tuple[list[Any], list[Any]]:
 
 _CANNOT_RAISE_CALLS = frozenset({
     "TRUE", "FALSE", "BLANK", "ISBLANK", "UPPER", "LOWER", "LEN", "ABS", "NOT", "AND", "OR", "COUNTROWS", "SUM", "MAX", "MIN", "COUNT", "SELECTEDVALUE", "DATE",
-    "IF", "SWITCH", "IFERROR", "COALESCE", "FORMAT", "EDATE", "CALCULATE",
+    "IF", "IF.EAGER", "SWITCH", "IFERROR", "COALESCE", "FORMAT", "EDATE", "EOMONTH", "CALCULATE", "CUSTOMDATA",
+    "LEFT", "RIGHT", "MID", "TRIM", "CONCATENATE", "CONCATENATEX", "CURRENCY", "INT", "ROUND", "ROUNDUP", "ROUNDDOWN",
+    "SUMX", "AVERAGEX", "MAXX", "MINX", "COUNTX", "COUNTAX", "PRODUCTX", "YEAR", "MONTH", "DAY", "TIME",
 })
 
 
 def _cannot_raise(node: Any) -> bool:
-    """An expression made only of literals, columns and functions that never raise an error on a row (so evaluating it eagerly is harmless)."""
+    """An expression of literals, columns and the functions below: COALESCE beside one in a body of mixed types has the answer of Power BI, also when the function
+    fails on a row (live Power BI, Task 15 review: COALESCE(1,YEAR("a"),"x") in MAXX is 1). Any other function keeps the refusal of the callers."""
     if not isinstance(node, tuple) or not node:
         return True
-    if node[0] in {"number", "string", "boolean", "blank", "reference"}:
+    if node[0] in {"number", "string", "boolean", "blank", "reference", "var", "table"}:
         return True
+    if node[0] == "let":
+        return all(_cannot_raise(val) for name, val in node[1]) and _cannot_raise(node[2])
     if node[0] in {"comparison", "logical", "binary", "unary", "concat"}:
         return all(_cannot_raise(child) for child in node[1:] if isinstance(child, tuple))
     if node[0] == "call" and node[1] in _CANNOT_RAISE_CALLS:
@@ -3039,10 +3069,21 @@ def _legacy_calculate_filters_valid(arguments: tuple[tuple[Any, ...], ...]) -> N
         return
     if (
         len(arguments) == 2
-        and arguments[1][0] == "call"
-        and arguments[1][1] == "FILTER"
+        and _is_table_filter_argument(arguments[1])
     ):
-        _validate_table_filter_call(arguments[1])
+        unwrapped = arguments[1]
+        while isinstance(unwrapped, tuple) and unwrapped:
+            if unwrapped[0] == "call" and unwrapped[1] == "KEEPFILTERS" and len(unwrapped[2]) == 1:
+                unwrapped = unwrapped[2][0]
+            elif unwrapped[0] == "let":
+                try:
+                    unwrapped = _unwrap_var_filter(unwrapped)
+                except MeasureError:
+                    break
+            else:
+                break
+        if isinstance(unwrapped, tuple) and unwrapped and unwrapped[0] == "call" and unwrapped[1] == "FILTER":
+            _validate_table_filter_call(unwrapped)
         return
     if any(_contains_function_call(argument, "FILTER") for argument in arguments[1:]):
         if _time_filters_beside_general_filters(arguments):
@@ -3497,7 +3538,7 @@ class _Parser:
                 self._take()
                 argument = self._expression()
                 self._expect(")")
-                if argument[0] not in {"reference", "table", "call", "table_call", "tableconstructor", "var"}:
+                if argument[0] not in {"reference", "table", "call", "table_call", "tableconstructor", "var", "let"}:
                     raise MeasureError(f"{function} needs one source column reference or table.")
                 return ("table_call", function, argument)
             if function not in _FUNCTIONS:
@@ -4012,8 +4053,7 @@ class _Parser:
                     )
                     valid_table_filter = (
                         len(arguments) == 2
-                        and arguments[1][0] == "call"
-                        and arguments[1][1] == "FILTER"
+                        and _is_table_filter_argument(arguments[1])
                     )
                     valid_removefilters = (
                         len(arguments) == 2
@@ -4905,7 +4945,7 @@ _STATIC_ALWAYS_DOUBLE = frozenset({
     "POWER", "SQRT", "EXP", "LN", "LOG", "LOG10", "PI",
     "COMBIN", "FACT", "AVERAGE", "VALUE",
     "SIN", "COS", "TAN", "ASIN", "DEGREES", "RADIANS", "MEDIAN", "MEDIANX", "PERCENTILE.INC", "PERCENTILEX.INC",
-    "STDEV.S", "VAR.S", "GEOMEAN", "PRODUCT", "PRODUCTX", "XNPV",
+    "STDEV.S", "VAR.S", "GEOMEAN", "PRODUCT", "PRODUCTX", "XNPV", "RAND",
 })
 
 _STATIC_ALWAYS_INT64 = frozenset({
@@ -4978,6 +5018,59 @@ def _normalize_model_column_types(model: Any) -> dict[str, dict[str, str]]:
     return {}
 
 
+_TABLE_VARIABLE = "\0"  # the columns of a table variable sit beside the tables, under this prefix and the variable's name
+
+
+def _static_table_columns(node: Any, columns: dict[str, dict[str, str]], variables: dict[str, str | None]) -> dict[str, str]:
+    """The columns of a table expression and their types, header.casefold() -> type ("" when it is not known); {} for a table of unknown shape."""
+    if not isinstance(node, tuple) or not node:
+        return {}
+    kind = node[0]
+    if kind == "table":
+        return dict(columns.get(str(node[1]).casefold(), {}))
+    if kind == "table_call":
+        return _static_table_columns(node[2], columns, variables)
+    if kind == "reference":
+        return dict(columns.get((node[1] or "").casefold(), {}))
+    if kind == "var":
+        return dict(columns.get(_TABLE_VARIABLE + str(node[1]).casefold(), {}))
+    if kind == "let":
+        scope_columns, scope = _static_let_scope(node, columns, variables)
+        return _static_table_columns(node[2], scope_columns, scope)
+    if kind != "call":
+        return {}
+    fn, args = node[1], node[2]
+    if fn in {"LINEST", "LINESTX"}:
+        from . import dax_linest
+        return {h.casefold(): "double" for h in dax_linest.headers_for(16, True)}
+    if fn in {"ADDCOLUMNS", "SELECTCOLUMNS"} and args:
+        base = _static_table_columns(args[0], columns, variables)
+        added = dict(base) if fn == "ADDCOLUMNS" else {}
+        scope_columns = {**columns, "": base}
+        for name, expression in zip(args[1::2], args[2::2]):
+            if name[0] == "string":
+                added[str(name[1]).casefold()] = _static_numeric_type(expression, scope_columns, variables) or ""
+        return added
+    if fn in {"FILTER", "CALCULATETABLE", "KEEPFILTERS", "ALL", "ALLSELECTED"} and args:
+        return _static_table_columns(args[0], columns, variables)
+    if fn == "TOPN" and len(args) >= 2:
+        return _static_table_columns(args[1], columns, variables)
+    return {}
+
+
+def _static_let_scope(
+    node: tuple[Any, ...],
+    columns: dict[str, dict[str, str]],
+    variables: dict[str, str | None],
+) -> tuple[dict[str, dict[str, str]], dict[str, str | None]]:
+    """The columns and the variables a VAR block adds to the type walk."""
+    scope_columns, scope = dict(columns), dict(variables)
+    for name, value in node[1]:
+        scope[str(name)] = _static_numeric_type(value, scope_columns, scope)
+        scope_columns[_TABLE_VARIABLE + str(name).casefold()] = _static_table_columns(value, scope_columns, scope)
+    return scope_columns, scope
+
+
 def _static_numeric_type(
     node: Any,
     model: Any = None,
@@ -5017,10 +5110,8 @@ def _static_numeric_type(
     if kind == "var":
         return variables.get(str(node[1]))
     if kind == "let":
-        scope = dict(variables)
-        for name, value in node[1]:
-            scope[str(name)] = _static_numeric_type(value, columns, scope)
-        return _static_numeric_type(node[2], columns, scope)
+        scope_columns, scope = _static_let_scope(node, columns, variables)
+        return _static_numeric_type(node[2], scope_columns, scope)
     if kind == "reference":
         table = (node[1] or "").casefold()
         col = str(node[2]).casefold()
@@ -5028,10 +5119,13 @@ def _static_numeric_type(
         if table:
             raw_type = columns.get(table, {}).get(col)
         else:
-            for tbl_types in columns.values():
-                if col in tbl_types:
-                    raw_type = tbl_types[col]
-                    break
+            if "" in columns:
+                raw_type = columns[""].get(col)  # the column of the iterated table, whatever a stored column of the same name holds
+            else:
+                for tbl_types in columns.values():
+                    if col in tbl_types:
+                        raw_type = tbl_types[col]
+                        break
         if not raw_type:
             return None
         raw = raw_type.casefold()
@@ -5062,6 +5156,10 @@ def _static_numeric_type(
         op, left, right = node[1], node[2], node[3]
         lt = _static_numeric_type(left, columns, variables)
         rt = _static_numeric_type(right, columns, variables)
+        if lt == "blank" and rt is not None:
+            lt = rt if op in {"+", "-"} else "int64"
+        elif rt == "blank" and lt is not None:
+            rt = lt if op in {"+", "-"} else "int64"
         if op in {"+", "-"}:
             if lt == "int64" and rt == "int64":
                 return "int64"
@@ -5177,12 +5275,9 @@ def _static_numeric_type(
         return "double"
     if fn in {"SUMX", "MAXX", "MINX"}:
         if len(args) >= 2:
-            if args[0][0] == "call" and args[0][1] in {"LINEST", "LINESTX"}:
-                # live Power BI (Task 14 review): every LINEST column is a Double, DegreesOfFreedom too; the body keeps its own type (MAXX(LINEST(..),1) is an Integer)
-                from . import dax_linest
-                scope = {**columns, "": {h.casefold(): "double" for h in dax_linest.headers_for(16, True)}}
-                return _static_numeric_type(args[1], scope, variables)
-            return _static_numeric_type(args[1], columns, variables)
+            table_cols = _static_table_columns(args[0], columns, variables)
+            scope = {**columns, "": table_cols} if table_cols else columns
+            return _static_numeric_type(args[1], scope, variables)
         return None
     if fn == "CALCULATE":
         if args:
@@ -5303,7 +5398,7 @@ def _static_type(node: Any, columns: dict[str, dict[str, str]], variables: dict[
 
 
 def _spells_boolean_or_number(text: str) -> bool:
-    if text.strip().casefold() in {"true", "false"}:
+    if text == "" or text.strip().casefold() in {"true", "false"}:
         return True
     try:
         dax_typed.text_to_number(text)
@@ -5351,9 +5446,11 @@ def _reject_mismatched_comparison_types(node: Any, columns: dict[str, dict[str, 
         return
     if node[0] == "let":
         scope = dict(variables)
+        columns = dict(columns)
         for name, value in node[1]:
             _reject_mismatched_comparison_types(value, columns, scope)
             scope[str(name)] = _static_type(value, columns, scope)
+            columns[_TABLE_VARIABLE + str(name).casefold()] = _static_table_columns(value, columns, {})
         _reject_mismatched_comparison_types(node[2], columns, scope)
         return
     if node[0] == "reference" and node[1] and columns:
@@ -7020,14 +7117,15 @@ def evaluate_measures(
             column_kinds: dict[str, str | None] = {}
             if rows:
                 for name, expression in zip(names, expressions):
-                    if id(logical_right_operand(expression)) in logical_blanks and any(out_row.get(name) is None for out_row in out_rows):
-                        refuse_logical_blank_in_a_column(expression, None)
-                    column_kinds[name] = iterator_body_kind(expression, (context, rows[0], 1))
-                    if column_kinds[name] is None:
-                        try:
-                            column_kinds[name] = iterator_expression_category(expression, (context, rows[0], 1))
-                        except MeasureError:
-                            pass
+                    if true_false_column(expression):
+                        column_kinds[name] = "boolean"
+                    else:
+                        column_kinds[name] = iterator_body_kind(expression, (context, rows[0], 1))
+                        if column_kinds[name] is None:
+                            try:
+                                column_kinds[name] = iterator_expression_category(expression, (context, rows[0], 1))
+                            except MeasureError:
+                                pass
                     if column_kinds[name] == "numdate":
                         # live Power BI (iteration 87): numbers beside dates make a number column, its dates are plain numbers
                         for out_row in out_rows:
@@ -7036,15 +7134,18 @@ def evaluate_measures(
             else:
                 ghost = ghost_row_of(context)
                 for name, expression in zip(names, expressions):
-                    try:
-                        column_kinds[name] = iterator_body_kind(expression, (context, ghost, 1))
-                    except MeasureError:
-                        pass
-                    if column_kinds[name] is None:
+                    if true_false_column(expression):
+                        column_kinds[name] = "boolean"
+                    else:
                         try:
-                            column_kinds[name] = iterator_expression_category(expression, (context, ghost, 1))
+                            column_kinds[name] = iterator_body_kind(expression, (context, ghost, 1))
                         except MeasureError:
                             pass
+                        if column_kinds[name] is None:
+                            try:
+                                column_kinds[name] = iterator_expression_category(expression, (context, ghost, 1))
+                            except MeasureError:
+                                pass
             static_types = {"variant": "any", "variant_dates": "any", "text": "text", "bool": "boolean", "boolean": "boolean", "number": "decimal_number", "numeric": "decimal_number", "numdate": "decimal_number", "date": "date", "date/time": "date"}
             types.update({name: static_types[kind] for name, kind in column_kinds.items() if kind in static_types})  # the type of the branches, not of the values the rows hold
             selected_context, selected_rows = derived_table(
@@ -9019,30 +9120,41 @@ def evaluate_measures(
             return left[0], left[1] + right[1]
         if condition[0] == "in" and condition[1][0] == "reference" and condition[2][0] == "tableconstructor" and all(item[0] != "tuple" for item in condition[2][1]):
             reference, constants = condition[1], list(condition[2][1])
+            if not all(plan_constant(constant) for constant in constants):
+                return None
+            table, column = resolve_table(reference[1], reference[2])
+            whole_column = str(table.get("column_types", {}).get(column, "")).casefold() in {"whole_number", "integer", "int64"}
+            wanted = [evaluate(constant, None, allow_text=True, allow_boolean=True) for constant in constants]
+            if any(value is None or (whole_column and isinstance(value, Decimal) and value != value.to_integral_value()) for value in wanted):
+                return None
+            stored = [value for value in values_of_stored_column(reference) if value is not None]
+            return (table["id"], column.casefold()), [value for value in stored if any(dax_typed.compare("=", value, one) for one in wanted)]
         elif condition[0] in {"comparison", "strict_equal"} and (condition[0] == "strict_equal" or condition[1] == "="):
             left, right = condition[-2:]
             reference, constant = (left, right) if left[0] == "reference" else (right, left)
-            if reference[0] != "reference":
+            if reference[0] != "reference" or not plan_constant(constant):
                 return None
-            constants = [constant]
-        else:
-            return None
-        if not all(plan_constant(constant) for constant in constants):
-            return None
-        table, column = resolve_table(reference[1], reference[2])
-        whole_column = str(table.get("column_types", {}).get(column, "")).casefold() in {"whole_number", "integer", "int64"}
-        wanted = [evaluate(constant, None, allow_text=True, allow_boolean=True) for constant in constants]
-        if any(value is None or (whole_column and isinstance(value, Decimal) and value != value.to_integral_value()) for value in wanted):
-            return None
-        stored = [value for value in values_of_stored_column(reference) if value is not None]
-        return (table["id"], column.casefold()), [value for value in stored if any(dax_typed.compare("=", value, one) for one in wanted)]
+            table, column = resolve_table(reference[1], reference[2])
+            whole_column = str(table.get("column_types", {}).get(column, "")).casefold() in {"whole_number", "integer", "int64"}
+            wanted_val = evaluate(constant, None, allow_text=True, allow_boolean=True)
+            if wanted_val is None or (whole_column and isinstance(wanted_val, Decimal) and wanted_val != wanted_val.to_integral_value()):
+                return None
+            stored = [value for value in values_of_stored_column(reference) if value is not None]
+            return (table["id"], column.casefold()), [value for value in stored if any(dax_typed.compare("=", value, one) for one in [wanted_val])]
+        return None
 
-    def plan_finds_no_rows(conditions: Iterable[tuple[Any, ...]]) -> bool | None:
+    def plan_finds_no_rows(conditions: Iterable[tuple[Any, ...]], allow_scan_pruning: bool = False) -> bool | None:
         """Is the result of these filters known to be empty without a scan?  A constant False, or a column whose stored values hold nothing the filters ask for.
         None: a condition of a shape not measured."""
         allowed: dict[tuple[str, str], list[Any]] = {}
         unknown = False
-        for condition in (conjunct for predicate in conditions for conjunct in logical_conjuncts(predicate)):
+        unwrapped_conditions: list[tuple[Any, ...]] = []
+        for predicate in conditions:
+            try:
+                unwrapped_conditions.append(_unwrap_var_filter(predicate))
+            except MeasureError:
+                unwrapped_conditions.append(predicate)
+        for condition in (conjunct for predicate in unwrapped_conditions for conjunct in logical_conjuncts(predicate)):
             if plan_constant(condition):
                 try:
                     if not as_boolean(evaluate(condition, None, allow_text=True, allow_boolean=True)):
@@ -9050,6 +9162,46 @@ def evaluate_measures(
                 except (MeasureRuntimeError, _HardError):
                     unknown = True
                 continue
+            if allow_scan_pruning:
+                if (
+                    condition[0] == "comparison"
+                    and condition[1] in {"<>", "!="}
+                    and condition[2] == condition[3]
+                    and condition[2][0] == "reference"
+                ):
+                    tbl, c = resolve_table(condition[2][1], condition[2][2])
+                    if str(tbl.get("column_types", {}).get(c, "")).casefold() == "text":
+                        return True
+                refs = list(_direct_column_references(condition))
+                if (
+                    len(refs) == 1
+                    and not _has_conditional_or_var(condition)
+                    and not _contains_function_call(condition, "CALCULATE")
+                    and not _contains_function_call(condition, "ISBLANK")
+                    and not (condition[0] == "comparison" and any(arg == ("blank",) or (isinstance(arg, tuple) and len(arg) > 1 and arg[1] == "BLANK") for arg in condition[2:4]))
+                ):
+                    ref = refs[0]
+                    try:
+                        table, col = resolve_table(ref[1], ref[2])
+                        if str(table.get("column_types", {}).get(col, "")).casefold() == "text":
+                            stored = [value for value in values_of_stored_column(ref) if value is not None]
+                            if stored:
+                                matched = []
+                                for val in stored:
+                                    row = {col: val}
+                                    frame = (table, row, 1)
+                                    row_stack.append(frame)
+                                    try:
+                                        if as_boolean(evaluate(condition, frame, allow_text=True, allow_boolean=True)):
+                                            matched.append(val)
+                                    except MeasureError:
+                                        matched.append(val)
+                                    finally:
+                                        row_stack.pop()
+                                if not matched:
+                                    return True
+                    except MeasureError:
+                        pass
             if condition[0] == "comparison" and condition[1] == "<" and condition[2][0] == "reference" and condition[3] == ("string", ""):
                 return True  # no text sorts below the empty text
             looked_up = values_a_condition_allows(condition)
@@ -9080,7 +9232,7 @@ def evaluate_measures(
         if name in {"ALL", "ALLSELECTED", "ALLNOBLANKROW"}:
             return True
         if name in {"FILTER", "CALCULATETABLE"}:
-            empty = plan_finds_no_rows(args[1:])
+            empty = plan_finds_no_rows(args[1:], allow_scan_pruning=(name == "CALCULATETABLE"))
             if empty and (name == "FILTER" or args[0][0] == "table"):
                 return False  # the filters of CALCULATETABLE do not stop a scan nested in its table (live Power BI: FILTER(ALL(Facts),Quantity>100) under Region="Nowhere" fails)
             below = filter_scan_ran(args[0])
@@ -9281,11 +9433,23 @@ def evaluate_measures(
         if argument[0] == "tableconstructor":
             items = argument[1]
             width = len(items[0][1]) if items and items[0][0] in {"tuple", "tableconstructor"} else 1
-            records = [
-                [refuse_logical_blank_in_a_column(member, evaluate(member, None, allow_text=True)) for member in (item[1] if item[0] in {"tuple", "tableconstructor"} else (item,))]
-                for item in items
-            ]
+            records = []
+            for item in items:
+                members = item[1] if item[0] in {"tuple", "tableconstructor"} else (item,)
+                row = []
+                row.extend(evaluate(member, None, allow_text=True) for member in members)
+                records.append(row)
             for column in range(width):  # mixed types become text, Boolean with numbers become numbers
+                members = [(item[1] if item[0] in {"tuple", "tableconstructor"} else (item,))[column] for item in items]
+                typed_blanks = [row_index for row_index, member in enumerate(members) if records[row_index][column] is None and typed_true_false(member)]
+                others = [records[row_index][column] for row_index in range(len(records)) if row_index not in typed_blanks]
+                if typed_blanks and any(isinstance(value, (str, dax_dates.DaxDateTime)) for value in others):
+                    # live Power BI (Task 15 review): beside a text mostly an empty text (ISTEXT, COUNTAX), but FORMAT fails and COALESCE gives BLANK; beside a date 12:00:00 AM: no rule found
+                    raise MeasureError("A logical operator that gives BLANK beside a text or a date in a table constructor is not modelled by the local engine.")
+                if not any(value is None for value in others):
+                    # live Power BI (Task 15 review): the column holds False, so COUNTAX({1&&""},[Value]) is 1; beside a BLANK it stays a BLANK
+                    for row_index in typed_blanks:
+                        records[row_index][column] = False
                 values = [record[column] for record in records]
                 if any(isinstance(value, str) for value in values):
                     for record in records:
@@ -9303,7 +9467,7 @@ def evaluate_measures(
                 col_kind = _unify_numeric_types([_static_numeric_type(node, table_context, variable_kinds) for node in col_nodes])
                 if col_vals and any(isinstance(v, str) for v in col_vals):
                     tc_types[col_name] = "text"
-                elif col_vals and all(isinstance(v, bool) for v in col_vals):
+                elif all(isinstance(v, bool) for v in col_vals) and (col_vals or any(true_false_column(node) for node in col_nodes)):
                     tc_types[col_name] = "boolean"
                 elif col_vals and col_kind in {"int64", "double", "currency"} and all(isinstance(v, Decimal) for v in col_vals):
                     tc_types[col_name] = {"int64": "whole_number", "double": "decimal_number", "currency": "currency"}[col_kind]
@@ -9664,8 +9828,8 @@ def evaluate_measures(
                 lambda operand: plan_constant(operand) or (operand[0] == "let" and plan_constant(operand[2]) and not any(references_variable(operand[2], name) for name, _bound in operand[1])),
             )
         except (MeasureRuntimeError, _HardError):
-            if len(failed) == 2 and right[0] == "let":
-                raise _HardError(str(failed[1])) from failed[1]  # live Power BI (Task 14 review): the error of the VAR block, which IFERROR and ISERROR do not catch
+            if len(failed) == 2 and right[0] == "let" and isinstance(failed[1], _HardError):
+                raise failed[1]
             raise
         seen0_needs_right = False
         if 0 in seen:
@@ -9675,22 +9839,8 @@ def evaluate_measures(
                 seen0_needs_right = False
 
         if result is False and (seen.get(1) == "" or (1 in seen and seen[1] is None and typed_true_false(right))) and 0 in seen and seen0_needs_right:
-            logical_blanks.add(id(right))
             return None  # live Power BI (Task 14 review): a BLANK at run time (LEN, *2, CONVERT, =BLANK() all see one); ISBLANK of the operator is False by its type
         return result
-
-    logical_blanks: set[int] = set()  # the right operands of the logical operators that gave a BLANK
-
-    def logical_right_operand(node: tuple[Any, ...]) -> Any:
-        while node[0] == "var" and node[1] in variable_nodes:
-            node = variable_nodes[node[1]]
-        return node[3] if node[0] == "logical" else node[2][1] if node[0] == "call" and node[1] in {"AND", "OR"} and len(node[2]) == 2 else None
-
-    def refuse_logical_blank_in_a_column(node: tuple[Any, ...], value: Any) -> Any:
-        if value is None and typed_true_false(node):
-            # live Power BI (Task 14 review): the column is True/False and COUNTAX counts this value, which the local engine cannot hold in a table
-            raise MeasureError("A logical operator that gives BLANK in a table column is not modelled by the local engine.")
-        return value
 
     def typed_true_false(node: tuple[Any, ...]) -> bool:
         """A logical operator, or a variable that holds one: True/False by its type, whatever BLANK it gives (see logical_operator)."""
@@ -9699,6 +9849,22 @@ def evaluate_measures(
             seen.add(node[1])
             node = variable_nodes[node[1]]
         return _is_pure_logical(node)
+
+    def true_false_column(node: tuple[Any, ...]) -> bool:
+        """A column of this expression is True/False, also through a VAR block or a CALCULATE, where the operator gives a plain BLANK (live Power BI, Task 15 review)."""
+        seen: set[str] = set()
+        local: dict[str, tuple[Any, ...]] = {}
+        while True:
+            if node[0] == "let":
+                local.update({str(name): value for name, value in node[1]})
+                node = node[2]
+            elif node[0] == "var" and node[1] not in seen and (node[1] in local or node[1] in variable_nodes):
+                seen.add(node[1])
+                node = local.get(node[1], variable_nodes.get(node[1]))
+            elif node[:2] == ("call", "CALCULATE") and len(node[2]) == 1:
+                node = node[2][0]
+            else:
+                return typed_true_false(node)
 
     def iterator_reference_type(
         reference: tuple[Any, ...],
@@ -13631,14 +13797,7 @@ def evaluate_measures(
                 raise MeasureError("ISLOGICAL of a logical operator that gives BLANK is not modelled by the local engine.")  # live Power BI (Task 14 review): True or False by the operands, rule not found
             return isinstance(values[0], bool)
         if function in {"ISINTEGER", "ISINT64", "ISDOUBLE", "ISDECIMAL", "ISCURRENCY"}:
-            column_types = {
-                str(ctx.get("name", "")).casefold(): {
-                    str(h).casefold(): str(ctx.get("column_types", {}).get(h, "")).casefold()
-                    for h in ctx.get("headers", [])
-                }
-                for ctx in contexts_by_id.values()
-            }
-            static_t = _static_numeric_type(arguments[0], column_types, {})
+            static_t = static_type_of(arguments[0])
             if static_t is None:
                 raise MeasureError(f"Cannot determine static type for function {function}.")
             if values[0] is None:
@@ -13655,17 +13814,22 @@ def evaluate_measures(
 
     static_type_of_nodes: dict[int, str | None] = {}
 
+    def static_scope() -> tuple[dict[str, dict[str, str]], dict[str, str | None]]:
+        """The tables and the variables of the query, for the type walk."""
+        column_types = {
+            str(ctx.get("name", "")).casefold(): {str(h).casefold(): str(ctx.get("column_types", {}).get(h, "")).casefold() for h in ctx.get("headers", [])}
+            for ctx in contexts_by_id.values()
+        }
+        scope: dict[str, str | None] = {}
+        for name, bound in variable_nodes.items():
+            scope[str(name)] = _static_numeric_type(bound, column_types, scope)
+            column_types[_TABLE_VARIABLE + str(name).casefold()] = _static_table_columns(bound, column_types, scope)
+        return column_types, scope
+
     def static_type_of(node: tuple[Any, ...]) -> str | None:
         """The static type of an expression, asked once per node: it does not depend on the row."""
         if id(node) not in static_type_of_nodes:
-            column_types = {
-                str(ctx.get("name", "")).casefold(): {str(h).casefold(): str(ctx.get("column_types", {}).get(h, "")).casefold() for h in ctx.get("headers", [])}
-                for ctx in contexts_by_id.values()
-            }
-            scope: dict[str, str | None] = {}
-            for name, bound in variable_nodes.items():
-                scope[str(name)] = _static_numeric_type(bound, column_types, scope)
-            static_type_of_nodes[id(node)] = _static_numeric_type(node, column_types, scope)
+            static_type_of_nodes[id(node)] = _static_numeric_type(node, *static_scope())
         return static_type_of_nodes[id(node)]
 
     def currency_typed(node: tuple[Any, ...]) -> bool:
@@ -14530,6 +14694,8 @@ def evaluate_measures(
         if kind == "binary":
             left = evaluate(node[2], row_context)
             right = evaluate(node[3], row_context)
+            if node[1] == "/" and currency_typed(node[2]) and (right is None or as_number(right) == 0):
+                raise _DivisionError("A division by zero has been encountered.")
             if node[1] == "^":
                 return _power(
                     None if left is None else as_number(left), None if right is None else as_number(right)
@@ -14617,8 +14783,10 @@ def evaluate_measures(
             # a constructor of one plain value is that value (Power BI: {1} is 1); any other table is not a scalar
             if len(node[1]) == 1 and node[1][0][0] not in {"tuple", "tableconstructor"}:
                 return evaluate(node[1][0], row_context, allow_text=allow_text, allow_boolean=allow_boolean)
-            raise MeasureError("A table constructor with more than one value cannot be used as a single value.")
-        if node[0] == "table_call":
+            if any(item[0] in {"tuple", "tableconstructor"} and len(item[1]) > 1 for item in node[1]):
+                raise MeasureError("The expression refers to multiple columns. Multiple columns cannot be converted to a scalar value.")  # IFERROR does not catch it (live Power BI, Task 15 review)
+            raise MeasureRuntimeError("A table constructor with more than one value cannot be used as a single value.")
+        if node[0] == "table_call" or (node[0] == "call" and node[1] in {"ALL", "ALLSELECTED", "ALLNOBLANKROW"}):
             return single_value_of(table_argument_value(node))
         _, function, arguments = node
         if function == "RELATED":
@@ -14681,9 +14849,6 @@ def evaluate_measures(
             if iteration_rows and function in dax_math.STAT_ITERATORS and body_kind is not None and _calls_function(arguments[1], "CURRENCY"):
                 # live Power BI (Task 13 review): GEOMEANX gives 30000 or 1.5E-322, STDEVX four decimals, PERCENTILEX a BLANK where the app reads a number
                 raise MeasureError(f"{function} over a Currency in a conditional is not modelled by the local engine.")
-            if iteration_rows and function[:4] in {"VARX", "STDE"} and body_kind in {"numdate", "date", "variant_dates"}:
-                # live Power BI (Task 13 review): 2.08166603764366 where the dates as day numbers give 2.08166599946613
-                raise MeasureError(f"{function} over a date in a conditional is not exact in the local engine.")
             variant_body, number_dates = body_kind in {"variant", "variant_dates"}, body_kind == "numdate"
             if not variant_body:
                 refuse_variant_aggregation(function, context, arguments[1])
@@ -14698,10 +14863,14 @@ def evaluate_measures(
                     arguments[1], (context, validation_row, 1)
                 )
                 if result_category not in {"numeric", "blank", "date/time", "text"}:
+                    if result_category == "boolean" and arguments[1][0] == "reference":
+                        raise MeasureError(f"The function {function} cannot work with values of type Boolean.")
                     raise MeasureError(
                         f"Iterator {function} expression needs a numeric result."
                     )
             text_extreme = function in {"MAXX", "MINX"} and result_category == "text"
+            if arguments[1][0] == "tableconstructor" and function in _EMPTY_BODY_NOT_TEXT and any(_static_type(item, static_scope()[0], {}) == "text" for item in arguments[1][1]):
+                raise MeasureError(f"The function {function} cannot work with values of type String.")  # live Power BI (Task 15 review): SUMX(FILTER(Facts,FALSE()),{"a","b"}), {1,2} is BLANK there
             if body_kind is None and iteration_rows and (function in _EMPTY_BODY_NOT_TEXT or function in _EMPTY_BODY_NOT_DATE):
                 try:
                     body_category = iterator_expression_category(arguments[1], (context, iteration_rows[0], 1))
@@ -14740,7 +14909,14 @@ def evaluate_measures(
                 if any(not value.is_finite() for value in values):
                     # live Power BI (Task 11 review): Infinity or NaN in the values gives Infinity, 0 or BLANK depending on the statistic: not modelled
                     raise MeasureError(f"{function} over Infinity or NaN values is not modelled by the local engine.")
-                if any(isinstance(value, dax_dates.DaxDateTime) for value in values):
+                if function[:4] in {"VARX", "STDE"}:
+                    has_dates = any(isinstance(v, dax_dates.DaxDateTime) for v in values)
+                    non_blank_vals = [v for v in values if v is not None and v.is_finite()]
+                    if len(set(non_blank_vals)) > 1 and (body_kind in {"numdate", "date", "variant_dates"} or has_dates):
+                        raise MeasureError(f"{function} over a date in a conditional is not exact in the local engine.")
+                    # live Power BI (Task 15 review): VARX.P(Facts,DATE(2020,1,1)+0.5) is 0: one repeated date has no spread
+                    values = [Decimal(0) if has_dates else v for v in values]
+                elif function in _EMPTY_BODY_NOT_DATE and any(isinstance(value, dax_dates.DaxDateTime) for value in values):
                     # live Power BI (iteration 84, critic): "MEDIANX does not support expressions of type string/Boolean/date"
                     raise MeasureError(f"{function} does not support expressions of type date.")
                 percentile = (
@@ -14836,9 +15012,11 @@ def evaluate_measures(
             if not iteration_rows:
                 refuse_foreign_columns_of_empty_set(context, arguments[1], function, typed=not variant_body and count_kind != "numdate")
             if not variant_body and count_kind != "numdate":
-                iterator_expression_category(
+                cat = iterator_expression_category(
                     arguments[1], (context, validation_row, 1)
                 )
+                if function == "COUNTX" and cat == "boolean":
+                    raise MeasureError("The function COUNTX cannot work with values of type Boolean.")
             count = 0
             saw_nan = False
             is_plain_constant_if = arguments[1][0] == "call" and arguments[1][1] == "IF" and _conditional_is_constant(arguments[1])
@@ -14854,7 +15032,10 @@ def evaluate_measures(
                     continue
                 if function == "COUNTX" and variant_body and isinstance(result, (bool, str)):
                     if arguments[1][:2] == ("call", "IFERROR") and next(iter(_direct_column_references(arguments[1][2][0])), None) is None:
-                        raise MeasureError("COUNTX of an IFERROR whose first value fails without a row is not modelled by the local engine.")  # live Power BI (Task 13 review): the plan folds it, the text is counted
+                        try:
+                            evaluate(arguments[1][2][0], None, allow_text=True, allow_boolean=True)
+                        except Exception:
+                            raise MeasureError("COUNTX of an IFERROR whose first value fails without a row is not modelled by the local engine.")
                     continue
 
 

@@ -270,7 +270,7 @@ def statistic(function: str, values: list[Decimal], k: Decimal | None = None) ->
             raise error
         if count > 1 and len(set(values)) == 1 and values[0] != values[0].to_integral_value():
             # live Power BI (Task 11 review): the spread of one repeated fraction is float noise (8.4E-08), not 0
-            raise dax_typed._error(f"{function} of one repeated fraction carries float noise that the local engine does not reproduce.")
+            raise dax_typed.refusal(f"{function} of one repeated fraction carries float noise that the local engine does not reproduce.")
         mean = sum(values, Decimal(0)) / count
         variance = sum(((value - mean) ** 2 for value in values), Decimal(0)) / (count - 1 if sample else count)
         return variance if name.startswith("VAR") else variance.sqrt()
