@@ -233,7 +233,7 @@ def _contains_string(function: str, args: list[object]) -> bool:
     if text == "":
         return False  # a blank or empty text contains nothing, not even the empty text
     folded = _fold(text)
-    if "*" not in find and "?" not in find:
+    if "*" not in find and "?" not in find and "~" not in find:
         return _found(folded, _fold(find))
     return _wildcard_search(find, folded) is not None
 

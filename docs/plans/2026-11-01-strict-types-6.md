@@ -49,3 +49,27 @@ Your Task 15 report was honest and that made the review faster: keep doing that.
 
 ## Not in Task 16 (parked, reasons in `HANDOFF.md`)
 Non-ASCII collation and composed / decomposed text (1,657), engine row orders (TOCSV, CONCATENATEX, SUMMARIZE, TABLEOF, about 665), LINEST rank-deficient or perfect fits (701), SUBSTITUTEWITHINDEX (857), NaN beside other numbers in a Variant MAXX / MINX (117), Currency in the statistical iterators (136), varying dates in VARX / STDEVX (125), `SIN` digits in CONCATENATEX (7), GEOMEANX of mixed signs.
+
+## Review outcome (Claude, 2026-11-01)
+Tested against Power BI Desktop on the iPad guest (queried headless, project never saved) and in the real Analytics Studio offscreen. The user was away; Claude approved the lock under the authority they delegated on 2026-11-01. Antigravity ran out of quota during the fix round, so Claude finished the fixes.
+
+**The build.** The first entry reported 80 of 80 fresh probes. The first review round found 290 wrong answers on the standard table, because the rules had been tried on narrow shapes.
+
+**Method.** The same as Task 15, at a larger size: about 250,000 probes on three Facts tables, answered by `main` and by the build. About 28,000 answers changed, and about 35,000 questions went to Power BI over the rounds. Score the whole answer set, not the fix list: a fix list hides what a fix breaks.
+
+**Rules Power BI showed, now in `measures.py`:**
+- Text order is ASCII with `'` and `-` ignored at primary level.
+- Empty text in a logical operator folds at compile time, except through LEFT, RIGHT, MID, REPT, REPLACE, FORMAT and SELECTEDVALUE, which do not fold.
+- A logical operator's BLANK stays a plain BLANK through IF, SWITCH and IFERROR with one branch.
+- `==` checks types at compile time; only a literal `BLANK()` fits every type.
+- UNION joins column types, and a date beside a number is a Double. DATE minus DATE is a date. GEOMEANX and STDEVX keep Currency.
+- A VAR holding a transition inside a table filter is evaluated once, in the caller's row context. A nested VAR block there stays refused.
+- Currency divided by 0 or BLANK in an iterator is a fatal division error.
+
+**Still refused, no rule found:** Part D, Part G, an operator beside another operator in a conditional, ISLOGICAL beside a data-reading operand or a column, `VAR b=BLANK() RETURN b=="a"`.
+
+**Still wrong, as on `main` (2 items, Part F of Task 17):** `IF(TRUE(),2.5&&"",FALSE())` in an added column gives False where Power BI gives a BLANK. Part A is not in a replayed battery, so the gate does not see these: score the spec file by hand.
+
+**A trap for later tasks.** The gate stops pytest at the first failure, so the pass count of a failed gate covers only part of the suite. Widening `_is_table_filter_argument` also sent tables to the legacy CALCULATE path, which changed a refusal on a locked model; the `legacy=True` argument keeps that path as it was. The last change only altered refusal text on 147 probes, no value.
+
+**Result:** 603 of 836 match, 231 refused, 2 wrong as before. Locked 276,038.
