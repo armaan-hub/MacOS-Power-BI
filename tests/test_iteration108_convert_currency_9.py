@@ -148,7 +148,9 @@ class PartAConvertTypingTests(unittest.TestCase):
         # Power BI gives 12/31/9999 23:59:59 for Infinity in a plain cell, but a locked item shows an error in CONCATENATEX
         # and BLANK in MINX, so the local engine refuses it until the iterator rule is known.
         self.assertTrue(_is_error("CONVERT(1E300,DATETIME)"))
-        self.assertTrue(_is_error("CONVERT(1/0,DATETIME)"))
+        # Task 21 Part D: the iterator rule is now modelled, so the plain cell gives Power BI's saved answer
+        # (dax_battery_convert9_extra); MINX over stored rows stays BLANK as saved.
+        self.assertEqual(_local("CONVERT(1/0,DATETIME)"), "12/31/9999 23:59:59")
 
     def test_convert_boolean_of_blank_is_false_and_empty_text_is_blank(self) -> None:
         self.assertEqual(_local("CONVERT(BLANK(),BOOLEAN)"), "False")

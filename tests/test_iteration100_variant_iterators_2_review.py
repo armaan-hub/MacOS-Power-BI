@@ -145,7 +145,9 @@ class TypingTest(unittest.TestCase):
         self.assertEqual("15", dax.local("SUMX(Facts,FIRSTNONBLANK(Facts[Quantity],1))"))
 
     def test_currency_averages_are_refused(self) -> None:
-        _refused(self, ["AVERAGEX(Facts,SWITCH(Facts[Quantity],1,CURRENCY(3),Facts[Quantity]*2))"])
+        # Task 21: a Currency-typed AVERAGEX body is now modelled (rounded to ten-thousandths); this is Power BI's saved answer
+        # (dax_battery_variant2_extra).
+        self.assertEqual("5.1667", dax.local("AVERAGEX(Facts,SWITCH(Facts[Quantity],1,CURRENCY(3),Facts[Quantity]*2))"))
 
     def test_a_date_past_the_display_range_is_refused_by_the_evaluator(self) -> None:
         # raised while a card formatted the value, it broke every later measure in the real app

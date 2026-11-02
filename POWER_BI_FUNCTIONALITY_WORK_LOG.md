@@ -1654,3 +1654,29 @@ The standing test workbook is now `tests/Data/Vat File -Aug 2026.xlsx` (sheet `V
 **Gate:** PARITY GATE PASSED. pytest 2,456 passed, 1 expected failure, 6,611 subtests; replay 434,881: 422,319 match, 12,562 refused, 0 DIFF, 0 CRASH; locked 382,125 to 422,299. The DSI workbook is still missing on this Mac, so its answers were not replayed.
 
 **Open:** 425 results wrong on both `main` and the build, 24 answers now refused, listed in `HANDOFF.md`.
+
+## 2026-11-02 — Iteration 110 (Task 21 currency-double-11: Currency with Doubles, types beside text numbers, CURRENCY of text, dates beside Infinity or NaN, logical BLANK beside an error)
+
+**Who did what:** Haiku 5.5 coded the six Parts as one subagent. Sonnet 5.5 fixed the review findings in two rounds. Claude Opus 5.5 planned, measured the rules in Power BI on the iPad guest, reviewed and shipped under the delegated approval.
+
+**Rules measured in Power BI and now in the engine:**
+- A Currency times or over a Double: the Currency's count of ten-thousandths is taken as a double, multiplied or divided in doubles and rounded half away from zero (136 of 136 rows). A Double over a Currency is a plain Double, held at 15 significant digits.
+- Static types beside text numbers: text + or - Currency is a Double, text times Currency is a Currency, Currency over text or a date is a Currency, text or a date over Currency is a Double, text or a logical + a date is a date.
+- CURRENCY and CONVERT of a text read its exact digits, rounded half to even; beyond the Currency range, or Infinity or NaN, is the error.
+- A text number beyond the Double range (`"1E400"`) in + - * / is the conversion error; IFERROR catches it, and for `/` it shows through type tests.
+- A date beside Infinity or NaN keeps that value: NaN prints as day zero, Infinity as the ends of the range; FORMAT "yyyy" of NaN is 1899 and of Infinity the error.
+- MINX or MAXX over a stored table whose body is NaN on every row is BLANK, but NaN when evaluated inside IFERROR's first argument (14 probes); a VAR bound outside keeps BLANK.
+- AVERAGEX of a Currency body is a Currency, rounded to ten-thousandths.
+- The logical BLANK `(x&&"")` or `(x||"")` cancels an error in `*` and on the left of `/`, also one level deeper in a chain.
+- UNICHAR(BLANK()) is BLANK; DIVIDE with a scanned BLANK numerator converts a text divisor.
+- Type tests of a row-reading Currency product beyond range: ISCURRENCY and ISNUMBER show the error, ISDOUBLE and ISINT64 answer by type (saved answers).
+
+**Review:** a fresh batch of 5,914 new shapes on 3 tables (17,742 Power BI answers), scored on `main` and the build: first round 10 new wrong answers (Double over Currency kept the full binary expansion; `"1E400"` under ISCURRENCY), fixed. Final: 560 wrong to right, 1,036 refused to match, 15,304 stay matching, 824 stay refused, 18 wrong to refused, 0 new wrong, 0 wrong on both. Spec score: 2,508 match, 29 refused, 0 wrong of 2,537. Code read for lookups: none.
+
+**Tested in the real app and against Power BI on the iPad guest:** the real app through the measure path, offscreen: 575/575 equal, and 6,000 fresh probes, 5,181 created, 819 refused (603 Power BI errors, 216 safe gaps), 0 wrong. New answers came from Power BI Desktop on the iPad guest, headless; the project was not saved.
+
+**Saved:** `tools/parity/dax_battery_currency11_extra.json` (8,168 answers on the standard table: the fresh probes, the Task 21 spec answers and the MINX probes), `tests/fixtures_currency11_review_alt.json` (5,789 each on tables A and B). No saved Power BI answer was edited. Two stale test expectations changed, each now asserting Power BI's saved answer: `tests/test_iteration108_convert_currency_9.py` (CONVERT(1/0,DATETIME) is 12/31/9999 23:59:59) and `tests/test_iteration100_variant_iterators_2_review.py` (an AVERAGEX of a Currency SWITCH is 5.1667).
+
+**Gate:** PARITY GATE PASSED. pytest 2,483 passed, 1 expected failure; replay 443,049: 430,574 match, 12,475 refused, 0 DIFF, 0 CRASH; locked 422,299 to 430,554. The DSI workbook is still missing on this Mac, so its answers were not replayed.
+
+**Open (refused, not wrong):** ISINT64 and ISCURRENCY of `"1E400"` minus a date; IFERROR around MINX or MAXX of NaN beside other functions; `(1&&"")*"a"*1` and `"a"*(1&&"")` with constant x; 5 Part D items (TODAY()*0 and a NaN date product); 24 Part E items (text beside the logical BLANK, constant x).

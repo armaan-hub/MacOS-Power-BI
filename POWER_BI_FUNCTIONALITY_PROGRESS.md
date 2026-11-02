@@ -8,7 +8,7 @@
 
 ## Latest status
 
-**Latest status (2026-11-02, after Iteration 109 / Task 20 never-blank-zero-10, what ISBLANK evaluates, sign of zero and NaN, logical BLANKs, Currency limits, powers with Infinity or NaN, Double text rounded from the binary value, coded by Haiku 5.5, fixed by Sonnet 5.5, planned, reviewed and shipped by Claude Opus 5.5 under the user's delegated approval):** pytest 2,456 passed and 1 expected failure, real app 575/575 and 6,000 fresh probes with 0 wrong, replay 434,881 answers with 422,319 match, 12,562 refused, 0 DIFF, 0 CRASH, locked 422,299. Open: 425 fresh probe results wrong on both `main` and this build, 24 answers now refused instead of matching (see `HANDOFF.md`). Next: Task 21 from those open items.
+**Latest status (2026-11-02, after Iteration 110 / Task 21 currency-double-11, Currency with Doubles computed in doubles, static types beside text numbers, CURRENCY of text and non-finite values, dates beside Infinity or NaN, the logical BLANK beside an error, coded by Haiku 5.5, fixed by Sonnet 5.5, planned, reviewed and shipped by Claude Opus 5.5 under the user's delegated approval):** pytest 2,483 passed and 1 expected failure, real app 575/575 and 6,000 fresh probes with 0 wrong, replay 443,049 answers with 430,574 match, 12,475 refused, 0 DIFF, 0 CRASH, locked 430,554. Open: refusals listed in `HANDOFF.md`. Next: Task 22 from those open items.
 
 **Previous status (2026-11-01, after Iteration 103 / Task 14 logic-tables-4, empty text in logical operators, a VAR block as an iterator table, FILTER over no rows, Currency arithmetic, review done, gate passed, locked 246,907, committed, merged and pushed; 246,927 of 253,237 saved answers match, 0 differ; next: Task 15 typed-columns-5, 1,836 items).**
 

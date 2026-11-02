@@ -122,6 +122,12 @@ def _stamp_row_dependence(failure: "_PowerFailure", operands: Iterable[Any], hel
 class _CurrencyRangeFailure(_StaticTypeFailure, _CurrencyOverflowError):
     """A Currency times a Double (or a date, or a text) beyond the Currency range."""
 
+    reads_rows = False  # Task 21 Part B: a product that reads rows is shown by ISCURRENCY (measured), a constant one is answered by its type
+
+
+class _TextRangeFailure(_StaticTypeFailure, MeasureRuntimeError):
+    """Task 21 Part G: a text number beyond the Double range in + - * (a type test of it is answered by its type)."""
+
 
 class _CalculateTableFilterRefusal(MeasureError):
     """A CALCULATETABLE in a Boolean filter whose hoist-or-transition reading was not established (see dax_ct_filters)."""
@@ -6007,7 +6013,17 @@ def _static_numeric_type(
                 return "datetime"
             if rt == "datetime" and op == "+" and lt in {"int64", "double", "currency", "blank"}:
                 return "datetime"
+            if op == "+" and ((lt == "datetime" and rt in {"text", "bool"}) or (rt == "datetime" and lt in {"text", "bool"})):
+                return "datetime"  # Task 21 Part B: a text number or a logical + a date is a date (not a Double, Integer or Currency)
             return None
+        if op in {"+", "-"} and "text" in (lt, rt) and "currency" in (lt, rt):
+            return "double"  # Task 21 Part B: a text number + or - a Currency is a Double
+        if op == "*" and "text" in (lt, rt) and "currency" in (lt, rt):
+            return "currency"  # Task 21 Part B: a text number times a Currency is a Currency
+        if op == "/" and lt == "currency" and rt in {"text", "datetime"}:
+            return "currency"  # Task 21 Part B: a Currency over a text number or a date is a Currency
+        if op == "/" and rt == "currency" and lt in {"text", "datetime"}:
+            return "double"  # Task 21 Part B: a text number or a date over a Currency is a Double
         if op in {"+", "-", "*", "/"} and "text" in (lt, rt) and "currency" not in (lt, rt):
             return "double"  # Part E: arithmetic on text is a Double ("1E15"+0 is 1E+15 in text); a Currency beside text is left as it was
         if lt == "blank" and rt is not None:
@@ -14568,6 +14584,8 @@ def evaluate_measures(
         if target in {"DOUBLE", "CURRENCY"}:
             if target == "DOUBLE":
                 return Decimal(number)
+            if isinstance(value, str):
+                return dax_math.text_to_currency(number)  # Task 21 Part C: a text is rounded from its exact digits; beyond the range is the Out of present range error
             if not number.is_finite() or abs(number) > _CURRENCY_LIMIT:  # Part B: Infinity, NaN and beyond the Currency range are the error
                 raise MeasureRuntimeError("The result of a conversion or arithmetic operation is either too large or too small.")
             return dax_math.to_currency(number)
@@ -14885,7 +14903,16 @@ def evaluate_measures(
             hidden = isinstance(failure, _StaticTypeFailure) and (
                 not isinstance(failure, _PowerFailure) or not failure.row_dependent or function not in {"ISNUMBER", "ISDOUBLE"}
             )
+            if getattr(failure, "reads_rows", False) and function in _TYPE_TESTS and len(arguments) == 1:
+                # Task 21 Part B/L: the range error of a Currency product that reads rows shows through ISCURRENCY and ISNUMBER (measured); the other type tests are not measured
+                if function in {"ISCURRENCY", "ISNUMBER"}:
+                    hidden = False  # the other type tests stay answered by their type (locked: ISDOUBLE and ISINT64 of such a product are False)
             answer = static_type_answer(function, static_type_of(arguments[0])) if function in _TYPE_TESTS and len(arguments) == 1 and hidden else None
+            if answer is None and function == "ISDATETIME" and len(arguments) == 1 and isinstance(failure, _TextRangeFailure):
+                text_type = static_type_of(arguments[0])  # Task 21 Part G: ISDATETIME of + - * around a text beyond the Double range is answered by the type of the expression
+                if text_type is None:
+                    raise dax_typed.refusal("ISDATETIME of arithmetic around a text beyond the Double range is not typed by the local engine.") from failure
+                return text_type == "datetime"
             if answer is None:
                 raise
             return answer
@@ -14908,6 +14935,15 @@ def evaluate_measures(
             ])
         if function in dax_ext.ARITY:
             return dax_ext.call(function, values)
+        if function == "CURRENCY" and isinstance(values[0], str):
+            try:
+                return dax_math.text_to_currency(dax_typed.to_number(values[0]))  # Task 21 Part C: a text read as a Currency; beyond the range it is a conversion error, which a type test of a constant answers by its type
+            except MeasureRuntimeError as failure:
+                if "Out of present range" not in str(failure):
+                    raise
+                raise _CurrencyConversionError(str(failure)) from failure
+        if function == "CURRENCY" and isinstance(values[0], Decimal) and not values[0].is_finite() and not dax_dates.is_date(values[0]):
+            raise _CurrencyConversionError("The result of a conversion or arithmetic operation is either too large or too small.")  # Task 21 Part C: CURRENCY of Infinity or NaN is the error
         if function == "CURRENCY" and isinstance(values[0], Decimal) and values[0].is_finite() and not dax_dates.is_date(values[0]) and abs(values[0]) > _CURRENCY_LIMIT:
             if left_static_type(arguments[0], row_context) == "int64":
                 return _currency_wrap(values[0])  # Task 20 F5: a whole number of the Int64 type wraps
@@ -15056,6 +15092,47 @@ def evaluate_measures(
                 scope[str(name)] = _static_numeric_type(bound, cols, scope)
             return _static_numeric_type(node, cols, scope) == "currency"
         return static_type_of(node) == "currency"
+
+    nan_date_extreme: list[str] = []
+    iferror_depth = [0]  # how many IFERROR first arguments are being evaluated (a VAR is evaluated where it is bound, so outside them)
+
+    def extreme_in_arithmetic(node: Any) -> bool:
+        """True when a MINX / MAXX call is reached from this node through + - * / and unary signs only."""
+        if not isinstance(node, tuple) or not node:
+            return False
+        if node[0] == "call":
+            return node[1] in {"MINX", "MAXX"}
+        if node[0] == "binary" and node[1] in {"+", "-", "*", "/"}:
+            return extreme_in_arithmetic(node[2]) or extreme_in_arithmetic(node[3])
+        if node[0] == "unary":
+            return extreme_in_arithmetic(node[2])
+        return False
+
+    def currency_double_operation(node: tuple[Any, ...], left: Decimal, right: Decimal, row_context: Any) -> Decimal | None:
+        """Task 21 Part A: a Currency with a Double in * or /, and a Double over a Currency, are computed on doubles.
+
+        The Currency is its count of ten-thousandths as a double; the product or quotient is rounded half away from zero to a
+        whole count and divided by 10000. A Double over a Currency is a plain Double. None when the rule does not apply.
+        """
+        left_currency = currency_typed(node[2], row_context)
+        right_currency = currency_typed(node[3], row_context)
+        if left_currency == right_currency:
+            return None
+        if node[1] == "/" and right_currency:
+            if right == 0:
+                return None
+            quotient = float(left) / float(right)
+            return Decimal(format(quotient, ".15g")) if math.isfinite(quotient) else None  # a double as the 15 digits Power BI shows: the next double product then lands on the clean value (3.14159/CURRENCY(0.0001))*10000 is 314159000
+        if node[1] == "*" and left_static_type(node[3] if left_currency else node[2], row_context) not in {"double", "datetime", "text"}:
+            return None  # an Int64 operand keeps the wrap of a Currency product
+        if node[1] == "/" and not left_currency:
+            return None
+        currency_value, other_value = (left, right) if left_currency else (right, left)
+        ticks = float((currency_value * 10000).to_integral_value(rounding=ROUND_HALF_UP))
+        operated = ticks * float(other_value) if node[1] == "*" else ticks / float(other_value)
+        if not math.isfinite(operated):
+            return None
+        return Decimal(int(Decimal(operated).to_integral_value(rounding=ROUND_HALF_UP))).scaleb(-4)
 
     def left_static_type(node: tuple[Any, ...], row_context: Any = None) -> str | None:
         """The static type of the left operand of a - with a date on the right, with the row's columns when a row is in scope."""
@@ -15960,7 +16037,35 @@ def evaluate_measures(
                 # (live Power BI, Task 19 Part F review: a logical BLANK on the right of * or on the left of * beside an error gives no BLANK, so only / on the left is lifted)
                 blank_left = left is None and left_error is None and (not right_bad or _reads_no_data(node[2], variable_nodes.get) or ((not scanning_calculates or _filter_flag_blank(node[2])) and _blank_without_scan(node[2], variable_nodes.get, row_scans_model(row_context))) or (not isinstance(right, str) and not (node[1] == "*" and _is_text_arithmetic(node[3])) and _logical_operands_scan_nothing(node[2], variable_nodes.get, row_scans_model(row_context))))
                 blank_right = right is None and right_error is None and (not left_bad or _reads_no_data(node[3], variable_nodes.get) or ((not scanning_calculates or _filter_flag_blank(node[3])) and _blank_without_scan(node[3], variable_nodes.get, row_scans_model(row_context))) or (not isinstance(left, str) and not _is_text_arithmetic(node[2]) and _logical_operands_scan_nothing(node[3], variable_nodes.get, row_scans_model(row_context))))
-                if blank_left or (node[1] == "*" and blank_right):
+                def logical_empty_text_blank(logical: Any, constant_ok: bool = False) -> bool:
+                    """Task 21 Part E: (x&&"") or (x||"") over a row-dependent x is the BLANK of Part C, and that BLANK cancels an error in * and on the left of /.
+                    The empty text may be any operand that reads no data and is empty (TRIM("") too); the other operand must read a column."""
+                    if not isinstance(logical, tuple) or len(logical) != 4 or logical[0] != "logical":
+                        return False
+                    for text_node, other in ((logical[3], logical[2]), (logical[2], logical[3])):
+                        if (
+                            isinstance(other, tuple) and (constant_ok or any(True for _ in _iter_reference_nodes(other)))
+                            and _reads_no_data(text_node, variable_nodes.get) and evaluate(text_node, row_context, allow_text=True) == ""
+                        ):
+                            return True
+                    return False
+
+                def logical_blank_chain(chain: Any) -> bool:
+                    """Task 21 Part K: a * chain, or a / chain on its left, that holds a logical empty-text BLANK (constant or not) is that BLANK
+                    wherever it sits in the chain (measured: (1&&"")/SQRT(-1)*ERROR("z") and (1&&"")*SQRT(-1)*ERROR("z") are BLANK)."""
+                    if not isinstance(chain, tuple) or len(chain) != 4 or chain[0] != "binary" or chain[1] not in {"*", "/"}:
+                        return False
+                    if logical_empty_text_blank(chain[2], True) or logical_blank_chain(chain[2]):
+                        return True
+                    return chain[1] == "*" and (logical_empty_text_blank(chain[3], True) or logical_blank_chain(chain[3]))
+
+                logical_blank_left = left is None and left_error is None and (logical_empty_text_blank(node[2]) or logical_blank_chain(node[2]))  # Task 21 Part E: (x&&"") beside an error is BLANK
+                logical_blank_right = right is None and right_error is None and node[1] == "*" and (
+                    logical_empty_text_blank(node[3]) or logical_blank_chain(node[3])
+                    or (left_error is not None and _is_text_arithmetic(node[2]) and logical_empty_text_blank(node[3], True))  # Task 21 Part K: "a"*1*(1&&"") is BLANK
+                )
+                logical_blank_right = logical_blank_right or (right is None and right_error is None and logical_empty_text_blank(node[3]))
+                if blank_left or logical_blank_left or (node[1] == "*" and (blank_right or logical_blank_right)):
                     return None
                 for held_error, other_operand in ((left_error, node[3]), (right_error, node[2])):
                     if held_error is not None:
@@ -15995,19 +16100,38 @@ def evaluate_measures(
                     left = dax_dates.DaxDateTime(Decimal(0))
                 elif right is None and node[1] == "+" and (is_date_aggregate(node[3]) or _is_datetime_conversion(node[3])):
                     right = dax_dates.DaxDateTime(Decimal(0))
+            for text_value in (left, right):
+                if isinstance(text_value, str):
+                    spelled = as_number(text_value)
+                    if spelled.is_finite() and not math.isfinite(float(spelled)):
+                        # Task 21 Part G: a text number beyond the Double range is the conversion error in + - * / (IFERROR catches it);
+                        # a type test of + - * is answered by its type, while one of / shows the error (measured)
+                        text_message = f"Cannot convert value '{text_value}' of type Text to type Number."
+                        if node[1] == "/":
+                            raise MeasureRuntimeError(text_message)
+                        raise _TextRangeFailure(text_message)
             result = _binary_value(
                 node[1],
                 None if left is None else as_number(left),
                 None if right is None else as_number(right),
             )
             result = typed_zero(result, node, row_context)
-            if node[1] in {"*", "/"} and isinstance(result, Decimal) and result.is_finite() and currency_typed(node, row_context):
+            double_currency = None
+            if node[1] in {"*", "/"} and isinstance(result, Decimal) and result.is_finite() and left is not None and right is not None:
+                double_currency = currency_double_operation(node, as_number(left), as_number(right), row_context)  # Task 21 Part A: a Currency with a Double is computed on doubles
+            if double_currency is not None:
+                result = double_currency
+            elif node[1] in {"*", "/"} and isinstance(result, Decimal) and result.is_finite() and currency_typed(node, row_context):
                 result = result.quantize(Decimal("0.0001"), rounding=ROUND_HALF_UP)  # live Power BI (Task 14 review): every step rounds to ten-thousandths, half away from zero
             if node[1] in {"*", "/"} and isinstance(result, Decimal) and not result.is_nan() and (result.is_infinite() or abs(result) > _CURRENCY_LIMIT):
                 # Task 20 F5: a Currency times (or over) a Double, a date or a text is a Currency checked for range, not wrapped: beyond it is the overflow error
                 currency_side, other_side = (node[2], node[3]) if currency_typed(node[2], row_context) else (node[3], node[2])
                 if currency_typed(currency_side, row_context) and not currency_typed(other_side, row_context) and (node[1] == "*" or currency_side is node[2]) and left_static_type(other_side, row_context) in {"double", "datetime", "text"}:
-                    raise _CurrencyRangeFailure("The result of a conversion or arithmetic operation is either too large or too small.")
+                    if node[1] == "/":
+                        raise _CurrencyOverflowError("The result of a conversion or arithmetic operation is either too large or too small.")  # Task 21 Part B: a Currency over a Double is evaluated, so a type test does not hide its range error
+                    failure = _CurrencyRangeFailure("The result of a conversion or arithmetic operation is either too large or too small.")
+                    failure.reads_rows = not (_reads_no_data(node[2], variable_nodes.get) and _reads_no_data(node[3], variable_nodes.get))  # Task 21 Part B: ISCURRENCY shows the range error of a product that reads rows
+                    raise failure
             if node[1] in {"+", "-", "*", "/"} and isinstance(result, Decimal) and result.is_finite() and not dax_dates.is_date(left) and not dax_dates.is_date(right) and currency_typed(node, row_context):
                 if node[1] == "/" and abs(result) > _CURRENCY_LIMIT:
                     raise _CurrencyOverflowError("The result of a conversion or arithmetic operation is either too large or too small.")  # Part D: a Currency quotient beyond the range is the error
@@ -16021,6 +16145,8 @@ def evaluate_measures(
                     if isinstance(result, Decimal) and result.is_finite():
                         result = result.to_integral_value() if result == result.to_integral_value() else result.normalize()  # Part A: a currency operand's four decimals are not kept by a number
                     return result
+                if not result.is_finite():
+                    return dax_dates.DaxDateTime(result)  # Task 21 Part D: a date beside Infinity or NaN keeps that value (it prints as a date, as CONVERT does)
                 return dax_dates.DaxDateTime(dax_dates.tick_round(result))
             return result
         if kind == "logical":
@@ -16264,12 +16390,19 @@ def evaluate_measures(
                     # live Power BI (Task 12 review): NaN or the other value, depending on the order the engine walks the rows (which columns the body reads)
                     raise MeasureError(f"{function} over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine does not model.")
                 if not ordered:
+                    if values and iferror_depth[0] > 0 and _stored_scan(arguments[0], variable_nodes.get) is not None:
+                        # Task 21 Part I: over a stored table a MINX / MAXX whose body is NaN on every row is NaN while IFERROR's first argument is evaluated
+                        # (date or plain number body alike), where bare, in COALESCE, in ISERROR or held by a VAR it is BLANK (measured)
+                        nan_date_extreme.append(function)
+                        return Decimal("-NaN")
                     return None  # NaN results are ignored; only NaN gives blank
                 extreme = max(ordered) if function == "MAXX" else min(ordered)
                 if variant_body and any(value == extreme and isinstance(value, dax_dates.DaxDateTime) != isinstance(extreme, dax_dates.DaxDateTime) for value in ordered):
                     raise MeasureError(f"{function} over a Variant found a date and a number of the same value at the extreme: which one Power BI returns is not modelled.")
                 if not variant_body and not row_set and extreme.is_infinite() and (extreme > 0) == (function == "MINX"):
                     return None  # live Power BI (iteration 87): MINX of nothing but +Infinity and MAXX of nothing but -Infinity are BLANK; over a Variant they are that Infinity
+                if variant_body and isinstance(extreme, dax_dates.DaxDateTime) and not extreme.is_finite() and _stored_scan(arguments[0], variable_nodes.get) is not None:
+                    raise MeasureError(f"{function} over a Variant of a date beyond the range over a stored table is not modelled by the local engine.")  # Task 21 Part D: measured on stored rows as an error
                 return extreme
             if not values:
                 return None
@@ -16278,13 +16411,20 @@ def evaluate_measures(
                 total = dax_typed.QUIET.add(total, value)
             if function in {"SUMX", "AVERAGEX"} and total.is_finite() and abs(total) > _CURRENCY_LIMIT and currency_typed(arguments[1], (context, iteration_rows[0] if iteration_rows else {}, 1)):
                 total = _currency_wrap(total)  # Task 20 F5: the sum of a Currency body wraps at 64 bits; AVERAGEX divides the wrapped sum
-            if function == "AVERAGEX" and not variant_body and all(v.is_nan() for v in values):
+            if function == "AVERAGEX" and not variant_body and all(v.is_nan() for v in values) and all(isinstance(v, dax_dates.DaxDateTime) for v in values):
+                result = Decimal("NaN")  # Task 21 Part D: AVERAGEX of a date body that is NaN is a number, NaN
+            elif function == "AVERAGEX" and not variant_body and all(v.is_nan() for v in values):
                 stored_scan = _stored_scan(arguments[0], variable_nodes.get)
                 if stored_scan is None:
                     raise MeasureError("AVERAGEX of nothing but NaN over this table is not modelled by the local engine.")
                 result = Decimal(0) if stored_scan else Decimal("NaN")  # live Power BI (Task 13 review): 0 over a stored scan of a number body
             else:
                 result = total if function == "SUMX" else dax_typed.QUIET.divide(total, Decimal(len(values)))
+            if (
+                function == "AVERAGEX" and not variant_body and result.is_finite() and abs(result) < _CURRENCY_LIMIT
+                and currency_typed(arguments[1], (context, iteration_rows[0] if iteration_rows else {}, 1))
+            ):
+                result = result.quantize(Decimal("0.0001"), rounding=ROUND_HALF_UP)  # Task 21 Part J: the average of a Currency body is a Currency, rounded to four decimals (measured on three tables)
             if function == "AVERAGEX" and result.is_finite() and _calls_function(arguments[1], "CURRENCY") and result != result.quantize(Decimal("0.0001")):
                 # live Power BI (Task 12 review): 4 decimals beside whole numbers, all of them beside a date: which branch types round is not measured
                 raise MeasureError("AVERAGEX over a Currency beside other number types is not typed by the local engine.")
@@ -16299,7 +16439,9 @@ def evaluate_measures(
                 raise MeasureError("SUMX over a mix of dates and plain numbers is not typed by the local engine.")
             if function == "SUMX" and date_sum and variant_body and result.is_finite() and result > _MAX_DATE_SERIAL:
                 raise MeasureError("SUMX of a Variant's dates past the year 9999 is an error in Power BI.")  # live Power BI (Task 13 review): a system error; a plain date sum saturates
-            if function == "SUMX" and date_sum and not result.is_finite() and _calls_function(arguments[1], "CONVERT"):
+            if function == "SUMX" and date_sum and not result.is_finite() and not _calls_function(arguments[1], "CONVERT") and _stored_scan(arguments[0], variable_nodes.get) is not None:
+                raise _CurrencyOverflowError("The result of a conversion or arithmetic operation is either too large or too small.")  # Task 21 Part D: measured on stored rows as an error (IFERROR catches it), not a date; a CONVERT body keeps Part E's date
+            if function == "SUMX" and date_sum and not result.is_finite():  # Task 21 Part D: a date body beside Infinity or NaN keeps the date type
                 # Part E: a date sum that is Infinity or NaN shows the date at the end of the range: NaN is 12/30/1899, Infinity the last
                 # moment of 9999 and -Infinity 01/01/0100 (measured, live Power BI)
                 return dax_dates.DaxDateTime(Decimal(0) if result.is_nan() else _MAX_DATE_SERIAL if result > 0 else _DATETIME_CLAMP_LOW)
@@ -16874,11 +17016,22 @@ def evaluate_measures(
                 lambda: evaluate(arguments[0], row_context, allow_text=True, allow_boolean=allow_boolean), arguments[0]
             )  # Task 20 Part A: an argument that can never be BLANK was answered above; any other error propagates
         if function == "IFERROR":
+            hits_before = len(nan_date_extreme)
+            iferror_depth[0] += 1
             try:
-                value = evaluate(arguments[0], row_context, allow_text=allow_text, allow_boolean=allow_boolean)
-                failed = dax_typed.is_non_finite(value)  # Infinity and NaN count as errors here
-            except (MeasureRuntimeError, DecimalException, OverflowError):
-                value, failed = None, True
+                try:
+                    value = evaluate(arguments[0], row_context, allow_text=allow_text, allow_boolean=allow_boolean)
+                    failed = dax_typed.is_non_finite(value)  # Infinity and NaN count as errors here
+                except (MeasureRuntimeError, DecimalException, OverflowError):
+                    value, failed = None, True
+            finally:
+                iferror_depth[0] -= 1
+            if len(nan_date_extreme) > hits_before:
+                if not extreme_in_arithmetic(arguments[0]):
+                    raise dax_typed.refusal("A MINX / MAXX of NaN inside an IFERROR argument beside anything but arithmetic is not modelled by the local engine.")
+                if isinstance(value, Decimal) and value.is_nan():
+                    return value  # Task 21 Part I: the NaN of such a MINX / MAXX is not an error for IFERROR (measured: IFERROR(MINX(Facts,DATE(2020,1,1)-0/0),7) is NaN, text -nan(ind))
+                raise dax_typed.refusal("A MINX / MAXX of NaN inside IFERROR that does not end as NaN is not modelled by the local engine.")
             if failed:
                 value = evaluate(arguments[1], row_context, allow_text=allow_text, allow_boolean=allow_boolean)
             else:
@@ -17044,6 +17197,14 @@ def evaluate_measures(
             numerator_value = evaluate(arguments[0], row_context)
             denominator_value = evaluate(arguments[1], row_context)
             if numerator_value is None:
+                def divide_truth(condition: tuple[Any, ...]) -> bool | None:
+                    if not _reads_no_data(condition, variable_nodes.get):
+                        return None
+                    answer = evaluate(condition, row_context, allow_text=True)
+                    return answer if isinstance(answer, bool) else None
+
+                if isinstance(denominator_value, str) and not _static_blank(arguments[0], variable_nodes.get, divide_truth):
+                    as_number(denominator_value)  # Task 21 Part F: a scanned BLANK numerator converts the divisor, so a text that is no number is the error
                 return None
             numerator = (
                 Decimal(int(numerator_value))
@@ -17860,6 +18021,6 @@ def evaluate_measures(
     for item in selected:
         _reject_mismatched_comparison_types(parsed[item["name"].casefold()], column_types_by_table)
     for value in results.values():
-        if dax_dates.is_date(value):
+        if dax_dates.is_date(value) and not value.is_infinite():
             dax_dates.date_text(value)  # a date that cannot be shown (before day zero, past 9999) is refused here, not when a card formats it
     return results

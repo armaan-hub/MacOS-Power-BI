@@ -47,6 +47,12 @@ def format_value(value: object, pattern: object) -> str:
     if isinstance(value, str):
         return fmt.replace("@", value) if "@" in fmt else value
     number: Decimal = value  # type: ignore[assignment]
+    if not number.is_finite() and dax_dates.is_date(number) and key == "yyyy":
+        # Task 21 Part H: FORMAT of a date beside NaN or Infinity with the pattern yyyy (measured): NaN is day zero (1899), Infinity is the error;
+        # other patterns keep the number text (locked: "General Number" shows -nan(ind), -inf)
+        if number.is_nan():
+            return "1899"
+        raise dax_typed._error("The parameter is incorrect.")
     if not number.is_finite():
         return dax_typed.number_to_text(number)  # a NaN shows its sign: -nan(ind) or nan
     if not dax_dates.is_date(number) and re.search(r"[@&<>]", fmt) and not re.search(r"[0#]", fmt) and key not in _NAMED:
