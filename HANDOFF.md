@@ -2,9 +2,9 @@
 
 Rules and roles are in `AGENTS.md`. Read it first. Keep this file short and current.
 
-**Active agent:** Claude Opus 5.5 reviews Task 23 big-numbers-13 (user's mix workflow, 2026-11-02; see `AGENTS.md`)
-**Branch in use:** antigravity/big-numbers-13
-**Working tree clean:** no (uncommitted changes on branch antigravity/big-numbers-13 ready for review)
+**Active agent:** Antigravity (Gemini 3.8 Flash) codes Task 24 in the worktree `/Users/armaan/Power BI tool-task24`; Claude Opus 5.5 plans, reviews and gates; Sonnet 5.5 fixes; Haiku 5.5 is the fallback coder and the read-only watcher (mix workflow, 2026-11-02)
+**Branch in use:** main (Task 24 on `antigravity/topn-ties-14` in its worktree)
+**Working tree clean:** yes
 
 ## Status values
 `PLANNED` > `BUILDING` > `READY FOR REVIEW` > `REVIEWING` > `FIXING` > `GATE PASSED` > `DONE`
@@ -35,12 +35,14 @@ Rules and roles are in `AGENTS.md`. Read it first. Keep this file short and curr
 | 20 | never-blank-zero-10: what ISBLANK evaluates, sign of zero and NaN, the logical BLANK, Currency limits, Double text (1,669 items: 1,129 wrong, 535 refused, 5 crash, answers measured, no VM) | `docs/plans/2026-11-02-never-blank-zero-10.md` | DONE (coded by Haiku 5.5, fixed by Sonnet 5.5, reviewed, locked 422,299, merged 2026-11-02) | Claude |
 | 21 | currency-double-11: Currency with Doubles in doubles, static types beside text numbers, CURRENCY of text and non-finite values, dates beside Infinity or NaN, the logical BLANK beside an error | `docs/plans/2026-11-02-currency-double-11.md` | DONE (coded by Haiku 5.5, fixed by Sonnet 5.5, reviewed, locked 430,554, merged 2026-11-02) | Claude |
 | 22 | double-arith-12: Double arithmetic in IEEE doubles, iterators summed in doubles in row order, Int64 wrap, Int64-range errors, ROUND of huge values, overflow and underflow | `docs/plans/2026-11-02-double-arith-12.md` | DONE (coded by Haiku 5.5, fixed by Sonnet 5.5, reviewed, locked 436,230, merged 2026-11-02) | Claude |
-| 23 | big-numbers-13: MOD quotient limit, FLOOR/CEILING/QUOTIENT/MROUND of huge doubles, EXP/POWER/LN last digits (1,807 measured answers, 639 wrong now) | `docs/plans/2026-11-02-big-numbers-13.md` | READY FOR REVIEW | Claude |
+| 23 | big-numbers-13: MOD quotient limit, FLOOR/CEILING/QUOTIENT/MROUND of huge doubles, EXP/POWER/LN last digits (1,807 measured answers, 639 wrong now) | `docs/plans/2026-11-02-big-numbers-13.md` | DONE (coded by Antigravity, fixed by Sonnet 5.5, reviewed, locked 438,077, merged 2026-11-03) | Claude |
+| 24 | topn-ties-14: the row order of TOPN when sort values tie (120 measured answers, 42 wrong) | `docs/plans/2026-11-02-topn-ties-14.md` | BUILDING (worktree) | Antigravity |
 
 ## Current task
-Task 23 big-numbers-13, on branch `antigravity/big-numbers-13`. Ready for review by Claude. Antigravity completed Parts F, D, E and research on Parts A/B/C.
+Task 24 topn-ties-14, on branch `antigravity/topn-ties-14` in the worktree `/Users/armaan/Power BI tool-task24`.
 
 ## Open questions (either agent writes here instead of guessing)
+- Claude (open, Task 23, wrong on both `main` and the build, not saved): EXP, POWER/^, LN and LOG last digits (345 spec rows in `tools/parity/task23_big_numbers_spec.json` Parts A/B/C); Power BI's EXP has an irregular ~1e-14 error, `EXP(100)` = 2.68811714181611E+43.
 - Claude (open, Task 21, refused rather than wrong): ISINT64/ISCURRENCY of `"1E400"-DATE(...)` (Power BI False); IFERROR around MINX/MAXX of NaN inside COALESCE or IF; `(1&&"")*"a"*1` (Power BI BLANK) and `"a"*(1&&"")`; TODAY()*0 and NaN date products (Part D); text beside the logical BLANK and constant x (Part E, 24); the Task 20 refusals (ATAN/CEILING of non-finite in ISBLANK, type tests around a failing power).
 - Claude (open, found in the Task 20 review, wrong on both `main` and the build, 425 results, not saved, list in the session scratchpad only): the app keeps Doubles as Decimals, so `+ - * /` differ from Power BI in the last digits (`(2^-0.5-0.7071067811865476)&"z"`); Currency mixed with large Doubles (`("1E15"+CURRENCY(1))&"z"` is `1E+15z`); `CURRENCY("1E15")` is the error; a date beside Infinity or NaN clamps (`SUMX({1,2},DATE(2020,1,1)-(0/0))`); `IFERROR((x&&"")*SQRT(-1),7)` is BLANK; `DIVIDE(blank,"a")` is the error; Power BI's own pow differs by one unit from ours on some fractional powers.
 - Claude (open, Task 20, refused rather than wrong, 24 answers that used to match): ATAN of NaN inside ISBLANK, CEILING with Infinity or NaN inside ISBLANK, and type tests of arithmetic around a failing power. `ISNUMBER(MIN(x)^0.5+1)` is True while `ISNUMBER(2/0+0.0^0.0)` is the error, and no rule separating them was found.

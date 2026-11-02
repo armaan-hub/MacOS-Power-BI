@@ -1701,3 +1701,24 @@ The standing test workbook is now `tests/Data/Vat File -Aug 2026.xlsx` (sheet `V
 **Gate:** PARITY GATE PASSED. pytest 2,500 passed, 1 expected failure; replay 448,816: 436,250 match, 12,566 refused, 0 DIFF, 0 CRASH; locked 430,554 to 436,230.
 
 **Open, moved to Task 23:** MOD's real limit is the quotient |x/d| above about 1.126E12 (Task 22's "|x| >= 1E15" was a stand-in; `MOD(5,1E-30)` is an error in Power BI, 0 here); FLOOR/CEILING/QUOTIENT of doubles near 2^62-2^63; MROUND of 5E15..8E15 (5000000000000002 in Power BI); EXP/POWER/LN last digits (Power BI's EXP has an irregular ~1e-14 error).
+
+## 2026-11-03 — Iteration 112 (Task 23 big-numbers-13: MOD quotient limit, FLOOR/CEILING/QUOTIENT/MROUND of huge doubles)
+
+**Who did what:** Antigravity (Gemini 3.8 Flash) coded Parts F, D and E and researched A/B/C (the user's mix workflow, from 2026-11-02). Sonnet 5.5 fixed the review findings. Claude Opus 5.5 planned, measured 1,807 spec answers in Power BI on the iPad guest, reviewed and shipped under the delegated approval. A read-only Haiku watcher checked Antigravity about every 30 minutes.
+
+**Rules measured in Power BI and now in the engine:**
+- MOD is the error "An argument of function 'MOD' has the wrong data type or the result is too large or too small." when |x/d| >= 1.126E12, at any |x| (`MOD(1E15,1E10)` = 0 works, `MOD(5,1E-30)` and `MOD(1E29,7)` are errors); the band 1,125,899,906,844..1.126E12 refuses. This replaces Task 22's stand-in "|x| >= 1E15". MOD of Doubles is computed in doubles.
+- FLOOR, CEILING and QUOTIENT of doubles from 2^53 to 2^63 read the quotient at 15 significant digits (`FLOOR(4.6E18,3)` = 4599999999999989760); a negative number keeps its sign.
+- MROUND from 2^52 to 2^53 with a whole multiple: an odd result goes up by one (`MROUND(5E15,3)` = 5000000000000002); the shapes it does not settle refuse.
+
+**Review:** Antigravity's build had 0 wrong on the spec's Parts F, D, E. 804 fresh shapes measured in Power BI found 24 new wrong answers (huge negative FLOOR/CEILING lost the sign), fixed by Sonnet, plus MROUND near 4.5E15 and MOD precision with fractional divisors (also wrong on main), fixed. A direct-call test found CEILING above 2^63, fixed. Final: 0 wrong on the 804 fresh probes (main: 138 wrong). Code read for lookups: none.
+
+**Tested in the real app and against Power BI on the iPad guest:** real app through the measure path, offscreen: 575/575 equal, and 1,500 fresh probes, 1,381 created, 119 refused, 0 wrong. Power BI answers came from Power BI Desktop on the iPad guest; the project was not saved.
+
+**Saved:** `tools/parity/dax_battery_big13_extra.json` (2,188 answers: the spec and the fresh probes), `tools/parity/task23_big_numbers_spec.json`. No saved Power BI answer was edited. Three stale test expectations changed after live Power BI checks (`MOD(5,1E-30)` is the error).
+
+**Faster gate (2026-11-03):** `tools/parity_check.py --tests` now starts the pytest suite (12 workers with pytest-xdist, no stop at the first failure, every failing test listed) and the real-app run beside the replay; a test that fails only beside other tests is re-run alone. Gate time went from about 90-125 minutes to 18. Antigravity now codes the next task in its own git worktree while the current one is gated.
+
+**Gate:** PARITY GATE PASSED. pytest 2,511 passed (2 failed only beside other tests and passed alone); replay 451,004: 438,097 match, 12,907 refused, 0 DIFF, 0 CRASH; locked 436,230 to 438,077.
+
+**Open:** EXP, POWER/^, LN and LOG last digits (345 spec rows: Power BI's EXP has an irregular ~1e-14 error; no formula fits every row, code unchanged, not saved).
