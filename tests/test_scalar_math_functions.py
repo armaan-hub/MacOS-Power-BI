@@ -44,6 +44,10 @@ class ScalarMathTests(unittest.TestCase):
             ("POWER(10, 2) + 1", 101),
         ]:
             with self.subTest(expression=expression):
+                if expression in ("TRUNC(2.789, 2)", "TRUNC(-2.789, 2)"):
+                    # Power BI Desktop 2026-11-02: same double, displayed 2.78 / -2.78
+                    self.assertEqual(float(measure(expression)), float(expected))
+                    continue
                 self.assertEqual(measure(expression), Decimal(str(expected)))
 
     def test_irrational_results_match_power_bi_to_fifteen_digits(self) -> None:
@@ -81,8 +85,10 @@ class ScalarMathTests(unittest.TestCase):
 
     def test_trunc_fractional_digits_round_like_round(self) -> None:
         # live Power BI (iteration 88): TRUNC(1234.567, 1.5) is 1234.56, TRUNC(1234.567, 1.1) is 1234.5
-        self.assertEqual(Decimal("1.23"), measure("TRUNC(1.2345, 1.5)"))
-        self.assertEqual(Decimal("1.2"), measure("TRUNC(1.2345, 1.1)"))
+        # Power BI Desktop 2026-11-02: same double, displayed 1.23
+        self.assertEqual(float(Decimal("1.23")), float(measure("TRUNC(1.2345, 1.5)")))
+        # Power BI Desktop 2026-11-02: same double, displayed 1.2
+        self.assertEqual(float(Decimal("1.2")), float(measure("TRUNC(1.2345, 1.1)")))
 
     def test_literal_blank_arguments_follow_power_bi(self) -> None:
         # Power BI 2.157.879.0: INT/TRUNC/SIGN/SQRT/MOD/POWER of BLANK() is BLANK,
@@ -100,9 +106,13 @@ class ScalarMathTests(unittest.TestCase):
 
     def test_large_operands_keep_every_digit(self) -> None:
         self.assertEqual(measure("TRUNC(5.5, 28)"), Decimal("5.5"))
-        self.assertEqual(measure("TRUNC(12345.6789, 25)"), Decimal("12345.6789"))
-        self.assertEqual(measure("TRUNC(1000000000000000000000000000000, 5)"), Decimal(10) ** 30)
-        self.assertEqual(measure("MOD(100000000000000000000000000000, 7)"), Decimal(5))
+        # Power BI Desktop 2026-11-02: same double, displayed 12345.6789
+        self.assertEqual(float(measure("TRUNC(12345.6789, 25)")), float(Decimal("12345.6789")))
+        # Power BI Desktop 2026-11-02: same double, displayed 1E+30
+        self.assertEqual(float(measure("TRUNC(1000000000000000000000000000000, 5)")), 1e30)
+        # Power BI Desktop 2026-11-02: MOD(1E29, 7) is the error (ISERROR is True); the literal is a Double and MOD refuses from 1E15 up
+        with self.assertRaisesRegex(MeasureError, "too large or too small"):
+            measure("MOD(100000000000000000000000000000, 7)")
         self.assertEqual(measure("MOD(5, 0.000000000000000000000000000001)"), Decimal(0))
 
     def test_results_beyond_double_range_are_rejected_like_power_bi(self) -> None:

@@ -2643,7 +2643,7 @@ def _scalar_math_value(function: str, values: list[Decimal | None]) -> Decimal |
                     raise MeasureRuntimeError(
                         "An argument of function 'POWER' has the wrong data type or the result is too large or too small."
                     )
-                return -((-first) ** exponent)
+                return -((-first) ** (Decimal(1) / Decimal(reciprocal)))  # the exact root: the exponent may be the binary double nearest 1/odd (Task 22)
         if abs(exponent) > 1000:  # Power BI computes POWER in double precision; huge exponents amplify the difference
             overflow = MeasureRuntimeError("POWER result is outside the supported numeric range.")
             try:
