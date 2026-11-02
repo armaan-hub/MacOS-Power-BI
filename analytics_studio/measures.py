@@ -8487,7 +8487,10 @@ def evaluate_measures(
                             return (left > right) == descending
                     return False
 
-                kept_indices = dax_iteration_order.heap_top(limit, range(len(scored)), beats)
+                try:
+                    kept_indices = dax_iteration_order.heap_top(limit, range(len(scored)), beats)
+                except dax_iteration_order.AmbiguousTieOrder:
+                    raise dax_typed.refusal("The walk order of a TOPN whose tied rows are dropped by a better row is not settled by the local engine.") from None
                 return dict(context), [scored[index][1] for index in kept_indices]
             kept = ordered[:limit]
             if kept and len(ordered) > limit:

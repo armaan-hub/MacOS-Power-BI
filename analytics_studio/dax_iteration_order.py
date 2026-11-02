@@ -320,6 +320,10 @@ def grouped(row_count: int, profiles: Sequence[Profile], dedup: bool = False) ->
     return combinations * row_count <= budget
 
 
+class AmbiguousTieOrder(Exception):
+    """Two readings of the measured heap give a different row order and no live answer separates them."""
+
+
 def heap_top(count: int, items: Sequence[Any], better: Callable[[Any, Any], bool]) -> list[Any]:
     """The rows Power BI's TOPN keeps, as the array of the binary heap it builds (worst kept item at the root).
 
@@ -330,6 +334,7 @@ def heap_top(count: int, items: Sequence[Any], better: Callable[[Any, Any], bool
     otherwise the item is pushed and the tied group stays. The array order, not a sorted order, is what the rows
     are returned in (measured: TOPN(3, Quantity 0..5) walks out as 3,5,4; with ties 137 live Power BI orders over three walk orders, ASC/DESC and two keys fit exactly)."""
     heap: list[Any] = []
+    pushed_ties: list[Any] = []  # rows that tied with the root of a full heap and were pushed since
 
     def sift_up(index: int) -> None:
         while index > 0:
@@ -377,11 +382,39 @@ def heap_top(count: int, items: Sequence[Any], better: Callable[[Any, Any], bool
                 heap.append(item)  # the tied group still holds a place inside the top count: it stays
                 sift_up(len(heap) - 1)
             else:
-                heap[0] = item  # the item takes the root's place and sifts down; the rest of the tied group is then popped
-                sift_down(0)
-                for _ in range(group - 1):
-                    pop_root()
+                if group == 2 and len(pushed_ties) == 1 and pushed_ties[0] in heap:
+                    # a lone root and one tie pushed onto the full heap, evicted together: the array comes out one way
+                    # when the tie is popped after the sift (most live Power BI answers) and another when it is taken
+                    # out first (one live answer); where the two readings differ the order is not decided here
+                    reference = list(heap)
+                    heap[0] = item
+                    sift_down(0)
+                    for _ in range(group - 1):
+                        pop_root()
+                    first_reading = list(heap)
+                    heap[:] = reference
+                    for row in pushed_ties:
+                        if row in heap:
+                            position = heap.index(row)
+                            last = heap.pop()
+                            if position < len(heap):
+                                heap[position] = last
+                                sift_down(position)
+                                sift_up(position)
+                    heap[0] = item
+                    sift_down(0)
+                    if first_reading != heap:
+                        raise AmbiguousTieOrder
+                    heap[:] = first_reading
+                else:
+                    heap[0] = item  # the item takes the root's place and sifts down; the rest of the tied group is then popped
+                    sift_down(0)
+                    for _ in range(group - 1):
+                        pop_root()
+                pushed_ties.clear()
         elif not better(heap[0], item):  # ties with the worst kept row
             heap.append(item)
+            if len(heap) > count:
+                pushed_ties.append(item)
             sift_up(len(heap) - 1)
     return heap
