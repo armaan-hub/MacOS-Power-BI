@@ -114,7 +114,6 @@ def math_function(function: str, args: list[object]) -> object:
             raise _fail(function)
         if abs(number) >= 2 ** 53:
             # Part D: from 2^53 the quotient and the product are rounded to doubles in Power BI (MROUND(2^63-1024,3) is the error, its double product being 2^63).
-            # Below 2^53 the exact rule below matches every measured row but MROUND(5E15,3), which Power BI gives as 5000000000000002 (exact ...001; wrong here as on main).
             quotient = float(number) / float(multiple)
             if not math.isfinite(quotient):
                 raise dax_typed.refusal("MROUND of a quotient beyond the Double range is not modelled by the local engine.")
@@ -123,6 +122,23 @@ def math_function(function: str, args: list[object]) -> object:
             if not math.isfinite(product) or abs(product) >= 2 ** 63:
                 raise dax_typed._error("The result of a conversion or arithmetic operation is either too large or too small.")
             return Decimal(0) if product == 0 else Decimal(product)
+        if abs(number) >= 2 ** 52:  # measured: from 2^52 a whole multiple gives an even result (an odd one goes up by 1)
+            m_f = float(multiple)
+            q = float(number) / m_f
+            steps = int(math.floor(abs(q) + 0.5))
+            if multiple == multiple.to_integral_value():
+                prod = steps * abs(int(multiple))
+                if prod % 2 != 0:
+                    if abs(number) < Decimal("5E15"):  # MROUND(4503599627370497,13) stays odd in Power BI but MROUND(4503599627370497,17) goes up: below 5E15 an odd product is not settled
+                        raise dax_typed.refusal("MROUND with an odd product between 2^52 and 5E15 is not modelled by the local engine.")
+                    prod += 1
+                result = Decimal(-prod if number < 0 else prod)
+            else:
+                prod = float(steps) * abs(m_f)
+                result = Decimal(-prod if number < 0 else prod)
+            if abs(result) >= 2 ** 63:
+                raise dax_typed._error("The result of a conversion or arithmetic operation is either too large or too small.")
+            return Decimal(0) if result == 0 else result
         steps = (number / multiple).quantize(Decimal(1), rounding=ROUND_HALF_UP)
         result = steps * multiple
         if abs(result) >= 2 ** 63:  # Part D: an Integer result beyond the 64-bit range is the conversion error
@@ -189,7 +205,11 @@ def math_function(function: str, args: list[object]) -> object:
             raise _fail(function)
         if denominator == 0:
             raise dax_typed._error("Division by zero has occurred when evaluating function 'QUOTIENT'.")
-        quotient = (numerator / denominator).to_integral_value(rounding=ROUND_DOWN)
+        if abs(numerator) >= 2 ** 53:
+            q = float(numerator) / float(denominator)
+            quotient = Decimal(int(q))
+        else:
+            quotient = (numerator / denominator).to_integral_value(rounding=ROUND_DOWN)
         if abs(quotient) >= 2 ** 63:  # Part D: an Integer result beyond the 64-bit range is the conversion error
             raise dax_typed._error("The result of a conversion or arithmetic operation is either too large or too small.")
         return quotient

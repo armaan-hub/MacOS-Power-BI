@@ -15,6 +15,7 @@ import argparse
 import hashlib
 import json
 import subprocess
+import tempfile
 import sys
 from datetime import date
 from pathlib import Path
@@ -38,7 +39,7 @@ DAX_BATTERIES = ["dax_battery", "dax_battery_review", "dax_battery_blank_logic",
     "dax_battery_sdet_filters", "dax_battery_comments_booleans",
     "dax_battery_round2_scope", "dax_battery_round2", "dax_battery_critic_shapes",
     "dax_battery_round3", "dax_battery_round4", "dax_battery_round5", "dax_battery_diff_groups", "dax_battery_iferror_hard_errors", "dax_battery_concatenatex_order", "dax_battery_not_operator", "dax_battery_promoted_pending", "dax_battery_utf16_text", "dax_battery_evaluation_order", "dax_battery_allselected_shadow", "dax_battery_allselected_critic2",
-    "dax_battery_xnpv", "dax_battery_scalar_misc2", "dax_battery_type_tests", "dax_battery_tocsv_tojson", "dax_battery_tocsv_tojson_extra", "dax_battery_tocsv_tojson_extra2", "dax_battery_linest", "dax_battery_linest_extra", "dax_battery_linest_extra2", "dax_battery_linest_extra3", "dax_battery_swi_extra", "dax_battery_swi_extra2", "dax_battery_swi_extra3", "dax_battery_ami_extra", "dax_battery_ami_extra2", "dax_battery_rollup_extra", "dax_battery_rollup_extra2", "dax_battery_rollup_extra3", "dax_battery_table_fns2", "dax_battery_var_scoping", "dax_battery_pending_extra", "dax_battery_pending_extra2", "dax_battery_misc3_extra", "dax_battery_misc3_extra2", "dax_battery_xnpv2", "dax_battery_gaps2", "dax_battery_gaps2_extra", "dax_battery_gaps2_extra2", "dax_battery_variant2_extra", "dax_battery_typed3_extra", "dax_battery_logic4_extra", "dax_battery_typed5_extra", "dax_battery_strict6_extra", "dax_battery_blank8_extra", "dax_battery_convert9_extra", "dax_battery_never10_extra", "dax_battery_currency11_extra", "dax_battery_double12_extra",
+    "dax_battery_xnpv", "dax_battery_scalar_misc2", "dax_battery_type_tests", "dax_battery_tocsv_tojson", "dax_battery_tocsv_tojson_extra", "dax_battery_tocsv_tojson_extra2", "dax_battery_linest", "dax_battery_linest_extra", "dax_battery_linest_extra2", "dax_battery_linest_extra3", "dax_battery_swi_extra", "dax_battery_swi_extra2", "dax_battery_swi_extra3", "dax_battery_ami_extra", "dax_battery_ami_extra2", "dax_battery_rollup_extra", "dax_battery_rollup_extra2", "dax_battery_rollup_extra3", "dax_battery_table_fns2", "dax_battery_var_scoping", "dax_battery_pending_extra", "dax_battery_pending_extra2", "dax_battery_misc3_extra", "dax_battery_misc3_extra2", "dax_battery_xnpv2", "dax_battery_gaps2", "dax_battery_gaps2_extra", "dax_battery_gaps2_extra2", "dax_battery_variant2_extra", "dax_battery_typed3_extra", "dax_battery_logic4_extra", "dax_battery_typed5_extra", "dax_battery_strict6_extra", "dax_battery_blank8_extra", "dax_battery_convert9_extra", "dax_battery_never10_extra", "dax_battery_currency11_extra", "dax_battery_double12_extra", "dax_battery_big13_extra",
     "dax_battery_scalar_misc2_extra", "dax_battery_scalar_misc2_extra2",
     "dax_battery_type_tests_extra", "dax_battery_type_tests_extra2"]
 # Real workbooks: the Power BI answers saved by tools/table_oracle_diff.py are replayed against the app's own import.
@@ -152,6 +153,60 @@ def write_ledger(results: list[dict], baseline: dict, failures: list[str], notes
     LEDGER.write_text("\n".join(lines) + "\n")
 
 
+def _start_pytest(env: dict) -> subprocess.Popen:
+    """Run the whole suite without stopping at the first failure, spread over CPU cores when pytest-xdist is installed."""
+    import importlib.util
+    import os
+    command = [sys.executable, "-m", "pytest", "-q", "-p", "no:cacheprovider", "-rfE"]
+    if importlib.util.find_spec("xdist"):
+        workers = int(os.environ.get("PARITY_WORKERS", max(1, min(12, (os.cpu_count() or 2) - 4))))
+        command += ["-n", str(workers)]
+    log = tempfile.TemporaryFile(mode="w+")  # a file, not a pipe: a full pipe would stall the suite while the answers replay
+    process = subprocess.Popen(command, cwd=ROOT, env=env, stdout=log, stderr=subprocess.STDOUT, text=True)
+    process.log = log
+    return process
+
+
+def _output(process: subprocess.Popen) -> str:
+    process.wait()
+    process.log.seek(0)
+    return process.log.read()
+
+
+def _failed_test_ids(output: str) -> list[str]:
+    ids = []
+    for line in output.splitlines():
+        if line.startswith(("FAILED ", "ERROR ")):
+            node = line.split(" ", 1)[1].split(" - ", 1)[0].strip()
+        elif line.startswith("SUBFAILED"):
+            node = line.split(") ", 1)[-1].split(" - ", 1)[0].strip()
+        else:
+            continue
+        if "::" in node and node not in ids:
+            ids.append(node)
+    return ids
+
+
+def _finish_pytest(suite: subprocess.Popen, env: dict) -> list[str]:
+    """Wait for the suite; a test that failed only in the parallel run is re-run alone before it counts as a failure."""
+    output = _output(suite)
+    print("pytest:", (output.strip().splitlines() or ["no output"])[-1])
+    if suite.returncode == 0:
+        return []
+    failed = _failed_test_ids(output)
+    if not failed:
+        return ["pytest suite failed (no test ids found in its output)"]
+    rerun = subprocess.run([sys.executable, "-m", "pytest", "-q", "-p", "no:cacheprovider", "-rfE", *failed], cwd=ROOT, env=env,
+                           capture_output=True, text=True)
+    still = _failed_test_ids(rerun.stdout) if rerun.returncode else []
+    flaky = [t for t in failed if t not in still]
+    if flaky:
+        print(f"pytest: {len(flaky)} test(s) failed only beside other tests and passed when re-run alone:", ", ".join(flaky))
+    if rerun.returncode and not still:
+        return ["pytest re-run failed: " + ((rerun.stdout.strip().splitlines() or ["no output"])[-1])]
+    return [f"pytest failed: {t}" for t in still]
+
+
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--freeze", action="store_true", help="re-ask the live Power BI for the DAX batteries")
@@ -166,6 +221,17 @@ def main() -> int:
         baseline["powerbi_version"] = json.loads(first.read_text())["powerbi_version"]
     except StopIteration:
         pass
+
+    # --tests: start the pytest suite and the real-app run in the background now, so they run while the answers replay
+    env = {"QT_QPA_PLATFORM": "offscreen", "PYTHONPATH": ".", **{k: v for k, v in __import__("os").environ.items()}}
+    suite = smoke = None
+    if args.tests:
+        suite = _start_pytest(env)
+        if TABLES["VAT"]["path"].exists():
+            log = tempfile.TemporaryFile(mode="w+")
+            smoke = subprocess.Popen([sys.executable, "tools/app_smoke.py", str(ROOT / "tools/parity/_smoke")], cwd=ROOT, env=env,
+                                     stdout=log, stderr=subprocess.DEVNULL, text=True)
+            smoke.log = log
 
     dax_rows = replay_dax()
     table_rows, digests, notes = replay_tables()
@@ -196,17 +262,12 @@ def main() -> int:
         print("not locking: the gate has failures")
 
     if args.tests:
-        env = {"QT_QPA_PLATFORM": "offscreen", "PYTHONPATH": ".", **{k: v for k, v in __import__("os").environ.items()}}
-        suite = subprocess.run([sys.executable, "-m", "pytest", "-q", "-x"], cwd=ROOT, env=env, capture_output=True, text=True)
-        print("pytest:", (suite.stdout.strip().splitlines() or ["no output"])[-1])
-        if suite.returncode:
-            failures.append("pytest suite failed")
-        if TABLES["VAT"]["path"].exists():
-            smoke = subprocess.run([sys.executable, "tools/app_smoke.py", str(ROOT / "tools/parity/_smoke")], cwd=ROOT, env=env,
-                                   capture_output=True, text=True)
-            line = next((l for l in smoke.stdout.splitlines() if l.startswith("MEASURES THROUGH THE APP")), "no result line")
+        failures += _finish_pytest(suite, env)
+        if smoke is not None:
+            out = _output(smoke)
+            line = next((l for l in out.splitlines() if l.startswith("MEASURES THROUGH THE APP")), "no result line")
             print("real app:", line)
-            if smoke.returncode or "0 different" not in line or "reopen: True" not in smoke.stdout:
+            if smoke.returncode or "0 different" not in line or "reopen: True" not in out:
                 failures.append(f"real-app run failed: {line}")
 
     write_ledger(results, baseline, failures, notes)
