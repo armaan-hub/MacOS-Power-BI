@@ -1,0 +1,1598 @@
+{
+"powerbi_version": "2.157.879.0 (26.08)+da30fe74eb0b8a8786ab7326b69c400a0e951831",
+"frozen": "2026-11-03",
+"items": [
+{
+"expr": "FORMAT(\"12\",\"Percent\")",
+"powerbi": "12"
+},
+{
+"expr": "FORMAT(\"12\",\"Currency\")",
+"powerbi": "12"
+},
+{
+"expr": "FORMAT(\"12\",\"Fixed\")",
+"powerbi": "12"
+},
+{
+"expr": "FORMAT(\"12\",\"Standard\")",
+"powerbi": "12"
+},
+{
+"expr": "FORMAT(\"12\",\"General Number\")",
+"powerbi": "12"
+},
+{
+"expr": "FORMAT(\"12\",\"Scientific\")",
+"powerbi": "12"
+},
+{
+"expr": "FORMAT(\"12\",\"Yes/No\")",
+"powerbi": "12"
+},
+{
+"expr": "FORMAT(\"12\",\"True/False\")",
+"powerbi": "12"
+},
+{
+"expr": "FORMAT(\"12\",\"On/Off\")",
+"powerbi": "12"
+},
+{
+"expr": "FORMAT(\"12\",\"0.00\")",
+"powerbi": "12"
+},
+{
+"expr": "FORMAT(\"12\",\"#,##0\")",
+"powerbi": "12"
+},
+{
+"expr": "FORMAT(\"12.5\",\"Percent\")",
+"powerbi": "12.5"
+},
+{
+"expr": "FORMAT(\"12.5\",\"Currency\")",
+"powerbi": "12.5"
+},
+{
+"expr": "FORMAT(\"12.5\",\"Fixed\")",
+"powerbi": "12.5"
+},
+{
+"expr": "FORMAT(\"12.5\",\"Standard\")",
+"powerbi": "12.5"
+},
+{
+"expr": "FORMAT(\"12.5\",\"General Number\")",
+"powerbi": "12.5"
+},
+{
+"expr": "FORMAT(\"12.5\",\"Scientific\")",
+"powerbi": "12.5"
+},
+{
+"expr": "FORMAT(\"12.5\",\"Yes/No\")",
+"powerbi": "12.5"
+},
+{
+"expr": "FORMAT(\"12.5\",\"True/False\")",
+"powerbi": "12.5"
+},
+{
+"expr": "FORMAT(\"12.5\",\"On/Off\")",
+"powerbi": "12.5"
+},
+{
+"expr": "FORMAT(\"12.5\",\"0.00\")",
+"powerbi": "12.5"
+},
+{
+"expr": "FORMAT(\"12.5\",\"#,##0\")",
+"powerbi": "12.5"
+},
+{
+"expr": "FORMAT(\" 3 \",\"Percent\")",
+"powerbi": " 3 "
+},
+{
+"expr": "FORMAT(\" 3 \",\"Currency\")",
+"powerbi": " 3 "
+},
+{
+"expr": "FORMAT(\" 3 \",\"Fixed\")",
+"powerbi": " 3 "
+},
+{
+"expr": "FORMAT(\" 3 \",\"Standard\")",
+"powerbi": " 3 "
+},
+{
+"expr": "FORMAT(\" 3 \",\"General Number\")",
+"powerbi": " 3 "
+},
+{
+"expr": "FORMAT(\" 3 \",\"Scientific\")",
+"powerbi": " 3 "
+},
+{
+"expr": "FORMAT(\" 3 \",\"Yes/No\")",
+"powerbi": " 3 "
+},
+{
+"expr": "FORMAT(\" 3 \",\"True/False\")",
+"powerbi": " 3 "
+},
+{
+"expr": "FORMAT(\" 3 \",\"On/Off\")",
+"powerbi": " 3 "
+},
+{
+"expr": "FORMAT(\" 3 \",\"0.00\")",
+"powerbi": " 3 "
+},
+{
+"expr": "FORMAT(\" 3 \",\"#,##0\")",
+"powerbi": " 3 "
+},
+{
+"expr": "FORMAT(\"abc\",\"Percent\")",
+"powerbi": "abc"
+},
+{
+"expr": "FORMAT(\"abc\",\"Currency\")",
+"powerbi": "abc"
+},
+{
+"expr": "FORMAT(\"abc\",\"Fixed\")",
+"powerbi": "abc"
+},
+{
+"expr": "FORMAT(\"abc\",\"Standard\")",
+"powerbi": "abc"
+},
+{
+"expr": "FORMAT(\"abc\",\"General Number\")",
+"powerbi": "abc"
+},
+{
+"expr": "FORMAT(\"abc\",\"Scientific\")",
+"powerbi": "abc"
+},
+{
+"expr": "FORMAT(\"abc\",\"Yes/No\")",
+"powerbi": "abc"
+},
+{
+"expr": "FORMAT(\"abc\",\"True/False\")",
+"powerbi": "abc"
+},
+{
+"expr": "FORMAT(\"abc\",\"On/Off\")",
+"powerbi": "abc"
+},
+{
+"expr": "FORMAT(\"abc\",\"0.00\")",
+"powerbi": "abc"
+},
+{
+"expr": "FORMAT(\"abc\",\"#,##0\")",
+"powerbi": "abc"
+},
+{
+"expr": "FORMAT(\"\",\"Percent\")",
+"powerbi": ""
+},
+{
+"expr": "FORMAT(\"\",\"Currency\")",
+"powerbi": ""
+},
+{
+"expr": "FORMAT(\"\",\"Fixed\")",
+"powerbi": ""
+},
+{
+"expr": "FORMAT(\"\",\"Standard\")",
+"powerbi": ""
+},
+{
+"expr": "FORMAT(\"\",\"General Number\")",
+"powerbi": ""
+},
+{
+"expr": "FORMAT(\"\",\"Scientific\")",
+"powerbi": ""
+},
+{
+"expr": "FORMAT(\"\",\"Yes/No\")",
+"powerbi": ""
+},
+{
+"expr": "FORMAT(\"\",\"True/False\")",
+"powerbi": ""
+},
+{
+"expr": "FORMAT(\"\",\"On/Off\")",
+"powerbi": ""
+},
+{
+"expr": "FORMAT(\"\",\"0.00\")",
+"powerbi": ""
+},
+{
+"expr": "FORMAT(\"\",\"#,##0\")",
+"powerbi": ""
+},
+{
+"expr": "FORMAT(\"1E3\",\"Percent\")",
+"powerbi": "1E3"
+},
+{
+"expr": "FORMAT(\"1E3\",\"Currency\")",
+"powerbi": "1E3"
+},
+{
+"expr": "FORMAT(\"1E3\",\"Fixed\")",
+"powerbi": "1E3"
+},
+{
+"expr": "FORMAT(\"1E3\",\"Standard\")",
+"powerbi": "1E3"
+},
+{
+"expr": "FORMAT(\"1E3\",\"General Number\")",
+"powerbi": "1E3"
+},
+{
+"expr": "FORMAT(\"1E3\",\"Scientific\")",
+"powerbi": "1E3"
+},
+{
+"expr": "FORMAT(\"1E3\",\"Yes/No\")",
+"powerbi": "1E3"
+},
+{
+"expr": "FORMAT(\"1E3\",\"True/False\")",
+"powerbi": "1E3"
+},
+{
+"expr": "FORMAT(\"1E3\",\"On/Off\")",
+"powerbi": "1E3"
+},
+{
+"expr": "FORMAT(\"1E3\",\"0.00\")",
+"powerbi": "1E3"
+},
+{
+"expr": "FORMAT(\"1E3\",\"#,##0\")",
+"powerbi": "1E3"
+},
+{
+"expr": "FORMAT(\"-0.25\",\"Percent\")",
+"powerbi": "-0.25"
+},
+{
+"expr": "FORMAT(\"-0.25\",\"Currency\")",
+"powerbi": "-0.25"
+},
+{
+"expr": "FORMAT(\"-0.25\",\"Fixed\")",
+"powerbi": "-0.25"
+},
+{
+"expr": "FORMAT(\"-0.25\",\"Standard\")",
+"powerbi": "-0.25"
+},
+{
+"expr": "FORMAT(\"-0.25\",\"General Number\")",
+"powerbi": "-0.25"
+},
+{
+"expr": "FORMAT(\"-0.25\",\"Scientific\")",
+"powerbi": "-0.25"
+},
+{
+"expr": "FORMAT(\"-0.25\",\"Yes/No\")",
+"powerbi": "-0.25"
+},
+{
+"expr": "FORMAT(\"-0.25\",\"True/False\")",
+"powerbi": "-0.25"
+},
+{
+"expr": "FORMAT(\"-0.25\",\"On/Off\")",
+"powerbi": "-0.25"
+},
+{
+"expr": "FORMAT(\"-0.25\",\"0.00\")",
+"powerbi": "-0.25"
+},
+{
+"expr": "FORMAT(\"-0.25\",\"#,##0\")",
+"powerbi": "-0.25"
+},
+{
+"expr": "FORMAT(\"TRUE\",\"Percent\")",
+"powerbi": "TRUE"
+},
+{
+"expr": "FORMAT(\"TRUE\",\"Currency\")",
+"powerbi": "TRUE"
+},
+{
+"expr": "FORMAT(\"TRUE\",\"Fixed\")",
+"powerbi": "TRUE"
+},
+{
+"expr": "FORMAT(\"TRUE\",\"Standard\")",
+"powerbi": "TRUE"
+},
+{
+"expr": "FORMAT(\"TRUE\",\"General Number\")",
+"powerbi": "TRUE"
+},
+{
+"expr": "FORMAT(\"TRUE\",\"Scientific\")",
+"powerbi": "TRUE"
+},
+{
+"expr": "FORMAT(\"TRUE\",\"Yes/No\")",
+"powerbi": "TRUE"
+},
+{
+"expr": "FORMAT(\"TRUE\",\"True/False\")",
+"powerbi": "TRUE"
+},
+{
+"expr": "FORMAT(\"TRUE\",\"On/Off\")",
+"powerbi": "TRUE"
+},
+{
+"expr": "FORMAT(\"TRUE\",\"0.00\")",
+"powerbi": "TRUE"
+},
+{
+"expr": "FORMAT(\"TRUE\",\"#,##0\")",
+"powerbi": "TRUE"
+},
+{
+"expr": "FORMAT(\"2020-01-01\",\"Percent\")",
+"powerbi": "2020-01-01"
+},
+{
+"expr": "FORMAT(\"2020-01-01\",\"Currency\")",
+"powerbi": "2020-01-01"
+},
+{
+"expr": "FORMAT(\"2020-01-01\",\"Fixed\")",
+"powerbi": "2020-01-01"
+},
+{
+"expr": "FORMAT(\"2020-01-01\",\"Standard\")",
+"powerbi": "2020-01-01"
+},
+{
+"expr": "FORMAT(\"2020-01-01\",\"General Number\")",
+"powerbi": "2020-01-01"
+},
+{
+"expr": "FORMAT(\"2020-01-01\",\"Scientific\")",
+"powerbi": "2020-01-01"
+},
+{
+"expr": "FORMAT(\"2020-01-01\",\"Yes/No\")",
+"powerbi": "2020-01-01"
+},
+{
+"expr": "FORMAT(\"2020-01-01\",\"True/False\")",
+"powerbi": "2020-01-01"
+},
+{
+"expr": "FORMAT(\"2020-01-01\",\"On/Off\")",
+"powerbi": "2020-01-01"
+},
+{
+"expr": "FORMAT(\"2020-01-01\",\"0.00\")",
+"powerbi": "2020-01-01"
+},
+{
+"expr": "FORMAT(\"2020-01-01\",\"#,##0\")",
+"powerbi": "2020-01-01"
+},
+{
+"expr": "FORMAT(MAX(Facts[Region]),\"Percent\")",
+"powerbi": "West"
+},
+{
+"expr": "FORMAT(MAX(Facts[Region]),\"Currency\")",
+"powerbi": "West"
+},
+{
+"expr": "FORMAT(MAX(Facts[Region]),\"Fixed\")",
+"powerbi": "West"
+},
+{
+"expr": "FORMAT(MAX(Facts[Region]),\"Standard\")",
+"powerbi": "West"
+},
+{
+"expr": "FORMAT(MAX(Facts[Region]),\"General Number\")",
+"powerbi": "West"
+},
+{
+"expr": "FORMAT(MAX(Facts[Region]),\"Scientific\")",
+"powerbi": "West"
+},
+{
+"expr": "FORMAT(MAX(Facts[Region]),\"Yes/No\")",
+"powerbi": "West"
+},
+{
+"expr": "FORMAT(MAX(Facts[Region]),\"True/False\")",
+"powerbi": "West"
+},
+{
+"expr": "FORMAT(MAX(Facts[Region]),\"On/Off\")",
+"powerbi": "West"
+},
+{
+"expr": "FORMAT(MAX(Facts[Region]),\"0.00\")",
+"powerbi": "West"
+},
+{
+"expr": "FORMAT(MAX(Facts[Region]),\"#,##0\")",
+"powerbi": "West"
+},
+{
+"expr": "FORMAT(\"12\"&\"\",\"Percent\")",
+"powerbi": "12"
+},
+{
+"expr": "FORMAT(\"12\"&\"\",\"Currency\")",
+"powerbi": "12"
+},
+{
+"expr": "FORMAT(\"12\"&\"\",\"Fixed\")",
+"powerbi": "12"
+},
+{
+"expr": "FORMAT(\"12\"&\"\",\"Standard\")",
+"powerbi": "12"
+},
+{
+"expr": "FORMAT(\"12\"&\"\",\"General Number\")",
+"powerbi": "12"
+},
+{
+"expr": "FORMAT(\"12\"&\"\",\"Scientific\")",
+"powerbi": "12"
+},
+{
+"expr": "FORMAT(\"12\"&\"\",\"Yes/No\")",
+"powerbi": "12"
+},
+{
+"expr": "FORMAT(\"12\"&\"\",\"True/False\")",
+"powerbi": "12"
+},
+{
+"expr": "FORMAT(\"12\"&\"\",\"On/Off\")",
+"powerbi": "12"
+},
+{
+"expr": "FORMAT(\"12\"&\"\",\"0.00\")",
+"powerbi": "12"
+},
+{
+"expr": "FORMAT(\"12\"&\"\",\"#,##0\")",
+"powerbi": "12"
+},
+{
+"expr": "FORMAT(FORMAT(5,\"0\"),\"Percent\")",
+"powerbi": "5"
+},
+{
+"expr": "FORMAT(FORMAT(5,\"0\"),\"Currency\")",
+"powerbi": "5"
+},
+{
+"expr": "FORMAT(FORMAT(5,\"0\"),\"Fixed\")",
+"powerbi": "5"
+},
+{
+"expr": "FORMAT(FORMAT(5,\"0\"),\"Standard\")",
+"powerbi": "5"
+},
+{
+"expr": "FORMAT(FORMAT(5,\"0\"),\"General Number\")",
+"powerbi": "5"
+},
+{
+"expr": "FORMAT(FORMAT(5,\"0\"),\"Scientific\")",
+"powerbi": "5"
+},
+{
+"expr": "FORMAT(FORMAT(5,\"0\"),\"Yes/No\")",
+"powerbi": "5"
+},
+{
+"expr": "FORMAT(FORMAT(5,\"0\"),\"True/False\")",
+"powerbi": "5"
+},
+{
+"expr": "FORMAT(FORMAT(5,\"0\"),\"On/Off\")",
+"powerbi": "5"
+},
+{
+"expr": "FORMAT(FORMAT(5,\"0\"),\"0.00\")",
+"powerbi": "5"
+},
+{
+"expr": "FORMAT(FORMAT(5,\"0\"),\"#,##0\")",
+"powerbi": "5"
+},
+{
+"expr": "COUNTAX({1&&\"\",\"a\"},[Value])",
+"powerbi": "2"
+},
+{
+"expr": "CONCATENATEX({1&&\"\",\"a\"},[Value],\"|\")",
+"powerbi": "|a"
+},
+{
+"expr": "CONCATENATEX({1&&\"\",\"a\"},LEN([Value]),\"|\")",
+"powerbi": "0|1"
+},
+{
+"expr": "COUNTX({1&&\"\",\"a\"},[Value])",
+"powerbi": "2"
+},
+{
+"expr": "MAXX({1&&\"\",\"a\"},[Value])&\"z\"",
+"powerbi": "az"
+},
+{
+"expr": "MINX({1&&\"\",\"a\"},[Value])&\"z\"",
+"powerbi": "z"
+},
+{
+"expr": "COUNTROWS(FILTER({1&&\"\",\"a\"},ISBLANK([Value])))",
+"powerbi": "BLANK"
+},
+{
+"expr": "COUNTROWS(FILTER({1&&\"\",\"a\"},[Value]=\"\"))",
+"powerbi": "1"
+},
+{
+"expr": "CONCATENATEX({1&&\"\",\"a\"},FORMAT([Value],\"yyyy\"),\"|\")",
+"powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"The following system error occurred: Type mismatch. \""
+},
+{
+"expr": "CONCATENATEX({1&&\"\",\"a\"},COALESCE([Value],\"n\"),\"|\")",
+"powerbi": "|a"
+},
+{
+"expr": "CONCATENATEX({1&&\"\",\"a\"},ISTEXT([Value]),\"|\")",
+"powerbi": "TRUE|TRUE"
+},
+{
+"expr": "COUNTAX({1&&\"\",\"\"},[Value])",
+"powerbi": "2"
+},
+{
+"expr": "CONCATENATEX({1&&\"\",\"\"},[Value],\"|\")",
+"powerbi": "|"
+},
+{
+"expr": "CONCATENATEX({1&&\"\",\"\"},LEN([Value]),\"|\")",
+"powerbi": "0|0"
+},
+{
+"expr": "COUNTX({1&&\"\",\"\"},[Value])",
+"powerbi": "2"
+},
+{
+"expr": "MAXX({1&&\"\",\"\"},[Value])&\"z\"",
+"powerbi": "z"
+},
+{
+"expr": "MINX({1&&\"\",\"\"},[Value])&\"z\"",
+"powerbi": "z"
+},
+{
+"expr": "COUNTROWS(FILTER({1&&\"\",\"\"},ISBLANK([Value])))",
+"powerbi": "BLANK"
+},
+{
+"expr": "COUNTROWS(FILTER({1&&\"\",\"\"},[Value]=\"\"))",
+"powerbi": "2"
+},
+{
+"expr": "CONCATENATEX({1&&\"\",\"\"},FORMAT([Value],\"yyyy\"),\"|\")",
+"powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"The following system error occurred: Type mismatch. \""
+},
+{
+"expr": "CONCATENATEX({1&&\"\",\"\"},COALESCE([Value],\"n\"),\"|\")",
+"powerbi": "|"
+},
+{
+"expr": "CONCATENATEX({1&&\"\",\"\"},ISTEXT([Value]),\"|\")",
+"powerbi": "TRUE|TRUE"
+},
+{
+"expr": "COUNTAX({1&&\"\",DATE(2020,1,1)},[Value])",
+"powerbi": "2"
+},
+{
+"expr": "CONCATENATEX({1&&\"\",DATE(2020,1,1)},[Value],\"|\")",
+"powerbi": "12:00:00 AM|1/1/2020"
+},
+{
+"expr": "CONCATENATEX({1&&\"\",DATE(2020,1,1)},LEN([Value]),\"|\")",
+"powerbi": "11|8"
+},
+{
+"expr": "COUNTX({1&&\"\",DATE(2020,1,1)},[Value])",
+"powerbi": "2"
+},
+{
+"expr": "MAXX({1&&\"\",DATE(2020,1,1)},[Value])&\"z\"",
+"powerbi": "1/1/2020z"
+},
+{
+"expr": "MINX({1&&\"\",DATE(2020,1,1)},[Value])&\"z\"",
+"powerbi": "12:00:00 AMz"
+},
+{
+"expr": "COUNTROWS(FILTER({1&&\"\",DATE(2020,1,1)},ISBLANK([Value])))",
+"powerbi": "BLANK"
+},
+{
+"expr": "COUNTROWS(FILTER({1&&\"\",DATE(2020,1,1)},[Value]=\"\"))",
+"powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 59) DAX comparison operations do not support comparing values of type Date with values of type Text. Consider using the VALUE or FORMAT function to convert one of the values.\""
+},
+{
+"expr": "CONCATENATEX({1&&\"\",DATE(2020,1,1)},FORMAT([Value],\"yyyy\"),\"|\")",
+"powerbi": "1899|2020"
+},
+{
+"expr": "CONCATENATEX({1&&\"\",DATE(2020,1,1)},COALESCE([Value],\"n\"),\"|\")",
+"powerbi": "12:00:00 AM|1/1/2020"
+},
+{
+"expr": "CONCATENATEX({1&&\"\",DATE(2020,1,1)},ISTEXT([Value]),\"|\")",
+"powerbi": "FALSE|FALSE"
+},
+{
+"expr": "COUNTAX({1&&\"\",\"x\"&\"y\"},[Value])",
+"powerbi": "2"
+},
+{
+"expr": "CONCATENATEX({1&&\"\",\"x\"&\"y\"},[Value],\"|\")",
+"powerbi": "|xy"
+},
+{
+"expr": "CONCATENATEX({1&&\"\",\"x\"&\"y\"},LEN([Value]),\"|\")",
+"powerbi": "0|2"
+},
+{
+"expr": "COUNTX({1&&\"\",\"x\"&\"y\"},[Value])",
+"powerbi": "2"
+},
+{
+"expr": "MAXX({1&&\"\",\"x\"&\"y\"},[Value])&\"z\"",
+"powerbi": "xyz"
+},
+{
+"expr": "MINX({1&&\"\",\"x\"&\"y\"},[Value])&\"z\"",
+"powerbi": "z"
+},
+{
+"expr": "COUNTROWS(FILTER({1&&\"\",\"x\"&\"y\"},ISBLANK([Value])))",
+"powerbi": "BLANK"
+},
+{
+"expr": "COUNTROWS(FILTER({1&&\"\",\"x\"&\"y\"},[Value]=\"\"))",
+"powerbi": "1"
+},
+{
+"expr": "CONCATENATEX({1&&\"\",\"x\"&\"y\"},FORMAT([Value],\"yyyy\"),\"|\")",
+"powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"The following system error occurred: Type mismatch. \""
+},
+{
+"expr": "CONCATENATEX({1&&\"\",\"x\"&\"y\"},COALESCE([Value],\"n\"),\"|\")",
+"powerbi": "|xy"
+},
+{
+"expr": "CONCATENATEX({1&&\"\",\"x\"&\"y\"},ISTEXT([Value]),\"|\")",
+"powerbi": "TRUE|TRUE"
+},
+{
+"expr": "COUNTAX({0||\"\",\"a\"},[Value])",
+"powerbi": "2"
+},
+{
+"expr": "CONCATENATEX({0||\"\",\"a\"},[Value],\"|\")",
+"powerbi": "|a"
+},
+{
+"expr": "CONCATENATEX({0||\"\",\"a\"},LEN([Value]),\"|\")",
+"powerbi": "0|1"
+},
+{
+"expr": "COUNTX({0||\"\",\"a\"},[Value])",
+"powerbi": "2"
+},
+{
+"expr": "MAXX({0||\"\",\"a\"},[Value])&\"z\"",
+"powerbi": "az"
+},
+{
+"expr": "MINX({0||\"\",\"a\"},[Value])&\"z\"",
+"powerbi": "z"
+},
+{
+"expr": "COUNTROWS(FILTER({0||\"\",\"a\"},ISBLANK([Value])))",
+"powerbi": "BLANK"
+},
+{
+"expr": "COUNTROWS(FILTER({0||\"\",\"a\"},[Value]=\"\"))",
+"powerbi": "1"
+},
+{
+"expr": "CONCATENATEX({0||\"\",\"a\"},FORMAT([Value],\"yyyy\"),\"|\")",
+"powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"The following system error occurred: Type mismatch. \""
+},
+{
+"expr": "CONCATENATEX({0||\"\",\"a\"},COALESCE([Value],\"n\"),\"|\")",
+"powerbi": "|a"
+},
+{
+"expr": "CONCATENATEX({0||\"\",\"a\"},ISTEXT([Value]),\"|\")",
+"powerbi": "TRUE|TRUE"
+},
+{
+"expr": "COUNTAX({0||\"\",\"\"},[Value])",
+"powerbi": "2"
+},
+{
+"expr": "CONCATENATEX({0||\"\",\"\"},[Value],\"|\")",
+"powerbi": "|"
+},
+{
+"expr": "CONCATENATEX({0||\"\",\"\"},LEN([Value]),\"|\")",
+"powerbi": "0|0"
+},
+{
+"expr": "COUNTX({0||\"\",\"\"},[Value])",
+"powerbi": "2"
+},
+{
+"expr": "MAXX({0||\"\",\"\"},[Value])&\"z\"",
+"powerbi": "z"
+},
+{
+"expr": "MINX({0||\"\",\"\"},[Value])&\"z\"",
+"powerbi": "z"
+},
+{
+"expr": "COUNTROWS(FILTER({0||\"\",\"\"},ISBLANK([Value])))",
+"powerbi": "BLANK"
+},
+{
+"expr": "COUNTROWS(FILTER({0||\"\",\"\"},[Value]=\"\"))",
+"powerbi": "2"
+},
+{
+"expr": "CONCATENATEX({0||\"\",\"\"},FORMAT([Value],\"yyyy\"),\"|\")",
+"powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"The following system error occurred: Type mismatch. \""
+},
+{
+"expr": "CONCATENATEX({0||\"\",\"\"},COALESCE([Value],\"n\"),\"|\")",
+"powerbi": "|"
+},
+{
+"expr": "CONCATENATEX({0||\"\",\"\"},ISTEXT([Value]),\"|\")",
+"powerbi": "TRUE|TRUE"
+},
+{
+"expr": "COUNTAX({0||\"\",DATE(2020,1,1)},[Value])",
+"powerbi": "2"
+},
+{
+"expr": "CONCATENATEX({0||\"\",DATE(2020,1,1)},[Value],\"|\")",
+"powerbi": "12:00:00 AM|1/1/2020"
+},
+{
+"expr": "CONCATENATEX({0||\"\",DATE(2020,1,1)},LEN([Value]),\"|\")",
+"powerbi": "11|8"
+},
+{
+"expr": "COUNTX({0||\"\",DATE(2020,1,1)},[Value])",
+"powerbi": "2"
+},
+{
+"expr": "MAXX({0||\"\",DATE(2020,1,1)},[Value])&\"z\"",
+"powerbi": "1/1/2020z"
+},
+{
+"expr": "MINX({0||\"\",DATE(2020,1,1)},[Value])&\"z\"",
+"powerbi": "12:00:00 AMz"
+},
+{
+"expr": "COUNTROWS(FILTER({0||\"\",DATE(2020,1,1)},ISBLANK([Value])))",
+"powerbi": "BLANK"
+},
+{
+"expr": "COUNTROWS(FILTER({0||\"\",DATE(2020,1,1)},[Value]=\"\"))",
+"powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 59) DAX comparison operations do not support comparing values of type Date with values of type Text. Consider using the VALUE or FORMAT function to convert one of the values.\""
+},
+{
+"expr": "CONCATENATEX({0||\"\",DATE(2020,1,1)},FORMAT([Value],\"yyyy\"),\"|\")",
+"powerbi": "1899|2020"
+},
+{
+"expr": "CONCATENATEX({0||\"\",DATE(2020,1,1)},COALESCE([Value],\"n\"),\"|\")",
+"powerbi": "12:00:00 AM|1/1/2020"
+},
+{
+"expr": "CONCATENATEX({0||\"\",DATE(2020,1,1)},ISTEXT([Value]),\"|\")",
+"powerbi": "FALSE|FALSE"
+},
+{
+"expr": "COUNTAX({0||\"\",\"x\"&\"y\"},[Value])",
+"powerbi": "2"
+},
+{
+"expr": "CONCATENATEX({0||\"\",\"x\"&\"y\"},[Value],\"|\")",
+"powerbi": "|xy"
+},
+{
+"expr": "CONCATENATEX({0||\"\",\"x\"&\"y\"},LEN([Value]),\"|\")",
+"powerbi": "0|2"
+},
+{
+"expr": "COUNTX({0||\"\",\"x\"&\"y\"},[Value])",
+"powerbi": "2"
+},
+{
+"expr": "MAXX({0||\"\",\"x\"&\"y\"},[Value])&\"z\"",
+"powerbi": "xyz"
+},
+{
+"expr": "MINX({0||\"\",\"x\"&\"y\"},[Value])&\"z\"",
+"powerbi": "z"
+},
+{
+"expr": "COUNTROWS(FILTER({0||\"\",\"x\"&\"y\"},ISBLANK([Value])))",
+"powerbi": "BLANK"
+},
+{
+"expr": "COUNTROWS(FILTER({0||\"\",\"x\"&\"y\"},[Value]=\"\"))",
+"powerbi": "1"
+},
+{
+"expr": "CONCATENATEX({0||\"\",\"x\"&\"y\"},FORMAT([Value],\"yyyy\"),\"|\")",
+"powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"The following system error occurred: Type mismatch. \""
+},
+{
+"expr": "CONCATENATEX({0||\"\",\"x\"&\"y\"},COALESCE([Value],\"n\"),\"|\")",
+"powerbi": "|xy"
+},
+{
+"expr": "CONCATENATEX({0||\"\",\"x\"&\"y\"},ISTEXT([Value]),\"|\")",
+"powerbi": "TRUE|TRUE"
+},
+{
+"expr": "COUNTAX({AND(1,\"\"),\"a\"},[Value])",
+"powerbi": "2"
+},
+{
+"expr": "CONCATENATEX({AND(1,\"\"),\"a\"},[Value],\"|\")",
+"powerbi": "|a"
+},
+{
+"expr": "CONCATENATEX({AND(1,\"\"),\"a\"},LEN([Value]),\"|\")",
+"powerbi": "0|1"
+},
+{
+"expr": "COUNTX({AND(1,\"\"),\"a\"},[Value])",
+"powerbi": "2"
+},
+{
+"expr": "MAXX({AND(1,\"\"),\"a\"},[Value])&\"z\"",
+"powerbi": "az"
+},
+{
+"expr": "MINX({AND(1,\"\"),\"a\"},[Value])&\"z\"",
+"powerbi": "z"
+},
+{
+"expr": "COUNTROWS(FILTER({AND(1,\"\"),\"a\"},ISBLANK([Value])))",
+"powerbi": "BLANK"
+},
+{
+"expr": "COUNTROWS(FILTER({AND(1,\"\"),\"a\"},[Value]=\"\"))",
+"powerbi": "1"
+},
+{
+"expr": "CONCATENATEX({AND(1,\"\"),\"a\"},FORMAT([Value],\"yyyy\"),\"|\")",
+"powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"The following system error occurred: Type mismatch. \""
+},
+{
+"expr": "CONCATENATEX({AND(1,\"\"),\"a\"},COALESCE([Value],\"n\"),\"|\")",
+"powerbi": "|a"
+},
+{
+"expr": "CONCATENATEX({AND(1,\"\"),\"a\"},ISTEXT([Value]),\"|\")",
+"powerbi": "TRUE|TRUE"
+},
+{
+"expr": "COUNTAX({AND(1,\"\"),\"\"},[Value])",
+"powerbi": "2"
+},
+{
+"expr": "CONCATENATEX({AND(1,\"\"),\"\"},[Value],\"|\")",
+"powerbi": "|"
+},
+{
+"expr": "CONCATENATEX({AND(1,\"\"),\"\"},LEN([Value]),\"|\")",
+"powerbi": "0|0"
+},
+{
+"expr": "COUNTX({AND(1,\"\"),\"\"},[Value])",
+"powerbi": "2"
+},
+{
+"expr": "MAXX({AND(1,\"\"),\"\"},[Value])&\"z\"",
+"powerbi": "z"
+},
+{
+"expr": "MINX({AND(1,\"\"),\"\"},[Value])&\"z\"",
+"powerbi": "z"
+},
+{
+"expr": "COUNTROWS(FILTER({AND(1,\"\"),\"\"},ISBLANK([Value])))",
+"powerbi": "BLANK"
+},
+{
+"expr": "COUNTROWS(FILTER({AND(1,\"\"),\"\"},[Value]=\"\"))",
+"powerbi": "2"
+},
+{
+"expr": "CONCATENATEX({AND(1,\"\"),\"\"},FORMAT([Value],\"yyyy\"),\"|\")",
+"powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"The following system error occurred: Type mismatch. \""
+},
+{
+"expr": "CONCATENATEX({AND(1,\"\"),\"\"},COALESCE([Value],\"n\"),\"|\")",
+"powerbi": "|"
+},
+{
+"expr": "CONCATENATEX({AND(1,\"\"),\"\"},ISTEXT([Value]),\"|\")",
+"powerbi": "TRUE|TRUE"
+},
+{
+"expr": "COUNTAX({AND(1,\"\"),DATE(2020,1,1)},[Value])",
+"powerbi": "2"
+},
+{
+"expr": "CONCATENATEX({AND(1,\"\"),DATE(2020,1,1)},[Value],\"|\")",
+"powerbi": "12:00:00 AM|1/1/2020"
+},
+{
+"expr": "CONCATENATEX({AND(1,\"\"),DATE(2020,1,1)},LEN([Value]),\"|\")",
+"powerbi": "11|8"
+},
+{
+"expr": "COUNTX({AND(1,\"\"),DATE(2020,1,1)},[Value])",
+"powerbi": "2"
+},
+{
+"expr": "MAXX({AND(1,\"\"),DATE(2020,1,1)},[Value])&\"z\"",
+"powerbi": "1/1/2020z"
+},
+{
+"expr": "MINX({AND(1,\"\"),DATE(2020,1,1)},[Value])&\"z\"",
+"powerbi": "12:00:00 AMz"
+},
+{
+"expr": "COUNTROWS(FILTER({AND(1,\"\"),DATE(2020,1,1)},ISBLANK([Value])))",
+"powerbi": "BLANK"
+},
+{
+"expr": "COUNTROWS(FILTER({AND(1,\"\"),DATE(2020,1,1)},[Value]=\"\"))",
+"powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 63) DAX comparison operations do not support comparing values of type Date with values of type Text. Consider using the VALUE or FORMAT function to convert one of the values.\""
+},
+{
+"expr": "CONCATENATEX({AND(1,\"\"),DATE(2020,1,1)},FORMAT([Value],\"yyyy\"),\"|\")",
+"powerbi": "1899|2020"
+},
+{
+"expr": "CONCATENATEX({AND(1,\"\"),DATE(2020,1,1)},COALESCE([Value],\"n\"),\"|\")",
+"powerbi": "12:00:00 AM|1/1/2020"
+},
+{
+"expr": "CONCATENATEX({AND(1,\"\"),DATE(2020,1,1)},ISTEXT([Value]),\"|\")",
+"powerbi": "FALSE|FALSE"
+},
+{
+"expr": "COUNTAX({AND(1,\"\"),\"x\"&\"y\"},[Value])",
+"powerbi": "2"
+},
+{
+"expr": "CONCATENATEX({AND(1,\"\"),\"x\"&\"y\"},[Value],\"|\")",
+"powerbi": "|xy"
+},
+{
+"expr": "CONCATENATEX({AND(1,\"\"),\"x\"&\"y\"},LEN([Value]),\"|\")",
+"powerbi": "0|2"
+},
+{
+"expr": "COUNTX({AND(1,\"\"),\"x\"&\"y\"},[Value])",
+"powerbi": "2"
+},
+{
+"expr": "MAXX({AND(1,\"\"),\"x\"&\"y\"},[Value])&\"z\"",
+"powerbi": "xyz"
+},
+{
+"expr": "MINX({AND(1,\"\"),\"x\"&\"y\"},[Value])&\"z\"",
+"powerbi": "z"
+},
+{
+"expr": "COUNTROWS(FILTER({AND(1,\"\"),\"x\"&\"y\"},ISBLANK([Value])))",
+"powerbi": "BLANK"
+},
+{
+"expr": "COUNTROWS(FILTER({AND(1,\"\"),\"x\"&\"y\"},[Value]=\"\"))",
+"powerbi": "1"
+},
+{
+"expr": "CONCATENATEX({AND(1,\"\"),\"x\"&\"y\"},FORMAT([Value],\"yyyy\"),\"|\")",
+"powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"The following system error occurred: Type mismatch. \""
+},
+{
+"expr": "CONCATENATEX({AND(1,\"\"),\"x\"&\"y\"},COALESCE([Value],\"n\"),\"|\")",
+"powerbi": "|xy"
+},
+{
+"expr": "CONCATENATEX({AND(1,\"\"),\"x\"&\"y\"},ISTEXT([Value]),\"|\")",
+"powerbi": "TRUE|TRUE"
+},
+{
+"expr": "CONCATENATEX({OR(0,\"\"),\"a\"},[Value],\"|\")",
+"powerbi": "|a"
+},
+{
+"expr": "CONCATENATEX({OR(0,\"\"),\"a\"},LEN([Value]),\"|\")",
+"powerbi": "0|1"
+},
+{
+"expr": "MAXX({OR(0,\"\"),\"a\"},[Value])&\"z\"",
+"powerbi": "az"
+},
+{
+"expr": "MINX({OR(0,\"\"),\"a\"},[Value])&\"z\"",
+"powerbi": "z"
+},
+{
+"expr": "COUNTROWS(FILTER({OR(0,\"\"),\"a\"},[Value]=\"\"))",
+"powerbi": "1"
+},
+{
+"expr": "CONCATENATEX({OR(0,\"\"),\"a\"},FORMAT([Value],\"yyyy\"),\"|\")",
+"powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"The following system error occurred: Type mismatch. \""
+},
+{
+"expr": "CONCATENATEX({OR(0,\"\"),\"a\"},COALESCE([Value],\"n\"),\"|\")",
+"powerbi": "|a"
+},
+{
+"expr": "CONCATENATEX({OR(0,\"\"),\"a\"},ISTEXT([Value]),\"|\")",
+"powerbi": "TRUE|TRUE"
+},
+{
+"expr": "COUNTAX({OR(0,\"\"),\"\"},[Value])",
+"powerbi": "2"
+},
+{
+"expr": "CONCATENATEX({OR(0,\"\"),\"\"},[Value],\"|\")",
+"powerbi": "|"
+},
+{
+"expr": "CONCATENATEX({OR(0,\"\"),\"\"},LEN([Value]),\"|\")",
+"powerbi": "0|0"
+},
+{
+"expr": "COUNTX({OR(0,\"\"),\"\"},[Value])",
+"powerbi": "2"
+},
+{
+"expr": "MAXX({OR(0,\"\"),\"\"},[Value])&\"z\"",
+"powerbi": "z"
+},
+{
+"expr": "MINX({OR(0,\"\"),\"\"},[Value])&\"z\"",
+"powerbi": "z"
+},
+{
+"expr": "COUNTROWS(FILTER({OR(0,\"\"),\"\"},ISBLANK([Value])))",
+"powerbi": "BLANK"
+},
+{
+"expr": "COUNTROWS(FILTER({OR(0,\"\"),\"\"},[Value]=\"\"))",
+"powerbi": "2"
+},
+{
+"expr": "CONCATENATEX({OR(0,\"\"),\"\"},FORMAT([Value],\"yyyy\"),\"|\")",
+"powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"The following system error occurred: Type mismatch. \""
+},
+{
+"expr": "CONCATENATEX({OR(0,\"\"),\"\"},COALESCE([Value],\"n\"),\"|\")",
+"powerbi": "|"
+},
+{
+"expr": "CONCATENATEX({OR(0,\"\"),\"\"},ISTEXT([Value]),\"|\")",
+"powerbi": "TRUE|TRUE"
+},
+{
+"expr": "CONCATENATEX({OR(0,\"\"),DATE(2020,1,1)},LEN([Value]),\"|\")",
+"powerbi": "11|8"
+},
+{
+"expr": "MAXX({OR(0,\"\"),DATE(2020,1,1)},[Value])&\"z\"",
+"powerbi": "1/1/2020z"
+},
+{
+"expr": "MINX({OR(0,\"\"),DATE(2020,1,1)},[Value])&\"z\"",
+"powerbi": "12:00:00 AMz"
+},
+{
+"expr": "COUNTROWS(FILTER({OR(0,\"\"),DATE(2020,1,1)},ISBLANK([Value])))",
+"powerbi": "BLANK"
+},
+{
+"expr": "COUNTROWS(FILTER({OR(0,\"\"),DATE(2020,1,1)},[Value]=\"\"))",
+"powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 62) DAX comparison operations do not support comparing values of type Date with values of type Text. Consider using the VALUE or FORMAT function to convert one of the values.\""
+},
+{
+"expr": "CONCATENATEX({OR(0,\"\"),DATE(2020,1,1)},FORMAT([Value],\"yyyy\"),\"|\")",
+"powerbi": "1899|2020"
+},
+{
+"expr": "CONCATENATEX({OR(0,\"\"),DATE(2020,1,1)},COALESCE([Value],\"n\"),\"|\")",
+"powerbi": "12:00:00 AM|1/1/2020"
+},
+{
+"expr": "CONCATENATEX({OR(0,\"\"),DATE(2020,1,1)},ISTEXT([Value]),\"|\")",
+"powerbi": "FALSE|FALSE"
+},
+{
+"expr": "COUNTAX({OR(0,\"\"),\"x\"&\"y\"},[Value])",
+"powerbi": "2"
+},
+{
+"expr": "CONCATENATEX({OR(0,\"\"),\"x\"&\"y\"},[Value],\"|\")",
+"powerbi": "|xy"
+},
+{
+"expr": "CONCATENATEX({OR(0,\"\"),\"x\"&\"y\"},LEN([Value]),\"|\")",
+"powerbi": "0|2"
+},
+{
+"expr": "COUNTX({OR(0,\"\"),\"x\"&\"y\"},[Value])",
+"powerbi": "2"
+},
+{
+"expr": "MAXX({OR(0,\"\"),\"x\"&\"y\"},[Value])&\"z\"",
+"powerbi": "xyz"
+},
+{
+"expr": "MINX({OR(0,\"\"),\"x\"&\"y\"},[Value])&\"z\"",
+"powerbi": "z"
+},
+{
+"expr": "COUNTROWS(FILTER({OR(0,\"\"),\"x\"&\"y\"},ISBLANK([Value])))",
+"powerbi": "BLANK"
+},
+{
+"expr": "COUNTROWS(FILTER({OR(0,\"\"),\"x\"&\"y\"},[Value]=\"\"))",
+"powerbi": "1"
+},
+{
+"expr": "CONCATENATEX({OR(0,\"\"),\"x\"&\"y\"},FORMAT([Value],\"yyyy\"),\"|\")",
+"powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"The following system error occurred: Type mismatch. \""
+},
+{
+"expr": "CONCATENATEX({OR(0,\"\"),\"x\"&\"y\"},COALESCE([Value],\"n\"),\"|\")",
+"powerbi": "|xy"
+},
+{
+"expr": "CONCATENATEX({OR(0,\"\"),\"x\"&\"y\"},ISTEXT([Value]),\"|\")",
+"powerbi": "TRUE|TRUE"
+},
+{
+"expr": "ISLOGICAL(IF(MAX(Facts[Sales])>5,1&&\"\",TRUE()))",
+"powerbi": "True"
+},
+{
+"expr": "ISBLANK(IF(MAX(Facts[Sales])>5,1&&\"\",TRUE()))",
+"powerbi": "False"
+},
+{
+"expr": "(IF(MAX(Facts[Sales])>5,1&&\"\",TRUE()))&\"z\"",
+"powerbi": "z"
+},
+{
+"expr": "IF(IF(MAX(Facts[Sales])>5,1&&\"\",TRUE()),1,2)",
+"powerbi": "2"
+},
+{
+"expr": "LEN(IF(MAX(Facts[Sales])>5,1&&\"\",TRUE()))",
+"powerbi": "BLANK"
+},
+{
+"expr": "NOT(IF(MAX(Facts[Sales])>5,1&&\"\",TRUE()))",
+"powerbi": "True"
+},
+{
+"expr": "(IF(MAX(Facts[Sales])>5,1&&\"\",TRUE()))=FALSE()",
+"powerbi": "True"
+},
+{
+"expr": "(IF(MAX(Facts[Sales])>5,1&&\"\",TRUE()))+0",
+"powerbi": "0"
+},
+{
+"expr": "ISLOGICAL(IF(MAX(Facts[Sales])>5,1&&\"\",FALSE()))",
+"powerbi": "True"
+},
+{
+"expr": "ISBLANK(IF(MAX(Facts[Sales])>5,1&&\"\",FALSE()))",
+"powerbi": "False"
+},
+{
+"expr": "(IF(MAX(Facts[Sales])>5,1&&\"\",FALSE()))&\"z\"",
+"powerbi": "z"
+},
+{
+"expr": "IF(IF(MAX(Facts[Sales])>5,1&&\"\",FALSE()),1,2)",
+"powerbi": "2"
+},
+{
+"expr": "LEN(IF(MAX(Facts[Sales])>5,1&&\"\",FALSE()))",
+"powerbi": "BLANK"
+},
+{
+"expr": "NOT(IF(MAX(Facts[Sales])>5,1&&\"\",FALSE()))",
+"powerbi": "True"
+},
+{
+"expr": "(IF(MAX(Facts[Sales])>5,1&&\"\",FALSE()))=FALSE()",
+"powerbi": "True"
+},
+{
+"expr": "(IF(MAX(Facts[Sales])>5,1&&\"\",FALSE()))+0",
+"powerbi": "0"
+},
+{
+"expr": "ISLOGICAL(SWITCH(TRUE(),MAX(Facts[Sales])>50,TRUE(),1&&\"\"))",
+"powerbi": "False"
+},
+{
+"expr": "ISBLANK(SWITCH(TRUE(),MAX(Facts[Sales])>50,TRUE(),1&&\"\"))",
+"powerbi": "True"
+},
+{
+"expr": "(SWITCH(TRUE(),MAX(Facts[Sales])>50,TRUE(),1&&\"\"))&\"z\"",
+"powerbi": "z"
+},
+{
+"expr": "IF(SWITCH(TRUE(),MAX(Facts[Sales])>50,TRUE(),1&&\"\"),1,2)",
+"powerbi": "2"
+},
+{
+"expr": "LEN(SWITCH(TRUE(),MAX(Facts[Sales])>50,TRUE(),1&&\"\"))",
+"powerbi": "BLANK"
+},
+{
+"expr": "NOT(SWITCH(TRUE(),MAX(Facts[Sales])>50,TRUE(),1&&\"\"))",
+"powerbi": "True"
+},
+{
+"expr": "(SWITCH(TRUE(),MAX(Facts[Sales])>50,TRUE(),1&&\"\"))=FALSE()",
+"powerbi": "True"
+},
+{
+"expr": "(SWITCH(TRUE(),MAX(Facts[Sales])>50,TRUE(),1&&\"\"))+0",
+"powerbi": "0"
+},
+{
+"expr": "ISLOGICAL(IF(MAX(Facts[Sales])>5,1&&\"\",1>0))",
+"powerbi": "True"
+},
+{
+"expr": "ISBLANK(IF(MAX(Facts[Sales])>5,1&&\"\",1>0))",
+"powerbi": "False"
+},
+{
+"expr": "(IF(MAX(Facts[Sales])>5,1&&\"\",1>0))&\"z\"",
+"powerbi": "z"
+},
+{
+"expr": "IF(IF(MAX(Facts[Sales])>5,1&&\"\",1>0),1,2)",
+"powerbi": "2"
+},
+{
+"expr": "LEN(IF(MAX(Facts[Sales])>5,1&&\"\",1>0))",
+"powerbi": "BLANK"
+},
+{
+"expr": "NOT(IF(MAX(Facts[Sales])>5,1&&\"\",1>0))",
+"powerbi": "True"
+},
+{
+"expr": "(IF(MAX(Facts[Sales])>5,1&&\"\",1>0))=FALSE()",
+"powerbi": "True"
+},
+{
+"expr": "(IF(MAX(Facts[Sales])>5,1&&\"\",1>0))+0",
+"powerbi": "0"
+},
+{
+"expr": "ISLOGICAL(IF(MAX(Facts[Sales])>50,1&&\"\",MAX(Facts[Sales])>5))",
+"powerbi": "True"
+},
+{
+"expr": "ISBLANK(IF(MAX(Facts[Sales])>50,1&&\"\",MAX(Facts[Sales])>5))",
+"powerbi": "False"
+},
+{
+"expr": "(IF(MAX(Facts[Sales])>50,1&&\"\",MAX(Facts[Sales])>5))&\"z\"",
+"powerbi": "TRUEz"
+},
+{
+"expr": "IF(IF(MAX(Facts[Sales])>50,1&&\"\",MAX(Facts[Sales])>5),1,2)",
+"powerbi": "1"
+},
+{
+"expr": "LEN(IF(MAX(Facts[Sales])>50,1&&\"\",MAX(Facts[Sales])>5))",
+"powerbi": "4"
+},
+{
+"expr": "NOT(IF(MAX(Facts[Sales])>50,1&&\"\",MAX(Facts[Sales])>5))",
+"powerbi": "False"
+},
+{
+"expr": "(IF(MAX(Facts[Sales])>50,1&&\"\",MAX(Facts[Sales])>5))=FALSE()",
+"powerbi": "False"
+},
+{
+"expr": "(IF(MAX(Facts[Sales])>50,1&&\"\",MAX(Facts[Sales])>5))+0",
+"powerbi": "1"
+},
+{
+"expr": "ISLOGICAL(SWITCH(MAX(Facts[Quantity]),5,1&&\"\",FALSE()))",
+"powerbi": "False"
+},
+{
+"expr": "ISBLANK(SWITCH(MAX(Facts[Quantity]),5,1&&\"\",FALSE()))",
+"powerbi": "True"
+},
+{
+"expr": "(SWITCH(MAX(Facts[Quantity]),5,1&&\"\",FALSE()))&\"z\"",
+"powerbi": "z"
+},
+{
+"expr": "IF(SWITCH(MAX(Facts[Quantity]),5,1&&\"\",FALSE()),1,2)",
+"powerbi": "2"
+},
+{
+"expr": "LEN(SWITCH(MAX(Facts[Quantity]),5,1&&\"\",FALSE()))",
+"powerbi": "BLANK"
+},
+{
+"expr": "NOT(SWITCH(MAX(Facts[Quantity]),5,1&&\"\",FALSE()))",
+"powerbi": "True"
+},
+{
+"expr": "(SWITCH(MAX(Facts[Quantity]),5,1&&\"\",FALSE()))=FALSE()",
+"powerbi": "True"
+},
+{
+"expr": "(SWITCH(MAX(Facts[Quantity]),5,1&&\"\",FALSE()))+0",
+"powerbi": "0"
+},
+{
+"expr": "ISLOGICAL(IF(MAX(Facts[Sales])>5,OR(0,\"\"),TRUE()))",
+"powerbi": "True"
+},
+{
+"expr": "ISBLANK(IF(MAX(Facts[Sales])>5,OR(0,\"\"),TRUE()))",
+"powerbi": "False"
+},
+{
+"expr": "(IF(MAX(Facts[Sales])>5,OR(0,\"\"),TRUE()))&\"z\"",
+"powerbi": "z"
+},
+{
+"expr": "IF(IF(MAX(Facts[Sales])>5,OR(0,\"\"),TRUE()),1,2)",
+"powerbi": "2"
+},
+{
+"expr": "LEN(IF(MAX(Facts[Sales])>5,OR(0,\"\"),TRUE()))",
+"powerbi": "BLANK"
+},
+{
+"expr": "NOT(IF(MAX(Facts[Sales])>5,OR(0,\"\"),TRUE()))",
+"powerbi": "True"
+},
+{
+"expr": "(IF(MAX(Facts[Sales])>5,OR(0,\"\"),TRUE()))=FALSE()",
+"powerbi": "True"
+},
+{
+"expr": "(IF(MAX(Facts[Sales])>5,OR(0,\"\"),TRUE()))+0",
+"powerbi": "0"
+},
+{
+"expr": "ISLOGICAL(IF(MAX(Facts[Sales])>5,OR(0,\"\"),FALSE()))",
+"powerbi": "True"
+},
+{
+"expr": "ISBLANK(IF(MAX(Facts[Sales])>5,OR(0,\"\"),FALSE()))",
+"powerbi": "False"
+},
+{
+"expr": "(IF(MAX(Facts[Sales])>5,OR(0,\"\"),FALSE()))&\"z\"",
+"powerbi": "z"
+},
+{
+"expr": "IF(IF(MAX(Facts[Sales])>5,OR(0,\"\"),FALSE()),1,2)",
+"powerbi": "2"
+},
+{
+"expr": "LEN(IF(MAX(Facts[Sales])>5,OR(0,\"\"),FALSE()))",
+"powerbi": "BLANK"
+},
+{
+"expr": "NOT(IF(MAX(Facts[Sales])>5,OR(0,\"\"),FALSE()))",
+"powerbi": "True"
+},
+{
+"expr": "(IF(MAX(Facts[Sales])>5,OR(0,\"\"),FALSE()))=FALSE()",
+"powerbi": "True"
+},
+{
+"expr": "(IF(MAX(Facts[Sales])>5,OR(0,\"\"),FALSE()))+0",
+"powerbi": "0"
+},
+{
+"expr": "ISLOGICAL(SWITCH(TRUE(),MAX(Facts[Sales])>50,TRUE(),OR(0,\"\")))",
+"powerbi": "False"
+},
+{
+"expr": "ISBLANK(SWITCH(TRUE(),MAX(Facts[Sales])>50,TRUE(),OR(0,\"\")))",
+"powerbi": "True"
+},
+{
+"expr": "(SWITCH(TRUE(),MAX(Facts[Sales])>50,TRUE(),OR(0,\"\")))&\"z\"",
+"powerbi": "z"
+},
+{
+"expr": "IF(SWITCH(TRUE(),MAX(Facts[Sales])>50,TRUE(),OR(0,\"\")),1,2)",
+"powerbi": "2"
+},
+{
+"expr": "LEN(SWITCH(TRUE(),MAX(Facts[Sales])>50,TRUE(),OR(0,\"\")))",
+"powerbi": "BLANK"
+},
+{
+"expr": "NOT(SWITCH(TRUE(),MAX(Facts[Sales])>50,TRUE(),OR(0,\"\")))",
+"powerbi": "True"
+},
+{
+"expr": "(SWITCH(TRUE(),MAX(Facts[Sales])>50,TRUE(),OR(0,\"\")))=FALSE()",
+"powerbi": "True"
+},
+{
+"expr": "(SWITCH(TRUE(),MAX(Facts[Sales])>50,TRUE(),OR(0,\"\")))+0",
+"powerbi": "0"
+},
+{
+"expr": "ISLOGICAL(IF(MAX(Facts[Sales])>5,OR(0,\"\"),1>0))",
+"powerbi": "True"
+},
+{
+"expr": "ISBLANK(IF(MAX(Facts[Sales])>5,OR(0,\"\"),1>0))",
+"powerbi": "False"
+},
+{
+"expr": "(IF(MAX(Facts[Sales])>5,OR(0,\"\"),1>0))&\"z\"",
+"powerbi": "z"
+},
+{
+"expr": "IF(IF(MAX(Facts[Sales])>5,OR(0,\"\"),1>0),1,2)",
+"powerbi": "2"
+},
+{
+"expr": "LEN(IF(MAX(Facts[Sales])>5,OR(0,\"\"),1>0))",
+"powerbi": "BLANK"
+},
+{
+"expr": "NOT(IF(MAX(Facts[Sales])>5,OR(0,\"\"),1>0))",
+"powerbi": "True"
+},
+{
+"expr": "(IF(MAX(Facts[Sales])>5,OR(0,\"\"),1>0))=FALSE()",
+"powerbi": "True"
+},
+{
+"expr": "(IF(MAX(Facts[Sales])>5,OR(0,\"\"),1>0))+0",
+"powerbi": "0"
+},
+{
+"expr": "ISLOGICAL(IF(MAX(Facts[Sales])>50,OR(0,\"\"),MAX(Facts[Sales])>5))",
+"powerbi": "True"
+},
+{
+"expr": "ISBLANK(IF(MAX(Facts[Sales])>50,OR(0,\"\"),MAX(Facts[Sales])>5))",
+"powerbi": "False"
+},
+{
+"expr": "(IF(MAX(Facts[Sales])>50,OR(0,\"\"),MAX(Facts[Sales])>5))&\"z\"",
+"powerbi": "TRUEz"
+},
+{
+"expr": "IF(IF(MAX(Facts[Sales])>50,OR(0,\"\"),MAX(Facts[Sales])>5),1,2)",
+"powerbi": "1"
+},
+{
+"expr": "LEN(IF(MAX(Facts[Sales])>50,OR(0,\"\"),MAX(Facts[Sales])>5))",
+"powerbi": "4"
+},
+{
+"expr": "NOT(IF(MAX(Facts[Sales])>50,OR(0,\"\"),MAX(Facts[Sales])>5))",
+"powerbi": "False"
+},
+{
+"expr": "(IF(MAX(Facts[Sales])>50,OR(0,\"\"),MAX(Facts[Sales])>5))=FALSE()",
+"powerbi": "False"
+},
+{
+"expr": "(IF(MAX(Facts[Sales])>50,OR(0,\"\"),MAX(Facts[Sales])>5))+0",
+"powerbi": "1"
+},
+{
+"expr": "ISLOGICAL(SWITCH(MAX(Facts[Quantity]),5,OR(0,\"\"),FALSE()))",
+"powerbi": "False"
+},
+{
+"expr": "ISBLANK(SWITCH(MAX(Facts[Quantity]),5,OR(0,\"\"),FALSE()))",
+"powerbi": "True"
+},
+{
+"expr": "(SWITCH(MAX(Facts[Quantity]),5,OR(0,\"\"),FALSE()))&\"z\"",
+"powerbi": "z"
+},
+{
+"expr": "IF(SWITCH(MAX(Facts[Quantity]),5,OR(0,\"\"),FALSE()),1,2)",
+"powerbi": "2"
+},
+{
+"expr": "LEN(SWITCH(MAX(Facts[Quantity]),5,OR(0,\"\"),FALSE()))",
+"powerbi": "BLANK"
+},
+{
+"expr": "NOT(SWITCH(MAX(Facts[Quantity]),5,OR(0,\"\"),FALSE()))",
+"powerbi": "True"
+},
+{
+"expr": "(SWITCH(MAX(Facts[Quantity]),5,OR(0,\"\"),FALSE()))=FALSE()",
+"powerbi": "True"
+},
+{
+"expr": "(SWITCH(MAX(Facts[Quantity]),5,OR(0,\"\"),FALSE()))+0",
+"powerbi": "0"
+}
+]
+}

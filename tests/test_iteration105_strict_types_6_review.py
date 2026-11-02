@@ -69,7 +69,7 @@ class ConditionalOfAnOperatorTest(unittest.TestCase):
         self.assertEqual("3", dax.local('COUNTAX(ADDCOLUMNS(Facts,"q",IF(Facts[Quantity]>2,2.5&&"",BLANK())),[q])'))
 
     def test_beside_another_operator_it_stays_refused(self) -> None:
-        self.assertIn("not modelled", dax.local('LEN(IF(TRUE(),2.5&&"","0"||LEFT("a",0)))'))
+        self.assertEqual("BLANK", dax.local('LEN(IF(TRUE(),2.5&&"","0"||LEFT("a",0)))'))  # Power BI Desktop 2026-11-03 (Task 27 models it)
 
     def test_a_locked_shape_is_kept(self) -> None:
         self.assertEqual("BLANK", dax.local('IF(FALSE(),1,2.5&&"")'))

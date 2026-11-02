@@ -78,6 +78,10 @@ class BlankSet(frozenset):
         return instance
 
 
+class _LogicalBlankText(str):
+    """The empty text a logical operator's BLANK becomes beside a text in a table constructor: it reads as "" everywhere found, but FORMAT of it is an error in live Power BI (Task 27)."""
+
+
 class MeasureError(ValueError):
     """A measure definition is invalid or cannot be evaluated for this table."""
 
@@ -10496,9 +10500,12 @@ def evaluate_measures(
                 members = [(item[1] if item[0] in {"tuple", "tableconstructor"} else (item,))[column] for item in items]
                 typed_blanks = [row_index for row_index, member in enumerate(members) if records[row_index][column] is None and (typed_true_false(member) or true_false_conditional(member, None))]
                 others = [records[row_index][column] for row_index in range(len(records)) if row_index not in typed_blanks]
-                if typed_blanks and any(isinstance(value, (str, dax_dates.DaxDateTime)) for value in others):
-                    # live Power BI (Task 15 review): beside a text mostly an empty text (ISTEXT, COUNTAX), but FORMAT fails and COALESCE gives BLANK; beside a date 12:00:00 AM: no rule found
-                    raise MeasureError("A logical operator that gives BLANK beside a text or a date in a table constructor is not modelled by the local engine.")
+                if typed_blanks and any(isinstance(value, str) for value in others):
+                    for row_index in typed_blanks:
+                        records[row_index][column] = _LogicalBlankText()
+                elif typed_blanks and any(isinstance(value, dax_dates.DaxDateTime) for value in others):
+                    for row_index in typed_blanks:
+                        records[row_index][column] = dax_dates.DaxDateTime(0)
                 elif not any(value is None for value in others):
                     # live Power BI (Task 15 review): the column holds False, so COUNTAX({1&&""},[Value]) is 1; beside a BLANK it stays a BLANK
                     for row_index in typed_blanks:
@@ -10923,7 +10930,7 @@ def evaluate_measures(
 
     def refuse_logical_blank_beside(other: tuple[Any, ...], row_context: Any) -> None:
         """Beside another operator, or on a row beside a text, the branches join differently in IF and SWITCH (live Power BI, Task 16 review): no rule found."""
-        if typed_true_false(other) or (row_context is not None and text_typed_on_row(other, row_context)):
+        if row_context is not None and text_typed_on_row(other, row_context):
             raise MeasureError("A logical operator that gives BLANK beside another branch of a conditional is not modelled by the local engine.")
 
     def refuse_bare_column(node: tuple[Any, ...], row_context: Any) -> None:
@@ -15070,8 +15077,24 @@ def evaluate_measures(
             return not isinstance(values[0], str)
         if function == "ISLOGICAL":
             read = arguments[0]
-            while values[0] is None and true_false_conditional(read, row_context):  # the rule of the operator it holds decides (live Power BI, Task 17 review)
-                read = next(branch for branch in read[2][1:] if true_false_column(branch) or true_false_conditional(branch, row_context))
+            if values[0] is None and true_false_conditional(read, row_context):
+                def _is_logical_branch(branch: tuple[Any, ...]) -> bool:
+                    if true_false_conditional(branch, row_context):
+                        return all(_is_logical_branch(b) for b in branch[2][1:])
+                    if not typed_true_false(branch):
+                        return branch_kind(branch, row_context) == "bool"
+                    held, walked = branch, set()
+                    while held[0] == "var" and held[1] in variable_nodes and held[1] not in walked:
+                        walked.add(held[1])
+                        held = variable_nodes[held[1]]
+                    operands = [held[2], held[3]] if held[0] == "logical" else list(held[2])
+                    read_late = [_read_at_run_time(operand) for operand in operands]
+                    reads_data = any(late is not True and any(True for _ in _iter_reference_nodes(operand)) for late, operand in zip(read_late, operands))
+                    if (None in read_late and True not in read_late) or (True in read_late and reads_data):
+                        raise MeasureError("ISLOGICAL of a logical operator over this function is not modelled by the local engine.")
+                    return True not in read_late
+
+                return all(_is_logical_branch(branch) for branch in read[2][1:])
             if values[0] is None and typed_true_false(read):
                 held, walked = read, set()
                 while held[0] == "var" and held[1] in variable_nodes and held[1] not in walked:
@@ -15098,6 +15121,8 @@ def evaluate_measures(
             if function in {"ISDECIMAL", "ISCURRENCY"}:
                 return static_t in {"currency", "decimal"}
         if function == "FORMAT":
+            if isinstance(values[0], _LogicalBlankText):
+                raise MeasureError("FORMAT of the empty text a logical operator's BLANK becomes beside a text is an error in Power BI and is not modelled by the local engine.")
             shown = double_as_text(arguments[0], values[0], row_context)
             if isinstance(shown, str) and not isinstance(values[0], str) and str(values[1] or "").strip().casefold() in {"", "general number"}:
                 return shown  # a large Double in the general format prints with an exponent
@@ -16029,7 +16054,7 @@ def evaluate_measures(
             while held[0] == "var" and held[1] in variable_nodes and held[1] not in walked:
                 walked.add(held[1])
                 held = variable_nodes[held[1]]
-            if actual == "boolean" and value is None and not typed_true_false(operand) and not (row_context is not None and held[0] == "reference"):
+            if actual == "boolean" and value is None and not (typed_true_false(operand) or true_false_column(operand)) and not (row_context is not None and held[0] == "reference"):
                 value = False  # a True/False-typed BLANK is FALSE (live Power BI, Task 14 review: a logical operator's BLANK stays one; Task 16 review: a column's stays one too, also held by a VAR)
             resolved.append((value, actual))
         (left, left_type), (right, right_type) = resolved
@@ -16202,9 +16227,15 @@ def evaluate_measures(
                 def logical_empty_text_blank(logical: Any, constant_ok: bool = False) -> bool:
                     """Task 21 Part E: (x&&"") or (x||"") over a row-dependent x is the BLANK of Part C, and that BLANK cancels an error in * and on the left of /.
                     The empty text may be any operand that reads no data and is empty (TRIM("") too); the other operand must read a column."""
-                    if not isinstance(logical, tuple) or len(logical) != 4 or logical[0] != "logical":
+                    if not isinstance(logical, tuple):
                         return False
-                    for text_node, other in ((logical[3], logical[2]), (logical[2], logical[3])):
+                    if logical[0] == "logical" and len(logical) == 4:
+                        pairs = ((logical[3], logical[2]), (logical[2], logical[3]))
+                    elif logical[0] == "call" and logical[1] in {"AND", "OR"} and len(logical[2]) == 2:
+                        pairs = ((logical[2][1], logical[2][0]), (logical[2][0], logical[2][1]))
+                    else:
+                        return False
+                    for text_node, other in pairs:
                         if (
                             isinstance(other, tuple) and (constant_ok or any(True for _ in _iter_reference_nodes(other)))
                             and _reads_no_data(text_node, variable_nodes.get) and evaluate(text_node, row_context, allow_text=True) == ""

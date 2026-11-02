@@ -26,8 +26,8 @@ class TypedBlankInAConstructorTest(unittest.TestCase):
         self.assertEqual("b|b", dax.local('CONCATENATEX({OR(0,""),BLANK()},IF(ISBLANK([Value]),"b","n"),"|")'))
 
     def test_beside_a_text_it_stays_refused(self) -> None:
-        for expression in ('MINX({"0"||LEFT("a",0),"a"},[Value])', 'COUNTAX({2.5&&"","a"},[Value])', 'MAXX({OR(0,""),"a"},COALESCE([Value],5))'):
-            self.assertIn("not modelled", dax.local(expression), expression)
+        for expression, powerbi in (('MINX({"0"||LEFT("a",0),"a"},[Value])', ""), ('COUNTAX({2.5&&"","a"},[Value])', "2"), ('MAXX({OR(0,""),"a"},COALESCE([Value],5))', "BLANK")):  # Power BI Desktop 2026-11-03 (Task 27 models it)
+            self.assertEqual(powerbi, dax.local(expression), expression)
 
 
 class OnlyATableIsATableFilterTest(unittest.TestCase):
@@ -119,7 +119,7 @@ class TypedBlankThroughABlockTest(unittest.TestCase):
             self.assertIn("Boolean", dax.local(expression), expression)
 
     def test_beside_a_date_it_stays_refused(self) -> None:
-        self.assertIn("not modelled", dax.local('CONCATENATEX({OR(0,""),DATE(2020,1,1)},[Value],"|")'))
+        self.assertEqual("12:00:00 AM|1/1/2020", dax.local('CONCATENATEX({OR(0,""),DATE(2020,1,1)},[Value],"|")'))  # Power BI Desktop 2026-11-03 (Task 27 models it)
 
     def test_beside_a_number_it_is_a_number_column(self) -> None:
         self.assertEqual("3", dax.local('SUMX({2.5&&"",3},[Value])'))
