@@ -113,7 +113,9 @@ class ScalarMathTests(unittest.TestCase):
         # Power BI Desktop 2026-11-02: MOD(1E29, 7) is the error (ISERROR is True); the literal is a Double and MOD refuses from 1E15 up
         with self.assertRaisesRegex(MeasureError, "too large or too small"):
             measure("MOD(100000000000000000000000000000, 7)")
-        self.assertEqual(measure("MOD(5, 0.000000000000000000000000000001)"), Decimal(0))
+        # Power BI Desktop 2026-11-02: MOD(5, 1E-30) is the error (ISERROR is True); MOD fails when |x/d| >= 1.126E12
+        with self.assertRaisesRegex(MeasureError, "too large or too small"):
+            measure("MOD(5, 0.000000000000000000000000000001)")
 
     def test_results_beyond_double_range_are_rejected_like_power_bi(self) -> None:
         for expression in ("EXP(1000)", "POWER(10, 1000)", "POWER(7, 123456.789)"):

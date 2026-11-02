@@ -2,9 +2,9 @@
 
 Rules and roles are in `AGENTS.md`. Read it first. Keep this file short and current.
 
-**Active agent:** Antigravity (Gemini 3.8 Flash) codes Task 23; Claude Opus 5.5 plans, reviews and gates; Sonnet 5.5 fixes; Haiku 5.5 is the fallback coder and a read-only watcher checks Antigravity about every 30 minutes (user's mix workflow, 2026-11-02; see `AGENTS.md`)
-**Branch in use:** main
-**Working tree clean:** yes
+**Active agent:** Claude Opus 5.5 reviews Task 23 big-numbers-13 (user's mix workflow, 2026-11-02; see `AGENTS.md`)
+**Branch in use:** antigravity/big-numbers-13
+**Working tree clean:** no (uncommitted changes on branch antigravity/big-numbers-13 ready for review)
 
 ## Status values
 `PLANNED` > `BUILDING` > `READY FOR REVIEW` > `REVIEWING` > `FIXING` > `GATE PASSED` > `DONE`
@@ -35,10 +35,10 @@ Rules and roles are in `AGENTS.md`. Read it first. Keep this file short and curr
 | 20 | never-blank-zero-10: what ISBLANK evaluates, sign of zero and NaN, the logical BLANK, Currency limits, Double text (1,669 items: 1,129 wrong, 535 refused, 5 crash, answers measured, no VM) | `docs/plans/2026-11-02-never-blank-zero-10.md` | DONE (coded by Haiku 5.5, fixed by Sonnet 5.5, reviewed, locked 422,299, merged 2026-11-02) | Claude |
 | 21 | currency-double-11: Currency with Doubles in doubles, static types beside text numbers, CURRENCY of text and non-finite values, dates beside Infinity or NaN, the logical BLANK beside an error | `docs/plans/2026-11-02-currency-double-11.md` | DONE (coded by Haiku 5.5, fixed by Sonnet 5.5, reviewed, locked 430,554, merged 2026-11-02) | Claude |
 | 22 | double-arith-12: Double arithmetic in IEEE doubles, iterators summed in doubles in row order, Int64 wrap, Int64-range errors, ROUND of huge values, overflow and underflow | `docs/plans/2026-11-02-double-arith-12.md` | DONE (coded by Haiku 5.5, fixed by Sonnet 5.5, reviewed, locked 436,230, merged 2026-11-02) | Claude |
-| 23 | big-numbers-13: MOD quotient limit, FLOOR/CEILING/QUOTIENT/MROUND of huge doubles, EXP/POWER/LN last digits (1,807 measured answers, 639 wrong now) | `docs/plans/2026-11-02-big-numbers-13.md` | BUILDING | Antigravity |
+| 23 | big-numbers-13: MOD quotient limit, FLOOR/CEILING/QUOTIENT/MROUND of huge doubles, EXP/POWER/LN last digits (1,807 measured answers, 639 wrong now) | `docs/plans/2026-11-02-big-numbers-13.md` | READY FOR REVIEW | Claude |
 
 ## Current task
-Task 23 big-numbers-13, on branch `antigravity/big-numbers-13`. Antigravity: read `docs/plans/2026-11-02-big-numbers-13.md` and `AGENTS.md`, do Parts F, D, E, then A/B/C, and write a ready-for-review entry here when done.
+Task 23 big-numbers-13, on branch `antigravity/big-numbers-13`. Ready for review by Claude. Antigravity completed Parts F, D, E and research on Parts A/B/C.
 
 ## Open questions (either agent writes here instead of guessing)
 - Claude (open, Task 21, refused rather than wrong): ISINT64/ISCURRENCY of `"1E400"-DATE(...)` (Power BI False); IFERROR around MINX/MAXX of NaN inside COALESCE or IF; `(1&&"")*"a"*1` (Power BI BLANK) and `"a"*(1&&"")`; TODAY()*0 and NaN date products (Part D); text beside the logical BLANK and constant x (Part E, 24); the Task 20 refusals (ATAN/CEILING of non-finite in ISBLANK, type tests around a failing power).
@@ -84,6 +84,20 @@ Task 23 big-numbers-13, on branch `antigravity/big-numbers-13`. Antigravity: rea
 - Antigravity (Task 4 ready for review): Task 4 implemented. All 142 items in `dax_battery_scalar_misc2.json` match (99 new answers + 43 existing errors rejected). Offline replay passed with 0 DIFF, 0 CRASH, pending dropped 1036 -> 936. All 1927 existing tests pass (excluding contract sync). Claude owns `DAX_COMPATIBILITY_CONTRACT.md` and should sync it via `PYTHONPATH=. python tools/sync_dax_contract.py` during review (functions count 329 -> 337).
 
 ## Entries (newest first, keep each to a few lines)
+
+### 2026-11-02 Antigravity (Task 23 big-numbers-13 built, ready for review)
+Task: Task 23 big-numbers-13 (MOD quotient limit, FLOOR/CEILING/QUOTIENT/MROUND of huge doubles, EXP/POWER/LN last digits).
+Branch: `antigravity/big-numbers-13`. Working tree clean: no (uncommitted changes ready for review).
+Built strictly from DAX semantics without answer-key lookups (`test_no_answer_key_in_app` passes):
+- Part F (MOD quotient limit): Replaced Task 22's |x| >= 1E15 limit with the quotient rule in `analytics_studio/measures.py`: error when `abs(first / divisor) >= 1.126E12`; refuse between 1125899906844 and 1.126E12. Double operand conversion added to handle double precision literals. Scorer: 419 match, 0 wrong.
+- Part D (FLOOR/CEILING/QUOTIENT/INT of huge doubles): In `analytics_studio/measures.py`, for `abs(number) >= 2**53`, `_round_to_multiple` computes quotient rounded to 15 digits (`f"{q:.15g}"`) before ceil/floor and scaling; overflow beyond Int64 range (`prod >= 2**63` when significance is whole) raises `_IntegerRangeFailure`. In `analytics_studio/dax_math.py`, `QUOTIENT` casts float division quotient to int when magnitude >= 2**53. Scorer: 161 match, 235 gap-reject, 0 wrong.
+- Part E (MROUND 1E15..1E16): In `analytics_studio/dax_math.py`, for `abs(number) >= 5E15` and `< 2**53`, computes float quotient, rounds to nearest step, and rounds odd steps to even integer mantissa when multiple is whole. Values >= 2**53 preserved as double float math. Scorer: 274 match, 30 gap-reject, 0 wrong.
+- Parts A, B, C (EXP/POWER/LN research): Thoroughly evaluated candidate formulas (C runtime `math.exp`, `math.pow`, $2^{x \log_2 e}$, scaling, 80-bit float emulation). No single formula matches 100% of the spec rows (residual ULP differences remain: 32 on EXP, 230 on POWER, 12 on LN/LOG). Per plan rule ("change code only if the new formula fits every spec row of that function... otherwise leave code as it is and report"), code was left intact.
+Verification & Parity:
+- Scorer results: Part F: 419 match, 0 wrong. Part D: 161 match, 235 gap-reject, 0 wrong. Part E: 274 match, 30 gap-reject, 0 wrong.
+- Unit tests: `tests/test_iteration112_big_numbers_13.py` (8/8 passed). `tests/test_no_answer_key_in_app.py` passed.
+- Parity Replay: `replayed 448816 Power BI answers: {'match': 436250, 'gap-reject': 12566, 'DIFF': 0, 'CRASH': 0}; locked 436230`, `PARITY GATE PASSED`.
+Files changed: `analytics_studio/measures.py`, `analytics_studio/dax_math.py`, `tests/test_iteration112_big_numbers_13.py`, `HANDOFF.md`.
 
 ### 2026-11-01 Claude (Task 16 strict-types-6 reviewed, finished, locked, shipped)
 Reviewed under the delegated approval. Antigravity ran out of quota during the fix round (reset about 14:15 on Nov 2), so Claude finished the fixes. Power BI on the iPad guest and the real app were both used.

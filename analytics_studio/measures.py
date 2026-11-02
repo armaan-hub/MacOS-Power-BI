@@ -2539,6 +2539,16 @@ def _round_to_multiple(
         raise MeasureRuntimeError(
             f"{function} needs a significance with the same sign as the number."
         )
+    if abs(number) >= 2 ** 53:
+        q = float(abs(number)) / float(abs(significance))
+        q15 = float(f"{q:.15g}")
+        whole = math.ceil(q15) if function == "CEILING" else math.floor(q15)
+        prod = float(whole) * float(abs(significance))
+        if number < 0:  # measured: FLOOR and CEILING of a negative number beyond 2^53 are both the negated magnitude result
+            prod = -prod
+        if significance == significance.to_integral_value():
+            return Decimal(int(prod))
+        return Decimal(prod)
     rounding = ROUND_CEILING if function == "CEILING" else ROUND_FLOOR
     with localcontext() as exact:
         exact.prec = max(_EXACT_PRECISION, number.adjusted() + 30)  # keep every integer digit
@@ -2678,10 +2688,13 @@ def _scalar_math_value(function: str, values: list[Decimal | None]) -> Decimal |
             return None
         if divisor == 0:
             raise MeasureRuntimeError("MOD cannot divide by zero.")
-        if abs(first) >= Decimal("1E15"):  # Part D: measured: MOD of every |x| from 1E15 up (1E15, 2E15, 2^52, 5E15, 2^53, 9.5E15, -5E15) is the error, with every divisor measured (0.5, 2, 3, 5, 7, 10, 11, 100)
-            raise MeasureRuntimeError("An argument of function 'MOD' has the wrong data type or the result is too large or too small.")
         with localcontext() as exact:
             exact.prec = _EXACT_PRECISION  # % needs the whole quotient to fit
+            quotient_magnitude = abs(first / divisor)
+            if quotient_magnitude >= Decimal("1.126E12"):  # measured 2026-11-02: also at small |x|, MOD(5,1E-30) is this error
+                raise MeasureRuntimeError("An argument of function 'MOD' has the wrong data type or the result is too large or too small.")
+            if quotient_magnitude > Decimal("1125899906844"):
+                raise dax_typed.refusal("MOD of a quotient between 1125899906844 and 1.126E12 is not modelled by the local engine.")
             remainder = first % divisor  # sign follows the dividend
             if remainder != 0 and (remainder < 0) != (divisor < 0):
                 remainder += divisor  # DAX: result takes the divisor's sign
@@ -3646,8 +3659,8 @@ def _is_power_node(node: Any) -> bool:
 
 
 def _double_rounding_result(function: str, result: Any, argument_type: str | None) -> Any:
-    """Part A: ROUND, ROUNDUP, ROUNDDOWN, TRUNC and MROUND of a Double are Doubles: the result is its exact binary value."""
-    if function in {"ROUND", "ROUNDUP", "ROUNDDOWN", "TRUNC", "MROUND"} and argument_type == "double" and isinstance(result, Decimal) and result.is_finite():
+    """Part A: ROUND, ROUNDUP, ROUNDDOWN, TRUNC, MROUND and MOD of a Double are Doubles: the result is its exact binary value."""
+    if function in {"ROUND", "ROUNDUP", "ROUNDDOWN", "TRUNC", "MROUND", "MOD"} and argument_type == "double" and isinstance(result, Decimal) and result.is_finite():
         return Decimal(float(result))
     return result
 
@@ -17438,7 +17451,20 @@ def evaluate_measures(
                     values[0] = _read_double_as_integer_source(values[0])  # Part D: INT, and FLOOR, CEILING, QUOTIENT by a whole number, read a Double alike
                 if function == "TRUNC" and len(values) == 2 and values[0] is not None and values[0].is_finite() and left_static_type(arguments[0], row_context) == "double":
                     values[0] = _read_double_as_integer_source(values[0])  # Task 22 fix: TRUNC with digits reads a Double at 15 significant digits, as ROUND does
-                return _double_rounding_result(function, _scalar_math(function, values), left_static_type(arguments[0], row_context))
+                if function == "MOD" and values[0] is not None and values[0].is_finite() and left_static_type(arguments[0], row_context) == "double":
+                    values[0] = Decimal(float(values[0]))
+                math_result = _scalar_math(function, values)  # raises the measured errors and refusals first
+                if (
+                    function == "MOD" and math_result is not None and values[0] is not None and values[1] is not None
+                    and values[0].is_finite() and values[1].is_finite() and left_static_type(arguments[0], row_context) == "double"
+                ):
+                    # Task 23: MOD of a Double is computed in IEEE doubles (fmod), the divisor read as a double; the result takes the divisor's sign
+                    divisor_float = float(values[1])
+                    remainder_float = math.fmod(float(values[0]), divisor_float)
+                    if remainder_float != 0 and (remainder_float < 0) != (divisor_float < 0):
+                        remainder_float += divisor_float
+                    math_result = Decimal(0) if remainder_float == 0 else Decimal(remainder_float)
+                return _double_rounding_result(function, math_result, left_static_type(arguments[0], row_context))
             except _PowerFailure as failure:
                 _stamp_row_dependence(failure, arguments, variable_nodes.get, row_scans_model(row_context))
                 raise
