@@ -15863,7 +15863,10 @@ def evaluate_measures(
         elif function == "SELECTEDVALUE" and arguments:
             reference = arguments[0]  # SELECTEDVALUE of a date column with no single selection is a typed BLANK date as well
         elif function in {"MAXX", "MINX"} and len(arguments) == 2:
-            reference = arguments[1]
+            body = arguments[1]
+            if conditional_type(body, None) == "date" or _static_date(body, static_scope()[0]) or _is_datetime_conversion(body):
+                return True
+            reference = body
         elif function == "CALCULATE" and arguments:
             return is_date_aggregate(arguments[0])
         if reference is None or reference[0] != "reference" or not reference[1]:

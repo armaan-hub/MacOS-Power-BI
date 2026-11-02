@@ -4,7 +4,7 @@
 **Project status:** In progress; the Power BI parity goal is currently paused.  
 **Latest verified full test run:** 998 tests and 738 subtests passed in Iteration 62. This run predates the unfinished Iteration 63 edits described below.
 
-**Latest status (2026-11-03, after Iteration 113 / Task 24 topn-ties-14, the row order of TOPN when sort values tie, mix workflow: Antigravity coded, Sonnet 5.5 fixed, Claude Opus 5.5 planned, reviewed and shipped under the user's delegated approval):** pytest 2,516 passed (fast gate), real app 575/575 and 1,500 fresh probes with 0 wrong, replay 451,421 answers with 438,510 match, 12,911 refused, 0 DIFF, 0 CRASH, locked 438,490. Next: Task 25 trig-limits-15 (gate next), Task 26 transcendental-16 research (Antigravity).
+**Latest status (2026-11-03, after Iteration 114 / Task 25 trig-limits-15, SIN/COS/TAN/COT limit at 2^27, ASINH/ACOSH overflow, a BLANK date plus a number, mix workflow: Antigravity coded, Sonnet 5.5 fixed, Claude Opus 5.5 planned, reviewed and shipped under the user's delegated approval):** pytest 2,518 passed (fast gate), real app 575/575 and 1,500 fresh probes with 0 wrong, replay 451,915 answers with 438,997 match, 12,918 refused, 0 DIFF, 0 CRASH, locked 438,977. Next: Task 27 logical-blank-17 (Antigravity: 2,763 saved answers the engine refuses).
 
 **Previous status (2026-11-01, after Iteration 103 / Task 14 logic-tables-4, empty text in logical operators, a VAR block as an iterator table, FILTER over no rows, Currency arithmetic, review done, gate passed, locked 246,907, committed, merged and pushed; 246,927 of 253,237 saved answers match, 0 differ; next: Task 15 typed-columns-5, 1,836 items).**
 
