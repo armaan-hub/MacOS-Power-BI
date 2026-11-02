@@ -898,7 +898,8 @@ class MeasureTests(unittest.TestCase):
         ], self.rows, self.headers)
 
         self.assertEqual(result["Absolute loss"], Decimal("1.5"))
-        self.assertEqual(result["Rounded average"], Decimal("9.67"))
+        # Power BI Desktop 2026-11-02: same double, displayed 9.67
+        self.assertEqual(float(result["Rounded average"]), float(Decimal("9.67")))
         self.assertEqual(result["Round positive half"], Decimal("3"))
         self.assertEqual(result["Round negative half"], Decimal("-3"))
         self.assertEqual(result["Round tens"], Decimal("1.3E+2"))
@@ -926,7 +927,8 @@ class MeasureTests(unittest.TestCase):
         ], self.rows, self.headers)
 
         self.assertEqual(result["Threshold"], Decimal("29.0"))
-        self.assertEqual(result["Fallback"], Decimal("9.67"))
+        # Power BI Desktop 2026-11-02: same double, displayed 9.67
+        self.assertEqual(float(result["Fallback"]), float(Decimal("9.67")))
         self.assertEqual(result["And condition"], Decimal(1))
         self.assertEqual(result["Or condition"], Decimal(1))
         self.assertEqual(result["Not condition"], Decimal(1))

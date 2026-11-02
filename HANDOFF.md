@@ -2,7 +2,7 @@
 
 Rules and roles are in `AGENTS.md`. Read it first. Keep this file short and current.
 
-**Active agent:** Claude (Opus 5.5 plans and reviews, Haiku 5.5 codes, Sonnet 5.5 fixes, as subagents, until Antigravity's quota returns, about 14:15 on Nov 2; see `AGENTS.md`)
+**Active agent:** Antigravity (Gemini 3.8 Flash) codes Task 23; Claude Opus 5.5 plans, reviews and gates; Sonnet 5.5 fixes; Haiku 5.5 is the fallback coder and a read-only watcher checks Antigravity about every 30 minutes (user's mix workflow, 2026-11-02; see `AGENTS.md`)
 **Branch in use:** main
 **Working tree clean:** yes
 
@@ -34,9 +34,11 @@ Rules and roles are in `AGENTS.md`. Read it first. Keep this file short and curr
 | 19 | convert-currency-9: CONVERT typing, Currency with Infinity or NaN, ISBLANK that never evaluates, BLANKs that cancel an error, text dates, sign of zero (5,778 items: 2,419 wrong, 3,359 refused, answers measured, no VM) | `docs/plans/2026-11-02-convert-currency-9.md` | DONE (coded by Haiku 5.5, fixed by Sonnet 5.5, reviewed, locked 382,125, merged 2026-11-02) | Claude |
 | 20 | never-blank-zero-10: what ISBLANK evaluates, sign of zero and NaN, the logical BLANK, Currency limits, Double text (1,669 items: 1,129 wrong, 535 refused, 5 crash, answers measured, no VM) | `docs/plans/2026-11-02-never-blank-zero-10.md` | DONE (coded by Haiku 5.5, fixed by Sonnet 5.5, reviewed, locked 422,299, merged 2026-11-02) | Claude |
 | 21 | currency-double-11: Currency with Doubles in doubles, static types beside text numbers, CURRENCY of text and non-finite values, dates beside Infinity or NaN, the logical BLANK beside an error | `docs/plans/2026-11-02-currency-double-11.md` | DONE (coded by Haiku 5.5, fixed by Sonnet 5.5, reviewed, locked 430,554, merged 2026-11-02) | Claude |
+| 22 | double-arith-12: Double arithmetic in IEEE doubles, iterators summed in doubles in row order, Int64 wrap, Int64-range errors, ROUND of huge values, overflow and underflow | `docs/plans/2026-11-02-double-arith-12.md` | DONE (coded by Haiku 5.5, fixed by Sonnet 5.5, reviewed, locked 436,230, merged 2026-11-02) | Claude |
+| 23 | big-numbers-13: MOD quotient limit, FLOOR/CEILING/QUOTIENT/MROUND of huge doubles, EXP/POWER/LN last digits (1,807 measured answers, 639 wrong now) | `docs/plans/2026-11-02-big-numbers-13.md` | BUILDING | Antigravity |
 
 ## Current task
-None. Task 22 is to be planned from the Task 21 open items below.
+Task 23 big-numbers-13, on branch `antigravity/big-numbers-13`. Antigravity: read `docs/plans/2026-11-02-big-numbers-13.md` and `AGENTS.md`, do Parts F, D, E, then A/B/C, and write a ready-for-review entry here when done.
 
 ## Open questions (either agent writes here instead of guessing)
 - Claude (open, Task 21, refused rather than wrong): ISINT64/ISCURRENCY of `"1E400"-DATE(...)` (Power BI False); IFERROR around MINX/MAXX of NaN inside COALESCE or IF; `(1&&"")*"a"*1` (Power BI BLANK) and `"a"*(1&&"")`; TODAY()*0 and NaN date products (Part D); text beside the logical BLANK and constant x (Part E, 24); the Task 20 refusals (ATAN/CEILING of non-finite in ISBLANK, type tests around a failing power).

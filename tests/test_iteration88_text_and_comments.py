@@ -1193,7 +1193,6 @@ STAYS_REFUSED = ['ROW("a",1)+1',
  'DIVIDE(1,2,"x")',
  'DIVIDE(1,0,"")',
  'DIVIDE(1,0,DATE(2020,1,1))',
- 'DIVIDE(1,3)*3==1',
  'HOUR("13:45.5")',
  'MINUTE("13:45.5")',
  'SECOND("13:45.5")',
@@ -1232,11 +1231,18 @@ class TextAndComments(unittest.TestCase):
         self.assertTrue(dax.local('HOUR("24:00")').startswith("LOCAL-REJECT"))
 
     def test_function_edges(self) -> None:
-        self.assertEqual("1234.56", dax.local("TRUNC(1234.567,1.9)"))
+        # Power BI Desktop 2026-11-02: displayed text is 1234.56z and the difference from 1234.56 is 0z.
+        self.assertEqual("1234.56z", dax.local('TRUNC(1234.567,1.9)&"z"'))
+        self.assertEqual("0z", dax.local('(TRUNC(1234.567,1.9)-1234.56)&"z"'))
         self.assertEqual("1234.5", dax.local("TRUNC(1234.567,1.1)"))
         self.assertEqual("4", dax.local("ISO.CEILING(2.1,-2)"))
         self.assertEqual("0", dax.local("PERCENTILE.INC(Facts[Quantity],BLANK())"))
         self.assertTrue(dax.local("PERCENTILE.EXC(Facts[Quantity],BLANK())").startswith("LOCAL-REJECT"))
+
+    def test_divide_third_times_three_is_one(self) -> None:
+        # Measured in Power BI Desktop 2026-11-02, modelled by Task 22 double arithmetic.
+        self.assertEqual("True", dax.local("DIVIDE(1,3)*3==1"))
+        self.assertEqual("True", dax.local("DIVIDE(1,3)*3=1"))
 
     def test_unmodelled_stays_refused(self) -> None:
         for expr in STAYS_REFUSED:

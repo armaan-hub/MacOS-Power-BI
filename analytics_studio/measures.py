@@ -129,6 +129,10 @@ class _TextRangeFailure(_StaticTypeFailure, MeasureRuntimeError):
     """Task 21 Part G: a text number beyond the Double range in + - * (a type test of it is answered by its type)."""
 
 
+class _IntegerRangeFailure(_StaticTypeFailure, MeasureRuntimeError):
+    """Part D: INT, FLOOR or CEILING of a value whose Integer result is beyond the 64-bit range (a type test of it is answered by its static type: ISINTEGER(INT(1E19)) is True, ISDOUBLE False, measured)."""
+
+
 class _CalculateTableFilterRefusal(MeasureError):
     """A CALCULATETABLE in a Boolean filter whose hoist-or-transition reading was not established (see dax_ct_filters)."""
 
@@ -2589,7 +2593,7 @@ def _scalar_math_value(function: str, values: list[Decimal | None]) -> Decimal |
         return Decimal(0)  # Task 20 F3: CEILING(0, Infinity) is 0, as CEILING(0, x) is
     if function != "POWER" and any(value is not None and not value.is_finite() for value in values):  # POWER: see the branch below
         if function == "TRUNC" and first is not None and not first.is_finite() and all(value is None or value.is_finite() for value in values[1:]):
-            return first  # TRUNC of Infinity is Infinity, an error value
+            return Decimal("NaN") if first == Decimal("Infinity") else first  # Part E: TRUNC of +Infinity is NaN (measured); -Infinity stays as it was
         raise MeasureRuntimeError(
             f"An argument of function '{function}' has the wrong data type or the result is too large or too small."
         )
@@ -2639,7 +2643,7 @@ def _scalar_math_value(function: str, values: list[Decimal | None]) -> Decimal |
                     raise MeasureRuntimeError(
                         "An argument of function 'POWER' has the wrong data type or the result is too large or too small."
                     )
-                return -((-first) ** exponent)
+                return -((-first) ** (Decimal(1) / Decimal(reciprocal)))  # the exact root: the exponent may be the binary double nearest 1/odd (Task 22)
         if abs(exponent) > 1000:  # Power BI computes POWER in double precision; huge exponents amplify the difference
             overflow = MeasureRuntimeError("POWER result is outside the supported numeric range.")
             try:
@@ -2674,6 +2678,8 @@ def _scalar_math_value(function: str, values: list[Decimal | None]) -> Decimal |
             return None
         if divisor == 0:
             raise MeasureRuntimeError("MOD cannot divide by zero.")
+        if abs(first) >= Decimal("1E15"):  # Part D: measured: MOD of every |x| from 1E15 up (1E15, 2E15, 2^52, 5E15, 2^53, 9.5E15, -5E15) is the error, with every divisor measured (0.5, 2, 3, 5, 7, 10, 11, 100)
+            raise MeasureRuntimeError("An argument of function 'MOD' has the wrong data type or the result is too large or too small.")
         with localcontext() as exact:
             exact.prec = _EXACT_PRECISION  # % needs the whole quotient to fit
             remainder = first % divisor  # sign follows the dividend
@@ -2696,6 +2702,8 @@ def _scalar_math_value(function: str, values: list[Decimal | None]) -> Decimal |
         digits = digits.to_integral_value(rounding=ROUND_HALF_UP)  # live Power BI (iteration 88): fractional digits round like ROUND's (1.9 is 2, 1.1 is 1)
     if not digits.is_finite():
         raise MeasureRuntimeError("TRUNC digits must be a number.")
+    if abs(first) >= Decimal("1E16"):
+        return first  # Part E: a finite value beyond 1E16 is returned unchanged by TRUNC (TRUNC(1E300) is 1E+300, measured)
     if digits > 28:
         return first  # live Power BI (iteration 88): nothing is left to cut (digits 29 and 100 give the number itself)
     if digits < -28:
@@ -2708,6 +2716,49 @@ def _scalar_math_value(function: str, values: list[Decimal | None]) -> Decimal |
 # Power BI computes in IEEE doubles; larger magnitudes are errors there.
 _DOUBLE_MAX = Decimal("1.7976931348623157E+308")
 _EXACT_PRECISION = 100
+_INT64_RANGE = Decimal(2) ** 63  # Part D: an Integer result must lie within the 64-bit range; 2^63 itself is the error
+
+
+def _has_power(node: Any, held: Callable[[str], Any], seen: frozenset[str] = frozenset()) -> bool:
+    """True when a ^ or POWER of 1E15 or more (or of unknown size) appears in the expression (followed through VARs): Power BI's own power precision is Task 23."""
+    if not isinstance(node, tuple) or not node:
+        return False
+    if (node[0] == "binary" and node[1] == "^") or (node[0] == "call" and node[1] == "POWER" and len(node[2]) == 2):
+        operands = (node[2], node[3]) if node[0] == "binary" else tuple(node[2])
+        literals = []
+        for operand in operands:
+            sign = 1
+            while isinstance(operand, tuple) and operand and operand[0] == "unary" and operand[1] in {"+", "-"}:
+                sign *= -1 if operand[1] == "-" else 1
+                operand = operand[2]
+            if not (isinstance(operand, tuple) and operand and operand[0] == "number"):
+                return True  # an operand that is not a literal: the size of the power is not known here
+            literals.append(sign * float(operand[1]))
+        try:
+            if abs(literals[0] ** literals[1]) < 1E15:
+                return any(_has_power(operand, held, seen) for operand in operands)  # a small literal power (2^-0.5) is multiplied up later; the spec settles those
+        except (OverflowError, ZeroDivisionError, ValueError):
+            pass
+        return True
+    if node[0] == "var" and len(node) > 1 and isinstance(node[1], str) and node[1] not in seen:
+        return _has_power(held(node[1]), held, seen | {node[1]})
+    return any(_has_power(child, held, seen) for child in node if isinstance(child, tuple)) or any(_has_power(item, held, seen) for child in node if isinstance(child, list) for item in child)
+
+
+def _refuse_power_beyond_1e15(node: Any, value: Any, held: Callable[[str], Any]) -> None:
+    """INT, FLOOR, CEILING, QUOTIENT, MROUND and CONVERT of a ^ or POWER result of 1E15 or more: Power BI's power is not the engine's (INT(2^52+0.5), FLOOR(2^53+0.5,1), measured): refused."""
+    if isinstance(value, Decimal) and value.is_finite() and Decimal("1E15") <= abs(value) < _INT64_RANGE and _has_power(node, held):  # from 2^63 up the result is the conversion error whatever the power's last bits
+        raise dax_typed.refusal("A rounding to an integer of a power result of 1E15 or more is not modelled by the local engine.")
+
+
+def _read_double_as_integer_source(number: Decimal) -> Decimal:
+    """How INT reads a finite Double (measured, Task 22 Part D): from 2^53 up its exact binary value (INT(9.223372036854775E18) is 9223372036854774784),
+    below that a fraction is read at 15 significant digits (INT((0.1+2/3)*1E15) is 766666666666667, CEILING(4.5E15+0.5,1) is 4500000000000000)."""
+    if abs(number) >= 2 ** 53:
+        return Decimal(float(number))
+    if number != number.to_integral_value():
+        return Decimal(format(number, ".14e"))
+    return number
 
 
 def _scalar_math(function: str, values: list[Decimal | None]) -> Decimal | None:
@@ -2729,6 +2780,10 @@ def _scalar_math_checked(function: str, values: list[Decimal | None]) -> Decimal
         return None
     if not result.is_finite():
         return result  # an Infinity argument that the function passes through (TRUNC)
+    if function in {"INT", "FLOOR", "CEILING", "QUOTIENT", "MROUND"} and abs(result) >= _INT64_RANGE:
+        if function in {"INT", "FLOOR", "CEILING"}:
+            raise _IntegerRangeFailure("The result of a conversion or arithmetic operation is either too large or too small.")  # Part D: a type test of it is answered by its type
+        raise MeasureRuntimeError("The result of a conversion or arithmetic operation is either too large or too small.")  # Part D: an Integer result beyond the 64-bit range is the error (IFERROR catches it)
     if function == "POWER" and result != 0 and abs(result) < _UNDERFLOW_DOUBLE:  # smaller than a Double can hold: 0 (the sign of a negative one is not measured)
         if result < 0:
             raise dax_typed.refusal("A negative POWER result below the Double range is not modelled by the local engine.")
@@ -3581,6 +3636,32 @@ def _currency_wrap(value: Decimal) -> Decimal:
     units = int((value * 10000).to_integral_value(rounding=ROUND_HALF_UP))
     units = (units + 2**63) % 2**64 - 2**63
     return Decimal(units).scaleb(-4)  # a zero has no sign in a Currency
+
+
+def _is_power_node(node: Any) -> bool:
+    """True when the node is a POWER call or a ^ operation (not one nested deeper)."""
+    if isinstance(node, tuple) and len(node) == 3 and node[0] == "unary":
+        return _is_power_node(node[2])  # a sign in front of a power (-"2"^1.5 is minus the power)
+    return isinstance(node, tuple) and len(node) >= 2 and ((node[0] == "call" and node[1] == "POWER") or (node[0] == "binary" and node[1] == "^"))
+
+
+def _double_rounding_result(function: str, result: Any, argument_type: str | None) -> Any:
+    """Part A: ROUND, ROUNDUP, ROUNDDOWN, TRUNC and MROUND of a Double are Doubles: the result is its exact binary value."""
+    if function in {"ROUND", "ROUNDUP", "ROUNDDOWN", "TRUNC", "MROUND"} and argument_type == "double" and isinstance(result, Decimal) and result.is_finite():
+        return Decimal(float(result))
+    return result
+
+
+def _int64_wrap(operator: str, left: Decimal, right: Decimal) -> Decimal:
+    """Part C: + - * of two Int64 values, exactly then wrapped to a signed 64-bit count (9223372036854775807+1 is -9223372036854775808).
+
+    A value that is not a whole number (not expected for an Int64) keeps the Decimal result.
+    """
+    if left != left.to_integral_value() or right != right.to_integral_value():
+        return _binary_value(operator, left, right)
+    a, b = int(left), int(right)
+    exact = a + b if operator == "+" else a - b if operator == "-" else a * b
+    return Decimal((exact + 2**63) % 2**64 - 2**63)
 
 
 def _binary_value(operator: str, left: Decimal | None, right: Decimal | None) -> Decimal | None:
@@ -14580,7 +14661,12 @@ def evaluate_measures(
         if target == "INTEGER":
             if not number.is_finite():
                 raise MeasureRuntimeError("An argument of function 'CONVERT' has the wrong data type or the result is too large or too small.")
-            return number.quantize(Decimal(1), rounding=ROUND_HALF_UP)
+            if abs(number) >= _INT64_RANGE:
+                raise MeasureRuntimeError("The result of a conversion or arithmetic operation is either too large or too small.")  # Part D: an Integer beyond the 64-bit range is the error
+            rounded = number.quantize(Decimal(1), rounding=ROUND_HALF_UP)
+            if abs(rounded) >= _INT64_RANGE:
+                raise MeasureRuntimeError("The result of a conversion or arithmetic operation is either too large or too small.")
+            return rounded
         if target in {"DOUBLE", "CURRENCY"}:
             if target == "DOUBLE":
                 return Decimal(number)
@@ -14924,6 +15010,11 @@ def evaluate_measures(
             if values[0] is None and interval == "BOOLEAN":
                 # Task 19 Part A: a plain BLANK is False; a logical operator's own BLANK (1&&"") stays a BLANK (locked items)
                 return None if (true_false_column(arguments[0]) or true_false_conditional(arguments[0], row_context)) else False
+            if interval == "INTEGER":
+                _refuse_power_beyond_1e15(arguments[0], values[0], variable_nodes.get)
+            if interval == "INTEGER" and isinstance(values[0], Decimal) and values[0].is_finite() and not dax_dates.is_date(values[0]) and left_static_type(arguments[0], row_context) == "double":
+                if abs(values[0]) >= 2 ** 53:
+                    values[0] = _read_double_as_integer_source(values[0])  # Part D: CONVERT(x, INTEGER) of a Double of 2^53 or more is its exact binary value; below that it rounds the exact value, not 15 digits (CONVERT(4.5E15+0.5,INTEGER) is 4500000000000001, measured)
             return convert_value(double_as_text(arguments[0], values[0], row_context) if interval == "STRING" else values[0], str(interval))
         if function in _DATE_FUNCTIONS:
             return dax_dates.date_function(function, values, interval)
@@ -14948,8 +15039,14 @@ def evaluate_measures(
             if left_static_type(arguments[0], row_context) == "int64":
                 return _currency_wrap(values[0])  # Task 20 F5: a whole number of the Int64 type wraps
             raise _CurrencyConversionError("The result of a conversion or arithmetic operation is either too large or too small.")  # a Double beyond the range is the error
+        if function in {"QUOTIENT", "MROUND"} and values:
+            _refuse_power_beyond_1e15(arguments[0], values[0], variable_nodes.get)
+        if function == "QUOTIENT" and len(values) == 2 and all(isinstance(value, Decimal) and value.is_finite() and not dax_dates.is_date(value) for value in values) and values[1] == values[1].to_integral_value() and left_static_type(arguments[0], row_context) == "double":
+            values = [_read_double_as_integer_source(values[0]), values[1]]  # Part D: QUOTIENT by a whole number reads a Double as INT does
+        if function in {"ROUND", "ROUNDUP", "ROUNDDOWN"} and len(values) == 2 and isinstance(values[0], Decimal) and values[0].is_finite() and not dax_dates.is_date(values[0]) and left_static_type(arguments[0], row_context) == "double":
+            values = [_read_double_as_integer_source(values[0]), values[1]]  # Task 22 fix: a Double is read at 15 significant digits before it is rounded with digits (TRUNC(66.6 as a product, 1.6) is 66.6, measured)
         if function in dax_math.MATH_ARITY or function == "ROUND":
-            return dax_math.math_function(function, values)
+            return _double_rounding_result(function, dax_math.math_function(function, values), left_static_type(arguments[0], row_context) if arguments else None)
         if function == "ISNUMBER":
             return isinstance(values[0], Decimal)
         if function == "ISTEXT":
@@ -14989,7 +15086,10 @@ def evaluate_measures(
             shown = double_as_text(arguments[0], values[0], row_context)
             if isinstance(shown, str) and not isinstance(values[0], str) and str(values[1] or "").strip().casefold() in {"", "general number"}:
                 return shown  # a large Double in the general format prints with an exponent
-            return dax_format.format_value(values[0], values[1])
+            shown_value = values[0]
+            if isinstance(shown_value, Decimal) and shown_value.is_finite() and shown_value != shown_value.to_integral_value() and left_static_type(arguments[0], row_context) == "double":
+                shown_value = Decimal(format(shown_value, ".14e"))  # Part A: FORMAT reads a Double as its 15 significant digits (FORMAT(MIN(x)/MAX(x),"0.00") is -0.08, measured)
+            return dax_format.format_value(shown_value, values[1])
         return dax_typed.text_function(function, values)
 
     static_type_of_nodes: dict[int, str | None] = {}
@@ -15093,7 +15193,16 @@ def evaluate_measures(
             return _static_numeric_type(node, cols, scope) == "currency"
         return static_type_of(node) == "currency"
 
+    def int64_operands(node: tuple[Any, ...], row_context: Any = None) -> bool:
+        """Part C: both operands of a + - * are Int64 (a whole number, a logical that can never be BLANK, or a column of that type)."""
+        operand_types = []
+        for operand in (node[2], node[3]):
+            operand_type = left_static_type(operand, row_context)
+            operand_types.append("int64" if operand_type == "bool" and _is_never_blank_logical(operand) else operand_type)
+        return operand_types == ["int64", "int64"]
+
     nan_date_extreme: list[str] = []
+    xnpv_depth = [0]  # Part A: how many XNPV calls are being evaluated (their arguments keep the exact arithmetic)
     iferror_depth = [0]  # how many IFERROR first arguments are being evaluated (a VAR is evaluated where it is bound, so outside them)
 
     def extreme_in_arithmetic(node: Any) -> bool:
@@ -15122,7 +15231,7 @@ def evaluate_measures(
             if right == 0:
                 return None
             quotient = float(left) / float(right)
-            return Decimal(format(quotient, ".15g")) if math.isfinite(quotient) else None  # a double as the 15 digits Power BI shows: the next double product then lands on the clean value (3.14159/CURRENCY(0.0001))*10000 is 314159000
+            return Decimal(float(format(quotient, ".15g"))) if math.isfinite(quotient) else None  # Part A: the exact binary value of that double, so a ROUND of it compares equal (a double as the 15 digits Power BI shows: the next double product then lands on the clean value (3.14159/CURRENCY(0.0001))*10000 is 314159000
         if node[1] == "*" and left_static_type(node[3] if left_currency else node[2], row_context) not in {"double", "datetime", "text"}:
             return None  # an Int64 operand keeps the wrap of a Currency product
         if node[1] == "/" and not left_currency:
@@ -15133,6 +15242,39 @@ def evaluate_measures(
         if not math.isfinite(operated):
             return None
         return Decimal(int(Decimal(operated).to_integral_value(rounding=ROUND_HALF_UP))).scaleb(-4)
+
+    def double_operation(node: tuple[Any, ...], left: Decimal, right: Decimal, row_context: Any) -> Decimal | None:
+        """Part A: + - * / whose result is a Double (a Double operand, a text number, TRUE beside a Double) are computed in IEEE doubles,
+        and the result is kept as its exact binary value (Decimal(float)), so (100.1-100)&"z" is 9.99999999999943E-02z.
+
+        None when the rule does not apply: a Currency with * or / (Task 21 Part A), a division by zero (its Infinity is kept), a NaN.
+        """
+        if left_static_type(node, row_context) != "double":
+            return None
+        if currency_typed(node[2], row_context) and currency_typed(node[3], row_context):
+            return None  # a Currency over a Currency is still the exact Currency division (FORMAT(MIN(x)/MAX(x),"0.00") is -0.08, measured)
+        if node[1] in {"*", "/"} and (currency_typed(node[2], row_context) or currency_typed(node[3], row_context)):
+            return None
+        if xnpv_depth[0]:
+            return None  # Part A: XNPV keeps its own arithmetic (6 saved XNPV answers depend on it)
+        if _is_power_node(node[2]) or _is_power_node(node[3]):
+            return None  # narrowed (measured): a POWER result as an operand is not yet a measured Double (VAR q=MIN(x)*-"2"^1.5 is 4.24264068711928 in Power BI)
+        if node[1] == "/" and right == 0:
+            return None
+        a, b = float(left), float(right)
+        if node[1] == "+":
+            value = a + b
+        elif node[1] == "-":
+            value = a - b
+        elif node[1] == "*":
+            value = a * b
+        else:
+            value = a / b
+        if math.isnan(value):
+            return None
+        if math.isinf(value):
+            return Decimal("Infinity") if value > 0 else Decimal("-Infinity")
+        return Decimal(value)
 
     def left_static_type(node: tuple[Any, ...], row_context: Any = None) -> str | None:
         """The static type of the left operand of a - with a date on the right, with the row's columns when a row is in scope."""
@@ -16014,6 +16156,8 @@ def evaluate_measures(
             if node[1] == "+" and isinstance(operand, bool):
                 return operand  # unary plus leaves a True/False value alone (-TRUE() is a number)
             value = as_number(operand)
+            if node[1] == "-" and value == -_INT64_RANGE and not dax_dates.is_date(value) and left_static_type(node[2], row_context) == "int64":
+                return value  # Part C: the negation of the Int64 minimum wraps to itself (-(9223372036854775807+1) is -9223372036854775808, measured)
             return typed_zero(value if node[1] == "+" else value.copy_negate(), node, row_context)  # copy_negate keeps a zero's sign; -x would round -0 to 0
         if kind == "binary":
             left_error = right_error = None
@@ -16115,6 +16259,10 @@ def evaluate_measures(
                 None if left is None else as_number(left),
                 None if right is None else as_number(right),
             )
+            if node[1] in {"+", "-", "*", "/"} and left is not None and right is not None and isinstance(result, Decimal) and result.is_finite() and not dax_dates.is_date(left) and not dax_dates.is_date(right):
+                double_value = double_operation(node, as_number(left), as_number(right), row_context)
+                if double_value is not None:
+                    result = double_value  # Part A: a Double operation is computed in IEEE doubles
             result = typed_zero(result, node, row_context)
             double_currency = None
             if node[1] in {"*", "/"} and isinstance(result, Decimal) and result.is_finite() and left is not None and right is not None:
@@ -16137,6 +16285,8 @@ def evaluate_measures(
                     raise _CurrencyOverflowError("The result of a conversion or arithmetic operation is either too large or too small.")  # Part D: a Currency quotient beyond the range is the error
                 if node[1] != "/":
                     result = _currency_wrap(result)  # Part D: + - * wrap at 64 bits
+            if node[1] in {"+", "-", "*"} and left is not None and right is not None and isinstance(result, Decimal) and result.is_finite() and not dax_dates.is_date(left) and not dax_dates.is_date(right) and not currency_typed(node, row_context) and int64_operands(node, row_context):
+                result = _int64_wrap(node[1], as_number(left), as_number(right))  # Part C: + - * of two Int64 operands wrap at 64 bits (exact integers, then two's complement)
             if node[1] in {"+", "-"} and result is not None and (
                 dax_dates.is_date(left) or dax_dates.is_date(right)
             ):
@@ -16207,6 +16357,8 @@ def evaluate_measures(
             )
             if len(node) > 4:  # x IN {...}: blank only equals blank, text ignores case, mixed types are an error
                 return dax_typed.values_match(left, right)
+            if isinstance(left, Decimal) and isinstance(right, Decimal) and left.is_finite() and right.is_finite() and not dax_dates.is_date(left) and not dax_dates.is_date(right) and not xnpv_depth[0] and "double" in (left_static_type(node[2], row_context), left_static_type(node[3], row_context)):
+                left, right = Decimal(float(left)), Decimal(float(right))  # Part A: a comparison with a Double is exact on the doubles ((0.2 from a division) > 0.2 is False)
             return dax_typed.compare(node[1], left, right, allow_variant=comparison_category == "variant")
         if node[0] == "tableconstructor":
             # a constructor of one plain value is that value (Power BI: {1} is 1); any other table is not a scalar
@@ -16407,8 +16559,37 @@ def evaluate_measures(
             if not values:
                 return None
             total = values[0]  # Part B: the sum starts from the first term, so a lone -0 stays -0 (0 + -0 would be 0)
-            for value in values[1:]:
-                total = dax_typed.QUIET.add(total, value)
+            double_body = len(values) > 1 and not variant_body and not _calls_function(arguments[1], "CURRENCY") and left_static_type(arguments[1], (context, iteration_rows[0] if iteration_rows else {}, 1)) == "double" and not any(dax_dates.is_date(v) for v in values)
+            if double_body and not _reads_no_data(arguments[1], variable_nodes.get):
+                running = float(values[0])  # Part B: a Double body adds in doubles, in row order (SUMX({1E16,1,-1E16},[Value]) is 0, measured)
+                for value in values[1:]:
+                    running += float(value)
+                total = Decimal(running)  # the exact binary value of the double sum
+            elif double_body:
+                counted = float(len(values)) * float(values[0])  # Part B: over a stored table, FILTER or VALUES a constant Double body is counted, not added row by row (SUMX(Facts,0.1)-0.6 is 1.11022302462516E-16, measured)
+                running = float(values[0])
+                for value in values[1:]:
+                    running += float(value)
+                table_node = arguments[0]
+                while table_node is not None and table_node[0] == "var":
+                    table_node = variable_nodes.get(table_node[1])
+                if _stored_scan(arguments[0], variable_nodes.get) or running == counted or (math.isnan(running) and math.isnan(counted)):
+                    running = counted  # the two ways agree (or the table is a stored scan, FILTER or VALUES): the counted value, which keeps the sign of a NaN
+                elif not (table_node is not None and (table_node[0] == "tableconstructor" or (table_node[0] == "call" and table_node[1] == "ADDCOLUMNS"))):
+                    raise MeasureError(f"{function} of a constant Double body over this kind of table: counted or added row by row is not measured, so the local engine does not model it.")
+                # a table constructor or ADDCOLUMNS adds row by row (SUMX(ADDCOLUMNS(Facts,"k",1),0.1)-COUNTROWS(...)*0.1 is -1.11022302462516E-16 too; SUMX({1,2,3,4,5,6,7},0.1)-COUNTROWS({1,2,3,4,5,6,7})*0.1 is -1.11022302462516E-16, measured)
+                total = Decimal(running)
+            else:
+                for value in values[1:]:
+                    total = dax_typed.QUIET.add(total, value)
+            if (
+                function in {"SUMX", "AVERAGEX"} and not variant_body and not double_body and total.is_finite() and not dax_dates.is_date(total) and not (-_INT64_RANGE <= total < _INT64_RANGE)
+                and total == total.to_integral_value() and all(v.is_finite() and not dax_dates.is_date(v) for v in values)
+                and left_static_type(arguments[1], (context, iteration_rows[0] if iteration_rows else {}, 1)) == "int64"
+            ):
+                total = Decimal((int(total) + 2**63) % 2**64 - 2**63)  # Part C: an Int64 body sums with the 64-bit wrap (SUMX({9223372036854775807,1},[Value]) is -9223372036854775808, AVERAGEX of it -4.61168601842739E+18, measured)
+            if total.is_finite() and abs(total) > _DOUBLE_MAX and not dax_dates.is_date(total):
+                total = Decimal("Infinity") if total > 0 else Decimal("-Infinity")  # Part F: a sum past the Double range is Infinity (SUMX({1,2},1E308-1E-7) is Infinity, measured)
             if function in {"SUMX", "AVERAGEX"} and total.is_finite() and abs(total) > _CURRENCY_LIMIT and currency_typed(arguments[1], (context, iteration_rows[0] if iteration_rows else {}, 1)):
                 total = _currency_wrap(total)  # Task 20 F5: the sum of a Currency body wraps at 64 bits; AVERAGEX divides the wrapped sum
             if function == "AVERAGEX" and not variant_body and all(v.is_nan() for v in values) and all(isinstance(v, dax_dates.DaxDateTime) for v in values):
@@ -16419,7 +16600,7 @@ def evaluate_measures(
                     raise MeasureError("AVERAGEX of nothing but NaN over this table is not modelled by the local engine.")
                 result = Decimal(0) if stored_scan else Decimal("NaN")  # live Power BI (Task 13 review): 0 over a stored scan of a number body
             else:
-                result = total if function == "SUMX" else dax_typed.QUIET.divide(total, Decimal(len(values)))
+                result = total if function == "SUMX" else (Decimal(float(total) / len(values)) if double_body and total.is_finite() else dax_typed.QUIET.divide(total, Decimal(len(values))))  # Part B: AVERAGEX of a Double body divides the double sum in doubles
             if (
                 function == "AVERAGEX" and not variant_body and result.is_finite() and abs(result) < _CURRENCY_LIMIT
                 and currency_typed(arguments[1], (context, iteration_rows[0] if iteration_rows else {}, 1))
@@ -17240,13 +17421,24 @@ def evaluate_measures(
             if value is None:
                 return None
             value = as_number(value)
+            if value.is_finite() and abs(value) > 2 ** 53 and not dax_dates.is_date(value) and left_static_type(arguments[0], row_context) == "int64":
+                if float(abs(value)) >= 2 ** 63:
+                    raise MeasureRuntimeError("The result of a conversion or arithmetic operation is either too large or too small.")  # Part C: ABS of an Int64 whose double reaches 2^63 is the error (ABS(-9223372036854775807), ABS(9223372036854775807+1), measured)
+                raise dax_typed.refusal("ABS of an Int64 beyond 2^53 is not modelled by the local engine.")
             return Decimal("NaN") if value.is_nan() else abs(value)  # Part B: ABS of nan is nan, unsigned
         if function in _SCALAR_MATH_ARITY:
             try:
-                return _scalar_math(function, [
-                    None if value is None else as_number(value)
-                    for value in (evaluate(argument, row_context) for argument in arguments)
-                ])
+                values = [None if value is None else as_number(value) for value in (evaluate(argument, row_context) for argument in arguments)]
+                if function in {"INT", "FLOOR", "CEILING"}:
+                    _refuse_power_beyond_1e15(arguments[0], values[0], variable_nodes.get)
+                if (
+                    (function == "INT" or (function in {"FLOOR", "CEILING", "QUOTIENT"} and len(values) == 2 and values[1] is not None and values[1].is_finite() and values[1] == values[1].to_integral_value()))
+                    and values[0] is not None and values[0].is_finite() and left_static_type(arguments[0], row_context) == "double"
+                ):
+                    values[0] = _read_double_as_integer_source(values[0])  # Part D: INT, and FLOOR, CEILING, QUOTIENT by a whole number, read a Double alike
+                if function == "TRUNC" and len(values) == 2 and values[0] is not None and values[0].is_finite() and left_static_type(arguments[0], row_context) == "double":
+                    values[0] = _read_double_as_integer_source(values[0])  # Task 22 fix: TRUNC with digits reads a Double at 15 significant digits, as ROUND does
+                return _double_rounding_result(function, _scalar_math(function, values), left_static_type(arguments[0], row_context))
             except _PowerFailure as failure:
                 _stamp_row_dependence(failure, arguments, variable_nodes.get, row_scans_model(row_context))
                 raise
@@ -17260,141 +17452,145 @@ def evaluate_measures(
             quantum = Decimal(1).scaleb(-int(precision))
             return value.quantize(quantum, rounding=ROUND_HALF_UP)
         if function == "XNPV":
+            xnpv_depth[0] += 1  # Part A: XNPV keeps its own arithmetic, so its arguments are not computed in doubles
             try:
-                rate_raw = evaluate(arguments[3], row_context, allow_text=True, allow_boolean=True)
-            except MeasureError as error:
-                if "is a column reference" in str(error):
-                    raise MeasureError("The Rate argument to the XNPV function needs a single value; a bare column cannot give one.") from error
                 try:
-                    t_ctx, t_rows = table_argument_value(arguments[3])
-                    rate_raw = single_value_of((t_ctx, t_rows))
-                except Exception:
-                    raise error
-            if rate_raw is None:
-                rate = 0.0
-            elif isinstance(rate_raw, bool):
-                rate = 1.0 if rate_raw else 0.0
-            elif isinstance(rate_raw, str):
-                try:
-                    rate = float(dax_typed.text_to_number(rate_raw))
-                except Exception as exc:
-                    raise MeasureRuntimeError(f"Cannot convert value '{rate_raw}' of type Text to type Number.") from exc
-            elif isinstance(rate_raw, (int, float, Decimal)):
-                rate = float(rate_raw)
-            else:
-                raise MeasureError("The Rate argument to the XNPV function must be a number.")
-            if rate <= -1.0:
-                raise MeasureRuntimeError("The Rate argument to the XNPV function must be greater than -1.")
+                    rate_raw = evaluate(arguments[3], row_context, allow_text=True, allow_boolean=True)
+                except MeasureError as error:
+                    if "is a column reference" in str(error):
+                        raise MeasureError("The Rate argument to the XNPV function needs a single value; a bare column cannot give one.") from error
+                    try:
+                        t_ctx, t_rows = table_argument_value(arguments[3])
+                        rate_raw = single_value_of((t_ctx, t_rows))
+                    except Exception:
+                        raise error
+                if rate_raw is None:
+                    rate = 0.0
+                elif isinstance(rate_raw, bool):
+                    rate = 1.0 if rate_raw else 0.0
+                elif isinstance(rate_raw, str):
+                    try:
+                        rate = float(dax_typed.text_to_number(rate_raw))
+                    except Exception as exc:
+                        raise MeasureRuntimeError(f"Cannot convert value '{rate_raw}' of type Text to type Number.") from exc
+                elif isinstance(rate_raw, (int, float, Decimal)):
+                    rate = float(rate_raw)
+                else:
+                    raise MeasureError("The Rate argument to the XNPV function must be a number.")
+                if rate <= -1.0:
+                    raise MeasureRuntimeError("The Rate argument to the XNPV function must be greater than -1.")
 
-            if arguments[0][0] == "tableconstructor" and any(isinstance(row, tuple) and row and row[0] == "tableconstructor" for row in arguments[0][1]):
-                # live Power BI (Task 10 review): "Column 'Value1' cannot be found" for a table constructor with several columns
-                raise MeasureError("XNPV over a table constructor with several columns is not supported in the local engine.")
-            read_nodes = [arguments[1], arguments[2]]
-            topn_walk_nodes[id(arguments[0])] = read_nodes
-            try:
-                context, iteration_rows = table_argument_value(arguments[0], allow_keepfilters=True)
-            finally:
-                topn_walk_nodes.pop(id(arguments[0]), None)
-
-            probe_frame = (context, iteration_rows[0] if iteration_rows else {}, 1)
-            try:
-                values_kind = iterator_body_kind(arguments[1], probe_frame)
-            except MeasureError:
-                values_kind = None
-            try:
-                values_cat = iterator_expression_category(arguments[1], probe_frame)
-            except MeasureError:
-                values_cat = None
-            if values_kind in {"text", "bool", "date"} or values_cat in {"text", "boolean", "date/time"}:
-                # live Power BI (iteration 91): the type of the Values expression is checked when the query is compiled, not per row
-                raise MeasureError("XNPV does not support expressions of type string/Boolean/date for the Values argument.")
-            currency_values = currency_typed(arguments[1])  # the type of the expression: Currency + 0.5 and Currency / Currency are Doubles
-            if not currency_values and _calls_function(arguments[1], "CURRENCY") and static_type_of(arguments[1]) is None:
-                raise MeasureError("XNPV over a Currency beside a column of unknown type is not modelled by the local engine.")
-            if arguments[1][0] == "reference":
+                if arguments[0][0] == "tableconstructor" and any(isinstance(row, tuple) and row and row[0] == "tableconstructor" for row in arguments[0][1]):
+                    # live Power BI (Task 10 review): "Column 'Value1' cannot be found" for a table constructor with several columns
+                    raise MeasureError("XNPV over a table constructor with several columns is not supported in the local engine.")
+                read_nodes = [arguments[1], arguments[2]]
+                topn_walk_nodes[id(arguments[0])] = read_nodes
                 try:
-                    currency_values = str(iterator_reference_type(arguments[1], probe_frame)).casefold() in {"currency", "fixed_decimal"}
+                    context, iteration_rows = table_argument_value(arguments[0], allow_keepfilters=True)
+                finally:
+                    topn_walk_nodes.pop(id(arguments[0]), None)
+
+                probe_frame = (context, iteration_rows[0] if iteration_rows else {}, 1)
+                try:
+                    values_kind = iterator_body_kind(arguments[1], probe_frame)
                 except MeasureError:
-                    pass  # a column outside the iterated table is validated further down
-
-            if not iteration_rows:
-                refuse_foreign_columns_of_empty_iteration(context, arguments[1], arguments[2])
-                return None
-
-            row_data: list[tuple[float | None, float]] = []
-            all_dates: list[float] = []
-            for frame in iterate_rows(context, iteration_rows, "install"):
-                val = in_row_expression(lambda frame=frame: evaluate(arguments[1], frame, allow_text=True, allow_boolean=True))
-                if val is None and currency_values:
-                    raise MeasureError("XNPV over a Currency that is BLANK is not modelled by the local engine.")  # live Power BI (Task 14 review): a value of 4.6E14 from six small rows
-                if val is None:
-                    v = None
-                elif isinstance(val, (str, bool, dax_dates.DaxDateTime)):
-                    type_name = "Text" if isinstance(val, str) else ("Boolean" if isinstance(val, bool) else "Date")
-                    raise MeasureRuntimeError(f"Cannot convert value '{val}' of type {type_name} to type Numeric.")
-                elif isinstance(val, (int, float, Decimal)):
-                    v = float(val)
-                else:
-                    raise MeasureRuntimeError(f"Cannot convert value '{val}' to type Numeric.")
-
-                d_val = in_row_expression(lambda frame=frame: evaluate(arguments[2], frame, allow_text=True, allow_boolean=True))
-                if d_val is None:
-                    raise MeasureRuntimeError("One or more values for the Dates argument passed to XNPV is blank.")
-                elif isinstance(d_val, str):
-                    parsed_dt = dax_dates.parse_date_text(d_val)
-                    if parsed_dt is not None:
-                        day = float(parsed_dt)
-                    else:
-                        raise MeasureRuntimeError(f"Cannot convert value '{d_val}' of type Text to type Date.")
-                elif isinstance(d_val, bool):
-                    day = 1.0 if d_val else 0.0
-                elif isinstance(d_val, (int, float, Decimal)):
-                    d_float = float(d_val)
-                    day = math.floor(d_float) if math.isfinite(d_float) else d_float
-                else:
-                    raise MeasureError("An argument of function 'XNPV' has the wrong data type or has an invalid value.")
-
-                all_dates.append(day)
-                row_data.append((v, day))
-
-            non_blank_values = [v for v, _ in row_data if v is not None]
-            if not non_blank_values:
-                return None
-
-            # live Power BI (Task 10 review, 498 probes): the arithmetic is plain IEEE double. The reference date is the earliest date, but never
-            # later than 9999-12-31 (serial 2958465); a NaN date makes every term NaN unless the rate is 0 (1 ** NaN is 1)
-            earliest_date = min([2958465.0] + [d for d in all_dates if not math.isnan(d)])
-
-            total = 0.0
-            for v, day in row_data:
-                if v is None:
-                    continue
-                # IEEE arithmetic like Power BI's double: a denominator that overflows is Infinity, one that underflows is 0 and v / 0 is
-                # +-Infinity or NaN (live Power BI, Task 10 review: rates of 1E300 and -0.999999 with dates 1E10 days apart)
+                    values_kind = None
                 try:
-                    denominator = (1.0 + rate) ** ((day - earliest_date) / 365.0)
-                except OverflowError:
-                    denominator = math.inf
-                if denominator == 0.0:
-                    term = math.nan if (v == 0.0 or math.isnan(v)) else math.copysign(math.inf, v)
-                else:
-                    term = v / denominator
-                total += term
+                    values_cat = iterator_expression_category(arguments[1], probe_frame)
+                except MeasureError:
+                    values_cat = None
+                if values_kind in {"text", "bool", "date"} or values_cat in {"text", "boolean", "date/time"}:
+                    # live Power BI (iteration 91): the type of the Values expression is checked when the query is compiled, not per row
+                    raise MeasureError("XNPV does not support expressions of type string/Boolean/date for the Values argument.")
+                currency_values = currency_typed(arguments[1])  # the type of the expression: Currency + 0.5 and Currency / Currency are Doubles
+                if not currency_values and _calls_function(arguments[1], "CURRENCY") and static_type_of(arguments[1]) is None:
+                    raise MeasureError("XNPV over a Currency beside a column of unknown type is not modelled by the local engine.")
+                if arguments[1][0] == "reference":
+                    try:
+                        currency_values = str(iterator_reference_type(arguments[1], probe_frame)).casefold() in {"currency", "fixed_decimal"}
+                    except MeasureError:
+                        pass  # a column outside the iterated table is validated further down
 
-            if currency_values and not math.isfinite(total):
-                raise MeasureError("XNPV over Currency values with a result that is not a finite number is not supported in the local engine.")
-            if math.isnan(total):
-                return Decimal("NaN")
-            if math.isinf(total):
-                return Decimal("Infinity") if total > 0 else Decimal("-Infinity")
-            if total == 0.0:
-                res = Decimal(0)
-            else:
-                res = Decimal(int(total)) if total.is_integer() else Decimal(repr(total))
-            if currency_values:
-                res = Decimal(total * 10000.0).quantize(Decimal(1), rounding=ROUND_HALF_EVEN) / 10000  # live Power BI (Task 14 review): 3.15625 gives 3.1562, -229.14375 gives -229.1438
-                res = res.quantize(Decimal("0.0001"))
-            return res
+                if not iteration_rows:
+                    refuse_foreign_columns_of_empty_iteration(context, arguments[1], arguments[2])
+                    return None
+
+                row_data: list[tuple[float | None, float]] = []
+                all_dates: list[float] = []
+                for frame in iterate_rows(context, iteration_rows, "install"):
+                    val = in_row_expression(lambda frame=frame: evaluate(arguments[1], frame, allow_text=True, allow_boolean=True))
+                    if val is None and currency_values:
+                        raise MeasureError("XNPV over a Currency that is BLANK is not modelled by the local engine.")  # live Power BI (Task 14 review): a value of 4.6E14 from six small rows
+                    if val is None:
+                        v = None
+                    elif isinstance(val, (str, bool, dax_dates.DaxDateTime)):
+                        type_name = "Text" if isinstance(val, str) else ("Boolean" if isinstance(val, bool) else "Date")
+                        raise MeasureRuntimeError(f"Cannot convert value '{val}' of type {type_name} to type Numeric.")
+                    elif isinstance(val, (int, float, Decimal)):
+                        v = float(val)
+                    else:
+                        raise MeasureRuntimeError(f"Cannot convert value '{val}' to type Numeric.")
+
+                    d_val = in_row_expression(lambda frame=frame: evaluate(arguments[2], frame, allow_text=True, allow_boolean=True))
+                    if d_val is None:
+                        raise MeasureRuntimeError("One or more values for the Dates argument passed to XNPV is blank.")
+                    elif isinstance(d_val, str):
+                        parsed_dt = dax_dates.parse_date_text(d_val)
+                        if parsed_dt is not None:
+                            day = float(parsed_dt)
+                        else:
+                            raise MeasureRuntimeError(f"Cannot convert value '{d_val}' of type Text to type Date.")
+                    elif isinstance(d_val, bool):
+                        day = 1.0 if d_val else 0.0
+                    elif isinstance(d_val, (int, float, Decimal)):
+                        d_float = float(d_val)
+                        day = math.floor(d_float) if math.isfinite(d_float) else d_float
+                    else:
+                        raise MeasureError("An argument of function 'XNPV' has the wrong data type or has an invalid value.")
+
+                    all_dates.append(day)
+                    row_data.append((v, day))
+
+                non_blank_values = [v for v, _ in row_data if v is not None]
+                if not non_blank_values:
+                    return None
+
+                # live Power BI (Task 10 review, 498 probes): the arithmetic is plain IEEE double. The reference date is the earliest date, but never
+                # later than 9999-12-31 (serial 2958465); a NaN date makes every term NaN unless the rate is 0 (1 ** NaN is 1)
+                earliest_date = min([2958465.0] + [d for d in all_dates if not math.isnan(d)])
+
+                total = 0.0
+                for v, day in row_data:
+                    if v is None:
+                        continue
+                    # IEEE arithmetic like Power BI's double: a denominator that overflows is Infinity, one that underflows is 0 and v / 0 is
+                    # +-Infinity or NaN (live Power BI, Task 10 review: rates of 1E300 and -0.999999 with dates 1E10 days apart)
+                    try:
+                        denominator = (1.0 + rate) ** ((day - earliest_date) / 365.0)
+                    except OverflowError:
+                        denominator = math.inf
+                    if denominator == 0.0:
+                        term = math.nan if (v == 0.0 or math.isnan(v)) else math.copysign(math.inf, v)
+                    else:
+                        term = v / denominator
+                    total += term
+
+                if currency_values and not math.isfinite(total):
+                    raise MeasureError("XNPV over Currency values with a result that is not a finite number is not supported in the local engine.")
+                if math.isnan(total):
+                    return Decimal("NaN")
+                if math.isinf(total):
+                    return Decimal("Infinity") if total > 0 else Decimal("-Infinity")
+                if total == 0.0:
+                    res = Decimal(0)
+                else:
+                    res = Decimal(int(total)) if total.is_integer() else Decimal(repr(total))
+                if currency_values:
+                    res = Decimal(total * 10000.0).quantize(Decimal(1), rounding=ROUND_HALF_EVEN) / 10000  # live Power BI (Task 14 review): 3.15625 gives 3.1562, -229.14375 gives -229.1438
+                    res = res.quantize(Decimal("0.0001"))
+                return res
+            finally:
+                xnpv_depth[0] -= 1
         if function in {"TOCSV", "TOJSON"}:
             is_csv = function == "TOCSV"
             table_node = arguments[0]
