@@ -128,8 +128,8 @@ class PartDTypedBlankBesideTextOrDateTest(unittest.TestCase):
 
     def test_typed_blank_beside_text_or_date_refused(self) -> None:
         refusal = "A logical operator that gives BLANK beside a text or a date in a table constructor is not modelled by the local engine."
-        self.assertIn(refusal, dax.local('SUMX({2.5&&"","a"},IF(ISBLANK([Value]),1,2))'))
-        self.assertIn(refusal, dax.local('MAXX({2.5&&"",DATE(2020,1,1)},[Value])'))
+        self.assertEqual("4", dax.local('SUMX({2.5&&"","a"},IF(ISBLANK([Value]),1,2))'))  # Power BI Desktop 2026-11-03 (Task 27 models it)
+        self.assertEqual("01/01/2020 00:00:00", dax.local('MAXX({2.5&&"",DATE(2020,1,1)},[Value])'))
 
 
 class PartEStrictEqualBlankColumnTest(unittest.TestCase):
