@@ -1746,3 +1746,13 @@ The standing test workbook is now `tests/Data/Vat File -Aug 2026.xlsx` (sheet `V
 **Saved:** `tools/parity/dax_battery_trig15_extra.json` (494 answers), `tools/parity/task25_trig_blank_date_spec.json`.
 
 **Gate:** PARITY GATE PASSED (fast gate). pytest 2,518 passed; replay 451,915: 438,997 match, 12,918 refused, 0 DIFF, 0 CRASH; locked 438,490 to 438,977. The real app through the measure path, offscreen: 575/575 equal and 1,500 fresh probes with 0 wrong. Power BI answers came from Power BI Desktop on the iPad guest; the project was not saved. No saved Power BI answer was edited.
+
+## 2026-11-03 — Iteration 117 (Task 27 logical-blank-17: a logical operator's BLANK beside other values (1,515 refusals become Power BI's answers))
+
+**Who did what:** Antigravity (Gemini 3.8 Flash) found the rules for the logical BLANK (`x&&""`, `x||""`, AND/OR with an empty text) beside other branches of IF/SWITCH/COALESCE, in table constructors beside a text (an empty text) or a date (12:00:00 AM), under ISLOGICAL, in == and with AND/OR in arithmetic; Sonnet 5.5 reverted Antigravity's FORMAT-of-text change (Power BI returns a text unchanged under named formats: `FORMAT("12","Percent")` = 12) and made FORMAT of a constructor's logical BLANK beside a text the error Power BI gives; Claude Opus 5.5 built the spec from 2,763 saved answers, measured 448 fresh probes and reviewed.
+
+**Review:** Antigravity's build matched 1,515 of 2,763 refused saved answers with 0 wrong, but 448 fresh probes found 39 answers that were right on main made wrong (FORMAT of text, FORMAT of a constructor BLANK) and 30 newly refused; Sonnet fixed all. Final fresh: 244 stay right, 160 refused on main now right, 0 worse. The gate found 4 stays-refused guard tests; all 7 of their shapes were measured in Power BI and match, so the guards now assert Power BI's answers. Code read for lookups: none.
+
+**Saved:** `tools/parity/dax_battery_logical17_extra.json` (398 answers), `tools/parity/task27_logical_blank_spec.json`.
+
+**Gate:** PARITY GATE PASSED (fast gate). pytest 2,524 passed; replay 452,313: 440,910 match, 11,403 refused, 0 DIFF, 0 CRASH; locked 438,977 to 440,890. The real app through the measure path, offscreen: 575/575 equal and 1,500 fresh probes with 0 wrong. Power BI answers came from Power BI Desktop on the iPad guest; the project was not saved. No saved Power BI answer was edited.

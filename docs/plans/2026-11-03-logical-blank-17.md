@@ -14,3 +14,6 @@ Compute, never look up (app code never reads tools/parity/*.json or tests/fixtur
 
 ## Commands (in the worktree)
 Scorer: `PYTHONPATH=. QT_QPA_PLATFORM=offscreen python3 tools/score_spec.py tools/parity/task27_logical_blank_spec.json [A|B]`. Tests: `tests/test_iteration117_logical_blank_17.py` (a sample per rule). When done, leave changes uncommitted and write a ready-for-review entry in this worktree's `HANDOFF.md` with scorer counts per Part and the replay line.
+
+## Review outcome (2026-11-03)
+Shipped as Iteration 117. Locked 440,890.

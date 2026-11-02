@@ -8,7 +8,7 @@
 
 ## Latest status
 
-**Latest status (2026-11-03, after Iteration 114 / Task 25 trig-limits-15, SIN/COS/TAN/COT limit at 2^27, ASINH/ACOSH overflow, a BLANK date plus a number, mix workflow: Antigravity coded, Sonnet 5.5 fixed, Claude Opus 5.5 planned, reviewed and shipped under the user's delegated approval):** pytest 2,518 passed (fast gate), real app 575/575 and 1,500 fresh probes with 0 wrong, replay 451,915 answers with 438,997 match, 12,918 refused, 0 DIFF, 0 CRASH, locked 438,977. Next: Task 27 logical-blank-17 (Antigravity: 2,763 saved answers the engine refuses).
+**Latest status (2026-11-03, after Iteration 117 / Task 27 logical-blank-17, a logical operator's BLANK beside other values (1,515 refusals become Power BI's answers), mix workflow: Antigravity coded, Sonnet 5.5 fixed, Claude Opus 5.5 planned, reviewed and shipped under the user's delegated approval):** pytest 2,524 passed (fast gate), real app 575/575 and 1,500 fresh probes with 0 wrong, replay 452,313 answers with 440,910 match, 11,403 refused, 0 DIFF, 0 CRASH, locked 440,890. Next: Task 28 text-collation-18 (Antigravity: 1,657 refused text comparisons with non-ASCII characters).
 
 **Previous status (2026-11-01, after Iteration 103 / Task 14 logic-tables-4, empty text in logical operators, a VAR block as an iterator table, FILTER over no rows, Currency arithmetic, review done, gate passed, locked 246,907, committed, merged and pushed; 246,927 of 253,237 saved answers match, 0 differ; next: Task 15 typed-columns-5, 1,836 items).**
 
