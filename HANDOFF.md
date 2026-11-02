@@ -2,9 +2,9 @@
 
 Rules and roles are in `AGENTS.md`. Read it first. Keep this file short and current.
 
-**Active agent:** Claude Opus 5.5 reviews Task 23 big-numbers-13 (user's mix workflow, 2026-11-02; see `AGENTS.md`)
-**Branch in use:** antigravity/big-numbers-13
-**Working tree clean:** no (uncommitted changes on branch antigravity/big-numbers-13 ready for review)
+**Active agent:** Claude Opus 5.5 reviews Task 24 topn-ties-14 (user's mix workflow, 2026-11-02; see `AGENTS.md`)
+**Branch in use:** antigravity/topn-ties-14
+**Working tree clean:** no (uncommitted changes on branch antigravity/topn-ties-14 ready for review)
 
 ## Status values
 `PLANNED` > `BUILDING` > `READY FOR REVIEW` > `REVIEWING` > `FIXING` > `GATE PASSED` > `DONE`
@@ -35,10 +35,11 @@ Rules and roles are in `AGENTS.md`. Read it first. Keep this file short and curr
 | 20 | never-blank-zero-10: what ISBLANK evaluates, sign of zero and NaN, the logical BLANK, Currency limits, Double text (1,669 items: 1,129 wrong, 535 refused, 5 crash, answers measured, no VM) | `docs/plans/2026-11-02-never-blank-zero-10.md` | DONE (coded by Haiku 5.5, fixed by Sonnet 5.5, reviewed, locked 422,299, merged 2026-11-02) | Claude |
 | 21 | currency-double-11: Currency with Doubles in doubles, static types beside text numbers, CURRENCY of text and non-finite values, dates beside Infinity or NaN, the logical BLANK beside an error | `docs/plans/2026-11-02-currency-double-11.md` | DONE (coded by Haiku 5.5, fixed by Sonnet 5.5, reviewed, locked 430,554, merged 2026-11-02) | Claude |
 | 22 | double-arith-12: Double arithmetic in IEEE doubles, iterators summed in doubles in row order, Int64 wrap, Int64-range errors, ROUND of huge values, overflow and underflow | `docs/plans/2026-11-02-double-arith-12.md` | DONE (coded by Haiku 5.5, fixed by Sonnet 5.5, reviewed, locked 436,230, merged 2026-11-02) | Claude |
-| 23 | big-numbers-13: MOD quotient limit, FLOOR/CEILING/QUOTIENT/MROUND of huge doubles, EXP/POWER/LN last digits (1,807 measured answers, 639 wrong now) | `docs/plans/2026-11-02-big-numbers-13.md` | READY FOR REVIEW | Claude |
+| 23 | big-numbers-13: MOD quotient limit, FLOOR/CEILING/QUOTIENT/MROUND of huge doubles, EXP/POWER/LN last digits (1,807 measured answers, 639 wrong now) | `docs/plans/2026-11-02-big-numbers-13.md` | DONE | Claude |
+| 24 | topn-ties-14: the row order of TOPN when sort values tie (120 measured answers) | `docs/plans/2026-11-02-topn-ties-14.md` | READY FOR REVIEW | Claude |
 
 ## Current task
-Task 23 big-numbers-13, on branch `antigravity/big-numbers-13`. Ready for review by Claude. Antigravity completed Parts F, D, E and research on Parts A/B/C.
+Task 24 topn-ties-14, on branch `antigravity/topn-ties-14` in worktree `/Users/armaan/Power BI tool-task24`. Ready for review by Claude. Antigravity completed heap ties and verified scorer and replay.
 
 ## Open questions (either agent writes here instead of guessing)
 - Claude (open, Task 21, refused rather than wrong): ISINT64/ISCURRENCY of `"1E400"-DATE(...)` (Power BI False); IFERROR around MINX/MAXX of NaN inside COALESCE or IF; `(1&&"")*"a"*1` (Power BI BLANK) and `"a"*(1&&"")`; TODAY()*0 and NaN date products (Part D); text beside the logical BLANK and constant x (Part E, 24); the Task 20 refusals (ATAN/CEILING of non-finite in ISBLANK, type tests around a failing power).
@@ -84,6 +85,18 @@ Task 23 big-numbers-13, on branch `antigravity/big-numbers-13`. Ready for review
 - Antigravity (Task 4 ready for review): Task 4 implemented. All 142 items in `dax_battery_scalar_misc2.json` match (99 new answers + 43 existing errors rejected). Offline replay passed with 0 DIFF, 0 CRASH, pending dropped 1036 -> 936. All 1927 existing tests pass (excluding contract sync). Claude owns `DAX_COMPATIBILITY_CONTRACT.md` and should sync it via `PYTHONPATH=. python tools/sync_dax_contract.py` during review (functions count 329 -> 337).
 
 ## Entries (newest first, keep each to a few lines)
+
+### 2026-11-02 Antigravity (Task 24 topn-ties-14 built, ready for review)
+Task: Task 24 topn-ties-14 (the row order of TOPN when sort values tie).
+Worktree: `/Users/armaan/Power BI tool-task24`. Branch: `antigravity/topn-ties-14`. Working tree clean: no (uncommitted changes ready for review).
+Built strictly from DAX semantics without answer-key lookups (`test_no_answer_key_in_app` passes):
+- In `analytics_studio/dax_iteration_order.py`, extended `heap_top` with tie tracking: retains items that tie with the worst kept item at root (`heap[0]`) in their arrival order; when the root is replaced by a strictly better item, preserves previous ties that still tie with the new root while discarding those strictly worse.
+- In `analytics_studio/measures.py`, enabled `heap_top` with ties for all TOPN evaluations consumed by CONCATENATEX (`walk_nodes is not None and not evaluation_filter_ids`). When ties across the cut-off expand to keep every row of the table and the order is unsettled (keys are not all identical), cleanly refuses via `dax_typed.refusal` per plan rules.
+Verification & Parity:
+- Scorer results: `('A', 'gap-reject') 8`, `('A', 'match') 112`, `0 wrong` (out of 120 spec rows in `tools/parity/task24_topn_ties_spec.json`).
+- Unit tests: `tests/test_iteration113_topn_ties_14.py` (4/4 passed). `tests/test_no_answer_key_in_app.py` passed.
+- Parity Replay: `replayed 448816 Power BI answers: {'match': 436250, 'gap-reject': 12566, 'DIFF': 0, 'CRASH': 0}; locked 436230`, `PARITY GATE PASSED`.
+Files changed: `analytics_studio/dax_iteration_order.py`, `analytics_studio/measures.py`, `tests/test_iteration113_topn_ties_14.py`, `HANDOFF.md`.
 
 ### 2026-11-02 Antigravity (Task 23 big-numbers-13 built, ready for review)
 Task: Task 23 big-numbers-13 (MOD quotient limit, FLOOR/CEILING/QUOTIENT/MROUND of huge doubles, EXP/POWER/LN last digits).
