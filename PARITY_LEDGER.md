@@ -86,13 +86,14 @@ Rule: a slice is finished only when it is compared with Power BI, its items are 
 | dax_battery_double12_extra | 5676 | 0 | 91 | 0 | 0 |
 | dax_battery_big13_extra | 1847 | 0 | 341 | 0 | 0 |
 | dax_battery_topn14_extra | 413 | 0 | 4 | 0 | 0 |
+| dax_battery_trig15_extra | 487 | 0 | 7 | 0 | 0 |
 | dax_battery_scalar_misc2_extra | 563 | 0 | 0 | 0 | 0 |
 | dax_battery_scalar_misc2_extra2 | 151 | 0 | 0 | 0 | 0 |
 | dax_battery_type_tests_extra | 2590 | 0 | 0 | 0 | 0 |
 | dax_battery_type_tests_extra2 | 4614 | 0 | 0 | 0 | 0 |
 | table VAT | 575 | 0 | 0 | 0 | 0 |
 
-## Pending work (12911): Power BI answers, the app refuses
+## Pending work (12918): Power BI answers, the app refuses
 
 - `CALCULATE(COUNTROWS(Facts),Facts[Quantity]<IF(ISEMPTY(CALCULATETABLE(Facts,Facts[Region]="East")),1,4))` (Power BI: `4`) [dax_battery_sdet_filters]
 - `CALCULATE(COUNTROWS(Facts),Facts[Quantity]<COUNTROWS(CALCULATETABLE(CALCULATETABLE(Facts,Facts[Region]="East"))))` (Power BI: `3`) [dax_battery_sdet_filters]
@@ -14775,6 +14776,13 @@ North`) [dax_battery_logic4_extra]
 - `CONCATENATEX(TOPN(3,Facts,Facts[Quantity]<3),Facts[Sales]&"/"&Facts[Quantity],"|")` (Power BI: `10.5/2|0/0|-1.5/1`) [dax_battery_topn14_extra]
 - `CONCATENATEX(TOPN(4,Facts,Facts[Region]="West",ASC),Facts[Sales]&"/"&Facts[Quantity],"|")` (Power BI: `10.5/2|2.5/5|-1.5/1|/4`) [dax_battery_topn14_extra]
 - `CONCATENATEX(TOPN(3,FILTER(Facts,Facts[Quantity]<>2),MOD(Facts[Quantity],2)),Facts[Quantity],"|")` (Power BI: `1|5|3`) [dax_battery_topn14_extra]
+- `ISLOGICAL(ISBLANK(MAX(Facts[Note]))||"")` (Power BI: `True`) [dax_battery_trig15_extra]
+- `(MAXX(FILTER(Facts,FALSE()),DATE(2021,6,1))-2.5)&""` (Power BI: `12/28/1899 12:00:00 PM`) [dax_battery_trig15_extra]
+- `(MINX(FILTER(Facts,FALSE()),TODAY())-2.5)&""` (Power BI: `12/28/1899 12:00:00 PM`) [dax_battery_trig15_extra]
+- `(MAXX(FILTER(Facts,Facts[Quantity]>99),DATE(2021,6,1))-2.5)&""` (Power BI: `12/28/1899 12:00:00 PM`) [dax_battery_trig15_extra]
+- `(MAXX(FILTER(Facts,FALSE()),DATEVALUE("2020-01-01"))-2.5)&""` (Power BI: `12/28/1899 12:00:00 PM`) [dax_battery_trig15_extra]
+- `(MAXX(FILTER(Facts,FALSE()),DATE(2020,1,1)+1)-2.5)&""` (Power BI: `12/28/1899 12:00:00 PM`) [dax_battery_trig15_extra]
+- `(MAXX(FILTER(Facts,FALSE()),EOMONTH(DATE(2020,1,1),0))-2.5)&""` (Power BI: `12/28/1899 12:00:00 PM`) [dax_battery_trig15_extra]
 
 ## Known deviations from Power BI (14): imprecise or unspecified in Power BI, each explained
 
