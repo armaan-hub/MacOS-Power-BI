@@ -15043,6 +15043,8 @@ def evaluate_measures(
             _refuse_power_beyond_1e15(arguments[0], values[0], variable_nodes.get)
         if function == "QUOTIENT" and len(values) == 2 and all(isinstance(value, Decimal) and value.is_finite() and not dax_dates.is_date(value) for value in values) and values[1] == values[1].to_integral_value() and left_static_type(arguments[0], row_context) == "double":
             values = [_read_double_as_integer_source(values[0]), values[1]]  # Part D: QUOTIENT by a whole number reads a Double as INT does
+        if function in {"ROUND", "ROUNDUP", "ROUNDDOWN"} and len(values) == 2 and isinstance(values[0], Decimal) and values[0].is_finite() and not dax_dates.is_date(values[0]) and left_static_type(arguments[0], row_context) == "double":
+            values = [_read_double_as_integer_source(values[0]), values[1]]  # Task 22 fix: a Double is read at 15 significant digits before it is rounded with digits (TRUNC(66.6 as a product, 1.6) is 66.6, measured)
         if function in dax_math.MATH_ARITY or function == "ROUND":
             return _double_rounding_result(function, dax_math.math_function(function, values), left_static_type(arguments[0], row_context) if arguments else None)
         if function == "ISNUMBER":
@@ -17434,6 +17436,8 @@ def evaluate_measures(
                     and values[0] is not None and values[0].is_finite() and left_static_type(arguments[0], row_context) == "double"
                 ):
                     values[0] = _read_double_as_integer_source(values[0])  # Part D: INT, and FLOOR, CEILING, QUOTIENT by a whole number, read a Double alike
+                if function == "TRUNC" and len(values) == 2 and values[0] is not None and values[0].is_finite() and left_static_type(arguments[0], row_context) == "double":
+                    values[0] = _read_double_as_integer_source(values[0])  # Task 22 fix: TRUNC with digits reads a Double at 15 significant digits, as ROUND does
                 return _double_rounding_result(function, _scalar_math(function, values), left_static_type(arguments[0], row_context))
             except _PowerFailure as failure:
                 _stamp_row_dependence(failure, arguments, variable_nodes.get, row_scans_model(row_context))
