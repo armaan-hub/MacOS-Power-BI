@@ -1722,3 +1722,13 @@ The standing test workbook is now `tests/Data/Vat File -Aug 2026.xlsx` (sheet `V
 **Gate:** PARITY GATE PASSED. pytest 2,511 passed (2 failed only beside other tests and passed alone); replay 451,004: 438,097 match, 12,907 refused, 0 DIFF, 0 CRASH; locked 436,230 to 438,077.
 
 **Open:** EXP, POWER/^, LN and LOG last digits (345 spec rows: Power BI's EXP has an irregular ~1e-14 error; no formula fits every row, code unchanged, not saved).
+
+## 2026-11-03 — Iteration 113 (Task 24 topn-ties-14: the row order of TOPN when sort values tie)
+
+**Who did what:** Antigravity (Gemini 3.8 Flash) extended the TOPN heap model with tied rows; Sonnet 5.5 found the rule that fits every measurement (a row tying with the heap root is pushed and the heap grows; a better row replacing a root with tied rows takes the root slot, sifts down, and the rest of the tied group is popped) and made the one ambiguous eviction refuse; Claude Opus 5.5 measured 120 spec, 201 fresh and 98 holdout answers in Power BI and reviewed.
+
+**Review:** Antigravity's first rule fitted the spec but broke 4 fresh answers that were right on main; Sonnet's rule gave 0 wrong on all 419 measured answers (main: 83 wrong of 201 fresh, 33 of 98 holdout). The fast gate then caught an older test on other Facts tables (`tests/fixtures_misc3_alt.json`): one eviction shape has two readings that the evidence cannot separate, so it refuses (4 refusals). Code read for lookups: none.
+
+**Saved:** `tools/parity/dax_battery_topn14_extra.json` (417 answers), `tools/parity/task24_topn_ties_spec.json`.
+
+**Gate:** PARITY GATE PASSED (fast gate). pytest 2,516 passed; replay 451,421: 438,510 match, 12,911 refused, 0 DIFF, 0 CRASH; locked 438,077 to 438,490. The real app through the measure path, offscreen: 575/575 equal and 1,500 fresh probes with 0 wrong. Power BI answers came from Power BI Desktop on the iPad guest; the project was not saved. No saved Power BI answer was edited.
