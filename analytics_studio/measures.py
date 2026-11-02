@@ -98,6 +98,10 @@ class _CurrencyDivisionError(_DivisionError):
     """A constant Currency numerator divided by 0 (Part F): Power BI folds it, so ISBLANK reads it as not BLANK."""
 
 
+class _CurrencyOverflowError(MeasureRuntimeError):
+    """Part B: a Currency times Infinity or NaN, which Power BI reports as 'too large or too small' (IFERROR catches it)."""
+
+
 class _CalculateTableFilterRefusal(MeasureError):
     """A CALCULATETABLE in a Boolean filter whose hoist-or-transition reading was not established (see dax_ct_filters)."""
 
@@ -296,6 +300,8 @@ def _consume_infinity(thunk: Any) -> Any:
         ) from exc
 
 
+_CURRENCY_LIMIT = Decimal("922337203685477.5807")  # the Currency type's range
+_DATETIME_CLAMP_LOW = dax_dates.from_datetime(datetime(100, 1, 1))  # Task 19 Part A: CONVERT of -Infinity or a too small number
 _CURRENCY_INFINITY = object()  # any value but None: ISBLANK of a constant Currency / 0 is False (Part F)
 
 
@@ -3077,6 +3083,73 @@ def _held_runtime_failure(error: MeasureError) -> MeasureError:
 
 
 _DATA_READING_CALLS = (_AGGREGATING_CALLS - {"CALCULATE"}) | _ITERATOR_CALLS | {"AND", "OR", "RELATED", "RELATEDTABLE", "LOOKUPVALUE"}
+_NEVER_BLANK_CALLS = frozenset({"SQRT", "LN", "LOG10", "LOG", "VALUE", "MOD", "DATE", "TRUE", "FALSE"})
+
+
+def _has_table_operand(node: Any) -> bool:
+    """True when a table expression occurs anywhere in this node (a table is an error as a logical or comparison operand)."""
+    if not isinstance(node, tuple) or not node:
+        return False
+    if node[0] in {"table", "table_call", "tablevalue", "tablecapture", "tableconstructor"}:
+        return True
+    children = node if isinstance(node[0], tuple) else node[1:]
+    return any(_has_table_operand(child) for child in children if isinstance(child, tuple))
+
+
+def _never_blank(node: Any) -> bool:
+    """Task 19 Part C: True when the expression can never be a BLANK, so ISBLANK answers False without evaluating it.
+
+    Static, on the parsed node. A VAR is not followed here; ISBLANK resolves an argument that is exactly a VAR first.
+    """
+    if not isinstance(node, tuple) or not node:
+        return False
+    kind = node[0]
+    if kind in {"number", "string", "boolean"}:
+        return True
+    if _is_pure_logical(node) or kind == "comparison":
+        return not _has_table_operand(node)  # Task 19 Part F: a logical operator, AND, OR, NOT and a comparison are never BLANK (a table operand is an error)
+    if kind == "unary":
+        return _never_blank(node[2])  # Task 19 Part F: a sign is judged by its operand
+    if kind == "call":
+        function, arguments = node[1], node[2]
+        if function in _NEVER_BLANK_CALLS:
+            return all(_never_blank(argument) for argument in arguments)  # a BLANK argument gives a BLANK (SQRT(BLANK()), VALUE(BLANK()))
+        if function == "IF" and len(arguments) == 3:
+            return _never_blank(arguments[1]) and _never_blank(arguments[2])
+        if function in {"CURRENCY", "ABS"} and len(arguments) == 1:
+            return _never_blank(arguments[0])  # CURRENCY and ABS are never BLANK when their operand is (ABS: checked on 120 answers, no exception)
+        return False
+    if kind == "concat":
+        return _never_blank(node[1]) or _never_blank(node[2])
+    if kind == "binary":
+        operator, left, right = node[1], node[2], node[3]
+        if operator in {"+", "-"}:
+            return _never_blank(left) or _never_blank(right)
+        if operator in {"*", "^"}:
+            return _never_blank(left) and _never_blank(right)
+        if operator == "/":
+            return _never_blank(left)
+    return False
+
+
+def _is_datetime_conversion(node: Any) -> bool:
+    return (isinstance(node, tuple) and len(node) == 3 and node[0] == "call" and node[1] == "CONVERT" and len(node[2]) == 2
+            and node[2][1][0] == "table" and str(node[2][1][1]).upper() == "DATETIME")
+
+
+def _currency_divisions(node: Any, currency_typed: Callable[[Any], bool]) -> list[tuple[Any, ...]]:
+    """The divisions inside this node whose numerator is a Currency that reads data and whose divisor is not a Currency: Power BI raises
+    their division by zero even where ISBLANK skips the rest (Task 19 Part C). A division that can itself never be BLANK (its numerator cannot)
+    is skipped like any other never-blank part."""
+    found: list[tuple[Any, ...]] = []
+    if not isinstance(node, tuple) or not node:
+        return found
+    if node[0] == "binary" and node[1] == "/" and currency_typed(node[2]) and not currency_typed(node[3]) and any(True for _ in _iter_reference_nodes(node[2])) and not _never_blank(node):
+        found.append(node)
+    children = node if isinstance(node[0], tuple) else node[1:]
+    for child in children:
+        found.extend(_currency_divisions(child, currency_typed))
+    return found
 
 
 def _reads_no_data(node: Any, held: Callable[[str], Any], seen: frozenset[str] = frozenset()) -> bool:
@@ -3104,6 +3177,68 @@ def _reads_no_data(node: Any, held: Callable[[str], Any], seen: frozenset[str] =
         return bound is not None and _reads_no_data(bound, held, seen | {node[1]})
     children = node if isinstance(node[0], tuple) else node[1:]
     return all(_reads_no_data(child, held, seen) for child in children if isinstance(child, tuple))
+
+
+
+_NO_SCAN_FILTER_CALLS = frozenset({"HASONEVALUE", "ISFILTERED", "ISINSCOPE"})  # Task 19 Part D: each reads the filter context of one column
+
+
+def _is_plain_all(node: Any) -> bool:
+    """A CALCULATE filter argument that is ALL, ALLSELECTED or REMOVEFILTERS of one table or column (also inside KEEPFILTERS): it removes filters and scans nothing."""
+    if isinstance(node, tuple) and len(node) > 2 and node[0] == "call" and node[1] == "KEEPFILTERS" and len(node[2]) == 1:
+        return _is_plain_all(node[2][0])  # keeping the filters of a filter that removes none changes nothing
+    return isinstance(node, tuple) and len(node) > 2 and node[0] == "call" and node[1] in {"ALL", "ALLSELECTED", "REMOVEFILTERS"} and len(node[2]) == 1
+
+
+def _blank_without_scan(node: Any, held: Callable[[str], Any], in_row: bool = False, seen: frozenset[str] = frozenset()) -> bool:
+    """Task 19 Part D: True when a BLANK operand works out without scanning any column values, so it cancels an error or a text beside it in * and in / (left side).
+
+    Recursive like _reads_no_data, but it allows only the filter-context calls (SELECTEDVALUE, HASONEVALUE, ISFILTERED, ISINSCOPE), COUNTROWS of a
+    table, CALCULATE with no filter, COALESCE, IF, ISBLANK, comparisons and arithmetic of those, constants and VARs. Any other call, a column in a
+    scan, or a logical operator makes the BLANK one from data, which does not cancel.
+    """
+    if not isinstance(node, tuple) or not node:
+        return False
+    kind = node[0]
+    if kind in {"number", "string", "boolean", "blank"}:
+        return True
+    if kind == "let":  # a VAR block inside the operand: its own names are held here
+        own = dict(node[1])
+        outer = held
+        held = lambda name: own.get(name, outer(name))  # noqa: E731
+        return all(_blank_without_scan(bound, held, in_row, seen) for _, bound in node[1]) and _blank_without_scan(node[2], held, in_row, seen)
+    if kind == "var":
+        if node[1] in seen:
+            return False
+        bound = held(node[1])
+        return bound is not None and _blank_without_scan(bound, held, in_row, seen | {node[1]})
+    if kind in {"binary", "comparison", "unary"}:
+        return all(_blank_without_scan(child, held, in_row, seen) for child in node[2:] if isinstance(child, tuple))
+    if kind != "call":
+        return False
+    name, arguments = node[1], node[2]
+    if name in _NO_SCAN_FILTER_CALLS:
+        return len(arguments) == 1 and arguments[0][0] == "reference"
+    if name == "SELECTEDVALUE":
+        return (len(arguments) in (1, 2) and arguments[0][0] == "reference"
+                and (len(arguments) == 1 or arguments[1] == ("blank",) or arguments[1][:2] == ("call", "BLANK")))
+    if name == "COUNTROWS":
+        return len(arguments) == 1 and arguments[0][0] == "table"
+    if name == "CALCULATE":
+        return len(arguments) == 1 and not in_row and _blank_without_scan(arguments[0], held, in_row, seen)  # under a row context a CALCULATE transitions it: a scan
+    if name in {"COALESCE", "IF", "ISBLANK", "BLANK"}:
+        return all(_blank_without_scan(argument, held, in_row, seen) for argument in arguments)
+    return False
+
+def _logical_operands_scan_nothing(node: Any, held: Callable[[str], Any], in_row: bool = False) -> bool:
+    """Task 19 Part F: a logical operator (&&, ||, AND, OR, NOT) whose operands all work out without scanning a column.
+
+    Its BLANK then cancels an error beside it in * and in / (left side), as a BLANK of Part D does. Only the top operator is looked at.
+    """
+    if not _is_pure_logical(node):
+        return False
+    operands = node[2:] if node[0] == "logical" else node[2]
+    return all(_blank_without_scan(operand, held, in_row) for operand in operands if isinstance(operand, tuple))
 
 
 def _binary_value(operator: str, left: Decimal | None, right: Decimal | None) -> Decimal | None:
@@ -5110,6 +5245,7 @@ def _sameperiodlastyear_dates(selected_dates: Iterable[date], available_dates: I
 
 # Functions and operators whose arguments are evaluated in the caller's context: a bare column below them still has no row context.
 _ROW_CONTEXT_FREE_CALLS = {
+    "CURRENCY", "CONVERT", "SQRT", "LN", "LOG10", "LOG", "VALUE", "MOD",
     "IF", "IF.EAGER", "FORMAT", "SWITCH", "COALESCE", "IFERROR", "AND", "OR", "NOT", "ISBLANK", "ABS", "EXACT",
     "UPPER", "LOWER", "LEN", "TRIM", "ROUND", "INT",
     "ISINTEGER", "ISINT64", "ISDOUBLE", "ISDECIMAL", "ISCURRENCY",
@@ -5667,6 +5803,12 @@ def _static_date(node: Any, columns: dict[str, dict[str, str]]) -> bool:
     return node[0] == "call" and node[1] in _STATIC_DATE_FUNCTIONS
 
 
+_CONVERT_TARGET_STATIC = {
+    "INTEGER": "number", "INT64": "number", "DOUBLE": "number", "CURRENCY": "number", "DECIMAL": "number",
+    "BOOLEAN": "boolean", "STRING": "text", "DATETIME": "date",
+}
+
+
 def _static_type(node: Any, columns: dict[str, dict[str, str]], variables: dict[str, str | None]) -> str | None:
     """text / number / boolean when the expression has that type whatever the data, else None (unknown or mixed).
 
@@ -5733,6 +5875,8 @@ def _static_type(node: Any, columns: dict[str, dict[str, str]], variables: dict[
         return "text"
     if function in _BOOLEAN_FUNCTIONS:
         return "boolean"
+    if function == "CONVERT" and len(arguments) == 2 and arguments[1][0] == "table":
+        return _CONVERT_TARGET_STATIC.get(str(arguments[1][1]).upper())  # Task 19 Part A: the target type is static, whatever the value (IF, VAR, COALESCE and IFERROR follow it)
     if function in {"IF", "IF.EAGER", "COALESCE", "IFERROR", "SWITCH"}:
         if function in {"IF", "IF.EAGER"}:
             results = list(arguments[1:])
@@ -5866,7 +6010,7 @@ def _reject_mismatched_comparison_types(node: Any, columns: dict[str, dict[str, 
             result_type = _static_type(arguments[1], iter_cols, variables)
             if result_type == "boolean" or (result_type == "text" and function not in {"MAXX", "MINX", "COUNTX"}):
                 raise MeasureError(f"The function {function} cannot work with values of type {'Boolean' if result_type == 'boolean' else 'String'}.")
-            if function in _STATIC_DATE_REFUSING_ITERATORS and _static_date(arguments[1], iter_cols):
+            if function in _STATIC_DATE_REFUSING_ITERATORS and (_static_date(arguments[1], iter_cols) or result_type == "date"):
                 raise MeasureError(f"{function} does not support expressions of type date.")  # at compile time: an untaken branch fails too (live Power BI, Task 13 review)
         elif function in {"SUM", "AVERAGE"} and len(arguments) == 1 and _static_type(arguments[0], columns, variables) == "text":
             raise MeasureError(f"The function {function} cannot work with values of type String.")
@@ -10079,7 +10223,7 @@ def evaluate_measures(
         return values
 
     def as_number(value: Decimal | bool | str | None) -> Decimal:
-        return dax_typed.to_number(value)
+        return dax_typed.to_number(value, dates=True)  # Task 19 Part E: text that is a date or a time is a number in arithmetic
 
     def as_boolean(value: Decimal | bool | str | None) -> bool:
         return dax_typed.to_boolean(value)
@@ -11081,6 +11225,8 @@ def evaluate_measures(
             return body_value_type(expression[1][0], row_context)
         if expression[0] in {"call", "table_call"} and expression[1] in dax_time_sets.SET_FUNCTIONS:
             return "date", False  # LASTDATE and the like: one value of a date set is a date, and a number beside it makes a number (live Power BI, iteration 84 probes)
+        if _is_datetime_conversion(expression):
+            return "date", False  # Task 19 Part A: CONVERT(x,DATETIME) is a date, also as a branch of an IF, IFERROR, COALESCE or SWITCH
         if expression[0] == "call" and expression[1] in {"FIRSTNONBLANKVALUE", "LASTNONBLANKVALUE"} and len(expression[2]) == 2:
             return body_value_type(expression[2][1], row_context)
         if expression[0] == "call" and expression[1] in {"FIRSTNONBLANK", "LASTNONBLANK"} and len(expression[2]) == 2:
@@ -13697,6 +13843,8 @@ def evaluate_measures(
         shapes = [{"columns": tuple(names), "rows": allowed, "active": tuple(names), "dirty": False}] if len(names) > 1 else []
         return {table_id: (context, {name: allowed for name in names}, shapes)}
 
+    scanning_calculates: set[int] = set()  # Task 19 Part D: the open CALCULATEs that scan (a filter, or a row context to transition); a BLANK under one does not cancel
+
     def evaluate_with_general_filters(
         expression_node: tuple[Any, ...],
         filter_arguments: tuple[tuple[Any, ...], ...],
@@ -13975,8 +14123,8 @@ def evaluate_measures(
                     value = evaluate(value_node, row_context, allow_text=True, allow_boolean=allow_boolean)
                 except (MeasureRuntimeError, _HardError) as error:
                     def failed(error: MeasureError = error) -> Any:
-                        if isinstance(error, _DivisionError):
-                            raise error  # Infinity stays an error value
+                        if isinstance(error, (_DivisionError, _CurrencyOverflowError)):
+                            raise error  # Infinity stays an error value (Part B: so does a Currency times Infinity or NaN)
                         raise _HardError(str(error)) from error  # a used VAR that failed is thrown
                     variables[name] = failed
                     failures[name] = error
@@ -14005,11 +14153,18 @@ def evaluate_measures(
         if target == "BOOLEAN":
             if isinstance(value, str):
                 lowered = value.strip().casefold()
+                if value == "":
+                    return None  # Task 19 Part A: exactly the empty text is a BLANK ("  " is an error)
                 if lowered not in {"true", "false"}:
-                    raise MeasureRuntimeError(f"Cannot convert value '{value}' of type Text to type True/False.")
+                    try:
+                        return dax_typed.to_number(value) != 0  # Task 19 Part A: a number text is True unless it is zero
+                    except MeasureRuntimeError:
+                        raise MeasureRuntimeError(f"Cannot convert value '{value.strip()}' of type Text to type True/False.") from None
                 return lowered == "true"
             return dax_typed.to_boolean(value)
-        number = dax_typed.to_number(value)
+        if target == "DATETIME" and isinstance(value, str):
+            return dax_dates.datetime_text(value)  # Task 19 Part E: CONVERT of text to DATETIME is strict, with no number path
+        number = dax_typed.to_number(value, dates=target == "DOUBLE")  # Part E: only DOUBLE reads a date text as a number
         if target == "INTEGER":
             if not number.is_finite():
                 raise MeasureRuntimeError("An argument of function 'CONVERT' has the wrong data type or the result is too large or too small.")
@@ -14017,9 +14172,13 @@ def evaluate_measures(
         if target in {"DOUBLE", "CURRENCY"}:
             if target == "DOUBLE":
                 return Decimal(number)
+            if not number.is_finite() or abs(number) > _CURRENCY_LIMIT:  # Part B: Infinity, NaN and beyond the Currency range are the error
+                raise MeasureRuntimeError("The result of a conversion or arithmetic operation is either too large or too small.")
             return dax_math.to_currency(number)
         if target == "DATETIME":
-            return dax_dates.DaxDateTime(number)
+            if not number.is_finite():
+                return dax_dates.DaxDateTime(number)  # live Power BI: Infinity and NaN stay what they are (they only print as a date); no clamp
+            return dax_dates.DaxDateTime(max(number, _DATETIME_CLAMP_LOW))  # Task 19 Part A: a finite number too small is 01/01/0100
         raise MeasureError(f"CONVERT does not support the type {target}.")
 
     def column_order_key(value: Any) -> Any:
@@ -14042,9 +14201,9 @@ def evaluate_measures(
         if function == "USERNAME" or function == "USERPRINCIPALNAME":
             return getpass.getuser()
         if function == "COMBINEVALUES":
-            delimiter = dax_typed.to_text(evaluate(arguments[0], row_context, allow_text=True))
+            delimiter = dax_typed.to_text(double_as_text(arguments[0], evaluate(arguments[0], row_context, allow_text=True), row_context))
             return delimiter.join(
-                dax_typed.to_text(evaluate(argument, row_context, allow_text=True)) for argument in arguments[1:]
+                dax_typed.to_text(double_as_text(argument, evaluate(argument, row_context, allow_text=True), row_context)) for argument in arguments[1:]
             )
         if function == "ISEMPTY":
             return not table_argument_value(arguments[0])[1]
@@ -14277,9 +14436,18 @@ def evaluate_measures(
                 raise MeasureError(f"{function} needs a keyword such as {'DAY' if function == 'DATEDIFF' else 'INTEGER'} as its last argument.")
             interval = str(keyword[1]).upper()
             arguments = arguments[:-1]
+        if function in {"ISINTEGER", "ISINT64", "ISDOUBLE", "ISDECIMAL", "ISCURRENCY", "ISTEXT", "ISLOGICAL"} and _is_datetime_conversion(arguments[0]):
+            return False  # live Power BI (Task 19 Part A): these tests of a date made by CONVERT are False without the conversion running (ISNUMBER and ISDATETIME run it)
         values = [evaluate(argument, row_context, allow_text=True) for argument in arguments]
+        values = [  # a Double of 1E15 or more that is about to become text prints with an exponent (Task 19 Part G)
+            double_as_text(argument, value, row_context) if index in dax_typed.TEXT_ARGUMENTS.get(function, ()) else value
+            for index, (argument, value) in enumerate(zip(arguments, values))
+        ]
         if function == "CONVERT":
-            return convert_value(values[0], str(interval))
+            if values[0] is None and interval == "BOOLEAN":
+                # Task 19 Part A: a plain BLANK is False; a logical operator's own BLANK (1&&"") stays a BLANK (locked items)
+                return None if (true_false_column(arguments[0]) or true_false_conditional(arguments[0], row_context)) else False
+            return convert_value(double_as_text(arguments[0], values[0], row_context) if interval == "STRING" else values[0], str(interval))
         if function in _DATE_FUNCTIONS:
             return dax_dates.date_function(function, values, interval)
         if function == "ISO.CEILING":
@@ -14328,10 +14496,68 @@ def evaluate_measures(
             if function in {"ISDECIMAL", "ISCURRENCY"}:
                 return static_t in {"currency", "decimal"}
         if function == "FORMAT":
+            shown = double_as_text(arguments[0], values[0], row_context)
+            if isinstance(shown, str) and not isinstance(values[0], str) and str(values[1] or "").strip().casefold() in {"", "general number"}:
+                return shown  # a large Double in the general format prints with an exponent
             return dax_format.format_value(values[0], values[1])
         return dax_typed.text_function(function, values)
 
     static_type_of_nodes: dict[int, str | None] = {}
+
+    def dates_only_from_numbers(node: tuple[Any, ...], row_context: Any) -> bool:
+        """True when this body holds a CONVERT(x,DATETIME) and no other source of a date (a date function, a time-set function, a date column): its
+        dates are numbers made into dates, so a variance or deviation over them is that of the numbers (live Power BI, Task 19 review)."""
+        found = False
+        pending = [node]
+        while pending:
+            part = pending.pop()
+            if not isinstance(part, tuple) or not part:
+                continue
+            if _is_datetime_conversion(part):
+                found = True
+                continue
+            if part[0] == "call" and (part[1] in _DATE_FUNCTIONS or part[1] in _STATIC_DATE_FUNCTIONS or part[1] in dax_time_sets.SET_FUNCTIONS or part[1] == "DATE"):
+                return False
+            if part[0] == "reference" and left_static_type(part, row_context) in {"datetime", None}:
+                return False
+            if part[0] == "var":
+                bound = variable_nodes.get(part[1])
+                if bound is not None:
+                    pending.append(bound)
+                continue
+            pending.extend(child for child in (part if isinstance(part[0], tuple) else part[1:]) if isinstance(child, tuple))
+        return found
+
+    def calculate_scans(arguments: tuple[tuple[Any, ...], ...], row_context: Any) -> bool:
+        """A CALCULATE scans (a BLANK under it cancels no error) when a filter of it is real, or when it has none and moves a row of the model into
+        the filters. Filters that only remove filters (ALL, ALLSELECTED, REMOVEFILTERS) do not scan; those of a whole table also wipe the moved row."""
+        filters = arguments[1:]
+        if any(not _is_plain_all(item) for item in filters):
+            return True
+        if not row_scans_model(row_context):
+            return False
+        return not (filters and all((item[2][0] if item[1] == "KEEPFILTERS" else item)[2][0][0] == "table" for item in filters))
+
+    def row_scans_model(row_context: Any) -> bool:
+        """True when a row context iterates rows of the model (a table, VALUES, SUMMARIZE, FILTER ...): a CALCULATE under it moves the row into the
+        filters. A constructor, ROW or GENERATESERIES has no model rows, so the transition adds no filter (live Power BI, Task 19 review)."""
+        frames = [*row_stack, row_context] if row_context is not None else []
+        return any(not (frame[0].get("derived") and "lineage" not in frame[0]) for frame in frames)
+
+    def bound_expression(node: tuple[Any, ...]) -> tuple[Any, ...]:
+        """An argument that is exactly a VAR, followed to the expression it holds."""
+        followed: set[str] = set()
+        while node[0] == "var" and node[1] in variable_nodes and node[1] not in followed:
+            followed.add(node[1])
+            node = variable_nodes[node[1]]
+        return node
+
+    def double_as_text(node: tuple[Any, ...], value: Any, row_context: Any) -> Any:
+        """A Double of 1E15 or more that turns into text implicitly (Task 19 Part G) prints with an exponent and 15 significant digits; an Integer or
+        a Currency of that size stays whole. The text stands in for the number only where the number is about to become text."""
+        if not isinstance(value, Decimal) or isinstance(value, bool) or not value.is_finite() or abs(value) < dax_typed.DOUBLE_EXPONENT_FROM or dax_dates.is_date(value):
+            return value
+        return dax_typed.to_text(value, True) if left_static_type(node, row_context) == "double" else value
 
     def row_columns(row_context: tuple[dict[str, Any], dict[str, Any], int]) -> dict[str, str]:
         """The columns an unqualified name can read: those of every enclosing row, the innermost last."""
@@ -15162,7 +15388,7 @@ def evaluate_measures(
             right = evaluate(node[2], row_context, allow_text=True)
             if left is None and right is None:
                 return None
-            return dax_typed.to_text(left) + dax_typed.to_text(right)
+            return dax_typed.to_text(double_as_text(node[1], left, row_context)) + dax_typed.to_text(double_as_text(node[2], right, row_context))
         if kind == "table":
             raise MeasureError(
                 "A table name is only supported as the first argument to COUNTROWS, SUMX, AVERAGEX, MAXX, MINX, COUNTX, or COUNTAX."
@@ -15266,8 +15492,10 @@ def evaluate_measures(
                 # corrections rule 1: a BLANK cancels the other side's error only when the BLANK operand reads no data
                 right_bad = right_error is not None or isinstance(right, str)  # an error, or a text that cannot be a number
                 left_bad = left_error is not None or isinstance(left, str)
-                blank_left = left is None and left_error is None and (not right_bad or _reads_no_data(node[2], variable_nodes.get))
-                blank_right = right is None and right_error is None and (not left_bad or _reads_no_data(node[3], variable_nodes.get))
+                # Task 19 Part F: a logical operator's BLANK cancels an error (not a text) beside it when its operands scan nothing
+                # (live Power BI, Task 19 Part F review: a logical BLANK on the right of * or on the left of * beside an error gives no BLANK, so only / on the left is lifted)
+                blank_left = left is None and left_error is None and (not right_bad or _reads_no_data(node[2], variable_nodes.get) or (not scanning_calculates and (_blank_without_scan(node[2], variable_nodes.get, row_scans_model(row_context)) or (node[1] == "/" and not isinstance(right, str) and _logical_operands_scan_nothing(node[2], variable_nodes.get, row_scans_model(row_context))))))
+                blank_right = right is None and right_error is None and (not left_bad or _reads_no_data(node[3], variable_nodes.get) or (not scanning_calculates and _blank_without_scan(node[3], variable_nodes.get, row_scans_model(row_context))))
                 if blank_left or (node[1] == "*" and blank_right):
                     return None
                 if left_error is not None:
@@ -15280,7 +15508,11 @@ def evaluate_measures(
             for operand, value, other, other_error in ((node[2], left, right, right_error), (node[3], right, left, left_error)):
                 if value is None and (operand[0] == "logical" or operand[:2] in {("call", "AND"), ("call", "OR")}) and (other is None or isinstance(other, str) or other_error is not None):
                     raise dax_typed.refusal("A logical operator's BLANK beside a BLANK, a text or an error in arithmetic is not modelled by the local engine.")  # live Power BI (Task 18 review): the result is not BLANK
-            if node[1] == "/" and currency_typed(node[2], row_context) and not currency_typed(node[3], row_context) and (right is None or as_number(right) == 0):
+            if node[1] == "*" and (currency_typed(node[2], row_context) or currency_typed(node[3], row_context)) and any(
+                isinstance(value, Decimal) and not value.is_finite() for value in (left, right)
+            ):
+                raise _CurrencyOverflowError("The result of a conversion or arithmetic operation is either too large or too small.")  # Part B
+            if node[1] == "/" and currency_typed(node[2], row_context) and not currency_typed(node[3], row_context) and (right is None or as_number(right) == 0 or (isinstance(right, Decimal) and right.is_nan())):  # Part B: a NaN divisor is the same division by zero
                 if _constant_currency(node[2]):
                     raise _CurrencyDivisionError("A division by zero has been encountered.")  # Part F
                 raise _DivisionError("A division by zero has been encountered.")
@@ -15423,6 +15655,7 @@ def evaluate_measures(
             # type (a Variant) read only the numbers and dates it returns; text and True/False rows count for nothing (never the number a text
             # happens to spell).  Numbers beside dates, without text or True/False, are one number type: its dates are plain numbers.
             body_kind = iterator_body_kind(arguments[1], (context, iteration_rows[0] if iteration_rows else {}, 1)) if function in {"SUMX", "AVERAGEX", "MAXX", "MINX"} or function in dax_math.STAT_ITERATORS else None
+            conditional_body = body_kind is not None
             if body_kind is None and function in _EMPTY_BODY_NOT_TEXT:
                 try:
                     column_category = iterator_expression_category(arguments[1], (context, iteration_rows[0] if iteration_rows else {}, 1))
@@ -15437,7 +15670,7 @@ def evaluate_measures(
                 raise MeasureError(f"{function} does not support expressions of type date.")
             if body_kind == "variant_dates" and function != "AVERAGEX":
                 raise MeasureError(f"{function} over a Variant that holds a number type with dates inside is not supported in the local engine.")
-            if iteration_rows and function in dax_math.STAT_ITERATORS and body_kind is not None and _calls_function(arguments[1], "CURRENCY"):
+            if iteration_rows and function in dax_math.STAT_ITERATORS and conditional_body and _calls_function(arguments[1], "CURRENCY"):
                 # live Power BI (Task 13 review): GEOMEANX gives 30000 or 1.5E-322, STDEVX four decimals, PERCENTILEX a BLANK where the app reads a number
                 raise MeasureError(f"{function} over a Currency in a conditional is not modelled by the local engine.")
             variant_body, number_dates = body_kind in {"variant", "variant_dates"}, body_kind == "numdate"
@@ -15509,17 +15742,23 @@ def evaluate_measures(
                 if function[:4] in {"VARX", "STDE"}:
                     has_dates = any(isinstance(v, dax_dates.DaxDateTime) for v in values)
                     non_blank_vals = [v for v in values if v is not None and v.is_finite()]
-                    if len(set(non_blank_vals)) > 1 and (body_kind in {"numdate", "date", "variant_dates"} or has_dates):
+                    exact_dates = bool(values) and dates_only_from_numbers(arguments[1], frame)  # Task 19 Part A: dates made from numbers spread as the numbers do
+                    if len(set(non_blank_vals)) > 1 and not exact_dates and (body_kind in {"numdate", "date", "variant_dates"} or has_dates):
                         raise MeasureError(f"{function} over a date in a conditional is not exact in the local engine.")
                     # live Power BI (Task 15 review): VARX.P(Facts,DATE(2020,1,1)+0.5) is 0: one repeated date has no spread
-                    values = [Decimal(0) if has_dates else v for v in values]
+                    values = [Decimal(v) if exact_dates and len(set(non_blank_vals)) > 1 else Decimal(0) if has_dates else v for v in values]
                 elif function in _EMPTY_BODY_NOT_DATE and any(isinstance(value, dax_dates.DaxDateTime) for value in values):
                     # live Power BI (iteration 84, critic): "MEDIANX does not support expressions of type string/Boolean/date"
                     raise MeasureError(f"{function} does not support expressions of type date.")
                 percentile = (
                     dax_typed.to_number(evaluate(arguments[2], row_context)) if function.startswith("PERCENTILEX") else None
                 )
+                currency_body = function in {"STDEVX.S", "VARX.S"} and _static_numeric_type(arguments[1]) == "currency"
+                if currency_body and len(values) == 1:
+                    raise MeasureRuntimeError("A division by zero has been encountered.")  # Task 19 Part A: one Currency row has no sample spread
                 answer = dax_math.statistic(function, [value for value in values if value.is_finite()], percentile)
+                if currency_body and function == "STDEVX.S" and isinstance(answer, Decimal) and answer.is_finite():
+                    answer = answer.quantize(Decimal("0.0001"), rounding=ROUND_HALF_UP)  # Task 19 Part A: a Currency result has four decimals
                 if blank_results and function in {"MEDIANX", "PERCENTILEX.INC", "PERCENTILEX.EXC"} and answer == 0 and arguments[1][0] != "reference":
                     raise MeasureError(f"{function} landing on a BLANK row is not modelled by the local engine.")  # live Power BI (Task 13 review): BLANK where blank-as-zero gives 0
                 return answer
@@ -15615,7 +15854,7 @@ def evaluate_measures(
                 cat = iterator_expression_category(
                     arguments[1], (context, validation_row, 1)
                 )
-                if function == "COUNTX" and (cat == "boolean" or true_false_column(arguments[1])):
+                if function == "COUNTX" and (cat == "boolean" or true_false_column(arguments[1]) or _static_type(arguments[1], {}, {}) == "boolean"):  # Task 19: also a VAR that holds a CONVERT to BOOLEAN, whatever its rows give
                     raise MeasureError("The function COUNTX cannot work with values of type Boolean.")
             count = 0
             saw_nan = False
@@ -15653,6 +15892,12 @@ def evaluate_measures(
                 raise MeasureError(f"{function} over a NaN beside a product with a constant zero is not supported in the local engine (Power BI may fold it to 0).")
             return Decimal(count) if count or saw_nan else None
         if function == "CALCULATE":
+            if id(node) not in scanning_calculates and calculate_scans(arguments, row_context):
+                scanning_calculates.add(id(node))  # a CALCULATE under a row context or with a real filter scans; one with none, or only ALL, does not
+                try:
+                    return evaluate(node, row_context, allow_text=allow_text, allow_boolean=allow_boolean)
+                finally:
+                    scanning_calculates.discard(id(node))
             if arguments[0][0] == "table_call" and row_context is not None:
                 return evaluate_with_general_filters(arguments[0], tuple(arguments[1:]), row_context)
             if (
@@ -16055,7 +16300,7 @@ def evaluate_measures(
                 if branch_kind(other, row_context) == "bool":
                     refuse_bare_column(other, row_context)
                     return None  # live Power BI (Task 17 review): a plain BLANK at run time; only a reader of its type sees False (true_false_conditional)
-            if value is None and bool_join([branch_kind(branch, row_context) for branch in arguments[1:]]):
+            if value is None and not (chosen is not None and chosen[0] == "call" and chosen[1] == "CONVERT") and bool_join([branch_kind(branch, row_context) for branch in arguments[1:]]):  # Task 19 Part A: a CONVERT to BOOLEAN that gives BLANK keeps it
                 return False  # a Boolean result has no blank: Power BI answers FALSE
             return value
         if function == "ISSUBTOTAL":
@@ -16105,6 +16350,31 @@ def evaluate_measures(
         if function == "ALLCROSSFILTERED":
             raise MeasureError("ALLCROSSFILTERED function cannot be used as a table expression. It can appear only as a filter in CALCULATE.")
         if function == "ISBLANK":
+            held_argument = bound_expression(arguments[0])  # Task 19 Part C: an argument that is a VAR is judged by its expression
+            if _never_blank(held_argument):
+                # Task 19 Part C: an argument that can never be BLANK is not evaluated, so its run-time errors are not seen. A Currency division
+                # by zero, a name that does not resolve, a column read with no row context (a compile-time error) and a construct the engine
+                # refuses are seen.
+                if row_context is None and (found := _bare_column_outside_row_context(held_argument, {
+                    str(ctx.get("name", "")).casefold(): {str(h).casefold() for h in ctx.get("headers", [])} for ctx in contexts_by_id.values()
+                })):
+                    raise MeasureError(
+                        f"A single value for column '{found[1]}' in table '{found[0]}' cannot be determined. "
+                        "Refer to the column inside an aggregation such as MIN, MAX, COUNT or SUM, or iterate its table."
+                    )
+                for division in _currency_divisions(held_argument, lambda part: currency_typed(part, row_context)):
+                    try:
+                        divisor = evaluate(division[3], row_context, allow_text=True)
+                        zero = divisor is None or as_number(divisor) == 0 or (isinstance(divisor, Decimal) and divisor.is_nan())
+                    except (MeasureRuntimeError, _HardError):
+                        zero = False  # a divisor that fails is not the division by zero
+                    if zero:
+                        raise _DivisionError("A division by zero has been encountered.")
+                try:
+                    evaluate(held_argument, row_context, allow_text=True, allow_boolean=True)
+                except (MeasureRuntimeError, _HardError):
+                    pass
+                return False
             if typed_true_false(arguments[0]) or true_false_conditional(arguments[0], row_context):
                 try:
                     evaluate(arguments[0], row_context, allow_text=True, allow_boolean=allow_boolean)
@@ -16120,9 +16390,11 @@ def evaluate_measures(
                 # EDATE ... "wrong data type") or a conversion of literals, but not when the argument is COALESCE/IFERROR/SWITCH/
                 # CALCULATE, nor a text conversion of data. Measured by probe (dax_battery_evaluation_order), not understood.
                 argument = arguments[0]
-                own_error = "needs a number" in str(error) or "wrong data type" in str(error)
+                own_error = ("needs a number" in str(error) or "wrong data type" in str(error)) and not (
+                    argument[0] == "binary" and argument[1] in {"*", "/"} and (currency_typed(argument[2], row_context) or currency_typed(argument[3], row_context))  # Part B: an error of a Currency product is not the function's own
+                )
                 swallowed = own_error or (not any(True for _ in _iter_reference_nodes(argument)) and plan_constant(argument))
-                if isinstance(error, _DivisionError) or not swallowed or (
+                if isinstance(error, _DivisionError) or (isinstance(error, _CurrencyOverflowError) and argument[0] not in {"let", "var"}) or not swallowed or (argument[0] == "binary" and any(True for _ in _iter_reference_nodes(argument))) or (  # Task 19 Part C: an operator that reads a column passes its error  # Part B: a Currency times Infinity or NaN is an error for ISBLANK, except a VAR that holds it (measured: ISBLANK(VAR) is FALSE)  # Part B: a Currency times Infinity or NaN is an error for ISBLANK, except a VAR that holds it (measured: ISBLANK(VAR) is FALSE)
                     argument[0] == "call" and (
                         argument[1] in {"COALESCE", "IFERROR", "SWITCH", "CALCULATE", "ASIN", "ACOS", "DIVIDE"}
                         or argument[1] in _ITERATOR_CALLS
@@ -16267,8 +16539,9 @@ def evaluate_measures(
             # row stays lazy. An error leaving a COALESCE cannot be caught by IFERROR or ISERROR, whichever argument it is.
             result, found, eager = None, False, False
             reached: list[tuple[Any, ...]] = []
+            first_never_blank = _never_blank(bound_expression(arguments[0])) and not (row_context is not None and reads_row(bound_expression(arguments[0])))  # Task 19 Part F: a first argument that can never be BLANK (a VAR by its expression), and does not read the row, is the answer; the rest is not looked at
             for argument in arguments:
-                if found and not eager:
+                if found and (not eager or first_never_blank):
                     break
                 reached.append(argument)
                 if not eager and not plan_constant(argument):
@@ -16291,7 +16564,7 @@ def evaluate_measures(
                     if isinstance(error, _DivisionError) or (row_context is not None and reads_row(argument) and argument is arguments[-1]):
                         raise  # an error from the last, lazily evaluated, row-dependent argument is an ordinary one (live Power BI, iteration 87: one in an earlier argument is not)
                     raise _HardError(str(error)) from error
-                if not found and (value is not None or typed_true_false(argument)):
+                if not found and (value is not None or typed_true_false(argument) or (first_never_blank and argument is arguments[0])):
                     result, found = value, True
             probe_untaken_branches([argument for argument in arguments if not any(argument is seen for seen in reached)], row_context)  # live Power BI (iteration 91): compile-time errors in arguments after the answer are raised too
             result = date_as_typed(node, result, row_context)
@@ -16814,7 +17087,7 @@ def evaluate_measures(
 
             outer_reads_before = outer_row_reads[0]
             for inner in iterate_rows(context, iteration_rows, "clear"):
-                text = dax_typed.to_text(evaluate(arguments[1], inner, allow_text=True))
+                text = dax_typed.to_text(double_as_text(arguments[1], evaluate(arguments[1], inner, allow_text=True), inner))
                 entries.append(([order_value(expression, inner) for expression, _d in order_spec], text))
             if (
                 outer_row_reads[0] != outer_reads_before

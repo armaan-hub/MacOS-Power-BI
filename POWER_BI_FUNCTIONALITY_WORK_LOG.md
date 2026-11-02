@@ -1603,3 +1603,26 @@ The standing test workbook is now `tests/Data/Vat File -Aug 2026.xlsx` (sheet `V
 **Gate:** PARITY GATE PASSED. pytest 2,272 passed, 6,465 subtests; replay 358,614: 343,818 match, 14,796 refused, 0 DIFF, 0 CRASH; locked 276,203 to 343,798.
 
 **Open:** 1,731 fresh answers wrong on both `main` and the build, listed in `HANDOFF.md`.
+
+## 2026-11-02 — Iteration 108 (Task 19 convert-currency-9: CONVERT typing, Currency with Infinity or NaN, ISBLANK that never evaluates, BLANKs that cancel an error, text dates, large Doubles as text)
+
+**Who did what:** Haiku 5.5 coded Parts B, A, C, D, E, F and G as subagents, one at a time. Sonnet 5.5 fixed the findings of two review rounds. Claude Opus 5.5 planned, measured the rules in Power BI on the iPad guest, reviewed and shipped under the delegated approval.
+
+**Rules measured in Power BI and now in the engine:**
+- ISBLANK does not evaluate an expression that can never be blank. Logical operators, comparisons, AND, OR, NOT, ABS and CURRENCY are never blank; `+ - &` need either operand never blank, `* ^` both, `/` the left one; a function only when its arguments are never blank; a variable is judged by its bound expression. `COALESCE(x,..)` returns x on the same test, unless its first argument reads the current row.
+- A BLANK that scans nothing cancels an error in `*` and on the left of `/`, at top level and through IF, VAR and plain iterators. CALCULATE with a filter other than ALL blocks it, and so does a row context over model rows; ALL, ALLSELECTED, REMOVEFILTERS and KEEPFILTERS(ALL) do not, and neither do tables with no model rows.
+- Currency times Infinity or NaN is an overflow error. Currency / NaN or 0 is a division error. Currency / Infinity is 0.
+- CONVERT has its target type statically through IF, VAR, COALESCE and IFERROR.
+- CONVERT of a non-finite number to DATETIME stays non-finite and only prints as 12/31/9999, 01/01/0100 or 12/30/1899. The plan's clamp was wrong and was corrected by measurement.
+- Text dates become serial numbers in arithmetic, VALUE and CONVERT to DOUBLE. `"1/2"` uses the current year, so its answers are not saved.
+- A Double of 1E15 or more prints with an exponent in every text conversion, to 15 significant digits.
+
+**Review:** every answer scored on 3 tables against `main` and the build, in three batches, the last two fresh after the rule changes. 117,156 results: 12,293 wrong to right, 7,592 refused to match, 46 wrong to refused, 85,334 stay matching, 9,136 stay refused, 2,746 wrong on both, 9 match to refused, 0 regressions, 0 crashes. The first review found 66 + 279 regressions and the second batch 21 more; Sonnet fixed all of them, which is why the last batch was fresh. Added code checked for lookups and shape-keyed rules: none.
+
+**Tested in the real app and against Power BI on the iPad guest:** the real app through the measure path, offscreen: 575/575 equal, and 6,000 fresh probes, 3,980 created, 2,020 refused (1,540 Power BI errors, 480 safe gaps), 0 wrong. New answers came from Power BI on the iPad guest, headless; the project was not saved.
+
+**Saved:** `tools/parity/dax_battery_convert9_extra.json` (37,202 items), `tests/fixtures_convert9_review_alt.json` (tables A and B). No saved Power BI answer was edited. Two stale test lines in `tests/test_iteration107_blank_dates_8.py` were removed, because Power BI gives BLANK for `SELECTEDVALUE(Facts[Sales])*ERROR("x")` and False for `VAR q=CURRENCY(1)/0 RETURN ISBLANK(q)`. No new function, so the DAX contract is unchanged.
+
+**Gate:** PARITY GATE PASSED. pytest 2,329 passed, 4 expected failures (sign of zero), 6,598 subtests; replay 395,816: 382,145 match, 13,671 refused, 0 DIFF, 0 CRASH; locked 343,798 to 382,125. The DSI workbook is still missing on this Mac, so its answers were not replayed.
+
+**Open:** 2,746 results wrong on both `main` and the build, listed in `HANDOFF.md`.

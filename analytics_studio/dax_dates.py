@@ -135,6 +135,51 @@ def _moment(value: object, rounding: str = ROUND_HALF_UP) -> datetime | None:
     return to_datetime(value, rounding)  # type: ignore[arg-type]
 
 
+_MONTH_DAY_TEXT = re.compile(r"(\d{1,2})[/-](\d{1,2})")  # live Power BI: "1/2" and "1-2" are month and day of the current year
+
+
+def text_serial(text: str) -> Decimal | None:
+    """A text read as a date, a time or both, by the parsers behind DATEVALUE and TIMEVALUE, as its serial number (days since
+    1899-12-30, the time of day as a fraction); None when it reads as neither (Task 19 Part E)."""
+    from .measures import MeasureRuntimeError  # late import: measures imports this module
+
+    for reader in (parse_date_text, _time_value):
+        try:
+            return Decimal(reader(text))
+        except MeasureRuntimeError:
+            continue
+    found = _MONTH_DAY_TEXT.fullmatch(text.strip())
+    if found is None:
+        return None
+    try:
+        return Decimal(from_datetime(datetime(date.today().year, int(found.group(1)), int(found.group(2)))))
+    except ValueError:
+        return None
+
+
+_DATE_SHAPED_TEXT = re.compile(r"\d[\d ./,:-]*\d")
+_ISO_DATE_SHAPE = re.compile(r"\d{4}-\d{1,2}-\d{1,2}")  # read strictly: a month or day out of range ("2020-13-01") is an error, not another reading
+
+
+def date_shaped_text(text: str) -> bool:
+    """A text of digits and date separators that begins and ends with a digit and is not a whole number ("1 1/2"): Power BI may read it as a
+    date that no reader here models. Every other text that is neither a number nor a date is an ordinary conversion error."""
+    shown = text.strip()
+    return _DATE_SHAPED_TEXT.fullmatch(shown) is not None and not shown.isdigit() and _ISO_DATE_SHAPE.fullmatch(shown) is None
+
+
+def datetime_text(text: str) -> DaxDateTime:
+    """CONVERT(text, DATETIME) is strict (Task 19 Part E): a text that reads as a date or a time is that moment. A whole number is the
+    error "Cannot convert value 'x' of type Text to type Date." and so is any text that is not date-shaped; a date-shaped one it cannot read is refused."""
+    serial = text_serial(text)
+    if serial is not None:
+        return DaxDateTime(serial)
+    shown = text.strip()
+    if date_shaped_text(shown):  # "1 1/2", "1,000": a shape no reader here models
+        raise dax_typed.refusal(f"The local engine does not model the text '{shown}' as a date.")
+    raise dax_typed._error(f"Cannot convert value '{shown}' of type Text to type Date.")
+
+
 # ------------------------------------------------------------------------------------------- functions
 
 
