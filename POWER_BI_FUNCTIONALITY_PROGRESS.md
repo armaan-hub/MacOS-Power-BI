@@ -8,7 +8,7 @@
 
 ## Latest status
 
-**Latest status (2026-11-02, after Iteration 111 / Task 22 double-arith-12, Double arithmetic in IEEE doubles, iterators summed in doubles in row order, Int64 wrap and range errors, ROUND of huge values, overflow and underflow, coded by Haiku 5.5, fixed by Sonnet 5.5, planned, reviewed and shipped by Claude Opus 5.5 under the user's delegated approval):** pytest 2,500 passed and 1 expected failure, real app 575/575 and 5,773 fresh probes with 0 wrong, replay 448,816 answers with 436,250 match, 12,566 refused, 0 DIFF, 0 CRASH, locked 436,230. Next: Task 23 big-numbers-13 (MOD quotient limit, FLOOR/CEILING/MROUND of huge doubles, EXP/POWER last digits), coded by Antigravity.
+**Latest status (2026-11-03, after Iteration 112 / Task 23 big-numbers-13, MOD's quotient limit, FLOOR/CEILING/QUOTIENT/MROUND of huge doubles, MOD of Doubles in doubles, coded by Antigravity (Gemini 3.8 Flash), fixed by Sonnet 5.5, planned, reviewed and shipped by Claude Opus 5.5 under the user's delegated approval; first task through the new fast gate, 18 minutes instead of about 90):** pytest 2,511 passed (12 workers), real app 575/575 and 1,500 fresh probes with 0 wrong, replay 451,004 answers with 438,097 match, 12,907 refused, 0 DIFF, 0 CRASH, locked 438,077. Next: Task 24 topn-ties-14 (Antigravity, in its own worktree).
 
 **Previous status (2026-11-01, after Iteration 103 / Task 14 logic-tables-4, empty text in logical operators, a VAR block as an iterator table, FILTER over no rows, Currency arithmetic, review done, gate passed, locked 246,907, committed, merged and pushed; 246,927 of 253,237 saved answers match, 0 differ; next: Task 15 typed-columns-5, 1,836 items).**
 

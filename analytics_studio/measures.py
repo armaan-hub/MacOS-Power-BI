@@ -2539,7 +2539,7 @@ def _round_to_multiple(
         raise MeasureRuntimeError(
             f"{function} needs a significance with the same sign as the number."
         )
-    if abs(number) >= 2 ** 53:
+    if 2 ** 53 <= abs(number) < 2 ** 63:
         q = float(abs(number)) / float(abs(significance))
         q15 = float(f"{q:.15g}")
         whole = math.ceil(q15) if function == "CEILING" else math.floor(q15)
