@@ -54,9 +54,13 @@ def rounding_function(function: str, args: list[object]) -> Decimal | None:
     digits = dax_typed.whole(args[1], function)
     mode = {"ROUND": ROUND_HALF_UP, "ROUNDUP": ROUND_UP, "ROUNDDOWN": ROUND_DOWN}[function]
     if not number.is_finite():
+        if function == "ROUNDDOWN" and number == Decimal("Infinity"):
+            return Decimal("NaN")  # Part E: ROUNDDOWN of +Infinity is NaN (measured)
         if function == "ROUNDDOWN":
             return number  # ROUNDDOWN of Infinity is Infinity, an error value
         raise _fail(function)
+    if abs(number) >= Decimal("1E16"):
+        return number  # Part E: a finite value beyond 1E16 is returned unchanged by ROUND, ROUNDUP and ROUNDDOWN, any digits (measured to 1E300 and 1E308)
     if digits > 40:
         return number  # nothing is left to round
     if digits < -40:
@@ -108,8 +112,21 @@ def math_function(function: str, args: list[object]) -> object:
             return Decimal(0)
         if (number > 0 and multiple < 0) or (number < 0 and multiple > 0):
             raise _fail(function)
+        if abs(number) >= 2 ** 53:
+            # Part D: from 2^53 the quotient and the product are rounded to doubles in Power BI (MROUND(2^63-1024,3) is the error, its double product being 2^63).
+            # Below 2^53 the exact rule below matches every measured row but MROUND(5E15,3), which Power BI gives as 5000000000000002 (exact ...001; wrong here as on main).
+            quotient = float(number) / float(multiple)
+            if not math.isfinite(quotient):
+                raise dax_typed.refusal("MROUND of a quotient beyond the Double range is not modelled by the local engine.")
+            whole = math.floor(abs(quotient) + 0.5)
+            product = float(-whole if quotient < 0 else whole) * float(multiple)
+            if not math.isfinite(product) or abs(product) >= 2 ** 63:
+                raise dax_typed._error("The result of a conversion or arithmetic operation is either too large or too small.")
+            return Decimal(0) if product == 0 else Decimal(product)
         steps = (number / multiple).quantize(Decimal(1), rounding=ROUND_HALF_UP)
         result = steps * multiple
+        if abs(result) >= 2 ** 63:  # Part D: an Integer result beyond the 64-bit range is the conversion error
+            raise dax_typed._error("The result of a conversion or arithmetic operation is either too large or too small.")
         return Decimal(0) if result == 0 else result
     if function in {"DEGREES", "RADIANS", "TANH", "ATAN", "EVEN", "ODD", "ISEVEN", "ISODD"} and args[0] is not None:
         number = dax_typed.to_number(args[0])
@@ -132,7 +149,10 @@ def math_function(function: str, args: list[object]) -> object:
     if args[0] is None and function in {"EVEN", "ODD"}:
         return Decimal(0) if function == "EVEN" else Decimal(1)
     if function in {"EVEN", "ODD"}:
-        return _next_multiple(dax_typed.to_number(args[0]), 2 if function == "EVEN" else 1)
+        number = dax_typed.to_number(args[0])
+        if abs(number) >= Decimal("1E16"):
+            return number  # Part E: EVEN and ODD of a finite value from 1E16 up are the value itself (EVEN(1E300) is 1E+300, ODD(9.22E18) is 9.22E+18, ODD(1E17+0.5) is 1E+17, measured)
+        return _next_multiple(number, 2 if function == "EVEN" else 1)
     if function in {"LOG", "LOG10"}:
         number = dax_typed.to_number(args[0])
         base = dax_typed.to_number(args[1]) if len(args) > 1 and args[1] is not None else Decimal(10)
@@ -169,7 +189,10 @@ def math_function(function: str, args: list[object]) -> object:
             raise _fail(function)
         if denominator == 0:
             raise dax_typed._error("Division by zero has occurred when evaluating function 'QUOTIENT'.")
-        return (numerator / denominator).to_integral_value(rounding=ROUND_DOWN)
+        quotient = (numerator / denominator).to_integral_value(rounding=ROUND_DOWN)
+        if abs(quotient) >= 2 ** 63:  # Part D: an Integer result beyond the 64-bit range is the conversion error
+            raise dax_typed._error("The result of a conversion or arithmetic operation is either too large or too small.")
+        return quotient
     if function == "SQRTPI":
         number = dax_typed.to_number(args[0])
         if number < 0:

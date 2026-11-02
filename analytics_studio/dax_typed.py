@@ -85,11 +85,12 @@ def number_to_text(value: Decimal, double: bool = False) -> str:
         return "-nan(ind)" if value.is_signed() else "nan"  # Part B: the sign of a NaN shows in text
     if value.is_infinite():
         return "-inf" if value < 0 else "inf"
-    if value == value.to_integral_value() and abs(value) < _INT64_LIMIT and not (double and abs(value) >= DOUBLE_EXPONENT_FROM):
+    if value == value.to_integral_value() and -_INT64_LIMIT <= value < _INT64_LIMIT and not (double and abs(value) >= DOUBLE_EXPONENT_FROM):  # Part C: -2^63 is a whole Int64 (a wrapped sum)
         return str(int(value))
     sign = "-" if value < 0 else ""
     digits, exponent10 = _significant(abs(value))
-    if exponent10 >= 15 or _decimal_places(digits, exponent10) > 15:
+    below_1e15 = abs(value) < DOUBLE_EXPONENT_FROM and exponent10 == 15  # Part C: a magnitude below 1E15 whose 15-digit rounding reaches 1E15 stays in fixed notation ((0.1-1E15)&"z" is -1000000000000000z, measured)
+    if (exponent10 >= 15 and not below_1e15) or _decimal_places(digits, exponent10) > 15:
         mantissa = digits[0] + ("." + digits[1:] if len(digits) > 1 else "")
         return f"{sign}{mantissa}E{'-' if exponent10 < 0 else '+'}{abs(exponent10):02d}"
     if exponent10 >= 0:
