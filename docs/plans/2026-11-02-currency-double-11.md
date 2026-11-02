@@ -39,3 +39,6 @@ A date `+` or `-` a non-finite number is a date holding the non-finite value (to
 6. After each Part run the scoring script for that Part and the replay: `PYTHONPATH=. QT_QPA_PLATFORM=offscreen python3 tools/parity_check.py` (restore the ledger after with `git checkout PARITY_LEDGER.md`). A DIFF in the replay is your bug: fix the code, never saved answers.
 7. Never run `--freeze`, `--accept`, commit, merge, push or Power BI. No global replace on `measures.py`. No edits to existing tests or saved answers: list those in your report. Scratch files go in the scratchpad. Do not run the full test suite.
 8. Add tests to a new `tests/test_iteration110_currency_double_11.py`, one class per Part, with the measured values.
+
+## Review outcome (2026-11-02)
+Shipped as Iteration 110. Haiku's six Parts scored 2,508 match, 29 refused, 0 wrong on the spec. A fresh batch of 5,914 shapes on 3 tables found 10 new wrong answers and 256 wrong on both; Sonnet fixed them in two rounds (Double over Currency at 15 digits, text beyond the Double range, FORMAT of a non-finite date, MINX/MAXX of NaN inside IFERROR, AVERAGEX of Currency, the logical BLANK in chains, type tests of a Currency product beyond range). Final: 0 wrong, 560 wrong to right, 1,036 refused to match. Locked 430,554.
