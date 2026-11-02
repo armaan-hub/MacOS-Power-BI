@@ -1680,3 +1680,24 @@ The standing test workbook is now `tests/Data/Vat File -Aug 2026.xlsx` (sheet `V
 **Gate:** PARITY GATE PASSED. pytest 2,483 passed, 1 expected failure; replay 443,049: 430,574 match, 12,475 refused, 0 DIFF, 0 CRASH; locked 422,299 to 430,554. The DSI workbook is still missing on this Mac, so its answers were not replayed.
 
 **Open (refused, not wrong):** ISINT64 and ISCURRENCY of `"1E400"` minus a date; IFERROR around MINX or MAXX of NaN beside other functions; `(1&&"")*"a"*1` and `"a"*(1&&"")` with constant x; 5 Part D items (TODAY()*0 and a NaN date product); 24 Part E items (text beside the logical BLANK, constant x).
+
+## 2026-11-02 — Iteration 111 (Task 22 double-arith-12: Double arithmetic in IEEE doubles, Int64 wrap, ROUND of huge values)
+
+**Who did what:** Haiku 5.5 coded the six Parts. Sonnet 5.5 fixed the review findings and the gate failures. Claude Opus 5.5 planned, measured the rules in Power BI on the iPad guest (4,051 spec answers), reviewed and shipped under the delegated approval.
+
+**Rules measured in Power BI and now in the engine:**
+- `+ - * /` with a Double operand compute in IEEE doubles and keep the exact double (`(100.1-100)` is 9.99999999999943E-02, `(0.1+0.2)=0.3` is False, `DIVIDE(1,3)*3==1` is True).
+- Int64 `+ - *` wrap at 64 bits; INT, FLOOR, CEILING, QUOTIENT, MROUND and CONVERT(x,INTEGER) outside the Int64 range are the conversion error; INT, FLOOR, CEILING, QUOTIENT, and TRUNC/ROUND with digits read a Double at 15 significant digits.
+- ROUND family and EVEN of finite values beyond 1E16 return the value; TRUNC and ROUNDDOWN of +Infinity are NaN; past the Double range is Infinity, below it rounds to the nearest double.
+- SUMX and AVERAGEX of a Double body add in doubles in row order.
+- POWER of a negative base with a 1/odd exponent stays the exact odd root.
+
+**Review:** fresh probes on 3 tables scored on `main` and the build: 0 right-to-wrong, about 1,140 wrong-to-right. Gate rounds found TRUNC with fractional digits (66.59 vs 66.6, fixed with the 15-digit read), the POWER odd root of a Double exponent (fixed), and 8 stale exact-decimal test expectations, each checked live in Power BI before the test was updated (`MOD(1E29,7)` is the error in Power BI; main answered 5). Code read for lookups: none.
+
+**Tested in the real app and against Power BI on the iPad guest:** real app through the measure path, offscreen: 575/575 equal, and 5,773 fresh probes, 5,314 created, 459 refused, 0 wrong. Power BI answers came from Power BI Desktop on the iPad guest, headless; the project was not saved.
+
+**Saved:** `tools/parity/dax_battery_double12_extra.json` (5,767 answers), `tools/parity/task22_double_arith_spec.json`, `tests/fixtures_double12_review_alt.json`. No saved Power BI answer was edited.
+
+**Gate:** PARITY GATE PASSED. pytest 2,500 passed, 1 expected failure; replay 448,816: 436,250 match, 12,566 refused, 0 DIFF, 0 CRASH; locked 430,554 to 436,230.
+
+**Open, moved to Task 23:** MOD's real limit is the quotient |x/d| above about 1.126E12 (Task 22's "|x| >= 1E15" was a stand-in; `MOD(5,1E-30)` is an error in Power BI, 0 here); FLOOR/CEILING/QUOTIENT of doubles near 2^62-2^63; MROUND of 5E15..8E15 (5000000000000002 in Power BI); EXP/POWER/LN last digits (Power BI's EXP has an irregular ~1e-14 error).

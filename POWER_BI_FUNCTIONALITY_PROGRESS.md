@@ -8,7 +8,7 @@
 
 ## Latest status
 
-**Latest status (2026-11-02, after Iteration 110 / Task 21 currency-double-11, Currency with Doubles computed in doubles, static types beside text numbers, CURRENCY of text and non-finite values, dates beside Infinity or NaN, the logical BLANK beside an error, coded by Haiku 5.5, fixed by Sonnet 5.5, planned, reviewed and shipped by Claude Opus 5.5 under the user's delegated approval):** pytest 2,483 passed and 1 expected failure, real app 575/575 and 6,000 fresh probes with 0 wrong, replay 443,049 answers with 430,574 match, 12,475 refused, 0 DIFF, 0 CRASH, locked 430,554. Open: refusals listed in `HANDOFF.md`. Next: Task 22 from those open items.
+**Latest status (2026-11-02, after Iteration 111 / Task 22 double-arith-12, Double arithmetic in IEEE doubles, iterators summed in doubles in row order, Int64 wrap and range errors, ROUND of huge values, overflow and underflow, coded by Haiku 5.5, fixed by Sonnet 5.5, planned, reviewed and shipped by Claude Opus 5.5 under the user's delegated approval):** pytest 2,500 passed and 1 expected failure, real app 575/575 and 5,773 fresh probes with 0 wrong, replay 448,816 answers with 436,250 match, 12,566 refused, 0 DIFF, 0 CRASH, locked 436,230. Next: Task 23 big-numbers-13 (MOD quotient limit, FLOOR/CEILING/MROUND of huge doubles, EXP/POWER last digits), coded by Antigravity.
 
 **Previous status (2026-11-01, after Iteration 103 / Task 14 logic-tables-4, empty text in logical operators, a VAR block as an iterator table, FILTER over no rows, Currency arithmetic, review done, gate passed, locked 246,907, committed, merged and pushed; 246,927 of 253,237 saved answers match, 0 differ; next: Task 15 typed-columns-5, 1,836 items).**
 

@@ -48,3 +48,6 @@ C, D, E, F, B, A (A last: it touches the most locked answers). After each Part: 
 3. Type tests (ISDOUBLE / ISINT64) after Part C wrap: the wrapped value is still Int64.
 4. Date + Double: tick rounding versus doubles.
 5. Iterators over a Variant body (mixed Int64 and Double rows) after Part B.
+
+## Review outcome (2026-11-02)
+Shipped as Iteration 111. Fresh probes on 3 tables: 0 right-to-wrong, about 1,140 wrong-to-right. Gate rounds fixed TRUNC/ROUND with fractional digits (15-digit read), the POWER odd root of a Double exponent, and 8 stale exact-decimal test expectations checked live in Power BI. Locked 436,230. Open items moved to Task 23.
