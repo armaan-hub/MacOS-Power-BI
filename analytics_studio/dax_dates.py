@@ -78,10 +78,22 @@ def is_date(value: object) -> bool:
     return isinstance(value, DaxDateTime)
 
 
+def _shown_moment(value: Decimal, rounding: str = ROUND_HALF_UP) -> datetime:
+    """Task 21 Part D: a date beside Infinity or NaN shows as Power BI prints it: NaN as day zero, +Infinity as the last
+    second of 9999 and -Infinity as 01/01/0100 (the same printing as CONVERT of a non-finite number to DATETIME)."""
+    if not value.is_finite():
+        if value.is_nan():
+            return EPOCH
+        return datetime(9999, 12, 31, 23, 59, 59) if value > 0 else datetime(100, 1, 1)
+    return to_datetime(value, rounding)
+
+
 def date_text(value: Decimal, pad_year: bool = False) -> str:
     """The text of a date in a concatenation: M/d/yyyy, plus h:mm:ss AM/PM when there is a time of day (FORMAT "General Date" pads the
     year to four digits, a concatenation does not: live Power BI, 1/1/0100 and 1/1/100)."""
-    moment = to_datetime(value, NEAREST_SECOND)  # live Power BI: the text of a date shows the time of day rounded to the nearest second
+    if value.is_infinite():
+        raise dax_typed._error("The parameter is incorrect.")  # Task 21 Part D: a date beside +Infinity or -Infinity has no text (NaN is day zero, as the text of a time)
+    moment = _shown_moment(value, NEAREST_SECOND)  # live Power BI: the text of a date shows the time of day rounded to the nearest second
     time_text = f"{moment.hour % 12 or 12}:{moment.minute:02d}:{moment.second:02d} {'AM' if moment.hour < 12 else 'PM'}"
     if (moment.year, moment.month, moment.day) == (1899, 12, 30):
         return time_text  # day zero is a time of day only
@@ -93,7 +105,7 @@ def date_text(value: Decimal, pad_year: bool = False) -> str:
 
 def oracle_text(value: Decimal) -> str:
     """The text Power BI's ADOMD client shows for a DateTime result (used by the comparison harness)."""
-    return to_datetime(value).strftime("%m/%d/%Y %H:%M:%S")
+    return _shown_moment(value).strftime("%m/%d/%Y %H:%M:%S")
 
 
 # ---------------------------------------------------------------------------------------------- parsing

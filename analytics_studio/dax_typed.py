@@ -465,6 +465,8 @@ def text_function(function: str, args: list[object]) -> object:
             raise _error("The result of function 'REPT' is longer than the allowed text size.")
         return text * times
     if function == "UNICHAR":
+        if args[0] is None:
+            return None  # Task 21 Part F: UNICHAR of a BLANK is BLANK
         code = whole(args[0], function, minimum=1)
         if code > 0x10FFFF or not _valid_unichar(code):
             raise _error("An argument of function 'UNICHAR' has the wrong data type or has an invalid value.")

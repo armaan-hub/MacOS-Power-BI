@@ -6,7 +6,7 @@ Scalar functions take already-evaluated arguments (``None`` is BLANK).  Compared
 
 from __future__ import annotations
 
-from decimal import Decimal, ROUND_DOWN, ROUND_FLOOR, ROUND_HALF_UP, ROUND_UP
+from decimal import Decimal, ROUND_DOWN, ROUND_FLOOR, ROUND_HALF_EVEN, ROUND_HALF_UP, ROUND_UP
 import math
 import random
 
@@ -178,6 +178,8 @@ def math_function(function: str, args: list[object]) -> object:
     if function == "CURRENCY":
         if args[0] is None:
             return None
+        if isinstance(args[0], str):
+            return text_to_currency(dax_typed.to_number(args[0]))  # Task 21 Part C: a text is read as a Currency from its exact digits
         return to_currency(dax_typed.to_number(args[0]))
     if function in {"COMBIN", "COMBINA", "PERMUT"}:
         n, k = (_round_half_away(value, function) for value in args)
@@ -213,6 +215,17 @@ def to_currency(number: Decimal) -> Decimal:
     if not number.is_finite() or abs(number) >= Decimal("1E14"):
         return number.quantize(Decimal("0.0001"), rounding=ROUND_HALF_UP) if number.is_finite() else number
     return (Decimal(float(number) * 10000.0).quantize(Decimal(1), rounding=ROUND_HALF_UP) / 10000).quantize(Decimal("0.0001"))
+
+
+_CURRENCY_MAX = Decimal("922337203685477.5807")  # the Currency type's range, both ways
+
+
+def text_to_currency(number: Decimal) -> Decimal:
+    """Task 21 Part C: a text read as a Currency is rounded half to even from its exact digits (CURRENCY("0.00005") is 0);
+    beyond the Currency range, or not finite, it is the 'Out of present range' error."""
+    if not number.is_finite() or abs(number) > _CURRENCY_MAX:
+        raise dax_typed._error("The following system error occurred: Out of present range.")
+    return number.quantize(Decimal("0.0001"), rounding=ROUND_HALF_EVEN)
 
 
 def _round_half_away(value: Any, function: str) -> int:
