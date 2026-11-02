@@ -47,6 +47,8 @@ def _round_digits(value: Decimal, digits: int, rounding: str) -> Decimal:
 def rounding_function(function: str, args: list[object]) -> Decimal | None:
     """ROUND, ROUNDUP and ROUNDDOWN: blank value is blank, blank digits are 0, fractional digits round."""
     if args[0] is None:
+        if args[1] is not None:
+            dax_typed.whole(args[1], function)  # Task 20 F4: a BLANK number still reads its digits; an Infinity, a NaN or a text there is the error
         return None
     number = dax_typed.to_number(args[0])
     digits = dax_typed.whole(args[1], function)
@@ -79,6 +81,9 @@ def math_function(function: str, args: list[object]) -> object:
     if function in _BLANK_IN_BLANK_OUT and args and args[0] is None:
         return None
     if function == "QUOTIENT" and args[0] is None:
+        dax_typed.to_number(args[1])  # a BLANK numerator still reads the divisor: a text is the error, an Infinity, a NaN or a zero gives BLANK
+        if args[1] is None:
+            raise dax_typed._error("Division by zero has occurred when evaluating function 'QUOTIENT'.")  # only an actual BLANK divisor
         return None
     if function == "LOG" and len(args) > 1 and args[1] is None:
         raise _fail(function)
@@ -95,6 +100,7 @@ def math_function(function: str, args: list[object]) -> object:
         return Decimal(random.randint(low, high))
     if function == "MROUND":
         if args[0] is None:
+            dax_typed.to_number(args[1])  # Task 20 F4: a BLANK number still reads the multiple; a text there is the error
             return None
         number = dax_typed.to_number(args[0])
         multiple = dax_typed.to_number(args[1])
@@ -105,6 +111,20 @@ def math_function(function: str, args: list[object]) -> object:
         steps = (number / multiple).quantize(Decimal(1), rounding=ROUND_HALF_UP)
         result = steps * multiple
         return Decimal(0) if result == 0 else result
+    if function in {"DEGREES", "RADIANS", "TANH", "ATAN", "EVEN", "ODD", "ISEVEN", "ISODD"} and args[0] is not None:
+        number = dax_typed.to_number(args[0])
+        if not number.is_finite():  # Task 20 F3: Power BI measures these (not an error) for an Infinity or a NaN
+            if function in {"DEGREES", "RADIANS", "ODD"}:
+                return Decimal(0)
+            if function == "TANH":
+                return Decimal(1)
+            if function == "EVEN":
+                return number  # EVEN gives x back
+            if function == "ATAN":
+                if number.is_nan():
+                    raise dax_typed.refusal("ATAN of NaN is an unpredictable value in Power BI and is not modelled by the local engine.")
+                return _double(math.atan(float(number)), function)
+            raise _fail(function)  # ISEVEN / ISODD of an Infinity or a NaN
     if function in {"ISEVEN", "ISODD"}:
         number = dax_typed.to_number(args[0])
         remainder = int(number.quantize(Decimal(1), rounding=ROUND_HALF_UP)) % 2  # to the nearest whole number first: ISEVEN(2.5) is False, ISEVEN(TIME(6,0,0)) True (live Power BI)
@@ -145,6 +165,8 @@ def math_function(function: str, args: list[object]) -> object:
         return Decimal(result)
     if function == "QUOTIENT":
         numerator, denominator = (dax_typed.to_number(value) for value in args)
+        if not numerator.is_finite() or denominator.is_nan():  # Task 20 F3: an Infinity or NaN numerator, or a NaN divisor, is the error (an Infinity divisor gives 0)
+            raise _fail(function)
         if denominator == 0:
             raise dax_typed._error("Division by zero has occurred when evaluating function 'QUOTIENT'.")
         return (numerator / denominator).to_integral_value(rounding=ROUND_DOWN)
@@ -253,6 +275,8 @@ def statistic(function: str, values: list[Decimal], k: Decimal | None = None) ->
         product = Decimal(1)
         for value in values:
             product *= value
+        if product.is_finite() and abs(product) > Decimal("1.7976931348623157E+308"):
+            return Decimal("Infinity") if product > 0 else Decimal("-Infinity")  # Part B: beyond the double range is Infinity
         return product
     if name == "MEDIAN":
         ordered = sorted(values)

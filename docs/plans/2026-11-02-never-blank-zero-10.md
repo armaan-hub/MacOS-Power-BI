@@ -19,6 +19,12 @@ Replace `_NEVER_BLANK_CALLS` with one table:
 - **Never blank when every argument is:** MAX and MIN of two scalars, ISPMT PPMT IPMT REPLACE.
 - **IF with three arguments:** both branches; the condition is not looked at. Two arguments: evaluated.
 - `x IN {..}` is never blank, like a comparison.
+- `x^y` is judged like POWER: by its base only (measured: `ISBLANK((1/0)^(FACT(-1)))` is False, `ISBLANK((FACT(-1))^(1/0))` an error). This replaces the `*`-style "both sides" for `^`.
+
+**`x^y` and `POWER(x,y)` with an infinite or NaN operand, for every numeric type (measured; this replaces the Currency-only line in Part D).** True is 1, False is 0.
+- A BLANK base with a non-BLANK exponent is BLANK, also for infinite or NaN y. A BLANK exponent with a non-BLANK base is 1, also for infinite or NaN x. BLANK^BLANK stays the error.
+- x infinite or NaN and y finite: y=0 gives 1, y<0 gives 0, y>0 is the POWER error. x and y both non-finite: the error.
+- x finite and y=+Infinity: the error, for every x. x finite and y=-Infinity or NaN: x>=0 gives 0, x<0 the error.
 - **Everything else is evaluated**, including SIN COS TAN and the other trigonometry, DEGREES RADIANS, FACT COMBIN COMBINA PERMUT GCD LCM SQRTPI EVEN ODD ISEVEN ISODD UNICODE, the BIT functions, the statistics (NORM.* T.* CHISQ.* BETA.* EXPON.DIST POISSON.DIST CONFIDENCE.*), PATHITEM PATHITEMREVERSE NETWORKDAYS DIVIDE COALESCE IFERROR SWITCH IF.EAGER CALCULATE CONVERT DATEDIFF COMBINEVALUES EVALUATEANDLOG, a VAR block, a measure, and an ERROR call.
 
 So `ISBLANK(1+FACT(-1))` is False (`+`: either side) and `ISBLANK(ABS(FACT(-1)))` is an error (ABS needs its first argument, FACT is evaluated). `ISBLANK(LEFT(MAX(Facts[Note]),-1))` is an error, because a column aggregate can be BLANK. `ISBLANK(VAR y=1+ERROR("x") RETURN ABS(y))` is an error; `ISBLANK(VAR y=BLANK()+ERROR("x") RETURN 1)` is False, because the unused VAR is not evaluated. The Currency-division check in that branch stays.
@@ -46,9 +52,9 @@ All of this is IEEE on a Double. An Int64 or Currency zero has no sign, so a res
 The 4 expected failures in `tests/test_iteration108_convert_currency_9.py` (`PartGSignOfZeroAndNaNOpenTests`) should now pass: list that in your report, do not edit the test; Opus removes the marker.
 
 ## Part D: Currency limits
+- First, the parser (measured): a sign binds the whole product or quotient that follows it, also after `*` or `/`. `1/-2*3` is -0.166666666666667, that is 1/(-(2*3)). Part B did this for a leading sign only.
 - Currency holds value×10000 in a signed 64-bit integer. `+`, `-`, and `*` by a non-Currency, wrap at 64 bits with no error: `CURRENCY(1E14)*10` is -844674407370955.1616, `CURRENCY(922337203685477)+1` is -922337203685477.1616, `CURRENCY(922337203685477)*2` -1.1616, `CURRENCY(1E14)*100` 776627963145224.192. The wrapped value carries on in later arithmetic and text.
 - `CURRENCY(x)` of a value outside ±922337203685477.5807 is the overflow error, as is `CURRENCY(1E14)/0.01`. `CURRENCY*CURRENCY` is a Double, no wrap: `CURRENCY(9E14)*CURRENCY(100)` is 9E+16.
-- `x^y` with a Currency on one side and an infinite or NaN on the other: exponent Infinity is an error. Exponent -Infinity or NaN: base ≥ 0 gives 0, base < 0 an error. Base Infinity, -Infinity or NaN with a Currency exponent: exponent > 0 error, 0 gives 1, < 0 gives 0. A BLANK base stays BLANK: `(BLANK()*CURRENCY(1))^(1/0)` is BLANK.
 
 ## Part E: small rules
 1. `IF(ISFILTERED(col),1)`, `IF(ISINSCOPE(col),1)`: a BLANK that reads only the filter context cancels an error also under CALCULATE or CALCULATETABLE with a column filter: `CALCULATE(ISERROR((IF(ISFILTERED(Facts[Region]),1))/(ERROR("x"))),Facts[Quantity]=2)` is False.
@@ -57,8 +63,33 @@ The 4 expected failures in `tests/test_iteration108_convert_currency_9.py` (`Par
 4. `FORMAT(1E300,"0")` and `"#,0"` and `"0.00"`: the 15 significant digits then zeros, no `NaN`.
 5. `CONVERT(BLANK(),DATETIME)+1` is `12/31/1899 00:00:00`. `SUMX` over a CONVERT to DATETIME of a non-finite value prints `12/30/1899 00:00:00`, `12/31/9999 23:59:59`, `01/01/0100 00:00:00` as a bare result (a date type through SUMX, with VAR and IF).
 
+## Corrections after the first fresh review (2026-11-02, all measured)
+The first review scored 67,500 fresh answers on 3 tables: 6,268 wrong to right, but 195 match to wrong and 59 refused to wrong, nearly all from the two wrong rules below. These replace the earlier text where they differ.
+
+**F1. The parser.** A sign after `^` also binds the whole product or quotient that follows, like a sign after `*` or `/`. `2^-1*3` is 0.125, that is 2^(-(1*3)). `2^-1/2` is 0.707106781186547, `2^+1*3` 8, `2^-1+1` 1.5, `2^-1^2` 0.5, `1/2^-1*3` 8, `3*2^-1*3` 0.375, `2^-2/2*4` 0.0625, `2^-MAX(Facts[Quantity])*0` 1. `2^3*4` stays 32. A `--` starts a comment: leave that alone.
+
+**F2. `x^y` and POWER with an infinite or NaN operand (replaces the Part A block).**
+- Finite x (a zero of either sign counts as x>=0), non-finite y: y=+Infinity or a positive NaN (`-(0/0)`) is the error. y=-Infinity or a negative NaN (plain `0/0`): x>=0 gives 0, x<0 the error. So `1^(0/0)` is 0 and `1^-(0/0)` an error.
+- Non-finite x, finite y: y=0 gives 1. y>0 is the error. y<0: x=+Infinity gives 0. x=-Infinity or NaN gives 0 for a whole y (-1, -2, -3 measured), the error for a fractional y (-0.5, -1.5, -1E-200), and the error for -1E15; refuse a whole y of size 1E9 or more that is not -1E15-like, do not guess.
+- x and y both non-finite: the error. BLANK rules stay.
+- `(0.0*-1)^0` and `(-(0.0))^0` are 1, because that is a Double minus zero; `0^0`, `0.0^0` and `(0*-1)^0` stay the error. `(0.0*-1)^1E-200` is the error, `(0.0*-1)^0.5` is 0.
+- `-(0/0)^0` is -1 by F1's rule that a sign covers the power.
+
+**F3. Functions given Infinity or NaN.** The non-finite refusal in `_scalar_math_value` hid these, and the old ISBLANK rule hid that. Bare values: DEGREES and RADIANS 0, TANH 1, ODD 0, EVEN gives x back, ATAN(±Infinity) is ±π/2. `ATAN` of NaN is a junk value in Power BI (1.7786...): keep it a `MeasureError` refusal, never a runtime error, so ISERROR does not say True. ISEVEN and ISODD of NaN must not crash: they are the error. `CEILING(0,1/0)` is 0. `DIVIDE(1,0/0)` is BLANK, `DIVIDE(1,1/0)` 0. `ISBLANK(IF(TRUE(),QUOTIENT(0/0,1)))` is an error.
+
+**F4. A BLANK first argument does not skip the second.** Today we return BLANK. Measured for y non-finite, `"a"` or `""`:
+- The error for ROUND ROUNDUP ROUNDDOWN LEFT RIGHT REPT EDATE EOMONTH, for QUOTIENT and MROUND when y is text.
+- BLANK for MOD CEILING FLOOR BITAND with non-finite y, BITAND also with text y; we refuse those today.
+- `MOD(BLANK(),BLANK())`, `QUOTIENT(BLANK(),BLANK())` are the error. `LEFT(BLANK(),-1)`, `RIGHT(BLANK(),-1)` the error, `REPT(BLANK(),-1)` BLANK.
+
+**F5. Currency.**
+- A wrap happens only between Currency and Currency, Int64 or True/False. With a Double, a date or a text operand: `+` and `-` give a Double with no wrap (`CURRENCY(9E14)+1E15` is 1.9E+15, `CURRENCY(9E14)+1.5` prints 900000000000002). `*` and `/` give a Currency checked for range, the overflow error when too large: `CURRENCY(9E14)*2.0`, `CURRENCY(1E14)*SUM(Facts[Sales])`, `CURRENCY(1)*1E15`, `CURRENCY(1)*"1E15"`, `CURRENCY(1E14)*DATE(2020,1,1)` are errors, `CURRENCY(1)*9E14` is fine.
+- SUMX of a Currency body wraps: `SUMX({1,2},CURRENCY(5E14))` is -844674407370955.1616. AVERAGEX divides the wrapped sum: `AVERAGEX({1,2},CURRENCY(5E14))` is -422337203685477.5808.
+- `CURRENCY(x)` of a Double out of range is the overflow error (`CURRENCY(1E15)`, `CONVERT(1E15,CURRENCY)`, `ISERROR(CURRENCY(1E15))` True), of a whole-number constant it wraps (`CURRENCY(922337203685478)` is -922337203685477.1616). `ISCURRENCY(CURRENCY(1E15))` stays True for a constant, and is the error when the value reads data.
+- `currency_typed` must see through a sign: `CURRENCY(2)/-1.5*-TRUE()` is 1.3333.
+
 ## Not in Task 20
-COUNTAX of NaN through IFERROR, conversion errors of constants in empty iterators through COALESCE, `DATEVALUE` of numeric text, `TIME` through FORMAT and DATEVALUE. They stay open.
+`ISNUMBER` of arithmetic on a logical BLANK (`ISNUMBER((1&&"")*2)` True but `/2` False: static-type detail, about 20 items), Double text from the shortest digits (`(2/41)&"z"`, it breaks saved answers), COUNTAX of NaN through IFERROR, conversion errors of constants in empty iterators through COALESCE, `DATEVALUE` of numeric text, `TIME` through FORMAT and DATEVALUE. They stay open.
 
 ## Rules
 1. One Part at a time, in the order A, C, B, D, E, then stop and report. Do not start the next Part.
@@ -68,3 +99,6 @@ COUNTAX of NaN through IFERROR, conversion errors of constants in empty iterator
 5. A refusal raises `MeasureError` (`dax_typed.refusal`), never `MeasureRuntimeError`.
 6. After each Part run the scoring script for that Part (`PYTHONPATH=. QT_QPA_PLATFORM=offscreen python <scratchpad>/t20/score.py A`) and the replay (about 2 minutes): `PYTHONPATH=. QT_QPA_PLATFORM=offscreen python tools/parity_check.py`. It must show 0 DIFF, 0 CRASH. `git checkout PARITY_LEDGER.md` after a replay.
 7. Never run `--freeze`, `--accept`, commit, merge, push or Power BI. No global replace on `measures.py`. No edits to existing tests or saved answers: list those in your report. Scratch files go in the scratchpad.
+
+## Review outcome (2026-11-02)
+Shipped as Iteration 109. Corrections F1 to F5 and the later measured rules are in the work log. Two fresh batches on 3 tables, after removing `--` comment artefacts: 15,623 wrong to right, 3,984 refused to match, 6 crash to match, 108,444 stay matching, 24 match to refused, 425 wrong on both, 0 new wrong answers. Left open: Double arithmetic kept as Decimal (a true binary `/` broke 6 XNPV answers and was undone), type tests of arithmetic around a failing power (refused), and the items listed in `HANDOFF.md`.

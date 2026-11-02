@@ -52,7 +52,7 @@ class IslogicalTest(unittest.TestCase):
             self.assertEqual("False", dax.local(expression), expression)
 
     def test_beside_data_there_is_no_rule(self) -> None:
-        for expression in ('ISLOGICAL(MAX(Facts[Quantity])&&LEFT("a",0))', 'ISLOGICAL(SUM(Facts[Quantity])&&LEFT("a",0))', 'ISLOGICAL(2.5&&UNICHAR(32))'):
+        for expression in ('ISLOGICAL(2.5&&UNICHAR(32))',):
             self.assertTrue(dax.local(expression).startswith("LOCAL-REJECT"), expression)
 
 

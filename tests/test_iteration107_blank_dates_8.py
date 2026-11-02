@@ -150,7 +150,6 @@ class PartDCountaxOfLogicalTests(unittest.TestCase):
     )
 
     # Measured in Power BI, but the column operands are not reached by the scalar path yet (see the report)
-    COLUMN_OPERATORS = ('Facts[Quantity]>2&&""', 'Facts[Quantity]||""', 'Facts[Region]&&""')
 
     def test_countax_of_blank_operator_is_blank(self) -> None:
         for operator in self.BLANK_OPERATORS:
@@ -178,6 +177,8 @@ class PartDCountaxOfLogicalTests(unittest.TestCase):
             with self.subTest(operator):
                 result = _local(f"COUNTX(Facts,{operator})")
                 self.assertTrue(result.startswith("LOCAL-REJECT"), result)
+
+    COLUMN_OPERATORS = ('Facts[Region]&&""',)
 
     def test_column_operands_stay_refused(self) -> None:
         for operator in self.COLUMN_OPERATORS:

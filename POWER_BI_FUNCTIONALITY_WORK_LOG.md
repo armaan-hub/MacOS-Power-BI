@@ -1626,3 +1626,31 @@ The standing test workbook is now `tests/Data/Vat File -Aug 2026.xlsx` (sheet `V
 **Gate:** PARITY GATE PASSED. pytest 2,329 passed, 4 expected failures (sign of zero), 6,598 subtests; replay 395,816: 382,145 match, 13,671 refused, 0 DIFF, 0 CRASH; locked 343,798 to 382,125. The DSI workbook is still missing on this Mac, so its answers were not replayed.
 
 **Open:** 2,746 results wrong on both `main` and the build, listed in `HANDOFF.md`.
+
+## 2026-11-02 — Iteration 109 (Task 20 never-blank-zero-10: what ISBLANK evaluates, sign of zero and NaN, logical BLANKs, Currency limits, powers, Double text)
+
+**Who did what:** Haiku 5.5 coded the Parts as subagents, one at a time. Sonnet 5.5 fixed the review findings. Claude Opus 5.5 planned, measured the rules in Power BI on the iPad guest, reviewed, made the last small fixes and shipped under the delegated approval.
+
+**Rules measured in Power BI and now in the engine:**
+- ISBLANK does not evaluate an expression that can never be blank, by a table of never-blank functions and argument positions.
+- `^` and POWER with Infinity or NaN follow a measured table, for every numeric type. A negative power is one over the positive power, in doubles (2^-0.5 is 0.7071067811865475, one unit below the nearest double).
+- A minus zero base: 0.5 gives 0, any other fraction is an error, a whole power gives 0 up to 3E9 and is an error from 1E14; between those is refused. A result below the Double range is 0.
+- QUOTIENT with a BLANK numerator only converts the divisor: a zero divisor gives BLANK, a BLANK divisor is the division error, a text one the conversion error.
+- BITAND, BITLSHIFT, BITRSHIFT: a BLANK known without scanning (BLANK(), X*BLANK(), SELECTEDVALUE, IF with a constant false condition) answers BLANK and the other operand is not looked at. A BLANK from a scan of an empty table validates the other operand. BITOR and BITXOR are unchanged. Huge operands no longer crash.
+- Type tests: a ^ or POWER of constant finite operands is typed without running. An Infinity, a NaN or two BLANKs let the error through, and so does a row-dependent operand for ISNUMBER and ISDOUBLE. A Currency overflow is typed statically.
+- A Double prints from its exact binary value, rounded half away from zero at 15 digits. 60 of 60 computed probes chosen to separate the candidates agreed with this rule.
+- A sign binds the whole following term at the start and after `*`, `/`, `^`. Logical operands count as Int64 in arithmetic, for typing and the sign of zero.
+
+**Tried and undone:** making `/` a true binary division fixed one last digit but broke 6 saved XNPV answers, so the quotient stays exact.
+
+**Refused on purpose:** a type test of arithmetic around a failing power (Power BI answers both ways, no rule found), and the last digit of a Double beyond 1E-100 to 1E100 when the held digits and the Double round differently.
+
+**Review:** every answer scored on 3 tables against `main` and the build, in two fresh batches, the second after the first round of fixes. After removing `--` comment artefacts: 15,623 wrong to right, 3,984 refused to match, 6 crash to match, 44 wrong to refused, 108,444 stay matching, 1,297 stay refused, 24 match to refused, 425 wrong on both, 0 new wrong answers. Code read for lookups: none, the app loads no saved answers.
+
+**Tested in the real app and against Power BI on the iPad guest:** the real app through the measure path, offscreen: 575/575 equal, and 6,000 fresh probes, 4,833 created, 1,167 refused (1,095 Power BI errors, 72 safe gaps), 0 wrong. New answers came from Power BI Desktop on the iPad guest, headless; the project was not saved.
+
+**Saved:** `tools/parity/dax_battery_never10_extra.json`, `tests/fixtures_never10_review_alt.json` (tables A and B). No saved Power BI answer was edited. Three stale test expectations were changed, each confirmed by Power BI: `tests/test_iteration107_blank_dates_8.py` (COLUMN_OPERATORS and two COUNTAX values), `tests/test_iteration105_strict_types_6_review.py` (two ISLOGICAL lines that are True in Power BI removed), `tests/test_iteration108_convert_currency_9.py` (an expected failure removed, `(0/-(0.0))&"z"` is `-nan(ind)z`).
+
+**Gate:** PARITY GATE PASSED. pytest 2,456 passed, 1 expected failure, 6,611 subtests; replay 434,881: 422,319 match, 12,562 refused, 0 DIFF, 0 CRASH; locked 382,125 to 422,299. The DSI workbook is still missing on this Mac, so its answers were not replayed.
+
+**Open:** 425 results wrong on both `main` and the build, 24 answers now refused, listed in `HANDOFF.md`.

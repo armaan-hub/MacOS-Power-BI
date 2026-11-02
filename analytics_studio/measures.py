@@ -102,8 +102,33 @@ class _CurrencyOverflowError(MeasureRuntimeError):
     """Part B: a Currency times Infinity or NaN, which Power BI reports as 'too large or too small' (IFERROR catches it)."""
 
 
+class _StaticTypeFailure:
+    """Marks an arithmetic, ^ / POWER or Currency-range failure: a type test (ISNUMBER, ISDOUBLE ...) of the expression is answered by its static type
+    instead (live Power BI), while a failure of any other function (ISNUMBER(SQRT(-1))) still propagates."""
+
+
+class _PowerFailure(_StaticTypeFailure, MeasureRuntimeError):
+    """The ^ operator or POWER could not produce a number from finite operands (live Power BI hides it from a type test when both operands are
+    constants; an operand that is Infinity or NaN, or that reads rows, lets the error through, except a zero base to a negative power)."""
+
+    zero_base = False  # zero to a power of zero or less
+    row_dependent = False  # an operand reads rows, set where the call is evaluated
+
+
+def _stamp_row_dependence(failure: "_PowerFailure", operands: Iterable[Any], held: Callable[[str], Any], in_row: bool = False) -> None:
+    failure.row_dependent = any(not _reads_no_data(operand, held) for operand in operands)
+
+
+class _CurrencyRangeFailure(_StaticTypeFailure, _CurrencyOverflowError):
+    """A Currency times a Double (or a date, or a text) beyond the Currency range."""
+
+
 class _CalculateTableFilterRefusal(MeasureError):
     """A CALCULATETABLE in a Boolean filter whose hoist-or-transition reading was not established (see dax_ct_filters)."""
+
+
+class _CurrencyConversionError(_CurrencyOverflowError):
+    """Task 20 F5: CURRENCY(x) of a Double beyond the Currency range."""
 
 
 class _HardError(MeasureError):
@@ -301,6 +326,7 @@ def _consume_infinity(thunk: Any) -> Any:
 
 
 _CURRENCY_LIMIT = Decimal("922337203685477.5807")  # the Currency type's range
+_TYPE_TESTS = frozenset({"ISINTEGER", "ISINT64", "ISDOUBLE", "ISDECIMAL", "ISCURRENCY", "ISNUMBER", "ISTEXT", "ISNONTEXT", "ISLOGICAL"})
 _DATETIME_CLAMP_LOW = dax_dates.from_datetime(datetime(100, 1, 1))  # Task 19 Part A: CONVERT of -Infinity or a too small number
 _CURRENCY_INFINITY = object()  # any value but None: ISBLANK of a constant Currency / 0 is False (Part F)
 
@@ -2415,6 +2441,26 @@ def _iterator_body_reads_a_table_column(node: Any) -> bool:
     return any(_iterator_body_reads_a_table_column(child) for child in children if isinstance(child, tuple))
 
 
+def _has_kind(node: Any, kinds: set[str]) -> bool:
+    """True when a node of one of these kinds occurs anywhere in this node."""
+    if not isinstance(node, tuple) or not node:
+        return False
+    if isinstance(node[0], str) and node[0] in kinds:
+        return True
+    children = node if isinstance(node[0], tuple) else node[1:]
+    return any(_has_kind(child, kinds) for child in children if isinstance(child, tuple))
+
+
+def _has_call_named(node: Any, names: set[str] | frozenset[str]) -> bool:
+    """True when a call of one of these functions occurs anywhere in this node."""
+    if not isinstance(node, tuple) or not node:
+        return False
+    if node[0] == "call" and len(node) > 1 and node[1] in names:
+        return True
+    children = node if isinstance(node[0], tuple) else node[1:]
+    return any(_has_call_named(child, names) for child in children if isinstance(child, tuple))
+
+
 def _iter_reference_nodes(node: Any) -> Iterable[tuple[Any, ...]]:
     if not isinstance(node, tuple) or not node:
         return
@@ -2492,6 +2538,36 @@ def _round_to_multiple(
         return (number / step).to_integral_value(rounding=rounding) * step
 
 
+def _non_finite_power(base: Decimal, exponent: Decimal) -> Decimal:
+    """Task 20 F2: x^y with an Infinity or NaN operand, as Power BI measures it.
+    Finite base, non-finite exponent: +Infinity and a positive NaN are the error; -Infinity and a negative NaN (the NaN of 0/0) give 0
+    for base >= 0 and the error for a negative base. Non-finite base, finite exponent: 0 gives 1, a positive exponent or one of size
+    0.5 is the error; a negative one gives 0 for +Infinity, and for -Infinity or NaN a whole one (the error from -1E15 down, a size of 1E9 up to there
+    unmeasured and refused) and the error for a fractional one. Both non-finite is the error."""
+    error = MeasureRuntimeError("An argument of function 'POWER' has the wrong data type or the result is too large or too small.")
+    if not base.is_finite():
+        if not exponent.is_finite():
+            raise error
+        if exponent == 0:
+            return Decimal(1)
+        if exponent > 0 or abs(exponent) == Decimal("0.5"):
+            raise error
+        if base == Decimal("Infinity"):
+            return Decimal(0)
+        if exponent != exponent.to_integral_value():
+            raise error
+        if abs(exponent) >= 1000000000:
+            if exponent <= Decimal("-1E15"):
+                raise error
+            raise dax_typed.refusal("A huge whole negative power of an Infinity or NaN is not modelled by the local engine.")
+        return Decimal(0)
+    if exponent.is_nan() and not exponent.is_signed() or exponent == Decimal("Infinity"):
+        raise error
+    if base >= 0:
+        return Decimal(0)
+    raise error
+
+
 def _scalar_math_value(function: str, values: list[Decimal | None]) -> Decimal | None:
     """Evaluate a scalar math function with Power BI's blank handling.
 
@@ -2501,7 +2577,11 @@ def _scalar_math_value(function: str, values: list[Decimal | None]) -> Decimal |
     LN(BLANK()) is -Infinity in Power BI, so it is rejected locally.
     """
     first = values[0]
-    if any(value is not None and not value.is_finite() for value in values):
+    if function in {"MOD", "CEILING", "FLOOR"} and first is None and values[1] is not None and not values[1].is_finite():
+        return None  # Task 20 F4: a BLANK first argument is BLANK beside an Infinity or a NaN
+    if function == "CEILING" and first is not None and first.is_finite() and first == 0 and values[1] is not None and not values[1].is_nan():
+        return Decimal(0)  # Task 20 F3: CEILING(0, Infinity) is 0, as CEILING(0, x) is
+    if function != "POWER" and any(value is not None and not value.is_finite() for value in values):  # POWER: see the branch below
         if function == "TRUNC" and first is not None and not first.is_finite() and all(value is None or value.is_finite() for value in values[1:]):
             return first  # TRUNC of Infinity is Infinity, an error value
         raise MeasureRuntimeError(
@@ -2525,6 +2605,19 @@ def _scalar_math_value(function: str, values: list[Decimal | None]) -> Decimal |
             if values[1] is None:
                 raise MeasureRuntimeError("An argument of function 'POWER' has the wrong data type or the result is too large or too small.")
             return None
+        if not first.is_finite() or not exponent.is_finite():
+            return _non_finite_power(first, exponent)  # Task 20: an infinite or NaN operand (every numeric type reaches here)
+        if first == 0 and exponent == 0 and first.is_signed():
+            return Decimal(1)  # Task 20 F2: a Double minus zero (an Int64 or literal zero has no sign) to the power 0 is 1
+        if first == 0 and first.is_signed() and exponent > 0:
+            # a Double minus zero to a positive power (measured): 0.5 gives 0, any other fraction is the error, a whole one gives 0 up to 3E9 and is the
+            # error from 1E14; the stretch between is unmeasured
+            wrong = MeasureRuntimeError("An argument of function 'POWER' has the wrong data type or the result is too large or too small.")
+            if exponent != Decimal("0.5"):
+                if exponent != exponent.to_integral_value() or exponent >= Decimal("1E14"):
+                    raise wrong
+                if exponent > Decimal("3E9"):
+                    raise dax_typed.refusal("A minus zero to a whole power between 3E9 and 1E14 is not modelled by the local engine.")
         if first == 0 and exponent <= 0:
             raise MeasureRuntimeError("POWER of zero needs a positive exponent.")
         if first < 0:
@@ -2562,10 +2655,16 @@ def _scalar_math_value(function: str, values: list[Decimal | None]) -> Decimal |
             if math.isinf(result) or math.isnan(result):
                 raise overflow
             return Decimal(repr(result))
+        if exponent < 0:  # measured: a negative power is one over the positive power, in doubles (2^-0.5 is 0.7071067811865475, one unit below the nearest)
+            positive = float(first ** -exponent)
+            if positive and not math.isinf(positive) and not math.isinf(1 / positive):
+                return Decimal(repr(1 / positive))
         return first ** exponent
     if function == "MOD":
         divisor = values[1] or Decimal(0)
         if first is None:
+            if values[1] is None:
+                raise MeasureRuntimeError("MOD cannot divide by zero.")  # Task 20 F4: MOD(BLANK(),BLANK()) is the error
             return None
         if divisor == 0:
             raise MeasureRuntimeError("MOD cannot divide by zero.")
@@ -2579,8 +2678,8 @@ def _scalar_math_value(function: str, values: list[Decimal | None]) -> Decimal |
         return None
     if function == "INT":
         return first.to_integral_value(rounding=ROUND_FLOOR)
-    if function == "SIGN":
-        return Decimal((first > 0) - (first < 0))
+    if function == "SIGN":  # Part B: SIGN of a negative zero is -1 (measured)
+        return Decimal(-1) if first.is_zero() and first.is_signed() else Decimal((first > 0) - (first < 0))
     if function == "SQRT":
         if first < 0:
             raise MeasureRuntimeError("SQRT needs a number that is zero or greater.")
@@ -2606,24 +2705,44 @@ _EXACT_PRECISION = 100
 
 
 def _scalar_math(function: str, values: list[Decimal | None]) -> Decimal | None:
+    if function == "POWER":  # a failure of ^ or POWER is typed statically by a type test around it (see _StaticTypeFailure)
+        try:
+            return _scalar_math_checked(function, values)
+        except MeasureRuntimeError as error:
+            if all(value is None for value in values) or any(value is not None and not value.is_finite() for value in values):
+                raise  # two BLANKs, or an Infinity or NaN operand: the error is not hidden from a type test
+            failure = _PowerFailure(str(error))
+            failure.zero_base = values[0] is not None and values[0] == 0 and (values[1] or Decimal(0)) <= 0
+            raise failure from error
+    return _scalar_math_checked(function, values)
+
+
+def _scalar_math_checked(function: str, values: list[Decimal | None]) -> Decimal | None:
     result = _scalar_math_value(function, values)
     if result is None:
         return None
     if not result.is_finite():
         return result  # an Infinity argument that the function passes through (TRUNC)
-    if result == 0:
-        return Decimal(0)  # no negative zero: Power BI shows 0
+    if function == "POWER" and result != 0 and abs(result) < _UNDERFLOW_DOUBLE:  # smaller than a Double can hold: 0 (the sign of a negative one is not measured)
+        if result < 0:
+            raise dax_typed.refusal("A negative POWER result below the Double range is not modelled by the local engine.")
+        return Decimal(0)
+    if result == 0 and function != "SQRT":
+        return Decimal(0)  # no negative zero: Power BI shows 0 (Part B: SQRT(-(0.0)) is -0)
     if abs(result) > _DOUBLE_MAX:
         raise MeasureRuntimeError(f"{function} result is outside the supported numeric range.")
     return result
 
 
+_UNDERFLOW_DOUBLE = Decimal("2.5E-324")  # Part B: half the smallest Double; a smaller product is a zero of its sign
+
+
 def _checked_double(result: Decimal) -> Decimal:
-    """Power BI shows 0 for a negative zero and returns Infinity beyond the double range."""
+    """A Double result: beyond the double range it is Infinity, below it a zero of the same sign (Part B)."""
     if not result.is_finite():
         return result
-    if result == 0:
-        return Decimal(0)
+    if abs(result) < _UNDERFLOW_DOUBLE:
+        return Decimal("-0") if result.is_signed() else Decimal(0)
     if abs(result) > _DOUBLE_MAX:
         return Decimal("Infinity") if result > 0 else Decimal("-Infinity")
     return result
@@ -3083,7 +3202,25 @@ def _held_runtime_failure(error: MeasureError) -> MeasureError:
 
 
 _DATA_READING_CALLS = (_AGGREGATING_CALLS - {"CALCULATE"}) | _ITERATOR_CALLS | {"AND", "OR", "RELATED", "RELATEDTABLE", "LOOKUPVALUE"}
-_NEVER_BLANK_CALLS = frozenset({"SQRT", "LN", "LOG10", "LOG", "VALUE", "MOD", "DATE", "TRUE", "FALSE"})
+# Task 20 Part A: the functions whose result can never be BLANK, and the argument that decides it. Measured in Power BI Desktop.
+_NEVER_BLANK_ALWAYS = frozenset({
+    "EXP", "LN", "LOG", "LOG10", "NOT", "AND", "OR", "ISBOOLEAN", "ISCURRENCY", "ISDATETIME", "ISDECIMAL", "ISDOUBLE", "ISERROR",
+    "ISINT64", "ISINTEGER", "ISLOGICAL", "ISNONTEXT", "ISNUMBER", "ISNUMERIC", "ISSTRING", "ISTEXT", "PI", "RAND", "NOW", "TODAY",
+    "UTCNOW", "UTCTODAY", "TRUE", "FALSE", "USERNAME", "USERPRINCIPALNAME", "USERCULTURE", "CONTAINSSTRING", "CONTAINSSTRINGEXACT",
+    "EXACT", "FIND", "SEARCH", "FORMAT", "ISAFTER", "ISONORAFTER", "PATHCONTAINS", "RANDBETWEEN", "EFFECT", "NOMINAL", "COUPDAYBS",
+    "COUPDAYS", "COUPDAYSNC", "COUPNCD", "COUPNUM", "COUPPCD", "PDURATION", "RRI", "SLN", "TBILLEQ", "TBILLPRICE", "TBILLYIELD", "RATE",
+    "INTRATE", "PRICEDISC", "RECEIVED", "SYD", "YIELDDISC", "ACCRINTM", "DB", "DDB", "DISC", "MDURATION", "PRICEMAT", "VDB", "YIELDMAT",
+    "CUMIPMT", "CUMPRINC", "YIELD", "AMORDEGRC", "AMORLINC", "ODDLPRICE", "ODDLYIELD", "ACCRINT", "DURATION", "PRICE", "ODDFPRICE",
+})
+_NEVER_BLANK_FIRST_ARGUMENT = frozenset({
+    "ABS", "CURRENCY", "DATEVALUE", "DAY", "FIXED", "HOUR", "INT", "ISO.CEILING", "LEFT", "LEN", "LOWER", "MINUTE", "MONTH", "PATHLENGTH",
+    "QUARTER", "RIGHT", "SECOND", "SIGN", "SQRT", "TIMEVALUE", "TRIM", "TRUNC", "UNICHAR", "UPPER", "VALUE", "WEEKDAY", "WEEKNUM", "YEAR",
+    "CEILING", "DOLLARDE", "DOLLARFR", "EDATE", "EOMONTH", "FLOOR", "MOD", "MROUND", "POWER", "QUOTIENT", "REPT", "ROUND", "ROUNDDOWN",
+    "ROUNDUP", "YEARFRAC", "MID", "SUBSTITUTE",
+})
+_NEVER_BLANK_ANY_ARGUMENT = frozenset({"CONCATENATE", "DATE", "TIME"})
+_NEVER_BLANK_THIRD_ARGUMENT = frozenset({"PMT", "PV", "NPER", "FV"})
+_NEVER_BLANK_ALL_ARGUMENTS = frozenset({"MAX", "MIN", "ISPMT", "PPMT", "IPMT", "REPLACE"})
 
 
 def _has_table_operand(node: Any) -> bool:
@@ -3106,18 +3243,26 @@ def _never_blank(node: Any) -> bool:
     kind = node[0]
     if kind in {"number", "string", "boolean"}:
         return True
+    if kind == "in":
+        return True  # Task 20 Part A: x IN {..} is never BLANK, like a comparison
     if _is_pure_logical(node) or kind == "comparison":
         return not _has_table_operand(node)  # Task 19 Part F: a logical operator, AND, OR, NOT and a comparison are never BLANK (a table operand is an error)
     if kind == "unary":
         return _never_blank(node[2])  # Task 19 Part F: a sign is judged by its operand
     if kind == "call":
         function, arguments = node[1], node[2]
-        if function in _NEVER_BLANK_CALLS:
-            return all(_never_blank(argument) for argument in arguments)  # a BLANK argument gives a BLANK (SQRT(BLANK()), VALUE(BLANK()))
+        if function in _NEVER_BLANK_ALWAYS:
+            return True
+        if function in _NEVER_BLANK_FIRST_ARGUMENT and arguments:
+            return _never_blank(arguments[0])
+        if function in _NEVER_BLANK_ANY_ARGUMENT and arguments:
+            return any(_never_blank(argument) for argument in arguments)
+        if function in _NEVER_BLANK_THIRD_ARGUMENT and len(arguments) >= 3:
+            return _never_blank(arguments[2])
+        if function in _NEVER_BLANK_ALL_ARGUMENTS and arguments:
+            return all(_never_blank(argument) for argument in arguments)
         if function == "IF" and len(arguments) == 3:
-            return _never_blank(arguments[1]) and _never_blank(arguments[2])
-        if function in {"CURRENCY", "ABS"} and len(arguments) == 1:
-            return _never_blank(arguments[0])  # CURRENCY and ABS are never BLANK when their operand is (ABS: checked on 120 answers, no exception)
+            return _never_blank(arguments[1]) and _never_blank(arguments[2])  # the condition is not looked at
         return False
     if kind == "concat":
         return _never_blank(node[1]) or _never_blank(node[2])
@@ -3125,10 +3270,10 @@ def _never_blank(node: Any) -> bool:
         operator, left, right = node[1], node[2], node[3]
         if operator in {"+", "-"}:
             return _never_blank(left) or _never_blank(right)
-        if operator in {"*", "^"}:
+        if operator == "*":
             return _never_blank(left) and _never_blank(right)
-        if operator == "/":
-            return _never_blank(left)
+        if operator in {"/", "^"}:
+            return _never_blank(left)  # Task 20 Part A: a power is judged by its base (measured: (1/0)^(FACT(-1)) is False, (DIVIDE(1,0))^("a"*2) is an error)
     return False
 
 
@@ -3150,6 +3295,20 @@ def _currency_divisions(node: Any, currency_typed: Callable[[Any], bool]) -> lis
     for child in children:
         found.extend(_currency_divisions(child, currency_typed))
     return found
+
+
+def _is_bare_power(node: Any) -> bool:
+    """The expression is one ^ or POWER of plain operands, signs aside."""
+    def divides_or_powers(part: Any) -> bool:
+        if not isinstance(part, tuple) or not part:
+            return any(divides_or_powers(item) for item in part) if isinstance(part, (list, tuple)) else False
+        return (part[0] == "binary" and part[1] in {"/", "^"}) or (part[:2] == ("call", "POWER")) or any(divides_or_powers(item) for item in part)
+
+    while node[0] == "unary" and node[1] in {"+", "-"}:
+        node = node[2]
+    if node[0] == "binary" and node[1] == "^":
+        return not divides_or_powers(node[2:4])  # measured: ISNUMBER(1.5^0.0^-1) and ISNUMBER(0^(BLANK()/2)) are errors
+    return node[0] == "call" and node[1] == "POWER" and not divides_or_powers(node[2])
 
 
 def _reads_no_data(node: Any, held: Callable[[str], Any], seen: frozenset[str] = frozenset()) -> bool:
@@ -3230,15 +3389,192 @@ def _blank_without_scan(node: Any, held: Callable[[str], Any], in_row: bool = Fa
         return all(_blank_without_scan(argument, held, in_row, seen) for argument in arguments)
     return False
 
+def _filter_flag_blank(node: Any) -> bool:
+    """Task 20 Part E: a BLANK built only from ISFILTERED or ISINSCOPE (with constants, IF, COALESCE, ISBLANK and arithmetic), at least one of
+    them. Only this BLANK still cancels an error under a CALCULATE that filters; a SELECTEDVALUE or a COUNTROWS there does not (live Power BI)."""
+    found = [False]
+
+    def walk(item: Any) -> bool:
+        if not isinstance(item, tuple) or not item:
+            return False
+        kind = item[0]
+        if kind in {"number", "string", "boolean", "blank"}:
+            return True
+        if kind in {"binary", "comparison", "unary"}:
+            return all(walk(child) for child in item[2:] if isinstance(child, tuple))
+        if kind == "call" and item[1] in {"ISFILTERED", "ISINSCOPE"}:
+            found[0] = True
+            return len(item[2]) == 1 and item[2][0][0] == "reference"
+        if kind == "call" and item[1] in {"IF", "COALESCE", "ISBLANK", "BLANK"}:
+            return all(walk(argument) for argument in item[2])
+        return False
+
+    return walk(node) and found[0]
+
+
+def _held_logical(node: Any, held: Callable[[str], Any]) -> tuple[Any, Callable[[str], Any]]:
+    """Task 20 Part C: the node a VAR, or a VAR block's RETURN, holds, with the block's names held (a VAR is followed to its bound expression)."""
+    seen: set[str] = set()
+    while isinstance(node, tuple) and node and node[0] in {"var", "let"}:
+        if node[0] == "let":
+            own, outer = dict(node[1]), held
+            held = lambda name, own=own, outer=outer: own.get(name, outer(name))  # noqa: E731
+            node = node[2]
+        elif node[1] not in seen and held(node[1]) is not None:
+            seen.add(node[1])
+            node = held(node[1])
+        else:
+            break
+    return node, held
+
+
 def _logical_operands_scan_nothing(node: Any, held: Callable[[str], Any], in_row: bool = False) -> bool:
     """Task 19 Part F: a logical operator (&&, ||, AND, OR, NOT) whose operands all work out without scanning a column.
 
     Its BLANK then cancels an error beside it in * and in / (left side), as a BLANK of Part D does. Only the top operator is looked at.
     """
+    node, held = _held_logical(node, held)
     if not _is_pure_logical(node):
         return False
     operands = node[2:] if node[0] == "logical" else node[2]
-    return all(_blank_without_scan(operand, held, in_row) for operand in operands if isinstance(operand, tuple))
+    return all(_blank_without_scan(operand, held, in_row) or (not _needs_scan(operand, held, in_row) and not any(True for _ in _iter_reference_nodes(operand))) for operand in operands if isinstance(operand, tuple))
+
+
+_SCAN_FREE_CALLS = frozenset({
+    "ALL", "ALLSELECTED", "VALUES", "DISTINCTCOUNT", "DISTINCTCOUNTNOBLANK", "HASONEVALUE", "HASONEFILTER", "ISFILTERED", "ISCROSSFILTERED",
+    "ISINSCOPE", "SELECTEDVALUE", "REMOVEFILTERS", "KEEPFILTERS",
+})
+
+
+def _is_true_constant(node: Any) -> bool:
+    return isinstance(node, tuple) and len(node) > 1 and ((node[0] == "boolean" and node[1] is True) or (node[0] == "call" and node[1] == "TRUE" and not node[2]))
+
+
+def _is_whole_table_all(item: tuple[Any, ...]) -> bool:
+    """An ALL(table) filter, possibly under KEEPFILTERS (the caller has checked it is a plain ALL)."""
+    inner = item[2][0] if item[1] == "KEEPFILTERS" else item
+    return inner[2][0][0] == "table"
+
+
+def _needs_scan(node: Any, held: Callable[[str], Any], in_row: bool = False, seen: frozenset[str] = frozenset()) -> bool:
+    """Task 20 Part C: True when the expression scans column values, so a BLANK beside it does not work out without a scan.
+
+    A column read is a scan in a row context. Aggregates, iterators, ISEMPTY, LOOKUPVALUE, FIRSTNONBLANK and FILTER scan (FILTER does not when its
+    predicate is TRUE()). MAX and MIN of a column, MAXX of a plain column, DISTINCTCOUNT, COUNTROWS of a table, ALL or VALUES and the filter-context
+    reads do not. A CALCULATE scans with a filter that is not ALL, or under a row context to transition it. Any other call scans when an operand does.
+    """
+    if not isinstance(node, tuple) or not node:
+        return False
+    kind = node[0]
+    if kind == "reference":
+        return in_row
+    if kind == "let":  # a VAR block inside the operand: its own names are held here
+        own = dict(node[1])
+        outer = held
+        held = lambda name: own.get(name, outer(name))  # noqa: E731
+        return any(_needs_scan(bound, held, in_row, seen) for _, bound in node[1]) or _needs_scan(node[2], held, in_row, seen)
+    if kind == "var":
+        if node[1] in seen:
+            return False
+        bound = held(node[1])
+        return bound is not None and _needs_scan(bound, held, in_row, seen | {node[1]})
+    if kind != "call":
+        return any(_needs_scan(child, held, in_row, seen) for child in node[1:] if isinstance(child, tuple))
+    name, arguments = node[1], node[2]
+
+    def operands_scan(items: Iterable[Any]) -> bool:
+        return any(_needs_scan(item, held, in_row, seen) for item in items if isinstance(item, tuple))
+
+    if name in {"AND", "OR"}:
+        return operands_scan(arguments)
+    if name in {"MAX", "MIN"}:
+        return operands_scan(argument for argument in arguments if argument[0] != "reference")
+    if name in {"MAXX", "MINX"}:
+        return len(arguments) != 2 or arguments[1][0] != "reference" or _needs_scan(arguments[0], held, in_row, seen)
+    if name == "FILTER":
+        return not (len(arguments) == 2 and _is_true_constant(arguments[1]))
+    if name == "COUNTROWS":
+        return operands_scan(arguments)
+    if name in {"CALCULATE", "CALCULATETABLE"}:
+        filters = arguments[1:]
+        if any(not _is_plain_all(item) for item in filters):
+            return True
+        if in_row and not (filters and all(_is_whole_table_all(item) for item in filters)):
+            return True  # under a row context the CALCULATE transitions the row into the filters
+        return operands_scan(arguments[:1])
+    if name in _SCAN_FREE_CALLS:
+        return False
+    if name == "ISEMPTY" or name in _DATA_READING_CALLS or name in _ITERATOR_CALLS:
+        return True
+    return operands_scan(arguments)
+
+
+def _static_blank(node: Any, held: Callable[[str], Any], truth: Callable[[Any], bool | None], seen: frozenset[str] = frozenset()) -> bool:
+    """True when Power BI knows this operand is BLANK without looking at any row (BITAND, BITLSHIFT and BITRSHIFT then skip their other operand).
+
+    BLANK(), SELECTEDVALUE of one column, BLANK + BLANK, anything * BLANK, an IF whose constant condition picks a missing else or a branch that is
+    itself static, and a VAR holding one. A BLANK read from an iterator or an aggregate over an empty table (COUNTROWS(FILTER(t,FALSE())), SUMX ...)
+    is a scanned BLANK, not this. ``truth`` answers a condition that reads no data (True, False) or None when it cannot be told.
+    """
+    if not isinstance(node, tuple) or not node:
+        return False
+    kind = node[0]
+    if kind == "blank":
+        return True
+    if kind == "let":
+        own, outer = dict(node[1]), held
+        return _static_blank(node[2], lambda name: own.get(name, outer(name)), truth, seen)
+    if kind == "var":
+        bound = None if node[1] in seen else held(node[1])
+        return bound is not None and _static_blank(bound, held, truth, seen | {node[1]})
+    if kind == "binary" and len(node) == 4:
+        left, right = _static_blank(node[2], held, truth, seen), _static_blank(node[3], held, truth, seen)
+        return (left or right) if node[1] == "*" else (left and right) if node[1] in {"+", "-"} else False
+    if kind != "call":
+        return False
+    name, arguments = node[1], node[2]
+    if name == "BLANK":
+        return not arguments
+    if name == "SELECTEDVALUE":
+        return len(arguments) == 1 and arguments[0][0] == "reference"
+    if name == "IF" and len(arguments) in (2, 3):
+        answer = truth(arguments[0])
+        if answer is None:
+            return False
+        if answer:
+            return _static_blank(arguments[1], held, truth, seen)
+        return len(arguments) == 2 or _static_blank(arguments[2], held, truth, seen)
+    return False
+
+
+def _is_empty_text(node: Any) -> bool:
+    return isinstance(node, tuple) and len(node) > 1 and node[0] == "string" and node[1] == ""
+
+
+def _empty_text_blank(node: Any, others: Iterable[Any]) -> bool:
+    """Task 20 Part C: an empty text is a BLANK beside an operand that reads a column (Facts[Sales]&&""), where Power BI answers the row's value; over constants it stays refused."""
+    return _is_empty_text(node) and any(True for other in others if isinstance(other, tuple) for _ in _iter_reference_nodes(other))
+
+
+def _is_text_arithmetic(node: Any) -> bool:
+    """Task 20 Part C: arithmetic on a text constant that is not a number ("a"*2). Power BI's answer for a logical BLANK beside one is not modelled
+    (a * of it is refused, as before Part C), so a logical BLANK does not cancel it here."""
+    if not isinstance(node, tuple) or len(node) != 4 or node[0] != "binary" or node[1] not in {"+", "-", "*", "/"}:
+        return False
+    for child in node[2:]:
+        if isinstance(child, tuple) and len(child) > 1 and child[0] == "string":
+            try:
+                Decimal(str(child[1]).strip())
+            except Exception:
+                return True
+    return False
+
+
+def _currency_wrap(value: Decimal) -> Decimal:
+    """Part D: a Currency is a signed 64-bit count of ten-thousandths; + - * wrap around with no error (CURRENCY(1E14)*10 is -844674407370955.1616)."""
+    units = int((value * 10000).to_integral_value(rounding=ROUND_HALF_UP))
+    units = (units + 2**63) % 2**64 - 2**63
+    return Decimal(units).scaleb(-4)  # a zero has no sign in a Currency
 
 
 def _binary_value(operator: str, left: Decimal | None, right: Decimal | None) -> Decimal | None:
@@ -3252,18 +3588,43 @@ def _binary_value(operator: str, left: Decimal | None, right: Decimal | None) ->
     if operator in {"+", "-"}:
         if left is None and right is None:
             return None
-        left_value, right_value = left or Decimal(0), right or Decimal(0)
-        return _checked_double(quiet.add(left_value, right_value) if operator == "+" else quiet.subtract(left_value, right_value))
+        if left is None and operator == "-":
+            return _checked_double(right.copy_negate())  # Part B: BLANK() - x is -x (BLANK()-(0/0) is nan, not -nan)
+        left_value = Decimal(0) if left is None else left  # not 'left or 0': a minus zero is falsy and must keep its sign
+        right_value = Decimal(0) if right is None else right
+        result = quiet.add(left_value, right_value) if operator == "+" else quiet.subtract(left_value, right_value)
+        return _checked_double(_invalid_nan(result, left_value, right_value))
     if left is None:
         return None
     if operator == "*":
-        return None if right is None else _checked_double(quiet.multiply(left, right))
+        return None if right is None else _checked_double(_invalid_nan(quiet.multiply(left, right), left, right))
     divisor = Decimal(0) if right is None else right
-    if divisor == 0:
-        if left.is_nan() or left == 0:
-            return Decimal("NaN")
-        return Decimal("Infinity") if left > 0 else Decimal("-Infinity")
-    return _checked_double(quiet.divide(left, divisor))
+    if divisor == 0:  # Part B: the sign of the divisor counts for an Infinity
+        if left.is_nan():
+            return left
+        if left == 0:
+            return Decimal("-NaN")  # zero over zero is the IEEE default NaN, negative
+        return Decimal("-Infinity") if left.is_signed() != divisor.is_signed() else Decimal("Infinity")
+    return _checked_double(_invalid_nan(quiet.divide(left, divisor), left, divisor))
+
+
+def _invalid_nan(result: Decimal, left: Decimal, right: Decimal) -> Decimal:
+    """Part B: an invalid operation (Infinity - Infinity, Infinity * 0, Infinity / Infinity) is the negative NaN; a NaN operand keeps its own sign."""
+    if result.is_nan() and not (left.is_nan() or right.is_nan()):
+        return Decimal("-NaN")
+    return result
+
+
+def _bare_result(value: Any) -> Any:
+    """Part B: a bare result prints 0 for a zero of either sign and NaN for a NaN of either sign."""
+    if isinstance(value, Decimal) and not isinstance(value, bool) and not dax_dates.is_date(value) and (value.is_zero() or value.is_nan()):
+        return Decimal("NaN") if value.is_nan() else Decimal(0)
+    return value
+
+
+def _unsigned_zero(value: Any) -> Any:
+    """A calculated column stores a zero without its sign."""
+    return Decimal(0) if isinstance(value, Decimal) and not dax_dates.is_date(value) and value.is_zero() else value
 
 
 def _is_abs_of_blank(node: tuple[Any, ...]) -> bool:
@@ -3840,10 +4201,18 @@ class _Parser:
         return node
 
     def _term(self) -> tuple[Any, ...]:
+        if self._peek() in {"+", "-"}:  # Part B: a leading sign applies to the whole product or quotient that follows it, not to its first operand
+            operator = self._take().kind
+            return ("unary", operator, self._term())
         node = self._unary()
         while self._peek() in {"*", "/"}:
             operator = self._take().kind
-            right = self._variables() if self._is_keyword("VAR") else self._unary()
+            if self._is_keyword("VAR"):
+                right = self._variables()
+            elif self._peek() in {"+", "-"}:  # Part D: a sign after * or / binds the whole product or quotient that follows it
+                right = ("unary", self._take().kind, self._term())
+            else:
+                right = self._unary()
             node = ("binary", operator, node, right)
         return node
 
@@ -3865,7 +4234,12 @@ class _Parser:
         base = self._primary()
         if self._peek() == "^":  # binds tighter than a leading minus and groups to the right
             self._take()
-            right = self._variables() if self._is_keyword("VAR") else self._unary()
+            if self._is_keyword("VAR"):
+                right = self._variables()
+            elif self._peek() in {"+", "-"}:  # Task 20 F1: a sign after ^ binds the whole product or quotient that follows, like one after * or /
+                right = ("unary", self._take().kind, self._term())
+            else:
+                right = self._unary()
             return ("binary", "^", base, right)
         return base
 
@@ -4846,11 +5220,11 @@ def evaluate_calculated_columns(
                 right = evaluate(node[3], row, row_index)
                 if node[1] == "/" and left is not None and (right is None or as_number(right) == 0):
                     raise _DivisionError(f"Calculated column {name!r} divides by zero at row {row_index}.")
-                return _binary_value(
+                return _unsigned_zero(_binary_value(
                     node[1],
                     None if left is None else as_number(left),
                     None if right is None else as_number(right),
-                )
+                ))
             if kind == "logical":
                 left = as_boolean(_consume_infinity(lambda: evaluate(node[2], row, row_index)))
                 if node[1] == "&&":
@@ -5528,6 +5902,11 @@ def _static_let_scope(
     return scope_columns, scope
 
 
+def _is_never_blank_logical(node: Any) -> bool:
+    """TRUE(), FALSE(), a Boolean constant or a comparison: a True/False that can never be BLANK."""
+    return isinstance(node, tuple) and bool(node) and (node[0] in {"boolean", "comparison"} or (node[0] == "call" and node[1] in {"TRUE", "FALSE"} and not node[2]))
+
+
 def _static_numeric_type(
     node: Any,
     model: Any = None,
@@ -5607,6 +5986,8 @@ def _static_numeric_type(
         if op in {"+", "-"}:
             if t in {"int64", "double", "currency"}:
                 return t
+            if op == "-" and t == "bool":
+                return "int64"  # Task 20 F5: -TRUE() is the whole number -1 (+TRUE() stays True/False)
             return None
         if op == "not":
             return "bool"
@@ -5627,10 +6008,15 @@ def _static_numeric_type(
             if rt == "datetime" and op == "+" and lt in {"int64", "double", "currency", "blank"}:
                 return "datetime"
             return None
+        if op in {"+", "-", "*", "/"} and "text" in (lt, rt) and "currency" not in (lt, rt):
+            return "double"  # Part E: arithmetic on text is a Double ("1E15"+0 is 1E+15 in text); a Currency beside text is left as it was
         if lt == "blank" and rt is not None:
             lt = rt if op in {"+", "-"} else "int64"
         elif rt == "blank" and lt is not None:
             rt = lt if op in {"+", "-"} else "int64"
+        # live Power BI: True/False (TRUE(), FALSE(), a comparison; never BLANK) in arithmetic is an Integer, so TRUE()*1 and TRUE()+1 are Int64
+        lt = "int64" if lt == "bool" and _is_never_blank_logical(left) else lt
+        rt = "int64" if rt == "bool" and _is_never_blank_logical(right) else rt
         if op in {"+", "-"}:
             if lt == "int64" and rt == "int64":
                 return "int64"
@@ -5651,6 +6037,8 @@ def _static_numeric_type(
         if op == "*" and "currency" in (lt, rt) and "datetime" in (lt, rt):
             return "currency"  # live Power BI (corrections rule 3): ISDOUBLE(DATE(..)*CURRENCY(0)) is False, a date times a Currency is not a Double
         if op == "*":
+            lt = "int64" if lt == "bool" and left[0] == "comparison" else lt  # a comparison (never BLANK) in arithmetic is an Integer
+            rt = "int64" if rt == "bool" and right[0] == "comparison" else rt
             if lt == "int64" and rt == "int64":
                 return "int64"
             if lt == "currency" and rt == "currency":
@@ -5686,6 +6074,8 @@ def _static_numeric_type(
         return "bool"
     if fn in _STATIC_DATE_FUNCTIONS:
         return "datetime"
+    if fn == "CONVERT" and _is_datetime_conversion(node):
+        return "datetime"  # Part E: CONVERT(x,DATETIME) is a date, so CONVERT(BLANK(),DATETIME)+1 is a date
     if fn == "BLANK":
         return "blank"
     if fn == "CURRENCY":
@@ -5777,6 +6167,8 @@ def _static_numeric_type(
         else:
             res_nodes = list(args)
         types = [_static_numeric_type(r, columns, variables) for r in res_nodes]
+        if fn == "IFERROR" and types[:1] and types[0] in {"int64", "double", "currency"} and types[1:] == ["text"]:
+            return types[0]  # Part B: the replacement text only shows where the number is an error
         known = {t for t in types if t != "blank"}
         if len(known) == 1 and None not in known:
             return known.pop()
@@ -5856,8 +6248,8 @@ def _static_type(node: Any, columns: dict[str, dict[str, str]], variables: dict[
     if kind != "call":
         return None
     function, arguments = node[1], node[2]
-    if function in _STATIC_ALWAYS_INT64 or function in _STATIC_ALWAYS_DOUBLE or function in {"INT", "COUNTROWS", "SUM", "SUMX", "AVERAGE", "AVERAGEX"}:
-        return "number"
+    if function in _STATIC_ALWAYS_INT64 or function in _STATIC_ALWAYS_DOUBLE or function in {"INT", "COUNTROWS", "SUM", "SUMX", "AVERAGE", "AVERAGEX", "CURRENCY"}:
+        return "number"  # Task 20: CURRENCY is a number, so MIN or MAX of it with text is refused as it is in Power BI
     if function in {"SELECTEDVALUE", "LOOKUPVALUE"} and arguments:
         return _static_type(arguments[0], columns, variables)
     if function in {"FIRSTNONBLANKVALUE", "LASTNONBLANKVALUE"} and len(arguments) == 2:
@@ -5977,10 +6369,12 @@ def _reject_mismatched_strict_operands(left: tuple[Any, ...], right: tuple[Any, 
         )
 
 
-def _reject_mismatched_comparison_types(node: Any, columns: dict[str, dict[str, str]], variables: dict[str, str | None] | None = None) -> None:
+def _reject_mismatched_comparison_types(node: Any, columns: dict[str, dict[str, str]], variables: dict[str, str | None] | None = None, *, unevaluated: bool = False) -> None:
     variables = {} if variables is None else variables
     if not isinstance(node, tuple) or not node:
         return
+    if node[0] == "call" and node[1] == "ISBLANK" and node[2] and _never_blank(node[2][0]):
+        unevaluated = True  # Task 20 Part A: ISBLANK does not evaluate a never-blank argument; the type tests below are not refused there
     if node[0] == "strict_equal":
         _reject_mismatched_strict_operands(node[1], node[2], columns, variables)
     if node[0] == "let":
@@ -6024,7 +6418,7 @@ def _reject_mismatched_comparison_types(node: Any, columns: dict[str, dict[str, 
                 if columns and str(arg[1]).casefold() not in columns:
                     raise MeasureError("Only measure or fully-qualified column or table or calendar references are allowed in NAMEOF function.")
         elif function in {"ISINTEGER", "ISINT64", "ISDOUBLE", "ISDECIMAL", "ISCURRENCY"}:
-            if arguments:
+            if arguments and not unevaluated:
                 st = _static_numeric_type(arguments[0], columns, variables)
                 if st is None:
                     raise MeasureError(f"Cannot determine static type for function {function}.")
@@ -6064,11 +6458,11 @@ def _reject_mismatched_comparison_types(node: Any, columns: dict[str, dict[str, 
             )
     for part in node[1:]:
         if isinstance(part, tuple) and part and isinstance(part[0], str):
-            _reject_mismatched_comparison_types(part, columns, variables)
+            _reject_mismatched_comparison_types(part, columns, variables, unevaluated=unevaluated)
         elif isinstance(part, (tuple, list, frozenset)):
             for item in part:
                 if isinstance(item, tuple):
-                    _reject_mismatched_comparison_types(item, columns, variables)
+                    _reject_mismatched_comparison_types(item, columns, variables, unevaluated=unevaluated)
 
 
 
@@ -10395,6 +10789,8 @@ def evaluate_measures(
                 seen0_needs_right = False
 
         if result is False and (seen.get(1) == "" or (1 in seen and seen[1] is None and typed_true_false(right))) and 0 in seen and seen0_needs_right:
+            if _needs_scan(left, variable_nodes.get, row_scans_model(row_context)):
+                return False  # Task 20 Part C: a deciding left side that scans gives False, not a BLANK
             return None  # live Power BI (Task 14 review): a BLANK at run time (LEN, *2, CONVERT, =BLANK() all see one); ISBLANK of the operator is False by its type
         return result
 
@@ -10900,8 +11296,8 @@ def evaluate_measures(
             return "numeric"
         if kind == "logical":
             operand_categories = (
-                iterator_expression_category(expression[2], row_context),
-                iterator_expression_category(expression[3], row_context),
+                "blank" if _empty_text_blank(expression[2], expression[3:]) else iterator_expression_category(expression[2], row_context),  # Task 20 Part C: an empty text beside a row read is a BLANK in && and ||
+                "blank" if _empty_text_blank(expression[3], expression[2:3]) else iterator_expression_category(expression[3], row_context),
             )
             if any(
                 category not in {"boolean", "blank", "numeric"}  # live Power BI (iteration 87): a number is True unless it is zero
@@ -10994,7 +11390,7 @@ def evaluate_measures(
                 return "table"
             if function in {"AND", "OR", "NOT"}:
                 operand_categories = tuple(
-                    iterator_expression_category(argument, row_context)
+                    "blank" if _empty_text_blank(argument, [other for other in expression[2] if other is not argument]) else iterator_expression_category(argument, row_context)  # Task 20 Part C: an empty text beside a row read is a BLANK in AND and OR
                     for argument in expression[2]
                 )
                 if any(
@@ -14189,6 +14585,8 @@ def evaluate_measures(
         if argument[0] == "table":
             context = resolve_table_context(str(argument[1]))
             return context, None, None
+        if not isinstance(argument[1], str):  # Task 20: a value that is not a column (ISFILTERED("a"&ERROR("x"))) is an error, not a crash
+            raise MeasureError("The argument must be a column or a table.")
         context, actual = resolve_table(argument[1], argument[2])
         current = evaluation_contexts_by_id.get(context["id"], context)
         return context, actual, current.get("filter_column_rows", {}).get(actual)
@@ -14239,6 +14637,8 @@ def evaluate_measures(
                 for row in rows
             )
         if function == "LOOKUPVALUE":
+            if not isinstance(arguments[0][1], str):  # Task 20: the result column must be a column (a value is an error, not a crash)
+                raise MeasureError("The argument must be a column.")
             result_context, result_column = resolve_table(arguments[0][1], arguments[0][2])
             pair_arguments = arguments[1:]
             alternate = None
@@ -14411,6 +14811,24 @@ def evaluate_measures(
             better = list({row_key([value]): value for value in better}.values())
         return Decimal(len(better) + 1)
 
+    def static_type_answer(function: str, static_t: str | None) -> bool | None:
+        """A type test answered by the static type of its argument; None when that type is not known well enough to answer."""
+        if static_t not in {"int64", "double", "currency", "decimal", "text", "bool"}:
+            return None
+        if function == "ISNUMBER":
+            return static_t in {"int64", "double", "currency", "decimal"}
+        if function == "ISTEXT":
+            return static_t == "text"
+        if function == "ISNONTEXT":
+            return static_t != "text"
+        if function == "ISLOGICAL":
+            return static_t == "bool"
+        if function in {"ISINTEGER", "ISINT64"}:
+            return static_t == "int64"
+        if function == "ISDOUBLE":
+            return static_t == "double"
+        return static_t in {"currency", "decimal"}  # ISDECIMAL, ISCURRENCY
+
     def evaluate_typed_function(
         function: str,
         arguments: tuple[tuple[Any, ...], ...],
@@ -14438,7 +14856,39 @@ def evaluate_measures(
             arguments = arguments[:-1]
         if function in {"ISINTEGER", "ISINT64", "ISDOUBLE", "ISDECIMAL", "ISCURRENCY", "ISTEXT", "ISLOGICAL"} and _is_datetime_conversion(arguments[0]):
             return False  # live Power BI (Task 19 Part A): these tests of a date made by CONVERT are False without the conversion running (ISNUMBER and ISDATETIME run it)
-        values = [evaluate(argument, row_context, allow_text=True) for argument in arguments]
+        if function in {"BITAND", "BITLSHIFT", "BITRSHIFT"} and len(arguments) == 2:
+            def constant_truth(condition: tuple[Any, ...]) -> bool | None:
+                if not _reads_no_data(condition, variable_nodes.get):
+                    return None
+                try:
+                    answer = evaluate(condition, row_context, allow_text=True)
+                except Exception:
+                    return None
+                return answer if isinstance(answer, bool) else None
+            for index in ((0, 1) if function == "BITAND" else (0,)):
+                # a BLANK that Power BI knows without a scan (BLANK(), SELECTEDVALUE, X*BLANK(), IF(1=2,x) ...) is the answer; the other operand is not looked at
+                if _static_blank(arguments[index], variable_nodes.get, constant_truth) and evaluate(arguments[index], row_context, allow_text=True) is None:
+                    return None
+        try:
+            values = [evaluate(argument, row_context, allow_text=True) for argument in arguments]
+        except _CurrencyConversionError:
+            if function not in _TYPE_TESTS or len(arguments) != 1 or arguments[0][:2] != ("call", "CURRENCY") or not _reads_no_data(arguments[0], variable_nodes.get):
+                raise
+            values = [Decimal(0)]  # Task 20 F5: a type test of a constant that cannot be evaluated is answered by its type (ISCURRENCY(CURRENCY(1E15)) is True); one that reads data raises
+        except MeasureRuntimeError as failure:
+            if isinstance(failure, _PowerFailure) and function in _TYPE_TESTS and len(arguments) == 1 and (
+                not _is_bare_power(arguments[0]) or (failure.zero_base and failure.row_dependent)
+            ):
+                # measured both ways: ISNUMBER(MIN(x)^0.5+1) is True, ISNUMBER(2/0+0.0^0.0) is the error; no rule found yet, so no answer is given
+                raise dax_typed.refusal("A type test of arithmetic around a failing power is not modelled by the local engine.") from failure
+            # a ^ or POWER of constants is typed without running (ISNUMBER((-1)^0.5) is True); a row-dependent failure shows through ISNUMBER and ISDOUBLE
+            hidden = isinstance(failure, _StaticTypeFailure) and (
+                not isinstance(failure, _PowerFailure) or not failure.row_dependent or function not in {"ISNUMBER", "ISDOUBLE"}
+            )
+            answer = static_type_answer(function, static_type_of(arguments[0])) if function in _TYPE_TESTS and len(arguments) == 1 and hidden else None
+            if answer is None:
+                raise
+            return answer
         values = [  # a Double of 1E15 or more that is about to become text prints with an exponent (Task 19 Part G)
             double_as_text(argument, value, row_context) if index in dax_typed.TEXT_ARGUMENTS.get(function, ()) else value
             for index, (argument, value) in enumerate(zip(arguments, values))
@@ -14458,6 +14908,10 @@ def evaluate_measures(
             ])
         if function in dax_ext.ARITY:
             return dax_ext.call(function, values)
+        if function == "CURRENCY" and isinstance(values[0], Decimal) and values[0].is_finite() and not dax_dates.is_date(values[0]) and abs(values[0]) > _CURRENCY_LIMIT:
+            if left_static_type(arguments[0], row_context) == "int64":
+                return _currency_wrap(values[0])  # Task 20 F5: a whole number of the Int64 type wraps
+            raise _CurrencyConversionError("The result of a conversion or arithmetic operation is either too large or too small.")  # a Double beyond the range is the error
         if function in dax_math.MATH_ARITY or function == "ROUND":
             return dax_math.math_function(function, values)
         if function == "ISNUMBER":
@@ -14552,9 +15006,19 @@ def evaluate_measures(
             node = variable_nodes[node[1]]
         return node
 
+    def typed_zero(value: Any, node: tuple[Any, ...], row_context: Any) -> Any:
+        """Part B: a zero keeps its minus sign only when its static type is Double; an Int64 or Currency zero has no sign."""
+        if isinstance(value, Decimal) and not dax_dates.is_date(value) and value.is_zero() and value.is_signed() and left_static_type(node, row_context) != "double":
+            return Decimal(0)
+        return value
+
     def double_as_text(node: tuple[Any, ...], value: Any, row_context: Any) -> Any:
         """A Double of 1E15 or more that turns into text implicitly (Task 19 Part G) prints with an exponent and 15 significant digits; an Integer or
         a Currency of that size stays whole. The text stands in for the number only where the number is about to become text."""
+        if isinstance(value, Decimal) and not isinstance(value, bool) and not dax_dates.is_date(value) and value.is_zero() and value.is_signed():
+            return "-0" if left_static_type(node, row_context) == "double" and node[0] != "reference" else Decimal(0)  # Part B: a Double minus zero is "-0" in text (a stored column value has no sign of zero)
+        if isinstance(value, Decimal) and not isinstance(value, bool) and value.is_finite() and not dax_dates.is_date(value) and currency_typed(node, row_context):
+            return dax_typed.currency_text(value)  # Part D: a Currency's text has its four decimals, not 15 significant digits
         if not isinstance(value, Decimal) or isinstance(value, bool) or not value.is_finite() or abs(value) < dax_typed.DOUBLE_EXPONENT_FROM or dax_dates.is_date(value):
             return value
         return dax_typed.to_text(value, True) if left_static_type(node, row_context) == "double" else value
@@ -15473,7 +15937,7 @@ def evaluate_measures(
             if node[1] == "+" and isinstance(operand, bool):
                 return operand  # unary plus leaves a True/False value alone (-TRUE() is a number)
             value = as_number(operand)
-            return value if node[1] == "+" else dax_typed.QUIET.minus(value) if value else Decimal(0)
+            return typed_zero(value if node[1] == "+" else value.copy_negate(), node, row_context)  # copy_negate keeps a zero's sign; -x would round -0 to 0
         if kind == "binary":
             left_error = right_error = None
             if node[1] in {"*", "/"}:  # Part B: BLANK makes * BLANK (either side) and / BLANK (left side); the other side's runtime error does not count
@@ -15494,14 +15958,15 @@ def evaluate_measures(
                 left_bad = left_error is not None or isinstance(left, str)
                 # Task 19 Part F: a logical operator's BLANK cancels an error (not a text) beside it when its operands scan nothing
                 # (live Power BI, Task 19 Part F review: a logical BLANK on the right of * or on the left of * beside an error gives no BLANK, so only / on the left is lifted)
-                blank_left = left is None and left_error is None and (not right_bad or _reads_no_data(node[2], variable_nodes.get) or (not scanning_calculates and (_blank_without_scan(node[2], variable_nodes.get, row_scans_model(row_context)) or (node[1] == "/" and not isinstance(right, str) and _logical_operands_scan_nothing(node[2], variable_nodes.get, row_scans_model(row_context))))))
-                blank_right = right is None and right_error is None and (not left_bad or _reads_no_data(node[3], variable_nodes.get) or (not scanning_calculates and _blank_without_scan(node[3], variable_nodes.get, row_scans_model(row_context))))
+                blank_left = left is None and left_error is None and (not right_bad or _reads_no_data(node[2], variable_nodes.get) or ((not scanning_calculates or _filter_flag_blank(node[2])) and _blank_without_scan(node[2], variable_nodes.get, row_scans_model(row_context))) or (not isinstance(right, str) and not (node[1] == "*" and _is_text_arithmetic(node[3])) and _logical_operands_scan_nothing(node[2], variable_nodes.get, row_scans_model(row_context))))
+                blank_right = right is None and right_error is None and (not left_bad or _reads_no_data(node[3], variable_nodes.get) or ((not scanning_calculates or _filter_flag_blank(node[3])) and _blank_without_scan(node[3], variable_nodes.get, row_scans_model(row_context))) or (not isinstance(left, str) and not _is_text_arithmetic(node[2]) and _logical_operands_scan_nothing(node[3], variable_nodes.get, row_scans_model(row_context))))
                 if blank_left or (node[1] == "*" and blank_right):
                     return None
-                if left_error is not None:
-                    raise left_error
-                if right_error is not None:
-                    raise right_error
+                for held_error, other_operand in ((left_error, node[3]), (right_error, node[2])):
+                    if held_error is not None:
+                        if node[1] == "*" and isinstance(held_error, _CurrencyConversionError) and left_static_type(other_operand, row_context) == "double":
+                            raise _CurrencyRangeFailure(str(held_error)) from held_error  # CURRENCY(1E15)*1E10: a Currency times a Double, typed statically
+                        raise held_error
             else:
                 left = evaluate(node[2], row_context)
                 right = evaluate(node[3], row_context)
@@ -15517,22 +15982,37 @@ def evaluate_measures(
                     raise _CurrencyDivisionError("A division by zero has been encountered.")  # Part F
                 raise _DivisionError("A division by zero has been encountered.")
             if node[1] == "^":
-                return _power(
-                    None if left is None else as_number(left), None if right is None else as_number(right)
-                )
+                try:
+                    return _power(
+                        None if left is None else as_number(left), None if right is None else as_number(right)
+                    )
+                except _PowerFailure as failure:
+                    _stamp_row_dependence(failure, node[2:4], variable_nodes.get, row_scans_model(row_context))
+                    raise
             if node[1] in {"+", "-"} and (left is None) != (right is None):
                 # live Power BI: MAX / MIN of an empty date column is a typed BLANK date, which counts as day zero in + and -
-                if left is None and is_date_aggregate(node[2]):
+                if left is None and (is_date_aggregate(node[2]) or _is_datetime_conversion(node[2])):  # Part E: CONVERT(BLANK(),DATETIME)+1 is a date too
                     left = dax_dates.DaxDateTime(Decimal(0))
-                elif right is None and node[1] == "+" and is_date_aggregate(node[3]):
+                elif right is None and node[1] == "+" and (is_date_aggregate(node[3]) or _is_datetime_conversion(node[3])):
                     right = dax_dates.DaxDateTime(Decimal(0))
             result = _binary_value(
                 node[1],
                 None if left is None else as_number(left),
                 None if right is None else as_number(right),
             )
+            result = typed_zero(result, node, row_context)
             if node[1] in {"*", "/"} and isinstance(result, Decimal) and result.is_finite() and currency_typed(node, row_context):
                 result = result.quantize(Decimal("0.0001"), rounding=ROUND_HALF_UP)  # live Power BI (Task 14 review): every step rounds to ten-thousandths, half away from zero
+            if node[1] in {"*", "/"} and isinstance(result, Decimal) and not result.is_nan() and (result.is_infinite() or abs(result) > _CURRENCY_LIMIT):
+                # Task 20 F5: a Currency times (or over) a Double, a date or a text is a Currency checked for range, not wrapped: beyond it is the overflow error
+                currency_side, other_side = (node[2], node[3]) if currency_typed(node[2], row_context) else (node[3], node[2])
+                if currency_typed(currency_side, row_context) and not currency_typed(other_side, row_context) and (node[1] == "*" or currency_side is node[2]) and left_static_type(other_side, row_context) in {"double", "datetime", "text"}:
+                    raise _CurrencyRangeFailure("The result of a conversion or arithmetic operation is either too large or too small.")
+            if node[1] in {"+", "-", "*", "/"} and isinstance(result, Decimal) and result.is_finite() and not dax_dates.is_date(left) and not dax_dates.is_date(right) and currency_typed(node, row_context):
+                if node[1] == "/" and abs(result) > _CURRENCY_LIMIT:
+                    raise _CurrencyOverflowError("The result of a conversion or arithmetic operation is either too large or too small.")  # Part D: a Currency quotient beyond the range is the error
+                if node[1] != "/":
+                    result = _currency_wrap(result)  # Part D: + - * wrap at 64 bits
             if node[1] in {"+", "-"} and result is not None and (
                 dax_dates.is_date(left) or dax_dates.is_date(right)
             ):
@@ -15779,7 +16259,7 @@ def evaluate_measures(
                 ordered = [value for value in values if not value.is_nan()]
                 row_set = _computed_rows(arguments[0], variable_nodes.get)  # live Power BI (Task 13 review, corrections rule 5): a row set the formula engine builds keeps NaN and Infinity, as a Variant does
                 if (variant_body or row_set) and values and not ordered:
-                    return Decimal("NaN")  # live Power BI (Task 12 review): over a Variant nothing but NaN is NaN, where a plain number body gives BLANK
+                    return values[0]  # live Power BI (Task 12 review): over a Variant nothing but NaN is NaN (its own sign, Part B), where a plain number body gives BLANK
                 if (variant_body or row_set) and len(ordered) != len(values):
                     # live Power BI (Task 12 review): NaN or the other value, depending on the order the engine walks the rows (which columns the body reads)
                     raise MeasureError(f"{function} over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine does not model.")
@@ -15793,9 +16273,11 @@ def evaluate_measures(
                 return extreme
             if not values:
                 return None
-            total = Decimal(0)
-            for value in values:
+            total = values[0]  # Part B: the sum starts from the first term, so a lone -0 stays -0 (0 + -0 would be 0)
+            for value in values[1:]:
                 total = dax_typed.QUIET.add(total, value)
+            if function in {"SUMX", "AVERAGEX"} and total.is_finite() and abs(total) > _CURRENCY_LIMIT and currency_typed(arguments[1], (context, iteration_rows[0] if iteration_rows else {}, 1)):
+                total = _currency_wrap(total)  # Task 20 F5: the sum of a Currency body wraps at 64 bits; AVERAGEX divides the wrapped sum
             if function == "AVERAGEX" and not variant_body and all(v.is_nan() for v in values):
                 stored_scan = _stored_scan(arguments[0], variable_nodes.get)
                 if stored_scan is None:
@@ -15817,6 +16299,10 @@ def evaluate_measures(
                 raise MeasureError("SUMX over a mix of dates and plain numbers is not typed by the local engine.")
             if function == "SUMX" and date_sum and variant_body and result.is_finite() and result > _MAX_DATE_SERIAL:
                 raise MeasureError("SUMX of a Variant's dates past the year 9999 is an error in Power BI.")  # live Power BI (Task 13 review): a system error; a plain date sum saturates
+            if function == "SUMX" and date_sum and not result.is_finite() and _calls_function(arguments[1], "CONVERT"):
+                # Part E: a date sum that is Infinity or NaN shows the date at the end of the range: NaN is 12/30/1899, Infinity the last
+                # moment of 9999 and -Infinity 01/01/0100 (measured, live Power BI)
+                return dax_dates.DaxDateTime(Decimal(0) if result.is_nan() else _MAX_DATE_SERIAL if result > 0 else _DATETIME_CLAMP_LOW)
             if function == "SUMX" and date_sum and result.is_finite():
                 return dax_dates.DaxDateTime(min(result, _MAX_DATE_SERIAL))  # live Power BI: a sum of dates saturates at 12/31/9999 23:59:59  # live Power BI: SUMX over dates is a date, AVERAGEX over dates is a plain number
             return result
@@ -16370,38 +16856,23 @@ def evaluate_measures(
                         zero = False  # a divisor that fails is not the division by zero
                     if zero:
                         raise _DivisionError("A division by zero has been encountered.")
-                try:
-                    evaluate(held_argument, row_context, allow_text=True, allow_boolean=True)
-                except (MeasureRuntimeError, _HardError):
-                    pass
-                return False
+                if not _has_kind(held_argument, {"var", "let"}) and not _has_call_named(held_argument, _ITERATOR_CALLS | {"CALCULATE", "CALCULATETABLE", "FILTER"}):  # a row or filter context reads its own names
+                    for reference in _iter_reference_nodes(held_argument):  # a name that does not resolve is a compile error (TRUE()&&[nope])
+                        if not reference[1]:
+                            try:
+                                evaluate(reference, row_context, allow_text=True)
+                            except (MeasureRuntimeError, _HardError):
+                                pass
+                return False  # Task 20 Part A: a never-blank argument is not evaluated (its errors are not seen)
             if typed_true_false(arguments[0]) or true_false_conditional(arguments[0], row_context):
                 try:
                     evaluate(arguments[0], row_context, allow_text=True, allow_boolean=allow_boolean)
                 except (MeasureRuntimeError, _HardError):
                     pass  # an error of a row or of an operand: the operator is typed True/False, so ISBLANK never asks for its value
                 return False
-            try:
-                return _isblank_consume(
-                    lambda: evaluate(arguments[0], row_context, allow_text=True, allow_boolean=allow_boolean), arguments[0]
-                )
-            except MeasureRuntimeError as error:
-                # ponytail: Power BI answers FALSE when the error is the argument function's own (SQRT/LN/LOG domain, UNICHAR, REPT,
-                # EDATE ... "wrong data type") or a conversion of literals, but not when the argument is COALESCE/IFERROR/SWITCH/
-                # CALCULATE, nor a text conversion of data. Measured by probe (dax_battery_evaluation_order), not understood.
-                argument = arguments[0]
-                own_error = ("needs a number" in str(error) or "wrong data type" in str(error)) and not (
-                    argument[0] == "binary" and argument[1] in {"*", "/"} and (currency_typed(argument[2], row_context) or currency_typed(argument[3], row_context))  # Part B: an error of a Currency product is not the function's own
-                )
-                swallowed = own_error or (not any(True for _ in _iter_reference_nodes(argument)) and plan_constant(argument))
-                if isinstance(error, _DivisionError) or (isinstance(error, _CurrencyOverflowError) and argument[0] not in {"let", "var"}) or not swallowed or (argument[0] == "binary" and any(True for _ in _iter_reference_nodes(argument))) or (  # Task 19 Part C: an operator that reads a column passes its error  # Part B: a Currency times Infinity or NaN is an error for ISBLANK, except a VAR that holds it (measured: ISBLANK(VAR) is FALSE)  # Part B: a Currency times Infinity or NaN is an error for ISBLANK, except a VAR that holds it (measured: ISBLANK(VAR) is FALSE)
-                    argument[0] == "call" and (
-                        argument[1] in {"COALESCE", "IFERROR", "SWITCH", "CALCULATE", "ASIN", "ACOS", "DIVIDE"}
-                        or argument[1] in _ITERATOR_CALLS
-                    )
-                ):
-                    raise
-                return False
+            return _isblank_consume(
+                lambda: evaluate(arguments[0], row_context, allow_text=True, allow_boolean=allow_boolean), arguments[0]
+            )  # Task 20 Part A: an argument that can never be BLANK was answered above; any other error propagates
         if function == "IFERROR":
             try:
                 value = evaluate(arguments[0], row_context, allow_text=allow_text, allow_boolean=allow_boolean)
@@ -16584,6 +17055,10 @@ def evaluate_measures(
                 if isinstance(denominator_value, bool)
                 else as_number(denominator_value)
             )
+            if denominator.is_nan():  # Task 20 F3: a NaN denominator is BLANK (the alternate result beside it is not measured)
+                if len(arguments) == 3:
+                    raise dax_typed.refusal("DIVIDE with an alternate result and a NaN denominator is not modelled by the local engine.")
+                return None
             if denominator == 0:
                 if len(arguments) == 3:
                     alternate = evaluate(arguments[2], row_context, allow_text=True, allow_boolean=True)
@@ -16601,12 +17076,19 @@ def evaluate_measures(
             return quotient
         if function == "ABS":
             value = evaluate(arguments[0], row_context)
-            return None if value is None else abs(as_number(value))
+            if value is None:
+                return None
+            value = as_number(value)
+            return Decimal("NaN") if value.is_nan() else abs(value)  # Part B: ABS of nan is nan, unsigned
         if function in _SCALAR_MATH_ARITY:
-            return _scalar_math(function, [
-                None if value is None else as_number(value)
-                for value in (evaluate(argument, row_context) for argument in arguments)
-            ])
+            try:
+                return _scalar_math(function, [
+                    None if value is None else as_number(value)
+                    for value in (evaluate(argument, row_context) for argument in arguments)
+                ])
+            except _PowerFailure as failure:
+                _stamp_row_dependence(failure, arguments, variable_nodes.get, row_scans_model(row_context))
+                raise
         if function == "ROUND":
             value = as_number(evaluate(arguments[0], row_context))
             precision = as_number(evaluate(arguments[1], row_context))
@@ -16974,7 +17456,7 @@ def evaluate_measures(
                             return csv_field("%.15G" % float(value))  # 1E+15, 1.23456789012346E+15
                         if kind not in {"int64", "currency"}:
                             raise MeasureError("A number of 1E15 or more needs its type to be printed; the local engine does not know it for this column.")
-                    text = dax_typed.to_text(value)
+                    text = dax_typed.currency_text(value) if kind == "currency" else dax_typed.to_text(value)  # Part D: a Currency keeps its four decimals
                     if kind == "double" and "E+15" in text and abs(value) < Decimal("1e15"):
                         raise MeasureError("A double that rounds up to 1E15 is not modelled in the local engine.")
                     return csv_field(text)
@@ -17147,8 +17629,8 @@ def evaluate_measures(
                     raise MeasureRuntimeError("Min or Max of booleans are not currently supported.")
             if dax_typed.is_non_finite(first) and first.is_nan():
                 return first
-            if dax_typed.is_non_finite(second) and second.is_nan():
-                return second
+            if dax_typed.is_non_finite(second) and second.is_nan() and first is not None:
+                return first  # Part B: MAX(1,0/0) is 1; the first argument is kept unless the second is greater
             larger = dax_typed.compare(">", first, second)
             smaller = dax_typed.compare("<", first, second)
             if isinstance(first, str) and isinstance(second, str) and first != second and not larger and not smaller:
@@ -17357,7 +17839,7 @@ def evaluate_measures(
     missing = targets - set(by_name) if targets is not None else set()
     if missing:
         raise MeasureError(f"Measure {sorted(missing)[0]!r} does not exist.")
-    results = {item["name"]: resolve(item["name"].casefold()) for item in selected}
+    results = {item["name"]: _bare_result(resolve(item["name"].casefold())) for item in selected}
     # Power BI checks the whole query when it compiles it, also the branches that never run; the engine's own errors come first
     reject_invalid_allexcept(parsed[item["name"].casefold()] for item in selected)
     if targets is not None:
