@@ -34,9 +34,10 @@ Rules and roles are in `AGENTS.md`. Read it first. Keep this file short and curr
 | 19 | convert-currency-9: CONVERT typing, Currency with Infinity or NaN, ISBLANK that never evaluates, BLANKs that cancel an error, text dates, sign of zero (5,778 items: 2,419 wrong, 3,359 refused, answers measured, no VM) | `docs/plans/2026-11-02-convert-currency-9.md` | DONE (coded by Haiku 5.5, fixed by Sonnet 5.5, reviewed, locked 382,125, merged 2026-11-02) | Claude |
 | 20 | never-blank-zero-10: what ISBLANK evaluates, sign of zero and NaN, the logical BLANK, Currency limits, Double text (1,669 items: 1,129 wrong, 535 refused, 5 crash, answers measured, no VM) | `docs/plans/2026-11-02-never-blank-zero-10.md` | DONE (coded by Haiku 5.5, fixed by Sonnet 5.5, reviewed, locked 422,299, merged 2026-11-02) | Claude |
 | 21 | currency-double-11: Currency with Doubles in doubles, static types beside text numbers, CURRENCY of text and non-finite values, dates beside Infinity or NaN, the logical BLANK beside an error | `docs/plans/2026-11-02-currency-double-11.md` | DONE (coded by Haiku 5.5, fixed by Sonnet 5.5, reviewed, locked 430,554, merged 2026-11-02) | Claude |
+| 22 | double-arith-12: Double arithmetic in IEEE doubles, iterators summed in doubles in row order, Int64 wrap, Int64-range errors, ROUND of huge values, overflow and underflow | `docs/plans/2026-11-02-double-arith-12.md` | BUILDING | Haiku 5.5 |
 
 ## Current task
-None. Task 22 is to be planned from the Task 21 open items below.
+Task 22 double-arith-12, on branch `haiku/double-arith-12`.
 
 ## Open questions (either agent writes here instead of guessing)
 - Claude (open, Task 21, refused rather than wrong): ISINT64/ISCURRENCY of `"1E400"-DATE(...)` (Power BI False); IFERROR around MINX/MAXX of NaN inside COALESCE or IF; `(1&&"")*"a"*1` (Power BI BLANK) and `"a"*(1&&"")`; TODAY()*0 and NaN date products (Part D); text beside the logical BLANK and constant x (Part E, 24); the Task 20 refusals (ATAN/CEILING of non-finite in ISBLANK, type tests around a failing power).
