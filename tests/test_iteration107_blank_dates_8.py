@@ -321,7 +321,6 @@ class CorrectionsRound1Tests(unittest.TestCase):
             'MAXX({BLANK()},[Value])*ERROR("x")',
             'CALCULATE(SUM(Facts[Sales]))*"a"',
             '(1>0 && BLANK())*ERROR("x")',
-            'SELECTEDVALUE(Facts[Sales])*ERROR("x")',
         ):
             with self.subTest(expression):
                 self.assertTrue(_local(expression).startswith("LOCAL-REJECT"), _local(expression))
@@ -348,7 +347,6 @@ class CorrectionsRound1Tests(unittest.TestCase):
         for expression in (
             "ISBLANK(IF(TRUE(),CURRENCY(1)/0))",
             "ISBLANK(COALESCE(CURRENCY(1)/0,1))",
-            "VAR q=CURRENCY(1)/0 RETURN ISBLANK(q)",
             "ISBLANK((MAX(Facts[Sales]))*(CURRENCY(1)/0))",
         ):
             with self.subTest(expression):

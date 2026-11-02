@@ -15,6 +15,7 @@ import unicodedata
 # Decimal arithmetic that yields NaN/Infinity instead of raising, like IEEE doubles.
 QUIET = Context(prec=28, rounding=ROUND_HALF_EVEN, traps=[])
 _INT64_LIMIT = 2**63
+DOUBLE_EXPONENT_FROM = Decimal(10) ** 15  # a Double this big or bigger prints with an exponent, as Power BI does
 _NUMBER_TEXT = re.compile(r"^[+-]?(?:\d+\.?\d*|\.\d+)(?:[eE][+-]?\d+)?$")
 
 
@@ -78,13 +79,13 @@ def is_non_finite(value: object) -> bool:
     return isinstance(value, Decimal) and not value.is_finite()
 
 
-def number_to_text(value: Decimal) -> str:
-    """General number to text: whole numbers in full, otherwise 15 significant digits."""
+def number_to_text(value: Decimal, double: bool = False) -> str:
+    """General number to text: whole numbers in full, otherwise 15 significant digits. A Double of 1E15 or more uses an exponent."""
     if value.is_nan():
         return "-nan(ind)"
     if value.is_infinite():
         return "-inf" if value < 0 else "inf"
-    if value == value.to_integral_value() and abs(value) < _INT64_LIMIT:
+    if value == value.to_integral_value() and abs(value) < _INT64_LIMIT and not (double and abs(value) >= DOUBLE_EXPONENT_FROM):
         return str(int(value))
     sign = "-" if value < 0 else ""
     digits, exponent10 = _significant(abs(value))
@@ -110,8 +111,16 @@ def _decimal_places(digits: str, exponent10: int) -> int:
     return max(0, len(digits) - 1 - exponent10)
 
 
-def to_text(value: object) -> str:
-    """The text DAX produces when a value is concatenated or passed to a text function."""
+# the positions of the arguments a text function reads as text, where a number becomes text implicitly
+TEXT_ARGUMENTS = {
+    "LEFT": (0,), "RIGHT": (0,), "MID": (0,), "LEN": (0,), "UPPER": (0,), "LOWER": (0,), "TRIM": (0,), "UNICODE": (0,), "REPT": (0,),
+    "SUBSTITUTE": (0, 1, 2), "REPLACE": (0, 3), "CONCATENATE": (0, 1), "EXACT": (0, 1), "FIND": (0, 1), "SEARCH": (0, 1),
+    "CONTAINSSTRING": (0, 1), "CONTAINSSTRINGEXACT": (0, 1),
+}
+
+
+def to_text(value: object, double: bool = False) -> str:
+    """The text DAX produces when a value is concatenated or passed to a text function; double: the value is a Double."""
     if value is None:
         return ""
     if isinstance(value, bool):
@@ -122,11 +131,12 @@ def to_text(value: object) -> str:
 
     if dax_dates.is_date(value):
         return dax_dates.date_text(value)  # type: ignore[arg-type]
-    return number_to_text(value)  # type: ignore[arg-type]
+    return number_to_text(value, double)  # type: ignore[arg-type]
 
 
-def text_to_number(text: str) -> Decimal:
-    """VALUE / implicit text-to-number conversion: spaces, commas, a currency sign, (5) and 5- are accepted."""
+def text_to_number(text: str, dates: bool = False) -> Decimal:
+    """VALUE / implicit text-to-number conversion: spaces, commas, a currency sign, (5) and 5- are accepted. With ``dates`` (arithmetic,
+    VALUE, CONVERT to DOUBLE) a text that is not a number is read as a date or a time, as DATEVALUE and TIMEVALUE read it (Task 19 Part E)."""
     cleaned = text.strip().replace(",", "")
     negative = False
     if cleaned.startswith("(") and cleaned.endswith(")"):
@@ -136,18 +146,26 @@ def text_to_number(text: str) -> Decimal:
     if cleaned.endswith("-") and not cleaned.startswith(("-", "+")):
         cleaned, negative = cleaned[:-1].strip(), not negative
     if not _NUMBER_TEXT.match(cleaned):
+        if dates:
+            from . import dax_dates  # late import: dax_dates imports this module
+
+            serial = dax_dates.text_serial(text)
+            if serial is not None:
+                return serial
+            if dax_dates.date_shaped_text(text):  # a date shape no reader models ("1 1/2"): refused, never guessed
+                raise refusal(f"The local engine does not model the text '{text.strip()}' as a number.")
         raise _error(f"Cannot convert value '{text}' of type Text to type Number.")
     number = Decimal(cleaned)
     return -number if negative else number
 
 
-def to_number(value: object) -> Decimal:
+def to_number(value: object, dates: bool = False) -> Decimal:
     if value is None:
         return Decimal(0)
     if isinstance(value, bool):
         return Decimal(1 if value else 0)
     if isinstance(value, str):
-        return text_to_number(value)
+        return text_to_number(value, dates)
     return value  # type: ignore[return-value]
 
 
@@ -447,7 +465,7 @@ def text_function(function: str, args: list[object]) -> object:
             if not first.is_finite():  # live Power BI (Task 12 review): VALUE of Infinity or NaN cannot read the text it prints
                 raise _error(f"Cannot convert value of type Number to type Number: {first} is not a number VALUE can read.")
             return Decimal(first)
-        return text_to_number(to_text(first))
+        return text_to_number(to_text(first), dates=True)  # Task 19 Part E: VALUE reads a date or a time text too
     if first is None:
         return None
     text = _units(to_text(first))  # Power BI positions and lengths are UTF-16 code units
