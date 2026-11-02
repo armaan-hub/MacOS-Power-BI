@@ -355,6 +355,8 @@ def date_function(function: str, args: list[object], interval: str | None = None
             return Decimal(clock[("HOUR", "MINUTE", "SECOND").index(function)])
     moment = _moment(args[0], ROUND_FLOOR if function in {"HOUR", "MINUTE", "SECOND"} else NEAREST_SECOND if function in {"WEEKDAY", "WEEKNUM"} else ROUND_HALF_UP)
     if moment is None:
+        if function in {"EDATE", "EOMONTH"} and args[1] is not None:
+            dax_typed.whole(args[1], function)  # Task 20 F4: a BLANK date still reads the months; an Infinity, a NaN or a text there is the error
         return None
     if function == "YEAR":
         return Decimal(moment.year)

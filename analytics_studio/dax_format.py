@@ -26,6 +26,7 @@ _BOOLEAN_NAMED = {
     "on/off": ("On", "Off"),
 }
 _EXACT = Context(prec=60, rounding=ROUND_HALF_UP, traps=[])
+_WIDE = Context(prec=400, rounding=ROUND_HALF_UP, traps=[])  # a number of 1E60 or more has more digits than _EXACT holds
 
 
 def format_value(value: object, pattern: object) -> str:
@@ -47,7 +48,7 @@ def format_value(value: object, pattern: object) -> str:
         return fmt.replace("@", value) if "@" in fmt else value
     number: Decimal = value  # type: ignore[assignment]
     if not number.is_finite():
-        return dax_typed.number_to_text(number)
+        return dax_typed.number_to_text(number)  # a NaN shows its sign: -nan(ind) or nan
     if not dax_dates.is_date(number) and re.search(r"[@&<>]", fmt) and not re.search(r"[0#]", fmt) and key not in _NAMED:
         return _text_placeholders(fmt, dax_typed.number_to_text(number))
     if dax_dates.is_date(number) and (key == "" or dax_dates.is_date_pattern(fmt, True)):
@@ -227,7 +228,9 @@ def _render(scaled: Decimal, tokens: list[tuple[str, str]]) -> str:
     integer_tokens = body if point_index is None else body[:point_index]
     fraction_tokens = [] if point_index is None else body[point_index + 1:]
     places = sum(1 for kind, _ in fraction_tokens if kind == "digit")
-    rounded = _EXACT.quantize(scaled, Decimal(1).scaleb(-places))
+    if scaled >= Decimal(10) ** 15:
+        scaled = Context(prec=15, rounding=ROUND_HALF_UP, traps=[]).plus(scaled)  # Part E: 15 significant digits, then zeros
+    rounded = _WIDE.quantize(scaled, Decimal(1).scaleb(-places))
     digits = f"{rounded:f}"
     whole, _, fraction = digits.partition(".")
     whole = whole.lstrip("0") or ("0" if exp_index is not None else "")

@@ -82,7 +82,7 @@ def is_non_finite(value: object) -> bool:
 def number_to_text(value: Decimal, double: bool = False) -> str:
     """General number to text: whole numbers in full, otherwise 15 significant digits. A Double of 1E15 or more uses an exponent."""
     if value.is_nan():
-        return "-nan(ind)"
+        return "-nan(ind)" if value.is_signed() else "nan"  # Part B: the sign of a NaN shows in text
     if value.is_infinite():
         return "-inf" if value < 0 else "inf"
     if value == value.to_integral_value() and abs(value) < _INT64_LIMIT and not (double and abs(value) >= DOUBLE_EXPONENT_FROM):
@@ -101,7 +101,17 @@ def number_to_text(value: Decimal, double: bool = False) -> str:
 
 def _significant(value: Decimal) -> tuple[str, int]:
     """(digits without trailing zeros, decimal exponent of the first digit) after rounding to 15 digits."""
-    rounded = Context(prec=15, rounding=ROUND_HALF_EVEN, traps=[]).plus(value)
+    try:
+        exact = Decimal(float(value))  # Power BI rounds the exact binary value of the Double, half away from zero (live Power BI, Task 20)
+    except OverflowError:
+        exact = value
+    if exact == 0 and value != 0:
+        exact = value  # below the Double range: nothing binary to take
+    fifteen = Context(prec=15, rounding=ROUND_HALF_UP, traps=[])
+    rounded = fifteen.plus(exact)
+    if value.is_finite() and value != 0 and not Decimal("1E-100") < abs(value) < Decimal("1E100") and len(value.as_tuple().digits) > 17 and fifteen.plus(value) != rounded:
+        # this far out the binary operands of a division are not exact, so the digits held here and the Double differ and the last digit cannot be told
+        raise refusal("The last digit of a Double this far from 1 is not modelled by the local engine.")
     _, digit_tuple, exponent = rounded.as_tuple()
     digits = "".join(map(str, digit_tuple)).rstrip("0") or "0"
     return digits, exponent + len(digit_tuple) - 1
@@ -132,6 +142,14 @@ def to_text(value: object, double: bool = False) -> str:
     if dax_dates.is_date(value):
         return dax_dates.date_text(value)  # type: ignore[arg-type]
     return number_to_text(value, double)  # type: ignore[arg-type]
+
+
+def currency_text(value: Decimal) -> str:
+    """Part D: a Currency as text keeps its four decimals, trailing zeros dropped (-844674407370955.1616, 776627963145224.192, 2)."""
+    if value.is_zero():
+        return "0"  # a Currency has no sign of zero
+    text = format(value.quantize(Decimal("0.0001"), rounding=ROUND_HALF_UP), "f")
+    return text.rstrip("0").rstrip(".") if "." in text else text
 
 
 def text_to_number(text: str, dates: bool = False) -> Decimal:
@@ -438,6 +456,8 @@ def text_function(function: str, args: list[object]) -> object:
         return to_text(args[0]) == to_text(args[1])
     if function == "REPT":
         if args[0] is None:
+            if args[1] is not None:
+                whole(args[1], function)  # Task 20 F4: a BLANK text still reads the count; an Infinity, a NaN or a text there is the error (a negative one is not)
             return None
         text = to_text(args[0])
         times = whole(args[1], function, minimum=0)
@@ -467,6 +487,8 @@ def text_function(function: str, args: list[object]) -> object:
             return Decimal(first)
         return text_to_number(to_text(first), dates=True)  # Task 19 Part E: VALUE reads a date or a time text too
     if first is None:
+        if function in {"LEFT", "RIGHT"} and len(args) > 1 and args[1] is not None:
+            whole(args[1], function, minimum=0)  # Task 20 F4: a BLANK text still reads the count (a negative one, an Infinity, a NaN or a text is the error)
         return None
     text = _units(to_text(first))  # Power BI positions and lengths are UTF-16 code units
     if function == "LEN":

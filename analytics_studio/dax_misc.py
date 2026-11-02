@@ -61,7 +61,10 @@ def _int64(value: object, *, blank: int | None = 0) -> int:
         raise _error(_TOO_BIG)
     if number != number.to_integral_value():
         number = Decimal(float(number))
-    result = int(number.quantize(Decimal(1), rounding=ROUND_HALF_UP, context=dax_typed.QUIET.copy()))
+    rounded = number.quantize(Decimal(1), rounding=ROUND_HALF_UP, context=dax_typed.QUIET.copy())
+    if not rounded.is_finite():  # more digits than the context holds (BITAND(1E300,1)): far outside the Int64 range
+        raise _error(_TOO_BIG)
+    result = int(rounded)
     if not -_INT64 < result < _INT64:  # int64 minimum is refused too (a double -2^63 does not convert)
         raise _error(_TOO_BIG)
     return result
@@ -74,7 +77,7 @@ def _wrap(value: int) -> int:
 def _bit_function(function: str, args: list[object]) -> object:
     first, second = args
     if function == "BITAND" and (first is None or second is None):
-        # BITAND validates the other operand first, then answers BLANK
+        # a scanned BLANK still reads the other operand (a text or an out-of-range number is the error); a static BLANK is answered before this point
         for value in args:
             if value is not None:
                 _int64(value)
@@ -163,7 +166,7 @@ def _cotangent(function: str, args: list[object]) -> Decimal:
         return _double(1 / math.tanh(x))
     if function == "ACOT":
         if math.isnan(x):
-            return _double(math.pi)
+            return _double(math.pi) if _decimal(args[0]).is_signed() else Decimal(0)  # Task 20 F3: the NaN of 0/0 (negative) gives pi, its negation 0
         if math.isinf(x):
             return Decimal(0) if x > 0 else _double(math.pi)
         number = _decimal(args[0])

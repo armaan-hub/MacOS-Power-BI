@@ -343,7 +343,6 @@ class PartGSignOfZeroNaNAndLargeDoublesTests(unittest.TestCase):
         self.assertEqual("3000000000000000z", _local('(3000000000000000)&"z"'))
 
 
-@unittest.expectedFailure  # Part G piece 2 is open: see the report; the Int64 zero has no sign, so the sign needs static types
 class PartGSignOfZeroAndNaNOpenTests(unittest.TestCase):
     """Part G piece 2 (open): -0 and NaN text. The Double zero keeps its sign; a NaN prints with or without its sign."""
 
@@ -360,7 +359,7 @@ class PartGSignOfZeroAndNaNOpenTests(unittest.TestCase):
     def test_nan_sign_is_kept_by_text(self) -> None:
         self.assertEqual("-nan(ind)z", _local('(0/0)&"z"'))
         self.assertEqual("nanz", _local('(-(0/0))&"z"'))
-        self.assertEqual("nanz", _local('(0/-(0.0))&"z"'))
+        self.assertEqual("-nan(ind)z", _local('(0/-(0.0))&"z"'))  # measured 2026-11-02: the sign of a new NaN is not the divisor's
         self.assertEqual("nanz", _local('(1/-(1/0*0))&"z"'))
 
     def test_format_prints_nan_without_indeterminate_suffix(self) -> None:
