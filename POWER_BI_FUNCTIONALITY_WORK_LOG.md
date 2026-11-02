@@ -1732,3 +1732,17 @@ The standing test workbook is now `tests/Data/Vat File -Aug 2026.xlsx` (sheet `V
 **Saved:** `tools/parity/dax_battery_topn14_extra.json` (417 answers), `tools/parity/task24_topn_ties_spec.json`.
 
 **Gate:** PARITY GATE PASSED (fast gate). pytest 2,516 passed; replay 451,421: 438,510 match, 12,911 refused, 0 DIFF, 0 CRASH; locked 438,077 to 438,490. The real app through the measure path, offscreen: 575/575 equal and 1,500 fresh probes with 0 wrong. Power BI answers came from Power BI Desktop on the iPad guest; the project was not saved. No saved Power BI answer was edited.
+
+## 2026-11-03 — Iteration 114 (Task 25 trig-limits-15: SIN/COS/TAN/COT limit at 2^27, ASINH/ACOSH overflow, a BLANK date plus a number)
+
+**Who did what:** Antigravity (Gemini 3.8 Flash) coded the trig limit, the ASINH overflow and the BLANK date rule; Sonnet 5.5 added the ACOSH overflow; Claude Opus 5.5 measured 333 spec and 180 fresh answers in Power BI and reviewed.
+
+**Rules measured in Power BI and now in the engine:** SIN, COS, TAN and COT of |x| >= 2^27 (134217728) are the error (`SIN(134217727.9)` works, `SIN(134217728)` errors); ASINH and ACOSH error when x*x overflows (from about 1.35E154); `MAXX(FILTER(Facts,FALSE()),DATE(2020,1,1))+1` is a date (12/31/1899), not the number 1.
+
+**Review:** 180 fresh probes: 0 new wrong, 52 wrong on main now right; the 4 ACOSH rows fixed by Sonnet. Code read for lookups: none.
+
+**Task 26 transcendental-16 (research, closed without code):** Antigravity tested more candidates for EXP, POWER, LN, SIN, COS, TAN last digits (MSVC/SSE2 table-driven reduction is the likely cause); none fits every row, so the code is unchanged as the strict rule requires.
+
+**Saved:** `tools/parity/dax_battery_trig15_extra.json` (494 answers), `tools/parity/task25_trig_blank_date_spec.json`.
+
+**Gate:** PARITY GATE PASSED (fast gate). pytest 2,518 passed; replay 451,915: 438,997 match, 12,918 refused, 0 DIFF, 0 CRASH; locked 438,490 to 438,977. The real app through the measure path, offscreen: 575/575 equal and 1,500 fresh probes with 0 wrong. Power BI answers came from Power BI Desktop on the iPad guest; the project was not saved. No saved Power BI answer was edited.

@@ -290,6 +290,15 @@ _TRIG = {
 
 
 def _trig(function: str, value: float) -> Decimal:
+    if function in {"SIN", "COS", "TAN"} and abs(value) >= 134217728:
+        raise _fail(function)
+    if function in {"ASINH", "ACOSH"}:  # both square the value, which overflows above about 1.34E154
+        try:
+            sq = value * value
+            if math.isinf(sq):
+                raise _fail(function)
+        except OverflowError:
+            raise _fail(function)
     try:
         return _double(_TRIG[function](value), function)
     except (ValueError, OverflowError) as exc:

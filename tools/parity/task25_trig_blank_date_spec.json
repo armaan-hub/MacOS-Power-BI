@@ -1,0 +1,2056 @@
+{
+ "items": [
+  {
+   "part": "A",
+   "expr": "SUMX({1,2},IF([Value]==FALSE(),1,2))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 33) DAX comparison operations do not support comparing values of type Integer with values of type True/False. Consider using the VALUE or FORMAT function to convert one of the values.\"",
+   "now": "LOCAL-REJECT:DAX comparison operations do not support comparing values of type Integer with values of type True/False. Consider using the VALUE or FORMAT function to convert one of the values."
+  },
+  {
+   "part": "A",
+   "expr": "COUNTX(FILTER({1,2},[Value]==FALSE()),1)",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 39) DAX comparison operations do not support comparing values of type Integer with values of type True/False. Consider using the VALUE or FORMAT function to convert one of the values.\"",
+   "now": "LOCAL-REJECT:DAX comparison operations do not support comparing values of type Integer with values of type True/False. Consider using the VALUE or FORMAT function to convert one of the values."
+  },
+  {
+   "part": "A",
+   "expr": "ISERROR(SUMX({1,2},IF([Value]==FALSE(),1,2)))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 41) DAX comparison operations do not support comparing values of type Integer with values of type True/False. Consider using the VALUE or FORMAT function to convert one of the values.\"",
+   "now": "LOCAL-REJECT:DAX comparison operations do not support comparing values of type Integer with values of type True/False. Consider using the VALUE or FORMAT function to convert one of the values."
+  },
+  {
+   "part": "A",
+   "expr": "SUMX({1,2},IF([Value]==TRUE(),1,2))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 33) DAX comparison operations do not support comparing values of type Integer with values of type True/False. Consider using the VALUE or FORMAT function to convert one of the values.\"",
+   "now": "LOCAL-REJECT:DAX comparison operations do not support comparing values of type Integer with values of type True/False. Consider using the VALUE or FORMAT function to convert one of the values."
+  },
+  {
+   "part": "A",
+   "expr": "COUNTX(FILTER({1,2},[Value]==TRUE()),1)",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 39) DAX comparison operations do not support comparing values of type Integer with values of type True/False. Consider using the VALUE or FORMAT function to convert one of the values.\"",
+   "now": "LOCAL-REJECT:DAX comparison operations do not support comparing values of type Integer with values of type True/False. Consider using the VALUE or FORMAT function to convert one of the values."
+  },
+  {
+   "part": "A",
+   "expr": "ISERROR(SUMX({1,2},IF([Value]==TRUE(),1,2)))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 41) DAX comparison operations do not support comparing values of type Integer with values of type True/False. Consider using the VALUE or FORMAT function to convert one of the values.\"",
+   "now": "LOCAL-REJECT:DAX comparison operations do not support comparing values of type Integer with values of type True/False. Consider using the VALUE or FORMAT function to convert one of the values."
+  },
+  {
+   "part": "A",
+   "expr": "SUMX({1,2},IF([Value]=FALSE(),1,2))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 33) DAX comparison operations do not support comparing values of type Integer with values of type True/False. Consider using the VALUE or FORMAT function to convert one of the values.\"",
+   "now": "LOCAL-REJECT:Iterator comparisons need matching local data types."
+  },
+  {
+   "part": "A",
+   "expr": "COUNTX(FILTER({1,2},[Value]=FALSE()),1)",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 39) DAX comparison operations do not support comparing values of type Integer with values of type True/False. Consider using the VALUE or FORMAT function to convert one of the values.\"",
+   "now": "LOCAL-REJECT:Iterator comparisons need matching local data types."
+  },
+  {
+   "part": "A",
+   "expr": "ISERROR(SUMX({1,2},IF([Value]=FALSE(),1,2)))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 41) DAX comparison operations do not support comparing values of type Integer with values of type True/False. Consider using the VALUE or FORMAT function to convert one of the values.\"",
+   "now": "LOCAL-REJECT:Iterator comparisons need matching local data types."
+  },
+  {
+   "part": "A",
+   "expr": "SUMX({1,2},IF([Value]==BLANK(),1,2))",
+   "powerbi": "4",
+   "now": "4"
+  },
+  {
+   "part": "A",
+   "expr": "COUNTX(FILTER({1,2},[Value]==BLANK()),1)",
+   "powerbi": "BLANK",
+   "now": "BLANK"
+  },
+  {
+   "part": "A",
+   "expr": "ISERROR(SUMX({1,2},IF([Value]==BLANK(),1,2)))",
+   "powerbi": "False",
+   "now": "False"
+  },
+  {
+   "part": "A",
+   "expr": "SUMX({1,2},IF([Value]==0,1,2))",
+   "powerbi": "4",
+   "now": "4"
+  },
+  {
+   "part": "A",
+   "expr": "COUNTX(FILTER({1,2},[Value]==0),1)",
+   "powerbi": "BLANK",
+   "now": "BLANK"
+  },
+  {
+   "part": "A",
+   "expr": "ISERROR(SUMX({1,2},IF([Value]==0,1,2)))",
+   "powerbi": "False",
+   "now": "False"
+  },
+  {
+   "part": "A",
+   "expr": "SUMX({1,2},IF(TRUE()==[Value],1,2))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 33) DAX comparison operations do not support comparing values of type True/False with values of type Integer. Consider using the VALUE or FORMAT function to convert one of the values.\"",
+   "now": "LOCAL-REJECT:DAX comparison operations do not support comparing values of type True/False with values of type Integer. Consider using the VALUE or FORMAT function to convert one of the values."
+  },
+  {
+   "part": "A",
+   "expr": "COUNTX(FILTER({1,2},TRUE()==[Value]),1)",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 39) DAX comparison operations do not support comparing values of type True/False with values of type Integer. Consider using the VALUE or FORMAT function to convert one of the values.\"",
+   "now": "LOCAL-REJECT:DAX comparison operations do not support comparing values of type True/False with values of type Integer. Consider using the VALUE or FORMAT function to convert one of the values."
+  },
+  {
+   "part": "A",
+   "expr": "ISERROR(SUMX({1,2},IF(TRUE()==[Value],1,2)))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 41) DAX comparison operations do not support comparing values of type True/False with values of type Integer. Consider using the VALUE or FORMAT function to convert one of the values.\"",
+   "now": "LOCAL-REJECT:DAX comparison operations do not support comparing values of type True/False with values of type Integer. Consider using the VALUE or FORMAT function to convert one of the values."
+  },
+  {
+   "part": "A",
+   "expr": "SUMX({0,1},IF([Value]==FALSE(),1,2))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 33) DAX comparison operations do not support comparing values of type Integer with values of type True/False. Consider using the VALUE or FORMAT function to convert one of the values.\"",
+   "now": "LOCAL-REJECT:DAX comparison operations do not support comparing values of type Integer with values of type True/False. Consider using the VALUE or FORMAT function to convert one of the values."
+  },
+  {
+   "part": "A",
+   "expr": "COUNTX(FILTER({0,1},[Value]==FALSE()),1)",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 39) DAX comparison operations do not support comparing values of type Integer with values of type True/False. Consider using the VALUE or FORMAT function to convert one of the values.\"",
+   "now": "LOCAL-REJECT:DAX comparison operations do not support comparing values of type Integer with values of type True/False. Consider using the VALUE or FORMAT function to convert one of the values."
+  },
+  {
+   "part": "A",
+   "expr": "ISERROR(SUMX({0,1},IF([Value]==FALSE(),1,2)))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 41) DAX comparison operations do not support comparing values of type Integer with values of type True/False. Consider using the VALUE or FORMAT function to convert one of the values.\"",
+   "now": "LOCAL-REJECT:DAX comparison operations do not support comparing values of type Integer with values of type True/False. Consider using the VALUE or FORMAT function to convert one of the values."
+  },
+  {
+   "part": "A",
+   "expr": "SUMX({0,1},IF([Value]==TRUE(),1,2))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 33) DAX comparison operations do not support comparing values of type Integer with values of type True/False. Consider using the VALUE or FORMAT function to convert one of the values.\"",
+   "now": "LOCAL-REJECT:DAX comparison operations do not support comparing values of type Integer with values of type True/False. Consider using the VALUE or FORMAT function to convert one of the values."
+  },
+  {
+   "part": "A",
+   "expr": "COUNTX(FILTER({0,1},[Value]==TRUE()),1)",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 39) DAX comparison operations do not support comparing values of type Integer with values of type True/False. Consider using the VALUE or FORMAT function to convert one of the values.\"",
+   "now": "LOCAL-REJECT:DAX comparison operations do not support comparing values of type Integer with values of type True/False. Consider using the VALUE or FORMAT function to convert one of the values."
+  },
+  {
+   "part": "A",
+   "expr": "ISERROR(SUMX({0,1},IF([Value]==TRUE(),1,2)))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 41) DAX comparison operations do not support comparing values of type Integer with values of type True/False. Consider using the VALUE or FORMAT function to convert one of the values.\"",
+   "now": "LOCAL-REJECT:DAX comparison operations do not support comparing values of type Integer with values of type True/False. Consider using the VALUE or FORMAT function to convert one of the values."
+  },
+  {
+   "part": "A",
+   "expr": "SUMX({0,1},IF([Value]=FALSE(),1,2))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 33) DAX comparison operations do not support comparing values of type Integer with values of type True/False. Consider using the VALUE or FORMAT function to convert one of the values.\"",
+   "now": "LOCAL-REJECT:Iterator comparisons need matching local data types."
+  },
+  {
+   "part": "A",
+   "expr": "COUNTX(FILTER({0,1},[Value]=FALSE()),1)",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 39) DAX comparison operations do not support comparing values of type Integer with values of type True/False. Consider using the VALUE or FORMAT function to convert one of the values.\"",
+   "now": "LOCAL-REJECT:Iterator comparisons need matching local data types."
+  },
+  {
+   "part": "A",
+   "expr": "ISERROR(SUMX({0,1},IF([Value]=FALSE(),1,2)))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 41) DAX comparison operations do not support comparing values of type Integer with values of type True/False. Consider using the VALUE or FORMAT function to convert one of the values.\"",
+   "now": "LOCAL-REJECT:Iterator comparisons need matching local data types."
+  },
+  {
+   "part": "A",
+   "expr": "SUMX({0,1},IF([Value]==BLANK(),1,2))",
+   "powerbi": "4",
+   "now": "4"
+  },
+  {
+   "part": "A",
+   "expr": "COUNTX(FILTER({0,1},[Value]==BLANK()),1)",
+   "powerbi": "BLANK",
+   "now": "BLANK"
+  },
+  {
+   "part": "A",
+   "expr": "ISERROR(SUMX({0,1},IF([Value]==BLANK(),1,2)))",
+   "powerbi": "False",
+   "now": "False"
+  },
+  {
+   "part": "A",
+   "expr": "SUMX({0,1},IF([Value]==0,1,2))",
+   "powerbi": "3",
+   "now": "3"
+  },
+  {
+   "part": "A",
+   "expr": "COUNTX(FILTER({0,1},[Value]==0),1)",
+   "powerbi": "1",
+   "now": "1"
+  },
+  {
+   "part": "A",
+   "expr": "ISERROR(SUMX({0,1},IF([Value]==0,1,2)))",
+   "powerbi": "False",
+   "now": "False"
+  },
+  {
+   "part": "A",
+   "expr": "SUMX({0,1},IF(TRUE()==[Value],1,2))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 33) DAX comparison operations do not support comparing values of type True/False with values of type Integer. Consider using the VALUE or FORMAT function to convert one of the values.\"",
+   "now": "LOCAL-REJECT:DAX comparison operations do not support comparing values of type True/False with values of type Integer. Consider using the VALUE or FORMAT function to convert one of the values."
+  },
+  {
+   "part": "A",
+   "expr": "COUNTX(FILTER({0,1},TRUE()==[Value]),1)",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 39) DAX comparison operations do not support comparing values of type True/False with values of type Integer. Consider using the VALUE or FORMAT function to convert one of the values.\"",
+   "now": "LOCAL-REJECT:DAX comparison operations do not support comparing values of type True/False with values of type Integer. Consider using the VALUE or FORMAT function to convert one of the values."
+  },
+  {
+   "part": "A",
+   "expr": "ISERROR(SUMX({0,1},IF(TRUE()==[Value],1,2)))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 41) DAX comparison operations do not support comparing values of type True/False with values of type Integer. Consider using the VALUE or FORMAT function to convert one of the values.\"",
+   "now": "LOCAL-REJECT:DAX comparison operations do not support comparing values of type True/False with values of type Integer. Consider using the VALUE or FORMAT function to convert one of the values."
+  },
+  {
+   "part": "A",
+   "expr": "SUMX({TRUE(),FALSE()},IF([Value]==FALSE(),1,2))",
+   "powerbi": "3",
+   "now": "3"
+  },
+  {
+   "part": "A",
+   "expr": "COUNTX(FILTER({TRUE(),FALSE()},[Value]==FALSE()),1)",
+   "powerbi": "1",
+   "now": "1"
+  },
+  {
+   "part": "A",
+   "expr": "ISERROR(SUMX({TRUE(),FALSE()},IF([Value]==FALSE(),1,2)))",
+   "powerbi": "False",
+   "now": "False"
+  },
+  {
+   "part": "A",
+   "expr": "SUMX({TRUE(),FALSE()},IF([Value]==TRUE(),1,2))",
+   "powerbi": "3",
+   "now": "3"
+  },
+  {
+   "part": "A",
+   "expr": "COUNTX(FILTER({TRUE(),FALSE()},[Value]==TRUE()),1)",
+   "powerbi": "1",
+   "now": "1"
+  },
+  {
+   "part": "A",
+   "expr": "ISERROR(SUMX({TRUE(),FALSE()},IF([Value]==TRUE(),1,2)))",
+   "powerbi": "False",
+   "now": "False"
+  },
+  {
+   "part": "A",
+   "expr": "SUMX({TRUE(),FALSE()},IF([Value]=FALSE(),1,2))",
+   "powerbi": "3",
+   "now": "3"
+  },
+  {
+   "part": "A",
+   "expr": "COUNTX(FILTER({TRUE(),FALSE()},[Value]=FALSE()),1)",
+   "powerbi": "1",
+   "now": "1"
+  },
+  {
+   "part": "A",
+   "expr": "ISERROR(SUMX({TRUE(),FALSE()},IF([Value]=FALSE(),1,2)))",
+   "powerbi": "False",
+   "now": "False"
+  },
+  {
+   "part": "A",
+   "expr": "SUMX({TRUE(),FALSE()},IF([Value]==BLANK(),1,2))",
+   "powerbi": "4",
+   "now": "4"
+  },
+  {
+   "part": "A",
+   "expr": "COUNTX(FILTER({TRUE(),FALSE()},[Value]==BLANK()),1)",
+   "powerbi": "BLANK",
+   "now": "BLANK"
+  },
+  {
+   "part": "A",
+   "expr": "ISERROR(SUMX({TRUE(),FALSE()},IF([Value]==BLANK(),1,2)))",
+   "powerbi": "False",
+   "now": "False"
+  },
+  {
+   "part": "A",
+   "expr": "SUMX({TRUE(),FALSE()},IF([Value]==0,1,2))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 44) DAX comparison operations do not support comparing values of type True/False with values of type Integer. Consider using the VALUE or FORMAT function to convert one of the values.\"",
+   "now": "LOCAL-REJECT:DAX comparison operations do not support comparing values of type True/False with values of type Integer. Consider using the VALUE or FORMAT function to convert one of the values."
+  },
+  {
+   "part": "A",
+   "expr": "COUNTX(FILTER({TRUE(),FALSE()},[Value]==0),1)",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 50) DAX comparison operations do not support comparing values of type True/False with values of type Integer. Consider using the VALUE or FORMAT function to convert one of the values.\"",
+   "now": "LOCAL-REJECT:DAX comparison operations do not support comparing values of type True/False with values of type Integer. Consider using the VALUE or FORMAT function to convert one of the values."
+  },
+  {
+   "part": "A",
+   "expr": "ISERROR(SUMX({TRUE(),FALSE()},IF([Value]==0,1,2)))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 52) DAX comparison operations do not support comparing values of type True/False with values of type Integer. Consider using the VALUE or FORMAT function to convert one of the values.\"",
+   "now": "LOCAL-REJECT:DAX comparison operations do not support comparing values of type True/False with values of type Integer. Consider using the VALUE or FORMAT function to convert one of the values."
+  },
+  {
+   "part": "A",
+   "expr": "SUMX({TRUE(),FALSE()},IF(TRUE()==[Value],1,2))",
+   "powerbi": "3",
+   "now": "3"
+  },
+  {
+   "part": "A",
+   "expr": "COUNTX(FILTER({TRUE(),FALSE()},TRUE()==[Value]),1)",
+   "powerbi": "1",
+   "now": "1"
+  },
+  {
+   "part": "A",
+   "expr": "ISERROR(SUMX({TRUE(),FALSE()},IF(TRUE()==[Value],1,2)))",
+   "powerbi": "False",
+   "now": "False"
+  },
+  {
+   "part": "A",
+   "expr": "SUMX({\"a\",\"b\"},IF([Value]==FALSE(),1,2))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 37) DAX comparison operations do not support comparing values of type Text with values of type True/False. Consider using the VALUE or FORMAT function to convert one of the values.\"",
+   "now": "LOCAL-REJECT:DAX comparison operations do not support comparing values of type Text with values of type True/False. Consider using the VALUE or FORMAT function to convert one of the values."
+  },
+  {
+   "part": "A",
+   "expr": "COUNTX(FILTER({\"a\",\"b\"},[Value]==FALSE()),1)",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 43) DAX comparison operations do not support comparing values of type Text with values of type True/False. Consider using the VALUE or FORMAT function to convert one of the values.\"",
+   "now": "LOCAL-REJECT:DAX comparison operations do not support comparing values of type Text with values of type True/False. Consider using the VALUE or FORMAT function to convert one of the values."
+  },
+  {
+   "part": "A",
+   "expr": "ISERROR(SUMX({\"a\",\"b\"},IF([Value]==FALSE(),1,2)))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 45) DAX comparison operations do not support comparing values of type Text with values of type True/False. Consider using the VALUE or FORMAT function to convert one of the values.\"",
+   "now": "LOCAL-REJECT:DAX comparison operations do not support comparing values of type Text with values of type True/False. Consider using the VALUE or FORMAT function to convert one of the values."
+  },
+  {
+   "part": "A",
+   "expr": "SUMX({\"a\",\"b\"},IF([Value]==TRUE(),1,2))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 37) DAX comparison operations do not support comparing values of type Text with values of type True/False. Consider using the VALUE or FORMAT function to convert one of the values.\"",
+   "now": "LOCAL-REJECT:DAX comparison operations do not support comparing values of type Text with values of type True/False. Consider using the VALUE or FORMAT function to convert one of the values."
+  },
+  {
+   "part": "A",
+   "expr": "COUNTX(FILTER({\"a\",\"b\"},[Value]==TRUE()),1)",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 43) DAX comparison operations do not support comparing values of type Text with values of type True/False. Consider using the VALUE or FORMAT function to convert one of the values.\"",
+   "now": "LOCAL-REJECT:DAX comparison operations do not support comparing values of type Text with values of type True/False. Consider using the VALUE or FORMAT function to convert one of the values."
+  },
+  {
+   "part": "A",
+   "expr": "ISERROR(SUMX({\"a\",\"b\"},IF([Value]==TRUE(),1,2)))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 45) DAX comparison operations do not support comparing values of type Text with values of type True/False. Consider using the VALUE or FORMAT function to convert one of the values.\"",
+   "now": "LOCAL-REJECT:DAX comparison operations do not support comparing values of type Text with values of type True/False. Consider using the VALUE or FORMAT function to convert one of the values."
+  },
+  {
+   "part": "A",
+   "expr": "SUMX({\"a\",\"b\"},IF([Value]=FALSE(),1,2))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 37) DAX comparison operations do not support comparing values of type Text with values of type True/False. Consider using the VALUE or FORMAT function to convert one of the values.\"",
+   "now": "LOCAL-REJECT:Iterator comparisons need matching local data types: DAX comparison operations do not support comparing values of type Text with values of type Integer."
+  },
+  {
+   "part": "A",
+   "expr": "COUNTX(FILTER({\"a\",\"b\"},[Value]=FALSE()),1)",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 43) DAX comparison operations do not support comparing values of type Text with values of type True/False. Consider using the VALUE or FORMAT function to convert one of the values.\"",
+   "now": "LOCAL-REJECT:Iterator comparisons need matching local data types: DAX comparison operations do not support comparing values of type Text with values of type Integer."
+  },
+  {
+   "part": "A",
+   "expr": "ISERROR(SUMX({\"a\",\"b\"},IF([Value]=FALSE(),1,2)))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 45) DAX comparison operations do not support comparing values of type Text with values of type True/False. Consider using the VALUE or FORMAT function to convert one of the values.\"",
+   "now": "LOCAL-REJECT:Iterator comparisons need matching local data types: DAX comparison operations do not support comparing values of type Text with values of type Integer."
+  },
+  {
+   "part": "A",
+   "expr": "SUMX({\"a\",\"b\"},IF([Value]==BLANK(),1,2))",
+   "powerbi": "4",
+   "now": "4"
+  },
+  {
+   "part": "A",
+   "expr": "COUNTX(FILTER({\"a\",\"b\"},[Value]==BLANK()),1)",
+   "powerbi": "BLANK",
+   "now": "BLANK"
+  },
+  {
+   "part": "A",
+   "expr": "ISERROR(SUMX({\"a\",\"b\"},IF([Value]==BLANK(),1,2)))",
+   "powerbi": "False",
+   "now": "False"
+  },
+  {
+   "part": "A",
+   "expr": "SUMX({\"a\",\"b\"},IF([Value]==0,1,2))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 37) DAX comparison operations do not support comparing values of type Text with values of type Integer. Consider using the VALUE or FORMAT function to convert one of the values.\"",
+   "now": "LOCAL-REJECT:DAX comparison operations do not support comparing values of type Text with values of type Integer. Consider using the VALUE or FORMAT function to convert one of the values."
+  },
+  {
+   "part": "A",
+   "expr": "COUNTX(FILTER({\"a\",\"b\"},[Value]==0),1)",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 43) DAX comparison operations do not support comparing values of type Text with values of type Integer. Consider using the VALUE or FORMAT function to convert one of the values.\"",
+   "now": "LOCAL-REJECT:DAX comparison operations do not support comparing values of type Text with values of type Integer. Consider using the VALUE or FORMAT function to convert one of the values."
+  },
+  {
+   "part": "A",
+   "expr": "ISERROR(SUMX({\"a\",\"b\"},IF([Value]==0,1,2)))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 45) DAX comparison operations do not support comparing values of type Text with values of type Integer. Consider using the VALUE or FORMAT function to convert one of the values.\"",
+   "now": "LOCAL-REJECT:DAX comparison operations do not support comparing values of type Text with values of type Integer. Consider using the VALUE or FORMAT function to convert one of the values."
+  },
+  {
+   "part": "A",
+   "expr": "SUMX({\"a\",\"b\"},IF(TRUE()==[Value],1,2))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 37) DAX comparison operations do not support comparing values of type True/False with values of type Text. Consider using the VALUE or FORMAT function to convert one of the values.\"",
+   "now": "LOCAL-REJECT:DAX comparison operations do not support comparing values of type True/False with values of type Text. Consider using the VALUE or FORMAT function to convert one of the values."
+  },
+  {
+   "part": "A",
+   "expr": "COUNTX(FILTER({\"a\",\"b\"},TRUE()==[Value]),1)",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 43) DAX comparison operations do not support comparing values of type True/False with values of type Text. Consider using the VALUE or FORMAT function to convert one of the values.\"",
+   "now": "LOCAL-REJECT:DAX comparison operations do not support comparing values of type True/False with values of type Text. Consider using the VALUE or FORMAT function to convert one of the values."
+  },
+  {
+   "part": "A",
+   "expr": "ISERROR(SUMX({\"a\",\"b\"},IF(TRUE()==[Value],1,2)))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 45) DAX comparison operations do not support comparing values of type True/False with values of type Text. Consider using the VALUE or FORMAT function to convert one of the values.\"",
+   "now": "LOCAL-REJECT:DAX comparison operations do not support comparing values of type True/False with values of type Text. Consider using the VALUE or FORMAT function to convert one of the values."
+  },
+  {
+   "part": "A",
+   "expr": "SUMX(ADDCOLUMNS({1,2},\"k\",[Value]>1),IF([Value]==FALSE(),1,2))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 59) DAX comparison operations do not support comparing values of type Integer with values of type True/False. Consider using the VALUE or FORMAT function to convert one of the values.\"",
+   "now": "LOCAL-REJECT:DAX comparison operations do not support comparing values of type Integer with values of type True/False. Consider using the VALUE or FORMAT function to convert one of the values."
+  },
+  {
+   "part": "A",
+   "expr": "COUNTX(FILTER(ADDCOLUMNS({1,2},\"k\",[Value]>1),[Value]==FALSE()),1)",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 65) DAX comparison operations do not support comparing values of type Integer with values of type True/False. Consider using the VALUE or FORMAT function to convert one of the values.\"",
+   "now": "LOCAL-REJECT:DAX comparison operations do not support comparing values of type Integer with values of type True/False. Consider using the VALUE or FORMAT function to convert one of the values."
+  },
+  {
+   "part": "A",
+   "expr": "ISERROR(SUMX(ADDCOLUMNS({1,2},\"k\",[Value]>1),IF([Value]==FALSE(),1,2)))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 67) DAX comparison operations do not support comparing values of type Integer with values of type True/False. Consider using the VALUE or FORMAT function to convert one of the values.\"",
+   "now": "LOCAL-REJECT:DAX comparison operations do not support comparing values of type Integer with values of type True/False. Consider using the VALUE or FORMAT function to convert one of the values."
+  },
+  {
+   "part": "A",
+   "expr": "SUMX(ADDCOLUMNS({1,2},\"k\",[Value]>1),IF([Value]==TRUE(),1,2))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 59) DAX comparison operations do not support comparing values of type Integer with values of type True/False. Consider using the VALUE or FORMAT function to convert one of the values.\"",
+   "now": "LOCAL-REJECT:DAX comparison operations do not support comparing values of type Integer with values of type True/False. Consider using the VALUE or FORMAT function to convert one of the values."
+  },
+  {
+   "part": "A",
+   "expr": "COUNTX(FILTER(ADDCOLUMNS({1,2},\"k\",[Value]>1),[Value]==TRUE()),1)",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 65) DAX comparison operations do not support comparing values of type Integer with values of type True/False. Consider using the VALUE or FORMAT function to convert one of the values.\"",
+   "now": "LOCAL-REJECT:DAX comparison operations do not support comparing values of type Integer with values of type True/False. Consider using the VALUE or FORMAT function to convert one of the values."
+  },
+  {
+   "part": "A",
+   "expr": "ISERROR(SUMX(ADDCOLUMNS({1,2},\"k\",[Value]>1),IF([Value]==TRUE(),1,2)))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 67) DAX comparison operations do not support comparing values of type Integer with values of type True/False. Consider using the VALUE or FORMAT function to convert one of the values.\"",
+   "now": "LOCAL-REJECT:DAX comparison operations do not support comparing values of type Integer with values of type True/False. Consider using the VALUE or FORMAT function to convert one of the values."
+  },
+  {
+   "part": "A",
+   "expr": "SUMX(ADDCOLUMNS({1,2},\"k\",[Value]>1),IF([Value]=FALSE(),1,2))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 59) DAX comparison operations do not support comparing values of type Integer with values of type True/False. Consider using the VALUE or FORMAT function to convert one of the values.\"",
+   "now": "LOCAL-REJECT:Iterator comparisons need matching local data types."
+  },
+  {
+   "part": "A",
+   "expr": "COUNTX(FILTER(ADDCOLUMNS({1,2},\"k\",[Value]>1),[Value]=FALSE()),1)",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 65) DAX comparison operations do not support comparing values of type Integer with values of type True/False. Consider using the VALUE or FORMAT function to convert one of the values.\"",
+   "now": "LOCAL-REJECT:Iterator comparisons need matching local data types."
+  },
+  {
+   "part": "A",
+   "expr": "ISERROR(SUMX(ADDCOLUMNS({1,2},\"k\",[Value]>1),IF([Value]=FALSE(),1,2)))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 67) DAX comparison operations do not support comparing values of type Integer with values of type True/False. Consider using the VALUE or FORMAT function to convert one of the values.\"",
+   "now": "LOCAL-REJECT:Iterator comparisons need matching local data types."
+  },
+  {
+   "part": "A",
+   "expr": "SUMX(ADDCOLUMNS({1,2},\"k\",[Value]>1),IF([Value]==BLANK(),1,2))",
+   "powerbi": "4",
+   "now": "4"
+  },
+  {
+   "part": "A",
+   "expr": "COUNTX(FILTER(ADDCOLUMNS({1,2},\"k\",[Value]>1),[Value]==BLANK()),1)",
+   "powerbi": "BLANK",
+   "now": "BLANK"
+  },
+  {
+   "part": "A",
+   "expr": "ISERROR(SUMX(ADDCOLUMNS({1,2},\"k\",[Value]>1),IF([Value]==BLANK(),1,2)))",
+   "powerbi": "False",
+   "now": "False"
+  },
+  {
+   "part": "A",
+   "expr": "SUMX(ADDCOLUMNS({1,2},\"k\",[Value]>1),IF([Value]==0,1,2))",
+   "powerbi": "4",
+   "now": "4"
+  },
+  {
+   "part": "A",
+   "expr": "COUNTX(FILTER(ADDCOLUMNS({1,2},\"k\",[Value]>1),[Value]==0),1)",
+   "powerbi": "BLANK",
+   "now": "BLANK"
+  },
+  {
+   "part": "A",
+   "expr": "ISERROR(SUMX(ADDCOLUMNS({1,2},\"k\",[Value]>1),IF([Value]==0,1,2)))",
+   "powerbi": "False",
+   "now": "False"
+  },
+  {
+   "part": "A",
+   "expr": "SUMX(ADDCOLUMNS({1,2},\"k\",[Value]>1),IF(TRUE()==[Value],1,2))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 59) DAX comparison operations do not support comparing values of type True/False with values of type Integer. Consider using the VALUE or FORMAT function to convert one of the values.\"",
+   "now": "LOCAL-REJECT:DAX comparison operations do not support comparing values of type True/False with values of type Integer. Consider using the VALUE or FORMAT function to convert one of the values."
+  },
+  {
+   "part": "A",
+   "expr": "COUNTX(FILTER(ADDCOLUMNS({1,2},\"k\",[Value]>1),TRUE()==[Value]),1)",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 65) DAX comparison operations do not support comparing values of type True/False with values of type Integer. Consider using the VALUE or FORMAT function to convert one of the values.\"",
+   "now": "LOCAL-REJECT:DAX comparison operations do not support comparing values of type True/False with values of type Integer. Consider using the VALUE or FORMAT function to convert one of the values."
+  },
+  {
+   "part": "A",
+   "expr": "ISERROR(SUMX(ADDCOLUMNS({1,2},\"k\",[Value]>1),IF(TRUE()==[Value],1,2)))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 67) DAX comparison operations do not support comparing values of type True/False with values of type Integer. Consider using the VALUE or FORMAT function to convert one of the values.\"",
+   "now": "LOCAL-REJECT:DAX comparison operations do not support comparing values of type True/False with values of type Integer. Consider using the VALUE or FORMAT function to convert one of the values."
+  },
+  {
+   "part": "A",
+   "expr": "SUMX(GENERATESERIES(0,2),IF([Value]==FALSE(),1,2))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 47) DAX comparison operations do not support comparing values of type Integer with values of type True/False. Consider using the VALUE or FORMAT function to convert one of the values.\"",
+   "now": "LOCAL-REJECT:DAX comparison operations do not support comparing values of type Integer with values of type True/False. Consider using the VALUE or FORMAT function to convert one of the values."
+  },
+  {
+   "part": "A",
+   "expr": "COUNTX(FILTER(GENERATESERIES(0,2),[Value]==FALSE()),1)",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 53) DAX comparison operations do not support comparing values of type Integer with values of type True/False. Consider using the VALUE or FORMAT function to convert one of the values.\"",
+   "now": "LOCAL-REJECT:DAX comparison operations do not support comparing values of type Integer with values of type True/False. Consider using the VALUE or FORMAT function to convert one of the values."
+  },
+  {
+   "part": "A",
+   "expr": "ISERROR(SUMX(GENERATESERIES(0,2),IF([Value]==FALSE(),1,2)))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 55) DAX comparison operations do not support comparing values of type Integer with values of type True/False. Consider using the VALUE or FORMAT function to convert one of the values.\"",
+   "now": "LOCAL-REJECT:DAX comparison operations do not support comparing values of type Integer with values of type True/False. Consider using the VALUE or FORMAT function to convert one of the values."
+  },
+  {
+   "part": "A",
+   "expr": "SUMX(GENERATESERIES(0,2),IF([Value]==TRUE(),1,2))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 47) DAX comparison operations do not support comparing values of type Integer with values of type True/False. Consider using the VALUE or FORMAT function to convert one of the values.\"",
+   "now": "LOCAL-REJECT:DAX comparison operations do not support comparing values of type Integer with values of type True/False. Consider using the VALUE or FORMAT function to convert one of the values."
+  },
+  {
+   "part": "A",
+   "expr": "COUNTX(FILTER(GENERATESERIES(0,2),[Value]==TRUE()),1)",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 53) DAX comparison operations do not support comparing values of type Integer with values of type True/False. Consider using the VALUE or FORMAT function to convert one of the values.\"",
+   "now": "LOCAL-REJECT:DAX comparison operations do not support comparing values of type Integer with values of type True/False. Consider using the VALUE or FORMAT function to convert one of the values."
+  },
+  {
+   "part": "A",
+   "expr": "ISERROR(SUMX(GENERATESERIES(0,2),IF([Value]==TRUE(),1,2)))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 55) DAX comparison operations do not support comparing values of type Integer with values of type True/False. Consider using the VALUE or FORMAT function to convert one of the values.\"",
+   "now": "LOCAL-REJECT:DAX comparison operations do not support comparing values of type Integer with values of type True/False. Consider using the VALUE or FORMAT function to convert one of the values."
+  },
+  {
+   "part": "A",
+   "expr": "SUMX(GENERATESERIES(0,2),IF([Value]=FALSE(),1,2))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 47) DAX comparison operations do not support comparing values of type Integer with values of type True/False. Consider using the VALUE or FORMAT function to convert one of the values.\"",
+   "now": "LOCAL-REJECT:Iterator comparisons need matching local data types."
+  },
+  {
+   "part": "A",
+   "expr": "COUNTX(FILTER(GENERATESERIES(0,2),[Value]=FALSE()),1)",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 53) DAX comparison operations do not support comparing values of type Integer with values of type True/False. Consider using the VALUE or FORMAT function to convert one of the values.\"",
+   "now": "LOCAL-REJECT:Iterator comparisons need matching local data types."
+  },
+  {
+   "part": "A",
+   "expr": "ISERROR(SUMX(GENERATESERIES(0,2),IF([Value]=FALSE(),1,2)))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 55) DAX comparison operations do not support comparing values of type Integer with values of type True/False. Consider using the VALUE or FORMAT function to convert one of the values.\"",
+   "now": "LOCAL-REJECT:Iterator comparisons need matching local data types."
+  },
+  {
+   "part": "A",
+   "expr": "SUMX(GENERATESERIES(0,2),IF([Value]==BLANK(),1,2))",
+   "powerbi": "6",
+   "now": "6"
+  },
+  {
+   "part": "A",
+   "expr": "COUNTX(FILTER(GENERATESERIES(0,2),[Value]==BLANK()),1)",
+   "powerbi": "BLANK",
+   "now": "BLANK"
+  },
+  {
+   "part": "A",
+   "expr": "ISERROR(SUMX(GENERATESERIES(0,2),IF([Value]==BLANK(),1,2)))",
+   "powerbi": "False",
+   "now": "False"
+  },
+  {
+   "part": "A",
+   "expr": "SUMX(GENERATESERIES(0,2),IF([Value]==0,1,2))",
+   "powerbi": "5",
+   "now": "5"
+  },
+  {
+   "part": "A",
+   "expr": "COUNTX(FILTER(GENERATESERIES(0,2),[Value]==0),1)",
+   "powerbi": "1",
+   "now": "1"
+  },
+  {
+   "part": "A",
+   "expr": "ISERROR(SUMX(GENERATESERIES(0,2),IF([Value]==0,1,2)))",
+   "powerbi": "False",
+   "now": "False"
+  },
+  {
+   "part": "A",
+   "expr": "SUMX(GENERATESERIES(0,2),IF(TRUE()==[Value],1,2))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 47) DAX comparison operations do not support comparing values of type True/False with values of type Integer. Consider using the VALUE or FORMAT function to convert one of the values.\"",
+   "now": "LOCAL-REJECT:DAX comparison operations do not support comparing values of type True/False with values of type Integer. Consider using the VALUE or FORMAT function to convert one of the values."
+  },
+  {
+   "part": "A",
+   "expr": "COUNTX(FILTER(GENERATESERIES(0,2),TRUE()==[Value]),1)",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 53) DAX comparison operations do not support comparing values of type True/False with values of type Integer. Consider using the VALUE or FORMAT function to convert one of the values.\"",
+   "now": "LOCAL-REJECT:DAX comparison operations do not support comparing values of type True/False with values of type Integer. Consider using the VALUE or FORMAT function to convert one of the values."
+  },
+  {
+   "part": "A",
+   "expr": "ISERROR(SUMX(GENERATESERIES(0,2),IF(TRUE()==[Value],1,2)))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 55) DAX comparison operations do not support comparing values of type True/False with values of type Integer. Consider using the VALUE or FORMAT function to convert one of the values.\"",
+   "now": "LOCAL-REJECT:DAX comparison operations do not support comparing values of type True/False with values of type Integer. Consider using the VALUE or FORMAT function to convert one of the values."
+  },
+  {
+   "part": "B",
+   "expr": "MAXX(FILTER(Facts,FALSE()),DATE(2020,1,1))+1&\"\"",
+   "powerbi": "12/31/1899",
+   "now": "1"
+  },
+  {
+   "part": "B",
+   "expr": "ISBLANK(MAXX(FILTER(Facts,FALSE()),DATE(2020,1,1))+1)",
+   "powerbi": "False",
+   "now": "False"
+  },
+  {
+   "part": "B",
+   "expr": "FORMAT(MAXX(FILTER(Facts,FALSE()),DATE(2020,1,1))+1,\"yyyy-mm-dd hh:nn\")",
+   "powerbi": "1899-12-31 00:00",
+   "now": "1899-12-31 00:00"
+  },
+  {
+   "part": "B",
+   "expr": "MINX(FILTER(Facts,FALSE()),DATE(2020,1,1))-1&\"\"",
+   "powerbi": "12/29/1899",
+   "now": "-1"
+  },
+  {
+   "part": "B",
+   "expr": "ISBLANK(MINX(FILTER(Facts,FALSE()),DATE(2020,1,1))-1)",
+   "powerbi": "False",
+   "now": "False"
+  },
+  {
+   "part": "B",
+   "expr": "FORMAT(MINX(FILTER(Facts,FALSE()),DATE(2020,1,1))-1,\"yyyy-mm-dd hh:nn\")",
+   "powerbi": "1899-12-29 00:00",
+   "now": "1899-12-29 00:00"
+  },
+  {
+   "part": "B",
+   "expr": "MAXX(FILTER(Facts,FALSE()),DATE(2020,1,1))*1&\"\"",
+   "powerbi": "",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "ISBLANK(MAXX(FILTER(Facts,FALSE()),DATE(2020,1,1))*1)",
+   "powerbi": "True",
+   "now": "True"
+  },
+  {
+   "part": "B",
+   "expr": "FORMAT(MAXX(FILTER(Facts,FALSE()),DATE(2020,1,1))*1,\"yyyy-mm-dd hh:nn\")",
+   "powerbi": "",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "MAXX(FILTER(Facts,FALSE()),NOW())+0.5&\"\"",
+   "powerbi": "12:00:00 PM",
+   "now": "0.5"
+  },
+  {
+   "part": "B",
+   "expr": "ISBLANK(MAXX(FILTER(Facts,FALSE()),NOW())+0.5)",
+   "powerbi": "False",
+   "now": "False"
+  },
+  {
+   "part": "B",
+   "expr": "FORMAT(MAXX(FILTER(Facts,FALSE()),NOW())+0.5,\"yyyy-mm-dd hh:nn\")",
+   "powerbi": "1899-12-30 12:00",
+   "now": "1899-12-30 12:00"
+  },
+  {
+   "part": "B",
+   "expr": "MAXX(FILTER(Facts,FALSE()),DATE(2020,1,1))+TIME(1,0,0)&\"\"",
+   "powerbi": "1:00:00 AM",
+   "now": "1:00:00 AM"
+  },
+  {
+   "part": "B",
+   "expr": "ISBLANK(MAXX(FILTER(Facts,FALSE()),DATE(2020,1,1))+TIME(1,0,0))",
+   "powerbi": "False",
+   "now": "False"
+  },
+  {
+   "part": "B",
+   "expr": "FORMAT(MAXX(FILTER(Facts,FALSE()),DATE(2020,1,1))+TIME(1,0,0),\"yyyy-mm-dd hh:nn\")",
+   "powerbi": "1899-12-30 01:00",
+   "now": "1899-12-30 01:00"
+  },
+  {
+   "part": "B",
+   "expr": "SUMX(FILTER(Facts,FALSE()),DATE(2020,1,1))+1&\"\"",
+   "powerbi": "12/31/1899",
+   "now": "12/31/1899"
+  },
+  {
+   "part": "B",
+   "expr": "ISBLANK(SUMX(FILTER(Facts,FALSE()),DATE(2020,1,1))+1)",
+   "powerbi": "False",
+   "now": "False"
+  },
+  {
+   "part": "B",
+   "expr": "FORMAT(SUMX(FILTER(Facts,FALSE()),DATE(2020,1,1))+1,\"yyyy-mm-dd hh:nn\")",
+   "powerbi": "1899-12-31 00:00",
+   "now": "1899-12-31 00:00"
+  },
+  {
+   "part": "B",
+   "expr": "MAXX(FILTER(Facts,FALSE()),DATE(2020,1,1))&\"z\"&\"\"",
+   "powerbi": "z",
+   "now": "z"
+  },
+  {
+   "part": "B",
+   "expr": "ISBLANK(MAXX(FILTER(Facts,FALSE()),DATE(2020,1,1))&\"z\")",
+   "powerbi": "False",
+   "now": "False"
+  },
+  {
+   "part": "B",
+   "expr": "FORMAT(MAXX(FILTER(Facts,FALSE()),DATE(2020,1,1))&\"z\",\"yyyy-mm-dd hh:nn\")",
+   "powerbi": "z",
+   "now": "z"
+  },
+  {
+   "part": "B",
+   "expr": "(MAXX(FILTER(Facts,FALSE()),DATE(2020,1,1))+1)&\"z\"&\"\"",
+   "powerbi": "12/31/1899z",
+   "now": "1z"
+  },
+  {
+   "part": "B",
+   "expr": "ISBLANK((MAXX(FILTER(Facts,FALSE()),DATE(2020,1,1))+1)&\"z\")",
+   "powerbi": "False",
+   "now": "False"
+  },
+  {
+   "part": "B",
+   "expr": "FORMAT((MAXX(FILTER(Facts,FALSE()),DATE(2020,1,1))+1)&\"z\",\"yyyy-mm-dd hh:nn\")",
+   "powerbi": "12/31/1899z",
+   "now": "1z"
+  },
+  {
+   "part": "B",
+   "expr": "INT(MAXX(FILTER(Facts,FALSE()),DATE(2020,1,1))+1)&\"\"",
+   "powerbi": "1",
+   "now": "1"
+  },
+  {
+   "part": "B",
+   "expr": "ISBLANK(INT(MAXX(FILTER(Facts,FALSE()),DATE(2020,1,1))+1))",
+   "powerbi": "False",
+   "now": "False"
+  },
+  {
+   "part": "B",
+   "expr": "FORMAT(INT(MAXX(FILTER(Facts,FALSE()),DATE(2020,1,1))+1),\"yyyy-mm-dd hh:nn\")",
+   "powerbi": "1899-12-31 00:00",
+   "now": "1899-12-31 00:00"
+  },
+  {
+   "part": "B",
+   "expr": "YEAR(MAXX(FILTER(Facts,FALSE()),DATE(2020,1,1))+1)&\"\"",
+   "powerbi": "1899",
+   "now": "1899"
+  },
+  {
+   "part": "B",
+   "expr": "ISBLANK(YEAR(MAXX(FILTER(Facts,FALSE()),DATE(2020,1,1))+1))",
+   "powerbi": "False",
+   "now": "False"
+  },
+  {
+   "part": "B",
+   "expr": "FORMAT(YEAR(MAXX(FILTER(Facts,FALSE()),DATE(2020,1,1))+1),\"yyyy-mm-dd hh:nn\")",
+   "powerbi": "1905-03-13 00:00",
+   "now": "1905-03-13 00:00"
+  },
+  {
+   "part": "C",
+   "expr": "(Facts[Sales]>5&&\"\")&\"z\"",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 20) A single value for column 'Sales' in table 'Facts' cannot be determined. This can happen when a measure or function formula refers to a column that contains many values without specifying an aggregation such as min, max, count, or sum to get a single result.\"",
+   "now": "LOCAL-REJECT:'Sales' is a column reference; use an aggregation such as SUM([Sales])."
+  },
+  {
+   "part": "C",
+   "expr": "ISBLANK(Facts[Sales]>5&&\"\")",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 27) A single value for column 'Sales' in table 'Facts' cannot be determined. This can happen when a measure or function formula refers to a column that contains many values without specifying an aggregation such as min, max, count, or sum to get a single result.\"",
+   "now": "LOCAL-REJECT:A single value for column 'Sales' in table 'Facts' cannot be determined. Refer to the column inside an aggregation such as MIN, MAX, COUNT or SUM, or iterate its table."
+  },
+  {
+   "part": "C",
+   "expr": "ISLOGICAL(Facts[Sales]>5&&\"\")",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 29) A single value for column 'Sales' in table 'Facts' cannot be determined. This can happen when a measure or function formula refers to a column that contains many values without specifying an aggregation such as min, max, count, or sum to get a single result.\"",
+   "now": "LOCAL-REJECT:'Sales' is a column reference; use an aggregation such as SUM([Sales])."
+  },
+  {
+   "part": "C",
+   "expr": "IF(Facts[Sales]>5&&\"\",1,2)",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 22) A single value for column 'Sales' in table 'Facts' cannot be determined. This can happen when a measure or function formula refers to a column that contains many values without specifying an aggregation such as min, max, count, or sum to get a single result.\"",
+   "now": "LOCAL-REJECT:'Sales' is a column reference; use an aggregation such as SUM([Sales])."
+  },
+  {
+   "part": "C",
+   "expr": "COUNTX(Facts,Facts[Sales]>5&&\"\")",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 32) The function COUNTX cannot work with values of type Boolean.\"",
+   "now": "LOCAL-REJECT:The function COUNTX cannot work with values of type Boolean."
+  },
+  {
+   "part": "C",
+   "expr": "CONCATENATEX(Facts,Facts[Sales]>5&&\"\",\"|\")",
+   "powerbi": "FALSE|FALSE|FALSE|FALSE|FALSE|FALSE",
+   "now": "FALSE|FALSE|FALSE|FALSE|FALSE|FALSE"
+  },
+  {
+   "part": "C",
+   "expr": "(Facts[Sales]>5||\"\")&\"z\"",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 20) A single value for column 'Sales' in table 'Facts' cannot be determined. This can happen when a measure or function formula refers to a column that contains many values without specifying an aggregation such as min, max, count, or sum to get a single result.\"",
+   "now": "LOCAL-REJECT:'Sales' is a column reference; use an aggregation such as SUM([Sales])."
+  },
+  {
+   "part": "C",
+   "expr": "ISBLANK(Facts[Sales]>5||\"\")",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 27) A single value for column 'Sales' in table 'Facts' cannot be determined. This can happen when a measure or function formula refers to a column that contains many values without specifying an aggregation such as min, max, count, or sum to get a single result.\"",
+   "now": "LOCAL-REJECT:A single value for column 'Sales' in table 'Facts' cannot be determined. Refer to the column inside an aggregation such as MIN, MAX, COUNT or SUM, or iterate its table."
+  },
+  {
+   "part": "C",
+   "expr": "ISLOGICAL(Facts[Sales]>5||\"\")",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 29) A single value for column 'Sales' in table 'Facts' cannot be determined. This can happen when a measure or function formula refers to a column that contains many values without specifying an aggregation such as min, max, count, or sum to get a single result.\"",
+   "now": "LOCAL-REJECT:'Sales' is a column reference; use an aggregation such as SUM([Sales])."
+  },
+  {
+   "part": "C",
+   "expr": "IF(Facts[Sales]>5||\"\",1,2)",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 22) A single value for column 'Sales' in table 'Facts' cannot be determined. This can happen when a measure or function formula refers to a column that contains many values without specifying an aggregation such as min, max, count, or sum to get a single result.\"",
+   "now": "LOCAL-REJECT:'Sales' is a column reference; use an aggregation such as SUM([Sales])."
+  },
+  {
+   "part": "C",
+   "expr": "COUNTX(Facts,Facts[Sales]>5||\"\")",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 32) The function COUNTX cannot work with values of type Boolean.\"",
+   "now": "LOCAL-REJECT:The function COUNTX cannot work with values of type Boolean."
+  },
+  {
+   "part": "C",
+   "expr": "CONCATENATEX(Facts,Facts[Sales]>5||\"\",\"|\")",
+   "powerbi": "FALSE|FALSE|FALSE|FALSE|TRUE|TRUE",
+   "now": "FALSE|FALSE|FALSE|FALSE|TRUE|TRUE"
+  },
+  {
+   "part": "C",
+   "expr": "(MAX(Facts[Sales])>5&&\"\")&\"z\"",
+   "powerbi": "z",
+   "now": "z"
+  },
+  {
+   "part": "C",
+   "expr": "ISBLANK(MAX(Facts[Sales])>5&&\"\")",
+   "powerbi": "False",
+   "now": "False"
+  },
+  {
+   "part": "C",
+   "expr": "ISLOGICAL(MAX(Facts[Sales])>5&&\"\")",
+   "powerbi": "True",
+   "now": "True"
+  },
+  {
+   "part": "C",
+   "expr": "IF(MAX(Facts[Sales])>5&&\"\",1,2)",
+   "powerbi": "2",
+   "now": "2"
+  },
+  {
+   "part": "C",
+   "expr": "COUNTX(Facts,MAX(Facts[Sales])>5&&\"\")",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 32) The function COUNTX cannot work with values of type Boolean.\"",
+   "now": "LOCAL-REJECT:The function COUNTX cannot work with values of type Boolean."
+  },
+  {
+   "part": "C",
+   "expr": "CONCATENATEX(Facts,MAX(Facts[Sales])>5&&\"\",\"|\")",
+   "powerbi": "|||||",
+   "now": "|||||"
+  },
+  {
+   "part": "C",
+   "expr": "(MAX(Facts[Sales])>5||\"\")&\"z\"",
+   "powerbi": "TRUEz",
+   "now": "TRUEz"
+  },
+  {
+   "part": "C",
+   "expr": "ISBLANK(MAX(Facts[Sales])>5||\"\")",
+   "powerbi": "False",
+   "now": "False"
+  },
+  {
+   "part": "C",
+   "expr": "ISLOGICAL(MAX(Facts[Sales])>5||\"\")",
+   "powerbi": "True",
+   "now": "True"
+  },
+  {
+   "part": "C",
+   "expr": "IF(MAX(Facts[Sales])>5||\"\",1,2)",
+   "powerbi": "1",
+   "now": "1"
+  },
+  {
+   "part": "C",
+   "expr": "COUNTX(Facts,MAX(Facts[Sales])>5||\"\")",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 32) The function COUNTX cannot work with values of type Boolean.\"",
+   "now": "LOCAL-REJECT:The function COUNTX cannot work with values of type Boolean."
+  },
+  {
+   "part": "C",
+   "expr": "CONCATENATEX(Facts,MAX(Facts[Sales])>5||\"\",\"|\")",
+   "powerbi": "TRUE|TRUE|TRUE|TRUE|TRUE|TRUE",
+   "now": "TRUE|TRUE|TRUE|TRUE|TRUE|TRUE"
+  },
+  {
+   "part": "C",
+   "expr": "(SUM(Facts[Quantity])>100&&\"\")&\"z\"",
+   "powerbi": "FALSEz",
+   "now": "FALSEz"
+  },
+  {
+   "part": "C",
+   "expr": "ISBLANK(SUM(Facts[Quantity])>100&&\"\")",
+   "powerbi": "False",
+   "now": "False"
+  },
+  {
+   "part": "C",
+   "expr": "ISLOGICAL(SUM(Facts[Quantity])>100&&\"\")",
+   "powerbi": "True",
+   "now": "True"
+  },
+  {
+   "part": "C",
+   "expr": "IF(SUM(Facts[Quantity])>100&&\"\",1,2)",
+   "powerbi": "2",
+   "now": "2"
+  },
+  {
+   "part": "C",
+   "expr": "COUNTX(Facts,SUM(Facts[Quantity])>100&&\"\")",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 32) The function COUNTX cannot work with values of type Boolean.\"",
+   "now": "LOCAL-REJECT:The function COUNTX cannot work with values of type Boolean."
+  },
+  {
+   "part": "C",
+   "expr": "CONCATENATEX(Facts,SUM(Facts[Quantity])>100&&\"\",\"|\")",
+   "powerbi": "FALSE|FALSE|FALSE|FALSE|FALSE|FALSE",
+   "now": "FALSE|FALSE|FALSE|FALSE|FALSE|FALSE"
+  },
+  {
+   "part": "C",
+   "expr": "(SUM(Facts[Quantity])>100||\"\")&\"z\"",
+   "powerbi": "FALSEz",
+   "now": "FALSEz"
+  },
+  {
+   "part": "C",
+   "expr": "ISBLANK(SUM(Facts[Quantity])>100||\"\")",
+   "powerbi": "False",
+   "now": "False"
+  },
+  {
+   "part": "C",
+   "expr": "ISLOGICAL(SUM(Facts[Quantity])>100||\"\")",
+   "powerbi": "True",
+   "now": "True"
+  },
+  {
+   "part": "C",
+   "expr": "IF(SUM(Facts[Quantity])>100||\"\",1,2)",
+   "powerbi": "2",
+   "now": "2"
+  },
+  {
+   "part": "C",
+   "expr": "COUNTX(Facts,SUM(Facts[Quantity])>100||\"\")",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 32) The function COUNTX cannot work with values of type Boolean.\"",
+   "now": "LOCAL-REJECT:The function COUNTX cannot work with values of type Boolean."
+  },
+  {
+   "part": "C",
+   "expr": "CONCATENATEX(Facts,SUM(Facts[Quantity])>100||\"\",\"|\")",
+   "powerbi": "FALSE|FALSE|FALSE|FALSE|FALSE|FALSE",
+   "now": "FALSE|FALSE|FALSE|FALSE|FALSE|FALSE"
+  },
+  {
+   "part": "C",
+   "expr": "(SELECTEDVALUE(Facts[Region])=\"East\"&&\"\")&\"z\"",
+   "powerbi": "FALSEz",
+   "now": "FALSEz"
+  },
+  {
+   "part": "C",
+   "expr": "ISBLANK(SELECTEDVALUE(Facts[Region])=\"East\"&&\"\")",
+   "powerbi": "False",
+   "now": "False"
+  },
+  {
+   "part": "C",
+   "expr": "ISLOGICAL(SELECTEDVALUE(Facts[Region])=\"East\"&&\"\")",
+   "powerbi": "True",
+   "now": "True"
+  },
+  {
+   "part": "C",
+   "expr": "IF(SELECTEDVALUE(Facts[Region])=\"East\"&&\"\",1,2)",
+   "powerbi": "2",
+   "now": "2"
+  },
+  {
+   "part": "C",
+   "expr": "COUNTX(Facts,SELECTEDVALUE(Facts[Region])=\"East\"&&\"\")",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 32) The function COUNTX cannot work with values of type Boolean.\"",
+   "now": "LOCAL-REJECT:The function COUNTX cannot work with values of type Boolean."
+  },
+  {
+   "part": "C",
+   "expr": "CONCATENATEX(Facts,SELECTEDVALUE(Facts[Region])=\"East\"&&\"\",\"|\")",
+   "powerbi": "FALSE|FALSE|FALSE|FALSE|FALSE|FALSE",
+   "now": "FALSE|FALSE|FALSE|FALSE|FALSE|FALSE"
+  },
+  {
+   "part": "C",
+   "expr": "(SELECTEDVALUE(Facts[Region])=\"East\"||\"\")&\"z\"",
+   "powerbi": "z",
+   "now": "z"
+  },
+  {
+   "part": "C",
+   "expr": "ISBLANK(SELECTEDVALUE(Facts[Region])=\"East\"||\"\")",
+   "powerbi": "False",
+   "now": "False"
+  },
+  {
+   "part": "C",
+   "expr": "ISLOGICAL(SELECTEDVALUE(Facts[Region])=\"East\"||\"\")",
+   "powerbi": "False",
+   "now": "False"
+  },
+  {
+   "part": "C",
+   "expr": "IF(SELECTEDVALUE(Facts[Region])=\"East\"||\"\",1,2)",
+   "powerbi": "2",
+   "now": "2"
+  },
+  {
+   "part": "C",
+   "expr": "COUNTX(Facts,SELECTEDVALUE(Facts[Region])=\"East\"||\"\")",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 32) The function COUNTX cannot work with values of type Boolean.\"",
+   "now": "LOCAL-REJECT:The function COUNTX cannot work with values of type Boolean."
+  },
+  {
+   "part": "C",
+   "expr": "CONCATENATEX(Facts,SELECTEDVALUE(Facts[Region])=\"East\"||\"\",\"|\")",
+   "powerbi": "|||||",
+   "now": "|||||"
+  },
+  {
+   "part": "C",
+   "expr": "(ISBLANK(MAX(Facts[Note]))&&\"\")&\"z\"",
+   "powerbi": "FALSEz",
+   "now": "FALSEz"
+  },
+  {
+   "part": "C",
+   "expr": "ISBLANK(ISBLANK(MAX(Facts[Note]))&&\"\")",
+   "powerbi": "False",
+   "now": "False"
+  },
+  {
+   "part": "C",
+   "expr": "ISLOGICAL(ISBLANK(MAX(Facts[Note]))&&\"\")",
+   "powerbi": "True",
+   "now": "True"
+  },
+  {
+   "part": "C",
+   "expr": "IF(ISBLANK(MAX(Facts[Note]))&&\"\",1,2)",
+   "powerbi": "2",
+   "now": "2"
+  },
+  {
+   "part": "C",
+   "expr": "COUNTX(Facts,ISBLANK(MAX(Facts[Note]))&&\"\")",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 32) The function COUNTX cannot work with values of type Boolean.\"",
+   "now": "LOCAL-REJECT:The function COUNTX cannot work with values of type Boolean."
+  },
+  {
+   "part": "C",
+   "expr": "CONCATENATEX(Facts,ISBLANK(MAX(Facts[Note]))&&\"\",\"|\")",
+   "powerbi": "FALSE|FALSE|FALSE|FALSE|FALSE|FALSE",
+   "now": "FALSE|FALSE|FALSE|FALSE|FALSE|FALSE"
+  },
+  {
+   "part": "C",
+   "expr": "(ISBLANK(MAX(Facts[Note]))||\"\")&\"z\"",
+   "powerbi": "z",
+   "now": "z"
+  },
+  {
+   "part": "C",
+   "expr": "ISBLANK(ISBLANK(MAX(Facts[Note]))||\"\")",
+   "powerbi": "False",
+   "now": "False"
+  },
+  {
+   "part": "C",
+   "expr": "ISLOGICAL(ISBLANK(MAX(Facts[Note]))||\"\")",
+   "powerbi": "True",
+   "now": "LOCAL-REJECT:ISLOGICAL of a logical operator over this function is not modelled by the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "IF(ISBLANK(MAX(Facts[Note]))||\"\",1,2)",
+   "powerbi": "2",
+   "now": "2"
+  },
+  {
+   "part": "C",
+   "expr": "COUNTX(Facts,ISBLANK(MAX(Facts[Note]))||\"\")",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 32) The function COUNTX cannot work with values of type Boolean.\"",
+   "now": "LOCAL-REJECT:The function COUNTX cannot work with values of type Boolean."
+  },
+  {
+   "part": "C",
+   "expr": "CONCATENATEX(Facts,ISBLANK(MAX(Facts[Note]))||\"\",\"|\")",
+   "powerbi": "|||||",
+   "now": "|||||"
+  },
+  {
+   "part": "D",
+   "expr": "SIN(DATE(2020,1,1))&\"z\"",
+   "powerbi": "-0.480042259560207z",
+   "now": "-0.480042259563374z"
+  },
+  {
+   "part": "D",
+   "expr": "CONCATENATEX({1},SIN(DATE(2020,1,1)))",
+   "powerbi": "-0.480042259560207",
+   "now": "-0.480042259563374"
+  },
+  {
+   "part": "D",
+   "expr": "COS(DATE(2020,1,1))&\"z\"",
+   "powerbi": "0.877245364214785z",
+   "now": "0.877245364213052z"
+  },
+  {
+   "part": "D",
+   "expr": "CONCATENATEX({1},COS(DATE(2020,1,1)))",
+   "powerbi": "0.877245364214785",
+   "now": "0.877245364213052"
+  },
+  {
+   "part": "D",
+   "expr": "TAN(DATE(2020,1,1))&\"z\"",
+   "powerbi": "-0.547215498813025z",
+   "now": "-0.547215498817716z"
+  },
+  {
+   "part": "D",
+   "expr": "CONCATENATEX({1},TAN(DATE(2020,1,1)))",
+   "powerbi": "-0.547215498813025",
+   "now": "-0.547215498817716"
+  },
+  {
+   "part": "D",
+   "expr": "ATAN(DATE(2020,1,1))&\"z\"",
+   "powerbi": "1.57077351189221z",
+   "now": "1.57077351189221z"
+  },
+  {
+   "part": "D",
+   "expr": "CONCATENATEX({1},ATAN(DATE(2020,1,1)))",
+   "powerbi": "1.57077351189221",
+   "now": "1.57077351189221"
+  },
+  {
+   "part": "A",
+   "expr": "SINH(DATE(2020,1,1))&\"z\"",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 19) An argument of function 'SINH' has the wrong data type or the result is too large or too small.\"",
+   "now": "LOCAL-REJECT:An argument of function 'SINH' has the wrong data type or the result is too large or too small."
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX({1},SINH(DATE(2020,1,1)))",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 36) An argument of function 'SINH' has the wrong data type or the result is too large or too small.\"",
+   "now": "LOCAL-REJECT:An argument of function 'SINH' has the wrong data type or the result is too large or too small."
+  },
+  {
+   "part": "D",
+   "expr": "SIN(TRUE())&\"z\"",
+   "powerbi": "0.841470984807897z",
+   "now": "0.841470984807897z"
+  },
+  {
+   "part": "D",
+   "expr": "CONCATENATEX({1},SIN(TRUE()))",
+   "powerbi": "0.841470984807897",
+   "now": "0.841470984807897"
+  },
+  {
+   "part": "D",
+   "expr": "COS(TRUE())&\"z\"",
+   "powerbi": "0.54030230586814z",
+   "now": "0.54030230586814z"
+  },
+  {
+   "part": "D",
+   "expr": "CONCATENATEX({1},COS(TRUE()))",
+   "powerbi": "0.54030230586814",
+   "now": "0.54030230586814"
+  },
+  {
+   "part": "D",
+   "expr": "TAN(TRUE())&\"z\"",
+   "powerbi": "1.5574077246549z",
+   "now": "1.5574077246549z"
+  },
+  {
+   "part": "D",
+   "expr": "CONCATENATEX({1},TAN(TRUE()))",
+   "powerbi": "1.5574077246549",
+   "now": "1.5574077246549"
+  },
+  {
+   "part": "D",
+   "expr": "ATAN(TRUE())&\"z\"",
+   "powerbi": "0.785398163397448z",
+   "now": "0.785398163397448z"
+  },
+  {
+   "part": "D",
+   "expr": "CONCATENATEX({1},ATAN(TRUE()))",
+   "powerbi": "0.785398163397448",
+   "now": "0.785398163397448"
+  },
+  {
+   "part": "A",
+   "expr": "SINH(TRUE())&\"z\"",
+   "powerbi": "1.1752011936438z",
+   "now": "1.1752011936438z"
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX({1},SINH(TRUE()))",
+   "powerbi": "1.1752011936438",
+   "now": "1.1752011936438"
+  },
+  {
+   "part": "D",
+   "expr": "SIN(1E10)&\"z\"",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 19) An argument of function 'SIN' has the wrong data type or the result is too large or too small.\"",
+   "now": "-0.487506025087511z"
+  },
+  {
+   "part": "D",
+   "expr": "CONCATENATEX({1},SIN(1E10))",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 36) An argument of function 'SIN' has the wrong data type or the result is too large or too small.\"",
+   "now": "-0.487506025087511"
+  },
+  {
+   "part": "D",
+   "expr": "COS(1E10)&\"z\"",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 19) An argument of function 'COS' has the wrong data type or the result is too large or too small.\"",
+   "now": "0.873119622676856z"
+  },
+  {
+   "part": "D",
+   "expr": "CONCATENATEX({1},COS(1E10))",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 36) An argument of function 'COS' has the wrong data type or the result is too large or too small.\"",
+   "now": "0.873119622676856"
+  },
+  {
+   "part": "D",
+   "expr": "TAN(1E10)&\"z\"",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 19) An argument of function 'TAN' has the wrong data type or the result is too large or too small.\"",
+   "now": "-0.558349637811242z"
+  },
+  {
+   "part": "D",
+   "expr": "CONCATENATEX({1},TAN(1E10))",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 36) An argument of function 'TAN' has the wrong data type or the result is too large or too small.\"",
+   "now": "-0.558349637811242"
+  },
+  {
+   "part": "D",
+   "expr": "ATAN(1E10)&\"z\"",
+   "powerbi": "1.5707963266949z",
+   "now": "1.5707963266949z"
+  },
+  {
+   "part": "D",
+   "expr": "CONCATENATEX({1},ATAN(1E10))",
+   "powerbi": "1.5707963266949",
+   "now": "1.5707963266949"
+  },
+  {
+   "part": "A",
+   "expr": "SINH(1E10)&\"z\"",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 19) An argument of function 'SINH' has the wrong data type or the result is too large or too small.\"",
+   "now": "LOCAL-REJECT:An argument of function 'SINH' has the wrong data type or the result is too large or too small."
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX({1},SINH(1E10))",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 36) An argument of function 'SINH' has the wrong data type or the result is too large or too small.\"",
+   "now": "LOCAL-REJECT:An argument of function 'SINH' has the wrong data type or the result is too large or too small."
+  },
+  {
+   "part": "D",
+   "expr": "SIN(123456789)&\"z\"",
+   "powerbi": "0.99011475188395z",
+   "now": "0.990114751802035z"
+  },
+  {
+   "part": "D",
+   "expr": "CONCATENATEX({1},SIN(123456789))",
+   "powerbi": "0.99011475188395",
+   "now": "0.990114751802035"
+  },
+  {
+   "part": "D",
+   "expr": "COS(123456789)&\"z\"",
+   "powerbi": "0.140259680955662z",
+   "now": "0.14025968153391z"
+  },
+  {
+   "part": "D",
+   "expr": "CONCATENATEX({1},COS(123456789))",
+   "powerbi": "0.140259680955662",
+   "now": "0.14025968153391"
+  },
+  {
+   "part": "D",
+   "expr": "TAN(123456789)&\"z\"",
+   "powerbi": "7.05915445648947z",
+   "now": "7.0591544268027z"
+  },
+  {
+   "part": "D",
+   "expr": "CONCATENATEX({1},TAN(123456789))",
+   "powerbi": "7.05915445648947",
+   "now": "7.0591544268027"
+  },
+  {
+   "part": "D",
+   "expr": "ATAN(123456789)&\"z\"",
+   "powerbi": "1.5707963186949z",
+   "now": "1.5707963186949z"
+  },
+  {
+   "part": "D",
+   "expr": "CONCATENATEX({1},ATAN(123456789))",
+   "powerbi": "1.5707963186949",
+   "now": "1.5707963186949"
+  },
+  {
+   "part": "A",
+   "expr": "SINH(123456789)&\"z\"",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 19) An argument of function 'SINH' has the wrong data type or the result is too large or too small.\"",
+   "now": "LOCAL-REJECT:An argument of function 'SINH' has the wrong data type or the result is too large or too small."
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX({1},SINH(123456789))",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 36) An argument of function 'SINH' has the wrong data type or the result is too large or too small.\"",
+   "now": "LOCAL-REJECT:An argument of function 'SINH' has the wrong data type or the result is too large or too small."
+  },
+  {
+   "part": "D",
+   "expr": "SIN(1E15)&\"z\"",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 19) An argument of function 'SIN' has the wrong data type or the result is too large or too small.\"",
+   "now": "0.858272793170236z"
+  },
+  {
+   "part": "D",
+   "expr": "CONCATENATEX({1},SIN(1E15))",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 36) An argument of function 'SIN' has the wrong data type or the result is too large or too small.\"",
+   "now": "0.858272793170236"
+  },
+  {
+   "part": "D",
+   "expr": "COS(1E15)&\"z\"",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 19) An argument of function 'COS' has the wrong data type or the result is too large or too small.\"",
+   "now": "-0.51319373778697z"
+  },
+  {
+   "part": "D",
+   "expr": "CONCATENATEX({1},COS(1E15))",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 36) An argument of function 'COS' has the wrong data type or the result is too large or too small.\"",
+   "now": "-0.51319373778697"
+  },
+  {
+   "part": "D",
+   "expr": "TAN(1E15)&\"z\"",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 19) An argument of function 'TAN' has the wrong data type or the result is too large or too small.\"",
+   "now": "-1.67241478212758z"
+  },
+  {
+   "part": "D",
+   "expr": "CONCATENATEX({1},TAN(1E15))",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 36) An argument of function 'TAN' has the wrong data type or the result is too large or too small.\"",
+   "now": "-1.67241478212758"
+  },
+  {
+   "part": "D",
+   "expr": "ATAN(1E15)&\"z\"",
+   "powerbi": "1.5707963267949z",
+   "now": "1.5707963267949z"
+  },
+  {
+   "part": "D",
+   "expr": "CONCATENATEX({1},ATAN(1E15))",
+   "powerbi": "1.5707963267949",
+   "now": "1.5707963267949"
+  },
+  {
+   "part": "A",
+   "expr": "SINH(1E15)&\"z\"",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 19) An argument of function 'SINH' has the wrong data type or the result is too large or too small.\"",
+   "now": "LOCAL-REJECT:An argument of function 'SINH' has the wrong data type or the result is too large or too small."
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX({1},SINH(1E15))",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 36) An argument of function 'SINH' has the wrong data type or the result is too large or too small.\"",
+   "now": "LOCAL-REJECT:An argument of function 'SINH' has the wrong data type or the result is too large or too small."
+  },
+  {
+   "part": "D",
+   "expr": "SIN(-7777777)&\"z\"",
+   "powerbi": "0.829953123095747z",
+   "now": "0.829953122717389z"
+  },
+  {
+   "part": "D",
+   "expr": "CONCATENATEX({1},SIN(-7777777))",
+   "powerbi": "0.829953123095747",
+   "now": "0.829953122717389"
+  },
+  {
+   "part": "D",
+   "expr": "COS(-7777777)&\"z\"",
+   "powerbi": "-0.557833141238144z",
+   "now": "-0.557833141801072z"
+  },
+  {
+   "part": "D",
+   "expr": "CONCATENATEX({1},COS(-7777777))",
+   "powerbi": "-0.557833141238144",
+   "now": "-0.557833141801072"
+  },
+  {
+   "part": "D",
+   "expr": "TAN(-7777777)&\"z\"",
+   "powerbi": "-1.48781609004732z",
+   "now": "-1.48781608786765z"
+  },
+  {
+   "part": "D",
+   "expr": "CONCATENATEX({1},TAN(-7777777))",
+   "powerbi": "-1.48781609004732",
+   "now": "-1.48781608786765"
+  },
+  {
+   "part": "D",
+   "expr": "ATAN(-7777777)&\"z\"",
+   "powerbi": "-1.57079619822346z",
+   "now": "-1.57079619822346z"
+  },
+  {
+   "part": "D",
+   "expr": "CONCATENATEX({1},ATAN(-7777777))",
+   "powerbi": "-1.57079619822346",
+   "now": "-1.57079619822346"
+  },
+  {
+   "part": "A",
+   "expr": "SINH(-7777777)&\"z\"",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 19) An argument of function 'SINH' has the wrong data type or the result is too large or too small.\"",
+   "now": "LOCAL-REJECT:An argument of function 'SINH' has the wrong data type or the result is too large or too small."
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX({1},SINH(-7777777))",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 36) An argument of function 'SINH' has the wrong data type or the result is too large or too small.\"",
+   "now": "LOCAL-REJECT:An argument of function 'SINH' has the wrong data type or the result is too large or too small."
+  },
+  {
+   "part": "D",
+   "expr": "SIN(45000.5)&\"z\"",
+   "powerbi": "0.32104243192133z",
+   "now": "0.321042431922804z"
+  },
+  {
+   "part": "D",
+   "expr": "CONCATENATEX({1},SIN(45000.5))",
+   "powerbi": "0.32104243192133",
+   "now": "0.321042431922804"
+  },
+  {
+   "part": "D",
+   "expr": "COS(45000.5)&\"z\"",
+   "powerbi": "0.947064811354555z",
+   "now": "0.947064811354055z"
+  },
+  {
+   "part": "D",
+   "expr": "CONCATENATEX({1},COS(45000.5))",
+   "powerbi": "0.947064811354555",
+   "now": "0.947064811354055"
+  },
+  {
+   "part": "D",
+   "expr": "TAN(45000.5)&\"z\"",
+   "powerbi": "0.33898676001081z",
+   "now": "0.338986760012546z"
+  },
+  {
+   "part": "D",
+   "expr": "CONCATENATEX({1},TAN(45000.5))",
+   "powerbi": "0.33898676001081",
+   "now": "0.338986760012546"
+  },
+  {
+   "part": "D",
+   "expr": "ATAN(45000.5)&\"z\"",
+   "powerbi": "1.57077410481959z",
+   "now": "1.57077410481959z"
+  },
+  {
+   "part": "D",
+   "expr": "CONCATENATEX({1},ATAN(45000.5))",
+   "powerbi": "1.57077410481959",
+   "now": "1.57077410481959"
+  },
+  {
+   "part": "A",
+   "expr": "SINH(45000.5)&\"z\"",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 19) An argument of function 'SINH' has the wrong data type or the result is too large or too small.\"",
+   "now": "LOCAL-REJECT:An argument of function 'SINH' has the wrong data type or the result is too large or too small."
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX({1},SINH(45000.5))",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 36) An argument of function 'SINH' has the wrong data type or the result is too large or too small.\"",
+   "now": "LOCAL-REJECT:An argument of function 'SINH' has the wrong data type or the result is too large or too small."
+  },
+  {
+   "part": "E",
+   "expr": "CONCATENATEX(DISTINCT(Facts[Region]),Facts[Region],\"|\")",
+   "powerbi": "East|West|North",
+   "now": "East|West|North"
+  },
+  {
+   "part": "E",
+   "expr": "CONCATENATEX(VALUES(Facts[Region]),Facts[Region],\"|\")",
+   "powerbi": "East|West|North",
+   "now": "East|West|North"
+  },
+  {
+   "part": "E",
+   "expr": "CONCATENATEX(ALL(Facts[Region]),Facts[Region],\"|\")",
+   "powerbi": "East|West|North",
+   "now": "East|West|North"
+  },
+  {
+   "part": "E",
+   "expr": "CONCATENATEX(SUMMARIZE(Facts,Facts[Region]),Facts[Region],\"|\")",
+   "powerbi": "East|West|North",
+   "now": "East|West|North"
+  },
+  {
+   "part": "E",
+   "expr": "CONCATENATEX(DISTINCT(Facts[Sales]),Facts[Sales],\"|\")",
+   "powerbi": "|-1.5|0|2.5|10.5|20",
+   "now": "|-1.5|0|2.5|10.5|20"
+  },
+  {
+   "part": "E",
+   "expr": "CONCATENATEX(VALUES(Facts[Sales]),Facts[Sales],\"|\")",
+   "powerbi": "|-1.5|0|2.5|10.5|20",
+   "now": "|-1.5|0|2.5|10.5|20"
+  },
+  {
+   "part": "E",
+   "expr": "CONCATENATEX(ALL(Facts[Sales]),Facts[Sales],\"|\")",
+   "powerbi": "|-1.5|0|2.5|10.5|20",
+   "now": "|-1.5|0|2.5|10.5|20"
+  },
+  {
+   "part": "E",
+   "expr": "CONCATENATEX(SUMMARIZE(Facts,Facts[Sales]),Facts[Sales],\"|\")",
+   "powerbi": "|-1.5|0|2.5|10.5|20",
+   "now": "|-1.5|0|2.5|10.5|20"
+  },
+  {
+   "part": "E",
+   "expr": "CONCATENATEX(DISTINCT(Facts[Quantity]),Facts[Quantity],\"|\")",
+   "powerbi": "0|1|2|3|4|5",
+   "now": "0|1|2|3|4|5"
+  },
+  {
+   "part": "E",
+   "expr": "CONCATENATEX(VALUES(Facts[Quantity]),Facts[Quantity],\"|\")",
+   "powerbi": "0|1|2|3|4|5",
+   "now": "0|1|2|3|4|5"
+  },
+  {
+   "part": "E",
+   "expr": "CONCATENATEX(ALL(Facts[Quantity]),Facts[Quantity],\"|\")",
+   "powerbi": "0|1|2|3|4|5",
+   "now": "0|1|2|3|4|5"
+  },
+  {
+   "part": "E",
+   "expr": "CONCATENATEX(SUMMARIZE(Facts,Facts[Quantity]),Facts[Quantity],\"|\")",
+   "powerbi": "0|1|2|3|4|5",
+   "now": "0|1|2|3|4|5"
+  },
+  {
+   "part": "E",
+   "expr": "CONCATENATEX(DISTINCT(Facts[Note]),Facts[Note],\"|\")",
+   "powerbi": "|Paid|Late",
+   "now": "|Paid|Late"
+  },
+  {
+   "part": "E",
+   "expr": "CONCATENATEX(VALUES(Facts[Note]),Facts[Note],\"|\")",
+   "powerbi": "|Paid|Late",
+   "now": "|Paid|Late"
+  },
+  {
+   "part": "E",
+   "expr": "CONCATENATEX(ALL(Facts[Note]),Facts[Note],\"|\")",
+   "powerbi": "|Paid|Late",
+   "now": "|Paid|Late"
+  },
+  {
+   "part": "E",
+   "expr": "CONCATENATEX(SUMMARIZE(Facts,Facts[Note]),Facts[Note],\"|\")",
+   "powerbi": "|Paid|Late",
+   "now": "|Paid|Late"
+  },
+  {
+   "part": "E",
+   "expr": "CONCATENATEX(DISTINCT(Facts),Facts[Region],\"|\")",
+   "powerbi": "East|West|East|North|West|East",
+   "now": "East|West|East|North|West|East"
+  },
+  {
+   "part": "E",
+   "expr": "CONCATENATEX(DISTINCT(Facts),Facts[Sales],\"|\")",
+   "powerbi": "10.5|20|-1.5||0|2.5",
+   "now": "10.5|20|-1.5||0|2.5"
+  },
+  {
+   "part": "E",
+   "expr": "CONCATENATEX(ALL(Facts),Facts[Sales],\"|\")",
+   "powerbi": "|-1.5|0|2.5|10.5|20",
+   "now": "|-1.5|0|2.5|10.5|20"
+  },
+  {
+   "part": "E",
+   "expr": "CONCATENATEX(SUMMARIZE(Facts,Facts[Region],Facts[Quantity]),Facts[Quantity],\"|\")",
+   "powerbi": "1|2|5|0|3|4",
+   "now": "1|2|5|0|3|4"
+  },
+  {
+   "part": "D",
+   "expr": "ISERROR(SIN(134217727))",
+   "powerbi": "False",
+   "now": "False"
+  },
+  {
+   "part": "D",
+   "expr": "ISERROR(COS(134217727))",
+   "powerbi": "False",
+   "now": "False"
+  },
+  {
+   "part": "D",
+   "expr": "ISERROR(TAN(134217727))",
+   "powerbi": "False",
+   "now": "False"
+  },
+  {
+   "part": "D",
+   "expr": "ISERROR(SIN(134217727.9))",
+   "powerbi": "False",
+   "now": "False"
+  },
+  {
+   "part": "D",
+   "expr": "ISERROR(COS(134217727.9))",
+   "powerbi": "False",
+   "now": "False"
+  },
+  {
+   "part": "D",
+   "expr": "ISERROR(TAN(134217727.9))",
+   "powerbi": "False",
+   "now": "False"
+  },
+  {
+   "part": "D",
+   "expr": "ISERROR(SIN(134217728))",
+   "powerbi": "True",
+   "now": "False"
+  },
+  {
+   "part": "D",
+   "expr": "ISERROR(COS(134217728))",
+   "powerbi": "True",
+   "now": "False"
+  },
+  {
+   "part": "D",
+   "expr": "ISERROR(TAN(134217728))",
+   "powerbi": "True",
+   "now": "False"
+  },
+  {
+   "part": "D",
+   "expr": "ISERROR(SIN(134217728.5))",
+   "powerbi": "True",
+   "now": "False"
+  },
+  {
+   "part": "D",
+   "expr": "ISERROR(COS(134217728.5))",
+   "powerbi": "True",
+   "now": "False"
+  },
+  {
+   "part": "D",
+   "expr": "ISERROR(TAN(134217728.5))",
+   "powerbi": "True",
+   "now": "False"
+  },
+  {
+   "part": "D",
+   "expr": "ISERROR(SIN(-134217727))",
+   "powerbi": "False",
+   "now": "False"
+  },
+  {
+   "part": "D",
+   "expr": "ISERROR(COS(-134217727))",
+   "powerbi": "False",
+   "now": "False"
+  },
+  {
+   "part": "D",
+   "expr": "ISERROR(TAN(-134217727))",
+   "powerbi": "False",
+   "now": "False"
+  },
+  {
+   "part": "D",
+   "expr": "ISERROR(SIN(-134217728))",
+   "powerbi": "True",
+   "now": "False"
+  },
+  {
+   "part": "D",
+   "expr": "ISERROR(COS(-134217728))",
+   "powerbi": "True",
+   "now": "False"
+  },
+  {
+   "part": "D",
+   "expr": "ISERROR(TAN(-134217728))",
+   "powerbi": "True",
+   "now": "False"
+  },
+  {
+   "part": "D",
+   "expr": "ISERROR(SIN(134217729))",
+   "powerbi": "True",
+   "now": "False"
+  },
+  {
+   "part": "D",
+   "expr": "ISERROR(COS(134217729))",
+   "powerbi": "True",
+   "now": "False"
+  },
+  {
+   "part": "D",
+   "expr": "ISERROR(TAN(134217729))",
+   "powerbi": "True",
+   "now": "False"
+  },
+  {
+   "part": "D",
+   "expr": "ISERROR(SINH(134217728))",
+   "powerbi": "True",
+   "now": "True"
+  },
+  {
+   "part": "D",
+   "expr": "ISERROR(COSH(134217728))",
+   "powerbi": "True",
+   "now": "True"
+  },
+  {
+   "part": "D",
+   "expr": "ISERROR(TANH(134217728))",
+   "powerbi": "False",
+   "now": "False"
+  },
+  {
+   "part": "D",
+   "expr": "ISERROR(ATAN(134217728))",
+   "powerbi": "False",
+   "now": "False"
+  },
+  {
+   "part": "D",
+   "expr": "ISERROR(COT(134217728))",
+   "powerbi": "True",
+   "now": "True"
+  },
+  {
+   "part": "D",
+   "expr": "ISERROR(ASIN(134217728))",
+   "powerbi": "True",
+   "now": "True"
+  },
+  {
+   "part": "D",
+   "expr": "ISERROR(ACOS(134217728))",
+   "powerbi": "True",
+   "now": "True"
+  },
+  {
+   "part": "D",
+   "expr": "ISERROR(ACOT(134217728))",
+   "powerbi": "False",
+   "now": "False"
+  },
+  {
+   "part": "D",
+   "expr": "ISERROR(ASINH(134217728))",
+   "powerbi": "False",
+   "now": "False"
+  },
+  {
+   "part": "D",
+   "expr": "ISERROR(DEGREES(134217728))",
+   "powerbi": "False",
+   "now": "False"
+  },
+  {
+   "part": "D",
+   "expr": "ISERROR(RADIANS(134217728))",
+   "powerbi": "False",
+   "now": "False"
+  },
+  {
+   "part": "D",
+   "expr": "ISERROR(SINH(1E9))",
+   "powerbi": "True",
+   "now": "True"
+  },
+  {
+   "part": "D",
+   "expr": "ISERROR(COSH(1E9))",
+   "powerbi": "True",
+   "now": "True"
+  },
+  {
+   "part": "D",
+   "expr": "ISERROR(TANH(1E9))",
+   "powerbi": "False",
+   "now": "False"
+  },
+  {
+   "part": "D",
+   "expr": "ISERROR(ATAN(1E9))",
+   "powerbi": "False",
+   "now": "False"
+  },
+  {
+   "part": "D",
+   "expr": "ISERROR(COT(1E9))",
+   "powerbi": "True",
+   "now": "True"
+  },
+  {
+   "part": "D",
+   "expr": "ISERROR(ASIN(1E9))",
+   "powerbi": "True",
+   "now": "True"
+  },
+  {
+   "part": "D",
+   "expr": "ISERROR(ACOS(1E9))",
+   "powerbi": "True",
+   "now": "True"
+  },
+  {
+   "part": "D",
+   "expr": "ISERROR(ACOT(1E9))",
+   "powerbi": "False",
+   "now": "False"
+  },
+  {
+   "part": "D",
+   "expr": "ISERROR(ASINH(1E9))",
+   "powerbi": "False",
+   "now": "False"
+  },
+  {
+   "part": "D",
+   "expr": "ISERROR(DEGREES(1E9))",
+   "powerbi": "False",
+   "now": "False"
+  },
+  {
+   "part": "D",
+   "expr": "ISERROR(RADIANS(1E9))",
+   "powerbi": "False",
+   "now": "False"
+  },
+  {
+   "part": "D",
+   "expr": "ISERROR(SINH(1E300))",
+   "powerbi": "True",
+   "now": "True"
+  },
+  {
+   "part": "D",
+   "expr": "ISERROR(COSH(1E300))",
+   "powerbi": "True",
+   "now": "True"
+  },
+  {
+   "part": "D",
+   "expr": "ISERROR(TANH(1E300))",
+   "powerbi": "False",
+   "now": "False"
+  },
+  {
+   "part": "D",
+   "expr": "ISERROR(ATAN(1E300))",
+   "powerbi": "False",
+   "now": "False"
+  },
+  {
+   "part": "D",
+   "expr": "ISERROR(COT(1E300))",
+   "powerbi": "True",
+   "now": "True"
+  },
+  {
+   "part": "D",
+   "expr": "ISERROR(ASIN(1E300))",
+   "powerbi": "True",
+   "now": "True"
+  },
+  {
+   "part": "D",
+   "expr": "ISERROR(ACOS(1E300))",
+   "powerbi": "True",
+   "now": "True"
+  },
+  {
+   "part": "D",
+   "expr": "ISERROR(ACOT(1E300))",
+   "powerbi": "False",
+   "now": "False"
+  },
+  {
+   "part": "D",
+   "expr": "ISERROR(ASINH(1E300))",
+   "powerbi": "True",
+   "now": "False"
+  },
+  {
+   "part": "D",
+   "expr": "ISERROR(DEGREES(1E300))",
+   "powerbi": "False",
+   "now": "False"
+  },
+  {
+   "part": "D",
+   "expr": "ISERROR(RADIANS(1E300))",
+   "powerbi": "False",
+   "now": "False"
+  }
+ ]
+}
