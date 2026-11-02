@@ -8471,13 +8471,11 @@ def evaluate_measures(
 
             scored = score_rows(rows)
             ordered = sort_scored(scored)
-            if walk_nodes is not None and not evaluation_filter_ids and (limit >= len(scored) or row_key(ordered[limit - 1][0]) != row_key(ordered[limit][0])):
-                # consumed by CONCATENATEX with nothing tied at the cut: the source is walked in dictionary order over the columns
-                # read and the kept rows come back as the array of Power BI's heap (a tie at the cut is not modelled: that keeps
-                # the sorted answer over the source order; under a CALCULATE filter the heap order was not measured either)
+            if walk_nodes is not None and not evaluation_filter_ids:
+                # consumed by CONCATENATEX: the source is walked in dictionary order over the columns
+                # read and the kept rows come back as the array of Power BI's heap (rows tied at the cut-off stay in the heap)
                 walked = dictionary_ordered_rows(arguments[1], context, rows, [*walk_nodes, *(expression for expression, _d in keys_spec)])
                 scored = score_rows(walked)
-                ordered = sort_scored(scored)
                 if limit >= len(scored):
                     return dict(context), [item[1] for item in scored]  # nothing is cut: the table comes back in walk order
                 column_keys = [blank_aware_keys([item[0][p] for item in scored]) for p in range(len(keys_spec))]
@@ -8489,7 +8487,11 @@ def evaluate_measures(
                             return (left > right) == descending
                     return False
 
-                return dict(context), [scored[index][1] for index in dax_iteration_order.heap_top(limit, range(len(scored)), beats)]
+                try:
+                    kept_indices = dax_iteration_order.heap_top(limit, range(len(scored)), beats)
+                except dax_iteration_order.AmbiguousTieOrder:
+                    raise dax_typed.refusal("The walk order of a TOPN whose tied rows are dropped by a better row is not settled by the local engine.") from None
+                return dict(context), [scored[index][1] for index in kept_indices]
             kept = ordered[:limit]
             if kept and len(ordered) > limit:
                 boundary = row_key(v for v in ordered[limit - 1][0])

@@ -36,7 +36,7 @@ Rules and roles are in `AGENTS.md`. Read it first. Keep this file short and curr
 | 21 | currency-double-11: Currency with Doubles in doubles, static types beside text numbers, CURRENCY of text and non-finite values, dates beside Infinity or NaN, the logical BLANK beside an error | `docs/plans/2026-11-02-currency-double-11.md` | DONE (coded by Haiku 5.5, fixed by Sonnet 5.5, reviewed, locked 430,554, merged 2026-11-02) | Claude |
 | 22 | double-arith-12: Double arithmetic in IEEE doubles, iterators summed in doubles in row order, Int64 wrap, Int64-range errors, ROUND of huge values, overflow and underflow | `docs/plans/2026-11-02-double-arith-12.md` | DONE (coded by Haiku 5.5, fixed by Sonnet 5.5, reviewed, locked 436,230, merged 2026-11-02) | Claude |
 | 23 | big-numbers-13: MOD quotient limit, FLOOR/CEILING/QUOTIENT/MROUND of huge doubles, EXP/POWER/LN last digits (1,807 measured answers, 639 wrong now) | `docs/plans/2026-11-02-big-numbers-13.md` | DONE (coded by Antigravity, fixed by Sonnet 5.5, reviewed, locked 438,077, merged 2026-11-03) | Claude |
-| 24 | topn-ties-14: the row order of TOPN when sort values tie (120 measured answers, 42 wrong) | `docs/plans/2026-11-02-topn-ties-14.md` | BUILDING (worktree) | Antigravity |
+| 24 | topn-ties-14: the row order of TOPN when sort values tie (120 measured answers, 42 wrong) | `docs/plans/2026-11-02-topn-ties-14.md` | DONE (coded by Antigravity, fixed by Sonnet 5.5, reviewed, locked 438,490, merged 2026-11-03) | Claude |
 
 ## Current task
 Task 24 topn-ties-14, on branch `antigravity/topn-ties-14` in the worktree `/Users/armaan/Power BI tool-task24`.

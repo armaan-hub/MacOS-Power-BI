@@ -1,0 +1,724 @@
+{
+ "items": [
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(TOPN(1,Facts,Facts[Quantity]),Facts[Sales],\"|\")",
+   "powerbi": "2.5",
+   "now": "2.5"
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(TOPN(1,Facts,Facts[Quantity]),Facts[Sales]&Facts[Region],\"|\")",
+   "powerbi": "2.5East",
+   "now": "2.5East"
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(TOPN(1,Facts,Facts[Quantity],ASC),Facts[Sales],\"|\")",
+   "powerbi": "0",
+   "now": "0"
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(TOPN(1,Facts,Facts[Quantity],ASC),Facts[Sales]&Facts[Region],\"|\")",
+   "powerbi": "0West",
+   "now": "0West"
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(TOPN(1,Facts,Facts[Quantity],DESC),Facts[Sales],\"|\")",
+   "powerbi": "2.5",
+   "now": "2.5"
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(TOPN(1,Facts,Facts[Quantity],DESC),Facts[Sales]&Facts[Region],\"|\")",
+   "powerbi": "2.5East",
+   "now": "2.5East"
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(TOPN(2,Facts,Facts[Quantity]),Facts[Sales],\"|\")",
+   "powerbi": "|2.5",
+   "now": "|2.5"
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(TOPN(2,Facts,Facts[Quantity]),Facts[Sales]&Facts[Region],\"|\")",
+   "powerbi": "North|2.5East",
+   "now": "North|2.5East"
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(TOPN(2,Facts,Facts[Quantity],ASC),Facts[Sales],\"|\")",
+   "powerbi": "-1.5|0",
+   "now": "-1.5|0"
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(TOPN(2,Facts,Facts[Quantity],ASC),Facts[Sales]&Facts[Region],\"|\")",
+   "powerbi": "-1.5East|0West",
+   "now": "-1.5East|0West"
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(TOPN(2,Facts,Facts[Quantity],DESC),Facts[Sales],\"|\")",
+   "powerbi": "|2.5",
+   "now": "|2.5"
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(TOPN(2,Facts,Facts[Quantity],DESC),Facts[Sales]&Facts[Region],\"|\")",
+   "powerbi": "North|2.5East",
+   "now": "North|2.5East"
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(TOPN(3,Facts,Facts[Quantity]),Facts[Sales],\"|\")",
+   "powerbi": "20|2.5|",
+   "now": "20|2.5|"
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(TOPN(3,Facts,Facts[Quantity]),Facts[Sales]&Facts[Region],\"|\")",
+   "powerbi": "20West|2.5East|North",
+   "now": "20West|2.5East|North"
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(TOPN(3,Facts,Facts[Quantity],ASC),Facts[Sales],\"|\")",
+   "powerbi": "10.5|0|-1.5",
+   "now": "10.5|0|-1.5"
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(TOPN(3,Facts,Facts[Quantity],ASC),Facts[Sales]&Facts[Region],\"|\")",
+   "powerbi": "10.5East|0West|-1.5East",
+   "now": "10.5East|0West|-1.5East"
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(TOPN(3,Facts,Facts[Quantity],DESC),Facts[Sales],\"|\")",
+   "powerbi": "20|2.5|",
+   "now": "20|2.5|"
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(TOPN(3,Facts,Facts[Quantity],DESC),Facts[Sales]&Facts[Region],\"|\")",
+   "powerbi": "20West|2.5East|North",
+   "now": "20West|2.5East|North"
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(TOPN(4,Facts,Facts[Quantity]),Facts[Sales],\"|\")",
+   "powerbi": "10.5|20|2.5|",
+   "now": "10.5|20|2.5|"
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(TOPN(4,Facts,Facts[Quantity]),Facts[Sales]&Facts[Region],\"|\")",
+   "powerbi": "10.5East|20West|2.5East|North",
+   "now": "10.5East|20West|2.5East|North"
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(TOPN(4,Facts,Facts[Quantity],ASC),Facts[Sales],\"|\")",
+   "powerbi": "20|10.5|-1.5|0",
+   "now": "20|10.5|-1.5|0"
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(TOPN(4,Facts,Facts[Quantity],ASC),Facts[Sales]&Facts[Region],\"|\")",
+   "powerbi": "20West|10.5East|-1.5East|0West",
+   "now": "20West|10.5East|-1.5East|0West"
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(TOPN(4,Facts,Facts[Quantity],DESC),Facts[Sales],\"|\")",
+   "powerbi": "10.5|20|2.5|",
+   "now": "10.5|20|2.5|"
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(TOPN(4,Facts,Facts[Quantity],DESC),Facts[Sales]&Facts[Region],\"|\")",
+   "powerbi": "10.5East|20West|2.5East|North",
+   "now": "10.5East|20West|2.5East|North"
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(TOPN(1,Facts,Facts[Region]),Facts[Sales],\"|\")",
+   "powerbi": "20|0",
+   "now": "20|0"
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(TOPN(1,Facts,Facts[Region]),Facts[Sales]&Facts[Region],\"|\")",
+   "powerbi": "20West|0West",
+   "now": "20West|0West"
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(TOPN(1,Facts,Facts[Region],ASC),Facts[Sales],\"|\")",
+   "powerbi": "10.5|-1.5|2.5",
+   "now": "10.5|-1.5|2.5"
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(TOPN(1,Facts,Facts[Region],ASC),Facts[Sales]&Facts[Region],\"|\")",
+   "powerbi": "10.5East|-1.5East|2.5East",
+   "now": "10.5East|-1.5East|2.5East"
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(TOPN(1,Facts,Facts[Region],DESC),Facts[Sales],\"|\")",
+   "powerbi": "20|0",
+   "now": "20|0"
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(TOPN(1,Facts,Facts[Region],DESC),Facts[Sales]&Facts[Region],\"|\")",
+   "powerbi": "20West|0West",
+   "now": "20West|0West"
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(TOPN(2,Facts,Facts[Region]),Facts[Sales],\"|\")",
+   "powerbi": "0|20",
+   "now": "0|20"
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(TOPN(2,Facts,Facts[Region]),Facts[Sales]&Facts[Region],\"|\")",
+   "powerbi": "0West|20West",
+   "now": "0West|20West"
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(TOPN(2,Facts,Facts[Region],ASC),Facts[Sales],\"|\")",
+   "powerbi": "-1.5|10.5|2.5",
+   "now": "10.5|-1.5|2.5"
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(TOPN(2,Facts,Facts[Region],ASC),Facts[Sales]&Facts[Region],\"|\")",
+   "powerbi": "-1.5East|10.5East|2.5East",
+   "now": "10.5East|-1.5East|2.5East"
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(TOPN(2,Facts,Facts[Region],DESC),Facts[Sales],\"|\")",
+   "powerbi": "0|20",
+   "now": "0|20"
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(TOPN(2,Facts,Facts[Region],DESC),Facts[Sales]&Facts[Region],\"|\")",
+   "powerbi": "0West|20West",
+   "now": "0West|20West"
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(TOPN(3,Facts,Facts[Region]),Facts[Sales],\"|\")",
+   "powerbi": "|20|0",
+   "now": "|20|0"
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(TOPN(3,Facts,Facts[Region]),Facts[Sales]&Facts[Region],\"|\")",
+   "powerbi": "North|20West|0West",
+   "now": "North|20West|0West"
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(TOPN(3,Facts,Facts[Region],ASC),Facts[Sales],\"|\")",
+   "powerbi": "2.5|10.5|-1.5",
+   "now": "2.5|10.5|-1.5"
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(TOPN(3,Facts,Facts[Region],ASC),Facts[Sales]&Facts[Region],\"|\")",
+   "powerbi": "2.5East|10.5East|-1.5East",
+   "now": "2.5East|10.5East|-1.5East"
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(TOPN(3,Facts,Facts[Region],DESC),Facts[Sales],\"|\")",
+   "powerbi": "|20|0",
+   "now": "|20|0"
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(TOPN(3,Facts,Facts[Region],DESC),Facts[Sales]&Facts[Region],\"|\")",
+   "powerbi": "North|20West|0West",
+   "now": "North|20West|0West"
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(TOPN(4,Facts,Facts[Region]),Facts[Sales],\"|\")",
+   "powerbi": "10.5||-1.5|20|0|2.5",
+   "now": "20|0||10.5|-1.5|2.5"
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(TOPN(4,Facts,Facts[Region]),Facts[Sales]&Facts[Region],\"|\")",
+   "powerbi": "10.5East|North|-1.5East|20West|0West|2.5East",
+   "now": "20West|0West|North|10.5East|-1.5East|2.5East"
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(TOPN(4,Facts,Facts[Region],ASC),Facts[Sales],\"|\")",
+   "powerbi": "|2.5|-1.5|10.5",
+   "now": "|2.5|-1.5|10.5"
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(TOPN(4,Facts,Facts[Region],ASC),Facts[Sales]&Facts[Region],\"|\")",
+   "powerbi": "North|2.5East|-1.5East|10.5East",
+   "now": "North|2.5East|-1.5East|10.5East"
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(TOPN(4,Facts,Facts[Region],DESC),Facts[Sales],\"|\")",
+   "powerbi": "10.5||-1.5|20|0|2.5",
+   "now": "20|0||10.5|-1.5|2.5"
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(TOPN(4,Facts,Facts[Region],DESC),Facts[Sales]&Facts[Region],\"|\")",
+   "powerbi": "10.5East|North|-1.5East|20West|0West|2.5East",
+   "now": "20West|0West|North|10.5East|-1.5East|2.5East"
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(TOPN(1,Facts,Facts[Sales]>50),Facts[Sales],\"|\")",
+   "powerbi": "|-1.5|0|2.5|10.5|20",
+   "now": "10.5|20|-1.5||0|2.5"
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(TOPN(1,Facts,Facts[Sales]>50),Facts[Sales]&Facts[Region],\"|\")",
+   "powerbi": "10.5East|20West|-1.5East|North|0West|2.5East",
+   "now": "10.5East|20West|-1.5East|North|0West|2.5East"
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(TOPN(1,Facts,Facts[Sales]>50,ASC),Facts[Sales],\"|\")",
+   "powerbi": "|-1.5|0|2.5|10.5|20",
+   "now": "10.5|20|-1.5||0|2.5"
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(TOPN(1,Facts,Facts[Sales]>50,ASC),Facts[Sales]&Facts[Region],\"|\")",
+   "powerbi": "10.5East|20West|-1.5East|North|0West|2.5East",
+   "now": "10.5East|20West|-1.5East|North|0West|2.5East"
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(TOPN(1,Facts,Facts[Sales]>50,DESC),Facts[Sales],\"|\")",
+   "powerbi": "|-1.5|0|2.5|10.5|20",
+   "now": "10.5|20|-1.5||0|2.5"
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(TOPN(1,Facts,Facts[Sales]>50,DESC),Facts[Sales]&Facts[Region],\"|\")",
+   "powerbi": "10.5East|20West|-1.5East|North|0West|2.5East",
+   "now": "10.5East|20West|-1.5East|North|0West|2.5East"
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(TOPN(2,Facts,Facts[Sales]>50),Facts[Sales],\"|\")",
+   "powerbi": "|-1.5|0|2.5|10.5|20",
+   "now": "10.5|20|-1.5||0|2.5"
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(TOPN(2,Facts,Facts[Sales]>50),Facts[Sales]&Facts[Region],\"|\")",
+   "powerbi": "10.5East|20West|-1.5East|North|0West|2.5East",
+   "now": "10.5East|20West|-1.5East|North|0West|2.5East"
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(TOPN(2,Facts,Facts[Sales]>50,ASC),Facts[Sales],\"|\")",
+   "powerbi": "|-1.5|0|2.5|10.5|20",
+   "now": "10.5|20|-1.5||0|2.5"
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(TOPN(2,Facts,Facts[Sales]>50,ASC),Facts[Sales]&Facts[Region],\"|\")",
+   "powerbi": "10.5East|20West|-1.5East|North|0West|2.5East",
+   "now": "10.5East|20West|-1.5East|North|0West|2.5East"
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(TOPN(2,Facts,Facts[Sales]>50,DESC),Facts[Sales],\"|\")",
+   "powerbi": "|-1.5|0|2.5|10.5|20",
+   "now": "10.5|20|-1.5||0|2.5"
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(TOPN(2,Facts,Facts[Sales]>50,DESC),Facts[Sales]&Facts[Region],\"|\")",
+   "powerbi": "10.5East|20West|-1.5East|North|0West|2.5East",
+   "now": "10.5East|20West|-1.5East|North|0West|2.5East"
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(TOPN(3,Facts,Facts[Sales]>50),Facts[Sales],\"|\")",
+   "powerbi": "|-1.5|0|2.5|10.5|20",
+   "now": "10.5|20|-1.5||0|2.5"
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(TOPN(3,Facts,Facts[Sales]>50),Facts[Sales]&Facts[Region],\"|\")",
+   "powerbi": "10.5East|20West|-1.5East|North|0West|2.5East",
+   "now": "10.5East|20West|-1.5East|North|0West|2.5East"
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(TOPN(3,Facts,Facts[Sales]>50,ASC),Facts[Sales],\"|\")",
+   "powerbi": "|-1.5|0|2.5|10.5|20",
+   "now": "10.5|20|-1.5||0|2.5"
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(TOPN(3,Facts,Facts[Sales]>50,ASC),Facts[Sales]&Facts[Region],\"|\")",
+   "powerbi": "10.5East|20West|-1.5East|North|0West|2.5East",
+   "now": "10.5East|20West|-1.5East|North|0West|2.5East"
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(TOPN(3,Facts,Facts[Sales]>50,DESC),Facts[Sales],\"|\")",
+   "powerbi": "|-1.5|0|2.5|10.5|20",
+   "now": "10.5|20|-1.5||0|2.5"
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(TOPN(3,Facts,Facts[Sales]>50,DESC),Facts[Sales]&Facts[Region],\"|\")",
+   "powerbi": "10.5East|20West|-1.5East|North|0West|2.5East",
+   "now": "10.5East|20West|-1.5East|North|0West|2.5East"
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(TOPN(4,Facts,Facts[Sales]>50),Facts[Sales],\"|\")",
+   "powerbi": "|-1.5|0|2.5|10.5|20",
+   "now": "10.5|20|-1.5||0|2.5"
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(TOPN(4,Facts,Facts[Sales]>50),Facts[Sales]&Facts[Region],\"|\")",
+   "powerbi": "10.5East|20West|-1.5East|North|0West|2.5East",
+   "now": "10.5East|20West|-1.5East|North|0West|2.5East"
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(TOPN(4,Facts,Facts[Sales]>50,ASC),Facts[Sales],\"|\")",
+   "powerbi": "|-1.5|0|2.5|10.5|20",
+   "now": "10.5|20|-1.5||0|2.5"
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(TOPN(4,Facts,Facts[Sales]>50,ASC),Facts[Sales]&Facts[Region],\"|\")",
+   "powerbi": "10.5East|20West|-1.5East|North|0West|2.5East",
+   "now": "10.5East|20West|-1.5East|North|0West|2.5East"
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(TOPN(4,Facts,Facts[Sales]>50,DESC),Facts[Sales],\"|\")",
+   "powerbi": "|-1.5|0|2.5|10.5|20",
+   "now": "10.5|20|-1.5||0|2.5"
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(TOPN(4,Facts,Facts[Sales]>50,DESC),Facts[Sales]&Facts[Region],\"|\")",
+   "powerbi": "10.5East|20West|-1.5East|North|0West|2.5East",
+   "now": "10.5East|20West|-1.5East|North|0West|2.5East"
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(TOPN(1,Facts,INT(Facts[Sales]/100)),Facts[Sales],\"|\")",
+   "powerbi": "0|2.5|10.5|20",
+   "now": "10.5|20|0|2.5"
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(TOPN(1,Facts,INT(Facts[Sales]/100)),Facts[Sales]&Facts[Region],\"|\")",
+   "powerbi": "10.5East|20West|0West|2.5East",
+   "now": "10.5East|20West|0West|2.5East"
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(TOPN(1,Facts,INT(Facts[Sales]/100),ASC),Facts[Sales],\"|\")",
+   "powerbi": "-1.5",
+   "now": "-1.5"
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(TOPN(1,Facts,INT(Facts[Sales]/100),ASC),Facts[Sales]&Facts[Region],\"|\")",
+   "powerbi": "-1.5East",
+   "now": "-1.5East"
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(TOPN(1,Facts,INT(Facts[Sales]/100),DESC),Facts[Sales],\"|\")",
+   "powerbi": "0|2.5|10.5|20",
+   "now": "10.5|20|0|2.5"
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(TOPN(1,Facts,INT(Facts[Sales]/100),DESC),Facts[Sales]&Facts[Region],\"|\")",
+   "powerbi": "10.5East|20West|0West|2.5East",
+   "now": "10.5East|20West|0West|2.5East"
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(TOPN(2,Facts,INT(Facts[Sales]/100)),Facts[Sales],\"|\")",
+   "powerbi": "2.5|0|10.5|20",
+   "now": "10.5|20|0|2.5"
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(TOPN(2,Facts,INT(Facts[Sales]/100)),Facts[Sales]&Facts[Region],\"|\")",
+   "powerbi": "10.5East|20West|0West|2.5East",
+   "now": "10.5East|20West|0West|2.5East"
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(TOPN(2,Facts,INT(Facts[Sales]/100),ASC),Facts[Sales],\"|\")",
+   "powerbi": "|-1.5",
+   "now": "|-1.5"
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(TOPN(2,Facts,INT(Facts[Sales]/100),ASC),Facts[Sales]&Facts[Region],\"|\")",
+   "powerbi": "North|-1.5East",
+   "now": "North|-1.5East"
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(TOPN(2,Facts,INT(Facts[Sales]/100),DESC),Facts[Sales],\"|\")",
+   "powerbi": "2.5|0|10.5|20",
+   "now": "10.5|20|0|2.5"
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(TOPN(2,Facts,INT(Facts[Sales]/100),DESC),Facts[Sales]&Facts[Region],\"|\")",
+   "powerbi": "10.5East|20West|0West|2.5East",
+   "now": "10.5East|20West|0West|2.5East"
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(TOPN(3,Facts,INT(Facts[Sales]/100)),Facts[Sales],\"|\")",
+   "powerbi": "10.5|2.5|0|20",
+   "now": "10.5|20|0|2.5"
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(TOPN(3,Facts,INT(Facts[Sales]/100)),Facts[Sales]&Facts[Region],\"|\")",
+   "powerbi": "0West|20West|10.5East|2.5East",
+   "now": "10.5East|20West|0West|2.5East"
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(TOPN(3,Facts,INT(Facts[Sales]/100),ASC),Facts[Sales],\"|\")",
+   "powerbi": "0|2.5|20|-1.5|10.5|",
+   "now": "-1.5||10.5|20|0|2.5"
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(TOPN(3,Facts,INT(Facts[Sales]/100),ASC),Facts[Sales]&Facts[Region],\"|\")",
+   "powerbi": "10.5East|20West|2.5East|North|0West|-1.5East",
+   "now": "-1.5East|North|10.5East|20West|0West|2.5East"
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(TOPN(3,Facts,INT(Facts[Sales]/100),DESC),Facts[Sales],\"|\")",
+   "powerbi": "10.5|2.5|0|20",
+   "now": "10.5|20|0|2.5"
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(TOPN(3,Facts,INT(Facts[Sales]/100),DESC),Facts[Sales]&Facts[Region],\"|\")",
+   "powerbi": "0West|20West|10.5East|2.5East",
+   "now": "10.5East|20West|0West|2.5East"
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(TOPN(4,Facts,INT(Facts[Sales]/100)),Facts[Sales],\"|\")",
+   "powerbi": "20|10.5|0|2.5",
+   "now": "20|10.5|0|2.5"
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(TOPN(4,Facts,INT(Facts[Sales]/100)),Facts[Sales]&Facts[Region],\"|\")",
+   "powerbi": "2.5East|0West|10.5East|20West",
+   "now": "2.5East|0West|10.5East|20West"
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(TOPN(4,Facts,INT(Facts[Sales]/100),ASC),Facts[Sales],\"|\")",
+   "powerbi": "0|2.5|20|-1.5|10.5|",
+   "now": "-1.5||10.5|20|0|2.5"
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(TOPN(4,Facts,INT(Facts[Sales]/100),ASC),Facts[Sales]&Facts[Region],\"|\")",
+   "powerbi": "10.5East|20West|2.5East|North|0West|-1.5East",
+   "now": "-1.5East|North|10.5East|20West|0West|2.5East"
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(TOPN(4,Facts,INT(Facts[Sales]/100),DESC),Facts[Sales],\"|\")",
+   "powerbi": "20|10.5|0|2.5",
+   "now": "20|10.5|0|2.5"
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(TOPN(4,Facts,INT(Facts[Sales]/100),DESC),Facts[Sales]&Facts[Region],\"|\")",
+   "powerbi": "2.5East|0West|10.5East|20West",
+   "now": "2.5East|0West|10.5East|20West"
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(TOPN(1,Facts,1),Facts[Sales],\"|\")",
+   "powerbi": "|-1.5|0|2.5|10.5|20",
+   "now": "10.5|20|-1.5||0|2.5"
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(TOPN(1,Facts,1),Facts[Sales]&Facts[Region],\"|\")",
+   "powerbi": "10.5East|20West|-1.5East|North|0West|2.5East",
+   "now": "10.5East|20West|-1.5East|North|0West|2.5East"
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(TOPN(1,Facts,1,ASC),Facts[Sales],\"|\")",
+   "powerbi": "|-1.5|0|2.5|10.5|20",
+   "now": "10.5|20|-1.5||0|2.5"
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(TOPN(1,Facts,1,ASC),Facts[Sales]&Facts[Region],\"|\")",
+   "powerbi": "10.5East|20West|-1.5East|North|0West|2.5East",
+   "now": "10.5East|20West|-1.5East|North|0West|2.5East"
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(TOPN(1,Facts,1,DESC),Facts[Sales],\"|\")",
+   "powerbi": "|-1.5|0|2.5|10.5|20",
+   "now": "10.5|20|-1.5||0|2.5"
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(TOPN(1,Facts,1,DESC),Facts[Sales]&Facts[Region],\"|\")",
+   "powerbi": "10.5East|20West|-1.5East|North|0West|2.5East",
+   "now": "10.5East|20West|-1.5East|North|0West|2.5East"
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(TOPN(2,Facts,1),Facts[Sales],\"|\")",
+   "powerbi": "|-1.5|0|2.5|10.5|20",
+   "now": "10.5|20|-1.5||0|2.5"
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(TOPN(2,Facts,1),Facts[Sales]&Facts[Region],\"|\")",
+   "powerbi": "10.5East|20West|-1.5East|North|0West|2.5East",
+   "now": "10.5East|20West|-1.5East|North|0West|2.5East"
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(TOPN(2,Facts,1,ASC),Facts[Sales],\"|\")",
+   "powerbi": "|-1.5|0|2.5|10.5|20",
+   "now": "10.5|20|-1.5||0|2.5"
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(TOPN(2,Facts,1,ASC),Facts[Sales]&Facts[Region],\"|\")",
+   "powerbi": "10.5East|20West|-1.5East|North|0West|2.5East",
+   "now": "10.5East|20West|-1.5East|North|0West|2.5East"
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(TOPN(2,Facts,1,DESC),Facts[Sales],\"|\")",
+   "powerbi": "|-1.5|0|2.5|10.5|20",
+   "now": "10.5|20|-1.5||0|2.5"
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(TOPN(2,Facts,1,DESC),Facts[Sales]&Facts[Region],\"|\")",
+   "powerbi": "10.5East|20West|-1.5East|North|0West|2.5East",
+   "now": "10.5East|20West|-1.5East|North|0West|2.5East"
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(TOPN(3,Facts,1),Facts[Sales],\"|\")",
+   "powerbi": "|-1.5|0|2.5|10.5|20",
+   "now": "10.5|20|-1.5||0|2.5"
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(TOPN(3,Facts,1),Facts[Sales]&Facts[Region],\"|\")",
+   "powerbi": "10.5East|20West|-1.5East|North|0West|2.5East",
+   "now": "10.5East|20West|-1.5East|North|0West|2.5East"
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(TOPN(3,Facts,1,ASC),Facts[Sales],\"|\")",
+   "powerbi": "|-1.5|0|2.5|10.5|20",
+   "now": "10.5|20|-1.5||0|2.5"
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(TOPN(3,Facts,1,ASC),Facts[Sales]&Facts[Region],\"|\")",
+   "powerbi": "10.5East|20West|-1.5East|North|0West|2.5East",
+   "now": "10.5East|20West|-1.5East|North|0West|2.5East"
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(TOPN(3,Facts,1,DESC),Facts[Sales],\"|\")",
+   "powerbi": "|-1.5|0|2.5|10.5|20",
+   "now": "10.5|20|-1.5||0|2.5"
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(TOPN(3,Facts,1,DESC),Facts[Sales]&Facts[Region],\"|\")",
+   "powerbi": "10.5East|20West|-1.5East|North|0West|2.5East",
+   "now": "10.5East|20West|-1.5East|North|0West|2.5East"
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(TOPN(4,Facts,1),Facts[Sales],\"|\")",
+   "powerbi": "|-1.5|0|2.5|10.5|20",
+   "now": "10.5|20|-1.5||0|2.5"
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(TOPN(4,Facts,1),Facts[Sales]&Facts[Region],\"|\")",
+   "powerbi": "10.5East|20West|-1.5East|North|0West|2.5East",
+   "now": "10.5East|20West|-1.5East|North|0West|2.5East"
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(TOPN(4,Facts,1,ASC),Facts[Sales],\"|\")",
+   "powerbi": "|-1.5|0|2.5|10.5|20",
+   "now": "10.5|20|-1.5||0|2.5"
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(TOPN(4,Facts,1,ASC),Facts[Sales]&Facts[Region],\"|\")",
+   "powerbi": "10.5East|20West|-1.5East|North|0West|2.5East",
+   "now": "10.5East|20West|-1.5East|North|0West|2.5East"
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(TOPN(4,Facts,1,DESC),Facts[Sales],\"|\")",
+   "powerbi": "|-1.5|0|2.5|10.5|20",
+   "now": "10.5|20|-1.5||0|2.5"
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(TOPN(4,Facts,1,DESC),Facts[Sales]&Facts[Region],\"|\")",
+   "powerbi": "10.5East|20West|-1.5East|North|0West|2.5East",
+   "now": "10.5East|20West|-1.5East|North|0West|2.5East"
+  }
+ ]
+}
