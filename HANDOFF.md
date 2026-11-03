@@ -44,7 +44,7 @@ Rules and roles are in `AGENTS.md`. Read it first. Keep this file short and curr
 | 29 | text-number-19: text-to-number conversions, iterator conditions, COALESCE order, text columns in arithmetic (2,044 saved answers the engine refuses) | `docs/plans/2026-11-03-text-number-19.md` | DONE (coded by Antigravity, fixed by Sonnet 5.5, reviewed, locked 444,122, merged 2026-11-03) | Claude |
 | 30 | static-types-20: static types the engine cannot establish (type tests, ==, COALESCE branches; 1,070 saved answers the engine refuses) | `docs/plans/2026-11-03-static-types-20.md` | DONE (coded by Antigravity, fixed by Sonnet 5.5, reviewed, locked 445,260, merged 2026-11-03) | Claude |
 | 31 | linest-edge-21: LINEST/LINESTX near-perfect fits and linearly dependent regressors (677 saved answers the engine refuses) | `docs/plans/2026-11-03-linest-edge-21.md` | DONE (coded by Antigravity, fixed by Sonnet 5.5, reviewed, locked 446,021, merged 2026-11-03) | Claude |
-| 32 | swi-order-22: SUBSTITUTEWITHINDEX index-table row order and shared column names (685 saved answers the engine refuses) | `docs/plans/2026-11-03-swi-order-22.md` | DONE (coded by Antigravity, reviewed by Claude, locked, merged 2026-11-03) | Claude |
+| 32 | swi-order-22: SUBSTITUTEWITHINDEX index-table row order and shared column names (685 saved answers the engine refuses) | `docs/plans/2026-11-03-swi-order-22.md` | DONE (coded by Antigravity, reviewed, locked 446,481, merged 2026-11-03) | Claude |
 | 33 | xirr-oddfyield-23: new DAX functions XIRR and ODDFYIELD, PATHITEM with type argument (392 measured answers) | `docs/plans/2026-11-03-xirr-oddfyield-23.md` | READY FOR REVIEW (worktree `/Users/armaan/Power BI tool-task33`) | Claude |
 
 ## Current task

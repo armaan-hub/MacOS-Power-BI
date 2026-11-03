@@ -1796,3 +1796,13 @@ The standing test workbook is now `tests/Data/Vat File -Aug 2026.xlsx` (sheet `V
 **Saved:** `tools/parity/dax_battery_linest21_extra.json` (440 answers), `tools/parity/task31_linest_edge_spec.json`.
 
 **Gate:** PARITY GATE PASSED (fast gate). pytest 2,544 passed; replay 453,682: 446,041 match, 7,641 refused, 0 DIFF, 0 CRASH; locked 445,260 to 446,021. The real app through the measure path, offscreen: 575/575 equal and 1,500 fresh probes with 0 wrong. Power BI answers came from Power BI Desktop on the iPad guest; the project was not saved. No saved Power BI answer was edited.
+
+## 2026-11-03 — Iteration 122 (Task 32 swi-order-22: SUBSTITUTEWITHINDEX index-table row order and shared column names (480 refusals become Power BI's answers))
+
+**Who did what:** Antigravity (Gemini 3.8 Flash) ordered the SUBSTITUTEWITHINDEX index table by the engine's own row orders (dictionary order for VALUES/SUMMARIZE/FILTER/EXCEPT, the TOPN heap order) with ties resolved the way Power BI does, and matched shared column names case-insensitively (unrelated columns with the same name join and usually give BLANK); Claude Opus 5.5 built the spec, measured 180 fresh shapes in Power BI and updated two stale guards (the ADDCOLUMNS "k"/"k" shape is BLANK in Power BI, measured 2026-11-03).
+
+**Review:** spec Part A 78 match, 462 still refused; Part B 145 match; 0 wrong. Fresh 180: 0 new wrong versus main, 30 newly right. Code read for lookups: none.
+
+**Saved:** `tools/parity/dax_battery_swi22_extra.json` (173 answers), `tools/parity/task32_swi_order_spec.json`.
+
+**Gate:** PARITY GATE PASSED (fast gate). pytest 2,547 passed; replay 453,855: 446,501 match, 7,354 refused, 0 DIFF, 0 CRASH; locked 446,021 to 446,481. The real app through the measure path, offscreen: 575/575 equal and 1,500 fresh probes with 0 wrong. Power BI answers came from Power BI Desktop on the iPad guest; the project was not saved. No saved Power BI answer was edited.
