@@ -18231,8 +18231,10 @@ def evaluate_measures(
                 total = Decimal("Infinity") if total > 0 else Decimal("-Infinity")  # Part F: a sum past the Double range is Infinity (SUMX({1,2},1E308-1E-7) is Infinity, measured)
             if function in {"SUMX", "AVERAGEX"} and total.is_finite() and abs(total) > _CURRENCY_LIMIT and currency_typed(arguments[1], (context, iteration_rows[0] if iteration_rows else {}, 1)):
                 total = _currency_wrap(total)  # Task 20 F5: the sum of a Currency body wraps at 64 bits; AVERAGEX divides the wrapped sum
-            if function == "AVERAGEX" and not variant_body and all(v.is_nan() for v in values):
-                result = Decimal(0) if _stored_scan(arguments[0], variable_nodes.get) is True else Decimal("NaN")
+            if function == "AVERAGEX" and not variant_body and all(v.is_nan() for v in values) and all(isinstance(v, dax_dates.DaxDateTime) for v in values) and _stored_scan(arguments[0], variable_nodes.get) is not True:
+                result = Decimal("NaN")  # Task 21 Part D: AVERAGEX of a date body that is NaN is a number, NaN (but over a stored scan Task 38 measured 0)
+            elif function == "AVERAGEX" and not variant_body and all(v.is_nan() for v in values):
+                result = Decimal(0) if _stored_scan(arguments[0], variable_nodes.get) is True else values[0]  # Task 38: 0 over a stored scan; otherwise (Task 39) the NaN keeps its sign (AVERAGEX({1},([Value]/0)*0) is -nan(ind), measured)
             else:
                 result = total if function == "SUMX" else (Decimal(float(total) / len(values)) if double_body and total.is_finite() else dax_typed.QUIET.divide(total, Decimal(len(values))))  # Part B: AVERAGEX of a Double body divides the double sum in doubles
             if (

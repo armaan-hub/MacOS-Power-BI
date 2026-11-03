@@ -12,6 +12,12 @@ from tools import dax_oracle_diff as dax
 
 
 class TestIteration129NanInfIterators29(unittest.TestCase):
+    def test_averagex_all_nan_keeps_sign_of_nan(self) -> None:
+        # Task 38 gives 0 over a stored scan; otherwise the NaN keeps its sign (live Power BI: -nan(ind))
+        self.assertEqual(dax.local('(AVERAGEX({1},([Value]/0)*0))&"z"'), "-nan(ind)z")
+        self.assertEqual(dax.local('(AVERAGEX({-1,-2,4},([Value]*0)*(1/0)))&"z"'), "-nan(ind)z")
+        self.assertEqual(dax.local('AVERAGEX(Facts,("2")/(1/0*0))'), "0")
+
     def test_part_a_productx_medianx_geomeanx_percentilex(self) -> None:
         self.assertEqual(
             dax.local('PRODUCTX(CALCULATETABLE(Facts,Facts[Region]="East"),1/0)'),
