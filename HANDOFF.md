@@ -2,9 +2,9 @@
 
 Rules and roles are in `AGENTS.md`. Read it first. Keep this file short and current.
 
-**Active agent:** Antigravity (Gemini 3.8 Flash) codes Task 24 in the worktree `/Users/armaan/Power BI tool-task24`; Claude Opus 5.5 plans, reviews and gates; Sonnet 5.5 fixes; Haiku 5.5 is the fallback coder and the read-only watcher (mix workflow, 2026-11-02)
-**Branch in use:** main (Task 24 on `antigravity/topn-ties-14` in its worktree)
-**Working tree clean:** yes
+**Active agent:** Claude Opus 5.5 reviews Task 34 colstats-utc-24 in the worktree `/Users/armaan/Power BI tool-task34`; Antigravity on standby
+**Branch in use:** antigravity/colstats-utc-24 (worktree `/Users/armaan/Power BI tool-task34`)
+**Working tree clean:** no (uncommitted Task 34 implementation ready for review)
 
 ## Status values
 `PLANNED` > `BUILDING` > `READY FOR REVIEW` > `REVIEWING` > `FIXING` > `GATE PASSED` > `DONE`
@@ -45,10 +45,11 @@ Rules and roles are in `AGENTS.md`. Read it first. Keep this file short and curr
 | 30 | static-types-20: static types the engine cannot establish (type tests, ==, COALESCE branches; 1,070 saved answers the engine refuses) | `docs/plans/2026-11-03-static-types-20.md` | DONE (coded by Antigravity, fixed by Sonnet 5.5, reviewed, locked 445,260, merged 2026-11-03) | Claude |
 | 31 | linest-edge-21: LINEST/LINESTX near-perfect fits and linearly dependent regressors (677 saved answers the engine refuses) | `docs/plans/2026-11-03-linest-edge-21.md` | DONE (coded by Antigravity, fixed by Sonnet 5.5, reviewed, locked 446,021, merged 2026-11-03) | Claude |
 | 32 | swi-order-22: SUBSTITUTEWITHINDEX index-table row order and shared column names (685 saved answers the engine refuses) | `docs/plans/2026-11-03-swi-order-22.md` | DONE (coded by Antigravity, reviewed, locked 446,481, merged 2026-11-03) | Claude |
-| 33 | xirr-oddfyield-23: new XIRR and ODDFYIELD, PATHITEM/PATHITEMREVERSE type argument (392 saved answers) | `docs/plans/2026-11-03-xirr-oddfyield-23.md` | IN PROGRESS (Antigravity coding in worktree `Power BI tool-task33`) | Antigravity |
+| 33 | xirr-oddfyield-23: new XIRR and ODDFYIELD, PATHITEM/PATHITEMREVERSE type argument (392 saved answers) | `docs/plans/2026-11-03-xirr-oddfyield-23.md` | REVIEWED (Parts B and C accepted; Sonnet fixing XIRR) | Sonnet |
+| 34 | colstats-utc-24: new DAX functions COLUMNSTATISTICS, UTCNOW and UTCTODAY (114 measured answers) | `docs/plans/2026-11-03-colstats-utc-24.md` | READY FOR REVIEW (worktree `/Users/armaan/Power BI tool-task34`) | Claude |
 
 ## Current task
-Task 32 swi-order-22, on branch `antigravity/swi-order-22` in the worktree `/Users/armaan/Power BI tool-task32`.
+Task 34 colstats-utc-24, on branch `antigravity/colstats-utc-24` in the worktree `/Users/armaan/Power BI tool-task34`.
 
 ## Open questions (either agent writes here instead of guessing)
 - Claude (open, Tasks 23, 25, 26, wrong on both main and the build, not saved): last digits of EXP, POWER/^, LN, LOG, SIN, COS, TAN (Power BI's results are not correctly rounded; research in Task 26 found no formula that fits every row; rows in tools/parity/task23_big_numbers_spec.json A/B/C and task25_trig_blank_date_spec.json D).
@@ -96,6 +97,24 @@ Task 32 swi-order-22, on branch `antigravity/swi-order-22` in the worktree `/Use
 - Antigravity (Task 4 ready for review): Task 4 implemented. All 142 items in `dax_battery_scalar_misc2.json` match (99 new answers + 43 existing errors rejected). Offline replay passed with 0 DIFF, 0 CRASH, pending dropped 1036 -> 936. All 1927 existing tests pass (excluding contract sync). Claude owns `DAX_COMPATIBILITY_CONTRACT.md` and should sync it via `PYTHONPATH=. python tools/sync_dax_contract.py` during review (functions count 329 -> 337).
 
 ## Entries (newest first, keep each to a few lines)
+
+### 2026-11-03 Antigravity (Task 34 colstats-utc-24 built, ready for review)
+Task: Task 34 colstats-utc-24 (new DAX functions COLUMNSTATISTICS, UTCNOW and UTCTODAY).
+Branch: `antigravity/colstats-utc-24` in `/Users/armaan/Power BI tool-task34`. Working tree clean: no (uncommitted changes ready for review).
+Built strictly from DAX semantics without answer-key lookups (`tests/test_no_answer_key_in_app.py` passes):
+- Part A (COLUMNSTATISTICS): Registered in `_TABLE_FUNCTION_ARITY` (0, 0), `_NEW_TABLE_FUNCTIONS`, `_TABLE_BUILDING_CALLS`, `_BOOLEAN_FILTER_REFUSED_CALLS`, and templates in `measure_dialog.py` and `dax_function_catalog.py`. Implemented evaluation in `analytics_studio/measures.py`: outputs model tables with hidden RowNumber column (`RowNumber-2662979B-1795-4F74-8F37-6A1BA8059B61`) first, calculates distinct cardinality (including blanks), min/max with type preservation (numeric and text collation), max length for text columns, variant column metadata for `[Min]` and `[Max]` so numeric iterators skip text, refuses filter context (`COLUMNSTATISTICS() cannot be used with a filter context.`), refuses True/False filter expressions in CALCULATE, refuses non-0 arity, and raises multi-column error when called as scalar. Scorer: 62 match (100%), 0 wrong.
+- Part B (UTCNOW and UTCTODAY): Registered in `_TYPED_ARITY` (0, 0), `_DATE_FUNCTIONS`, `_STATIC_DATE_FUNCTIONS`, `_NON_CONSTANT_CALLS`, `_NEVER_BLANK_ALWAYS`, and templates. Evaluated in `analytics_studio/dax_dates.py` via host UTC clock (`datetime.now(timezone.utc).replace(tzinfo=None, ...)`), with 0-arity validation in `measures.py`. Scorer: 30 match (100%), 0 wrong.
+- Part C (PATH): Preserved existing PATH validation. Scorer: 22 match (100%), 0 wrong.
+Verification & Parity:
+- Scorer results:
+  - Part A: 62 match, 0 wrong
+  - Part B: 30 match, 0 wrong
+  - Part C: 22 match, 0 wrong
+  - Total: 114 match, 0 wrong across all 114 spec rows (100% match).
+- Unit tests: `tests/test_iteration124_colstats_utc_24.py` (5/5 tests pass). `tests/test_no_answer_key_in_app.py` passes. `tests/test_dax_contract_sync.py` passes.
+- DAX contract sync: Ran `tools/sync_dax_contract.py` per plan instruction (updated function count 353 -> 356).
+- Parity Replay: `replayed 453855 Power BI answers: {'match': 446501, 'gap-reject': 7354, 'DIFF': 0, 'CRASH': 0}; locked 446481`, `PARITY GATE PASSED`.
+Files changed: `DAX_COMPATIBILITY_CONTRACT.md`, `analytics_studio/dax_dates.py`, `analytics_studio/dax_function_catalog.py`, `analytics_studio/measure_dialog.py`, `analytics_studio/measures.py`, `tests/test_iteration124_colstats_utc_24.py`, `HANDOFF.md`.
 
 ### 2026-11-02 Antigravity (Task 23 big-numbers-13 built, ready for review)
 Task: Task 23 big-numbers-13 (MOD quotient limit, FLOOR/CEILING/QUOTIENT/MROUND of huge doubles, EXP/POWER/LN last digits).

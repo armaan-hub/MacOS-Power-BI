@@ -56,6 +56,7 @@ CHISQ.INV.RT(<probability>, <deg_freedom>) ;; Returns the inverse of the right-t
 CLOSINGBALANCEMONTH(<expression>, <dates>, [<filter>]) ;; Value of the expression at the last date of the month.
 CLOSINGBALANCEQUARTER(<expression>, <dates>, [<filter>]) ;; Value of the expression at the last date of the quarter.
 CLOSINGBALANCEYEAR(<expression>, <dates>, [<filter>], [<year_end_date>]) ;; Value of the expression at the last date of the year.
+COLUMNSTATISTICS() ;; Returns a table of statistics for every column in the model.
 COALESCE(<expression>, <expression>, [<expression>]…) ;; Returns the first expression that does not evaluate to blank.
 COMBIN(<number>, <number_chosen>) ;; Returns the number of combinations for a number of items.
 COMBINA(<number>, <number_chosen>) ;; Returns the number of combinations, with repetitions.
@@ -353,6 +354,8 @@ USERELATIONSHIP(<columnName1>, <columnName2>) ;; Uses an inactive relationship f
 USERNAME() ;; Returns the domain and user name of the current connection.
 USEROBJECTID() ;; Returns the object id of the current user.
 USERPRINCIPALNAME() ;; Returns the user principal name.
+UTCNOW() ;; Returns the current date and time in UTC.
+UTCTODAY() ;; Returns the current date in UTC.
 VALUE(<text>) ;; Converts a text string to a number.
 VALUES(<TableNameOrColumnName>) ;; Returns the distinct values of a column or the rows of a table, including blank.
 VAR.P(<column>) ;; Variance of a population in a column.
