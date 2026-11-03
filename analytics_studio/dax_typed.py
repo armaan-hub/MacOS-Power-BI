@@ -226,21 +226,7 @@ def text_key(text: str) -> str:
 
 
 _PUNCTUATION_ORDER = {character: rank for rank, character in enumerate(" !\"#$%&()*,./:;?@[\\]^_`{|}~+<=>")}
-_IGNORED_AT_FIRST = {"'": 0, "-": 1}
-
-
-def text_collation_key(text: str) -> tuple[tuple[tuple[int, int], ...], tuple[tuple[int, int], ...], str]:
-    """The linguistic order of ASCII text (live Power BI, Task 16 review, every pair of ASCII punctuation, digits and letters):
-    punctuation, then digits, then letters.  ' and - are ignored at first (a-b is between aa and ac) and only break a tie:
-    the text without them first, then the earlier position, then ' before -, then the longer run."""
-    folded = text_key(text)
-    primary = tuple(
-        (0, _PUNCTUATION_ORDER[c]) if c in _PUNCTUATION_ORDER else (3 if c > "\x7f" else 2 if c.isalpha() else 1 if c.isdigit() else -1, ord(c))
-        for c in folded if c not in _IGNORED_AT_FIRST
-    )
-    secondary = tuple((position, _IGNORED_AT_FIRST[c]) for position, c in enumerate(folded) if c in _IGNORED_AT_FIRST)
-    return (primary, secondary, folded)
-
+_IGNORED_AT_FIRST = {"'": 0, "\u02bc": 0, "-": 1}
 
 _CULTURE_CHARS = re.compile("[\u0080-\ud7ff\ue000-\uffff]")
 
@@ -250,81 +236,129 @@ def _has_culture_chars(text: str) -> bool:
     return not text.isascii() and _CULTURE_CHARS.search(text) is not None
 
 
-def _strong_key(text: str) -> str:
-    return unicodedata.normalize("NFKC", text).casefold().replace("æ", "ae").replace("œ", "oe")
+_ACCENT_RANK = {
+    0x301: 1,   # acute
+    0x300: 2,   # grave
+    0x307: 3,   # dot above
+    0x302: 4,   # circumflex
+    0x308: 5,   # diaeresis
+    0x30C: 6,   # caron
+    0x306: 7,   # breve
+    0x304: 8,   # macron
+    0x303: 9,   # tilde
+    0x30A: 10,  # ring
+    0x328: 11,  # ogonek
+    0x327: 12,  # cedilla
+    0x30B: 13,  # double acute
+}
 
+_SPECIAL_DIACRITIC = {
+    "đ": 14, "Đ": 14, "ł": 14, "Ł": 14, "ø": 14, "Ø": 14, "ŀ": 15, "Ŀ": 15, "ð": 16, "Ð": 16,
+}
 
-_LIGATURE_MAP = {
-    "æ": "ae",
-    "Æ": "AE",
-    "œ": "oe",
-    "Œ": "OE",
-    "ß": "ss",
-    "ẞ": "SS",
-    "ǆ": "dž",
-    "Ǆ": "DŽ",
-    "ǅ": "Dž",
-    "ĳ": "ij",
-    "Ĳ": "IJ",
+_SPECIAL_EXPANSIONS = {
+    "æ": "ae", "Æ": "ae", "œ": "oe", "Œ": "oe", "ß": "ss", "ẞ": "ss", "ĳ": "ij", "Ĳ": "ij",
+    "ǆ": "dž", "Ǆ": "dž", "ǅ": "dž", "ǈ": "lj", "ǉ": "lj", "Ǉ": "lj", "ǌ": "nj", "ǋ": "nj", "Ǌ": "nj",
+    "þ": "th", "Þ": "th", "ð": "d", "Ð": "d", "đ": "d", "Đ": "d", "ı": "i",
+    "ŀ": "l", "Ŀ": "l", "ł": "l", "Ł": "l", "ŉ": "n", "ø": "o", "Ø": "o",
+    "ſ": "ſ",
 }
 
 
-def expand_ligatures(text: str) -> str:
-    for k, v in _LIGATURE_MAP.items():
-        if k in text:
-            text = text.replace(k, v)
-    return text
-
-
-# Live Power BI (Task 10 review, 2026-10-29): accents rank unmarked < acute < grave < dot above < circumflex < diaeresis < caron <
-# breve < macron < tilde < ring < ogonek < cedilla < double acute (the same order for every base letter probed, not code-point order).
-_ACCENT_RANK = {0x301: 1, 0x300: 2, 0x307: 3, 0x302: 4, 0x308: 5, 0x30C: 6, 0x306: 7, 0x304: 8, 0x303: 9, 0x30A: 10, 0x328: 11, 0x327: 12, 0x30B: 13}
-
-
-def _stacked_marks(text: str) -> bool:
-    """Two accents on one letter: Power BI ignores their order ("e" + dot + ring equals "e" + ring + dot), which is not modelled."""
-    previous_mark = False
-    for c in unicodedata.normalize("NFD", text):
-        is_mark = unicodedata.category(c) == "Mn"
-        if is_mark and previous_mark:
-            return True
-        previous_mark = is_mark
-    return False
-
-
-def _decomposed(text: str) -> str:
-    return unicodedata.normalize("NFD", expand_ligatures(text))
+def is_classifiable_char(c: str) -> bool:
+    if c.isascii():
+        return c.isalnum() or c in _PUNCTUATION_ORDER or c in _IGNORED_AT_FIRST
+    if c == "\u02bc":
+        return True
+    if c in _SPECIAL_EXPANSIONS:
+        return True
+    if ord(c) in _ACCENT_RANK:
+        return True
+    nfd = unicodedata.normalize("NFD", c)
+    base = nfd[0]
+    if not (base.isascii() and base.isalpha()):
+        return False
+    return all(ord(m) in _ACCENT_RANK for m in nfd[1:])
 
 
 def is_classifiable_latin(text: str) -> bool:
-    """Text made only of ASCII letters and digits, each letter carrying at most one accent whose rank is known.
+    """Text made of ASCII letters, digits, punctuation, and Latin letters with diacritics / ligatures."""
+    return all(is_classifiable_char(c) for c in text)
 
-    Letters without a canonical decomposition (ł, đ, ø, ð, þ, ı, ŀ, ŉ, ſ, ...) sort as letters of their own, and punctuation or
-    spaces are ordered by the culture (an apostrophe or hyphen counts for almost nothing), so all of those stay refused."""
-    marks = 0
-    for c in _decomposed(text):
-        if c.isascii():
-            if not c.isalnum():
-                return False
-            marks = 0
-        elif ord(c) in _ACCENT_RANK and marks == 0:
-            marks = 1
+
+def decompose_char_stream(text: str) -> list[tuple[str, tuple[int, ...], int]]:
+    text = _from_units(text)
+    stream: list[tuple[str, tuple[int, ...], int]] = []
+    i = 0
+    while i < len(text):
+        c = text[i]
+        if c in _SPECIAL_EXPANSIONS:
+            exp = _SPECIAL_EXPANSIONS[c]
+            diac = _SPECIAL_DIACRITIC.get(c, 0)
+            if c == "ſ":
+                stream.append(("ſ", (), 0))
+            elif diac > 0:
+                stream.append((exp.lower(), (diac,), 0))
+            elif c == "ı":
+                stream.append(("i", (), 1))
+            else:
+                for sc in unicodedata.normalize("NFD", exp):
+                    if unicodedata.category(sc) != "Mn":
+                        stream.append((sc.lower(), (), 0))
+                    else:
+                        rnk = _ACCENT_RANK.get(ord(sc), 99)
+                        base, d_tuple, v = stream[-1]
+                        stream[-1] = (base, tuple(sorted(d_tuple + (rnk,))), v)
+            i += 1
         else:
-            return False
-    return True
+            nfd = unicodedata.normalize("NFD", c)
+            for sc in nfd:
+                if unicodedata.category(sc) == "Mn":
+                    rnk = _ACCENT_RANK.get(ord(sc), 99)
+                    if stream:
+                        base, d_tuple, v = stream[-1]
+                        stream[-1] = (base, tuple(sorted(d_tuple + (rnk,))), v)
+                else:
+                    stream.append((sc.lower(), (), 0))
+            i += 1
+    return stream
 
 
-def latin_collation_key(text: str) -> tuple[str, tuple[int, ...]]:
-    """Linguistic order of classifiable text: base letters first (case ignored), then the accents left to right."""
-    base_chars: list[str] = []
-    ranks: list[int] = []
-    for c in _decomposed(text):
-        if c.isascii():
-            base_chars.append(c.casefold())
-            ranks.append(0)
+def _letter_rank(base: str) -> tuple[int, int]:
+    if base == "ſ":
+        return (ord("s"), 1)
+    return (ord(base), 0)
+
+
+def text_collation_key(text: str) -> tuple[tuple[tuple[int, tuple[int, int]], ...], tuple[tuple[int, ...], ...], tuple[int, ...], tuple[tuple[int, int], ...]]:
+    stream = decompose_char_stream(text)
+    primary: list[tuple[int, tuple[int, int]]] = []
+    secondary: list[tuple[int, ...]] = []
+    tertiary: list[int] = []
+    quaternary: list[tuple[int, int]] = []
+    for pos, (base, diacs, var) in enumerate(stream):
+        if base in _IGNORED_AT_FIRST:
+            quaternary.append((pos, _IGNORED_AT_FIRST[base]))
+        elif base in _PUNCTUATION_ORDER:
+            primary.append((0, (_PUNCTUATION_ORDER[base], 0)))
+            secondary.append(diacs)
+            tertiary.append(var)
+        elif base.isdigit():
+            primary.append((1, (ord(base), 0)))
+            secondary.append(diacs)
+            tertiary.append(var)
+        elif base.isalpha() or base == "ſ":
+            primary.append((2, _letter_rank(base)))
+            secondary.append(diacs)
+            tertiary.append(var)
         else:
-            ranks[-1] = _ACCENT_RANK[ord(c)]
-    return ("".join(base_chars), tuple(ranks))
+            primary.append((3, (ord(base), 0)))
+            secondary.append(diacs)
+            tertiary.append(var)
+    return (tuple(primary), tuple(secondary), tuple(tertiary), tuple(quaternary))
+
+
+latin_collation_key = text_collation_key
 
 
 def ordering_key(values: list[str]) -> Callable[[str], object]:
@@ -335,7 +369,22 @@ def ordering_key(values: list[str]) -> Callable[[str], object]:
         from .measures import MeasureError  # imported late: measures imports this module
 
         raise MeasureError("Ordering text with non-ASCII characters is not supported in the local engine.")
-    return latin_collation_key
+    return text_collation_key
+
+
+def _strong_key(text: str) -> str:
+    return unicodedata.normalize("NFKC", text).casefold().replace("æ", "ae").replace("œ", "oe")
+
+
+def _stacked_marks(text: str) -> bool:
+    """Two accents on one letter: Power BI ignores their order, which is not modelled."""
+    previous_mark = False
+    for c in unicodedata.normalize("NFD", text):
+        is_mark = unicodedata.category(c) == "Mn"
+        if is_mark and previous_mark:
+            return True
+        previous_mark = is_mark
+    return False
 
 
 def compare(operator: str, left: object, right: object, *, allow_variant: bool = False) -> bool:
@@ -384,35 +433,41 @@ def compare(operator: str, left: object, right: object, *, allow_variant: bool =
 
             raise MeasureError("Comparing text with full-width or half-width forms is not supported in the local engine.")
         has_culture = _has_culture_chars(left) or _has_culture_chars(right)  # type: ignore[arg-type]
-        if has_culture and is_classifiable_latin(left) and is_classifiable_latin(right):  # type: ignore[arg-type]
-            a, b = latin_collation_key(left), latin_collation_key(right)  # type: ignore[arg-type]
-        elif has_culture and operator in {"<", "<=", ">", ">="}:
-            # live Power BI (iteration 92): text is ordered by the culture, not by code point ("ä" < "z", "ñ" < "o", "ab" < "aä"); only accented ASCII letters are modelled
-            from .measures import MeasureError  # imported late: measures imports this module
-
-            raise MeasureError("Ordering text with non-ASCII characters is not supported in the local engine.")
-        else:
-            a, b = (text_key(left), text_key(right)) if operator in {"=", "<>"} else (text_collation_key(left), text_collation_key(right))  # type: ignore[arg-type]
-            if has_culture:
-                # live Power BI (iteration 92): canonically equivalent and expanded forms are equal ("a" + U+0308 = "ä", "æ" = "ae", "ǆ" = "dž"); refuse when that would change the answer
+        if has_culture:
+            if not (is_classifiable_latin(left) and is_classifiable_latin(right)):  # type: ignore[arg-type]
                 from .measures import MeasureError  # imported late: measures imports this module
 
-                if (a == b) != (_strong_key(left) == _strong_key(right)) or any(c.casefold() != c.lower() for c in left + right) or _stacked_marks(left) or _stacked_marks(right):  # type: ignore[operator,arg-type]
-                    # a letter whose case fold joins another letter ("ſ" is not "s" in Power BI) is not modelled either
+                if operator in {"<", "<=", ">", ">="}:
+                    raise MeasureError("Ordering text with non-ASCII characters is not supported in the local engine.")
+                # identical texts are always equal; otherwise (as before the collation) texts that cannot be told apart by case fold alone are refused
+                if left == right:
+                    return operator in {"=", "==", "<=", ">="}
+                fa, fb = text_key(left), text_key(right)  # type: ignore[arg-type]
+                if (not is_classifiable_latin(left) and not is_classifiable_latin(right)) or (fa == fb) != (_strong_key(left) == _strong_key(right)) or any(c.casefold() != c.lower() for c in left + right) or _stacked_marks(left) or _stacked_marks(right):  # type: ignore[operator,arg-type]
                     raise MeasureError("Comparing text that differs only in composed, decomposed or expanded characters is not supported in the local engine.")
+                a, b = fa, fb
+            else:
+                a, b = text_collation_key(left), text_collation_key(right)  # type: ignore[arg-type]
+        else:
+            a, b = (text_key(left), text_key(right)) if operator in {"=", "<>"} else (text_collation_key(left), text_collation_key(right))  # type: ignore[arg-type]
     elif isinstance(left, bool):
         a, b = int(left), int(right)  # type: ignore[arg-type]
     else:
         a, b = left, right
         if a.is_nan() or b.is_nan():  # type: ignore[union-attr]
             return operator == "<>"
-    if operator == "=":
+    if operator in {"=", "=="}:
         return a == b
     if operator == "<>":
         return a != b
     if operator == "<":
         return a < b  # type: ignore[operator]
     if operator == "<=":
+        return a <= b  # type: ignore[operator]
+    if operator == ">":
+        return a > b  # type: ignore[operator]
+    if operator == ">=":
+        return a >= b  # type: ignore[operator]
         return a <= b  # type: ignore[operator]
     if operator == ">":
         return a > b  # type: ignore[operator]
