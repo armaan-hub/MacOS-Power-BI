@@ -1,0 +1,6922 @@
+{
+"powerbi_version": "2.157.879.0 (26.08)+da30fe74eb0b8a8786ab7326b69c400a0e951831",
+"frozen": "2026-11-03",
+"items": [
+{
+"expr": "((\"TRUE\")*((AND(1,\"\"))))&\"z\"",
+"powerbi": "z"
+},
+{
+"expr": "((\"a\")/((OR(0,\"\"))))&\"z\"",
+"powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 21) Cannot convert value 'a' of type Text to type Number.\""
+},
+{
+"expr": "((((1&&\"\"))-(\"TRUE\"))*(CURRENCY(1.5)))&\"z\"",
+"powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 32) Cannot convert value 'TRUE' of type Text to type Number.\""
+},
+{
+"expr": "((((1/0))+((0||\"\")))-((VAR y=\"b\" RETURN y)))&\"z\"",
+"powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 42) Cannot convert value 'b' of type Text to type Number.\""
+},
+{
+"expr": "((((1/0))-((1&&\"\")))+(2.5))&\"z\"",
+"powerbi": "infz"
+},
+{
+"expr": "(((0||\"\"))+(VALUE(\"x\")))&\"z\"",
+"powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 31) Cannot convert value 'x' of type Text to type Number.\""
+},
+{
+"expr": "(((0||\"\"))-(DATE(2020,1,1)))&\"z\"",
+"powerbi": "-43831z"
+},
+{
+"expr": "(((1&&\"\"))*(DATE(2020,1,1)))&\"z\"",
+"powerbi": "z"
+},
+{
+"expr": "(((3||TRIM(\"\")))&(\"a\"))&\"z\"",
+"powerbi": "TRUEaz"
+},
+{
+"expr": "(((3||TRIM(\"\")))+(LEFT(\"a\",0)))&\"z\"",
+"powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 37) Cannot convert value '' of type Text to type Number.\""
+},
+{
+"expr": "(((AND(1,\"\")))&(LEFT(\"a\",0)))&\"z\"",
+"powerbi": "z"
+},
+{
+"expr": "((2.5)/((COUNTROWS(Facts)&&\"\")))&\"z\"",
+"powerbi": "infz"
+},
+{
+"expr": "((CURRENCY(1.5))*((OR(0,\"\"))))&\"z\"",
+"powerbi": "z"
+},
+{
+"expr": "((MAX(Facts[Note]))-((AND(1,\"\"))))&\"z\"",
+"powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 21) Cannot convert value 'Paid' of type Text to type Number.\""
+},
+{
+"expr": "((SQRT(-1))&((OR(0,\"\"))))&\"z\"",
+"powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 21) An argument of function 'SQRT' has the wrong data type or the result is too large or too small.\""
+},
+{
+"expr": "((SQRT(-1))*((3||TRIM(\"\"))))&\"z\"",
+"powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 21) An argument of function 'SQRT' has the wrong data type or the result is too large or too small.\""
+},
+{
+"expr": "((SQRT(-1))^((3||TRIM(\"\"))))&\"z\"",
+"powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 21) An argument of function 'SQRT' has the wrong data type or the result is too large or too small.\""
+},
+{
+"expr": "CALCULATE(IFERROR((\"\")+((3||TRIM(\"\"))),7),Facts[Region]=\"East\")",
+"powerbi": "7"
+},
+{
+"expr": "CALCULATE(IFERROR((\"\")/((AND(1,\"\"))),7),Facts[Region]=\"East\")",
+"powerbi": "7"
+},
+{
+"expr": "CALCULATE(IFERROR((\"2\")+((3||TRIM(\"\"))),7),Facts[Region]=\"East\")",
+"powerbi": "3"
+},
+{
+"expr": "CALCULATE(IFERROR((\"2\")^((3||TRIM(\"\"))),7),Facts[Region]=\"East\")",
+"powerbi": "2"
+},
+{
+"expr": "CALCULATE(IFERROR((\"TRUE\")+((0||\"\")),7),Facts[Region]=\"East\")",
+"powerbi": "7"
+},
+{
+"expr": "CALCULATE(IFERROR((\"a\")&((AND(1,\"\"))),7),Facts[Region]=\"East\")",
+"powerbi": "a"
+},
+{
+"expr": "CALCULATE(IFERROR((((0||\"\"))/((1/0)))/(\"2\"),7),Facts[Region]=\"East\")",
+"powerbi": "BLANK"
+},
+{
+"expr": "CALCULATE(IFERROR((((2.5&&\"\"))&(\"a\"))/(MAX(Facts[Note])),7),Facts[Region]=\"East\")",
+"powerbi": "7"
+},
+{
+"expr": "CALCULATE(IFERROR(((0||\"\"))+(\"2\"),7),Facts[Region]=\"East\")",
+"powerbi": "2"
+},
+{
+"expr": "CALCULATE(IFERROR(((1&&\"\"))/(2.5),7),Facts[Region]=\"East\")",
+"powerbi": "BLANK"
+},
+{
+"expr": "CALCULATE(IFERROR(((1/0))+((AND(1,\"\"))),7),Facts[Region]=\"East\")",
+"powerbi": "7"
+},
+{
+"expr": "CALCULATE(IFERROR(((2.5&&\"\"))^(SQRT(-1)),7),Facts[Region]=\"East\")",
+"powerbi": "7"
+},
+{
+"expr": "CALCULATE(IFERROR(((DATE(2020,1,1))-((COUNTROWS(Facts)&&\"\")))&(CURRENCY(1.5)),7),Facts[Region]=\"East\")",
+"powerbi": "1/1/20201.5"
+},
+{
+"expr": "CALCULATE(IFERROR(((LEFT(\"a\",0))/((TRUE()&&LEFT(\"a\",0))))-(DATE(2020,1,1)),7),Facts[Region]=\"East\")",
+"powerbi": "7"
+},
+{
+"expr": "CALCULATE(IFERROR(((TRUE()&&LEFT(\"a\",0)))/(\"TRUE\"),7),Facts[Region]=\"East\")",
+"powerbi": "BLANK"
+},
+{
+"expr": "CALCULATE(IFERROR((VALUE(\"x\"))/((2.5&&\"\")),7),Facts[Region]=\"East\")",
+"powerbi": "7"
+},
+{
+"expr": "COALESCE(((\"2\")+((TRUE()&&LEFT(\"a\",0))))^(\"\"),5)",
+"powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 61) Cannot convert value '' of type Text to type Number.\""
+},
+{
+"expr": "COALESCE((((1&&\"\"))*((VAR y=\"b\" RETURN y)))&(MAX(Facts[Note])),5)",
+"powerbi": "Paid"
+},
+{
+"expr": "COALESCE((((TRUE()&&LEFT(\"a\",0)))/((VAR y=\"b\" RETURN y)))*(VALUE(\"x\")),5)",
+"powerbi": "BLANK"
+},
+{
+"expr": "COALESCE(((0||\"\"))^(CURRENCY(1.5)),5)",
+"powerbi": "BLANK"
+},
+{
+"expr": "COALESCE(((1&&\"\"))&(CURRENCY(1.5)),5)",
+"powerbi": "1.5"
+},
+{
+"expr": "COALESCE(((2.5&&\"\"))+(\"a\"),5)",
+"powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 41) Cannot convert value 'a' of type Text to type Number.\""
+},
+{
+"expr": "COALESCE(((AND(1,\"\")))&(DATE(2020,1,1)),5)",
+"powerbi": "1/1/2020"
+},
+{
+"expr": "COALESCE(((COUNTROWS(Facts)&&\"\"))/(VALUE(\"x\")),5)",
+"powerbi": "BLANK"
+},
+{
+"expr": "COALESCE(((TRUE()&&LEFT(\"a\",0)))/((VAR y=\"b\" RETURN y)),5)",
+"powerbi": "BLANK"
+},
+{
+"expr": "COALESCE(((VALUE(\"x\"))*((0||\"\")))-(DATE(2020,1,1)),5)",
+"powerbi": "-43831"
+},
+{
+"expr": "COALESCE((CURRENCY(1.5))^((OR(0,\"\"))),5)",
+"powerbi": "1"
+},
+{
+"expr": "COALESCE((MAX(Facts[Note]))-((0||\"\")),5)",
+"powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 29) Cannot convert value 'Paid' of type Text to type Number.\""
+},
+{
+"expr": "COUNTAX(Facts,IF(Facts[Quantity]>2,(0||\"\"),\"a\"))",
+"powerbi": "3"
+},
+{
+"expr": "COUNTAX(Facts,IF(Facts[Quantity]>2,(1&&\"\"),\"a\"))",
+"powerbi": "3"
+},
+{
+"expr": "COUNTAX(Facts,IF(Facts[Quantity]>2,(AND(1,\"\")),\"a\"))",
+"powerbi": "3"
+},
+{
+"expr": "COUNTAX(Facts,IF(Facts[Quantity]>2,(COUNTROWS(Facts)&&\"\"),\"a\"))",
+"powerbi": "3"
+},
+{
+"expr": "COUNTAX(Facts,IF(Facts[Quantity]>2,(TRUE()&&LEFT(\"a\",0)),\"a\"))",
+"powerbi": "3"
+},
+{
+"expr": "COUNTAX(Facts,IF(TRUE(),(0||\"\"),\"\"))",
+"powerbi": "BLANK"
+},
+{
+"expr": "COUNTAX(Facts,IF(TRUE(),(2.5&&\"\"),\"\"))",
+"powerbi": "BLANK"
+},
+{
+"expr": "COUNTAX(Facts,IF(TRUE(),(3||TRIM(\"\")),\"\"))",
+"powerbi": "6"
+},
+{
+"expr": "COUNTAX(Facts,IF(TRUE(),(AND(1,\"\")),\"\"))",
+"powerbi": "BLANK"
+},
+{
+"expr": "COUNTAX(Facts,IF(TRUE(),(COUNTROWS(Facts)&&\"\"),\"\"))",
+"powerbi": "BLANK"
+},
+{
+"expr": "COUNTAX(Facts,IF(TRUE(),(OR(0,\"\")),\"\"))",
+"powerbi": "BLANK"
+},
+{
+"expr": "COUNTAX(Facts,IF.EAGER(TRUE(),(0||\"\"),\"x\"))",
+"powerbi": "BLANK"
+},
+{
+"expr": "COUNTAX(Facts,IF.EAGER(TRUE(),(COUNTROWS(Facts)&&\"\"),\"x\"))",
+"powerbi": "BLANK"
+},
+{
+"expr": "COUNTAX(Facts,SWITCH(TRUE(),FALSE(),\"a\",(0||\"\")))",
+"powerbi": "BLANK"
+},
+{
+"expr": "COUNTAX(Facts,SWITCH(TRUE(),FALSE(),\"a\",(1&&\"\")))",
+"powerbi": "BLANK"
+},
+{
+"expr": "COUNTAX(Facts,SWITCH(TRUE(),FALSE(),\"a\",(2.5&&\"\")))",
+"powerbi": "BLANK"
+},
+{
+"expr": "COUNTAX(Facts,SWITCH(TRUE(),FALSE(),\"a\",(AND(1,\"\"))))",
+"powerbi": "BLANK"
+},
+{
+"expr": "COUNTROWS(FILTER(ADDCOLUMNS(Facts,\"q\",IF(1=1,(1&&\"\"),\"a\")),ISBLANK([q])))",
+"powerbi": "6"
+},
+{
+"expr": "COUNTROWS(FILTER(ADDCOLUMNS(Facts,\"q\",IF(1=1,(2.5&&\"\"),\"a\")),ISBLANK([q])))",
+"powerbi": "6"
+},
+{
+"expr": "COUNTROWS(FILTER(ADDCOLUMNS(Facts,\"q\",IF(1=1,(3||TRIM(\"\")),\"a\")),ISBLANK([q])))",
+"powerbi": "BLANK"
+},
+{
+"expr": "COUNTROWS(FILTER(ADDCOLUMNS(Facts,\"q\",IF(1=1,(AND(1,\"\")),\"a\")),ISBLANK([q])))",
+"powerbi": "6"
+},
+{
+"expr": "COUNTROWS(FILTER(ADDCOLUMNS(Facts,\"q\",IF(1=1,(OR(0,\"\")),\"a\")),ISBLANK([q])))",
+"powerbi": "6"
+},
+{
+"expr": "COUNTROWS(FILTER(ADDCOLUMNS(Facts,\"q\",IF(Facts[Quantity]>2,(0||\"\"),\"a\")),ISBLANK([q])))",
+"powerbi": "3"
+},
+{
+"expr": "COUNTROWS(FILTER(ADDCOLUMNS(Facts,\"q\",IF(Facts[Quantity]>2,(1&&\"\"),\"a\")),ISBLANK([q])))",
+"powerbi": "3"
+},
+{
+"expr": "COUNTROWS(FILTER(ADDCOLUMNS(Facts,\"q\",IF(Facts[Quantity]>2,(2.5&&\"\"),\"a\")),ISBLANK([q])))",
+"powerbi": "3"
+},
+{
+"expr": "COUNTROWS(FILTER(ADDCOLUMNS(Facts,\"q\",IF(Facts[Quantity]>2,(3||TRIM(\"\")),\"a\")),ISBLANK([q])))",
+"powerbi": "BLANK"
+},
+{
+"expr": "COUNTROWS(FILTER(ADDCOLUMNS(Facts,\"q\",IF(Facts[Quantity]>2,(OR(0,\"\")),\"a\")),ISBLANK([q])))",
+"powerbi": "3"
+},
+{
+"expr": "COUNTROWS(FILTER(ADDCOLUMNS(Facts,\"q\",IF(Facts[Quantity]>2,(TRUE()&&LEFT(\"a\",0)),\"a\")),ISBLANK([q])))",
+"powerbi": "3"
+},
+{
+"expr": "COUNTROWS(FILTER(ADDCOLUMNS(Facts,\"q\",IF(TRUE(),(3||TRIM(\"\")),\"\")),ISBLANK([q])))",
+"powerbi": "BLANK"
+},
+{
+"expr": "COUNTROWS(FILTER(ADDCOLUMNS(Facts,\"q\",IF(TRUE(),(AND(1,\"\")),\"\")),ISBLANK([q])))",
+"powerbi": "6"
+},
+{
+"expr": "COUNTROWS(FILTER(ADDCOLUMNS(Facts,\"q\",IF(TRUE(),(OR(0,\"\")),\"\")),ISBLANK([q])))",
+"powerbi": "6"
+},
+{
+"expr": "COUNTROWS(FILTER(ADDCOLUMNS(Facts,\"q\",IF(TRUE(),(TRUE()&&LEFT(\"a\",0)),\"\")),ISBLANK([q])))",
+"powerbi": "6"
+},
+{
+"expr": "COUNTROWS(FILTER(ADDCOLUMNS(Facts,\"q\",IF.EAGER(TRUE(),(0||\"\"),\"x\")),ISBLANK([q])))",
+"powerbi": "6"
+},
+{
+"expr": "COUNTROWS(FILTER(ADDCOLUMNS(Facts,\"q\",IF.EAGER(TRUE(),(1&&\"\"),\"x\")),ISBLANK([q])))",
+"powerbi": "6"
+},
+{
+"expr": "COUNTROWS(FILTER(ADDCOLUMNS(Facts,\"q\",IF.EAGER(TRUE(),(2.5&&\"\"),\"x\")),ISBLANK([q])))",
+"powerbi": "6"
+},
+{
+"expr": "COUNTROWS(FILTER(ADDCOLUMNS(Facts,\"q\",IF.EAGER(TRUE(),(AND(1,\"\")),\"x\")),ISBLANK([q])))",
+"powerbi": "6"
+},
+{
+"expr": "COUNTROWS(FILTER(ADDCOLUMNS(Facts,\"q\",IF.EAGER(TRUE(),(OR(0,\"\")),\"x\")),ISBLANK([q])))",
+"powerbi": "6"
+},
+{
+"expr": "COUNTROWS(FILTER(ADDCOLUMNS(Facts,\"q\",IF.EAGER(TRUE(),(TRUE()&&LEFT(\"a\",0)),\"x\")),ISBLANK([q])))",
+"powerbi": "6"
+},
+{
+"expr": "COUNTROWS(FILTER(ADDCOLUMNS(Facts,\"q\",SWITCH(TRUE(),FALSE(),\"a\",(0||\"\"))),ISBLANK([q])))",
+"powerbi": "6"
+},
+{
+"expr": "COUNTROWS(FILTER(ADDCOLUMNS(Facts,\"q\",SWITCH(TRUE(),FALSE(),\"a\",(3||TRIM(\"\")))),ISBLANK([q])))",
+"powerbi": "BLANK"
+},
+{
+"expr": "COUNTROWS(FILTER(ADDCOLUMNS(Facts,\"q\",SWITCH(TRUE(),FALSE(),\"a\",(AND(1,\"\")))),ISBLANK([q])))",
+"powerbi": "6"
+},
+{
+"expr": "COUNTROWS(FILTER(ADDCOLUMNS(Facts,\"q\",SWITCH(TRUE(),FALSE(),\"a\",(TRUE()&&LEFT(\"a\",0)))),ISBLANK([q])))",
+"powerbi": "6"
+},
+{
+"expr": "COUNTX(Facts,(((3||TRIM(\"\")))/((1/0)))+(2.5))",
+"powerbi": "6"
+},
+{
+"expr": "COUNTX(Facts,((1/0))+((1&&\"\")))",
+"powerbi": "6"
+},
+{
+"expr": "COUNTX(Facts,((2.5&&\"\"))*((1/0)))",
+"powerbi": "BLANK"
+},
+{
+"expr": "COUNTX(Facts,((2.5)&((COUNTROWS(Facts)&&\"\")))*(\"\"))",
+"powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 66) Cannot convert value '' of type Text to type Number.\""
+},
+{
+"expr": "COUNTX(Facts,((COUNTROWS(Facts)&&\"\"))*((1/0)))",
+"powerbi": "BLANK"
+},
+{
+"expr": "COUNTX(Facts,((OR(0,\"\")))/(\"a\"))",
+"powerbi": "BLANK"
+},
+{
+"expr": "COUNTX(Facts,((OR(0,\"\")))^(LEFT(\"a\",0)))",
+"powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 46) Cannot convert value '' of type Text to type Number.\""
+},
+{
+"expr": "COUNTX(Facts,((SQRT(-1))-((3||TRIM(\"\"))))/(VALUE(\"x\")))",
+"powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 34) An argument of function 'SQRT' has the wrong data type or the result is too large or too small.\""
+},
+{
+"expr": "COUNTX(Facts,((TRUE()&&LEFT(\"a\",0)))+(BLANK()))",
+"powerbi": "BLANK"
+},
+{
+"expr": "COUNTX(Facts,((VAR y=\"b\" RETURN y))+((2.5&&\"\")))",
+"powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 34) Cannot convert value 'b' of type Text to type Number.\""
+},
+{
+"expr": "COUNTX(Facts,(MAX(Facts[Note]))+((0||\"\")))",
+"powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 33) Cannot convert value 'Paid' of type Text to type Number.\""
+},
+{
+"expr": "COUNTX(Facts,(MAX(Facts[Note]))-((2.5&&\"\")))",
+"powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 33) Cannot convert value 'Paid' of type Text to type Number.\""
+},
+{
+"expr": "COUNTX(Facts,IF(1=1,(0||\"\"),\"a\"))",
+"powerbi": "BLANK"
+},
+{
+"expr": "COUNTX(Facts,IF(1=1,(1&&\"\"),\"a\"))",
+"powerbi": "BLANK"
+},
+{
+"expr": "COUNTX(Facts,IF(1=1,(2.5&&\"\"),\"a\"))",
+"powerbi": "BLANK"
+},
+{
+"expr": "COUNTX(Facts,IF(1=1,(3||TRIM(\"\")),\"a\"))",
+"powerbi": "6"
+},
+{
+"expr": "COUNTX(Facts,IF(1=1,(OR(0,\"\")),\"a\"))",
+"powerbi": "BLANK"
+},
+{
+"expr": "COUNTX(Facts,IF(Facts[Quantity]>2,(0||\"\"),\"a\"))",
+"powerbi": "BLANK"
+},
+{
+"expr": "COUNTX(Facts,IF(Facts[Quantity]>2,(3||TRIM(\"\")),\"a\"))",
+"powerbi": "BLANK"
+},
+{
+"expr": "COUNTX(Facts,IF(Facts[Quantity]>2,(AND(1,\"\")),\"a\"))",
+"powerbi": "BLANK"
+},
+{
+"expr": "COUNTX(Facts,IF(Facts[Quantity]>2,(TRUE()&&LEFT(\"a\",0)),\"a\"))",
+"powerbi": "BLANK"
+},
+{
+"expr": "COUNTX(Facts,IF(TRUE(),(0||\"\"),\"\"))",
+"powerbi": "BLANK"
+},
+{
+"expr": "COUNTX(Facts,IF(TRUE(),(3||TRIM(\"\")),\"\"))",
+"powerbi": "6"
+},
+{
+"expr": "COUNTX(Facts,IF(TRUE(),(TRUE()&&LEFT(\"a\",0)),\"\"))",
+"powerbi": "BLANK"
+},
+{
+"expr": "COUNTX(Facts,IF.EAGER(TRUE(),(0||\"\"),\"x\"))",
+"powerbi": "BLANK"
+},
+{
+"expr": "COUNTX(Facts,IF.EAGER(TRUE(),(1&&\"\"),\"x\"))",
+"powerbi": "BLANK"
+},
+{
+"expr": "COUNTX(Facts,IF.EAGER(TRUE(),(3||TRIM(\"\")),\"x\"))",
+"powerbi": "BLANK"
+},
+{
+"expr": "COUNTX(Facts,IF.EAGER(TRUE(),(COUNTROWS(Facts)&&\"\"),\"x\"))",
+"powerbi": "BLANK"
+},
+{
+"expr": "COUNTX(Facts,IF.EAGER(TRUE(),(OR(0,\"\")),\"x\"))",
+"powerbi": "BLANK"
+},
+{
+"expr": "COUNTX(Facts,IF.EAGER(TRUE(),(TRUE()&&LEFT(\"a\",0)),\"x\"))",
+"powerbi": "BLANK"
+},
+{
+"expr": "COUNTX(Facts,SWITCH(TRUE(),FALSE(),\"a\",(0||\"\")))",
+"powerbi": "BLANK"
+},
+{
+"expr": "COUNTX(Facts,SWITCH(TRUE(),FALSE(),\"a\",(2.5&&\"\")))",
+"powerbi": "BLANK"
+},
+{
+"expr": "COUNTX(Facts,SWITCH(TRUE(),FALSE(),\"a\",(COUNTROWS(Facts)&&\"\")))",
+"powerbi": "BLANK"
+},
+{
+"expr": "COUNTX(Facts,SWITCH(TRUE(),FALSE(),\"a\",(OR(0,\"\"))))",
+"powerbi": "BLANK"
+},
+{
+"expr": "COUNTX(Facts,SWITCH(TRUE(),FALSE(),\"a\",(TRUE()&&LEFT(\"a\",0))))",
+"powerbi": "BLANK"
+},
+{
+"expr": "IF(ISERROR((((3||TRIM(\"\")))/(\"TRUE\"))*(\"2\")),\"x\",\"y\")",
+"powerbi": "x"
+},
+{
+"expr": "IF(ISERROR((((3||TRIM(\"\")))^(\"\"))&(2.5)),\"x\",\"y\")",
+"powerbi": "x"
+},
+{
+"expr": "IF(ISERROR(((2.5&&\"\"))+(2.5)),\"x\",\"y\")",
+"powerbi": "y"
+},
+{
+"expr": "IF(ISERROR(((3||TRIM(\"\")))*(CURRENCY(1.5))),\"x\",\"y\")",
+"powerbi": "y"
+},
+{
+"expr": "IF(ISERROR(((BLANK())-((COUNTROWS(Facts)&&\"\")))-(2.5)),\"x\",\"y\")",
+"powerbi": "y"
+},
+{
+"expr": "IF(ISERROR(((COUNTROWS(Facts)&&\"\"))&(SQRT(-1))),\"x\",\"y\")",
+"powerbi": "x"
+},
+{
+"expr": "IF(ISERROR(((SQRT(-1))/((OR(0,\"\"))))-(SQRT(-1))),\"x\",\"y\")",
+"powerbi": "x"
+},
+{
+"expr": "IF(ISERROR((BLANK())&((3||TRIM(\"\")))),\"x\",\"y\")",
+"powerbi": "y"
+},
+{
+"expr": "IF(ISERROR((DATE(2020,1,1))*((AND(1,\"\")))),\"x\",\"y\")",
+"powerbi": "y"
+},
+{
+"expr": "IF(ISERROR((MAX(Facts[Note]))*((1&&\"\"))),\"x\",\"y\")",
+"powerbi": "y"
+},
+{
+"expr": "IFERROR((\"2\")&((COUNTROWS(Facts)&&\"\")),\"e\")",
+"powerbi": "2"
+},
+{
+"expr": "IFERROR((\"TRUE\")*((1&&\"\")),\"e\")",
+"powerbi": "BLANK"
+},
+{
+"expr": "IFERROR((\"TRUE\")-((COUNTROWS(Facts)&&\"\")),\"e\")",
+"powerbi": "e"
+},
+{
+"expr": "IFERROR(((\"\")/((1&&\"\")))^(SQRT(-1)),\"e\")",
+"powerbi": "e"
+},
+{
+"expr": "IFERROR(((\"2\")&((1&&\"\")))-(2.5),\"e\")",
+"powerbi": "-0.5"
+},
+{
+"expr": "IFERROR(((\"2\")^((2.5&&\"\")))^((1/0)),\"e\")",
+"powerbi": "e"
+},
+{
+"expr": "IFERROR(((\"a\")+((COUNTROWS(Facts)&&\"\")))-(\"\"),\"e\")",
+"powerbi": "e"
+},
+{
+"expr": "IFERROR((((0||\"\"))-(CURRENCY(1.5)))&(LEFT(\"a\",0)),\"e\")",
+"powerbi": "-1.5"
+},
+{
+"expr": "IFERROR((((OR(0,\"\")))+(2.5))*(CURRENCY(1.5)),\"e\")",
+"powerbi": "3.75"
+},
+{
+"expr": "IFERROR((((OR(0,\"\")))+(DATE(2020,1,1)))-(LEFT(\"a\",0)),\"e\")",
+"powerbi": "e"
+},
+{
+"expr": "IFERROR(((2.5&&\"\"))+(LEFT(\"a\",0)),\"e\")",
+"powerbi": "e"
+},
+{
+"expr": "IFERROR(((3||TRIM(\"\")))^(\"2\"),\"e\")",
+"powerbi": "1"
+},
+{
+"expr": "IFERROR(((TRUE()&&LEFT(\"a\",0)))*(\"TRUE\"),\"e\")",
+"powerbi": "BLANK"
+},
+{
+"expr": "IFERROR(((TRUE()&&LEFT(\"a\",0)))^((VAR y=\"b\" RETURN y)),\"e\")",
+"powerbi": "e"
+},
+{
+"expr": "IFERROR(((VAR y=\"b\" RETURN y))/((2.5&&\"\")),\"e\")",
+"powerbi": "e"
+},
+{
+"expr": "ISBLANK((\"a\")&((0||\"\")))",
+"powerbi": "False"
+},
+{
+"expr": "ISBLANK((\"a\")*((COUNTROWS(Facts)&&\"\")))",
+"powerbi": "False"
+},
+{
+"expr": "ISBLANK((\"a\")+((2.5&&\"\")))",
+"powerbi": "False"
+},
+{
+"expr": "ISBLANK((\"a\")+((OR(0,\"\"))))",
+"powerbi": "False"
+},
+{
+"expr": "ISBLANK((\"a\")/((TRUE()&&LEFT(\"a\",0))))",
+"powerbi": "False"
+},
+{
+"expr": "ISBLANK(((\"2\")+((COUNTROWS(Facts)&&\"\")))+(DATE(2020,1,1)))",
+"powerbi": "False"
+},
+{
+"expr": "ISBLANK((((2.5&&\"\"))*(MAX(Facts[Note])))*(LEFT(\"a\",0)))",
+"powerbi": "True"
+},
+{
+"expr": "ISBLANK((((3||TRIM(\"\")))^((VAR y=\"b\" RETURN y)))-(\"\"))",
+"powerbi": "False"
+},
+{
+"expr": "ISBLANK((((OR(0,\"\")))^(LEFT(\"a\",0)))-(2.5))",
+"powerbi": "False"
+},
+{
+"expr": "ISBLANK((((TRUE()&&LEFT(\"a\",0)))^(SQRT(-1)))&((VAR y=\"b\" RETURN y)))",
+"powerbi": "False"
+},
+{
+"expr": "ISBLANK(((0||\"\"))^(\"a\"))",
+"powerbi": "False"
+},
+{
+"expr": "ISBLANK(((1&&\"\"))-(\"2\"))",
+"powerbi": "False"
+},
+{
+"expr": "ISBLANK(((1/0))^((OR(0,\"\"))))",
+"powerbi": "False"
+},
+{
+"expr": "ISBLANK(((AND(1,\"\")))+(BLANK()))",
+"powerbi": "False"
+},
+{
+"expr": "ISBLANK(((AND(1,\"\")))^(SQRT(-1)))",
+"powerbi": "False"
+},
+{
+"expr": "ISBLANK(((BLANK())/((2.5&&\"\")))*((1/0)))",
+"powerbi": "True"
+},
+{
+"expr": "ISBLANK(((COUNTROWS(Facts)&&\"\"))-(DATE(2020,1,1)))",
+"powerbi": "False"
+},
+{
+"expr": "ISBLANK(((COUNTROWS(Facts)&&\"\"))/(MAX(Facts[Note])))",
+"powerbi": "False"
+},
+{
+"expr": "ISBLANK(((DATE(2020,1,1))/((OR(0,\"\"))))^(LEFT(\"a\",0)))",
+"powerbi": "False"
+},
+{
+"expr": "ISBLANK(((OR(0,\"\")))*(MAX(Facts[Note])))",
+"powerbi": "True"
+},
+{
+"expr": "ISBLANK((2.5)^((3||TRIM(\"\"))))",
+"powerbi": "False"
+},
+{
+"expr": "ISBLANK((MAX(Facts[Note]))&((3||TRIM(\"\"))))",
+"powerbi": "False"
+},
+{
+"expr": "ISBLANK((MAX(Facts[Note]))-((2.5&&\"\")))",
+"powerbi": "False"
+},
+{
+"expr": "ISDOUBLE((\"\")+((AND(1,\"\"))))",
+"powerbi": "True"
+},
+{
+"expr": "ISDOUBLE((\"TRUE\")-((0||\"\")))",
+"powerbi": "True"
+},
+{
+"expr": "ISDOUBLE((\"a\")-((OR(0,\"\"))))",
+"powerbi": "True"
+},
+{
+"expr": "ISDOUBLE(((\"\")*((2.5&&\"\")))&(\"a\"))",
+"powerbi": "False"
+},
+{
+"expr": "ISDOUBLE(((\"2\")*((3||TRIM(\"\"))))/(DATE(2020,1,1)))",
+"powerbi": "True"
+},
+{
+"expr": "ISDOUBLE(((\"2\")+((COUNTROWS(Facts)&&\"\")))/(LEFT(\"a\",0)))",
+"powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 62) Cannot convert value '' of type Text to type Number.\""
+},
+{
+"expr": "ISDOUBLE(((\"TRUE\")/((1&&\"\")))^((1/0)))",
+"powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 30) Cannot convert value 'TRUE' of type Text to type Number.\""
+},
+{
+"expr": "ISDOUBLE((((0||\"\"))&(LEFT(\"a\",0)))^(\"TRUE\"))",
+"powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 29) Cannot convert value '' of type Text to type Number.\""
+},
+{
+"expr": "ISDOUBLE((((2.5&&\"\"))+(MAX(Facts[Note])))*(\"a\"))",
+"powerbi": "True"
+},
+{
+"expr": "ISDOUBLE((((2.5&&\"\"))^((VAR y=\"b\" RETURN y)))-(VALUE(\"x\")))",
+"powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 43) Cannot convert value 'b' of type Text to type Number.\""
+},
+{
+"expr": "ISDOUBLE((((3||TRIM(\"\")))+(\"a\"))&(\"2\"))",
+"powerbi": "False"
+},
+{
+"expr": "ISDOUBLE((((AND(1,\"\")))*(BLANK()))/((1/0)))",
+"powerbi": "False"
+},
+{
+"expr": "ISDOUBLE((((OR(0,\"\")))^(\"TRUE\"))/(2.5))",
+"powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 43) Cannot convert value 'TRUE' of type Text to type Number.\""
+},
+{
+"expr": "ISDOUBLE(((0||\"\"))+(LEFT(\"a\",0)))",
+"powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 39) Cannot convert value '' of type Text to type Number.\""
+},
+{
+"expr": "ISDOUBLE(((0||\"\"))-(VALUE(\"x\")))",
+"powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 39) Cannot convert value 'x' of type Text to type Number.\""
+},
+{
+"expr": "ISDOUBLE(((1&&\"\"))-(\"TRUE\"))",
+"powerbi": "True"
+},
+{
+"expr": "ISDOUBLE(((1&&\"\"))^((1/0)))",
+"powerbi": "False"
+},
+{
+"expr": "ISDOUBLE(((3||TRIM(\"\")))^(2.5))",
+"powerbi": "True"
+},
+{
+"expr": "ISDOUBLE(((AND(1,\"\")))*(\"TRUE\"))",
+"powerbi": "True"
+},
+{
+"expr": "ISDOUBLE(((AND(1,\"\")))*(DATE(2020,1,1)))",
+"powerbi": "True"
+},
+{
+"expr": "ISDOUBLE(((AND(1,\"\")))+(\"2\"))",
+"powerbi": "True"
+},
+{
+"expr": "ISDOUBLE(((COUNTROWS(Facts)&&\"\"))^(VALUE(\"x\")))",
+"powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 54) Cannot convert value 'x' of type Text to type Number.\""
+},
+{
+"expr": "ISDOUBLE(((CURRENCY(1.5))+((1&&\"\")))^(VALUE(\"x\")))",
+"powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 57) Cannot convert value 'x' of type Text to type Number.\""
+},
+{
+"expr": "ISDOUBLE(((OR(0,\"\")))/((1/0)))",
+"powerbi": "False"
+},
+{
+"expr": "ISDOUBLE(((OR(0,\"\")))/(DATE(2020,1,1)))",
+"powerbi": "False"
+},
+{
+"expr": "ISDOUBLE(((VALUE(\"x\"))&((1&&\"\")))+(\"2\"))",
+"powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 30) Cannot convert value 'x' of type Text to type Number.\""
+},
+{
+"expr": "ISDOUBLE(((VAR y=\"b\" RETURN y))^((3||TRIM(\"\"))))",
+"powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 30) Cannot convert value 'b' of type Text to type Number.\""
+},
+{
+"expr": "ISDOUBLE((BLANK())^((0||\"\")))",
+"powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 28) An argument of function 'POWER' has the wrong data type or the result is too large or too small.\""
+},
+{
+"expr": "ISERROR((\"2\")-((1&&\"\")))",
+"powerbi": "False"
+},
+{
+"expr": "ISERROR((\"2\")^((2.5&&\"\")))",
+"powerbi": "False"
+},
+{
+"expr": "ISERROR((\"2\")^((TRUE()&&LEFT(\"a\",0))))",
+"powerbi": "False"
+},
+{
+"expr": "ISERROR((\"TRUE\")+((3||TRIM(\"\"))))",
+"powerbi": "True"
+},
+{
+"expr": "ISERROR(((\"2\")-((0||\"\")))&(\"2\"))",
+"powerbi": "False"
+},
+{
+"expr": "ISERROR(((\"2\")-((OR(0,\"\"))))*(MAX(Facts[Note])))",
+"powerbi": "True"
+},
+{
+"expr": "ISERROR(((\"2\")^((OR(0,\"\"))))&(BLANK()))",
+"powerbi": "False"
+},
+{
+"expr": "ISERROR(((\"a\")*((1&&\"\")))^(BLANK()))",
+"powerbi": "True"
+},
+{
+"expr": "ISERROR((((1&&\"\"))/((1/0)))/((1/0)))",
+"powerbi": "False"
+},
+{
+"expr": "ISERROR((((TRUE()&&LEFT(\"a\",0)))+(2.5))^(2.5))",
+"powerbi": "False"
+},
+{
+"expr": "ISERROR(((1&&\"\"))*(2.5))",
+"powerbi": "False"
+},
+{
+"expr": "ISERROR(((CURRENCY(1.5))-((1&&\"\")))-(SQRT(-1)))",
+"powerbi": "True"
+},
+{
+"expr": "ISERROR(((OR(0,\"\")))*(2.5))",
+"powerbi": "False"
+},
+{
+"expr": "ISERROR(((VALUE(\"x\"))&((0||\"\")))*(2.5))",
+"powerbi": "True"
+},
+{
+"expr": "ISERROR((BLANK())+((2.5&&\"\")))",
+"powerbi": "False"
+},
+{
+"expr": "ISERROR((BLANK())^((TRUE()&&LEFT(\"a\",0))))",
+"powerbi": "True"
+},
+{
+"expr": "ISERROR((DATE(2020,1,1))&((OR(0,\"\"))))",
+"powerbi": "False"
+},
+{
+"expr": "ISLOGICAL((\"TRUE\")^((1&&\"\")))",
+"powerbi": "False"
+},
+{
+"expr": "ISLOGICAL((((0||\"\"))+(\"TRUE\"))+((1/0)))",
+"powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 41) Cannot convert value 'TRUE' of type Text to type Number.\""
+},
+{
+"expr": "ISLOGICAL((((0||\"\"))^(BLANK()))/(MAX(Facts[Note])))",
+"powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 30) An argument of function 'POWER' has the wrong data type or the result is too large or too small.\""
+},
+{
+"expr": "ISLOGICAL((((1&&\"\"))*(BLANK()))+(CURRENCY(1.5)))",
+"powerbi": "False"
+},
+{
+"expr": "ISLOGICAL((((3||TRIM(\"\")))&(\"2\"))^(DATE(2020,1,1)))",
+"powerbi": "False"
+},
+{
+"expr": "ISLOGICAL((((AND(1,\"\")))-((1/0)))-(CURRENCY(1.5)))",
+"powerbi": "False"
+},
+{
+"expr": "ISLOGICAL((((OR(0,\"\")))&(BLANK()))+(MAX(Facts[Note])))",
+"powerbi": "False"
+},
+{
+"expr": "ISLOGICAL(((1&&\"\"))&((VAR y=\"b\" RETURN y)))",
+"powerbi": "False"
+},
+{
+"expr": "ISLOGICAL(((1/0))*((AND(1,\"\"))))",
+"powerbi": "False"
+},
+{
+"expr": "ISLOGICAL(((3||TRIM(\"\")))*(\"2\"))",
+"powerbi": "False"
+},
+{
+"expr": "ISLOGICAL(((AND(1,\"\")))+(MAX(Facts[Note])))",
+"powerbi": "False"
+},
+{
+"expr": "ISLOGICAL(((AND(1,\"\")))-(BLANK()))",
+"powerbi": "False"
+},
+{
+"expr": "ISLOGICAL(((AND(1,\"\")))-(LEFT(\"a\",0)))",
+"powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 44) Cannot convert value '' of type Text to type Number.\""
+},
+{
+"expr": "ISLOGICAL(((COUNTROWS(Facts)&&\"\"))*((1/0)))",
+"powerbi": "False"
+},
+{
+"expr": "ISLOGICAL(((OR(0,\"\")))/((1/0)))",
+"powerbi": "False"
+},
+{
+"expr": "ISLOGICAL(((TRUE()&&LEFT(\"a\",0)))*((1/0)))",
+"powerbi": "False"
+},
+{
+"expr": "ISLOGICAL((2.5)&((0||\"\")))",
+"powerbi": "False"
+},
+{
+"expr": "ISLOGICAL((2.5)/((3||TRIM(\"\"))))",
+"powerbi": "False"
+},
+{
+"expr": "ISLOGICAL((LEFT(\"a\",0))+((2.5&&\"\")))",
+"powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 30) Cannot convert value '' of type Text to type Number.\""
+},
+{
+"expr": "ISNONTEXT((\"2\")&((3||TRIM(\"\"))))",
+"powerbi": "False"
+},
+{
+"expr": "ISNONTEXT(((\"a\")-((0||\"\")))&(BLANK()))",
+"powerbi": "False"
+},
+{
+"expr": "ISNONTEXT((((OR(0,\"\")))&(\"\"))+(BLANK()))",
+"powerbi": "True"
+},
+{
+"expr": "ISNONTEXT((((VAR y=\"b\" RETURN y))&((TRUE()&&LEFT(\"a\",0))))&(\"TRUE\"))",
+"powerbi": "False"
+},
+{
+"expr": "ISNONTEXT(((3||TRIM(\"\")))-(\"TRUE\"))",
+"powerbi": "True"
+},
+{
+"expr": "ISNONTEXT(((AND(1,\"\")))/(VALUE(\"x\")))",
+"powerbi": "True"
+},
+{
+"expr": "ISNONTEXT(((COUNTROWS(Facts)&&\"\"))+(\"TRUE\"))",
+"powerbi": "True"
+},
+{
+"expr": "ISNONTEXT(((COUNTROWS(Facts)&&\"\"))^(\"TRUE\"))",
+"powerbi": "True"
+},
+{
+"expr": "ISNONTEXT(((TRUE()&&LEFT(\"a\",0)))-(VALUE(\"x\")))",
+"powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 54) Cannot convert value 'x' of type Text to type Number.\""
+},
+{
+"expr": "ISNONTEXT((2.5)-((COUNTROWS(Facts)&&\"\")))",
+"powerbi": "True"
+},
+{
+"expr": "ISNONTEXT((MAX(Facts[Note]))&((1&&\"\")))",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER((\"\")^((TRUE()&&LEFT(\"a\",0))))",
+"powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 29) Cannot convert value '' of type Text to type Number.\""
+},
+{
+"expr": "ISNUMBER((\"2\")&((3||TRIM(\"\"))))",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER((\"TRUE\")+((1&&\"\")))",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER((\"a\")*((1&&\"\")))",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER((((3||TRIM(\"\")))^((VAR y=\"b\" RETURN y)))&(SQRT(-1)))",
+"powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 47) Cannot convert value 'b' of type Text to type Number.\""
+},
+{
+"expr": "ISNUMBER((((TRUE()&&LEFT(\"a\",0)))+(BLANK()))/(VALUE(\"x\")))",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER(((0||\"\"))/(VALUE(\"x\")))",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER(((1&&\"\"))-(\"\"))",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER(((1&&\"\"))-(LEFT(\"a\",0)))",
+"powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 39) Cannot convert value '' of type Text to type Number.\""
+},
+{
+"expr": "ISNUMBER(((2.5&&\"\"))&(\"2\"))",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER(((2.5)+((2.5&&\"\")))/((1/0)))",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER(((3||TRIM(\"\")))/(BLANK()))",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER(((MAX(Facts[Note]))&((1&&\"\")))-(VALUE(\"x\")))",
+"powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 29) Cannot convert value 'Paid' of type Text to type Number.\""
+},
+{
+"expr": "ISNUMBER(((OR(0,\"\")))+(\"a\"))",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER(((OR(0,\"\")))-(LEFT(\"a\",0)))",
+"powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 42) Cannot convert value '' of type Text to type Number.\""
+},
+{
+"expr": "ISNUMBER(((SQRT(-1))+((2.5&&\"\")))&((1/0)))",
+"powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 30) An argument of function 'SQRT' has the wrong data type or the result is too large or too small.\""
+},
+{
+"expr": "ISNUMBER(((TRUE()&&LEFT(\"a\",0)))*(\"2\"))",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER(((TRUE()&&LEFT(\"a\",0)))/((1/0)))",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER(((TRUE()&&LEFT(\"a\",0)))/(LEFT(\"a\",0)))",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER(((TRUE()&&LEFT(\"a\",0)))^(DATE(2020,1,1)))",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER((MAX(Facts[Note]))*((3||TRIM(\"\"))))",
+"powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 29) Cannot convert value 'Paid' of type Text to type Number.\""
+},
+{
+"expr": "ISNUMBER((MAX(Facts[Note]))+((1&&\"\")))",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER((SQRT(-1))&((COUNTROWS(Facts)&&\"\")))",
+"powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 29) An argument of function 'SQRT' has the wrong data type or the result is too large or too small.\""
+},
+{
+"expr": "ISNUMBER((SQRT(-1))*((TRUE()&&LEFT(\"a\",0))))",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER((VALUE(\"x\"))-((OR(0,\"\"))))",
+"powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 29) Cannot convert value 'x' of type Text to type Number.\""
+},
+{
+"expr": "ISTEXT((\"2\")&((COUNTROWS(Facts)&&\"\")))",
+"powerbi": "True"
+},
+{
+"expr": "ISTEXT((\"2\")-((TRUE()&&LEFT(\"a\",0))))",
+"powerbi": "False"
+},
+{
+"expr": "ISTEXT(((\"2\")&((AND(1,\"\"))))+(LEFT(\"a\",0)))",
+"powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 49) Cannot convert value '' of type Text to type Number.\""
+},
+{
+"expr": "ISTEXT((((3||TRIM(\"\")))&(\"\"))-(LEFT(\"a\",0)))",
+"powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 27) Cannot convert value 'TRUE' of type Text to type Number.\""
+},
+{
+"expr": "ISTEXT((((AND(1,\"\")))^(\"2\"))/(BLANK()))",
+"powerbi": "False"
+},
+{
+"expr": "ISTEXT((((OR(0,\"\")))&(SQRT(-1)))&(\"a\"))",
+"powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 41) An argument of function 'SQRT' has the wrong data type or the result is too large or too small.\""
+},
+{
+"expr": "ISTEXT(((0||\"\"))+(BLANK()))",
+"powerbi": "False"
+},
+{
+"expr": "ISTEXT(((1&&\"\"))-(\"a\"))",
+"powerbi": "False"
+},
+{
+"expr": "ISTEXT(((1/0))*((OR(0,\"\"))))",
+"powerbi": "False"
+},
+{
+"expr": "ISTEXT(((2.5&&\"\"))-(VALUE(\"x\")))",
+"powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 39) Cannot convert value 'x' of type Text to type Number.\""
+},
+{
+"expr": "ISTEXT(((3||TRIM(\"\")))^(\"TRUE\"))",
+"powerbi": "False"
+},
+{
+"expr": "ISTEXT(((COUNTROWS(Facts)&&\"\"))-(VALUE(\"x\")))",
+"powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 52) Cannot convert value 'x' of type Text to type Number.\""
+},
+{
+"expr": "ISTEXT(((COUNTROWS(Facts)&&\"\"))^(CURRENCY(1.5)))",
+"powerbi": "False"
+},
+{
+"expr": "ISTEXT(((TRUE()&&LEFT(\"a\",0)))&(\"\"))",
+"powerbi": "True"
+},
+{
+"expr": "ISTEXT(((TRUE()&&LEFT(\"a\",0)))*(VALUE(\"x\")))",
+"powerbi": "False"
+},
+{
+"expr": "ISTEXT(((VAR y=\"b\" RETURN y))/((1&&\"\")))",
+"powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 28) Cannot convert value 'b' of type Text to type Number.\""
+},
+{
+"expr": "ISTEXT((CURRENCY(1.5))/((1&&\"\")))",
+"powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 26) A division by zero has been encountered.\""
+},
+{
+"expr": "ISTEXT((CURRENCY(1.5))^((TRUE()&&LEFT(\"a\",0))))",
+"powerbi": "False"
+},
+{
+"expr": "ISTEXT((LEFT(\"a\",0))+((OR(0,\"\"))))",
+"powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 27) Cannot convert value '' of type Text to type Number.\""
+},
+{
+"expr": "ISTEXT((MAX(Facts[Note]))&((2.5&&\"\")))",
+"powerbi": "True"
+},
+{
+"expr": "ISTEXT((SQRT(-1))*((2.5&&\"\")))",
+"powerbi": "False"
+},
+{
+"expr": "ISTEXT((SQRT(-1))-((1&&\"\")))",
+"powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 27) An argument of function 'SQRT' has the wrong data type or the result is too large or too small.\""
+},
+{
+"expr": "MAXX(ADDCOLUMNS(Facts,\"q\",IF(1=1,(2.5&&\"\"),\"a\")),[q])",
+"powerbi": "BLANK"
+},
+{
+"expr": "MAXX(ADDCOLUMNS(Facts,\"q\",IF(1=1,(TRUE()&&LEFT(\"a\",0)),\"a\")),[q])",
+"powerbi": "BLANK"
+},
+{
+"expr": "MAXX(ADDCOLUMNS(Facts,\"q\",IF(Facts[Quantity]>2,(1&&\"\"),\"a\")),[q])",
+"powerbi": "BLANK"
+},
+{
+"expr": "MAXX(ADDCOLUMNS(Facts,\"q\",IF(Facts[Quantity]>2,(3||TRIM(\"\")),\"a\")),[q])",
+"powerbi": "BLANK"
+},
+{
+"expr": "MAXX(ADDCOLUMNS(Facts,\"q\",IF(Facts[Quantity]>2,(AND(1,\"\")),\"a\")),[q])",
+"powerbi": "BLANK"
+},
+{
+"expr": "MAXX(ADDCOLUMNS(Facts,\"q\",IF(Facts[Quantity]>2,(COUNTROWS(Facts)&&\"\"),\"a\")),[q])",
+"powerbi": "BLANK"
+},
+{
+"expr": "MAXX(ADDCOLUMNS(Facts,\"q\",IF(Facts[Quantity]>2,(TRUE()&&LEFT(\"a\",0)),\"a\")),[q])",
+"powerbi": "BLANK"
+},
+{
+"expr": "MAXX(ADDCOLUMNS(Facts,\"q\",IF(TRUE(),(3||TRIM(\"\")),\"\")),[q])",
+"powerbi": "BLANK"
+},
+{
+"expr": "MAXX(ADDCOLUMNS(Facts,\"q\",IF(TRUE(),(AND(1,\"\")),\"\")),[q])",
+"powerbi": "BLANK"
+},
+{
+"expr": "MAXX(ADDCOLUMNS(Facts,\"q\",IF(TRUE(),(OR(0,\"\")),\"\")),[q])",
+"powerbi": "BLANK"
+},
+{
+"expr": "MAXX(ADDCOLUMNS(Facts,\"q\",IF(TRUE(),(TRUE()&&LEFT(\"a\",0)),\"\")),[q])",
+"powerbi": "BLANK"
+},
+{
+"expr": "MAXX(ADDCOLUMNS(Facts,\"q\",IF.EAGER(TRUE(),(1&&\"\"),\"x\")),[q])",
+"powerbi": "BLANK"
+},
+{
+"expr": "MAXX(ADDCOLUMNS(Facts,\"q\",IF.EAGER(TRUE(),(3||TRIM(\"\")),\"x\")),[q])",
+"powerbi": "BLANK"
+},
+{
+"expr": "MAXX(ADDCOLUMNS(Facts,\"q\",SWITCH(TRUE(),FALSE(),\"a\",(0||\"\"))),[q])",
+"powerbi": "BLANK"
+},
+{
+"expr": "MAXX(ADDCOLUMNS(Facts,\"q\",SWITCH(TRUE(),FALSE(),\"a\",(3||TRIM(\"\")))),[q])",
+"powerbi": "BLANK"
+},
+{
+"expr": "MAXX(ADDCOLUMNS(Facts,\"q\",SWITCH(TRUE(),FALSE(),\"a\",(AND(1,\"\")))),[q])",
+"powerbi": "BLANK"
+},
+{
+"expr": "MAXX(Facts,(\"\")-((1&&\"\")))",
+"powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 31) Cannot convert value '' of type Text to type Number.\""
+},
+{
+"expr": "MAXX(Facts,(((2.5&&\"\"))-(\"TRUE\"))^(\"\"))",
+"powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 44) Cannot convert value 'TRUE' of type Text to type Number.\""
+},
+{
+"expr": "MAXX(Facts,(((AND(1,\"\")))-(MAX(Facts[Note])))-(MAX(Facts[Note])))",
+"powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 46) Cannot convert value 'Paid' of type Text to type Number.\""
+},
+{
+"expr": "MAXX(Facts,((1&&\"\"))+(\"TRUE\"))",
+"powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 41) Cannot convert value 'TRUE' of type Text to type Number.\""
+},
+{
+"expr": "MAXX(Facts,((1/0))*((TRUE()&&LEFT(\"a\",0))))",
+"powerbi": "BLANK"
+},
+{
+"expr": "MAXX(Facts,((2.5&&\"\"))^(\"TRUE\"))",
+"powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 43) Cannot convert value 'TRUE' of type Text to type Number.\""
+},
+{
+"expr": "MAXX(Facts,((2.5&&\"\"))^(\"a\"))",
+"powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 43) Cannot convert value 'a' of type Text to type Number.\""
+},
+{
+"expr": "MAXX(Facts,((2.5&&\"\"))^(BLANK()))",
+"powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 30) An argument of function 'POWER' has the wrong data type or the result is too large or too small.\""
+},
+{
+"expr": "MAXX(Facts,((2.5)-((AND(1,\"\"))))*(BLANK()))",
+"powerbi": "BLANK"
+},
+{
+"expr": "MAXX(Facts,((3||TRIM(\"\")))-(VALUE(\"x\")))",
+"powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 47) Cannot convert value 'x' of type Text to type Number.\""
+},
+{
+"expr": "MAXX(Facts,((AND(1,\"\")))&(CURRENCY(1.5)))",
+"powerbi": "1.5"
+},
+{
+"expr": "MAXX(Facts,((CURRENCY(1.5))*((0||\"\")))-(2.5))",
+"powerbi": "-2.5"
+},
+{
+"expr": "MAXX(Facts,((VAR y=\"b\" RETURN y))&((AND(1,\"\"))))",
+"powerbi": "b"
+},
+{
+"expr": "MAXX(Facts,((VAR y=\"b\" RETURN y))-((COUNTROWS(Facts)&&\"\")))",
+"powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 32) Cannot convert value 'b' of type Text to type Number.\""
+},
+{
+"expr": "MAXX(Facts,(2.5)-((1&&\"\")))",
+"powerbi": "2.5"
+},
+{
+"expr": "MAXX(Facts,(CURRENCY(1.5))^((AND(1,\"\"))))",
+"powerbi": "1"
+},
+{
+"expr": "MAXX(Facts,(DATE(2020,1,1))&((2.5&&\"\")))",
+"powerbi": "1/1/2020"
+},
+{
+"expr": "MAXX(Facts,(DATE(2020,1,1))+((3||TRIM(\"\"))))",
+"powerbi": "01/02/2020 00:00:00"
+},
+{
+"expr": "MINX(Facts,IF(1=1,(0||\"\"),\"a\"))",
+"powerbi": "BLANK"
+},
+{
+"expr": "MINX(Facts,IF(1=1,(1&&\"\"),\"a\"))",
+"powerbi": "BLANK"
+},
+{
+"expr": "MINX(Facts,IF(1=1,(2.5&&\"\"),\"a\"))",
+"powerbi": "BLANK"
+},
+{
+"expr": "MINX(Facts,IF(1=1,(AND(1,\"\")),\"a\"))",
+"powerbi": "BLANK"
+},
+{
+"expr": "MINX(Facts,IF(1=1,(TRUE()&&LEFT(\"a\",0)),\"a\"))",
+"powerbi": "BLANK"
+},
+{
+"expr": "MINX(Facts,IF(Facts[Quantity]>2,(0||\"\"),\"a\"))",
+"powerbi": "BLANK"
+},
+{
+"expr": "MINX(Facts,IF(Facts[Quantity]>2,(1&&\"\"),\"a\"))",
+"powerbi": "BLANK"
+},
+{
+"expr": "MINX(Facts,IF(Facts[Quantity]>2,(2.5&&\"\"),\"a\"))",
+"powerbi": "BLANK"
+},
+{
+"expr": "MINX(Facts,IF(Facts[Quantity]>2,(3||TRIM(\"\")),\"a\"))",
+"powerbi": "BLANK"
+},
+{
+"expr": "MINX(Facts,IF(TRUE(),(0||\"\"),\"\"))",
+"powerbi": "BLANK"
+},
+{
+"expr": "MINX(Facts,IF(TRUE(),(1&&\"\"),\"\"))",
+"powerbi": "BLANK"
+},
+{
+"expr": "MINX(Facts,IF(TRUE(),(2.5&&\"\"),\"\"))",
+"powerbi": "BLANK"
+},
+{
+"expr": "MINX(Facts,IF(TRUE(),(COUNTROWS(Facts)&&\"\"),\"\"))",
+"powerbi": "BLANK"
+},
+{
+"expr": "MINX(Facts,IF.EAGER(TRUE(),(0||\"\"),\"x\"))",
+"powerbi": "BLANK"
+},
+{
+"expr": "MINX(Facts,IF.EAGER(TRUE(),(AND(1,\"\")),\"x\"))",
+"powerbi": "BLANK"
+},
+{
+"expr": "MINX(Facts,IF.EAGER(TRUE(),(TRUE()&&LEFT(\"a\",0)),\"x\"))",
+"powerbi": "BLANK"
+},
+{
+"expr": "MINX(Facts,SWITCH(TRUE(),FALSE(),\"a\",(0||\"\")))",
+"powerbi": "BLANK"
+},
+{
+"expr": "MINX(Facts,SWITCH(TRUE(),FALSE(),\"a\",(2.5&&\"\")))",
+"powerbi": "BLANK"
+},
+{
+"expr": "MINX(Facts,SWITCH(TRUE(),FALSE(),\"a\",(AND(1,\"\"))))",
+"powerbi": "BLANK"
+},
+{
+"expr": "MINX(Facts,SWITCH(TRUE(),FALSE(),\"a\",(OR(0,\"\"))))",
+"powerbi": "BLANK"
+},
+{
+"expr": "SUMX(Facts,IF(IF(1=1,(0||\"\"),\"a\"),1,2))",
+"powerbi": "12"
+},
+{
+"expr": "SUMX(Facts,IF(IF(1=1,(1&&\"\"),\"a\"),1,2))",
+"powerbi": "12"
+},
+{
+"expr": "SUMX(Facts,IF(IF(1=1,(AND(1,\"\")),\"a\"),1,2))",
+"powerbi": "12"
+},
+{
+"expr": "SUMX(Facts,IF(IF(1=1,(TRUE()&&LEFT(\"a\",0)),\"a\"),1,2))",
+"powerbi": "12"
+},
+{
+"expr": "SUMX(Facts,IF(IF(Facts[Quantity]>2,(0||\"\"),\"a\"),1,2))",
+"powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 33) Cannot convert value 'a' of type Text to type True/False.\""
+},
+{
+"expr": "SUMX(Facts,IF(IF(Facts[Quantity]>2,(COUNTROWS(Facts)&&\"\"),\"a\"),1,2))",
+"powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 33) Cannot convert value 'a' of type Text to type True/False.\""
+},
+{
+"expr": "SUMX(Facts,IF(IF(Facts[Quantity]>2,(OR(0,\"\")),\"a\"),1,2))",
+"powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 33) Cannot convert value 'a' of type Text to type True/False.\""
+},
+{
+"expr": "SUMX(Facts,IF(IF(TRUE(),(3||TRIM(\"\")),\"\"),1,2))",
+"powerbi": "6"
+},
+{
+"expr": "SUMX(Facts,IF(IF(TRUE(),(AND(1,\"\")),\"\"),1,2))",
+"powerbi": "12"
+},
+{
+"expr": "SUMX(Facts,IF(IF(TRUE(),(OR(0,\"\")),\"\"),1,2))",
+"powerbi": "12"
+},
+{
+"expr": "SUMX(Facts,IF(IF.EAGER(TRUE(),(3||TRIM(\"\")),\"x\"),1,2))",
+"powerbi": "6"
+},
+{
+"expr": "SUMX(Facts,IF(IF.EAGER(TRUE(),(AND(1,\"\")),\"x\"),1,2))",
+"powerbi": "12"
+},
+{
+"expr": "SUMX(Facts,IF(IF.EAGER(TRUE(),(TRUE()&&LEFT(\"a\",0)),\"x\"),1,2))",
+"powerbi": "12"
+},
+{
+"expr": "SUMX(Facts,IF(SWITCH(TRUE(),FALSE(),\"a\",(0||\"\")),1,2))",
+"powerbi": "12"
+},
+{
+"expr": "SUMX(Facts,IF(SWITCH(TRUE(),FALSE(),\"a\",(3||TRIM(\"\"))),1,2))",
+"powerbi": "6"
+},
+{
+"expr": "SUMX(Facts,IF(SWITCH(TRUE(),FALSE(),\"a\",(AND(1,\"\"))),1,2))",
+"powerbi": "12"
+},
+{
+"expr": "SUMX(Facts,IF(SWITCH(TRUE(),FALSE(),\"a\",(COUNTROWS(Facts)&&\"\")),1,2))",
+"powerbi": "12"
+},
+{
+"expr": "SUMX(Facts,IF(SWITCH(TRUE(),FALSE(),\"a\",(OR(0,\"\"))),1,2))",
+"powerbi": "12"
+},
+{
+"expr": "SUMX(Facts,IF(SWITCH(TRUE(),FALSE(),\"a\",(TRUE()&&LEFT(\"a\",0))),1,2))",
+"powerbi": "12"
+},
+{
+"expr": "SUMX({1,2},(\"\")&((OR(0,\"\"))))",
+"powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 30) The function SUMX cannot work with values of type String.\""
+},
+{
+"expr": "SUMX({1,2},(((3||TRIM(\"\")))&(LEFT(\"a\",0)))+(\"\"))",
+"powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 31) Cannot convert value 'TRUE' of type Text to type Number.\""
+},
+{
+"expr": "SUMX({1,2},(((TRUE()&&LEFT(\"a\",0)))+(\"2\"))^(VALUE(\"x\")))",
+"powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 63) Cannot convert value 'x' of type Text to type Number.\""
+},
+{
+"expr": "SUMX({1,2},(((TRUE()&&LEFT(\"a\",0)))/((VAR y=\"b\" RETURN y)))+(DATE(2020,1,1)))",
+"powerbi": "01/03/2140 00:00:00"
+},
+{
+"expr": "SUMX({1,2},((0||\"\"))/(CURRENCY(1.5)))",
+"powerbi": "BLANK"
+},
+{
+"expr": "SUMX({1,2},((2.5&&\"\"))&((1/0)))",
+"powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 30) The function SUMX cannot work with values of type String.\""
+},
+{
+"expr": "SUMX({1,2},((AND(1,\"\")))&(MAX(Facts[Note])))",
+"powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 30) The function SUMX cannot work with values of type String.\""
+},
+{
+"expr": "SUMX({1,2},((AND(1,\"\")))*(BLANK()))",
+"powerbi": "BLANK"
+},
+{
+"expr": "SUMX({1,2},((BLANK())+((3||TRIM(\"\"))))*(2.5))",
+"powerbi": "5"
+},
+{
+"expr": "SUMX({1,2},((COUNTROWS(Facts)&&\"\"))*(VALUE(\"x\")))",
+"powerbi": "BLANK"
+},
+{
+"expr": "SUMX({1,2},((OR(0,\"\")))&((VAR y=\"b\" RETURN y)))",
+"powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 30) The function SUMX cannot work with values of type String.\""
+},
+{
+"expr": "SUMX({1,2},((VALUE(\"x\"))&((OR(0,\"\"))))&(\"\"))",
+"powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 30) The function SUMX cannot work with values of type String.\""
+},
+{
+"expr": "SUMX({1,2},(BLANK())+((AND(1,\"\"))))",
+"powerbi": "BLANK"
+},
+{
+"expr": "SUMX({1,2},(BLANK())-((AND(1,\"\"))))",
+"powerbi": "BLANK"
+},
+{
+"expr": "SUMX({1,2},(DATE(2020,1,1))*((OR(0,\"\"))))",
+"powerbi": "BLANK"
+},
+{
+"expr": "ISERROR((1&&\"\")+\"\")",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER((1&&\"\")+\"\")",
+"powerbi": "True"
+},
+{
+"expr": "ISERROR(\"\"+(1&&\"\"))",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER(\"\"+(1&&\"\"))",
+"powerbi": "True"
+},
+{
+"expr": "ISERROR((1&&\"\")-\"\")",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER((1&&\"\")-\"\")",
+"powerbi": "True"
+},
+{
+"expr": "ISERROR(\"\"-(1&&\"\"))",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER(\"\"-(1&&\"\"))",
+"powerbi": "True"
+},
+{
+"expr": "ISERROR((1&&\"\")*\"\")",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER((1&&\"\")*\"\")",
+"powerbi": "True"
+},
+{
+"expr": "ISERROR(\"\"*(1&&\"\"))",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER(\"\"*(1&&\"\"))",
+"powerbi": "True"
+},
+{
+"expr": "ISERROR((1&&\"\")/\"\")",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER((1&&\"\")/\"\")",
+"powerbi": "False"
+},
+{
+"expr": "ISERROR(\"\"/(1&&\"\"))",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER(\"\"/(1&&\"\"))",
+"powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 28) Cannot convert value '' of type Text to type Number.\""
+},
+{
+"expr": "ISERROR((1&&\"\")^\"\")",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER((1&&\"\")^\"\")",
+"powerbi": "True"
+},
+{
+"expr": "ISERROR(\"\"^(1&&\"\"))",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER(\"\"^(1&&\"\"))",
+"powerbi": "True"
+},
+{
+"expr": "ISERROR((1&&\"\")&\"\")",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER((1&&\"\")&\"\")",
+"powerbi": "False"
+},
+{
+"expr": "ISERROR(\"\"&(1&&\"\"))",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER(\"\"&(1&&\"\"))",
+"powerbi": "False"
+},
+{
+"expr": "ISERROR((1&&\"\")+LEFT(\"a\",0))",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER((1&&\"\")+LEFT(\"a\",0))",
+"powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 36) Cannot convert value '' of type Text to type Number.\""
+},
+{
+"expr": "ISERROR(LEFT(\"a\",0)+(1&&\"\"))",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER(LEFT(\"a\",0)+(1&&\"\"))",
+"powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 28) Cannot convert value '' of type Text to type Number.\""
+},
+{
+"expr": "ISERROR((1&&\"\")-LEFT(\"a\",0))",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER((1&&\"\")-LEFT(\"a\",0))",
+"powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 36) Cannot convert value '' of type Text to type Number.\""
+},
+{
+"expr": "ISERROR(LEFT(\"a\",0)-(1&&\"\"))",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER(LEFT(\"a\",0)-(1&&\"\"))",
+"powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 28) Cannot convert value '' of type Text to type Number.\""
+},
+{
+"expr": "ISERROR((1&&\"\")*LEFT(\"a\",0))",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER((1&&\"\")*LEFT(\"a\",0))",
+"powerbi": "False"
+},
+{
+"expr": "ISERROR(LEFT(\"a\",0)*(1&&\"\"))",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER(LEFT(\"a\",0)*(1&&\"\"))",
+"powerbi": "False"
+},
+{
+"expr": "ISERROR((1&&\"\")/LEFT(\"a\",0))",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER((1&&\"\")/LEFT(\"a\",0))",
+"powerbi": "False"
+},
+{
+"expr": "ISERROR(LEFT(\"a\",0)/(1&&\"\"))",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER(LEFT(\"a\",0)/(1&&\"\"))",
+"powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 28) Cannot convert value '' of type Text to type Number.\""
+},
+{
+"expr": "ISERROR((1&&\"\")^LEFT(\"a\",0))",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER((1&&\"\")^LEFT(\"a\",0))",
+"powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 36) Cannot convert value '' of type Text to type Number.\""
+},
+{
+"expr": "ISERROR(LEFT(\"a\",0)^(1&&\"\"))",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER(LEFT(\"a\",0)^(1&&\"\"))",
+"powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 28) Cannot convert value '' of type Text to type Number.\""
+},
+{
+"expr": "ISERROR((1&&\"\")&LEFT(\"a\",0))",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER((1&&\"\")&LEFT(\"a\",0))",
+"powerbi": "False"
+},
+{
+"expr": "ISERROR(LEFT(\"a\",0)&(1&&\"\"))",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER(LEFT(\"a\",0)&(1&&\"\"))",
+"powerbi": "False"
+},
+{
+"expr": "ISERROR((1&&\"\")+TRIM(\"\"))",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER((1&&\"\")+TRIM(\"\"))",
+"powerbi": "True"
+},
+{
+"expr": "ISERROR(TRIM(\"\")+(1&&\"\"))",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER(TRIM(\"\")+(1&&\"\"))",
+"powerbi": "True"
+},
+{
+"expr": "ISERROR((1&&\"\")-TRIM(\"\"))",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER((1&&\"\")-TRIM(\"\"))",
+"powerbi": "True"
+},
+{
+"expr": "ISERROR(TRIM(\"\")-(1&&\"\"))",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER(TRIM(\"\")-(1&&\"\"))",
+"powerbi": "True"
+},
+{
+"expr": "ISERROR((1&&\"\")*TRIM(\"\"))",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER((1&&\"\")*TRIM(\"\"))",
+"powerbi": "True"
+},
+{
+"expr": "ISERROR(TRIM(\"\")*(1&&\"\"))",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER(TRIM(\"\")*(1&&\"\"))",
+"powerbi": "True"
+},
+{
+"expr": "ISERROR((1&&\"\")/TRIM(\"\"))",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER((1&&\"\")/TRIM(\"\"))",
+"powerbi": "False"
+},
+{
+"expr": "ISERROR(TRIM(\"\")/(1&&\"\"))",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER(TRIM(\"\")/(1&&\"\"))",
+"powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 28) Cannot convert value '' of type Text to type Number.\""
+},
+{
+"expr": "ISERROR((1&&\"\")^TRIM(\"\"))",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER((1&&\"\")^TRIM(\"\"))",
+"powerbi": "True"
+},
+{
+"expr": "ISERROR(TRIM(\"\")^(1&&\"\"))",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER(TRIM(\"\")^(1&&\"\"))",
+"powerbi": "True"
+},
+{
+"expr": "ISERROR((1&&\"\")&TRIM(\"\"))",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER((1&&\"\")&TRIM(\"\"))",
+"powerbi": "False"
+},
+{
+"expr": "ISERROR(TRIM(\"\")&(1&&\"\"))",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER(TRIM(\"\")&(1&&\"\"))",
+"powerbi": "False"
+},
+{
+"expr": "ISERROR((1&&\"\")+\"a\")",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER((1&&\"\")+\"a\")",
+"powerbi": "True"
+},
+{
+"expr": "ISERROR(\"a\"+(1&&\"\"))",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER(\"a\"+(1&&\"\"))",
+"powerbi": "True"
+},
+{
+"expr": "ISERROR((1&&\"\")-\"a\")",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER((1&&\"\")-\"a\")",
+"powerbi": "True"
+},
+{
+"expr": "ISERROR(\"a\"-(1&&\"\"))",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER(\"a\"-(1&&\"\"))",
+"powerbi": "True"
+},
+{
+"expr": "ISERROR((1&&\"\")*\"a\")",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER((1&&\"\")*\"a\")",
+"powerbi": "True"
+},
+{
+"expr": "ISERROR(\"a\"*(1&&\"\"))",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER(\"a\"*(1&&\"\"))",
+"powerbi": "True"
+},
+{
+"expr": "ISERROR((1&&\"\")/\"a\")",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER((1&&\"\")/\"a\")",
+"powerbi": "False"
+},
+{
+"expr": "ISERROR(\"a\"/(1&&\"\"))",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER(\"a\"/(1&&\"\"))",
+"powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 28) Cannot convert value 'a' of type Text to type Number.\""
+},
+{
+"expr": "ISERROR((1&&\"\")^\"a\")",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER((1&&\"\")^\"a\")",
+"powerbi": "True"
+},
+{
+"expr": "ISERROR(\"a\"^(1&&\"\"))",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER(\"a\"^(1&&\"\"))",
+"powerbi": "True"
+},
+{
+"expr": "ISERROR((1&&\"\")&\"a\")",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER((1&&\"\")&\"a\")",
+"powerbi": "False"
+},
+{
+"expr": "ISERROR(\"a\"&(1&&\"\"))",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER(\"a\"&(1&&\"\"))",
+"powerbi": "False"
+},
+{
+"expr": "ISERROR((1&&\"\")+MAX(Facts[Note]))",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER((1&&\"\")+MAX(Facts[Note]))",
+"powerbi": "True"
+},
+{
+"expr": "ISERROR(MAX(Facts[Note])+(1&&\"\"))",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER(MAX(Facts[Note])+(1&&\"\"))",
+"powerbi": "True"
+},
+{
+"expr": "ISERROR((1&&\"\")-MAX(Facts[Note]))",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER((1&&\"\")-MAX(Facts[Note]))",
+"powerbi": "True"
+},
+{
+"expr": "ISERROR(MAX(Facts[Note])-(1&&\"\"))",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER(MAX(Facts[Note])-(1&&\"\"))",
+"powerbi": "True"
+},
+{
+"expr": "ISERROR((1&&\"\")*MAX(Facts[Note]))",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER((1&&\"\")*MAX(Facts[Note]))",
+"powerbi": "False"
+},
+{
+"expr": "ISERROR(MAX(Facts[Note])*(1&&\"\"))",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER(MAX(Facts[Note])*(1&&\"\"))",
+"powerbi": "False"
+},
+{
+"expr": "ISERROR((1&&\"\")/MAX(Facts[Note]))",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER((1&&\"\")/MAX(Facts[Note]))",
+"powerbi": "False"
+},
+{
+"expr": "ISERROR(MAX(Facts[Note])/(1&&\"\"))",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER(MAX(Facts[Note])/(1&&\"\"))",
+"powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 28) Cannot convert value 'Paid' of type Text to type Number.\""
+},
+{
+"expr": "ISERROR((1&&\"\")^MAX(Facts[Note]))",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER((1&&\"\")^MAX(Facts[Note]))",
+"powerbi": "True"
+},
+{
+"expr": "ISERROR(MAX(Facts[Note])^(1&&\"\"))",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER(MAX(Facts[Note])^(1&&\"\"))",
+"powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 28) Cannot convert value 'Paid' of type Text to type Number.\""
+},
+{
+"expr": "ISERROR((1&&\"\")&MAX(Facts[Note]))",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER((1&&\"\")&MAX(Facts[Note]))",
+"powerbi": "False"
+},
+{
+"expr": "ISERROR(MAX(Facts[Note])&(1&&\"\"))",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER(MAX(Facts[Note])&(1&&\"\"))",
+"powerbi": "False"
+},
+{
+"expr": "ISERROR((1&&\"\")+VALUE(\"x\"))",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER((1&&\"\")+VALUE(\"x\"))",
+"powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 36) Cannot convert value 'x' of type Text to type Number.\""
+},
+{
+"expr": "ISERROR(VALUE(\"x\")+(1&&\"\"))",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER(VALUE(\"x\")+(1&&\"\"))",
+"powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 28) Cannot convert value 'x' of type Text to type Number.\""
+},
+{
+"expr": "ISERROR((1&&\"\")-VALUE(\"x\"))",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER((1&&\"\")-VALUE(\"x\"))",
+"powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 36) Cannot convert value 'x' of type Text to type Number.\""
+},
+{
+"expr": "ISERROR(VALUE(\"x\")-(1&&\"\"))",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER(VALUE(\"x\")-(1&&\"\"))",
+"powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 28) Cannot convert value 'x' of type Text to type Number.\""
+},
+{
+"expr": "ISERROR((1&&\"\")*VALUE(\"x\"))",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER((1&&\"\")*VALUE(\"x\"))",
+"powerbi": "False"
+},
+{
+"expr": "ISERROR(VALUE(\"x\")*(1&&\"\"))",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER(VALUE(\"x\")*(1&&\"\"))",
+"powerbi": "False"
+},
+{
+"expr": "ISERROR((1&&\"\")/VALUE(\"x\"))",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER((1&&\"\")/VALUE(\"x\"))",
+"powerbi": "False"
+},
+{
+"expr": "ISERROR(VALUE(\"x\")/(1&&\"\"))",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER(VALUE(\"x\")/(1&&\"\"))",
+"powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 28) Cannot convert value 'x' of type Text to type Number.\""
+},
+{
+"expr": "ISERROR((1&&\"\")^VALUE(\"x\"))",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER((1&&\"\")^VALUE(\"x\"))",
+"powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 36) Cannot convert value 'x' of type Text to type Number.\""
+},
+{
+"expr": "ISERROR(VALUE(\"x\")^(1&&\"\"))",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER(VALUE(\"x\")^(1&&\"\"))",
+"powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 28) Cannot convert value 'x' of type Text to type Number.\""
+},
+{
+"expr": "ISERROR((1&&\"\")&VALUE(\"x\"))",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER((1&&\"\")&VALUE(\"x\"))",
+"powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 36) Cannot convert value 'x' of type Text to type Number.\""
+},
+{
+"expr": "ISERROR(VALUE(\"x\")&(1&&\"\"))",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER(VALUE(\"x\")&(1&&\"\"))",
+"powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 28) Cannot convert value 'x' of type Text to type Number.\""
+},
+{
+"expr": "ISERROR((1&&\"\")+\"TRUE\")",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER((1&&\"\")+\"TRUE\")",
+"powerbi": "True"
+},
+{
+"expr": "ISERROR(\"TRUE\"+(1&&\"\"))",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER(\"TRUE\"+(1&&\"\"))",
+"powerbi": "True"
+},
+{
+"expr": "ISERROR((1&&\"\")-\"TRUE\")",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER((1&&\"\")-\"TRUE\")",
+"powerbi": "True"
+},
+{
+"expr": "ISERROR(\"TRUE\"-(1&&\"\"))",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER(\"TRUE\"-(1&&\"\"))",
+"powerbi": "True"
+},
+{
+"expr": "ISERROR((1&&\"\")*\"TRUE\")",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER((1&&\"\")*\"TRUE\")",
+"powerbi": "True"
+},
+{
+"expr": "ISERROR(\"TRUE\"*(1&&\"\"))",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER(\"TRUE\"*(1&&\"\"))",
+"powerbi": "True"
+},
+{
+"expr": "ISERROR((1&&\"\")/\"TRUE\")",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER((1&&\"\")/\"TRUE\")",
+"powerbi": "False"
+},
+{
+"expr": "ISERROR(\"TRUE\"/(1&&\"\"))",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER(\"TRUE\"/(1&&\"\"))",
+"powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 28) Cannot convert value 'TRUE' of type Text to type Number.\""
+},
+{
+"expr": "ISERROR((1&&\"\")^\"TRUE\")",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER((1&&\"\")^\"TRUE\")",
+"powerbi": "True"
+},
+{
+"expr": "ISERROR(\"TRUE\"^(1&&\"\"))",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER(\"TRUE\"^(1&&\"\"))",
+"powerbi": "True"
+},
+{
+"expr": "ISERROR((1&&\"\")&\"TRUE\")",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER((1&&\"\")&\"TRUE\")",
+"powerbi": "False"
+},
+{
+"expr": "ISERROR(\"TRUE\"&(1&&\"\"))",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER(\"TRUE\"&(1&&\"\"))",
+"powerbi": "False"
+},
+{
+"expr": "ISERROR((1&&\"\")+\"2\")",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER((1&&\"\")+\"2\")",
+"powerbi": "True"
+},
+{
+"expr": "ISERROR(\"2\"+(1&&\"\"))",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER(\"2\"+(1&&\"\"))",
+"powerbi": "True"
+},
+{
+"expr": "ISERROR((1&&\"\")-\"2\")",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER((1&&\"\")-\"2\")",
+"powerbi": "True"
+},
+{
+"expr": "ISERROR(\"2\"-(1&&\"\"))",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER(\"2\"-(1&&\"\"))",
+"powerbi": "True"
+},
+{
+"expr": "ISERROR((1&&\"\")*\"2\")",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER((1&&\"\")*\"2\")",
+"powerbi": "True"
+},
+{
+"expr": "ISERROR(\"2\"*(1&&\"\"))",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER(\"2\"*(1&&\"\"))",
+"powerbi": "True"
+},
+{
+"expr": "ISERROR((1&&\"\")/\"2\")",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER((1&&\"\")/\"2\")",
+"powerbi": "False"
+},
+{
+"expr": "ISERROR(\"2\"/(1&&\"\"))",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER(\"2\"/(1&&\"\"))",
+"powerbi": "True"
+},
+{
+"expr": "ISERROR((1&&\"\")^\"2\")",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER((1&&\"\")^\"2\")",
+"powerbi": "True"
+},
+{
+"expr": "ISERROR(\"2\"^(1&&\"\"))",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER(\"2\"^(1&&\"\"))",
+"powerbi": "True"
+},
+{
+"expr": "ISERROR((1&&\"\")&\"2\")",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER((1&&\"\")&\"2\")",
+"powerbi": "False"
+},
+{
+"expr": "ISERROR(\"2\"&(1&&\"\"))",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER(\"2\"&(1&&\"\"))",
+"powerbi": "False"
+},
+{
+"expr": "ISERROR((0||\"\")+\"\")",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER((0||\"\")+\"\")",
+"powerbi": "True"
+},
+{
+"expr": "ISERROR(\"\"+(0||\"\"))",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER(\"\"+(0||\"\"))",
+"powerbi": "True"
+},
+{
+"expr": "ISERROR((0||\"\")-\"\")",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER((0||\"\")-\"\")",
+"powerbi": "True"
+},
+{
+"expr": "ISERROR(\"\"-(0||\"\"))",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER(\"\"-(0||\"\"))",
+"powerbi": "True"
+},
+{
+"expr": "ISERROR((0||\"\")*\"\")",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER((0||\"\")*\"\")",
+"powerbi": "True"
+},
+{
+"expr": "ISERROR(\"\"*(0||\"\"))",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER(\"\"*(0||\"\"))",
+"powerbi": "True"
+},
+{
+"expr": "ISERROR((0||\"\")/\"\")",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER((0||\"\")/\"\")",
+"powerbi": "False"
+},
+{
+"expr": "ISERROR(\"\"/(0||\"\"))",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER(\"\"/(0||\"\"))",
+"powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 28) Cannot convert value '' of type Text to type Number.\""
+},
+{
+"expr": "ISERROR((0||\"\")^\"\")",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER((0||\"\")^\"\")",
+"powerbi": "True"
+},
+{
+"expr": "ISERROR(\"\"^(0||\"\"))",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER(\"\"^(0||\"\"))",
+"powerbi": "True"
+},
+{
+"expr": "ISERROR((0||\"\")&\"\")",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER((0||\"\")&\"\")",
+"powerbi": "False"
+},
+{
+"expr": "ISERROR(\"\"&(0||\"\"))",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER(\"\"&(0||\"\"))",
+"powerbi": "False"
+},
+{
+"expr": "ISERROR((0||\"\")+LEFT(\"a\",0))",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER((0||\"\")+LEFT(\"a\",0))",
+"powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 36) Cannot convert value '' of type Text to type Number.\""
+},
+{
+"expr": "ISERROR(LEFT(\"a\",0)+(0||\"\"))",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER(LEFT(\"a\",0)+(0||\"\"))",
+"powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 28) Cannot convert value '' of type Text to type Number.\""
+},
+{
+"expr": "ISERROR((0||\"\")-LEFT(\"a\",0))",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER((0||\"\")-LEFT(\"a\",0))",
+"powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 36) Cannot convert value '' of type Text to type Number.\""
+},
+{
+"expr": "ISERROR(LEFT(\"a\",0)-(0||\"\"))",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER(LEFT(\"a\",0)-(0||\"\"))",
+"powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 28) Cannot convert value '' of type Text to type Number.\""
+},
+{
+"expr": "ISERROR((0||\"\")*LEFT(\"a\",0))",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER((0||\"\")*LEFT(\"a\",0))",
+"powerbi": "False"
+},
+{
+"expr": "ISERROR(LEFT(\"a\",0)*(0||\"\"))",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER(LEFT(\"a\",0)*(0||\"\"))",
+"powerbi": "False"
+},
+{
+"expr": "ISERROR((0||\"\")/LEFT(\"a\",0))",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER((0||\"\")/LEFT(\"a\",0))",
+"powerbi": "False"
+},
+{
+"expr": "ISERROR(LEFT(\"a\",0)/(0||\"\"))",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER(LEFT(\"a\",0)/(0||\"\"))",
+"powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 28) Cannot convert value '' of type Text to type Number.\""
+},
+{
+"expr": "ISERROR((0||\"\")^LEFT(\"a\",0))",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER((0||\"\")^LEFT(\"a\",0))",
+"powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 36) Cannot convert value '' of type Text to type Number.\""
+},
+{
+"expr": "ISERROR(LEFT(\"a\",0)^(0||\"\"))",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER(LEFT(\"a\",0)^(0||\"\"))",
+"powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 28) Cannot convert value '' of type Text to type Number.\""
+},
+{
+"expr": "ISERROR((0||\"\")&LEFT(\"a\",0))",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER((0||\"\")&LEFT(\"a\",0))",
+"powerbi": "False"
+},
+{
+"expr": "ISERROR(LEFT(\"a\",0)&(0||\"\"))",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER(LEFT(\"a\",0)&(0||\"\"))",
+"powerbi": "False"
+},
+{
+"expr": "ISERROR((0||\"\")+TRIM(\"\"))",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER((0||\"\")+TRIM(\"\"))",
+"powerbi": "True"
+},
+{
+"expr": "ISERROR(TRIM(\"\")+(0||\"\"))",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER(TRIM(\"\")+(0||\"\"))",
+"powerbi": "True"
+},
+{
+"expr": "ISERROR((0||\"\")-TRIM(\"\"))",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER((0||\"\")-TRIM(\"\"))",
+"powerbi": "True"
+},
+{
+"expr": "ISERROR(TRIM(\"\")-(0||\"\"))",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER(TRIM(\"\")-(0||\"\"))",
+"powerbi": "True"
+},
+{
+"expr": "ISERROR((0||\"\")*TRIM(\"\"))",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER((0||\"\")*TRIM(\"\"))",
+"powerbi": "True"
+},
+{
+"expr": "ISERROR(TRIM(\"\")*(0||\"\"))",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER(TRIM(\"\")*(0||\"\"))",
+"powerbi": "True"
+},
+{
+"expr": "ISERROR((0||\"\")/TRIM(\"\"))",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER((0||\"\")/TRIM(\"\"))",
+"powerbi": "False"
+},
+{
+"expr": "ISERROR(TRIM(\"\")/(0||\"\"))",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER(TRIM(\"\")/(0||\"\"))",
+"powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 28) Cannot convert value '' of type Text to type Number.\""
+},
+{
+"expr": "ISERROR((0||\"\")^TRIM(\"\"))",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER((0||\"\")^TRIM(\"\"))",
+"powerbi": "True"
+},
+{
+"expr": "ISERROR(TRIM(\"\")^(0||\"\"))",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER(TRIM(\"\")^(0||\"\"))",
+"powerbi": "True"
+},
+{
+"expr": "ISERROR((0||\"\")&TRIM(\"\"))",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER((0||\"\")&TRIM(\"\"))",
+"powerbi": "False"
+},
+{
+"expr": "ISERROR(TRIM(\"\")&(0||\"\"))",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER(TRIM(\"\")&(0||\"\"))",
+"powerbi": "False"
+},
+{
+"expr": "ISERROR((0||\"\")+\"a\")",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER((0||\"\")+\"a\")",
+"powerbi": "True"
+},
+{
+"expr": "ISERROR(\"a\"+(0||\"\"))",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER(\"a\"+(0||\"\"))",
+"powerbi": "True"
+},
+{
+"expr": "ISERROR((0||\"\")-\"a\")",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER((0||\"\")-\"a\")",
+"powerbi": "True"
+},
+{
+"expr": "ISERROR(\"a\"-(0||\"\"))",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER(\"a\"-(0||\"\"))",
+"powerbi": "True"
+},
+{
+"expr": "ISERROR((0||\"\")*\"a\")",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER((0||\"\")*\"a\")",
+"powerbi": "True"
+},
+{
+"expr": "ISERROR(\"a\"*(0||\"\"))",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER(\"a\"*(0||\"\"))",
+"powerbi": "True"
+},
+{
+"expr": "ISERROR((0||\"\")/\"a\")",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER((0||\"\")/\"a\")",
+"powerbi": "False"
+},
+{
+"expr": "ISERROR(\"a\"/(0||\"\"))",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER(\"a\"/(0||\"\"))",
+"powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 28) Cannot convert value 'a' of type Text to type Number.\""
+},
+{
+"expr": "ISERROR((0||\"\")^\"a\")",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER((0||\"\")^\"a\")",
+"powerbi": "True"
+},
+{
+"expr": "ISERROR(\"a\"^(0||\"\"))",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER(\"a\"^(0||\"\"))",
+"powerbi": "True"
+},
+{
+"expr": "ISERROR((0||\"\")&\"a\")",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER((0||\"\")&\"a\")",
+"powerbi": "False"
+},
+{
+"expr": "ISERROR(\"a\"&(0||\"\"))",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER(\"a\"&(0||\"\"))",
+"powerbi": "False"
+},
+{
+"expr": "ISERROR((0||\"\")+MAX(Facts[Note]))",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER((0||\"\")+MAX(Facts[Note]))",
+"powerbi": "True"
+},
+{
+"expr": "ISERROR(MAX(Facts[Note])+(0||\"\"))",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER(MAX(Facts[Note])+(0||\"\"))",
+"powerbi": "True"
+},
+{
+"expr": "ISERROR((0||\"\")-MAX(Facts[Note]))",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER((0||\"\")-MAX(Facts[Note]))",
+"powerbi": "True"
+},
+{
+"expr": "ISERROR(MAX(Facts[Note])-(0||\"\"))",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER(MAX(Facts[Note])-(0||\"\"))",
+"powerbi": "True"
+},
+{
+"expr": "ISERROR((0||\"\")*MAX(Facts[Note]))",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER((0||\"\")*MAX(Facts[Note]))",
+"powerbi": "False"
+},
+{
+"expr": "ISERROR(MAX(Facts[Note])*(0||\"\"))",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER(MAX(Facts[Note])*(0||\"\"))",
+"powerbi": "False"
+},
+{
+"expr": "ISERROR((0||\"\")/MAX(Facts[Note]))",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER((0||\"\")/MAX(Facts[Note]))",
+"powerbi": "False"
+},
+{
+"expr": "ISERROR(MAX(Facts[Note])/(0||\"\"))",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER(MAX(Facts[Note])/(0||\"\"))",
+"powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 28) Cannot convert value 'Paid' of type Text to type Number.\""
+},
+{
+"expr": "ISERROR((0||\"\")^MAX(Facts[Note]))",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER((0||\"\")^MAX(Facts[Note]))",
+"powerbi": "True"
+},
+{
+"expr": "ISERROR(MAX(Facts[Note])^(0||\"\"))",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER(MAX(Facts[Note])^(0||\"\"))",
+"powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 28) Cannot convert value 'Paid' of type Text to type Number.\""
+},
+{
+"expr": "ISERROR((0||\"\")&MAX(Facts[Note]))",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER((0||\"\")&MAX(Facts[Note]))",
+"powerbi": "False"
+},
+{
+"expr": "ISERROR(MAX(Facts[Note])&(0||\"\"))",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER(MAX(Facts[Note])&(0||\"\"))",
+"powerbi": "False"
+},
+{
+"expr": "ISERROR((0||\"\")+VALUE(\"x\"))",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER((0||\"\")+VALUE(\"x\"))",
+"powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 36) Cannot convert value 'x' of type Text to type Number.\""
+},
+{
+"expr": "ISERROR(VALUE(\"x\")+(0||\"\"))",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER(VALUE(\"x\")+(0||\"\"))",
+"powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 28) Cannot convert value 'x' of type Text to type Number.\""
+},
+{
+"expr": "ISERROR((0||\"\")-VALUE(\"x\"))",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER((0||\"\")-VALUE(\"x\"))",
+"powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 36) Cannot convert value 'x' of type Text to type Number.\""
+},
+{
+"expr": "ISERROR(VALUE(\"x\")-(0||\"\"))",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER(VALUE(\"x\")-(0||\"\"))",
+"powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 28) Cannot convert value 'x' of type Text to type Number.\""
+},
+{
+"expr": "ISERROR((0||\"\")*VALUE(\"x\"))",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER((0||\"\")*VALUE(\"x\"))",
+"powerbi": "False"
+},
+{
+"expr": "ISERROR(VALUE(\"x\")*(0||\"\"))",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER(VALUE(\"x\")*(0||\"\"))",
+"powerbi": "False"
+},
+{
+"expr": "ISERROR((0||\"\")/VALUE(\"x\"))",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER((0||\"\")/VALUE(\"x\"))",
+"powerbi": "False"
+},
+{
+"expr": "ISERROR(VALUE(\"x\")/(0||\"\"))",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER(VALUE(\"x\")/(0||\"\"))",
+"powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 28) Cannot convert value 'x' of type Text to type Number.\""
+},
+{
+"expr": "ISERROR((0||\"\")^VALUE(\"x\"))",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER((0||\"\")^VALUE(\"x\"))",
+"powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 36) Cannot convert value 'x' of type Text to type Number.\""
+},
+{
+"expr": "ISERROR(VALUE(\"x\")^(0||\"\"))",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER(VALUE(\"x\")^(0||\"\"))",
+"powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 28) Cannot convert value 'x' of type Text to type Number.\""
+},
+{
+"expr": "ISERROR((0||\"\")&VALUE(\"x\"))",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER((0||\"\")&VALUE(\"x\"))",
+"powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 36) Cannot convert value 'x' of type Text to type Number.\""
+},
+{
+"expr": "ISERROR(VALUE(\"x\")&(0||\"\"))",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER(VALUE(\"x\")&(0||\"\"))",
+"powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 28) Cannot convert value 'x' of type Text to type Number.\""
+},
+{
+"expr": "ISERROR((0||\"\")+\"TRUE\")",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER((0||\"\")+\"TRUE\")",
+"powerbi": "True"
+},
+{
+"expr": "ISERROR(\"TRUE\"+(0||\"\"))",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER(\"TRUE\"+(0||\"\"))",
+"powerbi": "True"
+},
+{
+"expr": "ISERROR((0||\"\")-\"TRUE\")",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER((0||\"\")-\"TRUE\")",
+"powerbi": "True"
+},
+{
+"expr": "ISERROR(\"TRUE\"-(0||\"\"))",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER(\"TRUE\"-(0||\"\"))",
+"powerbi": "True"
+},
+{
+"expr": "ISERROR((0||\"\")*\"TRUE\")",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER((0||\"\")*\"TRUE\")",
+"powerbi": "True"
+},
+{
+"expr": "ISERROR(\"TRUE\"*(0||\"\"))",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER(\"TRUE\"*(0||\"\"))",
+"powerbi": "True"
+},
+{
+"expr": "ISERROR((0||\"\")/\"TRUE\")",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER((0||\"\")/\"TRUE\")",
+"powerbi": "False"
+},
+{
+"expr": "ISERROR(\"TRUE\"/(0||\"\"))",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER(\"TRUE\"/(0||\"\"))",
+"powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 28) Cannot convert value 'TRUE' of type Text to type Number.\""
+},
+{
+"expr": "ISERROR((0||\"\")^\"TRUE\")",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER((0||\"\")^\"TRUE\")",
+"powerbi": "True"
+},
+{
+"expr": "ISERROR(\"TRUE\"^(0||\"\"))",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER(\"TRUE\"^(0||\"\"))",
+"powerbi": "True"
+},
+{
+"expr": "ISERROR((0||\"\")&\"TRUE\")",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER((0||\"\")&\"TRUE\")",
+"powerbi": "False"
+},
+{
+"expr": "ISERROR(\"TRUE\"&(0||\"\"))",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER(\"TRUE\"&(0||\"\"))",
+"powerbi": "False"
+},
+{
+"expr": "ISERROR((0||\"\")+\"2\")",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER((0||\"\")+\"2\")",
+"powerbi": "True"
+},
+{
+"expr": "ISERROR(\"2\"+(0||\"\"))",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER(\"2\"+(0||\"\"))",
+"powerbi": "True"
+},
+{
+"expr": "ISERROR((0||\"\")-\"2\")",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER((0||\"\")-\"2\")",
+"powerbi": "True"
+},
+{
+"expr": "ISERROR(\"2\"-(0||\"\"))",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER(\"2\"-(0||\"\"))",
+"powerbi": "True"
+},
+{
+"expr": "ISERROR((0||\"\")*\"2\")",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER((0||\"\")*\"2\")",
+"powerbi": "True"
+},
+{
+"expr": "ISERROR(\"2\"*(0||\"\"))",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER(\"2\"*(0||\"\"))",
+"powerbi": "True"
+},
+{
+"expr": "ISERROR((0||\"\")/\"2\")",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER((0||\"\")/\"2\")",
+"powerbi": "False"
+},
+{
+"expr": "ISERROR(\"2\"/(0||\"\"))",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER(\"2\"/(0||\"\"))",
+"powerbi": "True"
+},
+{
+"expr": "ISERROR((0||\"\")^\"2\")",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER((0||\"\")^\"2\")",
+"powerbi": "True"
+},
+{
+"expr": "ISERROR(\"2\"^(0||\"\"))",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER(\"2\"^(0||\"\"))",
+"powerbi": "True"
+},
+{
+"expr": "ISERROR((0||\"\")&\"2\")",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER((0||\"\")&\"2\")",
+"powerbi": "False"
+},
+{
+"expr": "ISERROR(\"2\"&(0||\"\"))",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER(\"2\"&(0||\"\"))",
+"powerbi": "False"
+},
+{
+"expr": "ISERROR((TRUE()&&LEFT(\"a\",0))+\"\")",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER((TRUE()&&LEFT(\"a\",0))+\"\")",
+"powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 50) Cannot convert value '' of type Text to type Number.\""
+},
+{
+"expr": "ISERROR(\"\"+(TRUE()&&LEFT(\"a\",0)))",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER(\"\"+(TRUE()&&LEFT(\"a\",0)))",
+"powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 28) Cannot convert value '' of type Text to type Number.\""
+},
+{
+"expr": "ISERROR((TRUE()&&LEFT(\"a\",0))-\"\")",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER((TRUE()&&LEFT(\"a\",0))-\"\")",
+"powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 50) Cannot convert value '' of type Text to type Number.\""
+},
+{
+"expr": "ISERROR(\"\"-(TRUE()&&LEFT(\"a\",0)))",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER(\"\"-(TRUE()&&LEFT(\"a\",0)))",
+"powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 28) Cannot convert value '' of type Text to type Number.\""
+},
+{
+"expr": "ISERROR((TRUE()&&LEFT(\"a\",0))*\"\")",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER((TRUE()&&LEFT(\"a\",0))*\"\")",
+"powerbi": "False"
+},
+{
+"expr": "ISERROR(\"\"*(TRUE()&&LEFT(\"a\",0)))",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER(\"\"*(TRUE()&&LEFT(\"a\",0)))",
+"powerbi": "False"
+},
+{
+"expr": "ISERROR((TRUE()&&LEFT(\"a\",0))/\"\")",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER((TRUE()&&LEFT(\"a\",0))/\"\")",
+"powerbi": "False"
+},
+{
+"expr": "ISERROR(\"\"/(TRUE()&&LEFT(\"a\",0)))",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER(\"\"/(TRUE()&&LEFT(\"a\",0)))",
+"powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 28) Cannot convert value '' of type Text to type Number.\""
+},
+{
+"expr": "ISERROR((TRUE()&&LEFT(\"a\",0))^\"\")",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER((TRUE()&&LEFT(\"a\",0))^\"\")",
+"powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 50) Cannot convert value '' of type Text to type Number.\""
+},
+{
+"expr": "ISERROR(\"\"^(TRUE()&&LEFT(\"a\",0)))",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER(\"\"^(TRUE()&&LEFT(\"a\",0)))",
+"powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 28) Cannot convert value '' of type Text to type Number.\""
+},
+{
+"expr": "ISERROR((TRUE()&&LEFT(\"a\",0))&\"\")",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER((TRUE()&&LEFT(\"a\",0))&\"\")",
+"powerbi": "False"
+},
+{
+"expr": "ISERROR(\"\"&(TRUE()&&LEFT(\"a\",0)))",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER(\"\"&(TRUE()&&LEFT(\"a\",0)))",
+"powerbi": "False"
+},
+{
+"expr": "ISERROR((TRUE()&&LEFT(\"a\",0))+LEFT(\"a\",0))",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER((TRUE()&&LEFT(\"a\",0))+LEFT(\"a\",0))",
+"powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 50) Cannot convert value '' of type Text to type Number.\""
+},
+{
+"expr": "ISERROR(LEFT(\"a\",0)+(TRUE()&&LEFT(\"a\",0)))",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER(LEFT(\"a\",0)+(TRUE()&&LEFT(\"a\",0)))",
+"powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 28) Cannot convert value '' of type Text to type Number.\""
+},
+{
+"expr": "ISERROR((TRUE()&&LEFT(\"a\",0))-LEFT(\"a\",0))",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER((TRUE()&&LEFT(\"a\",0))-LEFT(\"a\",0))",
+"powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 50) Cannot convert value '' of type Text to type Number.\""
+},
+{
+"expr": "ISERROR(LEFT(\"a\",0)-(TRUE()&&LEFT(\"a\",0)))",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER(LEFT(\"a\",0)-(TRUE()&&LEFT(\"a\",0)))",
+"powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 28) Cannot convert value '' of type Text to type Number.\""
+},
+{
+"expr": "ISERROR((TRUE()&&LEFT(\"a\",0))*LEFT(\"a\",0))",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER((TRUE()&&LEFT(\"a\",0))*LEFT(\"a\",0))",
+"powerbi": "False"
+},
+{
+"expr": "ISERROR(LEFT(\"a\",0)*(TRUE()&&LEFT(\"a\",0)))",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER(LEFT(\"a\",0)*(TRUE()&&LEFT(\"a\",0)))",
+"powerbi": "False"
+},
+{
+"expr": "ISERROR((TRUE()&&LEFT(\"a\",0))/LEFT(\"a\",0))",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER((TRUE()&&LEFT(\"a\",0))/LEFT(\"a\",0))",
+"powerbi": "False"
+},
+{
+"expr": "ISERROR(LEFT(\"a\",0)/(TRUE()&&LEFT(\"a\",0)))",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER(LEFT(\"a\",0)/(TRUE()&&LEFT(\"a\",0)))",
+"powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 28) Cannot convert value '' of type Text to type Number.\""
+},
+{
+"expr": "ISERROR((TRUE()&&LEFT(\"a\",0))^LEFT(\"a\",0))",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER((TRUE()&&LEFT(\"a\",0))^LEFT(\"a\",0))",
+"powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 50) Cannot convert value '' of type Text to type Number.\""
+},
+{
+"expr": "ISERROR(LEFT(\"a\",0)^(TRUE()&&LEFT(\"a\",0)))",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER(LEFT(\"a\",0)^(TRUE()&&LEFT(\"a\",0)))",
+"powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 28) Cannot convert value '' of type Text to type Number.\""
+},
+{
+"expr": "ISERROR((TRUE()&&LEFT(\"a\",0))&LEFT(\"a\",0))",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER((TRUE()&&LEFT(\"a\",0))&LEFT(\"a\",0))",
+"powerbi": "False"
+},
+{
+"expr": "ISERROR(LEFT(\"a\",0)&(TRUE()&&LEFT(\"a\",0)))",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER(LEFT(\"a\",0)&(TRUE()&&LEFT(\"a\",0)))",
+"powerbi": "False"
+},
+{
+"expr": "ISERROR((TRUE()&&LEFT(\"a\",0))+TRIM(\"\"))",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER((TRUE()&&LEFT(\"a\",0))+TRIM(\"\"))",
+"powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 50) Cannot convert value '' of type Text to type Number.\""
+},
+{
+"expr": "ISERROR(TRIM(\"\")+(TRUE()&&LEFT(\"a\",0)))",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER(TRIM(\"\")+(TRUE()&&LEFT(\"a\",0)))",
+"powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 28) Cannot convert value '' of type Text to type Number.\""
+},
+{
+"expr": "ISERROR((TRUE()&&LEFT(\"a\",0))-TRIM(\"\"))",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER((TRUE()&&LEFT(\"a\",0))-TRIM(\"\"))",
+"powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 50) Cannot convert value '' of type Text to type Number.\""
+},
+{
+"expr": "ISERROR(TRIM(\"\")-(TRUE()&&LEFT(\"a\",0)))",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER(TRIM(\"\")-(TRUE()&&LEFT(\"a\",0)))",
+"powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 28) Cannot convert value '' of type Text to type Number.\""
+},
+{
+"expr": "ISERROR((TRUE()&&LEFT(\"a\",0))*TRIM(\"\"))",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER((TRUE()&&LEFT(\"a\",0))*TRIM(\"\"))",
+"powerbi": "False"
+},
+{
+"expr": "ISERROR(TRIM(\"\")*(TRUE()&&LEFT(\"a\",0)))",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER(TRIM(\"\")*(TRUE()&&LEFT(\"a\",0)))",
+"powerbi": "False"
+},
+{
+"expr": "ISERROR((TRUE()&&LEFT(\"a\",0))/TRIM(\"\"))",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER((TRUE()&&LEFT(\"a\",0))/TRIM(\"\"))",
+"powerbi": "False"
+},
+{
+"expr": "ISERROR(TRIM(\"\")/(TRUE()&&LEFT(\"a\",0)))",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER(TRIM(\"\")/(TRUE()&&LEFT(\"a\",0)))",
+"powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 28) Cannot convert value '' of type Text to type Number.\""
+},
+{
+"expr": "ISERROR((TRUE()&&LEFT(\"a\",0))^TRIM(\"\"))",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER((TRUE()&&LEFT(\"a\",0))^TRIM(\"\"))",
+"powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 50) Cannot convert value '' of type Text to type Number.\""
+},
+{
+"expr": "ISERROR(TRIM(\"\")^(TRUE()&&LEFT(\"a\",0)))",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER(TRIM(\"\")^(TRUE()&&LEFT(\"a\",0)))",
+"powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 28) Cannot convert value '' of type Text to type Number.\""
+},
+{
+"expr": "ISERROR((TRUE()&&LEFT(\"a\",0))&TRIM(\"\"))",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER((TRUE()&&LEFT(\"a\",0))&TRIM(\"\"))",
+"powerbi": "False"
+},
+{
+"expr": "ISERROR(TRIM(\"\")&(TRUE()&&LEFT(\"a\",0)))",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER(TRIM(\"\")&(TRUE()&&LEFT(\"a\",0)))",
+"powerbi": "False"
+},
+{
+"expr": "ISERROR((TRUE()&&LEFT(\"a\",0))+\"a\")",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER((TRUE()&&LEFT(\"a\",0))+\"a\")",
+"powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 50) Cannot convert value 'a' of type Text to type Number.\""
+},
+{
+"expr": "ISERROR(\"a\"+(TRUE()&&LEFT(\"a\",0)))",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER(\"a\"+(TRUE()&&LEFT(\"a\",0)))",
+"powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 28) Cannot convert value 'a' of type Text to type Number.\""
+},
+{
+"expr": "ISERROR((TRUE()&&LEFT(\"a\",0))-\"a\")",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER((TRUE()&&LEFT(\"a\",0))-\"a\")",
+"powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 50) Cannot convert value 'a' of type Text to type Number.\""
+},
+{
+"expr": "ISERROR(\"a\"-(TRUE()&&LEFT(\"a\",0)))",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER(\"a\"-(TRUE()&&LEFT(\"a\",0)))",
+"powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 28) Cannot convert value 'a' of type Text to type Number.\""
+},
+{
+"expr": "ISERROR((TRUE()&&LEFT(\"a\",0))*\"a\")",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER((TRUE()&&LEFT(\"a\",0))*\"a\")",
+"powerbi": "False"
+},
+{
+"expr": "ISERROR(\"a\"*(TRUE()&&LEFT(\"a\",0)))",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER(\"a\"*(TRUE()&&LEFT(\"a\",0)))",
+"powerbi": "False"
+},
+{
+"expr": "ISERROR((TRUE()&&LEFT(\"a\",0))/\"a\")",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER((TRUE()&&LEFT(\"a\",0))/\"a\")",
+"powerbi": "False"
+},
+{
+"expr": "ISERROR(\"a\"/(TRUE()&&LEFT(\"a\",0)))",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER(\"a\"/(TRUE()&&LEFT(\"a\",0)))",
+"powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 28) Cannot convert value 'a' of type Text to type Number.\""
+},
+{
+"expr": "ISERROR((TRUE()&&LEFT(\"a\",0))^\"a\")",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER((TRUE()&&LEFT(\"a\",0))^\"a\")",
+"powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 50) Cannot convert value 'a' of type Text to type Number.\""
+},
+{
+"expr": "ISERROR(\"a\"^(TRUE()&&LEFT(\"a\",0)))",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER(\"a\"^(TRUE()&&LEFT(\"a\",0)))",
+"powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 28) Cannot convert value 'a' of type Text to type Number.\""
+},
+{
+"expr": "ISERROR((TRUE()&&LEFT(\"a\",0))&\"a\")",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER((TRUE()&&LEFT(\"a\",0))&\"a\")",
+"powerbi": "False"
+},
+{
+"expr": "ISERROR(\"a\"&(TRUE()&&LEFT(\"a\",0)))",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER(\"a\"&(TRUE()&&LEFT(\"a\",0)))",
+"powerbi": "False"
+},
+{
+"expr": "ISERROR((TRUE()&&LEFT(\"a\",0))+MAX(Facts[Note]))",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER((TRUE()&&LEFT(\"a\",0))+MAX(Facts[Note]))",
+"powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 50) Cannot convert value 'Paid' of type Text to type Number.\""
+},
+{
+"expr": "ISERROR(MAX(Facts[Note])+(TRUE()&&LEFT(\"a\",0)))",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER(MAX(Facts[Note])+(TRUE()&&LEFT(\"a\",0)))",
+"powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 28) Cannot convert value 'Paid' of type Text to type Number.\""
+},
+{
+"expr": "ISERROR((TRUE()&&LEFT(\"a\",0))-MAX(Facts[Note]))",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER((TRUE()&&LEFT(\"a\",0))-MAX(Facts[Note]))",
+"powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 50) Cannot convert value 'Paid' of type Text to type Number.\""
+},
+{
+"expr": "ISERROR(MAX(Facts[Note])-(TRUE()&&LEFT(\"a\",0)))",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER(MAX(Facts[Note])-(TRUE()&&LEFT(\"a\",0)))",
+"powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 28) Cannot convert value 'Paid' of type Text to type Number.\""
+},
+{
+"expr": "ISERROR((TRUE()&&LEFT(\"a\",0))*MAX(Facts[Note]))",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER((TRUE()&&LEFT(\"a\",0))*MAX(Facts[Note]))",
+"powerbi": "False"
+},
+{
+"expr": "ISERROR(MAX(Facts[Note])*(TRUE()&&LEFT(\"a\",0)))",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER(MAX(Facts[Note])*(TRUE()&&LEFT(\"a\",0)))",
+"powerbi": "False"
+},
+{
+"expr": "ISERROR((TRUE()&&LEFT(\"a\",0))/MAX(Facts[Note]))",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER((TRUE()&&LEFT(\"a\",0))/MAX(Facts[Note]))",
+"powerbi": "False"
+},
+{
+"expr": "ISERROR(MAX(Facts[Note])/(TRUE()&&LEFT(\"a\",0)))",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER(MAX(Facts[Note])/(TRUE()&&LEFT(\"a\",0)))",
+"powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 28) Cannot convert value 'Paid' of type Text to type Number.\""
+},
+{
+"expr": "ISERROR((TRUE()&&LEFT(\"a\",0))^MAX(Facts[Note]))",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER((TRUE()&&LEFT(\"a\",0))^MAX(Facts[Note]))",
+"powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 50) Cannot convert value 'Paid' of type Text to type Number.\""
+},
+{
+"expr": "ISERROR(MAX(Facts[Note])^(TRUE()&&LEFT(\"a\",0)))",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER(MAX(Facts[Note])^(TRUE()&&LEFT(\"a\",0)))",
+"powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 28) Cannot convert value 'Paid' of type Text to type Number.\""
+},
+{
+"expr": "ISERROR((TRUE()&&LEFT(\"a\",0))&MAX(Facts[Note]))",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER((TRUE()&&LEFT(\"a\",0))&MAX(Facts[Note]))",
+"powerbi": "False"
+},
+{
+"expr": "ISERROR(MAX(Facts[Note])&(TRUE()&&LEFT(\"a\",0)))",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER(MAX(Facts[Note])&(TRUE()&&LEFT(\"a\",0)))",
+"powerbi": "False"
+},
+{
+"expr": "ISERROR((TRUE()&&LEFT(\"a\",0))+VALUE(\"x\"))",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER((TRUE()&&LEFT(\"a\",0))+VALUE(\"x\"))",
+"powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 50) Cannot convert value 'x' of type Text to type Number.\""
+},
+{
+"expr": "ISERROR(VALUE(\"x\")+(TRUE()&&LEFT(\"a\",0)))",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER(VALUE(\"x\")+(TRUE()&&LEFT(\"a\",0)))",
+"powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 28) Cannot convert value 'x' of type Text to type Number.\""
+},
+{
+"expr": "ISERROR((TRUE()&&LEFT(\"a\",0))-VALUE(\"x\"))",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER((TRUE()&&LEFT(\"a\",0))-VALUE(\"x\"))",
+"powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 50) Cannot convert value 'x' of type Text to type Number.\""
+},
+{
+"expr": "ISERROR(VALUE(\"x\")-(TRUE()&&LEFT(\"a\",0)))",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER(VALUE(\"x\")-(TRUE()&&LEFT(\"a\",0)))",
+"powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 28) Cannot convert value 'x' of type Text to type Number.\""
+},
+{
+"expr": "ISERROR((TRUE()&&LEFT(\"a\",0))*VALUE(\"x\"))",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER((TRUE()&&LEFT(\"a\",0))*VALUE(\"x\"))",
+"powerbi": "False"
+},
+{
+"expr": "ISERROR(VALUE(\"x\")*(TRUE()&&LEFT(\"a\",0)))",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER(VALUE(\"x\")*(TRUE()&&LEFT(\"a\",0)))",
+"powerbi": "False"
+},
+{
+"expr": "ISERROR((TRUE()&&LEFT(\"a\",0))/VALUE(\"x\"))",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER((TRUE()&&LEFT(\"a\",0))/VALUE(\"x\"))",
+"powerbi": "False"
+},
+{
+"expr": "ISERROR(VALUE(\"x\")/(TRUE()&&LEFT(\"a\",0)))",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER(VALUE(\"x\")/(TRUE()&&LEFT(\"a\",0)))",
+"powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 28) Cannot convert value 'x' of type Text to type Number.\""
+},
+{
+"expr": "ISERROR((TRUE()&&LEFT(\"a\",0))^VALUE(\"x\"))",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER((TRUE()&&LEFT(\"a\",0))^VALUE(\"x\"))",
+"powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 50) Cannot convert value 'x' of type Text to type Number.\""
+},
+{
+"expr": "ISERROR(VALUE(\"x\")^(TRUE()&&LEFT(\"a\",0)))",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER(VALUE(\"x\")^(TRUE()&&LEFT(\"a\",0)))",
+"powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 28) Cannot convert value 'x' of type Text to type Number.\""
+},
+{
+"expr": "ISERROR((TRUE()&&LEFT(\"a\",0))&VALUE(\"x\"))",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER((TRUE()&&LEFT(\"a\",0))&VALUE(\"x\"))",
+"powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 50) Cannot convert value 'x' of type Text to type Number.\""
+},
+{
+"expr": "ISERROR(VALUE(\"x\")&(TRUE()&&LEFT(\"a\",0)))",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER(VALUE(\"x\")&(TRUE()&&LEFT(\"a\",0)))",
+"powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 28) Cannot convert value 'x' of type Text to type Number.\""
+},
+{
+"expr": "ISERROR((TRUE()&&LEFT(\"a\",0))+\"TRUE\")",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER((TRUE()&&LEFT(\"a\",0))+\"TRUE\")",
+"powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 50) Cannot convert value 'TRUE' of type Text to type Number.\""
+},
+{
+"expr": "ISERROR(\"TRUE\"+(TRUE()&&LEFT(\"a\",0)))",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER(\"TRUE\"+(TRUE()&&LEFT(\"a\",0)))",
+"powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 28) Cannot convert value 'TRUE' of type Text to type Number.\""
+},
+{
+"expr": "ISERROR((TRUE()&&LEFT(\"a\",0))-\"TRUE\")",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER((TRUE()&&LEFT(\"a\",0))-\"TRUE\")",
+"powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 50) Cannot convert value 'TRUE' of type Text to type Number.\""
+},
+{
+"expr": "ISERROR(\"TRUE\"-(TRUE()&&LEFT(\"a\",0)))",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER(\"TRUE\"-(TRUE()&&LEFT(\"a\",0)))",
+"powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 28) Cannot convert value 'TRUE' of type Text to type Number.\""
+},
+{
+"expr": "ISERROR((TRUE()&&LEFT(\"a\",0))*\"TRUE\")",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER((TRUE()&&LEFT(\"a\",0))*\"TRUE\")",
+"powerbi": "False"
+},
+{
+"expr": "ISERROR(\"TRUE\"*(TRUE()&&LEFT(\"a\",0)))",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER(\"TRUE\"*(TRUE()&&LEFT(\"a\",0)))",
+"powerbi": "False"
+},
+{
+"expr": "ISERROR((TRUE()&&LEFT(\"a\",0))/\"TRUE\")",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER((TRUE()&&LEFT(\"a\",0))/\"TRUE\")",
+"powerbi": "False"
+},
+{
+"expr": "ISERROR(\"TRUE\"/(TRUE()&&LEFT(\"a\",0)))",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER(\"TRUE\"/(TRUE()&&LEFT(\"a\",0)))",
+"powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 28) Cannot convert value 'TRUE' of type Text to type Number.\""
+},
+{
+"expr": "ISERROR((TRUE()&&LEFT(\"a\",0))^\"TRUE\")",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER((TRUE()&&LEFT(\"a\",0))^\"TRUE\")",
+"powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 50) Cannot convert value 'TRUE' of type Text to type Number.\""
+},
+{
+"expr": "ISERROR(\"TRUE\"^(TRUE()&&LEFT(\"a\",0)))",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER(\"TRUE\"^(TRUE()&&LEFT(\"a\",0)))",
+"powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 28) Cannot convert value 'TRUE' of type Text to type Number.\""
+},
+{
+"expr": "ISERROR((TRUE()&&LEFT(\"a\",0))&\"TRUE\")",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER((TRUE()&&LEFT(\"a\",0))&\"TRUE\")",
+"powerbi": "False"
+},
+{
+"expr": "ISERROR(\"TRUE\"&(TRUE()&&LEFT(\"a\",0)))",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER(\"TRUE\"&(TRUE()&&LEFT(\"a\",0)))",
+"powerbi": "False"
+},
+{
+"expr": "ISERROR((TRUE()&&LEFT(\"a\",0))+\"2\")",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER((TRUE()&&LEFT(\"a\",0))+\"2\")",
+"powerbi": "True"
+},
+{
+"expr": "ISERROR(\"2\"+(TRUE()&&LEFT(\"a\",0)))",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER(\"2\"+(TRUE()&&LEFT(\"a\",0)))",
+"powerbi": "True"
+},
+{
+"expr": "ISERROR((TRUE()&&LEFT(\"a\",0))-\"2\")",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER((TRUE()&&LEFT(\"a\",0))-\"2\")",
+"powerbi": "True"
+},
+{
+"expr": "ISERROR(\"2\"-(TRUE()&&LEFT(\"a\",0)))",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER(\"2\"-(TRUE()&&LEFT(\"a\",0)))",
+"powerbi": "True"
+},
+{
+"expr": "ISERROR((TRUE()&&LEFT(\"a\",0))*\"2\")",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER((TRUE()&&LEFT(\"a\",0))*\"2\")",
+"powerbi": "False"
+},
+{
+"expr": "ISERROR(\"2\"*(TRUE()&&LEFT(\"a\",0)))",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER(\"2\"*(TRUE()&&LEFT(\"a\",0)))",
+"powerbi": "False"
+},
+{
+"expr": "ISERROR((TRUE()&&LEFT(\"a\",0))/\"2\")",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER((TRUE()&&LEFT(\"a\",0))/\"2\")",
+"powerbi": "False"
+},
+{
+"expr": "ISERROR(\"2\"/(TRUE()&&LEFT(\"a\",0)))",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER(\"2\"/(TRUE()&&LEFT(\"a\",0)))",
+"powerbi": "True"
+},
+{
+"expr": "ISERROR((TRUE()&&LEFT(\"a\",0))^\"2\")",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER((TRUE()&&LEFT(\"a\",0))^\"2\")",
+"powerbi": "False"
+},
+{
+"expr": "ISERROR(\"2\"^(TRUE()&&LEFT(\"a\",0)))",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER(\"2\"^(TRUE()&&LEFT(\"a\",0)))",
+"powerbi": "True"
+},
+{
+"expr": "ISERROR((TRUE()&&LEFT(\"a\",0))&\"2\")",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER((TRUE()&&LEFT(\"a\",0))&\"2\")",
+"powerbi": "False"
+},
+{
+"expr": "ISERROR(\"2\"&(TRUE()&&LEFT(\"a\",0)))",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER(\"2\"&(TRUE()&&LEFT(\"a\",0)))",
+"powerbi": "False"
+},
+{
+"expr": "ISERROR((AND(1,\"\"))+\"\")",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER((AND(1,\"\"))+\"\")",
+"powerbi": "True"
+},
+{
+"expr": "ISERROR(\"\"+(AND(1,\"\")))",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER(\"\"+(AND(1,\"\")))",
+"powerbi": "True"
+},
+{
+"expr": "ISERROR((AND(1,\"\"))-\"\")",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER((AND(1,\"\"))-\"\")",
+"powerbi": "True"
+},
+{
+"expr": "ISERROR(\"\"-(AND(1,\"\")))",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER(\"\"-(AND(1,\"\")))",
+"powerbi": "True"
+},
+{
+"expr": "ISERROR((AND(1,\"\"))*\"\")",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER((AND(1,\"\"))*\"\")",
+"powerbi": "True"
+},
+{
+"expr": "ISERROR(\"\"*(AND(1,\"\")))",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER(\"\"*(AND(1,\"\")))",
+"powerbi": "True"
+},
+{
+"expr": "ISERROR((AND(1,\"\"))/\"\")",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER((AND(1,\"\"))/\"\")",
+"powerbi": "False"
+},
+{
+"expr": "ISERROR(\"\"/(AND(1,\"\")))",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER(\"\"/(AND(1,\"\")))",
+"powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 28) Cannot convert value '' of type Text to type Number.\""
+},
+{
+"expr": "ISERROR((AND(1,\"\"))^\"\")",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER((AND(1,\"\"))^\"\")",
+"powerbi": "True"
+},
+{
+"expr": "ISERROR(\"\"^(AND(1,\"\")))",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER(\"\"^(AND(1,\"\")))",
+"powerbi": "True"
+},
+{
+"expr": "ISERROR((AND(1,\"\"))&\"\")",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER((AND(1,\"\"))&\"\")",
+"powerbi": "False"
+},
+{
+"expr": "ISERROR(\"\"&(AND(1,\"\")))",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER(\"\"&(AND(1,\"\")))",
+"powerbi": "False"
+},
+{
+"expr": "ISERROR((AND(1,\"\"))+LEFT(\"a\",0))",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER((AND(1,\"\"))+LEFT(\"a\",0))",
+"powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 40) Cannot convert value '' of type Text to type Number.\""
+},
+{
+"expr": "ISERROR(LEFT(\"a\",0)+(AND(1,\"\")))",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER(LEFT(\"a\",0)+(AND(1,\"\")))",
+"powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 28) Cannot convert value '' of type Text to type Number.\""
+},
+{
+"expr": "ISERROR((AND(1,\"\"))-LEFT(\"a\",0))",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER((AND(1,\"\"))-LEFT(\"a\",0))",
+"powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 40) Cannot convert value '' of type Text to type Number.\""
+},
+{
+"expr": "ISERROR(LEFT(\"a\",0)-(AND(1,\"\")))",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER(LEFT(\"a\",0)-(AND(1,\"\")))",
+"powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 28) Cannot convert value '' of type Text to type Number.\""
+},
+{
+"expr": "ISERROR((AND(1,\"\"))*LEFT(\"a\",0))",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER((AND(1,\"\"))*LEFT(\"a\",0))",
+"powerbi": "False"
+},
+{
+"expr": "ISERROR(LEFT(\"a\",0)*(AND(1,\"\")))",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER(LEFT(\"a\",0)*(AND(1,\"\")))",
+"powerbi": "False"
+},
+{
+"expr": "ISERROR((AND(1,\"\"))/LEFT(\"a\",0))",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER((AND(1,\"\"))/LEFT(\"a\",0))",
+"powerbi": "False"
+},
+{
+"expr": "ISERROR(LEFT(\"a\",0)/(AND(1,\"\")))",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER(LEFT(\"a\",0)/(AND(1,\"\")))",
+"powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 28) Cannot convert value '' of type Text to type Number.\""
+},
+{
+"expr": "ISERROR((AND(1,\"\"))^LEFT(\"a\",0))",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER((AND(1,\"\"))^LEFT(\"a\",0))",
+"powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 40) Cannot convert value '' of type Text to type Number.\""
+},
+{
+"expr": "ISERROR(LEFT(\"a\",0)^(AND(1,\"\")))",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER(LEFT(\"a\",0)^(AND(1,\"\")))",
+"powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 28) Cannot convert value '' of type Text to type Number.\""
+},
+{
+"expr": "ISERROR((AND(1,\"\"))&LEFT(\"a\",0))",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER((AND(1,\"\"))&LEFT(\"a\",0))",
+"powerbi": "False"
+},
+{
+"expr": "ISERROR(LEFT(\"a\",0)&(AND(1,\"\")))",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER(LEFT(\"a\",0)&(AND(1,\"\")))",
+"powerbi": "False"
+},
+{
+"expr": "ISERROR((AND(1,\"\"))+TRIM(\"\"))",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER((AND(1,\"\"))+TRIM(\"\"))",
+"powerbi": "True"
+},
+{
+"expr": "ISERROR(TRIM(\"\")+(AND(1,\"\")))",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER(TRIM(\"\")+(AND(1,\"\")))",
+"powerbi": "True"
+},
+{
+"expr": "ISERROR((AND(1,\"\"))-TRIM(\"\"))",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER((AND(1,\"\"))-TRIM(\"\"))",
+"powerbi": "True"
+},
+{
+"expr": "ISERROR(TRIM(\"\")-(AND(1,\"\")))",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER(TRIM(\"\")-(AND(1,\"\")))",
+"powerbi": "True"
+},
+{
+"expr": "ISERROR((AND(1,\"\"))*TRIM(\"\"))",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER((AND(1,\"\"))*TRIM(\"\"))",
+"powerbi": "True"
+},
+{
+"expr": "ISERROR(TRIM(\"\")*(AND(1,\"\")))",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER(TRIM(\"\")*(AND(1,\"\")))",
+"powerbi": "True"
+},
+{
+"expr": "ISERROR((AND(1,\"\"))/TRIM(\"\"))",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER((AND(1,\"\"))/TRIM(\"\"))",
+"powerbi": "False"
+},
+{
+"expr": "ISERROR(TRIM(\"\")/(AND(1,\"\")))",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER(TRIM(\"\")/(AND(1,\"\")))",
+"powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 28) Cannot convert value '' of type Text to type Number.\""
+},
+{
+"expr": "ISERROR((AND(1,\"\"))^TRIM(\"\"))",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER((AND(1,\"\"))^TRIM(\"\"))",
+"powerbi": "True"
+},
+{
+"expr": "ISERROR(TRIM(\"\")^(AND(1,\"\")))",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER(TRIM(\"\")^(AND(1,\"\")))",
+"powerbi": "True"
+},
+{
+"expr": "ISERROR((AND(1,\"\"))&TRIM(\"\"))",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER((AND(1,\"\"))&TRIM(\"\"))",
+"powerbi": "False"
+},
+{
+"expr": "ISERROR(TRIM(\"\")&(AND(1,\"\")))",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER(TRIM(\"\")&(AND(1,\"\")))",
+"powerbi": "False"
+},
+{
+"expr": "ISERROR((AND(1,\"\"))+\"a\")",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER((AND(1,\"\"))+\"a\")",
+"powerbi": "True"
+},
+{
+"expr": "ISERROR(\"a\"+(AND(1,\"\")))",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER(\"a\"+(AND(1,\"\")))",
+"powerbi": "True"
+},
+{
+"expr": "ISERROR((AND(1,\"\"))-\"a\")",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER((AND(1,\"\"))-\"a\")",
+"powerbi": "True"
+},
+{
+"expr": "ISERROR(\"a\"-(AND(1,\"\")))",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER(\"a\"-(AND(1,\"\")))",
+"powerbi": "True"
+},
+{
+"expr": "ISERROR((AND(1,\"\"))*\"a\")",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER((AND(1,\"\"))*\"a\")",
+"powerbi": "True"
+},
+{
+"expr": "ISERROR(\"a\"*(AND(1,\"\")))",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER(\"a\"*(AND(1,\"\")))",
+"powerbi": "True"
+},
+{
+"expr": "ISERROR((AND(1,\"\"))/\"a\")",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER((AND(1,\"\"))/\"a\")",
+"powerbi": "False"
+},
+{
+"expr": "ISERROR(\"a\"/(AND(1,\"\")))",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER(\"a\"/(AND(1,\"\")))",
+"powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 28) Cannot convert value 'a' of type Text to type Number.\""
+},
+{
+"expr": "ISERROR((AND(1,\"\"))^\"a\")",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER((AND(1,\"\"))^\"a\")",
+"powerbi": "True"
+},
+{
+"expr": "ISERROR(\"a\"^(AND(1,\"\")))",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER(\"a\"^(AND(1,\"\")))",
+"powerbi": "True"
+},
+{
+"expr": "ISERROR((AND(1,\"\"))&\"a\")",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER((AND(1,\"\"))&\"a\")",
+"powerbi": "False"
+},
+{
+"expr": "ISERROR(\"a\"&(AND(1,\"\")))",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER(\"a\"&(AND(1,\"\")))",
+"powerbi": "False"
+},
+{
+"expr": "ISERROR((AND(1,\"\"))+MAX(Facts[Note]))",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER((AND(1,\"\"))+MAX(Facts[Note]))",
+"powerbi": "True"
+},
+{
+"expr": "ISERROR(MAX(Facts[Note])+(AND(1,\"\")))",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER(MAX(Facts[Note])+(AND(1,\"\")))",
+"powerbi": "True"
+},
+{
+"expr": "ISERROR((AND(1,\"\"))-MAX(Facts[Note]))",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER((AND(1,\"\"))-MAX(Facts[Note]))",
+"powerbi": "True"
+},
+{
+"expr": "ISERROR(MAX(Facts[Note])-(AND(1,\"\")))",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER(MAX(Facts[Note])-(AND(1,\"\")))",
+"powerbi": "True"
+},
+{
+"expr": "ISERROR((AND(1,\"\"))*MAX(Facts[Note]))",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER((AND(1,\"\"))*MAX(Facts[Note]))",
+"powerbi": "False"
+},
+{
+"expr": "ISERROR(MAX(Facts[Note])*(AND(1,\"\")))",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER(MAX(Facts[Note])*(AND(1,\"\")))",
+"powerbi": "False"
+},
+{
+"expr": "ISERROR((AND(1,\"\"))/MAX(Facts[Note]))",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER((AND(1,\"\"))/MAX(Facts[Note]))",
+"powerbi": "False"
+},
+{
+"expr": "ISERROR(MAX(Facts[Note])/(AND(1,\"\")))",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER(MAX(Facts[Note])/(AND(1,\"\")))",
+"powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 28) Cannot convert value 'Paid' of type Text to type Number.\""
+},
+{
+"expr": "ISERROR((AND(1,\"\"))^MAX(Facts[Note]))",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER((AND(1,\"\"))^MAX(Facts[Note]))",
+"powerbi": "True"
+},
+{
+"expr": "ISERROR(MAX(Facts[Note])^(AND(1,\"\")))",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER(MAX(Facts[Note])^(AND(1,\"\")))",
+"powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 28) Cannot convert value 'Paid' of type Text to type Number.\""
+},
+{
+"expr": "ISERROR((AND(1,\"\"))&MAX(Facts[Note]))",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER((AND(1,\"\"))&MAX(Facts[Note]))",
+"powerbi": "False"
+},
+{
+"expr": "ISERROR(MAX(Facts[Note])&(AND(1,\"\")))",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER(MAX(Facts[Note])&(AND(1,\"\")))",
+"powerbi": "False"
+},
+{
+"expr": "ISERROR((AND(1,\"\"))+VALUE(\"x\"))",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER((AND(1,\"\"))+VALUE(\"x\"))",
+"powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 40) Cannot convert value 'x' of type Text to type Number.\""
+},
+{
+"expr": "ISERROR(VALUE(\"x\")+(AND(1,\"\")))",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER(VALUE(\"x\")+(AND(1,\"\")))",
+"powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 28) Cannot convert value 'x' of type Text to type Number.\""
+},
+{
+"expr": "ISERROR((AND(1,\"\"))-VALUE(\"x\"))",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER((AND(1,\"\"))-VALUE(\"x\"))",
+"powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 40) Cannot convert value 'x' of type Text to type Number.\""
+},
+{
+"expr": "ISERROR(VALUE(\"x\")-(AND(1,\"\")))",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER(VALUE(\"x\")-(AND(1,\"\")))",
+"powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 28) Cannot convert value 'x' of type Text to type Number.\""
+},
+{
+"expr": "ISERROR((AND(1,\"\"))*VALUE(\"x\"))",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER((AND(1,\"\"))*VALUE(\"x\"))",
+"powerbi": "False"
+},
+{
+"expr": "ISERROR(VALUE(\"x\")*(AND(1,\"\")))",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER(VALUE(\"x\")*(AND(1,\"\")))",
+"powerbi": "False"
+},
+{
+"expr": "ISERROR((AND(1,\"\"))/VALUE(\"x\"))",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER((AND(1,\"\"))/VALUE(\"x\"))",
+"powerbi": "False"
+},
+{
+"expr": "ISERROR(VALUE(\"x\")/(AND(1,\"\")))",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER(VALUE(\"x\")/(AND(1,\"\")))",
+"powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 28) Cannot convert value 'x' of type Text to type Number.\""
+},
+{
+"expr": "ISERROR((AND(1,\"\"))^VALUE(\"x\"))",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER((AND(1,\"\"))^VALUE(\"x\"))",
+"powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 40) Cannot convert value 'x' of type Text to type Number.\""
+},
+{
+"expr": "ISERROR(VALUE(\"x\")^(AND(1,\"\")))",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER(VALUE(\"x\")^(AND(1,\"\")))",
+"powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 28) Cannot convert value 'x' of type Text to type Number.\""
+},
+{
+"expr": "ISERROR((AND(1,\"\"))&VALUE(\"x\"))",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER((AND(1,\"\"))&VALUE(\"x\"))",
+"powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 40) Cannot convert value 'x' of type Text to type Number.\""
+},
+{
+"expr": "ISERROR(VALUE(\"x\")&(AND(1,\"\")))",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER(VALUE(\"x\")&(AND(1,\"\")))",
+"powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 28) Cannot convert value 'x' of type Text to type Number.\""
+},
+{
+"expr": "ISERROR((AND(1,\"\"))+\"TRUE\")",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER((AND(1,\"\"))+\"TRUE\")",
+"powerbi": "True"
+},
+{
+"expr": "ISERROR(\"TRUE\"+(AND(1,\"\")))",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER(\"TRUE\"+(AND(1,\"\")))",
+"powerbi": "True"
+},
+{
+"expr": "ISERROR((AND(1,\"\"))-\"TRUE\")",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER((AND(1,\"\"))-\"TRUE\")",
+"powerbi": "True"
+},
+{
+"expr": "ISERROR(\"TRUE\"-(AND(1,\"\")))",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER(\"TRUE\"-(AND(1,\"\")))",
+"powerbi": "True"
+},
+{
+"expr": "ISERROR((AND(1,\"\"))*\"TRUE\")",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER((AND(1,\"\"))*\"TRUE\")",
+"powerbi": "True"
+},
+{
+"expr": "ISERROR(\"TRUE\"*(AND(1,\"\")))",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER(\"TRUE\"*(AND(1,\"\")))",
+"powerbi": "True"
+},
+{
+"expr": "ISERROR((AND(1,\"\"))/\"TRUE\")",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER((AND(1,\"\"))/\"TRUE\")",
+"powerbi": "False"
+},
+{
+"expr": "ISERROR(\"TRUE\"/(AND(1,\"\")))",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER(\"TRUE\"/(AND(1,\"\")))",
+"powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 28) Cannot convert value 'TRUE' of type Text to type Number.\""
+},
+{
+"expr": "ISERROR((AND(1,\"\"))^\"TRUE\")",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER((AND(1,\"\"))^\"TRUE\")",
+"powerbi": "True"
+},
+{
+"expr": "ISERROR(\"TRUE\"^(AND(1,\"\")))",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER(\"TRUE\"^(AND(1,\"\")))",
+"powerbi": "True"
+},
+{
+"expr": "ISERROR((AND(1,\"\"))&\"TRUE\")",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER((AND(1,\"\"))&\"TRUE\")",
+"powerbi": "False"
+},
+{
+"expr": "ISERROR(\"TRUE\"&(AND(1,\"\")))",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER(\"TRUE\"&(AND(1,\"\")))",
+"powerbi": "False"
+},
+{
+"expr": "ISERROR((AND(1,\"\"))+\"2\")",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER((AND(1,\"\"))+\"2\")",
+"powerbi": "True"
+},
+{
+"expr": "ISERROR(\"2\"+(AND(1,\"\")))",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER(\"2\"+(AND(1,\"\")))",
+"powerbi": "True"
+},
+{
+"expr": "ISERROR((AND(1,\"\"))-\"2\")",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER((AND(1,\"\"))-\"2\")",
+"powerbi": "True"
+},
+{
+"expr": "ISERROR(\"2\"-(AND(1,\"\")))",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER(\"2\"-(AND(1,\"\")))",
+"powerbi": "True"
+},
+{
+"expr": "ISERROR((AND(1,\"\"))*\"2\")",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER((AND(1,\"\"))*\"2\")",
+"powerbi": "True"
+},
+{
+"expr": "ISERROR(\"2\"*(AND(1,\"\")))",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER(\"2\"*(AND(1,\"\")))",
+"powerbi": "True"
+},
+{
+"expr": "ISERROR((AND(1,\"\"))/\"2\")",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER((AND(1,\"\"))/\"2\")",
+"powerbi": "False"
+},
+{
+"expr": "ISERROR(\"2\"/(AND(1,\"\")))",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER(\"2\"/(AND(1,\"\")))",
+"powerbi": "True"
+},
+{
+"expr": "ISERROR((AND(1,\"\"))^\"2\")",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER((AND(1,\"\"))^\"2\")",
+"powerbi": "True"
+},
+{
+"expr": "ISERROR(\"2\"^(AND(1,\"\")))",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER(\"2\"^(AND(1,\"\")))",
+"powerbi": "True"
+},
+{
+"expr": "ISERROR((AND(1,\"\"))&\"2\")",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER((AND(1,\"\"))&\"2\")",
+"powerbi": "False"
+},
+{
+"expr": "ISERROR(\"2\"&(AND(1,\"\")))",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER(\"2\"&(AND(1,\"\")))",
+"powerbi": "False"
+},
+{
+"expr": "ISERROR((COUNTROWS(Facts)&&\"\")+\"\")",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER((COUNTROWS(Facts)&&\"\")+\"\")",
+"powerbi": "True"
+},
+{
+"expr": "ISERROR(\"\"+(COUNTROWS(Facts)&&\"\"))",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER(\"\"+(COUNTROWS(Facts)&&\"\"))",
+"powerbi": "True"
+},
+{
+"expr": "ISERROR((COUNTROWS(Facts)&&\"\")-\"\")",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER((COUNTROWS(Facts)&&\"\")-\"\")",
+"powerbi": "True"
+},
+{
+"expr": "ISERROR(\"\"-(COUNTROWS(Facts)&&\"\"))",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER(\"\"-(COUNTROWS(Facts)&&\"\"))",
+"powerbi": "True"
+},
+{
+"expr": "ISERROR((COUNTROWS(Facts)&&\"\")*\"\")",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER((COUNTROWS(Facts)&&\"\")*\"\")",
+"powerbi": "True"
+},
+{
+"expr": "ISERROR(\"\"*(COUNTROWS(Facts)&&\"\"))",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER(\"\"*(COUNTROWS(Facts)&&\"\"))",
+"powerbi": "True"
+},
+{
+"expr": "ISERROR((COUNTROWS(Facts)&&\"\")/\"\")",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER((COUNTROWS(Facts)&&\"\")/\"\")",
+"powerbi": "False"
+},
+{
+"expr": "ISERROR(\"\"/(COUNTROWS(Facts)&&\"\"))",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER(\"\"/(COUNTROWS(Facts)&&\"\"))",
+"powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 28) Cannot convert value '' of type Text to type Number.\""
+},
+{
+"expr": "ISERROR((COUNTROWS(Facts)&&\"\")^\"\")",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER((COUNTROWS(Facts)&&\"\")^\"\")",
+"powerbi": "True"
+},
+{
+"expr": "ISERROR(\"\"^(COUNTROWS(Facts)&&\"\"))",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER(\"\"^(COUNTROWS(Facts)&&\"\"))",
+"powerbi": "True"
+},
+{
+"expr": "ISERROR((COUNTROWS(Facts)&&\"\")&\"\")",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER((COUNTROWS(Facts)&&\"\")&\"\")",
+"powerbi": "False"
+},
+{
+"expr": "ISERROR(\"\"&(COUNTROWS(Facts)&&\"\"))",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER(\"\"&(COUNTROWS(Facts)&&\"\"))",
+"powerbi": "False"
+},
+{
+"expr": "ISERROR((COUNTROWS(Facts)&&\"\")+LEFT(\"a\",0))",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER((COUNTROWS(Facts)&&\"\")+LEFT(\"a\",0))",
+"powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 51) Cannot convert value '' of type Text to type Number.\""
+},
+{
+"expr": "ISERROR(LEFT(\"a\",0)+(COUNTROWS(Facts)&&\"\"))",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER(LEFT(\"a\",0)+(COUNTROWS(Facts)&&\"\"))",
+"powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 28) Cannot convert value '' of type Text to type Number.\""
+},
+{
+"expr": "ISERROR((COUNTROWS(Facts)&&\"\")-LEFT(\"a\",0))",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER((COUNTROWS(Facts)&&\"\")-LEFT(\"a\",0))",
+"powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 51) Cannot convert value '' of type Text to type Number.\""
+},
+{
+"expr": "ISERROR(LEFT(\"a\",0)-(COUNTROWS(Facts)&&\"\"))",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER(LEFT(\"a\",0)-(COUNTROWS(Facts)&&\"\"))",
+"powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 28) Cannot convert value '' of type Text to type Number.\""
+},
+{
+"expr": "ISERROR((COUNTROWS(Facts)&&\"\")*LEFT(\"a\",0))",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER((COUNTROWS(Facts)&&\"\")*LEFT(\"a\",0))",
+"powerbi": "False"
+},
+{
+"expr": "ISERROR(LEFT(\"a\",0)*(COUNTROWS(Facts)&&\"\"))",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER(LEFT(\"a\",0)*(COUNTROWS(Facts)&&\"\"))",
+"powerbi": "False"
+},
+{
+"expr": "ISERROR((COUNTROWS(Facts)&&\"\")/LEFT(\"a\",0))",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER((COUNTROWS(Facts)&&\"\")/LEFT(\"a\",0))",
+"powerbi": "False"
+},
+{
+"expr": "ISERROR(LEFT(\"a\",0)/(COUNTROWS(Facts)&&\"\"))",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER(LEFT(\"a\",0)/(COUNTROWS(Facts)&&\"\"))",
+"powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 28) Cannot convert value '' of type Text to type Number.\""
+},
+{
+"expr": "ISERROR((COUNTROWS(Facts)&&\"\")^LEFT(\"a\",0))",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER((COUNTROWS(Facts)&&\"\")^LEFT(\"a\",0))",
+"powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 51) Cannot convert value '' of type Text to type Number.\""
+},
+{
+"expr": "ISERROR(LEFT(\"a\",0)^(COUNTROWS(Facts)&&\"\"))",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER(LEFT(\"a\",0)^(COUNTROWS(Facts)&&\"\"))",
+"powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 28) Cannot convert value '' of type Text to type Number.\""
+},
+{
+"expr": "ISERROR((COUNTROWS(Facts)&&\"\")&LEFT(\"a\",0))",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER((COUNTROWS(Facts)&&\"\")&LEFT(\"a\",0))",
+"powerbi": "False"
+},
+{
+"expr": "ISERROR(LEFT(\"a\",0)&(COUNTROWS(Facts)&&\"\"))",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER(LEFT(\"a\",0)&(COUNTROWS(Facts)&&\"\"))",
+"powerbi": "False"
+},
+{
+"expr": "ISERROR((COUNTROWS(Facts)&&\"\")+TRIM(\"\"))",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER((COUNTROWS(Facts)&&\"\")+TRIM(\"\"))",
+"powerbi": "True"
+},
+{
+"expr": "ISERROR(TRIM(\"\")+(COUNTROWS(Facts)&&\"\"))",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER(TRIM(\"\")+(COUNTROWS(Facts)&&\"\"))",
+"powerbi": "True"
+},
+{
+"expr": "ISERROR((COUNTROWS(Facts)&&\"\")-TRIM(\"\"))",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER((COUNTROWS(Facts)&&\"\")-TRIM(\"\"))",
+"powerbi": "True"
+},
+{
+"expr": "ISERROR(TRIM(\"\")-(COUNTROWS(Facts)&&\"\"))",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER(TRIM(\"\")-(COUNTROWS(Facts)&&\"\"))",
+"powerbi": "True"
+},
+{
+"expr": "ISERROR((COUNTROWS(Facts)&&\"\")*TRIM(\"\"))",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER((COUNTROWS(Facts)&&\"\")*TRIM(\"\"))",
+"powerbi": "True"
+},
+{
+"expr": "ISERROR(TRIM(\"\")*(COUNTROWS(Facts)&&\"\"))",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER(TRIM(\"\")*(COUNTROWS(Facts)&&\"\"))",
+"powerbi": "True"
+},
+{
+"expr": "ISERROR((COUNTROWS(Facts)&&\"\")/TRIM(\"\"))",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER((COUNTROWS(Facts)&&\"\")/TRIM(\"\"))",
+"powerbi": "False"
+},
+{
+"expr": "ISERROR(TRIM(\"\")/(COUNTROWS(Facts)&&\"\"))",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER(TRIM(\"\")/(COUNTROWS(Facts)&&\"\"))",
+"powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 28) Cannot convert value '' of type Text to type Number.\""
+},
+{
+"expr": "ISERROR((COUNTROWS(Facts)&&\"\")^TRIM(\"\"))",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER((COUNTROWS(Facts)&&\"\")^TRIM(\"\"))",
+"powerbi": "True"
+},
+{
+"expr": "ISERROR(TRIM(\"\")^(COUNTROWS(Facts)&&\"\"))",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER(TRIM(\"\")^(COUNTROWS(Facts)&&\"\"))",
+"powerbi": "True"
+},
+{
+"expr": "ISERROR((COUNTROWS(Facts)&&\"\")&TRIM(\"\"))",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER((COUNTROWS(Facts)&&\"\")&TRIM(\"\"))",
+"powerbi": "False"
+},
+{
+"expr": "ISERROR(TRIM(\"\")&(COUNTROWS(Facts)&&\"\"))",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER(TRIM(\"\")&(COUNTROWS(Facts)&&\"\"))",
+"powerbi": "False"
+},
+{
+"expr": "ISERROR((COUNTROWS(Facts)&&\"\")+\"a\")",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER((COUNTROWS(Facts)&&\"\")+\"a\")",
+"powerbi": "True"
+},
+{
+"expr": "ISERROR(\"a\"+(COUNTROWS(Facts)&&\"\"))",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER(\"a\"+(COUNTROWS(Facts)&&\"\"))",
+"powerbi": "True"
+},
+{
+"expr": "ISERROR((COUNTROWS(Facts)&&\"\")-\"a\")",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER((COUNTROWS(Facts)&&\"\")-\"a\")",
+"powerbi": "True"
+},
+{
+"expr": "ISERROR(\"a\"-(COUNTROWS(Facts)&&\"\"))",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER(\"a\"-(COUNTROWS(Facts)&&\"\"))",
+"powerbi": "True"
+},
+{
+"expr": "ISERROR((COUNTROWS(Facts)&&\"\")*\"a\")",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER((COUNTROWS(Facts)&&\"\")*\"a\")",
+"powerbi": "True"
+},
+{
+"expr": "ISERROR(\"a\"*(COUNTROWS(Facts)&&\"\"))",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER(\"a\"*(COUNTROWS(Facts)&&\"\"))",
+"powerbi": "True"
+},
+{
+"expr": "ISERROR((COUNTROWS(Facts)&&\"\")/\"a\")",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER((COUNTROWS(Facts)&&\"\")/\"a\")",
+"powerbi": "False"
+},
+{
+"expr": "ISERROR(\"a\"/(COUNTROWS(Facts)&&\"\"))",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER(\"a\"/(COUNTROWS(Facts)&&\"\"))",
+"powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 28) Cannot convert value 'a' of type Text to type Number.\""
+},
+{
+"expr": "ISERROR((COUNTROWS(Facts)&&\"\")^\"a\")",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER((COUNTROWS(Facts)&&\"\")^\"a\")",
+"powerbi": "True"
+},
+{
+"expr": "ISERROR(\"a\"^(COUNTROWS(Facts)&&\"\"))",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER(\"a\"^(COUNTROWS(Facts)&&\"\"))",
+"powerbi": "True"
+},
+{
+"expr": "ISERROR((COUNTROWS(Facts)&&\"\")&\"a\")",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER((COUNTROWS(Facts)&&\"\")&\"a\")",
+"powerbi": "False"
+},
+{
+"expr": "ISERROR(\"a\"&(COUNTROWS(Facts)&&\"\"))",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER(\"a\"&(COUNTROWS(Facts)&&\"\"))",
+"powerbi": "False"
+},
+{
+"expr": "ISERROR((COUNTROWS(Facts)&&\"\")+MAX(Facts[Note]))",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER((COUNTROWS(Facts)&&\"\")+MAX(Facts[Note]))",
+"powerbi": "True"
+},
+{
+"expr": "ISERROR(MAX(Facts[Note])+(COUNTROWS(Facts)&&\"\"))",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER(MAX(Facts[Note])+(COUNTROWS(Facts)&&\"\"))",
+"powerbi": "True"
+},
+{
+"expr": "ISERROR((COUNTROWS(Facts)&&\"\")-MAX(Facts[Note]))",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER((COUNTROWS(Facts)&&\"\")-MAX(Facts[Note]))",
+"powerbi": "True"
+},
+{
+"expr": "ISERROR(MAX(Facts[Note])-(COUNTROWS(Facts)&&\"\"))",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER(MAX(Facts[Note])-(COUNTROWS(Facts)&&\"\"))",
+"powerbi": "True"
+},
+{
+"expr": "ISERROR((COUNTROWS(Facts)&&\"\")*MAX(Facts[Note]))",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER((COUNTROWS(Facts)&&\"\")*MAX(Facts[Note]))",
+"powerbi": "False"
+},
+{
+"expr": "ISERROR(MAX(Facts[Note])*(COUNTROWS(Facts)&&\"\"))",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER(MAX(Facts[Note])*(COUNTROWS(Facts)&&\"\"))",
+"powerbi": "False"
+},
+{
+"expr": "ISERROR((COUNTROWS(Facts)&&\"\")/MAX(Facts[Note]))",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER((COUNTROWS(Facts)&&\"\")/MAX(Facts[Note]))",
+"powerbi": "False"
+},
+{
+"expr": "ISERROR(MAX(Facts[Note])/(COUNTROWS(Facts)&&\"\"))",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER(MAX(Facts[Note])/(COUNTROWS(Facts)&&\"\"))",
+"powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 28) Cannot convert value 'Paid' of type Text to type Number.\""
+},
+{
+"expr": "ISERROR((COUNTROWS(Facts)&&\"\")^MAX(Facts[Note]))",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER((COUNTROWS(Facts)&&\"\")^MAX(Facts[Note]))",
+"powerbi": "True"
+},
+{
+"expr": "ISERROR(MAX(Facts[Note])^(COUNTROWS(Facts)&&\"\"))",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER(MAX(Facts[Note])^(COUNTROWS(Facts)&&\"\"))",
+"powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 28) Cannot convert value 'Paid' of type Text to type Number.\""
+},
+{
+"expr": "ISERROR((COUNTROWS(Facts)&&\"\")&MAX(Facts[Note]))",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER((COUNTROWS(Facts)&&\"\")&MAX(Facts[Note]))",
+"powerbi": "False"
+},
+{
+"expr": "ISERROR(MAX(Facts[Note])&(COUNTROWS(Facts)&&\"\"))",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER(MAX(Facts[Note])&(COUNTROWS(Facts)&&\"\"))",
+"powerbi": "False"
+},
+{
+"expr": "ISERROR((COUNTROWS(Facts)&&\"\")+VALUE(\"x\"))",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER((COUNTROWS(Facts)&&\"\")+VALUE(\"x\"))",
+"powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 51) Cannot convert value 'x' of type Text to type Number.\""
+},
+{
+"expr": "ISERROR(VALUE(\"x\")+(COUNTROWS(Facts)&&\"\"))",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER(VALUE(\"x\")+(COUNTROWS(Facts)&&\"\"))",
+"powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 28) Cannot convert value 'x' of type Text to type Number.\""
+},
+{
+"expr": "ISERROR((COUNTROWS(Facts)&&\"\")-VALUE(\"x\"))",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER((COUNTROWS(Facts)&&\"\")-VALUE(\"x\"))",
+"powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 51) Cannot convert value 'x' of type Text to type Number.\""
+},
+{
+"expr": "ISERROR(VALUE(\"x\")-(COUNTROWS(Facts)&&\"\"))",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER(VALUE(\"x\")-(COUNTROWS(Facts)&&\"\"))",
+"powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 28) Cannot convert value 'x' of type Text to type Number.\""
+},
+{
+"expr": "ISERROR((COUNTROWS(Facts)&&\"\")*VALUE(\"x\"))",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER((COUNTROWS(Facts)&&\"\")*VALUE(\"x\"))",
+"powerbi": "False"
+},
+{
+"expr": "ISERROR(VALUE(\"x\")*(COUNTROWS(Facts)&&\"\"))",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER(VALUE(\"x\")*(COUNTROWS(Facts)&&\"\"))",
+"powerbi": "False"
+},
+{
+"expr": "ISERROR((COUNTROWS(Facts)&&\"\")/VALUE(\"x\"))",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER((COUNTROWS(Facts)&&\"\")/VALUE(\"x\"))",
+"powerbi": "False"
+},
+{
+"expr": "ISERROR(VALUE(\"x\")/(COUNTROWS(Facts)&&\"\"))",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER(VALUE(\"x\")/(COUNTROWS(Facts)&&\"\"))",
+"powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 28) Cannot convert value 'x' of type Text to type Number.\""
+},
+{
+"expr": "ISERROR((COUNTROWS(Facts)&&\"\")^VALUE(\"x\"))",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER((COUNTROWS(Facts)&&\"\")^VALUE(\"x\"))",
+"powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 51) Cannot convert value 'x' of type Text to type Number.\""
+},
+{
+"expr": "ISERROR(VALUE(\"x\")^(COUNTROWS(Facts)&&\"\"))",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER(VALUE(\"x\")^(COUNTROWS(Facts)&&\"\"))",
+"powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 28) Cannot convert value 'x' of type Text to type Number.\""
+},
+{
+"expr": "ISERROR((COUNTROWS(Facts)&&\"\")&VALUE(\"x\"))",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER((COUNTROWS(Facts)&&\"\")&VALUE(\"x\"))",
+"powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 51) Cannot convert value 'x' of type Text to type Number.\""
+},
+{
+"expr": "ISERROR(VALUE(\"x\")&(COUNTROWS(Facts)&&\"\"))",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER(VALUE(\"x\")&(COUNTROWS(Facts)&&\"\"))",
+"powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 28) Cannot convert value 'x' of type Text to type Number.\""
+},
+{
+"expr": "ISERROR((COUNTROWS(Facts)&&\"\")+\"TRUE\")",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER((COUNTROWS(Facts)&&\"\")+\"TRUE\")",
+"powerbi": "True"
+},
+{
+"expr": "ISERROR(\"TRUE\"+(COUNTROWS(Facts)&&\"\"))",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER(\"TRUE\"+(COUNTROWS(Facts)&&\"\"))",
+"powerbi": "True"
+},
+{
+"expr": "ISERROR((COUNTROWS(Facts)&&\"\")-\"TRUE\")",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER((COUNTROWS(Facts)&&\"\")-\"TRUE\")",
+"powerbi": "True"
+},
+{
+"expr": "ISERROR(\"TRUE\"-(COUNTROWS(Facts)&&\"\"))",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER(\"TRUE\"-(COUNTROWS(Facts)&&\"\"))",
+"powerbi": "True"
+},
+{
+"expr": "ISERROR((COUNTROWS(Facts)&&\"\")*\"TRUE\")",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER((COUNTROWS(Facts)&&\"\")*\"TRUE\")",
+"powerbi": "True"
+},
+{
+"expr": "ISERROR(\"TRUE\"*(COUNTROWS(Facts)&&\"\"))",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER(\"TRUE\"*(COUNTROWS(Facts)&&\"\"))",
+"powerbi": "True"
+},
+{
+"expr": "ISERROR((COUNTROWS(Facts)&&\"\")/\"TRUE\")",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER((COUNTROWS(Facts)&&\"\")/\"TRUE\")",
+"powerbi": "False"
+},
+{
+"expr": "ISERROR(\"TRUE\"/(COUNTROWS(Facts)&&\"\"))",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER(\"TRUE\"/(COUNTROWS(Facts)&&\"\"))",
+"powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 28) Cannot convert value 'TRUE' of type Text to type Number.\""
+},
+{
+"expr": "ISERROR((COUNTROWS(Facts)&&\"\")^\"TRUE\")",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER((COUNTROWS(Facts)&&\"\")^\"TRUE\")",
+"powerbi": "True"
+},
+{
+"expr": "ISERROR(\"TRUE\"^(COUNTROWS(Facts)&&\"\"))",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER(\"TRUE\"^(COUNTROWS(Facts)&&\"\"))",
+"powerbi": "True"
+},
+{
+"expr": "ISERROR((COUNTROWS(Facts)&&\"\")&\"TRUE\")",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER((COUNTROWS(Facts)&&\"\")&\"TRUE\")",
+"powerbi": "False"
+},
+{
+"expr": "ISERROR(\"TRUE\"&(COUNTROWS(Facts)&&\"\"))",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER(\"TRUE\"&(COUNTROWS(Facts)&&\"\"))",
+"powerbi": "False"
+},
+{
+"expr": "ISERROR((COUNTROWS(Facts)&&\"\")+\"2\")",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER((COUNTROWS(Facts)&&\"\")+\"2\")",
+"powerbi": "True"
+},
+{
+"expr": "ISERROR(\"2\"+(COUNTROWS(Facts)&&\"\"))",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER(\"2\"+(COUNTROWS(Facts)&&\"\"))",
+"powerbi": "True"
+},
+{
+"expr": "ISERROR((COUNTROWS(Facts)&&\"\")-\"2\")",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER((COUNTROWS(Facts)&&\"\")-\"2\")",
+"powerbi": "True"
+},
+{
+"expr": "ISERROR(\"2\"-(COUNTROWS(Facts)&&\"\"))",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER(\"2\"-(COUNTROWS(Facts)&&\"\"))",
+"powerbi": "True"
+},
+{
+"expr": "ISERROR((COUNTROWS(Facts)&&\"\")*\"2\")",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER((COUNTROWS(Facts)&&\"\")*\"2\")",
+"powerbi": "True"
+},
+{
+"expr": "ISERROR(\"2\"*(COUNTROWS(Facts)&&\"\"))",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER(\"2\"*(COUNTROWS(Facts)&&\"\"))",
+"powerbi": "True"
+},
+{
+"expr": "ISERROR((COUNTROWS(Facts)&&\"\")/\"2\")",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER((COUNTROWS(Facts)&&\"\")/\"2\")",
+"powerbi": "False"
+},
+{
+"expr": "ISERROR(\"2\"/(COUNTROWS(Facts)&&\"\"))",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER(\"2\"/(COUNTROWS(Facts)&&\"\"))",
+"powerbi": "True"
+},
+{
+"expr": "ISERROR((COUNTROWS(Facts)&&\"\")^\"2\")",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER((COUNTROWS(Facts)&&\"\")^\"2\")",
+"powerbi": "True"
+},
+{
+"expr": "ISERROR(\"2\"^(COUNTROWS(Facts)&&\"\"))",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER(\"2\"^(COUNTROWS(Facts)&&\"\"))",
+"powerbi": "True"
+},
+{
+"expr": "ISERROR((COUNTROWS(Facts)&&\"\")&\"2\")",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER((COUNTROWS(Facts)&&\"\")&\"2\")",
+"powerbi": "False"
+},
+{
+"expr": "ISERROR(\"2\"&(COUNTROWS(Facts)&&\"\"))",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER(\"2\"&(COUNTROWS(Facts)&&\"\"))",
+"powerbi": "False"
+},
+{
+"expr": "ISERROR((MAX(Facts[Quantity])>0&&\"\")+\"\")",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER((MAX(Facts[Quantity])>0&&\"\")+\"\")",
+"powerbi": "True"
+},
+{
+"expr": "ISERROR(\"\"+(MAX(Facts[Quantity])>0&&\"\"))",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER(\"\"+(MAX(Facts[Quantity])>0&&\"\"))",
+"powerbi": "True"
+},
+{
+"expr": "ISERROR((MAX(Facts[Quantity])>0&&\"\")-\"\")",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER((MAX(Facts[Quantity])>0&&\"\")-\"\")",
+"powerbi": "True"
+},
+{
+"expr": "ISERROR(\"\"-(MAX(Facts[Quantity])>0&&\"\"))",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER(\"\"-(MAX(Facts[Quantity])>0&&\"\"))",
+"powerbi": "True"
+},
+{
+"expr": "ISERROR((MAX(Facts[Quantity])>0&&\"\")*\"\")",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER((MAX(Facts[Quantity])>0&&\"\")*\"\")",
+"powerbi": "True"
+},
+{
+"expr": "ISERROR(\"\"*(MAX(Facts[Quantity])>0&&\"\"))",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER(\"\"*(MAX(Facts[Quantity])>0&&\"\"))",
+"powerbi": "True"
+},
+{
+"expr": "ISERROR((MAX(Facts[Quantity])>0&&\"\")/\"\")",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER((MAX(Facts[Quantity])>0&&\"\")/\"\")",
+"powerbi": "False"
+},
+{
+"expr": "ISERROR(\"\"/(MAX(Facts[Quantity])>0&&\"\"))",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER(\"\"/(MAX(Facts[Quantity])>0&&\"\"))",
+"powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 28) Cannot convert value '' of type Text to type Number.\""
+},
+{
+"expr": "ISERROR((MAX(Facts[Quantity])>0&&\"\")^\"\")",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER((MAX(Facts[Quantity])>0&&\"\")^\"\")",
+"powerbi": "True"
+},
+{
+"expr": "ISERROR(\"\"^(MAX(Facts[Quantity])>0&&\"\"))",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER(\"\"^(MAX(Facts[Quantity])>0&&\"\"))",
+"powerbi": "True"
+},
+{
+"expr": "ISERROR((MAX(Facts[Quantity])>0&&\"\")&\"\")",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER((MAX(Facts[Quantity])>0&&\"\")&\"\")",
+"powerbi": "False"
+},
+{
+"expr": "ISERROR(\"\"&(MAX(Facts[Quantity])>0&&\"\"))",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER(\"\"&(MAX(Facts[Quantity])>0&&\"\"))",
+"powerbi": "False"
+},
+{
+"expr": "ISERROR((MAX(Facts[Quantity])>0&&\"\")+LEFT(\"a\",0))",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER((MAX(Facts[Quantity])>0&&\"\")+LEFT(\"a\",0))",
+"powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 57) Cannot convert value '' of type Text to type Number.\""
+},
+{
+"expr": "ISERROR(LEFT(\"a\",0)+(MAX(Facts[Quantity])>0&&\"\"))",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER(LEFT(\"a\",0)+(MAX(Facts[Quantity])>0&&\"\"))",
+"powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 28) Cannot convert value '' of type Text to type Number.\""
+},
+{
+"expr": "ISERROR((MAX(Facts[Quantity])>0&&\"\")-LEFT(\"a\",0))",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER((MAX(Facts[Quantity])>0&&\"\")-LEFT(\"a\",0))",
+"powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 57) Cannot convert value '' of type Text to type Number.\""
+},
+{
+"expr": "ISERROR(LEFT(\"a\",0)-(MAX(Facts[Quantity])>0&&\"\"))",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER(LEFT(\"a\",0)-(MAX(Facts[Quantity])>0&&\"\"))",
+"powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 28) Cannot convert value '' of type Text to type Number.\""
+},
+{
+"expr": "ISERROR((MAX(Facts[Quantity])>0&&\"\")*LEFT(\"a\",0))",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER((MAX(Facts[Quantity])>0&&\"\")*LEFT(\"a\",0))",
+"powerbi": "False"
+},
+{
+"expr": "ISERROR(LEFT(\"a\",0)*(MAX(Facts[Quantity])>0&&\"\"))",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER(LEFT(\"a\",0)*(MAX(Facts[Quantity])>0&&\"\"))",
+"powerbi": "False"
+},
+{
+"expr": "ISERROR((MAX(Facts[Quantity])>0&&\"\")/LEFT(\"a\",0))",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER((MAX(Facts[Quantity])>0&&\"\")/LEFT(\"a\",0))",
+"powerbi": "False"
+},
+{
+"expr": "ISERROR(LEFT(\"a\",0)/(MAX(Facts[Quantity])>0&&\"\"))",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER(LEFT(\"a\",0)/(MAX(Facts[Quantity])>0&&\"\"))",
+"powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 28) Cannot convert value '' of type Text to type Number.\""
+},
+{
+"expr": "ISERROR((MAX(Facts[Quantity])>0&&\"\")^LEFT(\"a\",0))",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER((MAX(Facts[Quantity])>0&&\"\")^LEFT(\"a\",0))",
+"powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 57) Cannot convert value '' of type Text to type Number.\""
+},
+{
+"expr": "ISERROR(LEFT(\"a\",0)^(MAX(Facts[Quantity])>0&&\"\"))",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER(LEFT(\"a\",0)^(MAX(Facts[Quantity])>0&&\"\"))",
+"powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 28) Cannot convert value '' of type Text to type Number.\""
+},
+{
+"expr": "ISERROR((MAX(Facts[Quantity])>0&&\"\")&LEFT(\"a\",0))",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER((MAX(Facts[Quantity])>0&&\"\")&LEFT(\"a\",0))",
+"powerbi": "False"
+},
+{
+"expr": "ISERROR(LEFT(\"a\",0)&(MAX(Facts[Quantity])>0&&\"\"))",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER(LEFT(\"a\",0)&(MAX(Facts[Quantity])>0&&\"\"))",
+"powerbi": "False"
+},
+{
+"expr": "ISERROR((MAX(Facts[Quantity])>0&&\"\")+TRIM(\"\"))",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER((MAX(Facts[Quantity])>0&&\"\")+TRIM(\"\"))",
+"powerbi": "True"
+},
+{
+"expr": "ISERROR(TRIM(\"\")+(MAX(Facts[Quantity])>0&&\"\"))",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER(TRIM(\"\")+(MAX(Facts[Quantity])>0&&\"\"))",
+"powerbi": "True"
+},
+{
+"expr": "ISERROR((MAX(Facts[Quantity])>0&&\"\")-TRIM(\"\"))",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER((MAX(Facts[Quantity])>0&&\"\")-TRIM(\"\"))",
+"powerbi": "True"
+},
+{
+"expr": "ISERROR(TRIM(\"\")-(MAX(Facts[Quantity])>0&&\"\"))",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER(TRIM(\"\")-(MAX(Facts[Quantity])>0&&\"\"))",
+"powerbi": "True"
+},
+{
+"expr": "ISERROR((MAX(Facts[Quantity])>0&&\"\")*TRIM(\"\"))",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER((MAX(Facts[Quantity])>0&&\"\")*TRIM(\"\"))",
+"powerbi": "True"
+},
+{
+"expr": "ISERROR(TRIM(\"\")*(MAX(Facts[Quantity])>0&&\"\"))",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER(TRIM(\"\")*(MAX(Facts[Quantity])>0&&\"\"))",
+"powerbi": "True"
+},
+{
+"expr": "ISERROR((MAX(Facts[Quantity])>0&&\"\")/TRIM(\"\"))",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER((MAX(Facts[Quantity])>0&&\"\")/TRIM(\"\"))",
+"powerbi": "False"
+},
+{
+"expr": "ISERROR(TRIM(\"\")/(MAX(Facts[Quantity])>0&&\"\"))",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER(TRIM(\"\")/(MAX(Facts[Quantity])>0&&\"\"))",
+"powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 28) Cannot convert value '' of type Text to type Number.\""
+},
+{
+"expr": "ISERROR((MAX(Facts[Quantity])>0&&\"\")^TRIM(\"\"))",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER((MAX(Facts[Quantity])>0&&\"\")^TRIM(\"\"))",
+"powerbi": "True"
+},
+{
+"expr": "ISERROR(TRIM(\"\")^(MAX(Facts[Quantity])>0&&\"\"))",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER(TRIM(\"\")^(MAX(Facts[Quantity])>0&&\"\"))",
+"powerbi": "True"
+},
+{
+"expr": "ISERROR((MAX(Facts[Quantity])>0&&\"\")&TRIM(\"\"))",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER((MAX(Facts[Quantity])>0&&\"\")&TRIM(\"\"))",
+"powerbi": "False"
+},
+{
+"expr": "ISERROR(TRIM(\"\")&(MAX(Facts[Quantity])>0&&\"\"))",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER(TRIM(\"\")&(MAX(Facts[Quantity])>0&&\"\"))",
+"powerbi": "False"
+},
+{
+"expr": "ISERROR((MAX(Facts[Quantity])>0&&\"\")+\"a\")",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER((MAX(Facts[Quantity])>0&&\"\")+\"a\")",
+"powerbi": "True"
+},
+{
+"expr": "ISERROR(\"a\"+(MAX(Facts[Quantity])>0&&\"\"))",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER(\"a\"+(MAX(Facts[Quantity])>0&&\"\"))",
+"powerbi": "True"
+},
+{
+"expr": "ISERROR((MAX(Facts[Quantity])>0&&\"\")-\"a\")",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER((MAX(Facts[Quantity])>0&&\"\")-\"a\")",
+"powerbi": "True"
+},
+{
+"expr": "ISERROR(\"a\"-(MAX(Facts[Quantity])>0&&\"\"))",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER(\"a\"-(MAX(Facts[Quantity])>0&&\"\"))",
+"powerbi": "True"
+},
+{
+"expr": "ISERROR((MAX(Facts[Quantity])>0&&\"\")*\"a\")",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER((MAX(Facts[Quantity])>0&&\"\")*\"a\")",
+"powerbi": "True"
+},
+{
+"expr": "ISERROR(\"a\"*(MAX(Facts[Quantity])>0&&\"\"))",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER(\"a\"*(MAX(Facts[Quantity])>0&&\"\"))",
+"powerbi": "True"
+},
+{
+"expr": "ISERROR((MAX(Facts[Quantity])>0&&\"\")/\"a\")",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER((MAX(Facts[Quantity])>0&&\"\")/\"a\")",
+"powerbi": "False"
+},
+{
+"expr": "ISERROR(\"a\"/(MAX(Facts[Quantity])>0&&\"\"))",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER(\"a\"/(MAX(Facts[Quantity])>0&&\"\"))",
+"powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 28) Cannot convert value 'a' of type Text to type Number.\""
+},
+{
+"expr": "ISERROR((MAX(Facts[Quantity])>0&&\"\")^\"a\")",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER((MAX(Facts[Quantity])>0&&\"\")^\"a\")",
+"powerbi": "True"
+},
+{
+"expr": "ISERROR(\"a\"^(MAX(Facts[Quantity])>0&&\"\"))",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER(\"a\"^(MAX(Facts[Quantity])>0&&\"\"))",
+"powerbi": "True"
+},
+{
+"expr": "ISERROR((MAX(Facts[Quantity])>0&&\"\")&\"a\")",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER((MAX(Facts[Quantity])>0&&\"\")&\"a\")",
+"powerbi": "False"
+},
+{
+"expr": "ISERROR(\"a\"&(MAX(Facts[Quantity])>0&&\"\"))",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER(\"a\"&(MAX(Facts[Quantity])>0&&\"\"))",
+"powerbi": "False"
+},
+{
+"expr": "ISERROR((MAX(Facts[Quantity])>0&&\"\")+MAX(Facts[Note]))",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER((MAX(Facts[Quantity])>0&&\"\")+MAX(Facts[Note]))",
+"powerbi": "True"
+},
+{
+"expr": "ISERROR(MAX(Facts[Note])+(MAX(Facts[Quantity])>0&&\"\"))",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER(MAX(Facts[Note])+(MAX(Facts[Quantity])>0&&\"\"))",
+"powerbi": "True"
+},
+{
+"expr": "ISERROR((MAX(Facts[Quantity])>0&&\"\")-MAX(Facts[Note]))",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER((MAX(Facts[Quantity])>0&&\"\")-MAX(Facts[Note]))",
+"powerbi": "True"
+},
+{
+"expr": "ISERROR(MAX(Facts[Note])-(MAX(Facts[Quantity])>0&&\"\"))",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER(MAX(Facts[Note])-(MAX(Facts[Quantity])>0&&\"\"))",
+"powerbi": "True"
+},
+{
+"expr": "ISERROR((MAX(Facts[Quantity])>0&&\"\")*MAX(Facts[Note]))",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER((MAX(Facts[Quantity])>0&&\"\")*MAX(Facts[Note]))",
+"powerbi": "False"
+},
+{
+"expr": "ISERROR(MAX(Facts[Note])*(MAX(Facts[Quantity])>0&&\"\"))",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER(MAX(Facts[Note])*(MAX(Facts[Quantity])>0&&\"\"))",
+"powerbi": "False"
+},
+{
+"expr": "ISERROR((MAX(Facts[Quantity])>0&&\"\")/MAX(Facts[Note]))",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER((MAX(Facts[Quantity])>0&&\"\")/MAX(Facts[Note]))",
+"powerbi": "False"
+},
+{
+"expr": "ISERROR(MAX(Facts[Note])/(MAX(Facts[Quantity])>0&&\"\"))",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER(MAX(Facts[Note])/(MAX(Facts[Quantity])>0&&\"\"))",
+"powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 28) Cannot convert value 'Paid' of type Text to type Number.\""
+},
+{
+"expr": "ISERROR((MAX(Facts[Quantity])>0&&\"\")^MAX(Facts[Note]))",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER((MAX(Facts[Quantity])>0&&\"\")^MAX(Facts[Note]))",
+"powerbi": "True"
+},
+{
+"expr": "ISERROR(MAX(Facts[Note])^(MAX(Facts[Quantity])>0&&\"\"))",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER(MAX(Facts[Note])^(MAX(Facts[Quantity])>0&&\"\"))",
+"powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 28) Cannot convert value 'Paid' of type Text to type Number.\""
+},
+{
+"expr": "ISERROR((MAX(Facts[Quantity])>0&&\"\")&MAX(Facts[Note]))",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER((MAX(Facts[Quantity])>0&&\"\")&MAX(Facts[Note]))",
+"powerbi": "False"
+},
+{
+"expr": "ISERROR(MAX(Facts[Note])&(MAX(Facts[Quantity])>0&&\"\"))",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER(MAX(Facts[Note])&(MAX(Facts[Quantity])>0&&\"\"))",
+"powerbi": "False"
+},
+{
+"expr": "ISERROR((MAX(Facts[Quantity])>0&&\"\")+VALUE(\"x\"))",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER((MAX(Facts[Quantity])>0&&\"\")+VALUE(\"x\"))",
+"powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 57) Cannot convert value 'x' of type Text to type Number.\""
+},
+{
+"expr": "ISERROR(VALUE(\"x\")+(MAX(Facts[Quantity])>0&&\"\"))",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER(VALUE(\"x\")+(MAX(Facts[Quantity])>0&&\"\"))",
+"powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 28) Cannot convert value 'x' of type Text to type Number.\""
+},
+{
+"expr": "ISERROR((MAX(Facts[Quantity])>0&&\"\")-VALUE(\"x\"))",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER((MAX(Facts[Quantity])>0&&\"\")-VALUE(\"x\"))",
+"powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 57) Cannot convert value 'x' of type Text to type Number.\""
+},
+{
+"expr": "ISERROR(VALUE(\"x\")-(MAX(Facts[Quantity])>0&&\"\"))",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER(VALUE(\"x\")-(MAX(Facts[Quantity])>0&&\"\"))",
+"powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 28) Cannot convert value 'x' of type Text to type Number.\""
+},
+{
+"expr": "ISERROR((MAX(Facts[Quantity])>0&&\"\")*VALUE(\"x\"))",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER((MAX(Facts[Quantity])>0&&\"\")*VALUE(\"x\"))",
+"powerbi": "False"
+},
+{
+"expr": "ISERROR(VALUE(\"x\")*(MAX(Facts[Quantity])>0&&\"\"))",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER(VALUE(\"x\")*(MAX(Facts[Quantity])>0&&\"\"))",
+"powerbi": "False"
+},
+{
+"expr": "ISERROR((MAX(Facts[Quantity])>0&&\"\")/VALUE(\"x\"))",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER((MAX(Facts[Quantity])>0&&\"\")/VALUE(\"x\"))",
+"powerbi": "False"
+},
+{
+"expr": "ISERROR(VALUE(\"x\")/(MAX(Facts[Quantity])>0&&\"\"))",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER(VALUE(\"x\")/(MAX(Facts[Quantity])>0&&\"\"))",
+"powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 28) Cannot convert value 'x' of type Text to type Number.\""
+},
+{
+"expr": "ISERROR((MAX(Facts[Quantity])>0&&\"\")^VALUE(\"x\"))",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER((MAX(Facts[Quantity])>0&&\"\")^VALUE(\"x\"))",
+"powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 57) Cannot convert value 'x' of type Text to type Number.\""
+},
+{
+"expr": "ISERROR(VALUE(\"x\")^(MAX(Facts[Quantity])>0&&\"\"))",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER(VALUE(\"x\")^(MAX(Facts[Quantity])>0&&\"\"))",
+"powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 28) Cannot convert value 'x' of type Text to type Number.\""
+},
+{
+"expr": "ISERROR((MAX(Facts[Quantity])>0&&\"\")&VALUE(\"x\"))",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER((MAX(Facts[Quantity])>0&&\"\")&VALUE(\"x\"))",
+"powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 57) Cannot convert value 'x' of type Text to type Number.\""
+},
+{
+"expr": "ISERROR(VALUE(\"x\")&(MAX(Facts[Quantity])>0&&\"\"))",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER(VALUE(\"x\")&(MAX(Facts[Quantity])>0&&\"\"))",
+"powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 28) Cannot convert value 'x' of type Text to type Number.\""
+},
+{
+"expr": "ISERROR((MAX(Facts[Quantity])>0&&\"\")+\"TRUE\")",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER((MAX(Facts[Quantity])>0&&\"\")+\"TRUE\")",
+"powerbi": "True"
+},
+{
+"expr": "ISERROR(\"TRUE\"+(MAX(Facts[Quantity])>0&&\"\"))",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER(\"TRUE\"+(MAX(Facts[Quantity])>0&&\"\"))",
+"powerbi": "True"
+},
+{
+"expr": "ISERROR((MAX(Facts[Quantity])>0&&\"\")-\"TRUE\")",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER((MAX(Facts[Quantity])>0&&\"\")-\"TRUE\")",
+"powerbi": "True"
+},
+{
+"expr": "ISERROR(\"TRUE\"-(MAX(Facts[Quantity])>0&&\"\"))",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER(\"TRUE\"-(MAX(Facts[Quantity])>0&&\"\"))",
+"powerbi": "True"
+},
+{
+"expr": "ISERROR((MAX(Facts[Quantity])>0&&\"\")*\"TRUE\")",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER((MAX(Facts[Quantity])>0&&\"\")*\"TRUE\")",
+"powerbi": "True"
+},
+{
+"expr": "ISERROR(\"TRUE\"*(MAX(Facts[Quantity])>0&&\"\"))",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER(\"TRUE\"*(MAX(Facts[Quantity])>0&&\"\"))",
+"powerbi": "True"
+},
+{
+"expr": "ISERROR((MAX(Facts[Quantity])>0&&\"\")/\"TRUE\")",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER((MAX(Facts[Quantity])>0&&\"\")/\"TRUE\")",
+"powerbi": "False"
+},
+{
+"expr": "ISERROR(\"TRUE\"/(MAX(Facts[Quantity])>0&&\"\"))",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER(\"TRUE\"/(MAX(Facts[Quantity])>0&&\"\"))",
+"powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 28) Cannot convert value 'TRUE' of type Text to type Number.\""
+},
+{
+"expr": "ISERROR((MAX(Facts[Quantity])>0&&\"\")^\"TRUE\")",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER((MAX(Facts[Quantity])>0&&\"\")^\"TRUE\")",
+"powerbi": "True"
+},
+{
+"expr": "ISERROR(\"TRUE\"^(MAX(Facts[Quantity])>0&&\"\"))",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER(\"TRUE\"^(MAX(Facts[Quantity])>0&&\"\"))",
+"powerbi": "True"
+},
+{
+"expr": "ISERROR((MAX(Facts[Quantity])>0&&\"\")&\"TRUE\")",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER((MAX(Facts[Quantity])>0&&\"\")&\"TRUE\")",
+"powerbi": "False"
+},
+{
+"expr": "ISERROR(\"TRUE\"&(MAX(Facts[Quantity])>0&&\"\"))",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER(\"TRUE\"&(MAX(Facts[Quantity])>0&&\"\"))",
+"powerbi": "False"
+},
+{
+"expr": "ISERROR((MAX(Facts[Quantity])>0&&\"\")+\"2\")",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER((MAX(Facts[Quantity])>0&&\"\")+\"2\")",
+"powerbi": "True"
+},
+{
+"expr": "ISERROR(\"2\"+(MAX(Facts[Quantity])>0&&\"\"))",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER(\"2\"+(MAX(Facts[Quantity])>0&&\"\"))",
+"powerbi": "True"
+},
+{
+"expr": "ISERROR((MAX(Facts[Quantity])>0&&\"\")-\"2\")",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER((MAX(Facts[Quantity])>0&&\"\")-\"2\")",
+"powerbi": "True"
+},
+{
+"expr": "ISERROR(\"2\"-(MAX(Facts[Quantity])>0&&\"\"))",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER(\"2\"-(MAX(Facts[Quantity])>0&&\"\"))",
+"powerbi": "True"
+},
+{
+"expr": "ISERROR((MAX(Facts[Quantity])>0&&\"\")*\"2\")",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER((MAX(Facts[Quantity])>0&&\"\")*\"2\")",
+"powerbi": "True"
+},
+{
+"expr": "ISERROR(\"2\"*(MAX(Facts[Quantity])>0&&\"\"))",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER(\"2\"*(MAX(Facts[Quantity])>0&&\"\"))",
+"powerbi": "True"
+},
+{
+"expr": "ISERROR((MAX(Facts[Quantity])>0&&\"\")/\"2\")",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER((MAX(Facts[Quantity])>0&&\"\")/\"2\")",
+"powerbi": "False"
+},
+{
+"expr": "ISERROR(\"2\"/(MAX(Facts[Quantity])>0&&\"\"))",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER(\"2\"/(MAX(Facts[Quantity])>0&&\"\"))",
+"powerbi": "True"
+},
+{
+"expr": "ISERROR((MAX(Facts[Quantity])>0&&\"\")^\"2\")",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER((MAX(Facts[Quantity])>0&&\"\")^\"2\")",
+"powerbi": "True"
+},
+{
+"expr": "ISERROR(\"2\"^(MAX(Facts[Quantity])>0&&\"\"))",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER(\"2\"^(MAX(Facts[Quantity])>0&&\"\"))",
+"powerbi": "True"
+},
+{
+"expr": "ISERROR((MAX(Facts[Quantity])>0&&\"\")&\"2\")",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER((MAX(Facts[Quantity])>0&&\"\")&\"2\")",
+"powerbi": "False"
+},
+{
+"expr": "ISERROR(\"2\"&(MAX(Facts[Quantity])>0&&\"\"))",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER(\"2\"&(MAX(Facts[Quantity])>0&&\"\"))",
+"powerbi": "False"
+},
+{
+"expr": "ISERROR(BLANK()+\"\")",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER(BLANK()+\"\")",
+"powerbi": "True"
+},
+{
+"expr": "ISERROR(\"\"+BLANK())",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER(\"\"+BLANK())",
+"powerbi": "True"
+},
+{
+"expr": "ISERROR(BLANK()-\"\")",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER(BLANK()-\"\")",
+"powerbi": "True"
+},
+{
+"expr": "ISERROR(\"\"-BLANK())",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER(\"\"-BLANK())",
+"powerbi": "True"
+},
+{
+"expr": "ISERROR(BLANK()*\"\")",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER(BLANK()*\"\")",
+"powerbi": "False"
+},
+{
+"expr": "ISERROR(\"\"*BLANK())",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER(\"\"*BLANK())",
+"powerbi": "False"
+},
+{
+"expr": "ISERROR(BLANK()/\"\")",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER(BLANK()/\"\")",
+"powerbi": "False"
+},
+{
+"expr": "ISERROR(\"\"/BLANK())",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER(\"\"/BLANK())",
+"powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 28) Cannot convert value '' of type Text to type Number.\""
+},
+{
+"expr": "ISERROR(BLANK()^\"\")",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER(BLANK()^\"\")",
+"powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 36) Cannot convert value '' of type Text to type Number.\""
+},
+{
+"expr": "ISERROR(\"\"^BLANK())",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER(\"\"^BLANK())",
+"powerbi": "True"
+},
+{
+"expr": "ISERROR(BLANK()&\"\")",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER(BLANK()&\"\")",
+"powerbi": "False"
+},
+{
+"expr": "ISERROR(\"\"&BLANK())",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER(\"\"&BLANK())",
+"powerbi": "False"
+},
+{
+"expr": "ISERROR(BLANK()+LEFT(\"a\",0))",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER(BLANK()+LEFT(\"a\",0))",
+"powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 36) Cannot convert value '' of type Text to type Number.\""
+},
+{
+"expr": "ISERROR(LEFT(\"a\",0)+BLANK())",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER(LEFT(\"a\",0)+BLANK())",
+"powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 28) Cannot convert value '' of type Text to type Number.\""
+},
+{
+"expr": "ISERROR(BLANK()-LEFT(\"a\",0))",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER(BLANK()-LEFT(\"a\",0))",
+"powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 36) Cannot convert value '' of type Text to type Number.\""
+},
+{
+"expr": "ISERROR(LEFT(\"a\",0)-BLANK())",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER(LEFT(\"a\",0)-BLANK())",
+"powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 28) Cannot convert value '' of type Text to type Number.\""
+},
+{
+"expr": "ISERROR(BLANK()*LEFT(\"a\",0))",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER(BLANK()*LEFT(\"a\",0))",
+"powerbi": "False"
+},
+{
+"expr": "ISERROR(LEFT(\"a\",0)*BLANK())",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER(LEFT(\"a\",0)*BLANK())",
+"powerbi": "False"
+},
+{
+"expr": "ISERROR(BLANK()/LEFT(\"a\",0))",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER(BLANK()/LEFT(\"a\",0))",
+"powerbi": "False"
+},
+{
+"expr": "ISERROR(LEFT(\"a\",0)/BLANK())",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER(LEFT(\"a\",0)/BLANK())",
+"powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 28) Cannot convert value '' of type Text to type Number.\""
+},
+{
+"expr": "ISERROR(BLANK()^LEFT(\"a\",0))",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER(BLANK()^LEFT(\"a\",0))",
+"powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 36) Cannot convert value '' of type Text to type Number.\""
+},
+{
+"expr": "ISERROR(LEFT(\"a\",0)^BLANK())",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER(LEFT(\"a\",0)^BLANK())",
+"powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 28) Cannot convert value '' of type Text to type Number.\""
+},
+{
+"expr": "ISERROR(BLANK()&LEFT(\"a\",0))",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER(BLANK()&LEFT(\"a\",0))",
+"powerbi": "False"
+},
+{
+"expr": "ISERROR(LEFT(\"a\",0)&BLANK())",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER(LEFT(\"a\",0)&BLANK())",
+"powerbi": "False"
+},
+{
+"expr": "ISERROR(BLANK()+TRIM(\"\"))",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER(BLANK()+TRIM(\"\"))",
+"powerbi": "True"
+},
+{
+"expr": "ISERROR(TRIM(\"\")+BLANK())",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER(TRIM(\"\")+BLANK())",
+"powerbi": "True"
+},
+{
+"expr": "ISERROR(BLANK()-TRIM(\"\"))",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER(BLANK()-TRIM(\"\"))",
+"powerbi": "True"
+},
+{
+"expr": "ISERROR(TRIM(\"\")-BLANK())",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER(TRIM(\"\")-BLANK())",
+"powerbi": "True"
+},
+{
+"expr": "ISERROR(BLANK()*TRIM(\"\"))",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER(BLANK()*TRIM(\"\"))",
+"powerbi": "False"
+},
+{
+"expr": "ISERROR(TRIM(\"\")*BLANK())",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER(TRIM(\"\")*BLANK())",
+"powerbi": "False"
+},
+{
+"expr": "ISERROR(BLANK()/TRIM(\"\"))",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER(BLANK()/TRIM(\"\"))",
+"powerbi": "False"
+},
+{
+"expr": "ISERROR(TRIM(\"\")/BLANK())",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER(TRIM(\"\")/BLANK())",
+"powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 28) Cannot convert value '' of type Text to type Number.\""
+},
+{
+"expr": "ISERROR(BLANK()^TRIM(\"\"))",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER(BLANK()^TRIM(\"\"))",
+"powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 36) Cannot convert value '' of type Text to type Number.\""
+},
+{
+"expr": "ISERROR(TRIM(\"\")^BLANK())",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER(TRIM(\"\")^BLANK())",
+"powerbi": "True"
+},
+{
+"expr": "ISERROR(BLANK()&TRIM(\"\"))",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER(BLANK()&TRIM(\"\"))",
+"powerbi": "False"
+},
+{
+"expr": "ISERROR(TRIM(\"\")&BLANK())",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER(TRIM(\"\")&BLANK())",
+"powerbi": "False"
+},
+{
+"expr": "ISERROR(BLANK()+\"a\")",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER(BLANK()+\"a\")",
+"powerbi": "True"
+},
+{
+"expr": "ISERROR(\"a\"+BLANK())",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER(\"a\"+BLANK())",
+"powerbi": "True"
+},
+{
+"expr": "ISERROR(BLANK()-\"a\")",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER(BLANK()-\"a\")",
+"powerbi": "True"
+},
+{
+"expr": "ISERROR(\"a\"-BLANK())",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER(\"a\"-BLANK())",
+"powerbi": "True"
+},
+{
+"expr": "ISERROR(BLANK()*\"a\")",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER(BLANK()*\"a\")",
+"powerbi": "False"
+},
+{
+"expr": "ISERROR(\"a\"*BLANK())",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER(\"a\"*BLANK())",
+"powerbi": "False"
+},
+{
+"expr": "ISERROR(BLANK()/\"a\")",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER(BLANK()/\"a\")",
+"powerbi": "False"
+},
+{
+"expr": "ISERROR(\"a\"/BLANK())",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER(\"a\"/BLANK())",
+"powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 28) Cannot convert value 'a' of type Text to type Number.\""
+},
+{
+"expr": "ISERROR(BLANK()^\"a\")",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER(BLANK()^\"a\")",
+"powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 36) Cannot convert value 'a' of type Text to type Number.\""
+},
+{
+"expr": "ISERROR(\"a\"^BLANK())",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER(\"a\"^BLANK())",
+"powerbi": "True"
+},
+{
+"expr": "ISERROR(BLANK()&\"a\")",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER(BLANK()&\"a\")",
+"powerbi": "False"
+},
+{
+"expr": "ISERROR(\"a\"&BLANK())",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER(\"a\"&BLANK())",
+"powerbi": "False"
+},
+{
+"expr": "ISERROR(BLANK()+MAX(Facts[Note]))",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER(BLANK()+MAX(Facts[Note]))",
+"powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 36) Cannot convert value 'Paid' of type Text to type Number.\""
+},
+{
+"expr": "ISERROR(MAX(Facts[Note])+BLANK())",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER(MAX(Facts[Note])+BLANK())",
+"powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 28) Cannot convert value 'Paid' of type Text to type Number.\""
+},
+{
+"expr": "ISERROR(BLANK()-MAX(Facts[Note]))",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER(BLANK()-MAX(Facts[Note]))",
+"powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 36) Cannot convert value 'Paid' of type Text to type Number.\""
+},
+{
+"expr": "ISERROR(MAX(Facts[Note])-BLANK())",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER(MAX(Facts[Note])-BLANK())",
+"powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 28) Cannot convert value 'Paid' of type Text to type Number.\""
+},
+{
+"expr": "ISERROR(BLANK()*MAX(Facts[Note]))",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER(BLANK()*MAX(Facts[Note]))",
+"powerbi": "False"
+},
+{
+"expr": "ISERROR(MAX(Facts[Note])*BLANK())",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER(MAX(Facts[Note])*BLANK())",
+"powerbi": "False"
+},
+{
+"expr": "ISERROR(BLANK()/MAX(Facts[Note]))",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER(BLANK()/MAX(Facts[Note]))",
+"powerbi": "False"
+},
+{
+"expr": "ISERROR(MAX(Facts[Note])/BLANK())",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER(MAX(Facts[Note])/BLANK())",
+"powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 28) Cannot convert value 'Paid' of type Text to type Number.\""
+},
+{
+"expr": "ISERROR(BLANK()^MAX(Facts[Note]))",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER(BLANK()^MAX(Facts[Note]))",
+"powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 36) Cannot convert value 'Paid' of type Text to type Number.\""
+},
+{
+"expr": "ISERROR(MAX(Facts[Note])^BLANK())",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER(MAX(Facts[Note])^BLANK())",
+"powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 28) Cannot convert value 'Paid' of type Text to type Number.\""
+},
+{
+"expr": "ISERROR(BLANK()&MAX(Facts[Note]))",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER(BLANK()&MAX(Facts[Note]))",
+"powerbi": "False"
+},
+{
+"expr": "ISERROR(MAX(Facts[Note])&BLANK())",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER(MAX(Facts[Note])&BLANK())",
+"powerbi": "False"
+},
+{
+"expr": "ISERROR(BLANK()+VALUE(\"x\"))",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER(BLANK()+VALUE(\"x\"))",
+"powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 36) Cannot convert value 'x' of type Text to type Number.\""
+},
+{
+"expr": "ISERROR(VALUE(\"x\")+BLANK())",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER(VALUE(\"x\")+BLANK())",
+"powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 28) Cannot convert value 'x' of type Text to type Number.\""
+},
+{
+"expr": "ISERROR(BLANK()-VALUE(\"x\"))",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER(BLANK()-VALUE(\"x\"))",
+"powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 36) Cannot convert value 'x' of type Text to type Number.\""
+},
+{
+"expr": "ISERROR(VALUE(\"x\")-BLANK())",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER(VALUE(\"x\")-BLANK())",
+"powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 28) Cannot convert value 'x' of type Text to type Number.\""
+},
+{
+"expr": "ISERROR(BLANK()*VALUE(\"x\"))",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER(BLANK()*VALUE(\"x\"))",
+"powerbi": "False"
+},
+{
+"expr": "ISERROR(VALUE(\"x\")*BLANK())",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER(VALUE(\"x\")*BLANK())",
+"powerbi": "False"
+},
+{
+"expr": "ISERROR(BLANK()/VALUE(\"x\"))",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER(BLANK()/VALUE(\"x\"))",
+"powerbi": "False"
+},
+{
+"expr": "ISERROR(VALUE(\"x\")/BLANK())",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER(VALUE(\"x\")/BLANK())",
+"powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 28) Cannot convert value 'x' of type Text to type Number.\""
+},
+{
+"expr": "ISERROR(BLANK()^VALUE(\"x\"))",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER(BLANK()^VALUE(\"x\"))",
+"powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 36) Cannot convert value 'x' of type Text to type Number.\""
+},
+{
+"expr": "ISERROR(VALUE(\"x\")^BLANK())",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER(VALUE(\"x\")^BLANK())",
+"powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 28) Cannot convert value 'x' of type Text to type Number.\""
+},
+{
+"expr": "ISERROR(BLANK()&VALUE(\"x\"))",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER(BLANK()&VALUE(\"x\"))",
+"powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 36) Cannot convert value 'x' of type Text to type Number.\""
+},
+{
+"expr": "ISERROR(VALUE(\"x\")&BLANK())",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER(VALUE(\"x\")&BLANK())",
+"powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 28) Cannot convert value 'x' of type Text to type Number.\""
+},
+{
+"expr": "ISERROR(BLANK()+\"TRUE\")",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER(BLANK()+\"TRUE\")",
+"powerbi": "True"
+},
+{
+"expr": "ISERROR(\"TRUE\"+BLANK())",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER(\"TRUE\"+BLANK())",
+"powerbi": "True"
+},
+{
+"expr": "ISERROR(BLANK()-\"TRUE\")",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER(BLANK()-\"TRUE\")",
+"powerbi": "True"
+},
+{
+"expr": "ISERROR(\"TRUE\"-BLANK())",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER(\"TRUE\"-BLANK())",
+"powerbi": "True"
+},
+{
+"expr": "ISERROR(BLANK()*\"TRUE\")",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER(BLANK()*\"TRUE\")",
+"powerbi": "False"
+},
+{
+"expr": "ISERROR(\"TRUE\"*BLANK())",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER(\"TRUE\"*BLANK())",
+"powerbi": "False"
+},
+{
+"expr": "ISERROR(BLANK()/\"TRUE\")",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER(BLANK()/\"TRUE\")",
+"powerbi": "False"
+},
+{
+"expr": "ISERROR(\"TRUE\"/BLANK())",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER(\"TRUE\"/BLANK())",
+"powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 28) Cannot convert value 'TRUE' of type Text to type Number.\""
+},
+{
+"expr": "ISERROR(BLANK()^\"TRUE\")",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER(BLANK()^\"TRUE\")",
+"powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 36) Cannot convert value 'TRUE' of type Text to type Number.\""
+},
+{
+"expr": "ISERROR(\"TRUE\"^BLANK())",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER(\"TRUE\"^BLANK())",
+"powerbi": "True"
+},
+{
+"expr": "ISERROR(BLANK()&\"TRUE\")",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER(BLANK()&\"TRUE\")",
+"powerbi": "False"
+},
+{
+"expr": "ISERROR(\"TRUE\"&BLANK())",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER(\"TRUE\"&BLANK())",
+"powerbi": "False"
+},
+{
+"expr": "ISERROR(BLANK()+\"2\")",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER(BLANK()+\"2\")",
+"powerbi": "True"
+},
+{
+"expr": "ISERROR(\"2\"+BLANK())",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER(\"2\"+BLANK())",
+"powerbi": "True"
+},
+{
+"expr": "ISERROR(BLANK()-\"2\")",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER(BLANK()-\"2\")",
+"powerbi": "True"
+},
+{
+"expr": "ISERROR(\"2\"-BLANK())",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER(\"2\"-BLANK())",
+"powerbi": "True"
+},
+{
+"expr": "ISERROR(BLANK()*\"2\")",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER(BLANK()*\"2\")",
+"powerbi": "False"
+},
+{
+"expr": "ISERROR(\"2\"*BLANK())",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER(\"2\"*BLANK())",
+"powerbi": "False"
+},
+{
+"expr": "ISERROR(BLANK()/\"2\")",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER(BLANK()/\"2\")",
+"powerbi": "False"
+},
+{
+"expr": "ISERROR(\"2\"/BLANK())",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER(\"2\"/BLANK())",
+"powerbi": "True"
+},
+{
+"expr": "ISERROR(BLANK()^\"2\")",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER(BLANK()^\"2\")",
+"powerbi": "False"
+},
+{
+"expr": "ISERROR(\"2\"^BLANK())",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER(\"2\"^BLANK())",
+"powerbi": "True"
+},
+{
+"expr": "ISERROR(BLANK()&\"2\")",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER(BLANK()&\"2\")",
+"powerbi": "False"
+},
+{
+"expr": "ISERROR(\"2\"&BLANK())",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER(\"2\"&BLANK())",
+"powerbi": "False"
+},
+{
+"expr": "\"a\"*(1&&\"\")",
+"powerbi": "BLANK"
+},
+{
+"expr": "(2.5&&\"\")+\"a\"",
+"powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 29) Cannot convert value 'a' of type Text to type Number.\""
+},
+{
+"expr": "IFERROR(((1&&\"\"))*\"a\",7)",
+"powerbi": "BLANK"
+},
+{
+"expr": "IFERROR((2.5&&\"\")/SQRT(-1),\"e\")",
+"powerbi": "BLANK"
+},
+{
+"expr": "ISERROR((1&&\"\")/(\"a\"*2))",
+"powerbi": "False"
+}
+]
+}

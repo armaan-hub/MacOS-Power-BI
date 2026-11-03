@@ -2,9 +2,9 @@
 
 Rules and roles are in `AGENTS.md`. Read it first. Keep this file short and current.
 
-**Active agent:** Antigravity codes Task 37 blank-text-arith-27 in the worktree `/Users/armaan/Power BI tool-task37`; Claude Opus 5.5 reviews next
-**Branch in use:** antigravity/blank-text-arith-27 (worktree `/Users/armaan/Power BI tool-task37`)
-**Working tree clean:** main yes; Task 37 worktree has Antigravity's uncommitted work
+**Active agent:** Antigravity codes Task 38 coalesce-big-order-28 in the worktree `/Users/armaan/Power BI tool-task38`; Claude Opus 5.5 reviews next
+**Branch in use:** antigravity/coalesce-big-order-28 (worktree `/Users/armaan/Power BI tool-task38`)
+**Working tree clean:** main yes; Task 38 worktree has Antigravity's uncommitted work
 
 ## Status values
 `PLANNED` > `BUILDING` > `READY FOR REVIEW` > `REVIEWING` > `FIXING` > `GATE PASSED` > `DONE`
@@ -49,7 +49,8 @@ Rules and roles are in `AGENTS.md`. Read it first. Keep this file short and curr
 | 34 | colstats-utc-24: new COLUMNSTATISTICS, UTCNOW, UTCTODAY; PATH error guards (114 measured answers) | `docs/plans/2026-11-03-colstats-utc-24.md` | DONE (coded by Antigravity, fixed by Sonnet 5.5, reviewed, locked 447,094, merged 2026-11-03) | Claude |
 | 35 | info-view-25: new INFO.VIEW.TABLES/COLUMNS/MEASURES/RELATIONSHIPS and INFO.TABLES/COLUMNS/MEASURES/RELATIONSHIPS (172 measured answers) | `docs/plans/2026-11-03-info-view-25.md` | DONE (coded by Antigravity, fixed by Sonnet 5.5, reviewed, locked 447,265, merged 2026-11-03) | Claude |
 | 36 | info-empty-26: 42 more INFO.* functions that list objects a simple model lacks (210 measured answers) | `docs/plans/2026-11-03-info-empty-26.md` | DONE (coded by Antigravity, fixed by Sonnet 5.5, reviewed, locked 448,774, merged 2026-11-03) | Claude |
-| 37 | blank-text-arith-27: BLANK from && / || and text in arithmetic (2,020 saved answers the engine refuses) | `docs/plans/2026-11-03-blank-text-arith-27.md` | IN PROGRESS (Antigravity coding in worktree `Power BI tool-task37`) | Antigravity |
+| 37 | blank-text-arith-27: BLANK from && / || and text in arithmetic (2,020 saved answers the engine refuses) | `docs/plans/2026-11-03-blank-text-arith-27.md` | DONE (coded by Antigravity, fixed by Sonnet 5.5, reviewed, locked 452,125, merged 2026-11-03) | Claude |
+| 38 | coalesce-big-order-28: COALESCE evaluation order, rounding of huge numbers, CONCATENATEX row order (972 saved answers the engine refuses) | `docs/plans/2026-11-03-coalesce-big-order-28.md` | IN PROGRESS (Antigravity coding in worktree `Power BI tool-task38`) | Antigravity |
 
 ## Current task
 Task 33 xirr-oddfyield-23, on branch `antigravity/xirr-oddfyield-23` in the worktree `/Users/armaan/Power BI tool-task33`.

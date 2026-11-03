@@ -325,11 +325,12 @@ class PartFLogicalOperatorNeverBlankTests(unittest.TestCase):
 
     def test_logical_blank_cancels_error_on_left_of_divide_and_right_of_times(self) -> None:
         self.assertEqual("BLANK", _local('IFERROR((2.5&&"")/SQRT(-1),"e")'))
-        self.assertIn("is not modelled", _local('"a"*(1&&"")'))  # beside a text the logical BLANK is refused, as on main
+        self.assertEqual("BLANK", _local('"a"*(1&&"")'))  # Power BI 2026-11-03 (Task 37): * never converts the text
         self.assertEqual("False", _local('ISERROR((1&&"")/("a"*2))'))
 
     def test_logical_blank_plus_text_stays_refused(self) -> None:
-        self.assertIn("is not modelled", _local('(2.5&&"")+"a"'))
+        # Power BI 2026-11-03 (Task 37): + converts the text, so this is Power BI's conversion error
+        self.assertIn("Cannot convert value 'a' of type Text to type Number.", _local('(2.5&&"")+"a"'))
 
 
 class PartGSignOfZeroNaNAndLargeDoublesTests(unittest.TestCase):
