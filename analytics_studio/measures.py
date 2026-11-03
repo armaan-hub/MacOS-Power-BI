@@ -3418,6 +3418,38 @@ def _reads_no_data(node: Any, held: Callable[[str], Any], seen: frozenset[str] =
 
 
 
+def _has_error_or_data_or_blank(node: Any) -> bool:
+    """True if node contains explicit BLANK, errors, data reading, or variable references that can evaluate to BLANK/error."""
+    if not isinstance(node, tuple) or not node:
+        return False
+    kind = node[0]
+    if kind in {"reference", "measure", "table", "table_call", "tableconstructor", "blank", "blank_comment"}:
+        return True
+    if kind == "var":
+        return True
+    if kind == "call":
+        fn = node[1]
+        if fn in {"BLANK", "ERROR", "LN", "LOG", "SQRT", "VALUE", "DIVIDE", "SWITCH"}:
+            return True
+        if fn in (_DATA_READING_CALLS - {"AND", "OR"}):
+            return True
+        if fn in {"SUM", "AVERAGE", "MIN", "MAX", "COUNT", "SUMX", "AVERAGEX", "MAXX", "MINX", "COUNTX", "COUNTAX", "SELECTEDVALUE"}:
+            return True
+        if fn in {"IF", "IF.EAGER"} and len(node[2]) < 3:
+            return True
+        return any(_has_error_or_data_or_blank(arg) for arg in node[2])
+    if kind == "binary":
+        op, left, right = node[1], node[2], node[3]
+        if op == "/":
+            return True
+        return _has_error_or_data_or_blank(left) or _has_error_or_data_or_blank(right)
+    if kind == "unary":
+        return _has_error_or_data_or_blank(node[2])
+    if kind == "let":
+        return any(_has_error_or_data_or_blank(bound) for _, bound in node[1]) or _has_error_or_data_or_blank(node[2])
+    return False
+
+
 _NO_SCAN_FILTER_CALLS = frozenset({"HASONEVALUE", "ISFILTERED", "ISINSCOPE"})  # Task 19 Part D: each reads the filter context of one column
 
 
@@ -5840,11 +5872,15 @@ def _unify_numeric_types(types: list[str | None]) -> str | None:
     kinds = {t for t in types if t != "blank"}
     if not kinds:
         return "int64"
-    if None in kinds or not kinds <= {"int64", "double", "currency"}:
+    if None in kinds or not kinds <= {"int64", "double", "currency", "datetime"}:
         return None
     if kinds == {"int64"}:
         return "int64"
-    if "double" in kinds:
+    if kinds == {"datetime"}:
+        if "blank" in types:
+            return "double"
+        return "datetime"
+    if "double" in kinds or "datetime" in kinds:
         return "double"
     return "currency"
 
@@ -6091,12 +6127,22 @@ def _static_numeric_type(
     if kind == "unary":
         op, child = node[1], node[2]
         t = _static_numeric_type(child, columns, variables)
-        if op in {"+", "-"}:
-            if t in {"int64", "double", "currency"}:
+        if op == "+":
+            if t in {"int64", "double", "currency", "datetime", "blank"}:
                 return t
-            if op == "-" and t == "bool":
-                return "int64"  # Task 20 F5: -TRUE() is the whole number -1 (+TRUE() stays True/False)
-            return None
+            if t == "bool":
+                return "bool"
+            if t == "text":
+                return "double"
+        if op == "-":
+            if t in {"int64", "double", "currency", "blank"}:
+                return t
+            if t == "datetime":
+                return "double"
+            if t == "bool":
+                return "int64"
+            if t == "text":
+                return "double"
         if op == "not":
             return "bool"
         return None
@@ -6104,19 +6150,17 @@ def _static_numeric_type(
         op, left, right = node[1], node[2], node[3]
         lt = _static_numeric_type(left, columns, variables)
         rt = _static_numeric_type(right, columns, variables)
+        lt = "int64" if lt == "bool" else lt
+        rt = "int64" if rt == "bool" else rt
         if lt == "blank" and rt == "blank":
             return "blank"
         if op in {"+", "-"} and (lt == "datetime" or rt == "datetime"):
-            if op == "-" and rt == "datetime" and lt in {"int64", "double", "currency", "blank"}:
+            if op == "-":
+                if lt == "datetime":
+                    return "datetime"
                 return "double"
-            if op == "-" and lt == "datetime" and rt == "datetime":
+            if op == "+":
                 return "datetime"
-            if lt == "datetime" and rt in {"int64", "double", "currency", "blank"}:
-                return "datetime"
-            if rt == "datetime" and op == "+" and lt in {"int64", "double", "currency", "blank"}:
-                return "datetime"
-            if op == "+" and ((lt == "datetime" and rt in {"text", "bool"}) or (rt == "datetime" and lt in {"text", "bool"})):
-                return "datetime"  # Task 21 Part B: a text number or a logical + a date is a date (not a Double, Integer or Currency)
             return None
         if op in {"+", "-"} and "text" in (lt, rt) and "currency" in (lt, rt):
             return "double"  # Task 21 Part B: a text number + or - a Currency is a Double
@@ -6132,9 +6176,9 @@ def _static_numeric_type(
             lt = rt if op in {"+", "-"} else "int64"
         elif rt == "blank" and lt is not None:
             rt = lt if op in {"+", "-"} else "int64"
-        # live Power BI: True/False (TRUE(), FALSE(), a comparison; never BLANK) in arithmetic is an Integer, so TRUE()*1 and TRUE()+1 are Int64
-        lt = "int64" if lt == "bool" and _is_never_blank_logical(left) else lt
-        rt = "int64" if rt == "bool" and _is_never_blank_logical(right) else rt
+        # live Power BI: True/False in arithmetic is an Integer, so TRUE()*1 and TRUE()+1 are Int64
+        lt = "int64" if lt == "bool" else lt
+        rt = "int64" if rt == "bool" else rt
         if op in {"+", "-"}:
             if lt == "int64" and rt == "int64":
                 return "int64"
@@ -6145,23 +6189,19 @@ def _static_numeric_type(
             if rt == "currency" and lt in {"currency", "int64"}:
                 return "currency"
             return None
-        if op in {"*", "/"} and "datetime" in (lt, rt) and "logical" in (left[0], right[0]):
-            return None  # a logical operator's BLANK beside a date: Power BI still types it Double, but the local value is BLANK, so ISDOUBLE would say False; stay refused as on main
-        if op in {"*", "/"} and (
-            (lt == "datetime" and rt in {"int64", "double", "bool", "blank"})
-            or (rt == "datetime" and lt in {"int64", "double", "bool", "blank"})
-        ):
-            return "double"  # live Power BI (Part A): a date times or divided by a number or True/False is a Double (not a Currency), so NOW()*0+1 is a number
-        if op == "*" and "currency" in (lt, rt) and "datetime" in (lt, rt):
-            return "currency"  # live Power BI (corrections rule 3): ISDOUBLE(DATE(..)*CURRENCY(0)) is False, a date times a Currency is not a Double
+        if op in {"*", "/"}:
+            if lt == "datetime" and rt == "datetime":
+                return "double"
+            if "datetime" in (lt, rt):
+                if op == "*" and "currency" in (lt, rt):
+                    return "currency"
+                return "double"
         if op == "*":
-            lt = "int64" if lt == "bool" and left[0] == "comparison" else lt  # a comparison (never BLANK) in arithmetic is an Integer
-            rt = "int64" if rt == "bool" and right[0] == "comparison" else rt
             if lt == "int64" and rt == "int64":
                 return "int64"
             if lt == "currency" and rt == "currency":
                 return "double"
-            if "currency" in (lt, rt) and lt in {"int64", "double", "currency", "bool"} and rt in {"int64", "double", "currency", "bool"}:
+            if "currency" in (lt, rt) and lt in {"int64", "double", "currency"} and rt in {"int64", "double", "currency"}:
                 return "currency"
             if "double" in (lt, rt) and lt in {"int64", "double"} and rt in {"int64", "double"}:
                 return "double"
@@ -6198,6 +6238,8 @@ def _static_numeric_type(
         return "blank"
     if fn == "CURRENCY":
         return "currency"
+    if fn == "ERROR":
+        return "int64"
     if fn == "CONVERT" and len(args) == 2:
         kw = str(args[1][1]).upper() if args[1][0] == "table" else ""
         if kw in {"INTEGER", "INT64"}:
@@ -6260,8 +6302,12 @@ def _static_numeric_type(
             return _static_numeric_type(args[0], columns, variables)
         return None
     if fn == "AVERAGEX":
-        if len(args) >= 2 and _static_numeric_type(args[1], columns, variables) == "currency":
-            return "currency"
+        if len(args) >= 2:
+            table_cols = _static_table_columns(args[0], columns, variables)
+            scope = {**columns, "": table_cols} if table_cols else columns
+            arg_t = _static_numeric_type(args[1], scope, variables)
+            if arg_t == "currency":
+                return "currency"
         return "double"
     if fn in {"GEOMEANX", "STDEVX.P", "STDEVX.S"} and len(args) >= 2:
         return "currency" if _static_numeric_type(args[1], columns, variables) == "currency" else "double"  # live Power BI (Task 16 review): it keeps a Currency
@@ -6309,7 +6355,12 @@ def _static_date(node: Any, columns: dict[str, dict[str, str]]) -> bool:
             return columns.get(table, {}).get(col) in {"date", "datetime"}
         return columns.get("", {}).get(col) in {"date", "datetime"}
     if node[0] == "binary":
-        return node[1] in {"+", "-"} and (_static_date(node[2], columns) or _static_date(node[3], columns))
+        op, left, right = node[1], node[2], node[3]
+        if op == "-":
+            return _static_date(left, columns)
+        if op == "+":
+            return _static_date(left, columns) or _static_date(right, columns)
+        return False
     return node[0] == "call" and node[1] in _STATIC_DATE_FUNCTIONS
 
 
@@ -6465,8 +6516,24 @@ def _strict_operand_type(node: tuple[Any, ...], columns: dict[str, dict[str, str
         return "number"
     if probe[:2] == ("call", "SELECTEDVALUE") and len(probe[2]) == 1:
         probe = probe[2][0]
-    if probe[0] == "reference" and not probe[1] and "" not in columns:
-        return None  # an unqualified column of an iterated table: the row knows its type, see strict_equal_value
+    if probe[0] == "call" and probe[1] in {"MAXX", "MINX"} and len(probe[2]) >= 2:
+        table_cols = _static_table_columns(probe[2][0], columns, variables)
+        iter_cols = {**columns, "": table_cols} if table_cols else columns
+        return _strict_operand_type(probe[2][1], iter_cols, variables)
+    if probe[0] == "reference":
+        table = (probe[1] or "").casefold()
+        col = str(probe[2]).casefold()
+        col_type = columns.get(table, {}).get(col) or columns.get("", {}).get(col)
+        if col_type in {"text", "string"}:
+            return "text"
+        if col_type in _NUMBER_COLUMN_TYPES:
+            return "number"
+        if col_type in {"boolean", "bool", "true_false"}:
+            return "boolean"
+        if col_type in {"date", "datetime"}:
+            return "date"
+        if not table and "" not in columns:
+            return None
     known = _static_type(probe, columns, variables)
     if known is None and _static_numeric_type(probe, columns, variables) in {"int64", "double", "currency"}:
         return "number"
@@ -6475,10 +6542,12 @@ def _strict_operand_type(node: tuple[Any, ...], columns: dict[str, dict[str, str
 
 def _reject_mismatched_strict_operands(left: tuple[Any, ...], right: tuple[Any, ...], columns: dict[str, dict[str, str]], variables: dict[str, str | None]) -> None:
     types = (_strict_operand_type(left, columns, variables), _strict_operand_type(right, columns, variables))
-    if None not in types and types[0] != types[1] and set(types) <= {"number", "text", "boolean"}:
+    if None not in types and types[0] != types[1] and ("text" in types or set(types) <= {"number", "boolean"}):
         def shown(operand: tuple[Any, ...], kind: str | None) -> str:
             if kind == "number":
                 return {"double": "Number", "currency": "Currency"}.get(str(_static_numeric_type(operand, columns, variables)), "Integer")
+            if kind == "date":
+                return "Date"
             return "True/False" if kind == "boolean" else "Text"
 
         raise MeasureError(
@@ -11648,8 +11717,7 @@ def evaluate_measures(
                     if (
                         argument_index in numeric_argument_indexes
                         and argument_category not in {"numeric", "blank"}
-                        and not (function in {"ABS", "INT"} and argument_category == "boolean")  # live Power BI: ABS(TRUE) and INT(TRUE) are 1
-                        and not (function in {"INT", "ABS", "SQRT", "MOD", "ROUND", "TRUNC", "FLOOR", "CEILING", "POWER", "LOG", "LN", "EXP", "SIGN"} and argument_category == "date/time")
+                        and not (function in {"INT", "ABS", "SQRT", "MOD", "ROUND", "ROUNDUP", "ROUNDDOWN", "TRUNC", "FLOOR", "CEILING", "POWER", "LOG", "LN", "EXP", "SIGN", "EVEN", "ODD"} and (argument_category in {"date/time", "boolean"} or (argument_category == "text" and argument[0] != "reference")))  # a text literal converts (INT("1")); a text column read is still refused
                     ):
                         if function in {"MIN", "MAX"} and argument_category == "date/time":
                             date_extreme = True  # the latest / earliest date of a column or scalar is a date (live Power BI)
@@ -15127,7 +15195,7 @@ def evaluate_measures(
             static_t = static_type_of(arguments[0])
             if static_t is None:
                 raise MeasureError(f"Cannot determine static type for function {function}.")
-            if values[0] is None:
+            if values[0] is None and _has_error_or_data_or_blank(arguments[0]):
                 return False
             if function in {"ISINTEGER", "ISINT64"}:
                 return static_t == "int64"
@@ -15135,6 +15203,7 @@ def evaluate_measures(
                 return static_t == "double"
             if function in {"ISDECIMAL", "ISCURRENCY"}:
                 return static_t in {"currency", "decimal"}
+            return False
         if function == "FORMAT":
             if isinstance(values[0], _LogicalBlankText):
                 raise MeasureError("FORMAT of the empty text a logical operator's BLANK becomes beside a text is an error in Power BI and is not modelled by the local engine.")
@@ -16030,7 +16099,10 @@ def evaluate_measures(
             raise MeasureError("== with FIRSTNONBLANKVALUE on a row is not modelled by the local engine.")  # live Power BI (Task 13 review): one row against the app's six
         variable_types: dict[str, str | None] = {}
         for name, bound in variable_nodes.items():
-            variable_types[str(name)] = _strict_operand_type(bound, column_types, variable_types)
+            vt = _strict_operand_type(bound, column_types, variable_types)
+            if vt is None and bound == ("blank",):
+                vt = "number"  # a VAR holding BLANK() is typed as an Integer (number) in strict comparison
+            variable_types[str(name)] = vt
         _reject_mismatched_strict_operands(node[1], node[2], column_types, variable_types)
         resolved = []
         is_variant = False
@@ -16057,10 +16129,8 @@ def evaluate_measures(
                     actual = "blank"
                 elif static in {"number", "text", "boolean"}:
                     actual = static
-                elif operand[0] == "reference" or (operand[0] == "var" and operand[1] in variable_nodes and variable_nodes[operand[1]][0] == "reference"):
-                    actual = "blank"
                 else:
-                    raise MeasureError("== needs operands of a known type in the local engine.")
+                    actual = "blank"
             else:
                 raise MeasureError("== over dates is not supported in the local engine.")
             if static in {"number", "text", "boolean"} and actual not in {"blank", static}:

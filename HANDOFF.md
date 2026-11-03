@@ -42,10 +42,11 @@ Rules and roles are in `AGENTS.md`. Read it first. Keep this file short and curr
 | 27 | logical-blank-17: a logical operator's BLANK beside other values (2,763 saved answers the engine refuses) | `docs/plans/2026-11-03-logical-blank-17.md` | DONE (coded by Antigravity, fixed by Sonnet 5.5, reviewed, locked 440,890, merged 2026-11-03) | Claude |
 | 28 | text-collation-18: ordering and comparing text with non-ASCII characters (1,657 saved answers the engine refuses) | `docs/plans/2026-11-03-text-collation-18.md` | DONE (coded by Antigravity, fixed by Sonnet 5.5, reviewed, locked 442,933, merged 2026-11-03) | Claude |
 | 29 | text-number-19: text-to-number conversions, iterator conditions, COALESCE order, text columns in arithmetic (2,044 saved answers the engine refuses) | `docs/plans/2026-11-03-text-number-19.md` | DONE (coded by Antigravity, fixed by Sonnet 5.5, reviewed, locked 444,122, merged 2026-11-03) | Claude |
-| 30 | static-types-20: static types the engine cannot establish (type tests, ==, COALESCE branches; 1,070 saved answers the engine refuses) | `docs/plans/2026-11-03-static-types-20.md` | BUILDING (worktree `/Users/armaan/Power BI tool-task30`) | Antigravity |
+| 30 | static-types-20: static types the engine cannot establish (type tests, ==, COALESCE branches; 1,070 saved answers the engine refuses) | `docs/plans/2026-11-03-static-types-20.md` | DONE (coded by Antigravity, fixed by Sonnet 5.5, reviewed, locked 445,260, merged 2026-11-03) | Claude |
+| 31 | linest-edge-21: LINEST/LINESTX near-perfect fits and linearly dependent regressors (677 saved answers the engine refuses) | `docs/plans/2026-11-03-linest-edge-21.md` | BUILDING (worktree `/Users/armaan/Power BI tool-task31`) | Antigravity |
 
 ## Current task
-Task 30 static-types-20, on branch `antigravity/static-types-20` in the worktree `/Users/armaan/Power BI tool-task30`.
+Task 31 linest-edge-21, on branch `antigravity/linest-edge-21` in the worktree `/Users/armaan/Power BI tool-task31`.
 
 ## Open questions (either agent writes here instead of guessing)
 - Claude (open, Tasks 23, 25, 26, wrong on both main and the build, not saved): last digits of EXP, POWER/^, LN, LOG, SIN, COS, TAN (Power BI's results are not correctly rounded; research in Task 26 found no formula that fits every row; rows in tools/parity/task23_big_numbers_spec.json A/B/C and task25_trig_blank_date_spec.json D).
