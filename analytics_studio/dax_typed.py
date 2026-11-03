@@ -372,6 +372,21 @@ def ordering_key(values: list[str]) -> Callable[[str], object]:
     return text_collation_key
 
 
+def _strong_key(text: str) -> str:
+    return unicodedata.normalize("NFKC", text).casefold().replace("æ", "ae").replace("œ", "oe")
+
+
+def _stacked_marks(text: str) -> bool:
+    """Two accents on one letter: Power BI ignores their order, which is not modelled."""
+    previous_mark = False
+    for c in unicodedata.normalize("NFD", text):
+        is_mark = unicodedata.category(c) == "Mn"
+        if is_mark and previous_mark:
+            return True
+        previous_mark = is_mark
+    return False
+
+
 def compare(operator: str, left: object, right: object, *, allow_variant: bool = False) -> bool:
     """DAX comparison: blank takes the other side's type, text ignores case, mixed types are an error."""
     if left is None and right is None:
@@ -424,8 +439,15 @@ def compare(operator: str, left: object, right: object, *, allow_variant: bool =
 
                 if operator in {"<", "<=", ">", ">="}:
                     raise MeasureError("Ordering text with non-ASCII characters is not supported in the local engine.")
-                raise MeasureError("Comparing text that differs only in composed, decomposed or expanded characters is not supported in the local engine.")
-            a, b = text_collation_key(left), text_collation_key(right)  # type: ignore[arg-type]
+                # identical texts are always equal; otherwise (as before the collation) texts that cannot be told apart by case fold alone are refused
+                if left == right:
+                    return operator in {"=", "==", "<=", ">="}
+                fa, fb = text_key(left), text_key(right)  # type: ignore[arg-type]
+                if (not is_classifiable_latin(left) and not is_classifiable_latin(right)) or (fa == fb) != (_strong_key(left) == _strong_key(right)) or any(c.casefold() != c.lower() for c in left + right) or _stacked_marks(left) or _stacked_marks(right):  # type: ignore[operator,arg-type]
+                    raise MeasureError("Comparing text that differs only in composed, decomposed or expanded characters is not supported in the local engine.")
+                a, b = fa, fb
+            else:
+                a, b = text_collation_key(left), text_collation_key(right)  # type: ignore[arg-type]
         else:
             a, b = (text_key(left), text_key(right)) if operator in {"=", "<>"} else (text_collation_key(left), text_collation_key(right))  # type: ignore[arg-type]
     elif isinstance(left, bool):
