@@ -8,7 +8,7 @@
 
 ## Latest status
 
-**Latest status (2026-11-03, after Iteration 126 / Task 36 info-empty-26, 42 more INFO functions (empty lists in a simple model), mix workflow: Antigravity coded, Sonnet 5.5 fixed, Claude Opus 5.5 planned, reviewed and shipped under the user's delegated approval):** pytest 2,604 passed (fast gate), real app 575/575 and 1,500 fresh probes with 0 wrong, replay 456,295 answers with 448,794 match, 7,501 refused, 0 DIFF, 0 CRASH, locked 448,774. Next: Task 37 blank-text-arith-27 (2,020 refused answers about BLANK and text in arithmetic) review
+**Latest status (2026-11-03, after Iteration 127 / Task 37 blank-text-arith-27, BLANK from && / || and text in arithmetic (1,580 of 2,020 refused answers now answered), mix workflow: Antigravity coded, Sonnet 5.5 fixed, Claude Opus 5.5 planned, reviewed and shipped under the user's delegated approval):** pytest 2,611 passed (fast gate), real app 575/575 and 1,500 fresh probes with 0 wrong, replay 458,024 answers with 452,145 match, 5,879 refused, 0 DIFF, 0 CRASH, locked 452,125. Next: Task 38 coalesce-big-order-28 (972 refused answers: COALESCE order, huge-number rounding, CONCATENATEX order) review
 
 **Previous status (2026-11-01, after Iteration 103 / Task 14 logic-tables-4, empty text in logical operators, a VAR block as an iterator table, FILTER over no rows, Currency arithmetic, review done, gate passed, locked 246,907, committed, merged and pushed; 246,927 of 253,237 saved answers match, 0 differ; next: Task 15 typed-columns-5, 1,836 items).**
 
