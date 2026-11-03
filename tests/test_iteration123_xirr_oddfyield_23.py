@@ -104,6 +104,20 @@ class TestIteration123XirrOddfyield23(unittest.TestCase):
             self.assertTrue(dax.local(f"XIRR({table},[v],[d])").startswith("LOCAL-REJECT:"), table)
         self.assertTrue(dax.local(f"ISERROR(XIRR({first},[v],[d]))").startswith("LOCAL-REJECT:"))
 
+    def test_part_a_xirr_several_roots_first_row_not_earliest_refused(self) -> None:
+        # Live Power BI (Task 33 third round): A answered "couldn't find a solution" although a bracket exists, B answered a number
+        # (ISERROR False) although the doubling search finds no bracket.  Both have two roots and the first table row is not the earliest
+        # date, so we refuse (the "not modelled" error) instead of guessing.
+        a = 'DATATABLE("v",DOUBLE,"d",DATETIME,{{-2701.98,"2019-12-27"},{4770.02,"2019-12-09"},{-3076.28,"2020-04-09"},{1832.42,"2022-08-24"},{-2445.19,"2024-03-21"},{879.29,"2024-05-26"},{543.58,"2019-07-27"},{1125.56,"2023-01-16"}})'
+        b = 'DATATABLE("v",DOUBLE,"d",DATETIME,{{-8481.25,"2022-05-26"},{3694.89,"2021-09-23"},{938.78,"2018-04-13"},{1503.42,"2019-01-12"},{927.26,"2023-07-16"},{2385.99,"2023-03-31"}})'
+        for table in (a, b):
+            self.assertTrue(dax.local(f"XIRR({table},[v],[d])").startswith("LOCAL-REJECT:"), table)
+            self.assertIn("not modelled", dax.local(f"XIRR({table},[v],[d])"), table)
+        self.assertIn("not modelled", dax.local(f"ISERROR(XIRR({b},[v],[d]))"))
+        # A table whose doubling search finds nothing but which still has a root is never answered "no solution".
+        sorted_b = 'DATATABLE("v",DOUBLE,"d",DATETIME,{{938.78,"2018-04-13"},{1503.42,"2019-01-12"},{3694.89,"2021-09-23"},{-8481.25,"2022-05-26"},{2385.99,"2023-03-31"},{927.26,"2023-07-16"}})'
+        self.assertIn("not modelled", dax.local(f"XIRR({sorted_b},[v],[d])"))
+
 
 if __name__ == "__main__":
     unittest.main()

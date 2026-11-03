@@ -1733,6 +1733,21 @@ def _xirr_solve(flows: list[tuple[float, float]], guess: float) -> tuple[str, fl
         return ("refuse", None)
     base = 1.0 + guess
     terms = [(value, (day - first_day) / 365.0) for value, day in ordered]
+    # Count the real roots 1 + rate > 0 of the NPV on a fine log grid (200 points per decade, 1e-6 .. 1e6) and the sign flips of the
+    # date-ordered flows.  Anything that cannot be evaluated cleanly on the grid is refused.
+    try:
+        grid = [10.0 ** (index / 200.0) for index in range(-1200, 1201)]
+        grid_signs = [sum(value * y ** (-years) for value, years in terms) > 0.0 for y in grid]
+    except (OverflowError, ZeroDivisionError):
+        return ("refuse", None)
+    root_count = sum(1 for a, b in zip(grid_signs, grid_signs[1:]) if a != b)
+    flow_signs = [value > 0.0 for value, _ in ordered if value != 0.0]
+    sign_flips = sum(1 for a, b in zip(flow_signs, flow_signs[1:]) if a != b)
+    first_row_earliest = flows[0][1] == first_day
+    if root_count >= 2 and not first_row_earliest:
+        # Measured: four fresh answers with several roots and the first table row not at the earliest date broke every model
+        # (two "couldn't find a solution" where a bracket exists, one number where no bracket exists, one lowest root).  Refuse.
+        return ("refuse", None)
 
     def npv(u: float) -> float:
         y = base * u
@@ -1767,12 +1782,14 @@ def _xirr_solve(flows: list[tuple[float, float]], guess: float) -> tuple[str, fl
                 # Several brackets on one side of the guess.  Measured: Power BI took the first bracket going down only when it
                 # was the very first halving and nothing was found going up (5 answers); a first bracket at the 2nd halving
                 # answered "couldn't find a solution", and a second bracket going up made it answer the lower root.  Refuse the rest.
-                if direction == -1 and dn_k == 1 and up_k is None:
-                    continue
+                if direction == -1 and dn_k == 1 and up_k is None and sign_flips == 2 and root_count == 2:
+                    continue  # only with exactly two sign flips in the date-ordered flows and two roots (3 answers); 4 flips, 2 roots was an error
                 return ("refuse", None)
     except (OverflowError, ZeroDivisionError):
         return ("refuse", None)
     if up_k is None and dn_k is None:
+        if root_count:
+            return ("refuse", None)  # a root exists but the doubling search misses it: Power BI returned a number for such a case
         return ("none", None)
     if up_k is not None:
         if up_k > 26 or (dn_k is not None and up_k > 5):
