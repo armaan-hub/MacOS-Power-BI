@@ -1,0 +1,1264 @@
+{
+ "items": [
+  {
+   "part": "A",
+   "expr": "COUNTROWS(INFO.ALTERNATEOFDEFINITIONS())",
+   "powerbi": "BLANK",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "TOCSV(FILTER(INFO.ALTERNATEOFDEFINITIONS(),FALSE()),3,\",\",TRUE)",
+   "powerbi": "[ID],[ColumnID],[BaseColumnID],[BaseTableID],[Summarization]",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "IF(ISEMPTY(INFO.ALTERNATEOFDEFINITIONS()),\"e\",\"n\")",
+   "powerbi": "e",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "COUNTROWS(INFO.ALTERNATEOFDEFINITIONS(1))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 57) The 'INFO.ALTERNATEOFDEFINITIONS' function expects a constant string representing a restriction name.\"",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "INFO.ALTERNATEOFDEFINITIONS()",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 19) The expression refers to multiple columns. Multiple columns cannot be converted to a scalar value.\"",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "COUNTROWS(INFO.CALCDEPENDENCY())",
+   "powerbi": "BLANK",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "TOCSV(FILTER(INFO.CALCDEPENDENCY(),FALSE()),3,\",\",TRUE)",
+   "powerbi": "[DATABASE_NAME],[OBJECT_TYPE],[TABLE],[OBJECT],[EXPRESSION],[REFERENCED_OBJECT_TYPE],[REFERENCED_TABLE],[REFERENCED_OBJECT],[REFERENCED_EXPRESSION],[QUERY]",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "IF(ISEMPTY(INFO.CALCDEPENDENCY()),\"e\",\"n\")",
+   "powerbi": "e",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "COUNTROWS(INFO.CALCDEPENDENCY(1))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 49) The 'INFO.CALCDEPENDENCY' function expects a constant string representing a restriction name.\"",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "INFO.CALCDEPENDENCY()",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 19) The expression refers to multiple columns. Multiple columns cannot be converted to a scalar value.\"",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "COUNTROWS(INFO.CALCULATIONGROUPS())",
+   "powerbi": "BLANK",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "TOCSV(FILTER(INFO.CALCULATIONGROUPS(),FALSE()),3,\",\",TRUE)",
+   "powerbi": "[ID],[TableID],[Description],[ModifiedTime],[Precedence]",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "IF(ISEMPTY(INFO.CALCULATIONGROUPS()),\"e\",\"n\")",
+   "powerbi": "e",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "COUNTROWS(INFO.CALCULATIONGROUPS(1))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 52) The 'INFO.CALCULATIONGROUPS' function expects a constant string representing a restriction name.\"",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "INFO.CALCULATIONGROUPS()",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 19) The expression refers to multiple columns. Multiple columns cannot be converted to a scalar value.\"",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "COUNTROWS(INFO.CALCULATIONITEMS())",
+   "powerbi": "BLANK",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "TOCSV(FILTER(INFO.CALCULATIONITEMS(),FALSE()),3,\",\",TRUE)",
+   "powerbi": "[ID],[CalculationGroupID],[FormatStringDefinitionID],[Name],[Description],[ModifiedTime],[State],[ErrorMessage],[Expression],[Ordinal]",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "IF(ISEMPTY(INFO.CALCULATIONITEMS()),\"e\",\"n\")",
+   "powerbi": "e",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "COUNTROWS(INFO.CALCULATIONITEMS(1))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 51) The 'INFO.CALCULATIONITEMS' function expects a constant string representing a restriction name.\"",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "INFO.CALCULATIONITEMS()",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 19) The expression refers to multiple columns. Multiple columns cannot be converted to a scalar value.\"",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "COUNTROWS(INFO.CALENDARCOLUMNGROUPS())",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"The operation cannot be performed because it references an object or property that is unavailable in the current edition of the server or the compatibility level of the database.\"",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "TOCSV(FILTER(INFO.CALENDARCOLUMNGROUPS(),FALSE()),3,\",\",TRUE)",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"The operation cannot be performed because it references an object or property that is unavailable in the current edition of the server or the compatibility level of the database.\"",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "IF(ISEMPTY(INFO.CALENDARCOLUMNGROUPS()),\"e\",\"n\")",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"The operation cannot be performed because it references an object or property that is unavailable in the current edition of the server or the compatibility level of the database.\"",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "COUNTROWS(INFO.CALENDARCOLUMNGROUPS(1))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 55) The 'INFO.CALENDARCOLUMNGROUPS' function expects a constant string representing a restriction name.\"",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "INFO.CALENDARCOLUMNGROUPS()",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"The operation cannot be performed because it references an object or property that is unavailable in the current edition of the server or the compatibility level of the database.\"",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "COUNTROWS(INFO.CALENDARCOLUMNREFERENCES())",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"The operation cannot be performed because it references an object or property that is unavailable in the current edition of the server or the compatibility level of the database.\"",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "TOCSV(FILTER(INFO.CALENDARCOLUMNREFERENCES(),FALSE()),3,\",\",TRUE)",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"The operation cannot be performed because it references an object or property that is unavailable in the current edition of the server or the compatibility level of the database.\"",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "IF(ISEMPTY(INFO.CALENDARCOLUMNREFERENCES()),\"e\",\"n\")",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"The operation cannot be performed because it references an object or property that is unavailable in the current edition of the server or the compatibility level of the database.\"",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "COUNTROWS(INFO.CALENDARCOLUMNREFERENCES(1))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 59) The 'INFO.CALENDARCOLUMNREFERENCES' function expects a constant string representing a restriction name.\"",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "INFO.CALENDARCOLUMNREFERENCES()",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"The operation cannot be performed because it references an object or property that is unavailable in the current edition of the server or the compatibility level of the database.\"",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "COUNTROWS(INFO.CALENDARS())",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"The operation cannot be performed because it references an object or property that is unavailable in the current edition of the server or the compatibility level of the database.\"",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "TOCSV(FILTER(INFO.CALENDARS(),FALSE()),3,\",\",TRUE)",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"The operation cannot be performed because it references an object or property that is unavailable in the current edition of the server or the compatibility level of the database.\"",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "IF(ISEMPTY(INFO.CALENDARS()),\"e\",\"n\")",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"The operation cannot be performed because it references an object or property that is unavailable in the current edition of the server or the compatibility level of the database.\"",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "COUNTROWS(INFO.CALENDARS(1))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 44) The 'INFO.CALENDARS' function expects a constant string representing a restriction name.\"",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "INFO.CALENDARS()",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"The operation cannot be performed because it references an object or property that is unavailable in the current edition of the server or the compatibility level of the database.\"",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "COUNTROWS(INFO.CHANGEDPROPERTIES())",
+   "powerbi": "BLANK",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "TOCSV(FILTER(INFO.CHANGEDPROPERTIES(),FALSE()),3,\",\",TRUE)",
+   "powerbi": "[ID],[ObjectID],[ObjectType],[Property]",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "IF(ISEMPTY(INFO.CHANGEDPROPERTIES()),\"e\",\"n\")",
+   "powerbi": "e",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "COUNTROWS(INFO.CHANGEDPROPERTIES(1))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 52) The 'INFO.CHANGEDPROPERTIES' function expects a constant string representing a restriction name.\"",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "INFO.CHANGEDPROPERTIES()",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 19) The expression refers to multiple columns. Multiple columns cannot be converted to a scalar value.\"",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "COUNTROWS(INFO.COLUMNPERMISSIONS())",
+   "powerbi": "BLANK",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "TOCSV(FILTER(INFO.COLUMNPERMISSIONS(),FALSE()),3,\",\",TRUE)",
+   "powerbi": "[ID],[TablePermissionID],[ColumnID],[ModifiedTime],[MetadataPermission]",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "IF(ISEMPTY(INFO.COLUMNPERMISSIONS()),\"e\",\"n\")",
+   "powerbi": "e",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "COUNTROWS(INFO.COLUMNPERMISSIONS(1))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 52) The 'INFO.COLUMNPERMISSIONS' function expects a constant string representing a restriction name.\"",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "INFO.COLUMNPERMISSIONS()",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 19) The expression refers to multiple columns. Multiple columns cannot be converted to a scalar value.\"",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "COUNTROWS(INFO.DATACOVERAGEDEFINITIONS())",
+   "powerbi": "BLANK",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "TOCSV(FILTER(INFO.DATACOVERAGEDEFINITIONS(),FALSE()),3,\",\",TRUE)",
+   "powerbi": "[ID],[PartitionID],[Description],[Expression],[ModifiedTime],[State],[ErrorMessage]",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "IF(ISEMPTY(INFO.DATACOVERAGEDEFINITIONS()),\"e\",\"n\")",
+   "powerbi": "e",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "COUNTROWS(INFO.DATACOVERAGEDEFINITIONS(1))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 58) The 'INFO.DATACOVERAGEDEFINITIONS' function expects a constant string representing a restriction name.\"",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "INFO.DATACOVERAGEDEFINITIONS()",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 19) The expression refers to multiple columns. Multiple columns cannot be converted to a scalar value.\"",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "COUNTROWS(INFO.DATASOURCES())",
+   "powerbi": "BLANK",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "TOCSV(FILTER(INFO.DATASOURCES(),FALSE()),3,\",\",TRUE)",
+   "powerbi": "[ID],[ModelID],[Name],[Description],[Type],[ConnectionString],[ImpersonationMode],[Account],[Password],[MaxConnections],[Isolation],[Timeout],[Provider],[ModifiedTime],[ConnectionDetails],[Options],[Credential],[ContextExpression]",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "IF(ISEMPTY(INFO.DATASOURCES()),\"e\",\"n\")",
+   "powerbi": "e",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "COUNTROWS(INFO.DATASOURCES(1))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 46) The 'INFO.DATASOURCES' function expects a constant string representing a restriction name.\"",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "INFO.DATASOURCES()",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 19) The expression refers to multiple columns. Multiple columns cannot be converted to a scalar value.\"",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "COUNTROWS(INFO.DELTATABLEMETADATASTORAGES())",
+   "powerbi": "BLANK",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "TOCSV(FILTER(INFO.DELTATABLEMETADATASTORAGES(),FALSE()),3,\",\",TRUE)",
+   "powerbi": "[ID],[PartitionStorageID],[DataSourceReference],[TableName],[RootLocation],[CurrentVersion],[TableObjectID],[DatamartObjectID],[FramedSchemaName],[FallbackReason],[DeltaColumnMappingMode],[DeltaLogETag],[ArtifactObjectId],[ArtifactSecurityVersion]",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "IF(ISEMPTY(INFO.DELTATABLEMETADATASTORAGES()),\"e\",\"n\")",
+   "powerbi": "e",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "COUNTROWS(INFO.DELTATABLEMETADATASTORAGES(1))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 61) The 'INFO.DELTATABLEMETADATASTORAGES' function expects a constant string representing a restriction name.\"",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "INFO.DELTATABLEMETADATASTORAGES()",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 19) The expression refers to multiple columns. Multiple columns cannot be converted to a scalar value.\"",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "COUNTROWS(INFO.DEPENDENCIES())",
+   "powerbi": "BLANK",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "TOCSV(FILTER(INFO.DEPENDENCIES(),FALSE()),3,\",\",TRUE)",
+   "powerbi": "[DATABASE_NAME],[OBJECT_TYPE],[TABLE],[OBJECT],[EXPRESSION],[REFERENCED_OBJECT_TYPE],[REFERENCED_TABLE],[REFERENCED_OBJECT],[REFERENCED_EXPRESSION],[QUERY]",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "IF(ISEMPTY(INFO.DEPENDENCIES()),\"e\",\"n\")",
+   "powerbi": "e",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "COUNTROWS(INFO.DEPENDENCIES(1))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 47) The 'INFO.CALCDEPENDENCY' function expects a constant string representing a restriction name.\"",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "INFO.DEPENDENCIES()",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 19) The expression refers to multiple columns. Multiple columns cannot be converted to a scalar value.\"",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "COUNTROWS(INFO.DETAILROWSDEFINITIONS())",
+   "powerbi": "BLANK",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "TOCSV(FILTER(INFO.DETAILROWSDEFINITIONS(),FALSE()),3,\",\",TRUE)",
+   "powerbi": "[ID],[ObjectID],[ObjectType],[Expression],[ModifiedTime],[State],[ErrorMessage]",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "IF(ISEMPTY(INFO.DETAILROWSDEFINITIONS()),\"e\",\"n\")",
+   "powerbi": "e",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "COUNTROWS(INFO.DETAILROWSDEFINITIONS(1))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 56) The 'INFO.DETAILROWSDEFINITIONS' function expects a constant string representing a restriction name.\"",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "INFO.DETAILROWSDEFINITIONS()",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 19) The expression refers to multiple columns. Multiple columns cannot be converted to a scalar value.\"",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "COUNTROWS(INFO.EXCLUDEDARTIFACTS())",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"The operation cannot be performed because it references an object or property that is unavailable in the current edition of the server or the compatibility level of the database.\"",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "TOCSV(FILTER(INFO.EXCLUDEDARTIFACTS(),FALSE()),3,\",\",TRUE)",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"The operation cannot be performed because it references an object or property that is unavailable in the current edition of the server or the compatibility level of the database.\"",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "IF(ISEMPTY(INFO.EXCLUDEDARTIFACTS()),\"e\",\"n\")",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"The operation cannot be performed because it references an object or property that is unavailable in the current edition of the server or the compatibility level of the database.\"",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "COUNTROWS(INFO.EXCLUDEDARTIFACTS(1))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 52) The 'INFO.EXCLUDEDARTIFACTS' function expects a constant string representing a restriction name.\"",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "INFO.EXCLUDEDARTIFACTS()",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"The operation cannot be performed because it references an object or property that is unavailable in the current edition of the server or the compatibility level of the database.\"",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "COUNTROWS(INFO.EXPRESSIONS())",
+   "powerbi": "BLANK",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "TOCSV(FILTER(INFO.EXPRESSIONS(),FALSE()),3,\",\",TRUE)",
+   "powerbi": "[ID],[ModelID],[Name],[Description],[Kind],[Expression],[ModifiedTime],[QueryGroupID],[ParameterValuesColumnID],[MAttributes],[LineageTag],[SourceLineageTag],[RemoteParameterName],[ExpressionSourceID]",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "IF(ISEMPTY(INFO.EXPRESSIONS()),\"e\",\"n\")",
+   "powerbi": "e",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "COUNTROWS(INFO.EXPRESSIONS(1))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 46) The 'INFO.EXPRESSIONS' function expects a constant string representing a restriction name.\"",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "INFO.EXPRESSIONS()",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 19) The expression refers to multiple columns. Multiple columns cannot be converted to a scalar value.\"",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "COUNTROWS(INFO.EXTENDEDPROPERTIES())",
+   "powerbi": "BLANK",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "TOCSV(FILTER(INFO.EXTENDEDPROPERTIES(),FALSE()),3,\",\",TRUE)",
+   "powerbi": "[ID],[ObjectID],[ObjectType],[Name],[Type],[Value],[ModifiedTime]",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "IF(ISEMPTY(INFO.EXTENDEDPROPERTIES()),\"e\",\"n\")",
+   "powerbi": "e",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "COUNTROWS(INFO.EXTENDEDPROPERTIES(1))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 53) The 'INFO.EXTENDEDPROPERTIES' function expects a constant string representing a restriction name.\"",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "INFO.EXTENDEDPROPERTIES()",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 19) The expression refers to multiple columns. Multiple columns cannot be converted to a scalar value.\"",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "COUNTROWS(INFO.FORMATSTRINGDEFINITIONS())",
+   "powerbi": "BLANK",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "TOCSV(FILTER(INFO.FORMATSTRINGDEFINITIONS(),FALSE()),3,\",\",TRUE)",
+   "powerbi": "[ID],[ObjectID],[ObjectType],[Expression],[ModifiedTime],[State],[ErrorMessage]",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "IF(ISEMPTY(INFO.FORMATSTRINGDEFINITIONS()),\"e\",\"n\")",
+   "powerbi": "e",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "COUNTROWS(INFO.FORMATSTRINGDEFINITIONS(1))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 58) The 'INFO.FORMATSTRINGDEFINITIONS' function expects a constant string representing a restriction name.\"",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "INFO.FORMATSTRINGDEFINITIONS()",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 19) The expression refers to multiple columns. Multiple columns cannot be converted to a scalar value.\"",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "COUNTROWS(INFO.GENERALSEGMENTMAPSEGMENTMETADATASTORAGES())",
+   "powerbi": "BLANK",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "TOCSV(FILTER(INFO.GENERALSEGMENTMAPSEGMENTMETADATASTORAGES(),FALSE()),3,\",\",TRUE)",
+   "powerbi": "[ID],[SegmentMapStorageID],[RecordCount],[Ordinal]",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "IF(ISEMPTY(INFO.GENERALSEGMENTMAPSEGMENTMETADATASTORAGES()),\"e\",\"n\")",
+   "powerbi": "e",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "COUNTROWS(INFO.GENERALSEGMENTMAPSEGMENTMETADATASTORAGES(1))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 75) The 'INFO.GENERALSEGMENTMAPSEGMENTMETADATASTORAGES' function expects a constant string representing a restriction name.\"",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "INFO.GENERALSEGMENTMAPSEGMENTMETADATASTORAGES()",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 19) The expression refers to multiple columns. Multiple columns cannot be converted to a scalar value.\"",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "COUNTROWS(INFO.GROUPBYCOLUMNS())",
+   "powerbi": "BLANK",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "TOCSV(FILTER(INFO.GROUPBYCOLUMNS(),FALSE()),3,\",\",TRUE)",
+   "powerbi": "[ID],[RelatedColumnDetailsID],[GroupingColumnID],[ModifiedTime]",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "IF(ISEMPTY(INFO.GROUPBYCOLUMNS()),\"e\",\"n\")",
+   "powerbi": "e",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "COUNTROWS(INFO.GROUPBYCOLUMNS(1))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 49) The 'INFO.GROUPBYCOLUMNS' function expects a constant string representing a restriction name.\"",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "INFO.GROUPBYCOLUMNS()",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 19) The expression refers to multiple columns. Multiple columns cannot be converted to a scalar value.\"",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "COUNTROWS(INFO.HIERARCHIES())",
+   "powerbi": "BLANK",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "TOCSV(FILTER(INFO.HIERARCHIES(),FALSE()),3,\",\",TRUE)",
+   "powerbi": "[ID],[TableID],[Name],[Description],[IsHidden],[State],[HierarchyStorageID],[ModifiedTime],[StructureModifiedTime],[RefreshedTime],[DisplayFolder],[HideMembers],[LineageTag],[SourceLineageTag]",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "IF(ISEMPTY(INFO.HIERARCHIES()),\"e\",\"n\")",
+   "powerbi": "e",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "COUNTROWS(INFO.HIERARCHIES(1))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 46) The 'INFO.HIERARCHIES' function expects a constant string representing a restriction name.\"",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "INFO.HIERARCHIES()",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 19) The expression refers to multiple columns. Multiple columns cannot be converted to a scalar value.\"",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "COUNTROWS(INFO.HIERARCHYSTORAGES())",
+   "powerbi": "BLANK",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "TOCSV(FILTER(INFO.HIERARCHYSTORAGES(),FALSE()),3,\",\",TRUE)",
+   "powerbi": "[ID],[HierarchyID],[Name],[LevelDefinition],[MaterializationType],[StructureType],[SystemTableID]",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "IF(ISEMPTY(INFO.HIERARCHYSTORAGES()),\"e\",\"n\")",
+   "powerbi": "e",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "COUNTROWS(INFO.HIERARCHYSTORAGES(1))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 52) The 'INFO.HIERARCHYSTORAGES' function expects a constant string representing a restriction name.\"",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "INFO.HIERARCHYSTORAGES()",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 19) The expression refers to multiple columns. Multiple columns cannot be converted to a scalar value.\"",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "COUNTROWS(INFO.KPIS())",
+   "powerbi": "BLANK",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "TOCSV(FILTER(INFO.KPIS(),FALSE()),3,\",\",TRUE)",
+   "powerbi": "[ID],[MeasureID],[Description],[TargetDescription],[TargetExpression],[TargetFormatString],[StatusGraphic],[StatusDescription],[StatusExpression],[TrendGraphic],[TrendDescription],[TrendExpression],[ModifiedTime]",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "IF(ISEMPTY(INFO.KPIS()),\"e\",\"n\")",
+   "powerbi": "e",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "COUNTROWS(INFO.KPIS(1))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 39) The 'INFO.KPIS' function expects a constant string representing a restriction name.\"",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "INFO.KPIS()",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 19) The expression refers to multiple columns. Multiple columns cannot be converted to a scalar value.\"",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "COUNTROWS(INFO.LEVELS())",
+   "powerbi": "BLANK",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "TOCSV(FILTER(INFO.LEVELS(),FALSE()),3,\",\",TRUE)",
+   "powerbi": "[ID],[HierarchyID],[Ordinal],[Name],[Description],[ColumnID],[ModifiedTime],[LineageTag],[SourceLineageTag]",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "IF(ISEMPTY(INFO.LEVELS()),\"e\",\"n\")",
+   "powerbi": "e",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "COUNTROWS(INFO.LEVELS(1))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 41) The 'INFO.LEVELS' function expects a constant string representing a restriction name.\"",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "INFO.LEVELS()",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 19) The expression refers to multiple columns. Multiple columns cannot be converted to a scalar value.\"",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "COUNTROWS(INFO.LINGUISTICMETADATA())",
+   "powerbi": "BLANK",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "TOCSV(FILTER(INFO.LINGUISTICMETADATA(),FALSE()),3,\",\",TRUE)",
+   "powerbi": "[ID],[CultureID],[Content],[ModifiedTime],[ContentType]",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "IF(ISEMPTY(INFO.LINGUISTICMETADATA()),\"e\",\"n\")",
+   "powerbi": "e",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "COUNTROWS(INFO.LINGUISTICMETADATA(1))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 53) The 'INFO.LINGUISTICMETADATA' function expects a constant string representing a restriction name.\"",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "INFO.LINGUISTICMETADATA()",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 19) The expression refers to multiple columns. Multiple columns cannot be converted to a scalar value.\"",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "COUNTROWS(INFO.OBJECTTRANSLATIONS())",
+   "powerbi": "BLANK",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "TOCSV(FILTER(INFO.OBJECTTRANSLATIONS(),FALSE()),3,\",\",TRUE)",
+   "powerbi": "[ID],[CultureID],[ObjectID],[ObjectType],[Property],[Value],[ModifiedTime],[Altered]",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "IF(ISEMPTY(INFO.OBJECTTRANSLATIONS()),\"e\",\"n\")",
+   "powerbi": "e",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "COUNTROWS(INFO.OBJECTTRANSLATIONS(1))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 53) The 'INFO.OBJECTTRANSLATIONS' function expects a constant string representing a restriction name.\"",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "INFO.OBJECTTRANSLATIONS()",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 19) The expression refers to multiple columns. Multiple columns cannot be converted to a scalar value.\"",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "COUNTROWS(INFO.PARQUETFILESTORAGES())",
+   "powerbi": "BLANK",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "TOCSV(FILTER(INFO.PARQUETFILESTORAGES(),FALSE()),3,\",\",TRUE)",
+   "powerbi": "[ID],[DeltaTableMetadataStorageID],[Size],[Location],[CreatedVersion],[DeletedVersion],[RowgroupCount],[Ordinal],[ETag],[DeletionVectorFileLocation],[DeletionVectorBitmapOffset],[DeletionVectorBitmapSize],[DeletionVectorFileETag]",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "IF(ISEMPTY(INFO.PARQUETFILESTORAGES()),\"e\",\"n\")",
+   "powerbi": "e",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "COUNTROWS(INFO.PARQUETFILESTORAGES(1))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 54) The 'INFO.PARQUETFILESTORAGES' function expects a constant string representing a restriction name.\"",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "INFO.PARQUETFILESTORAGES()",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 19) The expression refers to multiple columns. Multiple columns cannot be converted to a scalar value.\"",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "COUNTROWS(INFO.PERSPECTIVECOLUMNS())",
+   "powerbi": "BLANK",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "TOCSV(FILTER(INFO.PERSPECTIVECOLUMNS(),FALSE()),3,\",\",TRUE)",
+   "powerbi": "[ID],[PerspectiveTableID],[ColumnID],[ModifiedTime]",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "IF(ISEMPTY(INFO.PERSPECTIVECOLUMNS()),\"e\",\"n\")",
+   "powerbi": "e",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "COUNTROWS(INFO.PERSPECTIVECOLUMNS(1))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 53) The 'INFO.PERSPECTIVECOLUMNS' function expects a constant string representing a restriction name.\"",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "INFO.PERSPECTIVECOLUMNS()",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 19) The expression refers to multiple columns. Multiple columns cannot be converted to a scalar value.\"",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "COUNTROWS(INFO.PERSPECTIVEHIERARCHIES())",
+   "powerbi": "BLANK",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "TOCSV(FILTER(INFO.PERSPECTIVEHIERARCHIES(),FALSE()),3,\",\",TRUE)",
+   "powerbi": "[ID],[PerspectiveTableID],[HierarchyID],[ModifiedTime]",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "IF(ISEMPTY(INFO.PERSPECTIVEHIERARCHIES()),\"e\",\"n\")",
+   "powerbi": "e",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "COUNTROWS(INFO.PERSPECTIVEHIERARCHIES(1))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 57) The 'INFO.PERSPECTIVEHIERARCHIES' function expects a constant string representing a restriction name.\"",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "INFO.PERSPECTIVEHIERARCHIES()",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 19) The expression refers to multiple columns. Multiple columns cannot be converted to a scalar value.\"",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "COUNTROWS(INFO.PERSPECTIVEMEASURES())",
+   "powerbi": "BLANK",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "TOCSV(FILTER(INFO.PERSPECTIVEMEASURES(),FALSE()),3,\",\",TRUE)",
+   "powerbi": "[ID],[PerspectiveTableID],[MeasureID],[ModifiedTime]",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "IF(ISEMPTY(INFO.PERSPECTIVEMEASURES()),\"e\",\"n\")",
+   "powerbi": "e",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "COUNTROWS(INFO.PERSPECTIVEMEASURES(1))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 54) The 'INFO.PERSPECTIVEMEASURES' function expects a constant string representing a restriction name.\"",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "INFO.PERSPECTIVEMEASURES()",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 19) The expression refers to multiple columns. Multiple columns cannot be converted to a scalar value.\"",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "COUNTROWS(INFO.PERSPECTIVES())",
+   "powerbi": "BLANK",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "TOCSV(FILTER(INFO.PERSPECTIVES(),FALSE()),3,\",\",TRUE)",
+   "powerbi": "[ID],[ModelID],[Name],[Description],[ModifiedTime]",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "IF(ISEMPTY(INFO.PERSPECTIVES()),\"e\",\"n\")",
+   "powerbi": "e",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "COUNTROWS(INFO.PERSPECTIVES(1))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 47) The 'INFO.PERSPECTIVES' function expects a constant string representing a restriction name.\"",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "INFO.PERSPECTIVES()",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 19) The expression refers to multiple columns. Multiple columns cannot be converted to a scalar value.\"",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "COUNTROWS(INFO.PERSPECTIVETABLES())",
+   "powerbi": "BLANK",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "TOCSV(FILTER(INFO.PERSPECTIVETABLES(),FALSE()),3,\",\",TRUE)",
+   "powerbi": "[ID],[PerspectiveID],[TableID],[IncludeAll],[ModifiedTime]",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "IF(ISEMPTY(INFO.PERSPECTIVETABLES()),\"e\",\"n\")",
+   "powerbi": "e",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "COUNTROWS(INFO.PERSPECTIVETABLES(1))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 52) The 'INFO.PERSPECTIVETABLES' function expects a constant string representing a restriction name.\"",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "INFO.PERSPECTIVETABLES()",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 19) The expression refers to multiple columns. Multiple columns cannot be converted to a scalar value.\"",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "COUNTROWS(INFO.QUERYGROUPS())",
+   "powerbi": "BLANK",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "TOCSV(FILTER(INFO.QUERYGROUPS(),FALSE()),3,\",\",TRUE)",
+   "powerbi": "[ID],[ModelID],[Folder],[Description]",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "IF(ISEMPTY(INFO.QUERYGROUPS()),\"e\",\"n\")",
+   "powerbi": "e",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "COUNTROWS(INFO.QUERYGROUPS(1))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 46) The 'INFO.QUERYGROUPS' function expects a constant string representing a restriction name.\"",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "INFO.QUERYGROUPS()",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 19) The expression refers to multiple columns. Multiple columns cannot be converted to a scalar value.\"",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "COUNTROWS(INFO.REFRESHPOLICIES())",
+   "powerbi": "BLANK",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "TOCSV(FILTER(INFO.REFRESHPOLICIES(),FALSE()),3,\",\",TRUE)",
+   "powerbi": "[ID],[TableID],[PolicyType],[RollingWindowGranularity],[RollingWindowPeriods],[IncrementalGranularity],[IncrementalPeriods],[IncrementalPeriodsOffset],[PollingExpression],[SourceExpression],[Mode]",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "IF(ISEMPTY(INFO.REFRESHPOLICIES()),\"e\",\"n\")",
+   "powerbi": "e",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "COUNTROWS(INFO.REFRESHPOLICIES(1))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 50) The 'INFO.REFRESHPOLICIES' function expects a constant string representing a restriction name.\"",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "INFO.REFRESHPOLICIES()",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 19) The expression refers to multiple columns. Multiple columns cannot be converted to a scalar value.\"",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "COUNTROWS(INFO.RELATEDCOLUMNDETAILS())",
+   "powerbi": "BLANK",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "TOCSV(FILTER(INFO.RELATEDCOLUMNDETAILS(),FALSE()),3,\",\",TRUE)",
+   "powerbi": "[ID],[ColumnID],[ModifiedTime]",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "IF(ISEMPTY(INFO.RELATEDCOLUMNDETAILS()),\"e\",\"n\")",
+   "powerbi": "e",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "COUNTROWS(INFO.RELATEDCOLUMNDETAILS(1))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 55) The 'INFO.RELATEDCOLUMNDETAILS' function expects a constant string representing a restriction name.\"",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "INFO.RELATEDCOLUMNDETAILS()",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 19) The expression refers to multiple columns. Multiple columns cannot be converted to a scalar value.\"",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "COUNTROWS(INFO.RELATIONSHIPINDEXSTORAGES())",
+   "powerbi": "BLANK",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "TOCSV(FILTER(INFO.RELATIONSHIPINDEXSTORAGES(),FALSE()),3,\",\",TRUE)",
+   "powerbi": "[ID],[RelationshipStorageID],[IndexType],[Flags],[RecordCount],[SecondaryRecordCount],[StorageFolderID],[StorageFileID],[SystemTableID],[SecondarySystemTableID]",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "IF(ISEMPTY(INFO.RELATIONSHIPINDEXSTORAGES()),\"e\",\"n\")",
+   "powerbi": "e",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "COUNTROWS(INFO.RELATIONSHIPINDEXSTORAGES(1))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 60) The 'INFO.RELATIONSHIPINDEXSTORAGES' function expects a constant string representing a restriction name.\"",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "INFO.RELATIONSHIPINDEXSTORAGES()",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 19) The expression refers to multiple columns. Multiple columns cannot be converted to a scalar value.\"",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "COUNTROWS(INFO.RELATIONSHIPSTORAGES())",
+   "powerbi": "BLANK",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "TOCSV(FILTER(INFO.RELATIONSHIPSTORAGES(),FALSE()),3,\",\",TRUE)",
+   "powerbi": "[ID],[RelationshipID],[Name],[DefinitionType],[Cardinality],[Flags],[RelationshipIndexStorageID]",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "IF(ISEMPTY(INFO.RELATIONSHIPSTORAGES()),\"e\",\"n\")",
+   "powerbi": "e",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "COUNTROWS(INFO.RELATIONSHIPSTORAGES(1))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 55) The 'INFO.RELATIONSHIPSTORAGES' function expects a constant string representing a restriction name.\"",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "INFO.RELATIONSHIPSTORAGES()",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 19) The expression refers to multiple columns. Multiple columns cannot be converted to a scalar value.\"",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "COUNTROWS(INFO.ROLEMEMBERSHIPS())",
+   "powerbi": "BLANK",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "TOCSV(FILTER(INFO.ROLEMEMBERSHIPS(),FALSE()),3,\",\",TRUE)",
+   "powerbi": "[ID],[RoleID],[MemberName],[MemberID],[IdentityProvider],[MemberType],[ModifiedTime]",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "IF(ISEMPTY(INFO.ROLEMEMBERSHIPS()),\"e\",\"n\")",
+   "powerbi": "e",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "COUNTROWS(INFO.ROLEMEMBERSHIPS(1))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 50) The 'INFO.ROLEMEMBERSHIPS' function expects a constant string representing a restriction name.\"",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "INFO.ROLEMEMBERSHIPS()",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 19) The expression refers to multiple columns. Multiple columns cannot be converted to a scalar value.\"",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "COUNTROWS(INFO.ROLES())",
+   "powerbi": "BLANK",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "TOCSV(FILTER(INFO.ROLES(),FALSE()),3,\",\",TRUE)",
+   "powerbi": "[ID],[ModelID],[Name],[Description],[ModelPermission],[ModifiedTime]",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "IF(ISEMPTY(INFO.ROLES()),\"e\",\"n\")",
+   "powerbi": "e",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "COUNTROWS(INFO.ROLES(1))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 40) The 'INFO.ROLES' function expects a constant string representing a restriction name.\"",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "INFO.ROLES()",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 19) The expression refers to multiple columns. Multiple columns cannot be converted to a scalar value.\"",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "COUNTROWS(INFO.TABLEPERMISSIONS())",
+   "powerbi": "BLANK",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "TOCSV(FILTER(INFO.TABLEPERMISSIONS(),FALSE()),3,\",\",TRUE)",
+   "powerbi": "[ID],[RoleID],[TableID],[FilterExpression],[ModifiedTime],[State],[ErrorMessage],[MetadataPermission]",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "IF(ISEMPTY(INFO.TABLEPERMISSIONS()),\"e\",\"n\")",
+   "powerbi": "e",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "COUNTROWS(INFO.TABLEPERMISSIONS(1))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 51) The 'INFO.TABLEPERMISSIONS' function expects a constant string representing a restriction name.\"",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "INFO.TABLEPERMISSIONS()",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 19) The expression refers to multiple columns. Multiple columns cannot be converted to a scalar value.\"",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "COUNTROWS(INFO.USERDEFINEDFUNCTIONS())",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"The operation cannot be performed because it references an object or property that is unavailable in the current edition of the server or the compatibility level of the database.\"",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "TOCSV(FILTER(INFO.USERDEFINEDFUNCTIONS(),FALSE()),3,\",\",TRUE)",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"The operation cannot be performed because it references an object or property that is unavailable in the current edition of the server or the compatibility level of the database.\"",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "IF(ISEMPTY(INFO.USERDEFINEDFUNCTIONS()),\"e\",\"n\")",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"The operation cannot be performed because it references an object or property that is unavailable in the current edition of the server or the compatibility level of the database.\"",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "COUNTROWS(INFO.USERDEFINEDFUNCTIONS(1))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 55) The 'INFO.USERDEFINEDFUNCTIONS' function expects a constant string representing a restriction name.\"",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "INFO.USERDEFINEDFUNCTIONS()",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"The operation cannot be performed because it references an object or property that is unavailable in the current edition of the server or the compatibility level of the database.\"",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "COUNTROWS(INFO.VARIATIONS())",
+   "powerbi": "BLANK",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "TOCSV(FILTER(INFO.VARIATIONS(),FALSE()),3,\",\",TRUE)",
+   "powerbi": "[ID],[ColumnID],[Name],[Description],[RelationshipID],[DefaultHierarchyID],[DefaultColumnID],[IsDefault]",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "IF(ISEMPTY(INFO.VARIATIONS()),\"e\",\"n\")",
+   "powerbi": "e",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "COUNTROWS(INFO.VARIATIONS(1))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 45) The 'INFO.VARIATIONS' function expects a constant string representing a restriction name.\"",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "INFO.VARIATIONS()",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 19) The expression refers to multiple columns. Multiple columns cannot be converted to a scalar value.\"",
+   "now": ""
+  }
+ ]
+}
