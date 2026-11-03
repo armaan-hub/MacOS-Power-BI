@@ -158,15 +158,15 @@ class PartFCalculateFiltersTest(unittest.TestCase):
 class PartGCoalesceFailingArgumentTest(unittest.TestCase):
     """Part G: COALESCE with earlier argument in iterators."""
 
-    def test_coalesce_with_table_iterators_stays_refused(self) -> None:
-        # Part G stays refused: widening the guard gave wrong answers on fresh probes (Task 16 review)
-        for expr in (
-            'MAXX(Facts,COALESCE(BLANK(),SUMX(VALUES(Facts[Region]),DATE(2020,1,1)),1))',
-            'SUMX(Facts,COALESCE(BLANK(),SUMX(VALUES(Facts[Region]),DATE(2020,1,1)),1))',
-            'MAXX(Facts,COALESCE(SUMX(VALUES(Facts[Region]),DATE(2020,1,1)),"a"))',
-            'MAXX(Facts,COALESCE(FIRSTNONBLANKVALUE(Facts[Quantity],BLANK()),"a"))',
+    def test_coalesce_with_table_iterators_match_power_bi(self) -> None:
+        # Task 38 (2026-11-03): these are now answered; measured again in Power BI Desktop on 2026-11-03
+        for expr, powerbi in (
+            ('MAXX(Facts,COALESCE(BLANK(),SUMX(VALUES(Facts[Region]),DATE(2020,1,1)),1))', "131493"),
+            ('SUMX(Facts,COALESCE(BLANK(),SUMX(VALUES(Facts[Region]),DATE(2020,1,1)),1))', "788958"),
+            ('MAXX(Facts,COALESCE(SUMX(VALUES(Facts[Region]),DATE(2020,1,1)),"a"))', "01/05/2260 00:00:00"),
+            ('MAXX(Facts,COALESCE(FIRSTNONBLANKVALUE(Facts[Quantity],BLANK()),"a"))', "BLANK"),
         ):
-            self.assertIn("COALESCE", dax.local(expr), expr)
+            self.assertEqual(powerbi, dax.local(expr), expr)
 
 
 class AlternateTablesTest(unittest.TestCase):

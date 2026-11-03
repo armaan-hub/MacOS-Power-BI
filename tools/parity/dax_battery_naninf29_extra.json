@@ -1,0 +1,4026 @@
+{
+"powerbi_version": "2.157.879.0 (26.08)+da30fe74eb0b8a8786ab7326b69c400a0e951831",
+"frozen": "2026-11-03",
+"items": [
+{
+"expr": "(AVERAGEX({1},([Value]/0)*0))&\"z\"",
+"powerbi": "-nan(ind)z"
+},
+{
+"expr": "(COUNTAX(CALCULATETABLE(Facts,Facts[Region]=\"East\"),(1/0*0)+Facts[Quantity]))&\"z\"",
+"powerbi": "0z"
+},
+{
+"expr": "(COUNTX(CALCULATETABLE(Facts,Facts[Region]=\"East\"),(1/0*0)+Facts[Quantity]))&\"z\"",
+"powerbi": "0z"
+},
+{
+"expr": "(GEOMEANX(FILTER(Facts,Facts[Quantity]>2),IF(Facts[Sales]>1,1/0,Facts[Sales])))&\"z\"",
+"powerbi": "infz"
+},
+{
+"expr": "(GEOMEANX({-1,2,5,0},1/[Value]))&\"z\"",
+"powerbi": "nanz"
+},
+{
+"expr": "(GEOMEANX({1,2},(1/0*0)+[Value]))&\"z\"",
+"powerbi": "0z"
+},
+{
+"expr": "(GEOMEANX({1},([Value]/0)*0))&\"z\"",
+"powerbi": "0z"
+},
+{
+"expr": "(MEDIANX(Facts,IF(Facts[Quantity]>1,Facts[Quantity]*1E308*10,Facts[Quantity])))&\"z\"",
+"powerbi": "infz"
+},
+{
+"expr": "(MEDIANX({1,2},-1/0))&\"z\"",
+"powerbi": "-infz"
+},
+{
+"expr": "(PERCENTILEX.EXC(CALCULATETABLE(Facts,Facts[Region]=\"East\"),(Facts[Quantity]-1)/0,0.75))&\"z\"",
+"powerbi": "infz"
+},
+{
+"expr": "(PERCENTILEX.EXC(Facts,1/Facts[Quantity],0))&\"z\"",
+"powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 20) The percentile value should be in the range 1/(N+1)..N/(N+1) inclusive, where N is the number of data values.\""
+},
+{
+"expr": "(PERCENTILEX.EXC(Facts,Facts[Quantity]*(1/0*0),1))&\"z\"",
+"powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 20) The percentile value should be in the range 1/(N+1)..N/(N+1) inclusive, where N is the number of data values.\""
+},
+{
+"expr": "(PERCENTILEX.EXC({-1,2,5,0},([Value]-1)/0,0))&\"z\"",
+"powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 20) The percentile value should be in the range 1/(N+1)..N/(N+1) inclusive, where N is the number of data values.\""
+},
+{
+"expr": "(PERCENTILEX.EXC({0,1},IF([Value]>2,0/0,1/0),0.75))&\"z\"",
+"powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 20) The percentile value should be in the range 1/(N+1)..N/(N+1) inclusive, where N is the number of data values.\""
+},
+{
+"expr": "(PERCENTILEX.EXC({1,2},(1/0*0)+[Value],1))&\"z\"",
+"powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 20) The percentile value should be in the range 1/(N+1)..N/(N+1) inclusive, where N is the number of data values.\""
+},
+{
+"expr": "(PERCENTILEX.EXC({1,2},([Value]/0)*0,1))&\"z\"",
+"powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 20) The percentile value should be in the range 1/(N+1)..N/(N+1) inclusive, where N is the number of data values.\""
+},
+{
+"expr": "(PERCENTILEX.EXC({1,2},-1/0,0.75))&\"z\"",
+"powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 20) The percentile value should be in the range 1/(N+1)..N/(N+1) inclusive, where N is the number of data values.\""
+},
+{
+"expr": "(PERCENTILEX.EXC({1,2},IF([Value]>1,[Value]*1E308*10,[Value]),0.5))&\"z\"",
+"powerbi": "infz"
+},
+{
+"expr": "(PERCENTILEX.EXC({1},0/0,0.5))&\"z\"",
+"powerbi": "-nan(ind)z"
+},
+{
+"expr": "(PERCENTILEX.EXC({1},1/0,1))&\"z\"",
+"powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 20) The percentile value should be in the range 1/(N+1)..N/(N+1) inclusive, where N is the number of data values.\""
+},
+{
+"expr": "(PERCENTILEX.INC(CALCULATETABLE(Facts,Facts[Region]=\"East\"),IF(Facts[Quantity]>1,-1/0,Facts[Quantity]),0.75))&\"z\"",
+"powerbi": "-nan(ind)z"
+},
+{
+"expr": "(PERCENTILEX.INC(FILTER(Facts,Facts[Quantity]>2),(Facts[Sales]-1)/0,0.5))&\"z\"",
+"powerbi": "infz"
+},
+{
+"expr": "(PERCENTILEX.INC(Facts,IF(Facts[Quantity]>2,0/0,1/0),0.5))&\"z\"",
+"powerbi": "-nan(ind)z"
+},
+{
+"expr": "(PERCENTILEX.INC({0,1},1/[Value],0.25))&\"z\"",
+"powerbi": "infz"
+},
+{
+"expr": "(PERCENTILEX.INC({1,2},(1/0*0)+[Value],0.25))&\"z\"",
+"powerbi": "-nan(ind)z"
+},
+{
+"expr": "(PERCENTILEX.INC({1,2},([Value]-1)/0,0.25))&\"z\"",
+"powerbi": "-nan(ind)z"
+},
+{
+"expr": "(PERCENTILEX.INC({1,2},IF([Value]>1,[Value]*1E308*10,[Value]),0.75))&\"z\"",
+"powerbi": "infz"
+},
+{
+"expr": "(PRODUCTX(CALCULATETABLE(Facts,Facts[Region]=\"East\"),Facts[Quantity]/0))&\"z\"",
+"powerbi": "infz"
+},
+{
+"expr": "(PRODUCTX(Facts,IF(Facts[Quantity]>1,1/0,-1/0)))&\"z\"",
+"powerbi": "infz"
+},
+{
+"expr": "(PRODUCTX({-1,2,5,0},(1/0*0)+[Value]))&\"z\"",
+"powerbi": "-nan(ind)z"
+},
+{
+"expr": "(PRODUCTX({0,1},1/0))&\"z\"",
+"powerbi": "infz"
+},
+{
+"expr": "(PRODUCTX({1},IF([Value]>1,1/0,-1/0)))&\"z\"",
+"powerbi": "-infz"
+},
+{
+"expr": "(STDEVX.P(FILTER(Facts,Facts[Quantity]>2),-1/0))&\"z\"",
+"powerbi": "0z"
+},
+{
+"expr": "(STDEVX.P({1},1/0))&\"z\"",
+"powerbi": "0z"
+},
+{
+"expr": "(STDEVX.P({1},IF([Value]>2,0/0,1/0)))&\"z\"",
+"powerbi": "0z"
+},
+{
+"expr": "(STDEVX.P({1},[Value]/0))&\"z\"",
+"powerbi": "0z"
+},
+{
+"expr": "(STDEVX.S(CALCULATETABLE(Facts,Facts[Region]=\"East\"),(Facts[Quantity]-1)/0))&\"z\"",
+"powerbi": "0z"
+},
+{
+"expr": "(STDEVX.S(Facts,IF(Facts[Quantity]>1,1/0,Facts[Quantity])))&\"z\"",
+"powerbi": "0z"
+},
+{
+"expr": "(STDEVX.S({-1,2,5,0},IF([Value]>1,[Value]*1E308*10,[Value])))&\"z\"",
+"powerbi": "0z"
+},
+{
+"expr": "(STDEVX.S({-1,2,5,0},[Value]/0))&\"z\"",
+"powerbi": "0z"
+},
+{
+"expr": "(STDEVX.S({0,1},0/0))&\"z\"",
+"powerbi": "0z"
+},
+{
+"expr": "(STDEVX.S({0,1},IF([Value]>1,1/0,-1/0)))&\"z\"",
+"powerbi": "0z"
+},
+{
+"expr": "(STDEVX.S({1,2,3},([Value]/0)*0))&\"z\"",
+"powerbi": "0z"
+},
+{
+"expr": "(STDEVX.S({1,2,3},IF([Value]>1,0/0,[Value])))&\"z\"",
+"powerbi": "0z"
+},
+{
+"expr": "(SUMX({1,2,3},(1/0*0)+[Value]))&\"z\"",
+"powerbi": "-nan(ind)z"
+},
+{
+"expr": "(VARX.P(FILTER(Facts,Facts[Quantity]>2),(Facts[Sales]/0)*0))&\"z\"",
+"powerbi": "0z"
+},
+{
+"expr": "(VARX.P(FILTER(Facts,Facts[Quantity]>2),IF(Facts[Sales]>1,0/0,Facts[Sales])))&\"z\"",
+"powerbi": "0z"
+},
+{
+"expr": "(VARX.P({0,1},(1/0*0)+[Value]))&\"z\"",
+"powerbi": "0z"
+},
+{
+"expr": "(VARX.P({1,2},([Value]-1)/0))&\"z\"",
+"powerbi": "0z"
+},
+{
+"expr": "(VARX.P({1,2},0/0))&\"z\"",
+"powerbi": "0z"
+},
+{
+"expr": "(VARX.P({1,2},1/0))&\"z\"",
+"powerbi": "0z"
+},
+{
+"expr": "(VARX.P({1},(1/0*0)+[Value]))&\"z\"",
+"powerbi": "0z"
+},
+{
+"expr": "(VARX.P({1},([Value]/0)*0))&\"z\"",
+"powerbi": "0z"
+},
+{
+"expr": "(VARX.S(CALCULATETABLE(Facts,Facts[Region]=\"East\"),-1/0))&\"z\"",
+"powerbi": "0z"
+},
+{
+"expr": "(VARX.S(FILTER(Facts,Facts[Quantity]>2),IF(Facts[Sales]>2,0/0,1/0)))&\"z\"",
+"powerbi": "-nan(ind)z"
+},
+{
+"expr": "(VARX.S({-1,2,5,0},IF([Value]>1,-1/0,[Value])))&\"z\"",
+"powerbi": "0z"
+},
+{
+"expr": "(VARX.S({-1,2,5,0},IF([Value]>1,[Value]*1E308*10,[Value])))&\"z\"",
+"powerbi": "0z"
+},
+{
+"expr": "(VARX.S({1,2,3},([Value]/0)*0))&\"z\"",
+"powerbi": "0z"
+},
+{
+"expr": "(VARX.S({1},([Value]-1)/0))&\"z\"",
+"powerbi": "-nan(ind)z"
+},
+{
+"expr": "(VARX.S({1},IF([Value]>2,0/0,1/0)))&\"z\"",
+"powerbi": "-nan(ind)z"
+},
+{
+"expr": "(VARX.S({BLANK(),1},[Value]/0))&\"z\"",
+"powerbi": "-nan(ind)z"
+},
+{
+"expr": "AVERAGEX(Facts,(1/0*0)+Facts[Quantity])",
+"powerbi": "0"
+},
+{
+"expr": "AVERAGEX({0,1},(1/0*0)+[Value])",
+"powerbi": "NaN"
+},
+{
+"expr": "AVERAGEX({1,2,3},(1/0*0)+[Value])",
+"powerbi": "NaN"
+},
+{
+"expr": "AVERAGEX({1,2,3},[Value]*(1/0*0))",
+"powerbi": "NaN"
+},
+{
+"expr": "COUNTAX(CALCULATETABLE(Facts,Facts[Region]=\"East\"),Facts[Quantity]*(1/0*0))",
+"powerbi": "0"
+},
+{
+"expr": "COUNTAX(FILTER(Facts,Facts[Quantity]>2),(1/0*0)+Facts[Sales])",
+"powerbi": "0"
+},
+{
+"expr": "COUNTX(CALCULATETABLE(Facts,Facts[Region]=\"East\"),(1/0*0)+Facts[Quantity])",
+"powerbi": "0"
+},
+{
+"expr": "COUNTX(Facts,(Facts[Quantity]/0)*0)",
+"powerbi": "6"
+},
+{
+"expr": "COUNTX(Facts,Facts[Quantity]*(1/0*0))",
+"powerbi": "0"
+},
+{
+"expr": "GEOMEANX(CALCULATETABLE(Facts,Facts[Region]=\"East\"),Facts[Quantity]*(1/0*0))",
+"powerbi": "0"
+},
+{
+"expr": "GEOMEANX(CALCULATETABLE(Facts,Facts[Region]=\"East\"),Facts[Quantity]/0)",
+"powerbi": "Infinity"
+},
+{
+"expr": "GEOMEANX(CALCULATETABLE(Facts,Facts[Region]=\"East\"),IF(Facts[Quantity]>1,1/0,-1/0))",
+"powerbi": "-Infinity"
+},
+{
+"expr": "GEOMEANX(FILTER(Facts,Facts[Quantity]>2),(1/0*0)+Facts[Sales])",
+"powerbi": "0"
+},
+{
+"expr": "GEOMEANX(FILTER(Facts,Facts[Quantity]>2),-1/Facts[Sales])",
+"powerbi": "-Infinity"
+},
+{
+"expr": "GEOMEANX(FILTER(Facts,Facts[Quantity]>2),Facts[Sales]/0)",
+"powerbi": "Infinity"
+},
+{
+"expr": "GEOMEANX(FILTER(Facts,Facts[Quantity]>2),IF(Facts[Sales]>1,-1/0,Facts[Sales]))",
+"powerbi": "Infinity"
+},
+{
+"expr": "GEOMEANX(FILTER(Facts,Facts[Quantity]>2),IF(Facts[Sales]>1,0/0,Facts[Sales]))",
+"powerbi": "0"
+},
+{
+"expr": "GEOMEANX(FILTER(Facts,Facts[Quantity]>2),IF(Facts[Sales]>1,1/0,-1/0))",
+"powerbi": "-Infinity"
+},
+{
+"expr": "GEOMEANX(FILTER(Facts,Facts[Quantity]>2),IF(Facts[Sales]>1,Facts[Sales]*1E308*10,Facts[Sales]))",
+"powerbi": "Infinity"
+},
+{
+"expr": "GEOMEANX(FILTER(Facts,Facts[Quantity]>2),IF(Facts[Sales]>2,0/0,1/0))",
+"powerbi": "0"
+},
+{
+"expr": "GEOMEANX(Facts,(1/0*0)+Facts[Quantity])",
+"powerbi": "0"
+},
+{
+"expr": "GEOMEANX(Facts,(Facts[Quantity]-1)/0)",
+"powerbi": "0"
+},
+{
+"expr": "GEOMEANX(Facts,-1/Facts[Quantity])",
+"powerbi": "Infinity"
+},
+{
+"expr": "GEOMEANX(Facts,0/0)",
+"powerbi": "0"
+},
+{
+"expr": "GEOMEANX(Facts,1/0)",
+"powerbi": "Infinity"
+},
+{
+"expr": "GEOMEANX(Facts,Facts[Quantity]*(1/0*0))",
+"powerbi": "0"
+},
+{
+"expr": "GEOMEANX({-1,2,5,0},(1/0*0)+[Value])",
+"powerbi": "0"
+},
+{
+"expr": "GEOMEANX({-1,2,5,0},-1/0)",
+"powerbi": "Infinity"
+},
+{
+"expr": "GEOMEANX({-1,2,5,0},-1/[Value])",
+"powerbi": "NaN"
+},
+{
+"expr": "GEOMEANX({-1,2,5,0},1/[Value])",
+"powerbi": "NaN"
+},
+{
+"expr": "GEOMEANX({-1,2,5,0},[Value]*(1/0*0))",
+"powerbi": "0"
+},
+{
+"expr": "GEOMEANX({0,1},(1/0*0)+[Value])",
+"powerbi": "0"
+},
+{
+"expr": "GEOMEANX({0,1},([Value]/0)*0)",
+"powerbi": "0"
+},
+{
+"expr": "GEOMEANX({0,1},IF([Value]>1,1/0,-1/0))",
+"powerbi": "Infinity"
+},
+{
+"expr": "GEOMEANX({0,1},IF([Value]>2,0/0,1/0))",
+"powerbi": "Infinity"
+},
+{
+"expr": "GEOMEANX({1,2},(1/0*0)+[Value])",
+"powerbi": "0"
+},
+{
+"expr": "GEOMEANX({1,2},([Value]-1)/0)",
+"powerbi": "0"
+},
+{
+"expr": "GEOMEANX({1,2},IF([Value]>1,0/0,[Value]))",
+"powerbi": "0"
+},
+{
+"expr": "GEOMEANX({1,2},IF([Value]>1,[Value]*1E308*10,[Value]))",
+"powerbi": "Infinity"
+},
+{
+"expr": "GEOMEANX({1,2},IF([Value]>2,0/0,1/0))",
+"powerbi": "Infinity"
+},
+{
+"expr": "GEOMEANX({1,2},[Value]*(1/0*0))",
+"powerbi": "0"
+},
+{
+"expr": "GEOMEANX({BLANK(),1},(1/0*0)+[Value])",
+"powerbi": "0"
+},
+{
+"expr": "GEOMEANX({BLANK(),1},([Value]-1)/0)",
+"powerbi": "0"
+},
+{
+"expr": "GEOMEANX({BLANK(),1},-1/[Value])",
+"powerbi": "Infinity"
+},
+{
+"expr": "GEOMEANX({BLANK(),1},0/0)",
+"powerbi": "0"
+},
+{
+"expr": "GEOMEANX({BLANK(),1},1/0)",
+"powerbi": "Infinity"
+},
+{
+"expr": "GEOMEANX({BLANK(),1},1/[Value])",
+"powerbi": "Infinity"
+},
+{
+"expr": "GEOMEANX({BLANK(),1},IF([Value]>1,1/0,-1/0))",
+"powerbi": "Infinity"
+},
+{
+"expr": "GEOMEANX({BLANK(),1},IF([Value]>2,0/0,1/0))",
+"powerbi": "Infinity"
+},
+{
+"expr": "GEOMEANX({BLANK(),1},[Value]*(1/0*0))",
+"powerbi": "0"
+},
+{
+"expr": "GEOMEANX({BLANK(),1},[Value]/0)",
+"powerbi": "Infinity"
+},
+{
+"expr": "IFERROR(GEOMEANX({-1,2,5,0},IF([Value]>1,-1/0,[Value])),7)",
+"powerbi": "0"
+},
+{
+"expr": "IFERROR(GEOMEANX({0,1},([Value]-1)/0),7)",
+"powerbi": "0"
+},
+{
+"expr": "IFERROR(GEOMEANX({1,2},IF([Value]>1,1/0,[Value])),7)",
+"powerbi": "7"
+},
+{
+"expr": "IFERROR(GEOMEANX({BLANK(),1},([Value]/0)*0),7)",
+"powerbi": "0"
+},
+{
+"expr": "IFERROR(MEDIANX(Facts,(Facts[Quantity]-1)/0),7)",
+"powerbi": "7"
+},
+{
+"expr": "IFERROR(MEDIANX({0,1},IF([Value]>2,0/0,1/0)),7)",
+"powerbi": "7"
+},
+{
+"expr": "IFERROR(MEDIANX({1,2,3},(1/0*0)+[Value]),7)",
+"powerbi": "7"
+},
+{
+"expr": "IFERROR(MEDIANX({1,2,3},IF([Value]>1,-1/0,[Value])),7)",
+"powerbi": "7"
+},
+{
+"expr": "IFERROR(MEDIANX({1,2,3},IF([Value]>1,[Value]*1E308*10,[Value])),7)",
+"powerbi": "7"
+},
+{
+"expr": "IFERROR(MEDIANX({1,2},([Value]-1)/0),7)",
+"powerbi": "7"
+},
+{
+"expr": "IFERROR(MEDIANX({1,2},0/0),7)",
+"powerbi": "7"
+},
+{
+"expr": "IFERROR(PERCENTILEX.EXC(CALCULATETABLE(Facts,Facts[Region]=\"East\"),IF(Facts[Quantity]>1,Facts[Quantity]*1E308*10,Facts[Quantity]),0.75),7)",
+"powerbi": "7"
+},
+{
+"expr": "IFERROR(PERCENTILEX.EXC(FILTER(Facts,Facts[Quantity]>2),IF(Facts[Sales]>1,-1/0,Facts[Sales]),0.75),7)",
+"powerbi": "BLANK"
+},
+{
+"expr": "IFERROR(PERCENTILEX.EXC(Facts,(Facts[Quantity]/0)*0,1),7)",
+"powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 27) The percentile value should be in the range 1/(N+1)..N/(N+1) inclusive, where N is the number of data values.\""
+},
+{
+"expr": "IFERROR(PERCENTILEX.EXC({-1,2,5,0},IF([Value]>1,-1/0,[Value]),0),7)",
+"powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 27) The percentile value should be in the range 1/(N+1)..N/(N+1) inclusive, where N is the number of data values.\""
+},
+{
+"expr": "IFERROR(PERCENTILEX.EXC({0,1},[Value]/0,0.75),7)",
+"powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 27) The percentile value should be in the range 1/(N+1)..N/(N+1) inclusive, where N is the number of data values.\""
+},
+{
+"expr": "IFERROR(PERCENTILEX.EXC({1},IF([Value]>1,1/0,-1/0),0.25),7)",
+"powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 27) The percentile value should be in the range 1/(N+1)..N/(N+1) inclusive, where N is the number of data values.\""
+},
+{
+"expr": "IFERROR(PERCENTILEX.EXC({BLANK(),1},1/[Value],1),7)",
+"powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 27) The percentile value should be in the range 1/(N+1)..N/(N+1) inclusive, where N is the number of data values.\""
+},
+{
+"expr": "IFERROR(PERCENTILEX.INC(CALCULATETABLE(Facts,Facts[Region]=\"East\"),0/0,0),7)",
+"powerbi": "7"
+},
+{
+"expr": "IFERROR(PERCENTILEX.INC(Facts,1/0,0.25),7)",
+"powerbi": "7"
+},
+{
+"expr": "IFERROR(PERCENTILEX.INC(Facts,1/Facts[Quantity],0.5),7)",
+"powerbi": "0.416666666666667"
+},
+{
+"expr": "IFERROR(PERCENTILEX.INC(Facts,IF(Facts[Quantity]>1,Facts[Quantity]*1E308*10,Facts[Quantity]),0),7)",
+"powerbi": "0"
+},
+{
+"expr": "IFERROR(PERCENTILEX.INC({0,1},(1/0*0)+[Value],0),7)",
+"powerbi": "7"
+},
+{
+"expr": "IFERROR(PERCENTILEX.INC({1,2},([Value]-1)/0,0.75),7)",
+"powerbi": "7"
+},
+{
+"expr": "IFERROR(PERCENTILEX.INC({BLANK(),1},1/[Value],0.25),7)",
+"powerbi": "7"
+},
+{
+"expr": "IFERROR(PRODUCTX(Facts,IF(Facts[Quantity]>1,-1/0,Facts[Quantity])),7)",
+"powerbi": "7"
+},
+{
+"expr": "IFERROR(PRODUCTX({0,1},-1/0),7)",
+"powerbi": "7"
+},
+{
+"expr": "IFERROR(STDEVX.P(Facts,(Facts[Quantity]-1)/0),7)",
+"powerbi": "0"
+},
+{
+"expr": "IFERROR(STDEVX.P(Facts,IF(Facts[Quantity]>1,Facts[Quantity]*1E308*10,Facts[Quantity])),7)",
+"powerbi": "0"
+},
+{
+"expr": "IFERROR(STDEVX.P({BLANK(),1},([Value]-1)/0),7)",
+"powerbi": "0"
+},
+{
+"expr": "IFERROR(STDEVX.P({BLANK(),1},IF([Value]>2,0/0,1/0)),7)",
+"powerbi": "0"
+},
+{
+"expr": "IFERROR(STDEVX.S(CALCULATETABLE(Facts,Facts[Region]=\"East\"),(1/0*0)+Facts[Quantity]),7)",
+"powerbi": "0"
+},
+{
+"expr": "IFERROR(STDEVX.S(CALCULATETABLE(Facts,Facts[Region]=\"East\"),Facts[Quantity]/0),7)",
+"powerbi": "0"
+},
+{
+"expr": "IFERROR(STDEVX.S({-1,2,5,0},IF([Value]>1,0/0,[Value])),7)",
+"powerbi": "0"
+},
+{
+"expr": "IFERROR(STDEVX.S({-1,2,5,0},IF([Value]>1,1/0,-1/0)),7)",
+"powerbi": "0"
+},
+{
+"expr": "IFERROR(STDEVX.S({1,2},(1/0*0)+[Value]),7)",
+"powerbi": "0"
+},
+{
+"expr": "IFERROR(STDEVX.S({1,2},IF([Value]>1,-1/0,[Value])),7)",
+"powerbi": "0"
+},
+{
+"expr": "IFERROR(STDEVX.S({1,2},IF([Value]>2,0/0,1/0)),7)",
+"powerbi": "0"
+},
+{
+"expr": "IFERROR(STDEVX.S({1},-1/0),7)",
+"powerbi": "7"
+},
+{
+"expr": "IFERROR(VARX.P(FILTER(Facts,Facts[Quantity]>2),Facts[Sales]*(1/0*0)),7)",
+"powerbi": "0"
+},
+{
+"expr": "IFERROR(VARX.P(Facts,IF(Facts[Quantity]>1,0/0,Facts[Quantity])),7)",
+"powerbi": "0"
+},
+{
+"expr": "IFERROR(VARX.P({-1,2,5,0},1/0),7)",
+"powerbi": "0"
+},
+{
+"expr": "IFERROR(VARX.P({1,2,3},([Value]-1)/0),7)",
+"powerbi": "0"
+},
+{
+"expr": "IFERROR(VARX.P({1,2},IF([Value]>1,1/0,-1/0)),7)",
+"powerbi": "0"
+},
+{
+"expr": "IFERROR(VARX.P({1,2},IF([Value]>1,1/0,[Value])),7)",
+"powerbi": "0"
+},
+{
+"expr": "IFERROR(VARX.S(FILTER(Facts,Facts[Quantity]>2),0/0),7)",
+"powerbi": "0"
+},
+{
+"expr": "IFERROR(VARX.S(Facts,(Facts[Quantity]/0)*0),7)",
+"powerbi": "0"
+},
+{
+"expr": "IFERROR(VARX.S({-1,2,5,0},-1/0),7)",
+"powerbi": "0"
+},
+{
+"expr": "IFERROR(VARX.S({-1,2,5,0},IF([Value]>1,-1/0,[Value])),7)",
+"powerbi": "0"
+},
+{
+"expr": "IFERROR(VARX.S({-1,2,5,0},[Value]/0),7)",
+"powerbi": "0"
+},
+{
+"expr": "IFERROR(VARX.S({0,1},1/0),7)",
+"powerbi": "0"
+},
+{
+"expr": "IFERROR(VARX.S({1,2},([Value]/0)*0),7)",
+"powerbi": "0"
+},
+{
+"expr": "ISBLANK(AVERAGEX(CALCULATETABLE(Facts,Facts[Region]=\"East\"),Facts[Quantity]*(1/0*0)))",
+"powerbi": "False"
+},
+{
+"expr": "ISBLANK(AVERAGEX({BLANK(),1},(1/0*0)+[Value]))",
+"powerbi": "False"
+},
+{
+"expr": "ISBLANK(COUNTAX(FILTER(Facts,Facts[Quantity]>2),Facts[Sales]*(1/0*0)))",
+"powerbi": "False"
+},
+{
+"expr": "ISBLANK(COUNTX(Facts,Facts[Quantity]*(1/0*0)))",
+"powerbi": "False"
+},
+{
+"expr": "ISBLANK(GEOMEANX(Facts,(1/0*0)+Facts[Quantity]))",
+"powerbi": "False"
+},
+{
+"expr": "ISBLANK(GEOMEANX({0,1},IF([Value]>1,1/0,-1/0)))",
+"powerbi": "False"
+},
+{
+"expr": "ISBLANK(GEOMEANX({1,2,3},([Value]/0)*0))",
+"powerbi": "False"
+},
+{
+"expr": "ISBLANK(GEOMEANX({1},[Value]/0))",
+"powerbi": "False"
+},
+{
+"expr": "ISBLANK(MEDIANX(FILTER(Facts,Facts[Quantity]>2),1/0))",
+"powerbi": "False"
+},
+{
+"expr": "ISBLANK(MEDIANX({0,1},(1/0*0)+[Value]))",
+"powerbi": "False"
+},
+{
+"expr": "ISBLANK(MEDIANX({1},IF([Value]>1,1/0,-1/0)))",
+"powerbi": "False"
+},
+{
+"expr": "ISBLANK(MEDIANX({BLANK(),1},-1/0))",
+"powerbi": "False"
+},
+{
+"expr": "ISBLANK(PERCENTILEX.EXC(CALCULATETABLE(Facts,Facts[Region]=\"East\"),-1/0,0.25))",
+"powerbi": "False"
+},
+{
+"expr": "ISBLANK(PERCENTILEX.EXC(Facts,1/Facts[Quantity],1))",
+"powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 27) The percentile value should be in the range 1/(N+1)..N/(N+1) inclusive, where N is the number of data values.\""
+},
+{
+"expr": "ISBLANK(PERCENTILEX.EXC({1,2,3},([Value]/0)*0,0.5))",
+"powerbi": "False"
+},
+{
+"expr": "ISBLANK(PERCENTILEX.EXC({1,2,3},[Value]*(1/0*0),0))",
+"powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 27) The percentile value should be in the range 1/(N+1)..N/(N+1) inclusive, where N is the number of data values.\""
+},
+{
+"expr": "ISBLANK(PERCENTILEX.EXC({1,2},1/0,0.75))",
+"powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 27) The percentile value should be in the range 1/(N+1)..N/(N+1) inclusive, where N is the number of data values.\""
+},
+{
+"expr": "ISBLANK(PERCENTILEX.EXC({1,2},[Value]*(1/0*0),0.5))",
+"powerbi": "False"
+},
+{
+"expr": "ISBLANK(PERCENTILEX.EXC({1},(1/0*0)+[Value],0.5))",
+"powerbi": "False"
+},
+{
+"expr": "ISBLANK(PERCENTILEX.EXC({1},-1/0,0.25))",
+"powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 27) The percentile value should be in the range 1/(N+1)..N/(N+1) inclusive, where N is the number of data values.\""
+},
+{
+"expr": "ISBLANK(PERCENTILEX.EXC({BLANK(),1},0/0,0))",
+"powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 27) The percentile value should be in the range 1/(N+1)..N/(N+1) inclusive, where N is the number of data values.\""
+},
+{
+"expr": "ISBLANK(PERCENTILEX.EXC({BLANK(),1},1/0,0))",
+"powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 27) The percentile value should be in the range 1/(N+1)..N/(N+1) inclusive, where N is the number of data values.\""
+},
+{
+"expr": "ISBLANK(PERCENTILEX.INC(FILTER(Facts,Facts[Quantity]>2),IF(Facts[Sales]>1,-1/0,Facts[Sales]),1))",
+"powerbi": "True"
+},
+{
+"expr": "ISBLANK(PERCENTILEX.INC({1,2},(1/0*0)+[Value],0.25))",
+"powerbi": "False"
+},
+{
+"expr": "ISBLANK(PERCENTILEX.INC({1,2},([Value]-1)/0,0.25))",
+"powerbi": "False"
+},
+{
+"expr": "ISBLANK(PERCENTILEX.INC({1},([Value]-1)/0,1))",
+"powerbi": "False"
+},
+{
+"expr": "ISBLANK(PERCENTILEX.INC({BLANK(),1},([Value]-1)/0,0.75))",
+"powerbi": "False"
+},
+{
+"expr": "ISBLANK(PRODUCTX(CALCULATETABLE(Facts,Facts[Region]=\"East\"),-1/0))",
+"powerbi": "False"
+},
+{
+"expr": "ISBLANK(PRODUCTX(FILTER(Facts,Facts[Quantity]>2),-1/Facts[Sales]))",
+"powerbi": "False"
+},
+{
+"expr": "ISBLANK(PRODUCTX(Facts,1/0))",
+"powerbi": "False"
+},
+{
+"expr": "ISBLANK(PRODUCTX({-1,2,5,0},1/0))",
+"powerbi": "False"
+},
+{
+"expr": "ISBLANK(PRODUCTX({0,1},([Value]/0)*0))",
+"powerbi": "False"
+},
+{
+"expr": "ISBLANK(PRODUCTX({1,2},IF([Value]>1,1/0,[Value])))",
+"powerbi": "False"
+},
+{
+"expr": "ISBLANK(PRODUCTX({1,2},[Value]*(1/0*0)))",
+"powerbi": "False"
+},
+{
+"expr": "ISBLANK(PRODUCTX({1,2},[Value]/0))",
+"powerbi": "False"
+},
+{
+"expr": "ISBLANK(PRODUCTX({BLANK(),1},IF([Value]>1,1/0,-1/0)))",
+"powerbi": "False"
+},
+{
+"expr": "ISBLANK(STDEVX.P(CALCULATETABLE(Facts,Facts[Region]=\"East\"),-1/0))",
+"powerbi": "False"
+},
+{
+"expr": "ISBLANK(STDEVX.P(CALCULATETABLE(Facts,Facts[Region]=\"East\"),IF(Facts[Quantity]>1,1/0,Facts[Quantity])))",
+"powerbi": "False"
+},
+{
+"expr": "ISBLANK(STDEVX.P(FILTER(Facts,Facts[Quantity]>2),1/0))",
+"powerbi": "False"
+},
+{
+"expr": "ISBLANK(STDEVX.P({-1,2,5,0},IF([Value]>1,0/0,[Value])))",
+"powerbi": "False"
+},
+{
+"expr": "ISBLANK(STDEVX.P({0,1},IF([Value]>1,1/0,-1/0)))",
+"powerbi": "False"
+},
+{
+"expr": "ISBLANK(STDEVX.P({1,2},IF([Value]>2,0/0,1/0)))",
+"powerbi": "False"
+},
+{
+"expr": "ISBLANK(STDEVX.P({1,2},[Value]/0))",
+"powerbi": "False"
+},
+{
+"expr": "ISBLANK(STDEVX.P({BLANK(),1},IF([Value]>2,0/0,1/0)))",
+"powerbi": "False"
+},
+{
+"expr": "ISBLANK(STDEVX.S(Facts,(Facts[Quantity]-1)/0))",
+"powerbi": "False"
+},
+{
+"expr": "ISBLANK(STDEVX.S(Facts,-1/0))",
+"powerbi": "False"
+},
+{
+"expr": "ISBLANK(STDEVX.S({-1,2,5,0},0/0))",
+"powerbi": "False"
+},
+{
+"expr": "ISBLANK(STDEVX.S({-1,2,5,0},1/0))",
+"powerbi": "False"
+},
+{
+"expr": "ISBLANK(STDEVX.S({-1,2,5,0},IF([Value]>1,[Value]*1E308*10,[Value])))",
+"powerbi": "False"
+},
+{
+"expr": "ISBLANK(STDEVX.S({0,1},[Value]/0))",
+"powerbi": "False"
+},
+{
+"expr": "ISBLANK(STDEVX.S({1,2,3},0/0))",
+"powerbi": "False"
+},
+{
+"expr": "ISBLANK(STDEVX.S({1},(1/0*0)+[Value]))",
+"powerbi": "False"
+},
+{
+"expr": "ISBLANK(SUMX(Facts,Facts[Quantity]*(1/0*0)))",
+"powerbi": "False"
+},
+{
+"expr": "ISBLANK(SUMX({0,1},(1/0*0)+[Value]))",
+"powerbi": "False"
+},
+{
+"expr": "ISBLANK(SUMX({BLANK(),1},([Value]/0)*0))",
+"powerbi": "False"
+},
+{
+"expr": "ISBLANK(VARX.P(CALCULATETABLE(Facts,Facts[Region]=\"East\"),IF(Facts[Quantity]>1,-1/0,Facts[Quantity])))",
+"powerbi": "False"
+},
+{
+"expr": "ISBLANK(VARX.P({-1,2,5,0},([Value]-1)/0))",
+"powerbi": "False"
+},
+{
+"expr": "ISBLANK(VARX.P({-1,2,5,0},[Value]/0))",
+"powerbi": "False"
+},
+{
+"expr": "ISBLANK(VARX.P({1,2},[Value]*(1/0*0)))",
+"powerbi": "False"
+},
+{
+"expr": "ISBLANK(VARX.S(Facts,1/0))",
+"powerbi": "False"
+},
+{
+"expr": "ISBLANK(VARX.S(Facts,1/Facts[Quantity]))",
+"powerbi": "False"
+},
+{
+"expr": "ISBLANK(VARX.S({-1,2,5,0},[Value]*(1/0*0)))",
+"powerbi": "False"
+},
+{
+"expr": "ISBLANK(VARX.S({0,1},0/0))",
+"powerbi": "False"
+},
+{
+"expr": "ISBLANK(VARX.S({1,2,3},0/0))",
+"powerbi": "False"
+},
+{
+"expr": "ISBLANK(VARX.S({1,2,3},IF([Value]>1,-1/0,[Value])))",
+"powerbi": "False"
+},
+{
+"expr": "ISBLANK(VARX.S({1,2},IF([Value]>1,1/0,-1/0)))",
+"powerbi": "False"
+},
+{
+"expr": "ISBLANK(VARX.S({1,2},[Value]*(1/0*0)))",
+"powerbi": "False"
+},
+{
+"expr": "ISBLANK(VARX.S({BLANK(),1},([Value]/0)*0))",
+"powerbi": "False"
+},
+{
+"expr": "ISBLANK(VARX.S({BLANK(),1},[Value]*(1/0*0)))",
+"powerbi": "False"
+},
+{
+"expr": "MEDIANX(CALCULATETABLE(Facts,Facts[Region]=\"East\"),(1/0*0)+Facts[Quantity])",
+"powerbi": "NaN"
+},
+{
+"expr": "MEDIANX(CALCULATETABLE(Facts,Facts[Region]=\"East\"),Facts[Quantity]*(1/0*0))",
+"powerbi": "NaN"
+},
+{
+"expr": "MEDIANX(CALCULATETABLE(Facts,Facts[Region]=\"East\"),Facts[Quantity]/0)",
+"powerbi": "Infinity"
+},
+{
+"expr": "MEDIANX(CALCULATETABLE(Facts,Facts[Region]=\"East\"),IF(Facts[Quantity]>1,-1/0,Facts[Quantity]))",
+"powerbi": "-Infinity"
+},
+{
+"expr": "MEDIANX(FILTER(Facts,Facts[Quantity]>2),(1/0*0)+Facts[Sales])",
+"powerbi": "NaN"
+},
+{
+"expr": "MEDIANX(FILTER(Facts,Facts[Quantity]>2),1/0)",
+"powerbi": "Infinity"
+},
+{
+"expr": "MEDIANX(FILTER(Facts,Facts[Quantity]>2),IF(Facts[Sales]>1,1/0,-1/0))",
+"powerbi": "Infinity"
+},
+{
+"expr": "MEDIANX(FILTER(Facts,Facts[Quantity]>2),IF(Facts[Sales]>1,1/0,Facts[Sales]))",
+"powerbi": "Infinity"
+},
+{
+"expr": "MEDIANX(FILTER(Facts,Facts[Quantity]>2),IF(Facts[Sales]>1,Facts[Sales]*1E308*10,Facts[Sales]))",
+"powerbi": "Infinity"
+},
+{
+"expr": "MEDIANX(Facts,-1/Facts[Quantity])",
+"powerbi": "-0.416666666666667"
+},
+{
+"expr": "MEDIANX(Facts,0/0)",
+"powerbi": "NaN"
+},
+{
+"expr": "MEDIANX(Facts,IF(Facts[Quantity]>1,-1/0,Facts[Quantity]))",
+"powerbi": "-Infinity"
+},
+{
+"expr": "MEDIANX({-1,2,5,0},-1/0)",
+"powerbi": "-Infinity"
+},
+{
+"expr": "MEDIANX({-1,2,5,0},IF([Value]>1,-1/0,[Value]))",
+"powerbi": "NaN"
+},
+{
+"expr": "MEDIANX({-1,2,5,0},IF([Value]>2,0/0,1/0))",
+"powerbi": "Infinity"
+},
+{
+"expr": "MEDIANX({-1,2,5,0},[Value]*(1/0*0))",
+"powerbi": "NaN"
+},
+{
+"expr": "MEDIANX({0,1},([Value]-1)/0)",
+"powerbi": "-Infinity"
+},
+{
+"expr": "MEDIANX({0,1},1/0)",
+"powerbi": "Infinity"
+},
+{
+"expr": "MEDIANX({0,1},1/[Value])",
+"powerbi": "Infinity"
+},
+{
+"expr": "MEDIANX({0,1},IF([Value]>1,1/0,-1/0))",
+"powerbi": "-Infinity"
+},
+{
+"expr": "MEDIANX({0,1},IF([Value]>2,0/0,1/0))",
+"powerbi": "Infinity"
+},
+{
+"expr": "MEDIANX({0,1},[Value]/0)",
+"powerbi": "NaN"
+},
+{
+"expr": "MEDIANX({1,2,3},([Value]-1)/0)",
+"powerbi": "Infinity"
+},
+{
+"expr": "MEDIANX({1,2,3},([Value]/0)*0)",
+"powerbi": "NaN"
+},
+{
+"expr": "MEDIANX({1,2,3},0/0)",
+"powerbi": "NaN"
+},
+{
+"expr": "MEDIANX({1,2,3},IF([Value]>1,0/0,[Value]))",
+"powerbi": "NaN"
+},
+{
+"expr": "MEDIANX({1,2,3},IF([Value]>2,0/0,1/0))",
+"powerbi": "Infinity"
+},
+{
+"expr": "MEDIANX({1,2},IF([Value]>1,1/0,-1/0))",
+"powerbi": "NaN"
+},
+{
+"expr": "MEDIANX({BLANK(),1},([Value]/0)*0)",
+"powerbi": "NaN"
+},
+{
+"expr": "MEDIANX({BLANK(),1},IF([Value]>2,0/0,1/0))",
+"powerbi": "Infinity"
+},
+{
+"expr": "MEDIANX({BLANK(),1},[Value]*(1/0*0))",
+"powerbi": "NaN"
+},
+{
+"expr": "PERCENTILEX.EXC(CALCULATETABLE(Facts,Facts[Region]=\"East\"),IF(Facts[Quantity]>1,-1/0,Facts[Quantity]),0.5)",
+"powerbi": "-Infinity"
+},
+{
+"expr": "PERCENTILEX.EXC(CALCULATETABLE(Facts,Facts[Region]=\"East\"),IF(Facts[Quantity]>1,Facts[Quantity]*1E308*10,Facts[Quantity]),0.25)",
+"powerbi": "1"
+},
+{
+"expr": "PERCENTILEX.EXC(FILTER(Facts,Facts[Quantity]>2),(Facts[Sales]/0)*0,1)",
+"powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 19) The percentile value should be in the range 1/(N+1)..N/(N+1) inclusive, where N is the number of data values.\""
+},
+{
+"expr": "PERCENTILEX.EXC(FILTER(Facts,Facts[Quantity]>2),0/0,1)",
+"powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 19) The percentile value should be in the range 1/(N+1)..N/(N+1) inclusive, where N is the number of data values.\""
+},
+{
+"expr": "PERCENTILEX.EXC(FILTER(Facts,Facts[Quantity]>2),1/0,1)",
+"powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 19) The percentile value should be in the range 1/(N+1)..N/(N+1) inclusive, where N is the number of data values.\""
+},
+{
+"expr": "PERCENTILEX.EXC(FILTER(Facts,Facts[Quantity]>2),Facts[Sales]*(1/0*0),0.25)",
+"powerbi": "BLANK"
+},
+{
+"expr": "PERCENTILEX.EXC(Facts,0/0,0.5)",
+"powerbi": "NaN"
+},
+{
+"expr": "PERCENTILEX.EXC(Facts,1/0,0.5)",
+"powerbi": "Infinity"
+},
+{
+"expr": "PERCENTILEX.EXC(Facts,Facts[Quantity]*(1/0*0),0.25)",
+"powerbi": "NaN"
+},
+{
+"expr": "PERCENTILEX.EXC(Facts,IF(Facts[Quantity]>1,1/0,Facts[Quantity]),0.25)",
+"powerbi": "0.75"
+},
+{
+"expr": "PERCENTILEX.EXC({-1,2,5,0},-1/[Value],0.75)",
+"powerbi": "0.7"
+},
+{
+"expr": "PERCENTILEX.EXC({-1,2,5,0},-1/[Value],1)",
+"powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 19) The percentile value should be in the range 1/(N+1)..N/(N+1) inclusive, where N is the number of data values.\""
+},
+{
+"expr": "PERCENTILEX.EXC({0,1},(1/0*0)+[Value],0)",
+"powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 19) The percentile value should be in the range 1/(N+1)..N/(N+1) inclusive, where N is the number of data values.\""
+},
+{
+"expr": "PERCENTILEX.EXC({0,1},[Value]*(1/0*0),1)",
+"powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 19) The percentile value should be in the range 1/(N+1)..N/(N+1) inclusive, where N is the number of data values.\""
+},
+{
+"expr": "PERCENTILEX.EXC({1,2,3},IF([Value]>1,1/0,-1/0),0.75)",
+"powerbi": "Infinity"
+},
+{
+"expr": "PERCENTILEX.EXC({1,2,3},[Value]/0,0.75)",
+"powerbi": "Infinity"
+},
+{
+"expr": "PERCENTILEX.EXC({1,2},([Value]-1)/0,0.5)",
+"powerbi": "NaN"
+},
+{
+"expr": "PERCENTILEX.EXC({1,2},IF([Value]>1,0/0,[Value]),0.25)",
+"powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 19) The percentile value should be in the range 1/(N+1)..N/(N+1) inclusive, where N is the number of data values.\""
+},
+{
+"expr": "PERCENTILEX.EXC({1,2},IF([Value]>1,0/0,[Value]),1)",
+"powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 19) The percentile value should be in the range 1/(N+1)..N/(N+1) inclusive, where N is the number of data values.\""
+},
+{
+"expr": "PERCENTILEX.EXC({1,2},IF([Value]>1,1/0,[Value]),0.5)",
+"powerbi": "Infinity"
+},
+{
+"expr": "PERCENTILEX.EXC({1},1/0,0.5)",
+"powerbi": "Infinity"
+},
+{
+"expr": "PERCENTILEX.EXC({1},IF([Value]>2,0/0,1/0),0)",
+"powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 19) The percentile value should be in the range 1/(N+1)..N/(N+1) inclusive, where N is the number of data values.\""
+},
+{
+"expr": "PERCENTILEX.EXC({1},[Value]/0,0.25)",
+"powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 19) The percentile value should be in the range 1/(N+1)..N/(N+1) inclusive, where N is the number of data values.\""
+},
+{
+"expr": "PERCENTILEX.EXC({BLANK(),1},1/0,0)",
+"powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 19) The percentile value should be in the range 1/(N+1)..N/(N+1) inclusive, where N is the number of data values.\""
+},
+{
+"expr": "PERCENTILEX.EXC({BLANK(),1},1/[Value],0.5)",
+"powerbi": "Infinity"
+},
+{
+"expr": "PERCENTILEX.EXC({BLANK(),1},[Value]*(1/0*0),0.25)",
+"powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 19) The percentile value should be in the range 1/(N+1)..N/(N+1) inclusive, where N is the number of data values.\""
+},
+{
+"expr": "PERCENTILEX.INC(CALCULATETABLE(Facts,Facts[Region]=\"East\"),(1/0*0)+Facts[Quantity],1)",
+"powerbi": "NaN"
+},
+{
+"expr": "PERCENTILEX.INC(FILTER(Facts,Facts[Quantity]>2),-1/0,0.75)",
+"powerbi": "-Infinity"
+},
+{
+"expr": "PERCENTILEX.INC(FILTER(Facts,Facts[Quantity]>2),-1/Facts[Sales],0.75)",
+"powerbi": "-0.225"
+},
+{
+"expr": "PERCENTILEX.INC(FILTER(Facts,Facts[Quantity]>2),IF(Facts[Sales]>2,0/0,1/0),0.75)",
+"powerbi": "NaN"
+},
+{
+"expr": "PERCENTILEX.INC(Facts,0/0,0.75)",
+"powerbi": "NaN"
+},
+{
+"expr": "PERCENTILEX.INC(Facts,1/Facts[Quantity],0.5)",
+"powerbi": "0.416666666666667"
+},
+{
+"expr": "PERCENTILEX.INC(Facts,1/Facts[Quantity],1)",
+"powerbi": "Infinity"
+},
+{
+"expr": "PERCENTILEX.INC(Facts,IF(Facts[Quantity]>2,0/0,1/0),0)",
+"powerbi": "NaN"
+},
+{
+"expr": "PERCENTILEX.INC({-1,2,5,0},(1/0*0)+[Value],0.25)",
+"powerbi": "NaN"
+},
+{
+"expr": "PERCENTILEX.INC({-1,2,5,0},([Value]/0)*0,1)",
+"powerbi": "NaN"
+},
+{
+"expr": "PERCENTILEX.INC({-1,2,5,0},-1/[Value],0.5)",
+"powerbi": "-0.35"
+},
+{
+"expr": "PERCENTILEX.INC({-1,2,5,0},0/0,0)",
+"powerbi": "NaN"
+},
+{
+"expr": "PERCENTILEX.INC({-1,2,5,0},1/0,0.25)",
+"powerbi": "Infinity"
+},
+{
+"expr": "PERCENTILEX.INC({-1,2,5,0},1/0,0.75)",
+"powerbi": "Infinity"
+},
+{
+"expr": "PERCENTILEX.INC({-1,2,5,0},IF([Value]>1,0/0,[Value]),0.75)",
+"powerbi": "-0.75"
+},
+{
+"expr": "PERCENTILEX.INC({-1,2,5,0},IF([Value]>1,1/0,-1/0),0)",
+"powerbi": "-Infinity"
+},
+{
+"expr": "PERCENTILEX.INC({-1,2,5,0},IF([Value]>1,[Value]*1E308*10,[Value]),0)",
+"powerbi": "-1"
+},
+{
+"expr": "PERCENTILEX.INC({-1,2,5,0},IF([Value]>2,0/0,1/0),0.25)",
+"powerbi": "NaN"
+},
+{
+"expr": "PERCENTILEX.INC({-1,2,5,0},[Value]*(1/0*0),0.75)",
+"powerbi": "NaN"
+},
+{
+"expr": "PERCENTILEX.INC({0,1},1/[Value],0.25)",
+"powerbi": "Infinity"
+},
+{
+"expr": "PERCENTILEX.INC({1,2,3},([Value]-1)/0,0)",
+"powerbi": "NaN"
+},
+{
+"expr": "PERCENTILEX.INC({1,2,3},IF([Value]>2,0/0,1/0),0.5)",
+"powerbi": "Infinity"
+},
+{
+"expr": "PERCENTILEX.INC({1,2,3},[Value]*(1/0*0),1)",
+"powerbi": "NaN"
+},
+{
+"expr": "PERCENTILEX.INC({1,2,3},[Value]/0,0.25)",
+"powerbi": "Infinity"
+},
+{
+"expr": "PERCENTILEX.INC({1,2},([Value]-1)/0,0.25)",
+"powerbi": "NaN"
+},
+{
+"expr": "PERCENTILEX.INC({1,2},([Value]/0)*0,0.5)",
+"powerbi": "NaN"
+},
+{
+"expr": "PERCENTILEX.INC({1,2},0/0,0)",
+"powerbi": "NaN"
+},
+{
+"expr": "PERCENTILEX.INC({1,2},IF([Value]>1,1/0,-1/0),1)",
+"powerbi": "Infinity"
+},
+{
+"expr": "PERCENTILEX.INC({1,2},IF([Value]>1,[Value]*1E308*10,[Value]),0.5)",
+"powerbi": "Infinity"
+},
+{
+"expr": "PERCENTILEX.INC({1,2},IF([Value]>1,[Value]*1E308*10,[Value]),1)",
+"powerbi": "Infinity"
+},
+{
+"expr": "PERCENTILEX.INC({1},0/0,1)",
+"powerbi": "NaN"
+},
+{
+"expr": "PERCENTILEX.INC({1},1/0,0.25)",
+"powerbi": "Infinity"
+},
+{
+"expr": "PERCENTILEX.INC({1},[Value]/0,0)",
+"powerbi": "Infinity"
+},
+{
+"expr": "PERCENTILEX.INC({BLANK(),1},([Value]/0)*0,0)",
+"powerbi": "BLANK"
+},
+{
+"expr": "PERCENTILEX.INC({BLANK(),1},([Value]/0)*0,0.25)",
+"powerbi": "NaN"
+},
+{
+"expr": "PERCENTILEX.INC({BLANK(),1},-1/[Value],0)",
+"powerbi": "-Infinity"
+},
+{
+"expr": "PERCENTILEX.INC({BLANK(),1},IF([Value]>1,1/0,-1/0),0.75)",
+"powerbi": "-Infinity"
+},
+{
+"expr": "PERCENTILEX.INC({BLANK(),1},[Value]*(1/0*0),0)",
+"powerbi": "BLANK"
+},
+{
+"expr": "PERCENTILEX.INC({BLANK(),1},[Value]*(1/0*0),1)",
+"powerbi": "NaN"
+},
+{
+"expr": "PRODUCTX(CALCULATETABLE(Facts,Facts[Region]=\"East\"),(1/0*0)+Facts[Quantity])",
+"powerbi": "NaN"
+},
+{
+"expr": "PRODUCTX(CALCULATETABLE(Facts,Facts[Region]=\"East\"),(Facts[Quantity]/0)*0)",
+"powerbi": "0"
+},
+{
+"expr": "PRODUCTX(CALCULATETABLE(Facts,Facts[Region]=\"East\"),-1/0)",
+"powerbi": "-Infinity"
+},
+{
+"expr": "PRODUCTX(CALCULATETABLE(Facts,Facts[Region]=\"East\"),IF(Facts[Quantity]>1,0/0,Facts[Quantity]))",
+"powerbi": "NaN"
+},
+{
+"expr": "PRODUCTX(CALCULATETABLE(Facts,Facts[Region]=\"East\"),IF(Facts[Quantity]>1,1/0,Facts[Quantity]))",
+"powerbi": "Infinity"
+},
+{
+"expr": "PRODUCTX(FILTER(Facts,Facts[Quantity]>2),(1/0*0)+Facts[Sales])",
+"powerbi": "NaN"
+},
+{
+"expr": "PRODUCTX(FILTER(Facts,Facts[Quantity]>2),(Facts[Sales]-1)/0)",
+"powerbi": "-Infinity"
+},
+{
+"expr": "PRODUCTX(FILTER(Facts,Facts[Quantity]>2),(Facts[Sales]/0)*0)",
+"powerbi": "NaN"
+},
+{
+"expr": "PRODUCTX(FILTER(Facts,Facts[Quantity]>2),1/0)",
+"powerbi": "Infinity"
+},
+{
+"expr": "PRODUCTX(FILTER(Facts,Facts[Quantity]>2),IF(Facts[Sales]>1,-1/0,Facts[Sales]))",
+"powerbi": "Infinity"
+},
+{
+"expr": "PRODUCTX(FILTER(Facts,Facts[Quantity]>2),IF(Facts[Sales]>1,0/0,Facts[Sales]))",
+"powerbi": "NaN"
+},
+{
+"expr": "PRODUCTX(FILTER(Facts,Facts[Quantity]>2),IF(Facts[Sales]>1,1/0,Facts[Sales]))",
+"powerbi": "Infinity"
+},
+{
+"expr": "PRODUCTX(FILTER(Facts,Facts[Quantity]>2),IF(Facts[Sales]>1,Facts[Sales]*1E308*10,Facts[Sales]))",
+"powerbi": "Infinity"
+},
+{
+"expr": "PRODUCTX(Facts,-1/0)",
+"powerbi": "Infinity"
+},
+{
+"expr": "PRODUCTX(Facts,Facts[Quantity]/0)",
+"powerbi": "NaN"
+},
+{
+"expr": "PRODUCTX(Facts,IF(Facts[Quantity]>1,1/0,-1/0))",
+"powerbi": "Infinity"
+},
+{
+"expr": "PRODUCTX(Facts,IF(Facts[Quantity]>1,Facts[Quantity]*1E308*10,Facts[Quantity]))",
+"powerbi": "NaN"
+},
+{
+"expr": "PRODUCTX({-1,2,5,0},([Value]/0)*0)",
+"powerbi": "NaN"
+},
+{
+"expr": "PRODUCTX({-1,2,5,0},1/[Value])",
+"powerbi": "-Infinity"
+},
+{
+"expr": "PRODUCTX({-1,2,5,0},IF([Value]>1,0/0,[Value]))",
+"powerbi": "NaN"
+},
+{
+"expr": "PRODUCTX({-1,2,5,0},IF([Value]>1,1/0,-1/0))",
+"powerbi": "Infinity"
+},
+{
+"expr": "PRODUCTX({0,1},([Value]-1)/0)",
+"powerbi": "NaN"
+},
+{
+"expr": "PRODUCTX({0,1},-1/[Value])",
+"powerbi": "Infinity"
+},
+{
+"expr": "PRODUCTX({0,1},0/0)",
+"powerbi": "NaN"
+},
+{
+"expr": "PRODUCTX({0,1},[Value]*(1/0*0))",
+"powerbi": "NaN"
+},
+{
+"expr": "PRODUCTX({1,2,3},([Value]/0)*0)",
+"powerbi": "NaN"
+},
+{
+"expr": "PRODUCTX({1,2,3},-1/0)",
+"powerbi": "-Infinity"
+},
+{
+"expr": "PRODUCTX({1,2,3},IF([Value]>1,0/0,[Value]))",
+"powerbi": "NaN"
+},
+{
+"expr": "PRODUCTX({1,2,3},IF([Value]>1,[Value]*1E308*10,[Value]))",
+"powerbi": "Infinity"
+},
+{
+"expr": "PRODUCTX({1,2,3},[Value]/0)",
+"powerbi": "Infinity"
+},
+{
+"expr": "PRODUCTX({1,2},([Value]/0)*0)",
+"powerbi": "NaN"
+},
+{
+"expr": "PRODUCTX({1,2},IF([Value]>2,0/0,1/0))",
+"powerbi": "Infinity"
+},
+{
+"expr": "PRODUCTX({1,2},[Value]*(1/0*0))",
+"powerbi": "NaN"
+},
+{
+"expr": "PRODUCTX({1,2},[Value]/0)",
+"powerbi": "Infinity"
+},
+{
+"expr": "PRODUCTX({1},(1/0*0)+[Value])",
+"powerbi": "NaN"
+},
+{
+"expr": "PRODUCTX({1},([Value]/0)*0)",
+"powerbi": "NaN"
+},
+{
+"expr": "PRODUCTX({1},1/0)",
+"powerbi": "Infinity"
+},
+{
+"expr": "PRODUCTX({BLANK(),1},1/0)",
+"powerbi": "Infinity"
+},
+{
+"expr": "PRODUCTX({BLANK(),1},[Value]/0)",
+"powerbi": "Infinity"
+},
+{
+"expr": "STDEVX.P(CALCULATETABLE(Facts,Facts[Region]=\"East\"),(1/0*0)+Facts[Quantity])",
+"powerbi": "0"
+},
+{
+"expr": "STDEVX.P(CALCULATETABLE(Facts,Facts[Region]=\"East\"),Facts[Quantity]*(1/0*0))",
+"powerbi": "0"
+},
+{
+"expr": "STDEVX.P(CALCULATETABLE(Facts,Facts[Region]=\"East\"),IF(Facts[Quantity]>1,0/0,Facts[Quantity]))",
+"powerbi": "0"
+},
+{
+"expr": "STDEVX.P(CALCULATETABLE(Facts,Facts[Region]=\"East\"),IF(Facts[Quantity]>2,0/0,1/0))",
+"powerbi": "0"
+},
+{
+"expr": "STDEVX.P(FILTER(Facts,Facts[Quantity]>2),(1/0*0)+Facts[Sales])",
+"powerbi": "0"
+},
+{
+"expr": "STDEVX.P(FILTER(Facts,Facts[Quantity]>2),(Facts[Sales]-1)/0)",
+"powerbi": "0"
+},
+{
+"expr": "STDEVX.P(FILTER(Facts,Facts[Quantity]>2),(Facts[Sales]/0)*0)",
+"powerbi": "0"
+},
+{
+"expr": "STDEVX.P(FILTER(Facts,Facts[Quantity]>2),-1/0)",
+"powerbi": "0"
+},
+{
+"expr": "STDEVX.P(FILTER(Facts,Facts[Quantity]>2),-1/Facts[Sales])",
+"powerbi": "0"
+},
+{
+"expr": "STDEVX.P(FILTER(Facts,Facts[Quantity]>2),1/0)",
+"powerbi": "0"
+},
+{
+"expr": "STDEVX.P(FILTER(Facts,Facts[Quantity]>2),1/Facts[Sales])",
+"powerbi": "0"
+},
+{
+"expr": "STDEVX.P(FILTER(Facts,Facts[Quantity]>2),Facts[Sales]/0)",
+"powerbi": "0"
+},
+{
+"expr": "STDEVX.P(FILTER(Facts,Facts[Quantity]>2),IF(Facts[Sales]>1,Facts[Sales]*1E308*10,Facts[Sales]))",
+"powerbi": "0"
+},
+{
+"expr": "STDEVX.P(Facts,(1/0*0)+Facts[Quantity])",
+"powerbi": "0"
+},
+{
+"expr": "STDEVX.P(Facts,(Facts[Quantity]/0)*0)",
+"powerbi": "0"
+},
+{
+"expr": "STDEVX.P(Facts,1/0)",
+"powerbi": "0"
+},
+{
+"expr": "STDEVX.P(Facts,Facts[Quantity]/0)",
+"powerbi": "0"
+},
+{
+"expr": "STDEVX.P(Facts,IF(Facts[Quantity]>1,1/0,Facts[Quantity]))",
+"powerbi": "0"
+},
+{
+"expr": "STDEVX.P(Facts,IF(Facts[Quantity]>1,Facts[Quantity]*1E308*10,Facts[Quantity]))",
+"powerbi": "0"
+},
+{
+"expr": "STDEVX.P({-1,2,5,0},([Value]/0)*0)",
+"powerbi": "0"
+},
+{
+"expr": "STDEVX.P({-1,2,5,0},-1/0)",
+"powerbi": "0"
+},
+{
+"expr": "STDEVX.P({-1,2,5,0},0/0)",
+"powerbi": "0"
+},
+{
+"expr": "STDEVX.P({-1,2,5,0},1/[Value])",
+"powerbi": "0"
+},
+{
+"expr": "STDEVX.P({-1,2,5,0},IF([Value]>1,1/0,-1/0))",
+"powerbi": "0"
+},
+{
+"expr": "STDEVX.P({0,1},([Value]-1)/0)",
+"powerbi": "0"
+},
+{
+"expr": "STDEVX.P({0,1},1/[Value])",
+"powerbi": "0"
+},
+{
+"expr": "STDEVX.P({0,1},IF([Value]>2,0/0,1/0))",
+"powerbi": "0"
+},
+{
+"expr": "STDEVX.P({1,2,3},(1/0*0)+[Value])",
+"powerbi": "0"
+},
+{
+"expr": "STDEVX.P({1,2,3},IF([Value]>1,-1/0,[Value]))",
+"powerbi": "0"
+},
+{
+"expr": "STDEVX.P({1,2,3},IF([Value]>1,1/0,-1/0))",
+"powerbi": "0"
+},
+{
+"expr": "STDEVX.P({1,2,3},IF([Value]>2,0/0,1/0))",
+"powerbi": "0"
+},
+{
+"expr": "STDEVX.P({1,2},IF([Value]>1,[Value]*1E308*10,[Value]))",
+"powerbi": "0"
+},
+{
+"expr": "STDEVX.P({1,2},[Value]*(1/0*0))",
+"powerbi": "0"
+},
+{
+"expr": "STDEVX.P({1},([Value]/0)*0)",
+"powerbi": "0"
+},
+{
+"expr": "STDEVX.P({1},IF([Value]>2,0/0,1/0))",
+"powerbi": "0"
+},
+{
+"expr": "STDEVX.P({BLANK(),1},(1/0*0)+[Value])",
+"powerbi": "0"
+},
+{
+"expr": "STDEVX.S(CALCULATETABLE(Facts,Facts[Region]=\"East\"),(Facts[Quantity]/0)*0)",
+"powerbi": "0"
+},
+{
+"expr": "STDEVX.S(CALCULATETABLE(Facts,Facts[Region]=\"East\"),Facts[Quantity]/0)",
+"powerbi": "0"
+},
+{
+"expr": "STDEVX.S(CALCULATETABLE(Facts,Facts[Region]=\"East\"),IF(Facts[Quantity]>2,0/0,1/0))",
+"powerbi": "0"
+},
+{
+"expr": "STDEVX.S(FILTER(Facts,Facts[Quantity]>2),(Facts[Sales]-1)/0)",
+"powerbi": "0"
+},
+{
+"expr": "STDEVX.S(FILTER(Facts,Facts[Quantity]>2),-1/0)",
+"powerbi": "0"
+},
+{
+"expr": "STDEVX.S(FILTER(Facts,Facts[Quantity]>2),0/0)",
+"powerbi": "0"
+},
+{
+"expr": "STDEVX.S(FILTER(Facts,Facts[Quantity]>2),1/Facts[Sales])",
+"powerbi": "0"
+},
+{
+"expr": "STDEVX.S(FILTER(Facts,Facts[Quantity]>2),IF(Facts[Sales]>1,1/0,Facts[Sales]))",
+"powerbi": "0"
+},
+{
+"expr": "STDEVX.S(FILTER(Facts,Facts[Quantity]>2),IF(Facts[Sales]>2,0/0,1/0))",
+"powerbi": "NaN"
+},
+{
+"expr": "STDEVX.S(Facts,IF(Facts[Quantity]>1,Facts[Quantity]*1E308*10,Facts[Quantity]))",
+"powerbi": "0"
+},
+{
+"expr": "STDEVX.S({-1,2,5,0},1/0)",
+"powerbi": "0"
+},
+{
+"expr": "STDEVX.S({-1,2,5,0},IF([Value]>1,-1/0,[Value]))",
+"powerbi": "0"
+},
+{
+"expr": "STDEVX.S({-1,2,5,0},IF([Value]>1,0/0,[Value]))",
+"powerbi": "0"
+},
+{
+"expr": "STDEVX.S({-1,2,5,0},IF([Value]>1,[Value]*1E308*10,[Value]))",
+"powerbi": "0"
+},
+{
+"expr": "STDEVX.S({-1,2,5,0},[Value]/0)",
+"powerbi": "0"
+},
+{
+"expr": "STDEVX.S({0,1},1/[Value])",
+"powerbi": "0"
+},
+{
+"expr": "STDEVX.S({0,1},IF([Value]>1,1/0,-1/0))",
+"powerbi": "0"
+},
+{
+"expr": "STDEVX.S({0,1},IF([Value]>2,0/0,1/0))",
+"powerbi": "0"
+},
+{
+"expr": "STDEVX.S({1,2,3},(1/0*0)+[Value])",
+"powerbi": "0"
+},
+{
+"expr": "STDEVX.S({1,2,3},IF([Value]>1,1/0,[Value]))",
+"powerbi": "0"
+},
+{
+"expr": "STDEVX.S({1,2},IF([Value]>2,0/0,1/0))",
+"powerbi": "0"
+},
+{
+"expr": "STDEVX.S({1},1/0)",
+"powerbi": "NaN"
+},
+{
+"expr": "STDEVX.S({BLANK(),1},-1/0)",
+"powerbi": "0"
+},
+{
+"expr": "STDEVX.S({BLANK(),1},-1/[Value])",
+"powerbi": "0"
+},
+{
+"expr": "STDEVX.S({BLANK(),1},[Value]*(1/0*0))",
+"powerbi": "NaN"
+},
+{
+"expr": "SUMX(CALCULATETABLE(Facts,Facts[Region]=\"East\"),(Facts[Quantity]/0)*0)",
+"powerbi": "0"
+},
+{
+"expr": "SUMX({-1,2,5,0},(1/0*0)+[Value])",
+"powerbi": "NaN"
+},
+{
+"expr": "SUMX({0,1},(1/0*0)+[Value])",
+"powerbi": "NaN"
+},
+{
+"expr": "SUMX({1,2,3},(1/0*0)+[Value])",
+"powerbi": "NaN"
+},
+{
+"expr": "SUMX({1,2},(1/0*0)+[Value])",
+"powerbi": "NaN"
+},
+{
+"expr": "SUMX({1},([Value]/0)*0)",
+"powerbi": "NaN"
+},
+{
+"expr": "SUMX({BLANK(),1},([Value]/0)*0)",
+"powerbi": "NaN"
+},
+{
+"expr": "SUMX({BLANK(),1},[Value]*(1/0*0))",
+"powerbi": "NaN"
+},
+{
+"expr": "VARX.P(CALCULATETABLE(Facts,Facts[Region]=\"East\"),(Facts[Quantity]/0)*0)",
+"powerbi": "0"
+},
+{
+"expr": "VARX.P(CALCULATETABLE(Facts,Facts[Region]=\"East\"),IF(Facts[Quantity]>1,1/0,Facts[Quantity]))",
+"powerbi": "0"
+},
+{
+"expr": "VARX.P(FILTER(Facts,Facts[Quantity]>2),Facts[Sales]*(1/0*0))",
+"powerbi": "0"
+},
+{
+"expr": "VARX.P(FILTER(Facts,Facts[Quantity]>2),Facts[Sales]/0)",
+"powerbi": "0"
+},
+{
+"expr": "VARX.P(FILTER(Facts,Facts[Quantity]>2),IF(Facts[Sales]>1,0/0,Facts[Sales]))",
+"powerbi": "0"
+},
+{
+"expr": "VARX.P(Facts,(Facts[Quantity]-1)/0)",
+"powerbi": "0"
+},
+{
+"expr": "VARX.P(Facts,1/Facts[Quantity])",
+"powerbi": "0"
+},
+{
+"expr": "VARX.P(Facts,Facts[Quantity]*(1/0*0))",
+"powerbi": "0"
+},
+{
+"expr": "VARX.P({-1,2,5,0},([Value]-1)/0)",
+"powerbi": "0"
+},
+{
+"expr": "VARX.P({-1,2,5,0},([Value]/0)*0)",
+"powerbi": "0"
+},
+{
+"expr": "VARX.P({-1,2,5,0},1/[Value])",
+"powerbi": "0"
+},
+{
+"expr": "VARX.P({-1,2,5,0},IF([Value]>1,1/0,-1/0))",
+"powerbi": "0"
+},
+{
+"expr": "VARX.P({-1,2,5,0},[Value]/0)",
+"powerbi": "0"
+},
+{
+"expr": "VARX.P({0,1},([Value]/0)*0)",
+"powerbi": "0"
+},
+{
+"expr": "VARX.P({0,1},-1/[Value])",
+"powerbi": "0"
+},
+{
+"expr": "VARX.P({0,1},IF([Value]>1,1/0,-1/0))",
+"powerbi": "0"
+},
+{
+"expr": "VARX.P({1,2,3},([Value]/0)*0)",
+"powerbi": "0"
+},
+{
+"expr": "VARX.P({1,2,3},1/0)",
+"powerbi": "0"
+},
+{
+"expr": "VARX.P({1,2,3},IF([Value]>1,1/0,-1/0))",
+"powerbi": "0"
+},
+{
+"expr": "VARX.P({1,2,3},[Value]/0)",
+"powerbi": "0"
+},
+{
+"expr": "VARX.P({1,2},([Value]/0)*0)",
+"powerbi": "0"
+},
+{
+"expr": "VARX.P({1,2},0/0)",
+"powerbi": "0"
+},
+{
+"expr": "VARX.P({1,2},IF([Value]>1,1/0,-1/0))",
+"powerbi": "0"
+},
+{
+"expr": "VARX.P({1,2},[Value]/0)",
+"powerbi": "0"
+},
+{
+"expr": "VARX.P({1},1/0)",
+"powerbi": "0"
+},
+{
+"expr": "VARX.P({BLANK(),1},([Value]/0)*0)",
+"powerbi": "0"
+},
+{
+"expr": "VARX.P({BLANK(),1},-1/[Value])",
+"powerbi": "0"
+},
+{
+"expr": "VARX.P({BLANK(),1},1/[Value])",
+"powerbi": "0"
+},
+{
+"expr": "VARX.P({BLANK(),1},IF([Value]>2,0/0,1/0))",
+"powerbi": "0"
+},
+{
+"expr": "VARX.P({BLANK(),1},[Value]/0)",
+"powerbi": "0"
+},
+{
+"expr": "VARX.S(CALCULATETABLE(Facts,Facts[Region]=\"East\"),(Facts[Quantity]-1)/0)",
+"powerbi": "0"
+},
+{
+"expr": "VARX.S(CALCULATETABLE(Facts,Facts[Region]=\"East\"),0/0)",
+"powerbi": "0"
+},
+{
+"expr": "VARX.S(CALCULATETABLE(Facts,Facts[Region]=\"East\"),Facts[Quantity]*(1/0*0))",
+"powerbi": "0"
+},
+{
+"expr": "VARX.S(CALCULATETABLE(Facts,Facts[Region]=\"East\"),IF(Facts[Quantity]>1,0/0,Facts[Quantity]))",
+"powerbi": "NaN"
+},
+{
+"expr": "VARX.S(FILTER(Facts,Facts[Quantity]>2),(Facts[Sales]/0)*0)",
+"powerbi": "0"
+},
+{
+"expr": "VARX.S(FILTER(Facts,Facts[Quantity]>2),-1/0)",
+"powerbi": "0"
+},
+{
+"expr": "VARX.S(FILTER(Facts,Facts[Quantity]>2),1/0)",
+"powerbi": "0"
+},
+{
+"expr": "VARX.S(FILTER(Facts,Facts[Quantity]>2),1/Facts[Sales])",
+"powerbi": "0"
+},
+{
+"expr": "VARX.S(FILTER(Facts,Facts[Quantity]>2),Facts[Sales]*(1/0*0))",
+"powerbi": "0"
+},
+{
+"expr": "VARX.S(FILTER(Facts,Facts[Quantity]>2),Facts[Sales]/0)",
+"powerbi": "0"
+},
+{
+"expr": "VARX.S(FILTER(Facts,Facts[Quantity]>2),IF(Facts[Sales]>1,0/0,Facts[Sales]))",
+"powerbi": "0"
+},
+{
+"expr": "VARX.S(FILTER(Facts,Facts[Quantity]>2),IF(Facts[Sales]>1,1/0,Facts[Sales]))",
+"powerbi": "0"
+},
+{
+"expr": "VARX.S(Facts,(1/0*0)+Facts[Quantity])",
+"powerbi": "0"
+},
+{
+"expr": "VARX.S(Facts,-1/Facts[Quantity])",
+"powerbi": "0"
+},
+{
+"expr": "VARX.S(Facts,1/Facts[Quantity])",
+"powerbi": "0"
+},
+{
+"expr": "VARX.S(Facts,Facts[Quantity]*(1/0*0))",
+"powerbi": "0"
+},
+{
+"expr": "VARX.S(Facts,IF(Facts[Quantity]>1,0/0,Facts[Quantity]))",
+"powerbi": "0"
+},
+{
+"expr": "VARX.S({-1,2,5,0},([Value]/0)*0)",
+"powerbi": "0"
+},
+{
+"expr": "VARX.S({-1,2,5,0},0/0)",
+"powerbi": "0"
+},
+{
+"expr": "VARX.S({-1,2,5,0},IF([Value]>1,[Value]*1E308*10,[Value]))",
+"powerbi": "0"
+},
+{
+"expr": "VARX.S({-1,2,5,0},[Value]*(1/0*0))",
+"powerbi": "0"
+},
+{
+"expr": "VARX.S({0,1},([Value]-1)/0)",
+"powerbi": "0"
+},
+{
+"expr": "VARX.S({0,1},([Value]/0)*0)",
+"powerbi": "0"
+},
+{
+"expr": "VARX.S({0,1},-1/[Value])",
+"powerbi": "0"
+},
+{
+"expr": "VARX.S({1,2,3},IF([Value]>1,0/0,[Value]))",
+"powerbi": "0"
+},
+{
+"expr": "VARX.S({1,2,3},[Value]*(1/0*0))",
+"powerbi": "0"
+},
+{
+"expr": "VARX.S({1,2},([Value]/0)*0)",
+"powerbi": "0"
+},
+{
+"expr": "VARX.S({1,2},IF([Value]>1,1/0,[Value]))",
+"powerbi": "0"
+},
+{
+"expr": "VARX.S({1},[Value]/0)",
+"powerbi": "NaN"
+},
+{
+"expr": "VARX.S({BLANK(),1},([Value]-1)/0)",
+"powerbi": "0"
+},
+{
+"expr": "VARX.S({BLANK(),1},0/0)",
+"powerbi": "0"
+},
+{
+"expr": "VARX.S({BLANK(),1},1/[Value])",
+"powerbi": "0"
+},
+{
+"expr": "VARX.S({BLANK(),1},IF([Value]>2,0/0,1/0))",
+"powerbi": "0"
+},
+{
+"expr": "(AVERAGEX(FILTER(Facts,Facts[Region]=\"West\"),Facts[Quantity]*(1/0*0)))&\"z\"",
+"powerbi": "0z"
+},
+{
+"expr": "(AVERAGEX(GENERATESERIES(1,5),([Value]-2)/([Value]-2)))&\"z\"",
+"powerbi": "-nan(ind)z"
+},
+{
+"expr": "(AVERAGEX({-1,-2,4},([Value]*0)*(1/0)))&\"z\"",
+"powerbi": "-nan(ind)z"
+},
+{
+"expr": "(AVERAGEX({BLANK(),2,3},IF(ISBLANK([Value]),0/0,[Value])))&\"z\"",
+"powerbi": "-nan(ind)z"
+},
+{
+"expr": "(AVERAGEX({BLANK(),2,3},IF([Value]=3,0/0,[Value])))&\"z\"",
+"powerbi": "-nan(ind)z"
+},
+{
+"expr": "(GEOMEANX(TOPN(4,Facts,Facts[Quantity],ASC),IF(Facts[Sales]<2,-1/0,Facts[Sales])))&\"z\"",
+"powerbi": "infz"
+},
+{
+"expr": "(GEOMEANX({0,3,7},IF([Value]=3,0/0,[Value])))&\"z\"",
+"powerbi": "0z"
+},
+{
+"expr": "(GEOMEANX({1,2,3,4},([Value]*0)*(1/0)))&\"z\"",
+"powerbi": "0z"
+},
+{
+"expr": "(GEOMEANX({1,2,3,4},1/0-[Value]))&\"z\"",
+"powerbi": "infz"
+},
+{
+"expr": "(GEOMEANX({1,2,3,4},[Value]/([Value]-3)))&\"z\"",
+"powerbi": "infz"
+},
+{
+"expr": "(GEOMEANX({2,2,2},1/0-[Value]))&\"z\"",
+"powerbi": "infz"
+},
+{
+"expr": "(GEOMEANX({BLANK(),2,3},IF([Value]>2,-1/0,1/0)))&\"z\"",
+"powerbi": "-infz"
+},
+{
+"expr": "(MEDIANX({-1,-2,4},IF([Value]>2,-1/0,1/0)))&\"z\"",
+"powerbi": "infz"
+},
+{
+"expr": "(MEDIANX({-1,-2,4},IF([Value]>3,0/0,IF([Value]<2,1/0,[Value]))))&\"z\"",
+"powerbi": "infz"
+},
+{
+"expr": "(MEDIANX({0,3,7},([Value]*0)*(1/0)))&\"z\"",
+"powerbi": "-nan(ind)z"
+},
+{
+"expr": "(MEDIANX({0,3,7},IF([Value]=3,0/0,[Value])))&\"z\"",
+"powerbi": "0z"
+},
+{
+"expr": "(MEDIANX({1,2,3,4},([Value]*0)*(1/0)))&\"z\"",
+"powerbi": "-nan(ind)z"
+},
+{
+"expr": "(MEDIANX({1,2,3,4},IF([Value]=3,0/0,[Value])))&\"z\"",
+"powerbi": "1.5z"
+},
+{
+"expr": "(PERCENTILEX.EXC(FILTER(Facts,Facts[Region]=\"West\"),(Facts[Quantity]*0)*(1/0),0.5))&\"z\"",
+"powerbi": "-nan(ind)z"
+},
+{
+"expr": "(PERCENTILEX.EXC(GENERATESERIES(1,5),[Value]/([Value]-3),0.2))&\"z\"",
+"powerbi": "-1.7z"
+},
+{
+"expr": "(PERCENTILEX.EXC(TOPN(4,Facts,Facts[Quantity],ASC),IF(Facts[Sales]<2,-1/0,Facts[Sales]),0.4))&\"z\"",
+"powerbi": "-infz"
+},
+{
+"expr": "(PERCENTILEX.EXC({-1,-2,4},IF([Value]>2,1/0,[Value]),0.8))&\"z\"",
+"powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 20) The percentile value should be in the range 1/(N+1)..N/(N+1) inclusive, where N is the number of data values.\""
+},
+{
+"expr": "(PERCENTILEX.EXC({-1,-2,4},IF([Value]>2,[Value]*1E308*10,-[Value]),0.4))&\"z\"",
+"powerbi": "1.6z"
+},
+{
+"expr": "(PERCENTILEX.EXC({0,3,7},IF([Value]=3,0/0,[Value]),0.2))&\"z\"",
+"powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 20) The percentile value should be in the range 1/(N+1)..N/(N+1) inclusive, where N is the number of data values.\""
+},
+{
+"expr": "(PERCENTILEX.EXC({1,2,3,4},1/0-[Value],0.6))&\"z\"",
+"powerbi": "infz"
+},
+{
+"expr": "(PERCENTILEX.INC(GENERATESERIES(1,5),([Value]-2)/([Value]-2),0.4))&\"z\"",
+"powerbi": "-nan(ind)z"
+},
+{
+"expr": "(PERCENTILEX.INC({0,3,7},IF([Value]>1,1/0-1/0,[Value]),0.5))&\"z\"",
+"powerbi": "-nan(ind)z"
+},
+{
+"expr": "(PERCENTILEX.INC({1,2,3,4},IF([Value]>1,1/0-1/0,[Value]),0.6))&\"z\"",
+"powerbi": "-nan(ind)z"
+},
+{
+"expr": "(PERCENTILEX.INC({1,2},([Value]-1)/0,0.5))&\"z\"",
+"powerbi": "-nan(ind)z"
+},
+{
+"expr": "(PERCENTILEX.INC({2,2,2},([Value]*0)*(1/0),0.6))&\"z\"",
+"powerbi": "-nan(ind)z"
+},
+{
+"expr": "(PERCENTILEX.INC({2,2,2},IF([Value]>2,-1/0,1/0),0.6))&\"z\"",
+"powerbi": "infz"
+},
+{
+"expr": "(PRODUCTX(FILTER(Facts,Facts[Region]=\"West\"),IF(Facts[Quantity]>1,1/0-1/0,Facts[Quantity])))&\"z\"",
+"powerbi": "nanz"
+},
+{
+"expr": "(PRODUCTX(GENERATESERIES(1,5),[Value]/([Value]-3)))&\"z\"",
+"powerbi": "infz"
+},
+{
+"expr": "(PRODUCTX(TOPN(4,Facts,Facts[Quantity],ASC),IF(Facts[Sales]>2,1/0,Facts[Sales])))&\"z\"",
+"powerbi": "-nan(ind)z"
+},
+{
+"expr": "(PRODUCTX({0,1},IF([Value]=1,1/0,[Value])))&\"z\"",
+"powerbi": "-nan(ind)z"
+},
+{
+"expr": "(PRODUCTX({1,2,3,4},[Value]*(1/0*0)))&\"z\"",
+"powerbi": "-nan(ind)z"
+},
+{
+"expr": "(PRODUCTX({2,2,2},1/0-[Value]))&\"z\"",
+"powerbi": "infz"
+},
+{
+"expr": "(PRODUCTX({5},IF([Value]>2,1/0,[Value])))&\"z\"",
+"powerbi": "infz"
+},
+{
+"expr": "(PRODUCTX({5},[Value]+0/0))&\"z\"",
+"powerbi": "-nan(ind)z"
+},
+{
+"expr": "(PRODUCTX({BLANK(),2,3},([Value]*0)*(1/0)))&\"z\"",
+"powerbi": "-nan(ind)z"
+},
+{
+"expr": "(PRODUCTX({BLANK(),2,3},IF([Value]>3,0/0,IF([Value]<2,1/0,[Value]))))&\"z\"",
+"powerbi": "infz"
+},
+{
+"expr": "(PRODUCTX({BLANK(),2,3},[Value]*(1/0*0)))&\"z\"",
+"powerbi": "-nan(ind)z"
+},
+{
+"expr": "(STDEVX.P(GENERATESERIES(1,5),IF([Value]=2,-1/0,[Value])))&\"z\"",
+"powerbi": "0z"
+},
+{
+"expr": "(STDEVX.P(GENERATESERIES(1,5),IF([Value]=3,0/0,[Value])))&\"z\"",
+"powerbi": "0z"
+},
+{
+"expr": "(STDEVX.P(GENERATESERIES(1,5),IF([Value]>2,-1/0,1/0)))&\"z\"",
+"powerbi": "0z"
+},
+{
+"expr": "(STDEVX.P({-1,-2,4},[Value]*(1/0*0)))&\"z\"",
+"powerbi": "0z"
+},
+{
+"expr": "(STDEVX.P({1,2,3,4},IF([Value]>2,-1/0,1/0)))&\"z\"",
+"powerbi": "0z"
+},
+{
+"expr": "(STDEVX.P({1,2,3,4},[Value]/([Value]-3)))&\"z\"",
+"powerbi": "0z"
+},
+{
+"expr": "(STDEVX.P({2,2,2},([Value]*0)*(1/0)))&\"z\"",
+"powerbi": "0z"
+},
+{
+"expr": "(STDEVX.P({5},[Value]+0/0))&\"z\"",
+"powerbi": "0z"
+},
+{
+"expr": "(STDEVX.S({-2,3},1/0-[Value]))&\"z\"",
+"powerbi": "0z"
+},
+{
+"expr": "(STDEVX.S({0,3,7},IF([Value]>3,0/0,IF([Value]<2,1/0,[Value]))))&\"z\"",
+"powerbi": "0z"
+},
+{
+"expr": "(STDEVX.S({5},IF([Value]>2,1/0,[Value])))&\"z\"",
+"powerbi": "-nan(ind)z"
+},
+{
+"expr": "(STDEVX.S({5},IF([Value]>3,0/0,IF([Value]<2,1/0,[Value]))))&\"z\"",
+"powerbi": "-nan(ind)z"
+},
+{
+"expr": "(SUMX(TOPN(4,Facts,Facts[Quantity],ASC),Facts[Sales]*(1/0*0)))&\"z\"",
+"powerbi": "-nan(ind)z"
+},
+{
+"expr": "(SUMX(TOPN(4,Facts,Facts[Quantity],ASC),IF(Facts[Sales]>1,1/0-1/0,Facts[Sales])))&\"z\"",
+"powerbi": "-nan(ind)z"
+},
+{
+"expr": "(SUMX({-2,3},[Value]*(1/0*0)))&\"z\"",
+"powerbi": "-nan(ind)z"
+},
+{
+"expr": "(SUMX({2,2,2},[Value]*(1/0*0)))&\"z\"",
+"powerbi": "-nan(ind)z"
+},
+{
+"expr": "(SUMX({5},[Value]*(1/0*0)))&\"z\"",
+"powerbi": "-nan(ind)z"
+},
+{
+"expr": "(SUMX({BLANK(),2,3},[Value]+0/0))&\"z\"",
+"powerbi": "-nan(ind)z"
+},
+{
+"expr": "(VARX.P(FILTER(Facts,Facts[Region]=\"West\"),IF(Facts[Quantity]<2,-1/0,Facts[Quantity])))&\"z\"",
+"powerbi": "0z"
+},
+{
+"expr": "(VARX.P(FILTER(Facts,Facts[Region]=\"West\"),IF(Facts[Quantity]>2,1/0,Facts[Quantity])))&\"z\"",
+"powerbi": "0z"
+},
+{
+"expr": "(VARX.P(TOPN(4,Facts,Facts[Quantity],ASC),1/0-Facts[Sales]))&\"z\"",
+"powerbi": "0z"
+},
+{
+"expr": "(VARX.P({-2,3},IF([Value]>2,-1/0,1/0)))&\"z\"",
+"powerbi": "0z"
+},
+{
+"expr": "(VARX.P({1,2,3,4},IF([Value]=3,0/0,[Value])))&\"z\"",
+"powerbi": "0z"
+},
+{
+"expr": "(VARX.P({BLANK(),2,3},-[Value]/([Value]-2)))&\"z\"",
+"powerbi": "0z"
+},
+{
+"expr": "(VARX.P({BLANK(),2,3},IF([Value]>3,0/0,IF([Value]<2,1/0,[Value]))))&\"z\"",
+"powerbi": "0z"
+},
+{
+"expr": "(VARX.S(GENERATESERIES(1,5),([Value]*0)*(1/0)))&\"z\"",
+"powerbi": "0z"
+},
+{
+"expr": "(VARX.S(GENERATESERIES(1,5),-[Value]/([Value]-2)))&\"z\"",
+"powerbi": "0z"
+},
+{
+"expr": "(VARX.S(GENERATESERIES(1,5),IF([Value]<2,-1/0,[Value])))&\"z\"",
+"powerbi": "0z"
+},
+{
+"expr": "(VARX.S({-2,3},IF([Value]<2,-1/0,[Value])))&\"z\"",
+"powerbi": "0z"
+},
+{
+"expr": "(VARX.S({-2,3},IF([Value]>2,1/0,[Value])))&\"z\"",
+"powerbi": "0z"
+},
+{
+"expr": "(VARX.S({0,3,7},IF([Value]<2,-1/0,[Value])))&\"z\"",
+"powerbi": "0z"
+},
+{
+"expr": "(VARX.S({0,3,7},[Value]/([Value]-3)))&\"z\"",
+"powerbi": "0z"
+},
+{
+"expr": "(VARX.S({1,2,3,4},IF([Value]>2,[Value]*1E308*10,-[Value])))&\"z\"",
+"powerbi": "0z"
+},
+{
+"expr": "(VARX.S({2,2,2},([Value]*0)*(1/0)))&\"z\"",
+"powerbi": "0z"
+},
+{
+"expr": "(VARX.S({5},IF([Value]>2,-1/0,1/0)))&\"z\"",
+"powerbi": "-nan(ind)z"
+},
+{
+"expr": "(VARX.S({5},IF([Value]>2,1/0,[Value])))&\"z\"",
+"powerbi": "-nan(ind)z"
+},
+{
+"expr": "(VARX.S({BLANK(),2,3},([Value]-2)/([Value]-2)))&\"z\"",
+"powerbi": "0z"
+},
+{
+"expr": "AVERAGEX(TOPN(4,Facts,Facts[Quantity],ASC),(Facts[Sales]*0)*(1/0))",
+"powerbi": "NaN"
+},
+{
+"expr": "AVERAGEX(TOPN(4,Facts,Facts[Quantity],ASC),Facts[Sales]*(1/0*0))",
+"powerbi": "NaN"
+},
+{
+"expr": "AVERAGEX({-1,-2,4},[Value]*(1/0*0))",
+"powerbi": "NaN"
+},
+{
+"expr": "AVERAGEX({-2,3},([Value]*0)*(1/0))",
+"powerbi": "NaN"
+},
+{
+"expr": "AVERAGEX({-2,3},[Value]*(1/0*0))",
+"powerbi": "NaN"
+},
+{
+"expr": "AVERAGEX({5},([Value]*0)*(1/0))",
+"powerbi": "NaN"
+},
+{
+"expr": "AVERAGEX({BLANK(),2,3},[Value]*(1/0*0))",
+"powerbi": "NaN"
+},
+{
+"expr": "COUNTAX(FILTER(Facts,Facts[Region]=\"West\"),(Facts[Quantity]*0)*(1/0))",
+"powerbi": "0"
+},
+{
+"expr": "COUNTX(FILTER(Facts,Facts[Region]=\"West\"),Facts[Quantity]*(1/0*0))",
+"powerbi": "0"
+},
+{
+"expr": "GEOMEANX(FILTER(Facts,Facts[Region]=\"West\"),(Facts[Quantity]*0)*(1/0))",
+"powerbi": "0"
+},
+{
+"expr": "GEOMEANX(FILTER(Facts,Facts[Region]=\"West\"),1/0-Facts[Quantity])",
+"powerbi": "Infinity"
+},
+{
+"expr": "GEOMEANX(FILTER(Facts,Facts[Region]=\"West\"),Facts[Quantity]*(1/0*0))",
+"powerbi": "0"
+},
+{
+"expr": "GEOMEANX(FILTER(Facts,Facts[Region]=\"West\"),Facts[Quantity]+0/0)",
+"powerbi": "0"
+},
+{
+"expr": "GEOMEANX(FILTER(Facts,Facts[Region]=\"West\"),IF(Facts[Quantity]=3,0/0,Facts[Quantity]))",
+"powerbi": "0"
+},
+{
+"expr": "GEOMEANX(FILTER(Facts,Facts[Region]=\"West\"),IF(Facts[Quantity]>2,1/0,Facts[Quantity]))",
+"powerbi": "0"
+},
+{
+"expr": "GEOMEANX(GENERATESERIES(1,5),([Value]*0)*(1/0))",
+"powerbi": "0"
+},
+{
+"expr": "GEOMEANX(GENERATESERIES(1,5),([Value]-2)/([Value]-2))",
+"powerbi": "0"
+},
+{
+"expr": "GEOMEANX(GENERATESERIES(1,5),IF([Value]<2,-1/0,[Value]))",
+"powerbi": "-Infinity"
+},
+{
+"expr": "GEOMEANX(GENERATESERIES(1,5),IF([Value]=2,-1/0,[Value]))",
+"powerbi": "-Infinity"
+},
+{
+"expr": "GEOMEANX(GENERATESERIES(1,5),IF([Value]>1,1/0-1/0,[Value]))",
+"powerbi": "0"
+},
+{
+"expr": "GEOMEANX(TOPN(4,Facts,Facts[Quantity],ASC),IF(Facts[Sales]>2,-1/0,1/0))",
+"powerbi": "Infinity"
+},
+{
+"expr": "GEOMEANX(TOPN(4,Facts,Facts[Quantity],ASC),IF(Facts[Sales]>2,1/0,Facts[Sales]))",
+"powerbi": "0"
+},
+{
+"expr": "GEOMEANX(TOPN(4,Facts,Facts[Quantity],ASC),IF(Facts[Sales]>3,0/0,IF(Facts[Sales]<2,1/0,Facts[Sales])))",
+"powerbi": "0"
+},
+{
+"expr": "GEOMEANX({-1,-2,4},1/0-[Value])",
+"powerbi": "Infinity"
+},
+{
+"expr": "GEOMEANX({-1,-2,4},IF([Value]>2,[Value]*1E308*10,-[Value]))",
+"powerbi": "Infinity"
+},
+{
+"expr": "GEOMEANX({-2,3},IF([Value]<2,-1/0,[Value]))",
+"powerbi": "NaN"
+},
+{
+"expr": "GEOMEANX({-2,3},[Value]*(1/0*0))",
+"powerbi": "0"
+},
+{
+"expr": "GEOMEANX({-2,3},[Value]+0/0)",
+"powerbi": "0"
+},
+{
+"expr": "GEOMEANX({0,3,7},IF([Value]<2,-1/0,[Value]))",
+"powerbi": "-Infinity"
+},
+{
+"expr": "GEOMEANX({0,3,7},IF([Value]>1,1/0-1/0,[Value]))",
+"powerbi": "0"
+},
+{
+"expr": "GEOMEANX({0,3,7},IF([Value]>3,0/0,IF([Value]<2,1/0,[Value])))",
+"powerbi": "0"
+},
+{
+"expr": "GEOMEANX({0,3,7},[Value]*(1/0*0))",
+"powerbi": "0"
+},
+{
+"expr": "GEOMEANX({0,3,7},[Value]+0/0)",
+"powerbi": "0"
+},
+{
+"expr": "GEOMEANX({1,2,3,4},1/0-[Value])",
+"powerbi": "Infinity"
+},
+{
+"expr": "GEOMEANX({1,2,3,4},IF([Value]>1,1/0-1/0,[Value]))",
+"powerbi": "0"
+},
+{
+"expr": "GEOMEANX({1,2,3,4},IF([Value]>2,-1/0,1/0))",
+"powerbi": "Infinity"
+},
+{
+"expr": "GEOMEANX({1,2,3,4},IF([Value]>2,1/0,[Value]))",
+"powerbi": "Infinity"
+},
+{
+"expr": "GEOMEANX({1,2,3,4},[Value]*(1/0*0))",
+"powerbi": "0"
+},
+{
+"expr": "GEOMEANX({1,2,3,4},[Value]+0/0)",
+"powerbi": "0"
+},
+{
+"expr": "GEOMEANX({1,2,3,4},[Value]/([Value]-3))",
+"powerbi": "Infinity"
+},
+{
+"expr": "GEOMEANX({1,2,3},IF([Value]>1,-1/0,1))",
+"powerbi": "Infinity"
+},
+{
+"expr": "GEOMEANX({2,2,2},-[Value]/([Value]-2))",
+"powerbi": "-Infinity"
+},
+{
+"expr": "GEOMEANX({2,2,2},IF([Value]=2,-1/0,[Value]))",
+"powerbi": "-Infinity"
+},
+{
+"expr": "GEOMEANX({2,2,2},IF([Value]>2,-1/0,1/0))",
+"powerbi": "Infinity"
+},
+{
+"expr": "GEOMEANX({5},1/0-[Value])",
+"powerbi": "Infinity"
+},
+{
+"expr": "GEOMEANX({5},IF([Value]>1,1/0-1/0,[Value]))",
+"powerbi": "0"
+},
+{
+"expr": "GEOMEANX({5},IF([Value]>3,0/0,IF([Value]<2,1/0,[Value])))",
+"powerbi": "0"
+},
+{
+"expr": "GEOMEANX({5},[Value]+0/0)",
+"powerbi": "0"
+},
+{
+"expr": "GEOMEANX({BLANK(),2,3},IF([Value]>1,1/0-1/0,[Value]))",
+"powerbi": "0"
+},
+{
+"expr": "GEOMEANX({BLANK(),2,3},IF([Value]>2,1/0,[Value]))",
+"powerbi": "Infinity"
+},
+{
+"expr": "IFERROR(AVERAGEX({1,2,3,4},([Value]*0)*(1/0)),7)",
+"powerbi": "7"
+},
+{
+"expr": "IFERROR(GEOMEANX(GENERATESERIES(1,5),IF([Value]=3,0/0,[Value])),7)",
+"powerbi": "0"
+},
+{
+"expr": "IFERROR(GEOMEANX(TOPN(4,Facts,Facts[Quantity],ASC),IF(Facts[Sales]>2,-1/0,1/0)),7)",
+"powerbi": "7"
+},
+{
+"expr": "IFERROR(GEOMEANX({-1,-2,4},1/0-[Value]),7)",
+"powerbi": "7"
+},
+{
+"expr": "IFERROR(GEOMEANX({-2,3},IF([Value]>2,-1/0,1/0)),7)",
+"powerbi": "7"
+},
+{
+"expr": "IFERROR(GEOMEANX({2,2,2},IF([Value]>2,-1/0,1/0)),7)",
+"powerbi": "7"
+},
+{
+"expr": "IFERROR(GEOMEANX({BLANK(),2,3},IF([Value]>2,-1/0,1/0)),7)",
+"powerbi": "7"
+},
+{
+"expr": "IFERROR(MEDIANX(FILTER(Facts,Facts[Region]=\"West\"),IF(Facts[Quantity]=3,0/0,Facts[Quantity])),7)",
+"powerbi": "7"
+},
+{
+"expr": "IFERROR(MEDIANX(FILTER(Facts,Facts[Region]=\"West\"),IF(Facts[Quantity]>2,-1/0,1/0)),7)",
+"powerbi": "7"
+},
+{
+"expr": "IFERROR(MEDIANX(GENERATESERIES(1,5),IF([Value]>2,1/0,[Value])),7)",
+"powerbi": "7"
+},
+{
+"expr": "IFERROR(MEDIANX(GENERATESERIES(1,5),IF([Value]>2,[Value]*1E308*10,-[Value])),7)",
+"powerbi": "7"
+},
+{
+"expr": "IFERROR(MEDIANX({-2,3},IF([Value]>1,1/0-1/0,[Value])),7)",
+"powerbi": "7"
+},
+{
+"expr": "IFERROR(MEDIANX({-2,3},[Value]*(1/0*0)),7)",
+"powerbi": "7"
+},
+{
+"expr": "IFERROR(MEDIANX({1,2,3,4},[Value]+0/0),7)",
+"powerbi": "7"
+},
+{
+"expr": "IFERROR(MEDIANX({2,2,2},IF([Value]=2,-1/0,[Value])),7)",
+"powerbi": "7"
+},
+{
+"expr": "IFERROR(MEDIANX({2,2,2},IF([Value]>2,-1/0,1/0)),7)",
+"powerbi": "7"
+},
+{
+"expr": "IFERROR(PERCENTILEX.EXC(FILTER(Facts,Facts[Region]=\"West\"),(Facts[Quantity]*0)*(1/0),0.8),7)",
+"powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 27) The percentile value should be in the range 1/(N+1)..N/(N+1) inclusive, where N is the number of data values.\""
+},
+{
+"expr": "IFERROR(PERCENTILEX.EXC(GENERATESERIES(1,5),IF([Value]<2,-1/0,[Value]),0.6),7)",
+"powerbi": "3.6"
+},
+{
+"expr": "IFERROR(PERCENTILEX.EXC(GENERATESERIES(1,5),IF([Value]>1,1/0-1/0,[Value]),0.4),7)",
+"powerbi": "7"
+},
+{
+"expr": "IFERROR(PERCENTILEX.EXC(TOPN(4,Facts,Facts[Quantity],ASC),-Facts[Sales]/(Facts[Sales]-2),0.6),7)",
+"powerbi": "-0.428571428571429"
+},
+{
+"expr": "IFERROR(PERCENTILEX.EXC(TOPN(4,Facts,Facts[Quantity],ASC),1/0-Facts[Sales],0.2),7)",
+"powerbi": "7"
+},
+{
+"expr": "IFERROR(PERCENTILEX.EXC(TOPN(4,Facts,Facts[Quantity],ASC),Facts[Sales]+0/0,0.6),7)",
+"powerbi": "7"
+},
+{
+"expr": "IFERROR(PERCENTILEX.EXC(TOPN(4,Facts,Facts[Quantity],ASC),IF(Facts[Sales]>3,0/0,IF(Facts[Sales]<2,1/0,Facts[Sales])),0.4),7)",
+"powerbi": "7"
+},
+{
+"expr": "IFERROR(PERCENTILEX.EXC({1,2,3,4},IF([Value]=2,-1/0,[Value]),0.2),7)",
+"powerbi": "7"
+},
+{
+"expr": "IFERROR(PERCENTILEX.EXC({2,2,2},IF([Value]>2,-1/0,1/0),0.4),7)",
+"powerbi": "7"
+},
+{
+"expr": "IFERROR(PERCENTILEX.EXC({2,2,2},IF([Value]>2,[Value]*1E308*10,-[Value]),0.8),7)",
+"powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 27) The percentile value should be in the range 1/(N+1)..N/(N+1) inclusive, where N is the number of data values.\""
+},
+{
+"expr": "IFERROR(PERCENTILEX.INC(FILTER(Facts,Facts[Region]=\"West\"),(Facts[Quantity]*0)*(1/0),0.5),7)",
+"powerbi": "7"
+},
+{
+"expr": "IFERROR(PERCENTILEX.INC(FILTER(Facts,Facts[Region]=\"West\"),(Facts[Quantity]*0)*(1/0),0.8),7)",
+"powerbi": "7"
+},
+{
+"expr": "IFERROR(PERCENTILEX.INC(FILTER(Facts,Facts[Region]=\"West\"),IF(Facts[Quantity]=3,0/0,Facts[Quantity]),0.8),7)",
+"powerbi": "7"
+},
+{
+"expr": "IFERROR(PERCENTILEX.INC({-1,-2,4},1/0-[Value],0.4),7)",
+"powerbi": "7"
+},
+{
+"expr": "IFERROR(PERCENTILEX.INC({0,3,7},([Value]*0)*(1/0),0.2),7)",
+"powerbi": "7"
+},
+{
+"expr": "IFERROR(PERCENTILEX.INC({0,3,7},IF([Value]>1,1/0-1/0,[Value]),0.6),7)",
+"powerbi": "7"
+},
+{
+"expr": "IFERROR(PERCENTILEX.INC({1,2,3,4},IF([Value]>3,0/0,IF([Value]<2,1/0,[Value])),0.6),7)",
+"powerbi": "2.8"
+},
+{
+"expr": "IFERROR(PERCENTILEX.INC({2,2,2},[Value]/([Value]-3),0.2),7)",
+"powerbi": "-2"
+},
+{
+"expr": "IFERROR(PRODUCTX(FILTER(Facts,Facts[Region]=\"West\"),IF(Facts[Quantity]>3,0/0,IF(Facts[Quantity]<2,1/0,Facts[Quantity]))),7)",
+"powerbi": "7"
+},
+{
+"expr": "IFERROR(PRODUCTX({1,2,3,4},[Value]/([Value]-3)),7)",
+"powerbi": "7"
+},
+{
+"expr": "IFERROR(PRODUCTX({5},([Value]*0)*(1/0)),7)",
+"powerbi": "7"
+},
+{
+"expr": "IFERROR(STDEVX.P(FILTER(Facts,Facts[Region]=\"West\"),(Facts[Quantity]*0)*(1/0)),7)",
+"powerbi": "0"
+},
+{
+"expr": "IFERROR(STDEVX.P(FILTER(Facts,Facts[Region]=\"West\"),1/0-Facts[Quantity]),7)",
+"powerbi": "0"
+},
+{
+"expr": "IFERROR(STDEVX.P(FILTER(Facts,Facts[Region]=\"West\"),IF(Facts[Quantity]=3,0/0,Facts[Quantity])),7)",
+"powerbi": "0"
+},
+{
+"expr": "IFERROR(STDEVX.P(FILTER(Facts,Facts[Region]=\"West\"),IF(Facts[Quantity]>1,1/0-1/0,Facts[Quantity])),7)",
+"powerbi": "0"
+},
+{
+"expr": "IFERROR(STDEVX.P(GENERATESERIES(1,5),[Value]*(1/0*0)),7)",
+"powerbi": "0"
+},
+{
+"expr": "IFERROR(STDEVX.P({-1,-2,4},IF([Value]>2,-1/0,1/0)),7)",
+"powerbi": "0"
+},
+{
+"expr": "IFERROR(STDEVX.P({-1,-2,4},IF([Value]>3,0/0,IF([Value]<2,1/0,[Value]))),7)",
+"powerbi": "0"
+},
+{
+"expr": "IFERROR(STDEVX.P({-2,3},IF([Value]<2,-1/0,[Value])),7)",
+"powerbi": "0"
+},
+{
+"expr": "IFERROR(STDEVX.P({0,3,7},IF([Value]>2,1/0,[Value])),7)",
+"powerbi": "0"
+},
+{
+"expr": "IFERROR(STDEVX.P({2,2,2},-[Value]/([Value]-2)),7)",
+"powerbi": "0"
+},
+{
+"expr": "IFERROR(STDEVX.P({2,2,2},IF([Value]>2,-1/0,1/0)),7)",
+"powerbi": "0"
+},
+{
+"expr": "IFERROR(STDEVX.P({BLANK(),2,3},IF([Value]>2,[Value]*1E308*10,-[Value])),7)",
+"powerbi": "0"
+},
+{
+"expr": "IFERROR(STDEVX.S(FILTER(Facts,Facts[Region]=\"West\"),IF(Facts[Quantity]>2,1/0,Facts[Quantity])),7)",
+"powerbi": "0"
+},
+{
+"expr": "IFERROR(STDEVX.S(GENERATESERIES(1,5),[Value]+0/0),7)",
+"powerbi": "0"
+},
+{
+"expr": "IFERROR(STDEVX.S(TOPN(4,Facts,Facts[Quantity],ASC),IF(Facts[Sales]>2,1/0,Facts[Sales])),7)",
+"powerbi": "0"
+},
+{
+"expr": "IFERROR(STDEVX.S({-1,-2,4},IF([Value]<2,-1/0,[Value])),7)",
+"powerbi": "0"
+},
+{
+"expr": "IFERROR(STDEVX.S({-1,-2,4},IF([Value]>1,1/0-1/0,[Value])),7)",
+"powerbi": "0"
+},
+{
+"expr": "IFERROR(STDEVX.S({1,2,3,4},1/0-[Value]),7)",
+"powerbi": "0"
+},
+{
+"expr": "IFERROR(SUMX({BLANK(),2,3},[Value]*(1/0*0)),7)",
+"powerbi": "7"
+},
+{
+"expr": "IFERROR(VARX.P(FILTER(Facts,Facts[Region]=\"West\"),IF(Facts[Quantity]<2,-1/0,Facts[Quantity])),7)",
+"powerbi": "0"
+},
+{
+"expr": "IFERROR(VARX.P(TOPN(4,Facts,Facts[Quantity],ASC),1/0-Facts[Sales]),7)",
+"powerbi": "0"
+},
+{
+"expr": "IFERROR(VARX.P(TOPN(4,Facts,Facts[Quantity],ASC),IF(Facts[Sales]>3,0/0,IF(Facts[Sales]<2,1/0,Facts[Sales]))),7)",
+"powerbi": "0"
+},
+{
+"expr": "IFERROR(VARX.P({-2,3},IF([Value]<2,-1/0,[Value])),7)",
+"powerbi": "0"
+},
+{
+"expr": "IFERROR(VARX.P({1,2,3,4},IF([Value]<2,-1/0,[Value])),7)",
+"powerbi": "0"
+},
+{
+"expr": "IFERROR(VARX.P({1,2,3,4},IF([Value]>2,1/0,[Value])),7)",
+"powerbi": "0"
+},
+{
+"expr": "IFERROR(VARX.P({1,2,3,4},[Value]*(1/0*0)),7)",
+"powerbi": "0"
+},
+{
+"expr": "IFERROR(VARX.P({BLANK(),2,3},IF([Value]>1,1/0-1/0,[Value])),7)",
+"powerbi": "0"
+},
+{
+"expr": "IFERROR(VARX.P({BLANK(),2,3},IF([Value]>2,1/0,[Value])),7)",
+"powerbi": "0"
+},
+{
+"expr": "IFERROR(VARX.S(GENERATESERIES(1,5),[Value]+0/0),7)",
+"powerbi": "0"
+},
+{
+"expr": "IFERROR(VARX.S({-1,-2,4},([Value]*0)*(1/0)),7)",
+"powerbi": "0"
+},
+{
+"expr": "IFERROR(VARX.S({-1,-2,4},[Value]+0/0),7)",
+"powerbi": "0"
+},
+{
+"expr": "IFERROR(VARX.S({-2,3},[Value]*(1/0*0)),7)",
+"powerbi": "0"
+},
+{
+"expr": "IFERROR(VARX.S({0,3,7},([Value]*0)*(1/0)),7)",
+"powerbi": "0"
+},
+{
+"expr": "IFERROR(VARX.S({5},IF([Value]>2,[Value]*1E308*10,-[Value])),7)",
+"powerbi": "7"
+},
+{
+"expr": "ISBLANK(AVERAGEX(TOPN(4,Facts,Facts[Quantity],ASC),Facts[Sales]*(1/0*0)))",
+"powerbi": "False"
+},
+{
+"expr": "ISBLANK(AVERAGEX({1,2,3,4},([Value]*0)*(1/0)))",
+"powerbi": "False"
+},
+{
+"expr": "ISBLANK(GEOMEANX(FILTER(Facts,Facts[Region]=\"West\"),Facts[Quantity]*(1/0*0)))",
+"powerbi": "False"
+},
+{
+"expr": "ISBLANK(GEOMEANX({-2,3},IF([Value]>2,1/0,[Value])))",
+"powerbi": "False"
+},
+{
+"expr": "ISBLANK(GEOMEANX({0,3,7},IF([Value]>2,-1/0,1/0)))",
+"powerbi": "False"
+},
+{
+"expr": "ISBLANK(GEOMEANX({1,2,3,4},IF([Value]>1,1/0-1/0,[Value])))",
+"powerbi": "False"
+},
+{
+"expr": "ISBLANK(GEOMEANX({1,2,3,4},IF([Value]>2,-1/0,1/0)))",
+"powerbi": "False"
+},
+{
+"expr": "ISBLANK(GEOMEANX({1,2,3,4},IF([Value]>2,1/0,[Value])))",
+"powerbi": "False"
+},
+{
+"expr": "ISBLANK(GEOMEANX({2,2,2},IF([Value]=2,-1/0,[Value])))",
+"powerbi": "False"
+},
+{
+"expr": "ISBLANK(GEOMEANX({2,2,2},IF([Value]>1,1/0-1/0,[Value])))",
+"powerbi": "False"
+},
+{
+"expr": "ISBLANK(GEOMEANX({5},IF([Value]>2,[Value]*1E308*10,-[Value])))",
+"powerbi": "False"
+},
+{
+"expr": "ISBLANK(GEOMEANX({BLANK(),2,3},[Value]/([Value]-3)))",
+"powerbi": "False"
+},
+{
+"expr": "ISBLANK(MEDIANX(GENERATESERIES(1,5),([Value]-2)/([Value]-2)))",
+"powerbi": "False"
+},
+{
+"expr": "ISBLANK(MEDIANX(TOPN(4,Facts,Facts[Quantity],ASC),Facts[Sales]*(1/0*0)))",
+"powerbi": "False"
+},
+{
+"expr": "ISBLANK(MEDIANX({-1,-2,4},IF([Value]<2,-1/0,[Value])))",
+"powerbi": "False"
+},
+{
+"expr": "ISBLANK(MEDIANX({-2,3},1/0-[Value]))",
+"powerbi": "False"
+},
+{
+"expr": "ISBLANK(MEDIANX({1,2,3,4},[Value]/([Value]-3)))",
+"powerbi": "False"
+},
+{
+"expr": "ISBLANK(MEDIANX({2,2,2},1/0-[Value]))",
+"powerbi": "False"
+},
+{
+"expr": "ISBLANK(MEDIANX({5},([Value]*0)*(1/0)))",
+"powerbi": "False"
+},
+{
+"expr": "ISBLANK(MEDIANX({BLANK(),2,3},[Value]*(1/0*0)))",
+"powerbi": "False"
+},
+{
+"expr": "ISBLANK(MEDIANX({BLANK(),2,3},[Value]/([Value]-3)))",
+"powerbi": "True"
+},
+{
+"expr": "ISBLANK(PERCENTILEX.EXC(GENERATESERIES(1,5),IF([Value]>1,1/0-1/0,[Value]),0.6))",
+"powerbi": "False"
+},
+{
+"expr": "ISBLANK(PERCENTILEX.EXC({-1,-2,4},([Value]*0)*(1/0),0.5))",
+"powerbi": "False"
+},
+{
+"expr": "ISBLANK(PERCENTILEX.EXC({-1,-2,4},IF([Value]>1,1/0-1/0,[Value]),0.6))",
+"powerbi": "False"
+},
+{
+"expr": "ISBLANK(PERCENTILEX.EXC({-2,3},IF([Value]>3,0/0,IF([Value]<2,1/0,[Value])),0.8))",
+"powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 27) The percentile value should be in the range 1/(N+1)..N/(N+1) inclusive, where N is the number of data values.\""
+},
+{
+"expr": "ISBLANK(PERCENTILEX.EXC({0,3,7},IF([Value]>3,0/0,IF([Value]<2,1/0,[Value])),0.4))",
+"powerbi": "False"
+},
+{
+"expr": "ISBLANK(PERCENTILEX.EXC({2,2,2},([Value]*0)*(1/0),0.2))",
+"powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 27) The percentile value should be in the range 1/(N+1)..N/(N+1) inclusive, where N is the number of data values.\""
+},
+{
+"expr": "ISBLANK(PERCENTILEX.EXC({2,2,2},-[Value]/([Value]-2),0.6))",
+"powerbi": "False"
+},
+{
+"expr": "ISBLANK(PERCENTILEX.EXC({2,2,2},IF([Value]>1,1/0-1/0,[Value]),0.6))",
+"powerbi": "False"
+},
+{
+"expr": "ISBLANK(PERCENTILEX.INC(TOPN(4,Facts,Facts[Quantity],ASC),Facts[Sales]*(1/0*0),0.4))",
+"powerbi": "False"
+},
+{
+"expr": "ISBLANK(PERCENTILEX.INC({0,3,7},IF([Value]=3,0/0,[Value]),0.2))",
+"powerbi": "False"
+},
+{
+"expr": "ISBLANK(PERCENTILEX.INC({1,2,3,4},IF([Value]=2,-1/0,[Value]),0.8))",
+"powerbi": "False"
+},
+{
+"expr": "ISBLANK(PERCENTILEX.INC({1,2,3,4},[Value]+0/0,0.5))",
+"powerbi": "False"
+},
+{
+"expr": "ISBLANK(PRODUCTX({-1,-2,4},IF([Value]>2,[Value]*1E308*10,-[Value])))",
+"powerbi": "False"
+},
+{
+"expr": "ISBLANK(PRODUCTX({2,2,2},1/0-[Value]))",
+"powerbi": "False"
+},
+{
+"expr": "ISBLANK(PRODUCTX({5},[Value]+0/0))",
+"powerbi": "False"
+},
+{
+"expr": "ISBLANK(PRODUCTX({BLANK(),2,3},IF([Value]>2,1/0,[Value])))",
+"powerbi": "False"
+},
+{
+"expr": "ISBLANK(STDEVX.P(FILTER(Facts,Facts[Region]=\"West\"),(Facts[Quantity]*0)*(1/0)))",
+"powerbi": "False"
+},
+{
+"expr": "ISBLANK(STDEVX.P(FILTER(Facts,Facts[Region]=\"West\"),Facts[Quantity]*(1/0*0)))",
+"powerbi": "False"
+},
+{
+"expr": "ISBLANK(STDEVX.P(FILTER(Facts,Facts[Region]=\"West\"),IF(Facts[Quantity]>2,Facts[Quantity]*1E308*10,-Facts[Quantity])))",
+"powerbi": "False"
+},
+{
+"expr": "ISBLANK(STDEVX.P(GENERATESERIES(1,5),([Value]*0)*(1/0)))",
+"powerbi": "False"
+},
+{
+"expr": "ISBLANK(STDEVX.P(TOPN(4,Facts,Facts[Quantity],ASC),IF(Facts[Sales]>3,0/0,IF(Facts[Sales]<2,1/0,Facts[Sales]))))",
+"powerbi": "False"
+},
+{
+"expr": "ISBLANK(STDEVX.P({1,2,3,4},[Value]+0/0))",
+"powerbi": "False"
+},
+{
+"expr": "ISBLANK(STDEVX.P({5},IF([Value]>2,-1/0,1/0)))",
+"powerbi": "False"
+},
+{
+"expr": "ISBLANK(STDEVX.P({5},[Value]+0/0))",
+"powerbi": "False"
+},
+{
+"expr": "ISBLANK(STDEVX.P({BLANK(),2,3},IF([Value]>3,0/0,IF([Value]<2,1/0,[Value]))))",
+"powerbi": "False"
+},
+{
+"expr": "ISBLANK(STDEVX.S(FILTER(Facts,Facts[Region]=\"West\"),Facts[Quantity]*(1/0*0)))",
+"powerbi": "False"
+},
+{
+"expr": "ISBLANK(STDEVX.S({-1,-2,4},IF([Value]>2,1/0,[Value])))",
+"powerbi": "False"
+},
+{
+"expr": "ISBLANK(STDEVX.S({-2,3},IF([Value]>1,1/0-1/0,[Value])))",
+"powerbi": "False"
+},
+{
+"expr": "ISBLANK(STDEVX.S({0,3,7},[Value]/([Value]-3)))",
+"powerbi": "False"
+},
+{
+"expr": "ISBLANK(STDEVX.S({1,2,3,4},IF([Value]>1,1/0-1/0,[Value])))",
+"powerbi": "False"
+},
+{
+"expr": "ISBLANK(STDEVX.S({BLANK(),2,3},IF([Value]<2,-1/0,[Value])))",
+"powerbi": "False"
+},
+{
+"expr": "ISBLANK(SUMX(FILTER(Facts,Facts[Region]=\"West\"),(Facts[Quantity]*0)*(1/0)))",
+"powerbi": "False"
+},
+{
+"expr": "ISBLANK(VARX.P(GENERATESERIES(1,5),IF([Value]=3,0/0,[Value])))",
+"powerbi": "False"
+},
+{
+"expr": "ISBLANK(VARX.P(GENERATESERIES(1,5),IF([Value]>2,[Value]*1E308*10,-[Value])))",
+"powerbi": "False"
+},
+{
+"expr": "ISBLANK(VARX.P(GENERATESERIES(1,5),[Value]*(1/0*0)))",
+"powerbi": "False"
+},
+{
+"expr": "ISBLANK(VARX.P({-1,-2,4},1/0-[Value]))",
+"powerbi": "False"
+},
+{
+"expr": "ISBLANK(VARX.P({-2,3},IF([Value]>3,0/0,IF([Value]<2,1/0,[Value]))))",
+"powerbi": "False"
+},
+{
+"expr": "ISBLANK(VARX.P({2,2,2},IF([Value]>2,-1/0,1/0)))",
+"powerbi": "False"
+},
+{
+"expr": "ISBLANK(VARX.P({5},IF([Value]>2,1/0,[Value])))",
+"powerbi": "False"
+},
+{
+"expr": "ISBLANK(VARX.P({5},[Value]+0/0))",
+"powerbi": "False"
+},
+{
+"expr": "ISBLANK(VARX.P({BLANK(),2,3},IF([Value]<2,-1/0,[Value])))",
+"powerbi": "False"
+},
+{
+"expr": "ISBLANK(VARX.P({BLANK(),2,3},IF([Value]>3,0/0,IF([Value]<2,1/0,[Value]))))",
+"powerbi": "False"
+},
+{
+"expr": "ISBLANK(VARX.S(FILTER(Facts,Facts[Region]=\"West\"),Facts[Quantity]*(1/0*0)))",
+"powerbi": "False"
+},
+{
+"expr": "ISBLANK(VARX.S(TOPN(4,Facts,Facts[Quantity],ASC),1/0-Facts[Sales]))",
+"powerbi": "False"
+},
+{
+"expr": "ISBLANK(VARX.S(TOPN(4,Facts,Facts[Quantity],ASC),IF(Facts[Sales]>1,1/0-1/0,Facts[Sales])))",
+"powerbi": "False"
+},
+{
+"expr": "ISBLANK(VARX.S({-2,3},1/0-[Value]))",
+"powerbi": "False"
+},
+{
+"expr": "ISBLANK(VARX.S({0,3,7},IF([Value]>2,1/0,[Value])))",
+"powerbi": "False"
+},
+{
+"expr": "ISBLANK(VARX.S({1,2,3,4},-[Value]/([Value]-2)))",
+"powerbi": "False"
+},
+{
+"expr": "ISBLANK(VARX.S({2,2,2},[Value]*(1/0*0)))",
+"powerbi": "False"
+},
+{
+"expr": "ISBLANK(VARX.S({BLANK(),2,3},-[Value]/([Value]-2)))",
+"powerbi": "False"
+},
+{
+"expr": "ISBLANK(VARX.S({BLANK(),2,3},IF(ISBLANK([Value]),0/0,[Value])))",
+"powerbi": "False"
+},
+{
+"expr": "MEDIANX(FILTER(Facts,Facts[Region]=\"West\"),(Facts[Quantity]*0)*(1/0))",
+"powerbi": "NaN"
+},
+{
+"expr": "MEDIANX(FILTER(Facts,Facts[Region]=\"West\"),1/0-Facts[Quantity])",
+"powerbi": "Infinity"
+},
+{
+"expr": "MEDIANX(FILTER(Facts,Facts[Region]=\"West\"),Facts[Quantity]*(1/0*0))",
+"powerbi": "NaN"
+},
+{
+"expr": "MEDIANX(FILTER(Facts,Facts[Region]=\"West\"),IF(Facts[Quantity]=3,0/0,Facts[Quantity]))",
+"powerbi": "NaN"
+},
+{
+"expr": "MEDIANX(FILTER(Facts,Facts[Region]=\"West\"),IF(Facts[Quantity]>2,Facts[Quantity]*1E308*10,-Facts[Quantity]))",
+"powerbi": "Infinity"
+},
+{
+"expr": "MEDIANX(GENERATESERIES(1,5),-[Value]/([Value]-2))",
+"powerbi": "-2"
+},
+{
+"expr": "MEDIANX(GENERATESERIES(1,5),IF([Value]=3,0/0,[Value]))",
+"powerbi": "2"
+},
+{
+"expr": "MEDIANX(GENERATESERIES(1,5),IF([Value]>2,1/0,[Value]))",
+"powerbi": "Infinity"
+},
+{
+"expr": "MEDIANX(GENERATESERIES(1,5),[Value]/([Value]-3))",
+"powerbi": "2.5"
+},
+{
+"expr": "MEDIANX(TOPN(4,Facts,Facts[Quantity],ASC),IF(Facts[Sales]>2,1/0,Facts[Sales]))",
+"powerbi": "Infinity"
+},
+{
+"expr": "MEDIANX({-1,-2,4},([Value]*0)*(1/0))",
+"powerbi": "NaN"
+},
+{
+"expr": "MEDIANX({-1,-2,4},IF([Value]<2,-1/0,[Value]))",
+"powerbi": "-Infinity"
+},
+{
+"expr": "MEDIANX({-1,-2,4},IF([Value]>1,1/0-1/0,[Value]))",
+"powerbi": "-2"
+},
+{
+"expr": "MEDIANX({-1,-2,4},IF([Value]>2,1/0,[Value]))",
+"powerbi": "-1"
+},
+{
+"expr": "MEDIANX({-1,-2,4},IF([Value]>2,[Value]*1E308*10,-[Value]))",
+"powerbi": "2"
+},
+{
+"expr": "MEDIANX({-1,-2,4},IF([Value]>3,0/0,IF([Value]<2,1/0,[Value])))",
+"powerbi": "Infinity"
+},
+{
+"expr": "MEDIANX({-2,3},IF([Value]=3,0/0,[Value]))",
+"powerbi": "NaN"
+},
+{
+"expr": "MEDIANX({-2,3},IF([Value]>1,1/0-1/0,[Value]))",
+"powerbi": "NaN"
+},
+{
+"expr": "MEDIANX({-2,3},IF([Value]>2,1/0,[Value]))",
+"powerbi": "Infinity"
+},
+{
+"expr": "MEDIANX({-2,3},[Value]*(1/0*0))",
+"powerbi": "NaN"
+},
+{
+"expr": "MEDIANX({-2,3},[Value]/([Value]-3))",
+"powerbi": "Infinity"
+},
+{
+"expr": "MEDIANX({0,3,7},1/0-[Value])",
+"powerbi": "Infinity"
+},
+{
+"expr": "MEDIANX({1,2,3,4},([Value]*0)*(1/0))",
+"powerbi": "NaN"
+},
+{
+"expr": "MEDIANX({1,2,3,4},-POWER([Value],501))",
+"powerbi": "-5.45404376938049E+238"
+},
+{
+"expr": "MEDIANX({1,2,3,4},-[Value]/([Value]-2))",
+"powerbi": "-2.5"
+},
+{
+"expr": "MEDIANX({2,2,2},IF([Value]>2,-1/0,1/0))",
+"powerbi": "Infinity"
+},
+{
+"expr": "MEDIANX({5},IF([Value]>2,1/0,[Value]))",
+"powerbi": "Infinity"
+},
+{
+"expr": "MEDIANX({BLANK(),2,3},-[Value]/([Value]-2))",
+"powerbi": "-3"
+},
+{
+"expr": "MEDIANX({BLANK(),2,3},IF([Value]=3,0/0,[Value]))",
+"powerbi": "BLANK"
+},
+{
+"expr": "MEDIANX({BLANK(),2,3},IF([Value]>1,1/0-1/0,[Value]))",
+"powerbi": "NaN"
+},
+{
+"expr": "PERCENTILEX.EXC(FILTER(Facts,Facts[Region]=\"West\"),IF(Facts[Quantity]<2,-1/0,Facts[Quantity]),0.2)",
+"powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 19) The percentile value should be in the range 1/(N+1)..N/(N+1) inclusive, where N is the number of data values.\""
+},
+{
+"expr": "PERCENTILEX.EXC(FILTER(Facts,Facts[Region]=\"West\"),IF(Facts[Quantity]<2,-1/0,Facts[Quantity]),0.6)",
+"powerbi": "NaN"
+},
+{
+"expr": "PERCENTILEX.EXC(FILTER(Facts,Facts[Region]=\"West\"),IF(Facts[Quantity]>3,0/0,IF(Facts[Quantity]<2,1/0,Facts[Quantity])),0.8)",
+"powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 19) The percentile value should be in the range 1/(N+1)..N/(N+1) inclusive, where N is the number of data values.\""
+},
+{
+"expr": "PERCENTILEX.EXC(GENERATESERIES(1,5),IF([Value]=2,-1/0,[Value]),0.6)",
+"powerbi": "3.6"
+},
+{
+"expr": "PERCENTILEX.EXC(GENERATESERIES(1,5),[Value]/([Value]-3),0.2)",
+"powerbi": "-1.7"
+},
+{
+"expr": "PERCENTILEX.EXC(TOPN(4,Facts,Facts[Quantity],ASC),-Facts[Sales]/(Facts[Sales]-2),0.2)",
+"powerbi": "-1.23529411764706"
+},
+{
+"expr": "PERCENTILEX.EXC(TOPN(4,Facts,Facts[Quantity],ASC),IF(Facts[Sales]<2,-1/0,Facts[Sales]),0.4)",
+"powerbi": "-Infinity"
+},
+{
+"expr": "PERCENTILEX.EXC(TOPN(4,Facts,Facts[Quantity],ASC),IF(Facts[Sales]<2,-1/0,Facts[Sales]),0.6)",
+"powerbi": "10.5"
+},
+{
+"expr": "PERCENTILEX.EXC(TOPN(4,Facts,Facts[Quantity],ASC),IF(Facts[Sales]>1,1/0-1/0,Facts[Sales]),0.5)",
+"powerbi": "NaN"
+},
+{
+"expr": "PERCENTILEX.EXC({-1,-2,4},IF([Value]>1,1/0-1/0,[Value]),0.2)",
+"powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 19) The percentile value should be in the range 1/(N+1)..N/(N+1) inclusive, where N is the number of data values.\""
+},
+{
+"expr": "PERCENTILEX.EXC({-1,-2,4},IF([Value]>2,-1/0,1/0),0.2)",
+"powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 19) The percentile value should be in the range 1/(N+1)..N/(N+1) inclusive, where N is the number of data values.\""
+},
+{
+"expr": "PERCENTILEX.EXC({-2,3},([Value]*0)*(1/0),0.2)",
+"powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 19) The percentile value should be in the range 1/(N+1)..N/(N+1) inclusive, where N is the number of data values.\""
+},
+{
+"expr": "PERCENTILEX.EXC({-2,3},IF([Value]>2,[Value]*1E308*10,-[Value]),0.6)",
+"powerbi": "Infinity"
+},
+{
+"expr": "PERCENTILEX.EXC({-2,3},IF([Value]>3,0/0,IF([Value]<2,1/0,[Value])),0.4)",
+"powerbi": "Infinity"
+},
+{
+"expr": "PERCENTILEX.EXC({0,3,7},([Value]-2)/([Value]-2),0.6)",
+"powerbi": "1"
+},
+{
+"expr": "PERCENTILEX.EXC({0,3,7},[Value]/([Value]-3),0.2)",
+"powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 19) The percentile value should be in the range 1/(N+1)..N/(N+1) inclusive, where N is the number of data values.\""
+},
+{
+"expr": "PERCENTILEX.EXC({1,2,3,4},IF([Value]=2,-1/0,[Value]),0.4)",
+"powerbi": "1"
+},
+{
+"expr": "PERCENTILEX.EXC({1,2,3,4},IF([Value]>2,1/0,[Value]),0.4)",
+"powerbi": "2"
+},
+{
+"expr": "PERCENTILEX.EXC({1,2,3,4},[Value]+0/0,0.2)",
+"powerbi": "NaN"
+},
+{
+"expr": "PERCENTILEX.EXC({1,2,3,4},[Value]+0/0,0.6)",
+"powerbi": "NaN"
+},
+{
+"expr": "PERCENTILEX.EXC({5},IF([Value]>1,1/0-1/0,[Value]),0.5)",
+"powerbi": "NaN"
+},
+{
+"expr": "PERCENTILEX.EXC({BLANK(),2,3},([Value]*0)*(1/0),0.5)",
+"powerbi": "NaN"
+},
+{
+"expr": "PERCENTILEX.EXC({BLANK(),2,3},([Value]-2)/([Value]-2),0.8)",
+"powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 19) The percentile value should be in the range 1/(N+1)..N/(N+1) inclusive, where N is the number of data values.\""
+},
+{
+"expr": "PERCENTILEX.EXC({BLANK(),2,3},[Value]*(1/0*0),0.2)",
+"powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 19) The percentile value should be in the range 1/(N+1)..N/(N+1) inclusive, where N is the number of data values.\""
+},
+{
+"expr": "PERCENTILEX.INC(FILTER(Facts,Facts[Region]=\"West\"),Facts[Quantity]+0/0,0.5)",
+"powerbi": "NaN"
+},
+{
+"expr": "PERCENTILEX.INC(FILTER(Facts,Facts[Region]=\"West\"),IF(Facts[Quantity]>1,1/0-1/0,Facts[Quantity]),0.6)",
+"powerbi": "NaN"
+},
+{
+"expr": "PERCENTILEX.INC(FILTER(Facts,Facts[Region]=\"West\"),IF(Facts[Quantity]>2,-1/0,1/0),0.5)",
+"powerbi": "NaN"
+},
+{
+"expr": "PERCENTILEX.INC(GENERATESERIES(1,5),([Value]-2)/([Value]-2),0.2)",
+"powerbi": "1"
+},
+{
+"expr": "PERCENTILEX.INC(GENERATESERIES(1,5),-[Value]/([Value]-2),0.5)",
+"powerbi": "-2"
+},
+{
+"expr": "PERCENTILEX.INC(GENERATESERIES(1,5),IF([Value]>2,[Value]*1E308*10,-[Value]),0.5)",
+"powerbi": "Infinity"
+},
+{
+"expr": "PERCENTILEX.INC(GENERATESERIES(1,5),IF([Value]>3,0/0,IF([Value]<2,1/0,[Value])),0.8)",
+"powerbi": "Infinity"
+},
+{
+"expr": "PERCENTILEX.INC(GENERATESERIES(1,5),[Value]*(1/0*0),0.6)",
+"powerbi": "NaN"
+},
+{
+"expr": "PERCENTILEX.INC(GENERATESERIES(1,5),[Value]*(1/0*0),0.8)",
+"powerbi": "NaN"
+},
+{
+"expr": "PERCENTILEX.INC(TOPN(4,Facts,Facts[Quantity],ASC),(Facts[Sales]-2)/(Facts[Sales]-2),0.6)",
+"powerbi": "1"
+},
+{
+"expr": "PERCENTILEX.INC(TOPN(4,Facts,Facts[Quantity],ASC),1/0-Facts[Sales],0.2)",
+"powerbi": "Infinity"
+},
+{
+"expr": "PERCENTILEX.INC(TOPN(4,Facts,Facts[Quantity],ASC),Facts[Sales]+0/0,0.5)",
+"powerbi": "NaN"
+},
+{
+"expr": "PERCENTILEX.INC(TOPN(4,Facts,Facts[Quantity],ASC),IF(Facts[Sales]>2,Facts[Sales]*1E308*10,-Facts[Sales]),0.4)",
+"powerbi": "Infinity"
+},
+{
+"expr": "PERCENTILEX.INC(TOPN(4,Facts,Facts[Quantity],ASC),IF(Facts[Sales]>3,0/0,IF(Facts[Sales]<2,1/0,Facts[Sales])),0.5)",
+"powerbi": "NaN"
+},
+{
+"expr": "PERCENTILEX.INC({-1,-2,4},IF([Value]>2,1/0,[Value]),0.6)",
+"powerbi": "Infinity"
+},
+{
+"expr": "PERCENTILEX.INC({-2,3},([Value]*0)*(1/0),0.8)",
+"powerbi": "NaN"
+},
+{
+"expr": "PERCENTILEX.INC({-2,3},([Value]-2)/([Value]-2),0.4)",
+"powerbi": "1"
+},
+{
+"expr": "PERCENTILEX.INC({-2,3},([Value]-2)/([Value]-2),0.8)",
+"powerbi": "1"
+},
+{
+"expr": "PERCENTILEX.INC({-2,3},IF([Value]<2,-1/0,[Value]),0.4)",
+"powerbi": "NaN"
+},
+{
+"expr": "PERCENTILEX.INC({-2,3},IF([Value]>3,0/0,IF([Value]<2,1/0,[Value])),0.5)",
+"powerbi": "Infinity"
+},
+{
+"expr": "PERCENTILEX.INC({0,3,7},([Value]-2)/([Value]-2),0.2)",
+"powerbi": "1"
+},
+{
+"expr": "PERCENTILEX.INC({0,3,7},-[Value]/([Value]-2),0.5)",
+"powerbi": "-1.4"
+},
+{
+"expr": "PERCENTILEX.INC({0,3,7},IF([Value]<2,-1/0,[Value]),0.6)",
+"powerbi": "3.8"
+},
+{
+"expr": "PERCENTILEX.INC({0,3,7},IF([Value]=3,0/0,[Value]),0.4)",
+"powerbi": "NaN"
+},
+{
+"expr": "PERCENTILEX.INC({0,3,7},IF([Value]>1,1/0-1/0,[Value]),0.8)",
+"powerbi": "NaN"
+},
+{
+"expr": "PERCENTILEX.INC({1,2,3,4},([Value]-2)/([Value]-2),0.4)",
+"powerbi": "NaN"
+},
+{
+"expr": "PERCENTILEX.INC({1,2,3,4},-[Value]/([Value]-2),0.2)",
+"powerbi": "NaN"
+},
+{
+"expr": "PERCENTILEX.INC({1,2,3,4},1/0-[Value],0.6)",
+"powerbi": "Infinity"
+},
+{
+"expr": "PERCENTILEX.INC({1,2,3,4},IF([Value]=2,-1/0,[Value]),0.2)",
+"powerbi": "NaN"
+},
+{
+"expr": "PERCENTILEX.INC({1,2,3,4},[Value]/([Value]-3),0.5)",
+"powerbi": "1.75"
+},
+{
+"expr": "PERCENTILEX.INC({2,2,2},([Value]*0)*(1/0),0.5)",
+"powerbi": "NaN"
+},
+{
+"expr": "PERCENTILEX.INC({2,2,2},-[Value]/([Value]-2),0.6)",
+"powerbi": "-Infinity"
+},
+{
+"expr": "PERCENTILEX.INC({2,2,2},IF([Value]>2,-1/0,1/0),0.4)",
+"powerbi": "Infinity"
+},
+{
+"expr": "PERCENTILEX.INC({2,2,2},IF([Value]>2,-1/0,1/0),0.6)",
+"powerbi": "Infinity"
+},
+{
+"expr": "PERCENTILEX.INC({2,2,2},IF([Value]>2,[Value]*1E308*10,-[Value]),0.4)",
+"powerbi": "-2"
+},
+{
+"expr": "PERCENTILEX.INC({2,2,2},IF([Value]>2,[Value]*1E308*10,-[Value]),0.5)",
+"powerbi": "-2"
+},
+{
+"expr": "PERCENTILEX.INC({5},IF([Value]>2,-1/0,1/0),0.6)",
+"powerbi": "-Infinity"
+},
+{
+"expr": "PERCENTILEX.INC({5},IF([Value]>2,[Value]*1E308*10,-[Value]),0.5)",
+"powerbi": "Infinity"
+},
+{
+"expr": "PERCENTILEX.INC({5},[Value]*(1/0*0),0.4)",
+"powerbi": "NaN"
+},
+{
+"expr": "PRODUCTX(FILTER(Facts,Facts[Region]=\"West\"),Facts[Quantity]+0/0)",
+"powerbi": "NaN"
+},
+{
+"expr": "PRODUCTX(GENERATESERIES(1,5),([Value]*0)*(1/0))",
+"powerbi": "NaN"
+},
+{
+"expr": "PRODUCTX(GENERATESERIES(1,5),IF([Value]=2,-1/0,[Value]))",
+"powerbi": "-Infinity"
+},
+{
+"expr": "PRODUCTX(GENERATESERIES(1,5),IF([Value]>2,-1/0,1/0))",
+"powerbi": "-Infinity"
+},
+{
+"expr": "PRODUCTX(GENERATESERIES(1,5),IF([Value]>2,[Value]*1E308*10,-[Value]))",
+"powerbi": "Infinity"
+},
+{
+"expr": "PRODUCTX(GENERATESERIES(1,5),[Value]*(1/0*0))",
+"powerbi": "NaN"
+},
+{
+"expr": "PRODUCTX(GENERATESERIES(1,5),[Value]/([Value]-3))",
+"powerbi": "Infinity"
+},
+{
+"expr": "PRODUCTX(TOPN(4,Facts,Facts[Quantity],ASC),IF(Facts[Sales]>3,0/0,IF(Facts[Sales]<2,1/0,Facts[Sales])))",
+"powerbi": "NaN"
+},
+{
+"expr": "PRODUCTX({-1,-2,4},([Value]*0)*(1/0))",
+"powerbi": "NaN"
+},
+{
+"expr": "PRODUCTX({-2,3},([Value]*0)*(1/0))",
+"powerbi": "NaN"
+},
+{
+"expr": "PRODUCTX({-2,3},IF([Value]=3,0/0,[Value]))",
+"powerbi": "NaN"
+},
+{
+"expr": "PRODUCTX({-2,3},IF([Value]>2,1/0,[Value]))",
+"powerbi": "-Infinity"
+},
+{
+"expr": "PRODUCTX({-2,3},[Value]+0/0)",
+"powerbi": "NaN"
+},
+{
+"expr": "PRODUCTX({-2,3},[Value]/([Value]-3))",
+"powerbi": "Infinity"
+},
+{
+"expr": "PRODUCTX({0,3,7},1/0-[Value])",
+"powerbi": "Infinity"
+},
+{
+"expr": "PRODUCTX({0,3,7},IF([Value]=3,0/0,[Value]))",
+"powerbi": "NaN"
+},
+{
+"expr": "PRODUCTX({0,3,7},IF([Value]>2,-1/0,1/0))",
+"powerbi": "Infinity"
+},
+{
+"expr": "PRODUCTX({0,3,7},IF([Value]>2,1/0,[Value]))",
+"powerbi": "NaN"
+},
+{
+"expr": "PRODUCTX({0,3,7},IF([Value]>2,[Value]*1E308*10,-[Value]))",
+"powerbi": "NaN"
+},
+{
+"expr": "PRODUCTX({1,2,3,4},1/0-[Value])",
+"powerbi": "Infinity"
+},
+{
+"expr": "PRODUCTX({1,2,3,4},IF([Value]<2,-1/0,[Value]))",
+"powerbi": "-Infinity"
+},
+{
+"expr": "PRODUCTX({1,2,3,4},IF([Value]>3,0/0,IF([Value]<2,1/0,[Value])))",
+"powerbi": "NaN"
+},
+{
+"expr": "PRODUCTX({2,2,2},([Value]-2)/([Value]-2))",
+"powerbi": "NaN"
+},
+{
+"expr": "PRODUCTX({2,2,2},-[Value]/([Value]-2))",
+"powerbi": "-Infinity"
+},
+{
+"expr": "PRODUCTX({2,2,2},IF([Value]=2,-1/0,[Value]))",
+"powerbi": "-Infinity"
+},
+{
+"expr": "PRODUCTX({2,2,2},IF([Value]>1,1/0-1/0,[Value]))",
+"powerbi": "NaN"
+},
+{
+"expr": "PRODUCTX({2,2,2},[Value]*(1/0*0))",
+"powerbi": "NaN"
+},
+{
+"expr": "PRODUCTX({5},IF([Value]>2,1/0,[Value]))",
+"powerbi": "Infinity"
+},
+{
+"expr": "PRODUCTX({5},[Value]+0/0)",
+"powerbi": "NaN"
+},
+{
+"expr": "PRODUCTX({BLANK(),2,3},IF(ISBLANK([Value]),0/0,[Value]))",
+"powerbi": "NaN"
+},
+{
+"expr": "STDEVX.P(FILTER(Facts,Facts[Region]=\"West\"),(Facts[Quantity]*0)*(1/0))",
+"powerbi": "0"
+},
+{
+"expr": "STDEVX.P(FILTER(Facts,Facts[Region]=\"West\"),Facts[Quantity]*(1/0*0))",
+"powerbi": "0"
+},
+{
+"expr": "STDEVX.P(FILTER(Facts,Facts[Region]=\"West\"),Facts[Quantity]+0/0)",
+"powerbi": "0"
+},
+{
+"expr": "STDEVX.P(FILTER(Facts,Facts[Region]=\"West\"),IF(Facts[Quantity]<2,-1/0,Facts[Quantity]))",
+"powerbi": "0"
+},
+{
+"expr": "STDEVX.P(FILTER(Facts,Facts[Region]=\"West\"),IF(Facts[Quantity]>1,1/0-1/0,Facts[Quantity]))",
+"powerbi": "0"
+},
+{
+"expr": "STDEVX.P(GENERATESERIES(1,5),([Value]-2)/([Value]-2))",
+"powerbi": "0"
+},
+{
+"expr": "STDEVX.P(GENERATESERIES(1,5),IF([Value]>1,1/0-1/0,[Value]))",
+"powerbi": "0"
+},
+{
+"expr": "STDEVX.P(GENERATESERIES(1,5),IF([Value]>2,[Value]*1E308*10,-[Value]))",
+"powerbi": "0"
+},
+{
+"expr": "STDEVX.P(TOPN(4,Facts,Facts[Quantity],ASC),1/0-Facts[Sales])",
+"powerbi": "0"
+},
+{
+"expr": "STDEVX.P(TOPN(4,Facts,Facts[Quantity],ASC),IF(Facts[Sales]>1,1/0-1/0,Facts[Sales]))",
+"powerbi": "0"
+},
+{
+"expr": "STDEVX.P(TOPN(4,Facts,Facts[Quantity],ASC),IF(Facts[Sales]>2,-1/0,1/0))",
+"powerbi": "0"
+},
+{
+"expr": "STDEVX.P({-1,-2,4},([Value]*0)*(1/0))",
+"powerbi": "0"
+},
+{
+"expr": "STDEVX.P({-1,-2,4},IF([Value]>1,1/0-1/0,[Value]))",
+"powerbi": "0"
+},
+{
+"expr": "STDEVX.P({-1,-2,4},IF([Value]>3,0/0,IF([Value]<2,1/0,[Value])))",
+"powerbi": "0"
+},
+{
+"expr": "STDEVX.P({-2,3},IF([Value]>2,[Value]*1E308*10,-[Value]))",
+"powerbi": "0"
+},
+{
+"expr": "STDEVX.P({-2,3},[Value]*(1/0*0))",
+"powerbi": "0"
+},
+{
+"expr": "STDEVX.P({-2,3},[Value]+0/0)",
+"powerbi": "0"
+},
+{
+"expr": "STDEVX.P({0,3,7},1/0-[Value])",
+"powerbi": "0"
+},
+{
+"expr": "STDEVX.P({0,3,7},IF([Value]>2,[Value]*1E308*10,-[Value]))",
+"powerbi": "0"
+},
+{
+"expr": "STDEVX.P({0,3,7},[Value]+0/0)",
+"powerbi": "0"
+},
+{
+"expr": "STDEVX.P({0,3,7},[Value]/([Value]-3))",
+"powerbi": "0"
+},
+{
+"expr": "STDEVX.P({1,2,3,4},IF([Value]=2,-1/0,[Value]))",
+"powerbi": "0"
+},
+{
+"expr": "STDEVX.P({1,2,3,4},IF([Value]>2,1/0,[Value]))",
+"powerbi": "0"
+},
+{
+"expr": "STDEVX.P({1,2,3,4},IF([Value]>2,[Value]*1E308*10,-[Value]))",
+"powerbi": "0"
+},
+{
+"expr": "STDEVX.P({1,2,3,4},[Value]*(1/0*0))",
+"powerbi": "0"
+},
+{
+"expr": "STDEVX.P({1,2,3,4},[Value]+0/0)",
+"powerbi": "0"
+},
+{
+"expr": "STDEVX.P({2,2,2},([Value]-2)/([Value]-2))",
+"powerbi": "0"
+},
+{
+"expr": "STDEVX.P({2,2,2},1/0-[Value])",
+"powerbi": "0"
+},
+{
+"expr": "STDEVX.P({5},([Value]*0)*(1/0))",
+"powerbi": "0"
+},
+{
+"expr": "STDEVX.P({5},IF([Value]>2,-1/0,1/0))",
+"powerbi": "0"
+},
+{
+"expr": "STDEVX.P({BLANK(),2,3},IF([Value]<2,-1/0,[Value]))",
+"powerbi": "0"
+},
+{
+"expr": "STDEVX.P({BLANK(),2,3},IF([Value]>3,0/0,IF([Value]<2,1/0,[Value])))",
+"powerbi": "0"
+},
+{
+"expr": "STDEVX.S(FILTER(Facts,Facts[Region]=\"West\"),Facts[Quantity]+0/0)",
+"powerbi": "0"
+},
+{
+"expr": "STDEVX.S(FILTER(Facts,Facts[Region]=\"West\"),IF(Facts[Quantity]>2,-1/0,1/0))",
+"powerbi": "0"
+},
+{
+"expr": "STDEVX.S(GENERATESERIES(1,5),1/0-[Value])",
+"powerbi": "0"
+},
+{
+"expr": "STDEVX.S(GENERATESERIES(1,5),IF([Value]>1,1/0-1/0,[Value]))",
+"powerbi": "0"
+},
+{
+"expr": "STDEVX.S(GENERATESERIES(1,5),[Value]+0/0)",
+"powerbi": "0"
+},
+{
+"expr": "STDEVX.S(TOPN(4,Facts,Facts[Quantity],ASC),Facts[Sales]*(1/0*0))",
+"powerbi": "0"
+},
+{
+"expr": "STDEVX.S(TOPN(4,Facts,Facts[Quantity],ASC),IF(Facts[Sales]>2,1/0,Facts[Sales]))",
+"powerbi": "0"
+},
+{
+"expr": "STDEVX.S({-1,-2,4},IF([Value]>1,1/0-1/0,[Value]))",
+"powerbi": "0"
+},
+{
+"expr": "STDEVX.S({-1,-2,4},IF([Value]>2,-1/0,1/0))",
+"powerbi": "0"
+},
+{
+"expr": "STDEVX.S({-1,-2,4},IF([Value]>3,0/0,IF([Value]<2,1/0,[Value])))",
+"powerbi": "0"
+},
+{
+"expr": "STDEVX.S({-1,-2,4},[Value]*(1/0*0))",
+"powerbi": "0"
+},
+{
+"expr": "STDEVX.S({-2,3},IF([Value]>2,[Value]*1E308*10,-[Value]))",
+"powerbi": "0"
+},
+{
+"expr": "STDEVX.S({0,3,7},IF([Value]<2,-1/0,[Value]))",
+"powerbi": "0"
+},
+{
+"expr": "STDEVX.S({0,3,7},IF([Value]>1,1/0-1/0,[Value]))",
+"powerbi": "0"
+},
+{
+"expr": "STDEVX.S({0,3,7},IF([Value]>3,0/0,IF([Value]<2,1/0,[Value])))",
+"powerbi": "0"
+},
+{
+"expr": "STDEVX.S({0,3,7},[Value]+0/0)",
+"powerbi": "0"
+},
+{
+"expr": "STDEVX.S({1,2,3,4},([Value]-2)/([Value]-2))",
+"powerbi": "0"
+},
+{
+"expr": "STDEVX.S({1,2,3,4},IF([Value]>2,1/0,[Value]))",
+"powerbi": "0"
+},
+{
+"expr": "STDEVX.S({1,2,3,4},IF([Value]>3,0/0,IF([Value]<2,1/0,[Value])))",
+"powerbi": "0"
+},
+{
+"expr": "STDEVX.S({1,2,3,4},[Value]/([Value]-3))",
+"powerbi": "0"
+},
+{
+"expr": "STDEVX.S({2,2,2},IF([Value]>1,1/0-1/0,[Value]))",
+"powerbi": "0"
+},
+{
+"expr": "STDEVX.S({5},IF([Value]>3,0/0,IF([Value]<2,1/0,[Value])))",
+"powerbi": "NaN"
+},
+{
+"expr": "STDEVX.S({BLANK(),2,3},[Value]*(1/0*0))",
+"powerbi": "0"
+},
+{
+"expr": "STDEVX.S({BLANK(),2,3},[Value]/([Value]-3))",
+"powerbi": "0"
+},
+{
+"expr": "SUMX(GENERATESERIES(1,5),[Value]*(1/0*0))",
+"powerbi": "NaN"
+},
+{
+"expr": "SUMX({-1,-2,4},([Value]*0)*(1/0))",
+"powerbi": "NaN"
+},
+{
+"expr": "SUMX({-2,3},[Value]*(1/0*0))",
+"powerbi": "NaN"
+},
+{
+"expr": "SUMX({1,2,3,4},([Value]*0)*(1/0))",
+"powerbi": "NaN"
+},
+{
+"expr": "SUMX({2,2,2},[Value]*(1/0*0))",
+"powerbi": "NaN"
+},
+{
+"expr": "VARX.P(FILTER(Facts,Facts[Region]=\"West\"),IF(Facts[Quantity]<2,-1/0,Facts[Quantity]))",
+"powerbi": "0"
+},
+{
+"expr": "VARX.P(FILTER(Facts,Facts[Region]=\"West\"),IF(Facts[Quantity]=3,0/0,Facts[Quantity]))",
+"powerbi": "0"
+},
+{
+"expr": "VARX.P(FILTER(Facts,Facts[Region]=\"West\"),IF(Facts[Quantity]>1,1/0-1/0,Facts[Quantity]))",
+"powerbi": "0"
+},
+{
+"expr": "VARX.P(FILTER(Facts,Facts[Region]=\"West\"),IF(Facts[Quantity]>2,1/0,Facts[Quantity]))",
+"powerbi": "0"
+},
+{
+"expr": "VARX.P(GENERATESERIES(1,5),([Value]-2)/([Value]-2))",
+"powerbi": "0"
+},
+{
+"expr": "VARX.P(GENERATESERIES(1,5),IF([Value]<2,-1/0,[Value]))",
+"powerbi": "0"
+},
+{
+"expr": "VARX.P(GENERATESERIES(1,5),[Value]*(1/0*0))",
+"powerbi": "0"
+},
+{
+"expr": "VARX.P(TOPN(4,Facts,Facts[Quantity],ASC),(Facts[Sales]*0)*(1/0))",
+"powerbi": "0"
+},
+{
+"expr": "VARX.P(TOPN(4,Facts,Facts[Quantity],ASC),IF(Facts[Sales]>3,0/0,IF(Facts[Sales]<2,1/0,Facts[Sales])))",
+"powerbi": "0"
+},
+{
+"expr": "VARX.P({-1,-2,4},IF([Value]>1,1/0-1/0,[Value]))",
+"powerbi": "0"
+},
+{
+"expr": "VARX.P({-1,-2,4},[Value]*(1/0*0))",
+"powerbi": "0"
+},
+{
+"expr": "VARX.P({-2,3},IF([Value]>2,1/0,[Value]))",
+"powerbi": "0"
+},
+{
+"expr": "VARX.P({-2,3},IF([Value]>2,[Value]*1E308*10,-[Value]))",
+"powerbi": "0"
+},
+{
+"expr": "VARX.P({1,2,3,4},1/0-[Value])",
+"powerbi": "0"
+},
+{
+"expr": "VARX.P({1,2,3,4},[Value]*(1/0*0))",
+"powerbi": "0"
+},
+{
+"expr": "VARX.P({1,2,3,4},[Value]/([Value]-3))",
+"powerbi": "0"
+},
+{
+"expr": "VARX.P({2,2,2},-[Value]/([Value]-2))",
+"powerbi": "0"
+},
+{
+"expr": "VARX.P({2,2,2},1/0-[Value])",
+"powerbi": "0"
+},
+{
+"expr": "VARX.P({2,2,2},IF([Value]>1,1/0-1/0,[Value]))",
+"powerbi": "0"
+},
+{
+"expr": "VARX.P({2,2,2},[Value]*(1/0*0))",
+"powerbi": "0"
+},
+{
+"expr": "VARX.P({5},IF([Value]>1,1/0-1/0,[Value]))",
+"powerbi": "0"
+},
+{
+"expr": "VARX.P({5},IF([Value]>3,0/0,IF([Value]<2,1/0,[Value])))",
+"powerbi": "0"
+},
+{
+"expr": "VARX.P({5},[Value]+0/0)",
+"powerbi": "0"
+},
+{
+"expr": "VARX.P({BLANK(),2,3},IF(ISBLANK([Value]),0/0,[Value]))",
+"powerbi": "0"
+},
+{
+"expr": "VARX.S(FILTER(Facts,Facts[Region]=\"West\"),Facts[Quantity]*(1/0*0))",
+"powerbi": "0"
+},
+{
+"expr": "VARX.S(FILTER(Facts,Facts[Region]=\"West\"),Facts[Quantity]/(Facts[Quantity]-3))",
+"powerbi": "0"
+},
+{
+"expr": "VARX.S(FILTER(Facts,Facts[Region]=\"West\"),IF(Facts[Quantity]>2,1/0,Facts[Quantity]))",
+"powerbi": "0"
+},
+{
+"expr": "VARX.S(FILTER(Facts,Facts[Region]=\"West\"),IF(Facts[Quantity]>2,Facts[Quantity]*1E308*10,-Facts[Quantity]))",
+"powerbi": "0"
+},
+{
+"expr": "VARX.S(GENERATESERIES(1,5),IF([Value]>1,1/0-1/0,[Value]))",
+"powerbi": "0"
+},
+{
+"expr": "VARX.S(GENERATESERIES(1,5),IF([Value]>2,[Value]*1E308*10,-[Value]))",
+"powerbi": "0"
+},
+{
+"expr": "VARX.S(GENERATESERIES(1,5),[Value]*(1/0*0))",
+"powerbi": "0"
+},
+{
+"expr": "VARX.S(GENERATESERIES(1,5),[Value]/([Value]-3))",
+"powerbi": "0"
+},
+{
+"expr": "VARX.S({-1,-2,4},([Value]*0)*(1/0))",
+"powerbi": "0"
+},
+{
+"expr": "VARX.S({-1,-2,4},[Value]*(1/0*0))",
+"powerbi": "0"
+},
+{
+"expr": "VARX.S({-2,3},IF([Value]<2,-1/0,[Value]))",
+"powerbi": "0"
+},
+{
+"expr": "VARX.S({1,2,3,4},-[Value]/([Value]-2))",
+"powerbi": "0"
+},
+{
+"expr": "VARX.S({1,2,3,4},1/0-[Value])",
+"powerbi": "0"
+},
+{
+"expr": "VARX.S({1,2,3,4},IF([Value]<2,-1/0,[Value]))",
+"powerbi": "0"
+},
+{
+"expr": "VARX.S({1,2,3,4},[Value]/([Value]-3))",
+"powerbi": "0"
+},
+{
+"expr": "VARX.S({2,2,2},-[Value]/([Value]-2))",
+"powerbi": "0"
+},
+{
+"expr": "VARX.S({2,2,2},IF([Value]=2,-1/0,[Value]))",
+"powerbi": "0"
+},
+{
+"expr": "VARX.S({2,2,2},IF([Value]>1,1/0-1/0,[Value]))",
+"powerbi": "0"
+},
+{
+"expr": "VARX.S({2,2,2},[Value]+0/0)",
+"powerbi": "0"
+},
+{
+"expr": "VARX.S({BLANK(),2,3},-[Value]/([Value]-2))",
+"powerbi": "0"
+},
+{
+"expr": "VARX.S({BLANK(),2,3},IF([Value]<2,-1/0,[Value]))",
+"powerbi": "0"
+},
+{
+"expr": "VARX.S({BLANK(),2,3},IF([Value]=2,-1/0,[Value]))",
+"powerbi": "0"
+},
+{
+"expr": "VARX.S({BLANK(),2,3},IF([Value]>3,0/0,IF([Value]<2,1/0,[Value])))",
+"powerbi": "0"
+},
+{
+"expr": "VARX.S({BLANK(),2,3},[Value]*(1/0*0))",
+"powerbi": "0"
+},
+{
+"expr": "VARX.S({BLANK(),2,3},[Value]+0/0)",
+"powerbi": "0"
+}
+]
+}

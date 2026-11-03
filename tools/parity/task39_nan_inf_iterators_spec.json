@@ -1,0 +1,3916 @@
+{
+ "items": [
+  {
+   "part": "A",
+   "expr": "PRODUCTX(CALCULATETABLE(Facts,Facts[Region]=\"East\"),1/0)",
+   "powerbi": "Infinity",
+   "now": "LOCAL-REJECT:PRODUCTX over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "PRODUCTX(Facts,LN(BLANK()))",
+   "powerbi": "Infinity",
+   "now": "LOCAL-REJECT:PRODUCTX over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "PRODUCTX(Facts,LOG(BLANK(),2))",
+   "powerbi": "Infinity",
+   "now": "LOCAL-REJECT:PRODUCTX over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "PRODUCTX(Facts,LOG10(BLANK()))",
+   "powerbi": "Infinity",
+   "now": "LOCAL-REJECT:PRODUCTX over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "PRODUCTX(Facts,VAR q=1/0 RETURN q)",
+   "powerbi": "Infinity",
+   "now": "LOCAL-REJECT:PRODUCTX over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "PRODUCTX(Facts,LOG10(SELECTEDVALUE(Facts[Quantity])))",
+   "powerbi": "Infinity",
+   "now": "LOCAL-REJECT:PRODUCTX over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "PRODUCTX(Facts,LOG(BLANK()+BLANK(),CURRENCY(2)))",
+   "powerbi": "Infinity",
+   "now": "LOCAL-REJECT:PRODUCTX over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "PRODUCTX(Facts,LOG(VAR y=BLANK() RETURN y,VAR b=2 RETURN b))",
+   "powerbi": "Infinity",
+   "now": "LOCAL-REJECT:PRODUCTX over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "PRODUCTX(Facts,LOG(BLANK()*2,-2))",
+   "powerbi": "Infinity",
+   "now": "LOCAL-REJECT:PRODUCTX over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "PRODUCTX(Facts,(MAXX(Facts,1/0))/(FORMAT(1,\"0\")))",
+   "powerbi": "Infinity",
+   "now": "LOCAL-REJECT:PRODUCTX over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "PRODUCTX(Facts,(DATE(2020,1,1))/(CALCULATE(SUM(Facts[Quantity]),Facts[Region]=\"Nope\")))",
+   "powerbi": "Infinity",
+   "now": "LOCAL-REJECT:PRODUCTX over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "PRODUCTX(Facts,(MAX(Facts[Sales]))/(IF(FALSE(),1)))",
+   "powerbi": "Infinity",
+   "now": "LOCAL-REJECT:PRODUCTX over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "PRODUCTX(Facts,LOG(CALCULATE(SUM(Facts[Quantity]),Facts[Region]=\"Nope\"),TRUE()))",
+   "powerbi": "Infinity",
+   "now": "LOCAL-REJECT:PRODUCTX over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "PRODUCTX(Facts,(Facts[Sales])/(BLANK()&&BLANK()))",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:PRODUCTX over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "PRODUCTX(Facts,LOG(BLANK()+BLANK(),2))",
+   "powerbi": "Infinity",
+   "now": "LOCAL-REJECT:PRODUCTX over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "PRODUCTX(Facts,1/-(BLANK()&&BLANK()))",
+   "powerbi": "Infinity",
+   "now": "LOCAL-REJECT:PRODUCTX over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "PRODUCTX(Facts,(\"2\")*(0/0))",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:PRODUCTX over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "PRODUCTX(Facts,(Facts[Sales])/(Facts[Sales]))",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:PRODUCTX over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "PRODUCTX(Facts,LOG(SUMX(FILTER(Facts,FALSE()),1),TRUE()))",
+   "powerbi": "Infinity",
+   "now": "LOCAL-REJECT:PRODUCTX over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "PRODUCTX(Facts,LOG(ABS(BLANK())))",
+   "powerbi": "Infinity",
+   "now": "LOCAL-REJECT:PRODUCTX over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "PRODUCTX(Facts,LOG(-BLANK(),TRUE()))",
+   "powerbi": "Infinity",
+   "now": "LOCAL-REJECT:PRODUCTX over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "PRODUCTX(Facts,(Facts[Quantity])*(0/0))",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:PRODUCTX over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "PRODUCTX(Facts,LOG(-BLANK(),2))",
+   "powerbi": "Infinity",
+   "now": "LOCAL-REJECT:PRODUCTX over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "PRODUCTX(Facts,LOG(IF(FALSE(),1)))",
+   "powerbi": "Infinity",
+   "now": "LOCAL-REJECT:PRODUCTX over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "PRODUCTX(Facts,(1/0*0)*(DATE(2020,1,1)))",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:PRODUCTX over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "PRODUCTX(Facts,LOG(VAR y=BLANK() RETURN y,-2))",
+   "powerbi": "Infinity",
+   "now": "LOCAL-REJECT:PRODUCTX over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "PRODUCTX(Facts,LOG(BLANK()+BLANK(),DATE(2020,1,1)))",
+   "powerbi": "Infinity",
+   "now": "LOCAL-REJECT:PRODUCTX over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "PRODUCTX(Facts,(0/0)-(VAR d=DATE(2020,1,1) RETURN d))",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:PRODUCTX over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "PRODUCTX(Facts,LOG(BLANK()+BLANK(),VAR b=2 RETURN b))",
+   "powerbi": "Infinity",
+   "now": "LOCAL-REJECT:PRODUCTX over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "PRODUCTX(Facts,LOG(INT(BLANK()),0))",
+   "powerbi": "Infinity",
+   "now": "LOCAL-REJECT:PRODUCTX over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "PRODUCTX(Facts,(1/0)/(CURRENCY(2)))",
+   "powerbi": "Infinity",
+   "now": "LOCAL-REJECT:PRODUCTX over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "PRODUCTX(Facts,LOG(IF(FALSE(),1),MAX(Facts[Quantity])))",
+   "powerbi": "Infinity",
+   "now": "LOCAL-REJECT:PRODUCTX over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "PRODUCTX(Facts,LOG(IF(FALSE(),1),CURRENCY(2)))",
+   "powerbi": "Infinity",
+   "now": "LOCAL-REJECT:PRODUCTX over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "PRODUCTX(Facts,LOG(BLANK(),0))",
+   "powerbi": "Infinity",
+   "now": "LOCAL-REJECT:PRODUCTX over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "PRODUCTX(Facts,(SUM(Facts[Sales]))/(FALSE()))",
+   "powerbi": "Infinity",
+   "now": "LOCAL-REJECT:PRODUCTX over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "PRODUCTX(Facts,LOG(BLANK()+BLANK(),TRUE()))",
+   "powerbi": "Infinity",
+   "now": "LOCAL-REJECT:PRODUCTX over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "PRODUCTX(Facts,(0/0)/(SUM(Facts[Sales])))",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:PRODUCTX over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "PRODUCTX(Facts,(2.5)*(0)*(VAR y=1/0 RETURN y))",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:PRODUCTX over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "PRODUCTX(Facts,1/-(SUMX(FILTER(Facts,FALSE()),1)))",
+   "powerbi": "Infinity",
+   "now": "LOCAL-REJECT:PRODUCTX over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "PRODUCTX(Facts,LOG(ABS(BLANK()),MAX(Facts[Quantity])))",
+   "powerbi": "Infinity",
+   "now": "LOCAL-REJECT:PRODUCTX over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "PRODUCTX(Facts,LOG10(SUMX(FILTER(Facts,FALSE()),1)))",
+   "powerbi": "Infinity",
+   "now": "LOCAL-REJECT:PRODUCTX over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "PRODUCTX(Facts,(-1)*(1/0))",
+   "powerbi": "Infinity",
+   "now": "LOCAL-REJECT:PRODUCTX over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "PRODUCTX(Facts,LOG(COUNTROWS(FILTER(Facts,FALSE())),10))",
+   "powerbi": "Infinity",
+   "now": "LOCAL-REJECT:PRODUCTX over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "PRODUCTX(Facts,(TRUE())*(1/0*0))",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:PRODUCTX over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "PRODUCTX(Facts,LOG(BLANK(),0/0))",
+   "powerbi": "Infinity",
+   "now": "LOCAL-REJECT:PRODUCTX over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "PRODUCTX(Facts,(MAX(Facts[Sales]))/(MAXX({BLANK()},[Value])))",
+   "powerbi": "Infinity",
+   "now": "LOCAL-REJECT:PRODUCTX over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "PRODUCTX(Facts,LOG(-BLANK(),CURRENCY(2)))",
+   "powerbi": "Infinity",
+   "now": "LOCAL-REJECT:PRODUCTX over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "PRODUCTX(Facts,LOG(CALCULATE(SUM(Facts[Quantity]),Facts[Region]=\"Nope\"),CURRENCY(2)))",
+   "powerbi": "Infinity",
+   "now": "LOCAL-REJECT:PRODUCTX over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "PRODUCTX(Facts,LOG(VAR y=BLANK() RETURN y,2))",
+   "powerbi": "Infinity",
+   "now": "LOCAL-REJECT:PRODUCTX over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "PRODUCTX(Facts,LOG(BLANK()*2,VAR b=2 RETURN b))",
+   "powerbi": "Infinity",
+   "now": "LOCAL-REJECT:PRODUCTX over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "PRODUCTX(Facts,(1/0*0)+(SUM(Facts[Sales]))/(DIVIDE(1,0)))",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:PRODUCTX over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "PRODUCTX(Facts,LOG(COUNTROWS(FILTER(Facts,FALSE())),0.5))",
+   "powerbi": "Infinity",
+   "now": "LOCAL-REJECT:PRODUCTX over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "PRODUCTX(Facts,LOG(INT(BLANK()),-1/0))",
+   "powerbi": "Infinity",
+   "now": "LOCAL-REJECT:PRODUCTX over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "PRODUCTX(Facts,LOG(CALCULATE(SUM(Facts[Quantity]),Facts[Region]=\"Nope\"),0.5))",
+   "powerbi": "Infinity",
+   "now": "LOCAL-REJECT:PRODUCTX over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "PRODUCTX(Facts,(1/0*0)/(DATE(2020,1,1)))",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:PRODUCTX over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "PRODUCTX(Facts,LOG(SELECTEDVALUE(Facts[Quantity])))",
+   "powerbi": "Infinity",
+   "now": "LOCAL-REJECT:PRODUCTX over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "PRODUCTX(Facts,LOG(VAR y=BLANK() RETURN y,10))",
+   "powerbi": "Infinity",
+   "now": "LOCAL-REJECT:PRODUCTX over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "PRODUCTX(Facts,LOG(CALCULATE(SUM(Facts[Quantity]),Facts[Region]=\"Nope\"),0/0))",
+   "powerbi": "Infinity",
+   "now": "LOCAL-REJECT:PRODUCTX over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "PRODUCTX(Facts,LOG(INT(BLANK()),-2))",
+   "powerbi": "Infinity",
+   "now": "LOCAL-REJECT:PRODUCTX over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "PRODUCTX(Facts,LOG(COUNTROWS(FILTER(Facts,FALSE())),0))",
+   "powerbi": "Infinity",
+   "now": "LOCAL-REJECT:PRODUCTX over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "PRODUCTX(Facts,LOG(SUMX(FILTER(Facts,FALSE()),1),1/0))",
+   "powerbi": "Infinity",
+   "now": "LOCAL-REJECT:PRODUCTX over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "PRODUCTX(Facts,LOG(-BLANK(),0/0))",
+   "powerbi": "Infinity",
+   "now": "LOCAL-REJECT:PRODUCTX over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "PRODUCTX(Facts,(1/0*0)/(FORMAT(1,\"0\")))",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:PRODUCTX over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "PRODUCTX(Facts,LOG(COUNTROWS(FILTER(Facts,FALSE())),0/0))",
+   "powerbi": "Infinity",
+   "now": "LOCAL-REJECT:PRODUCTX over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "PRODUCTX(Facts,LOG(BLANK()*2,-1/0))",
+   "powerbi": "Infinity",
+   "now": "LOCAL-REJECT:PRODUCTX over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "PRODUCTX(Facts,LOG(-BLANK(),1))",
+   "powerbi": "Infinity",
+   "now": "LOCAL-REJECT:PRODUCTX over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "PRODUCTX(Facts,LOG(BLANK()+BLANK()))",
+   "powerbi": "Infinity",
+   "now": "LOCAL-REJECT:PRODUCTX over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "PRODUCTX(Facts,LOG(INT(BLANK())))",
+   "powerbi": "Infinity",
+   "now": "LOCAL-REJECT:PRODUCTX over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "PRODUCTX(Facts,LOG(BLANK()*2,CURRENCY(2)))",
+   "powerbi": "Infinity",
+   "now": "LOCAL-REJECT:PRODUCTX over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "PRODUCTX(Facts,LOG(INT(BLANK()),0/0))",
+   "powerbi": "Infinity",
+   "now": "LOCAL-REJECT:PRODUCTX over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "PRODUCTX(Facts,LOG(VAR y=BLANK() RETURN y,0))",
+   "powerbi": "Infinity",
+   "now": "LOCAL-REJECT:PRODUCTX over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "PRODUCTX(Facts,(DATE(2020,1,1))/(COUNTROWS(FILTER(Facts,FALSE()))))",
+   "powerbi": "Infinity",
+   "now": "LOCAL-REJECT:PRODUCTX over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "PRODUCTX(Facts,LOG(CALCULATE(SUM(Facts[Quantity]),Facts[Region]=\"Nope\"),-1/0))",
+   "powerbi": "Infinity",
+   "now": "LOCAL-REJECT:PRODUCTX over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "PRODUCTX(Facts,LOG(-BLANK(),0))",
+   "powerbi": "Infinity",
+   "now": "LOCAL-REJECT:PRODUCTX over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "PRODUCTX(Facts,(1/0*0)*(MAXX(Facts,1/0)))",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:PRODUCTX over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "PRODUCTX(Facts,LOG(COUNTROWS(FILTER(Facts,FALSE())),2))",
+   "powerbi": "Infinity",
+   "now": "LOCAL-REJECT:PRODUCTX over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "PRODUCTX(Facts,LOG10(CALCULATE(SUM(Facts[Quantity]),Facts[Region]=\"Nope\")))",
+   "powerbi": "Infinity",
+   "now": "LOCAL-REJECT:PRODUCTX over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "PRODUCTX(Facts,(\"2\")/(1/0*0))",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:PRODUCTX over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "PRODUCTX(Facts,LOG(ABS(BLANK()),2))",
+   "powerbi": "Infinity",
+   "now": "LOCAL-REJECT:PRODUCTX over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "PRODUCTX(Facts,(Facts[Sales])/(COUNTROWS(FILTER(Facts,FALSE()))))",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:PRODUCTX over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "PRODUCTX(Facts,LOG(SELECTEDVALUE(Facts[Quantity]),0))",
+   "powerbi": "Infinity",
+   "now": "LOCAL-REJECT:PRODUCTX over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "PRODUCTX(Facts,LOG(IF(FALSE(),1),-1/0))",
+   "powerbi": "Infinity",
+   "now": "LOCAL-REJECT:PRODUCTX over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "PRODUCTX(Facts,(IF(Facts[Quantity]>2,BLANK(),1))*(0/0))",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:PRODUCTX over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "PRODUCTX(Facts,(0/0)*(1))",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:PRODUCTX over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "PRODUCTX(Facts,LOG10(IF(FALSE(),1)))",
+   "powerbi": "Infinity",
+   "now": "LOCAL-REJECT:PRODUCTX over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "PRODUCTX(Facts,LOG(COUNTROWS(FILTER(Facts,FALSE())),VAR b=2 RETURN b))",
+   "powerbi": "Infinity",
+   "now": "LOCAL-REJECT:PRODUCTX over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "PRODUCTX(Facts,(Facts[Quantity])/(0/0))",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:PRODUCTX over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "PRODUCTX(Facts,(-1)/(VAR y=BLANK() RETURN y))",
+   "powerbi": "Infinity",
+   "now": "LOCAL-REJECT:PRODUCTX over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "PRODUCTX(Facts,LOG(SUMX(FILTER(Facts,FALSE()),1),0/0))",
+   "powerbi": "Infinity",
+   "now": "LOCAL-REJECT:PRODUCTX over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "PRODUCTX(Facts,(IF(Facts[Quantity]>2,BLANK(),1))/(1&&\"\"))",
+   "powerbi": "Infinity",
+   "now": "LOCAL-REJECT:PRODUCTX over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "PRODUCTX(Facts,LOG(INT(BLANK()),TRUE()))",
+   "powerbi": "Infinity",
+   "now": "LOCAL-REJECT:PRODUCTX over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "PRODUCTX(Facts,LOG(SELECTEDVALUE(Facts[Quantity]),-1/0))",
+   "powerbi": "Infinity",
+   "now": "LOCAL-REJECT:PRODUCTX over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "PRODUCTX(Facts,LOG(INT(BLANK()),CURRENCY(2)))",
+   "powerbi": "Infinity",
+   "now": "LOCAL-REJECT:PRODUCTX over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "PRODUCTX(Facts,(FALSE())/(MAXX({BLANK()},[Value])))",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:PRODUCTX over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "PRODUCTX(Facts,LOG(-BLANK(),\"2\"))",
+   "powerbi": "Infinity",
+   "now": "LOCAL-REJECT:PRODUCTX over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "PRODUCTX(Facts,(TRUE())/(1/0*0))",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:PRODUCTX over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "PRODUCTX(Facts,LOG(SUMX(FILTER(Facts,FALSE()),1),0))",
+   "powerbi": "Infinity",
+   "now": "LOCAL-REJECT:PRODUCTX over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "PRODUCTX(Facts,IF(TRUE(),CONVERT(-1/0,DOUBLE)))",
+   "powerbi": "Infinity",
+   "now": "LOCAL-REJECT:PRODUCTX over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "PRODUCTX({1,2},IF(TRUE(),CONVERT(1/0,DOUBLE)))",
+   "powerbi": "Infinity",
+   "now": "LOCAL-REJECT:PRODUCTX over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "PRODUCTX(ROW(\"Value\",1),VAR v=CONVERT(0/0,DOUBLE) RETURN v)",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:PRODUCTX over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "PRODUCTX(ROW(\"Value\",1),VAR v=CONVERT(-1/0,DOUBLE) RETURN v)",
+   "powerbi": "-Infinity",
+   "now": "LOCAL-REJECT:PRODUCTX over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "PRODUCTX({1},CONVERT(1/0,DOUBLE))",
+   "powerbi": "Infinity",
+   "now": "LOCAL-REJECT:PRODUCTX over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "PRODUCTX({1},VAR v=CONVERT(-1/0,DOUBLE) RETURN v)",
+   "powerbi": "-Infinity",
+   "now": "LOCAL-REJECT:PRODUCTX over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "PRODUCTX(VALUES(Facts[Region]),CONVERT(1/0,DOUBLE))",
+   "powerbi": "Infinity",
+   "now": "LOCAL-REJECT:PRODUCTX over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "PRODUCTX(Facts,CONVERT(Facts[Sales]/0,DOUBLE))",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:PRODUCTX over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "PRODUCTX(Facts,CONVERT(Facts[Quantity]/0,DOUBLE))",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:PRODUCTX over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "MEDIANX(CALCULATETABLE(Facts,Facts[Region]=\"East\"),1/0)",
+   "powerbi": "Infinity",
+   "now": "LOCAL-REJECT:MEDIANX over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "MEDIANX(Facts,LN(BLANK()))",
+   "powerbi": "-Infinity",
+   "now": "LOCAL-REJECT:MEDIANX over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "MEDIANX(Facts,LOG(BLANK(),2))",
+   "powerbi": "-Infinity",
+   "now": "LOCAL-REJECT:MEDIANX over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "MEDIANX(Facts,LOG10(BLANK()))",
+   "powerbi": "-Infinity",
+   "now": "LOCAL-REJECT:MEDIANX over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "MEDIANX(Facts,VAR q=1/0 RETURN q)",
+   "powerbi": "Infinity",
+   "now": "LOCAL-REJECT:MEDIANX over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "MEDIANX(Facts,LOG(SELECTEDVALUE(Facts[Quantity]),DATE(2020,1,1)))",
+   "powerbi": "-Infinity",
+   "now": "LOCAL-REJECT:MEDIANX over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "MEDIANX(Facts,(1/0)*(FORMAT(1,\"0\"))*(2.5))",
+   "powerbi": "Infinity",
+   "now": "LOCAL-REJECT:MEDIANX over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "MEDIANX(Facts,LOG(CALCULATE(SUM(Facts[Quantity]),Facts[Region]=\"Nope\"),0/0))",
+   "powerbi": "-Infinity",
+   "now": "LOCAL-REJECT:MEDIANX over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "MEDIANX(Facts,(VAR y=1/0 RETURN y)*(MAX(Facts[Sales])))",
+   "powerbi": "Infinity",
+   "now": "LOCAL-REJECT:MEDIANX over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "MEDIANX(Facts,LOG(SELECTEDVALUE(Facts[Quantity])))",
+   "powerbi": "-Infinity",
+   "now": "LOCAL-REJECT:MEDIANX over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "MEDIANX(Facts,LOG(CALCULATE(SUM(Facts[Quantity]),Facts[Region]=\"Nope\"),0.5))",
+   "powerbi": "-Infinity",
+   "now": "LOCAL-REJECT:MEDIANX over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "MEDIANX(Facts,LOG(BLANK()+BLANK(),MAX(Facts[Quantity])))",
+   "powerbi": "-Infinity",
+   "now": "LOCAL-REJECT:MEDIANX over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "MEDIANX(Facts,LOG(BLANK()*2,TRUE()))",
+   "powerbi": "-Infinity",
+   "now": "LOCAL-REJECT:MEDIANX over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "ISBLANK(MEDIANX({1},CONVERT(1/0,DOUBLE)))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:MEDIANX over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "MEDIANX(Facts,(TRUE())/(IF(Facts[Quantity]>2,BLANK(),1)))",
+   "powerbi": "Infinity",
+   "now": "LOCAL-REJECT:MEDIANX over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "MEDIANX(Facts,(1/0*0)*(2.5))",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:MEDIANX over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "MEDIANX({TRUE()},CONVERT(1/0,DOUBLE))",
+   "powerbi": "Infinity",
+   "now": "LOCAL-REJECT:MEDIANX over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "MEDIANX(Facts,LOG(SELECTEDVALUE(Facts[Quantity]),0/0))",
+   "powerbi": "-Infinity",
+   "now": "LOCAL-REJECT:MEDIANX over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "MEDIANX(Facts,LOG(IF(FALSE(),1),-1/0))",
+   "powerbi": "-Infinity",
+   "now": "LOCAL-REJECT:MEDIANX over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "MEDIANX(Facts,LOG(SUMX(FILTER(Facts,FALSE()),1),2))",
+   "powerbi": "-Infinity",
+   "now": "LOCAL-REJECT:MEDIANX over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "MEDIANX(Facts,LOG(ABS(BLANK()),2))",
+   "powerbi": "-Infinity",
+   "now": "LOCAL-REJECT:MEDIANX over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "MEDIANX(Facts,(DATE(2020,1,1))*(1/0))",
+   "powerbi": "Infinity",
+   "now": "LOCAL-REJECT:MEDIANX over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "MEDIANX(Facts,(0)/(IF(FALSE(),1)))",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:MEDIANX over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "MEDIANX(Facts,(\"2\")*(1/0)*(FORMAT(1,\"0\")))",
+   "powerbi": "Infinity",
+   "now": "LOCAL-REJECT:MEDIANX over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "MEDIANX(Facts,(0)/(COUNTROWS(FILTER(Facts,FALSE()))))",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:MEDIANX over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "MEDIANX(Facts,(MAXX(Facts,1/0))*(FORMAT(1,\"0\")))",
+   "powerbi": "Infinity",
+   "now": "LOCAL-REJECT:MEDIANX over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "MEDIANX(Facts,LOG(VAR y=BLANK() RETURN y,0))",
+   "powerbi": "-Infinity",
+   "now": "LOCAL-REJECT:MEDIANX over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "MEDIANX(Facts,LOG(SUMX(FILTER(Facts,FALSE()),1),0))",
+   "powerbi": "-Infinity",
+   "now": "LOCAL-REJECT:MEDIANX over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "MEDIANX(Facts,LOG(BLANK()+BLANK(),0/0))",
+   "powerbi": "-Infinity",
+   "now": "LOCAL-REJECT:MEDIANX over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "MEDIANX(Facts,(FALSE())*(MAXX(Facts,1/0)))",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:MEDIANX over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "MEDIANX(Facts,(VAR y=1/0 RETURN y)/(VAR y=BLANK() RETURN y))",
+   "powerbi": "Infinity",
+   "now": "LOCAL-REJECT:MEDIANX over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "MEDIANX(Facts,LOG(VAR y=BLANK() RETURN y))",
+   "powerbi": "-Infinity",
+   "now": "LOCAL-REJECT:MEDIANX over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "MEDIANX(Facts,LOG(SELECTEDVALUE(Facts[Quantity]),TRUE()))",
+   "powerbi": "-Infinity",
+   "now": "LOCAL-REJECT:MEDIANX over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "MEDIANX(Facts,(1/0*0)/(-1))",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:MEDIANX over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "MEDIANX(Facts,LOG(-BLANK(),-1/0))",
+   "powerbi": "-Infinity",
+   "now": "LOCAL-REJECT:MEDIANX over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "MEDIANX(Facts,LOG(COUNTROWS(FILTER(Facts,FALSE())),1/0))",
+   "powerbi": "-Infinity",
+   "now": "LOCAL-REJECT:MEDIANX over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "MEDIANX(Facts,LOG(BLANK()*2,DATE(2020,1,1)))",
+   "powerbi": "-Infinity",
+   "now": "LOCAL-REJECT:MEDIANX over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "MEDIANX(Facts,(VAR y=1/0 RETURN y)/(1/0))",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:MEDIANX over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "MEDIANX(Facts,LOG(COUNTROWS(FILTER(Facts,FALSE())),DATE(2020,1,1)))",
+   "powerbi": "-Infinity",
+   "now": "LOCAL-REJECT:MEDIANX over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "MEDIANX(Facts,LOG(IF(FALSE(),1),Facts[Quantity]))",
+   "powerbi": "-Infinity",
+   "now": "LOCAL-REJECT:MEDIANX over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "MEDIANX(Facts,LOG(VAR y=BLANK() RETURN y,2))",
+   "powerbi": "-Infinity",
+   "now": "LOCAL-REJECT:MEDIANX over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "MEDIANX(Facts,LOG(IF(FALSE(),1),2))",
+   "powerbi": "-Infinity",
+   "now": "LOCAL-REJECT:MEDIANX over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "MEDIANX(VALUES(Facts[Region]),IF(TRUE(),CONVERT(1/0,DOUBLE)))",
+   "powerbi": "Infinity",
+   "now": "LOCAL-REJECT:MEDIANX over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "ISBLANK(MEDIANX({TRUE()},CONVERT(1/0,DOUBLE)))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:MEDIANX over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "MEDIANX(Facts,(IF(Facts[Quantity]>2,BLANK(),1))/(1&&\"\"))",
+   "powerbi": "Infinity",
+   "now": "LOCAL-REJECT:MEDIANX over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "MEDIANX(Facts,(MAXX(Facts,1/0))/(DIVIDE(1,0)))",
+   "powerbi": "Infinity",
+   "now": "LOCAL-REJECT:MEDIANX over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "MEDIANX(Facts,(1&&\"\")*(MAXX(Facts,1/0))+(0/0))",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:MEDIANX over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "MEDIANX(Facts,LOG(BLANK()+BLANK(),FALSE()))",
+   "powerbi": "-Infinity",
+   "now": "LOCAL-REJECT:MEDIANX over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "MEDIANX(Facts,LOG(BLANK()+BLANK(),CURRENCY(2)))",
+   "powerbi": "-Infinity",
+   "now": "LOCAL-REJECT:MEDIANX over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "MEDIANX(Facts,LOG(-BLANK(),CURRENCY(2)))",
+   "powerbi": "-Infinity",
+   "now": "LOCAL-REJECT:MEDIANX over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "MEDIANX(Facts,LOG(SUMX(FILTER(Facts,FALSE()),1),FALSE()))",
+   "powerbi": "-Infinity",
+   "now": "LOCAL-REJECT:MEDIANX over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "MEDIANX(Facts,LOG(ABS(BLANK()),CURRENCY(2)))",
+   "powerbi": "-Infinity",
+   "now": "LOCAL-REJECT:MEDIANX over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "MEDIANX(Facts,LOG(INT(BLANK()),2))",
+   "powerbi": "-Infinity",
+   "now": "LOCAL-REJECT:MEDIANX over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "MEDIANX(Facts,LOG(ABS(BLANK()),0/0))",
+   "powerbi": "-Infinity",
+   "now": "LOCAL-REJECT:MEDIANX over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "MEDIANX(Facts,(BLANK())+(FORMAT(1,\"0\"))/(Facts[Quantity]))",
+   "powerbi": "0.416666666666667",
+   "now": "LOCAL-REJECT:MEDIANX over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "MEDIANX(Facts,(1/0*0)/(FORMAT(1,\"0\")))",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:MEDIANX over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "MEDIANX(Facts,LOG(BLANK(),FALSE()))",
+   "powerbi": "-Infinity",
+   "now": "LOCAL-REJECT:MEDIANX over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "MEDIANX(Facts,LOG(COUNTROWS(FILTER(Facts,FALSE())),0/0))",
+   "powerbi": "-Infinity",
+   "now": "LOCAL-REJECT:MEDIANX over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "MEDIANX(Facts,LOG(INT(BLANK()),-2))",
+   "powerbi": "-Infinity",
+   "now": "LOCAL-REJECT:MEDIANX over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "MEDIANX(Facts,LOG(BLANK()*2,10))",
+   "powerbi": "-Infinity",
+   "now": "LOCAL-REJECT:MEDIANX over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "ISBLANK(MEDIANX(VALUES(Facts[Region]),CONVERT(1/0,DOUBLE)))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:MEDIANX over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "MEDIANX(Facts,(0)/(IF(Facts[Quantity]>2,BLANK(),1)))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:MEDIANX over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "MEDIANX(Facts,LOG(IF(FALSE(),1),0))",
+   "powerbi": "-Infinity",
+   "now": "LOCAL-REJECT:MEDIANX over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "MEDIANX(Facts,(FALSE())/(BLANK()&&BLANK()))",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:MEDIANX over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "MEDIANX(Facts,LOG(BLANK(),1/0))",
+   "powerbi": "-Infinity",
+   "now": "LOCAL-REJECT:MEDIANX over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "MEDIANX(Facts,LOG10(BLANK()+BLANK()))",
+   "powerbi": "-Infinity",
+   "now": "LOCAL-REJECT:MEDIANX over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "MEDIANX(Facts,(\"2\")*(1/0)+(FORMAT(1,\"0\")))",
+   "powerbi": "Infinity",
+   "now": "LOCAL-REJECT:MEDIANX over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "MEDIANX(Facts,(0/0)/(2.5&&\"\"))",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:MEDIANX over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "MEDIANX(Facts,LOG(BLANK(),\"2\"))",
+   "powerbi": "-Infinity",
+   "now": "LOCAL-REJECT:MEDIANX over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "MEDIANX(Facts,LOG(BLANK()*2,0))",
+   "powerbi": "-Infinity",
+   "now": "LOCAL-REJECT:MEDIANX over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "MEDIANX(Facts,LOG(BLANK()+BLANK(),VAR b=2 RETURN b))",
+   "powerbi": "-Infinity",
+   "now": "LOCAL-REJECT:MEDIANX over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "MEDIANX(Facts,LOG(BLANK()*2,-1/0))",
+   "powerbi": "-Infinity",
+   "now": "LOCAL-REJECT:MEDIANX over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "MEDIANX(Facts,(0/0)*(Facts[Quantity]))",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:MEDIANX over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "MEDIANX(Facts,LOG(ABS(BLANK()),TRUE()))",
+   "powerbi": "-Infinity",
+   "now": "LOCAL-REJECT:MEDIANX over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "MEDIANX(Facts,LOG(-BLANK(),VAR b=2 RETURN b))",
+   "powerbi": "-Infinity",
+   "now": "LOCAL-REJECT:MEDIANX over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "MEDIANX(Facts,(\"2\")*(DATE(2020,1,1))*(MAXX(Facts,1/0)))",
+   "powerbi": "Infinity",
+   "now": "LOCAL-REJECT:MEDIANX over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "MEDIANX(Facts,(1/0*0)*(DATE(2020,1,1))+(BLANK()))",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:MEDIANX over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "MEDIANX(Facts,LOG(SUMX(FILTER(Facts,FALSE()),1),0.5))",
+   "powerbi": "-Infinity",
+   "now": "LOCAL-REJECT:MEDIANX over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "MEDIANX(Facts,LOG(-BLANK(),1))",
+   "powerbi": "-Infinity",
+   "now": "LOCAL-REJECT:MEDIANX over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "MEDIANX(Facts,LOG(ABS(BLANK()),1))",
+   "powerbi": "-Infinity",
+   "now": "LOCAL-REJECT:MEDIANX over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "MEDIANX(Facts,LOG(CALCULATE(SUM(Facts[Quantity]),Facts[Region]=\"Nope\"),10))",
+   "powerbi": "-Infinity",
+   "now": "LOCAL-REJECT:MEDIANX over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "MEDIANX(Facts,LOG(BLANK(),CURRENCY(2)))",
+   "powerbi": "-Infinity",
+   "now": "LOCAL-REJECT:MEDIANX over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "MEDIANX(Facts,LOG(BLANK()+BLANK(),10))",
+   "powerbi": "-Infinity",
+   "now": "LOCAL-REJECT:MEDIANX over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "MEDIANX(VALUES(Facts[Region]),CONVERT(1/0,DOUBLE))",
+   "powerbi": "Infinity",
+   "now": "LOCAL-REJECT:MEDIANX over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "MEDIANX({TRUE()},IF(TRUE(),CONVERT(1/0,DOUBLE)))",
+   "powerbi": "Infinity",
+   "now": "LOCAL-REJECT:MEDIANX over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "MEDIANX(Facts,1*-(VAR y=1/0 RETURN y))",
+   "powerbi": "-Infinity",
+   "now": "LOCAL-REJECT:MEDIANX over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "MEDIANX(Facts,LOG(CALCULATE(SUM(Facts[Quantity]),Facts[Region]=\"Nope\"),0))",
+   "powerbi": "-Infinity",
+   "now": "LOCAL-REJECT:MEDIANX over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "MEDIANX({1},CONVERT(1/0,DOUBLE))",
+   "powerbi": "Infinity",
+   "now": "LOCAL-REJECT:MEDIANX over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "MEDIANX(Facts,LOG(INT(BLANK()),10))",
+   "powerbi": "-Infinity",
+   "now": "LOCAL-REJECT:MEDIANX over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "MEDIANX(Facts,LOG(SUMX(FILTER(Facts,FALSE()),1)))",
+   "powerbi": "-Infinity",
+   "now": "LOCAL-REJECT:MEDIANX over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "MEDIANX(Facts,(SUM(Facts[Sales]))/(SUMX(FILTER(Facts,FALSE()),1)))",
+   "powerbi": "Infinity",
+   "now": "LOCAL-REJECT:MEDIANX over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "MEDIANX({1},IF(TRUE(),CONVERT(1/0,DOUBLE)))",
+   "powerbi": "Infinity",
+   "now": "LOCAL-REJECT:MEDIANX over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "MEDIANX(Facts,LOG(CALCULATE(SUM(Facts[Quantity]),Facts[Region]=\"Nope\"),CURRENCY(2)))",
+   "powerbi": "-Infinity",
+   "now": "LOCAL-REJECT:MEDIANX over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "MEDIANX(Facts,LOG(-BLANK()))",
+   "powerbi": "-Infinity",
+   "now": "LOCAL-REJECT:MEDIANX over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "MEDIANX(Facts,(MAXX(Facts,1/0))/(FORMAT(1,\"0\")))",
+   "powerbi": "Infinity",
+   "now": "LOCAL-REJECT:MEDIANX over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "MEDIANX(Facts,(Facts[Quantity])/(IF(Facts[Quantity]>2,BLANK(),1)))",
+   "powerbi": "Infinity",
+   "now": "LOCAL-REJECT:MEDIANX over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "MEDIANX(Facts,LOG(COUNTROWS(FILTER(Facts,FALSE())),-2))",
+   "powerbi": "-Infinity",
+   "now": "LOCAL-REJECT:MEDIANX over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "MEDIANX(Facts,(Facts[Sales])/(BLANK()&&BLANK()))",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:MEDIANX over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "MEDIANX({\"a\"},VAR v=CONVERT(-1/0,DOUBLE) RETURN v)",
+   "powerbi": "-Infinity",
+   "now": "LOCAL-REJECT:MEDIANX over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "MEDIANX(Facts,COALESCE(CONVERT(1/0,DOUBLE),CONVERT(1/0,DOUBLE)))",
+   "powerbi": "Infinity",
+   "now": "LOCAL-REJECT:MEDIANX over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "MEDIANX({1,2},COALESCE(CONVERT(-1/0,DOUBLE),CONVERT(-1/0,DOUBLE)))",
+   "powerbi": "-Infinity",
+   "now": "LOCAL-REJECT:MEDIANX over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "MEDIANX(Facts,VAR v=CONVERT(0/0,DOUBLE) RETURN v)",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:MEDIANX over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "MEDIANX(Facts,CONVERT(Facts[Sales]/0,DOUBLE))",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:MEDIANX over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "MEDIANX(Facts,CONVERT(Facts[Quantity]/0,DOUBLE))",
+   "powerbi": "Infinity",
+   "now": "LOCAL-REJECT:MEDIANX over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "MAXX(Facts,IF.EAGER(TRUE(),-Facts[Quantity]/0,\"a\"))",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:MAXX over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine does not model."
+  },
+  {
+   "part": "C",
+   "expr": "MAXX(Facts,IF(FALSE(),TRUE(),Facts[Sales]/Facts[Quantity]))",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:MAXX over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine does not model."
+  },
+  {
+   "part": "C",
+   "expr": "MAXX(Facts,IF.EAGER(TRUE(),Facts[Sales]/Facts[Quantity],\"5\"))",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:MAXX over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine does not model."
+  },
+  {
+   "part": "C",
+   "expr": "MAXX(Facts,IF.EAGER(FALSE(),\"a\",Facts[Sales]/Facts[Quantity]))",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:MAXX over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine does not model."
+  },
+  {
+   "part": "C",
+   "expr": "MAXX(Facts,IF(TRUE(),-Facts[Quantity]/0,\"a\"))",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:MAXX over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine does not model."
+  },
+  {
+   "part": "C",
+   "expr": "MAXX(Facts,IF(Facts[Quantity]>2,Facts[Region],Facts[Quantity]/0))",
+   "powerbi": "Infinity",
+   "now": "LOCAL-REJECT:MAXX over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine does not model."
+  },
+  {
+   "part": "C",
+   "expr": "MAXX(Facts,IF(Facts[Quantity]>2,\"a\",Facts[Quantity]/Facts[Sales]))",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:MAXX over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine does not model."
+  },
+  {
+   "part": "C",
+   "expr": "MAXX(Facts,IF.EAGER(Facts[Quantity]>2,\"5\",Facts[Sales]/Facts[Quantity]))",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:MAXX over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine does not model."
+  },
+  {
+   "part": "C",
+   "expr": "MAXX(Facts,IF(TRUE(),-Facts[Quantity]/0,Facts[Region]))",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:MAXX over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine does not model."
+  },
+  {
+   "part": "C",
+   "expr": "MAXX(Facts,IF.EAGER(TRUE(),Facts[Quantity]/Facts[Sales],\"a\"))",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:MAXX over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine does not model."
+  },
+  {
+   "part": "C",
+   "expr": "MAXX(Facts,IF(Facts[Quantity]>2,\"a\",-Facts[Quantity]/0))",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:MAXX over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine does not model."
+  },
+  {
+   "part": "C",
+   "expr": "MAXX(Facts,IF.EAGER(FALSE(),\"a\",Facts[Quantity]/0))",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:MAXX over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine does not model."
+  },
+  {
+   "part": "C",
+   "expr": "MAXX(Facts,IF(Facts[Quantity]>2,\"5\",Facts[Quantity]/0))",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:MAXX over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine does not model."
+  },
+  {
+   "part": "C",
+   "expr": "MAXX(Facts,IF.EAGER(Facts[Quantity]>2,\"a\",-Facts[Quantity]/0))",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:MAXX over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine does not model."
+  },
+  {
+   "part": "C",
+   "expr": "MAXX(Facts,IF(Facts[Quantity]>2,\"5\",-Facts[Quantity]/0))",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:MAXX over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine does not model."
+  },
+  {
+   "part": "C",
+   "expr": "MAXX(Facts,IF(TRUE(),Facts[Quantity]/Facts[Sales],TRUE()))",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:MAXX over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine does not model."
+  },
+  {
+   "part": "C",
+   "expr": "MAXX(Facts,IF(FALSE(),\"5\",Facts[Quantity]/Facts[Sales]))",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:MAXX over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine does not model."
+  },
+  {
+   "part": "C",
+   "expr": "MAXX(ADDCOLUMNS(Facts,\"z\",1),IFERROR(-1/0,Facts[Quantity]/0))",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:MAXX over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine does not model."
+  },
+  {
+   "part": "C",
+   "expr": "MAXX(INTERSECT(Facts,Facts),IF(1,Facts[Quantity]/0,\"a\"))",
+   "powerbi": "Infinity",
+   "now": "LOCAL-REJECT:MAXX over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine does not model."
+  },
+  {
+   "part": "C",
+   "expr": "MAXX(TOPN(100,Facts,Facts[Quantity]),IF(1,Facts[Quantity]/0,\"a\"))",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:MAXX over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine does not model."
+  },
+  {
+   "part": "C",
+   "expr": "MAXX(INTERSECT(Facts,Facts),IF(\"\",Facts[Quantity]/0,Facts[Quantity]/0))",
+   "powerbi": "Infinity",
+   "now": "LOCAL-REJECT:MAXX over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine does not model."
+  },
+  {
+   "part": "C",
+   "expr": "MAXX(CALCULATETABLE(Facts),IF(1,Facts[Quantity]/0,\"a\"))",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:MAXX over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine does not model."
+  },
+  {
+   "part": "C",
+   "expr": "MAXX(EXCEPT(Facts,FILTER(Facts,FALSE())),IF(1,Facts[Quantity]/0,\"a\"))",
+   "powerbi": "Infinity",
+   "now": "LOCAL-REJECT:MAXX over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine does not model."
+  },
+  {
+   "part": "C",
+   "expr": "MAXX(EXCEPT(Facts,FILTER(Facts,FALSE())),IF(\"\",Facts[Quantity]/0,Facts[Quantity]/0))",
+   "powerbi": "Infinity",
+   "now": "LOCAL-REJECT:MAXX over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine does not model."
+  },
+  {
+   "part": "C",
+   "expr": "MAXX(TOPN(100,Facts,Facts[Quantity]),IFERROR(-1/0,Facts[Quantity]/0))",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:MAXX over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine does not model."
+  },
+  {
+   "part": "C",
+   "expr": "MAXX(UNION(Facts,Facts),IF(\"\",Facts[Quantity]/0,Facts[Quantity]/0))",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:MAXX over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine does not model."
+  },
+  {
+   "part": "C",
+   "expr": "MAXX(UNION(Facts,Facts),Facts[Sales]/0)",
+   "powerbi": "Infinity",
+   "now": "LOCAL-REJECT:MAXX over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine does not model."
+  },
+  {
+   "part": "C",
+   "expr": "MAXX(ALL(Facts),IF(1,Facts[Quantity]/0,\"a\"))",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:MAXX over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine does not model."
+  },
+  {
+   "part": "C",
+   "expr": "MAXX(INTERSECT(Facts,Facts),Facts[Sales]/0)",
+   "powerbi": "Infinity",
+   "now": "LOCAL-REJECT:MAXX over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine does not model."
+  },
+  {
+   "part": "C",
+   "expr": "MAXX(UNION(Facts,Facts),IF(Facts[Quantity]>2,0/0,2))",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:MAXX over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine does not model."
+  },
+  {
+   "part": "C",
+   "expr": "MAXX(SUMMARIZE(Facts,Facts[Region],Facts[Quantity]),IF(1,Facts[Quantity]/0,\"a\"))",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:MAXX over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine does not model."
+  },
+  {
+   "part": "C",
+   "expr": "MAXX(ADDCOLUMNS(Facts,\"z\",1),IF(Facts[Quantity]>2,0/0,2))",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:MAXX over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine does not model."
+  },
+  {
+   "part": "C",
+   "expr": "MAXX(FILTER(Facts,TRUE()),IF(1,Facts[Quantity]/0,\"a\"))",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:MAXX over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine does not model."
+  },
+  {
+   "part": "C",
+   "expr": "MAXX(ALLNOBLANKROW(Facts),IF(1,Facts[Quantity]/0,\"a\"))",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:MAXX over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine does not model."
+  },
+  {
+   "part": "C",
+   "expr": "MAXX(TOPN(100,Facts,Facts[Quantity]),IF(Facts[Quantity]>2,0/0,2))",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:MAXX over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine does not model."
+  },
+  {
+   "part": "C",
+   "expr": "MAXX(EXCEPT(Facts,FILTER(Facts,FALSE())),Facts[Quantity]/0)",
+   "powerbi": "Infinity",
+   "now": "LOCAL-REJECT:MAXX over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine does not model."
+  },
+  {
+   "part": "C",
+   "expr": "MAXX(EXCEPT(Facts,FILTER(Facts,FALSE())),IFERROR(-1/0,Facts[Quantity]/0))",
+   "powerbi": "Infinity",
+   "now": "LOCAL-REJECT:MAXX over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine does not model."
+  },
+  {
+   "part": "C",
+   "expr": "MAXX(ADDCOLUMNS(Facts,\"z\",1),IF(1,Facts[Quantity]/0,\"a\"))",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:MAXX over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine does not model."
+  },
+  {
+   "part": "C",
+   "expr": "MAXX(INTERSECT(Facts,Facts),IFERROR(-1/0,Facts[Quantity]/0))",
+   "powerbi": "Infinity",
+   "now": "LOCAL-REJECT:MAXX over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine does not model."
+  },
+  {
+   "part": "C",
+   "expr": "MAXX(VALUES(Facts),IF(1,Facts[Quantity]/0,\"a\"))",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:MAXX over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine does not model."
+  },
+  {
+   "part": "C",
+   "expr": "MAXX(ALLEXCEPT(Facts,Facts[Region]),IF(1,Facts[Quantity]/0,\"a\"))",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:MAXX over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine does not model."
+  },
+  {
+   "part": "C",
+   "expr": "MAXX(ALLSELECTED(Facts),IF(1,Facts[Quantity]/0,\"a\"))",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:MAXX over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine does not model."
+  },
+  {
+   "part": "C",
+   "expr": "MAXX(EXCEPT(Facts,FILTER(Facts,FALSE())),IF(Facts[Quantity]>2,0/0,2))",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:MAXX over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine does not model."
+  },
+  {
+   "part": "C",
+   "expr": "MAXX(TOPN(100,Facts,Facts[Quantity]),Facts[Quantity]/0)",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:MAXX over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine does not model."
+  },
+  {
+   "part": "C",
+   "expr": "MAXX(UNION(Facts,Facts),IF(1,Facts[Quantity]/0,\"a\"))",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:MAXX over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine does not model."
+  },
+  {
+   "part": "C",
+   "expr": "MAXX(TOPN(100,Facts,Facts[Quantity]),IF(\"\",Facts[Quantity]/0,Facts[Quantity]/0))",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:MAXX over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine does not model."
+  },
+  {
+   "part": "C",
+   "expr": "MAXX(UNION(Facts,Facts),IFERROR(-1/0,Facts[Quantity]/0))",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:MAXX over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine does not model."
+  },
+  {
+   "part": "C",
+   "expr": "MAXX(ALL(Facts[Region],Facts[Quantity]),IF(1,Facts[Quantity]/0,\"a\"))",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:MAXX over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine does not model."
+  },
+  {
+   "part": "C",
+   "expr": "MAXX(UNION(Facts,Facts),Facts[Quantity]/0)",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:MAXX over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine does not model."
+  },
+  {
+   "part": "C",
+   "expr": "MAXX(ADDCOLUMNS(Facts,\"z\",1),Facts[Sales]/0)",
+   "powerbi": "Infinity",
+   "now": "LOCAL-REJECT:MAXX over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine does not model."
+  },
+  {
+   "part": "C",
+   "expr": "MAXX(TOPN(100,Facts,Facts[Quantity]),Facts[Sales]/0)",
+   "powerbi": "Infinity",
+   "now": "LOCAL-REJECT:MAXX over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine does not model."
+  },
+  {
+   "part": "C",
+   "expr": "MAXX(EXCEPT(Facts,FILTER(Facts,FALSE())),Facts[Sales]/0)",
+   "powerbi": "Infinity",
+   "now": "LOCAL-REJECT:MAXX over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine does not model."
+  },
+  {
+   "part": "C",
+   "expr": "MAXX(Facts,IF(1,Facts[Quantity]/0,\"a\"))",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:MAXX over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine does not model."
+  },
+  {
+   "part": "C",
+   "expr": "MAXX(DISTINCT(Facts),IF(1,Facts[Quantity]/0,\"a\"))",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:MAXX over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine does not model."
+  },
+  {
+   "part": "C",
+   "expr": "MAXX(INTERSECT(Facts,Facts),IF(Facts[Quantity]>2,0/0,2))",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:MAXX over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine does not model."
+  },
+  {
+   "part": "C",
+   "expr": "MAXX(ADDCOLUMNS(Facts,\"z\",1),Facts[Quantity]/0)",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:MAXX over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine does not model."
+  },
+  {
+   "part": "C",
+   "expr": "MAXX(ADDCOLUMNS(Facts,\"z\",1),IF(\"\",Facts[Quantity]/0,Facts[Quantity]/0))",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:MAXX over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine does not model."
+  },
+  {
+   "part": "C",
+   "expr": "MAXX(INTERSECT(Facts,Facts),Facts[Quantity]/0)",
+   "powerbi": "Infinity",
+   "now": "LOCAL-REJECT:MAXX over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine does not model."
+  },
+  {
+   "part": "C",
+   "expr": "MAXX(ADDCOLUMNS(Facts,\"q\",(Facts[Quantity])*(MAXX(Facts,1/0))),[q])",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:MAXX over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine does not model."
+  },
+  {
+   "part": "C",
+   "expr": "MAXX(ADDCOLUMNS(Facts,\"q\",(Facts[Quantity])/(2.5&&\"\")),[q])",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:MAXX over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine does not model."
+  },
+  {
+   "part": "C",
+   "expr": "MAXX(ADDCOLUMNS(Facts,\"q\",(Facts[Quantity])/(DIVIDE(1,0))),[q])",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:MAXX over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine does not model."
+  },
+  {
+   "part": "C",
+   "expr": "MAXX(ADDCOLUMNS(Facts,\"q\",(Facts[Quantity])/(0||\"\")),[q])",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:MAXX over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine does not model."
+  },
+  {
+   "part": "C",
+   "expr": "MAXX(ADDCOLUMNS(Facts,\"c\",CURRENCY(Facts[Sales])),(Facts[Sales]*0)/([c]*2))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:MAXX over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine does not model."
+  },
+  {
+   "part": "C",
+   "expr": "MAXX(ADDCOLUMNS(Facts,\"c\",CURRENCY(Facts[Sales])),(Facts[Sales]*0)/(CURRENCY(Facts[Sales])))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:MAXX over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine does not model."
+  },
+  {
+   "part": "C",
+   "expr": "MAXX(ADDCOLUMNS(Facts,\"q\",CONVERT(Facts[Sales]/0,DOUBLE)),[q])",
+   "powerbi": "Infinity",
+   "now": "LOCAL-REJECT:MAXX over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine does not model."
+  },
+  {
+   "part": "C",
+   "expr": "MAXX(ADDCOLUMNS(Facts,\"c\",CURRENCY(Facts[Sales])),(Facts[Sales]/0)/([c]*2))",
+   "powerbi": "Infinity",
+   "now": "LOCAL-REJECT:MAXX over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine does not model."
+  },
+  {
+   "part": "C",
+   "expr": "MAXX(ADDCOLUMNS(Facts,\"c\",CURRENCY(Facts[Sales])),(0)/([c]))",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:MAXX over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine does not model."
+  },
+  {
+   "part": "C",
+   "expr": "MAXX(ADDCOLUMNS(Facts,\"c\",CURRENCY(Facts[Sales])),(Facts[Sales]*0)/([c]))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:MAXX over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine does not model."
+  },
+  {
+   "part": "C",
+   "expr": "MAXX(ADDCOLUMNS(Facts,\"c\",CURRENCY(Facts[Sales])),(Facts[Sales])/([c]))",
+   "powerbi": "1",
+   "now": "LOCAL-REJECT:MAXX over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine does not model."
+  },
+  {
+   "part": "C",
+   "expr": "MAXX(ADDCOLUMNS(Facts,\"c\",CURRENCY(Facts[Sales])),(0.0)/(CURRENCY(Facts[Quantity])))",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:MAXX over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine does not model."
+  },
+  {
+   "part": "C",
+   "expr": "MAXX(ADDCOLUMNS(Facts,\"c\",CURRENCY(Facts[Sales])),(SUM(Facts[Quantity])*CURRENCY(1))+(Facts[Sales]/0))",
+   "powerbi": "Infinity",
+   "now": "LOCAL-REJECT:MAXX over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine does not model."
+  },
+  {
+   "part": "C",
+   "expr": "MAXX(ADDCOLUMNS(Facts,\"c\",CURRENCY(Facts[Sales])),(0)/([c]*2))",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:MAXX over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine does not model."
+  },
+  {
+   "part": "C",
+   "expr": "MAXX(ADDCOLUMNS(Facts,\"q\",CONVERT(Facts[Quantity]/0,DOUBLE)),[q])",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:MAXX over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine does not model."
+  },
+  {
+   "part": "C",
+   "expr": "MAXX(ADDCOLUMNS(Facts,\"c\",CURRENCY(Facts[Sales])),(CURRENCY(Facts[Sales]))+(Facts[Sales]/0))",
+   "powerbi": "Infinity",
+   "now": "LOCAL-REJECT:MAXX over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine does not model."
+  },
+  {
+   "part": "C",
+   "expr": "MAXX(ADDCOLUMNS(Facts,\"q\",CONVERT(Facts[Quantity]/0,DATETIME)),[q])",
+   "powerbi": "12/30/1899 00:00:00",
+   "now": "LOCAL-REJECT:MAXX over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine does not model."
+  },
+  {
+   "part": "C",
+   "expr": "MAXX(ADDCOLUMNS(Facts,\"c\",CURRENCY(Facts[Sales])),(0.0)/(CURRENCY(Facts[Sales])))",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:MAXX over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine does not model."
+  },
+  {
+   "part": "C",
+   "expr": "MAXX(ADDCOLUMNS(Facts,\"c\",CURRENCY(Facts[Sales])),(Facts[Sales]/0)/([c]+1))",
+   "powerbi": "Infinity",
+   "now": "LOCAL-REJECT:MAXX over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine does not model."
+  },
+  {
+   "part": "C",
+   "expr": "MAXX(ADDCOLUMNS(Facts,\"q\",CONVERT(Facts[Sales]/0,DATETIME)),[q])",
+   "powerbi": "12/31/9999 23:59:59",
+   "now": "LOCAL-REJECT:MAXX over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine does not model."
+  },
+  {
+   "part": "C",
+   "expr": "MAXX(ADDCOLUMNS(Facts,\"c\",CURRENCY(Facts[Sales])),(Facts[Sales])/([c]*2))",
+   "powerbi": "0.5",
+   "now": "LOCAL-REJECT:MAXX over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine does not model."
+  },
+  {
+   "part": "C",
+   "expr": "MAXX(ADDCOLUMNS(Facts,\"c\",CURRENCY(Facts[Sales])),(Facts[Sales]/0)/(CURRENCY(Facts[Quantity])))",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:MAXX over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine does not model."
+  },
+  {
+   "part": "C",
+   "expr": "MAXX(ADDCOLUMNS(Facts,\"c\",CURRENCY(Facts[Sales])),(CURRENCY(Facts[Quantity]))+(Facts[Sales]/0))",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:MAXX over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine does not model."
+  },
+  {
+   "part": "C",
+   "expr": "MAXX(ADDCOLUMNS(Facts,\"c\",CURRENCY(Facts[Sales])),(0.0)/([c]))",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:MAXX over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine does not model."
+  },
+  {
+   "part": "C",
+   "expr": "MAXX(ADDCOLUMNS(Facts,\"c\",CURRENCY(Facts[Sales])),([c]*2)+(Facts[Sales]/0))",
+   "powerbi": "Infinity",
+   "now": "LOCAL-REJECT:MAXX over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine does not model."
+  },
+  {
+   "part": "C",
+   "expr": "MAXX(ADDCOLUMNS(Facts,\"q\",COALESCE((Facts[Sales]&&\"\")/Facts[Quantity],5)),[q])",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:MAXX over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine does not model."
+  },
+  {
+   "part": "C",
+   "expr": "MAXX(ADDCOLUMNS(Facts,\"c\",CURRENCY(Facts[Sales])),([c])+(Facts[Sales]/0))",
+   "powerbi": "Infinity",
+   "now": "LOCAL-REJECT:MAXX over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine does not model."
+  },
+  {
+   "part": "C",
+   "expr": "MAXX(ADDCOLUMNS(Facts,\"c\",CURRENCY(Facts[Sales])),(Facts[Sales]/0)/([c]))",
+   "powerbi": "Infinity",
+   "now": "LOCAL-REJECT:MAXX over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine does not model."
+  },
+  {
+   "part": "C",
+   "expr": "MAXX(ADDCOLUMNS(Facts,\"c\",CURRENCY(Facts[Sales])),(Facts[Sales]*0)/(CURRENCY(Facts[Quantity])))",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:MAXX over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine does not model."
+  },
+  {
+   "part": "C",
+   "expr": "MAXX(ADDCOLUMNS(Facts,\"c\",CURRENCY(Facts[Sales])),(Facts[Sales])/(CURRENCY(Facts[Quantity])))",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:MAXX over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine does not model."
+  },
+  {
+   "part": "C",
+   "expr": "MAXX(ADDCOLUMNS(Facts,\"c\",CURRENCY(Facts[Sales])),(0)/(CURRENCY(Facts[Sales])))",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:MAXX over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine does not model."
+  },
+  {
+   "part": "C",
+   "expr": "MAXX(ADDCOLUMNS(Facts,\"c\",CURRENCY(Facts[Sales])),([c]+1)+(Facts[Sales]/0))",
+   "powerbi": "Infinity",
+   "now": "LOCAL-REJECT:MAXX over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine does not model."
+  },
+  {
+   "part": "C",
+   "expr": "MAXX(ADDCOLUMNS(Facts,\"c\",CURRENCY(Facts[Sales])),(Facts[Sales])/(CURRENCY(Facts[Sales])))",
+   "powerbi": "1",
+   "now": "LOCAL-REJECT:MAXX over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine does not model."
+  },
+  {
+   "part": "C",
+   "expr": "MAXX(ADDCOLUMNS(Facts,\"c\",CURRENCY(Facts[Sales])),(0.0)/([c]*2))",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:MAXX over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine does not model."
+  },
+  {
+   "part": "C",
+   "expr": "MAXX(ADDCOLUMNS(Facts,\"c\",CURRENCY(Facts[Sales])),(Facts[Sales]/0)/(CURRENCY(Facts[Sales])))",
+   "powerbi": "Infinity",
+   "now": "LOCAL-REJECT:MAXX over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine does not model."
+  },
+  {
+   "part": "C",
+   "expr": "MAXX(ADDCOLUMNS(Facts,\"c\",CURRENCY(Facts[Sales])),(Facts[Sales]/0)/(SUM(Facts[Quantity])*CURRENCY(1)))",
+   "powerbi": "Infinity",
+   "now": "LOCAL-REJECT:MAXX over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine does not model."
+  },
+  {
+   "part": "C",
+   "expr": "MAXX(ADDCOLUMNS(Facts,\"c\",CURRENCY(Facts[Sales])),(0)/(CURRENCY(Facts[Quantity])))",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:MAXX over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine does not model."
+  },
+  {
+   "part": "B",
+   "expr": "STDEVX.P(CALCULATETABLE(Facts,Facts[Region]=\"East\"),1/0)",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:STDEVX.P over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "B",
+   "expr": "STDEVX.P(Facts,LOG10(VAR y=BLANK() RETURN y))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:STDEVX.P over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "B",
+   "expr": "STDEVX.P(Facts,LOG(VAR y=BLANK() RETURN y))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:STDEVX.P over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "B",
+   "expr": "STDEVX.P(Facts,LOG(SELECTEDVALUE(Facts[Quantity])))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:STDEVX.P over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "B",
+   "expr": "STDEVX.P(Facts,(MAXX(Facts,1/0))*(VAR y=1/0 RETURN y))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:STDEVX.P over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "B",
+   "expr": "STDEVX.P(Facts,(-1/0)-(MAXX(Facts,DATE(2020,1,1))))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:STDEVX.P over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "B",
+   "expr": "STDEVX.P(Facts,LOG(SUMX(FILTER(Facts,FALSE()),1),0.5))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:STDEVX.P over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "B",
+   "expr": "STDEVX.P(Facts,(BLANK()&&BLANK())*(1/0))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:STDEVX.P over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "B",
+   "expr": "STDEVX.P(Facts,LOG(CALCULATE(SUM(Facts[Quantity]),Facts[Region]=\"Nope\"),VAR b=2 RETURN b))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:STDEVX.P over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "B",
+   "expr": "STDEVX.P(Facts,(1/0*0)/(FORMAT(1,\"0\")))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:STDEVX.P over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "B",
+   "expr": "STDEVX.P(Facts,(MAXX(Facts,1/0))/(DIVIDE(1,0)))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:STDEVX.P over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "B",
+   "expr": "STDEVX.P(Facts,LOG(-BLANK(),FALSE()))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:STDEVX.P over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "B",
+   "expr": "STDEVX.P(Facts,LOG(BLANK()*2,Facts[Quantity]))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:STDEVX.P over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "B",
+   "expr": "STDEVX.P(Facts,1/-(MAXX({BLANK()},[Value])))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:STDEVX.P over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "B",
+   "expr": "STDEVX.P(Facts,LOG(IF(FALSE(),1),0.5))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:STDEVX.P over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "B",
+   "expr": "STDEVX.P(Facts,(\"2\")/(1/0*0))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:STDEVX.P over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "B",
+   "expr": "STDEVX.P(Facts,LOG(BLANK(),-1/0))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:STDEVX.P over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "B",
+   "expr": "STDEVX.P(Facts,LOG(ABS(BLANK()),FALSE()))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:STDEVX.P over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "B",
+   "expr": "STDEVX.P(Facts,LOG(VAR y=BLANK() RETURN y,10))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:STDEVX.P over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "B",
+   "expr": "STDEVX.P(Facts,LOG(COUNTROWS(FILTER(Facts,FALSE())),FALSE()))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:STDEVX.P over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "B",
+   "expr": "STDEVX.P(Facts,(Facts[Quantity])/(2.5&&\"\"))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:STDEVX.P over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "B",
+   "expr": "STDEVX.P(Facts,LOG(BLANK()*2,0/0))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:STDEVX.P over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "B",
+   "expr": "STDEVX.P(Facts,LOG(COUNTROWS(FILTER(Facts,FALSE())),1))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:STDEVX.P over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "B",
+   "expr": "STDEVX.P(Facts,LOG(COUNTROWS(FILTER(Facts,FALSE())),TRUE()))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:STDEVX.P over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "B",
+   "expr": "STDEVX.P(Facts,(0)/(MAXX({BLANK()},[Value])))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:STDEVX.P over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "B",
+   "expr": "STDEVX.P(Facts,(Facts[Sales])/(0||\"\"))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:STDEVX.P over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "B",
+   "expr": "STDEVX.P(Facts,LOG(-BLANK(),-1/0))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:STDEVX.P over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "B",
+   "expr": "STDEVX.P(Facts,(-1)/(1/0*0))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:STDEVX.P over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "B",
+   "expr": "STDEVX.P(Facts,LOG(SELECTEDVALUE(Facts[Quantity]),2))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:STDEVX.P over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "B",
+   "expr": "STDEVX.P(Facts,(BLANK()&&BLANK())/(CALCULATE(SUM(Facts[Quantity]),Facts[Region]=\"Nope\")))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:STDEVX.P over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "B",
+   "expr": "STDEVX.P(Facts,(1/0)/(MAXX(Facts,1/0)))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:STDEVX.P over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "B",
+   "expr": "STDEVX.P(Facts,(1)*(1/0*0))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:STDEVX.P over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "B",
+   "expr": "STDEVX.P(Facts,(VAR y=1/0 RETURN y)/(MAX(Facts[Sales])))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:STDEVX.P over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "B",
+   "expr": "STDEVX.P(Facts,LOG(SELECTEDVALUE(Facts[Quantity]),CURRENCY(2)))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:STDEVX.P over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "B",
+   "expr": "STDEVX.P(Facts,LOG(CALCULATE(SUM(Facts[Quantity]),Facts[Region]=\"Nope\"),Facts[Quantity]))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:STDEVX.P over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "B",
+   "expr": "STDEVX.P(Facts,LOG(BLANK()+BLANK(),1))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:STDEVX.P over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "B",
+   "expr": "STDEVX.P(Facts,LOG10(BLANK()))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:STDEVX.P over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "B",
+   "expr": "STDEVX.P(Facts,LOG(IF(FALSE(),1),Facts[Quantity]))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:STDEVX.P over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "B",
+   "expr": "STDEVX.P(Facts,(MAXX(Facts,1/0))/(CURRENCY(2)))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:STDEVX.P over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "B",
+   "expr": "STDEVX.P(Facts,(IF(Facts[Quantity]>2,BLANK(),1))/(0/0))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:STDEVX.P over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "B",
+   "expr": "STDEVX.P(Facts,LOG(INT(BLANK()),FALSE()))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:STDEVX.P over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "B",
+   "expr": "STDEVX.P(Facts,LOG10(CALCULATE(SUM(Facts[Quantity]),Facts[Region]=\"Nope\")))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:STDEVX.P over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "B",
+   "expr": "STDEVX.P(Facts,LOG(IF(FALSE(),1),MAX(Facts[Quantity])))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:STDEVX.P over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "B",
+   "expr": "STDEVX.P(Facts,LOG(CALCULATE(SUM(Facts[Quantity]),Facts[Region]=\"Nope\")))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:STDEVX.P over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "B",
+   "expr": "STDEVX.P(Facts,LOG(VAR y=BLANK() RETURN y,0.5))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:STDEVX.P over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "B",
+   "expr": "STDEVX.P(Facts,LOG(IF(FALSE(),1),1))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:STDEVX.P over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "B",
+   "expr": "STDEVX.P(Facts,(BLANK()&&BLANK())+(VAR y=1/0 RETURN y)/(0/0))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:STDEVX.P over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "B",
+   "expr": "STDEVX.P(Facts,LOG(INT(BLANK()),DATE(2020,1,1)))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:STDEVX.P over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "B",
+   "expr": "STDEVX.P(Facts,LOG(ABS(BLANK()),0.5))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:STDEVX.P over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "B",
+   "expr": "STDEVX.P(Facts,LOG(-BLANK(),1/0))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:STDEVX.P over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "B",
+   "expr": "STDEVX.P(Facts,(DATE(2020,1,1))/(IF(Facts[Quantity]>2,BLANK(),1)))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:STDEVX.P over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "B",
+   "expr": "STDEVX.P(Facts,(1/0)*(TRUE()))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:STDEVX.P over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "B",
+   "expr": "STDEVX.P(Facts,1*-(1/0))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:STDEVX.P over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "B",
+   "expr": "STDEVX.P(Facts,LOG(VAR y=BLANK() RETURN y,FALSE()))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:STDEVX.P over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "B",
+   "expr": "STDEVX.P(Facts,(Facts[Quantity])/(DIVIDE(1,0)))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:STDEVX.P over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "B",
+   "expr": "STDEVX.P(Facts,(FALSE())/(BLANK()&&BLANK()))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:STDEVX.P over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "B",
+   "expr": "STDEVX.P(Facts,(\"2\")/(0))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:STDEVX.P over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "B",
+   "expr": "STDEVX.P(Facts,LOG(SUMX(FILTER(Facts,FALSE()),1),0/0))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:STDEVX.P over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "B",
+   "expr": "STDEVX.P(Facts,LOG(IF(FALSE(),1),-1/0))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:STDEVX.P over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "B",
+   "expr": "STDEVX.P(Facts,(1/0)*(FORMAT(1,\"0\"))+(2.5))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:STDEVX.P over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "B",
+   "expr": "STDEVX.P(Facts,LOG(VAR y=BLANK() RETURN y,-1/0))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:STDEVX.P over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "B",
+   "expr": "STDEVX.P(Facts,LOG(SELECTEDVALUE(Facts[Quantity]),1/0))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:STDEVX.P over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "B",
+   "expr": "STDEVX.P(Facts,LOG(BLANK()+BLANK(),0/0))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:STDEVX.P over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "B",
+   "expr": "STDEVX.P(Facts,(1/0)*(SUM(Facts[Sales])))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:STDEVX.P over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "B",
+   "expr": "STDEVX.P(Facts,1/-(CALCULATE(SUM(Facts[Quantity]),Facts[Region]=\"Nope\")))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:STDEVX.P over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "B",
+   "expr": "STDEVX.P(Facts,LOG(BLANK()+BLANK(),-2))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:STDEVX.P over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "B",
+   "expr": "STDEVX.P(Facts,LOG(BLANK()+BLANK(),1/0))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:STDEVX.P over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "B",
+   "expr": "STDEVX.P(Facts,(BLANK()&&BLANK())/(COUNTROWS(FILTER(Facts,FALSE()))))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:STDEVX.P over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "B",
+   "expr": "STDEVX.P(Facts,(1/0*0)*(VAR y=1/0 RETURN y))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:STDEVX.P over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "B",
+   "expr": "STDEVX.P(Facts,LOG(SUMX(FILTER(Facts,FALSE()),1),10))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:STDEVX.P over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "B",
+   "expr": "STDEVX.P(Facts,(2.5)/(0||\"\"))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:STDEVX.P over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "B",
+   "expr": "STDEVX.P(Facts,(-1)*(1/0*0))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:STDEVX.P over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "B",
+   "expr": "STDEVX.P(Facts,LOG(-BLANK(),0/0))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:STDEVX.P over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "B",
+   "expr": "STDEVX.P(Facts,LOG(-BLANK(),10))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:STDEVX.P over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "B",
+   "expr": "STDEVX.P({\"a\"},COALESCE(CONVERT(-1/0,DATETIME),CONVERT(-1/0,DATETIME)))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:STDEVX.P over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "B",
+   "expr": "STDEVX.P({1,2},VAR v=CONVERT(1/0,DOUBLE) RETURN v)",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:STDEVX.P over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "B",
+   "expr": "STDEVX.P({1,2},COALESCE(CONVERT(1/0,DOUBLE),CONVERT(1/0,DOUBLE)))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:STDEVX.P over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "B",
+   "expr": "STDEVX.P(ROW(\"Value\",1),CONVERT(-1/0,DOUBLE))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:STDEVX.P over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "B",
+   "expr": "STDEVX.P({1,2},COALESCE(CONVERT(0/0,DATETIME),CONVERT(0/0,DATETIME)))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:STDEVX.P over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "B",
+   "expr": "STDEVX.P(VALUES(Facts[Region]),CONVERT(1/0,DOUBLE))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:STDEVX.P over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "B",
+   "expr": "STDEVX.P(VALUES(Facts[Region]),IF(TRUE(),CONVERT(0/0,DOUBLE)))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:STDEVX.P over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "B",
+   "expr": "STDEVX.P(Facts,CONVERT(Facts[Sales]/0,DOUBLE))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:STDEVX.P over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "B",
+   "expr": "STDEVX.P(Facts,CONVERT(Facts[Quantity]/0,DATETIME))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:STDEVX.P over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "B",
+   "expr": "STDEVX.P(Facts,CONVERT(Facts[Sales]/0,DATETIME))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:STDEVX.P over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "B",
+   "expr": "STDEVX.P(Facts,CONVERT(Facts[Quantity]/0,DOUBLE))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:STDEVX.P over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "D",
+   "expr": "SUMX({BLANK(),1},(1/0*0)/(2.5))",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:SUMX over a NaN beside a product with a constant zero is not supported in the local engine (Power BI may fold it to 0)."
+  },
+  {
+   "part": "D",
+   "expr": "SUMX({BLANK(),1},(1/0*0)/(1))",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:SUMX over a NaN beside a product with a constant zero is not supported in the local engine (Power BI may fold it to 0)."
+  },
+  {
+   "part": "D",
+   "expr": "SUMX(FILTER(Facts,Facts[Quantity]>2),(1/0*0)*(-1))",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:SUMX over a NaN beside a product with a constant zero is not supported in the local engine (Power BI may fold it to 0)."
+  },
+  {
+   "part": "D",
+   "expr": "SUMX(FILTER(Facts,Facts[Quantity]>2),(TRUE())/(1/0*0))",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:SUMX over a NaN beside a product with a constant zero is not supported in the local engine (Power BI may fold it to 0)."
+  },
+  {
+   "part": "D",
+   "expr": "SUMX(Facts,(-1)/(1/0*0))",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:SUMX over a NaN beside a product with a constant zero is not supported in the local engine (Power BI may fold it to 0)."
+  },
+  {
+   "part": "D",
+   "expr": "SUMX({BLANK(),1},(1/0*0)/(CURRENCY(2))*(VAR y=1/0 RETURN y))",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:SUMX over a NaN beside a product with a constant zero is not supported in the local engine (Power BI may fold it to 0)."
+  },
+  {
+   "part": "D",
+   "expr": "CALCULATE(SUMX(Facts,(0)*(MAXX(Facts,1/0))),Facts[Region]<>\"x\")",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:SUMX over a NaN beside a product with a constant zero is not supported in the local engine (Power BI may fold it to 0)."
+  },
+  {
+   "part": "D",
+   "expr": "SUMX(Facts,(1/0*0)/(DIVIDE(1,0)))",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:SUMX over a NaN beside a product with a constant zero is not supported in the local engine (Power BI may fold it to 0)."
+  },
+  {
+   "part": "D",
+   "expr": "CALCULATE(SUMX(Facts,(1/0*0)/(VAR y=1/0 RETURN y)),Facts[Region]<>\"x\")",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:SUMX over a NaN beside a product with a constant zero is not supported in the local engine (Power BI may fold it to 0)."
+  },
+  {
+   "part": "D",
+   "expr": "CALCULATE(SUMX(Facts,(1/0*0)*(FORMAT(1,\"0\"))),Facts[Region]<>\"x\")",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:SUMX over a NaN beside a product with a constant zero is not supported in the local engine (Power BI may fold it to 0)."
+  },
+  {
+   "part": "D",
+   "expr": "CALCULATE(SUMX(Facts,(\"2\")*(1/0*0)),Facts[Region]<>\"x\")",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:SUMX over a NaN beside a product with a constant zero is not supported in the local engine (Power BI may fold it to 0)."
+  },
+  {
+   "part": "D",
+   "expr": "SUMX(FILTER(Facts,Facts[Quantity]>2),(1/0*0)/(VAR y=1/0 RETURN y))",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:SUMX over a NaN beside a product with a constant zero is not supported in the local engine (Power BI may fold it to 0)."
+  },
+  {
+   "part": "D",
+   "expr": "CALCULATE(SUMX(Facts,(1/0*0)*(1)),Facts[Region]<>\"x\")",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:SUMX over a NaN beside a product with a constant zero is not supported in the local engine (Power BI may fold it to 0)."
+  },
+  {
+   "part": "D",
+   "expr": "CALCULATE(SUMX(Facts,(1)/(1/0*0)),Facts[Region]<>\"x\")",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:SUMX over a NaN beside a product with a constant zero is not supported in the local engine (Power BI may fold it to 0)."
+  },
+  {
+   "part": "D",
+   "expr": "SUMX({BLANK(),1},(1)/(1/0*0))",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:SUMX over a NaN beside a product with a constant zero is not supported in the local engine (Power BI may fold it to 0)."
+  },
+  {
+   "part": "D",
+   "expr": "SUMX(FILTER(Facts,Facts[Quantity]>2),(1/0*0)/(MAXX(Facts,1/0)))",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:SUMX over a NaN beside a product with a constant zero is not supported in the local engine (Power BI may fold it to 0)."
+  },
+  {
+   "part": "D",
+   "expr": "SUMX(Facts,(1/0*0)-(SUMX(Facts,CURRENCY(1))))",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:SUMX over a NaN beside a product with a constant zero is not supported in the local engine (Power BI may fold it to 0)."
+  },
+  {
+   "part": "D",
+   "expr": "SUMX(Facts,(1/0*0)/(SUMX(Facts,CURRENCY(1))))",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:SUMX over a NaN beside a product with a constant zero is not supported in the local engine (Power BI may fold it to 0)."
+  },
+  {
+   "part": "D",
+   "expr": "SUMX(Facts,(CURRENCY(-1))+(1/0*0))",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:SUMX over a NaN beside a product with a constant zero is not supported in the local engine (Power BI may fold it to 0)."
+  },
+  {
+   "part": "D",
+   "expr": "SUMX(Facts,(CALCULATE(CURRENCY(1)))+(1/0*0))",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:SUMX over a NaN beside a product with a constant zero is not supported in the local engine (Power BI may fold it to 0)."
+  },
+  {
+   "part": "D",
+   "expr": "SUMX(Facts,(1/0*0)+(CURRENCY(2)))",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:SUMX over a NaN beside a product with a constant zero is not supported in the local engine (Power BI may fold it to 0)."
+  },
+  {
+   "part": "D",
+   "expr": "SUMX(Facts,(IF(TRUE(),CURRENCY(2)))+(1/0*0))",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:SUMX over a NaN beside a product with a constant zero is not supported in the local engine (Power BI may fold it to 0)."
+  },
+  {
+   "part": "D",
+   "expr": "SUMX(Facts,(SUM(Facts[Quantity])*CURRENCY(1))+(1/0*0))",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:SUMX over a NaN beside a product with a constant zero is not supported in the local engine (Power BI may fold it to 0)."
+  },
+  {
+   "part": "D",
+   "expr": "SUMX(Facts,(BLANK()*CURRENCY(1))+(1/0*0))",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:SUMX over a NaN beside a product with a constant zero is not supported in the local engine (Power BI may fold it to 0)."
+  },
+  {
+   "part": "D",
+   "expr": "SUMX(Facts,(SUMX(Facts,CURRENCY(1)))+(1/0*0))",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:SUMX over a NaN beside a product with a constant zero is not supported in the local engine (Power BI may fold it to 0)."
+  },
+  {
+   "part": "D",
+   "expr": "SUMX(Facts,(1/0*0)/(CALCULATE(CURRENCY(1))))",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:SUMX over a NaN beside a product with a constant zero is not supported in the local engine (Power BI may fold it to 0)."
+  },
+  {
+   "part": "D",
+   "expr": "SUMX(Facts,(1/0*0)+(CONVERT(1,CURRENCY)))",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:SUMX over a NaN beside a product with a constant zero is not supported in the local engine (Power BI may fold it to 0)."
+  },
+  {
+   "part": "D",
+   "expr": "SUMX(Facts,(1/0*0)-(CONVERT(1,CURRENCY)))",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:SUMX over a NaN beside a product with a constant zero is not supported in the local engine (Power BI may fold it to 0)."
+  },
+  {
+   "part": "D",
+   "expr": "SUMX(Facts,(1/0*0)+(SUMX(Facts,CURRENCY(1))))",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:SUMX over a NaN beside a product with a constant zero is not supported in the local engine (Power BI may fold it to 0)."
+  },
+  {
+   "part": "D",
+   "expr": "SUMX(Facts,(1/0*0)-(CURRENCY(0)))",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:SUMX over a NaN beside a product with a constant zero is not supported in the local engine (Power BI may fold it to 0)."
+  },
+  {
+   "part": "D",
+   "expr": "SUMX(Facts,(CONVERT(1,CURRENCY))-(1/0*0))",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:SUMX over a NaN beside a product with a constant zero is not supported in the local engine (Power BI may fold it to 0)."
+  },
+  {
+   "part": "D",
+   "expr": "SUMX(Facts,(SUM(Facts[Quantity])*CURRENCY(1))-(1/0*0))",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:SUMX over a NaN beside a product with a constant zero is not supported in the local engine (Power BI may fold it to 0)."
+  },
+  {
+   "part": "D",
+   "expr": "SUMX(Facts,(CURRENCY(2))+(1/0*0))",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:SUMX over a NaN beside a product with a constant zero is not supported in the local engine (Power BI may fold it to 0)."
+  },
+  {
+   "part": "D",
+   "expr": "SUMX(ADDCOLUMNS(Facts,\"c\",CURRENCY(Facts[Quantity])),(Facts[Sales]*0)/(CURRENCY(Facts[Quantity])))",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:SUMX over a NaN beside a product with a constant zero is not supported in the local engine (Power BI may fold it to 0)."
+  },
+  {
+   "part": "D",
+   "expr": "SUMX(ADDCOLUMNS(Facts,\"c\",CURRENCY(Facts[Quantity])),(Facts[Sales]*0)/(CURRENCY(Facts[Sales])))",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:SUMX over a NaN beside a product with a constant zero is not supported in the local engine (Power BI may fold it to 0)."
+  },
+  {
+   "part": "D",
+   "expr": "SUMX(ADDCOLUMNS(Facts,\"c\",CURRENCY(Facts[Quantity])),(Facts[Sales]*0)/([c]))",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:SUMX over a NaN beside a product with a constant zero is not supported in the local engine (Power BI may fold it to 0)."
+  },
+  {
+   "part": "D",
+   "expr": "SUMX(ADDCOLUMNS(Facts,\"c\",CURRENCY(Facts[Quantity])),(Facts[Sales]*0)/([c]*2))",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:SUMX over a NaN beside a product with a constant zero is not supported in the local engine (Power BI may fold it to 0)."
+  },
+  {
+   "part": "D",
+   "expr": "SUMX({1,2},(0*-1)/- 0.0+(0.0*-1)-1.5)",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:SUMX over a NaN beside a product with a constant zero is not supported in the local engine (Power BI may fold it to 0)."
+  },
+  {
+   "part": "D",
+   "expr": "SUMX(Facts,1/((Facts[Quantity]*0)/-(0.0)))",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:SUMX over a NaN beside a product with a constant zero is not supported in the local engine (Power BI may fold it to 0)."
+  },
+  {
+   "part": "D",
+   "expr": "SUMX({1,2},+0*MIN(Facts[Sales])/(1-1))",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:SUMX over a NaN beside a product with a constant zero is not supported in the local engine (Power BI may fold it to 0)."
+  },
+  {
+   "part": "D",
+   "expr": "SUMX({1,2},+0*(-1/0)*0.0*+COUNTROWS(Facts))",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:SUMX over a NaN beside a product with a constant zero is not supported in the local engine (Power BI may fold it to 0)."
+  },
+  {
+   "part": "D",
+   "expr": "SUMX({1,2},-MAX(Facts[Quantity])*-\"2\"*- 0*-MIN(Facts[Sales])/+(1-1))",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:SUMX over a NaN beside a product with a constant zero is not supported in the local engine (Power BI may fold it to 0)."
+  },
+  {
+   "part": "D",
+   "expr": "SUMX({1,2},-(1-1)+(0/0)*(0*-1)/1.5)",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:SUMX over a NaN beside a product with a constant zero is not supported in the local engine (Power BI may fold it to 0)."
+  },
+  {
+   "part": "D",
+   "expr": "SUMX(Facts,(Facts[Quantity]*0)/-(0.0))",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:SUMX over a NaN beside a product with a constant zero is not supported in the local engine (Power BI may fold it to 0)."
+  },
+  {
+   "part": "D",
+   "expr": "SUMX(Facts,1/((Facts[Sales]*0)/0))",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:SUMX over a NaN beside a product with a constant zero is not supported in the local engine (Power BI may fold it to 0)."
+  },
+  {
+   "part": "D",
+   "expr": "SUMX({1,2},(0*-1)*(0/0))",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:SUMX over a NaN beside a product with a constant zero is not supported in the local engine (Power BI may fold it to 0)."
+  },
+  {
+   "part": "D",
+   "expr": "SUMX(Facts,(Facts[Quantity]*0)/0)",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:SUMX over a NaN beside a product with a constant zero is not supported in the local engine (Power BI may fold it to 0)."
+  },
+  {
+   "part": "D",
+   "expr": "SUMX(Facts,1/((Facts[Sales]*0)/-(0.0)))",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:SUMX over a NaN beside a product with a constant zero is not supported in the local engine (Power BI may fold it to 0)."
+  },
+  {
+   "part": "D",
+   "expr": "SUMX(Facts,1/((Facts[Quantity]*0)/0))",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:SUMX over a NaN beside a product with a constant zero is not supported in the local engine (Power BI may fold it to 0)."
+  },
+  {
+   "part": "D",
+   "expr": "SUMX(Facts,(Facts[Sales]*0)/0)",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:SUMX over a NaN beside a product with a constant zero is not supported in the local engine (Power BI may fold it to 0)."
+  },
+  {
+   "part": "D",
+   "expr": "SUMX({1,2},(0*-1)/DATE(2020,1,1)*- MIN(Facts[Sales])/+0)",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:SUMX over a NaN beside a product with a constant zero is not supported in the local engine (Power BI may fold it to 0)."
+  },
+  {
+   "part": "D",
+   "expr": "SUMX({1,2},(0*-1)*(-1/0))",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:SUMX over a NaN beside a product with a constant zero is not supported in the local engine (Power BI may fold it to 0)."
+  },
+  {
+   "part": "D",
+   "expr": "SUMX({1,2},-(0*-1)+-0.0/- SUM(Facts[Sales])/3/(0/0))",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:SUMX over a NaN beside a product with a constant zero is not supported in the local engine (Power BI may fold it to 0)."
+  },
+  {
+   "part": "D",
+   "expr": "SUMX({1,2},(0/0)*+0.0-(1/0)*-COUNTROWS(Facts))",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:SUMX over a NaN beside a product with a constant zero is not supported in the local engine (Power BI may fold it to 0)."
+  },
+  {
+   "part": "D",
+   "expr": "SUMX(Facts,(Facts[Sales]*0)/-(0.0))",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:SUMX over a NaN beside a product with a constant zero is not supported in the local engine (Power BI may fold it to 0)."
+  },
+  {
+   "part": "D",
+   "expr": "SUMX({1,2},(0*-1)/(0.0*-1)/COUNTROWS(Facts))",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:SUMX over a NaN beside a product with a constant zero is not supported in the local engine (Power BI may fold it to 0)."
+  },
+  {
+   "part": "D",
+   "expr": "SUMX({1,2},+(1-1)++(0/0)+MIN(Facts[Sales])^(0.0*-1))",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:SUMX over a NaN beside a product with a constant zero is not supported in the local engine (Power BI may fold it to 0)."
+  },
+  {
+   "part": "D",
+   "expr": "SUMX({1,2},(0.0*-1)/+(0/0)-+(1-1))",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:SUMX over a NaN beside a product with a constant zero is not supported in the local engine (Power BI may fold it to 0)."
+  },
+  {
+   "part": "D",
+   "expr": "SUMX({1,2},+0.5+(-1/0)-(0/0)*-(0*-1))",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:SUMX over a NaN beside a product with a constant zero is not supported in the local engine (Power BI may fold it to 0)."
+  },
+  {
+   "part": "D",
+   "expr": "SUMX({1,2},+TRUE()+-(0.0*-1)/BLANK())",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:SUMX over a NaN beside a product with a constant zero is not supported in the local engine (Power BI may fold it to 0)."
+  },
+  {
+   "part": "D",
+   "expr": "SUMX({1,2},+(-1/0)*+0-+(1/0))",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:SUMX over a NaN beside a product with a constant zero is not supported in the local engine (Power BI may fold it to 0)."
+  },
+  {
+   "part": "D",
+   "expr": "SUMX({1,2},- 3/- \"2\"/(0.0*-1)*(0*-1))",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:SUMX over a NaN beside a product with a constant zero is not supported in the local engine (Power BI may fold it to 0)."
+  },
+  {
+   "part": "D",
+   "expr": "SUMX({1,2},(0*-1)-(0*-1)*(0/0)-(0.0*-1))",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:SUMX over a NaN beside a product with a constant zero is not supported in the local engine (Power BI may fold it to 0)."
+  },
+  {
+   "part": "D",
+   "expr": "SUMX({1,2},- (0/0)/-BLANK()*+(1-1))",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:SUMX over a NaN beside a product with a constant zero is not supported in the local engine (Power BI may fold it to 0)."
+  },
+  {
+   "part": "D",
+   "expr": "SUMX({1,2},-(1-1)/-(0/0)+(0*-1))",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:SUMX over a NaN beside a product with a constant zero is not supported in the local engine (Power BI may fold it to 0)."
+  },
+  {
+   "part": "D",
+   "expr": "SUMX({1,2},+(0/0)/COUNTROWS(Facts)++0.5+-(1-1)*+1.5)",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:SUMX over a NaN beside a product with a constant zero is not supported in the local engine (Power BI may fold it to 0)."
+  },
+  {
+   "part": "D",
+   "expr": "SUMX({1,2},(0.0*-1)*1E-200/- 0.0/+(0.0*-1))",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:SUMX over a NaN beside a product with a constant zero is not supported in the local engine (Power BI may fold it to 0)."
+  },
+  {
+   "part": "D",
+   "expr": "SUMX({1,2},(0*-1)-(0/0))",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:SUMX over a NaN beside a product with a constant zero is not supported in the local engine (Power BI may fold it to 0)."
+  },
+  {
+   "part": "D",
+   "expr": "SUMX({1,2},1E-200+(0/0)*0.5-1-(0*-1))",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:SUMX over a NaN beside a product with a constant zero is not supported in the local engine (Power BI may fold it to 0)."
+  },
+  {
+   "part": "D",
+   "expr": "SUMX({1,2},(0/0)-CURRENCY(2)*- (0*-1)*+MIN(Facts[Sales])-1.5)",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:SUMX over a NaN beside a product with a constant zero is not supported in the local engine (Power BI may fold it to 0)."
+  },
+  {
+   "part": "D",
+   "expr": "SUMX({1,2},(1-1)/(0*-1)++(-1/0)+1E15+(0*-1))",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:SUMX over a NaN beside a product with a constant zero is not supported in the local engine (Power BI may fold it to 0)."
+  },
+  {
+   "part": "D",
+   "expr": "SUMX({1,2},+0.0/- 1E15+0.5/+(-1/0)*(0.0*-1))",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:SUMX over a NaN beside a product with a constant zero is not supported in the local engine (Power BI may fold it to 0)."
+  },
+  {
+   "part": "D",
+   "expr": "SUMX({1,2},MIN(Facts[Sales])-(1-1)+- (1-1)^0.5/- (0*-1))",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:SUMX over a NaN beside a product with a constant zero is not supported in the local engine (Power BI may fold it to 0)."
+  },
+  {
+   "part": "D",
+   "expr": "SUMX({1,2},ABS(MIN(Facts[Quantity])*0/0))",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:SUMX over a NaN beside a product with a constant zero is not supported in the local engine (Power BI may fold it to 0)."
+  },
+  {
+   "part": "D",
+   "expr": "SUMX({1,2},EVEN(MIN(Facts[Quantity])*0/0))",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:SUMX over a NaN beside a product with a constant zero is not supported in the local engine (Power BI may fold it to 0)."
+  },
+  {
+   "part": "C",
+   "expr": "MINX(Facts,IF.EAGER(Facts[Quantity]>2,Facts[Region],Facts[Sales]/Facts[Quantity]))",
+   "powerbi": "-1.5",
+   "now": "LOCAL-REJECT:MINX over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine does not model."
+  },
+  {
+   "part": "C",
+   "expr": "MINX(Facts,IF.EAGER(FALSE(),\"5\",Facts[Quantity]/0))",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:MINX over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine does not model."
+  },
+  {
+   "part": "C",
+   "expr": "MINX(Facts,IF(TRUE(),-Facts[Quantity]/0,Facts[Region]))",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:MINX over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine does not model."
+  },
+  {
+   "part": "C",
+   "expr": "MINX(Facts,IF.EAGER(FALSE(),TRUE(),Facts[Sales]/Facts[Quantity]))",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:MINX over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine does not model."
+  },
+  {
+   "part": "C",
+   "expr": "MINX(Facts,IF.EAGER(TRUE(),-Facts[Quantity]/0,\"5\"))",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:MINX over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine does not model."
+  },
+  {
+   "part": "C",
+   "expr": "MINX(Facts,IF.EAGER(FALSE(),\"5\",Facts[Sales]/Facts[Quantity]))",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:MINX over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine does not model."
+  },
+  {
+   "part": "C",
+   "expr": "MINX(Facts,IF(TRUE(),Facts[Quantity]/Facts[Sales],TRUE()))",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:MINX over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine does not model."
+  },
+  {
+   "part": "C",
+   "expr": "MINX(Facts,IF.EAGER(TRUE(),Facts[Sales]/Facts[Quantity],\"a\"))",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:MINX over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine does not model."
+  },
+  {
+   "part": "C",
+   "expr": "MINX(Facts,IF.EAGER(FALSE(),TRUE(),-Facts[Quantity]/0))",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:MINX over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine does not model."
+  },
+  {
+   "part": "C",
+   "expr": "MINX(Facts,IF.EAGER(FALSE(),Facts[Region],Facts[Quantity]/Facts[Sales]))",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:MINX over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine does not model."
+  },
+  {
+   "part": "C",
+   "expr": "MINX(Facts,IF.EAGER(FALSE(),\"5\",Facts[Quantity]/Facts[Sales]))",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:MINX over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine does not model."
+  },
+  {
+   "part": "C",
+   "expr": "MINX(Facts,IF(FALSE(),TRUE(),-Facts[Quantity]/0))",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:MINX over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine does not model."
+  },
+  {
+   "part": "C",
+   "expr": "MINX(Facts,IF(TRUE(),Facts[Sales]/Facts[Quantity],\"5\"))",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:MINX over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine does not model."
+  },
+  {
+   "part": "C",
+   "expr": "MINX(Facts,IF.EAGER(Facts[Quantity]>2,\"5\",Facts[Quantity]/0))",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:MINX over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine does not model."
+  },
+  {
+   "part": "C",
+   "expr": "MINX(Facts,IF.EAGER(Facts[Quantity]>2,\"a\",-Facts[Quantity]/0))",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:MINX over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine does not model."
+  },
+  {
+   "part": "C",
+   "expr": "MINX(Facts,IF.EAGER(FALSE(),Facts[Region],Facts[Sales]/Facts[Quantity]))",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:MINX over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine does not model."
+  },
+  {
+   "part": "C",
+   "expr": "MINX(Facts,IF(TRUE(),Facts[Quantity]/Facts[Sales],\"a\"))",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:MINX over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine does not model."
+  },
+  {
+   "part": "C",
+   "expr": "MINX(ADDCOLUMNS(Facts,\"z\",1),IF(\"\",Facts[Quantity]/0,Facts[Quantity]/0))",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:MINX over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine does not model."
+  },
+  {
+   "part": "C",
+   "expr": "MINX(EXCEPT(Facts,FILTER(Facts,FALSE())),IF(1,Facts[Quantity]/0,\"a\"))",
+   "powerbi": "Infinity",
+   "now": "LOCAL-REJECT:MINX over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine does not model."
+  },
+  {
+   "part": "C",
+   "expr": "MINX(UNION(Facts,Facts),Facts[Sales]/0)",
+   "powerbi": "-Infinity",
+   "now": "LOCAL-REJECT:MINX over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine does not model."
+  },
+  {
+   "part": "C",
+   "expr": "MINX(TOPN(100,Facts,Facts[Quantity]),IFERROR(-1/0,Facts[Quantity]/0))",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:MINX over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine does not model."
+  },
+  {
+   "part": "C",
+   "expr": "MINX(FILTER(Facts,TRUE()),IF(1,Facts[Quantity]/0,\"a\"))",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:MINX over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine does not model."
+  },
+  {
+   "part": "C",
+   "expr": "MINX(ADDCOLUMNS(Facts,\"z\",1),Facts[Sales]/0)",
+   "powerbi": "-Infinity",
+   "now": "LOCAL-REJECT:MINX over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine does not model."
+  },
+  {
+   "part": "C",
+   "expr": "MINX(TOPN(100,Facts,Facts[Quantity]),Facts[Quantity]/0)",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:MINX over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine does not model."
+  },
+  {
+   "part": "C",
+   "expr": "MINX(EXCEPT(Facts,FILTER(Facts,FALSE())),IF(Facts[Quantity]>2,0/0,2))",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:MINX over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine does not model."
+  },
+  {
+   "part": "C",
+   "expr": "MINX(UNION(Facts,Facts),IFERROR(-1/0,Facts[Quantity]/0))",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:MINX over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine does not model."
+  },
+  {
+   "part": "C",
+   "expr": "MINX(INTERSECT(Facts,Facts),IF(\"\",Facts[Quantity]/0,Facts[Quantity]/0))",
+   "powerbi": "Infinity",
+   "now": "LOCAL-REJECT:MINX over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine does not model."
+  },
+  {
+   "part": "C",
+   "expr": "MINX(INTERSECT(Facts,Facts),IF(1,Facts[Quantity]/0,\"a\"))",
+   "powerbi": "Infinity",
+   "now": "LOCAL-REJECT:MINX over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine does not model."
+  },
+  {
+   "part": "C",
+   "expr": "MINX(TOPN(100,Facts,Facts[Quantity]),Facts[Sales]/0)",
+   "powerbi": "-Infinity",
+   "now": "LOCAL-REJECT:MINX over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine does not model."
+  },
+  {
+   "part": "C",
+   "expr": "MINX(ADDCOLUMNS(Facts,\"z\",1),Facts[Quantity]/0)",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:MINX over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine does not model."
+  },
+  {
+   "part": "C",
+   "expr": "MINX(EXCEPT(Facts,FILTER(Facts,FALSE())),Facts[Sales]/0)",
+   "powerbi": "-Infinity",
+   "now": "LOCAL-REJECT:MINX over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine does not model."
+  },
+  {
+   "part": "C",
+   "expr": "MINX(VALUES(Facts),IF(1,Facts[Quantity]/0,\"a\"))",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:MINX over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine does not model."
+  },
+  {
+   "part": "C",
+   "expr": "MINX(INTERSECT(Facts,Facts),IFERROR(-1/0,Facts[Quantity]/0))",
+   "powerbi": "Infinity",
+   "now": "LOCAL-REJECT:MINX over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine does not model."
+  },
+  {
+   "part": "C",
+   "expr": "MINX(UNION(Facts,Facts),IF(\"\",Facts[Quantity]/0,Facts[Quantity]/0))",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:MINX over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine does not model."
+  },
+  {
+   "part": "C",
+   "expr": "MINX(INTERSECT(Facts,Facts),Facts[Quantity]/0)",
+   "powerbi": "Infinity",
+   "now": "LOCAL-REJECT:MINX over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine does not model."
+  },
+  {
+   "part": "C",
+   "expr": "MINX(TOPN(100,Facts,Facts[Quantity]),IF(\"\",Facts[Quantity]/0,Facts[Quantity]/0))",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:MINX over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine does not model."
+  },
+  {
+   "part": "C",
+   "expr": "MINX(TOPN(100,Facts,Facts[Quantity]),IF(1,Facts[Quantity]/0,\"a\"))",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:MINX over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine does not model."
+  },
+  {
+   "part": "C",
+   "expr": "MINX(ALL(Facts),IF(1,Facts[Quantity]/0,\"a\"))",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:MINX over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine does not model."
+  },
+  {
+   "part": "C",
+   "expr": "MINX(Facts,IF(1,Facts[Quantity]/0,\"a\"))",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:MINX over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine does not model."
+  },
+  {
+   "part": "C",
+   "expr": "MINX(EXCEPT(Facts,FILTER(Facts,FALSE())),IF(\"\",Facts[Quantity]/0,Facts[Quantity]/0))",
+   "powerbi": "Infinity",
+   "now": "LOCAL-REJECT:MINX over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine does not model."
+  },
+  {
+   "part": "C",
+   "expr": "MINX(CALCULATETABLE(Facts),IF(1,Facts[Quantity]/0,\"a\"))",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:MINX over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine does not model."
+  },
+  {
+   "part": "C",
+   "expr": "MINX(EXCEPT(Facts,FILTER(Facts,FALSE())),IFERROR(-1/0,Facts[Quantity]/0))",
+   "powerbi": "Infinity",
+   "now": "LOCAL-REJECT:MINX over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine does not model."
+  },
+  {
+   "part": "C",
+   "expr": "MINX(ALLEXCEPT(Facts,Facts[Region]),IF(1,Facts[Quantity]/0,\"a\"))",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:MINX over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine does not model."
+  },
+  {
+   "part": "C",
+   "expr": "MINX(SUMMARIZE(Facts,Facts[Region],Facts[Quantity]),IF(1,Facts[Quantity]/0,\"a\"))",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:MINX over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine does not model."
+  },
+  {
+   "part": "C",
+   "expr": "MINX(UNION(Facts,Facts),IF(1,Facts[Quantity]/0,\"a\"))",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:MINX over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine does not model."
+  },
+  {
+   "part": "C",
+   "expr": "MINX(ALLSELECTED(Facts),IF(1,Facts[Quantity]/0,\"a\"))",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:MINX over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine does not model."
+  },
+  {
+   "part": "C",
+   "expr": "MINX(TOPN(100,Facts,Facts[Quantity]),IF(Facts[Quantity]>2,0/0,2))",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:MINX over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine does not model."
+  },
+  {
+   "part": "C",
+   "expr": "MINX(INTERSECT(Facts,Facts),IF(Facts[Quantity]>2,0/0,2))",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:MINX over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine does not model."
+  },
+  {
+   "part": "C",
+   "expr": "MINX(ADDCOLUMNS(Facts,\"z\",1),IFERROR(-1/0,Facts[Quantity]/0))",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:MINX over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine does not model."
+  },
+  {
+   "part": "C",
+   "expr": "MINX(ADDCOLUMNS(Facts,\"z\",1),VAR x=1+1 RETURN IF(BLANK(),x,Facts[Sales]/0))",
+   "powerbi": "-Infinity",
+   "now": "LOCAL-REJECT:MINX over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine does not model."
+  },
+  {
+   "part": "C",
+   "expr": "MINX(UNION(Facts,Facts),IF(Facts[Quantity]>2,0/0,2))",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:MINX over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine does not model."
+  },
+  {
+   "part": "C",
+   "expr": "MINX(DISTINCT(Facts),IF(1,Facts[Quantity]/0,\"a\"))",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:MINX over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine does not model."
+  },
+  {
+   "part": "C",
+   "expr": "MINX(ADDCOLUMNS(Facts,\"z\",1),IF(Facts[Quantity]>2,0/0,2))",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:MINX over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine does not model."
+  },
+  {
+   "part": "C",
+   "expr": "MINX(INTERSECT(Facts,Facts),Facts[Sales]/0)",
+   "powerbi": "-Infinity",
+   "now": "LOCAL-REJECT:MINX over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine does not model."
+  },
+  {
+   "part": "C",
+   "expr": "MINX(ALLNOBLANKROW(Facts),IF(1,Facts[Quantity]/0,\"a\"))",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:MINX over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine does not model."
+  },
+  {
+   "part": "C",
+   "expr": "MINX(EXCEPT(Facts,FILTER(Facts,FALSE())),Facts[Quantity]/0)",
+   "powerbi": "Infinity",
+   "now": "LOCAL-REJECT:MINX over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine does not model."
+  },
+  {
+   "part": "C",
+   "expr": "MINX(ADDCOLUMNS(Facts,\"z\",1),IF(1,Facts[Quantity]/0,\"a\"))",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:MINX over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine does not model."
+  },
+  {
+   "part": "C",
+   "expr": "MINX(UNION(Facts,Facts),Facts[Quantity]/0)",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:MINX over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine does not model."
+  },
+  {
+   "part": "C",
+   "expr": "MINX(ALL(Facts[Region],Facts[Quantity]),IF(1,Facts[Quantity]/0,\"a\"))",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:MINX over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine does not model."
+  },
+  {
+   "part": "D",
+   "expr": "COUNTAX(Facts,(1/0*0)/(DATE(2020,1,1)))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:COUNTAX over a NaN beside a product with a constant zero is not supported in the local engine (Power BI may fold it to 0)."
+  },
+  {
+   "part": "D",
+   "expr": "COUNTAX(Facts,(1/0*0)*(2.5))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:COUNTAX over a NaN beside a product with a constant zero is not supported in the local engine (Power BI may fold it to 0)."
+  },
+  {
+   "part": "D",
+   "expr": "COUNTAX(Facts,1/0*0)",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:COUNTAX over a NaN beside a product with a constant zero is not supported in the local engine (Power BI may fold it to 0)."
+  },
+  {
+   "part": "D",
+   "expr": "IFERROR(COUNTAX(Facts,1/0*0),\"e\")",
+   "powerbi": "6",
+   "now": "LOCAL-REJECT:COUNTAX over a NaN beside a product with a constant zero is not supported in the local engine (Power BI may fold it to 0)."
+  },
+  {
+   "part": "D",
+   "expr": "CALCULATE(COUNTAX(Facts,1/0*0),Facts[Region]<>\"x\")",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:COUNTAX over a NaN beside a product with a constant zero is not supported in the local engine (Power BI may fold it to 0)."
+  },
+  {
+   "part": "D",
+   "expr": "ISBLANK(COUNTAX(Facts,1/0*0))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:COUNTAX over a NaN beside a product with a constant zero is not supported in the local engine (Power BI may fold it to 0)."
+  },
+  {
+   "part": "D",
+   "expr": "(COUNTAX(Facts,1/0*0))+0",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:COUNTAX over a NaN beside a product with a constant zero is not supported in the local engine (Power BI may fold it to 0)."
+  },
+  {
+   "part": "D",
+   "expr": "COUNTAX(ALL(Facts),1/0*0)",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:COUNTAX over a NaN beside a product with a constant zero is not supported in the local engine (Power BI may fold it to 0)."
+  },
+  {
+   "part": "D",
+   "expr": "IFERROR(COUNTAX(ALL(Facts),1/0*0),\"e\")",
+   "powerbi": "6",
+   "now": "LOCAL-REJECT:COUNTAX over a NaN beside a product with a constant zero is not supported in the local engine (Power BI may fold it to 0)."
+  },
+  {
+   "part": "D",
+   "expr": "CALCULATE(COUNTAX(ALL(Facts),1/0*0),Facts[Region]<>\"x\")",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:COUNTAX over a NaN beside a product with a constant zero is not supported in the local engine (Power BI may fold it to 0)."
+  },
+  {
+   "part": "D",
+   "expr": "ISBLANK(COUNTAX(ALL(Facts),1/0*0))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:COUNTAX over a NaN beside a product with a constant zero is not supported in the local engine (Power BI may fold it to 0)."
+  },
+  {
+   "part": "D",
+   "expr": "(COUNTAX(ALL(Facts),1/0*0))+0",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:COUNTAX over a NaN beside a product with a constant zero is not supported in the local engine (Power BI may fold it to 0)."
+  },
+  {
+   "part": "D",
+   "expr": "COUNTAX(FILTER(Facts,Facts[Quantity]>2),1/0*0)",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:COUNTAX over a NaN beside a product with a constant zero is not supported in the local engine (Power BI may fold it to 0)."
+  },
+  {
+   "part": "D",
+   "expr": "IFERROR(COUNTAX(FILTER(Facts,Facts[Quantity]>2),1/0*0),\"e\")",
+   "powerbi": "3",
+   "now": "LOCAL-REJECT:COUNTAX over a NaN beside a product with a constant zero is not supported in the local engine (Power BI may fold it to 0)."
+  },
+  {
+   "part": "D",
+   "expr": "CALCULATE(COUNTAX(FILTER(Facts,Facts[Quantity]>2),1/0*0),Facts[Region]<>\"x\")",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:COUNTAX over a NaN beside a product with a constant zero is not supported in the local engine (Power BI may fold it to 0)."
+  },
+  {
+   "part": "D",
+   "expr": "ISBLANK(COUNTAX(FILTER(Facts,Facts[Quantity]>2),1/0*0))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:COUNTAX over a NaN beside a product with a constant zero is not supported in the local engine (Power BI may fold it to 0)."
+  },
+  {
+   "part": "D",
+   "expr": "(COUNTAX(FILTER(Facts,Facts[Quantity]>2),1/0*0))+0",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:COUNTAX over a NaN beside a product with a constant zero is not supported in the local engine (Power BI may fold it to 0)."
+  },
+  {
+   "part": "D",
+   "expr": "COUNTAX(Facts,(Facts[Sales]*0)/0)",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:COUNTAX over a NaN beside a product with a constant zero is not supported in the local engine (Power BI may fold it to 0)."
+  },
+  {
+   "part": "D",
+   "expr": "COUNTAX(Facts,1/((Facts[Quantity]*0)/-(0.0)))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:COUNTAX over a NaN beside a product with a constant zero is not supported in the local engine (Power BI may fold it to 0)."
+  },
+  {
+   "part": "D",
+   "expr": "COUNTAX(Facts,(Facts[Quantity]*0)/0)",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:COUNTAX over a NaN beside a product with a constant zero is not supported in the local engine (Power BI may fold it to 0)."
+  },
+  {
+   "part": "D",
+   "expr": "COUNTAX(Facts,(Facts[Sales]*0)/-(0.0))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:COUNTAX over a NaN beside a product with a constant zero is not supported in the local engine (Power BI may fold it to 0)."
+  },
+  {
+   "part": "D",
+   "expr": "COUNTAX(Facts,1/((Facts[Quantity]*0)/0))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:COUNTAX over a NaN beside a product with a constant zero is not supported in the local engine (Power BI may fold it to 0)."
+  },
+  {
+   "part": "D",
+   "expr": "COUNTAX(Facts,(Facts[Quantity]*0)/-(0.0))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:COUNTAX over a NaN beside a product with a constant zero is not supported in the local engine (Power BI may fold it to 0)."
+  },
+  {
+   "part": "D",
+   "expr": "COUNTAX(Facts,1/((Facts[Sales]*0)/-(0.0)))",
+   "powerbi": "1",
+   "now": "LOCAL-REJECT:COUNTAX over a NaN beside a product with a constant zero is not supported in the local engine (Power BI may fold it to 0)."
+  },
+  {
+   "part": "D",
+   "expr": "COUNTAX(Facts,1/((Facts[Sales]*0)/0))",
+   "powerbi": "1",
+   "now": "LOCAL-REJECT:COUNTAX over a NaN beside a product with a constant zero is not supported in the local engine (Power BI may fold it to 0)."
+  },
+  {
+   "part": "B",
+   "expr": "VARX.P(CALCULATETABLE(Facts,Facts[Region]=\"East\"),1/0)",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:VARX.P over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "B",
+   "expr": "VARX.P(ROW(\"Value\",1),COALESCE(CONVERT(0/0,DATETIME),CONVERT(0/0,DATETIME)))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:VARX.P over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "B",
+   "expr": "VARX.P(Facts,VAR v=CONVERT(0/0,DATETIME) RETURN v)",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:VARX.P over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "B",
+   "expr": "VARX.P(VALUES(Facts[Region]),IFERROR(CONVERT(1/0,DOUBLE),CONVERT(1/0,DOUBLE)))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:VARX.P over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "B",
+   "expr": "VARX.P(ROW(\"Value\",1),IF(TRUE(),CONVERT(-1/0,DOUBLE)))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:VARX.P over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "B",
+   "expr": "VARX.P(VALUES(Facts[Region]),IF(TRUE(),CONVERT(-1/0,DATETIME)))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:VARX.P over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "B",
+   "expr": "VARX.P(Facts,COALESCE(CONVERT(0/0,DATETIME),CONVERT(0/0,DATETIME)))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:VARX.P over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "B",
+   "expr": "VARX.P({1,2},COALESCE(CONVERT(-1/0,DATETIME),CONVERT(-1/0,DATETIME)))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:VARX.P over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "B",
+   "expr": "VARX.P({1,2},COALESCE(CONVERT(1/0,DATETIME),CONVERT(1/0,DATETIME)))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:VARX.P over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "B",
+   "expr": "VARX.P(VALUES(Facts[Region]),CONVERT(-1/0,DATETIME))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:VARX.P over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "B",
+   "expr": "VARX.P({\"a\"},VAR v=CONVERT(1/0,DOUBLE) RETURN v)",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:VARX.P over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "B",
+   "expr": "VARX.P({1,2},CONVERT(-1/0,DATETIME))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:VARX.P over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "B",
+   "expr": "VARX.P({1,2},VAR v=CONVERT(1/0,DOUBLE) RETURN v)",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:VARX.P over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "B",
+   "expr": "VARX.P({\"a\"},VAR v=CONVERT(0/0,DOUBLE) RETURN v)",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:VARX.P over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "B",
+   "expr": "VARX.P(Facts,COALESCE(CONVERT(-1/0,DOUBLE),CONVERT(-1/0,DOUBLE)))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:VARX.P over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "B",
+   "expr": "VARX.P(ROW(\"Value\",1),VAR v=CONVERT(0/0,DOUBLE) RETURN v)",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:VARX.P over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "B",
+   "expr": "VARX.P(ROW(\"Value\",1),CONVERT(-1/0,DATETIME))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:VARX.P over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "B",
+   "expr": "VARX.P(VALUES(Facts[Region]),VAR v=CONVERT(-1/0,DATETIME) RETURN v)",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:VARX.P over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "B",
+   "expr": "VARX.P(Facts,CONVERT(Facts[Sales]/0,DATETIME))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:VARX.P over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "B",
+   "expr": "VARX.P(Facts,CONVERT(Facts[Quantity]/0,DATETIME))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:VARX.P over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "B",
+   "expr": "VARX.P(Facts,CONVERT(Facts[Quantity]/0,DOUBLE))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:VARX.P over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "B",
+   "expr": "VARX.P(Facts,CONVERT(Facts[Sales]/0,DOUBLE))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:VARX.P over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "D",
+   "expr": "COUNTX(Facts,(1/0*0)+(CURRENCY(2))/(VAR y=1/0 RETURN y))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:COUNTX over a NaN beside a product with a constant zero is not supported in the local engine (Power BI may fold it to 0)."
+  },
+  {
+   "part": "D",
+   "expr": "COUNTX(Facts,(1/0*0)*(2.5))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:COUNTX over a NaN beside a product with a constant zero is not supported in the local engine (Power BI may fold it to 0)."
+  },
+  {
+   "part": "D",
+   "expr": "COUNTX(Facts,(FORMAT(1,\"0\"))*(1/0*0)*(-1))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:COUNTX over a NaN beside a product with a constant zero is not supported in the local engine (Power BI may fold it to 0)."
+  },
+  {
+   "part": "D",
+   "expr": "COUNTX(Facts,(1/0*0)/(-1))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:COUNTX over a NaN beside a product with a constant zero is not supported in the local engine (Power BI may fold it to 0)."
+  },
+  {
+   "part": "D",
+   "expr": "COUNTX(Facts,(1/0*0)*(1))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:COUNTX over a NaN beside a product with a constant zero is not supported in the local engine (Power BI may fold it to 0)."
+  },
+  {
+   "part": "D",
+   "expr": "COUNTX(Facts,(-1)*(1/0*0))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:COUNTX over a NaN beside a product with a constant zero is not supported in the local engine (Power BI may fold it to 0)."
+  },
+  {
+   "part": "D",
+   "expr": "COUNTX(Facts,1/0*0)",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:COUNTX over a NaN beside a product with a constant zero is not supported in the local engine (Power BI may fold it to 0)."
+  },
+  {
+   "part": "D",
+   "expr": "IFERROR(COUNTX(Facts,1/0*0),\"e\")",
+   "powerbi": "6",
+   "now": "LOCAL-REJECT:COUNTX over a NaN beside a product with a constant zero is not supported in the local engine (Power BI may fold it to 0)."
+  },
+  {
+   "part": "D",
+   "expr": "CALCULATE(COUNTX(Facts,1/0*0),Facts[Region]<>\"x\")",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:COUNTX over a NaN beside a product with a constant zero is not supported in the local engine (Power BI may fold it to 0)."
+  },
+  {
+   "part": "D",
+   "expr": "ISBLANK(COUNTX(Facts,1/0*0))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:COUNTX over a NaN beside a product with a constant zero is not supported in the local engine (Power BI may fold it to 0)."
+  },
+  {
+   "part": "D",
+   "expr": "(COUNTX(Facts,1/0*0))+0",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:COUNTX over a NaN beside a product with a constant zero is not supported in the local engine (Power BI may fold it to 0)."
+  },
+  {
+   "part": "D",
+   "expr": "COUNTX(ALL(Facts),1/0*0)",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:COUNTX over a NaN beside a product with a constant zero is not supported in the local engine (Power BI may fold it to 0)."
+  },
+  {
+   "part": "D",
+   "expr": "IFERROR(COUNTX(ALL(Facts),1/0*0),\"e\")",
+   "powerbi": "6",
+   "now": "LOCAL-REJECT:COUNTX over a NaN beside a product with a constant zero is not supported in the local engine (Power BI may fold it to 0)."
+  },
+  {
+   "part": "D",
+   "expr": "CALCULATE(COUNTX(ALL(Facts),1/0*0),Facts[Region]<>\"x\")",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:COUNTX over a NaN beside a product with a constant zero is not supported in the local engine (Power BI may fold it to 0)."
+  },
+  {
+   "part": "D",
+   "expr": "ISBLANK(COUNTX(ALL(Facts),1/0*0))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:COUNTX over a NaN beside a product with a constant zero is not supported in the local engine (Power BI may fold it to 0)."
+  },
+  {
+   "part": "D",
+   "expr": "(COUNTX(ALL(Facts),1/0*0))+0",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:COUNTX over a NaN beside a product with a constant zero is not supported in the local engine (Power BI may fold it to 0)."
+  },
+  {
+   "part": "D",
+   "expr": "COUNTX(FILTER(Facts,Facts[Quantity]>2),1/0*0)",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:COUNTX over a NaN beside a product with a constant zero is not supported in the local engine (Power BI may fold it to 0)."
+  },
+  {
+   "part": "D",
+   "expr": "IFERROR(COUNTX(FILTER(Facts,Facts[Quantity]>2),1/0*0),\"e\")",
+   "powerbi": "3",
+   "now": "LOCAL-REJECT:COUNTX over a NaN beside a product with a constant zero is not supported in the local engine (Power BI may fold it to 0)."
+  },
+  {
+   "part": "D",
+   "expr": "CALCULATE(COUNTX(FILTER(Facts,Facts[Quantity]>2),1/0*0),Facts[Region]<>\"x\")",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:COUNTX over a NaN beside a product with a constant zero is not supported in the local engine (Power BI may fold it to 0)."
+  },
+  {
+   "part": "D",
+   "expr": "ISBLANK(COUNTX(FILTER(Facts,Facts[Quantity]>2),1/0*0))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:COUNTX over a NaN beside a product with a constant zero is not supported in the local engine (Power BI may fold it to 0)."
+  },
+  {
+   "part": "D",
+   "expr": "(COUNTX(FILTER(Facts,Facts[Quantity]>2),1/0*0))+0",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:COUNTX over a NaN beside a product with a constant zero is not supported in the local engine (Power BI may fold it to 0)."
+  },
+  {
+   "part": "B",
+   "expr": "STDEVX.S(CALCULATETABLE(Facts,Facts[Region]=\"East\"),1/0)",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:STDEVX.S over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "B",
+   "expr": "STDEVX.S(Facts,COALESCE(CONVERT(-1/0,DOUBLE),CONVERT(-1/0,DOUBLE)))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:STDEVX.S over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "B",
+   "expr": "STDEVX.S(ROW(\"Value\",1),IF(TRUE(),CONVERT(0/0,DATETIME)))",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:STDEVX.S over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "B",
+   "expr": "STDEVX.S({1,2},IFERROR(CONVERT(1/0,DATETIME),CONVERT(1/0,DATETIME)))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:STDEVX.S over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "B",
+   "expr": "STDEVX.S({1,2},IFERROR(CONVERT(-1/0,DOUBLE),CONVERT(-1/0,DOUBLE)))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:STDEVX.S over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "B",
+   "expr": "STDEVX.S(ROW(\"Value\",1),IFERROR(CONVERT(0/0,DATETIME),CONVERT(0/0,DATETIME)))",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:STDEVX.S over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "B",
+   "expr": "STDEVX.S(ROW(\"Value\",1),COALESCE(CONVERT(0/0,DOUBLE),CONVERT(0/0,DOUBLE)))",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:STDEVX.S over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "B",
+   "expr": "STDEVX.S({\"a\"},IF(TRUE(),CONVERT(1/0,DATETIME)))",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:STDEVX.S over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "B",
+   "expr": "STDEVX.S({\"a\"},CONVERT(1/0,DATETIME))",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:STDEVX.S over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "B",
+   "expr": "STDEVX.S(VALUES(Facts[Region]),IFERROR(CONVERT(-1/0,DOUBLE),CONVERT(-1/0,DOUBLE)))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:STDEVX.S over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "B",
+   "expr": "STDEVX.S(Facts,IFERROR(CONVERT(1/0,DATETIME),CONVERT(1/0,DATETIME)))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:STDEVX.S over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "B",
+   "expr": "STDEVX.S(Facts,IF(TRUE(),CONVERT(1/0,DOUBLE)))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:STDEVX.S over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "B",
+   "expr": "STDEVX.S(ROW(\"Value\",1),COALESCE(CONVERT(-1/0,DOUBLE),CONVERT(-1/0,DOUBLE)))",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:STDEVX.S over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "B",
+   "expr": "STDEVX.S({\"a\"},CONVERT(-1/0,DATETIME))",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:STDEVX.S over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "B",
+   "expr": "STDEVX.S({1,2},COALESCE(CONVERT(1/0,DOUBLE),CONVERT(1/0,DOUBLE)))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:STDEVX.S over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "B",
+   "expr": "STDEVX.S(Facts,CONVERT(1/0,DATETIME))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:STDEVX.S over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "B",
+   "expr": "STDEVX.S(Facts,CONVERT(Facts[Sales]/0,DOUBLE))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:STDEVX.S over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "B",
+   "expr": "STDEVX.S(Facts,CONVERT(Facts[Sales]/0,DATETIME))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:STDEVX.S over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "B",
+   "expr": "STDEVX.S(Facts,CONVERT(Facts[Quantity]/0,DATETIME))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:STDEVX.S over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "B",
+   "expr": "STDEVX.S(Facts,CONVERT(Facts[Quantity]/0,DOUBLE))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:STDEVX.S over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "B",
+   "expr": "VARX.S(CALCULATETABLE(Facts,Facts[Region]=\"East\"),1/0)",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:VARX.S over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "B",
+   "expr": "VARX.S({1},COALESCE(CONVERT(-1/0,DOUBLE),CONVERT(-1/0,DOUBLE)))",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:VARX.S over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "B",
+   "expr": "VARX.S({\"a\"},IFERROR(CONVERT(1/0,DATETIME),CONVERT(1/0,DATETIME)))",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:VARX.S over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "B",
+   "expr": "VARX.S(ROW(\"Value\",1),CONVERT(-1/0,DATETIME))",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:VARX.S over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "B",
+   "expr": "VARX.S({1,2},VAR v=CONVERT(0/0,DATETIME) RETURN v)",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:VARX.S over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "B",
+   "expr": "VARX.S({\"a\"},IFERROR(CONVERT(-1/0,DATETIME),CONVERT(-1/0,DATETIME)))",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:VARX.S over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "B",
+   "expr": "VARX.S({1},IF(TRUE(),CONVERT(0/0,DATETIME)))",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:VARX.S over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "B",
+   "expr": "VARX.S({\"a\"},IFERROR(CONVERT(1/0,DOUBLE),CONVERT(1/0,DOUBLE)))",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:VARX.S over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "B",
+   "expr": "VARX.S({1,2},CONVERT(-1/0,DATETIME))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:VARX.S over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "B",
+   "expr": "VARX.S({1,2},IFERROR(CONVERT(1/0,DOUBLE),CONVERT(1/0,DOUBLE)))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:VARX.S over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "B",
+   "expr": "VARX.S({1},COALESCE(CONVERT(0/0,DOUBLE),CONVERT(0/0,DOUBLE)))",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:VARX.S over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "B",
+   "expr": "VARX.S(ROW(\"Value\",1),IF(TRUE(),CONVERT(1/0,DOUBLE)))",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:VARX.S over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "B",
+   "expr": "VARX.S(Facts,CONVERT(Facts[Quantity]/0,DATETIME))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:VARX.S over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "B",
+   "expr": "VARX.S(Facts,CONVERT(Facts[Sales]/0,DOUBLE))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:VARX.S over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "B",
+   "expr": "VARX.S(Facts,CONVERT(Facts[Sales]/0,DATETIME))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:VARX.S over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "B",
+   "expr": "VARX.S(Facts,CONVERT(Facts[Quantity]/0,DOUBLE))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:VARX.S over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "GEOMEANX(CALCULATETABLE(Facts,Facts[Region]=\"East\"),1/0)",
+   "powerbi": "Infinity",
+   "now": "LOCAL-REJECT:GEOMEANX over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "ISBLANK(GEOMEANX({\"a\"},CONVERT(1/0,DOUBLE)))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:GEOMEANX over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "GEOMEANX(VALUES(Facts[Region]),IF(TRUE(),CONVERT(1/0,DOUBLE)))",
+   "powerbi": "Infinity",
+   "now": "LOCAL-REJECT:GEOMEANX over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "GEOMEANX({\"a\"},IF(TRUE(),CONVERT(1/0,DOUBLE)))",
+   "powerbi": "Infinity",
+   "now": "LOCAL-REJECT:GEOMEANX over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "GEOMEANX({\"a\"},CONVERT(1/0,DOUBLE))",
+   "powerbi": "Infinity",
+   "now": "LOCAL-REJECT:GEOMEANX over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "ISBLANK(GEOMEANX(VALUES(Facts[Region]),CONVERT(1/0,DOUBLE)))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:GEOMEANX over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "GEOMEANX(VALUES(Facts[Region]),CONVERT(1/0,DOUBLE))",
+   "powerbi": "Infinity",
+   "now": "LOCAL-REJECT:GEOMEANX over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "GEOMEANX(VALUES(Facts[Region]),IF(TRUE(),CONVERT(-1/0,DOUBLE)))",
+   "powerbi": "-Infinity",
+   "now": "LOCAL-REJECT:GEOMEANX over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "GEOMEANX({1},VAR v=CONVERT(1/0,DOUBLE) RETURN v)",
+   "powerbi": "Infinity",
+   "now": "LOCAL-REJECT:GEOMEANX over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "GEOMEANX({\"a\"},COALESCE(CONVERT(1/0,DOUBLE),CONVERT(1/0,DOUBLE)))",
+   "powerbi": "Infinity",
+   "now": "LOCAL-REJECT:GEOMEANX over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "GEOMEANX({\"a\"},IFERROR(CONVERT(-1/0,DOUBLE),CONVERT(-1/0,DOUBLE)))",
+   "powerbi": "-Infinity",
+   "now": "LOCAL-REJECT:GEOMEANX over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "GEOMEANX(VALUES(Facts[Region]),COALESCE(CONVERT(1/0,DOUBLE),CONVERT(1/0,DOUBLE)))",
+   "powerbi": "Infinity",
+   "now": "LOCAL-REJECT:GEOMEANX over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "GEOMEANX({1},COALESCE(CONVERT(1/0,DOUBLE),CONVERT(1/0,DOUBLE)))",
+   "powerbi": "Infinity",
+   "now": "LOCAL-REJECT:GEOMEANX over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "GEOMEANX({\"a\"},VAR v=CONVERT(1/0,DOUBLE) RETURN v)",
+   "powerbi": "Infinity",
+   "now": "LOCAL-REJECT:GEOMEANX over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "GEOMEANX(Facts,CONVERT(Facts[Quantity]/0,DOUBLE))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:GEOMEANX over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "GEOMEANX(Facts,CONVERT(Facts[Sales]/0,DOUBLE))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:GEOMEANX over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "D",
+   "expr": "AVERAGEX(Facts,(DIVIDE(1,BLANK()))*(VAR y=ERROR(\"x\") RETURN y)+(1/0*0))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:AVERAGEX over a NaN beside a product with a constant zero is not supported in the local engine (Power BI may fold it to 0)."
+  },
+  {
+   "part": "D",
+   "expr": "AVERAGEX(Facts,(\"2\")/(1/0*0))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:AVERAGEX over a NaN beside a product with a constant zero is not supported in the local engine (Power BI may fold it to 0)."
+  },
+  {
+   "part": "D",
+   "expr": "AVERAGEX(Facts,(1/0*0)*(VAR y=1/0 RETURN y))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:AVERAGEX over a NaN beside a product with a constant zero is not supported in the local engine (Power BI may fold it to 0)."
+  },
+  {
+   "part": "D",
+   "expr": "AVERAGEX(Facts,(1/0*0)/(MAXX(Facts,1/0)))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:AVERAGEX over a NaN beside a product with a constant zero is not supported in the local engine (Power BI may fold it to 0)."
+  },
+  {
+   "part": "D",
+   "expr": "AVERAGEX(Facts,(0)*(1/0))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:AVERAGEX over a NaN beside a product with a constant zero is not supported in the local engine (Power BI may fold it to 0)."
+  },
+  {
+   "part": "D",
+   "expr": "AVERAGEX(Facts,DATE(2020,1,1)*0/0)",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:AVERAGEX over a NaN beside a product with a constant zero is not supported in the local engine (Power BI may fold it to 0)."
+  },
+  {
+   "part": "A",
+   "expr": "PERCENTILEX.INC(CALCULATETABLE(Facts,Facts[Region]=\"East\"),1/0,0.5)",
+   "powerbi": "Infinity",
+   "now": "LOCAL-REJECT:PERCENTILEX.INC over Infinity or NaN values is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "PERCENTILEX.EXC(CALCULATETABLE(Facts,Facts[Region]=\"East\"),1/0,0.5)",
+   "powerbi": "Infinity",
+   "now": "LOCAL-REJECT:PERCENTILEX.EXC over Infinity or NaN values is not modelled by the local engine."
+  }
+ ]
+}

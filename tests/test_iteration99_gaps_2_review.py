@@ -112,9 +112,12 @@ class Gaps2ReviewTest(unittest.TestCase):
         east = 'CALCULATETABLE(Facts,Facts[Region]="East")'
         _refused(self, [
             f'GEOMEANX({east},FORMAT(Facts[Quantity],"0"))', f'STDEVX.S({east},FORMAT(Facts[Quantity],"0"))', f'VARX.P({east},IF(Facts[Quantity]>1,"1","2"))',
-            f"MEDIANX({east},1/0)", f"STDEVX.P({east},1/0)", f"STDEVX.S({east},AVERAGE(Facts[Sales]))",
+            f"STDEVX.S({east},AVERAGE(Facts[Sales]))",
             f"COUNTROWS(TOPN(1,{east},IF(Facts[Quantity]>1,1,\"a\")))",
         ])
+        # Task 39 (2026-11-03): answered now; Power BI's saved answers (dax_battery_gaps2_extra2) are Infinity and 0
+        self.assertEqual("Infinity", dax.local(f"MEDIANX({east},1/0)"))
+        self.assertEqual("0", dax.local(f"STDEVX.P({east},1/0)"))
         self.assertEqual("BLANK", dax.local(f"MEDIANX({east},DIVIDE(1,0))"))
         self.assertEqual("BLANK", dax.local(f"PERCENTILEX.INC({east},DIVIDE(1,0),0.5)"))
 

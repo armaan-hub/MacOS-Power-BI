@@ -1,0 +1,5836 @@
+{
+ "items": [
+  {
+   "part": "A",
+   "expr": "MAXX(Facts,COALESCE(BLANK(),SUMX(VALUES(Facts[Region]),DATE(2020,1,1)),1))",
+   "powerbi": "131493",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "SUMX(Facts,COALESCE(BLANK(),SUMX(VALUES(Facts[Region]),DATE(2020,1,1)),1))",
+   "powerbi": "788958",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "MAXX(Facts,COALESCE(SUMX(VALUES(Facts[Region]),DATE(2020,1,1)),\"a\"))",
+   "powerbi": "01/05/2260 00:00:00",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "SUMX(Facts,COALESCE(SUMX(VALUES(Facts[Region]),DATE(2020,1,1)),\"a\"))",
+   "powerbi": "02/02/4060 00:00:00",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "MAXX(Facts,COALESCE(BLANK(),SUMX(FILTER(Facts,FALSE()),DATE(2020,1,1)),1))",
+   "powerbi": "1",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "SUMX(Facts,COALESCE(BLANK(),SUMX(FILTER(Facts,FALSE()),DATE(2020,1,1)),1))",
+   "powerbi": "6",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "MAXX(Facts,COALESCE(SUMX(FILTER(Facts,FALSE()),DATE(2020,1,1)),\"a\"))",
+   "powerbi": "BLANK",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "SUMX(Facts,COALESCE(SUMX(FILTER(Facts,FALSE()),DATE(2020,1,1)),\"a\"))",
+   "powerbi": "BLANK",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "MAXX(Facts,COALESCE(BLANK(),MINX(VALUES(Facts[Region]),DATE(2020,1,1)),1))",
+   "powerbi": "43831",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "SUMX(Facts,COALESCE(BLANK(),MINX(VALUES(Facts[Region]),DATE(2020,1,1)),1))",
+   "powerbi": "262986",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "MAXX(Facts,COALESCE(MINX(VALUES(Facts[Region]),DATE(2020,1,1)),\"a\"))",
+   "powerbi": "01/01/2020 00:00:00",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "SUMX(Facts,COALESCE(MINX(VALUES(Facts[Region]),DATE(2020,1,1)),\"a\"))",
+   "powerbi": "01/11/2620 00:00:00",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "MAXX(Facts,COALESCE(BLANK(),DATEVALUE(\"2020-01-01\"),1))",
+   "powerbi": "43831",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "SUMX(Facts,COALESCE(BLANK(),DATEVALUE(\"2020-01-01\"),1))",
+   "powerbi": "262986",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "MAXX(Facts,COALESCE(DATEVALUE(\"2020-01-01\"),\"a\"))",
+   "powerbi": "01/01/2020 00:00:00",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "SUMX(Facts,COALESCE(DATEVALUE(\"2020-01-01\"),\"a\"))",
+   "powerbi": "01/11/2620 00:00:00",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "MAXX(Facts,COALESCE(BLANK(),TIMEVALUE(\"06:00\"),1))",
+   "powerbi": "0.25",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "SUMX(Facts,COALESCE(BLANK(),TIMEVALUE(\"06:00\"),1))",
+   "powerbi": "1.5",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "MAXX(Facts,COALESCE(TIMEVALUE(\"06:00\"),\"a\"))",
+   "powerbi": "12/30/1899 06:00:00",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "SUMX(Facts,COALESCE(TIMEVALUE(\"06:00\"),\"a\"))",
+   "powerbi": "12/31/1899 12:00:00",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "MAXX(Facts,COALESCE(BLANK(),FIRSTNONBLANKVALUE(Facts[Region],DATE(2020,1,1)),1))",
+   "powerbi": "43831",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "SUMX(Facts,COALESCE(BLANK(),FIRSTNONBLANKVALUE(Facts[Region],DATE(2020,1,1)),1))",
+   "powerbi": "262986",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "MAXX(Facts,COALESCE(FIRSTNONBLANKVALUE(Facts[Region],DATE(2020,1,1)),\"a\"))",
+   "powerbi": "01/01/2020 00:00:00",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "SUMX(Facts,COALESCE(FIRSTNONBLANKVALUE(Facts[Region],DATE(2020,1,1)),\"a\"))",
+   "powerbi": "01/11/2620 00:00:00",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "MINX(Facts,COALESCE(\"z\",VAR y=\"a\" RETURN VALUE(y),1))",
+   "powerbi": "BLANK",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "MAXX(Facts,COALESCE(1,VAR y=\"a\" RETURN VALUE(y),\"x\"))",
+   "powerbi": "1",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "COUNTAX(Facts,COALESCE(1,VAR y=\"a\" RETURN VALUE(y),\"x\"))",
+   "powerbi": "6",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "COUNTX(Facts,COALESCE(\"a\",VAR y=\"a\" RETURN VALUE(y),1))",
+   "powerbi": "BLANK",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "MINX(Facts,COALESCE(\"z\",VAR y=VALUE(\"a\") RETURN y,1))",
+   "powerbi": "BLANK",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "MAXX(Facts,COALESCE(1,VAR y=VALUE(\"a\") RETURN y,\"x\"))",
+   "powerbi": "1",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "COUNTAX(Facts,COALESCE(1,VAR y=VALUE(\"a\") RETURN y,\"x\"))",
+   "powerbi": "6",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "COUNTX(Facts,COALESCE(\"a\",VAR y=VALUE(\"a\") RETURN y,1))",
+   "powerbi": "BLANK",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "MAXX(Facts,COALESCE(SUMX(VALUES(Facts[Region]),DATE(2020,1,1)),\"a\"))",
+   "powerbi": "01/05/2260 00:00:00",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "MAXX(Facts,COALESCE(PERCENTILEX.INC(Facts,Facts[Quantity],0.5),\"a\"))",
+   "powerbi": "2.5",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "MAXX(Facts,COALESCE(COUNTROWS(VALUES(Facts[Region])),\"a\"))",
+   "powerbi": "3",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "MAXX(Facts,COALESCE(COUNTROWS(FILTER(Facts,TRUE())),\"a\"))",
+   "powerbi": "6",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "MAXX(Facts,COALESCE(MAXX(TOPN(1,Facts,Facts[Quantity]),Facts[Quantity]),\"a\"))",
+   "powerbi": "5",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "MAXX(Facts,COALESCE(FIRSTNONBLANK(Facts[Quantity],1),\"a\"))",
+   "powerbi": "5",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "MAXX(Facts,COALESCE(LASTNONBLANK(Facts[Region],1),\"a\"))",
+   "powerbi": "West",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "MAXX(Facts,COALESCE(LASTNONBLANKVALUE(Facts[Region],MAX(Facts[Region])),\"a\"))",
+   "powerbi": "West",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "MAXX(Facts,COALESCE(FIRSTNONBLANKVALUE(Facts[Quantity],BLANK()),\"a\"))",
+   "powerbi": "BLANK",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "MAXX(Facts,COALESCE(VARX.S(FILTER(Facts,FALSE()),1),\"a\"))",
+   "powerbi": "BLANK",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "MAXX(Facts,COALESCE(BLANK(),SUMX(VALUES(Facts[Region]),DATE(2020,1,1)),1))",
+   "powerbi": "131493",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "MAXX(Facts,COALESCE(BLANK(),PERCENTILEX.INC(Facts,Facts[Quantity],0.5),1))",
+   "powerbi": "2.5",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "MAXX(Facts,COALESCE(BLANK(),COUNTROWS(VALUES(Facts[Region])),1))",
+   "powerbi": "3",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "MAXX(Facts,COALESCE(BLANK(),COUNTROWS(FILTER(Facts,TRUE())),1))",
+   "powerbi": "6",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "MAXX(Facts,COALESCE(BLANK(),MAXX(TOPN(1,Facts,Facts[Quantity]),Facts[Quantity]),1))",
+   "powerbi": "5",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "MAXX(Facts,COALESCE(BLANK(),FIRSTNONBLANK(Facts[Quantity],1),1))",
+   "powerbi": "5",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "MAXX(Facts,COALESCE(BLANK(),LASTNONBLANK(Facts[Region],1),1))",
+   "powerbi": "BLANK",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "MAXX(Facts,COALESCE(BLANK(),LASTNONBLANKVALUE(Facts[Region],MAX(Facts[Region])),1))",
+   "powerbi": "BLANK",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "MAXX(Facts,COALESCE(BLANK(),FIRSTNONBLANKVALUE(Facts[Quantity],BLANK()),1))",
+   "powerbi": "1",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "MAXX(Facts,COALESCE(BLANK(),VARX.S(FILTER(Facts,FALSE()),1),1))",
+   "powerbi": "1",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "MINX(Facts,COALESCE(SUMX(VALUES(Facts[Region]),DATE(2020,1,1)),1))",
+   "powerbi": "131493",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "MINX(Facts,COALESCE(PERCENTILEX.INC(Facts,Facts[Quantity],0.5),1))",
+   "powerbi": "2.5",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "MINX(Facts,COALESCE(COUNTROWS(VALUES(Facts[Region])),1))",
+   "powerbi": "3",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "MINX(Facts,COALESCE(COUNTROWS(FILTER(Facts,TRUE())),1))",
+   "powerbi": "6",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "MINX(Facts,COALESCE(MAXX(TOPN(1,Facts,Facts[Quantity]),Facts[Quantity]),1))",
+   "powerbi": "5",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "MINX(Facts,COALESCE(FIRSTNONBLANK(Facts[Quantity],1),1))",
+   "powerbi": "0",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "MINX(Facts,COALESCE(LASTNONBLANK(Facts[Region],1),1))",
+   "powerbi": "BLANK",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "MINX(Facts,COALESCE(LASTNONBLANKVALUE(Facts[Region],MAX(Facts[Region])),1))",
+   "powerbi": "BLANK",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "MINX(Facts,COALESCE(FIRSTNONBLANKVALUE(Facts[Quantity],BLANK()),1))",
+   "powerbi": "1",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "MINX(Facts,COALESCE(VARX.S(FILTER(Facts,FALSE()),1),1))",
+   "powerbi": "1",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "SUMX(Facts,COALESCE(SUMX(VALUES(Facts[Region]),DATE(2020,1,1)),1))",
+   "powerbi": "788958",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "SUMX(Facts,COALESCE(PERCENTILEX.INC(Facts,Facts[Quantity],0.5),1))",
+   "powerbi": "15",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "SUMX(Facts,COALESCE(COUNTROWS(VALUES(Facts[Region])),1))",
+   "powerbi": "18",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "SUMX(Facts,COALESCE(COUNTROWS(FILTER(Facts,TRUE())),1))",
+   "powerbi": "36",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "SUMX(Facts,COALESCE(MAXX(TOPN(1,Facts,Facts[Quantity]),Facts[Quantity]),1))",
+   "powerbi": "30",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "SUMX(Facts,COALESCE(FIRSTNONBLANK(Facts[Quantity],1),1))",
+   "powerbi": "15",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "SUMX(Facts,COALESCE(LASTNONBLANK(Facts[Region],1),1))",
+   "powerbi": "BLANK",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "SUMX(Facts,COALESCE(LASTNONBLANKVALUE(Facts[Region],MAX(Facts[Region])),1))",
+   "powerbi": "BLANK",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "SUMX(Facts,COALESCE(FIRSTNONBLANKVALUE(Facts[Quantity],BLANK()),1))",
+   "powerbi": "6",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "SUMX(Facts,COALESCE(VARX.S(FILTER(Facts,FALSE()),1),1))",
+   "powerbi": "6",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "COUNTX(Facts,COALESCE(SUMX(VALUES(Facts[Region]),DATE(2020,1,1)),\"a\"))",
+   "powerbi": "6",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "COUNTX(Facts,COALESCE(PERCENTILEX.INC(Facts,Facts[Quantity],0.5),\"a\"))",
+   "powerbi": "6",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "COUNTX(Facts,COALESCE(COUNTROWS(VALUES(Facts[Region])),\"a\"))",
+   "powerbi": "6",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "COUNTX(Facts,COALESCE(COUNTROWS(FILTER(Facts,TRUE())),\"a\"))",
+   "powerbi": "6",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "COUNTX(Facts,COALESCE(MAXX(TOPN(1,Facts,Facts[Quantity]),Facts[Quantity]),\"a\"))",
+   "powerbi": "6",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "COUNTX(Facts,COALESCE(FIRSTNONBLANK(Facts[Quantity],1),\"a\"))",
+   "powerbi": "6",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "COUNTX(Facts,COALESCE(LASTNONBLANK(Facts[Region],1),\"a\"))",
+   "powerbi": "6",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "COUNTX(Facts,COALESCE(LASTNONBLANKVALUE(Facts[Region],MAX(Facts[Region])),\"a\"))",
+   "powerbi": "6",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "COUNTX(Facts,COALESCE(FIRSTNONBLANKVALUE(Facts[Quantity],BLANK()),\"a\"))",
+   "powerbi": "BLANK",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "COUNTX(Facts,COALESCE(VARX.S(FILTER(Facts,FALSE()),1),\"a\"))",
+   "powerbi": "BLANK",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "COUNTAX(Facts,COALESCE(SUMX(VALUES(Facts[Region]),DATE(2020,1,1)),\"a\"))",
+   "powerbi": "6",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "COUNTAX(Facts,COALESCE(PERCENTILEX.INC(Facts,Facts[Quantity],0.5),\"a\"))",
+   "powerbi": "6",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "COUNTAX(Facts,COALESCE(COUNTROWS(VALUES(Facts[Region])),\"a\"))",
+   "powerbi": "6",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "COUNTAX(Facts,COALESCE(COUNTROWS(FILTER(Facts,TRUE())),\"a\"))",
+   "powerbi": "6",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "COUNTAX(Facts,COALESCE(MAXX(TOPN(1,Facts,Facts[Quantity]),Facts[Quantity]),\"a\"))",
+   "powerbi": "6",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "COUNTAX(Facts,COALESCE(FIRSTNONBLANK(Facts[Quantity],1),\"a\"))",
+   "powerbi": "6",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "COUNTAX(Facts,COALESCE(LASTNONBLANK(Facts[Region],1),\"a\"))",
+   "powerbi": "6",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "COUNTAX(Facts,COALESCE(LASTNONBLANKVALUE(Facts[Region],MAX(Facts[Region])),\"a\"))",
+   "powerbi": "6",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "COUNTAX(Facts,COALESCE(FIRSTNONBLANKVALUE(Facts[Quantity],BLANK()),\"a\"))",
+   "powerbi": "6",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "COUNTAX(Facts,COALESCE(VARX.S(FILTER(Facts,FALSE()),1),\"a\"))",
+   "powerbi": "6",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "MAXX(Facts,COALESCE(\"z\",PERCENTILEX.INC(Facts,Facts[Quantity],0.5),1))",
+   "powerbi": "BLANK",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "MAXX(Facts,COALESCE(\"z\",COUNTROWS(VALUES(Facts[Region])),1))",
+   "powerbi": "BLANK",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "MAXX(Facts,COALESCE(\"z\",COUNTROWS(FILTER(Facts,TRUE())),1))",
+   "powerbi": "BLANK",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "MAXX(Facts,COALESCE(\"z\",MAXX(TOPN(1,Facts,Facts[Quantity]),Facts[Quantity]),1))",
+   "powerbi": "BLANK",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "MAXX(Facts,COALESCE(\"z\",FIRSTNONBLANK(Facts[Quantity],1),1))",
+   "powerbi": "BLANK",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "MAXX(Facts,COALESCE(\"z\",LASTNONBLANK(Facts[Region],1),1))",
+   "powerbi": "BLANK",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "MAXX(Facts,COALESCE(\"z\",LASTNONBLANKVALUE(Facts[Region],MAX(Facts[Region])),1))",
+   "powerbi": "BLANK",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "MAXX(Facts,COALESCE(\"z\",FIRSTNONBLANKVALUE(Facts[Quantity],BLANK()),1))",
+   "powerbi": "BLANK",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "MAXX(Facts,COALESCE(\"z\",VARX.S(FILTER(Facts,FALSE()),1),1))",
+   "powerbi": "BLANK",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "MAXX(Facts,COALESCE(\"z\",PERCENTILEX.INC(Facts,Facts[Quantity],2),1))",
+   "powerbi": "BLANK",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "MAXX(Facts,COALESCE(1,SUMX(VALUES(Facts[Region]),DATE(2020,1,1)),\"x\"))",
+   "powerbi": "1",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "MAXX(Facts,COALESCE(1,PERCENTILEX.INC(Facts,Facts[Quantity],0.5),\"x\"))",
+   "powerbi": "1",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "MAXX(Facts,COALESCE(1,COUNTROWS(VALUES(Facts[Region])),\"x\"))",
+   "powerbi": "1",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "MAXX(Facts,COALESCE(1,COUNTROWS(FILTER(Facts,TRUE())),\"x\"))",
+   "powerbi": "1",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "MAXX(Facts,COALESCE(1,MAXX(TOPN(1,Facts,Facts[Quantity]),Facts[Quantity]),\"x\"))",
+   "powerbi": "1",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "MAXX(Facts,COALESCE(1,FIRSTNONBLANK(Facts[Quantity],1),\"x\"))",
+   "powerbi": "1",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "MAXX(Facts,COALESCE(1,LASTNONBLANK(Facts[Region],1),\"x\"))",
+   "powerbi": "1",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "MAXX(Facts,COALESCE(1,LASTNONBLANKVALUE(Facts[Region],MAX(Facts[Region])),\"x\"))",
+   "powerbi": "1",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "MAXX(Facts,COALESCE(1,FIRSTNONBLANKVALUE(Facts[Quantity],BLANK()),\"x\"))",
+   "powerbi": "1",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "MAXX(Facts,COALESCE(1,VARX.S(FILTER(Facts,FALSE()),1),\"x\"))",
+   "powerbi": "1",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "MAXX(Facts,COALESCE(1,PERCENTILEX.INC(Facts,Facts[Quantity],2),\"x\"))",
+   "powerbi": "1",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "MAXX(Facts,COALESCE(Facts[Note],PERCENTILEX.INC(Facts,Facts[Quantity],0.5),1))",
+   "powerbi": "2.5",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "MAXX(Facts,COALESCE(Facts[Note],COUNTROWS(VALUES(Facts[Region])),1))",
+   "powerbi": "3",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "MAXX(Facts,COALESCE(Facts[Note],COUNTROWS(FILTER(Facts,TRUE())),1))",
+   "powerbi": "6",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "MAXX(Facts,COALESCE(Facts[Note],MAXX(TOPN(1,Facts,Facts[Quantity]),Facts[Quantity]),1))",
+   "powerbi": "5",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "MAXX(Facts,COALESCE(Facts[Note],FIRSTNONBLANK(Facts[Quantity],1),1))",
+   "powerbi": "5",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "MAXX(Facts,COALESCE(Facts[Note],LASTNONBLANK(Facts[Region],1),1))",
+   "powerbi": "BLANK",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "MAXX(Facts,COALESCE(Facts[Note],LASTNONBLANKVALUE(Facts[Region],MAX(Facts[Region])),1))",
+   "powerbi": "BLANK",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "MAXX(Facts,COALESCE(Facts[Note],FIRSTNONBLANKVALUE(Facts[Quantity],BLANK()),1))",
+   "powerbi": "1",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "MAXX(Facts,COALESCE(Facts[Note],VARX.S(FILTER(Facts,FALSE()),1),1))",
+   "powerbi": "1",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "IFERROR(MAXX(Facts,COALESCE(SUMX(VALUES(Facts[Region]),DATE(2020,1,1)),\"a\")),7)",
+   "powerbi": "131493",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "IFERROR(MAXX(Facts,COALESCE(PERCENTILEX.INC(Facts,Facts[Quantity],0.5),\"a\")),7)",
+   "powerbi": "2.5",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "IFERROR(MAXX(Facts,COALESCE(COUNTROWS(VALUES(Facts[Region])),\"a\")),7)",
+   "powerbi": "3",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "IFERROR(MAXX(Facts,COALESCE(COUNTROWS(FILTER(Facts,TRUE())),\"a\")),7)",
+   "powerbi": "6",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "IFERROR(MAXX(Facts,COALESCE(MAXX(TOPN(1,Facts,Facts[Quantity]),Facts[Quantity]),\"a\")),7)",
+   "powerbi": "5",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "IFERROR(MAXX(Facts,COALESCE(FIRSTNONBLANK(Facts[Quantity],1),\"a\")),7)",
+   "powerbi": "5",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "IFERROR(MAXX(Facts,COALESCE(LASTNONBLANK(Facts[Region],1),\"a\")),7)",
+   "powerbi": "West",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "IFERROR(MAXX(Facts,COALESCE(LASTNONBLANKVALUE(Facts[Region],MAX(Facts[Region])),\"a\")),7)",
+   "powerbi": "West",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "IFERROR(MAXX(Facts,COALESCE(FIRSTNONBLANKVALUE(Facts[Quantity],BLANK()),\"a\")),7)",
+   "powerbi": "BLANK",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "IFERROR(MAXX(Facts,COALESCE(VARX.S(FILTER(Facts,FALSE()),1),\"a\")),7)",
+   "powerbi": "BLANK",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "MINX({1,2},COALESCE(CONVERT(0||\"\",DOUBLE),CONVERT(0||\"\",DOUBLE)))",
+   "powerbi": "BLANK",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "MINX({1,2},COALESCE(CONVERT(1&&\"\",INTEGER),CONVERT(1&&\"\",INTEGER)))",
+   "powerbi": "BLANK",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "AVERAGEX({1,2},COALESCE(CONVERT(0||\"\",DATETIME),CONVERT(0||\"\",DATETIME)))",
+   "powerbi": "BLANK",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "COUNTAX({1,2},COALESCE(CONVERT(1&&\"\",STRING),CONVERT(1&&\"\",STRING)))",
+   "powerbi": "BLANK",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "AVERAGEX({\"a\"},COALESCE(CONVERT(\"3\",INTEGER),CONVERT(\"3\",INTEGER)))",
+   "powerbi": "3",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "COUNTAX(ROW(\"Value\",1),COALESCE(CONVERT(0||\"\",INTEGER),CONVERT(0||\"\",INTEGER)))",
+   "powerbi": "BLANK",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "AVERAGEX({1},COALESCE(CONVERT(FALSE(),DOUBLE),CONVERT(FALSE(),DOUBLE)))",
+   "powerbi": "0",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "SUMX(Facts,COALESCE(CONVERT(0||\"\",DATETIME),CONVERT(0||\"\",DATETIME)))",
+   "powerbi": "BLANK",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "MINX({\"a\"},COALESCE(CONVERT(1&&\"\",DATETIME),CONVERT(1&&\"\",DATETIME)))",
+   "powerbi": "BLANK",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "MINX(VALUES(Facts[Region]),COALESCE(CONVERT(SUM(Facts[Quantity]),INTEGER),CONVERT(SUM(Facts[Quantity]),INTEGER)))",
+   "powerbi": "15",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "MAXX(Facts,COALESCE(CONVERT(2.5,INTEGER),CONVERT(2.5,INTEGER)))",
+   "powerbi": "3",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "COUNTX({1,2},COALESCE(CONVERT(TRUE(),CURRENCY),CONVERT(TRUE(),CURRENCY)))",
+   "powerbi": "2",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "COUNTAX({1,2},COALESCE(CONVERT(CURRENCY(1.5),INTEGER),CONVERT(CURRENCY(1.5),INTEGER)))",
+   "powerbi": "2",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "COUNTX({\"a\"},COALESCE(CONVERT(BLANK(),DOUBLE),CONVERT(BLANK(),DOUBLE)))",
+   "powerbi": "BLANK",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "AVERAGEX(ROW(\"Value\",1),COALESCE(CONVERT(2.5,DOUBLE),CONVERT(2.5,DOUBLE)))",
+   "powerbi": "2.5",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "COUNTX(Facts,COALESCE(CONVERT(\"3\",STRING),CONVERT(\"3\",STRING)))",
+   "powerbi": "6",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "MAXX(VALUES(Facts[Region]),COALESCE(CONVERT(1/0,DOUBLE),CONVERT(1/0,DOUBLE)))",
+   "powerbi": "Infinity",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "COUNTX(ROW(\"Value\",1),COALESCE(CONVERT(FALSE(),INTEGER),CONVERT(FALSE(),INTEGER)))",
+   "powerbi": "1",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "COUNTAX(VALUES(Facts[Region]),COALESCE(CONVERT(FALSE(),CURRENCY),CONVERT(FALSE(),CURRENCY)))",
+   "powerbi": "3",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "AVERAGEX({\"a\"},COALESCE(CONVERT(BLANK(),INTEGER),CONVERT(BLANK(),INTEGER)))",
+   "powerbi": "BLANK",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "MAXX(Facts,COALESCE(CONVERT(FALSE(),DOUBLE),CONVERT(FALSE(),DOUBLE)))",
+   "powerbi": "0",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "COUNTAX(VALUES(Facts[Region]),COALESCE(CONVERT(CURRENCY(1.5),DATETIME),CONVERT(CURRENCY(1.5),DATETIME)))",
+   "powerbi": "3",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "AVERAGEX(Facts,COALESCE(CONVERT(CURRENCY(1.5),CURRENCY),CONVERT(CURRENCY(1.5),CURRENCY)))",
+   "powerbi": "1.5",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "MINX(VALUES(Facts[Region]),COALESCE(CONVERT(1&&\"\",INTEGER),CONVERT(1&&\"\",INTEGER)))",
+   "powerbi": "BLANK",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "COUNTAX(VALUES(Facts[Region]),COALESCE(CONVERT(1&&\"\",DOUBLE),CONVERT(1&&\"\",DOUBLE)))",
+   "powerbi": "BLANK",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "SUMX({\"a\"},COALESCE(CONVERT(1&&\"\",CURRENCY),CONVERT(1&&\"\",CURRENCY)))",
+   "powerbi": "BLANK",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "SUMX({1},COALESCE(CONVERT(FALSE(),INTEGER),CONVERT(FALSE(),INTEGER)))",
+   "powerbi": "0",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "MINX(ROW(\"Value\",1),COALESCE(CONVERT(0/0,DATETIME),CONVERT(0/0,DATETIME)))",
+   "powerbi": "12/30/1899 00:00:00",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "MINX({1},COALESCE(CONVERT(1&&\"\",DOUBLE),CONVERT(1&&\"\",DOUBLE)))",
+   "powerbi": "BLANK",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "COUNTAX({1,2},COALESCE(CONVERT(1E300,BOOLEAN),CONVERT(1E300,BOOLEAN)))",
+   "powerbi": "2",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "COUNTAX(ROW(\"Value\",1),COALESCE(CONVERT(0||\"\",DATETIME),CONVERT(0||\"\",DATETIME)))",
+   "powerbi": "BLANK",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "MAXX(Facts,COALESCE(CONVERT(1/0,DOUBLE),CONVERT(1/0,DOUBLE)))",
+   "powerbi": "Infinity",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "MAXX({1},COALESCE(CONVERT(FALSE(),DATETIME),CONVERT(FALSE(),DATETIME)))",
+   "powerbi": "12/30/1899 00:00:00",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "COUNTX(VALUES(Facts[Region]),COALESCE(CONVERT(FALSE(),DATETIME),CONVERT(FALSE(),DATETIME)))",
+   "powerbi": "3",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "COUNTX({1,2},COALESCE(CONVERT(DATE(2020,1,1),INTEGER),CONVERT(DATE(2020,1,1),INTEGER)))",
+   "powerbi": "2",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "SUMX({1},COALESCE(CONVERT(2.5,INTEGER),CONVERT(2.5,INTEGER)))",
+   "powerbi": "3",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "AVERAGEX(Facts,COALESCE(CONVERT(0/0,DATETIME),CONVERT(0/0,DATETIME)))",
+   "powerbi": "0",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "COUNTAX({\"a\"},COALESCE(CONVERT(FALSE(),DATETIME),CONVERT(FALSE(),DATETIME)))",
+   "powerbi": "1",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "AVERAGEX(ROW(\"Value\",1),COALESCE(CONVERT(1&&\"\",DOUBLE),CONVERT(1&&\"\",DOUBLE)))",
+   "powerbi": "BLANK",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "MAXX(VALUES(Facts[Region]),COALESCE(CONVERT(CURRENCY(1.5),CURRENCY),CONVERT(CURRENCY(1.5),CURRENCY)))",
+   "powerbi": "1.5",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "AVERAGEX(VALUES(Facts[Region]),COALESCE(CONVERT(CURRENCY(1.5),INTEGER),CONVERT(CURRENCY(1.5),INTEGER)))",
+   "powerbi": "2",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "COUNTAX(ROW(\"Value\",1),COALESCE(CONVERT(-1/0,BOOLEAN),CONVERT(-1/0,BOOLEAN)))",
+   "powerbi": "1",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "AVERAGEX(VALUES(Facts[Region]),COALESCE(CONVERT(2.5,DOUBLE),CONVERT(2.5,DOUBLE)))",
+   "powerbi": "2.5",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "MAXX({1,2},COALESCE(CONVERT(\"3\",INTEGER),CONVERT(\"3\",INTEGER)))",
+   "powerbi": "3",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "COUNTAX({\"a\"},COALESCE(CONVERT(CURRENCY(1.5),BOOLEAN),CONVERT(CURRENCY(1.5),BOOLEAN)))",
+   "powerbi": "1",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "AVERAGEX(ROW(\"Value\",1),COALESCE(CONVERT(0,DOUBLE),CONVERT(0,DOUBLE)))",
+   "powerbi": "0",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "MINX(VALUES(Facts[Region]),COALESCE(CONVERT(1,DATETIME),CONVERT(1,DATETIME)))",
+   "powerbi": "12/31/1899 00:00:00",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "AVERAGEX({1},COALESCE(CONVERT(BLANK(),DATETIME),CONVERT(BLANK(),DATETIME)))",
+   "powerbi": "BLANK",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "MINX(ROW(\"Value\",1),COALESCE(CONVERT(1&&\"\",INTEGER),CONVERT(1&&\"\",INTEGER)))",
+   "powerbi": "BLANK",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "MINX(ROW(\"Value\",1),COALESCE(CONVERT(1E300,DOUBLE),CONVERT(1E300,DOUBLE)))",
+   "powerbi": "1E+300",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "COUNTX({\"a\"},COALESCE(CONVERT(0/0,STRING),CONVERT(0/0,STRING)))",
+   "powerbi": "1",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "COUNTAX(Facts,COALESCE(CONVERT(0/0,STRING),CONVERT(0/0,STRING)))",
+   "powerbi": "6",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "AVERAGEX({\"a\"},COALESCE(CONVERT(FALSE(),INTEGER),CONVERT(FALSE(),INTEGER)))",
+   "powerbi": "0",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "COUNTX({1,2},COALESCE(CONVERT(CURRENCY(1.5),DOUBLE),CONVERT(CURRENCY(1.5),DOUBLE)))",
+   "powerbi": "2",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "MINX(VALUES(Facts[Region]),COALESCE(CONVERT(2.5,DOUBLE),CONVERT(2.5,DOUBLE)))",
+   "powerbi": "2.5",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "COUNTAX(VALUES(Facts[Region]),COALESCE(CONVERT(BLANK(),DOUBLE),CONVERT(BLANK(),DOUBLE)))",
+   "powerbi": "BLANK",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "MAXX({\"a\"},COALESCE(CONVERT(1/0,DOUBLE),CONVERT(1/0,DOUBLE)))",
+   "powerbi": "Infinity",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "COUNTX({1},COALESCE(CONVERT(0||\"\",DATETIME),CONVERT(0||\"\",DATETIME)))",
+   "powerbi": "BLANK",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "COUNTAX(Facts,COALESCE(CONVERT(CURRENCY(1.5),STRING),CONVERT(CURRENCY(1.5),STRING)))",
+   "powerbi": "6",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "MAXX({1,2},COALESCE(CONVERT(TRUE(),DATETIME),CONVERT(TRUE(),DATETIME)))",
+   "powerbi": "12/31/1899 00:00:00",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "SUMX(Facts,COALESCE(CONVERT(1/0,DATETIME),CONVERT(1/0,DATETIME)))",
+   "powerbi": "12/31/9999 23:59:59",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "AVERAGEX(VALUES(Facts[Region]),COALESCE(CONVERT(1/0,DOUBLE),CONVERT(1/0,DOUBLE)))",
+   "powerbi": "Infinity",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "COUNTAX({1,2},COALESCE(CONVERT(DATE(2020,1,1),STRING),CONVERT(DATE(2020,1,1),STRING)))",
+   "powerbi": "2",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "AVERAGEX({1},COALESCE(CONVERT(0||\"\",INTEGER),CONVERT(0||\"\",INTEGER)))",
+   "powerbi": "BLANK",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "COUNTAX(VALUES(Facts[Region]),COALESCE(CONVERT(0,STRING),CONVERT(0,STRING)))",
+   "powerbi": "3",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "COUNTX(VALUES(Facts[Region]),COALESCE(CONVERT(BLANK(),INTEGER),CONVERT(BLANK(),INTEGER)))",
+   "powerbi": "BLANK",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "COUNTAX({\"a\"},COALESCE(CONVERT(1/0,DOUBLE),CONVERT(1/0,DOUBLE)))",
+   "powerbi": "1",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "MAXX({1},COALESCE(CONVERT(TRUE(),CURRENCY),CONVERT(TRUE(),CURRENCY)))",
+   "powerbi": "1",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "MAXX(ROW(\"Value\",1),COALESCE(CONVERT(0||\"\",DATETIME),CONVERT(0||\"\",DATETIME)))",
+   "powerbi": "BLANK",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "COUNTX({1,2},COALESCE(CONVERT(SUM(Facts[Quantity]),INTEGER),CONVERT(SUM(Facts[Quantity]),INTEGER)))",
+   "powerbi": "2",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "MINX({\"a\"},COALESCE(CONVERT(\"3\",DOUBLE),CONVERT(\"3\",DOUBLE)))",
+   "powerbi": "3",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "COUNTX(ROW(\"Value\",1),COALESCE(CONVERT(1&&\"\",STRING),CONVERT(1&&\"\",STRING)))",
+   "powerbi": "BLANK",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "MAXX(ROW(\"Value\",1),COALESCE(CONVERT(0,DATETIME),CONVERT(0,DATETIME)))",
+   "powerbi": "12/30/1899 00:00:00",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "MAXX(Facts,COALESCE(CONVERT(SUM(Facts[Quantity]),CURRENCY),CONVERT(SUM(Facts[Quantity]),CURRENCY)))",
+   "powerbi": "15",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "COUNTAX({1},COALESCE(CONVERT(CURRENCY(1.5),CURRENCY),CONVERT(CURRENCY(1.5),CURRENCY)))",
+   "powerbi": "1",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "MAXX(ROW(\"Value\",1),COALESCE(CONVERT(0,INTEGER),CONVERT(0,INTEGER)))",
+   "powerbi": "0",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "MINX({\"a\"},COALESCE(CONVERT(\"1/2/2020\",DOUBLE),CONVERT(\"1/2/2020\",DOUBLE)))",
+   "powerbi": "43832",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "SUMX(VALUES(Facts[Region]),COALESCE(CONVERT(0||\"\",DATETIME),CONVERT(0||\"\",DATETIME)))",
+   "powerbi": "BLANK",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "COUNTAX(VALUES(Facts[Region]),COALESCE(CONVERT(\"a\",STRING),CONVERT(\"a\",STRING)))",
+   "powerbi": "3",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "MINX({\"a\"},COALESCE(CONVERT(SUM(Facts[Quantity]),DOUBLE),CONVERT(SUM(Facts[Quantity]),DOUBLE)))",
+   "powerbi": "15",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "MINX(ROW(\"Value\",1),COALESCE(CONVERT(0||\"\",STRING),CONVERT(0||\"\",STRING)))",
+   "powerbi": "BLANK",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "MAXX({1,2},COALESCE(CONVERT(\"a\",STRING),CONVERT(\"a\",STRING)))",
+   "powerbi": "a",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "AVERAGEX(Facts,COALESCE(CONVERT(\"1/2/2020\",DOUBLE),CONVERT(\"1/2/2020\",DOUBLE)))",
+   "powerbi": "43832",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "MAXX({\"a\"},COALESCE(CONVERT(0||\"\",CURRENCY),CONVERT(0||\"\",CURRENCY)))",
+   "powerbi": "BLANK",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "MINX({1},COALESCE(CONVERT(0/0,DATETIME),CONVERT(0/0,DATETIME)))",
+   "powerbi": "12/30/1899 00:00:00",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "AVERAGEX({\"a\"},COALESCE(CONVERT(BLANK(),DATETIME),CONVERT(BLANK(),DATETIME)))",
+   "powerbi": "BLANK",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "MINX({\"a\"},COALESCE(CONVERT(-1/0,DATETIME),CONVERT(-1/0,DATETIME)))",
+   "powerbi": "01/01/0100 00:00:00",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "COUNTAX(ROW(\"Value\",1),COALESCE(CONVERT(-1/0,STRING),CONVERT(-1/0,STRING)))",
+   "powerbi": "1",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "AVERAGEX({\"a\"},COALESCE(CONVERT(2.5,DOUBLE),CONVERT(2.5,DOUBLE)))",
+   "powerbi": "2.5",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "MAXX(Facts,COALESCE(CONVERT(SUM(Facts[Quantity]),DOUBLE),CONVERT(SUM(Facts[Quantity]),DOUBLE)))",
+   "powerbi": "15",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "SUMX({1,2},COALESCE(CONVERT(DATE(2020,1,1),DATETIME),CONVERT(DATE(2020,1,1),DATETIME)))",
+   "powerbi": "01/03/2140 00:00:00",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "COUNTAX(Facts,COALESCE(CONVERT(TRUE(),CURRENCY),CONVERT(TRUE(),CURRENCY)))",
+   "powerbi": "6",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "MAXX(VALUES(Facts[Region]),COALESCE(CONVERT(2.5,DOUBLE),CONVERT(2.5,DOUBLE)))",
+   "powerbi": "2.5",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "COUNTAX({\"a\"},COALESCE(CONVERT(1,BOOLEAN),CONVERT(1,BOOLEAN)))",
+   "powerbi": "1",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "AVERAGEX(Facts,COALESCE(CONVERT(2.5,DOUBLE),CONVERT(2.5,DOUBLE)))",
+   "powerbi": "2.5",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "MAXX({\"a\"},COALESCE(CONVERT(DATE(2020,1,1),CURRENCY),CONVERT(DATE(2020,1,1),CURRENCY)))",
+   "powerbi": "43831",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "AVERAGEX({1},COALESCE(CONVERT(1,DATETIME),CONVERT(1,DATETIME)))",
+   "powerbi": "1",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "COUNTAX(VALUES(Facts[Region]),COALESCE(CONVERT(\"\",STRING),CONVERT(\"\",STRING)))",
+   "powerbi": "3",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "COUNTAX(VALUES(Facts[Region]),COALESCE(CONVERT(0||\"\",INTEGER),CONVERT(0||\"\",INTEGER)))",
+   "powerbi": "BLANK",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "AVERAGEX(ROW(\"Value\",1),COALESCE(CONVERT(FALSE(),INTEGER),CONVERT(FALSE(),INTEGER)))",
+   "powerbi": "0",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "COUNTAX(VALUES(Facts[Region]),COALESCE(CONVERT(\"1/2/2020\",DATETIME),CONVERT(\"1/2/2020\",DATETIME)))",
+   "powerbi": "3",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "MAXX(Facts,COALESCE(CONVERT(1E300,DOUBLE),CONVERT(1E300,DOUBLE)))",
+   "powerbi": "1E+300",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "AVERAGEX({\"a\"},COALESCE(CONVERT(1&&\"\",INTEGER),CONVERT(1&&\"\",INTEGER)))",
+   "powerbi": "BLANK",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "MINX(VALUES(Facts[Region]),COALESCE(CONVERT(1&&\"\",DOUBLE),CONVERT(1&&\"\",DOUBLE)))",
+   "powerbi": "BLANK",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "MAXX(Facts,COALESCE(CONVERT(\"3\",STRING),CONVERT(\"3\",STRING)))",
+   "powerbi": "3",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "MAXX(Facts,COALESCE(CONVERT(1/0,DATETIME),CONVERT(1/0,DATETIME)))",
+   "powerbi": "12/31/9999 23:59:59",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "COUNTAX({\"a\"},COALESCE(CONVERT(2.5,DATETIME),CONVERT(2.5,DATETIME)))",
+   "powerbi": "1",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "COUNTX({1,2},COALESCE(CONVERT(FALSE(),CURRENCY),CONVERT(FALSE(),CURRENCY)))",
+   "powerbi": "2",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "MAXX({1},COALESCE(CONVERT(FALSE(),STRING),CONVERT(FALSE(),STRING)))",
+   "powerbi": "FALSE",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "MINX(ROW(\"Value\",1),COALESCE(CONVERT(1&&\"\",DATETIME),CONVERT(1&&\"\",DATETIME)))",
+   "powerbi": "BLANK",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "MINX({1,2},COALESCE(CONVERT(1&&\"\",STRING),CONVERT(1&&\"\",STRING)))",
+   "powerbi": "BLANK",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "MINX({\"a\"},COALESCE(CONVERT(2.5,DOUBLE),CONVERT(2.5,DOUBLE)))",
+   "powerbi": "2.5",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "SUMX(VALUES(Facts[Region]),COALESCE(CONVERT(-1/0,DATETIME),CONVERT(-1/0,DATETIME)))",
+   "powerbi": "01/01/0100 00:00:00",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "MAXX(VALUES(Facts[Region]),COALESCE(CONVERT(0/0,DATETIME),CONVERT(0/0,DATETIME)))",
+   "powerbi": "BLANK",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "AVERAGEX({\"a\"},COALESCE(CONVERT(DATE(2020,1,1),DOUBLE),CONVERT(DATE(2020,1,1),DOUBLE)))",
+   "powerbi": "43831",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "COUNTAX(Facts,COALESCE(CONVERT(CURRENCY(1.5),INTEGER),CONVERT(CURRENCY(1.5),INTEGER)))",
+   "powerbi": "6",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "MINX({1,2},COALESCE(CONVERT(FALSE(),STRING),CONVERT(FALSE(),STRING)))",
+   "powerbi": "FALSE",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "COUNTX(Facts,COALESCE(CONVERT(0/0,STRING),CONVERT(0/0,STRING)))",
+   "powerbi": "6",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "MINX({1,2},COALESCE(CONVERT(0||\"\",INTEGER),CONVERT(0||\"\",INTEGER)))",
+   "powerbi": "BLANK",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "MINX({1,2},COALESCE(CONVERT(1,CURRENCY),CONVERT(1,CURRENCY)))",
+   "powerbi": "1",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "MINX({1,2},COALESCE(CONVERT(0||\"\",STRING),CONVERT(0||\"\",STRING)))",
+   "powerbi": "BLANK",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "MAXX({1,2},COALESCE(CONVERT(MAX(Facts[Region]),STRING),CONVERT(MAX(Facts[Region]),STRING)))",
+   "powerbi": "West",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "COUNTAX({1},COALESCE(CONVERT(0||\"\",DOUBLE),CONVERT(0||\"\",DOUBLE)))",
+   "powerbi": "BLANK",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "MINX(ROW(\"Value\",1),COALESCE(CONVERT(0||\"\",DATETIME),CONVERT(0||\"\",DATETIME)))",
+   "powerbi": "BLANK",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "COUNTAX(VALUES(Facts[Region]),COALESCE(CONVERT(BLANK(),INTEGER),CONVERT(BLANK(),INTEGER)))",
+   "powerbi": "BLANK",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "AVERAGEX({1},COALESCE(CONVERT(FALSE(),DATETIME),CONVERT(FALSE(),DATETIME)))",
+   "powerbi": "0",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "MINX({1,2},COALESCE(CONVERT(0,DATETIME),CONVERT(0,DATETIME)))",
+   "powerbi": "12/30/1899 00:00:00",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "SUMX({1},COALESCE(CONVERT(SUM(Facts[Quantity]),DOUBLE),CONVERT(SUM(Facts[Quantity]),DOUBLE)))",
+   "powerbi": "15",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "COUNTAX({1},COALESCE(CONVERT(1,CURRENCY),CONVERT(1,CURRENCY)))",
+   "powerbi": "1",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "COUNTAX({1,2},COALESCE(CONVERT(0,STRING),CONVERT(0,STRING)))",
+   "powerbi": "2",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "COUNTAX({1,2},COALESCE(CONVERT(1E300,DATETIME),CONVERT(1E300,DATETIME)))",
+   "powerbi": "2",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "SUMX(Facts,COALESCE(CONVERT(0,DATETIME),CONVERT(0,DATETIME)))",
+   "powerbi": "12/30/1899 00:00:00",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "COUNTAX(ROW(\"Value\",1),COALESCE(CONVERT(DATE(2020,1,1),STRING),CONVERT(DATE(2020,1,1),STRING)))",
+   "powerbi": "1",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "MAXX({\"a\"},COALESCE(CONVERT(0,STRING),CONVERT(0,STRING)))",
+   "powerbi": "0",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "COUNTX({\"a\"},COALESCE(CONVERT(1,CURRENCY),CONVERT(1,CURRENCY)))",
+   "powerbi": "1",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "MAXX(ROW(\"Value\",1),COALESCE(CONVERT(TRUE(),STRING),CONVERT(TRUE(),STRING)))",
+   "powerbi": "TRUE",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "COUNTX({\"a\"},COALESCE(CONVERT(TRUE(),DOUBLE),CONVERT(TRUE(),DOUBLE)))",
+   "powerbi": "1",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "AVERAGEX({\"a\"},COALESCE(CONVERT(CURRENCY(1.5),CURRENCY),CONVERT(CURRENCY(1.5),CURRENCY)))",
+   "powerbi": "1.5",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "SUMX(ROW(\"Value\",1),COALESCE(CONVERT(CURRENCY(1.5),CURRENCY),CONVERT(CURRENCY(1.5),CURRENCY)))",
+   "powerbi": "1.5",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "MINX(Facts,COALESCE(CONVERT(2.5,STRING),CONVERT(2.5,STRING)))",
+   "powerbi": "2.5",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "COUNTAX(ROW(\"Value\",1),COALESCE(CONVERT(1&&\"\",BOOLEAN),CONVERT(1&&\"\",BOOLEAN)))",
+   "powerbi": "BLANK",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "COUNTX({1,2},COALESCE(CONVERT(2.5,STRING),CONVERT(2.5,STRING)))",
+   "powerbi": "2",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "MAXX({\"a\"},COALESCE(CONVERT(FALSE(),DATETIME),CONVERT(FALSE(),DATETIME)))",
+   "powerbi": "12/30/1899 00:00:00",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "MINX(ROW(\"Value\",1),COALESCE(CONVERT(\"1/2/2020\",STRING),CONVERT(\"1/2/2020\",STRING)))",
+   "powerbi": "1/2/2020",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "COUNTAX(Facts,COALESCE(CONVERT(\"1/2/2020\",STRING),CONVERT(\"1/2/2020\",STRING)))",
+   "powerbi": "6",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "MINX(Facts,COALESCE(CONVERT(DATE(2020,1,1),DOUBLE),CONVERT(DATE(2020,1,1),DOUBLE)))",
+   "powerbi": "43831",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "COUNTX(VALUES(Facts[Region]),COALESCE(CONVERT(1,STRING),CONVERT(1,STRING)))",
+   "powerbi": "3",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "MAXX({1},COALESCE(CONVERT(SUM(Facts[Quantity]),DOUBLE),CONVERT(SUM(Facts[Quantity]),DOUBLE)))",
+   "powerbi": "15",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "AVERAGEX({1},COALESCE(CONVERT(DATE(2020,1,1),INTEGER),CONVERT(DATE(2020,1,1),INTEGER)))",
+   "powerbi": "43831",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "AVERAGEX({1,2},COALESCE(CONVERT(\"1/2/2020\",DATETIME),CONVERT(\"1/2/2020\",DATETIME)))",
+   "powerbi": "43832",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "COUNTAX({1},COALESCE(CONVERT(2.5,DATETIME),CONVERT(2.5,DATETIME)))",
+   "powerbi": "1",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "AVERAGEX({1,2},COALESCE(CONVERT(CURRENCY(1.5),DATETIME),CONVERT(CURRENCY(1.5),DATETIME)))",
+   "powerbi": "1.5",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "AVERAGEX({1},COALESCE(CONVERT(SUM(Facts[Quantity]),INTEGER),CONVERT(SUM(Facts[Quantity]),INTEGER)))",
+   "powerbi": "15",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "MINX({1},COALESCE(CONVERT(FALSE(),CURRENCY),CONVERT(FALSE(),CURRENCY)))",
+   "powerbi": "0",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "COUNTAX(ROW(\"Value\",1),COALESCE(CONVERT(SUM(Facts[Quantity]),DOUBLE),CONVERT(SUM(Facts[Quantity]),DOUBLE)))",
+   "powerbi": "1",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "COUNTAX(VALUES(Facts[Region]),COALESCE(CONVERT(TRUE(),BOOLEAN),CONVERT(TRUE(),BOOLEAN)))",
+   "powerbi": "3",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "SUMX({\"a\"},COALESCE(CONVERT(1/0,DOUBLE),CONVERT(1/0,DOUBLE)))",
+   "powerbi": "Infinity",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "MINX({1},COALESCE(CONVERT(0,CURRENCY),CONVERT(0,CURRENCY)))",
+   "powerbi": "0",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "MINX({1,2},COALESCE(CONVERT(1E300,DOUBLE),CONVERT(1E300,DOUBLE)))",
+   "powerbi": "1E+300",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "MAXX({1,2},COALESCE(CONVERT(SUM(Facts[Quantity]),STRING),CONVERT(SUM(Facts[Quantity]),STRING)))",
+   "powerbi": "15",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "AVERAGEX(ROW(\"Value\",1),COALESCE(CONVERT(-1/0,DATETIME),CONVERT(-1/0,DATETIME)))",
+   "powerbi": "-Infinity",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "COUNTX({1,2},COALESCE(CONVERT(FALSE(),DATETIME),CONVERT(FALSE(),DATETIME)))",
+   "powerbi": "2",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "AVERAGEX(VALUES(Facts[Region]),COALESCE(CONVERT(BLANK(),DOUBLE),CONVERT(BLANK(),DOUBLE)))",
+   "powerbi": "BLANK",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "COUNTX({1},COALESCE(CONVERT(0||\"\",CURRENCY),CONVERT(0||\"\",CURRENCY)))",
+   "powerbi": "BLANK",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "COUNTX(VALUES(Facts[Region]),COALESCE(CONVERT(TRUE(),DOUBLE),CONVERT(TRUE(),DOUBLE)))",
+   "powerbi": "3",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "SUMX({1,2},COALESCE(CONVERT(\"3\",DOUBLE),CONVERT(\"3\",DOUBLE)))",
+   "powerbi": "6",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "MAXX(VALUES(Facts[Region]),COALESCE(CONVERT(CURRENCY(1.5),INTEGER),CONVERT(CURRENCY(1.5),INTEGER)))",
+   "powerbi": "2",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "MINX(VALUES(Facts[Region]),COALESCE(CONVERT(TRUE(),STRING),CONVERT(TRUE(),STRING)))",
+   "powerbi": "TRUE",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "COUNTX({1},COALESCE(CONVERT(1/0,STRING),CONVERT(1/0,STRING)))",
+   "powerbi": "1",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "COUNTAX(Facts,COALESCE(CONVERT(FALSE(),DATETIME),CONVERT(FALSE(),DATETIME)))",
+   "powerbi": "6",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "COUNTX({1},COALESCE(CONVERT(0||\"\",DOUBLE),CONVERT(0||\"\",DOUBLE)))",
+   "powerbi": "BLANK",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "MAXX(Facts,COALESCE(CONVERT(CURRENCY(1.5),DATETIME),CONVERT(CURRENCY(1.5),DATETIME)))",
+   "powerbi": "12/31/1899 12:00:00",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "SUMX(VALUES(Facts[Region]),COALESCE(CONVERT(FALSE(),CURRENCY),CONVERT(FALSE(),CURRENCY)))",
+   "powerbi": "0",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "AVERAGEX({\"a\"},COALESCE(CONVERT(\"1/2/2020\",DOUBLE),CONVERT(\"1/2/2020\",DOUBLE)))",
+   "powerbi": "43832",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "MAXX({\"a\"},COALESCE(CONVERT(1,DOUBLE),CONVERT(1,DOUBLE)))",
+   "powerbi": "1",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "COUNTAX({\"a\"},COALESCE(CONVERT(\"1/2/2020\",DATETIME),CONVERT(\"1/2/2020\",DATETIME)))",
+   "powerbi": "1",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "COUNTX(ROW(\"Value\",1),COALESCE(CONVERT(TRUE(),DOUBLE),CONVERT(TRUE(),DOUBLE)))",
+   "powerbi": "1",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "COUNTX(ROW(\"Value\",1),COALESCE(CONVERT(BLANK(),CURRENCY),CONVERT(BLANK(),CURRENCY)))",
+   "powerbi": "BLANK",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "COUNTAX(VALUES(Facts[Region]),COALESCE(CONVERT(DATE(2020,1,1),CURRENCY),CONVERT(DATE(2020,1,1),CURRENCY)))",
+   "powerbi": "3",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "MINX(VALUES(Facts[Region]),COALESCE(CONVERT(1E300,STRING),CONVERT(1E300,STRING)))",
+   "powerbi": "1E+300",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "MAXX({1},COALESCE(CONVERT(\"1/2/2020\",DATETIME),CONVERT(\"1/2/2020\",DATETIME)))",
+   "powerbi": "01/02/2020 00:00:00",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "COUNTX(ROW(\"Value\",1),COALESCE(CONVERT(2.5,INTEGER),CONVERT(2.5,INTEGER)))",
+   "powerbi": "1",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "MAXX(ROW(\"Value\",1),COALESCE(CONVERT(FALSE(),DOUBLE),CONVERT(FALSE(),DOUBLE)))",
+   "powerbi": "0",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "COUNTAX(VALUES(Facts[Region]),COALESCE(CONVERT(FALSE(),BOOLEAN),CONVERT(FALSE(),BOOLEAN)))",
+   "powerbi": "3",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "COUNTAX(Facts,COALESCE(CONVERT(0||\"\",BOOLEAN),CONVERT(0||\"\",BOOLEAN)))",
+   "powerbi": "BLANK",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "MAXX({1},COALESCE(CONVERT(1E300,DOUBLE),CONVERT(1E300,DOUBLE)))",
+   "powerbi": "1E+300",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "AVERAGEX(Facts,COALESCE(CONVERT(BLANK(),DATETIME),CONVERT(BLANK(),DATETIME)))",
+   "powerbi": "BLANK",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "COUNTX({1},COALESCE(CONVERT(SUM(Facts[Quantity]),DOUBLE),CONVERT(SUM(Facts[Quantity]),DOUBLE)))",
+   "powerbi": "1",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "COUNTAX({\"a\"},COALESCE(CONVERT(DATE(2020,1,1),CURRENCY),CONVERT(DATE(2020,1,1),CURRENCY)))",
+   "powerbi": "1",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "COUNTX(Facts,COALESCE(CONVERT(TRUE(),INTEGER),CONVERT(TRUE(),INTEGER)))",
+   "powerbi": "6",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "COUNTX(ROW(\"Value\",1),COALESCE(CONVERT(0,INTEGER),CONVERT(0,INTEGER)))",
+   "powerbi": "1",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "COUNTX({1,2},COALESCE(CONVERT(\"1/2/2020\",DATETIME),CONVERT(\"1/2/2020\",DATETIME)))",
+   "powerbi": "2",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "COUNTAX({1,2},COALESCE(CONVERT(FALSE(),CURRENCY),CONVERT(FALSE(),CURRENCY)))",
+   "powerbi": "2",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "AVERAGEX({1,2},COALESCE(CONVERT(2.5,DOUBLE),CONVERT(2.5,DOUBLE)))",
+   "powerbi": "2.5",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "COUNTAX(Facts,COALESCE(CONVERT(1&&\"\",CURRENCY),CONVERT(1&&\"\",CURRENCY)))",
+   "powerbi": "BLANK",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "COUNTX(ROW(\"Value\",1),COALESCE(CONVERT(CURRENCY(1.5),DOUBLE),CONVERT(CURRENCY(1.5),DOUBLE)))",
+   "powerbi": "1",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "AVERAGEX({1,2},COALESCE(CONVERT(1&&\"\",INTEGER),CONVERT(1&&\"\",INTEGER)))",
+   "powerbi": "BLANK",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "MINX({\"a\"},COALESCE(CONVERT(DATE(2020,1,1),CURRENCY),CONVERT(DATE(2020,1,1),CURRENCY)))",
+   "powerbi": "43831",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "COUNTX({\"a\"},COALESCE(CONVERT(1&&\"\",CURRENCY),CONVERT(1&&\"\",CURRENCY)))",
+   "powerbi": "BLANK",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "MAXX({\"a\"},COALESCE(CONVERT(BLANK(),DOUBLE),CONVERT(BLANK(),DOUBLE)))",
+   "powerbi": "BLANK",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "COUNTX(ROW(\"Value\",1),COALESCE(CONVERT(SUM(Facts[Quantity]),STRING),CONVERT(SUM(Facts[Quantity]),STRING)))",
+   "powerbi": "1",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "COUNTX(Facts,COALESCE(CONVERT(CURRENCY(1.5),INTEGER),CONVERT(CURRENCY(1.5),INTEGER)))",
+   "powerbi": "6",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "SUMX(Facts,IFERROR((COALESCE(SQRT(Facts[Quantity]),5))+0,7))",
+   "powerbi": "8.38233234744176",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "SUMX(Facts,IFERROR((COALESCE(MOD(Facts[Quantity],2),5))+0,7))",
+   "powerbi": "3",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "SUMX(Facts,IFERROR((COALESCE(LN(Facts[Quantity]),5))+0,7))",
+   "powerbi": "11.787491742782",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "SUMX(Facts,IFERROR((COALESCE(VALUE(Facts[Quantity]),5))+0,7))",
+   "powerbi": "15",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "SUMX(Facts,IFERROR((COALESCE(LOG10(Facts[Sales]),5))+0,7))",
+   "powerbi": "23.720159303406",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "SUMX(Facts,COALESCE(CONVERT(\"1/2/2020\",DATETIME),0))",
+   "powerbi": "262992",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "SUMX(Facts,IF(ISBLANK(COALESCE((LOOKUPVALUE(Facts[Quantity],Facts[Region],\"Nope\"))-(Facts[Sales]>1),1)),1,2))",
+   "powerbi": "12",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "SUMX(Facts,IF(ISBLANK(COALESCE((LOOKUPVALUE(Facts[Quantity],Facts[Region],\"Nope\"))/(LOOKUPVALUE(Facts[Quantity],Facts[Region],\"Nope\")),1)),1,2))",
+   "powerbi": "12",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "SUMX(Facts,COALESCE(CONVERT(CURRENCY(1.5),DATETIME),0))",
+   "powerbi": "9",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "AVERAGEX(Facts,COALESCE(CONVERT(BLANK(),DATETIME),0))",
+   "powerbi": "0",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "AVERAGEX(Facts,COALESCE(CONVERT(CURRENCY(1.5),DATETIME),0))",
+   "powerbi": "1.5",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "COUNTX(Facts,COALESCE(CONVERT(2.5,DATETIME),0))",
+   "powerbi": "6",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "SUMX(Facts,COALESCE(CONVERT(SUM(Facts[Sales]),DATETIME),0))",
+   "powerbi": "189",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "AVERAGEX(Facts,COALESCE(CONVERT(1,DATETIME),0))",
+   "powerbi": "1",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "MINX({1,2},COALESCE(CONVERT(TRUE(),DATETIME),0))",
+   "powerbi": "1",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "COUNTX(Facts,COALESCE(CONVERT(CURRENCY(1.5),DATETIME),0))",
+   "powerbi": "6",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "SUMX(Facts,IF(ISBLANK(COALESCE((COUNTROWS(FILTER(Facts,FALSE())))+(Facts[Sales]&&\"\"),1)),1,2))",
+   "powerbi": "12",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "COUNTX(Facts,COALESCE(CONVERT(TRUE(),DATETIME),0))",
+   "powerbi": "6",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "SUMX(Facts,COALESCE(CONVERT(TRUE(),DATETIME),0))",
+   "powerbi": "6",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "COUNTX(Facts,COALESCE(CONVERT(BLANK(),DATETIME),0))",
+   "powerbi": "6",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "MAXX(Facts,COALESCE(CONVERT(DATE(2020,1,1),DATETIME),0))",
+   "powerbi": "43831",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "MINX({1,2},COALESCE(CONVERT(SUM(Facts[Sales]),DATETIME),0))",
+   "powerbi": "31.5",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "SUMX(Facts,IF(ISBLANK(COALESCE((LOOKUPVALUE(Facts[Quantity],Facts[Region],\"Nope\"))^(Facts[Sales]&&\"\"),1)),1,2))",
+   "powerbi": "12",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "SUMX(Facts,COALESCE(CONVERT(DATE(2020,1,1),DATETIME),0))",
+   "powerbi": "262986",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "MAXX(Facts,COALESCE(CONVERT(2.5,DATETIME),0))",
+   "powerbi": "2.5",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "MINX({1,2},COALESCE(CONVERT(BLANK(),DATETIME),0))",
+   "powerbi": "0",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "AVERAGEX(Facts,COALESCE(CONVERT(2.5,DATETIME),0))",
+   "powerbi": "2.5",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "SUMX(Facts,IF(ISBLANK(COALESCE((DIVIDE(1,0))&(Facts[Sales]&&\"\"),1)),1,2))",
+   "powerbi": "12",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "MAXX(Facts,COALESCE(CONVERT(TRUE(),DATETIME),0))",
+   "powerbi": "1",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "SUMX(Facts,IF(ISBLANK(COALESCE((COUNTROWS(FILTER(Facts,FALSE())))+(Facts[Sales]),1)),1,2))",
+   "powerbi": "12",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "AVERAGEX(Facts,COALESCE(CONVERT(TRUE(),DATETIME),0))",
+   "powerbi": "1",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "SUMX(Facts,COALESCE(CONVERT(BLANK(),DATETIME),0))",
+   "powerbi": "0",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "MINX({1,2},COALESCE(CONVERT(1,DATETIME),0))",
+   "powerbi": "1",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "SUMX(Facts,COALESCE(CONVERT(1,DATETIME),0))",
+   "powerbi": "6",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "SUMX(Facts,COALESCE(CONVERT(Facts[Quantity],DATETIME),0))",
+   "powerbi": "15",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "SUMX(Facts,IF(ISBLANK(COALESCE((LOOKUPVALUE(Facts[Quantity],Facts[Region],\"Nope\"))*(\"a\"*2),1)),1,2))",
+   "powerbi": "12",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "MAXX(Facts,COALESCE(CONVERT(Facts[Quantity],DATETIME),0))",
+   "powerbi": "5",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "MAXX(Facts,COALESCE(CONVERT(BLANK(),DATETIME),0))",
+   "powerbi": "0",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "AVERAGEX(Facts,COALESCE(CONVERT(DATE(2020,1,1),DATETIME),0))",
+   "powerbi": "43831",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "MAXX(Facts,COALESCE(CONVERT(CURRENCY(1.5),DATETIME),0))",
+   "powerbi": "1.5",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "SUMX(Facts,IF(ISBLANK(COALESCE((\"a\")*(LOOKUPVALUE(Facts[Quantity],Facts[Region],\"Nope\")),1)),1,2))",
+   "powerbi": "12",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "MAXX(Facts,COALESCE(CONVERT(\"1/2/2020\",DATETIME),0))",
+   "powerbi": "43832",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "SUMX(Facts,IF(ISBLANK(COALESCE((COUNTROWS(FILTER(Facts,FALSE())))*(Facts[Sales]&&\"\"),1)),1,2))",
+   "powerbi": "12",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "SUMX(Facts,IF(ISBLANK(COALESCE((VALUE(\"x\"))*(LOOKUPVALUE(Facts[Quantity],Facts[Region],\"Nope\")),1)),1,2))",
+   "powerbi": "12",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "COUNTX(Facts,COALESCE(CONVERT(1,DATETIME),0))",
+   "powerbi": "6",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "SUMX(Facts,COALESCE(CONVERT(2.5,DATETIME),0))",
+   "powerbi": "15",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "MINX({1,2},COALESCE(CONVERT(CURRENCY(1.5),DATETIME),0))",
+   "powerbi": "1.5",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "SUMX(Facts,IF(ISBLANK(COALESCE((SUM(Facts[Sales]))*(COUNTROWS(FILTER(Facts,FALSE()))),1)),1,2))",
+   "powerbi": "12",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "SUMX(Facts,IF(ISBLANK(COALESCE((1)/(LOOKUPVALUE(Facts[Quantity],Facts[Region],\"Nope\")),1)),1,2))",
+   "powerbi": "12",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "MINX({1,2},COALESCE(CONVERT(\"1/2/2020\",DATETIME),0))",
+   "powerbi": "43832",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "COUNTX(Facts,COALESCE(CONVERT(SUM(Facts[Sales]),DATETIME),0))",
+   "powerbi": "6",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "SUMX(Facts,IF(ISBLANK(COALESCE((DIVIDE(1,0))&(Facts[Sales]>1),1)),1,2))",
+   "powerbi": "12",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "SUMX(Facts,IF(ISBLANK(COALESCE((1&&\"\")&(LOOKUPVALUE(Facts[Quantity],Facts[Region],\"Nope\")),1)),1,2))",
+   "powerbi": "6",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "AVERAGEX(Facts,COALESCE(CONVERT(\"1/2/2020\",DATETIME),0))",
+   "powerbi": "43832",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "COUNTX(Facts,COALESCE(CONVERT(DATE(2020,1,1),DATETIME),0))",
+   "powerbi": "6",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "MAXX(Facts,COALESCE(CONVERT(1,DATETIME),0))",
+   "powerbi": "1",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "SUMX(Facts,IF(ISBLANK(COALESCE((LOOKUPVALUE(Facts[Quantity],Facts[Region],\"Nope\"))&(TRUE()),1)),1,2))",
+   "powerbi": "12",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "SUMX(Facts,IF(ISBLANK(COALESCE((LOOKUPVALUE(Facts[Quantity],Facts[Region],\"Nope\"))/(DIVIDE(1,0)),1)),1,2))",
+   "powerbi": "12",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "MAXX(Facts,COALESCE(CONVERT(SUM(Facts[Sales]),DATETIME),0))",
+   "powerbi": "31.5",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "SUMX(Facts,IF(ISBLANK(COALESCE((COUNTROWS(FILTER(Facts,FALSE())))&(Facts[Sales]>1),1)),1,2))",
+   "powerbi": "12",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "MINX({1,2},COALESCE(CONVERT(DATE(2020,1,1),DATETIME),0))",
+   "powerbi": "43831",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "AVERAGEX(Facts,COALESCE(CONVERT(SUM(Facts[Sales]),DATETIME),0))",
+   "powerbi": "31.5",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "COUNTX(Facts,COALESCE(CONVERT(\"1/2/2020\",DATETIME),0))",
+   "powerbi": "6",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "AVERAGEX(Facts,COALESCE(CONVERT(Facts[Quantity],DATETIME),0))",
+   "powerbi": "2.5",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "COUNTX(Facts,COALESCE(CONVERT(Facts[Quantity],DATETIME),0))",
+   "powerbi": "6",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "MINX({1,2},COALESCE(CONVERT(2.5,DATETIME),0))",
+   "powerbi": "2.5",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "(INT(2^62))&\"z\"",
+   "powerbi": "4611686018427387904z",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "ISERROR(INT(2^62))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "(FLOOR(2^62,1))&\"z\"",
+   "powerbi": "4611686018427389952z",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "ISERROR(FLOOR(2^62,1))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "(CEILING(2^62,1))&\"z\"",
+   "powerbi": "4611686018427389952z",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "ISERROR(CEILING(2^62,1))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "(QUOTIENT(2^62,1))&\"z\"",
+   "powerbi": "4611686018427387904z",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "ISERROR(QUOTIENT(2^62,1))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "(MROUND(2^62,3))&\"z\"",
+   "powerbi": "4611686018427387904z",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "ISERROR(MROUND(2^62,3))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "(CONVERT(2^62,INTEGER))&\"z\"",
+   "powerbi": "4611686018427387904z",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "ISERROR(CONVERT(2^62,INTEGER))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "(INT(2^63-1024))&\"z\"",
+   "powerbi": "9223372036854774784z",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "ISERROR(INT(2^63-1024))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "(FLOOR(2^63-1024,1))&\"z\"",
+   "powerbi": "9223372036854769664z",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "ISERROR(FLOOR(2^63-1024,1))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "(CEILING(2^63-1024,1))&\"z\"",
+   "powerbi": "9223372036854769664z",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "ISERROR(CEILING(2^63-1024,1))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "(QUOTIENT(2^63-1024,1))&\"z\"",
+   "powerbi": "9223372036854774784z",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "ISERROR(QUOTIENT(2^63-1024,1))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "ISERROR(MROUND(2^63-1024,3))",
+   "powerbi": "True",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "(CONVERT(2^63-1024,INTEGER))&\"z\"",
+   "powerbi": "9223372036854774784z",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "ISERROR(CONVERT(2^63-1024,INTEGER))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "(MROUND(2^52,3))&\"z\"",
+   "powerbi": "4503599627370495z",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "ISERROR(MROUND(2^52,3))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "(MROUND(2^52,2))&\"z\"",
+   "powerbi": "4503599627370496z",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "ISERROR(MROUND(2^52,2))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "(MROUND(2^52,5))&\"z\"",
+   "powerbi": "4503599627370495z",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "ISERROR(MROUND(2^52,5))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "(MROUND(2^52,10))&\"z\"",
+   "powerbi": "4503599627370500z",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "ISERROR(MROUND(2^52,10))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "(CONVERT(2^52+0.5,INTEGER))&\"z\"",
+   "powerbi": "4503599627370496z",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "ISERROR(CONVERT(2^52+0.5,INTEGER))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "(CONVERT(2^52+0.25,INTEGER))&\"z\"",
+   "powerbi": "4503599627370496z",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "ISERROR(CONVERT(2^52+0.25,INTEGER))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "(FLOOR(2^52+0.5,1))&\"z\"",
+   "powerbi": "4503599627370500z",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "ISERROR(FLOOR(2^52+0.5,1))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "(CEILING(2^52+0.5,2))&\"z\"",
+   "powerbi": "4503599627370500z",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "ISERROR(CEILING(2^52+0.5,2))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "(QUOTIENT(2^52+0.5,1))&\"z\"",
+   "powerbi": "4503599627370496z",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "ISERROR(QUOTIENT(2^52+0.5,1))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "(INT(2^52+0.5))&\"z\"",
+   "powerbi": "4503599627370496z",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "ISERROR(INT(2^52+0.5))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "(MROUND(2^53,3))&\"z\"",
+   "powerbi": "9007199254740992z",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "ISERROR(MROUND(2^53,3))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "(MROUND(2^53,2))&\"z\"",
+   "powerbi": "9007199254740992z",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "ISERROR(MROUND(2^53,2))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "(MROUND(2^53,5))&\"z\"",
+   "powerbi": "9007199254740996z",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "ISERROR(MROUND(2^53,5))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "(MROUND(2^53,10))&\"z\"",
+   "powerbi": "9007199254740990z",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "ISERROR(MROUND(2^53,10))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "(CONVERT(2^53+0.5,INTEGER))&\"z\"",
+   "powerbi": "9007199254740992z",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "ISERROR(CONVERT(2^53+0.5,INTEGER))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "(CONVERT(2^53+0.25,INTEGER))&\"z\"",
+   "powerbi": "9007199254740992z",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "ISERROR(CONVERT(2^53+0.25,INTEGER))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "(FLOOR(2^53+0.5,1))&\"z\"",
+   "powerbi": "9007199254740990z",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "ISERROR(FLOOR(2^53+0.5,1))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "(CEILING(2^53+0.5,2))&\"z\"",
+   "powerbi": "9007199254741000z",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "ISERROR(CEILING(2^53+0.5,2))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "(QUOTIENT(2^53+0.5,1))&\"z\"",
+   "powerbi": "9007199254740992z",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "ISERROR(QUOTIENT(2^53+0.5,1))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "(INT(2^53+0.5))&\"z\"",
+   "powerbi": "9007199254740992z",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "ISERROR(INT(2^53+0.5))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "FLOOR(2^62,1)&\"z\"",
+   "powerbi": "4611686018427389952z",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "CEILING(2^62,1)&\"z\"",
+   "powerbi": "4611686018427389952z",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "FLOOR(2^62,2)&\"z\"",
+   "powerbi": "4611686018427380224z",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "ISERROR(FLOOR(2^62,2))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "CEILING(2^62,2)&\"z\"",
+   "powerbi": "4611686018427380224z",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "ISERROR(CEILING(2^62,2))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "FLOOR(2^62,3)&\"z\"",
+   "powerbi": "4611686018427389952z",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "ISERROR(FLOOR(2^62,3))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "CEILING(2^62,3)&\"z\"",
+   "powerbi": "4611686018427389952z",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "ISERROR(CEILING(2^62,3))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "FLOOR(2^62,7)&\"z\"",
+   "powerbi": "4611686018427389952z",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "ISERROR(FLOOR(2^62,7))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "CEILING(2^62,7)&\"z\"",
+   "powerbi": "4611686018427389952z",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "ISERROR(CEILING(2^62,7))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "FLOOR(2^62,1024)&\"z\"",
+   "powerbi": "4611686018427392000z",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "ISERROR(FLOOR(2^62,1024))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "CEILING(2^62,1024)&\"z\"",
+   "powerbi": "4611686018427392000z",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "ISERROR(CEILING(2^62,1024))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "FLOOR(2^62,0.5)&\"z\"",
+   "powerbi": "4.61168601842739E+18z",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "ISERROR(FLOOR(2^62,0.5))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "CEILING(2^62,0.5)&\"z\"",
+   "powerbi": "4.61168601842739E+18z",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "ISERROR(CEILING(2^62,0.5))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "INT(2^62)&\"z\"",
+   "powerbi": "4611686018427387904z",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "QUOTIENT(2^62,3)&\"z\"",
+   "powerbi": "1537228672809129216z",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "ISERROR(QUOTIENT(2^62,3))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "MROUND(2^62,3)&\"z\"",
+   "powerbi": "4611686018427387904z",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "CONVERT(2^62,INTEGER)&\"z\"",
+   "powerbi": "4611686018427387904z",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "FLOOR(2^62+1024,1)&\"z\"",
+   "powerbi": "4611686018427389952z",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "ISERROR(FLOOR(2^62+1024,1))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "CEILING(2^62+1024,1)&\"z\"",
+   "powerbi": "4611686018427389952z",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "ISERROR(CEILING(2^62+1024,1))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "FLOOR(2^62+1024,2)&\"z\"",
+   "powerbi": "4611686018427380224z",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "ISERROR(FLOOR(2^62+1024,2))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "CEILING(2^62+1024,2)&\"z\"",
+   "powerbi": "4611686018427380224z",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "ISERROR(CEILING(2^62+1024,2))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "FLOOR(2^62+1024,3)&\"z\"",
+   "powerbi": "4611686018427389952z",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "ISERROR(FLOOR(2^62+1024,3))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "CEILING(2^62+1024,3)&\"z\"",
+   "powerbi": "4611686018427389952z",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "ISERROR(CEILING(2^62+1024,3))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "FLOOR(2^62+1024,7)&\"z\"",
+   "powerbi": "4611686018427389952z",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "ISERROR(FLOOR(2^62+1024,7))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "CEILING(2^62+1024,7)&\"z\"",
+   "powerbi": "4611686018427389952z",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "ISERROR(CEILING(2^62+1024,7))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "FLOOR(2^62+1024,1024)&\"z\"",
+   "powerbi": "4611686018427392000z",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "ISERROR(FLOOR(2^62+1024,1024))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "CEILING(2^62+1024,1024)&\"z\"",
+   "powerbi": "4611686018427392000z",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "ISERROR(CEILING(2^62+1024,1024))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "FLOOR(2^62+1024,0.5)&\"z\"",
+   "powerbi": "4.61168601842739E+18z",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "ISERROR(FLOOR(2^62+1024,0.5))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "CEILING(2^62+1024,0.5)&\"z\"",
+   "powerbi": "4.61168601842739E+18z",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "ISERROR(CEILING(2^62+1024,0.5))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "INT(2^62+1024)&\"z\"",
+   "powerbi": "4611686018427388928z",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "ISERROR(INT(2^62+1024))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "QUOTIENT(2^62+1024,3)&\"z\"",
+   "powerbi": "1537228672809129728z",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "ISERROR(QUOTIENT(2^62+1024,3))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "MROUND(2^62+1024,3)&\"z\"",
+   "powerbi": "4611686018427388928z",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "ISERROR(MROUND(2^62+1024,3))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "CONVERT(2^62+1024,INTEGER)&\"z\"",
+   "powerbi": "4611686018427388928z",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "ISERROR(CONVERT(2^62+1024,INTEGER))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "FLOOR(2^63-1024,1)&\"z\"",
+   "powerbi": "9223372036854769664z",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "CEILING(2^63-1024,1)&\"z\"",
+   "powerbi": "9223372036854769664z",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "ISERROR(FLOOR(2^63-1024,2))",
+   "powerbi": "True",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "ISERROR(CEILING(2^63-1024,2))",
+   "powerbi": "True",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "ISERROR(FLOOR(2^63-1024,3))",
+   "powerbi": "True",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "ISERROR(CEILING(2^63-1024,3))",
+   "powerbi": "True",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "ISERROR(FLOOR(2^63-1024,7))",
+   "powerbi": "True",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "ISERROR(CEILING(2^63-1024,7))",
+   "powerbi": "True",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "FLOOR(2^63-1024,1024)&\"z\"",
+   "powerbi": "9223372036854773760z",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "ISERROR(FLOOR(2^63-1024,1024))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "CEILING(2^63-1024,1024)&\"z\"",
+   "powerbi": "9223372036854773760z",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "ISERROR(CEILING(2^63-1024,1024))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "FLOOR(2^63-1024,0.5)&\"z\"",
+   "powerbi": "9.22337203685475E+18z",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "ISERROR(FLOOR(2^63-1024,0.5))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "CEILING(2^63-1024,0.5)&\"z\"",
+   "powerbi": "9.22337203685475E+18z",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "ISERROR(CEILING(2^63-1024,0.5))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "INT(2^63-1024)&\"z\"",
+   "powerbi": "9223372036854774784z",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "QUOTIENT(2^63-1024,3)&\"z\"",
+   "powerbi": "3074457345618258432z",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "ISERROR(QUOTIENT(2^63-1024,3))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "CONVERT(2^63-1024,INTEGER)&\"z\"",
+   "powerbi": "9223372036854774784z",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "FLOOR(2^63-2048,1)&\"z\"",
+   "powerbi": "9223372036854769664z",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "ISERROR(FLOOR(2^63-2048,1))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "CEILING(2^63-2048,1)&\"z\"",
+   "powerbi": "9223372036854769664z",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "ISERROR(CEILING(2^63-2048,1))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "ISERROR(FLOOR(2^63-2048,2))",
+   "powerbi": "True",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "ISERROR(CEILING(2^63-2048,2))",
+   "powerbi": "True",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "ISERROR(FLOOR(2^63-2048,3))",
+   "powerbi": "True",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "ISERROR(CEILING(2^63-2048,3))",
+   "powerbi": "True",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "ISERROR(FLOOR(2^63-2048,7))",
+   "powerbi": "True",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "ISERROR(CEILING(2^63-2048,7))",
+   "powerbi": "True",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "FLOOR(2^63-2048,1024)&\"z\"",
+   "powerbi": "9223372036854773760z",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "ISERROR(FLOOR(2^63-2048,1024))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "CEILING(2^63-2048,1024)&\"z\"",
+   "powerbi": "9223372036854773760z",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "ISERROR(CEILING(2^63-2048,1024))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "FLOOR(2^63-2048,0.5)&\"z\"",
+   "powerbi": "9.22337203685475E+18z",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "ISERROR(FLOOR(2^63-2048,0.5))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "CEILING(2^63-2048,0.5)&\"z\"",
+   "powerbi": "9.22337203685475E+18z",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "ISERROR(CEILING(2^63-2048,0.5))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "INT(2^63-2048)&\"z\"",
+   "powerbi": "9223372036854773760z",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "ISERROR(INT(2^63-2048))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "QUOTIENT(2^63-2048,3)&\"z\"",
+   "powerbi": "3074457345618257920z",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "ISERROR(QUOTIENT(2^63-2048,3))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "MROUND(2^63-2048,3)&\"z\"",
+   "powerbi": "9223372036854773760z",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "ISERROR(MROUND(2^63-2048,3))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "CONVERT(2^63-2048,INTEGER)&\"z\"",
+   "powerbi": "9223372036854773760z",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "ISERROR(CONVERT(2^63-2048,INTEGER))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "FLOOR(-(2^62),1)&\"z\"",
+   "powerbi": "-4611686018427389952z",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "ISERROR(FLOOR(-(2^62),1))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "CEILING(-(2^62),1)&\"z\"",
+   "powerbi": "-4611686018427389952z",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "ISERROR(CEILING(-(2^62),1))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "FLOOR(-(2^62),2)&\"z\"",
+   "powerbi": "-4611686018427380224z",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "ISERROR(FLOOR(-(2^62),2))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "CEILING(-(2^62),2)&\"z\"",
+   "powerbi": "-4611686018427380224z",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "ISERROR(CEILING(-(2^62),2))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "FLOOR(-(2^62),3)&\"z\"",
+   "powerbi": "-4611686018427389952z",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "ISERROR(FLOOR(-(2^62),3))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "CEILING(-(2^62),3)&\"z\"",
+   "powerbi": "-4611686018427389952z",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "ISERROR(CEILING(-(2^62),3))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "FLOOR(-(2^62),7)&\"z\"",
+   "powerbi": "-4611686018427389952z",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "ISERROR(FLOOR(-(2^62),7))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "CEILING(-(2^62),7)&\"z\"",
+   "powerbi": "-4611686018427389952z",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "ISERROR(CEILING(-(2^62),7))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "FLOOR(-(2^62),1024)&\"z\"",
+   "powerbi": "-4611686018427392000z",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "ISERROR(FLOOR(-(2^62),1024))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "CEILING(-(2^62),1024)&\"z\"",
+   "powerbi": "-4611686018427392000z",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "ISERROR(CEILING(-(2^62),1024))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "FLOOR(-(2^62),0.5)&\"z\"",
+   "powerbi": "-4.61168601842739E+18z",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "ISERROR(FLOOR(-(2^62),0.5))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "CEILING(-(2^62),0.5)&\"z\"",
+   "powerbi": "-4.61168601842739E+18z",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "ISERROR(CEILING(-(2^62),0.5))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "INT(-(2^62))&\"z\"",
+   "powerbi": "-4611686018427387904z",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "ISERROR(INT(-(2^62)))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "QUOTIENT(-(2^62),3)&\"z\"",
+   "powerbi": "-1537228672809129216z",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "ISERROR(QUOTIENT(-(2^62),3))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "ISERROR(MROUND(-(2^62),3))",
+   "powerbi": "True",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "CONVERT(-(2^62),INTEGER)&\"z\"",
+   "powerbi": "-4611686018427387904z",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "ISERROR(CONVERT(-(2^62),INTEGER))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "FLOOR(-(2^63-1024),1)&\"z\"",
+   "powerbi": "-9223372036854769664z",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "ISERROR(FLOOR(-(2^63-1024),1))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "CEILING(-(2^63-1024),1)&\"z\"",
+   "powerbi": "-9223372036854769664z",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "ISERROR(CEILING(-(2^63-1024),1))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "ISERROR(FLOOR(-(2^63-1024),2))",
+   "powerbi": "True",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "ISERROR(CEILING(-(2^63-1024),2))",
+   "powerbi": "True",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "ISERROR(FLOOR(-(2^63-1024),3))",
+   "powerbi": "True",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "ISERROR(CEILING(-(2^63-1024),3))",
+   "powerbi": "True",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "ISERROR(FLOOR(-(2^63-1024),7))",
+   "powerbi": "True",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "ISERROR(CEILING(-(2^63-1024),7))",
+   "powerbi": "True",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "FLOOR(-(2^63-1024),1024)&\"z\"",
+   "powerbi": "-9223372036854773760z",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "ISERROR(FLOOR(-(2^63-1024),1024))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "CEILING(-(2^63-1024),1024)&\"z\"",
+   "powerbi": "-9223372036854773760z",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "ISERROR(CEILING(-(2^63-1024),1024))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "FLOOR(-(2^63-1024),0.5)&\"z\"",
+   "powerbi": "-9.22337203685475E+18z",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "ISERROR(FLOOR(-(2^63-1024),0.5))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "CEILING(-(2^63-1024),0.5)&\"z\"",
+   "powerbi": "-9.22337203685475E+18z",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "ISERROR(CEILING(-(2^63-1024),0.5))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "INT(-(2^63-1024))&\"z\"",
+   "powerbi": "-9223372036854774784z",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "ISERROR(INT(-(2^63-1024)))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "QUOTIENT(-(2^63-1024),3)&\"z\"",
+   "powerbi": "-3074457345618258432z",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "ISERROR(QUOTIENT(-(2^63-1024),3))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "ISERROR(MROUND(-(2^63-1024),3))",
+   "powerbi": "True",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "CONVERT(-(2^63-1024),INTEGER)&\"z\"",
+   "powerbi": "-9223372036854774784z",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "ISERROR(CONVERT(-(2^63-1024),INTEGER))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "FLOOR(2^61,1)&\"z\"",
+   "powerbi": "2305843009213690112z",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "ISERROR(FLOOR(2^61,1))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "CEILING(2^61,1)&\"z\"",
+   "powerbi": "2305843009213690112z",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "ISERROR(CEILING(2^61,1))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "FLOOR(2^61,2)&\"z\"",
+   "powerbi": "2305843009213700096z",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "ISERROR(FLOOR(2^61,2))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "CEILING(2^61,2)&\"z\"",
+   "powerbi": "2305843009213700096z",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "ISERROR(CEILING(2^61,2))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "FLOOR(2^61,3)&\"z\"",
+   "powerbi": "2305843009213694976z",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "ISERROR(FLOOR(2^61,3))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "CEILING(2^61,3)&\"z\"",
+   "powerbi": "2305843009213694976z",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "ISERROR(CEILING(2^61,3))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "FLOOR(2^61,7)&\"z\"",
+   "powerbi": "2305843009213694976z",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "ISERROR(FLOOR(2^61,7))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "CEILING(2^61,7)&\"z\"",
+   "powerbi": "2305843009213694976z",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "ISERROR(CEILING(2^61,7))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "FLOOR(2^61,1024)&\"z\"",
+   "powerbi": "2305843009213696000z",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "ISERROR(FLOOR(2^61,1024))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "CEILING(2^61,1024)&\"z\"",
+   "powerbi": "2305843009213696000z",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "ISERROR(CEILING(2^61,1024))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "FLOOR(2^61,0.5)&\"z\"",
+   "powerbi": "2.30584300921369E+18z",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "ISERROR(FLOOR(2^61,0.5))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "CEILING(2^61,0.5)&\"z\"",
+   "powerbi": "2.30584300921369E+18z",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "ISERROR(CEILING(2^61,0.5))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "INT(2^61)&\"z\"",
+   "powerbi": "2305843009213693952z",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "ISERROR(INT(2^61))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "QUOTIENT(2^61,3)&\"z\"",
+   "powerbi": "768614336404564608z",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "ISERROR(QUOTIENT(2^61,3))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "MROUND(2^61,3)&\"z\"",
+   "powerbi": "2305843009213693952z",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "ISERROR(MROUND(2^61,3))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "CONVERT(2^61,INTEGER)&\"z\"",
+   "powerbi": "2305843009213693952z",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "ISERROR(CONVERT(2^61,INTEGER))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "FLOOR(3*2^61,1)&\"z\"",
+   "powerbi": "6917529027641079808z",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "ISERROR(FLOOR(3*2^61,1))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "CEILING(3*2^61,1)&\"z\"",
+   "powerbi": "6917529027641079808z",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "ISERROR(CEILING(3*2^61,1))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "FLOOR(3*2^61,2)&\"z\"",
+   "powerbi": "6917529027641079808z",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "ISERROR(FLOOR(3*2^61,2))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "CEILING(3*2^61,2)&\"z\"",
+   "powerbi": "6917529027641079808z",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "ISERROR(CEILING(3*2^61,2))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "FLOOR(3*2^61,3)&\"z\"",
+   "powerbi": "6917529027641070592z",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "ISERROR(FLOOR(3*2^61,3))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "CEILING(3*2^61,3)&\"z\"",
+   "powerbi": "6917529027641070592z",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "ISERROR(CEILING(3*2^61,3))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "FLOOR(3*2^61,7)&\"z\"",
+   "powerbi": "6917529027641077760z",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "ISERROR(FLOOR(3*2^61,7))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "CEILING(3*2^61,7)&\"z\"",
+   "powerbi": "6917529027641077760z",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "ISERROR(CEILING(3*2^61,7))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "FLOOR(3*2^61,1024)&\"z\"",
+   "powerbi": "6917529027641077760z",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "ISERROR(FLOOR(3*2^61,1024))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "CEILING(3*2^61,1024)&\"z\"",
+   "powerbi": "6917529027641077760z",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "ISERROR(CEILING(3*2^61,1024))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "FLOOR(3*2^61,0.5)&\"z\"",
+   "powerbi": "6.9175290276411E+18z",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "ISERROR(FLOOR(3*2^61,0.5))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "CEILING(3*2^61,0.5)&\"z\"",
+   "powerbi": "6.9175290276411E+18z",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "ISERROR(CEILING(3*2^61,0.5))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "INT(3*2^61)&\"z\"",
+   "powerbi": "6917529027641081856z",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "ISERROR(INT(3*2^61))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "QUOTIENT(3*2^61,3)&\"z\"",
+   "powerbi": "2305843009213693952z",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "ISERROR(QUOTIENT(3*2^61,3))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "MROUND(3*2^61,3)&\"z\"",
+   "powerbi": "6917529027641081856z",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "ISERROR(MROUND(3*2^61,3))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "CONVERT(3*2^61,INTEGER)&\"z\"",
+   "powerbi": "6917529027641081856z",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "ISERROR(CONVERT(3*2^61,INTEGER))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "MROUND(2^52,3)&\"z\"",
+   "powerbi": "4503599627370495z",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "MROUND(2^52,7)&\"z\"",
+   "powerbi": "4503599627370494z",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "ISERROR(MROUND(2^52,7))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "MROUND(2^52,2)&\"z\"",
+   "powerbi": "4503599627370496z",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "MROUND(2^52,5)&\"z\"",
+   "powerbi": "4503599627370495z",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "MROUND(2^52,11)&\"z\"",
+   "powerbi": "4503599627370492z",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "ISERROR(MROUND(2^52,11))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "MROUND(2^52,0.5)&\"z\"",
+   "powerbi": "4.5035996273705E+15z",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "ISERROR(MROUND(2^52,0.5))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "MROUND(2^52,1.5)&\"z\"",
+   "powerbi": "4.5035996273705E+15z",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "ISERROR(MROUND(2^52,1.5))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "ISERROR(MROUND(2^52,-3))",
+   "powerbi": "True",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "MROUND(2^53,3)&\"z\"",
+   "powerbi": "9007199254740992z",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "MROUND(2^53,7)&\"z\"",
+   "powerbi": "9007199254740996z",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "ISERROR(MROUND(2^53,7))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "MROUND(2^53,2)&\"z\"",
+   "powerbi": "9007199254740992z",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "MROUND(2^53,5)&\"z\"",
+   "powerbi": "9007199254740996z",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "MROUND(2^53,11)&\"z\"",
+   "powerbi": "9007199254740996z",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "ISERROR(MROUND(2^53,11))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "MROUND(2^53,0.5)&\"z\"",
+   "powerbi": "9.00719925474099E+15z",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "ISERROR(MROUND(2^53,0.5))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "MROUND(2^53,1.5)&\"z\"",
+   "powerbi": "9.00719925474099E+15z",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "ISERROR(MROUND(2^53,1.5))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "ISERROR(MROUND(2^53,-3))",
+   "powerbi": "True",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "FLOOR(2^60,3)&\"z\"",
+   "powerbi": "1152921504606845952z",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "ISERROR(FLOOR(2^60,3))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "CEILING(2^60,3)&\"z\"",
+   "powerbi": "1152921504606845952z",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "ISERROR(CEILING(2^60,3))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "FLOOR(2^60,5)&\"z\"",
+   "powerbi": "1152921504606844928z",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "ISERROR(FLOOR(2^60,5))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "CEILING(2^60,5)&\"z\"",
+   "powerbi": "1152921504606844928z",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "ISERROR(CEILING(2^60,5))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "FLOOR(2^60,11)&\"z\"",
+   "powerbi": "1152921504606850048z",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "ISERROR(FLOOR(2^60,11))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "CEILING(2^60,11)&\"z\"",
+   "powerbi": "1152921504606850048z",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "ISERROR(CEILING(2^60,11))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "FLOOR(2^60,100)&\"z\"",
+   "powerbi": "1152921504606850048z",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "ISERROR(FLOOR(2^60,100))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "CEILING(2^60,100)&\"z\"",
+   "powerbi": "1152921504606850048z",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "ISERROR(CEILING(2^60,100))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "FLOOR(2^60,1E6)&\"z\"",
+   "powerbi": "1.152921504606E+18z",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "ISERROR(FLOOR(2^60,1E6))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "CEILING(2^60,1E6)&\"z\"",
+   "powerbi": "1.152921504607E+18z",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "ISERROR(CEILING(2^60,1E6))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "FLOOR(2^60,0.25)&\"z\"",
+   "powerbi": "1.15292150460685E+18z",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "ISERROR(FLOOR(2^60,0.25))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "CEILING(2^60,0.25)&\"z\"",
+   "powerbi": "1.15292150460685E+18z",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "ISERROR(CEILING(2^60,0.25))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "FLOOR(2^60,2.5)&\"z\"",
+   "powerbi": "1.15292150460685E+18z",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "ISERROR(FLOOR(2^60,2.5))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "CEILING(2^60,2.5)&\"z\"",
+   "powerbi": "1.15292150460685E+18z",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "ISERROR(CEILING(2^60,2.5))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "QUOTIENT(2^60,3)&\"z\"",
+   "powerbi": "384307168202282304z",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "ISERROR(QUOTIENT(2^60,3))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "QUOTIENT(2^60,7)&\"z\"",
+   "powerbi": "164703072086692416z",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "ISERROR(QUOTIENT(2^60,7))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "QUOTIENT(2^60,1E3)&\"z\"",
+   "powerbi": "1152921504606847z",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "ISERROR(QUOTIENT(2^60,1E3))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "QUOTIENT(2^60,0.5)&\"z\"",
+   "powerbi": "2305843009213693952z",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "ISERROR(QUOTIENT(2^60,0.5))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "FLOOR(2^61+2^55,3)&\"z\"",
+   "powerbi": "2341871806232657920z",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "ISERROR(FLOOR(2^61+2^55,3))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "CEILING(2^61+2^55,3)&\"z\"",
+   "powerbi": "2341871806232657920z",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "ISERROR(CEILING(2^61+2^55,3))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "FLOOR(2^61+2^55,5)&\"z\"",
+   "powerbi": "2341871806232659968z",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "ISERROR(FLOOR(2^61+2^55,5))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "CEILING(2^61+2^55,5)&\"z\"",
+   "powerbi": "2341871806232659968z",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "ISERROR(CEILING(2^61+2^55,5))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "FLOOR(2^61+2^55,11)&\"z\"",
+   "powerbi": "2341871806232662016z",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "ISERROR(FLOOR(2^61+2^55,11))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "CEILING(2^61+2^55,11)&\"z\"",
+   "powerbi": "2341871806232662016z",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "ISERROR(CEILING(2^61+2^55,11))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "FLOOR(2^61+2^55,100)&\"z\"",
+   "powerbi": "2341871806232659968z",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "ISERROR(FLOOR(2^61+2^55,100))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "CEILING(2^61+2^55,100)&\"z\"",
+   "powerbi": "2341871806232659968z",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "ISERROR(CEILING(2^61+2^55,100))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "FLOOR(2^61+2^55,1E6)&\"z\"",
+   "powerbi": "2.341871806232E+18z",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "ISERROR(FLOOR(2^61+2^55,1E6))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "CEILING(2^61+2^55,1E6)&\"z\"",
+   "powerbi": "2.341871806233E+18z",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "ISERROR(CEILING(2^61+2^55,1E6))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "FLOOR(2^61+2^55,0.25)&\"z\"",
+   "powerbi": "2.34187180623266E+18z",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "ISERROR(FLOOR(2^61+2^55,0.25))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "CEILING(2^61+2^55,0.25)&\"z\"",
+   "powerbi": "2.34187180623266E+18z",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "ISERROR(CEILING(2^61+2^55,0.25))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "FLOOR(2^61+2^55,2.5)&\"z\"",
+   "powerbi": "2.34187180623266E+18z",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "ISERROR(FLOOR(2^61+2^55,2.5))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "CEILING(2^61+2^55,2.5)&\"z\"",
+   "powerbi": "2.34187180623266E+18z",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "ISERROR(CEILING(2^61+2^55,2.5))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "QUOTIENT(2^61+2^55,3)&\"z\"",
+   "powerbi": "780623935410886016z",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "ISERROR(QUOTIENT(2^61+2^55,3))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "QUOTIENT(2^61+2^55,7)&\"z\"",
+   "powerbi": "334553115176094016z",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "ISERROR(QUOTIENT(2^61+2^55,7))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "QUOTIENT(2^61+2^55,1E3)&\"z\"",
+   "powerbi": "2341871806232658z",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "ISERROR(QUOTIENT(2^61+2^55,1E3))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "QUOTIENT(2^61+2^55,0.5)&\"z\"",
+   "powerbi": "4683743612465315840z",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "ISERROR(QUOTIENT(2^61+2^55,0.5))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "C",
+   "expr": "CONCATENATEX(Facts,IF.EAGER(1=1,Facts[Quantity],LEFT(\"a\",1)))",
+   "powerbi": "012345",
+   "now": ""
+  },
+  {
+   "part": "C",
+   "expr": "CONCATENATEX(FILTER(VALUES(Facts[Region]),TRUE()),IF(TRUE(),Facts[Region],1))",
+   "powerbi": "EastWestNorth",
+   "now": ""
+  },
+  {
+   "part": "C",
+   "expr": "CONCATENATEX(ALL(Facts[Region]),IF(TRUE(),Facts[Region],1))",
+   "powerbi": "EastWestNorth",
+   "now": ""
+  },
+  {
+   "part": "C",
+   "expr": "CONCATENATEX(VALUES(Facts[Region]),IF(TRUE(),Facts[Region],1))",
+   "powerbi": "EastWestNorth",
+   "now": ""
+  },
+  {
+   "part": "C",
+   "expr": "CONCATENATEX(ALL(Facts),IF(TRUE(),Facts[Region],1))",
+   "powerbi": "EastEastEastWestWestNorth",
+   "now": ""
+  },
+  {
+   "part": "C",
+   "expr": "CONCATENATEX(Facts,IF.EAGER(1=1,Facts[Quantity],UPPER(\"a\")))",
+   "powerbi": "012345",
+   "now": ""
+  },
+  {
+   "part": "C",
+   "expr": "CONCATENATEX(Facts,IF(1=1,-Facts[Quantity],Facts[Region]))",
+   "powerbi": "0-1-2-3-4-5",
+   "now": ""
+  },
+  {
+   "part": "C",
+   "expr": "CONCATENATEX(Facts,IF(1=1,Facts[Quantity],-(7)))",
+   "powerbi": "012345",
+   "now": ""
+  },
+  {
+   "part": "C",
+   "expr": "CONCATENATEX(SUMMARIZE(Facts,Facts[Region]),FIRSTNONBLANKVALUE(Facts[Region],MAX(Facts[Note])))",
+   "powerbi": "PaidPaidLate",
+   "now": ""
+  },
+  {
+   "part": "C",
+   "expr": "CONCATENATEX(Facts,IF(1=1,Facts[Region],-Facts[Quantity]))",
+   "powerbi": "EastEastEastWestWestNorth",
+   "now": ""
+  },
+  {
+   "part": "C",
+   "expr": "CONCATENATEX(SUMMARIZE(Facts,Facts[Region]),FIRSTNONBLANK(Facts[Region],1))",
+   "powerbi": "EastWestNorth",
+   "now": ""
+  },
+  {
+   "part": "C",
+   "expr": "CONCATENATEX(Facts,IF.EAGER(1=1,Facts[Quantity],FIXED(1)))",
+   "powerbi": "012345",
+   "now": ""
+  },
+  {
+   "part": "C",
+   "expr": "CONCATENATEX(Facts,IF.EAGER(1=1,-Facts[Quantity],Facts[Sales]))",
+   "powerbi": "0-1-2-3-4-5",
+   "now": ""
+  },
+  {
+   "part": "C",
+   "expr": "CONCATENATEX(Facts,IF(1=1,Facts[Region],Facts[Sales]))",
+   "powerbi": "EastEastEastWestWestNorth",
+   "now": ""
+  },
+  {
+   "part": "C",
+   "expr": "CONCATENATEX(Facts,IF(1=1,Facts[Quantity],(Facts[Quantity])))",
+   "powerbi": "012345",
+   "now": ""
+  },
+  {
+   "part": "C",
+   "expr": "CONCATENATEX(CALCULATETABLE(Facts,Facts[Region]=\"West\"),IF(TRUE(),Facts[Region],1))",
+   "powerbi": "WestWest",
+   "now": ""
+  },
+  {
+   "part": "C",
+   "expr": "CONCATENATEX(Facts,IF.EAGER(1=1,Facts[Region],-Facts[Quantity]))",
+   "powerbi": "EastEastEastWestWestNorth",
+   "now": ""
+  },
+  {
+   "part": "C",
+   "expr": "CONCATENATEX(Facts,IF.EAGER(1=1,NOT(Facts[Quantity]>2),Facts[Region]))",
+   "powerbi": "TRUETRUETRUEFALSEFALSEFALSE",
+   "now": ""
+  },
+  {
+   "part": "C",
+   "expr": "CONCATENATEX(Facts,IF.EAGER(1=1,Facts[Sales],Facts[Sales]))",
+   "powerbi": "-1.502.510.520",
+   "now": ""
+  },
+  {
+   "part": "C",
+   "expr": "CONCATENATEX(Facts,IF(1=1,Facts[Region],BLANK()))",
+   "powerbi": "EastEastEastWestWestNorth",
+   "now": ""
+  },
+  {
+   "part": "C",
+   "expr": "CONCATENATEX(CROSSJOIN(VALUES(Facts[Region]),VALUES(Facts[Note])),FIRSTNONBLANKVALUE(Facts[Region],MAX(Facts[Note])))",
+   "powerbi": "PaidPaidPaidPaidLate",
+   "now": ""
+  },
+  {
+   "part": "C",
+   "expr": "CONCATENATEX(Facts,IF(1=1,Facts[Region],(\"a\")))",
+   "powerbi": "EastEastEastWestWestNorth",
+   "now": ""
+  },
+  {
+   "part": "C",
+   "expr": "CONCATENATEX(VALUES(Facts),IF(TRUE(),Facts[Region],1))",
+   "powerbi": "EastEastEastWestWestNorth",
+   "now": ""
+  },
+  {
+   "part": "C",
+   "expr": "CONCATENATEX(FILTER(Facts,Facts[Quantity]>2),IF(TRUE(),Facts[Region],1))",
+   "powerbi": "EastWestNorth",
+   "now": ""
+  },
+  {
+   "part": "C",
+   "expr": "CONCATENATEX(FILTER(Facts,FALSE()),FIRSTNONBLANK(Facts[Region],1))",
+   "powerbi": "BLANK",
+   "now": ""
+  },
+  {
+   "part": "C",
+   "expr": "CONCATENATEX(Facts,IF.EAGER(1=1,Facts[Region],Facts[Quantity]))",
+   "powerbi": "EastEastEastWestWestNorth",
+   "now": ""
+  },
+  {
+   "part": "C",
+   "expr": "CONCATENATEX(CALCULATETABLE(Facts,Facts[Region]=\"West\"),MIN(\"a\",Facts[Region]))",
+   "powerbi": "aa",
+   "now": ""
+  },
+  {
+   "part": "C",
+   "expr": "CONCATENATEX(GENERATE(VALUES(Facts[Note]),VALUES(Facts[Region])),IF(TRUE(),Facts[Region],1))",
+   "powerbi": "EastEastEastWestWestWestNorthNorthNorth",
+   "now": ""
+  },
+  {
+   "part": "C",
+   "expr": "CONCATENATEX(Facts,IF(FALSE(),Facts[Region],TIME(1,0,0)))",
+   "powerbi": "1:00:00 AM1:00:00 AM1:00:00 AM1:00:00 AM1:00:00 AM1:00:00 AM",
+   "now": ""
+  },
+  {
+   "part": "C",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(Facts[Region]),IF(TRUE(),Facts[Region],1))",
+   "powerbi": "EastWestNorth",
+   "now": ""
+  },
+  {
+   "part": "C",
+   "expr": "CONCATENATEX(ALLEXCEPT(Facts,Facts[Note]),IF(TRUE(),Facts[Region],1))",
+   "powerbi": "EastWestEastNorthWestEast",
+   "now": ""
+  },
+  {
+   "part": "C",
+   "expr": "CONCATENATEX(Facts,IF.EAGER(1=1,Facts[Region],FIXED(1)))",
+   "powerbi": "EastEastEastWestWestNorth",
+   "now": ""
+  },
+  {
+   "part": "C",
+   "expr": "CONCATENATEX(Facts,IF(TRUE(),TIME(1,0,0),Facts[Sales]))",
+   "powerbi": "4.16666666666667E-024.16666666666667E-024.16666666666667E-02",
+   "now": ""
+  },
+  {
+   "part": "C",
+   "expr": "CONCATENATEX(Facts,IF(1=1,Facts[Region],-(7)))",
+   "powerbi": "EastEastEastWestWestNorth",
+   "now": ""
+  },
+  {
+   "part": "C",
+   "expr": "CONCATENATEX(SUMMARIZE(Facts,Facts[Region]),MAX(\"a\",\"b\"))",
+   "powerbi": "bbb",
+   "now": ""
+  },
+  {
+   "part": "C",
+   "expr": "CONCATENATEX(Facts,IF.EAGER(1=1,Facts[Quantity],ROUND(2.5,0)))",
+   "powerbi": "012345",
+   "now": ""
+  },
+  {
+   "part": "C",
+   "expr": "CONCATENATEX(Facts,IF.EAGER(1=1,Facts[Region],Facts[Sales]))",
+   "powerbi": "EastEastEastWestWestNorth",
+   "now": ""
+  },
+  {
+   "part": "C",
+   "expr": "CONCATENATEX(Facts,IF.EAGER(1=1,Facts[Region],PI()))",
+   "powerbi": "EastEastEastWestWestNorth",
+   "now": ""
+  },
+  {
+   "part": "C",
+   "expr": "CONCATENATEX(CALCULATETABLE(Facts),IF(TRUE(),Facts[Region],1))",
+   "powerbi": "EastEastEastWestWestNorth",
+   "now": ""
+  },
+  {
+   "part": "C",
+   "expr": "CONCATENATEX(CROSSJOIN(VALUES(Facts[Region]),VALUES(Facts[Note])),IF(TRUE(),Facts[Region],1))",
+   "powerbi": "EastWestNorthEastWestNorthEastWestNorth",
+   "now": ""
+  },
+  {
+   "part": "C",
+   "expr": "CONCATENATEX(Facts,IF(1=1,Facts[Region],NOT(0)))",
+   "powerbi": "EastEastEastWestWestNorth",
+   "now": ""
+  },
+  {
+   "part": "C",
+   "expr": "CONCATENATEX(Facts,IF(1=1,Facts[Quantity],NOT(Facts[Quantity]>2)))",
+   "powerbi": "012345",
+   "now": ""
+  },
+  {
+   "part": "C",
+   "expr": "CONCATENATEX(Facts,IF.EAGER(1=1,Facts[Quantity],2.5))",
+   "powerbi": "012345",
+   "now": ""
+  },
+  {
+   "part": "C",
+   "expr": "CONCATENATEX(Facts,IF.EAGER(1=1,Facts[Quantity],TRUE()))",
+   "powerbi": "012345",
+   "now": ""
+  },
+  {
+   "part": "C",
+   "expr": "CONCATENATEX(CALCULATETABLE(Facts,Facts[Region]=\"West\"),LASTNONBLANK(Facts[Note],1))",
+   "powerbi": "Paid",
+   "now": ""
+  },
+  {
+   "part": "C",
+   "expr": "CONCATENATEX(Facts,IF(1=1,Facts[Region],(Facts[Quantity])))",
+   "powerbi": "EastEastEastWestWestNorth",
+   "now": ""
+  },
+  {
+   "part": "C",
+   "expr": "CONCATENATEX(SUMMARIZE(Facts,Facts[Region]),IF(TRUE(),Facts[Region],1))",
+   "powerbi": "EastWestNorth",
+   "now": ""
+  },
+  {
+   "part": "C",
+   "expr": "CONCATENATEX(Facts,IF(1=1,Facts[Quantity],NOT(FALSE())))",
+   "powerbi": "012345",
+   "now": ""
+  },
+  {
+   "part": "C",
+   "expr": "CONCATENATEX(Facts,IF.EAGER(1=1,Facts[Region],NOT(0)))",
+   "powerbi": "EastEastEastWestWestNorth",
+   "now": ""
+  },
+  {
+   "part": "C",
+   "expr": "CONCATENATEX(FILTER(Facts,TRUE()),IF(TRUE(),Facts[Region],1))",
+   "powerbi": "EastEastEastWestWestNorth",
+   "now": ""
+  },
+  {
+   "part": "C",
+   "expr": "CONCATENATEX(Facts,MAX(\"a\",\"b\"))",
+   "powerbi": "bbbbbb",
+   "now": ""
+  },
+  {
+   "part": "C",
+   "expr": "CONCATENATEX(Facts,IF(1=1,Facts[Region],TIME(1,0,0)))",
+   "powerbi": "EastEastEastWestWestNorth",
+   "now": ""
+  },
+  {
+   "part": "C",
+   "expr": "CONCATENATEX(FILTER(ALL(Facts),TRUE()),IF(TRUE(),Facts[Region],1))",
+   "powerbi": "EastEastEastWestWestNorth",
+   "now": ""
+  },
+  {
+   "part": "C",
+   "expr": "CONCATENATEX(EXCEPT(Facts,FILTER(Facts,FALSE())),IF(TRUE(),Facts[Region],1))",
+   "powerbi": "EastWestEastNorthWestEast",
+   "now": ""
+  },
+  {
+   "part": "C",
+   "expr": "CONCATENATEX(Facts,IF.EAGER(1=1,Facts[Region],BLANK()))",
+   "powerbi": "EastEastEastWestWestNorth",
+   "now": ""
+  },
+  {
+   "part": "C",
+   "expr": "CONCATENATEX(UNION(Facts,Facts),IF(TRUE(),Facts[Region],1))",
+   "powerbi": "EastEastEastWestWestNorthEastEastEastWestWestNorth",
+   "now": ""
+  },
+  {
+   "part": "C",
+   "expr": "CONCATENATEX(Facts,IF(1=1,NOT(Facts[Quantity]>2),Facts[Sales]))",
+   "powerbi": "TRUETRUETRUEFALSEFALSEFALSE",
+   "now": ""
+  },
+  {
+   "part": "C",
+   "expr": "CONCATENATEX(Facts,MIN(\"a\",Facts[Region]))",
+   "powerbi": "aaaaaa",
+   "now": ""
+  },
+  {
+   "part": "C",
+   "expr": "CONCATENATEX(VALUES(Facts[Region]),FIRSTNONBLANK(Facts[Region],1))",
+   "powerbi": "EastWestNorth",
+   "now": ""
+  },
+  {
+   "part": "C",
+   "expr": "CONCATENATEX(TOPN(3,Facts,Facts[Quantity]),IF(TRUE(),Facts[Region],1))",
+   "powerbi": "WestNorthEast",
+   "now": ""
+  },
+  {
+   "part": "C",
+   "expr": "CONCATENATEX(ALL(Facts[Region],Facts[Note]),IF(TRUE(),Facts[Region],1))",
+   "powerbi": "EastWestEastWestNorth",
+   "now": ""
+  },
+  {
+   "part": "C",
+   "expr": "CONCATENATEX(Facts,IF(1=1,Facts[Region],2.5))",
+   "powerbi": "EastEastEastWestWestNorth",
+   "now": ""
+  },
+  {
+   "part": "C",
+   "expr": "CONCATENATEX(CALCULATETABLE(VALUES(Facts[Region]),Facts[Quantity]>2),IF(TRUE(),Facts[Region],1))",
+   "powerbi": "EastWestNorth",
+   "now": ""
+  },
+  {
+   "part": "C",
+   "expr": "CONCATENATEX(TOPN(1,Facts),IF(TRUE(),Facts[Region],1))",
+   "powerbi": "East",
+   "now": ""
+  },
+  {
+   "part": "C",
+   "expr": "CONCATENATEX(ADDCOLUMNS(Facts,\"w\",1),IF(TRUE(),Facts[Region],1))",
+   "powerbi": "EastEastEastWestWestNorth",
+   "now": ""
+  },
+  {
+   "part": "C",
+   "expr": "CONCATENATEX(Facts,MAX(Facts[Region],\"a\"))",
+   "powerbi": "EastEastEastWestWestNorth",
+   "now": ""
+  },
+  {
+   "part": "C",
+   "expr": "CONCATENATEX(ALLNOBLANKROW(Facts),IF(TRUE(),Facts[Region],1))",
+   "powerbi": "EastEastEastWestWestNorth",
+   "now": ""
+  },
+  {
+   "part": "C",
+   "expr": "CONCATENATEX(Facts,IF(1=1,NOT(Facts[Quantity]>2),Facts[Region]))",
+   "powerbi": "TRUETRUETRUEFALSEFALSEFALSE",
+   "now": ""
+  },
+  {
+   "part": "C",
+   "expr": "CONCATENATEX(Facts,IF(1=1,Facts[Note],Facts[Region]))",
+   "powerbi": "PaidPaidPaidLate",
+   "now": ""
+  },
+  {
+   "part": "C",
+   "expr": "CONCATENATEX(CALCULATETABLE(Facts,Facts[Region]=\"East\"),MAX(\"a\",\"b\"))",
+   "powerbi": "bbb",
+   "now": ""
+  },
+  {
+   "part": "C",
+   "expr": "CONCATENATEX(CROSSJOIN(VALUES(Facts[Region]),VALUES(Facts[Note])),MAX(Facts[Region],\"a\"))",
+   "powerbi": "EastWestNorthEastWestNorthEastWestNorth",
+   "now": ""
+  },
+  {
+   "part": "C",
+   "expr": "CONCATENATEX(DISTINCT(Facts),IF(TRUE(),Facts[Region],1))",
+   "powerbi": "EastWestEastNorthWestEast",
+   "now": ""
+  },
+  {
+   "part": "C",
+   "expr": "CONCATENATEX(Facts,IF(TRUE(),DATE(2020,1,1),Facts[Sales]))",
+   "powerbi": "438314383143831438314383143831",
+   "now": ""
+  },
+  {
+   "part": "C",
+   "expr": "CONCATENATEX(Facts,IF(1=1,Facts[Quantity],TIME(1,0,0)))",
+   "powerbi": "012345",
+   "now": ""
+  },
+  {
+   "part": "C",
+   "expr": "CONCATENATEX(Facts,IF.EAGER(1=1,Facts[Region],TIME(1,0,0)))",
+   "powerbi": "EastEastEastWestWestNorth",
+   "now": ""
+  },
+  {
+   "part": "C",
+   "expr": "CONCATENATEX(Facts,IF(1=1,Facts[Region],+7))",
+   "powerbi": "EastEastEastWestWestNorth",
+   "now": ""
+  },
+  {
+   "part": "C",
+   "expr": "CONCATENATEX(Facts,IF.EAGER(1=1,Facts[Region],DATE(2020,1,1)+1))",
+   "powerbi": "EastEastEastWestWestNorth",
+   "now": ""
+  },
+  {
+   "part": "C",
+   "expr": "CONCATENATEX(Facts,IF.EAGER(1=1,Facts[Region],(\"a\")))",
+   "powerbi": "EastEastEastWestWestNorth",
+   "now": ""
+  },
+  {
+   "part": "C",
+   "expr": "CONCATENATEX(Facts,IF(1=1,Facts[Region],-7))",
+   "powerbi": "EastEastEastWestWestNorth",
+   "now": ""
+  },
+  {
+   "part": "C",
+   "expr": "CONCATENATEX(Facts,IF(1=1,Facts[Region],NOT(Facts[Quantity]>2)))",
+   "powerbi": "EastEastEastWestWestNorth",
+   "now": ""
+  },
+  {
+   "part": "C",
+   "expr": "CONCATENATEX(Facts,IF(1=1,Facts[Quantity],DATE(2020,1,1)))",
+   "powerbi": "012345",
+   "now": ""
+  },
+  {
+   "part": "C",
+   "expr": "CONCATENATEX(Facts,IF(1=1,Facts[Region],(7)))",
+   "powerbi": "EastEastEastWestWestNorth",
+   "now": ""
+  },
+  {
+   "part": "C",
+   "expr": "CONCATENATEX(ALLSELECTED(Facts),IF(TRUE(),Facts[Region],1))",
+   "powerbi": "EastEastEastWestWestNorth",
+   "now": ""
+  },
+  {
+   "part": "C",
+   "expr": "CONCATENATEX(Facts,IF.EAGER(1=1,Facts[Region],LEFT(\"a\",1)))",
+   "powerbi": "EastEastEastWestWestNorth",
+   "now": ""
+  },
+  {
+   "part": "C",
+   "expr": "CONCATENATEX(Facts,FIRSTNONBLANKVALUE(Facts[Region],MAX(Facts[Note])))",
+   "powerbi": "PaidPaidPaidPaidPaidLate",
+   "now": ""
+  },
+  {
+   "part": "C",
+   "expr": "CONCATENATEX(DISTINCT(Facts[Region]),IF(TRUE(),Facts[Region],1))",
+   "powerbi": "EastWestNorth",
+   "now": ""
+  },
+  {
+   "part": "C",
+   "expr": "CONCATENATEX(Facts,IF.EAGER(1=1,Facts[Quantity],(7)))",
+   "powerbi": "012345",
+   "now": ""
+  },
+  {
+   "part": "C",
+   "expr": "CONCATENATEX(Facts,IF(1=1,Facts[Region],TRUE()&&FALSE()))",
+   "powerbi": "EastEastEastWestWestNorth",
+   "now": ""
+  },
+  {
+   "part": "C",
+   "expr": "CONCATENATEX(Facts,IF.EAGER(1=1,Facts[Quantity],NOT(Facts[Quantity]>2)))",
+   "powerbi": "012345",
+   "now": ""
+  },
+  {
+   "part": "C",
+   "expr": "CONCATENATEX(Facts,IF(1=1,Facts[Region],VALUE(\"1\")))",
+   "powerbi": "EastEastEastWestWestNorth",
+   "now": ""
+  },
+  {
+   "part": "C",
+   "expr": "CONCATENATEX(Facts,IF(TRUE(),DATE(2020,1,1),Facts[Region]))",
+   "powerbi": "1/1/20201/1/20201/1/20201/1/20201/1/20201/1/2020",
+   "now": ""
+  },
+  {
+   "part": "C",
+   "expr": "CONCATENATEX(Facts,IF.EAGER(1=1,Facts[Quantity],-Facts[Quantity]))",
+   "powerbi": "012345",
+   "now": ""
+  },
+  {
+   "part": "C",
+   "expr": "CONCATENATEX(INTERSECT(Facts,Facts),IF(TRUE(),Facts[Region],1))",
+   "powerbi": "EastWestEastNorthWestEast",
+   "now": ""
+  },
+  {
+   "part": "C",
+   "expr": "CONCATENATEX(SUMMARIZE(Facts,Facts[Region],Facts[Note]),IF(TRUE(),Facts[Region],1))",
+   "powerbi": "EastWestEastWestNorth",
+   "now": ""
+  },
+  {
+   "part": "C",
+   "expr": "CONCATENATEX(ALL(Facts),LASTNONBLANK(Facts[Note],1))",
+   "powerbi": "PaidPaidPaidLate",
+   "now": ""
+  },
+  {
+   "part": "C",
+   "expr": "CONCATENATEX(Facts,IF(1=1,DATE(2020,1,1),Facts[Sales]))",
+   "powerbi": "438314383143831438314383143831",
+   "now": ""
+  },
+  {
+   "part": "C",
+   "expr": "CONCATENATEX(Facts,IF(1=1,Facts[Region],ROUND(2.5,0)))",
+   "powerbi": "EastEastEastWestWestNorth",
+   "now": ""
+  },
+  {
+   "part": "C",
+   "expr": "CONCATENATEX(TOPN(2,Facts,Facts[Quantity]),COALESCE(BLANK(),DATE(2020,1,1)+Facts[Quantity],\"a\"),\"|\")",
+   "powerbi": "1/5/2020|1/6/2020",
+   "now": ""
+  },
+  {
+   "part": "C",
+   "expr": "CONCATENATEX(CROSSJOIN(VALUES(Facts[Region]),VALUES(Facts[Note])),COALESCE(BLANK(),BLANK(),MAX(Facts[Quantity])),\"|\")",
+   "powerbi": "5|5|5|5|5|5|5|5|5",
+   "now": ""
+  },
+  {
+   "part": "C",
+   "expr": "CONCATENATEX(EXCEPT(Facts,Facts),COALESCE(BLANK(),BLANK()),\"|\")",
+   "powerbi": "BLANK",
+   "now": ""
+  },
+  {
+   "part": "C",
+   "expr": "CONCATENATEX(TOPN(2,Facts,Facts[Quantity]),VAR x=INT(2.5) RETURN IF(BLANK(),x,-Facts[Quantity]),\"|\")",
+   "powerbi": "-4|-5",
+   "now": ""
+  },
+  {
+   "part": "C",
+   "expr": "CONCATENATEX(FILTER(Facts,Facts[Quantity]>2),IF.EAGER(1/0,UPPER(Facts[Region]),0/0),\"|\")",
+   "powerbi": "EAST|WEST|NORTH",
+   "now": ""
+  },
+  {
+   "part": "C",
+   "expr": "CONCATENATEX(Facts,IF(\"TRUE\",\"\",Facts[Quantity]),\"|\")",
+   "powerbi": "|||||",
+   "now": ""
+  },
+  {
+   "part": "C",
+   "expr": "CONCATENATEX(Facts,COALESCE(BLANK(),TIMEVALUE(\"06:00:00\"),CURRENCY(2)),\"|\")",
+   "powerbi": "0.25|0.25|0.25|0.25|0.25|0.25",
+   "now": ""
+  },
+  {
+   "part": "C",
+   "expr": "CONCATENATEX(Facts,COALESCE(BLANK(),1,DATE(2020,1,1)),\"|\")",
+   "powerbi": "1|1|1|1|1|1",
+   "now": ""
+  },
+  {
+   "part": "C",
+   "expr": "CONCATENATEX(Facts,COALESCE(BLANK(),MAX(Facts[Quantity]),\"5\"),\"|\")",
+   "powerbi": "5|5|5|5|5|5",
+   "now": ""
+  },
+  {
+   "part": "C",
+   "expr": "CONCATENATEX(CALCULATETABLE(Facts,Facts[Region]=\"East\"),COALESCE(TIME(6,0,0),Facts[Region]),\"|\")",
+   "powerbi": "6:00:00 AM|6:00:00 AM|6:00:00 AM",
+   "now": ""
+  },
+  {
+   "part": "C",
+   "expr": "CONCATENATEX(Facts,COALESCE(BLANK(),MAX(DATE(2020,1,1),DATE(2021,1,1)),TRUE()),\"|\")",
+   "powerbi": "1/1/2021|1/1/2021|1/1/2021|1/1/2021|1/1/2021|1/1/2021",
+   "now": ""
+  },
+  {
+   "part": "C",
+   "expr": "CONCATENATEX(Facts,COALESCE(BLANK(),NOT(TRUE()),Facts[Quantity]/0),\"|\")",
+   "powerbi": "FALSE|FALSE|FALSE|FALSE|FALSE|FALSE",
+   "now": ""
+  },
+  {
+   "part": "C",
+   "expr": "CONCATENATEX(DISTINCT(Facts),VAR x=-1/0 RETURN IF(TRUE()&&FALSE(),x,Facts[Quantity]),\"|\")",
+   "powerbi": "2|3|1|4|0|5",
+   "now": ""
+  },
+  {
+   "part": "C",
+   "expr": "CONCATENATEX(CALCULATETABLE(Facts,Facts[Region]=\"East\"),COALESCE(BLANK(),TIME(6,0,0),MAX(Facts[Quantity])),\"|\")",
+   "powerbi": "0.25|0.25|0.25",
+   "now": ""
+  },
+  {
+   "part": "C",
+   "expr": "CONCATENATEX(TOPN(2,Facts,Facts[Quantity]),IF.EAGER(\"\",CURRENCY(3),Facts[Note]),\"|\")",
+   "powerbi": "Late|",
+   "now": ""
+  },
+  {
+   "part": "C",
+   "expr": "CONCATENATEX(Facts,IF(LEN(\"a\"),FALSE(),Facts[Sales]/0),\"|\")",
+   "powerbi": "FALSE|FALSE|FALSE|FALSE|FALSE|FALSE",
+   "now": ""
+  },
+  {
+   "part": "C",
+   "expr": "CONCATENATEX(ALL(Facts),IF.EAGER(1/0,2.5,UPPER(Facts[Region])),\"|\")",
+   "powerbi": "2.5|2.5|2.5|2.5|2.5|2.5",
+   "now": ""
+  },
+  {
+   "part": "C",
+   "expr": "CONCATENATEX(FILTER(Facts,Facts[Region]=\"East\"),COALESCE(MAX(Facts[Region]),Facts[Quantity]/0),\"|\")",
+   "powerbi": "West|West|West",
+   "now": ""
+  },
+  {
+   "part": "C",
+   "expr": "CONCATENATEX(ALL(Facts),COALESCE(BLANK(),\"5\",-1/0),\"|\")",
+   "powerbi": "5|5|5|5|5|5",
+   "now": ""
+  },
+  {
+   "part": "C",
+   "expr": "CONCATENATEX(Facts,COALESCE(BLANK(),-1/0,\"\"),\"|\")",
+   "powerbi": "-inf|-inf|-inf|-inf|-inf|-inf",
+   "now": ""
+  },
+  {
+   "part": "C",
+   "expr": "CONCATENATEX(Facts,COALESCE(BLANK(),TIME(6,0,0)+TRUE(),SUM(Facts[Quantity])),\"|\")",
+   "powerbi": "1.25|1.25|1.25|1.25|1.25|1.25",
+   "now": ""
+  },
+  {
+   "part": "C",
+   "expr": "CONCATENATEX(ALL(Facts),COALESCE(BLANK(),BLANK()),\"|\")",
+   "powerbi": "|||||",
+   "now": ""
+  },
+  {
+   "part": "C",
+   "expr": "CONCATENATEX(DISTINCT(Facts),IF.EAGER(COUNTROWS(Facts)>3,DATE(2020,1,1)+Facts[Quantity],Facts[Quantity]/0),\"|\")",
+   "powerbi": "43833|43834|43832|43835|43831|43836",
+   "now": ""
+  },
+  {
+   "part": "C",
+   "expr": "CONCATENATEX(TOPN(2,Facts,Facts[Quantity]),IF.EAGER(COUNTROWS(Facts)>3,\"a\",-Facts[Quantity]),\"|\")",
+   "powerbi": "a|a",
+   "now": ""
+  },
+  {
+   "part": "C",
+   "expr": "CONCATENATEX(FILTER(Facts,FALSE()),COALESCE(BLANK(),1,1),\"|\")",
+   "powerbi": "BLANK",
+   "now": ""
+  },
+  {
+   "part": "C",
+   "expr": "CONCATENATEX(CROSSJOIN(VALUES(Facts[Region]),VALUES(Facts[Note])),SWITCH(TRUE(),TRUE(),Facts[Note],TRUE()),\"|\")",
+   "powerbi": "|||Paid|Paid|Paid|Late|Late|Late",
+   "now": ""
+  },
+  {
+   "part": "C",
+   "expr": "CONCATENATEX(Facts,COALESCE(BLANK(),DATE(2020,1,1),FORMAT(1,\"0\")),\"|\")",
+   "powerbi": "1/1/2020|1/1/2020|1/1/2020|1/1/2020|1/1/2020|1/1/2020",
+   "now": ""
+  },
+  {
+   "part": "C",
+   "expr": "CONCATENATEX(TOPN(2,Facts,Facts[Quantity]),IF(MAX(Facts[Quantity])>3,-Facts[Quantity],UPPER(Facts[Region])),\"|\")",
+   "powerbi": "-4|-5",
+   "now": ""
+  },
+  {
+   "part": "C",
+   "expr": "CONCATENATEX(DISTINCT(Facts),IFERROR(Facts[Quantity],-Facts[Quantity]),\"|\")",
+   "powerbi": "2|3|1|4|0|5",
+   "now": ""
+  },
+  {
+   "part": "C",
+   "expr": "CONCATENATEX(CROSSJOIN(VALUES(Facts[Region]),VALUES(Facts[Note])),IF(0/0,Facts[Region],1=1),\"|\")",
+   "powerbi": "East|West|North|East|West|North|East|West|North",
+   "now": ""
+  },
+  {
+   "part": "C",
+   "expr": "CONCATENATEX(DISTINCT(Facts),IF(ISBLANK(Facts[Sales]),1+1,TIME(6,0,0)),\"|\")",
+   "powerbi": "0.25|0.25|0.25|2|0.25|0.25",
+   "now": ""
+  },
+  {
+   "part": "C",
+   "expr": "CONCATENATEX(FILTER(Facts,Facts[Region]=\"East\"),IF.EAGER(UPPER(\"true\"),DATE(2020,1,1)+Facts[Quantity],Facts[Note]),\"|\")",
+   "powerbi": "1/2/2020|1/3/2020|1/6/2020",
+   "now": ""
+  },
+  {
+   "part": "C",
+   "expr": "CONCATENATEX(TOPN(2,Facts,Facts[Quantity]),COALESCE(BLANK(),CURRENCY(3),Facts[Quantity]>2),\"|\")",
+   "powerbi": "3|3",
+   "now": ""
+  },
+  {
+   "part": "C",
+   "expr": "CONCATENATEX(TOPN(2,Facts,Facts[Quantity]),IF.EAGER(Facts[Region]=\"East\",Facts[Region],\"5\"),\"|\")",
+   "powerbi": "5|East",
+   "now": ""
+  },
+  {
+   "part": "C",
+   "expr": "CONCATENATEX(CROSSJOIN(VALUES(Facts[Region]),VALUES(Facts[Note])),COALESCE(BLANK(),TRUE(),CURRENCY(3)),\"|\")",
+   "powerbi": "TRUE|TRUE|TRUE|TRUE|TRUE|TRUE|TRUE|TRUE|TRUE",
+   "now": ""
+  },
+  {
+   "part": "C",
+   "expr": "CONCATENATEX(TOPN(2,Facts,Facts[Quantity]),SWITCH(TRUE(),Facts[Region]=\"East\",-Facts[Quantity],TRUE()),\"|\")",
+   "powerbi": "TRUE|-5",
+   "now": ""
+  },
+  {
+   "part": "C",
+   "expr": "CONCATENATEX(TOPN(2,Facts,Facts[Quantity]),COALESCE(Facts[Sales],DATE(2020,1,1)),\"|\")",
+   "powerbi": "43831|2.5",
+   "now": ""
+  },
+  {
+   "part": "C",
+   "expr": "CONCATENATEX(TOPN(2,Facts,Facts[Quantity]),COALESCE(UPPER(Facts[Region]),1=1),\"|\")",
+   "powerbi": "NORTH|EAST",
+   "now": ""
+  },
+  {
+   "part": "C",
+   "expr": "CONCATENATEX(EXCEPT(Facts,Facts),COALESCE(BLANK(),FALSE(),NOT(TRUE())),\"|\")",
+   "powerbi": "BLANK",
+   "now": ""
+  },
+  {
+   "part": "C",
+   "expr": "CONCATENATEX(ALL(Facts),IF(INT(1.5),Facts[Sales]/0,DATE(2020,1,1)+Facts[Quantity]),\"|\")",
+   "powerbi": "|-inf|-nan(ind)|inf|inf|inf",
+   "now": ""
+  },
+  {
+   "part": "C",
+   "expr": "CONCATENATEX(Facts,COALESCE(BLANK(),DATE(2020,1,1)+Facts[Quantity],Facts[Region]),\"|\")",
+   "powerbi": "1/1/2020|1/2/2020|1/3/2020|1/4/2020|1/5/2020|1/6/2020",
+   "now": ""
+  },
+  {
+   "part": "C",
+   "expr": "CONCATENATEX(Facts,SWITCH(TRUE(),FALSE(),-Facts[Quantity],Facts[Quantity]>2),\"|\")",
+   "powerbi": "FALSE|FALSE|FALSE|TRUE|TRUE|TRUE",
+   "now": ""
+  },
+  {
+   "part": "C",
+   "expr": "CONCATENATEX(CROSSJOIN(VALUES(Facts[Region]),VALUES(Facts[Note])),COALESCE(BLANK(),1=1),\"|\")",
+   "powerbi": "TRUE|TRUE|TRUE|TRUE|TRUE|TRUE|TRUE|TRUE|TRUE",
+   "now": ""
+  },
+  {
+   "part": "C",
+   "expr": "CONCATENATEX(FILTER(Facts,Facts[Quantity]>2),IF.EAGER(UPPER(\"true\"),Facts[Quantity]>2,\"a\"),\"|\")",
+   "powerbi": "TRUE|TRUE|TRUE",
+   "now": ""
+  },
+  {
+   "part": "C",
+   "expr": "CONCATENATEX(CALCULATETABLE(Facts,Facts[Region]=\"East\"),SWITCH(TRUE(),COUNTROWS(Facts)>3,-Facts[Quantity],\"5\"),\"|\")",
+   "powerbi": "-1|-2|-5",
+   "now": ""
+  },
+  {
+   "part": "C",
+   "expr": "CONCATENATEX(FILTER(Facts,Facts[Region]=\"East\"),VAR x=UPPER(Facts[Region]) RETURN IF(1/0,x,-Facts[Quantity]),\"|\")",
+   "powerbi": "EAST|EAST|EAST",
+   "now": ""
+  },
+  {
+   "part": "C",
+   "expr": "CONCATENATEX(TOPN(2,Facts,Facts[Quantity]),VAR x=Facts[Region] RETURN IF(1=1,x,Facts[Note]),\"|\")",
+   "powerbi": "North|East",
+   "now": ""
+  },
+  {
+   "part": "C",
+   "expr": "CONCATENATEX(Facts,COALESCE(BLANK(),DATE(2020,1,1)*1,BLANK()),\"|\")",
+   "powerbi": "43831|43831|43831|43831|43831|43831",
+   "now": ""
+  },
+  {
+   "part": "C",
+   "expr": "CONCATENATEX(ADDCOLUMNS(Facts,\"z\",1),COALESCE(BLANK(),1,NOT(TRUE())),\"|\")",
+   "powerbi": "1|1|1|1|1|1",
+   "now": ""
+  },
+  {
+   "part": "C",
+   "expr": "CONCATENATEX(DISTINCT(Facts),SWITCH(TRUE(),Facts[Quantity]>2,-1/0,TRUE()),\"|\")",
+   "powerbi": "TRUE|-inf|TRUE|-inf|TRUE|-inf",
+   "now": ""
+  },
+  {
+   "part": "C",
+   "expr": "CONCATENATEX(TOPN(2,Facts,Facts[Quantity]),IF(1/0,NOT(TRUE()),Facts[Sales]),\"|\")",
+   "powerbi": "FALSE|FALSE",
+   "now": ""
+  },
+  {
+   "part": "C",
+   "expr": "CONCATENATEX(DISTINCT(Facts),COALESCE(BLANK(),1+1,INT(2.5)),\"|\")",
+   "powerbi": "2|2|2|2|2|2",
+   "now": ""
+  },
+  {
+   "part": "C",
+   "expr": "CONCATENATEX(Facts,COALESCE(BLANK(),COUNTROWS(Facts),DATE(2020,1,1)+0.5*2),\"|\")",
+   "powerbi": "6|6|6|6|6|6",
+   "now": ""
+  },
+  {
+   "part": "C",
+   "expr": "CONCATENATEX(SUMMARIZE(Facts,Facts[Region]),IF(\"\",UPPER(Facts[Region]),1+1),\"|\")",
+   "powerbi": "2|2|2",
+   "now": ""
+  },
+  {
+   "part": "C",
+   "expr": "CONCATENATEX(Facts,COALESCE(BLANK(),CURRENCY(3),Facts[Region]),\"|\")",
+   "powerbi": "3|3|3|3|3|3",
+   "now": ""
+  },
+  {
+   "part": "C",
+   "expr": "CONCATENATEX(Facts,COALESCE(BLANK(),UPPER(Facts[Region]),CURRENCY(1.23456)),\"|\")",
+   "powerbi": "EAST|EAST|EAST|WEST|WEST|NORTH",
+   "now": ""
+  },
+  {
+   "part": "C",
+   "expr": "CONCATENATEX(CROSSJOIN(VALUES(Facts[Region]),VALUES(Facts[Note])),IF(UPPER(\"true\"),MAX(Facts[Quantity]),Facts[Region]),\"|\")",
+   "powerbi": "5|5|5|5|5|5|5|5|5",
+   "now": ""
+  },
+  {
+   "part": "C",
+   "expr": "CONCATENATEX(Facts,COALESCE(BLANK(),DATE(9999,12,31),\"a\"),\"|\")",
+   "powerbi": "12/31/9999|12/31/9999|12/31/9999|12/31/9999|12/31/9999|12/31",
+   "now": ""
+  },
+  {
+   "part": "C",
+   "expr": "CONCATENATEX(FILTER(Facts,Facts[Quantity]>2),IF(COUNTROWS(Facts)>3,Facts[Quantity]/0,MAX(Facts[Region])),\"|\")",
+   "powerbi": "inf|inf|inf",
+   "now": ""
+  },
+  {
+   "part": "C",
+   "expr": "CONCATENATEX(TOPN(2,Facts,Facts[Quantity]),IF(UPPER(\"true\"),Facts[Quantity]/0),\"|\")",
+   "powerbi": "inf|inf",
+   "now": ""
+  },
+  {
+   "part": "C",
+   "expr": "CONCATENATEX(DISTINCT(Facts),IFERROR(Facts[Sales]/0,Facts[Sales]/0),\"|\")",
+   "powerbi": "inf|inf|-inf||-nan(ind)|inf",
+   "now": ""
+  },
+  {
+   "part": "C",
+   "expr": "CONCATENATEX(Facts,IF.EAGER(MAX(Facts[Quantity])>3,Facts[Sales],\"5\"),\"|\")",
+   "powerbi": "|-1.5|0|2.5|10.5|20",
+   "now": ""
+  },
+  {
+   "part": "C",
+   "expr": "CONCATENATEX(FILTER(Facts,FALSE()),SWITCH(TRUE(),1=1,\"\",Facts[Sales]),\"|\")",
+   "powerbi": "BLANK",
+   "now": ""
+  },
+  {
+   "part": "C",
+   "expr": "CONCATENATEX(TOPN(2,Facts,Facts[Quantity]),IFERROR(1=1,-Facts[Quantity]),\"|\")",
+   "powerbi": "TRUE|TRUE",
+   "now": ""
+  },
+  {
+   "part": "C",
+   "expr": "CONCATENATEX(Facts,COALESCE(BLANK(),TIME(6,0,0)+TRUE(),BLANK()),\"|\")",
+   "powerbi": "12/31/1899 6:00:00 AM|12/31/1899 6:00:00 AM|12/31/1899 6:00:",
+   "now": ""
+  },
+  {
+   "part": "C",
+   "expr": "CONCATENATEX(SUMMARIZE(Facts,Facts[Region]),COALESCE(BLANK(),BLANK()),\"|\")",
+   "powerbi": "||",
+   "now": ""
+  },
+  {
+   "part": "C",
+   "expr": "CONCATENATEX(FILTER(Facts,Facts[Quantity]>2),COALESCE(BLANK(),BLANK()),\"|\")",
+   "powerbi": "||",
+   "now": ""
+  },
+  {
+   "part": "C",
+   "expr": "CONCATENATEX(Facts,COALESCE(BLANK(),1.5,DATEVALUE(\"2020-01-01\")),\"|\")",
+   "powerbi": "1.5|1.5|1.5|1.5|1.5|1.5",
+   "now": ""
+  },
+  {
+   "part": "C",
+   "expr": "CONCATENATEX(VALUES(Facts[Region]),COALESCE(BLANK(),CURRENCY(1.23456),1/0),\"|\")",
+   "powerbi": "1.2346|1.2346|1.2346",
+   "now": ""
+  },
+  {
+   "part": "C",
+   "expr": "CONCATENATEX(ADDCOLUMNS(Facts,\"z\",1),VAR x=1/0 RETURN IF(BLANK(),x,-Facts[Quantity]),\"|\")",
+   "powerbi": "0|-1|-2|-3|-4|-5",
+   "now": ""
+  },
+  {
+   "part": "C",
+   "expr": "CONCATENATEX(DISTINCT(Facts),SWITCH(TRUE(),ISBLANK(Facts[Sales]),-Facts[Quantity],Facts[Note]),\"|\")",
+   "powerbi": "Paid||Paid|-4|Paid|",
+   "now": ""
+  },
+  {
+   "part": "C",
+   "expr": "CONCATENATEX(EXCEPT(Facts,Facts),IF.EAGER(INT(1.5),Facts[Sales],1=1),\"|\")",
+   "powerbi": "BLANK",
+   "now": ""
+  },
+  {
+   "part": "C",
+   "expr": "CONCATENATEX(ALL(Facts),IF(1/0,Facts[Quantity]&\"\",-1/0),\"|\")",
+   "powerbi": "0|1|2|3|4|5",
+   "now": ""
+  },
+  {
+   "part": "C",
+   "expr": "CONCATENATEX(ADDCOLUMNS(Facts,\"z\",1),VAR x=TIME(6,0,0) RETURN IF(BLANK(),x,Facts[Region]),\"|\")",
+   "powerbi": "East|East|East|West|West|North",
+   "now": ""
+  },
+  {
+   "part": "C",
+   "expr": "CONCATENATEX(DISTINCT(Facts),IF(ISBLANK(Facts[Sales]),Facts[Sales]/0,-1/0),\"|\")",
+   "powerbi": "-inf|-inf|-inf||-inf|-inf",
+   "now": ""
+  },
+  {
+   "part": "C",
+   "expr": "CONCATENATEX(CALCULATETABLE(Facts,Facts[Region]=\"East\"),IF(MAX(Facts[Quantity])>3,\"a\",Facts[Quantity]),\"|\")",
+   "powerbi": "a|a|a",
+   "now": ""
+  },
+  {
+   "part": "C",
+   "expr": "CONCATENATEX(Facts,COALESCE(BLANK(),\"a\",UPPER(Facts[Region])),\"|\")",
+   "powerbi": "a|a|a|a|a|a",
+   "now": ""
+  },
+  {
+   "part": "C",
+   "expr": "CONCATENATEX(Facts,IF(INT(1.5),Facts[Region],NOT(TRUE())),\"|\")",
+   "powerbi": "East|East|East|West|West|North",
+   "now": ""
+  },
+  {
+   "part": "C",
+   "expr": "CONCATENATEX(SUMMARIZE(Facts,Facts[Region]),COALESCE(BLANK(),INT(2.5),FORMAT(1,\"0\")),\"|\")",
+   "powerbi": "2|2|2",
+   "now": ""
+  },
+  {
+   "part": "C",
+   "expr": "CONCATENATEX(FILTER(Facts,FALSE()),IF.EAGER(UPPER(\"true\"),Facts[Note],1=1),\"|\")",
+   "powerbi": "BLANK",
+   "now": ""
+  },
+  {
+   "part": "C",
+   "expr": "CONCATENATEX(TOPN(2,ADDCOLUMNS(Facts,\"Value\",2.5&&\"\"),Facts[Quantity],ASC,Facts[Sales],ASC,Facts[Region],ASC),IF(ISBLANK([Value]),\"b\",\"n\"),\"|\")",
+   "powerbi": "b|b",
+   "now": ""
+  },
+  {
+   "part": "C",
+   "expr": "CONCATENATEX(TOPN(2,ADDCOLUMNS(Facts,\"Value\",\"0\"||LEFT(\"a\",0)),Facts[Quantity],ASC,Facts[Sales],ASC,Facts[Region],ASC),IF(ISBLANK([Value]),\"b\",\"n\"),\"|\")",
+   "powerbi": "b|b",
+   "now": ""
+  },
+  {
+   "part": "C",
+   "expr": "CONCATENATEX(TOPN(2,ADDCOLUMNS(Facts,\"Value\",TRUE()&&VAR y=\"\" RETURN y),Facts[Quantity],ASC,Facts[Sales],ASC,Facts[Region],ASC),IF(ISBLANK([Value]),\"b\",\"n\"),\"|\")",
+   "powerbi": "b|b",
+   "now": ""
+  },
+  {
+   "part": "C",
+   "expr": "CONCATENATEX(TOPN(2,ADDCOLUMNS(Facts,\"Value\",OR(0,\"\")),Facts[Quantity],ASC,Facts[Sales],ASC,Facts[Region],ASC),IF(ISBLANK([Value]),\"b\",\"n\"),\"|\")",
+   "powerbi": "b|b",
+   "now": ""
+  },
+  {
+   "part": "C",
+   "expr": "CONCATENATEX(TOPN(2,ADDCOLUMNS(Facts,\"Value\",AND(\"-1\",\"\")),Facts[Quantity],ASC,Facts[Sales],ASC,Facts[Region],ASC),IF(ISBLANK([Value]),\"b\",\"n\"),\"|\")",
+   "powerbi": "b|b",
+   "now": ""
+  },
+  {
+   "part": "C",
+   "expr": "CONCATENATEX({1},MAX(1E15,1))",
+   "powerbi": "1E+15",
+   "now": ""
+  },
+  {
+   "part": "C",
+   "expr": "CONCATENATEX({1},MIN(1E15,2E15))",
+   "powerbi": "1E+15",
+   "now": ""
+  },
+  {
+   "part": "C",
+   "expr": "CONCATENATEX({1,2},MAX(1E15,1),\",\")",
+   "powerbi": "1E+15,1E+15",
+   "now": ""
+  },
+  {
+   "part": "C",
+   "expr": "CONCATENATEX({1,2},IF(1=1,CONVERT(DATE(2020,1,1),DATETIME),1))",
+   "powerbi": "4383143831",
+   "now": ""
+  },
+  {
+   "part": "C",
+   "expr": "CONCATENATEX({1,2},IF(1=1,CONVERT(DATE(2020,1,1),DATETIME),BLANK()))",
+   "powerbi": "1/1/20201/1/2020",
+   "now": ""
+  },
+  {
+   "part": "C",
+   "expr": "CONCATENATEX({1,2},IF(1=2,1,CONVERT(DATE(2020,1,1),DATETIME)))",
+   "powerbi": "4383143831",
+   "now": ""
+  }
+ ]
+}
