@@ -95,13 +95,14 @@ Rule: a slice is finished only when it is compared with Power BI, its items are 
 | dax_battery_swi22_extra | 173 | 0 | 0 | 0 | 0 |
 | dax_battery_xirr23_extra | 500 | 0 | 80 | 0 | 0 |
 | dax_battery_colstats24_extra | 113 | 0 | 9 | 0 | 0 |
+| dax_battery_info25_extra | 171 | 0 | 24 | 0 | 0 |
 | dax_battery_scalar_misc2_extra | 563 | 0 | 0 | 0 | 0 |
 | dax_battery_scalar_misc2_extra2 | 151 | 0 | 0 | 0 | 0 |
 | dax_battery_type_tests_extra | 2590 | 0 | 0 | 0 | 0 |
 | dax_battery_type_tests_extra2 | 4614 | 0 | 0 | 0 | 0 |
 | table VAT | 575 | 0 | 0 | 0 | 0 |
 
-## Pending work (7443): Power BI answers, the app refuses
+## Pending work (7467): Power BI answers, the app refuses
 
 - `CALCULATE(COUNTROWS(Facts),Facts[Quantity]<IF(ISEMPTY(CALCULATETABLE(Facts,Facts[Region]="East")),1,4))` (Power BI: `4`) [dax_battery_sdet_filters]
 - `CALCULATE(COUNTROWS(Facts),Facts[Quantity]<COUNTROWS(CALCULATETABLE(CALCULATETABLE(Facts,Facts[Region]="East"))))` (Power BI: `3`) [dax_battery_sdet_filters]
@@ -9158,6 +9159,30 @@ North`) [dax_battery_logic4_extra]
 - `"x" IN SELECTCOLUMNS(COLUMNSTATISTICS(),"c",[Column Name])` (Power BI: `False`) [dax_battery_colstats24_extra]
 - `TOCSV(SELECTCOLUMNS(COLUMNSTATISTICS(),"c",[Column Name],"k",[Cardinality]),10,",",TRUE)` (Power BI: `[c],[k]`) [dax_battery_colstats24_extra]
 - `TOJSON(SELECTCOLUMNS(FILTER(COLUMNSTATISTICS(),[Column Name]="Region"),"c",[Column Name],"k",[Cardinality],"m",[Max Length]))` (Power BI: `{`) [dax_battery_colstats24_extra]
+- `COUNTROWS(EXCEPT(INFO.VIEW.TABLES(),INFO.VIEW.TABLES()))` (Power BI: `BLANK`) [dax_battery_info25_extra]
+- `COUNTROWS(EXCEPT(INFO.VIEW.COLUMNS(),INFO.VIEW.COLUMNS()))` (Power BI: `BLANK`) [dax_battery_info25_extra]
+- `COUNTROWS(TOPN(1,INFO.VIEW.MEASURES()))` (Power BI: `BLANK`) [dax_battery_info25_extra]
+- `COUNTROWS(CROSSJOIN(INFO.VIEW.MEASURES(),ROW("z",1)))` (Power BI: `BLANK`) [dax_battery_info25_extra]
+- `COUNTROWS(GENERATE(ROW("z",1),INFO.VIEW.MEASURES()))` (Power BI: `BLANK`) [dax_battery_info25_extra]
+- `SUMX(INFO.VIEW.MEASURES(),1)` (Power BI: `BLANK`) [dax_battery_info25_extra]
+- `COUNTX(INFO.VIEW.MEASURES(),1)` (Power BI: `BLANK`) [dax_battery_info25_extra]
+- `IF(ISEMPTY(INFO.VIEW.MEASURES()),"e","n")` (Power BI: `e`) [dax_battery_info25_extra]
+- `COUNTROWS(EXCEPT(INFO.VIEW.MEASURES(),INFO.VIEW.MEASURES()))` (Power BI: `BLANK`) [dax_battery_info25_extra]
+- `VAR t=INFO.VIEW.MEASURES() RETURN COUNTROWS(t)+0` (Power BI: `0`) [dax_battery_info25_extra]
+- `COUNTROWS(FILTER(INFO.VIEW.MEASURES(),TRUE()))*3` (Power BI: `BLANK`) [dax_battery_info25_extra]
+- `SUMX(Facts,COUNTROWS(INFO.VIEW.MEASURES())+0)` (Power BI: `0`) [dax_battery_info25_extra]
+- `COUNTROWS(EXCEPT(INFO.TABLES(),INFO.TABLES()))` (Power BI: `BLANK`) [dax_battery_info25_extra]
+- `COUNTROWS(EXCEPT(INFO.COLUMNS(),INFO.COLUMNS()))` (Power BI: `BLANK`) [dax_battery_info25_extra]
+- `COUNTROWS(TOPN(1,INFO.MEASURES()))` (Power BI: `BLANK`) [dax_battery_info25_extra]
+- `COUNTROWS(CROSSJOIN(INFO.MEASURES(),ROW("z",1)))` (Power BI: `BLANK`) [dax_battery_info25_extra]
+- `COUNTROWS(GENERATE(ROW("z",1),INFO.MEASURES()))` (Power BI: `BLANK`) [dax_battery_info25_extra]
+- `SUMX(INFO.MEASURES(),1)` (Power BI: `BLANK`) [dax_battery_info25_extra]
+- `COUNTX(INFO.MEASURES(),1)` (Power BI: `BLANK`) [dax_battery_info25_extra]
+- `IF(ISEMPTY(INFO.MEASURES()),"e","n")` (Power BI: `e`) [dax_battery_info25_extra]
+- `COUNTROWS(EXCEPT(INFO.MEASURES(),INFO.MEASURES()))` (Power BI: `BLANK`) [dax_battery_info25_extra]
+- `VAR t=INFO.MEASURES() RETURN COUNTROWS(t)+0` (Power BI: `0`) [dax_battery_info25_extra]
+- `COUNTROWS(FILTER(INFO.MEASURES(),TRUE()))*3` (Power BI: `BLANK`) [dax_battery_info25_extra]
+- `SUMX(Facts,COUNTROWS(INFO.MEASURES())+0)` (Power BI: `0`) [dax_battery_info25_extra]
 
 ## Known deviations from Power BI (14): imprecise or unspecified in Power BI, each explained
 
