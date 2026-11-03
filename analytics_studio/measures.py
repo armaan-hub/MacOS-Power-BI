@@ -1760,6 +1760,18 @@ def _xirr_solve(flows: list[tuple[float, float]], guess: float) -> tuple[str, fl
                 break
     except (OverflowError, ZeroDivisionError):
         return ("refuse", None)
+    try:
+        for direction in (1, -1):
+            signs = [npv(2.0 ** (direction * k)) > 0.0 for k in range(0, 41)]
+            if sum(1 for a, b in zip(signs, signs[1:]) if a != b) > 1:
+                # Several brackets on one side of the guess.  Measured: Power BI took the first bracket going down only when it
+                # was the very first halving and nothing was found going up (5 answers); a first bracket at the 2nd halving
+                # answered "couldn't find a solution", and a second bracket going up made it answer the lower root.  Refuse the rest.
+                if direction == -1 and dn_k == 1 and up_k is None:
+                    continue
+                return ("refuse", None)
+    except (OverflowError, ZeroDivisionError):
+        return ("refuse", None)
     if up_k is None and dn_k is None:
         return ("none", None)
     if up_k is not None:

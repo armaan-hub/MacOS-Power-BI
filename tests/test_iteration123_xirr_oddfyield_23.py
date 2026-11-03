@@ -95,6 +95,15 @@ class TestIteration123XirrOddfyield23(unittest.TestCase):
         deep = 'DATATABLE("v",DOUBLE,"d",DATETIME,{{-3196.7,"2019-04-06"},{1269.18,"2019-11-14"},{-164.01,"2021-07-19"},{95.31,"2021-07-29"}})'
         self.assertTrue(dax.local(f"XIRR({deep},[v],[d])").startswith("LOCAL-REJECT:"))
 
+    def test_part_a_xirr_several_roots_on_one_side_refused(self) -> None:
+        # Live Power BI (Task 33 fresh review): with several roots on one side of the guess its pick is unsettled, so we refuse.
+        # Power BI said "couldn't find a solution" for the first and -0.894808008519976 for the second (we used to say -0.643... and 0.2799...).
+        first = 'DATATABLE("v",DOUBLE,"d",DATETIME,{{-4122.65,"2021-09-16"},{243.16,"2021-09-30"},{2441.01,"2021-05-09"},{-1719.01,"2020-03-21"},{807.7,"2021-06-14"},{4698.24,"2020-05-08"},{393.04,"2022-04-12"},{966.44,"2019-01-25"}})'
+        second = 'DATATABLE("v",DOUBLE,"d",DATETIME,{{-7460.3,"2021-01-30"},{2638.28,"2020-01-25"},{-3318.55,"2020-10-21"},{4134.2,"2022-04-20"},{1178.31,"2022-08-15"},{4807.3,"2021-08-24"},{-736.0,"2023-04-22"}})'
+        for table in (first, second):
+            self.assertTrue(dax.local(f"XIRR({table},[v],[d])").startswith("LOCAL-REJECT:"), table)
+        self.assertTrue(dax.local(f"ISERROR(XIRR({first},[v],[d]))").startswith("LOCAL-REJECT:"))
+
 
 if __name__ == "__main__":
     unittest.main()
