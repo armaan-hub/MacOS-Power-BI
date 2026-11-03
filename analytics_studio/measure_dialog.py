@@ -471,6 +471,9 @@ DAX_FUNCTION_TEMPLATES.update({
     "ROLLUPADDISSUBTOTAL": ("ROLLUPADDISSUBTOTAL('Table'[Column1], \"SubtotalName\")", "'Table'[Column1]"),
     "ROLLUPISSUBTOTAL": ("ROLLUPISSUBTOTAL('Table'[Column1], [SubtotalColumn])", "'Table'[Column1]"),
     "ISSUBTOTAL": ("ISSUBTOTAL('Table'[Column1])", "'Table'[Column1]"),
+    "COLUMNSTATISTICS": ("COLUMNSTATISTICS()", None),
+    "UTCNOW": ("UTCNOW()", None),
+    "UTCTODAY": ("UTCTODAY()", None),
 })
 
 
