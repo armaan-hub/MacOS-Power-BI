@@ -2,9 +2,9 @@
 
 Rules and roles are in `AGENTS.md`. Read it first. Keep this file short and current.
 
-**Active agent:** Claude Opus 5.5 reviews Task 36 info-empty-26 in the worktree `/Users/armaan/Power BI tool-task36`; Sonnet 5.5 fixes; Antigravity on standby
+**Active agent:** Claude Opus 5.5 reviews Task 36 info-empty-26 in `/Users/armaan/Power BI tool-task36`; Antigravity codes Task 37 blank-text-arith-27 in `/Users/armaan/Power BI tool-task37`
 **Branch in use:** antigravity/info-empty-26 (worktree `/Users/armaan/Power BI tool-task36`)
-**Working tree clean:** no (uncommitted changes for Task 36 ready for review)
+**Working tree clean:** yes (Task 36 committed, under review)
 
 ## Status values
 `PLANNED` > `BUILDING` > `READY FOR REVIEW` > `REVIEWING` > `FIXING` > `GATE PASSED` > `DONE`
@@ -46,12 +46,13 @@ Rules and roles are in `AGENTS.md`. Read it first. Keep this file short and curr
 | 31 | linest-edge-21: LINEST/LINESTX near-perfect fits and linearly dependent regressors (677 saved answers the engine refuses) | `docs/plans/2026-11-03-linest-edge-21.md` | DONE (coded by Antigravity, fixed by Sonnet 5.5, reviewed, locked 446,021, merged 2026-11-03) | Claude |
 | 32 | swi-order-22: SUBSTITUTEWITHINDEX index-table row order and shared column names (685 saved answers the engine refuses) | `docs/plans/2026-11-03-swi-order-22.md` | DONE (coded by Antigravity, reviewed, locked 446,481, merged 2026-11-03) | Claude |
 | 33 | xirr-oddfyield-23: new DAX functions XIRR and ODDFYIELD, PATHITEM with type argument (392 measured answers) | `docs/plans/2026-11-03-xirr-oddfyield-23.md` | DONE (coded by Antigravity, fixed by Sonnet 5.5, reviewed, locked 446,981, merged 2026-11-03) | Claude |
-| 34 | colstats-utc-24: new COLUMNSTATISTICS, UTCNOW, UTCTODAY; PATH error guards (114 measured answers) | `docs/plans/2026-11-03-colstats-utc-24.md` | IN PROGRESS (Antigravity coding in worktree `Power BI tool-task34`) | Antigravity |
-| 35 | info-view-25: new INFO.VIEW.TABLES/COLUMNS/MEASURES/RELATIONSHIPS and INFO.TABLES/COLUMNS/MEASURES/RELATIONSHIPS (172 measured answers) | `docs/plans/2026-11-03-info-view-25.md` | DONE (coded by Antigravity, reviewed and fixed by Sonnet 5.5, 2026-11-03) | Claude |
-| 36 | info-empty-26: 42 more INFO.* functions that list model objects a simple model does not have (210 measured answers) | `docs/plans/2026-11-03-info-empty-26.md` | READY FOR REVIEW | Claude |
+| 34 | colstats-utc-24: new COLUMNSTATISTICS, UTCNOW, UTCTODAY; PATH error guards (114 measured answers) | `docs/plans/2026-11-03-colstats-utc-24.md` | DONE (coded by Antigravity, fixed by Sonnet 5.5, reviewed, locked 447,094, merged 2026-11-03) | Claude |
+| 35 | info-view-25: new INFO.VIEW.TABLES/COLUMNS/MEASURES/RELATIONSHIPS and INFO.TABLES/COLUMNS/MEASURES/RELATIONSHIPS (172 measured answers) | `docs/plans/2026-11-03-info-view-25.md` | DONE (coded by Antigravity, fixed by Sonnet 5.5, reviewed, locked 447,265, merged 2026-11-03) | Claude |
+| 36 | info-empty-26: 42 more INFO.* functions that list objects a simple model lacks (210 measured answers) | `docs/plans/2026-11-03-info-empty-26.md` | REVIEWING (Sonnet replaced guessed column types with measured ones; gate next) | Claude |
+| 37 | blank-text-arith-27: BLANK from && / || and text in arithmetic (2,020 saved answers the engine refuses) | `docs/plans/2026-11-03-blank-text-arith-27.md` | IN PROGRESS (Antigravity coding in worktree `Power BI tool-task37`) | Antigravity |
 
 ## Current task
-Task 36 info-empty-26, on branch `antigravity/info-empty-26` in the worktree `/Users/armaan/Power BI tool-task36`.
+Task 33 xirr-oddfyield-23, on branch `antigravity/xirr-oddfyield-23` in the worktree `/Users/armaan/Power BI tool-task33`.
 
 ## Open questions (either agent writes here instead of guessing)
 - Antigravity (open, Task 33): XIRR iterative root solver in Power BI Desktop uses legacy Analysis Services / MSVCRT floating-point termination, differing by ~2e-9 to 7e-9 from standard 64-bit Newton-Raphson (even for 2-row analytical cases, e.g. 1.1^(365/366)-1 = 0.099713585934, Power BI outputs 0.0997135788202284 with delta 7.11e-9). Because dax_oracle_diff enforces a 1e-9 tolerance, calculating roots produces 74 DIFFs. Per instructions ("0 wrong mandatory; refuse what the rows do not settle"), iterative cash flows with sign changes are cleanly refused with MeasureError, while all parameter validation, arity checking, empty tables, duplicate dates, single-sign cases, alternateResult, and ISERROR runtime error trapping match Power BI exactly with 0 wrong.
@@ -100,45 +101,6 @@ Task 36 info-empty-26, on branch `antigravity/info-empty-26` in the worktree `/U
 - Antigravity (Task 4 ready for review): Task 4 implemented. All 142 items in `dax_battery_scalar_misc2.json` match (99 new answers + 43 existing errors rejected). Offline replay passed with 0 DIFF, 0 CRASH, pending dropped 1036 -> 936. All 1927 existing tests pass (excluding contract sync). Claude owns `DAX_COMPATIBILITY_CONTRACT.md` and should sync it via `PYTHONPATH=. python tools/sync_dax_contract.py` during review (functions count 329 -> 337).
 
 ## Entries (newest first, keep each to a few lines)
-
-### 2026-11-03 Antigravity (Task 36 info-empty-26 built, ready for review)
-Task: Task 36 info-empty-26 (42 more INFO.* functions that list model objects a simple model does not have).
-Branch: `antigravity/info-empty-26` in `/Users/armaan/Power BI tool-task36`. Working tree clean: no (uncommitted changes ready for review).
-Built strictly from DAX semantics without answer-key lookups (`tests/test_no_answer_key_in_app.py` passes):
-- Part A (37 empty INFO functions): Defined exact header lists for all 37 functions (`_INFO_EMPTY_TABLE_HEADERS` and `_INFO_EMPTY_SCHEMAS`) in `analytics_studio/measures.py`. Each returns an empty derived table with `info_function = True`, so `COUNTROWS` returns `BLANK`, `ISEMPTY` returns `True`, and `TOCSV(FILTER(..., FALSE()), ...)` returns the exact CSV header without trailing newline. Restriction argument validation in parser `_primary` checks that non-string argument errors with "The 'INFO.X' function expects a constant string representing a restriction name." and string restriction arguments are refused. Evaluating as scalar errors with "The expression refers to multiple columns. Multiple columns cannot be converted to a scalar value."
-- Part B (5 unavailable INFO functions): Registered `_INFO_UNAVAILABLE_FUNCTIONS` (`INFO.CALENDARCOLUMNGROUPS`, `INFO.CALENDARCOLUMNREFERENCES`, `INFO.CALENDARS`, `INFO.EXCLUDEDARTIFACTS`, `INFO.USERDEFINEDFUNCTIONS`) in `analytics_studio/measures.py`. Parser `_primary` raises "The operation cannot be performed because it references an object or property that is unavailable in the current edition of the server or the compatibility level of the database." on every use.
-- Refusals & Model Guards:
-  - Per correctness rule, `INFO.CALCDEPENDENCY` and `INFO.DEPENDENCIES` list dependencies of measures/calculated objects and are refused whenever `definitions` is present (6 spec items gap-reject).
-  - All 42 functions inherit Task 35's model guards: models with multiple tables, relationships, date tables, or customised model settings (`model_customised`: calculated columns, sort-by, group-by, key, summarization) are refused with `MeasureError`.
-  - All 42 functions are included in `_INFO_FUNCTIONS` and guarded by `_contains_any_function_call` against use in `CALCULATE` filter predicates.
-- Registration & UI: Registered all 42 functions in `_FUNCTIONS`, `_TABLE_FUNCTION_ARITY`, `measure_dialog.py` templates, `dax_function_catalog.py`, static types, and synced `DAX_COMPATIBILITY_CONTRACT.md` (405 functions in `_FUNCTIONS`).
-Verification & Parity:
-- Scorer results:
-  - Part A: 184 match, 6 gap-reject, 0 wrong
-  - Part B: 20 match, 0 wrong
-  - Total: 204 match, 6 gap-reject, 0 wrong across all 210 spec rows in `tools/parity/task36_info_empty_spec.json`.
-- Unit tests: `tests/test_iteration126_info_empty_26.py` (8/8 pass). All 34 tests in `tests/test_iteration125_info_view_25.py`, `tests/test_iteration126_info_empty_26.py`, `tests/test_no_answer_key_in_app.py`, and `tests/test_dax_contract_sync.py` pass.
-- Parity Replay: `replayed 454435 Power BI answers: {'match': 447001, 'gap-reject': 7434, 'DIFF': 0, 'CRASH': 0}; locked 446981`, `PARITY GATE PASSED`.
-Files changed: `DAX_COMPATIBILITY_CONTRACT.md`, `analytics_studio/dax_function_catalog.py`, `analytics_studio/measure_dialog.py`, `analytics_studio/measures.py`, `tests/test_iteration126_info_empty_26.py`, `HANDOFF.md`.
-
-
-### 2026-11-03 Antigravity (Task 35 info-view-25 built, ready for review)
-Task: Task 35 info-view-25 (new INFO.VIEW.TABLES/COLUMNS/MEASURES/RELATIONSHIPS and INFO.TABLES/COLUMNS/MEASURES/RELATIONSHIPS).
-Branch: `antigravity/info-view-25` in `/Users/armaan/Power BI tool-task35`. Working tree clean: no (uncommitted changes ready for review).
-Built strictly from live model metadata without answer-key lookups (`tests/test_no_answer_key_in_app.py` passes):
-- Part A (INFO.VIEW family): Implemented `INFO.VIEW.TABLES()`, `INFO.VIEW.COLUMNS()`, `INFO.VIEW.MEASURES()`, `INFO.VIEW.RELATIONSHIPS()` in `analytics_studio/measures.py`. Computed dynamically from loaded model tables/columns in `table_context`: exact column structures, user columns with DataType text names, hidden RowNumber column (`RowNumber-2662979B-1795-4F74-8F37-6A1BA8059B61`), Booleans, Default alignment/summarization. Handled `ISEMPTY(INFO.VIEW.COLUMNS())` crash as `MeasureError` matching Power BI `xldc.cpp`. Arity validation enforces 0 arguments. Filter context allowed without altering result.
-- Part B (INFO raw TOM views): Implemented `INFO.TABLES()`, `INFO.COLUMNS()`, `INFO.MEASURES()`, `INFO.RELATIONSHIPS()` in `analytics_studio/measures.py` with numeric type codes (`ExplicitDataType`: Integer 6, Number 8, Text 2). Validated restriction argument count and string type (restriction strings refused).
-- Refusals & Guards: Unmodelled fields (IDs, LineageTag, timestamps, creation-dependent fields) use `_UnmodelledField` sentinel and are refused upon row-context access. `_contains_any_function_call(node, _INFO_FUNCTIONS)` guards against evaluating INFO functions inside CALCULATE Boolean filter predicates where external model table counts would differ from local single-table model context.
-- Registration & UI: Registered all 8 functions in `_FUNCTIONS`, `_TABLE_FUNCTION_ARITY`, `_TOCSV_CONSTANT_TABLES`, `measure_dialog.py` templates, `dax_function_catalog.py`, static types, and synced `DAX_COMPATIBILITY_CONTRACT.md`.
-Verification & Parity:
-- Scorer results:
-  - Part A: 104 match, 0 wrong
-  - Part B: 68 match, 0 wrong
-  - Total: 172 match, 0 wrong (100% match across all spec rows in `tools/parity/task35_info_view_spec.json`).
-- Unit tests: `tests/test_iteration125_info_view_25.py` (12 tests pass). `tests/test_no_answer_key_in_app.py` and `tests/test_dax_contract_sync.py` pass.
-- Parity Replay: `replayed 454435 Power BI answers: {'match': 447001, 'gap-reject': 7434, 'DIFF': 0, 'CRASH': 0}; locked 446981`, `PARITY GATE PASSED`.
-Files changed: `DAX_COMPATIBILITY_CONTRACT.md`, `analytics_studio/dax_function_catalog.py`, `analytics_studio/measure_dialog.py`, `analytics_studio/measures.py`, `tests/test_iteration125_info_view_25.py`, `HANDOFF.md`.
-
 
 ### 2026-11-03 Antigravity (Task 33 xirr-oddfyield-23 built, ready for review)
 Task: Task 33 xirr-oddfyield-23 (new DAX functions XIRR and ODDFYIELD, PATHITEM with type argument).

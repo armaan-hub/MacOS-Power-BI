@@ -1,0 +1,688 @@
+{
+ "items": [
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(COLUMNSTATISTICS(),[Table Name],\"|\")",
+   "powerbi": "Facts|Facts|Facts|Facts|Facts",
+   "now": "LOCAL-REJECT:Function COLUMNSTATISTICS is not supported by the local DAX engine."
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(COLUMNSTATISTICS(),ISBLANK([Table Name]),\"|\")",
+   "powerbi": "FALSE|FALSE|FALSE|FALSE|FALSE",
+   "now": "LOCAL-REJECT:Function COLUMNSTATISTICS is not supported by the local DAX engine."
+  },
+  {
+   "part": "A",
+   "expr": "COUNTROWS(FILTER(COLUMNSTATISTICS(),ISBLANK([Table Name])))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:Function COLUMNSTATISTICS is not supported by the local DAX engine."
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(COLUMNSTATISTICS(),[Table Name],\"|\",[Table Name],ASC)",
+   "powerbi": "Facts|Facts|Facts|Facts|Facts",
+   "now": "LOCAL-REJECT:Function COLUMNSTATISTICS is not supported by the local DAX engine."
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(COLUMNSTATISTICS(),[Table Name],\"|\",[Table Name],DESC)",
+   "powerbi": "Facts|Facts|Facts|Facts|Facts",
+   "now": "LOCAL-REJECT:Function COLUMNSTATISTICS is not supported by the local DAX engine."
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(COLUMNSTATISTICS(),[Column Name],\"|\")",
+   "powerbi": "RowNumber-2662979B-1795-4F74-8F37-6A1BA8059B61|Sales|Quantity|Region|Note",
+   "now": "LOCAL-REJECT:Function COLUMNSTATISTICS is not supported by the local DAX engine."
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(COLUMNSTATISTICS(),ISBLANK([Column Name]),\"|\")",
+   "powerbi": "FALSE|FALSE|FALSE|FALSE|FALSE",
+   "now": "LOCAL-REJECT:Function COLUMNSTATISTICS is not supported by the local DAX engine."
+  },
+  {
+   "part": "A",
+   "expr": "COUNTROWS(FILTER(COLUMNSTATISTICS(),ISBLANK([Column Name])))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:Function COLUMNSTATISTICS is not supported by the local DAX engine."
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(COLUMNSTATISTICS(),[Column Name],\"|\",[Column Name],ASC)",
+   "powerbi": "Note|Quantity|Region|RowNumber-2662979B-1795-4F74-8F37-6A1BA8059B61|Sales",
+   "now": "LOCAL-REJECT:Function COLUMNSTATISTICS is not supported by the local DAX engine."
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(COLUMNSTATISTICS(),[Column Name],\"|\",[Column Name],DESC)",
+   "powerbi": "Sales|RowNumber-2662979B-1795-4F74-8F37-6A1BA8059B61|Region|Quantity|Note",
+   "now": "LOCAL-REJECT:Function COLUMNSTATISTICS is not supported by the local DAX engine."
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(COLUMNSTATISTICS(),[Min],\"|\")",
+   "powerbi": "|-1.5|0|East|Late",
+   "now": "LOCAL-REJECT:Function COLUMNSTATISTICS is not supported by the local DAX engine."
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(COLUMNSTATISTICS(),ISBLANK([Min]),\"|\")",
+   "powerbi": "TRUE|FALSE|FALSE|FALSE|FALSE",
+   "now": "LOCAL-REJECT:Function COLUMNSTATISTICS is not supported by the local DAX engine."
+  },
+  {
+   "part": "A",
+   "expr": "COUNTROWS(FILTER(COLUMNSTATISTICS(),ISBLANK([Min])))",
+   "powerbi": "1",
+   "now": "LOCAL-REJECT:Function COLUMNSTATISTICS is not supported by the local DAX engine."
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(COLUMNSTATISTICS(),[Min],\"|\",[Min],ASC)",
+   "powerbi": "-1.5||0|East|Late",
+   "now": "LOCAL-REJECT:Function COLUMNSTATISTICS is not supported by the local DAX engine."
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(COLUMNSTATISTICS(),[Min],\"|\",[Min],DESC)",
+   "powerbi": "Late|East|0||-1.5",
+   "now": "LOCAL-REJECT:Function COLUMNSTATISTICS is not supported by the local DAX engine."
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(COLUMNSTATISTICS(),[Max],\"|\")",
+   "powerbi": "|20|5|West|Paid",
+   "now": "LOCAL-REJECT:Function COLUMNSTATISTICS is not supported by the local DAX engine."
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(COLUMNSTATISTICS(),ISBLANK([Max]),\"|\")",
+   "powerbi": "TRUE|FALSE|FALSE|FALSE|FALSE",
+   "now": "LOCAL-REJECT:Function COLUMNSTATISTICS is not supported by the local DAX engine."
+  },
+  {
+   "part": "A",
+   "expr": "COUNTROWS(FILTER(COLUMNSTATISTICS(),ISBLANK([Max])))",
+   "powerbi": "1",
+   "now": "LOCAL-REJECT:Function COLUMNSTATISTICS is not supported by the local DAX engine."
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(COLUMNSTATISTICS(),[Max],\"|\",[Max],ASC)",
+   "powerbi": "|5|20|Paid|West",
+   "now": "LOCAL-REJECT:Function COLUMNSTATISTICS is not supported by the local DAX engine."
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(COLUMNSTATISTICS(),[Max],\"|\",[Max],DESC)",
+   "powerbi": "West|Paid|20|5|",
+   "now": "LOCAL-REJECT:Function COLUMNSTATISTICS is not supported by the local DAX engine."
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(COLUMNSTATISTICS(),[Cardinality],\"|\")",
+   "powerbi": "6|6|6|3|3",
+   "now": "LOCAL-REJECT:Function COLUMNSTATISTICS is not supported by the local DAX engine."
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(COLUMNSTATISTICS(),ISBLANK([Cardinality]),\"|\")",
+   "powerbi": "FALSE|FALSE|FALSE|FALSE|FALSE",
+   "now": "LOCAL-REJECT:Function COLUMNSTATISTICS is not supported by the local DAX engine."
+  },
+  {
+   "part": "A",
+   "expr": "COUNTROWS(FILTER(COLUMNSTATISTICS(),ISBLANK([Cardinality])))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:Function COLUMNSTATISTICS is not supported by the local DAX engine."
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(COLUMNSTATISTICS(),[Cardinality],\"|\",[Cardinality],ASC)",
+   "powerbi": "3|3|6|6|6",
+   "now": "LOCAL-REJECT:Function COLUMNSTATISTICS is not supported by the local DAX engine."
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(COLUMNSTATISTICS(),[Cardinality],\"|\",[Cardinality],DESC)",
+   "powerbi": "6|6|6|3|3",
+   "now": "LOCAL-REJECT:Function COLUMNSTATISTICS is not supported by the local DAX engine."
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(COLUMNSTATISTICS(),[Max Length],\"|\")",
+   "powerbi": "|||5|4",
+   "now": "LOCAL-REJECT:Function COLUMNSTATISTICS is not supported by the local DAX engine."
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(COLUMNSTATISTICS(),ISBLANK([Max Length]),\"|\")",
+   "powerbi": "TRUE|TRUE|TRUE|FALSE|FALSE",
+   "now": "LOCAL-REJECT:Function COLUMNSTATISTICS is not supported by the local DAX engine."
+  },
+  {
+   "part": "A",
+   "expr": "COUNTROWS(FILTER(COLUMNSTATISTICS(),ISBLANK([Max Length])))",
+   "powerbi": "3",
+   "now": "LOCAL-REJECT:Function COLUMNSTATISTICS is not supported by the local DAX engine."
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(COLUMNSTATISTICS(),[Max Length],\"|\",[Max Length],ASC)",
+   "powerbi": "|||4|5",
+   "now": "LOCAL-REJECT:Function COLUMNSTATISTICS is not supported by the local DAX engine."
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(COLUMNSTATISTICS(),[Max Length],\"|\",[Max Length],DESC)",
+   "powerbi": "5|4|||",
+   "now": "LOCAL-REJECT:Function COLUMNSTATISTICS is not supported by the local DAX engine."
+  },
+  {
+   "part": "A",
+   "expr": "COUNTROWS(COLUMNSTATISTICS())",
+   "powerbi": "5",
+   "now": "LOCAL-REJECT:Function COLUMNSTATISTICS is not supported by the local DAX engine."
+  },
+  {
+   "part": "A",
+   "expr": "SUMX(COLUMNSTATISTICS(),[Cardinality])",
+   "powerbi": "24",
+   "now": "LOCAL-REJECT:Function COLUMNSTATISTICS is not supported by the local DAX engine."
+  },
+  {
+   "part": "A",
+   "expr": "MAXX(COLUMNSTATISTICS(),[Cardinality])",
+   "powerbi": "6",
+   "now": "LOCAL-REJECT:Function COLUMNSTATISTICS is not supported by the local DAX engine."
+  },
+  {
+   "part": "A",
+   "expr": "MINX(COLUMNSTATISTICS(),[Cardinality])",
+   "powerbi": "3",
+   "now": "LOCAL-REJECT:Function COLUMNSTATISTICS is not supported by the local DAX engine."
+  },
+  {
+   "part": "A",
+   "expr": "MAXX(COLUMNSTATISTICS(),[Max Length])",
+   "powerbi": "5",
+   "now": "LOCAL-REJECT:Function COLUMNSTATISTICS is not supported by the local DAX engine."
+  },
+  {
+   "part": "A",
+   "expr": "SUMX(COLUMNSTATISTICS(),[Max Length])",
+   "powerbi": "9",
+   "now": "LOCAL-REJECT:Function COLUMNSTATISTICS is not supported by the local DAX engine."
+  },
+  {
+   "part": "A",
+   "expr": "COUNTROWS(FILTER(COLUMNSTATISTICS(),[Table Name]=\"Facts\"))",
+   "powerbi": "5",
+   "now": "LOCAL-REJECT:Function COLUMNSTATISTICS is not supported by the local DAX engine."
+  },
+  {
+   "part": "A",
+   "expr": "COUNTROWS(FILTER(COLUMNSTATISTICS(),[Column Name]=\"Sales\"))",
+   "powerbi": "1",
+   "now": "LOCAL-REJECT:Function COLUMNSTATISTICS is not supported by the local DAX engine."
+  },
+  {
+   "part": "A",
+   "expr": "MAXX(FILTER(COLUMNSTATISTICS(),[Column Name]=\"Sales\"),[Min])",
+   "powerbi": "-1.5",
+   "now": "LOCAL-REJECT:Function COLUMNSTATISTICS is not supported by the local DAX engine."
+  },
+  {
+   "part": "A",
+   "expr": "MAXX(FILTER(COLUMNSTATISTICS(),[Column Name]=\"Sales\"),[Max])",
+   "powerbi": "20",
+   "now": "LOCAL-REJECT:Function COLUMNSTATISTICS is not supported by the local DAX engine."
+  },
+  {
+   "part": "A",
+   "expr": "MAXX(FILTER(COLUMNSTATISTICS(),[Column Name]=\"Quantity\"),[Min])+1",
+   "powerbi": "1",
+   "now": "LOCAL-REJECT:Function COLUMNSTATISTICS is not supported by the local DAX engine."
+  },
+  {
+   "part": "A",
+   "expr": "MAXX(FILTER(COLUMNSTATISTICS(),[Column Name]=\"Region\"),[Min])",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:Function COLUMNSTATISTICS is not supported by the local DAX engine."
+  },
+  {
+   "part": "A",
+   "expr": "MAXX(FILTER(COLUMNSTATISTICS(),[Column Name]=\"Note\"),[Min])",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:Function COLUMNSTATISTICS is not supported by the local DAX engine."
+  },
+  {
+   "part": "A",
+   "expr": "MAXX(FILTER(COLUMNSTATISTICS(),[Column Name]=\"Note\"),[Max])",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:Function COLUMNSTATISTICS is not supported by the local DAX engine."
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(FILTER(COLUMNSTATISTICS(),CONTAINSSTRING([Column Name],\"Row\")),LEN([Column Name]),\"|\")",
+   "powerbi": "46",
+   "now": "LOCAL-REJECT:Function COLUMNSTATISTICS is not supported by the local DAX engine."
+  },
+  {
+   "part": "A",
+   "expr": "COUNTROWS(FILTER(COLUMNSTATISTICS(),LEFT([Column Name],9)=\"RowNumber\"))",
+   "powerbi": "1",
+   "now": "LOCAL-REJECT:Function COLUMNSTATISTICS is not supported by the local DAX engine."
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(TOPN(2,COLUMNSTATISTICS(),[Cardinality],ASC),[Column Name],\"|\",[Column Name])",
+   "powerbi": "Note|Region",
+   "now": "LOCAL-REJECT:Function COLUMNSTATISTICS is not supported by the local DAX engine."
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(TOPN(1,COLUMNSTATISTICS(),[Max Length],DESC),[Column Name],\"|\")",
+   "powerbi": "Region",
+   "now": "LOCAL-REJECT:Function COLUMNSTATISTICS is not supported by the local DAX engine."
+  },
+  {
+   "part": "A",
+   "expr": "COUNTROWS(DISTINCT(SELECTCOLUMNS(COLUMNSTATISTICS(),\"t\",[Table Name])))",
+   "powerbi": "1",
+   "now": "LOCAL-REJECT:Function COLUMNSTATISTICS is not supported by the local DAX engine."
+  },
+  {
+   "part": "A",
+   "expr": "COUNTROWS(SUMMARIZE(COLUMNSTATISTICS(),[Cardinality]))",
+   "powerbi": "2",
+   "now": "LOCAL-REJECT:Function COLUMNSTATISTICS is not supported by the local DAX engine."
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(ADDCOLUMNS(COLUMNSTATISTICS(),\"x\",[Cardinality]*2),[x],\"|\")",
+   "powerbi": "12|12|12|6|6",
+   "now": "LOCAL-REJECT:Function COLUMNSTATISTICS is not supported by the local DAX engine."
+  },
+  {
+   "part": "A",
+   "expr": "ISNUMBER(MAXX(FILTER(COLUMNSTATISTICS(),[Column Name]=\"Sales\"),[Min]))",
+   "powerbi": "True",
+   "now": "LOCAL-REJECT:Function COLUMNSTATISTICS is not supported by the local DAX engine."
+  },
+  {
+   "part": "A",
+   "expr": "ISTEXT(MAXX(FILTER(COLUMNSTATISTICS(),[Column Name]=\"Sales\"),[Min]))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:Function COLUMNSTATISTICS is not supported by the local DAX engine."
+  },
+  {
+   "part": "A",
+   "expr": "ISTEXT(MAXX(FILTER(COLUMNSTATISTICS(),[Column Name]=\"Region\"),[Min]))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:Function COLUMNSTATISTICS is not supported by the local DAX engine."
+  },
+  {
+   "part": "A",
+   "expr": "COUNTROWS(FILTER(COLUMNSTATISTICS(),[Cardinality]=6))",
+   "powerbi": "3",
+   "now": "LOCAL-REJECT:Function COLUMNSTATISTICS is not supported by the local DAX engine."
+  },
+  {
+   "part": "A",
+   "expr": "COUNTROWS(FILTER(COLUMNSTATISTICS(),[Cardinality]<4))",
+   "powerbi": "2",
+   "now": "LOCAL-REJECT:Function COLUMNSTATISTICS is not supported by the local DAX engine."
+  },
+  {
+   "part": "A",
+   "expr": "COLUMNSTATISTICS()",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 19) The expression refers to multiple columns. Multiple columns cannot be converted to a scalar value.\"",
+   "now": "LOCAL-REJECT:Function COLUMNSTATISTICS is not supported by the local DAX engine."
+  },
+  {
+   "part": "A",
+   "expr": "COLUMNSTATISTICS(1)",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 36) Too many arguments were passed to the COLUMNSTATISTICS function. The maximum argument count for the function is 0.\"",
+   "now": "LOCAL-REJECT:Function COLUMNSTATISTICS is not supported by the local DAX engine."
+  },
+  {
+   "part": "A",
+   "expr": "COLUMNSTATISTICS(Facts)",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 36) Too many arguments were passed to the COLUMNSTATISTICS function. The maximum argument count for the function is 0.\"",
+   "now": "LOCAL-REJECT:Function COLUMNSTATISTICS is not supported by the local DAX engine."
+  },
+  {
+   "part": "A",
+   "expr": "CALCULATE(COUNTROWS(COLUMNSTATISTICS()),Facts[Region]=\"East\")",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 39) COLUMNSTATISTICS() cannot be used with a filter context.\"",
+   "now": "LOCAL-REJECT:Function COLUMNSTATISTICS is not supported by the local DAX engine."
+  },
+  {
+   "part": "A",
+   "expr": "COUNTROWS(CROSSJOIN(COLUMNSTATISTICS(),VALUES(Facts[Region])))",
+   "powerbi": "15",
+   "now": "LOCAL-REJECT:Function COLUMNSTATISTICS is not supported by the local DAX engine."
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(COLUMNSTATISTICS(),[Column Name]&\"=\"&[Cardinality],\", \",[Column Name],ASC)",
+   "powerbi": "Note=3, Quantity=6, Region=3, RowNumber-2662979B-1795-4F74-8F37-6A1BA8059B61=6, Sales=6",
+   "now": "LOCAL-REJECT:Function COLUMNSTATISTICS is not supported by the local DAX engine."
+  },
+  {
+   "part": "B",
+   "expr": "YEAR(UTCNOW())>2000",
+   "powerbi": "True",
+   "now": "LOCAL-REJECT:Function UTCNOW is not supported by the local DAX engine."
+  },
+  {
+   "part": "B",
+   "expr": "UTCNOW()>DATE(2020,1,1)",
+   "powerbi": "True",
+   "now": "LOCAL-REJECT:Function UTCNOW is not supported by the local DAX engine."
+  },
+  {
+   "part": "B",
+   "expr": "UTCTODAY()>DATE(2020,1,1)",
+   "powerbi": "True",
+   "now": "LOCAL-REJECT:Function UTCTODAY is not supported by the local DAX engine."
+  },
+  {
+   "part": "B",
+   "expr": "ISBLANK(UTCNOW())",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:Function UTCNOW is not supported by the local DAX engine."
+  },
+  {
+   "part": "B",
+   "expr": "ISBLANK(UTCTODAY())",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:Function UTCTODAY is not supported by the local DAX engine."
+  },
+  {
+   "part": "B",
+   "expr": "HOUR(UTCTODAY())",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:Function UTCTODAY is not supported by the local DAX engine."
+  },
+  {
+   "part": "B",
+   "expr": "MINUTE(UTCTODAY())",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:Function UTCTODAY is not supported by the local DAX engine."
+  },
+  {
+   "part": "B",
+   "expr": "SECOND(UTCTODAY())",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:Function UTCTODAY is not supported by the local DAX engine."
+  },
+  {
+   "part": "B",
+   "expr": "UTCTODAY()=INT(UTCTODAY())",
+   "powerbi": "True",
+   "now": "LOCAL-REJECT:Function UTCTODAY is not supported by the local DAX engine."
+  },
+  {
+   "part": "B",
+   "expr": "INT(UTCNOW())=UTCTODAY()",
+   "powerbi": "True",
+   "now": "LOCAL-REJECT:Function UTCNOW is not supported by the local DAX engine."
+  },
+  {
+   "part": "B",
+   "expr": "DATEDIFF(UTCTODAY(),UTCNOW(),DAY)",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:Function UTCTODAY is not supported by the local DAX engine."
+  },
+  {
+   "part": "B",
+   "expr": "UTCNOW(1)",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 26) Too many arguments were passed to the UTCNOW function. The maximum argument count for the function is 0.\"",
+   "now": "LOCAL-REJECT:Function UTCNOW is not supported by the local DAX engine."
+  },
+  {
+   "part": "B",
+   "expr": "UTCTODAY(1)",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 28) Too many arguments were passed to the UTCTODAY function. The maximum argument count for the function is 0.\"",
+   "now": "LOCAL-REJECT:Function UTCTODAY is not supported by the local DAX engine."
+  },
+  {
+   "part": "B",
+   "expr": "UTCNOW(\"a\")",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 26) Too many arguments were passed to the UTCNOW function. The maximum argument count for the function is 0.\"",
+   "now": "LOCAL-REJECT:Function UTCNOW is not supported by the local DAX engine."
+  },
+  {
+   "part": "B",
+   "expr": "ISERROR(UTCNOW())",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:Function UTCNOW is not supported by the local DAX engine."
+  },
+  {
+   "part": "B",
+   "expr": "ISDATETIME(UTCNOW())",
+   "powerbi": "True",
+   "now": "LOCAL-REJECT:Function UTCNOW is not supported by the local DAX engine."
+  },
+  {
+   "part": "B",
+   "expr": "ISDATETIME(UTCTODAY())",
+   "powerbi": "True",
+   "now": "LOCAL-REJECT:Function UTCTODAY is not supported by the local DAX engine."
+  },
+  {
+   "part": "B",
+   "expr": "ISNUMBER(UTCNOW())",
+   "powerbi": "True",
+   "now": "LOCAL-REJECT:Function UTCNOW is not supported by the local DAX engine."
+  },
+  {
+   "part": "B",
+   "expr": "ISTEXT(UTCNOW())",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:Function UTCNOW is not supported by the local DAX engine."
+  },
+  {
+   "part": "B",
+   "expr": "UTCNOW()-UTCNOW()",
+   "powerbi": "12/30/1899 00:00:00",
+   "now": "LOCAL-REJECT:Function UTCNOW is not supported by the local DAX engine."
+  },
+  {
+   "part": "B",
+   "expr": "ABS(UTCNOW()-NOW())<1",
+   "powerbi": "True",
+   "now": "LOCAL-REJECT:Function UTCNOW is not supported by the local DAX engine."
+  },
+  {
+   "part": "B",
+   "expr": "ABS(UTCTODAY()-TODAY())<=1",
+   "powerbi": "True",
+   "now": "LOCAL-REJECT:Function UTCTODAY is not supported by the local DAX engine."
+  },
+  {
+   "part": "B",
+   "expr": "UTCNOW()>=UTCTODAY()",
+   "powerbi": "True",
+   "now": "LOCAL-REJECT:Function UTCNOW is not supported by the local DAX engine."
+  },
+  {
+   "part": "B",
+   "expr": "UTCNOW()<UTCTODAY()+1",
+   "powerbi": "True",
+   "now": "LOCAL-REJECT:Function UTCNOW is not supported by the local DAX engine."
+  },
+  {
+   "part": "B",
+   "expr": "COALESCE(UTCTODAY(),0)>0",
+   "powerbi": "True",
+   "now": "LOCAL-REJECT:Function UTCTODAY is not supported by the local DAX engine."
+  },
+  {
+   "part": "B",
+   "expr": "COUNTROWS(FILTER(VALUES(Facts[Region]),UTCNOW()>0))",
+   "powerbi": "3",
+   "now": "LOCAL-REJECT:Function UTCNOW is not supported by the local DAX engine."
+  },
+  {
+   "part": "B",
+   "expr": "SUMX(Facts,IF(UTCTODAY()>0,1,0))",
+   "powerbi": "6",
+   "now": "LOCAL-REJECT:Function UTCTODAY is not supported by the local DAX engine."
+  },
+  {
+   "part": "B",
+   "expr": "LEN(FORMAT(UTCTODAY(),\"yyyy\"))",
+   "powerbi": "4",
+   "now": "LOCAL-REJECT:Function UTCTODAY is not supported by the local DAX engine."
+  },
+  {
+   "part": "B",
+   "expr": "FORMAT(UTCTODAY(),\"hh:nn:ss\")",
+   "powerbi": "00:00:00",
+   "now": "LOCAL-REJECT:Function UTCTODAY is not supported by the local DAX engine."
+  },
+  {
+   "part": "B",
+   "expr": "INT(UTCNOW()*0)",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:Function UTCNOW is not supported by the local DAX engine."
+  },
+  {
+   "part": "C",
+   "expr": "PATH(Facts[Region],Facts[Note])",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 19) The value 'Paid' in 'Facts'[Note] must also exist in 'Facts'[Region]. Please add the missing data and try again.\"",
+   "now": "LOCAL-REJECT:Function PATH is not supported by the local DAX engine."
+  },
+  {
+   "part": "C",
+   "expr": "PATH(Facts[Note],Facts[Region])",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 19) The value 'East' in 'Facts'[Region] must also exist in 'Facts'[Note]. Please add the missing data and try again.\"",
+   "now": "LOCAL-REJECT:Function PATH is not supported by the local DAX engine."
+  },
+  {
+   "part": "C",
+   "expr": "PATH(Facts[Quantity],Facts[Quantity])",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 19) The columns specified in the PATH function must be from the same table, have the same data type and that type must be Integer or Text. It is incorrect to reference the same column twice. The columns 'Facts'[Quantity] and 'Facts'[Quantity] do not satisfy these requirements.\"",
+   "now": "LOCAL-REJECT:Function PATH is not supported by the local DAX engine."
+  },
+  {
+   "part": "C",
+   "expr": "PATH(Facts[Region],Facts[Region])",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 19) The columns specified in the PATH function must be from the same table, have the same data type and that type must be Integer or Text. It is incorrect to reference the same column twice. The columns 'Facts'[Region] and 'Facts'[Region] do not satisfy these requirements.\"",
+   "now": "LOCAL-REJECT:Function PATH is not supported by the local DAX engine."
+  },
+  {
+   "part": "C",
+   "expr": "PATH(Facts[Sales],Facts[Sales])",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 19) The columns specified in the PATH function must be from the same table, have the same data type and that type must be Integer or Text. It is incorrect to reference the same column twice. The columns 'Facts'[Sales] and 'Facts'[Sales] do not satisfy these requirements.\"",
+   "now": "LOCAL-REJECT:Function PATH is not supported by the local DAX engine."
+  },
+  {
+   "part": "C",
+   "expr": "PATH(Facts[Sales],Facts[Quantity])",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 19) The columns specified in the PATH function must be from the same table, have the same data type and that type must be Integer or Text. It is incorrect to reference the same column twice. The columns 'Facts'[Sales] and 'Facts'[Quantity] do not satisfy these requirements.\"",
+   "now": "LOCAL-REJECT:Function PATH is not supported by the local DAX engine."
+  },
+  {
+   "part": "C",
+   "expr": "PATH(Facts[Quantity],Facts[Sales])",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 19) The columns specified in the PATH function must be from the same table, have the same data type and that type must be Integer or Text. It is incorrect to reference the same column twice. The columns 'Facts'[Quantity] and 'Facts'[Sales] do not satisfy these requirements.\"",
+   "now": "LOCAL-REJECT:Function PATH is not supported by the local DAX engine."
+  },
+  {
+   "part": "C",
+   "expr": "PATH(Facts[Region],Facts[Quantity])",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 19) The columns specified in the PATH function must be from the same table, have the same data type and that type must be Integer or Text. It is incorrect to reference the same column twice. The columns 'Facts'[Region] and 'Facts'[Quantity] do not satisfy these requirements.\"",
+   "now": "LOCAL-REJECT:Function PATH is not supported by the local DAX engine."
+  },
+  {
+   "part": "C",
+   "expr": "PATH(Facts[Quantity],Facts[Region])",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 19) The columns specified in the PATH function must be from the same table, have the same data type and that type must be Integer or Text. It is incorrect to reference the same column twice. The columns 'Facts'[Quantity] and 'Facts'[Region] do not satisfy these requirements.\"",
+   "now": "LOCAL-REJECT:Function PATH is not supported by the local DAX engine."
+  },
+  {
+   "part": "C",
+   "expr": "PATH(Facts[Region])",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 19) Too few arguments were passed to the PATH function. The minimum argument count for the function is 2.\"",
+   "now": "LOCAL-REJECT:Function PATH is not supported by the local DAX engine."
+  },
+  {
+   "part": "C",
+   "expr": "PATH()",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 19) Too few arguments were passed to the PATH function. The minimum argument count for the function is 2.\"",
+   "now": "LOCAL-REJECT:Function PATH is not supported by the local DAX engine."
+  },
+  {
+   "part": "C",
+   "expr": "PATH(Facts[Region],Facts[Note],1)",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 50) Too many arguments were passed to the PATH function. The maximum argument count for the function is 2.\"",
+   "now": "LOCAL-REJECT:Function PATH is not supported by the local DAX engine."
+  },
+  {
+   "part": "C",
+   "expr": "PATH(\"a\",\"b\")",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 24) Function Path expects a column reference as argument number 1.\"",
+   "now": "LOCAL-REJECT:Function PATH is not supported by the local DAX engine."
+  },
+  {
+   "part": "C",
+   "expr": "PATH(1,2)",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 24) Function Path expects a column reference as argument number 1.\"",
+   "now": "LOCAL-REJECT:Function PATH is not supported by the local DAX engine."
+  },
+  {
+   "part": "C",
+   "expr": "CONCATENATEX(Facts,PATH(Facts[Region],Facts[Note]),\"|\")",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 38) The value 'Paid' in 'Facts'[Note] must also exist in 'Facts'[Region]. Please add the missing data and try again.\"",
+   "now": "LOCAL-REJECT:Function PATH is not supported by the local DAX engine."
+  },
+  {
+   "part": "C",
+   "expr": "CONCATENATEX(Facts,PATH(Facts[Note],Facts[Region]),\"|\")",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 38) The value 'East' in 'Facts'[Region] must also exist in 'Facts'[Note]. Please add the missing data and try again.\"",
+   "now": "LOCAL-REJECT:Function PATH is not supported by the local DAX engine."
+  },
+  {
+   "part": "C",
+   "expr": "ISERROR(PATH(Facts[Region],Facts[Note]))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 27) The value 'Paid' in 'Facts'[Note] must also exist in 'Facts'[Region]. Please add the missing data and try again.\"",
+   "now": "LOCAL-REJECT:Function PATH is not supported by the local DAX engine."
+  },
+  {
+   "part": "C",
+   "expr": "IFERROR(PATH(Facts[Region],Facts[Note]),\"x\")",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 27) The value 'Paid' in 'Facts'[Note] must also exist in 'Facts'[Region]. Please add the missing data and try again.\"",
+   "now": "LOCAL-REJECT:Function PATH is not supported by the local DAX engine."
+  },
+  {
+   "part": "C",
+   "expr": "CONCATENATEX(ADDCOLUMNS(DATATABLE(\"id\",INTEGER,\"par\",INTEGER,{{1,BLANK()},{2,1}}),\"p\",PATH([id],[par])),[p],\"|\")",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 110) [id] is not a valid reference to a column in a table. Please provide a table name in front of the column name or fix the column name.\"",
+   "now": "LOCAL-REJECT:Function PATH is not supported by the local DAX engine."
+  },
+  {
+   "part": "C",
+   "expr": "CONCATENATEX(VALUES(Facts[Region]),PATH(Facts[Region],Facts[Note]),\"|\")",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 54) The value 'Paid' in 'Facts'[Note] must also exist in 'Facts'[Region]. Please add the missing data and try again.\"",
+   "now": "LOCAL-REJECT:Function PATH is not supported by the local DAX engine."
+  },
+  {
+   "part": "C",
+   "expr": "PATHLENGTH(PATH(Facts[Region],Facts[Note]))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 30) The value 'Paid' in 'Facts'[Note] must also exist in 'Facts'[Region]. Please add the missing data and try again.\"",
+   "now": "LOCAL-REJECT:Function PATH is not supported by the local DAX engine."
+  },
+  {
+   "part": "C",
+   "expr": "COUNTROWS(FILTER(Facts,PATH(Facts[Note],Facts[Region])<>\"\"))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 42) The value 'East' in 'Facts'[Region] must also exist in 'Facts'[Note]. Please add the missing data and try again.\"",
+   "now": "LOCAL-REJECT:Function PATH is not supported by the local DAX engine."
+  }
+ ]
+}
