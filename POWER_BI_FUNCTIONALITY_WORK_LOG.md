@@ -1806,3 +1806,9 @@ The standing test workbook is now `tests/Data/Vat File -Aug 2026.xlsx` (sheet `V
 **Saved:** `tools/parity/dax_battery_swi22_extra.json` (173 answers), `tools/parity/task32_swi_order_spec.json`.
 
 **Gate:** PARITY GATE PASSED (fast gate). pytest 2,547 passed; replay 453,855: 446,501 match, 7,354 refused, 0 DIFF, 0 CRASH; locked 446,021 to 446,481. The real app through the measure path, offscreen: 575/575 equal and 1,500 fresh probes with 0 wrong. Power BI answers came from Power BI Desktop on the iPad guest; the project was not saved. No saved Power BI answer was edited.
+
+## 2026-11-03 — Iteration 123 (Task 33 xirr-oddfyield-23: new XIRR and ODDFYIELD, PATHITEM type argument)
+
+Antigravity added XIRR, ODDFYIELD and the PATHITEM/PATHITEMREVERSE type argument. Sonnet 5.5 rebuilt the XIRR solver to Power BI's measured behaviour (dates sorted, NPV from the earliest date, bisection in (1+r)/(1+guess) searching upward then downward, stop at 1e-8). It also made XIRR refuse the cases Power BI does not settle: several sign flips with roots in disagreement, several roots when the first row is not the earliest date, and brackets needing more than 40 bisection steps. alternateResult is converted to a Number. Spec 392 items: A 183 match/4 refused, B 45, C 160, 0 wrong. Fresh review: 3 batches of 190-210 new XIRR shapes measured in Power BI; the four wrong answers found along the way were all fixed, ending at 0 wrong. 580 fresh answers saved as dax_battery_xirr23_extra.
+
+**Gate:** PARITY GATE PASSED (fast gate). pytest 2,557 passed; replay 454,435: 447,001 match, 7,434 refused, 0 DIFF, 0 CRASH; locked 446,481 to 446,981. The real app through the measure path, offscreen: 575/575 equal and 1,500 fresh probes with 0 wrong. Power BI answers came from Power BI Desktop on the iPad guest; the project was not saved. No saved Power BI answer was edited.

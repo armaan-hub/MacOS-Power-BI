@@ -14,3 +14,6 @@ Compute, never look up. Never edit saved Power BI answers or existing tests. No 
 
 ## Commands (in the worktree)
 Scorer: `PYTHONPATH=. QT_QPA_PLATFORM=offscreen python3 tools/score_spec.py tools/parity/task33_xirr_oddfyield_spec.json [A|B|C]`. Tests: `tests/test_iteration123_xirr_oddfyield_23.py`. When done, leave changes uncommitted and write a ready-for-review entry in this worktree's `HANDOFF.md`. Do not write session logs outside this worktree.
+
+## Review outcome (2026-11-03)
+Shipped as Iteration 123. Locked 446,981.
