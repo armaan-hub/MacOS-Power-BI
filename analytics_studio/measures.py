@@ -497,6 +497,185 @@ _LOOKUP_ARITY = {
     "LASTNONBLANK": (2, 2), "FIRSTNONBLANKVALUE": (2, 2), "LASTNONBLANKVALUE": (2, 2), "GENERATESERIES": (2, 3),
     "ROW": (2, None),
 }
+class _UnmodelledField:
+    """Sentinel for a Tabular Model metadata field not modelled by the local engine."""
+    __slots__ = ("name",)
+
+    def __init__(self, name: str) -> None:
+        self.name = name
+
+    def __repr__(self) -> str:
+        return f"_UnmodelledField({self.name!r})"
+
+    def _refuse(self, *_other: Any) -> Any:
+        # Power BI holds a real value here that the local engine does not model, so any comparison, ordering or hashing of it would be invented
+        raise MeasureError(f"Field '{self.name}' is not modelled by the local engine, so rows holding it cannot be compared.")
+
+    __eq__ = __ne__ = __lt__ = __le__ = __gt__ = __ge__ = _refuse
+    __hash__ = _refuse
+
+
+_INFO_VIEW_TABLES_HEADERS = [
+    "ID", "Name", "Model", "DataCategory", "Description", "IsHidden", "StorageMode",
+    "TableStorage", "Expression", "ShowAsVariationOnly", "IsPrivate",
+    "CalculationGroupPrecedence", "LineageTag",
+]
+
+_INFO_VIEW_TABLES_TYPES = {
+    "ID": "int64", "Name": "text", "Model": "text", "DataCategory": "text",
+    "Description": "text", "IsHidden": "boolean", "StorageMode": "text",
+    "TableStorage": "text", "Expression": "text", "ShowAsVariationOnly": "boolean",
+    "IsPrivate": "boolean", "CalculationGroupPrecedence": "int64", "LineageTag": "text",
+}
+
+_INFO_VIEW_COLUMNS_HEADERS = [
+    "ID", "Name", "Table", "DataType", "DataCategory", "Description", "IsHidden",
+    "IsUnique", "IsKey", "IsNullable", "Alignment", "SummarizeBy", "ColumnStorage",
+    "Type", "SourceColumn", "Expression", "FormatString", "IsAvailableInMDX",
+    "SortByColumn", "GroupingBehavior", "SourceProviderType", "DisplayFolder",
+    "AlternateOf", "LineageTag",
+]
+
+_INFO_VIEW_COLUMNS_TYPES = {
+    "ID": "int64", "Name": "text", "Table": "text", "DataType": "text",
+    "DataCategory": "text", "Description": "text", "IsHidden": "boolean",
+    "IsUnique": "boolean", "IsKey": "boolean", "IsNullable": "boolean",
+    "Alignment": "text", "SummarizeBy": "text", "ColumnStorage": "text",
+    "Type": "int64", "SourceColumn": "text", "Expression": "text",
+    "FormatString": "text", "IsAvailableInMDX": "boolean", "SortByColumn": "text",
+    "GroupingBehavior": "text", "SourceProviderType": "text", "DisplayFolder": "text",
+    "AlternateOf": "text", "LineageTag": "text",
+}
+
+_INFO_VIEW_MEASURES_HEADERS = [
+    "ID", "Name", "Table", "Description", "DataType", "Expression", "FormatString",
+    "IsHidden", "State", "KPIID", "IsSimpleMeasure", "DisplayFolder",
+    "DetailRowsDefinition", "DataCategory", "FormatStringDefinition", "LineageTag",
+]
+
+_INFO_VIEW_MEASURES_TYPES = {
+    "ID": "int64", "Name": "text", "Table": "text", "Description": "text",
+    "DataType": "text", "Expression": "text", "FormatString": "text", "IsHidden": "boolean",
+    "State": "int64", "KPIID": "int64", "IsSimpleMeasure": "boolean", "DisplayFolder": "text",
+    "DetailRowsDefinition": "text", "DataCategory": "text", "FormatStringDefinition": "text",
+    "LineageTag": "text",
+}
+
+_INFO_VIEW_RELATIONSHIPS_HEADERS = [
+    "ID", "Name", "Relationship", "Model", "IsActive", "CrossFilteringBehavior",
+    "RelyOnReferentialIntegrity", "FromTable", "FromColumn", "FromCardinality",
+    "ToTable", "ToColumn", "ToCardinality", "State", "SecurityFilteringBehavior",
+]
+
+_INFO_VIEW_RELATIONSHIPS_TYPES = {
+    "ID": "int64", "Name": "text", "Relationship": "text", "Model": "text",
+    "IsActive": "boolean", "CrossFilteringBehavior": "text", "RelyOnReferentialIntegrity": "boolean",
+    "FromTable": "text", "FromColumn": "text", "FromCardinality": "text",
+    "ToTable": "text", "ToColumn": "text", "ToCardinality": "text",
+    "State": "int64", "SecurityFilteringBehavior": "text",
+}
+
+_INFO_TABLES_HEADERS = [
+    "ID", "ModelID", "Name", "DataCategory", "Description", "IsHidden",
+    "TableStorageID", "ModifiedTime", "StructureModifiedTime", "SystemFlags",
+    "ShowAsVariationsOnly", "IsPrivate", "DefaultDetailRowsDefinitionID",
+    "AlternateSourcePrecedence", "RefreshPolicyID", "CalculationGroupID",
+    "ExcludeFromModelRefresh", "LineageTag", "SourceLineageTag", "SystemManaged",
+    "ExcludeFromAutomaticAggregations",
+]
+
+_INFO_TABLES_TYPES = {
+    "ID": "int64", "ModelID": "int64", "Name": "text", "DataCategory": "text",
+    "Description": "text", "IsHidden": "boolean", "TableStorageID": "int64",
+    "ModifiedTime": "datetime", "StructureModifiedTime": "datetime", "SystemFlags": "int64",
+    "ShowAsVariationsOnly": "boolean", "IsPrivate": "boolean",
+    "DefaultDetailRowsDefinitionID": "int64", "AlternateSourcePrecedence": "int64",
+    "RefreshPolicyID": "int64", "CalculationGroupID": "int64",
+    "ExcludeFromModelRefresh": "boolean", "LineageTag": "text", "SourceLineageTag": "text",
+    "SystemManaged": "boolean", "ExcludeFromAutomaticAggregations": "boolean",
+}
+
+_INFO_COLUMNS_HEADERS = [
+    "ID", "TableID", "ExplicitName", "InferredName", "ExplicitDataType",
+    "InferredDataType", "DataCategory", "Description", "IsHidden", "State",
+    "IsUnique", "IsKey", "IsNullable", "Alignment", "TableDetailPosition",
+    "IsDefaultLabel", "IsDefaultImage", "SummarizeBy", "ColumnStorageID", "Type",
+    "SourceColumn", "ColumnOriginID", "Expression", "FormatString",
+    "IsAvailableInMDX", "SortByColumnID", "AttributeHierarchyID", "ModifiedTime",
+    "StructureModifiedTime", "RefreshedTime", "SystemFlags", "KeepUniqueRows",
+    "DisplayOrdinal", "ErrorMessage", "SourceProviderType", "DisplayFolder",
+    "EncodingHint", "RelatedColumnDetailsID", "AlternateOfID", "LineageTag",
+    "SourceLineageTag",
+]
+
+_INFO_COLUMNS_TYPES = {
+    "ID": "int64", "TableID": "int64", "ExplicitName": "text", "InferredName": "text",
+    "ExplicitDataType": "int64", "InferredDataType": "int64", "DataCategory": "text",
+    "Description": "text", "IsHidden": "boolean", "State": "int64",
+    "IsUnique": "boolean", "IsKey": "boolean", "IsNullable": "boolean",
+    "Alignment": "int64", "TableDetailPosition": "int64", "IsDefaultLabel": "boolean",
+    "IsDefaultImage": "boolean", "SummarizeBy": "int64", "ColumnStorageID": "int64",
+    "Type": "int64", "SourceColumn": "text", "ColumnOriginID": "int64",
+    "Expression": "text", "FormatString": "text", "IsAvailableInMDX": "boolean",
+    "SortByColumnID": "int64", "AttributeHierarchyID": "int64",
+    "ModifiedTime": "datetime", "StructureModifiedTime": "datetime", "RefreshedTime": "datetime",
+    "SystemFlags": "int64", "KeepUniqueRows": "boolean", "DisplayOrdinal": "int64",
+    "ErrorMessage": "text", "SourceProviderType": "text", "DisplayFolder": "text",
+    "EncodingHint": "int64", "RelatedColumnDetailsID": "int64", "AlternateOfID": "int64",
+    "LineageTag": "text", "SourceLineageTag": "text",
+}
+
+_INFO_MEASURES_HEADERS = [
+    "ID", "TableID", "Name", "Description", "DataType", "Expression", "FormatString",
+    "IsHidden", "State", "ModifiedTime", "StructureModifiedTime", "KPIID",
+    "IsSimpleMeasure", "ErrorMessage", "DisplayFolder", "DetailRowsDefinitionID",
+    "DataCategory", "FormatStringDefinitionID", "LineageTag", "SourceLineageTag",
+]
+
+_INFO_MEASURES_TYPES = {
+    "ID": "int64", "TableID": "int64", "Name": "text", "Description": "text",
+    "DataType": "int64", "Expression": "text", "FormatString": "text", "IsHidden": "boolean",
+    "State": "int64", "ModifiedTime": "datetime", "StructureModifiedTime": "datetime",
+    "KPIID": "int64", "IsSimpleMeasure": "boolean", "ErrorMessage": "text",
+    "DisplayFolder": "text", "DetailRowsDefinitionID": "int64", "DataCategory": "text",
+    "FormatStringDefinitionID": "int64", "LineageTag": "text", "SourceLineageTag": "text",
+}
+
+_INFO_RELATIONSHIPS_HEADERS = [
+    "ID", "ModelID", "Name", "IsActive", "Type", "CrossFilteringBehavior",
+    "JoinOnDateBehavior", "RelyOnReferentialIntegrity", "FromTableID", "FromColumnID",
+    "FromCardinality", "ToTableID", "ToColumnID", "ToCardinality", "State",
+    "RelationshipStorageID", "RelationshipStorage2ID", "ModifiedTime",
+    "RefreshedTime", "SecurityFilteringBehavior",
+]
+
+_INFO_RELATIONSHIPS_TYPES = {
+    "ID": "int64", "ModelID": "int64", "Name": "text", "IsActive": "boolean",
+    "Type": "int64", "CrossFilteringBehavior": "int64", "JoinOnDateBehavior": "int64",
+    "RelyOnReferentialIntegrity": "boolean", "FromTableID": "int64", "FromColumnID": "int64",
+    "FromCardinality": "int64", "ToTableID": "int64", "ToColumnID": "int64",
+    "ToCardinality": "int64", "State": "int64", "RelationshipStorageID": "int64",
+    "RelationshipStorage2ID": "int64", "ModifiedTime": "datetime",
+    "RefreshedTime": "datetime", "SecurityFilteringBehavior": "int64",
+}
+
+_INFO_FUNCTIONS = frozenset({
+    "INFO.VIEW.TABLES", "INFO.VIEW.COLUMNS", "INFO.VIEW.MEASURES", "INFO.VIEW.RELATIONSHIPS",
+    "INFO.TABLES", "INFO.COLUMNS", "INFO.MEASURES", "INFO.RELATIONSHIPS",
+})
+
+
+def _contains_any_function_call(node: Any, functions: frozenset[str]) -> bool:
+    if not isinstance(node, tuple) or not node:
+        return False
+    return (
+        (node[0] == "call" and node[1] in functions)
+        or any(
+            isinstance(child, tuple) and _contains_any_function_call(child, functions)
+            for child in node
+        )
+    )
+
 _FUNCTIONS |= set(_LOOKUP_ARITY)
 # Table-valued functions (min, max arguments) and the rank / outer-row functions.
 _TABLE_FUNCTION_ARITY = {
@@ -509,6 +688,14 @@ _TABLE_FUNCTION_ARITY = {
     "LINEST": (2, None), "LINESTX": (3, None),
     "SUBSTITUTEWITHINDEX": (4, None),
     "ADDMISSINGITEMS": (1, None),
+    "INFO.VIEW.TABLES": (0, 0),
+    "INFO.VIEW.COLUMNS": (0, 0),
+    "INFO.VIEW.MEASURES": (0, 0),
+    "INFO.VIEW.RELATIONSHIPS": (0, 0),
+    "INFO.TABLES": (0, 1),
+    "INFO.COLUMNS": (0, 1),
+    "INFO.MEASURES": (0, 1),
+    "INFO.RELATIONSHIPS": (0, 1),
 }
 # only meaningful inside SUMMARIZECOLUMNS (IGNORE, NONVISUAL) and GROUPBY (CURRENTGROUP); elsewhere they raise
 _FUNCTIONS |= {"IGNORE", "NONVISUAL", "CURRENTGROUP", "ROLLUP", "ROLLUPGROUP", "ROLLUPADDISSUBTOTAL", "ROLLUPISSUBTOTAL", "ISSUBTOTAL"}
@@ -1389,6 +1576,8 @@ def _is_filter_scalar(node: Any) -> bool:
     if kind == "call":
         if node[1] == "CALCULATE":
             return False  # Power BI does not allow CALCULATE inside a True/False filter expression
+        if _contains_any_function_call(node, _INFO_FUNCTIONS):
+            return False  # INFO functions in a CALCULATE filter predicate depend on external model table counts
         if node[1] in _FILTER_AGGREGATES:
             return True
         return all(_is_filter_scalar(argument) for argument in node[2])
@@ -2983,7 +3172,7 @@ _NUMERIC_KIND_BY_COLUMN_TYPE = {
     "currency": "currency", "fixed_decimal": "currency",
 }
 _CURRENCY_MAX = Decimal("922337203685477.5807")  # a Currency is an Int64 of ten-thousandths
-_TOCSV_CONSTANT_TABLES = frozenset({"ROW", "DATATABLE", "GENERATESERIES", "CALENDAR", "CALENDARAUTO"})
+_TOCSV_CONSTANT_TABLES = frozenset({"ROW", "DATATABLE", "GENERATESERIES", "CALENDAR", "CALENDARAUTO"}) | _INFO_FUNCTIONS
 _TOCSV_DICTIONARY_TABLES = frozenset({"ALL", "ALLNOBLANKROW", "ALLSELECTED", "ALLEXCEPT"})  # FILTERS (Power BI sorts it) is refused; TREATAS is checked in _tocsv_row_order
 _TOCSV_JOIN_TABLES = frozenset({"EXCEPT", "INTERSECT", "CROSSJOIN", "NATURALINNERJOIN", "NATURALLEFTOUTERJOIN", "GENERATE", "GENERATEALL"})
 _TOCSV_SIGNED_ZERO_CALLS = frozenset({"CEILING", "FLOOR", "ISO.CEILING", "TRUNC", "ROUNDUP", "ROUNDDOWN", "DIVIDE", "POWER", "MOD"})
@@ -4808,6 +4997,14 @@ class _Parser:
             elif function in {"ROLLUPADDISSUBTOTAL", "ROLLUPISSUBTOTAL"}:
                 if len(arguments) < 2:
                     raise MeasureError(f"Too few arguments were passed to the {function} function. The minimum argument count for the function is 2.")
+            elif function in {"INFO.VIEW.TABLES", "INFO.VIEW.COLUMNS", "INFO.VIEW.MEASURES", "INFO.VIEW.RELATIONSHIPS"}:
+                if len(arguments) > 0:
+                    raise MeasureError(f"Too many arguments were passed to the {function} function. The maximum argument count for the function is 0.")
+            elif function in {"INFO.TABLES", "INFO.COLUMNS", "INFO.MEASURES", "INFO.RELATIONSHIPS"}:
+                if len(arguments) > 0:
+                    if arguments[0][0] != "string":
+                        raise MeasureError(f"The '{function}' function expects a constant string representing a restriction name.")
+                    raise MeasureError(f"'{arguments[0][1]}' is not a valid restriction name.")
             elif function in _TABLE_FUNCTION_ARITY and not (
                 _TABLE_FUNCTION_ARITY[function][0] <= len(arguments)
                 and (_TABLE_FUNCTION_ARITY[function][1] is None or len(arguments) <= _TABLE_FUNCTION_ARITY[function][1])
@@ -6133,6 +6330,19 @@ def _static_table_columns(node: Any, columns: dict[str, dict[str, str]], variabl
     if fn in {"LINEST", "LINESTX"}:
         from . import dax_linest
         return {h.casefold(): "double" for h in dax_linest.headers_for(16, True)}
+    if fn in _INFO_FUNCTIONS:
+        types_map = {
+            "INFO.VIEW.TABLES": (_INFO_VIEW_TABLES_HEADERS, _INFO_VIEW_TABLES_TYPES),
+            "INFO.VIEW.COLUMNS": (_INFO_VIEW_COLUMNS_HEADERS, _INFO_VIEW_COLUMNS_TYPES),
+            "INFO.VIEW.MEASURES": (_INFO_VIEW_MEASURES_HEADERS, _INFO_VIEW_MEASURES_TYPES),
+            "INFO.VIEW.RELATIONSHIPS": (_INFO_VIEW_RELATIONSHIPS_HEADERS, _INFO_VIEW_RELATIONSHIPS_TYPES),
+            "INFO.TABLES": (_INFO_TABLES_HEADERS, _INFO_TABLES_TYPES),
+            "INFO.COLUMNS": (_INFO_COLUMNS_HEADERS, _INFO_COLUMNS_TYPES),
+            "INFO.MEASURES": (_INFO_MEASURES_HEADERS, _INFO_MEASURES_TYPES),
+            "INFO.RELATIONSHIPS": (_INFO_RELATIONSHIPS_HEADERS, _INFO_RELATIONSHIPS_TYPES),
+        }
+        hdrs, typs = types_map[fn]
+        return {h.casefold(): typs.get(h, "") for h in hdrs}
     if fn in {"ADDCOLUMNS", "SELECTCOLUMNS"} and args:
         base = _static_table_columns(args[0], columns, variables)
         added = dict(base) if fn == "ADDCOLUMNS" else {}
@@ -6889,6 +7099,7 @@ def evaluate_measures(
                 "rows": list(table_rows),
                 "column_types": dict(item.get("column_types", {})),
                 "date_column": str(item.get("date_column") or ""),
+                "model_customised": [str(setting) for setting in item.get("model_customised", ())],
                 "filter_column_rows": filter_column_rows,
                 "filter_column_blank_allowed": filter_column_blank_allowed,
                 "filter_context_complete": filter_context_complete,
@@ -7005,6 +7216,8 @@ def evaluate_measures(
         """A loaded cell as the DAX value of its column type (None is blank)."""
         if raw is None:
             return None
+        if isinstance(raw, _UnmodelledField):
+            raw._refuse()  # reading it as a typed value (CONTAINS, lookups) would invent a value
         kind = str(context.get("column_types", {}).get(column, "text")).casefold()
         if kind in {"whole_number", "decimal_number", "decimal", "fixed_decimal", "currency", "number", "int64", "double"}:
             return raw if isinstance(raw, Decimal) else dax_typed.text_to_number(cell_to_text(raw))
@@ -7988,6 +8201,10 @@ def evaluate_measures(
         return {header: (context, header) for header in context["headers"]}
 
     def row_key(values: Iterable[Any]) -> tuple[Any, ...]:
+        values = list(values)
+        for v in values:
+            if isinstance(v, _UnmodelledField):
+                v._refuse()  # a whole-row comparison or hash over an unmodelled field would be invented
         return tuple(cell_key(ascii_fold(v) if isinstance(v, str) else v) for v in values)
 
     profile_cache: dict[tuple[str, str], Any] = {}
@@ -8780,6 +8997,252 @@ def evaluate_measures(
             return captured[-1]
         if function in {"INDEX", "OFFSET", "WINDOW"}:
             return window_table(function, arguments)
+        if function in _INFO_FUNCTIONS:
+            if function in {"INFO.VIEW.MEASURES", "INFO.MEASURES"} and definitions:
+                # Power BI lists every measure of the model, this one included; the local engine does not model their metadata
+                raise MeasureError(f"{function} is not modelled by the local engine when the model holds measures.")
+            if len(contexts_by_id) != 1:
+                raise MeasureError("Models with multiple tables are not supported by INFO functions in the local engine.")
+            if relationship_definitions:
+                raise MeasureError("Models with relationships are not supported by INFO functions in the local engine.")
+            for tbl_ctx in contexts_by_id.values():
+                if tbl_ctx.get("date_column") or tbl_ctx.get("model_customised"):
+                    raise MeasureError(
+                        "INFO functions are not modelled by the local engine for tables with calculated columns, "
+                        "sort-by, group-by, key, summarization or date-table settings."
+                    )
+                for h in tbl_ctx.get("headers", []):
+                    ct = tbl_ctx.get("column_types", {}).get(h, "text").casefold()
+                    if ct not in {"decimal_number", "double", "whole_number", "int64", "text", "string"}:
+                        raise MeasureError(f"Column '{h}' has data type '{ct}' which is not supported by INFO functions in the local engine.")
+            tbl = next(iter(contexts_by_id.values()))
+            if function == "INFO.VIEW.TABLES":
+                headers = _INFO_VIEW_TABLES_HEADERS
+                types = _INFO_VIEW_TABLES_TYPES
+                rows = [{
+                    "ID": _UnmodelledField("ID"),
+                    "Name": tbl["name"],
+                    "Model": _UnmodelledField("Model"),
+                    "DataCategory": "Regular",
+                    "Description": None,
+                    "IsHidden": False,
+                    "StorageMode": "Import",
+                    "TableStorage": _UnmodelledField("TableStorage"),
+                    "Expression": _UnmodelledField("Expression"),
+                    "ShowAsVariationOnly": False,
+                    "IsPrivate": False,
+                    "CalculationGroupPrecedence": None,
+                    "LineageTag": _UnmodelledField("LineageTag"),
+                }]
+            elif function == "INFO.VIEW.COLUMNS":
+                headers = _INFO_VIEW_COLUMNS_HEADERS
+                types = _INFO_VIEW_COLUMNS_TYPES
+                rows = [{
+                    "ID": _UnmodelledField("ID"),
+                    "Name": "RowNumber-2662979B-1795-4F74-8F37-6A1BA8059B61",
+                    "Table": tbl["name"],
+                    "DataType": "Integer",
+                    "DataCategory": "RowNumber",
+                    "Description": None,
+                    "IsHidden": True,
+                    "IsUnique": True,
+                    "IsKey": True,
+                    "IsNullable": False,
+                    "Alignment": "Default",
+                    "SummarizeBy": "Default",
+                    "ColumnStorage": _UnmodelledField("ColumnStorage"),
+                    "Type": _UnmodelledField("Type"),
+                    "SourceColumn": _UnmodelledField("SourceColumn"),
+                    "Expression": _UnmodelledField("Expression"),
+                    "FormatString": _UnmodelledField("FormatString"),
+                    "IsAvailableInMDX": True,
+                    "SortByColumn": None,
+                    "GroupingBehavior": "GroupOnValue",
+                    "SourceProviderType": None,
+                    "DisplayFolder": None,
+                    "AlternateOf": None,
+                    "LineageTag": _UnmodelledField("LineageTag"),
+                }]
+                for col_name in tbl["headers"]:
+                    col_t = tbl.get("column_types", {}).get(col_name, "text").casefold()
+                    if col_t in {"whole_number", "int64"}:
+                        dt_str = "Integer"
+                    elif col_t in {"decimal_number", "double"}:
+                        dt_str = "Number"
+                    else:
+                        dt_str = "Text"
+                    rows.append({
+                        "ID": _UnmodelledField("ID"),
+                        "Name": col_name,
+                        "Table": tbl["name"],
+                        "DataType": dt_str,
+                        "DataCategory": "Regular",
+                        "Description": None,
+                        "IsHidden": False,
+                        "IsUnique": False,
+                        "IsKey": False,
+                        "IsNullable": True,
+                        "Alignment": "Default",
+                        "SummarizeBy": "Default",
+                        "ColumnStorage": _UnmodelledField("ColumnStorage"),
+                        "Type": _UnmodelledField("Type"),
+                        "SourceColumn": _UnmodelledField("SourceColumn"),
+                        "Expression": _UnmodelledField("Expression"),
+                        "FormatString": _UnmodelledField("FormatString"),
+                        "IsAvailableInMDX": True,
+                        "SortByColumn": None,
+                        "GroupingBehavior": "GroupOnValue",
+                        "SourceProviderType": None,
+                        "DisplayFolder": None,
+                        "AlternateOf": None,
+                        "LineageTag": _UnmodelledField("LineageTag"),
+                    })
+            elif function == "INFO.VIEW.MEASURES":
+                headers = _INFO_VIEW_MEASURES_HEADERS
+                types = _INFO_VIEW_MEASURES_TYPES
+                rows = []
+            elif function == "INFO.VIEW.RELATIONSHIPS":
+                headers = _INFO_VIEW_RELATIONSHIPS_HEADERS
+                types = _INFO_VIEW_RELATIONSHIPS_TYPES
+                rows = []
+            elif function == "INFO.TABLES":
+                headers = _INFO_TABLES_HEADERS
+                types = _INFO_TABLES_TYPES
+                rows = [{
+                    "ID": _UnmodelledField("ID"),
+                    "ModelID": _UnmodelledField("ModelID"),
+                    "Name": tbl["name"],
+                    "DataCategory": None,
+                    "Description": None,
+                    "IsHidden": False,
+                    "TableStorageID": _UnmodelledField("TableStorageID"),
+                    "ModifiedTime": _UnmodelledField("ModifiedTime"),
+                    "StructureModifiedTime": _UnmodelledField("StructureModifiedTime"),
+                    "SystemFlags": _UnmodelledField("SystemFlags"),
+                    "ShowAsVariationsOnly": False,
+                    "IsPrivate": False,
+                    "DefaultDetailRowsDefinitionID": _UnmodelledField("DefaultDetailRowsDefinitionID"),
+                    "AlternateSourcePrecedence": Decimal(0),
+                    "RefreshPolicyID": _UnmodelledField("RefreshPolicyID"),
+                    "CalculationGroupID": _UnmodelledField("CalculationGroupID"),
+                    "ExcludeFromModelRefresh": False,
+                    "LineageTag": _UnmodelledField("LineageTag"),
+                    "SourceLineageTag": _UnmodelledField("SourceLineageTag"),
+                    "SystemManaged": False,
+                    "ExcludeFromAutomaticAggregations": _UnmodelledField("ExcludeFromAutomaticAggregations"),
+                }]
+            elif function == "INFO.COLUMNS":
+                headers = _INFO_COLUMNS_HEADERS
+                types = _INFO_COLUMNS_TYPES
+                rows = [{
+                    "ID": _UnmodelledField("ID"),
+                    "TableID": _UnmodelledField("TableID"),
+                    "ExplicitName": "RowNumber-2662979B-1795-4F74-8F37-6A1BA8059B61",
+                    "InferredName": _UnmodelledField("InferredName"),
+                    "ExplicitDataType": Decimal(6),
+                    "InferredDataType": _UnmodelledField("InferredDataType"),
+                    "DataCategory": None,
+                    "Description": None,
+                    "IsHidden": True,
+                    "State": _UnmodelledField("State"),
+                    "IsUnique": True,
+                    "IsKey": True,
+                    "IsNullable": False,
+                    "Alignment": Decimal(1),
+                    "TableDetailPosition": _UnmodelledField("TableDetailPosition"),
+                    "IsDefaultLabel": _UnmodelledField("IsDefaultLabel"),
+                    "IsDefaultImage": _UnmodelledField("IsDefaultImage"),
+                    "SummarizeBy": Decimal(1),
+                    "ColumnStorageID": _UnmodelledField("ColumnStorageID"),
+                    "Type": _UnmodelledField("Type"),
+                    "SourceColumn": _UnmodelledField("SourceColumn"),
+                    "ColumnOriginID": _UnmodelledField("ColumnOriginID"),
+                    "Expression": _UnmodelledField("Expression"),
+                    "FormatString": _UnmodelledField("FormatString"),
+                    "IsAvailableInMDX": True,
+                    "SortByColumnID": _UnmodelledField("SortByColumnID"),
+                    "AttributeHierarchyID": _UnmodelledField("AttributeHierarchyID"),
+                    "ModifiedTime": _UnmodelledField("ModifiedTime"),
+                    "StructureModifiedTime": _UnmodelledField("StructureModifiedTime"),
+                    "RefreshedTime": _UnmodelledField("RefreshedTime"),
+                    "SystemFlags": _UnmodelledField("SystemFlags"),
+                    "KeepUniqueRows": _UnmodelledField("KeepUniqueRows"),
+                    "DisplayOrdinal": _UnmodelledField("DisplayOrdinal"),
+                    "ErrorMessage": _UnmodelledField("ErrorMessage"),
+                    "SourceProviderType": None,
+                    "DisplayFolder": None,
+                    "EncodingHint": _UnmodelledField("EncodingHint"),
+                    "RelatedColumnDetailsID": _UnmodelledField("RelatedColumnDetailsID"),
+                    "AlternateOfID": _UnmodelledField("AlternateOfID"),
+                    "LineageTag": _UnmodelledField("LineageTag"),
+                    "SourceLineageTag": _UnmodelledField("SourceLineageTag"),
+                }]
+                for col_name in tbl["headers"]:
+                    col_t = tbl.get("column_types", {}).get(col_name, "text").casefold()
+                    if col_t in {"whole_number", "int64"}:
+                        dt_code = Decimal(6)
+                    elif col_t in {"decimal_number", "double"}:
+                        dt_code = Decimal(8)
+                    else:
+                        dt_code = Decimal(2)
+                    rows.append({
+                        "ID": _UnmodelledField("ID"),
+                        "TableID": _UnmodelledField("TableID"),
+                        "ExplicitName": col_name,
+                        "InferredName": _UnmodelledField("InferredName"),
+                        "ExplicitDataType": dt_code,
+                        "InferredDataType": _UnmodelledField("InferredDataType"),
+                        "DataCategory": None,
+                        "Description": None,
+                        "IsHidden": False,
+                        "State": _UnmodelledField("State"),
+                        "IsUnique": False,
+                        "IsKey": False,
+                        "IsNullable": True,
+                        "Alignment": Decimal(1),
+                        "TableDetailPosition": _UnmodelledField("TableDetailPosition"),
+                        "IsDefaultLabel": _UnmodelledField("IsDefaultLabel"),
+                        "IsDefaultImage": _UnmodelledField("IsDefaultImage"),
+                        "SummarizeBy": Decimal(1),
+                        "ColumnStorageID": _UnmodelledField("ColumnStorageID"),
+                        "Type": _UnmodelledField("Type"),
+                        "SourceColumn": _UnmodelledField("SourceColumn"),
+                        "ColumnOriginID": _UnmodelledField("ColumnOriginID"),
+                        "Expression": _UnmodelledField("Expression"),
+                        "FormatString": _UnmodelledField("FormatString"),
+                        "IsAvailableInMDX": True,
+                        "SortByColumnID": _UnmodelledField("SortByColumnID"),
+                        "AttributeHierarchyID": _UnmodelledField("AttributeHierarchyID"),
+                        "ModifiedTime": _UnmodelledField("ModifiedTime"),
+                        "StructureModifiedTime": _UnmodelledField("StructureModifiedTime"),
+                        "RefreshedTime": _UnmodelledField("RefreshedTime"),
+                        "SystemFlags": _UnmodelledField("SystemFlags"),
+                        "KeepUniqueRows": _UnmodelledField("KeepUniqueRows"),
+                        "DisplayOrdinal": _UnmodelledField("DisplayOrdinal"),
+                        "ErrorMessage": _UnmodelledField("ErrorMessage"),
+                        "SourceProviderType": None,
+                        "DisplayFolder": None,
+                        "EncodingHint": _UnmodelledField("EncodingHint"),
+                        "RelatedColumnDetailsID": _UnmodelledField("RelatedColumnDetailsID"),
+                        "AlternateOfID": _UnmodelledField("AlternateOfID"),
+                        "LineageTag": _UnmodelledField("LineageTag"),
+                        "SourceLineageTag": _UnmodelledField("SourceLineageTag"),
+                    })
+            elif function == "INFO.MEASURES":
+                headers = _INFO_MEASURES_HEADERS
+                types = _INFO_MEASURES_TYPES
+                rows = []
+            elif function == "INFO.RELATIONSHIPS":
+                headers = _INFO_RELATIONSHIPS_HEADERS
+                types = _INFO_RELATIONSHIPS_TYPES
+                rows = []
+            else:
+                raise MeasureError(f"{function} is not supported by the local DAX engine.")
+
+            dt_ctx, dt_rows = derived_table(headers, rows, lineage=None, base_types=types, certain_types=headers)
+            dt_ctx["info_function"] = True
+            dt_ctx["info_function_name"] = function
+            return dt_ctx, dt_rows
         if function in _NEW_TABLE_FUNCTIONS:
             return new_table_function(function, arguments)
         raise MeasureError(f"{function} is not supported by the local DAX engine.")
@@ -14563,6 +15026,8 @@ def evaluate_measures(
         return False, filtered  # a table filter now: nothing left to pre-evaluate
 
     def preevaluate_calculate_boolean_filter(argument: tuple[Any, ...]) -> tuple[Any, ...]:
+        if _contains_any_function_call(argument, _INFO_FUNCTIONS):
+            raise MeasureError("INFO functions in a CALCULATE filter predicate depend on external model table counts and are not modelled.")
         # the rule of dax_ct_filters first: it also fixes shapes the older path answered without refusing (a CALCULATE-carrying X-iterator
         # on the left of the comparison was evaluated per row there, where Power BI evaluates it once)
         planned = plan_calculatetable_filter(argument) if dax_ct_filters.has_calculatetable(argument) else None
@@ -14591,6 +15056,8 @@ def evaluate_measures(
 
     def general_boolean_filter_sets(node: tuple[Any, ...]) -> dict[str, tuple[dict[str, Any], dict[str, frozenset[int]], list[dict[str, Any]]]]:
         """A Boolean CALCULATE filter is FILTER(ALL(referenced columns), expression): test it on every row of the table."""
+        if _contains_any_function_call(node, _INFO_FUNCTIONS):
+            raise MeasureError("INFO functions in a CALCULATE filter predicate depend on external model table counts and are not modelled.")
         if _contains_refused_call_outside_x_iterator(node):
             raise MeasureError("CALCULATE and FILTER cannot be used inside a True/False filter expression.")
         node = preevaluate_filter_scalars(node)
@@ -15005,7 +15472,16 @@ def evaluate_measures(
                 dax_typed.to_text(double_as_text(argument, evaluate(argument, row_context, allow_text=True), row_context)) for argument in arguments[1:]
             )
         if function == "ISEMPTY":
-            return not table_argument_value(arguments[0])[1]
+            columns_functions = frozenset({"INFO.VIEW.COLUMNS", "INFO.COLUMNS"})
+            xldc_error = "An unexpected error occurred (file 'xldc.cpp', line 3940, function 'XLAggImpl_Set<11,1>::Accumulate')."
+            if arguments[0][0] == "call" and arguments[0][1] in columns_functions:
+                raise MeasureError(xldc_error)
+            isempty_context, isempty_rows = table_argument_value(arguments[0])
+            if isempty_context.get("info_function_name") in columns_functions:  # reached through a variable or another wrapper
+                raise MeasureError(xldc_error)
+            if _contains_any_function_call(arguments[0], columns_functions):
+                raise MeasureError("ISEMPTY over a table built from INFO.COLUMNS or INFO.VIEW.COLUMNS is not modelled by the local engine.")
+            return not isempty_rows
         if function == "CONTAINSROW":
             context, rows = in_row_expression(lambda: table_argument_value(arguments[0]))
             if len(arguments) - 1 != len(context["headers"]):
@@ -16466,6 +16942,8 @@ def evaluate_measures(
                         f"Column {name!r} does not exist in table {iterated_table['name']!r}."
                     )
                 source_value = row.get(actual)
+                if isinstance(source_value, _UnmodelledField):
+                    raise MeasureError(f"Field '{source_value.name}' is not modelled by the local engine.")
                 if iterated_table.get("derived"):
                     return source_value  # a derived table already holds DAX values
                 _reject_power_query_error(source_value, actual, row_index)
@@ -17623,6 +18101,10 @@ def evaluate_measures(
         if function in _LOOKUP_ARITY and function not in {"GENERATESERIES", "ROW"}:
             return evaluate_lookup_function(function, arguments, row_context)
         if function in _TABLE_FUNCTION_ARITY or function in {"GENERATESERIES", "ROW"}:
+            if function in _INFO_FUNCTIONS:
+                raise MeasureError(
+                    "The expression refers to multiple columns. Multiple columns cannot be converted to a scalar value."
+                )
             raise MeasureError(
                 f"{function} returns a table; use it inside COUNTROWS, SUMX, CONCATENATEX or another table argument."
             )
@@ -18330,6 +18812,8 @@ def evaluate_measures(
                 lines = [delimiter.join(csv_cell(cell_value(row, h), h) for h in headers) for row in shown_rows]
                 header_line = delimiter.join(csv_field(header_text(h)) for h in headers)
                 if not lines:
+                    if context.get("info_function"):
+                        return header_line if include_headers else None
                     return (header_line + "\n") if include_headers else None  # no header and no row is BLANK
                 return header_line + "\n" + "\n".join(lines) if include_headers else "\n".join(lines)
 

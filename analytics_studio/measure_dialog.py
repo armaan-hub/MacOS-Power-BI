@@ -537,6 +537,14 @@ def _add_generated_templates() -> None:
         "ORDERBY": ("ORDERBY('Table'[Column], ASC)", "'Table'[Column]"),
         "PARTITIONBY": ("PARTITIONBY('Table'[Column])", "'Table'[Column]"),
         "MATCHBY": ("MATCHBY('Table'[Column])", "'Table'[Column]"),
+        "INFO.VIEW.TABLES": ("INFO.VIEW.TABLES()", None),
+        "INFO.VIEW.COLUMNS": ("INFO.VIEW.COLUMNS()", None),
+        "INFO.VIEW.MEASURES": ("INFO.VIEW.MEASURES()", None),
+        "INFO.VIEW.RELATIONSHIPS": ("INFO.VIEW.RELATIONSHIPS()", None),
+        "INFO.TABLES": ("INFO.TABLES()", None),
+        "INFO.COLUMNS": ("INFO.COLUMNS()", None),
+        "INFO.MEASURES": ("INFO.MEASURES()", None),
+        "INFO.RELATIONSHIPS": ("INFO.RELATIONSHIPS()", None),
     }
     for name in sorted(set(_LOOKUP_ARITY) | set(lookup_templates)):
         DAX_FUNCTION_TEMPLATES.setdefault(name, lookup_templates.get(name, (f"{name}()", None)))
