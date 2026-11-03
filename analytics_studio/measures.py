@@ -273,6 +273,41 @@ _FOLDED_TEXT_CALLS = frozenset({
 })
 
 
+# Task 37: live Power BI, a grid of 1,344 answers (7 BLANK forms x 8 texts x 6 operators x both orders x ISERROR / ISNUMBER).
+# What it showed for a BLANK beside a text in arithmetic:
+#   * A runtime error (ISERROR True) is raised by + - ^ whenever the text is not a number, however it is made (a literal, TRIM(""), LEFT("a",0),
+#     MAX of a text column, the failing VALUE("x")); * never converts the text (it gives BLANK or a typed number); / is unchanged.
+#   * ISNUMBER of that failing expression is True ("typed", the error is not seen) only when every part is folded when the formula is compiled:
+#     a literal text or TRIM("") is folded, LEFT("a",0) and VALUE("x") are not (ISNUMBER shows the error). A logical BLANK over a folded ""
+#     ((1&&""), AND(1,""), (COUNTROWS(Facts)&&"") ...: "K1") also hides the error of a text read from data (MAX(Facts[Note])); the literal BLANK()
+#     ("K0") does not; a logical BLANK over a text read at run time ((TRUE()&&LEFT("a",0)): "K2") hides nothing.
+#   * K1 * a folded text is a number-typed BLANK (ISNUMBER True) whether the logical reads data or not; beside any other text, and for K0 and K2,
+#     the product is the plain BLANK (ISNUMBER False).
+#   * x ^ BLANK is x ^ 0, a number; BLANK ^ x does not convert a numeric text and is the plain BLANK except after K1.
+# Text kinds: "folded" (non-numeric literal or TRIM / UPPER ...), "number" (a numeric text), "runtime" (empty LEFT / RIGHT / MID ...),
+# "data" (MAX / MIN of a text column), "failing" (VALUE of a text that is no number).  Returns "T" / "F" / "E" (ISNUMBER raises the error).
+def _isnumber_blank_text(operator: str, blank_kind: str, text_kind: str, blank_first: bool) -> str:
+    if operator in {"+", "-"}:
+        if text_kind == "number":
+            return "T"
+        if text_kind == "folded":
+            return "E" if blank_kind == "K2" else "T"
+        if text_kind == "data":
+            return "T" if blank_kind == "K1" else "E"
+        return "E"
+    if operator == "*":
+        return "T" if blank_kind == "K1" and text_kind in {"folded", "number"} else "F"
+    if operator == "^":
+        if text_kind == "number":
+            return "T" if blank_kind == "K1" or not blank_first else "F"
+        if text_kind == "folded":
+            return "T" if blank_kind == "K1" or (blank_kind == "K0" and not blank_first) else "E"
+        if text_kind == "data":
+            return "T" if blank_kind == "K1" and blank_first else "E"
+        return "E"
+    raise ValueError(operator)
+
+
 def _read_at_run_time(node: Any) -> bool | None:
     """Does this operand reach a text the engine does not fold?  None: a function not measured."""
     if not isinstance(node, tuple) or not node:
@@ -3642,6 +3677,8 @@ def _has_table_operand(node: Any) -> bool:
         return False
     if node[0] in {"table", "table_call", "tablevalue", "tablecapture", "tableconstructor"}:
         return True
+    if node[0] == "call" and node[1] in (_AGGREGATING_CALLS - {"CALCULATE"}) | _ITERATOR_CALLS:
+        return False  # Task 37: the table inside COUNTROWS(Facts) or SUMX(...) is that call's argument; the call gives a scalar, not a table operand
     children = node if isinstance(node[0], tuple) else node[1:]
     return any(_has_table_operand(child) for child in children if isinstance(child, tuple))
 
@@ -15822,6 +15859,90 @@ def evaluate_measures(
             return static_t == "datetime"
         return static_t in {"currency", "decimal"}  # ISDECIMAL, ISCURRENCY
 
+    def blank_text_kind(node: tuple[Any, ...]) -> str | None:
+        """Task 37: "K0" the literal BLANK(); "K1" / "K2" a && or || (AND, OR) that is BLANK because one operand is the empty text, folded (K1)
+        or read at run time (K2).  None: any other node, so the grid does not decide it."""
+        if node[0] == "blank" or (node[0] == "call" and node[1] == "BLANK" and not node[2]):
+            return "K0"
+        if node[0] == "logical" and len(node) == 4:
+            operands = (node[2], node[3])
+        elif node[0] == "call" and node[1] in {"AND", "OR"} and len(node[2]) == 2:
+            operands = tuple(node[2])
+        else:
+            return None
+        try:
+            if evaluate(node, None) is not None:
+                return None
+        except (MeasureError, DecimalException, OverflowError):
+            return None
+        for operand in operands:
+            if not isinstance(operand, tuple) or operand[0] not in {"string", "call"} or not _reads_no_data(operand, variable_nodes.get):
+                continue
+            if operand[0] == "call" and operand[1] not in {"TRIM", "UPPER", "LOWER", "LEFT", "RIGHT", "MID"}:
+                continue
+            try:
+                if evaluate(operand, None, allow_text=True) != "":
+                    continue
+            except (MeasureError, DecimalException, OverflowError):
+                continue
+            return "K2" if _read_at_run_time(operand) else "K1"
+        return None
+
+    def arithmetic_text_kind(node: tuple[Any, ...]) -> str | None:
+        """Task 37: "folded", "number", "runtime", "data" or "failing" (see _isnumber_blank_text); None: not decided by the grid."""
+        def convertible(text: str) -> bool:
+            try:
+                as_number(text)
+            except (MeasureError, DecimalException, OverflowError):
+                return False
+            return True
+        if node[0] == "string":
+            return "number" if convertible(node[1]) else "folded"
+        if node[0] != "call":
+            return None
+        if node[1] in {"TRIM", "UPPER", "LOWER"} and _reads_no_data(node, variable_nodes.get):
+            try:
+                text = evaluate(node, None, allow_text=True)
+            except (MeasureError, DecimalException, OverflowError):
+                return None
+            return None if not isinstance(text, str) else ("number" if convertible(text) else "folded")
+        if node[1] in {"LEFT", "RIGHT", "MID"} and _reads_no_data(node, variable_nodes.get):
+            try:
+                return "runtime" if evaluate(node, None, allow_text=True) == "" else None
+            except (MeasureError, DecimalException, OverflowError):
+                return None
+        if node[1] == "VALUE" and len(node[2]) == 1 and node[2][0][0] == "string" and not convertible(node[2][0][1]):
+            return "failing"
+        if node[1] in {"MAX", "MIN"} and len(node[2]) == 1 and node[2][0][0] == "reference" and node[2][0][1]:
+            try:
+                text = evaluate(node, None, allow_text=True)
+            except (MeasureError, DecimalException, OverflowError):
+                return None
+            return "data" if isinstance(text, str) and text and not convertible(text) else None
+        return None
+
+    def blank_text_arithmetic_isnumber(arithmetic: tuple[Any, ...]) -> bool | None:
+        """Task 37: ISNUMBER of a BLANK beside a text in + - * ^ from the measured grid (see _isnumber_blank_text); None when the shape is not in it."""
+        operator, left, right = arithmetic[1], arithmetic[2], arithmetic[3]
+        for blank, text, blank_first in ((left, right, True), (right, left, False)):
+            blank_kind = blank_text_kind(blank)
+            text_kind = arithmetic_text_kind(text) if blank_kind is not None else None
+            if blank_kind is None or text_kind is None:
+                continue
+            answer = _isnumber_blank_text(operator, blank_kind, text_kind, blank_first)
+            if answer == "E":
+                try:
+                    evaluate(arithmetic, None, allow_text=True)
+                except (MeasureError, DecimalException, OverflowError) as error:
+                    raise MeasureRuntimeError(str(error)) from error
+                return None
+            return answer == "T"
+        for blank, text in ((left, right), (right, left)):
+            if blank_text_kind(blank) in {"K1", "K2"} and not _reads_no_data(blank, variable_nodes.get) and _has_kind(text, {"string"}):
+                # the grid shows a logical BLANK that reads data like the constant one, but only beside the texts it lists; a nesting it does not list is refused
+                raise dax_typed.refusal("A type test of a data-dependent logical BLANK beside a text in arithmetic is not modelled by the local engine beyond the measured shapes.")
+        return None
+
     def evaluate_typed_function(
         function: str,
         arguments: tuple[tuple[Any, ...], ...],
@@ -15840,6 +15961,10 @@ def evaluate_measures(
                 else argument
                 for index, argument in enumerate(arguments)
             )
+        if function == "ISNUMBER" and len(arguments) == 1 and row_context is None and arguments[0][0] == "binary" and arguments[0][1] in {"+", "-", "*", "^"}:
+            blank_text = blank_text_arithmetic_isnumber(arguments[0])
+            if blank_text is not None:
+                return blank_text
         interval = None
         if function in {"PATHITEM", "PATHITEMREVERSE"} and len(arguments) == 3 and arguments[-1][0] == "table":
             keyword = str(arguments[-1][1]).upper()
@@ -15992,7 +16117,7 @@ def evaluate_measures(
                         return False
                     except Exception:
                         return True
-                if n[0] == "call" and n[1] in {"UPPER", "LOWER", "TRIM", "LEFT", "RIGHT", "MID"} and n[2]:
+                if n[0] == "call" and n[1] in {"UPPER", "LOWER", "TRIM"} and n[2]:  # Task 37: LEFT / RIGHT / MID are read at run time, not folded
                     return _is_non_numeric_text(n[2][0])
                 if n[0] == "binary":
                     return _is_non_numeric_text(n[2]) or _is_non_numeric_text(n[3])
@@ -16006,10 +16131,10 @@ def evaluate_measures(
                     return True
                 return any(_has_slash(c) for c in n[1:] if isinstance(c, tuple))
             if reads_no_data and has_no_error and not _has_slash(arg):
-                if (op in {"+", "-", "^"} and (typed_true_false(left_node) or typed_true_false(right_node))) or (
+                if (op in {"+", "-"} and (typed_true_false(left_node) or typed_true_false(right_node))) or (
                     op == "*" and (typed_true_false(left_node) or typed_true_false(right_node)) and (
                         _is_non_numeric_text(right_node if typed_true_false(left_node) else left_node)
-                    )
+                    ) and blank_text_kind(left_node if typed_true_false(left_node) else right_node) != "K2"  # Task 37: a logical BLANK over a text read at run time gives the plain BLANK in *
                 ):
                     st_ans = static_type_answer(function, static_type_of(arg))
                     if st_ans is not None:
