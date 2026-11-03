@@ -231,7 +231,7 @@ _ROW_SHIELDING_CALLS = frozenset({
 })
 _ITERATOR_CALLS = frozenset({
     "SUMX", "AVERAGEX", "MAXX", "MINX", "COUNTX", "COUNTAX", "PRODUCTX", "MEDIANX", "CONCATENATEX", "FILTER", "ADDCOLUMNS",
-    "SELECTCOLUMNS", "TOPN", "GENERATE", "GENERATEALL", "RANKX", "SUMMARIZE", "GROUPBY", "XNPV",
+    "SELECTCOLUMNS", "TOPN", "GENERATE", "GENERATEALL", "RANKX", "SUMMARIZE", "GROUPBY", "XNPV", "XIRR",
 })
 
 
@@ -486,7 +486,7 @@ _ROW_ORDER_FUNCTIONS = frozenset({
     "CONCATENATEX", "TOPN", "TOPNSKIP", "INDEX", "OFFSET", "WINDOW", "FIRSTNONBLANK", "LASTNONBLANK", "RANKX", "GENERATE", "GENERATEALL",
 })
 _FUNCTIONS |= set(_COLUMN_SCALAR_ARITY) | {
-    "CONCATENATEX", "XNPV", "IF.EAGER", "ERROR", "CUSTOMDATA", "NAMEOF", "EVALUATEANDLOG", "ALLCROSSFILTERED",
+    "CONCATENATEX", "XNPV", "XIRR", "IF.EAGER", "ERROR", "CUSTOMDATA", "NAMEOF", "EVALUATEANDLOG", "ALLCROSSFILTERED",
     "TOCSV", "TOJSON",
 }
 # Lookup, membership, filter-context and table-constructor functions (min, max arguments; None is unbounded).
@@ -526,7 +526,7 @@ _FUNCTIONS |= set(_TABLE_FUNCTION_ARITY) | set(_RANK_ARITY)
 _FUNCTIONS |= dax_time_sets.SET_FUNCTIONS | dax_time_sets.BALANCES  # date sets and balances (iteration 84)
 _FUNCTIONS.add("RELATEDTABLE")
 _TABLE_FIRST_PARENTS = _ALL_ITERATORS | dax_time_sets.SET_FUNCTIONS | {"FIRSTNONBLANK", "LASTNONBLANK", "FIRSTNONBLANKVALUE", "LASTNONBLANKVALUE"} | {
-    "COUNTROWS", "CONCATENATEX", "XNPV", "ISEMPTY", "CONTAINS", "CONTAINSROW", "ADDCOLUMNS", "SELECTCOLUMNS", "SUMMARIZE",
+    "COUNTROWS", "CONCATENATEX", "XNPV", "XIRR", "ISEMPTY", "CONTAINS", "CONTAINSROW", "ADDCOLUMNS", "SELECTCOLUMNS", "SUMMARIZE",
     "FILTER", "RANKX", "CALCULATETABLE", "DISTINCT", "VALUES", "FILTERS", "TOCSV", "TOJSON", "LINESTX",
     "SUBSTITUTEWITHINDEX",
 }
@@ -1955,7 +1955,7 @@ def _has_membership_in_computed_table(node: Any) -> bool:
 _AGGREGATING_CALLS = {
     "SUM", "AVERAGE", "MIN", "MAX", "COUNT", "COUNTA", "COUNTBLANK", "DISTINCTCOUNT", "DISTINCTCOUNTNOBLANK", "MEDIAN",
     "PRODUCT", "COUNTROWS", "SUMX", "AVERAGEX", "MAXX", "MINX", "COUNTX", "COUNTAX", "CALCULATE", "SELECTEDVALUE",
-    "LOOKUPVALUE", "FIRSTNONBLANK", "LASTNONBLANK", "FIRSTNONBLANKVALUE", "LASTNONBLANKVALUE", "RANKX", "CONCATENATEX", "XNPV", "VALUES", "DISTINCT", "ALL",
+    "LOOKUPVALUE", "FIRSTNONBLANK", "LASTNONBLANK", "FIRSTNONBLANKVALUE", "LASTNONBLANKVALUE", "RANKX", "CONCATENATEX", "XNPV", "XIRR", "VALUES", "DISTINCT", "ALL",
     "ISFILTERED", "HASONEVALUE", "HASONEFILTER", "ISCROSSFILTERED", "ISINSCOPE", *dax_math.STAT_ITERATORS,
 }
 
@@ -2211,7 +2211,7 @@ _BOOLEAN_FILTER_REFUSED_CALLS = frozenset({
     "TABLEOF", "ALLCROSSFILTERED", "TOCSV", "TOJSON", "LINEST", "LINESTX",
     "ADDMISSINGITEMS", "ROLLUP", "ROLLUPGROUP", "ROLLUPADDISSUBTOTAL", "ROLLUPISSUBTOTAL",
 })
-_BOOLEAN_FILTER_X_ITERATORS = frozenset({"SUMX", "AVERAGEX", "MAXX", "MINX", "COUNTX", "COUNTAX", "CONCATENATEX", "XNPV", *dax_math.STAT_ITERATORS})
+_BOOLEAN_FILTER_X_ITERATORS = frozenset({"SUMX", "AVERAGEX", "MAXX", "MINX", "COUNTX", "COUNTAX", "CONCATENATEX", "XNPV", "XIRR", *dax_math.STAT_ITERATORS})
 
 _VAR_FILTER_DISALLOWED = _BOOLEAN_FILTER_X_ITERATORS | (_FILTER_AGGREGATES - {"COUNTROWS", "DISTINCTCOUNT"}) | _BOOLEAN_FILTER_REFUSED_CALLS
 
@@ -2315,7 +2315,7 @@ def _is_sample_statistic(node: Any) -> bool:
 
 _FRAME_FUNCTIONS = frozenset({
     "SUMX", "AVERAGEX", "MAXX", "MINX", "COUNTX", "COUNTAX", "CONCATENATEX", "PRODUCTX", "MEDIANX", "FILTER", "ADDCOLUMNS", "SELECTCOLUMNS", "TOPN", "RANKX",
-    "GENERATE", "GENERATEALL", "SUMMARIZE", "GEOMEANX", "STDEVX.S", "STDEVX.P", "VARX.S", "VARX.P", "PERCENTILEX.INC", "PERCENTILEX.EXC", "XNPV",
+    "GENERATE", "GENERATEALL", "SUMMARIZE", "GEOMEANX", "STDEVX.S", "STDEVX.P", "VARX.S", "VARX.P", "PERCENTILEX.INC", "PERCENTILEX.EXC", "XNPV", "XIRR",
 })
 
 
@@ -2330,12 +2330,12 @@ def _earlier_too_deep(node: Any, frames: int) -> bool:
             depth = int(node[2][1][1])
         return frames <= depth if node[1] == "EARLIER" else frames < 2
     if node[0] == "call" and node[1] in _FRAME_FUNCTIONS and node[2]:
-        if node[1] == "XNPV" and len(node[2]) == 4:
+        if node[1] in {"XNPV", "XIRR"}:
             return (
                 _earlier_too_deep(node[2][0], frames)
-                or _earlier_too_deep(node[2][1], frames + 1)
-                or _earlier_too_deep(node[2][2], frames + 1)
-                or _earlier_too_deep(node[2][3], frames)
+                or (len(node[2]) > 1 and _earlier_too_deep(node[2][1], frames + 1))
+                or (len(node[2]) > 2 and _earlier_too_deep(node[2][2], frames + 1))
+                or any(_earlier_too_deep(arg, frames) for arg in node[2][3:])
             )
         return _earlier_too_deep(node[2][0], frames) or any(_earlier_too_deep(argument, frames + 1) for argument in node[2][1:])
     return any(_earlier_too_deep(child, frames) for child in node if isinstance(child, tuple))
@@ -3289,7 +3289,7 @@ _NEVER_BLANK_ALWAYS = frozenset({
     "EXACT", "FIND", "SEARCH", "FORMAT", "ISAFTER", "ISONORAFTER", "PATHCONTAINS", "RANDBETWEEN", "EFFECT", "NOMINAL", "COUPDAYBS",
     "COUPDAYS", "COUPDAYSNC", "COUPNCD", "COUPNUM", "COUPPCD", "PDURATION", "RRI", "SLN", "TBILLEQ", "TBILLPRICE", "TBILLYIELD", "RATE",
     "INTRATE", "PRICEDISC", "RECEIVED", "SYD", "YIELDDISC", "ACCRINTM", "DB", "DDB", "DISC", "MDURATION", "PRICEMAT", "VDB", "YIELDMAT",
-    "CUMIPMT", "CUMPRINC", "YIELD", "AMORDEGRC", "AMORLINC", "ODDLPRICE", "ODDLYIELD", "ACCRINT", "DURATION", "PRICE", "ODDFPRICE",
+    "CUMIPMT", "CUMPRINC", "YIELD", "AMORDEGRC", "AMORLINC", "ODDLPRICE", "ODDLYIELD", "ACCRINT", "DURATION", "PRICE", "ODDFPRICE", "ODDFYIELD",
 })
 _NEVER_BLANK_FIRST_ARGUMENT = frozenset({
     "ABS", "CURRENCY", "DATEVALUE", "DAY", "FIXED", "HOUR", "INT", "ISO.CEILING", "LEFT", "LEN", "LOWER", "MINUTE", "MONTH", "PATHLENGTH",
@@ -4056,7 +4056,7 @@ def _validate_literal_positions(
                     continue  # a column or table expression of dates
                 _validate_literal_positions(argument, allow_blank=True)
             return
-        if function in {"CONCATENATEX", "XNPV", "TOCSV", "TOJSON", "LINESTX"}:
+        if function in {"CONCATENATEX", "XNPV", "XIRR", "TOCSV", "TOJSON", "LINESTX"}:
             for argument in arguments[1:]:
                 if argument[0] != "table":  # ASC / DESC
                     _validate_literal_positions(argument, allow_blank=True)
@@ -4584,6 +4584,15 @@ class _Parser:
                     raise MeasureError("The XNPV function expects a table expression for argument '1', but a string or numeric expression was used.")
                 if any(argument[0] == "omitted" for argument in arguments):
                     raise MeasureError("The XNPV function does not accept omitted arguments.")
+            elif function == "XIRR":
+                if len(arguments) < 3:
+                    raise MeasureError("Too few arguments were passed to the XIRR function. The minimum argument count for the function is 3.")
+                if len(arguments) > 5:
+                    raise MeasureError("Too many arguments were passed to the XIRR function. The maximum argument count for the function is 5.")
+                if not _is_all_table_value_argument(arguments[0]):
+                    raise MeasureError("The XIRR function expects a table expression for argument '1', but a string or numeric expression was used.")
+                if any(argument[0] == "omitted" for argument in arguments):
+                    raise MeasureError("The XIRR function does not accept omitted arguments.")
             elif function == "IF.EAGER":
                 if len(arguments) < 2:
                     raise MeasureError("Too few arguments were passed to the IF.EAGER function. The minimum argument count for the function is 2.")
@@ -5047,9 +5056,9 @@ class _Parser:
                 except MeasureError:
                     if not _general_calculate_filters_valid(tuple(arguments[1:])) and not _modifier_mix_filters_valid(tuple(arguments[1:])) and not _time_filters_beside_general_filters(tuple(arguments)):
                         raise
-            if (function in _ALL_ITERATORS or function in {"CONCATENATEX", "XNPV"} or function == "FILTER") and len(arguments) >= 2:
+            if (function in _ALL_ITERATORS or function in {"CONCATENATEX", "XNPV", "XIRR"} or function == "FILTER") and len(arguments) >= 2:
                 _check_set_iterator_body(arguments[0], arguments[1])  # live Power BI: FILTER(date set, ..) reads only the set's own column too
-                if function == "XNPV" and len(arguments) >= 3:
+                if function in {"XNPV", "XIRR"} and len(arguments) >= 3:
                     _check_set_iterator_body(arguments[0], arguments[2])
             if function in {"UNION", "EXCEPT", "INTERSECT", "CROSSJOIN"} and any(argument[0] == "reference" for argument in arguments):
                 # live Power BI (iteration 84, critic): a bare column where a table is expected is a compile-time error
@@ -5856,7 +5865,7 @@ _STATIC_ALWAYS_DOUBLE = frozenset({
     "POWER", "SQRT", "EXP", "LN", "LOG", "LOG10", "PI",
     "COMBIN", "FACT", "AVERAGE", "VALUE",
     "SIN", "COS", "TAN", "ASIN", "DEGREES", "RADIANS", "MEDIAN", "MEDIANX", "PERCENTILE.INC", "PERCENTILEX.INC",
-    "STDEV.S", "STDEV.P", "VAR.S", "VAR.P", "VARX.S", "VARX.P", "GEOMEAN", "PRODUCT", "PRODUCTX", "XNPV", "RAND",
+    "STDEV.S", "STDEV.P", "VAR.S", "VAR.P", "VARX.S", "VARX.P", "GEOMEAN", "PRODUCT", "PRODUCTX", "XNPV", "XIRR", "RAND",
 })
 
 _STATIC_ALWAYS_INT64 = frozenset({
@@ -10016,7 +10025,7 @@ def evaluate_measures(
         return single, ([] if raw is None else [{column: raw}])
 
     _SCALAR_PASS_CALLS = frozenset({"IF", "SWITCH", "IFERROR", "COALESCE", "ABS", "ROUND", "INT", "AND", "OR", "NOT", "ISBLANK", "DIVIDE"})
-    _NESTED_BODY_ITERATORS = frozenset({"SUMX", "AVERAGEX", "MAXX", "MINX", "COUNTX", "COUNTAX", "CONCATENATEX", "FILTER", "XNPV"})
+    _NESTED_BODY_ITERATORS = frozenset({"SUMX", "AVERAGEX", "MAXX", "MINX", "COUNTX", "COUNTAX", "CONCATENATEX", "FILTER", "XNPV", "XIRR"})
 
     def static_table_columns(node: Any) -> set[tuple[str, str]] | None:
         """The (table id, column) pairs the rows of a table expression hold, or None when that is not known without evaluating it."""
@@ -11559,7 +11568,7 @@ def evaluate_measures(
                 return "error"
             if function == "EVALUATEANDLOG" and expression[2]:
                 return iterator_expression_category(expression[2][0], row_context)
-            if function in {"RANKX", "RANK.EQ", "RANK", "ROWNUMBER", "XNPV"}:
+            if function in {"RANKX", "RANK.EQ", "RANK", "ROWNUMBER", "XNPV", "XIRR"}:
                 return "numeric"
             if function == "COALESCE" and expression[2]:
                 return merge_branch_categories([
@@ -15057,6 +15066,17 @@ def evaluate_measures(
                 for index, argument in enumerate(arguments)
             )
         interval = None
+        if function in {"PATHITEM", "PATHITEMREVERSE"} and len(arguments) == 3 and arguments[-1][0] == "table":
+            keyword = str(arguments[-1][1]).upper()
+            if keyword == "INTEGER":
+                arguments = (*arguments[:-1], ("number", Decimal(1), "1"))
+            elif keyword == "TEXT":
+                arguments = (*arguments[:-1], ("number", Decimal(0), "0"))
+            else:
+                raise MeasureError(
+                    "The final argument to the PathItem or PathItemReverse functions should be 0 for TEXT or 1 for INTEGER. "
+                    "It is also possible to use words 'TEXT' and 'INTEGER' respectively."
+                )
         if function in {"DATEDIFF", "CONVERT"}:
             keyword = arguments[-1]
             if keyword[0] != "table":
@@ -17791,6 +17811,80 @@ def evaluate_measures(
                 return res
             finally:
                 xnpv_depth[0] -= 1
+        if function == "XIRR":
+            if arguments[0][0] == "tableconstructor" and any(isinstance(row, tuple) and row and row[0] == "tableconstructor" for row in arguments[0][1]):
+                raise MeasureError("XIRR over a table constructor with several columns is not supported in the local engine.")
+            read_nodes = [arguments[1], arguments[2]]
+            topn_walk_nodes[id(arguments[0])] = read_nodes
+            try:
+                context, iteration_rows = table_argument_value(arguments[0], allow_keepfilters=True)
+            finally:
+                topn_walk_nodes.pop(id(arguments[0]), None)
+
+            probe_frame = (context, iteration_rows[0] if iteration_rows else {}, 1)
+            try:
+                values_kind = iterator_body_kind(arguments[1], probe_frame)
+            except MeasureError:
+                values_kind = None
+            try:
+                values_cat = iterator_expression_category(arguments[1], probe_frame)
+            except MeasureError:
+                values_cat = None
+            if values_kind in {"text", "bool", "date"} or values_cat in {"text", "boolean", "date/time"}:
+                raise MeasureError("XIRR does not support expressions of type string/Boolean/date for the Values argument.")
+
+            if not iteration_rows:
+                refuse_foreign_columns_of_empty_iteration(context, arguments[1], arguments[2])
+                raise MeasureRuntimeError("A result for XIRR couldn't be determined because the Values and Dates arguments are empty.")
+
+            row_data: list[tuple[float | None, float]] = []
+            for frame in iterate_rows(context, iteration_rows, "install"):
+                val = in_row_expression(lambda frame=frame: evaluate(arguments[1], frame, allow_text=True, allow_boolean=True))
+                if val is None:
+                    v = None
+                elif isinstance(val, (str, bool, dax_dates.DaxDateTime)):
+                    type_name = "Text" if isinstance(val, str) else ("Boolean" if isinstance(val, bool) else "Date")
+                    raise MeasureRuntimeError(f"Cannot convert value '{val}' of type {type_name} to type Numeric.")
+                elif isinstance(val, (int, float, Decimal)):
+                    v = float(val)
+                else:
+                    raise MeasureRuntimeError(f"Cannot convert value '{val}' to type Numeric.")
+
+                d_val = in_row_expression(lambda frame=frame: evaluate(arguments[2], frame, allow_text=True, allow_boolean=True))
+                if d_val is None:
+                    raise MeasureRuntimeError("One or more values for the Dates argument passed to XIRR is blank.")
+                elif isinstance(d_val, str):
+                    parsed_dt = dax_dates.parse_date_text(d_val)
+                    if parsed_dt is not None:
+                        day = math.floor(float(parsed_dt))
+                    else:
+                        raise MeasureRuntimeError(f"Cannot convert value '{d_val}' of type Text to type Date.")
+                elif isinstance(d_val, bool):
+                    day = 1.0 if d_val else 0.0
+                elif isinstance(d_val, (int, float, Decimal)):
+                    d_float = float(d_val)
+                    day = math.floor(d_float) if math.isfinite(d_float) else d_float
+                else:
+                    raise MeasureError("An argument of function 'XIRR' has the wrong data type or has an invalid value.")
+
+                row_data.append((v, day))
+
+            non_blank_flows = [(v, day) for v, day in row_data if v is not None]
+            if not non_blank_flows:
+                raise MeasureRuntimeError("A result for XIRR couldn't be determined because the Values and Dates arguments are empty.")
+
+            first_date = non_blank_flows[0][1]
+            if all(day == first_date for _, day in non_blank_flows):
+                raise MeasureRuntimeError("There isn't a valid result for the XIRR function for the given values.")
+
+            pos = any(v > 0 for v, _ in non_blank_flows)
+            neg = any(v < 0 for v, _ in non_blank_flows)
+            if not (pos and neg):
+                if len(arguments) == 5:
+                    return evaluate(arguments[4], row_context, allow_text=True, allow_boolean=True)
+                raise MeasureRuntimeError("The XIRR function couldn't find a solution.")
+
+            raise MeasureError("The XIRR function's iterative solution is not modelled by the local engine.")
         if function in {"TOCSV", "TOJSON"}:
             is_csv = function == "TOCSV"
             table_node = arguments[0]

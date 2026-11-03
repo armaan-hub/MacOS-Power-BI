@@ -30,6 +30,7 @@ ARITY: dict[str, tuple[int, int]] = {
     "INTRATE": (4, 5),
     "MDURATION": (5, 6),
     "ODDFPRICE": (8, 9),
+    "ODDFYIELD": (8, 9),
     "ODDLPRICE": (7, 8),
     "ODDLYIELD": (7, 8),
     "PRICE": (6, 7),
