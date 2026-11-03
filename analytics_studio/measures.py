@@ -3630,6 +3630,9 @@ def _is_empty_text(node: Any) -> bool:
     return isinstance(node, tuple) and len(node) > 1 and node[0] == "string" and node[1] == ""
 
 
+_LOGICAL_OPERAND_CATEGORIES = frozenset({"boolean", "blank", "numeric", "date/time"})
+
+
 def _empty_text_blank(node: Any, others: Iterable[Any]) -> bool:
     """Task 20 Part C: an empty text is a BLANK beside an operand that reads a column (Facts[Sales]&&""), where Power BI answers the row's value; over constants it stays refused."""
     return _is_empty_text(node) and any(True for other in others if isinstance(other, tuple) for _ in _iter_reference_nodes(other))
@@ -11306,6 +11309,17 @@ def evaluate_measures(
             return False
         return any(has_number_branch(result) for result in results)
 
+    def constant_empty_text(operand: Any, row_context: Any) -> bool:
+        """A column-free operand that is an empty text ("", TRIM(""), LEFT("a",0)): Power BI lets it stand beside a text in && || AND OR."""
+        if _is_empty_text(operand):
+            return True
+        if not isinstance(operand, tuple) or operand[0] != "call" or any(True for _ in _iter_reference_nodes(operand)):
+            return False
+        try:
+            return evaluate(operand, row_context) == ""
+        except Exception:
+            return False
+
     def iterator_expression_category(
         expression: tuple[Any, ...],
         row_context: tuple[dict[str, Any], dict[str, Any], int] | None,
@@ -11420,7 +11434,7 @@ def evaluate_measures(
                 "blank" if _empty_text_blank(expression[3], expression[2:3]) else iterator_expression_category(expression[3], row_context),
             )
             if any(
-                category not in {"boolean", "blank", "numeric", "text", "date/time"}  # live Power BI: numbers, text and dates evaluate as boolean
+                category not in (_LOGICAL_OPERAND_CATEGORIES | ({"text"} if any(constant_empty_text(operand, row_context) for operand in expression[2:4]) else set()))  # live Power BI: numbers and dates evaluate as boolean; a text operand is an error unless an empty text stands beside it (Facts[Region]&&"" answers 6)
                 for category in operand_categories
             ):
                 raise MeasureError(
@@ -11514,7 +11528,7 @@ def evaluate_measures(
                     for argument in expression[2]
                 )
                 if any(
-                    category not in {"boolean", "blank", "numeric", "text", "date/time"}
+                    category not in (_LOGICAL_OPERAND_CATEGORIES | ({"text"} if any(constant_empty_text(argument, row_context) for argument in expression[2]) else set()))  # a text operand of AND, OR and NOT is an error in Power BI (AND(Facts[Note],TRUE())) unless an empty text stands beside it
                     for category in operand_categories
                 ):
                     raise MeasureError(
@@ -16279,6 +16293,10 @@ def evaluate_measures(
                     right = evaluate(node[3], row_context)
                 except (MeasureRuntimeError, _HardError) as error:
                     right, right_error = None, error
+                except MeasureError:
+                    if left_error is None:
+                        raise
+                    raise left_error  # as before Task 29: the left side's failure was raised before the right side was read (the column-read-without-row-context error is then found by ISBLANK)
                 if isinstance(right_error, _HardError):
                     raise right_error
                 if isinstance(left_error, _HardError):
