@@ -1,0 +1,1206 @@
+{
+"powerbi_version": "2.157.879.0 (26.08)+da30fe74eb0b8a8786ab7326b69c400a0e951831",
+"frozen": "2026-11-03",
+"items": [
+{
+"expr": "ISINT64(-TRUE())",
+"powerbi": "True"
+},
+{
+"expr": "ISDOUBLE(-TRUE())",
+"powerbi": "False"
+},
+{
+"expr": "ISCURRENCY(-TRUE())",
+"powerbi": "False"
+},
+{
+"expr": "ISDATETIME(-TRUE())",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER(-TRUE())",
+"powerbi": "True"
+},
+{
+"expr": "ISLOGICAL(-TRUE())",
+"powerbi": "False"
+},
+{
+"expr": "ISTEXT(-TRUE())",
+"powerbi": "False"
+},
+{
+"expr": "ISBLANK(-TRUE())",
+"powerbi": "False"
+},
+{
+"expr": "(-TRUE())&\"z\"",
+"powerbi": "-1z"
+},
+{
+"expr": "ISINT64(+TRUE())",
+"powerbi": "False"
+},
+{
+"expr": "ISDOUBLE(+TRUE())",
+"powerbi": "False"
+},
+{
+"expr": "ISCURRENCY(+TRUE())",
+"powerbi": "False"
+},
+{
+"expr": "ISDATETIME(+TRUE())",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER(+TRUE())",
+"powerbi": "False"
+},
+{
+"expr": "ISLOGICAL(+TRUE())",
+"powerbi": "True"
+},
+{
+"expr": "ISTEXT(+TRUE())",
+"powerbi": "False"
+},
+{
+"expr": "ISBLANK(+TRUE())",
+"powerbi": "False"
+},
+{
+"expr": "(+TRUE())&\"z\"",
+"powerbi": "TRUEz"
+},
+{
+"expr": "ISINT64(-FALSE())",
+"powerbi": "True"
+},
+{
+"expr": "ISDOUBLE(-FALSE())",
+"powerbi": "False"
+},
+{
+"expr": "ISCURRENCY(-FALSE())",
+"powerbi": "False"
+},
+{
+"expr": "ISDATETIME(-FALSE())",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER(-FALSE())",
+"powerbi": "True"
+},
+{
+"expr": "ISLOGICAL(-FALSE())",
+"powerbi": "False"
+},
+{
+"expr": "ISTEXT(-FALSE())",
+"powerbi": "False"
+},
+{
+"expr": "ISBLANK(-FALSE())",
+"powerbi": "False"
+},
+{
+"expr": "(-FALSE())&\"z\"",
+"powerbi": "0z"
+},
+{
+"expr": "ISINT64(-(1>0))",
+"powerbi": "True"
+},
+{
+"expr": "ISDOUBLE(-(1>0))",
+"powerbi": "False"
+},
+{
+"expr": "ISCURRENCY(-(1>0))",
+"powerbi": "False"
+},
+{
+"expr": "ISDATETIME(-(1>0))",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER(-(1>0))",
+"powerbi": "True"
+},
+{
+"expr": "ISLOGICAL(-(1>0))",
+"powerbi": "False"
+},
+{
+"expr": "ISTEXT(-(1>0))",
+"powerbi": "False"
+},
+{
+"expr": "ISBLANK(-(1>0))",
+"powerbi": "False"
+},
+{
+"expr": "(-(1>0))&\"z\"",
+"powerbi": "-1z"
+},
+{
+"expr": "ISINT64(-DATE(2020,1,1))",
+"powerbi": "False"
+},
+{
+"expr": "ISDOUBLE(-DATE(2020,1,1))",
+"powerbi": "True"
+},
+{
+"expr": "ISCURRENCY(-DATE(2020,1,1))",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER(-DATE(2020,1,1))",
+"powerbi": "True"
+},
+{
+"expr": "ISLOGICAL(-DATE(2020,1,1))",
+"powerbi": "False"
+},
+{
+"expr": "ISTEXT(-DATE(2020,1,1))",
+"powerbi": "False"
+},
+{
+"expr": "ISBLANK(-DATE(2020,1,1))",
+"powerbi": "False"
+},
+{
+"expr": "(-DATE(2020,1,1))&\"z\"",
+"powerbi": "-43831z"
+},
+{
+"expr": "ISINT64(+DATE(2020,1,1))",
+"powerbi": "False"
+},
+{
+"expr": "ISDOUBLE(+DATE(2020,1,1))",
+"powerbi": "False"
+},
+{
+"expr": "ISCURRENCY(+DATE(2020,1,1))",
+"powerbi": "False"
+},
+{
+"expr": "ISDATETIME(+DATE(2020,1,1))",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER(+DATE(2020,1,1))",
+"powerbi": "True"
+},
+{
+"expr": "ISLOGICAL(+DATE(2020,1,1))",
+"powerbi": "False"
+},
+{
+"expr": "ISTEXT(+DATE(2020,1,1))",
+"powerbi": "False"
+},
+{
+"expr": "ISBLANK(+DATE(2020,1,1))",
+"powerbi": "False"
+},
+{
+"expr": "(+DATE(2020,1,1))&\"z\"",
+"powerbi": "1/1/2020z"
+},
+{
+"expr": "ISINT64(-TIME(1,0,0))",
+"powerbi": "False"
+},
+{
+"expr": "ISDOUBLE(-TIME(1,0,0))",
+"powerbi": "True"
+},
+{
+"expr": "ISCURRENCY(-TIME(1,0,0))",
+"powerbi": "False"
+},
+{
+"expr": "ISDATETIME(-TIME(1,0,0))",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER(-TIME(1,0,0))",
+"powerbi": "True"
+},
+{
+"expr": "ISLOGICAL(-TIME(1,0,0))",
+"powerbi": "False"
+},
+{
+"expr": "ISTEXT(-TIME(1,0,0))",
+"powerbi": "False"
+},
+{
+"expr": "ISBLANK(-TIME(1,0,0))",
+"powerbi": "False"
+},
+{
+"expr": "(-TIME(1,0,0))&\"z\"",
+"powerbi": "-4.16666666666667E-02z"
+},
+{
+"expr": "ISINT64(-\"2\")",
+"powerbi": "False"
+},
+{
+"expr": "ISDOUBLE(-\"2\")",
+"powerbi": "True"
+},
+{
+"expr": "ISCURRENCY(-\"2\")",
+"powerbi": "False"
+},
+{
+"expr": "ISDATETIME(-\"2\")",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER(-\"2\")",
+"powerbi": "True"
+},
+{
+"expr": "ISLOGICAL(-\"2\")",
+"powerbi": "False"
+},
+{
+"expr": "ISTEXT(-\"2\")",
+"powerbi": "False"
+},
+{
+"expr": "ISBLANK(-\"2\")",
+"powerbi": "False"
+},
+{
+"expr": "(-\"2\")&\"z\"",
+"powerbi": "-2z"
+},
+{
+"expr": "ISINT64(-BLANK())",
+"powerbi": "False"
+},
+{
+"expr": "ISDOUBLE(-BLANK())",
+"powerbi": "False"
+},
+{
+"expr": "ISCURRENCY(-BLANK())",
+"powerbi": "False"
+},
+{
+"expr": "ISDATETIME(-BLANK())",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER(-BLANK())",
+"powerbi": "False"
+},
+{
+"expr": "ISLOGICAL(-BLANK())",
+"powerbi": "False"
+},
+{
+"expr": "ISTEXT(-BLANK())",
+"powerbi": "False"
+},
+{
+"expr": "(-BLANK())&\"z\"",
+"powerbi": "z"
+},
+{
+"expr": "ISINT64(-(1&&\"\"))",
+"powerbi": "True"
+},
+{
+"expr": "ISDOUBLE(-(1&&\"\"))",
+"powerbi": "False"
+},
+{
+"expr": "ISCURRENCY(-(1&&\"\"))",
+"powerbi": "False"
+},
+{
+"expr": "ISDATETIME(-(1&&\"\"))",
+"powerbi": "False"
+},
+{
+"expr": "ISLOGICAL(-(1&&\"\"))",
+"powerbi": "False"
+},
+{
+"expr": "ISTEXT(-(1&&\"\"))",
+"powerbi": "False"
+},
+{
+"expr": "ISBLANK(-(1&&\"\"))",
+"powerbi": "False"
+},
+{
+"expr": "(-(1&&\"\"))&\"z\"",
+"powerbi": "z"
+},
+{
+"expr": "ISINT64(DATE(2020,1,1)-DATE(2019,1,1))",
+"powerbi": "False"
+},
+{
+"expr": "ISDOUBLE(DATE(2020,1,1)-DATE(2019,1,1))",
+"powerbi": "False"
+},
+{
+"expr": "ISCURRENCY(DATE(2020,1,1)-DATE(2019,1,1))",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER(DATE(2020,1,1)-DATE(2019,1,1))",
+"powerbi": "True"
+},
+{
+"expr": "ISLOGICAL(DATE(2020,1,1)-DATE(2019,1,1))",
+"powerbi": "False"
+},
+{
+"expr": "ISTEXT(DATE(2020,1,1)-DATE(2019,1,1))",
+"powerbi": "False"
+},
+{
+"expr": "ISBLANK(DATE(2020,1,1)-DATE(2019,1,1))",
+"powerbi": "False"
+},
+{
+"expr": "(DATE(2020,1,1)-DATE(2019,1,1))&\"z\"",
+"powerbi": "12/30/1900z"
+},
+{
+"expr": "ISINT64(DATE(2020,1,1)+TIME(6,0,0))",
+"powerbi": "False"
+},
+{
+"expr": "ISDOUBLE(DATE(2020,1,1)+TIME(6,0,0))",
+"powerbi": "False"
+},
+{
+"expr": "ISCURRENCY(DATE(2020,1,1)+TIME(6,0,0))",
+"powerbi": "False"
+},
+{
+"expr": "ISDATETIME(DATE(2020,1,1)+TIME(6,0,0))",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER(DATE(2020,1,1)+TIME(6,0,0))",
+"powerbi": "True"
+},
+{
+"expr": "ISLOGICAL(DATE(2020,1,1)+TIME(6,0,0))",
+"powerbi": "False"
+},
+{
+"expr": "ISTEXT(DATE(2020,1,1)+TIME(6,0,0))",
+"powerbi": "False"
+},
+{
+"expr": "ISBLANK(DATE(2020,1,1)+TIME(6,0,0))",
+"powerbi": "False"
+},
+{
+"expr": "(DATE(2020,1,1)+TIME(6,0,0))&\"z\"",
+"powerbi": "1/1/2020 6:00:00 AMz"
+},
+{
+"expr": "ISINT64(TIME(6,0,0)+TIME(6,0,0))",
+"powerbi": "False"
+},
+{
+"expr": "ISDOUBLE(TIME(6,0,0)+TIME(6,0,0))",
+"powerbi": "False"
+},
+{
+"expr": "ISCURRENCY(TIME(6,0,0)+TIME(6,0,0))",
+"powerbi": "False"
+},
+{
+"expr": "ISDATETIME(TIME(6,0,0)+TIME(6,0,0))",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER(TIME(6,0,0)+TIME(6,0,0))",
+"powerbi": "True"
+},
+{
+"expr": "ISLOGICAL(TIME(6,0,0)+TIME(6,0,0))",
+"powerbi": "False"
+},
+{
+"expr": "ISTEXT(TIME(6,0,0)+TIME(6,0,0))",
+"powerbi": "False"
+},
+{
+"expr": "ISBLANK(TIME(6,0,0)+TIME(6,0,0))",
+"powerbi": "False"
+},
+{
+"expr": "(TIME(6,0,0)+TIME(6,0,0))&\"z\"",
+"powerbi": "12:00:00 PMz"
+},
+{
+"expr": "ISNUMBER(DATE(2020,1,1)+1)",
+"powerbi": "True"
+},
+{
+"expr": "ISLOGICAL(DATE(2020,1,1)+1)",
+"powerbi": "False"
+},
+{
+"expr": "ISTEXT(DATE(2020,1,1)+1)",
+"powerbi": "False"
+},
+{
+"expr": "(DATE(2020,1,1)+1)&\"z\"",
+"powerbi": "1/2/2020z"
+},
+{
+"expr": "ISINT64(DATE(2020,1,1)*1)",
+"powerbi": "False"
+},
+{
+"expr": "ISDOUBLE(DATE(2020,1,1)*1)",
+"powerbi": "True"
+},
+{
+"expr": "ISCURRENCY(DATE(2020,1,1)*1)",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER(DATE(2020,1,1)*1)",
+"powerbi": "True"
+},
+{
+"expr": "ISLOGICAL(DATE(2020,1,1)*1)",
+"powerbi": "False"
+},
+{
+"expr": "ISTEXT(DATE(2020,1,1)*1)",
+"powerbi": "False"
+},
+{
+"expr": "(DATE(2020,1,1)*1)&\"z\"",
+"powerbi": "43831z"
+},
+{
+"expr": "ISINT64(DATE(2020,1,1)-1.5)",
+"powerbi": "False"
+},
+{
+"expr": "ISDOUBLE(DATE(2020,1,1)-1.5)",
+"powerbi": "False"
+},
+{
+"expr": "ISCURRENCY(DATE(2020,1,1)-1.5)",
+"powerbi": "False"
+},
+{
+"expr": "ISDATETIME(DATE(2020,1,1)-1.5)",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER(DATE(2020,1,1)-1.5)",
+"powerbi": "True"
+},
+{
+"expr": "ISLOGICAL(DATE(2020,1,1)-1.5)",
+"powerbi": "False"
+},
+{
+"expr": "ISTEXT(DATE(2020,1,1)-1.5)",
+"powerbi": "False"
+},
+{
+"expr": "ISBLANK(DATE(2020,1,1)-1.5)",
+"powerbi": "False"
+},
+{
+"expr": "(DATE(2020,1,1)-1.5)&\"z\"",
+"powerbi": "12/30/2019 12:00:00 PMz"
+},
+{
+"expr": "ISINT64(DATE(2020,1,1)+CURRENCY(1))",
+"powerbi": "False"
+},
+{
+"expr": "ISDOUBLE(DATE(2020,1,1)+CURRENCY(1))",
+"powerbi": "False"
+},
+{
+"expr": "ISCURRENCY(DATE(2020,1,1)+CURRENCY(1))",
+"powerbi": "False"
+},
+{
+"expr": "ISDATETIME(DATE(2020,1,1)+CURRENCY(1))",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER(DATE(2020,1,1)+CURRENCY(1))",
+"powerbi": "True"
+},
+{
+"expr": "ISLOGICAL(DATE(2020,1,1)+CURRENCY(1))",
+"powerbi": "False"
+},
+{
+"expr": "ISTEXT(DATE(2020,1,1)+CURRENCY(1))",
+"powerbi": "False"
+},
+{
+"expr": "ISBLANK(DATE(2020,1,1)+CURRENCY(1))",
+"powerbi": "False"
+},
+{
+"expr": "(DATE(2020,1,1)+CURRENCY(1))&\"z\"",
+"powerbi": "1/2/2020z"
+},
+{
+"expr": "ISINT64((VAR d=DATE(2020,1,1) RETURN d)+1)",
+"powerbi": "False"
+},
+{
+"expr": "ISDOUBLE((VAR d=DATE(2020,1,1) RETURN d)+1)",
+"powerbi": "False"
+},
+{
+"expr": "ISCURRENCY((VAR d=DATE(2020,1,1) RETURN d)+1)",
+"powerbi": "False"
+},
+{
+"expr": "ISDATETIME((VAR d=DATE(2020,1,1) RETURN d)+1)",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER((VAR d=DATE(2020,1,1) RETURN d)+1)",
+"powerbi": "True"
+},
+{
+"expr": "ISLOGICAL((VAR d=DATE(2020,1,1) RETURN d)+1)",
+"powerbi": "False"
+},
+{
+"expr": "ISTEXT((VAR d=DATE(2020,1,1) RETURN d)+1)",
+"powerbi": "False"
+},
+{
+"expr": "ISBLANK((VAR d=DATE(2020,1,1) RETURN d)+1)",
+"powerbi": "False"
+},
+{
+"expr": "((VAR d=DATE(2020,1,1) RETURN d)+1)&\"z\"",
+"powerbi": "1/2/2020z"
+},
+{
+"expr": "ISINT64((VAR d=DATE(2020,1,1) RETURN d)-(VAR e=DATE(2019,1,1) RETURN e))",
+"powerbi": "False"
+},
+{
+"expr": "ISDOUBLE((VAR d=DATE(2020,1,1) RETURN d)-(VAR e=DATE(2019,1,1) RETURN e))",
+"powerbi": "False"
+},
+{
+"expr": "ISCURRENCY((VAR d=DATE(2020,1,1) RETURN d)-(VAR e=DATE(2019,1,1) RETURN e))",
+"powerbi": "False"
+},
+{
+"expr": "ISDATETIME((VAR d=DATE(2020,1,1) RETURN d)-(VAR e=DATE(2019,1,1) RETURN e))",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER((VAR d=DATE(2020,1,1) RETURN d)-(VAR e=DATE(2019,1,1) RETURN e))",
+"powerbi": "True"
+},
+{
+"expr": "ISLOGICAL((VAR d=DATE(2020,1,1) RETURN d)-(VAR e=DATE(2019,1,1) RETURN e))",
+"powerbi": "False"
+},
+{
+"expr": "ISTEXT((VAR d=DATE(2020,1,1) RETURN d)-(VAR e=DATE(2019,1,1) RETURN e))",
+"powerbi": "False"
+},
+{
+"expr": "ISBLANK((VAR d=DATE(2020,1,1) RETURN d)-(VAR e=DATE(2019,1,1) RETURN e))",
+"powerbi": "False"
+},
+{
+"expr": "((VAR d=DATE(2020,1,1) RETURN d)-(VAR e=DATE(2019,1,1) RETURN e))&\"z\"",
+"powerbi": "12/30/1900z"
+},
+{
+"expr": "ISINT64(MAX(Facts[Sales])+DATE(2020,1,1))",
+"powerbi": "False"
+},
+{
+"expr": "ISDOUBLE(MAX(Facts[Sales])+DATE(2020,1,1))",
+"powerbi": "False"
+},
+{
+"expr": "ISCURRENCY(MAX(Facts[Sales])+DATE(2020,1,1))",
+"powerbi": "False"
+},
+{
+"expr": "ISDATETIME(MAX(Facts[Sales])+DATE(2020,1,1))",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER(MAX(Facts[Sales])+DATE(2020,1,1))",
+"powerbi": "True"
+},
+{
+"expr": "ISLOGICAL(MAX(Facts[Sales])+DATE(2020,1,1))",
+"powerbi": "False"
+},
+{
+"expr": "ISTEXT(MAX(Facts[Sales])+DATE(2020,1,1))",
+"powerbi": "False"
+},
+{
+"expr": "ISBLANK(MAX(Facts[Sales])+DATE(2020,1,1))",
+"powerbi": "False"
+},
+{
+"expr": "(MAX(Facts[Sales])+DATE(2020,1,1))&\"z\"",
+"powerbi": "1/21/2020z"
+},
+{
+"expr": "ISDATETIME(DATE(2020,1,1)+BLANK())",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER(DATE(2020,1,1)+BLANK())",
+"powerbi": "True"
+},
+{
+"expr": "ISLOGICAL(DATE(2020,1,1)+BLANK())",
+"powerbi": "False"
+},
+{
+"expr": "ISTEXT(DATE(2020,1,1)+BLANK())",
+"powerbi": "False"
+},
+{
+"expr": "(DATE(2020,1,1)+BLANK())&\"z\"",
+"powerbi": "1/1/2020z"
+},
+{
+"expr": "ISDATETIME(BLANK()+DATE(2020,1,1))",
+"powerbi": "True"
+},
+{
+"expr": "ISLOGICAL(BLANK()+DATE(2020,1,1))",
+"powerbi": "False"
+},
+{
+"expr": "ISTEXT(BLANK()+DATE(2020,1,1))",
+"powerbi": "False"
+},
+{
+"expr": "ISBLANK(BLANK()+DATE(2020,1,1))",
+"powerbi": "False"
+},
+{
+"expr": "(BLANK()+DATE(2020,1,1))&\"z\"",
+"powerbi": "1/1/2020z"
+},
+{
+"expr": "ISINT64(COALESCE(BLANK(),DATE(2020,1,1))+1)",
+"powerbi": "False"
+},
+{
+"expr": "ISDOUBLE(COALESCE(BLANK(),DATE(2020,1,1))+1)",
+"powerbi": "False"
+},
+{
+"expr": "ISCURRENCY(COALESCE(BLANK(),DATE(2020,1,1))+1)",
+"powerbi": "False"
+},
+{
+"expr": "ISDATETIME(COALESCE(BLANK(),DATE(2020,1,1))+1)",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER(COALESCE(BLANK(),DATE(2020,1,1))+1)",
+"powerbi": "True"
+},
+{
+"expr": "ISLOGICAL(COALESCE(BLANK(),DATE(2020,1,1))+1)",
+"powerbi": "False"
+},
+{
+"expr": "ISTEXT(COALESCE(BLANK(),DATE(2020,1,1))+1)",
+"powerbi": "False"
+},
+{
+"expr": "ISBLANK(COALESCE(BLANK(),DATE(2020,1,1))+1)",
+"powerbi": "False"
+},
+{
+"expr": "(COALESCE(BLANK(),DATE(2020,1,1))+1)&\"z\"",
+"powerbi": "1/2/2020z"
+},
+{
+"expr": "ISINT64(COALESCE(1,2.5))",
+"powerbi": "False"
+},
+{
+"expr": "ISDOUBLE(COALESCE(1,2.5))",
+"powerbi": "True"
+},
+{
+"expr": "ISCURRENCY(COALESCE(1,2.5))",
+"powerbi": "False"
+},
+{
+"expr": "ISDATETIME(COALESCE(1,2.5))",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER(COALESCE(1,2.5))",
+"powerbi": "True"
+},
+{
+"expr": "ISLOGICAL(COALESCE(1,2.5))",
+"powerbi": "False"
+},
+{
+"expr": "ISTEXT(COALESCE(1,2.5))",
+"powerbi": "False"
+},
+{
+"expr": "ISBLANK(COALESCE(1,2.5))",
+"powerbi": "False"
+},
+{
+"expr": "(COALESCE(1,2.5))&\"z\"",
+"powerbi": "1z"
+},
+{
+"expr": "ISINT64(COALESCE(BLANK(),\"a\",1))",
+"powerbi": "False"
+},
+{
+"expr": "ISDOUBLE(COALESCE(BLANK(),\"a\",1))",
+"powerbi": "False"
+},
+{
+"expr": "ISCURRENCY(COALESCE(BLANK(),\"a\",1))",
+"powerbi": "False"
+},
+{
+"expr": "ISDATETIME(COALESCE(BLANK(),\"a\",1))",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER(COALESCE(BLANK(),\"a\",1))",
+"powerbi": "False"
+},
+{
+"expr": "ISLOGICAL(COALESCE(BLANK(),\"a\",1))",
+"powerbi": "False"
+},
+{
+"expr": "ISTEXT(COALESCE(BLANK(),\"a\",1))",
+"powerbi": "True"
+},
+{
+"expr": "ISBLANK(COALESCE(BLANK(),\"a\",1))",
+"powerbi": "False"
+},
+{
+"expr": "(COALESCE(BLANK(),\"a\",1))&\"z\"",
+"powerbi": "az"
+},
+{
+"expr": "ISINT64(COALESCE(1&&\"\",TRUE()))",
+"powerbi": "False"
+},
+{
+"expr": "ISDOUBLE(COALESCE(1&&\"\",TRUE()))",
+"powerbi": "False"
+},
+{
+"expr": "ISCURRENCY(COALESCE(1&&\"\",TRUE()))",
+"powerbi": "False"
+},
+{
+"expr": "ISDATETIME(COALESCE(1&&\"\",TRUE()))",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER(COALESCE(1&&\"\",TRUE()))",
+"powerbi": "False"
+},
+{
+"expr": "ISLOGICAL(COALESCE(1&&\"\",TRUE()))",
+"powerbi": "False"
+},
+{
+"expr": "ISTEXT(COALESCE(1&&\"\",TRUE()))",
+"powerbi": "False"
+},
+{
+"expr": "ISBLANK(COALESCE(1&&\"\",TRUE()))",
+"powerbi": "True"
+},
+{
+"expr": "(COALESCE(1&&\"\",TRUE()))&\"z\"",
+"powerbi": "z"
+},
+{
+"expr": "ISDATETIME(COALESCE(CURRENCY(1),2))",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER(COALESCE(CURRENCY(1),2))",
+"powerbi": "True"
+},
+{
+"expr": "ISLOGICAL(COALESCE(CURRENCY(1),2))",
+"powerbi": "False"
+},
+{
+"expr": "ISTEXT(COALESCE(CURRENCY(1),2))",
+"powerbi": "False"
+},
+{
+"expr": "ISBLANK(COALESCE(CURRENCY(1),2))",
+"powerbi": "False"
+},
+{
+"expr": "(COALESCE(CURRENCY(1),2))&\"z\"",
+"powerbi": "1z"
+},
+{
+"expr": "ISINT64(COALESCE(DATE(2020,1,1),1))",
+"powerbi": "False"
+},
+{
+"expr": "ISDOUBLE(COALESCE(DATE(2020,1,1),1))",
+"powerbi": "True"
+},
+{
+"expr": "ISCURRENCY(COALESCE(DATE(2020,1,1),1))",
+"powerbi": "False"
+},
+{
+"expr": "ISDATETIME(COALESCE(DATE(2020,1,1),1))",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER(COALESCE(DATE(2020,1,1),1))",
+"powerbi": "True"
+},
+{
+"expr": "ISLOGICAL(COALESCE(DATE(2020,1,1),1))",
+"powerbi": "False"
+},
+{
+"expr": "ISTEXT(COALESCE(DATE(2020,1,1),1))",
+"powerbi": "False"
+},
+{
+"expr": "ISBLANK(COALESCE(DATE(2020,1,1),1))",
+"powerbi": "False"
+},
+{
+"expr": "(COALESCE(DATE(2020,1,1),1))&\"z\"",
+"powerbi": "43831z"
+},
+{
+"expr": "ISINT64(IF(TRUE(),DATE(2020,1,1),1))",
+"powerbi": "False"
+},
+{
+"expr": "ISDOUBLE(IF(TRUE(),DATE(2020,1,1),1))",
+"powerbi": "True"
+},
+{
+"expr": "ISCURRENCY(IF(TRUE(),DATE(2020,1,1),1))",
+"powerbi": "False"
+},
+{
+"expr": "ISDATETIME(IF(TRUE(),DATE(2020,1,1),1))",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER(IF(TRUE(),DATE(2020,1,1),1))",
+"powerbi": "True"
+},
+{
+"expr": "ISLOGICAL(IF(TRUE(),DATE(2020,1,1),1))",
+"powerbi": "False"
+},
+{
+"expr": "ISTEXT(IF(TRUE(),DATE(2020,1,1),1))",
+"powerbi": "False"
+},
+{
+"expr": "ISBLANK(IF(TRUE(),DATE(2020,1,1),1))",
+"powerbi": "False"
+},
+{
+"expr": "(IF(TRUE(),DATE(2020,1,1),1))&\"z\"",
+"powerbi": "43831z"
+},
+{
+"expr": "ISINT64(IF(TRUE(),1,2.5)+DATE(2020,1,1))",
+"powerbi": "False"
+},
+{
+"expr": "ISDOUBLE(IF(TRUE(),1,2.5)+DATE(2020,1,1))",
+"powerbi": "False"
+},
+{
+"expr": "ISCURRENCY(IF(TRUE(),1,2.5)+DATE(2020,1,1))",
+"powerbi": "False"
+},
+{
+"expr": "ISDATETIME(IF(TRUE(),1,2.5)+DATE(2020,1,1))",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER(IF(TRUE(),1,2.5)+DATE(2020,1,1))",
+"powerbi": "True"
+},
+{
+"expr": "ISLOGICAL(IF(TRUE(),1,2.5)+DATE(2020,1,1))",
+"powerbi": "False"
+},
+{
+"expr": "ISTEXT(IF(TRUE(),1,2.5)+DATE(2020,1,1))",
+"powerbi": "False"
+},
+{
+"expr": "ISBLANK(IF(TRUE(),1,2.5)+DATE(2020,1,1))",
+"powerbi": "False"
+},
+{
+"expr": "(IF(TRUE(),1,2.5)+DATE(2020,1,1))&\"z\"",
+"powerbi": "1/2/2020z"
+},
+{
+"expr": "ISINT64((1&&\"\")+DATE(2020,1,1))",
+"powerbi": "False"
+},
+{
+"expr": "ISDOUBLE((1&&\"\")+DATE(2020,1,1))",
+"powerbi": "False"
+},
+{
+"expr": "ISCURRENCY((1&&\"\")+DATE(2020,1,1))",
+"powerbi": "False"
+},
+{
+"expr": "ISDATETIME((1&&\"\")+DATE(2020,1,1))",
+"powerbi": "True"
+},
+{
+"expr": "ISNUMBER((1&&\"\")+DATE(2020,1,1))",
+"powerbi": "True"
+},
+{
+"expr": "ISLOGICAL((1&&\"\")+DATE(2020,1,1))",
+"powerbi": "False"
+},
+{
+"expr": "ISTEXT((1&&\"\")+DATE(2020,1,1))",
+"powerbi": "False"
+},
+{
+"expr": "ISBLANK((1&&\"\")+DATE(2020,1,1))",
+"powerbi": "False"
+},
+{
+"expr": "((1&&\"\")+DATE(2020,1,1))&\"z\"",
+"powerbi": "1/1/2020z"
+},
+{
+"expr": "ISINT64(TRUE()+TRUE())",
+"powerbi": "True"
+},
+{
+"expr": "ISDOUBLE(TRUE()+TRUE())",
+"powerbi": "False"
+},
+{
+"expr": "ISCURRENCY(TRUE()+TRUE())",
+"powerbi": "False"
+},
+{
+"expr": "ISDATETIME(TRUE()+TRUE())",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER(TRUE()+TRUE())",
+"powerbi": "True"
+},
+{
+"expr": "ISLOGICAL(TRUE()+TRUE())",
+"powerbi": "False"
+},
+{
+"expr": "ISTEXT(TRUE()+TRUE())",
+"powerbi": "False"
+},
+{
+"expr": "ISBLANK(TRUE()+TRUE())",
+"powerbi": "False"
+},
+{
+"expr": "(TRUE()+TRUE())&\"z\"",
+"powerbi": "2z"
+},
+{
+"expr": "ISINT64(TRUE()-FALSE())",
+"powerbi": "True"
+},
+{
+"expr": "ISDOUBLE(TRUE()-FALSE())",
+"powerbi": "False"
+},
+{
+"expr": "ISCURRENCY(TRUE()-FALSE())",
+"powerbi": "False"
+},
+{
+"expr": "ISDATETIME(TRUE()-FALSE())",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER(TRUE()-FALSE())",
+"powerbi": "True"
+},
+{
+"expr": "ISLOGICAL(TRUE()-FALSE())",
+"powerbi": "False"
+},
+{
+"expr": "ISTEXT(TRUE()-FALSE())",
+"powerbi": "False"
+},
+{
+"expr": "ISBLANK(TRUE()-FALSE())",
+"powerbi": "False"
+},
+{
+"expr": "(TRUE()-FALSE())&\"z\"",
+"powerbi": "1z"
+},
+{
+"expr": "ISINT64(-(-TRUE()))",
+"powerbi": "True"
+},
+{
+"expr": "ISDOUBLE(-(-TRUE()))",
+"powerbi": "False"
+},
+{
+"expr": "ISCURRENCY(-(-TRUE()))",
+"powerbi": "False"
+},
+{
+"expr": "ISDATETIME(-(-TRUE()))",
+"powerbi": "False"
+},
+{
+"expr": "ISNUMBER(-(-TRUE()))",
+"powerbi": "True"
+},
+{
+"expr": "ISLOGICAL(-(-TRUE()))",
+"powerbi": "False"
+},
+{
+"expr": "ISTEXT(-(-TRUE()))",
+"powerbi": "False"
+},
+{
+"expr": "ISBLANK(-(-TRUE()))",
+"powerbi": "False"
+},
+{
+"expr": "(-(-TRUE()))&\"z\"",
+"powerbi": "1z"
+},
+{
+"expr": "IFERROR((VAR y=BLANK() RETURN y)==0,\"e\")",
+"powerbi": "False"
+},
+{
+"expr": "IFERROR((0)==(VAR y=BLANK() RETURN y),\"e\")",
+"powerbi": "False"
+},
+{
+"expr": "IFERROR((VAR y=1 RETURN y)==TRUE(),\"e\")",
+"powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 27) DAX comparison operations do not support comparing values of type Integer with values of type True/False. Consider using the VALUE or FORMAT function to convert one of the values.\""
+},
+{
+"expr": "IFERROR((TRUE())==(VAR y=1 RETURN y),\"e\")",
+"powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 27) DAX comparison operations do not support comparing values of type True/False with values of type Integer. Consider using the VALUE or FORMAT function to convert one of the values.\""
+},
+{
+"expr": "IFERROR((VAR y=DATE(2020,1,1) RETURN y)==43831,\"e\")",
+"powerbi": "True"
+},
+{
+"expr": "IFERROR((43831)==(VAR y=DATE(2020,1,1) RETURN y),\"e\")",
+"powerbi": "True"
+},
+{
+"expr": "IFERROR((VAR y=\"a\" RETURN y)==BLANK(),\"e\")",
+"powerbi": "False"
+},
+{
+"expr": "IFERROR((BLANK())==(VAR y=\"a\" RETURN y),\"e\")",
+"powerbi": "False"
+},
+{
+"expr": "IFERROR((IF(TRUE(),1,\"a\"))==1,\"e\")",
+"powerbi": "True"
+},
+{
+"expr": "IFERROR((1)==(IF(TRUE(),1,\"a\")),\"e\")",
+"powerbi": "True"
+},
+{
+"expr": "IFERROR((COALESCE(BLANK(),2))==2.0,\"e\")",
+"powerbi": "True"
+},
+{
+"expr": "IFERROR((2.0)==(COALESCE(BLANK(),2)),\"e\")",
+"powerbi": "True"
+},
+{
+"expr": "IFERROR((1&&\"\")==FALSE(),\"e\")",
+"powerbi": "False"
+},
+{
+"expr": "IFERROR((FALSE())==(1&&\"\"),\"e\")",
+"powerbi": "False"
+},
+{
+"expr": "IFERROR((1&&\"\")==BLANK(),\"e\")",
+"powerbi": "True"
+},
+{
+"expr": "IFERROR((BLANK())==(1&&\"\"),\"e\")",
+"powerbi": "True"
+}
+]
+}

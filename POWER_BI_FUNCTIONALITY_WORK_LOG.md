@@ -1776,3 +1776,13 @@ The standing test workbook is now `tests/Data/Vat File -Aug 2026.xlsx` (sheet `V
 **Saved:** `tools/parity/dax_battery_textnum19_extra.json` (239 answers), `tools/parity/task29_text_number_spec.json`.
 
 **Gate:** PARITY GATE PASSED (fast gate). pytest 2,533 passed; replay 452,942: 444,142 match, 8,800 refused, 0 DIFF, 0 CRASH; locked 442,933 to 444,122. The real app through the measure path, offscreen: 575/575 equal and 1,500 fresh probes with 0 wrong. Power BI answers came from Power BI Desktop on the iPad guest; the project was not saved. No saved Power BI answer was edited.
+
+## 2026-11-03 — Iteration 120 (Task 30 static-types-20: static types of type tests, == and COALESCE branches (1,001 refusals become Power BI's answers))
+
+**Who did what:** Antigravity (Gemini 3.8 Flash) extended the static type inference: date and time arithmetic (date - date, date + time, a VAR block takes its RETURN's type), a BLANK beside a date, == beside VAR blocks and logical BLANKs, COALESCE branch types (1,001 of 1,070 refused saved answers now match); Sonnet 5.5 resolved the merge with Task 29 (kept Task 29's text-operand error) and narrowed a numeric-function text rule a test caught (`ABS([Note])` on a text column refuses again); Claude Opus 5.5 built the spec and measured 340 fresh type-test probes in Power BI (including -TRUE(), date arithmetic, COALESCE).
+
+**Review:** fresh 340: 0 new wrong, 31 rows refused or wrong on main now right. Gate passed on the first run after the merge. Code read for lookups: none.
+
+**Saved:** `tools/parity/dax_battery_types20_extra.json` (300 answers), `tools/parity/task30_static_types_spec.json`.
+
+**Gate:** PARITY GATE PASSED (fast gate). pytest 2,538 passed; replay 453,242: 445,280 match, 7,962 refused, 0 DIFF, 0 CRASH; locked 444,122 to 445,260. The real app through the measure path, offscreen: 575/575 equal and 1,500 fresh probes with 0 wrong. Power BI answers came from Power BI Desktop on the iPad guest; the project was not saved. No saved Power BI answer was edited.
