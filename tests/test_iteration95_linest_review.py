@@ -28,13 +28,8 @@ PARITY = Path(__file__).resolve().parents[1] / "tools" / "parity"
 # Valid DAX whose Power BI answer is rounding noise or a rank-deficient convention: the local engine must refuse.
 STAYS_REFUSED = [
     'MAXX(LINESTX(DATATABLE("x",DOUBLE,"y",DOUBLE,{{1,2},{2,4},{3,6},{4,8}}),[y],[x]),[Slope1])',  # perfect fit
-    'MAXX(LINESTX(DATATABLE("x",DOUBLE,"y",DOUBLE,{{1,5},{2,5},{3,5}}),[y],[x]),[Slope1])',  # constant response
-    'MAXX(LINESTX(DATATABLE("x",DOUBLE,"y",DOUBLE,{{1,2},{1,3},{1,5},{1,4}}),[y],[x]),[Slope1])',  # constant regressor
     'MAXX(LINESTX(DATATABLE("x",DOUBLE,"y",DOUBLE,{{1,2},{2,3}}),[y],[x]),[Slope1])',  # as many rows as coefficients
     'MAXX(LINESTX(ROW("a",1,"b",2),[a],[b]),[Slope1])',
-    "MAXX(LINESTX(Facts,Facts[Quantity],Facts[Sales],1=0),[Slope1])",  # Power BI zeroes the dependent coefficient
-    "MAXX(LINESTX(Facts,Facts[Quantity],Facts[Sales],1),[Slope1])",
-    "MAXX(LINEST(Facts[Quantity],Facts[Sales],Facts[Sales]),[Slope1])",
     "MAXX(LINESTX(Facts,Facts[Quantity],FORMAT(Facts[Quantity],\"0\")),[Slope1])",  # text that looks like a number
     "VAR c=FALSE() RETURN MAXX(LINESTX(Facts,Facts[Quantity],Facts[Sales],c),[Slope1])",  # Power BI folds the variable
     "TOCSV(LINEST(Facts[Quantity],Facts[Sales]))",  # the 15 digits include Power BI's rounding noise
@@ -124,8 +119,8 @@ class LinestReviewTest(unittest.TestCase):
         self.assertFalse(dax.local("MAXX(LINESTX(Facts,Facts[Quantity],Facts[Sales],FALSE()),[Slope1])").startswith("LOCAL"))
         self.assertTrue(dax.local("MAXX(LINESTX(Facts,Facts[Quantity],Facts[Sales],FALSE()),[Intercept])").startswith("LOCAL-REJECT"))
         self.assertFalse(dax.local("MAXX(LINESTX(Facts,Facts[Quantity],Facts[Sales],TRUE()),[Intercept])").startswith("LOCAL"))
-        # 1=0 is a regressor column: Power BI has a Slope2 and an Intercept there; the local engine refuses the design
-        self.assertTrue(dax.local("MAXX(LINESTX(Facts,Facts[Quantity],Facts[Sales],1=0),[Intercept])").startswith("LOCAL-REJECT"))
+        # Power BI Desktop 2026-11-03: 1=0 is a regressor column (dropped as constant); the Intercept is 2.30314821365405 (Task 31 models it)
+        self.assertAlmostEqual(2.30314821365405, float(dax.local("MAXX(LINESTX(Facts,Facts[Quantity],Facts[Sales],1=0),[Intercept])")), places=12)
 
     def test_blank_is_zero_and_booleans_are_numbers(self) -> None:
         self.assertEqual("4", dax.local("MAXX(LINESTX(Facts,Facts[Sales],Facts[Quantity]),[DegreesOfFreedom])"))
@@ -133,6 +128,11 @@ class LinestReviewTest(unittest.TestCase):
 
     def test_empty_input_gives_no_rows(self) -> None:
         self.assertEqual("BLANK", dax.local("COUNTROWS(LINESTX(FILTER(Facts,Facts[Quantity]>9),Facts[Quantity],Facts[Sales]))"))
+
+    def test_answered_since_task_31_match_power_bi(self) -> None:
+        """Power BI Desktop 2026-11-03: constant responses, constant regressors and duplicated columns (QR with column pivoting, Task 31)."""
+        for expression, powerbi in {'MAXX(LINESTX(DATATABLE("x",DOUBLE,"y",DOUBLE,{{1,5},{2,5},{3,5}}),[y],[x]),[Slope1])': '0', 'MAXX(LINESTX(DATATABLE("x",DOUBLE,"y",DOUBLE,{{1,2},{1,3},{1,5},{1,4}}),[y],[x]),[Slope1])': '0', 'MAXX(LINESTX(Facts,Facts[Quantity],Facts[Sales],1=0),[Slope1])': '0.0374955783516095', 'MAXX(LINESTX(Facts,Facts[Quantity],Facts[Sales],1),[Slope1])': '0.0374955783516095', 'MAXX(LINEST(Facts[Quantity],Facts[Sales],Facts[Sales]),[Slope1])': '0.0374955783516095'}.items():
+            self.assertAlmostEqual(float(powerbi), float(dax.local(expression)), places=12, msg=expression)
 
     def test_stays_refused(self) -> None:
         for expression in STAYS_REFUSED:
