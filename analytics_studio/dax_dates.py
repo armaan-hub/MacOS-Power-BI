@@ -9,7 +9,7 @@ from __future__ import annotations
 
 from calendar import monthrange
 from datetime import date, datetime, timedelta, timezone
-from decimal import Decimal, ROUND_DOWN, ROUND_FLOOR, ROUND_HALF_UP
+from decimal import Decimal, ROUND_CEILING, ROUND_DOWN, ROUND_FLOOR, ROUND_HALF_UP
 import re
 
 from analytics_studio import dax_typed
@@ -39,12 +39,12 @@ def from_datetime(moment: datetime | date) -> DaxDateTime:
 def to_datetime(serial: Decimal, rounding: str = ROUND_HALF_UP) -> datetime:
     if not serial.is_finite():
         raise dax_typed._error("An argument has the wrong data type or the result is too large or too small.")
-    days = serial.to_integral_value(rounding=ROUND_FLOOR)
-    if serial < 0 and serial != days:
-        # live Power BI counts the time of day of a serial before day zero forward from the day it follows (OLE) and rounds it in a
-        # way that is not modelled here (iteration 84, 800 probes): refused rather than guessed
-        raise dax_typed._error("A time of day before December 30, 1899 is not supported in the local engine.")
-    scaled = (serial - days) * _SECONDS_PER_DAY
+    if serial < 0:
+        days = serial.to_integral_value(rounding=ROUND_CEILING)
+        scaled = (abs(serial) - abs(days)) * _SECONDS_PER_DAY
+    else:
+        days = serial.to_integral_value(rounding=ROUND_FLOOR)
+        scaled = (serial - days) * _SECONDS_PER_DAY
     if rounding == ROUND_DOWN:
         seconds = scaled.quantize(Decimal(1), rounding=ROUND_DOWN)
     elif rounding == NEAREST_SECOND:  # live Power BI: WEEKDAY / WEEKNUM take the day of the time of day rounded to the nearest second
@@ -369,7 +369,23 @@ def date_function(function: str, args: list[object], interval: str | None = None
         clock = _clock_text(args[0])
         if clock is not None:
             return Decimal(clock[("HOUR", "MINUTE", "SECOND").index(function)])
-    moment = _moment(args[0], ROUND_FLOOR if function in {"HOUR", "MINUTE", "SECOND"} else NEAREST_SECOND if function in {"WEEKDAY", "WEEKNUM"} else ROUND_HALF_UP)
+    if function in {"HOUR", "MINUTE", "SECOND"} and isinstance(args[0], Decimal) and args[0].is_finite() and args[0] < 0:
+        # live Power BI (Task 40 review): SECOND(-3+0.999) is 27, where the same value shown as a date and time ends in :26 (the time of day, 1:26.4, is
+        # rounded up there and down there). Only the one value 0.999 was measured, so a whole-second time answers as always, and a time with a fraction
+        # of a second is refused for SECOND and, for HOUR and MINUTE, wherever rounding up would change the answer.
+        fraction_ticks = ((abs(args[0]) - abs(args[0].to_integral_value(rounding=ROUND_CEILING))) * _SECONDS_PER_DAY * 300).quantize(Decimal(1), rounding=ROUND_HALF_UP)
+        if fraction_ticks % 300:
+            unit = {"HOUR": 3600, "MINUTE": 60, "SECOND": 1}[function]
+            whole_seconds = int(fraction_ticks) // 300
+            if function == "SECOND" or (whole_seconds + 1) // unit != whole_seconds // unit:
+                raise dax_typed._error(f"{function} of a time before December 30, 1899 with a fraction of a second is not supported in the local engine.")
+    if function in {"EDATE", "EOMONTH"} and args[0] is not None and not isinstance(args[0], str):
+        if not Decimal(args[0]).is_finite():
+            raise dax_typed._error("An argument has the wrong data type or the result is too large or too small.")
+        int_day = Decimal(args[0]).to_integral_value(rounding=ROUND_FLOOR)
+        moment = EPOCH + timedelta(days=int(int_day))
+    else:
+        moment = _moment(args[0], ROUND_FLOOR if function in {"HOUR", "MINUTE", "SECOND"} else NEAREST_SECOND if function in {"WEEKDAY", "WEEKNUM"} else ROUND_HALF_UP)
     if moment is None:
         if function in {"EDATE", "EOMONTH"} and args[1] is not None:
             dax_typed.whole(args[1], function)  # Task 20 F4: a BLANK date still reads the months; an Infinity, a NaN or a text there is the error

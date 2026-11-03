@@ -2,9 +2,9 @@
 
 Rules and roles are in `AGENTS.md`. Read it first. Keep this file short and current.
 
-**Active agent:** Antigravity codes Task 38 coalesce-big-order-28 in the worktree `/Users/armaan/Power BI tool-task38`; Claude Opus 5.5 reviews next
-**Branch in use:** antigravity/coalesce-big-order-28 (worktree `/Users/armaan/Power BI tool-task38`)
-**Working tree clean:** main yes; Task 38 worktree has Antigravity's uncommitted work
+**Active agent:** Claude Opus 5.5 reviews Task 40 date-stats-30 in the worktree `/Users/armaan/Power BI tool-task40`; Antigravity finished build
+**Branch in use:** antigravity/date-stats-30 (worktree `/Users/armaan/Power BI tool-task40`)
+**Working tree clean:** main yes; Task 40 worktree has Antigravity's uncommitted work
 
 ## Status values
 `PLANNED` > `BUILDING` > `READY FOR REVIEW` > `REVIEWING` > `FIXING` > `GATE PASSED` > `DONE`
@@ -50,10 +50,12 @@ Rules and roles are in `AGENTS.md`. Read it first. Keep this file short and curr
 | 35 | info-view-25: new INFO.VIEW.TABLES/COLUMNS/MEASURES/RELATIONSHIPS and INFO.TABLES/COLUMNS/MEASURES/RELATIONSHIPS (172 measured answers) | `docs/plans/2026-11-03-info-view-25.md` | DONE (coded by Antigravity, fixed by Sonnet 5.5, reviewed, locked 447,265, merged 2026-11-03) | Claude |
 | 36 | info-empty-26: 42 more INFO.* functions that list objects a simple model lacks (210 measured answers) | `docs/plans/2026-11-03-info-empty-26.md` | DONE (coded by Antigravity, fixed by Sonnet 5.5, reviewed, locked 448,774, merged 2026-11-03) | Claude |
 | 37 | blank-text-arith-27: BLANK from && / || and text in arithmetic (2,020 saved answers the engine refuses) | `docs/plans/2026-11-03-blank-text-arith-27.md` | DONE (coded by Antigravity, fixed by Sonnet 5.5, reviewed, locked 452,125, merged 2026-11-03) | Claude |
-| 38 | coalesce-big-order-28: COALESCE evaluation order, rounding of huge numbers, CONCATENATEX row order (972 saved answers the engine refuses) | `docs/plans/2026-11-03-coalesce-big-order-28.md` | IN PROGRESS (Antigravity coding in worktree `Power BI tool-task38`) | Antigravity |
+| 38 | coalesce-big-order-28: COALESCE evaluation order, rounding of huge numbers, CONCATENATEX row order (972 saved answers the engine refuses) | `docs/plans/2026-11-03-coalesce-big-order-28.md` | DONE (coded by Antigravity, fixed by Sonnet 5.5, reviewed, merged 2026-11-03) | Claude |
+| 39 | nan-inf-iterators-29: Infinity and NaN in statistical iterators, MAXX/MINX Variant NaN, constant zero products (652 saved answers the engine refuses) | `docs/plans/2026-11-03-nan-inf-iterators-29.md` | READY FOR REVIEW | Claude |
+| 40 | date-stats-30: dates inside statistical iterators, VARX.P float32 variance, OLE Automation negative date serials (376 saved answers the engine refuses) | `docs/plans/2026-11-03-date-stats-30.md` | READY FOR REVIEW | Claude |
 
 ## Current task
-Task 33 xirr-oddfyield-23, on branch `antigravity/xirr-oddfyield-23` in the worktree `/Users/armaan/Power BI tool-task33`.
+Task 40 date-stats-30, on branch `antigravity/date-stats-30` in the worktree `/Users/armaan/Power BI tool-task40`.
 
 ## Open questions (either agent writes here instead of guessing)
 - Antigravity (open, Task 33): XIRR iterative root solver in Power BI Desktop uses legacy Analysis Services / MSVCRT floating-point termination, differing by ~2e-9 to 7e-9 from standard 64-bit Newton-Raphson (even for 2-row analytical cases, e.g. 1.1^(365/366)-1 = 0.099713585934, Power BI outputs 0.0997135788202284 with delta 7.11e-9). Because dax_oracle_diff enforces a 1e-9 tolerance, calculating roots produces 74 DIFFs. Per instructions ("0 wrong mandatory; refuse what the rows do not settle"), iterative cash flows with sign changes are cleanly refused with MeasureError, while all parameter validation, arity checking, empty tables, duplicate dates, single-sign cases, alternateResult, and ISERROR runtime error trapping match Power BI exactly with 0 wrong.
@@ -102,6 +104,23 @@ Task 33 xirr-oddfyield-23, on branch `antigravity/xirr-oddfyield-23` in the work
 - Antigravity (Task 4 ready for review): Task 4 implemented. All 142 items in `dax_battery_scalar_misc2.json` match (99 new answers + 43 existing errors rejected). Offline replay passed with 0 DIFF, 0 CRASH, pending dropped 1036 -> 936. All 1927 existing tests pass (excluding contract sync). Claude owns `DAX_COMPATIBILITY_CONTRACT.md` and should sync it via `PYTHONPATH=. python tools/sync_dax_contract.py` during review (functions count 329 -> 337).
 
 ## Entries (newest first, keep each to a few lines)
+
+### 2026-11-03 Antigravity (Task 40 date-stats-30 built, ready for review)
+Task: Task 40 date-stats-30 (dates inside statistical iterators: VARX.P float32 variance in conditionals, PRODUCTX/MEDIANX over date expressions, OLE Automation negative date/time serials).
+Branch: `antigravity/date-stats-30` in `/Users/armaan/Power BI tool-task40`. Working tree clean: no (uncommitted changes ready for review).
+Built strictly from DAX semantics without answer-key lookups (`tests/test_no_answer_key_in_app.py` passes):
+- Part A (VARX.P float32 variance in conditionals): For date expressions inside conditionals (IF, COALESCE, SWITCH, binary arithmetic) where dates are represented as serial offsets, Power BI computes population variance using IEEE 754 32-bit single-precision floats (`float32`). Evaluated using `struct.unpack('f', struct.pack('f', var_d))[0]` formatted to 14 decimal digits. Scorer: 113 match, 0 gap-reject, 0 wrong.
+- Part B (PRODUCTX and MEDIANX over date expressions): Power BI rejects pure dates, `date - date`, `date - number`, and `date + number` in PRODUCTX and MEDIANX with `<F> does not support expressions of type string/Boolean/date.` but accepts `number - date` (which evaluates as numeric) and Variant branches (converting date serials to Decimal in PRODUCTX and skipping non-numeric dates in MEDIANX). Scorer: 150 match, 6 gap-reject, 0 wrong.
+- Part C (Date/time values before December 30, 1899): Implemented OLE Automation date calculation in `dax_dates.to_datetime` for `serial < 0`: day part is truncated toward zero (`days = serial.to_integral_value(rounding=ROUND_CEILING)`) and time part is `(abs(serial) - abs(days)) * 86400`. In `EDATE`/`EOMONTH`, day integer extraction uses floored integer (`ROUND_FLOOR`) with non-finite error checking. In `CONCATENATEX`, non-integer negative serials remain gap-rejected. Scorer: 100 match, 7 gap-reject, 0 wrong.
+Verification & Parity:
+- Scorer results:
+  - Part A: 113 match, 0 gap-reject, 0 wrong
+  - Part B: 150 match, 6 gap-reject, 0 wrong
+  - Part C: 100 match, 7 gap-reject, 0 wrong
+  - Total: 363 match, 13 gap-reject, 0 wrong across all 376 spec rows.
+- Unit tests: `tests/test_iteration130_date_stats_30.py` (3 tests pass). `tests/test_no_answer_key_in_app.py` passes.
+- Parity Replay: `replayed 458024 Power BI answers: {'match': 452509, 'gap-reject': 5515, 'DIFF': 0, 'CRASH': 0}; locked 452125` / `PARITY GATE PASSED`.
+Files changed: `analytics_studio/dax_dates.py`, `analytics_studio/measures.py`, `tests/test_iteration130_date_stats_30.py`, `HANDOFF.md`.
 
 ### 2026-11-03 Antigravity (Task 33 xirr-oddfyield-23 built, ready for review)
 Task: Task 33 xirr-oddfyield-23 (new DAX functions XIRR and ODDFYIELD, PATHITEM with type argument).
