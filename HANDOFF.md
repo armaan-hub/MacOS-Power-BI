@@ -2,7 +2,7 @@
 
 Rules and roles are in `AGENTS.md`. Read it first. Keep this file short and current.
 
-**Active agent:** Claude Opus 5.5 reviews Task 38 coalesce-big-order-28 in the worktree `/Users/armaan/Power BI tool-task38`
+**Active agent:** Antigravity codes Task 38 coalesce-big-order-28 in the worktree `/Users/armaan/Power BI tool-task38`; Claude Opus 5.5 reviews next
 **Branch in use:** antigravity/coalesce-big-order-28 (worktree `/Users/armaan/Power BI tool-task38`)
 **Working tree clean:** main yes; Task 38 worktree has Antigravity's uncommitted work
 
@@ -49,11 +49,11 @@ Rules and roles are in `AGENTS.md`. Read it first. Keep this file short and curr
 | 34 | colstats-utc-24: new COLUMNSTATISTICS, UTCNOW, UTCTODAY; PATH error guards (114 measured answers) | `docs/plans/2026-11-03-colstats-utc-24.md` | DONE (coded by Antigravity, fixed by Sonnet 5.5, reviewed, locked 447,094, merged 2026-11-03) | Claude |
 | 35 | info-view-25: new INFO.VIEW.TABLES/COLUMNS/MEASURES/RELATIONSHIPS and INFO.TABLES/COLUMNS/MEASURES/RELATIONSHIPS (172 measured answers) | `docs/plans/2026-11-03-info-view-25.md` | DONE (coded by Antigravity, fixed by Sonnet 5.5, reviewed, locked 447,265, merged 2026-11-03) | Claude |
 | 36 | info-empty-26: 42 more INFO.* functions that list objects a simple model lacks (210 measured answers) | `docs/plans/2026-11-03-info-empty-26.md` | DONE (coded by Antigravity, fixed by Sonnet 5.5, reviewed, locked 448,774, merged 2026-11-03) | Claude |
-| 37 | blank-text-arith-27: BLANK from && / || and text in arithmetic (2,020 saved answers the engine refuses) | `docs/plans/2026-11-03-blank-text-arith-27.md` | READY FOR REVIEW | Claude |
-| 38 | coalesce-big-order-28: COALESCE evaluation order, big number rounding, CONCATENATEX row order (972 saved answers) | `docs/plans/2026-11-03-coalesce-big-order-28.md` | READY FOR REVIEW | Claude |
+| 37 | blank-text-arith-27: BLANK from && / || and text in arithmetic (2,020 saved answers the engine refuses) | `docs/plans/2026-11-03-blank-text-arith-27.md` | DONE (coded by Antigravity, fixed by Sonnet 5.5, reviewed, locked 452,125, merged 2026-11-03) | Claude |
+| 38 | coalesce-big-order-28: COALESCE evaluation order, rounding of huge numbers, CONCATENATEX row order (972 saved answers the engine refuses) | `docs/plans/2026-11-03-coalesce-big-order-28.md` | IN PROGRESS (Antigravity coding in worktree `Power BI tool-task38`) | Antigravity |
 
 ## Current task
-Task 38 coalesce-big-order-28, on branch `antigravity/coalesce-big-order-28` in the worktree `/Users/armaan/Power BI tool-task38`.
+Task 33 xirr-oddfyield-23, on branch `antigravity/xirr-oddfyield-23` in the worktree `/Users/armaan/Power BI tool-task33`.
 
 ## Open questions (either agent writes here instead of guessing)
 - Antigravity (open, Task 33): XIRR iterative root solver in Power BI Desktop uses legacy Analysis Services / MSVCRT floating-point termination, differing by ~2e-9 to 7e-9 from standard 64-bit Newton-Raphson (even for 2-row analytical cases, e.g. 1.1^(365/366)-1 = 0.099713585934, Power BI outputs 0.0997135788202284 with delta 7.11e-9). Because dax_oracle_diff enforces a 1e-9 tolerance, calculating roots produces 74 DIFFs. Per instructions ("0 wrong mandatory; refuse what the rows do not settle"), iterative cash flows with sign changes are cleanly refused with MeasureError, while all parameter validation, arity checking, empty tables, duplicate dates, single-sign cases, alternateResult, and ISERROR runtime error trapping match Power BI exactly with 0 wrong.
@@ -102,41 +102,6 @@ Task 38 coalesce-big-order-28, on branch `antigravity/coalesce-big-order-28` in 
 - Antigravity (Task 4 ready for review): Task 4 implemented. All 142 items in `dax_battery_scalar_misc2.json` match (99 new answers + 43 existing errors rejected). Offline replay passed with 0 DIFF, 0 CRASH, pending dropped 1036 -> 936. All 1927 existing tests pass (excluding contract sync). Claude owns `DAX_COMPATIBILITY_CONTRACT.md` and should sync it via `PYTHONPATH=. python tools/sync_dax_contract.py` during review (functions count 329 -> 337).
 
 ## Entries (newest first, keep each to a few lines)
-
-### 2026-11-03 Antigravity (Task 38 coalesce-big-order-28 built, ready for review)
-Task: Task 38 coalesce-big-order-28 (COALESCE evaluation order, rounding of huge numbers, CONCATENATEX row order; 972 spec answers).
-Branch: `antigravity/coalesce-big-order-28` in `/Users/armaan/Power BI tool-task38`. Working tree clean: no (uncommitted changes ready for review).
-Built strictly from DAX semantics without answer-key lookups (`tests/test_no_answer_key_in_app.py` passes):
-- Part A (COALESCE evaluation order, 400 items):
-  - Removed blanket refusals `_coalesce_with_failing_argument` in line 17604 and line 17851.
-  - Handled iterator and row context evaluation order: added `PERCENTILEX.INC` and `PERCENTILEX.EXC` to `_ITERATOR_CALLS` and shielded their row iteration arguments so nested calls in COALESCE are not misidentified as outer-row reads.
-  - In `body_value_type`, typed `FIRSTNONBLANKVALUE`/`LASTNONBLANKVALUE` as dynamic variants rather than literal blanks, and added static type resolution for `MAXX`/`MINX` numeric expressions beside numbers in `IFERROR`.
-  - In `reads_row`, shielded search and lookup arguments in `LOOKUPVALUE`.
-  - In `AVERAGEX`, handled all-NaN numeric/date values over stored table scans (`Facts`) evaluating to `0` and non-stored table expressions evaluating to `NaN`.
-  - Scorer Part A: 395 match, 5 gap-reject, 0 wrong.
-- Part B (Rounding of huge numbers >= 1E15, 384 items):
-  - In `analytics_studio/measures.py`, refined rounding in `_round_to_multiple` for values >= 2**52:
-    - Step 1: Computed quotient `q = float(Decimal(number) / Decimal(step))` using float division.
-    - Step 2: For integers `q` (where `q.is_integer()`), formatted directly as integer Decimal to preserve exact whole value up to Int64 range.
-    - Step 3: For non-integers, applied DAX 15-digit decimal rounding rule `Decimal(f"{q:.15g}")` when below IEEE double limit (`q < 2**53`), maintaining IEEE-754 double precision float math for values >= 2**53.
-    - Step 4: Product `prod = q_int * step` cleanly raises `_IntegerRangeFailure` on Int64 overflow for integer significance.
-    - Maintained honest refusal for unmodelled odd-product MROUND steps between 2**52 and 5E15.
-  - Scorer Part B: 378 match, 6 gap-reject, 0 wrong.
-- Part C (CONCATENATEX row order without an order argument, 188 items):
-  - In `CONCATENATEX` evaluation, added `fold_read_node` to fold constant conditionals (`IF(1=1, ...)`, `IF.EAGER(1=1, ...)`) without unbinding VAR/let expressions so `dictionary_ordered_rows` inspects the active column and iterates in storage dictionary order.
-  - In `concatenate_walk_is_unmodelled`:
-    - Allowed constant expressions and comparisons over standard storage scans (`table[0] == "table"`).
-    - Preserved honest refusals for `TIME` calls and `DATE` calls with year >= 9000, and unmodelled multi-table generators (`table[0] != "table"`: `GENERATE`, `UNION`, `SUMMARIZECOLUMNS`, etc.).
-  - Scorer Part C: 72 match, 116 gap-reject, 0 wrong.
-Verification & Parity:
-- Scorer results (`tools/parity/task38_coalesce_big_order_spec.json`):
-  - Part A: 395 match, 5 gap-reject, 0 wrong (out of 400)
-  - Part B: 378 match, 6 gap-reject, 0 wrong (out of 384)
-  - Part C: 72 match, 116 gap-reject, 0 wrong (out of 188)
-  - Total: 845 match, 127 gap-reject, 0 wrong across all 972 items (0 wrong).
-- Unit tests: `tests/test_iteration128_coalesce_big_order_28.py` (3/3 test suites pass). `tests/test_no_answer_key_in_app.py` passes (0.789s).
-- Parity Replay: `replayed 456295 Power BI answers: {'match': 449647, 'gap-reject': 6648, 'DIFF': 0, 'CRASH': 0}; locked 448774`, `PARITY GATE PASSED`.
-Files changed: `analytics_studio/measures.py`, `tests/test_iteration128_coalesce_big_order_28.py`, `HANDOFF.md`.
 
 ### 2026-11-03 Antigravity (Task 33 xirr-oddfyield-23 built, ready for review)
 Task: Task 33 xirr-oddfyield-23 (new DAX functions XIRR and ODDFYIELD, PATHITEM with type argument).

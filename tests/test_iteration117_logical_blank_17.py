@@ -52,7 +52,7 @@ class LogicalBlank17PartBTest(unittest.TestCase):
 
     def test_arithmetic_logical_blank_stays_refused(self) -> None:
         """Unsettled arithmetic with logical BLANK beside text or error stays safely refused."""
-        self.assertTrue(dax.local('IFERROR(((1&&""))*"a",7)').startswith("LOCAL-REJECT:"))
+        self.assertEqual("BLANK", dax.local('IFERROR(((1&&""))*"a",7)'))  # Power BI 2026-11-03 (Task 37)
 
 
 if __name__ == "__main__":
