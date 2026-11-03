@@ -9187,6 +9187,14 @@ class StudioController(QObject):
             if candidate is None:
                 continue
             table_id = str(table.get("id", ""))
+            model_table = self._model_table_for_source(self._project, source_id) or {}
+            # Model settings that change what INFO.* would report (IsKey, SortByColumn, SummarizeBy, calculated columns, ...)
+            customised = [
+                setting for setting in (
+                    "calculated_columns", "column_summarizations", "column_sort_by", "group_by_columns", "key_column",
+                )
+                if model_table.get(setting)
+            ]
             context.append({
                 "id": table_id,
                 "name": str(table.get("name", table_id)),
@@ -9194,6 +9202,7 @@ class StudioController(QObject):
                 "rows": candidate.rows,
                 "column_types": dict(table.get("columnTypes", {})),
                 "date_column": str(table.get("dateColumn") or ""),
+                "model_customised": customised,
                 "filter_column_rows": {},
                 "filter_column_blank_allowed": {},
                 "filter_context_complete": True,

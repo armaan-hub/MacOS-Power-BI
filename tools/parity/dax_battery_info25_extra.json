@@ -1,0 +1,786 @@
+{
+"powerbi_version": "2.157.879.0 (26.08)+da30fe74eb0b8a8786ab7326b69c400a0e951831",
+"frozen": "2026-11-03",
+"items": [
+{
+"expr": "COUNTROWS(TOPN(1,INFO.VIEW.TABLES()))",
+"powerbi": "1"
+},
+{
+"expr": "COUNTROWS(CROSSJOIN(INFO.VIEW.TABLES(),ROW(\"z\",1)))",
+"powerbi": "1"
+},
+{
+"expr": "COUNTROWS(GENERATE(ROW(\"z\",1),INFO.VIEW.TABLES()))",
+"powerbi": "1"
+},
+{
+"expr": "SUMX(INFO.VIEW.TABLES(),1)",
+"powerbi": "1"
+},
+{
+"expr": "COUNTX(INFO.VIEW.TABLES(),1)",
+"powerbi": "1"
+},
+{
+"expr": "IF(ISEMPTY(INFO.VIEW.TABLES()),\"e\",\"n\")",
+"powerbi": "n"
+},
+{
+"expr": "COUNTROWS(EXCEPT(INFO.VIEW.TABLES(),INFO.VIEW.TABLES()))",
+"powerbi": "BLANK"
+},
+{
+"expr": "VAR t=INFO.VIEW.TABLES() RETURN COUNTROWS(t)+0",
+"powerbi": "1"
+},
+{
+"expr": "COUNTROWS(FILTER(INFO.VIEW.TABLES(),TRUE()))*3",
+"powerbi": "3"
+},
+{
+"expr": "SUMX(Facts,COUNTROWS(INFO.VIEW.TABLES())+0)",
+"powerbi": "6"
+},
+{
+"expr": "COUNTROWS(TOPN(1,INFO.VIEW.COLUMNS()))",
+"powerbi": "1"
+},
+{
+"expr": "COUNTROWS(CROSSJOIN(INFO.VIEW.COLUMNS(),ROW(\"z\",1)))",
+"powerbi": "5"
+},
+{
+"expr": "COUNTROWS(GENERATE(ROW(\"z\",1),INFO.VIEW.COLUMNS()))",
+"powerbi": "5"
+},
+{
+"expr": "SUMX(INFO.VIEW.COLUMNS(),1)",
+"powerbi": "5"
+},
+{
+"expr": "COUNTX(INFO.VIEW.COLUMNS(),1)",
+"powerbi": "5"
+},
+{
+"expr": "IF(ISEMPTY(INFO.VIEW.COLUMNS()),\"e\",\"n\")",
+"powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"An unexpected error occurred (file 'xldc.cpp', line 3940, function 'XLAggImpl_Set<11,1>::Accumulate').\""
+},
+{
+"expr": "COUNTROWS(EXCEPT(INFO.VIEW.COLUMNS(),INFO.VIEW.COLUMNS()))",
+"powerbi": "BLANK"
+},
+{
+"expr": "VAR t=INFO.VIEW.COLUMNS() RETURN COUNTROWS(t)+0",
+"powerbi": "5"
+},
+{
+"expr": "COUNTROWS(FILTER(INFO.VIEW.COLUMNS(),TRUE()))*3",
+"powerbi": "15"
+},
+{
+"expr": "SUMX(Facts,COUNTROWS(INFO.VIEW.COLUMNS())+0)",
+"powerbi": "30"
+},
+{
+"expr": "COUNTROWS(TOPN(1,INFO.VIEW.MEASURES()))",
+"powerbi": "BLANK"
+},
+{
+"expr": "COUNTROWS(CROSSJOIN(INFO.VIEW.MEASURES(),ROW(\"z\",1)))",
+"powerbi": "BLANK"
+},
+{
+"expr": "COUNTROWS(GENERATE(ROW(\"z\",1),INFO.VIEW.MEASURES()))",
+"powerbi": "BLANK"
+},
+{
+"expr": "SUMX(INFO.VIEW.MEASURES(),1)",
+"powerbi": "BLANK"
+},
+{
+"expr": "COUNTX(INFO.VIEW.MEASURES(),1)",
+"powerbi": "BLANK"
+},
+{
+"expr": "IF(ISEMPTY(INFO.VIEW.MEASURES()),\"e\",\"n\")",
+"powerbi": "e"
+},
+{
+"expr": "COUNTROWS(EXCEPT(INFO.VIEW.MEASURES(),INFO.VIEW.MEASURES()))",
+"powerbi": "BLANK"
+},
+{
+"expr": "VAR t=INFO.VIEW.MEASURES() RETURN COUNTROWS(t)+0",
+"powerbi": "0"
+},
+{
+"expr": "COUNTROWS(FILTER(INFO.VIEW.MEASURES(),TRUE()))*3",
+"powerbi": "BLANK"
+},
+{
+"expr": "SUMX(Facts,COUNTROWS(INFO.VIEW.MEASURES())+0)",
+"powerbi": "0"
+},
+{
+"expr": "COUNTROWS(TOPN(1,INFO.VIEW.RELATIONSHIPS()))",
+"powerbi": "BLANK"
+},
+{
+"expr": "COUNTROWS(CROSSJOIN(INFO.VIEW.RELATIONSHIPS(),ROW(\"z\",1)))",
+"powerbi": "BLANK"
+},
+{
+"expr": "COUNTROWS(GENERATE(ROW(\"z\",1),INFO.VIEW.RELATIONSHIPS()))",
+"powerbi": "BLANK"
+},
+{
+"expr": "SUMX(INFO.VIEW.RELATIONSHIPS(),1)",
+"powerbi": "BLANK"
+},
+{
+"expr": "COUNTX(INFO.VIEW.RELATIONSHIPS(),1)",
+"powerbi": "BLANK"
+},
+{
+"expr": "IF(ISEMPTY(INFO.VIEW.RELATIONSHIPS()),\"e\",\"n\")",
+"powerbi": "e"
+},
+{
+"expr": "COUNTROWS(EXCEPT(INFO.VIEW.RELATIONSHIPS(),INFO.VIEW.RELATIONSHIPS()))",
+"powerbi": "BLANK"
+},
+{
+"expr": "VAR t=INFO.VIEW.RELATIONSHIPS() RETURN COUNTROWS(t)+0",
+"powerbi": "0"
+},
+{
+"expr": "COUNTROWS(FILTER(INFO.VIEW.RELATIONSHIPS(),TRUE()))*3",
+"powerbi": "BLANK"
+},
+{
+"expr": "SUMX(Facts,COUNTROWS(INFO.VIEW.RELATIONSHIPS())+0)",
+"powerbi": "0"
+},
+{
+"expr": "COUNTROWS(TOPN(1,INFO.TABLES()))",
+"powerbi": "1"
+},
+{
+"expr": "COUNTROWS(CROSSJOIN(INFO.TABLES(),ROW(\"z\",1)))",
+"powerbi": "1"
+},
+{
+"expr": "COUNTROWS(GENERATE(ROW(\"z\",1),INFO.TABLES()))",
+"powerbi": "1"
+},
+{
+"expr": "SUMX(INFO.TABLES(),1)",
+"powerbi": "1"
+},
+{
+"expr": "COUNTX(INFO.TABLES(),1)",
+"powerbi": "1"
+},
+{
+"expr": "IF(ISEMPTY(INFO.TABLES()),\"e\",\"n\")",
+"powerbi": "n"
+},
+{
+"expr": "COUNTROWS(EXCEPT(INFO.TABLES(),INFO.TABLES()))",
+"powerbi": "BLANK"
+},
+{
+"expr": "VAR t=INFO.TABLES() RETURN COUNTROWS(t)+0",
+"powerbi": "1"
+},
+{
+"expr": "COUNTROWS(FILTER(INFO.TABLES(),TRUE()))*3",
+"powerbi": "3"
+},
+{
+"expr": "SUMX(Facts,COUNTROWS(INFO.TABLES())+0)",
+"powerbi": "6"
+},
+{
+"expr": "COUNTROWS(TOPN(1,INFO.COLUMNS()))",
+"powerbi": "1"
+},
+{
+"expr": "COUNTROWS(CROSSJOIN(INFO.COLUMNS(),ROW(\"z\",1)))",
+"powerbi": "5"
+},
+{
+"expr": "COUNTROWS(GENERATE(ROW(\"z\",1),INFO.COLUMNS()))",
+"powerbi": "5"
+},
+{
+"expr": "SUMX(INFO.COLUMNS(),1)",
+"powerbi": "5"
+},
+{
+"expr": "COUNTX(INFO.COLUMNS(),1)",
+"powerbi": "5"
+},
+{
+"expr": "IF(ISEMPTY(INFO.COLUMNS()),\"e\",\"n\")",
+"powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"An unexpected error occurred (file 'xldc.cpp', line 3940, function 'XLAggImpl_Set<11,1>::Accumulate').\""
+},
+{
+"expr": "COUNTROWS(EXCEPT(INFO.COLUMNS(),INFO.COLUMNS()))",
+"powerbi": "BLANK"
+},
+{
+"expr": "VAR t=INFO.COLUMNS() RETURN COUNTROWS(t)+0",
+"powerbi": "5"
+},
+{
+"expr": "COUNTROWS(FILTER(INFO.COLUMNS(),TRUE()))*3",
+"powerbi": "15"
+},
+{
+"expr": "SUMX(Facts,COUNTROWS(INFO.COLUMNS())+0)",
+"powerbi": "30"
+},
+{
+"expr": "COUNTROWS(TOPN(1,INFO.MEASURES()))",
+"powerbi": "BLANK"
+},
+{
+"expr": "COUNTROWS(CROSSJOIN(INFO.MEASURES(),ROW(\"z\",1)))",
+"powerbi": "BLANK"
+},
+{
+"expr": "COUNTROWS(GENERATE(ROW(\"z\",1),INFO.MEASURES()))",
+"powerbi": "BLANK"
+},
+{
+"expr": "SUMX(INFO.MEASURES(),1)",
+"powerbi": "BLANK"
+},
+{
+"expr": "COUNTX(INFO.MEASURES(),1)",
+"powerbi": "BLANK"
+},
+{
+"expr": "IF(ISEMPTY(INFO.MEASURES()),\"e\",\"n\")",
+"powerbi": "e"
+},
+{
+"expr": "COUNTROWS(EXCEPT(INFO.MEASURES(),INFO.MEASURES()))",
+"powerbi": "BLANK"
+},
+{
+"expr": "VAR t=INFO.MEASURES() RETURN COUNTROWS(t)+0",
+"powerbi": "0"
+},
+{
+"expr": "COUNTROWS(FILTER(INFO.MEASURES(),TRUE()))*3",
+"powerbi": "BLANK"
+},
+{
+"expr": "SUMX(Facts,COUNTROWS(INFO.MEASURES())+0)",
+"powerbi": "0"
+},
+{
+"expr": "COUNTROWS(TOPN(1,INFO.RELATIONSHIPS()))",
+"powerbi": "BLANK"
+},
+{
+"expr": "COUNTROWS(CROSSJOIN(INFO.RELATIONSHIPS(),ROW(\"z\",1)))",
+"powerbi": "BLANK"
+},
+{
+"expr": "COUNTROWS(GENERATE(ROW(\"z\",1),INFO.RELATIONSHIPS()))",
+"powerbi": "BLANK"
+},
+{
+"expr": "SUMX(INFO.RELATIONSHIPS(),1)",
+"powerbi": "BLANK"
+},
+{
+"expr": "COUNTX(INFO.RELATIONSHIPS(),1)",
+"powerbi": "BLANK"
+},
+{
+"expr": "IF(ISEMPTY(INFO.RELATIONSHIPS()),\"e\",\"n\")",
+"powerbi": "e"
+},
+{
+"expr": "COUNTROWS(EXCEPT(INFO.RELATIONSHIPS(),INFO.RELATIONSHIPS()))",
+"powerbi": "BLANK"
+},
+{
+"expr": "VAR t=INFO.RELATIONSHIPS() RETURN COUNTROWS(t)+0",
+"powerbi": "0"
+},
+{
+"expr": "COUNTROWS(FILTER(INFO.RELATIONSHIPS(),TRUE()))*3",
+"powerbi": "BLANK"
+},
+{
+"expr": "SUMX(Facts,COUNTROWS(INFO.RELATIONSHIPS())+0)",
+"powerbi": "0"
+},
+{
+"expr": "CONCATENATEX(INFO.VIEW.COLUMNS(),[Name]&\"\",\"|\",[Name],ASC)",
+"powerbi": "Note|Quantity|Region|RowNumber-2662979B-1795-4F74-8F37-6A1BA8059B61|Sales"
+},
+{
+"expr": "COUNTROWS(DISTINCT(SELECTCOLUMNS(INFO.VIEW.COLUMNS(),\"v\",[Name])))",
+"powerbi": "5"
+},
+{
+"expr": "MAXX(INFO.VIEW.COLUMNS(),[Name])&\"\"",
+"powerbi": "Sales"
+},
+{
+"expr": "MINX(INFO.VIEW.COLUMNS(),[Name])&\"\"",
+"powerbi": "Note"
+},
+{
+"expr": "CONCATENATEX(INFO.VIEW.COLUMNS(),[Table]&\"\",\"|\",[Name],ASC)",
+"powerbi": "Facts|Facts|Facts|Facts|Facts"
+},
+{
+"expr": "COUNTROWS(DISTINCT(SELECTCOLUMNS(INFO.VIEW.COLUMNS(),\"v\",[Table])))",
+"powerbi": "1"
+},
+{
+"expr": "MAXX(INFO.VIEW.COLUMNS(),[Table])&\"\"",
+"powerbi": "Facts"
+},
+{
+"expr": "MINX(INFO.VIEW.COLUMNS(),[Table])&\"\"",
+"powerbi": "Facts"
+},
+{
+"expr": "CONCATENATEX(INFO.VIEW.COLUMNS(),[DataType]&\"\",\"|\",[Name],ASC)",
+"powerbi": "Text|Integer|Text|Integer|Number"
+},
+{
+"expr": "COUNTROWS(DISTINCT(SELECTCOLUMNS(INFO.VIEW.COLUMNS(),\"v\",[DataType])))",
+"powerbi": "3"
+},
+{
+"expr": "MAXX(INFO.VIEW.COLUMNS(),[DataType])&\"\"",
+"powerbi": "Text"
+},
+{
+"expr": "MINX(INFO.VIEW.COLUMNS(),[DataType])&\"\"",
+"powerbi": "Integer"
+},
+{
+"expr": "CONCATENATEX(INFO.VIEW.COLUMNS(),[DataCategory]&\"\",\"|\",[Name],ASC)",
+"powerbi": "Regular|Regular|Regular|RowNumber|Regular"
+},
+{
+"expr": "COUNTROWS(DISTINCT(SELECTCOLUMNS(INFO.VIEW.COLUMNS(),\"v\",[DataCategory])))",
+"powerbi": "2"
+},
+{
+"expr": "MAXX(INFO.VIEW.COLUMNS(),[DataCategory])&\"\"",
+"powerbi": "RowNumber"
+},
+{
+"expr": "MINX(INFO.VIEW.COLUMNS(),[DataCategory])&\"\"",
+"powerbi": "Regular"
+},
+{
+"expr": "CONCATENATEX(INFO.VIEW.COLUMNS(),[IsHidden]&\"\",\"|\",[Name],ASC)",
+"powerbi": "FALSE|FALSE|FALSE|TRUE|FALSE"
+},
+{
+"expr": "COUNTROWS(DISTINCT(SELECTCOLUMNS(INFO.VIEW.COLUMNS(),\"v\",[IsHidden])))",
+"powerbi": "2"
+},
+{
+"expr": "MAXX(INFO.VIEW.COLUMNS(),[IsHidden])&\"\"",
+"powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 44) The function MAXX cannot work with values of type Boolean.\""
+},
+{
+"expr": "MINX(INFO.VIEW.COLUMNS(),[IsHidden])&\"\"",
+"powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 44) The function MINX cannot work with values of type Boolean.\""
+},
+{
+"expr": "CONCATENATEX(INFO.VIEW.COLUMNS(),[IsUnique]&\"\",\"|\",[Name],ASC)",
+"powerbi": "FALSE|FALSE|FALSE|TRUE|FALSE"
+},
+{
+"expr": "COUNTROWS(DISTINCT(SELECTCOLUMNS(INFO.VIEW.COLUMNS(),\"v\",[IsUnique])))",
+"powerbi": "2"
+},
+{
+"expr": "MAXX(INFO.VIEW.COLUMNS(),[IsUnique])&\"\"",
+"powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 44) The function MAXX cannot work with values of type Boolean.\""
+},
+{
+"expr": "MINX(INFO.VIEW.COLUMNS(),[IsUnique])&\"\"",
+"powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 44) The function MINX cannot work with values of type Boolean.\""
+},
+{
+"expr": "CONCATENATEX(INFO.VIEW.COLUMNS(),[IsKey]&\"\",\"|\",[Name],ASC)",
+"powerbi": "FALSE|FALSE|FALSE|TRUE|FALSE"
+},
+{
+"expr": "COUNTROWS(DISTINCT(SELECTCOLUMNS(INFO.VIEW.COLUMNS(),\"v\",[IsKey])))",
+"powerbi": "2"
+},
+{
+"expr": "MAXX(INFO.VIEW.COLUMNS(),[IsKey])&\"\"",
+"powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 44) The function MAXX cannot work with values of type Boolean.\""
+},
+{
+"expr": "MINX(INFO.VIEW.COLUMNS(),[IsKey])&\"\"",
+"powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 44) The function MINX cannot work with values of type Boolean.\""
+},
+{
+"expr": "CONCATENATEX(INFO.VIEW.COLUMNS(),[IsNullable]&\"\",\"|\",[Name],ASC)",
+"powerbi": "TRUE|TRUE|TRUE|FALSE|TRUE"
+},
+{
+"expr": "COUNTROWS(DISTINCT(SELECTCOLUMNS(INFO.VIEW.COLUMNS(),\"v\",[IsNullable])))",
+"powerbi": "2"
+},
+{
+"expr": "MAXX(INFO.VIEW.COLUMNS(),[IsNullable])&\"\"",
+"powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 44) The function MAXX cannot work with values of type Boolean.\""
+},
+{
+"expr": "MINX(INFO.VIEW.COLUMNS(),[IsNullable])&\"\"",
+"powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 44) The function MINX cannot work with values of type Boolean.\""
+},
+{
+"expr": "CONCATENATEX(INFO.VIEW.COLUMNS(),[Alignment]&\"\",\"|\",[Name],ASC)",
+"powerbi": "Default|Default|Default|Default|Default"
+},
+{
+"expr": "COUNTROWS(DISTINCT(SELECTCOLUMNS(INFO.VIEW.COLUMNS(),\"v\",[Alignment])))",
+"powerbi": "1"
+},
+{
+"expr": "MAXX(INFO.VIEW.COLUMNS(),[Alignment])&\"\"",
+"powerbi": "Default"
+},
+{
+"expr": "MINX(INFO.VIEW.COLUMNS(),[Alignment])&\"\"",
+"powerbi": "Default"
+},
+{
+"expr": "CONCATENATEX(INFO.VIEW.COLUMNS(),[SummarizeBy]&\"\",\"|\",[Name],ASC)",
+"powerbi": "Default|Default|Default|Default|Default"
+},
+{
+"expr": "COUNTROWS(DISTINCT(SELECTCOLUMNS(INFO.VIEW.COLUMNS(),\"v\",[SummarizeBy])))",
+"powerbi": "1"
+},
+{
+"expr": "MAXX(INFO.VIEW.COLUMNS(),[SummarizeBy])&\"\"",
+"powerbi": "Default"
+},
+{
+"expr": "MINX(INFO.VIEW.COLUMNS(),[SummarizeBy])&\"\"",
+"powerbi": "Default"
+},
+{
+"expr": "CONCATENATEX(INFO.VIEW.COLUMNS(),[IsAvailableInMDX]&\"\",\"|\",[Name],ASC)",
+"powerbi": "TRUE|TRUE|TRUE|TRUE|TRUE"
+},
+{
+"expr": "COUNTROWS(DISTINCT(SELECTCOLUMNS(INFO.VIEW.COLUMNS(),\"v\",[IsAvailableInMDX])))",
+"powerbi": "1"
+},
+{
+"expr": "MAXX(INFO.VIEW.COLUMNS(),[IsAvailableInMDX])&\"\"",
+"powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 44) The function MAXX cannot work with values of type Boolean.\""
+},
+{
+"expr": "MINX(INFO.VIEW.COLUMNS(),[IsAvailableInMDX])&\"\"",
+"powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 44) The function MINX cannot work with values of type Boolean.\""
+},
+{
+"expr": "CONCATENATEX(INFO.VIEW.COLUMNS(),[GroupingBehavior]&\"\",\"|\",[Name],ASC)",
+"powerbi": "GroupOnValue|GroupOnValue|GroupOnValue|GroupOnValue|GroupOnValue"
+},
+{
+"expr": "COUNTROWS(DISTINCT(SELECTCOLUMNS(INFO.VIEW.COLUMNS(),\"v\",[GroupingBehavior])))",
+"powerbi": "1"
+},
+{
+"expr": "MAXX(INFO.VIEW.COLUMNS(),[GroupingBehavior])&\"\"",
+"powerbi": "GroupOnValue"
+},
+{
+"expr": "MINX(INFO.VIEW.COLUMNS(),[GroupingBehavior])&\"\"",
+"powerbi": "GroupOnValue"
+},
+{
+"expr": "CONCATENATEX(INFO.COLUMNS(),[ExplicitName]&\"\",\"|\",[ExplicitName],DESC)",
+"powerbi": "Sales|RowNumber-2662979B-1795-4F74-8F37-6A1BA8059B61|Region|Quantity|Note"
+},
+{
+"expr": "COUNTROWS(DISTINCT(SELECTCOLUMNS(INFO.COLUMNS(),\"v\",[ExplicitName])))",
+"powerbi": "5"
+},
+{
+"expr": "CONCATENATEX(INFO.COLUMNS(),[ExplicitDataType]&\"\",\"|\",[ExplicitName],DESC)",
+"powerbi": "8|6|2|6|2"
+},
+{
+"expr": "COUNTROWS(DISTINCT(SELECTCOLUMNS(INFO.COLUMNS(),\"v\",[ExplicitDataType])))",
+"powerbi": "3"
+},
+{
+"expr": "CONCATENATEX(INFO.COLUMNS(),[IsHidden]&\"\",\"|\",[ExplicitName],DESC)",
+"powerbi": "FALSE|TRUE|FALSE|FALSE|FALSE"
+},
+{
+"expr": "COUNTROWS(DISTINCT(SELECTCOLUMNS(INFO.COLUMNS(),\"v\",[IsHidden])))",
+"powerbi": "2"
+},
+{
+"expr": "CONCATENATEX(INFO.COLUMNS(),[IsUnique]&\"\",\"|\",[ExplicitName],DESC)",
+"powerbi": "FALSE|TRUE|FALSE|FALSE|FALSE"
+},
+{
+"expr": "COUNTROWS(DISTINCT(SELECTCOLUMNS(INFO.COLUMNS(),\"v\",[IsUnique])))",
+"powerbi": "2"
+},
+{
+"expr": "CONCATENATEX(INFO.COLUMNS(),[IsKey]&\"\",\"|\",[ExplicitName],DESC)",
+"powerbi": "FALSE|TRUE|FALSE|FALSE|FALSE"
+},
+{
+"expr": "COUNTROWS(DISTINCT(SELECTCOLUMNS(INFO.COLUMNS(),\"v\",[IsKey])))",
+"powerbi": "2"
+},
+{
+"expr": "CONCATENATEX(INFO.COLUMNS(),[IsNullable]&\"\",\"|\",[ExplicitName],DESC)",
+"powerbi": "TRUE|FALSE|TRUE|TRUE|TRUE"
+},
+{
+"expr": "COUNTROWS(DISTINCT(SELECTCOLUMNS(INFO.COLUMNS(),\"v\",[IsNullable])))",
+"powerbi": "2"
+},
+{
+"expr": "CONCATENATEX(INFO.COLUMNS(),[Alignment]&\"\",\"|\",[ExplicitName],DESC)",
+"powerbi": "1|1|1|1|1"
+},
+{
+"expr": "COUNTROWS(DISTINCT(SELECTCOLUMNS(INFO.COLUMNS(),\"v\",[Alignment])))",
+"powerbi": "1"
+},
+{
+"expr": "CONCATENATEX(INFO.COLUMNS(),[SummarizeBy]&\"\",\"|\",[ExplicitName],DESC)",
+"powerbi": "1|1|1|1|1"
+},
+{
+"expr": "COUNTROWS(DISTINCT(SELECTCOLUMNS(INFO.COLUMNS(),\"v\",[SummarizeBy])))",
+"powerbi": "1"
+},
+{
+"expr": "CONCATENATEX(INFO.COLUMNS(),[IsAvailableInMDX]&\"\",\"|\",[ExplicitName],DESC)",
+"powerbi": "TRUE|TRUE|TRUE|TRUE|TRUE"
+},
+{
+"expr": "COUNTROWS(DISTINCT(SELECTCOLUMNS(INFO.COLUMNS(),\"v\",[IsAvailableInMDX])))",
+"powerbi": "1"
+},
+{
+"expr": "MAXX(INFO.VIEW.TABLES(),[Name])&\"\"",
+"powerbi": "Facts"
+},
+{
+"expr": "COUNTROWS(FILTER(INFO.VIEW.TABLES(),[Name]=MAXX(INFO.VIEW.TABLES(),[Name])))",
+"powerbi": "1"
+},
+{
+"expr": "MAXX(INFO.VIEW.TABLES(),[DataCategory])&\"\"",
+"powerbi": "Regular"
+},
+{
+"expr": "COUNTROWS(FILTER(INFO.VIEW.TABLES(),[DataCategory]=MAXX(INFO.VIEW.TABLES(),[DataCategory])))",
+"powerbi": "1"
+},
+{
+"expr": "MAXX(INFO.VIEW.TABLES(),[IsHidden])&\"\"",
+"powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 43) The function MAXX cannot work with values of type Boolean.\""
+},
+{
+"expr": "COUNTROWS(FILTER(INFO.VIEW.TABLES(),[IsHidden]=MAXX(INFO.VIEW.TABLES(),[IsHidden])))",
+"powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 90) The function MAXX cannot work with values of type Boolean.\""
+},
+{
+"expr": "MAXX(INFO.VIEW.TABLES(),[StorageMode])&\"\"",
+"powerbi": "Import"
+},
+{
+"expr": "COUNTROWS(FILTER(INFO.VIEW.TABLES(),[StorageMode]=MAXX(INFO.VIEW.TABLES(),[StorageMode])))",
+"powerbi": "1"
+},
+{
+"expr": "MAXX(INFO.VIEW.TABLES(),[ShowAsVariationOnly])&\"\"",
+"powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 43) The function MAXX cannot work with values of type Boolean.\""
+},
+{
+"expr": "COUNTROWS(FILTER(INFO.VIEW.TABLES(),[ShowAsVariationOnly]=MAXX(INFO.VIEW.TABLES(),[ShowAsVariationOnly])))",
+"powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 101) The function MAXX cannot work with values of type Boolean.\""
+},
+{
+"expr": "MAXX(INFO.VIEW.TABLES(),[IsPrivate])&\"\"",
+"powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 43) The function MAXX cannot work with values of type Boolean.\""
+},
+{
+"expr": "COUNTROWS(FILTER(INFO.VIEW.TABLES(),[IsPrivate]=MAXX(INFO.VIEW.TABLES(),[IsPrivate])))",
+"powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 91) The function MAXX cannot work with values of type Boolean.\""
+},
+{
+"expr": "MAXX(INFO.TABLES(),[Name])&\"\"",
+"powerbi": "Facts"
+},
+{
+"expr": "ISBLANK(MAXX(INFO.TABLES(),[Name]))",
+"powerbi": "False"
+},
+{
+"expr": "MAXX(INFO.TABLES(),[IsHidden])&\"\"",
+"powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 38) The function MAXX cannot work with values of type Boolean.\""
+},
+{
+"expr": "ISBLANK(MAXX(INFO.TABLES(),[IsHidden]))",
+"powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 46) The function MAXX cannot work with values of type Boolean.\""
+},
+{
+"expr": "MAXX(INFO.TABLES(),[ShowAsVariationsOnly])&\"\"",
+"powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 38) The function MAXX cannot work with values of type Boolean.\""
+},
+{
+"expr": "ISBLANK(MAXX(INFO.TABLES(),[ShowAsVariationsOnly]))",
+"powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 46) The function MAXX cannot work with values of type Boolean.\""
+},
+{
+"expr": "MAXX(INFO.TABLES(),[IsPrivate])&\"\"",
+"powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 38) The function MAXX cannot work with values of type Boolean.\""
+},
+{
+"expr": "ISBLANK(MAXX(INFO.TABLES(),[IsPrivate]))",
+"powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 46) The function MAXX cannot work with values of type Boolean.\""
+},
+{
+"expr": "MAXX(INFO.TABLES(),[AlternateSourcePrecedence])&\"\"",
+"powerbi": "0"
+},
+{
+"expr": "ISBLANK(MAXX(INFO.TABLES(),[AlternateSourcePrecedence]))",
+"powerbi": "False"
+},
+{
+"expr": "MAXX(INFO.TABLES(),[ExcludeFromModelRefresh])&\"\"",
+"powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 38) The function MAXX cannot work with values of type Boolean.\""
+},
+{
+"expr": "ISBLANK(MAXX(INFO.TABLES(),[ExcludeFromModelRefresh]))",
+"powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 46) The function MAXX cannot work with values of type Boolean.\""
+},
+{
+"expr": "MAXX(INFO.TABLES(),[SystemManaged])&\"\"",
+"powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 38) The function MAXX cannot work with values of type Boolean.\""
+},
+{
+"expr": "ISBLANK(MAXX(INFO.TABLES(),[SystemManaged]))",
+"powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 46) The function MAXX cannot work with values of type Boolean.\""
+},
+{
+"expr": "MAXX(INFO.TABLES(),[Description])&\"\"",
+"powerbi": ""
+},
+{
+"expr": "ISBLANK(MAXX(INFO.TABLES(),[Description]))",
+"powerbi": "True"
+},
+{
+"expr": "MAXX(INFO.TABLES(),[DataCategory])&\"\"",
+"powerbi": ""
+},
+{
+"expr": "ISBLANK(MAXX(INFO.TABLES(),[DataCategory]))",
+"powerbi": "True"
+},
+{
+"expr": "COUNTROWS(FILTER(INFO.VIEW.COLUMNS(),[IsKey]&&[IsHidden]))",
+"powerbi": "1"
+},
+{
+"expr": "COUNTROWS(FILTER(INFO.VIEW.COLUMNS(),[IsNullable]||[IsKey]))",
+"powerbi": "5"
+},
+{
+"expr": "SUMX(INFO.COLUMNS(),[ExplicitDataType]*[Alignment])",
+"powerbi": "24"
+},
+{
+"expr": "AVERAGEX(INFO.COLUMNS(),[ExplicitDataType])",
+"powerbi": "4.8"
+},
+{
+"expr": "COUNTROWS(NATURALINNERJOIN(SELECTCOLUMNS(INFO.VIEW.COLUMNS(),\"Name\",[Name]&\"\"),SELECTCOLUMNS(INFO.COLUMNS(),\"Name\",[ExplicitName]&\"\")))",
+"powerbi": "5"
+},
+{
+"expr": "CONCATENATEX(FILTER(INFO.VIEW.COLUMNS(),[DataType]<>\"Text\"),[Name],\",\",[Name],ASC)",
+"powerbi": "Quantity,RowNumber-2662979B-1795-4F74-8F37-6A1BA8059B61,Sales"
+},
+{
+"expr": "COUNTROWS(INFO.VIEW.COLUMNS())-COUNTROWS(INFO.COLUMNS())",
+"powerbi": "0"
+},
+{
+"expr": "COUNTROWS(INFO.VIEW.COLUMNS())=COUNTROWS(COLUMNSTATISTICS())",
+"powerbi": "True"
+},
+{
+"expr": "INFO.VIEW.MEASURES()",
+"powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 19) The expression refers to multiple columns. Multiple columns cannot be converted to a scalar value.\""
+},
+{
+"expr": "INFO.COLUMNS()",
+"powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 19) The expression refers to multiple columns. Multiple columns cannot be converted to a scalar value.\""
+},
+{
+"expr": "INFO.TABLES(\"x\")",
+"powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 31) 'x' is not a valid restriction name.\""
+},
+{
+"expr": "COUNTROWS(INFO.COLUMNS(\"TableID\"))",
+"powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 42) The 'INFO.COLUMNS' function requires an even number of arguments, consisting of pairs of restriction names and their corresponding values.\""
+},
+{
+"expr": "COUNTROWS(INFO.MEASURES(\"\"))",
+"powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 43) The 'INFO.MEASURES' function expects a constant string representing a restriction name.\""
+},
+{
+"expr": "COUNTROWS(INFO.VIEW.MEASURES(1))",
+"powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 48) Too many arguments were passed to the INFO.VIEW.MEASURES function. The maximum argument count for the function is 0.\""
+},
+{
+"expr": "info.view.columns()",
+"powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 19) The expression refers to multiple columns. Multiple columns cannot be converted to a scalar value.\""
+},
+{
+"expr": "COUNTROWS(Info.View.Columns())",
+"powerbi": "5"
+},
+{
+"expr": "MAXX(FILTER(INFO.VIEW.COLUMNS(),[Name]=\"Quantity\"),[DataType])&MAXX(FILTER(INFO.VIEW.COLUMNS(),[Name]=\"Region\"),[DataType])",
+"powerbi": "IntegerText"
+},
+{
+"expr": "CONCATENATEX(INFO.VIEW.COLUMNS(),LEFT([Name],3),\"\",[Name],DESC)",
+"powerbi": "SalRowRegQuaNot"
+},
+{
+"expr": "LEN(CONCATENATEX(INFO.VIEW.COLUMNS(),[Name]))",
+"powerbi": "69"
+}
+]
+}

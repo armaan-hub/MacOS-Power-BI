@@ -158,6 +158,14 @@ IF.EAGER(<logical_test>, <value_if_true>, [<value_if_false>]) ;; Like IF but eva
 IFERROR(<value>, <value_if_error>) ;; Returns a value if the expression is an error, otherwise the expression.
 IGNORE(<expression>) ;; Omits a measure from a SUMMARIZECOLUMNS blank-row check.
 INDEX(<position>, [<relation>], [<orderBy>], [<blanks>], [<partitionBy>], [<matchBy>], [<reset>]) ;; Returns a row at an absolute position within a partition.
+INFO.COLUMNS([<restriction>]) ;; Internal metadata for columns in the tabular model.
+INFO.MEASURES([<restriction>]) ;; Internal metadata for measures in the tabular model.
+INFO.RELATIONSHIPS([<restriction>]) ;; Internal metadata for relationships in the tabular model.
+INFO.TABLES([<restriction>]) ;; Internal metadata for tables in the tabular model.
+INFO.VIEW.COLUMNS() ;; Metadata for columns in the tabular model.
+INFO.VIEW.MEASURES() ;; Metadata for measures in the tabular model.
+INFO.VIEW.RELATIONSHIPS() ;; Metadata for relationships in the tabular model.
+INFO.VIEW.TABLES() ;; Metadata for tables in the tabular model.
 INT(<number>) ;; Rounds a number down to the nearest integer.
 INTERSECT(<table1>, <table2>) ;; Returns the rows that appear in both tables.
 INTRATE(<settlement>, <maturity>, <investment>, <redemption>, [<basis>]) ;; Interest rate for a fully invested security.
