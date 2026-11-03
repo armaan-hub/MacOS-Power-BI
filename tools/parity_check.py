@@ -14,6 +14,7 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import re
 import subprocess
 import tempfile
 import sys
@@ -174,16 +175,14 @@ def _output(process: subprocess.Popen) -> str:
 
 
 def _failed_test_ids(output: str) -> list[str]:
+    """Test node ids from FAILED / ERROR / SUBFAILED summary lines (a subtest's parameters may hold spaces)."""
     ids = []
     for line in output.splitlines():
-        if line.startswith(("FAILED ", "ERROR ")):
-            node = line.split(" ", 1)[1].split(" - ", 1)[0].strip()
-        elif line.startswith("SUBFAILED"):
-            node = line.split(") ", 1)[-1].split(" - ", 1)[0].strip()
-        else:
+        if not line.startswith(("FAILED ", "ERROR ", "SUBFAILED")):
             continue
-        if "::" in node and node not in ids:
-            ids.append(node)
+        found = re.search(r"(tests/[^\s:]+\.py::[^\s]+)", line)
+        if found and found.group(1) not in ids:
+            ids.append(found.group(1))
     return ids
 
 
