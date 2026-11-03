@@ -14,3 +14,6 @@ Compute, never look up (app code never reads tools/parity/*.json or tests/fixtur
 
 ## Commands (in the worktree)
 Scorer: `PYTHONPATH=. QT_QPA_PLATFORM=offscreen python3 tools/score_spec.py tools/parity/task30_static_types_spec.json [A|B|C]`. Tests: `tests/test_iteration120_static_types_20.py`. When done, leave changes uncommitted and write a ready-for-review entry in this worktree's `HANDOFF.md` with scorer counts per Part and the replay line.
+
+## Review outcome (2026-11-03)
+Shipped as Iteration 120. Locked 445,260.
