@@ -1,0 +1,2356 @@
+{
+ "items": [
+  {
+   "part": "A",
+   "expr": "XIRR(DATATABLE(\"v\",DOUBLE,\"d\",DATETIME,{{-4461.19,\"2019-12-09\"},{925.15,\"2020-04-22\"},{912.93,\"2020-07-21\"},{1952.23,\"2021-09-07\"},{1781.96,\"2022-07-18\"},{1870.07,\"2022-08-28\"}}),[v],[d])",
+   "powerbi": "0.335566799342633",
+   "now": "LOCAL-REJECT:Function XIRR is not supported by the local DAX engine."
+  },
+  {
+   "part": "A",
+   "expr": "ISERROR(XIRR(DATATABLE(\"v\",DOUBLE,\"d\",DATETIME,{{-4461.19,\"2019-12-09\"},{925.15,\"2020-04-22\"},{912.93,\"2020-07-21\"},{1952.23,\"2021-09-07\"},{1781.96,\"2022-07-18\"},{1870.07,\"2022-08-28\"}}),[v],[d]))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:Function XIRR is not supported by the local DAX engine."
+  },
+  {
+   "part": "A",
+   "expr": "XIRR(DATATABLE(\"v\",DOUBLE,\"d\",DATETIME,{{-4461.19,\"2019-12-09\"},{925.15,\"2020-04-22\"},{912.93,\"2020-07-21\"},{1952.23,\"2021-09-07\"},{1781.96,\"2022-07-18\"},{1870.07,\"2022-08-28\"}}),[v],[d],-0.5)",
+   "powerbi": "0.3355667963624",
+   "now": "LOCAL-REJECT:Function XIRR is not supported by the local DAX engine."
+  },
+  {
+   "part": "A",
+   "expr": "XIRR(DATATABLE(\"v\",DOUBLE,\"d\",DATETIME,{{-4461.19,\"2019-12-09\"},{925.15,\"2020-04-22\"},{912.93,\"2020-07-21\"},{1952.23,\"2021-09-07\"},{1781.96,\"2022-07-18\"},{1870.07,\"2022-08-28\"}}),[v],[d],0.3,5)",
+   "powerbi": "0.335566798597574",
+   "now": "LOCAL-REJECT:Function XIRR is not supported by the local DAX engine."
+  },
+  {
+   "part": "A",
+   "expr": "XIRR(DATATABLE(\"v\",DOUBLE,\"d\",DATETIME,{{-1769.92,\"2021-06-30\"},{1247.71,\"2021-09-12\"},{-137.22,\"2021-12-17\"},{651.67,\"2022-11-08\"}}),[v],[d])",
+   "powerbi": "-0.0071658842265605",
+   "now": "LOCAL-REJECT:Function XIRR is not supported by the local DAX engine."
+  },
+  {
+   "part": "A",
+   "expr": "ISERROR(XIRR(DATATABLE(\"v\",DOUBLE,\"d\",DATETIME,{{-1769.92,\"2021-06-30\"},{1247.71,\"2021-09-12\"},{-137.22,\"2021-12-17\"},{651.67,\"2022-11-08\"}}),[v],[d]))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:Function XIRR is not supported by the local DAX engine."
+  },
+  {
+   "part": "A",
+   "expr": "XIRR(DATATABLE(\"v\",DOUBLE,\"d\",DATETIME,{{-4675.93,\"2019-04-18\"},{977.9,\"2020-07-28\"},{1267.11,\"2021-05-22\"},{-30.31,\"2021-10-13\"},{-171.16,\"2022-05-29\"},{1954.05,\"2022-10-18\"}}),[v],[d])",
+   "powerbi": "-0.0592749472707508",
+   "now": "LOCAL-REJECT:Function XIRR is not supported by the local DAX engine."
+  },
+  {
+   "part": "A",
+   "expr": "ISERROR(XIRR(DATATABLE(\"v\",DOUBLE,\"d\",DATETIME,{{-4675.93,\"2019-04-18\"},{977.9,\"2020-07-28\"},{1267.11,\"2021-05-22\"},{-30.31,\"2021-10-13\"},{-171.16,\"2022-05-29\"},{1954.05,\"2022-10-18\"}}),[v],[d]))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:Function XIRR is not supported by the local DAX engine."
+  },
+  {
+   "part": "A",
+   "expr": "XIRR(DATATABLE(\"v\",DOUBLE,\"d\",DATETIME,{{-3440.8,\"2019-05-16\"},{1470.01,\"2019-09-10\"},{879.43,\"2020-03-12\"},{436.25,\"2021-01-19\"}}),[v],[d])",
+   "powerbi": "-0.251737198978662",
+   "now": "LOCAL-REJECT:Function XIRR is not supported by the local DAX engine."
+  },
+  {
+   "part": "A",
+   "expr": "ISERROR(XIRR(DATATABLE(\"v\",DOUBLE,\"d\",DATETIME,{{-3440.8,\"2019-05-16\"},{1470.01,\"2019-09-10\"},{879.43,\"2020-03-12\"},{436.25,\"2021-01-19\"}}),[v],[d]))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:Function XIRR is not supported by the local DAX engine."
+  },
+  {
+   "part": "A",
+   "expr": "XIRR(DATATABLE(\"v\",DOUBLE,\"d\",DATETIME,{{-3440.8,\"2019-05-16\"},{1470.01,\"2019-09-10\"},{879.43,\"2020-03-12\"},{436.25,\"2021-01-19\"}}),[v],[d],-0.5)",
+   "powerbi": "-0.25173719227314",
+   "now": "LOCAL-REJECT:Function XIRR is not supported by the local DAX engine."
+  },
+  {
+   "part": "A",
+   "expr": "XIRR(DATATABLE(\"v\",DOUBLE,\"d\",DATETIME,{{-2273.94,\"2020-09-15\"},{126.5,\"2021-12-10\"},{-46.8,\"2022-02-10\"},{-224.3,\"2022-09-10\"}}),[v],[d])",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 19) The XIRR function couldn't find a solution.\"",
+   "now": "LOCAL-REJECT:Function XIRR is not supported by the local DAX engine."
+  },
+  {
+   "part": "A",
+   "expr": "ISERROR(XIRR(DATATABLE(\"v\",DOUBLE,\"d\",DATETIME,{{-2273.94,\"2020-09-15\"},{126.5,\"2021-12-10\"},{-46.8,\"2022-02-10\"},{-224.3,\"2022-09-10\"}}),[v],[d]))",
+   "powerbi": "True",
+   "now": "LOCAL-REJECT:Function XIRR is not supported by the local DAX engine."
+  },
+  {
+   "part": "A",
+   "expr": "XIRR(DATATABLE(\"v\",DOUBLE,\"d\",DATETIME,{{-2273.94,\"2020-09-15\"},{126.5,\"2021-12-10\"},{-46.8,\"2022-02-10\"},{-224.3,\"2022-09-10\"}}),[v],[d],0.3,5)",
+   "powerbi": "5",
+   "now": "LOCAL-REJECT:Function XIRR is not supported by the local DAX engine."
+  },
+  {
+   "part": "A",
+   "expr": "XIRR(DATATABLE(\"v\",DOUBLE,\"d\",DATETIME,{{-4136.72,\"2019-05-10\"},{-293.01,\"2019-07-11\"},{642.98,\"2019-09-03\"},{500.79,\"2019-09-11\"},{1694.28,\"2019-11-02\"},{1256.61,\"2022-02-20\"},{593.66,\"2022-07-08\"},{1074.62,\"2022-10-30\"}}),[v],[d])",
+   "powerbi": "0.175399105250836",
+   "now": "LOCAL-REJECT:Function XIRR is not supported by the local DAX engine."
+  },
+  {
+   "part": "A",
+   "expr": "ISERROR(XIRR(DATATABLE(\"v\",DOUBLE,\"d\",DATETIME,{{-4136.72,\"2019-05-10\"},{-293.01,\"2019-07-11\"},{642.98,\"2019-09-03\"},{500.79,\"2019-09-11\"},{1694.28,\"2019-11-02\"},{1256.61,\"2022-02-20\"},{593.66,\"2022-07-08\"},{1074.62,\"2022-10-30\"}}),[v],[d]))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:Function XIRR is not supported by the local DAX engine."
+  },
+  {
+   "part": "A",
+   "expr": "XIRR(DATATABLE(\"v\",DOUBLE,\"d\",DATETIME,{{-2665.27,\"2019-01-20\"},{572.09,\"2019-05-24\"},{1495.16,\"2020-09-22\"},{-44.72,\"2021-01-03\"},{1707.27,\"2021-07-19\"},{-265.9,\"2021-09-22\"},{947.14,\"2022-01-08\"},{720.27,\"2022-04-22\"}}),[v],[d])",
+   "powerbi": "0.370341369509697",
+   "now": "LOCAL-REJECT:Function XIRR is not supported by the local DAX engine."
+  },
+  {
+   "part": "A",
+   "expr": "ISERROR(XIRR(DATATABLE(\"v\",DOUBLE,\"d\",DATETIME,{{-2665.27,\"2019-01-20\"},{572.09,\"2019-05-24\"},{1495.16,\"2020-09-22\"},{-44.72,\"2021-01-03\"},{1707.27,\"2021-07-19\"},{-265.9,\"2021-09-22\"},{947.14,\"2022-01-08\"},{720.27,\"2022-04-22\"}}),[v],[d]))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:Function XIRR is not supported by the local DAX engine."
+  },
+  {
+   "part": "A",
+   "expr": "XIRR(DATATABLE(\"v\",DOUBLE,\"d\",DATETIME,{{-2665.27,\"2019-01-20\"},{572.09,\"2019-05-24\"},{1495.16,\"2020-09-22\"},{-44.72,\"2021-01-03\"},{1707.27,\"2021-07-19\"},{-265.9,\"2021-09-22\"},{947.14,\"2022-01-08\"},{720.27,\"2022-04-22\"}}),[v],[d],-0.5)",
+   "powerbi": "0.370341368019581",
+   "now": "LOCAL-REJECT:Function XIRR is not supported by the local DAX engine."
+  },
+  {
+   "part": "A",
+   "expr": "XIRR(DATATABLE(\"v\",DOUBLE,\"d\",DATETIME,{{-4485.07,\"2021-10-10\"},{1839.58,\"2022-12-08\"},{347.96,\"2019-12-01\"},{343.37,\"2023-02-02\"}}),[v],[d])",
+   "powerbi": "2.7288431853056",
+   "now": "LOCAL-REJECT:Function XIRR is not supported by the local DAX engine."
+  },
+  {
+   "part": "A",
+   "expr": "ISERROR(XIRR(DATATABLE(\"v\",DOUBLE,\"d\",DATETIME,{{-4485.07,\"2021-10-10\"},{1839.58,\"2022-12-08\"},{347.96,\"2019-12-01\"},{343.37,\"2023-02-02\"}}),[v],[d]))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:Function XIRR is not supported by the local DAX engine."
+  },
+  {
+   "part": "A",
+   "expr": "XIRR(DATATABLE(\"v\",DOUBLE,\"d\",DATETIME,{{592.4,\"2020-06-17\"},{613.35,\"2021-03-05\"},{1547.01,\"2021-04-12\"},{447.4,\"2021-08-25\"},{57.2,\"2021-09-13\"},{126.1,\"2022-06-28\"}}),[v],[d])",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 19) The XIRR function couldn't find a solution.\"",
+   "now": "LOCAL-REJECT:Function XIRR is not supported by the local DAX engine."
+  },
+  {
+   "part": "A",
+   "expr": "ISERROR(XIRR(DATATABLE(\"v\",DOUBLE,\"d\",DATETIME,{{592.4,\"2020-06-17\"},{613.35,\"2021-03-05\"},{1547.01,\"2021-04-12\"},{447.4,\"2021-08-25\"},{57.2,\"2021-09-13\"},{126.1,\"2022-06-28\"}}),[v],[d]))",
+   "powerbi": "True",
+   "now": "LOCAL-REJECT:Function XIRR is not supported by the local DAX engine."
+  },
+  {
+   "part": "A",
+   "expr": "XIRR(DATATABLE(\"v\",DOUBLE,\"d\",DATETIME,{{592.4,\"2020-06-17\"},{613.35,\"2021-03-05\"},{1547.01,\"2021-04-12\"},{447.4,\"2021-08-25\"},{57.2,\"2021-09-13\"},{126.1,\"2022-06-28\"}}),[v],[d],0.3,5)",
+   "powerbi": "5",
+   "now": "LOCAL-REJECT:Function XIRR is not supported by the local DAX engine."
+  },
+  {
+   "part": "A",
+   "expr": "XIRR(DATATABLE(\"v\",DOUBLE,\"d\",DATETIME,{{-4240.84,\"2019-12-20\"},{698.13,\"2019-12-20\"},{1562.01,\"2020-10-16\"},{1828.44,\"2020-12-25\"},{1698.58,\"2022-06-27\"},{1426.12,\"2022-07-01\"},{1049.28,\"2023-01-23\"}}),[v],[d])",
+   "powerbi": "0.555610018223524",
+   "now": "LOCAL-REJECT:Function XIRR is not supported by the local DAX engine."
+  },
+  {
+   "part": "A",
+   "expr": "ISERROR(XIRR(DATATABLE(\"v\",DOUBLE,\"d\",DATETIME,{{-4240.84,\"2019-12-20\"},{698.13,\"2019-12-20\"},{1562.01,\"2020-10-16\"},{1828.44,\"2020-12-25\"},{1698.58,\"2022-06-27\"},{1426.12,\"2022-07-01\"},{1049.28,\"2023-01-23\"}}),[v],[d]))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:Function XIRR is not supported by the local DAX engine."
+  },
+  {
+   "part": "A",
+   "expr": "XIRR(DATATABLE(\"v\",DOUBLE,\"d\",DATETIME,{{-4240.84,\"2019-12-20\"},{698.13,\"2019-12-20\"},{1562.01,\"2020-10-16\"},{1828.44,\"2020-12-25\"},{1698.58,\"2022-06-27\"},{1426.12,\"2022-07-01\"},{1049.28,\"2023-01-23\"}}),[v],[d],-0.5)",
+   "powerbi": "0.55561001598835",
+   "now": "LOCAL-REJECT:Function XIRR is not supported by the local DAX engine."
+  },
+  {
+   "part": "A",
+   "expr": "XIRR(DATATABLE(\"v\",DOUBLE,\"d\",DATETIME,{{-914.83,\"2019-01-27\"},{321.82,\"2019-03-13\"},{1041.76,\"2020-04-11\"},{1017.88,\"2021-09-11\"},{156.85,\"2022-07-04\"},{133.79,\"2023-01-17\"}}),[v],[d])",
+   "powerbi": "1.03821971565485",
+   "now": "LOCAL-REJECT:Function XIRR is not supported by the local DAX engine."
+  },
+  {
+   "part": "A",
+   "expr": "ISERROR(XIRR(DATATABLE(\"v\",DOUBLE,\"d\",DATETIME,{{-914.83,\"2019-01-27\"},{321.82,\"2019-03-13\"},{1041.76,\"2020-04-11\"},{1017.88,\"2021-09-11\"},{156.85,\"2022-07-04\"},{133.79,\"2023-01-17\"}}),[v],[d]))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:Function XIRR is not supported by the local DAX engine."
+  },
+  {
+   "part": "A",
+   "expr": "XIRR(DATATABLE(\"v\",DOUBLE,\"d\",DATETIME,{{-4980.09,\"2019-01-23\"},{1263.46,\"2019-05-13\"},{-284.41,\"2019-05-27\"},{1859.95,\"2021-06-09\"},{650.85,\"2022-03-20\"},{1808.2,\"2022-10-24\"}}),[v],[d])",
+   "powerbi": "0.0246767044067384",
+   "now": "LOCAL-REJECT:Function XIRR is not supported by the local DAX engine."
+  },
+  {
+   "part": "A",
+   "expr": "ISERROR(XIRR(DATATABLE(\"v\",DOUBLE,\"d\",DATETIME,{{-4980.09,\"2019-01-23\"},{1263.46,\"2019-05-13\"},{-284.41,\"2019-05-27\"},{1859.95,\"2021-06-09\"},{650.85,\"2022-03-20\"},{1808.2,\"2022-10-24\"}}),[v],[d]))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:Function XIRR is not supported by the local DAX engine."
+  },
+  {
+   "part": "A",
+   "expr": "XIRR(DATATABLE(\"v\",DOUBLE,\"d\",DATETIME,{{-3541.04,\"2019-02-12\"},{469.49,\"2019-03-23\"},{-95.92,\"2019-10-10\"},{1753.11,\"2020-03-05\"},{848.11,\"2020-04-11\"},{411.47,\"2021-07-24\"},{-228.64,\"2022-02-13\"},{1244.61,\"2022-04-19\"}}),[v],[d])",
+   "powerbi": "0.151402029395104",
+   "now": "LOCAL-REJECT:Function XIRR is not supported by the local DAX engine."
+  },
+  {
+   "part": "A",
+   "expr": "ISERROR(XIRR(DATATABLE(\"v\",DOUBLE,\"d\",DATETIME,{{-3541.04,\"2019-02-12\"},{469.49,\"2019-03-23\"},{-95.92,\"2019-10-10\"},{1753.11,\"2020-03-05\"},{848.11,\"2020-04-11\"},{411.47,\"2021-07-24\"},{-228.64,\"2022-02-13\"},{1244.61,\"2022-04-19\"}}),[v],[d]))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:Function XIRR is not supported by the local DAX engine."
+  },
+  {
+   "part": "A",
+   "expr": "XIRR(DATATABLE(\"v\",DOUBLE,\"d\",DATETIME,{{-3541.04,\"2019-02-12\"},{469.49,\"2019-03-23\"},{-95.92,\"2019-10-10\"},{1753.11,\"2020-03-05\"},{848.11,\"2020-04-11\"},{411.47,\"2021-07-24\"},{-228.64,\"2022-02-13\"},{1244.61,\"2022-04-19\"}}),[v],[d],-0.5)",
+   "powerbi": "0.151402026414871",
+   "now": "LOCAL-REJECT:Function XIRR is not supported by the local DAX engine."
+  },
+  {
+   "part": "A",
+   "expr": "XIRR(DATATABLE(\"v\",DOUBLE,\"d\",DATETIME,{{-3541.04,\"2019-02-12\"},{469.49,\"2019-03-23\"},{-95.92,\"2019-10-10\"},{1753.11,\"2020-03-05\"},{848.11,\"2020-04-11\"},{411.47,\"2021-07-24\"},{-228.64,\"2022-02-13\"},{1244.61,\"2022-04-19\"}}),[v],[d],0.3,5)",
+   "powerbi": "0.151402021944523",
+   "now": "LOCAL-REJECT:Function XIRR is not supported by the local DAX engine."
+  },
+  {
+   "part": "A",
+   "expr": "XIRR(DATATABLE(\"v\",DOUBLE,\"d\",DATETIME,{{-4381.21,\"2019-01-14\"},{1123.03,\"2021-10-16\"}}),[v],[d])",
+   "powerbi": "-0.389763723686337",
+   "now": "LOCAL-REJECT:Function XIRR is not supported by the local DAX engine."
+  },
+  {
+   "part": "A",
+   "expr": "ISERROR(XIRR(DATATABLE(\"v\",DOUBLE,\"d\",DATETIME,{{-4381.21,\"2019-01-14\"},{1123.03,\"2021-10-16\"}}),[v],[d]))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:Function XIRR is not supported by the local DAX engine."
+  },
+  {
+   "part": "A",
+   "expr": "XIRR(DATATABLE(\"v\",DOUBLE,\"d\",DATETIME,{{-940.44,\"2019-09-20\"},{589.59,\"2020-11-11\"},{1428.46,\"2021-12-10\"},{323.7,\"2023-01-12\"}}),[v],[d])",
+   "powerbi": "0.576572740823031",
+   "now": "LOCAL-REJECT:Function XIRR is not supported by the local DAX engine."
+  },
+  {
+   "part": "A",
+   "expr": "ISERROR(XIRR(DATATABLE(\"v\",DOUBLE,\"d\",DATETIME,{{-940.44,\"2019-09-20\"},{589.59,\"2020-11-11\"},{1428.46,\"2021-12-10\"},{323.7,\"2023-01-12\"}}),[v],[d]))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:Function XIRR is not supported by the local DAX engine."
+  },
+  {
+   "part": "A",
+   "expr": "XIRR(DATATABLE(\"v\",DOUBLE,\"d\",DATETIME,{{-2883.33,\"2019-06-18\"},{15.73,\"2019-07-25\"},{806.81,\"2019-09-20\"},{766.89,\"2019-12-22\"},{444.76,\"2020-02-20\"},{1397.43,\"2020-06-13\"},{-283.48,\"2021-04-28\"},{-245.77,\"2021-12-17\"}}),[v],[d])",
+   "powerbi": "0.0167227223515511",
+   "now": "LOCAL-REJECT:Function XIRR is not supported by the local DAX engine."
+  },
+  {
+   "part": "A",
+   "expr": "ISERROR(XIRR(DATATABLE(\"v\",DOUBLE,\"d\",DATETIME,{{-2883.33,\"2019-06-18\"},{15.73,\"2019-07-25\"},{806.81,\"2019-09-20\"},{766.89,\"2019-12-22\"},{444.76,\"2020-02-20\"},{1397.43,\"2020-06-13\"},{-283.48,\"2021-04-28\"},{-245.77,\"2021-12-17\"}}),[v],[d]))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:Function XIRR is not supported by the local DAX engine."
+  },
+  {
+   "part": "A",
+   "expr": "XIRR(DATATABLE(\"v\",DOUBLE,\"d\",DATETIME,{{-2883.33,\"2019-06-18\"},{15.73,\"2019-07-25\"},{806.81,\"2019-09-20\"},{766.89,\"2019-12-22\"},{444.76,\"2020-02-20\"},{1397.43,\"2020-06-13\"},{-283.48,\"2021-04-28\"},{-245.77,\"2021-12-17\"}}),[v],[d],-0.5)",
+   "powerbi": "0.0167227238416672",
+   "now": "LOCAL-REJECT:Function XIRR is not supported by the local DAX engine."
+  },
+  {
+   "part": "A",
+   "expr": "XIRR(DATATABLE(\"v\",DOUBLE,\"d\",DATETIME,{{-3812.38,\"2020-01-17\"},{246.14,\"2020-11-21\"},{1112.85,\"2021-01-09\"}}),[v],[d])",
+   "powerbi": "-0.659331150352955",
+   "now": "LOCAL-REJECT:Function XIRR is not supported by the local DAX engine."
+  },
+  {
+   "part": "A",
+   "expr": "ISERROR(XIRR(DATATABLE(\"v\",DOUBLE,\"d\",DATETIME,{{-3812.38,\"2020-01-17\"},{246.14,\"2020-11-21\"},{1112.85,\"2021-01-09\"}}),[v],[d]))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:Function XIRR is not supported by the local DAX engine."
+  },
+  {
+   "part": "A",
+   "expr": "XIRR(DATATABLE(\"v\",DOUBLE,\"d\",DATETIME,{{-3812.38,\"2020-01-17\"},{246.14,\"2020-11-21\"},{1112.85,\"2021-01-09\"}}),[v],[d],0.3,5)",
+   "powerbi": "-0.659331148676574",
+   "now": "LOCAL-REJECT:Function XIRR is not supported by the local DAX engine."
+  },
+  {
+   "part": "A",
+   "expr": "XIRR(DATATABLE(\"v\",DOUBLE,\"d\",DATETIME,{{-2055.96,\"2023-01-24\"},{-30.74,\"2022-03-18\"},{1932.99,\"2021-07-08\"},{1183.52,\"2022-05-12\"},{1899.83,\"2021-02-23\"},{462.16,\"2019-01-18\"},{1562.93,\"2020-07-31\"},{-204.85,\"2021-10-12\"}}),[v],[d])",
+   "powerbi": "-0.506473898520926",
+   "now": "LOCAL-REJECT:Function XIRR is not supported by the local DAX engine."
+  },
+  {
+   "part": "A",
+   "expr": "ISERROR(XIRR(DATATABLE(\"v\",DOUBLE,\"d\",DATETIME,{{-2055.96,\"2023-01-24\"},{-30.74,\"2022-03-18\"},{1932.99,\"2021-07-08\"},{1183.52,\"2022-05-12\"},{1899.83,\"2021-02-23\"},{462.16,\"2019-01-18\"},{1562.93,\"2020-07-31\"},{-204.85,\"2021-10-12\"}}),[v],[d]))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:Function XIRR is not supported by the local DAX engine."
+  },
+  {
+   "part": "A",
+   "expr": "XIRR(DATATABLE(\"v\",DOUBLE,\"d\",DATETIME,{{1222.31,\"2019-09-22\"},{1806.48,\"2021-11-22\"},{1117.65,\"2022-10-09\"}}),[v],[d])",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 19) The XIRR function couldn't find a solution.\"",
+   "now": "LOCAL-REJECT:Function XIRR is not supported by the local DAX engine."
+  },
+  {
+   "part": "A",
+   "expr": "ISERROR(XIRR(DATATABLE(\"v\",DOUBLE,\"d\",DATETIME,{{1222.31,\"2019-09-22\"},{1806.48,\"2021-11-22\"},{1117.65,\"2022-10-09\"}}),[v],[d]))",
+   "powerbi": "True",
+   "now": "LOCAL-REJECT:Function XIRR is not supported by the local DAX engine."
+  },
+  {
+   "part": "A",
+   "expr": "XIRR(DATATABLE(\"v\",DOUBLE,\"d\",DATETIME,{{1222.31,\"2019-09-22\"},{1806.48,\"2021-11-22\"},{1117.65,\"2022-10-09\"}}),[v],[d],-0.5)",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 19) The XIRR function couldn't find a solution.\"",
+   "now": "LOCAL-REJECT:Function XIRR is not supported by the local DAX engine."
+  },
+  {
+   "part": "A",
+   "expr": "XIRR(DATATABLE(\"v\",DOUBLE,\"d\",DATETIME,{{-1768.22,\"2019-06-08\"},{584.75,\"2019-06-08\"},{416.24,\"2020-02-13\"},{700.48,\"2020-08-04\"},{1051.39,\"2021-05-30\"},{1325.71,\"2021-10-16\"},{570.73,\"2022-06-30\"},{744.31,\"2022-12-21\"}}),[v],[d])",
+   "powerbi": "1.04581253230572",
+   "now": "LOCAL-REJECT:Function XIRR is not supported by the local DAX engine."
+  },
+  {
+   "part": "A",
+   "expr": "ISERROR(XIRR(DATATABLE(\"v\",DOUBLE,\"d\",DATETIME,{{-1768.22,\"2019-06-08\"},{584.75,\"2019-06-08\"},{416.24,\"2020-02-13\"},{700.48,\"2020-08-04\"},{1051.39,\"2021-05-30\"},{1325.71,\"2021-10-16\"},{570.73,\"2022-06-30\"},{744.31,\"2022-12-21\"}}),[v],[d]))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:Function XIRR is not supported by the local DAX engine."
+  },
+  {
+   "part": "A",
+   "expr": "XIRR(DATATABLE(\"v\",DOUBLE,\"d\",DATETIME,{{-4213.29,\"2019-07-21\"},{-61.79,\"2019-11-21\"},{129.33,\"2020-03-23\"},{457.84,\"2020-07-27\"},{1795.96,\"2021-01-25\"},{1619.15,\"2021-03-29\"},{2.58,\"2021-06-21\"}}),[v],[d])",
+   "powerbi": "-0.0425939828157424",
+   "now": "LOCAL-REJECT:Function XIRR is not supported by the local DAX engine."
+  },
+  {
+   "part": "A",
+   "expr": "ISERROR(XIRR(DATATABLE(\"v\",DOUBLE,\"d\",DATETIME,{{-4213.29,\"2019-07-21\"},{-61.79,\"2019-11-21\"},{129.33,\"2020-03-23\"},{457.84,\"2020-07-27\"},{1795.96,\"2021-01-25\"},{1619.15,\"2021-03-29\"},{2.58,\"2021-06-21\"}}),[v],[d]))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:Function XIRR is not supported by the local DAX engine."
+  },
+  {
+   "part": "A",
+   "expr": "XIRR(DATATABLE(\"v\",DOUBLE,\"d\",DATETIME,{{-4213.29,\"2019-07-21\"},{-61.79,\"2019-11-21\"},{129.33,\"2020-03-23\"},{457.84,\"2020-07-27\"},{1795.96,\"2021-01-25\"},{1619.15,\"2021-03-29\"},{2.58,\"2021-06-21\"}}),[v],[d],0.3,5)",
+   "powerbi": "-0.0425939846783874",
+   "now": "LOCAL-REJECT:Function XIRR is not supported by the local DAX engine."
+  },
+  {
+   "part": "A",
+   "expr": "XIRR(DATATABLE(\"v\",DOUBLE,\"d\",DATETIME,{{-2363.91,\"2019-07-18\"},{37.98,\"2019-10-05\"},{1807.85,\"2021-12-05\"}}),[v],[d])",
+   "powerbi": "-0.100068914890289",
+   "now": "LOCAL-REJECT:Function XIRR is not supported by the local DAX engine."
+  },
+  {
+   "part": "A",
+   "expr": "ISERROR(XIRR(DATATABLE(\"v\",DOUBLE,\"d\",DATETIME,{{-2363.91,\"2019-07-18\"},{37.98,\"2019-10-05\"},{1807.85,\"2021-12-05\"}}),[v],[d]))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:Function XIRR is not supported by the local DAX engine."
+  },
+  {
+   "part": "A",
+   "expr": "XIRR(DATATABLE(\"v\",DOUBLE,\"d\",DATETIME,{{-2363.91,\"2019-07-18\"},{37.98,\"2019-10-05\"},{1807.85,\"2021-12-05\"}}),[v],[d],-0.5)",
+   "powerbi": "-0.100068911910057",
+   "now": "LOCAL-REJECT:Function XIRR is not supported by the local DAX engine."
+  },
+  {
+   "part": "A",
+   "expr": "XIRR(DATATABLE(\"v\",DOUBLE,\"d\",DATETIME,{{-2221.9,\"2019-07-07\"},{1049.95,\"2019-07-12\"},{1518.12,\"2021-03-26\"},{1986.88,\"2021-06-24\"},{835.24,\"2021-12-23\"},{865.32,\"2022-03-03\"}}),[v],[d])",
+   "powerbi": "1.06200883537531",
+   "now": "LOCAL-REJECT:Function XIRR is not supported by the local DAX engine."
+  },
+  {
+   "part": "A",
+   "expr": "ISERROR(XIRR(DATATABLE(\"v\",DOUBLE,\"d\",DATETIME,{{-2221.9,\"2019-07-07\"},{1049.95,\"2019-07-12\"},{1518.12,\"2021-03-26\"},{1986.88,\"2021-06-24\"},{835.24,\"2021-12-23\"},{865.32,\"2022-03-03\"}}),[v],[d]))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:Function XIRR is not supported by the local DAX engine."
+  },
+  {
+   "part": "A",
+   "expr": "XIRR(DATATABLE(\"v\",DOUBLE,\"d\",DATETIME,{{-1773.95,\"2020-01-04\"},{753.99,\"2021-06-05\"},{1805.68,\"2022-01-11\"},{242.7,\"2022-01-18\"}}),[v],[d])",
+   "powerbi": "0.279995222389698",
+   "now": "LOCAL-REJECT:Function XIRR is not supported by the local DAX engine."
+  },
+  {
+   "part": "A",
+   "expr": "ISERROR(XIRR(DATATABLE(\"v\",DOUBLE,\"d\",DATETIME,{{-1773.95,\"2020-01-04\"},{753.99,\"2021-06-05\"},{1805.68,\"2022-01-11\"},{242.7,\"2022-01-18\"}}),[v],[d]))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:Function XIRR is not supported by the local DAX engine."
+  },
+  {
+   "part": "A",
+   "expr": "XIRR(DATATABLE(\"v\",DOUBLE,\"d\",DATETIME,{{-1864.66,\"2019-01-29\"},{1602.03,\"2019-12-13\"},{1836.43,\"2020-09-15\"},{1714.15,\"2021-09-17\"}}),[v],[d])",
+   "powerbi": "0.908509719371796",
+   "now": "LOCAL-REJECT:Function XIRR is not supported by the local DAX engine."
+  },
+  {
+   "part": "A",
+   "expr": "ISERROR(XIRR(DATATABLE(\"v\",DOUBLE,\"d\",DATETIME,{{-1864.66,\"2019-01-29\"},{1602.03,\"2019-12-13\"},{1836.43,\"2020-09-15\"},{1714.15,\"2021-09-17\"}}),[v],[d]))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:Function XIRR is not supported by the local DAX engine."
+  },
+  {
+   "part": "A",
+   "expr": "XIRR(DATATABLE(\"v\",DOUBLE,\"d\",DATETIME,{{-1864.66,\"2019-01-29\"},{1602.03,\"2019-12-13\"},{1836.43,\"2020-09-15\"},{1714.15,\"2021-09-17\"}}),[v],[d],-0.5)",
+   "powerbi": "0.908509716391563",
+   "now": "LOCAL-REJECT:Function XIRR is not supported by the local DAX engine."
+  },
+  {
+   "part": "A",
+   "expr": "XIRR(DATATABLE(\"v\",DOUBLE,\"d\",DATETIME,{{-1864.66,\"2019-01-29\"},{1602.03,\"2019-12-13\"},{1836.43,\"2020-09-15\"},{1714.15,\"2021-09-17\"}}),[v],[d],0.3,5)",
+   "powerbi": "0.908509713411332",
+   "now": "LOCAL-REJECT:Function XIRR is not supported by the local DAX engine."
+  },
+  {
+   "part": "A",
+   "expr": "XIRR(DATATABLE(\"v\",DOUBLE,\"d\",DATETIME,{{-2453.57,\"2019-03-22\"},{853.09,\"2020-02-03\"},{542.53,\"2020-05-18\"},{1289.55,\"2020-05-31\"},{153.76,\"2020-09-18\"},{692.47,\"2021-07-11\"},{257.2,\"2022-05-17\"},{1371.22,\"2023-02-06\"}}),[v],[d])",
+   "powerbi": "0.496399569511414",
+   "now": "LOCAL-REJECT:Function XIRR is not supported by the local DAX engine."
+  },
+  {
+   "part": "A",
+   "expr": "ISERROR(XIRR(DATATABLE(\"v\",DOUBLE,\"d\",DATETIME,{{-2453.57,\"2019-03-22\"},{853.09,\"2020-02-03\"},{542.53,\"2020-05-18\"},{1289.55,\"2020-05-31\"},{153.76,\"2020-09-18\"},{692.47,\"2021-07-11\"},{257.2,\"2022-05-17\"},{1371.22,\"2023-02-06\"}}),[v],[d]))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:Function XIRR is not supported by the local DAX engine."
+  },
+  {
+   "part": "A",
+   "expr": "XIRR(DATATABLE(\"v\",DOUBLE,\"d\",DATETIME,{{-1801.59,\"2019-03-01\"},{-36.29,\"2020-06-21\"},{1513.81,\"2020-11-03\"},{1770.87,\"2020-12-19\"},{-228.37,\"2022-04-23\"},{1348.06,\"2022-06-26\"},{-156.41,\"2022-08-24\"}}),[v],[d])",
+   "powerbi": "0.518312412500382",
+   "now": "LOCAL-REJECT:Function XIRR is not supported by the local DAX engine."
+  },
+  {
+   "part": "A",
+   "expr": "ISERROR(XIRR(DATATABLE(\"v\",DOUBLE,\"d\",DATETIME,{{-1801.59,\"2019-03-01\"},{-36.29,\"2020-06-21\"},{1513.81,\"2020-11-03\"},{1770.87,\"2020-12-19\"},{-228.37,\"2022-04-23\"},{1348.06,\"2022-06-26\"},{-156.41,\"2022-08-24\"}}),[v],[d]))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:Function XIRR is not supported by the local DAX engine."
+  },
+  {
+   "part": "A",
+   "expr": "XIRR(DATATABLE(\"v\",DOUBLE,\"d\",DATETIME,{{-1594.82,\"2019-08-10\"},{-156.72,\"2021-06-05\"},{-266.94,\"2020-10-10\"},{965.27,\"2020-10-18\"},{1398.27,\"2021-11-26\"}}),[v],[d])",
+   "powerbi": "0.106996252015233",
+   "now": "LOCAL-REJECT:Function XIRR is not supported by the local DAX engine."
+  },
+  {
+   "part": "A",
+   "expr": "ISERROR(XIRR(DATATABLE(\"v\",DOUBLE,\"d\",DATETIME,{{-1594.82,\"2019-08-10\"},{-156.72,\"2021-06-05\"},{-266.94,\"2020-10-10\"},{965.27,\"2020-10-18\"},{1398.27,\"2021-11-26\"}}),[v],[d]))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:Function XIRR is not supported by the local DAX engine."
+  },
+  {
+   "part": "A",
+   "expr": "XIRR(DATATABLE(\"v\",DOUBLE,\"d\",DATETIME,{{-1594.82,\"2019-08-10\"},{-156.72,\"2021-06-05\"},{-266.94,\"2020-10-10\"},{965.27,\"2020-10-18\"},{1398.27,\"2021-11-26\"}}),[v],[d],-0.5)",
+   "powerbi": "0.10699625313282",
+   "now": "LOCAL-REJECT:Function XIRR is not supported by the local DAX engine."
+  },
+  {
+   "part": "A",
+   "expr": "XIRR(DATATABLE(\"v\",DOUBLE,\"d\",DATETIME,{{3240.09,\"2019-06-11\"},{1359.39,\"2019-07-03\"},{591.61,\"2020-06-14\"},{33.69,\"2020-09-13\"},{407.52,\"2020-10-28\"},{1349.77,\"2021-06-03\"},{773.79,\"2021-07-08\"}}),[v],[d])",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 19) The XIRR function couldn't find a solution.\"",
+   "now": "LOCAL-REJECT:Function XIRR is not supported by the local DAX engine."
+  },
+  {
+   "part": "A",
+   "expr": "ISERROR(XIRR(DATATABLE(\"v\",DOUBLE,\"d\",DATETIME,{{3240.09,\"2019-06-11\"},{1359.39,\"2019-07-03\"},{591.61,\"2020-06-14\"},{33.69,\"2020-09-13\"},{407.52,\"2020-10-28\"},{1349.77,\"2021-06-03\"},{773.79,\"2021-07-08\"}}),[v],[d]))",
+   "powerbi": "True",
+   "now": "LOCAL-REJECT:Function XIRR is not supported by the local DAX engine."
+  },
+  {
+   "part": "A",
+   "expr": "XIRR(DATATABLE(\"v\",DOUBLE,\"d\",DATETIME,{{3240.09,\"2019-06-11\"},{1359.39,\"2019-07-03\"},{591.61,\"2020-06-14\"},{33.69,\"2020-09-13\"},{407.52,\"2020-10-28\"},{1349.77,\"2021-06-03\"},{773.79,\"2021-07-08\"}}),[v],[d],0.3,5)",
+   "powerbi": "5",
+   "now": "LOCAL-REJECT:Function XIRR is not supported by the local DAX engine."
+  },
+  {
+   "part": "A",
+   "expr": "XIRR(DATATABLE(\"v\",DOUBLE,\"d\",DATETIME,{{-505.07,\"2020-08-10\"},{64.22,\"2020-08-10\"},{1876.52,\"2020-09-09\"},{654.68,\"2020-10-28\"},{1383.62,\"2020-12-19\"},{1668.4,\"2021-02-01\"},{121.08,\"2022-04-20\"},{45.09,\"2022-09-27\"}}),[v],[d])",
+   "powerbi": "69704106.55",
+   "now": "LOCAL-REJECT:Function XIRR is not supported by the local DAX engine."
+  },
+  {
+   "part": "A",
+   "expr": "ISERROR(XIRR(DATATABLE(\"v\",DOUBLE,\"d\",DATETIME,{{-505.07,\"2020-08-10\"},{64.22,\"2020-08-10\"},{1876.52,\"2020-09-09\"},{654.68,\"2020-10-28\"},{1383.62,\"2020-12-19\"},{1668.4,\"2021-02-01\"},{121.08,\"2022-04-20\"},{45.09,\"2022-09-27\"}}),[v],[d]))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:Function XIRR is not supported by the local DAX engine."
+  },
+  {
+   "part": "A",
+   "expr": "XIRR(DATATABLE(\"v\",DOUBLE,\"d\",DATETIME,{{-4844.25,\"2019-09-15\"},{1696.3,\"2019-12-06\"},{1062.77,\"2020-05-05\"},{688.43,\"2021-04-23\"},{1742.2,\"2022-09-07\"}}),[v],[d])",
+   "powerbi": "0.0510742910206319",
+   "now": "LOCAL-REJECT:Function XIRR is not supported by the local DAX engine."
+  },
+  {
+   "part": "A",
+   "expr": "ISERROR(XIRR(DATATABLE(\"v\",DOUBLE,\"d\",DATETIME,{{-4844.25,\"2019-09-15\"},{1696.3,\"2019-12-06\"},{1062.77,\"2020-05-05\"},{688.43,\"2021-04-23\"},{1742.2,\"2022-09-07\"}}),[v],[d]))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:Function XIRR is not supported by the local DAX engine."
+  },
+  {
+   "part": "A",
+   "expr": "XIRR(DATATABLE(\"v\",DOUBLE,\"d\",DATETIME,{{-4844.25,\"2019-09-15\"},{1696.3,\"2019-12-06\"},{1062.77,\"2020-05-05\"},{688.43,\"2021-04-23\"},{1742.2,\"2022-09-07\"}}),[v],[d],-0.5)",
+   "powerbi": "0.0510743036866188",
+   "now": "LOCAL-REJECT:Function XIRR is not supported by the local DAX engine."
+  },
+  {
+   "part": "A",
+   "expr": "XIRR(DATATABLE(\"v\",DOUBLE,\"d\",DATETIME,{{-1361.79,\"2019-01-24\"},{475.04,\"2019-09-11\"},{1363.38,\"2021-09-30\"},{1920.2,\"2022-06-02\"},{422.1,\"2022-06-08\"},{1435.39,\"2022-07-19\"},{497.65,\"2022-08-02\"}}),[v],[d])",
+   "powerbi": "0.701415556296706",
+   "now": "LOCAL-REJECT:Function XIRR is not supported by the local DAX engine."
+  },
+  {
+   "part": "A",
+   "expr": "ISERROR(XIRR(DATATABLE(\"v\",DOUBLE,\"d\",DATETIME,{{-1361.79,\"2019-01-24\"},{475.04,\"2019-09-11\"},{1363.38,\"2021-09-30\"},{1920.2,\"2022-06-02\"},{422.1,\"2022-06-08\"},{1435.39,\"2022-07-19\"},{497.65,\"2022-08-02\"}}),[v],[d]))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:Function XIRR is not supported by the local DAX engine."
+  },
+  {
+   "part": "A",
+   "expr": "XIRR(DATATABLE(\"v\",DOUBLE,\"d\",DATETIME,{{-1004.71,\"2019-06-19\"},{-142.29,\"2019-12-22\"},{-234.63,\"2022-09-23\"},{94.31,\"2023-01-06\"}}),[v],[d])",
+   "powerbi": "-0.957958334498107",
+   "now": "LOCAL-REJECT:Function XIRR is not supported by the local DAX engine."
+  },
+  {
+   "part": "A",
+   "expr": "ISERROR(XIRR(DATATABLE(\"v\",DOUBLE,\"d\",DATETIME,{{-1004.71,\"2019-06-19\"},{-142.29,\"2019-12-22\"},{-234.63,\"2022-09-23\"},{94.31,\"2023-01-06\"}}),[v],[d]))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:Function XIRR is not supported by the local DAX engine."
+  },
+  {
+   "part": "A",
+   "expr": "XIRR(DATATABLE(\"v\",DOUBLE,\"d\",DATETIME,{{-1004.71,\"2019-06-19\"},{-142.29,\"2019-12-22\"},{-234.63,\"2022-09-23\"},{94.31,\"2023-01-06\"}}),[v],[d],0.3,5)",
+   "powerbi": "-0.957958334498198",
+   "now": "LOCAL-REJECT:Function XIRR is not supported by the local DAX engine."
+  },
+  {
+   "part": "A",
+   "expr": "XIRR(DATATABLE(\"v\",DOUBLE,\"d\",DATETIME,{{-2930.47,\"2021-03-30\"},{-14.43,\"2022-01-30\"},{782.82,\"2022-09-28\"}}),[v],[d])",
+   "powerbi": "-0.588396492227912",
+   "now": "LOCAL-REJECT:Function XIRR is not supported by the local DAX engine."
+  },
+  {
+   "part": "A",
+   "expr": "ISERROR(XIRR(DATATABLE(\"v\",DOUBLE,\"d\",DATETIME,{{-2930.47,\"2021-03-30\"},{-14.43,\"2022-01-30\"},{782.82,\"2022-09-28\"}}),[v],[d]))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:Function XIRR is not supported by the local DAX engine."
+  },
+  {
+   "part": "A",
+   "expr": "XIRR(DATATABLE(\"v\",DOUBLE,\"d\",DATETIME,{{-2930.47,\"2021-03-30\"},{-14.43,\"2022-01-30\"},{782.82,\"2022-09-28\"}}),[v],[d],-0.5)",
+   "powerbi": "-0.588396493345499",
+   "now": "LOCAL-REJECT:Function XIRR is not supported by the local DAX engine."
+  },
+  {
+   "part": "A",
+   "expr": "XIRR(DATATABLE(\"v\",DOUBLE,\"d\",DATETIME,{{-3167.13,\"2019-02-07\"},{981.07,\"2022-06-25\"},{691.72,\"2023-01-02\"}}),[v],[d])",
+   "powerbi": "-0.162355219572782",
+   "now": "LOCAL-REJECT:Function XIRR is not supported by the local DAX engine."
+  },
+  {
+   "part": "A",
+   "expr": "ISERROR(XIRR(DATATABLE(\"v\",DOUBLE,\"d\",DATETIME,{{-3167.13,\"2019-02-07\"},{981.07,\"2022-06-25\"},{691.72,\"2023-01-02\"}}),[v],[d]))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:Function XIRR is not supported by the local DAX engine."
+  },
+  {
+   "part": "A",
+   "expr": "XIRR(DATATABLE(\"v\",DOUBLE,\"d\",DATETIME,{{-592.22,\"2021-01-18\"},{734.36,\"2022-01-24\"}}),[v],[d])",
+   "powerbi": "0.235705597698689",
+   "now": "LOCAL-REJECT:Function XIRR is not supported by the local DAX engine."
+  },
+  {
+   "part": "A",
+   "expr": "ISERROR(XIRR(DATATABLE(\"v\",DOUBLE,\"d\",DATETIME,{{-592.22,\"2021-01-18\"},{734.36,\"2022-01-24\"}}),[v],[d]))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:Function XIRR is not supported by the local DAX engine."
+  },
+  {
+   "part": "A",
+   "expr": "XIRR(DATATABLE(\"v\",DOUBLE,\"d\",DATETIME,{{-3615.89,\"2019-11-03\"},{845.85,\"2020-01-24\"}}),[v],[d])",
+   "powerbi": "-0.998445365461521",
+   "now": "LOCAL-REJECT:Function XIRR is not supported by the local DAX engine."
+  },
+  {
+   "part": "A",
+   "expr": "ISERROR(XIRR(DATATABLE(\"v\",DOUBLE,\"d\",DATETIME,{{-3615.89,\"2019-11-03\"},{845.85,\"2020-01-24\"}}),[v],[d]))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:Function XIRR is not supported by the local DAX engine."
+  },
+  {
+   "part": "A",
+   "expr": "XIRR(DATATABLE(\"v\",DOUBLE,\"d\",DATETIME,{{-3615.89,\"2019-11-03\"},{845.85,\"2020-01-24\"}}),[v],[d],-0.5)",
+   "powerbi": "-0.998445365461521",
+   "now": "LOCAL-REJECT:Function XIRR is not supported by the local DAX engine."
+  },
+  {
+   "part": "A",
+   "expr": "XIRR(DATATABLE(\"v\",DOUBLE,\"d\",DATETIME,{{-3615.89,\"2019-11-03\"},{845.85,\"2020-01-24\"}}),[v],[d],0.3,5)",
+   "powerbi": "-0.9984453654557",
+   "now": "LOCAL-REJECT:Function XIRR is not supported by the local DAX engine."
+  },
+  {
+   "part": "A",
+   "expr": "XIRR(DATATABLE(\"v\",DOUBLE,\"d\",DATETIME,{{-1416.79,\"2022-08-01\"},{440.26,\"2021-01-04\"},{1823.28,\"2020-03-07\"},{1515.79,\"2020-10-18\"}}),[v],[d])",
+   "powerbi": "-0.383094063773751",
+   "now": "LOCAL-REJECT:Function XIRR is not supported by the local DAX engine."
+  },
+  {
+   "part": "A",
+   "expr": "ISERROR(XIRR(DATATABLE(\"v\",DOUBLE,\"d\",DATETIME,{{-1416.79,\"2022-08-01\"},{440.26,\"2021-01-04\"},{1823.28,\"2020-03-07\"},{1515.79,\"2020-10-18\"}}),[v],[d]))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:Function XIRR is not supported by the local DAX engine."
+  },
+  {
+   "part": "A",
+   "expr": "XIRR(DATATABLE(\"v\",DOUBLE,\"d\",DATETIME,{{2721.94,\"2019-04-06\"},{1281.81,\"2019-07-27\"},{527.0,\"2019-09-30\"},{568.22,\"2020-03-04\"},{897.93,\"2020-04-07\"},{295.4,\"2021-03-26\"},{161.13,\"2021-07-27\"},{507.21,\"2022-01-24\"}}),[v],[d])",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 19) The XIRR function couldn't find a solution.\"",
+   "now": "LOCAL-REJECT:Function XIRR is not supported by the local DAX engine."
+  },
+  {
+   "part": "A",
+   "expr": "ISERROR(XIRR(DATATABLE(\"v\",DOUBLE,\"d\",DATETIME,{{2721.94,\"2019-04-06\"},{1281.81,\"2019-07-27\"},{527.0,\"2019-09-30\"},{568.22,\"2020-03-04\"},{897.93,\"2020-04-07\"},{295.4,\"2021-03-26\"},{161.13,\"2021-07-27\"},{507.21,\"2022-01-24\"}}),[v],[d]))",
+   "powerbi": "True",
+   "now": "LOCAL-REJECT:Function XIRR is not supported by the local DAX engine."
+  },
+  {
+   "part": "A",
+   "expr": "XIRR(DATATABLE(\"v\",DOUBLE,\"d\",DATETIME,{{-2348.88,\"2019-08-09\"},{1500.99,\"2019-08-09\"},{1344.35,\"2020-02-07\"},{1578.85,\"2020-05-13\"},{985.12,\"2020-07-14\"},{1113.35,\"2021-01-21\"},{-77.09,\"2022-08-25\"}}),[v],[d])",
+   "powerbi": "9.1078853905201",
+   "now": "LOCAL-REJECT:Function XIRR is not supported by the local DAX engine."
+  },
+  {
+   "part": "A",
+   "expr": "ISERROR(XIRR(DATATABLE(\"v\",DOUBLE,\"d\",DATETIME,{{-2348.88,\"2019-08-09\"},{1500.99,\"2019-08-09\"},{1344.35,\"2020-02-07\"},{1578.85,\"2020-05-13\"},{985.12,\"2020-07-14\"},{1113.35,\"2021-01-21\"},{-77.09,\"2022-08-25\"}}),[v],[d]))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:Function XIRR is not supported by the local DAX engine."
+  },
+  {
+   "part": "A",
+   "expr": "XIRR(DATATABLE(\"v\",DOUBLE,\"d\",DATETIME,{{-2348.88,\"2019-08-09\"},{1500.99,\"2019-08-09\"},{1344.35,\"2020-02-07\"},{1578.85,\"2020-05-13\"},{985.12,\"2020-07-14\"},{1113.35,\"2021-01-21\"},{-77.09,\"2022-08-25\"}}),[v],[d],-0.5)",
+   "powerbi": "9.10788542032242",
+   "now": "LOCAL-REJECT:Function XIRR is not supported by the local DAX engine."
+  },
+  {
+   "part": "A",
+   "expr": "XIRR(DATATABLE(\"v\",DOUBLE,\"d\",DATETIME,{{-2202.85,\"2020-06-08\"},{491.81,\"2020-11-26\"},{861.63,\"2021-01-17\"},{895.49,\"2021-03-14\"},{574.06,\"2022-01-27\"}}),[v],[d])",
+   "powerbi": "0.35366685912013",
+   "now": "LOCAL-REJECT:Function XIRR is not supported by the local DAX engine."
+  },
+  {
+   "part": "A",
+   "expr": "ISERROR(XIRR(DATATABLE(\"v\",DOUBLE,\"d\",DATETIME,{{-2202.85,\"2020-06-08\"},{491.81,\"2020-11-26\"},{861.63,\"2021-01-17\"},{895.49,\"2021-03-14\"},{574.06,\"2022-01-27\"}}),[v],[d]))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:Function XIRR is not supported by the local DAX engine."
+  },
+  {
+   "part": "A",
+   "expr": "XIRR(DATATABLE(\"v\",DOUBLE,\"d\",DATETIME,{{-2202.85,\"2020-06-08\"},{491.81,\"2020-11-26\"},{861.63,\"2021-01-17\"},{895.49,\"2021-03-14\"},{574.06,\"2022-01-27\"}}),[v],[d],0.3,5)",
+   "powerbi": "0.353666859120131",
+   "now": "LOCAL-REJECT:Function XIRR is not supported by the local DAX engine."
+  },
+  {
+   "part": "A",
+   "expr": "XIRR(DATATABLE(\"v\",DOUBLE,\"d\",DATETIME,{{-4607.94,\"2019-02-17\"},{959.69,\"2022-12-08\"}}),[v],[d])",
+   "powerbi": "-0.337665214575827",
+   "now": "LOCAL-REJECT:Function XIRR is not supported by the local DAX engine."
+  },
+  {
+   "part": "A",
+   "expr": "ISERROR(XIRR(DATATABLE(\"v\",DOUBLE,\"d\",DATETIME,{{-4607.94,\"2019-02-17\"},{959.69,\"2022-12-08\"}}),[v],[d]))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:Function XIRR is not supported by the local DAX engine."
+  },
+  {
+   "part": "A",
+   "expr": "XIRR(DATATABLE(\"v\",DOUBLE,\"d\",DATETIME,{{-4338.36,\"2021-12-23\"},{1006.92,\"2023-01-15\"}}),[v],[d])",
+   "powerbi": "-0.746912060305476",
+   "now": "LOCAL-REJECT:Function XIRR is not supported by the local DAX engine."
+  },
+  {
+   "part": "A",
+   "expr": "ISERROR(XIRR(DATATABLE(\"v\",DOUBLE,\"d\",DATETIME,{{-4338.36,\"2021-12-23\"},{1006.92,\"2023-01-15\"}}),[v],[d]))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:Function XIRR is not supported by the local DAX engine."
+  },
+  {
+   "part": "A",
+   "expr": "XIRR(DATATABLE(\"v\",DOUBLE,\"d\",DATETIME,{{-4338.36,\"2021-12-23\"},{1006.92,\"2023-01-15\"}}),[v],[d],-0.5)",
+   "powerbi": "-0.746912060305476",
+   "now": "LOCAL-REJECT:Function XIRR is not supported by the local DAX engine."
+  },
+  {
+   "part": "A",
+   "expr": "XIRR(DATATABLE(\"v\",DOUBLE,\"d\",DATETIME,{{-861.33,\"2020-07-17\"},{621.0,\"2021-03-25\"},{1563.62,\"2021-06-29\"},{1488.92,\"2021-10-06\"},{1363.06,\"2022-12-08\"}}),[v],[d])",
+   "powerbi": "3.53999308049679",
+   "now": "LOCAL-REJECT:Function XIRR is not supported by the local DAX engine."
+  },
+  {
+   "part": "A",
+   "expr": "ISERROR(XIRR(DATATABLE(\"v\",DOUBLE,\"d\",DATETIME,{{-861.33,\"2020-07-17\"},{621.0,\"2021-03-25\"},{1563.62,\"2021-06-29\"},{1488.92,\"2021-10-06\"},{1363.06,\"2022-12-08\"}}),[v],[d]))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:Function XIRR is not supported by the local DAX engine."
+  },
+  {
+   "part": "A",
+   "expr": "XIRR(DATATABLE(\"v\",DOUBLE,\"d\",DATETIME,{{-4659.6,\"2019-04-16\"},{1702.11,\"2019-11-13\"},{1707.61,\"2021-01-29\"},{482.59,\"2021-02-18\"},{569.22,\"2022-12-09\"}}),[v],[d])",
+   "powerbi": "-0.0270300552248953",
+   "now": "LOCAL-REJECT:Function XIRR is not supported by the local DAX engine."
+  },
+  {
+   "part": "A",
+   "expr": "ISERROR(XIRR(DATATABLE(\"v\",DOUBLE,\"d\",DATETIME,{{-4659.6,\"2019-04-16\"},{1702.11,\"2019-11-13\"},{1707.61,\"2021-01-29\"},{482.59,\"2021-02-18\"},{569.22,\"2022-12-09\"}}),[v],[d]))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:Function XIRR is not supported by the local DAX engine."
+  },
+  {
+   "part": "A",
+   "expr": "XIRR(DATATABLE(\"v\",DOUBLE,\"d\",DATETIME,{{-4659.6,\"2019-04-16\"},{1702.11,\"2019-11-13\"},{1707.61,\"2021-01-29\"},{482.59,\"2021-02-18\"},{569.22,\"2022-12-09\"}}),[v],[d],0.3,5)",
+   "powerbi": "-0.0270300567150117",
+   "now": "LOCAL-REJECT:Function XIRR is not supported by the local DAX engine."
+  },
+  {
+   "part": "A",
+   "expr": "XIRR(DATATABLE(\"v\",DOUBLE,\"d\",DATETIME,{{-3963.0,\"2019-09-03\"},{1781.03,\"2020-09-11\"},{1432.31,\"2020-09-22\"},{1784.25,\"2020-09-26\"},{1062.71,\"2021-01-13\"},{610.52,\"2021-01-29\"}}),[v],[d])",
+   "powerbi": "0.587607750296593",
+   "now": "LOCAL-REJECT:Function XIRR is not supported by the local DAX engine."
+  },
+  {
+   "part": "A",
+   "expr": "ISERROR(XIRR(DATATABLE(\"v\",DOUBLE,\"d\",DATETIME,{{-3963.0,\"2019-09-03\"},{1781.03,\"2020-09-11\"},{1432.31,\"2020-09-22\"},{1784.25,\"2020-09-26\"},{1062.71,\"2021-01-13\"},{610.52,\"2021-01-29\"}}),[v],[d]))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:Function XIRR is not supported by the local DAX engine."
+  },
+  {
+   "part": "A",
+   "expr": "XIRR(DATATABLE(\"v\",DOUBLE,\"d\",DATETIME,{{-3963.0,\"2019-09-03\"},{1781.03,\"2020-09-11\"},{1432.31,\"2020-09-22\"},{1784.25,\"2020-09-26\"},{1062.71,\"2021-01-13\"},{610.52,\"2021-01-29\"}}),[v],[d],-0.5)",
+   "powerbi": "0.587607756257057",
+   "now": "LOCAL-REJECT:Function XIRR is not supported by the local DAX engine."
+  },
+  {
+   "part": "A",
+   "expr": "XIRR(DATATABLE(\"v\",DOUBLE,\"d\",DATETIME,{{-3902.76,\"2019-06-20\"},{945.37,\"2020-03-28\"},{1664.05,\"2020-04-03\"},{887.59,\"2021-11-25\"},{868.69,\"2021-12-15\"},{340.18,\"2022-11-03\"}}),[v],[d])",
+   "powerbi": "0.128739334642888",
+   "now": "LOCAL-REJECT:Function XIRR is not supported by the local DAX engine."
+  },
+  {
+   "part": "A",
+   "expr": "ISERROR(XIRR(DATATABLE(\"v\",DOUBLE,\"d\",DATETIME,{{-3902.76,\"2019-06-20\"},{945.37,\"2020-03-28\"},{1664.05,\"2020-04-03\"},{887.59,\"2021-11-25\"},{868.69,\"2021-12-15\"},{340.18,\"2022-11-03\"}}),[v],[d]))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:Function XIRR is not supported by the local DAX engine."
+  },
+  {
+   "part": "A",
+   "expr": "XIRR(DATATABLE(\"v\",DOUBLE,\"d\",DATETIME,{{-3541.51,\"2020-04-06\"},{1945.65,\"2019-02-11\"},{1834.91,\"2022-08-15\"},{1024.02,\"2022-04-26\"},{11.3,\"2019-11-30\"},{534.3,\"2021-03-17\"},{530.05,\"2020-08-24\"},{1219.17,\"2022-04-09\"}}),[v],[d])",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 19) The XIRR function couldn't find a solution.\"",
+   "now": "LOCAL-REJECT:Function XIRR is not supported by the local DAX engine."
+  },
+  {
+   "part": "A",
+   "expr": "ISERROR(XIRR(DATATABLE(\"v\",DOUBLE,\"d\",DATETIME,{{-3541.51,\"2020-04-06\"},{1945.65,\"2019-02-11\"},{1834.91,\"2022-08-15\"},{1024.02,\"2022-04-26\"},{11.3,\"2019-11-30\"},{534.3,\"2021-03-17\"},{530.05,\"2020-08-24\"},{1219.17,\"2022-04-09\"}}),[v],[d]))",
+   "powerbi": "True",
+   "now": "LOCAL-REJECT:Function XIRR is not supported by the local DAX engine."
+  },
+  {
+   "part": "A",
+   "expr": "XIRR(DATATABLE(\"v\",DOUBLE,\"d\",DATETIME,{{553.65,\"2020-10-15\"},{1124.32,\"2021-06-21\"},{1437.98,\"2022-04-19\"}}),[v],[d])",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 19) The XIRR function couldn't find a solution.\"",
+   "now": "LOCAL-REJECT:Function XIRR is not supported by the local DAX engine."
+  },
+  {
+   "part": "A",
+   "expr": "ISERROR(XIRR(DATATABLE(\"v\",DOUBLE,\"d\",DATETIME,{{553.65,\"2020-10-15\"},{1124.32,\"2021-06-21\"},{1437.98,\"2022-04-19\"}}),[v],[d]))",
+   "powerbi": "True",
+   "now": "LOCAL-REJECT:Function XIRR is not supported by the local DAX engine."
+  },
+  {
+   "part": "A",
+   "expr": "XIRR(DATATABLE(\"v\",DOUBLE,\"d\",DATETIME,{{553.65,\"2020-10-15\"},{1124.32,\"2021-06-21\"},{1437.98,\"2022-04-19\"}}),[v],[d],-0.5)",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 19) The XIRR function couldn't find a solution.\"",
+   "now": "LOCAL-REJECT:Function XIRR is not supported by the local DAX engine."
+  },
+  {
+   "part": "A",
+   "expr": "XIRR(DATATABLE(\"v\",DOUBLE,\"d\",DATETIME,{{553.65,\"2020-10-15\"},{1124.32,\"2021-06-21\"},{1437.98,\"2022-04-19\"}}),[v],[d],0.3,5)",
+   "powerbi": "5",
+   "now": "LOCAL-REJECT:Function XIRR is not supported by the local DAX engine."
+  },
+  {
+   "part": "A",
+   "expr": "XIRR(DATATABLE(\"v\",DOUBLE,\"d\",DATETIME,{{-4992.87,\"2019-10-12\"},{513.66,\"2019-10-12\"},{1342.55,\"2020-07-11\"},{730.23,\"2022-12-06\"}}),[v],[d])",
+   "powerbi": "-0.335966059938073",
+   "now": "LOCAL-REJECT:Function XIRR is not supported by the local DAX engine."
+  },
+  {
+   "part": "A",
+   "expr": "ISERROR(XIRR(DATATABLE(\"v\",DOUBLE,\"d\",DATETIME,{{-4992.87,\"2019-10-12\"},{513.66,\"2019-10-12\"},{1342.55,\"2020-07-11\"},{730.23,\"2022-12-06\"}}),[v],[d]))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:Function XIRR is not supported by the local DAX engine."
+  },
+  {
+   "part": "A",
+   "expr": "XIRR(DATATABLE(\"v\",DOUBLE,\"d\",DATETIME,{{-4071.14,\"2019-02-13\"},{505.54,\"2019-04-23\"},{-154.01,\"2019-09-28\"},{-115.4,\"2019-11-25\"},{170.56,\"2020-06-11\"},{1717.18,\"2021-10-20\"},{-28.43,\"2022-11-09\"},{73.94,\"2022-12-14\"}}),[v],[d])",
+   "powerbi": "-0.232417988777161",
+   "now": "LOCAL-REJECT:Function XIRR is not supported by the local DAX engine."
+  },
+  {
+   "part": "A",
+   "expr": "ISERROR(XIRR(DATATABLE(\"v\",DOUBLE,\"d\",DATETIME,{{-4071.14,\"2019-02-13\"},{505.54,\"2019-04-23\"},{-154.01,\"2019-09-28\"},{-115.4,\"2019-11-25\"},{170.56,\"2020-06-11\"},{1717.18,\"2021-10-20\"},{-28.43,\"2022-11-09\"},{73.94,\"2022-12-14\"}}),[v],[d]))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:Function XIRR is not supported by the local DAX engine."
+  },
+  {
+   "part": "A",
+   "expr": "XIRR(DATATABLE(\"v\",DOUBLE,\"d\",DATETIME,{{-3777.84,\"2019-07-17\"},{98.37,\"2021-09-09\"}}),[v],[d])",
+   "powerbi": "-0.816636308655143",
+   "now": "LOCAL-REJECT:Function XIRR is not supported by the local DAX engine."
+  },
+  {
+   "part": "A",
+   "expr": "ISERROR(XIRR(DATATABLE(\"v\",DOUBLE,\"d\",DATETIME,{{-3777.84,\"2019-07-17\"},{98.37,\"2021-09-09\"}}),[v],[d]))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:Function XIRR is not supported by the local DAX engine."
+  },
+  {
+   "part": "A",
+   "expr": "XIRR(DATATABLE(\"v\",DOUBLE,\"d\",DATETIME,{{-3777.84,\"2019-07-17\"},{98.37,\"2021-09-09\"}}),[v],[d],-0.5)",
+   "powerbi": "-0.816636308562011",
+   "now": "LOCAL-REJECT:Function XIRR is not supported by the local DAX engine."
+  },
+  {
+   "part": "A",
+   "expr": "XIRR(DATATABLE(\"v\",DOUBLE,\"d\",DATETIME,{{-3196.7,\"2019-04-06\"},{1269.18,\"2019-11-14\"},{-164.01,\"2021-07-19\"},{95.31,\"2021-07-29\"}}),[v],[d])",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 19) The XIRR function couldn't find a solution.\"",
+   "now": "LOCAL-REJECT:Function XIRR is not supported by the local DAX engine."
+  },
+  {
+   "part": "A",
+   "expr": "ISERROR(XIRR(DATATABLE(\"v\",DOUBLE,\"d\",DATETIME,{{-3196.7,\"2019-04-06\"},{1269.18,\"2019-11-14\"},{-164.01,\"2021-07-19\"},{95.31,\"2021-07-29\"}}),[v],[d]))",
+   "powerbi": "True",
+   "now": "LOCAL-REJECT:Function XIRR is not supported by the local DAX engine."
+  },
+  {
+   "part": "A",
+   "expr": "XIRR(DATATABLE(\"v\",DOUBLE,\"d\",DATETIME,{{-3196.7,\"2019-04-06\"},{1269.18,\"2019-11-14\"},{-164.01,\"2021-07-19\"},{95.31,\"2021-07-29\"}}),[v],[d],0.3,5)",
+   "powerbi": "5",
+   "now": "LOCAL-REJECT:Function XIRR is not supported by the local DAX engine."
+  },
+  {
+   "part": "A",
+   "expr": "XIRR(DATATABLE(\"v\",DOUBLE,\"d\",DATETIME,{{-3304.69,\"2019-10-09\"},{375.94,\"2019-12-12\"},{874.02,\"2021-03-11\"},{69.21,\"2021-12-16\"},{769.92,\"2022-04-25\"},{999.44,\"2022-10-30\"},{1912.13,\"2022-11-16\"}}),[v],[d])",
+   "powerbi": "0.187665501236916",
+   "now": "LOCAL-REJECT:Function XIRR is not supported by the local DAX engine."
+  },
+  {
+   "part": "A",
+   "expr": "ISERROR(XIRR(DATATABLE(\"v\",DOUBLE,\"d\",DATETIME,{{-3304.69,\"2019-10-09\"},{375.94,\"2019-12-12\"},{874.02,\"2021-03-11\"},{69.21,\"2021-12-16\"},{769.92,\"2022-04-25\"},{999.44,\"2022-10-30\"},{1912.13,\"2022-11-16\"}}),[v],[d]))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:Function XIRR is not supported by the local DAX engine."
+  },
+  {
+   "part": "A",
+   "expr": "XIRR(DATATABLE(\"v\",DOUBLE,\"d\",DATETIME,{{-3111.32,\"2019-05-26\"},{1275.54,\"2019-09-26\"},{1774.79,\"2021-01-24\"},{553.98,\"2021-03-25\"},{1911.43,\"2021-08-05\"},{1316.53,\"2021-10-13\"},{582.12,\"2022-02-22\"},{992.24,\"2022-10-14\"}}),[v],[d])",
+   "powerbi": "0.757539318501949",
+   "now": "LOCAL-REJECT:Function XIRR is not supported by the local DAX engine."
+  },
+  {
+   "part": "A",
+   "expr": "ISERROR(XIRR(DATATABLE(\"v\",DOUBLE,\"d\",DATETIME,{{-3111.32,\"2019-05-26\"},{1275.54,\"2019-09-26\"},{1774.79,\"2021-01-24\"},{553.98,\"2021-03-25\"},{1911.43,\"2021-08-05\"},{1316.53,\"2021-10-13\"},{582.12,\"2022-02-22\"},{992.24,\"2022-10-14\"}}),[v],[d]))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:Function XIRR is not supported by the local DAX engine."
+  },
+  {
+   "part": "A",
+   "expr": "XIRR(DATATABLE(\"v\",DOUBLE,\"d\",DATETIME,{{-3111.32,\"2019-05-26\"},{1275.54,\"2019-09-26\"},{1774.79,\"2021-01-24\"},{553.98,\"2021-03-25\"},{1911.43,\"2021-08-05\"},{1316.53,\"2021-10-13\"},{582.12,\"2022-02-22\"},{992.24,\"2022-10-14\"}}),[v],[d],-0.5)",
+   "powerbi": "0.757539317011833",
+   "now": "LOCAL-REJECT:Function XIRR is not supported by the local DAX engine."
+  },
+  {
+   "part": "A",
+   "expr": "XIRR(DATATABLE(\"v\",DOUBLE,\"d\",DATETIME,{{-4922.62,\"2019-02-20\"},{616.58,\"2020-11-14\"},{1081.72,\"2022-01-21\"},{-283.43,\"2022-08-29\"}}),[v],[d])",
+   "powerbi": "-0.417924849875271",
+   "now": "LOCAL-REJECT:Function XIRR is not supported by the local DAX engine."
+  },
+  {
+   "part": "A",
+   "expr": "ISERROR(XIRR(DATATABLE(\"v\",DOUBLE,\"d\",DATETIME,{{-4922.62,\"2019-02-20\"},{616.58,\"2020-11-14\"},{1081.72,\"2022-01-21\"},{-283.43,\"2022-08-29\"}}),[v],[d]))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:Function XIRR is not supported by the local DAX engine."
+  },
+  {
+   "part": "A",
+   "expr": "XIRR(DATATABLE(\"v\",DOUBLE,\"d\",DATETIME,{{-4624.05,\"2019-07-22\"},{339.64,\"2019-11-10\"},{493.43,\"2020-06-22\"},{1888.09,\"2020-11-25\"},{1674.89,\"2021-02-09\"},{1853.85,\"2021-04-20\"},{-36.54,\"2022-05-16\"}}),[v],[d])",
+   "powerbi": "0.232902271300554",
+   "now": "LOCAL-REJECT:Function XIRR is not supported by the local DAX engine."
+  },
+  {
+   "part": "A",
+   "expr": "ISERROR(XIRR(DATATABLE(\"v\",DOUBLE,\"d\",DATETIME,{{-4624.05,\"2019-07-22\"},{339.64,\"2019-11-10\"},{493.43,\"2020-06-22\"},{1888.09,\"2020-11-25\"},{1674.89,\"2021-02-09\"},{1853.85,\"2021-04-20\"},{-36.54,\"2022-05-16\"}}),[v],[d]))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:Function XIRR is not supported by the local DAX engine."
+  },
+  {
+   "part": "A",
+   "expr": "XIRR(DATATABLE(\"v\",DOUBLE,\"d\",DATETIME,{{-4624.05,\"2019-07-22\"},{339.64,\"2019-11-10\"},{493.43,\"2020-06-22\"},{1888.09,\"2020-11-25\"},{1674.89,\"2021-02-09\"},{1853.85,\"2021-04-20\"},{-36.54,\"2022-05-16\"}}),[v],[d],0.3,5)",
+   "powerbi": "0.232902263104916",
+   "now": "LOCAL-REJECT:Function XIRR is not supported by the local DAX engine."
+  },
+  {
+   "part": "A",
+   "expr": "XIRR(DATATABLE(\"v\",DOUBLE,\"d\",DATETIME,{{-2017.01,\"2020-01-22\"},{-58.9,\"2022-11-23\"}}),[v],[d])",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 19) The XIRR function couldn't find a solution.\"",
+   "now": "LOCAL-REJECT:Function XIRR is not supported by the local DAX engine."
+  },
+  {
+   "part": "A",
+   "expr": "ISERROR(XIRR(DATATABLE(\"v\",DOUBLE,\"d\",DATETIME,{{-2017.01,\"2020-01-22\"},{-58.9,\"2022-11-23\"}}),[v],[d]))",
+   "powerbi": "True",
+   "now": "LOCAL-REJECT:Function XIRR is not supported by the local DAX engine."
+  },
+  {
+   "part": "A",
+   "expr": "XIRR(DATATABLE(\"v\",DOUBLE,\"d\",DATETIME,{{-2017.01,\"2020-01-22\"},{-58.9,\"2022-11-23\"}}),[v],[d],-0.5)",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 19) The XIRR function couldn't find a solution.\"",
+   "now": "LOCAL-REJECT:Function XIRR is not supported by the local DAX engine."
+  },
+  {
+   "part": "A",
+   "expr": "XIRR(DATATABLE(\"v\",DOUBLE,\"d\",DATETIME,{{997.2,\"2020-10-23\"},{1488.9,\"2021-01-12\"}}),[v],[d])",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 19) The XIRR function couldn't find a solution.\"",
+   "now": "LOCAL-REJECT:Function XIRR is not supported by the local DAX engine."
+  },
+  {
+   "part": "A",
+   "expr": "ISERROR(XIRR(DATATABLE(\"v\",DOUBLE,\"d\",DATETIME,{{997.2,\"2020-10-23\"},{1488.9,\"2021-01-12\"}}),[v],[d]))",
+   "powerbi": "True",
+   "now": "LOCAL-REJECT:Function XIRR is not supported by the local DAX engine."
+  },
+  {
+   "part": "A",
+   "expr": "XIRR(DATATABLE(\"v\",DOUBLE,\"d\",DATETIME,{{-4399.74,\"2019-01-26\"},{1981.34,\"2019-01-26\"},{1807.03,\"2021-02-06\"},{3.27,\"2022-05-02\"},{1399.04,\"2022-09-22\"}}),[v],[d])",
+   "powerbi": "0.110111901909113",
+   "now": "LOCAL-REJECT:Function XIRR is not supported by the local DAX engine."
+  },
+  {
+   "part": "A",
+   "expr": "ISERROR(XIRR(DATATABLE(\"v\",DOUBLE,\"d\",DATETIME,{{-4399.74,\"2019-01-26\"},{1981.34,\"2019-01-26\"},{1807.03,\"2021-02-06\"},{3.27,\"2022-05-02\"},{1399.04,\"2022-09-22\"}}),[v],[d]))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:Function XIRR is not supported by the local DAX engine."
+  },
+  {
+   "part": "A",
+   "expr": "XIRR(DATATABLE(\"v\",DOUBLE,\"d\",DATETIME,{{-694.98,\"2019-03-07\"},{1864.91,\"2019-09-24\"},{1897.84,\"2019-11-13\"},{511.01,\"2021-02-18\"},{1507.05,\"2021-09-24\"},{1857.7,\"2021-12-06\"},{692.85,\"2022-04-25\"},{472.26,\"2022-07-09\"}}),[v],[d])",
+   "powerbi": "14.8768825769424",
+   "now": "LOCAL-REJECT:Function XIRR is not supported by the local DAX engine."
+  },
+  {
+   "part": "A",
+   "expr": "ISERROR(XIRR(DATATABLE(\"v\",DOUBLE,\"d\",DATETIME,{{-694.98,\"2019-03-07\"},{1864.91,\"2019-09-24\"},{1897.84,\"2019-11-13\"},{511.01,\"2021-02-18\"},{1507.05,\"2021-09-24\"},{1857.7,\"2021-12-06\"},{692.85,\"2022-04-25\"},{472.26,\"2022-07-09\"}}),[v],[d]))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:Function XIRR is not supported by the local DAX engine."
+  },
+  {
+   "part": "A",
+   "expr": "XIRR(DATATABLE(\"v\",DOUBLE,\"d\",DATETIME,{{-694.98,\"2019-03-07\"},{1864.91,\"2019-09-24\"},{1897.84,\"2019-11-13\"},{511.01,\"2021-02-18\"},{1507.05,\"2021-09-24\"},{1857.7,\"2021-12-06\"},{692.85,\"2022-04-25\"},{472.26,\"2022-07-09\"}}),[v],[d],-0.5)",
+   "powerbi": "14.8768825531006",
+   "now": "LOCAL-REJECT:Function XIRR is not supported by the local DAX engine."
+  },
+  {
+   "part": "A",
+   "expr": "XIRR(DATATABLE(\"v\",DOUBLE,\"d\",DATETIME,{{-694.98,\"2019-03-07\"},{1864.91,\"2019-09-24\"},{1897.84,\"2019-11-13\"},{511.01,\"2021-02-18\"},{1507.05,\"2021-09-24\"},{1857.7,\"2021-12-06\"},{692.85,\"2022-04-25\"},{472.26,\"2022-07-09\"}}),[v],[d],0.3,5)",
+   "powerbi": "14.8768825650215",
+   "now": "LOCAL-REJECT:Function XIRR is not supported by the local DAX engine."
+  },
+  {
+   "part": "A",
+   "expr": "XIRR(DATATABLE(\"v\",DOUBLE,\"d\",DATETIME,{{-4794.48,\"2019-01-14\"},{560.17,\"2019-04-10\"},{1793.05,\"2020-01-06\"},{22.46,\"2021-01-12\"},{1064.99,\"2021-04-24\"},{1616.5,\"2022-12-01\"}}),[v],[d])",
+   "powerbi": "0.0259967841207984",
+   "now": "LOCAL-REJECT:Function XIRR is not supported by the local DAX engine."
+  },
+  {
+   "part": "A",
+   "expr": "ISERROR(XIRR(DATATABLE(\"v\",DOUBLE,\"d\",DATETIME,{{-4794.48,\"2019-01-14\"},{560.17,\"2019-04-10\"},{1793.05,\"2020-01-06\"},{22.46,\"2021-01-12\"},{1064.99,\"2021-04-24\"},{1616.5,\"2022-12-01\"}}),[v],[d]))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:Function XIRR is not supported by the local DAX engine."
+  },
+  {
+   "part": "A",
+   "expr": "XIRR(DATATABLE(\"v\",DOUBLE,\"d\",DATETIME,{{-2138.58,\"2020-06-10\"},{597.86,\"2020-06-13\"},{652.06,\"2020-07-22\"},{261.45,\"2020-08-03\"},{1068.79,\"2023-01-12\"}}),[v],[d])",
+   "powerbi": "0.211720602214336",
+   "now": "LOCAL-REJECT:Function XIRR is not supported by the local DAX engine."
+  },
+  {
+   "part": "A",
+   "expr": "ISERROR(XIRR(DATATABLE(\"v\",DOUBLE,\"d\",DATETIME,{{-2138.58,\"2020-06-10\"},{597.86,\"2020-06-13\"},{652.06,\"2020-07-22\"},{261.45,\"2020-08-03\"},{1068.79,\"2023-01-12\"}}),[v],[d]))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:Function XIRR is not supported by the local DAX engine."
+  },
+  {
+   "part": "A",
+   "expr": "XIRR(DATATABLE(\"v\",DOUBLE,\"d\",DATETIME,{{-915.35,\"2019-07-19\"},{1892.62,\"2020-06-22\"},{-21.01,\"2021-08-10\"}}),[v],[d])",
+   "powerbi": "1.17529032975435",
+   "now": "LOCAL-REJECT:Function XIRR is not supported by the local DAX engine."
+  },
+  {
+   "part": "A",
+   "expr": "ISERROR(XIRR(DATATABLE(\"v\",DOUBLE,\"d\",DATETIME,{{-915.35,\"2019-07-19\"},{1892.62,\"2020-06-22\"},{-21.01,\"2021-08-10\"}}),[v],[d]))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:Function XIRR is not supported by the local DAX engine."
+  },
+  {
+   "part": "A",
+   "expr": "XIRR(DATATABLE(\"v\",DOUBLE,\"d\",DATETIME,{{-915.35,\"2019-07-19\"},{1892.62,\"2020-06-22\"},{-21.01,\"2021-08-10\"}}),[v],[d],-0.5)",
+   "powerbi": "1.17529033124447",
+   "now": "LOCAL-REJECT:Function XIRR is not supported by the local DAX engine."
+  },
+  {
+   "part": "A",
+   "expr": "XIRR(DATATABLE(\"v\",DOUBLE,\"d\",DATETIME,{{-4222.71,\"2019-09-04\"},{550.87,\"2020-02-15\"},{1146.71,\"2020-05-03\"},{1529.67,\"2021-09-13\"},{1318.45,\"2022-02-22\"},{414.46,\"2022-04-11\"},{393.21,\"2022-07-20\"},{1040.62,\"2022-11-17\"}}),[v],[d])",
+   "powerbi": "0.241007675975561",
+   "now": "LOCAL-REJECT:Function XIRR is not supported by the local DAX engine."
+  },
+  {
+   "part": "A",
+   "expr": "ISERROR(XIRR(DATATABLE(\"v\",DOUBLE,\"d\",DATETIME,{{-4222.71,\"2019-09-04\"},{550.87,\"2020-02-15\"},{1146.71,\"2020-05-03\"},{1529.67,\"2021-09-13\"},{1318.45,\"2022-02-22\"},{414.46,\"2022-04-11\"},{393.21,\"2022-07-20\"},{1040.62,\"2022-11-17\"}}),[v],[d]))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:Function XIRR is not supported by the local DAX engine."
+  },
+  {
+   "part": "A",
+   "expr": "XIRR(DATATABLE(\"v\",DOUBLE,\"d\",DATETIME,{{-4222.71,\"2019-09-04\"},{550.87,\"2020-02-15\"},{1146.71,\"2020-05-03\"},{1529.67,\"2021-09-13\"},{1318.45,\"2022-02-22\"},{414.46,\"2022-04-11\"},{393.21,\"2022-07-20\"},{1040.62,\"2022-11-17\"}}),[v],[d],0.3,5)",
+   "powerbi": "0.241007670760155",
+   "now": "LOCAL-REJECT:Function XIRR is not supported by the local DAX engine."
+  },
+  {
+   "part": "A",
+   "expr": "XIRR(DATATABLE(\"v\",DOUBLE,\"d\",DATETIME,{{-4684.05,\"2019-01-06\"},{985.27,\"2019-05-12\"},{1023.85,\"2019-05-21\"},{-170.28,\"2019-12-16\"},{292.36,\"2021-03-13\"},{1998.74,\"2023-01-02\"}}),[v],[d])",
+   "powerbi": "-0.0531111631542442",
+   "now": "LOCAL-REJECT:Function XIRR is not supported by the local DAX engine."
+  },
+  {
+   "part": "A",
+   "expr": "ISERROR(XIRR(DATATABLE(\"v\",DOUBLE,\"d\",DATETIME,{{-4684.05,\"2019-01-06\"},{985.27,\"2019-05-12\"},{1023.85,\"2019-05-21\"},{-170.28,\"2019-12-16\"},{292.36,\"2021-03-13\"},{1998.74,\"2023-01-02\"}}),[v],[d]))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:Function XIRR is not supported by the local DAX engine."
+  },
+  {
+   "part": "A",
+   "expr": "XIRR(DATATABLE(\"v\",DOUBLE,\"d\",DATETIME,{{-4363.88,\"2019-07-25\"},{756.19,\"2022-07-28\"}}),[v],[d])",
+   "powerbi": "-0.441303093545139",
+   "now": "LOCAL-REJECT:Function XIRR is not supported by the local DAX engine."
+  },
+  {
+   "part": "A",
+   "expr": "ISERROR(XIRR(DATATABLE(\"v\",DOUBLE,\"d\",DATETIME,{{-4363.88,\"2019-07-25\"},{756.19,\"2022-07-28\"}}),[v],[d]))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:Function XIRR is not supported by the local DAX engine."
+  },
+  {
+   "part": "A",
+   "expr": "XIRR(DATATABLE(\"v\",DOUBLE,\"d\",DATETIME,{{-4363.88,\"2019-07-25\"},{756.19,\"2022-07-28\"}}),[v],[d],-0.5)",
+   "powerbi": "-0.4413030911237",
+   "now": "LOCAL-REJECT:Function XIRR is not supported by the local DAX engine."
+  },
+  {
+   "part": "A",
+   "expr": "XIRR(DATATABLE(\"v\",DOUBLE,\"d\",DATETIME,{{-2412.2,\"2021-03-13\"},{1590.34,\"2019-03-28\"}}),[v],[d])",
+   "powerbi": "0.23660349547863",
+   "now": "LOCAL-REJECT:Function XIRR is not supported by the local DAX engine."
+  },
+  {
+   "part": "A",
+   "expr": "ISERROR(XIRR(DATATABLE(\"v\",DOUBLE,\"d\",DATETIME,{{-2412.2,\"2021-03-13\"},{1590.34,\"2019-03-28\"}}),[v],[d]))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:Function XIRR is not supported by the local DAX engine."
+  },
+  {
+   "part": "A",
+   "expr": "XIRR(DATATABLE(\"v\",DOUBLE,\"d\",DATETIME,{{2027.02,\"2021-03-16\"},{13.75,\"2021-06-18\"},{251.08,\"2021-08-10\"}}),[v],[d])",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 19) The XIRR function couldn't find a solution.\"",
+   "now": "LOCAL-REJECT:Function XIRR is not supported by the local DAX engine."
+  },
+  {
+   "part": "A",
+   "expr": "ISERROR(XIRR(DATATABLE(\"v\",DOUBLE,\"d\",DATETIME,{{2027.02,\"2021-03-16\"},{13.75,\"2021-06-18\"},{251.08,\"2021-08-10\"}}),[v],[d]))",
+   "powerbi": "True",
+   "now": "LOCAL-REJECT:Function XIRR is not supported by the local DAX engine."
+  },
+  {
+   "part": "A",
+   "expr": "XIRR(DATATABLE(\"v\",DOUBLE,\"d\",DATETIME,{{2027.02,\"2021-03-16\"},{13.75,\"2021-06-18\"},{251.08,\"2021-08-10\"}}),[v],[d],0.3,5)",
+   "powerbi": "5",
+   "now": "LOCAL-REJECT:Function XIRR is not supported by the local DAX engine."
+  },
+  {
+   "part": "A",
+   "expr": "XIRR(DATATABLE(\"v\",DOUBLE,\"d\",DATETIME,{{-1786.81,\"2019-04-28\"},{1260.0,\"2019-04-28\"},{1840.69,\"2019-11-25\"},{1264.95,\"2022-02-21\"}}),[v],[d])",
+   "powerbi": "7.78626673221588",
+   "now": "LOCAL-REJECT:Function XIRR is not supported by the local DAX engine."
+  },
+  {
+   "part": "A",
+   "expr": "ISERROR(XIRR(DATATABLE(\"v\",DOUBLE,\"d\",DATETIME,{{-1786.81,\"2019-04-28\"},{1260.0,\"2019-04-28\"},{1840.69,\"2019-11-25\"},{1264.95,\"2022-02-21\"}}),[v],[d]))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:Function XIRR is not supported by the local DAX engine."
+  },
+  {
+   "part": "A",
+   "expr": "XIRR(DATATABLE(\"v\",DOUBLE,\"d\",DATETIME,{{-1786.81,\"2019-04-28\"},{1260.0,\"2019-04-28\"},{1840.69,\"2019-11-25\"},{1264.95,\"2022-02-21\"}}),[v],[d],-0.5)",
+   "powerbi": "7.78626674413681",
+   "now": "LOCAL-REJECT:Function XIRR is not supported by the local DAX engine."
+  },
+  {
+   "part": "A",
+   "expr": "XIRR(FILTER(DATATABLE(\"v\",DOUBLE,\"d\",DATETIME,{{-1,\"2020-01-01\"}}),FALSE()),[v],[d])",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 19) A result for XIRR couldn't be determined because the Values and Dates arguments are empty.\"",
+   "now": "LOCAL-REJECT:Function XIRR is not supported by the local DAX engine."
+  },
+  {
+   "part": "A",
+   "expr": "XIRR(DATATABLE(\"v\",DOUBLE,\"d\",DATETIME,{{-100,\"2020-01-01\"},{BLANK(),\"2020-02-01\"},{110,\"2021-01-01\"}}),[v],[d])",
+   "powerbi": "0.0997135788202284",
+   "now": "LOCAL-REJECT:Function XIRR is not supported by the local DAX engine."
+  },
+  {
+   "part": "A",
+   "expr": "XIRR(DATATABLE(\"v\",DOUBLE,\"d\",DATETIME,{{-100,\"2020-01-01\"},{110,\"2020-01-01\"}}),[v],[d])",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 19) There isn't a valid result for the XIRR function for the given values.\"",
+   "now": "LOCAL-REJECT:Function XIRR is not supported by the local DAX engine."
+  },
+  {
+   "part": "A",
+   "expr": "XIRR(DATATABLE(\"v\",DOUBLE,\"d\",DATETIME,{{-100,\"2020-01-01 12:00:00\"},{110,\"2021-01-01 06:00:00\"}}),[v],[d])",
+   "powerbi": "0.0997135788202284",
+   "now": "LOCAL-REJECT:Function XIRR is not supported by the local DAX engine."
+  },
+  {
+   "part": "A",
+   "expr": "XIRR(DATATABLE(\"v\",DOUBLE,\"d\",DATETIME,{{-100,\"2020-01-01\"},{0,\"2021-01-01\"}}),[v],[d])",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 19) The XIRR function couldn't find a solution.\"",
+   "now": "LOCAL-REJECT:Function XIRR is not supported by the local DAX engine."
+  },
+  {
+   "part": "B",
+   "expr": "ODDFYIELD(DATE(2008,3,30),DATE(2010,7,14),DATE(2008,3,10),DATE(2009,1,2),0.0759,103.0,100,2,1)",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 19) An argument of function 'ODDFYIELD' has the wrong data type or the result is too large or too small.\"",
+   "now": "LOCAL-REJECT:Function ODDFYIELD is not supported by the local DAX engine."
+  },
+  {
+   "part": "B",
+   "expr": "ODDFYIELD(DATE(2009,9,12),DATE(2021,4,13),DATE(2009,7,15),DATE(2009,10,18),0.0222,97.28,105,2,0)",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 19) An argument of function 'ODDFYIELD' has the wrong data type or the result is too large or too small.\"",
+   "now": "LOCAL-REJECT:Function ODDFYIELD is not supported by the local DAX engine."
+  },
+  {
+   "part": "B",
+   "expr": "ODDFYIELD(DATE(2008,2,5),DATE(2012,11,10),DATE(2007,7,24),DATE(2008,9,23),0.0675,107.95,100,4,1)",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 19) An argument of function 'ODDFYIELD' has the wrong data type or the result is too large or too small.\"",
+   "now": "LOCAL-REJECT:Function ODDFYIELD is not supported by the local DAX engine."
+  },
+  {
+   "part": "B",
+   "expr": "ODDFYIELD(DATE(2008,11,5),DATE(2012,7,17),DATE(2008,6,1),DATE(2009,5,14),0.0313,89.89,105,2,0)",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 19) An argument of function 'ODDFYIELD' has the wrong data type or the result is too large or too small.\"",
+   "now": "LOCAL-REJECT:Function ODDFYIELD is not supported by the local DAX engine."
+  },
+  {
+   "part": "B",
+   "expr": "ODDFYIELD(DATE(2010,1,11),DATE(2016,6,15),DATE(2009,11,24),DATE(2010,7,1),0.0748,83.39,105,4,3)",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 19) An argument of function 'ODDFYIELD' has the wrong data type or the result is too large or too small.\"",
+   "now": "LOCAL-REJECT:Function ODDFYIELD is not supported by the local DAX engine."
+  },
+  {
+   "part": "B",
+   "expr": "ODDFYIELD(DATE(2009,3,5),DATE(2012,12,21),DATE(2009,2,16),DATE(2009,7,21),0.0238,107.04,105,4,4)",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 19) An argument of function 'ODDFYIELD' has the wrong data type or the result is too large or too small.\"",
+   "now": "LOCAL-REJECT:Function ODDFYIELD is not supported by the local DAX engine."
+  },
+  {
+   "part": "B",
+   "expr": "ODDFYIELD(DATE(2008,7,30),DATE(2021,9,8),DATE(2008,7,6),DATE(2008,11,1),0.0739,99.79,100,1,4)",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 19) An argument of function 'ODDFYIELD' has the wrong data type or the result is too large or too small.\"",
+   "now": "LOCAL-REJECT:Function ODDFYIELD is not supported by the local DAX engine."
+  },
+  {
+   "part": "B",
+   "expr": "ODDFYIELD(DATE(2009,12,18),DATE(2013,10,26),DATE(2009,8,26),DATE(2010,9,15),0.0187,87.34,105,4,2)",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 19) An argument of function 'ODDFYIELD' has the wrong data type or the result is too large or too small.\"",
+   "now": "LOCAL-REJECT:Function ODDFYIELD is not supported by the local DAX engine."
+  },
+  {
+   "part": "B",
+   "expr": "ODDFYIELD(DATE(2009,11,27),DATE(2019,12,13),DATE(2009,8,27),DATE(2010,8,21),0.0572,93.65,100,4,4)",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 19) An argument of function 'ODDFYIELD' has the wrong data type or the result is too large or too small.\"",
+   "now": "LOCAL-REJECT:Function ODDFYIELD is not supported by the local DAX engine."
+  },
+  {
+   "part": "B",
+   "expr": "ODDFYIELD(DATE(2009,2,16),DATE(2020,3,16),DATE(2008,11,28),DATE(2009,6,12),0.0497,87.98,100,1,4)",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 19) An argument of function 'ODDFYIELD' has the wrong data type or the result is too large or too small.\"",
+   "now": "LOCAL-REJECT:Function ODDFYIELD is not supported by the local DAX engine."
+  },
+  {
+   "part": "B",
+   "expr": "ODDFYIELD(DATE(2009,7,11),DATE(2017,7,8),DATE(2009,4,4),DATE(2009,8,12),0.0517,103.84,100,2,4)",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 19) An argument of function 'ODDFYIELD' has the wrong data type or the result is too large or too small.\"",
+   "now": "LOCAL-REJECT:Function ODDFYIELD is not supported by the local DAX engine."
+  },
+  {
+   "part": "B",
+   "expr": "ODDFYIELD(DATE(2009,10,28),DATE(2019,5,26),DATE(2009,6,25),DATE(2009,12,11),0.0768,85.06,105,2,3)",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 19) An argument of function 'ODDFYIELD' has the wrong data type or the result is too large or too small.\"",
+   "now": "LOCAL-REJECT:Function ODDFYIELD is not supported by the local DAX engine."
+  },
+  {
+   "part": "B",
+   "expr": "ODDFYIELD(DATE(2008,5,29),DATE(2016,6,12),DATE(2008,4,6),DATE(2008,9,17),0.0848,89.1,105,2,2)",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 19) An argument of function 'ODDFYIELD' has the wrong data type or the result is too large or too small.\"",
+   "now": "LOCAL-REJECT:Function ODDFYIELD is not supported by the local DAX engine."
+  },
+  {
+   "part": "B",
+   "expr": "ODDFYIELD(DATE(2009,12,24),DATE(2014,1,17),DATE(2009,9,28),DATE(2010,2,25),0.0423,103.79,100,4,2)",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 19) An argument of function 'ODDFYIELD' has the wrong data type or the result is too large or too small.\"",
+   "now": "LOCAL-REJECT:Function ODDFYIELD is not supported by the local DAX engine."
+  },
+  {
+   "part": "B",
+   "expr": "ODDFYIELD(DATE(2009,8,13),DATE(2022,11,15),DATE(2009,6,1),DATE(2009,9,15),0.0762,103.95,105,1,2)",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 19) An argument of function 'ODDFYIELD' has the wrong data type or the result is too large or too small.\"",
+   "now": "LOCAL-REJECT:Function ODDFYIELD is not supported by the local DAX engine."
+  },
+  {
+   "part": "B",
+   "expr": "ODDFYIELD(DATE(2008,9,19),DATE(2013,4,30),DATE(2008,9,8),DATE(2008,11,1),0.0102,90.23,105,2,4)",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 19) An argument of function 'ODDFYIELD' has the wrong data type or the result is too large or too small.\"",
+   "now": "LOCAL-REJECT:Function ODDFYIELD is not supported by the local DAX engine."
+  },
+  {
+   "part": "B",
+   "expr": "ODDFYIELD(DATE(2009,8,11),DATE(2015,8,9),DATE(2009,4,9),DATE(2010,5,30),0.0675,86.21,105,4,4)",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 19) An argument of function 'ODDFYIELD' has the wrong data type or the result is too large or too small.\"",
+   "now": "LOCAL-REJECT:Function ODDFYIELD is not supported by the local DAX engine."
+  },
+  {
+   "part": "B",
+   "expr": "ODDFYIELD(DATE(2008,12,13),DATE(2015,11,30),DATE(2008,7,18),DATE(2009,8,10),0.0628,87.98,100,4,2)",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 19) An argument of function 'ODDFYIELD' has the wrong data type or the result is too large or too small.\"",
+   "now": "LOCAL-REJECT:Function ODDFYIELD is not supported by the local DAX engine."
+  },
+  {
+   "part": "B",
+   "expr": "ODDFYIELD(DATE(2008,7,17),DATE(2013,10,9),DATE(2008,1,30),DATE(2009,4,5),0.0873,108.47,105,1,1)",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 19) An argument of function 'ODDFYIELD' has the wrong data type or the result is too large or too small.\"",
+   "now": "LOCAL-REJECT:Function ODDFYIELD is not supported by the local DAX engine."
+  },
+  {
+   "part": "B",
+   "expr": "ODDFYIELD(DATE(2008,12,19),DATE(2012,5,15),DATE(2008,8,30),DATE(2009,7,12),0.0324,101.66,100,4,0)",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 19) An argument of function 'ODDFYIELD' has the wrong data type or the result is too large or too small.\"",
+   "now": "LOCAL-REJECT:Function ODDFYIELD is not supported by the local DAX engine."
+  },
+  {
+   "part": "B",
+   "expr": "ODDFYIELD(DATE(2008,7,3),DATE(2020,7,26),DATE(2008,1,15),DATE(2008,10,13),0.04,101.51,105,2,2)",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 19) An argument of function 'ODDFYIELD' has the wrong data type or the result is too large or too small.\"",
+   "now": "LOCAL-REJECT:Function ODDFYIELD is not supported by the local DAX engine."
+  },
+  {
+   "part": "B",
+   "expr": "ODDFYIELD(DATE(2009,8,22),DATE(2019,7,10),DATE(2009,5,19),DATE(2010,5,19),0.0562,85.96,100,1,3)",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 19) An argument of function 'ODDFYIELD' has the wrong data type or the result is too large or too small.\"",
+   "now": "LOCAL-REJECT:Function ODDFYIELD is not supported by the local DAX engine."
+  },
+  {
+   "part": "B",
+   "expr": "ODDFYIELD(DATE(2009,10,7),DATE(2022,5,4),DATE(2009,7,13),DATE(2009,12,3),0.0893,103.61,105,4,0)",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 19) An argument of function 'ODDFYIELD' has the wrong data type or the result is too large or too small.\"",
+   "now": "LOCAL-REJECT:Function ODDFYIELD is not supported by the local DAX engine."
+  },
+  {
+   "part": "B",
+   "expr": "ODDFYIELD(DATE(2009,10,13),DATE(2012,2,26),DATE(2009,7,17),DATE(2010,6,2),0.0505,90.39,105,1,4)",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 19) An argument of function 'ODDFYIELD' has the wrong data type or the result is too large or too small.\"",
+   "now": "LOCAL-REJECT:Function ODDFYIELD is not supported by the local DAX engine."
+  },
+  {
+   "part": "B",
+   "expr": "ODDFYIELD(DATE(2009,9,17),DATE(2012,11,22),DATE(2009,8,8),DATE(2010,2,15),0.0312,84.58,105,4,1)",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 19) An argument of function 'ODDFYIELD' has the wrong data type or the result is too large or too small.\"",
+   "now": "LOCAL-REJECT:Function ODDFYIELD is not supported by the local DAX engine."
+  },
+  {
+   "part": "B",
+   "expr": "ODDFYIELD(DATE(2009,6,7),DATE(2019,5,30),DATE(2009,1,16),DATE(2010,1,7),0.0308,103.02,100,4,1)",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 19) An argument of function 'ODDFYIELD' has the wrong data type or the result is too large or too small.\"",
+   "now": "LOCAL-REJECT:Function ODDFYIELD is not supported by the local DAX engine."
+  },
+  {
+   "part": "B",
+   "expr": "ODDFYIELD(DATE(2008,10,19),DATE(2015,6,22),DATE(2008,7,11),DATE(2009,4,25),0.015,88.11,105,4,2)",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 19) An argument of function 'ODDFYIELD' has the wrong data type or the result is too large or too small.\"",
+   "now": "LOCAL-REJECT:Function ODDFYIELD is not supported by the local DAX engine."
+  },
+  {
+   "part": "B",
+   "expr": "ODDFYIELD(DATE(2009,9,21),DATE(2017,6,10),DATE(2009,6,1),DATE(2009,12,23),0.0276,95.24,100,2,2)",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 19) An argument of function 'ODDFYIELD' has the wrong data type or the result is too large or too small.\"",
+   "now": "LOCAL-REJECT:Function ODDFYIELD is not supported by the local DAX engine."
+  },
+  {
+   "part": "B",
+   "expr": "ODDFYIELD(DATE(2009,12,13),DATE(2019,2,14),DATE(2009,10,9),DATE(2010,5,7),0.0659,102.88,105,2,3)",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 19) An argument of function 'ODDFYIELD' has the wrong data type or the result is too large or too small.\"",
+   "now": "LOCAL-REJECT:Function ODDFYIELD is not supported by the local DAX engine."
+  },
+  {
+   "part": "B",
+   "expr": "ODDFYIELD(DATE(2008,4,24),DATE(2016,9,2),DATE(2007,11,9),DATE(2008,9,15),0.0208,81.05,100,4,4)",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 19) An argument of function 'ODDFYIELD' has the wrong data type or the result is too large or too small.\"",
+   "now": "LOCAL-REJECT:Function ODDFYIELD is not supported by the local DAX engine."
+  },
+  {
+   "part": "B",
+   "expr": "ODDFYIELD(DATE(2009,10,5),DATE(2016,12,11),DATE(2009,9,11),DATE(2010,1,24),0.011,104.96,105,1,4)",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 19) An argument of function 'ODDFYIELD' has the wrong data type or the result is too large or too small.\"",
+   "now": "LOCAL-REJECT:Function ODDFYIELD is not supported by the local DAX engine."
+  },
+  {
+   "part": "B",
+   "expr": "ODDFYIELD(DATE(2009,1,18),DATE(2015,11,7),DATE(2008,12,20),DATE(2009,3,1),0.0239,108.35,100,1,3)",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 19) An argument of function 'ODDFYIELD' has the wrong data type or the result is too large or too small.\"",
+   "now": "LOCAL-REJECT:Function ODDFYIELD is not supported by the local DAX engine."
+  },
+  {
+   "part": "B",
+   "expr": "ODDFYIELD(DATE(2008,3,12),DATE(2010,4,2),DATE(2007,12,25),DATE(2008,7,12),0.0514,100.41,100,4,0)",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 19) An argument of function 'ODDFYIELD' has the wrong data type or the result is too large or too small.\"",
+   "now": "LOCAL-REJECT:Function ODDFYIELD is not supported by the local DAX engine."
+  },
+  {
+   "part": "B",
+   "expr": "ODDFYIELD(DATE(2009,11,24),DATE(2019,2,3),DATE(2009,10,20),DATE(2010,6,29),0.0759,83.25,105,1,0)",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 19) An argument of function 'ODDFYIELD' has the wrong data type or the result is too large or too small.\"",
+   "now": "LOCAL-REJECT:Function ODDFYIELD is not supported by the local DAX engine."
+  },
+  {
+   "part": "B",
+   "expr": "ODDFYIELD(DATE(2009,8,24),DATE(2018,2,10),DATE(2009,3,2),DATE(2010,2,14),0.032,100.02,100,4,3)",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 19) An argument of function 'ODDFYIELD' has the wrong data type or the result is too large or too small.\"",
+   "now": "LOCAL-REJECT:Function ODDFYIELD is not supported by the local DAX engine."
+  },
+  {
+   "part": "B",
+   "expr": "ODDFYIELD(DATE(2009,6,14),DATE(2012,7,18),DATE(2008,11,30),DATE(2009,9,14),0.0112,86.37,100,4,1)",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 19) An argument of function 'ODDFYIELD' has the wrong data type or the result is too large or too small.\"",
+   "now": "LOCAL-REJECT:Function ODDFYIELD is not supported by the local DAX engine."
+  },
+  {
+   "part": "B",
+   "expr": "ODDFYIELD(DATE(2009,1,18),DATE(2020,5,20),DATE(2008,11,19),DATE(2009,8,29),0.0519,99.71,105,4,0)",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 19) An argument of function 'ODDFYIELD' has the wrong data type or the result is too large or too small.\"",
+   "now": "LOCAL-REJECT:Function ODDFYIELD is not supported by the local DAX engine."
+  },
+  {
+   "part": "B",
+   "expr": "ODDFYIELD(DATE(2008,10,25),DATE(2013,6,9),DATE(2008,9,8),DATE(2009,8,3),0.0307,102.65,100,1,1)",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 19) An argument of function 'ODDFYIELD' has the wrong data type or the result is too large or too small.\"",
+   "now": "LOCAL-REJECT:Function ODDFYIELD is not supported by the local DAX engine."
+  },
+  {
+   "part": "B",
+   "expr": "ODDFYIELD(DATE(2008,1,26),DATE(2017,11,19),DATE(2007,7,19),DATE(2008,6,25),0.0133,80.9,105,2,0)",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 19) An argument of function 'ODDFYIELD' has the wrong data type or the result is too large or too small.\"",
+   "now": "LOCAL-REJECT:Function ODDFYIELD is not supported by the local DAX engine."
+  },
+  {
+   "part": "B",
+   "expr": "ODDFYIELD(DATE(2009,5,3),DATE(2023,1,31),DATE(2008,10,19),DATE(2009,6,10),0.0859,101.01,105,2,0)",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 19) An argument of function 'ODDFYIELD' has the wrong data type or the result is too large or too small.\"",
+   "now": "LOCAL-REJECT:Function ODDFYIELD is not supported by the local DAX engine."
+  },
+  {
+   "part": "B",
+   "expr": "ODDFYIELD(DATE(2008,11,11),DATE(2021,3,1),DATE(2008,10,15),DATE(2009,3,1),0.0575,84.5,100,3,0)",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 19) An argument of function 'ODDFYIELD' has the wrong data type or the result is too large or too small.\"",
+   "now": "LOCAL-REJECT:Function ODDFYIELD is not supported by the local DAX engine."
+  },
+  {
+   "part": "B",
+   "expr": "ODDFYIELD(DATE(2008,11,11),DATE(2021,3,1),DATE(2008,10,15),DATE(2009,3,1),-0.01,84.5,100,2,0)",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 19) An argument of function 'ODDFYIELD' has the wrong data type or the result is too large or too small.\"",
+   "now": "LOCAL-REJECT:Function ODDFYIELD is not supported by the local DAX engine."
+  },
+  {
+   "part": "B",
+   "expr": "ODDFYIELD(DATE(2008,11,11),DATE(2021,3,1),DATE(2008,10,15),DATE(2009,3,1),0.0575,84.5,100,2,5)",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 19) An argument of function 'ODDFYIELD' has the wrong data type or the result is too large or too small.\"",
+   "now": "LOCAL-REJECT:Function ODDFYIELD is not supported by the local DAX engine."
+  },
+  {
+   "part": "B",
+   "expr": "ODDFYIELD(DATE(2009,11,11),DATE(2021,3,1),DATE(2008,10,15),DATE(2009,3,1),0.0575,84.5,100,2,0)",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 19) An argument of function 'ODDFYIELD' has the wrong data type or the result is too large or too small.\"",
+   "now": "LOCAL-REJECT:Function ODDFYIELD is not supported by the local DAX engine."
+  },
+  {
+   "part": "B",
+   "expr": "ODDFYIELD(DATE(2008,11,11),DATE(2021,3,1),DATE(2008,10,15),DATE(2009,3,1),0.0575,84.5,100,2)",
+   "powerbi": "0.0772455415972989",
+   "now": "LOCAL-REJECT:Function ODDFYIELD is not supported by the local DAX engine."
+  },
+  {
+   "part": "C",
+   "expr": "PATHITEM(\"1|2|3\",1,INTEGER)&\"z\"",
+   "powerbi": "1z",
+   "now": "LOCAL-REJECT:A table name is only supported as the first argument to COUNTROWS, SUMX, AVERAGEX, MAXX, MINX, COUNTX, or COUNTAX."
+  },
+  {
+   "part": "C",
+   "expr": "PATHITEMREVERSE(\"1|2|3\",1,INTEGER)&\"z\"",
+   "powerbi": "3z",
+   "now": "LOCAL-REJECT:A table name is only supported as the first argument to COUNTROWS, SUMX, AVERAGEX, MAXX, MINX, COUNTX, or COUNTAX."
+  },
+  {
+   "part": "C",
+   "expr": "PATHITEM(\"1|2|3\",2,INTEGER)&\"z\"",
+   "powerbi": "2z",
+   "now": "LOCAL-REJECT:A table name is only supported as the first argument to COUNTROWS, SUMX, AVERAGEX, MAXX, MINX, COUNTX, or COUNTAX."
+  },
+  {
+   "part": "C",
+   "expr": "PATHITEMREVERSE(\"1|2|3\",2,INTEGER)&\"z\"",
+   "powerbi": "2z",
+   "now": "LOCAL-REJECT:A table name is only supported as the first argument to COUNTROWS, SUMX, AVERAGEX, MAXX, MINX, COUNTX, or COUNTAX."
+  },
+  {
+   "part": "C",
+   "expr": "PATHITEM(\"1|2|3\",5,INTEGER)&\"z\"",
+   "powerbi": "z",
+   "now": "LOCAL-REJECT:A table name is only supported as the first argument to COUNTROWS, SUMX, AVERAGEX, MAXX, MINX, COUNTX, or COUNTAX."
+  },
+  {
+   "part": "C",
+   "expr": "PATHITEMREVERSE(\"1|2|3\",5,INTEGER)&\"z\"",
+   "powerbi": "z",
+   "now": "LOCAL-REJECT:A table name is only supported as the first argument to COUNTROWS, SUMX, AVERAGEX, MAXX, MINX, COUNTX, or COUNTAX."
+  },
+  {
+   "part": "C",
+   "expr": "PATHITEM(\"1|2|3\",-1,INTEGER)&\"z\"",
+   "powerbi": "z",
+   "now": "LOCAL-REJECT:A table name is only supported as the first argument to COUNTROWS, SUMX, AVERAGEX, MAXX, MINX, COUNTX, or COUNTAX."
+  },
+  {
+   "part": "C",
+   "expr": "PATHITEMREVERSE(\"1|2|3\",-1,INTEGER)&\"z\"",
+   "powerbi": "z",
+   "now": "LOCAL-REJECT:A table name is only supported as the first argument to COUNTROWS, SUMX, AVERAGEX, MAXX, MINX, COUNTX, or COUNTAX."
+  },
+  {
+   "part": "C",
+   "expr": "PATHITEM(\"1|2|3\",1,TEXT)&\"z\"",
+   "powerbi": "1z",
+   "now": "LOCAL-REJECT:A table name is only supported as the first argument to COUNTROWS, SUMX, AVERAGEX, MAXX, MINX, COUNTX, or COUNTAX."
+  },
+  {
+   "part": "C",
+   "expr": "PATHITEMREVERSE(\"1|2|3\",1,TEXT)&\"z\"",
+   "powerbi": "3z",
+   "now": "LOCAL-REJECT:A table name is only supported as the first argument to COUNTROWS, SUMX, AVERAGEX, MAXX, MINX, COUNTX, or COUNTAX."
+  },
+  {
+   "part": "C",
+   "expr": "PATHITEM(\"1|2|3\",2,TEXT)&\"z\"",
+   "powerbi": "2z",
+   "now": "LOCAL-REJECT:A table name is only supported as the first argument to COUNTROWS, SUMX, AVERAGEX, MAXX, MINX, COUNTX, or COUNTAX."
+  },
+  {
+   "part": "C",
+   "expr": "PATHITEMREVERSE(\"1|2|3\",2,TEXT)&\"z\"",
+   "powerbi": "2z",
+   "now": "LOCAL-REJECT:A table name is only supported as the first argument to COUNTROWS, SUMX, AVERAGEX, MAXX, MINX, COUNTX, or COUNTAX."
+  },
+  {
+   "part": "C",
+   "expr": "PATHITEM(\"1|2|3\",5,TEXT)&\"z\"",
+   "powerbi": "z",
+   "now": "LOCAL-REJECT:A table name is only supported as the first argument to COUNTROWS, SUMX, AVERAGEX, MAXX, MINX, COUNTX, or COUNTAX."
+  },
+  {
+   "part": "C",
+   "expr": "PATHITEMREVERSE(\"1|2|3\",5,TEXT)&\"z\"",
+   "powerbi": "z",
+   "now": "LOCAL-REJECT:A table name is only supported as the first argument to COUNTROWS, SUMX, AVERAGEX, MAXX, MINX, COUNTX, or COUNTAX."
+  },
+  {
+   "part": "C",
+   "expr": "PATHITEM(\"1|2|3\",-1,TEXT)&\"z\"",
+   "powerbi": "z",
+   "now": "LOCAL-REJECT:A table name is only supported as the first argument to COUNTROWS, SUMX, AVERAGEX, MAXX, MINX, COUNTX, or COUNTAX."
+  },
+  {
+   "part": "C",
+   "expr": "PATHITEMREVERSE(\"1|2|3\",-1,TEXT)&\"z\"",
+   "powerbi": "z",
+   "now": "LOCAL-REJECT:A table name is only supported as the first argument to COUNTROWS, SUMX, AVERAGEX, MAXX, MINX, COUNTX, or COUNTAX."
+  },
+  {
+   "part": "C",
+   "expr": "PATHITEM(\"1|2|3\",1,1)&\"z\"",
+   "powerbi": "1z",
+   "now": "1z"
+  },
+  {
+   "part": "C",
+   "expr": "PATHITEMREVERSE(\"1|2|3\",1,1)&\"z\"",
+   "powerbi": "3z",
+   "now": "3z"
+  },
+  {
+   "part": "C",
+   "expr": "PATHITEM(\"1|2|3\",2,1)&\"z\"",
+   "powerbi": "2z",
+   "now": "2z"
+  },
+  {
+   "part": "C",
+   "expr": "PATHITEMREVERSE(\"1|2|3\",2,1)&\"z\"",
+   "powerbi": "2z",
+   "now": "2z"
+  },
+  {
+   "part": "C",
+   "expr": "PATHITEM(\"1|2|3\",5,1)&\"z\"",
+   "powerbi": "z",
+   "now": "z"
+  },
+  {
+   "part": "C",
+   "expr": "PATHITEMREVERSE(\"1|2|3\",5,1)&\"z\"",
+   "powerbi": "z",
+   "now": "z"
+  },
+  {
+   "part": "C",
+   "expr": "PATHITEM(\"1|2|3\",-1,1)&\"z\"",
+   "powerbi": "z",
+   "now": "z"
+  },
+  {
+   "part": "C",
+   "expr": "PATHITEMREVERSE(\"1|2|3\",-1,1)&\"z\"",
+   "powerbi": "z",
+   "now": "z"
+  },
+  {
+   "part": "C",
+   "expr": "PATHITEM(\"1|2|3\",1,0)&\"z\"",
+   "powerbi": "1z",
+   "now": "1z"
+  },
+  {
+   "part": "C",
+   "expr": "PATHITEMREVERSE(\"1|2|3\",1,0)&\"z\"",
+   "powerbi": "3z",
+   "now": "3z"
+  },
+  {
+   "part": "C",
+   "expr": "PATHITEM(\"1|2|3\",2,0)&\"z\"",
+   "powerbi": "2z",
+   "now": "2z"
+  },
+  {
+   "part": "C",
+   "expr": "PATHITEMREVERSE(\"1|2|3\",2,0)&\"z\"",
+   "powerbi": "2z",
+   "now": "2z"
+  },
+  {
+   "part": "C",
+   "expr": "PATHITEM(\"1|2|3\",5,0)&\"z\"",
+   "powerbi": "z",
+   "now": "z"
+  },
+  {
+   "part": "C",
+   "expr": "PATHITEMREVERSE(\"1|2|3\",5,0)&\"z\"",
+   "powerbi": "z",
+   "now": "z"
+  },
+  {
+   "part": "C",
+   "expr": "PATHITEM(\"1|2|3\",-1,0)&\"z\"",
+   "powerbi": "z",
+   "now": "z"
+  },
+  {
+   "part": "C",
+   "expr": "PATHITEMREVERSE(\"1|2|3\",-1,0)&\"z\"",
+   "powerbi": "z",
+   "now": "z"
+  },
+  {
+   "part": "C",
+   "expr": "PATHITEM(\"a|b|c|d\",1,INTEGER)&\"z\"",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"The following system error occurred: Type mismatch. \"",
+   "now": "LOCAL-REJECT:A table name is only supported as the first argument to COUNTROWS, SUMX, AVERAGEX, MAXX, MINX, COUNTX, or COUNTAX."
+  },
+  {
+   "part": "C",
+   "expr": "PATHITEMREVERSE(\"a|b|c|d\",1,INTEGER)&\"z\"",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"The following system error occurred: Type mismatch. \"",
+   "now": "LOCAL-REJECT:A table name is only supported as the first argument to COUNTROWS, SUMX, AVERAGEX, MAXX, MINX, COUNTX, or COUNTAX."
+  },
+  {
+   "part": "C",
+   "expr": "PATHITEM(\"a|b|c|d\",2,INTEGER)&\"z\"",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"The following system error occurred: Type mismatch. \"",
+   "now": "LOCAL-REJECT:A table name is only supported as the first argument to COUNTROWS, SUMX, AVERAGEX, MAXX, MINX, COUNTX, or COUNTAX."
+  },
+  {
+   "part": "C",
+   "expr": "PATHITEMREVERSE(\"a|b|c|d\",2,INTEGER)&\"z\"",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"The following system error occurred: Type mismatch. \"",
+   "now": "LOCAL-REJECT:A table name is only supported as the first argument to COUNTROWS, SUMX, AVERAGEX, MAXX, MINX, COUNTX, or COUNTAX."
+  },
+  {
+   "part": "C",
+   "expr": "PATHITEM(\"a|b|c|d\",5,INTEGER)&\"z\"",
+   "powerbi": "z",
+   "now": "LOCAL-REJECT:A table name is only supported as the first argument to COUNTROWS, SUMX, AVERAGEX, MAXX, MINX, COUNTX, or COUNTAX."
+  },
+  {
+   "part": "C",
+   "expr": "PATHITEMREVERSE(\"a|b|c|d\",5,INTEGER)&\"z\"",
+   "powerbi": "z",
+   "now": "LOCAL-REJECT:A table name is only supported as the first argument to COUNTROWS, SUMX, AVERAGEX, MAXX, MINX, COUNTX, or COUNTAX."
+  },
+  {
+   "part": "C",
+   "expr": "PATHITEM(\"a|b|c|d\",-1,INTEGER)&\"z\"",
+   "powerbi": "z",
+   "now": "LOCAL-REJECT:A table name is only supported as the first argument to COUNTROWS, SUMX, AVERAGEX, MAXX, MINX, COUNTX, or COUNTAX."
+  },
+  {
+   "part": "C",
+   "expr": "PATHITEMREVERSE(\"a|b|c|d\",-1,INTEGER)&\"z\"",
+   "powerbi": "z",
+   "now": "LOCAL-REJECT:A table name is only supported as the first argument to COUNTROWS, SUMX, AVERAGEX, MAXX, MINX, COUNTX, or COUNTAX."
+  },
+  {
+   "part": "C",
+   "expr": "PATHITEM(\"a|b|c|d\",1,TEXT)&\"z\"",
+   "powerbi": "az",
+   "now": "LOCAL-REJECT:A table name is only supported as the first argument to COUNTROWS, SUMX, AVERAGEX, MAXX, MINX, COUNTX, or COUNTAX."
+  },
+  {
+   "part": "C",
+   "expr": "PATHITEMREVERSE(\"a|b|c|d\",1,TEXT)&\"z\"",
+   "powerbi": "dz",
+   "now": "LOCAL-REJECT:A table name is only supported as the first argument to COUNTROWS, SUMX, AVERAGEX, MAXX, MINX, COUNTX, or COUNTAX."
+  },
+  {
+   "part": "C",
+   "expr": "PATHITEM(\"a|b|c|d\",2,TEXT)&\"z\"",
+   "powerbi": "bz",
+   "now": "LOCAL-REJECT:A table name is only supported as the first argument to COUNTROWS, SUMX, AVERAGEX, MAXX, MINX, COUNTX, or COUNTAX."
+  },
+  {
+   "part": "C",
+   "expr": "PATHITEMREVERSE(\"a|b|c|d\",2,TEXT)&\"z\"",
+   "powerbi": "cz",
+   "now": "LOCAL-REJECT:A table name is only supported as the first argument to COUNTROWS, SUMX, AVERAGEX, MAXX, MINX, COUNTX, or COUNTAX."
+  },
+  {
+   "part": "C",
+   "expr": "PATHITEM(\"a|b|c|d\",5,TEXT)&\"z\"",
+   "powerbi": "z",
+   "now": "LOCAL-REJECT:A table name is only supported as the first argument to COUNTROWS, SUMX, AVERAGEX, MAXX, MINX, COUNTX, or COUNTAX."
+  },
+  {
+   "part": "C",
+   "expr": "PATHITEMREVERSE(\"a|b|c|d\",5,TEXT)&\"z\"",
+   "powerbi": "z",
+   "now": "LOCAL-REJECT:A table name is only supported as the first argument to COUNTROWS, SUMX, AVERAGEX, MAXX, MINX, COUNTX, or COUNTAX."
+  },
+  {
+   "part": "C",
+   "expr": "PATHITEM(\"a|b|c|d\",-1,TEXT)&\"z\"",
+   "powerbi": "z",
+   "now": "LOCAL-REJECT:A table name is only supported as the first argument to COUNTROWS, SUMX, AVERAGEX, MAXX, MINX, COUNTX, or COUNTAX."
+  },
+  {
+   "part": "C",
+   "expr": "PATHITEMREVERSE(\"a|b|c|d\",-1,TEXT)&\"z\"",
+   "powerbi": "z",
+   "now": "LOCAL-REJECT:A table name is only supported as the first argument to COUNTROWS, SUMX, AVERAGEX, MAXX, MINX, COUNTX, or COUNTAX."
+  },
+  {
+   "part": "C",
+   "expr": "PATHITEM(\"a|b|c|d\",1,1)&\"z\"",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"The following system error occurred: Type mismatch. \"",
+   "now": "LOCAL-REJECT:The following system error occurred: Type mismatch."
+  },
+  {
+   "part": "C",
+   "expr": "PATHITEMREVERSE(\"a|b|c|d\",1,1)&\"z\"",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"The following system error occurred: Type mismatch. \"",
+   "now": "LOCAL-REJECT:The following system error occurred: Type mismatch."
+  },
+  {
+   "part": "C",
+   "expr": "PATHITEM(\"a|b|c|d\",2,1)&\"z\"",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"The following system error occurred: Type mismatch. \"",
+   "now": "LOCAL-REJECT:The following system error occurred: Type mismatch."
+  },
+  {
+   "part": "C",
+   "expr": "PATHITEMREVERSE(\"a|b|c|d\",2,1)&\"z\"",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"The following system error occurred: Type mismatch. \"",
+   "now": "LOCAL-REJECT:The following system error occurred: Type mismatch."
+  },
+  {
+   "part": "C",
+   "expr": "PATHITEM(\"a|b|c|d\",5,1)&\"z\"",
+   "powerbi": "z",
+   "now": "z"
+  },
+  {
+   "part": "C",
+   "expr": "PATHITEMREVERSE(\"a|b|c|d\",5,1)&\"z\"",
+   "powerbi": "z",
+   "now": "z"
+  },
+  {
+   "part": "C",
+   "expr": "PATHITEM(\"a|b|c|d\",-1,1)&\"z\"",
+   "powerbi": "z",
+   "now": "z"
+  },
+  {
+   "part": "C",
+   "expr": "PATHITEMREVERSE(\"a|b|c|d\",-1,1)&\"z\"",
+   "powerbi": "z",
+   "now": "z"
+  },
+  {
+   "part": "C",
+   "expr": "PATHITEM(\"a|b|c|d\",1,0)&\"z\"",
+   "powerbi": "az",
+   "now": "az"
+  },
+  {
+   "part": "C",
+   "expr": "PATHITEMREVERSE(\"a|b|c|d\",1,0)&\"z\"",
+   "powerbi": "dz",
+   "now": "dz"
+  },
+  {
+   "part": "C",
+   "expr": "PATHITEM(\"a|b|c|d\",2,0)&\"z\"",
+   "powerbi": "bz",
+   "now": "bz"
+  },
+  {
+   "part": "C",
+   "expr": "PATHITEMREVERSE(\"a|b|c|d\",2,0)&\"z\"",
+   "powerbi": "cz",
+   "now": "cz"
+  },
+  {
+   "part": "C",
+   "expr": "PATHITEM(\"a|b|c|d\",5,0)&\"z\"",
+   "powerbi": "z",
+   "now": "z"
+  },
+  {
+   "part": "C",
+   "expr": "PATHITEMREVERSE(\"a|b|c|d\",5,0)&\"z\"",
+   "powerbi": "z",
+   "now": "z"
+  },
+  {
+   "part": "C",
+   "expr": "PATHITEM(\"a|b|c|d\",-1,0)&\"z\"",
+   "powerbi": "z",
+   "now": "z"
+  },
+  {
+   "part": "C",
+   "expr": "PATHITEMREVERSE(\"a|b|c|d\",-1,0)&\"z\"",
+   "powerbi": "z",
+   "now": "z"
+  },
+  {
+   "part": "C",
+   "expr": "PATHITEM(\"x\",1,INTEGER)&\"z\"",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"The following system error occurred: Type mismatch. \"",
+   "now": "LOCAL-REJECT:A table name is only supported as the first argument to COUNTROWS, SUMX, AVERAGEX, MAXX, MINX, COUNTX, or COUNTAX."
+  },
+  {
+   "part": "C",
+   "expr": "PATHITEMREVERSE(\"x\",1,INTEGER)&\"z\"",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"The following system error occurred: Type mismatch. \"",
+   "now": "LOCAL-REJECT:A table name is only supported as the first argument to COUNTROWS, SUMX, AVERAGEX, MAXX, MINX, COUNTX, or COUNTAX."
+  },
+  {
+   "part": "C",
+   "expr": "PATHITEM(\"x\",2,INTEGER)&\"z\"",
+   "powerbi": "z",
+   "now": "LOCAL-REJECT:A table name is only supported as the first argument to COUNTROWS, SUMX, AVERAGEX, MAXX, MINX, COUNTX, or COUNTAX."
+  },
+  {
+   "part": "C",
+   "expr": "PATHITEMREVERSE(\"x\",2,INTEGER)&\"z\"",
+   "powerbi": "z",
+   "now": "LOCAL-REJECT:A table name is only supported as the first argument to COUNTROWS, SUMX, AVERAGEX, MAXX, MINX, COUNTX, or COUNTAX."
+  },
+  {
+   "part": "C",
+   "expr": "PATHITEM(\"x\",5,INTEGER)&\"z\"",
+   "powerbi": "z",
+   "now": "LOCAL-REJECT:A table name is only supported as the first argument to COUNTROWS, SUMX, AVERAGEX, MAXX, MINX, COUNTX, or COUNTAX."
+  },
+  {
+   "part": "C",
+   "expr": "PATHITEMREVERSE(\"x\",5,INTEGER)&\"z\"",
+   "powerbi": "z",
+   "now": "LOCAL-REJECT:A table name is only supported as the first argument to COUNTROWS, SUMX, AVERAGEX, MAXX, MINX, COUNTX, or COUNTAX."
+  },
+  {
+   "part": "C",
+   "expr": "PATHITEM(\"x\",-1,INTEGER)&\"z\"",
+   "powerbi": "z",
+   "now": "LOCAL-REJECT:A table name is only supported as the first argument to COUNTROWS, SUMX, AVERAGEX, MAXX, MINX, COUNTX, or COUNTAX."
+  },
+  {
+   "part": "C",
+   "expr": "PATHITEMREVERSE(\"x\",-1,INTEGER)&\"z\"",
+   "powerbi": "z",
+   "now": "LOCAL-REJECT:A table name is only supported as the first argument to COUNTROWS, SUMX, AVERAGEX, MAXX, MINX, COUNTX, or COUNTAX."
+  },
+  {
+   "part": "C",
+   "expr": "PATHITEM(\"x\",1,TEXT)&\"z\"",
+   "powerbi": "xz",
+   "now": "LOCAL-REJECT:A table name is only supported as the first argument to COUNTROWS, SUMX, AVERAGEX, MAXX, MINX, COUNTX, or COUNTAX."
+  },
+  {
+   "part": "C",
+   "expr": "PATHITEMREVERSE(\"x\",1,TEXT)&\"z\"",
+   "powerbi": "xz",
+   "now": "LOCAL-REJECT:A table name is only supported as the first argument to COUNTROWS, SUMX, AVERAGEX, MAXX, MINX, COUNTX, or COUNTAX."
+  },
+  {
+   "part": "C",
+   "expr": "PATHITEM(\"x\",2,TEXT)&\"z\"",
+   "powerbi": "z",
+   "now": "LOCAL-REJECT:A table name is only supported as the first argument to COUNTROWS, SUMX, AVERAGEX, MAXX, MINX, COUNTX, or COUNTAX."
+  },
+  {
+   "part": "C",
+   "expr": "PATHITEMREVERSE(\"x\",2,TEXT)&\"z\"",
+   "powerbi": "z",
+   "now": "LOCAL-REJECT:A table name is only supported as the first argument to COUNTROWS, SUMX, AVERAGEX, MAXX, MINX, COUNTX, or COUNTAX."
+  },
+  {
+   "part": "C",
+   "expr": "PATHITEM(\"x\",5,TEXT)&\"z\"",
+   "powerbi": "z",
+   "now": "LOCAL-REJECT:A table name is only supported as the first argument to COUNTROWS, SUMX, AVERAGEX, MAXX, MINX, COUNTX, or COUNTAX."
+  },
+  {
+   "part": "C",
+   "expr": "PATHITEMREVERSE(\"x\",5,TEXT)&\"z\"",
+   "powerbi": "z",
+   "now": "LOCAL-REJECT:A table name is only supported as the first argument to COUNTROWS, SUMX, AVERAGEX, MAXX, MINX, COUNTX, or COUNTAX."
+  },
+  {
+   "part": "C",
+   "expr": "PATHITEM(\"x\",-1,TEXT)&\"z\"",
+   "powerbi": "z",
+   "now": "LOCAL-REJECT:A table name is only supported as the first argument to COUNTROWS, SUMX, AVERAGEX, MAXX, MINX, COUNTX, or COUNTAX."
+  },
+  {
+   "part": "C",
+   "expr": "PATHITEMREVERSE(\"x\",-1,TEXT)&\"z\"",
+   "powerbi": "z",
+   "now": "LOCAL-REJECT:A table name is only supported as the first argument to COUNTROWS, SUMX, AVERAGEX, MAXX, MINX, COUNTX, or COUNTAX."
+  },
+  {
+   "part": "C",
+   "expr": "PATHITEM(\"x\",1,1)&\"z\"",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"The following system error occurred: Type mismatch. \"",
+   "now": "LOCAL-REJECT:The following system error occurred: Type mismatch."
+  },
+  {
+   "part": "C",
+   "expr": "PATHITEMREVERSE(\"x\",1,1)&\"z\"",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"The following system error occurred: Type mismatch. \"",
+   "now": "LOCAL-REJECT:The following system error occurred: Type mismatch."
+  },
+  {
+   "part": "C",
+   "expr": "PATHITEM(\"x\",2,1)&\"z\"",
+   "powerbi": "z",
+   "now": "z"
+  },
+  {
+   "part": "C",
+   "expr": "PATHITEMREVERSE(\"x\",2,1)&\"z\"",
+   "powerbi": "z",
+   "now": "z"
+  },
+  {
+   "part": "C",
+   "expr": "PATHITEM(\"x\",5,1)&\"z\"",
+   "powerbi": "z",
+   "now": "z"
+  },
+  {
+   "part": "C",
+   "expr": "PATHITEMREVERSE(\"x\",5,1)&\"z\"",
+   "powerbi": "z",
+   "now": "z"
+  },
+  {
+   "part": "C",
+   "expr": "PATHITEM(\"x\",-1,1)&\"z\"",
+   "powerbi": "z",
+   "now": "z"
+  },
+  {
+   "part": "C",
+   "expr": "PATHITEMREVERSE(\"x\",-1,1)&\"z\"",
+   "powerbi": "z",
+   "now": "z"
+  },
+  {
+   "part": "C",
+   "expr": "PATHITEM(\"x\",1,0)&\"z\"",
+   "powerbi": "xz",
+   "now": "xz"
+  },
+  {
+   "part": "C",
+   "expr": "PATHITEMREVERSE(\"x\",1,0)&\"z\"",
+   "powerbi": "xz",
+   "now": "xz"
+  },
+  {
+   "part": "C",
+   "expr": "PATHITEM(\"x\",2,0)&\"z\"",
+   "powerbi": "z",
+   "now": "z"
+  },
+  {
+   "part": "C",
+   "expr": "PATHITEMREVERSE(\"x\",2,0)&\"z\"",
+   "powerbi": "z",
+   "now": "z"
+  },
+  {
+   "part": "C",
+   "expr": "PATHITEM(\"x\",5,0)&\"z\"",
+   "powerbi": "z",
+   "now": "z"
+  },
+  {
+   "part": "C",
+   "expr": "PATHITEMREVERSE(\"x\",5,0)&\"z\"",
+   "powerbi": "z",
+   "now": "z"
+  },
+  {
+   "part": "C",
+   "expr": "PATHITEM(\"x\",-1,0)&\"z\"",
+   "powerbi": "z",
+   "now": "z"
+  },
+  {
+   "part": "C",
+   "expr": "PATHITEMREVERSE(\"x\",-1,0)&\"z\"",
+   "powerbi": "z",
+   "now": "z"
+  },
+  {
+   "part": "C",
+   "expr": "PATHITEM(\"\",1,INTEGER)&\"z\"",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"The following system error occurred: Type mismatch. \"",
+   "now": "LOCAL-REJECT:A table name is only supported as the first argument to COUNTROWS, SUMX, AVERAGEX, MAXX, MINX, COUNTX, or COUNTAX."
+  },
+  {
+   "part": "C",
+   "expr": "PATHITEMREVERSE(\"\",1,INTEGER)&\"z\"",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"The following system error occurred: Type mismatch. \"",
+   "now": "LOCAL-REJECT:A table name is only supported as the first argument to COUNTROWS, SUMX, AVERAGEX, MAXX, MINX, COUNTX, or COUNTAX."
+  },
+  {
+   "part": "C",
+   "expr": "PATHITEM(\"\",2,INTEGER)&\"z\"",
+   "powerbi": "z",
+   "now": "LOCAL-REJECT:A table name is only supported as the first argument to COUNTROWS, SUMX, AVERAGEX, MAXX, MINX, COUNTX, or COUNTAX."
+  },
+  {
+   "part": "C",
+   "expr": "PATHITEMREVERSE(\"\",2,INTEGER)&\"z\"",
+   "powerbi": "z",
+   "now": "LOCAL-REJECT:A table name is only supported as the first argument to COUNTROWS, SUMX, AVERAGEX, MAXX, MINX, COUNTX, or COUNTAX."
+  },
+  {
+   "part": "C",
+   "expr": "PATHITEM(\"\",5,INTEGER)&\"z\"",
+   "powerbi": "z",
+   "now": "LOCAL-REJECT:A table name is only supported as the first argument to COUNTROWS, SUMX, AVERAGEX, MAXX, MINX, COUNTX, or COUNTAX."
+  },
+  {
+   "part": "C",
+   "expr": "PATHITEMREVERSE(\"\",5,INTEGER)&\"z\"",
+   "powerbi": "z",
+   "now": "LOCAL-REJECT:A table name is only supported as the first argument to COUNTROWS, SUMX, AVERAGEX, MAXX, MINX, COUNTX, or COUNTAX."
+  },
+  {
+   "part": "C",
+   "expr": "PATHITEM(\"\",-1,INTEGER)&\"z\"",
+   "powerbi": "z",
+   "now": "LOCAL-REJECT:A table name is only supported as the first argument to COUNTROWS, SUMX, AVERAGEX, MAXX, MINX, COUNTX, or COUNTAX."
+  },
+  {
+   "part": "C",
+   "expr": "PATHITEMREVERSE(\"\",-1,INTEGER)&\"z\"",
+   "powerbi": "z",
+   "now": "LOCAL-REJECT:A table name is only supported as the first argument to COUNTROWS, SUMX, AVERAGEX, MAXX, MINX, COUNTX, or COUNTAX."
+  },
+  {
+   "part": "C",
+   "expr": "PATHITEM(\"\",1,TEXT)&\"z\"",
+   "powerbi": "z",
+   "now": "LOCAL-REJECT:A table name is only supported as the first argument to COUNTROWS, SUMX, AVERAGEX, MAXX, MINX, COUNTX, or COUNTAX."
+  },
+  {
+   "part": "C",
+   "expr": "PATHITEMREVERSE(\"\",1,TEXT)&\"z\"",
+   "powerbi": "z",
+   "now": "LOCAL-REJECT:A table name is only supported as the first argument to COUNTROWS, SUMX, AVERAGEX, MAXX, MINX, COUNTX, or COUNTAX."
+  },
+  {
+   "part": "C",
+   "expr": "PATHITEM(\"\",2,TEXT)&\"z\"",
+   "powerbi": "z",
+   "now": "LOCAL-REJECT:A table name is only supported as the first argument to COUNTROWS, SUMX, AVERAGEX, MAXX, MINX, COUNTX, or COUNTAX."
+  },
+  {
+   "part": "C",
+   "expr": "PATHITEMREVERSE(\"\",2,TEXT)&\"z\"",
+   "powerbi": "z",
+   "now": "LOCAL-REJECT:A table name is only supported as the first argument to COUNTROWS, SUMX, AVERAGEX, MAXX, MINX, COUNTX, or COUNTAX."
+  },
+  {
+   "part": "C",
+   "expr": "PATHITEM(\"\",5,TEXT)&\"z\"",
+   "powerbi": "z",
+   "now": "LOCAL-REJECT:A table name is only supported as the first argument to COUNTROWS, SUMX, AVERAGEX, MAXX, MINX, COUNTX, or COUNTAX."
+  },
+  {
+   "part": "C",
+   "expr": "PATHITEMREVERSE(\"\",5,TEXT)&\"z\"",
+   "powerbi": "z",
+   "now": "LOCAL-REJECT:A table name is only supported as the first argument to COUNTROWS, SUMX, AVERAGEX, MAXX, MINX, COUNTX, or COUNTAX."
+  },
+  {
+   "part": "C",
+   "expr": "PATHITEM(\"\",-1,TEXT)&\"z\"",
+   "powerbi": "z",
+   "now": "LOCAL-REJECT:A table name is only supported as the first argument to COUNTROWS, SUMX, AVERAGEX, MAXX, MINX, COUNTX, or COUNTAX."
+  },
+  {
+   "part": "C",
+   "expr": "PATHITEMREVERSE(\"\",-1,TEXT)&\"z\"",
+   "powerbi": "z",
+   "now": "LOCAL-REJECT:A table name is only supported as the first argument to COUNTROWS, SUMX, AVERAGEX, MAXX, MINX, COUNTX, or COUNTAX."
+  },
+  {
+   "part": "C",
+   "expr": "PATHITEM(\"\",1,1)&\"z\"",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"The following system error occurred: Type mismatch. \"",
+   "now": "LOCAL-REJECT:The following system error occurred: Type mismatch."
+  },
+  {
+   "part": "C",
+   "expr": "PATHITEMREVERSE(\"\",1,1)&\"z\"",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"The following system error occurred: Type mismatch. \"",
+   "now": "LOCAL-REJECT:The following system error occurred: Type mismatch."
+  },
+  {
+   "part": "C",
+   "expr": "PATHITEM(\"\",2,1)&\"z\"",
+   "powerbi": "z",
+   "now": "z"
+  },
+  {
+   "part": "C",
+   "expr": "PATHITEMREVERSE(\"\",2,1)&\"z\"",
+   "powerbi": "z",
+   "now": "z"
+  },
+  {
+   "part": "C",
+   "expr": "PATHITEM(\"\",5,1)&\"z\"",
+   "powerbi": "z",
+   "now": "z"
+  },
+  {
+   "part": "C",
+   "expr": "PATHITEMREVERSE(\"\",5,1)&\"z\"",
+   "powerbi": "z",
+   "now": "z"
+  },
+  {
+   "part": "C",
+   "expr": "PATHITEM(\"\",-1,1)&\"z\"",
+   "powerbi": "z",
+   "now": "z"
+  },
+  {
+   "part": "C",
+   "expr": "PATHITEMREVERSE(\"\",-1,1)&\"z\"",
+   "powerbi": "z",
+   "now": "z"
+  },
+  {
+   "part": "C",
+   "expr": "PATHITEM(\"\",1,0)&\"z\"",
+   "powerbi": "z",
+   "now": "z"
+  },
+  {
+   "part": "C",
+   "expr": "PATHITEMREVERSE(\"\",1,0)&\"z\"",
+   "powerbi": "z",
+   "now": "z"
+  },
+  {
+   "part": "C",
+   "expr": "PATHITEM(\"\",2,0)&\"z\"",
+   "powerbi": "z",
+   "now": "z"
+  },
+  {
+   "part": "C",
+   "expr": "PATHITEMREVERSE(\"\",2,0)&\"z\"",
+   "powerbi": "z",
+   "now": "z"
+  },
+  {
+   "part": "C",
+   "expr": "PATHITEM(\"\",5,0)&\"z\"",
+   "powerbi": "z",
+   "now": "z"
+  },
+  {
+   "part": "C",
+   "expr": "PATHITEMREVERSE(\"\",5,0)&\"z\"",
+   "powerbi": "z",
+   "now": "z"
+  },
+  {
+   "part": "C",
+   "expr": "PATHITEM(\"\",-1,0)&\"z\"",
+   "powerbi": "z",
+   "now": "z"
+  },
+  {
+   "part": "C",
+   "expr": "PATHITEMREVERSE(\"\",-1,0)&\"z\"",
+   "powerbi": "z",
+   "now": "z"
+  },
+  {
+   "part": "C",
+   "expr": "PATHITEM(\"10|20\",1,INTEGER)&\"z\"",
+   "powerbi": "10z",
+   "now": "LOCAL-REJECT:A table name is only supported as the first argument to COUNTROWS, SUMX, AVERAGEX, MAXX, MINX, COUNTX, or COUNTAX."
+  },
+  {
+   "part": "C",
+   "expr": "PATHITEMREVERSE(\"10|20\",1,INTEGER)&\"z\"",
+   "powerbi": "20z",
+   "now": "LOCAL-REJECT:A table name is only supported as the first argument to COUNTROWS, SUMX, AVERAGEX, MAXX, MINX, COUNTX, or COUNTAX."
+  },
+  {
+   "part": "C",
+   "expr": "PATHITEM(\"10|20\",2,INTEGER)&\"z\"",
+   "powerbi": "20z",
+   "now": "LOCAL-REJECT:A table name is only supported as the first argument to COUNTROWS, SUMX, AVERAGEX, MAXX, MINX, COUNTX, or COUNTAX."
+  },
+  {
+   "part": "C",
+   "expr": "PATHITEMREVERSE(\"10|20\",2,INTEGER)&\"z\"",
+   "powerbi": "10z",
+   "now": "LOCAL-REJECT:A table name is only supported as the first argument to COUNTROWS, SUMX, AVERAGEX, MAXX, MINX, COUNTX, or COUNTAX."
+  },
+  {
+   "part": "C",
+   "expr": "PATHITEM(\"10|20\",5,INTEGER)&\"z\"",
+   "powerbi": "z",
+   "now": "LOCAL-REJECT:A table name is only supported as the first argument to COUNTROWS, SUMX, AVERAGEX, MAXX, MINX, COUNTX, or COUNTAX."
+  },
+  {
+   "part": "C",
+   "expr": "PATHITEMREVERSE(\"10|20\",5,INTEGER)&\"z\"",
+   "powerbi": "z",
+   "now": "LOCAL-REJECT:A table name is only supported as the first argument to COUNTROWS, SUMX, AVERAGEX, MAXX, MINX, COUNTX, or COUNTAX."
+  },
+  {
+   "part": "C",
+   "expr": "PATHITEM(\"10|20\",-1,INTEGER)&\"z\"",
+   "powerbi": "z",
+   "now": "LOCAL-REJECT:A table name is only supported as the first argument to COUNTROWS, SUMX, AVERAGEX, MAXX, MINX, COUNTX, or COUNTAX."
+  },
+  {
+   "part": "C",
+   "expr": "PATHITEMREVERSE(\"10|20\",-1,INTEGER)&\"z\"",
+   "powerbi": "z",
+   "now": "LOCAL-REJECT:A table name is only supported as the first argument to COUNTROWS, SUMX, AVERAGEX, MAXX, MINX, COUNTX, or COUNTAX."
+  },
+  {
+   "part": "C",
+   "expr": "PATHITEM(\"10|20\",1,TEXT)&\"z\"",
+   "powerbi": "10z",
+   "now": "LOCAL-REJECT:A table name is only supported as the first argument to COUNTROWS, SUMX, AVERAGEX, MAXX, MINX, COUNTX, or COUNTAX."
+  },
+  {
+   "part": "C",
+   "expr": "PATHITEMREVERSE(\"10|20\",1,TEXT)&\"z\"",
+   "powerbi": "20z",
+   "now": "LOCAL-REJECT:A table name is only supported as the first argument to COUNTROWS, SUMX, AVERAGEX, MAXX, MINX, COUNTX, or COUNTAX."
+  },
+  {
+   "part": "C",
+   "expr": "PATHITEM(\"10|20\",2,TEXT)&\"z\"",
+   "powerbi": "20z",
+   "now": "LOCAL-REJECT:A table name is only supported as the first argument to COUNTROWS, SUMX, AVERAGEX, MAXX, MINX, COUNTX, or COUNTAX."
+  },
+  {
+   "part": "C",
+   "expr": "PATHITEMREVERSE(\"10|20\",2,TEXT)&\"z\"",
+   "powerbi": "10z",
+   "now": "LOCAL-REJECT:A table name is only supported as the first argument to COUNTROWS, SUMX, AVERAGEX, MAXX, MINX, COUNTX, or COUNTAX."
+  },
+  {
+   "part": "C",
+   "expr": "PATHITEM(\"10|20\",5,TEXT)&\"z\"",
+   "powerbi": "z",
+   "now": "LOCAL-REJECT:A table name is only supported as the first argument to COUNTROWS, SUMX, AVERAGEX, MAXX, MINX, COUNTX, or COUNTAX."
+  },
+  {
+   "part": "C",
+   "expr": "PATHITEMREVERSE(\"10|20\",5,TEXT)&\"z\"",
+   "powerbi": "z",
+   "now": "LOCAL-REJECT:A table name is only supported as the first argument to COUNTROWS, SUMX, AVERAGEX, MAXX, MINX, COUNTX, or COUNTAX."
+  },
+  {
+   "part": "C",
+   "expr": "PATHITEM(\"10|20\",-1,TEXT)&\"z\"",
+   "powerbi": "z",
+   "now": "LOCAL-REJECT:A table name is only supported as the first argument to COUNTROWS, SUMX, AVERAGEX, MAXX, MINX, COUNTX, or COUNTAX."
+  },
+  {
+   "part": "C",
+   "expr": "PATHITEMREVERSE(\"10|20\",-1,TEXT)&\"z\"",
+   "powerbi": "z",
+   "now": "LOCAL-REJECT:A table name is only supported as the first argument to COUNTROWS, SUMX, AVERAGEX, MAXX, MINX, COUNTX, or COUNTAX."
+  },
+  {
+   "part": "C",
+   "expr": "PATHITEM(\"10|20\",1,1)&\"z\"",
+   "powerbi": "10z",
+   "now": "10z"
+  },
+  {
+   "part": "C",
+   "expr": "PATHITEMREVERSE(\"10|20\",1,1)&\"z\"",
+   "powerbi": "20z",
+   "now": "20z"
+  },
+  {
+   "part": "C",
+   "expr": "PATHITEM(\"10|20\",2,1)&\"z\"",
+   "powerbi": "20z",
+   "now": "20z"
+  },
+  {
+   "part": "C",
+   "expr": "PATHITEMREVERSE(\"10|20\",2,1)&\"z\"",
+   "powerbi": "10z",
+   "now": "10z"
+  },
+  {
+   "part": "C",
+   "expr": "PATHITEM(\"10|20\",5,1)&\"z\"",
+   "powerbi": "z",
+   "now": "z"
+  },
+  {
+   "part": "C",
+   "expr": "PATHITEMREVERSE(\"10|20\",5,1)&\"z\"",
+   "powerbi": "z",
+   "now": "z"
+  },
+  {
+   "part": "C",
+   "expr": "PATHITEM(\"10|20\",-1,1)&\"z\"",
+   "powerbi": "z",
+   "now": "z"
+  },
+  {
+   "part": "C",
+   "expr": "PATHITEMREVERSE(\"10|20\",-1,1)&\"z\"",
+   "powerbi": "z",
+   "now": "z"
+  },
+  {
+   "part": "C",
+   "expr": "PATHITEM(\"10|20\",1,0)&\"z\"",
+   "powerbi": "10z",
+   "now": "10z"
+  },
+  {
+   "part": "C",
+   "expr": "PATHITEMREVERSE(\"10|20\",1,0)&\"z\"",
+   "powerbi": "20z",
+   "now": "20z"
+  },
+  {
+   "part": "C",
+   "expr": "PATHITEM(\"10|20\",2,0)&\"z\"",
+   "powerbi": "20z",
+   "now": "20z"
+  },
+  {
+   "part": "C",
+   "expr": "PATHITEMREVERSE(\"10|20\",2,0)&\"z\"",
+   "powerbi": "10z",
+   "now": "10z"
+  },
+  {
+   "part": "C",
+   "expr": "PATHITEM(\"10|20\",5,0)&\"z\"",
+   "powerbi": "z",
+   "now": "z"
+  },
+  {
+   "part": "C",
+   "expr": "PATHITEMREVERSE(\"10|20\",5,0)&\"z\"",
+   "powerbi": "z",
+   "now": "z"
+  },
+  {
+   "part": "C",
+   "expr": "PATHITEM(\"10|20\",-1,0)&\"z\"",
+   "powerbi": "z",
+   "now": "z"
+  },
+  {
+   "part": "C",
+   "expr": "PATHITEMREVERSE(\"10|20\",-1,0)&\"z\"",
+   "powerbi": "z",
+   "now": "z"
+  }
+ ]
+}
