@@ -117,7 +117,8 @@ def math_function(function: str, args: list[object]) -> object:
             quotient = float(number) / float(multiple)
             if not math.isfinite(quotient):
                 raise dax_typed.refusal("MROUND of a quotient beyond the Double range is not modelled by the local engine.")
-            whole = math.floor(abs(quotient) + 0.5)
+            # a double quotient from 2^52 up is already a whole number: adding 0.5 would round it to even (3^34+1 over 3: ...523 is not ...524), so it is taken as it is
+            whole = math.floor(abs(quotient)) if abs(quotient) >= 2 ** 52 else math.floor(abs(quotient) + 0.5)
             product = float(-whole if quotient < 0 else whole) * float(multiple)
             if not math.isfinite(product) or abs(product) >= 2 ** 63:
                 raise dax_typed._error("The result of a conversion or arithmetic operation is either too large or too small.")

@@ -1,0 +1,17 @@
+# Task 38 coalesce-big-order-28: COALESCE evaluation order, rounding of huge numbers, CONCATENATEX row order (972 saved answers the engine refuses)
+
+**Coder:** Antigravity. **Work folder:** git worktree `/Users/armaan/Power BI tool-task38` (branch `antigravity/coalesce-big-order-28`). Work ONLY there.
+**Spec:** `tools/parity/task38_coalesce_big_order_spec.json`: 972 Power BI answers already saved in the locked batteries that the engine refuses today. Score with `PYTHONPATH=. python3 tools/score_spec.py tools/parity/task38_coalesce_big_order_spec.json`.
+
+- **Part A (400): COALESCE whose earlier argument can fail.** Refused today with "A COALESCE whose earlier argument can fail is evaluated in an order the local engine does not reproduce." Examples: `MAXX(Facts,COALESCE(Facts[Note],VARX.S(FILTER(Facts,FALSE()),1),1))` is 1; `SUMX({1,2},COALESCE(CONVERT("3",DOUBLE),CONVERT("3",DOUBLE)))` is 6; `MAXX(Facts,COALESCE(PERCENTILEX.INC(Facts,Facts[Quantity],0.5),"a"))` is 2.5; `COUNTX({1},COALESCE(CONVERT(0||"",DATETIME),CONVERT(0||"",DATETIME)))` is BLANK. Find when an argument is evaluated, whether an error in it propagates, and the result type.
+- **Part B (384): rounding of numbers of 1E15 or more.** Refused with "A rounding to an integer of a power result of 1E15 or more is not modelled". MROUND, FLOOR, CEILING, QUOTIENT, CONVERT(…,INTEGER) on values like `2^53`, `2^62`, `3*2^61`. Examples: `MROUND(2^53,2)&"z"` is `9007199254740992z`; `MROUND(2^53,1.5)&"z"` is `9.00719925474099E+15z`; `FLOOR(2^60,11)&"z"` is `1152921504606850048z`; `CEILING(2^61,1024)&"z"` is `2305843009213696000z`; `(CONVERT(2^52+0.25,INTEGER))&"z"` is `4503599627370496z`. These are IEEE double / int64 effects; reproduce Power BI's arithmetic exactly (which results become Integer vs Double, how text formatting of each type looks).
+- **Part C (188): CONCATENATEX without an order.** Refused with "CONCATENATEX of this expression without an order walks the rows in an order the local engine does not model". Many rows give the same text for every row (`3|3|3|3|3|3`, `TRUE|TRUE`), where order cannot matter: answer those. For the rest (`CONCATENATEX(Facts,IF(1=1,Facts[Region],-(7)))` is `EastEastEastWestWestNorth`), find the storage-engine walk order from the rows; refuse what they do not settle.
+
+## Rules
+Compute, never look up (app code must never read `tools/parity/*.json` or test fixtures; `tests/test_no_answer_key_in_app.py` must pass). 0 wrong on the spec and 0 DIFF in the replay are mandatory: a rule that breaks one locked answer must be narrowed. Never edit saved Power BI answers or existing tests; new tests go in `tests/test_iteration128_coalesce_big_order_28.py`. No `--freeze`, `--accept`, commit, merge, push or full pytest. Do not touch other folders.
+
+## Done when
+The scorer prints 0 wrong with as many matches as possible, `tools/parity_check.py` replay shows 0 DIFF and 0 CRASH, and a ready-for-review entry with scorer counts per Part and the replay line is in this worktree's `HANDOFF.md`. Leave changes uncommitted.
+
+## Review outcome (2026-11-03)
+Shipped as Iteration 128. Locked 456,084.

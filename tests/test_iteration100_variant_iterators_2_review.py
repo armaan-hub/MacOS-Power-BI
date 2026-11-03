@@ -166,9 +166,10 @@ class TypingTest(unittest.TestCase):
         _refused(self, [
             f'CONCATENATEX(Facts,MAX({R},"a"))',
             "CONCATENATEX(Facts,LASTNONBLANK(Facts[Note],1))",
-            "CONCATENATEX(Facts,IF(1=1,Facts[Quantity],Facts[Sales]))",
             "CONCATENATEX(Facts,IF(TRUE(),DATE(2020,1,1),Facts[Sales]))",
         ])
+        # Task 38 (2026-11-03): answered now; Power BI Desktop measured 012345 on 2026-11-03
+        self.assertEqual("012345", dax.local("CONCATENATEX(Facts,IF(1=1,Facts[Quantity],Facts[Sales]))"))
 
 
 if __name__ == "__main__":
