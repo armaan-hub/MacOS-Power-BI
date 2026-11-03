@@ -1,0 +1,494 @@
+{
+"powerbi_version": "2.157.879.0 (26.08)+da30fe74eb0b8a8786ab7326b69c400a0e951831",
+"frozen": "2026-11-03",
+"items": [
+{
+"expr": "MAXX(COLUMNSTATISTICS(),[Table Name])",
+"powerbi": "Facts"
+},
+{
+"expr": "MINX(COLUMNSTATISTICS(),[Table Name])",
+"powerbi": "Facts"
+},
+{
+"expr": "COUNTAX(COLUMNSTATISTICS(),[Table Name])",
+"powerbi": "5"
+},
+{
+"expr": "COUNTX(COLUMNSTATISTICS(),[Table Name])",
+"powerbi": "5"
+},
+{
+"expr": "CONCATENATEX(FILTER(COLUMNSTATISTICS(),NOT ISBLANK([Table Name])),[Table Name],\",\",[Column Name],ASC)",
+"powerbi": "Facts,Facts,Facts,Facts,Facts"
+},
+{
+"expr": "CONCATENATEX(COLUMNSTATISTICS(),[Table Name]&\"\",\";\",[Cardinality],DESC,[Column Name],ASC)",
+"powerbi": "Facts;Facts;Facts;Facts;Facts"
+},
+{
+"expr": "COUNTROWS(DISTINCT(SELECTCOLUMNS(COLUMNSTATISTICS(),\"v\",[Table Name])))",
+"powerbi": "1"
+},
+{
+"expr": "FIRSTNONBLANK(SELECTCOLUMNS(COLUMNSTATISTICS(),\"v\",[Table Name]),1)",
+"powerbi": "Facts"
+},
+{
+"expr": "COUNTROWS(FILTER(COLUMNSTATISTICS(),[Table Name]=BLANK()))",
+"powerbi": "BLANK"
+},
+{
+"expr": "MAXX(COLUMNSTATISTICS(),[Column Name])",
+"powerbi": "Sales"
+},
+{
+"expr": "MINX(COLUMNSTATISTICS(),[Column Name])",
+"powerbi": "Note"
+},
+{
+"expr": "COUNTAX(COLUMNSTATISTICS(),[Column Name])",
+"powerbi": "5"
+},
+{
+"expr": "COUNTX(COLUMNSTATISTICS(),[Column Name])",
+"powerbi": "5"
+},
+{
+"expr": "CONCATENATEX(FILTER(COLUMNSTATISTICS(),NOT ISBLANK([Column Name])),[Column Name],\",\",[Column Name],ASC)",
+"powerbi": "Note,Quantity,Region,RowNumber-2662979B-1795-4F74-8F37-6A1BA8059B61,Sales"
+},
+{
+"expr": "CONCATENATEX(COLUMNSTATISTICS(),[Column Name]&\"\",\";\",[Cardinality],DESC,[Column Name],ASC)",
+"powerbi": "Quantity;RowNumber-2662979B-1795-4F74-8F37-6A1BA8059B61;Sales;Note;Region"
+},
+{
+"expr": "COUNTROWS(DISTINCT(SELECTCOLUMNS(COLUMNSTATISTICS(),\"v\",[Column Name])))",
+"powerbi": "5"
+},
+{
+"expr": "FIRSTNONBLANK(SELECTCOLUMNS(COLUMNSTATISTICS(),\"v\",[Column Name]),1)",
+"powerbi": "Note"
+},
+{
+"expr": "COUNTROWS(FILTER(COLUMNSTATISTICS(),[Column Name]=BLANK()))",
+"powerbi": "BLANK"
+},
+{
+"expr": "MAXX(COLUMNSTATISTICS(),[Min])",
+"powerbi": "0"
+},
+{
+"expr": "MINX(COLUMNSTATISTICS(),[Min])",
+"powerbi": "-1.5"
+},
+{
+"expr": "COUNTAX(COLUMNSTATISTICS(),[Min])",
+"powerbi": "4"
+},
+{
+"expr": "COUNTX(COLUMNSTATISTICS(),[Min])",
+"powerbi": "2"
+},
+{
+"expr": "CONCATENATEX(FILTER(COLUMNSTATISTICS(),NOT ISBLANK([Min])),[Min],\",\",[Column Name],ASC)",
+"powerbi": "Late,0,East,-1.5"
+},
+{
+"expr": "CONCATENATEX(COLUMNSTATISTICS(),[Min]&\"\",\";\",[Cardinality],DESC,[Column Name],ASC)",
+"powerbi": "0;;-1.5;Late;East"
+},
+{
+"expr": "COUNTROWS(DISTINCT(SELECTCOLUMNS(COLUMNSTATISTICS(),\"v\",[Min])))",
+"powerbi": "5"
+},
+{
+"expr": "FIRSTNONBLANK(SELECTCOLUMNS(COLUMNSTATISTICS(),\"v\",[Min]),1)",
+"powerbi": "-1.5"
+},
+{
+"expr": "COUNTROWS(FILTER(COLUMNSTATISTICS(),[Min]=BLANK()))",
+"powerbi": "2"
+},
+{
+"expr": "MAXX(COLUMNSTATISTICS(),[Max])",
+"powerbi": "20"
+},
+{
+"expr": "MINX(COLUMNSTATISTICS(),[Max])",
+"powerbi": "5"
+},
+{
+"expr": "COUNTAX(COLUMNSTATISTICS(),[Max])",
+"powerbi": "4"
+},
+{
+"expr": "COUNTX(COLUMNSTATISTICS(),[Max])",
+"powerbi": "2"
+},
+{
+"expr": "CONCATENATEX(FILTER(COLUMNSTATISTICS(),NOT ISBLANK([Max])),[Max],\",\",[Column Name],ASC)",
+"powerbi": "Paid,5,West,20"
+},
+{
+"expr": "CONCATENATEX(COLUMNSTATISTICS(),[Max]&\"\",\";\",[Cardinality],DESC,[Column Name],ASC)",
+"powerbi": "5;;20;Paid;West"
+},
+{
+"expr": "COUNTROWS(DISTINCT(SELECTCOLUMNS(COLUMNSTATISTICS(),\"v\",[Max])))",
+"powerbi": "5"
+},
+{
+"expr": "FIRSTNONBLANK(SELECTCOLUMNS(COLUMNSTATISTICS(),\"v\",[Max]),1)",
+"powerbi": "5"
+},
+{
+"expr": "COUNTROWS(FILTER(COLUMNSTATISTICS(),[Max]=BLANK()))",
+"powerbi": "1"
+},
+{
+"expr": "MAXX(COLUMNSTATISTICS(),[Cardinality])",
+"powerbi": "6"
+},
+{
+"expr": "MINX(COLUMNSTATISTICS(),[Cardinality])",
+"powerbi": "3"
+},
+{
+"expr": "COUNTAX(COLUMNSTATISTICS(),[Cardinality])",
+"powerbi": "5"
+},
+{
+"expr": "COUNTX(COLUMNSTATISTICS(),[Cardinality])",
+"powerbi": "5"
+},
+{
+"expr": "CONCATENATEX(FILTER(COLUMNSTATISTICS(),NOT ISBLANK([Cardinality])),[Cardinality],\",\",[Column Name],ASC)",
+"powerbi": "3,6,3,6,6"
+},
+{
+"expr": "CONCATENATEX(COLUMNSTATISTICS(),[Cardinality]&\"\",\";\",[Cardinality],DESC,[Column Name],ASC)",
+"powerbi": "6;6;6;3;3"
+},
+{
+"expr": "COUNTROWS(DISTINCT(SELECTCOLUMNS(COLUMNSTATISTICS(),\"v\",[Cardinality])))",
+"powerbi": "2"
+},
+{
+"expr": "FIRSTNONBLANK(SELECTCOLUMNS(COLUMNSTATISTICS(),\"v\",[Cardinality]),1)",
+"powerbi": "3"
+},
+{
+"expr": "COUNTROWS(FILTER(COLUMNSTATISTICS(),[Cardinality]=BLANK()))",
+"powerbi": "BLANK"
+},
+{
+"expr": "MAXX(COLUMNSTATISTICS(),[Max Length])",
+"powerbi": "5"
+},
+{
+"expr": "MINX(COLUMNSTATISTICS(),[Max Length])",
+"powerbi": "4"
+},
+{
+"expr": "COUNTAX(COLUMNSTATISTICS(),[Max Length])",
+"powerbi": "2"
+},
+{
+"expr": "COUNTX(COLUMNSTATISTICS(),[Max Length])",
+"powerbi": "2"
+},
+{
+"expr": "CONCATENATEX(FILTER(COLUMNSTATISTICS(),NOT ISBLANK([Max Length])),[Max Length],\",\",[Column Name],ASC)",
+"powerbi": "4,5"
+},
+{
+"expr": "CONCATENATEX(COLUMNSTATISTICS(),[Max Length]&\"\",\";\",[Cardinality],DESC,[Column Name],ASC)",
+"powerbi": ";;;4;5"
+},
+{
+"expr": "COUNTROWS(DISTINCT(SELECTCOLUMNS(COLUMNSTATISTICS(),\"v\",[Max Length])))",
+"powerbi": "3"
+},
+{
+"expr": "FIRSTNONBLANK(SELECTCOLUMNS(COLUMNSTATISTICS(),\"v\",[Max Length]),1)",
+"powerbi": "4"
+},
+{
+"expr": "COUNTROWS(FILTER(COLUMNSTATISTICS(),[Max Length]=BLANK()))",
+"powerbi": "3"
+},
+{
+"expr": "MAXX(FILTER(COLUMNSTATISTICS(),[Column Name]=\"Sales\"),[Min])&\"|\"",
+"powerbi": "-1.5|"
+},
+{
+"expr": "LOOKUPVALUE(Facts[Quantity],Facts[Quantity],MAXX(FILTER(COLUMNSTATISTICS(),[Column Name]=\"Sales\"),[Cardinality]))",
+"powerbi": "BLANK"
+},
+{
+"expr": "MAXX(FILTER(COLUMNSTATISTICS(),[Column Name]=\"Sales\"),[Max])&\"|\"",
+"powerbi": "20|"
+},
+{
+"expr": "MAXX(FILTER(COLUMNSTATISTICS(),[Column Name]=\"Sales\"),[Cardinality])&\"|\"",
+"powerbi": "6|"
+},
+{
+"expr": "MAXX(FILTER(COLUMNSTATISTICS(),[Column Name]=\"Sales\"),[Max Length])&\"|\"",
+"powerbi": "|"
+},
+{
+"expr": "MAXX(FILTER(COLUMNSTATISTICS(),[Column Name]=\"Quantity\"),[Min])&\"|\"",
+"powerbi": "0|"
+},
+{
+"expr": "LOOKUPVALUE(Facts[Quantity],Facts[Quantity],MAXX(FILTER(COLUMNSTATISTICS(),[Column Name]=\"Quantity\"),[Cardinality]))",
+"powerbi": "BLANK"
+},
+{
+"expr": "MAXX(FILTER(COLUMNSTATISTICS(),[Column Name]=\"Quantity\"),[Max])&\"|\"",
+"powerbi": "5|"
+},
+{
+"expr": "MAXX(FILTER(COLUMNSTATISTICS(),[Column Name]=\"Quantity\"),[Cardinality])&\"|\"",
+"powerbi": "6|"
+},
+{
+"expr": "MAXX(FILTER(COLUMNSTATISTICS(),[Column Name]=\"Quantity\"),[Max Length])&\"|\"",
+"powerbi": "|"
+},
+{
+"expr": "MAXX(FILTER(COLUMNSTATISTICS(),[Column Name]=\"Region\"),[Min])&\"|\"",
+"powerbi": "|"
+},
+{
+"expr": "LOOKUPVALUE(Facts[Quantity],Facts[Quantity],MAXX(FILTER(COLUMNSTATISTICS(),[Column Name]=\"Region\"),[Cardinality]))",
+"powerbi": "3"
+},
+{
+"expr": "MAXX(FILTER(COLUMNSTATISTICS(),[Column Name]=\"Region\"),[Max])&\"|\"",
+"powerbi": "|"
+},
+{
+"expr": "MAXX(FILTER(COLUMNSTATISTICS(),[Column Name]=\"Region\"),[Cardinality])&\"|\"",
+"powerbi": "3|"
+},
+{
+"expr": "MAXX(FILTER(COLUMNSTATISTICS(),[Column Name]=\"Region\"),[Max Length])&\"|\"",
+"powerbi": "5|"
+},
+{
+"expr": "MAXX(FILTER(COLUMNSTATISTICS(),[Column Name]=\"Note\"),[Min])&\"|\"",
+"powerbi": "|"
+},
+{
+"expr": "LOOKUPVALUE(Facts[Quantity],Facts[Quantity],MAXX(FILTER(COLUMNSTATISTICS(),[Column Name]=\"Note\"),[Cardinality]))",
+"powerbi": "3"
+},
+{
+"expr": "MAXX(FILTER(COLUMNSTATISTICS(),[Column Name]=\"Note\"),[Max])&\"|\"",
+"powerbi": "|"
+},
+{
+"expr": "MAXX(FILTER(COLUMNSTATISTICS(),[Column Name]=\"Note\"),[Cardinality])&\"|\"",
+"powerbi": "3|"
+},
+{
+"expr": "MAXX(FILTER(COLUMNSTATISTICS(),[Column Name]=\"Note\"),[Max Length])&\"|\"",
+"powerbi": "4|"
+},
+{
+"expr": "SUMX(COLUMNSTATISTICS(),[Cardinality]*[Max Length])",
+"powerbi": "27"
+},
+{
+"expr": "AVERAGEX(COLUMNSTATISTICS(),[Cardinality])",
+"powerbi": "4.8"
+},
+{
+"expr": "COUNTROWS(EXCEPT(COLUMNSTATISTICS(),COLUMNSTATISTICS()))",
+"powerbi": "BLANK"
+},
+{
+"expr": "COUNTROWS(UNION(COLUMNSTATISTICS(),COLUMNSTATISTICS()))",
+"powerbi": "10"
+},
+{
+"expr": "COUNTROWS(INTERSECT(COLUMNSTATISTICS(),COLUMNSTATISTICS()))",
+"powerbi": "5"
+},
+{
+"expr": "COUNTROWS(TOPN(3,COLUMNSTATISTICS(),[Cardinality],DESC))",
+"powerbi": "3"
+},
+{
+"expr": "CONCATENATEX(GROUPBY(COLUMNSTATISTICS(),[Cardinality],\"n\",COUNTX(CURRENTGROUP(),1)),[Cardinality]&\":\"&[n],\",\",[Cardinality],ASC)",
+"powerbi": "3:2,6:3"
+},
+{
+"expr": "COUNTROWS(GENERATE(VALUES(Facts[Region]),COLUMNSTATISTICS()))",
+"powerbi": "15"
+},
+{
+"expr": "SUMX(VALUES(Facts[Region]),COUNTROWS(COLUMNSTATISTICS()))",
+"powerbi": "15"
+},
+{
+"expr": "SUMX(Facts,COUNTROWS(COLUMNSTATISTICS()))",
+"powerbi": "30"
+},
+{
+"expr": "COUNTROWS(FILTER(COLUMNSTATISTICS(),[Min]<0))",
+"powerbi": "1"
+},
+{
+"expr": "COUNTROWS(FILTER(COLUMNSTATISTICS(),[Max]>10))",
+"powerbi": "3"
+},
+{
+"expr": "MAXX(FILTER(COLUMNSTATISTICS(),[Column Name]=\"Sales\"),[Max])-MAXX(FILTER(COLUMNSTATISTICS(),[Column Name]=\"Sales\"),[Min])",
+"powerbi": "21.5"
+},
+{
+"expr": "MAXX(FILTER(COLUMNSTATISTICS(),[Column Name]=\"Region\"),[Max])&MAXX(FILTER(COLUMNSTATISTICS(),[Column Name]=\"Note\"),[Min])",
+"powerbi": "BLANK"
+},
+{
+"expr": "CALCULATE(COUNTROWS(COLUMNSTATISTICS()))",
+"powerbi": "5"
+},
+{
+"expr": "CALCULATE(COUNTROWS(COLUMNSTATISTICS()),ALL(Facts))",
+"powerbi": "5"
+},
+{
+"expr": "CALCULATE(COUNTROWS(COLUMNSTATISTICS()),REMOVEFILTERS())",
+"powerbi": "5"
+},
+{
+"expr": "CALCULATE(COUNTROWS(COLUMNSTATISTICS()),Facts[Quantity]>2)",
+"powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 39) COLUMNSTATISTICS() cannot be used with a filter context.\""
+},
+{
+"expr": "CALCULATE(COUNTROWS(COLUMNSTATISTICS()),FILTER(ALL(Facts),Facts[Quantity]>2))",
+"powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 39) COLUMNSTATISTICS() cannot be used with a filter context.\""
+},
+{
+"expr": "SUMX(FILTER(Facts,Facts[Quantity]>2),COUNTROWS(COLUMNSTATISTICS()))",
+"powerbi": "15"
+},
+{
+"expr": "SUMX(Facts,CALCULATE(COUNTROWS(COLUMNSTATISTICS())))",
+"powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 50) COLUMNSTATISTICS() cannot be used with a filter context.\""
+},
+{
+"expr": "IF(COUNTROWS(COLUMNSTATISTICS())>3,\"y\",\"n\")",
+"powerbi": "y"
+},
+{
+"expr": "COUNTROWS(COLUMNSTATISTICS())+0.5",
+"powerbi": "5.5"
+},
+{
+"expr": "ISEMPTY(COLUMNSTATISTICS())",
+"powerbi": "False"
+},
+{
+"expr": "COUNTROWS(ROW(\"a\",1))+COUNTROWS(COLUMNSTATISTICS())",
+"powerbi": "6"
+},
+{
+"expr": "CONTAINS(COLUMNSTATISTICS(),[Column Name],\"Sales\")",
+"powerbi": "True"
+},
+{
+"expr": "CONTAINSROW(SELECTCOLUMNS(COLUMNSTATISTICS(),\"c\",[Column Name]),\"Note\")",
+"powerbi": "True"
+},
+{
+"expr": "\"x\" IN SELECTCOLUMNS(COLUMNSTATISTICS(),\"c\",[Column Name])",
+"powerbi": "False"
+},
+{
+"expr": "COUNTROWS(SELECTCOLUMNS(COLUMNSTATISTICS(),\"a\",[Table Name],\"b\",[Column Name]))",
+"powerbi": "5"
+},
+{
+"expr": "TOCSV(SELECTCOLUMNS(COLUMNSTATISTICS(),\"c\",[Column Name],\"k\",[Cardinality]),10,\",\",TRUE)",
+"powerbi": "[c],[k]"
+},
+{
+"expr": "TOJSON(SELECTCOLUMNS(FILTER(COLUMNSTATISTICS(),[Column Name]=\"Region\"),\"c\",[Column Name],\"k\",[Cardinality],\"m\",[Max Length]))",
+"powerbi": "{"
+},
+{
+"expr": "COLUMNSTATISTICS(,)",
+"powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Too many arguments were passed to the COLUMNSTATISTICS function. The maximum argument count for the function is 0.\""
+},
+{
+"expr": "COUNTROWS(COLUMNSTATISTICS(Facts[Sales]))",
+"powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 46) Too many arguments were passed to the COLUMNSTATISTICS function. The maximum argument count for the function is 0.\""
+},
+{
+"expr": "COUNTROWS(columnstatistics())",
+"powerbi": "5"
+},
+{
+"expr": "VAR t=COLUMNSTATISTICS() RETURN COUNTROWS(t)",
+"powerbi": "5"
+},
+{
+"expr": "VAR t=FILTER(COLUMNSTATISTICS(),[Cardinality]=3) RETURN CONCATENATEX(t,[Column Name],\"|\",[Column Name],ASC)",
+"powerbi": "Note|Region"
+},
+{
+"expr": "CONCATENATEX(COLUMNSTATISTICS(),[Column Name],\"|\",[Min],ASC)",
+"powerbi": "Sales|RowNumber-2662979B-1795-4F74-8F37-6A1BA8059B61|Quantity|Region|Note"
+},
+{
+"expr": "CONCATENATEX(COLUMNSTATISTICS(),[Min]&\"\",\"|\",[Min],ASC)",
+"powerbi": "-1.5||0|East|Late"
+},
+{
+"expr": "CONCATENATEX(COLUMNSTATISTICS(),[Column Name],\"|\",[Min],ASC,[Column Name],ASC)",
+"powerbi": "Sales|RowNumber-2662979B-1795-4F74-8F37-6A1BA8059B61|Quantity|Region|Note"
+},
+{
+"expr": "CONCATENATEX(COLUMNSTATISTICS(),[Column Name],\"|\",[Min],DESC)",
+"powerbi": "Note|Region|Quantity|RowNumber-2662979B-1795-4F74-8F37-6A1BA8059B61|Sales"
+},
+{
+"expr": "CONCATENATEX(COLUMNSTATISTICS(),[Min]&\"\",\"|\",[Min],DESC)",
+"powerbi": "Late|East|0||-1.5"
+},
+{
+"expr": "CONCATENATEX(COLUMNSTATISTICS(),[Column Name],\"|\",[Min],DESC,[Column Name],ASC)",
+"powerbi": "Note|Region|Quantity|RowNumber-2662979B-1795-4F74-8F37-6A1BA8059B61|Sales"
+},
+{
+"expr": "CONCATENATEX(COLUMNSTATISTICS(),[Column Name],\"|\",[Max],ASC)",
+"powerbi": "RowNumber-2662979B-1795-4F74-8F37-6A1BA8059B61|Quantity|Sales|Note|Region"
+},
+{
+"expr": "CONCATENATEX(COLUMNSTATISTICS(),[Max]&\"\",\"|\",[Max],ASC)",
+"powerbi": "|5|20|Paid|West"
+},
+{
+"expr": "CONCATENATEX(COLUMNSTATISTICS(),[Column Name],\"|\",[Max],ASC,[Column Name],ASC)",
+"powerbi": "RowNumber-2662979B-1795-4F74-8F37-6A1BA8059B61|Quantity|Sales|Note|Region"
+},
+{
+"expr": "CONCATENATEX(COLUMNSTATISTICS(),[Column Name],\"|\",[Max],DESC)",
+"powerbi": "Region|Note|Sales|Quantity|RowNumber-2662979B-1795-4F74-8F37-6A1BA8059B61"
+},
+{
+"expr": "CONCATENATEX(COLUMNSTATISTICS(),[Max]&\"\",\"|\",[Max],DESC)",
+"powerbi": "West|Paid|20|5|"
+},
+{
+"expr": "CONCATENATEX(COLUMNSTATISTICS(),[Column Name],\"|\",[Max],DESC,[Column Name],ASC)",
+"powerbi": "Region|Note|Sales|Quantity|RowNumber-2662979B-1795-4F74-8F37-6A1BA8059B61"
+}
+]
+}
