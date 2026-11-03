@@ -71,7 +71,8 @@ class TableFns2PartATest(unittest.TestCase):
                 mismatches.append((expr, expected, actual, st))
         self.assertEqual([], mismatches, f"Mismatches found in Part A SUBSTITUTEWITHINDEX: {len(mismatches)} of {len(sub_items)}")
         for expr in KNOWN_REFUSED:
-            self.assertEqual("gap-reject", status(next(i["powerbi"] for i in sub_items if i["expr"] == expr), dax.local(expr)))
+            # Task 32 (2026-11-03) answers this shape; it may now match the saved Power BI answer, never differ
+            self.assertIn(status(next(i["powerbi"] for i in sub_items if i["expr"] == expr), dax.local(expr)), ("gap-reject", "match"))
 
     def test_refusals_stay_refused(self) -> None:
         """Explicit check for refused negative cases in Part A."""
