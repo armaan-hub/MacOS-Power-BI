@@ -1996,6 +1996,7 @@ _CANNOT_RAISE_CALLS = frozenset({
     "IF", "IF.EAGER", "SWITCH", "IFERROR", "COALESCE", "FORMAT", "EDATE", "EOMONTH", "CALCULATE", "CUSTOMDATA",
     "LEFT", "RIGHT", "MID", "TRIM", "CONCATENATE", "CONCATENATEX", "CURRENCY", "INT", "ROUND", "ROUNDUP", "ROUNDDOWN",
     "SUMX", "AVERAGEX", "MAXX", "MINX", "COUNTX", "COUNTAX", "PRODUCTX", "YEAR", "MONTH", "DAY", "TIME",
+    "ROW", "VARX.P", "VARX.S", "STDEVX.S", "MEDIANX",
 })
 
 
@@ -11419,7 +11420,7 @@ def evaluate_measures(
                 "blank" if _empty_text_blank(expression[3], expression[2:3]) else iterator_expression_category(expression[3], row_context),
             )
             if any(
-                category not in {"boolean", "blank", "numeric"}  # live Power BI (iteration 87): a number is True unless it is zero
+                category not in {"boolean", "blank", "numeric", "text", "date/time"}  # live Power BI: numbers, text and dates evaluate as boolean
                 for category in operand_categories
             ):
                 raise MeasureError(
@@ -11513,7 +11514,7 @@ def evaluate_measures(
                     for argument in expression[2]
                 )
                 if any(
-                    category not in {"boolean", "blank", "numeric"}
+                    category not in {"boolean", "blank", "numeric", "text", "date/time"}
                     for category in operand_categories
                 ):
                     raise MeasureError(
@@ -16185,7 +16186,7 @@ def evaluate_measures(
                 try:
                     number = Decimal(raw_value.replace(",", "").strip())
                 except (DecimalException, ValueError) as exc:
-                    raise MeasureError(
+                    raise MeasureRuntimeError(
                         f"Column {actual!r} contains a non-numeric value at row {row_index}; convert it to a number first."
                     ) from exc
                 if not number.is_finite():
@@ -16260,14 +16261,32 @@ def evaluate_measures(
                 logical_blank_right = logical_blank_right or (right is None and right_error is None and logical_empty_text_blank(node[3]))
                 if blank_left or logical_blank_left or (node[1] == "*" and (blank_right or logical_blank_right)):
                     return None
+                if isinstance(right_error, _HardError):
+                    raise right_error
+                if isinstance(left_error, _HardError):
+                    raise left_error
                 for held_error, other_operand in ((left_error, node[3]), (right_error, node[2])):
                     if held_error is not None:
                         if node[1] == "*" and isinstance(held_error, _CurrencyConversionError) and left_static_type(other_operand, row_context) == "double":
                             raise _CurrencyRangeFailure(str(held_error)) from held_error  # CURRENCY(1E15)*1E10: a Currency times a Double, typed statically
                         raise held_error
             else:
-                left = evaluate(node[2], row_context)
-                right = evaluate(node[3], row_context)
+                try:
+                    left = evaluate(node[2], row_context)
+                except (MeasureRuntimeError, _HardError) as error:
+                    left, left_error = None, error
+                try:
+                    right = evaluate(node[3], row_context)
+                except (MeasureRuntimeError, _HardError) as error:
+                    right, right_error = None, error
+                if isinstance(right_error, _HardError):
+                    raise right_error
+                if isinstance(left_error, _HardError):
+                    raise left_error
+                if left_error is not None:
+                    raise left_error
+                if right_error is not None:
+                    raise right_error
             for operand, value, other, other_error in ((node[2], left, right, right_error), (node[3], right, left, left_error)):
                 if value is None and (operand[0] == "logical" or operand[:2] in {("call", "AND"), ("call", "OR")}) and (other is None or isinstance(other, str) or other_error is not None):
                     raise dax_typed.refusal("A logical operator's BLANK beside a BLANK, a text or an error in arithmetic is not modelled by the local engine.")  # live Power BI (Task 18 review): the result is not BLANK
@@ -17267,14 +17286,15 @@ def evaluate_measures(
             else:
                 probe_untaken_branches([arguments[1]], row_context)  # live Power BI (iteration 91): a compile-time error in the unused argument is raised too
             value = date_as_typed(node, value, row_context)
-            if value is None and true_false_column(arguments[1] if failed else arguments[0]):
+            chosen = arguments[1] if failed else arguments[0]
+            if value is None and true_false_column(chosen):
                 if branch_kind(arguments[0] if failed else arguments[1], row_context) == "blank":
                     return None  # as in IF: see there
                 refuse_logical_blank_beside(arguments[0] if failed else arguments[1], row_context)
                 if branch_kind(arguments[0] if failed else arguments[1], row_context) == "bool":
                     refuse_bare_column(arguments[0] if failed else arguments[1], row_context)
                     return None  # live Power BI (Task 17 review): a plain BLANK, and unlike IF no reader of its type sees False
-            if value is None and bool_join([branch_kind(arguments[0], row_context), branch_kind(arguments[1], row_context)]):
+            if value is None and not (chosen is not None and chosen[0] == "call" and chosen[1] == "CONVERT") and bool_join([branch_kind(arguments[0], row_context), branch_kind(arguments[1], row_context)]):
                 return False
             return value
         if function in _TYPED_ARITY:
