@@ -231,7 +231,7 @@ _ROW_SHIELDING_CALLS = frozenset({
 })
 _ITERATOR_CALLS = frozenset({
     "SUMX", "AVERAGEX", "MAXX", "MINX", "COUNTX", "COUNTAX", "PRODUCTX", "MEDIANX", "CONCATENATEX", "FILTER", "ADDCOLUMNS",
-    "SELECTCOLUMNS", "TOPN", "GENERATE", "GENERATEALL", "RANKX", "SUMMARIZE", "GROUPBY", "XNPV",
+    "SELECTCOLUMNS", "TOPN", "GENERATE", "GENERATEALL", "RANKX", "SUMMARIZE", "GROUPBY", "XNPV", "XIRR",
 })
 
 
@@ -486,7 +486,7 @@ _ROW_ORDER_FUNCTIONS = frozenset({
     "CONCATENATEX", "TOPN", "TOPNSKIP", "INDEX", "OFFSET", "WINDOW", "FIRSTNONBLANK", "LASTNONBLANK", "RANKX", "GENERATE", "GENERATEALL",
 })
 _FUNCTIONS |= set(_COLUMN_SCALAR_ARITY) | {
-    "CONCATENATEX", "XNPV", "IF.EAGER", "ERROR", "CUSTOMDATA", "NAMEOF", "EVALUATEANDLOG", "ALLCROSSFILTERED",
+    "CONCATENATEX", "XNPV", "XIRR", "IF.EAGER", "ERROR", "CUSTOMDATA", "NAMEOF", "EVALUATEANDLOG", "ALLCROSSFILTERED",
     "TOCSV", "TOJSON",
 }
 # Lookup, membership, filter-context and table-constructor functions (min, max arguments; None is unbounded).
@@ -526,7 +526,7 @@ _FUNCTIONS |= set(_TABLE_FUNCTION_ARITY) | set(_RANK_ARITY)
 _FUNCTIONS |= dax_time_sets.SET_FUNCTIONS | dax_time_sets.BALANCES  # date sets and balances (iteration 84)
 _FUNCTIONS.add("RELATEDTABLE")
 _TABLE_FIRST_PARENTS = _ALL_ITERATORS | dax_time_sets.SET_FUNCTIONS | {"FIRSTNONBLANK", "LASTNONBLANK", "FIRSTNONBLANKVALUE", "LASTNONBLANKVALUE"} | {
-    "COUNTROWS", "CONCATENATEX", "XNPV", "ISEMPTY", "CONTAINS", "CONTAINSROW", "ADDCOLUMNS", "SELECTCOLUMNS", "SUMMARIZE",
+    "COUNTROWS", "CONCATENATEX", "XNPV", "XIRR", "ISEMPTY", "CONTAINS", "CONTAINSROW", "ADDCOLUMNS", "SELECTCOLUMNS", "SUMMARIZE",
     "FILTER", "RANKX", "CALCULATETABLE", "DISTINCT", "VALUES", "FILTERS", "TOCSV", "TOJSON", "LINESTX",
     "SUBSTITUTEWITHINDEX",
 }
@@ -1713,6 +1713,133 @@ def _linest_number(value: Any) -> float:
     raise MeasureError("A LINEST argument of this type is not modelled in the local engine.")
 
 
+def _xirr_solve(flows: list[tuple[float, float]], guess: float) -> tuple[str, float | None]:
+    """Power BI's XIRR root finder, rebuilt from 93 live answers (Task 33).
+
+    Power BI does not return the exact root.  It brackets the root in u = (1 + rate) / (1 + guess), first by doubling
+    u = 2, 4, 8 ... upwards (the first sign change of the NPV against its sign at u = 1), and only when that finds nothing
+    by halving u = 1/2, 1/4 ... downwards.  It then bisects the bracket and stops at the first step where both
+    (bracket width) / max(1, 1 + rate) < 1e-8 and |NPV| / |first flow| < 1e-8, and returns the end of the bracket that lies on the
+    far side of the root from the guess.  The flows are taken in date order, the NPV counts days / 365 from the earliest date.
+
+    Returns ("ok", rate), ("none", None) when no bracket exists, or ("refuse", None) when the case is outside what was measured.
+    The three width scalings that fit every measured answer, and a small window around each tolerance, must all agree on the result."""
+    if not (math.isfinite(guess) and -0.99 <= guess <= 10.0) or guess == 0.0:
+        return ("refuse", None)
+    ordered = sorted(flows, key=lambda item: item[1])  # stable: flows on the same date keep their table order
+    first_day = ordered[0][1]
+    first_abs = abs(ordered[0][0])
+    if first_abs == 0.0 or not math.isfinite(first_abs):
+        return ("refuse", None)
+    base = 1.0 + guess
+    terms = [(value, (day - first_day) / 365.0) for value, day in ordered]
+    # Count the real roots 1 + rate > 0 of the NPV on a fine log grid (200 points per decade, 1e-6 .. 1e6) and the sign flips of the
+    # date-ordered flows.  Anything that cannot be evaluated cleanly on the grid is refused.
+    try:
+        grid = [10.0 ** (index / 200.0) for index in range(-1200, 1201)]
+        grid_signs = [sum(value * y ** (-years) for value, years in terms) > 0.0 for y in grid]
+    except (OverflowError, ZeroDivisionError):
+        return ("refuse", None)
+    root_count = sum(1 for a, b in zip(grid_signs, grid_signs[1:]) if a != b)
+    flow_signs = [value > 0.0 for value, _ in ordered if value != 0.0]
+    sign_flips = sum(1 for a, b in zip(flow_signs, flow_signs[1:]) if a != b)
+    first_row_earliest = flows[0][1] == first_day
+    if root_count >= 2 and not first_row_earliest:
+        # Measured: four fresh answers with several roots and the first table row not at the earliest date broke every model
+        # (two "couldn't find a solution" where a bracket exists, one number where no bracket exists, one lowest root).  Refuse.
+        return ("refuse", None)
+
+    def npv(u: float) -> float:
+        y = base * u
+        return sum(value * y ** (-years) for value, years in terms)
+
+    try:
+        start = npv(1.0)
+        if not math.isfinite(start) or start == 0.0:
+            return ("refuse", None)
+        positive_start = start > 0.0
+        up_k = dn_k = None
+        for k in range(1, 61):
+            value = npv(2.0 ** k)
+            if not math.isfinite(value):
+                return ("refuse", None)
+            if (value > 0.0) != positive_start:
+                up_k = k
+                break
+        for k in range(1, 61):
+            value = npv(2.0 ** -k)
+            if not math.isfinite(value):
+                return ("refuse", None)
+            if (value > 0.0) != positive_start:
+                dn_k = k
+                break
+    except (OverflowError, ZeroDivisionError):
+        return ("refuse", None)
+    try:
+        for direction in (1, -1):
+            signs = [npv(2.0 ** (direction * k)) > 0.0 for k in range(0, 41)]
+            if sum(1 for a, b in zip(signs, signs[1:]) if a != b) > 1:
+                # Several brackets on one side of the guess.  Measured: Power BI took the first bracket going down only when it
+                # was the very first halving and nothing was found going up (5 answers); a first bracket at the 2nd halving
+                # answered "couldn't find a solution", and a second bracket going up made it answer the lower root.  Refuse the rest.
+                if direction == -1 and dn_k == 1 and up_k is None and sign_flips == 2 and root_count == 2:
+                    continue  # only with exactly two sign flips in the date-ordered flows and two roots (3 answers); 4 flips, 2 roots was an error
+                return ("refuse", None)
+    except (OverflowError, ZeroDivisionError):
+        return ("refuse", None)
+    if up_k is None and dn_k is None:
+        if root_count:
+            return ("refuse", None)  # a root exists but the doubling search misses it: Power BI returned a number for such a case
+        return ("none", None)
+    if up_k is not None:
+        if up_k > 26 or (dn_k is not None and up_k > 5):
+            return ("refuse", None)  # measured: up first (k <= 5 with a lower root too), roots up to 2^26 answered
+        lo, hi, upward = 2.0 ** (up_k - 1), 2.0 ** up_k, True
+    else:
+        if dn_k > 10:
+            return ("refuse", None)  # measured: a root at 2^-28 is not found, a root at 2^-10 is
+        lo, hi, upward = 2.0 ** -dn_k, 2.0 ** -(dn_k - 1), False
+    variants = [(w, t, f) for w in range(3) for t in (1e-8, 0.995e-8, 1.01e-8) for f in (1e-8, 1.005e-8)]
+    answers: dict[int, float] = {}
+    last_step = 0
+    try:
+        for step in range(1, 201):
+            mid = (lo + hi) / 2.0
+            mid_value = npv(mid)
+            if not math.isfinite(mid_value):
+                return ("refuse", None)
+            if (mid_value > 0.0) == positive_start:
+                if upward:
+                    lo = mid
+                else:
+                    hi = mid
+            else:
+                if upward:
+                    hi = mid
+                else:
+                    lo = mid
+            cross = hi if upward else lo
+            residual = abs(npv(cross)) / first_abs
+            rate_mid = base * mid - 1.0
+            width = (hi - lo) * base
+            scaled = (width / (1.0 + abs(rate_mid)), width / max(1.0, base * mid), (hi - lo) / max(1.0, mid))
+            for index, (w, t, f) in enumerate(variants):
+                if index not in answers and scaled[w] < t and residual < f:
+                    answers[index] = base * cross - 1.0
+                    last_step = max(last_step, step)
+            if len(answers) == len(variants):
+                break
+    except (OverflowError, ZeroDivisionError):
+        return ("refuse", None)
+    if len(answers) != len(variants) or len(set(answers.values())) != 1:
+        return ("refuse", None)
+    if last_step > 40:
+        # Measured: every answered case stopped within 35 bisection steps; a fresh case needing 51 (root at 1 + rate ~ 0.015, first row
+        # not the earliest date) was "couldn't find a solution".  Power BI's stop rule beyond 35 steps is unsettled: refuse.
+        return ("refuse", None)
+    return ("ok", answers[0])
+
+
 def _is_all_table_value_argument(node: Any) -> bool:
     """Return whether a node is a supported filter-function table value."""
     if not isinstance(node, tuple) or not node:
@@ -1955,7 +2082,7 @@ def _has_membership_in_computed_table(node: Any) -> bool:
 _AGGREGATING_CALLS = {
     "SUM", "AVERAGE", "MIN", "MAX", "COUNT", "COUNTA", "COUNTBLANK", "DISTINCTCOUNT", "DISTINCTCOUNTNOBLANK", "MEDIAN",
     "PRODUCT", "COUNTROWS", "SUMX", "AVERAGEX", "MAXX", "MINX", "COUNTX", "COUNTAX", "CALCULATE", "SELECTEDVALUE",
-    "LOOKUPVALUE", "FIRSTNONBLANK", "LASTNONBLANK", "FIRSTNONBLANKVALUE", "LASTNONBLANKVALUE", "RANKX", "CONCATENATEX", "XNPV", "VALUES", "DISTINCT", "ALL",
+    "LOOKUPVALUE", "FIRSTNONBLANK", "LASTNONBLANK", "FIRSTNONBLANKVALUE", "LASTNONBLANKVALUE", "RANKX", "CONCATENATEX", "XNPV", "XIRR", "VALUES", "DISTINCT", "ALL",
     "ISFILTERED", "HASONEVALUE", "HASONEFILTER", "ISCROSSFILTERED", "ISINSCOPE", *dax_math.STAT_ITERATORS,
 }
 
@@ -2211,7 +2338,7 @@ _BOOLEAN_FILTER_REFUSED_CALLS = frozenset({
     "TABLEOF", "ALLCROSSFILTERED", "TOCSV", "TOJSON", "LINEST", "LINESTX",
     "ADDMISSINGITEMS", "ROLLUP", "ROLLUPGROUP", "ROLLUPADDISSUBTOTAL", "ROLLUPISSUBTOTAL",
 })
-_BOOLEAN_FILTER_X_ITERATORS = frozenset({"SUMX", "AVERAGEX", "MAXX", "MINX", "COUNTX", "COUNTAX", "CONCATENATEX", "XNPV", *dax_math.STAT_ITERATORS})
+_BOOLEAN_FILTER_X_ITERATORS = frozenset({"SUMX", "AVERAGEX", "MAXX", "MINX", "COUNTX", "COUNTAX", "CONCATENATEX", "XNPV", "XIRR", *dax_math.STAT_ITERATORS})
 
 _VAR_FILTER_DISALLOWED = _BOOLEAN_FILTER_X_ITERATORS | (_FILTER_AGGREGATES - {"COUNTROWS", "DISTINCTCOUNT"}) | _BOOLEAN_FILTER_REFUSED_CALLS
 
@@ -2315,7 +2442,7 @@ def _is_sample_statistic(node: Any) -> bool:
 
 _FRAME_FUNCTIONS = frozenset({
     "SUMX", "AVERAGEX", "MAXX", "MINX", "COUNTX", "COUNTAX", "CONCATENATEX", "PRODUCTX", "MEDIANX", "FILTER", "ADDCOLUMNS", "SELECTCOLUMNS", "TOPN", "RANKX",
-    "GENERATE", "GENERATEALL", "SUMMARIZE", "GEOMEANX", "STDEVX.S", "STDEVX.P", "VARX.S", "VARX.P", "PERCENTILEX.INC", "PERCENTILEX.EXC", "XNPV",
+    "GENERATE", "GENERATEALL", "SUMMARIZE", "GEOMEANX", "STDEVX.S", "STDEVX.P", "VARX.S", "VARX.P", "PERCENTILEX.INC", "PERCENTILEX.EXC", "XNPV", "XIRR",
 })
 
 
@@ -2330,12 +2457,12 @@ def _earlier_too_deep(node: Any, frames: int) -> bool:
             depth = int(node[2][1][1])
         return frames <= depth if node[1] == "EARLIER" else frames < 2
     if node[0] == "call" and node[1] in _FRAME_FUNCTIONS and node[2]:
-        if node[1] == "XNPV" and len(node[2]) == 4:
+        if node[1] in {"XNPV", "XIRR"}:
             return (
                 _earlier_too_deep(node[2][0], frames)
-                or _earlier_too_deep(node[2][1], frames + 1)
-                or _earlier_too_deep(node[2][2], frames + 1)
-                or _earlier_too_deep(node[2][3], frames)
+                or (len(node[2]) > 1 and _earlier_too_deep(node[2][1], frames + 1))
+                or (len(node[2]) > 2 and _earlier_too_deep(node[2][2], frames + 1))
+                or any(_earlier_too_deep(arg, frames) for arg in node[2][3:])
             )
         return _earlier_too_deep(node[2][0], frames) or any(_earlier_too_deep(argument, frames + 1) for argument in node[2][1:])
     return any(_earlier_too_deep(child, frames) for child in node if isinstance(child, tuple))
@@ -3297,7 +3424,7 @@ _NEVER_BLANK_ALWAYS = frozenset({
     "EXACT", "FIND", "SEARCH", "FORMAT", "ISAFTER", "ISONORAFTER", "PATHCONTAINS", "RANDBETWEEN", "EFFECT", "NOMINAL", "COUPDAYBS",
     "COUPDAYS", "COUPDAYSNC", "COUPNCD", "COUPNUM", "COUPPCD", "PDURATION", "RRI", "SLN", "TBILLEQ", "TBILLPRICE", "TBILLYIELD", "RATE",
     "INTRATE", "PRICEDISC", "RECEIVED", "SYD", "YIELDDISC", "ACCRINTM", "DB", "DDB", "DISC", "MDURATION", "PRICEMAT", "VDB", "YIELDMAT",
-    "CUMIPMT", "CUMPRINC", "YIELD", "AMORDEGRC", "AMORLINC", "ODDLPRICE", "ODDLYIELD", "ACCRINT", "DURATION", "PRICE", "ODDFPRICE",
+    "CUMIPMT", "CUMPRINC", "YIELD", "AMORDEGRC", "AMORLINC", "ODDLPRICE", "ODDLYIELD", "ACCRINT", "DURATION", "PRICE", "ODDFPRICE", "ODDFYIELD",
 })
 _NEVER_BLANK_FIRST_ARGUMENT = frozenset({
     "ABS", "CURRENCY", "DATEVALUE", "DAY", "FIXED", "HOUR", "INT", "ISO.CEILING", "LEFT", "LEN", "LOWER", "MINUTE", "MONTH", "PATHLENGTH",
@@ -4064,7 +4191,7 @@ def _validate_literal_positions(
                     continue  # a column or table expression of dates
                 _validate_literal_positions(argument, allow_blank=True)
             return
-        if function in {"CONCATENATEX", "XNPV", "TOCSV", "TOJSON", "LINESTX"}:
+        if function in {"CONCATENATEX", "XNPV", "XIRR", "TOCSV", "TOJSON", "LINESTX"}:
             for argument in arguments[1:]:
                 if argument[0] != "table":  # ASC / DESC
                     _validate_literal_positions(argument, allow_blank=True)
@@ -4592,6 +4719,15 @@ class _Parser:
                     raise MeasureError("The XNPV function expects a table expression for argument '1', but a string or numeric expression was used.")
                 if any(argument[0] == "omitted" for argument in arguments):
                     raise MeasureError("The XNPV function does not accept omitted arguments.")
+            elif function == "XIRR":
+                if len(arguments) < 3:
+                    raise MeasureError("Too few arguments were passed to the XIRR function. The minimum argument count for the function is 3.")
+                if len(arguments) > 5:
+                    raise MeasureError("Too many arguments were passed to the XIRR function. The maximum argument count for the function is 5.")
+                if not _is_all_table_value_argument(arguments[0]):
+                    raise MeasureError("The XIRR function expects a table expression for argument '1', but a string or numeric expression was used.")
+                if any(argument[0] == "omitted" for argument in arguments):
+                    raise MeasureError("The XIRR function does not accept omitted arguments.")
             elif function == "IF.EAGER":
                 if len(arguments) < 2:
                     raise MeasureError("Too few arguments were passed to the IF.EAGER function. The minimum argument count for the function is 2.")
@@ -5055,9 +5191,9 @@ class _Parser:
                 except MeasureError:
                     if not _general_calculate_filters_valid(tuple(arguments[1:])) and not _modifier_mix_filters_valid(tuple(arguments[1:])) and not _time_filters_beside_general_filters(tuple(arguments)):
                         raise
-            if (function in _ALL_ITERATORS or function in {"CONCATENATEX", "XNPV"} or function == "FILTER") and len(arguments) >= 2:
+            if (function in _ALL_ITERATORS or function in {"CONCATENATEX", "XNPV", "XIRR"} or function == "FILTER") and len(arguments) >= 2:
                 _check_set_iterator_body(arguments[0], arguments[1])  # live Power BI: FILTER(date set, ..) reads only the set's own column too
-                if function == "XNPV" and len(arguments) >= 3:
+                if function in {"XNPV", "XIRR"} and len(arguments) >= 3:
                     _check_set_iterator_body(arguments[0], arguments[2])
             if function in {"UNION", "EXCEPT", "INTERSECT", "CROSSJOIN"} and any(argument[0] == "reference" for argument in arguments):
                 # live Power BI (iteration 84, critic): a bare column where a table is expected is a compile-time error
@@ -5864,7 +6000,7 @@ _STATIC_ALWAYS_DOUBLE = frozenset({
     "POWER", "SQRT", "EXP", "LN", "LOG", "LOG10", "PI",
     "COMBIN", "FACT", "AVERAGE", "VALUE",
     "SIN", "COS", "TAN", "ASIN", "DEGREES", "RADIANS", "MEDIAN", "MEDIANX", "PERCENTILE.INC", "PERCENTILEX.INC",
-    "STDEV.S", "STDEV.P", "VAR.S", "VAR.P", "VARX.S", "VARX.P", "GEOMEAN", "PRODUCT", "PRODUCTX", "XNPV", "RAND",
+    "STDEV.S", "STDEV.P", "VAR.S", "VAR.P", "VARX.S", "VARX.P", "GEOMEAN", "PRODUCT", "PRODUCTX", "XNPV", "XIRR", "RAND",
 })
 
 _STATIC_ALWAYS_INT64 = frozenset({
@@ -10072,7 +10208,7 @@ def evaluate_measures(
         return single, ([] if raw is None else [{column: raw}])
 
     _SCALAR_PASS_CALLS = frozenset({"IF", "SWITCH", "IFERROR", "COALESCE", "ABS", "ROUND", "INT", "AND", "OR", "NOT", "ISBLANK", "DIVIDE"})
-    _NESTED_BODY_ITERATORS = frozenset({"SUMX", "AVERAGEX", "MAXX", "MINX", "COUNTX", "COUNTAX", "CONCATENATEX", "FILTER", "XNPV"})
+    _NESTED_BODY_ITERATORS = frozenset({"SUMX", "AVERAGEX", "MAXX", "MINX", "COUNTX", "COUNTAX", "CONCATENATEX", "FILTER", "XNPV", "XIRR"})
 
     def static_table_columns(node: Any) -> set[tuple[str, str]] | None:
         """The (table id, column) pairs the rows of a table expression hold, or None when that is not known without evaluating it."""
@@ -11615,7 +11751,7 @@ def evaluate_measures(
                 return "error"
             if function == "EVALUATEANDLOG" and expression[2]:
                 return iterator_expression_category(expression[2][0], row_context)
-            if function in {"RANKX", "RANK.EQ", "RANK", "ROWNUMBER", "XNPV"}:
+            if function in {"RANKX", "RANK.EQ", "RANK", "ROWNUMBER", "XNPV", "XIRR"}:
                 return "numeric"
             if function == "COALESCE" and expression[2]:
                 return merge_branch_categories([
@@ -15113,6 +15249,17 @@ def evaluate_measures(
                 for index, argument in enumerate(arguments)
             )
         interval = None
+        if function in {"PATHITEM", "PATHITEMREVERSE"} and len(arguments) == 3 and arguments[-1][0] == "table":
+            keyword = str(arguments[-1][1]).upper()
+            if keyword == "INTEGER":
+                arguments = (*arguments[:-1], ("number", Decimal(1), "1"))
+            elif keyword == "TEXT":
+                arguments = (*arguments[:-1], ("number", Decimal(0), "0"))
+            else:
+                raise MeasureError(
+                    "The final argument to the PathItem or PathItemReverse functions should be 0 for TEXT or 1 for INTEGER. "
+                    "It is also possible to use words 'TEXT' and 'INTEGER' respectively."
+                )
         if function in {"DATEDIFF", "CONVERT"}:
             keyword = arguments[-1]
             if keyword[0] != "table":
@@ -17847,6 +17994,112 @@ def evaluate_measures(
                 return res
             finally:
                 xnpv_depth[0] -= 1
+        if function == "XIRR":
+            def xirr_alternate_number(alternate: Any) -> Any:
+                """Live Power BI (Task 33): the alternateResult is converted to a Number when it is returned (BLANK stays BLANK, TRUE is 1, a date is its serial)."""
+                if alternate is None or (isinstance(alternate, Decimal) and not isinstance(alternate, dax_dates.DaxDateTime)):
+                    return alternate
+                if isinstance(alternate, bool):
+                    return Decimal(1 if alternate else 0)
+                if isinstance(alternate, dax_dates.DaxDateTime):
+                    return Decimal(alternate)
+                if isinstance(alternate, (int, float)):
+                    return alternate
+                if isinstance(alternate, str):
+                    try:
+                        return dax_typed.text_to_number(alternate)
+                    except MeasureRuntimeError:
+                        if dax_dates.text_serial(alternate) is not None or dax_dates.date_shaped_text(alternate):  # a date-like text: not measured, refused
+                            raise MeasureError(f"The local engine does not model the text '{alternate.strip()}' as the XIRR alternate result.") from None
+                        raise
+                raise MeasureError("The XIRR alternate result of this type is not modelled by the local engine.")
+
+            if arguments[0][0] == "tableconstructor" and any(isinstance(row, tuple) and row and row[0] == "tableconstructor" for row in arguments[0][1]):
+                raise MeasureError("XIRR over a table constructor with several columns is not supported in the local engine.")
+            read_nodes = [arguments[1], arguments[2]]
+            topn_walk_nodes[id(arguments[0])] = read_nodes
+            try:
+                context, iteration_rows = table_argument_value(arguments[0], allow_keepfilters=True)
+            finally:
+                topn_walk_nodes.pop(id(arguments[0]), None)
+
+            probe_frame = (context, iteration_rows[0] if iteration_rows else {}, 1)
+            try:
+                values_kind = iterator_body_kind(arguments[1], probe_frame)
+            except MeasureError:
+                values_kind = None
+            try:
+                values_cat = iterator_expression_category(arguments[1], probe_frame)
+            except MeasureError:
+                values_cat = None
+            if values_kind in {"text", "bool", "date"} or values_cat in {"text", "boolean", "date/time"}:
+                raise MeasureError("XIRR does not support expressions of type string/Boolean/date for the Values argument.")
+
+            if not iteration_rows:
+                refuse_foreign_columns_of_empty_iteration(context, arguments[1], arguments[2])
+                raise MeasureRuntimeError("A result for XIRR couldn't be determined because the Values and Dates arguments are empty.")
+
+            row_data: list[tuple[float | None, float]] = []
+            for frame in iterate_rows(context, iteration_rows, "install"):
+                val = in_row_expression(lambda frame=frame: evaluate(arguments[1], frame, allow_text=True, allow_boolean=True))
+                if val is None:
+                    v = None
+                elif isinstance(val, (str, bool, dax_dates.DaxDateTime)):
+                    type_name = "Text" if isinstance(val, str) else ("Boolean" if isinstance(val, bool) else "Date")
+                    raise MeasureRuntimeError(f"Cannot convert value '{val}' of type {type_name} to type Numeric.")
+                elif isinstance(val, (int, float, Decimal)):
+                    v = float(val)
+                else:
+                    raise MeasureRuntimeError(f"Cannot convert value '{val}' to type Numeric.")
+
+                d_val = in_row_expression(lambda frame=frame: evaluate(arguments[2], frame, allow_text=True, allow_boolean=True))
+                if d_val is None:
+                    raise MeasureRuntimeError("One or more values for the Dates argument passed to XIRR is blank.")
+                elif isinstance(d_val, str):
+                    parsed_dt = dax_dates.parse_date_text(d_val)
+                    if parsed_dt is not None:
+                        day = math.floor(float(parsed_dt))
+                    else:
+                        raise MeasureRuntimeError(f"Cannot convert value '{d_val}' of type Text to type Date.")
+                elif isinstance(d_val, bool):
+                    day = 1.0 if d_val else 0.0
+                elif isinstance(d_val, (int, float, Decimal)):
+                    d_float = float(d_val)
+                    day = math.floor(d_float) if math.isfinite(d_float) else d_float
+                else:
+                    raise MeasureError("An argument of function 'XIRR' has the wrong data type or has an invalid value.")
+
+                row_data.append((v, day))
+
+            non_blank_flows = [(v, day) for v, day in row_data if v is not None]
+            if not non_blank_flows:
+                raise MeasureRuntimeError("A result for XIRR couldn't be determined because the Values and Dates arguments are empty.")
+
+            first_date = non_blank_flows[0][1]
+            if all(day == first_date for _, day in non_blank_flows):
+                raise MeasureRuntimeError("There isn't a valid result for the XIRR function for the given values.")
+
+            pos = any(v > 0 for v, _ in non_blank_flows)
+            neg = any(v < 0 for v, _ in non_blank_flows)
+            if not (pos and neg):
+                if len(arguments) == 5:
+                    return xirr_alternate_number(evaluate(arguments[4], row_context, allow_text=True, allow_boolean=True))
+                raise MeasureRuntimeError("The XIRR function couldn't find a solution.")
+
+            guess_value = 0.1
+            if len(arguments) >= 4:
+                guess_raw = evaluate(arguments[3], row_context, allow_text=True, allow_boolean=True)
+                if isinstance(guess_raw, bool) or not isinstance(guess_raw, (int, float, Decimal)):
+                    raise MeasureError("The XIRR function's iterative solution is not modelled for this guess argument by the local engine.")
+                guess_value = float(guess_raw)
+            state, rate = _xirr_solve([(v, day) for v, day in non_blank_flows], guess_value)
+            if state == "ok" and rate is not None:
+                return Decimal(int(rate)) if float(rate).is_integer() else Decimal(repr(float(rate)))
+            if state == "none":
+                if len(arguments) == 5:
+                    return xirr_alternate_number(evaluate(arguments[4], row_context, allow_text=True, allow_boolean=True))
+                raise MeasureRuntimeError("The XIRR function couldn't find a solution.")
+            raise MeasureError("The XIRR function's iterative solution is not modelled by the local engine.")
         if function in {"TOCSV", "TOJSON"}:
             is_csv = function == "TOCSV"
             table_node = arguments[0]

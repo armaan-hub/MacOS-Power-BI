@@ -284,6 +284,12 @@ def _item_type(args: list[object]) -> int:
     if len(args) < 3:
         return 0
     value = args[2]
+    if isinstance(value, str):
+        v = value.strip().upper()
+        if v == "INTEGER":
+            return 1
+        if v == "TEXT":
+            return 0
     if isinstance(value, bool) or not isinstance(value, Decimal) or dax_dates.is_date(value) or value not in (0, 1):
         raise _error(
             "The final argument to the PathItem or PathItemReverse functions should be 0 for TEXT or 1 for INTEGER. "
