@@ -85,14 +85,15 @@ class Misc3ReviewTest(unittest.TestCase):
             ('"ä"<"b"', "True"),
             ('"é"<"e"', "False"),
             ("MAX(\"ä\",\"z\")", "z"),
+            # Power BI Desktop measured 2026-11-03 (the text collation of Task 28 models these)
+            ('"ł">"s"', "False"),  # a letter with no decomposition sorts as a letter of its own
+            ('"s"<>"ſ"', "True"),  # long s is not s in Power BI
+            ("\"ñ'ÿòê\"<\"ňű2oä\"", "False"),  # an apostrophe counts for almost nothing
+            ('"ė̊"="e̊̇"', "True"),  # two accents on one letter are compared as a set
         ])
         _assert_refused(self, [
-            '"ł">"s"',  # a letter with no decomposition sorts as a letter of its own
-            '"s"<>"ſ"',  # long s is not s in Power BI
-            "MAX(\"a\",\"A\")",  # which of two texts that differ only in case comes back is not modelled
-            "\"ñ'ÿòê\"<\"ňű2oä\"",  # an apostrophe counts for almost nothing
-            '"ė̊"="e̊̇"',  # two accents on one letter are compared as a set
-            '"α"<"β"',
+            "MAX(\"a\",\"A\")",  # which of two texts that differ only in case comes back is not modelled (Power BI: a)
+            '"α"<"β"',  # Power BI: True; non-Latin ordering is not modelled
         ])
 
     def test_xnpv_is_ieee_double_arithmetic(self) -> None:

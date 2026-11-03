@@ -1,0 +1,1566 @@
+{
+"powerbi_version": "2.157.879.0 (26.08)+da30fe74eb0b8a8786ab7326b69c400a0e951831",
+"frozen": "2026-11-03",
+"items": [
+{
+"expr": "\"A\"=\"Ile\"",
+"powerbi": "False"
+},
+{
+"expr": "\"A\"=\"N\u00fa\u00f1ez\"",
+"powerbi": "False"
+},
+{
+"expr": "\"A\"<>\"\u0110or\u0111e\"",
+"powerbi": "True"
+},
+{
+"expr": "\"Aalborg\"<>\"Gda\u0144sk\"",
+"powerbi": "True"
+},
+{
+"expr": "\"Aalborg\"<>\"Stra\u00dfe\"",
+"powerbi": "True"
+},
+{
+"expr": "\"Aero\"=\"M\u00fcller\"",
+"powerbi": "False"
+},
+{
+"expr": "\"Aero\">\"coop\"",
+"powerbi": "False"
+},
+{
+"expr": "\"Aero\">=\"zoe\"",
+"powerbi": "False"
+},
+{
+"expr": "\"Aero\"=\"\u00e6\"",
+"powerbi": "False"
+},
+{
+"expr": "\"Aero\"<>\"\u0130stanbul\"",
+"powerbi": "True"
+},
+{
+"expr": "\"Angstrom\"=\"JOS\u00c9\"",
+"powerbi": "False"
+},
+{
+"expr": "\"Angstrom\"<\"S\u00f8ren\"",
+"powerbi": "True"
+},
+{
+"expr": "\"Angstrom\"<\"Zoe\"",
+"powerbi": "True"
+},
+{
+"expr": "\"Angstrom\"<=\"r\u00e9sum\u00e9\"",
+"powerbi": "True"
+},
+{
+"expr": "\"Angstrom\"<>\"\u00e5ngra\"",
+"powerbi": "True"
+},
+{
+"expr": "\"Cafe\">=\"JOS\u00c9\"",
+"powerbi": "False"
+},
+{
+"expr": "\"Cafe\">=\"\u011e\u00fczel\"",
+"powerbi": "False"
+},
+{
+"expr": "\"Cafe\">=\"\u0141\u00f3d\u017a\"",
+"powerbi": "False"
+},
+{
+"expr": "\"Celik\"=\"r\u00e9sum\u00e9\"",
+"powerbi": "False"
+},
+{
+"expr": "\"Celik\"<>\"\u00c4\"",
+"powerbi": "True"
+},
+{
+"expr": "\"Djordje\"=\"Angstrom\"",
+"powerbi": "False"
+},
+{
+"expr": "\"Djordje\">\"M\u00fcller\"",
+"powerbi": "False"
+},
+{
+"expr": "\"Djordje\"<\"co-op\"",
+"powerbi": "False"
+},
+{
+"expr": "\"Djordje\"<\"oneil\"",
+"powerbi": "True"
+},
+{
+"expr": "\"Dvorak\">=\"Mueller\"",
+"powerbi": "False"
+},
+{
+"expr": "\"Dvo\u0159\u00e1k\"<\"Dvorak\"",
+"powerbi": "False"
+},
+{
+"expr": "\"Dvo\u0159\u00e1k\"<=\"uber\"",
+"powerbi": "True"
+},
+{
+"expr": "\"Eclair\"<>\"Cafe\"",
+"powerbi": "True"
+},
+{
+"expr": "\"Eclair\"<>\"cafe\"",
+"powerbi": "True"
+},
+{
+"expr": "\"Eclair\">\"\u00c5lborg\"",
+"powerbi": "True"
+},
+{
+"expr": "\"Gdansk\">=\"Olander\"",
+"powerbi": "False"
+},
+{
+"expr": "\"Gdansk\"<=\"coop\"",
+"powerbi": "False"
+},
+{
+"expr": "\"Gdansk\"<\"\u00c4\"",
+"powerbi": "False"
+},
+{
+"expr": "\"Gdansk\"<\"\u00c5ngstr\u00f6m\"",
+"powerbi": "False"
+},
+{
+"expr": "\"Gda\u0144sk\"<>\"Lodz\"",
+"powerbi": "True"
+},
+{
+"expr": "\"Gda\u0144sk\"<\"Zoe\"",
+"powerbi": "True"
+},
+{
+"expr": "\"Gda\u0144sk\"<\"coop\"",
+"powerbi": "False"
+},
+{
+"expr": "\"Gda\u0144sk\"<\"\u00c5ngstr\u00f6m\"",
+"powerbi": "False"
+},
+{
+"expr": "\"Gda\u0144sk\"<>\"\u00e6\"",
+"powerbi": "True"
+},
+{
+"expr": "\"Guzel\">\"Gdansk\"",
+"powerbi": "True"
+},
+{
+"expr": "\"Guzel\"=\"M\u00fdrdal\"",
+"powerbi": "False"
+},
+{
+"expr": "\"Guzel\"<>\"Oeuvre\"",
+"powerbi": "True"
+},
+{
+"expr": "\"Guzel\"<=\"Strasse\"",
+"powerbi": "True"
+},
+{
+"expr": "\"Guzel\"<\"ae\"",
+"powerbi": "False"
+},
+{
+"expr": "\"Ile\"=\"Angstrom\"",
+"powerbi": "False"
+},
+{
+"expr": "\"Ile\"<>\"facade\"",
+"powerbi": "True"
+},
+{
+"expr": "\"Ile\"<>\"\u00e5ngra\"",
+"powerbi": "True"
+},
+{
+"expr": "\"Istanbul\">\"Ile\"",
+"powerbi": "True"
+},
+{
+"expr": "\"Istanbul\"<>\"Zoe\"",
+"powerbi": "True"
+},
+{
+"expr": "\"JOS\u00c9\">=\"o'neil\"",
+"powerbi": "False"
+},
+{
+"expr": "\"Jose\">=\"Djordje\"",
+"powerbi": "True"
+},
+{
+"expr": "\"Jose\"<>\"se\u00f1or\"",
+"powerbi": "True"
+},
+{
+"expr": "\"Jos\u00e9\">=\"Guzel\"",
+"powerbi": "True"
+},
+{
+"expr": "\"Jos\u00e9\"<>\"Soren\"",
+"powerbi": "True"
+},
+{
+"expr": "\"Jos\u00e9\"=\"\u011e\u00fczel\"",
+"powerbi": "False"
+},
+{
+"expr": "\"Krak\u00f3w\"<>\"facade\"",
+"powerbi": "True"
+},
+{
+"expr": "\"Krak\u00f3w\"<\"\u0160koda\"",
+"powerbi": "True"
+},
+{
+"expr": "\"Lodz\"<>\"Gdansk\"",
+"powerbi": "True"
+},
+{
+"expr": "\"Lodz\"<=\"Jose\"",
+"powerbi": "False"
+},
+{
+"expr": "\"Lodz\">\"Zo\u00eb\"",
+"powerbi": "False"
+},
+{
+"expr": "\"Lodz\"<=\"\u0152uvre\"",
+"powerbi": "True"
+},
+{
+"expr": "\"Mueller\">\"\u00fc\"",
+"powerbi": "False"
+},
+{
+"expr": "\"Muller\"<>\"Jose\"",
+"powerbi": "True"
+},
+{
+"expr": "\"M\u00fcller\">\"JOS\u00c9\"",
+"powerbi": "True"
+},
+{
+"expr": "\"M\u00fcller\"<=\"\u0160koda\"",
+"powerbi": "True"
+},
+{
+"expr": "\"M\u00fdrdal\">=\"Ile\"",
+"powerbi": "True"
+},
+{
+"expr": "\"M\u00fdrdal\">\"\u00d8resund\"",
+"powerbi": "False"
+},
+{
+"expr": "\"M\u00fdrdal\"<\"\u0130stanbul\"",
+"powerbi": "False"
+},
+{
+"expr": "\"Nandu\">\"fa\u00e7ade\"",
+"powerbi": "True"
+},
+{
+"expr": "\"Nandu\"<=\"\u00f8\"",
+"powerbi": "True"
+},
+{
+"expr": "\"Nunez\"<\"Muller\"",
+"powerbi": "False"
+},
+{
+"expr": "\"Nunez\"<=\"\u00f8\"",
+"powerbi": "True"
+},
+{
+"expr": "\"Nunez\"=\"\u0160koda\"",
+"powerbi": "False"
+},
+{
+"expr": "\"N\u00fa\u00f1ez\"<=\"Dvo\u0159\u00e1k\"",
+"powerbi": "False"
+},
+{
+"expr": "\"N\u00fa\u00f1ez\"<\"Gdansk\"",
+"powerbi": "False"
+},
+{
+"expr": "\"N\u00fa\u00f1ez\"<=\"O\"",
+"powerbi": "True"
+},
+{
+"expr": "\"O\"<=\"fa\u00e7ade\"",
+"powerbi": "False"
+},
+{
+"expr": "\"O\"<\"\u00f8\"",
+"powerbi": "True"
+},
+{
+"expr": "\"Oeuvre\"<\"Nandu\"",
+"powerbi": "False"
+},
+{
+"expr": "\"Oeuvre\"<\"ae\"",
+"powerbi": "False"
+},
+{
+"expr": "\"Oeuvre\">\"fa\u00e7ade\"",
+"powerbi": "True"
+},
+{
+"expr": "\"Oeuvre\"=\"oneil\"",
+"powerbi": "False"
+},
+{
+"expr": "\"Olander\"<>\"Nunez\"",
+"powerbi": "True"
+},
+{
+"expr": "\"Olander\">\"O\"",
+"powerbi": "True"
+},
+{
+"expr": "\"Olander\"=\"Stra\u00dfe\"",
+"powerbi": "False"
+},
+{
+"expr": "\"Olander\"<\"eclair\"",
+"powerbi": "False"
+},
+{
+"expr": "\"Olander\">=\"u\"",
+"powerbi": "False"
+},
+{
+"expr": "\"Olander\"<\"\u0152uvre\"",
+"powerbi": "False"
+},
+{
+"expr": "\"Oresund\"=\"Celik\"",
+"powerbi": "False"
+},
+{
+"expr": "\"Oresund\"<>\"Nandu\"",
+"powerbi": "True"
+},
+{
+"expr": "\"Oresund\"<=\"facade\"",
+"powerbi": "False"
+},
+{
+"expr": "\"R\u00e9sum\u00e9\"<=\"Gdansk\"",
+"powerbi": "False"
+},
+{
+"expr": "\"Skoda\"<\"Krak\u00f3w\"",
+"powerbi": "False"
+},
+{
+"expr": "\"Skoda\"=\"Stra\u00dfe\"",
+"powerbi": "False"
+},
+{
+"expr": "\"Soren\"=\"Dvo\u0159\u00e1k\"",
+"powerbi": "False"
+},
+{
+"expr": "\"Soren\">\"co-op\"",
+"powerbi": "True"
+},
+{
+"expr": "\"Strasse\">\"caf\u00e9\"",
+"powerbi": "True"
+},
+{
+"expr": "\"Stra\u00dfe\">=\"naive\"",
+"powerbi": "True"
+},
+{
+"expr": "\"Stra\u00dfe\">\"\u00e5ngra\"",
+"powerbi": "True"
+},
+{
+"expr": "\"S\u00f8ren\"<\"Dvorak\"",
+"powerbi": "False"
+},
+{
+"expr": "\"S\u00f8ren\">=\"Dvo\u0159\u00e1k\"",
+"powerbi": "True"
+},
+{
+"expr": "\"Thor\"=\"Ile\"",
+"powerbi": "False"
+},
+{
+"expr": "\"Thor\"<=\"Istanbul\"",
+"powerbi": "False"
+},
+{
+"expr": "\"Thor\"=\"Oresund\"",
+"powerbi": "False"
+},
+{
+"expr": "\"Thor\"<>\"se\u00f1or\"",
+"powerbi": "True"
+},
+{
+"expr": "\"Thor\"<=\"\u00c5lborg\"",
+"powerbi": "False"
+},
+{
+"expr": "\"Thor\"<\"\u00d8resund\"",
+"powerbi": "False"
+},
+{
+"expr": "\"Thor\"<\"\u00e5ngra\"",
+"powerbi": "False"
+},
+{
+"expr": "\"Ub\u00e9r\">=\"Jos\u00e9\"",
+"powerbi": "True"
+},
+{
+"expr": "\"Zoe\"=\"\u00c6r\u00f8\"",
+"powerbi": "False"
+},
+{
+"expr": "\"Zoe\"<\"\u00c9clair\"",
+"powerbi": "False"
+},
+{
+"expr": "\"Zo\u00eb\">\"o\"",
+"powerbi": "True"
+},
+{
+"expr": "\"Zo\u00eb\"<\"\u00fc\"",
+"powerbi": "False"
+},
+{
+"expr": "\"ae\"<\"N\u00fa\u00f1ez\"",
+"powerbi": "True"
+},
+{
+"expr": "\"ae\"<=\"senor\"",
+"powerbi": "True"
+},
+{
+"expr": "\"ae\"<\"\u00d6lander\"",
+"powerbi": "True"
+},
+{
+"expr": "\"ae\"=\"\u0160koda\"",
+"powerbi": "False"
+},
+{
+"expr": "\"caf\u00e9\"<\"Istanbul\"",
+"powerbi": "True"
+},
+{
+"expr": "\"co-op\"<=\"M\u00fdrdal\"",
+"powerbi": "True"
+},
+{
+"expr": "\"co\u00f6perate\"<=\"Djordje\"",
+"powerbi": "True"
+},
+{
+"expr": "\"co\u00f6perate\"<\"N\u00fa\u00f1ez\"",
+"powerbi": "True"
+},
+{
+"expr": "\"co\u00f6perate\"<\"Thor\"",
+"powerbi": "True"
+},
+{
+"expr": "\"co\u00f6perate\"<>\"u\"",
+"powerbi": "True"
+},
+{
+"expr": "\"eclair\"<\"Jose\"",
+"powerbi": "True"
+},
+{
+"expr": "\"eclair\"<\"caf\u00e9\"",
+"powerbi": "False"
+},
+{
+"expr": "\"facade\">=\"\u00df\"",
+"powerbi": "False"
+},
+{
+"expr": "\"fa\u00e7ade\">\"Celik\"",
+"powerbi": "True"
+},
+{
+"expr": "\"fa\u00e7ade\">=\"Zo\u00eb\"",
+"powerbi": "False"
+},
+{
+"expr": "\"fa\u00e7ade\"=\"senor\"",
+"powerbi": "False"
+},
+{
+"expr": "\"naive\">\"Aero\"",
+"powerbi": "True"
+},
+{
+"expr": "\"naive\"=\"\u00de\u00f3r\"",
+"powerbi": "False"
+},
+{
+"expr": "\"na\u00efve\">=\"Eclair\"",
+"powerbi": "True"
+},
+{
+"expr": "\"na\u00efve\">\"Guzel\"",
+"powerbi": "True"
+},
+{
+"expr": "\"na\u00efve\"<=\"coop\"",
+"powerbi": "False"
+},
+{
+"expr": "\"na\u00efve\"<\"facade\"",
+"powerbi": "False"
+},
+{
+"expr": "\"o\"<\"Ub\u00e9r\"",
+"powerbi": "True"
+},
+{
+"expr": "\"o\"<\"\u00e5ngra\"",
+"powerbi": "False"
+},
+{
+"expr": "\"o'neil\"<\"Istanbul\"",
+"powerbi": "False"
+},
+{
+"expr": "\"o'neil\"<=\"cafe\"",
+"powerbi": "False"
+},
+{
+"expr": "\"o'neil\">\"senor\"",
+"powerbi": "False"
+},
+{
+"expr": "\"oneil\"=\"Djordje\"",
+"powerbi": "False"
+},
+{
+"expr": "\"resume\">\"\u0130stanbul\"",
+"powerbi": "True"
+},
+{
+"expr": "\"r\u00e9sum\u00e9\"<\"Jos\u00e9\"",
+"powerbi": "False"
+},
+{
+"expr": "\"r\u00e9sum\u00e9\"<\"cafe\"",
+"powerbi": "False"
+},
+{
+"expr": "\"r\u00e9sum\u00e9\"=\"\u0141\u00f3d\u017a\"",
+"powerbi": "False"
+},
+{
+"expr": "\"senor\">=\"Krakow\"",
+"powerbi": "True"
+},
+{
+"expr": "\"senor\"=\"Muller\"",
+"powerbi": "False"
+},
+{
+"expr": "\"senor\">=\"facade\"",
+"powerbi": "True"
+},
+{
+"expr": "\"senor\"<=\"\u00e6\"",
+"powerbi": "False"
+},
+{
+"expr": "\"senor\"=\"\u00fcber\"",
+"powerbi": "False"
+},
+{
+"expr": "\"se\u00f1or\"<>\"Aalborg\"",
+"powerbi": "True"
+},
+{
+"expr": "\"se\u00f1or\"<=\"\u0160koda\"",
+"powerbi": "True"
+},
+{
+"expr": "\"ss\">\"Istanbul\"",
+"powerbi": "True"
+},
+{
+"expr": "\"ss\">\"Krak\u00f3w\"",
+"powerbi": "True"
+},
+{
+"expr": "\"ss\"<\"oneil\"",
+"powerbi": "False"
+},
+{
+"expr": "\"u\"<=\"na\u00efve\"",
+"powerbi": "False"
+},
+{
+"expr": "\"u\">=\"\u00c7elik\"",
+"powerbi": "True"
+},
+{
+"expr": "\"uber\"<=\"\u00c5lborg\"",
+"powerbi": "False"
+},
+{
+"expr": "\"uber\"<=\"\u00c5sa\"",
+"powerbi": "False"
+},
+{
+"expr": "\"zoe\"<=\"Stra\u00dfe\"",
+"powerbi": "False"
+},
+{
+"expr": "\"zoe\">\"\u00f8\"",
+"powerbi": "True"
+},
+{
+"expr": "\"\u00c4\">\"Skoda\"",
+"powerbi": "False"
+},
+{
+"expr": "\"\u00c5lborg\"<\"Oeuvre\"",
+"powerbi": "True"
+},
+{
+"expr": "\"\u00c5ngstr\u00f6m\"=\"caf\u00e9\"",
+"powerbi": "False"
+},
+{
+"expr": "\"\u00c5ngstr\u00f6m\"<=\"\u00c7elik\"",
+"powerbi": "True"
+},
+{
+"expr": "\"\u00c5ngstr\u00f6m\"<\"\u0160koda\"",
+"powerbi": "True"
+},
+{
+"expr": "\"\u00c6r\u00f8\"<=\"Djordje\"",
+"powerbi": "True"
+},
+{
+"expr": "\"\u00c6r\u00f8\">\"Dvo\u0159\u00e1k\"",
+"powerbi": "False"
+},
+{
+"expr": "\"\u00c6r\u00f8\">\"M\u00fdrdal\"",
+"powerbi": "False"
+},
+{
+"expr": "\"\u00c6r\u00f8\">\"O-Neil\"",
+"powerbi": "False"
+},
+{
+"expr": "\"\u00c6r\u00f8\">\"R\u00e9sum\u00e9\"",
+"powerbi": "False"
+},
+{
+"expr": "\"\u00c6r\u00f8\">=\"o\"",
+"powerbi": "False"
+},
+{
+"expr": "\"\u00c7elik\"<\"\u011e\u00fczel\"",
+"powerbi": "True"
+},
+{
+"expr": "\"\u00cele\">\"O-Neil\"",
+"powerbi": "False"
+},
+{
+"expr": "\"\u00cele\"<=\"\u00c6r\u00f8\"",
+"powerbi": "False"
+},
+{
+"expr": "\"\u00d1and\u00fa\"<\"Nandu\"",
+"powerbi": "False"
+},
+{
+"expr": "\"\u00d1and\u00fa\"<>\"N\u00fa\u00f1ez\"",
+"powerbi": "True"
+},
+{
+"expr": "\"\u00d1and\u00fa\"<>\"\u00fcber\"",
+"powerbi": "True"
+},
+{
+"expr": "\"\u00d6\">\"Gdansk\"",
+"powerbi": "True"
+},
+{
+"expr": "\"\u00d6\"<=\"Krakow\"",
+"powerbi": "False"
+},
+{
+"expr": "\"\u00d6\"<=\"Skoda\"",
+"powerbi": "True"
+},
+{
+"expr": "\"\u00d6lander\"<=\"Strasse\"",
+"powerbi": "True"
+},
+{
+"expr": "\"\u00d8resund\"=\"Aalborg\"",
+"powerbi": "False"
+},
+{
+"expr": "\"\u00d8resund\">\"Jose\"",
+"powerbi": "True"
+},
+{
+"expr": "\"\u00d8resund\"<=\"Mueller\"",
+"powerbi": "False"
+},
+{
+"expr": "\"\u00d8resund\"<\"eclair\"",
+"powerbi": "False"
+},
+{
+"expr": "\"\u00d8resund\"<=\"na\u00efve\"",
+"powerbi": "False"
+},
+{
+"expr": "\"\u00df\">=\"Ile\"",
+"powerbi": "True"
+},
+{
+"expr": "\"\u00df\">=\"Krakow\"",
+"powerbi": "True"
+},
+{
+"expr": "\"\u00df\"=\"\u00c5lborg\"",
+"powerbi": "False"
+},
+{
+"expr": "\"\u00df\"=\"\u0152uvre\"",
+"powerbi": "False"
+},
+{
+"expr": "\"\u00e6\"<>\"o'neil\"",
+"powerbi": "True"
+},
+{
+"expr": "\"\u00e6\"<\"\u00fc\"",
+"powerbi": "True"
+},
+{
+"expr": "\"\u00f8\"<=\"na\u00efve\"",
+"powerbi": "False"
+},
+{
+"expr": "\"\u00f8\"<=\"\u00de\u00f3r\"",
+"powerbi": "True"
+},
+{
+"expr": "\"\u00f8\">\"\u00e6\"",
+"powerbi": "True"
+},
+{
+"expr": "\"\u00fc\"=\"coop\"",
+"powerbi": "False"
+},
+{
+"expr": "\"\u00fc\"<=\"eclair\"",
+"powerbi": "False"
+},
+{
+"expr": "\"\u00fc\"<\"\u00c9clair\"",
+"powerbi": "False"
+},
+{
+"expr": "\"\u00fcber\"=\"Eclair\"",
+"powerbi": "False"
+},
+{
+"expr": "\"\u00fcber\"=\"Istanbul\"",
+"powerbi": "False"
+},
+{
+"expr": "\"\u00fcber\"<>\"zoe\"",
+"powerbi": "True"
+},
+{
+"expr": "\"\u00fcber\">\"\u0141\u00f3d\u017a\"",
+"powerbi": "True"
+},
+{
+"expr": "\"\u0110or\u0111e\"<\"Mueller\"",
+"powerbi": "True"
+},
+{
+"expr": "\"\u0110or\u0111e\"<=\"Zo\u00eb\"",
+"powerbi": "True"
+},
+{
+"expr": "\"\u0110or\u0111e\"<=\"uber\"",
+"powerbi": "True"
+},
+{
+"expr": "\"\u011e\u00fczel\"<\"Oeuvre\"",
+"powerbi": "True"
+},
+{
+"expr": "\"\u011e\u00fczel\"<=\"caf\u00e9\"",
+"powerbi": "False"
+},
+{
+"expr": "\"\u011e\u00fczel\"=\"eclair\"",
+"powerbi": "False"
+},
+{
+"expr": "\"\u0130stanbul\"<=\"Angstrom\"",
+"powerbi": "False"
+},
+{
+"expr": "\"\u0130stanbul\">=\"Stra\u00dfe\"",
+"powerbi": "False"
+},
+{
+"expr": "\"\u0130stanbul\"<>\"uber\"",
+"powerbi": "True"
+},
+{
+"expr": "\"\u0141\u00f3d\u017a\"<\"N\u00fa\u00f1ez\"",
+"powerbi": "True"
+},
+{
+"expr": "\"\u0141\u00f3d\u017a\"<>\"Stra\u00dfe\"",
+"powerbi": "True"
+},
+{
+"expr": "\"\u0141\u00f3d\u017a\"<\"uber\"",
+"powerbi": "True"
+},
+{
+"expr": "\"\u0141\u00f3d\u017a\"<\"\u0110or\u0111e\"",
+"powerbi": "False"
+},
+{
+"expr": "\"\u0152uvre\"<=\"Nandu\"",
+"powerbi": "False"
+},
+{
+"expr": "\"\u0160koda\"<=\"Nandu\"",
+"powerbi": "False"
+},
+{
+"expr": "\"\u0160koda\">\"Soren\"",
+"powerbi": "False"
+},
+{
+"expr": "\"\u0160koda\">\"se\u00f1or\"",
+"powerbi": "True"
+},
+{
+"expr": "CONCATENATEX({\"co\u00f6perate\",\"Dvo\u0159\u00e1k\",\"Celik\",\"Angstrom\",\"Mueller\"},[Value],\"|\",[Value],ASC)",
+"powerbi": "Angstrom|Celik|co\u00f6perate|Dvo\u0159\u00e1k|Mueller"
+},
+{
+"expr": "MAXX({\"co\u00f6perate\",\"Dvo\u0159\u00e1k\",\"Celik\",\"Angstrom\",\"Mueller\"},[Value])",
+"powerbi": "Mueller"
+},
+{
+"expr": "MINX({\"co\u00f6perate\",\"Dvo\u0159\u00e1k\",\"Celik\",\"Angstrom\",\"Mueller\"},[Value])",
+"powerbi": "Angstrom"
+},
+{
+"expr": "CONCATENATEX({\"\u00cele\",\"\u00d1and\u00fa\",\"Lodz\",\"co\u00f6perate\",\"Nandu\"},[Value],\"|\",[Value],ASC)",
+"powerbi": "co\u00f6perate|\u00cele|Lodz|Nandu|\u00d1and\u00fa"
+},
+{
+"expr": "MAXX({\"\u00cele\",\"\u00d1and\u00fa\",\"Lodz\",\"co\u00f6perate\",\"Nandu\"},[Value])",
+"powerbi": "\u00d1and\u00fa"
+},
+{
+"expr": "MINX({\"\u00cele\",\"\u00d1and\u00fa\",\"Lodz\",\"co\u00f6perate\",\"Nandu\"},[Value])",
+"powerbi": "co\u00f6perate"
+},
+{
+"expr": "CONCATENATEX({\"O\",\"Aalborg\",\"o'neil\",\"Stra\u00dfe\",\"A\"},[Value],\"|\",[Value],ASC)",
+"powerbi": "A|Aalborg|O|o'neil|Stra\u00dfe"
+},
+{
+"expr": "MAXX({\"O\",\"Aalborg\",\"o'neil\",\"Stra\u00dfe\",\"A\"},[Value])",
+"powerbi": "Stra\u00dfe"
+},
+{
+"expr": "MINX({\"O\",\"Aalborg\",\"o'neil\",\"Stra\u00dfe\",\"A\"},[Value])",
+"powerbi": "A"
+},
+{
+"expr": "CONCATENATEX({\"\u00fc\",\"Olander\",\"\u00f8\",\"R\u00e9sum\u00e9\",\"co\u00f6perate\"},[Value],\"|\",[Value],ASC)",
+"powerbi": "co\u00f6perate|\u00f8|Olander|R\u00e9sum\u00e9|\u00fc"
+},
+{
+"expr": "MAXX({\"\u00fc\",\"Olander\",\"\u00f8\",\"R\u00e9sum\u00e9\",\"co\u00f6perate\"},[Value])",
+"powerbi": "\u00fc"
+},
+{
+"expr": "MINX({\"\u00fc\",\"Olander\",\"\u00f8\",\"R\u00e9sum\u00e9\",\"co\u00f6perate\"},[Value])",
+"powerbi": "co\u00f6perate"
+},
+{
+"expr": "CONCATENATEX({\"\u00c5lborg\",\"R\u00e9sum\u00e9\",\"\u0110or\u0111e\",\"Gda\u0144sk\",\"O-Neil\"},[Value],\"|\",[Value],ASC)",
+"powerbi": "\u00c5lborg|\u0110or\u0111e|Gda\u0144sk|O-Neil|R\u00e9sum\u00e9"
+},
+{
+"expr": "MAXX({\"\u00c5lborg\",\"R\u00e9sum\u00e9\",\"\u0110or\u0111e\",\"Gda\u0144sk\",\"O-Neil\"},[Value])",
+"powerbi": "R\u00e9sum\u00e9"
+},
+{
+"expr": "MINX({\"\u00c5lborg\",\"R\u00e9sum\u00e9\",\"\u0110or\u0111e\",\"Gda\u0144sk\",\"O-Neil\"},[Value])",
+"powerbi": "\u00c5lborg"
+},
+{
+"expr": "CONCATENATEX({\"N\u00fa\u00f1ez\",\"Oresund\",\"\u00fc\",\"Thor\",\"Soren\"},[Value],\"|\",[Value],ASC)",
+"powerbi": "N\u00fa\u00f1ez|Oresund|Soren|Thor|\u00fc"
+},
+{
+"expr": "MAXX({\"N\u00fa\u00f1ez\",\"Oresund\",\"\u00fc\",\"Thor\",\"Soren\"},[Value])",
+"powerbi": "\u00fc"
+},
+{
+"expr": "MINX({\"N\u00fa\u00f1ez\",\"Oresund\",\"\u00fc\",\"Thor\",\"Soren\"},[Value])",
+"powerbi": "N\u00fa\u00f1ez"
+},
+{
+"expr": "CONCATENATEX({\"\u00e5ngra\",\"\u00c4\",\"Cafe\",\"oneil\",\"r\u00e9sum\u00e9\"},[Value],\"|\",[Value],ASC)",
+"powerbi": "\u00c4|\u00e5ngra|Cafe|oneil|r\u00e9sum\u00e9"
+},
+{
+"expr": "MAXX({\"\u00e5ngra\",\"\u00c4\",\"Cafe\",\"oneil\",\"r\u00e9sum\u00e9\"},[Value])",
+"powerbi": "r\u00e9sum\u00e9"
+},
+{
+"expr": "MINX({\"\u00e5ngra\",\"\u00c4\",\"Cafe\",\"oneil\",\"r\u00e9sum\u00e9\"},[Value])",
+"powerbi": "\u00c4"
+},
+{
+"expr": "CONCATENATEX({\"Aalborg\",\"\u0110or\u0111e\",\"\u00e6\",\"Cafe\",\"\u0160koda\"},[Value],\"|\",[Value],ASC)",
+"powerbi": "Aalborg|\u00e6|Cafe|\u0110or\u0111e|\u0160koda"
+},
+{
+"expr": "MAXX({\"Aalborg\",\"\u0110or\u0111e\",\"\u00e6\",\"Cafe\",\"\u0160koda\"},[Value])",
+"powerbi": "\u0160koda"
+},
+{
+"expr": "MINX({\"Aalborg\",\"\u0110or\u0111e\",\"\u00e6\",\"Cafe\",\"\u0160koda\"},[Value])",
+"powerbi": "Aalborg"
+},
+{
+"expr": "CONCATENATEX({\"se\u00f1or\",\"Krak\u00f3w\",\"\u00e6\",\"\u00c7elik\",\"ss\"},[Value],\"|\",[Value],ASC)",
+"powerbi": "\u00e6|\u00c7elik|Krak\u00f3w|se\u00f1or|ss"
+},
+{
+"expr": "MAXX({\"se\u00f1or\",\"Krak\u00f3w\",\"\u00e6\",\"\u00c7elik\",\"ss\"},[Value])",
+"powerbi": "ss"
+},
+{
+"expr": "MINX({\"se\u00f1or\",\"Krak\u00f3w\",\"\u00e6\",\"\u00c7elik\",\"ss\"},[Value])",
+"powerbi": "\u00e6"
+},
+{
+"expr": "CONCATENATEX({\"S\u00f8ren\",\"Krak\u00f3w\",\"A\",\"Jose\",\"eclair\"},[Value],\"|\",[Value],ASC)",
+"powerbi": "A|eclair|Jose|Krak\u00f3w|S\u00f8ren"
+},
+{
+"expr": "MAXX({\"S\u00f8ren\",\"Krak\u00f3w\",\"A\",\"Jose\",\"eclair\"},[Value])",
+"powerbi": "S\u00f8ren"
+},
+{
+"expr": "MINX({\"S\u00f8ren\",\"Krak\u00f3w\",\"A\",\"Jose\",\"eclair\"},[Value])",
+"powerbi": "A"
+},
+{
+"expr": "CONCATENATEX({\"Lodz\",\"na\u00efve\",\"Djordje\",\"Dvo\u0159\u00e1k\",\"\u00d6lander\"},[Value],\"|\",[Value],ASC)",
+"powerbi": "Djordje|Dvo\u0159\u00e1k|Lodz|na\u00efve|\u00d6lander"
+},
+{
+"expr": "MAXX({\"Lodz\",\"na\u00efve\",\"Djordje\",\"Dvo\u0159\u00e1k\",\"\u00d6lander\"},[Value])",
+"powerbi": "\u00d6lander"
+},
+{
+"expr": "MINX({\"Lodz\",\"na\u00efve\",\"Djordje\",\"Dvo\u0159\u00e1k\",\"\u00d6lander\"},[Value])",
+"powerbi": "Djordje"
+},
+{
+"expr": "CONCATENATEX({\"Dvo\u0159\u00e1k\",\"\u00c9clair\",\"co-op\",\"\u00e6\",\"\u00d6\"},[Value],\"|\",[Value],ASC)",
+"powerbi": "\u00e6|co-op|Dvo\u0159\u00e1k|\u00c9clair|\u00d6"
+},
+{
+"expr": "MAXX({\"Dvo\u0159\u00e1k\",\"\u00c9clair\",\"co-op\",\"\u00e6\",\"\u00d6\"},[Value])",
+"powerbi": "\u00d6"
+},
+{
+"expr": "MINX({\"Dvo\u0159\u00e1k\",\"\u00c9clair\",\"co-op\",\"\u00e6\",\"\u00d6\"},[Value])",
+"powerbi": "\u00e6"
+},
+{
+"expr": "CONCATENATEX({\"naive\",\"Dvo\u0159\u00e1k\",\"\u0160koda\",\"Aero\",\"Eclair\"},[Value],\"|\",[Value],ASC)",
+"powerbi": "Aero|Dvo\u0159\u00e1k|Eclair|naive|\u0160koda"
+},
+{
+"expr": "MAXX({\"naive\",\"Dvo\u0159\u00e1k\",\"\u0160koda\",\"Aero\",\"Eclair\"},[Value])",
+"powerbi": "\u0160koda"
+},
+{
+"expr": "MINX({\"naive\",\"Dvo\u0159\u00e1k\",\"\u0160koda\",\"Aero\",\"Eclair\"},[Value])",
+"powerbi": "Aero"
+},
+{
+"expr": "CONCATENATEX({\"uber\",\"\u00d1and\u00fa\",\"\u0110or\u0111e\",\"Jos\u00e9\",\"\u00cele\"},[Value],\"|\",[Value],ASC)",
+"powerbi": "\u0110or\u0111e|\u00cele|Jos\u00e9|\u00d1and\u00fa|uber"
+},
+{
+"expr": "MAXX({\"uber\",\"\u00d1and\u00fa\",\"\u0110or\u0111e\",\"Jos\u00e9\",\"\u00cele\"},[Value])",
+"powerbi": "uber"
+},
+{
+"expr": "MINX({\"uber\",\"\u00d1and\u00fa\",\"\u0110or\u0111e\",\"Jos\u00e9\",\"\u00cele\"},[Value])",
+"powerbi": "\u0110or\u0111e"
+},
+{
+"expr": "CONCATENATEX({\"N\u00fa\u00f1ez\",\"facade\",\"\u011e\u00fczel\",\"naive\",\"senor\"},[Value],\"|\",[Value],ASC)",
+"powerbi": "facade|\u011e\u00fczel|naive|N\u00fa\u00f1ez|senor"
+},
+{
+"expr": "MAXX({\"N\u00fa\u00f1ez\",\"facade\",\"\u011e\u00fczel\",\"naive\",\"senor\"},[Value])",
+"powerbi": "senor"
+},
+{
+"expr": "MINX({\"N\u00fa\u00f1ez\",\"facade\",\"\u011e\u00fczel\",\"naive\",\"senor\"},[Value])",
+"powerbi": "facade"
+},
+{
+"expr": "CONCATENATEX({\"JOS\u00c9\",\"Krak\u00f3w\",\"o\",\"\u00df\",\"Mueller\"},[Value],\"|\",[Value],ASC)",
+"powerbi": "JOS\u00c9|Krak\u00f3w|Mueller|o|\u00df"
+},
+{
+"expr": "MAXX({\"JOS\u00c9\",\"Krak\u00f3w\",\"o\",\"\u00df\",\"Mueller\"},[Value])",
+"powerbi": "\u00df"
+},
+{
+"expr": "MINX({\"JOS\u00c9\",\"Krak\u00f3w\",\"o\",\"\u00df\",\"Mueller\"},[Value])",
+"powerbi": "JOS\u00c9"
+},
+{
+"expr": "CONCATENATEX({\"S\u00f8ren\",\"Dvo\u0159\u00e1k\",\"o\",\"\u00fc\",\"Oeuvre\"},[Value],\"|\",[Value],ASC)",
+"powerbi": "Dvo\u0159\u00e1k|o|Oeuvre|S\u00f8ren|\u00fc"
+},
+{
+"expr": "MAXX({\"S\u00f8ren\",\"Dvo\u0159\u00e1k\",\"o\",\"\u00fc\",\"Oeuvre\"},[Value])",
+"powerbi": "\u00fc"
+},
+{
+"expr": "MINX({\"S\u00f8ren\",\"Dvo\u0159\u00e1k\",\"o\",\"\u00fc\",\"Oeuvre\"},[Value])",
+"powerbi": "Dvo\u0159\u00e1k"
+},
+{
+"expr": "CONCATENATEX({\"fa\u00e7ade\",\"Angstrom\",\"\u00c6r\u00f8\",\"O-Neil\",\"\u011e\u00fczel\"},[Value],\"|\",[Value],ASC)",
+"powerbi": "\u00c6r\u00f8|Angstrom|fa\u00e7ade|\u011e\u00fczel|O-Neil"
+},
+{
+"expr": "MAXX({\"fa\u00e7ade\",\"Angstrom\",\"\u00c6r\u00f8\",\"O-Neil\",\"\u011e\u00fczel\"},[Value])",
+"powerbi": "O-Neil"
+},
+{
+"expr": "MINX({\"fa\u00e7ade\",\"Angstrom\",\"\u00c6r\u00f8\",\"O-Neil\",\"\u011e\u00fczel\"},[Value])",
+"powerbi": "\u00c6r\u00f8"
+},
+{
+"expr": "CONCATENATEX({\"M\u00fcller\",\"N\u00fa\u00f1ez\",\"Stra\u00dfe\",\"na\u00efve\",\"co\u00f6perate\"},[Value],\"|\",[Value],ASC)",
+"powerbi": "co\u00f6perate|M\u00fcller|na\u00efve|N\u00fa\u00f1ez|Stra\u00dfe"
+},
+{
+"expr": "MAXX({\"M\u00fcller\",\"N\u00fa\u00f1ez\",\"Stra\u00dfe\",\"na\u00efve\",\"co\u00f6perate\"},[Value])",
+"powerbi": "Stra\u00dfe"
+},
+{
+"expr": "MINX({\"M\u00fcller\",\"N\u00fa\u00f1ez\",\"Stra\u00dfe\",\"na\u00efve\",\"co\u00f6perate\"},[Value])",
+"powerbi": "co\u00f6perate"
+},
+{
+"expr": "CONCATENATEX({\"Aalborg\",\"Krakow\",\"JOS\u00c9\",\"Zoe\",\"eclair\"},[Value],\"|\",[Value],ASC)",
+"powerbi": "Aalborg|eclair|JOS\u00c9|Krakow|Zoe"
+},
+{
+"expr": "MAXX({\"Aalborg\",\"Krakow\",\"JOS\u00c9\",\"Zoe\",\"eclair\"},[Value])",
+"powerbi": "Zoe"
+},
+{
+"expr": "MINX({\"Aalborg\",\"Krakow\",\"JOS\u00c9\",\"Zoe\",\"eclair\"},[Value])",
+"powerbi": "Aalborg"
+},
+{
+"expr": "CONCATENATEX({\"caf\u00e9\",\"facade\",\"\u00c5ngstr\u00f6m\",\"Jose\",\"Istanbul\"},[Value],\"|\",[Value],ASC)",
+"powerbi": "\u00c5ngstr\u00f6m|caf\u00e9|facade|Istanbul|Jose"
+},
+{
+"expr": "MAXX({\"caf\u00e9\",\"facade\",\"\u00c5ngstr\u00f6m\",\"Jose\",\"Istanbul\"},[Value])",
+"powerbi": "Jose"
+},
+{
+"expr": "MINX({\"caf\u00e9\",\"facade\",\"\u00c5ngstr\u00f6m\",\"Jose\",\"Istanbul\"},[Value])",
+"powerbi": "\u00c5ngstr\u00f6m"
+},
+{
+"expr": "CONCATENATEX({\"R\u00e9sum\u00e9\",\"Krakow\",\"Krak\u00f3w\",\"Jos\u00e9\",\"Gdansk\"},[Value],\"|\",[Value],ASC)",
+"powerbi": "Gdansk|Jos\u00e9|Krakow|Krak\u00f3w|R\u00e9sum\u00e9"
+},
+{
+"expr": "MAXX({\"R\u00e9sum\u00e9\",\"Krakow\",\"Krak\u00f3w\",\"Jos\u00e9\",\"Gdansk\"},[Value])",
+"powerbi": "R\u00e9sum\u00e9"
+},
+{
+"expr": "MINX({\"R\u00e9sum\u00e9\",\"Krakow\",\"Krak\u00f3w\",\"Jos\u00e9\",\"Gdansk\"},[Value])",
+"powerbi": "Gdansk"
+},
+{
+"expr": "CONCATENATEX({\"R\u00e9sum\u00e9\",\"caf\u00e9\",\"\u0152uvre\",\"Istanbul\",\"\u0141\u00f3d\u017a\"},[Value],\"|\",[Value],ASC)",
+"powerbi": "caf\u00e9|Istanbul|\u0141\u00f3d\u017a|\u0152uvre|R\u00e9sum\u00e9"
+},
+{
+"expr": "MAXX({\"R\u00e9sum\u00e9\",\"caf\u00e9\",\"\u0152uvre\",\"Istanbul\",\"\u0141\u00f3d\u017a\"},[Value])",
+"powerbi": "R\u00e9sum\u00e9"
+},
+{
+"expr": "MINX({\"R\u00e9sum\u00e9\",\"caf\u00e9\",\"\u0152uvre\",\"Istanbul\",\"\u0141\u00f3d\u017a\"},[Value])",
+"powerbi": "caf\u00e9"
+},
+{
+"expr": "CONCATENATEX({\"Ub\u00e9r\",\"Soren\",\"\u00de\u00f3r\",\"\u00e5ngra\",\"Dvorak\"},[Value],\"|\",[Value],ASC)",
+"powerbi": "\u00e5ngra|Dvorak|Soren|\u00de\u00f3r|Ub\u00e9r"
+},
+{
+"expr": "MAXX({\"Ub\u00e9r\",\"Soren\",\"\u00de\u00f3r\",\"\u00e5ngra\",\"Dvorak\"},[Value])",
+"powerbi": "Ub\u00e9r"
+},
+{
+"expr": "MINX({\"Ub\u00e9r\",\"Soren\",\"\u00de\u00f3r\",\"\u00e5ngra\",\"Dvorak\"},[Value])",
+"powerbi": "\u00e5ngra"
+},
+{
+"expr": "CONCATENATEX({\"ae\",\"uber\",\"R\u00e9sum\u00e9\",\"M\u00fcller\",\"\u00fc\"},[Value],\"|\",[Value],ASC)",
+"powerbi": "ae|M\u00fcller|R\u00e9sum\u00e9|\u00fc|uber"
+},
+{
+"expr": "MAXX({\"ae\",\"uber\",\"R\u00e9sum\u00e9\",\"M\u00fcller\",\"\u00fc\"},[Value])",
+"powerbi": "uber"
+},
+{
+"expr": "MINX({\"ae\",\"uber\",\"R\u00e9sum\u00e9\",\"M\u00fcller\",\"\u00fc\"},[Value])",
+"powerbi": "ae"
+},
+{
+"expr": "CONCATENATEX({\"co\u00f6perate\",\"Gda\u0144sk\",\"Aero\",\"Ub\u00e9r\",\"Jos\u00e9\"},[Value],\"|\",[Value],ASC)",
+"powerbi": "Aero|co\u00f6perate|Gda\u0144sk|Jos\u00e9|Ub\u00e9r"
+},
+{
+"expr": "MAXX({\"co\u00f6perate\",\"Gda\u0144sk\",\"Aero\",\"Ub\u00e9r\",\"Jos\u00e9\"},[Value])",
+"powerbi": "Ub\u00e9r"
+},
+{
+"expr": "MINX({\"co\u00f6perate\",\"Gda\u0144sk\",\"Aero\",\"Ub\u00e9r\",\"Jos\u00e9\"},[Value])",
+"powerbi": "Aero"
+},
+{
+"expr": "CONCATENATEX({\"naive\",\"caf\u00e9\",\"M\u00fcller\",\"N\u00fa\u00f1ez\",\"Ub\u00e9r\"},[Value],\"|\",[Value],ASC)",
+"powerbi": "caf\u00e9|M\u00fcller|naive|N\u00fa\u00f1ez|Ub\u00e9r"
+},
+{
+"expr": "MAXX({\"naive\",\"caf\u00e9\",\"M\u00fcller\",\"N\u00fa\u00f1ez\",\"Ub\u00e9r\"},[Value])",
+"powerbi": "Ub\u00e9r"
+},
+{
+"expr": "MINX({\"naive\",\"caf\u00e9\",\"M\u00fcller\",\"N\u00fa\u00f1ez\",\"Ub\u00e9r\"},[Value])",
+"powerbi": "caf\u00e9"
+},
+{
+"expr": "CONCATENATEX({\"senor\",\"\u00c9clair\",\"ss\",\"eclair\",\"\u00d1and\u00fa\"},[Value],\"|\",[Value],ASC)",
+"powerbi": "eclair|\u00c9clair|\u00d1and\u00fa|senor|ss"
+},
+{
+"expr": "MAXX({\"senor\",\"\u00c9clair\",\"ss\",\"eclair\",\"\u00d1and\u00fa\"},[Value])",
+"powerbi": "ss"
+},
+{
+"expr": "MINX({\"senor\",\"\u00c9clair\",\"ss\",\"eclair\",\"\u00d1and\u00fa\"},[Value])",
+"powerbi": "eclair"
+},
+{
+"expr": "CONCATENATEX({\"ae\",\"\u00c5lborg\",\"u\",\"Cafe\",\"\u00c6r\u00f8\"},[Value],\"|\",[Value],ASC)",
+"powerbi": "ae|\u00c6r\u00f8|\u00c5lborg|Cafe|u"
+},
+{
+"expr": "MAXX({\"ae\",\"\u00c5lborg\",\"u\",\"Cafe\",\"\u00c6r\u00f8\"},[Value])",
+"powerbi": "u"
+},
+{
+"expr": "MINX({\"ae\",\"\u00c5lborg\",\"u\",\"Cafe\",\"\u00c6r\u00f8\"},[Value])",
+"powerbi": "ae"
+},
+{
+"expr": "CONCATENATEX({\"\u00df\",\"R\u00e9sum\u00e9\",\"Krak\u00f3w\",\"JOS\u00c9\",\"Strasse\"},[Value],\"|\",[Value],ASC)",
+"powerbi": "JOS\u00c9|Krak\u00f3w|R\u00e9sum\u00e9|\u00df|Strasse"
+},
+{
+"expr": "MAXX({\"\u00df\",\"R\u00e9sum\u00e9\",\"Krak\u00f3w\",\"JOS\u00c9\",\"Strasse\"},[Value])",
+"powerbi": "Strasse"
+},
+{
+"expr": "MINX({\"\u00df\",\"R\u00e9sum\u00e9\",\"Krak\u00f3w\",\"JOS\u00c9\",\"Strasse\"},[Value])",
+"powerbi": "JOS\u00c9"
+},
+{
+"expr": "CONCATENATEX({\"\u00d6lander\",\"fa\u00e7ade\",\"\u0152uvre\",\"uber\",\"Nandu\"},[Value],\"|\",[Value],ASC)",
+"powerbi": "fa\u00e7ade|Nandu|\u0152uvre|\u00d6lander|uber"
+},
+{
+"expr": "MAXX({\"\u00d6lander\",\"fa\u00e7ade\",\"\u0152uvre\",\"uber\",\"Nandu\"},[Value])",
+"powerbi": "uber"
+},
+{
+"expr": "MINX({\"\u00d6lander\",\"fa\u00e7ade\",\"\u0152uvre\",\"uber\",\"Nandu\"},[Value])",
+"powerbi": "fa\u00e7ade"
+},
+{
+"expr": "CONCATENATEX({\"\u0152uvre\",\"Celik\",\"caf\u00e9\",\"Zo\u00eb\",\"\u00c5lborg\"},[Value],\"|\",[Value],ASC)",
+"powerbi": "\u00c5lborg|caf\u00e9|Celik|\u0152uvre|Zo\u00eb"
+},
+{
+"expr": "MAXX({\"\u0152uvre\",\"Celik\",\"caf\u00e9\",\"Zo\u00eb\",\"\u00c5lborg\"},[Value])",
+"powerbi": "Zo\u00eb"
+},
+{
+"expr": "MINX({\"\u0152uvre\",\"Celik\",\"caf\u00e9\",\"Zo\u00eb\",\"\u00c5lborg\"},[Value])",
+"powerbi": "\u00c5lborg"
+},
+{
+"expr": "CONCATENATEX({\"Strasse\",\"co\u00f6perate\",\"u\",\"resume\",\"Krak\u00f3w\"},[Value],\"|\",[Value],ASC)",
+"powerbi": "co\u00f6perate|Krak\u00f3w|resume|Strasse|u"
+},
+{
+"expr": "MAXX({\"Strasse\",\"co\u00f6perate\",\"u\",\"resume\",\"Krak\u00f3w\"},[Value])",
+"powerbi": "u"
+},
+{
+"expr": "MINX({\"Strasse\",\"co\u00f6perate\",\"u\",\"resume\",\"Krak\u00f3w\"},[Value])",
+"powerbi": "co\u00f6perate"
+},
+{
+"expr": "CONCATENATEX({\"\u00c6r\u00f8\",\"cafe\",\"Jose\",\"\u00d6lander\",\"caf\u00e9\"},[Value],\"|\",[Value],ASC)",
+"powerbi": "\u00c6r\u00f8|cafe|caf\u00e9|Jose|\u00d6lander"
+},
+{
+"expr": "MAXX({\"\u00c6r\u00f8\",\"cafe\",\"Jose\",\"\u00d6lander\",\"caf\u00e9\"},[Value])",
+"powerbi": "\u00d6lander"
+},
+{
+"expr": "MINX({\"\u00c6r\u00f8\",\"cafe\",\"Jose\",\"\u00d6lander\",\"caf\u00e9\"},[Value])",
+"powerbi": "\u00c6r\u00f8"
+},
+{
+"expr": "CONCATENATEX({\"N\u00fa\u00f1ez\",\"senor\",\"Aero\",\"Zoe\",\"Celik\"},[Value],\"|\",[Value],ASC)",
+"powerbi": "Aero|Celik|N\u00fa\u00f1ez|senor|Zoe"
+},
+{
+"expr": "MAXX({\"N\u00fa\u00f1ez\",\"senor\",\"Aero\",\"Zoe\",\"Celik\"},[Value])",
+"powerbi": "Zoe"
+},
+{
+"expr": "MINX({\"N\u00fa\u00f1ez\",\"senor\",\"Aero\",\"Zoe\",\"Celik\"},[Value])",
+"powerbi": "Aero"
+},
+{
+"expr": "CONCATENATEX({\"Celik\",\"Olander\",\"\u00f8\",\"Dvorak\",\"Angstrom\"},[Value],\"|\",[Value],ASC)",
+"powerbi": "Angstrom|Celik|Dvorak|\u00f8|Olander"
+},
+{
+"expr": "MAXX({\"Celik\",\"Olander\",\"\u00f8\",\"Dvorak\",\"Angstrom\"},[Value])",
+"powerbi": "Olander"
+},
+{
+"expr": "MINX({\"Celik\",\"Olander\",\"\u00f8\",\"Dvorak\",\"Angstrom\"},[Value])",
+"powerbi": "Angstrom"
+},
+{
+"expr": "CONCATENATEX({\"co\u00f6perate\",\"Eclair\",\"\u0110or\u0111e\",\"resume\",\"M\u00fcller\"},[Value],\"|\",[Value],ASC)",
+"powerbi": "co\u00f6perate|\u0110or\u0111e|Eclair|M\u00fcller|resume"
+},
+{
+"expr": "MAXX({\"co\u00f6perate\",\"Eclair\",\"\u0110or\u0111e\",\"resume\",\"M\u00fcller\"},[Value])",
+"powerbi": "resume"
+},
+{
+"expr": "MINX({\"co\u00f6perate\",\"Eclair\",\"\u0110or\u0111e\",\"resume\",\"M\u00fcller\"},[Value])",
+"powerbi": "co\u00f6perate"
+},
+{
+"expr": "CONCATENATEX({\"r\u00e9sum\u00e9\",\"Lodz\",\"\u00d6\",\"\u00e6\",\"fa\u00e7ade\"},[Value],\"|\",[Value],ASC)",
+"powerbi": "\u00e6|fa\u00e7ade|Lodz|\u00d6|r\u00e9sum\u00e9"
+},
+{
+"expr": "MAXX({\"r\u00e9sum\u00e9\",\"Lodz\",\"\u00d6\",\"\u00e6\",\"fa\u00e7ade\"},[Value])",
+"powerbi": "r\u00e9sum\u00e9"
+},
+{
+"expr": "MINX({\"r\u00e9sum\u00e9\",\"Lodz\",\"\u00d6\",\"\u00e6\",\"fa\u00e7ade\"},[Value])",
+"powerbi": "\u00e6"
+},
+{
+"expr": "CONCATENATEX({\"\u00c4\",\"naive\",\"Ub\u00e9r\",\"N\u00fa\u00f1ez\",\"M\u00fdrdal\"},[Value],\"|\",[Value],ASC)",
+"powerbi": "\u00c4|M\u00fdrdal|naive|N\u00fa\u00f1ez|Ub\u00e9r"
+},
+{
+"expr": "MAXX({\"\u00c4\",\"naive\",\"Ub\u00e9r\",\"N\u00fa\u00f1ez\",\"M\u00fdrdal\"},[Value])",
+"powerbi": "Ub\u00e9r"
+},
+{
+"expr": "MINX({\"\u00c4\",\"naive\",\"Ub\u00e9r\",\"N\u00fa\u00f1ez\",\"M\u00fdrdal\"},[Value])",
+"powerbi": "\u00c4"
+},
+{
+"expr": "CONCATENATEX({\"\u0152uvre\",\"A\",\"Guzel\",\"o\",\"\u00e6\"},[Value],\"|\",[Value],ASC)",
+"powerbi": "A|\u00e6|Guzel|o|\u0152uvre"
+},
+{
+"expr": "MAXX({\"\u0152uvre\",\"A\",\"Guzel\",\"o\",\"\u00e6\"},[Value])",
+"powerbi": "\u0152uvre"
+},
+{
+"expr": "MINX({\"\u0152uvre\",\"A\",\"Guzel\",\"o\",\"\u00e6\"},[Value])",
+"powerbi": "A"
+},
+{
+"expr": "ISAFTER(\"Zo\u00eb\",\"M\")",
+"powerbi": "True"
+},
+{
+"expr": "MAX(\"Zo\u00eb\",\"N\")",
+"powerbi": "Zo\u00eb"
+},
+{
+"expr": "ISAFTER(\"Mueller\",\"M\")",
+"powerbi": "True"
+},
+{
+"expr": "MAX(\"Mueller\",\"N\")",
+"powerbi": "N"
+},
+{
+"expr": "ISAFTER(\"S\u00f8ren\",\"M\")",
+"powerbi": "True"
+},
+{
+"expr": "MAX(\"S\u00f8ren\",\"N\")",
+"powerbi": "S\u00f8ren"
+},
+{
+"expr": "ISAFTER(\"Thor\",\"M\")",
+"powerbi": "True"
+},
+{
+"expr": "MAX(\"Thor\",\"N\")",
+"powerbi": "Thor"
+},
+{
+"expr": "ISAFTER(\"JOS\u00c9\",\"M\")",
+"powerbi": "False"
+},
+{
+"expr": "MAX(\"JOS\u00c9\",\"N\")",
+"powerbi": "N"
+},
+{
+"expr": "ISAFTER(\"Angstrom\",\"M\")",
+"powerbi": "False"
+},
+{
+"expr": "MAX(\"Angstrom\",\"N\")",
+"powerbi": "N"
+},
+{
+"expr": "ISAFTER(\"Jos\u00e9\",\"M\")",
+"powerbi": "False"
+},
+{
+"expr": "MAX(\"Jos\u00e9\",\"N\")",
+"powerbi": "N"
+},
+{
+"expr": "ISAFTER(\"Strasse\",\"M\")",
+"powerbi": "True"
+},
+{
+"expr": "MAX(\"Strasse\",\"N\")",
+"powerbi": "Strasse"
+},
+{
+"expr": "ISAFTER(\"facade\",\"M\")",
+"powerbi": "False"
+},
+{
+"expr": "MAX(\"facade\",\"N\")",
+"powerbi": "N"
+},
+{
+"expr": "ISAFTER(\"co-op\",\"M\")",
+"powerbi": "False"
+},
+{
+"expr": "MAX(\"co-op\",\"N\")",
+"powerbi": "N"
+},
+{
+"expr": "ISAFTER(\"Celik\",\"M\")",
+"powerbi": "False"
+},
+{
+"expr": "MAX(\"Celik\",\"N\")",
+"powerbi": "N"
+},
+{
+"expr": "ISAFTER(\"Lodz\",\"M\")",
+"powerbi": "False"
+},
+{
+"expr": "MAX(\"Lodz\",\"N\")",
+"powerbi": "N"
+},
+{
+"expr": "ISAFTER(\"\u00c7elik\",\"M\")",
+"powerbi": "False"
+},
+{
+"expr": "MAX(\"\u00c7elik\",\"N\")",
+"powerbi": "N"
+},
+{
+"expr": "ISAFTER(\"o'neil\",\"M\")",
+"powerbi": "True"
+},
+{
+"expr": "MAX(\"o'neil\",\"N\")",
+"powerbi": "o'neil"
+},
+{
+"expr": "ISAFTER(\"Krakow\",\"M\")",
+"powerbi": "False"
+},
+{
+"expr": "MAX(\"Krakow\",\"N\")",
+"powerbi": "N"
+},
+{
+"expr": "ISAFTER(\"Nunez\",\"M\")",
+"powerbi": "True"
+},
+{
+"expr": "MAX(\"Nunez\",\"N\")",
+"powerbi": "Nunez"
+},
+{
+"expr": "ISAFTER(\"eclair\",\"M\")",
+"powerbi": "False"
+},
+{
+"expr": "MAX(\"eclair\",\"N\")",
+"powerbi": "N"
+},
+{
+"expr": "ISAFTER(\"O-Neil\",\"M\")",
+"powerbi": "True"
+},
+{
+"expr": "MAX(\"O-Neil\",\"N\")",
+"powerbi": "O-Neil"
+},
+{
+"expr": "ISAFTER(\"\u0160koda\",\"M\")",
+"powerbi": "True"
+},
+{
+"expr": "MAX(\"\u0160koda\",\"N\")",
+"powerbi": "\u0160koda"
+},
+{
+"expr": "ISAFTER(\"Cafe\",\"M\")",
+"powerbi": "False"
+},
+{
+"expr": "MAX(\"Cafe\",\"N\")",
+"powerbi": "N"
+},
+{
+"expr": "\"\u0391\u03b8\u03ae\u03bd\u03b1\"<\"Athens\"",
+"powerbi": "False"
+},
+{
+"expr": "\"\u0391\u03b8\u03ae\u03bd\u03b1\"=\"Athens\"",
+"powerbi": "False"
+},
+{
+"expr": "\"\u041c\u043e\u0441\u043a\u0432\u0430\"<\"Moscow\"",
+"powerbi": "False"
+},
+{
+"expr": "\"\u041c\u043e\u0441\u043a\u0432\u0430\"=\"Moscow\"",
+"powerbi": "False"
+},
+{
+"expr": "\"\u6771\u4eac\"<\"Tokyo\"",
+"powerbi": "False"
+},
+{
+"expr": "\"\u6771\u4eac\"=\"Tokyo\"",
+"powerbi": "False"
+},
+{
+"expr": "\"\u03b1\"<\"a\"",
+"powerbi": "False"
+},
+{
+"expr": "\"\u03b1\"=\"a\"",
+"powerbi": "False"
+},
+{
+"expr": "\"\u00e4\"<\"\u05d0\"",
+"powerbi": "True"
+},
+{
+"expr": "\"\u00e4\"=\"\u05d0\"",
+"powerbi": "False"
+}
+]
+}

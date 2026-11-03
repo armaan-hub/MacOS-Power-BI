@@ -1756,3 +1756,13 @@ The standing test workbook is now `tests/Data/Vat File -Aug 2026.xlsx` (sheet `V
 **Saved:** `tools/parity/dax_battery_logical17_extra.json` (398 answers), `tools/parity/task27_logical_blank_spec.json`.
 
 **Gate:** PARITY GATE PASSED (fast gate). pytest 2,524 passed; replay 452,313: 440,910 match, 11,403 refused, 0 DIFF, 0 CRASH; locked 438,977 to 440,890. The real app through the measure path, offscreen: 575/575 equal and 1,500 fresh probes with 0 wrong. Power BI answers came from Power BI Desktop on the iPad guest; the project was not saved. No saved Power BI answer was edited.
+
+## 2026-11-03 — Iteration 118 (Task 28 text-collation-18: ordering and comparing text with non-ASCII characters (1,657 refusals become Power BI's answers))
+
+**Who did what:** Antigravity (Gemini 3.8 Flash) derived Power BI's case-insensitive Latin collation from 1,657 saved answers (primary letters with ligature expansions æ→ae, ß→ss, ð/đ→d, ı→i, ł→l, ø→o; accents ranked acute < grave < dot < circumflex < diaeresis < caron < breve < macron < tilde < ring < ogonek < cedilla < double acute; apostrophes and hyphens nearly ignored); Sonnet 5.5 kept main's fallback for non-Latin text (identical texts always equal) after the gate found 4 related-value answers newly refused; Claude Opus 5.5 built the spec and measured 390 fresh real-world words (Zoë, Ångström, Łódź, Straße, Øresund) in Power BI.
+
+**Review:** spec 1,657 of 1,657 match; fresh 390 words: 0 wrong, 91 refused or wrong on main now right, 5 newly refused. The gate found the related-value regression (fixed) and a stale collation guard whose 4 shapes were measured in Power BI and now match. Greek, Cyrillic and CJK ordering still refuse. Code read for lookups: none.
+
+**Saved:** `tools/parity/dax_battery_collation18_extra.json` (390 answers), `tools/parity/task28_text_collation_spec.json`.
+
+**Gate:** PARITY GATE PASSED (fast gate). pytest 2,531 passed; replay 452,703: 442,953 match, 9,750 refused, 0 DIFF, 0 CRASH; locked 440,890 to 442,933. The real app through the measure path, offscreen: 575/575 equal and 1,500 fresh probes with 0 wrong. Power BI answers came from Power BI Desktop on the iPad guest; the project was not saved. No saved Power BI answer was edited.
