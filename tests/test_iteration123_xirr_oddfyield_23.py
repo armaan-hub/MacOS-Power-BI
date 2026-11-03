@@ -142,5 +142,14 @@ class TestIteration123XirrOddfyield23(unittest.TestCase):
         self.assertEqual(dax.local(f'XIRR({added},[v],[d],0.1,"x")'), "LOCAL-REJECT:Cannot convert value 'x' of type Text to type Number.")
 
 
+    def test_part_a_xirr_slow_downward_bracket_is_refused(self) -> None:
+        # Live Power BI (Task 33, fourth round): this table (root at 1 + rate ~ 0.015, first row not the earliest date, one sign flip) was
+        # "The XIRR function couldn't find a solution."; the local bisection needs 51 steps (every answered case needed 35 or fewer).
+        table = 'DATATABLE("v",DOUBLE,"d",DATETIME,{{-2350.59,"2020-03-29"},{-4972.17,"2023-09-30"},{328.77,"2024-05-23"},{-1595.43,"2019-05-24"}})'
+        result = dax.local(f"XIRR({table},[v],[d],0.05)")
+        self.assertTrue(result.startswith("LOCAL-REJECT:"), result)
+        self.assertIn("not modelled", result)
+
+
 if __name__ == "__main__":
     unittest.main()

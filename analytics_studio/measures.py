@@ -1801,8 +1801,9 @@ def _xirr_solve(flows: list[tuple[float, float]], guess: float) -> tuple[str, fl
         lo, hi, upward = 2.0 ** -dn_k, 2.0 ** -(dn_k - 1), False
     variants = [(w, t, f) for w in range(3) for t in (1e-8, 0.995e-8, 1.01e-8) for f in (1e-8, 1.005e-8)]
     answers: dict[int, float] = {}
+    last_step = 0
     try:
-        for _ in range(200):
+        for step in range(1, 201):
             mid = (lo + hi) / 2.0
             mid_value = npv(mid)
             if not math.isfinite(mid_value):
@@ -1825,11 +1826,16 @@ def _xirr_solve(flows: list[tuple[float, float]], guess: float) -> tuple[str, fl
             for index, (w, t, f) in enumerate(variants):
                 if index not in answers and scaled[w] < t and residual < f:
                     answers[index] = base * cross - 1.0
+                    last_step = max(last_step, step)
             if len(answers) == len(variants):
                 break
     except (OverflowError, ZeroDivisionError):
         return ("refuse", None)
     if len(answers) != len(variants) or len(set(answers.values())) != 1:
+        return ("refuse", None)
+    if last_step > 40:
+        # Measured: every answered case stopped within 35 bisection steps; a fresh case needing 51 (root at 1 + rate ~ 0.015, first row
+        # not the earliest date) was "couldn't find a solution".  Power BI's stop rule beyond 35 steps is unsettled: refuse.
         return ("refuse", None)
     return ("ok", answers[0])
 
