@@ -1786,3 +1786,13 @@ The standing test workbook is now `tests/Data/Vat File -Aug 2026.xlsx` (sheet `V
 **Saved:** `tools/parity/dax_battery_types20_extra.json` (300 answers), `tools/parity/task30_static_types_spec.json`.
 
 **Gate:** PARITY GATE PASSED (fast gate). pytest 2,538 passed; replay 453,242: 445,280 match, 7,962 refused, 0 DIFF, 0 CRASH; locked 444,122 to 445,260. The real app through the measure path, offscreen: 575/575 equal and 1,500 fresh probes with 0 wrong. Power BI answers came from Power BI Desktop on the iPad guest; the project was not saved. No saved Power BI answer was edited.
+
+## 2026-11-03 — Iteration 121 (Task 31 linest-edge-21: LINEST/LINESTX near-perfect fits and linearly dependent regressors (645 refusals become Power BI's answers))
+
+**Who did what:** Antigravity (Gemini 3.8 Flash) implemented Power BI's rank-deficient LINEST convention (a collinear column gets slope 0 and standard error 0, degrees of freedom adjusted) and near-perfect fits in doubles in `dax_linest.py`; Sonnet 5.5 found which collinear column Power BI drops (QR with column pivoting: intercept first, then the column with the largest remainder; the later one in the swapped order is dropped), refuses exact ties between candidates and near-perfect fits below 1e-7 of y's spread; Claude Opus 5.5 built the spec and measured 440 fresh LINESTX answers on 40 random tables in Power BI.
+
+**Review:** spec 645 of 677 match, 32 refused, 0 wrong. Fresh 440: main 44 match, 33 wrong; first build 59 wrong (wrong column dropped), after Sonnet 110 match, 0 wrong. Stale LINEST guards (constant y, constant x, duplicated column, `1=0` regressor) measured in Power BI and now asserted. Code read for lookups: none.
+
+**Saved:** `tools/parity/dax_battery_linest21_extra.json` (440 answers), `tools/parity/task31_linest_edge_spec.json`.
+
+**Gate:** PARITY GATE PASSED (fast gate). pytest 2,544 passed; replay 453,682: 446,041 match, 7,641 refused, 0 DIFF, 0 CRASH; locked 445,260 to 446,021. The real app through the measure path, offscreen: 575/575 equal and 1,500 fresh probes with 0 wrong. Power BI answers came from Power BI Desktop on the iPad guest; the project was not saved. No saved Power BI answer was edited.
