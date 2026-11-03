@@ -1,0 +1,2260 @@
+{
+ "items": [
+  {
+   "part": "A",
+   "expr": "VARX.P(CALCULATETABLE(Facts,Facts[Region]=\"East\"),IF.EAGER(SELECTEDVALUE(Facts[Region])=\"East\",1,DATE(2020,1,1)+Facts[Quantity]))",
+   "powerbi": "2.88888907432556",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "IF(FALSE(),1,VARX.P(Facts,DATE(2020,1,1)+Facts[Quantity]))",
+   "powerbi": "2.91666674613953",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "(IF(FALSE(),1,VARX.P(Facts,DATE(2020,1,1)+Facts[Quantity])))+1",
+   "powerbi": "3.91666674613953",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "MAXX(Facts,IF(FALSE(),1,VARX.P(Facts,DATE(2020,1,1)+Facts[Quantity])))",
+   "powerbi": "2.91666674613953",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "SUMX(Facts,IF(FALSE(),1,VARX.P(Facts,DATE(2020,1,1)+Facts[Quantity])))",
+   "powerbi": "17.5000004768372",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "CALCULATE(IF(FALSE(),1,VARX.P(Facts,DATE(2020,1,1)+Facts[Quantity])),Facts[Region]=\"East\")",
+   "powerbi": "2.88888907432556",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "CALCULATE(IF(COUNTROWS(Facts)>3,1,VARX.P(Facts,DATE(2020,1,1)+Facts[Quantity])),Facts[Region]=\"East\")",
+   "powerbi": "2.88888907432556",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "IF(TRUE(),VARX.P(Facts,DATE(2020,1,1)+Facts[Quantity]),1)",
+   "powerbi": "2.91666674613953",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "(IF(TRUE(),VARX.P(Facts,DATE(2020,1,1)+Facts[Quantity]),1))+1",
+   "powerbi": "3.91666674613953",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "MAXX(Facts,IF(TRUE(),VARX.P(Facts,DATE(2020,1,1)+Facts[Quantity]),1))",
+   "powerbi": "2.91666674613953",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "SUMX(Facts,IF(TRUE(),VARX.P(Facts,DATE(2020,1,1)+Facts[Quantity]),1))",
+   "powerbi": "17.5000004768372",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "CALCULATE(IF(TRUE(),VARX.P(Facts,DATE(2020,1,1)+Facts[Quantity]),1),Facts[Region]=\"East\")",
+   "powerbi": "2.88888907432556",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "IF(COUNTROWS(Facts)>3,VARX.P(Facts,DATE(2020,1,1)+Facts[Quantity]),1)",
+   "powerbi": "2.91666674613953",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "(IF(COUNTROWS(Facts)>3,VARX.P(Facts,DATE(2020,1,1)+Facts[Quantity]),1))+1",
+   "powerbi": "3.91666674613953",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "MAXX(Facts,IF(COUNTROWS(Facts)>3,VARX.P(Facts,DATE(2020,1,1)+Facts[Quantity]),1))",
+   "powerbi": "2.91666674613953",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "SUMX(Facts,IF(COUNTROWS(Facts)>3,VARX.P(Facts,DATE(2020,1,1)+Facts[Quantity]),1))",
+   "powerbi": "17.5000004768372",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "IF(FALSE(),\"a\",VARX.P(Facts,DATE(2020,1,1)+Facts[Quantity]))",
+   "powerbi": "2.91666674613953",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "(IF(FALSE(),\"a\",VARX.P(Facts,DATE(2020,1,1)+Facts[Quantity])))+1",
+   "powerbi": "3.91666674613953",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "MAXX(Facts,IF(FALSE(),\"a\",VARX.P(Facts,DATE(2020,1,1)+Facts[Quantity])))",
+   "powerbi": "2.91666674613953",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "SUMX(Facts,IF(FALSE(),\"a\",VARX.P(Facts,DATE(2020,1,1)+Facts[Quantity])))",
+   "powerbi": "17.5000004768372",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "CALCULATE(IF(FALSE(),\"a\",VARX.P(Facts,DATE(2020,1,1)+Facts[Quantity])),Facts[Region]=\"East\")",
+   "powerbi": "2.88888907432556",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "CALCULATE(IF(COUNTROWS(Facts)>3,\"a\",VARX.P(Facts,DATE(2020,1,1)+Facts[Quantity])),Facts[Region]=\"East\")",
+   "powerbi": "2.88888907432556",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "IF(TRUE(),VARX.P(Facts,DATE(2020,1,1)+Facts[Quantity]),\"a\")",
+   "powerbi": "2.91666674613953",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "(IF(TRUE(),VARX.P(Facts,DATE(2020,1,1)+Facts[Quantity]),\"a\"))+1",
+   "powerbi": "3.91666674613953",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "MAXX(Facts,IF(TRUE(),VARX.P(Facts,DATE(2020,1,1)+Facts[Quantity]),\"a\"))",
+   "powerbi": "2.91666674613953",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "SUMX(Facts,IF(TRUE(),VARX.P(Facts,DATE(2020,1,1)+Facts[Quantity]),\"a\"))",
+   "powerbi": "17.5000004768372",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "CALCULATE(IF(TRUE(),VARX.P(Facts,DATE(2020,1,1)+Facts[Quantity]),\"a\"),Facts[Region]=\"East\")",
+   "powerbi": "2.88888907432556",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "IF(COUNTROWS(Facts)>3,VARX.P(Facts,DATE(2020,1,1)+Facts[Quantity]),\"a\")",
+   "powerbi": "2.91666674613953",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "(IF(COUNTROWS(Facts)>3,VARX.P(Facts,DATE(2020,1,1)+Facts[Quantity]),\"a\"))+1",
+   "powerbi": "3.91666674613953",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "MAXX(Facts,IF(COUNTROWS(Facts)>3,VARX.P(Facts,DATE(2020,1,1)+Facts[Quantity]),\"a\"))",
+   "powerbi": "2.91666674613953",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "SUMX(Facts,IF(COUNTROWS(Facts)>3,VARX.P(Facts,DATE(2020,1,1)+Facts[Quantity]),\"a\"))",
+   "powerbi": "17.5000004768372",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "IF(FALSE(),TRUE(),VARX.P(Facts,DATE(2020,1,1)+Facts[Quantity]))",
+   "powerbi": "2.91666674613953",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "(IF(FALSE(),TRUE(),VARX.P(Facts,DATE(2020,1,1)+Facts[Quantity])))+1",
+   "powerbi": "3.91666674613953",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "MAXX(Facts,IF(FALSE(),TRUE(),VARX.P(Facts,DATE(2020,1,1)+Facts[Quantity])))",
+   "powerbi": "2.91666674613953",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "SUMX(Facts,IF(FALSE(),TRUE(),VARX.P(Facts,DATE(2020,1,1)+Facts[Quantity])))",
+   "powerbi": "17.5000004768372",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "CALCULATE(IF(FALSE(),TRUE(),VARX.P(Facts,DATE(2020,1,1)+Facts[Quantity])),Facts[Region]=\"East\")",
+   "powerbi": "2.88888907432556",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "CALCULATE(IF(COUNTROWS(Facts)>3,TRUE(),VARX.P(Facts,DATE(2020,1,1)+Facts[Quantity])),Facts[Region]=\"East\")",
+   "powerbi": "2.88888907432556",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "IF(FALSE(),DATE(2021,1,1),VARX.P(Facts,DATE(2020,1,1)+Facts[Quantity]))",
+   "powerbi": "2.91666674613953",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "(IF(FALSE(),DATE(2021,1,1),VARX.P(Facts,DATE(2020,1,1)+Facts[Quantity])))+1",
+   "powerbi": "3.91666674613953",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "MAXX(Facts,IF(FALSE(),DATE(2021,1,1),VARX.P(Facts,DATE(2020,1,1)+Facts[Quantity])))",
+   "powerbi": "2.91666674613953",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "SUMX(Facts,IF(FALSE(),DATE(2021,1,1),VARX.P(Facts,DATE(2020,1,1)+Facts[Quantity])))",
+   "powerbi": "17.5000004768372",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "CALCULATE(IF(FALSE(),DATE(2021,1,1),VARX.P(Facts,DATE(2020,1,1)+Facts[Quantity])),Facts[Region]=\"East\")",
+   "powerbi": "2.88888907432556",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "CALCULATE(IF(COUNTROWS(Facts)>3,DATE(2021,1,1),VARX.P(Facts,DATE(2020,1,1)+Facts[Quantity])),Facts[Region]=\"East\")",
+   "powerbi": "2.88888907432556",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "IF(TRUE(),VARX.P(Facts,DATE(2020,1,1)+Facts[Quantity]))",
+   "powerbi": "2.91666674613953",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "(IF(TRUE(),VARX.P(Facts,DATE(2020,1,1)+Facts[Quantity])))+1",
+   "powerbi": "3.91666674613953",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "MAXX(Facts,IF(TRUE(),VARX.P(Facts,DATE(2020,1,1)+Facts[Quantity])))",
+   "powerbi": "2.91666674613953",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "SUMX(Facts,IF(TRUE(),VARX.P(Facts,DATE(2020,1,1)+Facts[Quantity])))",
+   "powerbi": "17.5000004768372",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "CALCULATE(IF(TRUE(),VARX.P(Facts,DATE(2020,1,1)+Facts[Quantity])),Facts[Region]=\"East\")",
+   "powerbi": "2.88888907432556",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "IF(COUNTROWS(Facts)>3,VARX.P(Facts,DATE(2020,1,1)+Facts[Quantity]))",
+   "powerbi": "2.91666674613953",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "(IF(COUNTROWS(Facts)>3,VARX.P(Facts,DATE(2020,1,1)+Facts[Quantity])))+1",
+   "powerbi": "3.91666674613953",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "MAXX(Facts,IF(COUNTROWS(Facts)>3,VARX.P(Facts,DATE(2020,1,1)+Facts[Quantity])))",
+   "powerbi": "2.91666674613953",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "SUMX(Facts,IF(COUNTROWS(Facts)>3,VARX.P(Facts,DATE(2020,1,1)+Facts[Quantity])))",
+   "powerbi": "17.5000004768372",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "IF(FALSE(),SUM(Facts[Quantity]),VARX.P(Facts,DATE(2020,1,1)+Facts[Quantity]))",
+   "powerbi": "2.91666674613953",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "(IF(FALSE(),SUM(Facts[Quantity]),VARX.P(Facts,DATE(2020,1,1)+Facts[Quantity])))+1",
+   "powerbi": "3.91666674613953",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "MAXX(Facts,IF(FALSE(),SUM(Facts[Quantity]),VARX.P(Facts,DATE(2020,1,1)+Facts[Quantity])))",
+   "powerbi": "2.91666674613953",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "SUMX(Facts,IF(FALSE(),SUM(Facts[Quantity]),VARX.P(Facts,DATE(2020,1,1)+Facts[Quantity])))",
+   "powerbi": "17.5000004768372",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "CALCULATE(IF(FALSE(),SUM(Facts[Quantity]),VARX.P(Facts,DATE(2020,1,1)+Facts[Quantity])),Facts[Region]=\"East\")",
+   "powerbi": "2.88888907432556",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "CALCULATE(IF(COUNTROWS(Facts)>3,SUM(Facts[Quantity]),VARX.P(Facts,DATE(2020,1,1)+Facts[Quantity])),Facts[Region]=\"East\")",
+   "powerbi": "2.88888907432556",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "SWITCH(1,2,1,VARX.P(Facts,DATE(2020,1,1)+Facts[Quantity]))",
+   "powerbi": "2.91666674613953",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "(SWITCH(1,2,1,VARX.P(Facts,DATE(2020,1,1)+Facts[Quantity])))+1",
+   "powerbi": "3.91666674613953",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "MAXX(Facts,SWITCH(1,2,1,VARX.P(Facts,DATE(2020,1,1)+Facts[Quantity])))",
+   "powerbi": "2.91666674613953",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "SUMX(Facts,SWITCH(1,2,1,VARX.P(Facts,DATE(2020,1,1)+Facts[Quantity])))",
+   "powerbi": "17.5000004768372",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "CALCULATE(SWITCH(1,2,1,VARX.P(Facts,DATE(2020,1,1)+Facts[Quantity])),Facts[Region]=\"East\")",
+   "powerbi": "2.88888907432556",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "SWITCH(1,2,\"a\",VARX.P(Facts,DATE(2020,1,1)+Facts[Quantity]))",
+   "powerbi": "2.91666674613953",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "(SWITCH(1,2,\"a\",VARX.P(Facts,DATE(2020,1,1)+Facts[Quantity])))+1",
+   "powerbi": "3.91666674613953",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "MAXX(Facts,SWITCH(1,2,\"a\",VARX.P(Facts,DATE(2020,1,1)+Facts[Quantity])))",
+   "powerbi": "2.91666674613953",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "SUMX(Facts,SWITCH(1,2,\"a\",VARX.P(Facts,DATE(2020,1,1)+Facts[Quantity])))",
+   "powerbi": "17.5000004768372",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "CALCULATE(SWITCH(1,2,\"a\",VARX.P(Facts,DATE(2020,1,1)+Facts[Quantity])),Facts[Region]=\"East\")",
+   "powerbi": "2.88888907432556",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "IFERROR(VARX.P(Facts,DATE(2020,1,1)+Facts[Quantity]),1)",
+   "powerbi": "2.91666674613953",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "(IFERROR(VARX.P(Facts,DATE(2020,1,1)+Facts[Quantity]),1))+1",
+   "powerbi": "3.91666674613953",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "MAXX(Facts,IFERROR(VARX.P(Facts,DATE(2020,1,1)+Facts[Quantity]),1))",
+   "powerbi": "2.91666674613953",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "SUMX(Facts,IFERROR(VARX.P(Facts,DATE(2020,1,1)+Facts[Quantity]),1))",
+   "powerbi": "17.5000004768372",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "CALCULATE(IFERROR(VARX.P(Facts,DATE(2020,1,1)+Facts[Quantity]),1),Facts[Region]=\"East\")",
+   "powerbi": "2.88888907432556",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "IFERROR(1/0,VARX.P(Facts,DATE(2020,1,1)+Facts[Quantity]))",
+   "powerbi": "2.91666674613953",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "(IFERROR(1/0,VARX.P(Facts,DATE(2020,1,1)+Facts[Quantity])))+1",
+   "powerbi": "3.91666674613953",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "MAXX(Facts,IFERROR(1/0,VARX.P(Facts,DATE(2020,1,1)+Facts[Quantity])))",
+   "powerbi": "2.91666674613953",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "SUMX(Facts,IFERROR(1/0,VARX.P(Facts,DATE(2020,1,1)+Facts[Quantity])))",
+   "powerbi": "17.5000004768372",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "CALCULATE(IFERROR(1/0,VARX.P(Facts,DATE(2020,1,1)+Facts[Quantity])),Facts[Region]=\"East\")",
+   "powerbi": "2.88888907432556",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "IFERROR(VARX.P(Facts,DATE(2020,1,1)+Facts[Quantity]),\"a\")",
+   "powerbi": "2.91666674613953",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "(IFERROR(VARX.P(Facts,DATE(2020,1,1)+Facts[Quantity]),\"a\"))+1",
+   "powerbi": "3.91666674613953",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "MAXX(Facts,IFERROR(VARX.P(Facts,DATE(2020,1,1)+Facts[Quantity]),\"a\"))",
+   "powerbi": "2.91666674613953",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "SUMX(Facts,IFERROR(VARX.P(Facts,DATE(2020,1,1)+Facts[Quantity]),\"a\"))",
+   "powerbi": "17.5000004768372",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "CALCULATE(IFERROR(VARX.P(Facts,DATE(2020,1,1)+Facts[Quantity]),\"a\"),Facts[Region]=\"East\")",
+   "powerbi": "2.88888907432556",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "COALESCE(BLANK(),VARX.P(Facts,DATE(2020,1,1)+Facts[Quantity]),1)",
+   "powerbi": "2.91666674613953",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "(COALESCE(BLANK(),VARX.P(Facts,DATE(2020,1,1)+Facts[Quantity]),1))+1",
+   "powerbi": "3.91666674613953",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "MAXX(Facts,COALESCE(BLANK(),VARX.P(Facts,DATE(2020,1,1)+Facts[Quantity]),1))",
+   "powerbi": "2.91666674613953",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "SUMX(Facts,COALESCE(BLANK(),VARX.P(Facts,DATE(2020,1,1)+Facts[Quantity]),1))",
+   "powerbi": "17.5000004768372",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "CALCULATE(COALESCE(BLANK(),VARX.P(Facts,DATE(2020,1,1)+Facts[Quantity]),1),Facts[Region]=\"East\")",
+   "powerbi": "2.88888907432556",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "COALESCE(VARX.P(Facts,DATE(2020,1,1)+Facts[Quantity]),\"a\")",
+   "powerbi": "2.91666674613953",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "(COALESCE(VARX.P(Facts,DATE(2020,1,1)+Facts[Quantity]),\"a\"))+1",
+   "powerbi": "3.91666674613953",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "MAXX(Facts,COALESCE(VARX.P(Facts,DATE(2020,1,1)+Facts[Quantity]),\"a\"))",
+   "powerbi": "2.91666674613953",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "SUMX(Facts,COALESCE(VARX.P(Facts,DATE(2020,1,1)+Facts[Quantity]),\"a\"))",
+   "powerbi": "17.5000004768372",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "CALCULATE(COALESCE(VARX.P(Facts,DATE(2020,1,1)+Facts[Quantity]),\"a\"),Facts[Region]=\"East\")",
+   "powerbi": "2.88888907432556",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "MAX(VARX.P(Facts,DATE(2020,1,1)+Facts[Quantity]),1)",
+   "powerbi": "2.91666674613953",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "(MAX(VARX.P(Facts,DATE(2020,1,1)+Facts[Quantity]),1))+1",
+   "powerbi": "3.91666674613953",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "MAXX(Facts,MAX(VARX.P(Facts,DATE(2020,1,1)+Facts[Quantity]),1))",
+   "powerbi": "2.91666674613953",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "SUMX(Facts,MAX(VARX.P(Facts,DATE(2020,1,1)+Facts[Quantity]),1))",
+   "powerbi": "17.5000004768372",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "CALCULATE(MAX(VARX.P(Facts,DATE(2020,1,1)+Facts[Quantity]),1),Facts[Region]=\"East\")",
+   "powerbi": "2.88888907432556",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "MIN(VARX.P(Facts,DATE(2020,1,1)+Facts[Quantity]),DATE(2021,1,1))",
+   "powerbi": "2.91666674613953",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "(MIN(VARX.P(Facts,DATE(2020,1,1)+Facts[Quantity]),DATE(2021,1,1)))+1",
+   "powerbi": "3.91666674613953",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "MAXX(Facts,MIN(VARX.P(Facts,DATE(2020,1,1)+Facts[Quantity]),DATE(2021,1,1)))",
+   "powerbi": "2.91666674613953",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "SUMX(Facts,MIN(VARX.P(Facts,DATE(2020,1,1)+Facts[Quantity]),DATE(2021,1,1)))",
+   "powerbi": "17.5000004768372",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "CALCULATE(MIN(VARX.P(Facts,DATE(2020,1,1)+Facts[Quantity]),DATE(2021,1,1)),Facts[Region]=\"East\")",
+   "powerbi": "2.88888907432556",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "VARX.P(Facts,DATE(2020,1,1)+Facts[Quantity])",
+   "powerbi": "2.91666674613953",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "(VARX.P(Facts,DATE(2020,1,1)+Facts[Quantity]))+1",
+   "powerbi": "3.91666674613953",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "(VARX.P(Facts,DATE(2020,1,1)+Facts[Quantity]))*1",
+   "powerbi": "2.91666674613953",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "-(VARX.P(Facts,DATE(2020,1,1)+Facts[Quantity]))",
+   "powerbi": "-2.91666674613953",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "(VARX.P(Facts,DATE(2020,1,1)+Facts[Quantity]))-1",
+   "powerbi": "1.91666674613953",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "MAXX(Facts,VARX.P(Facts,DATE(2020,1,1)+Facts[Quantity]))",
+   "powerbi": "2.91666674613953",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "SUMX(Facts,VARX.P(Facts,DATE(2020,1,1)+Facts[Quantity]))",
+   "powerbi": "17.5000004768372",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "VARX.P(Facts,VAR d=DATE(2020,1,1) RETURN d+Facts[Quantity])",
+   "powerbi": "2.91666674613953",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "VARX.P(FILTER(Facts,Facts[Quantity]>1),VAR d=DATE(2020,1,1) RETURN d+Facts[Quantity])",
+   "powerbi": "1.25",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "VARX.P(Facts,IF(1=1,CONVERT(Facts[Quantity],DATETIME),DATE(2020,1,1)))",
+   "powerbi": "2.91666666666667",
+   "now": "LOCAL-REJECT:VARX.P over a date in a conditional is not exact in the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "SUMX(Facts,IF.EAGER(TRUE(),TIME(6,0,0)-Facts[Quantity],\"a\"))",
+   "powerbi": "12/17/1899 12:00:00",
+   "now": "LOCAL-REJECT:A time of day before December 30, 1899 is not supported in the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "MINX(Facts,IF.EAGER(TRUE(),TIME(6,0,0)+Facts[Sales],\"a\"))",
+   "powerbi": "12/29/1899 06:00:00",
+   "now": "LOCAL-REJECT:A time of day before December 30, 1899 is not supported in the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "MINX(Facts,IF.EAGER(TRUE(),TIME(6,0,0)-Facts[Quantity],\"a\"))",
+   "powerbi": "12/26/1899 18:00:00",
+   "now": "LOCAL-REJECT:A time of day before December 30, 1899 is not supported in the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "(TIMEVALUE(\"06:00\"))-1",
+   "powerbi": "12/30/1899 18:00:00",
+   "now": "LOCAL-REJECT:A time of day before December 30, 1899 is not supported in the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "(TIME(6,0,0))-(DATE(2020,1,1))",
+   "powerbi": "12/29/1779 18:00:00",
+   "now": "LOCAL-REJECT:A time of day before December 30, 1899 is not supported in the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "((TIME(6,0,0))-(DATE(2020,1,1)))&\"z\"",
+   "powerbi": "12/29/1779 6:00:00 PMz",
+   "now": "LOCAL-REJECT:A time of day before December 30, 1899 is not supported in the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "MAXX(Facts,(TIME(6,0,0))-(DATE(2020,1,1)))",
+   "powerbi": "12/29/1779 18:00:00",
+   "now": "LOCAL-REJECT:A time of day before December 30, 1899 is not supported in the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "SUMX(Facts,(TIME(6,0,0))-(DATE(2020,1,1)))",
+   "powerbi": "12/21/1179 12:00:00",
+   "now": "LOCAL-REJECT:A time of day before December 30, 1899 is not supported in the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "MAXX(ADDCOLUMNS(Facts,\"q\",(TIME(6,0,0))-(DATE(2020,1,1))),[q])",
+   "powerbi": "12/29/1779 18:00:00",
+   "now": "LOCAL-REJECT:A time of day before December 30, 1899 is not supported in the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "(TIME(6,0,0))-(VAR d=DATE(2020,1,1) RETURN d)",
+   "powerbi": "12/29/1779 18:00:00",
+   "now": "LOCAL-REJECT:A time of day before December 30, 1899 is not supported in the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "((TIME(6,0,0))-(VAR d=DATE(2020,1,1) RETURN d))&\"z\"",
+   "powerbi": "12/29/1779 6:00:00 PMz",
+   "now": "LOCAL-REJECT:A time of day before December 30, 1899 is not supported in the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "MAXX(Facts,(TIME(6,0,0))-(VAR d=DATE(2020,1,1) RETURN d))",
+   "powerbi": "12/29/1779 18:00:00",
+   "now": "LOCAL-REJECT:A time of day before December 30, 1899 is not supported in the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "SUMX(Facts,(TIME(6,0,0))-(VAR d=DATE(2020,1,1) RETURN d))",
+   "powerbi": "12/21/1179 12:00:00",
+   "now": "LOCAL-REJECT:A time of day before December 30, 1899 is not supported in the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "MAXX(ADDCOLUMNS(Facts,\"q\",(TIME(6,0,0))-(VAR d=DATE(2020,1,1) RETURN d)),[q])",
+   "powerbi": "12/29/1779 18:00:00",
+   "now": "LOCAL-REJECT:A time of day before December 30, 1899 is not supported in the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "(TIME(6,0,0))-(IF(TRUE(),DATE(2020,1,1)))",
+   "powerbi": "12/29/1779 18:00:00",
+   "now": "LOCAL-REJECT:A time of day before December 30, 1899 is not supported in the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "((TIME(6,0,0))-(IF(TRUE(),DATE(2020,1,1))))&\"z\"",
+   "powerbi": "12/29/1779 6:00:00 PMz",
+   "now": "LOCAL-REJECT:A time of day before December 30, 1899 is not supported in the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "MAXX(Facts,(TIME(6,0,0))-(IF(TRUE(),DATE(2020,1,1))))",
+   "powerbi": "12/29/1779 18:00:00",
+   "now": "LOCAL-REJECT:A time of day before December 30, 1899 is not supported in the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "SUMX(Facts,(TIME(6,0,0))-(IF(TRUE(),DATE(2020,1,1))))",
+   "powerbi": "12/21/1179 12:00:00",
+   "now": "LOCAL-REJECT:A time of day before December 30, 1899 is not supported in the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "MAXX(ADDCOLUMNS(Facts,\"q\",(TIME(6,0,0))-(IF(TRUE(),DATE(2020,1,1)))),[q])",
+   "powerbi": "12/29/1779 18:00:00",
+   "now": "LOCAL-REJECT:A time of day before December 30, 1899 is not supported in the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "(TIME(6,0,0))-(DATEVALUE(\"2020-01-01\"))",
+   "powerbi": "12/29/1779 18:00:00",
+   "now": "LOCAL-REJECT:A time of day before December 30, 1899 is not supported in the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "((TIME(6,0,0))-(DATEVALUE(\"2020-01-01\")))&\"z\"",
+   "powerbi": "12/29/1779 6:00:00 PMz",
+   "now": "LOCAL-REJECT:A time of day before December 30, 1899 is not supported in the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "MAXX(Facts,(TIME(6,0,0))-(DATEVALUE(\"2020-01-01\")))",
+   "powerbi": "12/29/1779 18:00:00",
+   "now": "LOCAL-REJECT:A time of day before December 30, 1899 is not supported in the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "SUMX(Facts,(TIME(6,0,0))-(DATEVALUE(\"2020-01-01\")))",
+   "powerbi": "12/21/1179 12:00:00",
+   "now": "LOCAL-REJECT:A time of day before December 30, 1899 is not supported in the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "MAXX(ADDCOLUMNS(Facts,\"q\",(TIME(6,0,0))-(DATEVALUE(\"2020-01-01\"))),[q])",
+   "powerbi": "12/29/1779 18:00:00",
+   "now": "LOCAL-REJECT:A time of day before December 30, 1899 is not supported in the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "(TIME(6,0,0))-(MAX(Facts[Sales])+DATE(2020,1,1))",
+   "powerbi": "12/09/1779 18:00:00",
+   "now": "LOCAL-REJECT:A time of day before December 30, 1899 is not supported in the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "((TIME(6,0,0))-(MAX(Facts[Sales])+DATE(2020,1,1)))&\"z\"",
+   "powerbi": "12/9/1779 6:00:00 PMz",
+   "now": "LOCAL-REJECT:A time of day before December 30, 1899 is not supported in the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "MAXX(Facts,(TIME(6,0,0))-(MAX(Facts[Sales])+DATE(2020,1,1)))",
+   "powerbi": "12/09/1779 18:00:00",
+   "now": "LOCAL-REJECT:A time of day before December 30, 1899 is not supported in the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "SUMX(Facts,(TIME(6,0,0))-(MAX(Facts[Sales])+DATE(2020,1,1)))",
+   "powerbi": "08/23/1179 12:00:00",
+   "now": "LOCAL-REJECT:A time of day before December 30, 1899 is not supported in the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "MAXX(ADDCOLUMNS(Facts,\"q\",(TIME(6,0,0))-(MAX(Facts[Sales])+DATE(2020,1,1))),[q])",
+   "powerbi": "12/09/1779 18:00:00",
+   "now": "LOCAL-REJECT:A time of day before December 30, 1899 is not supported in the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "(TIME(1,0,0))-(MAXX({DATE(2020,1,1)},[Value]))",
+   "powerbi": "12/29/1779 23:00:00",
+   "now": "LOCAL-REJECT:A time of day before December 30, 1899 is not supported in the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "(TIME(1,0,0))-(DATE(2020,1,1)+1)",
+   "powerbi": "12/28/1779 23:00:00",
+   "now": "LOCAL-REJECT:A time of day before December 30, 1899 is not supported in the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "SUMX(Facts,(TIME(1,0,0))-(MAXX({DATE(2020,1,1)},[Value])))",
+   "powerbi": "12/20/1179 18:00:00",
+   "now": "LOCAL-REJECT:A time of day before December 30, 1899 is not supported in the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "VAR q=(TIME(1,0,0)+1)-(CALCULATE(DATE(2020,1,1))) RETURN q",
+   "powerbi": "12/30/1779 23:00:00",
+   "now": "LOCAL-REJECT:A time of day before December 30, 1899 is not supported in the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "(TIME(1,0,0))-(EDATE(DATE(2020,1,1),1))",
+   "powerbi": "11/28/1779 23:00:00",
+   "now": "LOCAL-REJECT:A time of day before December 30, 1899 is not supported in the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "CALCULATE(SUMX(Facts,(TIME(1,0,0)+1)-(CALCULATE(DATE(2020,1,1)))),Facts[Region]<>\"x\")",
+   "powerbi": "12/26/1179 18:00:00",
+   "now": "LOCAL-REJECT:A time of day before December 30, 1899 is not supported in the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "CONCATENATEX(Facts,(-1)+(TIME(6,0,0)),\"|\",Facts[Quantity],ASC,Facts[Sales],ASC)",
+   "powerbi": "6:00:00 PM|6:00:00 PM|6:00:00 PM|6:00:00 PM|6:00:00 PM|6:00:",
+   "now": "LOCAL-REJECT:A time of day before December 30, 1899 is not supported in the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "((TIME(1,0,0)+1)-(CALCULATE(DATE(2020,1,1))))&\"z\"",
+   "powerbi": "12/30/1779 11:00:00 PMz",
+   "now": "LOCAL-REJECT:A time of day before December 30, 1899 is not supported in the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "SUMX(FILTER(Facts,Facts[Quantity]>2),(TIME(1,0,0)+1)-(MAX(DATE(2020,1,1),DATE(2020,1,2))))",
+   "powerbi": "12/26/1539 21:00:00",
+   "now": "LOCAL-REJECT:A time of day before December 30, 1899 is not supported in the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "SUMX({BLANK(),1},(TIME(1,0,0)+1)-(CALCULATE(DATE(2020,1,1))))",
+   "powerbi": "12/29/1659 22:00:00",
+   "now": "LOCAL-REJECT:A time of day before December 30, 1899 is not supported in the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "(TIME(6,0,0))-(\"3\"&\"\")",
+   "powerbi": "12/28/1899 18:00:00",
+   "now": "LOCAL-REJECT:A time of day before December 30, 1899 is not supported in the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "MINX(Facts,CONVERT(Facts[Sales],DATETIME))",
+   "powerbi": "12/29/1899 12:00:00",
+   "now": "LOCAL-REJECT:A time of day before December 30, 1899 is not supported in the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "CONCATENATEX(Facts,IFERROR((TIME(1,0,0))-(MAXX({DATE(2020,1,1)},[Value])),\"e\"),\"|\",Facts[Quantity],ASC,Facts[Sales],ASC)",
+   "powerbi": "12/29/1779 11:00:00 PM|12/29/1779 11:00:00 PM|12/29/1779 11:",
+   "now": "LOCAL-REJECT:A time of day before December 30, 1899 is not supported in the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "MAXX({1,2},(TIME(6,0,0))-(VAR d=1 RETURN d))",
+   "powerbi": "12/30/1899 18:00:00",
+   "now": "LOCAL-REJECT:A time of day before December 30, 1899 is not supported in the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "VAR q=(TIME(1,0,0))-(MAXX(Facts,DATE(2020,1,1))) RETURN q",
+   "powerbi": "12/29/1779 23:00:00",
+   "now": "LOCAL-REJECT:A time of day before December 30, 1899 is not supported in the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "CALCULATE((TIME(1,0,0)+1)-(MAX(DATE(2020,1,1),DATE(2020,1,2))),Facts[Region]=\"East\")",
+   "powerbi": "12/29/1779 23:00:00",
+   "now": "LOCAL-REJECT:A time of day before December 30, 1899 is not supported in the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "CALCULATE((TIME(6,0,0))-(\"3\"&\"\"),Facts[Region]=\"East\")",
+   "powerbi": "12/28/1899 18:00:00",
+   "now": "LOCAL-REJECT:A time of day before December 30, 1899 is not supported in the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "((TIME(1,0,0)+1)-(MAX(DATE(2020,1,1),DATE(2020,1,2))))&\"z\"",
+   "powerbi": "12/29/1779 11:00:00 PMz",
+   "now": "LOCAL-REJECT:A time of day before December 30, 1899 is not supported in the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "(TIME(1,0,0)+1)-(MAXX({DATE(2020,1,1)},[Value]))",
+   "powerbi": "12/30/1779 23:00:00",
+   "now": "LOCAL-REJECT:A time of day before December 30, 1899 is not supported in the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "(TIME(6,0,0))-(VAR d=1 RETURN d)",
+   "powerbi": "12/30/1899 18:00:00",
+   "now": "LOCAL-REJECT:A time of day before December 30, 1899 is not supported in the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "MAXX(ADDCOLUMNS(Facts,\"q\",(TIME(1,0,0))-(DATE(2020,1,1)+1)),[q])",
+   "powerbi": "12/28/1779 23:00:00",
+   "now": "LOCAL-REJECT:A time of day before December 30, 1899 is not supported in the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "CALCULATE((TIME(1,0,0)+1)-(CALCULATE(DATE(2020,1,1))),Facts[Region]=\"East\")",
+   "powerbi": "12/30/1779 23:00:00",
+   "now": "LOCAL-REJECT:A time of day before December 30, 1899 is not supported in the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "MAXX(ADDCOLUMNS(Facts,\"q\",(TIME(1,0,0))-(EDATE(DATE(2020,1,1),1))),[q])",
+   "powerbi": "11/28/1779 23:00:00",
+   "now": "LOCAL-REJECT:A time of day before December 30, 1899 is not supported in the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "((TIME(1,0,0))-(DATE(2020,1,1)+1))&\"z\"",
+   "powerbi": "12/28/1779 11:00:00 PMz",
+   "now": "LOCAL-REJECT:A time of day before December 30, 1899 is not supported in the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "((TIME(1,0,0))-(EDATE(DATE(2020,1,1),1)))+1",
+   "powerbi": "11/29/1779 23:00:00",
+   "now": "LOCAL-REJECT:A time of day before December 30, 1899 is not supported in the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "(TIME(1,0,0))-(MAXX(Facts,DATE(2020,1,1)))",
+   "powerbi": "12/29/1779 23:00:00",
+   "now": "LOCAL-REJECT:A time of day before December 30, 1899 is not supported in the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "SUMX(FILTER(Facts,Facts[Quantity]>2),(TIME(1,0,0))-(DATE(2020,1,1)+1))",
+   "powerbi": "12/23/1539 21:00:00",
+   "now": "LOCAL-REJECT:A time of day before December 30, 1899 is not supported in the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "MINX(Facts,(-1)+(TIME(6,0,0)))",
+   "powerbi": "12/30/1899 18:00:00",
+   "now": "LOCAL-REJECT:A time of day before December 30, 1899 is not supported in the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "CONCATENATEX(Facts,(TIME(1,0,0))-(MAXX({DATE(2020,1,1)},[Value])),\"|\",Facts[Quantity],ASC,Facts[Sales],ASC)",
+   "powerbi": "12/29/1779 11:00:00 PM|12/29/1779 11:00:00 PM|12/29/1779 11:",
+   "now": "LOCAL-REJECT:A time of day before December 30, 1899 is not supported in the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "((TIME(1,0,0)+1)-(MAX(DATE(2020,1,1),DATE(2020,1,2))))+1",
+   "powerbi": "12/30/1779 23:00:00",
+   "now": "LOCAL-REJECT:A time of day before December 30, 1899 is not supported in the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "SUMX(ADDCOLUMNS(Facts,\"q\",(TIME(1,0,0))-(EDATE(DATE(2020,1,1),1))),[q])",
+   "powerbi": "06/17/1179 18:00:00",
+   "now": "LOCAL-REJECT:A time of day before December 30, 1899 is not supported in the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "SUMX({BLANK(),1},(TIME(1,0,0)+1)-(MAXX({DATE(2020,1,1)},[Value])))",
+   "powerbi": "12/29/1659 22:00:00",
+   "now": "LOCAL-REJECT:A time of day before December 30, 1899 is not supported in the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "(TIME(1,0,0)+1)-(DATE(2020,1,1))",
+   "powerbi": "12/30/1779 23:00:00",
+   "now": "LOCAL-REJECT:A time of day before December 30, 1899 is not supported in the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "IFERROR((TIME(1,0,0)+1)-(MAX(DATE(2020,1,1),DATE(2020,1,2))),\"e\")",
+   "powerbi": "12/29/1779 23:00:00",
+   "now": "LOCAL-REJECT:A time of day before December 30, 1899 is not supported in the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "SUMX({BLANK(),1},(TIME(1,0,0))-(DATE(2020,1,1)+1))",
+   "powerbi": "12/25/1659 22:00:00",
+   "now": "LOCAL-REJECT:A time of day before December 30, 1899 is not supported in the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "(-1)+(TIME(6,0,0))",
+   "powerbi": "12/30/1899 18:00:00",
+   "now": "LOCAL-REJECT:A time of day before December 30, 1899 is not supported in the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "((TIME(1,0,0)+1)-(MAXX({DATE(2020,1,1)},[Value])))+1",
+   "powerbi": "12/31/1779 23:00:00",
+   "now": "LOCAL-REJECT:A time of day before December 30, 1899 is not supported in the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "(TIME(6,0,0))-(MAXX({1},[Value]))",
+   "powerbi": "12/30/1899 18:00:00",
+   "now": "LOCAL-REJECT:A time of day before December 30, 1899 is not supported in the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "((TIME(6,0,0))-(\"3\"&\"\"))&\"z\"",
+   "powerbi": "12/28/1899 6:00:00 PMz",
+   "now": "LOCAL-REJECT:A time of day before December 30, 1899 is not supported in the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "SUMX(ADDCOLUMNS(Facts,\"q\",(TIME(1,0,0))-(MAXX({DATE(2020,1,1)},[Value]))),[q])",
+   "powerbi": "12/20/1179 18:00:00",
+   "now": "LOCAL-REJECT:A time of day before December 30, 1899 is not supported in the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "(TIME(1,0,0)+1)-(CALCULATE(DATE(2020,1,1)))",
+   "powerbi": "12/30/1779 23:00:00",
+   "now": "LOCAL-REJECT:A time of day before December 30, 1899 is not supported in the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "((TIME(1,0,0))-(MAXX({DATE(2020,1,1)},[Value])))+1",
+   "powerbi": "12/30/1779 23:00:00",
+   "now": "LOCAL-REJECT:A time of day before December 30, 1899 is not supported in the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "IFERROR((TIME(1,0,0)+1)-(DATE(2020,1,1)),\"e\")",
+   "powerbi": "12/30/1779 23:00:00",
+   "now": "LOCAL-REJECT:A time of day before December 30, 1899 is not supported in the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "(TIME(1,0,0)+1)-(MAX(DATE(2020,1,1),DATE(2020,1,2)))",
+   "powerbi": "12/29/1779 23:00:00",
+   "now": "LOCAL-REJECT:A time of day before December 30, 1899 is not supported in the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "SUMX({BLANK(),1},(TIME(1,0,0))-(EDATE(DATE(2020,1,1),1)))",
+   "powerbi": "10/26/1659 22:00:00",
+   "now": "LOCAL-REJECT:A time of day before December 30, 1899 is not supported in the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "CONCATENATEX(Facts,(TIME(1,0,0)+1)-(DATE(2020,1,1)),\"|\",Facts[Quantity],ASC,Facts[Sales],ASC)",
+   "powerbi": "12/30/1779 11:00:00 PM|12/30/1779 11:00:00 PM|12/30/1779 11:",
+   "now": "LOCAL-REJECT:A time of day before December 30, 1899 is not supported in the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "SUMX({BLANK(),1},(TIME(1,0,0)+1)-(MAX(DATE(2020,1,1),DATE(2020,1,2))))",
+   "powerbi": "12/27/1659 22:00:00",
+   "now": "LOCAL-REJECT:A time of day before December 30, 1899 is not supported in the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "CONCATENATEX(Facts,(TIME(1,0,0))-(MAXX(Facts,DATE(2020,1,1))),\"|\",Facts[Quantity],ASC,Facts[Sales],ASC)",
+   "powerbi": "12/29/1779 11:00:00 PM|12/29/1779 11:00:00 PM|12/29/1779 11:",
+   "now": "LOCAL-REJECT:A time of day before December 30, 1899 is not supported in the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "CALCULATE((TIME(1,0,0)+1)-(DATE(2020,1,1)),Facts[Region]=\"East\")",
+   "powerbi": "12/30/1779 23:00:00",
+   "now": "LOCAL-REJECT:A time of day before December 30, 1899 is not supported in the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "DATE(2020,1,1)-\"2020-01-02 03:04\"",
+   "powerbi": "12/29/1899 03:04:00",
+   "now": "LOCAL-REJECT:A time of day before December 30, 1899 is not supported in the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "CONCATENATEX(Facts,CONVERT(Facts[Sales],DATETIME),\"|\",Facts[Quantity],ASC,Facts[Sales],ASC)",
+   "powerbi": "12:00:00 AM|12/29/1899 12:00:00 PM|1/9/1900 12:00:00 PM|1/19",
+   "now": "LOCAL-REJECT:A time of day before December 30, 1899 is not supported in the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "CONCATENATEX(ADDCOLUMNS(Facts,\"q\",CONVERT(Facts[Sales],DATETIME)),[q],\"|\",Facts[Quantity],ASC,Facts[Sales],ASC)",
+   "powerbi": "12:00:00 AM|12/29/1899 12:00:00 PM|1/9/1900 12:00:00 PM|1/19",
+   "now": "LOCAL-REJECT:A time of day before December 30, 1899 is not supported in the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "MINX(Facts,VAR v=CONVERT(Facts[Sales],DATETIME) RETURN v)",
+   "powerbi": "12/29/1899 12:00:00",
+   "now": "LOCAL-REJECT:A time of day before December 30, 1899 is not supported in the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "ISBLANK(IF(TRUE(),EDATE(MIN(Facts[Sales]),0)))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:A time of day before December 30, 1899 is not supported in the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "ISBLANK(IF(1=1,EDATE(MIN(Facts[Sales]),-1),2))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:A time of day before December 30, 1899 is not supported in the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "ISBLANK(DAY(MIN(Facts[Sales])))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:A time of day before December 30, 1899 is not supported in the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "ISBLANK(IF(TRUE(),EDATE(MIN(Facts[Sales]),1)))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:A time of day before December 30, 1899 is not supported in the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "NOT(ISBLANK(YEAR(MIN(Facts[Sales]))))",
+   "powerbi": "True",
+   "now": "LOCAL-REJECT:A time of day before December 30, 1899 is not supported in the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "ISBLANK(EDATE(MIN(Facts[Sales]),0))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:A time of day before December 30, 1899 is not supported in the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "COALESCE(EDATE(MIN(Facts[Sales]),\"12\"),5)",
+   "powerbi": "363",
+   "now": "LOCAL-REJECT:A time of day before December 30, 1899 is not supported in the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "ISBLANK(IF(TRUE(),EDATE(MIN(Facts[Sales]),SUM(Facts[Quantity]))))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:A time of day before December 30, 1899 is not supported in the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "COALESCE(EDATE(MIN(Facts[Sales]),MAX(Facts[Sales])),5)",
+   "powerbi": "606",
+   "now": "LOCAL-REJECT:A time of day before December 30, 1899 is not supported in the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "IF(ISBLANK(YEAR(MIN(Facts[Sales]))),1,2)",
+   "powerbi": "2",
+   "now": "LOCAL-REJECT:A time of day before December 30, 1899 is not supported in the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "ISBLANK(IF(TRUE(),EDATE(MIN(Facts[Sales]),SELECTEDVALUE(Facts[Region]))))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:A time of day before December 30, 1899 is not supported in the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "ISBLANK(EDATE(MIN(Facts[Sales]),MIN(Facts[Sales])))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:A time of day before December 30, 1899 is not supported in the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "ISBLANK(IF(TRUE(),EDATE(MIN(Facts[Sales]),MIN(Facts[Sales]))))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:A time of day before December 30, 1899 is not supported in the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "COALESCE(EDATE(MIN(Facts[Sales]),IF(1=2,1)),5)",
+   "powerbi": "-2",
+   "now": "LOCAL-REJECT:A time of day before December 30, 1899 is not supported in the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "ISBLANK(IF(1=1,EDATE(MIN(Facts[Sales]),\"12\"),2))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:A time of day before December 30, 1899 is not supported in the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "ISBLANK(IF(TRUE(),EDATE(MIN(Facts[Sales]),IF(1=2,1))))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:A time of day before December 30, 1899 is not supported in the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "ISBLANK(EDATE(MIN(Facts[Sales]),SUM(Facts[Quantity])))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:A time of day before December 30, 1899 is not supported in the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "ISBLANK(EDATE(MIN(Facts[Sales]),SELECTEDVALUE(Facts[Region])))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:A time of day before December 30, 1899 is not supported in the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "IFERROR(CURRENCY(-3.33335)*DATE(2020,1,1)+DATE(2020,1,1),\"e\")",
+   "powerbi": "12/23/1619 06:07:46",
+   "now": "LOCAL-REJECT:A time of day before December 30, 1899 is not supported in the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "(MAXX(FILTER(Facts,FALSE()),DATE(2021,6,1))-2.5)&\"\"",
+   "powerbi": "12/28/1899 12:00:00 PM",
+   "now": "LOCAL-REJECT:A time of day before December 30, 1899 is not supported in the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "(MINX(FILTER(Facts,FALSE()),TODAY())-2.5)&\"\"",
+   "powerbi": "12/28/1899 12:00:00 PM",
+   "now": "LOCAL-REJECT:A time of day before December 30, 1899 is not supported in the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "(MAXX(FILTER(Facts,Facts[Quantity]>99),DATE(2021,6,1))-2.5)&\"\"",
+   "powerbi": "12/28/1899 12:00:00 PM",
+   "now": "LOCAL-REJECT:A time of day before December 30, 1899 is not supported in the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "(MAXX(FILTER(Facts,FALSE()),DATEVALUE(\"2020-01-01\"))-2.5)&\"\"",
+   "powerbi": "12/28/1899 12:00:00 PM",
+   "now": "LOCAL-REJECT:A time of day before December 30, 1899 is not supported in the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "(MAXX(FILTER(Facts,FALSE()),DATE(2020,1,1)+1)-2.5)&\"\"",
+   "powerbi": "12/28/1899 12:00:00 PM",
+   "now": "LOCAL-REJECT:A time of day before December 30, 1899 is not supported in the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "(MAXX(FILTER(Facts,FALSE()),EOMONTH(DATE(2020,1,1),0))-2.5)&\"\"",
+   "powerbi": "12/28/1899 12:00:00 PM",
+   "now": "LOCAL-REJECT:A time of day before December 30, 1899 is not supported in the local engine."
+  },
+  {
+   "part": "B",
+   "expr": "PRODUCTX(Facts,IF.EAGER(1=1,DATE(2020,1,1),Facts[Region]))",
+   "powerbi": "7.09068634572637E+27",
+   "now": "LOCAL-REJECT:PRODUCTX does not support expressions of type date."
+  },
+  {
+   "part": "B",
+   "expr": "PRODUCTX(Facts,IF(FALSE(),Facts[Region],DATE(2020,1,1)+1))",
+   "powerbi": "7.09165704100473E+27",
+   "now": "LOCAL-REJECT:PRODUCTX does not support expressions of type date."
+  },
+  {
+   "part": "B",
+   "expr": "PRODUCTX(Facts,IF(TRUE(),TIME(1,0,0),Facts[Region]))",
+   "powerbi": "5.23278088563099E-09",
+   "now": "LOCAL-REJECT:PRODUCTX does not support expressions of type date."
+  },
+  {
+   "part": "B",
+   "expr": "PRODUCTX(Facts,MAX(DATE(2020,1,1),1))",
+   "powerbi": "7.09068634572637E+27",
+   "now": "LOCAL-REJECT:PRODUCTX does not support expressions of type date."
+  },
+  {
+   "part": "B",
+   "expr": "PRODUCTX(Facts,MAX(BLANK(),DATE(2020,1,1)))",
+   "powerbi": "7.09068634572637E+27",
+   "now": "LOCAL-REJECT:PRODUCTX does not support expressions of type date."
+  },
+  {
+   "part": "B",
+   "expr": "PRODUCTX(Facts,MIN(DATE(2020,1,1),BLANK()))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:PRODUCTX does not support expressions of type date."
+  },
+  {
+   "part": "B",
+   "expr": "PRODUCTX(Facts,MIN(DATE(2020,1,1),Facts[Quantity]))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:PRODUCTX does not support expressions of type date."
+  },
+  {
+   "part": "B",
+   "expr": "PRODUCTX(Facts,(-(1))-(MAXX({DATE(2020,1,1)},[Value])))",
+   "powerbi": "7.09165704100473E+27",
+   "now": "LOCAL-REJECT:PRODUCTX does not support expressions of type date."
+  },
+  {
+   "part": "B",
+   "expr": "PRODUCTX(Facts,(SUMX({1},[Value]))-(IF(TRUE(),DATE(2020,1,1))))",
+   "powerbi": "7.08971576117319E+27",
+   "now": "LOCAL-REJECT:PRODUCTX does not support expressions of type date."
+  },
+  {
+   "part": "B",
+   "expr": "PRODUCTX(Facts,(1/0)-(MAX(DATE(2020,1,1),DATE(2020,1,2))))",
+   "powerbi": "Infinity",
+   "now": "LOCAL-REJECT:PRODUCTX does not support expressions of type date."
+  },
+  {
+   "part": "B",
+   "expr": "PRODUCTX(Facts,(IF(TRUE(),DATE(2020,1,2),1))-(MAXX(Facts,DATE(2020,1,1))))",
+   "powerbi": "1",
+   "now": "LOCAL-REJECT:PRODUCTX does not support expressions of type date."
+  },
+  {
+   "part": "B",
+   "expr": "PRODUCTX(Facts,(1*DATE(2020,1,1))-(MAX(DATE(2020,1,1),DATE(2020,1,2))))",
+   "powerbi": "1",
+   "now": "LOCAL-REJECT:PRODUCTX does not support expressions of type date."
+  },
+  {
+   "part": "B",
+   "expr": "PRODUCTX(Facts,(DISTINCTCOUNT(Facts[Region]))-(DATE(2020,1,1)+1))",
+   "powerbi": "7.08874528733518E+27",
+   "now": "LOCAL-REJECT:PRODUCTX does not support expressions of type date."
+  },
+  {
+   "part": "B",
+   "expr": "PRODUCTX(Facts,(2*3)-(DATE(2020,1,1)+1))",
+   "powerbi": "7.08583453001134E+27",
+   "now": "LOCAL-REJECT:PRODUCTX does not support expressions of type date."
+  },
+  {
+   "part": "B",
+   "expr": "PRODUCTX(Facts,(ROUND(2.5,0))-(MAXX({DATE(2020,1,1)},[Value])))",
+   "powerbi": "7.08777492420243E+27",
+   "now": "LOCAL-REJECT:PRODUCTX does not support expressions of type date."
+  },
+  {
+   "part": "B",
+   "expr": "PRODUCTX(Facts,(SELECTEDVALUE(Facts[Quantity],3))-(MAXX({DATE(2020,1,1)},[Value])))",
+   "powerbi": "7.08777492420243E+27",
+   "now": "LOCAL-REJECT:PRODUCTX does not support expressions of type date."
+  },
+  {
+   "part": "B",
+   "expr": "PRODUCTX(Facts,(COUNTBLANK(Facts[Sales]))-(COALESCE(BLANK(),DATE(2020,1,1))))",
+   "powerbi": "7.08971576117319E+27",
+   "now": "LOCAL-REJECT:PRODUCTX does not support expressions of type date."
+  },
+  {
+   "part": "B",
+   "expr": "PRODUCTX(Facts,(IF(TRUE(),1,DATE(2020,1,2)))-(CALCULATE(DATE(2020,1,1))))",
+   "powerbi": "7.08971576117319E+27",
+   "now": "LOCAL-REJECT:PRODUCTX does not support expressions of type date."
+  },
+  {
+   "part": "B",
+   "expr": "PRODUCTX(Facts,(SELECTEDVALUE(Facts[Quantity]))-(COALESCE(BLANK(),DATE(2020,1,1))))",
+   "powerbi": "7.09068634572637E+27",
+   "now": "LOCAL-REJECT:PRODUCTX does not support expressions of type date."
+  },
+  {
+   "part": "B",
+   "expr": "PRODUCTX(Facts,(IF(Facts[Quantity]>2,DATE(2020,1,2),1))-(EDATE(DATE(2020,1,1),1)))",
+   "powerbi": "2.27823936353229E+18",
+   "now": "LOCAL-REJECT:PRODUCTX does not support expressions of type date."
+  },
+  {
+   "part": "B",
+   "expr": "PRODUCTX(Facts,(HASONEVALUE(Facts[Region]))-(IF(TRUE(),DATE(2020,1,1))))",
+   "powerbi": "7.09068634572637E+27",
+   "now": "LOCAL-REJECT:PRODUCTX does not support expressions of type date."
+  },
+  {
+   "part": "B",
+   "expr": "PRODUCTX(Facts,(DIVIDE(1,0))-(EDATE(DATE(2020,1,1),1)))",
+   "powerbi": "7.12082943675651E+27",
+   "now": "LOCAL-REJECT:PRODUCTX does not support expressions of type date."
+  },
+  {
+   "part": "B",
+   "expr": "PRODUCTX(Facts,(CONVERT(1,CURRENCY))-(EDATE(DATE(2020,1,1),1)))",
+   "powerbi": "7.11985541501785E+27",
+   "now": "LOCAL-REJECT:PRODUCTX does not support expressions of type date."
+  },
+  {
+   "part": "B",
+   "expr": "PRODUCTX(Facts,(\"1/2/2020\")-(MAXX({DATE(2020,1,1)},[Value])))",
+   "powerbi": "1",
+   "now": "LOCAL-REJECT:PRODUCTX does not support expressions of type date."
+  },
+  {
+   "part": "B",
+   "expr": "PRODUCTX(Facts,(Facts[Quantity])-(MAXX(Facts,DATE(2020,1,1))))",
+   "powerbi": "7.0882600596437E+27",
+   "now": "LOCAL-REJECT:PRODUCTX does not support expressions of type date."
+  },
+  {
+   "part": "B",
+   "expr": "PRODUCTX(Facts,(MAX(Facts[Quantity]))-(IF(TRUE(),DATE(2020,1,1))))",
+   "powerbi": "7.08583453001134E+27",
+   "now": "LOCAL-REJECT:PRODUCTX does not support expressions of type date."
+  },
+  {
+   "part": "B",
+   "expr": "PRODUCTX(Facts,(CALCULATE(BLANK()))-(IF(TRUE(),DATE(2020,1,1))))",
+   "powerbi": "7.09068634572637E+27",
+   "now": "LOCAL-REJECT:PRODUCTX does not support expressions of type date."
+  },
+  {
+   "part": "B",
+   "expr": "PRODUCTX(Facts,(1=2)-(EDATE(DATE(2020,1,1),1)))",
+   "powerbi": "7.12082943675651E+27",
+   "now": "LOCAL-REJECT:PRODUCTX does not support expressions of type date."
+  },
+  {
+   "part": "B",
+   "expr": "PRODUCTX(Facts,(MAX(DATE(2020,1,1),1))-(IF(TRUE(),DATE(2020,1,1))))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:PRODUCTX does not support expressions of type date."
+  },
+  {
+   "part": "B",
+   "expr": "PRODUCTX(Facts,(ISBLANK(1))-(MAXX({DATE(2020,1,1)},[Value])))",
+   "powerbi": "7.09068634572637E+27",
+   "now": "LOCAL-REJECT:PRODUCTX does not support expressions of type date."
+  },
+  {
+   "part": "B",
+   "expr": "PRODUCTX(Facts,(CALCULATE(MAX(Facts[Quantity])))-(DATE(2020,1,1)+1))",
+   "powerbi": "7.08923047812503E+27",
+   "now": "LOCAL-REJECT:PRODUCTX does not support expressions of type date."
+  },
+  {
+   "part": "B",
+   "expr": "PRODUCTX(Facts,(Facts[Sales])-(EDATE(DATE(2020,1,1),1)))",
+   "powerbi": "7.11571640743383E+27",
+   "now": "LOCAL-REJECT:PRODUCTX does not support expressions of type date."
+  },
+  {
+   "part": "B",
+   "expr": "PRODUCTX(Facts,(CONVERT(1,STRING))-(DATE(2020,1,1)+1))",
+   "powerbi": "7.09068634572637E+27",
+   "now": "LOCAL-REJECT:PRODUCTX does not support expressions of type date."
+  },
+  {
+   "part": "B",
+   "expr": "PRODUCTX(Facts,(\"\"&\"3\")-(IF(TRUE(),DATE(2020,1,1))))",
+   "powerbi": "7.08777492420243E+27",
+   "now": "LOCAL-REJECT:PRODUCTX does not support expressions of type date."
+  },
+  {
+   "part": "B",
+   "expr": "PRODUCTX(Facts,(CONVERT(1,STRING))-(MAXX(Facts,DATE(2020,1,1))))",
+   "powerbi": "7.08971576117319E+27",
+   "now": "LOCAL-REJECT:PRODUCTX does not support expressions of type date."
+  },
+  {
+   "part": "B",
+   "expr": "PRODUCTX(Facts,(-BLANK())-(MAX(DATE(2020,1,1),DATE(2020,1,2))))",
+   "powerbi": "7.09165704100473E+27",
+   "now": "LOCAL-REJECT:PRODUCTX does not support expressions of type date."
+  },
+  {
+   "part": "B",
+   "expr": "PRODUCTX(Facts,(CONVERT(TRUE(),BOOLEAN))-(EDATE(DATE(2020,1,1),1)))",
+   "powerbi": "7.11985541501785E+27",
+   "now": "LOCAL-REJECT:PRODUCTX does not support expressions of type date."
+  },
+  {
+   "part": "B",
+   "expr": "PRODUCTX(Facts,(-(1))-(COALESCE(BLANK(),DATE(2020,1,1))))",
+   "powerbi": "7.09165704100473E+27",
+   "now": "LOCAL-REJECT:PRODUCTX does not support expressions of type date."
+  },
+  {
+   "part": "B",
+   "expr": "PRODUCTX(Facts,(UPPER(\"3\"))-(MAXX({DATE(2020,1,1)},[Value])))",
+   "powerbi": "7.08777492420243E+27",
+   "now": "LOCAL-REJECT:PRODUCTX does not support expressions of type date."
+  },
+  {
+   "part": "B",
+   "expr": "PRODUCTX(Facts,(SUM(Facts[Sales]))-(EDATE(DATE(2020,1,1),1)))",
+   "powerbi": "7.09020103960977E+27",
+   "now": "LOCAL-REJECT:PRODUCTX does not support expressions of type date."
+  },
+  {
+   "part": "B",
+   "expr": "PRODUCTX(Facts,(1/0)-(CALCULATE(DATE(2020,1,1))))",
+   "powerbi": "Infinity",
+   "now": "LOCAL-REJECT:PRODUCTX does not support expressions of type date."
+  },
+  {
+   "part": "B",
+   "expr": "PRODUCTX(Facts,(ROUND(2.5,0))-(DATE(2020,1,1)))",
+   "powerbi": "7.08777492420243E+27",
+   "now": "LOCAL-REJECT:PRODUCTX does not support expressions of type date."
+  },
+  {
+   "part": "B",
+   "expr": "PRODUCTX(Facts,(CURRENCY(2)*2)-(MAXX({DATE(2020,1,1)},[Value])))",
+   "powerbi": "7.08680467176445E+27",
+   "now": "LOCAL-REJECT:PRODUCTX does not support expressions of type date."
+  },
+  {
+   "part": "B",
+   "expr": "PRODUCTX(Facts,(CONVERT(1,INTEGER))-(IF(TRUE(),DATE(2020,1,1))))",
+   "powerbi": "7.08971576117319E+27",
+   "now": "LOCAL-REJECT:PRODUCTX does not support expressions of type date."
+  },
+  {
+   "part": "B",
+   "expr": "PRODUCTX(Facts,(IF(TRUE(),DATE(2020,1,2),1))-(DATE(2020,1,1)))",
+   "powerbi": "1",
+   "now": "LOCAL-REJECT:PRODUCTX does not support expressions of type date."
+  },
+  {
+   "part": "B",
+   "expr": "PRODUCTX(Facts,(SUMX(Facts,Facts[Quantity]))-(DATE(2020,1,1)+1))",
+   "powerbi": "7.07710823338602E+27",
+   "now": "LOCAL-REJECT:PRODUCTX does not support expressions of type date."
+  },
+  {
+   "part": "B",
+   "expr": "PRODUCTX(Facts,(SUMX(Facts,Facts[Quantity]))-(EDATE(DATE(2020,1,1),1)))",
+   "powerbi": "7.10623076408714E+27",
+   "now": "LOCAL-REJECT:PRODUCTX does not support expressions of type date."
+  },
+  {
+   "part": "B",
+   "expr": "PRODUCTX(Facts,(CURRENCY(2)*2)-(COALESCE(BLANK(),DATE(2020,1,1))))",
+   "powerbi": "7.08680467176445E+27",
+   "now": "LOCAL-REJECT:PRODUCTX does not support expressions of type date."
+  },
+  {
+   "part": "B",
+   "expr": "PRODUCTX(Facts,(IF(FALSE(),DATE(2020,1,2),1))-(EDATE(DATE(2020,1,1),1)))",
+   "powerbi": "7.11985541501785E+27",
+   "now": "LOCAL-REJECT:PRODUCTX does not support expressions of type date."
+  },
+  {
+   "part": "B",
+   "expr": "PRODUCTX(Facts,(1=1)-(COALESCE(BLANK(),DATE(2020,1,1))))",
+   "powerbi": "7.08971576117319E+27",
+   "now": "LOCAL-REJECT:PRODUCTX does not support expressions of type date."
+  },
+  {
+   "part": "B",
+   "expr": "PRODUCTX(Facts,(HASONEVALUE(Facts[Region]))-(DATE(2020,1,1)))",
+   "powerbi": "7.09068634572637E+27",
+   "now": "LOCAL-REJECT:PRODUCTX does not support expressions of type date."
+  },
+  {
+   "part": "B",
+   "expr": "PRODUCTX(Facts,(ROUND(2.5,0))-(IF(TRUE(),DATE(2020,1,1))))",
+   "powerbi": "7.08777492420243E+27",
+   "now": "LOCAL-REJECT:PRODUCTX does not support expressions of type date."
+  },
+  {
+   "part": "B",
+   "expr": "PRODUCTX(Facts,(MAXX({1,DATE(2020,1,2)},[Value]))-(MAX(DATE(2020,1,1),DATE(2020,1,2))))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:PRODUCTX does not support expressions of type date."
+  },
+  {
+   "part": "B",
+   "expr": "PRODUCTX(Facts,(CURRENCY(DATE(2020,1,1)))-(MAXX(Facts,DATE(2020,1,1))))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:PRODUCTX does not support expressions of type date."
+  },
+  {
+   "part": "B",
+   "expr": "PRODUCTX(Facts,(DIVIDE(1,2))-(IF(TRUE(),DATE(2020,1,1))))",
+   "powerbi": "7.09020103960977E+27",
+   "now": "LOCAL-REJECT:PRODUCTX does not support expressions of type date."
+  },
+  {
+   "part": "B",
+   "expr": "PRODUCTX(Facts,(RAND()*0)-(IF(TRUE(),DATE(2020,1,1))))",
+   "powerbi": "7.09068634572637E+27",
+   "now": "LOCAL-REJECT:PRODUCTX does not support expressions of type date."
+  },
+  {
+   "part": "B",
+   "expr": "PRODUCTX(Facts,(YEAR(DATE(2020,1,1)))-(DATE(2020,1,1)+1))",
+   "powerbi": "5.34325191824082E+27",
+   "now": "LOCAL-REJECT:PRODUCTX does not support expressions of type date."
+  },
+  {
+   "part": "B",
+   "expr": "PRODUCTX(Facts,(BLANK()+BLANK())-(EDATE(DATE(2020,1,1),1)))",
+   "powerbi": "7.12082943675651E+27",
+   "now": "LOCAL-REJECT:PRODUCTX does not support expressions of type date."
+  },
+  {
+   "part": "B",
+   "expr": "PRODUCTX(Facts,(VAR d=1 RETURN d)-(DATE(2020,1,1)))",
+   "powerbi": "7.08971576117319E+27",
+   "now": "LOCAL-REJECT:PRODUCTX does not support expressions of type date."
+  },
+  {
+   "part": "B",
+   "expr": "PRODUCTX(Facts,(DATE(2020,1,1)*1)-(IF(TRUE(),DATE(2020,1,1))))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:PRODUCTX does not support expressions of type date."
+  },
+  {
+   "part": "B",
+   "expr": "PRODUCTX(Facts,(SELECTEDVALUE(Facts[Quantity]))-(IF(TRUE(),DATE(2020,1,1))))",
+   "powerbi": "7.09068634572637E+27",
+   "now": "LOCAL-REJECT:PRODUCTX does not support expressions of type date."
+  },
+  {
+   "part": "B",
+   "expr": "PRODUCTX(Facts,(SQRT(4))-(MAXX(Facts,DATE(2020,1,1))))",
+   "powerbi": "7.08874528733518E+27",
+   "now": "LOCAL-REJECT:PRODUCTX does not support expressions of type date."
+  },
+  {
+   "part": "B",
+   "expr": "PRODUCTX(Facts,(COALESCE(1,DATE(2020,1,2)))-(DATE(2020,1,1)))",
+   "powerbi": "7.08971576117319E+27",
+   "now": "LOCAL-REJECT:PRODUCTX does not support expressions of type date."
+  },
+  {
+   "part": "B",
+   "expr": "PRODUCTX(Facts,(CONVERT(1,DOUBLE))-(MAX(DATE(2020,1,1),DATE(2020,1,2))))",
+   "powerbi": "7.09068634572637E+27",
+   "now": "LOCAL-REJECT:PRODUCTX does not support expressions of type date."
+  },
+  {
+   "part": "B",
+   "expr": "PRODUCTX(Facts,(YEAR(DATE(2020,1,1)))-(IF(TRUE(),DATE(2020,1,1))))",
+   "powerbi": "5.34248521024582E+27",
+   "now": "LOCAL-REJECT:PRODUCTX does not support expressions of type date."
+  },
+  {
+   "part": "B",
+   "expr": "PRODUCTX(Facts,(-BLANK())-(MAXX({DATE(2020,1,1)},[Value])))",
+   "powerbi": "7.09068634572637E+27",
+   "now": "LOCAL-REJECT:PRODUCTX does not support expressions of type date."
+  },
+  {
+   "part": "B",
+   "expr": "PRODUCTX(Facts,(BLANK()-1)-(DATE(2020,1,1)+1))",
+   "powerbi": "7.09262784701855E+27",
+   "now": "LOCAL-REJECT:PRODUCTX does not support expressions of type date."
+  },
+  {
+   "part": "B",
+   "expr": "PRODUCTX(Facts,(-1/0)-(DATE(2020,1,1)))",
+   "powerbi": "Infinity",
+   "now": "LOCAL-REJECT:PRODUCTX does not support expressions of type date."
+  },
+  {
+   "part": "B",
+   "expr": "PRODUCTX(Facts,(AVERAGE(Facts[Quantity]))-(COALESCE(BLANK(),DATE(2020,1,1))))",
+   "powerbi": "7.08826009193126E+27",
+   "now": "LOCAL-REJECT:PRODUCTX does not support expressions of type date."
+  },
+  {
+   "part": "B",
+   "expr": "PRODUCTX(Facts,(POWER(2,2))-(COALESCE(BLANK(),DATE(2020,1,1))))",
+   "powerbi": "7.08680467176445E+27",
+   "now": "LOCAL-REJECT:PRODUCTX does not support expressions of type date."
+  },
+  {
+   "part": "B",
+   "expr": "PRODUCTX(Facts,(MAX(Facts[Quantity]))-(MAXX({DATE(2020,1,1)},[Value])))",
+   "powerbi": "7.08583453001134E+27",
+   "now": "LOCAL-REJECT:PRODUCTX does not support expressions of type date."
+  },
+  {
+   "part": "B",
+   "expr": "PRODUCTX(Facts,(IFERROR(1/0,DATE(2020,1,2)))-(DATE(2020,1,1)+1))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:PRODUCTX does not support expressions of type date."
+  },
+  {
+   "part": "B",
+   "expr": "PRODUCTX(Facts,(CONVERT(1,CURRENCY))-(MAX(DATE(2020,1,1),DATE(2020,1,2))))",
+   "powerbi": "7.09068634572637E+27",
+   "now": "LOCAL-REJECT:PRODUCTX does not support expressions of type date."
+  },
+  {
+   "part": "B",
+   "expr": "PRODUCTX(Facts,(COUNT(Facts[Sales]))-(DATE(2020,1,1)))",
+   "powerbi": "7.08583453001134E+27",
+   "now": "LOCAL-REJECT:PRODUCTX does not support expressions of type date."
+  },
+  {
+   "part": "B",
+   "expr": "PRODUCTX(Facts,(CONVERT(1,INTEGER))-(MAXX(Facts,DATE(2020,1,1))))",
+   "powerbi": "7.08971576117319E+27",
+   "now": "LOCAL-REJECT:PRODUCTX does not support expressions of type date."
+  },
+  {
+   "part": "B",
+   "expr": "PRODUCTX(Facts,(1/2)-(TIME(6,0,0)))",
+   "powerbi": "0.000244140625",
+   "now": "LOCAL-REJECT:PRODUCTX does not support expressions of type date."
+  },
+  {
+   "part": "B",
+   "expr": "PRODUCTX(Facts,(VAR d=TRUE() RETURN d)-(MAXX({DATE(2020,1,1)},[Value])))",
+   "powerbi": "7.08971576117319E+27",
+   "now": "LOCAL-REJECT:PRODUCTX does not support expressions of type date."
+  },
+  {
+   "part": "B",
+   "expr": "PRODUCTX(Facts,(SUMX({1},[Value]))-(DATE(2020,1,1)+1))",
+   "powerbi": "7.09068634572637E+27",
+   "now": "LOCAL-REJECT:PRODUCTX does not support expressions of type date."
+  },
+  {
+   "part": "B",
+   "expr": "PRODUCTX(Facts,(MAX(BLANK(),DATE(2020,1,1)))-(MAXX({DATE(2020,1,1)},[Value])))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:PRODUCTX does not support expressions of type date."
+  },
+  {
+   "part": "B",
+   "expr": "PRODUCTX(Facts,(\"1/2/2020\")-(COALESCE(BLANK(),DATE(2020,1,1))))",
+   "powerbi": "1",
+   "now": "LOCAL-REJECT:PRODUCTX does not support expressions of type date."
+  },
+  {
+   "part": "B",
+   "expr": "PRODUCTX(Facts,(DIVIDE(1,0))-(TIME(6,0,0)))",
+   "powerbi": "0.000244140625",
+   "now": "LOCAL-REJECT:PRODUCTX does not support expressions of type date."
+  },
+  {
+   "part": "B",
+   "expr": "MEDIANX(Facts,IF(FALSE(),Facts[Region],DATE(2020,1,1)))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:MEDIANX does not support expressions of type date."
+  },
+  {
+   "part": "B",
+   "expr": "MEDIANX(Facts,IF.EAGER(1=1,DATE(2020,1,1)+1,Facts[Region]))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:MEDIANX does not support expressions of type date."
+  },
+  {
+   "part": "B",
+   "expr": "MEDIANX(Facts,IF(TRUE(),DATE(2020,1,1),Facts[Region]))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:MEDIANX does not support expressions of type date."
+  },
+  {
+   "part": "B",
+   "expr": "MEDIANX(Facts,MAX(DATE(2020,1,1),1))",
+   "powerbi": "43831",
+   "now": "LOCAL-REJECT:MEDIANX does not support expressions of type date."
+  },
+  {
+   "part": "B",
+   "expr": "MEDIANX(Facts,MAX(BLANK(),DATE(2020,1,1)))",
+   "powerbi": "43831",
+   "now": "LOCAL-REJECT:MEDIANX does not support expressions of type date."
+  },
+  {
+   "part": "B",
+   "expr": "MEDIANX(Facts,MIN(DATE(2020,1,1),BLANK()))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:MEDIANX does not support expressions of type date."
+  },
+  {
+   "part": "B",
+   "expr": "MEDIANX(Facts,MIN(DATE(2020,1,1),Facts[Quantity]))",
+   "powerbi": "2.5",
+   "now": "LOCAL-REJECT:MEDIANX does not support expressions of type date."
+  },
+  {
+   "part": "B",
+   "expr": "MEDIANX(Facts,(CALCULATE(BLANK()))-(IF(TRUE(),DATE(2020,1,1))))",
+   "powerbi": "-43831",
+   "now": "LOCAL-REJECT:MEDIANX does not support expressions of type date."
+  },
+  {
+   "part": "B",
+   "expr": "MEDIANX(Facts,(1/2)-(MAXX({DATE(2020,1,1)},[Value])))",
+   "powerbi": "-43830.5",
+   "now": "LOCAL-REJECT:MEDIANX does not support expressions of type date."
+  },
+  {
+   "part": "B",
+   "expr": "MEDIANX(Facts,(1=2)-(IF(TRUE(),DATE(2020,1,1))))",
+   "powerbi": "-43831",
+   "now": "LOCAL-REJECT:MEDIANX does not support expressions of type date."
+  },
+  {
+   "part": "B",
+   "expr": "MEDIANX(Facts,(MAX(Facts[Quantity]))-(MAX(DATE(2020,1,1),DATE(2020,1,2))))",
+   "powerbi": "-43827",
+   "now": "LOCAL-REJECT:MEDIANX does not support expressions of type date."
+  },
+  {
+   "part": "B",
+   "expr": "MEDIANX(Facts,(VAR d=\"3\" RETURN d)-(EDATE(DATE(2020,1,1),1)))",
+   "powerbi": "-43859",
+   "now": "LOCAL-REJECT:MEDIANX does not support expressions of type date."
+  },
+  {
+   "part": "B",
+   "expr": "MEDIANX(Facts,(SUMX(Facts,Facts[Quantity]))-(COALESCE(BLANK(),DATE(2020,1,1))))",
+   "powerbi": "-43816",
+   "now": "LOCAL-REJECT:MEDIANX does not support expressions of type date."
+  },
+  {
+   "part": "B",
+   "expr": "MEDIANX(Facts,(VAR d=\"3\" RETURN d)-(COALESCE(BLANK(),DATE(2020,1,1))))",
+   "powerbi": "-43828",
+   "now": "LOCAL-REJECT:MEDIANX does not support expressions of type date."
+  },
+  {
+   "part": "B",
+   "expr": "MEDIANX(Facts,(MIN(Facts[Sales]))-(CALCULATE(DATE(2020,1,1))))",
+   "powerbi": "-43832.5",
+   "now": "LOCAL-REJECT:MEDIANX does not support expressions of type date."
+  },
+  {
+   "part": "B",
+   "expr": "MEDIANX(Facts,(SQRT(4))-(MAXX(Facts,DATE(2020,1,1))))",
+   "powerbi": "-43829",
+   "now": "LOCAL-REJECT:MEDIANX does not support expressions of type date."
+  },
+  {
+   "part": "B",
+   "expr": "MEDIANX(Facts,(IF(TRUE(),1,DATE(2020,1,2)))-(CALCULATE(DATE(2020,1,1))))",
+   "powerbi": "-43830",
+   "now": "LOCAL-REJECT:MEDIANX does not support expressions of type date."
+  },
+  {
+   "part": "B",
+   "expr": "MEDIANX(Facts,(-1/0)-(DATE(2020,1,1)+1))",
+   "powerbi": "-Infinity",
+   "now": "LOCAL-REJECT:MEDIANX does not support expressions of type date."
+  },
+  {
+   "part": "B",
+   "expr": "MEDIANX(Facts,(DATE(2020,1,1)/1)-(TIME(6,0,0)))",
+   "powerbi": "43830.75",
+   "now": "LOCAL-REJECT:MEDIANX does not support expressions of type date."
+  },
+  {
+   "part": "B",
+   "expr": "MEDIANX(Facts,(AVERAGEX(Facts,1))-(TIME(6,0,0)))",
+   "powerbi": "0.75",
+   "now": "LOCAL-REJECT:MEDIANX does not support expressions of type date."
+  },
+  {
+   "part": "B",
+   "expr": "MEDIANX(Facts,(CONVERT(1,INTEGER))-(MAX(DATE(2020,1,1),DATE(2020,1,2))))",
+   "powerbi": "-43831",
+   "now": "LOCAL-REJECT:MEDIANX does not support expressions of type date."
+  },
+  {
+   "part": "B",
+   "expr": "MEDIANX(Facts,(DISTINCTCOUNT(Facts[Region]))-(MAXX({DATE(2020,1,1)},[Value])))",
+   "powerbi": "-43828",
+   "now": "LOCAL-REJECT:MEDIANX does not support expressions of type date."
+  },
+  {
+   "part": "B",
+   "expr": "MEDIANX(Facts,(AVERAGE(Facts[Quantity]))-(COALESCE(BLANK(),DATE(2020,1,1))))",
+   "powerbi": "-43828.5",
+   "now": "LOCAL-REJECT:MEDIANX does not support expressions of type date."
+  },
+  {
+   "part": "B",
+   "expr": "MEDIANX(Facts,(-\"3\")-(DATE(2020,1,1)+1))",
+   "powerbi": "-43835",
+   "now": "LOCAL-REJECT:MEDIANX does not support expressions of type date."
+  },
+  {
+   "part": "B",
+   "expr": "MEDIANX(Facts,(FORMAT(3,\"0\"))-(MAXX({DATE(2020,1,1)},[Value])))",
+   "powerbi": "-43828",
+   "now": "LOCAL-REJECT:MEDIANX does not support expressions of type date."
+  },
+  {
+   "part": "B",
+   "expr": "MEDIANX(Facts,(INT(\"3\"))-(DATE(2020,1,1)+1))",
+   "powerbi": "-43829",
+   "now": "LOCAL-REJECT:MEDIANX does not support expressions of type date."
+  },
+  {
+   "part": "B",
+   "expr": "MEDIANX(Facts,(YEAR(DATE(2020,1,1)))-(IF(TRUE(),DATE(2020,1,1))))",
+   "powerbi": "-41811",
+   "now": "LOCAL-REJECT:MEDIANX does not support expressions of type date."
+  },
+  {
+   "part": "B",
+   "expr": "MEDIANX(Facts,(CONVERT(1,DOUBLE))-(MAXX({DATE(2020,1,1)},[Value])))",
+   "powerbi": "-43830",
+   "now": "LOCAL-REJECT:MEDIANX does not support expressions of type date."
+  },
+  {
+   "part": "B",
+   "expr": "MEDIANX(Facts,(HASONEVALUE(Facts[Region]))-(COALESCE(BLANK(),DATE(2020,1,1))))",
+   "powerbi": "-43831",
+   "now": "LOCAL-REJECT:MEDIANX does not support expressions of type date."
+  },
+  {
+   "part": "B",
+   "expr": "MEDIANX(Facts,(IF(TRUE(),DATE(2020,1,2),1))-(DATE(2020,1,1)))",
+   "powerbi": "1",
+   "now": "LOCAL-REJECT:MEDIANX does not support expressions of type date."
+  },
+  {
+   "part": "B",
+   "expr": "MEDIANX(Facts,(-1)-(IF(TRUE(),DATE(2020,1,1))))",
+   "powerbi": "-43832",
+   "now": "LOCAL-REJECT:MEDIANX does not support expressions of type date."
+  },
+  {
+   "part": "B",
+   "expr": "MEDIANX(Facts,(SUMX(Facts,Facts[Quantity]))-(EDATE(DATE(2020,1,1),1)))",
+   "powerbi": "-43847",
+   "now": "LOCAL-REJECT:MEDIANX does not support expressions of type date."
+  },
+  {
+   "part": "B",
+   "expr": "MEDIANX(Facts,(CALCULATE(BLANK()))-(MAXX({DATE(2020,1,1)},[Value])))",
+   "powerbi": "-43831",
+   "now": "LOCAL-REJECT:MEDIANX does not support expressions of type date."
+  },
+  {
+   "part": "B",
+   "expr": "MEDIANX(Facts,(DIVIDE(1,2))-(IF(TRUE(),DATE(2020,1,1))))",
+   "powerbi": "-43830.5",
+   "now": "LOCAL-REJECT:MEDIANX does not support expressions of type date."
+  },
+  {
+   "part": "B",
+   "expr": "MEDIANX(Facts,(1=2)-(MAXX({DATE(2020,1,1)},[Value])))",
+   "powerbi": "-43831",
+   "now": "LOCAL-REJECT:MEDIANX does not support expressions of type date."
+  },
+  {
+   "part": "B",
+   "expr": "MEDIANX(Facts,(SELECTEDVALUE(Facts[Quantity],3))-(CALCULATE(DATE(2020,1,1))))",
+   "powerbi": "-43828",
+   "now": "LOCAL-REJECT:MEDIANX does not support expressions of type date."
+  },
+  {
+   "part": "B",
+   "expr": "MEDIANX(Facts,(COUNT(Facts[Sales]))-(COALESCE(BLANK(),DATE(2020,1,1))))",
+   "powerbi": "-43826",
+   "now": "LOCAL-REJECT:MEDIANX does not support expressions of type date."
+  },
+  {
+   "part": "B",
+   "expr": "MEDIANX(Facts,(2^3)-(EDATE(DATE(2020,1,1),1)))",
+   "powerbi": "-43854",
+   "now": "LOCAL-REJECT:MEDIANX does not support expressions of type date."
+  },
+  {
+   "part": "B",
+   "expr": "MEDIANX(Facts,(MAX(Facts[Quantity]))-(TIME(6,0,0)))",
+   "powerbi": "4.75",
+   "now": "LOCAL-REJECT:MEDIANX does not support expressions of type date."
+  },
+  {
+   "part": "B",
+   "expr": "MEDIANX(Facts,(IFERROR(DATE(2020,1,2),1))-(IF(TRUE(),DATE(2020,1,1))))",
+   "powerbi": "1",
+   "now": "LOCAL-REJECT:MEDIANX does not support expressions of type date."
+  },
+  {
+   "part": "B",
+   "expr": "MEDIANX(Facts,(MAXX(Facts,Facts[Sales]))-(TIME(6,0,0)))",
+   "powerbi": "19.75",
+   "now": "LOCAL-REJECT:MEDIANX does not support expressions of type date."
+  },
+  {
+   "part": "B",
+   "expr": "MEDIANX(Facts,(MOD(5,2))-(EDATE(DATE(2020,1,1),1)))",
+   "powerbi": "-43861",
+   "now": "LOCAL-REJECT:MEDIANX does not support expressions of type date."
+  },
+  {
+   "part": "B",
+   "expr": "MEDIANX(Facts,(MAXX({1},[Value]))-(TIME(6,0,0)))",
+   "powerbi": "0.75",
+   "now": "LOCAL-REJECT:MEDIANX does not support expressions of type date."
+  },
+  {
+   "part": "B",
+   "expr": "MEDIANX(Facts,(IF(TRUE(),DATE(2020,1,2),1))-(MAXX(Facts,DATE(2020,1,1))))",
+   "powerbi": "1",
+   "now": "LOCAL-REJECT:MEDIANX does not support expressions of type date."
+  },
+  {
+   "part": "B",
+   "expr": "MEDIANX(Facts,(COALESCE(1,DATE(2020,1,2)))-(COALESCE(BLANK(),DATE(2020,1,1))))",
+   "powerbi": "-43830",
+   "now": "LOCAL-REJECT:MEDIANX does not support expressions of type date."
+  },
+  {
+   "part": "B",
+   "expr": "MEDIANX(Facts,(-TRUE())-(IF(TRUE(),DATE(2020,1,1))))",
+   "powerbi": "-43832",
+   "now": "LOCAL-REJECT:MEDIANX does not support expressions of type date."
+  },
+  {
+   "part": "B",
+   "expr": "MEDIANX(Facts,(MAXX({1},[Value]))-(IF(TRUE(),DATE(2020,1,1))))",
+   "powerbi": "-43830",
+   "now": "LOCAL-REJECT:MEDIANX does not support expressions of type date."
+  },
+  {
+   "part": "B",
+   "expr": "MEDIANX(Facts,(ROUND(2.5,0))-(MAXX({DATE(2020,1,1)},[Value])))",
+   "powerbi": "-43828",
+   "now": "LOCAL-REJECT:MEDIANX does not support expressions of type date."
+  },
+  {
+   "part": "B",
+   "expr": "MEDIANX(Facts,(-1)-(DATE(2020,1,1)+1))",
+   "powerbi": "-43833",
+   "now": "LOCAL-REJECT:MEDIANX does not support expressions of type date."
+  },
+  {
+   "part": "B",
+   "expr": "MEDIANX(Facts,(DIVIDE(1,0))-(DATE(2020,1,1)+1))",
+   "powerbi": "-43832",
+   "now": "LOCAL-REJECT:MEDIANX does not support expressions of type date."
+  },
+  {
+   "part": "B",
+   "expr": "MEDIANX(Facts,(Facts[Sales])-(TIME(6,0,0)))",
+   "powerbi": "1",
+   "now": "LOCAL-REJECT:MEDIANX does not support expressions of type date."
+  },
+  {
+   "part": "B",
+   "expr": "MEDIANX(Facts,(DATE(2020,1,1)*1)-(MAXX(Facts,DATE(2020,1,1))))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:MEDIANX does not support expressions of type date."
+  },
+  {
+   "part": "B",
+   "expr": "MEDIANX(Facts,(Facts[Sales])-(CALCULATE(DATE(2020,1,1))))",
+   "powerbi": "-43829.75",
+   "now": "LOCAL-REJECT:MEDIANX does not support expressions of type date."
+  },
+  {
+   "part": "B",
+   "expr": "MEDIANX(Facts,(YEAR(DATE(2020,1,1)))-(MAXX({DATE(2020,1,1)},[Value])))",
+   "powerbi": "-41811",
+   "now": "LOCAL-REJECT:MEDIANX does not support expressions of type date."
+  },
+  {
+   "part": "B",
+   "expr": "MEDIANX(Facts,(IF(TRUE(),DATE(2020,1,2),1))-(DATE(2020,1,1)+1))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:MEDIANX does not support expressions of type date."
+  },
+  {
+   "part": "B",
+   "expr": "MEDIANX(Facts,(SELECTEDVALUE(Facts[Region],\"3\"))-(EDATE(DATE(2020,1,1),1)))",
+   "powerbi": "-43859",
+   "now": "LOCAL-REJECT:MEDIANX does not support expressions of type date."
+  },
+  {
+   "part": "B",
+   "expr": "MEDIANX(Facts,(VAR d=1 RETURN d)-(DATE(2020,1,1)))",
+   "powerbi": "-43830",
+   "now": "LOCAL-REJECT:MEDIANX does not support expressions of type date."
+  },
+  {
+   "part": "B",
+   "expr": "MEDIANX(Facts,(DIVIDE(1,0))-(TIME(6,0,0)))",
+   "powerbi": "-0.25",
+   "now": "LOCAL-REJECT:MEDIANX does not support expressions of type date."
+  },
+  {
+   "part": "B",
+   "expr": "MEDIANX(Facts,(YEAR(DATE(2020,1,1)))-(DATE(2020,1,1)+1))",
+   "powerbi": "-41812",
+   "now": "LOCAL-REJECT:MEDIANX does not support expressions of type date."
+  },
+  {
+   "part": "B",
+   "expr": "MEDIANX(Facts,(1=1)-(COALESCE(BLANK(),DATE(2020,1,1))))",
+   "powerbi": "-43830",
+   "now": "LOCAL-REJECT:MEDIANX does not support expressions of type date."
+  },
+  {
+   "part": "B",
+   "expr": "MEDIANX(Facts,(IF(FALSE(),DATE(2020,1,2),1))-(MAX(DATE(2020,1,1),DATE(2020,1,2))))",
+   "powerbi": "-43831",
+   "now": "LOCAL-REJECT:MEDIANX does not support expressions of type date."
+  },
+  {
+   "part": "B",
+   "expr": "MEDIANX(Facts,(ISBLANK(1))-(COALESCE(BLANK(),DATE(2020,1,1))))",
+   "powerbi": "-43831",
+   "now": "LOCAL-REJECT:MEDIANX does not support expressions of type date."
+  },
+  {
+   "part": "B",
+   "expr": "MEDIANX(Facts,(DATE(2020,1,1)/1)-(COALESCE(BLANK(),DATE(2020,1,1))))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:MEDIANX does not support expressions of type date."
+  },
+  {
+   "part": "B",
+   "expr": "MEDIANX(Facts,(CURRENCY(DATE(2020,1,1)))-(IF(TRUE(),DATE(2020,1,1))))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:MEDIANX does not support expressions of type date."
+  },
+  {
+   "part": "B",
+   "expr": "MEDIANX(Facts,(CONVERT(1,CURRENCY))-(MAX(DATE(2020,1,1),DATE(2020,1,2))))",
+   "powerbi": "-43831",
+   "now": "LOCAL-REJECT:MEDIANX does not support expressions of type date."
+  },
+  {
+   "part": "B",
+   "expr": "MEDIANX(Facts,(SWITCH(1,1,1,DATE(2020,1,2)))-(COALESCE(BLANK(),DATE(2020,1,1))))",
+   "powerbi": "-43830",
+   "now": "LOCAL-REJECT:MEDIANX does not support expressions of type date."
+  },
+  {
+   "part": "B",
+   "expr": "MEDIANX(Facts,(SQRT(4))-(CALCULATE(DATE(2020,1,1))))",
+   "powerbi": "-43829",
+   "now": "LOCAL-REJECT:MEDIANX does not support expressions of type date."
+  },
+  {
+   "part": "B",
+   "expr": "MEDIANX(Facts,(DISTINCTCOUNT(Facts[Region]))-(COALESCE(BLANK(),DATE(2020,1,1))))",
+   "powerbi": "-43828",
+   "now": "LOCAL-REJECT:MEDIANX does not support expressions of type date."
+  },
+  {
+   "part": "B",
+   "expr": "MEDIANX(Facts,(UPPER(\"3\"))-(MAX(DATE(2020,1,1),DATE(2020,1,2))))",
+   "powerbi": "-43829",
+   "now": "LOCAL-REJECT:MEDIANX does not support expressions of type date."
+  },
+  {
+   "part": "B",
+   "expr": "MEDIANX(Facts,(COUNTBLANK(Facts[Sales]))-(MAXX(Facts,DATE(2020,1,1))))",
+   "powerbi": "-43830",
+   "now": "LOCAL-REJECT:MEDIANX does not support expressions of type date."
+  },
+  {
+   "part": "B",
+   "expr": "MEDIANX(Facts,(SELECTEDVALUE(Facts[Quantity]))-(IF(TRUE(),DATE(2020,1,1))))",
+   "powerbi": "-43831",
+   "now": "LOCAL-REJECT:MEDIANX does not support expressions of type date."
+  },
+  {
+   "part": "B",
+   "expr": "MEDIANX(Facts,(VALUE(\"3\"))-(EDATE(DATE(2020,1,1),1)))",
+   "powerbi": "-43859",
+   "now": "LOCAL-REJECT:MEDIANX does not support expressions of type date."
+  },
+  {
+   "part": "B",
+   "expr": "MEDIANX(Facts,(Facts[Sales])-(MAXX({DATE(2020,1,1)},[Value])))",
+   "powerbi": "-43829.75",
+   "now": "LOCAL-REJECT:MEDIANX does not support expressions of type date."
+  },
+  {
+   "part": "B",
+   "expr": "MEDIANX(Facts,(ABS(-1))-(DATE(2020,1,1)+1))",
+   "powerbi": "-43831",
+   "now": "LOCAL-REJECT:MEDIANX does not support expressions of type date."
+  },
+  {
+   "part": "B",
+   "expr": "MEDIANX(Facts,(IF(TRUE(),DATE(2020,1,2),1))-(EDATE(DATE(2020,1,1),1)))",
+   "powerbi": "-30",
+   "now": "LOCAL-REJECT:MEDIANX does not support expressions of type date."
+  }
+ ]
+}
