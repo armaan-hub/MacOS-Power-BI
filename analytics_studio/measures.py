@@ -572,7 +572,7 @@ _INFO_VIEW_RELATIONSHIPS_TYPES = {
     "IsActive": "boolean", "CrossFilteringBehavior": "text", "RelyOnReferentialIntegrity": "boolean",
     "FromTable": "text", "FromColumn": "text", "FromCardinality": "text",
     "ToTable": "text", "ToColumn": "text", "ToCardinality": "text",
-    "State": "int64", "SecurityFilteringBehavior": "text",
+    "State": "text", "SecurityFilteringBehavior": "text",
 }
 
 _INFO_TABLES_HEADERS = [
@@ -659,10 +659,236 @@ _INFO_RELATIONSHIPS_TYPES = {
     "RefreshedTime": "datetime", "SecurityFilteringBehavior": "int64",
 }
 
+_INFO_UNAVAILABLE_FUNCTIONS = frozenset({
+    "INFO.CALENDARCOLUMNGROUPS", "INFO.CALENDARCOLUMNREFERENCES", "INFO.CALENDARS",
+    "INFO.EXCLUDEDARTIFACTS", "INFO.USERDEFINEDFUNCTIONS",
+})
+
+
+_INFO_EMPTY_TABLE_HEADERS: dict[str, list[str]] = {
+    "INFO.ALTERNATEOFDEFINITIONS": ["ID", "ColumnID", "BaseColumnID", "BaseTableID", "Summarization"],
+    "INFO.CALCDEPENDENCY": ["DATABASE_NAME", "OBJECT_TYPE", "TABLE", "OBJECT", "EXPRESSION", "REFERENCED_OBJECT_TYPE", "REFERENCED_TABLE", "REFERENCED_OBJECT", "REFERENCED_EXPRESSION", "QUERY"],
+    "INFO.CALCULATIONGROUPS": ["ID", "TableID", "Description", "ModifiedTime", "Precedence"],
+    "INFO.CALCULATIONITEMS": ["ID", "CalculationGroupID", "FormatStringDefinitionID", "Name", "Description", "ModifiedTime", "State", "ErrorMessage", "Expression", "Ordinal"],
+    "INFO.CHANGEDPROPERTIES": ["ID", "ObjectID", "ObjectType", "Property"],
+    "INFO.COLUMNPERMISSIONS": ["ID", "TablePermissionID", "ColumnID", "ModifiedTime", "MetadataPermission"],
+    "INFO.DATACOVERAGEDEFINITIONS": ["ID", "PartitionID", "Description", "Expression", "ModifiedTime", "State", "ErrorMessage"],
+    "INFO.DATASOURCES": ["ID", "ModelID", "Name", "Description", "Type", "ConnectionString", "ImpersonationMode", "Account", "Password", "MaxConnections", "Isolation", "Timeout", "Provider", "ModifiedTime", "ConnectionDetails", "Options", "Credential", "ContextExpression"],
+    "INFO.DELTATABLEMETADATASTORAGES": ["ID", "PartitionStorageID", "DataSourceReference", "TableName", "RootLocation", "CurrentVersion", "TableObjectID", "DatamartObjectID", "FramedSchemaName", "FallbackReason", "DeltaColumnMappingMode", "DeltaLogETag", "ArtifactObjectId", "ArtifactSecurityVersion"],
+    "INFO.DEPENDENCIES": ["DATABASE_NAME", "OBJECT_TYPE", "TABLE", "OBJECT", "EXPRESSION", "REFERENCED_OBJECT_TYPE", "REFERENCED_TABLE", "REFERENCED_OBJECT", "REFERENCED_EXPRESSION", "QUERY"],
+    "INFO.DETAILROWSDEFINITIONS": ["ID", "ObjectID", "ObjectType", "Expression", "ModifiedTime", "State", "ErrorMessage"],
+    "INFO.EXPRESSIONS": ["ID", "ModelID", "Name", "Description", "Kind", "Expression", "ModifiedTime", "QueryGroupID", "ParameterValuesColumnID", "MAttributes", "LineageTag", "SourceLineageTag", "RemoteParameterName", "ExpressionSourceID"],
+    "INFO.EXTENDEDPROPERTIES": ["ID", "ObjectID", "ObjectType", "Name", "Type", "Value", "ModifiedTime"],
+    "INFO.FORMATSTRINGDEFINITIONS": ["ID", "ObjectID", "ObjectType", "Expression", "ModifiedTime", "State", "ErrorMessage"],
+    "INFO.GENERALSEGMENTMAPSEGMENTMETADATASTORAGES": ["ID", "SegmentMapStorageID", "RecordCount", "Ordinal"],
+    "INFO.GROUPBYCOLUMNS": ["ID", "RelatedColumnDetailsID", "GroupingColumnID", "ModifiedTime"],
+    "INFO.HIERARCHIES": ["ID", "TableID", "Name", "Description", "IsHidden", "State", "HierarchyStorageID", "ModifiedTime", "StructureModifiedTime", "RefreshedTime", "DisplayFolder", "HideMembers", "LineageTag", "SourceLineageTag"],
+    "INFO.HIERARCHYSTORAGES": ["ID", "HierarchyID", "Name", "LevelDefinition", "MaterializationType", "StructureType", "SystemTableID"],
+    "INFO.KPIS": ["ID", "MeasureID", "Description", "TargetDescription", "TargetExpression", "TargetFormatString", "StatusGraphic", "StatusDescription", "StatusExpression", "TrendGraphic", "TrendDescription", "TrendExpression", "ModifiedTime"],
+    "INFO.LEVELS": ["ID", "HierarchyID", "Ordinal", "Name", "Description", "ColumnID", "ModifiedTime", "LineageTag", "SourceLineageTag"],
+    "INFO.LINGUISTICMETADATA": ["ID", "CultureID", "Content", "ModifiedTime", "ContentType"],
+    "INFO.OBJECTTRANSLATIONS": ["ID", "CultureID", "ObjectID", "ObjectType", "Property", "Value", "ModifiedTime", "Altered"],
+    "INFO.PARQUETFILESTORAGES": ["ID", "DeltaTableMetadataStorageID", "Size", "Location", "CreatedVersion", "DeletedVersion", "RowgroupCount", "Ordinal", "ETag", "DeletionVectorFileLocation", "DeletionVectorBitmapOffset", "DeletionVectorBitmapSize", "DeletionVectorFileETag"],
+    "INFO.PERSPECTIVECOLUMNS": ["ID", "PerspectiveTableID", "ColumnID", "ModifiedTime"],
+    "INFO.PERSPECTIVEHIERARCHIES": ["ID", "PerspectiveTableID", "HierarchyID", "ModifiedTime"],
+    "INFO.PERSPECTIVEMEASURES": ["ID", "PerspectiveTableID", "MeasureID", "ModifiedTime"],
+    "INFO.PERSPECTIVES": ["ID", "ModelID", "Name", "Description", "ModifiedTime"],
+    "INFO.PERSPECTIVETABLES": ["ID", "PerspectiveID", "TableID", "IncludeAll", "ModifiedTime"],
+    "INFO.QUERYGROUPS": ["ID", "ModelID", "Folder", "Description"],
+    "INFO.REFRESHPOLICIES": ["ID", "TableID", "PolicyType", "RollingWindowGranularity", "RollingWindowPeriods", "IncrementalGranularity", "IncrementalPeriods", "IncrementalPeriodsOffset", "PollingExpression", "SourceExpression", "Mode"],
+    "INFO.RELATEDCOLUMNDETAILS": ["ID", "ColumnID", "ModifiedTime"],
+    "INFO.RELATIONSHIPINDEXSTORAGES": ["ID", "RelationshipStorageID", "IndexType", "Flags", "RecordCount", "SecondaryRecordCount", "StorageFolderID", "StorageFileID", "SystemTableID", "SecondarySystemTableID"],
+    "INFO.RELATIONSHIPSTORAGES": ["ID", "RelationshipID", "Name", "DefinitionType", "Cardinality", "Flags", "RelationshipIndexStorageID"],
+    "INFO.ROLEMEMBERSHIPS": ["ID", "RoleID", "MemberName", "MemberID", "IdentityProvider", "MemberType", "ModifiedTime"],
+    "INFO.ROLES": ["ID", "ModelID", "Name", "Description", "ModelPermission", "ModifiedTime"],
+    "INFO.TABLEPERMISSIONS": ["ID", "RoleID", "TableID", "FilterExpression", "ModifiedTime", "State", "ErrorMessage", "MetadataPermission"],
+    "INFO.VARIATIONS": ["ID", "ColumnID", "Name", "Description", "RelationshipID", "DefaultHierarchyID", "DefaultColumnID", "IsDefault"],
+}
+
+# Column types measured in Power BI Desktop (comparison with 1, "x", TRUE() and a date).
+# Measurement cannot tell number from date: ...Time columns are datetime, other numbers int64.
+_INFO_EMPTY_COLUMN_TYPES: dict[str, dict[str, str]] = {
+    "INFO.ALTERNATEOFDEFINITIONS": {
+        "ID": "int64", "ColumnID": "int64", "BaseColumnID": "int64", "BaseTableID": "int64",
+        "Summarization": "int64",
+    },
+    "INFO.CALCDEPENDENCY": {
+        "DATABASE_NAME": "text", "OBJECT_TYPE": "text", "TABLE": "text", "OBJECT": "text",
+        "EXPRESSION": "text", "REFERENCED_OBJECT_TYPE": "text", "REFERENCED_TABLE": "text",
+        "REFERENCED_OBJECT": "text", "REFERENCED_EXPRESSION": "text", "QUERY": "text",
+    },
+    "INFO.CALCULATIONGROUPS": {
+        "ID": "int64", "TableID": "int64", "Description": "text", "ModifiedTime": "datetime",
+        "Precedence": "int64",
+    },
+    "INFO.CALCULATIONITEMS": {
+        "ID": "int64", "CalculationGroupID": "int64", "FormatStringDefinitionID": "int64", "Name": "text",
+        "Description": "text", "ModifiedTime": "datetime", "State": "int64", "ErrorMessage": "text",
+        "Expression": "text", "Ordinal": "int64",
+    },
+    "INFO.CHANGEDPROPERTIES": {
+        "ID": "int64", "ObjectID": "int64", "ObjectType": "int64", "Property": "text",
+    },
+    "INFO.COLUMNPERMISSIONS": {
+        "ID": "int64", "TablePermissionID": "int64", "ColumnID": "int64", "ModifiedTime": "datetime",
+        "MetadataPermission": "int64",
+    },
+    "INFO.DATACOVERAGEDEFINITIONS": {
+        "ID": "int64", "PartitionID": "int64", "Description": "text", "Expression": "text",
+        "ModifiedTime": "datetime", "State": "int64", "ErrorMessage": "text",
+    },
+    "INFO.DATASOURCES": {
+        "ID": "int64", "ModelID": "int64", "Name": "text", "Description": "text", "Type": "int64",
+        "ConnectionString": "text", "ImpersonationMode": "int64", "Account": "text", "Password": "text",
+        "MaxConnections": "int64", "Isolation": "int64", "Timeout": "int64", "Provider": "text",
+        "ModifiedTime": "datetime", "ConnectionDetails": "text", "Options": "text", "Credential": "text",
+        "ContextExpression": "text",
+    },
+    "INFO.DELTATABLEMETADATASTORAGES": {
+        "ID": "int64", "PartitionStorageID": "int64", "DataSourceReference": "text", "TableName": "text",
+        "RootLocation": "text", "CurrentVersion": "text", "TableObjectID": "text",
+        "DatamartObjectID": "text", "FramedSchemaName": "text", "FallbackReason": "int64",
+        "DeltaColumnMappingMode": "int64", "DeltaLogETag": "text", "ArtifactObjectId": "text",
+        "ArtifactSecurityVersion": "text",
+    },
+    "INFO.DEPENDENCIES": {
+        "DATABASE_NAME": "text", "OBJECT_TYPE": "text", "TABLE": "text", "OBJECT": "text",
+        "EXPRESSION": "text", "REFERENCED_OBJECT_TYPE": "text", "REFERENCED_TABLE": "text",
+        "REFERENCED_OBJECT": "text", "REFERENCED_EXPRESSION": "text", "QUERY": "text",
+    },
+    "INFO.DETAILROWSDEFINITIONS": {
+        "ID": "int64", "ObjectID": "int64", "ObjectType": "int64", "Expression": "text",
+        "ModifiedTime": "datetime", "State": "int64", "ErrorMessage": "text",
+    },
+    "INFO.EXPRESSIONS": {
+        "ID": "int64", "ModelID": "int64", "Name": "text", "Description": "text", "Kind": "int64",
+        "Expression": "text", "ModifiedTime": "datetime", "QueryGroupID": "int64",
+        "ParameterValuesColumnID": "int64", "MAttributes": "text", "LineageTag": "text",
+        "SourceLineageTag": "text", "RemoteParameterName": "text", "ExpressionSourceID": "int64",
+    },
+    "INFO.EXTENDEDPROPERTIES": {
+        "ID": "int64", "ObjectID": "int64", "ObjectType": "int64", "Name": "text", "Type": "int64",
+        "Value": "text", "ModifiedTime": "datetime",
+    },
+    "INFO.FORMATSTRINGDEFINITIONS": {
+        "ID": "int64", "ObjectID": "int64", "ObjectType": "int64", "Expression": "text",
+        "ModifiedTime": "datetime", "State": "int64", "ErrorMessage": "text",
+    },
+    "INFO.GENERALSEGMENTMAPSEGMENTMETADATASTORAGES": {
+        "ID": "int64", "SegmentMapStorageID": "int64", "RecordCount": "int64", "Ordinal": "int64",
+    },
+    "INFO.GROUPBYCOLUMNS": {
+        "ID": "int64", "RelatedColumnDetailsID": "int64", "GroupingColumnID": "int64",
+        "ModifiedTime": "datetime",
+    },
+    "INFO.HIERARCHIES": {
+        "ID": "int64", "TableID": "int64", "Name": "text", "Description": "text", "IsHidden": "boolean",
+        "State": "int64", "HierarchyStorageID": "int64", "ModifiedTime": "datetime",
+        "StructureModifiedTime": "datetime", "RefreshedTime": "datetime", "DisplayFolder": "text",
+        "HideMembers": "int64", "LineageTag": "text", "SourceLineageTag": "text",
+    },
+    "INFO.HIERARCHYSTORAGES": {
+        "ID": "int64", "HierarchyID": "int64", "Name": "text", "LevelDefinition": "text",
+        "MaterializationType": "int64", "StructureType": "int64", "SystemTableID": "int64",
+    },
+    "INFO.KPIS": {
+        "ID": "int64", "MeasureID": "int64", "Description": "text", "TargetDescription": "text",
+        "TargetExpression": "text", "TargetFormatString": "text", "StatusGraphic": "text",
+        "StatusDescription": "text", "StatusExpression": "text", "TrendGraphic": "text",
+        "TrendDescription": "text", "TrendExpression": "text", "ModifiedTime": "datetime",
+    },
+    "INFO.LEVELS": {
+        "ID": "int64", "HierarchyID": "int64", "Ordinal": "int64", "Name": "text", "Description": "text",
+        "ColumnID": "int64", "ModifiedTime": "datetime", "LineageTag": "text", "SourceLineageTag": "text",
+    },
+    "INFO.LINGUISTICMETADATA": {
+        "ID": "int64", "CultureID": "int64", "Content": "text", "ModifiedTime": "datetime",
+        "ContentType": "int64",
+    },
+    "INFO.OBJECTTRANSLATIONS": {
+        "ID": "int64", "CultureID": "int64", "ObjectID": "int64", "ObjectType": "int64", "Property": "int64",
+        "Value": "text", "ModifiedTime": "datetime", "Altered": "boolean",
+    },
+    "INFO.PARQUETFILESTORAGES": {
+        "ID": "int64", "DeltaTableMetadataStorageID": "int64", "Size": "int64", "Location": "text",
+        "CreatedVersion": "text", "DeletedVersion": "text", "RowgroupCount": "int64", "Ordinal": "int64",
+        "ETag": "text", "DeletionVectorFileLocation": "text", "DeletionVectorBitmapOffset": "int64",
+        "DeletionVectorBitmapSize": "int64", "DeletionVectorFileETag": "text",
+    },
+    "INFO.PERSPECTIVECOLUMNS": {
+        "ID": "int64", "PerspectiveTableID": "int64", "ColumnID": "int64", "ModifiedTime": "datetime",
+    },
+    "INFO.PERSPECTIVEHIERARCHIES": {
+        "ID": "int64", "PerspectiveTableID": "int64", "HierarchyID": "int64", "ModifiedTime": "datetime",
+    },
+    "INFO.PERSPECTIVEMEASURES": {
+        "ID": "int64", "PerspectiveTableID": "int64", "MeasureID": "int64", "ModifiedTime": "datetime",
+    },
+    "INFO.PERSPECTIVES": {
+        "ID": "int64", "ModelID": "int64", "Name": "text", "Description": "text", "ModifiedTime": "datetime",
+    },
+    "INFO.PERSPECTIVETABLES": {
+        "ID": "int64", "PerspectiveID": "int64", "TableID": "int64", "IncludeAll": "boolean",
+        "ModifiedTime": "datetime",
+    },
+    "INFO.QUERYGROUPS": {
+        "ID": "int64", "ModelID": "int64", "Folder": "text", "Description": "text",
+    },
+    "INFO.REFRESHPOLICIES": {
+        "ID": "int64", "TableID": "int64", "PolicyType": "int64", "RollingWindowGranularity": "int64",
+        "RollingWindowPeriods": "int64", "IncrementalGranularity": "int64", "IncrementalPeriods": "int64",
+        "IncrementalPeriodsOffset": "int64", "PollingExpression": "text", "SourceExpression": "text",
+        "Mode": "int64",
+    },
+    "INFO.RELATEDCOLUMNDETAILS": {
+        "ID": "int64", "ColumnID": "int64", "ModifiedTime": "datetime",
+    },
+    "INFO.RELATIONSHIPINDEXSTORAGES": {
+        "ID": "int64", "RelationshipStorageID": "int64", "IndexType": "int64", "Flags": "int64",
+        "RecordCount": "int64", "SecondaryRecordCount": "int64", "StorageFolderID": "int64",
+        "StorageFileID": "int64", "SystemTableID": "int64", "SecondarySystemTableID": "int64",
+    },
+    "INFO.RELATIONSHIPSTORAGES": {
+        "ID": "int64", "RelationshipID": "int64", "Name": "text", "DefinitionType": "int64",
+        "Cardinality": "int64", "Flags": "int64", "RelationshipIndexStorageID": "int64",
+    },
+    "INFO.ROLEMEMBERSHIPS": {
+        "ID": "int64", "RoleID": "int64", "MemberName": "text", "MemberID": "text",
+        "IdentityProvider": "text", "MemberType": "int64", "ModifiedTime": "datetime",
+    },
+    "INFO.ROLES": {
+        "ID": "int64", "ModelID": "int64", "Name": "text", "Description": "text", "ModelPermission": "int64",
+        "ModifiedTime": "datetime",
+    },
+    "INFO.TABLEPERMISSIONS": {
+        "ID": "int64", "RoleID": "int64", "TableID": "int64", "FilterExpression": "text",
+        "ModifiedTime": "datetime", "State": "int64", "ErrorMessage": "text", "MetadataPermission": "int64",
+    },
+    "INFO.VARIATIONS": {
+        "ID": "int64", "ColumnID": "int64", "Name": "text", "Description": "text", "RelationshipID": "int64",
+        "DefaultHierarchyID": "int64", "DefaultColumnID": "int64", "IsDefault": "boolean",
+    },
+}
+
+_INFO_EMPTY_SCHEMAS: dict[str, tuple[list[str], dict[str, str]]] = {
+    fn: (cols, dict(_INFO_EMPTY_COLUMN_TYPES[fn]))
+    for fn, cols in _INFO_EMPTY_TABLE_HEADERS.items()
+}
+
+# Functions whose rows come from Power Query objects the app can hold (parameters, functions, folders, load-off queries)
+_INFO_MODEL_EXPRESSION_FUNCTIONS = frozenset({"INFO.EXPRESSIONS", "INFO.QUERYGROUPS"})
+
+_INFO_RESTRICTION_FUNCTIONS = frozenset({
+    "INFO.TABLES", "INFO.COLUMNS", "INFO.MEASURES", "INFO.RELATIONSHIPS",
+    *_INFO_EMPTY_TABLE_HEADERS,
+})
+
 _INFO_FUNCTIONS = frozenset({
     "INFO.VIEW.TABLES", "INFO.VIEW.COLUMNS", "INFO.VIEW.MEASURES", "INFO.VIEW.RELATIONSHIPS",
-    "INFO.TABLES", "INFO.COLUMNS", "INFO.MEASURES", "INFO.RELATIONSHIPS",
+    *_INFO_RESTRICTION_FUNCTIONS,
+    *_INFO_UNAVAILABLE_FUNCTIONS,
 })
+
 
 
 def _contains_any_function_call(node: Any, functions: frozenset[str]) -> bool:
@@ -692,10 +918,8 @@ _TABLE_FUNCTION_ARITY = {
     "INFO.VIEW.COLUMNS": (0, 0),
     "INFO.VIEW.MEASURES": (0, 0),
     "INFO.VIEW.RELATIONSHIPS": (0, 0),
-    "INFO.TABLES": (0, 1),
-    "INFO.COLUMNS": (0, 1),
-    "INFO.MEASURES": (0, 1),
-    "INFO.RELATIONSHIPS": (0, 1),
+    **{fn: (0, 1) for fn in _INFO_RESTRICTION_FUNCTIONS},
+    **{fn: (0, 0) for fn in _INFO_UNAVAILABLE_FUNCTIONS},
     "COLUMNSTATISTICS": (0, 0),
 }
 # only meaningful inside SUMMARIZECOLUMNS (IGNORE, NONVISUAL) and GROUPBY (CURRENTGROUP); elsewhere they raise
@@ -4999,10 +5223,14 @@ class _Parser:
             elif function in {"ROLLUPADDISSUBTOTAL", "ROLLUPISSUBTOTAL"}:
                 if len(arguments) < 2:
                     raise MeasureError(f"Too few arguments were passed to the {function} function. The minimum argument count for the function is 2.")
+            elif function in _INFO_UNAVAILABLE_FUNCTIONS:
+                raise MeasureError(
+                    "The operation cannot be performed because it references an object or property that is unavailable in the current edition of the server or the compatibility level of the database."
+                )
             elif function in {"INFO.VIEW.TABLES", "INFO.VIEW.COLUMNS", "INFO.VIEW.MEASURES", "INFO.VIEW.RELATIONSHIPS"}:
                 if len(arguments) > 0:
                     raise MeasureError(f"Too many arguments were passed to the {function} function. The maximum argument count for the function is 0.")
-            elif function in {"INFO.TABLES", "INFO.COLUMNS", "INFO.MEASURES", "INFO.RELATIONSHIPS"}:
+            elif function in _INFO_RESTRICTION_FUNCTIONS:
                 if len(arguments) > 0:
                     if arguments[0][0] != "string":
                         raise MeasureError(f"The '{function}' function expects a constant string representing a restriction name.")
@@ -6342,6 +6570,9 @@ def _static_table_columns(node: Any, columns: dict[str, dict[str, str]], variabl
         from . import dax_linest
         return {h.casefold(): "double" for h in dax_linest.headers_for(16, True)}
     if fn in _INFO_FUNCTIONS:
+        if fn in _INFO_EMPTY_SCHEMAS:
+            hdrs, typs = _INFO_EMPTY_SCHEMAS[fn]
+            return {h.casefold(): typs.get(h, "") for h in hdrs}
         types_map = {
             "INFO.VIEW.TABLES": (_INFO_VIEW_TABLES_HEADERS, _INFO_VIEW_TABLES_TYPES),
             "INFO.VIEW.COLUMNS": (_INFO_VIEW_COLUMNS_HEADERS, _INFO_VIEW_COLUMNS_TYPES),
@@ -6352,7 +6583,7 @@ def _static_table_columns(node: Any, columns: dict[str, dict[str, str]], variabl
             "INFO.MEASURES": (_INFO_MEASURES_HEADERS, _INFO_MEASURES_TYPES),
             "INFO.RELATIONSHIPS": (_INFO_RELATIONSHIPS_HEADERS, _INFO_RELATIONSHIPS_TYPES),
         }
-        hdrs, typs = types_map[fn]
+        hdrs, typs = types_map.get(fn, ([], {}))
         return {h.casefold(): typs.get(h, "") for h in hdrs}
     if fn in {"ADDCOLUMNS", "SELECTCOLUMNS"} and args:
         base = _static_table_columns(args[0], columns, variables)
@@ -7111,6 +7342,7 @@ def evaluate_measures(
                 "column_types": dict(item.get("column_types", {})),
                 "date_column": str(item.get("date_column") or ""),
                 "model_customised": [str(setting) for setting in item.get("model_customised", ())],
+                "model_expressions": item.get("model_expressions", False) is True,
                 "filter_column_rows": filter_column_rows,
                 "filter_column_blank_allowed": filter_column_blank_allowed,
                 "filter_context_complete": filter_context_complete,
@@ -9084,7 +9316,7 @@ def evaluate_measures(
         if function in {"INDEX", "OFFSET", "WINDOW"}:
             return window_table(function, arguments)
         if function in _INFO_FUNCTIONS:
-            if function in {"INFO.VIEW.MEASURES", "INFO.MEASURES"} and definitions:
+            if function in {"INFO.VIEW.MEASURES", "INFO.MEASURES", "INFO.DEPENDENCIES", "INFO.CALCDEPENDENCY"} and definitions:
                 # Power BI lists every measure of the model, this one included; the local engine does not model their metadata
                 raise MeasureError(f"{function} is not modelled by the local engine when the model holds measures.")
             if len(contexts_by_id) != 1:
@@ -9096,6 +9328,13 @@ def evaluate_measures(
                     raise MeasureError(
                         "INFO functions are not modelled by the local engine for tables with calculated columns, "
                         "sort-by, group-by, key, summarization or date-table settings."
+                    )
+                if function in _INFO_MODEL_EXPRESSION_FUNCTIONS and tbl_ctx.get("model_expressions"):
+                    # Power BI lists query parameters, custom functions, queries with load off and query helper
+                    # queries as model expressions, and query folders as query groups
+                    raise MeasureError(
+                        f"{function} is not modelled by the local engine when the project holds query parameters, "
+                        "query functions, query groups or queries that are not loaded."
                     )
                 for h in tbl_ctx.get("headers", []):
                     ct = tbl_ctx.get("column_types", {}).get(h, "text").casefold()
@@ -9321,6 +9560,9 @@ def evaluate_measures(
             elif function == "INFO.RELATIONSHIPS":
                 headers = _INFO_RELATIONSHIPS_HEADERS
                 types = _INFO_RELATIONSHIPS_TYPES
+                rows = []
+            elif function in _INFO_EMPTY_SCHEMAS:
+                headers, types = _INFO_EMPTY_SCHEMAS[function]
                 rows = []
             else:
                 raise MeasureError(f"{function} is not supported by the local DAX engine.")
