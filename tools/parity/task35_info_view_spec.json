@@ -1,0 +1,1036 @@
+{
+ "items": [
+  {
+   "part": "A",
+   "expr": "COUNTROWS(INFO.VIEW.TABLES())",
+   "powerbi": "1",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "COUNTROWS(INFO.VIEW.COLUMNS())",
+   "powerbi": "5",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "COUNTROWS(INFO.VIEW.MEASURES())",
+   "powerbi": "BLANK",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "COUNTROWS(INFO.VIEW.RELATIONSHIPS())",
+   "powerbi": "BLANK",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "COUNTROWS(INFO.TABLES())",
+   "powerbi": "1",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "COUNTROWS(INFO.COLUMNS())",
+   "powerbi": "5",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "COUNTROWS(INFO.MEASURES())",
+   "powerbi": "BLANK",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "COUNTROWS(INFO.RELATIONSHIPS())",
+   "powerbi": "BLANK",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(INFO.VIEW.COLUMNS(),[Name]&\"\",\"|\")",
+   "powerbi": "RowNumber-2662979B-1795-4F74-8F37-6A1BA8059B61|Sales|Quantity|Region|Note",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(INFO.VIEW.COLUMNS(),[Table]&\"\",\"|\")",
+   "powerbi": "Facts|Facts|Facts|Facts|Facts",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(INFO.VIEW.COLUMNS(),[DataType]&\"\",\"|\")",
+   "powerbi": "Integer|Number|Integer|Text|Text",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(INFO.VIEW.COLUMNS(),[DataCategory]&\"\",\"|\")",
+   "powerbi": "RowNumber|Regular|Regular|Regular|Regular",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(INFO.VIEW.COLUMNS(),[Description]&\"\",\"|\")",
+   "powerbi": "||||",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(INFO.VIEW.COLUMNS(),[IsHidden]&\"\",\"|\")",
+   "powerbi": "TRUE|FALSE|FALSE|FALSE|FALSE",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(INFO.VIEW.COLUMNS(),[IsUnique]&\"\",\"|\")",
+   "powerbi": "TRUE|FALSE|FALSE|FALSE|FALSE",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(INFO.VIEW.COLUMNS(),[IsKey]&\"\",\"|\")",
+   "powerbi": "TRUE|FALSE|FALSE|FALSE|FALSE",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(INFO.VIEW.COLUMNS(),[IsNullable]&\"\",\"|\")",
+   "powerbi": "FALSE|TRUE|TRUE|TRUE|TRUE",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(INFO.VIEW.COLUMNS(),[Alignment]&\"\",\"|\")",
+   "powerbi": "Default|Default|Default|Default|Default",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(INFO.VIEW.COLUMNS(),[SummarizeBy]&\"\",\"|\")",
+   "powerbi": "Default|Default|Default|Default|Default",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(INFO.VIEW.COLUMNS(),[IsAvailableInMDX]&\"\",\"|\")",
+   "powerbi": "TRUE|TRUE|TRUE|TRUE|TRUE",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(INFO.VIEW.COLUMNS(),[SortByColumn]&\"\",\"|\")",
+   "powerbi": "||||",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(INFO.VIEW.COLUMNS(),[GroupingBehavior]&\"\",\"|\")",
+   "powerbi": "GroupOnValue|GroupOnValue|GroupOnValue|GroupOnValue|GroupOnValue",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(INFO.VIEW.COLUMNS(),[SourceProviderType]&\"\",\"|\")",
+   "powerbi": "||||",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(INFO.VIEW.COLUMNS(),[DisplayFolder]&\"\",\"|\")",
+   "powerbi": "||||",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(INFO.VIEW.COLUMNS(),[AlternateOf]&\"\",\"|\")",
+   "powerbi": "||||",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(INFO.VIEW.TABLES(),[Name]&\"\",\"|\")",
+   "powerbi": "Facts",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(INFO.VIEW.TABLES(),[DataCategory]&\"\",\"|\")",
+   "powerbi": "Regular",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(INFO.VIEW.TABLES(),[Description]&\"\",\"|\")",
+   "powerbi": "",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(INFO.VIEW.TABLES(),[IsHidden]&\"\",\"|\")",
+   "powerbi": "FALSE",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(INFO.VIEW.TABLES(),[StorageMode]&\"\",\"|\")",
+   "powerbi": "Import",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(INFO.VIEW.TABLES(),[ShowAsVariationOnly]&\"\",\"|\")",
+   "powerbi": "FALSE",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(INFO.VIEW.TABLES(),[IsPrivate]&\"\",\"|\")",
+   "powerbi": "FALSE",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(INFO.VIEW.TABLES(),[CalculationGroupPrecedence]&\"\",\"|\")",
+   "powerbi": "",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "CONCATENATEX(INFO.COLUMNS(),[ExplicitName]&\"\",\"|\")",
+   "powerbi": "RowNumber-2662979B-1795-4F74-8F37-6A1BA8059B61|Sales|Quantity|Region|Note",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "CONCATENATEX(INFO.COLUMNS(),[ExplicitDataType]&\"\",\"|\")",
+   "powerbi": "6|8|6|2|2",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "CONCATENATEX(INFO.COLUMNS(),[IsHidden]&\"\",\"|\")",
+   "powerbi": "TRUE|FALSE|FALSE|FALSE|FALSE",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "CONCATENATEX(INFO.COLUMNS(),[IsUnique]&\"\",\"|\")",
+   "powerbi": "TRUE|FALSE|FALSE|FALSE|FALSE",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "CONCATENATEX(INFO.COLUMNS(),[IsKey]&\"\",\"|\")",
+   "powerbi": "TRUE|FALSE|FALSE|FALSE|FALSE",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "CONCATENATEX(INFO.COLUMNS(),[IsNullable]&\"\",\"|\")",
+   "powerbi": "FALSE|TRUE|TRUE|TRUE|TRUE",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "CONCATENATEX(INFO.COLUMNS(),[Alignment]&\"\",\"|\")",
+   "powerbi": "1|1|1|1|1",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "CONCATENATEX(INFO.COLUMNS(),[SummarizeBy]&\"\",\"|\")",
+   "powerbi": "1|1|1|1|1",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "CONCATENATEX(INFO.COLUMNS(),[IsAvailableInMDX]&\"\",\"|\")",
+   "powerbi": "TRUE|TRUE|TRUE|TRUE|TRUE",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "CONCATENATEX(INFO.TABLES(),[Name]&\"\",\"|\")",
+   "powerbi": "Facts",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "CONCATENATEX(INFO.TABLES(),[DataCategory]&\"\",\"|\")",
+   "powerbi": "",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "CONCATENATEX(INFO.TABLES(),[IsHidden]&\"\",\"|\")",
+   "powerbi": "FALSE",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "CONCATENATEX(INFO.TABLES(),[ShowAsVariationsOnly]&\"\",\"|\")",
+   "powerbi": "FALSE",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "CONCATENATEX(INFO.TABLES(),[IsPrivate]&\"\",\"|\")",
+   "powerbi": "FALSE",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "CONCATENATEX(INFO.TABLES(),[AlternateSourcePrecedence]&\"\",\"|\")",
+   "powerbi": "0",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "CONCATENATEX(INFO.TABLES(),[ExcludeFromModelRefresh]&\"\",\"|\")",
+   "powerbi": "FALSE",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "CONCATENATEX(INFO.TABLES(),[SystemManaged]&\"\",\"|\")",
+   "powerbi": "FALSE",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "INFO.VIEW.TABLES()",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 19) The expression refers to multiple columns. Multiple columns cannot be converted to a scalar value.\"",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "COUNTROWS(INFO.VIEW.TABLES(1))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 46) Too many arguments were passed to the INFO.VIEW.TABLES function. The maximum argument count for the function is 0.\"",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "COUNTROWS(INFO.VIEW.COLUMNS(\"Facts\"))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 47) Too many arguments were passed to the INFO.VIEW.COLUMNS function. The maximum argument count for the function is 0.\"",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "COUNTROWS(INFO.TABLES(1))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 41) The 'INFO.TABLES' function expects a constant string representing a restriction name.\"",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "CALCULATE(COUNTROWS(INFO.VIEW.COLUMNS()),Facts[Region]=\"East\")",
+   "powerbi": "5",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "CALCULATE(COUNTROWS(INFO.TABLES()),Facts[Region]=\"East\")",
+   "powerbi": "1",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "COUNTROWS(FILTER(INFO.VIEW.COLUMNS(),[IsHidden]))",
+   "powerbi": "1",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "COUNTROWS(FILTER(INFO.VIEW.COLUMNS(),[DataType]=\"Text\"))",
+   "powerbi": "2",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "SUMX(INFO.VIEW.COLUMNS(),LEN([Name]))",
+   "powerbi": "69",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "MAXX(INFO.COLUMNS(),[ExplicitDataType])",
+   "powerbi": "8",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "COUNTROWS(INFO.VIEW.MEASURES())+0",
+   "powerbi": "0",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISEMPTY(INFO.VIEW.RELATIONSHIPS())",
+   "powerbi": "True",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISEMPTY(INFO.VIEW.COLUMNS())",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"An unexpected error occurred (file 'xldc.cpp', line 3940, function 'XLAggImpl_Set<11,1>::Accumulate').\"",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "COUNTROWS(SELECTCOLUMNS(INFO.VIEW.COLUMNS(),\"n\",[Name]))",
+   "powerbi": "5",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "COUNTROWS(INFO.VIEW.COLUMNS())*2",
+   "powerbi": "10",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "SUMX(Facts,COUNTROWS(INFO.VIEW.COLUMNS()))",
+   "powerbi": "30",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "COUNTROWS(ADDCOLUMNS(INFO.VIEW.TABLES(),\"x\",1))",
+   "powerbi": "1",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(INFO.VIEW.COLUMNS(),[Name],\"|\",[Name],DESC)",
+   "powerbi": "Sales|RowNumber-2662979B-1795-4F74-8F37-6A1BA8059B61|Region|Quantity|Note",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "LOOKUPVALUE(INFO.VIEW.COLUMNS()[DataType],INFO.VIEW.COLUMNS()[Name],\"Note\")",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 50) The syntax for '[DataType]' is incorrect. (EVALUATE ROW(\"v\", LOOKUPVALUE(INFO.VIEW.COLUMNS()[DataType],INFO.VIEW.COLUMNS()[Name],\"Note\"))).\"",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "MAXX(FILTER(INFO.VIEW.COLUMNS(),[Name]=\"Note\"),[DataType])",
+   "powerbi": "Text",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "MAXX(FILTER(INFO.VIEW.COLUMNS(),[Name]=\"Sales\"),[DataType])",
+   "powerbi": "Number",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "INFO.VIEW.COLUMNS()",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 19) The expression refers to multiple columns. Multiple columns cannot be converted to a scalar value.\"",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "TOCSV(FILTER(INFO.VIEW.TABLES(),FALSE()),3,\",\",TRUE)",
+   "powerbi": "[ID],[Name],[Model],[DataCategory],[Description],[IsHidden],[StorageMode],[TableStorage],[Expression],[ShowAsVariationOnly],[IsPrivate],[CalculationGroupPrecedence],[LineageTag]",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "COUNTROWS(FILTER(INFO.VIEW.TABLES(),TRUE()))",
+   "powerbi": "1",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(INFO.VIEW.TABLES(),\"x\",\"|\")",
+   "powerbi": "x",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "COUNTROWS(INFO.VIEW.TABLES())=0",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISBLANK(COUNTROWS(INFO.VIEW.TABLES()))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "COUNTROWS(INFO.VIEW.TABLES(\"a\"))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 46) Too many arguments were passed to the INFO.VIEW.TABLES function. The maximum argument count for the function is 0.\"",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "info.view.tables()<>BLANK()",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 19) The expression refers to multiple columns. Multiple columns cannot be converted to a scalar value.\"",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "COUNTROWS(CALCULATETABLE(INFO.VIEW.TABLES(),Facts[Region]=\"East\"))",
+   "powerbi": "1",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "COUNTROWS(DISTINCT(SELECTCOLUMNS(INFO.VIEW.TABLES(),\"c\",1)))",
+   "powerbi": "1",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "COUNTROWS(UNION(INFO.VIEW.TABLES(),INFO.VIEW.TABLES()))",
+   "powerbi": "2",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "TOCSV(FILTER(INFO.VIEW.COLUMNS(),FALSE()),3,\",\",TRUE)",
+   "powerbi": "[ID],[Name],[Table],[DataType],[DataCategory],[Description],[IsHidden],[IsUnique],[IsKey],[IsNullable],[Alignment],[SummarizeBy],[ColumnStorage],[Type],[SourceColumn],[Expression],[FormatString],[IsAvailableInMDX],[SortByColumn],[GroupingBehavior],[SourceProviderType],[DisplayFolder],[AlternateOf],[LineageTag]",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "COUNTROWS(FILTER(INFO.VIEW.COLUMNS(),TRUE()))",
+   "powerbi": "5",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(INFO.VIEW.COLUMNS(),\"x\",\"|\")",
+   "powerbi": "x|x|x|x|x",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "COUNTROWS(INFO.VIEW.COLUMNS())=0",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISBLANK(COUNTROWS(INFO.VIEW.COLUMNS()))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "COUNTROWS(INFO.VIEW.COLUMNS(\"a\"))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 47) Too many arguments were passed to the INFO.VIEW.COLUMNS function. The maximum argument count for the function is 0.\"",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "info.view.columns()<>BLANK()",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 19) The expression refers to multiple columns. Multiple columns cannot be converted to a scalar value.\"",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "COUNTROWS(CALCULATETABLE(INFO.VIEW.COLUMNS(),Facts[Region]=\"East\"))",
+   "powerbi": "5",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "COUNTROWS(DISTINCT(SELECTCOLUMNS(INFO.VIEW.COLUMNS(),\"c\",1)))",
+   "powerbi": "1",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "COUNTROWS(UNION(INFO.VIEW.COLUMNS(),INFO.VIEW.COLUMNS()))",
+   "powerbi": "10",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "TOCSV(FILTER(INFO.VIEW.MEASURES(),FALSE()),3,\",\",TRUE)",
+   "powerbi": "[ID],[Name],[Table],[Description],[DataType],[Expression],[FormatString],[IsHidden],[State],[KPIID],[IsSimpleMeasure],[DisplayFolder],[DetailRowsDefinition],[DataCategory],[FormatStringDefinition],[LineageTag]",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "COUNTROWS(FILTER(INFO.VIEW.MEASURES(),TRUE()))",
+   "powerbi": "BLANK",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(INFO.VIEW.MEASURES(),\"x\",\"|\")",
+   "powerbi": "BLANK",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "COUNTROWS(INFO.VIEW.MEASURES())=0",
+   "powerbi": "True",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISBLANK(COUNTROWS(INFO.VIEW.MEASURES()))",
+   "powerbi": "True",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "COUNTROWS(INFO.VIEW.MEASURES(\"a\"))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 48) Too many arguments were passed to the INFO.VIEW.MEASURES function. The maximum argument count for the function is 0.\"",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "info.view.measures()<>BLANK()",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 19) The expression refers to multiple columns. Multiple columns cannot be converted to a scalar value.\"",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "COUNTROWS(CALCULATETABLE(INFO.VIEW.MEASURES(),Facts[Region]=\"East\"))",
+   "powerbi": "BLANK",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "COUNTROWS(DISTINCT(SELECTCOLUMNS(INFO.VIEW.MEASURES(),\"c\",1)))",
+   "powerbi": "BLANK",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "COUNTROWS(UNION(INFO.VIEW.MEASURES(),INFO.VIEW.MEASURES()))",
+   "powerbi": "BLANK",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "TOCSV(FILTER(INFO.VIEW.RELATIONSHIPS(),FALSE()),3,\",\",TRUE)",
+   "powerbi": "[ID],[Name],[Relationship],[Model],[IsActive],[CrossFilteringBehavior],[RelyOnReferentialIntegrity],[FromTable],[FromColumn],[FromCardinality],[ToTable],[ToColumn],[ToCardinality],[State],[SecurityFilteringBehavior]",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "COUNTROWS(FILTER(INFO.VIEW.RELATIONSHIPS(),TRUE()))",
+   "powerbi": "BLANK",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(INFO.VIEW.RELATIONSHIPS(),\"x\",\"|\")",
+   "powerbi": "BLANK",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "COUNTROWS(INFO.VIEW.RELATIONSHIPS())=0",
+   "powerbi": "True",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISBLANK(COUNTROWS(INFO.VIEW.RELATIONSHIPS()))",
+   "powerbi": "True",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "COUNTROWS(INFO.VIEW.RELATIONSHIPS(\"a\"))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 53) Too many arguments were passed to the INFO.VIEW.RELATIONSHIPS function. The maximum argument count for the function is 0.\"",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "info.view.relationships()<>BLANK()",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 19) The expression refers to multiple columns. Multiple columns cannot be converted to a scalar value.\"",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "COUNTROWS(CALCULATETABLE(INFO.VIEW.RELATIONSHIPS(),Facts[Region]=\"East\"))",
+   "powerbi": "BLANK",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "COUNTROWS(DISTINCT(SELECTCOLUMNS(INFO.VIEW.RELATIONSHIPS(),\"c\",1)))",
+   "powerbi": "BLANK",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "COUNTROWS(UNION(INFO.VIEW.RELATIONSHIPS(),INFO.VIEW.RELATIONSHIPS()))",
+   "powerbi": "BLANK",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "TOCSV(FILTER(INFO.TABLES(),FALSE()),3,\",\",TRUE)",
+   "powerbi": "[ID],[ModelID],[Name],[DataCategory],[Description],[IsHidden],[TableStorageID],[ModifiedTime],[StructureModifiedTime],[SystemFlags],[ShowAsVariationsOnly],[IsPrivate],[DefaultDetailRowsDefinitionID],[AlternateSourcePrecedence],[RefreshPolicyID],[CalculationGroupID],[ExcludeFromModelRefresh],[LineageTag],[SourceLineageTag],[SystemManaged],[ExcludeFromAutomaticAggregations]",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "COUNTROWS(FILTER(INFO.TABLES(),TRUE()))",
+   "powerbi": "1",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "CONCATENATEX(INFO.TABLES(),\"x\",\"|\")",
+   "powerbi": "x",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "COUNTROWS(INFO.TABLES())=0",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "ISBLANK(COUNTROWS(INFO.TABLES()))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "COUNTROWS(INFO.TABLES(\"a\"))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 41) 'a' is not a valid restriction name.\"",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "info.tables()<>BLANK()",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 19) The expression refers to multiple columns. Multiple columns cannot be converted to a scalar value.\"",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "COUNTROWS(CALCULATETABLE(INFO.TABLES(),Facts[Region]=\"East\"))",
+   "powerbi": "1",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "COUNTROWS(DISTINCT(SELECTCOLUMNS(INFO.TABLES(),\"c\",1)))",
+   "powerbi": "1",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "COUNTROWS(UNION(INFO.TABLES(),INFO.TABLES()))",
+   "powerbi": "2",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "TOCSV(FILTER(INFO.COLUMNS(),FALSE()),3,\",\",TRUE)",
+   "powerbi": "[ID],[TableID],[ExplicitName],[InferredName],[ExplicitDataType],[InferredDataType],[DataCategory],[Description],[IsHidden],[State],[IsUnique],[IsKey],[IsNullable],[Alignment],[TableDetailPosition],[IsDefaultLabel],[IsDefaultImage],[SummarizeBy],[ColumnStorageID],[Type],[SourceColumn],[ColumnOriginID],[Expression],[FormatString],[IsAvailableInMDX],[SortByColumnID],[AttributeHierarchyID],[ModifiedTime],[StructureModifiedTime],[RefreshedTime],[SystemFlags],[KeepUniqueRows],[DisplayOrdinal],[ErrorMessage],[SourceProviderType],[DisplayFolder],[EncodingHint],[RelatedColumnDetailsID],[AlternateOfID],[LineageTag],[SourceLineageTag]",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "COUNTROWS(FILTER(INFO.COLUMNS(),TRUE()))",
+   "powerbi": "5",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "CONCATENATEX(INFO.COLUMNS(),\"x\",\"|\")",
+   "powerbi": "x|x|x|x|x",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "COUNTROWS(INFO.COLUMNS())=0",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "ISBLANK(COUNTROWS(INFO.COLUMNS()))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "COUNTROWS(INFO.COLUMNS(\"a\"))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 42) 'a' is not a valid restriction name.\"",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "info.columns()<>BLANK()",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 19) The expression refers to multiple columns. Multiple columns cannot be converted to a scalar value.\"",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "COUNTROWS(CALCULATETABLE(INFO.COLUMNS(),Facts[Region]=\"East\"))",
+   "powerbi": "5",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "COUNTROWS(DISTINCT(SELECTCOLUMNS(INFO.COLUMNS(),\"c\",1)))",
+   "powerbi": "1",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "COUNTROWS(UNION(INFO.COLUMNS(),INFO.COLUMNS()))",
+   "powerbi": "10",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "TOCSV(FILTER(INFO.MEASURES(),FALSE()),3,\",\",TRUE)",
+   "powerbi": "[ID],[TableID],[Name],[Description],[DataType],[Expression],[FormatString],[IsHidden],[State],[ModifiedTime],[StructureModifiedTime],[KPIID],[IsSimpleMeasure],[ErrorMessage],[DisplayFolder],[DetailRowsDefinitionID],[DataCategory],[FormatStringDefinitionID],[LineageTag],[SourceLineageTag]",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "COUNTROWS(FILTER(INFO.MEASURES(),TRUE()))",
+   "powerbi": "BLANK",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "CONCATENATEX(INFO.MEASURES(),\"x\",\"|\")",
+   "powerbi": "BLANK",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "COUNTROWS(INFO.MEASURES())=0",
+   "powerbi": "True",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "ISBLANK(COUNTROWS(INFO.MEASURES()))",
+   "powerbi": "True",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "COUNTROWS(INFO.MEASURES(\"a\"))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 43) 'a' is not a valid restriction name.\"",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "info.measures()<>BLANK()",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 19) The expression refers to multiple columns. Multiple columns cannot be converted to a scalar value.\"",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "COUNTROWS(CALCULATETABLE(INFO.MEASURES(),Facts[Region]=\"East\"))",
+   "powerbi": "BLANK",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "COUNTROWS(DISTINCT(SELECTCOLUMNS(INFO.MEASURES(),\"c\",1)))",
+   "powerbi": "BLANK",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "COUNTROWS(UNION(INFO.MEASURES(),INFO.MEASURES()))",
+   "powerbi": "BLANK",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "TOCSV(FILTER(INFO.RELATIONSHIPS(),FALSE()),3,\",\",TRUE)",
+   "powerbi": "[ID],[ModelID],[Name],[IsActive],[Type],[CrossFilteringBehavior],[JoinOnDateBehavior],[RelyOnReferentialIntegrity],[FromTableID],[FromColumnID],[FromCardinality],[ToTableID],[ToColumnID],[ToCardinality],[State],[RelationshipStorageID],[RelationshipStorage2ID],[ModifiedTime],[RefreshedTime],[SecurityFilteringBehavior]",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "COUNTROWS(FILTER(INFO.RELATIONSHIPS(),TRUE()))",
+   "powerbi": "BLANK",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "CONCATENATEX(INFO.RELATIONSHIPS(),\"x\",\"|\")",
+   "powerbi": "BLANK",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "COUNTROWS(INFO.RELATIONSHIPS())=0",
+   "powerbi": "True",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "ISBLANK(COUNTROWS(INFO.RELATIONSHIPS()))",
+   "powerbi": "True",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "COUNTROWS(INFO.RELATIONSHIPS(\"a\"))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 48) 'a' is not a valid restriction name.\"",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "info.relationships()<>BLANK()",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 19) The expression refers to multiple columns. Multiple columns cannot be converted to a scalar value.\"",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "COUNTROWS(CALCULATETABLE(INFO.RELATIONSHIPS(),Facts[Region]=\"East\"))",
+   "powerbi": "BLANK",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "COUNTROWS(DISTINCT(SELECTCOLUMNS(INFO.RELATIONSHIPS(),\"c\",1)))",
+   "powerbi": "BLANK",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "COUNTROWS(UNION(INFO.RELATIONSHIPS(),INFO.RELATIONSHIPS()))",
+   "powerbi": "BLANK",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(INFO.VIEW.COLUMNS(),[Name]&\":\"&[DataType],\"|\",[Name],ASC)",
+   "powerbi": "Note:Text|Quantity:Integer|Region:Text|RowNumber-2662979B-1795-4F74-8F37-6A1BA8059B61:Integer|Sales:Number",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(FILTER(INFO.VIEW.COLUMNS(),NOT [IsHidden]),[Name],\",\",[Name],ASC)",
+   "powerbi": "Note,Quantity,Region,Sales",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "COUNTROWS(FILTER(INFO.VIEW.COLUMNS(),[Table]=\"Facts\"))",
+   "powerbi": "5",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "COUNTROWS(FILTER(INFO.VIEW.COLUMNS(),[DataType]=\"Integer\"))",
+   "powerbi": "2",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "COUNTROWS(FILTER(INFO.COLUMNS(),[ExplicitDataType]=2))",
+   "powerbi": "2",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "COUNTROWS(GROUPBY(INFO.VIEW.COLUMNS(),[DataType]))",
+   "powerbi": "3",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(SUMMARIZE(INFO.VIEW.COLUMNS(),[DataType]),[DataType],\"|\",[DataType],ASC)",
+   "powerbi": "Integer|Number|Text",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "COUNTROWS(NATURALINNERJOIN(SELECTCOLUMNS(INFO.VIEW.TABLES(),\"Table\",[Name]),SELECTCOLUMNS(INFO.VIEW.COLUMNS(),\"Table\",[Table]&\"\",\"n\",[Name])))",
+   "powerbi": "5",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "MAXX(INFO.VIEW.TABLES(),[Name])",
+   "powerbi": "Facts",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "MAXX(INFO.TABLES(),[Name])",
+   "powerbi": "Facts",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "COUNTROWS(INFO.VIEW.COLUMNS())+COUNTROWS(INFO.VIEW.TABLES())",
+   "powerbi": "6",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "COUNTAX(INFO.VIEW.COLUMNS(),[Description])",
+   "powerbi": "BLANK",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "COUNTAX(INFO.VIEW.COLUMNS(),[Name])",
+   "powerbi": "5",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "COUNTBLANK(INFO.VIEW.COLUMNS()[Name])",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 49) The syntax for '[Name]' is incorrect. (EVALUATE ROW(\"v\", COUNTBLANK(INFO.VIEW.COLUMNS()[Name]))).\"",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "MINX(INFO.VIEW.COLUMNS(),[IsHidden])",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 44) The function MINX cannot work with values of type Boolean.\"",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "SUMX(INFO.VIEW.COLUMNS(),INT([IsNullable]))",
+   "powerbi": "4",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "MAXX(INFO.VIEW.COLUMNS(),LEN([Name]))",
+   "powerbi": "46",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "CONCATENATEX(INFO.COLUMNS(),[ExplicitName]&\"=\"&[ExplicitDataType],\"|\",[ExplicitName],ASC)",
+   "powerbi": "Note=2|Quantity=6|Region=2|RowNumber-2662979B-1795-4F74-8F37-6A1BA8059B61=6|Sales=8",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "SUMX(INFO.TABLES(),[IsHidden]+0)",
+   "powerbi": "0",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(INFO.VIEW.COLUMNS(),[SummarizeBy],\"|\")",
+   "powerbi": "Default|Default|Default|Default|Default",
+   "now": ""
+  }
+ ]
+}

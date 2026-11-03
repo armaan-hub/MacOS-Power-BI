@@ -47,6 +47,7 @@ Rules and roles are in `AGENTS.md`. Read it first. Keep this file short and curr
 | 32 | swi-order-22: SUBSTITUTEWITHINDEX index-table row order and shared column names (685 saved answers the engine refuses) | `docs/plans/2026-11-03-swi-order-22.md` | DONE (coded by Antigravity, reviewed, locked 446,481, merged 2026-11-03) | Claude |
 | 33 | xirr-oddfyield-23: new DAX functions XIRR and ODDFYIELD, PATHITEM with type argument (392 measured answers) | `docs/plans/2026-11-03-xirr-oddfyield-23.md` | DONE (coded by Antigravity, fixed by Sonnet 5.5, reviewed, locked 446,981, merged 2026-11-03) | Claude |
 | 34 | colstats-utc-24: new COLUMNSTATISTICS, UTCNOW, UTCTODAY; PATH error guards (114 measured answers) | `docs/plans/2026-11-03-colstats-utc-24.md` | IN PROGRESS (Antigravity coding in worktree `Power BI tool-task34`) | Antigravity |
+| 35 | info-view-25: new INFO.VIEW.TABLES/COLUMNS/MEASURES/RELATIONSHIPS and INFO.TABLES/COLUMNS/MEASURES/RELATIONSHIPS (172 measured answers) | `docs/plans/2026-11-03-info-view-25.md` | IN PROGRESS (Antigravity coding in worktree `Power BI tool-task35`) | Antigravity |
 
 ## Current task
 Task 33 xirr-oddfyield-23, on branch `antigravity/xirr-oddfyield-23` in the worktree `/Users/armaan/Power BI tool-task33`.
