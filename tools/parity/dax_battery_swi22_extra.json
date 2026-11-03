@@ -1,0 +1,698 @@
+{
+"powerbi_version": "2.157.879.0 (26.08)+da30fe74eb0b8a8786ab7326b69c400a0e951831",
+"frozen": "2026-11-03",
+"items": [
+{
+"expr": "COUNTROWS(SUBSTITUTEWITHINDEX(ADDCOLUMNS(VALUES(Facts[Region]),\"k\",1),\"i\",VALUES(Facts[Region]),Facts[Region],ASC))",
+"powerbi": "3"
+},
+{
+"expr": "SUMX(SUBSTITUTEWITHINDEX(ADDCOLUMNS(VALUES(Facts[Region]),\"k\",1),\"i\",VALUES(Facts[Region]),Facts[Region],ASC),[i])",
+"powerbi": "3"
+},
+{
+"expr": "CONCATENATEX(SUBSTITUTEWITHINDEX(ADDCOLUMNS(VALUES(Facts[Region]),\"k\",1),\"i\",VALUES(Facts[Region]),Facts[Region],ASC),[i],\"|\",[i],ASC)",
+"powerbi": "0|1|2"
+},
+{
+"expr": "CONCATENATEX(SUBSTITUTEWITHINDEX(ADDCOLUMNS(VALUES(Facts[Region]),\"k\",1),\"i\",VALUES(Facts[Region]),Facts[Region],DESC),[i],\"|\",[i],ASC)",
+"powerbi": "0|1|2"
+},
+{
+"expr": "COUNTROWS(SUBSTITUTEWITHINDEX(ADDCOLUMNS(VALUES(Facts[Region]),\"k\",1),\"i\",ADDCOLUMNS(VALUES(Facts[Region]),\"k\",3),Facts[Region],ASC))",
+"powerbi": "BLANK"
+},
+{
+"expr": "SUMX(SUBSTITUTEWITHINDEX(ADDCOLUMNS(VALUES(Facts[Region]),\"k\",1),\"i\",ADDCOLUMNS(VALUES(Facts[Region]),\"k\",3),Facts[Region],ASC),[i])",
+"powerbi": "BLANK"
+},
+{
+"expr": "CONCATENATEX(SUBSTITUTEWITHINDEX(ADDCOLUMNS(VALUES(Facts[Region]),\"k\",1),\"i\",ADDCOLUMNS(VALUES(Facts[Region]),\"k\",3),Facts[Region],ASC),[i],\"|\",[i],ASC)",
+"powerbi": "BLANK"
+},
+{
+"expr": "COUNTROWS(SUBSTITUTEWITHINDEX(ADDCOLUMNS(VALUES(Facts[Region]),\"k\",1),\"i\",ADDCOLUMNS(VALUES(Facts[Region]),\"k\",3),Facts[Region],DESC))",
+"powerbi": "BLANK"
+},
+{
+"expr": "SUMX(SUBSTITUTEWITHINDEX(ADDCOLUMNS(VALUES(Facts[Region]),\"k\",1),\"i\",ADDCOLUMNS(VALUES(Facts[Region]),\"k\",3),Facts[Region],DESC),[i])",
+"powerbi": "BLANK"
+},
+{
+"expr": "CONCATENATEX(SUBSTITUTEWITHINDEX(ADDCOLUMNS(VALUES(Facts[Region]),\"k\",1),\"i\",ADDCOLUMNS(VALUES(Facts[Region]),\"k\",3),Facts[Region],DESC),[i],\"|\",[i],ASC)",
+"powerbi": "BLANK"
+},
+{
+"expr": "COUNTROWS(SUBSTITUTEWITHINDEX(ADDCOLUMNS(VALUES(Facts[Region]),\"k\",1),\"i\",ADDCOLUMNS(VALUES(Facts[Region]),\"K\",3),Facts[Region],ASC))",
+"powerbi": "BLANK"
+},
+{
+"expr": "SUMX(SUBSTITUTEWITHINDEX(ADDCOLUMNS(VALUES(Facts[Region]),\"k\",1),\"i\",ADDCOLUMNS(VALUES(Facts[Region]),\"K\",3),Facts[Region],ASC),[i])",
+"powerbi": "BLANK"
+},
+{
+"expr": "CONCATENATEX(SUBSTITUTEWITHINDEX(ADDCOLUMNS(VALUES(Facts[Region]),\"k\",1),\"i\",ADDCOLUMNS(VALUES(Facts[Region]),\"K\",3),Facts[Region],ASC),[i],\"|\",[i],ASC)",
+"powerbi": "BLANK"
+},
+{
+"expr": "COUNTROWS(SUBSTITUTEWITHINDEX(ADDCOLUMNS(VALUES(Facts[Region]),\"k\",1),\"i\",ADDCOLUMNS(VALUES(Facts[Region]),\"K\",3),Facts[Region],DESC))",
+"powerbi": "BLANK"
+},
+{
+"expr": "SUMX(SUBSTITUTEWITHINDEX(ADDCOLUMNS(VALUES(Facts[Region]),\"k\",1),\"i\",ADDCOLUMNS(VALUES(Facts[Region]),\"K\",3),Facts[Region],DESC),[i])",
+"powerbi": "BLANK"
+},
+{
+"expr": "CONCATENATEX(SUBSTITUTEWITHINDEX(ADDCOLUMNS(VALUES(Facts[Region]),\"k\",1),\"i\",ADDCOLUMNS(VALUES(Facts[Region]),\"K\",3),Facts[Region],DESC),[i],\"|\",[i],ASC)",
+"powerbi": "BLANK"
+},
+{
+"expr": "COUNTROWS(SUBSTITUTEWITHINDEX(ADDCOLUMNS(VALUES(Facts[Region]),\"k\",1),\"i\",ADDCOLUMNS(VALUES(Facts[Region]),\"s\",0),Facts[Region],ASC))",
+"powerbi": "3"
+},
+{
+"expr": "SUMX(SUBSTITUTEWITHINDEX(ADDCOLUMNS(VALUES(Facts[Region]),\"k\",1),\"i\",ADDCOLUMNS(VALUES(Facts[Region]),\"s\",0),Facts[Region],ASC),[i])",
+"powerbi": "3"
+},
+{
+"expr": "CONCATENATEX(SUBSTITUTEWITHINDEX(ADDCOLUMNS(VALUES(Facts[Region]),\"k\",1),\"i\",ADDCOLUMNS(VALUES(Facts[Region]),\"s\",0),Facts[Region],ASC),[i],\"|\",[i],ASC)",
+"powerbi": "0|1|2"
+},
+{
+"expr": "COUNTROWS(SUBSTITUTEWITHINDEX(ADDCOLUMNS(VALUES(Facts[Region]),\"k\",1),\"i\",ADDCOLUMNS(VALUES(Facts[Region]),\"s\",0),Facts[Region],DESC))",
+"powerbi": "3"
+},
+{
+"expr": "SUMX(SUBSTITUTEWITHINDEX(ADDCOLUMNS(VALUES(Facts[Region]),\"k\",1),\"i\",ADDCOLUMNS(VALUES(Facts[Region]),\"s\",0),Facts[Region],DESC),[i])",
+"powerbi": "3"
+},
+{
+"expr": "CONCATENATEX(SUBSTITUTEWITHINDEX(ADDCOLUMNS(VALUES(Facts[Region]),\"k\",1),\"i\",ADDCOLUMNS(VALUES(Facts[Region]),\"s\",0),Facts[Region],DESC),[i],\"|\",[i],ASC)",
+"powerbi": "0|1|2"
+},
+{
+"expr": "COUNTROWS(SUBSTITUTEWITHINDEX(ADDCOLUMNS(VALUES(Facts[Region]),\"k\",1),\"i\",SELECTCOLUMNS(VALUES(Facts[Region]),\"REGION\",Facts[Region]),Facts[Region],ASC))",
+"powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 153) A single value for column 'Region' in table 'Facts' cannot be determined. This can happen when a measure or function formula refers to a column that contains many values without specifying an aggregation such as min, max, count, or sum to get a single result.\""
+},
+{
+"expr": "SUMX(SUBSTITUTEWITHINDEX(ADDCOLUMNS(VALUES(Facts[Region]),\"k\",1),\"i\",SELECTCOLUMNS(VALUES(Facts[Region]),\"REGION\",Facts[Region]),Facts[Region],ASC),[i])",
+"powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 148) A single value for column 'Region' in table 'Facts' cannot be determined. This can happen when a measure or function formula refers to a column that contains many values without specifying an aggregation such as min, max, count, or sum to get a single result.\""
+},
+{
+"expr": "CONCATENATEX(SUBSTITUTEWITHINDEX(ADDCOLUMNS(VALUES(Facts[Region]),\"k\",1),\"i\",SELECTCOLUMNS(VALUES(Facts[Region]),\"REGION\",Facts[Region]),Facts[Region],ASC),[i],\"|\",[i],ASC)",
+"powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 156) A single value for column 'Region' in table 'Facts' cannot be determined. This can happen when a measure or function formula refers to a column that contains many values without specifying an aggregation such as min, max, count, or sum to get a single result.\""
+},
+{
+"expr": "COUNTROWS(SUBSTITUTEWITHINDEX(ADDCOLUMNS(VALUES(Facts[Region]),\"k\",1),\"i\",SELECTCOLUMNS(VALUES(Facts[Region]),\"REGION\",Facts[Region]),Facts[Region],DESC))",
+"powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 153) A single value for column 'Region' in table 'Facts' cannot be determined. This can happen when a measure or function formula refers to a column that contains many values without specifying an aggregation such as min, max, count, or sum to get a single result.\""
+},
+{
+"expr": "SUMX(SUBSTITUTEWITHINDEX(ADDCOLUMNS(VALUES(Facts[Region]),\"k\",1),\"i\",SELECTCOLUMNS(VALUES(Facts[Region]),\"REGION\",Facts[Region]),Facts[Region],DESC),[i])",
+"powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 148) A single value for column 'Region' in table 'Facts' cannot be determined. This can happen when a measure or function formula refers to a column that contains many values without specifying an aggregation such as min, max, count, or sum to get a single result.\""
+},
+{
+"expr": "CONCATENATEX(SUBSTITUTEWITHINDEX(ADDCOLUMNS(VALUES(Facts[Region]),\"k\",1),\"i\",SELECTCOLUMNS(VALUES(Facts[Region]),\"REGION\",Facts[Region]),Facts[Region],DESC),[i],\"|\",[i],ASC)",
+"powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 156) A single value for column 'Region' in table 'Facts' cannot be determined. This can happen when a measure or function formula refers to a column that contains many values without specifying an aggregation such as min, max, count, or sum to get a single result.\""
+},
+{
+"expr": "COUNTROWS(SUBSTITUTEWITHINDEX(ADDCOLUMNS(VALUES(Facts[Region]),\"k\",1),\"i\",DISTINCT(SELECTCOLUMNS(Facts,\"Region\",Facts[Region])),Facts[Region],ASC))",
+"powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 147) A single value for column 'Region' in table 'Facts' cannot be determined. This can happen when a measure or function formula refers to a column that contains many values without specifying an aggregation such as min, max, count, or sum to get a single result.\""
+},
+{
+"expr": "SUMX(SUBSTITUTEWITHINDEX(ADDCOLUMNS(VALUES(Facts[Region]),\"k\",1),\"i\",DISTINCT(SELECTCOLUMNS(Facts,\"Region\",Facts[Region])),Facts[Region],ASC),[i])",
+"powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 142) A single value for column 'Region' in table 'Facts' cannot be determined. This can happen when a measure or function formula refers to a column that contains many values without specifying an aggregation such as min, max, count, or sum to get a single result.\""
+},
+{
+"expr": "CONCATENATEX(SUBSTITUTEWITHINDEX(ADDCOLUMNS(VALUES(Facts[Region]),\"k\",1),\"i\",DISTINCT(SELECTCOLUMNS(Facts,\"Region\",Facts[Region])),Facts[Region],ASC),[i],\"|\",[i],ASC)",
+"powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 150) A single value for column 'Region' in table 'Facts' cannot be determined. This can happen when a measure or function formula refers to a column that contains many values without specifying an aggregation such as min, max, count, or sum to get a single result.\""
+},
+{
+"expr": "COUNTROWS(SUBSTITUTEWITHINDEX(ADDCOLUMNS(VALUES(Facts[Region]),\"k\",1),\"i\",DISTINCT(SELECTCOLUMNS(Facts,\"Region\",Facts[Region])),Facts[Region],DESC))",
+"powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 147) A single value for column 'Region' in table 'Facts' cannot be determined. This can happen when a measure or function formula refers to a column that contains many values without specifying an aggregation such as min, max, count, or sum to get a single result.\""
+},
+{
+"expr": "SUMX(SUBSTITUTEWITHINDEX(ADDCOLUMNS(VALUES(Facts[Region]),\"k\",1),\"i\",DISTINCT(SELECTCOLUMNS(Facts,\"Region\",Facts[Region])),Facts[Region],DESC),[i])",
+"powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 142) A single value for column 'Region' in table 'Facts' cannot be determined. This can happen when a measure or function formula refers to a column that contains many values without specifying an aggregation such as min, max, count, or sum to get a single result.\""
+},
+{
+"expr": "CONCATENATEX(SUBSTITUTEWITHINDEX(ADDCOLUMNS(VALUES(Facts[Region]),\"k\",1),\"i\",DISTINCT(SELECTCOLUMNS(Facts,\"Region\",Facts[Region])),Facts[Region],DESC),[i],\"|\",[i],ASC)",
+"powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 150) A single value for column 'Region' in table 'Facts' cannot be determined. This can happen when a measure or function formula refers to a column that contains many values without specifying an aggregation such as min, max, count, or sum to get a single result.\""
+},
+{
+"expr": "COUNTROWS(SUBSTITUTEWITHINDEX(ADDCOLUMNS(VALUES(Facts[Region]),\"K\",2),\"i\",VALUES(Facts[Region]),Facts[Region],ASC))",
+"powerbi": "3"
+},
+{
+"expr": "SUMX(SUBSTITUTEWITHINDEX(ADDCOLUMNS(VALUES(Facts[Region]),\"K\",2),\"i\",VALUES(Facts[Region]),Facts[Region],ASC),[i])",
+"powerbi": "3"
+},
+{
+"expr": "CONCATENATEX(SUBSTITUTEWITHINDEX(ADDCOLUMNS(VALUES(Facts[Region]),\"K\",2),\"i\",VALUES(Facts[Region]),Facts[Region],ASC),[i],\"|\",[i],ASC)",
+"powerbi": "0|1|2"
+},
+{
+"expr": "COUNTROWS(SUBSTITUTEWITHINDEX(ADDCOLUMNS(VALUES(Facts[Region]),\"K\",2),\"i\",VALUES(Facts[Region]),Facts[Region],DESC))",
+"powerbi": "3"
+},
+{
+"expr": "SUMX(SUBSTITUTEWITHINDEX(ADDCOLUMNS(VALUES(Facts[Region]),\"K\",2),\"i\",VALUES(Facts[Region]),Facts[Region],DESC),[i])",
+"powerbi": "3"
+},
+{
+"expr": "CONCATENATEX(SUBSTITUTEWITHINDEX(ADDCOLUMNS(VALUES(Facts[Region]),\"K\",2),\"i\",VALUES(Facts[Region]),Facts[Region],DESC),[i],\"|\",[i],ASC)",
+"powerbi": "0|1|2"
+},
+{
+"expr": "COUNTROWS(SUBSTITUTEWITHINDEX(ADDCOLUMNS(VALUES(Facts[Region]),\"K\",2),\"i\",ADDCOLUMNS(VALUES(Facts[Region]),\"k\",3),Facts[Region],ASC))",
+"powerbi": "BLANK"
+},
+{
+"expr": "SUMX(SUBSTITUTEWITHINDEX(ADDCOLUMNS(VALUES(Facts[Region]),\"K\",2),\"i\",ADDCOLUMNS(VALUES(Facts[Region]),\"k\",3),Facts[Region],ASC),[i])",
+"powerbi": "BLANK"
+},
+{
+"expr": "CONCATENATEX(SUBSTITUTEWITHINDEX(ADDCOLUMNS(VALUES(Facts[Region]),\"K\",2),\"i\",ADDCOLUMNS(VALUES(Facts[Region]),\"k\",3),Facts[Region],ASC),[i],\"|\",[i],ASC)",
+"powerbi": "BLANK"
+},
+{
+"expr": "COUNTROWS(SUBSTITUTEWITHINDEX(ADDCOLUMNS(VALUES(Facts[Region]),\"K\",2),\"i\",ADDCOLUMNS(VALUES(Facts[Region]),\"k\",3),Facts[Region],DESC))",
+"powerbi": "BLANK"
+},
+{
+"expr": "SUMX(SUBSTITUTEWITHINDEX(ADDCOLUMNS(VALUES(Facts[Region]),\"K\",2),\"i\",ADDCOLUMNS(VALUES(Facts[Region]),\"k\",3),Facts[Region],DESC),[i])",
+"powerbi": "BLANK"
+},
+{
+"expr": "CONCATENATEX(SUBSTITUTEWITHINDEX(ADDCOLUMNS(VALUES(Facts[Region]),\"K\",2),\"i\",ADDCOLUMNS(VALUES(Facts[Region]),\"k\",3),Facts[Region],DESC),[i],\"|\",[i],ASC)",
+"powerbi": "BLANK"
+},
+{
+"expr": "COUNTROWS(SUBSTITUTEWITHINDEX(ADDCOLUMNS(VALUES(Facts[Region]),\"K\",2),\"i\",ADDCOLUMNS(VALUES(Facts[Region]),\"K\",3),Facts[Region],ASC))",
+"powerbi": "BLANK"
+},
+{
+"expr": "SUMX(SUBSTITUTEWITHINDEX(ADDCOLUMNS(VALUES(Facts[Region]),\"K\",2),\"i\",ADDCOLUMNS(VALUES(Facts[Region]),\"K\",3),Facts[Region],ASC),[i])",
+"powerbi": "BLANK"
+},
+{
+"expr": "CONCATENATEX(SUBSTITUTEWITHINDEX(ADDCOLUMNS(VALUES(Facts[Region]),\"K\",2),\"i\",ADDCOLUMNS(VALUES(Facts[Region]),\"K\",3),Facts[Region],ASC),[i],\"|\",[i],ASC)",
+"powerbi": "BLANK"
+},
+{
+"expr": "COUNTROWS(SUBSTITUTEWITHINDEX(ADDCOLUMNS(VALUES(Facts[Region]),\"K\",2),\"i\",ADDCOLUMNS(VALUES(Facts[Region]),\"K\",3),Facts[Region],DESC))",
+"powerbi": "BLANK"
+},
+{
+"expr": "SUMX(SUBSTITUTEWITHINDEX(ADDCOLUMNS(VALUES(Facts[Region]),\"K\",2),\"i\",ADDCOLUMNS(VALUES(Facts[Region]),\"K\",3),Facts[Region],DESC),[i])",
+"powerbi": "BLANK"
+},
+{
+"expr": "CONCATENATEX(SUBSTITUTEWITHINDEX(ADDCOLUMNS(VALUES(Facts[Region]),\"K\",2),\"i\",ADDCOLUMNS(VALUES(Facts[Region]),\"K\",3),Facts[Region],DESC),[i],\"|\",[i],ASC)",
+"powerbi": "BLANK"
+},
+{
+"expr": "COUNTROWS(SUBSTITUTEWITHINDEX(ADDCOLUMNS(VALUES(Facts[Region]),\"K\",2),\"i\",ADDCOLUMNS(VALUES(Facts[Region]),\"s\",0),Facts[Region],ASC))",
+"powerbi": "3"
+},
+{
+"expr": "SUMX(SUBSTITUTEWITHINDEX(ADDCOLUMNS(VALUES(Facts[Region]),\"K\",2),\"i\",ADDCOLUMNS(VALUES(Facts[Region]),\"s\",0),Facts[Region],ASC),[i])",
+"powerbi": "3"
+},
+{
+"expr": "CONCATENATEX(SUBSTITUTEWITHINDEX(ADDCOLUMNS(VALUES(Facts[Region]),\"K\",2),\"i\",ADDCOLUMNS(VALUES(Facts[Region]),\"s\",0),Facts[Region],ASC),[i],\"|\",[i],ASC)",
+"powerbi": "0|1|2"
+},
+{
+"expr": "COUNTROWS(SUBSTITUTEWITHINDEX(ADDCOLUMNS(VALUES(Facts[Region]),\"K\",2),\"i\",ADDCOLUMNS(VALUES(Facts[Region]),\"s\",0),Facts[Region],DESC))",
+"powerbi": "3"
+},
+{
+"expr": "SUMX(SUBSTITUTEWITHINDEX(ADDCOLUMNS(VALUES(Facts[Region]),\"K\",2),\"i\",ADDCOLUMNS(VALUES(Facts[Region]),\"s\",0),Facts[Region],DESC),[i])",
+"powerbi": "3"
+},
+{
+"expr": "CONCATENATEX(SUBSTITUTEWITHINDEX(ADDCOLUMNS(VALUES(Facts[Region]),\"K\",2),\"i\",ADDCOLUMNS(VALUES(Facts[Region]),\"s\",0),Facts[Region],DESC),[i],\"|\",[i],ASC)",
+"powerbi": "0|1|2"
+},
+{
+"expr": "COUNTROWS(SUBSTITUTEWITHINDEX(ADDCOLUMNS(VALUES(Facts[Region]),\"K\",2),\"i\",SELECTCOLUMNS(VALUES(Facts[Region]),\"REGION\",Facts[Region]),Facts[Region],ASC))",
+"powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 153) A single value for column 'Region' in table 'Facts' cannot be determined. This can happen when a measure or function formula refers to a column that contains many values without specifying an aggregation such as min, max, count, or sum to get a single result.\""
+},
+{
+"expr": "SUMX(SUBSTITUTEWITHINDEX(ADDCOLUMNS(VALUES(Facts[Region]),\"K\",2),\"i\",SELECTCOLUMNS(VALUES(Facts[Region]),\"REGION\",Facts[Region]),Facts[Region],ASC),[i])",
+"powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 148) A single value for column 'Region' in table 'Facts' cannot be determined. This can happen when a measure or function formula refers to a column that contains many values without specifying an aggregation such as min, max, count, or sum to get a single result.\""
+},
+{
+"expr": "CONCATENATEX(SUBSTITUTEWITHINDEX(ADDCOLUMNS(VALUES(Facts[Region]),\"K\",2),\"i\",SELECTCOLUMNS(VALUES(Facts[Region]),\"REGION\",Facts[Region]),Facts[Region],ASC),[i],\"|\",[i],ASC)",
+"powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 156) A single value for column 'Region' in table 'Facts' cannot be determined. This can happen when a measure or function formula refers to a column that contains many values without specifying an aggregation such as min, max, count, or sum to get a single result.\""
+},
+{
+"expr": "COUNTROWS(SUBSTITUTEWITHINDEX(ADDCOLUMNS(VALUES(Facts[Region]),\"K\",2),\"i\",SELECTCOLUMNS(VALUES(Facts[Region]),\"REGION\",Facts[Region]),Facts[Region],DESC))",
+"powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 153) A single value for column 'Region' in table 'Facts' cannot be determined. This can happen when a measure or function formula refers to a column that contains many values without specifying an aggregation such as min, max, count, or sum to get a single result.\""
+},
+{
+"expr": "SUMX(SUBSTITUTEWITHINDEX(ADDCOLUMNS(VALUES(Facts[Region]),\"K\",2),\"i\",SELECTCOLUMNS(VALUES(Facts[Region]),\"REGION\",Facts[Region]),Facts[Region],DESC),[i])",
+"powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 148) A single value for column 'Region' in table 'Facts' cannot be determined. This can happen when a measure or function formula refers to a column that contains many values without specifying an aggregation such as min, max, count, or sum to get a single result.\""
+},
+{
+"expr": "CONCATENATEX(SUBSTITUTEWITHINDEX(ADDCOLUMNS(VALUES(Facts[Region]),\"K\",2),\"i\",SELECTCOLUMNS(VALUES(Facts[Region]),\"REGION\",Facts[Region]),Facts[Region],DESC),[i],\"|\",[i],ASC)",
+"powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 156) A single value for column 'Region' in table 'Facts' cannot be determined. This can happen when a measure or function formula refers to a column that contains many values without specifying an aggregation such as min, max, count, or sum to get a single result.\""
+},
+{
+"expr": "COUNTROWS(SUBSTITUTEWITHINDEX(ADDCOLUMNS(VALUES(Facts[Region]),\"K\",2),\"i\",DISTINCT(SELECTCOLUMNS(Facts,\"Region\",Facts[Region])),Facts[Region],ASC))",
+"powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 147) A single value for column 'Region' in table 'Facts' cannot be determined. This can happen when a measure or function formula refers to a column that contains many values without specifying an aggregation such as min, max, count, or sum to get a single result.\""
+},
+{
+"expr": "SUMX(SUBSTITUTEWITHINDEX(ADDCOLUMNS(VALUES(Facts[Region]),\"K\",2),\"i\",DISTINCT(SELECTCOLUMNS(Facts,\"Region\",Facts[Region])),Facts[Region],ASC),[i])",
+"powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 142) A single value for column 'Region' in table 'Facts' cannot be determined. This can happen when a measure or function formula refers to a column that contains many values without specifying an aggregation such as min, max, count, or sum to get a single result.\""
+},
+{
+"expr": "CONCATENATEX(SUBSTITUTEWITHINDEX(ADDCOLUMNS(VALUES(Facts[Region]),\"K\",2),\"i\",DISTINCT(SELECTCOLUMNS(Facts,\"Region\",Facts[Region])),Facts[Region],ASC),[i],\"|\",[i],ASC)",
+"powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 150) A single value for column 'Region' in table 'Facts' cannot be determined. This can happen when a measure or function formula refers to a column that contains many values without specifying an aggregation such as min, max, count, or sum to get a single result.\""
+},
+{
+"expr": "COUNTROWS(SUBSTITUTEWITHINDEX(ADDCOLUMNS(VALUES(Facts[Region]),\"K\",2),\"i\",DISTINCT(SELECTCOLUMNS(Facts,\"Region\",Facts[Region])),Facts[Region],DESC))",
+"powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 147) A single value for column 'Region' in table 'Facts' cannot be determined. This can happen when a measure or function formula refers to a column that contains many values without specifying an aggregation such as min, max, count, or sum to get a single result.\""
+},
+{
+"expr": "SUMX(SUBSTITUTEWITHINDEX(ADDCOLUMNS(VALUES(Facts[Region]),\"K\",2),\"i\",DISTINCT(SELECTCOLUMNS(Facts,\"Region\",Facts[Region])),Facts[Region],DESC),[i])",
+"powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 142) A single value for column 'Region' in table 'Facts' cannot be determined. This can happen when a measure or function formula refers to a column that contains many values without specifying an aggregation such as min, max, count, or sum to get a single result.\""
+},
+{
+"expr": "CONCATENATEX(SUBSTITUTEWITHINDEX(ADDCOLUMNS(VALUES(Facts[Region]),\"K\",2),\"i\",DISTINCT(SELECTCOLUMNS(Facts,\"Region\",Facts[Region])),Facts[Region],DESC),[i],\"|\",[i],ASC)",
+"powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 150) A single value for column 'Region' in table 'Facts' cannot be determined. This can happen when a measure or function formula refers to a column that contains many values without specifying an aggregation such as min, max, count, or sum to get a single result.\""
+},
+{
+"expr": "CONCATENATEX(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],\"s\",SUM(Facts[Quantity])),\"i\",VALUES(Facts[Region]),Facts[Region],ASC),[i],\"|\",[i],ASC)",
+"powerbi": "0|1|2"
+},
+{
+"expr": "CONCATENATEX(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],\"s\",SUM(Facts[Quantity])),\"i\",VALUES(Facts[Region]),Facts[Region],DESC),[i],\"|\",[i],ASC)",
+"powerbi": "0|1|2"
+},
+{
+"expr": "COUNTROWS(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],\"s\",SUM(Facts[Quantity])),\"i\",ADDCOLUMNS(VALUES(Facts[Region]),\"k\",3),Facts[Region],ASC))",
+"powerbi": "3"
+},
+{
+"expr": "SUMX(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],\"s\",SUM(Facts[Quantity])),\"i\",ADDCOLUMNS(VALUES(Facts[Region]),\"k\",3),Facts[Region],ASC),[i])",
+"powerbi": "3"
+},
+{
+"expr": "CONCATENATEX(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],\"s\",SUM(Facts[Quantity])),\"i\",ADDCOLUMNS(VALUES(Facts[Region]),\"k\",3),Facts[Region],ASC),[i],\"|\",[i],ASC)",
+"powerbi": "0|1|2"
+},
+{
+"expr": "COUNTROWS(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],\"s\",SUM(Facts[Quantity])),\"i\",ADDCOLUMNS(VALUES(Facts[Region]),\"k\",3),Facts[Region],DESC))",
+"powerbi": "3"
+},
+{
+"expr": "SUMX(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],\"s\",SUM(Facts[Quantity])),\"i\",ADDCOLUMNS(VALUES(Facts[Region]),\"k\",3),Facts[Region],DESC),[i])",
+"powerbi": "3"
+},
+{
+"expr": "CONCATENATEX(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],\"s\",SUM(Facts[Quantity])),\"i\",ADDCOLUMNS(VALUES(Facts[Region]),\"k\",3),Facts[Region],DESC),[i],\"|\",[i],ASC)",
+"powerbi": "0|1|2"
+},
+{
+"expr": "COUNTROWS(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],\"s\",SUM(Facts[Quantity])),\"i\",ADDCOLUMNS(VALUES(Facts[Region]),\"K\",3),Facts[Region],ASC))",
+"powerbi": "3"
+},
+{
+"expr": "SUMX(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],\"s\",SUM(Facts[Quantity])),\"i\",ADDCOLUMNS(VALUES(Facts[Region]),\"K\",3),Facts[Region],ASC),[i])",
+"powerbi": "3"
+},
+{
+"expr": "CONCATENATEX(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],\"s\",SUM(Facts[Quantity])),\"i\",ADDCOLUMNS(VALUES(Facts[Region]),\"K\",3),Facts[Region],ASC),[i],\"|\",[i],ASC)",
+"powerbi": "0|1|2"
+},
+{
+"expr": "COUNTROWS(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],\"s\",SUM(Facts[Quantity])),\"i\",ADDCOLUMNS(VALUES(Facts[Region]),\"K\",3),Facts[Region],DESC))",
+"powerbi": "3"
+},
+{
+"expr": "SUMX(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],\"s\",SUM(Facts[Quantity])),\"i\",ADDCOLUMNS(VALUES(Facts[Region]),\"K\",3),Facts[Region],DESC),[i])",
+"powerbi": "3"
+},
+{
+"expr": "CONCATENATEX(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],\"s\",SUM(Facts[Quantity])),\"i\",ADDCOLUMNS(VALUES(Facts[Region]),\"K\",3),Facts[Region],DESC),[i],\"|\",[i],ASC)",
+"powerbi": "0|1|2"
+},
+{
+"expr": "COUNTROWS(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],\"s\",SUM(Facts[Quantity])),\"i\",ADDCOLUMNS(VALUES(Facts[Region]),\"s\",0),Facts[Region],ASC))",
+"powerbi": "BLANK"
+},
+{
+"expr": "SUMX(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],\"s\",SUM(Facts[Quantity])),\"i\",ADDCOLUMNS(VALUES(Facts[Region]),\"s\",0),Facts[Region],ASC),[i])",
+"powerbi": "BLANK"
+},
+{
+"expr": "CONCATENATEX(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],\"s\",SUM(Facts[Quantity])),\"i\",ADDCOLUMNS(VALUES(Facts[Region]),\"s\",0),Facts[Region],ASC),[i],\"|\",[i],ASC)",
+"powerbi": "BLANK"
+},
+{
+"expr": "COUNTROWS(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],\"s\",SUM(Facts[Quantity])),\"i\",ADDCOLUMNS(VALUES(Facts[Region]),\"s\",0),Facts[Region],DESC))",
+"powerbi": "BLANK"
+},
+{
+"expr": "SUMX(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],\"s\",SUM(Facts[Quantity])),\"i\",ADDCOLUMNS(VALUES(Facts[Region]),\"s\",0),Facts[Region],DESC),[i])",
+"powerbi": "BLANK"
+},
+{
+"expr": "CONCATENATEX(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],\"s\",SUM(Facts[Quantity])),\"i\",ADDCOLUMNS(VALUES(Facts[Region]),\"s\",0),Facts[Region],DESC),[i],\"|\",[i],ASC)",
+"powerbi": "BLANK"
+},
+{
+"expr": "COUNTROWS(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],\"s\",SUM(Facts[Quantity])),\"i\",SELECTCOLUMNS(VALUES(Facts[Region]),\"REGION\",Facts[Region]),Facts[Region],ASC))",
+"powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 169) A single value for column 'Region' in table 'Facts' cannot be determined. This can happen when a measure or function formula refers to a column that contains many values without specifying an aggregation such as min, max, count, or sum to get a single result.\""
+},
+{
+"expr": "SUMX(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],\"s\",SUM(Facts[Quantity])),\"i\",SELECTCOLUMNS(VALUES(Facts[Region]),\"REGION\",Facts[Region]),Facts[Region],ASC),[i])",
+"powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 164) A single value for column 'Region' in table 'Facts' cannot be determined. This can happen when a measure or function formula refers to a column that contains many values without specifying an aggregation such as min, max, count, or sum to get a single result.\""
+},
+{
+"expr": "CONCATENATEX(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],\"s\",SUM(Facts[Quantity])),\"i\",SELECTCOLUMNS(VALUES(Facts[Region]),\"REGION\",Facts[Region]),Facts[Region],ASC),[i],\"|\",[i],ASC)",
+"powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 172) A single value for column 'Region' in table 'Facts' cannot be determined. This can happen when a measure or function formula refers to a column that contains many values without specifying an aggregation such as min, max, count, or sum to get a single result.\""
+},
+{
+"expr": "COUNTROWS(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],\"s\",SUM(Facts[Quantity])),\"i\",SELECTCOLUMNS(VALUES(Facts[Region]),\"REGION\",Facts[Region]),Facts[Region],DESC))",
+"powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 169) A single value for column 'Region' in table 'Facts' cannot be determined. This can happen when a measure or function formula refers to a column that contains many values without specifying an aggregation such as min, max, count, or sum to get a single result.\""
+},
+{
+"expr": "SUMX(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],\"s\",SUM(Facts[Quantity])),\"i\",SELECTCOLUMNS(VALUES(Facts[Region]),\"REGION\",Facts[Region]),Facts[Region],DESC),[i])",
+"powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 164) A single value for column 'Region' in table 'Facts' cannot be determined. This can happen when a measure or function formula refers to a column that contains many values without specifying an aggregation such as min, max, count, or sum to get a single result.\""
+},
+{
+"expr": "CONCATENATEX(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],\"s\",SUM(Facts[Quantity])),\"i\",SELECTCOLUMNS(VALUES(Facts[Region]),\"REGION\",Facts[Region]),Facts[Region],DESC),[i],\"|\",[i],ASC)",
+"powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 172) A single value for column 'Region' in table 'Facts' cannot be determined. This can happen when a measure or function formula refers to a column that contains many values without specifying an aggregation such as min, max, count, or sum to get a single result.\""
+},
+{
+"expr": "COUNTROWS(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],\"s\",SUM(Facts[Quantity])),\"i\",DISTINCT(SELECTCOLUMNS(Facts,\"Region\",Facts[Region])),Facts[Region],ASC))",
+"powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 163) A single value for column 'Region' in table 'Facts' cannot be determined. This can happen when a measure or function formula refers to a column that contains many values without specifying an aggregation such as min, max, count, or sum to get a single result.\""
+},
+{
+"expr": "SUMX(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],\"s\",SUM(Facts[Quantity])),\"i\",DISTINCT(SELECTCOLUMNS(Facts,\"Region\",Facts[Region])),Facts[Region],ASC),[i])",
+"powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 158) A single value for column 'Region' in table 'Facts' cannot be determined. This can happen when a measure or function formula refers to a column that contains many values without specifying an aggregation such as min, max, count, or sum to get a single result.\""
+},
+{
+"expr": "CONCATENATEX(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],\"s\",SUM(Facts[Quantity])),\"i\",DISTINCT(SELECTCOLUMNS(Facts,\"Region\",Facts[Region])),Facts[Region],ASC),[i],\"|\",[i],ASC)",
+"powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 166) A single value for column 'Region' in table 'Facts' cannot be determined. This can happen when a measure or function formula refers to a column that contains many values without specifying an aggregation such as min, max, count, or sum to get a single result.\""
+},
+{
+"expr": "COUNTROWS(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],\"s\",SUM(Facts[Quantity])),\"i\",DISTINCT(SELECTCOLUMNS(Facts,\"Region\",Facts[Region])),Facts[Region],DESC))",
+"powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 163) A single value for column 'Region' in table 'Facts' cannot be determined. This can happen when a measure or function formula refers to a column that contains many values without specifying an aggregation such as min, max, count, or sum to get a single result.\""
+},
+{
+"expr": "SUMX(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],\"s\",SUM(Facts[Quantity])),\"i\",DISTINCT(SELECTCOLUMNS(Facts,\"Region\",Facts[Region])),Facts[Region],DESC),[i])",
+"powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 158) A single value for column 'Region' in table 'Facts' cannot be determined. This can happen when a measure or function formula refers to a column that contains many values without specifying an aggregation such as min, max, count, or sum to get a single result.\""
+},
+{
+"expr": "CONCATENATEX(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],\"s\",SUM(Facts[Quantity])),\"i\",DISTINCT(SELECTCOLUMNS(Facts,\"Region\",Facts[Region])),Facts[Region],DESC),[i],\"|\",[i],ASC)",
+"powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 166) A single value for column 'Region' in table 'Facts' cannot be determined. This can happen when a measure or function formula refers to a column that contains many values without specifying an aggregation such as min, max, count, or sum to get a single result.\""
+},
+{
+"expr": "COUNTROWS(SUBSTITUTEWITHINDEX(ADDCOLUMNS(VALUES(Facts[Region]),\"REGION2\",LEN(Facts[Region])),\"i\",VALUES(Facts[Region]),Facts[Region],ASC))",
+"powerbi": "3"
+},
+{
+"expr": "SUMX(SUBSTITUTEWITHINDEX(ADDCOLUMNS(VALUES(Facts[Region]),\"REGION2\",LEN(Facts[Region])),\"i\",VALUES(Facts[Region]),Facts[Region],ASC),[i])",
+"powerbi": "3"
+},
+{
+"expr": "CONCATENATEX(SUBSTITUTEWITHINDEX(ADDCOLUMNS(VALUES(Facts[Region]),\"REGION2\",LEN(Facts[Region])),\"i\",VALUES(Facts[Region]),Facts[Region],ASC),[i],\"|\",[i],ASC)",
+"powerbi": "0|1|2"
+},
+{
+"expr": "COUNTROWS(SUBSTITUTEWITHINDEX(ADDCOLUMNS(VALUES(Facts[Region]),\"REGION2\",LEN(Facts[Region])),\"i\",VALUES(Facts[Region]),Facts[Region],DESC))",
+"powerbi": "3"
+},
+{
+"expr": "SUMX(SUBSTITUTEWITHINDEX(ADDCOLUMNS(VALUES(Facts[Region]),\"REGION2\",LEN(Facts[Region])),\"i\",VALUES(Facts[Region]),Facts[Region],DESC),[i])",
+"powerbi": "3"
+},
+{
+"expr": "CONCATENATEX(SUBSTITUTEWITHINDEX(ADDCOLUMNS(VALUES(Facts[Region]),\"REGION2\",LEN(Facts[Region])),\"i\",VALUES(Facts[Region]),Facts[Region],DESC),[i],\"|\",[i],ASC)",
+"powerbi": "0|1|2"
+},
+{
+"expr": "COUNTROWS(SUBSTITUTEWITHINDEX(ADDCOLUMNS(VALUES(Facts[Region]),\"REGION2\",LEN(Facts[Region])),\"i\",ADDCOLUMNS(VALUES(Facts[Region]),\"k\",3),Facts[Region],ASC))",
+"powerbi": "3"
+},
+{
+"expr": "SUMX(SUBSTITUTEWITHINDEX(ADDCOLUMNS(VALUES(Facts[Region]),\"REGION2\",LEN(Facts[Region])),\"i\",ADDCOLUMNS(VALUES(Facts[Region]),\"k\",3),Facts[Region],ASC),[i])",
+"powerbi": "3"
+},
+{
+"expr": "CONCATENATEX(SUBSTITUTEWITHINDEX(ADDCOLUMNS(VALUES(Facts[Region]),\"REGION2\",LEN(Facts[Region])),\"i\",ADDCOLUMNS(VALUES(Facts[Region]),\"k\",3),Facts[Region],ASC),[i],\"|\",[i],ASC)",
+"powerbi": "0|1|2"
+},
+{
+"expr": "COUNTROWS(SUBSTITUTEWITHINDEX(ADDCOLUMNS(VALUES(Facts[Region]),\"REGION2\",LEN(Facts[Region])),\"i\",ADDCOLUMNS(VALUES(Facts[Region]),\"k\",3),Facts[Region],DESC))",
+"powerbi": "3"
+},
+{
+"expr": "SUMX(SUBSTITUTEWITHINDEX(ADDCOLUMNS(VALUES(Facts[Region]),\"REGION2\",LEN(Facts[Region])),\"i\",ADDCOLUMNS(VALUES(Facts[Region]),\"k\",3),Facts[Region],DESC),[i])",
+"powerbi": "3"
+},
+{
+"expr": "CONCATENATEX(SUBSTITUTEWITHINDEX(ADDCOLUMNS(VALUES(Facts[Region]),\"REGION2\",LEN(Facts[Region])),\"i\",ADDCOLUMNS(VALUES(Facts[Region]),\"k\",3),Facts[Region],DESC),[i],\"|\",[i],ASC)",
+"powerbi": "0|1|2"
+},
+{
+"expr": "COUNTROWS(SUBSTITUTEWITHINDEX(ADDCOLUMNS(VALUES(Facts[Region]),\"REGION2\",LEN(Facts[Region])),\"i\",ADDCOLUMNS(VALUES(Facts[Region]),\"K\",3),Facts[Region],ASC))",
+"powerbi": "3"
+},
+{
+"expr": "SUMX(SUBSTITUTEWITHINDEX(ADDCOLUMNS(VALUES(Facts[Region]),\"REGION2\",LEN(Facts[Region])),\"i\",ADDCOLUMNS(VALUES(Facts[Region]),\"K\",3),Facts[Region],ASC),[i])",
+"powerbi": "3"
+},
+{
+"expr": "CONCATENATEX(SUBSTITUTEWITHINDEX(ADDCOLUMNS(VALUES(Facts[Region]),\"REGION2\",LEN(Facts[Region])),\"i\",ADDCOLUMNS(VALUES(Facts[Region]),\"K\",3),Facts[Region],ASC),[i],\"|\",[i],ASC)",
+"powerbi": "0|1|2"
+},
+{
+"expr": "COUNTROWS(SUBSTITUTEWITHINDEX(ADDCOLUMNS(VALUES(Facts[Region]),\"REGION2\",LEN(Facts[Region])),\"i\",ADDCOLUMNS(VALUES(Facts[Region]),\"K\",3),Facts[Region],DESC))",
+"powerbi": "3"
+},
+{
+"expr": "SUMX(SUBSTITUTEWITHINDEX(ADDCOLUMNS(VALUES(Facts[Region]),\"REGION2\",LEN(Facts[Region])),\"i\",ADDCOLUMNS(VALUES(Facts[Region]),\"K\",3),Facts[Region],DESC),[i])",
+"powerbi": "3"
+},
+{
+"expr": "CONCATENATEX(SUBSTITUTEWITHINDEX(ADDCOLUMNS(VALUES(Facts[Region]),\"REGION2\",LEN(Facts[Region])),\"i\",ADDCOLUMNS(VALUES(Facts[Region]),\"K\",3),Facts[Region],DESC),[i],\"|\",[i],ASC)",
+"powerbi": "0|1|2"
+},
+{
+"expr": "COUNTROWS(SUBSTITUTEWITHINDEX(ADDCOLUMNS(VALUES(Facts[Region]),\"REGION2\",LEN(Facts[Region])),\"i\",ADDCOLUMNS(VALUES(Facts[Region]),\"s\",0),Facts[Region],ASC))",
+"powerbi": "3"
+},
+{
+"expr": "SUMX(SUBSTITUTEWITHINDEX(ADDCOLUMNS(VALUES(Facts[Region]),\"REGION2\",LEN(Facts[Region])),\"i\",ADDCOLUMNS(VALUES(Facts[Region]),\"s\",0),Facts[Region],ASC),[i])",
+"powerbi": "3"
+},
+{
+"expr": "CONCATENATEX(SUBSTITUTEWITHINDEX(ADDCOLUMNS(VALUES(Facts[Region]),\"REGION2\",LEN(Facts[Region])),\"i\",ADDCOLUMNS(VALUES(Facts[Region]),\"s\",0),Facts[Region],ASC),[i],\"|\",[i],ASC)",
+"powerbi": "0|1|2"
+},
+{
+"expr": "COUNTROWS(SUBSTITUTEWITHINDEX(ADDCOLUMNS(VALUES(Facts[Region]),\"REGION2\",LEN(Facts[Region])),\"i\",ADDCOLUMNS(VALUES(Facts[Region]),\"s\",0),Facts[Region],DESC))",
+"powerbi": "3"
+},
+{
+"expr": "SUMX(SUBSTITUTEWITHINDEX(ADDCOLUMNS(VALUES(Facts[Region]),\"REGION2\",LEN(Facts[Region])),\"i\",ADDCOLUMNS(VALUES(Facts[Region]),\"s\",0),Facts[Region],DESC),[i])",
+"powerbi": "3"
+},
+{
+"expr": "CONCATENATEX(SUBSTITUTEWITHINDEX(ADDCOLUMNS(VALUES(Facts[Region]),\"REGION2\",LEN(Facts[Region])),\"i\",ADDCOLUMNS(VALUES(Facts[Region]),\"s\",0),Facts[Region],DESC),[i],\"|\",[i],ASC)",
+"powerbi": "0|1|2"
+},
+{
+"expr": "COUNTROWS(SUBSTITUTEWITHINDEX(ADDCOLUMNS(VALUES(Facts[Region]),\"REGION2\",LEN(Facts[Region])),\"i\",SELECTCOLUMNS(VALUES(Facts[Region]),\"REGION\",Facts[Region]),Facts[Region],ASC))",
+"powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 176) A single value for column 'Region' in table 'Facts' cannot be determined. This can happen when a measure or function formula refers to a column that contains many values without specifying an aggregation such as min, max, count, or sum to get a single result.\""
+},
+{
+"expr": "SUMX(SUBSTITUTEWITHINDEX(ADDCOLUMNS(VALUES(Facts[Region]),\"REGION2\",LEN(Facts[Region])),\"i\",SELECTCOLUMNS(VALUES(Facts[Region]),\"REGION\",Facts[Region]),Facts[Region],ASC),[i])",
+"powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 171) A single value for column 'Region' in table 'Facts' cannot be determined. This can happen when a measure or function formula refers to a column that contains many values without specifying an aggregation such as min, max, count, or sum to get a single result.\""
+},
+{
+"expr": "CONCATENATEX(SUBSTITUTEWITHINDEX(ADDCOLUMNS(VALUES(Facts[Region]),\"REGION2\",LEN(Facts[Region])),\"i\",SELECTCOLUMNS(VALUES(Facts[Region]),\"REGION\",Facts[Region]),Facts[Region],ASC),[i],\"|\",[i],ASC)",
+"powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 179) A single value for column 'Region' in table 'Facts' cannot be determined. This can happen when a measure or function formula refers to a column that contains many values without specifying an aggregation such as min, max, count, or sum to get a single result.\""
+},
+{
+"expr": "COUNTROWS(SUBSTITUTEWITHINDEX(ADDCOLUMNS(VALUES(Facts[Region]),\"REGION2\",LEN(Facts[Region])),\"i\",SELECTCOLUMNS(VALUES(Facts[Region]),\"REGION\",Facts[Region]),Facts[Region],DESC))",
+"powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 176) A single value for column 'Region' in table 'Facts' cannot be determined. This can happen when a measure or function formula refers to a column that contains many values without specifying an aggregation such as min, max, count, or sum to get a single result.\""
+},
+{
+"expr": "SUMX(SUBSTITUTEWITHINDEX(ADDCOLUMNS(VALUES(Facts[Region]),\"REGION2\",LEN(Facts[Region])),\"i\",SELECTCOLUMNS(VALUES(Facts[Region]),\"REGION\",Facts[Region]),Facts[Region],DESC),[i])",
+"powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 171) A single value for column 'Region' in table 'Facts' cannot be determined. This can happen when a measure or function formula refers to a column that contains many values without specifying an aggregation such as min, max, count, or sum to get a single result.\""
+},
+{
+"expr": "CONCATENATEX(SUBSTITUTEWITHINDEX(ADDCOLUMNS(VALUES(Facts[Region]),\"REGION2\",LEN(Facts[Region])),\"i\",SELECTCOLUMNS(VALUES(Facts[Region]),\"REGION\",Facts[Region]),Facts[Region],DESC),[i],\"|\",[i],ASC)",
+"powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 179) A single value for column 'Region' in table 'Facts' cannot be determined. This can happen when a measure or function formula refers to a column that contains many values without specifying an aggregation such as min, max, count, or sum to get a single result.\""
+},
+{
+"expr": "COUNTROWS(SUBSTITUTEWITHINDEX(ADDCOLUMNS(VALUES(Facts[Region]),\"REGION2\",LEN(Facts[Region])),\"i\",DISTINCT(SELECTCOLUMNS(Facts,\"Region\",Facts[Region])),Facts[Region],ASC))",
+"powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 170) A single value for column 'Region' in table 'Facts' cannot be determined. This can happen when a measure or function formula refers to a column that contains many values without specifying an aggregation such as min, max, count, or sum to get a single result.\""
+},
+{
+"expr": "SUMX(SUBSTITUTEWITHINDEX(ADDCOLUMNS(VALUES(Facts[Region]),\"REGION2\",LEN(Facts[Region])),\"i\",DISTINCT(SELECTCOLUMNS(Facts,\"Region\",Facts[Region])),Facts[Region],ASC),[i])",
+"powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 165) A single value for column 'Region' in table 'Facts' cannot be determined. This can happen when a measure or function formula refers to a column that contains many values without specifying an aggregation such as min, max, count, or sum to get a single result.\""
+},
+{
+"expr": "CONCATENATEX(SUBSTITUTEWITHINDEX(ADDCOLUMNS(VALUES(Facts[Region]),\"REGION2\",LEN(Facts[Region])),\"i\",DISTINCT(SELECTCOLUMNS(Facts,\"Region\",Facts[Region])),Facts[Region],ASC),[i],\"|\",[i],ASC)",
+"powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 173) A single value for column 'Region' in table 'Facts' cannot be determined. This can happen when a measure or function formula refers to a column that contains many values without specifying an aggregation such as min, max, count, or sum to get a single result.\""
+},
+{
+"expr": "COUNTROWS(SUBSTITUTEWITHINDEX(ADDCOLUMNS(VALUES(Facts[Region]),\"REGION2\",LEN(Facts[Region])),\"i\",DISTINCT(SELECTCOLUMNS(Facts,\"Region\",Facts[Region])),Facts[Region],DESC))",
+"powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 170) A single value for column 'Region' in table 'Facts' cannot be determined. This can happen when a measure or function formula refers to a column that contains many values without specifying an aggregation such as min, max, count, or sum to get a single result.\""
+},
+{
+"expr": "SUMX(SUBSTITUTEWITHINDEX(ADDCOLUMNS(VALUES(Facts[Region]),\"REGION2\",LEN(Facts[Region])),\"i\",DISTINCT(SELECTCOLUMNS(Facts,\"Region\",Facts[Region])),Facts[Region],DESC),[i])",
+"powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 165) A single value for column 'Region' in table 'Facts' cannot be determined. This can happen when a measure or function formula refers to a column that contains many values without specifying an aggregation such as min, max, count, or sum to get a single result.\""
+},
+{
+"expr": "CONCATENATEX(SUBSTITUTEWITHINDEX(ADDCOLUMNS(VALUES(Facts[Region]),\"REGION2\",LEN(Facts[Region])),\"i\",DISTINCT(SELECTCOLUMNS(Facts,\"Region\",Facts[Region])),Facts[Region],DESC),[i],\"|\",[i],ASC)",
+"powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 173) A single value for column 'Region' in table 'Facts' cannot be determined. This can happen when a measure or function formula refers to a column that contains many values without specifying an aggregation such as min, max, count, or sum to get a single result.\""
+},
+{
+"expr": "COUNTROWS(SUBSTITUTEWITHINDEX(SELECTCOLUMNS(Facts,\"Region\",Facts[Region],\"q\",Facts[Quantity]),\"i\",VALUES(Facts[Region]),Facts[Region],ASC))",
+"powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 29) Function SubstituteWithIndex() is not able to detect common columns between its operands that could be used for join.\""
+},
+{
+"expr": "SUMX(SUBSTITUTEWITHINDEX(SELECTCOLUMNS(Facts,\"Region\",Facts[Region],\"q\",Facts[Quantity]),\"i\",VALUES(Facts[Region]),Facts[Region],ASC),[i])",
+"powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 24) Function SubstituteWithIndex() is not able to detect common columns between its operands that could be used for join.\""
+},
+{
+"expr": "CONCATENATEX(SUBSTITUTEWITHINDEX(SELECTCOLUMNS(Facts,\"Region\",Facts[Region],\"q\",Facts[Quantity]),\"i\",VALUES(Facts[Region]),Facts[Region],ASC),[i],\"|\",[i],ASC)",
+"powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 32) Function SubstituteWithIndex() is not able to detect common columns between its operands that could be used for join.\""
+},
+{
+"expr": "SUMX(SUBSTITUTEWITHINDEX(SELECTCOLUMNS(Facts,\"Region\",Facts[Region],\"q\",Facts[Quantity]),\"i\",VALUES(Facts[Region]),Facts[Region],DESC),[i])",
+"powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 24) Function SubstituteWithIndex() is not able to detect common columns between its operands that could be used for join.\""
+},
+{
+"expr": "CONCATENATEX(SUBSTITUTEWITHINDEX(SELECTCOLUMNS(Facts,\"Region\",Facts[Region],\"q\",Facts[Quantity]),\"i\",VALUES(Facts[Region]),Facts[Region],DESC),[i],\"|\",[i],ASC)",
+"powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 32) Function SubstituteWithIndex() is not able to detect common columns between its operands that could be used for join.\""
+},
+{
+"expr": "COUNTROWS(SUBSTITUTEWITHINDEX(SELECTCOLUMNS(Facts,\"Region\",Facts[Region],\"q\",Facts[Quantity]),\"i\",ADDCOLUMNS(VALUES(Facts[Region]),\"k\",3),Facts[Region],ASC))",
+"powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 29) Function SubstituteWithIndex() is not able to detect common columns between its operands that could be used for join.\""
+},
+{
+"expr": "SUMX(SUBSTITUTEWITHINDEX(SELECTCOLUMNS(Facts,\"Region\",Facts[Region],\"q\",Facts[Quantity]),\"i\",ADDCOLUMNS(VALUES(Facts[Region]),\"k\",3),Facts[Region],ASC),[i])",
+"powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 24) Function SubstituteWithIndex() is not able to detect common columns between its operands that could be used for join.\""
+},
+{
+"expr": "CONCATENATEX(SUBSTITUTEWITHINDEX(SELECTCOLUMNS(Facts,\"Region\",Facts[Region],\"q\",Facts[Quantity]),\"i\",ADDCOLUMNS(VALUES(Facts[Region]),\"k\",3),Facts[Region],ASC),[i],\"|\",[i],ASC)",
+"powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 32) Function SubstituteWithIndex() is not able to detect common columns between its operands that could be used for join.\""
+},
+{
+"expr": "COUNTROWS(SUBSTITUTEWITHINDEX(SELECTCOLUMNS(Facts,\"Region\",Facts[Region],\"q\",Facts[Quantity]),\"i\",ADDCOLUMNS(VALUES(Facts[Region]),\"k\",3),Facts[Region],DESC))",
+"powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 29) Function SubstituteWithIndex() is not able to detect common columns between its operands that could be used for join.\""
+},
+{
+"expr": "SUMX(SUBSTITUTEWITHINDEX(SELECTCOLUMNS(Facts,\"Region\",Facts[Region],\"q\",Facts[Quantity]),\"i\",ADDCOLUMNS(VALUES(Facts[Region]),\"k\",3),Facts[Region],DESC),[i])",
+"powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 24) Function SubstituteWithIndex() is not able to detect common columns between its operands that could be used for join.\""
+},
+{
+"expr": "CONCATENATEX(SUBSTITUTEWITHINDEX(SELECTCOLUMNS(Facts,\"Region\",Facts[Region],\"q\",Facts[Quantity]),\"i\",ADDCOLUMNS(VALUES(Facts[Region]),\"k\",3),Facts[Region],DESC),[i],\"|\",[i],ASC)",
+"powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 32) Function SubstituteWithIndex() is not able to detect common columns between its operands that could be used for join.\""
+},
+{
+"expr": "COUNTROWS(SUBSTITUTEWITHINDEX(SELECTCOLUMNS(Facts,\"Region\",Facts[Region],\"q\",Facts[Quantity]),\"i\",ADDCOLUMNS(VALUES(Facts[Region]),\"K\",3),Facts[Region],ASC))",
+"powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 29) Function SubstituteWithIndex() is not able to detect common columns between its operands that could be used for join.\""
+},
+{
+"expr": "SUMX(SUBSTITUTEWITHINDEX(SELECTCOLUMNS(Facts,\"Region\",Facts[Region],\"q\",Facts[Quantity]),\"i\",ADDCOLUMNS(VALUES(Facts[Region]),\"K\",3),Facts[Region],ASC),[i])",
+"powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 24) Function SubstituteWithIndex() is not able to detect common columns between its operands that could be used for join.\""
+},
+{
+"expr": "CONCATENATEX(SUBSTITUTEWITHINDEX(SELECTCOLUMNS(Facts,\"Region\",Facts[Region],\"q\",Facts[Quantity]),\"i\",ADDCOLUMNS(VALUES(Facts[Region]),\"K\",3),Facts[Region],ASC),[i],\"|\",[i],ASC)",
+"powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 32) Function SubstituteWithIndex() is not able to detect common columns between its operands that could be used for join.\""
+},
+{
+"expr": "COUNTROWS(SUBSTITUTEWITHINDEX(SELECTCOLUMNS(Facts,\"Region\",Facts[Region],\"q\",Facts[Quantity]),\"i\",ADDCOLUMNS(VALUES(Facts[Region]),\"K\",3),Facts[Region],DESC))",
+"powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 29) Function SubstituteWithIndex() is not able to detect common columns between its operands that could be used for join.\""
+},
+{
+"expr": "SUMX(SUBSTITUTEWITHINDEX(SELECTCOLUMNS(Facts,\"Region\",Facts[Region],\"q\",Facts[Quantity]),\"i\",ADDCOLUMNS(VALUES(Facts[Region]),\"K\",3),Facts[Region],DESC),[i])",
+"powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 24) Function SubstituteWithIndex() is not able to detect common columns between its operands that could be used for join.\""
+},
+{
+"expr": "CONCATENATEX(SUBSTITUTEWITHINDEX(SELECTCOLUMNS(Facts,\"Region\",Facts[Region],\"q\",Facts[Quantity]),\"i\",ADDCOLUMNS(VALUES(Facts[Region]),\"K\",3),Facts[Region],DESC),[i],\"|\",[i],ASC)",
+"powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 32) Function SubstituteWithIndex() is not able to detect common columns between its operands that could be used for join.\""
+},
+{
+"expr": "COUNTROWS(SUBSTITUTEWITHINDEX(SELECTCOLUMNS(Facts,\"Region\",Facts[Region],\"q\",Facts[Quantity]),\"i\",ADDCOLUMNS(VALUES(Facts[Region]),\"s\",0),Facts[Region],ASC))",
+"powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 29) Function SubstituteWithIndex() is not able to detect common columns between its operands that could be used for join.\""
+},
+{
+"expr": "SUMX(SUBSTITUTEWITHINDEX(SELECTCOLUMNS(Facts,\"Region\",Facts[Region],\"q\",Facts[Quantity]),\"i\",ADDCOLUMNS(VALUES(Facts[Region]),\"s\",0),Facts[Region],ASC),[i])",
+"powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 24) Function SubstituteWithIndex() is not able to detect common columns between its operands that could be used for join.\""
+},
+{
+"expr": "CONCATENATEX(SUBSTITUTEWITHINDEX(SELECTCOLUMNS(Facts,\"Region\",Facts[Region],\"q\",Facts[Quantity]),\"i\",ADDCOLUMNS(VALUES(Facts[Region]),\"s\",0),Facts[Region],ASC),[i],\"|\",[i],ASC)",
+"powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 32) Function SubstituteWithIndex() is not able to detect common columns between its operands that could be used for join.\""
+},
+{
+"expr": "COUNTROWS(SUBSTITUTEWITHINDEX(SELECTCOLUMNS(Facts,\"Region\",Facts[Region],\"q\",Facts[Quantity]),\"i\",ADDCOLUMNS(VALUES(Facts[Region]),\"s\",0),Facts[Region],DESC))",
+"powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 29) Function SubstituteWithIndex() is not able to detect common columns between its operands that could be used for join.\""
+},
+{
+"expr": "SUMX(SUBSTITUTEWITHINDEX(SELECTCOLUMNS(Facts,\"Region\",Facts[Region],\"q\",Facts[Quantity]),\"i\",ADDCOLUMNS(VALUES(Facts[Region]),\"s\",0),Facts[Region],DESC),[i])",
+"powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 24) Function SubstituteWithIndex() is not able to detect common columns between its operands that could be used for join.\""
+},
+{
+"expr": "CONCATENATEX(SUBSTITUTEWITHINDEX(SELECTCOLUMNS(Facts,\"Region\",Facts[Region],\"q\",Facts[Quantity]),\"i\",ADDCOLUMNS(VALUES(Facts[Region]),\"s\",0),Facts[Region],DESC),[i],\"|\",[i],ASC)",
+"powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 32) Function SubstituteWithIndex() is not able to detect common columns between its operands that could be used for join.\""
+},
+{
+"expr": "COUNTROWS(SUBSTITUTEWITHINDEX(SELECTCOLUMNS(Facts,\"Region\",Facts[Region],\"q\",Facts[Quantity]),\"i\",SELECTCOLUMNS(VALUES(Facts[Region]),\"REGION\",Facts[Region]),Facts[Region],ASC))",
+"powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 177) A single value for column 'Region' in table 'Facts' cannot be determined. This can happen when a measure or function formula refers to a column that contains many values without specifying an aggregation such as min, max, count, or sum to get a single result.\""
+},
+{
+"expr": "SUMX(SUBSTITUTEWITHINDEX(SELECTCOLUMNS(Facts,\"Region\",Facts[Region],\"q\",Facts[Quantity]),\"i\",SELECTCOLUMNS(VALUES(Facts[Region]),\"REGION\",Facts[Region]),Facts[Region],ASC),[i])",
+"powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 172) A single value for column 'Region' in table 'Facts' cannot be determined. This can happen when a measure or function formula refers to a column that contains many values without specifying an aggregation such as min, max, count, or sum to get a single result.\""
+},
+{
+"expr": "CONCATENATEX(SUBSTITUTEWITHINDEX(SELECTCOLUMNS(Facts,\"Region\",Facts[Region],\"q\",Facts[Quantity]),\"i\",SELECTCOLUMNS(VALUES(Facts[Region]),\"REGION\",Facts[Region]),Facts[Region],ASC),[i],\"|\",[i],ASC)",
+"powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 180) A single value for column 'Region' in table 'Facts' cannot be determined. This can happen when a measure or function formula refers to a column that contains many values without specifying an aggregation such as min, max, count, or sum to get a single result.\""
+},
+{
+"expr": "COUNTROWS(SUBSTITUTEWITHINDEX(SELECTCOLUMNS(Facts,\"Region\",Facts[Region],\"q\",Facts[Quantity]),\"i\",SELECTCOLUMNS(VALUES(Facts[Region]),\"REGION\",Facts[Region]),Facts[Region],DESC))",
+"powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 177) A single value for column 'Region' in table 'Facts' cannot be determined. This can happen when a measure or function formula refers to a column that contains many values without specifying an aggregation such as min, max, count, or sum to get a single result.\""
+},
+{
+"expr": "SUMX(SUBSTITUTEWITHINDEX(SELECTCOLUMNS(Facts,\"Region\",Facts[Region],\"q\",Facts[Quantity]),\"i\",SELECTCOLUMNS(VALUES(Facts[Region]),\"REGION\",Facts[Region]),Facts[Region],DESC),[i])",
+"powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 172) A single value for column 'Region' in table 'Facts' cannot be determined. This can happen when a measure or function formula refers to a column that contains many values without specifying an aggregation such as min, max, count, or sum to get a single result.\""
+},
+{
+"expr": "CONCATENATEX(SUBSTITUTEWITHINDEX(SELECTCOLUMNS(Facts,\"Region\",Facts[Region],\"q\",Facts[Quantity]),\"i\",SELECTCOLUMNS(VALUES(Facts[Region]),\"REGION\",Facts[Region]),Facts[Region],DESC),[i],\"|\",[i],ASC)",
+"powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 180) A single value for column 'Region' in table 'Facts' cannot be determined. This can happen when a measure or function formula refers to a column that contains many values without specifying an aggregation such as min, max, count, or sum to get a single result.\""
+},
+{
+"expr": "COUNTROWS(SUBSTITUTEWITHINDEX(SELECTCOLUMNS(Facts,\"Region\",Facts[Region],\"q\",Facts[Quantity]),\"i\",DISTINCT(SELECTCOLUMNS(Facts,\"Region\",Facts[Region])),Facts[Region],ASC))",
+"powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 171) A single value for column 'Region' in table 'Facts' cannot be determined. This can happen when a measure or function formula refers to a column that contains many values without specifying an aggregation such as min, max, count, or sum to get a single result.\""
+},
+{
+"expr": "SUMX(SUBSTITUTEWITHINDEX(SELECTCOLUMNS(Facts,\"Region\",Facts[Region],\"q\",Facts[Quantity]),\"i\",DISTINCT(SELECTCOLUMNS(Facts,\"Region\",Facts[Region])),Facts[Region],ASC),[i])",
+"powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 166) A single value for column 'Region' in table 'Facts' cannot be determined. This can happen when a measure or function formula refers to a column that contains many values without specifying an aggregation such as min, max, count, or sum to get a single result.\""
+},
+{
+"expr": "CONCATENATEX(SUBSTITUTEWITHINDEX(SELECTCOLUMNS(Facts,\"Region\",Facts[Region],\"q\",Facts[Quantity]),\"i\",DISTINCT(SELECTCOLUMNS(Facts,\"Region\",Facts[Region])),Facts[Region],ASC),[i],\"|\",[i],ASC)",
+"powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 174) A single value for column 'Region' in table 'Facts' cannot be determined. This can happen when a measure or function formula refers to a column that contains many values without specifying an aggregation such as min, max, count, or sum to get a single result.\""
+},
+{
+"expr": "COUNTROWS(SUBSTITUTEWITHINDEX(SELECTCOLUMNS(Facts,\"Region\",Facts[Region],\"q\",Facts[Quantity]),\"i\",DISTINCT(SELECTCOLUMNS(Facts,\"Region\",Facts[Region])),Facts[Region],DESC))",
+"powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 171) A single value for column 'Region' in table 'Facts' cannot be determined. This can happen when a measure or function formula refers to a column that contains many values without specifying an aggregation such as min, max, count, or sum to get a single result.\""
+},
+{
+"expr": "SUMX(SUBSTITUTEWITHINDEX(SELECTCOLUMNS(Facts,\"Region\",Facts[Region],\"q\",Facts[Quantity]),\"i\",DISTINCT(SELECTCOLUMNS(Facts,\"Region\",Facts[Region])),Facts[Region],DESC),[i])",
+"powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 166) A single value for column 'Region' in table 'Facts' cannot be determined. This can happen when a measure or function formula refers to a column that contains many values without specifying an aggregation such as min, max, count, or sum to get a single result.\""
+},
+{
+"expr": "CONCATENATEX(SUBSTITUTEWITHINDEX(SELECTCOLUMNS(Facts,\"Region\",Facts[Region],\"q\",Facts[Quantity]),\"i\",DISTINCT(SELECTCOLUMNS(Facts,\"Region\",Facts[Region])),Facts[Region],DESC),[i],\"|\",[i],ASC)",
+"powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 174) A single value for column 'Region' in table 'Facts' cannot be determined. This can happen when a measure or function formula refers to a column that contains many values without specifying an aggregation such as min, max, count, or sum to get a single result.\""
+}
+]
+}
