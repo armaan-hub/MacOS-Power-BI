@@ -8207,6 +8207,8 @@ def evaluate_measures(
                 if ctx["id"] not in seen_ids and not ctx.get("derived"):
                     seen_ids.add(ctx["id"])
                     model_tables.append(ctx)
+            if len(model_tables) > 1:
+                raise MeasureError("COLUMNSTATISTICS over a model with several tables is not modelled in the local engine (the row order and the tables listed are not settled).")
             for ctx in model_tables:
                 table_name = str(ctx["name"])
                 table_rows = list(ctx["rows"])
@@ -8891,7 +8893,10 @@ def evaluate_measures(
 
                 def order_key(row: dict[str, Any]) -> tuple[Any, ...]:
                     return tuple((value is not None, column_order_key(value) if value is not None else 0) for value in (row[h] for h in headers))
-                combos.sort(key=order_key)
+                try:
+                    combos.sort(key=order_key)
+                except TypeError as error:
+                    raise MeasureError("The ordering of a column with mixed types (a number beside text) is not modelled by the local engine.") from error
                 group_context, group_rows = derived_table(list(headers), combos, lineage, types)
                 output = []
                 for group_row in group_rows:
@@ -8933,7 +8938,10 @@ def evaluate_measures(
                                 return combos_h
                 except Exception:
                     pass
-                combos_h.sort(key=lambda row: tuple((value is not None, column_order_key(value) if value is not None else 0) for value in (row.get(h) for h in headers)))
+                try:
+                    combos_h.sort(key=lambda row: tuple((value is not None, column_order_key(value) if value is not None else 0) for value in (row.get(h) for h in headers)))
+                except TypeError as error:
+                    raise MeasureError("The ordering of a column with mixed types (a number beside text) is not modelled by the local engine.") from error
                 return combos_h
 
             # each ROLLUPADDISSUBTOTAL call is one group whose pairs roll up from the last one; the groups combine as a cube,
@@ -9306,10 +9314,13 @@ def evaluate_measures(
         for position in range(len(keys_spec) - 1, -1, -1):
             sample = next((item[0][position] for item in found if item[0][position] is not None), None)
             blank = dax_typed._blank_like(sample) if sample is not None else Decimal(0)
-            ranked.sort(
-                key=lambda item, p=position, blank=blank: (column_order_key(blank if item[0][p] is None else item[0][p]), item[0][p] is not None),
-                reverse=keys_spec[position][1],
-            )
+            try:
+                ranked.sort(
+                    key=lambda item, p=position, blank=blank: (column_order_key(blank if item[0][p] is None else item[0][p]), item[0][p] is not None),
+                    reverse=keys_spec[position][1],
+                )
+            except TypeError as error:
+                raise MeasureError("The ordering of a column with mixed types (a number beside text) is not modelled by the local engine.") from error
 
         if any(ranked[n][0] == ranked[n + 1][0] for n in range(len(ranked) - 1)) and not _swi_tied_order_known(arguments[2], variable_nodes.get):
             # rows the order expressions cannot tell apart keep the index table's own row order in Power BI, which is only
@@ -10107,7 +10118,10 @@ def evaluate_measures(
                 continue
             typed = raw if derived_source else typed_cell(base, column, raw)
             distinct.setdefault(cell_key(ascii_fold(typed) if isinstance(typed, str) else typed), (raw, typed))
-        ordered = sorted(distinct.values(), key=lambda pair: column_order_key(pair[1]), reverse=function.startswith("LAST"))
+        try:
+            ordered = sorted(distinct.values(), key=lambda pair: column_order_key(pair[1]), reverse=function.startswith("LAST"))
+        except TypeError as error:  # numbers beside text (a variant column such as COLUMNSTATISTICS [Min] / [Max]); the order is not measured
+            raise MeasureError(f"{function} over a column of mixed types (a number beside text): the ordering of a column with mixed types is not modelled by the local engine.") from error
         return base, column, derived_source, ordered
 
     def nonblank_pick(

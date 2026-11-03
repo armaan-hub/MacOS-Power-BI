@@ -70,6 +70,42 @@ class ColstatsUtc24Test(unittest.TestCase):
         self.assertTrue(dax.local("UTCNOW(1)").startswith("LOCAL-REJECT:"))
         self.assertTrue(dax.local("UTCTODAY(1)").startswith("LOCAL-REJECT:"))
 
+    def test_mixed_type_column_ordering_is_refused_not_crashed(self) -> None:
+        # COLUMNSTATISTICS [Min] / [Max] hold numbers beside text: Power BI answers -1.5 / 5, the order is not modelled
+        for column in ("Min", "Max"):
+            source = f'SELECTCOLUMNS(COLUMNSTATISTICS(),"v",[{column}])'
+            for function in ("FIRSTNONBLANK", "LASTNONBLANK", "FIRSTNONBLANKVALUE", "LASTNONBLANKVALUE"):
+                result = dax.local(f"{function}({source},1)")
+                self.assertTrue(result.startswith("LOCAL-REJECT:"), (function, column, result))
+                self.assertIn("mixed types", result)
+            for expression in (
+                f'CONCATENATEX(COLUMNSTATISTICS(),[Column Name],"|",[{column}])',
+                f'CONCATENATEX(COLUMNSTATISTICS(),[Column Name],"|",[{column}],DESC)',
+                f'CONCATENATEX(TOPN(2,COLUMNSTATISTICS(),[{column}]),[Column Name],"|")',
+                f'CONCATENATEX(SUMMARIZE(COLUMNSTATISTICS(),[{column}]),[{column}],"|")',
+            ):
+                self.assertFalse(dax.local(expression).startswith("LOCAL-CRASH:"), expression)
+
+    def test_columnstatistics_refuses_a_model_with_several_tables(self) -> None:
+        from analytics_studio.measures import MeasureError, evaluate_measures
+
+        facts = {
+            "id": "facts", "name": "Facts", "headers": dax.HEADERS, "rows": dax.LOCAL_ROWS,
+            "column_types": {"Sales": "decimal_number", "Quantity": "whole_number", "Region": "text", "Note": "text"},
+        }
+        other = {"id": "other", "name": "Other", "headers": ["K"], "rows": [{"K": 1}, {"K": 2}], "column_types": {"K": "whole_number"}}
+
+        def run(tables: list) -> str:
+            return str(evaluate_measures(
+                [{"name": "P", "expression": "COUNTROWS(COLUMNSTATISTICS())"}], dax.LOCAL_ROWS, dax.HEADERS, "Facts",
+                measure_names=["P"], table_context=tables, active_table_id="facts",
+            )["P"])
+
+        self.assertEqual(run([facts]), "5")
+        with self.assertRaises(MeasureError) as caught:
+            run([facts, other])
+        self.assertIn("several tables", str(caught.exception))
+
     def test_task34_spec_scores_zero_wrong(self) -> None:
         spec_path = ROOT / "tools" / "parity" / "task34_colstats_utc_spec.json"
         items = json.loads(spec_path.read_text(encoding="utf-8"))["items"]
