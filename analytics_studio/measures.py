@@ -469,7 +469,7 @@ _TYPED_ARITY = {
     "DATE": (3, 3), "TIME": (3, 3), "YEAR": (1, 1), "MONTH": (1, 1), "DAY": (1, 1), "HOUR": (1, 1),
     "MINUTE": (1, 1), "SECOND": (1, 1), "QUARTER": (1, 1), "WEEKDAY": (1, 2), "WEEKNUM": (1, 2),
     "EOMONTH": (2, 2), "EDATE": (2, 2), "DATEDIFF": (3, 3), "DATEVALUE": (1, 1), "TIMEVALUE": (1, 1),
-    "TODAY": (0, 0), "NOW": (0, 0), "CONVERT": (2, 2),
+    "TODAY": (0, 0), "NOW": (0, 0), "UTCTODAY": (0, 0), "UTCNOW": (0, 0), "CONVERT": (2, 2),
     "ISINTEGER": (1, 1), "ISINT64": (1, 1), "ISDOUBLE": (1, 1), "ISDECIMAL": (1, 1), "ISCURRENCY": (1, 1),
 }
 _TYPED_ARITY.update(dax_math.MATH_ARITY)
@@ -479,7 +479,7 @@ _FUNCTIONS |= set(_TYPED_ARITY) | dax_math.STAT_COLUMN_FUNCTIONS | dax_math.STAT
 _ALL_ITERATORS = {"SUMX", "AVERAGEX", "MAXX", "MINX", "COUNTX", "COUNTAX"} | dax_math.STAT_ITERATORS
 _DATE_FUNCTIONS = {
     "DATE", "TIME", "YEAR", "MONTH", "DAY", "HOUR", "MINUTE", "SECOND", "QUARTER", "WEEKDAY", "WEEKNUM", "EOMONTH",
-    "EDATE", "DATEDIFF", "DATEVALUE", "TIMEVALUE", "TODAY", "NOW",
+    "EDATE", "DATEDIFF", "DATEVALUE", "TIMEVALUE", "TODAY", "NOW", "UTCTODAY", "UTCNOW",
 }
 _COLUMN_SCALAR_ARITY = {"SELECTEDVALUE": (1, 2), "HASONEVALUE": (1, 1)}
 _ROW_ORDER_FUNCTIONS = frozenset({
@@ -509,13 +509,14 @@ _TABLE_FUNCTION_ARITY = {
     "LINEST": (2, None), "LINESTX": (3, None),
     "SUBSTITUTEWITHINDEX": (4, None),
     "ADDMISSINGITEMS": (1, None),
+    "COLUMNSTATISTICS": (0, 0),
 }
 # only meaningful inside SUMMARIZECOLUMNS (IGNORE, NONVISUAL) and GROUPBY (CURRENTGROUP); elsewhere they raise
 _FUNCTIONS |= {"IGNORE", "NONVISUAL", "CURRENTGROUP", "ROLLUP", "ROLLUPGROUP", "ROLLUPADDISSUBTOTAL", "ROLLUPISSUBTOTAL", "ISSUBTOTAL"}
 _NEW_TABLE_FUNCTIONS = {
     "SUMMARIZECOLUMNS", "GROUPBY", "TREATAS", "NATURALINNERJOIN", "NATURALLEFTOUTERJOIN", "SAMPLE", "GENERATE",
     "GENERATEALL", "DATATABLE", "CALENDAR", "TOPNSKIP", "FILTERS", "INDEX", "OFFSET", "WINDOW",
-    "SUBSTITUTEWITHINDEX", "ADDMISSINGITEMS",
+    "SUBSTITUTEWITHINDEX", "ADDMISSINGITEMS", "COLUMNSTATISTICS",
 }
 _RANK_ARITY = {
     "RANKX": (2, 5), "RANK.EQ": (2, 3), "EARLIER": (1, 2), "EARLIEST": (1, 1), "RANK": (0, 7), "ROWNUMBER": (0, 6),
@@ -553,7 +554,7 @@ def _table_position(parent_function: str, argument_index: int) -> bool:
 
 _TABLE_BUILDING_CALLS = frozenset({
     "UNION", "CROSSJOIN", "GENERATESERIES", "TREATAS", "NATURALINNERJOIN", "NATURALLEFTOUTERJOIN", "GENERATE", "GENERATEALL", "DATATABLE", "CALENDAR",
-    "DISTINCT", "VALUES", "ROW", "CALENDARAUTO",
+    "DISTINCT", "VALUES", "ROW", "CALENDARAUTO", "COLUMNSTATISTICS",
 })
 _BOOLEAN_INFO_CALLS = frozenset({"CONTAINS", "CONTAINSROW", "ISEMPTY", "ISFILTERED", "ISINSCOPE", "HASONEFILTER", "ISCROSSFILTERED"})
 _TYPED_RESULT_CATEGORY = {
@@ -562,7 +563,7 @@ _TYPED_RESULT_CATEGORY = {
         "text",
     ),
     **dict.fromkeys(["EXACT", "ISERROR", "ISNUMBER", "ISTEXT", "ISNONTEXT", "ISLOGICAL", "ISEVEN", "ISODD", "ISINTEGER", "ISINT64", "ISDOUBLE", "ISDECIMAL", "ISCURRENCY"], "boolean"),
-    **dict.fromkeys(["DATE", "TIME", "EOMONTH", "EDATE", "DATEVALUE", "TIMEVALUE", "TODAY", "NOW"], "date/time"),
+    **dict.fromkeys(["DATE", "TIME", "EOMONTH", "EDATE", "DATEVALUE", "TIMEVALUE", "TODAY", "NOW", "UTCTODAY", "UTCNOW"], "date/time"),
     **dax_ext.CATEGORY,
 }
 # These literal/table forms have local parser support outside ``_FUNCTIONS``.
@@ -2337,6 +2338,7 @@ _BOOLEAN_FILTER_REFUSED_CALLS = frozenset({
     "OFFSET", "WINDOW", "INDEX", "RANK", "ROWNUMBER", "CONTAINS",  # CONTAINS: live probes, iteration 87 (also inside IF and arithmetic)
     "TABLEOF", "ALLCROSSFILTERED", "TOCSV", "TOJSON", "LINEST", "LINESTX",
     "ADDMISSINGITEMS", "ROLLUP", "ROLLUPGROUP", "ROLLUPADDISSUBTOTAL", "ROLLUPISSUBTOTAL",
+    "COLUMNSTATISTICS",
 })
 _BOOLEAN_FILTER_X_ITERATORS = frozenset({"SUMX", "AVERAGEX", "MAXX", "MINX", "COUNTX", "COUNTAX", "CONCATENATEX", "XNPV", "XIRR", *dax_math.STAT_ITERATORS})
 
@@ -3325,7 +3327,7 @@ def _tocsv_has_signed_zero_risk(node: Any, allowed: tuple[Any, ...] = ()) -> boo
 
 _NON_CONSTANT_CALLS = frozenset({
     "CALCULATE", "CALCULATETABLE", "LOOKUPVALUE", "SELECTEDVALUE", "RELATED", "RELATEDTABLE", "COUNTROWS", "ISBLANK", "USERNAME", "USERPRINCIPALNAME",
-    "NOW", "TODAY", "RAND", "RANDBETWEEN",
+    "NOW", "TODAY", "UTCNOW", "UTCTODAY", "RAND", "RANDBETWEEN",
 })
 
 
@@ -4742,9 +4744,9 @@ class _Parser:
                     raise MeasureError("Too many arguments were passed to the ERROR function. The maximum argument count for the function is 1.")
                 if arguments[0][0] != "string":
                     raise MeasureError("The function 'ERROR' expects its argument number 1 to be constant.")
-            elif function == "CUSTOMDATA":
+            elif function in {"CUSTOMDATA", "UTCNOW", "UTCTODAY", "COLUMNSTATISTICS"}:
                 if len(arguments) > 0:
-                    raise MeasureError("Too many arguments were passed to the CUSTOMDATA function. The maximum argument count for the function is 0.")
+                    raise MeasureError(f"Too many arguments were passed to the {function} function. The maximum argument count for the function is 0.")
             elif function == "NAMEOF":
                 if len(arguments) < 1:
                     raise MeasureError("Too few arguments were passed to the NAMEOF function. The minimum argument count for the function is 1.")
@@ -6040,7 +6042,7 @@ _STATIC_BOOL_FUNCTIONS = frozenset({
 })
 
 _STATIC_DATE_FUNCTIONS = frozenset({
-    "DATE", "TIME", "EOMONTH", "EDATE", "DATEVALUE", "TIMEVALUE", "TODAY", "NOW"
+    "DATE", "TIME", "EOMONTH", "EDATE", "DATEVALUE", "TIMEVALUE", "TODAY", "NOW", "UTCNOW", "UTCTODAY"
 })
 
 
@@ -6130,6 +6132,15 @@ def _static_table_columns(node: Any, columns: dict[str, dict[str, str]], variabl
     if kind != "call":
         return {}
     fn, args = node[1], node[2]
+    if fn == "COLUMNSTATISTICS":
+        return {
+            "table name": "text",
+            "column name": "text",
+            "min": "",
+            "max": "",
+            "cardinality": "int64",
+            "max length": "int64",
+        }
     if fn in {"LINEST", "LINESTX"}:
         from . import dax_linest
         return {h.casefold(): "double" for h in dax_linest.headers_for(16, True)}
@@ -8319,6 +8330,81 @@ def evaluate_measures(
         if function == "TABLEOF":
             context = resolve_table_context(arguments[0][1])
             return context, list(rows_by_table_id[context["id"]])
+        if function == "COLUMNSTATISTICS":
+            if evaluation_filter_ids:
+                raise MeasureError("COLUMNSTATISTICS() cannot be used with a filter context.")
+            if len(arguments) > 0:
+                raise MeasureError(f"Too many arguments were passed to the {function} function. The maximum argument count for the function is 0.")
+            headers = ["Table Name", "Column Name", "Min", "Max", "Cardinality", "Max Length"]
+            out_rows = []
+            seen_ids = set()
+            model_tables = []
+            for ctx in contexts_by_id.values():
+                if ctx["id"] not in seen_ids and not ctx.get("derived"):
+                    seen_ids.add(ctx["id"])
+                    model_tables.append(ctx)
+            if len(model_tables) > 1:
+                raise MeasureError("COLUMNSTATISTICS over a model with several tables is not modelled in the local engine (the row order and the tables listed are not settled).")
+            for ctx in model_tables:
+                table_name = str(ctx["name"])
+                table_rows = list(ctx["rows"])
+                out_rows.append({
+                    "Table Name": table_name,
+                    "Column Name": "RowNumber-2662979B-1795-4F74-8F37-6A1BA8059B61",
+                    "Min": None,
+                    "Max": None,
+                    "Cardinality": Decimal(len(table_rows)),
+                    "Max Length": None,
+                })
+                for col in ctx["headers"]:
+                    col_type = str(ctx.get("column_types", {}).get(col, "text")).casefold()
+                    if col_type in {"date", "datetime", "boolean"}:
+                        raise MeasureError(f"COLUMNSTATISTICS over column '{col}' of type {col_type} is not modelled in the local engine.")
+                    raw_values = [r.get(col) for r in table_rows]
+                    non_blanks = [v for v in raw_values if v is not None]
+                    has_blank = len(non_blanks) < len(raw_values)
+
+                    is_numeric = col_type in {
+                        "whole_number", "decimal_number", "decimal", "fixed_decimal",
+                        "currency", "number", "numeric", "int64", "double",
+                    }
+                    if not is_numeric and non_blanks and all(isinstance(v, (Decimal, int, float)) for v in non_blanks):
+                        is_numeric = True
+
+                    if is_numeric:
+                        num_vals = [v if isinstance(v, Decimal) else Decimal(str(v)) for v in non_blanks]
+                        distinct_nums = set(num_vals)
+                        cardinality = Decimal(len(distinct_nums) + (1 if has_blank else 0))
+                        c_min = min(num_vals) if num_vals else None
+                        c_max = max(num_vals) if num_vals else None
+                        max_len = None
+                    else:
+                        str_vals = [str(v) for v in non_blanks]
+                        distinct_strs = {dax_typed.text_collation_key(s) for s in str_vals}
+                        cardinality = Decimal(len(distinct_strs) + (1 if has_blank else 0))
+                        c_min = min(str_vals, key=column_order_key) if str_vals else None
+                        c_max = max(str_vals, key=column_order_key) if str_vals else None
+                        max_len = Decimal(max(len(s) for s in str_vals)) if str_vals else None
+
+                    out_rows.append({
+                        "Table Name": table_name,
+                        "Column Name": col,
+                        "Min": c_min,
+                        "Max": c_max,
+                        "Cardinality": cardinality,
+                        "Max Length": max_len,
+                    })
+            base_types = {
+                "Table Name": "text",
+                "Column Name": "text",
+                "Min": "variant",
+                "Max": "variant",
+                "Cardinality": "int64",
+                "Max Length": "int64",
+            }
+            res_context, res_rows = derived_table(headers, out_rows, base_types=base_types, certain_types=headers)
+            res_context["variant_columns"] = {"min", "max"}
+            return res_context, res_rows
         if function in {"ADDCOLUMNS", "SELECTCOLUMNS"}:
             context, rows = table_argument_value(arguments[0], allow_keepfilters=True)
             implicit_flags: list[bool] = []
@@ -8943,7 +9029,10 @@ def evaluate_measures(
 
                 def order_key(row: dict[str, Any]) -> tuple[Any, ...]:
                     return tuple((value is not None, column_order_key(value) if value is not None else 0) for value in (row[h] for h in headers))
-                combos.sort(key=order_key)
+                try:
+                    combos.sort(key=order_key)
+                except TypeError as error:
+                    raise MeasureError("The ordering of a column with mixed types (a number beside text) is not modelled by the local engine.") from error
                 group_context, group_rows = derived_table(list(headers), combos, lineage, types)
                 output = []
                 for group_row in group_rows:
@@ -8985,7 +9074,10 @@ def evaluate_measures(
                                 return combos_h
                 except Exception:
                     pass
-                combos_h.sort(key=lambda row: tuple((value is not None, column_order_key(value) if value is not None else 0) for value in (row.get(h) for h in headers)))
+                try:
+                    combos_h.sort(key=lambda row: tuple((value is not None, column_order_key(value) if value is not None else 0) for value in (row.get(h) for h in headers)))
+                except TypeError as error:
+                    raise MeasureError("The ordering of a column with mixed types (a number beside text) is not modelled by the local engine.") from error
                 return combos_h
 
             # each ROLLUPADDISSUBTOTAL call is one group whose pairs roll up from the last one; the groups combine as a cube,
@@ -9358,10 +9450,13 @@ def evaluate_measures(
         for position in range(len(keys_spec) - 1, -1, -1):
             sample = next((item[0][position] for item in found if item[0][position] is not None), None)
             blank = dax_typed._blank_like(sample) if sample is not None else Decimal(0)
-            ranked.sort(
-                key=lambda item, p=position, blank=blank: (column_order_key(blank if item[0][p] is None else item[0][p]), item[0][p] is not None),
-                reverse=keys_spec[position][1],
-            )
+            try:
+                ranked.sort(
+                    key=lambda item, p=position, blank=blank: (column_order_key(blank if item[0][p] is None else item[0][p]), item[0][p] is not None),
+                    reverse=keys_spec[position][1],
+                )
+            except TypeError as error:
+                raise MeasureError("The ordering of a column with mixed types (a number beside text) is not modelled by the local engine.") from error
 
         if any(ranked[n][0] == ranked[n + 1][0] for n in range(len(ranked) - 1)) and not _swi_tied_order_known(arguments[2], variable_nodes.get):
             # rows the order expressions cannot tell apart keep the index table's own row order in Power BI, which is only
@@ -10071,7 +10166,7 @@ def evaluate_measures(
                 visible_rows = with_column_filters(row_filters, lambda: list(rows_by_table_id[context["id"]]), True)
             base, base_column, viewed = context, column, True
         else:
-            if source[0] == "call" and source[1] in {"DATE", "TIME", "TODAY", "NOW", "MAX", "MIN", "EDATE", "EOMONTH"}:
+            if source[0] == "call" and source[1] in {"DATE", "TIME", "TODAY", "NOW", "UTCTODAY", "UTCNOW", "MAX", "MIN", "EDATE", "EOMONTH"}:
                 raise MeasureError(f"{function} needs a column of dates, not a single date value.")
             table_context, visible_rows = table_argument_value(source)
             if len(table_context["headers"]) != 1:
@@ -10159,7 +10254,10 @@ def evaluate_measures(
                 continue
             typed = raw if derived_source else typed_cell(base, column, raw)
             distinct.setdefault(cell_key(ascii_fold(typed) if isinstance(typed, str) else typed), (raw, typed))
-        ordered = sorted(distinct.values(), key=lambda pair: column_order_key(pair[1]), reverse=function.startswith("LAST"))
+        try:
+            ordered = sorted(distinct.values(), key=lambda pair: column_order_key(pair[1]), reverse=function.startswith("LAST"))
+        except TypeError as error:  # numbers beside text (a variant column such as COLUMNSTATISTICS [Min] / [Max]); the order is not measured
+            raise MeasureError(f"{function} over a column of mixed types (a number beside text): the ordering of a column with mixed types is not modelled by the local engine.") from error
         return base, column, derived_source, ordered
 
     def nonblank_pick(
@@ -10561,7 +10659,7 @@ def evaluate_measures(
             return None if empty is None and below is not False else below
         if name in {"KEEPFILTERS", "SUMMARIZE", "DISTINCT"}:
             return filter_scan_ran(args[0])
-        if name in {"ADDCOLUMNS", "SELECTCOLUMNS", "TOPN", "EVALUATEANDLOG", "UNION", "INTERSECT", "EXCEPT", "CROSSJOIN", "GENERATE", "GENERATESERIES", "SAMPLE", "NATURALINNERJOIN", "ROW", "DATATABLE"}:
+        if name in {"ADDCOLUMNS", "SELECTCOLUMNS", "TOPN", "EVALUATEANDLOG", "UNION", "INTERSECT", "EXCEPT", "CROSSJOIN", "GENERATE", "GENERATESERIES", "SAMPLE", "NATURALINNERJOIN", "ROW", "DATATABLE", "COLUMNSTATISTICS"}:
             return False
         return None
 
@@ -17623,6 +17721,8 @@ def evaluate_measures(
         if function in _LOOKUP_ARITY and function not in {"GENERATESERIES", "ROW"}:
             return evaluate_lookup_function(function, arguments, row_context)
         if function in _TABLE_FUNCTION_ARITY or function in {"GENERATESERIES", "ROW"}:
+            if function == "COLUMNSTATISTICS":
+                raise MeasureError("The expression refers to multiple columns. Multiple columns cannot be converted to a scalar value.")
             raise MeasureError(
                 f"{function} returns a table; use it inside COUNTROWS, SUMX, CONCATENATEX or another table argument."
             )

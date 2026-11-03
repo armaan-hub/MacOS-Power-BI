@@ -94,13 +94,14 @@ Rule: a slice is finished only when it is compared with Power BI, its items are 
 | dax_battery_linest21_extra | 110 | 0 | 330 | 0 | 0 |
 | dax_battery_swi22_extra | 173 | 0 | 0 | 0 | 0 |
 | dax_battery_xirr23_extra | 500 | 0 | 80 | 0 | 0 |
+| dax_battery_colstats24_extra | 113 | 0 | 9 | 0 | 0 |
 | dax_battery_scalar_misc2_extra | 563 | 0 | 0 | 0 | 0 |
 | dax_battery_scalar_misc2_extra2 | 151 | 0 | 0 | 0 | 0 |
 | dax_battery_type_tests_extra | 2590 | 0 | 0 | 0 | 0 |
 | dax_battery_type_tests_extra2 | 4614 | 0 | 0 | 0 | 0 |
 | table VAT | 575 | 0 | 0 | 0 | 0 |
 
-## Pending work (7434): Power BI answers, the app refuses
+## Pending work (7443): Power BI answers, the app refuses
 
 - `CALCULATE(COUNTROWS(Facts),Facts[Quantity]<IF(ISEMPTY(CALCULATETABLE(Facts,Facts[Region]="East")),1,4))` (Power BI: `4`) [dax_battery_sdet_filters]
 - `CALCULATE(COUNTROWS(Facts),Facts[Quantity]<COUNTROWS(CALCULATETABLE(CALCULATETABLE(Facts,Facts[Region]="East"))))` (Power BI: `3`) [dax_battery_sdet_filters]
@@ -9148,6 +9149,15 @@ North`) [dax_battery_logic4_extra]
 - `ISERROR(XIRR(DATATABLE("v",DOUBLE,"d",DATETIME,{{-8036.04,"2022-09-09"},{921.21,"2023-12-01"},{-1579.15,"2023-03-10"},{-4956.2,"2022-02-07"},{2974.45,"2019-08-14"},{1831.52,"2019-09-06"}}),[v],[d]))` (Power BI: `False`) [dax_battery_xirr23_extra]
 - `ISERROR(XIRR(DATATABLE("v",DOUBLE,"d",DATETIME,{{-4331.34,"2023-05-06"},{2034.97,"2022-11-15"},{4372.72,"2021-12-15"},{-1397.14,"2021-04-05"}}),[v],[d]))` (Power BI: `False`) [dax_battery_xirr23_extra]
 - `ISERROR(XIRR(DATATABLE("v",DOUBLE,"d",DATETIME,{{-5737.22,"2018-09-21"},{4456.26,"2023-01-02"},{1260.85,"2018-03-25"}}),[v],[d]))` (Power BI: `False`) [dax_battery_xirr23_extra]
+- `FIRSTNONBLANK(SELECTCOLUMNS(COLUMNSTATISTICS(),"v",[Min]),1)` (Power BI: `-1.5`) [dax_battery_colstats24_extra]
+- `COUNTROWS(FILTER(COLUMNSTATISTICS(),[Min]=BLANK()))` (Power BI: `2`) [dax_battery_colstats24_extra]
+- `FIRSTNONBLANK(SELECTCOLUMNS(COLUMNSTATISTICS(),"v",[Max]),1)` (Power BI: `5`) [dax_battery_colstats24_extra]
+- `COUNTROWS(FILTER(COLUMNSTATISTICS(),[Max]=BLANK()))` (Power BI: `1`) [dax_battery_colstats24_extra]
+- `COUNTROWS(FILTER(COLUMNSTATISTICS(),[Min]<0))` (Power BI: `1`) [dax_battery_colstats24_extra]
+- `COUNTROWS(FILTER(COLUMNSTATISTICS(),[Max]>10))` (Power BI: `3`) [dax_battery_colstats24_extra]
+- `"x" IN SELECTCOLUMNS(COLUMNSTATISTICS(),"c",[Column Name])` (Power BI: `False`) [dax_battery_colstats24_extra]
+- `TOCSV(SELECTCOLUMNS(COLUMNSTATISTICS(),"c",[Column Name],"k",[Cardinality]),10,",",TRUE)` (Power BI: `[c],[k]`) [dax_battery_colstats24_extra]
+- `TOJSON(SELECTCOLUMNS(FILTER(COLUMNSTATISTICS(),[Column Name]="Region"),"c",[Column Name],"k",[Cardinality],"m",[Max Length]))` (Power BI: `{`) [dax_battery_colstats24_extra]
 
 ## Known deviations from Power BI (14): imprecise or unspecified in Power BI, each explained
 

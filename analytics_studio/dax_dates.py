@@ -8,7 +8,7 @@ A DateTime is a number of days since 1899-12-30 with a "date" tag (``DaxDateTime
 from __future__ import annotations
 
 from calendar import monthrange
-from datetime import date, datetime, timedelta
+from datetime import date, datetime, timedelta, timezone
 from decimal import Decimal, ROUND_DOWN, ROUND_FLOOR, ROUND_HALF_UP
 import re
 
@@ -337,6 +337,10 @@ def date_function(function: str, args: list[object], interval: str | None = None
         return from_datetime(datetime.now().replace(hour=0, minute=0, second=0, microsecond=0))
     if function == "NOW":
         return from_datetime(datetime.now().replace(microsecond=0))
+    if function == "UTCTODAY":
+        return from_datetime(datetime.now(timezone.utc).replace(tzinfo=None, hour=0, minute=0, second=0, microsecond=0))
+    if function == "UTCNOW":
+        return from_datetime(datetime.now(timezone.utc).replace(tzinfo=None, microsecond=0))
     if function == "DATE":
         return _make_date(*args)
     if function == "TIME":
