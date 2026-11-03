@@ -322,6 +322,18 @@ STAT_ITERATORS = {
 }
 
 
+def _interpolate(low: Decimal, high: Decimal, fraction: Decimal) -> Decimal:
+    """low + (high - low) * fraction for low <= high, either of them possibly an Infinity (live Power BI, Task 39 review: equal ends or a zero
+    fraction give the end itself; -Infinity + Infinity is the negative default NaN; a finite low with an Infinity high is that Infinity)."""
+    if fraction == 0 or low == high:
+        return low
+    if low.is_finite() and high.is_finite():
+        return low + (high - low) * fraction
+    if low == Decimal("-Infinity"):
+        return Decimal("-NaN")
+    return high
+
+
 def statistic(function: str, values: list[Decimal], k: Decimal | None = None) -> Decimal | None:
     """Statistic over the non-blank numbers of a column or iterator; None when there is nothing to compute."""
     name = {"PERCENTILEX.INC": "PERCENTILE.INC", "PERCENTILEX.EXC": "PERCENTILE.EXC", "STDEVX.S": "STDEV.S",
@@ -337,6 +349,18 @@ def statistic(function: str, values: list[Decimal], k: Decimal | None = None) ->
     if name == "MINA":
         return min(values)
     if name == "PRODUCT":
+        if any(not value.is_finite() for value in values):
+            # live Power BI (Task 39 review): a NaN factor keeps its own sign; Infinity * 0 is the negative default NaN; otherwise the sign of the product
+            nans = [value for value in values if value.is_nan()]
+            if nans:
+                if any(value == 0 for value in values):
+                    # live Power BI (Task 39 review): PRODUCTX over the rows 0 and NaN (the NaN made by 1/0-1/0 in the body) printed a POSITIVE nan, while
+                    # every NaN beside non-zero factors printed -nan(ind); the sign of a NaN beside a zero factor is not settled, so it is refused
+                    raise dax_typed.refusal(f"{function} with a NaN beside a zero factor: the sign of the NaN Power BI prints is not modelled by the local engine.")
+                return nans[0]
+            if any(value == 0 for value in values):
+                return Decimal("-NaN")
+            return Decimal("-Infinity") if sum(1 for value in values if value.is_signed()) % 2 else Decimal("Infinity")
         product = Decimal(1)
         for value in values:
             product *= value
@@ -344,12 +368,28 @@ def statistic(function: str, values: list[Decimal], k: Decimal | None = None) ->
             return Decimal("Infinity") if product > 0 else Decimal("-Infinity")  # Part B: beyond the double range is Infinity
         return product
     if name == "MEDIAN":
+        nans = [value for value in values if value.is_nan()]
+        if nans:
+            if len(nans) == count:
+                return nans[0]
+            # live Power BI (Task 39 review): NaN beside other numbers gives NaN, 0 or the number by position (MEDIANX({1,2,3},IF([Value]>1,0/0,[Value])) is NaN, 6 rows 0,NaN,0,NaN,0,NaN is 0)
+            raise dax_typed.refusal(f"{function} with NaN beside other numbers depends on the order the engine sorts them in, which the local engine does not model.")
         ordered = sorted(values)
         middle = count // 2
-        return ordered[middle] if count % 2 else (ordered[middle - 1] + ordered[middle]) / 2
+        if count % 2:
+            return ordered[middle]
+        answer = _interpolate(ordered[middle - 1], ordered[middle], Decimal("0.5"))
+        if answer.is_finite() and any(not value.is_finite() for value in values):
+            answer = Decimal(f"{float(answer):.15g}")  # a Double result beside Infinities, 15 digits as Power BI shows it
+        return answer
     if name == "GEOMEAN":
-        if any(value == 0 for value in values):
-            return Decimal(0)
+        if any(value == 0 or value.is_nan() for value in values):
+            return Decimal(0)  # a zero, or a NaN beside anything, gives 0 (measured)
+        if any(value.is_infinite() for value in values):
+            negatives = sum(1 for value in values if value < 0)
+            if negatives % 2 and count % 2 == 0:
+                return Decimal("NaN")  # live Power BI (Task 39 review): an even root of a negative product is NaN, printed nan (GEOMEANX({-1,2,5,0},1/[Value]) is nan)
+            return Decimal("-Infinity") if negatives % 2 else Decimal("Infinity")
         magnitude = _double(math.exp(sum(math.log(abs(float(value))) for value in values) / count), function)
         # live Power BI (Task 11 review): the geometric mean of the absolute values, negative when the product is (an odd number of negative values)
         return -magnitude if sum(1 for value in values if value < 0) % 2 else magnitude
@@ -359,6 +399,13 @@ def statistic(function: str, values: list[Decimal], k: Decimal | None = None) ->
             error = dax_typed._error(f"Division by zero has occurred when evaluating function '{function}'.")
             error.sample_statistic_nan = True  # NaN in Power BI (iteration 88); see the measure-level handling in measures.resolve
             raise error
+        if any(not value.is_finite() for value in values):
+            nan_count = sum(1 for value in values if value.is_nan())
+            if sample and 0 < nan_count < count and not (nan_count == 1 and all(value.is_infinite() for value in values if not value.is_nan())):
+                # live Power BI (Task 39 review): VARX.S of NaN beside other numbers is 0 for [1,NaN,NaN] and NaN for [NaN,1,NaN]: only one NaN beside
+                # nothing but Infinities (8 measured, 0 each) is settled
+                raise dax_typed.refusal(f"{function} with NaN beside other numbers is not modelled by the local engine.")
+            return Decimal(0)
         if count > 1 and len(set(values)) == 1 and values[0] != values[0].to_integral_value():
             # live Power BI (Task 11 review): the spread of one repeated fraction is float noise (8.4E-08), not 0
             raise dax_typed.refusal(f"{function} of one repeated fraction carries float noise that the local engine does not reproduce.")
@@ -368,20 +415,26 @@ def statistic(function: str, values: list[Decimal], k: Decimal | None = None) ->
     if name in {"PERCENTILE.INC", "PERCENTILE.EXC"}:
         if k is None:
             raise _fail(function)
-        ordered = sorted(values)
         if name == "PERCENTILE.INC":
             if not Decimal(0) <= k <= Decimal(1):
                 raise dax_typed._error("The percentile value should be in the range 0..1, inclusive.")
-            position = k * (count - 1)
-        else:
-            if not Decimal(1) / (count + 1) <= k <= Decimal(count) / (count + 1):
-                raise dax_typed._error(
-                    "The percentile value should be in the range 1/(N+1)..N/(N+1) inclusive, where N is the number of data values."
-                )
-            position = k * (count + 1) - 1
+        elif not Decimal(1) / (count + 1) <= k <= Decimal(count) / (count + 1):
+            raise dax_typed._error(
+                "The percentile value should be in the range 1/(N+1)..N/(N+1) inclusive, where N is the number of data values."
+            )
+        nans = [value for value in values if value.is_nan()]
+        if nans:
+            if len(nans) == count:
+                return nans[0]
+            raise dax_typed.refusal(f"{function} with NaN beside other numbers depends on the order the engine sorts them in, which the local engine does not model.")
+        ordered = sorted(values)
+        position = k * (count - 1) if name == "PERCENTILE.INC" else k * (count + 1) - 1
         low = int(position.to_integral_value(rounding=ROUND_FLOOR))
         fraction = position - low
         if low + 1 >= count:
             return ordered[-1] if low >= count - 1 else ordered[low]
-        return ordered[low] + (ordered[low + 1] - ordered[low]) * fraction
+        answer = _interpolate(ordered[low], ordered[low + 1], fraction)
+        if answer.is_finite() and any(not value.is_finite() for value in values):
+            answer = Decimal(f"{float(answer):.15g}")
+        return answer
     raise _fail(function)

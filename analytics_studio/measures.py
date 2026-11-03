@@ -2886,6 +2886,55 @@ def _multiplies_by_constant_zero(node: Any) -> bool:
     return any(_multiplies_by_constant_zero(child) for child in node if isinstance(child, tuple))
 
 
+def _data_free(node: Any) -> bool:
+    """An expression made of literals only (no column, no variable, no measure, no function but BLANK / TRUE / FALSE)."""
+    if not isinstance(node, tuple) or not node:
+        return False
+    if node[0] in {"number", "string", "blank"}:
+        return True
+    if node[0] == "unary":
+        return _data_free(node[2])
+    if node[0] == "binary":
+        return _data_free(node[2]) and _data_free(node[3])
+    return node[0] == "call" and node[1] in {"BLANK", "TRUE", "FALSE"} and not node[2]
+
+
+def _plain_factor(node: Any) -> bool:
+    """A literal, a bare reference, or + - of those: a factor that cannot turn into Infinity or NaN by itself."""
+    if not isinstance(node, tuple) or not node:
+        return False
+    if node[0] in {"number", "reference", "blank"}:
+        return True
+    if node[0] == "unary" and node[1] in {"+", "-"}:
+        return _plain_factor(node[2])
+    return node[0] == "binary" and node[1] in {"+", "-"} and _plain_factor(node[2]) and _plain_factor(node[3])
+
+
+def _has_table_column(node: Any) -> bool:
+    """A column of a named table (Facts[Quantity]) is read somewhere in the expression."""
+    if not isinstance(node, tuple) or not node:
+        return False
+    if node[0] == "reference" and len(node) > 2 and node[1]:
+        return True
+    return any(_has_table_column(child) for child in node if isinstance(child, tuple))
+
+
+def _risky_zero_product(node: Any, constructor_rows: bool = False) -> bool:
+    """x * 0 where x is built from data and may be Infinity or NaN (a division, a function...).  Live Power BI (Task 39 review): SUMX, PRODUCTX and
+    COUNTX of (Facts[Quantity]/0)*0 give 0 and 6 (the product is folded to 0, Infinity * 0 is not NaN) but (Facts[Sales]/0)*0 keeps NaN; what decides is
+    not settled for stored columns, so a NaN beside such a product is refused.  Settled and not refused: a zero product of literals only, such as
+    (1/0*0), a plain column, and over a table constructor ({1,2},([Value]/0)*0 is NaN in SUMX, PRODUCTX, MEDIANX, GEOMEANX, VARX, 30 measured)."""
+    if not isinstance(node, tuple) or not node:
+        return False
+    if node[0] == "binary" and node[1] == "*":
+        for zero, other in ((node[2], node[3]), (node[3], node[2])):
+            if _constant_number(zero) == 0 and not _data_free(other) and not _plain_factor(other):
+                if constructor_rows and not _has_table_column(other):
+                    continue
+                return True
+    return any(_risky_zero_product(child, constructor_rows) for child in node if isinstance(child, tuple))
+
+
 _SAMPLE_STATISTICS = frozenset({"STDEV.S", "VAR.S", "STDEVX.S", "VARX.S"})
 
 
@@ -17919,14 +17968,11 @@ def evaluate_measures(
                 elif function in {"MEDIANX", "PERCENTILEX.INC", "PERCENTILEX.EXC"}:
                     values.append(Decimal(0))  # these three count a blank result as zero
                     blank_results += 1
-            if function in {"SUMX", "AVERAGEX"} and _multiplies_by_constant_zero(arguments[1]) and any(isinstance(value, Decimal) and value.is_nan() for value in values):
+            if function not in {"MAXX", "MINX"} and _risky_zero_product(arguments[1], arguments[0][0] == "tableconstructor") and any(value.is_nan() for value in values if isinstance(value, Decimal)):
                 raise MeasureError(f"{function} over a NaN beside a product with a constant zero is not supported in the local engine (Power BI may fold it to 0).")
             if function in dax_math.STAT_ITERATORS:
                 if values and blank_results == len(values):
                     return None  # live Power BI (Task 11 review): nothing but BLANK results is BLANK, the blank-as-zero rule is for a mix
-                if any(not value.is_finite() for value in values):
-                    # live Power BI (Task 11 review): Infinity or NaN in the values gives Infinity, 0 or BLANK depending on the statistic: not modelled
-                    raise MeasureError(f"{function} over Infinity or NaN values is not modelled by the local engine.")
                 if function[:4] in {"VARX", "STDE"}:
                     has_dates = any(isinstance(v, dax_dates.DaxDateTime) for v in values)
                     non_blank_vals = [v for v in values if v is not None and v.is_finite()]
@@ -17944,7 +17990,12 @@ def evaluate_measures(
                 currency_body = function in {"STDEVX.S", "VARX.S"} and _static_numeric_type(arguments[1]) == "currency"
                 if currency_body and len(values) == 1:
                     raise MeasureRuntimeError("A division by zero has been encountered.")  # Task 19 Part A: one Currency row has no sample spread
-                answer = dax_math.statistic(function, [value for value in values if value.is_finite()], percentile)
+                try:
+                    answer = dax_math.statistic(function, values, percentile)
+                except MeasureRuntimeError as error:
+                    if function in {"PERCENTILEX.INC", "PERCENTILEX.EXC"} and "percentile value should be" in str(error):
+                        raise _HardError(str(error)) from error  # live Power BI (Task 39 review): an out-of-range PERCENTILEX is thrown, IFERROR does not catch it
+                    raise
                 if currency_body and function == "STDEVX.S" and isinstance(answer, Decimal) and answer.is_finite():
                     answer = answer.quantize(Decimal("0.0001"), rounding=ROUND_HALF_UP)  # Task 19 Part A: a Currency result has four decimals
                 if blank_results and function in {"MEDIANX", "PERCENTILEX.INC", "PERCENTILEX.EXC"} and answer == 0 and arguments[1][0] != "reference":
@@ -17995,6 +18046,8 @@ def evaluate_measures(
                 for value in values[1:]:
                     running += float(value)
                 total = Decimal(running)  # the exact binary value of the double sum
+                if total.is_nan():
+                    total = next((v for v in values if v.is_nan()), Decimal("-NaN"))  # live Power BI (Task 39 review): a NaN term keeps its sign (-nan(ind)); Infinity - Infinity is the negative default NaN
             elif double_body:
                 counted = float(len(values)) * float(values[0])  # Part B: over a stored table, FILTER or VALUES a constant Double body is counted, not added row by row (SUMX(Facts,0.1)-0.6 is 1.11022302462516E-16, measured)
                 running = float(values[0])
@@ -18009,6 +18062,8 @@ def evaluate_measures(
                     raise MeasureError(f"{function} of a constant Double body over this kind of table: counted or added row by row is not measured, so the local engine does not model it.")
                 # a table constructor or ADDCOLUMNS adds row by row (SUMX(ADDCOLUMNS(Facts,"k",1),0.1)-COUNTROWS(...)*0.1 is -1.11022302462516E-16 too; SUMX({1,2,3,4,5,6,7},0.1)-COUNTROWS({1,2,3,4,5,6,7})*0.1 is -1.11022302462516E-16, measured)
                 total = Decimal(running)
+                if total.is_nan():
+                    total = next((v for v in values if v.is_nan()), Decimal("-NaN"))
             else:
                 for value in values[1:]:
                     total = dax_typed.QUIET.add(total, value)
@@ -18128,7 +18183,8 @@ def evaluate_measures(
                 if isinstance(result, (Decimal, bool, str)):
                     count += 1
             if saw_nan and _multiplies_by_constant_zero(arguments[1]):
-                raise MeasureError(f"{function} over a NaN beside a product with a constant zero is not supported in the local engine (Power BI may fold it to 0).")
+                if iferror_depth[0] > 0 or evaluation_filter_ids or _risky_zero_product(arguments[1], arguments[0][0] == "tableconstructor"):
+                    raise MeasureError(f"{function} over a NaN beside a product with a constant zero is not supported in the local engine (Power BI may fold it to 0).")
             return Decimal(count) if count or saw_nan else None
         if function == "CALCULATE":
             if id(node) not in scanning_calculates and calculate_scans(arguments, row_context):

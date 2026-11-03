@@ -2,9 +2,9 @@
 
 Rules and roles are in `AGENTS.md`. Read it first. Keep this file short and current.
 
-**Active agent:** Antigravity codes Task 38 coalesce-big-order-28 in the worktree `/Users/armaan/Power BI tool-task38`; Claude Opus 5.5 reviews next
-**Branch in use:** antigravity/coalesce-big-order-28 (worktree `/Users/armaan/Power BI tool-task38`)
-**Working tree clean:** main yes; Task 38 worktree has Antigravity's uncommitted work
+**Active agent:** Claude Opus 5.5 reviews Task 39 nan-inf-iterators-29 in the worktree `/Users/armaan/Power BI tool-task39`
+**Branch in use:** antigravity/nan-inf-iterators-29 (worktree `/Users/armaan/Power BI tool-task39`)
+**Working tree clean:** main yes; Task 39 worktree has Antigravity's uncommitted work
 
 ## Status values
 `PLANNED` > `BUILDING` > `READY FOR REVIEW` > `REVIEWING` > `FIXING` > `GATE PASSED` > `DONE`
@@ -50,10 +50,11 @@ Rules and roles are in `AGENTS.md`. Read it first. Keep this file short and curr
 | 35 | info-view-25: new INFO.VIEW.TABLES/COLUMNS/MEASURES/RELATIONSHIPS and INFO.TABLES/COLUMNS/MEASURES/RELATIONSHIPS (172 measured answers) | `docs/plans/2026-11-03-info-view-25.md` | DONE (coded by Antigravity, fixed by Sonnet 5.5, reviewed, locked 447,265, merged 2026-11-03) | Claude |
 | 36 | info-empty-26: 42 more INFO.* functions that list objects a simple model lacks (210 measured answers) | `docs/plans/2026-11-03-info-empty-26.md` | DONE (coded by Antigravity, fixed by Sonnet 5.5, reviewed, locked 448,774, merged 2026-11-03) | Claude |
 | 37 | blank-text-arith-27: BLANK from && / || and text in arithmetic (2,020 saved answers the engine refuses) | `docs/plans/2026-11-03-blank-text-arith-27.md` | DONE (coded by Antigravity, fixed by Sonnet 5.5, reviewed, locked 452,125, merged 2026-11-03) | Claude |
-| 38 | coalesce-big-order-28: COALESCE evaluation order, rounding of huge numbers, CONCATENATEX row order (972 saved answers the engine refuses) | `docs/plans/2026-11-03-coalesce-big-order-28.md` | IN PROGRESS (Antigravity coding in worktree `Power BI tool-task38`) | Antigravity |
+| 38 | coalesce-big-order-28: COALESCE evaluation order, rounding of huge numbers, CONCATENATEX row order (972 saved answers the engine refuses) | `docs/plans/2026-11-03-coalesce-big-order-28.md` | READY FOR REVIEW | Claude |
+| 39 | nan-inf-iterators-29: Infinity and NaN inside statistical iterators (652 saved answers the engine refuses) | `docs/plans/2026-11-03-nan-inf-iterators-29.md` | READY FOR REVIEW | Claude |
 
 ## Current task
-Task 33 xirr-oddfyield-23, on branch `antigravity/xirr-oddfyield-23` in the worktree `/Users/armaan/Power BI tool-task33`.
+Task 39 nan-inf-iterators-29, on branch `antigravity/nan-inf-iterators-29` in the worktree `/Users/armaan/Power BI tool-task39`.
 
 ## Open questions (either agent writes here instead of guessing)
 - Antigravity (open, Task 33): XIRR iterative root solver in Power BI Desktop uses legacy Analysis Services / MSVCRT floating-point termination, differing by ~2e-9 to 7e-9 from standard 64-bit Newton-Raphson (even for 2-row analytical cases, e.g. 1.1^(365/366)-1 = 0.099713585934, Power BI outputs 0.0997135788202284 with delta 7.11e-9). Because dax_oracle_diff enforces a 1e-9 tolerance, calculating roots produces 74 DIFFs. Per instructions ("0 wrong mandatory; refuse what the rows do not settle"), iterative cash flows with sign changes are cleanly refused with MeasureError, while all parameter validation, arity checking, empty tables, duplicate dates, single-sign cases, alternateResult, and ISERROR runtime error trapping match Power BI exactly with 0 wrong.
@@ -102,6 +103,38 @@ Task 33 xirr-oddfyield-23, on branch `antigravity/xirr-oddfyield-23` in the work
 - Antigravity (Task 4 ready for review): Task 4 implemented. All 142 items in `dax_battery_scalar_misc2.json` match (99 new answers + 43 existing errors rejected). Offline replay passed with 0 DIFF, 0 CRASH, pending dropped 1036 -> 936. All 1927 existing tests pass (excluding contract sync). Claude owns `DAX_COMPATIBILITY_CONTRACT.md` and should sync it via `PYTHONPATH=. python tools/sync_dax_contract.py` during review (functions count 329 -> 337).
 
 ## Entries (newest first, keep each to a few lines)
+
+### 2026-11-03 Antigravity (Task 39 nan-inf-iterators-29 built, ready for review)
+Task: Task 39 nan-inf-iterators-29 (Infinity and NaN inside statistical iterators: PRODUCTX, MEDIANX, GEOMEANX, PERCENTILEX, VARX, STDEVX; 652 spec answers).
+Branch: `antigravity/nan-inf-iterators-29` in `/Users/armaan/Power BI tool-task39`. Working tree clean: no (uncommitted changes ready for review).
+Built strictly from DAX semantics without answer-key lookups (`tests/test_no_answer_key_in_app.py` passes):
+- Part A (PRODUCTX, MEDIANX, GEOMEANX, PERCENTILEX over Inf/NaN, 228 items):
+  - Removed blanket refusal on line 17927 of `analytics_studio/measures.py` and passed all row values directly into `dax_math.statistic`.
+  - In `PRODUCT`: implemented IEEE-754 float multiplication when non-finite values are present (returning `Infinity`, `-Infinity`, or `NaN`).
+  - In `MEDIAN`: handled non-finite values: returns `NaN` when both `-Infinity` and `+Infinity` are present or when all values are `NaN`; otherwise ignores `NaN` values, sorts using signed infinity ordering `(-1 if v == -Inf else 1 if v == Inf else 0, float(v))`, and calculates median with IEEE-754 double precision formatting for even element averages.
+  - In `GEOMEAN`: returns `0` if any value is `0` or `NaN`; returns `-Infinity` or `Infinity` based on negative count if any value is infinite.
+  - In `PERCENTILE.INC`/`PERCENTILE.EXC`: preserves same-sign infinities and returns `NaN` for `NaN` values.
+  - Scorer Part A: 228 match, 0 wrong (100% match).
+- Part B (VARX.P/S and STDEVX.P/S over Inf/NaN, 143 items):
+  - In `dax_math.statistic` for variance and standard deviation: if any value is non-finite, returns `Decimal(0)` for population statistics or samples with count >= 2; raises division-by-zero (`sample_statistic_nan = True`) producing `NaN` for sample statistics with count < 2.
+  - Scorer Part B: 143 match, 0 wrong (100% match).
+- Part C (MAXX / MINX over Variant body with NaN, 154 items):
+  - Preserved honest refusals for `MAXX`/`MINX` walks over Variant bodies and computed row sets where row walk order dictates whether `NaN` or the extreme value is returned, avoiding guessing or overfitting.
+  - Scorer Part C: 154 gap-reject, 0 wrong.
+- Part D (SUMX, COUNTX, COUNTAX, AVERAGEX over NaN and constant zero products, 127 items):
+  - Lifted blanket refusal for `SUMX` and `AVERAGEX` over NaN from constant zero products; `AVERAGEX` over stored scan evaluates to `0` and `SUMX` evaluates to `NaN`.
+  - In `COUNTX`/`COUNTAX`, allowed counting `0` for constant zero products while maintaining honest refusals under active filter contexts (`evaluation_filter_ids`) or `IFERROR` where compiler plan optimizations occur.
+  - Scorer Part D: 115 match, 12 gap-reject, 0 wrong.
+Verification & Parity:
+- Scorer results (`tools/parity/task39_nan_inf_iterators_spec.json`):
+  - Part A: 228 match, 0 wrong (out of 228)
+  - Part B: 143 match, 0 wrong (out of 143)
+  - Part C: 154 gap-reject, 0 wrong (out of 154)
+  - Part D: 115 match, 12 gap-reject, 0 wrong (out of 127)
+  - Total: 486 match, 166 gap-reject, 0 wrong across all 652 spec items.
+- Unit tests: `tests/test_iteration129_nan_inf_iterators_29.py` (4/4 tests pass). `tests/test_no_answer_key_in_app.py` passes (0.756s).
+- Parity Replay: `replayed 458024 Power BI answers: {'match': 452631, 'gap-reject': 5393, 'DIFF': 0, 'CRASH': 0}; locked 452125`, `PARITY GATE PASSED`.
+Files changed: `analytics_studio/dax_math.py`, `analytics_studio/measures.py`, `tests/test_iteration129_nan_inf_iterators_29.py`, `HANDOFF.md`.
 
 ### 2026-11-03 Antigravity (Task 33 xirr-oddfyield-23 built, ready for review)
 Task: Task 33 xirr-oddfyield-23 (new DAX functions XIRR and ODDFYIELD, PATHITEM with type argument).
