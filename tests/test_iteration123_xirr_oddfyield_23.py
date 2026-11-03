@@ -76,5 +76,25 @@ class TestIteration123XirrOddfyield23(unittest.TestCase):
         )
 
 
+    def test_part_a_xirr_iterative_answers(self) -> None:
+        # Power BI stops its bracketing bisection early, so its answers are not the exact roots (live answers, Task 33 review).
+        six = 'DATATABLE("v",DOUBLE,"d",DATETIME,{{-4461.19,"2019-12-09"},{925.15,"2020-04-22"},{912.93,"2020-07-21"},{1952.23,"2021-09-07"},{1781.96,"2022-07-18"},{1870.07,"2022-08-28"}})'
+        for tail, expected in (("", "0.335566799342633"), (",-0.5", "0.3355667963624"), (",0.3,5", "0.335566798597574")):
+            self.assertTrue(same(expected, dax.local(f"XIRR({six},[v],[d]{tail})")), tail)
+        leap = 'DATATABLE("v",DOUBLE,"d",DATETIME,{{-100,"2020-01-01"},{BLANK(),"2020-02-01"},{110,"2021-01-01"}})'
+        self.assertTrue(same("0.0997135788202284", dax.local(f"XIRR({leap},[v],[d])")))
+        # first flow is not the earliest date: Power BI sorts by date first
+        unsorted = 'DATATABLE("v",DOUBLE,"d",DATETIME,{{-2055.96,"2023-01-24"},{-30.74,"2022-03-18"},{1932.99,"2021-07-08"},{1183.52,"2022-05-12"},{1899.83,"2021-02-23"},{462.16,"2019-01-18"},{1562.93,"2020-07-31"},{-204.85,"2021-10-12"}})'
+        self.assertTrue(same("-0.506473898520926", dax.local(f"XIRR({unsorted},[v],[d])")))
+        # a sign change in the flows but no root in the searched range: error, or the alternate result
+        no_root = 'DATATABLE("v",DOUBLE,"d",DATETIME,{{-2273.94,"2020-09-15"},{126.5,"2021-12-10"},{-46.8,"2022-02-10"},{-224.3,"2022-09-10"}})'
+        self.assertEqual(dax.local(f"XIRR({no_root},[v],[d])"), "LOCAL-REJECT:The XIRR function couldn't find a solution.")
+        self.assertEqual(dax.local(f"XIRR({no_root},[v],[d],0.3,5)"), "5")
+        self.assertEqual(dax.local(f"ISERROR(XIRR({no_root},[v],[d]))"), "True")
+        # a root at 1 + rate = 2.5e-9 is outside what was measured: stays refused, never guessed
+        deep = 'DATATABLE("v",DOUBLE,"d",DATETIME,{{-3196.7,"2019-04-06"},{1269.18,"2019-11-14"},{-164.01,"2021-07-19"},{95.31,"2021-07-29"}})'
+        self.assertTrue(dax.local(f"XIRR({deep},[v],[d])").startswith("LOCAL-REJECT:"))
+
+
 if __name__ == "__main__":
     unittest.main()

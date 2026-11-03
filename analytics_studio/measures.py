@@ -1713,6 +1713,98 @@ def _linest_number(value: Any) -> float:
     raise MeasureError("A LINEST argument of this type is not modelled in the local engine.")
 
 
+def _xirr_solve(flows: list[tuple[float, float]], guess: float) -> tuple[str, float | None]:
+    """Power BI's XIRR root finder, rebuilt from 93 live answers (Task 33).
+
+    Power BI does not return the exact root.  It brackets the root in u = (1 + rate) / (1 + guess), first by doubling
+    u = 2, 4, 8 ... upwards (the first sign change of the NPV against its sign at u = 1), and only when that finds nothing
+    by halving u = 1/2, 1/4 ... downwards.  It then bisects the bracket and stops at the first step where both
+    (bracket width) / max(1, 1 + rate) < 1e-8 and |NPV| / |first flow| < 1e-8, and returns the end of the bracket that lies on the
+    far side of the root from the guess.  The flows are taken in date order, the NPV counts days / 365 from the earliest date.
+
+    Returns ("ok", rate), ("none", None) when no bracket exists, or ("refuse", None) when the case is outside what was measured.
+    The three width scalings that fit every measured answer, and a small window around each tolerance, must all agree on the result."""
+    if not (math.isfinite(guess) and -0.99 <= guess <= 10.0) or guess == 0.0:
+        return ("refuse", None)
+    ordered = sorted(flows, key=lambda item: item[1])  # stable: flows on the same date keep their table order
+    first_day = ordered[0][1]
+    first_abs = abs(ordered[0][0])
+    if first_abs == 0.0 or not math.isfinite(first_abs):
+        return ("refuse", None)
+    base = 1.0 + guess
+    terms = [(value, (day - first_day) / 365.0) for value, day in ordered]
+
+    def npv(u: float) -> float:
+        y = base * u
+        return sum(value * y ** (-years) for value, years in terms)
+
+    try:
+        start = npv(1.0)
+        if not math.isfinite(start) or start == 0.0:
+            return ("refuse", None)
+        positive_start = start > 0.0
+        up_k = dn_k = None
+        for k in range(1, 61):
+            value = npv(2.0 ** k)
+            if not math.isfinite(value):
+                return ("refuse", None)
+            if (value > 0.0) != positive_start:
+                up_k = k
+                break
+        for k in range(1, 61):
+            value = npv(2.0 ** -k)
+            if not math.isfinite(value):
+                return ("refuse", None)
+            if (value > 0.0) != positive_start:
+                dn_k = k
+                break
+    except (OverflowError, ZeroDivisionError):
+        return ("refuse", None)
+    if up_k is None and dn_k is None:
+        return ("none", None)
+    if up_k is not None:
+        if up_k > 26 or (dn_k is not None and up_k > 5):
+            return ("refuse", None)  # measured: up first (k <= 5 with a lower root too), roots up to 2^26 answered
+        lo, hi, upward = 2.0 ** (up_k - 1), 2.0 ** up_k, True
+    else:
+        if dn_k > 10:
+            return ("refuse", None)  # measured: a root at 2^-28 is not found, a root at 2^-10 is
+        lo, hi, upward = 2.0 ** -dn_k, 2.0 ** -(dn_k - 1), False
+    variants = [(w, t, f) for w in range(3) for t in (1e-8, 0.995e-8, 1.01e-8) for f in (1e-8, 1.005e-8)]
+    answers: dict[int, float] = {}
+    try:
+        for _ in range(200):
+            mid = (lo + hi) / 2.0
+            mid_value = npv(mid)
+            if not math.isfinite(mid_value):
+                return ("refuse", None)
+            if (mid_value > 0.0) == positive_start:
+                if upward:
+                    lo = mid
+                else:
+                    hi = mid
+            else:
+                if upward:
+                    hi = mid
+                else:
+                    lo = mid
+            cross = hi if upward else lo
+            residual = abs(npv(cross)) / first_abs
+            rate_mid = base * mid - 1.0
+            width = (hi - lo) * base
+            scaled = (width / (1.0 + abs(rate_mid)), width / max(1.0, base * mid), (hi - lo) / max(1.0, mid))
+            for index, (w, t, f) in enumerate(variants):
+                if index not in answers and scaled[w] < t and residual < f:
+                    answers[index] = base * cross - 1.0
+            if len(answers) == len(variants):
+                break
+    except (OverflowError, ZeroDivisionError):
+        return ("refuse", None)
+    if len(answers) != len(variants) or len(set(answers.values())) != 1:
+        return ("refuse", None)
+    return ("ok", answers[0])
+
+
 def _is_all_table_value_argument(node: Any) -> bool:
     """Return whether a node is a supported filter-function table value."""
     if not isinstance(node, tuple) or not node:
@@ -17940,6 +18032,19 @@ def evaluate_measures(
                     return evaluate(arguments[4], row_context, allow_text=True, allow_boolean=True)
                 raise MeasureRuntimeError("The XIRR function couldn't find a solution.")
 
+            guess_value = 0.1
+            if len(arguments) >= 4:
+                guess_raw = evaluate(arguments[3], row_context, allow_text=True, allow_boolean=True)
+                if isinstance(guess_raw, bool) or not isinstance(guess_raw, (int, float, Decimal)):
+                    raise MeasureError("The XIRR function's iterative solution is not modelled for this guess argument by the local engine.")
+                guess_value = float(guess_raw)
+            state, rate = _xirr_solve([(v, day) for v, day in non_blank_flows], guess_value)
+            if state == "ok" and rate is not None:
+                return Decimal(int(rate)) if float(rate).is_integer() else Decimal(repr(float(rate)))
+            if state == "none":
+                if len(arguments) == 5:
+                    return evaluate(arguments[4], row_context, allow_text=True, allow_boolean=True)
+                raise MeasureRuntimeError("The XIRR function couldn't find a solution.")
             raise MeasureError("The XIRR function's iterative solution is not modelled by the local engine.")
         if function in {"TOCSV", "TOJSON"}:
             is_csv = function == "TOCSV"
