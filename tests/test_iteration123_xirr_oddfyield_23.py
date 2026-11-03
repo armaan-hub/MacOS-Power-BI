@@ -119,5 +119,28 @@ class TestIteration123XirrOddfyield23(unittest.TestCase):
         self.assertIn("not modelled", dax.local(f"XIRR({sorted_b},[v],[d])"))
 
 
+    def test_part_a_xirr_alternate_result_is_converted_to_a_number(self) -> None:
+        # Live Power BI (Task 33, 2026-11-03): the alternateResult is converted to a Number when it is returned.
+        no_solution = 'DATATABLE("v",DOUBLE,"d",DATETIME,{{100,"2020-01-01"},{110,"2021-01-01"}})'
+        solved = 'DATATABLE("v",DOUBLE,"d",DATETIME,{{-100,"2020-01-01"},{110,"2021-01-01"}})'
+        x = f"XIRR({no_solution},[v],[d],0.1,"
+        self.assertEqual(dax.local(x + '"x")'), "LOCAL-REJECT:Cannot convert value 'x' of type Text to type Number.")
+        self.assertEqual(dax.local(x + '"5")'), "5")
+        self.assertEqual(dax.local(x + '"5")+1'), "6")
+        self.assertEqual(dax.local("ISTEXT(" + x + '"5"))'), "False")
+        self.assertEqual(dax.local(x + " TRUE())"), "1")
+        self.assertEqual(dax.local(x + " BLANK())"), "BLANK")
+        self.assertEqual(dax.local(x + " DATE(2020,1,1))"), "43831")
+        # the alternate is only converted when it is used
+        self.assertTrue(same("0.0997135788202284", dax.local(f'XIRR({solved},[v],[d],0.1,"x")')))
+        self.assertEqual(dax.local(f'ISERROR(XIRR({solved},[v],[d],0.1,"x"))'), "False")
+        # text that Power BI may read as a date is refused, never guessed
+        self.assertTrue(dax.local(x + '"2020-01-01")').startswith("LOCAL-REJECT:"))
+        self.assertNotIn("Cannot convert", dax.local(x + '"2020-01-01")'))
+        # the one-sign case of a generated table
+        added = 'ADDCOLUMNS(DATATABLE("v",DOUBLE,"n",INTEGER,{{100,0},{100,365}}),"d",DATE(2020,1,1)+[n])'
+        self.assertEqual(dax.local(f'XIRR({added},[v],[d],0.1,"x")'), "LOCAL-REJECT:Cannot convert value 'x' of type Text to type Number.")
+
+
 if __name__ == "__main__":
     unittest.main()

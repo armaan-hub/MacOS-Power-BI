@@ -17989,6 +17989,25 @@ def evaluate_measures(
             finally:
                 xnpv_depth[0] -= 1
         if function == "XIRR":
+            def xirr_alternate_number(alternate: Any) -> Any:
+                """Live Power BI (Task 33): the alternateResult is converted to a Number when it is returned (BLANK stays BLANK, TRUE is 1, a date is its serial)."""
+                if alternate is None or (isinstance(alternate, Decimal) and not isinstance(alternate, dax_dates.DaxDateTime)):
+                    return alternate
+                if isinstance(alternate, bool):
+                    return Decimal(1 if alternate else 0)
+                if isinstance(alternate, dax_dates.DaxDateTime):
+                    return Decimal(alternate)
+                if isinstance(alternate, (int, float)):
+                    return alternate
+                if isinstance(alternate, str):
+                    try:
+                        return dax_typed.text_to_number(alternate)
+                    except MeasureRuntimeError:
+                        if dax_dates.text_serial(alternate) is not None or dax_dates.date_shaped_text(alternate):  # a date-like text: not measured, refused
+                            raise MeasureError(f"The local engine does not model the text '{alternate.strip()}' as the XIRR alternate result.") from None
+                        raise
+                raise MeasureError("The XIRR alternate result of this type is not modelled by the local engine.")
+
             if arguments[0][0] == "tableconstructor" and any(isinstance(row, tuple) and row and row[0] == "tableconstructor" for row in arguments[0][1]):
                 raise MeasureError("XIRR over a table constructor with several columns is not supported in the local engine.")
             read_nodes = [arguments[1], arguments[2]]
@@ -18058,7 +18077,7 @@ def evaluate_measures(
             neg = any(v < 0 for v, _ in non_blank_flows)
             if not (pos and neg):
                 if len(arguments) == 5:
-                    return evaluate(arguments[4], row_context, allow_text=True, allow_boolean=True)
+                    return xirr_alternate_number(evaluate(arguments[4], row_context, allow_text=True, allow_boolean=True))
                 raise MeasureRuntimeError("The XIRR function couldn't find a solution.")
 
             guess_value = 0.1
@@ -18072,7 +18091,7 @@ def evaluate_measures(
                 return Decimal(int(rate)) if float(rate).is_integer() else Decimal(repr(float(rate)))
             if state == "none":
                 if len(arguments) == 5:
-                    return evaluate(arguments[4], row_context, allow_text=True, allow_boolean=True)
+                    return xirr_alternate_number(evaluate(arguments[4], row_context, allow_text=True, allow_boolean=True))
                 raise MeasureRuntimeError("The XIRR function couldn't find a solution.")
             raise MeasureError("The XIRR function's iterative solution is not modelled by the local engine.")
         if function in {"TOCSV", "TOJSON"}:
