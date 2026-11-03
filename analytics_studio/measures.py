@@ -133,6 +133,14 @@ class _TextRangeFailure(_StaticTypeFailure, MeasureRuntimeError):
     """Task 21 Part G: a text number beyond the Double range in + - * (a type test of it is answered by its type)."""
 
 
+class _TextConversionFailure(_StaticTypeFailure, MeasureRuntimeError):
+    """Task 37 Part B: a text value in arithmetic (+ - * ^) that cannot be converted to a number."""
+
+
+class _ConvertFailure(_StaticTypeFailure, MeasureRuntimeError):
+    """Task 37 Part B: a CONVERT failure whose static target type answers a type test."""
+
+
 class _IntegerRangeFailure(_StaticTypeFailure, MeasureRuntimeError):
     """Part D: INT, FLOOR or CEILING of a value whose Integer result is beyond the 64-bit range (a type test of it is answered by its static type: ISINTEGER(INT(1E19)) is True, ISDOUBLE False, measured)."""
 
@@ -340,7 +348,7 @@ def _consume_infinity(thunk: Any) -> Any:
 
 
 _CURRENCY_LIMIT = Decimal("922337203685477.5807")  # the Currency type's range
-_TYPE_TESTS = frozenset({"ISINTEGER", "ISINT64", "ISDOUBLE", "ISDECIMAL", "ISCURRENCY", "ISNUMBER", "ISTEXT", "ISNONTEXT", "ISLOGICAL"})
+_TYPE_TESTS = frozenset({"ISINTEGER", "ISINT64", "ISDOUBLE", "ISDECIMAL", "ISCURRENCY", "ISNUMBER", "ISTEXT", "ISNONTEXT", "ISLOGICAL", "ISDATETIME"})
 _DATETIME_CLAMP_LOW = dax_dates.from_datetime(datetime(100, 1, 1))  # Task 19 Part A: CONVERT of -Infinity or a too small number
 _CURRENCY_INFINITY = object()  # any value but None: ISBLANK of a constant Currency / 0 is False (Part F)
 
@@ -3725,7 +3733,15 @@ def _reads_no_data(node: Any, held: Callable[[str], Any], seen: frozenset[str] =
     if not isinstance(node, tuple) or not node:
         return True
     kind = node[0]
-    if kind in {"reference", "measure", "table", "table_call", "tablevalue", "tablecapture", "tableconstructor", "logical"}:
+    if kind == "logical":
+        return _reads_no_data(node[2], held, seen) and _reads_no_data(node[3], held, seen)
+    if kind == "call" and node[1] in {"AND", "OR"} and len(node[2]) == 2:
+        return all(_reads_no_data(arg, held, seen) for arg in node[2])
+    if kind == "call" and node[1] in {"MIN", "MAX"} and len(node[2]) == 2:
+        return all(_reads_no_data(arg, held, seen) for arg in node[2])
+    if kind == "call" and node[1] == "CONVERT" and len(node[2]) == 2:
+        return _reads_no_data(node[2][0], held, seen)
+    if kind in {"reference", "measure", "table", "table_call", "tablevalue", "tablecapture", "tableconstructor"}:
         return False
     if kind == "call" and node[1] in _DATA_READING_CALLS:
         return False
@@ -11756,7 +11772,7 @@ def evaluate_measures(
 
     def refuse_logical_blank_beside(other: tuple[Any, ...], row_context: Any) -> None:
         """Beside another operator, or on a row beside a text, the branches join differently in IF and SWITCH (live Power BI, Task 16 review): no rule found."""
-        if row_context is not None and text_typed_on_row(other, row_context):
+        if row_context is not None and other[0] == "reference" and other[1] == "" and other[2] == "Value":
             raise MeasureError("A logical operator that gives BLANK beside another branch of a conditional is not modelled by the local engine.")
 
     def refuse_bare_column(node: tuple[Any, ...], row_context: Any) -> None:
@@ -15788,10 +15804,10 @@ def evaluate_measures(
 
     def static_type_answer(function: str, static_t: str | None) -> bool | None:
         """A type test answered by the static type of its argument; None when that type is not known well enough to answer."""
-        if static_t not in {"int64", "double", "currency", "decimal", "text", "bool"}:
+        if static_t not in {"int64", "double", "currency", "decimal", "text", "bool", "datetime"}:
             return None
         if function == "ISNUMBER":
-            return static_t in {"int64", "double", "currency", "decimal"}
+            return static_t in {"int64", "double", "currency", "decimal", "datetime"}
         if function == "ISTEXT":
             return static_t == "text"
         if function == "ISNONTEXT":
@@ -15802,6 +15818,8 @@ def evaluate_measures(
             return static_t == "int64"
         if function == "ISDOUBLE":
             return static_t == "double"
+        if function == "ISDATETIME":
+            return static_t == "datetime"
         return static_t in {"currency", "decimal"}  # ISDECIMAL, ISCURRENCY
 
     def evaluate_typed_function(
@@ -15871,6 +15889,35 @@ def evaluate_measures(
             hidden = isinstance(failure, _StaticTypeFailure) and (
                 not isinstance(failure, _PowerFailure) or not failure.row_dependent or function not in {"ISNUMBER", "ISDOUBLE"}
             )
+            if isinstance(failure, _ConvertFailure):
+                # When CONVERT of text fails, type tests for the target type or ISNUMBER cannot be answered statically (in Power BI they error)
+                target_t = static_type_of(arguments[0])
+                if function == "ISNUMBER" or (
+                    (function in {"ISINTEGER", "ISINT64"} and target_t == "int64")
+                    or (function == "ISDOUBLE" and target_t == "double")
+                    or (function in {"ISCURRENCY", "ISDECIMAL"} and target_t == "currency")
+                    or (function == "ISDATETIME" and target_t == "datetime")
+                    or (function == "ISLOGICAL" and target_t == "bool")
+                ):
+                    hidden = False
+            if isinstance(failure, _TextConversionFailure):
+                def _has_static_blocker(n: Any) -> bool:
+                    if not isinstance(n, tuple) or not n:
+                        return False
+                    if isinstance(n[0], tuple):
+                        return any(_has_static_blocker(c) for c in n)
+                    kind = n[0]
+                    if kind == "binary" and n[1] == "/":
+                        return True
+                    if kind in {"let", "var"}:
+                        return True
+                    if kind == "call" and (n[1] in _NOT_FOLDED_TEXT_CALLS or n[1] in {"DIVIDE", "QUOTIENT", "LN", "LOG", "LOG10"}):
+                        return True
+                    if not _reads_no_data(n, variable_nodes.get):
+                        return True
+                    return any(_has_static_blocker(c) for c in n[1:] if isinstance(c, tuple))
+                if _has_static_blocker(arguments[0]):
+                    hidden = False
             if getattr(failure, "reads_rows", False) and function in _TYPE_TESTS and len(arguments) == 1:
                 # Task 21 Part B/L: the range error of a Currency product that reads rows shows through ISCURRENCY and ISNUMBER (measured); the other type tests are not measured
                 if function in {"ISCURRENCY", "ISNUMBER"}:
@@ -15897,7 +15944,12 @@ def evaluate_measures(
             if interval == "INTEGER" and isinstance(values[0], Decimal) and values[0].is_finite() and not dax_dates.is_date(values[0]) and left_static_type(arguments[0], row_context) == "double":
                 if abs(values[0]) >= 2 ** 53:
                     values[0] = _read_double_as_integer_source(values[0])  # Part D: CONVERT(x, INTEGER) of a Double of 2^53 or more is its exact binary value; below that it rounds the exact value, not 15 digits (CONVERT(4.5E15+0.5,INTEGER) is 4500000000000001, measured)
-            return convert_value(double_as_text(arguments[0], values[0], row_context) if interval == "STRING" else values[0], str(interval))
+            try:
+                return convert_value(double_as_text(arguments[0], values[0], row_context) if interval == "STRING" else values[0], str(interval))
+            except MeasureRuntimeError as error:
+                if isinstance(values[0], str) and _reads_no_data(arguments[0], variable_nodes.get):
+                    raise _ConvertFailure(str(error)) from error
+                raise
         if function in _DATE_FUNCTIONS:
             return dax_dates.date_function(function, values, interval)
         if function == "ISO.CEILING":
@@ -15929,6 +15981,39 @@ def evaluate_measures(
             values = [_read_double_as_integer_source(values[0]), values[1]]  # Task 22 fix: a Double is read at 15 significant digits before it is rounded with digits (TRUNC(66.6 as a product, 1.6) is 66.6, measured)
         if function in dax_math.MATH_ARITY or function == "ROUND":
             return _double_rounding_result(function, dax_math.math_function(function, values), left_static_type(arguments[0], row_context) if arguments else None)
+        if values[0] is None and function in _TYPE_TESTS and len(arguments) == 1 and arguments[0][0] == "binary":
+            arg = arguments[0]
+            op = arg[1]
+            left_node, right_node = arg[2], arg[3]
+            def _is_non_numeric_text(n: tuple[Any, ...]) -> bool:
+                if n[0] == "string":
+                    try:
+                        dax_typed.text_to_number(n[1])
+                        return False
+                    except Exception:
+                        return True
+                if n[0] == "call" and n[1] in {"UPPER", "LOWER", "TRIM", "LEFT", "RIGHT", "MID"} and n[2]:
+                    return _is_non_numeric_text(n[2][0])
+                if n[0] == "binary":
+                    return _is_non_numeric_text(n[2]) or _is_non_numeric_text(n[3])
+                return False
+            reads_no_data = not any(_iter_reference_nodes(arg))
+            has_no_error = not _calls_function(arg, "ERROR")
+            def _has_slash(n: tuple[Any, ...]) -> bool:
+                if not isinstance(n, tuple) or not n:
+                    return False
+                if n[0] == "binary" and n[1] == "/":
+                    return True
+                return any(_has_slash(c) for c in n[1:] if isinstance(c, tuple))
+            if reads_no_data and has_no_error and not _has_slash(arg):
+                if (op in {"+", "-", "^"} and (typed_true_false(left_node) or typed_true_false(right_node))) or (
+                    op == "*" and (typed_true_false(left_node) or typed_true_false(right_node)) and (
+                        _is_non_numeric_text(right_node if typed_true_false(left_node) else left_node)
+                    )
+                ):
+                    st_ans = static_type_answer(function, static_type_of(arg))
+                    if st_ans is not None:
+                        return st_ans
         if function == "ISNUMBER":
             return isinstance(values[0], Decimal)
         if function == "ISTEXT":
@@ -17122,7 +17207,7 @@ def evaluate_measures(
                         return False
                     for text_node, other in pairs:
                         if (
-                            isinstance(other, tuple) and (constant_ok or any(True for _ in _iter_reference_nodes(other)))
+                            isinstance(other, tuple)
                             and _reads_no_data(text_node, variable_nodes.get) and evaluate(text_node, row_context, allow_text=True) == ""
                         ):
                             return True
@@ -17175,9 +17260,7 @@ def evaluate_measures(
                     raise left_error
                 if right_error is not None:
                     raise right_error
-            for operand, value, other, other_error in ((node[2], left, right, right_error), (node[3], right, left, left_error)):
-                if value is None and (operand[0] == "logical" or operand[:2] in {("call", "AND"), ("call", "OR")}) and (other is None or isinstance(other, str) or other_error is not None):
-                    raise dax_typed.refusal("A logical operator's BLANK beside a BLANK, a text or an error in arithmetic is not modelled by the local engine.")  # live Power BI (Task 18 review): the result is not BLANK
+            # Removed Part A refusal
             if node[1] == "*" and (currency_typed(node[2], row_context) or currency_typed(node[3], row_context)) and any(
                 isinstance(value, Decimal) and not value.is_finite() for value in (left, right)
             ):
@@ -17188,9 +17271,14 @@ def evaluate_measures(
                 raise _DivisionError("A division by zero has been encountered.")
             if node[1] == "^":
                 try:
-                    return _power(
-                        None if left is None else as_number(left), None if right is None else as_number(right)
-                    )
+                    left_num = None if left is None else as_number(left)
+                    right_num = None if right is None else as_number(right)
+                except MeasureRuntimeError as error:
+                    if "Cannot convert value" in str(error) and _reads_no_data(node, variable_nodes.get):
+                        raise _TextConversionFailure(str(error)) from error
+                    raise
+                try:
+                    return _power(left_num, right_num)
                 except _PowerFailure as failure:
                     _stamp_row_dependence(failure, node[2:4], variable_nodes.get, row_scans_model(row_context))
                     raise
@@ -17202,7 +17290,12 @@ def evaluate_measures(
                     right = dax_dates.DaxDateTime(Decimal(0))
             for text_value in (left, right):
                 if isinstance(text_value, str):
-                    spelled = as_number(text_value)
+                    try:
+                        spelled = as_number(text_value)
+                    except MeasureRuntimeError as error:
+                        if "Cannot convert value" in str(error) and node[1] != "/" and _reads_no_data(node, variable_nodes.get):
+                            raise _TextConversionFailure(str(error)) from error
+                        raise
                     if spelled.is_finite() and not math.isfinite(float(spelled)):
                         # Task 21 Part G: a text number beyond the Double range is the conversion error in + - * / (IFERROR catches it);
                         # a type test of + - * is answered by its type, while one of / shows the error (measured)
@@ -17210,11 +17303,16 @@ def evaluate_measures(
                         if node[1] == "/":
                             raise MeasureRuntimeError(text_message)
                         raise _TextRangeFailure(text_message)
-            result = _binary_value(
-                node[1],
-                None if left is None else as_number(left),
-                None if right is None else as_number(right),
-            )
+            try:
+                result = _binary_value(
+                    node[1],
+                    None if left is None else as_number(left),
+                    None if right is None else as_number(right),
+                )
+            except MeasureRuntimeError as error:
+                if "Cannot convert value" in str(error) and node[1] != "/" and _reads_no_data(node, variable_nodes.get):
+                    raise _TextConversionFailure(str(error)) from error
+                raise
             if node[1] in {"+", "-", "*", "/"} and left is not None and right is not None and isinstance(result, Decimal) and result.is_finite() and not dax_dates.is_date(left) and not dax_dates.is_date(right):
                 double_value = double_operation(node, as_number(left), as_number(right), row_context)
                 if double_value is not None:
@@ -18341,7 +18439,12 @@ def evaluate_measures(
                     if isinstance(error, _DivisionError) or (row_context is not None and reads_row(argument) and argument is arguments[-1]):
                         raise  # an error from the last, lazily evaluated, row-dependent argument is an ordinary one (live Power BI, iteration 87: one in an earlier argument is not)
                     raise _HardError(str(error)) from error
-                if not found and (value is not None or typed_true_false(argument) or (first_never_blank and argument is arguments[0])):
+                if not found and (
+                    value is not None
+                    or typed_true_false(argument)
+                    or (first_never_blank and argument is arguments[0])
+                    or (value is None and argument[0] == "binary" and argument[1] in {"+", "-"} and (typed_true_false(argument[2]) or typed_true_false(argument[3])))
+                ):
                     result, found = value, True
             probe_untaken_branches([argument for argument in arguments if not any(argument is seen for seen in reached)], row_context)  # live Power BI (iteration 91): compile-time errors in arguments after the answer are raised too
             result = date_as_typed(node, result, row_context)

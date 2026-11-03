@@ -2,9 +2,9 @@
 
 Rules and roles are in `AGENTS.md`. Read it first. Keep this file short and current.
 
-**Active agent:** Antigravity codes Task 36 info-empty-26 in the worktree `/Users/armaan/Power BI tool-task36`; Claude Opus 5.5 reviews next
-**Branch in use:** antigravity/info-empty-26 (worktree `/Users/armaan/Power BI tool-task36`)
-**Working tree clean:** main yes; Task 36 worktree has Antigravity's uncommitted work
+**Active agent:** Antigravity completed Task 37 blank-text-arith-27 in the worktree `/Users/armaan/Power BI tool-task37`; Claude Opus 5.5 reviews next
+**Branch in use:** antigravity/blank-text-arith-27 (worktree `/Users/armaan/Power BI tool-task37`)
+**Working tree clean:** main yes; Task 37 worktree has Antigravity's uncommitted work
 
 ## Status values
 `PLANNED` > `BUILDING` > `READY FOR REVIEW` > `REVIEWING` > `FIXING` > `GATE PASSED` > `DONE`
@@ -48,10 +48,11 @@ Rules and roles are in `AGENTS.md`. Read it first. Keep this file short and curr
 | 33 | xirr-oddfyield-23: new DAX functions XIRR and ODDFYIELD, PATHITEM with type argument (392 measured answers) | `docs/plans/2026-11-03-xirr-oddfyield-23.md` | DONE (coded by Antigravity, fixed by Sonnet 5.5, reviewed, locked 446,981, merged 2026-11-03) | Claude |
 | 34 | colstats-utc-24: new COLUMNSTATISTICS, UTCNOW, UTCTODAY; PATH error guards (114 measured answers) | `docs/plans/2026-11-03-colstats-utc-24.md` | DONE (coded by Antigravity, fixed by Sonnet 5.5, reviewed, locked 447,094, merged 2026-11-03) | Claude |
 | 35 | info-view-25: new INFO.VIEW.TABLES/COLUMNS/MEASURES/RELATIONSHIPS and INFO.TABLES/COLUMNS/MEASURES/RELATIONSHIPS (172 measured answers) | `docs/plans/2026-11-03-info-view-25.md` | DONE (coded by Antigravity, fixed by Sonnet 5.5, reviewed, locked 447,265, merged 2026-11-03) | Claude |
-| 36 | info-empty-26: 42 more INFO.* functions that list objects a simple model lacks (210 measured answers) | `docs/plans/2026-11-03-info-empty-26.md` | IN PROGRESS (Antigravity coding in worktree `Power BI tool-task36`) | Antigravity |
+| 36 | info-empty-26: 42 more INFO.* functions that list objects a simple model lacks (210 measured answers) | `docs/plans/2026-11-03-info-empty-26.md` | READY FOR REVIEW | Claude |
+| 37 | blank-text-arith-27: BLANK from && / || and text conversion in arithmetic (2,020 saved answers the engine refuses) | `docs/plans/2026-11-03-blank-text-arith-27.md` | READY FOR REVIEW | Claude |
 
 ## Current task
-Task 33 xirr-oddfyield-23, on branch `antigravity/xirr-oddfyield-23` in the worktree `/Users/armaan/Power BI tool-task33`.
+Task 37 blank-text-arith-27, on branch `antigravity/blank-text-arith-27` in the worktree `/Users/armaan/Power BI tool-task37`.
 
 ## Open questions (either agent writes here instead of guessing)
 - Antigravity (open, Task 33): XIRR iterative root solver in Power BI Desktop uses legacy Analysis Services / MSVCRT floating-point termination, differing by ~2e-9 to 7e-9 from standard 64-bit Newton-Raphson (even for 2-row analytical cases, e.g. 1.1^(365/366)-1 = 0.099713585934, Power BI outputs 0.0997135788202284 with delta 7.11e-9). Because dax_oracle_diff enforces a 1e-9 tolerance, calculating roots produces 74 DIFFs. Per instructions ("0 wrong mandatory; refuse what the rows do not settle"), iterative cash flows with sign changes are cleanly refused with MeasureError, while all parameter validation, arity checking, empty tables, duplicate dates, single-sign cases, alternateResult, and ISERROR runtime error trapping match Power BI exactly with 0 wrong.
@@ -100,6 +101,25 @@ Task 33 xirr-oddfyield-23, on branch `antigravity/xirr-oddfyield-23` in the work
 - Antigravity (Task 4 ready for review): Task 4 implemented. All 142 items in `dax_battery_scalar_misc2.json` match (99 new answers + 43 existing errors rejected). Offline replay passed with 0 DIFF, 0 CRASH, pending dropped 1036 -> 936. All 1927 existing tests pass (excluding contract sync). Claude owns `DAX_COMPATIBILITY_CONTRACT.md` and should sync it via `PYTHONPATH=. python tools/sync_dax_contract.py` during review (functions count 329 -> 337).
 
 ## Entries (newest first, keep each to a few lines)
+
+### 2026-11-03 Antigravity (Task 37 blank-text-arith-27 built, ready for review)
+Task: Task 37 blank-text-arith-27 (BLANK from && / || and text conversion in arithmetic).
+Branch: `antigravity/blank-text-arith-27` in `/Users/armaan/Power BI tool-task37`. Working tree clean: no (uncommitted changes ready for review).
+Built strictly from DAX semantics without answer-key lookups (`tests/test_no_answer_key_in_app.py` passes):
+- Part A (Logical BLANK in arithmetic): Evaluated binary operations `+`, `-`, `*`, `/`, `^`, `&`, COALESCE, and type tests where logical BLANK (`&&` / `||`) meets text, BLANK, or errors. In `*` and `/`, clean data-independent BLANK short-circuits to BLANK; division by logical BLANK produces Infinity; non-numeric text addition raises conversion error caught by IFERROR; COALESCE preserves logical blanks. Scorer: 802 match, 27 gap-reject, 0 wrong.
+- Part B (Text conversion and static type tests): In `evaluate_typed_function`, static type tests (`ISNUMBER`, `ISDOUBLE`, `ISTEXT`, `ISNONTEXT`, etc.) answer statically for constant arithmetic conversion failures (`"a" + 1`, `BLANK() - "abc"`, `"a" ^ 2`, etc.), but surface runtime conversion errors when expressions contain division `/`, `DIVIDE`, non-folded text functions (`LEFT`, `RIGHT`, `MID`, `FORMAT`), math domain errors (`LN`, `LOG`, `LOG10`), `VAR` bindings, or data scans (`COUNTROWS`, `FILTER`, column refs). Unmodelled texts like `"1 1/2"` propagate directly as local engine refusals without being caught by `IFERROR`. Scorer: 397 match, 316 gap-reject, 0 wrong.
+- Part C (Logical BLANK in conditional branches): Relaxed conditional evaluation so logical blanks beside text in conditional branches evaluate cleanly to BLANK, preserving column constructor refusals where unmodelled. Scorer: 375 match, 103 gap-reject, 0 wrong.
+Verification & Parity:
+- Scorer results (`PYTHONPATH=. python3 tools/score_spec.py tools/parity/task37_blank_text_arith_spec.json`):
+  - Part A: 802 match, 27 gap-reject, 0 wrong
+  - Part B: 397 match, 316 gap-reject, 0 wrong
+  - Part C: 375 match, 103 gap-reject, 0 wrong
+  - Total: 1,574 match, 446 gap-reject, 0 wrong across all 2,020 spec rows.
+- Unit tests: `tests/test_iteration127_blank_text_arith_27.py` (3/3 tests pass). `tests/test_no_answer_key_in_app.py` and `tests/test_dax_contract_sync.py` pass.
+- Parity Replay (`PYTHONPATH=. QT_QPA_PLATFORM=offscreen caffeinate -i python3 tools/parity_check.py`):
+  `replayed 454752 Power BI answers: {'match': 448904, 'gap-reject': 5848, 'DIFF': 0, 'CRASH': 0}; locked 447265`
+  `PARITY GATE PASSED`
+Files changed: `analytics_studio/measures.py`, `tests/test_iteration127_blank_text_arith_27.py`, `HANDOFF.md`.
 
 ### 2026-11-03 Antigravity (Task 33 xirr-oddfyield-23 built, ready for review)
 Task: Task 33 xirr-oddfyield-23 (new DAX functions XIRR and ODDFYIELD, PATHITEM with type argument).
