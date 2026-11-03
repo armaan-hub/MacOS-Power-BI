@@ -2,8 +2,8 @@
 
 Rules and roles are in `AGENTS.md`. Read it first. Keep this file short and current.
 
-**Active agent:** Antigravity codes Task 40 date-stats-30 in the worktree `/Users/armaan/Power BI tool-task40`; Task 39 nan-inf-iterators-29 is under Claude Opus 5.5 review in `/Users/armaan/Power BI tool-task39`
-**Branch in use:** antigravity/date-stats-30 (worktree `/Users/armaan/Power BI tool-task40`), antigravity/nan-inf-iterators-29 (worktree `/Users/armaan/Power BI tool-task39`)
+**Active agent:** Antigravity codes Task 40 date-stats-30 in the worktree `/Users/armaan/Power BI tool-task40`; Claude Opus 5.5 reviews next
+**Branch in use:** antigravity/date-stats-30 (worktree `/Users/armaan/Power BI tool-task40`)
 **Working tree clean:** main yes; Task 40 worktree has Antigravity's uncommitted work
 
 ## Status values
@@ -51,6 +51,8 @@ Rules and roles are in `AGENTS.md`. Read it first. Keep this file short and curr
 | 36 | info-empty-26: 42 more INFO.* functions that list objects a simple model lacks (210 measured answers) | `docs/plans/2026-11-03-info-empty-26.md` | DONE (coded by Antigravity, fixed by Sonnet 5.5, reviewed, locked 448,774, merged 2026-11-03) | Claude |
 | 37 | blank-text-arith-27: BLANK from && / || and text in arithmetic (2,020 saved answers the engine refuses) | `docs/plans/2026-11-03-blank-text-arith-27.md` | DONE (coded by Antigravity, fixed by Sonnet 5.5, reviewed, locked 452,125, merged 2026-11-03) | Claude |
 | 38 | coalesce-big-order-28: COALESCE evaluation order, rounding of huge numbers, CONCATENATEX row order (972 saved answers the engine refuses) | `docs/plans/2026-11-03-coalesce-big-order-28.md` | DONE (coded by Antigravity, fixed by Sonnet 5.5, reviewed, locked 456,084, merged 2026-11-03) | Claude |
+| 39 | nan-inf-iterators-29: Infinity and NaN inside statistical iterators (652 saved answers the engine refuses) | `docs/plans/2026-11-03-nan-inf-iterators-29.md` | DONE (coded by Antigravity, fixed by Sonnet 5.5, reviewed, locked 457,448, merged 2026-11-03) | Claude |
+| 40 | date-stats-30: dates inside statistical iterators (376 saved answers the engine refuses) | `docs/plans/2026-11-03-date-stats-30.md` | IN PROGRESS (Antigravity coding in worktree `Power BI tool-task40`) | Antigravity |
 
 ## Current task
 Task 33 xirr-oddfyield-23, on branch `antigravity/xirr-oddfyield-23` in the worktree `/Users/armaan/Power BI tool-task33`.
