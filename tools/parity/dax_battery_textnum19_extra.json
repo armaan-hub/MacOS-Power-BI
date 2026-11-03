@@ -1,0 +1,962 @@
+{
+"powerbi_version": "2.157.879.0 (26.08)+da30fe74eb0b8a8786ab7326b69c400a0e951831",
+"frozen": "2026-11-03",
+"items": [
+{
+"expr": "COUNTROWS(FILTER(Facts,\"abc\"))",
+"powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 42) Cannot convert value 'abc' of type Text to type True/False.\""
+},
+{
+"expr": "SUMX(Facts,IF(\"abc\",1,2))",
+"powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 33) Cannot convert value 'abc' of type Text to type True/False.\""
+},
+{
+"expr": "COUNTX(FILTER(Facts,\"abc\"),1)",
+"powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 39) Cannot convert value 'abc' of type Text to type True/False.\""
+},
+{
+"expr": "CALCULATE(COUNTROWS(Facts),FILTER(Facts,\"abc\"))",
+"powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 59) Cannot convert value 'abc' of type Text to type True/False.\""
+},
+{
+"expr": "IF(\"abc\",1,2)",
+"powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 22) Cannot convert value 'abc' of type Text to type True/False.\""
+},
+{
+"expr": "ISERROR(IF(\"abc\",1,2))",
+"powerbi": "True"
+},
+{
+"expr": "NOT(\"abc\")",
+"powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 23) Cannot convert value 'abc' of type Text to type True/False.\""
+},
+{
+"expr": "SUMX(Facts,IF(NOT(\"abc\"),1,2))",
+"powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 37) Cannot convert value 'abc' of type Text to type True/False.\""
+},
+{
+"expr": "AND(\"abc\",TRUE())",
+"powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 23) Cannot convert value 'abc' of type Text to type True/False.\""
+},
+{
+"expr": "SWITCH(TRUE(),\"abc\",1,2)",
+"powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 33) Function 'SWITCH' does not support comparing values of type True/False with values of type Text. Consider using the VALUE or FORMAT function to convert one of the values.\""
+},
+{
+"expr": "COUNTROWS(FILTER(Facts,\"true\"))",
+"powerbi": "6"
+},
+{
+"expr": "SUMX(Facts,IF(\"true\",1,2))",
+"powerbi": "6"
+},
+{
+"expr": "COUNTX(FILTER(Facts,\"true\"),1)",
+"powerbi": "6"
+},
+{
+"expr": "ISERROR(COUNTROWS(FILTER(Facts,\"true\")))",
+"powerbi": "False"
+},
+{
+"expr": "CALCULATE(COUNTROWS(Facts),FILTER(Facts,\"true\"))",
+"powerbi": "6"
+},
+{
+"expr": "IF(\"true\",1,2)",
+"powerbi": "1"
+},
+{
+"expr": "ISERROR(IF(\"true\",1,2))",
+"powerbi": "False"
+},
+{
+"expr": "NOT(\"true\")",
+"powerbi": "False"
+},
+{
+"expr": "SUMX(Facts,IF(NOT(\"true\"),1,2))",
+"powerbi": "12"
+},
+{
+"expr": "AND(\"true\",TRUE())",
+"powerbi": "True"
+},
+{
+"expr": "SWITCH(TRUE(),\"true\",1,2)",
+"powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 33) Function 'SWITCH' does not support comparing values of type True/False with values of type Text. Consider using the VALUE or FORMAT function to convert one of the values.\""
+},
+{
+"expr": "COUNTROWS(FILTER(Facts,\"TRUE\"))",
+"powerbi": "6"
+},
+{
+"expr": "SUMX(Facts,IF(\"TRUE\",1,2))",
+"powerbi": "6"
+},
+{
+"expr": "COUNTX(FILTER(Facts,\"TRUE\"),1)",
+"powerbi": "6"
+},
+{
+"expr": "ISERROR(COUNTROWS(FILTER(Facts,\"TRUE\")))",
+"powerbi": "False"
+},
+{
+"expr": "CALCULATE(COUNTROWS(Facts),FILTER(Facts,\"TRUE\"))",
+"powerbi": "6"
+},
+{
+"expr": "IF(\"TRUE\",1,2)",
+"powerbi": "1"
+},
+{
+"expr": "ISERROR(IF(\"TRUE\",1,2))",
+"powerbi": "False"
+},
+{
+"expr": "NOT(\"TRUE\")",
+"powerbi": "False"
+},
+{
+"expr": "SUMX(Facts,IF(NOT(\"TRUE\"),1,2))",
+"powerbi": "12"
+},
+{
+"expr": "SWITCH(TRUE(),\"TRUE\",1,2)",
+"powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 33) Function 'SWITCH' does not support comparing values of type True/False with values of type Text. Consider using the VALUE or FORMAT function to convert one of the values.\""
+},
+{
+"expr": "COUNTROWS(FILTER(Facts,\"1\"))",
+"powerbi": "6"
+},
+{
+"expr": "SUMX(Facts,IF(\"1\",1,2))",
+"powerbi": "6"
+},
+{
+"expr": "COUNTX(FILTER(Facts,\"1\"),1)",
+"powerbi": "6"
+},
+{
+"expr": "ISERROR(COUNTROWS(FILTER(Facts,\"1\")))",
+"powerbi": "False"
+},
+{
+"expr": "CALCULATE(COUNTROWS(Facts),FILTER(Facts,\"1\"))",
+"powerbi": "6"
+},
+{
+"expr": "IF(\"1\",1,2)",
+"powerbi": "1"
+},
+{
+"expr": "ISERROR(IF(\"1\",1,2))",
+"powerbi": "False"
+},
+{
+"expr": "NOT(\"1\")",
+"powerbi": "False"
+},
+{
+"expr": "SUMX(Facts,IF(NOT(\"1\"),1,2))",
+"powerbi": "12"
+},
+{
+"expr": "SWITCH(TRUE(),\"1\",1,2)",
+"powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 33) Function 'SWITCH' does not support comparing values of type True/False with values of type Text. Consider using the VALUE or FORMAT function to convert one of the values.\""
+},
+{
+"expr": "COUNTROWS(FILTER(Facts,\"0\"))",
+"powerbi": "BLANK"
+},
+{
+"expr": "SUMX(Facts,IF(\"0\",1,2))",
+"powerbi": "12"
+},
+{
+"expr": "COUNTX(FILTER(Facts,\"0\"),1)",
+"powerbi": "BLANK"
+},
+{
+"expr": "ISERROR(COUNTROWS(FILTER(Facts,\"0\")))",
+"powerbi": "False"
+},
+{
+"expr": "CALCULATE(COUNTROWS(Facts),FILTER(Facts,\"0\"))",
+"powerbi": "BLANK"
+},
+{
+"expr": "IF(\"0\",1,2)",
+"powerbi": "2"
+},
+{
+"expr": "ISERROR(IF(\"0\",1,2))",
+"powerbi": "False"
+},
+{
+"expr": "NOT(\"0\")",
+"powerbi": "True"
+},
+{
+"expr": "SUMX(Facts,IF(NOT(\"0\"),1,2))",
+"powerbi": "6"
+},
+{
+"expr": "SWITCH(TRUE(),\"0\",1,2)",
+"powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 33) Function 'SWITCH' does not support comparing values of type True/False with values of type Text. Consider using the VALUE or FORMAT function to convert one of the values.\""
+},
+{
+"expr": "COUNTROWS(FILTER(Facts,\"\"))",
+"powerbi": "BLANK"
+},
+{
+"expr": "SUMX(Facts,IF(\"\",1,2))",
+"powerbi": "12"
+},
+{
+"expr": "COUNTX(FILTER(Facts,\"\"),1)",
+"powerbi": "BLANK"
+},
+{
+"expr": "ISERROR(COUNTROWS(FILTER(Facts,\"\")))",
+"powerbi": "False"
+},
+{
+"expr": "CALCULATE(COUNTROWS(Facts),FILTER(Facts,\"\"))",
+"powerbi": "BLANK"
+},
+{
+"expr": "IF(\"\",1,2)",
+"powerbi": "2"
+},
+{
+"expr": "ISERROR(IF(\"\",1,2))",
+"powerbi": "False"
+},
+{
+"expr": "NOT(\"\")",
+"powerbi": "True"
+},
+{
+"expr": "SUMX(Facts,IF(NOT(\"\"),1,2))",
+"powerbi": "6"
+},
+{
+"expr": "SWITCH(TRUE(),\"\",1,2)",
+"powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 33) Function 'SWITCH' does not support comparing values of type True/False with values of type Text. Consider using the VALUE or FORMAT function to convert one of the values.\""
+},
+{
+"expr": "COUNTROWS(FILTER(Facts,\" \"))",
+"powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 42) Cannot convert value '' of type Text to type True/False.\""
+},
+{
+"expr": "SUMX(Facts,IF(\" \",1,2))",
+"powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 33) Cannot convert value '' of type Text to type True/False.\""
+},
+{
+"expr": "COUNTX(FILTER(Facts,\" \"),1)",
+"powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 39) Cannot convert value '' of type Text to type True/False.\""
+},
+{
+"expr": "CALCULATE(COUNTROWS(Facts),FILTER(Facts,\" \"))",
+"powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 59) Cannot convert value '' of type Text to type True/False.\""
+},
+{
+"expr": "IF(\" \",1,2)",
+"powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 22) Cannot convert value '' of type Text to type True/False.\""
+},
+{
+"expr": "ISERROR(IF(\" \",1,2))",
+"powerbi": "True"
+},
+{
+"expr": "NOT(\" \")",
+"powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 23) Cannot convert value '' of type Text to type True/False.\""
+},
+{
+"expr": "SUMX(Facts,IF(NOT(\" \"),1,2))",
+"powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 37) Cannot convert value '' of type Text to type True/False.\""
+},
+{
+"expr": "AND(\" \",TRUE())",
+"powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"Query (1, 23) Cannot convert value '' of type Text to type True/False.\""
+},
+{
+"expr": "SWITCH(TRUE(),\" \",1,2)",
+"powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 33) Function 'SWITCH' does not support comparing values of type True/False with values of type Text. Consider using the VALUE or FORMAT function to convert one of the values.\""
+},
+{
+"expr": "COUNTROWS(FILTER(Facts,\"false\"))",
+"powerbi": "BLANK"
+},
+{
+"expr": "SUMX(Facts,IF(\"false\",1,2))",
+"powerbi": "12"
+},
+{
+"expr": "COUNTX(FILTER(Facts,\"false\"),1)",
+"powerbi": "BLANK"
+},
+{
+"expr": "ISERROR(COUNTROWS(FILTER(Facts,\"false\")))",
+"powerbi": "False"
+},
+{
+"expr": "CALCULATE(COUNTROWS(Facts),FILTER(Facts,\"false\"))",
+"powerbi": "BLANK"
+},
+{
+"expr": "IF(\"false\",1,2)",
+"powerbi": "2"
+},
+{
+"expr": "ISERROR(IF(\"false\",1,2))",
+"powerbi": "False"
+},
+{
+"expr": "NOT(\"false\")",
+"powerbi": "True"
+},
+{
+"expr": "SUMX(Facts,IF(NOT(\"false\"),1,2))",
+"powerbi": "6"
+},
+{
+"expr": "SWITCH(TRUE(),\"false\",1,2)",
+"powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 33) Function 'SWITCH' does not support comparing values of type True/False with values of type Text. Consider using the VALUE or FORMAT function to convert one of the values.\""
+},
+{
+"expr": "COUNTROWS(FILTER(Facts,DATE(2020,1,1)))",
+"powerbi": "6"
+},
+{
+"expr": "SUMX(Facts,IF(DATE(2020,1,1),1,2))",
+"powerbi": "6"
+},
+{
+"expr": "COUNTX(FILTER(Facts,DATE(2020,1,1)),1)",
+"powerbi": "6"
+},
+{
+"expr": "ISERROR(COUNTROWS(FILTER(Facts,DATE(2020,1,1))))",
+"powerbi": "False"
+},
+{
+"expr": "CALCULATE(COUNTROWS(Facts),FILTER(Facts,DATE(2020,1,1)))",
+"powerbi": "6"
+},
+{
+"expr": "IF(DATE(2020,1,1),1,2)",
+"powerbi": "1"
+},
+{
+"expr": "ISERROR(IF(DATE(2020,1,1),1,2))",
+"powerbi": "False"
+},
+{
+"expr": "NOT(DATE(2020,1,1))",
+"powerbi": "False"
+},
+{
+"expr": "SUMX(Facts,IF(NOT(DATE(2020,1,1)),1,2))",
+"powerbi": "12"
+},
+{
+"expr": "AND(DATE(2020,1,1),TRUE())",
+"powerbi": "True"
+},
+{
+"expr": "SWITCH(TRUE(),DATE(2020,1,1),1,2)",
+"powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 33) Function 'SWITCH' does not support comparing values of type True/False with values of type Date. Consider using the VALUE or FORMAT function to convert one of the values.\""
+},
+{
+"expr": "COUNTROWS(FILTER(Facts,DATE(1899,12,30)))",
+"powerbi": "BLANK"
+},
+{
+"expr": "SUMX(Facts,IF(DATE(1899,12,30),1,2))",
+"powerbi": "12"
+},
+{
+"expr": "COUNTX(FILTER(Facts,DATE(1899,12,30)),1)",
+"powerbi": "BLANK"
+},
+{
+"expr": "ISERROR(COUNTROWS(FILTER(Facts,DATE(1899,12,30))))",
+"powerbi": "False"
+},
+{
+"expr": "CALCULATE(COUNTROWS(Facts),FILTER(Facts,DATE(1899,12,30)))",
+"powerbi": "BLANK"
+},
+{
+"expr": "IF(DATE(1899,12,30),1,2)",
+"powerbi": "2"
+},
+{
+"expr": "ISERROR(IF(DATE(1899,12,30),1,2))",
+"powerbi": "False"
+},
+{
+"expr": "NOT(DATE(1899,12,30))",
+"powerbi": "True"
+},
+{
+"expr": "SUMX(Facts,IF(NOT(DATE(1899,12,30)),1,2))",
+"powerbi": "6"
+},
+{
+"expr": "AND(DATE(1899,12,30),TRUE())",
+"powerbi": "False"
+},
+{
+"expr": "SWITCH(TRUE(),DATE(1899,12,30),1,2)",
+"powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 33) Function 'SWITCH' does not support comparing values of type True/False with values of type Date. Consider using the VALUE or FORMAT function to convert one of the values.\""
+},
+{
+"expr": "COUNTROWS(FILTER(Facts,Facts[Region]))",
+"powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 42) Cannot convert value 'East' of type Text to type True/False.\""
+},
+{
+"expr": "SUMX(Facts,IF(Facts[Region],1,2))",
+"powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 33) Cannot convert value 'East' of type Text to type True/False.\""
+},
+{
+"expr": "COUNTX(FILTER(Facts,Facts[Region]),1)",
+"powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 39) Cannot convert value 'East' of type Text to type True/False.\""
+},
+{
+"expr": "CALCULATE(COUNTROWS(Facts),FILTER(Facts,Facts[Region]))",
+"powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 59) Cannot convert value 'East' of type Text to type True/False.\""
+},
+{
+"expr": "IF(Facts[Region],1,2)",
+"powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 22) A single value for column 'Region' in table 'Facts' cannot be determined. This can happen when a measure or function formula refers to a column that contains many values without specifying an aggregation such as min, max, count, or sum to get a single result.\""
+},
+{
+"expr": "ISERROR(IF(Facts[Region],1,2))",
+"powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 30) A single value for column 'Region' in table 'Facts' cannot be determined. This can happen when a measure or function formula refers to a column that contains many values without specifying an aggregation such as min, max, count, or sum to get a single result.\""
+},
+{
+"expr": "NOT(Facts[Region])",
+"powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 23) A single value for column 'Region' in table 'Facts' cannot be determined. This can happen when a measure or function formula refers to a column that contains many values without specifying an aggregation such as min, max, count, or sum to get a single result.\""
+},
+{
+"expr": "SUMX(Facts,IF(NOT(Facts[Region]),1,2))",
+"powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 37) Cannot convert value 'East' of type Text to type True/False.\""
+},
+{
+"expr": "AND(Facts[Region],TRUE())",
+"powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 23) A single value for column 'Region' in table 'Facts' cannot be determined. This can happen when a measure or function formula refers to a column that contains many values without specifying an aggregation such as min, max, count, or sum to get a single result.\""
+},
+{
+"expr": "SWITCH(TRUE(),Facts[Region],1,2)",
+"powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 33) A single value for column 'Region' in table 'Facts' cannot be determined. This can happen when a measure or function formula refers to a column that contains many values without specifying an aggregation such as min, max, count, or sum to get a single result.\""
+},
+{
+"expr": "COUNTROWS(FILTER(Facts,Facts[Note]))",
+"powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 42) Cannot convert value 'Paid' of type Text to type True/False.\""
+},
+{
+"expr": "SUMX(Facts,IF(Facts[Note],1,2))",
+"powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 33) Cannot convert value 'Paid' of type Text to type True/False.\""
+},
+{
+"expr": "COUNTX(FILTER(Facts,Facts[Note]),1)",
+"powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 39) Cannot convert value 'Paid' of type Text to type True/False.\""
+},
+{
+"expr": "CALCULATE(COUNTROWS(Facts),FILTER(Facts,Facts[Note]))",
+"powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 59) Cannot convert value 'Paid' of type Text to type True/False.\""
+},
+{
+"expr": "IF(Facts[Note],1,2)",
+"powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 22) A single value for column 'Note' in table 'Facts' cannot be determined. This can happen when a measure or function formula refers to a column that contains many values without specifying an aggregation such as min, max, count, or sum to get a single result.\""
+},
+{
+"expr": "ISERROR(IF(Facts[Note],1,2))",
+"powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 30) A single value for column 'Note' in table 'Facts' cannot be determined. This can happen when a measure or function formula refers to a column that contains many values without specifying an aggregation such as min, max, count, or sum to get a single result.\""
+},
+{
+"expr": "NOT(Facts[Note])",
+"powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 23) A single value for column 'Note' in table 'Facts' cannot be determined. This can happen when a measure or function formula refers to a column that contains many values without specifying an aggregation such as min, max, count, or sum to get a single result.\""
+},
+{
+"expr": "SUMX(Facts,IF(NOT(Facts[Note]),1,2))",
+"powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 37) Cannot convert value 'Paid' of type Text to type True/False.\""
+},
+{
+"expr": "AND(Facts[Note],TRUE())",
+"powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 23) A single value for column 'Note' in table 'Facts' cannot be determined. This can happen when a measure or function formula refers to a column that contains many values without specifying an aggregation such as min, max, count, or sum to get a single result.\""
+},
+{
+"expr": "SWITCH(TRUE(),Facts[Note],1,2)",
+"powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 33) A single value for column 'Note' in table 'Facts' cannot be determined. This can happen when a measure or function formula refers to a column that contains many values without specifying an aggregation such as min, max, count, or sum to get a single result.\""
+},
+{
+"expr": "COUNTROWS(FILTER(Facts,FORMAT(Facts[Quantity],\"0\")))",
+"powerbi": "5"
+},
+{
+"expr": "SUMX(Facts,IF(FORMAT(Facts[Quantity],\"0\"),1,2))",
+"powerbi": "7"
+},
+{
+"expr": "COUNTX(FILTER(Facts,FORMAT(Facts[Quantity],\"0\")),1)",
+"powerbi": "5"
+},
+{
+"expr": "ISERROR(COUNTROWS(FILTER(Facts,FORMAT(Facts[Quantity],\"0\"))))",
+"powerbi": "False"
+},
+{
+"expr": "CALCULATE(COUNTROWS(Facts),FILTER(Facts,FORMAT(Facts[Quantity],\"0\")))",
+"powerbi": "5"
+},
+{
+"expr": "IF(FORMAT(Facts[Quantity],\"0\"),1,2)",
+"powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 29) A single value for column 'Quantity' in table 'Facts' cannot be determined. This can happen when a measure or function formula refers to a column that contains many values without specifying an aggregation such as min, max, count, or sum to get a single result.\""
+},
+{
+"expr": "ISERROR(IF(FORMAT(Facts[Quantity],\"0\"),1,2))",
+"powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 37) A single value for column 'Quantity' in table 'Facts' cannot be determined. This can happen when a measure or function formula refers to a column that contains many values without specifying an aggregation such as min, max, count, or sum to get a single result.\""
+},
+{
+"expr": "NOT(FORMAT(Facts[Quantity],\"0\"))",
+"powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 30) A single value for column 'Quantity' in table 'Facts' cannot be determined. This can happen when a measure or function formula refers to a column that contains many values without specifying an aggregation such as min, max, count, or sum to get a single result.\""
+},
+{
+"expr": "SUMX(Facts,IF(NOT(FORMAT(Facts[Quantity],\"0\")),1,2))",
+"powerbi": "11"
+},
+{
+"expr": "AND(FORMAT(Facts[Quantity],\"0\"),TRUE())",
+"powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 30) A single value for column 'Quantity' in table 'Facts' cannot be determined. This can happen when a measure or function formula refers to a column that contains many values without specifying an aggregation such as min, max, count, or sum to get a single result.\""
+},
+{
+"expr": "SWITCH(TRUE(),FORMAT(Facts[Quantity],\"0\"),1,2)",
+"powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 40) A single value for column 'Quantity' in table 'Facts' cannot be determined. This can happen when a measure or function formula refers to a column that contains many values without specifying an aggregation such as min, max, count, or sum to get a single result.\""
+},
+{
+"expr": "COUNTROWS(FILTER(Facts,IF(Facts[Quantity]>2,\"x\",\"\")))",
+"powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 42) Cannot convert value 'x' of type Text to type True/False.\""
+},
+{
+"expr": "SUMX(Facts,IF(IF(Facts[Quantity]>2,\"x\",\"\"),1,2))",
+"powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 33) Cannot convert value 'x' of type Text to type True/False.\""
+},
+{
+"expr": "COUNTX(FILTER(Facts,IF(Facts[Quantity]>2,\"x\",\"\")),1)",
+"powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 39) Cannot convert value 'x' of type Text to type True/False.\""
+},
+{
+"expr": "CALCULATE(COUNTROWS(Facts),FILTER(Facts,IF(Facts[Quantity]>2,\"x\",\"\")))",
+"powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 59) Cannot convert value 'x' of type Text to type True/False.\""
+},
+{
+"expr": "IF(IF(Facts[Quantity]>2,\"x\",\"\"),1,2)",
+"powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 25) A single value for column 'Quantity' in table 'Facts' cannot be determined. This can happen when a measure or function formula refers to a column that contains many values without specifying an aggregation such as min, max, count, or sum to get a single result.\""
+},
+{
+"expr": "ISERROR(IF(IF(Facts[Quantity]>2,\"x\",\"\"),1,2))",
+"powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 33) A single value for column 'Quantity' in table 'Facts' cannot be determined. This can happen when a measure or function formula refers to a column that contains many values without specifying an aggregation such as min, max, count, or sum to get a single result.\""
+},
+{
+"expr": "NOT(IF(Facts[Quantity]>2,\"x\",\"\"))",
+"powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 26) A single value for column 'Quantity' in table 'Facts' cannot be determined. This can happen when a measure or function formula refers to a column that contains many values without specifying an aggregation such as min, max, count, or sum to get a single result.\""
+},
+{
+"expr": "SUMX(Facts,IF(NOT(IF(Facts[Quantity]>2,\"x\",\"\")),1,2))",
+"powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 37) Cannot convert value 'x' of type Text to type True/False.\""
+},
+{
+"expr": "AND(IF(Facts[Quantity]>2,\"x\",\"\"),TRUE())",
+"powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 26) A single value for column 'Quantity' in table 'Facts' cannot be determined. This can happen when a measure or function formula refers to a column that contains many values without specifying an aggregation such as min, max, count, or sum to get a single result.\""
+},
+{
+"expr": "SWITCH(TRUE(),IF(Facts[Quantity]>2,\"x\",\"\"),1,2)",
+"powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 36) A single value for column 'Quantity' in table 'Facts' cannot be determined. This can happen when a measure or function formula refers to a column that contains many values without specifying an aggregation such as min, max, count, or sum to get a single result.\""
+},
+{
+"expr": "COUNTROWS(FILTER(Facts,BLANK()))",
+"powerbi": "BLANK"
+},
+{
+"expr": "SUMX(Facts,IF(BLANK(),1,2))",
+"powerbi": "12"
+},
+{
+"expr": "COUNTX(FILTER(Facts,BLANK()),1)",
+"powerbi": "BLANK"
+},
+{
+"expr": "ISERROR(COUNTROWS(FILTER(Facts,BLANK())))",
+"powerbi": "False"
+},
+{
+"expr": "ISERROR(IF(BLANK(),1,2))",
+"powerbi": "False"
+},
+{
+"expr": "SUMX(Facts,IF(NOT(BLANK()),1,2))",
+"powerbi": "6"
+},
+{
+"expr": "COUNTROWS(FILTER(Facts,CONVERT(Facts[Quantity],STRING)))",
+"powerbi": "5"
+},
+{
+"expr": "SUMX(Facts,IF(CONVERT(Facts[Quantity],STRING),1,2))",
+"powerbi": "7"
+},
+{
+"expr": "COUNTX(FILTER(Facts,CONVERT(Facts[Quantity],STRING)),1)",
+"powerbi": "5"
+},
+{
+"expr": "ISERROR(COUNTROWS(FILTER(Facts,CONVERT(Facts[Quantity],STRING))))",
+"powerbi": "False"
+},
+{
+"expr": "CALCULATE(COUNTROWS(Facts),FILTER(Facts,CONVERT(Facts[Quantity],STRING)))",
+"powerbi": "5"
+},
+{
+"expr": "IF(CONVERT(Facts[Quantity],STRING),1,2)",
+"powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 30) A single value for column 'Quantity' in table 'Facts' cannot be determined. This can happen when a measure or function formula refers to a column that contains many values without specifying an aggregation such as min, max, count, or sum to get a single result.\""
+},
+{
+"expr": "ISERROR(IF(CONVERT(Facts[Quantity],STRING),1,2))",
+"powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 38) A single value for column 'Quantity' in table 'Facts' cannot be determined. This can happen when a measure or function formula refers to a column that contains many values without specifying an aggregation such as min, max, count, or sum to get a single result.\""
+},
+{
+"expr": "NOT(CONVERT(Facts[Quantity],STRING))",
+"powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 31) A single value for column 'Quantity' in table 'Facts' cannot be determined. This can happen when a measure or function formula refers to a column that contains many values without specifying an aggregation such as min, max, count, or sum to get a single result.\""
+},
+{
+"expr": "SUMX(Facts,IF(NOT(CONVERT(Facts[Quantity],STRING)),1,2))",
+"powerbi": "11"
+},
+{
+"expr": "AND(CONVERT(Facts[Quantity],STRING),TRUE())",
+"powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 31) A single value for column 'Quantity' in table 'Facts' cannot be determined. This can happen when a measure or function formula refers to a column that contains many values without specifying an aggregation such as min, max, count, or sum to get a single result.\""
+},
+{
+"expr": "SWITCH(TRUE(),CONVERT(Facts[Quantity],STRING),1,2)",
+"powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 41) A single value for column 'Quantity' in table 'Facts' cannot be determined. This can happen when a measure or function formula refers to a column that contains many values without specifying an aggregation such as min, max, count, or sum to get a single result.\""
+},
+{
+"expr": "IFERROR((VALUE(\"x\"))+(1/0),\"caught\")",
+"powerbi": "caught"
+},
+{
+"expr": "ISERROR((VALUE(\"x\"))+(1/0))",
+"powerbi": "True"
+},
+{
+"expr": "IFERROR(MAXX(Facts,(VALUE(\"x\"))+(1/0)),\"c\")",
+"powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 39) Cannot convert value 'x' of type Text to type Number.\""
+},
+{
+"expr": "IFERROR((VALUE(\"x\"))*(1/0),\"caught\")",
+"powerbi": "caught"
+},
+{
+"expr": "IFERROR(MAXX(Facts,(VALUE(\"x\"))*(1/0)),\"c\")",
+"powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 39) Cannot convert value 'x' of type Text to type Number.\""
+},
+{
+"expr": "IFERROR((VALUE(\"x\"))&(1/0),\"caught\")",
+"powerbi": "caught"
+},
+{
+"expr": "IFERROR(MAXX(Facts,(VALUE(\"x\"))&(1/0)),\"c\")",
+"powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 39) Cannot convert value 'x' of type Text to type Number.\""
+},
+{
+"expr": "IFERROR((VALUE(\"x\"))<(1/0),\"caught\")",
+"powerbi": "caught"
+},
+{
+"expr": "ISERROR((VALUE(\"x\"))<(1/0))",
+"powerbi": "True"
+},
+{
+"expr": "IFERROR(MAXX(Facts,(VALUE(\"x\"))<(1/0)),\"c\")",
+"powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 38) The function MAXX cannot work with values of type Boolean.\""
+},
+{
+"expr": "IFERROR((1/0)+(VALUE(\"x\")),\"caught\")",
+"powerbi": "caught"
+},
+{
+"expr": "IFERROR(MAXX(Facts,(1/0)+(VALUE(\"x\"))),\"c\")",
+"powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 45) Cannot convert value 'x' of type Text to type Number.\""
+},
+{
+"expr": "IFERROR((1/0)*(VALUE(\"x\")),\"caught\")",
+"powerbi": "caught"
+},
+{
+"expr": "ISERROR((1/0)*(VALUE(\"x\")))",
+"powerbi": "True"
+},
+{
+"expr": "IFERROR(MAXX(Facts,(1/0)*(VALUE(\"x\"))),\"c\")",
+"powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 45) Cannot convert value 'x' of type Text to type Number.\""
+},
+{
+"expr": "IFERROR((1/0)&(VALUE(\"x\")),\"caught\")",
+"powerbi": "caught"
+},
+{
+"expr": "ISERROR((1/0)&(VALUE(\"x\")))",
+"powerbi": "True"
+},
+{
+"expr": "IFERROR(MAXX(Facts,(1/0)&(VALUE(\"x\"))),\"c\")",
+"powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 45) Cannot convert value 'x' of type Text to type Number.\""
+},
+{
+"expr": "IFERROR((1/0)<(VALUE(\"x\")),\"caught\")",
+"powerbi": "caught"
+},
+{
+"expr": "ISERROR((1/0)<(VALUE(\"x\")))",
+"powerbi": "True"
+},
+{
+"expr": "IFERROR(MAXX(Facts,(1/0)<(VALUE(\"x\"))),\"c\")",
+"powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 38) The function MAXX cannot work with values of type Boolean.\""
+},
+{
+"expr": "IFERROR((VALUE(\"x\"))+(ERROR(\"e\")),\"caught\")",
+"powerbi": "caught"
+},
+{
+"expr": "ISERROR((VALUE(\"x\"))+(ERROR(\"e\")))",
+"powerbi": "True"
+},
+{
+"expr": "IFERROR(MAXX(Facts,(VALUE(\"x\"))+(ERROR(\"e\"))),\"c\")",
+"powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 39) Cannot convert value 'x' of type Text to type Number.\""
+},
+{
+"expr": "IFERROR((VALUE(\"x\"))*(ERROR(\"e\")),\"caught\")",
+"powerbi": "caught"
+},
+{
+"expr": "ISERROR((VALUE(\"x\"))*(ERROR(\"e\")))",
+"powerbi": "True"
+},
+{
+"expr": "IFERROR(MAXX(Facts,(VALUE(\"x\"))*(ERROR(\"e\"))),\"c\")",
+"powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 39) Cannot convert value 'x' of type Text to type Number.\""
+},
+{
+"expr": "IFERROR((VALUE(\"x\"))&(ERROR(\"e\")),\"caught\")",
+"powerbi": "caught"
+},
+{
+"expr": "ISERROR((VALUE(\"x\"))&(ERROR(\"e\")))",
+"powerbi": "True"
+},
+{
+"expr": "IFERROR(MAXX(Facts,(VALUE(\"x\"))&(ERROR(\"e\"))),\"c\")",
+"powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 39) Cannot convert value 'x' of type Text to type Number.\""
+},
+{
+"expr": "IFERROR((VALUE(\"x\"))<(ERROR(\"e\")),\"caught\")",
+"powerbi": "caught"
+},
+{
+"expr": "ISERROR((VALUE(\"x\"))<(ERROR(\"e\")))",
+"powerbi": "True"
+},
+{
+"expr": "IFERROR(MAXX(Facts,(VALUE(\"x\"))<(ERROR(\"e\"))),\"c\")",
+"powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 38) The function MAXX cannot work with values of type Boolean.\""
+},
+{
+"expr": "IFERROR((ERROR(\"e\"))+(VALUE(\"y\")),\"caught\")",
+"powerbi": "caught"
+},
+{
+"expr": "ISERROR((ERROR(\"e\"))+(VALUE(\"y\")))",
+"powerbi": "True"
+},
+{
+"expr": "IFERROR(MAXX(Facts,(ERROR(\"e\"))+(VALUE(\"y\"))),\"c\")",
+"powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 39) e\""
+},
+{
+"expr": "IFERROR((ERROR(\"e\"))*(VALUE(\"y\")),\"caught\")",
+"powerbi": "caught"
+},
+{
+"expr": "ISERROR((ERROR(\"e\"))*(VALUE(\"y\")))",
+"powerbi": "True"
+},
+{
+"expr": "IFERROR(MAXX(Facts,(ERROR(\"e\"))*(VALUE(\"y\"))),\"c\")",
+"powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 39) e\""
+},
+{
+"expr": "IFERROR((ERROR(\"e\"))&(VALUE(\"y\")),\"caught\")",
+"powerbi": "caught"
+},
+{
+"expr": "ISERROR((ERROR(\"e\"))&(VALUE(\"y\")))",
+"powerbi": "True"
+},
+{
+"expr": "IFERROR(MAXX(Facts,(ERROR(\"e\"))&(VALUE(\"y\"))),\"c\")",
+"powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 39) e\""
+},
+{
+"expr": "IFERROR((ERROR(\"e\"))<(VALUE(\"y\")),\"caught\")",
+"powerbi": "caught"
+},
+{
+"expr": "ISERROR((ERROR(\"e\"))<(VALUE(\"y\")))",
+"powerbi": "True"
+},
+{
+"expr": "IFERROR(MAXX(Facts,(ERROR(\"e\"))<(VALUE(\"y\"))),\"c\")",
+"powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 38) The function MAXX cannot work with values of type Boolean.\""
+},
+{
+"expr": "IFERROR((LOG(-1))+(VALUE(\"x\")),\"caught\")",
+"powerbi": "caught"
+},
+{
+"expr": "ISERROR((LOG(-1))+(VALUE(\"x\")))",
+"powerbi": "True"
+},
+{
+"expr": "IFERROR(MAXX(Facts,(LOG(-1))+(VALUE(\"x\"))),\"c\")",
+"powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 39) An argument of function 'LOG' has the wrong data type or the result is too large or too small.\""
+},
+{
+"expr": "IFERROR((LOG(-1))*(VALUE(\"x\")),\"caught\")",
+"powerbi": "caught"
+},
+{
+"expr": "ISERROR((LOG(-1))*(VALUE(\"x\")))",
+"powerbi": "True"
+},
+{
+"expr": "IFERROR(MAXX(Facts,(LOG(-1))*(VALUE(\"x\"))),\"c\")",
+"powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 39) An argument of function 'LOG' has the wrong data type or the result is too large or too small.\""
+},
+{
+"expr": "IFERROR((LOG(-1))&(VALUE(\"x\")),\"caught\")",
+"powerbi": "caught"
+},
+{
+"expr": "ISERROR((LOG(-1))&(VALUE(\"x\")))",
+"powerbi": "True"
+},
+{
+"expr": "IFERROR(MAXX(Facts,(LOG(-1))&(VALUE(\"x\"))),\"c\")",
+"powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 39) An argument of function 'LOG' has the wrong data type or the result is too large or too small.\""
+},
+{
+"expr": "IFERROR((LOG(-1))<(VALUE(\"x\")),\"caught\")",
+"powerbi": "caught"
+},
+{
+"expr": "ISERROR((LOG(-1))<(VALUE(\"x\")))",
+"powerbi": "True"
+},
+{
+"expr": "IFERROR(MAXX(Facts,(LOG(-1))<(VALUE(\"x\"))),\"c\")",
+"powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 38) The function MAXX cannot work with values of type Boolean.\""
+},
+{
+"expr": "IFERROR((Facts[Region]*1)+(VALUE(\"x\")),\"caught\")",
+"powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 28) A single value for column 'Region' in table 'Facts' cannot be determined. This can happen when a measure or function formula refers to a column that contains many values without specifying an aggregation such as min, max, count, or sum to get a single result.\""
+},
+{
+"expr": "ISERROR((Facts[Region]*1)+(VALUE(\"x\")))",
+"powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 28) A single value for column 'Region' in table 'Facts' cannot be determined. This can happen when a measure or function formula refers to a column that contains many values without specifying an aggregation such as min, max, count, or sum to get a single result.\""
+},
+{
+"expr": "IFERROR(MAXX(Facts,(Facts[Region]*1)+(VALUE(\"x\"))),\"c\")",
+"powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 57) Cannot convert value 'x' of type Text to type Number.\""
+},
+{
+"expr": "IFERROR((Facts[Region]*1)*(VALUE(\"x\")),\"caught\")",
+"powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 28) A single value for column 'Region' in table 'Facts' cannot be determined. This can happen when a measure or function formula refers to a column that contains many values without specifying an aggregation such as min, max, count, or sum to get a single result.\""
+},
+{
+"expr": "ISERROR((Facts[Region]*1)*(VALUE(\"x\")))",
+"powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 28) A single value for column 'Region' in table 'Facts' cannot be determined. This can happen when a measure or function formula refers to a column that contains many values without specifying an aggregation such as min, max, count, or sum to get a single result.\""
+},
+{
+"expr": "IFERROR(MAXX(Facts,(Facts[Region]*1)*(VALUE(\"x\"))),\"c\")",
+"powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 57) Cannot convert value 'x' of type Text to type Number.\""
+},
+{
+"expr": "IFERROR((Facts[Region]*1)&(VALUE(\"x\")),\"caught\")",
+"powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 28) A single value for column 'Region' in table 'Facts' cannot be determined. This can happen when a measure or function formula refers to a column that contains many values without specifying an aggregation such as min, max, count, or sum to get a single result.\""
+},
+{
+"expr": "ISERROR((Facts[Region]*1)&(VALUE(\"x\")))",
+"powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 28) A single value for column 'Region' in table 'Facts' cannot be determined. This can happen when a measure or function formula refers to a column that contains many values without specifying an aggregation such as min, max, count, or sum to get a single result.\""
+},
+{
+"expr": "IFERROR(MAXX(Facts,(Facts[Region]*1)&(VALUE(\"x\"))),\"c\")",
+"powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 39) Cannot convert value 'East' of type Text to type Number.\""
+},
+{
+"expr": "IFERROR((Facts[Region]*1)<(VALUE(\"x\")),\"caught\")",
+"powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 28) A single value for column 'Region' in table 'Facts' cannot be determined. This can happen when a measure or function formula refers to a column that contains many values without specifying an aggregation such as min, max, count, or sum to get a single result.\""
+},
+{
+"expr": "ISERROR((Facts[Region]*1)<(VALUE(\"x\")))",
+"powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 28) A single value for column 'Region' in table 'Facts' cannot be determined. This can happen when a measure or function formula refers to a column that contains many values without specifying an aggregation such as min, max, count, or sum to get a single result.\""
+},
+{
+"expr": "IFERROR(MAXX(Facts,(Facts[Region]*1)<(VALUE(\"x\"))),\"c\")",
+"powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 38) The function MAXX cannot work with values of type Boolean.\""
+},
+{
+"expr": "IFERROR((VALUE(\"x\"))+(Facts[Region]*1),\"caught\")",
+"powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 41) A single value for column 'Region' in table 'Facts' cannot be determined. This can happen when a measure or function formula refers to a column that contains many values without specifying an aggregation such as min, max, count, or sum to get a single result.\""
+},
+{
+"expr": "ISERROR((VALUE(\"x\"))+(Facts[Region]*1))",
+"powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 41) A single value for column 'Region' in table 'Facts' cannot be determined. This can happen when a measure or function formula refers to a column that contains many values without specifying an aggregation such as min, max, count, or sum to get a single result.\""
+},
+{
+"expr": "IFERROR(MAXX(Facts,(VALUE(\"x\"))+(Facts[Region]*1)),\"c\")",
+"powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 39) Cannot convert value 'x' of type Text to type Number.\""
+},
+{
+"expr": "IFERROR((VALUE(\"x\"))*(Facts[Region]*1),\"caught\")",
+"powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 41) A single value for column 'Region' in table 'Facts' cannot be determined. This can happen when a measure or function formula refers to a column that contains many values without specifying an aggregation such as min, max, count, or sum to get a single result.\""
+},
+{
+"expr": "IFERROR(MAXX(Facts,(VALUE(\"x\"))*(Facts[Region]*1)),\"c\")",
+"powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 39) Cannot convert value 'x' of type Text to type Number.\""
+},
+{
+"expr": "IFERROR((VALUE(\"x\"))&(Facts[Region]*1),\"caught\")",
+"powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 41) A single value for column 'Region' in table 'Facts' cannot be determined. This can happen when a measure or function formula refers to a column that contains many values without specifying an aggregation such as min, max, count, or sum to get a single result.\""
+},
+{
+"expr": "IFERROR(MAXX(Facts,(VALUE(\"x\"))&(Facts[Region]*1)),\"c\")",
+"powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 39) Cannot convert value 'x' of type Text to type Number.\""
+},
+{
+"expr": "IFERROR((VALUE(\"x\"))<(Facts[Region]*1),\"caught\")",
+"powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 41) A single value for column 'Region' in table 'Facts' cannot be determined. This can happen when a measure or function formula refers to a column that contains many values without specifying an aggregation such as min, max, count, or sum to get a single result.\""
+},
+{
+"expr": "IFERROR(MAXX(Facts,(VALUE(\"x\"))<(Facts[Region]*1)),\"c\")",
+"powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 38) The function MAXX cannot work with values of type Boolean.\""
+}
+]
+}

@@ -1766,3 +1766,13 @@ The standing test workbook is now `tests/Data/Vat File -Aug 2026.xlsx` (sheet `V
 **Saved:** `tools/parity/dax_battery_collation18_extra.json` (390 answers), `tools/parity/task28_text_collation_spec.json`.
 
 **Gate:** PARITY GATE PASSED (fast gate). pytest 2,531 passed; replay 452,703: 442,953 match, 9,750 refused, 0 DIFF, 0 CRASH; locked 440,890 to 442,933. The real app through the measure path, offscreen: 575/575 equal and 1,500 fresh probes with 0 wrong. Power BI answers came from Power BI Desktop on the iPad guest; the project was not saved. No saved Power BI answer was edited.
+
+## 2026-11-03 — Iteration 119 (Task 29 text-number-19: iterator conditions, COALESCE order and text columns in arithmetic (722 refusals become Power BI's answers))
+
+**Who did what:** Antigravity (Gemini 3.8 Flash) found rules for iterator conditions over typed BLANKs and conversions, COALESCE whose earlier argument fails, and text columns in arithmetic inside IFERROR, DIVIDE and ADDCOLUMNS (722 of 2,044 refused saved answers now match; the 826 type-test rows of Part A stay refused); Sonnet 5.5 fixed the gate findings: a text operand of AND/OR/NOT/&&/|| is the error again (`AND(Facts[Note],TRUE())`: 'Cannot convert value Paid of type Text to type True/False'), and a column read without a row context wins over a catchable error and is not swallowed by ISERROR/IFERROR; Claude Opus 5.5 built the spec and measured 282 fresh probes in Power BI.
+
+**Review:** fresh 282: 0 new wrong, 4 rows wrong on main now right. The gate caught the text-condition widening (a wrong answer in the test model), an error-precedence change and one saved answer turned wrong by the first fix; all fixed. A stale guard (`COUNTAX(Facts,Facts[Region]&&"")` = 6 in Power BI) now asserts the measured answer. The fast gate's failure parser was fixed to read subtest ids with spaces. Code read for lookups: none.
+
+**Saved:** `tools/parity/dax_battery_textnum19_extra.json` (239 answers), `tools/parity/task29_text_number_spec.json`.
+
+**Gate:** PARITY GATE PASSED (fast gate). pytest 2,533 passed; replay 452,942: 444,142 match, 8,800 refused, 0 DIFF, 0 CRASH; locked 442,933 to 444,122. The real app through the measure path, offscreen: 575/575 equal and 1,500 fresh probes with 0 wrong. Power BI answers came from Power BI Desktop on the iPad guest; the project was not saved. No saved Power BI answer was edited.

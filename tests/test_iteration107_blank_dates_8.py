@@ -181,10 +181,10 @@ class PartDCountaxOfLogicalTests(unittest.TestCase):
     COLUMN_OPERATORS = ('Facts[Region]&&""',)
 
     def test_column_operands_stay_refused(self) -> None:
+        # Live Power BI measured on 2026-11-03 (Task 29): COUNTAX(Facts,Facts[Region]&&"") answers 6, so it is no longer refused.
         for operator in self.COLUMN_OPERATORS:
             with self.subTest(operator):
-                result = _local(f"COUNTAX(Facts,{operator})")
-                self.assertTrue(result.startswith("LOCAL-REJECT"), result)
+                self.assertEqual("6", _local(f"COUNTAX(Facts,{operator})"))
 
 
 class PartFIsblankCurrencyDivisionTests(unittest.TestCase):
