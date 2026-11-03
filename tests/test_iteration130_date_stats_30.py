@@ -131,6 +131,39 @@ class DateStats30Tests(unittest.TestCase):
         # Negative datetime text formatting
         self.assertEqual("12/28/1899 12:00:00 PM", dax.local('(MAXX(FILTER(Facts,FALSE()),DATE(2021,6,1))-2.5)&""'))
 
+    def test_exact_half_second_of_negative_serial_is_refused_and_card_is_safe(self) -> None:
+        # Task 40 t40h: Power BI rounds an exact half second of a serial below zero up or down by the last digit of its double
+        # (DATE(1800,1,1)+1.5/86400 shows 11:59:58 PM, DATE(1850,7,4)+1.5/86400 shows 11:59:59 PM): refused, never guessed
+        for expression in (
+            '(DATE(1800,1,1)+0.5/86400)&"z"', '(DATE(1800,1,1)+1.5/86400)&"z"', '(DATE(1850,7,4)+1-1.5/86400)&"z"',
+            '(DATE(1899,12,29)+1-1.5/86400)&"z"', 'FORMAT(DATE(1899,12,29)+1-1.5/86400,"yyyy-mm-dd hh:nn:ss")',
+            'FORMAT(DATE(1899,1,15)+1.5/86400,"yyyy-mm-dd hh:nn:ss")',
+        ):
+            self.assertTrue(dax.local(expression).startswith("LOCAL-REJECT"), expression)
+        # off the half second, and a time of day after day zero, keep their measured answers
+        self.assertEqual("1/2/1800 11:59:55 PMz", dax.local('(DATE(1800,1,1)+5.25/86400)&"z"'))
+        self.assertEqual("1899-12-30 00:00:02", dax.local('FORMAT(-0+1.5/86400,"yyyy-mm-dd hh:nn:ss")'))
+        self.assertEqual("1899-12-30 00:00:01", dax.local('FORMAT(-0+0.5/86400,"yyyy-mm-dd hh:nn:ss")'))
+        self.assertEqual("1899-12-30 23:59:59", dax.local('FORMAT(-0+1-1.5/86400,"yyyy-mm-dd hh:nn:ss")'))
+        # the report card never receives such a value: the evaluator refuses it and the next measure still evaluates
+        from analytics_studio.controller import _format_report_number
+        from analytics_studio.measures import MeasureError, evaluate_measures
+
+        def evaluate(expression: str):
+            return evaluate_measures(
+                [{"name": "Probe__", "expression": expression}], dax.LOCAL_ROWS, dax.HEADERS, "Facts", measure_names=["Probe__"],
+                table_context=[{
+                    "id": "facts", "name": "Facts", "headers": dax.HEADERS, "rows": dax.LOCAL_ROWS,
+                    "column_types": {"Sales": "decimal_number", "Quantity": "whole_number", "Region": "text", "Note": "text"},
+                }],
+                active_table_id="facts",
+            )["Probe__"]
+
+        for expression in ("DATE(1800,1,1)+1.5/86400", "DATE(1899,12,29)+1-1.5/86400"):
+            with self.assertRaises(MeasureError, msg=expression):
+                _format_report_number(evaluate(expression))
+        self.assertEqual("15", _format_report_number(evaluate("SUM(Facts[Quantity])")))
+
 
 if __name__ == "__main__":
     unittest.main()
