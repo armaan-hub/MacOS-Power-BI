@@ -14,6 +14,7 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import re
 import subprocess
 import tempfile
 import sys
@@ -39,7 +40,7 @@ DAX_BATTERIES = ["dax_battery", "dax_battery_review", "dax_battery_blank_logic",
     "dax_battery_sdet_filters", "dax_battery_comments_booleans",
     "dax_battery_round2_scope", "dax_battery_round2", "dax_battery_critic_shapes",
     "dax_battery_round3", "dax_battery_round4", "dax_battery_round5", "dax_battery_diff_groups", "dax_battery_iferror_hard_errors", "dax_battery_concatenatex_order", "dax_battery_not_operator", "dax_battery_promoted_pending", "dax_battery_utf16_text", "dax_battery_evaluation_order", "dax_battery_allselected_shadow", "dax_battery_allselected_critic2",
-    "dax_battery_xnpv", "dax_battery_scalar_misc2", "dax_battery_type_tests", "dax_battery_tocsv_tojson", "dax_battery_tocsv_tojson_extra", "dax_battery_tocsv_tojson_extra2", "dax_battery_linest", "dax_battery_linest_extra", "dax_battery_linest_extra2", "dax_battery_linest_extra3", "dax_battery_swi_extra", "dax_battery_swi_extra2", "dax_battery_swi_extra3", "dax_battery_ami_extra", "dax_battery_ami_extra2", "dax_battery_rollup_extra", "dax_battery_rollup_extra2", "dax_battery_rollup_extra3", "dax_battery_table_fns2", "dax_battery_var_scoping", "dax_battery_pending_extra", "dax_battery_pending_extra2", "dax_battery_misc3_extra", "dax_battery_misc3_extra2", "dax_battery_xnpv2", "dax_battery_gaps2", "dax_battery_gaps2_extra", "dax_battery_gaps2_extra2", "dax_battery_variant2_extra", "dax_battery_typed3_extra", "dax_battery_logic4_extra", "dax_battery_typed5_extra", "dax_battery_strict6_extra", "dax_battery_blank8_extra", "dax_battery_convert9_extra", "dax_battery_never10_extra", "dax_battery_currency11_extra", "dax_battery_double12_extra", "dax_battery_big13_extra", "dax_battery_topn14_extra", "dax_battery_trig15_extra", "dax_battery_logical17_extra", "dax_battery_collation18_extra",
+    "dax_battery_xnpv", "dax_battery_scalar_misc2", "dax_battery_type_tests", "dax_battery_tocsv_tojson", "dax_battery_tocsv_tojson_extra", "dax_battery_tocsv_tojson_extra2", "dax_battery_linest", "dax_battery_linest_extra", "dax_battery_linest_extra2", "dax_battery_linest_extra3", "dax_battery_swi_extra", "dax_battery_swi_extra2", "dax_battery_swi_extra3", "dax_battery_ami_extra", "dax_battery_ami_extra2", "dax_battery_rollup_extra", "dax_battery_rollup_extra2", "dax_battery_rollup_extra3", "dax_battery_table_fns2", "dax_battery_var_scoping", "dax_battery_pending_extra", "dax_battery_pending_extra2", "dax_battery_misc3_extra", "dax_battery_misc3_extra2", "dax_battery_xnpv2", "dax_battery_gaps2", "dax_battery_gaps2_extra", "dax_battery_gaps2_extra2", "dax_battery_variant2_extra", "dax_battery_typed3_extra", "dax_battery_logic4_extra", "dax_battery_typed5_extra", "dax_battery_strict6_extra", "dax_battery_blank8_extra", "dax_battery_convert9_extra", "dax_battery_never10_extra", "dax_battery_currency11_extra", "dax_battery_double12_extra", "dax_battery_big13_extra", "dax_battery_topn14_extra", "dax_battery_trig15_extra", "dax_battery_logical17_extra", "dax_battery_collation18_extra", "dax_battery_textnum19_extra",
     "dax_battery_scalar_misc2_extra", "dax_battery_scalar_misc2_extra2",
     "dax_battery_type_tests_extra", "dax_battery_type_tests_extra2"]
 # Real workbooks: the Power BI answers saved by tools/table_oracle_diff.py are replayed against the app's own import.
@@ -174,16 +175,14 @@ def _output(process: subprocess.Popen) -> str:
 
 
 def _failed_test_ids(output: str) -> list[str]:
+    """Test node ids from FAILED / ERROR / SUBFAILED summary lines (a subtest's parameters may hold spaces)."""
     ids = []
     for line in output.splitlines():
-        if line.startswith(("FAILED ", "ERROR ")):
-            node = line.split(" ", 1)[1].split(" - ", 1)[0].strip()
-        elif line.startswith("SUBFAILED"):
-            node = line.split(") ", 1)[-1].split(" - ", 1)[0].strip()
-        else:
+        if not line.startswith(("FAILED ", "ERROR ", "SUBFAILED")):
             continue
-        if "::" in node and node not in ids:
-            ids.append(node)
+        found = re.search(r"(tests/[^\s:]+\.py::[^\s]+)", line)
+        if found and found.group(1) not in ids:
+            ids.append(found.group(1))
     return ids
 
 
