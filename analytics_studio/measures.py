@@ -16124,8 +16124,29 @@ def evaluate_measures(
             return held
         if kind == "let":
             return evaluate_let(node, row_context, allow_text, allow_boolean)
+        def column_read_failure(right_node: Any, error: MeasureError, left_error: BaseException | None = None) -> BaseException:
+            """The left side failed and the right side refused. A column read with no row context is a compile-time error of the whole
+            query in Power BI: it wins over the left side's catchable failure (ISERROR and IFERROR do not see it) and carries Power BI's message."""
+            if row_context is None and (found := _bare_column_outside_row_context(right_node, {
+                str(ctx.get("name", "")).casefold(): {str(h).casefold() for h in ctx.get("headers", [])} for ctx in contexts_by_id.values()
+            })):
+                return MeasureError(
+                    f"A single value for column '{found[1]}' in table '{found[0]}' cannot be determined. "
+                    "Refer to the column inside an aggregation such as MIN, MAX, COUNT or SUM, or iterate its table."
+                )
+            return left_error if left_error is not None else error
+
         if kind == "concat":
-            left = evaluate(node[1], row_context, allow_text=True)
+            try:
+                left = evaluate(node[1], row_context, allow_text=True)
+            except (MeasureRuntimeError, _HardError) as left_failure:
+                try:
+                    evaluate(node[2], row_context, allow_text=True)
+                except (MeasureRuntimeError, _HardError):
+                    pass
+                except MeasureError as error:
+                    raise column_read_failure(node[2], error, left_failure)
+                raise
             right = evaluate(node[2], row_context, allow_text=True)
             if left is None and right is None:
                 return None
@@ -16228,9 +16249,9 @@ def evaluate_measures(
                     right = evaluate(node[3], row_context)
                 except (MeasureRuntimeError, _HardError) as error:
                     right, right_error = None, _held_runtime_failure(error)
-                except MeasureError:
+                except MeasureError as error:
                     if left_error is not None:
-                        raise left_error  # the left side failed first, as it does without Part B
+                        raise column_read_failure(node[3], error, left_error)  # the left side failed first, as it does without Part B
                     raise
                 # corrections rule 1: a BLANK cancels the other side's error only when the BLANK operand reads no data
                 right_bad = right_error is not None or isinstance(right, str)  # an error, or a text that cannot be a number
@@ -16293,10 +16314,10 @@ def evaluate_measures(
                     right = evaluate(node[3], row_context)
                 except (MeasureRuntimeError, _HardError) as error:
                     right, right_error = None, error
-                except MeasureError:
+                except MeasureError as error:
                     if left_error is None:
                         raise
-                    raise left_error  # as before Task 29: the left side's failure was raised before the right side was read (the column-read-without-row-context error is then found by ISBLANK)
+                    raise column_read_failure(node[3], error, left_error)
                 if isinstance(right_error, _HardError):
                     raise right_error
                 if isinstance(left_error, _HardError):
@@ -16433,10 +16454,19 @@ def evaluate_measures(
                 comparison_category = ""
             compare_text = comparison_category in {"text", "variant"}
             compare_boolean = comparison_category in {"boolean", "variant"}
-            left = evaluate(
-                node[2], row_context, allow_text=compare_text,
-                allow_boolean=compare_boolean,
-            )
+            try:
+                left = evaluate(
+                    node[2], row_context, allow_text=compare_text,
+                    allow_boolean=compare_boolean,
+                )
+            except (MeasureRuntimeError, _HardError) as left_failure:
+                try:
+                    evaluate(node[3], row_context, allow_text=compare_text, allow_boolean=compare_boolean)
+                except (MeasureRuntimeError, _HardError):
+                    pass
+                except MeasureError as error:
+                    raise column_read_failure(node[3], error, left_failure)
+                raise
             right = evaluate(
                 node[3], row_context, allow_text=compare_text,
                 allow_boolean=compare_boolean,
