@@ -2864,7 +2864,9 @@ _TOCSV_SIGNED_ZERO_CALLS = frozenset({"CEILING", "FLOOR", "ISO.CEILING", "TRUNC"
 
 def _swi_tied_order_known(node: tuple[Any, ...], lookup: Any) -> bool:
     """True for an index table whose own row order (what breaks ties between equal order values) was checked against Power BI:
-    the distinct values of one column, and FILTER / ADDCOLUMNS / CALCULATETABLE / SUMMARIZE of those."""
+    the distinct values of one column, and FILTER / ADDCOLUMNS / CALCULATETABLE / SUMMARIZE / EXCEPT / INTERSECT / CROSSJOIN of those."""
+    if not isinstance(node, tuple) or not node:
+        return False
     kind = node[0]
     if kind == "var":
         held = lookup(node[1])
@@ -2873,12 +2875,18 @@ def _swi_tied_order_known(node: tuple[Any, ...], lookup: Any) -> bool:
         return node[2][0] == "reference"
     if kind == "call":
         function, arguments = node[1], node[2]
+        if function in {"TOPN", "SAMPLE", "SUMMARIZECOLUMNS"}:
+            return False
         if function in {"ALL", "ALLNOBLANKROW"}:
             return len(arguments) == 1 and arguments[0][0] == "reference"
-        if function in {"FILTER", "ADDCOLUMNS", "CALCULATETABLE"} and arguments:
+        if function in {"FILTER", "ADDCOLUMNS", "CALCULATETABLE", "TREATAS"} and arguments:
             return _swi_tied_order_known(arguments[0], lookup)
-        if function == "SUMMARIZE" and len(arguments) >= 2 and arguments[0][0] == "table":
+        if function in {"SUMMARIZE", "GROUPBY"} and len(arguments) >= 2 and arguments[0][0] == "table":
             return sum(1 for argument in arguments[1:] if argument[0] == "reference") == 1
+        if function in {"EXCEPT", "INTERSECT", "NATURALINNERJOIN", "CROSSJOIN"} and arguments:
+            return _swi_tied_order_known(arguments[0], lookup)
+        if function in {"VALUES", "DISTINCT"} and arguments:
+            return len(arguments) == 1 and arguments[0][0] == "reference"
     return False
 
 
@@ -8945,7 +8953,14 @@ def evaluate_measures(
             finally:
                 group_stack.pop()
             output.append(row)
-        return derived_table(columns + names, output, lineage, {c: context.get("column_types", {}).get(c, "text") for c in columns})
+        gb_types = {c: context.get("column_types", {}).get(c, "text") for c in columns}
+        gb_certain = set()
+        for name, expression in zip(names, expressions):
+            st = _static_numeric_type(expression, table_context, variable_kinds)
+            if st is not None:
+                gb_types[name] = st
+                gb_certain.add(name)
+        return derived_table(columns + names, output, lineage, gb_types, certain_types=gb_certain)
 
     def treat_as(arguments: tuple[tuple[Any, ...], ...]) -> tuple[dict[str, Any], list[dict[str, Any]]]:
         context, rows = table_argument_value(arguments[0])
@@ -9086,7 +9101,7 @@ def evaluate_measures(
         left_context, left_rows = table_argument_value(arguments[0])
         right_context, right_rows = table_argument_value(arguments[2])
 
-        # Power BI joins on data lineage (the loaded column a column came from), never on the column names
+        # Power BI joins on data lineage (the loaded column a column came from), and on matching column names with matching data types
         left_lineage, right_lineage = base_lineage(left_context), base_lineage(right_context)
         right_by_source = {(source["id"], column): h for h, (source, column) in right_lineage.items()}
         common = [(h, right_by_source[(left_lineage[h][0]["id"], left_lineage[h][1])])
@@ -9094,11 +9109,52 @@ def evaluate_measures(
         if not common:
             raise MeasureError("Function SubstituteWithIndex() is not able to detect common columns between its operands that could be used for join.")
 
-        joined_left, joined_right = {l for l, _r in common}, {r.casefold() for _l, r in common}
-        if any(h not in joined_left and h.casefold() in {r.casefold() for r in right_context["headers"]} and h.casefold() not in joined_right
-               for h in left_context["headers"]):
-            # a same-named column without shared lineage (ADDCOLUMNS "k" on both sides): Power BI's join rule for it is not modelled
-            raise MeasureError("SUBSTITUTEWITHINDEX is not modelled when unrelated columns of the two tables share a name.")
+        left_types = left_context.get("column_types", {})
+        right_types = right_context.get("column_types", {})
+
+        def _col_bare(h: str) -> str:
+            return h[h.rfind("[") + 1:-1] if (h.endswith("]") and "[" in h) else h
+
+        def _swi_col_type(context: dict[str, Any], header: str) -> str:
+            t = context.get("column_types", {}).get(header)
+            if t in {"whole_number", "int64", "integer"}:
+                return "int64"
+            if t in {"decimal_number", "decimal", "fixed_decimal", "currency", "double", "number"}:
+                return "double"
+            if t in {"date", "datetime"}:
+                return "date"
+            if t in {"boolean", "bool"}:
+                return "boolean"
+            if t in {"text", "string"}:
+                return "text"
+            for row in context.get("rows", []):
+                val = row.get(header)
+                if val is not None:
+                    if isinstance(val, bool): return "boolean"
+                    if isinstance(val, str): return "text"
+                    if isinstance(val, (date, datetime, dax_dates.DaxDateTime)): return "date"
+                    if isinstance(val, (int, Decimal)):
+                        return "int64" if (isinstance(val, int) or val % 1 == 0) else "double"
+            return "unknown"
+
+        joined_left = {l for l, _r in common}
+        joined_right = {r.casefold() for _l, r in common}
+
+        right_unjoined = {r.casefold(): r for r in right_context["headers"] if r.casefold() not in joined_right}
+        right_unjoined_bare = {_col_bare(r).casefold(): r for r in right_context["headers"] if r.casefold() not in joined_right}
+
+        for l_h in left_context["headers"]:
+            if l_h in joined_left:
+                continue
+            bare_l = _col_bare(l_h).casefold()
+            match_r = right_unjoined.get(l_h.casefold()) or right_unjoined_bare.get(bare_l)
+            if match_r is not None:
+                l_t = _swi_col_type(left_context, l_h)
+                r_t = _swi_col_type(right_context, match_r)
+                if l_t == r_t and l_t != "unknown":
+                    common.append((l_h, match_r))
+                    joined_left.add(l_h)
+                    joined_right.add(match_r.casefold())
         left_types = left_context.get("column_types", {})
         right_types = right_context.get("column_types", {})
         for l_h, r_h in common:
