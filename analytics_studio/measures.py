@@ -2633,8 +2633,10 @@ def _coalesce_with_failing_argument(node: Any) -> bool:
     those arguments in an order the local engine does not reproduce (live probes, iteration 87), so the error may or may not surface."""
     if not isinstance(node, tuple) or not node:
         return False
-    if node[:1] == ("call",) and node[1] == "COALESCE" and len(node[2]) >= 2 and not all(_cannot_raise(argument) for argument in node[2][:-1]):
-        return True
+    if node[:1] == ("call",) and node[1] == "COALESCE" and len(node[2]) >= 2 and any(
+        not _cannot_raise(argument) and next(iter(_direct_column_references(argument)), None) is not None for argument in node[2][:-1]
+    ):
+        return True  # only an argument that reads a row can fail on some rows; one that reads none gives the same answer on every row (measured, Task 38 Part A)
     return any(_coalesce_with_failing_argument(child) for child in node if isinstance(child, tuple))
 
 
@@ -13097,6 +13099,9 @@ def evaluate_measures(
                 # the older rules type a COALESCE by its first argument only, which gives wrong answers when the others differ in type
                 raise MeasureError("COALESCE with branches whose types the local engine cannot establish is not supported in iterator bodies.")
             return None
+        if any(not _cannot_raise(argument) and next(iter(_direct_column_references(argument)), None) is not None for argument in variant_coalesce_arguments):
+            # live Power BI: a COALESCE of mixed types evaluates all its arguments, so an error in a later one (VALUE("East")) is not skipped
+            raise MeasureError("COALESCE of mixed types with an argument that can fail is not supported in the local engine.")
         if value_type == "variant" and numdate_nodes:
             kind = "variant_dates"  # live Power BI: a number-and-date branch inside a Variant turns its dates into plain numbers first
         else:
@@ -17975,6 +17980,8 @@ def evaluate_measures(
             refuse_one_to_one_values_iteration(arguments[0])
             refuse_column_no_row_holds(context, iteration_rows, arguments[1])
             arguments = [arguments[0], iterator_body_as_scanned(function, arguments[0], arguments[1], (context, iteration_rows[0] if iteration_rows else {}, 1)), *arguments[2:]]
+            if iteration_rows and function in {"SUMX", "AVERAGEX", "MAXX", "MINX"} and _coalesce_with_failing_argument(arguments[1]):
+                raise MeasureError("A COALESCE whose earlier argument can fail is evaluated in an order the local engine does not reproduce.")
             if iteration_rows and function in {"SUMX", "AVERAGEX", "MAXX", "MINX"} and _statistic_with_arithmetic(arguments[1]):
                 raise MeasureError("A statistical function beside arithmetic in an iterator body is not exact in the local engine.")
             if function not in {"MAXX", "MINX"} and arguments[1][0] == "call" and arguments[1][1] in {"FIRSTNONBLANK", "LASTNONBLANK", "FIRSTNONBLANKVALUE", "LASTNONBLANKVALUE"}:
@@ -18215,6 +18222,8 @@ def evaluate_measures(
             validation_row = iteration_rows[0] if iteration_rows else {}
             refuse_column_no_row_holds(context, iteration_rows, arguments[1])
             arguments = [arguments[0], iterator_body_as_scanned(function, arguments[0], arguments[1], (context, validation_row, 1)), *arguments[2:]]
+            if iteration_rows and _coalesce_with_failing_argument(arguments[1]):
+                raise MeasureError("A COALESCE whose earlier argument can fail is evaluated in an order the local engine does not reproduce.")
             if iteration_rows and _statistic_with_arithmetic(arguments[1]):
                 raise MeasureError("A statistical function beside arithmetic in an iterator body is not exact in the local engine.")
             # live Power BI (iteration 87): over a body whose IF / SWITCH / IFERROR / COALESCE branches differ in type (a Variant) COUNTX counts
