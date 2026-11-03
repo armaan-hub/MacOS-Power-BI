@@ -9179,6 +9179,18 @@ class StudioController(QObject):
     ) -> list[dict[str, Any]]:
         filter_rows_by_table = filter_rows_by_table or {}
         context = []
+        # Power BI keeps query parameters, custom functions, queries with load off and query folders in the model
+        # (INFO.EXPRESSIONS, INFO.QUERYGROUPS); a folder source also adds its helper queries.
+        model_expressions = bool(
+            self._project.get("query_parameters")
+            or self._project.get("query_functions")
+            or any(
+                source.get("query_group") or source.get("kind") == "folder"
+                for source in self._project.get("data_sources", [])
+                if isinstance(source, dict)
+            )
+            or any(not (table.get("loaded") and table.get("loadEnabled")) for table in self._table_catalog)
+        )
         for table in self._table_catalog:
             if not (table.get("loaded") and table.get("loadEnabled")):
                 continue
@@ -9203,6 +9215,7 @@ class StudioController(QObject):
                 "column_types": dict(table.get("columnTypes", {})),
                 "date_column": str(table.get("dateColumn") or ""),
                 "model_customised": customised,
+                "model_expressions": model_expressions,
                 "filter_column_rows": {},
                 "filter_column_blank_allowed": {},
                 "filter_context_complete": True,

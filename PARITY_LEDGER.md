@@ -96,13 +96,14 @@ Rule: a slice is finished only when it is compared with Power BI, its items are 
 | dax_battery_xirr23_extra | 500 | 0 | 80 | 0 | 0 |
 | dax_battery_colstats24_extra | 113 | 0 | 9 | 0 | 0 |
 | dax_battery_info25_extra | 171 | 0 | 24 | 0 | 0 |
+| dax_battery_info26_extra | 1509 | 0 | 34 | 0 | 0 |
 | dax_battery_scalar_misc2_extra | 563 | 0 | 0 | 0 | 0 |
 | dax_battery_scalar_misc2_extra2 | 151 | 0 | 0 | 0 | 0 |
 | dax_battery_type_tests_extra | 2590 | 0 | 0 | 0 | 0 |
 | dax_battery_type_tests_extra2 | 4614 | 0 | 0 | 0 | 0 |
 | table VAT | 575 | 0 | 0 | 0 | 0 |
 
-## Pending work (7467): Power BI answers, the app refuses
+## Pending work (7501): Power BI answers, the app refuses
 
 - `CALCULATE(COUNTROWS(Facts),Facts[Quantity]<IF(ISEMPTY(CALCULATETABLE(Facts,Facts[Region]="East")),1,4))` (Power BI: `4`) [dax_battery_sdet_filters]
 - `CALCULATE(COUNTROWS(Facts),Facts[Quantity]<COUNTROWS(CALCULATETABLE(CALCULATETABLE(Facts,Facts[Region]="East"))))` (Power BI: `3`) [dax_battery_sdet_filters]
@@ -9183,6 +9184,40 @@ North`) [dax_battery_logic4_extra]
 - `VAR t=INFO.MEASURES() RETURN COUNTROWS(t)+0` (Power BI: `0`) [dax_battery_info25_extra]
 - `COUNTROWS(FILTER(INFO.MEASURES(),TRUE()))*3` (Power BI: `BLANK`) [dax_battery_info25_extra]
 - `SUMX(Facts,COUNTROWS(INFO.MEASURES())+0)` (Power BI: `0`) [dax_battery_info25_extra]
+- `COUNTROWS(UNION(INFO.CALCDEPENDENCY(),INFO.CALCDEPENDENCY()))` (Power BI: `BLANK`) [dax_battery_info26_extra]
+- `SUMX(INFO.CALCDEPENDENCY(),1)+0` (Power BI: `0`) [dax_battery_info26_extra]
+- `CONCATENATEX(INFO.CALCDEPENDENCY(),"x")&"|"` (Power BI: `|`) [dax_battery_info26_extra]
+- `COUNTROWS(CROSSJOIN(INFO.CALCDEPENDENCY(),ROW("z",1)))` (Power BI: `BLANK`) [dax_battery_info26_extra]
+- `COUNTROWS(SELECTCOLUMNS(INFO.CALCDEPENDENCY(),"a",[DATABASE_NAME]))` (Power BI: `BLANK`) [dax_battery_info26_extra]
+- `MAXX(INFO.CALCDEPENDENCY(),[QUERY])` (Power BI: `BLANK`) [dax_battery_info26_extra]
+- `ISBLANK(MINX(INFO.CALCDEPENDENCY(),[DATABASE_NAME]))` (Power BI: `True`) [dax_battery_info26_extra]
+- `COUNTROWS(FILTER(INFO.CALCDEPENDENCY(),[DATABASE_NAME]="x"))` (Power BI: `BLANK`) [dax_battery_info26_extra]
+- `COUNTROWS(FILTER(INFO.CALCDEPENDENCY(),[OBJECT_TYPE]="x"))` (Power BI: `BLANK`) [dax_battery_info26_extra]
+- `COUNTROWS(FILTER(INFO.CALCDEPENDENCY(),[TABLE]="x"))` (Power BI: `BLANK`) [dax_battery_info26_extra]
+- `COUNTROWS(FILTER(INFO.CALCDEPENDENCY(),[OBJECT]="x"))` (Power BI: `BLANK`) [dax_battery_info26_extra]
+- `COUNTROWS(UNION(INFO.DEPENDENCIES(),INFO.DEPENDENCIES()))` (Power BI: `BLANK`) [dax_battery_info26_extra]
+- `SUMX(INFO.DEPENDENCIES(),1)+0` (Power BI: `0`) [dax_battery_info26_extra]
+- `CONCATENATEX(INFO.DEPENDENCIES(),"x")&"|"` (Power BI: `|`) [dax_battery_info26_extra]
+- `COUNTROWS(CROSSJOIN(INFO.DEPENDENCIES(),ROW("z",1)))` (Power BI: `BLANK`) [dax_battery_info26_extra]
+- `COUNTROWS(SELECTCOLUMNS(INFO.DEPENDENCIES(),"a",[DATABASE_NAME]))` (Power BI: `BLANK`) [dax_battery_info26_extra]
+- `MAXX(INFO.DEPENDENCIES(),[QUERY])` (Power BI: `BLANK`) [dax_battery_info26_extra]
+- `ISBLANK(MINX(INFO.DEPENDENCIES(),[DATABASE_NAME]))` (Power BI: `True`) [dax_battery_info26_extra]
+- `COUNTROWS(FILTER(INFO.DEPENDENCIES(),[DATABASE_NAME]="x"))` (Power BI: `BLANK`) [dax_battery_info26_extra]
+- `COUNTROWS(FILTER(INFO.DEPENDENCIES(),[OBJECT_TYPE]="x"))` (Power BI: `BLANK`) [dax_battery_info26_extra]
+- `COUNTROWS(FILTER(INFO.DEPENDENCIES(),[TABLE]="x"))` (Power BI: `BLANK`) [dax_battery_info26_extra]
+- `COUNTROWS(FILTER(INFO.DEPENDENCIES(),[OBJECT]="x"))` (Power BI: `BLANK`) [dax_battery_info26_extra]
+- `COUNTROWS(FILTER(INFO.CALCDEPENDENCY(),[EXPRESSION]="x"))` (Power BI: `BLANK`) [dax_battery_info26_extra]
+- `COUNTROWS(FILTER(INFO.CALCDEPENDENCY(),[REFERENCED_OBJECT_TYPE]="x"))` (Power BI: `BLANK`) [dax_battery_info26_extra]
+- `COUNTROWS(FILTER(INFO.CALCDEPENDENCY(),[REFERENCED_TABLE]="x"))` (Power BI: `BLANK`) [dax_battery_info26_extra]
+- `COUNTROWS(FILTER(INFO.CALCDEPENDENCY(),[REFERENCED_OBJECT]="x"))` (Power BI: `BLANK`) [dax_battery_info26_extra]
+- `COUNTROWS(FILTER(INFO.CALCDEPENDENCY(),[REFERENCED_EXPRESSION]="x"))` (Power BI: `BLANK`) [dax_battery_info26_extra]
+- `COUNTROWS(FILTER(INFO.CALCDEPENDENCY(),[QUERY]="x"))` (Power BI: `BLANK`) [dax_battery_info26_extra]
+- `COUNTROWS(FILTER(INFO.DEPENDENCIES(),[EXPRESSION]="x"))` (Power BI: `BLANK`) [dax_battery_info26_extra]
+- `COUNTROWS(FILTER(INFO.DEPENDENCIES(),[REFERENCED_OBJECT_TYPE]="x"))` (Power BI: `BLANK`) [dax_battery_info26_extra]
+- `COUNTROWS(FILTER(INFO.DEPENDENCIES(),[REFERENCED_TABLE]="x"))` (Power BI: `BLANK`) [dax_battery_info26_extra]
+- `COUNTROWS(FILTER(INFO.DEPENDENCIES(),[REFERENCED_OBJECT]="x"))` (Power BI: `BLANK`) [dax_battery_info26_extra]
+- `COUNTROWS(FILTER(INFO.DEPENDENCIES(),[REFERENCED_EXPRESSION]="x"))` (Power BI: `BLANK`) [dax_battery_info26_extra]
+- `COUNTROWS(FILTER(INFO.DEPENDENCIES(),[QUERY]="x"))` (Power BI: `BLANK`) [dax_battery_info26_extra]
 
 ## Known deviations from Power BI (14): imprecise or unspecified in Power BI, each explained
 
