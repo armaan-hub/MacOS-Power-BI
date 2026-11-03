@@ -429,6 +429,7 @@ DAX_FUNCTION_TEMPLATES.update({
     "VALUE": ("VALUE(text)", "text"),
     "CONCATENATEX": ("CONCATENATEX('Table', expression, \", \")", "'Table'"),
     "XNPV": ("XNPV('Table', values, dates, rate)", "'Table'"),
+    "XIRR": ("XIRR('Table', values, dates)", "'Table'"),
     "CONVERT": ("CONVERT(expression, INTEGER)", "expression"),
     "DATE": ("DATE(2024, 1, 31)", "2024"),
     "DATEDIFF": ("DATEDIFF(start_date, end_date, DAY)", "start_date"),

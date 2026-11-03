@@ -8,7 +8,7 @@
 
 ## Latest status
 
-**Latest status (2026-11-03, after Iteration 122 / Task 32 swi-order-22, SUBSTITUTEWITHINDEX index-table row order and shared column names (480 refusals become Power BI's answers), mix workflow: Antigravity coded, Claude Opus 5.5 planned, reviewed and shipped under the user's delegated approval):** pytest 2,547 passed (fast gate), real app 575/575 and 1,500 fresh probes with 0 wrong, replay 453,855 answers with 446,501 match, 7,354 refused, 0 DIFF, 0 CRASH, locked 446,481. Next: Task 33 xirr-oddfyield-23 (Antigravity coding XIRR, ODDFYIELD, PATHITEM type argument).
+**Latest status (2026-11-03, after Iteration 123 / Task 33 xirr-oddfyield-23, new XIRR and ODDFYIELD, PATHITEM type argument, mix workflow: Antigravity coded, Sonnet 5.5 fixed, Claude Opus 5.5 planned, reviewed and shipped under the user's delegated approval):** pytest 2,557 passed (fast gate), real app 575/575 and 1,500 fresh probes with 0 wrong, replay 454,435 answers with 447,001 match, 7,434 refused, 0 DIFF, 0 CRASH, locked 446,981. Next: Task 34 colstats-utc-24 (COLUMNSTATISTICS, UTCNOW, UTCTODAY) review, then Task 35 info-view-25 (INFO.VIEW and INFO table functions)
 
 **Previous status (2026-11-01, after Iteration 103 / Task 14 logic-tables-4, empty text in logical operators, a VAR block as an iterator table, FILTER over no rows, Currency arithmetic, review done, gate passed, locked 246,907, committed, merged and pushed; 246,927 of 253,237 saved answers match, 0 differ; next: Task 15 typed-columns-5, 1,836 items).**
 

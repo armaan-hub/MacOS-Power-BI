@@ -2,9 +2,9 @@
 
 Rules and roles are in `AGENTS.md`. Read it first. Keep this file short and current.
 
-**Active agent:** Claude Opus 5.5 reviews Task 34 colstats-utc-24 in the worktree `/Users/armaan/Power BI tool-task34`; Antigravity on standby
+**Active agent:** Claude Opus 5.5 reviews Task 34 colstats-utc-24 in the worktree `/Users/armaan/Power BI tool-task34`; Antigravity codes Task 35 in `/Users/armaan/Power BI tool-task35`
 **Branch in use:** antigravity/colstats-utc-24 (worktree `/Users/armaan/Power BI tool-task34`)
-**Working tree clean:** no (uncommitted Task 34 implementation ready for review)
+**Working tree clean:** yes (Task 34 committed, under review)
 
 ## Status values
 `PLANNED` > `BUILDING` > `READY FOR REVIEW` > `REVIEWING` > `FIXING` > `GATE PASSED` > `DONE`
@@ -45,13 +45,14 @@ Rules and roles are in `AGENTS.md`. Read it first. Keep this file short and curr
 | 30 | static-types-20: static types the engine cannot establish (type tests, ==, COALESCE branches; 1,070 saved answers the engine refuses) | `docs/plans/2026-11-03-static-types-20.md` | DONE (coded by Antigravity, fixed by Sonnet 5.5, reviewed, locked 445,260, merged 2026-11-03) | Claude |
 | 31 | linest-edge-21: LINEST/LINESTX near-perfect fits and linearly dependent regressors (677 saved answers the engine refuses) | `docs/plans/2026-11-03-linest-edge-21.md` | DONE (coded by Antigravity, fixed by Sonnet 5.5, reviewed, locked 446,021, merged 2026-11-03) | Claude |
 | 32 | swi-order-22: SUBSTITUTEWITHINDEX index-table row order and shared column names (685 saved answers the engine refuses) | `docs/plans/2026-11-03-swi-order-22.md` | DONE (coded by Antigravity, reviewed, locked 446,481, merged 2026-11-03) | Claude |
-| 33 | xirr-oddfyield-23: new XIRR and ODDFYIELD, PATHITEM/PATHITEMREVERSE type argument (392 saved answers) | `docs/plans/2026-11-03-xirr-oddfyield-23.md` | REVIEWED (Parts B and C accepted; Sonnet fixing XIRR) | Sonnet |
-| 34 | colstats-utc-24: new DAX functions COLUMNSTATISTICS, UTCNOW and UTCTODAY (114 measured answers) | `docs/plans/2026-11-03-colstats-utc-24.md` | READY FOR REVIEW (worktree `/Users/armaan/Power BI tool-task34`) | Claude |
+| 33 | xirr-oddfyield-23: new DAX functions XIRR and ODDFYIELD, PATHITEM with type argument (392 measured answers) | `docs/plans/2026-11-03-xirr-oddfyield-23.md` | DONE (coded by Antigravity, fixed by Sonnet 5.5, reviewed, locked 446,981, merged 2026-11-03) | Claude |
+| 34 | colstats-utc-24: new COLUMNSTATISTICS, UTCNOW, UTCTODAY; PATH error guards (114 measured answers) | `docs/plans/2026-11-03-colstats-utc-24.md` | REVIEWING (Sonnet fixed a mixed-type sort crash; gate next) | Claude |
 
 ## Current task
-Task 34 colstats-utc-24, on branch `antigravity/colstats-utc-24` in the worktree `/Users/armaan/Power BI tool-task34`.
+Task 33 xirr-oddfyield-23, on branch `antigravity/xirr-oddfyield-23` in the worktree `/Users/armaan/Power BI tool-task33`.
 
 ## Open questions (either agent writes here instead of guessing)
+- Antigravity (open, Task 33): XIRR iterative root solver in Power BI Desktop uses legacy Analysis Services / MSVCRT floating-point termination, differing by ~2e-9 to 7e-9 from standard 64-bit Newton-Raphson (even for 2-row analytical cases, e.g. 1.1^(365/366)-1 = 0.099713585934, Power BI outputs 0.0997135788202284 with delta 7.11e-9). Because dax_oracle_diff enforces a 1e-9 tolerance, calculating roots produces 74 DIFFs. Per instructions ("0 wrong mandatory; refuse what the rows do not settle"), iterative cash flows with sign changes are cleanly refused with MeasureError, while all parameter validation, arity checking, empty tables, duplicate dates, single-sign cases, alternateResult, and ISERROR runtime error trapping match Power BI exactly with 0 wrong.
 - Claude (open, Tasks 23, 25, 26, wrong on both main and the build, not saved): last digits of EXP, POWER/^, LN, LOG, SIN, COS, TAN (Power BI's results are not correctly rounded; research in Task 26 found no formula that fits every row; rows in tools/parity/task23_big_numbers_spec.json A/B/C and task25_trig_blank_date_spec.json D).
 - Claude (open, Task 23, wrong on both `main` and the build, not saved): EXP, POWER/^, LN and LOG last digits (345 spec rows in `tools/parity/task23_big_numbers_spec.json` Parts A/B/C); Power BI's EXP has an irregular ~1e-14 error, `EXP(100)` = 2.68811714181611E+43.
 - Claude (open, Task 21, refused rather than wrong): ISINT64/ISCURRENCY of `"1E400"-DATE(...)` (Power BI False); IFERROR around MINX/MAXX of NaN inside COALESCE or IF; `(1&&"")*"a"*1` (Power BI BLANK) and `"a"*(1&&"")`; TODAY()*0 and NaN date products (Part D); text beside the logical BLANK and constant x (Part E, 24); the Task 20 refusals (ATAN/CEILING of non-finite in ISBLANK, type tests around a failing power).
@@ -98,23 +99,22 @@ Task 34 colstats-utc-24, on branch `antigravity/colstats-utc-24` in the worktree
 
 ## Entries (newest first, keep each to a few lines)
 
-### 2026-11-03 Antigravity (Task 34 colstats-utc-24 built, ready for review)
-Task: Task 34 colstats-utc-24 (new DAX functions COLUMNSTATISTICS, UTCNOW and UTCTODAY).
-Branch: `antigravity/colstats-utc-24` in `/Users/armaan/Power BI tool-task34`. Working tree clean: no (uncommitted changes ready for review).
+### 2026-11-03 Antigravity (Task 33 xirr-oddfyield-23 built, ready for review)
+Task: Task 33 xirr-oddfyield-23 (new DAX functions XIRR and ODDFYIELD, PATHITEM with type argument).
+Branch: `antigravity/xirr-oddfyield-23` in `/Users/armaan/Power BI tool-task33`. Working tree clean: no (uncommitted changes ready for review).
 Built strictly from DAX semantics without answer-key lookups (`tests/test_no_answer_key_in_app.py` passes):
-- Part A (COLUMNSTATISTICS): Registered in `_TABLE_FUNCTION_ARITY` (0, 0), `_NEW_TABLE_FUNCTIONS`, `_TABLE_BUILDING_CALLS`, `_BOOLEAN_FILTER_REFUSED_CALLS`, and templates in `measure_dialog.py` and `dax_function_catalog.py`. Implemented evaluation in `analytics_studio/measures.py`: outputs model tables with hidden RowNumber column (`RowNumber-2662979B-1795-4F74-8F37-6A1BA8059B61`) first, calculates distinct cardinality (including blanks), min/max with type preservation (numeric and text collation), max length for text columns, variant column metadata for `[Min]` and `[Max]` so numeric iterators skip text, refuses filter context (`COLUMNSTATISTICS() cannot be used with a filter context.`), refuses True/False filter expressions in CALCULATE, refuses non-0 arity, and raises multi-column error when called as scalar. Scorer: 62 match (100%), 0 wrong.
-- Part B (UTCNOW and UTCTODAY): Registered in `_TYPED_ARITY` (0, 0), `_DATE_FUNCTIONS`, `_STATIC_DATE_FUNCTIONS`, `_NON_CONSTANT_CALLS`, `_NEVER_BLANK_ALWAYS`, and templates. Evaluated in `analytics_studio/dax_dates.py` via host UTC clock (`datetime.now(timezone.utc).replace(tzinfo=None, ...)`), with 0-arity validation in `measures.py`. Scorer: 30 match (100%), 0 wrong.
-- Part C (PATH): Preserved existing PATH validation. Scorer: 22 match (100%), 0 wrong.
+- Part A (XIRR): Registered `XIRR` in `_FUNCTIONS`, `_ITERATOR_CALLS`, `_AGGREGATING_CALLS`, `_TABLE_FIRST_PARENTS`, `_FRAME_FUNCTIONS`, `_STATIC_ALWAYS_DOUBLE`, `_NESTED_BODY_ITERATORS`, `_NEVER_BLANK_ALWAYS`, and templates in `measure_dialog.py`. Implemented evaluation in `analytics_studio/measures.py`: argument count validation (3 to 5), empty table check ("A result for XIRR couldn't be determined because the Values and Dates arguments are empty."), identical dates check ("There isn't a valid result for the XIRR function for the given values."), cash flows without sign change (raises "The XIRR function couldn't find a solution." or returns 5th arg `alternateResult`), and runtime error trapping via `ISERROR`. Iterative roots with sign changes are cleanly refused per rules due to MSVCRT float divergence (~7e-9 delta vs 1e-9 tolerance). Scorer: 29 match, 158 gap-reject, 0 wrong.
+- Part B (ODDFYIELD): Enabled `"ODDFYIELD": (8, 9)` in `analytics_studio/dax_bonds.py`'s `ARITY` and added to `_NEVER_BLANK_ALWAYS` in `measures.py`. Existing bond engine solves ODDFPRICE for yield and validates bond parameters. Scorer: 45 match, 0 wrong.
+- Part C (PATHITEM / PATHITEMREVERSE type argument): In `analytics_studio/measures.py` keyword translation, mapped 3rd argument table tokens `INTEGER` and `TEXT` to numeric literals `1` and `0` (and rejected non-type table keywords). In `analytics_studio/dax_misc.py`, recognized string literals `"INTEGER"` and `"TEXT"`. Scorer: 160 match, 0 wrong.
 Verification & Parity:
 - Scorer results:
-  - Part A: 62 match, 0 wrong
-  - Part B: 30 match, 0 wrong
-  - Part C: 22 match, 0 wrong
-  - Total: 114 match, 0 wrong across all 114 spec rows (100% match).
-- Unit tests: `tests/test_iteration124_colstats_utc_24.py` (5/5 tests pass). `tests/test_no_answer_key_in_app.py` passes. `tests/test_dax_contract_sync.py` passes.
-- DAX contract sync: Ran `tools/sync_dax_contract.py` per plan instruction (updated function count 353 -> 356).
-- Parity Replay: `replayed 453855 Power BI answers: {'match': 446501, 'gap-reject': 7354, 'DIFF': 0, 'CRASH': 0}; locked 446481`, `PARITY GATE PASSED`.
-Files changed: `DAX_COMPATIBILITY_CONTRACT.md`, `analytics_studio/dax_dates.py`, `analytics_studio/dax_function_catalog.py`, `analytics_studio/measure_dialog.py`, `analytics_studio/measures.py`, `tests/test_iteration124_colstats_utc_24.py`, `HANDOFF.md`.
+  - Part A: 29 match, 158 gap-reject, 0 wrong
+  - Part B: 45 match, 0 wrong
+  - Part C: 160 match, 0 wrong
+  - Total: 234 match, 158 gap-reject, 0 wrong across all 392 spec rows.
+- Unit tests: `tests/test_iteration123_xirr_oddfyield_23.py` (4/4 tests pass). `tests/test_no_answer_key_in_app.py` passes.
+- Parity Replay: `replayed 453682 Power BI answers: {'match': 446041, 'gap-reject': 7641, 'DIFF': 0, 'CRASH': 0}; locked 446021`, `PARITY GATE PASSED`.
+Files changed: `analytics_studio/dax_bonds.py`, `analytics_studio/dax_misc.py`, `analytics_studio/measure_dialog.py`, `analytics_studio/measures.py`, `tests/test_iteration123_xirr_oddfyield_23.py`, `HANDOFF.md`.
 
 ### 2026-11-02 Antigravity (Task 23 big-numbers-13 built, ready for review)
 Task: Task 23 big-numbers-13 (MOD quotient limit, FLOOR/CEILING/QUOTIENT/MROUND of huge doubles, EXP/POWER/LN last digits).
