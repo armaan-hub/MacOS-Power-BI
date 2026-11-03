@@ -33,6 +33,8 @@ from analytics_studio.measures import (
     MeasureError,
     escape_bracket_name,
     normalize_measure,
+    _INFO_EMPTY_TABLE_HEADERS,
+    _INFO_UNAVAILABLE_FUNCTIONS,
 )
 from analytics_studio.dialog_theme import apply_light_dialog_theme
 
@@ -545,6 +547,8 @@ def _add_generated_templates() -> None:
         "INFO.COLUMNS": ("INFO.COLUMNS()", None),
         "INFO.MEASURES": ("INFO.MEASURES()", None),
         "INFO.RELATIONSHIPS": ("INFO.RELATIONSHIPS()", None),
+        **{fn: (f"{fn}()", None) for fn in _INFO_EMPTY_TABLE_HEADERS},
+        **{fn: (f"{fn}()", None) for fn in _INFO_UNAVAILABLE_FUNCTIONS},
     }
     for name in sorted(set(_LOOKUP_ARITY) | set(lookup_templates)):
         DAX_FUNCTION_TEMPLATES.setdefault(name, lookup_templates.get(name, (f"{name}()", None)))
