@@ -17,3 +17,6 @@ Compute, never look up (app code never reads tools/parity/*.json or tests/fixtur
 
 ## Commands (in the worktree)
 Scorer: `PYTHONPATH=. QT_QPA_PLATFORM=offscreen python3 tools/score_spec.py tools/parity/task28_text_collation_spec.json [A|B]`. Tests: `tests/test_iteration118_text_collation_18.py`. When done, leave changes uncommitted and write a ready-for-review entry in this worktree's `HANDOFF.md` with scorer counts per Part and the replay line.
+
+## Review outcome (2026-11-03)
+Shipped as Iteration 118. Locked 442,933.
