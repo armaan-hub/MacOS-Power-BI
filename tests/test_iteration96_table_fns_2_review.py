@@ -29,8 +29,6 @@ STAYS_REFUSED = [
     'VAR t=SELECTCOLUMNS(Facts,"Region",Facts[Region]) RETURN COUNTROWS(SUBSTITUTEWITHINDEX(t,"i",VALUES(Facts[Region]),Facts[Region]))',
     # a table with no lineage (DATATABLE) has no common column with a loaded one, whatever its column is called
     'COUNTROWS(SUBSTITUTEWITHINDEX(DATATABLE("Region",STRING,{{"East"},{"North"}}),"i",VALUES(Facts[Region]),Facts[Region]))',
-    # the same computed column name on both sides
-    'COUNTROWS(SUBSTITUTEWITHINDEX(ADDCOLUMNS(VALUES(Facts[Region]),"k",1),"i",ADDCOLUMNS(VALUES(Facts[Region]),"k",2),Facts[Region]))',
     # a duplicate key anywhere in the index table, although the left table only uses unique ones
     'COUNTROWS(SUBSTITUTEWITHINDEX(TOPN(2,VALUES(Facts[Region]),Facts[Region]),"i",FILTER(ALL(Facts),Facts[Quantity]>1),Facts[Region]))',
 ]
@@ -60,6 +58,11 @@ class SubstituteWithIndexReviewTest(unittest.TestCase):
         for expression in STAYS_REFUSED:
             outcome = dax.local(expression)
             self.assertTrue(outcome.startswith("LOCAL-REJECT"), f"{expression} -> {outcome}")
+
+    def test_same_computed_column_name_on_both_sides_is_blank(self) -> None:
+        # Power BI Desktop 2026-11-03: the "k"/"k" shape returns BLANK (no rows in common)
+        self.assertEqual("BLANK", dax.local(
+            'COUNTROWS(SUBSTITUTEWITHINDEX(ADDCOLUMNS(VALUES(Facts[Region]),"k",1),"i",ADDCOLUMNS(VALUES(Facts[Region]),"k",2),Facts[Region]))'))
 
     def test_unique_order_values_and_known_orders_are_still_computed(self) -> None:
         self.assertEqual("3", dax.local('COUNTROWS(SUBSTITUTEWITHINDEX(VALUES(Facts[Region]),"i",VALUES(Facts[Region]),Facts[Region]))'))
