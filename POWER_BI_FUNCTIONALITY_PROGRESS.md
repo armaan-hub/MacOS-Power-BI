@@ -8,7 +8,7 @@
 
 ## Latest status
 
-**Latest status (2026-11-03, after Iteration 129 / Task 39 nan-inf-iterators-29, Infinity and NaN inside statistical iterators, mix workflow: Antigravity coded, Sonnet 5.5 fixed, Claude Opus 5.5 planned, reviewed and shipped under the user's delegated approval):** pytest 2,621 passed (fast gate), real app 575/575 and 1,500 fresh probes with 0 wrong, replay 463,727 answers with 457,468 match, 6,259 refused, 0 DIFF, 0 CRASH, locked 457,448. Next: Antigravity finishes Task 40 date-stats-30, then Opus reviews it
+**Latest status (2026-11-03, after Iteration 130 / Task 40 date-stats-30, dates inside statistical iterators and date-times before 1899, mix workflow: Antigravity coded, Sonnet 5.5 fixed, Claude Opus 5.5 planned, reviewed and shipped under the user's delegated approval):** pytest 2,629 passed (fast gate), real app 575/575 and 1,500 fresh probes with 0 wrong, replay 466,884 answers with 460,019 match, 6,865 refused, 0 DIFF, 0 CRASH, locked 459,999. Next: Opus reviews Task 41 type-tests-errors-31 (Power BI guest is suspended); Antigravity codes Task 42 row-order-32
 
 **Previous status (2026-11-01, after Iteration 103 / Task 14 logic-tables-4, empty text in logical operators, a VAR block as an iterator table, FILTER over no rows, Currency arithmetic, review done, gate passed, locked 246,907, committed, merged and pushed; 246,927 of 253,237 saved answers match, 0 differ; next: Task 15 typed-columns-5, 1,836 items).**
 
