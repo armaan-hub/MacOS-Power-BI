@@ -2,9 +2,9 @@
 
 Rules and roles are in `AGENTS.md`. Read it first. Keep this file short and current.
 
-**Active agent:** Antigravity fixes Task 45 review findings in its worktree; Claude Opus 5.5 reviews Task 45 next (Tasks 42-44 shipped as Iterations 132-134)
-**Branch in use:** antigravity/xnpv-blank-swi-35 (worktree `Power BI tool-task45`)
-**Working tree clean:** main yes; the Task 45 worktree has Antigravity's uncommitted work
+**Active agent:** Claude Opus 5.5 plans Task 46+ next (Tasks 41-45 shipped as Iterations 131-135); Antigravity idle
+**Branch in use:** none
+**Working tree clean:** main yes
 
 ## Status values
 `PLANNED` > `BUILDING` > `READY FOR REVIEW` > `REVIEWING` > `FIXING` > `GATE PASSED` > `DONE`
@@ -57,7 +57,7 @@ Rules and roles are in `AGENTS.md`. Read it first. Keep this file short and curr
 | 42 | row-order-32: the row order of tables (640 saved answers the engine refuses) | `docs/plans/2026-11-03-row-order-32.md` | DONE (coded by Antigravity, fixed by Sonnet 5.5, reviewed, locked 463,719, merged 2026-11-04) | Claude |
 | 43 | mixed-bodies-tables-33: mixed-type iterator bodies and table-valued results (557 saved answers) | `docs/plans/2026-11-04-mixed-bodies-tables-33.md` | DONE (coded by Antigravity, fixed by Sonnet 5.5, reviewed, locked 467,289, merged 2026-11-04) | Claude |
 | 44 | count-text-compare-34: COUNTX of True/False, date/time text, strict comparisons | `docs/plans/2026-11-04-count-text-compare-34.md` | DONE (coded by Antigravity, fixed by Sonnet 5.5, reviewed, locked 467,289, merged 2026-11-04) | Claude |
-| 45 | xnpv-blank-swi-35: XNPV Currency, BLANK beside failing iterators, FIRSTNONBLANK/SWI of derived tables (190 saved answers) | `docs/plans/2026-11-04-xnpv-blank-swi-35.md` | Antigravity fixing review findings | Antigravity |
+| 45 | xnpv-blank-swi-35: XNPV Currency, BLANK beside failing iterators, FIRSTNONBLANK/SWI of derived tables (190 saved answers) | `docs/plans/2026-11-04-xnpv-blank-swi-35.md` | DONE (coded by Antigravity, fixed by Sonnet 5.5, reviewed, locked 468,717, merged 2026-11-04) | Claude |
 
 ## Current task
 Task 33 xirr-oddfyield-23, on branch `antigravity/xirr-oddfyield-23` in the worktree `/Users/armaan/Power BI tool-task33`.
