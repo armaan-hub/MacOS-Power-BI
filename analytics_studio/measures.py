@@ -4958,6 +4958,11 @@ def _validate_literal_positions(
         if function == "COUNTROWS":
             return
         if function == "FILTER":
+            if not (isinstance(arguments[0], tuple) and arguments[0] and arguments[0][0] == "call" and arguments[0][1] == "ROW"):
+                # only a table that is one row by construction can be read as a single cell; any other FILTER in a scalar position is a table result
+                raise MeasureError(
+                    "FILTER is supported only as the sole table-valued CALCULATE filter argument."
+                )
             if not (_is_all_table_value_argument(arguments[0]) or _table_position(function, 0)):
                 _validate_literal_positions(arguments[0], allow_blank=True)
             _validate_literal_positions(arguments[1], allow_blank=True)
@@ -18448,9 +18453,10 @@ def evaluate_measures(
                 raise MeasureError(f"{function} does not support expressions of type date.")
             if body_kind == "variant_dates" and function != "AVERAGEX":
                 raise MeasureError(f"{function} over a Variant that holds a number type with dates inside is not supported in the local engine.")
-            # if iteration_rows and function in dax_math.STAT_ITERATORS and conditional_body and _calls_function(arguments[1], "CURRENCY"):
-            #     # live Power BI (Task 13 review): GEOMEANX gives 30000 or 1.5E-322, STDEVX four decimals, PERCENTILEX a BLANK where the app reads a number
-            #     raise MeasureError(f"{function} over a Currency in a conditional is not modelled by the local engine.")
+            if iteration_rows and function == "PRODUCTX" and conditional_body and _calls_function(arguments[1], "CURRENCY"):
+                # live Power BI (Task 13 review): GEOMEANX gives 30000 or 1.5E-322, STDEVX four decimals, PERCENTILEX a BLANK where the app reads a number;
+                # the fresh Task 43 grids measured STDEVX / VARX / GEOMEANX / MEDIANX / PERCENTILEX bodies one by one (modelled or refused below), PRODUCTX still has no rule
+                raise MeasureError(f"{function} over a Currency in a conditional is not modelled by the local engine.")
             variant_body, number_dates = body_kind in {"variant", "variant_dates"}, body_kind == "numdate"
             if not variant_body:
                 refuse_variant_aggregation(function, context, arguments[1])
@@ -18471,6 +18477,8 @@ def evaluate_measures(
                     result_category = iterator_expression_category(
                         arguments[1], (context, validation_row, 1)
                     )
+                    if result_category == "variant" and _calls_function(arguments[1], "EVALUATEANDLOG"):
+                        raise MeasureError(f"Iterator {function} expression needs a numeric result.")  # a logged Variant is not reduced to its numbers by Power BI either (iteration 100)
                     if result_category not in {"numeric", "blank", "date/time", "text", "variant", "error"}:
                         if result_category == "boolean" and (arguments[1][0] == "reference" or (arguments[1][0] == "call" and arguments[1][1] == "CONVERT")):
                             raise MeasureError(f"The function {function} cannot work with values of type Boolean.")  # blank-dates-8 Part E: CONVERT(x,BOOLEAN) too
@@ -20392,6 +20400,8 @@ def evaluate_measures(
             raise
         except Exception:
             return False, None
+        if (is_row or is_datatable or is_nested_tc) and not (isinstance(val, (int, Decimal)) and not isinstance(val, bool)):
+            return False, None  # a bare ROW / {{..}} / DATATABLE holding text, a Boolean or BLANK stays a refused table result (iteration 89)
         return True, val
 
     def resolve(key: str) -> Decimal | bool | str | None:
