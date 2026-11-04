@@ -1,0 +1,5606 @@
+{
+ "powerbi_version": "2.157.879.0 (26.08)+da30fe74eb0b8a8786ab7326b69c400a0e951831",
+ "frozen": "2026-11-04",
+ "items": [
+  {
+   "expr": "AVERAGEX(ADDCOLUMNS(Facts,\"m\",COALESCE(Facts[Note],1)),IF(0,[m],BLANK()))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "AVERAGEX(ADDCOLUMNS(Facts,\"m\",COALESCE(Facts[Note],1)),IF(0,[m],Facts[Quantity]))",
+   "powerbi": "2.5"
+  },
+  {
+   "expr": "AVERAGEX(ADDCOLUMNS(Facts,\"m\",COALESCE(Facts[Note],1)),IF(1,[m],BLANK()))",
+   "powerbi": "1"
+  },
+  {
+   "expr": "AVERAGEX(ADDCOLUMNS(Facts,\"m\",COALESCE(Facts[Note],1)),IF(FALSE(),[m],TRUE()))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "AVERAGEX(ADDCOLUMNS(Facts,\"m\",COALESCE(Facts[Note],1)),IF(Facts[Quantity]>2,[m],DATE(2020,1,1)+Facts[Quantity]))",
+   "powerbi": "26299.6"
+  },
+  {
+   "expr": "AVERAGEX(ADDCOLUMNS(Facts,\"m\",COALESCE(Facts[Note],1)),IF(Facts[Quantity]>=3,[m],1))",
+   "powerbi": "1"
+  },
+  {
+   "expr": "AVERAGEX(ADDCOLUMNS(Facts,\"m\",COALESCE(Facts[Note],1)),IF(Facts[Quantity]>=3,[m],BLANK()))",
+   "powerbi": "1"
+  },
+  {
+   "expr": "AVERAGEX(ADDCOLUMNS(Facts,\"m\",COALESCE(Facts[Note],1)),IF(ISBLANK(Facts[Note]),[m],\"a\"))",
+   "powerbi": "1"
+  },
+  {
+   "expr": "AVERAGEX(ADDCOLUMNS(Facts,\"m\",COALESCE(Facts[Note],1)),IF(ISBLANK(Facts[Note]),[m],DATE(2020,1,1)))",
+   "powerbi": "29221"
+  },
+  {
+   "expr": "AVERAGEX(ADDCOLUMNS(Facts,\"m\",COALESCE(Facts[Note],1)),IF(TRUE(),[m],1))",
+   "powerbi": "1"
+  },
+  {
+   "expr": "AVERAGEX(ADDCOLUMNS(Facts,\"m\",IF(Facts[Quantity]>2,1,\"a\")),IF(1,[m],1))",
+   "powerbi": "1"
+  },
+  {
+   "expr": "AVERAGEX(ADDCOLUMNS(Facts,\"m\",IF(Facts[Quantity]>2,1,\"a\")),IF(1,[m],BLANK()))",
+   "powerbi": "1"
+  },
+  {
+   "expr": "AVERAGEX(ADDCOLUMNS(Facts,\"m\",IF(Facts[Quantity]>2,1,\"a\")),IF(FALSE(),[m],\"a\"))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "AVERAGEX(ADDCOLUMNS(Facts,\"m\",IF(Facts[Quantity]>2,1,\"a\")),IF(Facts[Quantity]>2,[m],2.5))",
+   "powerbi": "1.75"
+  },
+  {
+   "expr": "AVERAGEX(ADDCOLUMNS(Facts,\"m\",IF(Facts[Quantity]>2,1,\"a\")),IF(Facts[Quantity]>=3,[m],Facts[Sales]))",
+   "powerbi": "2"
+  },
+  {
+   "expr": "AVERAGEX(ADDCOLUMNS(Facts,\"m\",IF(Facts[Quantity]>2,DATE(2020,1,1),2)),IF(0,[m],DATE(2020,1,1)))",
+   "powerbi": "43831"
+  },
+  {
+   "expr": "AVERAGEX(ADDCOLUMNS(Facts,\"m\",IF(Facts[Quantity]>2,DATE(2020,1,1),2)),IF(1,[m],BLANK()))",
+   "powerbi": "21916.5"
+  },
+  {
+   "expr": "AVERAGEX(ADDCOLUMNS(Facts,\"m\",IF(Facts[Quantity]>2,DATE(2020,1,1),2)),IF(FALSE(),[m],BLANK()))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "AVERAGEX(ADDCOLUMNS(Facts,\"m\",IF(Facts[Quantity]>2,DATE(2020,1,1),2)),IF(FALSE(),[m],DATE(2020,1,1)+Facts[Quantity]))",
+   "powerbi": "43833.5"
+  },
+  {
+   "expr": "AVERAGEX(ADDCOLUMNS(Facts,\"m\",IF(Facts[Quantity]>2,DATE(2020,1,1),2)),IF(FALSE(),[m],Facts[Sales]))",
+   "powerbi": "6.3"
+  },
+  {
+   "expr": "AVERAGEX(ADDCOLUMNS(Facts,\"m\",IF(Facts[Quantity]>2,DATE(2020,1,1),2)),IF(Facts[Quantity]>=3,[m],BLANK()))",
+   "powerbi": "43831"
+  },
+  {
+   "expr": "AVERAGEX(ADDCOLUMNS(Facts,\"m\",IF(Facts[Quantity]>2,DATE(2020,1,1),2)),IF(Facts[Quantity]>=3,[m],DATE(2020,1,1)))",
+   "powerbi": "43831"
+  },
+  {
+   "expr": "AVERAGEX(ADDCOLUMNS(Facts,\"m\",IF(Facts[Quantity]>2,DATE(2020,1,1),2)),IF(Facts[Quantity]>=3,[m],DATE(2020,1,1)+Facts[Quantity]))",
+   "powerbi": "43831.5"
+  },
+  {
+   "expr": "AVERAGEX(ADDCOLUMNS(Facts,\"m\",IF(Facts[Quantity]>2,DATE(2020,1,1),2)),IF(ISBLANK(Facts[Note]),[m],2.5))",
+   "powerbi": "14612"
+  },
+  {
+   "expr": "AVERAGEX(ADDCOLUMNS(Facts,\"m\",IF(Facts[Quantity]>2,DATE(2020,1,1),2)),IF(ISBLANK(Facts[Note]),[m],BLANK()))",
+   "powerbi": "43831"
+  },
+  {
+   "expr": "AVERAGEX(ADDCOLUMNS(Facts,\"m\",IF(Facts[Quantity]>2,DATE(2020,1,1),2)),IF(ISBLANK(Facts[Note]),[m],DATE(2020,1,1)))",
+   "powerbi": "43831"
+  },
+  {
+   "expr": "AVERAGEX(ADDCOLUMNS(Facts,\"m\",IF(Facts[Quantity]>2,DATE(2020,1,1),2)),IF(ISBLANK(Facts[Note]),[m],Facts[Quantity]))",
+   "powerbi": "14611.5"
+  },
+  {
+   "expr": "AVERAGEX(ADDCOLUMNS(Facts,\"m\",IF(Facts[Quantity]>2,DATE(2020,1,1),2)),IF(TRUE(),[m],DATE(2020,1,1)))",
+   "powerbi": "21916.5"
+  },
+  {
+   "expr": "AVERAGEX(ADDCOLUMNS(Facts,\"m\",IF(Facts[Quantity]>2,TRUE(),3)),IF(0,[m],TRUE()))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "AVERAGEX(ADDCOLUMNS(Facts,\"m\",IF(Facts[Quantity]>2,TRUE(),3)),IF(1,[m],DATE(2020,1,1)))",
+   "powerbi": "3"
+  },
+  {
+   "expr": "AVERAGEX(ADDCOLUMNS(Facts,\"m\",IF(Facts[Quantity]>2,TRUE(),3)),IF(FALSE(),[m],\"a\"))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "AVERAGEX(ADDCOLUMNS(Facts,\"m\",IF(Facts[Quantity]>2,TRUE(),3)),IF(FALSE(),[m],1))",
+   "powerbi": "1"
+  },
+  {
+   "expr": "AVERAGEX(ADDCOLUMNS(Facts,\"m\",IF(Facts[Quantity]>2,TRUE(),3)),IF(FALSE(),[m],Facts[Sales]))",
+   "powerbi": "6.3"
+  },
+  {
+   "expr": "AVERAGEX(ADDCOLUMNS(Facts,\"m\",IF(Facts[Quantity]>2,TRUE(),3)),IF(Facts[Quantity]>=3,[m],TRUE()))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "AVERAGEX(ADDCOLUMNS(Facts,\"m\",IF(Facts[Quantity]>2,TRUE(),3)),IF(ISBLANK(Facts[Note]),[m],Facts[Sales]))",
+   "powerbi": "3"
+  },
+  {
+   "expr": "AVERAGEX(ADDCOLUMNS(Facts,\"m\",IF(Facts[Quantity]>2,TRUE(),3)),IF(ISBLANK(Facts[Note]),[m],TRUE()))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "AVERAGEX(ADDCOLUMNS(Facts,\"m\",IF(Facts[Quantity]>2,TRUE(),3)),IF(TRUE(),[m],BLANK()))",
+   "powerbi": "3"
+  },
+  {
+   "expr": "AVERAGEX(ADDCOLUMNS(Facts,\"m\",IF(Facts[Quantity]>2,TRUE(),3)),IF(TRUE(),[m],DATE(2020,1,1)+Facts[Quantity]))",
+   "powerbi": "3"
+  },
+  {
+   "expr": "AVERAGEX(ADDCOLUMNS(Facts,\"m\",IF(Facts[Quantity]>2,TRUE(),3)),IF(TRUE(),[m],TRUE()))",
+   "powerbi": "3"
+  },
+  {
+   "expr": "AVERAGEX(ADDCOLUMNS(Facts,\"m\",SWITCH(Facts[Quantity],1,\"x\",2,2.5,BLANK())),IF(0,[m],2.5))",
+   "powerbi": "2.5"
+  },
+  {
+   "expr": "AVERAGEX(ADDCOLUMNS(Facts,\"m\",SWITCH(Facts[Quantity],1,\"x\",2,2.5,BLANK())),IF(0,[m],Facts[Quantity]))",
+   "powerbi": "2.5"
+  },
+  {
+   "expr": "AVERAGEX(ADDCOLUMNS(Facts,\"m\",SWITCH(Facts[Quantity],1,\"x\",2,2.5,BLANK())),IF(FALSE(),[m],DATE(2020,1,1)))",
+   "powerbi": "43831"
+  },
+  {
+   "expr": "AVERAGEX(ADDCOLUMNS(Facts,\"m\",SWITCH(Facts[Quantity],1,\"x\",2,2.5,BLANK())),IF(FALSE(),[m],DATE(2020,1,1)+Facts[Quantity]))",
+   "powerbi": "43833.5"
+  },
+  {
+   "expr": "AVERAGEX(ADDCOLUMNS(Facts,\"m\",SWITCH(Facts[Quantity],1,\"x\",2,2.5,BLANK())),IF(Facts[Quantity]>2,[m],DATE(2020,1,1)+Facts[Quantity]))",
+   "powerbi": "43832"
+  },
+  {
+   "expr": "AVERAGEX(ADDCOLUMNS(Facts,\"m\",SWITCH(Facts[Quantity],1,\"x\",2,2.5,BLANK())),IF(ISBLANK(Facts[Note]),[m],Facts[Quantity]))",
+   "powerbi": "1.75"
+  },
+  {
+   "expr": "AVERAGEX(ADDCOLUMNS(Facts,\"m\",SWITCH(Facts[Quantity],1,\"x\",2,2.5,BLANK())),IF(TRUE(),[m],2.5))",
+   "powerbi": "2.5"
+  },
+  {
+   "expr": "AVERAGEX(ADDCOLUMNS(Facts,\"z\",1),CONVERT(CURRENCY(1.5),DOUBLE))",
+   "powerbi": "1.5"
+  },
+  {
+   "expr": "AVERAGEX(ADDCOLUMNS(Facts,\"z\",1),CURRENCY(-2))",
+   "powerbi": "-2"
+  },
+  {
+   "expr": "AVERAGEX(ADDCOLUMNS(Facts,\"z\",1),CURRENCY(0.33333))",
+   "powerbi": "0.3333"
+  },
+  {
+   "expr": "AVERAGEX(ADDCOLUMNS(Facts,\"z\",1),CURRENCY(Facts[Sales]))",
+   "powerbi": "6.3"
+  },
+  {
+   "expr": "AVERAGEX(ADDCOLUMNS(Facts,\"z\",1),IF(0,CONVERT(CURRENCY(1.5),DOUBLE)))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "AVERAGEX(ADDCOLUMNS(Facts,\"z\",1),IF(1,CURRENCY(0)))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "AVERAGEX(ADDCOLUMNS(Facts,\"z\",1),IF(1,TRUE(),CURRENCY(0)))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "AVERAGEX(ADDCOLUMNS(Facts,\"z\",1),IF(FALSE(),CURRENCY(0.33333)))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "AVERAGEX(ADDCOLUMNS(Facts,\"z\",1),IF(FALSE(),CURRENCY(2.75),1))",
+   "powerbi": "1"
+  },
+  {
+   "expr": "AVERAGEX(ADDCOLUMNS(Facts,\"z\",1),IF(Facts[Quantity]>2,CURRENCY(Facts[Sales]),BLANK()))",
+   "powerbi": "11.25"
+  },
+  {
+   "expr": "AVERAGEX(ADDCOLUMNS(Facts,\"z\",1),IF(ISBLANK(Facts[Note]),\"a\",CURRENCY(-1.1)))",
+   "powerbi": "-1.1"
+  },
+  {
+   "expr": "AVERAGEX(ADDCOLUMNS(Facts,\"z\",1),IF(ISBLANK(Facts[Note]),CURRENCY(-2),TRUE()))",
+   "powerbi": "-2"
+  },
+  {
+   "expr": "AVERAGEX(ADDCOLUMNS(Facts,\"z\",1),IF(TRUE(),1,CONVERT(CURRENCY(1.5),DOUBLE)))",
+   "powerbi": "1"
+  },
+  {
+   "expr": "AVERAGEX(ADDCOLUMNS(Facts,\"z\",1),IF(TRUE(),CURRENCY(0),DATE(2020,1,1)+Facts[Quantity]))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "AVERAGEX(ADDCOLUMNS(Facts,\"z\",1),IF(TRUE(),CURRENCY(1.5)))",
+   "powerbi": "1.5"
+  },
+  {
+   "expr": "AVERAGEX(ADDCOLUMNS(Facts,\"z\",1),IF(TRUE(),CURRENCY(7)))",
+   "powerbi": "7"
+  },
+  {
+   "expr": "AVERAGEX(ADDCOLUMNS(Facts,\"z\",1),IF.EAGER(1,CONVERT(CURRENCY(1.5),DOUBLE),DATE(2020,1,1)))",
+   "powerbi": "1.5"
+  },
+  {
+   "expr": "AVERAGEX(ADDCOLUMNS(Facts,\"z\",1),IF.EAGER(FALSE(),CURRENCY(Facts[Sales]),\"a\"))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "AVERAGEX(ADDCOLUMNS(Facts,\"z\",1),SWITCH(Facts[Quantity],2,CURRENCY(-2),1))",
+   "powerbi": "0.5"
+  },
+  {
+   "expr": "AVERAGEX(ADDCOLUMNS(Facts,\"z\",1),SWITCH(TRUE(),TRUE(),CURRENCY(2.75),\"a\"))",
+   "powerbi": "2.75"
+  },
+  {
+   "expr": "AVERAGEX(ADDCOLUMNS(Facts,\"z\",1),SWITCH(TRUE(),TRUE(),CURRENCY(2.75),BLANK()))",
+   "powerbi": "2.75"
+  },
+  {
+   "expr": "AVERAGEX(FILTER(Facts,Facts[Quantity]>1),COALESCE(CURRENCY(0),BLANK()))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "AVERAGEX(FILTER(Facts,Facts[Quantity]>1),COALESCE(CURRENCY(0),Facts[Quantity]))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "AVERAGEX(FILTER(Facts,Facts[Quantity]>1),COALESCE(CURRENCY(1.23456),BLANK()))",
+   "powerbi": "1.2346"
+  },
+  {
+   "expr": "AVERAGEX(FILTER(Facts,Facts[Quantity]>1),COALESCE(CURRENCY(Facts[Sales]),1))",
+   "powerbi": "8.5"
+  },
+  {
+   "expr": "AVERAGEX(FILTER(Facts,Facts[Quantity]>1),CURRENCY(-1.1))",
+   "powerbi": "-1.1"
+  },
+  {
+   "expr": "AVERAGEX(FILTER(Facts,Facts[Quantity]>1),CURRENCY(0.33333))",
+   "powerbi": "0.3333"
+  },
+  {
+   "expr": "AVERAGEX(FILTER(Facts,Facts[Quantity]>1),CURRENCY(1.23456))",
+   "powerbi": "1.2346"
+  },
+  {
+   "expr": "AVERAGEX(FILTER(Facts,Facts[Quantity]>1),IF(FALSE(),CURRENCY(0.33333),DATE(2020,1,1)+Facts[Quantity]))",
+   "powerbi": "43834.5"
+  },
+  {
+   "expr": "AVERAGEX(FILTER(Facts,Facts[Quantity]>1),IF(Facts[Quantity]>=3,CURRENCY(-1.1),DATE(2020,1,1)+Facts[Quantity]))",
+   "powerbi": "10957.425"
+  },
+  {
+   "expr": "AVERAGEX(FILTER(Facts,Facts[Quantity]>1),IF(TRUE(),CURRENCY(-1.1)))",
+   "powerbi": "-1.1"
+  },
+  {
+   "expr": "AVERAGEX(FILTER(Facts,Facts[Quantity]>1),IF(TRUE(),CURRENCY(-1.1),TRUE()))",
+   "powerbi": "-1.1"
+  },
+  {
+   "expr": "AVERAGEX(FILTER(Facts,Facts[Quantity]>1),IF(TRUE(),TRUE(),CURRENCY(-1.1)))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "AVERAGEX(FILTER(Facts,Facts[Quantity]>1),IF.EAGER(TRUE(),CURRENCY(-1.1),Facts[Quantity]))",
+   "powerbi": "-1.1"
+  },
+  {
+   "expr": "AVERAGEX(FILTER(Facts,Facts[Quantity]>1),SWITCH(Facts[Quantity],1,CURRENCY(0.33333),BLANK()))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "AVERAGEX(FILTER(Facts,Facts[Sales]>3),COALESCE(CONVERT(CURRENCY(1.5),DOUBLE),Facts[Sales]))",
+   "powerbi": "1.5"
+  },
+  {
+   "expr": "AVERAGEX(FILTER(Facts,Facts[Sales]>3),IF(0,CURRENCY(7),1))",
+   "powerbi": "1"
+  },
+  {
+   "expr": "AVERAGEX(FILTER(Facts,Facts[Sales]>3),IF(Facts[Quantity]>=3,CONVERT(CURRENCY(1.5),DOUBLE),1))",
+   "powerbi": "1.25"
+  },
+  {
+   "expr": "AVERAGEX(FILTER(Facts,Facts[Sales]>3),IF(TRUE(),CURRENCY(Facts[Sales]),1))",
+   "powerbi": "15.25"
+  },
+  {
+   "expr": "AVERAGEX(Facts,COALESCE(CONVERT(CURRENCY(1.5),DOUBLE),BLANK()))",
+   "powerbi": "1.5"
+  },
+  {
+   "expr": "AVERAGEX(Facts,COALESCE(CURRENCY(1.5),1))",
+   "powerbi": "1.5"
+  },
+  {
+   "expr": "AVERAGEX(Facts,COALESCE(CURRENCY(2.75),1))",
+   "powerbi": "2.75"
+  },
+  {
+   "expr": "AVERAGEX(Facts,COALESCE(CURRENCY(2.75),Facts[Quantity]))",
+   "powerbi": "2.75"
+  },
+  {
+   "expr": "AVERAGEX(Facts,COALESCE(CURRENCY(Facts[Sales]),1))",
+   "powerbi": "5.4167"
+  },
+  {
+   "expr": "AVERAGEX(Facts,CONVERT(CURRENCY(1.5),DOUBLE))",
+   "powerbi": "1.5"
+  },
+  {
+   "expr": "AVERAGEX(Facts,CURRENCY(-1.1))",
+   "powerbi": "-1.1"
+  },
+  {
+   "expr": "AVERAGEX(Facts,CURRENCY(1.5))",
+   "powerbi": "1.5"
+  },
+  {
+   "expr": "AVERAGEX(Facts,CURRENCY(2.75))",
+   "powerbi": "2.75"
+  },
+  {
+   "expr": "AVERAGEX(Facts,IF(1,CURRENCY(-1.1)))",
+   "powerbi": "-1.1"
+  },
+  {
+   "expr": "AVERAGEX(Facts,IF(FALSE(),CURRENCY(7),BLANK()))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "AVERAGEX(Facts,IF(FALSE(),CURRENCY(Facts[Sales]),DATE(2020,1,1)+Facts[Quantity]))",
+   "powerbi": "43833.5"
+  },
+  {
+   "expr": "AVERAGEX(Facts,IF(FALSE(),Facts[Quantity],CURRENCY(1.23456)))",
+   "powerbi": "1.2346"
+  },
+  {
+   "expr": "AVERAGEX(Facts,IF(FALSE(),Facts[Sales],CURRENCY(0)))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "AVERAGEX(Facts,IF(Facts[Quantity]>=3,CURRENCY(-1.1),BLANK()))",
+   "powerbi": "-1.1"
+  },
+  {
+   "expr": "AVERAGEX(Facts,IF.EAGER(1,CONVERT(CURRENCY(1.5),DOUBLE),BLANK()))",
+   "powerbi": "1.5"
+  },
+  {
+   "expr": "AVERAGEX(Facts,IF.EAGER(FALSE(),CONVERT(CURRENCY(1.5),DOUBLE),\"a\"))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "AVERAGEX(Facts,IF.EAGER(FALSE(),CURRENCY(1.23456),DATE(2020,1,1)))",
+   "powerbi": "43831"
+  },
+  {
+   "expr": "AVERAGEX(Facts,IF.EAGER(TRUE(),CURRENCY(-2),Facts[Quantity]))",
+   "powerbi": "-2"
+  },
+  {
+   "expr": "AVERAGEX({0.5,4},COALESCE(CONVERT(CURRENCY(1.5),DOUBLE),DATE(2020,1,1)))",
+   "powerbi": "1.5"
+  },
+  {
+   "expr": "AVERAGEX({0.5,4},CONVERT(CURRENCY(1.5),DOUBLE))",
+   "powerbi": "1.5"
+  },
+  {
+   "expr": "AVERAGEX({0.5,4},CURRENCY(-1.1))",
+   "powerbi": "-1.1"
+  },
+  {
+   "expr": "AVERAGEX({0.5,4},CURRENCY(2.75))",
+   "powerbi": "2.75"
+  },
+  {
+   "expr": "AVERAGEX({0.5,4},IF(0,2.5,CONVERT(CURRENCY(1.5),DOUBLE)))",
+   "powerbi": "1.5"
+  },
+  {
+   "expr": "AVERAGEX({0.5,4},IF(1,DATE(2020,1,1),CONVERT(CURRENCY(1.5),DOUBLE)))",
+   "powerbi": "43831"
+  },
+  {
+   "expr": "AVERAGEX({0.5,4},IF(FALSE(),CURRENCY(2.75),\"a\"))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "AVERAGEX({1,2,3},CURRENCY(-2))",
+   "powerbi": "-2"
+  },
+  {
+   "expr": "AVERAGEX({1,2,3},CURRENCY(0.33333))",
+   "powerbi": "0.3333"
+  },
+  {
+   "expr": "AVERAGEX({1,2,3},CURRENCY(1.5))",
+   "powerbi": "1.5"
+  },
+  {
+   "expr": "AVERAGEX({1,2,3},IF(1,CURRENCY(0)))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "AVERAGEX({1,2,3},IF(TRUE(),BLANK(),CURRENCY(0.33333)))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "AVERAGEX({1,2,3},IF.EAGER(FALSE(),CURRENCY(-1.1),1))",
+   "powerbi": "1"
+  },
+  {
+   "expr": "AVERAGEX({1,2,3},IF.EAGER(FALSE(),CURRENCY(1.23456),TRUE()))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "AVERAGEX({1.5,2.5},COALESCE(CURRENCY(-2),\"a\"))",
+   "powerbi": "-2"
+  },
+  {
+   "expr": "AVERAGEX({1.5,2.5},CURRENCY(0))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "AVERAGEX({TRUE()},CONVERT(CURRENCY(1.5),DOUBLE))",
+   "powerbi": "1.5"
+  },
+  {
+   "expr": "AVERAGEX({TRUE()},CURRENCY(1.5))",
+   "powerbi": "1.5"
+  },
+  {
+   "expr": "AVERAGEX({TRUE()},IF(0,CURRENCY(7)))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "AVERAGEX({TRUE()},IF(1,2.5,CURRENCY(0.33333)))",
+   "powerbi": "2.5"
+  },
+  {
+   "expr": "AVERAGEX({TRUE()},IF(FALSE(),CONVERT(CURRENCY(1.5),DOUBLE)))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "AVERAGEX({TRUE()},IF(TRUE(),DATE(2020,1,1),CONVERT(CURRENCY(1.5),DOUBLE)))",
+   "powerbi": "43831"
+  },
+  {
+   "expr": "AVERAGEX({TRUE()},IF.EAGER(FALSE(),CURRENCY(0.33333),TRUE()))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(ADDCOLUMNS(Facts,\"m\",COALESCE(Facts[Note],1)),[m]<\"a\"))",
+   "powerbi": "2"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(ADDCOLUMNS(Facts,\"m\",COALESCE(Facts[Note],1)),[m]<=1))",
+   "powerbi": "2"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(ADDCOLUMNS(Facts,\"m\",COALESCE(Facts[Note],1)),[m]<=BLANK()))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(ADDCOLUMNS(Facts,\"m\",COALESCE(Facts[Note],1)),[m]<>\"a\"))",
+   "powerbi": "6"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(ADDCOLUMNS(Facts,\"m\",COALESCE(Facts[Note],1)),[m]<>2.5))",
+   "powerbi": "6"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(ADDCOLUMNS(Facts,\"m\",COALESCE(Facts[Note],1)),[m]<BLANK()))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(ADDCOLUMNS(Facts,\"m\",COALESCE(Facts[Note],1)),[m]<TRUE()))",
+   "powerbi": "6"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(ADDCOLUMNS(Facts,\"m\",COALESCE(Facts[Note],1)),[m]=1))",
+   "powerbi": "2"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(ADDCOLUMNS(Facts,\"m\",COALESCE(Facts[Note],1)),[m]==\"a\"))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(ADDCOLUMNS(Facts,\"m\",COALESCE(Facts[Note],1)),[m]==2.5))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(ADDCOLUMNS(Facts,\"m\",COALESCE(Facts[Note],1)),[m]=DATE(2020,1,1)))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(ADDCOLUMNS(Facts,\"m\",COALESCE(Facts[Note],1)),[m]=TRUE()))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(ADDCOLUMNS(Facts,\"m\",COALESCE(Facts[Note],1)),[m]>\"a\"))",
+   "powerbi": "4"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(ADDCOLUMNS(Facts,\"m\",COALESCE(Facts[Note],1)),[m]>2.5))",
+   "powerbi": "4"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(ADDCOLUMNS(Facts,\"m\",COALESCE(Facts[Note],1)),[m]>=\"a\"))",
+   "powerbi": "4"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(ADDCOLUMNS(Facts,\"m\",COALESCE(Facts[Note],1)),[m]>=TRUE()))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(ADDCOLUMNS(Facts,\"m\",COALESCE(Facts[Note],1)),[m]>DATE(2020,1,1)))",
+   "powerbi": "4"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(ADDCOLUMNS(Facts,\"m\",IF(Facts[Quantity]>2,1,\"a\")),[m]<1))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(ADDCOLUMNS(Facts,\"m\",IF(Facts[Quantity]>2,1,\"a\")),[m]<=1))",
+   "powerbi": "3"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(ADDCOLUMNS(Facts,\"m\",IF(Facts[Quantity]>2,1,\"a\")),[m]<=2.5))",
+   "powerbi": "3"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(ADDCOLUMNS(Facts,\"m\",IF(Facts[Quantity]>2,1,\"a\")),[m]<=DATE(2020,1,1)))",
+   "powerbi": "3"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(ADDCOLUMNS(Facts,\"m\",IF(Facts[Quantity]>2,1,\"a\")),[m]<=TRUE()))",
+   "powerbi": "6"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(ADDCOLUMNS(Facts,\"m\",IF(Facts[Quantity]>2,1,\"a\")),[m]<>\"a\"))",
+   "powerbi": "3"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(ADDCOLUMNS(Facts,\"m\",IF(Facts[Quantity]>2,1,\"a\")),[m]<>TRUE()))",
+   "powerbi": "6"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(ADDCOLUMNS(Facts,\"m\",IF(Facts[Quantity]>2,1,\"a\")),[m]<TRUE()))",
+   "powerbi": "6"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(ADDCOLUMNS(Facts,\"m\",IF(Facts[Quantity]>2,1,\"a\")),[m]=\"a\"))",
+   "powerbi": "3"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(ADDCOLUMNS(Facts,\"m\",IF(Facts[Quantity]>2,1,\"a\")),[m]=1))",
+   "powerbi": "3"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(ADDCOLUMNS(Facts,\"m\",IF(Facts[Quantity]>2,1,\"a\")),[m]=2.5))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(ADDCOLUMNS(Facts,\"m\",IF(Facts[Quantity]>2,1,\"a\")),[m]=BLANK()))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(ADDCOLUMNS(Facts,\"m\",IF(Facts[Quantity]>2,1,\"a\")),[m]>2.5))",
+   "powerbi": "3"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(ADDCOLUMNS(Facts,\"m\",IF(Facts[Quantity]>2,1,\"a\")),[m]>=DATE(2020,1,1)))",
+   "powerbi": "3"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(ADDCOLUMNS(Facts,\"m\",IF(Facts[Quantity]>2,1,\"a\")),[m]>TRUE()))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(ADDCOLUMNS(Facts,\"m\",IF(Facts[Quantity]>2,DATE(2020,1,1),2)),[m]<1))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(ADDCOLUMNS(Facts,\"m\",IF(Facts[Quantity]>2,DATE(2020,1,1),2)),[m]<2.5))",
+   "powerbi": "3"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(ADDCOLUMNS(Facts,\"m\",IF(Facts[Quantity]>2,DATE(2020,1,1),2)),[m]<=1))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(ADDCOLUMNS(Facts,\"m\",IF(Facts[Quantity]>2,DATE(2020,1,1),2)),[m]<>DATE(2020,1,1)))",
+   "powerbi": "3"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(ADDCOLUMNS(Facts,\"m\",IF(Facts[Quantity]>2,DATE(2020,1,1),2)),[m]<BLANK()))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(ADDCOLUMNS(Facts,\"m\",IF(Facts[Quantity]>2,DATE(2020,1,1),2)),[m]=2.5))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(ADDCOLUMNS(Facts,\"m\",IF(Facts[Quantity]>2,DATE(2020,1,1),2)),[m]==BLANK()))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(ADDCOLUMNS(Facts,\"m\",IF(Facts[Quantity]>2,DATE(2020,1,1),2)),[m]=BLANK()))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(ADDCOLUMNS(Facts,\"m\",IF(Facts[Quantity]>2,DATE(2020,1,1),2)),[m]=DATE(2020,1,1)))",
+   "powerbi": "3"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(ADDCOLUMNS(Facts,\"m\",IF(Facts[Quantity]>2,DATE(2020,1,1),2)),[m]>2.5))",
+   "powerbi": "3"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(ADDCOLUMNS(Facts,\"m\",IF(Facts[Quantity]>2,DATE(2020,1,1),2)),[m]>=1))",
+   "powerbi": "6"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(ADDCOLUMNS(Facts,\"m\",IF(Facts[Quantity]>2,DATE(2020,1,1),2)),[m]>=2.5))",
+   "powerbi": "3"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(ADDCOLUMNS(Facts,\"m\",IF(Facts[Quantity]>2,DATE(2020,1,1),2)),[m]>=BLANK()))",
+   "powerbi": "6"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(ADDCOLUMNS(Facts,\"m\",IF(Facts[Quantity]>2,DATE(2020,1,1),2)),[m]>=DATE(2020,1,1)))",
+   "powerbi": "3"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(ADDCOLUMNS(Facts,\"m\",IF(Facts[Quantity]>2,TRUE(),3)),[m]<2.5))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(ADDCOLUMNS(Facts,\"m\",IF(Facts[Quantity]>2,TRUE(),3)),[m]<=1))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(ADDCOLUMNS(Facts,\"m\",IF(Facts[Quantity]>2,TRUE(),3)),[m]<=2.5))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(ADDCOLUMNS(Facts,\"m\",IF(Facts[Quantity]>2,TRUE(),3)),[m]<=TRUE()))",
+   "powerbi": "6"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(ADDCOLUMNS(Facts,\"m\",IF(Facts[Quantity]>2,TRUE(),3)),[m]<>1))",
+   "powerbi": "6"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(ADDCOLUMNS(Facts,\"m\",IF(Facts[Quantity]>2,TRUE(),3)),[m]<>BLANK()))",
+   "powerbi": "6"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(ADDCOLUMNS(Facts,\"m\",IF(Facts[Quantity]>2,TRUE(),3)),[m]<TRUE()))",
+   "powerbi": "3"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(ADDCOLUMNS(Facts,\"m\",IF(Facts[Quantity]>2,TRUE(),3)),[m]=1))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(ADDCOLUMNS(Facts,\"m\",IF(Facts[Quantity]>2,TRUE(),3)),[m]==2.5))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(ADDCOLUMNS(Facts,\"m\",IF(Facts[Quantity]>2,TRUE(),3)),[m]==BLANK()))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(ADDCOLUMNS(Facts,\"m\",IF(Facts[Quantity]>2,TRUE(),3)),[m]==DATE(2020,1,1)))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(ADDCOLUMNS(Facts,\"m\",IF(Facts[Quantity]>2,TRUE(),3)),[m]=DATE(2020,1,1)))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(ADDCOLUMNS(Facts,\"m\",IF(Facts[Quantity]>2,TRUE(),3)),[m]>\"a\"))",
+   "powerbi": "3"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(ADDCOLUMNS(Facts,\"m\",IF(Facts[Quantity]>2,TRUE(),3)),[m]>=2.5))",
+   "powerbi": "6"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(ADDCOLUMNS(Facts,\"m\",IF(Facts[Quantity]>2,TRUE(),3)),[m]>=DATE(2020,1,1)))",
+   "powerbi": "3"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(ADDCOLUMNS(Facts,\"m\",IF(Facts[Quantity]>2,TRUE(),3)),[m]>=TRUE()))",
+   "powerbi": "3"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(ADDCOLUMNS(Facts,\"m\",IF(Facts[Quantity]>2,TRUE(),3)),[m]>TRUE()))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(ADDCOLUMNS(Facts,\"m\",SWITCH(Facts[Quantity],1,\"x\",2,2.5,BLANK())),[m]<=2.5))",
+   "powerbi": "5"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(ADDCOLUMNS(Facts,\"m\",SWITCH(Facts[Quantity],1,\"x\",2,2.5,BLANK())),[m]<>2.5))",
+   "powerbi": "5"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(ADDCOLUMNS(Facts,\"m\",SWITCH(Facts[Quantity],1,\"x\",2,2.5,BLANK())),[m]<>DATE(2020,1,1)))",
+   "powerbi": "6"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(ADDCOLUMNS(Facts,\"m\",SWITCH(Facts[Quantity],1,\"x\",2,2.5,BLANK())),[m]<TRUE()))",
+   "powerbi": "6"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(ADDCOLUMNS(Facts,\"m\",SWITCH(Facts[Quantity],1,\"x\",2,2.5,BLANK())),[m]=1))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(ADDCOLUMNS(Facts,\"m\",SWITCH(Facts[Quantity],1,\"x\",2,2.5,BLANK())),[m]==1))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(ADDCOLUMNS(Facts,\"m\",SWITCH(Facts[Quantity],1,\"x\",2,2.5,BLANK())),[m]>=\"a\"))",
+   "powerbi": "1"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(ADDCOLUMNS(Facts,\"m\",SWITCH(Facts[Quantity],1,\"x\",2,2.5,BLANK())),[m]>=1))",
+   "powerbi": "2"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(ADDCOLUMNS(Facts,\"m\",SWITCH(Facts[Quantity],1,\"x\",2,2.5,BLANK())),[m]>=BLANK()))",
+   "powerbi": "6"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(ADDCOLUMNS(Facts,\"m\",SWITCH(Facts[Quantity],1,\"x\",2,2.5,BLANK())),[m]>BLANK()))",
+   "powerbi": "2"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(ADDCOLUMNS(Facts,\"m\",SWITCH(Facts[Quantity],1,\"x\",2,2.5,BLANK())),[m]>TRUE()))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTX(ADDCOLUMNS(Facts,\"m\",COALESCE(Facts[Note],1)),IF(1,[m],1))",
+   "powerbi": "2"
+  },
+  {
+   "expr": "COUNTX(ADDCOLUMNS(Facts,\"m\",COALESCE(Facts[Note],1)),IF(1,[m],DATE(2020,1,1)))",
+   "powerbi": "2"
+  },
+  {
+   "expr": "COUNTX(ADDCOLUMNS(Facts,\"m\",COALESCE(Facts[Note],1)),IF(1,[m],Facts[Quantity]))",
+   "powerbi": "2"
+  },
+  {
+   "expr": "COUNTX(ADDCOLUMNS(Facts,\"m\",COALESCE(Facts[Note],1)),IF(FALSE(),[m],\"a\"))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTX(ADDCOLUMNS(Facts,\"m\",COALESCE(Facts[Note],1)),IF(FALSE(),[m],BLANK()))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTX(ADDCOLUMNS(Facts,\"m\",COALESCE(Facts[Note],1)),IF(FALSE(),[m],DATE(2020,1,1)))",
+   "powerbi": "6"
+  },
+  {
+   "expr": "COUNTX(ADDCOLUMNS(Facts,\"m\",COALESCE(Facts[Note],1)),IF(FALSE(),[m],Facts[Sales]))",
+   "powerbi": "5"
+  },
+  {
+   "expr": "COUNTX(ADDCOLUMNS(Facts,\"m\",COALESCE(Facts[Note],1)),IF(Facts[Quantity]>=3,[m],DATE(2020,1,1)))",
+   "powerbi": "5"
+  },
+  {
+   "expr": "COUNTX(ADDCOLUMNS(Facts,\"m\",COALESCE(Facts[Note],1)),IF(Facts[Quantity]>=3,[m],DATE(2020,1,1)+Facts[Quantity]))",
+   "powerbi": "5"
+  },
+  {
+   "expr": "COUNTX(ADDCOLUMNS(Facts,\"m\",COALESCE(Facts[Note],1)),IF(Facts[Quantity]>=3,[m],Facts[Sales]))",
+   "powerbi": "5"
+  },
+  {
+   "expr": "COUNTX(ADDCOLUMNS(Facts,\"m\",COALESCE(Facts[Note],1)),IF(ISBLANK(Facts[Note]),[m],2.5))",
+   "powerbi": "6"
+  },
+  {
+   "expr": "COUNTX(ADDCOLUMNS(Facts,\"m\",COALESCE(Facts[Note],1)),IF(ISBLANK(Facts[Note]),[m],Facts[Sales]))",
+   "powerbi": "5"
+  },
+  {
+   "expr": "COUNTX(ADDCOLUMNS(Facts,\"m\",COALESCE(Facts[Note],1)),IF(TRUE(),[m],1))",
+   "powerbi": "2"
+  },
+  {
+   "expr": "COUNTX(ADDCOLUMNS(Facts,\"m\",COALESCE(Facts[Note],1)),IF(TRUE(),[m],TRUE()))",
+   "powerbi": "2"
+  },
+  {
+   "expr": "COUNTX(ADDCOLUMNS(Facts,\"m\",COALESCE(Facts[Note],1)),IF([m]<1,1))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTX(ADDCOLUMNS(Facts,\"m\",COALESCE(Facts[Note],1)),IF([m]<=1,1))",
+   "powerbi": "2"
+  },
+  {
+   "expr": "COUNTX(ADDCOLUMNS(Facts,\"m\",COALESCE(Facts[Note],1)),IF([m]<=2.5,1))",
+   "powerbi": "2"
+  },
+  {
+   "expr": "COUNTX(ADDCOLUMNS(Facts,\"m\",COALESCE(Facts[Note],1)),IF([m]<=DATE(2020,1,1),1))",
+   "powerbi": "2"
+  },
+  {
+   "expr": "COUNTX(ADDCOLUMNS(Facts,\"m\",COALESCE(Facts[Note],1)),IF([m]<>\"a\",1))",
+   "powerbi": "6"
+  },
+  {
+   "expr": "COUNTX(ADDCOLUMNS(Facts,\"m\",COALESCE(Facts[Note],1)),IF([m]<>1,1))",
+   "powerbi": "4"
+  },
+  {
+   "expr": "COUNTX(ADDCOLUMNS(Facts,\"m\",COALESCE(Facts[Note],1)),IF([m]<>BLANK(),1))",
+   "powerbi": "6"
+  },
+  {
+   "expr": "COUNTX(ADDCOLUMNS(Facts,\"m\",COALESCE(Facts[Note],1)),IF([m]<BLANK(),1))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTX(ADDCOLUMNS(Facts,\"m\",COALESCE(Facts[Note],1)),IF([m]=2.5,1))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTX(ADDCOLUMNS(Facts,\"m\",COALESCE(Facts[Note],1)),IF([m]=BLANK(),1))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTX(ADDCOLUMNS(Facts,\"m\",COALESCE(Facts[Note],1)),IF([m]=TRUE(),1))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTX(ADDCOLUMNS(Facts,\"m\",COALESCE(Facts[Note],1)),IF([m]>1,1))",
+   "powerbi": "4"
+  },
+  {
+   "expr": "COUNTX(ADDCOLUMNS(Facts,\"m\",COALESCE(Facts[Note],1)),IF([m]>=\"a\",1))",
+   "powerbi": "4"
+  },
+  {
+   "expr": "COUNTX(ADDCOLUMNS(Facts,\"m\",COALESCE(Facts[Note],1)),IF([m]>=1,1))",
+   "powerbi": "6"
+  },
+  {
+   "expr": "COUNTX(ADDCOLUMNS(Facts,\"m\",COALESCE(Facts[Note],1)),IF([m]>=2.5,1))",
+   "powerbi": "4"
+  },
+  {
+   "expr": "COUNTX(ADDCOLUMNS(Facts,\"m\",COALESCE(Facts[Note],1)),IF([m]>=DATE(2020,1,1),1))",
+   "powerbi": "4"
+  },
+  {
+   "expr": "COUNTX(ADDCOLUMNS(Facts,\"m\",COALESCE(Facts[Note],1)),IF([m]>DATE(2020,1,1),1))",
+   "powerbi": "4"
+  },
+  {
+   "expr": "COUNTX(ADDCOLUMNS(Facts,\"m\",IF(Facts[Quantity]>2,1,\"a\")),IF(0,[m],\"a\"))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTX(ADDCOLUMNS(Facts,\"m\",IF(Facts[Quantity]>2,1,\"a\")),IF(0,[m],BLANK()))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTX(ADDCOLUMNS(Facts,\"m\",IF(Facts[Quantity]>2,1,\"a\")),IF(1,[m],2.5))",
+   "powerbi": "3"
+  },
+  {
+   "expr": "COUNTX(ADDCOLUMNS(Facts,\"m\",IF(Facts[Quantity]>2,1,\"a\")),IF(1,[m],Facts[Sales]))",
+   "powerbi": "3"
+  },
+  {
+   "expr": "COUNTX(ADDCOLUMNS(Facts,\"m\",IF(Facts[Quantity]>2,1,\"a\")),IF(FALSE(),[m],DATE(2020,1,1)))",
+   "powerbi": "6"
+  },
+  {
+   "expr": "COUNTX(ADDCOLUMNS(Facts,\"m\",IF(Facts[Quantity]>2,1,\"a\")),IF(ISBLANK(Facts[Note]),[m],1))",
+   "powerbi": "6"
+  },
+  {
+   "expr": "COUNTX(ADDCOLUMNS(Facts,\"m\",IF(Facts[Quantity]>2,1,\"a\")),IF(ISBLANK(Facts[Note]),[m],DATE(2020,1,1)))",
+   "powerbi": "6"
+  },
+  {
+   "expr": "COUNTX(ADDCOLUMNS(Facts,\"m\",IF(Facts[Quantity]>2,1,\"a\")),IF(ISBLANK(Facts[Note]),[m],Facts[Sales]))",
+   "powerbi": "5"
+  },
+  {
+   "expr": "COUNTX(ADDCOLUMNS(Facts,\"m\",IF(Facts[Quantity]>2,1,\"a\")),IF(TRUE(),[m],DATE(2020,1,1)))",
+   "powerbi": "3"
+  },
+  {
+   "expr": "COUNTX(ADDCOLUMNS(Facts,\"m\",IF(Facts[Quantity]>2,1,\"a\")),IF(TRUE(),[m],Facts[Sales]))",
+   "powerbi": "3"
+  },
+  {
+   "expr": "COUNTX(ADDCOLUMNS(Facts,\"m\",IF(Facts[Quantity]>2,1,\"a\")),IF([m]<\"a\",1))",
+   "powerbi": "3"
+  },
+  {
+   "expr": "COUNTX(ADDCOLUMNS(Facts,\"m\",IF(Facts[Quantity]>2,1,\"a\")),IF([m]<>2.5,1))",
+   "powerbi": "6"
+  },
+  {
+   "expr": "COUNTX(ADDCOLUMNS(Facts,\"m\",IF(Facts[Quantity]>2,1,\"a\")),IF([m]<>DATE(2020,1,1),1))",
+   "powerbi": "6"
+  },
+  {
+   "expr": "COUNTX(ADDCOLUMNS(Facts,\"m\",IF(Facts[Quantity]>2,1,\"a\")),IF([m]=2.5,1))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTX(ADDCOLUMNS(Facts,\"m\",IF(Facts[Quantity]>2,1,\"a\")),IF([m]=BLANK(),1))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTX(ADDCOLUMNS(Facts,\"m\",IF(Facts[Quantity]>2,1,\"a\")),IF([m]=DATE(2020,1,1),1))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTX(ADDCOLUMNS(Facts,\"m\",IF(Facts[Quantity]>2,1,\"a\")),IF([m]>=2.5,1))",
+   "powerbi": "3"
+  },
+  {
+   "expr": "COUNTX(ADDCOLUMNS(Facts,\"m\",IF(Facts[Quantity]>2,1,\"a\")),IF([m]>=TRUE(),1))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTX(ADDCOLUMNS(Facts,\"m\",IF(Facts[Quantity]>2,DATE(2020,1,1),2)),IF(0,[m],\"a\"))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTX(ADDCOLUMNS(Facts,\"m\",IF(Facts[Quantity]>2,DATE(2020,1,1),2)),IF(0,[m],2.5))",
+   "powerbi": "6"
+  },
+  {
+   "expr": "COUNTX(ADDCOLUMNS(Facts,\"m\",IF(Facts[Quantity]>2,DATE(2020,1,1),2)),IF(1,[m],1))",
+   "powerbi": "6"
+  },
+  {
+   "expr": "COUNTX(ADDCOLUMNS(Facts,\"m\",IF(Facts[Quantity]>2,DATE(2020,1,1),2)),IF(1,[m],DATE(2020,1,1)+Facts[Quantity]))",
+   "powerbi": "6"
+  },
+  {
+   "expr": "COUNTX(ADDCOLUMNS(Facts,\"m\",IF(Facts[Quantity]>2,DATE(2020,1,1),2)),IF(1,[m],Facts[Quantity]))",
+   "powerbi": "6"
+  },
+  {
+   "expr": "COUNTX(ADDCOLUMNS(Facts,\"m\",IF(Facts[Quantity]>2,DATE(2020,1,1),2)),IF(1,[m],TRUE()))",
+   "powerbi": "6"
+  },
+  {
+   "expr": "COUNTX(ADDCOLUMNS(Facts,\"m\",IF(Facts[Quantity]>2,DATE(2020,1,1),2)),IF(FALSE(),[m],\"a\"))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTX(ADDCOLUMNS(Facts,\"m\",IF(Facts[Quantity]>2,DATE(2020,1,1),2)),IF(FALSE(),[m],2.5))",
+   "powerbi": "6"
+  },
+  {
+   "expr": "COUNTX(ADDCOLUMNS(Facts,\"m\",IF(Facts[Quantity]>2,DATE(2020,1,1),2)),IF(FALSE(),[m],DATE(2020,1,1)))",
+   "powerbi": "6"
+  },
+  {
+   "expr": "COUNTX(ADDCOLUMNS(Facts,\"m\",IF(Facts[Quantity]>2,DATE(2020,1,1),2)),IF(Facts[Quantity]>=3,[m],BLANK()))",
+   "powerbi": "3"
+  },
+  {
+   "expr": "COUNTX(ADDCOLUMNS(Facts,\"m\",IF(Facts[Quantity]>2,DATE(2020,1,1),2)),IF(ISBLANK(Facts[Note]),[m],1))",
+   "powerbi": "6"
+  },
+  {
+   "expr": "COUNTX(ADDCOLUMNS(Facts,\"m\",IF(Facts[Quantity]>2,DATE(2020,1,1),2)),IF(ISBLANK(Facts[Note]),[m],Facts[Quantity]))",
+   "powerbi": "6"
+  },
+  {
+   "expr": "COUNTX(ADDCOLUMNS(Facts,\"m\",IF(Facts[Quantity]>2,DATE(2020,1,1),2)),IF([m]<=1,1))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTX(ADDCOLUMNS(Facts,\"m\",IF(Facts[Quantity]>2,DATE(2020,1,1),2)),IF([m]<=2.5,1))",
+   "powerbi": "3"
+  },
+  {
+   "expr": "COUNTX(ADDCOLUMNS(Facts,\"m\",IF(Facts[Quantity]>2,DATE(2020,1,1),2)),IF([m]<>DATE(2020,1,1),1))",
+   "powerbi": "3"
+  },
+  {
+   "expr": "COUNTX(ADDCOLUMNS(Facts,\"m\",IF(Facts[Quantity]>2,DATE(2020,1,1),2)),IF([m]=BLANK(),1))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTX(ADDCOLUMNS(Facts,\"m\",IF(Facts[Quantity]>2,DATE(2020,1,1),2)),IF([m]>2.5,1))",
+   "powerbi": "3"
+  },
+  {
+   "expr": "COUNTX(ADDCOLUMNS(Facts,\"m\",IF(Facts[Quantity]>2,DATE(2020,1,1),2)),IF([m]>BLANK(),1))",
+   "powerbi": "6"
+  },
+  {
+   "expr": "COUNTX(ADDCOLUMNS(Facts,\"m\",IF(Facts[Quantity]>2,TRUE(),3)),IF(0,[m],2.5))",
+   "powerbi": "6"
+  },
+  {
+   "expr": "COUNTX(ADDCOLUMNS(Facts,\"m\",IF(Facts[Quantity]>2,TRUE(),3)),IF(0,[m],Facts[Quantity]))",
+   "powerbi": "6"
+  },
+  {
+   "expr": "COUNTX(ADDCOLUMNS(Facts,\"m\",IF(Facts[Quantity]>2,TRUE(),3)),IF(0,[m],TRUE()))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTX(ADDCOLUMNS(Facts,\"m\",IF(Facts[Quantity]>2,TRUE(),3)),IF(1,[m],Facts[Sales]))",
+   "powerbi": "3"
+  },
+  {
+   "expr": "COUNTX(ADDCOLUMNS(Facts,\"m\",IF(Facts[Quantity]>2,TRUE(),3)),IF(FALSE(),[m],Facts[Sales]))",
+   "powerbi": "5"
+  },
+  {
+   "expr": "COUNTX(ADDCOLUMNS(Facts,\"m\",IF(Facts[Quantity]>2,TRUE(),3)),IF(Facts[Quantity]>=3,[m],2.5))",
+   "powerbi": "3"
+  },
+  {
+   "expr": "COUNTX(ADDCOLUMNS(Facts,\"m\",IF(Facts[Quantity]>2,TRUE(),3)),IF(ISBLANK(Facts[Note]),[m],DATE(2020,1,1)+Facts[Quantity]))",
+   "powerbi": "4"
+  },
+  {
+   "expr": "COUNTX(ADDCOLUMNS(Facts,\"m\",IF(Facts[Quantity]>2,TRUE(),3)),IF(TRUE(),[m],1))",
+   "powerbi": "3"
+  },
+  {
+   "expr": "COUNTX(ADDCOLUMNS(Facts,\"m\",IF(Facts[Quantity]>2,TRUE(),3)),IF(TRUE(),[m],BLANK()))",
+   "powerbi": "3"
+  },
+  {
+   "expr": "COUNTX(ADDCOLUMNS(Facts,\"m\",IF(Facts[Quantity]>2,TRUE(),3)),IF(TRUE(),[m],Facts[Sales]))",
+   "powerbi": "3"
+  },
+  {
+   "expr": "COUNTX(ADDCOLUMNS(Facts,\"m\",IF(Facts[Quantity]>2,TRUE(),3)),IF(TRUE(),[m],TRUE()))",
+   "powerbi": "3"
+  },
+  {
+   "expr": "COUNTX(ADDCOLUMNS(Facts,\"m\",IF(Facts[Quantity]>2,TRUE(),3)),IF([m]<=1,1))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTX(ADDCOLUMNS(Facts,\"m\",IF(Facts[Quantity]>2,TRUE(),3)),IF([m]<=TRUE(),1))",
+   "powerbi": "6"
+  },
+  {
+   "expr": "COUNTX(ADDCOLUMNS(Facts,\"m\",IF(Facts[Quantity]>2,TRUE(),3)),IF([m]=2.5,1))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTX(ADDCOLUMNS(Facts,\"m\",IF(Facts[Quantity]>2,TRUE(),3)),IF([m]>\"a\",1))",
+   "powerbi": "3"
+  },
+  {
+   "expr": "COUNTX(ADDCOLUMNS(Facts,\"m\",IF(Facts[Quantity]>2,TRUE(),3)),IF([m]>1,1))",
+   "powerbi": "6"
+  },
+  {
+   "expr": "COUNTX(ADDCOLUMNS(Facts,\"m\",IF(Facts[Quantity]>2,TRUE(),3)),IF([m]>2.5,1))",
+   "powerbi": "6"
+  },
+  {
+   "expr": "COUNTX(ADDCOLUMNS(Facts,\"m\",IF(Facts[Quantity]>2,TRUE(),3)),IF([m]>=2.5,1))",
+   "powerbi": "6"
+  },
+  {
+   "expr": "COUNTX(ADDCOLUMNS(Facts,\"m\",IF(Facts[Quantity]>2,TRUE(),3)),IF([m]>=BLANK(),1))",
+   "powerbi": "6"
+  },
+  {
+   "expr": "COUNTX(ADDCOLUMNS(Facts,\"m\",IF(Facts[Quantity]>2,TRUE(),3)),IF([m]>=DATE(2020,1,1),1))",
+   "powerbi": "3"
+  },
+  {
+   "expr": "COUNTX(ADDCOLUMNS(Facts,\"m\",IF(Facts[Quantity]>2,TRUE(),3)),IF([m]>=TRUE(),1))",
+   "powerbi": "3"
+  },
+  {
+   "expr": "COUNTX(ADDCOLUMNS(Facts,\"m\",IF(Facts[Quantity]>2,TRUE(),3)),IF([m]>BLANK(),1))",
+   "powerbi": "6"
+  },
+  {
+   "expr": "COUNTX(ADDCOLUMNS(Facts,\"m\",IF(Facts[Quantity]>2,TRUE(),3)),IF([m]>TRUE(),1))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTX(ADDCOLUMNS(Facts,\"m\",SWITCH(Facts[Quantity],1,\"x\",2,2.5,BLANK())),IF(FALSE(),[m],DATE(2020,1,1)))",
+   "powerbi": "6"
+  },
+  {
+   "expr": "COUNTX(ADDCOLUMNS(Facts,\"m\",SWITCH(Facts[Quantity],1,\"x\",2,2.5,BLANK())),IF(Facts[Quantity]>=3,[m],Facts[Sales]))",
+   "powerbi": "3"
+  },
+  {
+   "expr": "COUNTX(ADDCOLUMNS(Facts,\"m\",SWITCH(Facts[Quantity],1,\"x\",2,2.5,BLANK())),IF(ISBLANK(Facts[Note]),[m],DATE(2020,1,1)+Facts[Quantity]))",
+   "powerbi": "4"
+  },
+  {
+   "expr": "COUNTX(ADDCOLUMNS(Facts,\"m\",SWITCH(Facts[Quantity],1,\"x\",2,2.5,BLANK())),IF(TRUE(),[m],BLANK()))",
+   "powerbi": "1"
+  },
+  {
+   "expr": "COUNTX(ADDCOLUMNS(Facts,\"m\",SWITCH(Facts[Quantity],1,\"x\",2,2.5,BLANK())),IF(TRUE(),[m],DATE(2020,1,1)))",
+   "powerbi": "1"
+  },
+  {
+   "expr": "COUNTX(ADDCOLUMNS(Facts,\"m\",SWITCH(Facts[Quantity],1,\"x\",2,2.5,BLANK())),IF(TRUE(),[m],Facts[Quantity]))",
+   "powerbi": "1"
+  },
+  {
+   "expr": "COUNTX(ADDCOLUMNS(Facts,\"m\",SWITCH(Facts[Quantity],1,\"x\",2,2.5,BLANK())),IF([m]<\"a\",1))",
+   "powerbi": "5"
+  },
+  {
+   "expr": "COUNTX(ADDCOLUMNS(Facts,\"m\",SWITCH(Facts[Quantity],1,\"x\",2,2.5,BLANK())),IF([m]<=\"a\",1))",
+   "powerbi": "5"
+  },
+  {
+   "expr": "COUNTX(ADDCOLUMNS(Facts,\"m\",SWITCH(Facts[Quantity],1,\"x\",2,2.5,BLANK())),IF([m]<=1,1))",
+   "powerbi": "4"
+  },
+  {
+   "expr": "COUNTX(ADDCOLUMNS(Facts,\"m\",SWITCH(Facts[Quantity],1,\"x\",2,2.5,BLANK())),IF([m]<=BLANK(),1))",
+   "powerbi": "4"
+  },
+  {
+   "expr": "COUNTX(ADDCOLUMNS(Facts,\"m\",SWITCH(Facts[Quantity],1,\"x\",2,2.5,BLANK())),IF([m]<=DATE(2020,1,1),1))",
+   "powerbi": "5"
+  },
+  {
+   "expr": "COUNTX(ADDCOLUMNS(Facts,\"m\",SWITCH(Facts[Quantity],1,\"x\",2,2.5,BLANK())),IF([m]<>\"a\",1))",
+   "powerbi": "6"
+  },
+  {
+   "expr": "COUNTX(ADDCOLUMNS(Facts,\"m\",SWITCH(Facts[Quantity],1,\"x\",2,2.5,BLANK())),IF([m]<>1,1))",
+   "powerbi": "6"
+  },
+  {
+   "expr": "COUNTX(ADDCOLUMNS(Facts,\"m\",SWITCH(Facts[Quantity],1,\"x\",2,2.5,BLANK())),IF([m]<>TRUE(),1))",
+   "powerbi": "6"
+  },
+  {
+   "expr": "COUNTX(ADDCOLUMNS(Facts,\"m\",SWITCH(Facts[Quantity],1,\"x\",2,2.5,BLANK())),IF([m]=\"a\",1))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTX(ADDCOLUMNS(Facts,\"m\",SWITCH(Facts[Quantity],1,\"x\",2,2.5,BLANK())),IF([m]=2.5,1))",
+   "powerbi": "1"
+  },
+  {
+   "expr": "COUNTX(ADDCOLUMNS(Facts,\"m\",SWITCH(Facts[Quantity],1,\"x\",2,2.5,BLANK())),IF([m]=BLANK(),1))",
+   "powerbi": "4"
+  },
+  {
+   "expr": "COUNTX(ADDCOLUMNS(Facts,\"m\",SWITCH(Facts[Quantity],1,\"x\",2,2.5,BLANK())),IF([m]=DATE(2020,1,1),1))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTX(ADDCOLUMNS(Facts,\"m\",SWITCH(Facts[Quantity],1,\"x\",2,2.5,BLANK())),IF([m]>=\"a\",1))",
+   "powerbi": "1"
+  },
+  {
+   "expr": "COUNTX(ADDCOLUMNS(Facts,\"m\",SWITCH(Facts[Quantity],1,\"x\",2,2.5,BLANK())),IF([m]>=1,1))",
+   "powerbi": "2"
+  },
+  {
+   "expr": "COUNTX(ADDCOLUMNS(Facts,\"m\",SWITCH(Facts[Quantity],1,\"x\",2,2.5,BLANK())),IF([m]>=2.5,1))",
+   "powerbi": "2"
+  },
+  {
+   "expr": "COUNTX(ADDCOLUMNS(Facts,\"m\",SWITCH(Facts[Quantity],1,\"x\",2,2.5,BLANK())),IF([m]>DATE(2020,1,1),1))",
+   "powerbi": "1"
+  },
+  {
+   "expr": "COUNTX(ADDCOLUMNS(Facts,\"z\",1),1/0*0)",
+   "powerbi": "6"
+  },
+  {
+   "expr": "COUNTX(ADDCOLUMNS(Facts,\"z\",1),1/0*0*2)",
+   "powerbi": "6"
+  },
+  {
+   "expr": "COUNTX(ADDCOLUMNS(Facts,\"z\",1),1/0*0+BLANK())",
+   "powerbi": "6"
+  },
+  {
+   "expr": "COUNTX(FILTER(Facts,Facts[Quantity]>1),IFERROR(1/0,2)*2)",
+   "powerbi": "4"
+  },
+  {
+   "expr": "COUNTX(FILTER(Facts,Facts[Sales]>3),IFERROR(1/0,2))",
+   "powerbi": "2"
+  },
+  {
+   "expr": "COUNTX(Facts,1/0*0*2)",
+   "powerbi": "0"
+  },
+  {
+   "expr": "COUNTX(KEEPFILTERS(FILTER(Facts,0)),Facts[Region])",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTX(KEEPFILTERS(FILTER(Facts,0)),VALUES(Facts[Region]))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTX(KEEPFILTERS(FILTER(Facts,1)),Facts[Quantity]*2)",
+   "powerbi": "6"
+  },
+  {
+   "expr": "COUNTX(KEEPFILTERS(FILTER(Facts,1)),Facts[Region])",
+   "powerbi": "6"
+  },
+  {
+   "expr": "COUNTX(KEEPFILTERS(FILTER(Facts,FALSE())),Facts[Quantity]*2)",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTX(KEEPFILTERS(FILTER(Facts,FALSE())),Facts[Sales])",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTX(KEEPFILTERS(FILTER(Facts,Facts[Quantity]>=3)),Facts[Quantity]*2)",
+   "powerbi": "3"
+  },
+  {
+   "expr": "COUNTX(KEEPFILTERS(FILTER(Facts,Facts[Quantity]>=3)),Facts[Region])",
+   "powerbi": "3"
+  },
+  {
+   "expr": "COUNTX(KEEPFILTERS(FILTER(Facts,ISBLANK(Facts[Note]))),Facts[Region])",
+   "powerbi": "2"
+  },
+  {
+   "expr": "COUNTX(KEEPFILTERS(FILTER(Facts,TRUE())),Facts[Sales])",
+   "powerbi": "5"
+  },
+  {
+   "expr": "COUNTX({1,2,3},IFERROR(1/0,2)+BLANK())",
+   "powerbi": "3"
+  },
+  {
+   "expr": "COUNTX({TRUE()},IFERROR(1/0,2)*2)",
+   "powerbi": "1"
+  },
+  {
+   "expr": "GEOMEANX(ADDCOLUMNS(Facts,\"z\",1),COALESCE(CURRENCY(1.23456),2.5))",
+   "powerbi": "1.2346"
+  },
+  {
+   "expr": "GEOMEANX(ADDCOLUMNS(Facts,\"z\",1),CURRENCY(7))",
+   "powerbi": "7"
+  },
+  {
+   "expr": "GEOMEANX(ADDCOLUMNS(Facts,\"z\",1),CURRENCY(Facts[Sales]))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "GEOMEANX(ADDCOLUMNS(Facts,\"z\",1),IF(0,CURRENCY(1.23456)))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "GEOMEANX(ADDCOLUMNS(Facts,\"z\",1),IF(0,CURRENCY(7),1))",
+   "powerbi": "1"
+  },
+  {
+   "expr": "GEOMEANX(ADDCOLUMNS(Facts,\"z\",1),IF(FALSE(),CONVERT(CURRENCY(1.5),DOUBLE)))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "GEOMEANX(ADDCOLUMNS(Facts,\"z\",1),IF(FALSE(),CURRENCY(Facts[Sales])))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "GEOMEANX(ADDCOLUMNS(Facts,\"z\",1),IF(FALSE(),DATE(2020,1,1),CURRENCY(2.75)))",
+   "powerbi": "2.75"
+  },
+  {
+   "expr": "GEOMEANX(ADDCOLUMNS(Facts,\"z\",1),IF(Facts[Quantity]>=3,Facts[Quantity],CONVERT(CURRENCY(1.5),DOUBLE)))",
+   "powerbi": "2.42328319883444"
+  },
+  {
+   "expr": "GEOMEANX(ADDCOLUMNS(Facts,\"z\",1),IF(ISBLANK(Facts[Note]),CURRENCY(0.33333),BLANK()))",
+   "powerbi": "0.3333"
+  },
+  {
+   "expr": "GEOMEANX(ADDCOLUMNS(Facts,\"z\",1),IF(TRUE(),CURRENCY(Facts[Sales])))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "GEOMEANX(ADDCOLUMNS(Facts,\"z\",1),IF(TRUE(),TRUE(),CURRENCY(2.75)))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "GEOMEANX(ADDCOLUMNS(Facts,\"z\",1),IF.EAGER(FALSE(),CURRENCY(Facts[Sales]),1))",
+   "powerbi": "1"
+  },
+  {
+   "expr": "GEOMEANX(ADDCOLUMNS(Facts,\"z\",1),IF.EAGER(Facts[Quantity]>=3,CURRENCY(2.75),BLANK()))",
+   "powerbi": "2.75"
+  },
+  {
+   "expr": "GEOMEANX(FILTER(Facts,Facts[Quantity]>1),COALESCE(CURRENCY(2.75),Facts[Sales]))",
+   "powerbi": "2.75"
+  },
+  {
+   "expr": "GEOMEANX(FILTER(Facts,Facts[Quantity]>1),COALESCE(CURRENCY(7),Facts[Sales]))",
+   "powerbi": "7"
+  },
+  {
+   "expr": "GEOMEANX(FILTER(Facts,Facts[Quantity]>1),CONVERT(CURRENCY(1.5),DOUBLE))",
+   "powerbi": "1.5"
+  },
+  {
+   "expr": "GEOMEANX(FILTER(Facts,Facts[Quantity]>1),CURRENCY(0.33333))",
+   "powerbi": "0.3333"
+  },
+  {
+   "expr": "GEOMEANX(FILTER(Facts,Facts[Quantity]>1),CURRENCY(1.5))",
+   "powerbi": "1.5"
+  },
+  {
+   "expr": "GEOMEANX(FILTER(Facts,Facts[Quantity]>1),CURRENCY(Facts[Sales]))",
+   "powerbi": "8.0671"
+  },
+  {
+   "expr": "GEOMEANX(FILTER(Facts,Facts[Quantity]>1),IF(0,CURRENCY(-2),BLANK()))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "GEOMEANX(FILTER(Facts,Facts[Quantity]>1),IF(0,CURRENCY(Facts[Sales])))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "GEOMEANX(FILTER(Facts,Facts[Quantity]>1),IF(1,CURRENCY(Facts[Sales])))",
+   "powerbi": "8.0671"
+  },
+  {
+   "expr": "GEOMEANX(FILTER(Facts,Facts[Quantity]>1),IF(FALSE(),CURRENCY(Facts[Sales]),BLANK()))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "GEOMEANX(FILTER(Facts,Facts[Quantity]>1),IF(Facts[Quantity]>2,CURRENCY(1.23456)))",
+   "powerbi": "1.2346"
+  },
+  {
+   "expr": "GEOMEANX(FILTER(Facts,Facts[Quantity]>1),IF(Facts[Quantity]>=3,CURRENCY(0.33333)))",
+   "powerbi": "0.3333"
+  },
+  {
+   "expr": "GEOMEANX(FILTER(Facts,Facts[Quantity]>1),IF(ISBLANK(Facts[Note]),CURRENCY(2.75)))",
+   "powerbi": "2.75"
+  },
+  {
+   "expr": "GEOMEANX(FILTER(Facts,Facts[Quantity]>1),IF(ISBLANK(Facts[Note]),Facts[Quantity],CONVERT(CURRENCY(1.5),DOUBLE)))",
+   "powerbi": "2.41028525683396"
+  },
+  {
+   "expr": "GEOMEANX(FILTER(Facts,Facts[Quantity]>1),IF(TRUE(),CONVERT(CURRENCY(1.5),DOUBLE)))",
+   "powerbi": "1.5"
+  },
+  {
+   "expr": "GEOMEANX(FILTER(Facts,Facts[Quantity]>1),IF.EAGER(1,CURRENCY(Facts[Sales]),2.5))",
+   "powerbi": "8.06714323012272"
+  },
+  {
+   "expr": "GEOMEANX(FILTER(Facts,Facts[Sales]>3),CURRENCY(7))",
+   "powerbi": "7"
+  },
+  {
+   "expr": "GEOMEANX(FILTER(Facts,Facts[Sales]>3),IF(1,CURRENCY(-1.1)))",
+   "powerbi": "1.1"
+  },
+  {
+   "expr": "GEOMEANX(FILTER(Facts,Facts[Sales]>3),IF(FALSE(),CURRENCY(2.75)))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "GEOMEANX(FILTER(Facts,Facts[Sales]>3),IF(FALSE(),CURRENCY(Facts[Sales])))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "GEOMEANX(FILTER(Facts,Facts[Sales]>3),IF(ISBLANK(Facts[Note]),CURRENCY(-1.1)))",
+   "powerbi": "-1.1"
+  },
+  {
+   "expr": "GEOMEANX(FILTER(Facts,Facts[Sales]>3),SWITCH(TRUE(),TRUE(),CURRENCY(-1.1),1))",
+   "powerbi": "1.1"
+  },
+  {
+   "expr": "GEOMEANX(Facts,COALESCE(CURRENCY(1.23456),DATE(2020,1,1)))",
+   "powerbi": "1.2346"
+  },
+  {
+   "expr": "GEOMEANX(Facts,CONVERT(CURRENCY(1.5),DOUBLE))",
+   "powerbi": "1.5"
+  },
+  {
+   "expr": "GEOMEANX(Facts,IF(0,Facts[Sales],CONVERT(CURRENCY(1.5),DOUBLE)))",
+   "powerbi": "1.5"
+  },
+  {
+   "expr": "GEOMEANX(Facts,IF(1,CONVERT(CURRENCY(1.5),DOUBLE)))",
+   "powerbi": "1.5"
+  },
+  {
+   "expr": "GEOMEANX(Facts,IF(Facts[Quantity]>=3,CURRENCY(-1.1),Facts[Quantity]))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "GEOMEANX(Facts,IF(ISBLANK(Facts[Note]),CURRENCY(-2)))",
+   "powerbi": "2"
+  },
+  {
+   "expr": "GEOMEANX(Facts,IF(ISBLANK(Facts[Note]),CURRENCY(1.5)))",
+   "powerbi": "1.5"
+  },
+  {
+   "expr": "GEOMEANX(Facts,IF(TRUE(),2.5,CONVERT(CURRENCY(1.5),DOUBLE)))",
+   "powerbi": "2.5"
+  },
+  {
+   "expr": "GEOMEANX(Facts,IF(TRUE(),CURRENCY(0)))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "GEOMEANX(Facts,IF(TRUE(),CURRENCY(0.33333)))",
+   "powerbi": "0.3333"
+  },
+  {
+   "expr": "GEOMEANX(Facts,IF(TRUE(),CURRENCY(2.75),Facts[Sales]))",
+   "powerbi": "2.75"
+  },
+  {
+   "expr": "GEOMEANX(Facts,IF.EAGER(1,CURRENCY(7),DATE(2020,1,1)+Facts[Quantity]))",
+   "powerbi": "7"
+  },
+  {
+   "expr": "GEOMEANX(Facts,IF.EAGER(Facts[Quantity]>2,CURRENCY(1.23456),2.5))",
+   "powerbi": "1.75684376083931"
+  },
+  {
+   "expr": "GEOMEANX(Facts,SWITCH(Facts[Quantity],1,CURRENCY(1.5),DATE(2020,1,1)))",
+   "powerbi": "7897.68290154425"
+  },
+  {
+   "expr": "GEOMEANX(Facts,SWITCH(TRUE(),TRUE(),CURRENCY(-2),BLANK()))",
+   "powerbi": "2"
+  },
+  {
+   "expr": "GEOMEANX(Facts,SWITCH(TRUE(),TRUE(),CURRENCY(-2),Facts[Quantity]))",
+   "powerbi": "2"
+  },
+  {
+   "expr": "GEOMEANX({0.5,4},IF(1,2.5,CURRENCY(2.75)))",
+   "powerbi": "2.5"
+  },
+  {
+   "expr": "GEOMEANX({0.5,4},IF(FALSE(),CURRENCY(-1.1)))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "GEOMEANX({0.5,4},IF(TRUE(),CURRENCY(7)))",
+   "powerbi": "7"
+  },
+  {
+   "expr": "GEOMEANX({1,2,3},CONVERT(CURRENCY(1.5),DOUBLE))",
+   "powerbi": "1.5"
+  },
+  {
+   "expr": "GEOMEANX({1,2,3},CURRENCY(2.75))",
+   "powerbi": "2.75"
+  },
+  {
+   "expr": "GEOMEANX({1,2,3},IF(1,CURRENCY(-1.1),2.5))",
+   "powerbi": "-1.1"
+  },
+  {
+   "expr": "GEOMEANX({1,2,3},IF(1,CURRENCY(-2)))",
+   "powerbi": "-2"
+  },
+  {
+   "expr": "GEOMEANX({1,2,3},IF(FALSE(),2.5,CURRENCY(2.75)))",
+   "powerbi": "2.75"
+  },
+  {
+   "expr": "GEOMEANX({1,2,3},IF(FALSE(),CONVERT(CURRENCY(1.5),DOUBLE),\"a\"))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "GEOMEANX({1,2,3},IF(FALSE(),CURRENCY(-1.1),TRUE()))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "GEOMEANX({1.5,2.5},CURRENCY(1.5))",
+   "powerbi": "1.5"
+  },
+  {
+   "expr": "GEOMEANX({1.5,2.5},IF(0,2.5,CURRENCY(1.5)))",
+   "powerbi": "1.5"
+  },
+  {
+   "expr": "GEOMEANX({TRUE()},COALESCE(CURRENCY(2.75),BLANK()))",
+   "powerbi": "2.75"
+  },
+  {
+   "expr": "GEOMEANX({TRUE()},CURRENCY(0.33333))",
+   "powerbi": "0.3333"
+  },
+  {
+   "expr": "GEOMEANX({TRUE()},CURRENCY(2.75))",
+   "powerbi": "2.75"
+  },
+  {
+   "expr": "GEOMEANX({TRUE()},IF(0,CONVERT(CURRENCY(1.5),DOUBLE)))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "GEOMEANX({TRUE()},IF(0,CURRENCY(2.75)))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "GEOMEANX({TRUE()},IF(1,TRUE(),CURRENCY(2.75)))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "GEOMEANX({TRUE()},IF(FALSE(),CURRENCY(2.75)))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "GEOMEANX({TRUE()},IF(TRUE(),\"a\",CURRENCY(1.5)))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "GEOMEANX({TRUE()},IF(TRUE(),CONVERT(CURRENCY(1.5),DOUBLE)))",
+   "powerbi": "1.5"
+  },
+  {
+   "expr": "GEOMEANX({TRUE()},SWITCH(TRUE(),TRUE(),CURRENCY(0.33333),2.5))",
+   "powerbi": "0.3333"
+  },
+  {
+   "expr": "MAXX(ADDCOLUMNS(Facts,\"m\",COALESCE(Facts[Note],1)),IF(0,[m],\"a\"))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MAXX(ADDCOLUMNS(Facts,\"m\",COALESCE(Facts[Note],1)),IF(0,[m],Facts[Quantity]))",
+   "powerbi": "5"
+  },
+  {
+   "expr": "MAXX(ADDCOLUMNS(Facts,\"m\",COALESCE(Facts[Note],1)),IF(0,[m],Facts[Sales]))",
+   "powerbi": "20"
+  },
+  {
+   "expr": "MAXX(ADDCOLUMNS(Facts,\"m\",COALESCE(Facts[Note],1)),IF(1,[m],DATE(2020,1,1)))",
+   "powerbi": "1"
+  },
+  {
+   "expr": "MAXX(ADDCOLUMNS(Facts,\"m\",COALESCE(Facts[Note],1)),IF(1,[m],Facts[Sales]))",
+   "powerbi": "1"
+  },
+  {
+   "expr": "MAXX(ADDCOLUMNS(Facts,\"m\",COALESCE(Facts[Note],1)),IF(FALSE(),[m],Facts[Quantity]))",
+   "powerbi": "5"
+  },
+  {
+   "expr": "MAXX(ADDCOLUMNS(Facts,\"m\",COALESCE(Facts[Note],1)),IF(FALSE(),[m],TRUE()))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MAXX(ADDCOLUMNS(Facts,\"m\",COALESCE(Facts[Note],1)),IF(Facts[Quantity]>2,[m],TRUE()))",
+   "powerbi": "1"
+  },
+  {
+   "expr": "MAXX(ADDCOLUMNS(Facts,\"m\",COALESCE(Facts[Note],1)),IF(ISBLANK(Facts[Note]),[m],DATE(2020,1,1)))",
+   "powerbi": "01/01/2020 00:00:00"
+  },
+  {
+   "expr": "MAXX(ADDCOLUMNS(Facts,\"m\",COALESCE(Facts[Note],1)),IF(ISBLANK(Facts[Note]),[m],TRUE()))",
+   "powerbi": "1"
+  },
+  {
+   "expr": "MAXX(ADDCOLUMNS(Facts,\"m\",IF(Facts[Quantity]>2,1,\"a\")),IF(0,[m],DATE(2020,1,1)+Facts[Quantity]))",
+   "powerbi": "01/06/2020 00:00:00"
+  },
+  {
+   "expr": "MAXX(ADDCOLUMNS(Facts,\"m\",IF(Facts[Quantity]>2,1,\"a\")),IF(FALSE(),[m],1))",
+   "powerbi": "1"
+  },
+  {
+   "expr": "MAXX(ADDCOLUMNS(Facts,\"m\",IF(Facts[Quantity]>2,1,\"a\")),IF(Facts[Quantity]>2,[m],2.5))",
+   "powerbi": "2.5"
+  },
+  {
+   "expr": "MAXX(ADDCOLUMNS(Facts,\"m\",IF(Facts[Quantity]>2,1,\"a\")),IF(Facts[Quantity]>=3,[m],\"a\"))",
+   "powerbi": "1"
+  },
+  {
+   "expr": "MAXX(ADDCOLUMNS(Facts,\"m\",IF(Facts[Quantity]>2,1,\"a\")),IF(Facts[Quantity]>=3,[m],BLANK()))",
+   "powerbi": "1"
+  },
+  {
+   "expr": "MAXX(ADDCOLUMNS(Facts,\"m\",IF(Facts[Quantity]>2,1,\"a\")),IF(Facts[Quantity]>=3,[m],TRUE()))",
+   "powerbi": "1"
+  },
+  {
+   "expr": "MAXX(ADDCOLUMNS(Facts,\"m\",IF(Facts[Quantity]>2,1,\"a\")),IF(ISBLANK(Facts[Note]),[m],BLANK()))",
+   "powerbi": "1"
+  },
+  {
+   "expr": "MAXX(ADDCOLUMNS(Facts,\"m\",IF(Facts[Quantity]>2,1,\"a\")),IF(ISBLANK(Facts[Note]),[m],DATE(2020,1,1)))",
+   "powerbi": "01/01/2020 00:00:00"
+  },
+  {
+   "expr": "MAXX(ADDCOLUMNS(Facts,\"m\",IF(Facts[Quantity]>2,1,\"a\")),IF(ISBLANK(Facts[Note]),[m],Facts[Quantity]))",
+   "powerbi": "4"
+  },
+  {
+   "expr": "MAXX(ADDCOLUMNS(Facts,\"m\",IF(Facts[Quantity]>2,1,\"a\")),IF(ISBLANK(Facts[Note]),[m],TRUE()))",
+   "powerbi": "1"
+  },
+  {
+   "expr": "MAXX(ADDCOLUMNS(Facts,\"m\",IF(Facts[Quantity]>2,DATE(2020,1,1),2)),IF(0,[m],DATE(2020,1,1)+Facts[Quantity]))",
+   "powerbi": "43836"
+  },
+  {
+   "expr": "MAXX(ADDCOLUMNS(Facts,\"m\",IF(Facts[Quantity]>2,DATE(2020,1,1),2)),IF(0,[m],Facts[Sales]))",
+   "powerbi": "20"
+  },
+  {
+   "expr": "MAXX(ADDCOLUMNS(Facts,\"m\",IF(Facts[Quantity]>2,DATE(2020,1,1),2)),IF(1,[m],BLANK()))",
+   "powerbi": "43831"
+  },
+  {
+   "expr": "MAXX(ADDCOLUMNS(Facts,\"m\",IF(Facts[Quantity]>2,DATE(2020,1,1),2)),IF(Facts[Quantity]>2,[m],TRUE()))",
+   "powerbi": "43831"
+  },
+  {
+   "expr": "MAXX(ADDCOLUMNS(Facts,\"m\",IF(Facts[Quantity]>2,DATE(2020,1,1),2)),IF(Facts[Quantity]>=3,[m],2.5))",
+   "powerbi": "43831"
+  },
+  {
+   "expr": "MAXX(ADDCOLUMNS(Facts,\"m\",IF(Facts[Quantity]>2,DATE(2020,1,1),2)),IF(Facts[Quantity]>=3,[m],Facts[Quantity]))",
+   "powerbi": "43831"
+  },
+  {
+   "expr": "MAXX(ADDCOLUMNS(Facts,\"m\",IF(Facts[Quantity]>2,DATE(2020,1,1),2)),IF(ISBLANK(Facts[Note]),[m],Facts[Quantity]))",
+   "powerbi": "43831"
+  },
+  {
+   "expr": "MAXX(ADDCOLUMNS(Facts,\"m\",IF(Facts[Quantity]>2,TRUE(),3)),IF(0,[m],1))",
+   "powerbi": "1"
+  },
+  {
+   "expr": "MAXX(ADDCOLUMNS(Facts,\"m\",IF(Facts[Quantity]>2,TRUE(),3)),IF(0,[m],2.5))",
+   "powerbi": "2.5"
+  },
+  {
+   "expr": "MAXX(ADDCOLUMNS(Facts,\"m\",IF(Facts[Quantity]>2,TRUE(),3)),IF(1,[m],2.5))",
+   "powerbi": "3"
+  },
+  {
+   "expr": "MAXX(ADDCOLUMNS(Facts,\"m\",IF(Facts[Quantity]>2,TRUE(),3)),IF(1,[m],BLANK()))",
+   "powerbi": "3"
+  },
+  {
+   "expr": "MAXX(ADDCOLUMNS(Facts,\"m\",IF(Facts[Quantity]>2,TRUE(),3)),IF(1,[m],DATE(2020,1,1)+Facts[Quantity]))",
+   "powerbi": "3"
+  },
+  {
+   "expr": "MAXX(ADDCOLUMNS(Facts,\"m\",IF(Facts[Quantity]>2,TRUE(),3)),IF(FALSE(),[m],1))",
+   "powerbi": "1"
+  },
+  {
+   "expr": "MAXX(ADDCOLUMNS(Facts,\"m\",IF(Facts[Quantity]>2,TRUE(),3)),IF(FALSE(),[m],DATE(2020,1,1)))",
+   "powerbi": "01/01/2020 00:00:00"
+  },
+  {
+   "expr": "MAXX(ADDCOLUMNS(Facts,\"m\",IF(Facts[Quantity]>2,TRUE(),3)),IF(FALSE(),[m],Facts[Quantity]))",
+   "powerbi": "5"
+  },
+  {
+   "expr": "MAXX(ADDCOLUMNS(Facts,\"m\",IF(Facts[Quantity]>2,TRUE(),3)),IF(FALSE(),[m],TRUE()))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MAXX(ADDCOLUMNS(Facts,\"m\",IF(Facts[Quantity]>2,TRUE(),3)),IF(Facts[Quantity]>2,[m],\"a\"))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MAXX(ADDCOLUMNS(Facts,\"m\",IF(Facts[Quantity]>2,TRUE(),3)),IF(Facts[Quantity]>=3,[m],\"a\"))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MAXX(ADDCOLUMNS(Facts,\"m\",IF(Facts[Quantity]>2,TRUE(),3)),IF(ISBLANK(Facts[Note]),[m],Facts[Sales]))",
+   "powerbi": "10.5"
+  },
+  {
+   "expr": "MAXX(ADDCOLUMNS(Facts,\"m\",IF(Facts[Quantity]>2,TRUE(),3)),IF(ISBLANK(Facts[Note]),[m],TRUE()))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MAXX(ADDCOLUMNS(Facts,\"m\",IF(Facts[Quantity]>2,TRUE(),3)),IF(TRUE(),[m],1))",
+   "powerbi": "3"
+  },
+  {
+   "expr": "MAXX(ADDCOLUMNS(Facts,\"m\",IF(Facts[Quantity]>2,TRUE(),3)),IF(TRUE(),[m],DATE(2020,1,1)))",
+   "powerbi": "3"
+  },
+  {
+   "expr": "MAXX(ADDCOLUMNS(Facts,\"m\",IF(Facts[Quantity]>2,TRUE(),3)),IF(TRUE(),[m],Facts[Sales]))",
+   "powerbi": "3"
+  },
+  {
+   "expr": "MAXX(ADDCOLUMNS(Facts,\"m\",SWITCH(Facts[Quantity],1,\"x\",2,2.5,BLANK())),IF(0,[m],1))",
+   "powerbi": "1"
+  },
+  {
+   "expr": "MAXX(ADDCOLUMNS(Facts,\"m\",SWITCH(Facts[Quantity],1,\"x\",2,2.5,BLANK())),IF(1,[m],DATE(2020,1,1)+Facts[Quantity]))",
+   "powerbi": "2.5"
+  },
+  {
+   "expr": "MAXX(ADDCOLUMNS(Facts,\"m\",SWITCH(Facts[Quantity],1,\"x\",2,2.5,BLANK())),IF(FALSE(),[m],DATE(2020,1,1)))",
+   "powerbi": "01/01/2020 00:00:00"
+  },
+  {
+   "expr": "MAXX(ADDCOLUMNS(Facts,\"m\",SWITCH(Facts[Quantity],1,\"x\",2,2.5,BLANK())),IF(Facts[Quantity]>2,[m],Facts[Quantity]))",
+   "powerbi": "2"
+  },
+  {
+   "expr": "MAXX(ADDCOLUMNS(Facts,\"m\",SWITCH(Facts[Quantity],1,\"x\",2,2.5,BLANK())),IF(Facts[Quantity]>=3,[m],\"a\"))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MAXX(ADDCOLUMNS(Facts,\"m\",SWITCH(Facts[Quantity],1,\"x\",2,2.5,BLANK())),IF(Facts[Quantity]>=3,[m],1))",
+   "powerbi": "1"
+  },
+  {
+   "expr": "MAXX(ADDCOLUMNS(Facts,\"m\",SWITCH(Facts[Quantity],1,\"x\",2,2.5,BLANK())),IF(Facts[Quantity]>=3,[m],Facts[Quantity]))",
+   "powerbi": "2"
+  },
+  {
+   "expr": "MAXX(ADDCOLUMNS(Facts,\"m\",SWITCH(Facts[Quantity],1,\"x\",2,2.5,BLANK())),IF(TRUE(),[m],1))",
+   "powerbi": "2.5"
+  },
+  {
+   "expr": "MAXX(ADDCOLUMNS(Facts,\"m\",SWITCH(Facts[Quantity],1,\"x\",2,2.5,BLANK())),IF(TRUE(),[m],BLANK()))",
+   "powerbi": "2.5"
+  },
+  {
+   "expr": "MAXX(ADDCOLUMNS(Facts,\"z\",1),1/0*0*2)",
+   "powerbi": "NaN"
+  },
+  {
+   "expr": "MAXX(ADDCOLUMNS(Facts,\"z\",1),COALESCE(CURRENCY(1.23456),DATE(2020,1,1)))",
+   "powerbi": "1.2346"
+  },
+  {
+   "expr": "MAXX(ADDCOLUMNS(Facts,\"z\",1),COALESCE(CURRENCY(1.5),Facts[Sales]))",
+   "powerbi": "1.5"
+  },
+  {
+   "expr": "MAXX(ADDCOLUMNS(Facts,\"z\",1),COALESCE(CURRENCY(2.75),BLANK()))",
+   "powerbi": "2.75"
+  },
+  {
+   "expr": "MAXX(ADDCOLUMNS(Facts,\"z\",1),COALESCE(CURRENCY(7),2.5))",
+   "powerbi": "7"
+  },
+  {
+   "expr": "MAXX(ADDCOLUMNS(Facts,\"z\",1),CURRENCY(1.23456))",
+   "powerbi": "1.2346"
+  },
+  {
+   "expr": "MAXX(ADDCOLUMNS(Facts,\"z\",1),CURRENCY(2.75))",
+   "powerbi": "2.75"
+  },
+  {
+   "expr": "MAXX(ADDCOLUMNS(Facts,\"z\",1),IF(0,BLANK(),CURRENCY(0.33333)))",
+   "powerbi": "0.3333"
+  },
+  {
+   "expr": "MAXX(ADDCOLUMNS(Facts,\"z\",1),IF(0,CURRENCY(-2),2.5))",
+   "powerbi": "2.5"
+  },
+  {
+   "expr": "MAXX(ADDCOLUMNS(Facts,\"z\",1),IF(0,CURRENCY(Facts[Sales])))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MAXX(ADDCOLUMNS(Facts,\"z\",1),IF(0,CURRENCY(Facts[Sales]),Facts[Quantity]))",
+   "powerbi": "5"
+  },
+  {
+   "expr": "MAXX(ADDCOLUMNS(Facts,\"z\",1),IF(1,\"a\",CURRENCY(-1.1)))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MAXX(ADDCOLUMNS(Facts,\"z\",1),IF(FALSE(),2.5,CURRENCY(7)))",
+   "powerbi": "7"
+  },
+  {
+   "expr": "MAXX(ADDCOLUMNS(Facts,\"z\",1),IF(FALSE(),CURRENCY(-2),Facts[Quantity]))",
+   "powerbi": "5"
+  },
+  {
+   "expr": "MAXX(ADDCOLUMNS(Facts,\"z\",1),IF(FALSE(),CURRENCY(0.33333)))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MAXX(ADDCOLUMNS(Facts,\"z\",1),IF(FALSE(),CURRENCY(7)))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MAXX(ADDCOLUMNS(Facts,\"z\",1),IF(TRUE(),CONVERT(CURRENCY(1.5),DOUBLE),Facts[Quantity]))",
+   "powerbi": "1.5"
+  },
+  {
+   "expr": "MAXX(ADDCOLUMNS(Facts,\"z\",1),IF(TRUE(),CURRENCY(0.33333)))",
+   "powerbi": "0.3333"
+  },
+  {
+   "expr": "MAXX(ADDCOLUMNS(Facts,\"z\",1),IF(TRUE(),TRUE(),CURRENCY(7)))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MAXX(ADDCOLUMNS(Facts,\"z\",1),IF.EAGER(1,CURRENCY(-1.1),Facts[Sales]))",
+   "powerbi": "-1.1"
+  },
+  {
+   "expr": "MAXX(ADDCOLUMNS(Facts,\"z\",1),IF.EAGER(FALSE(),CURRENCY(1.5),1))",
+   "powerbi": "1"
+  },
+  {
+   "expr": "MAXX(ADDCOLUMNS(Facts,\"z\",1),IF.EAGER(Facts[Quantity]>=3,CONVERT(CURRENCY(1.5),DOUBLE),BLANK()))",
+   "powerbi": "1.5"
+  },
+  {
+   "expr": "MAXX(ADDCOLUMNS(Facts,\"z\",1),IFERROR(1/0,2)+BLANK())",
+   "powerbi": "2"
+  },
+  {
+   "expr": "MAXX(FILTER(Facts,Facts[Quantity]>1),1/0*0+BLANK())",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MAXX(FILTER(Facts,Facts[Quantity]>1),COALESCE(CURRENCY(1.23456),Facts[Quantity]))",
+   "powerbi": "1.2346"
+  },
+  {
+   "expr": "MAXX(FILTER(Facts,Facts[Quantity]>1),CURRENCY(0.33333))",
+   "powerbi": "0.3333"
+  },
+  {
+   "expr": "MAXX(FILTER(Facts,Facts[Quantity]>1),CURRENCY(Facts[Sales]))",
+   "powerbi": "20"
+  },
+  {
+   "expr": "MAXX(FILTER(Facts,Facts[Quantity]>1),IF(0,CONVERT(CURRENCY(1.5),DOUBLE)))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MAXX(FILTER(Facts,Facts[Quantity]>1),IF(1,1,CURRENCY(7)))",
+   "powerbi": "1"
+  },
+  {
+   "expr": "MAXX(FILTER(Facts,Facts[Quantity]>1),IF(1,2.5,CONVERT(CURRENCY(1.5),DOUBLE)))",
+   "powerbi": "2.5"
+  },
+  {
+   "expr": "MAXX(FILTER(Facts,Facts[Quantity]>1),IF(1,CONVERT(CURRENCY(1.5),DOUBLE)))",
+   "powerbi": "1.5"
+  },
+  {
+   "expr": "MAXX(FILTER(Facts,Facts[Quantity]>1),IF(Facts[Quantity]>2,BLANK(),CURRENCY(0)))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "MAXX(FILTER(Facts,Facts[Quantity]>1),IF(ISBLANK(Facts[Note]),CONVERT(CURRENCY(1.5),DOUBLE),DATE(2020,1,1)))",
+   "powerbi": "43831"
+  },
+  {
+   "expr": "MAXX(FILTER(Facts,Facts[Quantity]>1),IF(ISBLANK(Facts[Note]),CURRENCY(0),Facts[Quantity]))",
+   "powerbi": "4"
+  },
+  {
+   "expr": "MAXX(FILTER(Facts,Facts[Quantity]>1),IF(ISBLANK(Facts[Note]),CURRENCY(1.23456),Facts[Quantity]))",
+   "powerbi": "4"
+  },
+  {
+   "expr": "MAXX(FILTER(Facts,Facts[Quantity]>1),IF(ISBLANK(Facts[Note]),CURRENCY(Facts[Sales])))",
+   "powerbi": "20"
+  },
+  {
+   "expr": "MAXX(FILTER(Facts,Facts[Quantity]>1),IF(ISBLANK(Facts[Note]),DATE(2020,1,1)+Facts[Quantity],CURRENCY(7)))",
+   "powerbi": "43836"
+  },
+  {
+   "expr": "MAXX(FILTER(Facts,Facts[Quantity]>1),IF(TRUE(),\"a\",CURRENCY(2.75)))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MAXX(FILTER(Facts,Facts[Quantity]>1),IF.EAGER(ISBLANK(Facts[Note]),CONVERT(CURRENCY(1.5),DOUBLE),DATE(2020,1,1)))",
+   "powerbi": "43831"
+  },
+  {
+   "expr": "MAXX(FILTER(Facts,Facts[Quantity]>1),IF.EAGER(ISBLANK(Facts[Note]),CURRENCY(0.33333),1))",
+   "powerbi": "1"
+  },
+  {
+   "expr": "MAXX(FILTER(Facts,Facts[Quantity]>1),IFERROR(1/0,2))",
+   "powerbi": "2"
+  },
+  {
+   "expr": "MAXX(FILTER(Facts,Facts[Quantity]>1),IFERROR(1/0,2)+BLANK())",
+   "powerbi": "2"
+  },
+  {
+   "expr": "MAXX(FILTER(Facts,Facts[Quantity]>1),SWITCH(TRUE(),TRUE(),CONVERT(CURRENCY(1.5),DOUBLE),DATE(2020,1,1)))",
+   "powerbi": "1.5"
+  },
+  {
+   "expr": "MAXX(FILTER(Facts,Facts[Sales]>3),COALESCE(CURRENCY(Facts[Sales]),\"a\"))",
+   "powerbi": "20"
+  },
+  {
+   "expr": "MAXX(FILTER(Facts,Facts[Sales]>3),CURRENCY(-1.1))",
+   "powerbi": "-1.1"
+  },
+  {
+   "expr": "MAXX(FILTER(Facts,Facts[Sales]>3),IF(0,CONVERT(CURRENCY(1.5),DOUBLE)))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MAXX(FILTER(Facts,Facts[Sales]>3),IF(0,CURRENCY(0.33333),2.5))",
+   "powerbi": "2.5"
+  },
+  {
+   "expr": "MAXX(FILTER(Facts,Facts[Sales]>3),IF(0,CURRENCY(2.75)))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MAXX(FILTER(Facts,Facts[Sales]>3),IF(1,2.5,CONVERT(CURRENCY(1.5),DOUBLE)))",
+   "powerbi": "2.5"
+  },
+  {
+   "expr": "MAXX(FILTER(Facts,Facts[Sales]>3),IF(1,CURRENCY(Facts[Sales])))",
+   "powerbi": "20"
+  },
+  {
+   "expr": "MAXX(FILTER(Facts,Facts[Sales]>3),IF(1,Facts[Sales],CURRENCY(-1.1)))",
+   "powerbi": "20"
+  },
+  {
+   "expr": "MAXX(FILTER(Facts,Facts[Sales]>3),IF(Facts[Quantity]>=3,CURRENCY(2.75),DATE(2020,1,1)+Facts[Quantity]))",
+   "powerbi": "43833"
+  },
+  {
+   "expr": "MAXX(FILTER(Facts,Facts[Sales]>3),IF.EAGER(1,CURRENCY(2.75),TRUE()))",
+   "powerbi": "2.75"
+  },
+  {
+   "expr": "MAXX(FILTER(Facts,Facts[Sales]>3),IFERROR(1/0,2)+BLANK())",
+   "powerbi": "2"
+  },
+  {
+   "expr": "MAXX(Facts,COALESCE(CONVERT(CURRENCY(1.5),DOUBLE),1))",
+   "powerbi": "1.5"
+  },
+  {
+   "expr": "MAXX(Facts,COALESCE(CURRENCY(-2),\"a\"))",
+   "powerbi": "-2"
+  },
+  {
+   "expr": "MAXX(Facts,CURRENCY(-1.1))",
+   "powerbi": "-1.1"
+  },
+  {
+   "expr": "MAXX(Facts,CURRENCY(0))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "MAXX(Facts,CURRENCY(0.33333))",
+   "powerbi": "0.3333"
+  },
+  {
+   "expr": "MAXX(Facts,CURRENCY(Facts[Sales]))",
+   "powerbi": "20"
+  },
+  {
+   "expr": "MAXX(Facts,IF(1,CONVERT(CURRENCY(1.5),DOUBLE)))",
+   "powerbi": "1.5"
+  },
+  {
+   "expr": "MAXX(Facts,IF(1,CURRENCY(-1.1)))",
+   "powerbi": "-1.1"
+  },
+  {
+   "expr": "MAXX(Facts,IF(1,DATE(2020,1,1),CURRENCY(0)))",
+   "powerbi": "43831"
+  },
+  {
+   "expr": "MAXX(Facts,IF(TRUE(),BLANK(),CURRENCY(2.75)))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MAXX(Facts,IF(TRUE(),CURRENCY(0.33333)))",
+   "powerbi": "0.3333"
+  },
+  {
+   "expr": "MAXX(Facts,IF.EAGER(ISBLANK(Facts[Note]),CURRENCY(0.33333),BLANK()))",
+   "powerbi": "0.3333"
+  },
+  {
+   "expr": "MAXX(Facts,IF.EAGER(ISBLANK(Facts[Note]),CURRENCY(1.23456),\"a\"))",
+   "powerbi": "1.2346"
+  },
+  {
+   "expr": "MAXX(Facts,IFERROR(1/0,2)*2)",
+   "powerbi": "4"
+  },
+  {
+   "expr": "MAXX(Facts,SWITCH(TRUE(),TRUE(),CONVERT(CURRENCY(1.5),DOUBLE),2.5))",
+   "powerbi": "1.5"
+  },
+  {
+   "expr": "MAXX(KEEPFILTERS(FILTER(Facts,0)),Facts[Region])",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MAXX(KEEPFILTERS(FILTER(Facts,0)),Facts[Sales])",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MAXX(KEEPFILTERS(FILTER(Facts,0)),VALUES(Facts[Region]))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MAXX(KEEPFILTERS(FILTER(Facts,1)),Facts[Quantity]*2)",
+   "powerbi": "10"
+  },
+  {
+   "expr": "MAXX(KEEPFILTERS(FILTER(Facts,1)),Facts[Sales])",
+   "powerbi": "20"
+  },
+  {
+   "expr": "MAXX(KEEPFILTERS(FILTER(Facts,FALSE())),Facts[Quantity]*2)",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MAXX(KEEPFILTERS(FILTER(Facts,FALSE())),Facts[Region])",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MAXX(KEEPFILTERS(FILTER(Facts,FALSE())),VALUES(Facts[Region]))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MAXX(KEEPFILTERS(FILTER(Facts,Facts[Quantity]>2)),Facts[Quantity]*2)",
+   "powerbi": "10"
+  },
+  {
+   "expr": "MAXX(KEEPFILTERS(FILTER(Facts,Facts[Quantity]>=3)),Facts[Quantity]*2)",
+   "powerbi": "10"
+  },
+  {
+   "expr": "MAXX(KEEPFILTERS(FILTER(Facts,Facts[Quantity]>=3)),Facts[Region])",
+   "powerbi": "West"
+  },
+  {
+   "expr": "MAXX(KEEPFILTERS(FILTER(Facts,Facts[Quantity]>=3)),Facts[Sales])",
+   "powerbi": "20"
+  },
+  {
+   "expr": "MAXX(KEEPFILTERS(FILTER(Facts,ISBLANK(Facts[Note]))),Facts[Quantity]*2)",
+   "powerbi": "10"
+  },
+  {
+   "expr": "MAXX(KEEPFILTERS(FILTER(Facts,TRUE())),Facts[Quantity]*2)",
+   "powerbi": "10"
+  },
+  {
+   "expr": "MAXX(KEEPFILTERS(FILTER(Facts,TRUE())),Facts[Sales])",
+   "powerbi": "20"
+  },
+  {
+   "expr": "MAXX({0.5,4},1/0*0)",
+   "powerbi": "NaN"
+  },
+  {
+   "expr": "MAXX({0.5,4},IF(0,CURRENCY(-1.1)))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MAXX({0.5,4},IF(1,BLANK(),CURRENCY(7)))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MAXX({0.5,4},IF(1,CURRENCY(0.33333)))",
+   "powerbi": "0.3333"
+  },
+  {
+   "expr": "MAXX({0.5,4},IF(TRUE(),CURRENCY(2.75),2.5))",
+   "powerbi": "2.75"
+  },
+  {
+   "expr": "MAXX({0.5,4},IFERROR(1/0,2))",
+   "powerbi": "2"
+  },
+  {
+   "expr": "MAXX({1,2,3},1/0*0*2)",
+   "powerbi": "NaN"
+  },
+  {
+   "expr": "MAXX({1,2,3},COALESCE(CONVERT(CURRENCY(1.5),DOUBLE),DATE(2020,1,1)))",
+   "powerbi": "1.5"
+  },
+  {
+   "expr": "MAXX({1,2,3},COALESCE(CURRENCY(1.5),1))",
+   "powerbi": "1.5"
+  },
+  {
+   "expr": "MAXX({1,2,3},COALESCE(CURRENCY(7),TRUE()))",
+   "powerbi": "7"
+  },
+  {
+   "expr": "MAXX({1,2,3},CURRENCY(-2))",
+   "powerbi": "-2"
+  },
+  {
+   "expr": "MAXX({1,2,3},IF(0,CURRENCY(1.5),TRUE()))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MAXX({1,2,3},IF(1,CONVERT(CURRENCY(1.5),DOUBLE),\"a\"))",
+   "powerbi": "1.5"
+  },
+  {
+   "expr": "MAXX({1,2,3},IF(FALSE(),CONVERT(CURRENCY(1.5),DOUBLE)))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MAXX({1,2,3},IF(TRUE(),CURRENCY(7)))",
+   "powerbi": "7"
+  },
+  {
+   "expr": "MAXX({1,2,3},IF.EAGER(1,CURRENCY(0.33333),2.5))",
+   "powerbi": "0.3333"
+  },
+  {
+   "expr": "MAXX({1,2,3},IF.EAGER(1,CURRENCY(1.23456),BLANK()))",
+   "powerbi": "1.2346"
+  },
+  {
+   "expr": "MAXX({1,2,3},IF.EAGER(1,CURRENCY(7),\"a\"))",
+   "powerbi": "7"
+  },
+  {
+   "expr": "MAXX({1,2,3},IFERROR(1/0,2)+BLANK())",
+   "powerbi": "2"
+  },
+  {
+   "expr": "MAXX({1.5,2.5},1/0*0*2)",
+   "powerbi": "NaN"
+  },
+  {
+   "expr": "MAXX({1.5,2.5},IF(0,1,CURRENCY(1.5)))",
+   "powerbi": "1.5"
+  },
+  {
+   "expr": "MAXX({1.5,2.5},IF(1,CURRENCY(1.5),1))",
+   "powerbi": "1.5"
+  },
+  {
+   "expr": "MAXX({1.5,2.5},IFERROR(1/0,2)+BLANK())",
+   "powerbi": "2"
+  },
+  {
+   "expr": "MAXX({TRUE()},1/0*0)",
+   "powerbi": "NaN"
+  },
+  {
+   "expr": "MAXX({TRUE()},1/0*0*2)",
+   "powerbi": "NaN"
+  },
+  {
+   "expr": "MAXX({TRUE()},COALESCE(CURRENCY(-2),1))",
+   "powerbi": "-2"
+  },
+  {
+   "expr": "MAXX({TRUE()},COALESCE(CURRENCY(7),\"a\"))",
+   "powerbi": "7"
+  },
+  {
+   "expr": "MAXX({TRUE()},CURRENCY(0))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "MAXX({TRUE()},CURRENCY(1.23456))",
+   "powerbi": "1.2346"
+  },
+  {
+   "expr": "MAXX({TRUE()},IF(1,CURRENCY(0),DATE(2020,1,1)))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "MAXX({TRUE()},IF(1,CURRENCY(0.33333)))",
+   "powerbi": "0.3333"
+  },
+  {
+   "expr": "MAXX({TRUE()},IF(1,CURRENCY(7)))",
+   "powerbi": "7"
+  },
+  {
+   "expr": "MAXX({TRUE()},IF(FALSE(),2.5,CURRENCY(0.33333)))",
+   "powerbi": "0.3333"
+  },
+  {
+   "expr": "MAXX({TRUE()},IF.EAGER(0,CURRENCY(2.75),1))",
+   "powerbi": "1"
+  },
+  {
+   "expr": "MEDIANX(ADDCOLUMNS(Facts,\"z\",1),COALESCE(CURRENCY(0),Facts[Quantity]))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "MEDIANX(ADDCOLUMNS(Facts,\"z\",1),COALESCE(CURRENCY(0.33333),TRUE()))",
+   "powerbi": "0.3333"
+  },
+  {
+   "expr": "MEDIANX(ADDCOLUMNS(Facts,\"z\",1),COALESCE(CURRENCY(1.23456),TRUE()))",
+   "powerbi": "1.2346"
+  },
+  {
+   "expr": "MEDIANX(ADDCOLUMNS(Facts,\"z\",1),CONVERT(CURRENCY(1.5),DOUBLE))",
+   "powerbi": "1.5"
+  },
+  {
+   "expr": "MEDIANX(ADDCOLUMNS(Facts,\"z\",1),CURRENCY(0))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "MEDIANX(ADDCOLUMNS(Facts,\"z\",1),CURRENCY(1.23456))",
+   "powerbi": "1.2346"
+  },
+  {
+   "expr": "MEDIANX(ADDCOLUMNS(Facts,\"z\",1),CURRENCY(Facts[Sales]))",
+   "powerbi": "1.25"
+  },
+  {
+   "expr": "MEDIANX(ADDCOLUMNS(Facts,\"z\",1),IF(0,2.5,CURRENCY(Facts[Sales])))",
+   "powerbi": "1.25"
+  },
+  {
+   "expr": "MEDIANX(ADDCOLUMNS(Facts,\"z\",1),IF(0,CURRENCY(Facts[Sales]),DATE(2020,1,1)+Facts[Quantity]))",
+   "powerbi": "43833.5"
+  },
+  {
+   "expr": "MEDIANX(ADDCOLUMNS(Facts,\"z\",1),IF(1,CONVERT(CURRENCY(1.5),DOUBLE),\"a\"))",
+   "powerbi": "1.5"
+  },
+  {
+   "expr": "MEDIANX(ADDCOLUMNS(Facts,\"z\",1),IF(FALSE(),CURRENCY(1.23456),Facts[Sales]))",
+   "powerbi": "1.25"
+  },
+  {
+   "expr": "MEDIANX(ADDCOLUMNS(Facts,\"z\",1),IF(FALSE(),CURRENCY(Facts[Sales]),BLANK()))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MEDIANX(ADDCOLUMNS(Facts,\"z\",1),IF(Facts[Quantity]>=3,TRUE(),CONVERT(CURRENCY(1.5),DOUBLE)))",
+   "powerbi": "1.5"
+  },
+  {
+   "expr": "MEDIANX(ADDCOLUMNS(Facts,\"z\",1),IF(ISBLANK(Facts[Note]),CURRENCY(-1.1),DATE(2020,1,1)+Facts[Quantity]))",
+   "powerbi": "43831.5"
+  },
+  {
+   "expr": "MEDIANX(ADDCOLUMNS(Facts,\"z\",1),IF(TRUE(),CURRENCY(-2)))",
+   "powerbi": "-2"
+  },
+  {
+   "expr": "MEDIANX(ADDCOLUMNS(Facts,\"z\",1),IF.EAGER(1,CURRENCY(-2),\"a\"))",
+   "powerbi": "-2"
+  },
+  {
+   "expr": "MEDIANX(ADDCOLUMNS(Facts,\"z\",1),IF.EAGER(FALSE(),CURRENCY(Facts[Sales]),DATE(2020,1,1)+Facts[Quantity]))",
+   "powerbi": "43833.5"
+  },
+  {
+   "expr": "MEDIANX(ADDCOLUMNS(Facts,\"z\",1),IF.EAGER(TRUE(),CONVERT(CURRENCY(1.5),DOUBLE),DATE(2020,1,1)+Facts[Quantity]))",
+   "powerbi": "1.5"
+  },
+  {
+   "expr": "MEDIANX(ADDCOLUMNS(Facts,\"z\",1),IF.EAGER(TRUE(),CURRENCY(Facts[Sales]),BLANK()))",
+   "powerbi": "1.25"
+  },
+  {
+   "expr": "MEDIANX(FILTER(Facts,Facts[Quantity]>1),CONVERT(CURRENCY(1.5),DOUBLE))",
+   "powerbi": "1.5"
+  },
+  {
+   "expr": "MEDIANX(FILTER(Facts,Facts[Quantity]>1),IF(1,CURRENCY(-2),2.5))",
+   "powerbi": "-2"
+  },
+  {
+   "expr": "MEDIANX(FILTER(Facts,Facts[Quantity]>1),IF(1,CURRENCY(0),Facts[Sales]))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "MEDIANX(FILTER(Facts,Facts[Quantity]>1),IF(FALSE(),CONVERT(CURRENCY(1.5),DOUBLE),1))",
+   "powerbi": "1"
+  },
+  {
+   "expr": "MEDIANX(FILTER(Facts,Facts[Quantity]>1),IF(FALSE(),CURRENCY(Facts[Sales])))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MEDIANX(FILTER(Facts,Facts[Quantity]>1),IF(FALSE(),TRUE(),CURRENCY(Facts[Sales])))",
+   "powerbi": "6.5"
+  },
+  {
+   "expr": "MEDIANX(FILTER(Facts,Facts[Quantity]>1),IF(ISBLANK(Facts[Note]),1,CURRENCY(0)))",
+   "powerbi": "0.5"
+  },
+  {
+   "expr": "MEDIANX(FILTER(Facts,Facts[Quantity]>1),IF(ISBLANK(Facts[Note]),CONVERT(CURRENCY(1.5),DOUBLE)))",
+   "powerbi": "0.75"
+  },
+  {
+   "expr": "MEDIANX(FILTER(Facts,Facts[Quantity]>1),IF(ISBLANK(Facts[Note]),CONVERT(CURRENCY(1.5),DOUBLE),DATE(2020,1,1)))",
+   "powerbi": "21916.25"
+  },
+  {
+   "expr": "MEDIANX(FILTER(Facts,Facts[Quantity]>1),IF(TRUE(),1,CURRENCY(1.5)))",
+   "powerbi": "1"
+  },
+  {
+   "expr": "MEDIANX(FILTER(Facts,Facts[Quantity]>1),IF.EAGER(TRUE(),CURRENCY(Facts[Sales]),DATE(2020,1,1)))",
+   "powerbi": "6.5"
+  },
+  {
+   "expr": "MEDIANX(FILTER(Facts,Facts[Quantity]>1),SWITCH(Facts[Quantity],1,CONVERT(CURRENCY(1.5),DOUBLE),Facts[Sales]))",
+   "powerbi": "6.5"
+  },
+  {
+   "expr": "MEDIANX(FILTER(Facts,Facts[Quantity]>1),SWITCH(TRUE(),TRUE(),CURRENCY(-1.1),TRUE()))",
+   "powerbi": "-1.1"
+  },
+  {
+   "expr": "MEDIANX(FILTER(Facts,Facts[Quantity]>1),SWITCH(TRUE(),TRUE(),CURRENCY(1.23456),Facts[Sales]))",
+   "powerbi": "1.2346"
+  },
+  {
+   "expr": "MEDIANX(FILTER(Facts,Facts[Quantity]>1),SWITCH(TRUE(),TRUE(),CURRENCY(2.75),DATE(2020,1,1)))",
+   "powerbi": "2.75"
+  },
+  {
+   "expr": "MEDIANX(FILTER(Facts,Facts[Sales]>3),CURRENCY(7))",
+   "powerbi": "7"
+  },
+  {
+   "expr": "MEDIANX(FILTER(Facts,Facts[Sales]>3),CURRENCY(Facts[Sales]))",
+   "powerbi": "15.25"
+  },
+  {
+   "expr": "MEDIANX(FILTER(Facts,Facts[Sales]>3),IF(1,CURRENCY(7)))",
+   "powerbi": "7"
+  },
+  {
+   "expr": "MEDIANX(FILTER(Facts,Facts[Sales]>3),IF(ISBLANK(Facts[Note]),CURRENCY(Facts[Sales]),DATE(2020,1,1)))",
+   "powerbi": "21925.5"
+  },
+  {
+   "expr": "MEDIANX(FILTER(Facts,Facts[Sales]>3),IF(TRUE(),1,CURRENCY(Facts[Sales])))",
+   "powerbi": "1"
+  },
+  {
+   "expr": "MEDIANX(FILTER(Facts,Facts[Sales]>3),IF(TRUE(),CURRENCY(2.75)))",
+   "powerbi": "2.75"
+  },
+  {
+   "expr": "MEDIANX(FILTER(Facts,Facts[Sales]>3),IF(TRUE(),CURRENCY(7)))",
+   "powerbi": "7"
+  },
+  {
+   "expr": "MEDIANX(FILTER(Facts,Facts[Sales]>3),IF.EAGER(FALSE(),CURRENCY(0.33333),BLANK()))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MEDIANX(FILTER(Facts,Facts[Sales]>3),SWITCH(Facts[Quantity],2,CURRENCY(Facts[Sales]),Facts[Sales]))",
+   "powerbi": "15.25"
+  },
+  {
+   "expr": "MEDIANX(FILTER(Facts,Facts[Sales]>3),SWITCH(TRUE(),TRUE(),CURRENCY(0.33333),BLANK()))",
+   "powerbi": "0.3333"
+  },
+  {
+   "expr": "MEDIANX(FILTER(Facts,Facts[Sales]>3),SWITCH(TRUE(),TRUE(),CURRENCY(2.75),1))",
+   "powerbi": "2.75"
+  },
+  {
+   "expr": "MEDIANX(FILTER(Facts,Facts[Sales]>3),SWITCH(TRUE(),TRUE(),CURRENCY(7),1))",
+   "powerbi": "7"
+  },
+  {
+   "expr": "MEDIANX(FILTER(Facts,Facts[Sales]>3),SWITCH(TRUE(),TRUE(),CURRENCY(Facts[Sales]),\"a\"))",
+   "powerbi": "15.25"
+  },
+  {
+   "expr": "MEDIANX(Facts,COALESCE(CONVERT(CURRENCY(1.5),DOUBLE),2.5))",
+   "powerbi": "1.5"
+  },
+  {
+   "expr": "MEDIANX(Facts,CURRENCY(1.23456))",
+   "powerbi": "1.2346"
+  },
+  {
+   "expr": "MEDIANX(Facts,CURRENCY(7))",
+   "powerbi": "7"
+  },
+  {
+   "expr": "MEDIANX(Facts,IF(FALSE(),CURRENCY(-1.1)))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MEDIANX(Facts,IF(FALSE(),CURRENCY(0.33333),Facts[Quantity]))",
+   "powerbi": "2.5"
+  },
+  {
+   "expr": "MEDIANX(Facts,IF(FALSE(),DATE(2020,1,1),CURRENCY(7)))",
+   "powerbi": "7"
+  },
+  {
+   "expr": "MEDIANX(Facts,IF(Facts[Quantity]>2,CURRENCY(1.23456)))",
+   "powerbi": "0.6173"
+  },
+  {
+   "expr": "MEDIANX(Facts,IF(ISBLANK(Facts[Note]),CONVERT(CURRENCY(1.5),DOUBLE),DATE(2020,1,1)+Facts[Quantity]))",
+   "powerbi": "43831.5"
+  },
+  {
+   "expr": "MEDIANX(Facts,IF(TRUE(),BLANK(),CURRENCY(2.75)))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MEDIANX(Facts,IF(TRUE(),Facts[Quantity],CURRENCY(Facts[Sales])))",
+   "powerbi": "2.5"
+  },
+  {
+   "expr": "MEDIANX(Facts,IF.EAGER(Facts[Quantity]>2,CURRENCY(-2),\"a\"))",
+   "powerbi": "-2"
+  },
+  {
+   "expr": "MEDIANX(Facts,SWITCH(Facts[Quantity],2,CURRENCY(0),DATE(2020,1,1)))",
+   "powerbi": "43831"
+  },
+  {
+   "expr": "MEDIANX({0.5,4},CONVERT(CURRENCY(1.5),DOUBLE))",
+   "powerbi": "1.5"
+  },
+  {
+   "expr": "MEDIANX({0.5,4},IF(FALSE(),CURRENCY(2.75)))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MEDIANX({0.5,4},IF(TRUE(),CURRENCY(2.75)))",
+   "powerbi": "2.75"
+  },
+  {
+   "expr": "MEDIANX({1,2,3},COALESCE(CURRENCY(-2),DATE(2020,1,1)))",
+   "powerbi": "-2"
+  },
+  {
+   "expr": "MEDIANX({1,2,3},COALESCE(CURRENCY(7),DATE(2020,1,1)))",
+   "powerbi": "7"
+  },
+  {
+   "expr": "MEDIANX({1,2,3},CONVERT(CURRENCY(1.5),DOUBLE))",
+   "powerbi": "1.5"
+  },
+  {
+   "expr": "MEDIANX({1,2,3},CURRENCY(1.23456))",
+   "powerbi": "1.2346"
+  },
+  {
+   "expr": "MEDIANX({1,2,3},CURRENCY(1.5))",
+   "powerbi": "1.5"
+  },
+  {
+   "expr": "MEDIANX({1,2,3},CURRENCY(7))",
+   "powerbi": "7"
+  },
+  {
+   "expr": "MEDIANX({1,2,3},IF(1,CURRENCY(1.5)))",
+   "powerbi": "1.5"
+  },
+  {
+   "expr": "MEDIANX({1,2,3},IF(1,TRUE(),CURRENCY(2.75)))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MEDIANX({1,2,3},IF(FALSE(),CURRENCY(7)))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MEDIANX({1,2,3},IF.EAGER(1,CONVERT(CURRENCY(1.5),DOUBLE),DATE(2020,1,1)))",
+   "powerbi": "1.5"
+  },
+  {
+   "expr": "MEDIANX({1,2,3},IF.EAGER(FALSE(),CURRENCY(-1.1),DATE(2020,1,1)))",
+   "powerbi": "43831"
+  },
+  {
+   "expr": "MEDIANX({1.5,2.5},CONVERT(CURRENCY(1.5),DOUBLE))",
+   "powerbi": "1.5"
+  },
+  {
+   "expr": "MEDIANX({1.5,2.5},CURRENCY(0))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "MEDIANX({1.5,2.5},IF(1,CURRENCY(0),BLANK()))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "MEDIANX({1.5,2.5},IF.EAGER(1,CURRENCY(0),\"a\"))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "MEDIANX({TRUE()},COALESCE(CURRENCY(-1.1),2.5))",
+   "powerbi": "-1.1"
+  },
+  {
+   "expr": "MEDIANX({TRUE()},COALESCE(CURRENCY(-2),\"a\"))",
+   "powerbi": "-2"
+  },
+  {
+   "expr": "MEDIANX({TRUE()},COALESCE(CURRENCY(0),\"a\"))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "MEDIANX({TRUE()},CONVERT(CURRENCY(1.5),DOUBLE))",
+   "powerbi": "1.5"
+  },
+  {
+   "expr": "MEDIANX({TRUE()},CURRENCY(-2))",
+   "powerbi": "-2"
+  },
+  {
+   "expr": "MEDIANX({TRUE()},CURRENCY(0))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "MEDIANX({TRUE()},CURRENCY(0.33333))",
+   "powerbi": "0.3333"
+  },
+  {
+   "expr": "MEDIANX({TRUE()},IF(0,CURRENCY(2.75),2.5))",
+   "powerbi": "2.5"
+  },
+  {
+   "expr": "MEDIANX({TRUE()},IF(1,CONVERT(CURRENCY(1.5),DOUBLE)))",
+   "powerbi": "1.5"
+  },
+  {
+   "expr": "MEDIANX({TRUE()},IF(TRUE(),\"a\",CURRENCY(-1.1)))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MEDIANX({TRUE()},IF(TRUE(),CURRENCY(0.33333),\"a\"))",
+   "powerbi": "0.3333"
+  },
+  {
+   "expr": "MINX(ADDCOLUMNS(Facts,\"m\",COALESCE(Facts[Note],1)),IF(0,[m],\"a\"))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MINX(ADDCOLUMNS(Facts,\"m\",COALESCE(Facts[Note],1)),IF(0,[m],BLANK()))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MINX(ADDCOLUMNS(Facts,\"m\",COALESCE(Facts[Note],1)),IF(0,[m],DATE(2020,1,1)+Facts[Quantity]))",
+   "powerbi": "01/01/2020 00:00:00"
+  },
+  {
+   "expr": "MINX(ADDCOLUMNS(Facts,\"m\",COALESCE(Facts[Note],1)),IF(0,[m],TRUE()))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MINX(ADDCOLUMNS(Facts,\"m\",COALESCE(Facts[Note],1)),IF(1,[m],TRUE()))",
+   "powerbi": "1"
+  },
+  {
+   "expr": "MINX(ADDCOLUMNS(Facts,\"m\",COALESCE(Facts[Note],1)),IF(FALSE(),[m],1))",
+   "powerbi": "1"
+  },
+  {
+   "expr": "MINX(ADDCOLUMNS(Facts,\"m\",COALESCE(Facts[Note],1)),IF(Facts[Quantity]>=3,[m],DATE(2020,1,1)+Facts[Quantity]))",
+   "powerbi": "1"
+  },
+  {
+   "expr": "MINX(ADDCOLUMNS(Facts,\"m\",COALESCE(Facts[Note],1)),IF(Facts[Quantity]>=3,[m],TRUE()))",
+   "powerbi": "1"
+  },
+  {
+   "expr": "MINX(ADDCOLUMNS(Facts,\"m\",COALESCE(Facts[Note],1)),IF(ISBLANK(Facts[Note]),[m],TRUE()))",
+   "powerbi": "1"
+  },
+  {
+   "expr": "MINX(ADDCOLUMNS(Facts,\"m\",COALESCE(Facts[Note],1)),IF(TRUE(),[m],1))",
+   "powerbi": "1"
+  },
+  {
+   "expr": "MINX(ADDCOLUMNS(Facts,\"m\",COALESCE(Facts[Note],1)),IF(TRUE(),[m],BLANK()))",
+   "powerbi": "1"
+  },
+  {
+   "expr": "MINX(ADDCOLUMNS(Facts,\"m\",COALESCE(Facts[Note],1)),IF(TRUE(),[m],DATE(2020,1,1)))",
+   "powerbi": "1"
+  },
+  {
+   "expr": "MINX(ADDCOLUMNS(Facts,\"m\",IF(Facts[Quantity]>2,1,\"a\")),IF(1,[m],Facts[Quantity]))",
+   "powerbi": "1"
+  },
+  {
+   "expr": "MINX(ADDCOLUMNS(Facts,\"m\",IF(Facts[Quantity]>2,1,\"a\")),IF(1,[m],TRUE()))",
+   "powerbi": "1"
+  },
+  {
+   "expr": "MINX(ADDCOLUMNS(Facts,\"m\",IF(Facts[Quantity]>2,1,\"a\")),IF(Facts[Quantity]>2,[m],Facts[Quantity]))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "MINX(ADDCOLUMNS(Facts,\"m\",IF(Facts[Quantity]>2,1,\"a\")),IF(Facts[Quantity]>=3,[m],DATE(2020,1,1)))",
+   "powerbi": "1"
+  },
+  {
+   "expr": "MINX(ADDCOLUMNS(Facts,\"m\",IF(Facts[Quantity]>2,1,\"a\")),IF(Facts[Quantity]>=3,[m],TRUE()))",
+   "powerbi": "1"
+  },
+  {
+   "expr": "MINX(ADDCOLUMNS(Facts,\"m\",IF(Facts[Quantity]>2,1,\"a\")),IF(ISBLANK(Facts[Note]),[m],Facts[Quantity]))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "MINX(ADDCOLUMNS(Facts,\"m\",IF(Facts[Quantity]>2,1,\"a\")),IF(ISBLANK(Facts[Note]),[m],Facts[Sales]))",
+   "powerbi": "-1.5"
+  },
+  {
+   "expr": "MINX(ADDCOLUMNS(Facts,\"m\",IF(Facts[Quantity]>2,1,\"a\")),IF(TRUE(),[m],1))",
+   "powerbi": "1"
+  },
+  {
+   "expr": "MINX(ADDCOLUMNS(Facts,\"m\",IF(Facts[Quantity]>2,1,\"a\")),IF(TRUE(),[m],BLANK()))",
+   "powerbi": "1"
+  },
+  {
+   "expr": "MINX(ADDCOLUMNS(Facts,\"m\",IF(Facts[Quantity]>2,1,\"a\")),IF(TRUE(),[m],TRUE()))",
+   "powerbi": "1"
+  },
+  {
+   "expr": "MINX(ADDCOLUMNS(Facts,\"m\",IF(Facts[Quantity]>2,DATE(2020,1,1),2)),IF(0,[m],1))",
+   "powerbi": "1"
+  },
+  {
+   "expr": "MINX(ADDCOLUMNS(Facts,\"m\",IF(Facts[Quantity]>2,DATE(2020,1,1),2)),IF(0,[m],DATE(2020,1,1)))",
+   "powerbi": "43831"
+  },
+  {
+   "expr": "MINX(ADDCOLUMNS(Facts,\"m\",IF(Facts[Quantity]>2,DATE(2020,1,1),2)),IF(1,[m],2.5))",
+   "powerbi": "2"
+  },
+  {
+   "expr": "MINX(ADDCOLUMNS(Facts,\"m\",IF(Facts[Quantity]>2,DATE(2020,1,1),2)),IF(1,[m],TRUE()))",
+   "powerbi": "2"
+  },
+  {
+   "expr": "MINX(ADDCOLUMNS(Facts,\"m\",IF(Facts[Quantity]>2,DATE(2020,1,1),2)),IF(FALSE(),[m],Facts[Sales]))",
+   "powerbi": "-1.5"
+  },
+  {
+   "expr": "MINX(ADDCOLUMNS(Facts,\"m\",IF(Facts[Quantity]>2,DATE(2020,1,1),2)),IF(Facts[Quantity]>=3,[m],DATE(2020,1,1)))",
+   "powerbi": "43831"
+  },
+  {
+   "expr": "MINX(ADDCOLUMNS(Facts,\"m\",IF(Facts[Quantity]>2,DATE(2020,1,1),2)),IF(TRUE(),[m],\"a\"))",
+   "powerbi": "2"
+  },
+  {
+   "expr": "MINX(ADDCOLUMNS(Facts,\"m\",IF(Facts[Quantity]>2,DATE(2020,1,1),2)),IF(TRUE(),[m],DATE(2020,1,1)))",
+   "powerbi": "2"
+  },
+  {
+   "expr": "MINX(ADDCOLUMNS(Facts,\"m\",IF(Facts[Quantity]>2,TRUE(),3)),IF(0,[m],\"a\"))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MINX(ADDCOLUMNS(Facts,\"m\",IF(Facts[Quantity]>2,TRUE(),3)),IF(0,[m],DATE(2020,1,1)))",
+   "powerbi": "01/01/2020 00:00:00"
+  },
+  {
+   "expr": "MINX(ADDCOLUMNS(Facts,\"m\",IF(Facts[Quantity]>2,TRUE(),3)),IF(0,[m],TRUE()))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MINX(ADDCOLUMNS(Facts,\"m\",IF(Facts[Quantity]>2,TRUE(),3)),IF(1,[m],\"a\"))",
+   "powerbi": "3"
+  },
+  {
+   "expr": "MINX(ADDCOLUMNS(Facts,\"m\",IF(Facts[Quantity]>2,TRUE(),3)),IF(1,[m],DATE(2020,1,1)+Facts[Quantity]))",
+   "powerbi": "3"
+  },
+  {
+   "expr": "MINX(ADDCOLUMNS(Facts,\"m\",IF(Facts[Quantity]>2,TRUE(),3)),IF(1,[m],Facts[Quantity]))",
+   "powerbi": "3"
+  },
+  {
+   "expr": "MINX(ADDCOLUMNS(Facts,\"m\",IF(Facts[Quantity]>2,TRUE(),3)),IF(FALSE(),[m],1))",
+   "powerbi": "1"
+  },
+  {
+   "expr": "MINX(ADDCOLUMNS(Facts,\"m\",IF(Facts[Quantity]>2,TRUE(),3)),IF(FALSE(),[m],BLANK()))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MINX(ADDCOLUMNS(Facts,\"m\",IF(Facts[Quantity]>2,TRUE(),3)),IF(Facts[Quantity]>2,[m],2.5))",
+   "powerbi": "2.5"
+  },
+  {
+   "expr": "MINX(ADDCOLUMNS(Facts,\"m\",IF(Facts[Quantity]>2,TRUE(),3)),IF(Facts[Quantity]>=3,[m],TRUE()))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MINX(ADDCOLUMNS(Facts,\"m\",IF(Facts[Quantity]>2,TRUE(),3)),IF(ISBLANK(Facts[Note]),[m],2.5))",
+   "powerbi": "2.5"
+  },
+  {
+   "expr": "MINX(ADDCOLUMNS(Facts,\"m\",IF(Facts[Quantity]>2,TRUE(),3)),IF(ISBLANK(Facts[Note]),[m],DATE(2020,1,1)))",
+   "powerbi": "01/01/2020 00:00:00"
+  },
+  {
+   "expr": "MINX(ADDCOLUMNS(Facts,\"m\",IF(Facts[Quantity]>2,TRUE(),3)),IF(ISBLANK(Facts[Note]),[m],DATE(2020,1,1)+Facts[Quantity]))",
+   "powerbi": "01/01/2020 00:00:00"
+  },
+  {
+   "expr": "MINX(ADDCOLUMNS(Facts,\"m\",IF(Facts[Quantity]>2,TRUE(),3)),IF(TRUE(),[m],2.5))",
+   "powerbi": "3"
+  },
+  {
+   "expr": "MINX(ADDCOLUMNS(Facts,\"m\",IF(Facts[Quantity]>2,TRUE(),3)),IF(TRUE(),[m],BLANK()))",
+   "powerbi": "3"
+  },
+  {
+   "expr": "MINX(ADDCOLUMNS(Facts,\"m\",IF(Facts[Quantity]>2,TRUE(),3)),IF(TRUE(),[m],DATE(2020,1,1)+Facts[Quantity]))",
+   "powerbi": "3"
+  },
+  {
+   "expr": "MINX(ADDCOLUMNS(Facts,\"m\",SWITCH(Facts[Quantity],1,\"x\",2,2.5,BLANK())),IF(1,[m],DATE(2020,1,1)))",
+   "powerbi": "2.5"
+  },
+  {
+   "expr": "MINX(ADDCOLUMNS(Facts,\"m\",SWITCH(Facts[Quantity],1,\"x\",2,2.5,BLANK())),IF(1,[m],DATE(2020,1,1)+Facts[Quantity]))",
+   "powerbi": "2.5"
+  },
+  {
+   "expr": "MINX(ADDCOLUMNS(Facts,\"m\",SWITCH(Facts[Quantity],1,\"x\",2,2.5,BLANK())),IF(FALSE(),[m],1))",
+   "powerbi": "1"
+  },
+  {
+   "expr": "MINX(ADDCOLUMNS(Facts,\"m\",SWITCH(Facts[Quantity],1,\"x\",2,2.5,BLANK())),IF(FALSE(),[m],Facts[Sales]))",
+   "powerbi": "-1.5"
+  },
+  {
+   "expr": "MINX(ADDCOLUMNS(Facts,\"m\",SWITCH(Facts[Quantity],1,\"x\",2,2.5,BLANK())),IF(Facts[Quantity]>2,[m],TRUE()))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MINX(ADDCOLUMNS(Facts,\"m\",SWITCH(Facts[Quantity],1,\"x\",2,2.5,BLANK())),IF(Facts[Quantity]>=3,[m],Facts[Quantity]))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "MINX(ADDCOLUMNS(Facts,\"m\",SWITCH(Facts[Quantity],1,\"x\",2,2.5,BLANK())),IF(TRUE(),[m],\"a\"))",
+   "powerbi": "2.5"
+  },
+  {
+   "expr": "MINX(ADDCOLUMNS(Facts,\"m\",SWITCH(Facts[Quantity],1,\"x\",2,2.5,BLANK())),IF(TRUE(),[m],2.5))",
+   "powerbi": "2.5"
+  },
+  {
+   "expr": "MINX(ADDCOLUMNS(Facts,\"m\",SWITCH(Facts[Quantity],1,\"x\",2,2.5,BLANK())),IF(TRUE(),[m],BLANK()))",
+   "powerbi": "2.5"
+  },
+  {
+   "expr": "MINX(ADDCOLUMNS(Facts,\"z\",1),COALESCE(CONVERT(CURRENCY(1.5),DOUBLE),DATE(2020,1,1)))",
+   "powerbi": "1.5"
+  },
+  {
+   "expr": "MINX(ADDCOLUMNS(Facts,\"z\",1),COALESCE(CURRENCY(0),DATE(2020,1,1)+Facts[Quantity]))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "MINX(ADDCOLUMNS(Facts,\"z\",1),COALESCE(CURRENCY(2.75),Facts[Sales]))",
+   "powerbi": "2.75"
+  },
+  {
+   "expr": "MINX(ADDCOLUMNS(Facts,\"z\",1),CURRENCY(1.23456))",
+   "powerbi": "1.2346"
+  },
+  {
+   "expr": "MINX(ADDCOLUMNS(Facts,\"z\",1),CURRENCY(1.5))",
+   "powerbi": "1.5"
+  },
+  {
+   "expr": "MINX(ADDCOLUMNS(Facts,\"z\",1),IF(1,DATE(2020,1,1),CURRENCY(1.5)))",
+   "powerbi": "43831"
+  },
+  {
+   "expr": "MINX(ADDCOLUMNS(Facts,\"z\",1),IF(FALSE(),CURRENCY(-1.1),TRUE()))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MINX(ADDCOLUMNS(Facts,\"z\",1),IF(ISBLANK(Facts[Note]),TRUE(),CURRENCY(1.5)))",
+   "powerbi": "1.5"
+  },
+  {
+   "expr": "MINX(ADDCOLUMNS(Facts,\"z\",1),SWITCH(Facts[Quantity],1,CURRENCY(7),Facts[Sales]))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "MINX(FILTER(Facts,Facts[Quantity]>1),COALESCE(CONVERT(CURRENCY(1.5),DOUBLE),1))",
+   "powerbi": "1.5"
+  },
+  {
+   "expr": "MINX(FILTER(Facts,Facts[Quantity]>1),COALESCE(CONVERT(CURRENCY(1.5),DOUBLE),DATE(2020,1,1)))",
+   "powerbi": "1.5"
+  },
+  {
+   "expr": "MINX(FILTER(Facts,Facts[Quantity]>1),COALESCE(CURRENCY(7),Facts[Sales]))",
+   "powerbi": "7"
+  },
+  {
+   "expr": "MINX(FILTER(Facts,Facts[Quantity]>1),CONVERT(CURRENCY(1.5),DOUBLE))",
+   "powerbi": "1.5"
+  },
+  {
+   "expr": "MINX(FILTER(Facts,Facts[Quantity]>1),CURRENCY(-1.1))",
+   "powerbi": "-1.1"
+  },
+  {
+   "expr": "MINX(FILTER(Facts,Facts[Quantity]>1),CURRENCY(1.23456))",
+   "powerbi": "1.2346"
+  },
+  {
+   "expr": "MINX(FILTER(Facts,Facts[Quantity]>1),IF(0,CONVERT(CURRENCY(1.5),DOUBLE),1))",
+   "powerbi": "1"
+  },
+  {
+   "expr": "MINX(FILTER(Facts,Facts[Quantity]>1),IF(0,CURRENCY(1.5)))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MINX(FILTER(Facts,Facts[Quantity]>1),IF(0,CURRENCY(7)))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MINX(FILTER(Facts,Facts[Quantity]>1),IF(1,CURRENCY(0)))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "MINX(FILTER(Facts,Facts[Quantity]>1),IF(1,CURRENCY(1.23456)))",
+   "powerbi": "1.2346"
+  },
+  {
+   "expr": "MINX(FILTER(Facts,Facts[Quantity]>1),IF(1,CURRENCY(1.5),\"a\"))",
+   "powerbi": "1.5"
+  },
+  {
+   "expr": "MINX(FILTER(Facts,Facts[Quantity]>1),IF(FALSE(),DATE(2020,1,1)+Facts[Quantity],CURRENCY(0.33333)))",
+   "powerbi": "0.3333"
+  },
+  {
+   "expr": "MINX(FILTER(Facts,Facts[Quantity]>1),IF(Facts[Quantity]>=3,CONVERT(CURRENCY(1.5),DOUBLE),Facts[Quantity]))",
+   "powerbi": "1.5"
+  },
+  {
+   "expr": "MINX(FILTER(Facts,Facts[Quantity]>1),IF(TRUE(),CURRENCY(-2),1))",
+   "powerbi": "-2"
+  },
+  {
+   "expr": "MINX(FILTER(Facts,Facts[Quantity]>1),IF.EAGER(ISBLANK(Facts[Note]),CURRENCY(Facts[Sales]),DATE(2020,1,1)))",
+   "powerbi": "2.5"
+  },
+  {
+   "expr": "MINX(FILTER(Facts,Facts[Quantity]>1),SWITCH(Facts[Quantity],1,CONVERT(CURRENCY(1.5),DOUBLE),DATE(2020,1,1)))",
+   "powerbi": "43831"
+  },
+  {
+   "expr": "MINX(FILTER(Facts,Facts[Sales]>3),COALESCE(CURRENCY(-1.1),2.5))",
+   "powerbi": "-1.1"
+  },
+  {
+   "expr": "MINX(FILTER(Facts,Facts[Sales]>3),COALESCE(CURRENCY(-1.1),DATE(2020,1,1)))",
+   "powerbi": "-1.1"
+  },
+  {
+   "expr": "MINX(FILTER(Facts,Facts[Sales]>3),COALESCE(CURRENCY(7),2.5))",
+   "powerbi": "7"
+  },
+  {
+   "expr": "MINX(FILTER(Facts,Facts[Sales]>3),CONVERT(CURRENCY(1.5),DOUBLE))",
+   "powerbi": "1.5"
+  },
+  {
+   "expr": "MINX(FILTER(Facts,Facts[Sales]>3),CURRENCY(0.33333))",
+   "powerbi": "0.3333"
+  },
+  {
+   "expr": "MINX(FILTER(Facts,Facts[Sales]>3),CURRENCY(7))",
+   "powerbi": "7"
+  },
+  {
+   "expr": "MINX(FILTER(Facts,Facts[Sales]>3),IF.EAGER(TRUE(),CURRENCY(0.33333),DATE(2020,1,1)+Facts[Quantity]))",
+   "powerbi": "0.3333"
+  },
+  {
+   "expr": "MINX(Facts,COALESCE(CURRENCY(1.23456),Facts[Quantity]))",
+   "powerbi": "1.2346"
+  },
+  {
+   "expr": "MINX(Facts,COALESCE(CURRENCY(Facts[Sales]),Facts[Sales]))",
+   "powerbi": "-1.5"
+  },
+  {
+   "expr": "MINX(Facts,CURRENCY(-1.1))",
+   "powerbi": "-1.1"
+  },
+  {
+   "expr": "MINX(Facts,CURRENCY(0))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "MINX(Facts,CURRENCY(2.75))",
+   "powerbi": "2.75"
+  },
+  {
+   "expr": "MINX(Facts,CURRENCY(7))",
+   "powerbi": "7"
+  },
+  {
+   "expr": "MINX(Facts,CURRENCY(Facts[Sales]))",
+   "powerbi": "-1.5"
+  },
+  {
+   "expr": "MINX(Facts,IF(0,CONVERT(CURRENCY(1.5),DOUBLE),DATE(2020,1,1)))",
+   "powerbi": "43831"
+  },
+  {
+   "expr": "MINX(Facts,IF(0,CURRENCY(0.33333),BLANK()))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MINX(Facts,IF(FALSE(),CURRENCY(Facts[Sales]),2.5))",
+   "powerbi": "2.5"
+  },
+  {
+   "expr": "MINX(Facts,IF(FALSE(),DATE(2020,1,1),CURRENCY(0)))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "MINX(Facts,IF(Facts[Quantity]>2,CURRENCY(1.23456),DATE(2020,1,1)+Facts[Quantity]))",
+   "powerbi": "1.2346"
+  },
+  {
+   "expr": "MINX(Facts,IF(ISBLANK(Facts[Note]),Facts[Quantity],CURRENCY(1.23456)))",
+   "powerbi": "1.2346"
+  },
+  {
+   "expr": "MINX(Facts,IF(TRUE(),CONVERT(CURRENCY(1.5),DOUBLE),1))",
+   "powerbi": "1.5"
+  },
+  {
+   "expr": "MINX(Facts,IF.EAGER(1,CURRENCY(7),DATE(2020,1,1)))",
+   "powerbi": "7"
+  },
+  {
+   "expr": "MINX(Facts,SWITCH(TRUE(),TRUE(),CURRENCY(-2),TRUE()))",
+   "powerbi": "-2"
+  },
+  {
+   "expr": "MINX(KEEPFILTERS(FILTER(Facts,0)),Facts[Region])",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MINX(KEEPFILTERS(FILTER(Facts,0)),VALUES(Facts[Region]))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MINX(KEEPFILTERS(FILTER(Facts,1)),Facts[Region])",
+   "powerbi": "East"
+  },
+  {
+   "expr": "MINX(KEEPFILTERS(FILTER(Facts,FALSE())),Facts[Quantity]*2)",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MINX(KEEPFILTERS(FILTER(Facts,Facts[Quantity]>=3)),Facts[Quantity]*2)",
+   "powerbi": "6"
+  },
+  {
+   "expr": "MINX(KEEPFILTERS(FILTER(Facts,Facts[Quantity]>=3)),Facts[Region])",
+   "powerbi": "East"
+  },
+  {
+   "expr": "MINX(KEEPFILTERS(FILTER(Facts,Facts[Quantity]>=3)),Facts[Sales])",
+   "powerbi": "2.5"
+  },
+  {
+   "expr": "MINX(KEEPFILTERS(FILTER(Facts,TRUE())),Facts[Quantity]*2)",
+   "powerbi": "0"
+  },
+  {
+   "expr": "MINX({0.5,4},COALESCE(CURRENCY(-1.1),BLANK()))",
+   "powerbi": "-1.1"
+  },
+  {
+   "expr": "MINX({0.5,4},IF(0,CONVERT(CURRENCY(1.5),DOUBLE)))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MINX({0.5,4},IF(0,CURRENCY(7),BLANK()))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MINX({0.5,4},IF(TRUE(),\"a\",CURRENCY(7)))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MINX({0.5,4},IF(TRUE(),1,CURRENCY(2.75)))",
+   "powerbi": "1"
+  },
+  {
+   "expr": "MINX({1,2,3},COALESCE(CURRENCY(-1.1),\"a\"))",
+   "powerbi": "-1.1"
+  },
+  {
+   "expr": "MINX({1,2,3},CURRENCY(1.23456))",
+   "powerbi": "1.2346"
+  },
+  {
+   "expr": "MINX({1,2,3},IF(0,DATE(2020,1,1),CURRENCY(0.33333)))",
+   "powerbi": "0.3333"
+  },
+  {
+   "expr": "MINX({1,2,3},IF(1,CURRENCY(-1.1)))",
+   "powerbi": "-1.1"
+  },
+  {
+   "expr": "MINX({1,2,3},IF(FALSE(),\"a\",CURRENCY(-1.1)))",
+   "powerbi": "-1.1"
+  },
+  {
+   "expr": "MINX({1,2,3},IF(FALSE(),CURRENCY(0),DATE(2020,1,1)))",
+   "powerbi": "43831"
+  },
+  {
+   "expr": "MINX({1,2,3},IF(TRUE(),CONVERT(CURRENCY(1.5),DOUBLE),2.5))",
+   "powerbi": "1.5"
+  },
+  {
+   "expr": "MINX({1.5,2.5},IF(0,CURRENCY(-2)))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MINX({TRUE()},CURRENCY(0))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "MINX({TRUE()},CURRENCY(1.23456))",
+   "powerbi": "1.2346"
+  },
+  {
+   "expr": "MINX({TRUE()},CURRENCY(7))",
+   "powerbi": "7"
+  },
+  {
+   "expr": "MINX({TRUE()},IF(1,CURRENCY(2.75)))",
+   "powerbi": "2.75"
+  },
+  {
+   "expr": "MINX({TRUE()},IF(FALSE(),CURRENCY(2.75),DATE(2020,1,1)))",
+   "powerbi": "43831"
+  },
+  {
+   "expr": "MINX({TRUE()},IF.EAGER(0,CONVERT(CURRENCY(1.5),DOUBLE),BLANK()))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MINX({TRUE()},IF.EAGER(FALSE(),CURRENCY(1.23456),1))",
+   "powerbi": "1"
+  },
+  {
+   "expr": "PERCENTILEX.INC(ADDCOLUMNS(Facts,\"z\",1),COALESCE(CURRENCY(0.33333),TRUE()),1)",
+   "powerbi": "0.3333"
+  },
+  {
+   "expr": "PERCENTILEX.INC(ADDCOLUMNS(Facts,\"z\",1),CONVERT(CURRENCY(1.5),DOUBLE),1)",
+   "powerbi": "1.5"
+  },
+  {
+   "expr": "PERCENTILEX.INC(ADDCOLUMNS(Facts,\"z\",1),CURRENCY(-1.1),0.5)",
+   "powerbi": "-1.1"
+  },
+  {
+   "expr": "PERCENTILEX.INC(ADDCOLUMNS(Facts,\"z\",1),CURRENCY(-2),0.25)",
+   "powerbi": "-2"
+  },
+  {
+   "expr": "PERCENTILEX.INC(ADDCOLUMNS(Facts,\"z\",1),CURRENCY(0),1)",
+   "powerbi": "0"
+  },
+  {
+   "expr": "PERCENTILEX.INC(ADDCOLUMNS(Facts,\"z\",1),CURRENCY(0.33333),1)",
+   "powerbi": "0.3333"
+  },
+  {
+   "expr": "PERCENTILEX.INC(ADDCOLUMNS(Facts,\"z\",1),CURRENCY(2.75),0.5)",
+   "powerbi": "2.75"
+  },
+  {
+   "expr": "PERCENTILEX.INC(ADDCOLUMNS(Facts,\"z\",1),IF(0,\"a\",CONVERT(CURRENCY(1.5),DOUBLE)),0.25)",
+   "powerbi": "1.5"
+  },
+  {
+   "expr": "PERCENTILEX.INC(ADDCOLUMNS(Facts,\"z\",1),IF(0,CURRENCY(0),DATE(2020,1,1)+Facts[Quantity]),0.5)",
+   "powerbi": "43833.5"
+  },
+  {
+   "expr": "PERCENTILEX.INC(ADDCOLUMNS(Facts,\"z\",1),IF(0,CURRENCY(0.33333)),0.25)",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "PERCENTILEX.INC(ADDCOLUMNS(Facts,\"z\",1),IF(0,CURRENCY(7)),0.25)",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "PERCENTILEX.INC(ADDCOLUMNS(Facts,\"z\",1),IF(0,TRUE(),CURRENCY(Facts[Sales])),1)",
+   "powerbi": "20"
+  },
+  {
+   "expr": "PERCENTILEX.INC(ADDCOLUMNS(Facts,\"z\",1),IF(1,CONVERT(CURRENCY(1.5),DOUBLE)),0.25)",
+   "powerbi": "1.5"
+  },
+  {
+   "expr": "PERCENTILEX.INC(ADDCOLUMNS(Facts,\"z\",1),IF(1,CONVERT(CURRENCY(1.5),DOUBLE),\"a\"),0.25)",
+   "powerbi": "1.5"
+  },
+  {
+   "expr": "PERCENTILEX.INC(ADDCOLUMNS(Facts,\"z\",1),IF(1,CURRENCY(1.5)),0.5)",
+   "powerbi": "1.5"
+  },
+  {
+   "expr": "PERCENTILEX.INC(ADDCOLUMNS(Facts,\"z\",1),IF(1,TRUE(),CURRENCY(0.33333)),1)",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "PERCENTILEX.INC(ADDCOLUMNS(Facts,\"z\",1),IF(FALSE(),\"a\",CONVERT(CURRENCY(1.5),DOUBLE)),0.25)",
+   "powerbi": "1.5"
+  },
+  {
+   "expr": "PERCENTILEX.INC(ADDCOLUMNS(Facts,\"z\",1),IF(FALSE(),CURRENCY(1.23456),Facts[Quantity]),1)",
+   "powerbi": "5"
+  },
+  {
+   "expr": "PERCENTILEX.INC(ADDCOLUMNS(Facts,\"z\",1),IF(FALSE(),CURRENCY(1.5),DATE(2020,1,1)),0.5)",
+   "powerbi": "43831"
+  },
+  {
+   "expr": "PERCENTILEX.INC(ADDCOLUMNS(Facts,\"z\",1),IF(Facts[Quantity]>=3,CURRENCY(7),1),1)",
+   "powerbi": "7"
+  },
+  {
+   "expr": "PERCENTILEX.INC(ADDCOLUMNS(Facts,\"z\",1),IF(TRUE(),CURRENCY(Facts[Sales]),TRUE()),1)",
+   "powerbi": "20"
+  },
+  {
+   "expr": "PERCENTILEX.INC(ADDCOLUMNS(Facts,\"z\",1),IF.EAGER(0,CONVERT(CURRENCY(1.5),DOUBLE),Facts[Sales]),1)",
+   "powerbi": "20"
+  },
+  {
+   "expr": "PERCENTILEX.INC(ADDCOLUMNS(Facts,\"z\",1),IF.EAGER(0,CURRENCY(2.75),2.5),0.25)",
+   "powerbi": "2.5"
+  },
+  {
+   "expr": "PERCENTILEX.INC(ADDCOLUMNS(Facts,\"z\",1),IF.EAGER(Facts[Quantity]>=3,CONVERT(CURRENCY(1.5),DOUBLE),DATE(2020,1,1)+Facts[Quantity]),0.25)",
+   "powerbi": "1.5"
+  },
+  {
+   "expr": "PERCENTILEX.INC(ADDCOLUMNS(Facts,\"z\",1),IF.EAGER(Facts[Quantity]>=3,CURRENCY(2.75),1),0.5)",
+   "powerbi": "1.875"
+  },
+  {
+   "expr": "PERCENTILEX.INC(ADDCOLUMNS(Facts,\"z\",1),IF.EAGER(ISBLANK(Facts[Note]),CURRENCY(0.33333),\"a\"),0.25)",
+   "powerbi": "0.3333"
+  },
+  {
+   "expr": "PERCENTILEX.INC(ADDCOLUMNS(Facts,\"z\",1),IF.EAGER(TRUE(),CURRENCY(0.33333),Facts[Sales]),1)",
+   "powerbi": "0.3333"
+  },
+  {
+   "expr": "PERCENTILEX.INC(ADDCOLUMNS(Facts,\"z\",1),IF.EAGER(TRUE(),CURRENCY(Facts[Sales]),2.5),0.5)",
+   "powerbi": "1.25"
+  },
+  {
+   "expr": "PERCENTILEX.INC(ADDCOLUMNS(Facts,\"z\",1),SWITCH(Facts[Quantity],1,CONVERT(CURRENCY(1.5),DOUBLE),TRUE()),0.5)",
+   "powerbi": "1.5"
+  },
+  {
+   "expr": "PERCENTILEX.INC(ADDCOLUMNS(Facts,\"z\",1),SWITCH(Facts[Quantity],2,CURRENCY(Facts[Sales]),Facts[Quantity]),1)",
+   "powerbi": "10.5"
+  },
+  {
+   "expr": "PERCENTILEX.INC(ADDCOLUMNS(Facts,\"z\",1),SWITCH(TRUE(),TRUE(),CURRENCY(0.33333),DATE(2020,1,1)+Facts[Quantity]),1)",
+   "powerbi": "0.3333"
+  },
+  {
+   "expr": "PERCENTILEX.INC(FILTER(Facts,Facts[Quantity]>1),COALESCE(CURRENCY(1.5),Facts[Quantity]),0.5)",
+   "powerbi": "1.5"
+  },
+  {
+   "expr": "PERCENTILEX.INC(FILTER(Facts,Facts[Quantity]>1),CURRENCY(-1.1),0.5)",
+   "powerbi": "-1.1"
+  },
+  {
+   "expr": "PERCENTILEX.INC(FILTER(Facts,Facts[Quantity]>1),CURRENCY(-2),0.25)",
+   "powerbi": "-2"
+  },
+  {
+   "expr": "PERCENTILEX.INC(FILTER(Facts,Facts[Quantity]>1),CURRENCY(0),1)",
+   "powerbi": "0"
+  },
+  {
+   "expr": "PERCENTILEX.INC(FILTER(Facts,Facts[Quantity]>1),CURRENCY(1.5),1)",
+   "powerbi": "1.5"
+  },
+  {
+   "expr": "PERCENTILEX.INC(FILTER(Facts,Facts[Quantity]>1),IF(0,CONVERT(CURRENCY(1.5),DOUBLE),DATE(2020,1,1)+Facts[Quantity]),0.5)",
+   "powerbi": "43834.5"
+  },
+  {
+   "expr": "PERCENTILEX.INC(FILTER(Facts,Facts[Quantity]>1),IF(0,Facts[Quantity],CURRENCY(Facts[Sales])),0.25)",
+   "powerbi": "1.875"
+  },
+  {
+   "expr": "PERCENTILEX.INC(FILTER(Facts,Facts[Quantity]>1),IF(1,CONVERT(CURRENCY(1.5),DOUBLE),Facts[Quantity]),1)",
+   "powerbi": "1.5"
+  },
+  {
+   "expr": "PERCENTILEX.INC(FILTER(Facts,Facts[Quantity]>1),IF(1,CURRENCY(Facts[Sales])),0.5)",
+   "powerbi": "6.5"
+  },
+  {
+   "expr": "PERCENTILEX.INC(FILTER(Facts,Facts[Quantity]>1),IF(FALSE(),CURRENCY(0.33333)),0.25)",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "PERCENTILEX.INC(FILTER(Facts,Facts[Quantity]>1),IF(FALSE(),CURRENCY(2.75),DATE(2020,1,1)+Facts[Quantity]),0.5)",
+   "powerbi": "43834.5"
+  },
+  {
+   "expr": "PERCENTILEX.INC(FILTER(Facts,Facts[Quantity]>1),IF(FALSE(),DATE(2020,1,1)+Facts[Quantity],CURRENCY(1.23456)),1)",
+   "powerbi": "1.2346"
+  },
+  {
+   "expr": "PERCENTILEX.INC(FILTER(Facts,Facts[Quantity]>1),IF(Facts[Quantity]>2,2.5,CURRENCY(1.23456)),0.5)",
+   "powerbi": "2.5"
+  },
+  {
+   "expr": "PERCENTILEX.INC(FILTER(Facts,Facts[Quantity]>1),IF(Facts[Quantity]>=3,CURRENCY(0.33333)),0.25)",
+   "powerbi": "0.25"
+  },
+  {
+   "expr": "PERCENTILEX.INC(FILTER(Facts,Facts[Quantity]>1),IF(Facts[Quantity]>=3,CURRENCY(0.33333),Facts[Sales]),1)",
+   "powerbi": "10.5"
+  },
+  {
+   "expr": "PERCENTILEX.INC(FILTER(Facts,Facts[Quantity]>1),IF(Facts[Quantity]>=3,CURRENCY(Facts[Sales]),BLANK()),0.5)",
+   "powerbi": "1.25"
+  },
+  {
+   "expr": "PERCENTILEX.INC(FILTER(Facts,Facts[Quantity]>1),IF(ISBLANK(Facts[Note]),CONVERT(CURRENCY(1.5),DOUBLE),Facts[Quantity]),1)",
+   "powerbi": "4"
+  },
+  {
+   "expr": "PERCENTILEX.INC(FILTER(Facts,Facts[Quantity]>1),IF(ISBLANK(Facts[Note]),CURRENCY(1.5),DATE(2020,1,1)+Facts[Quantity]),0.25)",
+   "powerbi": "1.5"
+  },
+  {
+   "expr": "PERCENTILEX.INC(FILTER(Facts,Facts[Quantity]>1),IF.EAGER(1,CURRENCY(-1.1),2.5),1)",
+   "powerbi": "-1.1"
+  },
+  {
+   "expr": "PERCENTILEX.INC(FILTER(Facts,Facts[Quantity]>1),IF.EAGER(FALSE(),CURRENCY(1.5),1),0.25)",
+   "powerbi": "1"
+  },
+  {
+   "expr": "PERCENTILEX.INC(FILTER(Facts,Facts[Quantity]>1),IF.EAGER(Facts[Quantity]>2,CURRENCY(Facts[Sales]),BLANK()),0.5)",
+   "powerbi": "1.25"
+  },
+  {
+   "expr": "PERCENTILEX.INC(FILTER(Facts,Facts[Sales]>3),COALESCE(CURRENCY(-1.1),2.5),1)",
+   "powerbi": "-1.1"
+  },
+  {
+   "expr": "PERCENTILEX.INC(FILTER(Facts,Facts[Sales]>3),COALESCE(CURRENCY(2.75),DATE(2020,1,1)),0.25)",
+   "powerbi": "2.75"
+  },
+  {
+   "expr": "PERCENTILEX.INC(FILTER(Facts,Facts[Sales]>3),CURRENCY(-1.1),0.25)",
+   "powerbi": "-1.1"
+  },
+  {
+   "expr": "PERCENTILEX.INC(FILTER(Facts,Facts[Sales]>3),CURRENCY(Facts[Sales]),0.25)",
+   "powerbi": "12.875"
+  },
+  {
+   "expr": "PERCENTILEX.INC(FILTER(Facts,Facts[Sales]>3),IF(FALSE(),Facts[Sales],CURRENCY(-1.1)),0.25)",
+   "powerbi": "-1.1"
+  },
+  {
+   "expr": "PERCENTILEX.INC(FILTER(Facts,Facts[Sales]>3),IF(ISBLANK(Facts[Note]),CURRENCY(Facts[Sales]),BLANK()),1)",
+   "powerbi": "20"
+  },
+  {
+   "expr": "PERCENTILEX.INC(FILTER(Facts,Facts[Sales]>3),IF(TRUE(),CURRENCY(-1.1),BLANK()),1)",
+   "powerbi": "-1.1"
+  },
+  {
+   "expr": "PERCENTILEX.INC(FILTER(Facts,Facts[Sales]>3),IF(TRUE(),DATE(2020,1,1),CONVERT(CURRENCY(1.5),DOUBLE)),0.25)",
+   "powerbi": "43831"
+  },
+  {
+   "expr": "PERCENTILEX.INC(FILTER(Facts,Facts[Sales]>3),IF.EAGER(FALSE(),CURRENCY(Facts[Sales]),Facts[Sales]),0.25)",
+   "powerbi": "12.875"
+  },
+  {
+   "expr": "PERCENTILEX.INC(FILTER(Facts,Facts[Sales]>3),IF.EAGER(Facts[Quantity]>=3,CURRENCY(7),BLANK()),0.25)",
+   "powerbi": "1.75"
+  },
+  {
+   "expr": "PERCENTILEX.INC(FILTER(Facts,Facts[Sales]>3),IF.EAGER(Facts[Quantity]>=3,CURRENCY(7),Facts[Sales]),1)",
+   "powerbi": "10.5"
+  },
+  {
+   "expr": "PERCENTILEX.INC(Facts,COALESCE(CURRENCY(0),\"a\"),1)",
+   "powerbi": "0"
+  },
+  {
+   "expr": "PERCENTILEX.INC(Facts,COALESCE(CURRENCY(0.33333),2.5),0.25)",
+   "powerbi": "0.3333"
+  },
+  {
+   "expr": "PERCENTILEX.INC(Facts,COALESCE(CURRENCY(Facts[Sales]),1),0.5)",
+   "powerbi": "1.75"
+  },
+  {
+   "expr": "PERCENTILEX.INC(Facts,COALESCE(CURRENCY(Facts[Sales]),TRUE()),1)",
+   "powerbi": "20"
+  },
+  {
+   "expr": "PERCENTILEX.INC(Facts,CONVERT(CURRENCY(1.5),DOUBLE),0.5)",
+   "powerbi": "1.5"
+  },
+  {
+   "expr": "PERCENTILEX.INC(Facts,CURRENCY(-2),1)",
+   "powerbi": "-2"
+  },
+  {
+   "expr": "PERCENTILEX.INC(Facts,CURRENCY(0),0.5)",
+   "powerbi": "0"
+  },
+  {
+   "expr": "PERCENTILEX.INC(Facts,CURRENCY(1.23456),0.5)",
+   "powerbi": "1.2346"
+  },
+  {
+   "expr": "PERCENTILEX.INC(Facts,CURRENCY(1.23456),1)",
+   "powerbi": "1.2346"
+  },
+  {
+   "expr": "PERCENTILEX.INC(Facts,CURRENCY(1.5),0.5)",
+   "powerbi": "1.5"
+  },
+  {
+   "expr": "PERCENTILEX.INC(Facts,IF(1,BLANK(),CURRENCY(0)),0.5)",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "PERCENTILEX.INC(Facts,IF(1,CURRENCY(1.5)),0.25)",
+   "powerbi": "1.5"
+  },
+  {
+   "expr": "PERCENTILEX.INC(Facts,IF(1,CURRENCY(7),TRUE()),0.5)",
+   "powerbi": "7"
+  },
+  {
+   "expr": "PERCENTILEX.INC(Facts,IF(FALSE(),\"a\",CONVERT(CURRENCY(1.5),DOUBLE)),0.5)",
+   "powerbi": "1.5"
+  },
+  {
+   "expr": "PERCENTILEX.INC(Facts,IF(FALSE(),DATE(2020,1,1)+Facts[Quantity],CURRENCY(Facts[Sales])),1)",
+   "powerbi": "20"
+  },
+  {
+   "expr": "PERCENTILEX.INC(Facts,IF(Facts[Quantity]>2,CURRENCY(-2)),0.25)",
+   "powerbi": "-2"
+  },
+  {
+   "expr": "PERCENTILEX.INC(Facts,IF.EAGER(Facts[Quantity]>=3,CURRENCY(2.75),1),0.25)",
+   "powerbi": "1"
+  },
+  {
+   "expr": "PERCENTILEX.INC(Facts,IF.EAGER(TRUE(),CONVERT(CURRENCY(1.5),DOUBLE),1),0.5)",
+   "powerbi": "1.5"
+  },
+  {
+   "expr": "PERCENTILEX.INC(Facts,IF.EAGER(TRUE(),CURRENCY(1.5),2.5),0.5)",
+   "powerbi": "1.5"
+  },
+  {
+   "expr": "PERCENTILEX.INC(Facts,SWITCH(Facts[Quantity],1,CONVERT(CURRENCY(1.5),DOUBLE),2.5),0.25)",
+   "powerbi": "2.5"
+  },
+  {
+   "expr": "PERCENTILEX.INC(Facts,SWITCH(Facts[Quantity],2,CURRENCY(7),DATE(2020,1,1)+Facts[Quantity]),0.25)",
+   "powerbi": "43831.25"
+  },
+  {
+   "expr": "PERCENTILEX.INC({0.5,4},COALESCE(CONVERT(CURRENCY(1.5),DOUBLE),TRUE()),0.5)",
+   "powerbi": "1.5"
+  },
+  {
+   "expr": "PERCENTILEX.INC({0.5,4},CURRENCY(-1.1),0.25)",
+   "powerbi": "-1.1"
+  },
+  {
+   "expr": "PERCENTILEX.INC({0.5,4},CURRENCY(-1.1),1)",
+   "powerbi": "-1.1"
+  },
+  {
+   "expr": "PERCENTILEX.INC({0.5,4},IF(1,CURRENCY(2.75)),0.5)",
+   "powerbi": "2.75"
+  },
+  {
+   "expr": "PERCENTILEX.INC({0.5,4},IF(1,CURRENCY(2.75),TRUE()),0.5)",
+   "powerbi": "2.75"
+  },
+  {
+   "expr": "PERCENTILEX.INC({0.5,4},IF(FALSE(),CURRENCY(2.75)),0.5)",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "PERCENTILEX.INC({0.5,4},IF(FALSE(),CURRENCY(7),TRUE()),0.5)",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "PERCENTILEX.INC({0.5,4},IF.EAGER(1,CURRENCY(0.33333),BLANK()),1)",
+   "powerbi": "0.3333"
+  },
+  {
+   "expr": "PERCENTILEX.INC({1,2,3},COALESCE(CURRENCY(-2),2.5),1)",
+   "powerbi": "-2"
+  },
+  {
+   "expr": "PERCENTILEX.INC({1,2,3},CONVERT(CURRENCY(1.5),DOUBLE),0.25)",
+   "powerbi": "1.5"
+  },
+  {
+   "expr": "PERCENTILEX.INC({1,2,3},CONVERT(CURRENCY(1.5),DOUBLE),0.5)",
+   "powerbi": "1.5"
+  },
+  {
+   "expr": "PERCENTILEX.INC({1,2,3},CURRENCY(0.33333),1)",
+   "powerbi": "0.3333"
+  },
+  {
+   "expr": "PERCENTILEX.INC({1,2,3},CURRENCY(1.5),0.25)",
+   "powerbi": "1.5"
+  },
+  {
+   "expr": "PERCENTILEX.INC({1,2,3},IF(0,\"a\",CURRENCY(2.75)),1)",
+   "powerbi": "2.75"
+  },
+  {
+   "expr": "PERCENTILEX.INC({1,2,3},IF(1,\"a\",CURRENCY(7)),1)",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "PERCENTILEX.INC({1,2,3},IF(FALSE(),DATE(2020,1,1),CURRENCY(1.5)),0.5)",
+   "powerbi": "1.5"
+  },
+  {
+   "expr": "PERCENTILEX.INC({1,2,3},SWITCH(TRUE(),TRUE(),CURRENCY(2.75),TRUE()),0.25)",
+   "powerbi": "2.75"
+  },
+  {
+   "expr": "PERCENTILEX.INC({1.5,2.5},COALESCE(CURRENCY(1.5),\"a\"),1)",
+   "powerbi": "1.5"
+  },
+  {
+   "expr": "PERCENTILEX.INC({1.5,2.5},CURRENCY(-2),1)",
+   "powerbi": "-2"
+  },
+  {
+   "expr": "PERCENTILEX.INC({1.5,2.5},CURRENCY(1.5),1)",
+   "powerbi": "1.5"
+  },
+  {
+   "expr": "PERCENTILEX.INC({1.5,2.5},IF(0,CURRENCY(1.5)),0.25)",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "PERCENTILEX.INC({1.5,2.5},IF(FALSE(),1,CONVERT(CURRENCY(1.5),DOUBLE)),1)",
+   "powerbi": "1.5"
+  },
+  {
+   "expr": "PERCENTILEX.INC({1.5,2.5},IF(TRUE(),CONVERT(CURRENCY(1.5),DOUBLE),\"a\"),0.5)",
+   "powerbi": "1.5"
+  },
+  {
+   "expr": "PERCENTILEX.INC({1.5,2.5},IF.EAGER(1,CONVERT(CURRENCY(1.5),DOUBLE),\"a\"),0.5)",
+   "powerbi": "1.5"
+  },
+  {
+   "expr": "PERCENTILEX.INC({1.5,2.5},IF.EAGER(1,CURRENCY(1.23456),2.5),0.25)",
+   "powerbi": "1.2346"
+  },
+  {
+   "expr": "PERCENTILEX.INC({1.5,2.5},SWITCH(TRUE(),TRUE(),CURRENCY(-2),BLANK()),0.5)",
+   "powerbi": "-2"
+  },
+  {
+   "expr": "PERCENTILEX.INC({TRUE()},COALESCE(CONVERT(CURRENCY(1.5),DOUBLE),BLANK()),0.25)",
+   "powerbi": "1.5"
+  },
+  {
+   "expr": "PERCENTILEX.INC({TRUE()},COALESCE(CURRENCY(-1.1),TRUE()),0.5)",
+   "powerbi": "-1.1"
+  },
+  {
+   "expr": "PERCENTILEX.INC({TRUE()},COALESCE(CURRENCY(1.23456),2.5),0.5)",
+   "powerbi": "1.2346"
+  },
+  {
+   "expr": "PERCENTILEX.INC({TRUE()},COALESCE(CURRENCY(2.75),DATE(2020,1,1)),0.5)",
+   "powerbi": "2.75"
+  },
+  {
+   "expr": "PERCENTILEX.INC({TRUE()},CURRENCY(0),0.5)",
+   "powerbi": "0"
+  },
+  {
+   "expr": "PERCENTILEX.INC({TRUE()},CURRENCY(0.33333),0.25)",
+   "powerbi": "0.3333"
+  },
+  {
+   "expr": "PERCENTILEX.INC({TRUE()},CURRENCY(1.5),1)",
+   "powerbi": "1.5"
+  },
+  {
+   "expr": "PERCENTILEX.INC({TRUE()},CURRENCY(2.75),0.25)",
+   "powerbi": "2.75"
+  },
+  {
+   "expr": "PERCENTILEX.INC({TRUE()},IF(1,CURRENCY(0.33333)),1)",
+   "powerbi": "0.3333"
+  },
+  {
+   "expr": "PERCENTILEX.INC({TRUE()},IF(1,DATE(2020,1,1),CURRENCY(0)),1)",
+   "powerbi": "43831"
+  },
+  {
+   "expr": "PERCENTILEX.INC({TRUE()},IF(FALSE(),CURRENCY(-1.1),\"a\"),1)",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "PERCENTILEX.INC({TRUE()},IF(FALSE(),CURRENCY(1.5),\"a\"),1)",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "PERCENTILEX.INC({TRUE()},IF(FALSE(),CURRENCY(1.5),1),0.5)",
+   "powerbi": "1"
+  },
+  {
+   "expr": "PERCENTILEX.INC({TRUE()},IF(TRUE(),CURRENCY(-2)),1)",
+   "powerbi": "-2"
+  },
+  {
+   "expr": "PERCENTILEX.INC({TRUE()},IF(TRUE(),TRUE(),CONVERT(CURRENCY(1.5),DOUBLE)),1)",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "PERCENTILEX.INC({TRUE()},IF.EAGER(TRUE(),CONVERT(CURRENCY(1.5),DOUBLE),\"a\"),0.5)",
+   "powerbi": "1.5"
+  },
+  {
+   "expr": "PERCENTILEX.INC({TRUE()},IF.EAGER(TRUE(),CURRENCY(1.5),TRUE()),0.25)",
+   "powerbi": "1.5"
+  },
+  {
+   "expr": "PRODUCTX(ADDCOLUMNS(Facts,\"z\",1),IF(0,1,CURRENCY(-1.1)))",
+   "powerbi": "1.771561"
+  },
+  {
+   "expr": "PRODUCTX(ADDCOLUMNS(Facts,\"z\",1),IF(0,BLANK(),CURRENCY(1.5)))",
+   "powerbi": "11.390625"
+  },
+  {
+   "expr": "PRODUCTX(ADDCOLUMNS(Facts,\"z\",1),IF(1,BLANK(),CONVERT(CURRENCY(1.5),DOUBLE)))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "PRODUCTX(ADDCOLUMNS(Facts,\"z\",1),IF(1,BLANK(),CURRENCY(2.75)))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "PRODUCTX(ADDCOLUMNS(Facts,\"z\",1),IF(Facts[Quantity]>2,CURRENCY(Facts[Sales])))",
+   "powerbi": "50"
+  },
+  {
+   "expr": "PRODUCTX(ADDCOLUMNS(Facts,\"z\",1),IF(Facts[Quantity]>2,CURRENCY(Facts[Sales]),TRUE()))",
+   "powerbi": "50"
+  },
+  {
+   "expr": "PRODUCTX(ADDCOLUMNS(Facts,\"z\",1),IF(ISBLANK(Facts[Note]),CONVERT(CURRENCY(1.5),DOUBLE),DATE(2020,1,1)))",
+   "powerbi": "8.30439569671503E+18"
+  },
+  {
+   "expr": "PRODUCTX(ADDCOLUMNS(Facts,\"z\",1),IF(TRUE(),CONVERT(CURRENCY(1.5),DOUBLE),DATE(2020,1,1)))",
+   "powerbi": "11.390625"
+  },
+  {
+   "expr": "PRODUCTX(ADDCOLUMNS(Facts,\"z\",1),IF(TRUE(),CURRENCY(-1.1),DATE(2020,1,1)+Facts[Quantity]))",
+   "powerbi": "1.771561"
+  },
+  {
+   "expr": "PRODUCTX(ADDCOLUMNS(Facts,\"z\",1),IF(TRUE(),CURRENCY(2.75),1))",
+   "powerbi": "432.510009765625"
+  },
+  {
+   "expr": "PRODUCTX(ADDCOLUMNS(Facts,\"z\",1),SWITCH(Facts[Quantity],2,CONVERT(CURRENCY(1.5),DOUBLE),BLANK()))",
+   "powerbi": "1.5"
+  },
+  {
+   "expr": "PRODUCTX(ADDCOLUMNS(Facts,\"z\",1),SWITCH(Facts[Quantity],2,CURRENCY(-2),Facts[Sales]))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "PRODUCTX(ADDCOLUMNS(Facts,\"z\",1),SWITCH(Facts[Quantity],2,CURRENCY(-2),TRUE()))",
+   "powerbi": "-2"
+  },
+  {
+   "expr": "PRODUCTX(ADDCOLUMNS(Facts,\"z\",1),SWITCH(TRUE(),TRUE(),CURRENCY(-1.1),2.5))",
+   "powerbi": "1.771561"
+  },
+  {
+   "expr": "PRODUCTX(ADDCOLUMNS(Facts,\"z\",1),SWITCH(TRUE(),TRUE(),CURRENCY(-2),1))",
+   "powerbi": "64"
+  },
+  {
+   "expr": "PRODUCTX(FILTER(Facts,Facts[Quantity]>1),COALESCE(CURRENCY(1.23456),1))",
+   "powerbi": "2.32329891992486"
+  },
+  {
+   "expr": "PRODUCTX(FILTER(Facts,Facts[Quantity]>1),IF(0,1,CURRENCY(-2)))",
+   "powerbi": "15.9999999999999"
+  },
+  {
+   "expr": "PRODUCTX(FILTER(Facts,Facts[Quantity]>1),IF(0,1,CURRENCY(Facts[Sales])))",
+   "powerbi": "524.999999999997"
+  },
+  {
+   "expr": "PRODUCTX(FILTER(Facts,Facts[Quantity]>1),IF(0,CURRENCY(2.75),BLANK()))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "PRODUCTX(FILTER(Facts,Facts[Quantity]>1),IF(0,CURRENCY(Facts[Sales]),Facts[Sales]))",
+   "powerbi": "525"
+  },
+  {
+   "expr": "PRODUCTX(FILTER(Facts,Facts[Quantity]>1),IF(1,DATE(2020,1,1)+Facts[Quantity],CURRENCY(7)))",
+   "powerbi": "3.69202155526736E+18"
+  },
+  {
+   "expr": "PRODUCTX(FILTER(Facts,Facts[Quantity]>1),IF(1,TRUE(),CURRENCY(1.5)))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "PRODUCTX(FILTER(Facts,Facts[Quantity]>1),IF(FALSE(),CURRENCY(Facts[Sales])))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "PRODUCTX(FILTER(Facts,Facts[Quantity]>1),IF(FALSE(),Facts[Quantity],CURRENCY(0)))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "PRODUCTX(FILTER(Facts,Facts[Quantity]>1),IF(Facts[Quantity]>2,CURRENCY(-2),DATE(2020,1,1)+Facts[Quantity]))",
+   "powerbi": "-350664"
+  },
+  {
+   "expr": "PRODUCTX(FILTER(Facts,Facts[Quantity]>1),IF(Facts[Quantity]>2,Facts[Sales],CURRENCY(1.23456)))",
+   "powerbi": "61.73"
+  },
+  {
+   "expr": "PRODUCTX(FILTER(Facts,Facts[Quantity]>1),IF(Facts[Quantity]>=3,DATE(2020,1,1)+Facts[Quantity],CURRENCY(2.75)))",
+   "powerbi": "231630490201109"
+  },
+  {
+   "expr": "PRODUCTX(FILTER(Facts,Facts[Quantity]>1),IF(Facts[Quantity]>=3,DATE(2020,1,1),CURRENCY(-1.1)))",
+   "powerbi": "-92626834547710.1"
+  },
+  {
+   "expr": "PRODUCTX(FILTER(Facts,Facts[Quantity]>1),IF(ISBLANK(Facts[Note]),CURRENCY(0)))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "PRODUCTX(FILTER(Facts,Facts[Quantity]>1),IF(TRUE(),\"a\",CURRENCY(0)))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "PRODUCTX(FILTER(Facts,Facts[Quantity]>1),IF(TRUE(),Facts[Quantity],CURRENCY(0)))",
+   "powerbi": "120"
+  },
+  {
+   "expr": "PRODUCTX(FILTER(Facts,Facts[Quantity]>1),IF.EAGER(FALSE(),CURRENCY(1.23456),2.5))",
+   "powerbi": "39.0625"
+  },
+  {
+   "expr": "PRODUCTX(FILTER(Facts,Facts[Quantity]>1),SWITCH(Facts[Quantity],1,CONVERT(CURRENCY(1.5),DOUBLE),Facts[Quantity]))",
+   "powerbi": "120"
+  },
+  {
+   "expr": "PRODUCTX(FILTER(Facts,Facts[Quantity]>1),SWITCH(Facts[Quantity],1,CURRENCY(7),TRUE()))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "PRODUCTX(FILTER(Facts,Facts[Sales]>3),CURRENCY(-1.1))",
+   "powerbi": "1.21"
+  },
+  {
+   "expr": "PRODUCTX(FILTER(Facts,Facts[Sales]>3),IF(0,CURRENCY(2.75)))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "PRODUCTX(FILTER(Facts,Facts[Sales]>3),IF.EAGER(FALSE(),CURRENCY(7),BLANK()))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "PRODUCTX(FILTER(Facts,Facts[Sales]>3),SWITCH(Facts[Quantity],2,CURRENCY(0.33333),DATE(2020,1,1)+Facts[Quantity]))",
+   "powerbi": "14609.8722"
+  },
+  {
+   "expr": "PRODUCTX(Facts,CURRENCY(Facts[Sales]))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "PRODUCTX(Facts,IF(0,CURRENCY(-2),DATE(2020,1,1)+Facts[Quantity]))",
+   "powerbi": "7.09311325925216E+27"
+  },
+  {
+   "expr": "PRODUCTX(Facts,IF(0,CURRENCY(2.75),\"a\"))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "PRODUCTX(Facts,IF(1,CURRENCY(-2)))",
+   "powerbi": "63.9999999999994"
+  },
+  {
+   "expr": "PRODUCTX(Facts,IF(Facts[Quantity]>=3,CURRENCY(-1.1),BLANK()))",
+   "powerbi": "-1.33099999999999"
+  },
+  {
+   "expr": "PRODUCTX(Facts,IF(ISBLANK(Facts[Note]),CURRENCY(1.23456),DATE(2020,1,1)+Facts[Quantity]))",
+   "powerbi": "5.62661783146166E+18"
+  },
+  {
+   "expr": "PRODUCTX(Facts,IF(ISBLANK(Facts[Note]),CURRENCY(Facts[Sales]),\"a\"))",
+   "powerbi": "50"
+  },
+  {
+   "expr": "PRODUCTX(Facts,IF(ISBLANK(Facts[Note]),CURRENCY(Facts[Sales]),1))",
+   "powerbi": "49.9999999999997"
+  },
+  {
+   "expr": "PRODUCTX(Facts,IF(TRUE(),CURRENCY(Facts[Sales])))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "PRODUCTX(Facts,IF.EAGER(0,CURRENCY(1.5),DATE(2020,1,1)+Facts[Quantity]))",
+   "powerbi": "7.09311325925216E+27"
+  },
+  {
+   "expr": "PRODUCTX(Facts,IF.EAGER(FALSE(),CURRENCY(-2),Facts[Sales]))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "PRODUCTX(Facts,SWITCH(Facts[Quantity],2,CURRENCY(-2),TRUE()))",
+   "powerbi": "-2"
+  },
+  {
+   "expr": "PRODUCTX(Facts,SWITCH(Facts[Quantity],2,CURRENCY(7),2.5))",
+   "powerbi": "683.59375"
+  },
+  {
+   "expr": "PRODUCTX({0.5,4},CONVERT(CURRENCY(1.5),DOUBLE))",
+   "powerbi": "2.25"
+  },
+  {
+   "expr": "PRODUCTX({0.5,4},IF(0,DATE(2020,1,1),CONVERT(CURRENCY(1.5),DOUBLE)))",
+   "powerbi": "2.25"
+  },
+  {
+   "expr": "PRODUCTX({0.5,4},IF(TRUE(),CURRENCY(-1.1),\"a\"))",
+   "powerbi": "1.21"
+  },
+  {
+   "expr": "PRODUCTX({0.5,4},IF(TRUE(),CURRENCY(7)))",
+   "powerbi": "49"
+  },
+  {
+   "expr": "PRODUCTX({1,2,3},COALESCE(CURRENCY(-1.1),1))",
+   "powerbi": "-1.331"
+  },
+  {
+   "expr": "PRODUCTX({1,2,3},COALESCE(CURRENCY(-1.1),BLANK()))",
+   "powerbi": "-1.331"
+  },
+  {
+   "expr": "PRODUCTX({1,2,3},CURRENCY(0))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "PRODUCTX({1,2,3},CURRENCY(0.33333))",
+   "powerbi": "0.037025927037"
+  },
+  {
+   "expr": "PRODUCTX({1,2,3},IF(FALSE(),DATE(2020,1,1),CONVERT(CURRENCY(1.5),DOUBLE)))",
+   "powerbi": "3.375"
+  },
+  {
+   "expr": "PRODUCTX({1,2,3},IF.EAGER(0,CURRENCY(0.33333),TRUE()))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "PRODUCTX({1,2,3},IF.EAGER(FALSE(),CURRENCY(-1.1),\"a\"))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "PRODUCTX({1.5,2.5},CONVERT(CURRENCY(1.5),DOUBLE))",
+   "powerbi": "2.25"
+  },
+  {
+   "expr": "PRODUCTX({1.5,2.5},IF(1,CONVERT(CURRENCY(1.5),DOUBLE)))",
+   "powerbi": "2.25"
+  },
+  {
+   "expr": "PRODUCTX({TRUE()},CURRENCY(0))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "PRODUCTX({TRUE()},IF(0,\"a\",CURRENCY(1.23456)))",
+   "powerbi": "1.2346"
+  },
+  {
+   "expr": "PRODUCTX({TRUE()},SWITCH(TRUE(),TRUE(),CURRENCY(1.23456),2.5))",
+   "powerbi": "1.2346"
+  },
+  {
+   "expr": "STDEVX.P(ADDCOLUMNS(Facts,\"z\",1),COALESCE(CURRENCY(Facts[Sales]),1))",
+   "powerbi": "7.5687"
+  },
+  {
+   "expr": "STDEVX.P(ADDCOLUMNS(Facts,\"z\",1),COALESCE(CURRENCY(Facts[Sales]),Facts[Quantity]))",
+   "powerbi": "7.3565"
+  },
+  {
+   "expr": "STDEVX.P(ADDCOLUMNS(Facts,\"z\",1),IF(1,CURRENCY(0),1))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "STDEVX.P(ADDCOLUMNS(Facts,\"z\",1),IF(FALSE(),BLANK(),CURRENCY(0)))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "STDEVX.P(ADDCOLUMNS(Facts,\"z\",1),IF.EAGER(Facts[Quantity]>2,CURRENCY(-2),\"a\"))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "STDEVX.P(ADDCOLUMNS(Facts,\"z\",1),IF.EAGER(TRUE(),CURRENCY(0),Facts[Quantity]))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "STDEVX.P(FILTER(Facts,Facts[Quantity]>1),CURRENCY(0))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "STDEVX.P(FILTER(Facts,Facts[Quantity]>1),CURRENCY(Facts[Sales]))",
+   "powerbi": "7.1531"
+  },
+  {
+   "expr": "STDEVX.P(FILTER(Facts,Facts[Quantity]>1),IF(0,CURRENCY(7)))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "STDEVX.P(FILTER(Facts,Facts[Quantity]>1),IF(0,CURRENCY(Facts[Sales])))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "STDEVX.P(FILTER(Facts,Facts[Quantity]>1),IF(FALSE(),CURRENCY(-2)))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "STDEVX.P(FILTER(Facts,Facts[Quantity]>1),IF(Facts[Quantity]>2,TRUE(),CURRENCY(-2)))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "STDEVX.P(FILTER(Facts,Facts[Quantity]>1),IF(ISBLANK(Facts[Note]),CURRENCY(1.23456),2.5))",
+   "powerbi": "0.6327"
+  },
+  {
+   "expr": "STDEVX.P(FILTER(Facts,Facts[Quantity]>1),IF(ISBLANK(Facts[Note]),CURRENCY(7),TRUE()))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "STDEVX.P(FILTER(Facts,Facts[Quantity]>1),IF(TRUE(),1,CONVERT(CURRENCY(1.5),DOUBLE)))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "STDEVX.P(FILTER(Facts,Facts[Quantity]>1),IF.EAGER(FALSE(),CURRENCY(-2),BLANK()))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "STDEVX.P(FILTER(Facts,Facts[Quantity]>1),IF.EAGER(Facts[Quantity]>=3,CURRENCY(-1.1),1))",
+   "powerbi": "0.9093"
+  },
+  {
+   "expr": "STDEVX.P(FILTER(Facts,Facts[Sales]>3),IF(1,Facts[Sales],CURRENCY(2.75)))",
+   "powerbi": "4.75"
+  },
+  {
+   "expr": "STDEVX.P(Facts,COALESCE(CURRENCY(7),Facts[Sales]))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "STDEVX.P(Facts,IF(0,Facts[Quantity],CURRENCY(-2)))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "STDEVX.P(Facts,IF(1,CURRENCY(0),\"a\"))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "STDEVX.P(Facts,IF(FALSE(),CURRENCY(Facts[Sales]),Facts[Sales]))",
+   "powerbi": "8.0037491215055"
+  },
+  {
+   "expr": "STDEVX.P(Facts,IF(ISBLANK(Facts[Note]),CURRENCY(7)))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "STDEVX.P({0.5,4},IF(0,CONVERT(CURRENCY(1.5),DOUBLE),BLANK()))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "STDEVX.P({0.5,4},IF(0,CURRENCY(7)))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "STDEVX.P({0.5,4},IF(1,BLANK(),CURRENCY(0.33333)))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "STDEVX.P({0.5,4},IF(FALSE(),CONVERT(CURRENCY(1.5),DOUBLE),\"a\"))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "STDEVX.P({0.5,4},IF(TRUE(),CURRENCY(7)))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "STDEVX.P({1,2,3},CURRENCY(-2))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "STDEVX.P({1,2,3},CURRENCY(0))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "STDEVX.P({1,2,3},CURRENCY(7))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "STDEVX.P({1,2,3},IF(0,TRUE(),CURRENCY(-2)))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "STDEVX.P({1,2,3},IF(1,TRUE(),CURRENCY(-2)))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "STDEVX.P({1,2,3},IF(TRUE(),CURRENCY(0)))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "STDEVX.P({1.5,2.5},IF(TRUE(),CURRENCY(0),BLANK()))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "STDEVX.P({TRUE()},COALESCE(CURRENCY(-1.1),\"a\"))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "STDEVX.P({TRUE()},COALESCE(CURRENCY(-2),2.5))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "STDEVX.P({TRUE()},COALESCE(CURRENCY(0),1))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "STDEVX.P({TRUE()},CURRENCY(-1.1))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "STDEVX.P({TRUE()},CURRENCY(-2))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "STDEVX.P({TRUE()},CURRENCY(1.23456))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "STDEVX.S(ADDCOLUMNS(Facts,\"z\",1),CURRENCY(-2))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "STDEVX.S(ADDCOLUMNS(Facts,\"z\",1),IF(0,CONVERT(CURRENCY(1.5),DOUBLE),\"a\"))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "STDEVX.S(ADDCOLUMNS(Facts,\"z\",1),IF(0,CURRENCY(7)))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "STDEVX.S(ADDCOLUMNS(Facts,\"z\",1),IF(0,CURRENCY(Facts[Sales])))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "STDEVX.S(ADDCOLUMNS(Facts,\"z\",1),IF(1,CURRENCY(Facts[Sales]),BLANK()))",
+   "powerbi": "8.9485"
+  },
+  {
+   "expr": "STDEVX.S(ADDCOLUMNS(Facts,\"z\",1),IF(Facts[Quantity]>2,CURRENCY(Facts[Sales])))",
+   "powerbi": "12.3744"
+  },
+  {
+   "expr": "STDEVX.S(ADDCOLUMNS(Facts,\"z\",1),IF(Facts[Quantity]>=3,CURRENCY(7)))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "STDEVX.S(ADDCOLUMNS(Facts,\"z\",1),IF(TRUE(),\"a\",CURRENCY(0.33333)))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "STDEVX.S(ADDCOLUMNS(Facts,\"z\",1),IF.EAGER(0,CURRENCY(0),\"a\"))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "STDEVX.S(ADDCOLUMNS(Facts,\"z\",1),IF.EAGER(0,CURRENCY(Facts[Sales]),Facts[Quantity]))",
+   "powerbi": "1.8708"
+  },
+  {
+   "expr": "STDEVX.S(ADDCOLUMNS(Facts,\"z\",1),IF.EAGER(FALSE(),CONVERT(CURRENCY(1.5),DOUBLE),\"a\"))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "STDEVX.S(ADDCOLUMNS(Facts,\"z\",1),IF.EAGER(Facts[Quantity]>2,CURRENCY(0),Facts[Quantity]))",
+   "powerbi": "0.8367"
+  },
+  {
+   "expr": "STDEVX.S(ADDCOLUMNS(Facts,\"z\",1),SWITCH(Facts[Quantity],2,CURRENCY(1.23456),1))",
+   "powerbi": "0.0958"
+  },
+  {
+   "expr": "STDEVX.S(FILTER(Facts,Facts[Quantity]>1),COALESCE(CURRENCY(0),2.5))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "STDEVX.S(FILTER(Facts,Facts[Quantity]>1),CURRENCY(-2))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "STDEVX.S(FILTER(Facts,Facts[Quantity]>1),CURRENCY(7))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "STDEVX.S(FILTER(Facts,Facts[Quantity]>1),CURRENCY(Facts[Sales]))",
+   "powerbi": "8.7607"
+  },
+  {
+   "expr": "STDEVX.S(FILTER(Facts,Facts[Quantity]>1),IF(FALSE(),CURRENCY(-2)))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "STDEVX.S(FILTER(Facts,Facts[Quantity]>1),IF(Facts[Quantity]>2,CURRENCY(0)))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "STDEVX.S(FILTER(Facts,Facts[Quantity]>1),IF(TRUE(),DATE(2020,1,1),CURRENCY(-1.1)))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "STDEVX.S(FILTER(Facts,Facts[Quantity]>1),SWITCH(TRUE(),TRUE(),CURRENCY(-2),Facts[Quantity]))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "STDEVX.S(FILTER(Facts,Facts[Sales]>3),IF(0,CURRENCY(2.75)))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "STDEVX.S(FILTER(Facts,Facts[Sales]>3),IF(TRUE(),Facts[Quantity],CONVERT(CURRENCY(1.5),DOUBLE)))",
+   "powerbi": "0.707106781186548"
+  },
+  {
+   "expr": "STDEVX.S(Facts,COALESCE(CURRENCY(-2),\"a\"))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "STDEVX.S(Facts,COALESCE(CURRENCY(0),BLANK()))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "STDEVX.S(Facts,COALESCE(CURRENCY(0),TRUE()))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "STDEVX.S(Facts,COALESCE(CURRENCY(7),1))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "STDEVX.S(Facts,COALESCE(CURRENCY(Facts[Sales]),1))",
+   "powerbi": "8.2911"
+  },
+  {
+   "expr": "STDEVX.S(Facts,CURRENCY(7))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "STDEVX.S(Facts,IF(0,CURRENCY(2.75),TRUE()))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "STDEVX.S(Facts,IF(FALSE(),CONVERT(CURRENCY(1.5),DOUBLE),\"a\"))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "STDEVX.S(Facts,IF(FALSE(),CONVERT(CURRENCY(1.5),DOUBLE),Facts[Quantity]))",
+   "powerbi": "1.87082869338697"
+  },
+  {
+   "expr": "STDEVX.S(Facts,IF(Facts[Quantity]>=3,1,CONVERT(CURRENCY(1.5),DOUBLE)))",
+   "powerbi": "0.273861278752583"
+  },
+  {
+   "expr": "STDEVX.S(Facts,IF(Facts[Quantity]>=3,CURRENCY(7),1))",
+   "powerbi": "3.2863"
+  },
+  {
+   "expr": "STDEVX.S(Facts,IF(ISBLANK(Facts[Note]),1,CONVERT(CURRENCY(1.5),DOUBLE)))",
+   "powerbi": "0.258198889747161"
+  },
+  {
+   "expr": "STDEVX.S(Facts,IF(ISBLANK(Facts[Note]),CURRENCY(-2)))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "STDEVX.S(Facts,IF(ISBLANK(Facts[Note]),CURRENCY(Facts[Sales])))",
+   "powerbi": "12.3744"
+  },
+  {
+   "expr": "STDEVX.S(Facts,IF(TRUE(),BLANK(),CONVERT(CURRENCY(1.5),DOUBLE)))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "STDEVX.S(Facts,IF.EAGER(TRUE(),CURRENCY(7),TRUE()))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "STDEVX.S({0.5,4},COALESCE(CURRENCY(7),\"a\"))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "STDEVX.S({0.5,4},IF(TRUE(),\"a\",CURRENCY(-1.1)))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "STDEVX.S({1,2,3},CURRENCY(-2))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "STDEVX.S({1,2,3},IF(0,CURRENCY(0)))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "STDEVX.S({1,2,3},IF(1,CURRENCY(7),TRUE()))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "STDEVX.S({1,2,3},IF.EAGER(TRUE(),CURRENCY(0),TRUE()))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "STDEVX.S({1.5,2.5},CURRENCY(-2))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "STDEVX.S({1.5,2.5},IF(1,CURRENCY(0),TRUE()))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "STDEVX.S({1.5,2.5},IF(FALSE(),2.5,CURRENCY(0)))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "STDEVX.S({TRUE()},COALESCE(CONVERT(CURRENCY(1.5),DOUBLE),DATE(2020,1,1)))",
+   "powerbi": "NaN"
+  },
+  {
+   "expr": "STDEVX.S({TRUE()},IF(FALSE(),CURRENCY(2.75)))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "STDEVX.S({TRUE()},IF(TRUE(),CURRENCY(2.75),TRUE()))",
+   "powerbi": "NaN"
+  },
+  {
+   "expr": "SUMX(ADDCOLUMNS(Facts,\"m\",COALESCE(Facts[Note],1)),IF(0,[m],Facts[Sales]))",
+   "powerbi": "31.5"
+  },
+  {
+   "expr": "SUMX(ADDCOLUMNS(Facts,\"m\",COALESCE(Facts[Note],1)),IF(1,[m],Facts[Sales]))",
+   "powerbi": "2"
+  },
+  {
+   "expr": "SUMX(ADDCOLUMNS(Facts,\"m\",COALESCE(Facts[Note],1)),IF(FALSE(),[m],DATE(2020,1,1)+Facts[Quantity]))",
+   "powerbi": "01/26/2620 00:00:00"
+  },
+  {
+   "expr": "SUMX(ADDCOLUMNS(Facts,\"m\",COALESCE(Facts[Note],1)),IF(FALSE(),[m],Facts[Quantity]))",
+   "powerbi": "15"
+  },
+  {
+   "expr": "SUMX(ADDCOLUMNS(Facts,\"m\",COALESCE(Facts[Note],1)),IF(Facts[Quantity]>=3,[m],2.5))",
+   "powerbi": "9.5"
+  },
+  {
+   "expr": "SUMX(ADDCOLUMNS(Facts,\"m\",COALESCE(Facts[Note],1)),IF(TRUE(),[m],1))",
+   "powerbi": "2"
+  },
+  {
+   "expr": "SUMX(ADDCOLUMNS(Facts,\"m\",COALESCE(Facts[Note],1)),IF(TRUE(),[m],DATE(2020,1,1)))",
+   "powerbi": "2"
+  },
+  {
+   "expr": "SUMX(ADDCOLUMNS(Facts,\"m\",COALESCE(Facts[Note],1)),IF([m]<=2.5,1,0))",
+   "powerbi": "2"
+  },
+  {
+   "expr": "SUMX(ADDCOLUMNS(Facts,\"m\",COALESCE(Facts[Note],1)),IF([m]<>1,1,0))",
+   "powerbi": "4"
+  },
+  {
+   "expr": "SUMX(ADDCOLUMNS(Facts,\"m\",COALESCE(Facts[Note],1)),IF([m]<>DATE(2020,1,1),1,0))",
+   "powerbi": "6"
+  },
+  {
+   "expr": "SUMX(ADDCOLUMNS(Facts,\"m\",COALESCE(Facts[Note],1)),IF([m]<BLANK(),1,0))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "SUMX(ADDCOLUMNS(Facts,\"m\",COALESCE(Facts[Note],1)),IF([m]=\"a\",1,0))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "SUMX(ADDCOLUMNS(Facts,\"m\",COALESCE(Facts[Note],1)),IF([m]=2.5,1,0))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "SUMX(ADDCOLUMNS(Facts,\"m\",COALESCE(Facts[Note],1)),IF([m]==1,1,0))",
+   "powerbi": "2"
+  },
+  {
+   "expr": "SUMX(ADDCOLUMNS(Facts,\"m\",COALESCE(Facts[Note],1)),IF([m]==DATE(2020,1,1),1,0))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "SUMX(ADDCOLUMNS(Facts,\"m\",COALESCE(Facts[Note],1)),IF([m]==TRUE(),1,0))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "SUMX(ADDCOLUMNS(Facts,\"m\",COALESCE(Facts[Note],1)),IF([m]>1,1,0))",
+   "powerbi": "4"
+  },
+  {
+   "expr": "SUMX(ADDCOLUMNS(Facts,\"m\",COALESCE(Facts[Note],1)),IF([m]>=2.5,1,0))",
+   "powerbi": "4"
+  },
+  {
+   "expr": "SUMX(ADDCOLUMNS(Facts,\"m\",COALESCE(Facts[Note],1)),IF([m]>=DATE(2020,1,1),1,0))",
+   "powerbi": "4"
+  },
+  {
+   "expr": "SUMX(ADDCOLUMNS(Facts,\"m\",IF(Facts[Quantity]>2,1,\"a\")),IF(0,[m],\"a\"))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "SUMX(ADDCOLUMNS(Facts,\"m\",IF(Facts[Quantity]>2,1,\"a\")),IF(0,[m],DATE(2020,1,1)))",
+   "powerbi": "01/11/2620 00:00:00"
+  },
+  {
+   "expr": "SUMX(ADDCOLUMNS(Facts,\"m\",IF(Facts[Quantity]>2,1,\"a\")),IF(1,[m],2.5))",
+   "powerbi": "3"
+  },
+  {
+   "expr": "SUMX(ADDCOLUMNS(Facts,\"m\",IF(Facts[Quantity]>2,1,\"a\")),IF(FALSE(),[m],1))",
+   "powerbi": "6"
+  },
+  {
+   "expr": "SUMX(ADDCOLUMNS(Facts,\"m\",IF(Facts[Quantity]>2,1,\"a\")),IF(FALSE(),[m],2.5))",
+   "powerbi": "15"
+  },
+  {
+   "expr": "SUMX(ADDCOLUMNS(Facts,\"m\",IF(Facts[Quantity]>2,1,\"a\")),IF(Facts[Quantity]>2,[m],Facts[Quantity]))",
+   "powerbi": "6"
+  },
+  {
+   "expr": "SUMX(ADDCOLUMNS(Facts,\"m\",IF(Facts[Quantity]>2,1,\"a\")),IF(Facts[Quantity]>=3,[m],BLANK()))",
+   "powerbi": "3"
+  },
+  {
+   "expr": "SUMX(ADDCOLUMNS(Facts,\"m\",IF(Facts[Quantity]>2,1,\"a\")),IF(Facts[Quantity]>=3,[m],DATE(2020,1,1)+Facts[Quantity]))",
+   "powerbi": "01/11/2260 00:00:00"
+  },
+  {
+   "expr": "SUMX(ADDCOLUMNS(Facts,\"m\",IF(Facts[Quantity]>2,1,\"a\")),IF(Facts[Quantity]>=3,[m],Facts[Sales]))",
+   "powerbi": "12"
+  },
+  {
+   "expr": "SUMX(ADDCOLUMNS(Facts,\"m\",IF(Facts[Quantity]>2,1,\"a\")),IF(ISBLANK(Facts[Note]),[m],BLANK()))",
+   "powerbi": "2"
+  },
+  {
+   "expr": "SUMX(ADDCOLUMNS(Facts,\"m\",IF(Facts[Quantity]>2,1,\"a\")),IF(ISBLANK(Facts[Note]),[m],DATE(2020,1,1)))",
+   "powerbi": "01/09/2380 00:00:00"
+  },
+  {
+   "expr": "SUMX(ADDCOLUMNS(Facts,\"m\",IF(Facts[Quantity]>2,1,\"a\")),IF(TRUE(),[m],BLANK()))",
+   "powerbi": "3"
+  },
+  {
+   "expr": "SUMX(ADDCOLUMNS(Facts,\"m\",IF(Facts[Quantity]>2,1,\"a\")),IF([m]<\"a\",1,0))",
+   "powerbi": "3"
+  },
+  {
+   "expr": "SUMX(ADDCOLUMNS(Facts,\"m\",IF(Facts[Quantity]>2,1,\"a\")),IF([m]<2.5,1,0))",
+   "powerbi": "3"
+  },
+  {
+   "expr": "SUMX(ADDCOLUMNS(Facts,\"m\",IF(Facts[Quantity]>2,1,\"a\")),IF([m]<=\"a\",1,0))",
+   "powerbi": "6"
+  },
+  {
+   "expr": "SUMX(ADDCOLUMNS(Facts,\"m\",IF(Facts[Quantity]>2,1,\"a\")),IF([m]<=BLANK(),1,0))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "SUMX(ADDCOLUMNS(Facts,\"m\",IF(Facts[Quantity]>2,1,\"a\")),IF([m]<>1,1,0))",
+   "powerbi": "3"
+  },
+  {
+   "expr": "SUMX(ADDCOLUMNS(Facts,\"m\",IF(Facts[Quantity]>2,1,\"a\")),IF([m]<>2.5,1,0))",
+   "powerbi": "6"
+  },
+  {
+   "expr": "SUMX(ADDCOLUMNS(Facts,\"m\",IF(Facts[Quantity]>2,1,\"a\")),IF([m]<>BLANK(),1,0))",
+   "powerbi": "6"
+  },
+  {
+   "expr": "SUMX(ADDCOLUMNS(Facts,\"m\",IF(Facts[Quantity]>2,1,\"a\")),IF([m]<>DATE(2020,1,1),1,0))",
+   "powerbi": "6"
+  },
+  {
+   "expr": "SUMX(ADDCOLUMNS(Facts,\"m\",IF(Facts[Quantity]>2,1,\"a\")),IF([m]<DATE(2020,1,1),1,0))",
+   "powerbi": "3"
+  },
+  {
+   "expr": "SUMX(ADDCOLUMNS(Facts,\"m\",IF(Facts[Quantity]>2,1,\"a\")),IF([m]<TRUE(),1,0))",
+   "powerbi": "6"
+  },
+  {
+   "expr": "SUMX(ADDCOLUMNS(Facts,\"m\",IF(Facts[Quantity]>2,1,\"a\")),IF([m]=2.5,1,0))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "SUMX(ADDCOLUMNS(Facts,\"m\",IF(Facts[Quantity]>2,1,\"a\")),IF([m]==2.5,1,0))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "SUMX(ADDCOLUMNS(Facts,\"m\",IF(Facts[Quantity]>2,1,\"a\")),IF([m]==DATE(2020,1,1),1,0))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "SUMX(ADDCOLUMNS(Facts,\"m\",IF(Facts[Quantity]>2,1,\"a\")),IF([m]=BLANK(),1,0))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "SUMX(ADDCOLUMNS(Facts,\"m\",IF(Facts[Quantity]>2,1,\"a\")),IF([m]>2.5,1,0))",
+   "powerbi": "3"
+  },
+  {
+   "expr": "SUMX(ADDCOLUMNS(Facts,\"m\",IF(Facts[Quantity]>2,1,\"a\")),IF([m]>=2.5,1,0))",
+   "powerbi": "3"
+  },
+  {
+   "expr": "SUMX(ADDCOLUMNS(Facts,\"m\",IF(Facts[Quantity]>2,1,\"a\")),IF([m]>=BLANK(),1,0))",
+   "powerbi": "6"
+  },
+  {
+   "expr": "SUMX(ADDCOLUMNS(Facts,\"m\",IF(Facts[Quantity]>2,1,\"a\")),IF([m]>=DATE(2020,1,1),1,0))",
+   "powerbi": "3"
+  },
+  {
+   "expr": "SUMX(ADDCOLUMNS(Facts,\"m\",IF(Facts[Quantity]>2,1,\"a\")),IF([m]>TRUE(),1,0))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "SUMX(ADDCOLUMNS(Facts,\"m\",IF(Facts[Quantity]>2,DATE(2020,1,1),2)),IF(0,[m],BLANK()))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "SUMX(ADDCOLUMNS(Facts,\"m\",IF(Facts[Quantity]>2,DATE(2020,1,1),2)),IF(FALSE(),[m],1))",
+   "powerbi": "6"
+  },
+  {
+   "expr": "SUMX(ADDCOLUMNS(Facts,\"m\",IF(Facts[Quantity]>2,DATE(2020,1,1),2)),IF(FALSE(),[m],Facts[Quantity]))",
+   "powerbi": "15"
+  },
+  {
+   "expr": "SUMX(ADDCOLUMNS(Facts,\"m\",IF(Facts[Quantity]>2,DATE(2020,1,1),2)),IF(Facts[Quantity]>2,[m],2.5))",
+   "powerbi": "131500.5"
+  },
+  {
+   "expr": "SUMX(ADDCOLUMNS(Facts,\"m\",IF(Facts[Quantity]>2,DATE(2020,1,1),2)),IF(Facts[Quantity]>=3,[m],\"a\"))",
+   "powerbi": "131493"
+  },
+  {
+   "expr": "SUMX(ADDCOLUMNS(Facts,\"m\",IF(Facts[Quantity]>2,DATE(2020,1,1),2)),IF(ISBLANK(Facts[Note]),[m],\"a\"))",
+   "powerbi": "87662"
+  },
+  {
+   "expr": "SUMX(ADDCOLUMNS(Facts,\"m\",IF(Facts[Quantity]>2,DATE(2020,1,1),2)),IF(ISBLANK(Facts[Note]),[m],DATE(2020,1,1)+Facts[Quantity]))",
+   "powerbi": "262993"
+  },
+  {
+   "expr": "SUMX(ADDCOLUMNS(Facts,\"m\",IF(Facts[Quantity]>2,DATE(2020,1,1),2)),IF(ISBLANK(Facts[Note]),[m],Facts[Sales]))",
+   "powerbi": "87671"
+  },
+  {
+   "expr": "SUMX(ADDCOLUMNS(Facts,\"m\",IF(Facts[Quantity]>2,DATE(2020,1,1),2)),IF(TRUE(),[m],\"a\"))",
+   "powerbi": "131499"
+  },
+  {
+   "expr": "SUMX(ADDCOLUMNS(Facts,\"m\",IF(Facts[Quantity]>2,DATE(2020,1,1),2)),IF(TRUE(),[m],1))",
+   "powerbi": "131499"
+  },
+  {
+   "expr": "SUMX(ADDCOLUMNS(Facts,\"m\",IF(Facts[Quantity]>2,DATE(2020,1,1),2)),IF(TRUE(),[m],2.5))",
+   "powerbi": "131499"
+  },
+  {
+   "expr": "SUMX(ADDCOLUMNS(Facts,\"m\",IF(Facts[Quantity]>2,DATE(2020,1,1),2)),IF([m]<2.5,1,0))",
+   "powerbi": "3"
+  },
+  {
+   "expr": "SUMX(ADDCOLUMNS(Facts,\"m\",IF(Facts[Quantity]>2,DATE(2020,1,1),2)),IF([m]<=2.5,1,0))",
+   "powerbi": "3"
+  },
+  {
+   "expr": "SUMX(ADDCOLUMNS(Facts,\"m\",IF(Facts[Quantity]>2,DATE(2020,1,1),2)),IF([m]<BLANK(),1,0))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "SUMX(ADDCOLUMNS(Facts,\"m\",IF(Facts[Quantity]>2,DATE(2020,1,1),2)),IF([m]==1,1,0))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "SUMX(ADDCOLUMNS(Facts,\"m\",IF(Facts[Quantity]>2,DATE(2020,1,1),2)),IF([m]>2.5,1,0))",
+   "powerbi": "3"
+  },
+  {
+   "expr": "SUMX(ADDCOLUMNS(Facts,\"m\",IF(Facts[Quantity]>2,DATE(2020,1,1),2)),IF([m]>=2.5,1,0))",
+   "powerbi": "3"
+  },
+  {
+   "expr": "SUMX(ADDCOLUMNS(Facts,\"m\",IF(Facts[Quantity]>2,DATE(2020,1,1),2)),IF([m]>=DATE(2020,1,1),1,0))",
+   "powerbi": "3"
+  },
+  {
+   "expr": "SUMX(ADDCOLUMNS(Facts,\"m\",IF(Facts[Quantity]>2,DATE(2020,1,1),2)),IF([m]>BLANK(),1,0))",
+   "powerbi": "6"
+  },
+  {
+   "expr": "SUMX(ADDCOLUMNS(Facts,\"m\",IF(Facts[Quantity]>2,DATE(2020,1,1),2)),IF([m]>DATE(2020,1,1),1,0))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "SUMX(ADDCOLUMNS(Facts,\"m\",IF(Facts[Quantity]>2,TRUE(),3)),IF(0,[m],DATE(2020,1,1)+Facts[Quantity]))",
+   "powerbi": "01/26/2620 00:00:00"
+  },
+  {
+   "expr": "SUMX(ADDCOLUMNS(Facts,\"m\",IF(Facts[Quantity]>2,TRUE(),3)),IF(0,[m],Facts[Sales]))",
+   "powerbi": "31.5"
+  },
+  {
+   "expr": "SUMX(ADDCOLUMNS(Facts,\"m\",IF(Facts[Quantity]>2,TRUE(),3)),IF(1,[m],\"a\"))",
+   "powerbi": "9"
+  },
+  {
+   "expr": "SUMX(ADDCOLUMNS(Facts,\"m\",IF(Facts[Quantity]>2,TRUE(),3)),IF(1,[m],1))",
+   "powerbi": "9"
+  },
+  {
+   "expr": "SUMX(ADDCOLUMNS(Facts,\"m\",IF(Facts[Quantity]>2,TRUE(),3)),IF(1,[m],BLANK()))",
+   "powerbi": "9"
+  },
+  {
+   "expr": "SUMX(ADDCOLUMNS(Facts,\"m\",IF(Facts[Quantity]>2,TRUE(),3)),IF(FALSE(),[m],2.5))",
+   "powerbi": "15"
+  },
+  {
+   "expr": "SUMX(ADDCOLUMNS(Facts,\"m\",IF(Facts[Quantity]>2,TRUE(),3)),IF(FALSE(),[m],BLANK()))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "SUMX(ADDCOLUMNS(Facts,\"m\",IF(Facts[Quantity]>2,TRUE(),3)),IF(Facts[Quantity]>2,[m],DATE(2020,1,1)))",
+   "powerbi": "01/05/2260 00:00:00"
+  },
+  {
+   "expr": "SUMX(ADDCOLUMNS(Facts,\"m\",IF(Facts[Quantity]>2,TRUE(),3)),IF(Facts[Quantity]>=3,[m],BLANK()))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "SUMX(ADDCOLUMNS(Facts,\"m\",IF(Facts[Quantity]>2,TRUE(),3)),IF(Facts[Quantity]>=3,[m],Facts[Quantity]))",
+   "powerbi": "3"
+  },
+  {
+   "expr": "SUMX(ADDCOLUMNS(Facts,\"m\",IF(Facts[Quantity]>2,TRUE(),3)),IF(TRUE(),[m],2.5))",
+   "powerbi": "9"
+  },
+  {
+   "expr": "SUMX(ADDCOLUMNS(Facts,\"m\",IF(Facts[Quantity]>2,TRUE(),3)),IF(TRUE(),[m],BLANK()))",
+   "powerbi": "9"
+  },
+  {
+   "expr": "SUMX(ADDCOLUMNS(Facts,\"m\",IF(Facts[Quantity]>2,TRUE(),3)),IF([m]<1,1,0))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "SUMX(ADDCOLUMNS(Facts,\"m\",IF(Facts[Quantity]>2,TRUE(),3)),IF([m]<2.5,1,0))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "SUMX(ADDCOLUMNS(Facts,\"m\",IF(Facts[Quantity]>2,TRUE(),3)),IF([m]<>\"a\",1,0))",
+   "powerbi": "6"
+  },
+  {
+   "expr": "SUMX(ADDCOLUMNS(Facts,\"m\",IF(Facts[Quantity]>2,TRUE(),3)),IF([m]<>TRUE(),1,0))",
+   "powerbi": "3"
+  },
+  {
+   "expr": "SUMX(ADDCOLUMNS(Facts,\"m\",IF(Facts[Quantity]>2,TRUE(),3)),IF([m]<TRUE(),1,0))",
+   "powerbi": "3"
+  },
+  {
+   "expr": "SUMX(ADDCOLUMNS(Facts,\"m\",IF(Facts[Quantity]>2,TRUE(),3)),IF([m]==\"a\",1,0))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "SUMX(ADDCOLUMNS(Facts,\"m\",IF(Facts[Quantity]>2,TRUE(),3)),IF([m]>2.5,1,0))",
+   "powerbi": "6"
+  },
+  {
+   "expr": "SUMX(ADDCOLUMNS(Facts,\"m\",IF(Facts[Quantity]>2,TRUE(),3)),IF([m]>=DATE(2020,1,1),1,0))",
+   "powerbi": "3"
+  },
+  {
+   "expr": "SUMX(ADDCOLUMNS(Facts,\"m\",SWITCH(Facts[Quantity],1,\"x\",2,2.5,BLANK())),IF(0,[m],1))",
+   "powerbi": "6"
+  },
+  {
+   "expr": "SUMX(ADDCOLUMNS(Facts,\"m\",SWITCH(Facts[Quantity],1,\"x\",2,2.5,BLANK())),IF(0,[m],2.5))",
+   "powerbi": "15"
+  },
+  {
+   "expr": "SUMX(ADDCOLUMNS(Facts,\"m\",SWITCH(Facts[Quantity],1,\"x\",2,2.5,BLANK())),IF(0,[m],DATE(2020,1,1)))",
+   "powerbi": "01/11/2620 00:00:00"
+  },
+  {
+   "expr": "SUMX(ADDCOLUMNS(Facts,\"m\",SWITCH(Facts[Quantity],1,\"x\",2,2.5,BLANK())),IF(1,[m],Facts[Quantity]))",
+   "powerbi": "2.5"
+  },
+  {
+   "expr": "SUMX(ADDCOLUMNS(Facts,\"m\",SWITCH(Facts[Quantity],1,\"x\",2,2.5,BLANK())),IF(FALSE(),[m],2.5))",
+   "powerbi": "15"
+  },
+  {
+   "expr": "SUMX(ADDCOLUMNS(Facts,\"m\",SWITCH(Facts[Quantity],1,\"x\",2,2.5,BLANK())),IF(FALSE(),[m],DATE(2020,1,1)+Facts[Quantity]))",
+   "powerbi": "01/26/2620 00:00:00"
+  },
+  {
+   "expr": "SUMX(ADDCOLUMNS(Facts,\"m\",SWITCH(Facts[Quantity],1,\"x\",2,2.5,BLANK())),IF(FALSE(),[m],Facts[Quantity]))",
+   "powerbi": "15"
+  },
+  {
+   "expr": "SUMX(ADDCOLUMNS(Facts,\"m\",SWITCH(Facts[Quantity],1,\"x\",2,2.5,BLANK())),IF(FALSE(),[m],Facts[Sales]))",
+   "powerbi": "31.5"
+  },
+  {
+   "expr": "SUMX(ADDCOLUMNS(Facts,\"m\",SWITCH(Facts[Quantity],1,\"x\",2,2.5,BLANK())),IF(FALSE(),[m],TRUE()))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "SUMX(ADDCOLUMNS(Facts,\"m\",SWITCH(Facts[Quantity],1,\"x\",2,2.5,BLANK())),IF(Facts[Quantity]>2,[m],1))",
+   "powerbi": "3"
+  },
+  {
+   "expr": "SUMX(ADDCOLUMNS(Facts,\"m\",SWITCH(Facts[Quantity],1,\"x\",2,2.5,BLANK())),IF(Facts[Quantity]>=3,[m],Facts[Sales]))",
+   "powerbi": "9"
+  },
+  {
+   "expr": "SUMX(ADDCOLUMNS(Facts,\"m\",SWITCH(Facts[Quantity],1,\"x\",2,2.5,BLANK())),IF(ISBLANK(Facts[Note]),[m],BLANK()))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "SUMX(ADDCOLUMNS(Facts,\"m\",SWITCH(Facts[Quantity],1,\"x\",2,2.5,BLANK())),IF(ISBLANK(Facts[Note]),[m],Facts[Quantity]))",
+   "powerbi": "7"
+  },
+  {
+   "expr": "SUMX(ADDCOLUMNS(Facts,\"m\",SWITCH(Facts[Quantity],1,\"x\",2,2.5,BLANK())),IF(TRUE(),[m],1))",
+   "powerbi": "2.5"
+  },
+  {
+   "expr": "SUMX(ADDCOLUMNS(Facts,\"m\",SWITCH(Facts[Quantity],1,\"x\",2,2.5,BLANK())),IF([m]<=1,1,0))",
+   "powerbi": "4"
+  },
+  {
+   "expr": "SUMX(ADDCOLUMNS(Facts,\"m\",SWITCH(Facts[Quantity],1,\"x\",2,2.5,BLANK())),IF([m]<=2.5,1,0))",
+   "powerbi": "5"
+  },
+  {
+   "expr": "SUMX(ADDCOLUMNS(Facts,\"m\",SWITCH(Facts[Quantity],1,\"x\",2,2.5,BLANK())),IF([m]<=BLANK(),1,0))",
+   "powerbi": "4"
+  },
+  {
+   "expr": "SUMX(ADDCOLUMNS(Facts,\"m\",SWITCH(Facts[Quantity],1,\"x\",2,2.5,BLANK())),IF([m]<=DATE(2020,1,1),1,0))",
+   "powerbi": "5"
+  },
+  {
+   "expr": "SUMX(ADDCOLUMNS(Facts,\"m\",SWITCH(Facts[Quantity],1,\"x\",2,2.5,BLANK())),IF([m]<>\"a\",1,0))",
+   "powerbi": "6"
+  },
+  {
+   "expr": "SUMX(ADDCOLUMNS(Facts,\"m\",SWITCH(Facts[Quantity],1,\"x\",2,2.5,BLANK())),IF([m]<>2.5,1,0))",
+   "powerbi": "5"
+  },
+  {
+   "expr": "SUMX(ADDCOLUMNS(Facts,\"m\",SWITCH(Facts[Quantity],1,\"x\",2,2.5,BLANK())),IF([m]<>DATE(2020,1,1),1,0))",
+   "powerbi": "6"
+  },
+  {
+   "expr": "SUMX(ADDCOLUMNS(Facts,\"m\",SWITCH(Facts[Quantity],1,\"x\",2,2.5,BLANK())),IF([m]<>TRUE(),1,0))",
+   "powerbi": "6"
+  },
+  {
+   "expr": "SUMX(ADDCOLUMNS(Facts,\"m\",SWITCH(Facts[Quantity],1,\"x\",2,2.5,BLANK())),IF([m]=\"a\",1,0))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "SUMX(ADDCOLUMNS(Facts,\"m\",SWITCH(Facts[Quantity],1,\"x\",2,2.5,BLANK())),IF([m]=2.5,1,0))",
+   "powerbi": "1"
+  },
+  {
+   "expr": "SUMX(ADDCOLUMNS(Facts,\"m\",SWITCH(Facts[Quantity],1,\"x\",2,2.5,BLANK())),IF([m]==DATE(2020,1,1),1,0))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "SUMX(ADDCOLUMNS(Facts,\"m\",SWITCH(Facts[Quantity],1,\"x\",2,2.5,BLANK())),IF([m]>\"a\",1,0))",
+   "powerbi": "1"
+  },
+  {
+   "expr": "SUMX(ADDCOLUMNS(Facts,\"m\",SWITCH(Facts[Quantity],1,\"x\",2,2.5,BLANK())),IF([m]>1,1,0))",
+   "powerbi": "2"
+  },
+  {
+   "expr": "SUMX(ADDCOLUMNS(Facts,\"m\",SWITCH(Facts[Quantity],1,\"x\",2,2.5,BLANK())),IF([m]>=2.5,1,0))",
+   "powerbi": "2"
+  },
+  {
+   "expr": "SUMX(ADDCOLUMNS(Facts,\"m\",SWITCH(Facts[Quantity],1,\"x\",2,2.5,BLANK())),IF([m]>=DATE(2020,1,1),1,0))",
+   "powerbi": "1"
+  },
+  {
+   "expr": "SUMX(ADDCOLUMNS(Facts,\"m\",SWITCH(Facts[Quantity],1,\"x\",2,2.5,BLANK())),IF([m]>BLANK(),1,0))",
+   "powerbi": "2"
+  },
+  {
+   "expr": "SUMX(ADDCOLUMNS(Facts,\"m\",SWITCH(Facts[Quantity],1,\"x\",2,2.5,BLANK())),IF([m]>TRUE(),1,0))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "SUMX(ADDCOLUMNS(Facts,\"z\",1),1/0*0*2)",
+   "powerbi": "NaN"
+  },
+  {
+   "expr": "SUMX(ADDCOLUMNS(Facts,\"z\",1),1/0*0+BLANK())",
+   "powerbi": "NaN"
+  },
+  {
+   "expr": "SUMX(ADDCOLUMNS(Facts,\"z\",1),COALESCE(CURRENCY(1.5),1))",
+   "powerbi": "9"
+  },
+  {
+   "expr": "SUMX(ADDCOLUMNS(Facts,\"z\",1),COALESCE(CURRENCY(Facts[Sales]),BLANK()))",
+   "powerbi": "31.5"
+  },
+  {
+   "expr": "SUMX(ADDCOLUMNS(Facts,\"z\",1),CONVERT(CURRENCY(1.5),DOUBLE))",
+   "powerbi": "9"
+  },
+  {
+   "expr": "SUMX(ADDCOLUMNS(Facts,\"z\",1),CURRENCY(Facts[Sales]))",
+   "powerbi": "31.5"
+  },
+  {
+   "expr": "SUMX(ADDCOLUMNS(Facts,\"z\",1),IF(0,\"a\",CURRENCY(1.5)))",
+   "powerbi": "9"
+  },
+  {
+   "expr": "SUMX(ADDCOLUMNS(Facts,\"z\",1),IF(0,CONVERT(CURRENCY(1.5),DOUBLE),DATE(2020,1,1)+Facts[Quantity]))",
+   "powerbi": "263001"
+  },
+  {
+   "expr": "SUMX(ADDCOLUMNS(Facts,\"z\",1),IF(0,CURRENCY(0),2.5))",
+   "powerbi": "15"
+  },
+  {
+   "expr": "SUMX(ADDCOLUMNS(Facts,\"z\",1),IF(1,CONVERT(CURRENCY(1.5),DOUBLE),Facts[Quantity]))",
+   "powerbi": "9"
+  },
+  {
+   "expr": "SUMX(ADDCOLUMNS(Facts,\"z\",1),IF(FALSE(),CURRENCY(-1.1)))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "SUMX(ADDCOLUMNS(Facts,\"z\",1),IF(Facts[Quantity]>2,CURRENCY(Facts[Sales]),2.5))",
+   "powerbi": "30"
+  },
+  {
+   "expr": "SUMX(ADDCOLUMNS(Facts,\"z\",1),IF(Facts[Quantity]>2,Facts[Sales],CURRENCY(0)))",
+   "powerbi": "22.5"
+  },
+  {
+   "expr": "SUMX(ADDCOLUMNS(Facts,\"z\",1),IF(ISBLANK(Facts[Note]),CURRENCY(Facts[Sales]),DATE(2020,1,1)+Facts[Quantity]))",
+   "powerbi": "175353.5"
+  },
+  {
+   "expr": "SUMX(ADDCOLUMNS(Facts,\"z\",1),IF(TRUE(),CURRENCY(-1.1),DATE(2020,1,1)+Facts[Quantity]))",
+   "powerbi": "-6.6"
+  },
+  {
+   "expr": "SUMX(ADDCOLUMNS(Facts,\"z\",1),IF(TRUE(),CURRENCY(Facts[Sales])))",
+   "powerbi": "31.5"
+  },
+  {
+   "expr": "SUMX(ADDCOLUMNS(Facts,\"z\",1),IF.EAGER(0,CURRENCY(-1.1),DATE(2020,1,1)))",
+   "powerbi": "262986"
+  },
+  {
+   "expr": "SUMX(ADDCOLUMNS(Facts,\"z\",1),IF.EAGER(FALSE(),CURRENCY(2.75),1))",
+   "powerbi": "6"
+  },
+  {
+   "expr": "SUMX(ADDCOLUMNS(Facts,\"z\",1),IFERROR(1/0,2))",
+   "powerbi": "12"
+  },
+  {
+   "expr": "SUMX(ADDCOLUMNS(Facts,\"z\",1),IFERROR(1/0,2)*2)",
+   "powerbi": "24"
+  },
+  {
+   "expr": "SUMX(FILTER(Facts,Facts[Quantity]>1),1/0*0)",
+   "powerbi": "NaN"
+  },
+  {
+   "expr": "SUMX(FILTER(Facts,Facts[Quantity]>1),1/0*0*2)",
+   "powerbi": "NaN"
+  },
+  {
+   "expr": "SUMX(FILTER(Facts,Facts[Quantity]>1),COALESCE(CURRENCY(Facts[Sales]),\"a\"))",
+   "powerbi": "33"
+  },
+  {
+   "expr": "SUMX(FILTER(Facts,Facts[Quantity]>1),CONVERT(CURRENCY(1.5),DOUBLE))",
+   "powerbi": "6"
+  },
+  {
+   "expr": "SUMX(FILTER(Facts,Facts[Quantity]>1),CURRENCY(-1.1))",
+   "powerbi": "-4.4"
+  },
+  {
+   "expr": "SUMX(FILTER(Facts,Facts[Quantity]>1),CURRENCY(0.33333))",
+   "powerbi": "1.3332"
+  },
+  {
+   "expr": "SUMX(FILTER(Facts,Facts[Quantity]>1),CURRENCY(1.5))",
+   "powerbi": "6"
+  },
+  {
+   "expr": "SUMX(FILTER(Facts,Facts[Quantity]>1),IF(1,CURRENCY(-1.1)))",
+   "powerbi": "-4.4"
+  },
+  {
+   "expr": "SUMX(FILTER(Facts,Facts[Quantity]>1),IF(FALSE(),CONVERT(CURRENCY(1.5),DOUBLE),2.5))",
+   "powerbi": "10"
+  },
+  {
+   "expr": "SUMX(FILTER(Facts,Facts[Quantity]>1),IF(FALSE(),CURRENCY(0)))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "SUMX(FILTER(Facts,Facts[Quantity]>1),IF(FALSE(),CURRENCY(0.33333),BLANK()))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "SUMX(FILTER(Facts,Facts[Quantity]>1),IF(FALSE(),CURRENCY(1.23456),DATE(2020,1,1)))",
+   "powerbi": "175324"
+  },
+  {
+   "expr": "SUMX(FILTER(Facts,Facts[Quantity]>1),IF(Facts[Quantity]>2,Facts[Quantity],CURRENCY(-2)))",
+   "powerbi": "10"
+  },
+  {
+   "expr": "SUMX(FILTER(Facts,Facts[Quantity]>1),IF(Facts[Quantity]>=3,Facts[Quantity],CURRENCY(Facts[Sales])))",
+   "powerbi": "22.5"
+  },
+  {
+   "expr": "SUMX(FILTER(Facts,Facts[Quantity]>1),IF(TRUE(),CURRENCY(-1.1)))",
+   "powerbi": "-4.4"
+  },
+  {
+   "expr": "SUMX(FILTER(Facts,Facts[Quantity]>1),IF(TRUE(),CURRENCY(7)))",
+   "powerbi": "28"
+  },
+  {
+   "expr": "SUMX(FILTER(Facts,Facts[Quantity]>1),IF(TRUE(),Facts[Sales],CURRENCY(-1.1)))",
+   "powerbi": "33"
+  },
+  {
+   "expr": "SUMX(FILTER(Facts,Facts[Quantity]>1),IF.EAGER(1,CURRENCY(0.33333),Facts[Sales]))",
+   "powerbi": "1.3332"
+  },
+  {
+   "expr": "SUMX(FILTER(Facts,Facts[Quantity]>1),IFERROR(1/0,2))",
+   "powerbi": "8"
+  },
+  {
+   "expr": "SUMX(FILTER(Facts,Facts[Quantity]>1),IFERROR(1/0,2)+BLANK())",
+   "powerbi": "8"
+  },
+  {
+   "expr": "SUMX(FILTER(Facts,Facts[Quantity]>1),SWITCH(TRUE(),TRUE(),CURRENCY(0.33333),\"a\"))",
+   "powerbi": "1.3332"
+  },
+  {
+   "expr": "SUMX(FILTER(Facts,Facts[Sales]>3),1/0*0)",
+   "powerbi": "NaN"
+  },
+  {
+   "expr": "SUMX(FILTER(Facts,Facts[Sales]>3),1/0*0*2)",
+   "powerbi": "NaN"
+  },
+  {
+   "expr": "SUMX(FILTER(Facts,Facts[Sales]>3),1/0*0+BLANK())",
+   "powerbi": "NaN"
+  },
+  {
+   "expr": "SUMX(FILTER(Facts,Facts[Sales]>3),COALESCE(CURRENCY(-1.1),2.5))",
+   "powerbi": "-2.2"
+  },
+  {
+   "expr": "SUMX(FILTER(Facts,Facts[Sales]>3),CURRENCY(7))",
+   "powerbi": "14"
+  },
+  {
+   "expr": "SUMX(FILTER(Facts,Facts[Sales]>3),IF(0,1,CONVERT(CURRENCY(1.5),DOUBLE)))",
+   "powerbi": "3"
+  },
+  {
+   "expr": "SUMX(FILTER(Facts,Facts[Sales]>3),IF.EAGER(1,CURRENCY(-1.1),2.5))",
+   "powerbi": "-2.2"
+  },
+  {
+   "expr": "SUMX(FILTER(Facts,Facts[Sales]>3),IF.EAGER(1,CURRENCY(Facts[Sales]),DATE(2020,1,1)+Facts[Quantity]))",
+   "powerbi": "30.5"
+  },
+  {
+   "expr": "SUMX(FILTER(Facts,Facts[Sales]>3),IFERROR(1/0,2)*2)",
+   "powerbi": "8"
+  },
+  {
+   "expr": "SUMX(FILTER(Facts,Facts[Sales]>3),SWITCH(Facts[Quantity],1,CONVERT(CURRENCY(1.5),DOUBLE),DATE(2020,1,1)+Facts[Quantity]))",
+   "powerbi": "87667"
+  },
+  {
+   "expr": "SUMX(FILTER(Facts,Facts[Sales]>3),SWITCH(Facts[Quantity],1,CURRENCY(2.75),\"a\"))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "SUMX(FILTER(Facts,Facts[Sales]>3),SWITCH(Facts[Quantity],2,CURRENCY(2.75),DATE(2020,1,1)))",
+   "powerbi": "43833.75"
+  },
+  {
+   "expr": "SUMX(Facts,1/0*0)",
+   "powerbi": "NaN"
+  },
+  {
+   "expr": "SUMX(Facts,COALESCE(CONVERT(CURRENCY(1.5),DOUBLE),TRUE()))",
+   "powerbi": "9"
+  },
+  {
+   "expr": "SUMX(Facts,COALESCE(CURRENCY(0),1))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "SUMX(Facts,CURRENCY(1.23456))",
+   "powerbi": "7.4076"
+  },
+  {
+   "expr": "SUMX(Facts,CURRENCY(1.5))",
+   "powerbi": "9"
+  },
+  {
+   "expr": "SUMX(Facts,CURRENCY(Facts[Sales]))",
+   "powerbi": "31.5"
+  },
+  {
+   "expr": "SUMX(Facts,IF(0,Facts[Sales],CURRENCY(1.5)))",
+   "powerbi": "9"
+  },
+  {
+   "expr": "SUMX(Facts,IF(1,CURRENCY(0)))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "SUMX(Facts,IF(1,CURRENCY(0.33333)))",
+   "powerbi": "1.9998"
+  },
+  {
+   "expr": "SUMX(Facts,IF(1,DATE(2020,1,1)+Facts[Quantity],CURRENCY(Facts[Sales])))",
+   "powerbi": "263001"
+  },
+  {
+   "expr": "SUMX(Facts,IF(1,DATE(2020,1,1),CONVERT(CURRENCY(1.5),DOUBLE)))",
+   "powerbi": "262986"
+  },
+  {
+   "expr": "SUMX(Facts,IF(FALSE(),DATE(2020,1,1)+Facts[Quantity],CONVERT(CURRENCY(1.5),DOUBLE)))",
+   "powerbi": "9"
+  },
+  {
+   "expr": "SUMX(Facts,IF(Facts[Quantity]>2,CURRENCY(-2),DATE(2020,1,1)+Facts[Quantity]))",
+   "powerbi": "131490"
+  },
+  {
+   "expr": "SUMX(Facts,IF(Facts[Quantity]>2,CURRENCY(Facts[Sales])))",
+   "powerbi": "22.5"
+  },
+  {
+   "expr": "SUMX(Facts,IF(Facts[Quantity]>=3,CONVERT(CURRENCY(1.5),DOUBLE),\"a\"))",
+   "powerbi": "4.5"
+  },
+  {
+   "expr": "SUMX(Facts,IF(ISBLANK(Facts[Note]),1,CURRENCY(0.33333)))",
+   "powerbi": "3.3332"
+  },
+  {
+   "expr": "SUMX(Facts,IF(ISBLANK(Facts[Note]),Facts[Quantity],CURRENCY(1.5)))",
+   "powerbi": "14"
+  },
+  {
+   "expr": "SUMX(Facts,IF(ISBLANK(Facts[Note]),TRUE(),CURRENCY(2.75)))",
+   "powerbi": "11"
+  },
+  {
+   "expr": "SUMX(Facts,IF(TRUE(),CURRENCY(1.5)))",
+   "powerbi": "9"
+  },
+  {
+   "expr": "SUMX(Facts,IF(TRUE(),CURRENCY(Facts[Sales])))",
+   "powerbi": "31.5"
+  },
+  {
+   "expr": "SUMX(Facts,IF.EAGER(0,CURRENCY(0.33333),Facts[Quantity]))",
+   "powerbi": "15"
+  },
+  {
+   "expr": "SUMX(Facts,IF.EAGER(1,CURRENCY(2.75),Facts[Quantity]))",
+   "powerbi": "16.5"
+  },
+  {
+   "expr": "SUMX(Facts,IFERROR(1/0,2))",
+   "powerbi": "12"
+  },
+  {
+   "expr": "SUMX(Facts,IFERROR(1/0,2)*2)",
+   "powerbi": "24"
+  },
+  {
+   "expr": "SUMX(Facts,SWITCH(Facts[Quantity],1,CURRENCY(7),TRUE()))",
+   "powerbi": "7"
+  },
+  {
+   "expr": "SUMX(Facts,SWITCH(Facts[Quantity],1,CURRENCY(Facts[Sales]),Facts[Sales]))",
+   "powerbi": "31.5"
+  },
+  {
+   "expr": "SUMX(KEEPFILTERS(FILTER(Facts,Facts[Quantity]>2)),Facts[Sales])",
+   "powerbi": "22.5"
+  },
+  {
+   "expr": "SUMX(KEEPFILTERS(FILTER(Facts,TRUE())),Facts[Sales])",
+   "powerbi": "31.5"
+  },
+  {
+   "expr": "SUMX({0.5,4},CONVERT(CURRENCY(1.5),DOUBLE))",
+   "powerbi": "3"
+  },
+  {
+   "expr": "SUMX({1,2,3},1/0*0)",
+   "powerbi": "NaN"
+  },
+  {
+   "expr": "SUMX({1,2,3},1/0*0*2)",
+   "powerbi": "NaN"
+  },
+  {
+   "expr": "SUMX({1,2,3},CURRENCY(-2))",
+   "powerbi": "-6"
+  },
+  {
+   "expr": "SUMX({1,2,3},CURRENCY(1.23456))",
+   "powerbi": "3.7038"
+  },
+  {
+   "expr": "SUMX({1,2,3},IF(1,CURRENCY(-1.1),DATE(2020,1,1)))",
+   "powerbi": "-3.3"
+  },
+  {
+   "expr": "SUMX({1,2,3},IF(1,DATE(2020,1,1),CURRENCY(7)))",
+   "powerbi": "131493"
+  },
+  {
+   "expr": "SUMX({1,2,3},IF(FALSE(),CONVERT(CURRENCY(1.5),DOUBLE),TRUE()))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "SUMX({1,2,3},IFERROR(1/0,2))",
+   "powerbi": "6"
+  },
+  {
+   "expr": "SUMX({1,2,3},SWITCH(TRUE(),TRUE(),CURRENCY(2.75),\"a\"))",
+   "powerbi": "8.25"
+  },
+  {
+   "expr": "SUMX({1.5,2.5},COALESCE(CONVERT(CURRENCY(1.5),DOUBLE),\"a\"))",
+   "powerbi": "3"
+  },
+  {
+   "expr": "SUMX({1.5,2.5},COALESCE(CURRENCY(0),\"a\"))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "SUMX({1.5,2.5},CURRENCY(-2))",
+   "powerbi": "-4"
+  },
+  {
+   "expr": "SUMX({1.5,2.5},CURRENCY(0))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "SUMX({1.5,2.5},CURRENCY(1.5))",
+   "powerbi": "3"
+  },
+  {
+   "expr": "SUMX({1.5,2.5},IF.EAGER(1,CURRENCY(1.5),2.5))",
+   "powerbi": "3"
+  },
+  {
+   "expr": "SUMX({1.5,2.5},IFERROR(1/0,2)*2)",
+   "powerbi": "8"
+  },
+  {
+   "expr": "SUMX({1.5,2.5},IFERROR(1/0,2)+BLANK())",
+   "powerbi": "4"
+  },
+  {
+   "expr": "SUMX({TRUE()},1/0*0)",
+   "powerbi": "NaN"
+  },
+  {
+   "expr": "SUMX({TRUE()},1/0*0+BLANK())",
+   "powerbi": "NaN"
+  },
+  {
+   "expr": "SUMX({TRUE()},CURRENCY(0))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "SUMX({TRUE()},IF(1,CURRENCY(2.75)))",
+   "powerbi": "2.75"
+  },
+  {
+   "expr": "SUMX({TRUE()},IF(FALSE(),CURRENCY(7),2.5))",
+   "powerbi": "2.5"
+  },
+  {
+   "expr": "SUMX({TRUE()},IF(TRUE(),\"a\",CURRENCY(-1.1)))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "SUMX({TRUE()},IFERROR(1/0,2))",
+   "powerbi": "2"
+  },
+  {
+   "expr": "SUMX({TRUE()},IFERROR(1/0,2)*2)",
+   "powerbi": "4"
+  },
+  {
+   "expr": "SUMX({TRUE()},SWITCH(TRUE(),TRUE(),CURRENCY(0),TRUE()))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "SUMX({TRUE()},SWITCH(TRUE(),TRUE(),CURRENCY(2.75),DATE(2020,1,1)))",
+   "powerbi": "2.75"
+  },
+  {
+   "expr": "VARX.P(ADDCOLUMNS(Facts,\"z\",1),COALESCE(CURRENCY(0),BLANK()))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "VARX.P(ADDCOLUMNS(Facts,\"z\",1),CURRENCY(Facts[Sales]))",
+   "powerbi": "64.06"
+  },
+  {
+   "expr": "VARX.P(ADDCOLUMNS(Facts,\"z\",1),IF(0,CURRENCY(2.75)))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "VARX.P(ADDCOLUMNS(Facts,\"z\",1),IF(FALSE(),CURRENCY(-2)))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "VARX.P(ADDCOLUMNS(Facts,\"z\",1),IF.EAGER(ISBLANK(Facts[Note]),CURRENCY(Facts[Sales]),TRUE()))",
+   "powerbi": "76.5625"
+  },
+  {
+   "expr": "VARX.P(FILTER(Facts,Facts[Quantity]>1),CURRENCY(0))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "VARX.P(FILTER(Facts,Facts[Quantity]>1),IF(0,CURRENCY(-2),\"a\"))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "VARX.P(FILTER(Facts,Facts[Quantity]>1),IF(0,DATE(2020,1,1),CURRENCY(-2)))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "VARX.P(FILTER(Facts,Facts[Quantity]>1),IF(1,\"a\",CONVERT(CURRENCY(1.5),DOUBLE)))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "VARX.P(FILTER(Facts,Facts[Quantity]>1),IF(FALSE(),CURRENCY(2.75)))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "VARX.P(FILTER(Facts,Facts[Quantity]>1),IF(ISBLANK(Facts[Note]),CURRENCY(7)))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "VARX.P(FILTER(Facts,Facts[Quantity]>1),IF.EAGER(FALSE(),CURRENCY(0.33333),BLANK()))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "VARX.P(FILTER(Facts,Facts[Quantity]>1),IF.EAGER(ISBLANK(Facts[Note]),CURRENCY(-2),Facts[Quantity]))",
+   "powerbi": "6.75"
+  },
+  {
+   "expr": "VARX.P(FILTER(Facts,Facts[Quantity]>1),SWITCH(TRUE(),TRUE(),CURRENCY(-2),Facts[Quantity]))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "VARX.P(FILTER(Facts,Facts[Sales]>3),CURRENCY(7))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "VARX.P(FILTER(Facts,Facts[Sales]>3),IF(1,CURRENCY(Facts[Sales]),BLANK()))",
+   "powerbi": "22.5625"
+  },
+  {
+   "expr": "VARX.P(FILTER(Facts,Facts[Sales]>3),IF(FALSE(),CURRENCY(0.33333)))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "VARX.P(FILTER(Facts,Facts[Sales]>3),IF(ISBLANK(Facts[Note]),CURRENCY(Facts[Sales])))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "VARX.P(FILTER(Facts,Facts[Sales]>3),IF(TRUE(),DATE(2020,1,1),CURRENCY(0.33333)))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "VARX.P(FILTER(Facts,Facts[Sales]>3),IF(TRUE(),Facts[Sales],CURRENCY(Facts[Sales])))",
+   "powerbi": "22.5625"
+  },
+  {
+   "expr": "VARX.P(FILTER(Facts,Facts[Sales]>3),IF.EAGER(FALSE(),CURRENCY(-1.1),Facts[Sales]))",
+   "powerbi": "22.5625"
+  },
+  {
+   "expr": "VARX.P(Facts,CURRENCY(7))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "VARX.P(Facts,CURRENCY(Facts[Sales]))",
+   "powerbi": "64.06"
+  },
+  {
+   "expr": "VARX.P(Facts,IF(0,CONVERT(CURRENCY(1.5),DOUBLE),Facts[Quantity]))",
+   "powerbi": "2.91666666666667"
+  },
+  {
+   "expr": "VARX.P(Facts,IF(Facts[Quantity]>=3,CONVERT(CURRENCY(1.5),DOUBLE),1))",
+   "powerbi": "0.0625"
+  },
+  {
+   "expr": "VARX.P(Facts,SWITCH(Facts[Quantity],1,CURRENCY(Facts[Sales]),1))",
+   "powerbi": "0.868055555555555"
+  },
+  {
+   "expr": "VARX.P({0.5,4},IF(0,CONVERT(CURRENCY(1.5),DOUBLE)))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "VARX.P({0.5,4},SWITCH(TRUE(),TRUE(),CURRENCY(7),\"a\"))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "VARX.P({1,2,3},COALESCE(CURRENCY(7),TRUE()))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "VARX.P({1,2,3},CURRENCY(0))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "VARX.P({1,2,3},IF(0,CURRENCY(-2)))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "VARX.P({1,2,3},IF(0,CURRENCY(1.5)))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "VARX.P({1,2,3},IF(0,CURRENCY(1.5),TRUE()))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "VARX.P({1,2,3},IF(FALSE(),CURRENCY(2.75)))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "VARX.P({1,2,3},IF(TRUE(),BLANK(),CURRENCY(7)))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "VARX.P({1,2,3},IF(TRUE(),CURRENCY(0)))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "VARX.P({1.5,2.5},CURRENCY(-2))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "VARX.P({1.5,2.5},IF(1,\"a\",CURRENCY(-2)))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "VARX.P({1.5,2.5},IF(1,1,CONVERT(CURRENCY(1.5),DOUBLE)))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "VARX.P({1.5,2.5},IF(1,DATE(2020,1,1),CURRENCY(1.5)))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "VARX.P({1.5,2.5},IF(TRUE(),CURRENCY(-2)))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "VARX.P({1.5,2.5},IF.EAGER(FALSE(),CURRENCY(-2),TRUE()))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "VARX.P({TRUE()},COALESCE(CURRENCY(0),1))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "VARX.P({TRUE()},CURRENCY(1.23456))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "VARX.P({TRUE()},CURRENCY(7))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "VARX.P({TRUE()},IF(1,1,CONVERT(CURRENCY(1.5),DOUBLE)))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "VARX.P({TRUE()},IF(1,CONVERT(CURRENCY(1.5),DOUBLE),DATE(2020,1,1)))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "VARX.P({TRUE()},IF(FALSE(),CURRENCY(0),2.5))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "VARX.P({TRUE()},IF(TRUE(),CURRENCY(7),2.5))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "VARX.P({TRUE()},IF.EAGER(TRUE(),CURRENCY(1.5),1))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "VARX.S(ADDCOLUMNS(Facts,\"z\",1),IF(0,CURRENCY(0),Facts[Sales]))",
+   "powerbi": "80.075"
+  },
+  {
+   "expr": "VARX.S(ADDCOLUMNS(Facts,\"z\",1),IF(FALSE(),CURRENCY(0.33333)))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "VARX.S(ADDCOLUMNS(Facts,\"z\",1),IF(ISBLANK(Facts[Note]),CURRENCY(Facts[Sales])))",
+   "powerbi": "153.125"
+  },
+  {
+   "expr": "VARX.S(ADDCOLUMNS(Facts,\"z\",1),IF.EAGER(0,CURRENCY(-1.1),TRUE()))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "VARX.S(ADDCOLUMNS(Facts,\"z\",1),IF.EAGER(0,CURRENCY(0),Facts[Quantity]))",
+   "powerbi": "3.5"
+  },
+  {
+   "expr": "VARX.S(ADDCOLUMNS(Facts,\"z\",1),SWITCH(Facts[Quantity],2,CURRENCY(-1.1),\"a\"))",
+   "powerbi": "NaN"
+  },
+  {
+   "expr": "VARX.S(ADDCOLUMNS(Facts,\"z\",1),SWITCH(Facts[Quantity],2,CURRENCY(7),Facts[Sales]))",
+   "powerbi": "75.175"
+  },
+  {
+   "expr": "VARX.S(FILTER(Facts,Facts[Quantity]>1),COALESCE(CURRENCY(0),BLANK()))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "VARX.S(FILTER(Facts,Facts[Quantity]>1),COALESCE(CURRENCY(Facts[Sales]),\"a\"))",
+   "powerbi": "76.75"
+  },
+  {
+   "expr": "VARX.S(FILTER(Facts,Facts[Quantity]>1),IF(0,CURRENCY(0)))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "VARX.S(FILTER(Facts,Facts[Quantity]>1),IF(0,CURRENCY(2.75),Facts[Sales]))",
+   "powerbi": "76.75"
+  },
+  {
+   "expr": "VARX.S(FILTER(Facts,Facts[Quantity]>1),IF(1,TRUE(),CURRENCY(-2)))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "VARX.S(FILTER(Facts,Facts[Quantity]>1),IF(FALSE(),CONVERT(CURRENCY(1.5),DOUBLE),DATE(2020,1,1)))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "VARX.S(FILTER(Facts,Facts[Quantity]>1),IF(FALSE(),CURRENCY(1.5)))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "VARX.S(FILTER(Facts,Facts[Quantity]>1),IF(Facts[Quantity]>2,CURRENCY(1.5),Facts[Sales]))",
+   "powerbi": "20.25"
+  },
+  {
+   "expr": "VARX.S(FILTER(Facts,Facts[Quantity]>1),IF(TRUE(),\"a\",CURRENCY(2.75)))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "VARX.S(FILTER(Facts,Facts[Quantity]>1),IF.EAGER(1,CURRENCY(0),DATE(2020,1,1)+Facts[Quantity]))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "VARX.S(FILTER(Facts,Facts[Sales]>3),IF(0,2.5,CURRENCY(7)))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "VARX.S(FILTER(Facts,Facts[Sales]>3),IF(0,CURRENCY(Facts[Sales]),\"a\"))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "VARX.S(FILTER(Facts,Facts[Sales]>3),IF(TRUE(),1,CONVERT(CURRENCY(1.5),DOUBLE)))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "VARX.S(FILTER(Facts,Facts[Sales]>3),IF(TRUE(),CURRENCY(7),TRUE()))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "VARX.S(FILTER(Facts,Facts[Sales]>3),IF.EAGER(0,CURRENCY(0.33333),Facts[Sales]))",
+   "powerbi": "45.125"
+  },
+  {
+   "expr": "VARX.S(Facts,CURRENCY(0))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "VARX.S(Facts,IF(1,CURRENCY(-2)))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "VARX.S(Facts,IF(1,Facts[Quantity],CURRENCY(Facts[Sales])))",
+   "powerbi": "3.5"
+  },
+  {
+   "expr": "VARX.S(Facts,IF(ISBLANK(Facts[Note]),2.5,CURRENCY(0)))",
+   "powerbi": "1.66666666666667"
+  },
+  {
+   "expr": "VARX.S(Facts,IF(TRUE(),Facts[Sales],CURRENCY(1.23456)))",
+   "powerbi": "80.075"
+  },
+  {
+   "expr": "VARX.S(Facts,IF.EAGER(1,CURRENCY(Facts[Sales]),1))",
+   "powerbi": "80.075"
+  },
+  {
+   "expr": "VARX.S(Facts,IF.EAGER(Facts[Quantity]>2,CURRENCY(Facts[Sales]),\"a\"))",
+   "powerbi": "153.125"
+  },
+  {
+   "expr": "VARX.S({1,2,3},IF(1,CURRENCY(-2),1))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "VARX.S({1,2,3},IF(1,TRUE(),CURRENCY(7)))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "VARX.S({1,2,3},IF.EAGER(1,CURRENCY(-2),BLANK()))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "VARX.S({1,2,3},IF.EAGER(TRUE(),CURRENCY(-2),1))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "VARX.S({1,2,3},IF.EAGER(TRUE(),CURRENCY(7),2.5))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "VARX.S({1.5,2.5},CURRENCY(-2))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "VARX.S({1.5,2.5},IF(TRUE(),BLANK(),CURRENCY(1.23456)))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "VARX.S({TRUE()},IF(0,BLANK(),CONVERT(CURRENCY(1.5),DOUBLE)))",
+   "powerbi": "NaN"
+  },
+  {
+   "expr": "VARX.S({TRUE()},IF(FALSE(),CURRENCY(2.75),TRUE()))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "VARX.S({TRUE()},IF(TRUE(),CONVERT(CURRENCY(1.5),DOUBLE)))",
+   "powerbi": "NaN"
+  }
+ ]
+}

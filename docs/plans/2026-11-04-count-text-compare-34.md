@@ -1,0 +1,17 @@
+# Task 44 count-text-compare-34: COUNTX/COUNTAX edge cases, text read as numbers or dates, BLANK comparisons (227 saved answers the engine refuses)
+
+**Coder:** Antigravity. **Work folder:** git worktree `/Users/armaan/Power BI tool-task44` (branch `antigravity/count-text-compare-34`). Work ONLY there.
+**Spec:** `tools/parity/task44_count_text_compare_spec.json`: 227 Power BI answers already saved in the locked batteries that the engine refuses today. Score with `PYTHONPATH=. python3 tools/score_spec.py tools/parity/task44_count_text_compare_spec.json`.
+
+- **Part A (105): COUNTX / COUNTAX.** Refused with "COUNTX of a True/False under a condition that aggregates…", "COUNTAX of a NaN over this table…", "COUNTX over a NaN beside a product with a constant zero…" and similar. Examples: `CALCULATE(COUNTAX({1},0/0))` is 1; `COUNTAX(ROW("Value",1),0/0)` is 1; `IFERROR(COUNTX(Facts,1/0*0),"e")` is 6; `CALCULATE(COUNTX(Facts,IF(MAX(Facts[Quantity])>3,FALSE(),7)),Facts[Region]<>"x")` is BLANK. Find exactly what COUNTX and COUNTAX count (NaN, True/False, BLANK) per table kind.
+- **Part B (56): text read as a number or date.** `"1 1/2"+0` is 37257 (Power BI reads "1 1/2" as the date January 2 of the current-century default year? check: 37257 is 2002-01-01), `DATE(2020,1,1)-"1 1/2"` is 12/30/1917, `TIMEVALUE("2020-01-02")` is 12/30/1899 00:00:00. Find Power BI's text-to-number/date parsing rules for these forms (fractions, dates without a year, ISO dates in TIMEVALUE) and implement them generally; refuse forms the rows do not settle.
+- **Part C (66): comparisons of BLANK or mixed types.** `VAR y=BLANK() RETURN y==FALSE()` inside FILTER, `Facts[Sales]>=IF(1=2,2,"")` (an IF typed Variant whose taken branch is text), `Facts[Sales]>VAR t="East" RETURN COALESCE(t,0)`. Refused with "DAX comparison operations do not support comparing values of type Integer with values of type Text/True/False." Find when Power BI compares (strict `==` with BLANK, Variant branches) instead of raising.
+
+## Rules
+Compute, never look up (app code must never read `tools/parity/*.json` or test fixtures; `tests/test_no_answer_key_in_app.py` must pass). Find general rules, do not fit single expressions or literal values: Claude tests every rule on fresh Power BI formulas you have not seen. Prefer refusing over guessing. 0 wrong on the spec and 0 DIFF in the replay are mandatory: a rule that breaks one locked answer must be narrowed. Never edit saved Power BI answers or existing tests; new tests go in `tests/test_iteration134_count_text_compare_34.py`. No `--freeze`, `--accept`, commit, merge, push or full pytest (run `tools/parity_check.py` without `--tests`). Do not touch other folders, and do not write files outside this worktree.
+
+## Done when
+The scorer prints 0 wrong with as many matches as possible, `tools/parity_check.py` replay (no `--tests`) shows 0 DIFF and 0 CRASH, and a ready-for-review entry with scorer counts per Part and the replay line is in this worktree's `HANDOFF.md`. Leave changes uncommitted.
+
+## Review outcome (2026-11-04)
+Shipped as Iteration 134. Locked 467,289.

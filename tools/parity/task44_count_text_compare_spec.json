@@ -1,0 +1,1366 @@
+{
+ "items": [
+  {
+   "part": "B",
+   "expr": "VALUE(\"1 1/2\")",
+   "powerbi": "37257",
+   "now": "LOCAL-REJECT:The local engine does not model the text '1 1/2' as a number."
+  },
+  {
+   "part": "B",
+   "expr": "\"1 1/2\"+0",
+   "powerbi": "37257",
+   "now": "LOCAL-REJECT:The local engine does not model the text '1 1/2' as a number."
+  },
+  {
+   "part": "B",
+   "expr": "0+\"1 1/2\"",
+   "powerbi": "37257",
+   "now": "LOCAL-REJECT:The local engine does not model the text '1 1/2' as a number."
+  },
+  {
+   "part": "B",
+   "expr": "\"1 1/2\"*1",
+   "powerbi": "37257",
+   "now": "LOCAL-REJECT:The local engine does not model the text '1 1/2' as a number."
+  },
+  {
+   "part": "B",
+   "expr": "\"1 1/2\"/1",
+   "powerbi": "37257",
+   "now": "LOCAL-REJECT:The local engine does not model the text '1 1/2' as a number."
+  },
+  {
+   "part": "B",
+   "expr": "\"1 1/2\"-0",
+   "powerbi": "37257",
+   "now": "LOCAL-REJECT:The local engine does not model the text '1 1/2' as a number."
+  },
+  {
+   "part": "B",
+   "expr": "-\"1 1/2\"",
+   "powerbi": "-37257",
+   "now": "LOCAL-REJECT:The local engine does not model the text '1 1/2' as a number."
+  },
+  {
+   "part": "B",
+   "expr": "\"1 1/2\"+\"1 1/2\"",
+   "powerbi": "74514",
+   "now": "LOCAL-REJECT:The local engine does not model the text '1 1/2' as a number."
+  },
+  {
+   "part": "B",
+   "expr": "\"1 1/2\"-DATE(2020,1,1)",
+   "powerbi": "-6574",
+   "now": "LOCAL-REJECT:The local engine does not model the text '1 1/2' as a number."
+  },
+  {
+   "part": "B",
+   "expr": "DATE(2020,1,1)-\"1 1/2\"",
+   "powerbi": "12/30/1917 00:00:00",
+   "now": "LOCAL-REJECT:The local engine does not model the text '1 1/2' as a number."
+  },
+  {
+   "part": "B",
+   "expr": "DATE(2020,1,1)+\"1 1/2\"",
+   "powerbi": "01/03/2122 00:00:00",
+   "now": "LOCAL-REJECT:The local engine does not model the text '1 1/2' as a number."
+  },
+  {
+   "part": "B",
+   "expr": "\"1 1/2\"+DATE(2020,1,1)",
+   "powerbi": "01/03/2122 00:00:00",
+   "now": "LOCAL-REJECT:The local engine does not model the text '1 1/2' as a number."
+  },
+  {
+   "part": "B",
+   "expr": "DATE(2020,1,1)*\"1 1/2\"",
+   "powerbi": "1633011567",
+   "now": "LOCAL-REJECT:The local engine does not model the text '1 1/2' as a number."
+  },
+  {
+   "part": "B",
+   "expr": "\"1 1/2\"*DATE(2020,1,1)",
+   "powerbi": "1633011567",
+   "now": "LOCAL-REJECT:The local engine does not model the text '1 1/2' as a number."
+  },
+  {
+   "part": "B",
+   "expr": "CONVERT(\"1 1/2\",DOUBLE)",
+   "powerbi": "37257",
+   "now": "LOCAL-REJECT:The local engine does not model the text '1 1/2' as a number."
+  },
+  {
+   "part": "B",
+   "expr": "INT(\"1 1/2\")",
+   "powerbi": "37257",
+   "now": "LOCAL-REJECT:The local engine does not model the text '1 1/2' as a number."
+  },
+  {
+   "part": "B",
+   "expr": "ABS(\"1 1/2\")",
+   "powerbi": "37257",
+   "now": "LOCAL-REJECT:The local engine does not model the text '1 1/2' as a number."
+  },
+  {
+   "part": "B",
+   "expr": "SUMX(Facts,\"1 1/2\"+0)",
+   "powerbi": "223542",
+   "now": "LOCAL-REJECT:The local engine does not model the text '1 1/2' as a number."
+  },
+  {
+   "part": "B",
+   "expr": "MAXX(Facts,\"1 1/2\"*1)",
+   "powerbi": "37257",
+   "now": "LOCAL-REJECT:The local engine does not model the text '1 1/2' as a number."
+  },
+  {
+   "part": "B",
+   "expr": "\"1 1/2\"+CURRENCY(1)",
+   "powerbi": "37258",
+   "now": "LOCAL-REJECT:The local engine does not model the text '1 1/2' as a number."
+  },
+  {
+   "part": "B",
+   "expr": "\"1 1/2\"^2",
+   "powerbi": "1388084049",
+   "now": "LOCAL-REJECT:The local engine does not model the text '1 1/2' as a number."
+  },
+  {
+   "part": "B",
+   "expr": "SQRT(\"1 1/2\")",
+   "powerbi": "193.020724275918",
+   "now": "LOCAL-REJECT:The local engine does not model the text '1 1/2' as a number."
+  },
+  {
+   "part": "B",
+   "expr": "INT(VALUE(\"1 1/2\"))",
+   "powerbi": "37257",
+   "now": "LOCAL-REJECT:The local engine does not model the text '1 1/2' as a number."
+  },
+  {
+   "part": "B",
+   "expr": "IF(TRUE(),\"1 1/2\")+0",
+   "powerbi": "37257",
+   "now": "LOCAL-REJECT:The local engine does not model the text '1 1/2' as a number."
+  },
+  {
+   "part": "B",
+   "expr": "VAR y=\"1 1/2\" RETURN y+0",
+   "powerbi": "37257",
+   "now": "LOCAL-REJECT:The local engine does not model the text '1 1/2' as a number."
+  },
+  {
+   "part": "B",
+   "expr": "IFERROR(\"1 1/2\"+0,\"e\")",
+   "powerbi": "37257",
+   "now": "LOCAL-REJECT:The local engine does not model the text '1 1/2' as a number."
+  },
+  {
+   "part": "B",
+   "expr": "ISERROR(\"1 1/2\"+0)",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:The local engine does not model the text '1 1/2' as a number."
+  },
+  {
+   "part": "B",
+   "expr": "ISNUMBER(\"1 1/2\"+0)",
+   "powerbi": "True",
+   "now": "LOCAL-REJECT:The local engine does not model the text '1 1/2' as a number."
+  },
+  {
+   "part": "B",
+   "expr": "ISDATETIME(\"1 1/2\"+0)",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:The local engine does not model the text '1 1/2' as a number."
+  },
+  {
+   "part": "B",
+   "expr": "ISDATETIME(\"1 1/2\"-DATE(2020,1,1))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:The local engine does not model the text '1 1/2' as a number."
+  },
+  {
+   "part": "B",
+   "expr": "ISDATETIME(DATE(2020,1,1)-\"1 1/2\")",
+   "powerbi": "True",
+   "now": "LOCAL-REJECT:The local engine does not model the text '1 1/2' as a number."
+  },
+  {
+   "part": "B",
+   "expr": "COUNTROWS(FILTER(Facts,ISERROR(VALUE(Facts[Quantity]&\"/2/2020\"))))",
+   "powerbi": "1",
+   "now": "LOCAL-REJECT:The local engine does not model the text '0/2/2020' as a number."
+  },
+  {
+   "part": "B",
+   "expr": "SUMX(Facts,IFERROR((Facts[Quantity]&\"/2/2020\")/2,7))",
+   "powerbi": "109738.5",
+   "now": "LOCAL-REJECT:The local engine does not model the text '0/2/2020' as a number."
+  },
+  {
+   "part": "B",
+   "expr": "SUMX(Facts,IFERROR(ABS(Facts[Quantity]&\"/2/2020\"),7))",
+   "powerbi": "219470",
+   "now": "LOCAL-REJECT:The local engine does not model the text '0/2/2020' as a number."
+  },
+  {
+   "part": "B",
+   "expr": "SUMX(Facts,IFERROR(VALUE(Facts[Quantity]&\"/2/2020\"),7))",
+   "powerbi": "219470",
+   "now": "LOCAL-REJECT:The local engine does not model the text '0/2/2020' as a number."
+  },
+  {
+   "part": "B",
+   "expr": "SUMX(Facts,IFERROR(CONVERT(Facts[Quantity]&\"/2/2020\",DOUBLE),7))",
+   "powerbi": "219470",
+   "now": "LOCAL-REJECT:The local engine does not model the text '0/2/2020' as a number."
+  },
+  {
+   "part": "B",
+   "expr": "SUMX(Facts,IFERROR(INT(Facts[Quantity]&\"/2/2020\"),7))",
+   "powerbi": "219470",
+   "now": "LOCAL-REJECT:The local engine does not model the text '0/2/2020' as a number."
+  },
+  {
+   "part": "A",
+   "expr": "CALCULATE(COUNTX(Facts,IF(MAX(Facts[Quantity])>3,TRUE(),7)),Facts[Region]<>\"x\")",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:COUNTX of a True/False under a condition that aggregates is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "CALCULATE(COUNTX(FILTER(Facts,Facts[Quantity]>2),IF(COUNTROWS(Facts)>3,TRUE(),\"a\")),Facts[Region]<>\"x\")",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:COUNTX of a True/False under a condition that aggregates is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "CALCULATE(COUNTX(FILTER(Facts,TRUE()),IF(COUNTROWS(Facts)>3,TRUE(),\"a\")),Facts[Region]<>\"x\")",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:COUNTX of a True/False under a condition that aggregates is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "CALCULATE(COUNTX(Facts,IF(COUNTROWS(Facts)>3,TRUE(),\"a\")),Facts[Region]<>\"x\")",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:COUNTX of a True/False under a condition that aggregates is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "CALCULATE(COUNTX(FILTER(Facts,TRUE()),IF(MAX(Facts[Quantity])>3,TRUE(),7)),Facts[Region]<>\"x\")",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:COUNTX of a True/False under a condition that aggregates is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "CALCULATE(COUNTX(VALUES(Facts),IF(MAX(Facts[Quantity])>3,TRUE(),7)),Facts[Region]<>\"x\")",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:COUNTX of a True/False under a condition that aggregates is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "CALCULATE(COUNTX(ALL(Facts),IF(COUNTROWS(Facts)>3,TRUE(),\"a\")),Facts[Region]<>\"x\")",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:COUNTX of a True/False under a condition that aggregates is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "CALCULATE(COUNTX(FILTER(Facts,Facts[Quantity]>2),IF(MAX(Facts[Quantity])>3,TRUE(),7)),Facts[Region]<>\"x\")",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:COUNTX of a True/False under a condition that aggregates is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "CALCULATE(COUNTX(VALUES(Facts),IF(COUNTROWS(Facts)>3,TRUE(),\"a\")),Facts[Region]<>\"x\")",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:COUNTX of a True/False under a condition that aggregates is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "CALCULATE(COUNTX(ALL(Facts),IF(MAX(Facts[Quantity])>3,TRUE(),7)),Facts[Region]<>\"x\")",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:COUNTX of a True/False under a condition that aggregates is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "CALCULATE(COUNTX(Facts,IF(MAX(Facts[Quantity])>3,TRUE(),\"a\")),Facts[Region]<>\"x\")",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:COUNTX of a True/False under a condition that aggregates is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "CALCULATE(COUNTX(Facts,IF(MAX(Facts[Quantity])>3,TRUE(),DATE(2020,1,1))),Facts[Region]<>\"x\")",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:COUNTX of a True/False under a condition that aggregates is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "CALCULATE(COUNTX(Facts,IF(MAX(Facts[Quantity])>3,TRUE(),2.5)),Facts[Region]<>\"x\")",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:COUNTX of a True/False under a condition that aggregates is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "CALCULATE(COUNTX(Facts,IF(MAX(Facts[Quantity])>3,FALSE(),7)),Facts[Region]<>\"x\")",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:COUNTX of a True/False under a condition that aggregates is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "CALCULATE(COUNTX(Facts,IF(MAX(Facts[Quantity])>3,FALSE(),\"a\")),Facts[Region]<>\"x\")",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:COUNTX of a True/False under a condition that aggregates is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "CALCULATE(COUNTX(Facts,IF(MAX(Facts[Quantity])>3,FALSE(),DATE(2020,1,1))),Facts[Region]<>\"x\")",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:COUNTX of a True/False under a condition that aggregates is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "CALCULATE(COUNTX(Facts,IF(MAX(Facts[Quantity])>3,FALSE(),2.5)),Facts[Region]<>\"x\")",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:COUNTX of a True/False under a condition that aggregates is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "CALCULATE(COUNTX(Facts,IF(MAX(Facts[Quantity])>3,1=1,7)),Facts[Region]<>\"x\")",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:COUNTX of a True/False under a condition that aggregates is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "CALCULATE(COUNTX(Facts,IF(MAX(Facts[Quantity])>3,1=1,\"a\")),Facts[Region]<>\"x\")",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:COUNTX of a True/False under a condition that aggregates is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "CALCULATE(COUNTX(Facts,IF(MAX(Facts[Quantity])>3,1=1,DATE(2020,1,1))),Facts[Region]<>\"x\")",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:COUNTX of a True/False under a condition that aggregates is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "CALCULATE(COUNTX(Facts,IF(MAX(Facts[Quantity])>3,1=1,2.5)),Facts[Region]<>\"x\")",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:COUNTX of a True/False under a condition that aggregates is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "CALCULATE(COUNTX(Facts,IF(COUNTROWS(Facts)>3,TRUE(),7)),Facts[Region]<>\"x\")",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:COUNTX of a True/False under a condition that aggregates is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "CALCULATE(COUNTX(Facts,IF(COUNTROWS(Facts)>3,TRUE(),DATE(2020,1,1))),Facts[Region]<>\"x\")",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:COUNTX of a True/False under a condition that aggregates is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "CALCULATE(COUNTX(Facts,IF(COUNTROWS(Facts)>3,TRUE(),2.5)),Facts[Region]<>\"x\")",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:COUNTX of a True/False under a condition that aggregates is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "CALCULATE(COUNTX(Facts,IF(COUNTROWS(Facts)>3,FALSE(),7)),Facts[Region]<>\"x\")",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:COUNTX of a True/False under a condition that aggregates is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "CALCULATE(COUNTX(Facts,IF(COUNTROWS(Facts)>3,FALSE(),\"a\")),Facts[Region]<>\"x\")",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:COUNTX of a True/False under a condition that aggregates is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "CALCULATE(COUNTX(Facts,IF(COUNTROWS(Facts)>3,FALSE(),DATE(2020,1,1))),Facts[Region]<>\"x\")",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:COUNTX of a True/False under a condition that aggregates is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "CALCULATE(COUNTX(Facts,IF(COUNTROWS(Facts)>3,FALSE(),2.5)),Facts[Region]<>\"x\")",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:COUNTX of a True/False under a condition that aggregates is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "CALCULATE(COUNTX(Facts,IF(COUNTROWS(Facts)>3,1=1,7)),Facts[Region]<>\"x\")",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:COUNTX of a True/False under a condition that aggregates is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "CALCULATE(COUNTX(Facts,IF(COUNTROWS(Facts)>3,1=1,\"a\")),Facts[Region]<>\"x\")",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:COUNTX of a True/False under a condition that aggregates is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "CALCULATE(COUNTX(Facts,IF(COUNTROWS(Facts)>3,1=1,DATE(2020,1,1))),Facts[Region]<>\"x\")",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:COUNTX of a True/False under a condition that aggregates is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "CALCULATE(COUNTX(Facts,IF(COUNTROWS(Facts)>3,1=1,2.5)),Facts[Region]<>\"x\")",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:COUNTX of a True/False under a condition that aggregates is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "CALCULATE(COUNTAX({\"a\"},0/0),Facts[Region]<>\"x\")",
+   "powerbi": "1",
+   "now": "LOCAL-REJECT:COUNTAX of a NaN over this table is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "COUNTAX(ROW(\"Value\",1),0/0)+1",
+   "powerbi": "2",
+   "now": "LOCAL-REJECT:COUNTAX of a NaN over this table is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "ISBLANK(COUNTAX(ROW(\"Value\",1),0/0))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:COUNTAX of a NaN over this table is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "IFERROR(COUNTAX(ROW(\"Value\",1),0/0),\"e\")",
+   "powerbi": "1",
+   "now": "LOCAL-REJECT:COUNTAX of a NaN over this table is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "IFERROR(COUNTAX({1},0/0),\"e\")",
+   "powerbi": "1",
+   "now": "LOCAL-REJECT:COUNTAX of a NaN over this table is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "COUNTAX({\"a\"},0/0)+1",
+   "powerbi": "2",
+   "now": "LOCAL-REJECT:COUNTAX of a NaN over this table is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "CALCULATE(COUNTAX({1},0/0))",
+   "powerbi": "1",
+   "now": "LOCAL-REJECT:COUNTAX of a NaN over this table is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "CALCULATE(COUNTAX({\"a\"},0/0))",
+   "powerbi": "1",
+   "now": "LOCAL-REJECT:COUNTAX of a NaN over this table is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "CALCULATE(COUNTAX({1,2},0/0),Facts[Region]<>\"x\")",
+   "powerbi": "2",
+   "now": "LOCAL-REJECT:COUNTAX of a NaN over this table is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "IFERROR(COUNTAX({\"a\"},0/0),\"e\")",
+   "powerbi": "1",
+   "now": "LOCAL-REJECT:COUNTAX of a NaN over this table is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "CALCULATE(COUNTAX({1,2},0/0))",
+   "powerbi": "2",
+   "now": "LOCAL-REJECT:COUNTAX of a NaN over this table is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "ISBLANK(COUNTAX({1,2},0/0))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:COUNTAX of a NaN over this table is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "ISBLANK(COUNTAX({\"a\"},0/0))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:COUNTAX of a NaN over this table is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "ISBLANK(COUNTAX({1},0/0))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:COUNTAX of a NaN over this table is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "COUNTAX({1},0/0)+1",
+   "powerbi": "2",
+   "now": "LOCAL-REJECT:COUNTAX of a NaN over this table is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "CALCULATE(COUNTAX({1},0/0),Facts[Region]<>\"x\")",
+   "powerbi": "1",
+   "now": "LOCAL-REJECT:COUNTAX of a NaN over this table is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "COUNTAX({1,2},0/0)+1",
+   "powerbi": "3",
+   "now": "LOCAL-REJECT:COUNTAX of a NaN over this table is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "COUNTAX({1,2},0/0)",
+   "powerbi": "2",
+   "now": "LOCAL-REJECT:COUNTAX of a NaN over this table is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "COUNTAX(ROW(\"Value\",1),0/0)",
+   "powerbi": "1",
+   "now": "LOCAL-REJECT:COUNTAX of a NaN over this table is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "CALCULATE(COUNTAX(ROW(\"Value\",1),0/0),Facts[Region]<>\"x\")",
+   "powerbi": "1",
+   "now": "LOCAL-REJECT:COUNTAX of a NaN over this table is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "IFERROR(COUNTAX({1,2},0/0),\"e\")",
+   "powerbi": "2",
+   "now": "LOCAL-REJECT:COUNTAX of a NaN over this table is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "COUNTAX({\"a\"},0/0)",
+   "powerbi": "1",
+   "now": "LOCAL-REJECT:COUNTAX of a NaN over this table is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "COUNTAX({1},0/0)",
+   "powerbi": "1",
+   "now": "LOCAL-REJECT:COUNTAX of a NaN over this table is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "CALCULATE(COUNTAX(ROW(\"Value\",1),0/0))",
+   "powerbi": "1",
+   "now": "LOCAL-REJECT:COUNTAX of a NaN over this table is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "COUNTAX({\"a\"},IFERROR(CONVERT(0/0,DATETIME),CONVERT(0/0,DATETIME)))",
+   "powerbi": "1",
+   "now": "LOCAL-REJECT:COUNTAX of a NaN over this table is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "COUNTAX(ROW(\"Value\",1),VAR v=CONVERT(0/0,DOUBLE) RETURN v)",
+   "powerbi": "1",
+   "now": "LOCAL-REJECT:COUNTAX of a NaN over this table is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "(COUNTAX({1,2},0/0))+0",
+   "powerbi": "2",
+   "now": "LOCAL-REJECT:COUNTAX of a NaN over this table is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "COUNTAX({1,2},1/0*0)",
+   "powerbi": "2",
+   "now": "LOCAL-REJECT:COUNTAX of a NaN over this table is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "IFERROR(COUNTAX({1,2},1/0*0),\"e\")",
+   "powerbi": "2",
+   "now": "LOCAL-REJECT:COUNTAX of a NaN over this table is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "CALCULATE(COUNTAX({1,2},1/0*0),Facts[Region]<>\"x\")",
+   "powerbi": "2",
+   "now": "LOCAL-REJECT:COUNTAX of a NaN over this table is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "ISBLANK(COUNTAX({1,2},1/0*0))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:COUNTAX of a NaN over this table is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "(COUNTAX({1,2},1/0*0))+0",
+   "powerbi": "2",
+   "now": "LOCAL-REJECT:COUNTAX of a NaN over this table is not modelled by the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "SUMX({\"a\",\"b\"},IF(VAR y=BLANK() RETURN y==[Value],1,2))",
+   "powerbi": "4",
+   "now": "LOCAL-REJECT:DAX comparison operations do not support comparing values of type Integer with values of type Text. Consider using the VALUE or FORMAT function to convert one of the values."
+  },
+  {
+   "part": "C",
+   "expr": "COUNTROWS(FILTER({\"a\",\"b\"},VAR y=BLANK() RETURN y==[Value]))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:DAX comparison operations do not support comparing values of type Integer with values of type Text. Consider using the VALUE or FORMAT function to convert one of the values."
+  },
+  {
+   "part": "C",
+   "expr": "SUMX({BLANK(),\"a\"},IF(VAR y=BLANK() RETURN y==[Value],1,2))",
+   "powerbi": "3",
+   "now": "LOCAL-REJECT:DAX comparison operations do not support comparing values of type Integer with values of type Text. Consider using the VALUE or FORMAT function to convert one of the values."
+  },
+  {
+   "part": "C",
+   "expr": "COUNTROWS(FILTER({BLANK(),\"a\"},VAR y=BLANK() RETURN y==[Value]))",
+   "powerbi": "1",
+   "now": "LOCAL-REJECT:DAX comparison operations do not support comparing values of type Integer with values of type Text. Consider using the VALUE or FORMAT function to convert one of the values."
+  },
+  {
+   "part": "C",
+   "expr": "SUMX(SELECTCOLUMNS(Facts,\"Value\",Facts[Region]),IF(VAR y=BLANK() RETURN y==[Value],1,2))",
+   "powerbi": "12",
+   "now": "LOCAL-REJECT:DAX comparison operations do not support comparing values of type Integer with values of type Text. Consider using the VALUE or FORMAT function to convert one of the values."
+  },
+  {
+   "part": "C",
+   "expr": "COUNTROWS(FILTER(SELECTCOLUMNS(Facts,\"Value\",Facts[Region]),VAR y=BLANK() RETURN y==[Value]))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:DAX comparison operations do not support comparing values of type Integer with values of type Text. Consider using the VALUE or FORMAT function to convert one of the values."
+  },
+  {
+   "part": "C",
+   "expr": "SUMX(SELECTCOLUMNS(Facts,\"Value\",Facts[Note]),IF(VAR y=BLANK() RETURN y==[Value],1,2))",
+   "powerbi": "10",
+   "now": "LOCAL-REJECT:DAX comparison operations do not support comparing values of type Integer with values of type Text. Consider using the VALUE or FORMAT function to convert one of the values."
+  },
+  {
+   "part": "C",
+   "expr": "COUNTROWS(FILTER(SELECTCOLUMNS(Facts,\"Value\",Facts[Note]),VAR y=BLANK() RETURN y==[Value]))",
+   "powerbi": "2",
+   "now": "LOCAL-REJECT:DAX comparison operations do not support comparing values of type Integer with values of type Text. Consider using the VALUE or FORMAT function to convert one of the values."
+  },
+  {
+   "part": "C",
+   "expr": "SUMX(Facts,IF(VAR y=BLANK() RETURN y==\"a\",1,2))",
+   "powerbi": "12",
+   "now": "LOCAL-REJECT:DAX comparison operations do not support comparing values of type Integer with values of type Text. Consider using the VALUE or FORMAT function to convert one of the values."
+  },
+  {
+   "part": "C",
+   "expr": "SUMX(Facts,IF(VAR y=BLANK() RETURN y==\"\",1,2))",
+   "powerbi": "12",
+   "now": "LOCAL-REJECT:DAX comparison operations do not support comparing values of type Integer with values of type Text. Consider using the VALUE or FORMAT function to convert one of the values."
+  },
+  {
+   "part": "C",
+   "expr": "SUMX(Facts,IF(VAR y=BLANK() RETURN y==Facts[Region],1,2))",
+   "powerbi": "12",
+   "now": "LOCAL-REJECT:DAX comparison operations do not support comparing values of type Integer with values of type Text. Consider using the VALUE or FORMAT function to convert one of the values."
+  },
+  {
+   "part": "C",
+   "expr": "SUMX(Facts,IF(VAR y=BLANK() RETURN y==Facts[Note],1,2))",
+   "powerbi": "10",
+   "now": "LOCAL-REJECT:DAX comparison operations do not support comparing values of type Integer with values of type Text. Consider using the VALUE or FORMAT function to convert one of the values."
+  },
+  {
+   "part": "C",
+   "expr": "SUMX(Facts,IF(VAR y=BLANK() RETURN y==MAX(Facts[Region]),1,2))",
+   "powerbi": "12",
+   "now": "LOCAL-REJECT:DAX comparison operations do not support comparing values of type Integer with values of type Text. Consider using the VALUE or FORMAT function to convert one of the values."
+  },
+  {
+   "part": "C",
+   "expr": "COUNTROWS(FILTER(Facts,VAR y=BLANK() RETURN y==\"a\"))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:DAX comparison operations do not support comparing values of type Integer with values of type Text. Consider using the VALUE or FORMAT function to convert one of the values."
+  },
+  {
+   "part": "C",
+   "expr": "COUNTROWS(FILTER(Facts,VAR y=BLANK() RETURN y==\"\"))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:DAX comparison operations do not support comparing values of type Integer with values of type Text. Consider using the VALUE or FORMAT function to convert one of the values."
+  },
+  {
+   "part": "C",
+   "expr": "COUNTROWS(FILTER(Facts,VAR y=BLANK() RETURN y==Facts[Region]))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:DAX comparison operations do not support comparing values of type Integer with values of type Text. Consider using the VALUE or FORMAT function to convert one of the values."
+  },
+  {
+   "part": "C",
+   "expr": "COUNTROWS(FILTER(Facts,VAR y=BLANK() RETURN y==Facts[Note]))",
+   "powerbi": "2",
+   "now": "LOCAL-REJECT:DAX comparison operations do not support comparing values of type Integer with values of type Text. Consider using the VALUE or FORMAT function to convert one of the values."
+  },
+  {
+   "part": "C",
+   "expr": "COUNTROWS(FILTER(Facts,VAR y=BLANK() RETURN y==MAX(Facts[Region])))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:DAX comparison operations do not support comparing values of type Integer with values of type Text. Consider using the VALUE or FORMAT function to convert one of the values."
+  },
+  {
+   "part": "C",
+   "expr": "VAR y=BLANK() RETURN y==\"a\"",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:DAX comparison operations do not support comparing values of type Integer with values of type Text. Consider using the VALUE or FORMAT function to convert one of the values."
+  },
+  {
+   "part": "C",
+   "expr": "VAR y=BLANK() RETURN y==\"\"",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:DAX comparison operations do not support comparing values of type Integer with values of type Text. Consider using the VALUE or FORMAT function to convert one of the values."
+  },
+  {
+   "part": "C",
+   "expr": "VAR y=BLANK() RETURN y==MAX(Facts[Region])",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:DAX comparison operations do not support comparing values of type Integer with values of type Text. Consider using the VALUE or FORMAT function to convert one of the values."
+  },
+  {
+   "part": "C",
+   "expr": "IFERROR(VAR y=BLANK() RETURN y==\"a\",7)",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:DAX comparison operations do not support comparing values of type Integer with values of type Text. Consider using the VALUE or FORMAT function to convert one of the values."
+  },
+  {
+   "part": "C",
+   "expr": "IFERROR(VAR y=BLANK() RETURN y==\"\",7)",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:DAX comparison operations do not support comparing values of type Integer with values of type Text. Consider using the VALUE or FORMAT function to convert one of the values."
+  },
+  {
+   "part": "C",
+   "expr": "IFERROR(VAR y=BLANK() RETURN y==MAX(Facts[Region]),7)",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:DAX comparison operations do not support comparing values of type Integer with values of type Text. Consider using the VALUE or FORMAT function to convert one of the values."
+  },
+  {
+   "part": "C",
+   "expr": "SELECTEDVALUE(Facts[Quantity],\"x\")==\"x\"",
+   "powerbi": "True",
+   "now": "LOCAL-REJECT:DAX comparison operations do not support comparing values of type Integer with values of type Text. Consider using the VALUE or FORMAT function to convert one of the values."
+  },
+  {
+   "part": "C",
+   "expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]==SELECTEDVALUE(Facts[Region],1))",
+   "powerbi": "1",
+   "now": "LOCAL-REJECT:DAX comparison operations do not support comparing values of type Integer with values of type Text. Consider using the VALUE or FORMAT function to convert one of the values."
+  },
+  {
+   "part": "C",
+   "expr": "VAR b=BLANK() RETURN b==\"a\"",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:DAX comparison operations do not support comparing values of type Integer with values of type Text. Consider using the VALUE or FORMAT function to convert one of the values."
+  },
+  {
+   "part": "C",
+   "expr": "SUMX({TRUE(),FALSE()},IF(VAR y=BLANK() RETURN y==[Value],1,2))",
+   "powerbi": "4",
+   "now": "LOCAL-REJECT:DAX comparison operations do not support comparing values of type Integer with values of type True/False. Consider using the VALUE or FORMAT function to convert one of the values."
+  },
+  {
+   "part": "C",
+   "expr": "COUNTROWS(FILTER({TRUE(),FALSE()},VAR y=BLANK() RETURN y==[Value]))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:DAX comparison operations do not support comparing values of type Integer with values of type True/False. Consider using the VALUE or FORMAT function to convert one of the values."
+  },
+  {
+   "part": "C",
+   "expr": "SUMX({BLANK(),TRUE()},IF(VAR y=BLANK() RETURN y==[Value],1,2))",
+   "powerbi": "3",
+   "now": "LOCAL-REJECT:DAX comparison operations do not support comparing values of type Integer with values of type True/False. Consider using the VALUE or FORMAT function to convert one of the values."
+  },
+  {
+   "part": "C",
+   "expr": "COUNTROWS(FILTER({BLANK(),TRUE()},VAR y=BLANK() RETURN y==[Value]))",
+   "powerbi": "1",
+   "now": "LOCAL-REJECT:DAX comparison operations do not support comparing values of type Integer with values of type True/False. Consider using the VALUE or FORMAT function to convert one of the values."
+  },
+  {
+   "part": "C",
+   "expr": "SUMX(SELECTCOLUMNS(Facts,\"Value\",Facts[Quantity]>1),IF(VAR y=BLANK() RETURN y==[Value],1,2))",
+   "powerbi": "12",
+   "now": "LOCAL-REJECT:DAX comparison operations do not support comparing values of type Integer with values of type True/False. Consider using the VALUE or FORMAT function to convert one of the values."
+  },
+  {
+   "part": "C",
+   "expr": "COUNTROWS(FILTER(SELECTCOLUMNS(Facts,\"Value\",Facts[Quantity]>1),VAR y=BLANK() RETURN y==[Value]))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:DAX comparison operations do not support comparing values of type Integer with values of type True/False. Consider using the VALUE or FORMAT function to convert one of the values."
+  },
+  {
+   "part": "C",
+   "expr": "SUMX(Facts,IF(VAR y=BLANK() RETURN y==TRUE(),1,2))",
+   "powerbi": "12",
+   "now": "LOCAL-REJECT:DAX comparison operations do not support comparing values of type Integer with values of type True/False. Consider using the VALUE or FORMAT function to convert one of the values."
+  },
+  {
+   "part": "C",
+   "expr": "SUMX(Facts,IF(VAR y=BLANK() RETURN y==FALSE(),1,2))",
+   "powerbi": "12",
+   "now": "LOCAL-REJECT:DAX comparison operations do not support comparing values of type Integer with values of type True/False. Consider using the VALUE or FORMAT function to convert one of the values."
+  },
+  {
+   "part": "C",
+   "expr": "SUMX(Facts,IF(VAR y=BLANK() RETURN y==OR(0,\"\"),1,2))",
+   "powerbi": "6",
+   "now": "LOCAL-REJECT:DAX comparison operations do not support comparing values of type Integer with values of type True/False. Consider using the VALUE or FORMAT function to convert one of the values."
+  },
+  {
+   "part": "C",
+   "expr": "COUNTROWS(FILTER(Facts,VAR y=BLANK() RETURN y==TRUE()))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:DAX comparison operations do not support comparing values of type Integer with values of type True/False. Consider using the VALUE or FORMAT function to convert one of the values."
+  },
+  {
+   "part": "C",
+   "expr": "COUNTROWS(FILTER(Facts,VAR y=BLANK() RETURN y==FALSE()))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:DAX comparison operations do not support comparing values of type Integer with values of type True/False. Consider using the VALUE or FORMAT function to convert one of the values."
+  },
+  {
+   "part": "C",
+   "expr": "COUNTROWS(FILTER(Facts,VAR y=BLANK() RETURN y==OR(0,\"\")))",
+   "powerbi": "6",
+   "now": "LOCAL-REJECT:DAX comparison operations do not support comparing values of type Integer with values of type True/False. Consider using the VALUE or FORMAT function to convert one of the values."
+  },
+  {
+   "part": "C",
+   "expr": "VAR y=BLANK() RETURN y==TRUE()",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:DAX comparison operations do not support comparing values of type Integer with values of type True/False. Consider using the VALUE or FORMAT function to convert one of the values."
+  },
+  {
+   "part": "C",
+   "expr": "VAR y=BLANK() RETURN y==FALSE()",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:DAX comparison operations do not support comparing values of type Integer with values of type True/False. Consider using the VALUE or FORMAT function to convert one of the values."
+  },
+  {
+   "part": "C",
+   "expr": "VAR y=BLANK() RETURN y==OR(0,\"\")",
+   "powerbi": "True",
+   "now": "LOCAL-REJECT:DAX comparison operations do not support comparing values of type Integer with values of type True/False. Consider using the VALUE or FORMAT function to convert one of the values."
+  },
+  {
+   "part": "C",
+   "expr": "IFERROR(VAR y=BLANK() RETURN y==TRUE(),7)",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:DAX comparison operations do not support comparing values of type Integer with values of type True/False. Consider using the VALUE or FORMAT function to convert one of the values."
+  },
+  {
+   "part": "C",
+   "expr": "IFERROR(VAR y=BLANK() RETURN y==FALSE(),7)",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:DAX comparison operations do not support comparing values of type Integer with values of type True/False. Consider using the VALUE or FORMAT function to convert one of the values."
+  },
+  {
+   "part": "C",
+   "expr": "IFERROR(VAR y=BLANK() RETURN y==OR(0,\"\"),7)",
+   "powerbi": "True",
+   "now": "LOCAL-REJECT:DAX comparison operations do not support comparing values of type Integer with values of type True/False. Consider using the VALUE or FORMAT function to convert one of the values."
+  },
+  {
+   "part": "C",
+   "expr": "VAR b=BLANK() RETURN b==TRUE()",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:DAX comparison operations do not support comparing values of type Integer with values of type True/False. Consider using the VALUE or FORMAT function to convert one of the values."
+  },
+  {
+   "part": "B",
+   "expr": "TIMEVALUE(\"2020-01-02\")",
+   "powerbi": "12/30/1899 00:00:00",
+   "now": "LOCAL-REJECT:Cannot convert value '2020-01-02' of type Text to type Date."
+  },
+  {
+   "part": "B",
+   "expr": "TIMEVALUE(\"1/2/2020\")",
+   "powerbi": "12/30/1899 00:00:00",
+   "now": "LOCAL-REJECT:Cannot convert value '1/2/2020' of type Text to type Date."
+  },
+  {
+   "part": "B",
+   "expr": "TIMEVALUE(\"01/02/2020\")",
+   "powerbi": "12/30/1899 00:00:00",
+   "now": "LOCAL-REJECT:Cannot convert value '01/02/2020' of type Text to type Date."
+  },
+  {
+   "part": "B",
+   "expr": "TIMEVALUE(\"2020/01/02\")",
+   "powerbi": "12/30/1899 00:00:00",
+   "now": "LOCAL-REJECT:Cannot convert value '2020/01/02' of type Text to type Date."
+  },
+  {
+   "part": "B",
+   "expr": "TIMEVALUE(\"2-Jan-2020\")",
+   "powerbi": "12/30/1899 00:00:00",
+   "now": "LOCAL-REJECT:Cannot convert value '2-Jan-2020' of type Text to type Date."
+  },
+  {
+   "part": "B",
+   "expr": "TIMEVALUE(\"Jan 2, 2020\")",
+   "powerbi": "12/30/1899 00:00:00",
+   "now": "LOCAL-REJECT:Cannot convert value 'Jan 2, 2020' of type Text to type Date."
+  },
+  {
+   "part": "B",
+   "expr": "TIMEVALUE(\"January 2 2020\")",
+   "powerbi": "12/30/1899 00:00:00",
+   "now": "LOCAL-REJECT:Cannot convert value 'January 2 2020' of type Text to type Date."
+  },
+  {
+   "part": "B",
+   "expr": "DATEVALUE(\"12:30\")",
+   "powerbi": "12/30/1899 00:00:00",
+   "now": "LOCAL-REJECT:Cannot convert value '12:30' of type Text to type Date."
+  },
+  {
+   "part": "B",
+   "expr": "DATEVALUE(\"12:30:15\")",
+   "powerbi": "12/30/1899 00:00:00",
+   "now": "LOCAL-REJECT:Cannot convert value '12:30:15' of type Text to type Date."
+  },
+  {
+   "part": "B",
+   "expr": "DATEVALUE(\"1:30 PM\")",
+   "powerbi": "12/30/1899 00:00:00",
+   "now": "LOCAL-REJECT:Cannot convert value '1:30 PM' of type Text to type Date."
+  },
+  {
+   "part": "B",
+   "expr": "TIMEVALUE(\"13/1/2020\")",
+   "powerbi": "12/30/1899 00:00:00",
+   "now": "LOCAL-REJECT:Cannot convert value '13/1/2020' of type Text to type Date."
+  },
+  {
+   "part": "B",
+   "expr": "DATEVALUE(\"1,000\")",
+   "powerbi": "01/01/2000 00:00:00",
+   "now": "LOCAL-REJECT:Cannot convert value '1,000' of type Text to type Date."
+  },
+  {
+   "part": "B",
+   "expr": "TIMEVALUE(\"1,000\")",
+   "powerbi": "12/30/1899 00:00:00",
+   "now": "LOCAL-REJECT:Cannot convert value '1,000' of type Text to type Date."
+  },
+  {
+   "part": "B",
+   "expr": "DATEVALUE(\"3.5\")",
+   "powerbi": "12/30/1899 00:00:00",
+   "now": "LOCAL-REJECT:Cannot convert value '3.5' of type Text to type Date."
+  },
+  {
+   "part": "B",
+   "expr": "DATEVALUE(\"1 1/2\")",
+   "powerbi": "01/01/2002 00:00:00",
+   "now": "LOCAL-REJECT:Cannot convert value '1 1/2' of type Text to type Date."
+  },
+  {
+   "part": "B",
+   "expr": "TIMEVALUE(\"1 1/2\")",
+   "powerbi": "12/30/1899 00:00:00",
+   "now": "LOCAL-REJECT:Cannot convert value '1 1/2' of type Text to type Date."
+  },
+  {
+   "part": "A",
+   "expr": "COUNTX({1,2},0/0)",
+   "powerbi": "2",
+   "now": "LOCAL-REJECT:COUNTX of a NaN over this table is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "COUNTX({1},0/0)",
+   "powerbi": "1",
+   "now": "LOCAL-REJECT:COUNTX of a NaN over this table is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "COUNTX(ROW(\"Value\",1),0/0)",
+   "powerbi": "1",
+   "now": "LOCAL-REJECT:COUNTX of a NaN over this table is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "COUNTX({\"a\"},0/0)",
+   "powerbi": "1",
+   "now": "LOCAL-REJECT:COUNTX of a NaN over this table is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "COUNTX({\"a\"},IF(TRUE(),CONVERT(0/0,DATETIME)))",
+   "powerbi": "1",
+   "now": "LOCAL-REJECT:COUNTX of a NaN over this table is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "COUNTX({1},IFERROR(CONVERT(0/0,DATETIME),CONVERT(0/0,DATETIME)))",
+   "powerbi": "1",
+   "now": "LOCAL-REJECT:COUNTX of a NaN over this table is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "IFERROR(COUNTX({1,2},0/0),\"e\")",
+   "powerbi": "2",
+   "now": "LOCAL-REJECT:COUNTX of a NaN over this table is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "CALCULATE(COUNTX({1,2},0/0),Facts[Region]<>\"x\")",
+   "powerbi": "2",
+   "now": "LOCAL-REJECT:COUNTX of a NaN over this table is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "ISBLANK(COUNTX({1,2},0/0))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:COUNTX of a NaN over this table is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "(COUNTX({1,2},0/0))+0",
+   "powerbi": "2",
+   "now": "LOCAL-REJECT:COUNTX of a NaN over this table is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "COUNTX({1,2},1/0*0)",
+   "powerbi": "2",
+   "now": "LOCAL-REJECT:COUNTX of a NaN over this table is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "IFERROR(COUNTX({1,2},1/0*0),\"e\")",
+   "powerbi": "2",
+   "now": "LOCAL-REJECT:COUNTX of a NaN over this table is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "CALCULATE(COUNTX({1,2},1/0*0),Facts[Region]<>\"x\")",
+   "powerbi": "2",
+   "now": "LOCAL-REJECT:COUNTX of a NaN over this table is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "ISBLANK(COUNTX({1,2},1/0*0))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:COUNTX of a NaN over this table is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "(COUNTX({1,2},1/0*0))+0",
+   "powerbi": "2",
+   "now": "LOCAL-REJECT:COUNTX of a NaN over this table is not modelled by the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "CALCULATE(COUNTROWS(Facts),Facts[Sales]>=IF(1=2,2,\"\"))",
+   "powerbi": "1",
+   "now": "LOCAL-REJECT:DAX comparison operations do not support comparing values of type Integer with values of type Text."
+  },
+  {
+   "part": "C",
+   "expr": "COUNTROWS(CALCULATETABLE(Facts,Facts[Quantity]>VAR t=\"East\" RETURN COALESCE(t,0)))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:DAX comparison operations do not support comparing values of type Integer with values of type Text."
+  },
+  {
+   "part": "C",
+   "expr": "CALCULATE(COUNTROWS(Facts),Facts[Sales]>COALESCE(\"a\",1))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:DAX comparison operations do not support comparing values of type Integer with values of type Text."
+  },
+  {
+   "part": "C",
+   "expr": "CALCULATE(COUNTROWS(Facts),Facts[Sales]>=IF(1=2,5,\"east\"))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:DAX comparison operations do not support comparing values of type Integer with values of type Text."
+  },
+  {
+   "part": "C",
+   "expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]>=IF(1=2,5,\"east\"))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:DAX comparison operations do not support comparing values of type Integer with values of type Text."
+  },
+  {
+   "part": "C",
+   "expr": "COUNTROWS(CALCULATETABLE(Facts,Facts[Sales]>VAR t=\"East\" RETURN COALESCE(t,0)))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:DAX comparison operations do not support comparing values of type Integer with values of type Text."
+  },
+  {
+   "part": "C",
+   "expr": "COUNTROWS(CALCULATETABLE(Facts,Facts[Sales]>IF.EAGER(FALSE(),1,\"a\")))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:DAX comparison operations do not support comparing values of type Integer with values of type Text."
+  },
+  {
+   "part": "C",
+   "expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]<>IF(TRUE(),\"a\",TRUE()))",
+   "powerbi": "6",
+   "now": "LOCAL-REJECT:DAX comparison operations do not support comparing values of type Integer with values of type Text."
+  },
+  {
+   "part": "C",
+   "expr": "COUNTROWS(CALCULATETABLE(Facts,Facts[Sales]<>IF(TRUE(),\"a\",DATE(2020,1,1))))",
+   "powerbi": "6",
+   "now": "LOCAL-REJECT:DAX comparison operations do not support comparing values of type Integer with values of type Text."
+  },
+  {
+   "part": "C",
+   "expr": "COUNTROWS(CALCULATETABLE(Facts,Facts[Sales]<IF(1=2,5,\"East\")))",
+   "powerbi": "6",
+   "now": "LOCAL-REJECT:DAX comparison operations do not support comparing values of type Integer with values of type Text."
+  },
+  {
+   "part": "C",
+   "expr": "CALCULATE(COUNTROWS(Facts),Facts[Quantity]=IF(1=2,5,\"east\"))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:DAX comparison operations do not support comparing values of type Integer with values of type Text."
+  },
+  {
+   "part": "C",
+   "expr": "COUNTROWS(CALCULATETABLE(Facts,Facts[Sales]>=COALESCE(\"a\",1)))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:DAX comparison operations do not support comparing values of type Integer with values of type Text."
+  },
+  {
+   "part": "C",
+   "expr": "CALCULATE(COUNTROWS(Facts),Facts[Sales]<=VAR t=\"East\" RETURN COALESCE(t,0))",
+   "powerbi": "6",
+   "now": "LOCAL-REJECT:DAX comparison operations do not support comparing values of type Integer with values of type Text."
+  },
+  {
+   "part": "C",
+   "expr": "CALCULATE(COUNTROWS(Facts),Facts[Sales]<IF(TRUE(),\"a\",1))",
+   "powerbi": "6",
+   "now": "LOCAL-REJECT:DAX comparison operations do not support comparing values of type Integer with values of type Text."
+  },
+  {
+   "part": "A",
+   "expr": "COUNTX({1,2},SWITCH(TRUE(),1=1,TRUE(),\"a\"))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:COUNTX of a True/False over this table is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "COUNTX({\"a\"},IF(1=1,TRUE(),\"a\"))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:COUNTX of a True/False over this table is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "COUNTX(ROW(\"Value\",1),IF(1=1,TRUE(),1))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:COUNTX of a True/False over this table is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "COUNTX({1,2},IF(1=1,TRUE(),\"a\"))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:COUNTX of a True/False over this table is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "COUNTX({\"a\"},SWITCH(TRUE(),1=1,TRUE(),\"a\"))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:COUNTX of a True/False over this table is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "COUNTX({1,2},IF(1=1,TRUE(),1))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:COUNTX of a True/False over this table is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "COUNTX({1},IF(1=1,TRUE(),\"a\"))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:COUNTX of a True/False over this table is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "COUNTX({1},SWITCH(TRUE(),1=1,TRUE(),\"a\"))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:COUNTX of a True/False over this table is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "COUNTX(ROW(\"Value\",1),SWITCH(TRUE(),1=1,TRUE(),\"a\"))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:COUNTX of a True/False over this table is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "COUNTX({\"a\"},IF(1=1,TRUE(),1))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:COUNTX of a True/False over this table is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "COUNTX({1},IF(1=1,TRUE(),1))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:COUNTX of a True/False over this table is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "COUNTX(ROW(\"Value\",1),IF(1=1,TRUE(),\"a\"))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:COUNTX of a True/False over this table is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "COUNTX({1,2},COALESCE(FIRSTNONBLANKVALUE(Facts[Quantity],BLANK()),TRUE()))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:COUNTX of a True/False over this table is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "IFERROR(COUNTX(Facts,1/0*0),\"e\")",
+   "powerbi": "6",
+   "now": "LOCAL-REJECT:COUNTX over a NaN beside a product with a constant zero is not supported in the local engine (Power BI may fold it to 0)."
+  },
+  {
+   "part": "A",
+   "expr": "CALCULATE(COUNTX(Facts,1/0*0),Facts[Region]<>\"x\")",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:COUNTX over a NaN beside a product with a constant zero is not supported in the local engine (Power BI may fold it to 0)."
+  },
+  {
+   "part": "A",
+   "expr": "IFERROR(COUNTX(ALL(Facts),1/0*0),\"e\")",
+   "powerbi": "6",
+   "now": "LOCAL-REJECT:COUNTX over a NaN beside a product with a constant zero is not supported in the local engine (Power BI may fold it to 0)."
+  },
+  {
+   "part": "A",
+   "expr": "CALCULATE(COUNTX(ALL(Facts),1/0*0),Facts[Region]<>\"x\")",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:COUNTX over a NaN beside a product with a constant zero is not supported in the local engine (Power BI may fold it to 0)."
+  },
+  {
+   "part": "A",
+   "expr": "IFERROR(COUNTX(FILTER(Facts,Facts[Quantity]>2),1/0*0),\"e\")",
+   "powerbi": "3",
+   "now": "LOCAL-REJECT:COUNTX over a NaN beside a product with a constant zero is not supported in the local engine (Power BI may fold it to 0)."
+  },
+  {
+   "part": "A",
+   "expr": "CALCULATE(COUNTX(FILTER(Facts,Facts[Quantity]>2),1/0*0),Facts[Region]<>\"x\")",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:COUNTX over a NaN beside a product with a constant zero is not supported in the local engine (Power BI may fold it to 0)."
+  },
+  {
+   "part": "A",
+   "expr": "COUNTX(Facts,(Facts[Quantity]/0)*0)",
+   "powerbi": "6",
+   "now": "LOCAL-REJECT:COUNTX over a NaN beside a product with a constant zero is not supported in the local engine (Power BI may fold it to 0)."
+  },
+  {
+   "part": "C",
+   "expr": "SUMX(Facts,IF(FALSE()=VAR t=\"East\" RETURN COALESCE(t,0),1,0))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:Iterator comparisons need matching local data types: DAX comparison operations do not support comparing values of type Text with values of type Integer."
+  },
+  {
+   "part": "C",
+   "expr": "SUMX(Facts,IF(Facts[Region]>VAR t=TRUE() RETURN COALESCE(t,0),1,0))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:Iterator comparisons need matching local data types: DAX comparison operations do not support comparing values of type Text with values of type Integer."
+  },
+  {
+   "part": "C",
+   "expr": "COUNTROWS(FILTER(Facts,0<>VAR t=\"East\" RETURN COALESCE(t,0)))",
+   "powerbi": "6",
+   "now": "LOCAL-REJECT:Iterator comparisons need matching local data types: DAX comparison operations do not support comparing values of type Text with values of type Integer."
+  },
+  {
+   "part": "C",
+   "expr": "COUNTROWS(CALCULATETABLE(Facts,Facts[Note]<>VAR t=TRUE() RETURN COALESCE(t,0)))",
+   "powerbi": "6",
+   "now": "LOCAL-REJECT:Iterator comparisons need matching local data types: DAX comparison operations do not support comparing values of type Text with values of type Integer."
+  },
+  {
+   "part": "C",
+   "expr": "IF(0>VAR t=\"East\" RETURN COALESCE(t,0),1,2)",
+   "powerbi": "2",
+   "now": "LOCAL-REJECT:Iterator comparisons need matching local data types: DAX comparison operations do not support comparing values of type Text with values of type Integer."
+  },
+  {
+   "part": "C",
+   "expr": "IF(TRUE(),BLANK(),\"a\")>VAR t=TRUE() RETURN COALESCE(t,0)",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:Iterator comparisons need matching local data types: DAX comparison operations do not support comparing values of type Text with values of type Integer."
+  },
+  {
+   "part": "A",
+   "expr": "IFERROR(COUNTAX(Facts,1/0*0),\"e\")",
+   "powerbi": "6",
+   "now": "LOCAL-REJECT:COUNTAX over a NaN beside a product with a constant zero is not supported in the local engine (Power BI may fold it to 0)."
+  },
+  {
+   "part": "A",
+   "expr": "CALCULATE(COUNTAX(Facts,1/0*0),Facts[Region]<>\"x\")",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:COUNTAX over a NaN beside a product with a constant zero is not supported in the local engine (Power BI may fold it to 0)."
+  },
+  {
+   "part": "A",
+   "expr": "IFERROR(COUNTAX(ALL(Facts),1/0*0),\"e\")",
+   "powerbi": "6",
+   "now": "LOCAL-REJECT:COUNTAX over a NaN beside a product with a constant zero is not supported in the local engine (Power BI may fold it to 0)."
+  },
+  {
+   "part": "A",
+   "expr": "CALCULATE(COUNTAX(ALL(Facts),1/0*0),Facts[Region]<>\"x\")",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:COUNTAX over a NaN beside a product with a constant zero is not supported in the local engine (Power BI may fold it to 0)."
+  },
+  {
+   "part": "A",
+   "expr": "IFERROR(COUNTAX(FILTER(Facts,Facts[Quantity]>2),1/0*0),\"e\")",
+   "powerbi": "3",
+   "now": "LOCAL-REJECT:COUNTAX over a NaN beside a product with a constant zero is not supported in the local engine (Power BI may fold it to 0)."
+  },
+  {
+   "part": "A",
+   "expr": "CALCULATE(COUNTAX(FILTER(Facts,Facts[Quantity]>2),1/0*0),Facts[Region]<>\"x\")",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:COUNTAX over a NaN beside a product with a constant zero is not supported in the local engine (Power BI may fold it to 0)."
+  },
+  {
+   "part": "B",
+   "expr": "CONVERT(\"1,000\",DATETIME)",
+   "powerbi": "01/01/2000 00:00:00",
+   "now": "LOCAL-REJECT:The local engine does not model the text '1,000' as a date."
+  },
+  {
+   "part": "B",
+   "expr": "CONVERT(\"1 1/2\",DATETIME)",
+   "powerbi": "01/01/2002 00:00:00",
+   "now": "LOCAL-REJECT:The local engine does not model the text '1 1/2' as a date."
+  },
+  {
+   "part": "B",
+   "expr": "CONCATENATEX(Facts,IFERROR(CONVERT(Facts[Quantity]&\"/2/2020\",DATETIME),\"e\"),\"|\",Facts[Quantity],ASC,Facts[Sales],ASC)",
+   "powerbi": "e|1/2/2020|2/2/2020|3/2/2020|4/2/2020|5/2/2020",
+   "now": "LOCAL-REJECT:The local engine does not model the text '0/2/2020' as a date."
+  }
+ ]
+}

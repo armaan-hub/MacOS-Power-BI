@@ -145,6 +145,34 @@ _TEXT_DATE_FORMATS = (
 
 def parse_date_text(text: str) -> DaxDateTime:
     cleaned = " ".join(text.split())
+    matched = re.match(r"^(\d{1,2})\s+(\d{1,2})/(\d{1,4})$", cleaned)
+    if matched:
+        m, d, y = int(matched.group(1)), int(matched.group(2)), int(matched.group(3))
+        if y < 50:
+            y += 2000
+        elif y < 100:
+            y += 1900
+        try:
+            return from_datetime(datetime(y, m, d))
+        except ValueError as error:
+            raise dax_typed.refusal(f"The local engine does not model the text '{text}' as a date.") from error
+    matched = re.match(r"^(\d{1,2}),\s*(\d{2,4})$", cleaned)
+    if matched:
+        m, y_str = int(matched.group(1)), matched.group(2)
+        if len(y_str) == 2 and 1 <= int(y_str) <= 31:  # live Power BI reads "12, 05" as month 12, day 5 of the CURRENT year, so the answer moves with today's date: not modelled
+            raise dax_typed.refusal(f"The local engine does not model the text '{text}' as a date: it may be a month and a day of the current year.")
+        y = int(y_str)
+        if len(y_str) <= 2:
+            if y < 50:
+                y += 2000
+            elif y < 100:
+                y += 1900
+        elif y == 0:
+            y = 2000
+        try:
+            return from_datetime(datetime(y, m, 1))
+        except ValueError as error:
+            raise dax_typed.refusal(f"The local engine does not model the text '{text}' as a date.") from error
     for pattern in _TEXT_DATE_FORMATS:
         try:
             parsed = datetime.strptime(cleaned, pattern)
@@ -208,13 +236,14 @@ def text_serial(text: str) -> Decimal | None:
 
 _DATE_SHAPED_TEXT = re.compile(r"\d[\d ./,:-]*\d")
 _ISO_DATE_SHAPE = re.compile(r"\d{4}-\d{1,2}-\d{1,2}")  # read strictly: a month or day out of range ("2020-13-01") is an error, not another reading
+_MDY_DATE_SHAPE = re.compile(r"\d{1,2}[/-]\d{1,2}[/-]\d{2,4}")
 
 
 def date_shaped_text(text: str) -> bool:
     """A text of digits and date separators that begins and ends with a digit and is not a whole number ("1 1/2"): Power BI may read it as a
     date that no reader here models. Every other text that is neither a number nor a date is an ordinary conversion error."""
     shown = text.strip()
-    return _DATE_SHAPED_TEXT.fullmatch(shown) is not None and not shown.isdigit() and _ISO_DATE_SHAPE.fullmatch(shown) is None
+    return _DATE_SHAPED_TEXT.fullmatch(shown) is not None and not shown.isdigit() and _ISO_DATE_SHAPE.fullmatch(shown) is None and _MDY_DATE_SHAPE.fullmatch(shown) is None
 
 
 def datetime_text(text: str) -> DaxDateTime:
@@ -392,11 +421,33 @@ def date_function(function: str, args: list[object], interval: str | None = None
     if function == "DATEVALUE":
         if args[0] is None:
             return None
-        return from_datetime(to_datetime(parse_date_text(dax_typed.to_text(args[0]))).replace(hour=0, minute=0, second=0))
+        text_arg = dax_typed.to_text(args[0])
+        try:
+            return from_datetime(to_datetime(parse_date_text(text_arg)).replace(hour=0, minute=0, second=0))
+        except Exception:
+            try:
+                _time_value(text_arg)
+                return from_datetime(datetime(1899, 12, 30))
+            except Exception:
+                pass
+            if date_shaped_text(text_arg):  # a date shape whose time reading failed: Power BI may parse it
+                raise dax_typed.refusal(f"The local engine does not model the text '{text_arg}' as a date.")
+            raise
     if function == "TIMEVALUE":
         if args[0] is None:
             return None
-        return _time_value(dax_typed.to_text(args[0]))
+        text_arg = dax_typed.to_text(args[0])
+        try:
+            return _time_value(text_arg)
+        except Exception:
+            try:
+                parse_date_text(text_arg)
+                return DaxDateTime(Decimal(0))
+            except Exception:
+                pass
+            if date_shaped_text(text_arg) or _MDY_DATE_SHAPE.fullmatch(text_arg.strip()):  # a date shape whose date reading failed: Power BI may parse it
+                raise dax_typed.refusal(f"The local engine does not model the text '{text_arg}' as a time.")
+            raise
     if function == "DATEDIFF":
         start, end = _moment(args[0], ROUND_DOWN), _moment(args[1], ROUND_DOWN)
         if start is None or end is None:

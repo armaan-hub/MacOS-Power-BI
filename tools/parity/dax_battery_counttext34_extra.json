@@ -1,0 +1,6286 @@
+{
+ "powerbi_version": "2.157.879.0 (26.08)+da30fe74eb0b8a8786ab7326b69c400a0e951831",
+ "frozen": "2026-11-04",
+ "items": [
+  {
+   "expr": "\"\"<\"a\"",
+   "powerbi": "True"
+  },
+  {
+   "expr": "\"\"<>\"1\"",
+   "powerbi": "True"
+  },
+  {
+   "expr": "\"\"<>SELECTEDVALUE(Facts[Region],\"East\")",
+   "powerbi": "True"
+  },
+  {
+   "expr": "\"\"<BLANK()",
+   "powerbi": "False"
+  },
+  {
+   "expr": "\"\"<MAX(Facts[Region])",
+   "powerbi": "True"
+  },
+  {
+   "expr": "\"\"<SELECTEDVALUE(Facts[Region])",
+   "powerbi": "False"
+  },
+  {
+   "expr": "\"\"==\"a\"",
+   "powerbi": "False"
+  },
+  {
+   "expr": "\"\"==BLANK()",
+   "powerbi": "False"
+  },
+  {
+   "expr": "\"\"=MAX(Facts[Region])",
+   "powerbi": "False"
+  },
+  {
+   "expr": "\"\"=SELECTEDVALUE(Facts[Note],BLANK())",
+   "powerbi": "True"
+  },
+  {
+   "expr": "\"\"=SELECTEDVALUE(Facts[Region],\"East\")",
+   "powerbi": "False"
+  },
+  {
+   "expr": "\"\">\"1\"",
+   "powerbi": "False"
+  },
+  {
+   "expr": "\"\">SELECTEDVALUE(Facts[Note],BLANK())",
+   "powerbi": "False"
+  },
+  {
+   "expr": "\"1\"<>\"a\"",
+   "powerbi": "True"
+  },
+  {
+   "expr": "\"1\"<>BLANK()",
+   "powerbi": "True"
+  },
+  {
+   "expr": "\"1\"<>SELECTEDVALUE(Facts[Region])",
+   "powerbi": "True"
+  },
+  {
+   "expr": "\"1\"<SELECTEDVALUE(Facts[Region],\"x\")",
+   "powerbi": "True"
+  },
+  {
+   "expr": "\"1\"=\"a\"",
+   "powerbi": "False"
+  },
+  {
+   "expr": "\"1\"==\"\"",
+   "powerbi": "False"
+  },
+  {
+   "expr": "\"1\"==\"a\"",
+   "powerbi": "False"
+  },
+  {
+   "expr": "\"1\"==MAX(Facts[Region])",
+   "powerbi": "False"
+  },
+  {
+   "expr": "\"1\"==SELECTEDVALUE(Facts[Region],\"East\")",
+   "powerbi": "False"
+  },
+  {
+   "expr": "\"1\"==SELECTEDVALUE(Facts[Region],\"x\")",
+   "powerbi": "False"
+  },
+  {
+   "expr": "\"1\"=SELECTEDVALUE(Facts[Note],BLANK())",
+   "powerbi": "False"
+  },
+  {
+   "expr": "\"1\">\"1\"",
+   "powerbi": "False"
+  },
+  {
+   "expr": "\"1\">\"a\"",
+   "powerbi": "False"
+  },
+  {
+   "expr": "\"1\">BLANK()",
+   "powerbi": "True"
+  },
+  {
+   "expr": "\"a\"<>\"\"",
+   "powerbi": "True"
+  },
+  {
+   "expr": "\"a\"<>MAX(Facts[Region])",
+   "powerbi": "True"
+  },
+  {
+   "expr": "\"a\"<>SELECTEDVALUE(Facts[Region])",
+   "powerbi": "True"
+  },
+  {
+   "expr": "\"a\"<SELECTEDVALUE(Facts[Region])",
+   "powerbi": "False"
+  },
+  {
+   "expr": "\"a\"<SELECTEDVALUE(Facts[Region],\"x\")",
+   "powerbi": "True"
+  },
+  {
+   "expr": "\"a\"=\"a\"",
+   "powerbi": "True"
+  },
+  {
+   "expr": "\"a\"==\"\"",
+   "powerbi": "False"
+  },
+  {
+   "expr": "\"a\"==BLANK()",
+   "powerbi": "False"
+  },
+  {
+   "expr": "\"a\"=BLANK()",
+   "powerbi": "False"
+  },
+  {
+   "expr": "\"a\"=SELECTEDVALUE(Facts[Region])",
+   "powerbi": "False"
+  },
+  {
+   "expr": "\"a\">\"a\"",
+   "powerbi": "False"
+  },
+  {
+   "expr": "\"a\">SELECTEDVALUE(Facts[Region],\"East\")",
+   "powerbi": "False"
+  },
+  {
+   "expr": "0<>0",
+   "powerbi": "False"
+  },
+  {
+   "expr": "0<>1",
+   "powerbi": "True"
+  },
+  {
+   "expr": "0<>SELECTEDVALUE(Facts[Quantity],0)",
+   "powerbi": "False"
+  },
+  {
+   "expr": "0<>SELECTEDVALUE(Facts[Sales],2.5)",
+   "powerbi": "True"
+  },
+  {
+   "expr": "0<BLANK()",
+   "powerbi": "False"
+  },
+  {
+   "expr": "0<DATE(2020,1,1)",
+   "powerbi": "True"
+  },
+  {
+   "expr": "0<SELECTEDVALUE(Facts[Sales],2.5)",
+   "powerbi": "True"
+  },
+  {
+   "expr": "0==1",
+   "powerbi": "False"
+  },
+  {
+   "expr": "0==2.5",
+   "powerbi": "False"
+  },
+  {
+   "expr": "0==BLANK()",
+   "powerbi": "False"
+  },
+  {
+   "expr": "0==SELECTEDVALUE(Facts[Note],BLANK())",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 19) DAX comparison operations do not support comparing values of type Integer with values of type Text. Consider using the VALUE or FORMAT function to convert one of the values.\""
+  },
+  {
+   "expr": "0==SELECTEDVALUE(Facts[Quantity],0)",
+   "powerbi": "True"
+  },
+  {
+   "expr": "0==SELECTEDVALUE(Facts[Region],\"x\")",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 19) DAX comparison operations do not support comparing values of type Integer with values of type Text. Consider using the VALUE or FORMAT function to convert one of the values.\""
+  },
+  {
+   "expr": "0=SELECTEDVALUE(Facts[Quantity],0)",
+   "powerbi": "True"
+  },
+  {
+   "expr": "0>0",
+   "powerbi": "False"
+  },
+  {
+   "expr": "0>1",
+   "powerbi": "False"
+  },
+  {
+   "expr": "0>2.5",
+   "powerbi": "False"
+  },
+  {
+   "expr": "0>SELECTEDVALUE(Facts[Quantity],0)",
+   "powerbi": "False"
+  },
+  {
+   "expr": "1<1",
+   "powerbi": "False"
+  },
+  {
+   "expr": "1<>DATE(2020,1,1)",
+   "powerbi": "True"
+  },
+  {
+   "expr": "1<SELECTEDVALUE(Facts[Sales],2.5)",
+   "powerbi": "True"
+  },
+  {
+   "expr": "1==2.5",
+   "powerbi": "False"
+  },
+  {
+   "expr": "1==BLANK()",
+   "powerbi": "False"
+  },
+  {
+   "expr": "1==SELECTEDVALUE(Facts[Region],\"x\")",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 19) DAX comparison operations do not support comparing values of type Integer with values of type Text. Consider using the VALUE or FORMAT function to convert one of the values.\""
+  },
+  {
+   "expr": "1>0",
+   "powerbi": "True"
+  },
+  {
+   "expr": "2.5<0",
+   "powerbi": "False"
+  },
+  {
+   "expr": "2.5<1",
+   "powerbi": "False"
+  },
+  {
+   "expr": "2.5<>2.5",
+   "powerbi": "False"
+  },
+  {
+   "expr": "2.5<>DATE(2020,1,1)",
+   "powerbi": "True"
+  },
+  {
+   "expr": "2.5<SELECTEDVALUE(Facts[Quantity],0)",
+   "powerbi": "False"
+  },
+  {
+   "expr": "2.5=1",
+   "powerbi": "False"
+  },
+  {
+   "expr": "2.5=2.5",
+   "powerbi": "True"
+  },
+  {
+   "expr": "2.5==0",
+   "powerbi": "False"
+  },
+  {
+   "expr": "2.5==2.5",
+   "powerbi": "True"
+  },
+  {
+   "expr": "2.5==DATE(2020,1,1)",
+   "powerbi": "False"
+  },
+  {
+   "expr": "2.5==SELECTEDVALUE(Facts[Region],\"x\")",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 19) DAX comparison operations do not support comparing values of type Number with values of type Text. Consider using the VALUE or FORMAT function to convert one of the values.\""
+  },
+  {
+   "expr": "2.5=SELECTEDVALUE(Facts[Quantity],0)",
+   "powerbi": "False"
+  },
+  {
+   "expr": "2.5>0",
+   "powerbi": "True"
+  },
+  {
+   "expr": "2.5>DATE(2020,1,1)",
+   "powerbi": "False"
+  },
+  {
+   "expr": "BLANK()<\"\"",
+   "powerbi": "False"
+  },
+  {
+   "expr": "BLANK()<\"a\"",
+   "powerbi": "True"
+  },
+  {
+   "expr": "BLANK()<2.5",
+   "powerbi": "True"
+  },
+  {
+   "expr": "BLANK()<>\"\"",
+   "powerbi": "False"
+  },
+  {
+   "expr": "BLANK()<>\"1\"",
+   "powerbi": "True"
+  },
+  {
+   "expr": "BLANK()<>2.5",
+   "powerbi": "True"
+  },
+  {
+   "expr": "BLANK()<>BLANK()",
+   "powerbi": "False"
+  },
+  {
+   "expr": "BLANK()<>MAX(Facts[Region])",
+   "powerbi": "True"
+  },
+  {
+   "expr": "BLANK()<>SELECTEDVALUE(Facts[Quantity],0)",
+   "powerbi": "False"
+  },
+  {
+   "expr": "BLANK()<>SELECTEDVALUE(Facts[Region])",
+   "powerbi": "False"
+  },
+  {
+   "expr": "BLANK()<>SELECTEDVALUE(Facts[Region],\"East\")",
+   "powerbi": "True"
+  },
+  {
+   "expr": "BLANK()<BLANK()",
+   "powerbi": "False"
+  },
+  {
+   "expr": "BLANK()<SELECTEDVALUE(Facts[Note],BLANK())",
+   "powerbi": "False"
+  },
+  {
+   "expr": "BLANK()<SELECTEDVALUE(Facts[Quantity],0)",
+   "powerbi": "False"
+  },
+  {
+   "expr": "BLANK()<SELECTEDVALUE(Facts[Region])",
+   "powerbi": "False"
+  },
+  {
+   "expr": "BLANK()<SELECTEDVALUE(Facts[Region],\"East\")",
+   "powerbi": "True"
+  },
+  {
+   "expr": "BLANK()<TRUE()",
+   "powerbi": "True"
+  },
+  {
+   "expr": "BLANK()=\"1\"",
+   "powerbi": "False"
+  },
+  {
+   "expr": "BLANK()=\"a\"",
+   "powerbi": "False"
+  },
+  {
+   "expr": "BLANK()=1",
+   "powerbi": "False"
+  },
+  {
+   "expr": "BLANK()=2.5",
+   "powerbi": "False"
+  },
+  {
+   "expr": "BLANK()==2.5",
+   "powerbi": "False"
+  },
+  {
+   "expr": "BLANK()==MAX(Facts[Region])",
+   "powerbi": "False"
+  },
+  {
+   "expr": "BLANK()==SELECTEDVALUE(Facts[Region])",
+   "powerbi": "True"
+  },
+  {
+   "expr": "BLANK()==SELECTEDVALUE(Facts[Region],\"East\")",
+   "powerbi": "False"
+  },
+  {
+   "expr": "BLANK()=BLANK()",
+   "powerbi": "True"
+  },
+  {
+   "expr": "BLANK()=DATE(2020,1,1)",
+   "powerbi": "False"
+  },
+  {
+   "expr": "BLANK()=SELECTEDVALUE(Facts[Region])",
+   "powerbi": "True"
+  },
+  {
+   "expr": "BLANK()>\"1\"",
+   "powerbi": "False"
+  },
+  {
+   "expr": "BLANK()>0",
+   "powerbi": "False"
+  },
+  {
+   "expr": "BLANK()>2.5",
+   "powerbi": "False"
+  },
+  {
+   "expr": "BLANK()>BLANK()",
+   "powerbi": "False"
+  },
+  {
+   "expr": "BLANK()>SELECTEDVALUE(Facts[Region],\"East\")",
+   "powerbi": "False"
+  },
+  {
+   "expr": "BLANK()>TRUE()",
+   "powerbi": "False"
+  },
+  {
+   "expr": "CALCULATE(COUNTX(ALL(Facts),BLANK()),Facts[Region]=\"East\")",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "CALCULATE(COUNTX(FILTER(Facts,Facts[Quantity]>1),BLANK()),Facts[Region]=\"East\")",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "CALCULATE(COUNTX({1,2,3},BLANK()),Facts[Region]=\"East\")",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTAX(ADDCOLUMNS(Facts,\"b\",Facts[Quantity]>2),FALSE())",
+   "powerbi": "6"
+  },
+  {
+   "expr": "COUNTAX(ADDCOLUMNS(Facts,\"b\",Facts[Quantity]>2),Facts[Quantity]>2)",
+   "powerbi": "6"
+  },
+  {
+   "expr": "COUNTAX(ADDCOLUMNS(Facts,\"b\",Facts[Quantity]>2),Facts[Region]=\"East\")",
+   "powerbi": "6"
+  },
+  {
+   "expr": "COUNTAX(ADDCOLUMNS(Facts,\"b\",Facts[Quantity]>2),ISBLANK(Facts[Note]))",
+   "powerbi": "6"
+  },
+  {
+   "expr": "COUNTAX(ALL(Facts),BLANK())",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTAX(ALL(Facts),Facts[Quantity]>2)",
+   "powerbi": "6"
+  },
+  {
+   "expr": "COUNTAX(ALL(Facts),Facts[Region]=\"East\")",
+   "powerbi": "6"
+  },
+  {
+   "expr": "COUNTAX(ALL(Facts),IF(Facts[Quantity]>2,TRUE()))",
+   "powerbi": "6"
+  },
+  {
+   "expr": "COUNTAX(ALL(Facts),ISBLANK(Facts[Note]))",
+   "powerbi": "6"
+  },
+  {
+   "expr": "COUNTAX(ALL(Facts),NOT(Facts[Sales]>5))",
+   "powerbi": "6"
+  },
+  {
+   "expr": "COUNTAX(ALL(Facts),TRUE())",
+   "powerbi": "6"
+  },
+  {
+   "expr": "COUNTAX(FILTER(Facts,Facts[Quantity]>1),BLANK())",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTAX(FILTER(Facts,Facts[Quantity]>1),COUNTROWS(Facts)>3)",
+   "powerbi": "4"
+  },
+  {
+   "expr": "COUNTAX(FILTER(Facts,Facts[Quantity]>1),FALSE())",
+   "powerbi": "4"
+  },
+  {
+   "expr": "COUNTAX(FILTER(Facts,Facts[Quantity]>1),Facts[Quantity]>2)",
+   "powerbi": "4"
+  },
+  {
+   "expr": "COUNTAX(FILTER(Facts,Facts[Quantity]>1),ISBLANK(Facts[Note]))",
+   "powerbi": "4"
+  },
+  {
+   "expr": "COUNTAX(FILTER(Facts,Facts[Quantity]>1),NOT(Facts[Sales]>5))",
+   "powerbi": "4"
+  },
+  {
+   "expr": "COUNTAX(FILTER(Facts,Facts[Quantity]>1),TRUE())",
+   "powerbi": "4"
+  },
+  {
+   "expr": "COUNTAX(Facts,BLANK())",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTAX(Facts,COUNTROWS(Facts)>3)",
+   "powerbi": "6"
+  },
+  {
+   "expr": "COUNTAX(Facts,FALSE())",
+   "powerbi": "6"
+  },
+  {
+   "expr": "COUNTAX(Facts,Facts[Region]=\"East\")",
+   "powerbi": "6"
+  },
+  {
+   "expr": "COUNTAX(Facts,IF(Facts[Quantity]>2,TRUE()))",
+   "powerbi": "6"
+  },
+  {
+   "expr": "COUNTAX(Facts,ISBLANK(Facts[Note]))",
+   "powerbi": "6"
+  },
+  {
+   "expr": "COUNTAX(Facts,NOT(Facts[Sales]>5))",
+   "powerbi": "6"
+  },
+  {
+   "expr": "COUNTAX(Facts,TRUE())",
+   "powerbi": "6"
+  },
+  {
+   "expr": "COUNTAX(VALUES(Facts[Region]),BLANK())",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTAX(VALUES(Facts[Region]),COUNTROWS(Facts)>3)",
+   "powerbi": "3"
+  },
+  {
+   "expr": "COUNTAX(VALUES(Facts[Region]),FALSE())",
+   "powerbi": "3"
+  },
+  {
+   "expr": "COUNTAX(VALUES(Facts[Region]),Facts[Region]=\"East\")",
+   "powerbi": "3"
+  },
+  {
+   "expr": "COUNTAX(VALUES(Facts[Region]),TRUE())",
+   "powerbi": "3"
+  },
+  {
+   "expr": "COUNTAX({1,2,3},BLANK())",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTAX({1,2,3},FALSE())",
+   "powerbi": "3"
+  },
+  {
+   "expr": "COUNTAX({1,2,3},TRUE())",
+   "powerbi": "3"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(Facts,VAR x=\"\" RETURN x<>\"1\"))",
+   "powerbi": "6"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(Facts,VAR x=\"\" RETURN x<>BLANK()))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(Facts,VAR x=\"\" RETURN x<>SELECTEDVALUE(Facts[Region])))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(Facts,VAR x=\"\" RETURN x<SELECTEDVALUE(Facts[Note],BLANK())))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(Facts,VAR x=\"\" RETURN x<SELECTEDVALUE(Facts[Region],\"East\")))",
+   "powerbi": "6"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(Facts,VAR x=\"\" RETURN x=\"\"))",
+   "powerbi": "6"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(Facts,VAR x=\"\" RETURN x==\"1\"))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(Facts,VAR x=\"\" RETURN x==BLANK()))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(Facts,VAR x=\"\" RETURN x==SELECTEDVALUE(Facts[Region],\"East\")))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(Facts,VAR x=\"\" RETURN x=BLANK()))",
+   "powerbi": "6"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(Facts,VAR x=\"\" RETURN x>\"1\"))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(Facts,VAR x=\"\" RETURN x>\"a\"))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(Facts,VAR x=\"\" RETURN x>MAX(Facts[Region])))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(Facts,VAR x=\"\" RETURN x>SELECTEDVALUE(Facts[Region],\"x\")))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(Facts,VAR x=\"1\" RETURN x<\"\"))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(Facts,VAR x=\"1\" RETURN x<BLANK()))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(Facts,VAR x=\"1\" RETURN x<MAX(Facts[Region])))",
+   "powerbi": "6"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(Facts,VAR x=\"1\" RETURN x<SELECTEDVALUE(Facts[Region],\"x\")))",
+   "powerbi": "6"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(Facts,VAR x=\"1\" RETURN x=\"\"))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(Facts,VAR x=\"1\" RETURN x=\"1\"))",
+   "powerbi": "6"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(Facts,VAR x=\"1\" RETURN x==\"\"))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(Facts,VAR x=\"1\" RETURN x==BLANK()))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(Facts,VAR x=\"1\" RETURN x=SELECTEDVALUE(Facts[Region],\"x\")))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(Facts,VAR x=\"1\" RETURN x>\"a\"))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(Facts,VAR x=\"1\" RETURN x>MAX(Facts[Region])))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(Facts,VAR x=\"a\" RETURN x<\"\"))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(Facts,VAR x=\"a\" RETURN x<\"a\"))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(Facts,VAR x=\"a\" RETURN x<>MAX(Facts[Region])))",
+   "powerbi": "6"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(Facts,VAR x=\"a\" RETURN x<>SELECTEDVALUE(Facts[Note],BLANK())))",
+   "powerbi": "6"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(Facts,VAR x=\"a\" RETURN x<SELECTEDVALUE(Facts[Region],\"East\")))",
+   "powerbi": "6"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(Facts,VAR x=\"a\" RETURN x==\"1\"))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(Facts,VAR x=\"a\" RETURN x==\"a\"))",
+   "powerbi": "6"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(Facts,VAR x=\"a\" RETURN x==BLANK()))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(Facts,VAR x=\"a\" RETURN x==SELECTEDVALUE(Facts[Note],BLANK())))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(Facts,VAR x=\"a\" RETURN x=SELECTEDVALUE(Facts[Note],BLANK())))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(Facts,VAR x=\"a\" RETURN x=SELECTEDVALUE(Facts[Region])))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(Facts,VAR x=\"a\" RETURN x>\"\"))",
+   "powerbi": "6"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(Facts,VAR x=\"a\" RETURN x>\"a\"))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(Facts,VAR x=\"a\" RETURN x>BLANK()))",
+   "powerbi": "6"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(Facts,VAR x=\"a\" RETURN x>SELECTEDVALUE(Facts[Note],BLANK())))",
+   "powerbi": "6"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(Facts,VAR x=\"a\" RETURN x>SELECTEDVALUE(Facts[Region])))",
+   "powerbi": "6"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(Facts,VAR x=0 RETURN x<2.5))",
+   "powerbi": "6"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(Facts,VAR x=0 RETURN x<>2.5))",
+   "powerbi": "6"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(Facts,VAR x=0 RETURN x<BLANK()))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(Facts,VAR x=0 RETURN x<SELECTEDVALUE(Facts[Quantity],0)))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(Facts,VAR x=0 RETURN x=1))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(Facts,VAR x=0 RETURN x=2.5))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(Facts,VAR x=0 RETURN x==2.5))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(Facts,VAR x=0 RETURN x=BLANK()))",
+   "powerbi": "6"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(Facts,VAR x=0 RETURN x=SELECTEDVALUE(Facts[Quantity],0)))",
+   "powerbi": "6"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(Facts,VAR x=0 RETURN x=SELECTEDVALUE(Facts[Sales],2.5)))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(Facts,VAR x=0 RETURN x>0))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(Facts,VAR x=0 RETURN x>1))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(Facts,VAR x=0 RETURN x>2.5))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(Facts,VAR x=1 RETURN x<1))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(Facts,VAR x=1 RETURN x<2.5))",
+   "powerbi": "6"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(Facts,VAR x=1 RETURN x<>SELECTEDVALUE(Facts[Quantity],0)))",
+   "powerbi": "6"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(Facts,VAR x=1 RETURN x<>SELECTEDVALUE(Facts[Sales],2.5)))",
+   "powerbi": "6"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(Facts,VAR x=1 RETURN x<DATE(2020,1,1)))",
+   "powerbi": "6"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(Facts,VAR x=1 RETURN x=0))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(Facts,VAR x=1 RETURN x=2.5))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(Facts,VAR x=1 RETURN x==0))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(Facts,VAR x=1 RETURN x==2.5))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(Facts,VAR x=1 RETURN x==BLANK()))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(Facts,VAR x=1 RETURN x==SELECTEDVALUE(Facts[Quantity],0)))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(Facts,VAR x=1 RETURN x==SELECTEDVALUE(Facts[Region],\"x\")))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 57) DAX comparison operations do not support comparing values of type Integer with values of type Text. Consider using the VALUE or FORMAT function to convert one of the values.\""
+  },
+  {
+   "expr": "COUNTROWS(FILTER(Facts,VAR x=1 RETURN x=BLANK()))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(Facts,VAR x=1 RETURN x>0))",
+   "powerbi": "6"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(Facts,VAR x=1 RETURN x>DATE(2020,1,1)))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(Facts,VAR x=1 RETURN x>SELECTEDVALUE(Facts[Quantity],0)))",
+   "powerbi": "6"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(Facts,VAR x=2.5 RETURN x<>BLANK()))",
+   "powerbi": "6"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(Facts,VAR x=2.5 RETURN x<>DATE(2020,1,1)))",
+   "powerbi": "6"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(Facts,VAR x=2.5 RETURN x<BLANK()))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(Facts,VAR x=2.5 RETURN x<SELECTEDVALUE(Facts[Quantity],0)))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(Facts,VAR x=2.5 RETURN x=1))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(Facts,VAR x=2.5 RETURN x=DATE(2020,1,1)))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(Facts,VAR x=2.5 RETURN x>0))",
+   "powerbi": "6"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(Facts,VAR x=2.5 RETURN x>1))",
+   "powerbi": "6"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(Facts,VAR x=2.5 RETURN x>BLANK()))",
+   "powerbi": "6"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(Facts,VAR x=2.5 RETURN x>SELECTEDVALUE(Facts[Quantity],0)))",
+   "powerbi": "6"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(Facts,VAR x=BLANK() RETURN x<\"\"))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(Facts,VAR x=BLANK() RETURN x<\"1\"))",
+   "powerbi": "6"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(Facts,VAR x=BLANK() RETURN x<0))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(Facts,VAR x=BLANK() RETURN x<>\"a\"))",
+   "powerbi": "6"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(Facts,VAR x=BLANK() RETURN x<>2.5))",
+   "powerbi": "6"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(Facts,VAR x=BLANK() RETURN x<>SELECTEDVALUE(Facts[Note],BLANK())))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(Facts,VAR x=BLANK() RETURN x<DATE(2020,1,1)))",
+   "powerbi": "6"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(Facts,VAR x=BLANK() RETURN x<MAX(Facts[Region])))",
+   "powerbi": "6"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(Facts,VAR x=BLANK() RETURN x<SELECTEDVALUE(Facts[Note],BLANK())))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(Facts,VAR x=BLANK() RETURN x<SELECTEDVALUE(Facts[Quantity],0)))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(Facts,VAR x=BLANK() RETURN x<SELECTEDVALUE(Facts[Region])))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(Facts,VAR x=BLANK() RETURN x<TRUE()))",
+   "powerbi": "6"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(Facts,VAR x=BLANK() RETURN x=\"\"))",
+   "powerbi": "6"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(Facts,VAR x=BLANK() RETURN x=0))",
+   "powerbi": "6"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(Facts,VAR x=BLANK() RETURN x=1))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(Facts,VAR x=BLANK() RETURN x=2.5))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(Facts,VAR x=BLANK() RETURN x==\"\"))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(Facts,VAR x=BLANK() RETURN x==\"1\"))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(Facts,VAR x=BLANK() RETURN x==1))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(Facts,VAR x=BLANK() RETURN x==2.5))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(Facts,VAR x=BLANK() RETURN x==BLANK()))",
+   "powerbi": "6"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(Facts,VAR x=BLANK() RETURN x==SELECTEDVALUE(Facts[Region])))",
+   "powerbi": "6"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(Facts,VAR x=BLANK() RETURN x=MAX(Facts[Region])))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(Facts,VAR x=BLANK() RETURN x=SELECTEDVALUE(Facts[Quantity],0)))",
+   "powerbi": "6"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(Facts,VAR x=BLANK() RETURN x=SELECTEDVALUE(Facts[Region])))",
+   "powerbi": "6"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(Facts,VAR x=BLANK() RETURN x=SELECTEDVALUE(Facts[Region],\"East\")))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(Facts,VAR x=BLANK() RETURN x=SELECTEDVALUE(Facts[Sales],2.5)))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(Facts,VAR x=BLANK() RETURN x=TRUE()))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(Facts,VAR x=BLANK() RETURN x>\"1\"))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(Facts,VAR x=BLANK() RETURN x>1))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(Facts,VAR x=BLANK() RETURN x>DATE(2020,1,1)))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(Facts,VAR x=BLANK() RETURN x>MAX(Facts[Region])))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(Facts,VAR x=BLANK() RETURN x>SELECTEDVALUE(Facts[Sales],2.5)))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(Facts,VAR x=DATE(2020,1,1) RETURN x<1))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(Facts,VAR x=DATE(2020,1,1) RETURN x<>1))",
+   "powerbi": "6"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(Facts,VAR x=DATE(2020,1,1) RETURN x<>SELECTEDVALUE(Facts[Quantity],0)))",
+   "powerbi": "6"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(Facts,VAR x=DATE(2020,1,1) RETURN x<BLANK()))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(Facts,VAR x=DATE(2020,1,1) RETURN x=1))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(Facts,VAR x=DATE(2020,1,1) RETURN x=2.5))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(Facts,VAR x=DATE(2020,1,1) RETURN x==0))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(Facts,VAR x=DATE(2020,1,1) RETURN x==DATE(2020,1,1)))",
+   "powerbi": "6"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(Facts,VAR x=DATE(2020,1,1) RETURN x==SELECTEDVALUE(Facts[Note],BLANK())))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 70) DAX comparison operations do not support comparing values of type Date with values of type Text. Consider using the VALUE or FORMAT function to convert one of the values.\""
+  },
+  {
+   "expr": "COUNTROWS(FILTER(Facts,VAR x=DATE(2020,1,1) RETURN x==SELECTEDVALUE(Facts[Quantity],0)))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(Facts,VAR x=DATE(2020,1,1) RETURN x==SELECTEDVALUE(Facts[Region],\"x\")))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 70) DAX comparison operations do not support comparing values of type Date with values of type Text. Consider using the VALUE or FORMAT function to convert one of the values.\""
+  },
+  {
+   "expr": "COUNTROWS(FILTER(Facts,VAR x=DATE(2020,1,1) RETURN x=BLANK()))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(Facts,VAR x=DATE(2020,1,1) RETURN x=DATE(2020,1,1)))",
+   "powerbi": "6"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(Facts,VAR x=DATE(2020,1,1) RETURN x=SELECTEDVALUE(Facts[Quantity],0)))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(Facts,VAR x=DATE(2020,1,1) RETURN x>0))",
+   "powerbi": "6"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(Facts,VAR x=DATE(2020,1,1) RETURN x>BLANK()))",
+   "powerbi": "6"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(Facts,VAR x=DATE(2020,1,1) RETURN x>DATE(2020,1,1)))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(Facts,VAR x=MAX(Facts[Region]) RETURN x<\"1\"))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(Facts,VAR x=MAX(Facts[Region]) RETURN x<\"a\"))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(Facts,VAR x=MAX(Facts[Region]) RETURN x<>\"\"))",
+   "powerbi": "6"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(Facts,VAR x=MAX(Facts[Region]) RETURN x<>SELECTEDVALUE(Facts[Note],BLANK())))",
+   "powerbi": "6"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(Facts,VAR x=MAX(Facts[Region]) RETURN x<>SELECTEDVALUE(Facts[Region])))",
+   "powerbi": "6"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(Facts,VAR x=MAX(Facts[Region]) RETURN x<MAX(Facts[Region])))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(Facts,VAR x=MAX(Facts[Region]) RETURN x<SELECTEDVALUE(Facts[Region])))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(Facts,VAR x=MAX(Facts[Region]) RETURN x<SELECTEDVALUE(Facts[Region],\"x\")))",
+   "powerbi": "6"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(Facts,VAR x=MAX(Facts[Region]) RETURN x=\"a\"))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(Facts,VAR x=MAX(Facts[Region]) RETURN x==\"\"))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(Facts,VAR x=MAX(Facts[Region]) RETURN x==\"a\"))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(Facts,VAR x=MAX(Facts[Region]) RETURN x==MAX(Facts[Region])))",
+   "powerbi": "6"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(Facts,VAR x=MAX(Facts[Region]) RETURN x==SELECTEDVALUE(Facts[Region])))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(Facts,VAR x=MAX(Facts[Region]) RETURN x=SELECTEDVALUE(Facts[Region],\"East\")))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(Facts,VAR x=MAX(Facts[Region]) RETURN x>BLANK()))",
+   "powerbi": "6"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(Facts,VAR x=MAX(Facts[Region]) RETURN x>MAX(Facts[Region])))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(Facts,VAR x=MAX(Facts[Region]) RETURN x>SELECTEDVALUE(Facts[Region],\"x\")))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(Facts,VAR x=SELECTEDVALUE(Facts[Note],BLANK()) RETURN x<\"1\"))",
+   "powerbi": "6"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(Facts,VAR x=SELECTEDVALUE(Facts[Note],BLANK()) RETURN x<>MAX(Facts[Region])))",
+   "powerbi": "6"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(Facts,VAR x=SELECTEDVALUE(Facts[Note],BLANK()) RETURN x<>SELECTEDVALUE(Facts[Region])))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(Facts,VAR x=SELECTEDVALUE(Facts[Note],BLANK()) RETURN x<BLANK()))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(Facts,VAR x=SELECTEDVALUE(Facts[Note],BLANK()) RETURN x<MAX(Facts[Region])))",
+   "powerbi": "6"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(Facts,VAR x=SELECTEDVALUE(Facts[Note],BLANK()) RETURN x=\"1\"))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(Facts,VAR x=SELECTEDVALUE(Facts[Note],BLANK()) RETURN x==\"1\"))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(Facts,VAR x=SELECTEDVALUE(Facts[Note],BLANK()) RETURN x==SELECTEDVALUE(Facts[Region],\"East\")))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(Facts,VAR x=SELECTEDVALUE(Facts[Note],BLANK()) RETURN x=MAX(Facts[Region])))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(Facts,VAR x=SELECTEDVALUE(Facts[Note],BLANK()) RETURN x=SELECTEDVALUE(Facts[Note],BLANK())))",
+   "powerbi": "6"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(Facts,VAR x=SELECTEDVALUE(Facts[Note],BLANK()) RETURN x=SELECTEDVALUE(Facts[Region])))",
+   "powerbi": "6"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(Facts,VAR x=SELECTEDVALUE(Facts[Note],BLANK()) RETURN x=SELECTEDVALUE(Facts[Region],\"East\")))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(Facts,VAR x=SELECTEDVALUE(Facts[Note],BLANK()) RETURN x>\"a\"))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(Facts,VAR x=SELECTEDVALUE(Facts[Note],BLANK()) RETURN x>BLANK()))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(Facts,VAR x=SELECTEDVALUE(Facts[Note],BLANK()) RETURN x>MAX(Facts[Region])))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(Facts,VAR x=SELECTEDVALUE(Facts[Note],BLANK()) RETURN x>SELECTEDVALUE(Facts[Note],BLANK())))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(Facts,VAR x=SELECTEDVALUE(Facts[Quantity],0) RETURN x<0))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(Facts,VAR x=SELECTEDVALUE(Facts[Quantity],0) RETURN x<1))",
+   "powerbi": "6"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(Facts,VAR x=SELECTEDVALUE(Facts[Quantity],0) RETURN x<2.5))",
+   "powerbi": "6"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(Facts,VAR x=SELECTEDVALUE(Facts[Quantity],0) RETURN x<>DATE(2020,1,1)))",
+   "powerbi": "6"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(Facts,VAR x=SELECTEDVALUE(Facts[Quantity],0) RETURN x<>SELECTEDVALUE(Facts[Quantity],0)))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(Facts,VAR x=SELECTEDVALUE(Facts[Quantity],0) RETURN x<DATE(2020,1,1)))",
+   "powerbi": "6"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(Facts,VAR x=SELECTEDVALUE(Facts[Quantity],0) RETURN x<SELECTEDVALUE(Facts[Sales],2.5)))",
+   "powerbi": "6"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(Facts,VAR x=SELECTEDVALUE(Facts[Quantity],0) RETURN x==BLANK()))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(Facts,VAR x=SELECTEDVALUE(Facts[Quantity],0) RETURN x==SELECTEDVALUE(Facts[Note],BLANK())))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 88) DAX comparison operations do not support comparing values of type Integer with values of type Text. Consider using the VALUE or FORMAT function to convert one of the values.\""
+  },
+  {
+   "expr": "COUNTROWS(FILTER(Facts,VAR x=SELECTEDVALUE(Facts[Quantity],0) RETURN x=SELECTEDVALUE(Facts[Sales],2.5)))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(Facts,VAR x=SELECTEDVALUE(Facts[Quantity],0) RETURN x>0))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(Facts,VAR x=SELECTEDVALUE(Facts[Quantity],0) RETURN x>1))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(Facts,VAR x=SELECTEDVALUE(Facts[Quantity],0) RETURN x>2.5))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(Facts,VAR x=SELECTEDVALUE(Facts[Quantity],0) RETURN x>DATE(2020,1,1)))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(Facts,VAR x=SELECTEDVALUE(Facts[Region]) RETURN x<\"\"))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(Facts,VAR x=SELECTEDVALUE(Facts[Region]) RETURN x<>\"1\"))",
+   "powerbi": "6"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(Facts,VAR x=SELECTEDVALUE(Facts[Region]) RETURN x<>BLANK()))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(Facts,VAR x=SELECTEDVALUE(Facts[Region]) RETURN x<>MAX(Facts[Region])))",
+   "powerbi": "6"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(Facts,VAR x=SELECTEDVALUE(Facts[Region]) RETURN x<>SELECTEDVALUE(Facts[Note],BLANK())))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(Facts,VAR x=SELECTEDVALUE(Facts[Region]) RETURN x<>SELECTEDVALUE(Facts[Region])))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(Facts,VAR x=SELECTEDVALUE(Facts[Region]) RETURN x<>SELECTEDVALUE(Facts[Region],\"East\")))",
+   "powerbi": "6"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(Facts,VAR x=SELECTEDVALUE(Facts[Region]) RETURN x<>SELECTEDVALUE(Facts[Region],\"x\")))",
+   "powerbi": "6"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(Facts,VAR x=SELECTEDVALUE(Facts[Region]) RETURN x<MAX(Facts[Region])))",
+   "powerbi": "6"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(Facts,VAR x=SELECTEDVALUE(Facts[Region]) RETURN x=\"1\"))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(Facts,VAR x=SELECTEDVALUE(Facts[Region]) RETURN x==\"\"))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(Facts,VAR x=SELECTEDVALUE(Facts[Region]) RETURN x==\"a\"))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(Facts,VAR x=SELECTEDVALUE(Facts[Region]) RETURN x==SELECTEDVALUE(Facts[Region],\"x\")))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(Facts,VAR x=SELECTEDVALUE(Facts[Region]) RETURN x=BLANK()))",
+   "powerbi": "6"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(Facts,VAR x=SELECTEDVALUE(Facts[Region]) RETURN x=MAX(Facts[Region])))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(Facts,VAR x=SELECTEDVALUE(Facts[Region]) RETURN x=SELECTEDVALUE(Facts[Region],\"East\")))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(Facts,VAR x=SELECTEDVALUE(Facts[Region]) RETURN x=SELECTEDVALUE(Facts[Region],\"x\")))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(Facts,VAR x=SELECTEDVALUE(Facts[Region]) RETURN x>\"\"))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(Facts,VAR x=SELECTEDVALUE(Facts[Region]) RETURN x>MAX(Facts[Region])))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(Facts,VAR x=SELECTEDVALUE(Facts[Region]) RETURN x>SELECTEDVALUE(Facts[Note],BLANK())))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(Facts,VAR x=SELECTEDVALUE(Facts[Region]) RETURN x>SELECTEDVALUE(Facts[Region])))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(Facts,VAR x=SELECTEDVALUE(Facts[Region],\"East\") RETURN x<>\"1\"))",
+   "powerbi": "6"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(Facts,VAR x=SELECTEDVALUE(Facts[Region],\"East\") RETURN x<>\"a\"))",
+   "powerbi": "6"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(Facts,VAR x=SELECTEDVALUE(Facts[Region],\"East\") RETURN x<>SELECTEDVALUE(Facts[Region],\"East\")))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(Facts,VAR x=SELECTEDVALUE(Facts[Region],\"East\") RETURN x==\"a\"))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(Facts,VAR x=SELECTEDVALUE(Facts[Region],\"East\") RETURN x==MAX(Facts[Region])))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(Facts,VAR x=SELECTEDVALUE(Facts[Region],\"East\") RETURN x=BLANK()))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(Facts,VAR x=SELECTEDVALUE(Facts[Region],\"East\") RETURN x=SELECTEDVALUE(Facts[Region])))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(Facts,VAR x=SELECTEDVALUE(Facts[Region],\"East\") RETURN x>\"1\"))",
+   "powerbi": "6"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(Facts,VAR x=SELECTEDVALUE(Facts[Region],\"East\") RETURN x>\"a\"))",
+   "powerbi": "6"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(Facts,VAR x=SELECTEDVALUE(Facts[Region],\"East\") RETURN x>SELECTEDVALUE(Facts[Note],BLANK())))",
+   "powerbi": "6"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(Facts,VAR x=SELECTEDVALUE(Facts[Region],\"x\") RETURN x<>\"1\"))",
+   "powerbi": "6"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(Facts,VAR x=SELECTEDVALUE(Facts[Region],\"x\") RETURN x<BLANK()))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(Facts,VAR x=SELECTEDVALUE(Facts[Region],\"x\") RETURN x==\"a\"))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(Facts,VAR x=SELECTEDVALUE(Facts[Region],\"x\") RETURN x==MAX(Facts[Region])))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(Facts,VAR x=SELECTEDVALUE(Facts[Region],\"x\") RETURN x=SELECTEDVALUE(Facts[Region])))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(Facts,VAR x=SELECTEDVALUE(Facts[Region],\"x\") RETURN x=SELECTEDVALUE(Facts[Region],\"x\")))",
+   "powerbi": "6"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(Facts,VAR x=SELECTEDVALUE(Facts[Region],\"x\") RETURN x>\"\"))",
+   "powerbi": "6"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(Facts,VAR x=SELECTEDVALUE(Facts[Region],\"x\") RETURN x>\"1\"))",
+   "powerbi": "6"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(Facts,VAR x=SELECTEDVALUE(Facts[Sales],2.5) RETURN x<>BLANK()))",
+   "powerbi": "6"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(Facts,VAR x=SELECTEDVALUE(Facts[Sales],2.5) RETURN x=DATE(2020,1,1)))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(Facts,VAR x=SELECTEDVALUE(Facts[Sales],2.5) RETURN x>DATE(2020,1,1)))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(Facts,VAR x=SELECTEDVALUE(Facts[Sales],2.5) RETURN x>SELECTEDVALUE(Facts[Quantity],0)))",
+   "powerbi": "6"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(Facts,VAR x=SELECTEDVALUE(Facts[Sales],2.5) RETURN x>SELECTEDVALUE(Facts[Sales],2.5)))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(Facts,VAR x=TRUE() RETURN x==SELECTEDVALUE(Facts[Note],BLANK())))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 62) DAX comparison operations do not support comparing values of type True/False with values of type Text. Consider using the VALUE or FORMAT function to convert one of the values.\""
+  },
+  {
+   "expr": "COUNTROWS(FILTER(Facts,VAR x=TRUE() RETURN x==SELECTEDVALUE(Facts[Quantity],0)))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 62) DAX comparison operations do not support comparing values of type True/False with values of type Integer. Consider using the VALUE or FORMAT function to convert one of the values.\""
+  },
+  {
+   "expr": "COUNTROWS(FILTER(Facts,VAR x=TRUE() RETURN x=BLANK()))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(Facts,VAR x=TRUE() RETURN x>BLANK()))",
+   "powerbi": "6"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(Facts,VAR x=TRUE() RETURN x>TRUE()))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTX(FILTER(Facts,Facts[Quantity]>1),BLANK())",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTX(Facts,0)",
+   "powerbi": "6"
+  },
+  {
+   "expr": "COUNTX(Facts,2.5)",
+   "powerbi": "6"
+  },
+  {
+   "expr": "COUNTX(Facts,BLANK())",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTX(Facts,SELECTEDVALUE(Facts[Note],BLANK()))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTX(Facts,SELECTEDVALUE(Facts[Region]))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTX(Facts,SELECTEDVALUE(Facts[Region],\"East\"))",
+   "powerbi": "6"
+  },
+  {
+   "expr": "COUNTX(Facts,SELECTEDVALUE(Facts[Region],\"x\"))",
+   "powerbi": "6"
+  },
+  {
+   "expr": "COUNTX(Facts,SELECTEDVALUE(Facts[Sales],2.5))",
+   "powerbi": "6"
+  },
+  {
+   "expr": "COUNTX(VALUES(Facts[Region]),BLANK())",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTX({1,2,3},BLANK())",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "DATE(2020,1,1)<1",
+   "powerbi": "False"
+  },
+  {
+   "expr": "DATE(2020,1,1)<2.5",
+   "powerbi": "False"
+  },
+  {
+   "expr": "DATE(2020,1,1)<>1",
+   "powerbi": "True"
+  },
+  {
+   "expr": "DATE(2020,1,1)<>2.5",
+   "powerbi": "True"
+  },
+  {
+   "expr": "DATE(2020,1,1)<>BLANK()",
+   "powerbi": "True"
+  },
+  {
+   "expr": "DATE(2020,1,1)<>SELECTEDVALUE(Facts[Quantity],0)",
+   "powerbi": "True"
+  },
+  {
+   "expr": "DATE(2020,1,1)<BLANK()",
+   "powerbi": "False"
+  },
+  {
+   "expr": "DATE(2020,1,1)<SELECTEDVALUE(Facts[Quantity],0)",
+   "powerbi": "False"
+  },
+  {
+   "expr": "DATE(2020,1,1)=0",
+   "powerbi": "False"
+  },
+  {
+   "expr": "DATE(2020,1,1)=1",
+   "powerbi": "False"
+  },
+  {
+   "expr": "DATE(2020,1,1)==1",
+   "powerbi": "False"
+  },
+  {
+   "expr": "DATE(2020,1,1)==2.5",
+   "powerbi": "False"
+  },
+  {
+   "expr": "DATE(2020,1,1)==BLANK()",
+   "powerbi": "False"
+  },
+  {
+   "expr": "DATE(2020,1,1)==SELECTEDVALUE(Facts[Note],BLANK())",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 19) DAX comparison operations do not support comparing values of type Date with values of type Text. Consider using the VALUE or FORMAT function to convert one of the values.\""
+  },
+  {
+   "expr": "DATE(2020,1,1)==SELECTEDVALUE(Facts[Quantity],0)",
+   "powerbi": "False"
+  },
+  {
+   "expr": "DATE(2020,1,1)==SELECTEDVALUE(Facts[Region],\"x\")",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 19) DAX comparison operations do not support comparing values of type Date with values of type Text. Consider using the VALUE or FORMAT function to convert one of the values.\""
+  },
+  {
+   "expr": "DATE(2020,1,1)=DATE(2020,1,1)",
+   "powerbi": "True"
+  },
+  {
+   "expr": "DATE(2020,1,1)=SELECTEDVALUE(Facts[Sales],2.5)",
+   "powerbi": "False"
+  },
+  {
+   "expr": "DATE(2020,1,1)>DATE(2020,1,1)",
+   "powerbi": "False"
+  },
+  {
+   "expr": "DATE(2020,1,1)>SELECTEDVALUE(Facts[Quantity],0)",
+   "powerbi": "True"
+  },
+  {
+   "expr": "DATE(2020,1,1)>SELECTEDVALUE(Facts[Sales],2.5)",
+   "powerbi": "True"
+  },
+  {
+   "expr": "DATEVALUE(\"1 2/2020\")+TIMEVALUE(\"1 2/2020\")",
+   "powerbi": "01/02/2020 00:00:00"
+  },
+  {
+   "expr": "DATEVALUE(\"1 2/2020\")+TIMEVALUE(\"10:30\")",
+   "powerbi": "01/02/2020 10:30:00"
+  },
+  {
+   "expr": "DATEVALUE(\"1 2/2020\")+TIMEVALUE(\"3 4/49\")",
+   "powerbi": "01/02/2020 00:00:00"
+  },
+  {
+   "expr": "DATEVALUE(\"1,99\")",
+   "powerbi": "01/01/1999 00:00:00"
+  },
+  {
+   "expr": "DATEVALUE(\"1,99\")+TIMEVALUE(\"1,99\")",
+   "powerbi": "01/01/1999 00:00:00"
+  },
+  {
+   "expr": "DATEVALUE(\"1,99\")+TIMEVALUE(\"11:45 AM\")",
+   "powerbi": "01/01/1999 11:45:00"
+  },
+  {
+   "expr": "DATEVALUE(\"1,99\")+TIMEVALUE(\"12, 05\")",
+   "powerbi": "01/01/1999 00:00:00"
+  },
+  {
+   "expr": "DATEVALUE(\"1,99\")+TIMEVALUE(\"12:00 AM\")",
+   "powerbi": "01/01/1999 00:00:00"
+  },
+  {
+   "expr": "DATEVALUE(\"1,99\")+TIMEVALUE(\"13:00:01\")",
+   "powerbi": "01/01/1999 13:00:01"
+  },
+  {
+   "expr": "DATEVALUE(\"1,99\")+TIMEVALUE(\"2020-01-02\")",
+   "powerbi": "01/01/1999 00:00:00"
+  },
+  {
+   "expr": "DATEVALUE(\"1,99\")+TIMEVALUE(\"3 4/50\")",
+   "powerbi": "01/01/1999 00:00:00"
+  },
+  {
+   "expr": "DATEVALUE(\"1,99\")+TIMEVALUE(\"6 30/01\")",
+   "powerbi": "01/01/1999 00:00:00"
+  },
+  {
+   "expr": "DATEVALUE(\"1,99\")+TIMEVALUE(\"7, 2015\")",
+   "powerbi": "01/01/1999 00:00:00"
+  },
+  {
+   "expr": "DATEVALUE(\"1,99\")+TIMEVALUE(\"Jan 2, 2020\")",
+   "powerbi": "01/01/1999 00:00:00"
+  },
+  {
+   "expr": "DATEVALUE(\"1/2/2020 3:04 PM\")+TIMEVALUE(\"1 2/2020\")",
+   "powerbi": "01/02/2020 00:00:00"
+  },
+  {
+   "expr": "DATEVALUE(\"1/2/2020 3:04 PM\")+TIMEVALUE(\"1,99\")",
+   "powerbi": "01/02/2020 00:00:00"
+  },
+  {
+   "expr": "DATEVALUE(\"1/2/2020 3:04 PM\")+TIMEVALUE(\"10:30 PM\")",
+   "powerbi": "01/02/2020 22:30:00"
+  },
+  {
+   "expr": "DATEVALUE(\"1/2/2020 3:04 PM\")+TIMEVALUE(\"12, 05\")",
+   "powerbi": "01/02/2020 00:00:00"
+  },
+  {
+   "expr": "DATEVALUE(\"1/2/2020 3:04 PM\")+TIMEVALUE(\"12:00 AM\")",
+   "powerbi": "01/02/2020 00:00:00"
+  },
+  {
+   "expr": "DATEVALUE(\"1/2/2020 3:04 PM\")+TIMEVALUE(\"2, 2021\")",
+   "powerbi": "01/02/2020 00:00:00"
+  },
+  {
+   "expr": "DATEVALUE(\"1/2/2020 3:04 PM\")+TIMEVALUE(\"2020-01-02\")",
+   "powerbi": "01/02/2020 00:00:00"
+  },
+  {
+   "expr": "DATEVALUE(\"1/2/2020 3:04 PM\")+TIMEVALUE(\"23:59:59\")",
+   "powerbi": "01/02/2020 23:59:59"
+  },
+  {
+   "expr": "DATEVALUE(\"1/2/2020 3:04 PM\")+TIMEVALUE(\"4 15/2019\")",
+   "powerbi": "01/02/2020 00:00:00"
+  },
+  {
+   "expr": "DATEVALUE(\"1/2/2020 3:04 PM\")+TIMEVALUE(\"5 5/5\")",
+   "powerbi": "01/02/2020 00:00:00"
+  },
+  {
+   "expr": "DATEVALUE(\"1/2/2020 3:04 PM\")+TIMEVALUE(\"6 30/01\")",
+   "powerbi": "01/02/2020 00:00:00"
+  },
+  {
+   "expr": "DATEVALUE(\"1/2/2020 3:04 PM\")+TIMEVALUE(\"7/4/21\")",
+   "powerbi": "01/02/2020 00:00:00"
+  },
+  {
+   "expr": "DATEVALUE(\"1/2/2020 3:04 PM\")+TIMEVALUE(\"Jan 2, 2020\")",
+   "powerbi": "01/02/2020 00:00:00"
+  },
+  {
+   "expr": "DATEVALUE(\"1/2/2020\")",
+   "powerbi": "01/02/2020 00:00:00"
+  },
+  {
+   "expr": "DATEVALUE(\"1/2/2020\")+TIMEVALUE(\"13:00:01\")",
+   "powerbi": "01/02/2020 13:00:01"
+  },
+  {
+   "expr": "DATEVALUE(\"1/2/2020\")+TIMEVALUE(\"2 29/2020\")",
+   "powerbi": "01/02/2020 00:00:00"
+  },
+  {
+   "expr": "DATEVALUE(\"1/2/2020\")+TIMEVALUE(\"2020-01-02\")",
+   "powerbi": "01/02/2020 00:00:00"
+  },
+  {
+   "expr": "DATEVALUE(\"1/2/2020\")+TIMEVALUE(\"23:59:59\")",
+   "powerbi": "01/02/2020 23:59:59"
+  },
+  {
+   "expr": "DATEVALUE(\"1/2/2020\")+TIMEVALUE(\"3 4/49\")",
+   "powerbi": "01/02/2020 00:00:00"
+  },
+  {
+   "expr": "DATEVALUE(\"1/2/2020\")+TIMEVALUE(\"3 4/50\")",
+   "powerbi": "01/02/2020 00:00:00"
+  },
+  {
+   "expr": "DATEVALUE(\"1/2/2020\")+TIMEVALUE(\"4 15/2019\")",
+   "powerbi": "01/02/2020 00:00:00"
+  },
+  {
+   "expr": "DATEVALUE(\"1/2/2020\")+TIMEVALUE(\"6 30/01\")",
+   "powerbi": "01/02/2020 00:00:00"
+  },
+  {
+   "expr": "DATEVALUE(\"1/2/2020\")+TIMEVALUE(\"9:15\")",
+   "powerbi": "01/02/2020 09:15:00"
+  },
+  {
+   "expr": "DATEVALUE(\"10:30 PM\")",
+   "powerbi": "12/30/1899 00:00:00"
+  },
+  {
+   "expr": "DATEVALUE(\"10:30 PM\")+TIMEVALUE(\"1 2/2020\")",
+   "powerbi": "12/30/1899 00:00:00"
+  },
+  {
+   "expr": "DATEVALUE(\"10:30 PM\")+TIMEVALUE(\"12:00 AM\")",
+   "powerbi": "12/30/1899 00:00:00"
+  },
+  {
+   "expr": "DATEVALUE(\"10:30 PM\")+TIMEVALUE(\"2, 2021\")",
+   "powerbi": "12/30/1899 00:00:00"
+  },
+  {
+   "expr": "DATEVALUE(\"10:30 PM\")+TIMEVALUE(\"3 4/49\")",
+   "powerbi": "12/30/1899 00:00:00"
+  },
+  {
+   "expr": "DATEVALUE(\"10:30 PM\")+TIMEVALUE(\"Jan 2, 2020\")",
+   "powerbi": "12/30/1899 00:00:00"
+  },
+  {
+   "expr": "DATEVALUE(\"10:30\")+TIMEVALUE(\"1/2/2020 3:04 PM\")",
+   "powerbi": "12/30/1899 15:04:00"
+  },
+  {
+   "expr": "DATEVALUE(\"10:30\")+TIMEVALUE(\"1/2/2020\")",
+   "powerbi": "12/30/1899 00:00:00"
+  },
+  {
+   "expr": "DATEVALUE(\"10:30\")+TIMEVALUE(\"11, 99\")",
+   "powerbi": "12/30/1899 00:00:00"
+  },
+  {
+   "expr": "DATEVALUE(\"10:30\")+TIMEVALUE(\"12 31/99\")",
+   "powerbi": "12/30/1899 00:00:00"
+  },
+  {
+   "expr": "DATEVALUE(\"10:30\")+TIMEVALUE(\"12:00 AM\")",
+   "powerbi": "12/30/1899 00:00:00"
+  },
+  {
+   "expr": "DATEVALUE(\"10:30\")+TIMEVALUE(\"5 5/5\")",
+   "powerbi": "12/30/1899 00:00:00"
+  },
+  {
+   "expr": "DATEVALUE(\"10:30\")+TIMEVALUE(\"7/4/21\")",
+   "powerbi": "12/30/1899 00:00:00"
+  },
+  {
+   "expr": "DATEVALUE(\"10:30\")+TIMEVALUE(\"Jan 2, 2020\")",
+   "powerbi": "12/30/1899 00:00:00"
+  },
+  {
+   "expr": "DATEVALUE(\"11, 99\")+TIMEVALUE(\"10:30 PM\")",
+   "powerbi": "11/01/1999 22:30:00"
+  },
+  {
+   "expr": "DATEVALUE(\"11, 99\")+TIMEVALUE(\"10:30\")",
+   "powerbi": "11/01/1999 10:30:00"
+  },
+  {
+   "expr": "DATEVALUE(\"11, 99\")+TIMEVALUE(\"12 31/99\")",
+   "powerbi": "11/01/1999 00:00:00"
+  },
+  {
+   "expr": "DATEVALUE(\"11, 99\")+TIMEVALUE(\"2,2021\")",
+   "powerbi": "11/01/1999 00:00:00"
+  },
+  {
+   "expr": "DATEVALUE(\"11, 99\")+TIMEVALUE(\"3 4/49\")",
+   "powerbi": "11/01/1999 00:00:00"
+  },
+  {
+   "expr": "DATEVALUE(\"11, 99\")+TIMEVALUE(\"5 5/5\")",
+   "powerbi": "11/01/1999 00:00:00"
+  },
+  {
+   "expr": "DATEVALUE(\"11:45 AM\")",
+   "powerbi": "12/30/1899 00:00:00"
+  },
+  {
+   "expr": "DATEVALUE(\"11:45 AM\")+TIMEVALUE(\"1,99\")",
+   "powerbi": "12/30/1899 00:00:00"
+  },
+  {
+   "expr": "DATEVALUE(\"11:45 AM\")+TIMEVALUE(\"11:45 AM\")",
+   "powerbi": "12/30/1899 11:45:00"
+  },
+  {
+   "expr": "DATEVALUE(\"11:45 AM\")+TIMEVALUE(\"12:00 AM\")",
+   "powerbi": "12/30/1899 00:00:00"
+  },
+  {
+   "expr": "DATEVALUE(\"11:45 AM\")+TIMEVALUE(\"13:00:01\")",
+   "powerbi": "12/30/1899 13:00:01"
+  },
+  {
+   "expr": "DATEVALUE(\"11:45 AM\")+TIMEVALUE(\"2 29/2020\")",
+   "powerbi": "12/30/1899 00:00:00"
+  },
+  {
+   "expr": "DATEVALUE(\"11:45 AM\")+TIMEVALUE(\"2,2021\")",
+   "powerbi": "12/30/1899 00:00:00"
+  },
+  {
+   "expr": "DATEVALUE(\"11:45 AM\")+TIMEVALUE(\"23:59:59\")",
+   "powerbi": "12/30/1899 23:59:59"
+  },
+  {
+   "expr": "DATEVALUE(\"11:45 AM\")+TIMEVALUE(\"3 4/50\")",
+   "powerbi": "12/30/1899 00:00:00"
+  },
+  {
+   "expr": "DATEVALUE(\"11:45 AM\")+TIMEVALUE(\"4 15/2019\")",
+   "powerbi": "12/30/1899 00:00:00"
+  },
+  {
+   "expr": "DATEVALUE(\"11:45 AM\")+TIMEVALUE(\"6 30/01\")",
+   "powerbi": "12/30/1899 00:00:00"
+  },
+  {
+   "expr": "DATEVALUE(\"11:45 AM\")+TIMEVALUE(\"7/4/21\")",
+   "powerbi": "12/30/1899 00:00:00"
+  },
+  {
+   "expr": "DATEVALUE(\"11:45 AM\")+TIMEVALUE(\"9:15\")",
+   "powerbi": "12/30/1899 09:15:00"
+  },
+  {
+   "expr": "DATEVALUE(\"11:45 AM\")+TIMEVALUE(\"Jan 2, 2020\")",
+   "powerbi": "12/30/1899 00:00:00"
+  },
+  {
+   "expr": "DATEVALUE(\"12 31/99\")+TIMEVALUE(\"1/2/2020\")",
+   "powerbi": "12/31/1999 00:00:00"
+  },
+  {
+   "expr": "DATEVALUE(\"12 31/99\")+TIMEVALUE(\"10:30\")",
+   "powerbi": "12/31/1999 10:30:00"
+  },
+  {
+   "expr": "DATEVALUE(\"12 31/99\")+TIMEVALUE(\"11, 99\")",
+   "powerbi": "12/31/1999 00:00:00"
+  },
+  {
+   "expr": "DATEVALUE(\"12 31/99\")+TIMEVALUE(\"12:00 AM\")",
+   "powerbi": "12/31/1999 00:00:00"
+  },
+  {
+   "expr": "DATEVALUE(\"12 31/99\")+TIMEVALUE(\"2, 2021\")",
+   "powerbi": "12/31/1999 00:00:00"
+  },
+  {
+   "expr": "DATEVALUE(\"12 31/99\")+TIMEVALUE(\"23:59:59\")",
+   "powerbi": "12/31/1999 23:59:59"
+  },
+  {
+   "expr": "DATEVALUE(\"12 31/99\")+TIMEVALUE(\"3 4/49\")",
+   "powerbi": "12/31/1999 00:00:00"
+  },
+  {
+   "expr": "DATEVALUE(\"12 31/99\")+TIMEVALUE(\"Jan 2, 2020\")",
+   "powerbi": "12/31/1999 00:00:00"
+  },
+  {
+   "expr": "DATEVALUE(\"12, 05\")",
+   "powerbi": "12/05/2026 00:00:00"
+  },
+  {
+   "expr": "DATEVALUE(\"12, 05\")+TIMEVALUE(\"1,99\")",
+   "powerbi": "12/05/2026 00:00:00"
+  },
+  {
+   "expr": "DATEVALUE(\"12, 05\")+TIMEVALUE(\"1/2/2020\")",
+   "powerbi": "12/05/2026 00:00:00"
+  },
+  {
+   "expr": "DATEVALUE(\"12, 05\")+TIMEVALUE(\"11:45 AM\")",
+   "powerbi": "12/05/2026 11:45:00"
+  },
+  {
+   "expr": "DATEVALUE(\"12, 05\")+TIMEVALUE(\"12, 05\")",
+   "powerbi": "12/05/2026 00:00:00"
+  },
+  {
+   "expr": "DATEVALUE(\"12, 05\")+TIMEVALUE(\"12:00 AM\")",
+   "powerbi": "12/05/2026 00:00:00"
+  },
+  {
+   "expr": "DATEVALUE(\"12, 05\")+TIMEVALUE(\"13:00:01\")",
+   "powerbi": "12/05/2026 13:00:01"
+  },
+  {
+   "expr": "DATEVALUE(\"12, 05\")+TIMEVALUE(\"2020-01-02\")",
+   "powerbi": "12/05/2026 00:00:00"
+  },
+  {
+   "expr": "DATEVALUE(\"12, 05\")+TIMEVALUE(\"3 4/50\")",
+   "powerbi": "12/05/2026 00:00:00"
+  },
+  {
+   "expr": "DATEVALUE(\"12, 05\")+TIMEVALUE(\"4 15/2019\")",
+   "powerbi": "12/05/2026 00:00:00"
+  },
+  {
+   "expr": "DATEVALUE(\"12, 05\")+TIMEVALUE(\"7, 2015\")",
+   "powerbi": "12/05/2026 00:00:00"
+  },
+  {
+   "expr": "DATEVALUE(\"12, 05\")+TIMEVALUE(\"7/4/21\")",
+   "powerbi": "12/05/2026 00:00:00"
+  },
+  {
+   "expr": "DATEVALUE(\"12, 05\")+TIMEVALUE(\"9:15\")",
+   "powerbi": "12/05/2026 09:15:00"
+  },
+  {
+   "expr": "DATEVALUE(\"12, 05\")+TIMEVALUE(\"Jan 2, 2020\")",
+   "powerbi": "12/05/2026 00:00:00"
+  },
+  {
+   "expr": "DATEVALUE(\"12:00 AM\")+TIMEVALUE(\"1/2/2020 3:04 PM\")",
+   "powerbi": "12/30/1899 15:04:00"
+  },
+  {
+   "expr": "DATEVALUE(\"12:00 AM\")+TIMEVALUE(\"10:30 PM\")",
+   "powerbi": "12/30/1899 22:30:00"
+  },
+  {
+   "expr": "DATEVALUE(\"12:00 AM\")+TIMEVALUE(\"11, 99\")",
+   "powerbi": "12/30/1899 00:00:00"
+  },
+  {
+   "expr": "DATEVALUE(\"12:00 AM\")+TIMEVALUE(\"12, 05\")",
+   "powerbi": "12/30/1899 00:00:00"
+  },
+  {
+   "expr": "DATEVALUE(\"12:00 AM\")+TIMEVALUE(\"12:00 AM\")",
+   "powerbi": "12/30/1899 00:00:00"
+  },
+  {
+   "expr": "DATEVALUE(\"12:00 AM\")+TIMEVALUE(\"23:59:59\")",
+   "powerbi": "12/30/1899 23:59:59"
+  },
+  {
+   "expr": "DATEVALUE(\"12:00 AM\")+TIMEVALUE(\"3 4/50\")",
+   "powerbi": "12/30/1899 00:00:00"
+  },
+  {
+   "expr": "DATEVALUE(\"12:00 AM\")+TIMEVALUE(\"6 30/01\")",
+   "powerbi": "12/30/1899 00:00:00"
+  },
+  {
+   "expr": "DATEVALUE(\"12:00 AM\")+TIMEVALUE(\"9:15\")",
+   "powerbi": "12/30/1899 09:15:00"
+  },
+  {
+   "expr": "DATEVALUE(\"13:00:01\")",
+   "powerbi": "12/30/1899 00:00:00"
+  },
+  {
+   "expr": "DATEVALUE(\"13:00:01\")+TIMEVALUE(\"1,99\")",
+   "powerbi": "12/30/1899 00:00:00"
+  },
+  {
+   "expr": "DATEVALUE(\"13:00:01\")+TIMEVALUE(\"11:45 AM\")",
+   "powerbi": "12/30/1899 11:45:00"
+  },
+  {
+   "expr": "DATEVALUE(\"13:00:01\")+TIMEVALUE(\"12:00 AM\")",
+   "powerbi": "12/30/1899 00:00:00"
+  },
+  {
+   "expr": "DATEVALUE(\"13:00:01\")+TIMEVALUE(\"2 29/2020\")",
+   "powerbi": "12/30/1899 00:00:00"
+  },
+  {
+   "expr": "DATEVALUE(\"13:00:01\")+TIMEVALUE(\"2,2021\")",
+   "powerbi": "12/30/1899 00:00:00"
+  },
+  {
+   "expr": "DATEVALUE(\"13:00:01\")+TIMEVALUE(\"2020-01-02\")",
+   "powerbi": "12/30/1899 00:00:00"
+  },
+  {
+   "expr": "DATEVALUE(\"13:00:01\")+TIMEVALUE(\"6 30/01\")",
+   "powerbi": "12/30/1899 00:00:00"
+  },
+  {
+   "expr": "DATEVALUE(\"13:00:01\")+TIMEVALUE(\"7, 2015\")",
+   "powerbi": "12/30/1899 00:00:00"
+  },
+  {
+   "expr": "DATEVALUE(\"13:00:01\")+TIMEVALUE(\"9:15\")",
+   "powerbi": "12/30/1899 09:15:00"
+  },
+  {
+   "expr": "DATEVALUE(\"2 29/2020\")",
+   "powerbi": "02/29/2020 00:00:00"
+  },
+  {
+   "expr": "DATEVALUE(\"2 29/2020\")+TIMEVALUE(\"1/2/2020\")",
+   "powerbi": "02/29/2020 00:00:00"
+  },
+  {
+   "expr": "DATEVALUE(\"2 29/2020\")+TIMEVALUE(\"11:45 AM\")",
+   "powerbi": "02/29/2020 11:45:00"
+  },
+  {
+   "expr": "DATEVALUE(\"2 29/2020\")+TIMEVALUE(\"12, 05\")",
+   "powerbi": "02/29/2020 00:00:00"
+  },
+  {
+   "expr": "DATEVALUE(\"2 29/2020\")+TIMEVALUE(\"2,2021\")",
+   "powerbi": "02/29/2020 00:00:00"
+  },
+  {
+   "expr": "DATEVALUE(\"2 29/2020\")+TIMEVALUE(\"4 15/2019\")",
+   "powerbi": "02/29/2020 00:00:00"
+  },
+  {
+   "expr": "DATEVALUE(\"2 29/2020\")+TIMEVALUE(\"5 5/5\")",
+   "powerbi": "02/29/2020 00:00:00"
+  },
+  {
+   "expr": "DATEVALUE(\"2 29/2020\")+TIMEVALUE(\"6 30/01\")",
+   "powerbi": "02/29/2020 00:00:00"
+  },
+  {
+   "expr": "DATEVALUE(\"2 29/2020\")+TIMEVALUE(\"7/4/21\")",
+   "powerbi": "02/29/2020 00:00:00"
+  },
+  {
+   "expr": "DATEVALUE(\"2 29/2020\")+TIMEVALUE(\"9:15\")",
+   "powerbi": "02/29/2020 09:15:00"
+  },
+  {
+   "expr": "DATEVALUE(\"2, 2021\")",
+   "powerbi": "02/01/2021 00:00:00"
+  },
+  {
+   "expr": "DATEVALUE(\"2, 2021\")+TIMEVALUE(\"1 2/2020\")",
+   "powerbi": "02/01/2021 00:00:00"
+  },
+  {
+   "expr": "DATEVALUE(\"2, 2021\")+TIMEVALUE(\"1/2/2020 3:04 PM\")",
+   "powerbi": "02/01/2021 15:04:00"
+  },
+  {
+   "expr": "DATEVALUE(\"2, 2021\")+TIMEVALUE(\"1/2/2020\")",
+   "powerbi": "02/01/2021 00:00:00"
+  },
+  {
+   "expr": "DATEVALUE(\"2, 2021\")+TIMEVALUE(\"12 31/99\")",
+   "powerbi": "02/01/2021 00:00:00"
+  },
+  {
+   "expr": "DATEVALUE(\"2, 2021\")+TIMEVALUE(\"12:00 AM\")",
+   "powerbi": "02/01/2021 00:00:00"
+  },
+  {
+   "expr": "DATEVALUE(\"2, 2021\")+TIMEVALUE(\"2,2021\")",
+   "powerbi": "02/01/2021 00:00:00"
+  },
+  {
+   "expr": "DATEVALUE(\"2, 2021\")+TIMEVALUE(\"3 4/50\")",
+   "powerbi": "02/01/2021 00:00:00"
+  },
+  {
+   "expr": "DATEVALUE(\"2, 2021\")+TIMEVALUE(\"7/4/21\")",
+   "powerbi": "02/01/2021 00:00:00"
+  },
+  {
+   "expr": "DATEVALUE(\"2, 2021\")+TIMEVALUE(\"Jan 2, 2020\")",
+   "powerbi": "02/01/2021 00:00:00"
+  },
+  {
+   "expr": "DATEVALUE(\"2,2021\")",
+   "powerbi": "02/01/2021 00:00:00"
+  },
+  {
+   "expr": "DATEVALUE(\"2,2021\")+TIMEVALUE(\"1 2/2020\")",
+   "powerbi": "02/01/2021 00:00:00"
+  },
+  {
+   "expr": "DATEVALUE(\"2,2021\")+TIMEVALUE(\"1,99\")",
+   "powerbi": "02/01/2021 00:00:00"
+  },
+  {
+   "expr": "DATEVALUE(\"2,2021\")+TIMEVALUE(\"1/2/2020\")",
+   "powerbi": "02/01/2021 00:00:00"
+  },
+  {
+   "expr": "DATEVALUE(\"2,2021\")+TIMEVALUE(\"10:30\")",
+   "powerbi": "02/01/2021 10:30:00"
+  },
+  {
+   "expr": "DATEVALUE(\"2,2021\")+TIMEVALUE(\"11:45 AM\")",
+   "powerbi": "02/01/2021 11:45:00"
+  },
+  {
+   "expr": "DATEVALUE(\"2,2021\")+TIMEVALUE(\"12 31/99\")",
+   "powerbi": "02/01/2021 00:00:00"
+  },
+  {
+   "expr": "DATEVALUE(\"2,2021\")+TIMEVALUE(\"12:00 AM\")",
+   "powerbi": "02/01/2021 00:00:00"
+  },
+  {
+   "expr": "DATEVALUE(\"2,2021\")+TIMEVALUE(\"13:00:01\")",
+   "powerbi": "02/01/2021 13:00:01"
+  },
+  {
+   "expr": "DATEVALUE(\"2,2021\")+TIMEVALUE(\"2,2021\")",
+   "powerbi": "02/01/2021 00:00:00"
+  },
+  {
+   "expr": "DATEVALUE(\"2,2021\")+TIMEVALUE(\"2020-01-02\")",
+   "powerbi": "02/01/2021 00:00:00"
+  },
+  {
+   "expr": "DATEVALUE(\"2,2021\")+TIMEVALUE(\"23:59:59\")",
+   "powerbi": "02/01/2021 23:59:59"
+  },
+  {
+   "expr": "DATEVALUE(\"2,2021\")+TIMEVALUE(\"3 4/49\")",
+   "powerbi": "02/01/2021 00:00:00"
+  },
+  {
+   "expr": "DATEVALUE(\"2,2021\")+TIMEVALUE(\"4 15/2019\")",
+   "powerbi": "02/01/2021 00:00:00"
+  },
+  {
+   "expr": "DATEVALUE(\"2,2021\")+TIMEVALUE(\"5 5/5\")",
+   "powerbi": "02/01/2021 00:00:00"
+  },
+  {
+   "expr": "DATEVALUE(\"2,2021\")+TIMEVALUE(\"9:15\")",
+   "powerbi": "02/01/2021 09:15:00"
+  },
+  {
+   "expr": "DATEVALUE(\"2,2021\")+TIMEVALUE(\"Jan 2, 2020\")",
+   "powerbi": "02/01/2021 00:00:00"
+  },
+  {
+   "expr": "DATEVALUE(\"2020-01-02\")",
+   "powerbi": "01/02/2020 00:00:00"
+  },
+  {
+   "expr": "DATEVALUE(\"2020-01-02\")+TIMEVALUE(\"1/2/2020 3:04 PM\")",
+   "powerbi": "01/02/2020 15:04:00"
+  },
+  {
+   "expr": "DATEVALUE(\"2020-01-02\")+TIMEVALUE(\"1/2/2020\")",
+   "powerbi": "01/02/2020 00:00:00"
+  },
+  {
+   "expr": "DATEVALUE(\"2020-01-02\")+TIMEVALUE(\"11:45 AM\")",
+   "powerbi": "01/02/2020 11:45:00"
+  },
+  {
+   "expr": "DATEVALUE(\"2020-01-02\")+TIMEVALUE(\"12:00 AM\")",
+   "powerbi": "01/02/2020 00:00:00"
+  },
+  {
+   "expr": "DATEVALUE(\"2020-01-02\")+TIMEVALUE(\"2 29/2020\")",
+   "powerbi": "01/02/2020 00:00:00"
+  },
+  {
+   "expr": "DATEVALUE(\"2020-01-02\")+TIMEVALUE(\"2020-01-02\")",
+   "powerbi": "01/02/2020 00:00:00"
+  },
+  {
+   "expr": "DATEVALUE(\"2020-01-02\")+TIMEVALUE(\"23:59:59\")",
+   "powerbi": "01/02/2020 23:59:59"
+  },
+  {
+   "expr": "DATEVALUE(\"2020-01-02\")+TIMEVALUE(\"3 4/49\")",
+   "powerbi": "01/02/2020 00:00:00"
+  },
+  {
+   "expr": "DATEVALUE(\"2020-01-02\")+TIMEVALUE(\"4 15/2019\")",
+   "powerbi": "01/02/2020 00:00:00"
+  },
+  {
+   "expr": "DATEVALUE(\"2020-01-02\")+TIMEVALUE(\"5 5/5\")",
+   "powerbi": "01/02/2020 00:00:00"
+  },
+  {
+   "expr": "DATEVALUE(\"2020-01-02\")+TIMEVALUE(\"7, 2015\")",
+   "powerbi": "01/02/2020 00:00:00"
+  },
+  {
+   "expr": "DATEVALUE(\"2020-01-02\")+TIMEVALUE(\"7/4/21\")",
+   "powerbi": "01/02/2020 00:00:00"
+  },
+  {
+   "expr": "DATEVALUE(\"2020-01-02\")+TIMEVALUE(\"9:15\")",
+   "powerbi": "01/02/2020 09:15:00"
+  },
+  {
+   "expr": "DATEVALUE(\"23:59:59\")+TIMEVALUE(\"1 2/2020\")",
+   "powerbi": "12/30/1899 00:00:00"
+  },
+  {
+   "expr": "DATEVALUE(\"23:59:59\")+TIMEVALUE(\"1/2/2020 3:04 PM\")",
+   "powerbi": "12/30/1899 15:04:00"
+  },
+  {
+   "expr": "DATEVALUE(\"23:59:59\")+TIMEVALUE(\"10:30 PM\")",
+   "powerbi": "12/30/1899 22:30:00"
+  },
+  {
+   "expr": "DATEVALUE(\"23:59:59\")+TIMEVALUE(\"11, 99\")",
+   "powerbi": "12/30/1899 00:00:00"
+  },
+  {
+   "expr": "DATEVALUE(\"23:59:59\")+TIMEVALUE(\"12 31/99\")",
+   "powerbi": "12/30/1899 00:00:00"
+  },
+  {
+   "expr": "DATEVALUE(\"23:59:59\")+TIMEVALUE(\"13:00:01\")",
+   "powerbi": "12/30/1899 13:00:01"
+  },
+  {
+   "expr": "DATEVALUE(\"23:59:59\")+TIMEVALUE(\"2 29/2020\")",
+   "powerbi": "12/30/1899 00:00:00"
+  },
+  {
+   "expr": "DATEVALUE(\"23:59:59\")+TIMEVALUE(\"2,2021\")",
+   "powerbi": "12/30/1899 00:00:00"
+  },
+  {
+   "expr": "DATEVALUE(\"23:59:59\")+TIMEVALUE(\"2020-01-02\")",
+   "powerbi": "12/30/1899 00:00:00"
+  },
+  {
+   "expr": "DATEVALUE(\"23:59:59\")+TIMEVALUE(\"5 5/5\")",
+   "powerbi": "12/30/1899 00:00:00"
+  },
+  {
+   "expr": "DATEVALUE(\"23:59:59\")+TIMEVALUE(\"6 30/01\")",
+   "powerbi": "12/30/1899 00:00:00"
+  },
+  {
+   "expr": "DATEVALUE(\"23:59:59\")+TIMEVALUE(\"9:15\")",
+   "powerbi": "12/30/1899 09:15:00"
+  },
+  {
+   "expr": "DATEVALUE(\"3 4/49\")",
+   "powerbi": "03/04/2049 00:00:00"
+  },
+  {
+   "expr": "DATEVALUE(\"3 4/49\")+TIMEVALUE(\"1/2/2020 3:04 PM\")",
+   "powerbi": "03/04/2049 15:04:00"
+  },
+  {
+   "expr": "DATEVALUE(\"3 4/49\")+TIMEVALUE(\"10:30 PM\")",
+   "powerbi": "03/04/2049 22:30:00"
+  },
+  {
+   "expr": "DATEVALUE(\"3 4/49\")+TIMEVALUE(\"10:30\")",
+   "powerbi": "03/04/2049 10:30:00"
+  },
+  {
+   "expr": "DATEVALUE(\"3 4/49\")+TIMEVALUE(\"11, 99\")",
+   "powerbi": "03/04/2049 00:00:00"
+  },
+  {
+   "expr": "DATEVALUE(\"3 4/49\")+TIMEVALUE(\"12 31/99\")",
+   "powerbi": "03/04/2049 00:00:00"
+  },
+  {
+   "expr": "DATEVALUE(\"3 4/49\")+TIMEVALUE(\"12:00 AM\")",
+   "powerbi": "03/04/2049 00:00:00"
+  },
+  {
+   "expr": "DATEVALUE(\"3 4/49\")+TIMEVALUE(\"3 4/49\")",
+   "powerbi": "03/04/2049 00:00:00"
+  },
+  {
+   "expr": "DATEVALUE(\"3 4/49\")+TIMEVALUE(\"3 4/50\")",
+   "powerbi": "03/04/2049 00:00:00"
+  },
+  {
+   "expr": "DATEVALUE(\"3 4/49\")+TIMEVALUE(\"5 5/5\")",
+   "powerbi": "03/04/2049 00:00:00"
+  },
+  {
+   "expr": "DATEVALUE(\"3 4/49\")+TIMEVALUE(\"7/4/21\")",
+   "powerbi": "03/04/2049 00:00:00"
+  },
+  {
+   "expr": "DATEVALUE(\"3 4/50\")",
+   "powerbi": "03/04/1950 00:00:00"
+  },
+  {
+   "expr": "DATEVALUE(\"3 4/50\")+TIMEVALUE(\"1,99\")",
+   "powerbi": "03/04/1950 00:00:00"
+  },
+  {
+   "expr": "DATEVALUE(\"3 4/50\")+TIMEVALUE(\"1/2/2020\")",
+   "powerbi": "03/04/1950 00:00:00"
+  },
+  {
+   "expr": "DATEVALUE(\"3 4/50\")+TIMEVALUE(\"10:30\")",
+   "powerbi": "03/04/1950 10:30:00"
+  },
+  {
+   "expr": "DATEVALUE(\"3 4/50\")+TIMEVALUE(\"11, 99\")",
+   "powerbi": "03/04/1950 00:00:00"
+  },
+  {
+   "expr": "DATEVALUE(\"3 4/50\")+TIMEVALUE(\"12 31/99\")",
+   "powerbi": "03/04/1950 00:00:00"
+  },
+  {
+   "expr": "DATEVALUE(\"3 4/50\")+TIMEVALUE(\"13:00:01\")",
+   "powerbi": "03/04/1950 13:00:01"
+  },
+  {
+   "expr": "DATEVALUE(\"3 4/50\")+TIMEVALUE(\"2 29/2020\")",
+   "powerbi": "03/04/1950 00:00:00"
+  },
+  {
+   "expr": "DATEVALUE(\"3 4/50\")+TIMEVALUE(\"2,2021\")",
+   "powerbi": "03/04/1950 00:00:00"
+  },
+  {
+   "expr": "DATEVALUE(\"3 4/50\")+TIMEVALUE(\"2020-01-02\")",
+   "powerbi": "03/04/1950 00:00:00"
+  },
+  {
+   "expr": "DATEVALUE(\"3 4/50\")+TIMEVALUE(\"23:59:59\")",
+   "powerbi": "03/04/1950 23:59:59"
+  },
+  {
+   "expr": "DATEVALUE(\"3 4/50\")+TIMEVALUE(\"3 4/50\")",
+   "powerbi": "03/04/1950 00:00:00"
+  },
+  {
+   "expr": "DATEVALUE(\"3 4/50\")+TIMEVALUE(\"4 15/2019\")",
+   "powerbi": "03/04/1950 00:00:00"
+  },
+  {
+   "expr": "DATEVALUE(\"3 4/50\")+TIMEVALUE(\"7, 2015\")",
+   "powerbi": "03/04/1950 00:00:00"
+  },
+  {
+   "expr": "DATEVALUE(\"3 4/50\")+TIMEVALUE(\"7/4/21\")",
+   "powerbi": "03/04/1950 00:00:00"
+  },
+  {
+   "expr": "DATEVALUE(\"3 4/50\")+TIMEVALUE(\"Jan 2, 2020\")",
+   "powerbi": "03/04/1950 00:00:00"
+  },
+  {
+   "expr": "DATEVALUE(\"4 15/2019\")",
+   "powerbi": "04/15/2019 00:00:00"
+  },
+  {
+   "expr": "DATEVALUE(\"4 15/2019\")+TIMEVALUE(\"1/2/2020 3:04 PM\")",
+   "powerbi": "04/15/2019 15:04:00"
+  },
+  {
+   "expr": "DATEVALUE(\"4 15/2019\")+TIMEVALUE(\"1/2/2020\")",
+   "powerbi": "04/15/2019 00:00:00"
+  },
+  {
+   "expr": "DATEVALUE(\"4 15/2019\")+TIMEVALUE(\"11:45 AM\")",
+   "powerbi": "04/15/2019 11:45:00"
+  },
+  {
+   "expr": "DATEVALUE(\"4 15/2019\")+TIMEVALUE(\"12, 05\")",
+   "powerbi": "04/15/2019 00:00:00"
+  },
+  {
+   "expr": "DATEVALUE(\"4 15/2019\")+TIMEVALUE(\"12:00 AM\")",
+   "powerbi": "04/15/2019 00:00:00"
+  },
+  {
+   "expr": "DATEVALUE(\"4 15/2019\")+TIMEVALUE(\"2 29/2020\")",
+   "powerbi": "04/15/2019 00:00:00"
+  },
+  {
+   "expr": "DATEVALUE(\"4 15/2019\")+TIMEVALUE(\"2,2021\")",
+   "powerbi": "04/15/2019 00:00:00"
+  },
+  {
+   "expr": "DATEVALUE(\"4 15/2019\")+TIMEVALUE(\"2020-01-02\")",
+   "powerbi": "04/15/2019 00:00:00"
+  },
+  {
+   "expr": "DATEVALUE(\"4 15/2019\")+TIMEVALUE(\"23:59:59\")",
+   "powerbi": "04/15/2019 23:59:59"
+  },
+  {
+   "expr": "DATEVALUE(\"4 15/2019\")+TIMEVALUE(\"4 15/2019\")",
+   "powerbi": "04/15/2019 00:00:00"
+  },
+  {
+   "expr": "DATEVALUE(\"4 15/2019\")+TIMEVALUE(\"5 5/5\")",
+   "powerbi": "04/15/2019 00:00:00"
+  },
+  {
+   "expr": "DATEVALUE(\"4 15/2019\")+TIMEVALUE(\"Jan 2, 2020\")",
+   "powerbi": "04/15/2019 00:00:00"
+  },
+  {
+   "expr": "DATEVALUE(\"5 5/5\")",
+   "powerbi": "05/05/2005 00:00:00"
+  },
+  {
+   "expr": "DATEVALUE(\"5 5/5\")+TIMEVALUE(\"1 2/2020\")",
+   "powerbi": "05/05/2005 00:00:00"
+  },
+  {
+   "expr": "DATEVALUE(\"5 5/5\")+TIMEVALUE(\"1,99\")",
+   "powerbi": "05/05/2005 00:00:00"
+  },
+  {
+   "expr": "DATEVALUE(\"5 5/5\")+TIMEVALUE(\"1/2/2020\")",
+   "powerbi": "05/05/2005 00:00:00"
+  },
+  {
+   "expr": "DATEVALUE(\"5 5/5\")+TIMEVALUE(\"10:30 PM\")",
+   "powerbi": "05/05/2005 22:30:00"
+  },
+  {
+   "expr": "DATEVALUE(\"5 5/5\")+TIMEVALUE(\"10:30\")",
+   "powerbi": "05/05/2005 10:30:00"
+  },
+  {
+   "expr": "DATEVALUE(\"5 5/5\")+TIMEVALUE(\"12, 05\")",
+   "powerbi": "05/05/2005 00:00:00"
+  },
+  {
+   "expr": "DATEVALUE(\"5 5/5\")+TIMEVALUE(\"13:00:01\")",
+   "powerbi": "05/05/2005 13:00:01"
+  },
+  {
+   "expr": "DATEVALUE(\"5 5/5\")+TIMEVALUE(\"2 29/2020\")",
+   "powerbi": "05/05/2005 00:00:00"
+  },
+  {
+   "expr": "DATEVALUE(\"5 5/5\")+TIMEVALUE(\"2020-01-02\")",
+   "powerbi": "05/05/2005 00:00:00"
+  },
+  {
+   "expr": "DATEVALUE(\"5 5/5\")+TIMEVALUE(\"23:59:59\")",
+   "powerbi": "05/05/2005 23:59:59"
+  },
+  {
+   "expr": "DATEVALUE(\"5 5/5\")+TIMEVALUE(\"3 4/49\")",
+   "powerbi": "05/05/2005 00:00:00"
+  },
+  {
+   "expr": "DATEVALUE(\"5 5/5\")+TIMEVALUE(\"3 4/50\")",
+   "powerbi": "05/05/2005 00:00:00"
+  },
+  {
+   "expr": "DATEVALUE(\"5 5/5\")+TIMEVALUE(\"6 30/01\")",
+   "powerbi": "05/05/2005 00:00:00"
+  },
+  {
+   "expr": "DATEVALUE(\"6 30/01\")",
+   "powerbi": "06/30/2001 00:00:00"
+  },
+  {
+   "expr": "DATEVALUE(\"6 30/01\")+TIMEVALUE(\"1,99\")",
+   "powerbi": "06/30/2001 00:00:00"
+  },
+  {
+   "expr": "DATEVALUE(\"6 30/01\")+TIMEVALUE(\"1/2/2020\")",
+   "powerbi": "06/30/2001 00:00:00"
+  },
+  {
+   "expr": "DATEVALUE(\"6 30/01\")+TIMEVALUE(\"12:00 AM\")",
+   "powerbi": "06/30/2001 00:00:00"
+  },
+  {
+   "expr": "DATEVALUE(\"6 30/01\")+TIMEVALUE(\"2 29/2020\")",
+   "powerbi": "06/30/2001 00:00:00"
+  },
+  {
+   "expr": "DATEVALUE(\"6 30/01\")+TIMEVALUE(\"3 4/50\")",
+   "powerbi": "06/30/2001 00:00:00"
+  },
+  {
+   "expr": "DATEVALUE(\"6 30/01\")+TIMEVALUE(\"6 30/01\")",
+   "powerbi": "06/30/2001 00:00:00"
+  },
+  {
+   "expr": "DATEVALUE(\"6 30/01\")+TIMEVALUE(\"7, 2015\")",
+   "powerbi": "06/30/2001 00:00:00"
+  },
+  {
+   "expr": "DATEVALUE(\"6 30/01\")+TIMEVALUE(\"7/4/21\")",
+   "powerbi": "06/30/2001 00:00:00"
+  },
+  {
+   "expr": "DATEVALUE(\"6 30/01\")+TIMEVALUE(\"9:15\")",
+   "powerbi": "06/30/2001 09:15:00"
+  },
+  {
+   "expr": "DATEVALUE(\"7, 2015\")",
+   "powerbi": "07/01/2015 00:00:00"
+  },
+  {
+   "expr": "DATEVALUE(\"7, 2015\")+TIMEVALUE(\"1/2/2020 3:04 PM\")",
+   "powerbi": "07/01/2015 15:04:00"
+  },
+  {
+   "expr": "DATEVALUE(\"7, 2015\")+TIMEVALUE(\"1/2/2020\")",
+   "powerbi": "07/01/2015 00:00:00"
+  },
+  {
+   "expr": "DATEVALUE(\"7, 2015\")+TIMEVALUE(\"11:45 AM\")",
+   "powerbi": "07/01/2015 11:45:00"
+  },
+  {
+   "expr": "DATEVALUE(\"7, 2015\")+TIMEVALUE(\"12, 05\")",
+   "powerbi": "07/01/2015 00:00:00"
+  },
+  {
+   "expr": "DATEVALUE(\"7, 2015\")+TIMEVALUE(\"12:00 AM\")",
+   "powerbi": "07/01/2015 00:00:00"
+  },
+  {
+   "expr": "DATEVALUE(\"7, 2015\")+TIMEVALUE(\"2020-01-02\")",
+   "powerbi": "07/01/2015 00:00:00"
+  },
+  {
+   "expr": "DATEVALUE(\"7, 2015\")+TIMEVALUE(\"23:59:59\")",
+   "powerbi": "07/01/2015 23:59:59"
+  },
+  {
+   "expr": "DATEVALUE(\"7, 2015\")+TIMEVALUE(\"3 4/50\")",
+   "powerbi": "07/01/2015 00:00:00"
+  },
+  {
+   "expr": "DATEVALUE(\"7, 2015\")+TIMEVALUE(\"5 5/5\")",
+   "powerbi": "07/01/2015 00:00:00"
+  },
+  {
+   "expr": "DATEVALUE(\"7, 2015\")+TIMEVALUE(\"9:15\")",
+   "powerbi": "07/01/2015 09:15:00"
+  },
+  {
+   "expr": "DATEVALUE(\"7/4/21\")+TIMEVALUE(\"1 2/2020\")",
+   "powerbi": "07/04/2021 00:00:00"
+  },
+  {
+   "expr": "DATEVALUE(\"7/4/21\")+TIMEVALUE(\"1/2/2020 3:04 PM\")",
+   "powerbi": "07/04/2021 15:04:00"
+  },
+  {
+   "expr": "DATEVALUE(\"7/4/21\")+TIMEVALUE(\"10:30\")",
+   "powerbi": "07/04/2021 10:30:00"
+  },
+  {
+   "expr": "DATEVALUE(\"7/4/21\")+TIMEVALUE(\"12 31/99\")",
+   "powerbi": "07/04/2021 00:00:00"
+  },
+  {
+   "expr": "DATEVALUE(\"7/4/21\")+TIMEVALUE(\"12:00 AM\")",
+   "powerbi": "07/04/2021 00:00:00"
+  },
+  {
+   "expr": "DATEVALUE(\"7/4/21\")+TIMEVALUE(\"13:00:01\")",
+   "powerbi": "07/04/2021 13:00:01"
+  },
+  {
+   "expr": "DATEVALUE(\"7/4/21\")+TIMEVALUE(\"2, 2021\")",
+   "powerbi": "07/04/2021 00:00:00"
+  },
+  {
+   "expr": "DATEVALUE(\"7/4/21\")+TIMEVALUE(\"2020-01-02\")",
+   "powerbi": "07/04/2021 00:00:00"
+  },
+  {
+   "expr": "DATEVALUE(\"7/4/21\")+TIMEVALUE(\"5 5/5\")",
+   "powerbi": "07/04/2021 00:00:00"
+  },
+  {
+   "expr": "DATEVALUE(\"7/4/21\")+TIMEVALUE(\"Jan 2, 2020\")",
+   "powerbi": "07/04/2021 00:00:00"
+  },
+  {
+   "expr": "DATEVALUE(\"9:15\")",
+   "powerbi": "12/30/1899 00:00:00"
+  },
+  {
+   "expr": "DATEVALUE(\"9:15\")+TIMEVALUE(\"1,99\")",
+   "powerbi": "12/30/1899 00:00:00"
+  },
+  {
+   "expr": "DATEVALUE(\"9:15\")+TIMEVALUE(\"1/2/2020 3:04 PM\")",
+   "powerbi": "12/30/1899 15:04:00"
+  },
+  {
+   "expr": "DATEVALUE(\"9:15\")+TIMEVALUE(\"12, 05\")",
+   "powerbi": "12/30/1899 00:00:00"
+  },
+  {
+   "expr": "DATEVALUE(\"9:15\")+TIMEVALUE(\"13:00:01\")",
+   "powerbi": "12/30/1899 13:00:01"
+  },
+  {
+   "expr": "DATEVALUE(\"9:15\")+TIMEVALUE(\"3 4/50\")",
+   "powerbi": "12/30/1899 00:00:00"
+  },
+  {
+   "expr": "DATEVALUE(\"9:15\")+TIMEVALUE(\"4 15/2019\")",
+   "powerbi": "12/30/1899 00:00:00"
+  },
+  {
+   "expr": "DATEVALUE(\"9:15\")+TIMEVALUE(\"6 30/01\")",
+   "powerbi": "12/30/1899 00:00:00"
+  },
+  {
+   "expr": "DATEVALUE(\"9:15\")+TIMEVALUE(\"7, 2015\")",
+   "powerbi": "12/30/1899 00:00:00"
+  },
+  {
+   "expr": "DATEVALUE(\"9:15\")+TIMEVALUE(\"7/4/21\")",
+   "powerbi": "12/30/1899 00:00:00"
+  },
+  {
+   "expr": "DATEVALUE(\"9:15\")+TIMEVALUE(\"Jan 2, 2020\")",
+   "powerbi": "12/30/1899 00:00:00"
+  },
+  {
+   "expr": "DATEVALUE(\"Jan 2, 2020\")+TIMEVALUE(\"1/2/2020 3:04 PM\")",
+   "powerbi": "01/02/2020 15:04:00"
+  },
+  {
+   "expr": "DATEVALUE(\"Jan 2, 2020\")+TIMEVALUE(\"10:30 PM\")",
+   "powerbi": "01/02/2020 22:30:00"
+  },
+  {
+   "expr": "DATEVALUE(\"Jan 2, 2020\")+TIMEVALUE(\"12:00 AM\")",
+   "powerbi": "01/02/2020 00:00:00"
+  },
+  {
+   "expr": "DATEVALUE(\"Jan 2, 2020\")+TIMEVALUE(\"2,2021\")",
+   "powerbi": "01/02/2020 00:00:00"
+  },
+  {
+   "expr": "DATEVALUE(\"Jan 2, 2020\")+TIMEVALUE(\"2020-01-02\")",
+   "powerbi": "01/02/2020 00:00:00"
+  },
+  {
+   "expr": "DATEVALUE(\"Jan 2, 2020\")+TIMEVALUE(\"3 4/49\")",
+   "powerbi": "01/02/2020 00:00:00"
+  },
+  {
+   "expr": "DATEVALUE(\"Jan 2, 2020\")+TIMEVALUE(\"5 5/5\")",
+   "powerbi": "01/02/2020 00:00:00"
+  },
+  {
+   "expr": "DATEVALUE(\"Jan 2, 2020\")+TIMEVALUE(\"7/4/21\")",
+   "powerbi": "01/02/2020 00:00:00"
+  },
+  {
+   "expr": "DATEVALUE(\"Jan 2, 2020\")+TIMEVALUE(\"9:15\")",
+   "powerbi": "01/02/2020 09:15:00"
+  },
+  {
+   "expr": "DAY(DATEVALUE(\"1 2/2020\"))",
+   "powerbi": "2"
+  },
+  {
+   "expr": "DAY(DATEVALUE(\"1,99\"))",
+   "powerbi": "1"
+  },
+  {
+   "expr": "DAY(DATEVALUE(\"1/2/2020 3:04 PM\"))",
+   "powerbi": "2"
+  },
+  {
+   "expr": "DAY(DATEVALUE(\"1/2/2020\"))",
+   "powerbi": "2"
+  },
+  {
+   "expr": "DAY(DATEVALUE(\"10:30 PM\"))",
+   "powerbi": "30"
+  },
+  {
+   "expr": "DAY(DATEVALUE(\"10:30\"))",
+   "powerbi": "30"
+  },
+  {
+   "expr": "DAY(DATEVALUE(\"11, 99\"))",
+   "powerbi": "1"
+  },
+  {
+   "expr": "DAY(DATEVALUE(\"11:45 AM\"))",
+   "powerbi": "30"
+  },
+  {
+   "expr": "DAY(DATEVALUE(\"12 31/99\"))",
+   "powerbi": "31"
+  },
+  {
+   "expr": "DAY(DATEVALUE(\"12, 05\"))",
+   "powerbi": "5"
+  },
+  {
+   "expr": "DAY(DATEVALUE(\"12:00 AM\"))",
+   "powerbi": "30"
+  },
+  {
+   "expr": "DAY(DATEVALUE(\"13:00:01\"))",
+   "powerbi": "30"
+  },
+  {
+   "expr": "DAY(DATEVALUE(\"2 29/2020\"))",
+   "powerbi": "29"
+  },
+  {
+   "expr": "DAY(DATEVALUE(\"2,2021\"))",
+   "powerbi": "1"
+  },
+  {
+   "expr": "DAY(DATEVALUE(\"23:59:59\"))",
+   "powerbi": "30"
+  },
+  {
+   "expr": "DAY(DATEVALUE(\"4 15/2019\"))",
+   "powerbi": "15"
+  },
+  {
+   "expr": "DAY(DATEVALUE(\"6 30/01\"))",
+   "powerbi": "30"
+  },
+  {
+   "expr": "DAY(DATEVALUE(\"7, 2015\"))",
+   "powerbi": "1"
+  },
+  {
+   "expr": "DAY(DATEVALUE(\"7/4/21\"))",
+   "powerbi": "4"
+  },
+  {
+   "expr": "DAY(DATEVALUE(\"9:15\"))",
+   "powerbi": "30"
+  },
+  {
+   "expr": "DAY(DATEVALUE(\"Jan 2, 2020\"))",
+   "powerbi": "2"
+  },
+  {
+   "expr": "FORMAT(DATEVALUE(\"1,99\"),\"yyyy-mm-dd\")",
+   "powerbi": "1999-01-01"
+  },
+  {
+   "expr": "FORMAT(DATEVALUE(\"1/2/2020 3:04 PM\"),\"yyyy-mm-dd\")",
+   "powerbi": "2020-01-02"
+  },
+  {
+   "expr": "FORMAT(DATEVALUE(\"10:30 PM\"),\"yyyy-mm-dd\")",
+   "powerbi": "1899-12-30"
+  },
+  {
+   "expr": "FORMAT(DATEVALUE(\"11, 99\"),\"yyyy-mm-dd\")",
+   "powerbi": "1999-11-01"
+  },
+  {
+   "expr": "FORMAT(DATEVALUE(\"11:45 AM\"),\"yyyy-mm-dd\")",
+   "powerbi": "1899-12-30"
+  },
+  {
+   "expr": "FORMAT(DATEVALUE(\"12 31/99\"),\"yyyy-mm-dd\")",
+   "powerbi": "1999-12-31"
+  },
+  {
+   "expr": "FORMAT(DATEVALUE(\"12, 05\"),\"yyyy-mm-dd\")",
+   "powerbi": "2026-12-05"
+  },
+  {
+   "expr": "FORMAT(DATEVALUE(\"13:00:01\"),\"yyyy-mm-dd\")",
+   "powerbi": "1899-12-30"
+  },
+  {
+   "expr": "FORMAT(DATEVALUE(\"2 29/2020\"),\"yyyy-mm-dd\")",
+   "powerbi": "2020-02-29"
+  },
+  {
+   "expr": "FORMAT(DATEVALUE(\"2020-01-02\"),\"yyyy-mm-dd\")",
+   "powerbi": "2020-01-02"
+  },
+  {
+   "expr": "FORMAT(DATEVALUE(\"4 15/2019\"),\"yyyy-mm-dd\")",
+   "powerbi": "2019-04-15"
+  },
+  {
+   "expr": "FORMAT(DATEVALUE(\"5 5/5\"),\"yyyy-mm-dd\")",
+   "powerbi": "2005-05-05"
+  },
+  {
+   "expr": "FORMAT(DATEVALUE(\"6 30/01\"),\"yyyy-mm-dd\")",
+   "powerbi": "2001-06-30"
+  },
+  {
+   "expr": "FORMAT(DATEVALUE(\"7, 2015\"),\"yyyy-mm-dd\")",
+   "powerbi": "2015-07-01"
+  },
+  {
+   "expr": "FORMAT(DATEVALUE(\"7/4/21\"),\"yyyy-mm-dd\")",
+   "powerbi": "2021-07-04"
+  },
+  {
+   "expr": "FORMAT(DATEVALUE(\"9:15\"),\"yyyy-mm-dd\")",
+   "powerbi": "1899-12-30"
+  },
+  {
+   "expr": "FORMAT(DATEVALUE(\"Jan 2, 2020\"),\"yyyy-mm-dd\")",
+   "powerbi": "2020-01-02"
+  },
+  {
+   "expr": "HOUR(TIMEVALUE(\"1 2/2020\"))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "HOUR(TIMEVALUE(\"1,99\"))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "HOUR(TIMEVALUE(\"11, 99\"))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "HOUR(TIMEVALUE(\"11:45 AM\"))",
+   "powerbi": "11"
+  },
+  {
+   "expr": "HOUR(TIMEVALUE(\"12 31/99\"))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "HOUR(TIMEVALUE(\"12, 05\"))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "HOUR(TIMEVALUE(\"13:00:01\"))",
+   "powerbi": "13"
+  },
+  {
+   "expr": "HOUR(TIMEVALUE(\"2 29/2020\"))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "HOUR(TIMEVALUE(\"2,2021\"))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "HOUR(TIMEVALUE(\"2020-01-02\"))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "HOUR(TIMEVALUE(\"3 4/50\"))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "HOUR(TIMEVALUE(\"4 15/2019\"))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "HOUR(TIMEVALUE(\"5 5/5\"))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "HOUR(TIMEVALUE(\"6 30/01\"))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "HOUR(TIMEVALUE(\"7, 2015\"))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "HOUR(TIMEVALUE(\"9:15\"))",
+   "powerbi": "9"
+  },
+  {
+   "expr": "HOUR(TIMEVALUE(\"Jan 2, 2020\"))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "INT(DATEVALUE(\"1,99\"))",
+   "powerbi": "36161"
+  },
+  {
+   "expr": "INT(DATEVALUE(\"10:30 PM\"))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "INT(DATEVALUE(\"11, 99\"))",
+   "powerbi": "36465"
+  },
+  {
+   "expr": "INT(DATEVALUE(\"11:45 AM\"))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "INT(DATEVALUE(\"12 31/99\"))",
+   "powerbi": "36525"
+  },
+  {
+   "expr": "INT(DATEVALUE(\"12, 05\"))",
+   "powerbi": "46361"
+  },
+  {
+   "expr": "INT(DATEVALUE(\"13:00:01\"))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "INT(DATEVALUE(\"2 29/2020\"))",
+   "powerbi": "43890"
+  },
+  {
+   "expr": "INT(DATEVALUE(\"2,2021\"))",
+   "powerbi": "44228"
+  },
+  {
+   "expr": "INT(DATEVALUE(\"2020-01-02\"))",
+   "powerbi": "43832"
+  },
+  {
+   "expr": "INT(DATEVALUE(\"3 4/50\"))",
+   "powerbi": "18326"
+  },
+  {
+   "expr": "INT(DATEVALUE(\"4 15/2019\"))",
+   "powerbi": "43570"
+  },
+  {
+   "expr": "INT(DATEVALUE(\"5 5/5\"))",
+   "powerbi": "38477"
+  },
+  {
+   "expr": "INT(DATEVALUE(\"6 30/01\"))",
+   "powerbi": "37072"
+  },
+  {
+   "expr": "INT(DATEVALUE(\"7, 2015\"))",
+   "powerbi": "42186"
+  },
+  {
+   "expr": "INT(DATEVALUE(\"9:15\"))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "INT(DATEVALUE(\"Jan 2, 2020\"))",
+   "powerbi": "43832"
+  },
+  {
+   "expr": "ISBLANK(\"\")",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISBLANK(\"a\")",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISBLANK(1)",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISBLANK(BLANK())",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISBLANK(DATE(2020,1,1))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISBLANK(MAX(Facts[Region]))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISBLANK(SELECTEDVALUE(Facts[Note],BLANK()))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISBLANK(SELECTEDVALUE(Facts[Quantity],0))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISBLANK(SELECTEDVALUE(Facts[Region]))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISBLANK(SELECTEDVALUE(Facts[Region],\"East\"))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISBLANK(SELECTEDVALUE(Facts[Sales],2.5))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISERROR(DATEVALUE(\"0, 2020\"))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISERROR(DATEVALUE(\"1 2/2020\"))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISERROR(DATEVALUE(\"1,99\"))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISERROR(DATEVALUE(\"1/2/2020\"))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISERROR(DATEVALUE(\"10:30 PM\"))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISERROR(DATEVALUE(\"10:30\"))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISERROR(DATEVALUE(\"11:45 AM\"))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISERROR(DATEVALUE(\"12 31/99\"))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISERROR(DATEVALUE(\"12, 05\"))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISERROR(DATEVALUE(\"13 1/2020\"))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISERROR(DATEVALUE(\"13:00:01\"))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISERROR(DATEVALUE(\"2 29/2020\"))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISERROR(DATEVALUE(\"2, 2021\"))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISERROR(DATEVALUE(\"2020-01-02\"))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISERROR(DATEVALUE(\"25:00\"))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISERROR(DATEVALUE(\"4 15/2019\"))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISERROR(DATEVALUE(\"6 30/01\"))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISERROR(DATEVALUE(\"7, 2015\"))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISERROR(DATEVALUE(\"7/4/21\"))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISERROR(DATEVALUE(\"9:15\"))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISERROR(TIMEVALUE(\"0, 2020\"))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISERROR(TIMEVALUE(\"1 2/20 10:30\"))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISERROR(TIMEVALUE(\"1 2/2020\"))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISERROR(TIMEVALUE(\"1,99\"))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISERROR(TIMEVALUE(\"1/2/2020 3:04 PM\"))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISERROR(TIMEVALUE(\"1/2/2020\"))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISERROR(TIMEVALUE(\"10:30 PM\"))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISERROR(TIMEVALUE(\"11, 99\"))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISERROR(TIMEVALUE(\"11:45 AM\"))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISERROR(TIMEVALUE(\"12, 05\"))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISERROR(TIMEVALUE(\"12-31-99\"))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISERROR(TIMEVALUE(\"12:00 AM\"))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISERROR(TIMEVALUE(\"13:00:01\"))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISERROR(TIMEVALUE(\"2 29/2020\"))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISERROR(TIMEVALUE(\"2, 0\"))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISERROR(TIMEVALUE(\"2, 2021\"))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISERROR(TIMEVALUE(\"2,2021\"))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISERROR(TIMEVALUE(\"2/30/2020\"))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISERROR(TIMEVALUE(\"2020-01-02\"))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISERROR(TIMEVALUE(\"23:59:59\"))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISERROR(TIMEVALUE(\"3 4/50\"))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISERROR(TIMEVALUE(\"4 15/2019\"))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISERROR(TIMEVALUE(\"5 5/5\"))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISERROR(TIMEVALUE(\"6 30/01\"))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISERROR(TIMEVALUE(\"7, 2015\"))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISERROR(TIMEVALUE(\"9:15\"))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISERROR(TIMEVALUE(\"Jan 2, 2020\"))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISNUMBER(\"1\")",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISNUMBER(\"a\")",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISNUMBER(0)",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISNUMBER(2.5)",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISNUMBER(BLANK())",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISNUMBER(MAX(Facts[Region]))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISNUMBER(SELECTEDVALUE(Facts[Note],BLANK()))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISNUMBER(SELECTEDVALUE(Facts[Quantity],0))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISNUMBER(SELECTEDVALUE(Facts[Region]))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISNUMBER(SELECTEDVALUE(Facts[Region],\"East\"))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISNUMBER(SELECTEDVALUE(Facts[Sales],2.5))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISTEXT(\"1\")",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISTEXT(\"a\")",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISTEXT(0)",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISTEXT(DATE(2020,1,1))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISTEXT(MAX(Facts[Region]))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISTEXT(SELECTEDVALUE(Facts[Note],BLANK()))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISTEXT(SELECTEDVALUE(Facts[Quantity],0))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISTEXT(SELECTEDVALUE(Facts[Region]))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISTEXT(SELECTEDVALUE(Facts[Region],\"East\"))",
+   "powerbi": "True"
+  },
+  {
+   "expr": "ISTEXT(SELECTEDVALUE(Facts[Sales],2.5))",
+   "powerbi": "False"
+  },
+  {
+   "expr": "ISTEXT(TRUE())",
+   "powerbi": "False"
+  },
+  {
+   "expr": "MAX(Facts[Region])<\"a\"",
+   "powerbi": "False"
+  },
+  {
+   "expr": "MAX(Facts[Region])<>\"a\"",
+   "powerbi": "True"
+  },
+  {
+   "expr": "MAX(Facts[Region])<>BLANK()",
+   "powerbi": "True"
+  },
+  {
+   "expr": "MAX(Facts[Region])<>SELECTEDVALUE(Facts[Note],BLANK())",
+   "powerbi": "True"
+  },
+  {
+   "expr": "MAX(Facts[Region])<>SELECTEDVALUE(Facts[Region],\"x\")",
+   "powerbi": "True"
+  },
+  {
+   "expr": "MAX(Facts[Region])<SELECTEDVALUE(Facts[Note],BLANK())",
+   "powerbi": "False"
+  },
+  {
+   "expr": "MAX(Facts[Region])=\"a\"",
+   "powerbi": "False"
+  },
+  {
+   "expr": "MAX(Facts[Region])==\"1\"",
+   "powerbi": "False"
+  },
+  {
+   "expr": "MAX(Facts[Region])==\"a\"",
+   "powerbi": "False"
+  },
+  {
+   "expr": "MAX(Facts[Region])==BLANK()",
+   "powerbi": "False"
+  },
+  {
+   "expr": "MAX(Facts[Region])==SELECTEDVALUE(Facts[Region])",
+   "powerbi": "False"
+  },
+  {
+   "expr": "MAX(Facts[Region])>SELECTEDVALUE(Facts[Note],BLANK())",
+   "powerbi": "True"
+  },
+  {
+   "expr": "MAX(Facts[Region])>SELECTEDVALUE(Facts[Region])",
+   "powerbi": "True"
+  },
+  {
+   "expr": "MAXX(ALL(Facts),BLANK())",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MAXX(FILTER(Facts,Facts[Quantity]>1),BLANK())",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MAXX(Facts,BLANK())",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MAXX(VALUES(Facts[Region]),BLANK())",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MAXX({1,2,3},BLANK())",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MINUTE(TIMEVALUE(\"1 2/2020\"))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "MINUTE(TIMEVALUE(\"1,99\"))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "MINUTE(TIMEVALUE(\"1/2/2020 3:04 PM\"))",
+   "powerbi": "4"
+  },
+  {
+   "expr": "MINUTE(TIMEVALUE(\"1/2/2020\"))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "MINUTE(TIMEVALUE(\"10:30\"))",
+   "powerbi": "30"
+  },
+  {
+   "expr": "MINUTE(TIMEVALUE(\"11, 99\"))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "MINUTE(TIMEVALUE(\"11:45 AM\"))",
+   "powerbi": "45"
+  },
+  {
+   "expr": "MINUTE(TIMEVALUE(\"12 31/99\"))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "MINUTE(TIMEVALUE(\"12, 05\"))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "MINUTE(TIMEVALUE(\"12:00 AM\"))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "MINUTE(TIMEVALUE(\"13:00:01\"))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "MINUTE(TIMEVALUE(\"2 29/2020\"))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "MINUTE(TIMEVALUE(\"2, 2021\"))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "MINUTE(TIMEVALUE(\"2020-01-02\"))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "MINUTE(TIMEVALUE(\"3 4/49\"))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "MINUTE(TIMEVALUE(\"3 4/50\"))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "MINUTE(TIMEVALUE(\"4 15/2019\"))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "MINUTE(TIMEVALUE(\"6 30/01\"))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "MINUTE(TIMEVALUE(\"7, 2015\"))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "MINUTE(TIMEVALUE(\"9:15\"))",
+   "powerbi": "15"
+  },
+  {
+   "expr": "MINUTE(TIMEVALUE(\"Jan 2, 2020\"))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "MONTH(DATEVALUE(\"1,99\"))",
+   "powerbi": "1"
+  },
+  {
+   "expr": "MONTH(DATEVALUE(\"1/2/2020 3:04 PM\"))",
+   "powerbi": "1"
+  },
+  {
+   "expr": "MONTH(DATEVALUE(\"1/2/2020\"))",
+   "powerbi": "1"
+  },
+  {
+   "expr": "MONTH(DATEVALUE(\"11, 99\"))",
+   "powerbi": "11"
+  },
+  {
+   "expr": "MONTH(DATEVALUE(\"11:45 AM\"))",
+   "powerbi": "12"
+  },
+  {
+   "expr": "MONTH(DATEVALUE(\"12 31/99\"))",
+   "powerbi": "12"
+  },
+  {
+   "expr": "MONTH(DATEVALUE(\"12, 05\"))",
+   "powerbi": "12"
+  },
+  {
+   "expr": "MONTH(DATEVALUE(\"12:00 AM\"))",
+   "powerbi": "12"
+  },
+  {
+   "expr": "MONTH(DATEVALUE(\"13:00:01\"))",
+   "powerbi": "12"
+  },
+  {
+   "expr": "MONTH(DATEVALUE(\"2 29/2020\"))",
+   "powerbi": "2"
+  },
+  {
+   "expr": "MONTH(DATEVALUE(\"2, 2021\"))",
+   "powerbi": "2"
+  },
+  {
+   "expr": "MONTH(DATEVALUE(\"2,2021\"))",
+   "powerbi": "2"
+  },
+  {
+   "expr": "MONTH(DATEVALUE(\"23:59:59\"))",
+   "powerbi": "12"
+  },
+  {
+   "expr": "MONTH(DATEVALUE(\"4 15/2019\"))",
+   "powerbi": "4"
+  },
+  {
+   "expr": "MONTH(DATEVALUE(\"6 30/01\"))",
+   "powerbi": "6"
+  },
+  {
+   "expr": "MONTH(DATEVALUE(\"7, 2015\"))",
+   "powerbi": "7"
+  },
+  {
+   "expr": "MONTH(DATEVALUE(\"7/4/21\"))",
+   "powerbi": "7"
+  },
+  {
+   "expr": "MONTH(DATEVALUE(\"9:15\"))",
+   "powerbi": "12"
+  },
+  {
+   "expr": "MONTH(DATEVALUE(\"Jan 2, 2020\"))",
+   "powerbi": "1"
+  },
+  {
+   "expr": "SELECTEDVALUE(Facts[Note],BLANK())<\"\"",
+   "powerbi": "False"
+  },
+  {
+   "expr": "SELECTEDVALUE(Facts[Note],BLANK())<\"1\"",
+   "powerbi": "True"
+  },
+  {
+   "expr": "SELECTEDVALUE(Facts[Note],BLANK())<>\"a\"",
+   "powerbi": "True"
+  },
+  {
+   "expr": "SELECTEDVALUE(Facts[Note],BLANK())<>MAX(Facts[Region])",
+   "powerbi": "True"
+  },
+  {
+   "expr": "SELECTEDVALUE(Facts[Note],BLANK())<>SELECTEDVALUE(Facts[Note],BLANK())",
+   "powerbi": "False"
+  },
+  {
+   "expr": "SELECTEDVALUE(Facts[Note],BLANK())<SELECTEDVALUE(Facts[Note],BLANK())",
+   "powerbi": "False"
+  },
+  {
+   "expr": "SELECTEDVALUE(Facts[Note],BLANK())=\"\"",
+   "powerbi": "True"
+  },
+  {
+   "expr": "SELECTEDVALUE(Facts[Note],BLANK())==0",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 19) DAX comparison operations do not support comparing values of type Text with values of type Integer. Consider using the VALUE or FORMAT function to convert one of the values.\""
+  },
+  {
+   "expr": "SELECTEDVALUE(Facts[Note],BLANK())==2.5",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 19) DAX comparison operations do not support comparing values of type Text with values of type Number. Consider using the VALUE or FORMAT function to convert one of the values.\""
+  },
+  {
+   "expr": "SELECTEDVALUE(Facts[Note],BLANK())==SELECTEDVALUE(Facts[Quantity],0)",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 19) DAX comparison operations do not support comparing values of type Text with values of type Integer. Consider using the VALUE or FORMAT function to convert one of the values.\""
+  },
+  {
+   "expr": "SELECTEDVALUE(Facts[Note],BLANK())==TRUE()",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 19) DAX comparison operations do not support comparing values of type Text with values of type True/False. Consider using the VALUE or FORMAT function to convert one of the values.\""
+  },
+  {
+   "expr": "SELECTEDVALUE(Facts[Note],BLANK())>MAX(Facts[Region])",
+   "powerbi": "False"
+  },
+  {
+   "expr": "SELECTEDVALUE(Facts[Note],BLANK())>SELECTEDVALUE(Facts[Note],BLANK())",
+   "powerbi": "False"
+  },
+  {
+   "expr": "SELECTEDVALUE(Facts[Quantity],0)<1",
+   "powerbi": "True"
+  },
+  {
+   "expr": "SELECTEDVALUE(Facts[Quantity],0)<>0",
+   "powerbi": "False"
+  },
+  {
+   "expr": "SELECTEDVALUE(Facts[Quantity],0)<>1",
+   "powerbi": "True"
+  },
+  {
+   "expr": "SELECTEDVALUE(Facts[Quantity],0)<>2.5",
+   "powerbi": "True"
+  },
+  {
+   "expr": "SELECTEDVALUE(Facts[Quantity],0)<>BLANK()",
+   "powerbi": "False"
+  },
+  {
+   "expr": "SELECTEDVALUE(Facts[Quantity],0)<BLANK()",
+   "powerbi": "False"
+  },
+  {
+   "expr": "SELECTEDVALUE(Facts[Quantity],0)<SELECTEDVALUE(Facts[Sales],2.5)",
+   "powerbi": "True"
+  },
+  {
+   "expr": "SELECTEDVALUE(Facts[Quantity],0)=0",
+   "powerbi": "True"
+  },
+  {
+   "expr": "SELECTEDVALUE(Facts[Quantity],0)=2.5",
+   "powerbi": "False"
+  },
+  {
+   "expr": "SELECTEDVALUE(Facts[Quantity],0)==1",
+   "powerbi": "False"
+  },
+  {
+   "expr": "SELECTEDVALUE(Facts[Quantity],0)==BLANK()",
+   "powerbi": "False"
+  },
+  {
+   "expr": "SELECTEDVALUE(Facts[Quantity],0)==SELECTEDVALUE(Facts[Quantity],0)",
+   "powerbi": "True"
+  },
+  {
+   "expr": "SELECTEDVALUE(Facts[Quantity],0)=SELECTEDVALUE(Facts[Quantity],0)",
+   "powerbi": "True"
+  },
+  {
+   "expr": "SELECTEDVALUE(Facts[Quantity],0)=SELECTEDVALUE(Facts[Sales],2.5)",
+   "powerbi": "False"
+  },
+  {
+   "expr": "SELECTEDVALUE(Facts[Quantity],0)>DATE(2020,1,1)",
+   "powerbi": "False"
+  },
+  {
+   "expr": "SELECTEDVALUE(Facts[Quantity],0)>SELECTEDVALUE(Facts[Quantity],0)",
+   "powerbi": "False"
+  },
+  {
+   "expr": "SELECTEDVALUE(Facts[Region])<\"\"",
+   "powerbi": "False"
+  },
+  {
+   "expr": "SELECTEDVALUE(Facts[Region])<>\"a\"",
+   "powerbi": "True"
+  },
+  {
+   "expr": "SELECTEDVALUE(Facts[Region])<>MAX(Facts[Region])",
+   "powerbi": "True"
+  },
+  {
+   "expr": "SELECTEDVALUE(Facts[Region])<>SELECTEDVALUE(Facts[Region],\"East\")",
+   "powerbi": "True"
+  },
+  {
+   "expr": "SELECTEDVALUE(Facts[Region])<SELECTEDVALUE(Facts[Region])",
+   "powerbi": "False"
+  },
+  {
+   "expr": "SELECTEDVALUE(Facts[Region])=\"\"",
+   "powerbi": "True"
+  },
+  {
+   "expr": "SELECTEDVALUE(Facts[Region])=\"1\"",
+   "powerbi": "False"
+  },
+  {
+   "expr": "SELECTEDVALUE(Facts[Region])==\"1\"",
+   "powerbi": "False"
+  },
+  {
+   "expr": "SELECTEDVALUE(Facts[Region])==SELECTEDVALUE(Facts[Quantity],0)",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 19) DAX comparison operations do not support comparing values of type Text with values of type Integer. Consider using the VALUE or FORMAT function to convert one of the values.\""
+  },
+  {
+   "expr": "SELECTEDVALUE(Facts[Region])==SELECTEDVALUE(Facts[Region])",
+   "powerbi": "True"
+  },
+  {
+   "expr": "SELECTEDVALUE(Facts[Region])=MAX(Facts[Region])",
+   "powerbi": "False"
+  },
+  {
+   "expr": "SELECTEDVALUE(Facts[Region])>MAX(Facts[Region])",
+   "powerbi": "False"
+  },
+  {
+   "expr": "SELECTEDVALUE(Facts[Region])>SELECTEDVALUE(Facts[Region],\"x\")",
+   "powerbi": "False"
+  },
+  {
+   "expr": "SELECTEDVALUE(Facts[Region],\"East\")<>SELECTEDVALUE(Facts[Region])",
+   "powerbi": "True"
+  },
+  {
+   "expr": "SELECTEDVALUE(Facts[Region],\"East\")==BLANK()",
+   "powerbi": "False"
+  },
+  {
+   "expr": "SELECTEDVALUE(Facts[Region],\"East\")==MAX(Facts[Region])",
+   "powerbi": "False"
+  },
+  {
+   "expr": "SELECTEDVALUE(Facts[Region],\"East\")=SELECTEDVALUE(Facts[Region])",
+   "powerbi": "False"
+  },
+  {
+   "expr": "SELECTEDVALUE(Facts[Region],\"East\")>\"\"",
+   "powerbi": "True"
+  },
+  {
+   "expr": "SELECTEDVALUE(Facts[Region],\"East\")>MAX(Facts[Region])",
+   "powerbi": "False"
+  },
+  {
+   "expr": "SELECTEDVALUE(Facts[Region],\"East\")>SELECTEDVALUE(Facts[Note],BLANK())",
+   "powerbi": "True"
+  },
+  {
+   "expr": "SELECTEDVALUE(Facts[Region],\"x\")<\"a\"",
+   "powerbi": "False"
+  },
+  {
+   "expr": "SELECTEDVALUE(Facts[Region],\"x\")<>SELECTEDVALUE(Facts[Region],\"x\")",
+   "powerbi": "False"
+  },
+  {
+   "expr": "SELECTEDVALUE(Facts[Region],\"x\")<BLANK()",
+   "powerbi": "False"
+  },
+  {
+   "expr": "SELECTEDVALUE(Facts[Region],\"x\")=\"\"",
+   "powerbi": "False"
+  },
+  {
+   "expr": "SELECTEDVALUE(Facts[Region],\"x\")==\"1\"",
+   "powerbi": "False"
+  },
+  {
+   "expr": "SELECTEDVALUE(Facts[Region],\"x\")==0",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 19) DAX comparison operations do not support comparing values of type Text with values of type Integer. Consider using the VALUE or FORMAT function to convert one of the values.\""
+  },
+  {
+   "expr": "SELECTEDVALUE(Facts[Region],\"x\")==1",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 19) DAX comparison operations do not support comparing values of type Text with values of type Integer. Consider using the VALUE or FORMAT function to convert one of the values.\""
+  },
+  {
+   "expr": "SELECTEDVALUE(Facts[Region],\"x\")==TRUE()",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 19) DAX comparison operations do not support comparing values of type Text with values of type True/False. Consider using the VALUE or FORMAT function to convert one of the values.\""
+  },
+  {
+   "expr": "SELECTEDVALUE(Facts[Region],\"x\")>\"\"",
+   "powerbi": "True"
+  },
+  {
+   "expr": "SELECTEDVALUE(Facts[Region],\"x\")>MAX(Facts[Region])",
+   "powerbi": "True"
+  },
+  {
+   "expr": "SELECTEDVALUE(Facts[Region],\"x\")>SELECTEDVALUE(Facts[Region],\"x\")",
+   "powerbi": "False"
+  },
+  {
+   "expr": "SELECTEDVALUE(Facts[Sales],2.5)<>0",
+   "powerbi": "True"
+  },
+  {
+   "expr": "SELECTEDVALUE(Facts[Sales],2.5)<SELECTEDVALUE(Facts[Quantity],0)",
+   "powerbi": "False"
+  },
+  {
+   "expr": "SELECTEDVALUE(Facts[Sales],2.5)=DATE(2020,1,1)",
+   "powerbi": "False"
+  },
+  {
+   "expr": "SELECTEDVALUE(Facts[Sales],2.5)=SELECTEDVALUE(Facts[Quantity],0)",
+   "powerbi": "False"
+  },
+  {
+   "expr": "SUMX(ALL(Facts),BLANK())",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "SUMX(FILTER(Facts,Facts[Quantity]>1),BLANK())",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "SUMX(VALUES(Facts[Region]),BLANK())",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "TIMEVALUE(\"1 2/2020\")",
+   "powerbi": "12/30/1899 00:00:00"
+  },
+  {
+   "expr": "TIMEVALUE(\"1,99\")",
+   "powerbi": "12/30/1899 00:00:00"
+  },
+  {
+   "expr": "TIMEVALUE(\"1/2/2020 3:04 PM\")",
+   "powerbi": "12/30/1899 15:04:00"
+  },
+  {
+   "expr": "TIMEVALUE(\"1/2/2020\")",
+   "powerbi": "12/30/1899 00:00:00"
+  },
+  {
+   "expr": "TIMEVALUE(\"10:30\")",
+   "powerbi": "12/30/1899 10:30:00"
+  },
+  {
+   "expr": "TIMEVALUE(\"11, 99\")",
+   "powerbi": "12/30/1899 00:00:00"
+  },
+  {
+   "expr": "TIMEVALUE(\"11:45 AM\")",
+   "powerbi": "12/30/1899 11:45:00"
+  },
+  {
+   "expr": "TIMEVALUE(\"12 31/99\")",
+   "powerbi": "12/30/1899 00:00:00"
+  },
+  {
+   "expr": "TIMEVALUE(\"12, 05\")",
+   "powerbi": "12/30/1899 00:00:00"
+  },
+  {
+   "expr": "TIMEVALUE(\"12:00 AM\")",
+   "powerbi": "12/30/1899 00:00:00"
+  },
+  {
+   "expr": "TIMEVALUE(\"13:00:01\")",
+   "powerbi": "12/30/1899 13:00:01"
+  },
+  {
+   "expr": "TIMEVALUE(\"2 29/2020\")",
+   "powerbi": "12/30/1899 00:00:00"
+  },
+  {
+   "expr": "TIMEVALUE(\"2,2021\")",
+   "powerbi": "12/30/1899 00:00:00"
+  },
+  {
+   "expr": "TIMEVALUE(\"2020-01-02\")",
+   "powerbi": "12/30/1899 00:00:00"
+  },
+  {
+   "expr": "TIMEVALUE(\"3 4/49\")",
+   "powerbi": "12/30/1899 00:00:00"
+  },
+  {
+   "expr": "TIMEVALUE(\"3 4/50\")",
+   "powerbi": "12/30/1899 00:00:00"
+  },
+  {
+   "expr": "TIMEVALUE(\"4 15/2019\")",
+   "powerbi": "12/30/1899 00:00:00"
+  },
+  {
+   "expr": "TIMEVALUE(\"6 30/01\")",
+   "powerbi": "12/30/1899 00:00:00"
+  },
+  {
+   "expr": "TIMEVALUE(\"7, 2015\")",
+   "powerbi": "12/30/1899 00:00:00"
+  },
+  {
+   "expr": "TIMEVALUE(\"9:15\")",
+   "powerbi": "12/30/1899 09:15:00"
+  },
+  {
+   "expr": "TIMEVALUE(\"Jan 2, 2020\")",
+   "powerbi": "12/30/1899 00:00:00"
+  },
+  {
+   "expr": "TRUE()<>BLANK()",
+   "powerbi": "True"
+  },
+  {
+   "expr": "TRUE()<BLANK()",
+   "powerbi": "False"
+  },
+  {
+   "expr": "TRUE()>BLANK()",
+   "powerbi": "True"
+  },
+  {
+   "expr": "TRUE()>TRUE()",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VALUE(\"1,99\")",
+   "powerbi": "199"
+  },
+  {
+   "expr": "VALUE(\"1/2/2020 3:04 PM\")",
+   "powerbi": "43832.6277777778"
+  },
+  {
+   "expr": "VALUE(\"10:30 PM\")",
+   "powerbi": "0.9375"
+  },
+  {
+   "expr": "VALUE(\"10:30\")",
+   "powerbi": "0.4375"
+  },
+  {
+   "expr": "VALUE(\"11, 99\")",
+   "powerbi": "36465"
+  },
+  {
+   "expr": "VALUE(\"11:45 AM\")",
+   "powerbi": "0.489583333333333"
+  },
+  {
+   "expr": "VALUE(\"12, 05\")",
+   "powerbi": "46361"
+  },
+  {
+   "expr": "VALUE(\"12:00 AM\")",
+   "powerbi": "0"
+  },
+  {
+   "expr": "VALUE(\"13:00:01\")",
+   "powerbi": "0.541678240740741"
+  },
+  {
+   "expr": "VALUE(\"2 29/2020\")",
+   "powerbi": "43890"
+  },
+  {
+   "expr": "VALUE(\"2, 2021\")",
+   "powerbi": "44228"
+  },
+  {
+   "expr": "VALUE(\"2020-01-02\")",
+   "powerbi": "43832"
+  },
+  {
+   "expr": "VALUE(\"23:59:59\")",
+   "powerbi": "0.999988425925926"
+  },
+  {
+   "expr": "VALUE(\"3 4/49\")",
+   "powerbi": "54486"
+  },
+  {
+   "expr": "VALUE(\"3 4/50\")",
+   "powerbi": "18326"
+  },
+  {
+   "expr": "VALUE(\"4 15/2019\")",
+   "powerbi": "43570"
+  },
+  {
+   "expr": "VALUE(\"5 5/5\")",
+   "powerbi": "38477"
+  },
+  {
+   "expr": "VALUE(\"6 30/01\")",
+   "powerbi": "37072"
+  },
+  {
+   "expr": "VALUE(\"7, 2015\")",
+   "powerbi": "42186"
+  },
+  {
+   "expr": "VALUE(\"9:15\")",
+   "powerbi": "0.385416666666667"
+  },
+  {
+   "expr": "VALUE(\"Jan 2, 2020\")",
+   "powerbi": "43832"
+  },
+  {
+   "expr": "VAR x=\"\" RETURN x<\"1\"",
+   "powerbi": "True"
+  },
+  {
+   "expr": "VAR x=\"\" RETURN x<>\"a\"",
+   "powerbi": "True"
+  },
+  {
+   "expr": "VAR x=\"\" RETURN x<>BLANK()",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR x=\"\" RETURN x<>SELECTEDVALUE(Facts[Note],BLANK())",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR x=\"\" RETURN x<>SELECTEDVALUE(Facts[Region])",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR x=\"\" RETURN x<>SELECTEDVALUE(Facts[Region],\"x\")",
+   "powerbi": "True"
+  },
+  {
+   "expr": "VAR x=\"\" RETURN x<SELECTEDVALUE(Facts[Note],BLANK())",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR x=\"\" RETURN x<SELECTEDVALUE(Facts[Region],\"East\")",
+   "powerbi": "True"
+  },
+  {
+   "expr": "VAR x=\"\" RETURN x=\"\"",
+   "powerbi": "True"
+  },
+  {
+   "expr": "VAR x=\"\" RETURN x=\"a\"",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR x=\"\" RETURN x==\"\"",
+   "powerbi": "True"
+  },
+  {
+   "expr": "VAR x=\"\" RETURN x==\"1\"",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR x=\"\" RETURN x==BLANK()",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR x=\"\" RETURN x==SELECTEDVALUE(Facts[Region],\"x\")",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR x=\"\" RETURN x=SELECTEDVALUE(Facts[Note],BLANK())",
+   "powerbi": "True"
+  },
+  {
+   "expr": "VAR x=\"\" RETURN x=SELECTEDVALUE(Facts[Region])",
+   "powerbi": "True"
+  },
+  {
+   "expr": "VAR x=\"\" RETURN x>\"a\"",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR x=\"\" RETURN x>BLANK()",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR x=\"\" RETURN x>MAX(Facts[Region])",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR x=\"\" RETURN x>SELECTEDVALUE(Facts[Note],BLANK())",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR x=\"\" RETURN x>SELECTEDVALUE(Facts[Region])",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR x=\"\" RETURN x>SELECTEDVALUE(Facts[Region],\"East\")",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR x=\"\" VAR y=x RETURN y<\"\"",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR x=\"\" VAR y=x RETURN y<\"1\"",
+   "powerbi": "True"
+  },
+  {
+   "expr": "VAR x=\"\" VAR y=x RETURN y<\"a\"",
+   "powerbi": "True"
+  },
+  {
+   "expr": "VAR x=\"\" VAR y=x RETURN y<>\"a\"",
+   "powerbi": "True"
+  },
+  {
+   "expr": "VAR x=\"\" VAR y=x RETURN y<>MAX(Facts[Region])",
+   "powerbi": "True"
+  },
+  {
+   "expr": "VAR x=\"\" VAR y=x RETURN y<>SELECTEDVALUE(Facts[Note],BLANK())",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR x=\"\" VAR y=x RETURN y<>SELECTEDVALUE(Facts[Region])",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR x=\"\" VAR y=x RETURN y<BLANK()",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR x=\"\" VAR y=x RETURN y<MAX(Facts[Region])",
+   "powerbi": "True"
+  },
+  {
+   "expr": "VAR x=\"\" VAR y=x RETURN y=\"a\"",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR x=\"\" VAR y=x RETURN y==\"a\"",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR x=\"\" VAR y=x RETURN y==BLANK()",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR x=\"\" VAR y=x RETURN y==SELECTEDVALUE(Facts[Region])",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR x=\"\" VAR y=x RETURN y==SELECTEDVALUE(Facts[Region],\"East\")",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR x=\"\" VAR y=x RETURN y=MAX(Facts[Region])",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR x=\"\" VAR y=x RETURN y>\"\"",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR x=\"\" VAR y=x RETURN y>\"a\"",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR x=\"\" VAR y=x RETURN y>SELECTEDVALUE(Facts[Region])",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR x=\"1\" RETURN x<>\"1\"",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR x=\"1\" RETURN x<>BLANK()",
+   "powerbi": "True"
+  },
+  {
+   "expr": "VAR x=\"1\" RETURN x<>MAX(Facts[Region])",
+   "powerbi": "True"
+  },
+  {
+   "expr": "VAR x=\"1\" RETURN x<>SELECTEDVALUE(Facts[Note],BLANK())",
+   "powerbi": "True"
+  },
+  {
+   "expr": "VAR x=\"1\" RETURN x<BLANK()",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR x=\"1\" RETURN x<MAX(Facts[Region])",
+   "powerbi": "True"
+  },
+  {
+   "expr": "VAR x=\"1\" RETURN x<SELECTEDVALUE(Facts[Note],BLANK())",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR x=\"1\" RETURN x<SELECTEDVALUE(Facts[Region],\"x\")",
+   "powerbi": "True"
+  },
+  {
+   "expr": "VAR x=\"1\" RETURN x=\"a\"",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR x=\"1\" RETURN x==\"\"",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR x=\"1\" RETURN x==\"1\"",
+   "powerbi": "True"
+  },
+  {
+   "expr": "VAR x=\"1\" RETURN x==SELECTEDVALUE(Facts[Note],BLANK())",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR x=\"1\" RETURN x==SELECTEDVALUE(Facts[Region],\"East\")",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR x=\"1\" RETURN x=SELECTEDVALUE(Facts[Region],\"x\")",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR x=\"1\" RETURN x>\"\"",
+   "powerbi": "True"
+  },
+  {
+   "expr": "VAR x=\"1\" RETURN x>\"1\"",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR x=\"1\" RETURN x>SELECTEDVALUE(Facts[Region])",
+   "powerbi": "True"
+  },
+  {
+   "expr": "VAR x=\"1\" RETURN x>SELECTEDVALUE(Facts[Region],\"East\")",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR x=\"1\" VAR y=x RETURN y<\"\"",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR x=\"1\" VAR y=x RETURN y<>\"1\"",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR x=\"1\" VAR y=x RETURN y<>MAX(Facts[Region])",
+   "powerbi": "True"
+  },
+  {
+   "expr": "VAR x=\"1\" VAR y=x RETURN y<>SELECTEDVALUE(Facts[Region])",
+   "powerbi": "True"
+  },
+  {
+   "expr": "VAR x=\"1\" VAR y=x RETURN y<SELECTEDVALUE(Facts[Note],BLANK())",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR x=\"1\" VAR y=x RETURN y<SELECTEDVALUE(Facts[Region],\"x\")",
+   "powerbi": "True"
+  },
+  {
+   "expr": "VAR x=\"1\" VAR y=x RETURN y=\"\"",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR x=\"1\" VAR y=x RETURN y=\"1\"",
+   "powerbi": "True"
+  },
+  {
+   "expr": "VAR x=\"1\" VAR y=x RETURN y=\"a\"",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR x=\"1\" VAR y=x RETURN y==\"\"",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR x=\"1\" VAR y=x RETURN y==MAX(Facts[Region])",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR x=\"1\" VAR y=x RETURN y==SELECTEDVALUE(Facts[Note],BLANK())",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR x=\"1\" VAR y=x RETURN y==SELECTEDVALUE(Facts[Region],\"x\")",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR x=\"1\" VAR y=x RETURN y=SELECTEDVALUE(Facts[Region])",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR x=\"1\" VAR y=x RETURN y>\"\"",
+   "powerbi": "True"
+  },
+  {
+   "expr": "VAR x=\"1\" VAR y=x RETURN y>\"1\"",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR x=\"1\" VAR y=x RETURN y>BLANK()",
+   "powerbi": "True"
+  },
+  {
+   "expr": "VAR x=\"1\" VAR y=x RETURN y>MAX(Facts[Region])",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR x=\"a\" RETURN x<\"\"",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR x=\"a\" RETURN x<\"1\"",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR x=\"a\" RETURN x<\"a\"",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR x=\"a\" RETURN x<>\"\"",
+   "powerbi": "True"
+  },
+  {
+   "expr": "VAR x=\"a\" RETURN x<>\"a\"",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR x=\"a\" RETURN x<>SELECTEDVALUE(Facts[Region])",
+   "powerbi": "True"
+  },
+  {
+   "expr": "VAR x=\"a\" RETURN x<>SELECTEDVALUE(Facts[Region],\"East\")",
+   "powerbi": "True"
+  },
+  {
+   "expr": "VAR x=\"a\" RETURN x<BLANK()",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR x=\"a\" RETURN x<MAX(Facts[Region])",
+   "powerbi": "True"
+  },
+  {
+   "expr": "VAR x=\"a\" RETURN x<SELECTEDVALUE(Facts[Region])",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR x=\"a\" RETURN x==\"\"",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR x=\"a\" RETURN x==\"1\"",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR x=\"a\" RETURN x==\"a\"",
+   "powerbi": "True"
+  },
+  {
+   "expr": "VAR x=\"a\" RETURN x==BLANK()",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR x=\"a\" RETURN x==SELECTEDVALUE(Facts[Note],BLANK())",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR x=\"a\" RETURN x==SELECTEDVALUE(Facts[Quantity],0)",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 36) DAX comparison operations do not support comparing values of type Text with values of type Integer. Consider using the VALUE or FORMAT function to convert one of the values.\""
+  },
+  {
+   "expr": "VAR x=\"a\" RETURN x=MAX(Facts[Region])",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR x=\"a\" RETURN x>\"\"",
+   "powerbi": "True"
+  },
+  {
+   "expr": "VAR x=\"a\" RETURN x>\"a\"",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR x=\"a\" RETURN x>BLANK()",
+   "powerbi": "True"
+  },
+  {
+   "expr": "VAR x=\"a\" RETURN x>SELECTEDVALUE(Facts[Note],BLANK())",
+   "powerbi": "True"
+  },
+  {
+   "expr": "VAR x=\"a\" RETURN x>SELECTEDVALUE(Facts[Region],\"East\")",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR x=\"a\" VAR y=x RETURN y<\"1\"",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR x=\"a\" VAR y=x RETURN y<>\"1\"",
+   "powerbi": "True"
+  },
+  {
+   "expr": "VAR x=\"a\" VAR y=x RETURN y<>\"a\"",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR x=\"a\" VAR y=x RETURN y<SELECTEDVALUE(Facts[Note],BLANK())",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR x=\"a\" VAR y=x RETURN y<SELECTEDVALUE(Facts[Region])",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR x=\"a\" VAR y=x RETURN y=\"a\"",
+   "powerbi": "True"
+  },
+  {
+   "expr": "VAR x=\"a\" VAR y=x RETURN y==\"\"",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR x=\"a\" VAR y=x RETURN y==\"1\"",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR x=\"a\" VAR y=x RETURN y==\"a\"",
+   "powerbi": "True"
+  },
+  {
+   "expr": "VAR x=\"a\" VAR y=x RETURN y==BLANK()",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR x=\"a\" VAR y=x RETURN y==MAX(Facts[Region])",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR x=\"a\" VAR y=x RETURN y=MAX(Facts[Region])",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR x=\"a\" VAR y=x RETURN y=SELECTEDVALUE(Facts[Region])",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR x=\"a\" VAR y=x RETURN y=SELECTEDVALUE(Facts[Region],\"x\")",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR x=\"a\" VAR y=x RETURN y>\"\"",
+   "powerbi": "True"
+  },
+  {
+   "expr": "VAR x=\"a\" VAR y=x RETURN y>MAX(Facts[Region])",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR x=0 RETURN x<0",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR x=0 RETURN x<>0",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR x=0 RETURN x<>1",
+   "powerbi": "True"
+  },
+  {
+   "expr": "VAR x=0 RETURN x<>2.5",
+   "powerbi": "True"
+  },
+  {
+   "expr": "VAR x=0 RETURN x<>DATE(2020,1,1)",
+   "powerbi": "True"
+  },
+  {
+   "expr": "VAR x=0 RETURN x<>SELECTEDVALUE(Facts[Quantity],0)",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR x=0 RETURN x<>SELECTEDVALUE(Facts[Sales],2.5)",
+   "powerbi": "True"
+  },
+  {
+   "expr": "VAR x=0 RETURN x<BLANK()",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR x=0 RETURN x<DATE(2020,1,1)",
+   "powerbi": "True"
+  },
+  {
+   "expr": "VAR x=0 RETURN x<SELECTEDVALUE(Facts[Quantity],0)",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR x=0 RETURN x=0",
+   "powerbi": "True"
+  },
+  {
+   "expr": "VAR x=0 RETURN x=2.5",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR x=0 RETURN x==2.5",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR x=0 RETURN x==BLANK()",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR x=0 RETURN x==SELECTEDVALUE(Facts[Region],\"x\")",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 34) DAX comparison operations do not support comparing values of type Integer with values of type Text. Consider using the VALUE or FORMAT function to convert one of the values.\""
+  },
+  {
+   "expr": "VAR x=0 RETURN x=DATE(2020,1,1)",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR x=0 RETURN x=SELECTEDVALUE(Facts[Quantity],0)",
+   "powerbi": "True"
+  },
+  {
+   "expr": "VAR x=0 RETURN x=SELECTEDVALUE(Facts[Sales],2.5)",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR x=0 RETURN x>0",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR x=0 RETURN x>1",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR x=0 RETURN x>2.5",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR x=0 RETURN x>BLANK()",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR x=0 RETURN x>DATE(2020,1,1)",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR x=0 RETURN x>SELECTEDVALUE(Facts[Quantity],0)",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR x=0 RETURN x>SELECTEDVALUE(Facts[Sales],2.5)",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR x=0 VAR y=x RETURN y<1",
+   "powerbi": "True"
+  },
+  {
+   "expr": "VAR x=0 VAR y=x RETURN y<>1",
+   "powerbi": "True"
+  },
+  {
+   "expr": "VAR x=0 VAR y=x RETURN y<>2.5",
+   "powerbi": "True"
+  },
+  {
+   "expr": "VAR x=0 VAR y=x RETURN y<BLANK()",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR x=0 VAR y=x RETURN y<SELECTEDVALUE(Facts[Sales],2.5)",
+   "powerbi": "True"
+  },
+  {
+   "expr": "VAR x=0 VAR y=x RETURN y=2.5",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR x=0 VAR y=x RETURN y==1",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR x=0 VAR y=x RETURN y==DATE(2020,1,1)",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR x=0 VAR y=x RETURN y==SELECTEDVALUE(Facts[Note],BLANK())",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 42) DAX comparison operations do not support comparing values of type Integer with values of type Text. Consider using the VALUE or FORMAT function to convert one of the values.\""
+  },
+  {
+   "expr": "VAR x=0 VAR y=x RETURN y>2.5",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR x=0 VAR y=x RETURN y>SELECTEDVALUE(Facts[Quantity],0)",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR x=1 RETURN x<0",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR x=1 RETURN x<1",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR x=1 RETURN x<>1",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR x=1 RETURN x<>BLANK()",
+   "powerbi": "True"
+  },
+  {
+   "expr": "VAR x=1 RETURN x<>DATE(2020,1,1)",
+   "powerbi": "True"
+  },
+  {
+   "expr": "VAR x=1 RETURN x<>SELECTEDVALUE(Facts[Sales],2.5)",
+   "powerbi": "True"
+  },
+  {
+   "expr": "VAR x=1 RETURN x<DATE(2020,1,1)",
+   "powerbi": "True"
+  },
+  {
+   "expr": "VAR x=1 RETURN x<SELECTEDVALUE(Facts[Quantity],0)",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR x=1 RETURN x<SELECTEDVALUE(Facts[Sales],2.5)",
+   "powerbi": "True"
+  },
+  {
+   "expr": "VAR x=1 RETURN x=1",
+   "powerbi": "True"
+  },
+  {
+   "expr": "VAR x=1 RETURN x==0",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR x=1 RETURN x==BLANK()",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR x=1 RETURN x==SELECTEDVALUE(Facts[Note],BLANK())",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 34) DAX comparison operations do not support comparing values of type Integer with values of type Text. Consider using the VALUE or FORMAT function to convert one of the values.\""
+  },
+  {
+   "expr": "VAR x=1 RETURN x==SELECTEDVALUE(Facts[Quantity],0)",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR x=1 RETURN x==SELECTEDVALUE(Facts[Region],\"x\")",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 34) DAX comparison operations do not support comparing values of type Integer with values of type Text. Consider using the VALUE or FORMAT function to convert one of the values.\""
+  },
+  {
+   "expr": "VAR x=1 RETURN x=BLANK()",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR x=1 RETURN x=SELECTEDVALUE(Facts[Quantity],0)",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR x=1 RETURN x=SELECTEDVALUE(Facts[Sales],2.5)",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR x=1 RETURN x>1",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR x=1 RETURN x>BLANK()",
+   "powerbi": "True"
+  },
+  {
+   "expr": "VAR x=1 RETURN x>SELECTEDVALUE(Facts[Quantity],0)",
+   "powerbi": "True"
+  },
+  {
+   "expr": "VAR x=1 VAR y=x RETURN y<>BLANK()",
+   "powerbi": "True"
+  },
+  {
+   "expr": "VAR x=1 VAR y=x RETURN y<>SELECTEDVALUE(Facts[Quantity],0)",
+   "powerbi": "True"
+  },
+  {
+   "expr": "VAR x=1 VAR y=x RETURN y<BLANK()",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR x=1 VAR y=x RETURN y<DATE(2020,1,1)",
+   "powerbi": "True"
+  },
+  {
+   "expr": "VAR x=1 VAR y=x RETURN y=1",
+   "powerbi": "True"
+  },
+  {
+   "expr": "VAR x=1 VAR y=x RETURN y=2.5",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR x=1 VAR y=x RETURN y==0",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR x=1 VAR y=x RETURN y==1",
+   "powerbi": "True"
+  },
+  {
+   "expr": "VAR x=1 VAR y=x RETURN y==BLANK()",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR x=1 VAR y=x RETURN y==SELECTEDVALUE(Facts[Note],BLANK())",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 42) DAX comparison operations do not support comparing values of type Integer with values of type Text. Consider using the VALUE or FORMAT function to convert one of the values.\""
+  },
+  {
+   "expr": "VAR x=1 VAR y=x RETURN y==SELECTEDVALUE(Facts[Quantity],0)",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR x=1 VAR y=x RETURN y=BLANK()",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR x=1 VAR y=x RETURN y=SELECTEDVALUE(Facts[Sales],2.5)",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR x=1 VAR y=x RETURN y>1",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR x=1 VAR y=x RETURN y>BLANK()",
+   "powerbi": "True"
+  },
+  {
+   "expr": "VAR x=1 VAR y=x RETURN y>DATE(2020,1,1)",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR x=1 VAR y=x RETURN y>SELECTEDVALUE(Facts[Quantity],0)",
+   "powerbi": "True"
+  },
+  {
+   "expr": "VAR x=2.5 RETURN x<1",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR x=2.5 RETURN x<2.5",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR x=2.5 RETURN x<>0",
+   "powerbi": "True"
+  },
+  {
+   "expr": "VAR x=2.5 RETURN x<>1",
+   "powerbi": "True"
+  },
+  {
+   "expr": "VAR x=2.5 RETURN x<>2.5",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR x=2.5 RETURN x<>BLANK()",
+   "powerbi": "True"
+  },
+  {
+   "expr": "VAR x=2.5 RETURN x<>DATE(2020,1,1)",
+   "powerbi": "True"
+  },
+  {
+   "expr": "VAR x=2.5 RETURN x<>SELECTEDVALUE(Facts[Quantity],0)",
+   "powerbi": "True"
+  },
+  {
+   "expr": "VAR x=2.5 RETURN x<DATE(2020,1,1)",
+   "powerbi": "True"
+  },
+  {
+   "expr": "VAR x=2.5 RETURN x<SELECTEDVALUE(Facts[Quantity],0)",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR x=2.5 RETURN x=0",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR x=2.5 RETURN x=BLANK()",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR x=2.5 RETURN x=SELECTEDVALUE(Facts[Quantity],0)",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR x=2.5 RETURN x=SELECTEDVALUE(Facts[Sales],2.5)",
+   "powerbi": "True"
+  },
+  {
+   "expr": "VAR x=2.5 RETURN x>0",
+   "powerbi": "True"
+  },
+  {
+   "expr": "VAR x=2.5 RETURN x>2.5",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR x=2.5 RETURN x>BLANK()",
+   "powerbi": "True"
+  },
+  {
+   "expr": "VAR x=2.5 RETURN x>DATE(2020,1,1)",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR x=2.5 RETURN x>SELECTEDVALUE(Facts[Sales],2.5)",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR x=2.5 VAR y=x RETURN y<1",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR x=2.5 VAR y=x RETURN y<>2.5",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR x=2.5 VAR y=x RETURN y<>SELECTEDVALUE(Facts[Sales],2.5)",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR x=2.5 VAR y=x RETURN y<SELECTEDVALUE(Facts[Quantity],0)",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR x=2.5 VAR y=x RETURN y=0",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR x=2.5 VAR y=x RETURN y=DATE(2020,1,1)",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR x=2.5 VAR y=x RETURN y=SELECTEDVALUE(Facts[Quantity],0)",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR x=2.5 VAR y=x RETURN y=SELECTEDVALUE(Facts[Sales],2.5)",
+   "powerbi": "True"
+  },
+  {
+   "expr": "VAR x=2.5 VAR y=x RETURN y>2.5",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR x=BLANK() RETURN x<\"\"",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR x=BLANK() RETURN x<\"a\"",
+   "powerbi": "True"
+  },
+  {
+   "expr": "VAR x=BLANK() RETURN x<0",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR x=BLANK() RETURN x<1",
+   "powerbi": "True"
+  },
+  {
+   "expr": "VAR x=BLANK() RETURN x<>\"1\"",
+   "powerbi": "True"
+  },
+  {
+   "expr": "VAR x=BLANK() RETURN x<>\"a\"",
+   "powerbi": "True"
+  },
+  {
+   "expr": "VAR x=BLANK() RETURN x<>0",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR x=BLANK() RETURN x<>2.5",
+   "powerbi": "True"
+  },
+  {
+   "expr": "VAR x=BLANK() RETURN x<>DATE(2020,1,1)",
+   "powerbi": "True"
+  },
+  {
+   "expr": "VAR x=BLANK() RETURN x<>MAX(Facts[Region])",
+   "powerbi": "True"
+  },
+  {
+   "expr": "VAR x=BLANK() RETURN x<>SELECTEDVALUE(Facts[Quantity],0)",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR x=BLANK() RETURN x<>SELECTEDVALUE(Facts[Region])",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR x=BLANK() RETURN x<>SELECTEDVALUE(Facts[Region],\"East\")",
+   "powerbi": "True"
+  },
+  {
+   "expr": "VAR x=BLANK() RETURN x<>SELECTEDVALUE(Facts[Sales],2.5)",
+   "powerbi": "True"
+  },
+  {
+   "expr": "VAR x=BLANK() RETURN x<>TRUE()",
+   "powerbi": "True"
+  },
+  {
+   "expr": "VAR x=BLANK() RETURN x<BLANK()",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR x=BLANK() RETURN x<DATE(2020,1,1)",
+   "powerbi": "True"
+  },
+  {
+   "expr": "VAR x=BLANK() RETURN x<MAX(Facts[Region])",
+   "powerbi": "True"
+  },
+  {
+   "expr": "VAR x=BLANK() RETURN x<SELECTEDVALUE(Facts[Quantity],0)",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR x=BLANK() RETURN x<SELECTEDVALUE(Facts[Region])",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR x=BLANK() RETURN x<SELECTEDVALUE(Facts[Sales],2.5)",
+   "powerbi": "True"
+  },
+  {
+   "expr": "VAR x=BLANK() RETURN x=\"1\"",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR x=BLANK() RETURN x=\"a\"",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR x=BLANK() RETURN x=0",
+   "powerbi": "True"
+  },
+  {
+   "expr": "VAR x=BLANK() RETURN x=2.5",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR x=BLANK() RETURN x==\"1\"",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR x=BLANK() RETURN x==\"a\"",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR x=BLANK() RETURN x==2.5",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR x=BLANK() RETURN x==BLANK()",
+   "powerbi": "True"
+  },
+  {
+   "expr": "VAR x=BLANK() RETURN x==MAX(Facts[Region])",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR x=BLANK() RETURN x==SELECTEDVALUE(Facts[Quantity],0)",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR x=BLANK() RETURN x==SELECTEDVALUE(Facts[Region],\"East\")",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR x=BLANK() RETURN x=MAX(Facts[Region])",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR x=BLANK() RETURN x=SELECTEDVALUE(Facts[Note],BLANK())",
+   "powerbi": "True"
+  },
+  {
+   "expr": "VAR x=BLANK() RETURN x=SELECTEDVALUE(Facts[Region])",
+   "powerbi": "True"
+  },
+  {
+   "expr": "VAR x=BLANK() RETURN x=SELECTEDVALUE(Facts[Region],\"East\")",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR x=BLANK() RETURN x=SELECTEDVALUE(Facts[Region],\"x\")",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR x=BLANK() RETURN x=SELECTEDVALUE(Facts[Sales],2.5)",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR x=BLANK() RETURN x=TRUE()",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR x=BLANK() RETURN x>\"\"",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR x=BLANK() RETURN x>\"a\"",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR x=BLANK() RETURN x>0",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR x=BLANK() RETURN x>SELECTEDVALUE(Facts[Region])",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR x=BLANK() RETURN x>SELECTEDVALUE(Facts[Region],\"East\")",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR x=BLANK() RETURN x>SELECTEDVALUE(Facts[Sales],2.5)",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR x=BLANK() VAR y=x RETURN y<\"1\"",
+   "powerbi": "True"
+  },
+  {
+   "expr": "VAR x=BLANK() VAR y=x RETURN y<\"a\"",
+   "powerbi": "True"
+  },
+  {
+   "expr": "VAR x=BLANK() VAR y=x RETURN y<0",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR x=BLANK() VAR y=x RETURN y<1",
+   "powerbi": "True"
+  },
+  {
+   "expr": "VAR x=BLANK() VAR y=x RETURN y<2.5",
+   "powerbi": "True"
+  },
+  {
+   "expr": "VAR x=BLANK() VAR y=x RETURN y<>\"\"",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR x=BLANK() VAR y=x RETURN y<>\"a\"",
+   "powerbi": "True"
+  },
+  {
+   "expr": "VAR x=BLANK() VAR y=x RETURN y<>0",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR x=BLANK() VAR y=x RETURN y<>1",
+   "powerbi": "True"
+  },
+  {
+   "expr": "VAR x=BLANK() VAR y=x RETURN y<>2.5",
+   "powerbi": "True"
+  },
+  {
+   "expr": "VAR x=BLANK() VAR y=x RETURN y<>SELECTEDVALUE(Facts[Quantity],0)",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR x=BLANK() VAR y=x RETURN y<>SELECTEDVALUE(Facts[Region])",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR x=BLANK() VAR y=x RETURN y<MAX(Facts[Region])",
+   "powerbi": "True"
+  },
+  {
+   "expr": "VAR x=BLANK() VAR y=x RETURN y<SELECTEDVALUE(Facts[Note],BLANK())",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR x=BLANK() VAR y=x RETURN y<SELECTEDVALUE(Facts[Quantity],0)",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR x=BLANK() VAR y=x RETURN y=\"\"",
+   "powerbi": "True"
+  },
+  {
+   "expr": "VAR x=BLANK() VAR y=x RETURN y=\"1\"",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR x=BLANK() VAR y=x RETURN y==1",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR x=BLANK() VAR y=x RETURN y==2.5",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR x=BLANK() VAR y=x RETURN y==BLANK()",
+   "powerbi": "True"
+  },
+  {
+   "expr": "VAR x=BLANK() VAR y=x RETURN y==DATE(2020,1,1)",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR x=BLANK() VAR y=x RETURN y==SELECTEDVALUE(Facts[Region],\"East\")",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR x=BLANK() VAR y=x RETURN y==TRUE()",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR x=BLANK() VAR y=x RETURN y=BLANK()",
+   "powerbi": "True"
+  },
+  {
+   "expr": "VAR x=BLANK() VAR y=x RETURN y=SELECTEDVALUE(Facts[Region],\"East\")",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR x=BLANK() VAR y=x RETURN y>\"\"",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR x=BLANK() VAR y=x RETURN y>\"1\"",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR x=BLANK() VAR y=x RETURN y>1",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR x=BLANK() VAR y=x RETURN y>DATE(2020,1,1)",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR x=BLANK() VAR y=x RETURN y>MAX(Facts[Region])",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR x=BLANK() VAR y=x RETURN y>SELECTEDVALUE(Facts[Region],\"x\")",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR x=DATE(2020,1,1) RETURN x<>0",
+   "powerbi": "True"
+  },
+  {
+   "expr": "VAR x=DATE(2020,1,1) RETURN x<BLANK()",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR x=DATE(2020,1,1) RETURN x<DATE(2020,1,1)",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR x=DATE(2020,1,1) RETURN x=0",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR x=DATE(2020,1,1) RETURN x=1",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR x=DATE(2020,1,1) RETURN x=2.5",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR x=DATE(2020,1,1) RETURN x==0",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR x=DATE(2020,1,1) RETURN x==BLANK()",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR x=DATE(2020,1,1) RETURN x==DATE(2020,1,1)",
+   "powerbi": "True"
+  },
+  {
+   "expr": "VAR x=DATE(2020,1,1) RETURN x==SELECTEDVALUE(Facts[Note],BLANK())",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 47) DAX comparison operations do not support comparing values of type Date with values of type Text. Consider using the VALUE or FORMAT function to convert one of the values.\""
+  },
+  {
+   "expr": "VAR x=DATE(2020,1,1) RETURN x==SELECTEDVALUE(Facts[Quantity],0)",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR x=DATE(2020,1,1) RETURN x==SELECTEDVALUE(Facts[Region],\"x\")",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 47) DAX comparison operations do not support comparing values of type Date with values of type Text. Consider using the VALUE or FORMAT function to convert one of the values.\""
+  },
+  {
+   "expr": "VAR x=DATE(2020,1,1) RETURN x=SELECTEDVALUE(Facts[Quantity],0)",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR x=DATE(2020,1,1) RETURN x=SELECTEDVALUE(Facts[Sales],2.5)",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR x=DATE(2020,1,1) RETURN x>0",
+   "powerbi": "True"
+  },
+  {
+   "expr": "VAR x=DATE(2020,1,1) RETURN x>2.5",
+   "powerbi": "True"
+  },
+  {
+   "expr": "VAR x=DATE(2020,1,1) RETURN x>BLANK()",
+   "powerbi": "True"
+  },
+  {
+   "expr": "VAR x=DATE(2020,1,1) RETURN x>SELECTEDVALUE(Facts[Quantity],0)",
+   "powerbi": "True"
+  },
+  {
+   "expr": "VAR x=DATE(2020,1,1) RETURN x>SELECTEDVALUE(Facts[Sales],2.5)",
+   "powerbi": "True"
+  },
+  {
+   "expr": "VAR x=DATE(2020,1,1) VAR y=x RETURN y<0",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR x=DATE(2020,1,1) VAR y=x RETURN y<>2.5",
+   "powerbi": "True"
+  },
+  {
+   "expr": "VAR x=DATE(2020,1,1) VAR y=x RETURN y<>DATE(2020,1,1)",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR x=DATE(2020,1,1) VAR y=x RETURN y<>SELECTEDVALUE(Facts[Sales],2.5)",
+   "powerbi": "True"
+  },
+  {
+   "expr": "VAR x=DATE(2020,1,1) VAR y=x RETURN y<SELECTEDVALUE(Facts[Quantity],0)",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR x=DATE(2020,1,1) VAR y=x RETURN y=0",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR x=DATE(2020,1,1) VAR y=x RETURN y=2.5",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR x=DATE(2020,1,1) VAR y=x RETURN y==2.5",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR x=DATE(2020,1,1) VAR y=x RETURN y==BLANK()",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR x=DATE(2020,1,1) VAR y=x RETURN y==DATE(2020,1,1)",
+   "powerbi": "True"
+  },
+  {
+   "expr": "VAR x=DATE(2020,1,1) VAR y=x RETURN y=BLANK()",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR x=DATE(2020,1,1) VAR y=x RETURN y>0",
+   "powerbi": "True"
+  },
+  {
+   "expr": "VAR x=DATE(2020,1,1) VAR y=x RETURN y>1",
+   "powerbi": "True"
+  },
+  {
+   "expr": "VAR x=DATE(2020,1,1) VAR y=x RETURN y>2.5",
+   "powerbi": "True"
+  },
+  {
+   "expr": "VAR x=DATE(2020,1,1) VAR y=x RETURN y>BLANK()",
+   "powerbi": "True"
+  },
+  {
+   "expr": "VAR x=MAX(Facts[Region]) RETURN x<\"\"",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR x=MAX(Facts[Region]) RETURN x<\"a\"",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR x=MAX(Facts[Region]) RETURN x<>\"\"",
+   "powerbi": "True"
+  },
+  {
+   "expr": "VAR x=MAX(Facts[Region]) RETURN x<>\"1\"",
+   "powerbi": "True"
+  },
+  {
+   "expr": "VAR x=MAX(Facts[Region]) RETURN x<>\"a\"",
+   "powerbi": "True"
+  },
+  {
+   "expr": "VAR x=MAX(Facts[Region]) RETURN x<>BLANK()",
+   "powerbi": "True"
+  },
+  {
+   "expr": "VAR x=MAX(Facts[Region]) RETURN x<>SELECTEDVALUE(Facts[Region])",
+   "powerbi": "True"
+  },
+  {
+   "expr": "VAR x=MAX(Facts[Region]) RETURN x<>SELECTEDVALUE(Facts[Region],\"East\")",
+   "powerbi": "True"
+  },
+  {
+   "expr": "VAR x=MAX(Facts[Region]) RETURN x<BLANK()",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR x=MAX(Facts[Region]) RETURN x<SELECTEDVALUE(Facts[Region])",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR x=MAX(Facts[Region]) RETURN x=\"1\"",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR x=MAX(Facts[Region]) RETURN x=\"a\"",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR x=MAX(Facts[Region]) RETURN x==\"\"",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR x=MAX(Facts[Region]) RETURN x==BLANK()",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR x=MAX(Facts[Region]) RETURN x==MAX(Facts[Region])",
+   "powerbi": "True"
+  },
+  {
+   "expr": "VAR x=MAX(Facts[Region]) RETURN x==SELECTEDVALUE(Facts[Quantity],0)",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 51) DAX comparison operations do not support comparing values of type Text with values of type Integer. Consider using the VALUE or FORMAT function to convert one of the values.\""
+  },
+  {
+   "expr": "VAR x=MAX(Facts[Region]) RETURN x==SELECTEDVALUE(Facts[Region])",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR x=MAX(Facts[Region]) RETURN x=MAX(Facts[Region])",
+   "powerbi": "True"
+  },
+  {
+   "expr": "VAR x=MAX(Facts[Region]) RETURN x=SELECTEDVALUE(Facts[Note],BLANK())",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR x=MAX(Facts[Region]) RETURN x=SELECTEDVALUE(Facts[Region])",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR x=MAX(Facts[Region]) RETURN x>\"\"",
+   "powerbi": "True"
+  },
+  {
+   "expr": "VAR x=MAX(Facts[Region]) RETURN x>\"1\"",
+   "powerbi": "True"
+  },
+  {
+   "expr": "VAR x=MAX(Facts[Region]) RETURN x>SELECTEDVALUE(Facts[Note],BLANK())",
+   "powerbi": "True"
+  },
+  {
+   "expr": "VAR x=MAX(Facts[Region]) RETURN x>SELECTEDVALUE(Facts[Region])",
+   "powerbi": "True"
+  },
+  {
+   "expr": "VAR x=MAX(Facts[Region]) VAR y=x RETURN y<\"1\"",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR x=MAX(Facts[Region]) VAR y=x RETURN y<>SELECTEDVALUE(Facts[Region],\"x\")",
+   "powerbi": "True"
+  },
+  {
+   "expr": "VAR x=MAX(Facts[Region]) VAR y=x RETURN y<MAX(Facts[Region])",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR x=MAX(Facts[Region]) VAR y=x RETURN y<SELECTEDVALUE(Facts[Region])",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR x=MAX(Facts[Region]) VAR y=x RETURN y==\"\"",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR x=MAX(Facts[Region]) VAR y=x RETURN y==\"1\"",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR x=MAX(Facts[Region]) VAR y=x RETURN y==\"a\"",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR x=MAX(Facts[Region]) VAR y=x RETURN y==SELECTEDVALUE(Facts[Region],\"East\")",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR x=MAX(Facts[Region]) VAR y=x RETURN y==SELECTEDVALUE(Facts[Region],\"x\")",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR x=MAX(Facts[Region]) VAR y=x RETURN y=SELECTEDVALUE(Facts[Region])",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR x=MAX(Facts[Region]) VAR y=x RETURN y>\"1\"",
+   "powerbi": "True"
+  },
+  {
+   "expr": "VAR x=MAX(Facts[Region]) VAR y=x RETURN y>SELECTEDVALUE(Facts[Region],\"x\")",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR x=SELECTEDVALUE(Facts[Note],BLANK()) RETURN x<\"1\"",
+   "powerbi": "True"
+  },
+  {
+   "expr": "VAR x=SELECTEDVALUE(Facts[Note],BLANK()) RETURN x<>\"\"",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR x=SELECTEDVALUE(Facts[Note],BLANK()) RETURN x<>\"1\"",
+   "powerbi": "True"
+  },
+  {
+   "expr": "VAR x=SELECTEDVALUE(Facts[Note],BLANK()) RETURN x<>SELECTEDVALUE(Facts[Region])",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR x=SELECTEDVALUE(Facts[Note],BLANK()) RETURN x<>SELECTEDVALUE(Facts[Region],\"East\")",
+   "powerbi": "True"
+  },
+  {
+   "expr": "VAR x=SELECTEDVALUE(Facts[Note],BLANK()) RETURN x<BLANK()",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR x=SELECTEDVALUE(Facts[Note],BLANK()) RETURN x<SELECTEDVALUE(Facts[Region])",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR x=SELECTEDVALUE(Facts[Note],BLANK()) RETURN x=\"\"",
+   "powerbi": "True"
+  },
+  {
+   "expr": "VAR x=SELECTEDVALUE(Facts[Note],BLANK()) RETURN x=\"a\"",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR x=SELECTEDVALUE(Facts[Note],BLANK()) RETURN x==\"\"",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR x=SELECTEDVALUE(Facts[Note],BLANK()) RETURN x==\"1\"",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR x=SELECTEDVALUE(Facts[Note],BLANK()) RETURN x==BLANK()",
+   "powerbi": "True"
+  },
+  {
+   "expr": "VAR x=SELECTEDVALUE(Facts[Note],BLANK()) RETURN x==MAX(Facts[Region])",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR x=SELECTEDVALUE(Facts[Note],BLANK()) RETURN x==SELECTEDVALUE(Facts[Note],BLANK())",
+   "powerbi": "True"
+  },
+  {
+   "expr": "VAR x=SELECTEDVALUE(Facts[Note],BLANK()) RETURN x=BLANK()",
+   "powerbi": "True"
+  },
+  {
+   "expr": "VAR x=SELECTEDVALUE(Facts[Note],BLANK()) RETURN x=MAX(Facts[Region])",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR x=SELECTEDVALUE(Facts[Note],BLANK()) RETURN x=SELECTEDVALUE(Facts[Region])",
+   "powerbi": "True"
+  },
+  {
+   "expr": "VAR x=SELECTEDVALUE(Facts[Note],BLANK()) RETURN x>\"\"",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR x=SELECTEDVALUE(Facts[Note],BLANK()) RETURN x>\"a\"",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR x=SELECTEDVALUE(Facts[Note],BLANK()) VAR y=x RETURN y<\"1\"",
+   "powerbi": "True"
+  },
+  {
+   "expr": "VAR x=SELECTEDVALUE(Facts[Note],BLANK()) VAR y=x RETURN y<>\"1\"",
+   "powerbi": "True"
+  },
+  {
+   "expr": "VAR x=SELECTEDVALUE(Facts[Note],BLANK()) VAR y=x RETURN y<>SELECTEDVALUE(Facts[Region],\"East\")",
+   "powerbi": "True"
+  },
+  {
+   "expr": "VAR x=SELECTEDVALUE(Facts[Note],BLANK()) VAR y=x RETURN y<SELECTEDVALUE(Facts[Region])",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR x=SELECTEDVALUE(Facts[Note],BLANK()) VAR y=x RETURN y<SELECTEDVALUE(Facts[Region],\"East\")",
+   "powerbi": "True"
+  },
+  {
+   "expr": "VAR x=SELECTEDVALUE(Facts[Note],BLANK()) VAR y=x RETURN y==\"a\"",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR x=SELECTEDVALUE(Facts[Note],BLANK()) VAR y=x RETURN y==BLANK()",
+   "powerbi": "True"
+  },
+  {
+   "expr": "VAR x=SELECTEDVALUE(Facts[Note],BLANK()) VAR y=x RETURN y==SELECTEDVALUE(Facts[Note],BLANK())",
+   "powerbi": "True"
+  },
+  {
+   "expr": "VAR x=SELECTEDVALUE(Facts[Note],BLANK()) VAR y=x RETURN y==SELECTEDVALUE(Facts[Region],\"East\")",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR x=SELECTEDVALUE(Facts[Note],BLANK()) VAR y=x RETURN y=MAX(Facts[Region])",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR x=SELECTEDVALUE(Facts[Note],BLANK()) VAR y=x RETURN y=SELECTEDVALUE(Facts[Note],BLANK())",
+   "powerbi": "True"
+  },
+  {
+   "expr": "VAR x=SELECTEDVALUE(Facts[Note],BLANK()) VAR y=x RETURN y>\"a\"",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR x=SELECTEDVALUE(Facts[Note],BLANK()) VAR y=x RETURN y>SELECTEDVALUE(Facts[Region],\"East\")",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR x=SELECTEDVALUE(Facts[Quantity],0) RETURN x<0",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR x=SELECTEDVALUE(Facts[Quantity],0) RETURN x<2.5",
+   "powerbi": "True"
+  },
+  {
+   "expr": "VAR x=SELECTEDVALUE(Facts[Quantity],0) RETURN x<>0",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR x=SELECTEDVALUE(Facts[Quantity],0) RETURN x<>1",
+   "powerbi": "True"
+  },
+  {
+   "expr": "VAR x=SELECTEDVALUE(Facts[Quantity],0) RETURN x<>2.5",
+   "powerbi": "True"
+  },
+  {
+   "expr": "VAR x=SELECTEDVALUE(Facts[Quantity],0) RETURN x<>SELECTEDVALUE(Facts[Quantity],0)",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR x=SELECTEDVALUE(Facts[Quantity],0) RETURN x<>SELECTEDVALUE(Facts[Sales],2.5)",
+   "powerbi": "True"
+  },
+  {
+   "expr": "VAR x=SELECTEDVALUE(Facts[Quantity],0) RETURN x<BLANK()",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR x=SELECTEDVALUE(Facts[Quantity],0) RETURN x<SELECTEDVALUE(Facts[Quantity],0)",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR x=SELECTEDVALUE(Facts[Quantity],0) RETURN x=2.5",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR x=SELECTEDVALUE(Facts[Quantity],0) RETURN x==0",
+   "powerbi": "True"
+  },
+  {
+   "expr": "VAR x=SELECTEDVALUE(Facts[Quantity],0) RETURN x==1",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR x=SELECTEDVALUE(Facts[Quantity],0) RETURN x==2.5",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR x=SELECTEDVALUE(Facts[Quantity],0) RETURN x==BLANK()",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR x=SELECTEDVALUE(Facts[Quantity],0) RETURN x==SELECTEDVALUE(Facts[Region],\"x\")",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 65) DAX comparison operations do not support comparing values of type Integer with values of type Text. Consider using the VALUE or FORMAT function to convert one of the values.\""
+  },
+  {
+   "expr": "VAR x=SELECTEDVALUE(Facts[Quantity],0) RETURN x=BLANK()",
+   "powerbi": "True"
+  },
+  {
+   "expr": "VAR x=SELECTEDVALUE(Facts[Quantity],0) RETURN x=DATE(2020,1,1)",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR x=SELECTEDVALUE(Facts[Quantity],0) RETURN x>0",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR x=SELECTEDVALUE(Facts[Quantity],0) RETURN x>1",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR x=SELECTEDVALUE(Facts[Quantity],0) RETURN x>2.5",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR x=SELECTEDVALUE(Facts[Quantity],0) RETURN x>BLANK()",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR x=SELECTEDVALUE(Facts[Quantity],0) RETURN x>DATE(2020,1,1)",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR x=SELECTEDVALUE(Facts[Quantity],0) VAR y=x RETURN y<1",
+   "powerbi": "True"
+  },
+  {
+   "expr": "VAR x=SELECTEDVALUE(Facts[Quantity],0) VAR y=x RETURN y<>0",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR x=SELECTEDVALUE(Facts[Quantity],0) VAR y=x RETURN y<>BLANK()",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR x=SELECTEDVALUE(Facts[Quantity],0) VAR y=x RETURN y<>DATE(2020,1,1)",
+   "powerbi": "True"
+  },
+  {
+   "expr": "VAR x=SELECTEDVALUE(Facts[Quantity],0) VAR y=x RETURN y<>SELECTEDVALUE(Facts[Sales],2.5)",
+   "powerbi": "True"
+  },
+  {
+   "expr": "VAR x=SELECTEDVALUE(Facts[Quantity],0) VAR y=x RETURN y<SELECTEDVALUE(Facts[Quantity],0)",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR x=SELECTEDVALUE(Facts[Quantity],0) VAR y=x RETURN y=0",
+   "powerbi": "True"
+  },
+  {
+   "expr": "VAR x=SELECTEDVALUE(Facts[Quantity],0) VAR y=x RETURN y=1",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR x=SELECTEDVALUE(Facts[Quantity],0) VAR y=x RETURN y==0",
+   "powerbi": "True"
+  },
+  {
+   "expr": "VAR x=SELECTEDVALUE(Facts[Quantity],0) VAR y=x RETURN y==1",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR x=SELECTEDVALUE(Facts[Quantity],0) VAR y=x RETURN y=SELECTEDVALUE(Facts[Quantity],0)",
+   "powerbi": "True"
+  },
+  {
+   "expr": "VAR x=SELECTEDVALUE(Facts[Quantity],0) VAR y=x RETURN y>2.5",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR x=SELECTEDVALUE(Facts[Quantity],0) VAR y=x RETURN y>SELECTEDVALUE(Facts[Quantity],0)",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR x=SELECTEDVALUE(Facts[Region]) RETURN x<\"1\"",
+   "powerbi": "True"
+  },
+  {
+   "expr": "VAR x=SELECTEDVALUE(Facts[Region]) RETURN x<>\"a\"",
+   "powerbi": "True"
+  },
+  {
+   "expr": "VAR x=SELECTEDVALUE(Facts[Region]) RETURN x<>BLANK()",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR x=SELECTEDVALUE(Facts[Region]) RETURN x<>SELECTEDVALUE(Facts[Region])",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR x=SELECTEDVALUE(Facts[Region]) RETURN x<BLANK()",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR x=SELECTEDVALUE(Facts[Region]) RETURN x<MAX(Facts[Region])",
+   "powerbi": "True"
+  },
+  {
+   "expr": "VAR x=SELECTEDVALUE(Facts[Region]) RETURN x<SELECTEDVALUE(Facts[Region],\"x\")",
+   "powerbi": "True"
+  },
+  {
+   "expr": "VAR x=SELECTEDVALUE(Facts[Region]) RETURN x=\"\"",
+   "powerbi": "True"
+  },
+  {
+   "expr": "VAR x=SELECTEDVALUE(Facts[Region]) RETURN x=\"1\"",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR x=SELECTEDVALUE(Facts[Region]) RETURN x=\"a\"",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR x=SELECTEDVALUE(Facts[Region]) RETURN x==\"a\"",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR x=SELECTEDVALUE(Facts[Region]) RETURN x==BLANK()",
+   "powerbi": "True"
+  },
+  {
+   "expr": "VAR x=SELECTEDVALUE(Facts[Region]) RETURN x==MAX(Facts[Region])",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR x=SELECTEDVALUE(Facts[Region]) RETURN x==SELECTEDVALUE(Facts[Note],BLANK())",
+   "powerbi": "True"
+  },
+  {
+   "expr": "VAR x=SELECTEDVALUE(Facts[Region]) RETURN x==SELECTEDVALUE(Facts[Quantity],0)",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 61) DAX comparison operations do not support comparing values of type Text with values of type Integer. Consider using the VALUE or FORMAT function to convert one of the values.\""
+  },
+  {
+   "expr": "VAR x=SELECTEDVALUE(Facts[Region]) RETURN x==SELECTEDVALUE(Facts[Region])",
+   "powerbi": "True"
+  },
+  {
+   "expr": "VAR x=SELECTEDVALUE(Facts[Region]) RETURN x=BLANK()",
+   "powerbi": "True"
+  },
+  {
+   "expr": "VAR x=SELECTEDVALUE(Facts[Region]) RETURN x=MAX(Facts[Region])",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR x=SELECTEDVALUE(Facts[Region]) RETURN x=SELECTEDVALUE(Facts[Note],BLANK())",
+   "powerbi": "True"
+  },
+  {
+   "expr": "VAR x=SELECTEDVALUE(Facts[Region]) RETURN x=SELECTEDVALUE(Facts[Region],\"East\")",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR x=SELECTEDVALUE(Facts[Region]) RETURN x>\"a\"",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR x=SELECTEDVALUE(Facts[Region]) RETURN x>SELECTEDVALUE(Facts[Note],BLANK())",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR x=SELECTEDVALUE(Facts[Region]) RETURN x>SELECTEDVALUE(Facts[Region],\"East\")",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR x=SELECTEDVALUE(Facts[Region]) RETURN x>SELECTEDVALUE(Facts[Region],\"x\")",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR x=SELECTEDVALUE(Facts[Region]) VAR y=x RETURN y<\"1\"",
+   "powerbi": "True"
+  },
+  {
+   "expr": "VAR x=SELECTEDVALUE(Facts[Region]) VAR y=x RETURN y<>BLANK()",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR x=SELECTEDVALUE(Facts[Region]) VAR y=x RETURN y<>SELECTEDVALUE(Facts[Region])",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR x=SELECTEDVALUE(Facts[Region]) VAR y=x RETURN y<>SELECTEDVALUE(Facts[Region],\"East\")",
+   "powerbi": "True"
+  },
+  {
+   "expr": "VAR x=SELECTEDVALUE(Facts[Region]) VAR y=x RETURN y<MAX(Facts[Region])",
+   "powerbi": "True"
+  },
+  {
+   "expr": "VAR x=SELECTEDVALUE(Facts[Region]) VAR y=x RETURN y=\"\"",
+   "powerbi": "True"
+  },
+  {
+   "expr": "VAR x=SELECTEDVALUE(Facts[Region]) VAR y=x RETURN y=\"a\"",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR x=SELECTEDVALUE(Facts[Region]) VAR y=x RETURN y==\"1\"",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR x=SELECTEDVALUE(Facts[Region]) VAR y=x RETURN y==SELECTEDVALUE(Facts[Quantity],0)",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 69) DAX comparison operations do not support comparing values of type Text with values of type Integer. Consider using the VALUE or FORMAT function to convert one of the values.\""
+  },
+  {
+   "expr": "VAR x=SELECTEDVALUE(Facts[Region]) VAR y=x RETURN y==SELECTEDVALUE(Facts[Region],\"x\")",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR x=SELECTEDVALUE(Facts[Region]) VAR y=x RETURN y=SELECTEDVALUE(Facts[Region])",
+   "powerbi": "True"
+  },
+  {
+   "expr": "VAR x=SELECTEDVALUE(Facts[Region]) VAR y=x RETURN y=SELECTEDVALUE(Facts[Region],\"x\")",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR x=SELECTEDVALUE(Facts[Region]) VAR y=x RETURN y>\"\"",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR x=SELECTEDVALUE(Facts[Region]) VAR y=x RETURN y>\"1\"",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR x=SELECTEDVALUE(Facts[Region]) VAR y=x RETURN y>MAX(Facts[Region])",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR x=SELECTEDVALUE(Facts[Region],\"East\") RETURN x<\"\"",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR x=SELECTEDVALUE(Facts[Region],\"East\") RETURN x<\"a\"",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR x=SELECTEDVALUE(Facts[Region],\"East\") RETURN x<>\"1\"",
+   "powerbi": "True"
+  },
+  {
+   "expr": "VAR x=SELECTEDVALUE(Facts[Region],\"East\") RETURN x<>MAX(Facts[Region])",
+   "powerbi": "True"
+  },
+  {
+   "expr": "VAR x=SELECTEDVALUE(Facts[Region],\"East\") RETURN x<>SELECTEDVALUE(Facts[Region])",
+   "powerbi": "True"
+  },
+  {
+   "expr": "VAR x=SELECTEDVALUE(Facts[Region],\"East\") RETURN x<>SELECTEDVALUE(Facts[Region],\"East\")",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR x=SELECTEDVALUE(Facts[Region],\"East\") RETURN x<MAX(Facts[Region])",
+   "powerbi": "True"
+  },
+  {
+   "expr": "VAR x=SELECTEDVALUE(Facts[Region],\"East\") RETURN x<SELECTEDVALUE(Facts[Note],BLANK())",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR x=SELECTEDVALUE(Facts[Region],\"East\") RETURN x=\"\"",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR x=SELECTEDVALUE(Facts[Region],\"East\") RETURN x=\"1\"",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR x=SELECTEDVALUE(Facts[Region],\"East\") RETURN x==\"\"",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR x=SELECTEDVALUE(Facts[Region],\"East\") RETURN x==SELECTEDVALUE(Facts[Note],BLANK())",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR x=SELECTEDVALUE(Facts[Region],\"East\") RETURN x==SELECTEDVALUE(Facts[Region],\"East\")",
+   "powerbi": "True"
+  },
+  {
+   "expr": "VAR x=SELECTEDVALUE(Facts[Region],\"East\") RETURN x=BLANK()",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR x=SELECTEDVALUE(Facts[Region],\"East\") RETURN x=SELECTEDVALUE(Facts[Note],BLANK())",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR x=SELECTEDVALUE(Facts[Region],\"East\") RETURN x=SELECTEDVALUE(Facts[Region],\"East\")",
+   "powerbi": "True"
+  },
+  {
+   "expr": "VAR x=SELECTEDVALUE(Facts[Region],\"East\") RETURN x>\"1\"",
+   "powerbi": "True"
+  },
+  {
+   "expr": "VAR x=SELECTEDVALUE(Facts[Region],\"East\") RETURN x>MAX(Facts[Region])",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR x=SELECTEDVALUE(Facts[Region],\"East\") RETURN x>SELECTEDVALUE(Facts[Note],BLANK())",
+   "powerbi": "True"
+  },
+  {
+   "expr": "VAR x=SELECTEDVALUE(Facts[Region],\"East\") VAR y=x RETURN y<>MAX(Facts[Region])",
+   "powerbi": "True"
+  },
+  {
+   "expr": "VAR x=SELECTEDVALUE(Facts[Region],\"East\") VAR y=x RETURN y<SELECTEDVALUE(Facts[Region])",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR x=SELECTEDVALUE(Facts[Region],\"East\") VAR y=x RETURN y=\"\"",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR x=SELECTEDVALUE(Facts[Region],\"East\") VAR y=x RETURN y=\"a\"",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR x=SELECTEDVALUE(Facts[Region],\"East\") VAR y=x RETURN y==\"a\"",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR x=SELECTEDVALUE(Facts[Region],\"East\") VAR y=x RETURN y==SELECTEDVALUE(Facts[Region])",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR x=SELECTEDVALUE(Facts[Region],\"East\") VAR y=x RETURN y=MAX(Facts[Region])",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR x=SELECTEDVALUE(Facts[Region],\"East\") VAR y=x RETURN y>\"a\"",
+   "powerbi": "True"
+  },
+  {
+   "expr": "VAR x=SELECTEDVALUE(Facts[Region],\"x\") RETURN x<>\"a\"",
+   "powerbi": "True"
+  },
+  {
+   "expr": "VAR x=SELECTEDVALUE(Facts[Region],\"x\") RETURN x<>MAX(Facts[Region])",
+   "powerbi": "True"
+  },
+  {
+   "expr": "VAR x=SELECTEDVALUE(Facts[Region],\"x\") RETURN x<>SELECTEDVALUE(Facts[Region])",
+   "powerbi": "True"
+  },
+  {
+   "expr": "VAR x=SELECTEDVALUE(Facts[Region],\"x\") RETURN x<>SELECTEDVALUE(Facts[Region],\"x\")",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR x=SELECTEDVALUE(Facts[Region],\"x\") RETURN x<MAX(Facts[Region])",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR x=SELECTEDVALUE(Facts[Region],\"x\") RETURN x<SELECTEDVALUE(Facts[Region])",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR x=SELECTEDVALUE(Facts[Region],\"x\") RETURN x=\"\"",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR x=SELECTEDVALUE(Facts[Region],\"x\") RETURN x=\"a\"",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR x=SELECTEDVALUE(Facts[Region],\"x\") RETURN x==\"1\"",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR x=SELECTEDVALUE(Facts[Region],\"x\") RETURN x==SELECTEDVALUE(Facts[Region])",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR x=SELECTEDVALUE(Facts[Region],\"x\") RETURN x>\"\"",
+   "powerbi": "True"
+  },
+  {
+   "expr": "VAR x=SELECTEDVALUE(Facts[Region],\"x\") VAR y=x RETURN y<>\"\"",
+   "powerbi": "True"
+  },
+  {
+   "expr": "VAR x=SELECTEDVALUE(Facts[Region],\"x\") VAR y=x RETURN y<>\"1\"",
+   "powerbi": "True"
+  },
+  {
+   "expr": "VAR x=SELECTEDVALUE(Facts[Region],\"x\") VAR y=x RETURN y<>SELECTEDVALUE(Facts[Region],\"x\")",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR x=SELECTEDVALUE(Facts[Region],\"x\") VAR y=x RETURN y<BLANK()",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR x=SELECTEDVALUE(Facts[Region],\"x\") VAR y=x RETURN y=\"1\"",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR x=SELECTEDVALUE(Facts[Region],\"x\") VAR y=x RETURN y>\"1\"",
+   "powerbi": "True"
+  },
+  {
+   "expr": "VAR x=SELECTEDVALUE(Facts[Region],\"x\") VAR y=x RETURN y>MAX(Facts[Region])",
+   "powerbi": "True"
+  },
+  {
+   "expr": "VAR x=SELECTEDVALUE(Facts[Sales],2.5) RETURN x<>0",
+   "powerbi": "True"
+  },
+  {
+   "expr": "VAR x=SELECTEDVALUE(Facts[Sales],2.5) RETURN x<>1",
+   "powerbi": "True"
+  },
+  {
+   "expr": "VAR x=SELECTEDVALUE(Facts[Sales],2.5) RETURN x<>2.5",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR x=SELECTEDVALUE(Facts[Sales],2.5) RETURN x<>DATE(2020,1,1)",
+   "powerbi": "True"
+  },
+  {
+   "expr": "VAR x=SELECTEDVALUE(Facts[Sales],2.5) RETURN x<>SELECTEDVALUE(Facts[Quantity],0)",
+   "powerbi": "True"
+  },
+  {
+   "expr": "VAR x=SELECTEDVALUE(Facts[Sales],2.5) RETURN x<BLANK()",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR x=SELECTEDVALUE(Facts[Sales],2.5) RETURN x<SELECTEDVALUE(Facts[Quantity],0)",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR x=SELECTEDVALUE(Facts[Sales],2.5) RETURN x=DATE(2020,1,1)",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR x=SELECTEDVALUE(Facts[Sales],2.5) RETURN x>1",
+   "powerbi": "True"
+  },
+  {
+   "expr": "VAR x=SELECTEDVALUE(Facts[Sales],2.5) RETURN x>2.5",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR x=SELECTEDVALUE(Facts[Sales],2.5) VAR y=x RETURN y<2.5",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR x=SELECTEDVALUE(Facts[Sales],2.5) VAR y=x RETURN y<SELECTEDVALUE(Facts[Sales],2.5)",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR x=SELECTEDVALUE(Facts[Sales],2.5) VAR y=x RETURN y=2.5",
+   "powerbi": "True"
+  },
+  {
+   "expr": "VAR x=SELECTEDVALUE(Facts[Sales],2.5) VAR y=x RETURN y=SELECTEDVALUE(Facts[Quantity],0)",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR x=SELECTEDVALUE(Facts[Sales],2.5) VAR y=x RETURN y>0",
+   "powerbi": "True"
+  },
+  {
+   "expr": "VAR x=SELECTEDVALUE(Facts[Sales],2.5) VAR y=x RETURN y>1",
+   "powerbi": "True"
+  },
+  {
+   "expr": "VAR x=SELECTEDVALUE(Facts[Sales],2.5) VAR y=x RETURN y>2.5",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR x=TRUE() RETURN x<>TRUE()",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR x=TRUE() RETURN x==TRUE()",
+   "powerbi": "True"
+  },
+  {
+   "expr": "VAR x=TRUE() RETURN x=BLANK()",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR x=TRUE() RETURN x>BLANK()",
+   "powerbi": "True"
+  },
+  {
+   "expr": "VAR x=TRUE() RETURN x>TRUE()",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR x=TRUE() VAR y=x RETURN y<>TRUE()",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR x=TRUE() VAR y=x RETURN y<BLANK()",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR x=TRUE() VAR y=x RETURN y==SELECTEDVALUE(Facts[Quantity],0)",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 47) DAX comparison operations do not support comparing values of type True/False with values of type Integer. Consider using the VALUE or FORMAT function to convert one of the values.\""
+  },
+  {
+   "expr": "VAR x=TRUE() VAR y=x RETURN y==TRUE()",
+   "powerbi": "True"
+  },
+  {
+   "expr": "VAR x=TRUE() VAR y=x RETURN y=BLANK()",
+   "powerbi": "False"
+  },
+  {
+   "expr": "VAR x=TRUE() VAR y=x RETURN y=TRUE()",
+   "powerbi": "True"
+  },
+  {
+   "expr": "VAR x=TRUE() VAR y=x RETURN y>BLANK()",
+   "powerbi": "True"
+  },
+  {
+   "expr": "YEAR(DATEVALUE(\"1 2/2020\"))",
+   "powerbi": "2020"
+  },
+  {
+   "expr": "YEAR(DATEVALUE(\"1,99\"))",
+   "powerbi": "1999"
+  },
+  {
+   "expr": "YEAR(DATEVALUE(\"1/2/2020 3:04 PM\"))",
+   "powerbi": "2020"
+  },
+  {
+   "expr": "YEAR(DATEVALUE(\"1/2/2020\"))",
+   "powerbi": "2020"
+  },
+  {
+   "expr": "YEAR(DATEVALUE(\"10:30 PM\"))",
+   "powerbi": "1899"
+  },
+  {
+   "expr": "YEAR(DATEVALUE(\"10:30\"))",
+   "powerbi": "1899"
+  },
+  {
+   "expr": "YEAR(DATEVALUE(\"11, 99\"))",
+   "powerbi": "1999"
+  },
+  {
+   "expr": "YEAR(DATEVALUE(\"11:45 AM\"))",
+   "powerbi": "1899"
+  },
+  {
+   "expr": "YEAR(DATEVALUE(\"12 31/99\"))",
+   "powerbi": "1999"
+  },
+  {
+   "expr": "YEAR(DATEVALUE(\"12, 05\"))",
+   "powerbi": "2026"
+  },
+  {
+   "expr": "YEAR(DATEVALUE(\"13:00:01\"))",
+   "powerbi": "1899"
+  },
+  {
+   "expr": "YEAR(DATEVALUE(\"2 29/2020\"))",
+   "powerbi": "2020"
+  },
+  {
+   "expr": "YEAR(DATEVALUE(\"2, 2021\"))",
+   "powerbi": "2021"
+  },
+  {
+   "expr": "YEAR(DATEVALUE(\"3 4/49\"))",
+   "powerbi": "2049"
+  },
+  {
+   "expr": "YEAR(DATEVALUE(\"4 15/2019\"))",
+   "powerbi": "2019"
+  },
+  {
+   "expr": "YEAR(DATEVALUE(\"6 30/01\"))",
+   "powerbi": "2001"
+  },
+  {
+   "expr": "YEAR(DATEVALUE(\"7, 2015\"))",
+   "powerbi": "2015"
+  },
+  {
+   "expr": "YEAR(DATEVALUE(\"9:15\"))",
+   "powerbi": "1899"
+  }
+ ]
+}
