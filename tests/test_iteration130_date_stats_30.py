@@ -100,15 +100,15 @@ class DateStats30Tests(unittest.TestCase):
         # a product of dates that is exact stays answered
         self.assertEqual("652458240z", dax.local('(PRODUCTX(Facts,(Facts[Quantity])-(EDATE(DATE(1899,12,31),1))))&"z"'))
 
-    def test_second_of_negative_serial_with_fraction_of_second_refuses(self) -> None:
-        # Power BI: SECOND(-(3)+(0.999)) is 27; the local engine's 26 is wrong, and one measured value does not settle the rule
+    def test_second_of_negative_serial_with_fraction_of_second_is_answered(self) -> None:
+        # Task 48 (2026-11-04): answered now; live Power BI answer (dax_battery_datestats30_extra: 27 for each)
         for expression in (
             "SECOND(-(3)+(0.999))",
             "SECOND(-(10.5)+(0.999))",
             "SECOND(-(DATE(1900,1,2))+(0.999))",
             "SECOND(-(DATE(2019,5,5))+(0.999))",
         ):
-            self.assertRefused(expression)
+            self.assertEqual("27", dax.local(expression))
         # whole seconds and hours / minutes that rounding cannot change stay answered (live)
         self.assertEqual("51", dax.local("SECOND((TIME(9,9,9))-(DATE(2019,5,5)))"))
         self.assertEqual("1", dax.local("MINUTE(-(DATE(2019,5,5))+(0.999))"))
