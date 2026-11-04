@@ -384,7 +384,7 @@ def _consume_infinity(thunk: Any) -> Any:
 
 
 _CURRENCY_LIMIT = Decimal("922337203685477.5807")  # the Currency type's range
-_TYPE_TESTS = frozenset({"ISINTEGER", "ISINT64", "ISDOUBLE", "ISDECIMAL", "ISCURRENCY", "ISNUMBER", "ISTEXT", "ISNONTEXT", "ISLOGICAL", "ISDATETIME"})
+_TYPE_TESTS = frozenset({"ISINTEGER", "ISINT64", "ISDOUBLE", "ISDECIMAL", "ISCURRENCY", "ISNUMBER", "ISTEXT", "ISNONTEXT", "ISLOGICAL", "ISDATETIME", "ISBOOLEAN", "ISSTRING", "ISNUMERIC", "ISBLANK"})
 _DATETIME_CLAMP_LOW = dax_dates.from_datetime(datetime(100, 1, 1))  # Task 19 Part A: CONVERT of -Infinity or a too small number
 _CURRENCY_INFINITY = object()  # any value but None: ISBLANK of a constant Currency / 0 is False (Part F)
 
@@ -4158,6 +4158,44 @@ def _is_bare_power(node: Any) -> bool:
     return node[0] == "call" and node[1] == "POWER" and not divides_or_powers(node[2])
 
 
+def _is_bare_let_var(node: Any) -> bool:
+    """True if node is a bare let returning a var (e.g. VAR y = ... RETURN y) or a bare var."""
+    if not isinstance(node, tuple) or not node:
+        return False
+    if node[0] == "let":
+        return _is_bare_let_var(node[2])
+    return node[0] == "var"
+
+
+def _has_bare_error(node: Any) -> bool:
+    """True if node contains a call to ERROR."""
+    if not isinstance(node, tuple) or not node:
+        return False
+    if node[0] == "call" and node[1] == "ERROR":
+        return True
+    return any(_has_bare_error(c) for c in (node[1:] if isinstance(node[0], str) else node))
+
+
+def _has_call_outside_let(node: Any, call_names: set[str] | frozenset[str]) -> bool:
+    if not isinstance(node, tuple) or not node:
+        return False
+    if node[0] == "let":
+        return _has_call_outside_let(node[2], call_names)
+    if node[0] == "call" and len(node) > 1 and node[1] in call_names:
+        return True
+    return any(_has_call_outside_let(c, call_names) for c in (node[1:] if isinstance(node[0], str) else node))
+
+
+def _has_op_outside_let(node: Any, ops: set[str] | frozenset[str]) -> bool:
+    if not isinstance(node, tuple) or not node:
+        return False
+    if node[0] == "let":
+        return _has_op_outside_let(node[2], ops)
+    if node[0] == "binary" and len(node) > 1 and node[1] in ops:
+        return True
+    return any(_has_op_outside_let(c, ops) for c in (node[1:] if isinstance(node[0], str) else node))
+
+
 def _reads_no_data(node: Any, held: Callable[[str], Any], seen: frozenset[str] = frozenset()) -> bool:
     """Corrections rule 1: True when an operand reads no data (BLANK(), IF(1=2,1), ABS(BLANK()), CALCULATE(BLANK()), a VAR of those).
 
@@ -6970,6 +7008,8 @@ def _static_numeric_type(
         return None
     if kind == "binary":
         op, left, right = node[1], node[2], node[3]
+        if op == "^":
+            return "double"
         lt = _static_numeric_type(left, columns, variables)
         rt = _static_numeric_type(right, columns, variables)
         lt = "int64" if lt == "bool" else lt
@@ -7081,7 +7121,7 @@ def _static_numeric_type(
         at = _static_numeric_type(args[0], columns, variables) if args else None
         if at in {"int64", "double", "currency"}:
             return at
-        return "int64" if at == "bool" else None
+        return "int64" if at == "bool" else "double"
     if fn == "INT":
         at = _static_numeric_type(args[0], columns, variables) if args else None
         if at == "currency":
@@ -7158,6 +7198,8 @@ def _static_numeric_type(
         known = {t for t in types if t != "blank"}
         if len(known) == 1 and None not in known:
             return known.pop()
+        if "datetime" in known and any(r[:2] == ("call", "ERROR") for r in res_nodes):
+            return None  # Task 41: ISDOUBLE(IF(1=0,ERROR("e"),DATE(2020,1,1))) is False in Power BI (a Double beside a date is True); not settled
         return _unify_numeric_types(types)
     return None
 
@@ -7410,7 +7452,7 @@ def _strict_operand_type(node: tuple[Any, ...], columns: dict[str, dict[str, str
             probe = probe[2]
         else:
             probe = bound.pop(str(probe[1]))
-    if probe == ("blank",):
+    if probe == ("blank",) or (probe[0] == "call" and probe[1] == "BLANK" and not probe[2]):
         return "number"
     if probe[:2] == ("call", "SELECTEDVALUE") and len(probe[2]) == 1:
         probe = probe[2][0]
@@ -16353,14 +16395,19 @@ def evaluate_measures(
     def static_type_answer(function: str, static_t: str | None) -> bool | None:
         """A type test answered by the static type of its argument; None when that type is not known well enough to answer."""
         if static_t not in {"int64", "double", "currency", "decimal", "text", "bool", "datetime"}:
+            if static_t is None:
+                if function in {"ISINTEGER", "ISINT64", "ISDOUBLE", "ISDECIMAL", "ISCURRENCY", "ISTEXT", "ISLOGICAL", "ISBOOLEAN", "ISSTRING", "ISDATETIME"}:
+                    return False
+                if function == "ISNONTEXT":
+                    return True
             return None
-        if function == "ISNUMBER":
+        if function in {"ISNUMBER", "ISNUMERIC"}:
             return static_t in {"int64", "double", "currency", "decimal", "datetime"}
-        if function == "ISTEXT":
+        if function in {"ISTEXT", "ISSTRING"}:
             return static_t == "text"
         if function == "ISNONTEXT":
             return static_t != "text"
-        if function == "ISLOGICAL":
+        if function in {"ISLOGICAL", "ISBOOLEAN"}:
             return static_t == "bool"
         if function in {"ISINTEGER", "ISINT64"}:
             return static_t == "int64"
@@ -16368,7 +16415,163 @@ def evaluate_measures(
             return static_t == "double"
         if function == "ISDATETIME":
             return static_t == "datetime"
+        if function == "ISBLANK":
+            return False
         return static_t in {"currency", "decimal"}  # ISDECIMAL, ISCURRENCY
+
+    def hidden_failure_verdict(function: str, node: tuple[Any, ...], row_context: Any) -> str | None:
+        """Task 41: where a type test of a failing argument may be answered by the argument's static type.  Measured on fresh Power BI shapes
+        (never on the saved ones): the static type answers only for the shape families below; a failing value that changes kind under IF /
+        SWITCH shows its error; a wrapper or a shape that was not measured is refused.  Returns "error" (the failure shows), "refuse" (not
+        settled by the rows), or None (the static type answers).  ISBLANK is never changed."""
+        if function == "ISBLANK" or not isinstance(node, tuple) or not node:
+            return None
+        kinds = {"int64": "num", "double": "num", "currency": "num", "decimal": "num", "number": "num", "datetime": "date", "text": "text", "bool": "bool", "blank": "blank"}
+        branching = {"IF", "IF.EAGER", "SWITCH", "IFERROR", "COALESCE"}
+        measured_calls = {"ABS", "CONVERT", "CURRENCY", "DATEVALUE", "EXP", "INT", "LN", "LOG", "MOD", "POWER", "ROUND", "SIGN", "TRUNC", "VALUE"}  # failing calls with five or more measured rows
+
+        def branch_class(part: Any, defs: dict[str, Any]) -> str:
+            while isinstance(part, tuple) and part and part[0] in {"let", "var"}:
+                if part[0] == "let":
+                    defs = {**defs, **{str(name): bound for name, bound in part[1]}}
+                    part = part[2]
+                elif str(part[1]) in defs:
+                    part = defs[str(part[1])]
+                else:
+                    return "?"
+            if part == ("blank",) or part[:2] == ("call", "BLANK"):
+                return "blank"
+            if part[:2] == ("call", "ERROR"):
+                return "?"
+            return kinds.get(static_type_of(part), "?")
+
+        def fails(part: Any) -> bool:
+            try:
+                evaluate(part, row_context, allow_text=True, allow_boolean=True)
+            except Exception:
+                return True
+            return False
+
+        def children(part: Any) -> list[Any]:
+            return [child for child in (part if isinstance(part[0], tuple) else part[1:]) if isinstance(child, tuple)]
+
+        def minimal_failing(part: Any, path: list[str]) -> tuple[Any, list[str]] | None:
+            """The deepest part that fails and the names of the calls (or "let") around it."""
+            if not isinstance(part, tuple) or not part:
+                return None
+            if isinstance(part[0], tuple):
+                for child in part:
+                    found = minimal_failing(child, path)
+                    if found is not None:
+                        return found
+                return None
+            if part[0] in {"table", "string", "number", "boolean", "var", "blank"}:
+                return None
+            if part[0] == "let":
+                for _name, bound in part[1]:
+                    found = minimal_failing(bound, path + ["let"])
+                    if found is not None:
+                        return found
+                return minimal_failing(part[2], path + ["let"])
+            if not fails(part):
+                return None
+            step = path + [str(part[1]) if part[0] == "call" else str(part[0])]
+            for child in children(part):
+                found = minimal_failing(child, step)
+                if found is not None:
+                    return found
+            return part, path
+
+        def failing_dates(part: Any) -> bool:
+            """A part of the tree that fails and is typed datetime (DATEVALUE of a text, a date plus a text)."""
+            if not isinstance(part, tuple) or not part:
+                return False
+            if part[0] in {"call", "binary"} and static_type_of(part) == "datetime" and fails(part):
+                return True
+            return any(failing_dates(child) for child in children(part))
+
+        def failing_date_calls(part: Any) -> bool:
+            """A call (DATEVALUE, TIME, EDATE ...) that fails and is typed datetime, anywhere under part (a date plus a text is arithmetic, not a call)."""
+            if not isinstance(part, tuple) or not part:
+                return False
+            if part[0] == "call" and static_type_of(part) == "datetime" and fails(part):
+                return True
+            return any(failing_date_calls(child) for child in children(part))
+
+        defs: dict[str, Any] = {}
+        via_var = False
+        if node[0] == "let":
+            defs = {str(name): bound for name, bound in node[1]}
+            if node[2][0] != "var" or str(node[2][1]) not in defs:
+                # a failing datetime call read inside other arithmetic is not settled (ISNUMBER of it raises, the other tests do not)
+                return "refuse" if any(failing_date_calls(bound) for bound in defs.values()) else None
+            node, via_var = defs[str(node[2][1])], True
+        if node[0] == "call" and node[1] not in branching:
+            found = minimal_failing(node, [])
+            if found is not None and found[1]:  # a function around a failing value (not a failing call itself)
+                leaf, path = found
+                chain = [name for name in path if name != "let"]
+                if "FORMAT" in chain:
+                    return "error"
+                if leaf[:2] == ("call", "CURRENCY") and all(name in {"ABS", "ROUND", "INT", "NOT", "binary", "unary"} for name in chain):
+                    chain = ["ABS"]  # a Currency out of range under arithmetic / ABS / ROUND: answered by its type (locked Task 21 rows)
+                if chain not in (["ABS"], ["ROUND"], ["NOT"], ["INT"], ["INT", "INT"], ["NOT", "ISBLANK"]):
+                    return "refuse"
+                if leaf[0] == "call":
+                    if leaf[1] in {"CURRENCY", "ABS", "ROUND", "EXP", "INT", "SIGN", "TRUNC", "CONVERT", "VALUE"}:
+                        pass  # a failing text-to-number conversion: the static type answers
+                    elif leaf[1] in {"DATEVALUE", "TIME", "EDATE", "CEILING", "WEEKDAY", "FACT"} and set(chain) == {"INT"}:
+                        return "error"  # INT of any other failing call raised in every measured row
+                    else:
+                        return "refuse"
+                elif leaf[0] != "binary":
+                    return "refuse"
+        if failing_dates(node):
+            if function == "ISNUMERIC":
+                return "refuse"
+            if via_var and function == "ISDATETIME":
+                return "error"
+        if node[0] == "call" and node[1] not in branching:
+            found = minimal_failing(node, [])
+            if found is not None and not found[1] and node[1] not in measured_calls:
+                return "refuse"  # a failing call with fewer than five measured rows
+        if node[0] != "call":
+            return None
+        name, args = node[1], node[2]
+        if name in {"IFERROR", "COALESCE"}:
+            if any(argument[0] == "let" for argument in args) and len(args) == 2:
+                return "refuse"
+            return None
+        if name in {"IF", "IF.EAGER"}:
+            results = list(args[1:])
+        elif name == "SWITCH":
+            results = [args[index] for index in range(2, len(args), 2)]
+            if len(args) >= 4 and len(args) % 2 == 0:
+                results.append(args[-1])
+        else:
+            return None
+        classes = {result: branch_class(result, defs) for result in results}
+        failing = [result for result in results if fails(result)]
+        if not failing:
+            return None
+        present = set(classes.values()) - {"blank"}
+        if "?" in present:
+            return "refuse"
+        for result in failing:
+            leaf = minimal_failing(result, [])
+            if leaf is not None and leaf[0][0] == "call" and leaf[0][1] not in measured_calls:
+                return "refuse"
+        if len(present) > 1 and not present <= {"num", "date"}:
+            return "error"  # text or logical beside another kind: a Variant, so the failing branch shows
+        if name == "SWITCH":
+            return "refuse"  # the numeric / date branches of a SWITCH raised for some tests and not for others
+        if len(present) > 1 and any(classes[result] == "date" for result in failing):
+            return "refuse"
+        if "blank" in classes.values():
+            # a failing value beside BLANK: ISNUMBER, ISNUMERIC and ISDOUBLE raised in every measured row (a text sum, a product, EXP of a text);
+            # the other tests have fewer than five rows each, so they are not answered
+            return "error" if function in {"ISNUMBER", "ISNUMERIC", "ISDOUBLE"} and all(result[0] in {"binary", "call"} for result in failing) else "refuse"
+        return None
 
     def blank_text_kind(node: tuple[Any, ...]) -> str | None:
         """Task 37: "K0" the literal BLANK(); "K1" / "K2" a && or || (AND, OR) that is BLANK because one operand is the empty text, folded (K1)
@@ -16515,25 +16718,48 @@ def evaluate_measures(
             if function not in _TYPE_TESTS or len(arguments) != 1 or arguments[0][:2] != ("call", "CURRENCY") or not _reads_no_data(arguments[0], variable_nodes.get):
                 raise
             values = [Decimal(0)]  # Task 20 F5: a type test of a constant that cannot be evaluated is answered by its type (ISCURRENCY(CURRENCY(1E15)) is True); one that reads data raises
-        except MeasureRuntimeError as failure:
+        except (MeasureRuntimeError, _HardError) as failure:
             if isinstance(failure, _PowerFailure) and function in _TYPE_TESTS and len(arguments) == 1 and (
                 not _is_bare_power(arguments[0]) or (failure.zero_base and failure.row_dependent)
             ):
                 # measured both ways: ISNUMBER(MIN(x)^0.5+1) is True, ISNUMBER(2/0+0.0^0.0) is the error; no rule found yet, so no answer is given
                 raise dax_typed.refusal("A type test of arithmetic around a failing power is not modelled by the local engine.") from failure
-            # a ^ or POWER of constants is typed without running (ISNUMBER((-1)^0.5) is True); a row-dependent failure shows through ISNUMBER and ISDOUBLE
-            hidden = isinstance(failure, _StaticTypeFailure) and (
-                not isinstance(failure, _PowerFailure) or not failure.row_dependent or function not in {"ISNUMBER", "ISDOUBLE"}
+            hidden = function in _TYPE_TESTS and len(arguments) == 1 and (
+                (isinstance(failure, _StaticTypeFailure) and (
+                    not isinstance(failure, _PowerFailure) or not failure.row_dependent or function not in {"ISNUMBER", "ISDOUBLE"}
+                ))
+                or (isinstance(failure, _HardError) and _has_kind(arguments[0], {"let"}) and not _has_bare_error(arguments[0])
+                    and not (_is_bare_let_var(arguments[0]) and function in {"ISNUMBER", "ISDOUBLE", "ISINTEGER", "ISINT64", "ISNUMERIC"}))
             )
+            if isinstance(failure, (_DivisionError, _CurrencyDivisionError)):
+                hidden = False
+            if isinstance(failure, _HardError):
+                if not _reads_no_data(arguments[0], variable_nodes.get):
+                    hidden = False
+                elif _has_op_outside_let(arguments[0], {"/"}):
+                    hidden = False
+                elif _has_op_outside_let(arguments[0], {"*"}) and function in {"ISNUMBER", "ISDOUBLE"}:
+                    hidden = False
+                elif _has_call_outside_let(arguments[0], {"VALUE", "FORMAT", "SQRT", "LN", "LOG", "LOG10", "DIVIDE", "QUOTIENT", "ERROR"} | _NOT_FOLDED_TEXT_CALLS):
+                    hidden = False
+                else:
+                    st = static_type_of(arguments[0])
+                    if (
+                        (function in {"ISNUMBER", "ISDOUBLE", "ISINTEGER", "ISINT64", "ISNUMERIC"} and st in {"int64", "double", "currency", "decimal", "number"})
+                        or (function in {"ISTEXT", "ISSTRING"} and st == "text")
+                        or (function in {"ISLOGICAL", "ISBOOLEAN"} and st == "bool")
+                    ):
+                        hidden = False
             if isinstance(failure, _ConvertFailure):
                 # When CONVERT of text fails, type tests for the target type or ISNUMBER cannot be answered statically (in Power BI they error)
                 target_t = static_type_of(arguments[0])
-                if function == "ISNUMBER" or (
+                if (function in {"ISNUMBER", "ISNUMERIC"} and target_t in {"int64", "double", "currency", "decimal", "datetime"}) or (
                     (function in {"ISINTEGER", "ISINT64"} and target_t == "int64")
                     or (function == "ISDOUBLE" and target_t == "double")
                     or (function in {"ISCURRENCY", "ISDECIMAL"} and target_t == "currency")
                     or (function == "ISDATETIME" and target_t == "datetime")
-                    or (function == "ISLOGICAL" and target_t == "bool")
+                    or (function in {"ISLOGICAL", "ISBOOLEAN"} and target_t == "bool")
+                    or (function in {"ISTEXT", "ISSTRING"} and target_t == "text")
                 ):
                     hidden = False
             if isinstance(failure, _TextConversionFailure):
@@ -16547,9 +16773,9 @@ def evaluate_measures(
                         return True
                     if kind in {"let", "var"}:
                         return True
-                    if kind == "call" and (n[1] in _NOT_FOLDED_TEXT_CALLS or n[1] in {"DIVIDE", "QUOTIENT", "LN", "LOG", "LOG10"}):
+                    if kind == "call" and (n[1] in _NOT_FOLDED_TEXT_CALLS or n[1] in {"DIVIDE", "QUOTIENT", "LN", "LOG", "LOG10", "VALUE", "ERROR", "SQRT"}):
                         return True
-                    if not _reads_no_data(n, variable_nodes.get):
+                    if not _reads_no_data(n, variable_nodes.get) and kind not in {"logical", "call", "let", "var"}:
                         return True
                     return any(_has_static_blocker(c) for c in n[1:] if isinstance(c, tuple))
                 if _has_static_blocker(arguments[0]):
@@ -16558,6 +16784,12 @@ def evaluate_measures(
                 # Task 21 Part B/L: the range error of a Currency product that reads rows shows through ISCURRENCY and ISNUMBER (measured); the other type tests are not measured
                 if function in {"ISCURRENCY", "ISNUMBER"}:
                     hidden = False  # the other type tests stay answered by their type (locked: ISDOUBLE and ISINT64 of such a product are False)
+            if hidden and function in _TYPE_TESTS and len(arguments) == 1:
+                verdict = hidden_failure_verdict(function, arguments[0], row_context)
+                if verdict == "refuse":
+                    raise dax_typed.refusal("A type test of a failing value Power BI may raise the error for is not modelled by the local engine.") from failure
+                if verdict == "error":
+                    hidden = False
             answer = static_type_answer(function, static_type_of(arguments[0])) if function in _TYPE_TESTS and len(arguments) == 1 and hidden else None
             if answer is None and function == "ISDATETIME" and len(arguments) == 1 and isinstance(failure, _TextRangeFailure):
                 text_type = static_type_of(arguments[0])  # Task 21 Part G: ISDATETIME of + - * around a text beyond the Double range is answered by the type of the expression
@@ -16584,7 +16816,7 @@ def evaluate_measures(
             try:
                 return convert_value(double_as_text(arguments[0], values[0], row_context) if interval == "STRING" else values[0], str(interval))
             except MeasureRuntimeError as error:
-                if isinstance(values[0], str) and _reads_no_data(arguments[0], variable_nodes.get):
+                if isinstance(values[0], str):
                     raise _ConvertFailure(str(error)) from error
                 raise
         if function in _DATE_FUNCTIONS:
@@ -16600,7 +16832,7 @@ def evaluate_measures(
         if function == "CURRENCY" and isinstance(values[0], str):
             try:
                 return dax_math.text_to_currency(dax_typed.to_number(values[0]))  # Task 21 Part C: a text read as a Currency; beyond the range it is a conversion error, which a type test of a constant answers by its type
-            except MeasureRuntimeError as failure:
+            except (MeasureRuntimeError, _HardError) as failure:
                 if "Out of present range" not in str(failure):
                     raise
                 raise _CurrencyConversionError(str(failure)) from failure
@@ -16622,7 +16854,12 @@ def evaluate_measures(
         if function in {"ROUND", "ROUNDUP", "ROUNDDOWN"} and len(values) == 2 and isinstance(values[0], Decimal) and values[0].is_finite() and not dax_dates.is_date(values[0]) and left_static_type(arguments[0], row_context) == "double":
             values = [_read_double_as_integer_source(values[0]), values[1]]  # Task 22 fix: a Double is read at 15 significant digits before it is rounded with digits (TRUNC(66.6 as a product, 1.6) is 66.6, measured)
         if function in dax_math.MATH_ARITY or function == "ROUND":
-            return _double_rounding_result(function, dax_math.math_function(function, values), left_static_type(arguments[0], row_context) if arguments else None)
+            try:
+                return _double_rounding_result(function, dax_math.math_function(function, values), left_static_type(arguments[0], row_context) if arguments else None)
+            except MeasureRuntimeError as error:
+                if function in {"ROUND", "ROUNDUP", "ROUNDDOWN"} and "Cannot convert value" in str(error) and _reads_no_data(("call", function, arguments), variable_nodes.get):
+                    raise _TextConversionFailure(str(error)) from error
+                raise
         if values[0] is None and function in _TYPE_TESTS and len(arguments) == 1 and arguments[0][0] == "binary":
             arg = arguments[0]
             op = arg[1]
@@ -16983,8 +17220,8 @@ def evaluate_measures(
                 return walk(operand[2]) and walk(operand[3])
             if kind == "concat":
                 return all(walk(part) for part in operand[1:])
-            if kind == "table" and str(operand[1]).upper() in {"DAY", "MONTH", "YEAR", "QUARTER", "WEEK", "HOUR", "MINUTE", "SECOND", "ASC", "DESC", "TRUE", "FALSE"}:
-                return True  # an interval or order keyword (DATEDIFF(a,b,DAY)) is a literal
+            if kind == "table" and str(operand[1]).upper() in {"DAY", "MONTH", "YEAR", "QUARTER", "WEEK", "HOUR", "MINUTE", "SECOND", "ASC", "DESC", "TRUE", "FALSE", "INTEGER", "DOUBLE", "STRING", "BOOLEAN", "DATETIME", "CURRENCY", "DECIMAL"}:
+                return True  # an interval, order or type keyword (DATEDIFF(a,b,DAY), CONVERT(x,INTEGER)) is a literal
             if kind != "call":
                 return False
             function, arguments = operand[1], operand[2]
@@ -17615,13 +17852,11 @@ def evaluate_measures(
         variable_types: dict[str, str | None] = {}
         for name, bound in variable_nodes.items():
             vt = _strict_operand_type(bound, column_types, variable_types)
-            if vt is None and bound == ("blank",):
-                vt = "number"  # a VAR holding BLANK() is typed as an Integer (number) in strict comparison
             variable_types[str(name)] = vt
         _reject_mismatched_strict_operands(node[1], node[2], column_types, variable_types)
         resolved = []
         is_variant = False
-        for operand in (node[1], node[2]):
+        for index, operand in enumerate((node[1], node[2])):
             is_blank_literal = operand == ("blank",)
             value = evaluate(operand, row_context, allow_text=True, allow_boolean=True)
             static = _strict_operand_type(operand, column_types, variable_types)
@@ -19090,7 +19325,7 @@ def evaluate_measures(
             # row stays lazy. An error leaving a COALESCE cannot be caught by IFERROR or ISERROR, whichever argument it is.
             result, found, eager = None, False, False
             reached: list[tuple[Any, ...]] = []
-            first_never_blank = _never_blank(bound_expression(arguments[0])) and not (row_context is not None and reads_row(bound_expression(arguments[0])))  # Task 19 Part F: a first argument that can never be BLANK (a VAR by its expression), and does not read the row, is the answer; the rest is not looked at
+            first_never_blank = _never_blank(bound_expression(arguments[0]))
             for argument in arguments:
                 if found and (not eager or first_never_blank):
                     break
@@ -19114,7 +19349,20 @@ def evaluate_measures(
                 except MeasureRuntimeError as error:
                     if isinstance(error, _DivisionError) or (row_context is not None and reads_row(argument) and argument is arguments[-1]):
                         raise  # an error from the last, lazily evaluated, row-dependent argument is an ordinary one (live Power BI, iteration 87: one in an earlier argument is not)
-                    raise _HardError(str(error)) from error
+                    if "Cannot convert value" in str(error) and argument[0] == "binary" and argument[1] == "*":
+                        try:
+                            lv = evaluate(argument[2], row_context, allow_text=True)
+                            rv = evaluate(argument[3], row_context, allow_text=True)
+                            if lv is None or rv is None:
+                                value = None
+                            else:
+                                raise _HardError(str(error)) from error
+                        except _HardError:
+                            raise
+                        except Exception:
+                            raise _HardError(str(error)) from error
+                    else:
+                        raise _HardError(str(error)) from error
                 if not found and (
                     value is not None
                     or typed_true_false(argument)
@@ -19171,7 +19419,12 @@ def evaluate_measures(
             value = evaluate(arguments[0], row_context)
             if value is None:
                 return None
-            value = as_number(value)
+            try:
+                value = as_number(value)
+            except MeasureRuntimeError as error:
+                if "Cannot convert value" in str(error) and _reads_no_data(("call", function, arguments), variable_nodes.get):
+                    raise _TextConversionFailure(str(error)) from error
+                raise
             if value.is_finite() and abs(value) > 2 ** 53 and not dax_dates.is_date(value) and left_static_type(arguments[0], row_context) == "int64":
                 if float(abs(value)) >= 2 ** 63:
                     raise MeasureRuntimeError("The result of a conversion or arithmetic operation is either too large or too small.")  # Part C: ABS of an Int64 whose double reaches 2^63 is the error (ABS(-9223372036854775807), ABS(9223372036854775807+1), measured)
@@ -19179,7 +19432,12 @@ def evaluate_measures(
             return Decimal("NaN") if value.is_nan() else abs(value)  # Part B: ABS of nan is nan, unsigned
         if function in _SCALAR_MATH_ARITY:
             try:
-                values = [None if value is None else as_number(value) for value in (evaluate(argument, row_context) for argument in arguments)]
+                try:
+                    values = [None if value is None else as_number(value) for value in (evaluate(argument, row_context) for argument in arguments)]
+                except MeasureRuntimeError as error:
+                    if function in {"INT", "EXP", "ROUND", "ABS", "ROUNDUP", "ROUNDDOWN", "TRUNC", "SIGN"} and "Cannot convert value" in str(error) and _reads_no_data(("call", function, arguments), variable_nodes.get):
+                        raise _TextConversionFailure(str(error)) from error
+                    raise
                 if function in {"INT", "FLOOR", "CEILING"}:
                     _refuse_power_beyond_1e15(arguments[0], values[0], variable_nodes.get)
                 if function in {"INT", "FLOOR", "CEILING", "QUOTIENT", "MROUND"} and values:
