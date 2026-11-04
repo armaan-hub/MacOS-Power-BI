@@ -16,19 +16,20 @@ class DateStats30Tests(unittest.TestCase):
         self.assertTrue(dax.local(expression).startswith("LOCAL-REJECT:"), dax.local(expression))
 
     def test_part_a_varx_p_over_dates_in_conditionals(self) -> None:
-        # Full Facts table VARX.P of DATE + Quantity
-        self.assertRefused('VARX.P(Facts,DATE(2020,1,1)+Facts[Quantity])')
-        self.assertRefused('IF(FALSE(),1,VARX.P(Facts,DATE(2020,1,1)+Facts[Quantity]))')
-        self.assertRefused('(VARX.P(Facts,DATE(2020,1,1)+Facts[Quantity]))+1')
-        self.assertRefused('SUMX(Facts,IF(FALSE(),1,VARX.P(Facts,DATE(2020,1,1)+Facts[Quantity])))')
-
-        # East region filter (3 rows)
-        self.assertRefused('CALCULATE(IF(FALSE(),1,VARX.P(Facts,DATE(2020,1,1)+Facts[Quantity])),Facts[Region]="East")')
-        self.assertRefused('VARX.P(CALCULATETABLE(Facts,Facts[Region]="East"),IF.EAGER(SELECTEDVALUE(Facts[Region])="East",1,DATE(2020,1,1)+Facts[Quantity]))')
-
-        # Filtered subset and small numbers converted to dates
-        self.assertRefused('VARX.P(FILTER(Facts,Facts[Quantity]>1),VAR d=DATE(2020,1,1) RETURN d+Facts[Quantity])')
-        self.assertRefused('VARX.P(Facts,IF(1=1,CONVERT(Facts[Quantity],DATETIME),DATE(2020,1,1)))')
+        # Task 47 (2026-11-04): answered now; live Power BI answer
+        from tools.parity_check import status
+        for powerbi, expression in (
+            ("2.91666674613953", 'VARX.P(Facts,DATE(2020,1,1)+Facts[Quantity])'),
+            ("2.91666674613953", 'IF(FALSE(),1,VARX.P(Facts,DATE(2020,1,1)+Facts[Quantity]))'),
+            ("3.91666674613953", '(VARX.P(Facts,DATE(2020,1,1)+Facts[Quantity]))+1'),
+            ("17.5000004768372", 'SUMX(Facts,IF(FALSE(),1,VARX.P(Facts,DATE(2020,1,1)+Facts[Quantity])))'),
+            ("2.88888907432556", 'CALCULATE(IF(FALSE(),1,VARX.P(Facts,DATE(2020,1,1)+Facts[Quantity])),Facts[Region]="East")'),
+            ("2.88888907432556", 'VARX.P(CALCULATETABLE(Facts,Facts[Region]="East"),IF.EAGER(SELECTEDVALUE(Facts[Region])="East",1,DATE(2020,1,1)+Facts[Quantity]))'),
+            ("1.25", 'VARX.P(FILTER(Facts,Facts[Quantity]>1),VAR d=DATE(2020,1,1) RETURN d+Facts[Quantity])'),
+            ("2.91666666666667", 'VARX.P(Facts,IF(1=1,CONVERT(Facts[Quantity],DATETIME),DATE(2020,1,1)))'),
+        ):
+            with self.subTest(expression):
+                self.assertEqual("match", status(powerbi, dax.local(expression)))
 
     def test_part_b_productx_medianx_over_dates(self) -> None:
         # PRODUCTX over Variant holding date (a number agrees to 14 digits; as text it is refused, see test_productx_double_product_refuses_text)

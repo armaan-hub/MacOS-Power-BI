@@ -453,7 +453,8 @@ class SecondReviewCorrectionsTests(unittest.TestCase):
     def test_date_made_from_numbers_keeps_variance_numeric_over_a_column(self) -> None:
         self.assertAlmostEqual(2.91666666666667, float(_local("VARX.P(Facts,COALESCE(CONVERT(Facts[Quantity],DATETIME),0))")), places=10)
         self.assertAlmostEqual(1.87082869338697, float(_local("STDEVX.S(Facts,1+IF(TRUE(),CONVERT(Facts[Quantity],DATETIME)))")), places=10)
-        self.assertIn("not exact", _local("VARX.S(Facts,DATE(2020,1,1)+Facts[Quantity])"))
+        # Task 47 (2026-11-04): answered now; live Power BI answer
+        self.assertAlmostEqual(3.5, float(_local("VARX.S(Facts,DATE(2020,1,1)+Facts[Quantity])")), places=10)
 
     def test_calculate_of_all_like_filters_or_over_a_constructor_does_not_block(self) -> None:
         for expression in (
