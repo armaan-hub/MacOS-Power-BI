@@ -50,7 +50,7 @@ def rounding_function(function: str, args: list[object]) -> Decimal | None:
         if args[1] is not None:
             dax_typed.whole(args[1], function)  # Task 20 F4: a BLANK number still reads its digits; an Infinity, a NaN or a text there is the error
         return None
-    number = dax_typed.to_number(args[0])
+    number = dax_typed.to_number(args[0], dates=True)
     digits = dax_typed.whole(args[1], function)
     mode = {"ROUND": ROUND_HALF_UP, "ROUNDUP": ROUND_UP, "ROUNDDOWN": ROUND_DOWN}[function]
     if not number.is_finite():
