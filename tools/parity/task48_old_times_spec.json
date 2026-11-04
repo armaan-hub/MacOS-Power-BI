@@ -1,0 +1,2668 @@
+{
+ "items": [
+  {
+   "part": "B",
+   "expr": "CONCATENATEX(Facts,(-1)+(TIME(6,0,0)),\"|\",Facts[Quantity],ASC,Facts[Sales],ASC)",
+   "powerbi": "6:00:00 PM|6:00:00 PM|6:00:00 PM|6:00:00 PM|6:00:00 PM|6:00:",
+   "now": "LOCAL-REJECT:CONCATENATEX over date/time before December #, # is not supported in the local engine."
+  },
+  {
+   "part": "B",
+   "expr": "CONCATENATEX(Facts,IFERROR((TIME(1,0,0))-(MAXX({DATE(2020,1,1)},[Value])),\"e\"),\"|\",Facts[Quantity],ASC,Facts[Sales],ASC)",
+   "powerbi": "12/29/1779 11:00:00 PM|12/29/1779 11:00:00 PM|12/29/1779 11:",
+   "now": "LOCAL-REJECT:CONCATENATEX over date/time before December #, # is not supported in the local engine."
+  },
+  {
+   "part": "B",
+   "expr": "CONCATENATEX(Facts,(TIME(1,0,0))-(MAXX({DATE(2020,1,1)},[Value])),\"|\",Facts[Quantity],ASC,Facts[Sales],ASC)",
+   "powerbi": "12/29/1779 11:00:00 PM|12/29/1779 11:00:00 PM|12/29/1779 11:",
+   "now": "LOCAL-REJECT:CONCATENATEX over date/time before December #, # is not supported in the local engine."
+  },
+  {
+   "part": "B",
+   "expr": "CONCATENATEX(Facts,(TIME(1,0,0)+1)-(DATE(2020,1,1)),\"|\",Facts[Quantity],ASC,Facts[Sales],ASC)",
+   "powerbi": "12/30/1779 11:00:00 PM|12/30/1779 11:00:00 PM|12/30/1779 11:",
+   "now": "LOCAL-REJECT:CONCATENATEX over date/time before December #, # is not supported in the local engine."
+  },
+  {
+   "part": "B",
+   "expr": "CONCATENATEX(Facts,(TIME(1,0,0))-(MAXX(Facts,DATE(2020,1,1))),\"|\",Facts[Quantity],ASC,Facts[Sales],ASC)",
+   "powerbi": "12/29/1779 11:00:00 PM|12/29/1779 11:00:00 PM|12/29/1779 11:",
+   "now": "LOCAL-REJECT:CONCATENATEX over date/time before December #, # is not supported in the local engine."
+  },
+  {
+   "part": "B",
+   "expr": "CONCATENATEX(Facts,CONVERT(Facts[Sales],DATETIME),\"|\",Facts[Quantity],ASC,Facts[Sales],ASC)",
+   "powerbi": "12:00:00 AM|12/29/1899 12:00:00 PM|1/9/1900 12:00:00 PM|1/19",
+   "now": "LOCAL-REJECT:CONCATENATEX over date/time before December #, # is not supported in the local engine."
+  },
+  {
+   "part": "B",
+   "expr": "CONCATENATEX(ADDCOLUMNS(Facts,\"q\",CONVERT(Facts[Sales],DATETIME)),[q],\"|\",Facts[Quantity],ASC,Facts[Sales],ASC)",
+   "powerbi": "12:00:00 AM|12/29/1899 12:00:00 PM|1/9/1900 12:00:00 PM|1/19",
+   "now": "LOCAL-REJECT:CONCATENATEX over date/time before December #, # is not supported in the local engine."
+  },
+  {
+   "part": "B",
+   "expr": "CONCATENATEX({1},(TIME(0,0,1))-(DATE(1899,12,31)))",
+   "powerbi": "11:59:59 PM",
+   "now": "LOCAL-REJECT:CONCATENATEX over date/time before December #, # is not supported in the local engine."
+  },
+  {
+   "part": "B",
+   "expr": "CONCATENATEX({1},(TIME(0,0,1))-(DATE(1900,1,1)))",
+   "powerbi": "12/29/1899 11:59:59 PM",
+   "now": "LOCAL-REJECT:CONCATENATEX over date/time before December #, # is not supported in the local engine."
+  },
+  {
+   "part": "B",
+   "expr": "CONCATENATEX({1},(TIME(1,30,0))-(2.5))",
+   "powerbi": "12/28/1899 10:30:00 AM",
+   "now": "LOCAL-REJECT:CONCATENATEX over date/time before December #, # is not supported in the local engine."
+  },
+  {
+   "part": "B",
+   "expr": "CONCATENATEX({1},(TIME(1,30,0))-(DATE(1899,12,31)))",
+   "powerbi": "10:30:00 PM",
+   "now": "LOCAL-REJECT:CONCATENATEX over date/time before December #, # is not supported in the local engine."
+  },
+  {
+   "part": "B",
+   "expr": "CONCATENATEX({1},(TIME(12,0,0))-(1))",
+   "powerbi": "12:00:00 PM",
+   "now": "LOCAL-REJECT:CONCATENATEX over date/time before December #, # is not supported in the local engine."
+  },
+  {
+   "part": "B",
+   "expr": "CONCATENATEX({1},(TIME(12,0,0))-(100))",
+   "powerbi": "9/22/1899 12:00:00 PM",
+   "now": "LOCAL-REJECT:CONCATENATEX over date/time before December #, # is not supported in the local engine."
+  },
+  {
+   "part": "B",
+   "expr": "CONCATENATEX({1},(TIME(12,0,0))-(DATE(1900,1,1)))",
+   "powerbi": "12/29/1899 12:00:00 PM",
+   "now": "LOCAL-REJECT:CONCATENATEX over date/time before December #, # is not supported in the local engine."
+  },
+  {
+   "part": "B",
+   "expr": "CONCATENATEX({1},(TIME(23,59,59))-(2.5))",
+   "powerbi": "12/29/1899 12:00:01 PM",
+   "now": "LOCAL-REJECT:CONCATENATEX over date/time before December #, # is not supported in the local engine."
+  },
+  {
+   "part": "B",
+   "expr": "CONCATENATEX({1},(TIME(23,59,59))-(DATE(1899,12,31)))",
+   "powerbi": "12:00:01 AM",
+   "now": "LOCAL-REJECT:CONCATENATEX over date/time before December #, # is not supported in the local engine."
+  },
+  {
+   "part": "B",
+   "expr": "CONCATENATEX({1},(TIME(23,59,59))-(DATE(1900,1,1)))",
+   "powerbi": "12/29/1899 12:00:01 AM",
+   "now": "LOCAL-REJECT:CONCATENATEX over date/time before December #, # is not supported in the local engine."
+  },
+  {
+   "part": "B",
+   "expr": "CONCATENATEX({1},(TIME(6,0,0))-(1))",
+   "powerbi": "6:00:00 PM",
+   "now": "LOCAL-REJECT:CONCATENATEX over date/time before December #, # is not supported in the local engine."
+  },
+  {
+   "part": "B",
+   "expr": "CONCATENATEX({1},(TIME(6,0,0))-(100))",
+   "powerbi": "9/22/1899 6:00:00 PM",
+   "now": "LOCAL-REJECT:CONCATENATEX over date/time before December #, # is not supported in the local engine."
+  },
+  {
+   "part": "B",
+   "expr": "CONCATENATEX({1},(TIME(6,0,0))-(DATE(2020,1,1)))",
+   "powerbi": "12/29/1779 6:00:00 PM",
+   "now": "LOCAL-REJECT:CONCATENATEX over date/time before December #, # is not supported in the local engine."
+  },
+  {
+   "part": "B",
+   "expr": "CONCATENATEX({1},(TIME(6,0,0))-(EDATE(DATE(2020,1,1),1)))",
+   "powerbi": "11/28/1779 6:00:00 PM",
+   "now": "LOCAL-REJECT:CONCATENATEX over date/time before December #, # is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "DAY((TIME(0,0,1))-(DATE(2020,1,1)))",
+   "powerbi": "29",
+   "now": "LOCAL-REJECT:A time of day before December #, # is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "FORMAT((TIME(23,59,59))-(DATE(1900,1,1)),\"yyyy-mm-dd hh:nn:ss\")",
+   "powerbi": "1899-12-29 00:00:01",
+   "now": "LOCAL-REJECT:A time of day before December #, # is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "HOUR((TIME(0,0,1))-(100))",
+   "powerbi": "23",
+   "now": "LOCAL-REJECT:A time of day before December #, # is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "HOUR((TIME(0,0,1))-(DATE(1900,1,1)))",
+   "powerbi": "23",
+   "now": "LOCAL-REJECT:A time of day before December #, # is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "HOUR((TIME(23,59,59))-(DATE(1900,1,1)))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:A time of day before December #, # is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "MINUTE((TIME(23,59,59))-(100))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:A time of day before December #, # is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "MINUTE((TIME(23,59,59))-(EDATE(DATE(2020,1,1),1)))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:A time of day before December #, # is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "MONTH((TIME(0,0,1))-(100))",
+   "powerbi": "9",
+   "now": "LOCAL-REJECT:A time of day before December #, # is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "MONTH((TIME(23,59,59))-(DATE(2020,1,1)))",
+   "powerbi": "12",
+   "now": "LOCAL-REJECT:A time of day before December #, # is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "SECOND((TIME(0,0,1))-(DATE(1900,1,1)))",
+   "powerbi": "59",
+   "now": "LOCAL-REJECT:A time of day before December #, # is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "SECOND((TIME(0,0,1))-(DATE(2020,1,1)))",
+   "powerbi": "59",
+   "now": "LOCAL-REJECT:A time of day before December #, # is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "SECOND((TIME(23,59,59))-(100))",
+   "powerbi": "1",
+   "now": "LOCAL-REJECT:A time of day before December #, # is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "SECOND((TIME(23,59,59))-(DATE(1900,1,1)))",
+   "powerbi": "1",
+   "now": "LOCAL-REJECT:A time of day before December #, # is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "WEEKDAY((TIME(0,0,1))-(100))",
+   "powerbi": "6",
+   "now": "LOCAL-REJECT:A time of day before December #, # is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "WEEKDAY((TIME(23,59,59))-(DATE(2020,1,1)))",
+   "powerbi": "4",
+   "now": "LOCAL-REJECT:A time of day before December #, # is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "WEEKDAY((TIME(23,59,59))-(EDATE(DATE(2020,1,1),1)))",
+   "powerbi": "1",
+   "now": "LOCAL-REJECT:A time of day before December #, # is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "YEAR((TIME(0,0,1))-(100))",
+   "powerbi": "1899",
+   "now": "LOCAL-REJECT:A time of day before December #, # is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "YEAR((TIME(0,0,1))-(DATE(2020,1,1)))",
+   "powerbi": "1779",
+   "now": "LOCAL-REJECT:A time of day before December #, # is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "YEAR((TIME(23,59,59))-(100))",
+   "powerbi": "1899",
+   "now": "LOCAL-REJECT:A time of day before December #, # is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "YEAR((TIME(23,59,59))-(DATE(1900,1,1)))",
+   "powerbi": "1899",
+   "now": "LOCAL-REJECT:A time of day before December #, # is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "YEAR((TIME(23,59,59))-(DATE(2020,1,1)))",
+   "powerbi": "1779",
+   "now": "LOCAL-REJECT:A time of day before December #, # is not supported in the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "SECOND(-(10.5)+(0.999))",
+   "powerbi": "27",
+   "now": "LOCAL-REJECT:SECOND of a time before December #, # with a fraction of a second is not supported in the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "SECOND(-(3)+(0.999))",
+   "powerbi": "27",
+   "now": "LOCAL-REJECT:SECOND of a time before December #, # with a fraction of a second is not supported in the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "SECOND(-(DATE(1900,1,2))+(0.999))",
+   "powerbi": "27",
+   "now": "LOCAL-REJECT:SECOND of a time before December #, # with a fraction of a second is not supported in the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "SECOND(-(DATE(2019,5,5))+(0.999))",
+   "powerbi": "27",
+   "now": "LOCAL-REJECT:SECOND of a time before December #, # with a fraction of a second is not supported in the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "(DATE(1700,6,15)+0.5/86400)&\"z\"",
+   "powerbi": "6/17/1700z",
+   "now": "LOCAL-REJECT:A time of day before December #, # on an exact half second is not supported in the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "(DATE(1700,6,15)+1-1.5/86400)&\"z\"",
+   "powerbi": "6/16/1700 12:00:01 AMz",
+   "now": "LOCAL-REJECT:A time of day before December #, # on an exact half second is not supported in the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "(DATE(1700,6,15)+1.5/86400)&\"z\"",
+   "powerbi": "6/16/1700 11:59:59 PMz",
+   "now": "LOCAL-REJECT:A time of day before December #, # on an exact half second is not supported in the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "(DATE(1800,1,1)+0.5/86400)&\"z\"",
+   "powerbi": "1/3/1800z",
+   "now": "LOCAL-REJECT:A time of day before December #, # on an exact half second is not supported in the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "(DATE(1800,1,1)+1-1.5/86400)&\"z\"",
+   "powerbi": "1/2/1800 12:00:01 AMz",
+   "now": "LOCAL-REJECT:A time of day before December #, # on an exact half second is not supported in the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "(DATE(1800,1,1)+1.5/86400)&\"z\"",
+   "powerbi": "1/2/1800 11:59:58 PMz",
+   "now": "LOCAL-REJECT:A time of day before December #, # on an exact half second is not supported in the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "(DATE(1850,7,4)+0.5/86400)&\"z\"",
+   "powerbi": "7/6/1850z",
+   "now": "LOCAL-REJECT:A time of day before December #, # on an exact half second is not supported in the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "(DATE(1850,7,4)+1-1.5/86400)&\"z\"",
+   "powerbi": "7/5/1850 12:00:02 AMz",
+   "now": "LOCAL-REJECT:A time of day before December #, # on an exact half second is not supported in the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "(DATE(1850,7,4)+1.5/86400)&\"z\"",
+   "powerbi": "7/5/1850 11:59:59 PMz",
+   "now": "LOCAL-REJECT:A time of day before December #, # on an exact half second is not supported in the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "(DATE(1899,1,15)+0.5/86400)&\"z\"",
+   "powerbi": "1/17/1899z",
+   "now": "LOCAL-REJECT:A time of day before December #, # on an exact half second is not supported in the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "(DATE(1899,1,15)+1-1.5/86400)&\"z\"",
+   "powerbi": "1/16/1899 12:00:02 AMz",
+   "now": "LOCAL-REJECT:A time of day before December #, # on an exact half second is not supported in the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "(DATE(1899,1,15)+1.5/86400)&\"z\"",
+   "powerbi": "1/16/1899 11:59:58 PMz",
+   "now": "LOCAL-REJECT:A time of day before December #, # on an exact half second is not supported in the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "(DATE(1899,12,29)+0.5/86400)&\"z\"",
+   "powerbi": "12/31/1899z",
+   "now": "LOCAL-REJECT:A time of day before December #, # on an exact half second is not supported in the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "(DATE(1899,12,29)+1-1.5/86400)&\"z\"",
+   "powerbi": "12:00:01 AMz",
+   "now": "LOCAL-REJECT:A time of day before December #, # on an exact half second is not supported in the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "(DATE(1899,12,29)+1.5/86400)&\"z\"",
+   "powerbi": "11:59:59 PMz",
+   "now": "LOCAL-REJECT:A time of day before December #, # on an exact half second is not supported in the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "(DATE(1899,12,30)-1+0.5/86400)&\"z\"",
+   "powerbi": "12/31/1899z",
+   "now": "LOCAL-REJECT:A time of day before December #, # on an exact half second is not supported in the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "(DATE(1899,12,30)-1+1-1.5/86400)&\"z\"",
+   "powerbi": "12:00:01 AMz",
+   "now": "LOCAL-REJECT:A time of day before December #, # on an exact half second is not supported in the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "(DATE(1899,12,30)-1+1.5/86400)&\"z\"",
+   "powerbi": "11:59:59 PMz",
+   "now": "LOCAL-REJECT:A time of day before December #, # on an exact half second is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "DAY(-100+0.00001)",
+   "powerbi": "21",
+   "now": "LOCAL-REJECT:A time of day before December #, # is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "DAY(-100+0.0000115)",
+   "powerbi": "21",
+   "now": "LOCAL-REJECT:A time of day before December #, # is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "DAY(-100+0.5/86400)",
+   "powerbi": "21",
+   "now": "LOCAL-REJECT:A time of day before December #, # is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "DAY(-100+0.99999)",
+   "powerbi": "22",
+   "now": "LOCAL-REJECT:A time of day before December #, # is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "DAY(-100+TIME(23,59,59))",
+   "powerbi": "22",
+   "now": "LOCAL-REJECT:A time of day before December #, # is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "DAY(-3+0.00001)",
+   "powerbi": "27",
+   "now": "LOCAL-REJECT:A time of day before December #, # is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "DAY(-3+0.000011)",
+   "powerbi": "27",
+   "now": "LOCAL-REJECT:A time of day before December #, # is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "DAY(-3+0.0000115)",
+   "powerbi": "27",
+   "now": "LOCAL-REJECT:A time of day before December #, # is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "DAY(-3+0.5/86400)",
+   "powerbi": "27",
+   "now": "LOCAL-REJECT:A time of day before December #, # is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "DAY(-3+0.99999)",
+   "powerbi": "28",
+   "now": "LOCAL-REJECT:A time of day before December #, # is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "DAY(-3+TIME(0,0,1))",
+   "powerbi": "28",
+   "now": "LOCAL-REJECT:A time of day before December #, # is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "DAY(DATE(1700,6,15)+0.000011)",
+   "powerbi": "15",
+   "now": "LOCAL-REJECT:A time of day before December #, # is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "DAY(DATE(1700,6,15)+0.999989)",
+   "powerbi": "16",
+   "now": "LOCAL-REJECT:A time of day before December #, # is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "DAY(DATE(1700,6,15)+0.99999)",
+   "powerbi": "16",
+   "now": "LOCAL-REJECT:A time of day before December #, # is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "DAY(DATE(1700,6,15)+1-1/86400)",
+   "powerbi": "16",
+   "now": "LOCAL-REJECT:A time of day before December #, # is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "DAY(DATE(1800,1,1)+0.000011)",
+   "powerbi": "1",
+   "now": "LOCAL-REJECT:A time of day before December #, # is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "DAY(DATE(1800,1,1)+0.0000115)",
+   "powerbi": "1",
+   "now": "LOCAL-REJECT:A time of day before December #, # is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "DAY(DATE(1800,1,1)+0.99999)",
+   "powerbi": "2",
+   "now": "LOCAL-REJECT:A time of day before December #, # is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "DAY(DATE(1800,1,1)+1-1/86400)",
+   "powerbi": "2",
+   "now": "LOCAL-REJECT:A time of day before December #, # is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "DAY(DATE(1800,1,1)+1/86400)",
+   "powerbi": "2",
+   "now": "LOCAL-REJECT:A time of day before December #, # is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "DAY(DATE(1850,7,4)+0.00001)",
+   "powerbi": "4",
+   "now": "LOCAL-REJECT:A time of day before December #, # is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "DAY(DATE(1850,7,4)+0.000011)",
+   "powerbi": "4",
+   "now": "LOCAL-REJECT:A time of day before December #, # is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "DAY(DATE(1850,7,4)+0.5/86400)",
+   "powerbi": "4",
+   "now": "LOCAL-REJECT:A time of day before December #, # is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "DAY(DATE(1850,7,4)+0.999989)",
+   "powerbi": "5",
+   "now": "LOCAL-REJECT:A time of day before December #, # is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "DAY(DATE(1850,7,4)+1-1/86400)",
+   "powerbi": "5",
+   "now": "LOCAL-REJECT:A time of day before December #, # is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "DAY(DATE(1850,7,4)+1/86400)",
+   "powerbi": "5",
+   "now": "LOCAL-REJECT:A time of day before December #, # is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "DAY(DATE(1850,7,4)+TIME(23,59,59))",
+   "powerbi": "5",
+   "now": "LOCAL-REJECT:A time of day before December #, # is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "DAY(DATE(1899,1,15)+0.0000115)",
+   "powerbi": "15",
+   "now": "LOCAL-REJECT:A time of day before December #, # is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "DAY(DATE(1899,1,15)+0.5/86400)",
+   "powerbi": "15",
+   "now": "LOCAL-REJECT:A time of day before December #, # is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "DAY(DATE(1899,1,15)+0.999989)",
+   "powerbi": "16",
+   "now": "LOCAL-REJECT:A time of day before December #, # is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "DAY(DATE(1899,12,29)+0.000011)",
+   "powerbi": "29",
+   "now": "LOCAL-REJECT:A time of day before December #, # is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "DAY(DATE(1899,12,29)+0.99999)",
+   "powerbi": "30",
+   "now": "LOCAL-REJECT:A time of day before December #, # is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "DAY(DATE(1899,12,30)-1+0.99999)",
+   "powerbi": "30",
+   "now": "LOCAL-REJECT:A time of day before December #, # is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "FORMAT(-100+0.00001,\"yyyy-mm-dd hh:nn:ss\")",
+   "powerbi": "1899-09-22 23:59:59",
+   "now": "LOCAL-REJECT:A time of day before December #, # is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "FORMAT(-100+0.000011,\"yyyy-mm-dd hh:nn:ss\")",
+   "powerbi": "1899-09-22 23:59:59",
+   "now": "LOCAL-REJECT:A time of day before December #, # is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "FORMAT(-100+0.0000115,\"yyyy-mm-dd hh:nn:ss\")",
+   "powerbi": "1899-09-22 23:59:59",
+   "now": "LOCAL-REJECT:A time of day before December #, # is not supported in the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "FORMAT(-100+0.5/86400,\"yyyy-mm-dd hh:nn:ss\")",
+   "powerbi": "1899-09-23 00:00:00",
+   "now": "LOCAL-REJECT:A time of day before December #, # on an exact half second is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "FORMAT(-100+0.999989,\"yyyy-mm-dd hh:nn:ss\")",
+   "powerbi": "1899-09-22 00:00:01",
+   "now": "LOCAL-REJECT:A time of day before December #, # is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "FORMAT(-100+0.99999,\"yyyy-mm-dd hh:nn:ss\")",
+   "powerbi": "1899-09-22 00:00:01",
+   "now": "LOCAL-REJECT:A time of day before December #, # is not supported in the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "FORMAT(-100+1-1.5/86400,\"yyyy-mm-dd hh:nn:ss\")",
+   "powerbi": "1899-09-22 00:00:01",
+   "now": "LOCAL-REJECT:A time of day before December #, # on an exact half second is not supported in the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "FORMAT(-100+1.5/86400,\"yyyy-mm-dd hh:nn:ss\")",
+   "powerbi": "1899-09-22 23:59:59",
+   "now": "LOCAL-REJECT:A time of day before December #, # on an exact half second is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "FORMAT(-100+TIME(0,0,1),\"yyyy-mm-dd hh:nn:ss\")",
+   "powerbi": "1899-09-22 23:59:59",
+   "now": "LOCAL-REJECT:A time of day before December #, # is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "FORMAT(-100+TIME(23,59,59),\"yyyy-mm-dd hh:nn:ss\")",
+   "powerbi": "1899-09-22 00:00:01",
+   "now": "LOCAL-REJECT:A time of day before December #, # is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "FORMAT(-3+0.00001,\"yyyy-mm-dd hh:nn:ss\")",
+   "powerbi": "1899-12-28 23:59:59",
+   "now": "LOCAL-REJECT:A time of day before December #, # is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "FORMAT(-3+0.000011,\"yyyy-mm-dd hh:nn:ss\")",
+   "powerbi": "1899-12-28 23:59:59",
+   "now": "LOCAL-REJECT:A time of day before December #, # is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "FORMAT(-3+0.0000115,\"yyyy-mm-dd hh:nn:ss\")",
+   "powerbi": "1899-12-28 23:59:59",
+   "now": "LOCAL-REJECT:A time of day before December #, # is not supported in the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "FORMAT(-3+0.5/86400,\"yyyy-mm-dd hh:nn:ss\")",
+   "powerbi": "1899-12-29 00:00:00",
+   "now": "LOCAL-REJECT:A time of day before December #, # on an exact half second is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "FORMAT(-3+0.999989,\"yyyy-mm-dd hh:nn:ss\")",
+   "powerbi": "1899-12-28 00:00:01",
+   "now": "LOCAL-REJECT:A time of day before December #, # is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "FORMAT(-3+0.99999,\"yyyy-mm-dd hh:nn:ss\")",
+   "powerbi": "1899-12-28 00:00:01",
+   "now": "LOCAL-REJECT:A time of day before December #, # is not supported in the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "FORMAT(-3+1-1.5/86400,\"yyyy-mm-dd hh:nn:ss\")",
+   "powerbi": "1899-12-28 00:00:01",
+   "now": "LOCAL-REJECT:A time of day before December #, # on an exact half second is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "FORMAT(-3+1-1/86400,\"yyyy-mm-dd hh:nn:ss\")",
+   "powerbi": "1899-12-28 00:00:01",
+   "now": "LOCAL-REJECT:A time of day before December #, # is not supported in the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "FORMAT(-3+1.5/86400,\"yyyy-mm-dd hh:nn:ss\")",
+   "powerbi": "1899-12-28 23:59:59",
+   "now": "LOCAL-REJECT:A time of day before December #, # on an exact half second is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "FORMAT(-3+1/86400,\"yyyy-mm-dd hh:nn:ss\")",
+   "powerbi": "1899-12-28 23:59:59",
+   "now": "LOCAL-REJECT:A time of day before December #, # is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "FORMAT(-3+TIME(0,0,1),\"yyyy-mm-dd hh:nn:ss\")",
+   "powerbi": "1899-12-28 23:59:59",
+   "now": "LOCAL-REJECT:A time of day before December #, # is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "FORMAT(-3+TIME(23,59,59),\"yyyy-mm-dd hh:nn:ss\")",
+   "powerbi": "1899-12-28 00:00:01",
+   "now": "LOCAL-REJECT:A time of day before December #, # is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "FORMAT(DATE(1700,6,15)+0.00001,\"yyyy-mm-dd hh:nn:ss\")",
+   "powerbi": "1700-06-16 23:59:59",
+   "now": "LOCAL-REJECT:A time of day before December #, # is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "FORMAT(DATE(1700,6,15)+0.000011,\"yyyy-mm-dd hh:nn:ss\")",
+   "powerbi": "1700-06-16 23:59:59",
+   "now": "LOCAL-REJECT:A time of day before December #, # is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "FORMAT(DATE(1700,6,15)+0.0000115,\"yyyy-mm-dd hh:nn:ss\")",
+   "powerbi": "1700-06-16 23:59:59",
+   "now": "LOCAL-REJECT:A time of day before December #, # is not supported in the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "FORMAT(DATE(1700,6,15)+0.5/86400,\"yyyy-mm-dd hh:nn:ss\")",
+   "powerbi": "1700-06-17 00:00:00",
+   "now": "LOCAL-REJECT:A time of day before December #, # on an exact half second is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "FORMAT(DATE(1700,6,15)+0.999989,\"yyyy-mm-dd hh:nn:ss\")",
+   "powerbi": "1700-06-16 00:00:01",
+   "now": "LOCAL-REJECT:A time of day before December #, # is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "FORMAT(DATE(1700,6,15)+0.99999,\"yyyy-mm-dd hh:nn:ss\")",
+   "powerbi": "1700-06-16 00:00:01",
+   "now": "LOCAL-REJECT:A time of day before December #, # is not supported in the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "FORMAT(DATE(1700,6,15)+1-1.5/86400,\"yyyy-mm-dd hh:nn:ss\")",
+   "powerbi": "1700-06-16 00:00:01",
+   "now": "LOCAL-REJECT:A time of day before December #, # on an exact half second is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "FORMAT(DATE(1700,6,15)+1-1/86400,\"yyyy-mm-dd hh:nn:ss\")",
+   "powerbi": "1700-06-16 00:00:01",
+   "now": "LOCAL-REJECT:A time of day before December #, # is not supported in the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "FORMAT(DATE(1700,6,15)+1.5/86400,\"yyyy-mm-dd hh:nn:ss\")",
+   "powerbi": "1700-06-16 23:59:59",
+   "now": "LOCAL-REJECT:A time of day before December #, # on an exact half second is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "FORMAT(DATE(1700,6,15)+1/86400,\"yyyy-mm-dd hh:nn:ss\")",
+   "powerbi": "1700-06-16 23:59:59",
+   "now": "LOCAL-REJECT:A time of day before December #, # is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "FORMAT(DATE(1700,6,15)+TIME(0,0,1),\"yyyy-mm-dd hh:nn:ss\")",
+   "powerbi": "1700-06-16 23:59:59",
+   "now": "LOCAL-REJECT:A time of day before December #, # is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "FORMAT(DATE(1700,6,15)+TIME(23,59,59),\"yyyy-mm-dd hh:nn:ss\")",
+   "powerbi": "1700-06-16 00:00:01",
+   "now": "LOCAL-REJECT:A time of day before December #, # is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "FORMAT(DATE(1800,1,1)+0.00001,\"yyyy-mm-dd hh:nn:ss\")",
+   "powerbi": "1800-01-02 23:59:59",
+   "now": "LOCAL-REJECT:A time of day before December #, # is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "FORMAT(DATE(1800,1,1)+0.000011,\"yyyy-mm-dd hh:nn:ss\")",
+   "powerbi": "1800-01-02 23:59:59",
+   "now": "LOCAL-REJECT:A time of day before December #, # is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "FORMAT(DATE(1800,1,1)+0.0000115,\"yyyy-mm-dd hh:nn:ss\")",
+   "powerbi": "1800-01-02 23:59:59",
+   "now": "LOCAL-REJECT:A time of day before December #, # is not supported in the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "FORMAT(DATE(1800,1,1)+0.5/86400,\"yyyy-mm-dd hh:nn:ss\")",
+   "powerbi": "1800-01-03 00:00:00",
+   "now": "LOCAL-REJECT:A time of day before December #, # on an exact half second is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "FORMAT(DATE(1800,1,1)+0.999989,\"yyyy-mm-dd hh:nn:ss\")",
+   "powerbi": "1800-01-02 00:00:01",
+   "now": "LOCAL-REJECT:A time of day before December #, # is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "FORMAT(DATE(1800,1,1)+0.99999,\"yyyy-mm-dd hh:nn:ss\")",
+   "powerbi": "1800-01-02 00:00:01",
+   "now": "LOCAL-REJECT:A time of day before December #, # is not supported in the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "FORMAT(DATE(1800,1,1)+1-1.5/86400,\"yyyy-mm-dd hh:nn:ss\")",
+   "powerbi": "1800-01-02 00:00:01",
+   "now": "LOCAL-REJECT:A time of day before December #, # on an exact half second is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "FORMAT(DATE(1800,1,1)+1-1/86400,\"yyyy-mm-dd hh:nn:ss\")",
+   "powerbi": "1800-01-02 00:00:01",
+   "now": "LOCAL-REJECT:A time of day before December #, # is not supported in the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "FORMAT(DATE(1800,1,1)+1.5/86400,\"yyyy-mm-dd hh:nn:ss\")",
+   "powerbi": "1800-01-02 23:59:58",
+   "now": "LOCAL-REJECT:A time of day before December #, # on an exact half second is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "FORMAT(DATE(1800,1,1)+1/86400,\"yyyy-mm-dd hh:nn:ss\")",
+   "powerbi": "1800-01-02 23:59:59",
+   "now": "LOCAL-REJECT:A time of day before December #, # is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "FORMAT(DATE(1800,1,1)+TIME(0,0,1),\"yyyy-mm-dd hh:nn:ss\")",
+   "powerbi": "1800-01-02 23:59:59",
+   "now": "LOCAL-REJECT:A time of day before December #, # is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "FORMAT(DATE(1800,1,1)+TIME(23,59,59),\"yyyy-mm-dd hh:nn:ss\")",
+   "powerbi": "1800-01-02 00:00:01",
+   "now": "LOCAL-REJECT:A time of day before December #, # is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "FORMAT(DATE(1850,7,4)+0.00001,\"yyyy-mm-dd hh:nn:ss\")",
+   "powerbi": "1850-07-05 23:59:59",
+   "now": "LOCAL-REJECT:A time of day before December #, # is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "FORMAT(DATE(1850,7,4)+0.000011,\"yyyy-mm-dd hh:nn:ss\")",
+   "powerbi": "1850-07-05 23:59:59",
+   "now": "LOCAL-REJECT:A time of day before December #, # is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "FORMAT(DATE(1850,7,4)+0.0000115,\"yyyy-mm-dd hh:nn:ss\")",
+   "powerbi": "1850-07-05 23:59:59",
+   "now": "LOCAL-REJECT:A time of day before December #, # is not supported in the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "FORMAT(DATE(1850,7,4)+0.5/86400,\"yyyy-mm-dd hh:nn:ss\")",
+   "powerbi": "1850-07-06 00:00:00",
+   "now": "LOCAL-REJECT:A time of day before December #, # on an exact half second is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "FORMAT(DATE(1850,7,4)+0.999989,\"yyyy-mm-dd hh:nn:ss\")",
+   "powerbi": "1850-07-05 00:00:01",
+   "now": "LOCAL-REJECT:A time of day before December #, # is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "FORMAT(DATE(1850,7,4)+0.99999,\"yyyy-mm-dd hh:nn:ss\")",
+   "powerbi": "1850-07-05 00:00:01",
+   "now": "LOCAL-REJECT:A time of day before December #, # is not supported in the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "FORMAT(DATE(1850,7,4)+1-1.5/86400,\"yyyy-mm-dd hh:nn:ss\")",
+   "powerbi": "1850-07-05 00:00:02",
+   "now": "LOCAL-REJECT:A time of day before December #, # on an exact half second is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "FORMAT(DATE(1850,7,4)+1-1/86400,\"yyyy-mm-dd hh:nn:ss\")",
+   "powerbi": "1850-07-05 00:00:01",
+   "now": "LOCAL-REJECT:A time of day before December #, # is not supported in the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "FORMAT(DATE(1850,7,4)+1.5/86400,\"yyyy-mm-dd hh:nn:ss\")",
+   "powerbi": "1850-07-05 23:59:59",
+   "now": "LOCAL-REJECT:A time of day before December #, # on an exact half second is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "FORMAT(DATE(1850,7,4)+1/86400,\"yyyy-mm-dd hh:nn:ss\")",
+   "powerbi": "1850-07-05 23:59:59",
+   "now": "LOCAL-REJECT:A time of day before December #, # is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "FORMAT(DATE(1850,7,4)+TIME(0,0,1),\"yyyy-mm-dd hh:nn:ss\")",
+   "powerbi": "1850-07-05 23:59:59",
+   "now": "LOCAL-REJECT:A time of day before December #, # is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "FORMAT(DATE(1850,7,4)+TIME(23,59,59),\"yyyy-mm-dd hh:nn:ss\")",
+   "powerbi": "1850-07-05 00:00:01",
+   "now": "LOCAL-REJECT:A time of day before December #, # is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "FORMAT(DATE(1899,1,15)+0.00001,\"yyyy-mm-dd hh:nn:ss\")",
+   "powerbi": "1899-01-16 23:59:59",
+   "now": "LOCAL-REJECT:A time of day before December #, # is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "FORMAT(DATE(1899,1,15)+0.000011,\"yyyy-mm-dd hh:nn:ss\")",
+   "powerbi": "1899-01-16 23:59:59",
+   "now": "LOCAL-REJECT:A time of day before December #, # is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "FORMAT(DATE(1899,1,15)+0.0000115,\"yyyy-mm-dd hh:nn:ss\")",
+   "powerbi": "1899-01-16 23:59:59",
+   "now": "LOCAL-REJECT:A time of day before December #, # is not supported in the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "FORMAT(DATE(1899,1,15)+0.5/86400,\"yyyy-mm-dd hh:nn:ss\")",
+   "powerbi": "1899-01-17 00:00:00",
+   "now": "LOCAL-REJECT:A time of day before December #, # on an exact half second is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "FORMAT(DATE(1899,1,15)+0.999989,\"yyyy-mm-dd hh:nn:ss\")",
+   "powerbi": "1899-01-16 00:00:01",
+   "now": "LOCAL-REJECT:A time of day before December #, # is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "FORMAT(DATE(1899,1,15)+0.99999,\"yyyy-mm-dd hh:nn:ss\")",
+   "powerbi": "1899-01-16 00:00:01",
+   "now": "LOCAL-REJECT:A time of day before December #, # is not supported in the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "FORMAT(DATE(1899,1,15)+1-1.5/86400,\"yyyy-mm-dd hh:nn:ss\")",
+   "powerbi": "1899-01-16 00:00:02",
+   "now": "LOCAL-REJECT:A time of day before December #, # on an exact half second is not supported in the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "FORMAT(DATE(1899,1,15)+1.5/86400,\"yyyy-mm-dd hh:nn:ss\")",
+   "powerbi": "1899-01-16 23:59:58",
+   "now": "LOCAL-REJECT:A time of day before December #, # on an exact half second is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "FORMAT(DATE(1899,12,29)+0.00001,\"yyyy-mm-dd hh:nn:ss\")",
+   "powerbi": "1899-12-30 23:59:59",
+   "now": "LOCAL-REJECT:A time of day before December #, # is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "FORMAT(DATE(1899,12,29)+0.000011,\"yyyy-mm-dd hh:nn:ss\")",
+   "powerbi": "1899-12-30 23:59:59",
+   "now": "LOCAL-REJECT:A time of day before December #, # is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "FORMAT(DATE(1899,12,29)+0.0000115,\"yyyy-mm-dd hh:nn:ss\")",
+   "powerbi": "1899-12-30 23:59:59",
+   "now": "LOCAL-REJECT:A time of day before December #, # is not supported in the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "FORMAT(DATE(1899,12,29)+0.5/86400,\"yyyy-mm-dd hh:nn:ss\")",
+   "powerbi": "1899-12-31 00:00:00",
+   "now": "LOCAL-REJECT:A time of day before December #, # on an exact half second is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "FORMAT(DATE(1899,12,29)+0.999989,\"yyyy-mm-dd hh:nn:ss\")",
+   "powerbi": "1899-12-30 00:00:01",
+   "now": "LOCAL-REJECT:A time of day before December #, # is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "FORMAT(DATE(1899,12,29)+0.99999,\"yyyy-mm-dd hh:nn:ss\")",
+   "powerbi": "1899-12-30 00:00:01",
+   "now": "LOCAL-REJECT:A time of day before December #, # is not supported in the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "FORMAT(DATE(1899,12,29)+1-1.5/86400,\"yyyy-mm-dd hh:nn:ss\")",
+   "powerbi": "1899-12-30 00:00:01",
+   "now": "LOCAL-REJECT:A time of day before December #, # on an exact half second is not supported in the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "FORMAT(DATE(1899,12,29)+1.5/86400,\"yyyy-mm-dd hh:nn:ss\")",
+   "powerbi": "1899-12-30 23:59:59",
+   "now": "LOCAL-REJECT:A time of day before December #, # on an exact half second is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "FORMAT(DATE(1899,12,30)-1+0.00001,\"yyyy-mm-dd hh:nn:ss\")",
+   "powerbi": "1899-12-30 23:59:59",
+   "now": "LOCAL-REJECT:A time of day before December #, # is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "FORMAT(DATE(1899,12,30)-1+0.000011,\"yyyy-mm-dd hh:nn:ss\")",
+   "powerbi": "1899-12-30 23:59:59",
+   "now": "LOCAL-REJECT:A time of day before December #, # is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "FORMAT(DATE(1899,12,30)-1+0.0000115,\"yyyy-mm-dd hh:nn:ss\")",
+   "powerbi": "1899-12-30 23:59:59",
+   "now": "LOCAL-REJECT:A time of day before December #, # is not supported in the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "FORMAT(DATE(1899,12,30)-1+0.5/86400,\"yyyy-mm-dd hh:nn:ss\")",
+   "powerbi": "1899-12-31 00:00:00",
+   "now": "LOCAL-REJECT:A time of day before December #, # on an exact half second is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "FORMAT(DATE(1899,12,30)-1+0.999989,\"yyyy-mm-dd hh:nn:ss\")",
+   "powerbi": "1899-12-30 00:00:01",
+   "now": "LOCAL-REJECT:A time of day before December #, # is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "FORMAT(DATE(1899,12,30)-1+0.99999,\"yyyy-mm-dd hh:nn:ss\")",
+   "powerbi": "1899-12-30 00:00:01",
+   "now": "LOCAL-REJECT:A time of day before December #, # is not supported in the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "FORMAT(DATE(1899,12,30)-1+1-1.5/86400,\"yyyy-mm-dd hh:nn:ss\")",
+   "powerbi": "1899-12-30 00:00:01",
+   "now": "LOCAL-REJECT:A time of day before December #, # on an exact half second is not supported in the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "FORMAT(DATE(1899,12,30)-1+1.5/86400,\"yyyy-mm-dd hh:nn:ss\")",
+   "powerbi": "1899-12-30 23:59:59",
+   "now": "LOCAL-REJECT:A time of day before December #, # on an exact half second is not supported in the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "HOUR(-100+0.00001)",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:HOUR of a time before December #, # with a fraction of a second is not supported in the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "HOUR(-100+0.000011)",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:HOUR of a time before December #, # with a fraction of a second is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "HOUR(-100+0.999989)",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:A time of day before December #, # is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "HOUR(-100+0.99999)",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:A time of day before December #, # is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "HOUR(-100+TIME(0,0,1))",
+   "powerbi": "23",
+   "now": "LOCAL-REJECT:A time of day before December #, # is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "HOUR(-100+TIME(23,59,59))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:A time of day before December #, # is not supported in the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "HOUR(-3+0.000011)",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:HOUR of a time before December #, # with a fraction of a second is not supported in the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "HOUR(-3+0.0000115)",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:HOUR of a time before December #, # with a fraction of a second is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "HOUR(-3+0.999989)",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:A time of day before December #, # is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "HOUR(-3+0.99999)",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:A time of day before December #, # is not supported in the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "HOUR(DATE(1700,6,15)+0.00001)",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:HOUR of a time before December #, # with a fraction of a second is not supported in the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "HOUR(DATE(1700,6,15)+0.000011)",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:HOUR of a time before December #, # with a fraction of a second is not supported in the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "HOUR(DATE(1700,6,15)+0.0000115)",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:HOUR of a time before December #, # with a fraction of a second is not supported in the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "HOUR(DATE(1700,6,15)+0.5/86400)",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:HOUR of a time before December #, # with a fraction of a second is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "HOUR(DATE(1700,6,15)+0.99999)",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:A time of day before December #, # is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "HOUR(DATE(1700,6,15)+1/86400)",
+   "powerbi": "23",
+   "now": "LOCAL-REJECT:A time of day before December #, # is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "HOUR(DATE(1700,6,15)+TIME(23,59,59))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:A time of day before December #, # is not supported in the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "HOUR(DATE(1800,1,1)+0.0000115)",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:HOUR of a time before December #, # with a fraction of a second is not supported in the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "HOUR(DATE(1800,1,1)+0.5/86400)",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:HOUR of a time before December #, # with a fraction of a second is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "HOUR(DATE(1800,1,1)+0.999989)",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:A time of day before December #, # is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "HOUR(DATE(1800,1,1)+0.99999)",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:A time of day before December #, # is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "HOUR(DATE(1800,1,1)+1-1/86400)",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:A time of day before December #, # is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "HOUR(DATE(1800,1,1)+1/86400)",
+   "powerbi": "23",
+   "now": "LOCAL-REJECT:A time of day before December #, # is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "HOUR(DATE(1800,1,1)+TIME(23,59,59))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:A time of day before December #, # is not supported in the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "HOUR(DATE(1850,7,4)+0.00001)",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:HOUR of a time before December #, # with a fraction of a second is not supported in the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "HOUR(DATE(1850,7,4)+0.0000115)",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:HOUR of a time before December #, # with a fraction of a second is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "HOUR(DATE(1850,7,4)+0.99999)",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:A time of day before December #, # is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "HOUR(DATE(1850,7,4)+TIME(0,0,1))",
+   "powerbi": "23",
+   "now": "LOCAL-REJECT:A time of day before December #, # is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "HOUR(DATE(1850,7,4)+TIME(23,59,59))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:A time of day before December #, # is not supported in the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "HOUR(DATE(1899,1,15)+0.000011)",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:HOUR of a time before December #, # with a fraction of a second is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "HOUR(DATE(1899,1,15)+0.999989)",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:A time of day before December #, # is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "HOUR(DATE(1899,1,15)+0.99999)",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:A time of day before December #, # is not supported in the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "HOUR(DATE(1899,12,29)+0.00001)",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:HOUR of a time before December #, # with a fraction of a second is not supported in the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "HOUR(DATE(1899,12,29)+0.000011)",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:HOUR of a time before December #, # with a fraction of a second is not supported in the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "HOUR(DATE(1899,12,29)+0.0000115)",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:HOUR of a time before December #, # with a fraction of a second is not supported in the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "HOUR(DATE(1899,12,29)+0.5/86400)",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:HOUR of a time before December #, # with a fraction of a second is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "HOUR(DATE(1899,12,29)+0.999989)",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:A time of day before December #, # is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "HOUR(DATE(1899,12,29)+0.99999)",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:A time of day before December #, # is not supported in the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "HOUR(DATE(1899,12,30)-1+0.00001)",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:HOUR of a time before December #, # with a fraction of a second is not supported in the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "HOUR(DATE(1899,12,30)-1+0.000011)",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:HOUR of a time before December #, # with a fraction of a second is not supported in the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "HOUR(DATE(1899,12,30)-1+0.5/86400)",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:HOUR of a time before December #, # with a fraction of a second is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "HOUR(DATE(1899,12,30)-1+0.999989)",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:A time of day before December #, # is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "HOUR(DATE(1899,12,30)-1+0.99999)",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:A time of day before December #, # is not supported in the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "MINUTE(-100+0.000011)",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:MINUTE of a time before December #, # with a fraction of a second is not supported in the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "MINUTE(-100+0.0000115)",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:MINUTE of a time before December #, # with a fraction of a second is not supported in the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "MINUTE(-100+0.5/86400)",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:MINUTE of a time before December #, # with a fraction of a second is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "MINUTE(-100+0.99999)",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:A time of day before December #, # is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "MINUTE(-100+TIME(23,59,59))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:A time of day before December #, # is not supported in the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "MINUTE(-3+0.00001)",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:MINUTE of a time before December #, # with a fraction of a second is not supported in the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "MINUTE(-3+0.0000115)",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:MINUTE of a time before December #, # with a fraction of a second is not supported in the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "MINUTE(-3+0.5/86400)",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:MINUTE of a time before December #, # with a fraction of a second is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "MINUTE(-3+0.999989)",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:A time of day before December #, # is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "MINUTE(-3+0.99999)",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:A time of day before December #, # is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "MINUTE(-3+TIME(23,59,59))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:A time of day before December #, # is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "MINUTE(DATE(1700,6,15)+0.999989)",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:A time of day before December #, # is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "MINUTE(DATE(1700,6,15)+0.99999)",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:A time of day before December #, # is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "MINUTE(DATE(1700,6,15)+TIME(0,0,1))",
+   "powerbi": "59",
+   "now": "LOCAL-REJECT:A time of day before December #, # is not supported in the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "MINUTE(DATE(1800,1,1)+0.00001)",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:MINUTE of a time before December #, # with a fraction of a second is not supported in the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "MINUTE(DATE(1800,1,1)+0.000011)",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:MINUTE of a time before December #, # with a fraction of a second is not supported in the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "MINUTE(DATE(1800,1,1)+0.5/86400)",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:MINUTE of a time before December #, # with a fraction of a second is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "MINUTE(DATE(1800,1,1)+0.999989)",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:A time of day before December #, # is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "MINUTE(DATE(1800,1,1)+0.99999)",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:A time of day before December #, # is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "MINUTE(DATE(1800,1,1)+TIME(0,0,1))",
+   "powerbi": "59",
+   "now": "LOCAL-REJECT:A time of day before December #, # is not supported in the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "MINUTE(DATE(1850,7,4)+0.000011)",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:MINUTE of a time before December #, # with a fraction of a second is not supported in the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "MINUTE(DATE(1850,7,4)+0.5/86400)",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:MINUTE of a time before December #, # with a fraction of a second is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "MINUTE(DATE(1850,7,4)+0.999989)",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:A time of day before December #, # is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "MINUTE(DATE(1850,7,4)+0.99999)",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:A time of day before December #, # is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "MINUTE(DATE(1850,7,4)+1-1/86400)",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:A time of day before December #, # is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "MINUTE(DATE(1850,7,4)+1/86400)",
+   "powerbi": "59",
+   "now": "LOCAL-REJECT:A time of day before December #, # is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "MINUTE(DATE(1850,7,4)+TIME(0,0,1))",
+   "powerbi": "59",
+   "now": "LOCAL-REJECT:A time of day before December #, # is not supported in the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "MINUTE(DATE(1899,1,15)+0.000011)",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:MINUTE of a time before December #, # with a fraction of a second is not supported in the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "MINUTE(DATE(1899,1,15)+0.5/86400)",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:MINUTE of a time before December #, # with a fraction of a second is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "MINUTE(DATE(1899,1,15)+0.999989)",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:A time of day before December #, # is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "MINUTE(DATE(1899,1,15)+0.99999)",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:A time of day before December #, # is not supported in the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "MINUTE(DATE(1899,12,29)+0.0000115)",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:MINUTE of a time before December #, # with a fraction of a second is not supported in the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "MINUTE(DATE(1899,12,29)+0.5/86400)",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:MINUTE of a time before December #, # with a fraction of a second is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "MINUTE(DATE(1899,12,29)+0.999989)",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:A time of day before December #, # is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "MINUTE(DATE(1899,12,29)+0.99999)",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:A time of day before December #, # is not supported in the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "MINUTE(DATE(1899,12,30)-1+0.00001)",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:MINUTE of a time before December #, # with a fraction of a second is not supported in the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "MINUTE(DATE(1899,12,30)-1+0.0000115)",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:MINUTE of a time before December #, # with a fraction of a second is not supported in the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "MINUTE(DATE(1899,12,30)-1+0.5/86400)",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:MINUTE of a time before December #, # with a fraction of a second is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "MINUTE(DATE(1899,12,30)-1+0.99999)",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:A time of day before December #, # is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "MONTH(-100+0.000011)",
+   "powerbi": "9",
+   "now": "LOCAL-REJECT:A time of day before December #, # is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "MONTH(-100+0.5/86400)",
+   "powerbi": "9",
+   "now": "LOCAL-REJECT:A time of day before December #, # is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "MONTH(-100+0.999989)",
+   "powerbi": "9",
+   "now": "LOCAL-REJECT:A time of day before December #, # is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "MONTH(-100+TIME(0,0,1))",
+   "powerbi": "9",
+   "now": "LOCAL-REJECT:A time of day before December #, # is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "MONTH(-3+0.00001)",
+   "powerbi": "12",
+   "now": "LOCAL-REJECT:A time of day before December #, # is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "MONTH(-3+0.000011)",
+   "powerbi": "12",
+   "now": "LOCAL-REJECT:A time of day before December #, # is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "MONTH(-3+0.999989)",
+   "powerbi": "12",
+   "now": "LOCAL-REJECT:A time of day before December #, # is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "MONTH(-3+TIME(0,0,1))",
+   "powerbi": "12",
+   "now": "LOCAL-REJECT:A time of day before December #, # is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "MONTH(-3+TIME(23,59,59))",
+   "powerbi": "12",
+   "now": "LOCAL-REJECT:A time of day before December #, # is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "MONTH(DATE(1700,6,15)+0.00001)",
+   "powerbi": "6",
+   "now": "LOCAL-REJECT:A time of day before December #, # is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "MONTH(DATE(1700,6,15)+0.0000115)",
+   "powerbi": "6",
+   "now": "LOCAL-REJECT:A time of day before December #, # is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "MONTH(DATE(1700,6,15)+0.5/86400)",
+   "powerbi": "6",
+   "now": "LOCAL-REJECT:A time of day before December #, # is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "MONTH(DATE(1700,6,15)+1-1/86400)",
+   "powerbi": "6",
+   "now": "LOCAL-REJECT:A time of day before December #, # is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "MONTH(DATE(1700,6,15)+TIME(0,0,1))",
+   "powerbi": "6",
+   "now": "LOCAL-REJECT:A time of day before December #, # is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "MONTH(DATE(1700,6,15)+TIME(23,59,59))",
+   "powerbi": "6",
+   "now": "LOCAL-REJECT:A time of day before December #, # is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "MONTH(DATE(1800,1,1)+0.00001)",
+   "powerbi": "1",
+   "now": "LOCAL-REJECT:A time of day before December #, # is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "MONTH(DATE(1800,1,1)+1-1/86400)",
+   "powerbi": "1",
+   "now": "LOCAL-REJECT:A time of day before December #, # is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "MONTH(DATE(1800,1,1)+1/86400)",
+   "powerbi": "1",
+   "now": "LOCAL-REJECT:A time of day before December #, # is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "MONTH(DATE(1800,1,1)+TIME(0,0,1))",
+   "powerbi": "1",
+   "now": "LOCAL-REJECT:A time of day before December #, # is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "MONTH(DATE(1800,1,1)+TIME(23,59,59))",
+   "powerbi": "1",
+   "now": "LOCAL-REJECT:A time of day before December #, # is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "MONTH(DATE(1850,7,4)+0.5/86400)",
+   "powerbi": "7",
+   "now": "LOCAL-REJECT:A time of day before December #, # is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "MONTH(DATE(1899,1,15)+0.00001)",
+   "powerbi": "1",
+   "now": "LOCAL-REJECT:A time of day before December #, # is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "MONTH(DATE(1899,1,15)+0.000011)",
+   "powerbi": "1",
+   "now": "LOCAL-REJECT:A time of day before December #, # is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "MONTH(DATE(1899,1,15)+0.0000115)",
+   "powerbi": "1",
+   "now": "LOCAL-REJECT:A time of day before December #, # is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "MONTH(DATE(1899,1,15)+0.5/86400)",
+   "powerbi": "1",
+   "now": "LOCAL-REJECT:A time of day before December #, # is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "MONTH(DATE(1899,1,15)+0.999989)",
+   "powerbi": "1",
+   "now": "LOCAL-REJECT:A time of day before December #, # is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "MONTH(DATE(1899,12,29)+0.00001)",
+   "powerbi": "12",
+   "now": "LOCAL-REJECT:A time of day before December #, # is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "MONTH(DATE(1899,12,29)+0.000011)",
+   "powerbi": "12",
+   "now": "LOCAL-REJECT:A time of day before December #, # is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "MONTH(DATE(1899,12,29)+0.5/86400)",
+   "powerbi": "12",
+   "now": "LOCAL-REJECT:A time of day before December #, # is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "MONTH(DATE(1899,12,30)-1+0.00001)",
+   "powerbi": "12",
+   "now": "LOCAL-REJECT:A time of day before December #, # is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "MONTH(DATE(1899,12,30)-1+0.000011)",
+   "powerbi": "12",
+   "now": "LOCAL-REJECT:A time of day before December #, # is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "MONTH(DATE(1899,12,30)-1+0.0000115)",
+   "powerbi": "12",
+   "now": "LOCAL-REJECT:A time of day before December #, # is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "MONTH(DATE(1899,12,30)-1+0.5/86400)",
+   "powerbi": "12",
+   "now": "LOCAL-REJECT:A time of day before December #, # is not supported in the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "SECOND(-100+0.00001)",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:SECOND of a time before December #, # with a fraction of a second is not supported in the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "SECOND(-100+0.00002)",
+   "powerbi": "59",
+   "now": "LOCAL-REJECT:SECOND of a time before December #, # with a fraction of a second is not supported in the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "SECOND(-100+0.0001)",
+   "powerbi": "52",
+   "now": "LOCAL-REJECT:SECOND of a time before December #, # with a fraction of a second is not supported in the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "SECOND(-100+0.999988)",
+   "powerbi": "2",
+   "now": "LOCAL-REJECT:SECOND of a time before December #, # with a fraction of a second is not supported in the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "SECOND(-100+0.99999)",
+   "powerbi": "1",
+   "now": "LOCAL-REJECT:SECOND of a time before December #, # with a fraction of a second is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "SECOND(-100+TIME(0,0,1))",
+   "powerbi": "59",
+   "now": "LOCAL-REJECT:A time of day before December #, # is not supported in the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "SECOND(-3+0.00001)",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:SECOND of a time before December #, # with a fraction of a second is not supported in the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "SECOND(-3+0.000011)",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:SECOND of a time before December #, # with a fraction of a second is not supported in the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "SECOND(-3+0.0000116)",
+   "powerbi": "59",
+   "now": "LOCAL-REJECT:SECOND of a time before December #, # with a fraction of a second is not supported in the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "SECOND(-3+0.00002)",
+   "powerbi": "59",
+   "now": "LOCAL-REJECT:SECOND of a time before December #, # with a fraction of a second is not supported in the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "SECOND(-3+0.0001)",
+   "powerbi": "52",
+   "now": "LOCAL-REJECT:SECOND of a time before December #, # with a fraction of a second is not supported in the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "SECOND(-3+0.001)",
+   "powerbi": "34",
+   "now": "LOCAL-REJECT:SECOND of a time before December #, # with a fraction of a second is not supported in the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "SECOND(-3+0.5/86400)",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:SECOND of a time before December #, # with a fraction of a second is not supported in the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "SECOND(-3+0.999)",
+   "powerbi": "27",
+   "now": "LOCAL-REJECT:SECOND of a time before December #, # with a fraction of a second is not supported in the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "SECOND(-3+0.999988)",
+   "powerbi": "2",
+   "now": "LOCAL-REJECT:SECOND of a time before December #, # with a fraction of a second is not supported in the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "SECOND(-3+0.9999884)",
+   "powerbi": "2",
+   "now": "LOCAL-REJECT:SECOND of a time before December #, # with a fraction of a second is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "SECOND(-3+TIME(0,0,1))",
+   "powerbi": "59",
+   "now": "LOCAL-REJECT:A time of day before December #, # is not supported in the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "SECOND(DATE(1700,6,15)+0.00001)",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:SECOND of a time before December #, # with a fraction of a second is not supported in the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "SECOND(DATE(1700,6,15)+0.000011)",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:SECOND of a time before December #, # with a fraction of a second is not supported in the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "SECOND(DATE(1700,6,15)+0.0000115)",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:SECOND of a time before December #, # with a fraction of a second is not supported in the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "SECOND(DATE(1700,6,15)+0.0000116)",
+   "powerbi": "59",
+   "now": "LOCAL-REJECT:SECOND of a time before December #, # with a fraction of a second is not supported in the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "SECOND(DATE(1700,6,15)+0.5/86400)",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:SECOND of a time before December #, # with a fraction of a second is not supported in the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "SECOND(DATE(1700,6,15)+0.999)",
+   "powerbi": "27",
+   "now": "LOCAL-REJECT:SECOND of a time before December #, # with a fraction of a second is not supported in the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "SECOND(DATE(1700,6,15)+0.9999)",
+   "powerbi": "9",
+   "now": "LOCAL-REJECT:SECOND of a time before December #, # with a fraction of a second is not supported in the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "SECOND(DATE(1700,6,15)+0.99998)",
+   "powerbi": "2",
+   "now": "LOCAL-REJECT:SECOND of a time before December #, # with a fraction of a second is not supported in the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "SECOND(DATE(1700,6,15)+0.999988)",
+   "powerbi": "2",
+   "now": "LOCAL-REJECT:SECOND of a time before December #, # with a fraction of a second is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "SECOND(DATE(1700,6,15)+1-1/86400)",
+   "powerbi": "1",
+   "now": "LOCAL-REJECT:A time of day before December #, # is not supported in the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "SECOND(DATE(1700,6,15)+1.5/86400)",
+   "powerbi": "59",
+   "now": "LOCAL-REJECT:SECOND of a time before December #, # with a fraction of a second is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "SECOND(DATE(1700,6,15)+1/86400)",
+   "powerbi": "59",
+   "now": "LOCAL-REJECT:A time of day before December #, # is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "SECOND(DATE(1700,6,15)+TIME(0,0,1))",
+   "powerbi": "59",
+   "now": "LOCAL-REJECT:A time of day before December #, # is not supported in the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "SECOND(DATE(1800,1,1)+0.00001)",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:SECOND of a time before December #, # with a fraction of a second is not supported in the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "SECOND(DATE(1800,1,1)+0.5/86400)",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:SECOND of a time before December #, # with a fraction of a second is not supported in the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "SECOND(DATE(1800,1,1)+0.9999)",
+   "powerbi": "9",
+   "now": "LOCAL-REJECT:SECOND of a time before December #, # with a fraction of a second is not supported in the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "SECOND(DATE(1800,1,1)+0.99998)",
+   "powerbi": "2",
+   "now": "LOCAL-REJECT:SECOND of a time before December #, # with a fraction of a second is not supported in the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "SECOND(DATE(1800,1,1)+0.999988)",
+   "powerbi": "2",
+   "now": "LOCAL-REJECT:SECOND of a time before December #, # with a fraction of a second is not supported in the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "SECOND(DATE(1800,1,1)+0.999989)",
+   "powerbi": "1",
+   "now": "LOCAL-REJECT:SECOND of a time before December #, # with a fraction of a second is not supported in the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "SECOND(DATE(1800,1,1)+0.99999)",
+   "powerbi": "1",
+   "now": "LOCAL-REJECT:SECOND of a time before December #, # with a fraction of a second is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "SECOND(DATE(1800,1,1)+1-1/86400)",
+   "powerbi": "1",
+   "now": "LOCAL-REJECT:A time of day before December #, # is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "SECOND(DATE(1800,1,1)+1/86400)",
+   "powerbi": "59",
+   "now": "LOCAL-REJECT:A time of day before December #, # is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "SECOND(DATE(1800,1,1)+TIME(23,59,59))",
+   "powerbi": "1",
+   "now": "LOCAL-REJECT:A time of day before December #, # is not supported in the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "SECOND(DATE(1850,7,4)+0.00001)",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:SECOND of a time before December #, # with a fraction of a second is not supported in the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "SECOND(DATE(1850,7,4)+0.000011)",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:SECOND of a time before December #, # with a fraction of a second is not supported in the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "SECOND(DATE(1850,7,4)+0.0000115)",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:SECOND of a time before December #, # with a fraction of a second is not supported in the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "SECOND(DATE(1850,7,4)+0.0001)",
+   "powerbi": "52",
+   "now": "LOCAL-REJECT:SECOND of a time before December #, # with a fraction of a second is not supported in the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "SECOND(DATE(1850,7,4)+0.999)",
+   "powerbi": "27",
+   "now": "LOCAL-REJECT:SECOND of a time before December #, # with a fraction of a second is not supported in the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "SECOND(DATE(1850,7,4)+0.99998)",
+   "powerbi": "2",
+   "now": "LOCAL-REJECT:SECOND of a time before December #, # with a fraction of a second is not supported in the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "SECOND(DATE(1850,7,4)+0.999988)",
+   "powerbi": "2",
+   "now": "LOCAL-REJECT:SECOND of a time before December #, # with a fraction of a second is not supported in the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "SECOND(DATE(1850,7,4)+0.9999884)",
+   "powerbi": "2",
+   "now": "LOCAL-REJECT:SECOND of a time before December #, # with a fraction of a second is not supported in the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "SECOND(DATE(1850,7,4)+0.999989)",
+   "powerbi": "1",
+   "now": "LOCAL-REJECT:SECOND of a time before December #, # with a fraction of a second is not supported in the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "SECOND(DATE(1850,7,4)+0.99999)",
+   "powerbi": "1",
+   "now": "LOCAL-REJECT:SECOND of a time before December #, # with a fraction of a second is not supported in the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "SECOND(DATE(1850,7,4)+1-1.5/86400)",
+   "powerbi": "2",
+   "now": "LOCAL-REJECT:SECOND of a time before December #, # with a fraction of a second is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "SECOND(DATE(1850,7,4)+1-1/86400)",
+   "powerbi": "1",
+   "now": "LOCAL-REJECT:A time of day before December #, # is not supported in the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "SECOND(DATE(1850,7,4)+1.5/86400)",
+   "powerbi": "59",
+   "now": "LOCAL-REJECT:SECOND of a time before December #, # with a fraction of a second is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "SECOND(DATE(1850,7,4)+1/86400)",
+   "powerbi": "59",
+   "now": "LOCAL-REJECT:A time of day before December #, # is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "SECOND(DATE(1850,7,4)+TIME(0,0,1))",
+   "powerbi": "59",
+   "now": "LOCAL-REJECT:A time of day before December #, # is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "SECOND(DATE(1850,7,4)+TIME(23,59,59))",
+   "powerbi": "1",
+   "now": "LOCAL-REJECT:A time of day before December #, # is not supported in the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "SECOND(DATE(1899,1,15)+0.00001)",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:SECOND of a time before December #, # with a fraction of a second is not supported in the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "SECOND(DATE(1899,1,15)+0.0001)",
+   "powerbi": "52",
+   "now": "LOCAL-REJECT:SECOND of a time before December #, # with a fraction of a second is not supported in the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "SECOND(DATE(1899,1,15)+0.9999)",
+   "powerbi": "9",
+   "now": "LOCAL-REJECT:SECOND of a time before December #, # with a fraction of a second is not supported in the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "SECOND(DATE(1899,1,15)+0.99998)",
+   "powerbi": "2",
+   "now": "LOCAL-REJECT:SECOND of a time before December #, # with a fraction of a second is not supported in the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "SECOND(DATE(1899,1,15)+0.999988)",
+   "powerbi": "2",
+   "now": "LOCAL-REJECT:SECOND of a time before December #, # with a fraction of a second is not supported in the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "SECOND(DATE(1899,1,15)+0.99999)",
+   "powerbi": "1",
+   "now": "LOCAL-REJECT:SECOND of a time before December #, # with a fraction of a second is not supported in the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "SECOND(DATE(1899,1,15)+1.5/86400)",
+   "powerbi": "59",
+   "now": "LOCAL-REJECT:SECOND of a time before December #, # with a fraction of a second is not supported in the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "SECOND(DATE(1899,12,29)+0.00001)",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:SECOND of a time before December #, # with a fraction of a second is not supported in the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "SECOND(DATE(1899,12,29)+0.0000115)",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:SECOND of a time before December #, # with a fraction of a second is not supported in the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "SECOND(DATE(1899,12,29)+0.001)",
+   "powerbi": "34",
+   "now": "LOCAL-REJECT:SECOND of a time before December #, # with a fraction of a second is not supported in the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "SECOND(DATE(1899,12,29)+0.99998)",
+   "powerbi": "2",
+   "now": "LOCAL-REJECT:SECOND of a time before December #, # with a fraction of a second is not supported in the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "SECOND(DATE(1899,12,29)+0.999988)",
+   "powerbi": "2",
+   "now": "LOCAL-REJECT:SECOND of a time before December #, # with a fraction of a second is not supported in the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "SECOND(DATE(1899,12,29)+0.9999884)",
+   "powerbi": "2",
+   "now": "LOCAL-REJECT:SECOND of a time before December #, # with a fraction of a second is not supported in the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "SECOND(DATE(1899,12,29)+1.5/86400)",
+   "powerbi": "59",
+   "now": "LOCAL-REJECT:SECOND of a time before December #, # with a fraction of a second is not supported in the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "SECOND(DATE(1899,12,30)-1+0.001)",
+   "powerbi": "34",
+   "now": "LOCAL-REJECT:SECOND of a time before December #, # with a fraction of a second is not supported in the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "SECOND(DATE(1899,12,30)-1+0.999)",
+   "powerbi": "27",
+   "now": "LOCAL-REJECT:SECOND of a time before December #, # with a fraction of a second is not supported in the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "SECOND(DATE(1899,12,30)-1+0.9999)",
+   "powerbi": "9",
+   "now": "LOCAL-REJECT:SECOND of a time before December #, # with a fraction of a second is not supported in the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "SECOND(DATE(1899,12,30)-1+0.99998)",
+   "powerbi": "2",
+   "now": "LOCAL-REJECT:SECOND of a time before December #, # with a fraction of a second is not supported in the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "SECOND(DATE(1899,12,30)-1+0.9999884)",
+   "powerbi": "2",
+   "now": "LOCAL-REJECT:SECOND of a time before December #, # with a fraction of a second is not supported in the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "SECOND(DATE(1899,12,30)-1+0.999989)",
+   "powerbi": "1",
+   "now": "LOCAL-REJECT:SECOND of a time before December #, # with a fraction of a second is not supported in the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "SECOND(DATE(1899,12,30)-1+1.5/86400)",
+   "powerbi": "59",
+   "now": "LOCAL-REJECT:SECOND of a time before December #, # with a fraction of a second is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "WEEKDAY(-100+0.00001)",
+   "powerbi": "6",
+   "now": "LOCAL-REJECT:A time of day before December #, # is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "WEEKDAY(-100+0.000011)",
+   "powerbi": "6",
+   "now": "LOCAL-REJECT:A time of day before December #, # is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "WEEKDAY(-100+0.0000115)",
+   "powerbi": "6",
+   "now": "LOCAL-REJECT:A time of day before December #, # is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "WEEKDAY(-100+0.999989)",
+   "powerbi": "6",
+   "now": "LOCAL-REJECT:A time of day before December #, # is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "WEEKDAY(-100+TIME(0,0,1))",
+   "powerbi": "6",
+   "now": "LOCAL-REJECT:A time of day before December #, # is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "WEEKDAY(-3+0.999989)",
+   "powerbi": "5",
+   "now": "LOCAL-REJECT:A time of day before December #, # is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "WEEKDAY(-3+0.99999)",
+   "powerbi": "5",
+   "now": "LOCAL-REJECT:A time of day before December #, # is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "WEEKDAY(-3+TIME(0,0,1))",
+   "powerbi": "5",
+   "now": "LOCAL-REJECT:A time of day before December #, # is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "WEEKDAY(-3+TIME(23,59,59))",
+   "powerbi": "5",
+   "now": "LOCAL-REJECT:A time of day before December #, # is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "WEEKDAY(DATE(1700,6,15)+0.000011)",
+   "powerbi": "4",
+   "now": "LOCAL-REJECT:A time of day before December #, # is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "WEEKDAY(DATE(1700,6,15)+0.0000115)",
+   "powerbi": "4",
+   "now": "LOCAL-REJECT:A time of day before December #, # is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "WEEKDAY(DATE(1700,6,15)+0.999989)",
+   "powerbi": "4",
+   "now": "LOCAL-REJECT:A time of day before December #, # is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "WEEKDAY(DATE(1700,6,15)+1-1/86400)",
+   "powerbi": "4",
+   "now": "LOCAL-REJECT:A time of day before December #, # is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "WEEKDAY(DATE(1700,6,15)+1/86400)",
+   "powerbi": "4",
+   "now": "LOCAL-REJECT:A time of day before December #, # is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "WEEKDAY(DATE(1700,6,15)+TIME(23,59,59))",
+   "powerbi": "4",
+   "now": "LOCAL-REJECT:A time of day before December #, # is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "WEEKDAY(DATE(1800,1,1)+0.00001)",
+   "powerbi": "5",
+   "now": "LOCAL-REJECT:A time of day before December #, # is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "WEEKDAY(DATE(1800,1,1)+0.000011)",
+   "powerbi": "5",
+   "now": "LOCAL-REJECT:A time of day before December #, # is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "WEEKDAY(DATE(1800,1,1)+0.0000115)",
+   "powerbi": "5",
+   "now": "LOCAL-REJECT:A time of day before December #, # is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "WEEKDAY(DATE(1800,1,1)+TIME(0,0,1))",
+   "powerbi": "5",
+   "now": "LOCAL-REJECT:A time of day before December #, # is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "WEEKDAY(DATE(1800,1,1)+TIME(23,59,59))",
+   "powerbi": "5",
+   "now": "LOCAL-REJECT:A time of day before December #, # is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "WEEKDAY(DATE(1850,7,4)+0.00001)",
+   "powerbi": "6",
+   "now": "LOCAL-REJECT:A time of day before December #, # is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "WEEKDAY(DATE(1850,7,4)+0.0000115)",
+   "powerbi": "6",
+   "now": "LOCAL-REJECT:A time of day before December #, # is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "WEEKDAY(DATE(1850,7,4)+0.5/86400)",
+   "powerbi": "5",
+   "now": "LOCAL-REJECT:A time of day before December #, # is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "WEEKDAY(DATE(1850,7,4)+0.99999)",
+   "powerbi": "6",
+   "now": "LOCAL-REJECT:A time of day before December #, # is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "WEEKDAY(DATE(1850,7,4)+TIME(23,59,59))",
+   "powerbi": "6",
+   "now": "LOCAL-REJECT:A time of day before December #, # is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "WEEKDAY(DATE(1899,1,15)+0.00001)",
+   "powerbi": "2",
+   "now": "LOCAL-REJECT:A time of day before December #, # is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "WEEKDAY(DATE(1899,1,15)+0.0000115)",
+   "powerbi": "2",
+   "now": "LOCAL-REJECT:A time of day before December #, # is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "WEEKDAY(DATE(1899,12,29)+0.000011)",
+   "powerbi": "7",
+   "now": "LOCAL-REJECT:A time of day before December #, # is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "WEEKDAY(DATE(1899,12,29)+0.999989)",
+   "powerbi": "7",
+   "now": "LOCAL-REJECT:A time of day before December #, # is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "WEEKDAY(DATE(1899,12,30)-1+0.00001)",
+   "powerbi": "7",
+   "now": "LOCAL-REJECT:A time of day before December #, # is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "WEEKDAY(DATE(1899,12,30)-1+0.000011)",
+   "powerbi": "7",
+   "now": "LOCAL-REJECT:A time of day before December #, # is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "WEEKDAY(DATE(1899,12,30)-1+0.0000115)",
+   "powerbi": "7",
+   "now": "LOCAL-REJECT:A time of day before December #, # is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "WEEKDAY(DATE(1899,12,30)-1+0.5/86400)",
+   "powerbi": "6",
+   "now": "LOCAL-REJECT:A time of day before December #, # is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "WEEKDAY(DATE(1899,12,30)-1+0.999989)",
+   "powerbi": "7",
+   "now": "LOCAL-REJECT:A time of day before December #, # is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "YEAR(-100+0.0000115)",
+   "powerbi": "1899",
+   "now": "LOCAL-REJECT:A time of day before December #, # is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "YEAR(-100+0.5/86400)",
+   "powerbi": "1899",
+   "now": "LOCAL-REJECT:A time of day before December #, # is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "YEAR(-100+0.999989)",
+   "powerbi": "1899",
+   "now": "LOCAL-REJECT:A time of day before December #, # is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "YEAR(-100+TIME(23,59,59))",
+   "powerbi": "1899",
+   "now": "LOCAL-REJECT:A time of day before December #, # is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "YEAR(-3+0.0000115)",
+   "powerbi": "1899",
+   "now": "LOCAL-REJECT:A time of day before December #, # is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "YEAR(-3+0.5/86400)",
+   "powerbi": "1899",
+   "now": "LOCAL-REJECT:A time of day before December #, # is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "YEAR(-3+TIME(23,59,59))",
+   "powerbi": "1899",
+   "now": "LOCAL-REJECT:A time of day before December #, # is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "YEAR(DATE(1700,6,15)+0.00001)",
+   "powerbi": "1700",
+   "now": "LOCAL-REJECT:A time of day before December #, # is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "YEAR(DATE(1700,6,15)+0.5/86400)",
+   "powerbi": "1700",
+   "now": "LOCAL-REJECT:A time of day before December #, # is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "YEAR(DATE(1700,6,15)+0.999989)",
+   "powerbi": "1700",
+   "now": "LOCAL-REJECT:A time of day before December #, # is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "YEAR(DATE(1700,6,15)+0.99999)",
+   "powerbi": "1700",
+   "now": "LOCAL-REJECT:A time of day before December #, # is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "YEAR(DATE(1700,6,15)+1/86400)",
+   "powerbi": "1700",
+   "now": "LOCAL-REJECT:A time of day before December #, # is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "YEAR(DATE(1700,6,15)+TIME(0,0,1))",
+   "powerbi": "1700",
+   "now": "LOCAL-REJECT:A time of day before December #, # is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "YEAR(DATE(1700,6,15)+TIME(23,59,59))",
+   "powerbi": "1700",
+   "now": "LOCAL-REJECT:A time of day before December #, # is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "YEAR(DATE(1800,1,1)+0.000011)",
+   "powerbi": "1800",
+   "now": "LOCAL-REJECT:A time of day before December #, # is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "YEAR(DATE(1800,1,1)+0.0000115)",
+   "powerbi": "1800",
+   "now": "LOCAL-REJECT:A time of day before December #, # is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "YEAR(DATE(1800,1,1)+0.5/86400)",
+   "powerbi": "1800",
+   "now": "LOCAL-REJECT:A time of day before December #, # is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "YEAR(DATE(1800,1,1)+0.999989)",
+   "powerbi": "1800",
+   "now": "LOCAL-REJECT:A time of day before December #, # is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "YEAR(DATE(1800,1,1)+TIME(0,0,1))",
+   "powerbi": "1800",
+   "now": "LOCAL-REJECT:A time of day before December #, # is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "YEAR(DATE(1850,7,4)+0.000011)",
+   "powerbi": "1850",
+   "now": "LOCAL-REJECT:A time of day before December #, # is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "YEAR(DATE(1850,7,4)+0.0000115)",
+   "powerbi": "1850",
+   "now": "LOCAL-REJECT:A time of day before December #, # is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "YEAR(DATE(1850,7,4)+0.999989)",
+   "powerbi": "1850",
+   "now": "LOCAL-REJECT:A time of day before December #, # is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "YEAR(DATE(1850,7,4)+1-1/86400)",
+   "powerbi": "1850",
+   "now": "LOCAL-REJECT:A time of day before December #, # is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "YEAR(DATE(1850,7,4)+1/86400)",
+   "powerbi": "1850",
+   "now": "LOCAL-REJECT:A time of day before December #, # is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "YEAR(DATE(1850,7,4)+TIME(0,0,1))",
+   "powerbi": "1850",
+   "now": "LOCAL-REJECT:A time of day before December #, # is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "YEAR(DATE(1899,1,15)+0.00001)",
+   "powerbi": "1899",
+   "now": "LOCAL-REJECT:A time of day before December #, # is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "YEAR(DATE(1899,1,15)+0.000011)",
+   "powerbi": "1899",
+   "now": "LOCAL-REJECT:A time of day before December #, # is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "YEAR(DATE(1899,1,15)+0.0000115)",
+   "powerbi": "1899",
+   "now": "LOCAL-REJECT:A time of day before December #, # is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "YEAR(DATE(1899,1,15)+0.5/86400)",
+   "powerbi": "1899",
+   "now": "LOCAL-REJECT:A time of day before December #, # is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "YEAR(DATE(1899,1,15)+0.99999)",
+   "powerbi": "1899",
+   "now": "LOCAL-REJECT:A time of day before December #, # is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "YEAR(DATE(1899,12,29)+0.00001)",
+   "powerbi": "1899",
+   "now": "LOCAL-REJECT:A time of day before December #, # is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "YEAR(DATE(1899,12,29)+0.0000115)",
+   "powerbi": "1899",
+   "now": "LOCAL-REJECT:A time of day before December #, # is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "YEAR(DATE(1899,12,29)+0.5/86400)",
+   "powerbi": "1899",
+   "now": "LOCAL-REJECT:A time of day before December #, # is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "YEAR(DATE(1899,12,29)+0.999989)",
+   "powerbi": "1899",
+   "now": "LOCAL-REJECT:A time of day before December #, # is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "YEAR(DATE(1899,12,29)+0.99999)",
+   "powerbi": "1899",
+   "now": "LOCAL-REJECT:A time of day before December #, # is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "YEAR(DATE(1899,12,30)-1+0.000011)",
+   "powerbi": "1899",
+   "now": "LOCAL-REJECT:A time of day before December #, # is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "YEAR(DATE(1899,12,30)-1+0.0000115)",
+   "powerbi": "1899",
+   "now": "LOCAL-REJECT:A time of day before December #, # is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "YEAR(DATE(1899,12,30)-1+0.999989)",
+   "powerbi": "1899",
+   "now": "LOCAL-REJECT:A time of day before December #, # is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "YEAR(DATE(1899,12,30)-1+0.99999)",
+   "powerbi": "1899",
+   "now": "LOCAL-REJECT:A time of day before December #, # is not supported in the local engine."
+  }
+ ]
+}
