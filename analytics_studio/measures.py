@@ -3851,10 +3851,12 @@ def _swi_tied_order_known(node: tuple[Any, ...], lookup: Any) -> bool:
         if function in {"TOPN", "SAMPLE", "SUMMARIZECOLUMNS"}:
             return False
         if function in {"ALL", "ALLNOBLANKROW"}:
-            return len(arguments) == 1 and arguments[0][0] == "reference"
+            return bool(arguments) and all(argument[0] == "reference" for argument in arguments) and len({argument[1] for argument in arguments}) == 1
         if function in {"FILTER", "ADDCOLUMNS", "CALCULATETABLE", "TREATAS"} and arguments:
             return _swi_tied_order_known(arguments[0], lookup)
         if function in {"SUMMARIZE", "GROUPBY"} and len(arguments) >= 2 and arguments[0][0] == "table":
+            if all(argument[0] == "reference" for argument in arguments[1:]):
+                return True  # Task 49: the groups of several columns are walked in dictionary order too
             return sum(1 for argument in arguments[1:] if argument[0] == "reference") == 1
         if function in {"EXCEPT", "INTERSECT", "NATURALINNERJOIN", "CROSSJOIN"} and arguments:
             return _swi_tied_order_known(arguments[0], lookup)
@@ -10814,7 +10816,9 @@ def evaluate_measures(
             return derived_table(output_headers, [], lineage, types, certain_types=[index_col_name])
 
         found: list[tuple[list[Any], dict[str, Any]]] = []
-        for frame in iterate_rows(right_context, right_rows, "install"):
+        # rows the order keys cannot tell apart keep the index table's own walk order (Task 49, dax_iteration_order)
+        walk_rows = dictionary_ordered_rows(arguments[2], right_context, right_rows, [("reference", "", h) for h in right_context["headers"]]) if _swi_tied_order_known(arguments[2], variable_nodes.get) else right_rows
+        for frame in iterate_rows(right_context, walk_rows, "install"):
             keys = []
             for expression, _desc in keys_spec:
                 val = in_row_expression(lambda expression=expression, frame=frame: evaluate(expression, frame, allow_text=True))
@@ -10849,6 +10853,7 @@ def evaluate_measures(
             )
 
         output_rows: list[dict[str, Any]] = []
+        produced: dict[int, dict[str, Any]] = {}  # id of a left row -> its result row
         for left_row in left_rows:
             typed_left = typed_row(left_context, left_row)
             left_k = row_key(typed_left[l] for l, _r in common)
@@ -10863,12 +10868,19 @@ def evaluate_measures(
             out_row = {h: typed_left[h] for h in remaining_headers}
             out_row[index_col_name] = Decimal(matches[0])
             output_rows.append(out_row)
+            produced[id(left_row)] = out_row
 
         output_headers = remaining_headers + [index_col_name]
         lineage = {h: base_lineage(left_context)[h] for h in remaining_headers if h in base_lineage(left_context)}
         types = {h: left_types.get(h, "text") for h in remaining_headers}
         types[index_col_name] = "whole_number"
-        return derived_table(output_headers, output_rows, lineage, types, certain_types=[index_col_name])
+        result = derived_table(output_headers, output_rows, lineage, types, certain_types=[index_col_name])
+        # Task 49 (live Power BI 2026-11-05): an iterator without an ORDER BY (CONCATENATEX) walks the result in the dictionary order
+        # of the left table's join columns; TOCSV and the other readers keep the left table's row order
+        walk_left = dictionary_ordered_rows(arguments[0], left_context, left_rows, [("reference", "", l) for l, _r in common])
+        if walk_left is not left_rows:
+            result[0]["swi_walk_rows"] = [produced[id(r)] for r in walk_left if id(r) in produced]
+        return result
 
     def add_missing_items(arguments: tuple[tuple[Any, ...], ...]) -> tuple[dict[str, Any], list[dict[str, Any]]]:
         """ADDMISSINGITEMS(showAll..., table, groupBy..., filterTable...) (live Power BI, iteration 96 Part B).
@@ -20482,6 +20494,8 @@ def evaluate_measures(
             if not iteration_rows:
                 refuse_foreign_columns_of_empty_iteration(context, *read_nodes)
             iteration_rows = dictionary_ordered_rows(walked_table, context, iteration_rows, read_nodes)
+            if not order_spec and context.get("swi_walk_rows") is not None and len(context["swi_walk_rows"]) == len(iteration_rows):
+                iteration_rows = context["swi_walk_rows"]  # Task 49: SUBSTITUTEWITHINDEX result, walked as its left table is
             def order_value(expression: tuple[Any, ...], inner: tuple[Any, ...]) -> Any:
                 value = evaluate(expression, inner, allow_text=True)
                 if value is None and expression[0] == "reference" and not inner[0].get("derived"):

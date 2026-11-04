@@ -26,9 +26,7 @@ class TestIteration132RowOrder32(unittest.TestCase):
             'SUMX(SUBSTITUTEWITHINDEX(VALUES(Facts[Quantity]),"i",FILTER(ALL(Facts),Facts[Quantity]>1),Facts[Region],1),[i]*[i])',
             'MINX(SUBSTITUTEWITHINDEX(Facts,"i",FILTER(ALL(Facts),Facts[Quantity]>1),Facts[Region],TRUE()),[i])',
             'SUMX(SUBSTITUTEWITHINDEX(Facts,"i",FILTER(ALL(Facts),Facts[Quantity]>1),Facts[Region],TRUE()),[i])',
-            'MAXX(SUBSTITUTEWITHINDEX(Facts,"i",SUMMARIZE(Facts,Facts[Region],Facts[Note]),CALCULATE(COUNTROWS(Facts)),ASC),[i])',
             'COUNTROWS(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],Facts[Note],"s",SUM(Facts[Quantity])),"i",FILTER(ALL(Facts),Facts[Quantity]>1),Facts[Region]&"x",ASC))',
-            'SUMX(SUBSTITUTEWITHINDEX(Facts,"i",ALL(Facts[Region],Facts[Note]),Facts[Region],0),[i]*[i])',
             'CONCATENATEX(SUBSTITUTEWITHINDEX(FILTER(VALUES(Facts[Region]),Facts[Region]<>"West"),"i",TOPN(2,VALUES(Facts[Region]),Facts[Region]),BLANK()),[i],"|",[i])',
             'SUMX(SUBSTITUTEWITHINDEX(Facts,"i",TOPN(2,VALUES(Facts[Region]),Facts[Region]),IF(Facts[Region]="East",1,2),ASC),[i])',
             'SUMX(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],"s",SUM(Facts[Quantity])),"i",SAMPLE(3,VALUES(Facts[Region]),Facts[Region]),LEN(Facts[Region])),[i])',
@@ -37,6 +35,9 @@ class TestIteration132RowOrder32(unittest.TestCase):
             with self.subTest(expr=expr):
                 actual = str(dax.local(expr))
                 self.assertTrue(actual.startswith("LOCAL-REJECT:"), f"Expected refusal for {expr}, got: {actual}")
+        # Task 49 (2026-11-05): answered now; live Power BI answers
+        self.assertEqual(dax.local('MAXX(SUBSTITUTEWITHINDEX(Facts,"i",SUMMARIZE(Facts,Facts[Region],Facts[Note]),CALCULATE(COUNTROWS(Facts)),ASC),[i])'), "4")
+        self.assertEqual(dax.local('SUMX(SUBSTITUTEWITHINDEX(Facts,"i",ALL(Facts[Region],Facts[Note]),Facts[Region],0),[i]*[i])'), "46")
 
     def test_part_b_tocsv_tojson(self) -> None:
         cases = [
