@@ -68,7 +68,7 @@ Rule: a slice is finished only when it is compared with Power BI, its items are 
 | dax_battery_var_scoping | 90 | 0 | 0 | 0 | 0 |
 | dax_battery_pending_extra | 3026 | 0 | 7 | 0 | 0 |
 | dax_battery_pending_extra2 | 3001 | 0 | 4 | 0 | 0 |
-| dax_battery_misc3_extra | 6033 | 0 | 70 | 0 | 0 |
+| dax_battery_misc3_extra | 6077 | 0 | 26 | 0 | 0 |
 | dax_battery_misc3_extra2 | 20889 | 0 | 20 | 0 | 0 |
 | dax_battery_xnpv2 | 258 | 0 | 0 | 0 | 0 |
 | dax_battery_gaps2 | 1476 | 0 | 0 | 0 | 0 |
@@ -76,7 +76,7 @@ Rule: a slice is finished only when it is compared with Power BI, its items are 
 | dax_battery_gaps2_extra2 | 13421 | 0 | 6 | 0 | 0 |
 | dax_battery_variant2_extra | 17441 | 0 | 145 | 0 | 0 |
 | dax_battery_typed3_extra | 29255 | 0 | 416 | 0 | 0 |
-| dax_battery_logic4_extra | 35998 | 0 | 120 | 0 | 0 |
+| dax_battery_logic4_extra | 36012 | 0 | 106 | 0 | 0 |
 | dax_battery_typed5_extra | 12247 | 0 | 45 | 0 | 0 |
 | dax_battery_strict6_extra | 17898 | 0 | 166 | 0 | 0 |
 | dax_battery_blank8_extra | 74553 | 0 | 468 | 0 | 0 |
@@ -102,6 +102,7 @@ Rule: a slice is finished only when it is compared with Power BI, its items are 
 | dax_battery_naninf29_extra | 890 | 0 | 115 | 0 | 0 |
 | dax_battery_datestats30_extra | 2296 | 0 | 861 | 0 | 0 |
 | dax_battery_typeerr31_extra | 2619 | 0 | 230 | 0 | 0 |
+| dax_battery_roworder32_extra | 809 | 0 | 58 | 0 | 0 |
 | dax_battery_scalar_misc2_extra | 563 | 0 | 0 | 0 | 0 |
 | dax_battery_scalar_misc2_extra2 | 151 | 0 | 0 | 0 | 0 |
 | dax_battery_type_tests_extra | 2590 | 0 | 0 | 0 | 0 |
@@ -2706,62 +2707,18 @@ North,4`) [dax_battery_table_fns2]
 - `EVALUATEANDLOG(ROW("a",1))+1` (Power BI: `2`) [dax_battery_misc3_extra]
 - `SUMX(Facts,EVALUATEANDLOG(ROW("a",1)))` (Power BI: `6`) [dax_battery_misc3_extra]
 - `MAXX(Facts,EVALUATEANDLOG(ROW("a",1),"a"))` (Power BI: `1`) [dax_battery_misc3_extra]
-- `CONCATENATEX(TOPN(1,TABLEOF(Facts[Region]),Facts[Region],ASC),Facts[Region],",")` (Power BI: `East,East,East`) [dax_battery_misc3_extra]
-- `CONCATENATEX(TOPN(1,TABLEOF(Facts[Region]),Facts[Region],DESC),Facts[Region],",")` (Power BI: `West,West`) [dax_battery_misc3_extra]
-- `CONCATENATEX(TOPN(2,TABLEOF(Facts[Region]),Facts[Region],ASC),Facts[Region],",")` (Power BI: `East,East,East`) [dax_battery_misc3_extra]
-- `CONCATENATEX(TOPN(2,TABLEOF(Facts[Region]),Facts[Region],DESC),Facts[Region],",")` (Power BI: `West,West`) [dax_battery_misc3_extra]
-- `CONCATENATEX(TOPN(3,TABLEOF(Facts[Region]),Facts[Region],ASC),Facts[Region],",")` (Power BI: `East,East,East`) [dax_battery_misc3_extra]
-- `CONCATENATEX(TOPN(3,TABLEOF(Facts[Region]),Facts[Region],DESC),Facts[Region],",")` (Power BI: `North,West,West`) [dax_battery_misc3_extra]
-- `CONCATENATEX(TOPN(4,TABLEOF(Facts[Region]),Facts[Region],ASC),Facts[Region],",")` (Power BI: `North,East,East,East`) [dax_battery_misc3_extra]
-- `CONCATENATEX(TOPN(4,TABLEOF(Facts[Region]),Facts[Region],DESC),Facts[Region],",")` (Power BI: `East,East,East,West,West,North`) [dax_battery_misc3_extra]
-- `CONCATENATEX(FILTER(TABLEOF(Facts[Region]),Facts[Region]<>BLANK()),Facts[Region],",")` (Power BI: `East,East,East,West,West,North`) [dax_battery_misc3_extra]
-- `CONCATENATEX(CALCULATETABLE(TABLEOF(Facts[Region]),Facts[Region]<>"West"),Facts[Region],",")` (Power BI: `East,East,East,North`) [dax_battery_misc3_extra]
-- `CONCATENATEX(CALCULATETABLE(TABLEOF(Facts[Region]),Facts[Quantity]>2),Facts[Region],",")` (Power BI: `East,West,North`) [dax_battery_misc3_extra]
 - `CONCATENATEX(UNION(TABLEOF(Facts[Region]),TABLEOF(Facts[Region])),Facts[Region],",")` (Power BI: `East,East,East,West,West,North,East,East,East,West,West,Nort`) [dax_battery_misc3_extra]
 - `CONCATENATEX(DISTINCT(TABLEOF(Facts[Region])),Facts[Region],",")` (Power BI: `East,West,East,North,West,East`) [dax_battery_misc3_extra]
 - `TOCSV(TABLEOF(Facts[Region]),100)` (Power BI: `'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Not`) [dax_battery_misc3_extra]
-- `CONCATENATEX(ADDCOLUMNS(TABLEOF(Facts[Region]),"k",1),Facts[Region],",")` (Power BI: `East,East,East,West,West,North`) [dax_battery_misc3_extra]
-- `CONCATENATEX(TOPN(2,TABLEOF(Facts[Quantity]),Facts[Quantity],ASC),Facts[Quantity],",")` (Power BI: `1,0`) [dax_battery_misc3_extra]
-- `CONCATENATEX(TOPN(2,TABLEOF(Facts[Quantity]),Facts[Quantity],DESC),Facts[Quantity],",")` (Power BI: `4,5`) [dax_battery_misc3_extra]
-- `CONCATENATEX(TOPN(3,TABLEOF(Facts[Quantity]),Facts[Quantity],ASC),Facts[Quantity],",")` (Power BI: `2,0,1`) [dax_battery_misc3_extra]
-- `CONCATENATEX(TOPN(3,TABLEOF(Facts[Quantity]),Facts[Quantity],DESC),Facts[Quantity],",")` (Power BI: `3,5,4`) [dax_battery_misc3_extra]
-- `CONCATENATEX(TOPN(4,TABLEOF(Facts[Quantity]),Facts[Quantity],ASC),Facts[Quantity],",")` (Power BI: `3,2,1,0`) [dax_battery_misc3_extra]
-- `CONCATENATEX(TOPN(4,TABLEOF(Facts[Quantity]),Facts[Quantity],DESC),Facts[Quantity],",")` (Power BI: `2,3,5,4`) [dax_battery_misc3_extra]
-- `CONCATENATEX(FILTER(TABLEOF(Facts[Quantity]),Facts[Quantity]<>BLANK()),Facts[Quantity],",")` (Power BI: `1,2,3,4,5`) [dax_battery_misc3_extra]
-- `CONCATENATEX(CALCULATETABLE(TABLEOF(Facts[Quantity]),Facts[Region]<>"West"),Facts[Quantity],",")` (Power BI: `1,2,4,5`) [dax_battery_misc3_extra]
-- `CONCATENATEX(CALCULATETABLE(TABLEOF(Facts[Quantity]),Facts[Quantity]>2),Facts[Quantity],",")` (Power BI: `3,4,5`) [dax_battery_misc3_extra]
 - `CONCATENATEX(UNION(TABLEOF(Facts[Quantity]),TABLEOF(Facts[Quantity])),Facts[Quantity],",")` (Power BI: `0,1,2,3,4,5,0,1,2,3,4,5`) [dax_battery_misc3_extra]
 - `CONCATENATEX(DISTINCT(TABLEOF(Facts[Quantity])),Facts[Quantity],",")` (Power BI: `2,3,1,4,0,5`) [dax_battery_misc3_extra]
 - `TOCSV(TABLEOF(Facts[Quantity]),100)` (Power BI: `'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Not`) [dax_battery_misc3_extra]
-- `CONCATENATEX(ADDCOLUMNS(TABLEOF(Facts[Quantity]),"k",1),Facts[Quantity],",")` (Power BI: `0,1,2,3,4,5`) [dax_battery_misc3_extra]
-- `CONCATENATEX(TOPN(1,TABLEOF(Facts[Note]),Facts[Note],ASC),Facts[Note],",")` (Power BI: `,`) [dax_battery_misc3_extra]
-- `CONCATENATEX(TOPN(1,TABLEOF(Facts[Note]),Facts[Note],DESC),Facts[Note],",")` (Power BI: `Paid,Paid,Paid`) [dax_battery_misc3_extra]
-- `CONCATENATEX(TOPN(2,TABLEOF(Facts[Note]),Facts[Note],ASC),Facts[Note],",")` (Power BI: `,`) [dax_battery_misc3_extra]
-- `CONCATENATEX(TOPN(2,TABLEOF(Facts[Note]),Facts[Note],DESC),Facts[Note],",")` (Power BI: `Paid,Paid,Paid`) [dax_battery_misc3_extra]
-- `CONCATENATEX(TOPN(3,TABLEOF(Facts[Note]),Facts[Note],ASC),Facts[Note],",")` (Power BI: `Late,,`) [dax_battery_misc3_extra]
-- `CONCATENATEX(TOPN(3,TABLEOF(Facts[Note]),Facts[Note],DESC),Facts[Note],",")` (Power BI: `Paid,Paid,Paid`) [dax_battery_misc3_extra]
-- `CONCATENATEX(TOPN(4,TABLEOF(Facts[Note]),Facts[Note],ASC),Facts[Note],",")` (Power BI: `Paid,Paid,Late,,Paid,`) [dax_battery_misc3_extra]
-- `CONCATENATEX(TOPN(4,TABLEOF(Facts[Note]),Facts[Note],DESC),Facts[Note],",")` (Power BI: `Late,Paid,Paid,Paid`) [dax_battery_misc3_extra]
-- `CONCATENATEX(FILTER(TABLEOF(Facts[Note]),Facts[Note]<>BLANK()),Facts[Note],",")` (Power BI: `Paid,Paid,Paid,Late`) [dax_battery_misc3_extra]
-- `CONCATENATEX(CALCULATETABLE(TABLEOF(Facts[Note]),Facts[Region]<>"West"),Facts[Note],",")` (Power BI: `,Paid,Paid,Late`) [dax_battery_misc3_extra]
-- `CONCATENATEX(CALCULATETABLE(TABLEOF(Facts[Note]),Facts[Quantity]>2),Facts[Note],",")` (Power BI: `,,Late`) [dax_battery_misc3_extra]
 - `CONCATENATEX(UNION(TABLEOF(Facts[Note]),TABLEOF(Facts[Note])),Facts[Note],",")` (Power BI: `,,Paid,Paid,Paid,Late,,,Paid,Paid,Paid,Late`) [dax_battery_misc3_extra]
 - `CONCATENATEX(DISTINCT(TABLEOF(Facts[Note])),Facts[Note],",")` (Power BI: `Paid,,Paid,Late,Paid,`) [dax_battery_misc3_extra]
 - `TOCSV(TABLEOF(Facts[Note]),100)` (Power BI: `'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Not`) [dax_battery_misc3_extra]
-- `CONCATENATEX(ADDCOLUMNS(TABLEOF(Facts[Note]),"k",1),Facts[Note],",")` (Power BI: `,,Paid,Paid,Paid,Late`) [dax_battery_misc3_extra]
-- `CONCATENATEX(TOPN(2,TABLEOF(Facts[Sales]),Facts[Sales],ASC),Facts[Sales],",")` (Power BI: `,-1.5`) [dax_battery_misc3_extra]
-- `CONCATENATEX(TOPN(2,TABLEOF(Facts[Sales]),Facts[Sales],DESC),Facts[Sales],",")` (Power BI: `10.5,20`) [dax_battery_misc3_extra]
-- `CONCATENATEX(TOPN(3,TABLEOF(Facts[Sales]),Facts[Sales],ASC),Facts[Sales],",")` (Power BI: `0,-1.5,`) [dax_battery_misc3_extra]
-- `CONCATENATEX(TOPN(3,TABLEOF(Facts[Sales]),Facts[Sales],DESC),Facts[Sales],",")` (Power BI: `2.5,20,10.5`) [dax_battery_misc3_extra]
-- `CONCATENATEX(TOPN(4,TABLEOF(Facts[Sales]),Facts[Sales],ASC),Facts[Sales],",")` (Power BI: `2.5,0,,-1.5`) [dax_battery_misc3_extra]
-- `CONCATENATEX(TOPN(4,TABLEOF(Facts[Sales]),Facts[Sales],DESC),Facts[Sales],",")` (Power BI: `0,2.5,20,10.5`) [dax_battery_misc3_extra]
-- `CONCATENATEX(FILTER(TABLEOF(Facts[Sales]),Facts[Sales]<>BLANK()),Facts[Sales],",")` (Power BI: `-1.5,2.5,10.5,20`) [dax_battery_misc3_extra]
-- `CONCATENATEX(CALCULATETABLE(TABLEOF(Facts[Sales]),Facts[Region]<>"West"),Facts[Sales],",")` (Power BI: `,-1.5,2.5,10.5`) [dax_battery_misc3_extra]
-- `CONCATENATEX(CALCULATETABLE(TABLEOF(Facts[Sales]),Facts[Quantity]>2),Facts[Sales],",")` (Power BI: `,2.5,20`) [dax_battery_misc3_extra]
 - `CONCATENATEX(UNION(TABLEOF(Facts[Sales]),TABLEOF(Facts[Sales])),Facts[Sales],",")` (Power BI: `,-1.5,0,2.5,10.5,20,,-1.5,0,2.5,10.5,20`) [dax_battery_misc3_extra]
 - `CONCATENATEX(DISTINCT(TABLEOF(Facts[Sales])),Facts[Sales],",")` (Power BI: `10.5,20,-1.5,,0,2.5`) [dax_battery_misc3_extra]
 - `TOCSV(TABLEOF(Facts[Sales]),100)` (Power BI: `'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Not`) [dax_battery_misc3_extra]
-- `CONCATENATEX(ADDCOLUMNS(TABLEOF(Facts[Sales]),"k",1),Facts[Sales],",")` (Power BI: `,-1.5,0,2.5,10.5,20`) [dax_battery_misc3_extra]
 - `SUMX(Facts,IF.EAGER(Facts[Sales]>1,NOT(TRUE()),TODAY()-TODAY()+DATE(2020,2,2))+1)` (Power BI: `04/16/2260 00:00:00`) [dax_battery_misc3_extra]
 - `XNPV(ADDCOLUMNS(DATATABLE("v",DOUBLE,"n",INTEGER,{{-1000,0},{300,365},{400,730},{500,1095}}),"d",DATE(2020,1,1)+[n]),CURRENCY([v]),IF([n]=365,-1/0,[d]),1E308)` (Power BI: `0`) [dax_battery_misc3_extra]
 - `XNPV(ADDCOLUMNS(DATATABLE("v",DOUBLE,"n",INTEGER,{{-1000,0},{300,365},{400,730},{500,1095}}),"d",DATE(2020,1,1)+[n]),CURRENCY([v])/3,IF([n]=365,-1/0,[d]),5)` (Power BI: `0`) [dax_battery_misc3_extra]
@@ -3404,23 +3361,9 @@ North`) [dax_battery_logic4_extra]
 - `TOCSV(VAR r="West" RETURN FILTER(VALUES(Facts[Region]),Facts[Region]<>r))` (Power BI: `'Facts'[Region]
 East
 North`) [dax_battery_logic4_extra]
-- `LEN(TOJSON(VAR t=FILTER(Facts,Facts[Quantity]>2) RETURN t))` (Power BI: `203`) [dax_battery_logic4_extra]
-- `LEN(TOJSON(VAR t=Facts RETURN t))` (Power BI: `289`) [dax_battery_logic4_extra]
 - `LEN(TOJSON(VAR t=TOPN(2,Facts,Facts[Quantity],DESC,Facts[Sales],ASC,Facts[Region],ASC) RETURN t))` (Power BI: `176`) [dax_battery_logic4_extra]
-- `LEN(TOJSON(VAR t=ALL(Facts) RETURN t))` (Power BI: `289`) [dax_battery_logic4_extra]
 - `LEN(TOJSON(VAR t=ADDCOLUMNS(Facts,"q",Facts[Quantity]*2) RETURN t))` (Power BI: `315`) [dax_battery_logic4_extra]
-- `LEN(TOJSON(VAR a=1 VAR t=FILTER(Facts,Facts[Quantity]>a) RETURN t))` (Power BI: `232`) [dax_battery_logic4_extra]
-- `LEN(TOJSON(VAR t=FILTER(Facts,Facts[Quantity]>2) VAR u=t RETURN u))` (Power BI: `203`) [dax_battery_logic4_extra]
-- `LEN(TOJSON(VAR t=FILTER(Facts,Facts[Quantity]>2) RETURN FILTER(t,Facts[Region]<>"West")))` (Power BI: `176`) [dax_battery_logic4_extra]
 - `LEN(TOJSON(VAR n=2 RETURN TOPN(n,Facts,Facts[Quantity],DESC,Facts[Sales],ASC,Facts[Region],ASC)))` (Power BI: `176`) [dax_battery_logic4_extra]
-- `LEN(TOJSON(VAR t=Facts RETURN CALCULATETABLE(t,Facts[Region]="West")))` (Power BI: `289`) [dax_battery_logic4_extra]
-- `LEN(TOJSON(VAR a=2 RETURN FILTER(Facts,Facts[Quantity]>a)))` (Power BI: `203`) [dax_battery_logic4_extra]
-- `LEN(TOJSON(VAR t=CALCULATETABLE(Facts,Facts[Region]="West") RETURN t))` (Power BI: `175`) [dax_battery_logic4_extra]
-- `LEN(TOJSON(VAR t=VALUES(Facts[Region]) RETURN t))` (Power BI: `101`) [dax_battery_logic4_extra]
-- `LEN(TOJSON(VAR t=SUMMARIZE(Facts,Facts[Region]) RETURN t))` (Power BI: `101`) [dax_battery_logic4_extra]
-- `LEN(TOJSON(VAR t=DISTINCT(Facts[Quantity]) RETURN t))` (Power BI: `108`) [dax_battery_logic4_extra]
-- `LEN(TOJSON(VAR t=ALL(Facts[Region]) RETURN t))` (Power BI: `101`) [dax_battery_logic4_extra]
-- `LEN(TOJSON(VAR r="West" RETURN FILTER(VALUES(Facts[Region]),Facts[Region]<>r)))` (Power BI: `89`) [dax_battery_logic4_extra]
 - `COUNTROWS(LINESTX(VAR t=TOPN(2,Facts,Facts[Quantity],DESC,Facts[Sales],ASC,Facts[Region],ASC) RETURN t,Facts[Quantity],Facts[Sales]))` (Power BI: `1`) [dax_battery_logic4_extra]
 - `COUNTROWS(LINESTX(VAR t=FILTER(Facts,Facts[Quantity]>2) RETURN FILTER(t,Facts[Region]<>"West"),Facts[Quantity],Facts[Sales]))` (Power BI: `1`) [dax_battery_logic4_extra]
 - `COUNTROWS(LINESTX(VAR n=2 RETURN TOPN(n,Facts,Facts[Quantity],DESC,Facts[Sales],ASC,Facts[Region],ASC),Facts[Quantity],Facts[Sales]))` (Power BI: `1`) [dax_battery_logic4_extra]
@@ -8583,6 +8526,148 @@ North`) [dax_battery_logic4_extra]
 - `ISTEXT(VAR v=SQRT(-1) RETURN v)` (Power BI: `False`) [dax_battery_typeerr31_extra]
 - `ISTEXT(VAR v=TIME("h",1,1) RETURN v+1)` (Power BI: `False`) [dax_battery_typeerr31_extra]
 - `ISTEXT(VAR v=WEEKDAY("w") RETURN v)` (Power BI: `False`) [dax_battery_typeerr31_extra]
+- `CONCATENATEX(ADDCOLUMNS(FILTER(TABLEOF(Facts[Note]),NOT(ISBLANK(Facts[Note]))),"k",Facts[Quantity]),Facts[Note],",")` (Power BI: `Paid,Paid,Paid,Late`) [dax_battery_roworder32_extra]
+- `CONCATENATEX(ADDCOLUMNS(FILTER(TABLEOF(Facts[Note]),NOT(ISBLANK(Facts[Note]))),"k",Facts[Quantity]),Facts[Note],"|")` (Power BI: `Paid|Paid|Paid|Late`) [dax_battery_roworder32_extra]
+- `CONCATENATEX(ADDCOLUMNS(FILTER(TABLEOF(Facts[Quantity]),Facts[Quantity]>1),"k",Facts[Quantity]),Facts[Quantity],",")` (Power BI: `2,3,4,5`) [dax_battery_roworder32_extra]
+- `CONCATENATEX(ADDCOLUMNS(FILTER(TABLEOF(Facts[Quantity]),Facts[Quantity]>1),"k",Facts[Quantity]),Facts[Quantity],"|")` (Power BI: `2|3|4|5`) [dax_battery_roworder32_extra]
+- `CONCATENATEX(ADDCOLUMNS(FILTER(TABLEOF(Facts[Region]),Facts[Region]<>"West"),"k",Facts[Quantity]),Facts[Region],",")` (Power BI: `East,East,East,North`) [dax_battery_roworder32_extra]
+- `CONCATENATEX(ADDCOLUMNS(FILTER(TABLEOF(Facts[Region]),Facts[Region]<>"West"),"k",Facts[Quantity]),Facts[Region],"|")` (Power BI: `East|East|East|North`) [dax_battery_roworder32_extra]
+- `CONCATENATEX(ADDCOLUMNS(FILTER(TABLEOF(Facts[Sales]),Facts[Sales]>0),"k",Facts[Quantity]),Facts[Sales],",")` (Power BI: `10.5,20,2.5`) [dax_battery_roworder32_extra]
+- `CONCATENATEX(ADDCOLUMNS(FILTER(TABLEOF(Facts[Sales]),Facts[Sales]>0),"k",Facts[Quantity]),Facts[Sales],"|")` (Power BI: `10.5|20|2.5`) [dax_battery_roworder32_extra]
+- `CONCATENATEX(FILTER(TOPN(4,TABLEOF(Facts[Note]),Facts[Note]),NOT(ISBLANK(Facts[Note]))),Facts[Note],",")` (Power BI: `Late,Paid,Paid,Paid`) [dax_battery_roworder32_extra]
+- `CONCATENATEX(FILTER(TOPN(4,TABLEOF(Facts[Note]),Facts[Note]),NOT(ISBLANK(Facts[Note]))),Facts[Note],"|")` (Power BI: `Late|Paid|Paid|Paid`) [dax_battery_roworder32_extra]
+- `CONCATENATEX(FILTER(TOPN(4,TABLEOF(Facts[Quantity]),Facts[Quantity]),Facts[Quantity]>1),Facts[Quantity],",")` (Power BI: `2,3,5,4`) [dax_battery_roworder32_extra]
+- `CONCATENATEX(FILTER(TOPN(4,TABLEOF(Facts[Quantity]),Facts[Quantity]),Facts[Quantity]>1),Facts[Quantity],"|")` (Power BI: `2|3|5|4`) [dax_battery_roworder32_extra]
+- `CONCATENATEX(FILTER(TOPN(4,TABLEOF(Facts[Region]),Facts[Region]),Facts[Region]<>"West"),Facts[Region],",")` (Power BI: `East,East,East,North`) [dax_battery_roworder32_extra]
+- `CONCATENATEX(FILTER(TOPN(4,TABLEOF(Facts[Region]),Facts[Region]),Facts[Region]<>"West"),Facts[Region],"|")` (Power BI: `East|East|East|North`) [dax_battery_roworder32_extra]
+- `CONCATENATEX(FILTER(TOPN(4,TABLEOF(Facts[Sales]),Facts[Sales]),Facts[Sales]>0),Facts[Sales],",")` (Power BI: `2.5,20,10.5`) [dax_battery_roworder32_extra]
+- `CONCATENATEX(FILTER(TOPN(4,TABLEOF(Facts[Sales]),Facts[Sales]),Facts[Sales]>0),Facts[Sales],"|")` (Power BI: `2.5|20|10.5`) [dax_battery_roworder32_extra]
+- `CONCATENATEX(TOPN(3,TABLEOF(Facts[Note]),Facts[Quantity]),Facts[Note],",")` (Power BI: `,,Late`) [dax_battery_roworder32_extra]
+- `CONCATENATEX(TOPN(3,TABLEOF(Facts[Note]),Facts[Quantity]),Facts[Note],"|")` (Power BI: `||Late`) [dax_battery_roworder32_extra]
+- `CONCATENATEX(TOPN(3,TABLEOF(Facts[Region]),Facts[Quantity]),Facts[Region],",")` (Power BI: `West,North,East`) [dax_battery_roworder32_extra]
+- `CONCATENATEX(TOPN(3,TABLEOF(Facts[Region]),Facts[Quantity]),Facts[Region],"|")` (Power BI: `West|North|East`) [dax_battery_roworder32_extra]
+- `CONCATENATEX(TOPN(3,TABLEOF(Facts[Sales]),Facts[Quantity]),Facts[Sales],",")` (Power BI: `20,2.5,`) [dax_battery_roworder32_extra]
+- `CONCATENATEX(TOPN(3,TABLEOF(Facts[Sales]),Facts[Quantity]),Facts[Sales],"|")` (Power BI: `20|2.5|`) [dax_battery_roworder32_extra]
+- `TOJSON(VAR n=1 RETURN FILTER(ALL(Facts[Region],Facts[Note]),Facts[Region]<>"x"))` (Power BI: `{
+	"header": ["'Facts'[Region]", "'Facts'[Note]"],
+	"rowCoun`) [dax_battery_roworder32_extra]
+- `TOJSON(VAR n=1 RETURN FILTER(ALL(Facts[Region],Facts[Note]),Facts[Region]<>"x"),10)` (Power BI: `{
+	"header": ["'Facts'[Region]", "'Facts'[Note]"],
+	"rowCoun`) [dax_battery_roworder32_extra]
+- `TOJSON(VAR n=1 RETURN FILTER(ALL(Facts[Region],Facts[Note]),Facts[Region]<>"x"),3)` (Power BI: `{
+	"header": ["'Facts'[Region]", "'Facts'[Note]"],
+	"rowCoun`) [dax_battery_roworder32_extra]
+- `TOJSON(VAR n=1 RETURN SELECTCOLUMNS(Facts,"r",Facts[Region]))` (Power BI: `{
+	"header": ["[r]"],
+	"rowCount": 6,
+	"data": [
+		["East"],`) [dax_battery_roworder32_extra]
+- `TOJSON(VAR n=1 RETURN SELECTCOLUMNS(Facts,"r",Facts[Region]),10)` (Power BI: `{
+	"header": ["[r]"],
+	"rowCount": 6,
+	"data": [
+		["East"],`) [dax_battery_roworder32_extra]
+- `TOJSON(VAR n=1 RETURN SELECTCOLUMNS(Facts,"r",Facts[Region]),3)` (Power BI: `{
+	"header": ["[r]"],
+	"rowCount": 6,
+	"data": [
+		["East"],`) [dax_battery_roworder32_extra]
+- `TOJSON(VAR n=1 RETURN TOPN(3,Facts,Facts[Sales]))` (Power BI: `{
+	"header": ["'Facts'[Sales]", "'Facts'[Quantity]", "'Facts`) [dax_battery_roworder32_extra]
+- `TOJSON(VAR n=1 RETURN TOPN(3,Facts,Facts[Sales]),10)` (Power BI: `{
+	"header": ["'Facts'[Sales]", "'Facts'[Quantity]", "'Facts`) [dax_battery_roworder32_extra]
+- `TOJSON(VAR n=1 RETURN TOPN(3,Facts,Facts[Sales]),3)` (Power BI: `{
+	"header": ["'Facts'[Sales]", "'Facts'[Quantity]", "'Facts`) [dax_battery_roworder32_extra]
+- `TOJSON(VAR t=FILTER(ALL(Facts[Region],Facts[Note]),Facts[Region]<>"x") RETURN FILTER(t,TRUE()))` (Power BI: `{
+	"header": ["'Facts'[Region]", "'Facts'[Note]"],
+	"rowCoun`) [dax_battery_roworder32_extra]
+- `TOJSON(VAR t=FILTER(ALL(Facts[Region],Facts[Note]),Facts[Region]<>"x") RETURN FILTER(t,TRUE()),10)` (Power BI: `{
+	"header": ["'Facts'[Region]", "'Facts'[Note]"],
+	"rowCoun`) [dax_battery_roworder32_extra]
+- `TOJSON(VAR t=FILTER(ALL(Facts[Region],Facts[Note]),Facts[Region]<>"x") RETURN FILTER(t,TRUE()),3)` (Power BI: `{
+	"header": ["'Facts'[Region]", "'Facts'[Note]"],
+	"rowCoun`) [dax_battery_roworder32_extra]
+- `TOJSON(VAR t=FILTER(ALL(Facts[Region],Facts[Note]),Facts[Region]<>"x") RETURN t)` (Power BI: `{
+	"header": ["'Facts'[Region]", "'Facts'[Note]"],
+	"rowCoun`) [dax_battery_roworder32_extra]
+- `TOJSON(VAR t=FILTER(ALL(Facts[Region],Facts[Note]),Facts[Region]<>"x") RETURN t,10)` (Power BI: `{
+	"header": ["'Facts'[Region]", "'Facts'[Note]"],
+	"rowCoun`) [dax_battery_roworder32_extra]
+- `TOJSON(VAR t=FILTER(ALL(Facts[Region],Facts[Note]),Facts[Region]<>"x") RETURN t,3)` (Power BI: `{
+	"header": ["'Facts'[Region]", "'Facts'[Note]"],
+	"rowCoun`) [dax_battery_roworder32_extra]
+- `TOJSON(VAR t=FILTER(ALL(Facts[Region],Facts[Note]),Facts[Region]<>"x") VAR u=t RETURN u)` (Power BI: `{
+	"header": ["'Facts'[Region]", "'Facts'[Note]"],
+	"rowCoun`) [dax_battery_roworder32_extra]
+- `TOJSON(VAR t=FILTER(ALL(Facts[Region],Facts[Note]),Facts[Region]<>"x") VAR u=t RETURN u,10)` (Power BI: `{
+	"header": ["'Facts'[Region]", "'Facts'[Note]"],
+	"rowCoun`) [dax_battery_roworder32_extra]
+- `TOJSON(VAR t=FILTER(ALL(Facts[Region],Facts[Note]),Facts[Region]<>"x") VAR u=t RETURN u,3)` (Power BI: `{
+	"header": ["'Facts'[Region]", "'Facts'[Note]"],
+	"rowCoun`) [dax_battery_roworder32_extra]
+- `TOJSON(VAR t=SELECTCOLUMNS(Facts,"r",Facts[Region]) RETURN FILTER(t,TRUE()))` (Power BI: `{
+	"header": ["[r]"],
+	"rowCount": 6,
+	"data": [
+		["East"],`) [dax_battery_roworder32_extra]
+- `TOJSON(VAR t=SELECTCOLUMNS(Facts,"r",Facts[Region]) RETURN FILTER(t,TRUE()),10)` (Power BI: `{
+	"header": ["[r]"],
+	"rowCount": 6,
+	"data": [
+		["East"],`) [dax_battery_roworder32_extra]
+- `TOJSON(VAR t=SELECTCOLUMNS(Facts,"r",Facts[Region]) RETURN FILTER(t,TRUE()),3)` (Power BI: `{
+	"header": ["[r]"],
+	"rowCount": 6,
+	"data": [
+		["East"],`) [dax_battery_roworder32_extra]
+- `TOJSON(VAR t=SELECTCOLUMNS(Facts,"r",Facts[Region]) RETURN t)` (Power BI: `{
+	"header": ["[r]"],
+	"rowCount": 6,
+	"data": [
+		["East"],`) [dax_battery_roworder32_extra]
+- `TOJSON(VAR t=SELECTCOLUMNS(Facts,"r",Facts[Region]) RETURN t,10)` (Power BI: `{
+	"header": ["[r]"],
+	"rowCount": 6,
+	"data": [
+		["East"],`) [dax_battery_roworder32_extra]
+- `TOJSON(VAR t=SELECTCOLUMNS(Facts,"r",Facts[Region]) RETURN t,3)` (Power BI: `{
+	"header": ["[r]"],
+	"rowCount": 6,
+	"data": [
+		["East"],`) [dax_battery_roworder32_extra]
+- `TOJSON(VAR t=SELECTCOLUMNS(Facts,"r",Facts[Region]) VAR u=t RETURN u)` (Power BI: `{
+	"header": ["[r]"],
+	"rowCount": 6,
+	"data": [
+		["East"],`) [dax_battery_roworder32_extra]
+- `TOJSON(VAR t=SELECTCOLUMNS(Facts,"r",Facts[Region]) VAR u=t RETURN u,10)` (Power BI: `{
+	"header": ["[r]"],
+	"rowCount": 6,
+	"data": [
+		["East"],`) [dax_battery_roworder32_extra]
+- `TOJSON(VAR t=SELECTCOLUMNS(Facts,"r",Facts[Region]) VAR u=t RETURN u,3)` (Power BI: `{
+	"header": ["[r]"],
+	"rowCount": 6,
+	"data": [
+		["East"],`) [dax_battery_roworder32_extra]
+- `TOJSON(VAR t=TOPN(3,Facts,Facts[Sales]) RETURN FILTER(t,TRUE()))` (Power BI: `{
+	"header": ["'Facts'[Sales]", "'Facts'[Quantity]", "'Facts`) [dax_battery_roworder32_extra]
+- `TOJSON(VAR t=TOPN(3,Facts,Facts[Sales]) RETURN FILTER(t,TRUE()),10)` (Power BI: `{
+	"header": ["'Facts'[Sales]", "'Facts'[Quantity]", "'Facts`) [dax_battery_roworder32_extra]
+- `TOJSON(VAR t=TOPN(3,Facts,Facts[Sales]) RETURN FILTER(t,TRUE()),3)` (Power BI: `{
+	"header": ["'Facts'[Sales]", "'Facts'[Quantity]", "'Facts`) [dax_battery_roworder32_extra]
+- `TOJSON(VAR t=TOPN(3,Facts,Facts[Sales]) RETURN t)` (Power BI: `{
+	"header": ["'Facts'[Sales]", "'Facts'[Quantity]", "'Facts`) [dax_battery_roworder32_extra]
+- `TOJSON(VAR t=TOPN(3,Facts,Facts[Sales]) RETURN t,10)` (Power BI: `{
+	"header": ["'Facts'[Sales]", "'Facts'[Quantity]", "'Facts`) [dax_battery_roworder32_extra]
+- `TOJSON(VAR t=TOPN(3,Facts,Facts[Sales]) RETURN t,3)` (Power BI: `{
+	"header": ["'Facts'[Sales]", "'Facts'[Quantity]", "'Facts`) [dax_battery_roworder32_extra]
+- `TOJSON(VAR t=TOPN(3,Facts,Facts[Sales]) VAR u=t RETURN u)` (Power BI: `{
+	"header": ["'Facts'[Sales]", "'Facts'[Quantity]", "'Facts`) [dax_battery_roworder32_extra]
+- `TOJSON(VAR t=TOPN(3,Facts,Facts[Sales]) VAR u=t RETURN u,10)` (Power BI: `{
+	"header": ["'Facts'[Sales]", "'Facts'[Quantity]", "'Facts`) [dax_battery_roworder32_extra]
+- `TOJSON(VAR t=TOPN(3,Facts,Facts[Sales]) VAR u=t RETURN u,3)` (Power BI: `{
+	"header": ["'Facts'[Sales]", "'Facts'[Quantity]", "'Facts`) [dax_battery_roworder32_extra]
 
 ## Known deviations from Power BI (14): imprecise or unspecified in Power BI, each explained
 
