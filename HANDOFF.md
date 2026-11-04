@@ -2,9 +2,9 @@
 
 Rules and roles are in `AGENTS.md`. Read it first. Keep this file short and current.
 
-**Active agent:** Claude Opus 5.5 reviews Task 42 row-order-32 next (Antigravity finished Tasks 42-45, each waits for review in its own worktree); Antigravity idle
-**Branch in use:** antigravity/row-order-32, antigravity/mixed-bodies-tables-33, antigravity/count-text-compare-34, antigravity/xnpv-blank-swi-35 (worktrees `Power BI tool-task42` to `-task45`)
-**Working tree clean:** main yes; Task 42-45 worktrees have Antigravity's uncommitted work
+**Active agent:** Claude Opus 5.5 ships Task 43 next; Sonnet fixes Task 44 review findings; Antigravity fixes Task 45 review findings (in its worktree)
+**Branch in use:** antigravity/mixed-bodies-tables-33, antigravity/count-text-compare-34, antigravity/xnpv-blank-swi-35 (worktrees `Power BI tool-task43` to `-task45`)
+**Working tree clean:** main yes; Task 43-45 worktrees have uncommitted review work
 
 ## Status values
 `PLANNED` > `BUILDING` > `READY FOR REVIEW` > `REVIEWING` > `FIXING` > `GATE PASSED` > `DONE`
@@ -54,7 +54,7 @@ Rules and roles are in `AGENTS.md`. Read it first. Keep this file short and curr
 | 39 | nan-inf-iterators-29: Infinity and NaN inside statistical iterators (652 saved answers the engine refuses) | `docs/plans/2026-11-03-nan-inf-iterators-29.md` | DONE (coded by Antigravity, fixed by Sonnet 5.5, reviewed, locked 457,448, merged 2026-11-03) | Claude |
 | 40 | date-stats-30: dates inside statistical iterators (376 saved answers the engine refuses) | `docs/plans/2026-11-03-date-stats-30.md` | DONE (coded by Antigravity, fixed by Sonnet 5.5, reviewed, locked 459,999, merged 2026-11-03) | Claude |
 | 41 | type-tests-errors-31: type tests and errors Power BI does not raise (893 saved answers the engine refuses) | `docs/plans/2026-11-03-type-tests-errors-31.md` | DONE (coded by Antigravity, fixed by Sonnet 5.5, reviewed, locked 462,852, merged 2026-11-04) | Claude |
-| 42 | row-order-32: the row order of tables (640 saved answers the engine refuses) | `docs/plans/2026-11-03-row-order-32.md` | READY FOR REVIEW (Antigravity finished; Opus reviews next) | Claude |
+| 42 | row-order-32: the row order of tables (640 saved answers the engine refuses) | `docs/plans/2026-11-03-row-order-32.md` | DONE (coded by Antigravity, fixed by Sonnet 5.5, reviewed, locked 463,719, merged 2026-11-04) | Claude |
 
 ## Current task
 Task 33 xirr-oddfyield-23, on branch `antigravity/xirr-oddfyield-23` in the worktree `/Users/armaan/Power BI tool-task33`.
