@@ -305,9 +305,11 @@ class PartETextDatesTests(unittest.TestCase):
                 self.assertIn(f"Cannot convert value '{shown}' of type Text to type Date.", _local(expression))
 
     def test_convert_datetime_of_unreadable_text_is_refused(self) -> None:
-        for expression in ('CONVERT("1,000",DATETIME)', 'CONVERT("1 1/2",DATETIME)', '"1 1/2"+0'):
+        # Task 44 (2026-11-04): these were refusals; the engine now reads them, and the answers are the saved live Power BI
+        # answers in dax_battery_convert9_extra and task19_convert_currency_spec, so they must match those answers
+        for expression, shown in (('CONVERT("1,000",DATETIME)', "01/01/2000 00:00:00"), ('CONVERT("1 1/2",DATETIME)', "01/01/2002 00:00:00"), ('"1 1/2"+0', "37257")):
             with self.subTest(expression):
-                self.assertIn("does not model", _local(expression), _local(expression))
+                self.assertTrue(dax.same(shown, _local(expression)), _local(expression))
 
 
 class PartFLogicalOperatorNeverBlankTests(unittest.TestCase):
