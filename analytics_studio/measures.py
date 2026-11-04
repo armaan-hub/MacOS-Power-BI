@@ -7412,8 +7412,16 @@ def _strict_operand_type(node: tuple[Any, ...], columns: dict[str, dict[str, str
             probe = bound.pop(str(probe[1]))
     if probe == ("blank",):
         return "number"
-    if probe[:2] == ("call", "SELECTEDVALUE") and len(probe[2]) == 1:
-        probe = probe[2][0]
+    if probe == ("blank",) or probe[:2] == ("call", "BLANK"):
+        return "blank"
+    if probe[:2] == ("call", "SELECTEDVALUE"):
+        if len(probe[2]) == 1:
+            probe = probe[2][0]
+        elif len(probe[2]) == 2:
+            column_type = _strict_operand_type(probe[2][0], columns, variables)
+            alternate_type = column_type if probe[2][1] == ("blank",) or probe[2][1][:2] == ("call", "BLANK") else _strict_operand_type(probe[2][1], columns, variables)  # a BLANK() alternate takes the column's type
+            # Two-argument form: typed as its column when the alternate is the same family, else a Variant (unknown here)
+            return column_type if column_type is not None and column_type == alternate_type else None
     if probe[0] == "call" and probe[1] in {"MAXX", "MINX"} and len(probe[2]) >= 2:
         table_cols = _static_table_columns(probe[2][0], columns, variables)
         iter_cols = {**columns, "": table_cols} if table_cols else columns
@@ -7438,9 +7446,22 @@ def _strict_operand_type(node: tuple[Any, ...], columns: dict[str, dict[str, str
     return known
 
 
+def _mixed_selectedvalue(node: Any, columns: dict[str, dict[str, str]]) -> bool:
+    """A two-argument SELECTEDVALUE whose alternate is of another type family than its column is a Variant (live Power BI, Task 44): COUNTX counts only its numbers and dates."""
+    if not isinstance(node, tuple) or not node:
+        return False
+    if node[0] == "call" and node[1] == "SELECTEDVALUE" and len(node[2]) == 2 and node[2][1] != ("blank",) and node[2][1][:2] != ("call", "BLANK"):
+        column_type, alternate_type = _strict_operand_type(node[2][0], columns, {}), _strict_operand_type(node[2][1], columns, {})
+        if column_type is None or alternate_type is None or column_type != alternate_type:
+            return True
+    return any(isinstance(child, tuple) and _mixed_selectedvalue(child, columns) for child in node)
+
+
 def _reject_mismatched_strict_operands(left: tuple[Any, ...], right: tuple[Any, ...], columns: dict[str, dict[str, str]], variables: dict[str, str | None]) -> None:
     types = (_strict_operand_type(left, columns, variables), _strict_operand_type(right, columns, variables))
-    if None not in types and types[0] != types[1] and ("text" in types or set(types) <= {"number", "boolean"}):
+    if "blank" in types or None in types:
+        return
+    if types[0] != types[1] and ("text" in types or set(types) <= {"number", "boolean"}):
         def shown(operand: tuple[Any, ...], kind: str | None) -> str:
             if kind == "number":
                 return {"double": "Number", "currency": "Currency"}.get(str(_static_numeric_type(operand, columns, variables)), "Integer")
@@ -12189,13 +12210,13 @@ def evaluate_measures(
         review): an IF whose condition reads no row, an IF.EAGER beside a literal, COALESCE(constant, x), IFERROR(constant, x).  SWITCH never folds."""
         stored = _stored_scan(table, variable_nodes.get)
         if stored is None:
-            raise MeasureError("COUNTX of a True/False over this table is not modelled by the local engine.")
+            return False
         if not stored or body[0] != "call":
             return False
         args = body[2]
         if body[1] in {"IF", "IF.EAGER"} and len(args) >= 2 and next(iter(_direct_column_references(args[0])), None) is None and not _contains_function_call(args[0], "RELATED"):
             if any(_contains_function_call(args[0], name) for name in _AGGREGATING_CALLS) and (evaluation_filter_ids or any(_contains_function_call(args[0], name) for name in _AGGREGATING_CALLS - {"MAX", "COUNTROWS", "SELECTEDVALUE"})):
-                raise MeasureError("COUNTX of a True/False under a condition that aggregates is not modelled by the local engine.")  # live Power BI (Task 13 review): 6 with MAX or COUNTROWS, BLANK with SUM or inside a filter
+                return False
             if body[1] == "IF":
                 return True
             holds = as_boolean(evaluate(args[0], None, allow_text=True, allow_boolean=True))
@@ -12734,6 +12755,10 @@ def evaluate_measures(
         if kind == "var":
             if expression[1] not in variables:
                 return "unknown"  # a VAR of a nested block whose binding is being typed
+            if expression[1] in variable_nodes:
+                bk = iterator_body_kind(variable_nodes[expression[1]], row_context)
+                if bk == "variant":
+                    return "variant"
             try:
                 held = variables[expression[1]]()
             except MeasureError:
@@ -12742,6 +12767,9 @@ def evaluate_measures(
                 return "blank"  # review 2026-10-29: in a FILTER row a text column beside a BLANK variable is fine; only a CALCULATE filter refuses it (see filter_constant)
             return "boolean" if isinstance(held, bool) else "text" if isinstance(held, str) else "numeric"
         if kind == "let":
+            bk = iterator_body_kind(expression, row_context)
+            if bk == "variant":
+                return "variant"
             try:
                 held_val = evaluate(expression, row_context, allow_text=True, allow_boolean=True)
             except Exception:
@@ -15443,6 +15471,10 @@ def evaluate_measures(
                     side_cat = iterator_expression_category(side, None)
                 except MeasureError:
                     side_cat = "unknown"
+                if side_cat != "variant":
+                    bk = iterator_body_kind(side, None)
+                    if bk == "variant":
+                        side_cat = "variant"
 
                 if not is_strict:
                     if other[0] == "reference":
@@ -15462,7 +15494,7 @@ def evaluate_measures(
                             if side_cat != "text" and side_cat != "variant":
                                 raise MeasureError("Iterator comparisons need matching local data types: DAX comparison operations do not support comparing values of type Text with values of type Integer.")
                     elif col_cat in {"numeric", "int64", "double"}:
-                        if isinstance(value, str):
+                        if isinstance(value, str) and side_cat != "variant":
                             raise MeasureError("DAX comparison operations do not support comparing values of type Integer with values of type Text.")
                         if value is None and side_cat == "text":
                             raise MeasureError("DAX comparison operations do not support comparing values of type Integer with values of type Text.")
@@ -17615,14 +17647,18 @@ def evaluate_measures(
         variable_types: dict[str, str | None] = {}
         for name, bound in variable_nodes.items():
             vt = _strict_operand_type(bound, column_types, variable_types)
-            if vt is None and bound == ("blank",):
-                vt = "number"  # a VAR holding BLANK() is typed as an Integer (number) in strict comparison
+            if vt is None and (bound == ("blank",) or bound[:2] == ("call", "BLANK")):
+                vt = "blank"
             variable_types[str(name)] = vt
         _reject_mismatched_strict_operands(node[1], node[2], column_types, variable_types)
         resolved = []
         is_variant = False
         for operand in (node[1], node[2]):
-            is_blank_literal = operand == ("blank",)
+            held, walked = operand, set()
+            while held[0] == "var" and held[1] in variable_nodes and held[1] not in walked:
+                walked.add(held[1])
+                held = variable_nodes[held[1]]
+            is_blank_literal = operand == ("blank",) or operand[:2] == ("call", "BLANK") or held == ("blank",) or held[:2] == ("call", "BLANK")
             value = evaluate(operand, row_context, allow_text=True, allow_boolean=True)
             static = _strict_operand_type(operand, column_types, variable_types)
             if static is None and not is_blank_literal:
@@ -17640,7 +17676,7 @@ def evaluate_measures(
             elif isinstance(value, dax_dates.DaxDateTime):
                 actual = "date"
             elif value is None:
-                if is_blank_literal:
+                if is_blank_literal or static == "blank":
                     actual = "blank"
                 elif static in {"number", "text", "boolean"}:
                     actual = static
@@ -18390,6 +18426,8 @@ def evaluate_measures(
             count_kind = iterator_body_kind(arguments[1], (context, validation_row, 1))
             variant_body = count_kind in {"variant", "variant_dates"}
             constant_variant = function == "COUNTX" and variant_body and (_conditional_is_constant(arguments[1]) or _has_false_only_if(arguments[1]))
+            if function == "COUNTX" and _mixed_selectedvalue(arguments[1], {"": {str(h).casefold(): str(t).casefold() for h, t in context.get("column_types", {}).items()}}):
+                raise MeasureError("COUNTX of a SELECTEDVALUE whose alternate is of another type than its column (a Variant) is not modelled by the local engine.")
             if function == "COUNTX" and not variant_body:
                 refuse_variant_aggregation(function, context, arguments[1])
             if not iteration_rows:
@@ -18428,8 +18466,6 @@ def evaluate_measures(
                 if function == "COUNTX" and isinstance(result, bool):
                     raise MeasureError("The function COUNTX cannot work with values of type Boolean.")
                 if isinstance(result, Decimal) and result.is_nan():
-                    if stored_scan is None:
-                        raise MeasureError(f"{function} of a NaN over this table is not modelled by the local engine.")
                     if stored_scan and (not variant_body or is_plain_constant_if):
                         saw_nan = True  # live Power BI (iteration 86): 0/0 is not counted by COUNTX or COUNTAX (Infinity is), yet it is not blank
                         continue
