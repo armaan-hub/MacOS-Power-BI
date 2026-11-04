@@ -134,15 +134,23 @@ class TestIteration128CoalesceBigOrder28(unittest.TestCase):
             self.assertEqual(dax.local(expression), expected, expression)
 
     def test_part_b_inexact_power_beyond_2_53_is_refused(self) -> None:
-        # measured (third fresh set): Power BI's pow differs from the correctly rounded power by many ulps (INT(1.5^100) is ...215296, exact double ...215232),
-        # so a power of 2^53 or more whose exact value is not a double is refused, also inside a larger expression
-        for expression in (
-            'INT(POWER(1.5,98))&"z"', 'INT(1.5^100)&"z"', 'INT(2.5^45)&"z"', 'INT(13^17)&"z"',
-            'QUOTIENT(POWER(13,17)+3,2)&"z"', 'MROUND(1.5^98,5)&"z"', 'QUOTIENT(13^17*3,7)&"z"',
-            '(CONVERT(3^34+1,INTEGER))&"z"', 'INT(3^34+1)&"z"', 'MROUND(POWER(3,35),9)&"z"',
-            'FLOOR(1.5^100,1)&"z"', 'CEILING(1.5^100,1)&"z"',
+        # Task 46 (2026-11-04): a whole-number power is square-and-multiply in doubles like Power BI, so these are answered now;
+        # every value below is the live Power BI Desktop answer (saved batteries, and FLOOR/CEILING measured on 2026-11-04)
+        for expression, expected in (
+            ('INT(POWER(1.5,98))&"z"', '180693856682317856z'),
+            ('INT(1.5^100)&"z"', '406561177535215296z'),
+            ('INT(2.5^45)&"z"', '807793566946316160z'),
+            ('INT(13^17)&"z"', '8650415919381339136z'),
+            ('QUOTIENT(POWER(13,17)+3,2)&"z"', '4325207959690669568z'),
+            ('MROUND(1.5^98,5)&"z"', '180693856682317824z'),
+            ('QUOTIENT(13^17*3,7)&"z"', '3707321108306288128z'),
+            ('(CONVERT(3^34+1,INTEGER))&"z"', '16677181699666568z'),
+            ('INT(3^34+1)&"z"', '16677181699666568z'),
+            ('MROUND(POWER(3,35),9)&"z"', '50031545098999704z'),
+            ('FLOOR(1.5^100,1)&"z"', '406561177535214976z'),
+            ('CEILING(1.5^100,1)&"z"', '406561177535214976z'),
         ):
-            self.assertTrue(dax.local(expression).startswith("LOCAL-REJECT:"), expression)
+            self.assertEqual(dax.local(expression), expected, expression)
 
 
     def test_part_c_round_4_ceiling_tie_and_quotient_band(self) -> None:
