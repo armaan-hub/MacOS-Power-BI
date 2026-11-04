@@ -3464,16 +3464,11 @@ def _scalar_math_value(function: str, values: list[Decimal | None]) -> Decimal |
                         "An argument of function 'POWER' has the wrong data type or the result is too large or too small."
                     )
                 return -((-first) ** (Decimal(1) / Decimal(reciprocal)))  # the exact root: the exponent may be the binary double nearest 1/odd (Task 22)
-        if abs(exponent) > 1000:  # Power BI computes POWER in double precision; huge exponents amplify the difference
+        if abs(exponent) > 1000 or exponent == exponent.to_integral_value():  # Power BI computes a whole power by square-and-multiply in doubles at every magnitude (Task 46); other huge exponents amplify the difference
             overflow = MeasureRuntimeError("POWER result is outside the supported numeric range.")
             try:
                 if exponent == exponent.to_integral_value():
-                    result, square, count = 1.0, float(first), int(abs(exponent))
-                    while count:  # repeated squaring, as the engine does
-                        if count & 1:
-                            result *= square
-                        square *= square
-                        count >>= 1
+                    result = _power_by_squaring(float(first), int(abs(exponent)))
                     if exponent < 0:
                         if not result:  # the reciprocal of an underflowed power is infinite
                             raise overflow
@@ -3611,6 +3606,19 @@ def _power_is_exact(base: float, exponent: float, result: float) -> bool:
         return False
 
 
+def _power_by_squaring(base: float, exponent: int) -> float:
+    """base ^ exponent for a whole exponent >= 0 as Power BI computes it: square-and-multiply in IEEE doubles, the low bit of the exponent first, every product rounded
+    (Task 46, measured on 49 saved whole powers; this matches all 49, correctly rounded and C pow() match 36-39)."""
+    result = 1.0
+    square = base
+    while exponent:
+        if exponent & 1:
+            result *= square
+        square *= square
+        exponent >>= 1
+    return result
+
+
 def _double_arithmetic(node: Any, held: Callable[[str], Any], depth: int = 0) -> tuple[float, bool] | None:
     """The value of a constant expression of numbers, + - * / ^ and POWER computed in IEEE doubles, one rounding per operation, as Power BI does;
     returns (value, is_whole_number_literal_arithmetic) or None when the expression is anything else (a column, a function, text, a division by zero)."""
@@ -3639,11 +3647,11 @@ def _double_arithmetic(node: Any, held: Callable[[str], Any], depth: int = 0) ->
             return None
         a, b = left[0], right[0]
         if operator == "^":
-            if a == int(a) and b == int(b) and 0 <= b <= 1100 and abs(a) <= 1e15:
-                result = float(int(a) ** int(b))  # a whole power is the correctly rounded double (3^34 is ...568 though the C library's pow gives ...570)
+            if b == int(b) and 0 <= b <= 1100 and math.isfinite(a):
+                result = _power_by_squaring(a, int(b))  # Task 46 (measured on 49 saved Power BI powers): a whole power is square-and-multiply in doubles (1.5^100, 13^17, 2.5^45 are not the correctly rounded double)
             else:
                 result = math.pow(a, b)
-            if result and abs(result) >= 2 ** 53 and not _power_is_exact(a, b, result):
+            if result and abs(result) >= 2 ** 53 and b != int(b) and not _power_is_exact(a, b, result):
                 raise _InexactPower()  # measured (Task 38 round 3): Power BI's own pow differs from the correctly rounded power by many ulps (INT(1.5^100), INT(13^17))
         elif operator == "/":
             result = a / b
@@ -17304,6 +17312,15 @@ def evaluate_measures(
             return "-0" if left_static_type(node, row_context) == "double" and node[0] != "reference" else Decimal(0)  # Part B: a Double minus zero is "-0" in text (a stored column value has no sign of zero)
         if isinstance(value, Decimal) and not isinstance(value, bool) and value.is_finite() and not dax_dates.is_date(value) and currency_typed(node, row_context):
             return dax_typed.currency_text(value)  # Part D: a Currency's text has its four decimals, not 15 significant digits
+        if isinstance(value, Decimal) and not isinstance(value, bool) and value.is_finite() and not dax_dates.is_date(value) and node[0] == "binary" and node[1] in {"+", "-", "*", "/"} and _contains_power(node, variable_nodes.get) and left_static_type(node, row_context) == "double":
+            # Task 46 (measured, 6 of 1,600 fresh powers): a sum, product or quotient that holds a power is the double of the whole expression, one rounding per operation
+            # (2^109*13 is 8.43748239511909E+33; the engine's Decimal product of the power's 17 shortest digits is 8.4374823951191E+33), shown at 15 significant digits
+            try:
+                computed = _double_arithmetic(node, variable_nodes.get)
+            except _InexactPower:
+                computed = None
+            if computed is not None and not computed[1]:
+                return dax_typed.to_text(Decimal(computed[0]), True)
         if not isinstance(value, Decimal) or isinstance(value, bool) or not value.is_finite() or abs(value) < dax_typed.DOUBLE_EXPONENT_FROM or dax_dates.is_date(value):
             return value
         return dax_typed.to_text(value, True) if left_static_type(node, row_context) == "double" else value

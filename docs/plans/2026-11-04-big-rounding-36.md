@@ -14,3 +14,10 @@ Compute, never look up (app code must never read `tools/parity/*.json` or test f
 
 ## Done when
 The scorer prints 0 wrong with as many matches as possible, `tools/parity_check.py` replay (no `--tests`) shows 0 DIFF and 0 CRASH, and a ready-for-review entry with scorer counts per Part and the replay line is in this plan.
+
+## Ready for review (Task 46, big-rounding-36, partial: the 1,112 power guard)
+- Change: `analytics_studio/measures.py` `_power_by_squaring` (square-and-multiply in doubles, low bit first) for whole exponents 0..1100 in `_double_arithmetic`; the "power beyond 2^53 not exactly a double" refusal now applies only to non-whole exponents.
+- Scorer (`tools/score_spec.py tools/parity/task46_big_rounding_spec.json`), before -> after: Part A 0 match / 513 refused -> 428 match / 85 refused; Part B 0 / 553 -> 458 / 95; Part C 0 / 233 -> 221 / 12. WRONG 0 throughout.
+- Still refused: the 1E15..2^53 rounding guard (146), the QUOTIENT 2^52..2^53 guard (23 to 28), the MROUND odd-product guard (11), and the 3 conversion-range items. A 15-digit-read quotient model was tried and did not fit (dropping the 1E15 guard gave 57 WRONG), so it stays refused.
+- Tests: `tests/test_iteration136_big_rounding_36.py` (4 tests); with test_iteration112, test_iteration135 and test_no_answer_key_in_app: 22 passed.
+- Replay (`PYTHONPATH=. QT_QPA_PLATFORM=offscreen python3 tools/parity_check.py`): replayed 474391 Power BI answers: match 469489, gap-reject 4902, DIFF 0, CRASH 0; locked 468717. PARITY GATE PASSED. (VAT and DSI workbooks missing in this worktree, not replayed.) PARITY_LEDGER.md restored with git checkout.
