@@ -20471,8 +20471,6 @@ def evaluate_measures(
             outer_reads_before = outer_row_reads[0]
             for inner in iterate_rows(context, iteration_rows, "clear"):
                 body_value = evaluate(arguments[1], inner, allow_text=True)
-                if isinstance(body_value, dax_dates.DaxDateTime) and body_value < 0 and body_value != body_value.to_integral_value():
-                    raise MeasureError("CONCATENATEX over date/time before December 30, 1899 is not supported in the local engine.")
                 if dax_dates.is_date(body_value) and body_value.is_finite() and body_value >= _XNPV_LAST_DAY:
                     # a date on the last day of the range or later: the one measured text of this kind (Task 38) is cut short by Power BI, as XNPV answers erratically there
                     raise MeasureError("A CONCATENATEX of dates on 9999-12-31 or later is not modelled by the local engine.")

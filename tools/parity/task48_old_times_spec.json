@@ -3,43 +3,43 @@
   {
    "part": "B",
    "expr": "CONCATENATEX(Facts,(-1)+(TIME(6,0,0)),\"|\",Facts[Quantity],ASC,Facts[Sales],ASC)",
-   "powerbi": "6:00:00 PM|6:00:00 PM|6:00:00 PM|6:00:00 PM|6:00:00 PM|6:00:",
+   "powerbi": "6:00:00 PM|6:00:00 PM|6:00:00 PM|6:00:00 PM|6:00:00 PM|6:00:00 PM",
    "now": "LOCAL-REJECT:CONCATENATEX over date/time before December #, # is not supported in the local engine."
   },
   {
    "part": "B",
    "expr": "CONCATENATEX(Facts,IFERROR((TIME(1,0,0))-(MAXX({DATE(2020,1,1)},[Value])),\"e\"),\"|\",Facts[Quantity],ASC,Facts[Sales],ASC)",
-   "powerbi": "12/29/1779 11:00:00 PM|12/29/1779 11:00:00 PM|12/29/1779 11:",
+   "powerbi": "12/29/1779 11:00:00 PM|12/29/1779 11:00:00 PM|12/29/1779 11:00:00 PM|12/29/1779 11:00:00 PM|12/29/1779 11:00:00 PM|12/29/1779 11:00:00 PM",
    "now": "LOCAL-REJECT:CONCATENATEX over date/time before December #, # is not supported in the local engine."
   },
   {
    "part": "B",
    "expr": "CONCATENATEX(Facts,(TIME(1,0,0))-(MAXX({DATE(2020,1,1)},[Value])),\"|\",Facts[Quantity],ASC,Facts[Sales],ASC)",
-   "powerbi": "12/29/1779 11:00:00 PM|12/29/1779 11:00:00 PM|12/29/1779 11:",
+   "powerbi": "12/29/1779 11:00:00 PM|12/29/1779 11:00:00 PM|12/29/1779 11:00:00 PM|12/29/1779 11:00:00 PM|12/29/1779 11:00:00 PM|12/29/1779 11:00:00 PM",
    "now": "LOCAL-REJECT:CONCATENATEX over date/time before December #, # is not supported in the local engine."
   },
   {
    "part": "B",
    "expr": "CONCATENATEX(Facts,(TIME(1,0,0)+1)-(DATE(2020,1,1)),\"|\",Facts[Quantity],ASC,Facts[Sales],ASC)",
-   "powerbi": "12/30/1779 11:00:00 PM|12/30/1779 11:00:00 PM|12/30/1779 11:",
+   "powerbi": "12/30/1779 11:00:00 PM|12/30/1779 11:00:00 PM|12/30/1779 11:00:00 PM|12/30/1779 11:00:00 PM|12/30/1779 11:00:00 PM|12/30/1779 11:00:00 PM",
    "now": "LOCAL-REJECT:CONCATENATEX over date/time before December #, # is not supported in the local engine."
   },
   {
    "part": "B",
    "expr": "CONCATENATEX(Facts,(TIME(1,0,0))-(MAXX(Facts,DATE(2020,1,1))),\"|\",Facts[Quantity],ASC,Facts[Sales],ASC)",
-   "powerbi": "12/29/1779 11:00:00 PM|12/29/1779 11:00:00 PM|12/29/1779 11:",
+   "powerbi": "12/29/1779 11:00:00 PM|12/29/1779 11:00:00 PM|12/29/1779 11:00:00 PM|12/29/1779 11:00:00 PM|12/29/1779 11:00:00 PM|12/29/1779 11:00:00 PM",
    "now": "LOCAL-REJECT:CONCATENATEX over date/time before December #, # is not supported in the local engine."
   },
   {
    "part": "B",
    "expr": "CONCATENATEX(Facts,CONVERT(Facts[Sales],DATETIME),\"|\",Facts[Quantity],ASC,Facts[Sales],ASC)",
-   "powerbi": "12:00:00 AM|12/29/1899 12:00:00 PM|1/9/1900 12:00:00 PM|1/19",
+   "powerbi": "12:00:00 AM|12/29/1899 12:00:00 PM|1/9/1900 12:00:00 PM|1/19/1900||1/1/1900 12:00:00 PM",
    "now": "LOCAL-REJECT:CONCATENATEX over date/time before December #, # is not supported in the local engine."
   },
   {
    "part": "B",
    "expr": "CONCATENATEX(ADDCOLUMNS(Facts,\"q\",CONVERT(Facts[Sales],DATETIME)),[q],\"|\",Facts[Quantity],ASC,Facts[Sales],ASC)",
-   "powerbi": "12:00:00 AM|12/29/1899 12:00:00 PM|1/9/1900 12:00:00 PM|1/19",
+   "powerbi": "12:00:00 AM|12/29/1899 12:00:00 PM|1/9/1900 12:00:00 PM|1/19/1900||1/1/1900 12:00:00 PM",
    "now": "LOCAL-REJECT:CONCATENATEX over date/time before December #, # is not supported in the local engine."
   },
   {
