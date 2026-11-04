@@ -1,0 +1,3474 @@
+{
+ "powerbi_version": "2.157.879.0 (26.08)+da30fe74eb0b8a8786ab7326b69c400a0e951831",
+ "frozen": "2026-11-04",
+ "items": [
+  {
+   "expr": "CONCATENATEX(ADDCOLUMNS(FILTER(TABLEOF(Facts[Note]),NOT(ISBLANK(Facts[Note]))),\"k\",Facts[Quantity]),Facts[Note],\",\")",
+   "powerbi": "Paid,Paid,Paid,Late"
+  },
+  {
+   "expr": "CONCATENATEX(ADDCOLUMNS(FILTER(TABLEOF(Facts[Note]),NOT(ISBLANK(Facts[Note]))),\"k\",Facts[Quantity]),Facts[Note],\",\",Facts[Note])",
+   "powerbi": "Late,Paid,Paid,Paid"
+  },
+  {
+   "expr": "CONCATENATEX(ADDCOLUMNS(FILTER(TABLEOF(Facts[Note]),NOT(ISBLANK(Facts[Note]))),\"k\",Facts[Quantity]),Facts[Note],\",\",Facts[Note],DESC)",
+   "powerbi": "Paid,Paid,Paid,Late"
+  },
+  {
+   "expr": "CONCATENATEX(ADDCOLUMNS(FILTER(TABLEOF(Facts[Note]),NOT(ISBLANK(Facts[Note]))),\"k\",Facts[Quantity]),Facts[Note],\"|\")",
+   "powerbi": "Paid|Paid|Paid|Late"
+  },
+  {
+   "expr": "CONCATENATEX(ADDCOLUMNS(FILTER(TABLEOF(Facts[Note]),NOT(ISBLANK(Facts[Note]))),\"k\",Facts[Quantity]),Facts[Note],\"|\",Facts[Note])",
+   "powerbi": "Late|Paid|Paid|Paid"
+  },
+  {
+   "expr": "CONCATENATEX(ADDCOLUMNS(FILTER(TABLEOF(Facts[Note]),NOT(ISBLANK(Facts[Note]))),\"k\",Facts[Quantity]),Facts[Note],\"|\",Facts[Note],DESC)",
+   "powerbi": "Paid|Paid|Paid|Late"
+  },
+  {
+   "expr": "CONCATENATEX(ADDCOLUMNS(FILTER(TABLEOF(Facts[Quantity]),Facts[Quantity]<4),\"k\",Facts[Quantity]),Facts[Quantity],\",\",Facts[Quantity])",
+   "powerbi": "0,1,2,3"
+  },
+  {
+   "expr": "CONCATENATEX(ADDCOLUMNS(FILTER(TABLEOF(Facts[Quantity]),Facts[Quantity]<4),\"k\",Facts[Quantity]),Facts[Quantity],\",\",Facts[Quantity],DESC)",
+   "powerbi": "3,2,1,0"
+  },
+  {
+   "expr": "CONCATENATEX(ADDCOLUMNS(FILTER(TABLEOF(Facts[Quantity]),Facts[Quantity]<4),\"k\",Facts[Quantity]),Facts[Quantity],\"|\",Facts[Quantity])",
+   "powerbi": "0|1|2|3"
+  },
+  {
+   "expr": "CONCATENATEX(ADDCOLUMNS(FILTER(TABLEOF(Facts[Quantity]),Facts[Quantity]<4),\"k\",Facts[Quantity]),Facts[Quantity],\"|\",Facts[Quantity],DESC)",
+   "powerbi": "3|2|1|0"
+  },
+  {
+   "expr": "CONCATENATEX(ADDCOLUMNS(FILTER(TABLEOF(Facts[Quantity]),Facts[Quantity]>1),\"k\",Facts[Quantity]),Facts[Quantity],\",\")",
+   "powerbi": "2,3,4,5"
+  },
+  {
+   "expr": "CONCATENATEX(ADDCOLUMNS(FILTER(TABLEOF(Facts[Quantity]),Facts[Quantity]>1),\"k\",Facts[Quantity]),Facts[Quantity],\",\",Facts[Quantity])",
+   "powerbi": "2,3,4,5"
+  },
+  {
+   "expr": "CONCATENATEX(ADDCOLUMNS(FILTER(TABLEOF(Facts[Quantity]),Facts[Quantity]>1),\"k\",Facts[Quantity]),Facts[Quantity],\",\",Facts[Quantity],DESC)",
+   "powerbi": "5,4,3,2"
+  },
+  {
+   "expr": "CONCATENATEX(ADDCOLUMNS(FILTER(TABLEOF(Facts[Quantity]),Facts[Quantity]>1),\"k\",Facts[Quantity]),Facts[Quantity],\"|\")",
+   "powerbi": "2|3|4|5"
+  },
+  {
+   "expr": "CONCATENATEX(ADDCOLUMNS(FILTER(TABLEOF(Facts[Quantity]),Facts[Quantity]>1),\"k\",Facts[Quantity]),Facts[Quantity],\"|\",Facts[Quantity])",
+   "powerbi": "2|3|4|5"
+  },
+  {
+   "expr": "CONCATENATEX(ADDCOLUMNS(FILTER(TABLEOF(Facts[Quantity]),Facts[Quantity]>1),\"k\",Facts[Quantity]),Facts[Quantity],\"|\",Facts[Quantity],DESC)",
+   "powerbi": "5|4|3|2"
+  },
+  {
+   "expr": "CONCATENATEX(ADDCOLUMNS(FILTER(TABLEOF(Facts[Region]),Facts[Region]<>\"East\"),\"k\",Facts[Quantity]),Facts[Region],\",\",Facts[Region])",
+   "powerbi": "North,West,West"
+  },
+  {
+   "expr": "CONCATENATEX(ADDCOLUMNS(FILTER(TABLEOF(Facts[Region]),Facts[Region]<>\"East\"),\"k\",Facts[Quantity]),Facts[Region],\",\",Facts[Region],DESC)",
+   "powerbi": "West,West,North"
+  },
+  {
+   "expr": "CONCATENATEX(ADDCOLUMNS(FILTER(TABLEOF(Facts[Region]),Facts[Region]<>\"East\"),\"k\",Facts[Quantity]),Facts[Region],\"|\",Facts[Region])",
+   "powerbi": "North|West|West"
+  },
+  {
+   "expr": "CONCATENATEX(ADDCOLUMNS(FILTER(TABLEOF(Facts[Region]),Facts[Region]<>\"East\"),\"k\",Facts[Quantity]),Facts[Region],\"|\",Facts[Region],DESC)",
+   "powerbi": "West|West|North"
+  },
+  {
+   "expr": "CONCATENATEX(ADDCOLUMNS(FILTER(TABLEOF(Facts[Region]),Facts[Region]<>\"West\"),\"k\",Facts[Quantity]),Facts[Region],\",\")",
+   "powerbi": "East,East,East,North"
+  },
+  {
+   "expr": "CONCATENATEX(ADDCOLUMNS(FILTER(TABLEOF(Facts[Region]),Facts[Region]<>\"West\"),\"k\",Facts[Quantity]),Facts[Region],\",\",Facts[Region])",
+   "powerbi": "East,East,East,North"
+  },
+  {
+   "expr": "CONCATENATEX(ADDCOLUMNS(FILTER(TABLEOF(Facts[Region]),Facts[Region]<>\"West\"),\"k\",Facts[Quantity]),Facts[Region],\",\",Facts[Region],DESC)",
+   "powerbi": "North,East,East,East"
+  },
+  {
+   "expr": "CONCATENATEX(ADDCOLUMNS(FILTER(TABLEOF(Facts[Region]),Facts[Region]<>\"West\"),\"k\",Facts[Quantity]),Facts[Region],\"|\")",
+   "powerbi": "East|East|East|North"
+  },
+  {
+   "expr": "CONCATENATEX(ADDCOLUMNS(FILTER(TABLEOF(Facts[Region]),Facts[Region]<>\"West\"),\"k\",Facts[Quantity]),Facts[Region],\"|\",Facts[Region])",
+   "powerbi": "East|East|East|North"
+  },
+  {
+   "expr": "CONCATENATEX(ADDCOLUMNS(FILTER(TABLEOF(Facts[Region]),Facts[Region]<>\"West\"),\"k\",Facts[Quantity]),Facts[Region],\"|\",Facts[Region],DESC)",
+   "powerbi": "North|East|East|East"
+  },
+  {
+   "expr": "CONCATENATEX(ADDCOLUMNS(FILTER(TABLEOF(Facts[Sales]),Facts[Sales]>0),\"k\",Facts[Quantity]),Facts[Sales],\",\")",
+   "powerbi": "10.5,20,2.5"
+  },
+  {
+   "expr": "CONCATENATEX(ADDCOLUMNS(FILTER(TABLEOF(Facts[Sales]),Facts[Sales]>0),\"k\",Facts[Quantity]),Facts[Sales],\",\",Facts[Sales])",
+   "powerbi": "2.5,10.5,20"
+  },
+  {
+   "expr": "CONCATENATEX(ADDCOLUMNS(FILTER(TABLEOF(Facts[Sales]),Facts[Sales]>0),\"k\",Facts[Quantity]),Facts[Sales],\",\",Facts[Sales],DESC)",
+   "powerbi": "20,10.5,2.5"
+  },
+  {
+   "expr": "CONCATENATEX(ADDCOLUMNS(FILTER(TABLEOF(Facts[Sales]),Facts[Sales]>0),\"k\",Facts[Quantity]),Facts[Sales],\"|\")",
+   "powerbi": "10.5|20|2.5"
+  },
+  {
+   "expr": "CONCATENATEX(ADDCOLUMNS(FILTER(TABLEOF(Facts[Sales]),Facts[Sales]>0),\"k\",Facts[Quantity]),Facts[Sales],\"|\",Facts[Sales])",
+   "powerbi": "2.5|10.5|20"
+  },
+  {
+   "expr": "CONCATENATEX(ADDCOLUMNS(FILTER(TABLEOF(Facts[Sales]),Facts[Sales]>0),\"k\",Facts[Quantity]),Facts[Sales],\"|\",Facts[Sales],DESC)",
+   "powerbi": "20|10.5|2.5"
+  },
+  {
+   "expr": "CONCATENATEX(ADDCOLUMNS(FILTER(TABLEOF(Facts[Sales]),Facts[Sales]>5),\"k\",Facts[Quantity]),Facts[Sales],\",\",Facts[Sales])",
+   "powerbi": "10.5,20"
+  },
+  {
+   "expr": "CONCATENATEX(ADDCOLUMNS(FILTER(TABLEOF(Facts[Sales]),Facts[Sales]>5),\"k\",Facts[Quantity]),Facts[Sales],\",\",Facts[Sales],DESC)",
+   "powerbi": "20,10.5"
+  },
+  {
+   "expr": "CONCATENATEX(ADDCOLUMNS(FILTER(TABLEOF(Facts[Sales]),Facts[Sales]>5),\"k\",Facts[Quantity]),Facts[Sales],\"|\",Facts[Sales])",
+   "powerbi": "10.5|20"
+  },
+  {
+   "expr": "CONCATENATEX(ADDCOLUMNS(FILTER(TABLEOF(Facts[Sales]),Facts[Sales]>5),\"k\",Facts[Quantity]),Facts[Sales],\"|\",Facts[Sales],DESC)",
+   "powerbi": "20|10.5"
+  },
+  {
+   "expr": "CONCATENATEX(ADDCOLUMNS(TABLEOF(Facts[Note]),\"k\",1),Facts[Note],\",\")",
+   "powerbi": ",,Paid,Paid,Paid,Late"
+  },
+  {
+   "expr": "CONCATENATEX(ADDCOLUMNS(TABLEOF(Facts[Note]),\"k\",1),Facts[Note],\",\",Facts[Note])",
+   "powerbi": ",,Late,Paid,Paid,Paid"
+  },
+  {
+   "expr": "CONCATENATEX(ADDCOLUMNS(TABLEOF(Facts[Note]),\"k\",1),Facts[Note],\",\",Facts[Note],DESC)",
+   "powerbi": "Paid,Paid,Paid,Late,,"
+  },
+  {
+   "expr": "CONCATENATEX(ADDCOLUMNS(TABLEOF(Facts[Note]),\"k\",1),Facts[Note],\"|\")",
+   "powerbi": "||Paid|Paid|Paid|Late"
+  },
+  {
+   "expr": "CONCATENATEX(ADDCOLUMNS(TABLEOF(Facts[Note]),\"k\",1),Facts[Note],\"|\",Facts[Note])",
+   "powerbi": "||Late|Paid|Paid|Paid"
+  },
+  {
+   "expr": "CONCATENATEX(ADDCOLUMNS(TABLEOF(Facts[Note]),\"k\",1),Facts[Note],\"|\",Facts[Note],DESC)",
+   "powerbi": "Paid|Paid|Paid|Late||"
+  },
+  {
+   "expr": "CONCATENATEX(ADDCOLUMNS(TABLEOF(Facts[Quantity]),\"k\",1),Facts[Quantity],\",\")",
+   "powerbi": "0,1,2,3,4,5"
+  },
+  {
+   "expr": "CONCATENATEX(ADDCOLUMNS(TABLEOF(Facts[Quantity]),\"k\",1),Facts[Quantity],\",\",Facts[Quantity])",
+   "powerbi": "0,1,2,3,4,5"
+  },
+  {
+   "expr": "CONCATENATEX(ADDCOLUMNS(TABLEOF(Facts[Quantity]),\"k\",1),Facts[Quantity],\",\",Facts[Quantity],DESC)",
+   "powerbi": "5,4,3,2,1,0"
+  },
+  {
+   "expr": "CONCATENATEX(ADDCOLUMNS(TABLEOF(Facts[Quantity]),\"k\",1),Facts[Quantity],\"|\")",
+   "powerbi": "0|1|2|3|4|5"
+  },
+  {
+   "expr": "CONCATENATEX(ADDCOLUMNS(TABLEOF(Facts[Quantity]),\"k\",1),Facts[Quantity],\"|\",Facts[Quantity])",
+   "powerbi": "0|1|2|3|4|5"
+  },
+  {
+   "expr": "CONCATENATEX(ADDCOLUMNS(TABLEOF(Facts[Quantity]),\"k\",1),Facts[Quantity],\"|\",Facts[Quantity],DESC)",
+   "powerbi": "5|4|3|2|1|0"
+  },
+  {
+   "expr": "CONCATENATEX(ADDCOLUMNS(TABLEOF(Facts[Region]),\"k\",1),Facts[Region],\",\")",
+   "powerbi": "East,East,East,West,West,North"
+  },
+  {
+   "expr": "CONCATENATEX(ADDCOLUMNS(TABLEOF(Facts[Region]),\"k\",1),Facts[Region],\",\",Facts[Region])",
+   "powerbi": "East,East,East,North,West,West"
+  },
+  {
+   "expr": "CONCATENATEX(ADDCOLUMNS(TABLEOF(Facts[Region]),\"k\",1),Facts[Region],\",\",Facts[Region],DESC)",
+   "powerbi": "West,West,North,East,East,East"
+  },
+  {
+   "expr": "CONCATENATEX(ADDCOLUMNS(TABLEOF(Facts[Region]),\"k\",1),Facts[Region],\"|\")",
+   "powerbi": "East|East|East|West|West|North"
+  },
+  {
+   "expr": "CONCATENATEX(ADDCOLUMNS(TABLEOF(Facts[Region]),\"k\",1),Facts[Region],\"|\",Facts[Region])",
+   "powerbi": "East|East|East|North|West|West"
+  },
+  {
+   "expr": "CONCATENATEX(ADDCOLUMNS(TABLEOF(Facts[Region]),\"k\",1),Facts[Region],\"|\",Facts[Region],DESC)",
+   "powerbi": "West|West|North|East|East|East"
+  },
+  {
+   "expr": "CONCATENATEX(ADDCOLUMNS(TABLEOF(Facts[Sales]),\"k\",1),Facts[Sales],\",\")",
+   "powerbi": ",-1.5,0,2.5,10.5,20"
+  },
+  {
+   "expr": "CONCATENATEX(ADDCOLUMNS(TABLEOF(Facts[Sales]),\"k\",1),Facts[Sales],\",\",Facts[Sales])",
+   "powerbi": "-1.5,,0,2.5,10.5,20"
+  },
+  {
+   "expr": "CONCATENATEX(ADDCOLUMNS(TABLEOF(Facts[Sales]),\"k\",1),Facts[Sales],\",\",Facts[Sales],DESC)",
+   "powerbi": "20,10.5,2.5,0,,-1.5"
+  },
+  {
+   "expr": "CONCATENATEX(ADDCOLUMNS(TABLEOF(Facts[Sales]),\"k\",1),Facts[Sales],\"|\")",
+   "powerbi": "|-1.5|0|2.5|10.5|20"
+  },
+  {
+   "expr": "CONCATENATEX(ADDCOLUMNS(TABLEOF(Facts[Sales]),\"k\",1),Facts[Sales],\"|\",Facts[Sales])",
+   "powerbi": "-1.5||0|2.5|10.5|20"
+  },
+  {
+   "expr": "CONCATENATEX(ADDCOLUMNS(TABLEOF(Facts[Sales]),\"k\",1),Facts[Sales],\"|\",Facts[Sales],DESC)",
+   "powerbi": "20|10.5|2.5|0||-1.5"
+  },
+  {
+   "expr": "CONCATENATEX(CALCULATETABLE(TABLEOF(Facts[Note]),Facts[Quantity]>0),Facts[Note],\",\")",
+   "powerbi": ",,Paid,Paid,Late"
+  },
+  {
+   "expr": "CONCATENATEX(CALCULATETABLE(TABLEOF(Facts[Note]),Facts[Quantity]>0),Facts[Note],\",\",Facts[Note])",
+   "powerbi": ",,Late,Paid,Paid"
+  },
+  {
+   "expr": "CONCATENATEX(CALCULATETABLE(TABLEOF(Facts[Note]),Facts[Quantity]>0),Facts[Note],\",\",Facts[Note],DESC)",
+   "powerbi": "Paid,Paid,Late,,"
+  },
+  {
+   "expr": "CONCATENATEX(CALCULATETABLE(TABLEOF(Facts[Note]),Facts[Quantity]>0),Facts[Note],\"|\")",
+   "powerbi": "||Paid|Paid|Late"
+  },
+  {
+   "expr": "CONCATENATEX(CALCULATETABLE(TABLEOF(Facts[Note]),Facts[Quantity]>0),Facts[Note],\"|\",Facts[Note])",
+   "powerbi": "||Late|Paid|Paid"
+  },
+  {
+   "expr": "CONCATENATEX(CALCULATETABLE(TABLEOF(Facts[Note]),Facts[Quantity]>0),Facts[Note],\"|\",Facts[Note],DESC)",
+   "powerbi": "Paid|Paid|Late||"
+  },
+  {
+   "expr": "CONCATENATEX(CALCULATETABLE(TABLEOF(Facts[Quantity]),Facts[Quantity]>0),Facts[Quantity],\",\")",
+   "powerbi": "1,2,3,4,5"
+  },
+  {
+   "expr": "CONCATENATEX(CALCULATETABLE(TABLEOF(Facts[Quantity]),Facts[Quantity]>0),Facts[Quantity],\",\",Facts[Quantity])",
+   "powerbi": "1,2,3,4,5"
+  },
+  {
+   "expr": "CONCATENATEX(CALCULATETABLE(TABLEOF(Facts[Quantity]),Facts[Quantity]>0),Facts[Quantity],\",\",Facts[Quantity],DESC)",
+   "powerbi": "5,4,3,2,1"
+  },
+  {
+   "expr": "CONCATENATEX(CALCULATETABLE(TABLEOF(Facts[Quantity]),Facts[Quantity]>0),Facts[Quantity],\"|\")",
+   "powerbi": "1|2|3|4|5"
+  },
+  {
+   "expr": "CONCATENATEX(CALCULATETABLE(TABLEOF(Facts[Quantity]),Facts[Quantity]>0),Facts[Quantity],\"|\",Facts[Quantity])",
+   "powerbi": "1|2|3|4|5"
+  },
+  {
+   "expr": "CONCATENATEX(CALCULATETABLE(TABLEOF(Facts[Quantity]),Facts[Quantity]>0),Facts[Quantity],\"|\",Facts[Quantity],DESC)",
+   "powerbi": "5|4|3|2|1"
+  },
+  {
+   "expr": "CONCATENATEX(CALCULATETABLE(TABLEOF(Facts[Region]),Facts[Quantity]>0),Facts[Region],\",\")",
+   "powerbi": "East,East,East,West,North"
+  },
+  {
+   "expr": "CONCATENATEX(CALCULATETABLE(TABLEOF(Facts[Region]),Facts[Quantity]>0),Facts[Region],\",\",Facts[Region])",
+   "powerbi": "East,East,East,North,West"
+  },
+  {
+   "expr": "CONCATENATEX(CALCULATETABLE(TABLEOF(Facts[Region]),Facts[Quantity]>0),Facts[Region],\",\",Facts[Region],DESC)",
+   "powerbi": "West,North,East,East,East"
+  },
+  {
+   "expr": "CONCATENATEX(CALCULATETABLE(TABLEOF(Facts[Region]),Facts[Quantity]>0),Facts[Region],\"|\")",
+   "powerbi": "East|East|East|West|North"
+  },
+  {
+   "expr": "CONCATENATEX(CALCULATETABLE(TABLEOF(Facts[Region]),Facts[Quantity]>0),Facts[Region],\"|\",Facts[Region])",
+   "powerbi": "East|East|East|North|West"
+  },
+  {
+   "expr": "CONCATENATEX(CALCULATETABLE(TABLEOF(Facts[Region]),Facts[Quantity]>0),Facts[Region],\"|\",Facts[Region],DESC)",
+   "powerbi": "West|North|East|East|East"
+  },
+  {
+   "expr": "CONCATENATEX(CALCULATETABLE(TABLEOF(Facts[Sales]),Facts[Quantity]>0),Facts[Sales],\",\")",
+   "powerbi": ",-1.5,2.5,10.5,20"
+  },
+  {
+   "expr": "CONCATENATEX(CALCULATETABLE(TABLEOF(Facts[Sales]),Facts[Quantity]>0),Facts[Sales],\",\",Facts[Sales])",
+   "powerbi": "-1.5,,2.5,10.5,20"
+  },
+  {
+   "expr": "CONCATENATEX(CALCULATETABLE(TABLEOF(Facts[Sales]),Facts[Quantity]>0),Facts[Sales],\",\",Facts[Sales],DESC)",
+   "powerbi": "20,10.5,2.5,,-1.5"
+  },
+  {
+   "expr": "CONCATENATEX(CALCULATETABLE(TABLEOF(Facts[Sales]),Facts[Quantity]>0),Facts[Sales],\"|\")",
+   "powerbi": "|-1.5|2.5|10.5|20"
+  },
+  {
+   "expr": "CONCATENATEX(CALCULATETABLE(TABLEOF(Facts[Sales]),Facts[Quantity]>0),Facts[Sales],\"|\",Facts[Sales])",
+   "powerbi": "-1.5||2.5|10.5|20"
+  },
+  {
+   "expr": "CONCATENATEX(CALCULATETABLE(TABLEOF(Facts[Sales]),Facts[Quantity]>0),Facts[Sales],\"|\",Facts[Sales],DESC)",
+   "powerbi": "20|10.5|2.5||-1.5"
+  },
+  {
+   "expr": "CONCATENATEX(FILTER(TABLEOF(Facts[Note]),NOT(ISBLANK(Facts[Note]))),Facts[Note],\",\")",
+   "powerbi": "Paid,Paid,Paid,Late"
+  },
+  {
+   "expr": "CONCATENATEX(FILTER(TABLEOF(Facts[Note]),NOT(ISBLANK(Facts[Note]))),Facts[Note],\",\",Facts[Note])",
+   "powerbi": "Late,Paid,Paid,Paid"
+  },
+  {
+   "expr": "CONCATENATEX(FILTER(TABLEOF(Facts[Note]),NOT(ISBLANK(Facts[Note]))),Facts[Note],\",\",Facts[Note],DESC)",
+   "powerbi": "Paid,Paid,Paid,Late"
+  },
+  {
+   "expr": "CONCATENATEX(FILTER(TABLEOF(Facts[Note]),NOT(ISBLANK(Facts[Note]))),Facts[Note],\"|\")",
+   "powerbi": "Paid|Paid|Paid|Late"
+  },
+  {
+   "expr": "CONCATENATEX(FILTER(TABLEOF(Facts[Note]),NOT(ISBLANK(Facts[Note]))),Facts[Note],\"|\",Facts[Note])",
+   "powerbi": "Late|Paid|Paid|Paid"
+  },
+  {
+   "expr": "CONCATENATEX(FILTER(TABLEOF(Facts[Note]),NOT(ISBLANK(Facts[Note]))),Facts[Note],\"|\",Facts[Note],DESC)",
+   "powerbi": "Paid|Paid|Paid|Late"
+  },
+  {
+   "expr": "CONCATENATEX(FILTER(TABLEOF(Facts[Quantity]),Facts[Quantity]<4),Facts[Quantity],\",\")",
+   "powerbi": "0,1,2,3"
+  },
+  {
+   "expr": "CONCATENATEX(FILTER(TABLEOF(Facts[Quantity]),Facts[Quantity]<4),Facts[Quantity],\",\",Facts[Quantity])",
+   "powerbi": "0,1,2,3"
+  },
+  {
+   "expr": "CONCATENATEX(FILTER(TABLEOF(Facts[Quantity]),Facts[Quantity]<4),Facts[Quantity],\",\",Facts[Quantity],DESC)",
+   "powerbi": "3,2,1,0"
+  },
+  {
+   "expr": "CONCATENATEX(FILTER(TABLEOF(Facts[Quantity]),Facts[Quantity]<4),Facts[Quantity],\"|\")",
+   "powerbi": "0|1|2|3"
+  },
+  {
+   "expr": "CONCATENATEX(FILTER(TABLEOF(Facts[Quantity]),Facts[Quantity]<4),Facts[Quantity],\"|\",Facts[Quantity])",
+   "powerbi": "0|1|2|3"
+  },
+  {
+   "expr": "CONCATENATEX(FILTER(TABLEOF(Facts[Quantity]),Facts[Quantity]<4),Facts[Quantity],\"|\",Facts[Quantity],DESC)",
+   "powerbi": "3|2|1|0"
+  },
+  {
+   "expr": "CONCATENATEX(FILTER(TABLEOF(Facts[Quantity]),Facts[Quantity]>1),Facts[Quantity],\",\")",
+   "powerbi": "2,3,4,5"
+  },
+  {
+   "expr": "CONCATENATEX(FILTER(TABLEOF(Facts[Quantity]),Facts[Quantity]>1),Facts[Quantity],\",\",Facts[Quantity])",
+   "powerbi": "2,3,4,5"
+  },
+  {
+   "expr": "CONCATENATEX(FILTER(TABLEOF(Facts[Quantity]),Facts[Quantity]>1),Facts[Quantity],\",\",Facts[Quantity],DESC)",
+   "powerbi": "5,4,3,2"
+  },
+  {
+   "expr": "CONCATENATEX(FILTER(TABLEOF(Facts[Quantity]),Facts[Quantity]>1),Facts[Quantity],\"|\")",
+   "powerbi": "2|3|4|5"
+  },
+  {
+   "expr": "CONCATENATEX(FILTER(TABLEOF(Facts[Quantity]),Facts[Quantity]>1),Facts[Quantity],\"|\",Facts[Quantity])",
+   "powerbi": "2|3|4|5"
+  },
+  {
+   "expr": "CONCATENATEX(FILTER(TABLEOF(Facts[Quantity]),Facts[Quantity]>1),Facts[Quantity],\"|\",Facts[Quantity],DESC)",
+   "powerbi": "5|4|3|2"
+  },
+  {
+   "expr": "CONCATENATEX(FILTER(TABLEOF(Facts[Region]),Facts[Region]<>\"East\"),Facts[Region],\",\")",
+   "powerbi": "West,West,North"
+  },
+  {
+   "expr": "CONCATENATEX(FILTER(TABLEOF(Facts[Region]),Facts[Region]<>\"East\"),Facts[Region],\",\",Facts[Region])",
+   "powerbi": "North,West,West"
+  },
+  {
+   "expr": "CONCATENATEX(FILTER(TABLEOF(Facts[Region]),Facts[Region]<>\"East\"),Facts[Region],\",\",Facts[Region],DESC)",
+   "powerbi": "West,West,North"
+  },
+  {
+   "expr": "CONCATENATEX(FILTER(TABLEOF(Facts[Region]),Facts[Region]<>\"East\"),Facts[Region],\"|\")",
+   "powerbi": "West|West|North"
+  },
+  {
+   "expr": "CONCATENATEX(FILTER(TABLEOF(Facts[Region]),Facts[Region]<>\"East\"),Facts[Region],\"|\",Facts[Region])",
+   "powerbi": "North|West|West"
+  },
+  {
+   "expr": "CONCATENATEX(FILTER(TABLEOF(Facts[Region]),Facts[Region]<>\"East\"),Facts[Region],\"|\",Facts[Region],DESC)",
+   "powerbi": "West|West|North"
+  },
+  {
+   "expr": "CONCATENATEX(FILTER(TABLEOF(Facts[Region]),Facts[Region]<>\"West\"),Facts[Region],\",\")",
+   "powerbi": "East,East,East,North"
+  },
+  {
+   "expr": "CONCATENATEX(FILTER(TABLEOF(Facts[Region]),Facts[Region]<>\"West\"),Facts[Region],\",\",Facts[Region])",
+   "powerbi": "East,East,East,North"
+  },
+  {
+   "expr": "CONCATENATEX(FILTER(TABLEOF(Facts[Region]),Facts[Region]<>\"West\"),Facts[Region],\",\",Facts[Region],DESC)",
+   "powerbi": "North,East,East,East"
+  },
+  {
+   "expr": "CONCATENATEX(FILTER(TABLEOF(Facts[Region]),Facts[Region]<>\"West\"),Facts[Region],\"|\")",
+   "powerbi": "East|East|East|North"
+  },
+  {
+   "expr": "CONCATENATEX(FILTER(TABLEOF(Facts[Region]),Facts[Region]<>\"West\"),Facts[Region],\"|\",Facts[Region])",
+   "powerbi": "East|East|East|North"
+  },
+  {
+   "expr": "CONCATENATEX(FILTER(TABLEOF(Facts[Region]),Facts[Region]<>\"West\"),Facts[Region],\"|\",Facts[Region],DESC)",
+   "powerbi": "North|East|East|East"
+  },
+  {
+   "expr": "CONCATENATEX(FILTER(TABLEOF(Facts[Sales]),Facts[Sales]>0),Facts[Sales],\",\")",
+   "powerbi": "2.5,10.5,20"
+  },
+  {
+   "expr": "CONCATENATEX(FILTER(TABLEOF(Facts[Sales]),Facts[Sales]>0),Facts[Sales],\",\",Facts[Sales])",
+   "powerbi": "2.5,10.5,20"
+  },
+  {
+   "expr": "CONCATENATEX(FILTER(TABLEOF(Facts[Sales]),Facts[Sales]>0),Facts[Sales],\",\",Facts[Sales],DESC)",
+   "powerbi": "20,10.5,2.5"
+  },
+  {
+   "expr": "CONCATENATEX(FILTER(TABLEOF(Facts[Sales]),Facts[Sales]>0),Facts[Sales],\"|\")",
+   "powerbi": "2.5|10.5|20"
+  },
+  {
+   "expr": "CONCATENATEX(FILTER(TABLEOF(Facts[Sales]),Facts[Sales]>0),Facts[Sales],\"|\",Facts[Sales])",
+   "powerbi": "2.5|10.5|20"
+  },
+  {
+   "expr": "CONCATENATEX(FILTER(TABLEOF(Facts[Sales]),Facts[Sales]>0),Facts[Sales],\"|\",Facts[Sales],DESC)",
+   "powerbi": "20|10.5|2.5"
+  },
+  {
+   "expr": "CONCATENATEX(FILTER(TABLEOF(Facts[Sales]),Facts[Sales]>5),Facts[Sales],\",\")",
+   "powerbi": "10.5,20"
+  },
+  {
+   "expr": "CONCATENATEX(FILTER(TABLEOF(Facts[Sales]),Facts[Sales]>5),Facts[Sales],\",\",Facts[Sales])",
+   "powerbi": "10.5,20"
+  },
+  {
+   "expr": "CONCATENATEX(FILTER(TABLEOF(Facts[Sales]),Facts[Sales]>5),Facts[Sales],\",\",Facts[Sales],DESC)",
+   "powerbi": "20,10.5"
+  },
+  {
+   "expr": "CONCATENATEX(FILTER(TABLEOF(Facts[Sales]),Facts[Sales]>5),Facts[Sales],\"|\")",
+   "powerbi": "10.5|20"
+  },
+  {
+   "expr": "CONCATENATEX(FILTER(TABLEOF(Facts[Sales]),Facts[Sales]>5),Facts[Sales],\"|\",Facts[Sales])",
+   "powerbi": "10.5|20"
+  },
+  {
+   "expr": "CONCATENATEX(FILTER(TABLEOF(Facts[Sales]),Facts[Sales]>5),Facts[Sales],\"|\",Facts[Sales],DESC)",
+   "powerbi": "20|10.5"
+  },
+  {
+   "expr": "CONCATENATEX(FILTER(TOPN(3,TABLEOF(Facts[Note]),Facts[Note]),NOT(ISBLANK(Facts[Note]))),Facts[Note],\",\",Facts[Note])",
+   "powerbi": "Paid,Paid,Paid"
+  },
+  {
+   "expr": "CONCATENATEX(FILTER(TOPN(3,TABLEOF(Facts[Note]),Facts[Note]),NOT(ISBLANK(Facts[Note]))),Facts[Note],\",\",Facts[Note],DESC)",
+   "powerbi": "Paid,Paid,Paid"
+  },
+  {
+   "expr": "CONCATENATEX(FILTER(TOPN(3,TABLEOF(Facts[Note]),Facts[Note]),NOT(ISBLANK(Facts[Note]))),Facts[Note],\"|\",Facts[Note])",
+   "powerbi": "Paid|Paid|Paid"
+  },
+  {
+   "expr": "CONCATENATEX(FILTER(TOPN(3,TABLEOF(Facts[Note]),Facts[Note]),NOT(ISBLANK(Facts[Note]))),Facts[Note],\"|\",Facts[Note],DESC)",
+   "powerbi": "Paid|Paid|Paid"
+  },
+  {
+   "expr": "CONCATENATEX(FILTER(TOPN(3,TABLEOF(Facts[Quantity]),Facts[Quantity]),Facts[Quantity]<4),Facts[Quantity],\",\")",
+   "powerbi": "3"
+  },
+  {
+   "expr": "CONCATENATEX(FILTER(TOPN(3,TABLEOF(Facts[Quantity]),Facts[Quantity]),Facts[Quantity]<4),Facts[Quantity],\",\",Facts[Quantity])",
+   "powerbi": "3"
+  },
+  {
+   "expr": "CONCATENATEX(FILTER(TOPN(3,TABLEOF(Facts[Quantity]),Facts[Quantity]),Facts[Quantity]<4),Facts[Quantity],\",\",Facts[Quantity],DESC)",
+   "powerbi": "3"
+  },
+  {
+   "expr": "CONCATENATEX(FILTER(TOPN(3,TABLEOF(Facts[Quantity]),Facts[Quantity]),Facts[Quantity]<4),Facts[Quantity],\"|\")",
+   "powerbi": "3"
+  },
+  {
+   "expr": "CONCATENATEX(FILTER(TOPN(3,TABLEOF(Facts[Quantity]),Facts[Quantity]),Facts[Quantity]<4),Facts[Quantity],\"|\",Facts[Quantity])",
+   "powerbi": "3"
+  },
+  {
+   "expr": "CONCATENATEX(FILTER(TOPN(3,TABLEOF(Facts[Quantity]),Facts[Quantity]),Facts[Quantity]<4),Facts[Quantity],\"|\",Facts[Quantity],DESC)",
+   "powerbi": "3"
+  },
+  {
+   "expr": "CONCATENATEX(FILTER(TOPN(3,TABLEOF(Facts[Region]),Facts[Region]),Facts[Region]<>\"East\"),Facts[Region],\",\",Facts[Region])",
+   "powerbi": "North,West,West"
+  },
+  {
+   "expr": "CONCATENATEX(FILTER(TOPN(3,TABLEOF(Facts[Region]),Facts[Region]),Facts[Region]<>\"East\"),Facts[Region],\",\",Facts[Region],DESC)",
+   "powerbi": "West,West,North"
+  },
+  {
+   "expr": "CONCATENATEX(FILTER(TOPN(3,TABLEOF(Facts[Region]),Facts[Region]),Facts[Region]<>\"East\"),Facts[Region],\"|\",Facts[Region])",
+   "powerbi": "North|West|West"
+  },
+  {
+   "expr": "CONCATENATEX(FILTER(TOPN(3,TABLEOF(Facts[Region]),Facts[Region]),Facts[Region]<>\"East\"),Facts[Region],\"|\",Facts[Region],DESC)",
+   "powerbi": "West|West|North"
+  },
+  {
+   "expr": "CONCATENATEX(FILTER(TOPN(3,TABLEOF(Facts[Sales]),Facts[Sales]),Facts[Sales]>5),Facts[Sales],\",\",Facts[Sales])",
+   "powerbi": "10.5,20"
+  },
+  {
+   "expr": "CONCATENATEX(FILTER(TOPN(3,TABLEOF(Facts[Sales]),Facts[Sales]),Facts[Sales]>5),Facts[Sales],\",\",Facts[Sales],DESC)",
+   "powerbi": "20,10.5"
+  },
+  {
+   "expr": "CONCATENATEX(FILTER(TOPN(3,TABLEOF(Facts[Sales]),Facts[Sales]),Facts[Sales]>5),Facts[Sales],\"|\",Facts[Sales])",
+   "powerbi": "10.5|20"
+  },
+  {
+   "expr": "CONCATENATEX(FILTER(TOPN(3,TABLEOF(Facts[Sales]),Facts[Sales]),Facts[Sales]>5),Facts[Sales],\"|\",Facts[Sales],DESC)",
+   "powerbi": "20|10.5"
+  },
+  {
+   "expr": "CONCATENATEX(FILTER(TOPN(4,TABLEOF(Facts[Note]),Facts[Note]),NOT(ISBLANK(Facts[Note]))),Facts[Note],\",\")",
+   "powerbi": "Late,Paid,Paid,Paid"
+  },
+  {
+   "expr": "CONCATENATEX(FILTER(TOPN(4,TABLEOF(Facts[Note]),Facts[Note]),NOT(ISBLANK(Facts[Note]))),Facts[Note],\",\",Facts[Note])",
+   "powerbi": "Late,Paid,Paid,Paid"
+  },
+  {
+   "expr": "CONCATENATEX(FILTER(TOPN(4,TABLEOF(Facts[Note]),Facts[Note]),NOT(ISBLANK(Facts[Note]))),Facts[Note],\",\",Facts[Note],DESC)",
+   "powerbi": "Paid,Paid,Paid,Late"
+  },
+  {
+   "expr": "CONCATENATEX(FILTER(TOPN(4,TABLEOF(Facts[Note]),Facts[Note]),NOT(ISBLANK(Facts[Note]))),Facts[Note],\"|\")",
+   "powerbi": "Late|Paid|Paid|Paid"
+  },
+  {
+   "expr": "CONCATENATEX(FILTER(TOPN(4,TABLEOF(Facts[Note]),Facts[Note]),NOT(ISBLANK(Facts[Note]))),Facts[Note],\"|\",Facts[Note])",
+   "powerbi": "Late|Paid|Paid|Paid"
+  },
+  {
+   "expr": "CONCATENATEX(FILTER(TOPN(4,TABLEOF(Facts[Note]),Facts[Note]),NOT(ISBLANK(Facts[Note]))),Facts[Note],\"|\",Facts[Note],DESC)",
+   "powerbi": "Paid|Paid|Paid|Late"
+  },
+  {
+   "expr": "CONCATENATEX(FILTER(TOPN(4,TABLEOF(Facts[Quantity]),Facts[Quantity]),Facts[Quantity]>1),Facts[Quantity],\",\")",
+   "powerbi": "2,3,5,4"
+  },
+  {
+   "expr": "CONCATENATEX(FILTER(TOPN(4,TABLEOF(Facts[Quantity]),Facts[Quantity]),Facts[Quantity]>1),Facts[Quantity],\",\",Facts[Quantity])",
+   "powerbi": "2,3,4,5"
+  },
+  {
+   "expr": "CONCATENATEX(FILTER(TOPN(4,TABLEOF(Facts[Quantity]),Facts[Quantity]),Facts[Quantity]>1),Facts[Quantity],\",\",Facts[Quantity],DESC)",
+   "powerbi": "5,4,3,2"
+  },
+  {
+   "expr": "CONCATENATEX(FILTER(TOPN(4,TABLEOF(Facts[Quantity]),Facts[Quantity]),Facts[Quantity]>1),Facts[Quantity],\"|\")",
+   "powerbi": "2|3|5|4"
+  },
+  {
+   "expr": "CONCATENATEX(FILTER(TOPN(4,TABLEOF(Facts[Quantity]),Facts[Quantity]),Facts[Quantity]>1),Facts[Quantity],\"|\",Facts[Quantity])",
+   "powerbi": "2|3|4|5"
+  },
+  {
+   "expr": "CONCATENATEX(FILTER(TOPN(4,TABLEOF(Facts[Quantity]),Facts[Quantity]),Facts[Quantity]>1),Facts[Quantity],\"|\",Facts[Quantity],DESC)",
+   "powerbi": "5|4|3|2"
+  },
+  {
+   "expr": "CONCATENATEX(FILTER(TOPN(4,TABLEOF(Facts[Region]),Facts[Region]),Facts[Region]<>\"West\"),Facts[Region],\",\")",
+   "powerbi": "East,East,East,North"
+  },
+  {
+   "expr": "CONCATENATEX(FILTER(TOPN(4,TABLEOF(Facts[Region]),Facts[Region]),Facts[Region]<>\"West\"),Facts[Region],\",\",Facts[Region])",
+   "powerbi": "East,East,East,North"
+  },
+  {
+   "expr": "CONCATENATEX(FILTER(TOPN(4,TABLEOF(Facts[Region]),Facts[Region]),Facts[Region]<>\"West\"),Facts[Region],\",\",Facts[Region],DESC)",
+   "powerbi": "North,East,East,East"
+  },
+  {
+   "expr": "CONCATENATEX(FILTER(TOPN(4,TABLEOF(Facts[Region]),Facts[Region]),Facts[Region]<>\"West\"),Facts[Region],\"|\")",
+   "powerbi": "East|East|East|North"
+  },
+  {
+   "expr": "CONCATENATEX(FILTER(TOPN(4,TABLEOF(Facts[Region]),Facts[Region]),Facts[Region]<>\"West\"),Facts[Region],\"|\",Facts[Region])",
+   "powerbi": "East|East|East|North"
+  },
+  {
+   "expr": "CONCATENATEX(FILTER(TOPN(4,TABLEOF(Facts[Region]),Facts[Region]),Facts[Region]<>\"West\"),Facts[Region],\"|\",Facts[Region],DESC)",
+   "powerbi": "North|East|East|East"
+  },
+  {
+   "expr": "CONCATENATEX(FILTER(TOPN(4,TABLEOF(Facts[Sales]),Facts[Sales]),Facts[Sales]>0),Facts[Sales],\",\")",
+   "powerbi": "2.5,20,10.5"
+  },
+  {
+   "expr": "CONCATENATEX(FILTER(TOPN(4,TABLEOF(Facts[Sales]),Facts[Sales]),Facts[Sales]>0),Facts[Sales],\",\",Facts[Sales])",
+   "powerbi": "2.5,10.5,20"
+  },
+  {
+   "expr": "CONCATENATEX(FILTER(TOPN(4,TABLEOF(Facts[Sales]),Facts[Sales]),Facts[Sales]>0),Facts[Sales],\",\",Facts[Sales],DESC)",
+   "powerbi": "20,10.5,2.5"
+  },
+  {
+   "expr": "CONCATENATEX(FILTER(TOPN(4,TABLEOF(Facts[Sales]),Facts[Sales]),Facts[Sales]>0),Facts[Sales],\"|\")",
+   "powerbi": "2.5|20|10.5"
+  },
+  {
+   "expr": "CONCATENATEX(FILTER(TOPN(4,TABLEOF(Facts[Sales]),Facts[Sales]),Facts[Sales]>0),Facts[Sales],\"|\",Facts[Sales])",
+   "powerbi": "2.5|10.5|20"
+  },
+  {
+   "expr": "CONCATENATEX(FILTER(TOPN(4,TABLEOF(Facts[Sales]),Facts[Sales]),Facts[Sales]>0),Facts[Sales],\"|\",Facts[Sales],DESC)",
+   "powerbi": "20|10.5|2.5"
+  },
+  {
+   "expr": "CONCATENATEX(TABLEOF(Facts[Note]),Facts[Note],\",\")",
+   "powerbi": ",,Paid,Paid,Paid,Late"
+  },
+  {
+   "expr": "CONCATENATEX(TABLEOF(Facts[Note]),Facts[Note],\"|\")",
+   "powerbi": "||Paid|Paid|Paid|Late"
+  },
+  {
+   "expr": "CONCATENATEX(TABLEOF(Facts[Quantity]),Facts[Quantity],\",\",Facts[Quantity],DESC)",
+   "powerbi": "5,4,3,2,1,0"
+  },
+  {
+   "expr": "CONCATENATEX(TABLEOF(Facts[Region]),Facts[Region],\",\")",
+   "powerbi": "East,East,East,West,West,North"
+  },
+  {
+   "expr": "CONCATENATEX(TABLEOF(Facts[Region]),Facts[Region],\"|\",Facts[Region],DESC)",
+   "powerbi": "West|West|North|East|East|East"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(1,TABLEOF(Facts[Note]),Facts[Note],ASC),Facts[Note],\",\")",
+   "powerbi": ","
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(1,TABLEOF(Facts[Note]),Facts[Note],ASC),Facts[Note],\",\",Facts[Note])",
+   "powerbi": ","
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(1,TABLEOF(Facts[Note]),Facts[Note],ASC),Facts[Note],\",\",Facts[Note],DESC)",
+   "powerbi": ","
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(1,TABLEOF(Facts[Note]),Facts[Note],ASC),Facts[Note],\"|\")",
+   "powerbi": "|"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(1,TABLEOF(Facts[Note]),Facts[Note],ASC),Facts[Note],\"|\",Facts[Note])",
+   "powerbi": "|"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(1,TABLEOF(Facts[Note]),Facts[Note],ASC),Facts[Note],\"|\",Facts[Note],DESC)",
+   "powerbi": "|"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(1,TABLEOF(Facts[Note]),Facts[Note],DESC),Facts[Note],\",\")",
+   "powerbi": "Paid,Paid,Paid"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(1,TABLEOF(Facts[Note]),Facts[Note],DESC),Facts[Note],\",\",Facts[Note])",
+   "powerbi": "Paid,Paid,Paid"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(1,TABLEOF(Facts[Note]),Facts[Note],DESC),Facts[Note],\",\",Facts[Note],DESC)",
+   "powerbi": "Paid,Paid,Paid"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(1,TABLEOF(Facts[Note]),Facts[Note],DESC),Facts[Note],\"|\")",
+   "powerbi": "Paid|Paid|Paid"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(1,TABLEOF(Facts[Note]),Facts[Note],DESC),Facts[Note],\"|\",Facts[Note])",
+   "powerbi": "Paid|Paid|Paid"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(1,TABLEOF(Facts[Note]),Facts[Note],DESC),Facts[Note],\"|\",Facts[Note],DESC)",
+   "powerbi": "Paid|Paid|Paid"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(1,TABLEOF(Facts[Quantity]),Facts[Quantity],DESC),Facts[Quantity],\",\",Facts[Quantity])",
+   "powerbi": "5"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(1,TABLEOF(Facts[Quantity]),Facts[Quantity],DESC),Facts[Quantity],\",\",Facts[Quantity],DESC)",
+   "powerbi": "5"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(1,TABLEOF(Facts[Quantity]),Facts[Quantity],DESC),Facts[Quantity],\"|\",Facts[Quantity],DESC)",
+   "powerbi": "5"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(1,TABLEOF(Facts[Region]),Facts[Region],ASC),Facts[Region],\",\")",
+   "powerbi": "East,East,East"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(1,TABLEOF(Facts[Region]),Facts[Region],ASC),Facts[Region],\",\",Facts[Region])",
+   "powerbi": "East,East,East"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(1,TABLEOF(Facts[Region]),Facts[Region],ASC),Facts[Region],\",\",Facts[Region],DESC)",
+   "powerbi": "East,East,East"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(1,TABLEOF(Facts[Region]),Facts[Region],ASC),Facts[Region],\"|\")",
+   "powerbi": "East|East|East"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(1,TABLEOF(Facts[Region]),Facts[Region],ASC),Facts[Region],\"|\",Facts[Region])",
+   "powerbi": "East|East|East"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(1,TABLEOF(Facts[Region]),Facts[Region],ASC),Facts[Region],\"|\",Facts[Region],DESC)",
+   "powerbi": "East|East|East"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(1,TABLEOF(Facts[Region]),Facts[Region],DESC),Facts[Region],\",\")",
+   "powerbi": "West,West"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(1,TABLEOF(Facts[Region]),Facts[Region],DESC),Facts[Region],\",\",Facts[Region])",
+   "powerbi": "West,West"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(1,TABLEOF(Facts[Region]),Facts[Region],DESC),Facts[Region],\",\",Facts[Region],DESC)",
+   "powerbi": "West,West"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(1,TABLEOF(Facts[Region]),Facts[Region],DESC),Facts[Region],\"|\")",
+   "powerbi": "West|West"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(1,TABLEOF(Facts[Region]),Facts[Region],DESC),Facts[Region],\"|\",Facts[Region])",
+   "powerbi": "West|West"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(1,TABLEOF(Facts[Region]),Facts[Region],DESC),Facts[Region],\"|\",Facts[Region],DESC)",
+   "powerbi": "West|West"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(1,TABLEOF(Facts[Sales]),Facts[Sales],ASC),Facts[Sales],\",\",Facts[Sales])",
+   "powerbi": "-1.5"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(1,TABLEOF(Facts[Sales]),Facts[Sales],ASC),Facts[Sales],\"|\",Facts[Sales],DESC)",
+   "powerbi": "-1.5"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(1,TABLEOF(Facts[Sales]),Facts[Sales],DESC),Facts[Sales],\"|\")",
+   "powerbi": "20"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(1,TABLEOF(Facts[Sales]),Facts[Sales],DESC),Facts[Sales],\"|\",Facts[Sales])",
+   "powerbi": "20"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(2,TABLEOF(Facts[Note]),Facts[Note],ASC),Facts[Note],\",\")",
+   "powerbi": ","
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(2,TABLEOF(Facts[Note]),Facts[Note],ASC),Facts[Note],\",\",Facts[Note])",
+   "powerbi": ","
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(2,TABLEOF(Facts[Note]),Facts[Note],ASC),Facts[Note],\",\",Facts[Note],DESC)",
+   "powerbi": ","
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(2,TABLEOF(Facts[Note]),Facts[Note],ASC),Facts[Note],\"|\")",
+   "powerbi": "|"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(2,TABLEOF(Facts[Note]),Facts[Note],ASC),Facts[Note],\"|\",Facts[Note])",
+   "powerbi": "|"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(2,TABLEOF(Facts[Note]),Facts[Note],ASC),Facts[Note],\"|\",Facts[Note],DESC)",
+   "powerbi": "|"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(2,TABLEOF(Facts[Note]),Facts[Note],DESC),Facts[Note],\",\")",
+   "powerbi": "Paid,Paid,Paid"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(2,TABLEOF(Facts[Note]),Facts[Note],DESC),Facts[Note],\",\",Facts[Note])",
+   "powerbi": "Paid,Paid,Paid"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(2,TABLEOF(Facts[Note]),Facts[Note],DESC),Facts[Note],\",\",Facts[Note],DESC)",
+   "powerbi": "Paid,Paid,Paid"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(2,TABLEOF(Facts[Note]),Facts[Note],DESC),Facts[Note],\"|\")",
+   "powerbi": "Paid|Paid|Paid"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(2,TABLEOF(Facts[Note]),Facts[Note],DESC),Facts[Note],\"|\",Facts[Note])",
+   "powerbi": "Paid|Paid|Paid"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(2,TABLEOF(Facts[Note]),Facts[Note],DESC),Facts[Note],\"|\",Facts[Note],DESC)",
+   "powerbi": "Paid|Paid|Paid"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(2,TABLEOF(Facts[Note]),Facts[Sales],DESC),Facts[Note],\",\",Facts[Note])",
+   "powerbi": ",Paid"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(2,TABLEOF(Facts[Note]),Facts[Sales],DESC),Facts[Note],\",\",Facts[Note],DESC)",
+   "powerbi": "Paid,"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(2,TABLEOF(Facts[Note]),Facts[Sales],DESC),Facts[Note],\"|\",Facts[Note])",
+   "powerbi": "|Paid"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(2,TABLEOF(Facts[Note]),Facts[Sales],DESC),Facts[Note],\"|\",Facts[Note],DESC)",
+   "powerbi": "Paid|"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(2,TABLEOF(Facts[Quantity]),Facts[Quantity],ASC),Facts[Quantity],\",\")",
+   "powerbi": "1,0"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(2,TABLEOF(Facts[Quantity]),Facts[Quantity],ASC),Facts[Quantity],\",\",Facts[Quantity])",
+   "powerbi": "0,1"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(2,TABLEOF(Facts[Quantity]),Facts[Quantity],ASC),Facts[Quantity],\",\",Facts[Quantity],DESC)",
+   "powerbi": "1,0"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(2,TABLEOF(Facts[Quantity]),Facts[Quantity],ASC),Facts[Quantity],\"|\")",
+   "powerbi": "1|0"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(2,TABLEOF(Facts[Quantity]),Facts[Quantity],ASC),Facts[Quantity],\"|\",Facts[Quantity])",
+   "powerbi": "0|1"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(2,TABLEOF(Facts[Quantity]),Facts[Quantity],ASC),Facts[Quantity],\"|\",Facts[Quantity],DESC)",
+   "powerbi": "1|0"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(2,TABLEOF(Facts[Quantity]),Facts[Quantity],DESC),Facts[Quantity],\",\")",
+   "powerbi": "4,5"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(2,TABLEOF(Facts[Quantity]),Facts[Quantity],DESC),Facts[Quantity],\",\",Facts[Quantity])",
+   "powerbi": "4,5"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(2,TABLEOF(Facts[Quantity]),Facts[Quantity],DESC),Facts[Quantity],\",\",Facts[Quantity],DESC)",
+   "powerbi": "5,4"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(2,TABLEOF(Facts[Quantity]),Facts[Quantity],DESC),Facts[Quantity],\"|\")",
+   "powerbi": "4|5"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(2,TABLEOF(Facts[Quantity]),Facts[Quantity],DESC),Facts[Quantity],\"|\",Facts[Quantity])",
+   "powerbi": "4|5"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(2,TABLEOF(Facts[Quantity]),Facts[Quantity],DESC),Facts[Quantity],\"|\",Facts[Quantity],DESC)",
+   "powerbi": "5|4"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(2,TABLEOF(Facts[Quantity]),Facts[Sales],DESC),Facts[Quantity],\",\",Facts[Quantity])",
+   "powerbi": "2,3"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(2,TABLEOF(Facts[Quantity]),Facts[Sales],DESC),Facts[Quantity],\",\",Facts[Quantity],DESC)",
+   "powerbi": "3,2"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(2,TABLEOF(Facts[Quantity]),Facts[Sales],DESC),Facts[Quantity],\"|\",Facts[Quantity])",
+   "powerbi": "2|3"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(2,TABLEOF(Facts[Quantity]),Facts[Sales],DESC),Facts[Quantity],\"|\",Facts[Quantity],DESC)",
+   "powerbi": "3|2"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(2,TABLEOF(Facts[Region]),Facts[Region],ASC),Facts[Region],\",\")",
+   "powerbi": "East,East,East"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(2,TABLEOF(Facts[Region]),Facts[Region],ASC),Facts[Region],\",\",Facts[Region])",
+   "powerbi": "East,East,East"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(2,TABLEOF(Facts[Region]),Facts[Region],ASC),Facts[Region],\",\",Facts[Region],DESC)",
+   "powerbi": "East,East,East"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(2,TABLEOF(Facts[Region]),Facts[Region],ASC),Facts[Region],\"|\")",
+   "powerbi": "East|East|East"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(2,TABLEOF(Facts[Region]),Facts[Region],ASC),Facts[Region],\"|\",Facts[Region])",
+   "powerbi": "East|East|East"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(2,TABLEOF(Facts[Region]),Facts[Region],ASC),Facts[Region],\"|\",Facts[Region],DESC)",
+   "powerbi": "East|East|East"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(2,TABLEOF(Facts[Region]),Facts[Region],DESC),Facts[Region],\",\")",
+   "powerbi": "West,West"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(2,TABLEOF(Facts[Region]),Facts[Region],DESC),Facts[Region],\",\",Facts[Region])",
+   "powerbi": "West,West"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(2,TABLEOF(Facts[Region]),Facts[Region],DESC),Facts[Region],\",\",Facts[Region],DESC)",
+   "powerbi": "West,West"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(2,TABLEOF(Facts[Region]),Facts[Region],DESC),Facts[Region],\"|\")",
+   "powerbi": "West|West"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(2,TABLEOF(Facts[Region]),Facts[Region],DESC),Facts[Region],\"|\",Facts[Region])",
+   "powerbi": "West|West"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(2,TABLEOF(Facts[Region]),Facts[Region],DESC),Facts[Region],\"|\",Facts[Region],DESC)",
+   "powerbi": "West|West"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(2,TABLEOF(Facts[Region]),Facts[Sales],DESC),Facts[Region],\",\",Facts[Region])",
+   "powerbi": "East,West"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(2,TABLEOF(Facts[Region]),Facts[Sales],DESC),Facts[Region],\",\",Facts[Region],DESC)",
+   "powerbi": "West,East"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(2,TABLEOF(Facts[Region]),Facts[Sales],DESC),Facts[Region],\"|\",Facts[Region])",
+   "powerbi": "East|West"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(2,TABLEOF(Facts[Region]),Facts[Sales],DESC),Facts[Region],\"|\",Facts[Region],DESC)",
+   "powerbi": "West|East"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(2,TABLEOF(Facts[Sales]),Facts[Sales],ASC),Facts[Sales],\",\")",
+   "powerbi": ",-1.5"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(2,TABLEOF(Facts[Sales]),Facts[Sales],ASC),Facts[Sales],\",\",Facts[Sales])",
+   "powerbi": "-1.5,"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(2,TABLEOF(Facts[Sales]),Facts[Sales],ASC),Facts[Sales],\",\",Facts[Sales],DESC)",
+   "powerbi": ",-1.5"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(2,TABLEOF(Facts[Sales]),Facts[Sales],ASC),Facts[Sales],\"|\")",
+   "powerbi": "|-1.5"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(2,TABLEOF(Facts[Sales]),Facts[Sales],ASC),Facts[Sales],\"|\",Facts[Sales])",
+   "powerbi": "-1.5|"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(2,TABLEOF(Facts[Sales]),Facts[Sales],ASC),Facts[Sales],\"|\",Facts[Sales],DESC)",
+   "powerbi": "|-1.5"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(2,TABLEOF(Facts[Sales]),Facts[Sales],DESC),Facts[Sales],\",\")",
+   "powerbi": "10.5,20"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(2,TABLEOF(Facts[Sales]),Facts[Sales],DESC),Facts[Sales],\",\",Facts[Sales])",
+   "powerbi": "10.5,20"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(2,TABLEOF(Facts[Sales]),Facts[Sales],DESC),Facts[Sales],\",\",Facts[Sales],DESC)",
+   "powerbi": "20,10.5"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(2,TABLEOF(Facts[Sales]),Facts[Sales],DESC),Facts[Sales],\"|\")",
+   "powerbi": "10.5|20"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(2,TABLEOF(Facts[Sales]),Facts[Sales],DESC),Facts[Sales],\"|\",Facts[Sales])",
+   "powerbi": "10.5|20"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(2,TABLEOF(Facts[Sales]),Facts[Sales],DESC),Facts[Sales],\"|\",Facts[Sales],DESC)",
+   "powerbi": "20|10.5"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(3,TABLEOF(Facts[Note]),Facts[Note],ASC),Facts[Note],\",\")",
+   "powerbi": "Late,,"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(3,TABLEOF(Facts[Note]),Facts[Note],ASC),Facts[Note],\",\",Facts[Note])",
+   "powerbi": ",,Late"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(3,TABLEOF(Facts[Note]),Facts[Note],ASC),Facts[Note],\",\",Facts[Note],DESC)",
+   "powerbi": "Late,,"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(3,TABLEOF(Facts[Note]),Facts[Note],ASC),Facts[Note],\"|\")",
+   "powerbi": "Late||"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(3,TABLEOF(Facts[Note]),Facts[Note],ASC),Facts[Note],\"|\",Facts[Note])",
+   "powerbi": "||Late"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(3,TABLEOF(Facts[Note]),Facts[Note],ASC),Facts[Note],\"|\",Facts[Note],DESC)",
+   "powerbi": "Late||"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(3,TABLEOF(Facts[Note]),Facts[Note],DESC),Facts[Note],\",\")",
+   "powerbi": "Paid,Paid,Paid"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(3,TABLEOF(Facts[Note]),Facts[Note],DESC),Facts[Note],\",\",Facts[Note])",
+   "powerbi": "Paid,Paid,Paid"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(3,TABLEOF(Facts[Note]),Facts[Note],DESC),Facts[Note],\",\",Facts[Note],DESC)",
+   "powerbi": "Paid,Paid,Paid"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(3,TABLEOF(Facts[Note]),Facts[Note],DESC),Facts[Note],\"|\")",
+   "powerbi": "Paid|Paid|Paid"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(3,TABLEOF(Facts[Note]),Facts[Note],DESC),Facts[Note],\"|\",Facts[Note])",
+   "powerbi": "Paid|Paid|Paid"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(3,TABLEOF(Facts[Note]),Facts[Note],DESC),Facts[Note],\"|\",Facts[Note],DESC)",
+   "powerbi": "Paid|Paid|Paid"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(3,TABLEOF(Facts[Note]),Facts[Quantity]),Facts[Note],\",\")",
+   "powerbi": ",,Late"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(3,TABLEOF(Facts[Note]),Facts[Quantity]),Facts[Note],\",\",Facts[Note])",
+   "powerbi": ",,Late"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(3,TABLEOF(Facts[Note]),Facts[Quantity]),Facts[Note],\",\",Facts[Note],DESC)",
+   "powerbi": "Late,,"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(3,TABLEOF(Facts[Note]),Facts[Quantity]),Facts[Note],\"|\")",
+   "powerbi": "||Late"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(3,TABLEOF(Facts[Note]),Facts[Quantity]),Facts[Note],\"|\",Facts[Note])",
+   "powerbi": "||Late"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(3,TABLEOF(Facts[Note]),Facts[Quantity]),Facts[Note],\"|\",Facts[Note],DESC)",
+   "powerbi": "Late||"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(3,TABLEOF(Facts[Quantity]),Facts[Quantity]),Facts[Quantity],\",\")",
+   "powerbi": "3,5,4"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(3,TABLEOF(Facts[Quantity]),Facts[Quantity]),Facts[Quantity],\",\",Facts[Quantity])",
+   "powerbi": "3,4,5"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(3,TABLEOF(Facts[Quantity]),Facts[Quantity]),Facts[Quantity],\",\",Facts[Quantity],DESC)",
+   "powerbi": "5,4,3"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(3,TABLEOF(Facts[Quantity]),Facts[Quantity]),Facts[Quantity],\"|\")",
+   "powerbi": "3|5|4"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(3,TABLEOF(Facts[Quantity]),Facts[Quantity]),Facts[Quantity],\"|\",Facts[Quantity])",
+   "powerbi": "3|4|5"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(3,TABLEOF(Facts[Quantity]),Facts[Quantity]),Facts[Quantity],\"|\",Facts[Quantity],DESC)",
+   "powerbi": "5|4|3"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(3,TABLEOF(Facts[Quantity]),Facts[Quantity],ASC),Facts[Quantity],\",\")",
+   "powerbi": "2,0,1"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(3,TABLEOF(Facts[Quantity]),Facts[Quantity],ASC),Facts[Quantity],\",\",Facts[Quantity])",
+   "powerbi": "0,1,2"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(3,TABLEOF(Facts[Quantity]),Facts[Quantity],ASC),Facts[Quantity],\",\",Facts[Quantity],DESC)",
+   "powerbi": "2,1,0"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(3,TABLEOF(Facts[Quantity]),Facts[Quantity],ASC),Facts[Quantity],\"|\")",
+   "powerbi": "2|0|1"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(3,TABLEOF(Facts[Quantity]),Facts[Quantity],ASC),Facts[Quantity],\"|\",Facts[Quantity])",
+   "powerbi": "0|1|2"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(3,TABLEOF(Facts[Quantity]),Facts[Quantity],ASC),Facts[Quantity],\"|\",Facts[Quantity],DESC)",
+   "powerbi": "2|1|0"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(3,TABLEOF(Facts[Quantity]),Facts[Quantity],DESC),Facts[Quantity],\",\")",
+   "powerbi": "3,5,4"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(3,TABLEOF(Facts[Quantity]),Facts[Quantity],DESC),Facts[Quantity],\",\",Facts[Quantity])",
+   "powerbi": "3,4,5"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(3,TABLEOF(Facts[Quantity]),Facts[Quantity],DESC),Facts[Quantity],\",\",Facts[Quantity],DESC)",
+   "powerbi": "5,4,3"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(3,TABLEOF(Facts[Quantity]),Facts[Quantity],DESC),Facts[Quantity],\"|\")",
+   "powerbi": "3|5|4"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(3,TABLEOF(Facts[Quantity]),Facts[Quantity],DESC),Facts[Quantity],\"|\",Facts[Quantity])",
+   "powerbi": "3|4|5"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(3,TABLEOF(Facts[Quantity]),Facts[Quantity],DESC),Facts[Quantity],\"|\",Facts[Quantity],DESC)",
+   "powerbi": "5|4|3"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(3,TABLEOF(Facts[Region]),Facts[Quantity]),Facts[Region],\",\")",
+   "powerbi": "West,North,East"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(3,TABLEOF(Facts[Region]),Facts[Quantity]),Facts[Region],\",\",Facts[Region])",
+   "powerbi": "East,North,West"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(3,TABLEOF(Facts[Region]),Facts[Quantity]),Facts[Region],\",\",Facts[Region],DESC)",
+   "powerbi": "West,North,East"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(3,TABLEOF(Facts[Region]),Facts[Quantity]),Facts[Region],\"|\")",
+   "powerbi": "West|North|East"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(3,TABLEOF(Facts[Region]),Facts[Quantity]),Facts[Region],\"|\",Facts[Region])",
+   "powerbi": "East|North|West"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(3,TABLEOF(Facts[Region]),Facts[Quantity]),Facts[Region],\"|\",Facts[Region],DESC)",
+   "powerbi": "West|North|East"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(3,TABLEOF(Facts[Region]),Facts[Region],ASC),Facts[Region],\",\")",
+   "powerbi": "East,East,East"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(3,TABLEOF(Facts[Region]),Facts[Region],ASC),Facts[Region],\",\",Facts[Region])",
+   "powerbi": "East,East,East"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(3,TABLEOF(Facts[Region]),Facts[Region],ASC),Facts[Region],\",\",Facts[Region],DESC)",
+   "powerbi": "East,East,East"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(3,TABLEOF(Facts[Region]),Facts[Region],ASC),Facts[Region],\"|\")",
+   "powerbi": "East|East|East"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(3,TABLEOF(Facts[Region]),Facts[Region],ASC),Facts[Region],\"|\",Facts[Region])",
+   "powerbi": "East|East|East"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(3,TABLEOF(Facts[Region]),Facts[Region],ASC),Facts[Region],\"|\",Facts[Region],DESC)",
+   "powerbi": "East|East|East"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(3,TABLEOF(Facts[Region]),Facts[Region],DESC),Facts[Region],\",\")",
+   "powerbi": "North,West,West"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(3,TABLEOF(Facts[Region]),Facts[Region],DESC),Facts[Region],\",\",Facts[Region])",
+   "powerbi": "North,West,West"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(3,TABLEOF(Facts[Region]),Facts[Region],DESC),Facts[Region],\",\",Facts[Region],DESC)",
+   "powerbi": "West,West,North"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(3,TABLEOF(Facts[Region]),Facts[Region],DESC),Facts[Region],\"|\")",
+   "powerbi": "North|West|West"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(3,TABLEOF(Facts[Region]),Facts[Region],DESC),Facts[Region],\"|\",Facts[Region])",
+   "powerbi": "North|West|West"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(3,TABLEOF(Facts[Region]),Facts[Region],DESC),Facts[Region],\"|\",Facts[Region],DESC)",
+   "powerbi": "West|West|North"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(3,TABLEOF(Facts[Sales]),Facts[Quantity]),Facts[Sales],\",\")",
+   "powerbi": "20,2.5,"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(3,TABLEOF(Facts[Sales]),Facts[Quantity]),Facts[Sales],\",\",Facts[Sales])",
+   "powerbi": ",2.5,20"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(3,TABLEOF(Facts[Sales]),Facts[Quantity]),Facts[Sales],\",\",Facts[Sales],DESC)",
+   "powerbi": "20,2.5,"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(3,TABLEOF(Facts[Sales]),Facts[Quantity]),Facts[Sales],\"|\")",
+   "powerbi": "20|2.5|"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(3,TABLEOF(Facts[Sales]),Facts[Quantity]),Facts[Sales],\"|\",Facts[Sales])",
+   "powerbi": "|2.5|20"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(3,TABLEOF(Facts[Sales]),Facts[Quantity]),Facts[Sales],\"|\",Facts[Sales],DESC)",
+   "powerbi": "20|2.5|"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(3,TABLEOF(Facts[Sales]),Facts[Sales],ASC),Facts[Sales],\",\")",
+   "powerbi": "0,-1.5,"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(3,TABLEOF(Facts[Sales]),Facts[Sales],ASC),Facts[Sales],\",\",Facts[Sales])",
+   "powerbi": "-1.5,,0"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(3,TABLEOF(Facts[Sales]),Facts[Sales],ASC),Facts[Sales],\",\",Facts[Sales],DESC)",
+   "powerbi": "0,,-1.5"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(3,TABLEOF(Facts[Sales]),Facts[Sales],ASC),Facts[Sales],\"|\")",
+   "powerbi": "0|-1.5|"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(3,TABLEOF(Facts[Sales]),Facts[Sales],ASC),Facts[Sales],\"|\",Facts[Sales])",
+   "powerbi": "-1.5||0"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(3,TABLEOF(Facts[Sales]),Facts[Sales],ASC),Facts[Sales],\"|\",Facts[Sales],DESC)",
+   "powerbi": "0||-1.5"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(3,TABLEOF(Facts[Sales]),Facts[Sales],DESC),Facts[Sales],\",\")",
+   "powerbi": "2.5,20,10.5"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(3,TABLEOF(Facts[Sales]),Facts[Sales],DESC),Facts[Sales],\",\",Facts[Sales])",
+   "powerbi": "2.5,10.5,20"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(3,TABLEOF(Facts[Sales]),Facts[Sales],DESC),Facts[Sales],\",\",Facts[Sales],DESC)",
+   "powerbi": "20,10.5,2.5"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(3,TABLEOF(Facts[Sales]),Facts[Sales],DESC),Facts[Sales],\"|\")",
+   "powerbi": "2.5|20|10.5"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(3,TABLEOF(Facts[Sales]),Facts[Sales],DESC),Facts[Sales],\"|\",Facts[Sales])",
+   "powerbi": "2.5|10.5|20"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(3,TABLEOF(Facts[Sales]),Facts[Sales],DESC),Facts[Sales],\"|\",Facts[Sales],DESC)",
+   "powerbi": "20|10.5|2.5"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(4,TABLEOF(Facts[Note]),Facts[Note],ASC),Facts[Note],\",\")",
+   "powerbi": "Paid,Paid,Late,,Paid,"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(4,TABLEOF(Facts[Note]),Facts[Note],ASC),Facts[Note],\",\",Facts[Note])",
+   "powerbi": ",,Late,Paid,Paid,Paid"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(4,TABLEOF(Facts[Note]),Facts[Note],ASC),Facts[Note],\",\",Facts[Note],DESC)",
+   "powerbi": "Paid,Paid,Paid,Late,,"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(4,TABLEOF(Facts[Note]),Facts[Note],ASC),Facts[Note],\"|\")",
+   "powerbi": "Paid|Paid|Late||Paid|"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(4,TABLEOF(Facts[Note]),Facts[Note],ASC),Facts[Note],\"|\",Facts[Note])",
+   "powerbi": "||Late|Paid|Paid|Paid"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(4,TABLEOF(Facts[Note]),Facts[Note],ASC),Facts[Note],\"|\",Facts[Note],DESC)",
+   "powerbi": "Paid|Paid|Paid|Late||"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(4,TABLEOF(Facts[Note]),Facts[Note],DESC),Facts[Note],\",\")",
+   "powerbi": "Late,Paid,Paid,Paid"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(4,TABLEOF(Facts[Note]),Facts[Note],DESC),Facts[Note],\",\",Facts[Note])",
+   "powerbi": "Late,Paid,Paid,Paid"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(4,TABLEOF(Facts[Note]),Facts[Note],DESC),Facts[Note],\",\",Facts[Note],DESC)",
+   "powerbi": "Paid,Paid,Paid,Late"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(4,TABLEOF(Facts[Note]),Facts[Note],DESC),Facts[Note],\"|\")",
+   "powerbi": "Late|Paid|Paid|Paid"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(4,TABLEOF(Facts[Note]),Facts[Note],DESC),Facts[Note],\"|\",Facts[Note])",
+   "powerbi": "Late|Paid|Paid|Paid"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(4,TABLEOF(Facts[Note]),Facts[Note],DESC),Facts[Note],\"|\",Facts[Note],DESC)",
+   "powerbi": "Paid|Paid|Paid|Late"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(4,TABLEOF(Facts[Quantity]),Facts[Quantity],ASC),Facts[Quantity],\",\")",
+   "powerbi": "3,2,1,0"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(4,TABLEOF(Facts[Quantity]),Facts[Quantity],ASC),Facts[Quantity],\",\",Facts[Quantity])",
+   "powerbi": "0,1,2,3"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(4,TABLEOF(Facts[Quantity]),Facts[Quantity],ASC),Facts[Quantity],\",\",Facts[Quantity],DESC)",
+   "powerbi": "3,2,1,0"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(4,TABLEOF(Facts[Quantity]),Facts[Quantity],ASC),Facts[Quantity],\"|\")",
+   "powerbi": "3|2|1|0"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(4,TABLEOF(Facts[Quantity]),Facts[Quantity],ASC),Facts[Quantity],\"|\",Facts[Quantity])",
+   "powerbi": "0|1|2|3"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(4,TABLEOF(Facts[Quantity]),Facts[Quantity],ASC),Facts[Quantity],\"|\",Facts[Quantity],DESC)",
+   "powerbi": "3|2|1|0"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(4,TABLEOF(Facts[Quantity]),Facts[Quantity],DESC),Facts[Quantity],\",\")",
+   "powerbi": "2,3,5,4"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(4,TABLEOF(Facts[Quantity]),Facts[Quantity],DESC),Facts[Quantity],\",\",Facts[Quantity])",
+   "powerbi": "2,3,4,5"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(4,TABLEOF(Facts[Quantity]),Facts[Quantity],DESC),Facts[Quantity],\",\",Facts[Quantity],DESC)",
+   "powerbi": "5,4,3,2"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(4,TABLEOF(Facts[Quantity]),Facts[Quantity],DESC),Facts[Quantity],\"|\")",
+   "powerbi": "2|3|5|4"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(4,TABLEOF(Facts[Quantity]),Facts[Quantity],DESC),Facts[Quantity],\"|\",Facts[Quantity])",
+   "powerbi": "2|3|4|5"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(4,TABLEOF(Facts[Quantity]),Facts[Quantity],DESC),Facts[Quantity],\"|\",Facts[Quantity],DESC)",
+   "powerbi": "5|4|3|2"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(4,TABLEOF(Facts[Region]),Facts[Region],ASC),Facts[Region],\",\")",
+   "powerbi": "North,East,East,East"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(4,TABLEOF(Facts[Region]),Facts[Region],ASC),Facts[Region],\",\",Facts[Region])",
+   "powerbi": "East,East,East,North"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(4,TABLEOF(Facts[Region]),Facts[Region],ASC),Facts[Region],\",\",Facts[Region],DESC)",
+   "powerbi": "North,East,East,East"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(4,TABLEOF(Facts[Region]),Facts[Region],ASC),Facts[Region],\"|\")",
+   "powerbi": "North|East|East|East"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(4,TABLEOF(Facts[Region]),Facts[Region],ASC),Facts[Region],\"|\",Facts[Region])",
+   "powerbi": "East|East|East|North"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(4,TABLEOF(Facts[Region]),Facts[Region],ASC),Facts[Region],\"|\",Facts[Region],DESC)",
+   "powerbi": "North|East|East|East"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(4,TABLEOF(Facts[Region]),Facts[Region],DESC),Facts[Region],\",\")",
+   "powerbi": "East,East,East,West,West,North"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(4,TABLEOF(Facts[Region]),Facts[Region],DESC),Facts[Region],\",\",Facts[Region])",
+   "powerbi": "East,East,East,North,West,West"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(4,TABLEOF(Facts[Region]),Facts[Region],DESC),Facts[Region],\",\",Facts[Region],DESC)",
+   "powerbi": "West,West,North,East,East,East"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(4,TABLEOF(Facts[Region]),Facts[Region],DESC),Facts[Region],\"|\")",
+   "powerbi": "East|East|East|West|West|North"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(4,TABLEOF(Facts[Region]),Facts[Region],DESC),Facts[Region],\"|\",Facts[Region])",
+   "powerbi": "East|East|East|North|West|West"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(4,TABLEOF(Facts[Region]),Facts[Region],DESC),Facts[Region],\"|\",Facts[Region],DESC)",
+   "powerbi": "West|West|North|East|East|East"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(4,TABLEOF(Facts[Sales]),Facts[Sales],ASC),Facts[Sales],\",\")",
+   "powerbi": "2.5,0,,-1.5"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(4,TABLEOF(Facts[Sales]),Facts[Sales],ASC),Facts[Sales],\",\",Facts[Sales])",
+   "powerbi": "-1.5,,0,2.5"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(4,TABLEOF(Facts[Sales]),Facts[Sales],ASC),Facts[Sales],\",\",Facts[Sales],DESC)",
+   "powerbi": "2.5,0,,-1.5"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(4,TABLEOF(Facts[Sales]),Facts[Sales],ASC),Facts[Sales],\"|\")",
+   "powerbi": "2.5|0||-1.5"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(4,TABLEOF(Facts[Sales]),Facts[Sales],ASC),Facts[Sales],\"|\",Facts[Sales])",
+   "powerbi": "-1.5||0|2.5"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(4,TABLEOF(Facts[Sales]),Facts[Sales],ASC),Facts[Sales],\"|\",Facts[Sales],DESC)",
+   "powerbi": "2.5|0||-1.5"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(4,TABLEOF(Facts[Sales]),Facts[Sales],DESC),Facts[Sales],\",\")",
+   "powerbi": "0,2.5,20,10.5"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(4,TABLEOF(Facts[Sales]),Facts[Sales],DESC),Facts[Sales],\",\",Facts[Sales])",
+   "powerbi": "0,2.5,10.5,20"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(4,TABLEOF(Facts[Sales]),Facts[Sales],DESC),Facts[Sales],\",\",Facts[Sales],DESC)",
+   "powerbi": "20,10.5,2.5,0"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(4,TABLEOF(Facts[Sales]),Facts[Sales],DESC),Facts[Sales],\"|\")",
+   "powerbi": "0|2.5|20|10.5"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(4,TABLEOF(Facts[Sales]),Facts[Sales],DESC),Facts[Sales],\"|\",Facts[Sales])",
+   "powerbi": "0|2.5|10.5|20"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(4,TABLEOF(Facts[Sales]),Facts[Sales],DESC),Facts[Sales],\"|\",Facts[Sales],DESC)",
+   "powerbi": "20|10.5|2.5|0"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(5,TABLEOF(Facts[Note]),Facts[Note],ASC),Facts[Note],\",\")",
+   "powerbi": "Paid,Paid,Late,,Paid,"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(5,TABLEOF(Facts[Note]),Facts[Note],ASC),Facts[Note],\",\",Facts[Note])",
+   "powerbi": ",,Late,Paid,Paid,Paid"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(5,TABLEOF(Facts[Note]),Facts[Note],ASC),Facts[Note],\",\",Facts[Note],DESC)",
+   "powerbi": "Paid,Paid,Paid,Late,,"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(5,TABLEOF(Facts[Note]),Facts[Note],ASC),Facts[Note],\"|\")",
+   "powerbi": "Paid|Paid|Late||Paid|"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(5,TABLEOF(Facts[Note]),Facts[Note],ASC),Facts[Note],\"|\",Facts[Note])",
+   "powerbi": "||Late|Paid|Paid|Paid"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(5,TABLEOF(Facts[Note]),Facts[Note],ASC),Facts[Note],\"|\",Facts[Note],DESC)",
+   "powerbi": "Paid|Paid|Paid|Late||"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(5,TABLEOF(Facts[Note]),Facts[Note],DESC),Facts[Note],\",\")",
+   "powerbi": ",,Late,Paid,Paid,Paid"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(5,TABLEOF(Facts[Note]),Facts[Note],DESC),Facts[Note],\",\",Facts[Note])",
+   "powerbi": ",,Late,Paid,Paid,Paid"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(5,TABLEOF(Facts[Note]),Facts[Note],DESC),Facts[Note],\",\",Facts[Note],DESC)",
+   "powerbi": "Paid,Paid,Paid,Late,,"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(5,TABLEOF(Facts[Note]),Facts[Note],DESC),Facts[Note],\"|\")",
+   "powerbi": "||Late|Paid|Paid|Paid"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(5,TABLEOF(Facts[Note]),Facts[Note],DESC),Facts[Note],\"|\",Facts[Note])",
+   "powerbi": "||Late|Paid|Paid|Paid"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(5,TABLEOF(Facts[Note]),Facts[Note],DESC),Facts[Note],\"|\",Facts[Note],DESC)",
+   "powerbi": "Paid|Paid|Paid|Late||"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(5,TABLEOF(Facts[Quantity]),Facts[Quantity],ASC),Facts[Quantity],\",\")",
+   "powerbi": "4,3,1,0,2"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(5,TABLEOF(Facts[Quantity]),Facts[Quantity],ASC),Facts[Quantity],\",\",Facts[Quantity])",
+   "powerbi": "0,1,2,3,4"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(5,TABLEOF(Facts[Quantity]),Facts[Quantity],ASC),Facts[Quantity],\",\",Facts[Quantity],DESC)",
+   "powerbi": "4,3,2,1,0"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(5,TABLEOF(Facts[Quantity]),Facts[Quantity],ASC),Facts[Quantity],\"|\")",
+   "powerbi": "4|3|1|0|2"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(5,TABLEOF(Facts[Quantity]),Facts[Quantity],ASC),Facts[Quantity],\"|\",Facts[Quantity])",
+   "powerbi": "0|1|2|3|4"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(5,TABLEOF(Facts[Quantity]),Facts[Quantity],ASC),Facts[Quantity],\"|\",Facts[Quantity],DESC)",
+   "powerbi": "4|3|2|1|0"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(5,TABLEOF(Facts[Quantity]),Facts[Quantity],DESC),Facts[Quantity],\",\")",
+   "powerbi": "1,3,2,5,4"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(5,TABLEOF(Facts[Quantity]),Facts[Quantity],DESC),Facts[Quantity],\",\",Facts[Quantity])",
+   "powerbi": "1,2,3,4,5"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(5,TABLEOF(Facts[Quantity]),Facts[Quantity],DESC),Facts[Quantity],\",\",Facts[Quantity],DESC)",
+   "powerbi": "5,4,3,2,1"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(5,TABLEOF(Facts[Quantity]),Facts[Quantity],DESC),Facts[Quantity],\"|\")",
+   "powerbi": "1|3|2|5|4"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(5,TABLEOF(Facts[Quantity]),Facts[Quantity],DESC),Facts[Quantity],\"|\",Facts[Quantity])",
+   "powerbi": "1|2|3|4|5"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(5,TABLEOF(Facts[Quantity]),Facts[Quantity],DESC),Facts[Quantity],\"|\",Facts[Quantity],DESC)",
+   "powerbi": "5|4|3|2|1"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(5,TABLEOF(Facts[Region]),Facts[Region],ASC),Facts[Region],\",\")",
+   "powerbi": "West,West,North,East,East,East"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(5,TABLEOF(Facts[Region]),Facts[Region],ASC),Facts[Region],\",\",Facts[Region])",
+   "powerbi": "East,East,East,North,West,West"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(5,TABLEOF(Facts[Region]),Facts[Region],ASC),Facts[Region],\",\",Facts[Region],DESC)",
+   "powerbi": "West,West,North,East,East,East"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(5,TABLEOF(Facts[Region]),Facts[Region],ASC),Facts[Region],\"|\")",
+   "powerbi": "West|West|North|East|East|East"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(5,TABLEOF(Facts[Region]),Facts[Region],ASC),Facts[Region],\"|\",Facts[Region])",
+   "powerbi": "East|East|East|North|West|West"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(5,TABLEOF(Facts[Region]),Facts[Region],ASC),Facts[Region],\"|\",Facts[Region],DESC)",
+   "powerbi": "West|West|North|East|East|East"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(5,TABLEOF(Facts[Region]),Facts[Region],DESC),Facts[Region],\",\")",
+   "powerbi": "East,East,East,West,West,North"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(5,TABLEOF(Facts[Region]),Facts[Region],DESC),Facts[Region],\",\",Facts[Region])",
+   "powerbi": "East,East,East,North,West,West"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(5,TABLEOF(Facts[Region]),Facts[Region],DESC),Facts[Region],\",\",Facts[Region],DESC)",
+   "powerbi": "West,West,North,East,East,East"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(5,TABLEOF(Facts[Region]),Facts[Region],DESC),Facts[Region],\"|\")",
+   "powerbi": "East|East|East|West|West|North"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(5,TABLEOF(Facts[Region]),Facts[Region],DESC),Facts[Region],\"|\",Facts[Region])",
+   "powerbi": "East|East|East|North|West|West"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(5,TABLEOF(Facts[Region]),Facts[Region],DESC),Facts[Region],\"|\",Facts[Region],DESC)",
+   "powerbi": "West|West|North|East|East|East"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(5,TABLEOF(Facts[Sales]),Facts[Sales],ASC),Facts[Sales],\",\")",
+   "powerbi": "10.5,2.5,,-1.5,0"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(5,TABLEOF(Facts[Sales]),Facts[Sales],ASC),Facts[Sales],\",\",Facts[Sales])",
+   "powerbi": "-1.5,,0,2.5,10.5"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(5,TABLEOF(Facts[Sales]),Facts[Sales],ASC),Facts[Sales],\",\",Facts[Sales],DESC)",
+   "powerbi": "10.5,2.5,0,,-1.5"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(5,TABLEOF(Facts[Sales]),Facts[Sales],ASC),Facts[Sales],\"|\")",
+   "powerbi": "10.5|2.5||-1.5|0"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(5,TABLEOF(Facts[Sales]),Facts[Sales],ASC),Facts[Sales],\"|\",Facts[Sales])",
+   "powerbi": "-1.5||0|2.5|10.5"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(5,TABLEOF(Facts[Sales]),Facts[Sales],ASC),Facts[Sales],\"|\",Facts[Sales],DESC)",
+   "powerbi": "10.5|2.5|0||-1.5"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(5,TABLEOF(Facts[Sales]),Facts[Sales],DESC),Facts[Sales],\",\")",
+   "powerbi": ",2.5,0,20,10.5"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(5,TABLEOF(Facts[Sales]),Facts[Sales],DESC),Facts[Sales],\",\",Facts[Sales])",
+   "powerbi": ",0,2.5,10.5,20"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(5,TABLEOF(Facts[Sales]),Facts[Sales],DESC),Facts[Sales],\",\",Facts[Sales],DESC)",
+   "powerbi": "20,10.5,2.5,0,"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(5,TABLEOF(Facts[Sales]),Facts[Sales],DESC),Facts[Sales],\"|\")",
+   "powerbi": "|2.5|0|20|10.5"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(5,TABLEOF(Facts[Sales]),Facts[Sales],DESC),Facts[Sales],\"|\",Facts[Sales])",
+   "powerbi": "|0|2.5|10.5|20"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(5,TABLEOF(Facts[Sales]),Facts[Sales],DESC),Facts[Sales],\"|\",Facts[Sales],DESC)",
+   "powerbi": "20|10.5|2.5|0|"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(6,TABLEOF(Facts[Note]),Facts[Note],ASC),Facts[Note],\",\")",
+   "powerbi": ",,Paid,Paid,Paid,Late"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(6,TABLEOF(Facts[Note]),Facts[Note],ASC),Facts[Note],\",\",Facts[Note])",
+   "powerbi": ",,Late,Paid,Paid,Paid"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(6,TABLEOF(Facts[Note]),Facts[Note],ASC),Facts[Note],\",\",Facts[Note],DESC)",
+   "powerbi": "Paid,Paid,Paid,Late,,"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(6,TABLEOF(Facts[Note]),Facts[Note],ASC),Facts[Note],\"|\")",
+   "powerbi": "||Paid|Paid|Paid|Late"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(6,TABLEOF(Facts[Note]),Facts[Note],ASC),Facts[Note],\"|\",Facts[Note])",
+   "powerbi": "||Late|Paid|Paid|Paid"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(6,TABLEOF(Facts[Note]),Facts[Note],ASC),Facts[Note],\"|\",Facts[Note],DESC)",
+   "powerbi": "Paid|Paid|Paid|Late||"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(6,TABLEOF(Facts[Note]),Facts[Note],DESC),Facts[Note],\",\")",
+   "powerbi": ",,Paid,Paid,Paid,Late"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(6,TABLEOF(Facts[Note]),Facts[Note],DESC),Facts[Note],\",\",Facts[Note])",
+   "powerbi": ",,Late,Paid,Paid,Paid"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(6,TABLEOF(Facts[Note]),Facts[Note],DESC),Facts[Note],\",\",Facts[Note],DESC)",
+   "powerbi": "Paid,Paid,Paid,Late,,"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(6,TABLEOF(Facts[Note]),Facts[Note],DESC),Facts[Note],\"|\")",
+   "powerbi": "||Paid|Paid|Paid|Late"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(6,TABLEOF(Facts[Note]),Facts[Note],DESC),Facts[Note],\"|\",Facts[Note])",
+   "powerbi": "||Late|Paid|Paid|Paid"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(6,TABLEOF(Facts[Note]),Facts[Note],DESC),Facts[Note],\"|\",Facts[Note],DESC)",
+   "powerbi": "Paid|Paid|Paid|Late||"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(6,TABLEOF(Facts[Quantity]),Facts[Quantity],ASC),Facts[Quantity],\",\")",
+   "powerbi": "0,1,2,3,4,5"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(6,TABLEOF(Facts[Quantity]),Facts[Quantity],ASC),Facts[Quantity],\",\",Facts[Quantity])",
+   "powerbi": "0,1,2,3,4,5"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(6,TABLEOF(Facts[Quantity]),Facts[Quantity],ASC),Facts[Quantity],\",\",Facts[Quantity],DESC)",
+   "powerbi": "5,4,3,2,1,0"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(6,TABLEOF(Facts[Quantity]),Facts[Quantity],ASC),Facts[Quantity],\"|\")",
+   "powerbi": "0|1|2|3|4|5"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(6,TABLEOF(Facts[Quantity]),Facts[Quantity],ASC),Facts[Quantity],\"|\",Facts[Quantity])",
+   "powerbi": "0|1|2|3|4|5"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(6,TABLEOF(Facts[Quantity]),Facts[Quantity],ASC),Facts[Quantity],\"|\",Facts[Quantity],DESC)",
+   "powerbi": "5|4|3|2|1|0"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(6,TABLEOF(Facts[Quantity]),Facts[Quantity],DESC),Facts[Quantity],\",\")",
+   "powerbi": "0,1,2,3,4,5"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(6,TABLEOF(Facts[Quantity]),Facts[Quantity],DESC),Facts[Quantity],\",\",Facts[Quantity])",
+   "powerbi": "0,1,2,3,4,5"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(6,TABLEOF(Facts[Quantity]),Facts[Quantity],DESC),Facts[Quantity],\",\",Facts[Quantity],DESC)",
+   "powerbi": "5,4,3,2,1,0"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(6,TABLEOF(Facts[Quantity]),Facts[Quantity],DESC),Facts[Quantity],\"|\")",
+   "powerbi": "0|1|2|3|4|5"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(6,TABLEOF(Facts[Quantity]),Facts[Quantity],DESC),Facts[Quantity],\"|\",Facts[Quantity])",
+   "powerbi": "0|1|2|3|4|5"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(6,TABLEOF(Facts[Quantity]),Facts[Quantity],DESC),Facts[Quantity],\"|\",Facts[Quantity],DESC)",
+   "powerbi": "5|4|3|2|1|0"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(6,TABLEOF(Facts[Region]),Facts[Region],ASC),Facts[Region],\",\")",
+   "powerbi": "East,East,East,West,West,North"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(6,TABLEOF(Facts[Region]),Facts[Region],ASC),Facts[Region],\",\",Facts[Region])",
+   "powerbi": "East,East,East,North,West,West"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(6,TABLEOF(Facts[Region]),Facts[Region],ASC),Facts[Region],\",\",Facts[Region],DESC)",
+   "powerbi": "West,West,North,East,East,East"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(6,TABLEOF(Facts[Region]),Facts[Region],ASC),Facts[Region],\"|\")",
+   "powerbi": "East|East|East|West|West|North"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(6,TABLEOF(Facts[Region]),Facts[Region],ASC),Facts[Region],\"|\",Facts[Region])",
+   "powerbi": "East|East|East|North|West|West"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(6,TABLEOF(Facts[Region]),Facts[Region],ASC),Facts[Region],\"|\",Facts[Region],DESC)",
+   "powerbi": "West|West|North|East|East|East"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(6,TABLEOF(Facts[Region]),Facts[Region],DESC),Facts[Region],\",\")",
+   "powerbi": "East,East,East,West,West,North"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(6,TABLEOF(Facts[Region]),Facts[Region],DESC),Facts[Region],\",\",Facts[Region])",
+   "powerbi": "East,East,East,North,West,West"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(6,TABLEOF(Facts[Region]),Facts[Region],DESC),Facts[Region],\",\",Facts[Region],DESC)",
+   "powerbi": "West,West,North,East,East,East"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(6,TABLEOF(Facts[Region]),Facts[Region],DESC),Facts[Region],\"|\")",
+   "powerbi": "East|East|East|West|West|North"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(6,TABLEOF(Facts[Region]),Facts[Region],DESC),Facts[Region],\"|\",Facts[Region])",
+   "powerbi": "East|East|East|North|West|West"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(6,TABLEOF(Facts[Region]),Facts[Region],DESC),Facts[Region],\"|\",Facts[Region],DESC)",
+   "powerbi": "West|West|North|East|East|East"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(6,TABLEOF(Facts[Sales]),Facts[Sales],ASC),Facts[Sales],\",\")",
+   "powerbi": ",-1.5,0,2.5,10.5,20"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(6,TABLEOF(Facts[Sales]),Facts[Sales],ASC),Facts[Sales],\",\",Facts[Sales])",
+   "powerbi": "-1.5,,0,2.5,10.5,20"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(6,TABLEOF(Facts[Sales]),Facts[Sales],ASC),Facts[Sales],\",\",Facts[Sales],DESC)",
+   "powerbi": "20,10.5,2.5,0,,-1.5"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(6,TABLEOF(Facts[Sales]),Facts[Sales],ASC),Facts[Sales],\"|\")",
+   "powerbi": "|-1.5|0|2.5|10.5|20"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(6,TABLEOF(Facts[Sales]),Facts[Sales],ASC),Facts[Sales],\"|\",Facts[Sales])",
+   "powerbi": "-1.5||0|2.5|10.5|20"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(6,TABLEOF(Facts[Sales]),Facts[Sales],ASC),Facts[Sales],\"|\",Facts[Sales],DESC)",
+   "powerbi": "20|10.5|2.5|0||-1.5"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(6,TABLEOF(Facts[Sales]),Facts[Sales],DESC),Facts[Sales],\",\")",
+   "powerbi": ",-1.5,0,2.5,10.5,20"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(6,TABLEOF(Facts[Sales]),Facts[Sales],DESC),Facts[Sales],\",\",Facts[Sales])",
+   "powerbi": "-1.5,,0,2.5,10.5,20"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(6,TABLEOF(Facts[Sales]),Facts[Sales],DESC),Facts[Sales],\",\",Facts[Sales],DESC)",
+   "powerbi": "20,10.5,2.5,0,,-1.5"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(6,TABLEOF(Facts[Sales]),Facts[Sales],DESC),Facts[Sales],\"|\")",
+   "powerbi": "|-1.5|0|2.5|10.5|20"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(6,TABLEOF(Facts[Sales]),Facts[Sales],DESC),Facts[Sales],\"|\",Facts[Sales])",
+   "powerbi": "-1.5||0|2.5|10.5|20"
+  },
+  {
+   "expr": "CONCATENATEX(TOPN(6,TABLEOF(Facts[Sales]),Facts[Sales],DESC),Facts[Sales],\"|\",Facts[Sales],DESC)",
+   "powerbi": "20|10.5|2.5|0||-1.5"
+  },
+  {
+   "expr": "COUNTROWS(ADDCOLUMNS(FILTER(TABLEOF(Facts[Quantity]),Facts[Quantity]<4),\"k\",Facts[Quantity]))",
+   "powerbi": "4"
+  },
+  {
+   "expr": "COUNTROWS(ADDCOLUMNS(FILTER(TABLEOF(Facts[Region]),Facts[Region]<>\"East\"),\"k\",Facts[Quantity]))",
+   "powerbi": "3"
+  },
+  {
+   "expr": "COUNTROWS(ADDCOLUMNS(FILTER(TABLEOF(Facts[Sales]),Facts[Sales]>5),\"k\",Facts[Quantity]))",
+   "powerbi": "2"
+  },
+  {
+   "expr": "COUNTROWS(ADDCOLUMNS(TABLEOF(Facts[Quantity]),\"k\",1))",
+   "powerbi": "6"
+  },
+  {
+   "expr": "COUNTROWS(ADDCOLUMNS(TABLEOF(Facts[Region]),\"k\",1))",
+   "powerbi": "6"
+  },
+  {
+   "expr": "COUNTROWS(DISTINCT(TABLEOF(Facts[Sales])))",
+   "powerbi": "6"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(TABLEOF(Facts[Note]),NOT(ISBLANK(Facts[Note]))))",
+   "powerbi": "4"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(TABLEOF(Facts[Quantity]),Facts[Quantity]<4))",
+   "powerbi": "4"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(TABLEOF(Facts[Region]),Facts[Region]<>\"East\"))",
+   "powerbi": "3"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(TABLEOF(Facts[Region]),Facts[Region]<>\"West\"))",
+   "powerbi": "4"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(TABLEOF(Facts[Sales]),Facts[Sales]>5))",
+   "powerbi": "2"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(TOPN(3,TABLEOF(Facts[Note]),Facts[Note]),NOT(ISBLANK(Facts[Note]))))",
+   "powerbi": "3"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(TOPN(3,TABLEOF(Facts[Quantity]),Facts[Quantity]),Facts[Quantity]<4))",
+   "powerbi": "1"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(TOPN(3,TABLEOF(Facts[Region]),Facts[Region]),Facts[Region]<>\"East\"))",
+   "powerbi": "3"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(TOPN(3,TABLEOF(Facts[Sales]),Facts[Sales]),Facts[Sales]>5))",
+   "powerbi": "2"
+  },
+  {
+   "expr": "COUNTROWS(FILTER(TOPN(4,TABLEOF(Facts[Sales]),Facts[Sales]),Facts[Sales]>0))",
+   "powerbi": "3"
+  },
+  {
+   "expr": "COUNTROWS(TABLEOF(Facts[Note]))",
+   "powerbi": "6"
+  },
+  {
+   "expr": "COUNTROWS(TOPN(1,TABLEOF(Facts[Note]),Facts[Note],ASC))",
+   "powerbi": "2"
+  },
+  {
+   "expr": "COUNTROWS(TOPN(1,TABLEOF(Facts[Sales]),Facts[Sales],ASC))",
+   "powerbi": "1"
+  },
+  {
+   "expr": "COUNTROWS(TOPN(1,TABLEOF(Facts[Sales]),Facts[Sales],DESC))",
+   "powerbi": "1"
+  },
+  {
+   "expr": "COUNTROWS(TOPN(2,TABLEOF(Facts[Note]),Facts[Sales],DESC))",
+   "powerbi": "2"
+  },
+  {
+   "expr": "COUNTROWS(TOPN(2,TABLEOF(Facts[Quantity]),Facts[Sales],DESC))",
+   "powerbi": "2"
+  },
+  {
+   "expr": "COUNTROWS(TOPN(2,TABLEOF(Facts[Region]),Facts[Region],ASC))",
+   "powerbi": "3"
+  },
+  {
+   "expr": "COUNTROWS(TOPN(2,TABLEOF(Facts[Region]),Facts[Region],DESC))",
+   "powerbi": "2"
+  },
+  {
+   "expr": "COUNTROWS(TOPN(2,TABLEOF(Facts[Region]),Facts[Sales],DESC))",
+   "powerbi": "2"
+  },
+  {
+   "expr": "COUNTROWS(TOPN(3,TABLEOF(Facts[Quantity]),Facts[Quantity],ASC))",
+   "powerbi": "3"
+  },
+  {
+   "expr": "COUNTROWS(TOPN(3,TABLEOF(Facts[Region]),Facts[Region],DESC))",
+   "powerbi": "3"
+  },
+  {
+   "expr": "COUNTROWS(TOPN(3,TABLEOF(Facts[Sales]),Facts[Quantity]))",
+   "powerbi": "3"
+  },
+  {
+   "expr": "COUNTROWS(TOPN(3,TABLEOF(Facts[Sales]),Facts[Sales],DESC))",
+   "powerbi": "3"
+  },
+  {
+   "expr": "COUNTROWS(TOPN(4,TABLEOF(Facts[Note]),Facts[Note],DESC))",
+   "powerbi": "4"
+  },
+  {
+   "expr": "COUNTROWS(TOPN(4,TABLEOF(Facts[Region]),Facts[Region],DESC))",
+   "powerbi": "6"
+  },
+  {
+   "expr": "COUNTROWS(TOPN(4,TABLEOF(Facts[Sales]),Facts[Sales],ASC))",
+   "powerbi": "4"
+  },
+  {
+   "expr": "COUNTROWS(TOPN(6,TABLEOF(Facts[Note]),Facts[Note],ASC))",
+   "powerbi": "6"
+  },
+  {
+   "expr": "COUNTROWS(TOPN(6,TABLEOF(Facts[Note]),Facts[Note],DESC))",
+   "powerbi": "6"
+  },
+  {
+   "expr": "COUNTROWS(TOPN(6,TABLEOF(Facts[Quantity]),Facts[Quantity],ASC))",
+   "powerbi": "6"
+  },
+  {
+   "expr": "COUNTROWS(TOPN(6,TABLEOF(Facts[Quantity]),Facts[Quantity],DESC))",
+   "powerbi": "6"
+  },
+  {
+   "expr": "COUNTROWS(TOPN(6,TABLEOF(Facts[Region]),Facts[Region],ASC))",
+   "powerbi": "6"
+  },
+  {
+   "expr": "COUNTROWS(TOPN(6,TABLEOF(Facts[Region]),Facts[Region],DESC))",
+   "powerbi": "6"
+  },
+  {
+   "expr": "COUNTROWS(TOPN(6,TABLEOF(Facts[Sales]),Facts[Sales],ASC))",
+   "powerbi": "6"
+  },
+  {
+   "expr": "COUNTROWS(TOPN(6,TABLEOF(Facts[Sales]),Facts[Sales],DESC))",
+   "powerbi": "6"
+  },
+  {
+   "expr": "COUNTROWS(UNION(TABLEOF(Facts[Note]),TABLEOF(Facts[Note])))",
+   "powerbi": "12"
+  },
+  {
+   "expr": "COUNTROWS(UNION(TABLEOF(Facts[Sales]),TABLEOF(Facts[Sales])))",
+   "powerbi": "12"
+  },
+  {
+   "expr": "COUNTX(ADDCOLUMNS(FILTER(TABLEOF(Facts[Quantity]),Facts[Quantity]<4),\"k\",Facts[Quantity]),Facts[Quantity])",
+   "powerbi": "4"
+  },
+  {
+   "expr": "COUNTX(ADDCOLUMNS(FILTER(TABLEOF(Facts[Quantity]),Facts[Quantity]>1),\"k\",Facts[Quantity]),Facts[Quantity])",
+   "powerbi": "4"
+  },
+  {
+   "expr": "COUNTX(ADDCOLUMNS(FILTER(TABLEOF(Facts[Region]),Facts[Region]<>\"East\"),\"k\",Facts[Quantity]),Facts[Region])",
+   "powerbi": "3"
+  },
+  {
+   "expr": "COUNTX(ADDCOLUMNS(FILTER(TABLEOF(Facts[Sales]),Facts[Sales]>5),\"k\",Facts[Quantity]),Facts[Sales])",
+   "powerbi": "2"
+  },
+  {
+   "expr": "COUNTX(ADDCOLUMNS(TABLEOF(Facts[Sales]),\"k\",1),Facts[Sales])",
+   "powerbi": "5"
+  },
+  {
+   "expr": "COUNTX(CALCULATETABLE(TABLEOF(Facts[Note]),Facts[Quantity]>0),Facts[Note])",
+   "powerbi": "3"
+  },
+  {
+   "expr": "COUNTX(DISTINCT(TABLEOF(Facts[Note])),Facts[Note])",
+   "powerbi": "4"
+  },
+  {
+   "expr": "COUNTX(DISTINCT(TABLEOF(Facts[Sales])),Facts[Sales])",
+   "powerbi": "5"
+  },
+  {
+   "expr": "COUNTX(FILTER(TABLEOF(Facts[Quantity]),Facts[Quantity]<4),Facts[Quantity])",
+   "powerbi": "4"
+  },
+  {
+   "expr": "COUNTX(FILTER(TABLEOF(Facts[Quantity]),Facts[Quantity]>1),Facts[Quantity])",
+   "powerbi": "4"
+  },
+  {
+   "expr": "COUNTX(FILTER(TABLEOF(Facts[Region]),Facts[Region]<>\"East\"),Facts[Region])",
+   "powerbi": "3"
+  },
+  {
+   "expr": "COUNTX(FILTER(TABLEOF(Facts[Sales]),Facts[Sales]>5),Facts[Sales])",
+   "powerbi": "2"
+  },
+  {
+   "expr": "COUNTX(FILTER(TOPN(3,TABLEOF(Facts[Note]),Facts[Note]),NOT(ISBLANK(Facts[Note]))),Facts[Note])",
+   "powerbi": "3"
+  },
+  {
+   "expr": "COUNTX(FILTER(TOPN(3,TABLEOF(Facts[Quantity]),Facts[Quantity]),Facts[Quantity]<4),Facts[Quantity])",
+   "powerbi": "1"
+  },
+  {
+   "expr": "COUNTX(FILTER(TOPN(3,TABLEOF(Facts[Region]),Facts[Region]),Facts[Region]<>\"East\"),Facts[Region])",
+   "powerbi": "3"
+  },
+  {
+   "expr": "COUNTX(FILTER(TOPN(3,TABLEOF(Facts[Sales]),Facts[Sales]),Facts[Sales]>5),Facts[Sales])",
+   "powerbi": "2"
+  },
+  {
+   "expr": "COUNTX(FILTER(TOPN(4,TABLEOF(Facts[Sales]),Facts[Sales]),Facts[Sales]>0),Facts[Sales])",
+   "powerbi": "3"
+  },
+  {
+   "expr": "COUNTX(TABLEOF(Facts[Note]),Facts[Note])",
+   "powerbi": "4"
+  },
+  {
+   "expr": "COUNTX(TABLEOF(Facts[Sales]),Facts[Sales])",
+   "powerbi": "5"
+  },
+  {
+   "expr": "COUNTX(TOPN(1,TABLEOF(Facts[Note]),Facts[Note],ASC),Facts[Note])",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTX(TOPN(1,TABLEOF(Facts[Quantity]),Facts[Quantity],ASC),Facts[Quantity])",
+   "powerbi": "1"
+  },
+  {
+   "expr": "COUNTX(TOPN(1,TABLEOF(Facts[Region]),Facts[Region],ASC),Facts[Region])",
+   "powerbi": "3"
+  },
+  {
+   "expr": "COUNTX(TOPN(1,TABLEOF(Facts[Region]),Facts[Region],DESC),Facts[Region])",
+   "powerbi": "2"
+  },
+  {
+   "expr": "COUNTX(TOPN(1,TABLEOF(Facts[Sales]),Facts[Sales],ASC),Facts[Sales])",
+   "powerbi": "1"
+  },
+  {
+   "expr": "COUNTX(TOPN(1,TABLEOF(Facts[Sales]),Facts[Sales],DESC),Facts[Sales])",
+   "powerbi": "1"
+  },
+  {
+   "expr": "COUNTX(TOPN(2,TABLEOF(Facts[Note]),Facts[Note],ASC),Facts[Note])",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTX(TOPN(2,TABLEOF(Facts[Note]),Facts[Sales],DESC),Facts[Note])",
+   "powerbi": "1"
+  },
+  {
+   "expr": "COUNTX(TOPN(2,TABLEOF(Facts[Quantity]),Facts[Quantity],ASC),Facts[Quantity])",
+   "powerbi": "2"
+  },
+  {
+   "expr": "COUNTX(TOPN(2,TABLEOF(Facts[Quantity]),Facts[Sales],DESC),Facts[Quantity])",
+   "powerbi": "2"
+  },
+  {
+   "expr": "COUNTX(TOPN(2,TABLEOF(Facts[Region]),Facts[Region],ASC),Facts[Region])",
+   "powerbi": "3"
+  },
+  {
+   "expr": "COUNTX(TOPN(2,TABLEOF(Facts[Region]),Facts[Sales],DESC),Facts[Region])",
+   "powerbi": "2"
+  },
+  {
+   "expr": "COUNTX(TOPN(2,TABLEOF(Facts[Sales]),Facts[Sales],ASC),Facts[Sales])",
+   "powerbi": "1"
+  },
+  {
+   "expr": "COUNTX(TOPN(3,TABLEOF(Facts[Note]),Facts[Note],ASC),Facts[Note])",
+   "powerbi": "1"
+  },
+  {
+   "expr": "COUNTX(TOPN(3,TABLEOF(Facts[Quantity]),Facts[Quantity]),Facts[Quantity])",
+   "powerbi": "3"
+  },
+  {
+   "expr": "COUNTX(TOPN(3,TABLEOF(Facts[Quantity]),Facts[Quantity],DESC),Facts[Quantity])",
+   "powerbi": "3"
+  },
+  {
+   "expr": "COUNTX(TOPN(3,TABLEOF(Facts[Region]),Facts[Region],DESC),Facts[Region])",
+   "powerbi": "3"
+  },
+  {
+   "expr": "COUNTX(TOPN(4,TABLEOF(Facts[Note]),Facts[Note],ASC),Facts[Note])",
+   "powerbi": "4"
+  },
+  {
+   "expr": "COUNTX(TOPN(5,TABLEOF(Facts[Quantity]),Facts[Quantity],DESC),Facts[Quantity])",
+   "powerbi": "5"
+  },
+  {
+   "expr": "COUNTX(TOPN(5,TABLEOF(Facts[Region]),Facts[Region],ASC),Facts[Region])",
+   "powerbi": "6"
+  },
+  {
+   "expr": "COUNTX(TOPN(5,TABLEOF(Facts[Region]),Facts[Region],DESC),Facts[Region])",
+   "powerbi": "6"
+  },
+  {
+   "expr": "COUNTX(TOPN(5,TABLEOF(Facts[Sales]),Facts[Sales],ASC),Facts[Sales])",
+   "powerbi": "4"
+  },
+  {
+   "expr": "COUNTX(TOPN(6,TABLEOF(Facts[Note]),Facts[Note],ASC),Facts[Note])",
+   "powerbi": "4"
+  },
+  {
+   "expr": "COUNTX(TOPN(6,TABLEOF(Facts[Note]),Facts[Note],DESC),Facts[Note])",
+   "powerbi": "4"
+  },
+  {
+   "expr": "COUNTX(TOPN(6,TABLEOF(Facts[Quantity]),Facts[Quantity],ASC),Facts[Quantity])",
+   "powerbi": "6"
+  },
+  {
+   "expr": "COUNTX(TOPN(6,TABLEOF(Facts[Quantity]),Facts[Quantity],DESC),Facts[Quantity])",
+   "powerbi": "6"
+  },
+  {
+   "expr": "COUNTX(TOPN(6,TABLEOF(Facts[Region]),Facts[Region],ASC),Facts[Region])",
+   "powerbi": "6"
+  },
+  {
+   "expr": "COUNTX(TOPN(6,TABLEOF(Facts[Region]),Facts[Region],DESC),Facts[Region])",
+   "powerbi": "6"
+  },
+  {
+   "expr": "COUNTX(TOPN(6,TABLEOF(Facts[Sales]),Facts[Sales],ASC),Facts[Sales])",
+   "powerbi": "5"
+  },
+  {
+   "expr": "COUNTX(TOPN(6,TABLEOF(Facts[Sales]),Facts[Sales],DESC),Facts[Sales])",
+   "powerbi": "5"
+  },
+  {
+   "expr": "COUNTX(UNION(TABLEOF(Facts[Quantity]),TABLEOF(Facts[Quantity])),Facts[Quantity])",
+   "powerbi": "12"
+  },
+  {
+   "expr": "MAXX(ADDCOLUMNS(FILTER(TABLEOF(Facts[Quantity]),Facts[Quantity]<4),\"k\",Facts[Quantity]),Facts[Quantity])",
+   "powerbi": "3"
+  },
+  {
+   "expr": "MAXX(ADDCOLUMNS(FILTER(TABLEOF(Facts[Quantity]),Facts[Quantity]>1),\"k\",Facts[Quantity]),Facts[Quantity])",
+   "powerbi": "5"
+  },
+  {
+   "expr": "MAXX(ADDCOLUMNS(FILTER(TABLEOF(Facts[Region]),Facts[Region]<>\"East\"),\"k\",Facts[Quantity]),Facts[Region])",
+   "powerbi": "West"
+  },
+  {
+   "expr": "MAXX(ADDCOLUMNS(FILTER(TABLEOF(Facts[Sales]),Facts[Sales]>0),\"k\",Facts[Quantity]),Facts[Sales])",
+   "powerbi": "20"
+  },
+  {
+   "expr": "MAXX(ADDCOLUMNS(FILTER(TABLEOF(Facts[Sales]),Facts[Sales]>5),\"k\",Facts[Quantity]),Facts[Sales])",
+   "powerbi": "20"
+  },
+  {
+   "expr": "MAXX(ADDCOLUMNS(TABLEOF(Facts[Note]),\"k\",1),Facts[Note])",
+   "powerbi": "Paid"
+  },
+  {
+   "expr": "MAXX(ADDCOLUMNS(TABLEOF(Facts[Region]),\"k\",1),Facts[Region])",
+   "powerbi": "West"
+  },
+  {
+   "expr": "MAXX(ADDCOLUMNS(TABLEOF(Facts[Sales]),\"k\",1),Facts[Sales])",
+   "powerbi": "20"
+  },
+  {
+   "expr": "MAXX(CALCULATETABLE(TABLEOF(Facts[Quantity]),Facts[Quantity]>0),Facts[Quantity])",
+   "powerbi": "5"
+  },
+  {
+   "expr": "MAXX(DISTINCT(TABLEOF(Facts[Region])),Facts[Region])",
+   "powerbi": "West"
+  },
+  {
+   "expr": "MAXX(FILTER(TABLEOF(Facts[Quantity]),Facts[Quantity]<4),Facts[Quantity])",
+   "powerbi": "3"
+  },
+  {
+   "expr": "MAXX(FILTER(TABLEOF(Facts[Region]),Facts[Region]<>\"East\"),Facts[Region])",
+   "powerbi": "West"
+  },
+  {
+   "expr": "MAXX(FILTER(TABLEOF(Facts[Sales]),Facts[Sales]>5),Facts[Sales])",
+   "powerbi": "20"
+  },
+  {
+   "expr": "MAXX(FILTER(TOPN(3,TABLEOF(Facts[Note]),Facts[Note]),NOT(ISBLANK(Facts[Note]))),Facts[Note])",
+   "powerbi": "Paid"
+  },
+  {
+   "expr": "MAXX(FILTER(TOPN(3,TABLEOF(Facts[Quantity]),Facts[Quantity]),Facts[Quantity]<4),Facts[Quantity])",
+   "powerbi": "3"
+  },
+  {
+   "expr": "MAXX(FILTER(TOPN(3,TABLEOF(Facts[Region]),Facts[Region]),Facts[Region]<>\"East\"),Facts[Region])",
+   "powerbi": "West"
+  },
+  {
+   "expr": "MAXX(FILTER(TOPN(3,TABLEOF(Facts[Sales]),Facts[Sales]),Facts[Sales]>5),Facts[Sales])",
+   "powerbi": "20"
+  },
+  {
+   "expr": "MAXX(FILTER(TOPN(4,TABLEOF(Facts[Region]),Facts[Region]),Facts[Region]<>\"West\"),Facts[Region])",
+   "powerbi": "North"
+  },
+  {
+   "expr": "MAXX(FILTER(TOPN(4,TABLEOF(Facts[Sales]),Facts[Sales]),Facts[Sales]>0),Facts[Sales])",
+   "powerbi": "20"
+  },
+  {
+   "expr": "MAXX(TOPN(1,TABLEOF(Facts[Note]),Facts[Note],DESC),Facts[Note])",
+   "powerbi": "Paid"
+  },
+  {
+   "expr": "MAXX(TOPN(1,TABLEOF(Facts[Quantity]),Facts[Quantity],DESC),Facts[Quantity])",
+   "powerbi": "5"
+  },
+  {
+   "expr": "MAXX(TOPN(1,TABLEOF(Facts[Region]),Facts[Region],ASC),Facts[Region])",
+   "powerbi": "East"
+  },
+  {
+   "expr": "MAXX(TOPN(2,TABLEOF(Facts[Note]),Facts[Sales],DESC),Facts[Note])",
+   "powerbi": "Paid"
+  },
+  {
+   "expr": "MAXX(TOPN(2,TABLEOF(Facts[Quantity]),Facts[Quantity],ASC),Facts[Quantity])",
+   "powerbi": "1"
+  },
+  {
+   "expr": "MAXX(TOPN(2,TABLEOF(Facts[Quantity]),Facts[Sales],DESC),Facts[Quantity])",
+   "powerbi": "3"
+  },
+  {
+   "expr": "MAXX(TOPN(2,TABLEOF(Facts[Region]),Facts[Region],DESC),Facts[Region])",
+   "powerbi": "West"
+  },
+  {
+   "expr": "MAXX(TOPN(2,TABLEOF(Facts[Region]),Facts[Sales],DESC),Facts[Region])",
+   "powerbi": "West"
+  },
+  {
+   "expr": "MAXX(TOPN(2,TABLEOF(Facts[Sales]),Facts[Sales],DESC),Facts[Sales])",
+   "powerbi": "20"
+  },
+  {
+   "expr": "MAXX(TOPN(3,TABLEOF(Facts[Note]),Facts[Note],DESC),Facts[Note])",
+   "powerbi": "Paid"
+  },
+  {
+   "expr": "MAXX(TOPN(3,TABLEOF(Facts[Quantity]),Facts[Quantity]),Facts[Quantity])",
+   "powerbi": "5"
+  },
+  {
+   "expr": "MAXX(TOPN(3,TABLEOF(Facts[Sales]),Facts[Sales],ASC),Facts[Sales])",
+   "powerbi": "0"
+  },
+  {
+   "expr": "MAXX(TOPN(4,TABLEOF(Facts[Region]),Facts[Region],ASC),Facts[Region])",
+   "powerbi": "North"
+  },
+  {
+   "expr": "MAXX(TOPN(4,TABLEOF(Facts[Sales]),Facts[Sales],ASC),Facts[Sales])",
+   "powerbi": "2.5"
+  },
+  {
+   "expr": "MAXX(TOPN(4,TABLEOF(Facts[Sales]),Facts[Sales],DESC),Facts[Sales])",
+   "powerbi": "20"
+  },
+  {
+   "expr": "MAXX(TOPN(5,TABLEOF(Facts[Quantity]),Facts[Quantity],DESC),Facts[Quantity])",
+   "powerbi": "5"
+  },
+  {
+   "expr": "MAXX(TOPN(5,TABLEOF(Facts[Region]),Facts[Region],DESC),Facts[Region])",
+   "powerbi": "West"
+  },
+  {
+   "expr": "MAXX(TOPN(6,TABLEOF(Facts[Note]),Facts[Note],ASC),Facts[Note])",
+   "powerbi": "Paid"
+  },
+  {
+   "expr": "MAXX(TOPN(6,TABLEOF(Facts[Note]),Facts[Note],DESC),Facts[Note])",
+   "powerbi": "Paid"
+  },
+  {
+   "expr": "MAXX(TOPN(6,TABLEOF(Facts[Quantity]),Facts[Quantity],ASC),Facts[Quantity])",
+   "powerbi": "5"
+  },
+  {
+   "expr": "MAXX(TOPN(6,TABLEOF(Facts[Quantity]),Facts[Quantity],DESC),Facts[Quantity])",
+   "powerbi": "5"
+  },
+  {
+   "expr": "MAXX(TOPN(6,TABLEOF(Facts[Region]),Facts[Region],ASC),Facts[Region])",
+   "powerbi": "West"
+  },
+  {
+   "expr": "MAXX(TOPN(6,TABLEOF(Facts[Region]),Facts[Region],DESC),Facts[Region])",
+   "powerbi": "West"
+  },
+  {
+   "expr": "MAXX(TOPN(6,TABLEOF(Facts[Sales]),Facts[Sales],ASC),Facts[Sales])",
+   "powerbi": "20"
+  },
+  {
+   "expr": "MAXX(TOPN(6,TABLEOF(Facts[Sales]),Facts[Sales],DESC),Facts[Sales])",
+   "powerbi": "20"
+  },
+  {
+   "expr": "MINX(ADDCOLUMNS(FILTER(TABLEOF(Facts[Quantity]),Facts[Quantity]<4),\"k\",Facts[Quantity]),Facts[Quantity])",
+   "powerbi": "0"
+  },
+  {
+   "expr": "MINX(ADDCOLUMNS(FILTER(TABLEOF(Facts[Region]),Facts[Region]<>\"East\"),\"k\",Facts[Quantity]),Facts[Region])",
+   "powerbi": "North"
+  },
+  {
+   "expr": "MINX(ADDCOLUMNS(FILTER(TABLEOF(Facts[Region]),Facts[Region]<>\"West\"),\"k\",Facts[Quantity]),Facts[Region])",
+   "powerbi": "East"
+  },
+  {
+   "expr": "MINX(ADDCOLUMNS(FILTER(TABLEOF(Facts[Sales]),Facts[Sales]>0),\"k\",Facts[Quantity]),Facts[Sales])",
+   "powerbi": "2.5"
+  },
+  {
+   "expr": "MINX(ADDCOLUMNS(FILTER(TABLEOF(Facts[Sales]),Facts[Sales]>5),\"k\",Facts[Quantity]),Facts[Sales])",
+   "powerbi": "10.5"
+  },
+  {
+   "expr": "MINX(CALCULATETABLE(TABLEOF(Facts[Note]),Facts[Quantity]>0),Facts[Note])",
+   "powerbi": "Late"
+  },
+  {
+   "expr": "MINX(CALCULATETABLE(TABLEOF(Facts[Quantity]),Facts[Quantity]>0),Facts[Quantity])",
+   "powerbi": "1"
+  },
+  {
+   "expr": "MINX(CALCULATETABLE(TABLEOF(Facts[Region]),Facts[Quantity]>0),Facts[Region])",
+   "powerbi": "East"
+  },
+  {
+   "expr": "MINX(DISTINCT(TABLEOF(Facts[Region])),Facts[Region])",
+   "powerbi": "East"
+  },
+  {
+   "expr": "MINX(FILTER(TABLEOF(Facts[Quantity]),Facts[Quantity]<4),Facts[Quantity])",
+   "powerbi": "0"
+  },
+  {
+   "expr": "MINX(FILTER(TABLEOF(Facts[Region]),Facts[Region]<>\"East\"),Facts[Region])",
+   "powerbi": "North"
+  },
+  {
+   "expr": "MINX(FILTER(TABLEOF(Facts[Sales]),Facts[Sales]>5),Facts[Sales])",
+   "powerbi": "10.5"
+  },
+  {
+   "expr": "MINX(FILTER(TOPN(3,TABLEOF(Facts[Note]),Facts[Note]),NOT(ISBLANK(Facts[Note]))),Facts[Note])",
+   "powerbi": "Paid"
+  },
+  {
+   "expr": "MINX(FILTER(TOPN(3,TABLEOF(Facts[Quantity]),Facts[Quantity]),Facts[Quantity]<4),Facts[Quantity])",
+   "powerbi": "3"
+  },
+  {
+   "expr": "MINX(FILTER(TOPN(3,TABLEOF(Facts[Region]),Facts[Region]),Facts[Region]<>\"East\"),Facts[Region])",
+   "powerbi": "North"
+  },
+  {
+   "expr": "MINX(FILTER(TOPN(3,TABLEOF(Facts[Sales]),Facts[Sales]),Facts[Sales]>5),Facts[Sales])",
+   "powerbi": "10.5"
+  },
+  {
+   "expr": "MINX(FILTER(TOPN(4,TABLEOF(Facts[Quantity]),Facts[Quantity]),Facts[Quantity]>1),Facts[Quantity])",
+   "powerbi": "2"
+  },
+  {
+   "expr": "MINX(FILTER(TOPN(4,TABLEOF(Facts[Region]),Facts[Region]),Facts[Region]<>\"West\"),Facts[Region])",
+   "powerbi": "East"
+  },
+  {
+   "expr": "MINX(TABLEOF(Facts[Region]),Facts[Region])",
+   "powerbi": "East"
+  },
+  {
+   "expr": "MINX(TABLEOF(Facts[Sales]),Facts[Sales])",
+   "powerbi": "-1.5"
+  },
+  {
+   "expr": "MINX(TOPN(1,TABLEOF(Facts[Note]),Facts[Note],DESC),Facts[Note])",
+   "powerbi": "Paid"
+  },
+  {
+   "expr": "MINX(TOPN(1,TABLEOF(Facts[Quantity]),Facts[Quantity],DESC),Facts[Quantity])",
+   "powerbi": "5"
+  },
+  {
+   "expr": "MINX(TOPN(2,TABLEOF(Facts[Note]),Facts[Note],ASC),Facts[Note])",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MINX(TOPN(2,TABLEOF(Facts[Note]),Facts[Sales],DESC),Facts[Note])",
+   "powerbi": "Paid"
+  },
+  {
+   "expr": "MINX(TOPN(2,TABLEOF(Facts[Quantity]),Facts[Quantity],DESC),Facts[Quantity])",
+   "powerbi": "4"
+  },
+  {
+   "expr": "MINX(TOPN(2,TABLEOF(Facts[Quantity]),Facts[Sales],DESC),Facts[Quantity])",
+   "powerbi": "2"
+  },
+  {
+   "expr": "MINX(TOPN(2,TABLEOF(Facts[Region]),Facts[Sales],DESC),Facts[Region])",
+   "powerbi": "East"
+  },
+  {
+   "expr": "MINX(TOPN(2,TABLEOF(Facts[Sales]),Facts[Sales],DESC),Facts[Sales])",
+   "powerbi": "10.5"
+  },
+  {
+   "expr": "MINX(TOPN(3,TABLEOF(Facts[Note]),Facts[Note],ASC),Facts[Note])",
+   "powerbi": "Late"
+  },
+  {
+   "expr": "MINX(TOPN(3,TABLEOF(Facts[Region]),Facts[Quantity]),Facts[Region])",
+   "powerbi": "East"
+  },
+  {
+   "expr": "MINX(TOPN(3,TABLEOF(Facts[Sales]),Facts[Quantity]),Facts[Sales])",
+   "powerbi": "2.5"
+  },
+  {
+   "expr": "MINX(TOPN(3,TABLEOF(Facts[Sales]),Facts[Sales],ASC),Facts[Sales])",
+   "powerbi": "-1.5"
+  },
+  {
+   "expr": "MINX(TOPN(4,TABLEOF(Facts[Note]),Facts[Note],DESC),Facts[Note])",
+   "powerbi": "Late"
+  },
+  {
+   "expr": "MINX(TOPN(5,TABLEOF(Facts[Quantity]),Facts[Quantity],ASC),Facts[Quantity])",
+   "powerbi": "0"
+  },
+  {
+   "expr": "MINX(TOPN(6,TABLEOF(Facts[Note]),Facts[Note],ASC),Facts[Note])",
+   "powerbi": "Late"
+  },
+  {
+   "expr": "MINX(TOPN(6,TABLEOF(Facts[Note]),Facts[Note],DESC),Facts[Note])",
+   "powerbi": "Late"
+  },
+  {
+   "expr": "MINX(TOPN(6,TABLEOF(Facts[Quantity]),Facts[Quantity],ASC),Facts[Quantity])",
+   "powerbi": "0"
+  },
+  {
+   "expr": "MINX(TOPN(6,TABLEOF(Facts[Quantity]),Facts[Quantity],DESC),Facts[Quantity])",
+   "powerbi": "0"
+  },
+  {
+   "expr": "MINX(TOPN(6,TABLEOF(Facts[Region]),Facts[Region],ASC),Facts[Region])",
+   "powerbi": "East"
+  },
+  {
+   "expr": "MINX(TOPN(6,TABLEOF(Facts[Region]),Facts[Region],DESC),Facts[Region])",
+   "powerbi": "East"
+  },
+  {
+   "expr": "MINX(TOPN(6,TABLEOF(Facts[Sales]),Facts[Sales],ASC),Facts[Sales])",
+   "powerbi": "-1.5"
+  },
+  {
+   "expr": "MINX(TOPN(6,TABLEOF(Facts[Sales]),Facts[Sales],DESC),Facts[Sales])",
+   "powerbi": "-1.5"
+  },
+  {
+   "expr": "MINX(UNION(TABLEOF(Facts[Sales]),TABLEOF(Facts[Sales])),Facts[Sales])",
+   "powerbi": "-1.5"
+  },
+  {
+   "expr": "SUMX(ADDCOLUMNS(FILTER(TABLEOF(Facts[Quantity]),Facts[Quantity]<4),\"k\",Facts[Quantity]),Facts[Quantity])",
+   "powerbi": "6"
+  },
+  {
+   "expr": "SUMX(ADDCOLUMNS(FILTER(TABLEOF(Facts[Quantity]),Facts[Quantity]>1),\"k\",Facts[Quantity]),Facts[Quantity])",
+   "powerbi": "14"
+  },
+  {
+   "expr": "SUMX(ADDCOLUMNS(FILTER(TABLEOF(Facts[Sales]),Facts[Sales]>5),\"k\",Facts[Quantity]),Facts[Sales])",
+   "powerbi": "30.5"
+  },
+  {
+   "expr": "SUMX(DISTINCT(TABLEOF(Facts[Sales])),Facts[Sales])",
+   "powerbi": "31.5"
+  },
+  {
+   "expr": "SUMX(FILTER(TABLEOF(Facts[Quantity]),Facts[Quantity]<4),Facts[Quantity])",
+   "powerbi": "6"
+  },
+  {
+   "expr": "SUMX(FILTER(TABLEOF(Facts[Quantity]),Facts[Quantity]>1),Facts[Quantity])",
+   "powerbi": "14"
+  },
+  {
+   "expr": "SUMX(FILTER(TABLEOF(Facts[Sales]),Facts[Sales]>5),Facts[Sales])",
+   "powerbi": "30.5"
+  },
+  {
+   "expr": "SUMX(FILTER(TOPN(3,TABLEOF(Facts[Quantity]),Facts[Quantity]),Facts[Quantity]<4),Facts[Quantity])",
+   "powerbi": "3"
+  },
+  {
+   "expr": "SUMX(FILTER(TOPN(3,TABLEOF(Facts[Sales]),Facts[Sales]),Facts[Sales]>5),Facts[Sales])",
+   "powerbi": "30.5"
+  },
+  {
+   "expr": "SUMX(TOPN(1,TABLEOF(Facts[Sales]),Facts[Sales],ASC),Facts[Sales])",
+   "powerbi": "-1.5"
+  },
+  {
+   "expr": "SUMX(TOPN(2,TABLEOF(Facts[Quantity]),Facts[Sales],DESC),Facts[Quantity])",
+   "powerbi": "5"
+  },
+  {
+   "expr": "SUMX(TOPN(3,TABLEOF(Facts[Sales]),Facts[Sales],ASC),Facts[Sales])",
+   "powerbi": "-1.5"
+  },
+  {
+   "expr": "SUMX(TOPN(4,TABLEOF(Facts[Quantity]),Facts[Quantity],DESC),Facts[Quantity])",
+   "powerbi": "14"
+  },
+  {
+   "expr": "SUMX(TOPN(4,TABLEOF(Facts[Sales]),Facts[Sales],DESC),Facts[Sales])",
+   "powerbi": "33"
+  },
+  {
+   "expr": "SUMX(TOPN(5,TABLEOF(Facts[Sales]),Facts[Sales],ASC),Facts[Sales])",
+   "powerbi": "11.5"
+  },
+  {
+   "expr": "SUMX(TOPN(6,TABLEOF(Facts[Quantity]),Facts[Quantity],ASC),Facts[Quantity])",
+   "powerbi": "15"
+  },
+  {
+   "expr": "SUMX(TOPN(6,TABLEOF(Facts[Quantity]),Facts[Quantity],DESC),Facts[Quantity])",
+   "powerbi": "15"
+  },
+  {
+   "expr": "SUMX(TOPN(6,TABLEOF(Facts[Sales]),Facts[Sales],ASC),Facts[Sales])",
+   "powerbi": "31.5"
+  },
+  {
+   "expr": "SUMX(TOPN(6,TABLEOF(Facts[Sales]),Facts[Sales],DESC),Facts[Sales])",
+   "powerbi": "31.5"
+  },
+  {
+   "expr": "TOJSON(VAR n=1 RETURN ALL(Facts))",
+   "powerbi": "{\n\t\"header\": [\"'Facts'[Sales]\", \"'Facts'[Quantity]\", \"'Facts'[Region]\", \"'Facts'[Note]\"],\n\t\"rowCount\": 6,\n\t\"data\": [\n\t\t[10.5, 2, \"East\", \"Paid\"],\n\t\t[20.0, 3, \"West\", null],\n\t\t[-1.5, 1, \"East\", \"Paid\"],\n\t\t[null, 4, \"North\", \"Late\"],\n\t\t[0.0, 0, \"West\", \"Paid\"],\n\t\t[2.5, 5, \"East\", null]\n\t]\n}"
+  },
+  {
+   "expr": "TOJSON(VAR n=1 RETURN ALL(Facts),10)",
+   "powerbi": "{\n\t\"header\": [\"'Facts'[Sales]\", \"'Facts'[Quantity]\", \"'Facts'[Region]\", \"'Facts'[Note]\"],\n\t\"rowCount\": 6,\n\t\"data\": [\n\t\t[10.5, 2, \"East\", \"Paid\"],\n\t\t[20.0, 3, \"West\", null],\n\t\t[-1.5, 1, \"East\", \"Paid\"],\n\t\t[null, 4, \"North\", \"Late\"],\n\t\t[0.0, 0, \"West\", \"Paid\"],\n\t\t[2.5, 5, \"East\", null]\n\t]\n}"
+  },
+  {
+   "expr": "TOJSON(VAR n=1 RETURN ALL(Facts),3)",
+   "powerbi": "{\n\t\"header\": [\"'Facts'[Sales]\", \"'Facts'[Quantity]\", \"'Facts'[Region]\", \"'Facts'[Note]\"],\n\t\"rowCount\": 6,\n\t\"data\": [\n\t\t[10.5, 2, \"East\", \"Paid\"],\n\t\t[20.0, 3, \"West\", null],\n\t\t[-1.5, 1, \"East\", \"Paid\"]\n\t]\n}"
+  },
+  {
+   "expr": "TOJSON(VAR n=1 RETURN ALL(Facts[Region]))",
+   "powerbi": "{\n\t\"header\": [\"'Facts'[Region]\"],\n\t\"rowCount\": 3,\n\t\"data\": [\n\t\t[\"East\"],\n\t\t[\"West\"],\n\t\t[\"North\"]\n\t]\n}"
+  },
+  {
+   "expr": "TOJSON(VAR n=1 RETURN ALL(Facts[Region]),10)",
+   "powerbi": "{\n\t\"header\": [\"'Facts'[Region]\"],\n\t\"rowCount\": 3,\n\t\"data\": [\n\t\t[\"East\"],\n\t\t[\"West\"],\n\t\t[\"North\"]\n\t]\n}"
+  },
+  {
+   "expr": "TOJSON(VAR n=1 RETURN ALL(Facts[Region]),3)",
+   "powerbi": "{\n\t\"header\": [\"'Facts'[Region]\"],\n\t\"rowCount\": 3,\n\t\"data\": [\n\t\t[\"East\"],\n\t\t[\"West\"],\n\t\t[\"North\"]\n\t]\n}"
+  },
+  {
+   "expr": "TOJSON(VAR n=1 RETURN CALCULATETABLE(Facts,Facts[Sales]>3))",
+   "powerbi": "{\n\t\"header\": [\"'Facts'[Sales]\", \"'Facts'[Quantity]\", \"'Facts'[Region]\", \"'Facts'[Note]\"],\n\t\"rowCount\": 2,\n\t\"data\": [\n\t\t[10.5, 2, \"East\", \"Paid\"],\n\t\t[20.0, 3, \"West\", null]\n\t]\n}"
+  },
+  {
+   "expr": "TOJSON(VAR n=1 RETURN CALCULATETABLE(Facts,Facts[Sales]>3),10)",
+   "powerbi": "{\n\t\"header\": [\"'Facts'[Sales]\", \"'Facts'[Quantity]\", \"'Facts'[Region]\", \"'Facts'[Note]\"],\n\t\"rowCount\": 2,\n\t\"data\": [\n\t\t[10.5, 2, \"East\", \"Paid\"],\n\t\t[20.0, 3, \"West\", null]\n\t]\n}"
+  },
+  {
+   "expr": "TOJSON(VAR n=1 RETURN CALCULATETABLE(Facts,Facts[Sales]>3),3)",
+   "powerbi": "{\n\t\"header\": [\"'Facts'[Sales]\", \"'Facts'[Quantity]\", \"'Facts'[Region]\", \"'Facts'[Note]\"],\n\t\"rowCount\": 2,\n\t\"data\": [\n\t\t[10.5, 2, \"East\", \"Paid\"],\n\t\t[20.0, 3, \"West\", null]\n\t]\n}"
+  },
+  {
+   "expr": "TOJSON(VAR n=1 RETURN DATATABLE(\"a\",INTEGER,{{3},{1},{2}}))",
+   "powerbi": "{\n\t\"header\": [\"[a]\"],\n\t\"rowCount\": 3,\n\t\"data\": [\n\t\t[3],\n\t\t[1],\n\t\t[2]\n\t]\n}"
+  },
+  {
+   "expr": "TOJSON(VAR n=1 RETURN DATATABLE(\"a\",INTEGER,{{3},{1},{2}}),10)",
+   "powerbi": "{\n\t\"header\": [\"[a]\"],\n\t\"rowCount\": 3,\n\t\"data\": [\n\t\t[3],\n\t\t[1],\n\t\t[2]\n\t]\n}"
+  },
+  {
+   "expr": "TOJSON(VAR n=1 RETURN DATATABLE(\"a\",INTEGER,{{3},{1},{2}}),3)",
+   "powerbi": "{\n\t\"header\": [\"[a]\"],\n\t\"rowCount\": 3,\n\t\"data\": [\n\t\t[3],\n\t\t[1],\n\t\t[2]\n\t]\n}"
+  },
+  {
+   "expr": "TOJSON(VAR n=1 RETURN DISTINCT(Facts[Quantity]))",
+   "powerbi": "{\n\t\"header\": [\"'Facts'[Quantity]\"],\n\t\"rowCount\": 6,\n\t\"data\": [\n\t\t[0],\n\t\t[1],\n\t\t[2],\n\t\t[3],\n\t\t[4],\n\t\t[5]\n\t]\n}"
+  },
+  {
+   "expr": "TOJSON(VAR n=1 RETURN DISTINCT(Facts[Quantity]),10)",
+   "powerbi": "{\n\t\"header\": [\"'Facts'[Quantity]\"],\n\t\"rowCount\": 6,\n\t\"data\": [\n\t\t[0],\n\t\t[1],\n\t\t[2],\n\t\t[3],\n\t\t[4],\n\t\t[5]\n\t]\n}"
+  },
+  {
+   "expr": "TOJSON(VAR n=1 RETURN DISTINCT(Facts[Quantity]),3)",
+   "powerbi": "{\n\t\"header\": [\"'Facts'[Quantity]\"],\n\t\"rowCount\": 6,\n\t\"data\": [\n\t\t[0],\n\t\t[1],\n\t\t[2]\n\t]\n}"
+  },
+  {
+   "expr": "TOJSON(VAR n=1 RETURN FILTER(ALL(Facts[Region],Facts[Note]),Facts[Region]<>\"x\"))",
+   "powerbi": "{\n\t\"header\": [\"'Facts'[Region]\", \"'Facts'[Note]\"],\n\t\"rowCount\": 5,\n\t\"data\": [\n\t\t[\"East\", null],\n\t\t[\"West\", null],\n\t\t[\"East\", \"Paid\"],\n\t\t[\"West\", \"Paid\"],\n\t\t[\"North\", \"Late\"]\n\t]\n}"
+  },
+  {
+   "expr": "TOJSON(VAR n=1 RETURN FILTER(ALL(Facts[Region],Facts[Note]),Facts[Region]<>\"x\"),10)",
+   "powerbi": "{\n\t\"header\": [\"'Facts'[Region]\", \"'Facts'[Note]\"],\n\t\"rowCount\": 5,\n\t\"data\": [\n\t\t[\"East\", null],\n\t\t[\"West\", null],\n\t\t[\"East\", \"Paid\"],\n\t\t[\"West\", \"Paid\"],\n\t\t[\"North\", \"Late\"]\n\t]\n}"
+  },
+  {
+   "expr": "TOJSON(VAR n=1 RETURN FILTER(ALL(Facts[Region],Facts[Note]),Facts[Region]<>\"x\"),3)",
+   "powerbi": "{\n\t\"header\": [\"'Facts'[Region]\", \"'Facts'[Note]\"],\n\t\"rowCount\": 5,\n\t\"data\": [\n\t\t[\"East\", null],\n\t\t[\"West\", null],\n\t\t[\"East\", \"Paid\"]\n\t]\n}"
+  },
+  {
+   "expr": "TOJSON(VAR n=1 RETURN FILTER(Facts,Facts[Quantity]>2))",
+   "powerbi": "{\n\t\"header\": [\"'Facts'[Sales]\", \"'Facts'[Quantity]\", \"'Facts'[Region]\", \"'Facts'[Note]\"],\n\t\"rowCount\": 3,\n\t\"data\": [\n\t\t[20.0, 3, \"West\", null],\n\t\t[null, 4, \"North\", \"Late\"],\n\t\t[2.5, 5, \"East\", null]\n\t]\n}"
+  },
+  {
+   "expr": "TOJSON(VAR n=1 RETURN FILTER(Facts,Facts[Quantity]>2),10)",
+   "powerbi": "{\n\t\"header\": [\"'Facts'[Sales]\", \"'Facts'[Quantity]\", \"'Facts'[Region]\", \"'Facts'[Note]\"],\n\t\"rowCount\": 3,\n\t\"data\": [\n\t\t[20.0, 3, \"West\", null],\n\t\t[null, 4, \"North\", \"Late\"],\n\t\t[2.5, 5, \"East\", null]\n\t]\n}"
+  },
+  {
+   "expr": "TOJSON(VAR n=1 RETURN FILTER(Facts,Facts[Quantity]>2),3)",
+   "powerbi": "{\n\t\"header\": [\"'Facts'[Sales]\", \"'Facts'[Quantity]\", \"'Facts'[Region]\", \"'Facts'[Note]\"],\n\t\"rowCount\": 3,\n\t\"data\": [\n\t\t[20.0, 3, \"West\", null],\n\t\t[null, 4, \"North\", \"Late\"],\n\t\t[2.5, 5, \"East\", null]\n\t]\n}"
+  },
+  {
+   "expr": "TOJSON(VAR n=1 RETURN FILTER(VALUES(Facts[Quantity]),Facts[Quantity]>1))",
+   "powerbi": "{\n\t\"header\": [\"'Facts'[Quantity]\"],\n\t\"rowCount\": 4,\n\t\"data\": [\n\t\t[2],\n\t\t[3],\n\t\t[4],\n\t\t[5]\n\t]\n}"
+  },
+  {
+   "expr": "TOJSON(VAR n=1 RETURN FILTER(VALUES(Facts[Quantity]),Facts[Quantity]>1),10)",
+   "powerbi": "{\n\t\"header\": [\"'Facts'[Quantity]\"],\n\t\"rowCount\": 4,\n\t\"data\": [\n\t\t[2],\n\t\t[3],\n\t\t[4],\n\t\t[5]\n\t]\n}"
+  },
+  {
+   "expr": "TOJSON(VAR n=1 RETURN FILTER(VALUES(Facts[Quantity]),Facts[Quantity]>1),3)",
+   "powerbi": "{\n\t\"header\": [\"'Facts'[Quantity]\"],\n\t\"rowCount\": 4,\n\t\"data\": [\n\t\t[2],\n\t\t[3],\n\t\t[4]\n\t]\n}"
+  },
+  {
+   "expr": "TOJSON(VAR n=1 RETURN Facts)",
+   "powerbi": "{\n\t\"header\": [\"'Facts'[Sales]\", \"'Facts'[Quantity]\", \"'Facts'[Region]\", \"'Facts'[Note]\"],\n\t\"rowCount\": 6,\n\t\"data\": [\n\t\t[10.5, 2, \"East\", \"Paid\"],\n\t\t[20.0, 3, \"West\", null],\n\t\t[-1.5, 1, \"East\", \"Paid\"],\n\t\t[null, 4, \"North\", \"Late\"],\n\t\t[0.0, 0, \"West\", \"Paid\"],\n\t\t[2.5, 5, \"East\", null]\n\t]\n}"
+  },
+  {
+   "expr": "TOJSON(VAR n=1 RETURN Facts,10)",
+   "powerbi": "{\n\t\"header\": [\"'Facts'[Sales]\", \"'Facts'[Quantity]\", \"'Facts'[Region]\", \"'Facts'[Note]\"],\n\t\"rowCount\": 6,\n\t\"data\": [\n\t\t[10.5, 2, \"East\", \"Paid\"],\n\t\t[20.0, 3, \"West\", null],\n\t\t[-1.5, 1, \"East\", \"Paid\"],\n\t\t[null, 4, \"North\", \"Late\"],\n\t\t[0.0, 0, \"West\", \"Paid\"],\n\t\t[2.5, 5, \"East\", null]\n\t]\n}"
+  },
+  {
+   "expr": "TOJSON(VAR n=1 RETURN Facts,3)",
+   "powerbi": "{\n\t\"header\": [\"'Facts'[Sales]\", \"'Facts'[Quantity]\", \"'Facts'[Region]\", \"'Facts'[Note]\"],\n\t\"rowCount\": 6,\n\t\"data\": [\n\t\t[10.5, 2, \"East\", \"Paid\"],\n\t\t[20.0, 3, \"West\", null],\n\t\t[-1.5, 1, \"East\", \"Paid\"]\n\t]\n}"
+  },
+  {
+   "expr": "TOJSON(VAR n=1 RETURN ROW(\"a\",1))",
+   "powerbi": "{\n\t\"header\": [\"[a]\"],\n\t\"rowCount\": 1,\n\t\"data\": [\n\t\t[1]\n\t]\n}"
+  },
+  {
+   "expr": "TOJSON(VAR n=1 RETURN ROW(\"a\",1),10)",
+   "powerbi": "{\n\t\"header\": [\"[a]\"],\n\t\"rowCount\": 1,\n\t\"data\": [\n\t\t[1]\n\t]\n}"
+  },
+  {
+   "expr": "TOJSON(VAR n=1 RETURN ROW(\"a\",1),3)",
+   "powerbi": "{\n\t\"header\": [\"[a]\"],\n\t\"rowCount\": 1,\n\t\"data\": [\n\t\t[1]\n\t]\n}"
+  },
+  {
+   "expr": "TOJSON(VAR n=1 RETURN SELECTCOLUMNS(Facts,\"r\",Facts[Region]))",
+   "powerbi": "{\n\t\"header\": [\"[r]\"],\n\t\"rowCount\": 6,\n\t\"data\": [\n\t\t[\"East\"],\n\t\t[\"East\"],\n\t\t[\"East\"],\n\t\t[\"West\"],\n\t\t[\"West\"],\n\t\t[\"North\"]\n\t]\n}"
+  },
+  {
+   "expr": "TOJSON(VAR n=1 RETURN SELECTCOLUMNS(Facts,\"r\",Facts[Region]),10)",
+   "powerbi": "{\n\t\"header\": [\"[r]\"],\n\t\"rowCount\": 6,\n\t\"data\": [\n\t\t[\"East\"],\n\t\t[\"East\"],\n\t\t[\"East\"],\n\t\t[\"West\"],\n\t\t[\"West\"],\n\t\t[\"North\"]\n\t]\n}"
+  },
+  {
+   "expr": "TOJSON(VAR n=1 RETURN SELECTCOLUMNS(Facts,\"r\",Facts[Region]),3)",
+   "powerbi": "{\n\t\"header\": [\"[r]\"],\n\t\"rowCount\": 6,\n\t\"data\": [\n\t\t[\"East\"],\n\t\t[\"East\"],\n\t\t[\"East\"]\n\t]\n}"
+  },
+  {
+   "expr": "TOJSON(VAR n=1 RETURN SUMMARIZE(Facts,Facts[Region]))",
+   "powerbi": "{\n\t\"header\": [\"'Facts'[Region]\"],\n\t\"rowCount\": 3,\n\t\"data\": [\n\t\t[\"East\"],\n\t\t[\"West\"],\n\t\t[\"North\"]\n\t]\n}"
+  },
+  {
+   "expr": "TOJSON(VAR n=1 RETURN SUMMARIZE(Facts,Facts[Region]),10)",
+   "powerbi": "{\n\t\"header\": [\"'Facts'[Region]\"],\n\t\"rowCount\": 3,\n\t\"data\": [\n\t\t[\"East\"],\n\t\t[\"West\"],\n\t\t[\"North\"]\n\t]\n}"
+  },
+  {
+   "expr": "TOJSON(VAR n=1 RETURN SUMMARIZE(Facts,Facts[Region]),3)",
+   "powerbi": "{\n\t\"header\": [\"'Facts'[Region]\"],\n\t\"rowCount\": 3,\n\t\"data\": [\n\t\t[\"East\"],\n\t\t[\"West\"],\n\t\t[\"North\"]\n\t]\n}"
+  },
+  {
+   "expr": "TOJSON(VAR n=1 RETURN TOPN(3,Facts,Facts[Sales]))",
+   "powerbi": "{\n\t\"header\": [\"'Facts'[Sales]\", \"'Facts'[Quantity]\", \"'Facts'[Region]\", \"'Facts'[Note]\"],\n\t\"rowCount\": 3,\n\t\"data\": [\n\t\t[2.5, 5, \"East\", null],\n\t\t[20.0, 3, \"West\", null],\n\t\t[10.5, 2, \"East\", \"Paid\"]\n\t]\n}"
+  },
+  {
+   "expr": "TOJSON(VAR n=1 RETURN TOPN(3,Facts,Facts[Sales]),10)",
+   "powerbi": "{\n\t\"header\": [\"'Facts'[Sales]\", \"'Facts'[Quantity]\", \"'Facts'[Region]\", \"'Facts'[Note]\"],\n\t\"rowCount\": 3,\n\t\"data\": [\n\t\t[2.5, 5, \"East\", null],\n\t\t[20.0, 3, \"West\", null],\n\t\t[10.5, 2, \"East\", \"Paid\"]\n\t]\n}"
+  },
+  {
+   "expr": "TOJSON(VAR n=1 RETURN TOPN(3,Facts,Facts[Sales]),3)",
+   "powerbi": "{\n\t\"header\": [\"'Facts'[Sales]\", \"'Facts'[Quantity]\", \"'Facts'[Region]\", \"'Facts'[Note]\"],\n\t\"rowCount\": 3,\n\t\"data\": [\n\t\t[2.5, 5, \"East\", null],\n\t\t[20.0, 3, \"West\", null],\n\t\t[10.5, 2, \"East\", \"Paid\"]\n\t]\n}"
+  },
+  {
+   "expr": "TOJSON(VAR n=1 RETURN VALUES(Facts[Note]))",
+   "powerbi": "{\n\t\"header\": [\"'Facts'[Note]\"],\n\t\"rowCount\": 3,\n\t\"data\": [\n\t\t[null],\n\t\t[\"Paid\"],\n\t\t[\"Late\"]\n\t]\n}"
+  },
+  {
+   "expr": "TOJSON(VAR n=1 RETURN VALUES(Facts[Note]),10)",
+   "powerbi": "{\n\t\"header\": [\"'Facts'[Note]\"],\n\t\"rowCount\": 3,\n\t\"data\": [\n\t\t[null],\n\t\t[\"Paid\"],\n\t\t[\"Late\"]\n\t]\n}"
+  },
+  {
+   "expr": "TOJSON(VAR n=1 RETURN VALUES(Facts[Note]),3)",
+   "powerbi": "{\n\t\"header\": [\"'Facts'[Note]\"],\n\t\"rowCount\": 3,\n\t\"data\": [\n\t\t[null],\n\t\t[\"Paid\"],\n\t\t[\"Late\"]\n\t]\n}"
+  },
+  {
+   "expr": "TOJSON(VAR n=1 RETURN VALUES(Facts[Region]))",
+   "powerbi": "{\n\t\"header\": [\"'Facts'[Region]\"],\n\t\"rowCount\": 3,\n\t\"data\": [\n\t\t[\"East\"],\n\t\t[\"West\"],\n\t\t[\"North\"]\n\t]\n}"
+  },
+  {
+   "expr": "TOJSON(VAR n=1 RETURN VALUES(Facts[Region]),10)",
+   "powerbi": "{\n\t\"header\": [\"'Facts'[Region]\"],\n\t\"rowCount\": 3,\n\t\"data\": [\n\t\t[\"East\"],\n\t\t[\"West\"],\n\t\t[\"North\"]\n\t]\n}"
+  },
+  {
+   "expr": "TOJSON(VAR n=1 RETURN VALUES(Facts[Region]),3)",
+   "powerbi": "{\n\t\"header\": [\"'Facts'[Region]\"],\n\t\"rowCount\": 3,\n\t\"data\": [\n\t\t[\"East\"],\n\t\t[\"West\"],\n\t\t[\"North\"]\n\t]\n}"
+  },
+  {
+   "expr": "TOJSON(VAR n=1 RETURN {3,1,2})",
+   "powerbi": "{\n\t\"header\": [\"[Value]\"],\n\t\"rowCount\": 3,\n\t\"data\": [\n\t\t[3],\n\t\t[1],\n\t\t[2]\n\t]\n}"
+  },
+  {
+   "expr": "TOJSON(VAR n=1 RETURN {3,1,2},10)",
+   "powerbi": "{\n\t\"header\": [\"[Value]\"],\n\t\"rowCount\": 3,\n\t\"data\": [\n\t\t[3],\n\t\t[1],\n\t\t[2]\n\t]\n}"
+  },
+  {
+   "expr": "TOJSON(VAR n=1 RETURN {3,1,2},3)",
+   "powerbi": "{\n\t\"header\": [\"[Value]\"],\n\t\"rowCount\": 3,\n\t\"data\": [\n\t\t[3],\n\t\t[1],\n\t\t[2]\n\t]\n}"
+  },
+  {
+   "expr": "TOJSON(VAR t=ALL(Facts) RETURN FILTER(t,TRUE()))",
+   "powerbi": "{\n\t\"header\": [\"'Facts'[Sales]\", \"'Facts'[Quantity]\", \"'Facts'[Region]\", \"'Facts'[Note]\"],\n\t\"rowCount\": 6,\n\t\"data\": [\n\t\t[10.5, 2, \"East\", \"Paid\"],\n\t\t[20.0, 3, \"West\", null],\n\t\t[-1.5, 1, \"East\", \"Paid\"],\n\t\t[null, 4, \"North\", \"Late\"],\n\t\t[0.0, 0, \"West\", \"Paid\"],\n\t\t[2.5, 5, \"East\", null]\n\t]\n}"
+  },
+  {
+   "expr": "TOJSON(VAR t=ALL(Facts) RETURN FILTER(t,TRUE()),10)",
+   "powerbi": "{\n\t\"header\": [\"'Facts'[Sales]\", \"'Facts'[Quantity]\", \"'Facts'[Region]\", \"'Facts'[Note]\"],\n\t\"rowCount\": 6,\n\t\"data\": [\n\t\t[10.5, 2, \"East\", \"Paid\"],\n\t\t[20.0, 3, \"West\", null],\n\t\t[-1.5, 1, \"East\", \"Paid\"],\n\t\t[null, 4, \"North\", \"Late\"],\n\t\t[0.0, 0, \"West\", \"Paid\"],\n\t\t[2.5, 5, \"East\", null]\n\t]\n}"
+  },
+  {
+   "expr": "TOJSON(VAR t=ALL(Facts) RETURN FILTER(t,TRUE()),3)",
+   "powerbi": "{\n\t\"header\": [\"'Facts'[Sales]\", \"'Facts'[Quantity]\", \"'Facts'[Region]\", \"'Facts'[Note]\"],\n\t\"rowCount\": 6,\n\t\"data\": [\n\t\t[10.5, 2, \"East\", \"Paid\"],\n\t\t[20.0, 3, \"West\", null],\n\t\t[-1.5, 1, \"East\", \"Paid\"]\n\t]\n}"
+  },
+  {
+   "expr": "TOJSON(VAR t=ALL(Facts) RETURN t)",
+   "powerbi": "{\n\t\"header\": [\"'Facts'[Sales]\", \"'Facts'[Quantity]\", \"'Facts'[Region]\", \"'Facts'[Note]\"],\n\t\"rowCount\": 6,\n\t\"data\": [\n\t\t[10.5, 2, \"East\", \"Paid\"],\n\t\t[20.0, 3, \"West\", null],\n\t\t[-1.5, 1, \"East\", \"Paid\"],\n\t\t[null, 4, \"North\", \"Late\"],\n\t\t[0.0, 0, \"West\", \"Paid\"],\n\t\t[2.5, 5, \"East\", null]\n\t]\n}"
+  },
+  {
+   "expr": "TOJSON(VAR t=ALL(Facts) RETURN t,10)",
+   "powerbi": "{\n\t\"header\": [\"'Facts'[Sales]\", \"'Facts'[Quantity]\", \"'Facts'[Region]\", \"'Facts'[Note]\"],\n\t\"rowCount\": 6,\n\t\"data\": [\n\t\t[10.5, 2, \"East\", \"Paid\"],\n\t\t[20.0, 3, \"West\", null],\n\t\t[-1.5, 1, \"East\", \"Paid\"],\n\t\t[null, 4, \"North\", \"Late\"],\n\t\t[0.0, 0, \"West\", \"Paid\"],\n\t\t[2.5, 5, \"East\", null]\n\t]\n}"
+  },
+  {
+   "expr": "TOJSON(VAR t=ALL(Facts) RETURN t,3)",
+   "powerbi": "{\n\t\"header\": [\"'Facts'[Sales]\", \"'Facts'[Quantity]\", \"'Facts'[Region]\", \"'Facts'[Note]\"],\n\t\"rowCount\": 6,\n\t\"data\": [\n\t\t[10.5, 2, \"East\", \"Paid\"],\n\t\t[20.0, 3, \"West\", null],\n\t\t[-1.5, 1, \"East\", \"Paid\"]\n\t]\n}"
+  },
+  {
+   "expr": "TOJSON(VAR t=ALL(Facts) VAR u=t RETURN u)",
+   "powerbi": "{\n\t\"header\": [\"'Facts'[Sales]\", \"'Facts'[Quantity]\", \"'Facts'[Region]\", \"'Facts'[Note]\"],\n\t\"rowCount\": 6,\n\t\"data\": [\n\t\t[10.5, 2, \"East\", \"Paid\"],\n\t\t[20.0, 3, \"West\", null],\n\t\t[-1.5, 1, \"East\", \"Paid\"],\n\t\t[null, 4, \"North\", \"Late\"],\n\t\t[0.0, 0, \"West\", \"Paid\"],\n\t\t[2.5, 5, \"East\", null]\n\t]\n}"
+  },
+  {
+   "expr": "TOJSON(VAR t=ALL(Facts) VAR u=t RETURN u,10)",
+   "powerbi": "{\n\t\"header\": [\"'Facts'[Sales]\", \"'Facts'[Quantity]\", \"'Facts'[Region]\", \"'Facts'[Note]\"],\n\t\"rowCount\": 6,\n\t\"data\": [\n\t\t[10.5, 2, \"East\", \"Paid\"],\n\t\t[20.0, 3, \"West\", null],\n\t\t[-1.5, 1, \"East\", \"Paid\"],\n\t\t[null, 4, \"North\", \"Late\"],\n\t\t[0.0, 0, \"West\", \"Paid\"],\n\t\t[2.5, 5, \"East\", null]\n\t]\n}"
+  },
+  {
+   "expr": "TOJSON(VAR t=ALL(Facts) VAR u=t RETURN u,3)",
+   "powerbi": "{\n\t\"header\": [\"'Facts'[Sales]\", \"'Facts'[Quantity]\", \"'Facts'[Region]\", \"'Facts'[Note]\"],\n\t\"rowCount\": 6,\n\t\"data\": [\n\t\t[10.5, 2, \"East\", \"Paid\"],\n\t\t[20.0, 3, \"West\", null],\n\t\t[-1.5, 1, \"East\", \"Paid\"]\n\t]\n}"
+  },
+  {
+   "expr": "TOJSON(VAR t=ALL(Facts[Region]) RETURN FILTER(t,TRUE()))",
+   "powerbi": "{\n\t\"header\": [\"'Facts'[Region]\"],\n\t\"rowCount\": 3,\n\t\"data\": [\n\t\t[\"East\"],\n\t\t[\"West\"],\n\t\t[\"North\"]\n\t]\n}"
+  },
+  {
+   "expr": "TOJSON(VAR t=ALL(Facts[Region]) RETURN FILTER(t,TRUE()),10)",
+   "powerbi": "{\n\t\"header\": [\"'Facts'[Region]\"],\n\t\"rowCount\": 3,\n\t\"data\": [\n\t\t[\"East\"],\n\t\t[\"West\"],\n\t\t[\"North\"]\n\t]\n}"
+  },
+  {
+   "expr": "TOJSON(VAR t=ALL(Facts[Region]) RETURN FILTER(t,TRUE()),3)",
+   "powerbi": "{\n\t\"header\": [\"'Facts'[Region]\"],\n\t\"rowCount\": 3,\n\t\"data\": [\n\t\t[\"East\"],\n\t\t[\"West\"],\n\t\t[\"North\"]\n\t]\n}"
+  },
+  {
+   "expr": "TOJSON(VAR t=ALL(Facts[Region]) RETURN t)",
+   "powerbi": "{\n\t\"header\": [\"'Facts'[Region]\"],\n\t\"rowCount\": 3,\n\t\"data\": [\n\t\t[\"East\"],\n\t\t[\"West\"],\n\t\t[\"North\"]\n\t]\n}"
+  },
+  {
+   "expr": "TOJSON(VAR t=ALL(Facts[Region]) RETURN t,10)",
+   "powerbi": "{\n\t\"header\": [\"'Facts'[Region]\"],\n\t\"rowCount\": 3,\n\t\"data\": [\n\t\t[\"East\"],\n\t\t[\"West\"],\n\t\t[\"North\"]\n\t]\n}"
+  },
+  {
+   "expr": "TOJSON(VAR t=ALL(Facts[Region]) RETURN t,3)",
+   "powerbi": "{\n\t\"header\": [\"'Facts'[Region]\"],\n\t\"rowCount\": 3,\n\t\"data\": [\n\t\t[\"East\"],\n\t\t[\"West\"],\n\t\t[\"North\"]\n\t]\n}"
+  },
+  {
+   "expr": "TOJSON(VAR t=ALL(Facts[Region]) VAR u=t RETURN u)",
+   "powerbi": "{\n\t\"header\": [\"'Facts'[Region]\"],\n\t\"rowCount\": 3,\n\t\"data\": [\n\t\t[\"East\"],\n\t\t[\"West\"],\n\t\t[\"North\"]\n\t]\n}"
+  },
+  {
+   "expr": "TOJSON(VAR t=ALL(Facts[Region]) VAR u=t RETURN u,10)",
+   "powerbi": "{\n\t\"header\": [\"'Facts'[Region]\"],\n\t\"rowCount\": 3,\n\t\"data\": [\n\t\t[\"East\"],\n\t\t[\"West\"],\n\t\t[\"North\"]\n\t]\n}"
+  },
+  {
+   "expr": "TOJSON(VAR t=ALL(Facts[Region]) VAR u=t RETURN u,3)",
+   "powerbi": "{\n\t\"header\": [\"'Facts'[Region]\"],\n\t\"rowCount\": 3,\n\t\"data\": [\n\t\t[\"East\"],\n\t\t[\"West\"],\n\t\t[\"North\"]\n\t]\n}"
+  },
+  {
+   "expr": "TOJSON(VAR t=CALCULATETABLE(Facts,Facts[Sales]>3) RETURN FILTER(t,TRUE()))",
+   "powerbi": "{\n\t\"header\": [\"'Facts'[Sales]\", \"'Facts'[Quantity]\", \"'Facts'[Region]\", \"'Facts'[Note]\"],\n\t\"rowCount\": 2,\n\t\"data\": [\n\t\t[10.5, 2, \"East\", \"Paid\"],\n\t\t[20.0, 3, \"West\", null]\n\t]\n}"
+  },
+  {
+   "expr": "TOJSON(VAR t=CALCULATETABLE(Facts,Facts[Sales]>3) RETURN FILTER(t,TRUE()),10)",
+   "powerbi": "{\n\t\"header\": [\"'Facts'[Sales]\", \"'Facts'[Quantity]\", \"'Facts'[Region]\", \"'Facts'[Note]\"],\n\t\"rowCount\": 2,\n\t\"data\": [\n\t\t[10.5, 2, \"East\", \"Paid\"],\n\t\t[20.0, 3, \"West\", null]\n\t]\n}"
+  },
+  {
+   "expr": "TOJSON(VAR t=CALCULATETABLE(Facts,Facts[Sales]>3) RETURN FILTER(t,TRUE()),3)",
+   "powerbi": "{\n\t\"header\": [\"'Facts'[Sales]\", \"'Facts'[Quantity]\", \"'Facts'[Region]\", \"'Facts'[Note]\"],\n\t\"rowCount\": 2,\n\t\"data\": [\n\t\t[10.5, 2, \"East\", \"Paid\"],\n\t\t[20.0, 3, \"West\", null]\n\t]\n}"
+  },
+  {
+   "expr": "TOJSON(VAR t=CALCULATETABLE(Facts,Facts[Sales]>3) RETURN t)",
+   "powerbi": "{\n\t\"header\": [\"'Facts'[Sales]\", \"'Facts'[Quantity]\", \"'Facts'[Region]\", \"'Facts'[Note]\"],\n\t\"rowCount\": 2,\n\t\"data\": [\n\t\t[10.5, 2, \"East\", \"Paid\"],\n\t\t[20.0, 3, \"West\", null]\n\t]\n}"
+  },
+  {
+   "expr": "TOJSON(VAR t=CALCULATETABLE(Facts,Facts[Sales]>3) RETURN t,10)",
+   "powerbi": "{\n\t\"header\": [\"'Facts'[Sales]\", \"'Facts'[Quantity]\", \"'Facts'[Region]\", \"'Facts'[Note]\"],\n\t\"rowCount\": 2,\n\t\"data\": [\n\t\t[10.5, 2, \"East\", \"Paid\"],\n\t\t[20.0, 3, \"West\", null]\n\t]\n}"
+  },
+  {
+   "expr": "TOJSON(VAR t=CALCULATETABLE(Facts,Facts[Sales]>3) RETURN t,3)",
+   "powerbi": "{\n\t\"header\": [\"'Facts'[Sales]\", \"'Facts'[Quantity]\", \"'Facts'[Region]\", \"'Facts'[Note]\"],\n\t\"rowCount\": 2,\n\t\"data\": [\n\t\t[10.5, 2, \"East\", \"Paid\"],\n\t\t[20.0, 3, \"West\", null]\n\t]\n}"
+  },
+  {
+   "expr": "TOJSON(VAR t=CALCULATETABLE(Facts,Facts[Sales]>3) VAR u=t RETURN u)",
+   "powerbi": "{\n\t\"header\": [\"'Facts'[Sales]\", \"'Facts'[Quantity]\", \"'Facts'[Region]\", \"'Facts'[Note]\"],\n\t\"rowCount\": 2,\n\t\"data\": [\n\t\t[10.5, 2, \"East\", \"Paid\"],\n\t\t[20.0, 3, \"West\", null]\n\t]\n}"
+  },
+  {
+   "expr": "TOJSON(VAR t=CALCULATETABLE(Facts,Facts[Sales]>3) VAR u=t RETURN u,10)",
+   "powerbi": "{\n\t\"header\": [\"'Facts'[Sales]\", \"'Facts'[Quantity]\", \"'Facts'[Region]\", \"'Facts'[Note]\"],\n\t\"rowCount\": 2,\n\t\"data\": [\n\t\t[10.5, 2, \"East\", \"Paid\"],\n\t\t[20.0, 3, \"West\", null]\n\t]\n}"
+  },
+  {
+   "expr": "TOJSON(VAR t=CALCULATETABLE(Facts,Facts[Sales]>3) VAR u=t RETURN u,3)",
+   "powerbi": "{\n\t\"header\": [\"'Facts'[Sales]\", \"'Facts'[Quantity]\", \"'Facts'[Region]\", \"'Facts'[Note]\"],\n\t\"rowCount\": 2,\n\t\"data\": [\n\t\t[10.5, 2, \"East\", \"Paid\"],\n\t\t[20.0, 3, \"West\", null]\n\t]\n}"
+  },
+  {
+   "expr": "TOJSON(VAR t=DATATABLE(\"a\",INTEGER,{{3},{1},{2}}) RETURN FILTER(t,TRUE()))",
+   "powerbi": "{\n\t\"header\": [\"[a]\"],\n\t\"rowCount\": 3,\n\t\"data\": [\n\t\t[3],\n\t\t[1],\n\t\t[2]\n\t]\n}"
+  },
+  {
+   "expr": "TOJSON(VAR t=DATATABLE(\"a\",INTEGER,{{3},{1},{2}}) RETURN FILTER(t,TRUE()),10)",
+   "powerbi": "{\n\t\"header\": [\"[a]\"],\n\t\"rowCount\": 3,\n\t\"data\": [\n\t\t[3],\n\t\t[1],\n\t\t[2]\n\t]\n}"
+  },
+  {
+   "expr": "TOJSON(VAR t=DATATABLE(\"a\",INTEGER,{{3},{1},{2}}) RETURN FILTER(t,TRUE()),3)",
+   "powerbi": "{\n\t\"header\": [\"[a]\"],\n\t\"rowCount\": 3,\n\t\"data\": [\n\t\t[3],\n\t\t[1],\n\t\t[2]\n\t]\n}"
+  },
+  {
+   "expr": "TOJSON(VAR t=DATATABLE(\"a\",INTEGER,{{3},{1},{2}}) RETURN t)",
+   "powerbi": "{\n\t\"header\": [\"[a]\"],\n\t\"rowCount\": 3,\n\t\"data\": [\n\t\t[3],\n\t\t[1],\n\t\t[2]\n\t]\n}"
+  },
+  {
+   "expr": "TOJSON(VAR t=DATATABLE(\"a\",INTEGER,{{3},{1},{2}}) RETURN t,10)",
+   "powerbi": "{\n\t\"header\": [\"[a]\"],\n\t\"rowCount\": 3,\n\t\"data\": [\n\t\t[3],\n\t\t[1],\n\t\t[2]\n\t]\n}"
+  },
+  {
+   "expr": "TOJSON(VAR t=DATATABLE(\"a\",INTEGER,{{3},{1},{2}}) RETURN t,3)",
+   "powerbi": "{\n\t\"header\": [\"[a]\"],\n\t\"rowCount\": 3,\n\t\"data\": [\n\t\t[3],\n\t\t[1],\n\t\t[2]\n\t]\n}"
+  },
+  {
+   "expr": "TOJSON(VAR t=DATATABLE(\"a\",INTEGER,{{3},{1},{2}}) VAR u=t RETURN u)",
+   "powerbi": "{\n\t\"header\": [\"[a]\"],\n\t\"rowCount\": 3,\n\t\"data\": [\n\t\t[3],\n\t\t[1],\n\t\t[2]\n\t]\n}"
+  },
+  {
+   "expr": "TOJSON(VAR t=DATATABLE(\"a\",INTEGER,{{3},{1},{2}}) VAR u=t RETURN u,10)",
+   "powerbi": "{\n\t\"header\": [\"[a]\"],\n\t\"rowCount\": 3,\n\t\"data\": [\n\t\t[3],\n\t\t[1],\n\t\t[2]\n\t]\n}"
+  },
+  {
+   "expr": "TOJSON(VAR t=DATATABLE(\"a\",INTEGER,{{3},{1},{2}}) VAR u=t RETURN u,3)",
+   "powerbi": "{\n\t\"header\": [\"[a]\"],\n\t\"rowCount\": 3,\n\t\"data\": [\n\t\t[3],\n\t\t[1],\n\t\t[2]\n\t]\n}"
+  },
+  {
+   "expr": "TOJSON(VAR t=DISTINCT(Facts[Quantity]) RETURN FILTER(t,TRUE()))",
+   "powerbi": "{\n\t\"header\": [\"'Facts'[Quantity]\"],\n\t\"rowCount\": 6,\n\t\"data\": [\n\t\t[0],\n\t\t[1],\n\t\t[2],\n\t\t[3],\n\t\t[4],\n\t\t[5]\n\t]\n}"
+  },
+  {
+   "expr": "TOJSON(VAR t=DISTINCT(Facts[Quantity]) RETURN FILTER(t,TRUE()),10)",
+   "powerbi": "{\n\t\"header\": [\"'Facts'[Quantity]\"],\n\t\"rowCount\": 6,\n\t\"data\": [\n\t\t[0],\n\t\t[1],\n\t\t[2],\n\t\t[3],\n\t\t[4],\n\t\t[5]\n\t]\n}"
+  },
+  {
+   "expr": "TOJSON(VAR t=DISTINCT(Facts[Quantity]) RETURN FILTER(t,TRUE()),3)",
+   "powerbi": "{\n\t\"header\": [\"'Facts'[Quantity]\"],\n\t\"rowCount\": 6,\n\t\"data\": [\n\t\t[0],\n\t\t[1],\n\t\t[2]\n\t]\n}"
+  },
+  {
+   "expr": "TOJSON(VAR t=DISTINCT(Facts[Quantity]) RETURN t)",
+   "powerbi": "{\n\t\"header\": [\"'Facts'[Quantity]\"],\n\t\"rowCount\": 6,\n\t\"data\": [\n\t\t[0],\n\t\t[1],\n\t\t[2],\n\t\t[3],\n\t\t[4],\n\t\t[5]\n\t]\n}"
+  },
+  {
+   "expr": "TOJSON(VAR t=DISTINCT(Facts[Quantity]) RETURN t,10)",
+   "powerbi": "{\n\t\"header\": [\"'Facts'[Quantity]\"],\n\t\"rowCount\": 6,\n\t\"data\": [\n\t\t[0],\n\t\t[1],\n\t\t[2],\n\t\t[3],\n\t\t[4],\n\t\t[5]\n\t]\n}"
+  },
+  {
+   "expr": "TOJSON(VAR t=DISTINCT(Facts[Quantity]) RETURN t,3)",
+   "powerbi": "{\n\t\"header\": [\"'Facts'[Quantity]\"],\n\t\"rowCount\": 6,\n\t\"data\": [\n\t\t[0],\n\t\t[1],\n\t\t[2]\n\t]\n}"
+  },
+  {
+   "expr": "TOJSON(VAR t=DISTINCT(Facts[Quantity]) VAR u=t RETURN u)",
+   "powerbi": "{\n\t\"header\": [\"'Facts'[Quantity]\"],\n\t\"rowCount\": 6,\n\t\"data\": [\n\t\t[0],\n\t\t[1],\n\t\t[2],\n\t\t[3],\n\t\t[4],\n\t\t[5]\n\t]\n}"
+  },
+  {
+   "expr": "TOJSON(VAR t=DISTINCT(Facts[Quantity]) VAR u=t RETURN u,10)",
+   "powerbi": "{\n\t\"header\": [\"'Facts'[Quantity]\"],\n\t\"rowCount\": 6,\n\t\"data\": [\n\t\t[0],\n\t\t[1],\n\t\t[2],\n\t\t[3],\n\t\t[4],\n\t\t[5]\n\t]\n}"
+  },
+  {
+   "expr": "TOJSON(VAR t=DISTINCT(Facts[Quantity]) VAR u=t RETURN u,3)",
+   "powerbi": "{\n\t\"header\": [\"'Facts'[Quantity]\"],\n\t\"rowCount\": 6,\n\t\"data\": [\n\t\t[0],\n\t\t[1],\n\t\t[2]\n\t]\n}"
+  },
+  {
+   "expr": "TOJSON(VAR t=FILTER(ALL(Facts[Region],Facts[Note]),Facts[Region]<>\"x\") RETURN FILTER(t,TRUE()))",
+   "powerbi": "{\n\t\"header\": [\"'Facts'[Region]\", \"'Facts'[Note]\"],\n\t\"rowCount\": 5,\n\t\"data\": [\n\t\t[\"East\", null],\n\t\t[\"West\", null],\n\t\t[\"East\", \"Paid\"],\n\t\t[\"West\", \"Paid\"],\n\t\t[\"North\", \"Late\"]\n\t]\n}"
+  },
+  {
+   "expr": "TOJSON(VAR t=FILTER(ALL(Facts[Region],Facts[Note]),Facts[Region]<>\"x\") RETURN FILTER(t,TRUE()),10)",
+   "powerbi": "{\n\t\"header\": [\"'Facts'[Region]\", \"'Facts'[Note]\"],\n\t\"rowCount\": 5,\n\t\"data\": [\n\t\t[\"East\", null],\n\t\t[\"West\", null],\n\t\t[\"East\", \"Paid\"],\n\t\t[\"West\", \"Paid\"],\n\t\t[\"North\", \"Late\"]\n\t]\n}"
+  },
+  {
+   "expr": "TOJSON(VAR t=FILTER(ALL(Facts[Region],Facts[Note]),Facts[Region]<>\"x\") RETURN FILTER(t,TRUE()),3)",
+   "powerbi": "{\n\t\"header\": [\"'Facts'[Region]\", \"'Facts'[Note]\"],\n\t\"rowCount\": 5,\n\t\"data\": [\n\t\t[\"East\", null],\n\t\t[\"West\", null],\n\t\t[\"East\", \"Paid\"]\n\t]\n}"
+  },
+  {
+   "expr": "TOJSON(VAR t=FILTER(ALL(Facts[Region],Facts[Note]),Facts[Region]<>\"x\") RETURN t)",
+   "powerbi": "{\n\t\"header\": [\"'Facts'[Region]\", \"'Facts'[Note]\"],\n\t\"rowCount\": 5,\n\t\"data\": [\n\t\t[\"East\", null],\n\t\t[\"West\", null],\n\t\t[\"East\", \"Paid\"],\n\t\t[\"West\", \"Paid\"],\n\t\t[\"North\", \"Late\"]\n\t]\n}"
+  },
+  {
+   "expr": "TOJSON(VAR t=FILTER(ALL(Facts[Region],Facts[Note]),Facts[Region]<>\"x\") RETURN t,10)",
+   "powerbi": "{\n\t\"header\": [\"'Facts'[Region]\", \"'Facts'[Note]\"],\n\t\"rowCount\": 5,\n\t\"data\": [\n\t\t[\"East\", null],\n\t\t[\"West\", null],\n\t\t[\"East\", \"Paid\"],\n\t\t[\"West\", \"Paid\"],\n\t\t[\"North\", \"Late\"]\n\t]\n}"
+  },
+  {
+   "expr": "TOJSON(VAR t=FILTER(ALL(Facts[Region],Facts[Note]),Facts[Region]<>\"x\") RETURN t,3)",
+   "powerbi": "{\n\t\"header\": [\"'Facts'[Region]\", \"'Facts'[Note]\"],\n\t\"rowCount\": 5,\n\t\"data\": [\n\t\t[\"East\", null],\n\t\t[\"West\", null],\n\t\t[\"East\", \"Paid\"]\n\t]\n}"
+  },
+  {
+   "expr": "TOJSON(VAR t=FILTER(ALL(Facts[Region],Facts[Note]),Facts[Region]<>\"x\") VAR u=t RETURN u)",
+   "powerbi": "{\n\t\"header\": [\"'Facts'[Region]\", \"'Facts'[Note]\"],\n\t\"rowCount\": 5,\n\t\"data\": [\n\t\t[\"East\", null],\n\t\t[\"West\", null],\n\t\t[\"East\", \"Paid\"],\n\t\t[\"West\", \"Paid\"],\n\t\t[\"North\", \"Late\"]\n\t]\n}"
+  },
+  {
+   "expr": "TOJSON(VAR t=FILTER(ALL(Facts[Region],Facts[Note]),Facts[Region]<>\"x\") VAR u=t RETURN u,10)",
+   "powerbi": "{\n\t\"header\": [\"'Facts'[Region]\", \"'Facts'[Note]\"],\n\t\"rowCount\": 5,\n\t\"data\": [\n\t\t[\"East\", null],\n\t\t[\"West\", null],\n\t\t[\"East\", \"Paid\"],\n\t\t[\"West\", \"Paid\"],\n\t\t[\"North\", \"Late\"]\n\t]\n}"
+  },
+  {
+   "expr": "TOJSON(VAR t=FILTER(ALL(Facts[Region],Facts[Note]),Facts[Region]<>\"x\") VAR u=t RETURN u,3)",
+   "powerbi": "{\n\t\"header\": [\"'Facts'[Region]\", \"'Facts'[Note]\"],\n\t\"rowCount\": 5,\n\t\"data\": [\n\t\t[\"East\", null],\n\t\t[\"West\", null],\n\t\t[\"East\", \"Paid\"]\n\t]\n}"
+  },
+  {
+   "expr": "TOJSON(VAR t=FILTER(Facts,Facts[Quantity]>2) RETURN FILTER(t,TRUE()))",
+   "powerbi": "{\n\t\"header\": [\"'Facts'[Sales]\", \"'Facts'[Quantity]\", \"'Facts'[Region]\", \"'Facts'[Note]\"],\n\t\"rowCount\": 3,\n\t\"data\": [\n\t\t[20.0, 3, \"West\", null],\n\t\t[null, 4, \"North\", \"Late\"],\n\t\t[2.5, 5, \"East\", null]\n\t]\n}"
+  },
+  {
+   "expr": "TOJSON(VAR t=FILTER(Facts,Facts[Quantity]>2) RETURN FILTER(t,TRUE()),10)",
+   "powerbi": "{\n\t\"header\": [\"'Facts'[Sales]\", \"'Facts'[Quantity]\", \"'Facts'[Region]\", \"'Facts'[Note]\"],\n\t\"rowCount\": 3,\n\t\"data\": [\n\t\t[20.0, 3, \"West\", null],\n\t\t[null, 4, \"North\", \"Late\"],\n\t\t[2.5, 5, \"East\", null]\n\t]\n}"
+  },
+  {
+   "expr": "TOJSON(VAR t=FILTER(Facts,Facts[Quantity]>2) RETURN FILTER(t,TRUE()),3)",
+   "powerbi": "{\n\t\"header\": [\"'Facts'[Sales]\", \"'Facts'[Quantity]\", \"'Facts'[Region]\", \"'Facts'[Note]\"],\n\t\"rowCount\": 3,\n\t\"data\": [\n\t\t[20.0, 3, \"West\", null],\n\t\t[null, 4, \"North\", \"Late\"],\n\t\t[2.5, 5, \"East\", null]\n\t]\n}"
+  },
+  {
+   "expr": "TOJSON(VAR t=FILTER(Facts,Facts[Quantity]>2) RETURN t)",
+   "powerbi": "{\n\t\"header\": [\"'Facts'[Sales]\", \"'Facts'[Quantity]\", \"'Facts'[Region]\", \"'Facts'[Note]\"],\n\t\"rowCount\": 3,\n\t\"data\": [\n\t\t[20.0, 3, \"West\", null],\n\t\t[null, 4, \"North\", \"Late\"],\n\t\t[2.5, 5, \"East\", null]\n\t]\n}"
+  },
+  {
+   "expr": "TOJSON(VAR t=FILTER(Facts,Facts[Quantity]>2) RETURN t,10)",
+   "powerbi": "{\n\t\"header\": [\"'Facts'[Sales]\", \"'Facts'[Quantity]\", \"'Facts'[Region]\", \"'Facts'[Note]\"],\n\t\"rowCount\": 3,\n\t\"data\": [\n\t\t[20.0, 3, \"West\", null],\n\t\t[null, 4, \"North\", \"Late\"],\n\t\t[2.5, 5, \"East\", null]\n\t]\n}"
+  },
+  {
+   "expr": "TOJSON(VAR t=FILTER(Facts,Facts[Quantity]>2) RETURN t,3)",
+   "powerbi": "{\n\t\"header\": [\"'Facts'[Sales]\", \"'Facts'[Quantity]\", \"'Facts'[Region]\", \"'Facts'[Note]\"],\n\t\"rowCount\": 3,\n\t\"data\": [\n\t\t[20.0, 3, \"West\", null],\n\t\t[null, 4, \"North\", \"Late\"],\n\t\t[2.5, 5, \"East\", null]\n\t]\n}"
+  },
+  {
+   "expr": "TOJSON(VAR t=FILTER(Facts,Facts[Quantity]>2) VAR u=t RETURN u)",
+   "powerbi": "{\n\t\"header\": [\"'Facts'[Sales]\", \"'Facts'[Quantity]\", \"'Facts'[Region]\", \"'Facts'[Note]\"],\n\t\"rowCount\": 3,\n\t\"data\": [\n\t\t[20.0, 3, \"West\", null],\n\t\t[null, 4, \"North\", \"Late\"],\n\t\t[2.5, 5, \"East\", null]\n\t]\n}"
+  },
+  {
+   "expr": "TOJSON(VAR t=FILTER(Facts,Facts[Quantity]>2) VAR u=t RETURN u,10)",
+   "powerbi": "{\n\t\"header\": [\"'Facts'[Sales]\", \"'Facts'[Quantity]\", \"'Facts'[Region]\", \"'Facts'[Note]\"],\n\t\"rowCount\": 3,\n\t\"data\": [\n\t\t[20.0, 3, \"West\", null],\n\t\t[null, 4, \"North\", \"Late\"],\n\t\t[2.5, 5, \"East\", null]\n\t]\n}"
+  },
+  {
+   "expr": "TOJSON(VAR t=FILTER(Facts,Facts[Quantity]>2) VAR u=t RETURN u,3)",
+   "powerbi": "{\n\t\"header\": [\"'Facts'[Sales]\", \"'Facts'[Quantity]\", \"'Facts'[Region]\", \"'Facts'[Note]\"],\n\t\"rowCount\": 3,\n\t\"data\": [\n\t\t[20.0, 3, \"West\", null],\n\t\t[null, 4, \"North\", \"Late\"],\n\t\t[2.5, 5, \"East\", null]\n\t]\n}"
+  },
+  {
+   "expr": "TOJSON(VAR t=FILTER(VALUES(Facts[Quantity]),Facts[Quantity]>1) RETURN FILTER(t,TRUE()))",
+   "powerbi": "{\n\t\"header\": [\"'Facts'[Quantity]\"],\n\t\"rowCount\": 4,\n\t\"data\": [\n\t\t[2],\n\t\t[3],\n\t\t[4],\n\t\t[5]\n\t]\n}"
+  },
+  {
+   "expr": "TOJSON(VAR t=FILTER(VALUES(Facts[Quantity]),Facts[Quantity]>1) RETURN FILTER(t,TRUE()),10)",
+   "powerbi": "{\n\t\"header\": [\"'Facts'[Quantity]\"],\n\t\"rowCount\": 4,\n\t\"data\": [\n\t\t[2],\n\t\t[3],\n\t\t[4],\n\t\t[5]\n\t]\n}"
+  },
+  {
+   "expr": "TOJSON(VAR t=FILTER(VALUES(Facts[Quantity]),Facts[Quantity]>1) RETURN FILTER(t,TRUE()),3)",
+   "powerbi": "{\n\t\"header\": [\"'Facts'[Quantity]\"],\n\t\"rowCount\": 4,\n\t\"data\": [\n\t\t[2],\n\t\t[3],\n\t\t[4]\n\t]\n}"
+  },
+  {
+   "expr": "TOJSON(VAR t=FILTER(VALUES(Facts[Quantity]),Facts[Quantity]>1) RETURN t)",
+   "powerbi": "{\n\t\"header\": [\"'Facts'[Quantity]\"],\n\t\"rowCount\": 4,\n\t\"data\": [\n\t\t[2],\n\t\t[3],\n\t\t[4],\n\t\t[5]\n\t]\n}"
+  },
+  {
+   "expr": "TOJSON(VAR t=FILTER(VALUES(Facts[Quantity]),Facts[Quantity]>1) RETURN t,10)",
+   "powerbi": "{\n\t\"header\": [\"'Facts'[Quantity]\"],\n\t\"rowCount\": 4,\n\t\"data\": [\n\t\t[2],\n\t\t[3],\n\t\t[4],\n\t\t[5]\n\t]\n}"
+  },
+  {
+   "expr": "TOJSON(VAR t=FILTER(VALUES(Facts[Quantity]),Facts[Quantity]>1) RETURN t,3)",
+   "powerbi": "{\n\t\"header\": [\"'Facts'[Quantity]\"],\n\t\"rowCount\": 4,\n\t\"data\": [\n\t\t[2],\n\t\t[3],\n\t\t[4]\n\t]\n}"
+  },
+  {
+   "expr": "TOJSON(VAR t=FILTER(VALUES(Facts[Quantity]),Facts[Quantity]>1) VAR u=t RETURN u)",
+   "powerbi": "{\n\t\"header\": [\"'Facts'[Quantity]\"],\n\t\"rowCount\": 4,\n\t\"data\": [\n\t\t[2],\n\t\t[3],\n\t\t[4],\n\t\t[5]\n\t]\n}"
+  },
+  {
+   "expr": "TOJSON(VAR t=FILTER(VALUES(Facts[Quantity]),Facts[Quantity]>1) VAR u=t RETURN u,10)",
+   "powerbi": "{\n\t\"header\": [\"'Facts'[Quantity]\"],\n\t\"rowCount\": 4,\n\t\"data\": [\n\t\t[2],\n\t\t[3],\n\t\t[4],\n\t\t[5]\n\t]\n}"
+  },
+  {
+   "expr": "TOJSON(VAR t=FILTER(VALUES(Facts[Quantity]),Facts[Quantity]>1) VAR u=t RETURN u,3)",
+   "powerbi": "{\n\t\"header\": [\"'Facts'[Quantity]\"],\n\t\"rowCount\": 4,\n\t\"data\": [\n\t\t[2],\n\t\t[3],\n\t\t[4]\n\t]\n}"
+  },
+  {
+   "expr": "TOJSON(VAR t=Facts RETURN t)",
+   "powerbi": "{\n\t\"header\": [\"'Facts'[Sales]\", \"'Facts'[Quantity]\", \"'Facts'[Region]\", \"'Facts'[Note]\"],\n\t\"rowCount\": 6,\n\t\"data\": [\n\t\t[10.5, 2, \"East\", \"Paid\"],\n\t\t[20.0, 3, \"West\", null],\n\t\t[-1.5, 1, \"East\", \"Paid\"],\n\t\t[null, 4, \"North\", \"Late\"],\n\t\t[0.0, 0, \"West\", \"Paid\"],\n\t\t[2.5, 5, \"East\", null]\n\t]\n}"
+  },
+  {
+   "expr": "TOJSON(VAR t=Facts RETURN t,10)",
+   "powerbi": "{\n\t\"header\": [\"'Facts'[Sales]\", \"'Facts'[Quantity]\", \"'Facts'[Region]\", \"'Facts'[Note]\"],\n\t\"rowCount\": 6,\n\t\"data\": [\n\t\t[10.5, 2, \"East\", \"Paid\"],\n\t\t[20.0, 3, \"West\", null],\n\t\t[-1.5, 1, \"East\", \"Paid\"],\n\t\t[null, 4, \"North\", \"Late\"],\n\t\t[0.0, 0, \"West\", \"Paid\"],\n\t\t[2.5, 5, \"East\", null]\n\t]\n}"
+  },
+  {
+   "expr": "TOJSON(VAR t=Facts RETURN t,3)",
+   "powerbi": "{\n\t\"header\": [\"'Facts'[Sales]\", \"'Facts'[Quantity]\", \"'Facts'[Region]\", \"'Facts'[Note]\"],\n\t\"rowCount\": 6,\n\t\"data\": [\n\t\t[10.5, 2, \"East\", \"Paid\"],\n\t\t[20.0, 3, \"West\", null],\n\t\t[-1.5, 1, \"East\", \"Paid\"]\n\t]\n}"
+  },
+  {
+   "expr": "TOJSON(VAR t=Facts VAR u=t RETURN u)",
+   "powerbi": "{\n\t\"header\": [\"'Facts'[Sales]\", \"'Facts'[Quantity]\", \"'Facts'[Region]\", \"'Facts'[Note]\"],\n\t\"rowCount\": 6,\n\t\"data\": [\n\t\t[10.5, 2, \"East\", \"Paid\"],\n\t\t[20.0, 3, \"West\", null],\n\t\t[-1.5, 1, \"East\", \"Paid\"],\n\t\t[null, 4, \"North\", \"Late\"],\n\t\t[0.0, 0, \"West\", \"Paid\"],\n\t\t[2.5, 5, \"East\", null]\n\t]\n}"
+  },
+  {
+   "expr": "TOJSON(VAR t=Facts VAR u=t RETURN u,10)",
+   "powerbi": "{\n\t\"header\": [\"'Facts'[Sales]\", \"'Facts'[Quantity]\", \"'Facts'[Region]\", \"'Facts'[Note]\"],\n\t\"rowCount\": 6,\n\t\"data\": [\n\t\t[10.5, 2, \"East\", \"Paid\"],\n\t\t[20.0, 3, \"West\", null],\n\t\t[-1.5, 1, \"East\", \"Paid\"],\n\t\t[null, 4, \"North\", \"Late\"],\n\t\t[0.0, 0, \"West\", \"Paid\"],\n\t\t[2.5, 5, \"East\", null]\n\t]\n}"
+  },
+  {
+   "expr": "TOJSON(VAR t=Facts VAR u=t RETURN u,3)",
+   "powerbi": "{\n\t\"header\": [\"'Facts'[Sales]\", \"'Facts'[Quantity]\", \"'Facts'[Region]\", \"'Facts'[Note]\"],\n\t\"rowCount\": 6,\n\t\"data\": [\n\t\t[10.5, 2, \"East\", \"Paid\"],\n\t\t[20.0, 3, \"West\", null],\n\t\t[-1.5, 1, \"East\", \"Paid\"]\n\t]\n}"
+  },
+  {
+   "expr": "TOJSON(VAR t=ROW(\"a\",1) RETURN FILTER(t,TRUE()))",
+   "powerbi": "{\n\t\"header\": [\"[a]\"],\n\t\"rowCount\": 1,\n\t\"data\": [\n\t\t[1]\n\t]\n}"
+  },
+  {
+   "expr": "TOJSON(VAR t=ROW(\"a\",1) RETURN FILTER(t,TRUE()),10)",
+   "powerbi": "{\n\t\"header\": [\"[a]\"],\n\t\"rowCount\": 1,\n\t\"data\": [\n\t\t[1]\n\t]\n}"
+  },
+  {
+   "expr": "TOJSON(VAR t=ROW(\"a\",1) RETURN FILTER(t,TRUE()),3)",
+   "powerbi": "{\n\t\"header\": [\"[a]\"],\n\t\"rowCount\": 1,\n\t\"data\": [\n\t\t[1]\n\t]\n}"
+  },
+  {
+   "expr": "TOJSON(VAR t=ROW(\"a\",1) RETURN t)",
+   "powerbi": "{\n\t\"header\": [\"[a]\"],\n\t\"rowCount\": 1,\n\t\"data\": [\n\t\t[1]\n\t]\n}"
+  },
+  {
+   "expr": "TOJSON(VAR t=ROW(\"a\",1) RETURN t,10)",
+   "powerbi": "{\n\t\"header\": [\"[a]\"],\n\t\"rowCount\": 1,\n\t\"data\": [\n\t\t[1]\n\t]\n}"
+  },
+  {
+   "expr": "TOJSON(VAR t=ROW(\"a\",1) RETURN t,3)",
+   "powerbi": "{\n\t\"header\": [\"[a]\"],\n\t\"rowCount\": 1,\n\t\"data\": [\n\t\t[1]\n\t]\n}"
+  },
+  {
+   "expr": "TOJSON(VAR t=ROW(\"a\",1) VAR u=t RETURN u)",
+   "powerbi": "{\n\t\"header\": [\"[a]\"],\n\t\"rowCount\": 1,\n\t\"data\": [\n\t\t[1]\n\t]\n}"
+  },
+  {
+   "expr": "TOJSON(VAR t=ROW(\"a\",1) VAR u=t RETURN u,10)",
+   "powerbi": "{\n\t\"header\": [\"[a]\"],\n\t\"rowCount\": 1,\n\t\"data\": [\n\t\t[1]\n\t]\n}"
+  },
+  {
+   "expr": "TOJSON(VAR t=ROW(\"a\",1) VAR u=t RETURN u,3)",
+   "powerbi": "{\n\t\"header\": [\"[a]\"],\n\t\"rowCount\": 1,\n\t\"data\": [\n\t\t[1]\n\t]\n}"
+  },
+  {
+   "expr": "TOJSON(VAR t=SELECTCOLUMNS(Facts,\"r\",Facts[Region]) RETURN FILTER(t,TRUE()))",
+   "powerbi": "{\n\t\"header\": [\"[r]\"],\n\t\"rowCount\": 6,\n\t\"data\": [\n\t\t[\"East\"],\n\t\t[\"East\"],\n\t\t[\"East\"],\n\t\t[\"West\"],\n\t\t[\"West\"],\n\t\t[\"North\"]\n\t]\n}"
+  },
+  {
+   "expr": "TOJSON(VAR t=SELECTCOLUMNS(Facts,\"r\",Facts[Region]) RETURN FILTER(t,TRUE()),10)",
+   "powerbi": "{\n\t\"header\": [\"[r]\"],\n\t\"rowCount\": 6,\n\t\"data\": [\n\t\t[\"East\"],\n\t\t[\"East\"],\n\t\t[\"East\"],\n\t\t[\"West\"],\n\t\t[\"West\"],\n\t\t[\"North\"]\n\t]\n}"
+  },
+  {
+   "expr": "TOJSON(VAR t=SELECTCOLUMNS(Facts,\"r\",Facts[Region]) RETURN FILTER(t,TRUE()),3)",
+   "powerbi": "{\n\t\"header\": [\"[r]\"],\n\t\"rowCount\": 6,\n\t\"data\": [\n\t\t[\"East\"],\n\t\t[\"East\"],\n\t\t[\"East\"]\n\t]\n}"
+  },
+  {
+   "expr": "TOJSON(VAR t=SELECTCOLUMNS(Facts,\"r\",Facts[Region]) RETURN t)",
+   "powerbi": "{\n\t\"header\": [\"[r]\"],\n\t\"rowCount\": 6,\n\t\"data\": [\n\t\t[\"East\"],\n\t\t[\"East\"],\n\t\t[\"East\"],\n\t\t[\"West\"],\n\t\t[\"West\"],\n\t\t[\"North\"]\n\t]\n}"
+  },
+  {
+   "expr": "TOJSON(VAR t=SELECTCOLUMNS(Facts,\"r\",Facts[Region]) RETURN t,10)",
+   "powerbi": "{\n\t\"header\": [\"[r]\"],\n\t\"rowCount\": 6,\n\t\"data\": [\n\t\t[\"East\"],\n\t\t[\"East\"],\n\t\t[\"East\"],\n\t\t[\"West\"],\n\t\t[\"West\"],\n\t\t[\"North\"]\n\t]\n}"
+  },
+  {
+   "expr": "TOJSON(VAR t=SELECTCOLUMNS(Facts,\"r\",Facts[Region]) RETURN t,3)",
+   "powerbi": "{\n\t\"header\": [\"[r]\"],\n\t\"rowCount\": 6,\n\t\"data\": [\n\t\t[\"East\"],\n\t\t[\"East\"],\n\t\t[\"East\"]\n\t]\n}"
+  },
+  {
+   "expr": "TOJSON(VAR t=SELECTCOLUMNS(Facts,\"r\",Facts[Region]) VAR u=t RETURN u)",
+   "powerbi": "{\n\t\"header\": [\"[r]\"],\n\t\"rowCount\": 6,\n\t\"data\": [\n\t\t[\"East\"],\n\t\t[\"East\"],\n\t\t[\"East\"],\n\t\t[\"West\"],\n\t\t[\"West\"],\n\t\t[\"North\"]\n\t]\n}"
+  },
+  {
+   "expr": "TOJSON(VAR t=SELECTCOLUMNS(Facts,\"r\",Facts[Region]) VAR u=t RETURN u,10)",
+   "powerbi": "{\n\t\"header\": [\"[r]\"],\n\t\"rowCount\": 6,\n\t\"data\": [\n\t\t[\"East\"],\n\t\t[\"East\"],\n\t\t[\"East\"],\n\t\t[\"West\"],\n\t\t[\"West\"],\n\t\t[\"North\"]\n\t]\n}"
+  },
+  {
+   "expr": "TOJSON(VAR t=SELECTCOLUMNS(Facts,\"r\",Facts[Region]) VAR u=t RETURN u,3)",
+   "powerbi": "{\n\t\"header\": [\"[r]\"],\n\t\"rowCount\": 6,\n\t\"data\": [\n\t\t[\"East\"],\n\t\t[\"East\"],\n\t\t[\"East\"]\n\t]\n}"
+  },
+  {
+   "expr": "TOJSON(VAR t=SUMMARIZE(Facts,Facts[Region]) RETURN FILTER(t,TRUE()))",
+   "powerbi": "{\n\t\"header\": [\"'Facts'[Region]\"],\n\t\"rowCount\": 3,\n\t\"data\": [\n\t\t[\"East\"],\n\t\t[\"West\"],\n\t\t[\"North\"]\n\t]\n}"
+  },
+  {
+   "expr": "TOJSON(VAR t=SUMMARIZE(Facts,Facts[Region]) RETURN FILTER(t,TRUE()),10)",
+   "powerbi": "{\n\t\"header\": [\"'Facts'[Region]\"],\n\t\"rowCount\": 3,\n\t\"data\": [\n\t\t[\"East\"],\n\t\t[\"West\"],\n\t\t[\"North\"]\n\t]\n}"
+  },
+  {
+   "expr": "TOJSON(VAR t=SUMMARIZE(Facts,Facts[Region]) RETURN FILTER(t,TRUE()),3)",
+   "powerbi": "{\n\t\"header\": [\"'Facts'[Region]\"],\n\t\"rowCount\": 3,\n\t\"data\": [\n\t\t[\"East\"],\n\t\t[\"West\"],\n\t\t[\"North\"]\n\t]\n}"
+  },
+  {
+   "expr": "TOJSON(VAR t=SUMMARIZE(Facts,Facts[Region]) RETURN t)",
+   "powerbi": "{\n\t\"header\": [\"'Facts'[Region]\"],\n\t\"rowCount\": 3,\n\t\"data\": [\n\t\t[\"East\"],\n\t\t[\"West\"],\n\t\t[\"North\"]\n\t]\n}"
+  },
+  {
+   "expr": "TOJSON(VAR t=SUMMARIZE(Facts,Facts[Region]) RETURN t,10)",
+   "powerbi": "{\n\t\"header\": [\"'Facts'[Region]\"],\n\t\"rowCount\": 3,\n\t\"data\": [\n\t\t[\"East\"],\n\t\t[\"West\"],\n\t\t[\"North\"]\n\t]\n}"
+  },
+  {
+   "expr": "TOJSON(VAR t=SUMMARIZE(Facts,Facts[Region]) RETURN t,3)",
+   "powerbi": "{\n\t\"header\": [\"'Facts'[Region]\"],\n\t\"rowCount\": 3,\n\t\"data\": [\n\t\t[\"East\"],\n\t\t[\"West\"],\n\t\t[\"North\"]\n\t]\n}"
+  },
+  {
+   "expr": "TOJSON(VAR t=SUMMARIZE(Facts,Facts[Region]) VAR u=t RETURN u)",
+   "powerbi": "{\n\t\"header\": [\"'Facts'[Region]\"],\n\t\"rowCount\": 3,\n\t\"data\": [\n\t\t[\"East\"],\n\t\t[\"West\"],\n\t\t[\"North\"]\n\t]\n}"
+  },
+  {
+   "expr": "TOJSON(VAR t=SUMMARIZE(Facts,Facts[Region]) VAR u=t RETURN u,10)",
+   "powerbi": "{\n\t\"header\": [\"'Facts'[Region]\"],\n\t\"rowCount\": 3,\n\t\"data\": [\n\t\t[\"East\"],\n\t\t[\"West\"],\n\t\t[\"North\"]\n\t]\n}"
+  },
+  {
+   "expr": "TOJSON(VAR t=SUMMARIZE(Facts,Facts[Region]) VAR u=t RETURN u,3)",
+   "powerbi": "{\n\t\"header\": [\"'Facts'[Region]\"],\n\t\"rowCount\": 3,\n\t\"data\": [\n\t\t[\"East\"],\n\t\t[\"West\"],\n\t\t[\"North\"]\n\t]\n}"
+  },
+  {
+   "expr": "TOJSON(VAR t=TOPN(3,Facts,Facts[Sales]) RETURN FILTER(t,TRUE()))",
+   "powerbi": "{\n\t\"header\": [\"'Facts'[Sales]\", \"'Facts'[Quantity]\", \"'Facts'[Region]\", \"'Facts'[Note]\"],\n\t\"rowCount\": 3,\n\t\"data\": [\n\t\t[2.5, 5, \"East\", null],\n\t\t[20.0, 3, \"West\", null],\n\t\t[10.5, 2, \"East\", \"Paid\"]\n\t]\n}"
+  },
+  {
+   "expr": "TOJSON(VAR t=TOPN(3,Facts,Facts[Sales]) RETURN FILTER(t,TRUE()),10)",
+   "powerbi": "{\n\t\"header\": [\"'Facts'[Sales]\", \"'Facts'[Quantity]\", \"'Facts'[Region]\", \"'Facts'[Note]\"],\n\t\"rowCount\": 3,\n\t\"data\": [\n\t\t[2.5, 5, \"East\", null],\n\t\t[20.0, 3, \"West\", null],\n\t\t[10.5, 2, \"East\", \"Paid\"]\n\t]\n}"
+  },
+  {
+   "expr": "TOJSON(VAR t=TOPN(3,Facts,Facts[Sales]) RETURN FILTER(t,TRUE()),3)",
+   "powerbi": "{\n\t\"header\": [\"'Facts'[Sales]\", \"'Facts'[Quantity]\", \"'Facts'[Region]\", \"'Facts'[Note]\"],\n\t\"rowCount\": 3,\n\t\"data\": [\n\t\t[2.5, 5, \"East\", null],\n\t\t[20.0, 3, \"West\", null],\n\t\t[10.5, 2, \"East\", \"Paid\"]\n\t]\n}"
+  },
+  {
+   "expr": "TOJSON(VAR t=TOPN(3,Facts,Facts[Sales]) RETURN t)",
+   "powerbi": "{\n\t\"header\": [\"'Facts'[Sales]\", \"'Facts'[Quantity]\", \"'Facts'[Region]\", \"'Facts'[Note]\"],\n\t\"rowCount\": 3,\n\t\"data\": [\n\t\t[2.5, 5, \"East\", null],\n\t\t[20.0, 3, \"West\", null],\n\t\t[10.5, 2, \"East\", \"Paid\"]\n\t]\n}"
+  },
+  {
+   "expr": "TOJSON(VAR t=TOPN(3,Facts,Facts[Sales]) RETURN t,10)",
+   "powerbi": "{\n\t\"header\": [\"'Facts'[Sales]\", \"'Facts'[Quantity]\", \"'Facts'[Region]\", \"'Facts'[Note]\"],\n\t\"rowCount\": 3,\n\t\"data\": [\n\t\t[2.5, 5, \"East\", null],\n\t\t[20.0, 3, \"West\", null],\n\t\t[10.5, 2, \"East\", \"Paid\"]\n\t]\n}"
+  },
+  {
+   "expr": "TOJSON(VAR t=TOPN(3,Facts,Facts[Sales]) RETURN t,3)",
+   "powerbi": "{\n\t\"header\": [\"'Facts'[Sales]\", \"'Facts'[Quantity]\", \"'Facts'[Region]\", \"'Facts'[Note]\"],\n\t\"rowCount\": 3,\n\t\"data\": [\n\t\t[2.5, 5, \"East\", null],\n\t\t[20.0, 3, \"West\", null],\n\t\t[10.5, 2, \"East\", \"Paid\"]\n\t]\n}"
+  },
+  {
+   "expr": "TOJSON(VAR t=TOPN(3,Facts,Facts[Sales]) VAR u=t RETURN u)",
+   "powerbi": "{\n\t\"header\": [\"'Facts'[Sales]\", \"'Facts'[Quantity]\", \"'Facts'[Region]\", \"'Facts'[Note]\"],\n\t\"rowCount\": 3,\n\t\"data\": [\n\t\t[2.5, 5, \"East\", null],\n\t\t[20.0, 3, \"West\", null],\n\t\t[10.5, 2, \"East\", \"Paid\"]\n\t]\n}"
+  },
+  {
+   "expr": "TOJSON(VAR t=TOPN(3,Facts,Facts[Sales]) VAR u=t RETURN u,10)",
+   "powerbi": "{\n\t\"header\": [\"'Facts'[Sales]\", \"'Facts'[Quantity]\", \"'Facts'[Region]\", \"'Facts'[Note]\"],\n\t\"rowCount\": 3,\n\t\"data\": [\n\t\t[2.5, 5, \"East\", null],\n\t\t[20.0, 3, \"West\", null],\n\t\t[10.5, 2, \"East\", \"Paid\"]\n\t]\n}"
+  },
+  {
+   "expr": "TOJSON(VAR t=TOPN(3,Facts,Facts[Sales]) VAR u=t RETURN u,3)",
+   "powerbi": "{\n\t\"header\": [\"'Facts'[Sales]\", \"'Facts'[Quantity]\", \"'Facts'[Region]\", \"'Facts'[Note]\"],\n\t\"rowCount\": 3,\n\t\"data\": [\n\t\t[2.5, 5, \"East\", null],\n\t\t[20.0, 3, \"West\", null],\n\t\t[10.5, 2, \"East\", \"Paid\"]\n\t]\n}"
+  },
+  {
+   "expr": "TOJSON(VAR t=VALUES(Facts[Note]) RETURN FILTER(t,TRUE()))",
+   "powerbi": "{\n\t\"header\": [\"'Facts'[Note]\"],\n\t\"rowCount\": 3,\n\t\"data\": [\n\t\t[null],\n\t\t[\"Paid\"],\n\t\t[\"Late\"]\n\t]\n}"
+  },
+  {
+   "expr": "TOJSON(VAR t=VALUES(Facts[Note]) RETURN FILTER(t,TRUE()),10)",
+   "powerbi": "{\n\t\"header\": [\"'Facts'[Note]\"],\n\t\"rowCount\": 3,\n\t\"data\": [\n\t\t[null],\n\t\t[\"Paid\"],\n\t\t[\"Late\"]\n\t]\n}"
+  },
+  {
+   "expr": "TOJSON(VAR t=VALUES(Facts[Note]) RETURN FILTER(t,TRUE()),3)",
+   "powerbi": "{\n\t\"header\": [\"'Facts'[Note]\"],\n\t\"rowCount\": 3,\n\t\"data\": [\n\t\t[null],\n\t\t[\"Paid\"],\n\t\t[\"Late\"]\n\t]\n}"
+  },
+  {
+   "expr": "TOJSON(VAR t=VALUES(Facts[Note]) RETURN t)",
+   "powerbi": "{\n\t\"header\": [\"'Facts'[Note]\"],\n\t\"rowCount\": 3,\n\t\"data\": [\n\t\t[null],\n\t\t[\"Paid\"],\n\t\t[\"Late\"]\n\t]\n}"
+  },
+  {
+   "expr": "TOJSON(VAR t=VALUES(Facts[Note]) RETURN t,10)",
+   "powerbi": "{\n\t\"header\": [\"'Facts'[Note]\"],\n\t\"rowCount\": 3,\n\t\"data\": [\n\t\t[null],\n\t\t[\"Paid\"],\n\t\t[\"Late\"]\n\t]\n}"
+  },
+  {
+   "expr": "TOJSON(VAR t=VALUES(Facts[Note]) RETURN t,3)",
+   "powerbi": "{\n\t\"header\": [\"'Facts'[Note]\"],\n\t\"rowCount\": 3,\n\t\"data\": [\n\t\t[null],\n\t\t[\"Paid\"],\n\t\t[\"Late\"]\n\t]\n}"
+  },
+  {
+   "expr": "TOJSON(VAR t=VALUES(Facts[Note]) VAR u=t RETURN u)",
+   "powerbi": "{\n\t\"header\": [\"'Facts'[Note]\"],\n\t\"rowCount\": 3,\n\t\"data\": [\n\t\t[null],\n\t\t[\"Paid\"],\n\t\t[\"Late\"]\n\t]\n}"
+  },
+  {
+   "expr": "TOJSON(VAR t=VALUES(Facts[Note]) VAR u=t RETURN u,10)",
+   "powerbi": "{\n\t\"header\": [\"'Facts'[Note]\"],\n\t\"rowCount\": 3,\n\t\"data\": [\n\t\t[null],\n\t\t[\"Paid\"],\n\t\t[\"Late\"]\n\t]\n}"
+  },
+  {
+   "expr": "TOJSON(VAR t=VALUES(Facts[Note]) VAR u=t RETURN u,3)",
+   "powerbi": "{\n\t\"header\": [\"'Facts'[Note]\"],\n\t\"rowCount\": 3,\n\t\"data\": [\n\t\t[null],\n\t\t[\"Paid\"],\n\t\t[\"Late\"]\n\t]\n}"
+  },
+  {
+   "expr": "TOJSON(VAR t=VALUES(Facts[Region]) RETURN FILTER(t,TRUE()))",
+   "powerbi": "{\n\t\"header\": [\"'Facts'[Region]\"],\n\t\"rowCount\": 3,\n\t\"data\": [\n\t\t[\"East\"],\n\t\t[\"West\"],\n\t\t[\"North\"]\n\t]\n}"
+  },
+  {
+   "expr": "TOJSON(VAR t=VALUES(Facts[Region]) RETURN FILTER(t,TRUE()),10)",
+   "powerbi": "{\n\t\"header\": [\"'Facts'[Region]\"],\n\t\"rowCount\": 3,\n\t\"data\": [\n\t\t[\"East\"],\n\t\t[\"West\"],\n\t\t[\"North\"]\n\t]\n}"
+  },
+  {
+   "expr": "TOJSON(VAR t=VALUES(Facts[Region]) RETURN FILTER(t,TRUE()),3)",
+   "powerbi": "{\n\t\"header\": [\"'Facts'[Region]\"],\n\t\"rowCount\": 3,\n\t\"data\": [\n\t\t[\"East\"],\n\t\t[\"West\"],\n\t\t[\"North\"]\n\t]\n}"
+  },
+  {
+   "expr": "TOJSON(VAR t=VALUES(Facts[Region]) RETURN t)",
+   "powerbi": "{\n\t\"header\": [\"'Facts'[Region]\"],\n\t\"rowCount\": 3,\n\t\"data\": [\n\t\t[\"East\"],\n\t\t[\"West\"],\n\t\t[\"North\"]\n\t]\n}"
+  },
+  {
+   "expr": "TOJSON(VAR t=VALUES(Facts[Region]) RETURN t,10)",
+   "powerbi": "{\n\t\"header\": [\"'Facts'[Region]\"],\n\t\"rowCount\": 3,\n\t\"data\": [\n\t\t[\"East\"],\n\t\t[\"West\"],\n\t\t[\"North\"]\n\t]\n}"
+  },
+  {
+   "expr": "TOJSON(VAR t=VALUES(Facts[Region]) RETURN t,3)",
+   "powerbi": "{\n\t\"header\": [\"'Facts'[Region]\"],\n\t\"rowCount\": 3,\n\t\"data\": [\n\t\t[\"East\"],\n\t\t[\"West\"],\n\t\t[\"North\"]\n\t]\n}"
+  },
+  {
+   "expr": "TOJSON(VAR t=VALUES(Facts[Region]) VAR u=t RETURN u)",
+   "powerbi": "{\n\t\"header\": [\"'Facts'[Region]\"],\n\t\"rowCount\": 3,\n\t\"data\": [\n\t\t[\"East\"],\n\t\t[\"West\"],\n\t\t[\"North\"]\n\t]\n}"
+  },
+  {
+   "expr": "TOJSON(VAR t=VALUES(Facts[Region]) VAR u=t RETURN u,10)",
+   "powerbi": "{\n\t\"header\": [\"'Facts'[Region]\"],\n\t\"rowCount\": 3,\n\t\"data\": [\n\t\t[\"East\"],\n\t\t[\"West\"],\n\t\t[\"North\"]\n\t]\n}"
+  },
+  {
+   "expr": "TOJSON(VAR t=VALUES(Facts[Region]) VAR u=t RETURN u,3)",
+   "powerbi": "{\n\t\"header\": [\"'Facts'[Region]\"],\n\t\"rowCount\": 3,\n\t\"data\": [\n\t\t[\"East\"],\n\t\t[\"West\"],\n\t\t[\"North\"]\n\t]\n}"
+  },
+  {
+   "expr": "TOJSON(VAR t={3,1,2} RETURN FILTER(t,TRUE()))",
+   "powerbi": "{\n\t\"header\": [\"[Value]\"],\n\t\"rowCount\": 3,\n\t\"data\": [\n\t\t[3],\n\t\t[1],\n\t\t[2]\n\t]\n}"
+  },
+  {
+   "expr": "TOJSON(VAR t={3,1,2} RETURN FILTER(t,TRUE()),10)",
+   "powerbi": "{\n\t\"header\": [\"[Value]\"],\n\t\"rowCount\": 3,\n\t\"data\": [\n\t\t[3],\n\t\t[1],\n\t\t[2]\n\t]\n}"
+  },
+  {
+   "expr": "TOJSON(VAR t={3,1,2} RETURN FILTER(t,TRUE()),3)",
+   "powerbi": "{\n\t\"header\": [\"[Value]\"],\n\t\"rowCount\": 3,\n\t\"data\": [\n\t\t[3],\n\t\t[1],\n\t\t[2]\n\t]\n}"
+  },
+  {
+   "expr": "TOJSON(VAR t={3,1,2} RETURN t)",
+   "powerbi": "{\n\t\"header\": [\"[Value]\"],\n\t\"rowCount\": 3,\n\t\"data\": [\n\t\t[3],\n\t\t[1],\n\t\t[2]\n\t]\n}"
+  },
+  {
+   "expr": "TOJSON(VAR t={3,1,2} RETURN t,10)",
+   "powerbi": "{\n\t\"header\": [\"[Value]\"],\n\t\"rowCount\": 3,\n\t\"data\": [\n\t\t[3],\n\t\t[1],\n\t\t[2]\n\t]\n}"
+  },
+  {
+   "expr": "TOJSON(VAR t={3,1,2} RETURN t,3)",
+   "powerbi": "{\n\t\"header\": [\"[Value]\"],\n\t\"rowCount\": 3,\n\t\"data\": [\n\t\t[3],\n\t\t[1],\n\t\t[2]\n\t]\n}"
+  },
+  {
+   "expr": "TOJSON(VAR t={3,1,2} VAR u=t RETURN u)",
+   "powerbi": "{\n\t\"header\": [\"[Value]\"],\n\t\"rowCount\": 3,\n\t\"data\": [\n\t\t[3],\n\t\t[1],\n\t\t[2]\n\t]\n}"
+  },
+  {
+   "expr": "TOJSON(VAR t={3,1,2} VAR u=t RETURN u,10)",
+   "powerbi": "{\n\t\"header\": [\"[Value]\"],\n\t\"rowCount\": 3,\n\t\"data\": [\n\t\t[3],\n\t\t[1],\n\t\t[2]\n\t]\n}"
+  },
+  {
+   "expr": "TOJSON(VAR t={3,1,2} VAR u=t RETURN u,3)",
+   "powerbi": "{\n\t\"header\": [\"[Value]\"],\n\t\"rowCount\": 3,\n\t\"data\": [\n\t\t[3],\n\t\t[1],\n\t\t[2]\n\t]\n}"
+  }
+ ]
+}

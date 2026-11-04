@@ -136,9 +136,12 @@ class Misc3ReviewTest(unittest.TestCase):
         ])
 
     def test_tableof_has_a_known_order_only_straight_under_concatenatex(self) -> None:
-        _assert_matches(self, [('CONCATENATEX(TABLEOF(Facts[Region]),Facts[Region],",")', "East,East,East,West,West,North")])
+        _assert_matches(self, [
+            ('CONCATENATEX(TABLEOF(Facts[Region]),Facts[Region],",")', "East,East,East,West,West,North"),
+            # Task 42 (2026-11-04): live Power BI Desktop gives this order, so it is answered now, not refused
+            ('CONCATENATEX(TOPN(4,TABLEOF(Facts[Region]),Facts[Region],DESC),Facts[Region],",")', "East,East,East,West,West,North"),
+        ])
         _assert_refused(self, [
-            'CONCATENATEX(TOPN(4,TABLEOF(Facts[Region]),Facts[Region],DESC),Facts[Region],",")',
             'CONCATENATEX(UNION(TABLEOF(Facts[Region]),TABLEOF(Facts[Region])),Facts[Region],",")',
         ])
 

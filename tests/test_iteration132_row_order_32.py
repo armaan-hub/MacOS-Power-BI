@@ -91,5 +91,26 @@ class TestIteration132RowOrder32(unittest.TestCase):
                     self.assertEqual(status(expected, actual), "match", f"Mismatch for {expr}: expected {expected}, got {actual}")
 
 
+    def test_var_held_table_keeps_its_own_row_order_or_is_refused(self) -> None:
+        for expr in [
+            'TOJSON(VAR t=SELECTCOLUMNS(Facts,"r",Facts[Region]) RETURN t)',
+            'TOJSON(VAR t=SELECTCOLUMNS(Facts,"r",Facts[Region]) VAR u=t RETURN u,3)',
+            'TOJSON(VAR t=TOPN(3,Facts,Facts[Sales]) RETURN t)',
+            'TOJSON(VAR t=TOPN(3,Facts,Facts[Sales]) RETURN FILTER(t,TRUE()),3)',
+            'TOJSON(VAR n=1 RETURN SELECTCOLUMNS(Facts,"r",Facts[Region]),10)',
+        ]:
+            with self.subTest(expr=expr):
+                self.assertTrue(str(dax.local(expr)).startswith("LOCAL-REJECT"), expr)
+
+    def test_concatenatex_without_order_by_around_tableof_is_refused(self) -> None:
+        for expr in [
+            'CONCATENATEX(FILTER(TOPN(4,TABLEOF(Facts[Sales]),Facts[Sales]),Facts[Sales]>0),Facts[Sales],",")',
+            'CONCATENATEX(ADDCOLUMNS(FILTER(TABLEOF(Facts[Sales]),Facts[Sales]>0),"k",Facts[Quantity]),Facts[Sales],",")',
+            'CONCATENATEX(TOPN(3,TABLEOF(Facts[Sales]),Facts[Quantity]),Facts[Sales],",")',
+        ]:
+            with self.subTest(expr=expr):
+                self.assertTrue(str(dax.local(expr)).startswith("LOCAL-REJECT"), expr)
+
+
 if __name__ == "__main__":
     unittest.main()

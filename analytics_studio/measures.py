@@ -3769,6 +3769,17 @@ def _rollup_issubtotal_columns(node: Any) -> list[str]:
     return found
 
 
+def _tocsv_inline_vars(node: tuple[Any, ...]) -> tuple[Any, ...]:
+    """A VAR block (kind "let") written out: its RETURN with every VAR replaced by the expression it holds, so the rows keep
+    the order the held table expression has on its own. Later VARs may read earlier ones."""
+    while isinstance(node, tuple) and node and node[0] == "let":
+        held: dict[str, tuple[Any, ...]] = {}
+        for name, value in node[1]:
+            held[str(name)] = _replace_held(value, held)
+        node = _replace_held(node[2], held)
+    return node
+
+
 def _tocsv_row_order(node: tuple[Any, ...]) -> str:
     """How Power BI orders the rows TOCSV / TOJSON print for a table expression (live probes, iteration 94).
 
@@ -3779,7 +3790,13 @@ def _tocsv_row_order(node: tuple[Any, ...]) -> str:
     known. Every other table expression raises: its order is not modelled."""
     kind = node[0]
     if kind == "let":
-        return "constant"
+        # a VAR block orders its rows like the RETURN expression with every VAR replaced by the expression it holds
+        inner_order = _tocsv_row_order(_tocsv_inline_vars(node))  # raises for a table whose row order is not modelled
+        if inner_order == "scan":
+            return "constant"  # live Power BI: a VAR-held scan or FILTER of a loaded table comes back in storage order, never reversed
+        if inner_order in {"constant", "dictionary", "grouped"}:
+            return inner_order
+        raise MeasureError("The row order of a VAR-held table of this kind is not modelled in the local engine, so TOCSV / TOJSON refuse it.")
     if kind == "table":
         return "scan"
     if kind == "tableconstructor":
@@ -19739,6 +19756,10 @@ def evaluate_measures(
             table_node = arguments[0]
             if is_csv and isinstance(table_node, tuple) and table_node and table_node[0] == "let":
                 raise MeasureError("The row order of this table expression is not modelled in the local engine, so TOCSV / TOJSON refuse it.")
+            if table_node[0] == "let":
+                _tocsv_row_order(table_node)  # raises for a VAR-held table whose row order is not modelled
+                if _tocsv_row_order(_tocsv_inline_vars(table_node)) != "scan":  # a scan keeps the VAR block: Power BI never reverses it
+                    table_node = _tocsv_inline_vars(table_node)  # the rows of the held table, in its own order
             order_class = _tocsv_row_order(table_node)  # raises for a row order that is not modelled
             max_rows = _tocsv_max_rows(arguments[1]) if len(arguments) > 1 else 10
             topn_walk_nodes[id(table_node)] = []
@@ -20073,6 +20094,17 @@ def evaluate_measures(
             if len(iteration_rows) > 1 and walked_table[:2] != ("call", "TABLEOF") and _contains_function_call(walked_table, "TABLEOF"):
                 if walked_table[0] in {"call", "table_call"} and walked_table[1] in {"UNION", "DISTINCT"}:
                     raise MeasureError("CONCATENATEX over rows built from TABLEOF depends on the row order, which is not modelled in the local engine.")
+                if not order_spec:
+                    # no ORDER BY: the rows come in the walk order of the table around TABLEOF. Live Power BI (Task 42): that order is only
+                    # known when TABLEOF is an argument of the table itself (not buried under a second TABLEOF-wrapping table) and a TOPN
+                    # ranks by the TABLEOF column
+                    wrapped = [a for a in (walked_table[2] if walked_table[0] == "call" else ()) if isinstance(a, tuple) and a[:2] == ("call", "TABLEOF")]
+                    ranked_elsewhere = (
+                        walked_table[1] == "TOPN" and len(walked_table[2]) > 2 and wrapped
+                        and repr(walked_table[2][2]).casefold() != repr(wrapped[0][2][0]).casefold()
+                    )
+                    if walked_table[0] != "call" or not wrapped or ranked_elsewhere:
+                        raise MeasureError("CONCATENATEX without an ORDER BY over a table built around TABLEOF depends on the row order, which is not modelled in the local engine.")
             if not iteration_rows:
                 refuse_foreign_columns_of_empty_iteration(context, *read_nodes)
             iteration_rows = dictionary_ordered_rows(walked_table, context, iteration_rows, read_nodes)
