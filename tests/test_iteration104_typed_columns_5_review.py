@@ -72,7 +72,8 @@ class OneRepeatedDateHasNoSpreadTest(unittest.TestCase):
         self.assertEqual("0", dax.local('STDEVX.S(FILTER(Facts,Facts[Quantity]>1),DATE(2020,1,1)+0.5)'))
 
     def test_a_refusal_is_not_an_error_for_iferror(self) -> None:
-        self.assertTrue(dax.local('IFERROR(VARX.P(Facts,0.5),7)').startswith("LOCAL-REJECT"))
+        # Task 47 (2026-11-04): answered now; live Power BI answer
+        self.assertEqual("match", status("0", dax.local('IFERROR(VARX.P(Facts,0.5),7)')))
 
 
 class TypesComeFromTheTableTest(unittest.TestCase):

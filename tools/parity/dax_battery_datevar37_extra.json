@@ -1,0 +1,3618 @@
+{
+ "powerbi_version": "2.157.879.0 (26.08)+da30fe74eb0b8a8786ab7326b69c400a0e951831",
+ "frozen": "2026-11-04",
+ "items": [
+  {
+   "expr": "(STDEVX.P(CALCULATETABLE(Facts,Facts[Region]=\"East\"),0.3))&\"z\"",
+   "powerbi": "3.72529029846191E-09z"
+  },
+  {
+   "expr": "(STDEVX.P(CALCULATETABLE(Facts,Facts[Region]=\"East\"),DATE(1999,12,31)+Facts[Quantity]))&\"z\"",
+   "powerbi": "1.69967322574828z"
+  },
+  {
+   "expr": "(STDEVX.P(CALCULATETABLE(Facts,Facts[Region]=\"East\"),IF.EAGER(TRUE(),DATE(2020,1,1)+Facts[Quantity],BLANK())))&\"z\"",
+   "powerbi": "1.69967322574828z"
+  },
+  {
+   "expr": "(STDEVX.P(CALCULATETABLE(Facts,Facts[Region]=\"West\"),DATE(1999,12,31)+Facts[Sales]*7))&\"z\"",
+   "powerbi": "70z"
+  },
+  {
+   "expr": "(STDEVX.P(CALCULATETABLE(Facts,Facts[Region]=\"West\"),DATE(2010,3,3)+0.25+Facts[Quantity]))&\"z\"",
+   "powerbi": "1.5z"
+  },
+  {
+   "expr": "(STDEVX.P(CALCULATETABLE(Facts,Facts[Region]=\"West\"),DATE(2020,1,1)+Facts[Sales]))&\"z\"",
+   "powerbi": "10z"
+  },
+  {
+   "expr": "(STDEVX.P(CALCULATETABLE(Facts,Facts[Region]=\"West\"),IF(COUNTROWS(Facts)>3,DATE(1900,3,1)+Facts[Quantity],BLANK())))&\"z\"",
+   "powerbi": "1.5z"
+  },
+  {
+   "expr": "(STDEVX.P(FILTER(Facts,Facts[Quantity]>1),COALESCE(DATE(1950,1,1)+Facts[Sales],0)))&\"z\"",
+   "powerbi": "7.81424980404389z"
+  },
+  {
+   "expr": "(STDEVX.P(FILTER(Facts,Facts[Quantity]>1),COALESCE(DATE(2100,1,1)+Facts[Quantity],0)))&\"z\"",
+   "powerbi": "1.11803398874989z"
+  },
+  {
+   "expr": "(STDEVX.P(FILTER(Facts,Facts[Quantity]>1),DATE(1900,3,1)+Facts[Sales]*7))&\"z\"",
+   "powerbi": "54.6997486283072z"
+  },
+  {
+   "expr": "(STDEVX.P(FILTER(Facts,Facts[Quantity]>1),DATE(1999,12,31)+0.5))&\"z\"",
+   "powerbi": "0z"
+  },
+  {
+   "expr": "(STDEVX.P(FILTER(Facts,Facts[Quantity]>1),DATE(1999,12,31)+Facts[Quantity]*7))&\"z\"",
+   "powerbi": "7.82623792124926z"
+  },
+  {
+   "expr": "(STDEVX.P(FILTER(Facts,Facts[Quantity]>1),DATE(2020,1,1)+0.5))&\"z\"",
+   "powerbi": "0z"
+  },
+  {
+   "expr": "(STDEVX.P(FILTER(Facts,Facts[Quantity]>1),DATE(2100,1,1)+Facts[Quantity]*0.5))&\"z\"",
+   "powerbi": "0.559016994374947z"
+  },
+  {
+   "expr": "(STDEVX.P(FILTER(Facts,Facts[Quantity]>1),IF(Facts[Quantity]>2,DATE(1900,3,1)+Facts[Quantity],1)))&\"z\"",
+   "powerbi": "27.7218325512582z"
+  },
+  {
+   "expr": "(STDEVX.P(FILTER(Facts,Facts[Quantity]>1),IF.EAGER(TRUE(),DATE(1950,1,1)+Facts[Sales],BLANK())))&\"z\"",
+   "powerbi": "7.81424980404389z"
+  },
+  {
+   "expr": "(STDEVX.P(FILTER(Facts,Facts[Sales]>2),AVERAGE(Facts[Sales])))&\"z\"",
+   "powerbi": "0z"
+  },
+  {
+   "expr": "(STDEVX.P(FILTER(Facts,Facts[Sales]>2),DATE(1900,3,1)+0.25))&\"z\"",
+   "powerbi": "0z"
+  },
+  {
+   "expr": "(STDEVX.P(FILTER(Facts,Facts[Sales]>2),DATE(1900,3,1)+Facts[Quantity]*0.25))&\"z\"",
+   "powerbi": "0.311804782231081z"
+  },
+  {
+   "expr": "(STDEVX.P(FILTER(Facts,Facts[Sales]>2),DATE(2010,3,3)+0.25+0.5))&\"z\"",
+   "powerbi": "0z"
+  },
+  {
+   "expr": "(STDEVX.P(FILTER(Facts,Facts[Sales]>2),DATE(2010,3,3)+0.25+Facts[Quantity]*7))&\"z\"",
+   "powerbi": "8.73053389488681z"
+  },
+  {
+   "expr": "(STDEVX.P(FILTER(Facts,Facts[Sales]>2),DATE(2010,3,3)+0.25+Facts[Sales]*0.5))&\"z\"",
+   "powerbi": "3.57654396675611z"
+  },
+  {
+   "expr": "(STDEVX.P(FILTER(Facts,Facts[Sales]>2),DATE(2100,1,1)+0.5))&\"z\"",
+   "powerbi": "0z"
+  },
+  {
+   "expr": "(STDEVX.P(FILTER(Facts,Facts[Sales]>2),DATE(2100,1,1)+Facts[Sales]*0.25))&\"z\"",
+   "powerbi": "1.7882720667052z"
+  },
+  {
+   "expr": "(STDEVX.P(FILTER(Facts,Facts[Sales]>2),DATE(2100,1,1)+Facts[Sales]*7))&\"z\"",
+   "powerbi": "50.0716153822159z"
+  },
+  {
+   "expr": "(STDEVX.P(FILTER(Facts,Facts[Sales]>2),IF(TRUE(),DATE(1950,1,1)+Facts[Quantity],BLANK())))&\"z\"",
+   "powerbi": "1.24721916343967z"
+  },
+  {
+   "expr": "(STDEVX.P(Facts,DATE(1999,12,31)+Facts[Quantity]))&\"z\"",
+   "powerbi": "1.7078251509272z"
+  },
+  {
+   "expr": "(STDEVX.P(Facts,DATE(2020,1,1)+Facts[Quantity]*0.5))&\"z\"",
+   "powerbi": "0.853912610364507z"
+  },
+  {
+   "expr": "(STDEVX.P(Facts,IF(Facts[Quantity]>2,DATE(1999,12,31)+Facts[Sales],1)))&\"z\"",
+   "powerbi": "18265.7510835397z"
+  },
+  {
+   "expr": "(STDEVX.P(Facts,IF.EAGER(TRUE(),DATE(1900,3,1)+Facts[Quantity],BLANK())))&\"z\"",
+   "powerbi": "1.70782512765989z"
+  },
+  {
+   "expr": "(STDEVX.P(TOPN(4,Facts,Facts[Sales]),SWITCH(TRUE(),Facts[Sales]>2,DATE(1999,12,31)+Facts[Sales],DATE(1999,12,31))))&\"z\"",
+   "powerbi": "7.81424980404389z"
+  },
+  {
+   "expr": "(STDEVX.P(TOPN(4,Facts,Facts[Sales]),SWITCH(TRUE(),Facts[Sales]>2,DATE(2020,1,1)+Facts[Sales],DATE(2020,1,1))))&\"z\"",
+   "powerbi": "7.81424980404389z"
+  },
+  {
+   "expr": "(STDEVX.P({1,2,3},DATE(1950,1,1)+1.5))&\"z\"",
+   "powerbi": "0z"
+  },
+  {
+   "expr": "(STDEVX.P({1,2,3},DATE(1999,12,31)+[Value]*0.25))&\"z\"",
+   "powerbi": "0.204124339899793z"
+  },
+  {
+   "expr": "(STDEVX.P({1,2,3},DATE(1999,12,31)+[Value]*7))&\"z\"",
+   "powerbi": "5.71547607344651z"
+  },
+  {
+   "expr": "(STDEVX.P({1,2,3},DATE(2100,1,1)+0.5))&\"z\"",
+   "powerbi": "0z"
+  },
+  {
+   "expr": "(STDEVX.P({1,2,3},IF.EAGER(TRUE(),DATE(1950,1,1)+[Value],BLANK())))&\"z\"",
+   "powerbi": "0.816496593094473z"
+  },
+  {
+   "expr": "(STDEVX.P({1,2,3},SUM(Facts[Sales])/7))&\"z\"",
+   "powerbi": "0z"
+  },
+  {
+   "expr": "(STDEVX.P({5,9},DATE(1950,1,1)+[Value]*0.25))&\"z\"",
+   "powerbi": "0.5z"
+  },
+  {
+   "expr": "(STDEVX.P({5,9},IF(TRUE(),DATE(1900,3,1)+[Value],BLANK())))&\"z\"",
+   "powerbi": "2z"
+  },
+  {
+   "expr": "(STDEVX.S(CALCULATETABLE(Facts,Facts[Region]=\"East\"),DATE(2010,3,3)+0.25+0.5))&\"z\"",
+   "powerbi": "0z"
+  },
+  {
+   "expr": "(STDEVX.S(CALCULATETABLE(Facts,Facts[Region]=\"East\"),IF.EAGER(TRUE(),DATE(1950,1,1)+Facts[Quantity],BLANK())))&\"z\"",
+   "powerbi": "2.08166599469394z"
+  },
+  {
+   "expr": "(STDEVX.S(CALCULATETABLE(Facts,Facts[Region]=\"West\"),DATE(1999,12,31)+Facts[Sales]))&\"z\"",
+   "powerbi": "14.142135623731z"
+  },
+  {
+   "expr": "(STDEVX.S(CALCULATETABLE(Facts,Facts[Region]=\"West\"),DATE(1999,12,31)+Facts[Sales]*7))&\"z\"",
+   "powerbi": "98.9949493661167z"
+  },
+  {
+   "expr": "(STDEVX.S(CALCULATETABLE(Facts,Facts[Region]=\"West\"),DATE(2010,3,3)+0.25+Facts[Sales]*0.5))&\"z\"",
+   "powerbi": "7.07106781186548z"
+  },
+  {
+   "expr": "(STDEVX.S(CALCULATETABLE(Facts,Facts[Region]=\"West\"),DATE(2010,3,3)+0.25+Facts[Sales]*7))&\"z\"",
+   "powerbi": "98.9949493661167z"
+  },
+  {
+   "expr": "(STDEVX.S(CALCULATETABLE(Facts,Facts[Region]=\"West\"),DATE(2100,1,1)+Facts[Quantity]*7))&\"z\"",
+   "powerbi": "14.8492424049175z"
+  },
+  {
+   "expr": "(STDEVX.S(CALCULATETABLE(Facts,Facts[Region]=\"West\"),IF(TRUE(),TIME(6,0,0)+Facts[Quantity],TIME(6,0,0))))&\"z\"",
+   "powerbi": "2.12132034355964z"
+  },
+  {
+   "expr": "(STDEVX.S(CALCULATETABLE(Facts,Facts[Region]=\"West\"),SUM(Facts[Sales])/7))&\"z\"",
+   "powerbi": "0z"
+  },
+  {
+   "expr": "(STDEVX.S(CALCULATETABLE(Facts,Facts[Region]=\"West\"),TIME(6,0,0)+0.1))&\"z\"",
+   "powerbi": "0z"
+  },
+  {
+   "expr": "(STDEVX.S(FILTER(Facts,Facts[Quantity]>1),2.5))&\"z\"",
+   "powerbi": "0z"
+  },
+  {
+   "expr": "(STDEVX.S(FILTER(Facts,Facts[Quantity]>1),COALESCE(DATE(2024,6,15)+Facts[Sales],0)))&\"z\"",
+   "powerbi": "9.02311845575944z"
+  },
+  {
+   "expr": "(STDEVX.S(FILTER(Facts,Facts[Quantity]>1),DATE(1900,3,1)+Facts[Sales]))&\"z\"",
+   "powerbi": "9.02311845575944z"
+  },
+  {
+   "expr": "(STDEVX.S(FILTER(Facts,Facts[Quantity]>1),DATE(1900,3,1)+Facts[Sales]*7))&\"z\"",
+   "powerbi": "63.1618291903161z"
+  },
+  {
+   "expr": "(STDEVX.S(FILTER(Facts,Facts[Quantity]>1),DATE(1950,1,1)+Facts[Sales]*7))&\"z\"",
+   "powerbi": "63.1618291903161z"
+  },
+  {
+   "expr": "(STDEVX.S(FILTER(Facts,Facts[Quantity]>1),DATE(2100,1,1)+0.1))&\"z\"",
+   "powerbi": "0z"
+  },
+  {
+   "expr": "(STDEVX.S(FILTER(Facts,Facts[Quantity]>1),SWITCH(TRUE(),Facts[Sales]>2,DATE(1999,12,31)+Facts[Sales],DATE(1999,12,31))))&\"z\"",
+   "powerbi": "9.02311845575944z"
+  },
+  {
+   "expr": "(STDEVX.S(FILTER(Facts,Facts[Sales]>2),AVERAGE(Facts[Sales])))&\"z\"",
+   "powerbi": "8.42936970217881E-08z"
+  },
+  {
+   "expr": "(STDEVX.S(FILTER(Facts,Facts[Sales]>2),DATE(1900,3,1)+Facts[Sales]*0.5))&\"z\"",
+   "powerbi": "4.38035386698381z"
+  },
+  {
+   "expr": "(STDEVX.S(FILTER(Facts,Facts[Sales]>2),DATE(1950,1,1)+Facts[Quantity]*7))&\"z\"",
+   "powerbi": "10.6926766206346z"
+  },
+  {
+   "expr": "(STDEVX.S(FILTER(Facts,Facts[Sales]>2),IF(COUNTROWS(Facts)>3,DATE(2024,6,15)+Facts[Quantity],1)))&\"z\"",
+   "powerbi": "1.52752528367915z"
+  },
+  {
+   "expr": "(STDEVX.S(FILTER(Facts,Facts[Sales]>2),TIME(6,0,0)+Facts[Sales]*0.5))&\"z\"",
+   "powerbi": "4.38035386698381z"
+  },
+  {
+   "expr": "(STDEVX.S(Facts,1/3))&\"z\"",
+   "powerbi": "0z"
+  },
+  {
+   "expr": "(STDEVX.S(Facts,DATE(2010,3,3)+0.25+0.5))&\"z\"",
+   "powerbi": "0z"
+  },
+  {
+   "expr": "(STDEVX.S(Facts,DATE(2020,1,1)+0.1))&\"z\"",
+   "powerbi": "6.17632355501637E-04z"
+  },
+  {
+   "expr": "(STDEVX.S(Facts,DATE(2020,1,1)+Facts[Quantity]*0.5))&\"z\"",
+   "powerbi": "0.935414346693485z"
+  },
+  {
+   "expr": "(STDEVX.S(Facts,DATE(2024,6,15)+Facts[Sales]*0.5))&\"z\"",
+   "powerbi": "4.20342122562086z"
+  },
+  {
+   "expr": "(STDEVX.S(Facts,IF(Facts[Quantity]>2,DATE(2024,6,15)+Facts[Sales],1)))&\"z\"",
+   "powerbi": "24901.9331694349z"
+  },
+  {
+   "expr": "(STDEVX.S(Facts,SWITCH(TRUE(),Facts[Quantity]>2,DATE(1950,1,1)+Facts[Quantity],DATE(1950,1,1))))&\"z\"",
+   "powerbi": "2.28035085019828z"
+  },
+  {
+   "expr": "(STDEVX.S(Facts,SWITCH(TRUE(),Facts[Quantity]>2,DATE(2100,1,1)+Facts[Quantity],DATE(2100,1,1))))&\"z\"",
+   "powerbi": "2.28035085019828z"
+  },
+  {
+   "expr": "(STDEVX.S(Facts,SWITCH(TRUE(),Facts[Sales]>2,DATE(1950,1,1)+Facts[Sales],DATE(1950,1,1))))&\"z\"",
+   "powerbi": "8.18535277187245z"
+  },
+  {
+   "expr": "(STDEVX.S(Facts,TIME(6,0,0)+0.5))&\"z\"",
+   "powerbi": "0z"
+  },
+  {
+   "expr": "(STDEVX.S(TOPN(4,Facts,Facts[Sales]),DATE(1900,3,1)+Facts[Quantity]*0.5))&\"z\"",
+   "powerbi": "1.04083299973307z"
+  },
+  {
+   "expr": "(STDEVX.S(TOPN(4,Facts,Facts[Sales]),DATE(2010,3,3)+0.25+Facts[Quantity]*0.25))&\"z\"",
+   "powerbi": "0.520416499866533z"
+  },
+  {
+   "expr": "(STDEVX.S(TOPN(4,Facts,Facts[Sales]),DATE(2010,3,3)+0.25+Facts[Sales]*0.5))&\"z\"",
+   "powerbi": "4.51155922787972z"
+  },
+  {
+   "expr": "(STDEVX.S(TOPN(4,Facts,Facts[Sales]),IF(COUNTROWS(Facts)>3,DATE(2024,6,15)+Facts[Sales],BLANK())))&\"z\"",
+   "powerbi": "9.02311845575944z"
+  },
+  {
+   "expr": "(STDEVX.S(TOPN(4,Facts,Facts[Sales]),IF(COUNTROWS(Facts)>3,DATE(2100,1,1)+Facts[Sales],BLANK())))&\"z\"",
+   "powerbi": "9.02311845575944z"
+  },
+  {
+   "expr": "(STDEVX.S(TOPN(4,Facts,Facts[Sales]),IF(TRUE(),DATE(2100,1,1)+Facts[Sales],1)))&\"z\"",
+   "powerbi": "9.02311845575944z"
+  },
+  {
+   "expr": "(STDEVX.S(TOPN(4,Facts,Facts[Sales]),TIME(6,0,0)+Facts[Sales]*0.5))&\"z\"",
+   "powerbi": "4.51155922787972z"
+  },
+  {
+   "expr": "(STDEVX.S({1,2,3},COALESCE(DATE(2010,3,3)+0.25+[Value],0)))&\"z\"",
+   "powerbi": "1z"
+  },
+  {
+   "expr": "(STDEVX.S({1,2,3},DATE(2010,3,3)+0.25+1.5))&\"z\"",
+   "powerbi": "0z"
+  },
+  {
+   "expr": "(STDEVX.S({1,2,3},DATE(2020,1,1)+[Value]*7))&\"z\"",
+   "powerbi": "7z"
+  },
+  {
+   "expr": "(STDEVX.S({5,9},0.1))&\"z\"",
+   "powerbi": "0z"
+  },
+  {
+   "expr": "(STDEVX.S({5,9},DATE(1900,3,1)+[Value]*0.25))&\"z\"",
+   "powerbi": "0.707106781186548z"
+  },
+  {
+   "expr": "(STDEVX.S({5,9},DATE(1900,3,1)+[Value]*7))&\"z\"",
+   "powerbi": "19.7989898732233z"
+  },
+  {
+   "expr": "(STDEVX.S({5,9},DATE(1999,12,31)+0.5))&\"z\"",
+   "powerbi": "0z"
+  },
+  {
+   "expr": "(STDEVX.S({5,9},DATE(2010,3,3)+0.25+[Value]*0.5))&\"z\"",
+   "powerbi": "1.4142135623731z"
+  },
+  {
+   "expr": "(STDEVX.S({5,9},DATE(2020,1,1)+[Value]))&\"z\"",
+   "powerbi": "2.82842712474619z"
+  },
+  {
+   "expr": "(STDEVX.S({5,9},DATE(2100,1,1)+0.25))&\"z\"",
+   "powerbi": "0z"
+  },
+  {
+   "expr": "(STDEVX.S({5,9},IF.EAGER(TRUE(),DATE(1950,1,1)+[Value],BLANK())))&\"z\"",
+   "powerbi": "2.82842712474619z"
+  },
+  {
+   "expr": "(STDEVX.S({5,9},SWITCH(TRUE(),[Value]>2,DATE(2020,1,1)+[Value],DATE(2020,1,1))))&\"z\"",
+   "powerbi": "2.82842712474619z"
+  },
+  {
+   "expr": "(STDEVX.S({5,9},SWITCH(TRUE(),[Value]>2,TIME(6,0,0)+[Value],TIME(6,0,0))))&\"z\"",
+   "powerbi": "2.82842712474619z"
+  },
+  {
+   "expr": "(VARX.P(CALCULATETABLE(Facts,Facts[Region]=\"East\"),0.1))&\"z\"",
+   "powerbi": "0z"
+  },
+  {
+   "expr": "(VARX.P(CALCULATETABLE(Facts,Facts[Region]=\"East\"),COALESCE(DATE(1999,12,31)+Facts[Sales],0)))&\"z\"",
+   "powerbi": "24.8888885974884z"
+  },
+  {
+   "expr": "(VARX.P(CALCULATETABLE(Facts,Facts[Region]=\"East\"),DATE(2020,1,1)+Facts[Quantity]))&\"z\"",
+   "powerbi": "2.88888907432556z"
+  },
+  {
+   "expr": "(VARX.P(CALCULATETABLE(Facts,Facts[Region]=\"East\"),IF(Facts[Quantity]>2,DATE(2024,6,15)+Facts[Sales],DATE(2024,6,15))))&\"z\"",
+   "powerbi": "1.38888883590698z"
+  },
+  {
+   "expr": "(VARX.P(CALCULATETABLE(Facts,Facts[Region]=\"East\"),IF.EAGER(TRUE(),DATE(1999,12,31)+Facts[Sales],BLANK())))&\"z\"",
+   "powerbi": "24.8888885974884z"
+  },
+  {
+   "expr": "(VARX.P(CALCULATETABLE(Facts,Facts[Region]=\"East\"),SWITCH(TRUE(),Facts[Quantity]>2,DATE(2010,3,3)+0.25+Facts[Quantity],DATE(2010,3,3)+0.25)))&\"z\"",
+   "powerbi": "5.55555582046509z"
+  },
+  {
+   "expr": "(VARX.P(CALCULATETABLE(Facts,Facts[Region]=\"West\"),2.5))&\"z\"",
+   "powerbi": "0z"
+  },
+  {
+   "expr": "(VARX.P(CALCULATETABLE(Facts,Facts[Region]=\"West\"),DATE(1900,3,1)+Facts[Quantity]*0.25))&\"z\"",
+   "powerbi": "0.140625z"
+  },
+  {
+   "expr": "(VARX.P(CALCULATETABLE(Facts,Facts[Region]=\"West\"),DATE(1900,3,1)+Facts[Sales]*7))&\"z\"",
+   "powerbi": "4900z"
+  },
+  {
+   "expr": "(VARX.P(CALCULATETABLE(Facts,Facts[Region]=\"West\"),DATE(1950,1,1)+0.1))&\"z\"",
+   "powerbi": "0z"
+  },
+  {
+   "expr": "(VARX.P(CALCULATETABLE(Facts,Facts[Region]=\"West\"),DATE(1950,1,1)+0.5))&\"z\"",
+   "powerbi": "0z"
+  },
+  {
+   "expr": "(VARX.P(CALCULATETABLE(Facts,Facts[Region]=\"West\"),DATE(2100,1,1)+Facts[Quantity]*0.25))&\"z\"",
+   "powerbi": "0.140625z"
+  },
+  {
+   "expr": "(VARX.P(CALCULATETABLE(Facts,Facts[Region]=\"West\"),IF(COUNTROWS(Facts)>3,DATE(1950,1,1)+Facts[Sales],BLANK())))&\"z\"",
+   "powerbi": "100z"
+  },
+  {
+   "expr": "(VARX.P(CALCULATETABLE(Facts,Facts[Region]=\"West\"),IF(COUNTROWS(Facts)>3,DATE(2020,1,1)+Facts[Quantity],DATE(2020,1,1))))&\"z\"",
+   "powerbi": "2.25z"
+  },
+  {
+   "expr": "(VARX.P(CALCULATETABLE(Facts,Facts[Region]=\"West\"),IF(Facts[Quantity]>2,DATE(1950,1,1)+Facts[Quantity],1)))&\"z\"",
+   "powerbi": "83411689z"
+  },
+  {
+   "expr": "(VARX.P(CALCULATETABLE(Facts,Facts[Region]=\"West\"),SWITCH(TRUE(),Facts[Sales]>2,DATE(1999,12,31)+Facts[Sales],DATE(1999,12,31))))&\"z\"",
+   "powerbi": "100z"
+  },
+  {
+   "expr": "(VARX.P(FILTER(Facts,Facts[Quantity]>1),0.3))&\"z\"",
+   "powerbi": "0z"
+  },
+  {
+   "expr": "(VARX.P(FILTER(Facts,Facts[Quantity]>1),DATE(2010,3,3)+0.25+Facts[Quantity]*0.5))&\"z\"",
+   "powerbi": "0.3125z"
+  },
+  {
+   "expr": "(VARX.P(FILTER(Facts,Facts[Quantity]>1),DATE(2024,6,15)+Facts[Sales]*0.25))&\"z\"",
+   "powerbi": "3.81640625z"
+  },
+  {
+   "expr": "(VARX.P(FILTER(Facts,Facts[Quantity]>1),DATE(2100,1,1)+Facts[Sales]*7))&\"z\"",
+   "powerbi": "2992.0625z"
+  },
+  {
+   "expr": "(VARX.P(FILTER(Facts,Facts[Quantity]>1),IF(Facts[Quantity]>2,TIME(6,0,0)+Facts[Quantity],1)))&\"z\"",
+   "powerbi": "2.48046875z"
+  },
+  {
+   "expr": "(VARX.P(FILTER(Facts,Facts[Quantity]>1),IF.EAGER(TRUE(),TIME(6,0,0)+Facts[Sales],BLANK())))&\"z\"",
+   "powerbi": "61.0625z"
+  },
+  {
+   "expr": "(VARX.P(FILTER(Facts,Facts[Sales]>2),2.5))&\"z\"",
+   "powerbi": "0z"
+  },
+  {
+   "expr": "(VARX.P(FILTER(Facts,Facts[Sales]>2),COALESCE(DATE(1950,1,1)+Facts[Sales],0)))&\"z\"",
+   "powerbi": "51.1666666865349z"
+  },
+  {
+   "expr": "(VARX.P(FILTER(Facts,Facts[Sales]>2),DATE(1950,1,1)+0.1))&\"z\"",
+   "powerbi": "0z"
+  },
+  {
+   "expr": "(VARX.P(FILTER(Facts,Facts[Sales]>2),DATE(2024,6,15)+Facts[Sales]*0.25))&\"z\"",
+   "powerbi": "3.19791674613953z"
+  },
+  {
+   "expr": "(VARX.P(FILTER(Facts,Facts[Sales]>2),SWITCH(TRUE(),Facts[Quantity]>2,TIME(6,0,0)+Facts[Quantity],TIME(6,0,0))))&\"z\"",
+   "powerbi": "4.22222222222222z"
+  },
+  {
+   "expr": "(VARX.P(Facts,DATE(1950,1,1)+Facts[Sales]*0.5))&\"z\"",
+   "powerbi": "14.7239583134651z"
+  },
+  {
+   "expr": "(VARX.P(Facts,DATE(2010,3,3)+0.25+Facts[Sales]))&\"z\"",
+   "powerbi": "58.8958332538605z"
+  },
+  {
+   "expr": "(VARX.P(Facts,DATE(2100,1,1)+0.5))&\"z\"",
+   "powerbi": "0z"
+  },
+  {
+   "expr": "(VARX.P(Facts,IF(COUNTROWS(Facts)>3,DATE(2020,1,1)+Facts[Quantity],BLANK())))&\"z\"",
+   "powerbi": "2.91666674613953z"
+  },
+  {
+   "expr": "(VARX.P(Facts,IF(TRUE(),TIME(6,0,0)+Facts[Sales],BLANK())))&\"z\"",
+   "powerbi": "58.8958333333333z"
+  },
+  {
+   "expr": "(VARX.P(Facts,IF.EAGER(TRUE(),DATE(2100,1,1)+Facts[Sales],BLANK())))&\"z\"",
+   "powerbi": "58.8958330154419z"
+  },
+  {
+   "expr": "(VARX.P(Facts,TIME(6,0,0)+Facts[Quantity]*7))&\"z\"",
+   "powerbi": "142.916666666667z"
+  },
+  {
+   "expr": "(VARX.P(TOPN(4,Facts,Facts[Sales]),TIME(6,0,0)+Facts[Quantity]*0.25))&\"z\"",
+   "powerbi": "0.203125z"
+  },
+  {
+   "expr": "(VARX.P({1,2,3},IF(TRUE(),DATE(2010,3,3)+0.25+[Value],1)))&\"z\"",
+   "powerbi": "0.666666746139526z"
+  },
+  {
+   "expr": "(VARX.P({1,2,3},SUM(Facts[Sales])/7))&\"z\"",
+   "powerbi": "0z"
+  },
+  {
+   "expr": "(VARX.P({1,2,3},SWITCH(TRUE(),[Value]>2,DATE(2010,3,3)+0.25+[Value],DATE(2010,3,3)+0.25)))&\"z\"",
+   "powerbi": "2z"
+  },
+  {
+   "expr": "(VARX.P({1,2,3},SWITCH(TRUE(),[Value]>2,TIME(6,0,0)+[Value],TIME(6,0,0))))&\"z\"",
+   "powerbi": "2z"
+  },
+  {
+   "expr": "(VARX.P({1,2,3},TIME(6,0,0)+0.1))&\"z\"",
+   "powerbi": "4.16333634234434E-17z"
+  },
+  {
+   "expr": "(VARX.P({1,2,3},TIME(6,0,0)+1.5))&\"z\"",
+   "powerbi": "0z"
+  },
+  {
+   "expr": "(VARX.P({5,9},DATE(1999,12,31)+0.5))&\"z\"",
+   "powerbi": "0z"
+  },
+  {
+   "expr": "(VARX.P({5,9},DATE(2100,1,1)+[Value]))&\"z\"",
+   "powerbi": "4z"
+  },
+  {
+   "expr": "(VARX.P({5,9},DATE(2100,1,1)+[Value]*0.25))&\"z\"",
+   "powerbi": "0.25z"
+  },
+  {
+   "expr": "(VARX.S(CALCULATETABLE(Facts,Facts[Region]=\"East\"),DATE(1900,3,1)+0.1))&\"z\"",
+   "powerbi": "0z"
+  },
+  {
+   "expr": "(VARX.S(CALCULATETABLE(Facts,Facts[Region]=\"West\"),0.3))&\"z\"",
+   "powerbi": "0z"
+  },
+  {
+   "expr": "(VARX.S(CALCULATETABLE(Facts,Facts[Region]=\"West\"),COALESCE(DATE(2100,1,1)+Facts[Sales],0)))&\"z\"",
+   "powerbi": "200z"
+  },
+  {
+   "expr": "(VARX.S(CALCULATETABLE(Facts,Facts[Region]=\"West\"),DATE(1900,3,1)+0.1))&\"z\"",
+   "powerbi": "0z"
+  },
+  {
+   "expr": "(VARX.S(CALCULATETABLE(Facts,Facts[Region]=\"West\"),DATE(1999,12,31)+1.5))&\"z\"",
+   "powerbi": "0z"
+  },
+  {
+   "expr": "(VARX.S(CALCULATETABLE(Facts,Facts[Region]=\"West\"),DATE(1999,12,31)+Facts[Sales]))&\"z\"",
+   "powerbi": "200z"
+  },
+  {
+   "expr": "(VARX.S(CALCULATETABLE(Facts,Facts[Region]=\"West\"),DATE(2024,6,15)+1.5))&\"z\"",
+   "powerbi": "0z"
+  },
+  {
+   "expr": "(VARX.S(CALCULATETABLE(Facts,Facts[Region]=\"West\"),DATE(2100,1,1)+Facts[Sales]*0.5))&\"z\"",
+   "powerbi": "50z"
+  },
+  {
+   "expr": "(VARX.S(CALCULATETABLE(Facts,Facts[Region]=\"West\"),IF(COUNTROWS(Facts)>3,DATE(2100,1,1)+Facts[Quantity],DATE(2100,1,1))))&\"z\"",
+   "powerbi": "4.5z"
+  },
+  {
+   "expr": "(VARX.S(CALCULATETABLE(Facts,Facts[Region]=\"West\"),IF(TRUE(),TIME(6,0,0)+Facts[Quantity],BLANK())))&\"z\"",
+   "powerbi": "4.5z"
+  },
+  {
+   "expr": "(VARX.S(CALCULATETABLE(Facts,Facts[Region]=\"West\"),IF.EAGER(TRUE(),DATE(1900,3,1)+Facts[Quantity],BLANK())))&\"z\"",
+   "powerbi": "4.5z"
+  },
+  {
+   "expr": "(VARX.S(CALCULATETABLE(Facts,Facts[Region]=\"West\"),SWITCH(TRUE(),Facts[Sales]>2,DATE(1950,1,1)+Facts[Sales],DATE(1950,1,1))))&\"z\"",
+   "powerbi": "200z"
+  },
+  {
+   "expr": "(VARX.S(FILTER(Facts,Facts[Quantity]>1),2.5))&\"z\"",
+   "powerbi": "0z"
+  },
+  {
+   "expr": "(VARX.S(FILTER(Facts,Facts[Quantity]>1),DATE(1950,1,1)+Facts[Sales]*7))&\"z\"",
+   "powerbi": "3989.41666666667z"
+  },
+  {
+   "expr": "(VARX.S(FILTER(Facts,Facts[Quantity]>1),DATE(2010,3,3)+0.25+Facts[Quantity]*0.25))&\"z\"",
+   "powerbi": "0.104166666666667z"
+  },
+  {
+   "expr": "(VARX.S(FILTER(Facts,Facts[Quantity]>1),DATE(2010,3,3)+0.25+Facts[Sales]*7))&\"z\"",
+   "powerbi": "3989.41666666667z"
+  },
+  {
+   "expr": "(VARX.S(FILTER(Facts,Facts[Quantity]>1),DATE(2020,1,1)+Facts[Sales]))&\"z\"",
+   "powerbi": "81.4166666666667z"
+  },
+  {
+   "expr": "(VARX.S(FILTER(Facts,Facts[Quantity]>1),DATE(2024,6,15)+0.25))&\"z\"",
+   "powerbi": "0z"
+  },
+  {
+   "expr": "(VARX.S(FILTER(Facts,Facts[Quantity]>1),IF(Facts[Quantity]>2,DATE(2024,6,15)+Facts[Quantity],DATE(2024,6,15))))&\"z\"",
+   "powerbi": "4.66666666666667z"
+  },
+  {
+   "expr": "(VARX.S(FILTER(Facts,Facts[Quantity]>1),IF(TRUE(),DATE(2010,3,3)+0.25+Facts[Quantity],DATE(2010,3,3)+0.25)))&\"z\"",
+   "powerbi": "1.66666666666667z"
+  },
+  {
+   "expr": "(VARX.S(FILTER(Facts,Facts[Quantity]>1),IF(TRUE(),DATE(2024,6,15)+Facts[Sales],BLANK())))&\"z\"",
+   "powerbi": "81.4166666666667z"
+  },
+  {
+   "expr": "(VARX.S(FILTER(Facts,Facts[Sales]>2),DATE(1950,1,1)+Facts[Quantity]*7))&\"z\"",
+   "powerbi": "114.333333313465z"
+  },
+  {
+   "expr": "(VARX.S(FILTER(Facts,Facts[Sales]>2),DATE(1999,12,31)+Facts[Quantity]*7))&\"z\"",
+   "powerbi": "114.33333325386z"
+  },
+  {
+   "expr": "(VARX.S(FILTER(Facts,Facts[Sales]>2),DATE(2010,3,3)+0.25+0.5))&\"z\"",
+   "powerbi": "0z"
+  },
+  {
+   "expr": "(VARX.S(FILTER(Facts,Facts[Sales]>2),IF(COUNTROWS(Facts)>3,DATE(1950,1,1)+Facts[Sales],1)))&\"z\"",
+   "powerbi": "76.75z"
+  },
+  {
+   "expr": "(VARX.S(FILTER(Facts,Facts[Sales]>2),IF(COUNTROWS(Facts)>3,TIME(6,0,0)+Facts[Quantity],TIME(6,0,0))))&\"z\"",
+   "powerbi": "2.33333333333333z"
+  },
+  {
+   "expr": "(VARX.S(FILTER(Facts,Facts[Sales]>2),IF.EAGER(TRUE(),DATE(1900,3,1)+Facts[Quantity],BLANK())))&\"z\"",
+   "powerbi": "2.33333333333303z"
+  },
+  {
+   "expr": "(VARX.S(FILTER(Facts,Facts[Sales]>2),SWITCH(TRUE(),Facts[Sales]>2,TIME(6,0,0)+Facts[Sales],TIME(6,0,0))))&\"z\"",
+   "powerbi": "76.75z"
+  },
+  {
+   "expr": "(VARX.S(Facts,DATE(2020,1,1)+0.1))&\"z\"",
+   "powerbi": "3.814697265625E-07z"
+  },
+  {
+   "expr": "(VARX.S(Facts,DATE(2020,1,1)+Facts[Quantity]*7))&\"z\"",
+   "powerbi": "171.5z"
+  },
+  {
+   "expr": "(VARX.S(TOPN(4,Facts,Facts[Sales]),DATE(1999,12,31)+0.1))&\"z\"",
+   "powerbi": "0z"
+  },
+  {
+   "expr": "(VARX.S(TOPN(4,Facts,Facts[Sales]),DATE(2024,6,15)+Facts[Quantity]*0.25))&\"z\"",
+   "powerbi": "0.270833333333333z"
+  },
+  {
+   "expr": "(VARX.S(TOPN(4,Facts,Facts[Sales]),DATE(2100,1,1)+0.25))&\"z\"",
+   "powerbi": "0z"
+  },
+  {
+   "expr": "(VARX.S(TOPN(4,Facts,Facts[Sales]),IF(COUNTROWS(Facts)>3,DATE(2020,1,1)+Facts[Sales],1)))&\"z\"",
+   "powerbi": "81.4166666666667z"
+  },
+  {
+   "expr": "(VARX.S(TOPN(4,Facts,Facts[Sales]),IF(Facts[Quantity]>2,DATE(2020,1,1)+Facts[Sales],1)))&\"z\"",
+   "powerbi": "640685118.229167z"
+  },
+  {
+   "expr": "(VARX.S(TOPN(4,Facts,Facts[Sales]),IF(TRUE(),DATE(2024,6,15)+Facts[Sales],BLANK())))&\"z\"",
+   "powerbi": "81.4166666666667z"
+  },
+  {
+   "expr": "(VARX.S(TOPN(4,Facts,Facts[Sales]),IF.EAGER(TRUE(),DATE(2010,3,3)+0.25+Facts[Sales],BLANK())))&\"z\"",
+   "powerbi": "81.4166666666667z"
+  },
+  {
+   "expr": "(VARX.S(TOPN(4,Facts,Facts[Sales]),SUM(Facts[Sales])/7))&\"z\"",
+   "powerbi": "0z"
+  },
+  {
+   "expr": "(VARX.S(TOPN(4,Facts,Facts[Sales]),SWITCH(TRUE(),Facts[Quantity]>2,DATE(2010,3,3)+0.25+Facts[Quantity],DATE(2010,3,3)+0.25)))&\"z\"",
+   "powerbi": "6z"
+  },
+  {
+   "expr": "(VARX.S({1,2,3},DATE(1900,3,1)+[Value]*0.5))&\"z\"",
+   "powerbi": "0.25z"
+  },
+  {
+   "expr": "(VARX.S({1,2,3},DATE(1999,12,31)+1.5))&\"z\"",
+   "powerbi": "0z"
+  },
+  {
+   "expr": "(VARX.S({1,2,3},IF(COUNTROWS(Facts)>3,DATE(1900,3,1)+[Value],DATE(1900,3,1))))&\"z\"",
+   "powerbi": "1z"
+  },
+  {
+   "expr": "(VARX.S({1,2,3},IF(COUNTROWS(Facts)>3,DATE(1950,1,1)+[Value],BLANK())))&\"z\"",
+   "powerbi": "1z"
+  },
+  {
+   "expr": "(VARX.S({1,2,3},IF(COUNTROWS(Facts)>3,DATE(2010,3,3)+0.25+[Value],DATE(2010,3,3)+0.25)))&\"z\"",
+   "powerbi": "1z"
+  },
+  {
+   "expr": "(VARX.S({5,9},DATE(2020,1,1)+1.5))&\"z\"",
+   "powerbi": "0z"
+  },
+  {
+   "expr": "(VARX.S({5,9},IF.EAGER(TRUE(),TIME(6,0,0)+[Value],BLANK())))&\"z\"",
+   "powerbi": "8z"
+  },
+  {
+   "expr": "CALCULATE(STDEVX.P(CALCULATETABLE(Facts,Facts[Region]=\"East\"),AVERAGE(Facts[Sales])),Facts[Note]<>\"x\")",
+   "powerbi": "0"
+  },
+  {
+   "expr": "CALCULATE(STDEVX.P(CALCULATETABLE(Facts,Facts[Region]=\"East\"),COALESCE(DATE(2020,1,1)+Facts[Sales],0)),Facts[Note]<>\"x\")",
+   "powerbi": "4.98887648649357"
+  },
+  {
+   "expr": "CALCULATE(STDEVX.P(CALCULATETABLE(Facts,Facts[Region]=\"East\"),DATE(2100,1,1)+0.1),Facts[Note]<>\"x\")",
+   "powerbi": "0"
+  },
+  {
+   "expr": "CALCULATE(STDEVX.P(CALCULATETABLE(Facts,Facts[Region]=\"East\"),DATE(2100,1,1)+Facts[Quantity]),Facts[Note]<>\"x\")",
+   "powerbi": "1.69967273479206"
+  },
+  {
+   "expr": "CALCULATE(STDEVX.P(CALCULATETABLE(Facts,Facts[Region]=\"East\"),DATE(2100,1,1)+Facts[Sales]),Facts[Note]<>\"x\")",
+   "powerbi": "4.98887655817862"
+  },
+  {
+   "expr": "CALCULATE(STDEVX.P(CALCULATETABLE(Facts,Facts[Region]=\"East\"),IF(Facts[Quantity]>2,DATE(2100,1,1)+Facts[Sales],DATE(2100,1,1))),Facts[Note]<>\"x\")",
+   "powerbi": "1.17851148180412"
+  },
+  {
+   "expr": "CALCULATE(STDEVX.P(CALCULATETABLE(Facts,Facts[Region]=\"East\"),TIME(6,0,0)+0.1),Facts[Note]<>\"x\")",
+   "powerbi": "6.45239206987946E-09"
+  },
+  {
+   "expr": "CALCULATE(STDEVX.P(CALCULATETABLE(Facts,Facts[Region]=\"West\"),COALESCE(DATE(2024,6,15)+Facts[Quantity],0)),Facts[Note]<>\"x\")",
+   "powerbi": "1.5"
+  },
+  {
+   "expr": "CALCULATE(STDEVX.P(FILTER(Facts,Facts[Quantity]>1),AVERAGE(Facts[Sales])),Facts[Note]<>\"x\")",
+   "powerbi": "0"
+  },
+  {
+   "expr": "CALCULATE(STDEVX.P(FILTER(Facts,Facts[Quantity]>1),DATE(1950,1,1)+Facts[Quantity]*0.5),Facts[Note]<>\"x\")",
+   "powerbi": "0.559016994374947"
+  },
+  {
+   "expr": "CALCULATE(STDEVX.P(FILTER(Facts,Facts[Quantity]>1),DATE(2010,3,3)+0.25+Facts[Sales]*0.5),Facts[Note]<>\"x\")",
+   "powerbi": "3.90712490202195"
+  },
+  {
+   "expr": "CALCULATE(STDEVX.P(FILTER(Facts,Facts[Quantity]>1),IF(Facts[Quantity]>2,TIME(6,0,0)+Facts[Quantity],BLANK())),Facts[Note]<>\"x\")",
+   "powerbi": "0.816496580927727"
+  },
+  {
+   "expr": "CALCULATE(STDEVX.P(FILTER(Facts,Facts[Quantity]>1),IF.EAGER(TRUE(),DATE(2010,3,3)+0.25+Facts[Quantity],BLANK())),Facts[Note]<>\"x\")",
+   "powerbi": "1.11803398874989"
+  },
+  {
+   "expr": "CALCULATE(STDEVX.P(FILTER(Facts,Facts[Quantity]>1),SWITCH(TRUE(),Facts[Quantity]>2,DATE(1950,1,1)+Facts[Quantity],DATE(1950,1,1))),Facts[Note]<>\"x\")",
+   "powerbi": "1.87082869338697"
+  },
+  {
+   "expr": "CALCULATE(STDEVX.P(FILTER(Facts,Facts[Quantity]>1),TIME(6,0,0)+Facts[Sales]*7),Facts[Note]<>\"x\")",
+   "powerbi": "54.6997486283072"
+  },
+  {
+   "expr": "CALCULATE(STDEVX.P(FILTER(Facts,Facts[Sales]>2),COALESCE(DATE(1999,12,31)+Facts[Sales],0)),Facts[Note]<>\"x\")",
+   "powerbi": "7.15308791684679"
+  },
+  {
+   "expr": "CALCULATE(STDEVX.P(FILTER(Facts,Facts[Sales]>2),DATE(1900,3,1)+0.25),Facts[Note]<>\"x\")",
+   "powerbi": "0"
+  },
+  {
+   "expr": "CALCULATE(STDEVX.P(FILTER(Facts,Facts[Sales]>2),DATE(1950,1,1)+Facts[Quantity]),Facts[Note]<>\"x\")",
+   "powerbi": "1.24721916343967"
+  },
+  {
+   "expr": "CALCULATE(STDEVX.P(FILTER(Facts,Facts[Sales]>2),DATE(2020,1,1)+1.5),Facts[Note]<>\"x\")",
+   "powerbi": "0"
+  },
+  {
+   "expr": "CALCULATE(STDEVX.P(FILTER(Facts,Facts[Sales]>2),IF(Facts[Quantity]>2,DATE(2100,1,1)+Facts[Quantity],1)),Facts[Note]<>\"x\")",
+   "powerbi": "34437.9858715473"
+  },
+  {
+   "expr": "CALCULATE(STDEVX.P(FILTER(Facts,Facts[Sales]>2),SWITCH(TRUE(),Facts[Quantity]>2,DATE(2024,6,15)+Facts[Quantity],DATE(2024,6,15))),Facts[Note]<>\"x\")",
+   "powerbi": "2.05480469344073"
+  },
+  {
+   "expr": "CALCULATE(STDEVX.P(FILTER(Facts,Facts[Sales]>2),SWITCH(TRUE(),Facts[Sales]>2,DATE(1950,1,1)+Facts[Sales],DATE(1950,1,1))),Facts[Note]<>\"x\")",
+   "powerbi": "7.15308791268043"
+  },
+  {
+   "expr": "CALCULATE(STDEVX.P(FILTER(Facts,Facts[Sales]>2),TIME(6,0,0)+0.5),Facts[Note]<>\"x\")",
+   "powerbi": "0"
+  },
+  {
+   "expr": "CALCULATE(STDEVX.P(FILTER(Facts,Facts[Sales]>2),TIME(6,0,0)+Facts[Quantity]*7),Facts[Note]<>\"x\")",
+   "powerbi": "8.73053390247253"
+  },
+  {
+   "expr": "CALCULATE(STDEVX.P(Facts,1/3),Facts[Note]<>\"x\")",
+   "powerbi": "0"
+  },
+  {
+   "expr": "CALCULATE(STDEVX.P(Facts,AVERAGE(Facts[Sales])),Facts[Note]<>\"x\")",
+   "powerbi": "0"
+  },
+  {
+   "expr": "CALCULATE(STDEVX.P(Facts,DATE(2020,1,1)+Facts[Quantity]*0.5),Facts[Note]<>\"x\")",
+   "powerbi": "0.853912610364507"
+  },
+  {
+   "expr": "CALCULATE(STDEVX.P(Facts,IF(COUNTROWS(Facts)>3,DATE(1999,12,31)+Facts[Quantity],DATE(1999,12,31))),Facts[Note]<>\"x\")",
+   "powerbi": "1.7078251509272"
+  },
+  {
+   "expr": "CALCULATE(STDEVX.P(TOPN(4,Facts,Facts[Sales]),AVERAGE(Facts[Sales])),Facts[Note]<>\"x\")",
+   "powerbi": "0"
+  },
+  {
+   "expr": "CALCULATE(STDEVX.P({1,2,3},2.5),Facts[Note]<>\"x\")",
+   "powerbi": "0"
+  },
+  {
+   "expr": "CALCULATE(STDEVX.P({1,2,3},AVERAGE(Facts[Sales])),Facts[Note]<>\"x\")",
+   "powerbi": "0"
+  },
+  {
+   "expr": "CALCULATE(STDEVX.P({1,2,3},IF(COUNTROWS(Facts)>3,DATE(1950,1,1)+[Value],1)),Facts[Note]<>\"x\")",
+   "powerbi": "0.816496593094473"
+  },
+  {
+   "expr": "CALCULATE(STDEVX.P({1,2,3},IF(COUNTROWS(Facts)>3,DATE(1999,12,31)+[Value],BLANK())),Facts[Note]<>\"x\")",
+   "powerbi": "0.816496629594713"
+  },
+  {
+   "expr": "CALCULATE(STDEVX.P({1,2,3},IF.EAGER(TRUE(),DATE(1950,1,1)+[Value],BLANK())),Facts[Note]<>\"x\")",
+   "powerbi": "0.816496593094473"
+  },
+  {
+   "expr": "CALCULATE(STDEVX.P({5,9},DATE(1900,3,1)+0.25),Facts[Note]<>\"x\")",
+   "powerbi": "0"
+  },
+  {
+   "expr": "CALCULATE(STDEVX.P({5,9},DATE(1900,3,1)+[Value]*7),Facts[Note]<>\"x\")",
+   "powerbi": "14"
+  },
+  {
+   "expr": "CALCULATE(STDEVX.P({5,9},DATE(1950,1,1)+[Value]*0.25),Facts[Note]<>\"x\")",
+   "powerbi": "0.5"
+  },
+  {
+   "expr": "CALCULATE(STDEVX.P({5,9},DATE(2010,3,3)+0.25+0.25),Facts[Note]<>\"x\")",
+   "powerbi": "0"
+  },
+  {
+   "expr": "CALCULATE(STDEVX.P({5,9},IF.EAGER(TRUE(),DATE(2100,1,1)+[Value],BLANK())),Facts[Note]<>\"x\")",
+   "powerbi": "2"
+  },
+  {
+   "expr": "CALCULATE(STDEVX.P({5,9},IF.EAGER(TRUE(),TIME(6,0,0)+[Value],BLANK())),Facts[Note]<>\"x\")",
+   "powerbi": "2"
+  },
+  {
+   "expr": "CALCULATE(STDEVX.P({5,9},SWITCH(TRUE(),[Value]>2,DATE(1900,3,1)+[Value],DATE(1900,3,1))),Facts[Note]<>\"x\")",
+   "powerbi": "2"
+  },
+  {
+   "expr": "CALCULATE(STDEVX.S(CALCULATETABLE(Facts,Facts[Region]=\"East\"),COALESCE(DATE(1900,3,1)+Facts[Quantity],0)),Facts[Note]<>\"x\")",
+   "powerbi": "2.08166599946606"
+  },
+  {
+   "expr": "CALCULATE(STDEVX.S(CALCULATETABLE(Facts,Facts[Region]=\"East\"),COALESCE(DATE(2024,6,15)+Facts[Quantity],0)),Facts[Note]<>\"x\")",
+   "powerbi": "2.08166603764366"
+  },
+  {
+   "expr": "CALCULATE(STDEVX.S(CALCULATETABLE(Facts,Facts[Region]=\"East\"),DATE(1999,12,31)+Facts[Sales]*0.25),Facts[Note]<>\"x\")",
+   "powerbi": "1.52752520563835"
+  },
+  {
+   "expr": "CALCULATE(STDEVX.S(CALCULATETABLE(Facts,Facts[Region]=\"East\"),DATE(2010,3,3)+0.25+Facts[Quantity]*7),Facts[Note]<>\"x\")",
+   "powerbi": "14.5716620017169"
+  },
+  {
+   "expr": "CALCULATE(STDEVX.S(CALCULATETABLE(Facts,Facts[Region]=\"East\"),DATE(2100,1,1)+Facts[Sales]*7),Facts[Note]<>\"x\")",
+   "powerbi": "42.7707064825383"
+  },
+  {
+   "expr": "CALCULATE(STDEVX.S(CALCULATETABLE(Facts,Facts[Region]=\"East\"),IF(Facts[Quantity]>2,DATE(2020,1,1)+Facts[Quantity],DATE(2020,1,1))),Facts[Note]<>\"x\")",
+   "powerbi": "2.88675137347833"
+  },
+  {
+   "expr": "CALCULATE(STDEVX.S(CALCULATETABLE(Facts,Facts[Region]=\"East\"),TIME(6,0,0)+Facts[Quantity]*7),Facts[Note]<>\"x\")",
+   "powerbi": "14.5716619962629"
+  },
+  {
+   "expr": "CALCULATE(STDEVX.S(CALCULATETABLE(Facts,Facts[Region]=\"West\"),DATE(1950,1,1)+Facts[Quantity]*0.5),Facts[Note]<>\"x\")",
+   "powerbi": "1.06066017177982"
+  },
+  {
+   "expr": "CALCULATE(STDEVX.S(CALCULATETABLE(Facts,Facts[Region]=\"West\"),IF.EAGER(TRUE(),DATE(2020,1,1)+Facts[Quantity],BLANK())),Facts[Note]<>\"x\")",
+   "powerbi": "2.12132034355964"
+  },
+  {
+   "expr": "CALCULATE(STDEVX.S(CALCULATETABLE(Facts,Facts[Region]=\"West\"),SWITCH(TRUE(),Facts[Quantity]>2,TIME(6,0,0)+Facts[Quantity],TIME(6,0,0))),Facts[Note]<>\"x\")",
+   "powerbi": "2.12132034355964"
+  },
+  {
+   "expr": "CALCULATE(STDEVX.S(CALCULATETABLE(Facts,Facts[Region]=\"West\"),SWITCH(TRUE(),Facts[Sales]>2,DATE(2024,6,15)+Facts[Sales],DATE(2024,6,15))),Facts[Note]<>\"x\")",
+   "powerbi": "14.142135623731"
+  },
+  {
+   "expr": "CALCULATE(STDEVX.S(FILTER(Facts,Facts[Quantity]>1),DATE(1900,3,1)+0.1),Facts[Note]<>\"x\")",
+   "powerbi": "0"
+  },
+  {
+   "expr": "CALCULATE(STDEVX.S(FILTER(Facts,Facts[Quantity]>1),DATE(1999,12,31)+Facts[Sales]*0.5),Facts[Note]<>\"x\")",
+   "powerbi": "4.51155922787972"
+  },
+  {
+   "expr": "CALCULATE(STDEVX.S(FILTER(Facts,Facts[Quantity]>1),IF(COUNTROWS(Facts)>3,DATE(1950,1,1)+Facts[Sales],BLANK())),Facts[Note]<>\"x\")",
+   "powerbi": "9.02311845575944"
+  },
+  {
+   "expr": "CALCULATE(STDEVX.S(FILTER(Facts,Facts[Quantity]>1),IF(Facts[Quantity]>2,TIME(6,0,0)+Facts[Sales],BLANK())),Facts[Note]<>\"x\")",
+   "powerbi": "10.8972473588517"
+  },
+  {
+   "expr": "CALCULATE(STDEVX.S(FILTER(Facts,Facts[Sales]>2),1/3),Facts[Note]<>\"x\")",
+   "powerbi": "0"
+  },
+  {
+   "expr": "CALCULATE(STDEVX.S(FILTER(Facts,Facts[Sales]>2),2.5),Facts[Note]<>\"x\")",
+   "powerbi": "0"
+  },
+  {
+   "expr": "CALCULATE(STDEVX.S(FILTER(Facts,Facts[Sales]>2),DATE(2020,1,1)+0.25),Facts[Note]<>\"x\")",
+   "powerbi": "0"
+  },
+  {
+   "expr": "CALCULATE(STDEVX.S(FILTER(Facts,Facts[Sales]>2),DATE(2020,1,1)+Facts[Sales]*7),Facts[Note]<>\"x\")",
+   "powerbi": "61.3249541377733"
+  },
+  {
+   "expr": "CALCULATE(STDEVX.S(FILTER(Facts,Facts[Sales]>2),DATE(2100,1,1)+Facts[Quantity]*7),Facts[Note]<>\"x\")",
+   "powerbi": "10.6926766066987"
+  },
+  {
+   "expr": "CALCULATE(STDEVX.S(FILTER(Facts,Facts[Sales]>2),SWITCH(TRUE(),Facts[Sales]>2,DATE(2020,1,1)+Facts[Sales],DATE(2020,1,1))),Facts[Note]<>\"x\")",
+   "powerbi": "8.76070773396762"
+  },
+  {
+   "expr": "CALCULATE(STDEVX.S(Facts,COALESCE(DATE(1950,1,1)+Facts[Quantity],0)),Facts[Note]<>\"x\")",
+   "powerbi": "1.87082869338697"
+  },
+  {
+   "expr": "CALCULATE(STDEVX.S(Facts,DATE(2010,3,3)+0.25+0.1),Facts[Note]<>\"x\")",
+   "powerbi": "0.000617632355501637"
+  },
+  {
+   "expr": "CALCULATE(STDEVX.S(Facts,IF(COUNTROWS(Facts)>3,TIME(6,0,0)+Facts[Sales],TIME(6,0,0))),Facts[Note]<>\"x\")",
+   "powerbi": "8.40684245124173"
+  },
+  {
+   "expr": "CALCULATE(STDEVX.S(Facts,IF(TRUE(),TIME(6,0,0)+Facts[Quantity],1)),Facts[Note]<>\"x\")",
+   "powerbi": "1.87082869338697"
+  },
+  {
+   "expr": "CALCULATE(STDEVX.S(TOPN(4,Facts,Facts[Sales]),1/3),Facts[Note]<>\"x\")",
+   "powerbi": "0"
+  },
+  {
+   "expr": "CALCULATE(STDEVX.S(TOPN(4,Facts,Facts[Sales]),COALESCE(TIME(6,0,0)+Facts[Sales],0)),Facts[Note]<>\"x\")",
+   "powerbi": "9.02311845575944"
+  },
+  {
+   "expr": "CALCULATE(STDEVX.S(TOPN(4,Facts,Facts[Sales]),DATE(1900,3,1)+0.25),Facts[Note]<>\"x\")",
+   "powerbi": "0"
+  },
+  {
+   "expr": "CALCULATE(STDEVX.S(TOPN(4,Facts,Facts[Sales]),DATE(1900,3,1)+Facts[Quantity]),Facts[Note]<>\"x\")",
+   "powerbi": "2.08166599946613"
+  },
+  {
+   "expr": "CALCULATE(STDEVX.S(TOPN(4,Facts,Facts[Sales]),DATE(1950,1,1)+Facts[Sales]*0.5),Facts[Note]<>\"x\")",
+   "powerbi": "4.51155922787972"
+  },
+  {
+   "expr": "CALCULATE(STDEVX.S(TOPN(4,Facts,Facts[Sales]),DATE(2024,6,15)+Facts[Sales]*0.25),Facts[Note]<>\"x\")",
+   "powerbi": "2.25577961393986"
+  },
+  {
+   "expr": "CALCULATE(STDEVX.S(TOPN(4,Facts,Facts[Sales]),DATE(2100,1,1)+Facts[Sales]*7),Facts[Note]<>\"x\")",
+   "powerbi": "63.1618291903161"
+  },
+  {
+   "expr": "CALCULATE(STDEVX.S(TOPN(4,Facts,Facts[Sales]),IF(TRUE(),DATE(2024,6,15)+Facts[Sales],1)),Facts[Note]<>\"x\")",
+   "powerbi": "9.02311845575944"
+  },
+  {
+   "expr": "CALCULATE(STDEVX.S(TOPN(4,Facts,Facts[Sales]),SWITCH(TRUE(),Facts[Sales]>2,DATE(2100,1,1)+Facts[Sales],DATE(2100,1,1))),Facts[Note]<>\"x\")",
+   "powerbi": "9.02311845575944"
+  },
+  {
+   "expr": "CALCULATE(STDEVX.S({1,2,3},1/3),Facts[Note]<>\"x\")",
+   "powerbi": "0"
+  },
+  {
+   "expr": "CALCULATE(STDEVX.S({1,2,3},DATE(1900,3,1)+[Value]),Facts[Note]<>\"x\")",
+   "powerbi": "1"
+  },
+  {
+   "expr": "CALCULATE(STDEVX.S({1,2,3},DATE(2020,1,1)+[Value]*0.25),Facts[Note]<>\"x\")",
+   "powerbi": "0.25"
+  },
+  {
+   "expr": "CALCULATE(STDEVX.S({5,9},DATE(1999,12,31)+[Value]*7),Facts[Note]<>\"x\")",
+   "powerbi": "19.7989898732233"
+  },
+  {
+   "expr": "CALCULATE(STDEVX.S({5,9},IF(COUNTROWS(Facts)>3,DATE(1999,12,31)+[Value],DATE(1999,12,31))),Facts[Note]<>\"x\")",
+   "powerbi": "2.82842712474619"
+  },
+  {
+   "expr": "CALCULATE(STDEVX.S({5,9},IF(COUNTROWS(Facts)>3,DATE(2010,3,3)+0.25+[Value],BLANK())),Facts[Note]<>\"x\")",
+   "powerbi": "2.82842712474619"
+  },
+  {
+   "expr": "CALCULATE(VARX.P(CALCULATETABLE(Facts,Facts[Region]=\"East\"),DATE(2010,3,3)+0.25+Facts[Quantity]*0.5),Facts[Note]<>\"x\")",
+   "powerbi": "0.722221851348877"
+  },
+  {
+   "expr": "CALCULATE(VARX.P(CALCULATETABLE(Facts,Facts[Region]=\"East\"),IF(COUNTROWS(Facts)>3,DATE(1950,1,1)+Facts[Sales],1)),Facts[Note]<>\"x\")",
+   "powerbi": "24.8888888955116"
+  },
+  {
+   "expr": "CALCULATE(VARX.P(CALCULATETABLE(Facts,Facts[Region]=\"East\"),IF.EAGER(TRUE(),DATE(1999,12,31)+Facts[Quantity],BLANK())),Facts[Note]<>\"x\")",
+   "powerbi": "2.88888907432556"
+  },
+  {
+   "expr": "CALCULATE(VARX.P(CALCULATETABLE(Facts,Facts[Region]=\"West\"),DATE(1900,3,1)+Facts[Sales]*0.5),Facts[Note]<>\"x\")",
+   "powerbi": "25"
+  },
+  {
+   "expr": "CALCULATE(VARX.P(CALCULATETABLE(Facts,Facts[Region]=\"West\"),DATE(1950,1,1)+Facts[Quantity]*0.5),Facts[Note]<>\"x\")",
+   "powerbi": "0.5625"
+  },
+  {
+   "expr": "CALCULATE(VARX.P(CALCULATETABLE(Facts,Facts[Region]=\"West\"),IF(COUNTROWS(Facts)>3,DATE(1999,12,31)+Facts[Quantity],DATE(1999,12,31))),Facts[Note]<>\"x\")",
+   "powerbi": "2.25"
+  },
+  {
+   "expr": "CALCULATE(VARX.P(CALCULATETABLE(Facts,Facts[Region]=\"West\"),SUM(Facts[Sales])/7),Facts[Note]<>\"x\")",
+   "powerbi": "0"
+  },
+  {
+   "expr": "CALCULATE(VARX.P(CALCULATETABLE(Facts,Facts[Region]=\"West\"),TIME(6,0,0)+Facts[Quantity]*0.25),Facts[Note]<>\"x\")",
+   "powerbi": "0.140625"
+  },
+  {
+   "expr": "CALCULATE(VARX.P(CALCULATETABLE(Facts,Facts[Region]=\"West\"),TIME(6,0,0)+Facts[Sales]*0.5),Facts[Note]<>\"x\")",
+   "powerbi": "25"
+  },
+  {
+   "expr": "CALCULATE(VARX.P(FILTER(Facts,Facts[Quantity]>1),2.5),Facts[Note]<>\"x\")",
+   "powerbi": "0"
+  },
+  {
+   "expr": "CALCULATE(VARX.P(FILTER(Facts,Facts[Quantity]>1),DATE(1999,12,31)+Facts[Quantity]*0.5),Facts[Note]<>\"x\")",
+   "powerbi": "0.3125"
+  },
+  {
+   "expr": "CALCULATE(VARX.P(FILTER(Facts,Facts[Quantity]>1),IF(COUNTROWS(Facts)>3,DATE(1950,1,1)+Facts[Quantity],DATE(1950,1,1))),Facts[Note]<>\"x\")",
+   "powerbi": "1.25"
+  },
+  {
+   "expr": "CALCULATE(VARX.P(FILTER(Facts,Facts[Quantity]>1),SWITCH(TRUE(),Facts[Quantity]>2,DATE(1900,3,1)+Facts[Quantity],DATE(1900,3,1))),Facts[Note]<>\"x\")",
+   "powerbi": "3.5"
+  },
+  {
+   "expr": "CALCULATE(VARX.P(FILTER(Facts,Facts[Quantity]>1),SWITCH(TRUE(),Facts[Sales]>2,DATE(1999,12,31)+Facts[Sales],DATE(1999,12,31))),Facts[Note]<>\"x\")",
+   "powerbi": "61.0625"
+  },
+  {
+   "expr": "CALCULATE(VARX.P(FILTER(Facts,Facts[Sales]>2),1/3),Facts[Note]<>\"x\")",
+   "powerbi": "0"
+  },
+  {
+   "expr": "CALCULATE(VARX.P(FILTER(Facts,Facts[Sales]>2),AVERAGE(Facts[Sales])),Facts[Note]<>\"x\")",
+   "powerbi": "0"
+  },
+  {
+   "expr": "CALCULATE(VARX.P(FILTER(Facts,Facts[Sales]>2),DATE(2100,1,1)+Facts[Quantity]*7),Facts[Note]<>\"x\")",
+   "powerbi": "76.222222328186"
+  },
+  {
+   "expr": "CALCULATE(VARX.P(FILTER(Facts,Facts[Sales]>2),IF(Facts[Quantity]>2,DATE(2010,3,3)+0.25+Facts[Quantity],1)),Facts[Note]<>\"x\")",
+   "powerbi": "359893149.680556"
+  },
+  {
+   "expr": "CALCULATE(VARX.P(FILTER(Facts,Facts[Sales]>2),IF(TRUE(),DATE(2020,1,1)+Facts[Quantity],1)),Facts[Note]<>\"x\")",
+   "powerbi": "1.55555534362793"
+  },
+  {
+   "expr": "CALCULATE(VARX.P(Facts,IF(TRUE(),DATE(2020,1,1)+Facts[Sales],1)),Facts[Note]<>\"x\")",
+   "powerbi": "58.8958332538605"
+  },
+  {
+   "expr": "CALCULATE(VARX.P(Facts,IF(TRUE(),TIME(6,0,0)+Facts[Sales],1)),Facts[Note]<>\"x\")",
+   "powerbi": "58.8958333333333"
+  },
+  {
+   "expr": "CALCULATE(VARX.P(Facts,IF.EAGER(TRUE(),DATE(1999,12,31)+Facts[Quantity],BLANK())),Facts[Note]<>\"x\")",
+   "powerbi": "2.91666674613953"
+  },
+  {
+   "expr": "CALCULATE(VARX.P(TOPN(4,Facts,Facts[Sales]),2.5),Facts[Note]<>\"x\")",
+   "powerbi": "0"
+  },
+  {
+   "expr": "CALCULATE(VARX.P(TOPN(4,Facts,Facts[Sales]),AVERAGE(Facts[Sales])),Facts[Note]<>\"x\")",
+   "powerbi": "0"
+  },
+  {
+   "expr": "CALCULATE(VARX.P(TOPN(4,Facts,Facts[Sales]),COALESCE(DATE(1900,3,1)+Facts[Sales],0)),Facts[Note]<>\"x\")",
+   "powerbi": "61.0625"
+  },
+  {
+   "expr": "CALCULATE(VARX.P(TOPN(4,Facts,Facts[Sales]),COALESCE(DATE(1950,1,1)+Facts[Sales],0)),Facts[Note]<>\"x\")",
+   "powerbi": "61.0625"
+  },
+  {
+   "expr": "CALCULATE(VARX.P(TOPN(4,Facts,Facts[Sales]),DATE(1900,3,1)+Facts[Quantity]),Facts[Note]<>\"x\")",
+   "powerbi": "3.25"
+  },
+  {
+   "expr": "CALCULATE(VARX.P(TOPN(4,Facts,Facts[Sales]),DATE(1999,12,31)+Facts[Sales]*0.5),Facts[Note]<>\"x\")",
+   "powerbi": "15.265625"
+  },
+  {
+   "expr": "CALCULATE(VARX.P(TOPN(4,Facts,Facts[Sales]),DATE(2010,3,3)+0.25+Facts[Sales]*0.5),Facts[Note]<>\"x\")",
+   "powerbi": "15.265625"
+  },
+  {
+   "expr": "CALCULATE(VARX.P(TOPN(4,Facts,Facts[Sales]),DATE(2020,1,1)+Facts[Quantity]*0.25),Facts[Note]<>\"x\")",
+   "powerbi": "0.203125"
+  },
+  {
+   "expr": "CALCULATE(VARX.P(TOPN(4,Facts,Facts[Sales]),IF(TRUE(),DATE(2020,1,1)+Facts[Sales],BLANK())),Facts[Note]<>\"x\")",
+   "powerbi": "61.0625"
+  },
+  {
+   "expr": "CALCULATE(VARX.P(TOPN(4,Facts,Facts[Sales]),SWITCH(TRUE(),Facts[Sales]>2,DATE(2020,1,1)+Facts[Sales],DATE(2020,1,1))),Facts[Note]<>\"x\")",
+   "powerbi": "61.0625"
+  },
+  {
+   "expr": "CALCULATE(VARX.P({1,2,3},0.1),Facts[Note]<>\"x\")",
+   "powerbi": "0"
+  },
+  {
+   "expr": "CALCULATE(VARX.P({1,2,3},COALESCE(DATE(2020,1,1)+[Value],0)),Facts[Note]<>\"x\")",
+   "powerbi": "0.666666746139526"
+  },
+  {
+   "expr": "CALCULATE(VARX.P({1,2,3},DATE(2024,6,15)+0.5),Facts[Note]<>\"x\")",
+   "powerbi": "0"
+  },
+  {
+   "expr": "CALCULATE(VARX.P({1,2,3},TIME(6,0,0)+[Value]),Facts[Note]<>\"x\")",
+   "powerbi": "0.666666666666667"
+  },
+  {
+   "expr": "CALCULATE(VARX.P({5,9},DATE(2010,3,3)+0.25+[Value]),Facts[Note]<>\"x\")",
+   "powerbi": "4"
+  },
+  {
+   "expr": "CALCULATE(VARX.P({5,9},IF(TRUE(),DATE(2100,1,1)+[Value],1)),Facts[Note]<>\"x\")",
+   "powerbi": "4"
+  },
+  {
+   "expr": "CALCULATE(VARX.P({5,9},SWITCH(TRUE(),[Value]>2,DATE(2024,6,15)+[Value],DATE(2024,6,15))),Facts[Note]<>\"x\")",
+   "powerbi": "4"
+  },
+  {
+   "expr": "CALCULATE(VARX.P({5,9},TIME(6,0,0)+[Value]*7),Facts[Note]<>\"x\")",
+   "powerbi": "196"
+  },
+  {
+   "expr": "CALCULATE(VARX.S(CALCULATETABLE(Facts,Facts[Region]=\"East\"),DATE(1950,1,1)+0.25),Facts[Note]<>\"x\")",
+   "powerbi": "0"
+  },
+  {
+   "expr": "CALCULATE(VARX.S(CALCULATETABLE(Facts,Facts[Region]=\"East\"),DATE(2010,3,3)+0.25+0.1),Facts[Note]<>\"x\")",
+   "powerbi": "4.76837158203125E-07"
+  },
+  {
+   "expr": "CALCULATE(VARX.S(CALCULATETABLE(Facts,Facts[Region]=\"East\"),IF.EAGER(TRUE(),DATE(1900,3,1)+Facts[Quantity],BLANK())),Facts[Note]<>\"x\")",
+   "powerbi": "4.33333333333303"
+  },
+  {
+   "expr": "CALCULATE(VARX.S(CALCULATETABLE(Facts,Facts[Region]=\"East\"),IF.EAGER(TRUE(),DATE(1999,12,31)+Facts[Quantity],BLANK())),Facts[Note]<>\"x\")",
+   "powerbi": "4.33333325386047"
+  },
+  {
+   "expr": "CALCULATE(VARX.S(CALCULATETABLE(Facts,Facts[Region]=\"East\"),SUM(Facts[Sales])/7),Facts[Note]<>\"x\")",
+   "powerbi": "0"
+  },
+  {
+   "expr": "CALCULATE(VARX.S(CALCULATETABLE(Facts,Facts[Region]=\"East\"),SWITCH(TRUE(),Facts[Quantity]>2,DATE(2010,3,3)+0.25+Facts[Quantity],DATE(2010,3,3)+0.25)),Facts[Note]<>\"x\")",
+   "powerbi": "8.33333349227905"
+  },
+  {
+   "expr": "CALCULATE(VARX.S(CALCULATETABLE(Facts,Facts[Region]=\"West\"),DATE(1950,1,1)+Facts[Quantity]*0.5),Facts[Note]<>\"x\")",
+   "powerbi": "1.125"
+  },
+  {
+   "expr": "CALCULATE(VARX.S(CALCULATETABLE(Facts,Facts[Region]=\"West\"),DATE(2010,3,3)+0.25+0.1),Facts[Note]<>\"x\")",
+   "powerbi": "0"
+  },
+  {
+   "expr": "CALCULATE(VARX.S(CALCULATETABLE(Facts,Facts[Region]=\"West\"),DATE(2024,6,15)+Facts[Sales]),Facts[Note]<>\"x\")",
+   "powerbi": "200"
+  },
+  {
+   "expr": "CALCULATE(VARX.S(CALCULATETABLE(Facts,Facts[Region]=\"West\"),IF.EAGER(TRUE(),DATE(1900,3,1)+Facts[Sales],BLANK())),Facts[Note]<>\"x\")",
+   "powerbi": "200"
+  },
+  {
+   "expr": "CALCULATE(VARX.S(CALCULATETABLE(Facts,Facts[Region]=\"West\"),IF.EAGER(TRUE(),DATE(2024,6,15)+Facts[Sales],BLANK())),Facts[Note]<>\"x\")",
+   "powerbi": "200"
+  },
+  {
+   "expr": "CALCULATE(VARX.S(FILTER(Facts,Facts[Quantity]>1),COALESCE(TIME(6,0,0)+Facts[Quantity],0)),Facts[Note]<>\"x\")",
+   "powerbi": "1.66666666666667"
+  },
+  {
+   "expr": "CALCULATE(VARX.S(FILTER(Facts,Facts[Quantity]>1),DATE(1900,3,1)+0.25),Facts[Note]<>\"x\")",
+   "powerbi": "0"
+  },
+  {
+   "expr": "CALCULATE(VARX.S(FILTER(Facts,Facts[Quantity]>1),DATE(1950,1,1)+Facts[Sales]*7),Facts[Note]<>\"x\")",
+   "powerbi": "3989.41666666667"
+  },
+  {
+   "expr": "CALCULATE(VARX.S(FILTER(Facts,Facts[Quantity]>1),DATE(2020,1,1)+Facts[Quantity]*0.5),Facts[Note]<>\"x\")",
+   "powerbi": "0.416666666666667"
+  },
+  {
+   "expr": "CALCULATE(VARX.S(FILTER(Facts,Facts[Quantity]>1),DATE(2100,1,1)+Facts[Quantity]*0.5),Facts[Note]<>\"x\")",
+   "powerbi": "0.416666666666667"
+  },
+  {
+   "expr": "CALCULATE(VARX.S(FILTER(Facts,Facts[Quantity]>1),IF(COUNTROWS(Facts)>3,DATE(2020,1,1)+Facts[Sales],1)),Facts[Note]<>\"x\")",
+   "powerbi": "81.4166666666667"
+  },
+  {
+   "expr": "CALCULATE(VARX.S(FILTER(Facts,Facts[Quantity]>1),IF(Facts[Quantity]>2,DATE(1950,1,1)+Facts[Quantity],BLANK())),Facts[Note]<>\"x\")",
+   "powerbi": "1"
+  },
+  {
+   "expr": "CALCULATE(VARX.S(FILTER(Facts,Facts[Quantity]>1),IF.EAGER(TRUE(),DATE(1900,3,1)+Facts[Quantity],BLANK())),Facts[Note]<>\"x\")",
+   "powerbi": "1.66666666666667"
+  },
+  {
+   "expr": "CALCULATE(VARX.S(FILTER(Facts,Facts[Quantity]>1),IF.EAGER(TRUE(),DATE(2100,1,1)+Facts[Sales],BLANK())),Facts[Note]<>\"x\")",
+   "powerbi": "81.4166666666667"
+  },
+  {
+   "expr": "CALCULATE(VARX.S(FILTER(Facts,Facts[Quantity]>1),SUM(Facts[Sales])/7),Facts[Note]<>\"x\")",
+   "powerbi": "0"
+  },
+  {
+   "expr": "CALCULATE(VARX.S(FILTER(Facts,Facts[Quantity]>1),SWITCH(TRUE(),Facts[Quantity]>2,DATE(2100,1,1)+Facts[Quantity],DATE(2100,1,1))),Facts[Note]<>\"x\")",
+   "powerbi": "4.66666666666667"
+  },
+  {
+   "expr": "CALCULATE(VARX.S(FILTER(Facts,Facts[Sales]>2),DATE(2100,1,1)+Facts[Quantity]*0.5),Facts[Note]<>\"x\")",
+   "powerbi": "0.583333015441895"
+  },
+  {
+   "expr": "CALCULATE(VARX.S(FILTER(Facts,Facts[Sales]>2),IF.EAGER(TRUE(),DATE(2010,3,3)+0.25+Facts[Quantity],BLANK())),Facts[Note]<>\"x\")",
+   "powerbi": "2.33333349227905"
+  },
+  {
+   "expr": "CALCULATE(VARX.S(FILTER(Facts,Facts[Sales]>2),TIME(6,0,0)+Facts[Quantity]*0.25),Facts[Note]<>\"x\")",
+   "powerbi": "0.145833333333333"
+  },
+  {
+   "expr": "CALCULATE(VARX.S(Facts,AVERAGE(Facts[Sales])),Facts[Note]<>\"x\")",
+   "powerbi": "5.6843418860808E-15"
+  },
+  {
+   "expr": "CALCULATE(VARX.S(Facts,DATE(1900,3,1)+0.5),Facts[Note]<>\"x\")",
+   "powerbi": "0"
+  },
+  {
+   "expr": "CALCULATE(VARX.S(Facts,DATE(1999,12,31)+Facts[Quantity]*7),Facts[Note]<>\"x\")",
+   "powerbi": "171.5"
+  },
+  {
+   "expr": "CALCULATE(VARX.S(Facts,DATE(2010,3,3)+0.25+Facts[Sales]*0.25),Facts[Note]<>\"x\")",
+   "powerbi": "4.4171875"
+  },
+  {
+   "expr": "CALCULATE(VARX.S(Facts,DATE(2024,6,15)+Facts[Sales]*0.25),Facts[Note]<>\"x\")",
+   "powerbi": "4.4171875"
+  },
+  {
+   "expr": "CALCULATE(VARX.S(Facts,IF.EAGER(TRUE(),TIME(6,0,0)+Facts[Quantity],BLANK())),Facts[Note]<>\"x\")",
+   "powerbi": "3.5"
+  },
+  {
+   "expr": "CALCULATE(VARX.S(TOPN(4,Facts,Facts[Sales]),DATE(2020,1,1)+Facts[Sales]),Facts[Note]<>\"x\")",
+   "powerbi": "81.4166666666667"
+  },
+  {
+   "expr": "CALCULATE(VARX.S(TOPN(4,Facts,Facts[Sales]),SWITCH(TRUE(),Facts[Quantity]>2,DATE(2100,1,1)+Facts[Quantity],DATE(2100,1,1))),Facts[Note]<>\"x\")",
+   "powerbi": "6"
+  },
+  {
+   "expr": "CALCULATE(VARX.S(TOPN(4,Facts,Facts[Sales]),TIME(6,0,0)+Facts[Quantity]),Facts[Note]<>\"x\")",
+   "powerbi": "4.33333333333333"
+  },
+  {
+   "expr": "CALCULATE(VARX.S({1,2,3},0.1),Facts[Note]<>\"x\")",
+   "powerbi": "0"
+  },
+  {
+   "expr": "CALCULATE(VARX.S({1,2,3},IF(COUNTROWS(Facts)>3,DATE(1950,1,1)+[Value],BLANK())),Facts[Note]<>\"x\")",
+   "powerbi": "1"
+  },
+  {
+   "expr": "CALCULATE(VARX.S({1,2,3},IF(TRUE(),TIME(6,0,0)+[Value],BLANK())),Facts[Note]<>\"x\")",
+   "powerbi": "1"
+  },
+  {
+   "expr": "CALCULATE(VARX.S({5,9},COALESCE(DATE(2010,3,3)+0.25+[Value],0)),Facts[Note]<>\"x\")",
+   "powerbi": "8"
+  },
+  {
+   "expr": "CALCULATE(VARX.S({5,9},DATE(1950,1,1)+[Value]*7),Facts[Note]<>\"x\")",
+   "powerbi": "392"
+  },
+  {
+   "expr": "CALCULATE(VARX.S({5,9},DATE(2024,6,15)+[Value]*0.5),Facts[Note]<>\"x\")",
+   "powerbi": "2"
+  },
+  {
+   "expr": "CALCULATE(VARX.S({5,9},DATE(2100,1,1)+0.25),Facts[Note]<>\"x\")",
+   "powerbi": "0"
+  },
+  {
+   "expr": "CALCULATE(VARX.S({5,9},DATE(2100,1,1)+[Value]),Facts[Note]<>\"x\")",
+   "powerbi": "8"
+  },
+  {
+   "expr": "CALCULATE(VARX.S({5,9},IF(COUNTROWS(Facts)>3,DATE(2020,1,1)+[Value],DATE(2020,1,1))),Facts[Note]<>\"x\")",
+   "powerbi": "8"
+  },
+  {
+   "expr": "CALCULATE(VARX.S({5,9},IF.EAGER(TRUE(),DATE(1900,3,1)+[Value],BLANK())),Facts[Note]<>\"x\")",
+   "powerbi": "8"
+  },
+  {
+   "expr": "CALCULATE(VARX.S({5,9},IF.EAGER(TRUE(),DATE(1999,12,31)+[Value],BLANK())),Facts[Note]<>\"x\")",
+   "powerbi": "8"
+  },
+  {
+   "expr": "IF(TRUE(),STDEVX.P(CALCULATETABLE(Facts,Facts[Region]=\"East\"),DATE(1900,3,1)+Facts[Quantity]*0.5))",
+   "powerbi": "0.8498365855985"
+  },
+  {
+   "expr": "IF(TRUE(),STDEVX.P(CALCULATETABLE(Facts,Facts[Region]=\"East\"),DATE(2024,6,15)+Facts[Sales]))",
+   "powerbi": "4.98887651038859"
+  },
+  {
+   "expr": "IF(TRUE(),STDEVX.P(CALCULATETABLE(Facts,Facts[Region]=\"East\"),IF(COUNTROWS(Facts)>3,DATE(1999,12,31)+Facts[Sales],1)))",
+   "powerbi": "4.98887648649357"
+  },
+  {
+   "expr": "IF(TRUE(),STDEVX.P(CALCULATETABLE(Facts,Facts[Region]=\"East\"),IF(Facts[Quantity]>2,DATE(1999,12,31)+Facts[Quantity],DATE(1999,12,31))))",
+   "powerbi": "2.35702260957474"
+  },
+  {
+   "expr": "IF(TRUE(),STDEVX.P(CALCULATETABLE(Facts,Facts[Region]=\"East\"),IF(Facts[Quantity]>2,DATE(2010,3,3)+0.25+Facts[Quantity],BLANK())))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "IF(TRUE(),STDEVX.P(CALCULATETABLE(Facts,Facts[Region]=\"East\"),SWITCH(TRUE(),Facts[Quantity]>2,DATE(2010,3,3)+0.25+Facts[Quantity],DATE(2010,3,3)+0.25)))",
+   "powerbi": "2.35702266015096"
+  },
+  {
+   "expr": "IF(TRUE(),STDEVX.P(CALCULATETABLE(Facts,Facts[Region]=\"West\"),0.3))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "IF(TRUE(),STDEVX.P(CALCULATETABLE(Facts,Facts[Region]=\"West\"),DATE(1900,3,1)+0.5))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "IF(TRUE(),STDEVX.P(CALCULATETABLE(Facts,Facts[Region]=\"West\"),DATE(1950,1,1)+Facts[Quantity]*0.5))",
+   "powerbi": "0.75"
+  },
+  {
+   "expr": "IF(TRUE(),STDEVX.P(CALCULATETABLE(Facts,Facts[Region]=\"West\"),DATE(2020,1,1)+Facts[Sales]*0.25))",
+   "powerbi": "2.5"
+  },
+  {
+   "expr": "IF(TRUE(),STDEVX.P(CALCULATETABLE(Facts,Facts[Region]=\"West\"),DATE(2024,6,15)+Facts[Quantity]*7))",
+   "powerbi": "10.5"
+  },
+  {
+   "expr": "IF(TRUE(),STDEVX.P(CALCULATETABLE(Facts,Facts[Region]=\"West\"),DATE(2100,1,1)+Facts[Sales]*0.5))",
+   "powerbi": "5"
+  },
+  {
+   "expr": "IF(TRUE(),STDEVX.P(FILTER(Facts,Facts[Quantity]>1),AVERAGE(Facts[Sales])))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "IF(TRUE(),STDEVX.P(FILTER(Facts,Facts[Quantity]>1),COALESCE(DATE(1900,3,1)+Facts[Quantity],0)))",
+   "powerbi": "1.11803398874989"
+  },
+  {
+   "expr": "IF(TRUE(),STDEVX.P(FILTER(Facts,Facts[Quantity]>1),COALESCE(DATE(2020,1,1)+Facts[Sales],0)))",
+   "powerbi": "7.81424980404389"
+  },
+  {
+   "expr": "IF(TRUE(),STDEVX.P(FILTER(Facts,Facts[Quantity]>1),DATE(2010,3,3)+0.25+1.5))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "IF(TRUE(),STDEVX.P(FILTER(Facts,Facts[Quantity]>1),DATE(2100,1,1)+Facts[Quantity]*7))",
+   "powerbi": "7.82623792124926"
+  },
+  {
+   "expr": "IF(TRUE(),STDEVX.P(FILTER(Facts,Facts[Quantity]>1),IF.EAGER(TRUE(),DATE(1999,12,31)+Facts[Sales],BLANK())))",
+   "powerbi": "7.81424980404389"
+  },
+  {
+   "expr": "IF(TRUE(),STDEVX.P(FILTER(Facts,Facts[Quantity]>1),SWITCH(TRUE(),Facts[Sales]>2,DATE(2010,3,3)+0.25+Facts[Sales],DATE(2010,3,3)+0.25)))",
+   "powerbi": "7.81424980404389"
+  },
+  {
+   "expr": "IF(TRUE(),STDEVX.P(FILTER(Facts,Facts[Quantity]>1),TIME(6,0,0)+1.5))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "IF(TRUE(),STDEVX.P(FILTER(Facts,Facts[Quantity]>1),TIME(6,0,0)+Facts[Sales]*7))",
+   "powerbi": "54.6997486283072"
+  },
+  {
+   "expr": "IF(TRUE(),STDEVX.P(FILTER(Facts,Facts[Sales]>2),DATE(1900,3,1)+Facts[Sales]))",
+   "powerbi": "7.15308791129167"
+  },
+  {
+   "expr": "IF(TRUE(),STDEVX.P(FILTER(Facts,Facts[Sales]>2),DATE(1999,12,31)+1.5))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "IF(TRUE(),STDEVX.P(FILTER(Facts,Facts[Sales]>2),DATE(2100,1,1)+Facts[Sales]))",
+   "powerbi": "7.15308793351222"
+  },
+  {
+   "expr": "IF(TRUE(),STDEVX.P(FILTER(Facts,Facts[Sales]>2),SWITCH(TRUE(),Facts[Quantity]>2,TIME(6,0,0)+Facts[Quantity],TIME(6,0,0))))",
+   "powerbi": "2.05480466765633"
+  },
+  {
+   "expr": "IF(TRUE(),STDEVX.P(Facts,COALESCE(DATE(1900,3,1)+Facts[Quantity],0)))",
+   "powerbi": "1.70782512765989"
+  },
+  {
+   "expr": "IF(TRUE(),STDEVX.P(Facts,COALESCE(DATE(1999,12,31)+Facts[Sales],0)))",
+   "powerbi": "7.67436207471738"
+  },
+  {
+   "expr": "IF(TRUE(),STDEVX.P(Facts,COALESCE(DATE(2010,3,3)+0.25+Facts[Sales],0)))",
+   "powerbi": "7.67436207471738"
+  },
+  {
+   "expr": "IF(TRUE(),STDEVX.P(Facts,DATE(2100,1,1)+Facts[Quantity]*0.25))",
+   "powerbi": "0.426956654191155"
+  },
+  {
+   "expr": "IF(TRUE(),STDEVX.P(Facts,IF(COUNTROWS(Facts)>3,DATE(2100,1,1)+Facts[Quantity],BLANK())))",
+   "powerbi": "1.70782522072901"
+  },
+  {
+   "expr": "IF(TRUE(),STDEVX.P(Facts,SWITCH(TRUE(),Facts[Quantity]>2,DATE(2100,1,1)+Facts[Quantity],DATE(2100,1,1))))",
+   "powerbi": "2.08166592311108"
+  },
+  {
+   "expr": "IF(TRUE(),STDEVX.P(Facts,SWITCH(TRUE(),Facts[Sales]>2,TIME(6,0,0)+Facts[Sales],TIME(6,0,0))))",
+   "powerbi": "7.47217059048663"
+  },
+  {
+   "expr": "IF(TRUE(),STDEVX.P(TOPN(4,Facts,Facts[Sales]),COALESCE(TIME(6,0,0)+Facts[Sales],0)))",
+   "powerbi": "7.81424980404389"
+  },
+  {
+   "expr": "IF(TRUE(),STDEVX.P(TOPN(4,Facts,Facts[Sales]),DATE(1999,12,31)+Facts[Sales]*7))",
+   "powerbi": "54.6997486283072"
+  },
+  {
+   "expr": "IF(TRUE(),STDEVX.P(TOPN(4,Facts,Facts[Sales]),DATE(2010,3,3)+0.25+Facts[Quantity]))",
+   "powerbi": "1.80277563773199"
+  },
+  {
+   "expr": "IF(TRUE(),STDEVX.P(TOPN(4,Facts,Facts[Sales]),DATE(2020,1,1)+Facts[Quantity]*7))",
+   "powerbi": "12.619429464124"
+  },
+  {
+   "expr": "IF(TRUE(),STDEVX.P(TOPN(4,Facts,Facts[Sales]),DATE(2024,6,15)+Facts[Quantity]))",
+   "powerbi": "1.80277563773199"
+  },
+  {
+   "expr": "IF(TRUE(),STDEVX.P(TOPN(4,Facts,Facts[Sales]),SWITCH(TRUE(),Facts[Quantity]>2,DATE(2010,3,3)+0.25+Facts[Quantity],DATE(2010,3,3)+0.25)))",
+   "powerbi": "2.12132034355964"
+  },
+  {
+   "expr": "IF(TRUE(),STDEVX.P({1,2,3},COALESCE(DATE(1900,3,1)+[Value],0)))",
+   "powerbi": "0.816496580927633"
+  },
+  {
+   "expr": "IF(TRUE(),STDEVX.P({1,2,3},DATE(1900,3,1)+[Value]))",
+   "powerbi": "0.816496580927633"
+  },
+  {
+   "expr": "IF(TRUE(),STDEVX.P({1,2,3},DATE(2020,1,1)+[Value]*0.25))",
+   "powerbi": "0.204124339899793"
+  },
+  {
+   "expr": "IF(TRUE(),STDEVX.P({1,2,3},DATE(2024,6,15)+[Value]))",
+   "powerbi": "0.816496629594713"
+  },
+  {
+   "expr": "IF(TRUE(),STDEVX.P({1,2,3},IF(TRUE(),DATE(1950,1,1)+[Value],1)))",
+   "powerbi": "0.816496593094473"
+  },
+  {
+   "expr": "IF(TRUE(),STDEVX.P({1,2,3},IF.EAGER(TRUE(),DATE(1950,1,1)+[Value],BLANK())))",
+   "powerbi": "0.816496593094473"
+  },
+  {
+   "expr": "IF(TRUE(),STDEVX.P({1,2,3},SWITCH(TRUE(),[Value]>2,TIME(6,0,0)+[Value],TIME(6,0,0))))",
+   "powerbi": "1.4142135623731"
+  },
+  {
+   "expr": "IF(TRUE(),STDEVX.P({1,2,3},TIME(6,0,0)+[Value]*0.25))",
+   "powerbi": "0.204124145231931"
+  },
+  {
+   "expr": "IF(TRUE(),STDEVX.P({5,9},0.3))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "IF(TRUE(),STDEVX.P({5,9},AVERAGE(Facts[Sales])))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "IF(TRUE(),STDEVX.P({5,9},DATE(2020,1,1)+[Value]))",
+   "powerbi": "2"
+  },
+  {
+   "expr": "IF(TRUE(),STDEVX.P({5,9},IF.EAGER(TRUE(),DATE(2010,3,3)+0.25+[Value],BLANK())))",
+   "powerbi": "2"
+  },
+  {
+   "expr": "IF(TRUE(),STDEVX.P({5,9},SWITCH(TRUE(),[Value]>2,TIME(6,0,0)+[Value],TIME(6,0,0))))",
+   "powerbi": "2"
+  },
+  {
+   "expr": "IF(TRUE(),STDEVX.S(CALCULATETABLE(Facts,Facts[Region]=\"East\"),1/3))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "IF(TRUE(),STDEVX.S(CALCULATETABLE(Facts,Facts[Region]=\"East\"),2.5))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "IF(TRUE(),STDEVX.S(CALCULATETABLE(Facts,Facts[Region]=\"East\"),DATE(1900,3,1)+Facts[Sales]*0.5))",
+   "powerbi": "3.05505046330384"
+  },
+  {
+   "expr": "IF(TRUE(),STDEVX.S(CALCULATETABLE(Facts,Facts[Region]=\"East\"),DATE(1950,1,1)+0.5))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "IF(TRUE(),STDEVX.S(CALCULATETABLE(Facts,Facts[Region]=\"East\"),DATE(1950,1,1)+Facts[Sales]*0.5))",
+   "powerbi": "3.05505046005219"
+  },
+  {
+   "expr": "IF(TRUE(),STDEVX.S(CALCULATETABLE(Facts,Facts[Region]=\"East\"),DATE(2010,3,3)+0.25+1.5))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "IF(TRUE(),STDEVX.S(CALCULATETABLE(Facts,Facts[Region]=\"East\"),DATE(2024,6,15)+Facts[Sales]*7))",
+   "powerbi": "42.7707064881126"
+  },
+  {
+   "expr": "IF(TRUE(),STDEVX.S(CALCULATETABLE(Facts,Facts[Region]=\"West\"),AVERAGE(Facts[Sales])))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "IF(TRUE(),STDEVX.S(CALCULATETABLE(Facts,Facts[Region]=\"West\"),DATE(1900,3,1)+0.1))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "IF(TRUE(),STDEVX.S(CALCULATETABLE(Facts,Facts[Region]=\"West\"),IF(TRUE(),DATE(2020,1,1)+Facts[Sales],DATE(2020,1,1))))",
+   "powerbi": "14.142135623731"
+  },
+  {
+   "expr": "IF(TRUE(),STDEVX.S(CALCULATETABLE(Facts,Facts[Region]=\"West\"),IF(TRUE(),TIME(6,0,0)+Facts[Sales],1)))",
+   "powerbi": "14.142135623731"
+  },
+  {
+   "expr": "IF(TRUE(),STDEVX.S(FILTER(Facts,Facts[Quantity]>1),COALESCE(DATE(2024,6,15)+Facts[Sales],0)))",
+   "powerbi": "9.02311845575944"
+  },
+  {
+   "expr": "IF(TRUE(),STDEVX.S(FILTER(Facts,Facts[Quantity]>1),COALESCE(TIME(6,0,0)+Facts[Sales],0)))",
+   "powerbi": "9.02311845575944"
+  },
+  {
+   "expr": "IF(TRUE(),STDEVX.S(FILTER(Facts,Facts[Quantity]>1),DATE(1950,1,1)+0.1))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "IF(TRUE(),STDEVX.S(FILTER(Facts,Facts[Quantity]>1),DATE(1999,12,31)+Facts[Sales]*0.5))",
+   "powerbi": "4.51155922787972"
+  },
+  {
+   "expr": "IF(TRUE(),STDEVX.S(FILTER(Facts,Facts[Quantity]>1),IF(COUNTROWS(Facts)>3,DATE(1999,12,31)+Facts[Quantity],DATE(1999,12,31))))",
+   "powerbi": "1.29099444873581"
+  },
+  {
+   "expr": "IF(TRUE(),STDEVX.S(FILTER(Facts,Facts[Quantity]>1),IF(Facts[Quantity]>2,DATE(2024,6,15)+Facts[Quantity],BLANK())))",
+   "powerbi": "1"
+  },
+  {
+   "expr": "IF(TRUE(),STDEVX.S(FILTER(Facts,Facts[Quantity]>1),IF.EAGER(TRUE(),TIME(6,0,0)+Facts[Sales],BLANK())))",
+   "powerbi": "9.02311845575944"
+  },
+  {
+   "expr": "IF(TRUE(),STDEVX.S(FILTER(Facts,Facts[Quantity]>1),SWITCH(TRUE(),Facts[Quantity]>2,DATE(2010,3,3)+0.25+Facts[Quantity],DATE(2010,3,3)+0.25)))",
+   "powerbi": "2.16024689946929"
+  },
+  {
+   "expr": "IF(TRUE(),STDEVX.S(FILTER(Facts,Facts[Quantity]>1),SWITCH(TRUE(),Facts[Quantity]>2,DATE(2020,1,1)+Facts[Quantity],DATE(2020,1,1))))",
+   "powerbi": "2.16024689946929"
+  },
+  {
+   "expr": "IF(TRUE(),STDEVX.S(FILTER(Facts,Facts[Quantity]>1),SWITCH(TRUE(),Facts[Quantity]>2,DATE(2024,6,15)+Facts[Quantity],DATE(2024,6,15))))",
+   "powerbi": "2.16024689946929"
+  },
+  {
+   "expr": "IF(TRUE(),STDEVX.S(FILTER(Facts,Facts[Sales]>2),COALESCE(DATE(1999,12,31)+Facts[Quantity],0)))",
+   "powerbi": "1.52752520563835"
+  },
+  {
+   "expr": "IF(TRUE(),STDEVX.S(FILTER(Facts,Facts[Sales]>2),DATE(1999,12,31)+0.1))",
+   "powerbi": "0.00048828125"
+  },
+  {
+   "expr": "IF(TRUE(),STDEVX.S(FILTER(Facts,Facts[Sales]>2),DATE(1999,12,31)+Facts[Quantity]))",
+   "powerbi": "1.52752520563835"
+  },
+  {
+   "expr": "IF(TRUE(),STDEVX.S(FILTER(Facts,Facts[Sales]>2),DATE(2010,3,3)+0.25+Facts[Sales]*0.25))",
+   "powerbi": "2.1901769334919"
+  },
+  {
+   "expr": "IF(TRUE(),STDEVX.S(FILTER(Facts,Facts[Sales]>2),DATE(2020,1,1)+Facts[Sales]*7))",
+   "powerbi": "61.3249541377733"
+  },
+  {
+   "expr": "IF(TRUE(),STDEVX.S(FILTER(Facts,Facts[Sales]>2),IF(Facts[Quantity]>2,DATE(2020,1,1)+Facts[Quantity],DATE(2020,1,1))))",
+   "powerbi": "2.5166115100029"
+  },
+  {
+   "expr": "IF(TRUE(),STDEVX.S(FILTER(Facts,Facts[Sales]>2),SWITCH(TRUE(),Facts[Quantity]>2,DATE(2024,6,15)+Facts[Quantity],DATE(2024,6,15))))",
+   "powerbi": "2.5166115100029"
+  },
+  {
+   "expr": "IF(TRUE(),STDEVX.S(Facts,AVERAGE(Facts[Sales])))",
+   "powerbi": "7.53945746461959E-08"
+  },
+  {
+   "expr": "IF(TRUE(),STDEVX.S(Facts,COALESCE(DATE(2024,6,15)+Facts[Quantity],0)))",
+   "powerbi": "1.87082869338697"
+  },
+  {
+   "expr": "IF(TRUE(),STDEVX.S(Facts,DATE(2010,3,3)+0.25+Facts[Quantity]*7))",
+   "powerbi": "13.0958008537088"
+  },
+  {
+   "expr": "IF(TRUE(),STDEVX.S(Facts,DATE(2020,1,1)+Facts[Sales]*7))",
+   "powerbi": "58.8478971586921"
+  },
+  {
+   "expr": "IF(TRUE(),STDEVX.S(Facts,IF(COUNTROWS(Facts)>3,DATE(1999,12,31)+Facts[Sales],BLANK())))",
+   "powerbi": "8.40684245124173"
+  },
+  {
+   "expr": "IF(TRUE(),STDEVX.S(Facts,IF(COUNTROWS(Facts)>3,DATE(2020,1,1)+Facts[Quantity],1)))",
+   "powerbi": "1.87082869338697"
+  },
+  {
+   "expr": "IF(TRUE(),STDEVX.S(TOPN(4,Facts,Facts[Sales]),2.5))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "IF(TRUE(),STDEVX.S(TOPN(4,Facts,Facts[Sales]),DATE(1900,3,1)+Facts[Quantity]*0.5))",
+   "powerbi": "1.04083299973307"
+  },
+  {
+   "expr": "IF(TRUE(),STDEVX.S(TOPN(4,Facts,Facts[Sales]),DATE(1900,3,1)+Facts[Sales]))",
+   "powerbi": "9.02311845575944"
+  },
+  {
+   "expr": "IF(TRUE(),STDEVX.S(TOPN(4,Facts,Facts[Sales]),IF(COUNTROWS(Facts)>3,DATE(1999,12,31)+Facts[Sales],1)))",
+   "powerbi": "9.02311845575944"
+  },
+  {
+   "expr": "IF(TRUE(),STDEVX.S(TOPN(4,Facts,Facts[Sales]),IF(TRUE(),DATE(2100,1,1)+Facts[Sales],BLANK())))",
+   "powerbi": "9.02311845575944"
+  },
+  {
+   "expr": "IF(TRUE(),STDEVX.S(TOPN(4,Facts,Facts[Sales]),TIME(6,0,0)+0.1))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "IF(TRUE(),STDEVX.S({1,2,3},COALESCE(DATE(1950,1,1)+[Value],0)))",
+   "powerbi": "1"
+  },
+  {
+   "expr": "IF(TRUE(),STDEVX.S({1,2,3},DATE(2010,3,3)+0.25+1.5))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "IF(TRUE(),STDEVX.S({1,2,3},IF(COUNTROWS(Facts)>3,DATE(1900,3,1)+[Value],DATE(1900,3,1))))",
+   "powerbi": "1"
+  },
+  {
+   "expr": "IF(TRUE(),STDEVX.S({1,2,3},IF.EAGER(TRUE(),TIME(6,0,0)+[Value],BLANK())))",
+   "powerbi": "1"
+  },
+  {
+   "expr": "IF(TRUE(),STDEVX.S({1,2,3},SWITCH(TRUE(),[Value]>2,DATE(1950,1,1)+[Value],DATE(1950,1,1))))",
+   "powerbi": "1.73205080756888"
+  },
+  {
+   "expr": "IF(TRUE(),STDEVX.S({1,2,3},SWITCH(TRUE(),[Value]>2,DATE(1999,12,31)+[Value],DATE(1999,12,31))))",
+   "powerbi": "1.73205080756888"
+  },
+  {
+   "expr": "IF(TRUE(),STDEVX.S({5,9},0.1))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "IF(TRUE(),STDEVX.S({5,9},DATE(1999,12,31)+0.25))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "IF(TRUE(),STDEVX.S({5,9},DATE(1999,12,31)+[Value]*0.25))",
+   "powerbi": "0.707106781186548"
+  },
+  {
+   "expr": "IF(TRUE(),STDEVX.S({5,9},DATE(2020,1,1)+0.25))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "IF(TRUE(),STDEVX.S({5,9},TIME(6,0,0)+0.25))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "IF(TRUE(),VARX.P(CALCULATETABLE(Facts,Facts[Region]=\"East\"),COALESCE(DATE(2010,3,3)+0.25+Facts[Quantity],0)))",
+   "powerbi": "2.88888907432556"
+  },
+  {
+   "expr": "IF(TRUE(),VARX.P(CALCULATETABLE(Facts,Facts[Region]=\"East\"),DATE(1900,3,1)+1.5))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "IF(TRUE(),VARX.P(CALCULATETABLE(Facts,Facts[Region]=\"East\"),DATE(2020,1,1)+Facts[Quantity]*7))",
+   "powerbi": "141.555555582047"
+  },
+  {
+   "expr": "IF(TRUE(),VARX.P(CALCULATETABLE(Facts,Facts[Region]=\"East\"),DATE(2024,6,15)+Facts[Quantity]*0.25))",
+   "powerbi": "0.180555820465088"
+  },
+  {
+   "expr": "IF(TRUE(),VARX.P(CALCULATETABLE(Facts,Facts[Region]=\"East\"),DATE(2100,1,1)+0.25))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "IF(TRUE(),VARX.P(CALCULATETABLE(Facts,Facts[Region]=\"East\"),IF(COUNTROWS(Facts)>3,DATE(2024,6,15)+Facts[Quantity],DATE(2024,6,15))))",
+   "powerbi": "2.88888907432556"
+  },
+  {
+   "expr": "IF(TRUE(),VARX.P(CALCULATETABLE(Facts,Facts[Region]=\"East\"),SWITCH(TRUE(),Facts[Sales]>2,DATE(2024,6,15)+Facts[Sales],DATE(2024,6,15))))",
+   "powerbi": "20.0555553436279"
+  },
+  {
+   "expr": "IF(TRUE(),VARX.P(CALCULATETABLE(Facts,Facts[Region]=\"East\"),TIME(6,0,0)+Facts[Quantity]*0.5))",
+   "powerbi": "0.722222222222222"
+  },
+  {
+   "expr": "IF(TRUE(),VARX.P(CALCULATETABLE(Facts,Facts[Region]=\"West\"),COALESCE(DATE(2010,3,3)+0.25+Facts[Sales],0)))",
+   "powerbi": "100"
+  },
+  {
+   "expr": "IF(TRUE(),VARX.P(CALCULATETABLE(Facts,Facts[Region]=\"West\"),COALESCE(TIME(6,0,0)+Facts[Quantity],0)))",
+   "powerbi": "2.25"
+  },
+  {
+   "expr": "IF(TRUE(),VARX.P(CALCULATETABLE(Facts,Facts[Region]=\"West\"),DATE(2020,1,1)+Facts[Sales]))",
+   "powerbi": "100"
+  },
+  {
+   "expr": "IF(TRUE(),VARX.P(CALCULATETABLE(Facts,Facts[Region]=\"West\"),IF(TRUE(),DATE(2024,6,15)+Facts[Sales],DATE(2024,6,15))))",
+   "powerbi": "100"
+  },
+  {
+   "expr": "IF(TRUE(),VARX.P(CALCULATETABLE(Facts,Facts[Region]=\"West\"),IF(TRUE(),TIME(6,0,0)+Facts[Quantity],1)))",
+   "powerbi": "2.25"
+  },
+  {
+   "expr": "IF(TRUE(),VARX.P(CALCULATETABLE(Facts,Facts[Region]=\"West\"),TIME(6,0,0)+0.25))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "IF(TRUE(),VARX.P(FILTER(Facts,Facts[Quantity]>1),DATE(2020,1,1)+Facts[Quantity]*0.5))",
+   "powerbi": "0.3125"
+  },
+  {
+   "expr": "IF(TRUE(),VARX.P(FILTER(Facts,Facts[Quantity]>1),DATE(2020,1,1)+Facts[Quantity]*7))",
+   "powerbi": "61.25"
+  },
+  {
+   "expr": "IF(TRUE(),VARX.P(FILTER(Facts,Facts[Quantity]>1),DATE(2100,1,1)+Facts[Quantity]*0.25))",
+   "powerbi": "0.078125"
+  },
+  {
+   "expr": "IF(TRUE(),VARX.P(FILTER(Facts,Facts[Quantity]>1),IF(COUNTROWS(Facts)>3,DATE(1999,12,31)+Facts[Quantity],BLANK())))",
+   "powerbi": "1.25"
+  },
+  {
+   "expr": "IF(TRUE(),VARX.P(FILTER(Facts,Facts[Quantity]>1),IF(COUNTROWS(Facts)>3,DATE(2020,1,1)+Facts[Sales],DATE(2020,1,1))))",
+   "powerbi": "61.0625"
+  },
+  {
+   "expr": "IF(TRUE(),VARX.P(FILTER(Facts,Facts[Quantity]>1),IF(TRUE(),DATE(2100,1,1)+Facts[Sales],BLANK())))",
+   "powerbi": "61.0625"
+  },
+  {
+   "expr": "IF(TRUE(),VARX.P(FILTER(Facts,Facts[Sales]>2),AVERAGE(Facts[Sales])))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "IF(TRUE(),VARX.P(FILTER(Facts,Facts[Sales]>2),DATE(1999,12,31)+Facts[Quantity]))",
+   "powerbi": "1.55555534362793"
+  },
+  {
+   "expr": "IF(TRUE(),VARX.P(FILTER(Facts,Facts[Sales]>2),DATE(2020,1,1)+Facts[Sales]))",
+   "powerbi": "51.1666667461395"
+  },
+  {
+   "expr": "IF(TRUE(),VARX.P(FILTER(Facts,Facts[Sales]>2),TIME(6,0,0)+1.5))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "IF(TRUE(),VARX.P(Facts,2.5))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "IF(TRUE(),VARX.P(Facts,COALESCE(TIME(6,0,0)+Facts[Quantity],0)))",
+   "powerbi": "2.91666666666667"
+  },
+  {
+   "expr": "IF(TRUE(),VARX.P(Facts,DATE(2020,1,1)+0.25))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "IF(TRUE(),VARX.P(Facts,DATE(2020,1,1)+Facts[Quantity]*0.5))",
+   "powerbi": "0.729166746139526"
+  },
+  {
+   "expr": "IF(TRUE(),VARX.P(Facts,DATE(2024,6,15)+Facts[Quantity]*0.25))",
+   "powerbi": "0.182291746139526"
+  },
+  {
+   "expr": "IF(TRUE(),VARX.P(Facts,DATE(2024,6,15)+Facts[Sales]*0.5))",
+   "powerbi": "14.7239582538605"
+  },
+  {
+   "expr": "IF(TRUE(),VARX.P(Facts,IF(Facts[Quantity]>2,DATE(1950,1,1)+Facts[Sales],1)))",
+   "powerbi": "83452832.1458333"
+  },
+  {
+   "expr": "IF(TRUE(),VARX.P(Facts,IF(Facts[Quantity]>2,DATE(1999,12,31)+Facts[Quantity],1)))",
+   "powerbi": "333573696.333333"
+  },
+  {
+   "expr": "IF(TRUE(),VARX.P(Facts,SWITCH(TRUE(),Facts[Sales]>2,DATE(1900,3,1)+Facts[Sales],DATE(1900,3,1))))",
+   "powerbi": "55.833333333333"
+  },
+  {
+   "expr": "IF(TRUE(),VARX.P(Facts,TIME(6,0,0)+Facts[Quantity]*0.5))",
+   "powerbi": "0.729166666666667"
+  },
+  {
+   "expr": "IF(TRUE(),VARX.P(TOPN(4,Facts,Facts[Sales]),2.5))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "IF(TRUE(),VARX.P(TOPN(4,Facts,Facts[Sales]),DATE(1999,12,31)+0.5))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "IF(TRUE(),VARX.P(TOPN(4,Facts,Facts[Sales]),DATE(2010,3,3)+0.25+Facts[Sales]*0.5))",
+   "powerbi": "15.265625"
+  },
+  {
+   "expr": "IF(TRUE(),VARX.P(TOPN(4,Facts,Facts[Sales]),DATE(2024,6,15)+0.5))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "IF(TRUE(),VARX.P(TOPN(4,Facts,Facts[Sales]),DATE(2024,6,15)+Facts[Sales]))",
+   "powerbi": "61.0625"
+  },
+  {
+   "expr": "IF(TRUE(),VARX.P(TOPN(4,Facts,Facts[Sales]),DATE(2100,1,1)+0.1))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "IF(TRUE(),VARX.P(TOPN(4,Facts,Facts[Sales]),IF.EAGER(TRUE(),DATE(2010,3,3)+0.25+Facts[Quantity],BLANK())))",
+   "powerbi": "3.25"
+  },
+  {
+   "expr": "IF(TRUE(),VARX.P(TOPN(4,Facts,Facts[Sales]),TIME(6,0,0)+1.5))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "IF(TRUE(),VARX.P({1,2,3},AVERAGE(Facts[Sales])))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "IF(TRUE(),VARX.P({1,2,3},IF.EAGER(TRUE(),DATE(2024,6,15)+[Value],BLANK())))",
+   "powerbi": "0.666666746139526"
+  },
+  {
+   "expr": "IF(TRUE(),VARX.P({5,9},COALESCE(DATE(2100,1,1)+[Value],0)))",
+   "powerbi": "4"
+  },
+  {
+   "expr": "IF(TRUE(),VARX.P({5,9},DATE(1950,1,1)+[Value]*0.25))",
+   "powerbi": "0.25"
+  },
+  {
+   "expr": "IF(TRUE(),VARX.P({5,9},DATE(2010,3,3)+0.25+0.5))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "IF(TRUE(),VARX.P({5,9},DATE(2020,1,1)+0.5))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "IF(TRUE(),VARX.P({5,9},IF.EAGER(TRUE(),DATE(2010,3,3)+0.25+[Value],BLANK())))",
+   "powerbi": "4"
+  },
+  {
+   "expr": "IF(TRUE(),VARX.S(CALCULATETABLE(Facts,Facts[Region]=\"East\"),COALESCE(DATE(1950,1,1)+Facts[Quantity],0)))",
+   "powerbi": "4.33333331346512"
+  },
+  {
+   "expr": "IF(TRUE(),VARX.S(CALCULATETABLE(Facts,Facts[Region]=\"East\"),COALESCE(DATE(2020,1,1)+Facts[Sales],0)))",
+   "powerbi": "37.3333334922791"
+  },
+  {
+   "expr": "IF(TRUE(),VARX.S(CALCULATETABLE(Facts,Facts[Region]=\"East\"),DATE(1950,1,1)+0.5))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "IF(TRUE(),VARX.S(CALCULATETABLE(Facts,Facts[Region]=\"East\"),DATE(1950,1,1)+Facts[Quantity]*0.5))",
+   "powerbi": "1.08333331346512"
+  },
+  {
+   "expr": "IF(TRUE(),VARX.S(CALCULATETABLE(Facts,Facts[Region]=\"East\"),DATE(2010,3,3)+0.25+Facts[Sales]*0.5))",
+   "powerbi": "9.33333349227905"
+  },
+  {
+   "expr": "IF(TRUE(),VARX.S(CALCULATETABLE(Facts,Facts[Region]=\"East\"),DATE(2020,1,1)+0.1))",
+   "powerbi": "4.76837158203125E-07"
+  },
+  {
+   "expr": "IF(TRUE(),VARX.S(CALCULATETABLE(Facts,Facts[Region]=\"East\"),DATE(2024,6,15)+0.25))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "IF(TRUE(),VARX.S(CALCULATETABLE(Facts,Facts[Region]=\"East\"),DATE(2100,1,1)+Facts[Quantity]*0.25))",
+   "powerbi": "0.270833015441895"
+  },
+  {
+   "expr": "IF(TRUE(),VARX.S(CALCULATETABLE(Facts,Facts[Region]=\"East\"),DATE(2100,1,1)+Facts[Sales]*7))",
+   "powerbi": "1829.33333301544"
+  },
+  {
+   "expr": "IF(TRUE(),VARX.S(CALCULATETABLE(Facts,Facts[Region]=\"East\"),IF(COUNTROWS(Facts)>3,DATE(1999,12,31)+Facts[Sales],1)))",
+   "powerbi": "37.3333332538605"
+  },
+  {
+   "expr": "IF(TRUE(),VARX.S(CALCULATETABLE(Facts,Facts[Region]=\"East\"),IF(COUNTROWS(Facts)>3,DATE(2010,3,3)+0.25+Facts[Quantity],BLANK())))",
+   "powerbi": "4.33333349227905"
+  },
+  {
+   "expr": "IF(TRUE(),VARX.S(CALCULATETABLE(Facts,Facts[Region]=\"East\"),TIME(6,0,0)+0.1))",
+   "powerbi": "2.77555756156289E-17"
+  },
+  {
+   "expr": "IF(TRUE(),VARX.S(CALCULATETABLE(Facts,Facts[Region]=\"West\"),1/3))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "IF(TRUE(),VARX.S(CALCULATETABLE(Facts,Facts[Region]=\"West\"),DATE(1950,1,1)+0.1))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "IF(TRUE(),VARX.S(CALCULATETABLE(Facts,Facts[Region]=\"West\"),DATE(1999,12,31)+Facts[Sales]))",
+   "powerbi": "200"
+  },
+  {
+   "expr": "IF(TRUE(),VARX.S(CALCULATETABLE(Facts,Facts[Region]=\"West\"),DATE(2100,1,1)+1.5))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "IF(TRUE(),VARX.S(CALCULATETABLE(Facts,Facts[Region]=\"West\"),IF(TRUE(),DATE(1950,1,1)+Facts[Sales],1)))",
+   "powerbi": "200"
+  },
+  {
+   "expr": "IF(TRUE(),VARX.S(CALCULATETABLE(Facts,Facts[Region]=\"West\"),IF.EAGER(TRUE(),DATE(2024,6,15)+Facts[Quantity],BLANK())))",
+   "powerbi": "4.5"
+  },
+  {
+   "expr": "IF(TRUE(),VARX.S(FILTER(Facts,Facts[Quantity]>1),1/3))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "IF(TRUE(),VARX.S(FILTER(Facts,Facts[Quantity]>1),DATE(1950,1,1)+0.5))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "IF(TRUE(),VARX.S(FILTER(Facts,Facts[Quantity]>1),DATE(1950,1,1)+Facts[Sales]))",
+   "powerbi": "81.4166666666667"
+  },
+  {
+   "expr": "IF(TRUE(),VARX.S(FILTER(Facts,Facts[Quantity]>1),DATE(2024,6,15)+Facts[Quantity]*7))",
+   "powerbi": "81.6666666666667"
+  },
+  {
+   "expr": "IF(TRUE(),VARX.S(FILTER(Facts,Facts[Quantity]>1),DATE(2100,1,1)+Facts[Quantity]*0.25))",
+   "powerbi": "0.104166666666667"
+  },
+  {
+   "expr": "IF(TRUE(),VARX.S(FILTER(Facts,Facts[Quantity]>1),IF(Facts[Quantity]>2,DATE(1950,1,1)+Facts[Sales],1)))",
+   "powerbi": "83452871.7291667"
+  },
+  {
+   "expr": "IF(TRUE(),VARX.S(FILTER(Facts,Facts[Sales]>2),DATE(1950,1,1)+Facts[Quantity]))",
+   "powerbi": "2.33333331346512"
+  },
+  {
+   "expr": "IF(TRUE(),VARX.S(FILTER(Facts,Facts[Sales]>2),DATE(2100,1,1)+Facts[Quantity]))",
+   "powerbi": "2.33333301544189"
+  },
+  {
+   "expr": "IF(TRUE(),VARX.S(FILTER(Facts,Facts[Sales]>2),SWITCH(TRUE(),Facts[Quantity]>2,TIME(6,0,0)+Facts[Quantity],TIME(6,0,0))))",
+   "powerbi": "6.33333333333333"
+  },
+  {
+   "expr": "IF(TRUE(),VARX.S(FILTER(Facts,Facts[Sales]>2),TIME(6,0,0)+1.5))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "IF(TRUE(),VARX.S(Facts,0.3))",
+   "powerbi": "2.22044604925031E-17"
+  },
+  {
+   "expr": "IF(TRUE(),VARX.S(Facts,DATE(1950,1,1)+Facts[Quantity]*0.25))",
+   "powerbi": "0.21875"
+  },
+  {
+   "expr": "IF(TRUE(),VARX.S(Facts,DATE(2010,3,3)+0.25+0.5))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "IF(TRUE(),VARX.S(Facts,IF(COUNTROWS(Facts)>3,DATE(1950,1,1)+Facts[Quantity],BLANK())))",
+   "powerbi": "3.5"
+  },
+  {
+   "expr": "IF(TRUE(),VARX.S(Facts,IF.EAGER(TRUE(),DATE(1999,12,31)+Facts[Sales],BLANK())))",
+   "powerbi": "70.675"
+  },
+  {
+   "expr": "IF(TRUE(),VARX.S(TOPN(4,Facts,Facts[Sales]),1/3))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "IF(TRUE(),VARX.S(TOPN(4,Facts,Facts[Sales]),DATE(1900,3,1)+Facts[Quantity]))",
+   "powerbi": "4.33333333333333"
+  },
+  {
+   "expr": "IF(TRUE(),VARX.S(TOPN(4,Facts,Facts[Sales]),DATE(2010,3,3)+0.25+Facts[Sales]*7))",
+   "powerbi": "3989.41666666667"
+  },
+  {
+   "expr": "IF(TRUE(),VARX.S(TOPN(4,Facts,Facts[Sales]),DATE(2100,1,1)+Facts[Sales]*0.5))",
+   "powerbi": "20.3541666666667"
+  },
+  {
+   "expr": "IF(TRUE(),VARX.S(TOPN(4,Facts,Facts[Sales]),IF(Facts[Quantity]>2,TIME(6,0,0)+Facts[Sales],BLANK())))",
+   "powerbi": "153.125"
+  },
+  {
+   "expr": "IF(TRUE(),VARX.S(TOPN(4,Facts,Facts[Sales]),IF(TRUE(),TIME(6,0,0)+Facts[Quantity],BLANK())))",
+   "powerbi": "4.33333333333333"
+  },
+  {
+   "expr": "IF(TRUE(),VARX.S({1,2,3},COALESCE(DATE(1999,12,31)+[Value],0)))",
+   "powerbi": "1"
+  },
+  {
+   "expr": "IF(TRUE(),VARX.S({1,2,3},DATE(1900,3,1)+0.1))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "IF(TRUE(),VARX.S({1,2,3},DATE(2010,3,3)+0.25+[Value]*0.5))",
+   "powerbi": "0.25"
+  },
+  {
+   "expr": "IF(TRUE(),VARX.S({1,2,3},DATE(2024,6,15)+[Value]))",
+   "powerbi": "1"
+  },
+  {
+   "expr": "IF(TRUE(),VARX.S({1,2,3},SWITCH(TRUE(),[Value]>2,DATE(2010,3,3)+0.25+[Value],DATE(2010,3,3)+0.25)))",
+   "powerbi": "3"
+  },
+  {
+   "expr": "IF(TRUE(),VARX.S({1,2,3},TIME(6,0,0)+[Value]*0.25))",
+   "powerbi": "0.0625"
+  },
+  {
+   "expr": "IF(TRUE(),VARX.S({5,9},2.5))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "IF(TRUE(),VARX.S({5,9},COALESCE(DATE(2024,6,15)+[Value],0)))",
+   "powerbi": "8"
+  },
+  {
+   "expr": "IF(TRUE(),VARX.S({5,9},DATE(1950,1,1)+[Value]*0.25))",
+   "powerbi": "0.5"
+  },
+  {
+   "expr": "IF(TRUE(),VARX.S({5,9},DATE(1999,12,31)+[Value]*0.25))",
+   "powerbi": "0.5"
+  },
+  {
+   "expr": "IF(TRUE(),VARX.S({5,9},DATE(2010,3,3)+0.25+0.25))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "IF(TRUE(),VARX.S({5,9},DATE(2010,3,3)+0.25+[Value]*0.5))",
+   "powerbi": "2"
+  },
+  {
+   "expr": "IFERROR(VARX.P(Facts,0.5),7)",
+   "powerbi": "0"
+  },
+  {
+   "expr": "STDEVX.P(CALCULATETABLE(Facts,Facts[Region]=\"East\"),COALESCE(TIME(6,0,0)+Facts[Quantity],0))",
+   "powerbi": "1.6996731711976"
+  },
+  {
+   "expr": "STDEVX.P(CALCULATETABLE(Facts,Facts[Region]=\"East\"),DATE(2024,6,15)+0.25)",
+   "powerbi": "0"
+  },
+  {
+   "expr": "STDEVX.P(CALCULATETABLE(Facts,Facts[Region]=\"East\"),DATE(2024,6,15)+Facts[Sales]*7)",
+   "powerbi": "34.9221356068558"
+  },
+  {
+   "expr": "STDEVX.P(CALCULATETABLE(Facts,Facts[Region]=\"East\"),IF(COUNTROWS(Facts)>3,DATE(1900,3,1)+Facts[Quantity],BLANK()))",
+   "powerbi": "1.69967317119767"
+  },
+  {
+   "expr": "STDEVX.P(CALCULATETABLE(Facts,Facts[Region]=\"East\"),IF(COUNTROWS(Facts)>3,TIME(6,0,0)+Facts[Sales],BLANK()))",
+   "powerbi": "4.98887651569859"
+  },
+  {
+   "expr": "STDEVX.P(CALCULATETABLE(Facts,Facts[Region]=\"East\"),SWITCH(TRUE(),Facts[Quantity]>2,DATE(1950,1,1)+Facts[Quantity],DATE(1950,1,1)))",
+   "powerbi": "2.35702258428663"
+  },
+  {
+   "expr": "STDEVX.P(CALCULATETABLE(Facts,Facts[Region]=\"West\"),1/3)",
+   "powerbi": "0"
+  },
+  {
+   "expr": "STDEVX.P(CALCULATETABLE(Facts,Facts[Region]=\"West\"),2.5)",
+   "powerbi": "0"
+  },
+  {
+   "expr": "STDEVX.P(CALCULATETABLE(Facts,Facts[Region]=\"West\"),DATE(1950,1,1)+Facts[Quantity]*7)",
+   "powerbi": "10.5"
+  },
+  {
+   "expr": "STDEVX.P(CALCULATETABLE(Facts,Facts[Region]=\"West\"),DATE(1999,12,31)+Facts[Quantity])",
+   "powerbi": "1.5"
+  },
+  {
+   "expr": "STDEVX.P(CALCULATETABLE(Facts,Facts[Region]=\"West\"),DATE(2010,3,3)+0.25+0.1)",
+   "powerbi": "0"
+  },
+  {
+   "expr": "STDEVX.P(CALCULATETABLE(Facts,Facts[Region]=\"West\"),DATE(2100,1,1)+Facts[Sales])",
+   "powerbi": "10"
+  },
+  {
+   "expr": "STDEVX.P(CALCULATETABLE(Facts,Facts[Region]=\"West\"),IF(Facts[Quantity]>2,DATE(1900,3,1)+Facts[Sales],DATE(1900,3,1)))",
+   "powerbi": "10"
+  },
+  {
+   "expr": "STDEVX.P(CALCULATETABLE(Facts,Facts[Region]=\"West\"),IF(TRUE(),DATE(1999,12,31)+Facts[Quantity],DATE(1999,12,31)))",
+   "powerbi": "1.5"
+  },
+  {
+   "expr": "STDEVX.P(CALCULATETABLE(Facts,Facts[Region]=\"West\"),SUM(Facts[Sales])/7)",
+   "powerbi": "0"
+  },
+  {
+   "expr": "STDEVX.P(CALCULATETABLE(Facts,Facts[Region]=\"West\"),TIME(6,0,0)+0.5)",
+   "powerbi": "0"
+  },
+  {
+   "expr": "STDEVX.P(FILTER(Facts,Facts[Quantity]>1),AVERAGE(Facts[Sales]))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "STDEVX.P(FILTER(Facts,Facts[Quantity]>1),DATE(2010,3,3)+0.25+Facts[Quantity]*7)",
+   "powerbi": "7.82623792124926"
+  },
+  {
+   "expr": "STDEVX.P(FILTER(Facts,Facts[Quantity]>1),DATE(2020,1,1)+1.5)",
+   "powerbi": "0"
+  },
+  {
+   "expr": "STDEVX.P(FILTER(Facts,Facts[Quantity]>1),IF(COUNTROWS(Facts)>3,TIME(6,0,0)+Facts[Quantity],TIME(6,0,0)))",
+   "powerbi": "1.11803398874989"
+  },
+  {
+   "expr": "STDEVX.P(FILTER(Facts,Facts[Quantity]>1),IF(Facts[Quantity]>2,TIME(6,0,0)+Facts[Quantity],TIME(6,0,0)))",
+   "powerbi": "1.87082869338697"
+  },
+  {
+   "expr": "STDEVX.P(FILTER(Facts,Facts[Quantity]>1),SUM(Facts[Sales])/7)",
+   "powerbi": "0"
+  },
+  {
+   "expr": "STDEVX.P(FILTER(Facts,Facts[Quantity]>1),TIME(6,0,0)+0.1)",
+   "powerbi": "0"
+  },
+  {
+   "expr": "STDEVX.P(FILTER(Facts,Facts[Sales]>2),COALESCE(DATE(1999,12,31)+Facts[Sales],0))",
+   "powerbi": "7.15308791684679"
+  },
+  {
+   "expr": "STDEVX.P(FILTER(Facts,Facts[Sales]>2),COALESCE(DATE(2024,6,15)+Facts[Sales],0))",
+   "powerbi": "7.15308791684679"
+  },
+  {
+   "expr": "STDEVX.P(FILTER(Facts,Facts[Sales]>2),DATE(2010,3,3)+0.25+Facts[Quantity]*0.5)",
+   "powerbi": "0.623609713142412"
+  },
+  {
+   "expr": "STDEVX.P(FILTER(Facts,Facts[Sales]>2),DATE(2020,1,1)+1.5)",
+   "powerbi": "0"
+  },
+  {
+   "expr": "STDEVX.P(FILTER(Facts,Facts[Sales]>2),DATE(2020,1,1)+Facts[Quantity])",
+   "powerbi": "1.24721904396458"
+  },
+  {
+   "expr": "STDEVX.P(FILTER(Facts,Facts[Sales]>2),DATE(2100,1,1)+Facts[Sales]*7)",
+   "powerbi": "50.0716153822159"
+  },
+  {
+   "expr": "STDEVX.P(FILTER(Facts,Facts[Sales]>2),IF.EAGER(TRUE(),DATE(1900,3,1)+Facts[Quantity],BLANK()))",
+   "powerbi": "1.24721912892469"
+  },
+  {
+   "expr": "STDEVX.P(FILTER(Facts,Facts[Sales]>2),IF.EAGER(TRUE(),DATE(1999,12,31)+Facts[Quantity],BLANK()))",
+   "powerbi": "1.24721904396458"
+  },
+  {
+   "expr": "STDEVX.P(Facts,DATE(2020,1,1)+Facts[Sales]*0.25)",
+   "powerbi": "1.91859049926254"
+  },
+  {
+   "expr": "STDEVX.P(Facts,DATE(2100,1,1)+Facts[Quantity])",
+   "powerbi": "1.70782522072901"
+  },
+  {
+   "expr": "STDEVX.P(Facts,DATE(2100,1,1)+Facts[Quantity]*0.25)",
+   "powerbi": "0.426956654191155"
+  },
+  {
+   "expr": "STDEVX.P(Facts,IF(COUNTROWS(Facts)>3,DATE(2100,1,1)+Facts[Quantity],DATE(2100,1,1)))",
+   "powerbi": "1.70782522072901"
+  },
+  {
+   "expr": "STDEVX.P(Facts,SWITCH(TRUE(),Facts[Quantity]>2,DATE(1999,12,31)+Facts[Quantity],DATE(1999,12,31)))",
+   "powerbi": "2.08166598037737"
+  },
+  {
+   "expr": "STDEVX.P(Facts,TIME(6,0,0)+0.1)",
+   "powerbi": "6.45239206987946E-09"
+  },
+  {
+   "expr": "STDEVX.P(Facts,TIME(6,0,0)+Facts[Quantity])",
+   "powerbi": "1.70782512765993"
+  },
+  {
+   "expr": "STDEVX.P(Facts,TIME(6,0,0)+Facts[Quantity]*0.5)",
+   "powerbi": "0.853912563829966"
+  },
+  {
+   "expr": "STDEVX.P(TOPN(4,Facts,Facts[Sales]),COALESCE(DATE(1950,1,1)+Facts[Quantity],0))",
+   "powerbi": "1.80277563773199"
+  },
+  {
+   "expr": "STDEVX.P(TOPN(4,Facts,Facts[Sales]),DATE(1900,3,1)+1.5)",
+   "powerbi": "0"
+  },
+  {
+   "expr": "STDEVX.P(TOPN(4,Facts,Facts[Sales]),DATE(1900,3,1)+Facts[Quantity]*7)",
+   "powerbi": "12.619429464124"
+  },
+  {
+   "expr": "STDEVX.P(TOPN(4,Facts,Facts[Sales]),DATE(2100,1,1)+Facts[Quantity]*7)",
+   "powerbi": "12.619429464124"
+  },
+  {
+   "expr": "STDEVX.P(TOPN(4,Facts,Facts[Sales]),IF(COUNTROWS(Facts)>3,DATE(1999,12,31)+Facts[Sales],BLANK()))",
+   "powerbi": "7.81424980404389"
+  },
+  {
+   "expr": "STDEVX.P(TOPN(4,Facts,Facts[Sales]),IF.EAGER(TRUE(),TIME(6,0,0)+Facts[Sales],BLANK()))",
+   "powerbi": "7.81424980404389"
+  },
+  {
+   "expr": "STDEVX.P(TOPN(4,Facts,Facts[Sales]),SWITCH(TRUE(),Facts[Quantity]>2,DATE(1950,1,1)+Facts[Quantity],DATE(1950,1,1)))",
+   "powerbi": "2.12132034355964"
+  },
+  {
+   "expr": "STDEVX.P(TOPN(4,Facts,Facts[Sales]),SWITCH(TRUE(),Facts[Quantity]>2,DATE(1999,12,31)+Facts[Quantity],DATE(1999,12,31)))",
+   "powerbi": "2.12132034355964"
+  },
+  {
+   "expr": "STDEVX.P(TOPN(4,Facts,Facts[Sales]),SWITCH(TRUE(),Facts[Sales]>2,TIME(6,0,0)+Facts[Sales],TIME(6,0,0)))",
+   "powerbi": "7.81424980404389"
+  },
+  {
+   "expr": "STDEVX.P(TOPN(4,Facts,Facts[Sales]),TIME(6,0,0)+0.5)",
+   "powerbi": "0"
+  },
+  {
+   "expr": "STDEVX.P(TOPN(4,Facts,Facts[Sales]),TIME(6,0,0)+1.5)",
+   "powerbi": "0"
+  },
+  {
+   "expr": "STDEVX.P({1,2,3},COALESCE(DATE(2024,6,15)+[Value],0))",
+   "powerbi": "0.816496629594713"
+  },
+  {
+   "expr": "STDEVX.P({1,2,3},COALESCE(TIME(6,0,0)+[Value],0))",
+   "powerbi": "0.816496580927726"
+  },
+  {
+   "expr": "STDEVX.P({1,2,3},DATE(1900,3,1)+[Value]*7)",
+   "powerbi": "5.71547606649411"
+  },
+  {
+   "expr": "STDEVX.P({1,2,3},DATE(1950,1,1)+[Value]*0.25)",
+   "powerbi": "0.204124193898914"
+  },
+  {
+   "expr": "STDEVX.P({1,2,3},DATE(1999,12,31)+[Value]*7)",
+   "powerbi": "5.71547607344651"
+  },
+  {
+   "expr": "STDEVX.P({1,2,3},DATE(2010,3,3)+0.25+[Value]*0.25)",
+   "powerbi": "0.204124339899793"
+  },
+  {
+   "expr": "STDEVX.P({1,2,3},DATE(2024,6,15)+[Value]*7)",
+   "powerbi": "5.71547607344651"
+  },
+  {
+   "expr": "STDEVX.P({1,2,3},SUM(Facts[Sales])/7)",
+   "powerbi": "0"
+  },
+  {
+   "expr": "STDEVX.P({1,2,3},SWITCH(TRUE(),[Value]>2,DATE(2020,1,1)+[Value],DATE(2020,1,1)))",
+   "powerbi": "1.4142135623731"
+  },
+  {
+   "expr": "STDEVX.P({5,9},AVERAGE(Facts[Sales]))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "STDEVX.P({5,9},COALESCE(DATE(2100,1,1)+[Value],0))",
+   "powerbi": "2"
+  },
+  {
+   "expr": "STDEVX.P({5,9},DATE(1950,1,1)+[Value])",
+   "powerbi": "2"
+  },
+  {
+   "expr": "STDEVX.P({5,9},DATE(2010,3,3)+0.25+[Value]*7)",
+   "powerbi": "14"
+  },
+  {
+   "expr": "STDEVX.P({5,9},DATE(2020,1,1)+0.1)",
+   "powerbi": "0"
+  },
+  {
+   "expr": "STDEVX.P({5,9},DATE(2020,1,1)+0.25)",
+   "powerbi": "0"
+  },
+  {
+   "expr": "STDEVX.P({5,9},DATE(2020,1,1)+[Value]*7)",
+   "powerbi": "14"
+  },
+  {
+   "expr": "STDEVX.P({5,9},IF(COUNTROWS(Facts)>3,DATE(2010,3,3)+0.25+[Value],BLANK()))",
+   "powerbi": "2"
+  },
+  {
+   "expr": "STDEVX.P({5,9},IF(COUNTROWS(Facts)>3,TIME(6,0,0)+[Value],TIME(6,0,0)))",
+   "powerbi": "2"
+  },
+  {
+   "expr": "STDEVX.P({5,9},SWITCH(TRUE(),[Value]>2,DATE(2100,1,1)+[Value],DATE(2100,1,1)))",
+   "powerbi": "2"
+  },
+  {
+   "expr": "STDEVX.P({5,9},TIME(6,0,0)+[Value])",
+   "powerbi": "2"
+  },
+  {
+   "expr": "STDEVX.S(CALCULATETABLE(Facts,Facts[Region]=\"East\"),0.3)",
+   "powerbi": "5.26835606386175E-09"
+  },
+  {
+   "expr": "STDEVX.S(CALCULATETABLE(Facts,Facts[Region]=\"East\"),1/3)",
+   "powerbi": "0"
+  },
+  {
+   "expr": "STDEVX.S(CALCULATETABLE(Facts,Facts[Region]=\"East\"),COALESCE(DATE(2020,1,1)+Facts[Sales],0))",
+   "powerbi": "6.11010093961459"
+  },
+  {
+   "expr": "STDEVX.S(CALCULATETABLE(Facts,Facts[Region]=\"East\"),COALESCE(TIME(6,0,0)+Facts[Quantity],0))",
+   "powerbi": "2.08166599946613"
+  },
+  {
+   "expr": "STDEVX.S(CALCULATETABLE(Facts,Facts[Region]=\"East\"),DATE(1900,3,1)+0.1)",
+   "powerbi": "0"
+  },
+  {
+   "expr": "STDEVX.S(CALCULATETABLE(Facts,Facts[Region]=\"East\"),DATE(1900,3,1)+1.5)",
+   "powerbi": "0"
+  },
+  {
+   "expr": "STDEVX.S(CALCULATETABLE(Facts,Facts[Region]=\"East\"),DATE(1999,12,31)+Facts[Sales])",
+   "powerbi": "6.11010092010439"
+  },
+  {
+   "expr": "STDEVX.S(CALCULATETABLE(Facts,Facts[Region]=\"East\"),DATE(1999,12,31)+Facts[Sales]*0.5)",
+   "powerbi": "3.05505045029709"
+  },
+  {
+   "expr": "STDEVX.S(CALCULATETABLE(Facts,Facts[Region]=\"East\"),DATE(2010,3,3)+0.25+Facts[Quantity])",
+   "powerbi": "2.08166603764366"
+  },
+  {
+   "expr": "STDEVX.S(CALCULATETABLE(Facts,Facts[Region]=\"East\"),DATE(2020,1,1)+1.5)",
+   "powerbi": "0"
+  },
+  {
+   "expr": "STDEVX.S(CALCULATETABLE(Facts,Facts[Region]=\"East\"),DATE(2020,1,1)+Facts[Quantity])",
+   "powerbi": "2.08166603764366"
+  },
+  {
+   "expr": "STDEVX.S(CALCULATETABLE(Facts,Facts[Region]=\"East\"),DATE(2020,1,1)+Facts[Sales]*7)",
+   "powerbi": "42.7707064881126"
+  },
+  {
+   "expr": "STDEVX.S(CALCULATETABLE(Facts,Facts[Region]=\"East\"),DATE(2024,6,15)+Facts[Sales]*0.5)",
+   "powerbi": "3.05505048931749"
+  },
+  {
+   "expr": "STDEVX.S(CALCULATETABLE(Facts,Facts[Region]=\"East\"),IF(COUNTROWS(Facts)>3,DATE(2010,3,3)+0.25+Facts[Sales],1))",
+   "powerbi": "6.11010093961459"
+  },
+  {
+   "expr": "STDEVX.S(CALCULATETABLE(Facts,Facts[Region]=\"East\"),IF.EAGER(TRUE(),DATE(1950,1,1)+Facts[Quantity],BLANK()))",
+   "powerbi": "2.08166599469394"
+  },
+  {
+   "expr": "STDEVX.S(CALCULATETABLE(Facts,Facts[Region]=\"East\"),SWITCH(TRUE(),Facts[Quantity]>2,DATE(1999,12,31)+Facts[Quantity],DATE(1999,12,31)))",
+   "powerbi": "2.88675133218303"
+  },
+  {
+   "expr": "STDEVX.S(CALCULATETABLE(Facts,Facts[Region]=\"East\"),TIME(6,0,0)+0.5)",
+   "powerbi": "0"
+  },
+  {
+   "expr": "STDEVX.S(CALCULATETABLE(Facts,Facts[Region]=\"East\"),TIME(6,0,0)+Facts[Sales])",
+   "powerbi": "6.11010092660779"
+  },
+  {
+   "expr": "STDEVX.S(CALCULATETABLE(Facts,Facts[Region]=\"West\"),DATE(1900,3,1)+Facts[Sales]*7)",
+   "powerbi": "98.9949493661167"
+  },
+  {
+   "expr": "STDEVX.S(CALCULATETABLE(Facts,Facts[Region]=\"West\"),DATE(2024,6,15)+0.1)",
+   "powerbi": "0"
+  },
+  {
+   "expr": "STDEVX.S(CALCULATETABLE(Facts,Facts[Region]=\"West\"),DATE(2024,6,15)+Facts[Sales]*0.25)",
+   "powerbi": "3.53553390593274"
+  },
+  {
+   "expr": "STDEVX.S(CALCULATETABLE(Facts,Facts[Region]=\"West\"),DATE(2100,1,1)+Facts[Sales]*0.5)",
+   "powerbi": "7.07106781186548"
+  },
+  {
+   "expr": "STDEVX.S(CALCULATETABLE(Facts,Facts[Region]=\"West\"),IF(TRUE(),DATE(2010,3,3)+0.25+Facts[Quantity],DATE(2010,3,3)+0.25))",
+   "powerbi": "2.12132034355964"
+  },
+  {
+   "expr": "STDEVX.S(CALCULATETABLE(Facts,Facts[Region]=\"West\"),IF.EAGER(TRUE(),DATE(2100,1,1)+Facts[Sales],BLANK()))",
+   "powerbi": "14.142135623731"
+  },
+  {
+   "expr": "STDEVX.S(FILTER(Facts,Facts[Quantity]>1),COALESCE(DATE(2020,1,1)+Facts[Quantity],0))",
+   "powerbi": "1.29099444873581"
+  },
+  {
+   "expr": "STDEVX.S(FILTER(Facts,Facts[Quantity]>1),DATE(1950,1,1)+1.5)",
+   "powerbi": "0"
+  },
+  {
+   "expr": "STDEVX.S(FILTER(Facts,Facts[Quantity]>1),DATE(1999,12,31)+1.5)",
+   "powerbi": "0"
+  },
+  {
+   "expr": "STDEVX.S(FILTER(Facts,Facts[Quantity]>1),DATE(2010,3,3)+0.25+Facts[Quantity]*7)",
+   "powerbi": "9.03696114115064"
+  },
+  {
+   "expr": "STDEVX.S(FILTER(Facts,Facts[Quantity]>1),DATE(2020,1,1)+Facts[Quantity])",
+   "powerbi": "1.29099444873581"
+  },
+  {
+   "expr": "STDEVX.S(FILTER(Facts,Facts[Quantity]>1),DATE(2100,1,1)+Facts[Quantity]*7)",
+   "powerbi": "9.03696114115064"
+  },
+  {
+   "expr": "STDEVX.S(FILTER(Facts,Facts[Quantity]>1),DATE(2100,1,1)+Facts[Sales]*0.5)",
+   "powerbi": "4.51155922787972"
+  },
+  {
+   "expr": "STDEVX.S(FILTER(Facts,Facts[Quantity]>1),IF(COUNTROWS(Facts)>3,DATE(2010,3,3)+0.25+Facts[Sales],1))",
+   "powerbi": "9.02311845575944"
+  },
+  {
+   "expr": "STDEVX.S(FILTER(Facts,Facts[Quantity]>1),IF(TRUE(),DATE(1999,12,31)+Facts[Quantity],DATE(1999,12,31)))",
+   "powerbi": "1.29099444873581"
+  },
+  {
+   "expr": "STDEVX.S(FILTER(Facts,Facts[Quantity]>1),IF.EAGER(TRUE(),DATE(2020,1,1)+Facts[Quantity],BLANK()))",
+   "powerbi": "1.29099444873581"
+  },
+  {
+   "expr": "STDEVX.S(FILTER(Facts,Facts[Quantity]>1),SWITCH(TRUE(),Facts[Quantity]>2,DATE(1900,3,1)+Facts[Quantity],DATE(1900,3,1)))",
+   "powerbi": "2.16024689946929"
+  },
+  {
+   "expr": "STDEVX.S(FILTER(Facts,Facts[Quantity]>1),SWITCH(TRUE(),Facts[Quantity]>2,DATE(2010,3,3)+0.25+Facts[Quantity],DATE(2010,3,3)+0.25))",
+   "powerbi": "2.16024689946929"
+  },
+  {
+   "expr": "STDEVX.S(FILTER(Facts,Facts[Sales]>2),1/3)",
+   "powerbi": "0"
+  },
+  {
+   "expr": "STDEVX.S(FILTER(Facts,Facts[Sales]>2),AVERAGE(Facts[Sales]))",
+   "powerbi": "8.42936970217881E-08"
+  },
+  {
+   "expr": "STDEVX.S(FILTER(Facts,Facts[Sales]>2),DATE(1900,3,1)+Facts[Quantity]*0.5)",
+   "powerbi": "0.763762615825775"
+  },
+  {
+   "expr": "STDEVX.S(FILTER(Facts,Facts[Sales]>2),DATE(1950,1,1)+Facts[Quantity]*0.25)",
+   "powerbi": "0.381881281899386"
+  },
+  {
+   "expr": "STDEVX.S(FILTER(Facts,Facts[Sales]>2),DATE(1950,1,1)+Facts[Quantity]*7)",
+   "powerbi": "10.6926766206346"
+  },
+  {
+   "expr": "STDEVX.S(FILTER(Facts,Facts[Sales]>2),DATE(1999,12,31)+Facts[Quantity]*0.25)",
+   "powerbi": "0.381881203858574"
+  },
+  {
+   "expr": "STDEVX.S(FILTER(Facts,Facts[Sales]>2),DATE(2010,3,3)+0.25+Facts[Quantity])",
+   "powerbi": "1.52752528367915"
+  },
+  {
+   "expr": "STDEVX.S(FILTER(Facts,Facts[Sales]>2),DATE(2010,3,3)+0.25+Facts[Sales]*7)",
+   "powerbi": "61.3249541377733"
+  },
+  {
+   "expr": "STDEVX.S(FILTER(Facts,Facts[Sales]>2),DATE(2020,1,1)+Facts[Sales])",
+   "powerbi": "8.76070773396762"
+  },
+  {
+   "expr": "STDEVX.S(FILTER(Facts,Facts[Sales]>2),DATE(2024,6,15)+0.25)",
+   "powerbi": "0"
+  },
+  {
+   "expr": "STDEVX.S(FILTER(Facts,Facts[Sales]>2),DATE(2024,6,15)+Facts[Quantity])",
+   "powerbi": "1.52752528367915"
+  },
+  {
+   "expr": "STDEVX.S(FILTER(Facts,Facts[Sales]>2),IF.EAGER(TRUE(),DATE(1950,1,1)+Facts[Sales],BLANK()))",
+   "powerbi": "8.76070773396762"
+  },
+  {
+   "expr": "STDEVX.S(Facts,0.3)",
+   "powerbi": "4.71216091538724E-09"
+  },
+  {
+   "expr": "STDEVX.S(Facts,DATE(1900,3,1)+Facts[Quantity]*0.25)",
+   "powerbi": "0.467707173346743"
+  },
+  {
+   "expr": "STDEVX.S(Facts,DATE(1900,3,1)+Facts[Sales]*7)",
+   "powerbi": "58.8478971586921"
+  },
+  {
+   "expr": "STDEVX.S(Facts,DATE(1999,12,31)+1.5)",
+   "powerbi": "0"
+  },
+  {
+   "expr": "STDEVX.S(Facts,DATE(2010,3,3)+0.25+0.5)",
+   "powerbi": "0"
+  },
+  {
+   "expr": "STDEVX.S(Facts,DATE(2010,3,3)+0.25+1.5)",
+   "powerbi": "0"
+  },
+  {
+   "expr": "STDEVX.S(Facts,DATE(2010,3,3)+0.25+Facts[Sales]*0.5)",
+   "powerbi": "4.20342122562086"
+  },
+  {
+   "expr": "STDEVX.S(Facts,DATE(2024,6,15)+0.5)",
+   "powerbi": "0"
+  },
+  {
+   "expr": "STDEVX.S(Facts,IF(TRUE(),TIME(6,0,0)+Facts[Quantity],TIME(6,0,0)))",
+   "powerbi": "1.87082869338697"
+  },
+  {
+   "expr": "STDEVX.S(Facts,IF.EAGER(TRUE(),DATE(2020,1,1)+Facts[Quantity],BLANK()))",
+   "powerbi": "1.87082869338697"
+  },
+  {
+   "expr": "STDEVX.S(TOPN(4,Facts,Facts[Sales]),0.1)",
+   "powerbi": "0"
+  },
+  {
+   "expr": "STDEVX.S(TOPN(4,Facts,Facts[Sales]),DATE(1900,3,1)+Facts[Quantity]*0.25)",
+   "powerbi": "0.520416499866533"
+  },
+  {
+   "expr": "STDEVX.S(TOPN(4,Facts,Facts[Sales]),DATE(1950,1,1)+Facts[Quantity])",
+   "powerbi": "2.08166599946613"
+  },
+  {
+   "expr": "STDEVX.S(TOPN(4,Facts,Facts[Sales]),DATE(1999,12,31)+Facts[Quantity]*0.5)",
+   "powerbi": "1.04083299973307"
+  },
+  {
+   "expr": "STDEVX.S(TOPN(4,Facts,Facts[Sales]),DATE(2010,3,3)+0.25+0.25)",
+   "powerbi": "0"
+  },
+  {
+   "expr": "STDEVX.S(TOPN(4,Facts,Facts[Sales]),DATE(2020,1,1)+Facts[Quantity])",
+   "powerbi": "2.08166599946613"
+  },
+  {
+   "expr": "STDEVX.S(TOPN(4,Facts,Facts[Sales]),DATE(2100,1,1)+Facts[Quantity]*0.25)",
+   "powerbi": "0.520416499866533"
+  },
+  {
+   "expr": "STDEVX.S(TOPN(4,Facts,Facts[Sales]),DATE(2100,1,1)+Facts[Quantity]*7)",
+   "powerbi": "14.5716619962629"
+  },
+  {
+   "expr": "STDEVX.S(TOPN(4,Facts,Facts[Sales]),IF(TRUE(),DATE(2020,1,1)+Facts[Quantity],1))",
+   "powerbi": "2.08166599946613"
+  },
+  {
+   "expr": "STDEVX.S(TOPN(4,Facts,Facts[Sales]),SWITCH(TRUE(),Facts[Quantity]>2,DATE(1950,1,1)+Facts[Quantity],DATE(1950,1,1)))",
+   "powerbi": "2.44948974278318"
+  },
+  {
+   "expr": "STDEVX.S(TOPN(4,Facts,Facts[Sales]),SWITCH(TRUE(),Facts[Quantity]>2,DATE(1999,12,31)+Facts[Quantity],DATE(1999,12,31)))",
+   "powerbi": "2.44948974278318"
+  },
+  {
+   "expr": "STDEVX.S({1,2,3},2.5)",
+   "powerbi": "0"
+  },
+  {
+   "expr": "STDEVX.S({1,2,3},DATE(1950,1,1)+[Value]*7)",
+   "powerbi": "7"
+  },
+  {
+   "expr": "STDEVX.S({1,2,3},DATE(1999,12,31)+[Value]*7)",
+   "powerbi": "7"
+  },
+  {
+   "expr": "STDEVX.S({1,2,3},DATE(2010,3,3)+0.25+1.5)",
+   "powerbi": "0"
+  },
+  {
+   "expr": "STDEVX.S({1,2,3},DATE(2020,1,1)+1.5)",
+   "powerbi": "0"
+  },
+  {
+   "expr": "STDEVX.S({1,2,3},DATE(2020,1,1)+[Value]*0.5)",
+   "powerbi": "0.5"
+  },
+  {
+   "expr": "STDEVX.S({1,2,3},DATE(2024,6,15)+[Value]*0.25)",
+   "powerbi": "0.25"
+  },
+  {
+   "expr": "STDEVX.S({1,2,3},DATE(2100,1,1)+[Value]*7)",
+   "powerbi": "7"
+  },
+  {
+   "expr": "STDEVX.S({1,2,3},IF(TRUE(),TIME(6,0,0)+[Value],BLANK()))",
+   "powerbi": "1"
+  },
+  {
+   "expr": "STDEVX.S({1,2,3},IF.EAGER(TRUE(),DATE(1999,12,31)+[Value],BLANK()))",
+   "powerbi": "1"
+  },
+  {
+   "expr": "STDEVX.S({1,2,3},SWITCH(TRUE(),[Value]>2,DATE(1900,3,1)+[Value],DATE(1900,3,1)))",
+   "powerbi": "1.73205080756888"
+  },
+  {
+   "expr": "STDEVX.S({5,9},0.1)",
+   "powerbi": "0"
+  },
+  {
+   "expr": "STDEVX.S({5,9},DATE(1999,12,31)+[Value]*7)",
+   "powerbi": "19.7989898732233"
+  },
+  {
+   "expr": "STDEVX.S({5,9},DATE(2010,3,3)+0.25+0.1)",
+   "powerbi": "0"
+  },
+  {
+   "expr": "STDEVX.S({5,9},DATE(2010,3,3)+0.25+[Value])",
+   "powerbi": "2.82842712474619"
+  },
+  {
+   "expr": "STDEVX.S({5,9},DATE(2020,1,1)+[Value]*7)",
+   "powerbi": "19.7989898732233"
+  },
+  {
+   "expr": "STDEVX.S({5,9},DATE(2024,6,15)+[Value])",
+   "powerbi": "2.82842712474619"
+  },
+  {
+   "expr": "STDEVX.S({5,9},DATE(2024,6,15)+[Value]*0.25)",
+   "powerbi": "0.707106781186548"
+  },
+  {
+   "expr": "STDEVX.S({5,9},DATE(2100,1,1)+0.1)",
+   "powerbi": "0"
+  },
+  {
+   "expr": "STDEVX.S({5,9},IF(COUNTROWS(Facts)>3,DATE(1900,3,1)+[Value],DATE(1900,3,1)))",
+   "powerbi": "2.82842712474619"
+  },
+  {
+   "expr": "STDEVX.S({5,9},IF(COUNTROWS(Facts)>3,DATE(2010,3,3)+0.25+[Value],1))",
+   "powerbi": "2.82842712474619"
+  },
+  {
+   "expr": "STDEVX.S({5,9},SWITCH(TRUE(),[Value]>2,DATE(2020,1,1)+[Value],DATE(2020,1,1)))",
+   "powerbi": "2.82842712474619"
+  },
+  {
+   "expr": "STDEVX.S({5,9},SWITCH(TRUE(),[Value]>2,DATE(2100,1,1)+[Value],DATE(2100,1,1)))",
+   "powerbi": "2.82842712474619"
+  },
+  {
+   "expr": "STDEVX.S({5,9},TIME(6,0,0)+[Value]*0.25)",
+   "powerbi": "0.707106781186548"
+  },
+  {
+   "expr": "STDEVX.S({5,9},TIME(6,0,0)+[Value]*7)",
+   "powerbi": "19.7989898732233"
+  },
+  {
+   "expr": "VARX.P(CALCULATETABLE(Facts,Facts[Region]=\"East\"),0.1)",
+   "powerbi": "0"
+  },
+  {
+   "expr": "VARX.P(CALCULATETABLE(Facts,Facts[Region]=\"East\"),AVERAGE(Facts[Sales]))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "VARX.P(CALCULATETABLE(Facts,Facts[Region]=\"East\"),COALESCE(DATE(1950,1,1)+Facts[Sales],0))",
+   "powerbi": "24.8888888955116"
+  },
+  {
+   "expr": "VARX.P(CALCULATETABLE(Facts,Facts[Region]=\"East\"),COALESCE(DATE(2010,3,3)+0.25+Facts[Sales],0))",
+   "powerbi": "24.888888835907"
+  },
+  {
+   "expr": "VARX.P(CALCULATETABLE(Facts,Facts[Region]=\"East\"),COALESCE(DATE(2100,1,1)+Facts[Quantity],0))",
+   "powerbi": "2.88888740539551"
+  },
+  {
+   "expr": "VARX.P(CALCULATETABLE(Facts,Facts[Region]=\"East\"),DATE(1999,12,31)+Facts[Quantity])",
+   "powerbi": "2.88888907432556"
+  },
+  {
+   "expr": "VARX.P(CALCULATETABLE(Facts,Facts[Region]=\"East\"),DATE(2010,3,3)+0.25+0.1)",
+   "powerbi": "2.38418579101563E-07"
+  },
+  {
+   "expr": "VARX.P(CALCULATETABLE(Facts,Facts[Region]=\"East\"),DATE(2020,1,1)+Facts[Quantity]*0.5)",
+   "powerbi": "0.722222089767456"
+  },
+  {
+   "expr": "VARX.P(CALCULATETABLE(Facts,Facts[Region]=\"East\"),IF(COUNTROWS(Facts)>3,TIME(6,0,0)+Facts[Quantity],1))",
+   "powerbi": "2.88888888888889"
+  },
+  {
+   "expr": "VARX.P(CALCULATETABLE(Facts,Facts[Region]=\"East\"),IF(Facts[Quantity]>2,DATE(1950,1,1)+Facts[Quantity],DATE(1950,1,1)))",
+   "powerbi": "5.55555546283722"
+  },
+  {
+   "expr": "VARX.P(CALCULATETABLE(Facts,Facts[Region]=\"East\"),IF.EAGER(TRUE(),DATE(1950,1,1)+Facts[Quantity],BLANK()))",
+   "powerbi": "2.88888883590698"
+  },
+  {
+   "expr": "VARX.P(CALCULATETABLE(Facts,Facts[Region]=\"East\"),IF.EAGER(TRUE(),DATE(1999,12,31)+Facts[Quantity],BLANK()))",
+   "powerbi": "2.88888907432556"
+  },
+  {
+   "expr": "VARX.P(CALCULATETABLE(Facts,Facts[Region]=\"East\"),SUM(Facts[Sales])/7)",
+   "powerbi": "0"
+  },
+  {
+   "expr": "VARX.P(CALCULATETABLE(Facts,Facts[Region]=\"East\"),SWITCH(TRUE(),Facts[Sales]>2,DATE(1900,3,1)+Facts[Sales],DATE(1900,3,1)))",
+   "powerbi": "20.0555555555566"
+  },
+  {
+   "expr": "VARX.P(CALCULATETABLE(Facts,Facts[Region]=\"East\"),SWITCH(TRUE(),Facts[Sales]>2,DATE(2020,1,1)+Facts[Sales],DATE(2020,1,1)))",
+   "powerbi": "20.0555553436279"
+  },
+  {
+   "expr": "VARX.P(CALCULATETABLE(Facts,Facts[Region]=\"East\"),TIME(6,0,0)+1.5)",
+   "powerbi": "0"
+  },
+  {
+   "expr": "VARX.P(CALCULATETABLE(Facts,Facts[Region]=\"West\"),AVERAGE(Facts[Sales]))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "VARX.P(CALCULATETABLE(Facts,Facts[Region]=\"West\"),DATE(1950,1,1)+0.1)",
+   "powerbi": "0"
+  },
+  {
+   "expr": "VARX.P(CALCULATETABLE(Facts,Facts[Region]=\"West\"),DATE(1950,1,1)+Facts[Quantity]*0.25)",
+   "powerbi": "0.140625"
+  },
+  {
+   "expr": "VARX.P(CALCULATETABLE(Facts,Facts[Region]=\"West\"),DATE(1950,1,1)+Facts[Sales]*0.25)",
+   "powerbi": "6.25"
+  },
+  {
+   "expr": "VARX.P(CALCULATETABLE(Facts,Facts[Region]=\"West\"),DATE(1999,12,31)+Facts[Quantity]*7)",
+   "powerbi": "110.25"
+  },
+  {
+   "expr": "VARX.P(CALCULATETABLE(Facts,Facts[Region]=\"West\"),DATE(1999,12,31)+Facts[Sales])",
+   "powerbi": "100"
+  },
+  {
+   "expr": "VARX.P(CALCULATETABLE(Facts,Facts[Region]=\"West\"),DATE(2010,3,3)+0.25+0.25)",
+   "powerbi": "0"
+  },
+  {
+   "expr": "VARX.P(CALCULATETABLE(Facts,Facts[Region]=\"West\"),DATE(2010,3,3)+0.25+1.5)",
+   "powerbi": "0"
+  },
+  {
+   "expr": "VARX.P(CALCULATETABLE(Facts,Facts[Region]=\"West\"),DATE(2020,1,1)+Facts[Sales]*7)",
+   "powerbi": "4900"
+  },
+  {
+   "expr": "VARX.P(CALCULATETABLE(Facts,Facts[Region]=\"West\"),IF(COUNTROWS(Facts)>3,DATE(1900,3,1)+Facts[Sales],BLANK()))",
+   "powerbi": "100"
+  },
+  {
+   "expr": "VARX.P(CALCULATETABLE(Facts,Facts[Region]=\"West\"),IF(Facts[Quantity]>2,DATE(2024,6,15)+Facts[Sales],BLANK()))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "VARX.P(CALCULATETABLE(Facts,Facts[Region]=\"West\"),IF(Facts[Quantity]>2,DATE(2024,6,15)+Facts[Sales],DATE(2024,6,15)))",
+   "powerbi": "100"
+  },
+  {
+   "expr": "VARX.P(CALCULATETABLE(Facts,Facts[Region]=\"West\"),IF.EAGER(TRUE(),DATE(1950,1,1)+Facts[Sales],BLANK()))",
+   "powerbi": "100"
+  },
+  {
+   "expr": "VARX.P(CALCULATETABLE(Facts,Facts[Region]=\"West\"),IF.EAGER(TRUE(),DATE(2020,1,1)+Facts[Sales],BLANK()))",
+   "powerbi": "100"
+  },
+  {
+   "expr": "VARX.P(FILTER(Facts,Facts[Quantity]>1),0.1)",
+   "powerbi": "0"
+  },
+  {
+   "expr": "VARX.P(FILTER(Facts,Facts[Quantity]>1),1/3)",
+   "powerbi": "0"
+  },
+  {
+   "expr": "VARX.P(FILTER(Facts,Facts[Quantity]>1),DATE(1900,3,1)+Facts[Sales]*0.25)",
+   "powerbi": "3.81640625"
+  },
+  {
+   "expr": "VARX.P(FILTER(Facts,Facts[Quantity]>1),DATE(2010,3,3)+0.25+Facts[Sales]*0.5)",
+   "powerbi": "15.265625"
+  },
+  {
+   "expr": "VARX.P(FILTER(Facts,Facts[Quantity]>1),DATE(2020,1,1)+0.25)",
+   "powerbi": "0"
+  },
+  {
+   "expr": "VARX.P(FILTER(Facts,Facts[Quantity]>1),DATE(2024,6,15)+1.5)",
+   "powerbi": "0"
+  },
+  {
+   "expr": "VARX.P(FILTER(Facts,Facts[Quantity]>1),DATE(2024,6,15)+Facts[Quantity])",
+   "powerbi": "1.25"
+  },
+  {
+   "expr": "VARX.P(FILTER(Facts,Facts[Quantity]>1),DATE(2024,6,15)+Facts[Quantity]*0.25)",
+   "powerbi": "0.078125"
+  },
+  {
+   "expr": "VARX.P(FILTER(Facts,Facts[Quantity]>1),DATE(2100,1,1)+0.1)",
+   "powerbi": "0"
+  },
+  {
+   "expr": "VARX.P(FILTER(Facts,Facts[Quantity]>1),IF(TRUE(),DATE(2024,6,15)+Facts[Quantity],DATE(2024,6,15)))",
+   "powerbi": "1.25"
+  },
+  {
+   "expr": "VARX.P(FILTER(Facts,Facts[Quantity]>1),IF.EAGER(TRUE(),DATE(1999,12,31)+Facts[Sales],BLANK()))",
+   "powerbi": "61.0625"
+  },
+  {
+   "expr": "VARX.P(FILTER(Facts,Facts[Quantity]>1),IF.EAGER(TRUE(),DATE(2024,6,15)+Facts[Quantity],BLANK()))",
+   "powerbi": "1.25"
+  },
+  {
+   "expr": "VARX.P(FILTER(Facts,Facts[Sales]>2),0.1)",
+   "powerbi": "0"
+  },
+  {
+   "expr": "VARX.P(FILTER(Facts,Facts[Sales]>2),AVERAGE(Facts[Sales]))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "VARX.P(FILTER(Facts,Facts[Sales]>2),DATE(1900,3,1)+Facts[Quantity]*0.5)",
+   "powerbi": "0.388888888889142"
+  },
+  {
+   "expr": "VARX.P(FILTER(Facts,Facts[Sales]>2),DATE(1950,1,1)+Facts[Quantity]*0.5)",
+   "powerbi": "0.388888835906982"
+  },
+  {
+   "expr": "VARX.P(FILTER(Facts,Facts[Sales]>2),IF(Facts[Quantity]>2,DATE(2010,3,3)+0.25+Facts[Sales],DATE(2010,3,3)+0.25))",
+   "powerbi": "79.1666667461395"
+  },
+  {
+   "expr": "VARX.P(FILTER(Facts,Facts[Sales]>2),SWITCH(TRUE(),Facts[Sales]>2,DATE(2020,1,1)+Facts[Sales],DATE(2020,1,1)))",
+   "powerbi": "51.1666667461395"
+  },
+  {
+   "expr": "VARX.P(Facts,0.5)",
+   "powerbi": "0"
+  },
+  {
+   "expr": "VARX.P(Facts,DATE(1900,3,1)+Facts[Quantity]*7)",
+   "powerbi": "142.916666666667"
+  },
+  {
+   "expr": "VARX.P(Facts,DATE(1900,3,1)+Facts[Sales]*0.5)",
+   "powerbi": "14.7239583333335"
+  },
+  {
+   "expr": "VARX.P(Facts,DATE(1950,1,1)+Facts[Quantity]*0.25)",
+   "powerbi": "0.182291686534882"
+  },
+  {
+   "expr": "VARX.P(Facts,DATE(2010,3,3)+0.25+1.5)",
+   "powerbi": "0"
+  },
+  {
+   "expr": "VARX.P(Facts,DATE(2010,3,3)+0.25+Facts[Quantity]*0.25)",
+   "powerbi": "0.182291746139526"
+  },
+  {
+   "expr": "VARX.P(Facts,DATE(2020,1,1)+0.5)",
+   "powerbi": "0"
+  },
+  {
+   "expr": "VARX.P(Facts,DATE(2024,6,15)+0.1)",
+   "powerbi": "0"
+  },
+  {
+   "expr": "VARX.P(Facts,DATE(2024,6,15)+Facts[Quantity]*0.5)",
+   "powerbi": "0.729166746139526"
+  },
+  {
+   "expr": "VARX.P(Facts,DATE(2024,6,15)+Facts[Sales])",
+   "powerbi": "58.8958332538605"
+  },
+  {
+   "expr": "VARX.P(Facts,IF(Facts[Quantity]>2,DATE(2010,3,3)+0.25+Facts[Sales],DATE(2010,3,3)+0.25))",
+   "powerbi": "53.6458332538605"
+  },
+  {
+   "expr": "VARX.P(Facts,IF(Facts[Quantity]>2,DATE(2100,1,1)+Facts[Sales],BLANK()))",
+   "powerbi": "79.1666669845581"
+  },
+  {
+   "expr": "VARX.P(Facts,IF(Facts[Quantity]>2,TIME(6,0,0)+Facts[Sales],BLANK()))",
+   "powerbi": "79.1666666666667"
+  },
+  {
+   "expr": "VARX.P(Facts,IF.EAGER(TRUE(),DATE(1999,12,31)+Facts[Sales],BLANK()))",
+   "powerbi": "58.8958332538605"
+  },
+  {
+   "expr": "VARX.P(TOPN(4,Facts,Facts[Sales]),COALESCE(DATE(2024,6,15)+Facts[Sales],0))",
+   "powerbi": "61.0625"
+  },
+  {
+   "expr": "VARX.P(TOPN(4,Facts,Facts[Sales]),DATE(1950,1,1)+Facts[Quantity])",
+   "powerbi": "3.25"
+  },
+  {
+   "expr": "VARX.P(TOPN(4,Facts,Facts[Sales]),DATE(2100,1,1)+Facts[Quantity]*7)",
+   "powerbi": "159.25"
+  },
+  {
+   "expr": "VARX.P(TOPN(4,Facts,Facts[Sales]),SWITCH(TRUE(),Facts[Sales]>2,DATE(1999,12,31)+Facts[Sales],DATE(1999,12,31)))",
+   "powerbi": "61.0625"
+  },
+  {
+   "expr": "VARX.P(TOPN(4,Facts,Facts[Sales]),TIME(6,0,0)+0.5)",
+   "powerbi": "0"
+  },
+  {
+   "expr": "VARX.P({1,2,3},AVERAGE(Facts[Sales]))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "VARX.P({1,2,3},DATE(1950,1,1)+[Value]*7)",
+   "powerbi": "32.6666666865349"
+  },
+  {
+   "expr": "VARX.P({1,2,3},DATE(1999,12,31)+1.5)",
+   "powerbi": "0"
+  },
+  {
+   "expr": "VARX.P({1,2,3},DATE(2010,3,3)+0.25+[Value]*7)",
+   "powerbi": "32.6666667461395"
+  },
+  {
+   "expr": "VARX.P({1,2,3},DATE(2024,6,15)+[Value])",
+   "powerbi": "0.666666746139526"
+  },
+  {
+   "expr": "VARX.P({1,2,3},DATE(2100,1,1)+0.25)",
+   "powerbi": "0"
+  },
+  {
+   "expr": "VARX.P({1,2,3},DATE(2100,1,1)+1.5)",
+   "powerbi": "0"
+  },
+  {
+   "expr": "VARX.P({1,2,3},IF(TRUE(),DATE(1900,3,1)+[Value],DATE(1900,3,1)))",
+   "powerbi": "0.666666666666515"
+  },
+  {
+   "expr": "VARX.P({1,2,3},IF.EAGER(TRUE(),DATE(2024,6,15)+[Value],BLANK()))",
+   "powerbi": "0.666666746139526"
+  },
+  {
+   "expr": "VARX.P({1,2,3},IF.EAGER(TRUE(),TIME(6,0,0)+[Value],BLANK()))",
+   "powerbi": "0.666666666666667"
+  },
+  {
+   "expr": "VARX.P({1,2,3},TIME(6,0,0)+0.25)",
+   "powerbi": "0"
+  },
+  {
+   "expr": "VARX.P({5,9},DATE(1950,1,1)+[Value])",
+   "powerbi": "4"
+  },
+  {
+   "expr": "VARX.P({5,9},DATE(1999,12,31)+[Value]*0.25)",
+   "powerbi": "0.25"
+  },
+  {
+   "expr": "VARX.P({5,9},DATE(1999,12,31)+[Value]*0.5)",
+   "powerbi": "1"
+  },
+  {
+   "expr": "VARX.P({5,9},DATE(2010,3,3)+0.25+[Value]*0.25)",
+   "powerbi": "0.25"
+  },
+  {
+   "expr": "VARX.P({5,9},DATE(2020,1,1)+[Value]*0.5)",
+   "powerbi": "1"
+  },
+  {
+   "expr": "VARX.P({5,9},DATE(2024,6,15)+0.25)",
+   "powerbi": "0"
+  },
+  {
+   "expr": "VARX.P({5,9},DATE(2024,6,15)+[Value])",
+   "powerbi": "4"
+  },
+  {
+   "expr": "VARX.P({5,9},IF(COUNTROWS(Facts)>3,DATE(2100,1,1)+[Value],1))",
+   "powerbi": "4"
+  },
+  {
+   "expr": "VARX.P({5,9},IF.EAGER(TRUE(),DATE(1999,12,31)+[Value],BLANK()))",
+   "powerbi": "4"
+  },
+  {
+   "expr": "VARX.P({5,9},IF.EAGER(TRUE(),DATE(2010,3,3)+0.25+[Value],BLANK()))",
+   "powerbi": "4"
+  },
+  {
+   "expr": "VARX.P({5,9},SWITCH(TRUE(),[Value]>2,TIME(6,0,0)+[Value],TIME(6,0,0)))",
+   "powerbi": "4"
+  },
+  {
+   "expr": "VARX.P({5,9},TIME(6,0,0)+1.5)",
+   "powerbi": "0"
+  },
+  {
+   "expr": "VARX.S(CALCULATETABLE(Facts,Facts[Region]=\"East\"),1/3)",
+   "powerbi": "0"
+  },
+  {
+   "expr": "VARX.S(CALCULATETABLE(Facts,Facts[Region]=\"East\"),DATE(1900,3,1)+Facts[Quantity]*7)",
+   "powerbi": "212.333333333334"
+  },
+  {
+   "expr": "VARX.S(CALCULATETABLE(Facts,Facts[Region]=\"East\"),DATE(2010,3,3)+0.25+Facts[Sales])",
+   "powerbi": "37.3333334922791"
+  },
+  {
+   "expr": "VARX.S(CALCULATETABLE(Facts,Facts[Region]=\"East\"),DATE(2020,1,1)+Facts[Quantity]*0.25)",
+   "powerbi": "0.270833492279053"
+  },
+  {
+   "expr": "VARX.S(CALCULATETABLE(Facts,Facts[Region]=\"East\"),DATE(2020,1,1)+Facts[Sales]*7)",
+   "powerbi": "1829.33333349228"
+  },
+  {
+   "expr": "VARX.S(CALCULATETABLE(Facts,Facts[Region]=\"East\"),DATE(2024,6,15)+0.25)",
+   "powerbi": "0"
+  },
+  {
+   "expr": "VARX.S(CALCULATETABLE(Facts,Facts[Region]=\"East\"),IF(Facts[Quantity]>2,DATE(1900,3,1)+Facts[Sales],BLANK()))",
+   "powerbi": "NaN"
+  },
+  {
+   "expr": "VARX.S(CALCULATETABLE(Facts,Facts[Region]=\"East\"),IF(TRUE(),DATE(1999,12,31)+Facts[Sales],BLANK()))",
+   "powerbi": "37.3333332538605"
+  },
+  {
+   "expr": "VARX.S(CALCULATETABLE(Facts,Facts[Region]=\"East\"),IF.EAGER(TRUE(),DATE(1900,3,1)+Facts[Quantity],BLANK()))",
+   "powerbi": "4.33333333333303"
+  },
+  {
+   "expr": "VARX.S(CALCULATETABLE(Facts,Facts[Region]=\"East\"),TIME(6,0,0)+Facts[Quantity]*7)",
+   "powerbi": "212.333333333333"
+  },
+  {
+   "expr": "VARX.S(CALCULATETABLE(Facts,Facts[Region]=\"West\"),COALESCE(TIME(6,0,0)+Facts[Sales],0))",
+   "powerbi": "200"
+  },
+  {
+   "expr": "VARX.S(CALCULATETABLE(Facts,Facts[Region]=\"West\"),DATE(2020,1,1)+1.5)",
+   "powerbi": "0"
+  },
+  {
+   "expr": "VARX.S(CALCULATETABLE(Facts,Facts[Region]=\"West\"),DATE(2020,1,1)+Facts[Quantity]*0.5)",
+   "powerbi": "1.125"
+  },
+  {
+   "expr": "VARX.S(CALCULATETABLE(Facts,Facts[Region]=\"West\"),DATE(2024,6,15)+0.5)",
+   "powerbi": "0"
+  },
+  {
+   "expr": "VARX.S(CALCULATETABLE(Facts,Facts[Region]=\"West\"),DATE(2100,1,1)+0.25)",
+   "powerbi": "0"
+  },
+  {
+   "expr": "VARX.S(CALCULATETABLE(Facts,Facts[Region]=\"West\"),IF(Facts[Quantity]>2,DATE(1950,1,1)+Facts[Sales],1))",
+   "powerbi": "167134044.5"
+  },
+  {
+   "expr": "VARX.S(CALCULATETABLE(Facts,Facts[Region]=\"West\"),IF(TRUE(),DATE(2024,6,15)+Facts[Quantity],1))",
+   "powerbi": "4.5"
+  },
+  {
+   "expr": "VARX.S(CALCULATETABLE(Facts,Facts[Region]=\"West\"),SWITCH(TRUE(),Facts[Sales]>2,DATE(1999,12,31)+Facts[Sales],DATE(1999,12,31)))",
+   "powerbi": "200"
+  },
+  {
+   "expr": "VARX.S(FILTER(Facts,Facts[Quantity]>1),1/3)",
+   "powerbi": "0"
+  },
+  {
+   "expr": "VARX.S(FILTER(Facts,Facts[Quantity]>1),COALESCE(DATE(1900,3,1)+Facts[Quantity],0))",
+   "powerbi": "1.66666666666667"
+  },
+  {
+   "expr": "VARX.S(FILTER(Facts,Facts[Quantity]>1),COALESCE(DATE(1999,12,31)+Facts[Sales],0))",
+   "powerbi": "81.4166666666667"
+  },
+  {
+   "expr": "VARX.S(FILTER(Facts,Facts[Quantity]>1),DATE(1999,12,31)+Facts[Sales]*0.25)",
+   "powerbi": "5.08854166666667"
+  },
+  {
+   "expr": "VARX.S(FILTER(Facts,Facts[Quantity]>1),DATE(2020,1,1)+Facts[Quantity]*0.25)",
+   "powerbi": "0.104166666666667"
+  },
+  {
+   "expr": "VARX.S(FILTER(Facts,Facts[Quantity]>1),DATE(2024,6,15)+Facts[Quantity]*7)",
+   "powerbi": "81.6666666666667"
+  },
+  {
+   "expr": "VARX.S(FILTER(Facts,Facts[Quantity]>1),DATE(2100,1,1)+1.5)",
+   "powerbi": "0"
+  },
+  {
+   "expr": "VARX.S(FILTER(Facts,Facts[Quantity]>1),DATE(2100,1,1)+Facts[Quantity])",
+   "powerbi": "1.66666666666667"
+  },
+  {
+   "expr": "VARX.S(FILTER(Facts,Facts[Quantity]>1),DATE(2100,1,1)+Facts[Sales])",
+   "powerbi": "81.4166666666667"
+  },
+  {
+   "expr": "VARX.S(FILTER(Facts,Facts[Quantity]>1),DATE(2100,1,1)+Facts[Sales]*0.25)",
+   "powerbi": "5.08854166666667"
+  },
+  {
+   "expr": "VARX.S(FILTER(Facts,Facts[Quantity]>1),IF(TRUE(),DATE(1900,3,1)+Facts[Sales],DATE(1900,3,1)))",
+   "powerbi": "81.4166666666667"
+  },
+  {
+   "expr": "VARX.S(FILTER(Facts,Facts[Quantity]>1),SWITCH(TRUE(),Facts[Sales]>2,TIME(6,0,0)+Facts[Sales],TIME(6,0,0)))",
+   "powerbi": "81.4166666666667"
+  },
+  {
+   "expr": "VARX.S(FILTER(Facts,Facts[Quantity]>1),TIME(6,0,0)+1.5)",
+   "powerbi": "0"
+  },
+  {
+   "expr": "VARX.S(FILTER(Facts,Facts[Quantity]>1),TIME(6,0,0)+Facts[Sales]*0.5)",
+   "powerbi": "20.3541666666667"
+  },
+  {
+   "expr": "VARX.S(FILTER(Facts,Facts[Sales]>2),COALESCE(DATE(1950,1,1)+Facts[Sales],0))",
+   "powerbi": "76.75"
+  },
+  {
+   "expr": "VARX.S(FILTER(Facts,Facts[Sales]>2),DATE(1900,3,1)+Facts[Quantity]*0.5)",
+   "powerbi": "0.58333333333303"
+  },
+  {
+   "expr": "VARX.S(FILTER(Facts,Facts[Sales]>2),DATE(1950,1,1)+0.1)",
+   "powerbi": "0"
+  },
+  {
+   "expr": "VARX.S(FILTER(Facts,Facts[Sales]>2),DATE(1950,1,1)+0.5)",
+   "powerbi": "0"
+  },
+  {
+   "expr": "VARX.S(FILTER(Facts,Facts[Sales]>2),DATE(1950,1,1)+Facts[Quantity]*0.25)",
+   "powerbi": "0.145833313465118"
+  },
+  {
+   "expr": "VARX.S(FILTER(Facts,Facts[Sales]>2),DATE(1999,12,31)+Facts[Sales]*0.25)",
+   "powerbi": "4.796875"
+  },
+  {
+   "expr": "VARX.S(FILTER(Facts,Facts[Sales]>2),DATE(2010,3,3)+0.25+0.25)",
+   "powerbi": "0"
+  },
+  {
+   "expr": "VARX.S(FILTER(Facts,Facts[Sales]>2),DATE(2010,3,3)+0.25+0.5)",
+   "powerbi": "0"
+  },
+  {
+   "expr": "VARX.S(FILTER(Facts,Facts[Sales]>2),DATE(2010,3,3)+0.25+1.5)",
+   "powerbi": "0"
+  },
+  {
+   "expr": "VARX.S(FILTER(Facts,Facts[Sales]>2),DATE(2010,3,3)+0.25+Facts[Quantity])",
+   "powerbi": "2.33333349227905"
+  },
+  {
+   "expr": "VARX.S(FILTER(Facts,Facts[Sales]>2),DATE(2024,6,15)+1.5)",
+   "powerbi": "0"
+  },
+  {
+   "expr": "VARX.S(FILTER(Facts,Facts[Sales]>2),DATE(2100,1,1)+0.25)",
+   "powerbi": "0"
+  },
+  {
+   "expr": "VARX.S(FILTER(Facts,Facts[Sales]>2),DATE(2100,1,1)+1.5)",
+   "powerbi": "0"
+  },
+  {
+   "expr": "VARX.S(FILTER(Facts,Facts[Sales]>2),IF(COUNTROWS(Facts)>3,DATE(2010,3,3)+0.25+Facts[Quantity],BLANK()))",
+   "powerbi": "2.33333349227905"
+  },
+  {
+   "expr": "VARX.S(FILTER(Facts,Facts[Sales]>2),IF(TRUE(),DATE(1900,3,1)+Facts[Sales],1))",
+   "powerbi": "76.75"
+  },
+  {
+   "expr": "VARX.S(FILTER(Facts,Facts[Sales]>2),IF.EAGER(TRUE(),DATE(2010,3,3)+0.25+Facts[Sales],BLANK()))",
+   "powerbi": "76.75"
+  },
+  {
+   "expr": "VARX.S(FILTER(Facts,Facts[Sales]>2),IF.EAGER(TRUE(),TIME(6,0,0)+Facts[Quantity],BLANK()))",
+   "powerbi": "2.33333333333333"
+  },
+  {
+   "expr": "VARX.S(FILTER(Facts,Facts[Sales]>2),SWITCH(TRUE(),Facts[Sales]>2,DATE(2100,1,1)+Facts[Sales],DATE(2100,1,1)))",
+   "powerbi": "76.75"
+  },
+  {
+   "expr": "VARX.S(FILTER(Facts,Facts[Sales]>2),TIME(6,0,0)+Facts[Sales]*7)",
+   "powerbi": "3760.75"
+  },
+  {
+   "expr": "VARX.S(Facts,AVERAGE(Facts[Sales]))",
+   "powerbi": "5.6843418860808E-15"
+  },
+  {
+   "expr": "VARX.S(Facts,DATE(1900,3,1)+1.5)",
+   "powerbi": "0"
+  },
+  {
+   "expr": "VARX.S(Facts,DATE(1900,3,1)+Facts[Quantity])",
+   "powerbi": "3.5"
+  },
+  {
+   "expr": "VARX.S(Facts,DATE(1950,1,1)+1.5)",
+   "powerbi": "0"
+  },
+  {
+   "expr": "VARX.S(Facts,DATE(1950,1,1)+Facts[Quantity]*0.5)",
+   "powerbi": "0.875"
+  },
+  {
+   "expr": "VARX.S(Facts,DATE(1999,12,31)+Facts[Sales]*0.25)",
+   "powerbi": "4.4171875"
+  },
+  {
+   "expr": "VARX.S(Facts,DATE(2010,3,3)+0.25+0.5)",
+   "powerbi": "0"
+  },
+  {
+   "expr": "VARX.S(Facts,DATE(2010,3,3)+0.25+Facts[Quantity]*7)",
+   "powerbi": "171.5"
+  },
+  {
+   "expr": "VARX.S(Facts,DATE(2020,1,1)+0.5)",
+   "powerbi": "0"
+  },
+  {
+   "expr": "VARX.S(Facts,DATE(2020,1,1)+Facts[Quantity])",
+   "powerbi": "3.5"
+  },
+  {
+   "expr": "VARX.S(Facts,DATE(2024,6,15)+0.5)",
+   "powerbi": "0"
+  },
+  {
+   "expr": "VARX.S(Facts,DATE(2024,6,15)+Facts[Quantity]*7)",
+   "powerbi": "171.5"
+  },
+  {
+   "expr": "VARX.S(Facts,IF(COUNTROWS(Facts)>3,DATE(1999,12,31)+Facts[Sales],1))",
+   "powerbi": "70.675"
+  },
+  {
+   "expr": "VARX.S(Facts,IF.EAGER(TRUE(),DATE(2010,3,3)+0.25+Facts[Quantity],BLANK()))",
+   "powerbi": "3.5"
+  },
+  {
+   "expr": "VARX.S(Facts,SUM(Facts[Sales])/7)",
+   "powerbi": "0"
+  },
+  {
+   "expr": "VARX.S(Facts,SWITCH(TRUE(),Facts[Quantity]>2,DATE(1950,1,1)+Facts[Quantity],DATE(1950,1,1)))",
+   "powerbi": "5.2"
+  },
+  {
+   "expr": "VARX.S(Facts,TIME(6,0,0)+Facts[Quantity]*0.25)",
+   "powerbi": "0.21875"
+  },
+  {
+   "expr": "VARX.S(Facts,TIME(6,0,0)+Facts[Quantity]*7)",
+   "powerbi": "171.5"
+  },
+  {
+   "expr": "VARX.S(TOPN(4,Facts,Facts[Sales]),0.3)",
+   "powerbi": "0"
+  },
+  {
+   "expr": "VARX.S(TOPN(4,Facts,Facts[Sales]),1/3)",
+   "powerbi": "0"
+  },
+  {
+   "expr": "VARX.S(TOPN(4,Facts,Facts[Sales]),COALESCE(DATE(1900,3,1)+Facts[Quantity],0))",
+   "powerbi": "4.33333333333333"
+  },
+  {
+   "expr": "VARX.S(TOPN(4,Facts,Facts[Sales]),DATE(1900,3,1)+0.25)",
+   "powerbi": "0"
+  },
+  {
+   "expr": "VARX.S(TOPN(4,Facts,Facts[Sales]),DATE(1950,1,1)+0.5)",
+   "powerbi": "0"
+  },
+  {
+   "expr": "VARX.S(TOPN(4,Facts,Facts[Sales]),DATE(1950,1,1)+Facts[Quantity]*7)",
+   "powerbi": "212.333333333333"
+  },
+  {
+   "expr": "VARX.S(TOPN(4,Facts,Facts[Sales]),DATE(2010,3,3)+0.25+0.1)",
+   "powerbi": "0"
+  },
+  {
+   "expr": "VARX.S(TOPN(4,Facts,Facts[Sales]),DATE(2020,1,1)+0.1)",
+   "powerbi": "0"
+  },
+  {
+   "expr": "VARX.S(TOPN(4,Facts,Facts[Sales]),DATE(2020,1,1)+1.5)",
+   "powerbi": "0"
+  },
+  {
+   "expr": "VARX.S({1,2,3},AVERAGE(Facts[Sales]))",
+   "powerbi": "7.105427357601E-15"
+  },
+  {
+   "expr": "VARX.S({1,2,3},COALESCE(DATE(2100,1,1)+[Value],0))",
+   "powerbi": "1"
+  },
+  {
+   "expr": "VARX.S({1,2,3},DATE(1999,12,31)+0.1)",
+   "powerbi": "2.38418579101563E-07"
+  },
+  {
+   "expr": "VARX.S({1,2,3},DATE(2024,6,15)+[Value]*7)",
+   "powerbi": "49"
+  },
+  {
+   "expr": "VARX.S({1,2,3},SWITCH(TRUE(),[Value]>2,DATE(2010,3,3)+0.25+[Value],DATE(2010,3,3)+0.25))",
+   "powerbi": "3"
+  },
+  {
+   "expr": "VARX.S({1,2,3},SWITCH(TRUE(),[Value]>2,DATE(2024,6,15)+[Value],DATE(2024,6,15)))",
+   "powerbi": "3"
+  },
+  {
+   "expr": "VARX.S({5,9},2.5)",
+   "powerbi": "0"
+  },
+  {
+   "expr": "VARX.S({5,9},DATE(1900,3,1)+0.1)",
+   "powerbi": "0"
+  },
+  {
+   "expr": "VARX.S({5,9},DATE(1900,3,1)+[Value]*0.25)",
+   "powerbi": "0.5"
+  },
+  {
+   "expr": "VARX.S({5,9},DATE(2010,3,3)+0.25+1.5)",
+   "powerbi": "0"
+  },
+  {
+   "expr": "VARX.S({5,9},DATE(2020,1,1)+[Value]*0.25)",
+   "powerbi": "0.5"
+  },
+  {
+   "expr": "VARX.S({5,9},DATE(2020,1,1)+[Value]*0.5)",
+   "powerbi": "2"
+  },
+  {
+   "expr": "VARX.S({5,9},DATE(2024,6,15)+[Value]*0.25)",
+   "powerbi": "0.5"
+  },
+  {
+   "expr": "VARX.S({5,9},DATE(2100,1,1)+0.25)",
+   "powerbi": "0"
+  },
+  {
+   "expr": "VARX.S({5,9},IF(COUNTROWS(Facts)>3,DATE(1900,3,1)+[Value],1))",
+   "powerbi": "8"
+  },
+  {
+   "expr": "VARX.S({5,9},IF(COUNTROWS(Facts)>3,DATE(1950,1,1)+[Value],BLANK()))",
+   "powerbi": "8"
+  },
+  {
+   "expr": "VARX.S({5,9},IF(TRUE(),DATE(1999,12,31)+[Value],DATE(1999,12,31)))",
+   "powerbi": "8"
+  },
+  {
+   "expr": "VARX.S({5,9},IF(TRUE(),TIME(6,0,0)+[Value],TIME(6,0,0)))",
+   "powerbi": "8"
+  },
+  {
+   "expr": "VARX.S({5,9},SWITCH(TRUE(),[Value]>2,DATE(2024,6,15)+[Value],DATE(2024,6,15)))",
+   "powerbi": "8"
+  },
+  {
+   "expr": "VARX.S({5,9},TIME(6,0,0)+[Value]*0.25)",
+   "powerbi": "0.5"
+  }
+ ]
+}
