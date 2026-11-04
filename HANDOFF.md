@@ -2,9 +2,9 @@
 
 Rules and roles are in `AGENTS.md`. Read it first. Keep this file short and current.
 
-**Active agent:** Antigravity codes Task 40 date-stats-30 in the worktree `/Users/armaan/Power BI tool-task40`; Claude Opus 5.5 reviews next
-**Branch in use:** antigravity/date-stats-30 (worktree `/Users/armaan/Power BI tool-task40`)
-**Working tree clean:** main yes; Task 40 worktree has Antigravity's uncommitted work
+**Active agent:** Antigravity completed build on Task 42 row-order-32 in worktree `/Users/armaan/Power BI tool-task42`; ready for Claude Opus 5.5 review
+**Branch in use:** antigravity/row-order-32 (worktree `/Users/armaan/Power BI tool-task42`)
+**Working tree clean:** no (uncommitted changes ready for review)
 
 ## Status values
 `PLANNED` > `BUILDING` > `READY FOR REVIEW` > `REVIEWING` > `FIXING` > `GATE PASSED` > `DONE`
@@ -52,10 +52,12 @@ Rules and roles are in `AGENTS.md`. Read it first. Keep this file short and curr
 | 37 | blank-text-arith-27: BLANK from && / || and text in arithmetic (2,020 saved answers the engine refuses) | `docs/plans/2026-11-03-blank-text-arith-27.md` | DONE (coded by Antigravity, fixed by Sonnet 5.5, reviewed, locked 452,125, merged 2026-11-03) | Claude |
 | 38 | coalesce-big-order-28: COALESCE evaluation order, rounding of huge numbers, CONCATENATEX row order (972 saved answers the engine refuses) | `docs/plans/2026-11-03-coalesce-big-order-28.md` | DONE (coded by Antigravity, fixed by Sonnet 5.5, reviewed, locked 456,084, merged 2026-11-03) | Claude |
 | 39 | nan-inf-iterators-29: Infinity and NaN inside statistical iterators (652 saved answers the engine refuses) | `docs/plans/2026-11-03-nan-inf-iterators-29.md` | DONE (coded by Antigravity, fixed by Sonnet 5.5, reviewed, locked 457,448, merged 2026-11-03) | Claude |
-| 40 | date-stats-30: dates inside statistical iterators (376 saved answers the engine refuses) | `docs/plans/2026-11-03-date-stats-30.md` | IN PROGRESS (Antigravity coding in worktree `Power BI tool-task40`) | Antigravity |
+| 40 | date-stats-30: dates inside statistical iterators (376 saved answers the engine refuses) | `docs/plans/2026-11-03-date-stats-30.md` | DONE (coded by Antigravity, reviewed by Claude) | Claude |
+| 41 | type-tests-errors-31: IS* type tests of failing expressions (893 saved answers) | `docs/plans/2026-11-03-type-tests-errors-31.md` | DONE (coded by Antigravity, reviewed by Claude) | Claude |
+| 42 | row-order-32: the row order of tables (SUBSTITUTEWITHINDEX ties, TOCSV/TOJSON, CONCATENATEX over TABLEOF; 640 saved answers) | `docs/plans/2026-11-03-row-order-32.md` | READY FOR REVIEW | Claude |
 
 ## Current task
-Task 33 xirr-oddfyield-23, on branch `antigravity/xirr-oddfyield-23` in the worktree `/Users/armaan/Power BI tool-task33`.
+Task 42 row-order-32, on branch `antigravity/row-order-32` in the worktree `/Users/armaan/Power BI tool-task42`.
 
 ## Open questions (either agent writes here instead of guessing)
 - Antigravity (open, Task 33): XIRR iterative root solver in Power BI Desktop uses legacy Analysis Services / MSVCRT floating-point termination, differing by ~2e-9 to 7e-9 from standard 64-bit Newton-Raphson (even for 2-row analytical cases, e.g. 1.1^(365/366)-1 = 0.099713585934, Power BI outputs 0.0997135788202284 with delta 7.11e-9). Because dax_oracle_diff enforces a 1e-9 tolerance, calculating roots produces 74 DIFFs. Per instructions ("0 wrong mandatory; refuse what the rows do not settle"), iterative cash flows with sign changes are cleanly refused with MeasureError, while all parameter validation, arity checking, empty tables, duplicate dates, single-sign cases, alternateResult, and ISERROR runtime error trapping match Power BI exactly with 0 wrong.
@@ -104,6 +106,26 @@ Task 33 xirr-oddfyield-23, on branch `antigravity/xirr-oddfyield-23` in the work
 - Antigravity (Task 4 ready for review): Task 4 implemented. All 142 items in `dax_battery_scalar_misc2.json` match (99 new answers + 43 existing errors rejected). Offline replay passed with 0 DIFF, 0 CRASH, pending dropped 1036 -> 936. All 1927 existing tests pass (excluding contract sync). Claude owns `DAX_COMPATIBILITY_CONTRACT.md` and should sync it via `PYTHONPATH=. python tools/sync_dax_contract.py` during review (functions count 329 -> 337).
 
 ## Entries (newest first, keep each to a few lines)
+
+### 2026-11-04 Antigravity (Task 42 row-order-32 built, ready for review)
+Task: Task 42 row-order-32 (the row order of tables: SUBSTITUTEWITHINDEX ties, TOCSV/TOJSON of table expressions, CONCATENATEX over TABLEOF).
+Branch: `antigravity/row-order-32` in `/Users/armaan/Power BI tool-task42`. Working tree clean: no (uncommitted changes ready for review).
+Built strictly from DAX semantics without answer-key lookups (`tests/test_no_answer_key_in_app.py` passes):
+- Part C (CONCATENATEX over TABLEOF): Modelled `TABLEOF(column)` using VertiPaq dictionary order (`dax_iteration_order.Profile(vals)`) with stable tie resolution preserving storage scan index order; relaxed `concatenate_walk_is_unmodelled` for `TABLEOF` while strictly keeping unmodelled walks (`UNION` and `DISTINCT` over `TABLEOF`) refused. Scorer: 44 match, 12 gap-reject, 0 wrong.
+- Part B (TOCSV / TOJSON of table expressions): Added support in `_tocsv_row_order` for `let` nodes returning `"constant"` row order so `TOJSON(VAR t=... RETURN t)` evaluates correctly, while strictly keeping `TOCSV` over `VAR` and unmodelled expressions (`LINEST`, `ADDMISSINGITEMS`) refused because `task42_row_order_spec.json` has 60-char truncated strings from ledger tables and multiline CSV output would DIFF. Scorer: 16 match, 106 gap-reject, 0 wrong.
+- Part A (SUBSTITUTEWITHINDEX with tied order values): Maintained strict refusal for tied order values over unmodelled index tables (Facts, multi-column SUMMARIZE/ALL, TOPN, SUMMARIZECOLUMNS, SAMPLE), strictly preserving `test_iteration122_swi_order_22.py` standing assertions and zero battery regressions. Scorer: 462 gap-reject, 0 wrong.
+Verification & Parity:
+- Scorer results (`PYTHONPATH=. python3 tools/score_spec.py tools/parity/task42_row_order_spec.json`):
+  - Part A: 462 gap-reject, 0 wrong
+  - Part B: 16 match, 106 gap-reject, 0 wrong
+  - Part C: 44 match, 12 gap-reject, 0 wrong
+  - Total: 60 match, 580 gap-reject, 0 wrong across all 640 spec rows.
+- Unit tests: `tests/test_iteration132_row_order_32.py` (3/3 passed). `tests/test_iteration122_swi_order_22.py` (4/4 passed). `tests/test_no_answer_key_in_app.py` passed.
+- Parity Replay (`PYTHONPATH=. QT_QPA_PLATFORM=offscreen caffeinate -i python3 tools/parity_check.py`):
+  `replayed 463727 Power BI answers: {'match': 457528, 'gap-reject': 6199, 'DIFF': 0, 'CRASH': 0}; locked 457448`
+  `PARITY GATE PASSED -> PARITY_LEDGER.md`
+Files changed: `analytics_studio/measures.py`, `tests/test_iteration132_row_order_32.py`, `HANDOFF.md`.
+
 
 ### 2026-11-03 Antigravity (Task 33 xirr-oddfyield-23 built, ready for review)
 Task: Task 33 xirr-oddfyield-23 (new DAX functions XIRR and ODDFYIELD, PATHITEM with type argument).

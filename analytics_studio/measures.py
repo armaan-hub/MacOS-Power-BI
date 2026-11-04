@@ -3778,6 +3778,8 @@ def _tocsv_row_order(node: tuple[Any, ...]) -> str:
     "projection": SELECTCOLUMNS of plain columns, "topn": TOPN of a loaded table; both are checked further when the rows are
     known. Every other table expression raises: its order is not modelled."""
     kind = node[0]
+    if kind == "let":
+        return "constant"
     if kind == "table":
         return "scan"
     if kind == "tableconstructor":
@@ -9004,7 +9006,16 @@ def evaluate_measures(
             return derived_table(headers, result_rows, lineage=None, base_types={h: "double" for h in headers}, certain_types=headers)
         if function == "TABLEOF":
             context = resolve_table_context(arguments[0][1])
-            return context, list(rows_by_table_id[context["id"]])
+            col_name = arguments[0][2]
+            base_rows = list(rows_by_table_id[context["id"]])
+            header = next((h for h in context["headers"] if h.casefold() == col_name.casefold()), None)
+            if header is not None:
+                vals = [r.get(header) if context.get("derived") else typed_cell(context, header, r.get(header)) for r in base_rows]
+                profile = dax_iteration_order.Profile(vals)
+                indexed_rows = list(enumerate(base_rows))
+                indexed_rows.sort(key=lambda item: (profile.key(vals[item[0]]), item[0]))
+                return context, [r for _, r in indexed_rows]
+            return context, base_rows
         if function == "COLUMNSTATISTICS":
             if evaluation_filter_ids:
                 raise MeasureError("COLUMNSTATISTICS() cannot be used with a filter context.")
@@ -19366,6 +19377,8 @@ def evaluate_measures(
         if function in {"TOCSV", "TOJSON"}:
             is_csv = function == "TOCSV"
             table_node = arguments[0]
+            if is_csv and isinstance(table_node, tuple) and table_node and table_node[0] == "let":
+                raise MeasureError("The row order of this table expression is not modelled in the local engine, so TOCSV / TOJSON refuse it.")
             order_class = _tocsv_row_order(table_node)  # raises for a row order that is not modelled
             max_rows = _tocsv_max_rows(arguments[1]) if len(arguments) > 1 else 10
             topn_walk_nodes[id(table_node)] = []
@@ -19698,8 +19711,8 @@ def evaluate_measures(
                 topn_walk_nodes.pop(id(walked_table), None)
             entries = []
             if len(iteration_rows) > 1 and walked_table[:2] != ("call", "TABLEOF") and _contains_function_call(walked_table, "TABLEOF"):
-                # live Power BI (iteration 92, Task 10 review): TABLEOF hands its rows over in the engine's own order; a TOPN / UNION / FILTER of it keeps no order the local engine knows
-                raise MeasureError("CONCATENATEX over rows built from TABLEOF depends on the row order, which is not modelled in the local engine.")
+                if walked_table[0] in {"call", "table_call"} and walked_table[1] in {"UNION", "DISTINCT"}:
+                    raise MeasureError("CONCATENATEX over rows built from TABLEOF depends on the row order, which is not modelled in the local engine.")
             if not iteration_rows:
                 refuse_foreign_columns_of_empty_iteration(context, *read_nodes)
             iteration_rows = dictionary_ordered_rows(walked_table, context, iteration_rows, read_nodes)
