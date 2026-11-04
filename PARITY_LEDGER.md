@@ -56,8 +56,8 @@ Rule: a slice is finished only when it is compared with Power BI, its items are 
 | dax_battery_linest_extra | 2824 | 0 | 51 | 0 | 0 |
 | dax_battery_linest_extra2 | 173 | 0 | 11 | 0 | 0 |
 | dax_battery_linest_extra3 | 2420 | 0 | 0 | 0 | 0 |
-| dax_battery_swi_extra | 9869 | 0 | 232 | 0 | 0 |
-| dax_battery_swi_extra2 | 4514 | 0 | 337 | 0 | 0 |
+| dax_battery_swi_extra | 9936 | 0 | 165 | 0 | 0 |
+| dax_battery_swi_extra2 | 4621 | 0 | 230 | 0 | 0 |
 | dax_battery_swi_extra3 | 1353 | 0 | 71 | 0 | 0 |
 | dax_battery_ami_extra | 4499 | 0 | 225 | 0 | 0 |
 | dax_battery_ami_extra2 | 3661 | 0 | 82 | 0 | 0 |
@@ -109,13 +109,14 @@ Rule: a slice is finished only when it is compared with Power BI, its items are 
 | dax_battery_biground36_extra | 1825 | 0 | 0 | 0 | 0 |
 | dax_battery_datevar37_extra | 903 | 0 | 0 | 0 | 0 |
 | dax_battery_oldtimes38_extra | 898 | 0 | 0 | 0 | 0 |
+| dax_battery_swiorder39_extra | 900 | 0 | 0 | 0 | 0 |
 | dax_battery_scalar_misc2_extra | 563 | 0 | 0 | 0 | 0 |
 | dax_battery_scalar_misc2_extra2 | 151 | 0 | 0 | 0 | 0 |
 | dax_battery_type_tests_extra | 2590 | 0 | 0 | 0 | 0 |
 | dax_battery_type_tests_extra2 | 4614 | 0 | 0 | 0 | 0 |
 | table VAT | 575 | 0 | 0 | 0 | 0 |
 
-## Pending work (4066): Power BI answers, the app refuses
+## Pending work (3892): Power BI answers, the app refuses
 
 - `CALCULATE(COUNTROWS(Facts),Facts[Quantity]<IF(ISEMPTY(CALCULATETABLE(Facts,Facts[Region]="East")),1,4))` (Power BI: `4`) [dax_battery_sdet_filters]
 - `CALCULATE(COUNTROWS(Facts),Facts[Quantity]<COUNTROWS(CALCULATETABLE(CALCULATETABLE(Facts,Facts[Region]="East"))))` (Power BI: `3`) [dax_battery_sdet_filters]
@@ -234,12 +235,10 @@ Rule: a slice is finished only when it is compared with Power BI, its items are 
 - `MAXX(LINESTX(Facts,FORMAT(Facts[Quantity],"0"),Facts[Sales]),[Slope1])` (Power BI: `0.0374955783516095`) [dax_battery_linest_extra2]
 - `MAXX(LINESTX(ROW("a",1,"b",2),[a],[b]),[Slope1])` (Power BI: `0`) [dax_battery_linest_extra2]
 - `MAXX(LINESTX(CALENDAR(DATE(2020,1,1),DATE(2020,1,10)),[Date],DAY([Date])),[Slope1])` (Power BI: `1`) [dax_battery_linest_extra2]
-- `SUMX(SUBSTITUTEWITHINDEX(Facts,"i",ALL(Facts[Region],Facts[Note]),CALCULATE(COUNTROWS(Facts)),ASC),[i]*[i])` (Power BI: `46`) [dax_battery_swi_extra]
 - `TOCSV(SUBSTITUTEWITHINDEX(TOPN(2,VALUES(Facts[Region]),Facts[Region]),"i",VALUES(Facts[Region]),BLANK()))` (Power BI: `[i]
 2
 1`) [dax_battery_swi_extra]
 - `SUMX(SUBSTITUTEWITHINDEX(VALUES(Facts[Quantity]),"i",FILTER(ALL(Facts),Facts[Quantity]>1),Facts[Region],1),[i]*[i])` (Power BI: `14`) [dax_battery_swi_extra]
-- `SUMX(SUBSTITUTEWITHINDEX(Facts,"i",ALL(Facts[Region],Facts[Note]),Facts[Region],0),[i]*[i])` (Power BI: `46`) [dax_battery_swi_extra]
 - `TOCSV(SUBSTITUTEWITHINDEX(TOPN(2,VALUES(Facts[Region]),Facts[Region]),"i",DISTINCT(Facts[Region]),Facts[Region]))` (Power BI: `[i]
 1
 0`) [dax_battery_swi_extra]
@@ -254,10 +253,8 @@ Rule: a slice is finished only when it is compared with Power BI, its items are 
 - `COUNTROWS(SUBSTITUTEWITHINDEX(FILTER(VALUES(Facts[Region]),Facts[Region]<>"West"),"i",TOPN(2,VALUES(Facts[Region]),Facts[Region]),BLANK()))` (Power BI: `1`) [dax_battery_swi_extra]
 - `MINX(SUBSTITUTEWITHINDEX(Facts,"i",FILTER(ALL(Facts),Facts[Quantity]>1),Facts[Region],TRUE()),[i])` (Power BI: `0`) [dax_battery_swi_extra]
 - `COUNTROWS(FILTER(SUBSTITUTEWITHINDEX(VALUES(Facts[Quantity]),"i",FILTER(ALL(Facts),Facts[Quantity]>1),LEN(Facts[Region]),DESC),[i]>0))` (Power BI: `3`) [dax_battery_swi_extra]
-- `MAXX(SUBSTITUTEWITHINDEX(Facts,"i",SUMMARIZE(Facts,Facts[Region],Facts[Note]),CALCULATE(COUNTROWS(Facts)),ASC),[i])` (Power BI: `4`) [dax_battery_swi_extra]
 - `COUNTROWS(FILTER(SUBSTITUTEWITHINDEX(ADDCOLUMNS(VALUES(Facts[Region]),"q",CALCULATE(SUM(Facts[Quantity]))),"i",TOPN(2,VALUES(Facts[Region]),Facts[Region]),BLANK()),[i]>0))` (Power BI: `1`) [dax_battery_swi_extra]
 - `COUNTROWS(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],Facts[Note],"s",SUM(Facts[Quantity])),"i",FILTER(ALL(Facts),Facts[Quantity]>1),Facts[Region]&"x",ASC))` (Power BI: `4`) [dax_battery_swi_extra]
-- `MAXX(SUBSTITUTEWITHINDEX(Facts,"i",ALL(Facts[Region],Facts[Note]),CALCULATE(COUNTROWS(Facts)),ASC),[i])` (Power BI: `4`) [dax_battery_swi_extra]
 - `MINX(SUBSTITUTEWITHINDEX(Facts,"i",Facts,Facts[Region],DESC),[i])` (Power BI: `0`) [dax_battery_swi_extra]
 - `TOCSV(SUBSTITUTEWITHINDEX(Facts,"i",TOPN(2,VALUES(Facts[Region]),Facts[Region]),CALCULATE(SUM(Facts[Quantity])),DESC))` (Power BI: `'Facts'[Sales],'Facts'[Quantity],'Facts'[Note],[i]
 20,3,,1
@@ -273,7 +270,6 @@ Rule: a slice is finished only when it is compared with Power BI, its items are 
 - `TOCSV(SUBSTITUTEWITHINDEX(TOPN(2,VALUES(Facts[Region]),Facts[Region]),"i",SUMMARIZE(Facts,Facts[Region],"t",SUM(Facts[Sales])),Facts[Region],TRUE))` (Power BI: `[i]
 1
 2`) [dax_battery_swi_extra]
-- `SUMX(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],Facts[Note],"s",SUM(Facts[Quantity])),"i",ALL(Facts[Region],Facts[Note]),Facts[Region],ASC,Facts[Region],DESC),[i]*[i])` (Power BI: `30`) [dax_battery_swi_extra]
 - `COUNTROWS(DISTINCT(SELECTCOLUMNS(SUBSTITUTEWITHINDEX(TOPN(2,VALUES(Facts[Region]),Facts[Region]),"i",TOPN(2,VALUES(Facts[Region]),Facts[Region]),1),"v",[i])))` (Power BI: `2`) [dax_battery_swi_extra]
 - `CONCATENATEX(SUBSTITUTEWITHINDEX(Facts,"i",Facts,Facts[Region],ASC),[i],"|",[i])` (Power BI: `0|1|2|3|4|5`) [dax_battery_swi_extra]
 - `TOCSV(SUBSTITUTEWITHINDEX(ALL(Facts[Region],Facts[Note]),"i",VALUES(Facts[Region]),IF(Facts[Region]="East",1,2),ASC))` (Power BI: `'Facts'[Note],[i]
@@ -284,12 +280,9 @@ Paid,1
 Late,2`) [dax_battery_swi_extra]
 - `SUMX(SUBSTITUTEWITHINDEX(ADDCOLUMNS(VALUES(Facts[Region]),"q",CALCULATE(SUM(Facts[Quantity]))),"i",TOPN(2,VALUES(Facts[Region]),Facts[Region]),1),[i]*[i])` (Power BI: `1`) [dax_battery_swi_extra]
 - `CONCATENATEX(SUBSTITUTEWITHINDEX(VALUES(Facts[Quantity]),"i",Facts,BLANK()),[i],"|",[i])` (Power BI: `0|1|2|3|4|5`) [dax_battery_swi_extra]
-- `AVERAGEX(SUBSTITUTEWITHINDEX(Facts,"i",SUMMARIZE(Facts,Facts[Region],Facts[Note]),Facts[Region],TRUE()),[i])` (Power BI: `1.83333333333333`) [dax_battery_swi_extra]
 - `TOCSV(SUBSTITUTEWITHINDEX(Facts,"i",TOPN(2,VALUES(Facts[Region]),Facts[Region]),CALCULATE(SUM(Facts[Quantity]),Facts[Region]="East"),ASC))` (Power BI: `'Facts'[Sales],'Facts'[Quantity],'Facts'[Note],[i]
 20,3,,1
 ,`) [dax_battery_swi_extra]
-- `COUNTROWS(SUBSTITUTEWITHINDEX(Facts,"i",ALL(Facts[Region],Facts[Note]),Facts[Note],DESC))` (Power BI: `6`) [dax_battery_swi_extra]
-- `COUNTROWS(FILTER(SUBSTITUTEWITHINDEX(Facts,"i",ALL(Facts[Region],Facts[Note]),Facts[Region],DESC),[i]>0))` (Power BI: `5`) [dax_battery_swi_extra]
 - `COUNTROWS(FILTER(SUBSTITUTEWITHINDEX(ADDCOLUMNS(VALUES(Facts[Quantity]),"d",Facts[Quantity]*2),"i",Facts,Facts[Region],FALSE()),[i]>0))` (Power BI: `5`) [dax_battery_swi_extra]
 - `MINX(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],Facts[Note],"s",SUM(Facts[Quantity])),"i",FILTER(ALL(Facts),Facts[Quantity]>1),BLANK()),[i])` (Power BI: `0`) [dax_battery_swi_extra]
 - `TOCSV(SUBSTITUTEWITHINDEX(Facts,"i",ALL(Facts[Region],Facts[Note]),Facts[Region],DESC))` (Power BI: `'Facts'[Sales],'Facts'[Quantity],[i]
@@ -301,7 +294,6 @@ Late,2`) [dax_battery_swi_extra]
 20,3,3
 -1.5,1,`) [dax_battery_swi_extra]
 - `SUMX(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],Facts[Note],"s",SUM(Facts[Quantity])),"i",FILTER(ALL(Facts),Facts[Quantity]>1),Facts[Region]&"x",ASC),[i])` (Power BI: `6`) [dax_battery_swi_extra]
-- `COUNTROWS(FILTER(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],Facts[Note],"s",SUM(Facts[Quantity])),"i",ALL(Facts[Region],Facts[Note]),BLANK()),[i]>0))` (Power BI: `4`) [dax_battery_swi_extra]
 - `COUNTROWS(SUBSTITUTEWITHINDEX(ADDCOLUMNS(VALUES(Facts[Quantity]),"d",Facts[Quantity]*2),"i",FILTER(ALL(Facts),Facts[Quantity]>1),Facts[Region]))` (Power BI: `4`) [dax_battery_swi_extra]
 - `SUMX(SUBSTITUTEWITHINDEX(VALUES(Facts[Quantity]),"i",Facts,CALCULATE(COUNTROWS(Facts)),ASC),[i])` (Power BI: `15`) [dax_battery_swi_extra]
 - `TOCSV(SUBSTITUTEWITHINDEX(Facts,"i",Facts,Facts[Region],TRUE()))` (Power BI: `[i]
@@ -318,7 +310,6 @@ Late,2`) [dax_battery_swi_extra]
 - `SUMX(SUBSTITUTEWITHINDEX(DISTINCT(Facts[Region]),"i",TOPN(2,VALUES(Facts[Region]),Facts[Region]),1),[i]*[i])` (Power BI: `1`) [dax_battery_swi_extra]
 - `TOCSV(SUBSTITUTEWITHINDEX(Facts,"i",SUMMARIZE(Facts,Facts[Region],"t",SUM(Facts[Sales])),Facts[Region],1))` (Power BI: `'Facts'[Sales],'Facts'[Quantity],'Facts'[Note],[i]
 10.5,2,Pa`) [dax_battery_swi_extra]
-- `MINX(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],Facts[Note],"s",SUM(Facts[Quantity])),"i",ALL(Facts[Region],Facts[Note]),CALCULATE(COUNTROWS(Facts)),ASC),[i])` (Power BI: `0`) [dax_battery_swi_extra]
 - `TOCSV(SUBSTITUTEWITHINDEX(ALL(Facts[Region],Facts[Note]),"i",DISTINCT(Facts[Region]),IF(Facts[Region]="East",1,2),ASC))` (Power BI: `'Facts'[Note],[i]
 ,0
 ,1
@@ -326,19 +317,14 @@ Paid,0
 Paid,1
 Late,2`) [dax_battery_swi_extra]
 - `COUNTROWS(SUBSTITUTEWITHINDEX(TOPN(2,VALUES(Facts[Region]),Facts[Region]),"i",TOPN(2,VALUES(Facts[Region]),Facts[Region]),1))` (Power BI: `2`) [dax_battery_swi_extra]
-- `AVERAGEX(SUBSTITUTEWITHINDEX(ALL(Facts[Region],Facts[Note]),"i",SUMMARIZE(Facts,Facts[Region],Facts[Note]),Facts[Note],ASC),[i])` (Power BI: `2`) [dax_battery_swi_extra]
 - `MAXX(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],Facts[Note],"s",SUM(Facts[Quantity])),"i",FILTER(ALL(Facts),Facts[Quantity]>1),0),[i])` (Power BI: `3`) [dax_battery_swi_extra]
-- `MAXX(SUBSTITUTEWITHINDEX(ALL(Facts[Region],Facts[Note]),"i",SUMMARIZE(Facts,Facts[Region],Facts[Note]),CALCULATE(SUM(Facts[Quantity]),Facts[Region]="East"),ASC),[i])` (Power BI: `4`) [dax_battery_swi_extra]
 - `COUNTROWS(FILTER(SUBSTITUTEWITHINDEX(ADDCOLUMNS(VALUES(Facts[Quantity]),"d",Facts[Quantity]*2),"i",FILTER(ALL(Facts),Facts[Quantity]>1),Facts[Region]),[i]>0))` (Power BI: `3`) [dax_battery_swi_extra]
 - `MINX(SUBSTITUTEWITHINDEX(ADDCOLUMNS(VALUES(Facts[Quantity]),"d",Facts[Quantity]*2),"i",Facts,Facts[Region],FALSE()),[i])` (Power BI: `0`) [dax_battery_swi_extra]
-- `CONCATENATEX(SUBSTITUTEWITHINDEX(Facts,"i",ALL(Facts[Region],Facts[Note]),Facts[Region],1),[i],"|",[i])` (Power BI: `0|1|1|2|3|4`) [dax_battery_swi_extra]
-- `MINX(SUBSTITUTEWITHINDEX(Facts,"i",SUMMARIZE(Facts,Facts[Region],Facts[Note]),LEN(Facts[Region]),DESC),[i])` (Power BI: `0`) [dax_battery_swi_extra]
 - `AVERAGEX(SUBSTITUTEWITHINDEX(VALUES(Facts[Quantity]),"i",FILTER(ALL(Facts),Facts[Quantity]>1),Facts[Note],DESC),[i])` (Power BI: `1.5`) [dax_battery_swi_extra]
 - `TOCSV(SUBSTITUTEWITHINDEX(Facts,"i",VALUES(Facts[Quantity]),CALCULATE(SUM(Facts[Quantity])),ASC))` (Power BI: `'Facts'[Sales],'Facts'[Region],'Facts'[Note],[i]
 10.5,East,P`) [dax_battery_swi_extra]
 - `SUMX(SUBSTITUTEWITHINDEX(Facts,"i",Facts,0),[i])` (Power BI: `15`) [dax_battery_swi_extra]
 - `COUNTROWS(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],Facts[Note],"s",SUM(Facts[Quantity])),"i",FILTER(ALL(Facts),Facts[Quantity]>1),Facts[Region],FALSE()))` (Power BI: `4`) [dax_battery_swi_extra]
-- `SUMX(SUBSTITUTEWITHINDEX(Facts,"i",SUMMARIZE(Facts,Facts[Region],Facts[Note]),LEN(Facts[Region]),DESC),[i]*[i])` (Power BI: `39`) [dax_battery_swi_extra]
 - `COUNTROWS(SUBSTITUTEWITHINDEX(DISTINCT(Facts[Region]),"i",TOPN(2,VALUES(Facts[Region]),Facts[Region]),1))` (Power BI: `2`) [dax_battery_swi_extra]
 - `TOCSV(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],Facts[Note],"s",SUM(Facts[Quantity])),"i",TOPN(2,VALUES(Facts[Region]),Facts[Region]),IF(Facts[Region]="East",1,2),ASC))` (Power BI: `'Facts'[Note],[s],[i]
 ,3,1
@@ -349,17 +335,8 @@ Late,4,0`) [dax_battery_swi_extra]
 10.5,2,Pa`) [dax_battery_swi_extra]
 - `TOCSV(SUBSTITUTEWITHINDEX(Facts,"i",ADDCOLUMNS(VALUES(Facts[Region]),"c",CALCULATE(COUNTROWS(Facts))),CALCULATE(SUM(Facts[Quantity])),ASC))` (Power BI: `'Facts'[Sales],'Facts'[Quantity],'Facts'[Note],[i]
 10.5,2,Pa`) [dax_battery_swi_extra]
-- `TOCSV(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],Facts[Note],"s",SUM(Facts[Quantity])),"i",SUMMARIZE(Facts,Facts[Region],Facts[Note]),0))` (Power BI: `[s],[i]
-5,0
-3,1
-3,2
-0,3
-4,4`) [dax_battery_swi_extra]
-- `MAXX(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],Facts[Note],"s",SUM(Facts[Quantity])),"i",ALL(Facts[Region],Facts[Note]),Facts[Region],DESC),[s])` (Power BI: `5`) [dax_battery_swi_extra]
-- `CONCATENATEX(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],Facts[Note],"s",SUM(Facts[Quantity])),"i",SUMMARIZE(Facts,Facts[Region],Facts[Note]),CALCULATE(SUM(Facts[Quantity]),Facts[Region]="East"),ASC),[i],"|",[i])` (Power BI: `0|1|2|3|4`) [dax_battery_swi_extra]
 - `TOCSV(SUBSTITUTEWITHINDEX(Facts,"i",DISTINCT(Facts[Region]),CALCULATE(COUNTROWS(Facts)),ASC))` (Power BI: `'Facts'[Sales],'Facts'[Quantity],'Facts'[Note],[i]
 10.5,2,Pa`) [dax_battery_swi_extra]
-- `SUMX(SUBSTITUTEWITHINDEX(Facts,"i",SUMMARIZE(Facts,Facts[Region],Facts[Note]),[Region],DESC),[i])` (Power BI: `14`) [dax_battery_swi_extra]
 - `TOCSV(SUBSTITUTEWITHINDEX(Facts,"i",SUMMARIZE(Facts,Facts[Region],"t",SUM(Facts[Quantity])),CALCULATE(SUM(Facts[Quantity]),Facts[Region]="East"),ASC))` (Power BI: `'Facts'[Sales],'Facts'[Quantity],'Facts'[Note],[i]
 10.5,2,Pa`) [dax_battery_swi_extra]
 - `TOCSV(SUBSTITUTEWITHINDEX(FILTER(VALUES(Facts[Region]),Facts[Region]<>"West"),"i",TOPN(2,VALUES(Facts[Region]),Facts[Region]),BLANK()))` (Power BI: `[i]
@@ -368,25 +345,17 @@ Late,4,0`) [dax_battery_swi_extra]
 - `TOCSV(SUBSTITUTEWITHINDEX(Facts,"i",SUMMARIZE(Facts,Facts[Region],"t",SUM(Facts[Quantity]),"u",COUNTROWS(Facts)),Facts[Region],ASC))` (Power BI: `'Facts'[Sales],'Facts'[Quantity],'Facts'[Note],[i]
 10.5,2,Pa`) [dax_battery_swi_extra]
 - `COUNTROWS(DISTINCT(SELECTCOLUMNS(SUBSTITUTEWITHINDEX(Facts,"i",FILTER(ALL(Facts),Facts[Quantity]>1),1),"v",[i])))` (Power BI: `4`) [dax_battery_swi_extra]
-- `COUNTROWS(FILTER(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],Facts[Note],"s",SUM(Facts[Quantity])),"i",ALL(Facts[Region],Facts[Note]),Facts[Region],ASC),[i]>0))` (Power BI: `4`) [dax_battery_swi_extra]
-- `SUMX(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],Facts[Note],"s",SUM(Facts[Quantity])),"i",ALL(Facts[Region],Facts[Note]),Facts[Region],ASC,Facts[Region],DESC),[i])` (Power BI: `10`) [dax_battery_swi_extra]
 - `COUNTROWS(FILTER(SUBSTITUTEWITHINDEX(ADDCOLUMNS(VALUES(Facts[Quantity]),"d",Facts[Quantity]*2),"i",Facts,LEN(Facts[Region]),DESC),[i]>0))` (Power BI: `5`) [dax_battery_swi_extra]
 - `MAXX(SUBSTITUTEWITHINDEX(VALUES(Facts[Quantity]),"i",FILTER(ALL(Facts),Facts[Quantity]>1),Facts[Region],FALSE()),[i])` (Power BI: `3`) [dax_battery_swi_extra]
 - `COUNTROWS(FILTER(SUBSTITUTEWITHINDEX(Facts,"i",Facts,Facts[Region],DESC,Facts[Note],ASC),[i]>0))` (Power BI: `5`) [dax_battery_swi_extra]
-- `COUNTROWS(FILTER(SUBSTITUTEWITHINDEX(ALL(Facts[Region],Facts[Note]),"i",ALL(Facts[Region],Facts[Note]),IF(Facts[Region]="East",1,2),ASC),[i]>0))` (Power BI: `4`) [dax_battery_swi_extra]
 - `TOCSV(SUBSTITUTEWITHINDEX(ALL(Facts[Region],Facts[Note]),"i",FILTER(ALL(Facts),Facts[Quantity]>1),Facts[Quantity],ASC))` (Power BI: `[i]
 3
 1
 0
 2`) [dax_battery_swi_extra]
 - `AVERAGEX(SUBSTITUTEWITHINDEX(DISTINCT(Facts[Region]),"i",TOPN(2,VALUES(Facts[Region]),Facts[Region]),1),[i])` (Power BI: `0.5`) [dax_battery_swi_extra]
-- `SUMX(SUBSTITUTEWITHINDEX(Facts,"i",ALL(Facts[Region],Facts[Note]),Facts[Region],1),[i]*[i])` (Power BI: `31`) [dax_battery_swi_extra]
-- `AVERAGEX(SUBSTITUTEWITHINDEX(Facts,"i",SUMMARIZE(Facts,Facts[Region],Facts[Note]),LEN(Facts[Region]),DESC),[i])` (Power BI: `2.16666666666667`) [dax_battery_swi_extra]
 - `AVERAGEX(SUBSTITUTEWITHINDEX(TOPN(2,VALUES(Facts[Region]),Facts[Region]),"i",TOPN(2,VALUES(Facts[Region]),Facts[Region]),1),[i])` (Power BI: `0.5`) [dax_battery_swi_extra]
-- `CONCATENATEX(SUBSTITUTEWITHINDEX(Facts,"i",SUMMARIZE(Facts,Facts[Region],Facts[Note]),1),[i],"|",[i])` (Power BI: `0|1|2|2|3|4`) [dax_battery_swi_extra]
 - `MAXX(SUBSTITUTEWITHINDEX(ALL(Facts[Region],Facts[Note]),"i",FILTER(ALL(Facts),Facts[Quantity]>1),0),[i])` (Power BI: `3`) [dax_battery_swi_extra]
-- `COUNTROWS(FILTER(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],Facts[Note],"s",SUM(Facts[Quantity])),"i",SUMMARIZE(Facts,Facts[Region],Facts[Note]),Facts[Region],FALSE()),[i]>0))` (Power BI: `4`) [dax_battery_swi_extra]
-- `MAXX(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],Facts[Note],"s",SUM(Facts[Quantity])),"i",ALL(Facts[Region],Facts[Note]),Facts[Region],ASC),[i])` (Power BI: `4`) [dax_battery_swi_extra]
 - `MINX(SUBSTITUTEWITHINDEX(ADDCOLUMNS(VALUES(Facts[Quantity]),"d",Facts[Quantity]*2),"i",Facts,CALCULATE(SUM(Facts[Quantity]),Facts[Region]="East"),ASC),[i])` (Power BI: `0`) [dax_battery_swi_extra]
 - `MINX(SUBSTITUTEWITHINDEX(Facts,"i",TOPN(2,VALUES(Facts[Region]),Facts[Region]),CALCULATE(SUM(Facts[Quantity]),Facts[Region]="East"),ASC),[i])` (Power BI: `0`) [dax_battery_swi_extra]
 - `COUNTROWS(SUBSTITUTEWITHINDEX(ALL(Facts[Region],Facts[Note]),"i",FILTER(ALL(Facts),Facts[Quantity]>1),Facts[Region]&"x",ASC))` (Power BI: `4`) [dax_battery_swi_extra]
@@ -401,9 +370,6 @@ Late,4,0`) [dax_battery_swi_extra]
 20,3,1
 -1.5,1,`) [dax_battery_swi_extra]
 - `COUNTROWS(FILTER(SUBSTITUTEWITHINDEX(ADDCOLUMNS(VALUES(Facts[Quantity]),"d",Facts[Quantity]*2),"i",FILTER(ALL(Facts),Facts[Quantity]>1),[Region],DESC),[i]>0))` (Power BI: `3`) [dax_battery_swi_extra]
-- `MAXX(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],Facts[Note],"s",SUM(Facts[Quantity])),"i",ALL(Facts[Region],Facts[Note]),CALCULATE(COUNTROWS(Facts)),ASC),[i])` (Power BI: `4`) [dax_battery_swi_extra]
-- `MAXX(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],Facts[Note],"s",SUM(Facts[Quantity])),"i",SUMMARIZE(Facts,Facts[Region],Facts[Note]),Facts[Region],FALSE()),[i])` (Power BI: `4`) [dax_battery_swi_extra]
-- `MINX(SUBSTITUTEWITHINDEX(Facts,"i",ALL(Facts[Region],Facts[Note]),0),[i])` (Power BI: `0`) [dax_battery_swi_extra]
 - `MINX(SUBSTITUTEWITHINDEX(ALL(Facts[Region],Facts[Note]),"i",FILTER(ALL(Facts),Facts[Quantity]>1),Facts[Region]&"x",ASC),[i])` (Power BI: `0`) [dax_battery_swi_extra]
 - `AVERAGEX(SUBSTITUTEWITHINDEX(Facts,"i",Facts,[Region],DESC),[i])` (Power BI: `2.5`) [dax_battery_swi_extra]
 - `TOCSV(SUBSTITUTEWITHINDEX(VALUES(Facts[Quantity]),"i",FILTER(ALL(Facts),Facts[Quantity]>1),Facts[Region],DESC))` (Power BI: `[i]
@@ -426,7 +392,6 @@ Late,4,0`) [dax_battery_swi_extra]
 0
 1
 3`) [dax_battery_swi_extra]
-- `MAXX(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],Facts[Note],"s",SUM(Facts[Quantity])),"i",SUMMARIZE(Facts,Facts[Region],Facts[Note]),0),[i])` (Power BI: `4`) [dax_battery_swi_extra]
 - `AVERAGEX(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],Facts[Note],"s",SUM(Facts[Quantity])),"i",FILTER(ALL(Facts),Facts[Quantity]>1),Facts[Region],FALSE()),[i])` (Power BI: `1.5`) [dax_battery_swi_extra]
 - `COUNTROWS(FILTER(SUBSTITUTEWITHINDEX(ADDCOLUMNS(VALUES(Facts[Quantity]),"d",Facts[Quantity]*2),"i",FILTER(ALL(Facts),Facts[Quantity]>1),Facts[Region],1),[i]>0))` (Power BI: `3`) [dax_battery_swi_extra]
 - `COUNTROWS(FILTER(SUBSTITUTEWITHINDEX(ADDCOLUMNS(VALUES(Facts[Quantity]),"d",Facts[Quantity]*2),"i",FILTER(ALL(Facts),Facts[Quantity]>1),BLANK()),[i]>0))` (Power BI: `3`) [dax_battery_swi_extra]
@@ -437,10 +402,8 @@ Paid,0
 Paid,1
 Late,2`) [dax_battery_swi_extra]
 - `AVERAGEX(SUBSTITUTEWITHINDEX(ADDCOLUMNS(VALUES(Facts[Region]),"q",CALCULATE(SUM(Facts[Quantity]))),"i",TOPN(2,VALUES(Facts[Region]),Facts[Region]),1),[i])` (Power BI: `0.5`) [dax_battery_swi_extra]
-- `AVERAGEX(SUBSTITUTEWITHINDEX(Facts,"i",SUMMARIZE(Facts,Facts[Region],Facts[Note]),Facts[Region],0),[i])` (Power BI: `2.33333333333333`) [dax_battery_swi_extra]
 - `SUMX(SUBSTITUTEWITHINDEX(ADDCOLUMNS(VALUES(Facts[Quantity]),"d",Facts[Quantity]*2),"i",Facts,Facts[Region],TRUE()),[i])` (Power BI: `15`) [dax_battery_swi_extra]
 - `COUNTROWS(SUBSTITUTEWITHINDEX(ALL(Facts[Region],Facts[Note]),"i",FILTER(ALL(Facts),Facts[Quantity]>1),Facts[Region],TRUE))` (Power BI: `4`) [dax_battery_swi_extra]
-- `SUMX(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],Facts[Note],"s",SUM(Facts[Quantity])),"i",SUMMARIZE(Facts,Facts[Region],Facts[Note]),Facts[Region],FALSE()),[i]*[i])` (Power BI: `30`) [dax_battery_swi_extra]
 - `COUNTROWS(DISTINCT(SELECTCOLUMNS(SUBSTITUTEWITHINDEX(ALL(Facts[Region]),"i",TOPN(2,VALUES(Facts[Region]),Facts[Region]),IF(Facts[Region]="East",1,2),ASC),"v",[i])))` (Power BI: `2`) [dax_battery_swi_extra]
 - `TOCSV(SUBSTITUTEWITHINDEX(ALL(Facts[Region],Facts[Note]),"i",SUMMARIZE(Facts,Facts[Region],"t",SUM(Facts[Quantity])),Facts[Region]&"x",ASC))` (Power BI: `'Facts'[Note],[i]
 ,0
@@ -448,8 +411,6 @@ Late,2`) [dax_battery_swi_extra]
 Paid,0
 Paid,2
 Late,1`) [dax_battery_swi_extra]
-- `MAXX(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],Facts[Note],"s",SUM(Facts[Quantity])),"i",SUMMARIZE(Facts,Facts[Region],Facts[Note]),CALCULATE(SUM(Facts[Quantity]),Facts[Region]="East"),ASC),[s])` (Power BI: `5`) [dax_battery_swi_extra]
-- `MAXX(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],Facts[Note],"s",SUM(Facts[Quantity])),"i",ALL(Facts[Region],Facts[Note]),Facts[Region],DESC),[i])` (Power BI: `4`) [dax_battery_swi_extra]
 - `TOCSV(SUBSTITUTEWITHINDEX(Facts,"i",ALL(Facts[Quantity]),0))` (Power BI: `'Facts'[Sales],'Facts'[Region],'Facts'[Note],[i]
 10.5,East,P`) [dax_battery_swi_extra]
 - `AVERAGEX(SUBSTITUTEWITHINDEX(VALUES(Facts[Quantity]),"i",FILTER(ALL(Facts),Facts[Quantity]>1),Facts[Region],DESC),[i])` (Power BI: `1.5`) [dax_battery_swi_extra]
@@ -465,19 +426,13 @@ Paid,0
 Paid,1
 Late,2`) [dax_battery_swi_extra]
 - `SUMX(SUBSTITUTEWITHINDEX(Facts,"i",TOPN(2,VALUES(Facts[Region]),Facts[Region]),IF(Facts[Region]="East",1,2),ASC),[i])` (Power BI: `2`) [dax_battery_swi_extra]
-- `AVERAGEX(SUBSTITUTEWITHINDEX(Facts,"i",SUMMARIZE(Facts,Facts[Region],Facts[Note]),CALCULATE(COUNTROWS(Facts)),ASC),[i])` (Power BI: `2.33333333333333`) [dax_battery_swi_extra]
 - `MINX(SUBSTITUTEWITHINDEX(ADDCOLUMNS(VALUES(Facts[Quantity]),"d",Facts[Quantity]*2),"i",FILTER(ALL(Facts),Facts[Quantity]>1),[Region],DESC),[i])` (Power BI: `0`) [dax_battery_swi_extra]
 - `SUMX(SUBSTITUTEWITHINDEX(ADDCOLUMNS(VALUES(Facts[Quantity]),"d",Facts[Quantity]*2),"i",Facts,LEN(Facts[Region]),DESC),[i])` (Power BI: `15`) [dax_battery_swi_extra]
-- `COUNTROWS(FILTER(SUBSTITUTEWITHINDEX(Facts,"i",ALL(Facts[Region],Facts[Note]),Facts[Note],DESC),[i]>0))` (Power BI: `4`) [dax_battery_swi_extra]
 - `COUNTROWS(FILTER(SUBSTITUTEWITHINDEX(VALUES(Facts[Quantity]),"i",Facts,Facts[Region],0),[i]>0))` (Power BI: `5`) [dax_battery_swi_extra]
-- `SUMX(SUBSTITUTEWITHINDEX(ALL(Facts[Region],Facts[Note]),"i",SUMMARIZE(Facts,Facts[Region],Facts[Note]),Facts[Note],ASC),[i])` (Power BI: `10`) [dax_battery_swi_extra]
-- `COUNTROWS(SUBSTITUTEWITHINDEX(ALL(Facts[Region],Facts[Note]),"i",ALL(Facts[Region],Facts[Note]),Facts[Region],TRUE))` (Power BI: `5`) [dax_battery_swi_extra]
 - `CONCATENATEX(SUBSTITUTEWITHINDEX(ADDCOLUMNS(VALUES(Facts[Quantity]),"d",Facts[Quantity]*2),"i",FILTER(ALL(Facts),Facts[Quantity]>1),Facts[Region]),[i],"|",[i])` (Power BI: `0|1|2|3`) [dax_battery_swi_extra]
 - `CONCATENATEX(SUBSTITUTEWITHINDEX(ADDCOLUMNS(VALUES(Facts[Quantity]),"d",Facts[Quantity]*2),"i",FILTER(ALL(Facts),Facts[Quantity]>1),BLANK()),[i],"|",[i])` (Power BI: `0|1|2|3`) [dax_battery_swi_extra]
-- `CONCATENATEX(SUBSTITUTEWITHINDEX(Facts,"i",SUMMARIZE(Facts,Facts[Region],Facts[Note]),IF(Facts[Region]="East",1,2),ASC),[i],"|",[i])` (Power BI: `0|1|1|2|3|4`) [dax_battery_swi_extra]
 - `CONCATENATEX(SUBSTITUTEWITHINDEX(VALUES(Facts[Quantity]),"i",Facts,Facts[Region],0),[i],"|",[i])` (Power BI: `0|1|2|3|4|5`) [dax_battery_swi_extra]
 - `MAXX(SUBSTITUTEWITHINDEX(VALUES(Facts[Quantity]),"i",FILTER(ALL(Facts),Facts[Quantity]>1),Facts[Note],DESC),[i])` (Power BI: `3`) [dax_battery_swi_extra]
-- `COUNTROWS(FILTER(SUBSTITUTEWITHINDEX(ALL(Facts[Region],Facts[Note]),"i",SUMMARIZE(Facts,Facts[Region],Facts[Note]),CALCULATE(SUM(Facts[Quantity]),Facts[Region]="East"),ASC),[i]>0))` (Power BI: `4`) [dax_battery_swi_extra]
 - `TOCSV(SUBSTITUTEWITHINDEX(TOPN(2,VALUES(Facts[Region]),Facts[Region]),"i",SUMMARIZE(Facts,Facts[Region],"t",SUM(Facts[Quantity])),Facts[Region]))` (Power BI: `[i]
 1
 0`) [dax_battery_swi_extra]
@@ -485,18 +440,14 @@ Late,2`) [dax_battery_swi_extra]
 - `TOCSV(SUBSTITUTEWITHINDEX(TOPN(2,VALUES(Facts[Region]),Facts[Region]),"i",VALUES(Facts[Region]),Facts[Region],TRUE()))` (Power BI: `[i]
 1
 2`) [dax_battery_swi_extra]
-- `MINX(SUBSTITUTEWITHINDEX(Facts,"i",ALL(Facts[Region],Facts[Note]),CALCULATE(COUNTROWS(Facts)),ASC),[i])` (Power BI: `0`) [dax_battery_swi_extra]
-- `MAXX(SUBSTITUTEWITHINDEX(ALL(Facts[Region],Facts[Note]),"i",ALL(Facts[Region],Facts[Note]),IF(Facts[Region]="East",1,2),ASC),[i])` (Power BI: `4`) [dax_battery_swi_extra]
 - `COUNTROWS(FILTER(SUBSTITUTEWITHINDEX(Facts,"i",Facts,Facts[Region],ASC),[i]>0))` (Power BI: `5`) [dax_battery_swi_extra]
 - `TOCSV(SUBSTITUTEWITHINDEX(TOPN(2,VALUES(Facts[Region]),Facts[Region]),"i",ADDCOLUMNS(VALUES(Facts[Region]),"c",CALCULATE(COUNTROWS(Facts))),Facts[Region],ASC))` (Power BI: `[i]
 1
 2`) [dax_battery_swi_extra]
-- `MAXX(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],Facts[Note],"s",SUM(Facts[Quantity])),"i",ALL(Facts[Region],Facts[Note]),CALCULATE(SUM(Facts[Quantity]),Facts[Region]="East"),ASC),[s])` (Power BI: `5`) [dax_battery_swi_extra]
 - `SUMX(SUBSTITUTEWITHINDEX(TOPN(2,VALUES(Facts[Region]),Facts[Region]),"i",TOPN(2,VALUES(Facts[Region]),Facts[Region]),IF(Facts[Region]="East",1,2),ASC),[i])` (Power BI: `1`) [dax_battery_swi_extra]
 - `TOCSV(SUBSTITUTEWITHINDEX(ALL(Facts[Region]),"i",TOPN(2,VALUES(Facts[Region]),Facts[Region]),IF(Facts[Region]="East",1,2),ASC))` (Power BI: `[i]
 1
 0`) [dax_battery_swi_extra]
-- `MINX(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],Facts[Note],"s",SUM(Facts[Quantity])),"i",ALL(Facts[Region],Facts[Note]),BLANK()),[i])` (Power BI: `0`) [dax_battery_swi_extra]
 - `TOCSV(SUBSTITUTEWITHINDEX(ADDCOLUMNS(VALUES(Facts[Quantity]),"d",Facts[Quantity]*2),"i",Facts,Facts[Region],FALSE()))` (Power BI: `[d],[i]
 0,0
 2,3
@@ -506,25 +457,18 @@ Late,2`) [dax_battery_swi_extra]
 10,5`) [dax_battery_swi_extra]
 - `COUNTROWS(DISTINCT(SELECTCOLUMNS(SUBSTITUTEWITHINDEX(Facts,"i",FILTER(ALL(Facts),Facts[Quantity]>1),Facts[Region]&"x",ASC),"v",[i])))` (Power BI: `4`) [dax_battery_swi_extra]
 - `SUMX(SUBSTITUTEWITHINDEX(ALL(Facts[Region]),"i",TOPN(2,VALUES(Facts[Region]),Facts[Region]),IF(Facts[Region]="East",1,2),ASC),[i])` (Power BI: `1`) [dax_battery_swi_extra]
-- `AVERAGEX(SUBSTITUTEWITHINDEX(ALL(Facts[Region],Facts[Note]),"i",ALL(Facts[Region],Facts[Note]),BLANK()),[i])` (Power BI: `2`) [dax_battery_swi_extra]
-- `AVERAGEX(SUBSTITUTEWITHINDEX(Facts,"i",ALL(Facts[Region],Facts[Note]),CALCULATE(SUM(Facts[Quantity])),ASC),[i])` (Power BI: `2`) [dax_battery_swi_extra]
 - `TOCSV(SUBSTITUTEWITHINDEX(TOPN(2,VALUES(Facts[Region]),Facts[Region]),"i",SUMMARIZE(Facts,Facts[Region],"t",SUM(Facts[Sales])),Facts[Region],DESC))` (Power BI: `[i]
 1
 0`) [dax_battery_swi_extra]
-- `COUNTROWS(DISTINCT(SELECTCOLUMNS(SUBSTITUTEWITHINDEX(Facts,"i",ALL(Facts[Region],Facts[Note]),0),"v",[i])))` (Power BI: `5`) [dax_battery_swi_extra]
 - `MAXX(SUBSTITUTEWITHINDEX(Facts,"i",Facts,0),[i])` (Power BI: `5`) [dax_battery_swi_extra]
 - `COUNTROWS(FILTER(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],"s",SUM(Facts[Sales])),"i",TOPN(2,VALUES(Facts[Region]),Facts[Region]),BLANK()),[i]>0))` (Power BI: `1`) [dax_battery_swi_extra]
-- `MAXX(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],Facts[Note],"s",SUM(Facts[Quantity])),"i",SUMMARIZE(Facts,Facts[Region],Facts[Note]),CALCULATE(SUM(Facts[Quantity]),Facts[Region]="East"),ASC),[i])` (Power BI: `4`) [dax_battery_swi_extra]
 - `MINX(SUBSTITUTEWITHINDEX(VALUES(Facts[Quantity]),"i",Facts,Facts[Note],ASC),[i])` (Power BI: `0`) [dax_battery_swi_extra]
-- `COUNTROWS(FILTER(SUBSTITUTEWITHINDEX(Facts,"i",ALL(Facts[Region],Facts[Note]),Facts[Region],0),[i]>0))` (Power BI: `5`) [dax_battery_swi_extra]
 - `COUNTROWS(DISTINCT(SELECTCOLUMNS(SUBSTITUTEWITHINDEX(Facts,"i",Facts,Facts[Region],FALSE()),"v",[i])))` (Power BI: `6`) [dax_battery_swi_extra]
 - `COUNTROWS(FILTER(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],"x",1),"i",TOPN(2,VALUES(Facts[Region]),Facts[Region]),BLANK()),[i]>0))` (Power BI: `1`) [dax_battery_swi_extra]
 - `SUMX(SUBSTITUTEWITHINDEX(Facts,"i",FILTER(ALL(Facts),Facts[Quantity]>1),Facts[Region]&"x",ASC),[i]*[i])` (Power BI: `14`) [dax_battery_swi_extra]
 - `SUMX(SUBSTITUTEWITHINDEX(ADDCOLUMNS(VALUES(Facts[Quantity]),"d",Facts[Quantity]*2),"i",FILTER(ALL(Facts),Facts[Quantity]>1),Facts[Region],1),[i]*[i])` (Power BI: `14`) [dax_battery_swi_extra]
 - `MINX(SUBSTITUTEWITHINDEX(ALL(Facts[Region],Facts[Note]),"i",FILTER(ALL(Facts),Facts[Quantity]>1),0),[i])` (Power BI: `0`) [dax_battery_swi_extra]
-- `MINX(SUBSTITUTEWITHINDEX(ALL(Facts[Region],Facts[Note]),"i",SUMMARIZE(Facts,Facts[Region],Facts[Note]),Facts[Region],1),[i])` (Power BI: `0`) [dax_battery_swi_extra]
 - `COUNTROWS(DISTINCT(SELECTCOLUMNS(SUBSTITUTEWITHINDEX(VALUES(Facts[Quantity]),"i",FILTER(ALL(Facts),Facts[Quantity]>1),Facts[Region],1),"v",[i])))` (Power BI: `4`) [dax_battery_swi_extra]
-- `COUNTROWS(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],Facts[Note],"s",SUM(Facts[Quantity])),"i",ALL(Facts[Region],Facts[Note]),Facts[Region],ASC,Facts[Region],DESC))` (Power BI: `5`) [dax_battery_swi_extra]
 - `TOCSV(SUBSTITUTEWITHINDEX(Facts,"i",Facts,Facts[Region],FALSE()))` (Power BI: `[i]
 3
 0
@@ -532,19 +476,16 @@ Late,2`) [dax_battery_swi_extra]
 2
 1
 5`) [dax_battery_swi_extra]
-- `COUNTROWS(FILTER(SUBSTITUTEWITHINDEX(ALL(Facts[Region],Facts[Note]),"i",ALL(Facts[Region],Facts[Note]),CALCULATE(SUM(Facts[Quantity])),ASC),[i]>0))` (Power BI: `4`) [dax_battery_swi_extra]
 - `COUNTROWS(FILTER(SUBSTITUTEWITHINDEX(Facts,"i",FILTER(ALL(Facts),Facts[Quantity]>1),Facts[Region]&"x",ASC),[i]>0))` (Power BI: `3`) [dax_battery_swi_extra]
 - `CONCATENATEX(SUBSTITUTEWITHINDEX(ADDCOLUMNS(VALUES(Facts[Quantity]),"d",Facts[Quantity]*2),"i",Facts,LEN(Facts[Region]),DESC),[i],"|",[i])` (Power BI: `0|1|2|3|4|5`) [dax_battery_swi_extra]
 - `MAXX(SUBSTITUTEWITHINDEX(VALUES(Facts[Quantity]),"i",Facts,CALCULATE(COUNTROWS(Facts)),ASC),[i])` (Power BI: `5`) [dax_battery_swi_extra]
 - `AVERAGEX(SUBSTITUTEWITHINDEX(Facts,"i",FILTER(ALL(Facts),Facts[Quantity]>1),Facts[Region],TRUE()),[i])` (Power BI: `1.5`) [dax_battery_swi_extra]
-- `SUMX(SUBSTITUTEWITHINDEX(Facts,"i",ALL(Facts[Region],Facts[Note]),CALCULATE(SUM(Facts[Quantity])),ASC),[i])` (Power BI: `12`) [dax_battery_swi_extra]
 - `TOCSV(SUBSTITUTEWITHINDEX(VALUES(Facts[Quantity]),"i",FILTER(ALL(Facts),Facts[Quantity]>1),1))` (Power BI: `[i]
 0
 1
 2
 3`) [dax_battery_swi_extra]
 - `MAXX(SUBSTITUTEWITHINDEX(VALUES(Facts[Quantity]),"i",FILTER(ALL(Facts),Facts[Quantity]>1),Facts[Region],DESC),[i])` (Power BI: `3`) [dax_battery_swi_extra]
-- `COUNTROWS(DISTINCT(SELECTCOLUMNS(SUBSTITUTEWITHINDEX(Facts,"i",ALL(Facts[Region],Facts[Note]),Facts[Region],0),"v",[i])))` (Power BI: `5`) [dax_battery_swi_extra]
 - `MINX(SUBSTITUTEWITHINDEX(VALUES(Facts[Quantity]),"i",Facts,BLANK()),[i])` (Power BI: `0`) [dax_battery_swi_extra]
 - `TOCSV(SUBSTITUTEWITHINDEX(Facts,"i",FILTER(VALUES(Facts[Region]),Facts[Region]<>"East"),CALCULATE(COUNTROWS(Facts)),ASC))` (Power BI: `'Facts'[Sales],'Facts'[Quantity],'Facts'[Note],[i]
 20,3,,1
@@ -563,8 +504,6 @@ Late,2`) [dax_battery_swi_extra]
 - `CONCATENATEX(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],"s",SUM(Facts[Sales])),"i",TOPN(2,VALUES(Facts[Region]),Facts[Region]),BLANK()),[i],"|",[i])` (Power BI: `0|1`) [dax_battery_swi_extra]
 - `MAXX(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],Facts[Note],"s",SUM(Facts[Quantity])),"i",FILTER(ALL(Facts),Facts[Quantity]>1),CALCULATE(SUM(Facts[Quantity]),Facts[Region]="East"),ASC),[s])` (Power BI: `5`) [dax_battery_swi_extra]
 - `COUNTROWS(DISTINCT(SELECTCOLUMNS(SUBSTITUTEWITHINDEX(ADDCOLUMNS(VALUES(Facts[Quantity]),"d",Facts[Quantity]*2),"i",Facts,CALCULATE(SUM(Facts[Quantity]),Facts[Region]="East"),ASC),"v",[i])))` (Power BI: `6`) [dax_battery_swi_extra]
-- `AVERAGEX(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],Facts[Note],"s",SUM(Facts[Quantity])),"i",ALL(Facts[Region],Facts[Note]),BLANK()),[i])` (Power BI: `2`) [dax_battery_swi_extra]
-- `MAXX(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],Facts[Note],"s",SUM(Facts[Quantity])),"i",ALL(Facts[Region],Facts[Note]),Facts[Region],ASC),[s])` (Power BI: `5`) [dax_battery_swi_extra]
 - `TOCSV(SUBSTITUTEWITHINDEX(TOPN(2,VALUES(Facts[Region]),Facts[Region]),"i",FILTER(VALUES(Facts[Region]),Facts[Region]<>"East"),1))` (Power BI: `[i]
 1
 0`) [dax_battery_swi_extra]
@@ -583,66 +522,43 @@ Late,2`) [dax_battery_swi_extra]
 10.5,2,1
 20,3,2
 -1.5,1,`) [dax_battery_swi_extra]
-- `MINX(SUBSTITUTEWITHINDEX(ALL(Facts[Region],Facts[Note]),"i",SUMMARIZE(Facts,Facts[Region],Facts[Note]),0),[i])` (Power BI: `0`) [dax_battery_swi_extra]
 - `MAXX(SUBSTITUTEWITHINDEX(ALL(Facts[Region],Facts[Note]),"i",FILTER(ALL(Facts),Facts[Quantity]>1),Facts[Region]&"x",ASC),[i])` (Power BI: `3`) [dax_battery_swi_extra]
 - `SUMX(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],Facts[Note],"s",SUM(Facts[Quantity])),"i",TOPN(2,VALUES(Facts[Region]),Facts[Region]),IF(Facts[Region]="East",1,2),ASC),[i])` (Power BI: `2`) [dax_battery_swi_extra]
 - `MAXX(SUBSTITUTEWITHINDEX(TOPN(2,VALUES(Facts[Region]),Facts[Region]),"i",TOPN(2,VALUES(Facts[Region]),Facts[Region]),IF(Facts[Region]="East",1,2),ASC),[i])` (Power BI: `1`) [dax_battery_swi_extra]
-- `COUNTROWS(FILTER(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],Facts[Note],"s",SUM(Facts[Quantity])),"i",ALL(Facts[Region],Facts[Note]),CALCULATE(SUM(Facts[Quantity]),Facts[Region]="East"),ASC),[i]>0))` (Power BI: `4`) [dax_battery_swi_extra]
 - `SUMX(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],Facts[Note],"s",SUM(Facts[Quantity])),"i",FILTER(ALL(Facts),Facts[Quantity]>1),BLANK()),[i])` (Power BI: `6`) [dax_battery_swi_extra]
 - `MINX(SUBSTITUTEWITHINDEX(FILTER(VALUES(Facts[Region]),Facts[Region]<>"West"),"i",TOPN(2,VALUES(Facts[Region]),Facts[Region]),0),[i])` (Power BI: `0`) [dax_battery_swi_extra]
 - `TOCSV(SUBSTITUTEWITHINDEX(ALL(Facts[Region],Facts[Note]),"i",FILTER(VALUES(Facts[Region]),Facts[Region]<>"East"),IF(Facts[Region]="East",1,2),ASC))` (Power BI: `'Facts'[Note],[i]
 ,0
 Paid,0
 Late,1`) [dax_battery_swi_extra]
-- `COUNTROWS(SUBSTITUTEWITHINDEX(Facts,"i",SUMMARIZE(Facts,Facts[Region],Facts[Note]),[Region],DESC))` (Power BI: `6`) [dax_battery_swi_extra]
 - `AVERAGEX(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],"x",1),"i",TOPN(2,VALUES(Facts[Region]),Facts[Region]),BLANK()),[i])` (Power BI: `0.5`) [dax_battery_swi_extra]
 - `CONCATENATEX(SUBSTITUTEWITHINDEX(Facts,"i",Facts,Facts[Region],DESC),[i],"|",[i])` (Power BI: `0|1|2|3|4|5`) [dax_battery_swi_extra]
 - `TOCSV(SUBSTITUTEWITHINDEX(ADDCOLUMNS(VALUES(Facts[Region]),"q",CALCULATE(SUM(Facts[Quantity]))),"i",TOPN(2,VALUES(Facts[Region]),Facts[Region]),BLANK()))` (Power BI: `[q],[i]
 3,1
 4,0`) [dax_battery_swi_extra]
-- `COUNTROWS(FILTER(SUBSTITUTEWITHINDEX(ALL(Facts[Region],Facts[Note]),"i",ALL(Facts[Region],Facts[Note]),Facts[Region],TRUE),[i]>0))` (Power BI: `4`) [dax_battery_swi_extra]
-- `COUNTROWS(SUBSTITUTEWITHINDEX(Facts,"i",SUMMARIZE(Facts,Facts[Region],Facts[Note]),Facts[Region],TRUE()))` (Power BI: `6`) [dax_battery_swi_extra]
-- `COUNTROWS(DISTINCT(SELECTCOLUMNS(SUBSTITUTEWITHINDEX(ALL(Facts[Region],Facts[Note]),"i",ALL(Facts[Region],Facts[Note]),BLANK()),"v",[i])))` (Power BI: `5`) [dax_battery_swi_extra]
 - `MINX(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],Facts[Note],"s",SUM(Facts[Quantity])),"i",FILTER(ALL(Facts),Facts[Quantity]>1),CALCULATE(SUM(Facts[Quantity]),Facts[Region]="East"),ASC),[i])` (Power BI: `0`) [dax_battery_swi_extra]
 - `COUNTROWS(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],"x",1),"i",TOPN(2,VALUES(Facts[Region]),Facts[Region]),BLANK()))` (Power BI: `2`) [dax_battery_swi_extra]
 - `MINX(SUBSTITUTEWITHINDEX(VALUES(Facts[Quantity]),"i",FILTER(ALL(Facts),Facts[Quantity]>1),LEN(Facts[Region]),DESC),[i])` (Power BI: `0`) [dax_battery_swi_extra]
 - `TOCSV(SUBSTITUTEWITHINDEX(TOPN(2,VALUES(Facts[Region]),Facts[Region]),"i",ADDCOLUMNS(VALUES(Facts[Region]),"c",CALCULATE(COUNTROWS(Facts))),CALCULATE(SUM(Facts[Quantity]),Facts[Region]="East"),ASC))` (Power BI: `[i]
 2
 1`) [dax_battery_swi_extra]
-- `AVERAGEX(SUBSTITUTEWITHINDEX(ALL(Facts[Region],Facts[Note]),"i",ALL(Facts[Region],Facts[Note]),CALCULATE(SUM(Facts[Quantity])),ASC),[i])` (Power BI: `2`) [dax_battery_swi_extra]
-- `MAXX(SUBSTITUTEWITHINDEX(ALL(Facts[Region],Facts[Note]),"i",SUMMARIZE(Facts,Facts[Region],Facts[Note]),Facts[Note],ASC),[i])` (Power BI: `4`) [dax_battery_swi_extra]
 - `TOCSV(SUBSTITUTEWITHINDEX(Facts,"i",ADDCOLUMNS(VALUES(Facts[Region]),"c",CALCULATE(COUNTROWS(Facts))),[c],ASC))` (Power BI: `'Facts'[Sales],'Facts'[Quantity],'Facts'[Note],[i]
 10.5,2,Pa`) [dax_battery_swi_extra]
 - `TOCSV(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],Facts[Note],"s",SUM(Facts[Quantity])),"i",FILTER(VALUES(Facts[Region]),Facts[Region]<>"East"),-LEN(Facts[Region]),ASC))` (Power BI: `'Facts'[Note],[s],[i]
 ,3,1
 Paid,0,1
 Late,4,0`) [dax_battery_swi_extra]
-- `SUMX(SUBSTITUTEWITHINDEX(Facts,"i",SUMMARIZE(Facts,Facts[Region],Facts[Note]),1),[i]*[i])` (Power BI: `34`) [dax_battery_swi_extra]
 - `MAXX(SUBSTITUTEWITHINDEX(FILTER(VALUES(Facts[Region]),Facts[Region]<>"West"),"i",TOPN(2,VALUES(Facts[Region]),Facts[Region]),0),[i])` (Power BI: `0`) [dax_battery_swi_extra]
-- `SUMX(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],Facts[Note],"s",SUM(Facts[Quantity])),"i",SUMMARIZE(Facts,Facts[Region],Facts[Note]),0),[i])` (Power BI: `10`) [dax_battery_swi_extra]
-- `AVERAGEX(SUBSTITUTEWITHINDEX(ALL(Facts),"i",SUMMARIZE(Facts,Facts[Region],Facts[Note],Facts[Quantity]),Facts[Region],DESC,Facts[Note],DESC),[i])` (Power BI: `2.5`) [dax_battery_swi_extra2]
 - `COUNTROWS(SUBSTITUTEWITHINDEX(ALL(Facts[Region],Facts[Quantity]),"i",Facts,Facts[Region],DESC,Facts[Note],DESC))` (Power BI: `6`) [dax_battery_swi_extra2]
 - `COUNTROWS(SUBSTITUTEWITHINDEX(Facts,"i",DISTINCT(Facts),Facts[Region],DESC,Facts[Note],DESC))` (Power BI: `6`) [dax_battery_swi_extra2]
 - `MINX(SUBSTITUTEWITHINDEX(Facts,"i",ALL(Facts),Facts[Region]),[i])` (Power BI: `0`) [dax_battery_swi_extra2]
-- `TOCSV(SUBSTITUTEWITHINDEX(DISTINCT(Facts),"i",ALL(Facts[Region],Facts[Note]),Facts[Region]))` (Power BI: `'Facts'[Sales],'Facts'[Quantity],[i]
-10.5,2,4
-20,3,0
--1.5,1,`) [dax_battery_swi_extra2]
-- `SUMX(SUBSTITUTEWITHINDEX(ALL(Facts),"i",ALL(Facts[Region],Facts[Quantity]),Facts[Region]),[i]*[i])` (Power BI: `55`) [dax_battery_swi_extra2]
 - `MINX(SUBSTITUTEWITHINDEX(FILTER(Facts,Facts[Quantity]>1),"i",DISTINCT(Facts),Facts[Region],DESC,Facts[Note],DESC),[i])` (Power BI: `1`) [dax_battery_swi_extra2]
-- `COUNTROWS(FILTER(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],Facts[Quantity],"z",1),"i",ALL(Facts[Region],Facts[Quantity]),Facts[Region]),[i]>=1))` (Power BI: `5`) [dax_battery_swi_extra2]
 - `SUMX(SUBSTITUTEWITHINDEX(CALCULATETABLE(VALUES(Facts[Note]),Facts[Quantity]>1),"i",TOPN(3,VALUES(Facts[Note]),Facts[Note],ASC),1,ASC),[i]*[i])` (Power BI: `5`) [dax_battery_swi_extra2]
 - `MAXX(SUBSTITUTEWITHINDEX(ALL(Facts[Region],Facts[Quantity]),"i",DISTINCT(Facts),Facts[Region]),[i])` (Power BI: `5`) [dax_battery_swi_extra2]
 - `MINX(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],Facts[Quantity],"z",1),"i",DISTINCT(Facts),Facts[Region]),[i])` (Power BI: `0`) [dax_battery_swi_extra2]
 - `COUNTROWS(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Note],"cnt",COUNTROWS(Facts)),"i",SUMMARIZE(Facts,Facts[Region],"cnt",COUNTROWS(Facts)),Facts[Region]))` (Power BI: `3`) [dax_battery_swi_extra2]
-- `COUNTROWS(SUBSTITUTEWITHINDEX(Facts,"i",SUMMARIZE(Facts,Facts[Region],Facts[Note]),Facts[Region]))` (Power BI: `6`) [dax_battery_swi_extra2]
-- `AVERAGEX(SUBSTITUTEWITHINDEX(VALUES(Facts),"i",ALL(Facts[Region],Facts[Note]),Facts[Region]),[i])` (Power BI: `2.33333333333333`) [dax_battery_swi_extra2]
 - `CONCATENATEX(SUBSTITUTEWITHINDEX(Facts,"i",DISTINCT(Facts),Facts[Region],DESC,Facts[Note],DESC),[i],"|",[i])` (Power BI: `0|1|2|3|4|5`) [dax_battery_swi_extra2]
 - `SUMX(SUBSTITUTEWITHINDEX(ALL(Facts[Region],Facts[Quantity]),"i",ALL(Facts),Facts[Region],DESC,Facts[Note],DESC),[i])` (Power BI: `15`) [dax_battery_swi_extra2]
-- `MINX(SUBSTITUTEWITHINDEX(DISTINCT(Facts),"i",ALL(Facts[Region],Facts[Quantity]),Facts[Region]),[i])` (Power BI: `0`) [dax_battery_swi_extra2]
-- `COUNTROWS(FILTER(SUBSTITUTEWITHINDEX(VALUES(Facts),"i",ALL(Facts[Region],Facts[Quantity]),Facts[Region]),[i]>=1))` (Power BI: `5`) [dax_battery_swi_extra2]
-- `SUMX(SUBSTITUTEWITHINDEX(FILTER(Facts,Facts[Quantity]>1),"i",SUMMARIZE(Facts,Facts[Region],Facts[Note],Facts[Quantity]),Facts[Region]),[i]*[i])` (Power BI: `38`) [dax_battery_swi_extra2]
-- `SUMX(SUBSTITUTEWITHINDEX(Facts,"i",SUMMARIZE(Facts,Facts[Region],Facts[Note],Facts[Quantity]),Facts[Region],DESC,Facts[Note],DESC),[i])` (Power BI: `15`) [dax_battery_swi_extra2]
 - `TOCSV(SUBSTITUTEWITHINDEX(VALUES(Facts),"i",Facts,Facts[Note],ASC,Facts[Quantity],ASC))` (Power BI: `[i]
 5
 0
@@ -662,14 +578,12 @@ Late,4,0`) [dax_battery_swi_extra]
 - `MAXX(SUBSTITUTEWITHINDEX(FILTER(Facts,Facts[Quantity]>1),"i",ALL(Facts),Facts[Region],DESC,Facts[Note],DESC),[i])` (Power BI: `5`) [dax_battery_swi_extra2]
 - `CONCATENATEX(SUBSTITUTEWITHINDEX(FILTER(ALL(Facts[Sales]),Facts[Sales]<>BLANK()),"i",TOPN(3,VALUES(Facts[Sales]),Facts[Sales],ASC),0,DESC),[i],"|",[i])` (Power BI: `1`) [dax_battery_swi_extra2]
 - `AVERAGEX(SUBSTITUTEWITHINDEX(FILTER(Facts,Facts[Quantity]>1),"i",ALL(Facts),Facts[Region]),[i])` (Power BI: `2.5`) [dax_battery_swi_extra2]
-- `CONCATENATEX(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],Facts[Quantity],"z",1),"i",ALL(Facts[Region],Facts[Quantity]),Facts[Region]),[i],"|",[i])` (Power BI: `0|1|2|3|4|5`) [dax_battery_swi_extra2]
 - `TOCSV(SUBSTITUTEWITHINDEX(TREATAS(VALUES(Facts[Region]),Facts[Region]),"i",TOPN(3,VALUES(Facts[Region]),Facts[Region],ASC),Facts[Region],0))` (Power BI: `[i]
 2
 0
 1`) [dax_battery_swi_extra2]
 - `COUNTROWS(SUBSTITUTEWITHINDEX(VALUES(Facts[Note]),"i",TOPN(3,VALUES(Facts[Note]),Facts[Note]),ISBLANK(Facts[Note]),ASC))` (Power BI: `3`) [dax_battery_swi_extra2]
 - `MAXX(SUBSTITUTEWITHINDEX(VALUES(Facts),"i",ALL(Facts),Facts[Region]),[i])` (Power BI: `5`) [dax_battery_swi_extra2]
-- `COUNTROWS(FILTER(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],Facts[Note]),"i",SUMMARIZE(Facts,Facts[Region],Facts[Note]),Facts[Region]),[i]>=1))` (Power BI: `4`) [dax_battery_swi_extra2]
 - `COUNTROWS(SUBSTITUTEWITHINDEX(VALUES(Facts),"i",Facts,Facts[Region]))` (Power BI: `6`) [dax_battery_swi_extra2]
 - `TOCSV(SUBSTITUTEWITHINDEX(ALL(Facts[Region],Facts[Quantity]),"i",ALL(Facts),Facts[Region],DESC,Facts[Note],DESC))` (Power BI: `[i]
 3
@@ -707,7 +621,6 @@ Late,4,0`) [dax_battery_swi_extra]
 2`) [dax_battery_swi_extra2]
 - `MINX(SUBSTITUTEWITHINDEX(ALL(Facts[Region],Facts[Quantity]),"i",DISTINCT(Facts),Facts[Region]),[i])` (Power BI: `0`) [dax_battery_swi_extra2]
 - `CONCATENATEX(SUBSTITUTEWITHINDEX(ALL(Facts),"i",ALL(Facts),Facts[Region],DESC,Facts[Note],DESC),[i],"|",[i])` (Power BI: `0|1|2|3|4|5`) [dax_battery_swi_extra2]
-- `SUMX(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],Facts[Quantity],"z",1),"i",SUMMARIZE(Facts,Facts[Region],Facts[Quantity]),Facts[Region]),[i])` (Power BI: `15`) [dax_battery_swi_extra2]
 - `CONCATENATEX(SUBSTITUTEWITHINDEX(Facts,"i",Facts,Facts[Region]),[i],"|",[i])` (Power BI: `0|1|2|3|4|5`) [dax_battery_swi_extra2]
 - `TOCSV(SUBSTITUTEWITHINDEX(FILTER(Facts,Facts[Quantity]>1),"i",Facts,Facts[Region]))` (Power BI: `[i]
 3
@@ -723,7 +636,6 @@ Late,4,0`) [dax_battery_swi_extra]
 2`) [dax_battery_swi_extra2]
 - `SUMX(SUBSTITUTEWITHINDEX(TOPN(3,VALUES(Facts[Quantity]),Facts[Quantity]),"i",TOPN(3,VALUES(Facts[Quantity]),Facts[Quantity],ASC),BLANK()),[i]*[i])` (Power BI: `BLANK`) [dax_battery_swi_extra2]
 - `MAXX(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Note],"cnt",COUNTROWS(Facts)),"i",SUMMARIZE(Facts,Facts[Region],"cnt",COUNTROWS(Facts)),Facts[Region]),[i])` (Power BI: `2`) [dax_battery_swi_extra2]
-- `SUMX(SUBSTITUTEWITHINDEX(VALUES(Facts),"i",SUMMARIZE(Facts,Facts[Region],Facts[Note]),Facts[Region]),[i])` (Power BI: `14`) [dax_battery_swi_extra2]
 - `SUMX(SUBSTITUTEWITHINDEX(FILTER(Facts,Facts[Quantity]>1),"i",Facts,Facts[Region]),[i]*[i])` (Power BI: `38`) [dax_battery_swi_extra2]
 - `MINX(SUBSTITUTEWITHINDEX(ALL(Facts),"i",Facts,Facts[Region],DESC,Facts[Note],DESC),[i])` (Power BI: `0`) [dax_battery_swi_extra2]
 - `CONCATENATEX(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Sales],"tot",SUM(Facts[Quantity])),"i",SUMMARIZE(Facts,Facts[Note],"tot",SUM(Facts[Quantity])),CALCULATE(COUNTROWS(Facts)),DESC),[i],"|",[i])` (Power BI: `0|2`) [dax_battery_swi_extra2]
@@ -731,7 +643,6 @@ Late,4,0`) [dax_battery_swi_extra]
 0
 2
 1`) [dax_battery_swi_extra2]
-- `AVERAGEX(SUBSTITUTEWITHINDEX(DISTINCT(Facts),"i",SUMMARIZE(Facts,Facts[Region],Facts[Quantity]),Facts[Region]),[i])` (Power BI: `2.5`) [dax_battery_swi_extra2]
 - `TOCSV(SUBSTITUTEWITHINDEX(UNION(VALUES(Facts[Note]),VALUES(Facts[Note])),"i",ADDCOLUMNS(VALUES(Facts[Note]),"k",1),LEN(Facts[Note]),DESC))` (Power BI: `[i]
 2
 0
@@ -739,26 +650,18 @@ Late,4,0`) [dax_battery_swi_extra]
 2
 0
 1`) [dax_battery_swi_extra2]
-- `CONCATENATEX(SUBSTITUTEWITHINDEX(FILTER(Facts,Facts[Quantity]>1),"i",SUMMARIZE(Facts,Facts[Region],Facts[Note],Facts[Quantity]),Facts[Region],DESC,Facts[Note],DESC),[i],"|",[i])` (Power BI: `1|2|4|5`) [dax_battery_swi_extra2]
-- `CONCATENATEX(SUBSTITUTEWITHINDEX(ALL(Facts),"i",SUMMARIZE(Facts,Facts[Region],Facts[Note],Facts[Quantity]),Facts[Region]),[i],"|",[i])` (Power BI: `0|1|2|3|4|5`) [dax_battery_swi_extra2]
 - `MAXX(SUBSTITUTEWITHINDEX(ALL(Facts[Region],Facts[Quantity]),"i",Facts,Facts[Region]),[i])` (Power BI: `5`) [dax_battery_swi_extra2]
-- `COUNTROWS(DISTINCT(SELECTCOLUMNS(SUBSTITUTEWITHINDEX(DISTINCT(Facts),"i",SUMMARIZE(Facts,Facts[Region],Facts[Note],Facts[Quantity]),Facts[Region],DESC,Facts[Note],DESC),"v",[i])))` (Power BI: `6`) [dax_battery_swi_extra2]
 - `TOCSV(SUBSTITUTEWITHINDEX(TOPN(3,VALUES(Facts[Note]),Facts[Note]),"i",ALLNOBLANKROW(Facts[Note]),Facts[Note],DESC))` (Power BI: `[i]
 2
 0
 1`) [dax_battery_swi_extra2]
 - `AVERAGEX(SUBSTITUTEWITHINDEX(DISTINCT(Facts),"i",DISTINCT(Facts),Facts[Region],DESC,Facts[Note],DESC),[i])` (Power BI: `2.5`) [dax_battery_swi_extra2]
-- `MINX(SUBSTITUTEWITHINDEX(FILTER(Facts,Facts[Quantity]>1),"i",SUMMARIZE(Facts,Facts[Region],Facts[Note],Facts[Quantity]),Facts[Region],DESC,Facts[Note],DESC),[i])` (Power BI: `1`) [dax_battery_swi_extra2]
-- `MINX(SUBSTITUTEWITHINDEX(Facts,"i",SUMMARIZE(Facts,Facts[Region],Facts[Note],Facts[Quantity]),Facts[Region]),[i])` (Power BI: `0`) [dax_battery_swi_extra2]
-- `SUMX(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],Facts[Note]),"i",ALL(Facts[Region],Facts[Note]),Facts[Region]),[i]*[i])` (Power BI: `30`) [dax_battery_swi_extra2]
 - `COUNTROWS(DISTINCT(SELECTCOLUMNS(SUBSTITUTEWITHINDEX(FILTER(ALL(Facts[Sales]),Facts[Sales]<>BLANK()),"i",TOPN(3,VALUES(Facts[Sales]),Facts[Sales],ASC),0,DESC),"v",[i])))` (Power BI: `1`) [dax_battery_swi_extra2]
 - `TOCSV(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Note],"cnt",COUNTROWS(Facts)),"i",TOPN(3,VALUES(Facts[Note]),Facts[Note]),LEN(Facts[Note]),DESC))` (Power BI: `[cnt],[i]
 2,2
 3,0
 1,1`) [dax_battery_swi_extra2]
-- `SUMX(SUBSTITUTEWITHINDEX(ALL(Facts),"i",SUMMARIZE(Facts,Facts[Region],Facts[Note],Facts[Quantity]),Facts[Region],DESC,Facts[Note],DESC),[i])` (Power BI: `15`) [dax_battery_swi_extra2]
 - `SUMX(SUBSTITUTEWITHINDEX(Facts,"i",ALL(Facts),Facts[Region],DESC,Facts[Note],DESC),[i]*[i])` (Power BI: `55`) [dax_battery_swi_extra2]
-- `COUNTROWS(FILTER(SUBSTITUTEWITHINDEX(VALUES(Facts),"i",SUMMARIZE(Facts,Facts[Region],Facts[Note],Facts[Quantity]),Facts[Region]),[i]>=1))` (Power BI: `5`) [dax_battery_swi_extra2]
 - `TOCSV(SUBSTITUTEWITHINDEX(TREATAS(VALUES(Facts[Quantity]),Facts[Quantity]),"i",VALUES(Facts[Quantity]),Facts[Quantity],1))` (Power BI: `[i]
 0
 1
@@ -773,7 +676,6 @@ Late,4,0`) [dax_battery_swi_extra]
 0
 1
 2`) [dax_battery_swi_extra2]
-- `COUNTROWS(DISTINCT(SELECTCOLUMNS(SUBSTITUTEWITHINDEX(ALL(Facts),"i",SUMMARIZE(Facts,Facts[Region],Facts[Quantity]),Facts[Region]),"v",[i])))` (Power BI: `6`) [dax_battery_swi_extra2]
 - `COUNTROWS(FILTER(SUBSTITUTEWITHINDEX(Facts,"i",DISTINCT(Facts),Facts[Region]),[i]>=1))` (Power BI: `5`) [dax_battery_swi_extra2]
 - `AVERAGEX(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],Facts[Quantity],"z",1),"i",Facts,Facts[Region],DESC,Facts[Note],DESC),[i])` (Power BI: `2.5`) [dax_battery_swi_extra2]
 - `COUNTROWS(FILTER(SUBSTITUTEWITHINDEX(Facts,"i",DISTINCT(Facts),Facts[Region],DESC,Facts[Note],DESC),[i]>=1))` (Power BI: `5`) [dax_battery_swi_extra2]
@@ -802,21 +704,16 @@ Late,4,0`) [dax_battery_swi_extra]
 ,4,2
 2.`) [dax_battery_swi_extra2]
 - `SUMX(SUBSTITUTEWITHINDEX(DISTINCT(Facts),"i",DISTINCT(Facts),Facts[Region]),[i])` (Power BI: `15`) [dax_battery_swi_extra2]
-- `COUNTROWS(FILTER(SUBSTITUTEWITHINDEX(ALL(Facts[Region],Facts[Quantity]),"i",ALL(Facts[Region],Facts[Quantity]),Facts[Region]),[i]>=1))` (Power BI: `5`) [dax_battery_swi_extra2]
 - `TOCSV(SUBSTITUTEWITHINDEX(FILTER(Facts,Facts[Quantity]>1),"i",ALL(Facts[Region],Facts[Quantity]),Facts[Region]))` (Power BI: `'Facts'[Sales],'Facts'[Note],[i]
 10.5,Paid,4
 20,,1
 ,Late,2
 2`) [dax_battery_swi_extra2]
 - `MAXX(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Sales],"tot",SUM(Facts[Quantity])),"i",SUMMARIZE(Facts,Facts[Note],"tot",SUM(Facts[Quantity])),CALCULATE(SUM(Facts[Quantity])),ASC),[i])` (Power BI: `1`) [dax_battery_swi_extra2]
-- `COUNTROWS(DISTINCT(SELECTCOLUMNS(SUBSTITUTEWITHINDEX(ALL(Facts[Region],Facts[Quantity]),"i",SUMMARIZE(Facts,Facts[Region],Facts[Note],Facts[Quantity]),Facts[Region],DESC,Facts[Note],DESC),"v",[i])))` (Power BI: `6`) [dax_battery_swi_extra2]
-- `MAXX(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],Facts[Note]),"i",ALL(Facts[Region],Facts[Note]),Facts[Region]),[i])` (Power BI: `4`) [dax_battery_swi_extra2]
-- `CONCATENATEX(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],Facts[Quantity],"z",1),"i",SUMMARIZE(Facts,Facts[Region],Facts[Note],Facts[Quantity]),Facts[Region]),[i],"|",[i])` (Power BI: `0|1|2|3|4|5`) [dax_battery_swi_extra2]
 - `TOCSV(SUBSTITUTEWITHINDEX(TOPN(3,VALUES(Facts[Sales]),Facts[Sales]),"i",ADDCOLUMNS(VALUES(Facts[Sales]),"k",1),ISBLANK(Facts[Sales]),ASC))` (Power BI: `[i]
 2
 4
 3`) [dax_battery_swi_extra2]
-- `COUNTROWS(FILTER(SUBSTITUTEWITHINDEX(FILTER(Facts,Facts[Quantity]>1),"i",ALL(Facts[Region],Facts[Note]),Facts[Region]),[i]>=1))` (Power BI: `3`) [dax_battery_swi_extra2]
 - `AVERAGEX(SUBSTITUTEWITHINDEX(Facts,"i",ALL(Facts),Facts[Region],DESC,Facts[Note],DESC),[i])` (Power BI: `2.5`) [dax_battery_swi_extra2]
 - `COUNTROWS(DISTINCT(SELECTCOLUMNS(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Quantity],"tot",SUM(Facts[Quantity])),"i",SUMMARIZE(Facts,Facts[Sales],"tot",SUM(Facts[Quantity])),0,DESC),"v",[i])))` (Power BI: `6`) [dax_battery_swi_extra2]
 - `TOCSV(SUBSTITUTEWITHINDEX(UNION(VALUES(Facts[Sales]),VALUES(Facts[Sales])),"i",VALUES(Facts[Sales]),Facts[Sales],TRUE()))` (Power BI: `[i]
@@ -841,18 +738,8 @@ Late,4,0`) [dax_battery_swi_extra]
 0,1
 2.5,3`) [dax_battery_swi_extra2]
 - `COUNTROWS(FILTER(SUBSTITUTEWITHINDEX(TOPN(3,VALUES(Facts[Quantity]),Facts[Quantity]),"i",TOPN(3,VALUES(Facts[Quantity]),Facts[Quantity],ASC),BLANK()),[i]>=1))` (Power BI: `BLANK`) [dax_battery_swi_extra2]
-- `MAXX(SUBSTITUTEWITHINDEX(Facts,"i",SUMMARIZE(Facts,Facts[Region],Facts[Quantity]),Facts[Region]),[i])` (Power BI: `5`) [dax_battery_swi_extra2]
-- `MAXX(SUBSTITUTEWITHINDEX(VALUES(Facts),"i",SUMMARIZE(Facts,Facts[Region],Facts[Note],Facts[Quantity]),Facts[Region]),[i])` (Power BI: `5`) [dax_battery_swi_extra2]
-- `CONCATENATEX(SUBSTITUTEWITHINDEX(VALUES(Facts),"i",SUMMARIZE(Facts,Facts[Region],Facts[Note]),Facts[Region]),[i],"|",[i])` (Power BI: `0|1|2|3|4|4`) [dax_battery_swi_extra2]
 - `SUMX(SUBSTITUTEWITHINDEX(FILTER(Facts,Facts[Quantity]>1),"i",Facts,Facts[Region],DESC,Facts[Note],DESC),[i]*[i])` (Power BI: `39`) [dax_battery_swi_extra2]
 - `SUMX(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],Facts[Quantity],"z",1),"i",Facts,Facts[Region],DESC,Facts[Note],DESC),[i]*[i])` (Power BI: `55`) [dax_battery_swi_extra2]
-- `TOCSV(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],Facts[Quantity],"z",1),"i",SUMMARIZE(Facts,Facts[Region],Facts[Quantity]),Facts[Region]))` (Power BI: `[z],[i]
-1,3
-1,4
-1,5
-1,0
-1,1
-1,2`) [dax_battery_swi_extra2]
 - `AVERAGEX(SUBSTITUTEWITHINDEX(Facts,"i",ALL(Facts),Facts[Region]),[i])` (Power BI: `2.5`) [dax_battery_swi_extra2]
 - `TOCSV(SUBSTITUTEWITHINDEX(VALUES(Facts),"i",SUMMARIZE(Facts,Facts[Region],Facts[Note],Facts[Quantity]),Facts[Region],ASC,Facts[Quantity],DESC,Facts[Note],ASC))` (Power BI: `'Facts'[Sales],[i]
 10.5,1
@@ -862,14 +749,7 @@ Late,4,0`) [dax_battery_swi_extra]
 0,5
 2.5,0`) [dax_battery_swi_extra2]
 - `COUNTROWS(DISTINCT(SELECTCOLUMNS(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Sales],"tot",SUM(Facts[Quantity])),"i",SUMMARIZE(Facts,Facts[Note],"tot",SUM(Facts[Quantity])),CALCULATE(COUNTROWS(Facts)),DESC),"v",[i])))` (Power BI: `2`) [dax_battery_swi_extra2]
-- `SUMX(SUBSTITUTEWITHINDEX(Facts,"i",ALL(Facts[Region],Facts[Note]),Facts[Region]),[i])` (Power BI: `14`) [dax_battery_swi_extra2]
-- `COUNTROWS(SUBSTITUTEWITHINDEX(Facts,"i",SUMMARIZE(Facts,Facts[Region],Facts[Note],Facts[Quantity]),Facts[Region]))` (Power BI: `6`) [dax_battery_swi_extra2]
 - `MAXX(SUBSTITUTEWITHINDEX(ALL(Facts[Region],Facts[Quantity]),"i",ALL(Facts),Facts[Region],DESC,Facts[Note],DESC),[i])` (Power BI: `5`) [dax_battery_swi_extra2]
-- `TOCSV(SUBSTITUTEWITHINDEX(ALL(Facts),"i",SUMMARIZE(Facts,Facts[Region],Facts[Note]),Facts[Region]))` (Power BI: `'Facts'[Sales],'Facts'[Quantity],[i]
-10.5,2,4
-20,3,0
--1.5,1,`) [dax_battery_swi_extra2]
-- `SUMX(SUBSTITUTEWITHINDEX(VALUES(Facts),"i",SUMMARIZE(Facts,Facts[Region],Facts[Note],Facts[Quantity]),Facts[Region],DESC,Facts[Note],DESC),[i])` (Power BI: `15`) [dax_battery_swi_extra2]
 - `COUNTROWS(DISTINCT(SELECTCOLUMNS(SUBSTITUTEWITHINDEX(VALUES(Facts[Quantity]),"i",TOPN(3,VALUES(Facts[Quantity]),Facts[Quantity]),ISBLANK(Facts[Quantity]),ASC),"v",[i])))` (Power BI: `3`) [dax_battery_swi_extra2]
 - `SUMX(SUBSTITUTEWITHINDEX(VALUES(Facts),"i",Facts,Facts[Region]),[i])` (Power BI: `15`) [dax_battery_swi_extra2]
 - `TOCSV(SUBSTITUTEWITHINDEX(ALL(Facts[Region],Facts[Quantity]),"i",ALL(Facts[Region],Facts[Quantity]),Facts[Region]))` (Power BI: `[i]
@@ -879,7 +759,6 @@ Late,4,0`) [dax_battery_swi_extra]
 0
 1
 2`) [dax_battery_swi_extra2]
-- `AVERAGEX(SUBSTITUTEWITHINDEX(DISTINCT(Facts),"i",SUMMARIZE(Facts,Facts[Region],Facts[Note],Facts[Quantity]),Facts[Region]),[i])` (Power BI: `2.5`) [dax_battery_swi_extra2]
 - `COUNTROWS(DISTINCT(SELECTCOLUMNS(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],Facts[Quantity],"z",1),"i",DISTINCT(Facts),Facts[Region],DESC,Facts[Note],DESC),"v",[i])))` (Power BI: `6`) [dax_battery_swi_extra2]
 - `SUMX(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Sales],"tot",SUM(Facts[Quantity])),"i",SUMMARIZE(Facts,Facts[Note],"tot",SUM(Facts[Quantity])),CALCULATE(SUM(Facts[Quantity])),ASC),[i])` (Power BI: `1`) [dax_battery_swi_extra2]
 - `TOCSV(SUBSTITUTEWITHINDEX(VALUES(Facts),"i",DISTINCT(Facts),Facts[Region],DESC,Facts[Note],DESC))` (Power BI: `[i]
@@ -903,7 +782,6 @@ Late,4,0`) [dax_battery_swi_extra]
 - `MAXX(SUBSTITUTEWITHINDEX(TOPN(3,VALUES(Facts[Note]),Facts[Note],ASC),"i",TOPN(3,VALUES(Facts[Note]),Facts[Note],ASC),IF(ISBLANK(Facts[Note]),0,1),DESC),[i])` (Power BI: `2`) [dax_battery_swi_extra2]
 - `CONCATENATEX(SUBSTITUTEWITHINDEX(VALUES(Facts),"i",DISTINCT(Facts),Facts[Region]),[i],"|",[i])` (Power BI: `0|1|2|3|4|5`) [dax_battery_swi_extra2]
 - `MAXX(SUBSTITUTEWITHINDEX(VALUES(Facts),"i",ALL(Facts),Facts[Region],DESC,Facts[Note],DESC),[i])` (Power BI: `5`) [dax_battery_swi_extra2]
-- `AVERAGEX(SUBSTITUTEWITHINDEX(FILTER(Facts,Facts[Quantity]>1),"i",SUMMARIZE(Facts,Facts[Region],Facts[Quantity]),Facts[Region]),[i])` (Power BI: `3`) [dax_battery_swi_extra2]
 - `COUNTROWS(SUBSTITUTEWITHINDEX(VALUES(Facts),"i",ALL(Facts),Facts[Region]))` (Power BI: `6`) [dax_battery_swi_extra2]
 - `MINX(SUBSTITUTEWITHINDEX(FILTER(ALL(Facts[Sales]),Facts[Sales]<>BLANK()),"i",TOPN(3,VALUES(Facts[Sales]),Facts[Sales],ASC),0,DESC),[i])` (Power BI: `1`) [dax_battery_swi_extra2]
 - `TOCSV(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],Facts[Quantity],"z",1),"i",DISTINCT(Facts),Facts[Region],DESC,Facts[Note],DESC))` (Power BI: `[z],[i]
@@ -914,7 +792,6 @@ Late,4,0`) [dax_battery_swi_extra]
 1,1
 1,2`) [dax_battery_swi_extra2]
 - `COUNTROWS(FILTER(SUBSTITUTEWITHINDEX(ALL(Facts),"i",DISTINCT(Facts),Facts[Region]),[i]>=1))` (Power BI: `5`) [dax_battery_swi_extra2]
-- `SUMX(SUBSTITUTEWITHINDEX(FILTER(Facts,Facts[Quantity]>1),"i",ALL(Facts[Region],Facts[Quantity]),Facts[Region]),[i])` (Power BI: `12`) [dax_battery_swi_extra2]
 - `TOCSV(SUBSTITUTEWITHINDEX(Facts,"i",ALL(Facts),Facts[Region]))` (Power BI: `[i]
 3
 0
@@ -928,10 +805,7 @@ Late,4,0`) [dax_battery_swi_extra]
 - `MINX(SUBSTITUTEWITHINDEX(FILTER(Facts,Facts[Quantity]>1),"i",DISTINCT(Facts),Facts[Region]),[i])` (Power BI: `0`) [dax_battery_swi_extra2]
 - `COUNTROWS(DISTINCT(SELECTCOLUMNS(SUBSTITUTEWITHINDEX(FILTER(Facts,Facts[Quantity]>1),"i",Facts,Facts[Region],DESC,Facts[Note],DESC),"v",[i])))` (Power BI: `4`) [dax_battery_swi_extra2]
 - `SUMX(SUBSTITUTEWITHINDEX(FILTER(Facts,Facts[Quantity]>1),"i",DISTINCT(Facts),Facts[Region]),[i]*[i])` (Power BI: `38`) [dax_battery_swi_extra2]
-- `COUNTROWS(FILTER(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],Facts[Quantity],"z",1),"i",SUMMARIZE(Facts,Facts[Region],Facts[Note],Facts[Quantity]),Facts[Region]),[i]>=1))` (Power BI: `5`) [dax_battery_swi_extra2]
 - `SUMX(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Sales],"tot",SUM(Facts[Quantity])),"i",SUMMARIZE(Facts,Facts[Note],"tot",SUM(Facts[Quantity])),CALCULATE(COUNTROWS(Facts)),DESC,Facts[Note],ASC),[i]*[i])` (Power BI: `4`) [dax_battery_swi_extra2]
-- `SUMX(SUBSTITUTEWITHINDEX(FILTER(Facts,Facts[Quantity]>1),"i",SUMMARIZE(Facts,Facts[Region],Facts[Quantity]),Facts[Region]),[i])` (Power BI: `12`) [dax_battery_swi_extra2]
-- `MINX(SUBSTITUTEWITHINDEX(Facts,"i",SUMMARIZE(Facts,Facts[Region],Facts[Quantity]),Facts[Region]),[i])` (Power BI: `0`) [dax_battery_swi_extra2]
 - `AVERAGEX(SUBSTITUTEWITHINDEX(ALL(Facts),"i",Facts,Facts[Region],DESC,Facts[Note],DESC),[i])` (Power BI: `2.5`) [dax_battery_swi_extra2]
 - `TOCSV(SUBSTITUTEWITHINDEX(ALL(Facts),"i",DISTINCT(Facts),Facts[Region],DESC,Facts[Note],DESC))` (Power BI: `[i]
 3
@@ -940,19 +814,10 @@ Late,4,0`) [dax_battery_swi_extra]
 2
 0
 5`) [dax_battery_swi_extra2]
-- `MAXX(SUBSTITUTEWITHINDEX(DISTINCT(Facts),"i",SUMMARIZE(Facts,Facts[Region],Facts[Note]),Facts[Region]),[i])` (Power BI: `4`) [dax_battery_swi_extra2]
 - `MINX(SUBSTITUTEWITHINDEX(DISTINCT(Facts),"i",DISTINCT(Facts),Facts[Region]),[i])` (Power BI: `0`) [dax_battery_swi_extra2]
 - `MINX(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Note],"cnt",COUNTROWS(Facts)),"i",TOPN(3,VALUES(Facts[Note]),Facts[Note]),LEN(Facts[Note]),DESC),[i])` (Power BI: `0`) [dax_battery_swi_extra2]
 - `TOCSV(SUBSTITUTEWITHINDEX(TOPN(3,VALUES(Facts[Quantity]),Facts[Quantity]),"i",TOPN(3,VALUES(Facts[Quantity]),Facts[Quantity],ASC),BLANK()))` (Power BI: `[i]
 `) [dax_battery_swi_extra2]
-- `MINX(SUBSTITUTEWITHINDEX(DISTINCT(Facts),"i",SUMMARIZE(Facts,Facts[Region],Facts[Note],Facts[Quantity]),Facts[Region]),[i])` (Power BI: `0`) [dax_battery_swi_extra2]
-- `TOCSV(SUBSTITUTEWITHINDEX(ALL(Facts),"i",SUMMARIZE(Facts,Facts[Region],Facts[Note],Facts[Quantity]),Facts[Region],DESC,Facts[Note],DESC))` (Power BI: `'Facts'[Sales],[i]
-10.5,4
-20,1
--1.5,3
-,2
-0,0
-2.5,5`) [dax_battery_swi_extra2]
 - `MAXX(SUBSTITUTEWITHINDEX(DISTINCT(Facts),"i",Facts,Facts[Region]),[i])` (Power BI: `5`) [dax_battery_swi_extra2]
 - `COUNTROWS(DISTINCT(SELECTCOLUMNS(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Sales],"tot",SUM(Facts[Quantity])),"i",SUMMARIZE(Facts,Facts[Note],"tot",SUM(Facts[Quantity])),CALCULATE(SUM(Facts[Quantity])),ASC),"v",[i])))` (Power BI: `2`) [dax_battery_swi_extra2]
 - `COUNTROWS(SUBSTITUTEWITHINDEX(DISTINCT(Facts),"i",Facts,Facts[Region]))` (Power BI: `6`) [dax_battery_swi_extra2]
@@ -967,11 +832,6 @@ Late,4,0`) [dax_battery_swi_extra]
 - `CONCATENATEX(SUBSTITUTEWITHINDEX(VALUES(Facts),"i",Facts,Facts[Region]),[i],"|",[i])` (Power BI: `0|1|2|3|4|5`) [dax_battery_swi_extra2]
 - `SUMX(SUBSTITUTEWITHINDEX(Facts,"i",DISTINCT(Facts),Facts[Region]),[i])` (Power BI: `15`) [dax_battery_swi_extra2]
 - `MAXX(SUBSTITUTEWITHINDEX(ALL(Facts[Region],Facts[Quantity]),"i",DISTINCT(Facts),Facts[Region],DESC,Facts[Note],DESC),[i])` (Power BI: `5`) [dax_battery_swi_extra2]
-- `TOCSV(SUBSTITUTEWITHINDEX(DISTINCT(Facts),"i",SUMMARIZE(Facts,Facts[Region],Facts[Quantity]),Facts[Region]))` (Power BI: `'Facts'[Sales],'Facts'[Note],[i]
-10.5,Paid,4
-20,,1
--1.5,Paid`) [dax_battery_swi_extra2]
-- `MAXX(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],Facts[Quantity],"z",1),"i",SUMMARIZE(Facts,Facts[Region],Facts[Note],Facts[Quantity]),Facts[Region]),[i])` (Power BI: `5`) [dax_battery_swi_extra2]
 - `TOCSV(SUBSTITUTEWITHINDEX(ALL(Facts[Region],Facts[Quantity]),"i",Facts,Facts[Region]))` (Power BI: `[i]
 3
 4
@@ -988,11 +848,7 @@ Late,4,0`) [dax_battery_swi_extra]
 1`) [dax_battery_swi_extra2]
 - `COUNTROWS(DISTINCT(SELECTCOLUMNS(SUBSTITUTEWITHINDEX(ALLNOBLANKROW(Facts[Quantity]),"i",TOPN(3,VALUES(Facts[Quantity]),Facts[Quantity]),CALCULATE(COUNTROWS(Facts)),DESC),"v",[i])))` (Power BI: `3`) [dax_battery_swi_extra2]
 - `COUNTROWS(FILTER(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],Facts[Quantity],"z",1),"i",Facts,Facts[Region]),[i]>=1))` (Power BI: `5`) [dax_battery_swi_extra2]
-- `COUNTROWS(SUBSTITUTEWITHINDEX(ALL(Facts[Region],Facts[Quantity]),"i",SUMMARIZE(Facts,Facts[Region],Facts[Note],Facts[Quantity]),Facts[Region],DESC,Facts[Note],DESC))` (Power BI: `6`) [dax_battery_swi_extra2]
-- `COUNTROWS(DISTINCT(SELECTCOLUMNS(SUBSTITUTEWITHINDEX(Facts,"i",ALL(Facts[Region],Facts[Note]),Facts[Region]),"v",[i])))` (Power BI: `5`) [dax_battery_swi_extra2]
-- `AVERAGEX(SUBSTITUTEWITHINDEX(DISTINCT(Facts),"i",SUMMARIZE(Facts,Facts[Region],Facts[Note]),Facts[Region]),[i])` (Power BI: `2.33333333333333`) [dax_battery_swi_extra2]
 - `MAXX(SUBSTITUTEWITHINDEX(VALUES(Facts),"i",Facts,Facts[Region],DESC,Facts[Note],DESC),[i])` (Power BI: `5`) [dax_battery_swi_extra2]
-- `COUNTROWS(SUBSTITUTEWITHINDEX(FILTER(Facts,Facts[Quantity]>1),"i",SUMMARIZE(Facts,Facts[Region],Facts[Note],Facts[Quantity]),Facts[Region]))` (Power BI: `4`) [dax_battery_swi_extra2]
 - `COUNTROWS(DISTINCT(SELECTCOLUMNS(SUBSTITUTEWITHINDEX(ALL(Facts[Region],Facts[Quantity]),"i",ALL(Facts),Facts[Region]),"v",[i])))` (Power BI: `6`) [dax_battery_swi_extra2]
 - `TOCSV(SUBSTITUTEWITHINDEX(VALUES(Facts),"i",SUMMARIZE(Facts,Facts[Region],Facts[Quantity]),Facts[Quantity],DESC))` (Power BI: `'Facts'[Sales],'Facts'[Note],[i]
 10.5,Paid,3
@@ -1002,7 +858,6 @@ Late,4,0`) [dax_battery_swi_extra]
 10.5,2,4
 20,3,0
 -1.5,1,`) [dax_battery_swi_extra2]
-- `SUMX(SUBSTITUTEWITHINDEX(Facts,"i",ALL(Facts[Region],Facts[Quantity]),Facts[Region]),[i])` (Power BI: `15`) [dax_battery_swi_extra2]
 - `TOCSV(SUBSTITUTEWITHINDEX(ALL(Facts[Region],Facts[Quantity]),"i",DISTINCT(Facts),Facts[Region]))` (Power BI: `[i]
 4
 3
@@ -1010,7 +865,6 @@ Late,4,0`) [dax_battery_swi_extra]
 1
 0
 2`) [dax_battery_swi_extra2]
-- `COUNTROWS(SUBSTITUTEWITHINDEX(VALUES(Facts),"i",SUMMARIZE(Facts,Facts[Region],Facts[Note],Facts[Quantity]),Facts[Region]))` (Power BI: `6`) [dax_battery_swi_extra2]
 - `SUMX(SUBSTITUTEWITHINDEX(FILTER(Facts,Facts[Quantity]>1),"i",DISTINCT(Facts),Facts[Region],DESC,Facts[Note],DESC),[i]*[i])` (Power BI: `39`) [dax_battery_swi_extra2]
 - `MINX(SUBSTITUTEWITHINDEX(ALL(Facts),"i",DISTINCT(Facts),Facts[Region],DESC,Facts[Note],DESC),[i])` (Power BI: `0`) [dax_battery_swi_extra2]
 - `MINX(SUBSTITUTEWITHINDEX(VALUES(Facts),"i",ALL(Facts),Facts[Region],DESC,Facts[Note],DESC),[i])` (Power BI: `0`) [dax_battery_swi_extra2]
@@ -1020,7 +874,6 @@ Late,4,0`) [dax_battery_swi_extra]
 20,,1
 -1.5,Paid`) [dax_battery_swi_extra2]
 - `SUMX(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],Facts[Quantity],"z",1),"i",DISTINCT(Facts),Facts[Region]),[i]*[i])` (Power BI: `55`) [dax_battery_swi_extra2]
-- `MINX(SUBSTITUTEWITHINDEX(VALUES(Facts),"i",ALL(Facts[Region],Facts[Note]),Facts[Region]),[i])` (Power BI: `0`) [dax_battery_swi_extra2]
 - `TOCSV(SUBSTITUTEWITHINDEX(ALL(Facts[Region],Facts[Quantity]),"i",SUMMARIZE(Facts,Facts[Region],Facts[Note],Facts[Quantity]),Facts[Region]))` (Power BI: `[i]
 4
 5
@@ -1033,7 +886,6 @@ Late,4,0`) [dax_battery_swi_extra]
 10.5,East,3
 20,West,2
 ,No`) [dax_battery_swi_extra2]
-- `MAXX(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],Facts[Quantity],"z",1),"i",SUMMARIZE(Facts,Facts[Region],Facts[Note],Facts[Quantity]),Facts[Region],DESC,Facts[Note],DESC),[i])` (Power BI: `5`) [dax_battery_swi_extra2]
 - `TOCSV(SUBSTITUTEWITHINDEX(FILTER(Facts,Facts[Quantity]>1),"i",SUMMARIZE(Facts,Facts[Region],Facts[Note],Facts[Quantity]),Facts[Region],DESC,Facts[Note],DESC))` (Power BI: `'Facts'[Sales],[i]
 10.5,4
 20,1
@@ -1042,8 +894,6 @@ Late,4,0`) [dax_battery_swi_extra]
 - `COUNTROWS(SUBSTITUTEWITHINDEX(VALUES(Facts),"i",DISTINCT(Facts),Facts[Region]))` (Power BI: `6`) [dax_battery_swi_extra2]
 - `COUNTROWS(FILTER(SUBSTITUTEWITHINDEX(DISTINCT(Facts),"i",Facts,Facts[Region]),[i]>=1))` (Power BI: `5`) [dax_battery_swi_extra2]
 - `MAXX(SUBSTITUTEWITHINDEX(TOPN(3,VALUES(Facts[Quantity]),Facts[Quantity]),"i",TOPN(3,VALUES(Facts[Quantity]),Facts[Quantity],ASC),LEN(Facts[Quantity]),DESC),[i])` (Power BI: `BLANK`) [dax_battery_swi_extra2]
-- `COUNTROWS(FILTER(SUBSTITUTEWITHINDEX(Facts,"i",ALL(Facts[Region],Facts[Quantity]),Facts[Region]),[i]>=1))` (Power BI: `5`) [dax_battery_swi_extra2]
-- `CONCATENATEX(SUBSTITUTEWITHINDEX(Facts,"i",SUMMARIZE(Facts,Facts[Region],Facts[Note],Facts[Quantity]),Facts[Region],DESC,Facts[Note],DESC),[i],"|",[i])` (Power BI: `0|1|2|3|4|5`) [dax_battery_swi_extra2]
 - `TOCSV(SUBSTITUTEWITHINDEX(FILTER(Facts,Facts[Quantity]>1),"i",ALL(Facts[Region],Facts[Quantity]),Facts[Quantity],DESC))` (Power BI: `'Facts'[Sales],'Facts'[Note],[i]
 10.5,Paid,3
 20,,2
@@ -1056,8 +906,6 @@ Late,4,0`) [dax_battery_swi_extra]
 5
 1
 3`) [dax_battery_swi_extra2]
-- `MINX(SUBSTITUTEWITHINDEX(FILTER(Facts,Facts[Quantity]>1),"i",ALL(Facts[Region],Facts[Note]),Facts[Region]),[i])` (Power BI: `0`) [dax_battery_swi_extra2]
-- `SUMX(SUBSTITUTEWITHINDEX(ALL(Facts[Region],Facts[Quantity]),"i",SUMMARIZE(Facts,Facts[Region],Facts[Note],Facts[Quantity]),Facts[Region]),[i])` (Power BI: `15`) [dax_battery_swi_extra2]
 - `TOCSV(SUBSTITUTEWITHINDEX(UNION(VALUES(Facts[Note]),VALUES(Facts[Note])),"i",TOPN(3,VALUES(Facts[Note]),Facts[Note]),CALCULATE(SUM(Facts[Quantity])),ASC))` (Power BI: `[i]
 2
 0
@@ -1067,8 +915,6 @@ Late,4,0`) [dax_battery_swi_extra]
 1`) [dax_battery_swi_extra2]
 - `CONCATENATEX(SUBSTITUTEWITHINDEX(Facts,"i",DISTINCT(Facts),Facts[Region]),[i],"|",[i])` (Power BI: `0|1|2|3|4|5`) [dax_battery_swi_extra2]
 - `SUMX(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],Facts[Quantity],"z",1),"i",ALL(Facts),Facts[Region]),[i])` (Power BI: `15`) [dax_battery_swi_extra2]
-- `SUMX(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],Facts[Quantity],"z",1),"i",ALL(Facts[Region],Facts[Quantity]),Facts[Region]),[i])` (Power BI: `15`) [dax_battery_swi_extra2]
-- `COUNTROWS(DISTINCT(SELECTCOLUMNS(SUBSTITUTEWITHINDEX(ALL(Facts),"i",ALL(Facts[Region],Facts[Quantity]),Facts[Region]),"v",[i])))` (Power BI: `6`) [dax_battery_swi_extra2]
 - `TOCSV(SUBSTITUTEWITHINDEX(UNION(VALUES(Facts[Quantity]),VALUES(Facts[Quantity])),"i",SUMMARIZE(Facts,Facts[Quantity],"cnt",COUNTROWS(Facts)),Facts[Quantity]))` (Power BI: `[i]
 5
 4
@@ -1081,14 +927,10 @@ Late,4,0`) [dax_battery_swi_extra]
 3
 2`) [dax_battery_swi_extra2]
 - `MINX(SUBSTITUTEWITHINDEX(TOPN(3,VALUES(Facts[Quantity]),Facts[Quantity]),"i",TOPN(3,VALUES(Facts[Quantity]),Facts[Quantity],ASC),LEN(Facts[Quantity]),DESC),[i])` (Power BI: `BLANK`) [dax_battery_swi_extra2]
-- `MAXX(SUBSTITUTEWITHINDEX(ALL(Facts),"i",ALL(Facts[Region],Facts[Note]),Facts[Region]),[i])` (Power BI: `4`) [dax_battery_swi_extra2]
-- `COUNTROWS(FILTER(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],Facts[Note]),"i",ALL(Facts[Region],Facts[Note]),Facts[Region]),[i]>=1))` (Power BI: `4`) [dax_battery_swi_extra2]
 - `MAXX(SUBSTITUTEWITHINDEX(VALUES(Facts),"i",DISTINCT(Facts),Facts[Region]),[i])` (Power BI: `5`) [dax_battery_swi_extra2]
-- `COUNTROWS(FILTER(SUBSTITUTEWITHINDEX(VALUES(Facts),"i",SUMMARIZE(Facts,Facts[Region],Facts[Quantity]),Facts[Region]),[i]>=1))` (Power BI: `5`) [dax_battery_swi_extra2]
 - `TOCSV(SUBSTITUTEWITHINDEX(Facts,"i",VALUES(Facts[Region]),Facts[Region]))` (Power BI: `'Facts'[Sales],'Facts'[Quantity],'Facts'[Note],[i]
 10.5,2,Pa`) [dax_battery_swi_extra2]
 - `COUNTROWS(FILTER(SUBSTITUTEWITHINDEX(CALCULATETABLE(VALUES(Facts[Note]),Facts[Quantity]>1),"i",TOPN(3,VALUES(Facts[Note]),Facts[Note],ASC),1,ASC),[i]>=1))` (Power BI: `2`) [dax_battery_swi_extra2]
-- `MAXX(SUBSTITUTEWITHINDEX(FILTER(Facts,Facts[Quantity]>1),"i",SUMMARIZE(Facts,Facts[Region],Facts[Note],Facts[Quantity]),Facts[Region]),[i])` (Power BI: `5`) [dax_battery_swi_extra2]
 - `SUMX(SUBSTITUTEWITHINDEX(VALUES(Facts[Quantity]),"i",TOPN(3,VALUES(Facts[Quantity]),Facts[Quantity]),ISBLANK(Facts[Quantity]),ASC),[i]*[i])` (Power BI: `5`) [dax_battery_swi_extra2]
 - `COUNTROWS(FILTER(SUBSTITUTEWITHINDEX(VALUES(Facts),"i",DISTINCT(Facts),Facts[Region],DESC,Facts[Note],DESC),[i]>=1))` (Power BI: `5`) [dax_battery_swi_extra2]
 - `SUMX(SUBSTITUTEWITHINDEX(ALL(Facts),"i",ALL(Facts),Facts[Region]),[i])` (Power BI: `15`) [dax_battery_swi_extra2]
@@ -1099,9 +941,6 @@ Late,4,0`) [dax_battery_swi_extra]
 20,0
 ,2
 2.5,1`) [dax_battery_swi_extra2]
-- `COUNTROWS(SUBSTITUTEWITHINDEX(VALUES(Facts),"i",SUMMARIZE(Facts,Facts[Region],Facts[Quantity]),Facts[Region]))` (Power BI: `6`) [dax_battery_swi_extra2]
-- `AVERAGEX(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],Facts[Quantity],"z",1),"i",SUMMARIZE(Facts,Facts[Region],Facts[Quantity]),Facts[Region]),[i])` (Power BI: `2.5`) [dax_battery_swi_extra2]
-- `SUMX(SUBSTITUTEWITHINDEX(Facts,"i",ALL(Facts[Region],Facts[Quantity]),Facts[Region]),[i]*[i])` (Power BI: `55`) [dax_battery_swi_extra2]
 - `COUNTROWS(SUBSTITUTEWITHINDEX(Facts,"i",Facts,Facts[Region]))` (Power BI: `6`) [dax_battery_swi_extra2]
 - `TOCSV(SUBSTITUTEWITHINDEX(FILTER(Facts,Facts[Quantity]>1),"i",SUMMARIZE(Facts,Facts[Region],Facts[Quantity]),Facts[Region]))` (Power BI: `'Facts'[Sales],'Facts'[Note],[i]
 10.5,Paid,4
@@ -1114,8 +953,6 @@ Late,4,0`) [dax_battery_swi_extra]
 10.5,Paid,4
 20,,1
 -1.5,Paid`) [dax_battery_swi_extra2]
-- `MINX(SUBSTITUTEWITHINDEX(ALL(Facts),"i",SUMMARIZE(Facts,Facts[Region],Facts[Quantity]),Facts[Region]),[i])` (Power BI: `0`) [dax_battery_swi_extra2]
-- `CONCATENATEX(SUBSTITUTEWITHINDEX(VALUES(Facts),"i",SUMMARIZE(Facts,Facts[Region],Facts[Quantity]),Facts[Region]),[i],"|",[i])` (Power BI: `0|1|2|3|4|5`) [dax_battery_swi_extra2]
 - `TOCSV(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],Facts[Quantity],"z",1),"i",Facts,Facts[Region],DESC,Facts[Note],DESC))` (Power BI: `[z],[i]
 1,3
 1,4
@@ -1131,8 +968,6 @@ Late,4,0`) [dax_battery_swi_extra]
 2
 1
 5`) [dax_battery_swi_extra2]
-- `CONCATENATEX(SUBSTITUTEWITHINDEX(ALL(Facts),"i",ALL(Facts[Region],Facts[Quantity]),Facts[Region]),[i],"|",[i])` (Power BI: `0|1|2|3|4|5`) [dax_battery_swi_extra2]
-- `SUMX(SUBSTITUTEWITHINDEX(DISTINCT(Facts),"i",SUMMARIZE(Facts,Facts[Region],Facts[Quantity]),Facts[Region]),[i]*[i])` (Power BI: `55`) [dax_battery_swi_extra2]
 - `MAXX(SUBSTITUTEWITHINDEX(ALL(Facts[Region],Facts[Quantity]),"i",ALL(Facts),Facts[Region]),[i])` (Power BI: `5`) [dax_battery_swi_extra2]
 - `TOCSV(SUBSTITUTEWITHINDEX(ALL(Facts[Region],Facts[Quantity]),"i",Facts,Facts[Region],DESC,Facts[Note],DESC))` (Power BI: `[i]
 3
@@ -1167,11 +1002,7 @@ Late,4,0`) [dax_battery_swi_extra]
 - `COUNTROWS(SUBSTITUTEWITHINDEX(UNION(VALUES(Facts[Quantity]),VALUES(Facts[Quantity])),"i",TOPN(3,VALUES(Facts[Quantity]),Facts[Quantity]),IF(ISBLANK(Facts[Quantity]),0,1),DESC))` (Power BI: `6`) [dax_battery_swi_extra2]
 - `SUMX(SUBSTITUTEWITHINDEX(DISTINCT(Facts),"i",DISTINCT(Facts),Facts[Region],DESC,Facts[Note],DESC),[i]*[i])` (Power BI: `55`) [dax_battery_swi_extra2]
 - `CONCATENATEX(SUBSTITUTEWITHINDEX(FILTER(Facts,Facts[Quantity]>1),"i",DISTINCT(Facts),Facts[Region]),[i],"|",[i])` (Power BI: `0|2|3|5`) [dax_battery_swi_extra2]
-- `COUNTROWS(DISTINCT(SELECTCOLUMNS(SUBSTITUTEWITHINDEX(DISTINCT(Facts),"i",ALL(Facts[Region],Facts[Quantity]),Facts[Region]),"v",[i])))` (Power BI: `6`) [dax_battery_swi_extra2]
 - `AVERAGEX(SUBSTITUTEWITHINDEX(VALUES(Facts),"i",Facts,Facts[Region],DESC,Facts[Note],DESC),[i])` (Power BI: `2.5`) [dax_battery_swi_extra2]
-- `AVERAGEX(SUBSTITUTEWITHINDEX(DISTINCT(Facts),"i",SUMMARIZE(Facts,Facts[Region],Facts[Note],Facts[Quantity]),Facts[Region],DESC,Facts[Note],DESC),[i])` (Power BI: `2.5`) [dax_battery_swi_extra2]
-- `COUNTROWS(FILTER(SUBSTITUTEWITHINDEX(ALL(Facts),"i",SUMMARIZE(Facts,Facts[Region],Facts[Quantity]),Facts[Region]),[i]>=1))` (Power BI: `5`) [dax_battery_swi_extra2]
-- `MINX(SUBSTITUTEWITHINDEX(DISTINCT(Facts),"i",SUMMARIZE(Facts,Facts[Region],Facts[Note],Facts[Quantity]),Facts[Region],DESC,Facts[Note],DESC),[i])` (Power BI: `0`) [dax_battery_swi_extra2]
 - `TOCSV(SUBSTITUTEWITHINDEX(ALL(Facts[Region],Facts[Quantity]),"i",VALUES(Facts[Region]),Facts[Region]))` (Power BI: `'Facts'[Quantity],[i]
 1,2
 2,2
@@ -1184,7 +1015,6 @@ Late,4,0`) [dax_battery_swi_extra]
 10.5,2,4
 20,3,0
 -1.5,1,`) [dax_battery_swi_extra2]
-- `COUNTROWS(SUBSTITUTEWITHINDEX(VALUES(Facts),"i",SUMMARIZE(Facts,Facts[Region],Facts[Note]),Facts[Region]))` (Power BI: `6`) [dax_battery_swi_extra2]
 - `TOCSV(SUBSTITUTEWITHINDEX(UNION(VALUES(Facts[Region]),VALUES(Facts[Region])),"i",ALLNOBLANKROW(Facts[Region]),Facts[Region],TRUE()))` (Power BI: `[i]
 0
 2
@@ -1200,29 +1030,20 @@ Late,4,0`) [dax_battery_swi_extra]
 2
 3`) [dax_battery_swi_extra2]
 - `COUNTROWS(DISTINCT(SELECTCOLUMNS(SUBSTITUTEWITHINDEX(DISTINCT(Facts),"i",DISTINCT(Facts),Facts[Region],DESC,Facts[Note],DESC),"v",[i])))` (Power BI: `6`) [dax_battery_swi_extra2]
-- `MAXX(SUBSTITUTEWITHINDEX(DISTINCT(Facts),"i",ALL(Facts[Region],Facts[Note]),Facts[Region]),[i])` (Power BI: `4`) [dax_battery_swi_extra2]
 - `SUMX(SUBSTITUTEWITHINDEX(Facts,"i",ALL(Facts),Facts[Region],DESC,Facts[Note],DESC),[i])` (Power BI: `15`) [dax_battery_swi_extra2]
 - `TOCSV(SUBSTITUTEWITHINDEX(FILTER(Facts,Facts[Quantity]>1),"i",SUMMARIZE(Facts,Facts[Region],Facts[Quantity]),Facts[Quantity],DESC))` (Power BI: `'Facts'[Sales],'Facts'[Note],[i]
 10.5,Paid,3
 20,,2
 ,Late,1
 2`) [dax_battery_swi_extra2]
-- `MINX(SUBSTITUTEWITHINDEX(FILTER(Facts,Facts[Quantity]>1),"i",ALL(Facts[Region],Facts[Quantity]),Facts[Region]),[i])` (Power BI: `1`) [dax_battery_swi_extra2]
-- `COUNTROWS(FILTER(SUBSTITUTEWITHINDEX(DISTINCT(Facts),"i",ALL(Facts[Region],Facts[Note]),Facts[Region]),[i]>=1))` (Power BI: `5`) [dax_battery_swi_extra2]
 - `AVERAGEX(SUBSTITUTEWITHINDEX(CALCULATETABLE(VALUES(Facts[Note]),Facts[Quantity]>1),"i",TOPN(3,VALUES(Facts[Note]),Facts[Note],ASC),1,ASC),[i])` (Power BI: `1`) [dax_battery_swi_extra2]
-- `COUNTROWS(FILTER(SUBSTITUTEWITHINDEX(ALL(Facts),"i",SUMMARIZE(Facts,Facts[Region],Facts[Note]),Facts[Region]),[i]>=1))` (Power BI: `5`) [dax_battery_swi_extra2]
 - `COUNTROWS(FILTER(SUBSTITUTEWITHINDEX(DISTINCT(Facts),"i",ALL(Facts),Facts[Region]),[i]>=1))` (Power BI: `5`) [dax_battery_swi_extra2]
 - `AVERAGEX(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Note],"cnt",COUNTROWS(Facts)),"i",TOPN(3,VALUES(Facts[Note]),Facts[Note]),LEN(Facts[Note]),DESC),[i])` (Power BI: `1`) [dax_battery_swi_extra2]
 - `CONCATENATEX(SUBSTITUTEWITHINDEX(FILTER(Facts,Facts[Quantity]>1),"i",Facts,Facts[Region],DESC,Facts[Note],DESC),[i],"|",[i])` (Power BI: `1|2|3|5`) [dax_battery_swi_extra2]
 - `AVERAGEX(SUBSTITUTEWITHINDEX(ALLNOBLANKROW(Facts[Quantity]),"i",TOPN(3,VALUES(Facts[Quantity]),Facts[Quantity]),CALCULATE(COUNTROWS(Facts)),DESC),[i])` (Power BI: `1`) [dax_battery_swi_extra2]
-- `MINX(SUBSTITUTEWITHINDEX(VALUES(Facts),"i",ALL(Facts[Region],Facts[Quantity]),Facts[Region]),[i])` (Power BI: `0`) [dax_battery_swi_extra2]
-- `SUMX(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],Facts[Quantity],"z",1),"i",SUMMARIZE(Facts,Facts[Region],Facts[Note],Facts[Quantity]),Facts[Region],DESC,Facts[Note],DESC),[i]*[i])` (Power BI: `55`) [dax_battery_swi_extra2]
 - `SUMX(SUBSTITUTEWITHINDEX(DISTINCT(Facts),"i",Facts,Facts[Region],DESC,Facts[Note],DESC),[i]*[i])` (Power BI: `55`) [dax_battery_swi_extra2]
-- `COUNTROWS(FILTER(SUBSTITUTEWITHINDEX(ALL(Facts[Region],Facts[Quantity]),"i",SUMMARIZE(Facts,Facts[Region],Facts[Note],Facts[Quantity]),Facts[Region]),[i]>=1))` (Power BI: `5`) [dax_battery_swi_extra2]
 - `MAXX(SUBSTITUTEWITHINDEX(DISTINCT(Facts),"i",ALL(Facts),Facts[Region],DESC,Facts[Note],DESC),[i])` (Power BI: `5`) [dax_battery_swi_extra2]
-- `COUNTROWS(FILTER(SUBSTITUTEWITHINDEX(ALL(Facts),"i",ALL(Facts[Region],Facts[Note]),Facts[Region]),[i]>=1))` (Power BI: `5`) [dax_battery_swi_extra2]
 - `CONCATENATEX(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],Facts[Quantity],"z",1),"i",Facts,Facts[Region]),[i],"|",[i])` (Power BI: `0|1|2|3|4|5`) [dax_battery_swi_extra2]
-- `COUNTROWS(DISTINCT(SELECTCOLUMNS(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],Facts[Note]),"i",SUMMARIZE(Facts,Facts[Region],Facts[Note]),Facts[Region]),"v",[i])))` (Power BI: `5`) [dax_battery_swi_extra2]
 - `MAXX(SUBSTITUTEWITHINDEX(FILTER(Facts,Facts[Quantity]>1),"i",Facts,Facts[Region]),[i])` (Power BI: `5`) [dax_battery_swi_extra2]
 - `TOCSV(SUBSTITUTEWITHINDEX(FILTER(Facts,Facts[Quantity]>1),"i",ALL(Facts),Facts[Note],ASC,Facts[Quantity],ASC))` (Power BI: `[i]
 5
@@ -1230,7 +1051,6 @@ Late,4,0`) [dax_battery_swi_extra]
 2
 1`) [dax_battery_swi_extra2]
 - `SUMX(SUBSTITUTEWITHINDEX(TOPN(3,VALUES(Facts[Note]),Facts[Note],ASC),"i",TOPN(3,VALUES(Facts[Note]),Facts[Note],ASC),IF(ISBLANK(Facts[Note]),0,1),DESC),[i])` (Power BI: `3`) [dax_battery_swi_extra2]
-- `COUNTROWS(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],Facts[Quantity],"z",1),"i",SUMMARIZE(Facts,Facts[Region],Facts[Note],Facts[Quantity]),Facts[Region],DESC,Facts[Note],DESC))` (Power BI: `6`) [dax_battery_swi_extra2]
 - `TOCSV(SUBSTITUTEWITHINDEX(FILTER(Facts,Facts[Quantity]>1),"i",SUMMARIZE(Facts,Facts[Region],Facts[Note],Facts[Quantity]),Facts[Quantity],DESC))` (Power BI: `'Facts'[Sales],[i]
 10.5,3
 20,2
@@ -1247,7 +1067,6 @@ Late,4,0`) [dax_battery_swi_extra]
 1
 0
 2`) [dax_battery_swi_extra2]
-- `COUNTROWS(SUBSTITUTEWITHINDEX(Facts,"i",ALL(Facts[Region],Facts[Note]),Facts[Region]))` (Power BI: `6`) [dax_battery_swi_extra2]
 - `MINX(SUBSTITUTEWITHINDEX(TOPN(3,VALUES(Facts[Note]),Facts[Note],ASC),"i",TOPN(3,VALUES(Facts[Note]),Facts[Note],ASC),IF(ISBLANK(Facts[Note]),0,1),DESC),[i])` (Power BI: `0`) [dax_battery_swi_extra2]
 - `TOCSV(SUBSTITUTEWITHINDEX(FILTER(Facts,Facts[Quantity]>1),"i",Facts,Facts[Region],ASC,Facts[Quantity],DESC,Facts[Note],ASC))` (Power BI: `[i]
 1
@@ -1259,8 +1078,6 @@ Late,4,0`) [dax_battery_swi_extra]
 1
 2`) [dax_battery_swi_extra2]
 - `MINX(SUBSTITUTEWITHINDEX(VALUES(Facts[Note]),"i",TOPN(3,VALUES(Facts[Note]),Facts[Note]),ISBLANK(Facts[Note]),ASC),[i])` (Power BI: `0`) [dax_battery_swi_extra2]
-- `SUMX(SUBSTITUTEWITHINDEX(FILTER(Facts,Facts[Quantity]>1),"i",SUMMARIZE(Facts,Facts[Region],Facts[Note]),Facts[Region]),[i])` (Power BI: `9`) [dax_battery_swi_extra2]
-- `MAXX(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],Facts[Note]),"i",SUMMARIZE(Facts,Facts[Region],Facts[Note]),Facts[Region]),[i])` (Power BI: `4`) [dax_battery_swi_extra2]
 - `TOCSV(SUBSTITUTEWITHINDEX(FILTER(Facts,Facts[Quantity]>1),"i",SUMMARIZE(Facts,Facts[Region],Facts[Note]),Facts[Region]))` (Power BI: `'Facts'[Sales],'Facts'[Quantity],[i]
 10.5,2,4
 20,3,0
@@ -1268,10 +1085,6 @@ Late,4,0`) [dax_battery_swi_extra]
 2.`) [dax_battery_swi_extra2]
 - `CONCATENATEX(SUBSTITUTEWITHINDEX(VALUES(Facts[Quantity]),"i",TOPN(3,VALUES(Facts[Quantity]),Facts[Quantity]),ISBLANK(Facts[Quantity]),ASC),[i],"|",[i])` (Power BI: `0|1|2`) [dax_battery_swi_extra2]
 - `COUNTROWS(FILTER(SUBSTITUTEWITHINDEX(FILTER(Facts,Facts[Quantity]>1),"i",DISTINCT(Facts),Facts[Region],DESC,Facts[Note],DESC),[i]>=1))` (Power BI: `4`) [dax_battery_swi_extra2]
-- `MAXX(SUBSTITUTEWITHINDEX(ALL(Facts[Region],Facts[Quantity]),"i",SUMMARIZE(Facts,Facts[Region],Facts[Quantity]),Facts[Region]),[i])` (Power BI: `5`) [dax_battery_swi_extra2]
-- `SUMX(SUBSTITUTEWITHINDEX(ALL(Facts),"i",ALL(Facts[Region],Facts[Note]),Facts[Region]),[i]*[i])` (Power BI: `46`) [dax_battery_swi_extra2]
-- `SUMX(SUBSTITUTEWITHINDEX(ALL(Facts[Region],Facts[Quantity]),"i",ALL(Facts[Region],Facts[Quantity]),Facts[Region]),[i]*[i])` (Power BI: `55`) [dax_battery_swi_extra2]
-- `AVERAGEX(SUBSTITUTEWITHINDEX(ALL(Facts),"i",SUMMARIZE(Facts,Facts[Region],Facts[Note]),Facts[Region]),[i])` (Power BI: `2.33333333333333`) [dax_battery_swi_extra2]
 - `CONCATENATEX(SUBSTITUTEWITHINDEX(ALL(Facts),"i",Facts,Facts[Region]),[i],"|",[i])` (Power BI: `0|1|2|3|4|5`) [dax_battery_swi_extra2]
 - `COUNTROWS(FILTER(SUBSTITUTEWITHINDEX(UNION(VALUES(Facts[Quantity]),VALUES(Facts[Quantity])),"i",TOPN(3,VALUES(Facts[Quantity]),Facts[Quantity]),IF(ISBLANK(Facts[Quantity]),0,1),DESC),[i]>=1))` (Power BI: `4`) [dax_battery_swi_extra2]
 - `AVERAGEX(SUBSTITUTEWITHINDEX(Facts,"i",Facts,Facts[Region]),[i])` (Power BI: `2.5`) [dax_battery_swi_extra2]
@@ -1285,8 +1098,6 @@ Late,4,0`) [dax_battery_swi_extra]
 2`) [dax_battery_swi_extra2]
 - `CONCATENATEX(SUBSTITUTEWITHINDEX(DISTINCT(Facts),"i",ALL(Facts),Facts[Region]),[i],"|",[i])` (Power BI: `0|1|2|3|4|5`) [dax_battery_swi_extra2]
 - `MINX(SUBSTITUTEWITHINDEX(ALL(Facts),"i",ALL(Facts),Facts[Region],DESC,Facts[Note],DESC),[i])` (Power BI: `0`) [dax_battery_swi_extra2]
-- `MINX(SUBSTITUTEWITHINDEX(Facts,"i",SUMMARIZE(Facts,Facts[Region],Facts[Note]),Facts[Region]),[i])` (Power BI: `0`) [dax_battery_swi_extra2]
-- `MAXX(SUBSTITUTEWITHINDEX(VALUES(Facts),"i",SUMMARIZE(Facts,Facts[Region],Facts[Note],Facts[Quantity]),Facts[Region],DESC,Facts[Note],DESC),[i])` (Power BI: `5`) [dax_battery_swi_extra2]
 - `TOCSV(SUBSTITUTEWITHINDEX(FILTER(Facts,Facts[Quantity]>1),"i",Facts,Facts[Note],ASC,Facts[Quantity],ASC))` (Power BI: `[i]
 5
 0
@@ -1300,7 +1111,6 @@ Late,4,0`) [dax_battery_swi_extra]
 2
 0
 5`) [dax_battery_swi_extra2]
-- `COUNTROWS(FILTER(SUBSTITUTEWITHINDEX(ALL(Facts),"i",SUMMARIZE(Facts,Facts[Region],Facts[Note],Facts[Quantity]),Facts[Region]),[i]>=1))` (Power BI: `5`) [dax_battery_swi_extra2]
 - `TOCSV(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Sales],"tot",SUM(Facts[Quantity])),"i",SUMMARIZE(Facts,Facts[Note],"tot",SUM(Facts[Quantity])),CALCULATE(COUNTROWS(Facts)),DESC,Facts[Note],ASC))` (Power BI: `'Facts'[Sales],[i]
 ,2
 20,0`) [dax_battery_swi_extra2]
@@ -1316,10 +1126,8 @@ Late,4,0`) [dax_battery_swi_extra]
 3
 2`) [dax_battery_swi_extra2]
 - `CONCATENATEX(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],Facts[Quantity],"z",1),"i",ALL(Facts),Facts[Region]),[i],"|",[i])` (Power BI: `0|1|2|3|4|5`) [dax_battery_swi_extra2]
-- `AVERAGEX(SUBSTITUTEWITHINDEX(Facts,"i",SUMMARIZE(Facts,Facts[Region],Facts[Note],Facts[Quantity]),Facts[Region],DESC,Facts[Note],DESC),[i])` (Power BI: `2.5`) [dax_battery_swi_extra2]
 - `SUMX(SUBSTITUTEWITHINDEX(DISTINCT(Facts),"i",ALL(Facts),Facts[Region],DESC,Facts[Note],DESC),[i]*[i])` (Power BI: `55`) [dax_battery_swi_extra2]
 - `SUMX(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],Facts[Quantity],"z",1),"i",ALL(Facts),Facts[Region]),[i]*[i])` (Power BI: `55`) [dax_battery_swi_extra2]
-- `CONCATENATEX(SUBSTITUTEWITHINDEX(DISTINCT(Facts),"i",SUMMARIZE(Facts,Facts[Region],Facts[Note]),Facts[Region]),[i],"|",[i])` (Power BI: `0|1|2|3|4|4`) [dax_battery_swi_extra2]
 - `SUMX(SUBSTITUTEWITHINDEX(FILTER(Facts,Facts[Quantity]>1),"i",ALL(Facts),Facts[Region]),[i])` (Power BI: `10`) [dax_battery_swi_extra2]
 - `TOCSV(SUBSTITUTEWITHINDEX(ALL(Facts[Region],Facts[Quantity]),"i",ALL(Facts),Facts[Sales],ASC))` (Power BI: `[i]
 0
@@ -1335,7 +1143,6 @@ Late,4,0`) [dax_battery_swi_extra]
 5
 4`) [dax_battery_swi_extra2]
 - `COUNTROWS(FILTER(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Sales],"tot",SUM(Facts[Quantity])),"i",SUMMARIZE(Facts,Facts[Note],"tot",SUM(Facts[Quantity])),CALCULATE(COUNTROWS(Facts)),DESC,Facts[Note],ASC),[i]>=1))` (Power BI: `1`) [dax_battery_swi_extra2]
-- `MAXX(SUBSTITUTEWITHINDEX(DISTINCT(Facts),"i",ALL(Facts[Region],Facts[Quantity]),Facts[Region]),[i])` (Power BI: `5`) [dax_battery_swi_extra2]
 - `TOCSV(SUBSTITUTEWITHINDEX(UNION(VALUES(Facts[Quantity]),VALUES(Facts[Quantity])),"i",TOPN(3,VALUES(Facts[Quantity]),Facts[Quantity]),IF(ISBLANK(Facts[Quantity]),0,1),DESC))` (Power BI: `[i]
 0
 2
@@ -1347,22 +1154,16 @@ Late,4,0`) [dax_battery_swi_extra]
 10.5,2,3
 20,3,1
 -1.5,1,`) [dax_battery_swi_extra2]
-- `COUNTROWS(DISTINCT(SELECTCOLUMNS(SUBSTITUTEWITHINDEX(ALL(Facts[Region],Facts[Quantity]),"i",SUMMARIZE(Facts,Facts[Region],Facts[Quantity]),Facts[Region]),"v",[i])))` (Power BI: `6`) [dax_battery_swi_extra2]
 - `AVERAGEX(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Note],"cnt",COUNTROWS(Facts)),"i",SUMMARIZE(Facts,Facts[Region],"cnt",COUNTROWS(Facts)),Facts[Region]),[i])` (Power BI: `1`) [dax_battery_swi_extra2]
 - `SUMX(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],Facts[Quantity],"z",1),"i",Facts,Facts[Region]),[i])` (Power BI: `15`) [dax_battery_swi_extra2]
-- `COUNTROWS(SUBSTITUTEWITHINDEX(VALUES(Facts),"i",SUMMARIZE(Facts,Facts[Region],Facts[Note],Facts[Quantity]),Facts[Region],DESC,Facts[Note],DESC))` (Power BI: `6`) [dax_battery_swi_extra2]
-- `COUNTROWS(SUBSTITUTEWITHINDEX(DISTINCT(Facts),"i",SUMMARIZE(Facts,Facts[Region],Facts[Note],Facts[Quantity]),Facts[Region]))` (Power BI: `6`) [dax_battery_swi_extra2]
-- `SUMX(SUBSTITUTEWITHINDEX(ALL(Facts[Region],Facts[Quantity]),"i",SUMMARIZE(Facts,Facts[Region],Facts[Quantity]),Facts[Region]),[i]*[i])` (Power BI: `55`) [dax_battery_swi_extra2]
 - `COUNTROWS(FILTER(SUBSTITUTEWITHINDEX(DISTINCT(Facts),"i",ALL(Facts),Facts[Region],DESC,Facts[Note],DESC),[i]>=1))` (Power BI: `5`) [dax_battery_swi_extra2]
 - `MAXX(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],Facts[Quantity],"z",1),"i",DISTINCT(Facts),Facts[Region]),[i])` (Power BI: `5`) [dax_battery_swi_extra2]
 - `TOCSV(SUBSTITUTEWITHINDEX(TREATAS(VALUES(Facts[Region]),Facts[Region]),"i",TREATAS(VALUES(Facts[Region]),Facts[Region]),Facts[Region],ASC,Facts[Region],DESC))` (Power BI: `[i]
 0
 2
 1`) [dax_battery_swi_extra2]
-- `AVERAGEX(SUBSTITUTEWITHINDEX(ALL(Facts),"i",SUMMARIZE(Facts,Facts[Region],Facts[Note],Facts[Quantity]),Facts[Region]),[i])` (Power BI: `2.5`) [dax_battery_swi_extra2]
 - `COUNTROWS(FILTER(SUBSTITUTEWITHINDEX(ALLNOBLANKROW(Facts[Region]),"i",TOPN(3,VALUES(Facts[Region]),Facts[Region]),LEN(Facts[Region]),ASC),[i]>=1))` (Power BI: `2`) [dax_battery_swi_extra2]
 - `COUNTROWS(FILTER(SUBSTITUTEWITHINDEX(ALL(Facts[Region],Facts[Quantity]),"i",DISTINCT(Facts),Facts[Region],DESC,Facts[Note],DESC),[i]>=1))` (Power BI: `5`) [dax_battery_swi_extra2]
-- `MAXX(SUBSTITUTEWITHINDEX(FILTER(Facts,Facts[Quantity]>1),"i",SUMMARIZE(Facts,Facts[Region],Facts[Note]),Facts[Region]),[i])` (Power BI: `4`) [dax_battery_swi_extra2]
 - `CONCATENATEX(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],"s",SUM(Facts[Quantity])),"i",SUMMARIZECOLUMNS(Facts[Region],"t",SUM(Facts[Quantity])),0),[s]&":"&[i],"|",[s])` (Power BI: `3:1|4:2|8:0`) [dax_battery_swi_extra3]
 - `CONCATENATEX(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],"s",SUM(Facts[Quantity])),"i",SUMMARIZECOLUMNS(Facts[Region],"t",SUM(Facts[Quantity])),1),[s]&":"&[i],"|",[s])` (Power BI: `3:1|4:2|8:0`) [dax_battery_swi_extra3]
 - `CONCATENATEX(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region],"s",SUM(Facts[Quantity])),"i",SUMMARIZECOLUMNS(Facts[Region],"t",SUM(Facts[Quantity])),BLANK()),[s]&":"&[i],"|",[s])` (Power BI: `3:1|4:2|8:0`) [dax_battery_swi_extra3]
