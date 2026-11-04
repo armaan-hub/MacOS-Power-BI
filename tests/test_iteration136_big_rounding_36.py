@@ -28,6 +28,14 @@ class BigRoundingPowerTests(unittest.TestCase):
     def test_mround_of_product_of_power(self) -> None:
         self.assert_power_bi('MROUND(POWER(1.5,98)*3,3)&"z"', "542081570046953600z")
 
+    def test_product_with_a_power_is_one_double(self) -> None:
+        # measured on live Power BI: the product is a double multiplication, not a Decimal one of the power's shortest digits
+        self.assert_power_bi('3^67*3&"z"', "2.78128389443694E+32z")
+        self.assert_power_bi('1.1^67*1.1&"z"', "652.683435371441z")
+        self.assert_power_bi('2^109*13&"z"', "8.43748239511909E+33z")
+        self.assert_power_bi('5*9^75&"z"', "1.84994242517563E+72z")
+        self.assert_power_bi('7^31*7*7&"z"', "7.73099371970745E+27z")
+
 
 if __name__ == "__main__":
     unittest.main()
