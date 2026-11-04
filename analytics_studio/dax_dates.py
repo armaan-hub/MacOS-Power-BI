@@ -416,7 +416,9 @@ def date_function(function: str, args: list[object], interval: str | None = None
             whole_seconds = int(fraction_ticks) // 300
             if function == "SECOND" or (whole_seconds + 1) // unit != whole_seconds // unit:
                 raise dax_typed._error(f"{function} of a time before December 30, 1899 with a fraction of a second is not supported in the local engine.")
-    if function in {"EDATE", "EOMONTH"} and args[0] is not None and not isinstance(args[0], str):
+    if function in {"YEAR", "MONTH", "DAY", "HOUR", "MINUTE", "SECOND", "QUARTER"} and isinstance(args[0], Decimal) and not args[0].is_finite():
+        moment = EPOCH
+    elif function in {"EDATE", "EOMONTH"} and args[0] is not None and not isinstance(args[0], str):
         if not Decimal(args[0]).is_finite():
             raise dax_typed._error("An argument has the wrong data type or the result is too large or too small.")
         int_day = Decimal(args[0]).to_integral_value(rounding=ROUND_FLOOR)
