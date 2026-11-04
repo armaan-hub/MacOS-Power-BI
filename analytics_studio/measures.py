@@ -3466,19 +3466,31 @@ def _scalar_math_value(function: str, values: list[Decimal | None]) -> Decimal |
                 return -((-first) ** (Decimal(1) / Decimal(reciprocal)))  # the exact root: the exponent may be the binary double nearest 1/odd (Task 22)
         if abs(exponent) > 1000 or exponent == exponent.to_integral_value():  # Power BI computes a whole power by square-and-multiply in doubles at every magnitude (Task 46); other huge exponents amplify the difference
             overflow = MeasureRuntimeError("POWER result is outside the supported numeric range.")
+            unmodelled = ""  # a refusal is raised outside the try below: a MeasureError is a ValueError and would turn into the overflow error (IFERROR would then hide it)
             try:
                 if exponent == exponent.to_integral_value():
-                    result = _power_by_squaring(float(first), int(abs(exponent)))
+                    try:
+                        result = _power_by_squaring(float(first), int(abs(exponent)))
+                    except _InexactPower:
+                        result, unmodelled = 1.0, "A power of ten other than 10 whose squared and exact doubles differ is not modelled by the local engine."
                     if exponent < 0:
                         if not result:  # the reciprocal of an underflowed power is infinite
                             raise overflow
                         result = 1 / result if not math.isinf(result) else 0.0
+                        if first == 10 and result != float(f"1e{int(exponent)}"):
+                            unmodelled = "A negative power of ten whose reciprocal is not the exact double is not modelled by the local engine."
                 else:
                     result = math.pow(float(first), float(exponent))
             except (OverflowError, ValueError, ZeroDivisionError) as error:
                 raise overflow from error
+            if unmodelled:
+                raise dax_typed.refusal(unmodelled)
             if math.isinf(result) or math.isnan(result):
                 raise overflow
+            if result == 0 and first != 0 and 0 < exponent <= 1000:
+                return first ** exponent  # the double underflowed (it lost the sign of a negative base too): the exact power goes through the underflow checks as before; beyond 1000 the double zero was always the answer ((-0.5)^43831 is 0 in Power BI)
+            if result.is_integer() and abs(result) < 2 ** 53:
+                return Decimal(int(result))  # a whole power below 2^53 is a whole number, not '8.0'
             return Decimal(repr(result))
         if exponent < 0:  # measured: a negative power is one over the positive power, in doubles (2^-0.5 is 0.7071067811865475, one unit below the nearest)
             positive = float(first ** -exponent)
@@ -3627,6 +3639,9 @@ def _power_is_exact(base: float, exponent: float, result: float) -> bool:
 def _power_by_squaring(base: float, exponent: int) -> float:
     """base ^ exponent for a whole exponent >= 0 as Power BI computes it: square-and-multiply in IEEE doubles, the low bit of the exponent first, every product rounded
     (Task 46, measured on 49 saved whole powers; this matches all 49, correctly rounded and C pow() match 36-39)."""
+    if base == 10.0:
+        return float(f"1e{exponent}")  # measured live (Task 46, t46h): 10^n is exactly the double of 1En (10^100=1E100, 10^300=1E300, POWER(10,300)-1E300 is 0), not the squared value
+    exponent_was = exponent
     result = 1.0
     square = base
     while exponent:
@@ -3634,6 +3649,9 @@ def _power_by_squaring(base: float, exponent: int) -> float:
             result *= square
         square *= square
         exponent >>= 1
+    magnitude = round(math.log10(abs(base))) if base and math.isfinite(base) else 0
+    if magnitude in {2, 3} and abs(base) == float(f"1e{magnitude}") and exponent_was != 1 and f"{result:.14e}" != f"{float(f'1e{magnitude * exponent_was}'):.14e}":
+        raise _InexactPower()  # 100 and 1000: not measured as exact or squared; where their 15 digits differ no answer is given (saved answers show 0.1 and 1E14 squared: POWER(0.1,-300) is 9.99999999999968E+299, 1E14^15 is 9.99999999999999E+209)
     return result
 
 

@@ -3,6 +3,18 @@
  "frozen": "2026-11-04",
  "items": [
   {
+   "expr": "(10^23-1E23)&\"z\"",
+   "powerbi": "0z"
+  },
+  {
+   "expr": "(10^30-1E30)&\"z\"",
+   "powerbi": "0z"
+  },
+  {
+   "expr": "(10^50-1E50)&\"z\"",
+   "powerbi": "0z"
+  },
+  {
    "expr": "-1.5^102*7&\"z\"",
    "powerbi": "-6.40333854617964E+18z"
   },
@@ -707,6 +719,10 @@
    "powerbi": "1E+100"
   },
   {
+   "expr": "10^100=1E100",
+   "powerbi": "True"
+  },
+  {
    "expr": "10^109&\"z\"",
    "powerbi": "1E+109z"
   },
@@ -731,8 +747,24 @@
    "powerbi": "10000000000000z"
   },
   {
+   "expr": "10^200=1E200",
+   "powerbi": "True"
+  },
+  {
+   "expr": "10^22=1E22",
+   "powerbi": "True"
+  },
+  {
+   "expr": "10^23=1E23",
+   "powerbi": "True"
+  },
+  {
    "expr": "10^27-0.5",
    "powerbi": "1E+27"
+  },
+  {
+   "expr": "10^300=1E300",
+   "powerbi": "True"
   },
   {
    "expr": "10^35*7&\"z\"",
@@ -753,6 +785,10 @@
   {
    "expr": "10^48*7",
    "powerbi": "7E+48"
+  },
+  {
+   "expr": "10^50=1E50",
+   "powerbi": "True"
   },
   {
    "expr": "10^52+1",
@@ -2399,6 +2435,14 @@
    "powerbi": "527109898.5"
   },
   {
+   "expr": "CEILING(1.5^100,0.5)&\"z\"",
+   "powerbi": "4.06561177535215E+17z"
+  },
+  {
+   "expr": "CEILING(1.5^100,1)&\"z\"",
+   "powerbi": "406561177535214976z"
+  },
+  {
    "expr": "CEILING(1.5^101*3,10)&\"z\"",
    "powerbi": "1829525298908470016z"
   },
@@ -2499,6 +2543,10 @@
    "powerbi": "214358883"
   },
   {
+   "expr": "CEILING(13^17,1)&\"z\"",
+   "powerbi": "8650415919381340160z"
+  },
+  {
    "expr": "CEILING(13^4,0.5)",
    "powerbi": "28561"
   },
@@ -2545,6 +2593,10 @@
   {
    "expr": "CEILING(2.5^41,3)",
    "powerbi": "20679515313825688"
+  },
+  {
+   "expr": "CEILING(2.5^45,1)&\"z\"",
+   "powerbi": "807793566946316032z"
   },
   {
    "expr": "CEILING(2.5^7,0.5)",
@@ -2597,6 +2649,10 @@
   {
    "expr": "CEILING(3^38,3)&\"z\"",
    "powerbi": "1350851717672990976z"
+  },
+  {
+   "expr": "CEILING(3^40,1)&\"z\"",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"The result of a conversion or arithmetic operation is either too large or too small.\""
   },
   {
    "expr": "CEILING(3^6,10)",
@@ -3119,6 +3175,14 @@
    "powerbi": "138178698z"
   },
   {
+   "expr": "FLOOR(1.5^100,1)&\"z\"",
+   "powerbi": "406561177535214976z"
+  },
+  {
+   "expr": "FLOOR(1.5^100,2)&\"z\"",
+   "powerbi": "406561177535216000z"
+  },
+  {
    "expr": "FLOOR(1.5^102+0.25,1)",
    "powerbi": "914762649454233984"
   },
@@ -3187,6 +3251,10 @@
    "powerbi": "35692613665643100z"
   },
   {
+   "expr": "FLOOR(1.5^98,1)&\"z\"",
+   "powerbi": "180693856682318016z"
+  },
+  {
    "expr": "FLOOR(10^2,3)",
    "powerbi": "99"
   },
@@ -3203,6 +3271,10 @@
    "powerbi": "1792160394037"
   },
   {
+   "expr": "FLOOR(13^17,1)&\"z\"",
+   "powerbi": "8650415919381340160z"
+  },
+  {
    "expr": "FLOOR(13^6,0.5)",
    "powerbi": "4826809"
   },
@@ -3217,6 +3289,10 @@
   {
    "expr": "FLOOR(2.5^3,0.5)",
    "powerbi": "15.5"
+  },
+  {
+   "expr": "FLOOR(2.5^45,1)&\"z\"",
+   "powerbi": "807793566946316032z"
   },
   {
    "expr": "FLOOR(2.5^6-1,0.5)&\"z\"",
@@ -3275,6 +3351,10 @@
    "powerbi": "450283905890996992"
   },
   {
+   "expr": "FLOOR(3^40,1)&\"z\"",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"The result of a conversion or arithmetic operation is either too large or too small.\""
+  },
+  {
    "expr": "FLOOR(6^11*1.5,10)",
    "powerbi": "544195580"
   },
@@ -3297,6 +3377,10 @@
   {
    "expr": "FLOOR(7^21,10)",
    "powerbi": "558545864083283968"
+  },
+  {
+   "expr": "FLOOR(7^25,1)&\"z\"",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"The result of a conversion or arithmetic operation is either too large or too small.\""
   },
   {
    "expr": "FLOOR(7^8,0.5)",
@@ -4035,6 +4119,10 @@
    "powerbi": "617673396283947z"
   },
   {
+   "expr": "INT(3^40)&\"z\"",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"The result of a conversion or arithmetic operation is either too large or too small.\""
+  },
+  {
    "expr": "INT(3^7)",
    "powerbi": "2187"
   },
@@ -4085,6 +4173,10 @@
   {
    "expr": "INT(7^21*7)",
    "powerbi": "3909821048582988288"
+  },
+  {
+   "expr": "INT(7^25)&\"z\"",
+   "powerbi": "ERR:Exception calling \"Read\" with \"0\" argument(s): \"The result of a conversion or arithmetic operation is either too large or too small.\""
   },
   {
    "expr": "INT(7^7+3)",
@@ -5239,12 +5331,36 @@
    "powerbi": "8.03083807476968E+16"
   },
   {
+   "expr": "POWER(10,100)/1E100-1",
+   "powerbi": "0"
+  },
+  {
    "expr": "POWER(10,118)",
    "powerbi": "1E+118"
   },
   {
+   "expr": "POWER(10,200)/1E200-1",
+   "powerbi": "0"
+  },
+  {
+   "expr": "POWER(10,23)/1E23-1",
+   "powerbi": "0"
+  },
+  {
+   "expr": "POWER(10,300)-1E300",
+   "powerbi": "0"
+  },
+  {
+   "expr": "POWER(10,300)/1E300-1",
+   "powerbi": "0"
+  },
+  {
    "expr": "POWER(10,38)",
    "powerbi": "1E+38"
+  },
+  {
+   "expr": "POWER(10,50)/1E50-1",
+   "powerbi": "0"
   },
   {
    "expr": "POWER(11,114)&\"z\"",
@@ -6519,6 +6635,10 @@
    "powerbi": "58z"
   },
   {
+   "expr": "ROUND(1.5^100,0)&\"z\"",
+   "powerbi": "4.06561177535215E+17z"
+  },
+  {
    "expr": "ROUND(1.5^21*7,-2)",
    "powerbi": "34900"
   },
@@ -7177,6 +7297,10 @@
   {
    "expr": "ROUND(POWER(9,26),2)&\"z\"",
    "powerbi": "6.46108188922667E+24z"
+  },
+  {
+   "expr": "TRUNC(1.5^100)&\"z\"",
+   "powerbi": "4.06561177535215E+17z"
   }
  ]
 }
