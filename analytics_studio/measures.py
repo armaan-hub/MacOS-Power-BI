@@ -7198,6 +7198,8 @@ def _static_numeric_type(
         known = {t for t in types if t != "blank"}
         if len(known) == 1 and None not in known:
             return known.pop()
+        if "datetime" in known and any(r[:2] == ("call", "ERROR") for r in res_nodes):
+            return None  # Task 41: ISDOUBLE(IF(1=0,ERROR("e"),DATE(2020,1,1))) is False in Power BI (a Double beside a date is True); not settled
         return _unify_numeric_types(types)
     return None
 
@@ -16417,6 +16419,158 @@ def evaluate_measures(
             return False
         return static_t in {"currency", "decimal"}  # ISDECIMAL, ISCURRENCY
 
+    def hidden_failure_verdict(function: str, node: tuple[Any, ...], row_context: Any) -> str | None:
+        """Task 41: where a type test of a failing argument may be answered by the argument's static type.  Measured on fresh Power BI shapes
+        (never on the saved ones): the static type answers only for the shape families below; a failing value that changes kind under IF /
+        SWITCH shows its error; a wrapper or a shape that was not measured is refused.  Returns "error" (the failure shows), "refuse" (not
+        settled by the rows), or None (the static type answers).  ISBLANK is never changed."""
+        if function == "ISBLANK" or not isinstance(node, tuple) or not node:
+            return None
+        kinds = {"int64": "num", "double": "num", "currency": "num", "decimal": "num", "number": "num", "datetime": "date", "text": "text", "bool": "bool", "blank": "blank"}
+        branching = {"IF", "IF.EAGER", "SWITCH", "IFERROR", "COALESCE"}
+        measured_calls = {"ABS", "CONVERT", "DATEVALUE", "EXP", "INT", "LN", "LOG", "MOD", "POWER", "ROUND", "SIGN", "TRUNC", "VALUE"}  # failing calls with five or more measured rows
+
+        def branch_class(part: Any, defs: dict[str, Any]) -> str:
+            while isinstance(part, tuple) and part and part[0] in {"let", "var"}:
+                if part[0] == "let":
+                    defs = {**defs, **{str(name): bound for name, bound in part[1]}}
+                    part = part[2]
+                elif str(part[1]) in defs:
+                    part = defs[str(part[1])]
+                else:
+                    return "?"
+            if part == ("blank",) or part[:2] == ("call", "BLANK"):
+                return "blank"
+            if part[:2] == ("call", "ERROR"):
+                return "?"
+            return kinds.get(static_type_of(part), "?")
+
+        def fails(part: Any) -> bool:
+            try:
+                evaluate(part, row_context, allow_text=True, allow_boolean=True)
+            except Exception:
+                return True
+            return False
+
+        def children(part: Any) -> list[Any]:
+            return [child for child in (part if isinstance(part[0], tuple) else part[1:]) if isinstance(child, tuple)]
+
+        def minimal_failing(part: Any, path: list[str]) -> tuple[Any, list[str]] | None:
+            """The deepest part that fails and the names of the calls (or "let") around it."""
+            if not isinstance(part, tuple) or not part:
+                return None
+            if isinstance(part[0], tuple):
+                for child in part:
+                    found = minimal_failing(child, path)
+                    if found is not None:
+                        return found
+                return None
+            if part[0] in {"table", "string", "number", "boolean", "var", "blank"}:
+                return None
+            if part[0] == "let":
+                for _name, bound in part[1]:
+                    found = minimal_failing(bound, path + ["let"])
+                    if found is not None:
+                        return found
+                return minimal_failing(part[2], path + ["let"])
+            if not fails(part):
+                return None
+            step = path + [str(part[1]) if part[0] == "call" else str(part[0])]
+            for child in children(part):
+                found = minimal_failing(child, step)
+                if found is not None:
+                    return found
+            return part, path
+
+        def failing_dates(part: Any) -> bool:
+            """A part of the tree that fails and is typed datetime (DATEVALUE of a text, a date plus a text)."""
+            if not isinstance(part, tuple) or not part:
+                return False
+            if part[0] in {"call", "binary"} and static_type_of(part) == "datetime" and fails(part):
+                return True
+            return any(failing_dates(child) for child in children(part))
+
+        def failing_date_calls(part: Any) -> bool:
+            """A call (DATEVALUE, TIME, EDATE ...) that fails and is typed datetime, anywhere under part (a date plus a text is arithmetic, not a call)."""
+            if not isinstance(part, tuple) or not part:
+                return False
+            if part[0] == "call" and static_type_of(part) == "datetime" and fails(part):
+                return True
+            return any(failing_date_calls(child) for child in children(part))
+
+        defs: dict[str, Any] = {}
+        via_var = False
+        if node[0] == "let":
+            defs = {str(name): bound for name, bound in node[1]}
+            if node[2][0] != "var" or str(node[2][1]) not in defs:
+                # a failing datetime call read inside other arithmetic is not settled (ISNUMBER of it raises, the other tests do not)
+                return "refuse" if any(failing_date_calls(bound) for bound in defs.values()) else None
+            node, via_var = defs[str(node[2][1])], True
+        if node[0] == "call" and node[1] not in branching:
+            found = minimal_failing(node, [])
+            if found is not None and found[1]:  # a function around a failing value (not a failing call itself)
+                leaf, path = found
+                chain = [name for name in path if name != "let"]
+                if "FORMAT" in chain:
+                    return "error"
+                if chain not in (["ABS"], ["ROUND"], ["NOT"], ["INT"], ["INT", "INT"], ["NOT", "ISBLANK"]):
+                    return "refuse"
+                if leaf[0] == "call":
+                    if leaf[1] in {"ABS", "ROUND", "EXP", "INT", "SIGN", "TRUNC", "CONVERT", "VALUE"}:
+                        pass  # a failing text-to-number conversion: the static type answers
+                    elif leaf[1] in {"DATEVALUE", "TIME", "EDATE", "CEILING", "WEEKDAY", "FACT"} and set(chain) == {"INT"}:
+                        return "error"  # INT of any other failing call raised in every measured row
+                    else:
+                        return "refuse"
+                elif leaf[0] != "binary":
+                    return "refuse"
+        if failing_dates(node):
+            if function == "ISNUMERIC":
+                return "refuse"
+            if via_var and function == "ISDATETIME":
+                return "error"
+        if node[0] == "call" and node[1] not in branching:
+            found = minimal_failing(node, [])
+            if found is not None and not found[1] and node[1] not in measured_calls:
+                return "refuse"  # a failing call with fewer than five measured rows
+        if node[0] != "call":
+            return None
+        name, args = node[1], node[2]
+        if name in {"IFERROR", "COALESCE"}:
+            if any(argument[0] == "let" for argument in args) and len(args) == 2:
+                return "refuse"
+            return None
+        if name in {"IF", "IF.EAGER"}:
+            results = list(args[1:])
+        elif name == "SWITCH":
+            results = [args[index] for index in range(2, len(args), 2)]
+            if len(args) >= 4 and len(args) % 2 == 0:
+                results.append(args[-1])
+        else:
+            return None
+        classes = {result: branch_class(result, defs) for result in results}
+        failing = [result for result in results if fails(result)]
+        if not failing:
+            return None
+        present = set(classes.values()) - {"blank"}
+        if "?" in present:
+            return "refuse"
+        for result in failing:
+            leaf = minimal_failing(result, [])
+            if leaf is not None and leaf[0][0] == "call" and leaf[0][1] not in measured_calls:
+                return "refuse"
+        if len(present) > 1 and not present <= {"num", "date"}:
+            return "error"  # text or logical beside another kind: a Variant, so the failing branch shows
+        if name == "SWITCH":
+            return "refuse"  # the numeric / date branches of a SWITCH raised for some tests and not for others
+        if len(present) > 1 and any(classes[result] == "date" for result in failing):
+            return "refuse"
+        if "blank" in classes.values():
+            # a failing value beside BLANK: ISNUMBER, ISNUMERIC and ISDOUBLE raised in every measured row (a text sum, a product, EXP of a text);
+            # the other tests have fewer than five rows each, so they are not answered
+            return "error" if function in {"ISNUMBER", "ISNUMERIC", "ISDOUBLE"} and all(result[0] in {"binary", "call"} for result in failing) else "refuse"
+        return None
+
     def blank_text_kind(node: tuple[Any, ...]) -> str | None:
         """Task 37: "K0" the literal BLANK(); "K1" / "K2" a && or || (AND, OR) that is BLANK because one operand is the empty text, folded (K1)
         or read at run time (K2).  None: any other node, so the grid does not decide it."""
@@ -16628,6 +16782,12 @@ def evaluate_measures(
                 # Task 21 Part B/L: the range error of a Currency product that reads rows shows through ISCURRENCY and ISNUMBER (measured); the other type tests are not measured
                 if function in {"ISCURRENCY", "ISNUMBER"}:
                     hidden = False  # the other type tests stay answered by their type (locked: ISDOUBLE and ISINT64 of such a product are False)
+            if hidden and function in _TYPE_TESTS and len(arguments) == 1:
+                verdict = hidden_failure_verdict(function, arguments[0], row_context)
+                if verdict == "refuse":
+                    raise dax_typed.refusal("A type test of a failing value Power BI may raise the error for is not modelled by the local engine.") from failure
+                if verdict == "error":
+                    hidden = False
             answer = static_type_answer(function, static_type_of(arguments[0])) if function in _TYPE_TESTS and len(arguments) == 1 and hidden else None
             if answer is None and function == "ISDATETIME" and len(arguments) == 1 and isinstance(failure, _TextRangeFailure):
                 text_type = static_type_of(arguments[0])  # Task 21 Part G: ISDATETIME of + - * around a text beyond the Double range is answered by the type of the expression
