@@ -1,0 +1,3346 @@
+{
+ "items": [
+  {
+   "part": "A",
+   "expr": "SUMX(ADDCOLUMNS(Facts,\"q\",COALESCE(2.5&&\"\",\"\")),IF(ISBLANK([q]),1,2))",
+   "powerbi": "6",
+   "now": "LOCAL-REJECT:SUMX over a column whose branches have different types is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "SUMX(ADDCOLUMNS(Facts,\"q\",COALESCE(2.5&&\"\",1)),IF(ISBLANK([q]),1,2))",
+   "powerbi": "6",
+   "now": "LOCAL-REJECT:SUMX over a column whose branches have different types is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "SUMX(ADDCOLUMNS(Facts,\"q\",COALESCE(2.5&&\"\",\"a\")),IF(ISBLANK([q]),1,2))",
+   "powerbi": "6",
+   "now": "LOCAL-REJECT:SUMX over a column whose branches have different types is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "SUMX(ADDCOLUMNS(Facts,\"q\",COALESCE(OR(0,\"\"),\"\")),IF(ISBLANK([q]),1,2))",
+   "powerbi": "6",
+   "now": "LOCAL-REJECT:SUMX over a column whose branches have different types is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "SUMX(ADDCOLUMNS(Facts,\"q\",COALESCE(OR(0,\"\"),1)),IF(ISBLANK([q]),1,2))",
+   "powerbi": "6",
+   "now": "LOCAL-REJECT:SUMX over a column whose branches have different types is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "SUMX(ADDCOLUMNS(Facts,\"q\",COALESCE(OR(0,\"\"),\"a\")),IF(ISBLANK([q]),1,2))",
+   "powerbi": "6",
+   "now": "LOCAL-REJECT:SUMX over a column whose branches have different types is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "SUMX(ADDCOLUMNS(Facts,\"q\",COALESCE(\"0\"||LEFT(\"a\",0),\"\")),IF(ISBLANK([q]),1,2))",
+   "powerbi": "6",
+   "now": "LOCAL-REJECT:SUMX over a column whose branches have different types is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "SUMX(ADDCOLUMNS(Facts,\"q\",COALESCE(\"0\"||LEFT(\"a\",0),1)),IF(ISBLANK([q]),1,2))",
+   "powerbi": "6",
+   "now": "LOCAL-REJECT:SUMX over a column whose branches have different types is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "SUMX(ADDCOLUMNS(Facts,\"q\",COALESCE(\"0\"||LEFT(\"a\",0),\"a\")),IF(ISBLANK([q]),1,2))",
+   "powerbi": "6",
+   "now": "LOCAL-REJECT:SUMX over a column whose branches have different types is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "SUMX(ADDCOLUMNS(Facts,\"q\",COALESCE(2.5&&\"\",\"\")),IF([q],1,2))",
+   "powerbi": "12",
+   "now": "LOCAL-REJECT:SUMX over a column whose branches have different types is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "SUMX(ADDCOLUMNS(Facts,\"q\",COALESCE(2.5&&\"\",1)),IF([q],1,2))",
+   "powerbi": "12",
+   "now": "LOCAL-REJECT:SUMX over a column whose branches have different types is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "SUMX(ADDCOLUMNS(Facts,\"q\",COALESCE(2.5&&\"\",\"a\")),IF([q],1,2))",
+   "powerbi": "12",
+   "now": "LOCAL-REJECT:SUMX over a column whose branches have different types is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "SUMX(ADDCOLUMNS(Facts,\"q\",COALESCE(OR(0,\"\"),\"\")),IF([q],1,2))",
+   "powerbi": "12",
+   "now": "LOCAL-REJECT:SUMX over a column whose branches have different types is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "SUMX(ADDCOLUMNS(Facts,\"q\",COALESCE(OR(0,\"\"),1)),IF([q],1,2))",
+   "powerbi": "12",
+   "now": "LOCAL-REJECT:SUMX over a column whose branches have different types is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "SUMX(ADDCOLUMNS(Facts,\"q\",COALESCE(OR(0,\"\"),\"a\")),IF([q],1,2))",
+   "powerbi": "12",
+   "now": "LOCAL-REJECT:SUMX over a column whose branches have different types is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "SUMX(ADDCOLUMNS(Facts,\"q\",COALESCE(\"0\"||LEFT(\"a\",0),\"\")),IF([q],1,2))",
+   "powerbi": "12",
+   "now": "LOCAL-REJECT:SUMX over a column whose branches have different types is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "SUMX(ADDCOLUMNS(Facts,\"q\",COALESCE(\"0\"||LEFT(\"a\",0),1)),IF([q],1,2))",
+   "powerbi": "12",
+   "now": "LOCAL-REJECT:SUMX over a column whose branches have different types is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "SUMX(ADDCOLUMNS(Facts,\"q\",COALESCE(\"0\"||LEFT(\"a\",0),\"a\")),IF([q],1,2))",
+   "powerbi": "12",
+   "now": "LOCAL-REJECT:SUMX over a column whose branches have different types is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "SUMX(ADDCOLUMNS(Facts,\"q\",IF(TRUE(),2.5&&\"\",\"\")),IF(ISBLANK([q]),1,2))",
+   "powerbi": "6",
+   "now": "LOCAL-REJECT:SUMX over a column whose branches have different types is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "SUMX(ADDCOLUMNS(Facts,\"q\",IF(TRUE(),2.5&&\"\",\"a\")),IF(ISBLANK([q]),1,2))",
+   "powerbi": "6",
+   "now": "LOCAL-REJECT:SUMX over a column whose branches have different types is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "SUMX(ADDCOLUMNS(Facts,\"q\",IF(TRUE(),OR(0,\"\"),\"\")),IF(ISBLANK([q]),1,2))",
+   "powerbi": "6",
+   "now": "LOCAL-REJECT:SUMX over a column whose branches have different types is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "SUMX(ADDCOLUMNS(Facts,\"q\",IF(TRUE(),OR(0,\"\"),\"a\")),IF(ISBLANK([q]),1,2))",
+   "powerbi": "6",
+   "now": "LOCAL-REJECT:SUMX over a column whose branches have different types is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "SUMX(ADDCOLUMNS(Facts,\"q\",IF(TRUE(),\"0\"||LEFT(\"a\",0),\"\")),IF(ISBLANK([q]),1,2))",
+   "powerbi": "6",
+   "now": "LOCAL-REJECT:SUMX over a column whose branches have different types is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "SUMX(ADDCOLUMNS(Facts,\"q\",IF(TRUE(),\"0\"||LEFT(\"a\",0),\"a\")),IF(ISBLANK([q]),1,2))",
+   "powerbi": "6",
+   "now": "LOCAL-REJECT:SUMX over a column whose branches have different types is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "SUMX(ADDCOLUMNS(Facts,\"q\",IF(FALSE(),\"\",2.5&&\"\")),IF(ISBLANK([q]),1,2))",
+   "powerbi": "6",
+   "now": "LOCAL-REJECT:SUMX over a column whose branches have different types is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "SUMX(ADDCOLUMNS(Facts,\"q\",IF(FALSE(),\"a\",2.5&&\"\")),IF(ISBLANK([q]),1,2))",
+   "powerbi": "6",
+   "now": "LOCAL-REJECT:SUMX over a column whose branches have different types is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "SUMX(ADDCOLUMNS(Facts,\"q\",IF(FALSE(),\"\",OR(0,\"\"))),IF(ISBLANK([q]),1,2))",
+   "powerbi": "6",
+   "now": "LOCAL-REJECT:SUMX over a column whose branches have different types is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "SUMX(ADDCOLUMNS(Facts,\"q\",IF(FALSE(),\"a\",OR(0,\"\"))),IF(ISBLANK([q]),1,2))",
+   "powerbi": "6",
+   "now": "LOCAL-REJECT:SUMX over a column whose branches have different types is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "SUMX(ADDCOLUMNS(Facts,\"q\",IF(FALSE(),\"\",\"0\"||LEFT(\"a\",0))),IF(ISBLANK([q]),1,2))",
+   "powerbi": "6",
+   "now": "LOCAL-REJECT:SUMX over a column whose branches have different types is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "SUMX(ADDCOLUMNS(Facts,\"q\",IF(FALSE(),\"a\",\"0\"||LEFT(\"a\",0))),IF(ISBLANK([q]),1,2))",
+   "powerbi": "6",
+   "now": "LOCAL-REJECT:SUMX over a column whose branches have different types is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "SUMX(ADDCOLUMNS(Facts,\"q\",IF(Facts[Quantity]>2,2.5&&\"\",\"\")),IF(ISBLANK([q]),1,2))",
+   "powerbi": "9",
+   "now": "LOCAL-REJECT:SUMX over a column whose branches have different types is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "SUMX(ADDCOLUMNS(Facts,\"q\",IF(Facts[Quantity]>2,2.5&&\"\",\"a\")),IF(ISBLANK([q]),1,2))",
+   "powerbi": "9",
+   "now": "LOCAL-REJECT:SUMX over a column whose branches have different types is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "SUMX(ADDCOLUMNS(Facts,\"q\",IF(Facts[Quantity]>2,OR(0,\"\"),\"\")),IF(ISBLANK([q]),1,2))",
+   "powerbi": "9",
+   "now": "LOCAL-REJECT:SUMX over a column whose branches have different types is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "SUMX(ADDCOLUMNS(Facts,\"q\",IF(Facts[Quantity]>2,OR(0,\"\"),\"a\")),IF(ISBLANK([q]),1,2))",
+   "powerbi": "9",
+   "now": "LOCAL-REJECT:SUMX over a column whose branches have different types is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "SUMX(ADDCOLUMNS(Facts,\"q\",IF(Facts[Quantity]>2,\"0\"||LEFT(\"a\",0),\"\")),IF(ISBLANK([q]),1,2))",
+   "powerbi": "9",
+   "now": "LOCAL-REJECT:SUMX over a column whose branches have different types is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "SUMX(ADDCOLUMNS(Facts,\"q\",IF(Facts[Quantity]>2,\"0\"||LEFT(\"a\",0),\"a\")),IF(ISBLANK([q]),1,2))",
+   "powerbi": "9",
+   "now": "LOCAL-REJECT:SUMX over a column whose branches have different types is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "SUMX(ADDCOLUMNS(Facts,\"q\",IF(MAX(Facts[Quantity])>0,2.5&&\"\",\"\")),IF(ISBLANK([q]),1,2))",
+   "powerbi": "6",
+   "now": "LOCAL-REJECT:SUMX over a column whose branches have different types is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "SUMX(ADDCOLUMNS(Facts,\"q\",IF(MAX(Facts[Quantity])>0,2.5&&\"\",\"a\")),IF(ISBLANK([q]),1,2))",
+   "powerbi": "6",
+   "now": "LOCAL-REJECT:SUMX over a column whose branches have different types is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "SUMX(ADDCOLUMNS(Facts,\"q\",IF(MAX(Facts[Quantity])>0,OR(0,\"\"),\"\")),IF(ISBLANK([q]),1,2))",
+   "powerbi": "6",
+   "now": "LOCAL-REJECT:SUMX over a column whose branches have different types is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "SUMX(ADDCOLUMNS(Facts,\"q\",IF(MAX(Facts[Quantity])>0,OR(0,\"\"),\"a\")),IF(ISBLANK([q]),1,2))",
+   "powerbi": "6",
+   "now": "LOCAL-REJECT:SUMX over a column whose branches have different types is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "SUMX(ADDCOLUMNS(Facts,\"q\",IF(MAX(Facts[Quantity])>0,\"0\"||LEFT(\"a\",0),\"\")),IF(ISBLANK([q]),1,2))",
+   "powerbi": "6",
+   "now": "LOCAL-REJECT:SUMX over a column whose branches have different types is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "SUMX(ADDCOLUMNS(Facts,\"q\",IF(MAX(Facts[Quantity])>0,\"0\"||LEFT(\"a\",0),\"a\")),IF(ISBLANK([q]),1,2))",
+   "powerbi": "6",
+   "now": "LOCAL-REJECT:SUMX over a column whose branches have different types is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "SUMX(ADDCOLUMNS(Facts,\"q\",SWITCH(TRUE(),FALSE(),\"\",2.5&&\"\")),IF(ISBLANK([q]),1,2))",
+   "powerbi": "6",
+   "now": "LOCAL-REJECT:SUMX over a column whose branches have different types is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "SUMX(ADDCOLUMNS(Facts,\"q\",SWITCH(TRUE(),FALSE(),\"a\",2.5&&\"\")),IF(ISBLANK([q]),1,2))",
+   "powerbi": "6",
+   "now": "LOCAL-REJECT:SUMX over a column whose branches have different types is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "SUMX(ADDCOLUMNS(Facts,\"q\",SWITCH(TRUE(),FALSE(),\"\",OR(0,\"\"))),IF(ISBLANK([q]),1,2))",
+   "powerbi": "6",
+   "now": "LOCAL-REJECT:SUMX over a column whose branches have different types is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "SUMX(ADDCOLUMNS(Facts,\"q\",SWITCH(TRUE(),FALSE(),\"a\",OR(0,\"\"))),IF(ISBLANK([q]),1,2))",
+   "powerbi": "6",
+   "now": "LOCAL-REJECT:SUMX over a column whose branches have different types is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "SUMX(ADDCOLUMNS(Facts,\"q\",SWITCH(TRUE(),FALSE(),\"\",\"0\"||LEFT(\"a\",0))),IF(ISBLANK([q]),1,2))",
+   "powerbi": "6",
+   "now": "LOCAL-REJECT:SUMX over a column whose branches have different types is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "SUMX(ADDCOLUMNS(Facts,\"q\",SWITCH(TRUE(),FALSE(),\"a\",\"0\"||LEFT(\"a\",0))),IF(ISBLANK([q]),1,2))",
+   "powerbi": "6",
+   "now": "LOCAL-REJECT:SUMX over a column whose branches have different types is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "SUMX(ADDCOLUMNS(Facts,\"q\",SWITCH(1,1,2.5&&\"\",\"\")),IF(ISBLANK([q]),1,2))",
+   "powerbi": "6",
+   "now": "LOCAL-REJECT:SUMX over a column whose branches have different types is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "SUMX(ADDCOLUMNS(Facts,\"q\",SWITCH(1,1,2.5&&\"\",\"a\")),IF(ISBLANK([q]),1,2))",
+   "powerbi": "6",
+   "now": "LOCAL-REJECT:SUMX over a column whose branches have different types is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "SUMX(ADDCOLUMNS(Facts,\"q\",SWITCH(1,1,OR(0,\"\"),\"\")),IF(ISBLANK([q]),1,2))",
+   "powerbi": "6",
+   "now": "LOCAL-REJECT:SUMX over a column whose branches have different types is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "SUMX(ADDCOLUMNS(Facts,\"q\",SWITCH(1,1,OR(0,\"\"),\"a\")),IF(ISBLANK([q]),1,2))",
+   "powerbi": "6",
+   "now": "LOCAL-REJECT:SUMX over a column whose branches have different types is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "SUMX(ADDCOLUMNS(Facts,\"q\",SWITCH(1,1,\"0\"||LEFT(\"a\",0),\"\")),IF(ISBLANK([q]),1,2))",
+   "powerbi": "6",
+   "now": "LOCAL-REJECT:SUMX over a column whose branches have different types is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "SUMX(ADDCOLUMNS(Facts,\"q\",SWITCH(1,1,\"0\"||LEFT(\"a\",0),\"a\")),IF(ISBLANK([q]),1,2))",
+   "powerbi": "6",
+   "now": "LOCAL-REJECT:SUMX over a column whose branches have different types is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "SUMX(ADDCOLUMNS(Facts,\"q\",SWITCH(TRUE(),Facts[Quantity]>2,2.5&&\"\",\"\")),IF(ISBLANK([q]),1,2))",
+   "powerbi": "9",
+   "now": "LOCAL-REJECT:SUMX over a column whose branches have different types is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "SUMX(ADDCOLUMNS(Facts,\"q\",SWITCH(TRUE(),Facts[Quantity]>2,2.5&&\"\",\"a\")),IF(ISBLANK([q]),1,2))",
+   "powerbi": "9",
+   "now": "LOCAL-REJECT:SUMX over a column whose branches have different types is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "SUMX(ADDCOLUMNS(Facts,\"q\",SWITCH(TRUE(),Facts[Quantity]>2,OR(0,\"\"),\"\")),IF(ISBLANK([q]),1,2))",
+   "powerbi": "9",
+   "now": "LOCAL-REJECT:SUMX over a column whose branches have different types is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "SUMX(ADDCOLUMNS(Facts,\"q\",SWITCH(TRUE(),Facts[Quantity]>2,OR(0,\"\"),\"a\")),IF(ISBLANK([q]),1,2))",
+   "powerbi": "9",
+   "now": "LOCAL-REJECT:SUMX over a column whose branches have different types is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "SUMX(ADDCOLUMNS(Facts,\"q\",SWITCH(TRUE(),Facts[Quantity]>2,\"0\"||LEFT(\"a\",0),\"\")),IF(ISBLANK([q]),1,2))",
+   "powerbi": "9",
+   "now": "LOCAL-REJECT:SUMX over a column whose branches have different types is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "SUMX(ADDCOLUMNS(Facts,\"q\",SWITCH(TRUE(),Facts[Quantity]>2,\"0\"||LEFT(\"a\",0),\"a\")),IF(ISBLANK([q]),1,2))",
+   "powerbi": "9",
+   "now": "LOCAL-REJECT:SUMX over a column whose branches have different types is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "SUMX(ADDCOLUMNS(Facts,\"q\",IF.EAGER(TRUE(),2.5&&\"\",\"\")),IF(ISBLANK([q]),1,2))",
+   "powerbi": "6",
+   "now": "LOCAL-REJECT:SUMX over a column whose branches have different types is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "SUMX(ADDCOLUMNS(Facts,\"q\",IF.EAGER(TRUE(),2.5&&\"\",\"a\")),IF(ISBLANK([q]),1,2))",
+   "powerbi": "6",
+   "now": "LOCAL-REJECT:SUMX over a column whose branches have different types is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "SUMX(ADDCOLUMNS(Facts,\"q\",IF.EAGER(TRUE(),OR(0,\"\"),\"\")),IF(ISBLANK([q]),1,2))",
+   "powerbi": "6",
+   "now": "LOCAL-REJECT:SUMX over a column whose branches have different types is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "SUMX(ADDCOLUMNS(Facts,\"q\",IF.EAGER(TRUE(),OR(0,\"\"),\"a\")),IF(ISBLANK([q]),1,2))",
+   "powerbi": "6",
+   "now": "LOCAL-REJECT:SUMX over a column whose branches have different types is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "SUMX(ADDCOLUMNS(Facts,\"q\",IF.EAGER(TRUE(),\"0\"||LEFT(\"a\",0),\"\")),IF(ISBLANK([q]),1,2))",
+   "powerbi": "6",
+   "now": "LOCAL-REJECT:SUMX over a column whose branches have different types is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "SUMX(ADDCOLUMNS(Facts,\"q\",IF.EAGER(TRUE(),\"0\"||LEFT(\"a\",0),\"a\")),IF(ISBLANK([q]),1,2))",
+   "powerbi": "6",
+   "now": "LOCAL-REJECT:SUMX over a column whose branches have different types is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "SUMX(ADDCOLUMNS(Facts,\"q\",IFERROR(2.5&&\"\",\"\")),IF(ISBLANK([q]),1,2))",
+   "powerbi": "6",
+   "now": "LOCAL-REJECT:SUMX over a column whose branches have different types is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "SUMX(ADDCOLUMNS(Facts,\"q\",IFERROR(2.5&&\"\",\"a\")),IF(ISBLANK([q]),1,2))",
+   "powerbi": "6",
+   "now": "LOCAL-REJECT:SUMX over a column whose branches have different types is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "SUMX(ADDCOLUMNS(Facts,\"q\",IFERROR(OR(0,\"\"),\"\")),IF(ISBLANK([q]),1,2))",
+   "powerbi": "6",
+   "now": "LOCAL-REJECT:SUMX over a column whose branches have different types is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "SUMX(ADDCOLUMNS(Facts,\"q\",IFERROR(OR(0,\"\"),\"a\")),IF(ISBLANK([q]),1,2))",
+   "powerbi": "6",
+   "now": "LOCAL-REJECT:SUMX over a column whose branches have different types is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "SUMX(ADDCOLUMNS(Facts,\"q\",IFERROR(\"0\"||LEFT(\"a\",0),\"\")),IF(ISBLANK([q]),1,2))",
+   "powerbi": "6",
+   "now": "LOCAL-REJECT:SUMX over a column whose branches have different types is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "SUMX(ADDCOLUMNS(Facts,\"q\",IFERROR(\"0\"||LEFT(\"a\",0),\"a\")),IF(ISBLANK([q]),1,2))",
+   "powerbi": "6",
+   "now": "LOCAL-REJECT:SUMX over a column whose branches have different types is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "SUMX(ADDCOLUMNS(Facts,\"q\",IF(TRUE(),2.5&&\"\",\"\")),IF([q],1,2))",
+   "powerbi": "12",
+   "now": "LOCAL-REJECT:SUMX over a column whose branches have different types is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "SUMX(ADDCOLUMNS(Facts,\"q\",IF(TRUE(),2.5&&\"\",\"a\")),IF([q],1,2))",
+   "powerbi": "12",
+   "now": "LOCAL-REJECT:SUMX over a column whose branches have different types is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "SUMX(ADDCOLUMNS(Facts,\"q\",IF(TRUE(),OR(0,\"\"),\"\")),IF([q],1,2))",
+   "powerbi": "12",
+   "now": "LOCAL-REJECT:SUMX over a column whose branches have different types is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "SUMX(ADDCOLUMNS(Facts,\"q\",IF(TRUE(),OR(0,\"\"),\"a\")),IF([q],1,2))",
+   "powerbi": "12",
+   "now": "LOCAL-REJECT:SUMX over a column whose branches have different types is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "SUMX(ADDCOLUMNS(Facts,\"q\",IF(TRUE(),\"0\"||LEFT(\"a\",0),\"\")),IF([q],1,2))",
+   "powerbi": "12",
+   "now": "LOCAL-REJECT:SUMX over a column whose branches have different types is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "SUMX(ADDCOLUMNS(Facts,\"q\",IF(TRUE(),\"0\"||LEFT(\"a\",0),\"a\")),IF([q],1,2))",
+   "powerbi": "12",
+   "now": "LOCAL-REJECT:SUMX over a column whose branches have different types is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "SUMX(ADDCOLUMNS(Facts,\"q\",IF(FALSE(),\"\",2.5&&\"\")),IF([q],1,2))",
+   "powerbi": "12",
+   "now": "LOCAL-REJECT:SUMX over a column whose branches have different types is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "SUMX(ADDCOLUMNS(Facts,\"q\",IF(FALSE(),\"a\",2.5&&\"\")),IF([q],1,2))",
+   "powerbi": "12",
+   "now": "LOCAL-REJECT:SUMX over a column whose branches have different types is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "SUMX(ADDCOLUMNS(Facts,\"q\",IF(FALSE(),\"\",OR(0,\"\"))),IF([q],1,2))",
+   "powerbi": "12",
+   "now": "LOCAL-REJECT:SUMX over a column whose branches have different types is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "SUMX(ADDCOLUMNS(Facts,\"q\",IF(FALSE(),\"a\",OR(0,\"\"))),IF([q],1,2))",
+   "powerbi": "12",
+   "now": "LOCAL-REJECT:SUMX over a column whose branches have different types is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "SUMX(ADDCOLUMNS(Facts,\"q\",IF(FALSE(),\"\",\"0\"||LEFT(\"a\",0))),IF([q],1,2))",
+   "powerbi": "12",
+   "now": "LOCAL-REJECT:SUMX over a column whose branches have different types is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "SUMX(ADDCOLUMNS(Facts,\"q\",IF(FALSE(),\"a\",\"0\"||LEFT(\"a\",0))),IF([q],1,2))",
+   "powerbi": "12",
+   "now": "LOCAL-REJECT:SUMX over a column whose branches have different types is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "SUMX(ADDCOLUMNS(Facts,\"q\",IF(Facts[Quantity]>2,2.5&&\"\",\"\")),IF([q],1,2))",
+   "powerbi": "12",
+   "now": "LOCAL-REJECT:SUMX over a column whose branches have different types is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "SUMX(ADDCOLUMNS(Facts,\"q\",IF(Facts[Quantity]>2,OR(0,\"\"),\"\")),IF([q],1,2))",
+   "powerbi": "12",
+   "now": "LOCAL-REJECT:SUMX over a column whose branches have different types is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "SUMX(ADDCOLUMNS(Facts,\"q\",IF(Facts[Quantity]>2,\"0\"||LEFT(\"a\",0),\"\")),IF([q],1,2))",
+   "powerbi": "12",
+   "now": "LOCAL-REJECT:SUMX over a column whose branches have different types is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "SUMX(ADDCOLUMNS(Facts,\"q\",IF(MAX(Facts[Quantity])>0,2.5&&\"\",\"\")),IF([q],1,2))",
+   "powerbi": "12",
+   "now": "LOCAL-REJECT:SUMX over a column whose branches have different types is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "SUMX(ADDCOLUMNS(Facts,\"q\",IF(MAX(Facts[Quantity])>0,2.5&&\"\",\"a\")),IF([q],1,2))",
+   "powerbi": "12",
+   "now": "LOCAL-REJECT:SUMX over a column whose branches have different types is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "SUMX(ADDCOLUMNS(Facts,\"q\",IF(MAX(Facts[Quantity])>0,OR(0,\"\"),\"\")),IF([q],1,2))",
+   "powerbi": "12",
+   "now": "LOCAL-REJECT:SUMX over a column whose branches have different types is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "SUMX(ADDCOLUMNS(Facts,\"q\",IF(MAX(Facts[Quantity])>0,OR(0,\"\"),\"a\")),IF([q],1,2))",
+   "powerbi": "12",
+   "now": "LOCAL-REJECT:SUMX over a column whose branches have different types is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "SUMX(ADDCOLUMNS(Facts,\"q\",IF(MAX(Facts[Quantity])>0,\"0\"||LEFT(\"a\",0),\"\")),IF([q],1,2))",
+   "powerbi": "12",
+   "now": "LOCAL-REJECT:SUMX over a column whose branches have different types is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "SUMX(ADDCOLUMNS(Facts,\"q\",IF(MAX(Facts[Quantity])>0,\"0\"||LEFT(\"a\",0),\"a\")),IF([q],1,2))",
+   "powerbi": "12",
+   "now": "LOCAL-REJECT:SUMX over a column whose branches have different types is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "SUMX(ADDCOLUMNS(Facts,\"q\",SWITCH(TRUE(),FALSE(),\"\",2.5&&\"\")),IF([q],1,2))",
+   "powerbi": "12",
+   "now": "LOCAL-REJECT:SUMX over a column whose branches have different types is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "SUMX(ADDCOLUMNS(Facts,\"q\",SWITCH(TRUE(),FALSE(),\"a\",2.5&&\"\")),IF([q],1,2))",
+   "powerbi": "12",
+   "now": "LOCAL-REJECT:SUMX over a column whose branches have different types is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "SUMX(ADDCOLUMNS(Facts,\"q\",SWITCH(TRUE(),FALSE(),\"\",OR(0,\"\"))),IF([q],1,2))",
+   "powerbi": "12",
+   "now": "LOCAL-REJECT:SUMX over a column whose branches have different types is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "SUMX(ADDCOLUMNS(Facts,\"q\",SWITCH(TRUE(),FALSE(),\"a\",OR(0,\"\"))),IF([q],1,2))",
+   "powerbi": "12",
+   "now": "LOCAL-REJECT:SUMX over a column whose branches have different types is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "SUMX(ADDCOLUMNS(Facts,\"q\",SWITCH(TRUE(),FALSE(),\"\",\"0\"||LEFT(\"a\",0))),IF([q],1,2))",
+   "powerbi": "12",
+   "now": "LOCAL-REJECT:SUMX over a column whose branches have different types is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "SUMX(ADDCOLUMNS(Facts,\"q\",SWITCH(TRUE(),FALSE(),\"a\",\"0\"||LEFT(\"a\",0))),IF([q],1,2))",
+   "powerbi": "12",
+   "now": "LOCAL-REJECT:SUMX over a column whose branches have different types is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "SUMX(ADDCOLUMNS(Facts,\"q\",SWITCH(1,1,2.5&&\"\",\"\")),IF([q],1,2))",
+   "powerbi": "12",
+   "now": "LOCAL-REJECT:SUMX over a column whose branches have different types is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "SUMX(ADDCOLUMNS(Facts,\"q\",SWITCH(1,1,2.5&&\"\",\"a\")),IF([q],1,2))",
+   "powerbi": "12",
+   "now": "LOCAL-REJECT:SUMX over a column whose branches have different types is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "SUMX(ADDCOLUMNS(Facts,\"q\",SWITCH(1,1,OR(0,\"\"),\"\")),IF([q],1,2))",
+   "powerbi": "12",
+   "now": "LOCAL-REJECT:SUMX over a column whose branches have different types is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "SUMX(ADDCOLUMNS(Facts,\"q\",SWITCH(1,1,OR(0,\"\"),\"a\")),IF([q],1,2))",
+   "powerbi": "12",
+   "now": "LOCAL-REJECT:SUMX over a column whose branches have different types is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "SUMX(ADDCOLUMNS(Facts,\"q\",SWITCH(1,1,\"0\"||LEFT(\"a\",0),\"\")),IF([q],1,2))",
+   "powerbi": "12",
+   "now": "LOCAL-REJECT:SUMX over a column whose branches have different types is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "SUMX(ADDCOLUMNS(Facts,\"q\",SWITCH(1,1,\"0\"||LEFT(\"a\",0),\"a\")),IF([q],1,2))",
+   "powerbi": "12",
+   "now": "LOCAL-REJECT:SUMX over a column whose branches have different types is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "SUMX(ADDCOLUMNS(Facts,\"q\",SWITCH(TRUE(),Facts[Quantity]>2,2.5&&\"\",\"\")),IF([q],1,2))",
+   "powerbi": "12",
+   "now": "LOCAL-REJECT:SUMX over a column whose branches have different types is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "SUMX(ADDCOLUMNS(Facts,\"q\",SWITCH(TRUE(),Facts[Quantity]>2,OR(0,\"\"),\"\")),IF([q],1,2))",
+   "powerbi": "12",
+   "now": "LOCAL-REJECT:SUMX over a column whose branches have different types is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "SUMX(ADDCOLUMNS(Facts,\"q\",SWITCH(TRUE(),Facts[Quantity]>2,\"0\"||LEFT(\"a\",0),\"\")),IF([q],1,2))",
+   "powerbi": "12",
+   "now": "LOCAL-REJECT:SUMX over a column whose branches have different types is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "SUMX(ADDCOLUMNS(Facts,\"q\",IF.EAGER(TRUE(),2.5&&\"\",\"\")),IF([q],1,2))",
+   "powerbi": "12",
+   "now": "LOCAL-REJECT:SUMX over a column whose branches have different types is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "SUMX(ADDCOLUMNS(Facts,\"q\",IF.EAGER(TRUE(),2.5&&\"\",\"a\")),IF([q],1,2))",
+   "powerbi": "12",
+   "now": "LOCAL-REJECT:SUMX over a column whose branches have different types is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "SUMX(ADDCOLUMNS(Facts,\"q\",IF.EAGER(TRUE(),OR(0,\"\"),\"\")),IF([q],1,2))",
+   "powerbi": "12",
+   "now": "LOCAL-REJECT:SUMX over a column whose branches have different types is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "SUMX(ADDCOLUMNS(Facts,\"q\",IF.EAGER(TRUE(),OR(0,\"\"),\"a\")),IF([q],1,2))",
+   "powerbi": "12",
+   "now": "LOCAL-REJECT:SUMX over a column whose branches have different types is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "SUMX(ADDCOLUMNS(Facts,\"q\",IF.EAGER(TRUE(),\"0\"||LEFT(\"a\",0),\"\")),IF([q],1,2))",
+   "powerbi": "12",
+   "now": "LOCAL-REJECT:SUMX over a column whose branches have different types is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "SUMX(ADDCOLUMNS(Facts,\"q\",IF.EAGER(TRUE(),\"0\"||LEFT(\"a\",0),\"a\")),IF([q],1,2))",
+   "powerbi": "12",
+   "now": "LOCAL-REJECT:SUMX over a column whose branches have different types is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "SUMX(ADDCOLUMNS(Facts,\"q\",IFERROR(2.5&&\"\",\"\")),IF([q],1,2))",
+   "powerbi": "12",
+   "now": "LOCAL-REJECT:SUMX over a column whose branches have different types is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "SUMX(ADDCOLUMNS(Facts,\"q\",IFERROR(2.5&&\"\",\"a\")),IF([q],1,2))",
+   "powerbi": "12",
+   "now": "LOCAL-REJECT:SUMX over a column whose branches have different types is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "SUMX(ADDCOLUMNS(Facts,\"q\",IFERROR(OR(0,\"\"),\"\")),IF([q],1,2))",
+   "powerbi": "12",
+   "now": "LOCAL-REJECT:SUMX over a column whose branches have different types is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "SUMX(ADDCOLUMNS(Facts,\"q\",IFERROR(OR(0,\"\"),\"a\")),IF([q],1,2))",
+   "powerbi": "12",
+   "now": "LOCAL-REJECT:SUMX over a column whose branches have different types is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "SUMX(ADDCOLUMNS(Facts,\"q\",IFERROR(\"0\"||LEFT(\"a\",0),\"\")),IF([q],1,2))",
+   "powerbi": "12",
+   "now": "LOCAL-REJECT:SUMX over a column whose branches have different types is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "SUMX(ADDCOLUMNS(Facts,\"q\",IFERROR(\"0\"||LEFT(\"a\",0),\"a\")),IF([q],1,2))",
+   "powerbi": "12",
+   "now": "LOCAL-REJECT:SUMX over a column whose branches have different types is not supported in the local engine."
+  },
+  {
+   "part": "B",
+   "expr": "MAXX(KEEPFILTERS(FILTER(Facts,FALSE())),VALUES(Facts[Region]))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:Table-valued functions are not supported in measure expressions."
+  },
+  {
+   "part": "B",
+   "expr": "COUNTX(KEEPFILTERS(FILTER(Facts,FALSE())),VALUES(Facts[Region]))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:Table-valued functions are not supported in measure expressions."
+  },
+  {
+   "part": "B",
+   "expr": "COUNTAX(KEEPFILTERS(FILTER(Facts,FALSE())),VALUES(Facts[Region]))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:Table-valued functions are not supported in measure expressions."
+  },
+  {
+   "part": "B",
+   "expr": "CALCULATETABLE(ROW(\"a\",COUNTROWS(Facts)),VAR a=2 VAR t=FILTER(Facts,Facts[Quantity]>a) RETURN t)",
+   "powerbi": "3",
+   "now": "LOCAL-REJECT:Table-valued functions are not supported in measure expressions."
+  },
+  {
+   "part": "B",
+   "expr": "CALCULATETABLE(ROW(\"v\",(SELECTEDVALUE(Facts[Region]))*(MAX(Facts[Note]))),ALL(Facts))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:Table-valued functions are not supported in measure expressions."
+  },
+  {
+   "part": "B",
+   "expr": "CALCULATETABLE(ROW(\"v\",(IF(ISINSCOPE(Facts[Region]),1))*(\"a\")),ALL(Facts))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:Table-valued functions are not supported in measure expressions."
+  },
+  {
+   "part": "B",
+   "expr": "CALCULATETABLE(ROW(\"v\",ISERROR((IF(ISFILTERED(Facts[Region]),1))/(MAX(Facts[Note])))),ALL(Facts))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:Table-valued functions are not supported in measure expressions."
+  },
+  {
+   "part": "B",
+   "expr": "CALCULATETABLE(ROW(\"v\",ISERROR((VAR s=SELECTEDVALUE(Facts[Quantity]) RETURN s)*(MAX(Facts[Note])))),ALL(Facts))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:Table-valued functions are not supported in measure expressions."
+  },
+  {
+   "part": "B",
+   "expr": "CALCULATETABLE(ROW(\"v\",IFERROR((MAX(Facts[Note]))*(0||\"\"),7)),ALL(Facts))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:Table-valued functions are not supported in measure expressions."
+  },
+  {
+   "part": "B",
+   "expr": "CALCULATETABLE(ROW(\"v\",IFERROR((IF(ISINSCOPE(Facts[Region]),1))*(SQRT(-1)),7)),ALL(Facts))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:Table-valued functions are not supported in measure expressions."
+  },
+  {
+   "part": "B",
+   "expr": "CALCULATETABLE(ROW(\"v\",ISERROR((MAX(Facts[Note]))*(0||\"\"))),ALL(Facts))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:Table-valued functions are not supported in measure expressions."
+  },
+  {
+   "part": "B",
+   "expr": "CALCULATETABLE(ROW(\"v\",ISERROR((SELECTEDVALUE(Facts[Region]))/(SQRT(-1)))),ALL(Facts))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:Table-valued functions are not supported in measure expressions."
+  },
+  {
+   "part": "B",
+   "expr": "CALCULATETABLE(ROW(\"v\",IFERROR((MAX(Facts[Note]))*(IF(ISINSCOPE(Facts[Region]),1)),7)),ALL(Facts))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:Table-valued functions are not supported in measure expressions."
+  },
+  {
+   "part": "B",
+   "expr": "CALCULATETABLE(ROW(\"v\",ISERROR((MAX(Facts[Note]))*(IF(HASONEVALUE(Facts[Region]),1)))),ALL(Facts))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:Table-valued functions are not supported in measure expressions."
+  },
+  {
+   "part": "B",
+   "expr": "CALCULATETABLE(ROW(\"v\",IFERROR((MAX(Facts[Note]))*(1&&\"\"),7)),ALL(Facts))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:Table-valued functions are not supported in measure expressions."
+  },
+  {
+   "part": "B",
+   "expr": "CALCULATETABLE(ROW(\"v\",IFERROR((IF(COUNTROWS(Facts)=0,1))/(MAX(Facts[Note])),7)),ALL(Facts))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:Table-valued functions are not supported in measure expressions."
+  },
+  {
+   "part": "B",
+   "expr": "CALCULATETABLE(ROW(\"v\",IFERROR((IF(HASONEVALUE(Facts[Region]),1))/(\"a\"),7)),ALL(Facts))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:Table-valued functions are not supported in measure expressions."
+  },
+  {
+   "part": "B",
+   "expr": "CALCULATETABLE(ROW(\"v\",(0||\"\")/(\"a\")),ALL(Facts))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:Table-valued functions are not supported in measure expressions."
+  },
+  {
+   "part": "B",
+   "expr": "CALCULATETABLE(ROW(\"v\",ISERROR((SQRT(-1))*(IF(ISFILTERED(Facts[Region]),1)))),ALL(Facts))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:Table-valued functions are not supported in measure expressions."
+  },
+  {
+   "part": "B",
+   "expr": "CALCULATETABLE(ROW(\"v\",(IF(ISFILTERED(Facts[Region]),1))/(\"a\")),ALL(Facts))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:Table-valued functions are not supported in measure expressions."
+  },
+  {
+   "part": "B",
+   "expr": "CALCULATETABLE(ROW(\"v\",IFERROR((COALESCE(SELECTEDVALUE(Facts[Quantity]),BLANK()))/(MAX(Facts[Note])),7)),ALL(Facts))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:Table-valued functions are not supported in measure expressions."
+  },
+  {
+   "part": "B",
+   "expr": "CALCULATETABLE(ROW(\"v\",(1&&\"\")/(\"a\")),ALL(Facts))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:Table-valued functions are not supported in measure expressions."
+  },
+  {
+   "part": "B",
+   "expr": "CALCULATETABLE(ROW(\"v\",ISERROR((IF(COUNTROWS(Facts)=0,1))*(SQRT(-1)))),ALL(Facts))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:Table-valued functions are not supported in measure expressions."
+  },
+  {
+   "part": "B",
+   "expr": "CALCULATETABLE(ROW(\"v\",(IF(ISFILTERED(Facts[Region]),1))/(MAX(Facts[Note]))),ALL(Facts))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:Table-valued functions are not supported in measure expressions."
+  },
+  {
+   "part": "B",
+   "expr": "CALCULATETABLE(ROW(\"v\",ISERROR((SQRT(-1))*(SELECTEDVALUE(Facts[Region])))),ALL(Facts))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:Table-valued functions are not supported in measure expressions."
+  },
+  {
+   "part": "B",
+   "expr": "CALCULATETABLE(ROW(\"v\",(ERROR(\"x\"))*(VAR s=SELECTEDVALUE(Facts[Quantity]) RETURN s)),ALL(Facts))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:Table-valued functions are not supported in measure expressions."
+  },
+  {
+   "part": "B",
+   "expr": "CALCULATETABLE(ROW(\"v\",IFERROR((\"a\")*(1&&\"\"),7)),ALL(Facts))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:Table-valued functions are not supported in measure expressions."
+  },
+  {
+   "part": "B",
+   "expr": "CALCULATETABLE(ROW(\"v\",IFERROR((IF(ISINSCOPE(Facts[Region]),1))*(MAX(Facts[Note])),7)),ALL(Facts))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:Table-valued functions are not supported in measure expressions."
+  },
+  {
+   "part": "B",
+   "expr": "CALCULATETABLE(ROW(\"v\",(SELECTEDVALUE(Facts[Region]))/(MAX(Facts[Note]))),ALL(Facts))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:Table-valued functions are not supported in measure expressions."
+  },
+  {
+   "part": "B",
+   "expr": "CALCULATETABLE(ROW(\"v\",(SQRT(-1))*(SELECTEDVALUE(Facts[Quantity]))),ALL(Facts))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:Table-valued functions are not supported in measure expressions."
+  },
+  {
+   "part": "B",
+   "expr": "CALCULATETABLE(ROW(\"v\",(IF(COUNTROWS(Facts)=0,1))*(MAX(Facts[Note]))),ALL(Facts))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:Table-valued functions are not supported in measure expressions."
+  },
+  {
+   "part": "B",
+   "expr": "CALCULATETABLE(ROW(\"v\",(\"a\")*(IF(ISFILTERED(Facts[Region]),1))),ALL(Facts))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:Table-valued functions are not supported in measure expressions."
+  },
+  {
+   "part": "B",
+   "expr": "CALCULATETABLE(ROW(\"v\",(ERROR(\"x\"))*(IF(HASONEVALUE(Facts[Region]),1))),ALL(Facts))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:Table-valued functions are not supported in measure expressions."
+  },
+  {
+   "part": "B",
+   "expr": "CALCULATETABLE(ROW(\"v\",IFERROR((ERROR(\"x\"))*(SELECTEDVALUE(Facts[Quantity])),7)),ALL(Facts))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:Table-valued functions are not supported in measure expressions."
+  },
+  {
+   "part": "B",
+   "expr": "CALCULATETABLE(ROW(\"v\",(ERROR(\"x\"))*(IF(COUNTROWS(Facts)=0,1))),ALL(Facts))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:Table-valued functions are not supported in measure expressions."
+  },
+  {
+   "part": "B",
+   "expr": "CALCULATETABLE(ROW(\"v\",(SELECTEDVALUE(Facts[Region]))*(SQRT(-1))),ALL(Facts))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:Table-valued functions are not supported in measure expressions."
+  },
+  {
+   "part": "B",
+   "expr": "CALCULATETABLE(ROW(\"v\",(IF(COUNTROWS(Facts)=0,1))/(MAX(Facts[Note]))),ALL(Facts))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:Table-valued functions are not supported in measure expressions."
+  },
+  {
+   "part": "B",
+   "expr": "CALCULATETABLE(ROW(\"v\",(SELECTEDVALUE(Facts[Quantity]))/(ERROR(\"x\"))),ALL(Facts))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:Table-valued functions are not supported in measure expressions."
+  },
+  {
+   "part": "B",
+   "expr": "CALCULATETABLE(ROW(\"v\",ISERROR((IF(ISFILTERED(Facts[Region]),1))/(ERROR(\"x\")))),ALL(Facts))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:Table-valued functions are not supported in measure expressions."
+  },
+  {
+   "part": "B",
+   "expr": "CALCULATETABLE(ROW(\"v\",(IF(COUNTROWS(Facts)=0,1))*(SQRT(-1))),ALL(Facts))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:Table-valued functions are not supported in measure expressions."
+  },
+  {
+   "part": "B",
+   "expr": "CALCULATETABLE(ROW(\"v\",IFERROR((VAR s=SELECTEDVALUE(Facts[Quantity]) RETURN s)*(SQRT(-1)),7)),ALL(Facts))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:Table-valued functions are not supported in measure expressions."
+  },
+  {
+   "part": "B",
+   "expr": "CALCULATETABLE(ROW(\"v\",ISERROR((IF(COUNTROWS(Facts)=0,1))/(SQRT(-1)))),ALL(Facts))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:Table-valued functions are not supported in measure expressions."
+  },
+  {
+   "part": "B",
+   "expr": "CALCULATETABLE(ROW(\"v\",IFERROR((SQRT(-1))*(0||\"\"),7)),ALL(Facts))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:Table-valued functions are not supported in measure expressions."
+  },
+  {
+   "part": "B",
+   "expr": "CALCULATETABLE(ROW(\"v\",ISERROR((IF(ISINSCOPE(Facts[Region]),1))/(MAX(Facts[Note])))),ALL(Facts))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:Table-valued functions are not supported in measure expressions."
+  },
+  {
+   "part": "B",
+   "expr": "CALCULATETABLE(ROW(\"v\",(MAX(Facts[Note]))*(COALESCE(SELECTEDVALUE(Facts[Quantity]),BLANK()))),ALL(Facts))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:Table-valued functions are not supported in measure expressions."
+  },
+  {
+   "part": "B",
+   "expr": "CALCULATETABLE(ROW(\"v\",ISERROR((IF(HASONEVALUE(Facts[Region]),1))*(SQRT(-1)))),ALL(Facts))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:Table-valued functions are not supported in measure expressions."
+  },
+  {
+   "part": "B",
+   "expr": "CALCULATETABLE(ROW(\"v\",(\"a\")*(IF(ISINSCOPE(Facts[Region]),1))),ALL(Facts))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:Table-valued functions are not supported in measure expressions."
+  },
+  {
+   "part": "B",
+   "expr": "CALCULATETABLE(ROW(\"v\",IFERROR((IF(ISFILTERED(Facts[Region]),1))/(MAX(Facts[Note])),7)),ALL(Facts))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:Table-valued functions are not supported in measure expressions."
+  },
+  {
+   "part": "B",
+   "expr": "CALCULATETABLE(ROW(\"v\",(SELECTEDVALUE(Facts[Quantity]))*(ERROR(\"x\"))),ALL(Facts))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:Table-valued functions are not supported in measure expressions."
+  },
+  {
+   "part": "B",
+   "expr": "CALCULATETABLE(ROW(\"v\",ISERROR((MAX(Facts[Note]))*(SELECTEDVALUE(Facts[Region])))),ALL(Facts))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:Table-valued functions are not supported in measure expressions."
+  },
+  {
+   "part": "B",
+   "expr": "CALCULATETABLE(ROW(\"v\",IFERROR((IF(ISFILTERED(Facts[Region]),1))*(ERROR(\"x\")),7)),ALL(Facts))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:Table-valued functions are not supported in measure expressions."
+  },
+  {
+   "part": "B",
+   "expr": "CALCULATETABLE(ROW(\"v\",IFERROR((IF(ISFILTERED(Facts[Region]),1))/(\"a\"),7)),ALL(Facts))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:Table-valued functions are not supported in measure expressions."
+  },
+  {
+   "part": "B",
+   "expr": "CALCULATETABLE(ROW(\"v\",ISERROR((0||\"\")/(SQRT(-1)))),ALL(Facts))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:Table-valued functions are not supported in measure expressions."
+  },
+  {
+   "part": "B",
+   "expr": "CALCULATETABLE(ROW(\"v\",IFERROR((SELECTEDVALUE(Facts[Quantity]))/(\"a\"),7)),ALL(Facts))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:Table-valued functions are not supported in measure expressions."
+  },
+  {
+   "part": "B",
+   "expr": "CALCULATETABLE(ROW(\"v\",IFERROR((\"a\")*(IF(HASONEVALUE(Facts[Region]),1)),7)),ALL(Facts))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:Table-valued functions are not supported in measure expressions."
+  },
+  {
+   "part": "B",
+   "expr": "CALCULATETABLE(ROW(\"v\",(IF(COUNTROWS(Facts)=0,1))*(\"a\")),ALL(Facts))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:Table-valued functions are not supported in measure expressions."
+  },
+  {
+   "part": "B",
+   "expr": "CALCULATETABLE(ROW(\"v\",IFERROR((\"a\")*(SELECTEDVALUE(Facts[Region])),7)),ALL(Facts))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:Table-valued functions are not supported in measure expressions."
+  },
+  {
+   "part": "B",
+   "expr": "CALCULATETABLE(ROW(\"v\",(SQRT(-1))*(IF(ISINSCOPE(Facts[Region]),1))),ALL(Facts))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:Table-valued functions are not supported in measure expressions."
+  },
+  {
+   "part": "B",
+   "expr": "CALCULATETABLE(ROW(\"v\",IFERROR((SQRT(-1))*(SELECTEDVALUE(Facts[Quantity])),7)),ALL(Facts))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:Table-valued functions are not supported in measure expressions."
+  },
+  {
+   "part": "B",
+   "expr": "CALCULATETABLE(ROW(\"v\",IFERROR((MAX(Facts[Note]))*(COALESCE(SELECTEDVALUE(Facts[Quantity]),BLANK())),7)),ALL(Facts))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:Table-valued functions are not supported in measure expressions."
+  },
+  {
+   "part": "B",
+   "expr": "CALCULATETABLE(ROW(\"v\",ISERROR((SELECTEDVALUE(Facts[Region]))*(\"a\"))),ALL(Facts))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:Table-valued functions are not supported in measure expressions."
+  },
+  {
+   "part": "B",
+   "expr": "CALCULATETABLE(ROW(\"v\",(SELECTEDVALUE(Facts[Region]))/(ERROR(\"x\"))),ALL(Facts))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:Table-valued functions are not supported in measure expressions."
+  },
+  {
+   "part": "B",
+   "expr": "CALCULATETABLE(ROW(\"v\",IFERROR((IF(ISINSCOPE(Facts[Region]),1))/(\"a\"),7)),ALL(Facts))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:Table-valued functions are not supported in measure expressions."
+  },
+  {
+   "part": "B",
+   "expr": "CALCULATETABLE(ROW(\"v\",IFERROR((SQRT(-1))*(IF(HASONEVALUE(Facts[Region]),1)),7)),ALL(Facts))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:Table-valued functions are not supported in measure expressions."
+  },
+  {
+   "part": "B",
+   "expr": "CALCULATETABLE(ROW(\"v\",ISERROR((SELECTEDVALUE(Facts[Region]))*(MAX(Facts[Note])))),ALL(Facts))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:Table-valued functions are not supported in measure expressions."
+  },
+  {
+   "part": "B",
+   "expr": "CALCULATETABLE(ROW(\"v\",(VAR s=SELECTEDVALUE(Facts[Quantity]) RETURN s)/(ERROR(\"x\"))),ALL(Facts))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:Table-valued functions are not supported in measure expressions."
+  },
+  {
+   "part": "B",
+   "expr": "CALCULATETABLE(ROW(\"v\",ISERROR((SELECTEDVALUE(Facts[Quantity]))*(ERROR(\"x\")))),ALL(Facts))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:Table-valued functions are not supported in measure expressions."
+  },
+  {
+   "part": "B",
+   "expr": "CALCULATETABLE(ROW(\"v\",ISERROR((SELECTEDVALUE(Facts[Region]))/(MAX(Facts[Note])))),ALL(Facts))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:Table-valued functions are not supported in measure expressions."
+  },
+  {
+   "part": "B",
+   "expr": "CALCULATETABLE(ROW(\"v\",IFERROR((0||\"\")/(ERROR(\"x\")),7)),ALL(Facts))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:Table-valued functions are not supported in measure expressions."
+  },
+  {
+   "part": "B",
+   "expr": "CALCULATETABLE(ROW(\"v\",(SELECTEDVALUE(Facts[Quantity]))*(\"a\")),ALL(Facts))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:Table-valued functions are not supported in measure expressions."
+  },
+  {
+   "part": "B",
+   "expr": "CALCULATETABLE(ROW(\"v\",IFERROR((\"a\")*(IF(ISFILTERED(Facts[Region]),1)),7)),ALL(Facts))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:Table-valued functions are not supported in measure expressions."
+  },
+  {
+   "part": "B",
+   "expr": "CALCULATETABLE(ROW(\"v\",(SQRT(-1))*(SELECTEDVALUE(Facts[Region]))),ALL(Facts))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:Table-valued functions are not supported in measure expressions."
+  },
+  {
+   "part": "B",
+   "expr": "CALCULATETABLE(ROW(\"v\",(\"a\")*(IF(COUNTROWS(Facts)=0,1))),ALL(Facts))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:Table-valued functions are not supported in measure expressions."
+  },
+  {
+   "part": "B",
+   "expr": "CALCULATETABLE(ROW(\"v\",IFERROR((IF(COUNTROWS(Facts)=0,1))/(ERROR(\"x\")),7)),ALL(Facts))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:Table-valued functions are not supported in measure expressions."
+  },
+  {
+   "part": "B",
+   "expr": "CALCULATETABLE(ROW(\"v\",IFERROR((IF(HASONEVALUE(Facts[Region]),1))*(ERROR(\"x\")),7)),ALL(Facts))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:Table-valued functions are not supported in measure expressions."
+  },
+  {
+   "part": "B",
+   "expr": "CALCULATETABLE(ROW(\"v\",IFERROR((IF(ISINSCOPE(Facts[Region]),1))*(\"a\"),7)),ALL(Facts))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:Table-valued functions are not supported in measure expressions."
+  },
+  {
+   "part": "B",
+   "expr": "CALCULATETABLE(ROW(\"v\",ISERROR((0||\"\")*(ERROR(\"x\")))),ALL(Facts))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:Table-valued functions are not supported in measure expressions."
+  },
+  {
+   "part": "B",
+   "expr": "CALCULATETABLE(ROW(\"v\",ISERROR((VAR s=SELECTEDVALUE(Facts[Quantity]) RETURN s)*(SQRT(-1)))),ALL(Facts))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:Table-valued functions are not supported in measure expressions."
+  },
+  {
+   "part": "B",
+   "expr": "FILTER(ROW(\"v\",1),ISBLANK(IFERROR((SQRT(-1))*(SELECTEDVALUE(Facts[Region])),7)))",
+   "powerbi": "1",
+   "now": "LOCAL-REJECT:FILTER is supported only as the sole table-valued CALCULATE filter argument."
+  },
+  {
+   "part": "B",
+   "expr": "FILTER(ROW(\"v\",1),ISBLANK(IFERROR((IF(COUNTROWS(Facts)=0,1))*(\"a\"),7)))",
+   "powerbi": "1",
+   "now": "LOCAL-REJECT:FILTER is supported only as the sole table-valued CALCULATE filter argument."
+  },
+  {
+   "part": "B",
+   "expr": "FILTER(ROW(\"v\",1),ISBLANK((SELECTEDVALUE(Facts[Region]))*(MAX(Facts[Note]))))",
+   "powerbi": "1",
+   "now": "LOCAL-REJECT:FILTER is supported only as the sole table-valued CALCULATE filter argument."
+  },
+  {
+   "part": "B",
+   "expr": "FILTER(ROW(\"v\",1),ISBLANK(ISERROR((VAR s=SELECTEDVALUE(Facts[Quantity]) RETURN s)*(SQRT(-1)))))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:FILTER is supported only as the sole table-valued CALCULATE filter argument."
+  },
+  {
+   "part": "B",
+   "expr": "FILTER(ROW(\"v\",1),ISBLANK(ISERROR((SQRT(-1))*(0||\"\"))))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:FILTER is supported only as the sole table-valued CALCULATE filter argument."
+  },
+  {
+   "part": "B",
+   "expr": "FILTER(ROW(\"v\",1),ISBLANK(ISERROR((SELECTEDVALUE(Facts[Quantity]))/(MAX(Facts[Note])))))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:FILTER is supported only as the sole table-valued CALCULATE filter argument."
+  },
+  {
+   "part": "B",
+   "expr": "FILTER(ROW(\"v\",1),ISBLANK(ISERROR((SELECTEDVALUE(Facts[Quantity]))/(\"a\"))))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:FILTER is supported only as the sole table-valued CALCULATE filter argument."
+  },
+  {
+   "part": "B",
+   "expr": "FILTER(ROW(\"v\",1),ISBLANK(IFERROR((IF(COUNTROWS(Facts)=0,1))/(MAX(Facts[Note])),7)))",
+   "powerbi": "1",
+   "now": "LOCAL-REJECT:FILTER is supported only as the sole table-valued CALCULATE filter argument."
+  },
+  {
+   "part": "B",
+   "expr": "FILTER(ROW(\"v\",1),ISBLANK(IFERROR((0||\"\")/(SQRT(-1)),7)))",
+   "powerbi": "1",
+   "now": "LOCAL-REJECT:FILTER is supported only as the sole table-valued CALCULATE filter argument."
+  },
+  {
+   "part": "B",
+   "expr": "FILTER(ROW(\"v\",1),ISBLANK(ISERROR((SELECTEDVALUE(Facts[Quantity]))/(ERROR(\"x\")))))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:FILTER is supported only as the sole table-valued CALCULATE filter argument."
+  },
+  {
+   "part": "B",
+   "expr": "FILTER(ROW(\"v\",1),ISBLANK((SELECTEDVALUE(Facts[Region]))*(\"a\")))",
+   "powerbi": "1",
+   "now": "LOCAL-REJECT:FILTER is supported only as the sole table-valued CALCULATE filter argument."
+  },
+  {
+   "part": "B",
+   "expr": "FILTER(ROW(\"v\",1),ISBLANK(ISERROR((IF(ISINSCOPE(Facts[Region]),1))*(ERROR(\"x\")))))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:FILTER is supported only as the sole table-valued CALCULATE filter argument."
+  },
+  {
+   "part": "B",
+   "expr": "FILTER(ROW(\"v\",1),ISBLANK((SELECTEDVALUE(Facts[Region]))*(ERROR(\"x\"))))",
+   "powerbi": "1",
+   "now": "LOCAL-REJECT:FILTER is supported only as the sole table-valued CALCULATE filter argument."
+  },
+  {
+   "part": "B",
+   "expr": "FILTER(ROW(\"v\",1),ISBLANK(IFERROR((ERROR(\"x\"))*(IF(ISINSCOPE(Facts[Region]),1)),7)))",
+   "powerbi": "1",
+   "now": "LOCAL-REJECT:FILTER is supported only as the sole table-valued CALCULATE filter argument."
+  },
+  {
+   "part": "B",
+   "expr": "FILTER(ROW(\"v\",1),ISBLANK(ISERROR((IF(ISFILTERED(Facts[Region]),1))*(ERROR(\"x\")))))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:FILTER is supported only as the sole table-valued CALCULATE filter argument."
+  },
+  {
+   "part": "B",
+   "expr": "FILTER(ROW(\"v\",1),ISBLANK((\"a\")*(VAR s=SELECTEDVALUE(Facts[Quantity]) RETURN s)))",
+   "powerbi": "1",
+   "now": "LOCAL-REJECT:FILTER is supported only as the sole table-valued CALCULATE filter argument."
+  },
+  {
+   "part": "B",
+   "expr": "FILTER(ROW(\"v\",1),ISBLANK((ERROR(\"x\"))*(VAR s=SELECTEDVALUE(Facts[Quantity]) RETURN s)))",
+   "powerbi": "1",
+   "now": "LOCAL-REJECT:FILTER is supported only as the sole table-valued CALCULATE filter argument."
+  },
+  {
+   "part": "B",
+   "expr": "FILTER(ROW(\"v\",1),ISBLANK(ISERROR((ERROR(\"x\"))*(IF(ISFILTERED(Facts[Region]),1)))))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:FILTER is supported only as the sole table-valued CALCULATE filter argument."
+  },
+  {
+   "part": "B",
+   "expr": "FILTER(ROW(\"v\",1),ISBLANK(ISERROR((MAX(Facts[Note]))*(1&&\"\"))))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:FILTER is supported only as the sole table-valued CALCULATE filter argument."
+  },
+  {
+   "part": "B",
+   "expr": "FILTER(ROW(\"v\",1),ISBLANK((IF(ISINSCOPE(Facts[Region]),1))/(\"a\")))",
+   "powerbi": "1",
+   "now": "LOCAL-REJECT:FILTER is supported only as the sole table-valued CALCULATE filter argument."
+  },
+  {
+   "part": "B",
+   "expr": "FILTER(ROW(\"v\",1),ISBLANK(ISERROR((SELECTEDVALUE(Facts[Region]))*(SQRT(-1)))))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:FILTER is supported only as the sole table-valued CALCULATE filter argument."
+  },
+  {
+   "part": "B",
+   "expr": "FILTER(ROW(\"v\",1),ISBLANK(IFERROR((IF(COUNTROWS(Facts)=0,1))/(ERROR(\"x\")),7)))",
+   "powerbi": "1",
+   "now": "LOCAL-REJECT:FILTER is supported only as the sole table-valued CALCULATE filter argument."
+  },
+  {
+   "part": "B",
+   "expr": "FILTER(ROW(\"v\",1),ISBLANK(IFERROR((MAX(Facts[Note]))*(VAR s=SELECTEDVALUE(Facts[Quantity]) RETURN s),7)))",
+   "powerbi": "1",
+   "now": "LOCAL-REJECT:FILTER is supported only as the sole table-valued CALCULATE filter argument."
+  },
+  {
+   "part": "B",
+   "expr": "FILTER(ROW(\"v\",1),ISBLANK((ERROR(\"x\"))*(SELECTEDVALUE(Facts[Quantity]))))",
+   "powerbi": "1",
+   "now": "LOCAL-REJECT:FILTER is supported only as the sole table-valued CALCULATE filter argument."
+  },
+  {
+   "part": "B",
+   "expr": "FILTER(ROW(\"v\",1),ISBLANK(ISERROR((IF(HASONEVALUE(Facts[Region]),1))/(MAX(Facts[Note])))))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:FILTER is supported only as the sole table-valued CALCULATE filter argument."
+  },
+  {
+   "part": "B",
+   "expr": "FILTER(ROW(\"v\",1),ISBLANK(IFERROR((0||\"\")/(ERROR(\"x\")),7)))",
+   "powerbi": "1",
+   "now": "LOCAL-REJECT:FILTER is supported only as the sole table-valued CALCULATE filter argument."
+  },
+  {
+   "part": "B",
+   "expr": "FILTER(ROW(\"v\",1),ISBLANK(ISERROR((1&&\"\")*(MAX(Facts[Note])))))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:FILTER is supported only as the sole table-valued CALCULATE filter argument."
+  },
+  {
+   "part": "B",
+   "expr": "FILTER(ROW(\"v\",1),ISBLANK(ISERROR((SELECTEDVALUE(Facts[Region]))/(ERROR(\"x\")))))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:FILTER is supported only as the sole table-valued CALCULATE filter argument."
+  },
+  {
+   "part": "B",
+   "expr": "FILTER(ROW(\"v\",1),ISBLANK(IFERROR((IF(COUNTROWS(Facts)=0,1))*(ERROR(\"x\")),7)))",
+   "powerbi": "1",
+   "now": "LOCAL-REJECT:FILTER is supported only as the sole table-valued CALCULATE filter argument."
+  },
+  {
+   "part": "B",
+   "expr": "FILTER(ROW(\"v\",1),ISBLANK(ISERROR((1&&\"\")*(\"a\"))))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:FILTER is supported only as the sole table-valued CALCULATE filter argument."
+  },
+  {
+   "part": "B",
+   "expr": "FILTER(ROW(\"v\",1),ISBLANK((COALESCE(SELECTEDVALUE(Facts[Quantity]),BLANK()))*(MAX(Facts[Note]))))",
+   "powerbi": "1",
+   "now": "LOCAL-REJECT:FILTER is supported only as the sole table-valued CALCULATE filter argument."
+  },
+  {
+   "part": "B",
+   "expr": "FILTER(ROW(\"v\",1),ISBLANK(IFERROR((MAX(Facts[Note]))*(0||\"\"),7)))",
+   "powerbi": "1",
+   "now": "LOCAL-REJECT:FILTER is supported only as the sole table-valued CALCULATE filter argument."
+  },
+  {
+   "part": "B",
+   "expr": "FILTER(ROW(\"v\",1),ISBLANK((IF(ISFILTERED(Facts[Region]),1))*(\"a\")))",
+   "powerbi": "1",
+   "now": "LOCAL-REJECT:FILTER is supported only as the sole table-valued CALCULATE filter argument."
+  },
+  {
+   "part": "B",
+   "expr": "FILTER(ROW(\"v\",1),ISBLANK(IFERROR((SQRT(-1))*(0||\"\"),7)))",
+   "powerbi": "1",
+   "now": "LOCAL-REJECT:FILTER is supported only as the sole table-valued CALCULATE filter argument."
+  },
+  {
+   "part": "B",
+   "expr": "FILTER(ROW(\"v\",1),ISBLANK((ERROR(\"x\"))*(IF(COUNTROWS(Facts)=0,1))))",
+   "powerbi": "1",
+   "now": "LOCAL-REJECT:FILTER is supported only as the sole table-valued CALCULATE filter argument."
+  },
+  {
+   "part": "B",
+   "expr": "FILTER(ROW(\"v\",1),ISBLANK(ISERROR((IF(ISFILTERED(Facts[Region]),1))/(SQRT(-1)))))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:FILTER is supported only as the sole table-valued CALCULATE filter argument."
+  },
+  {
+   "part": "B",
+   "expr": "FILTER(ROW(\"v\",1),ISBLANK(IFERROR((IF(HASONEVALUE(Facts[Region]),1))/(MAX(Facts[Note])),7)))",
+   "powerbi": "1",
+   "now": "LOCAL-REJECT:FILTER is supported only as the sole table-valued CALCULATE filter argument."
+  },
+  {
+   "part": "B",
+   "expr": "FILTER(ROW(\"v\",1),ISBLANK(ISERROR((1&&\"\")/(ERROR(\"x\")))))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:FILTER is supported only as the sole table-valued CALCULATE filter argument."
+  },
+  {
+   "part": "B",
+   "expr": "FILTER(ROW(\"v\",1),ISBLANK(IFERROR((VAR s=SELECTEDVALUE(Facts[Quantity]) RETURN s)*(\"a\"),7)))",
+   "powerbi": "1",
+   "now": "LOCAL-REJECT:FILTER is supported only as the sole table-valued CALCULATE filter argument."
+  },
+  {
+   "part": "B",
+   "expr": "FILTER(ROW(\"v\",1),ISBLANK(IFERROR((VAR s=SELECTEDVALUE(Facts[Quantity]) RETURN s)/(SQRT(-1)),7)))",
+   "powerbi": "1",
+   "now": "LOCAL-REJECT:FILTER is supported only as the sole table-valued CALCULATE filter argument."
+  },
+  {
+   "part": "B",
+   "expr": "FILTER(ROW(\"v\",1),ISBLANK((\"a\")*(IF(HASONEVALUE(Facts[Region]),1))))",
+   "powerbi": "1",
+   "now": "LOCAL-REJECT:FILTER is supported only as the sole table-valued CALCULATE filter argument."
+  },
+  {
+   "part": "B",
+   "expr": "FILTER(ROW(\"v\",1),ISBLANK(ISERROR((1&&\"\")*(SQRT(-1)))))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:FILTER is supported only as the sole table-valued CALCULATE filter argument."
+  },
+  {
+   "part": "B",
+   "expr": "FILTER(ROW(\"v\",1),ISBLANK(IFERROR((SQRT(-1))*(IF(HASONEVALUE(Facts[Region]),1)),7)))",
+   "powerbi": "1",
+   "now": "LOCAL-REJECT:FILTER is supported only as the sole table-valued CALCULATE filter argument."
+  },
+  {
+   "part": "B",
+   "expr": "FILTER(ROW(\"v\",1),ISBLANK(IFERROR((SQRT(-1))*(SELECTEDVALUE(Facts[Quantity])),7)))",
+   "powerbi": "1",
+   "now": "LOCAL-REJECT:FILTER is supported only as the sole table-valued CALCULATE filter argument."
+  },
+  {
+   "part": "B",
+   "expr": "FILTER(ROW(\"v\",1),ISBLANK(IFERROR((ERROR(\"x\"))*(0||\"\"),7)))",
+   "powerbi": "1",
+   "now": "LOCAL-REJECT:FILTER is supported only as the sole table-valued CALCULATE filter argument."
+  },
+  {
+   "part": "B",
+   "expr": "FILTER(ROW(\"v\",1),ISBLANK(IFERROR((COALESCE(SELECTEDVALUE(Facts[Quantity]),BLANK()))*(MAX(Facts[Note])),7)))",
+   "powerbi": "1",
+   "now": "LOCAL-REJECT:FILTER is supported only as the sole table-valued CALCULATE filter argument."
+  },
+  {
+   "part": "B",
+   "expr": "FILTER(ROW(\"v\",1),ISBLANK(ISERROR((0||\"\")/(SQRT(-1)))))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:FILTER is supported only as the sole table-valued CALCULATE filter argument."
+  },
+  {
+   "part": "B",
+   "expr": "FILTER(ROW(\"v\",1),ISBLANK(ISERROR((ERROR(\"x\"))*(SELECTEDVALUE(Facts[Quantity])))))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:FILTER is supported only as the sole table-valued CALCULATE filter argument."
+  },
+  {
+   "part": "B",
+   "expr": "FILTER(ROW(\"v\",1),ISBLANK(ISERROR((IF(ISFILTERED(Facts[Region]),1))/(ERROR(\"x\")))))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:FILTER is supported only as the sole table-valued CALCULATE filter argument."
+  },
+  {
+   "part": "B",
+   "expr": "FILTER(ROW(\"v\",1),ISBLANK((\"a\")*(IF(COUNTROWS(Facts)=0,1))))",
+   "powerbi": "1",
+   "now": "LOCAL-REJECT:FILTER is supported only as the sole table-valued CALCULATE filter argument."
+  },
+  {
+   "part": "B",
+   "expr": "FILTER(ROW(\"v\",1),ISBLANK(ISERROR((COALESCE(SELECTEDVALUE(Facts[Quantity]),BLANK()))*(SQRT(-1)))))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:FILTER is supported only as the sole table-valued CALCULATE filter argument."
+  },
+  {
+   "part": "B",
+   "expr": "FILTER(ROW(\"v\",1),ISBLANK(IFERROR((IF(ISFILTERED(Facts[Region]),1))*(ERROR(\"x\")),7)))",
+   "powerbi": "1",
+   "now": "LOCAL-REJECT:FILTER is supported only as the sole table-valued CALCULATE filter argument."
+  },
+  {
+   "part": "B",
+   "expr": "FILTER(ROW(\"v\",1),ISBLANK((SQRT(-1))*(IF(ISINSCOPE(Facts[Region]),1))))",
+   "powerbi": "1",
+   "now": "LOCAL-REJECT:FILTER is supported only as the sole table-valued CALCULATE filter argument."
+  },
+  {
+   "part": "B",
+   "expr": "FILTER(ROW(\"v\",1),ISBLANK(IFERROR((\"a\")*(VAR s=SELECTEDVALUE(Facts[Quantity]) RETURN s),7)))",
+   "powerbi": "1",
+   "now": "LOCAL-REJECT:FILTER is supported only as the sole table-valued CALCULATE filter argument."
+  },
+  {
+   "part": "B",
+   "expr": "FILTER(ROW(\"v\",1),ISBLANK((SQRT(-1))*(1&&\"\")))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:FILTER is supported only as the sole table-valued CALCULATE filter argument."
+  },
+  {
+   "part": "B",
+   "expr": "FILTER(ROW(\"v\",1),ISBLANK(IFERROR((COALESCE(SELECTEDVALUE(Facts[Quantity]),BLANK()))/(\"a\"),7)))",
+   "powerbi": "1",
+   "now": "LOCAL-REJECT:FILTER is supported only as the sole table-valued CALCULATE filter argument."
+  },
+  {
+   "part": "B",
+   "expr": "FILTER(ROW(\"v\",1),ISBLANK((IF(COUNTROWS(Facts)=0,1))*(ERROR(\"x\"))))",
+   "powerbi": "1",
+   "now": "LOCAL-REJECT:FILTER is supported only as the sole table-valued CALCULATE filter argument."
+  },
+  {
+   "part": "B",
+   "expr": "FILTER(ROW(\"v\",1),ISBLANK(ISERROR((0||\"\")/(\"a\"))))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:FILTER is supported only as the sole table-valued CALCULATE filter argument."
+  },
+  {
+   "part": "B",
+   "expr": "FILTER(ROW(\"v\",1),ISBLANK(IFERROR((COALESCE(SELECTEDVALUE(Facts[Quantity]),BLANK()))*(ERROR(\"x\")),7)))",
+   "powerbi": "1",
+   "now": "LOCAL-REJECT:FILTER is supported only as the sole table-valued CALCULATE filter argument."
+  },
+  {
+   "part": "B",
+   "expr": "FILTER(ROW(\"v\",1),ISBLANK(IFERROR((IF(ISFILTERED(Facts[Region]),1))*(\"a\"),7)))",
+   "powerbi": "1",
+   "now": "LOCAL-REJECT:FILTER is supported only as the sole table-valued CALCULATE filter argument."
+  },
+  {
+   "part": "B",
+   "expr": "FILTER(ROW(\"v\",1),ISBLANK(ISERROR((IF(HASONEVALUE(Facts[Region]),1))/(\"a\"))))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:FILTER is supported only as the sole table-valued CALCULATE filter argument."
+  },
+  {
+   "part": "B",
+   "expr": "FILTER(ROW(\"v\",1),ISBLANK((SQRT(-1))*(IF(ISFILTERED(Facts[Region]),1))))",
+   "powerbi": "1",
+   "now": "LOCAL-REJECT:FILTER is supported only as the sole table-valued CALCULATE filter argument."
+  },
+  {
+   "part": "B",
+   "expr": "FILTER(ROW(\"v\",1),ISBLANK(IFERROR((0||\"\")*(SQRT(-1)),7)))",
+   "powerbi": "1",
+   "now": "LOCAL-REJECT:FILTER is supported only as the sole table-valued CALCULATE filter argument."
+  },
+  {
+   "part": "B",
+   "expr": "FILTER(ROW(\"v\",1),ISBLANK((MAX(Facts[Note]))*(IF(ISFILTERED(Facts[Region]),1))))",
+   "powerbi": "1",
+   "now": "LOCAL-REJECT:FILTER is supported only as the sole table-valued CALCULATE filter argument."
+  },
+  {
+   "part": "B",
+   "expr": "FILTER(ROW(\"v\",1),ISBLANK(ISERROR((\"a\")*(1&&\"\"))))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:FILTER is supported only as the sole table-valued CALCULATE filter argument."
+  },
+  {
+   "part": "B",
+   "expr": "FILTER(ROW(\"v\",1),ISBLANK(IFERROR((VAR s=SELECTEDVALUE(Facts[Quantity]) RETURN s)/(\"a\"),7)))",
+   "powerbi": "1",
+   "now": "LOCAL-REJECT:FILTER is supported only as the sole table-valued CALCULATE filter argument."
+  },
+  {
+   "part": "B",
+   "expr": "FILTER(ROW(\"v\",1),ISBLANK(IFERROR((MAX(Facts[Note]))*(IF(COUNTROWS(Facts)=0,1)),7)))",
+   "powerbi": "1",
+   "now": "LOCAL-REJECT:FILTER is supported only as the sole table-valued CALCULATE filter argument."
+  },
+  {
+   "part": "B",
+   "expr": "FILTER(ROW(\"v\",1),ISBLANK(ISERROR((\"a\")*(SELECTEDVALUE(Facts[Quantity])))))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:FILTER is supported only as the sole table-valued CALCULATE filter argument."
+  },
+  {
+   "part": "B",
+   "expr": "FILTER(ROW(\"v\",1),ISBLANK((VAR s=SELECTEDVALUE(Facts[Quantity]) RETURN s)/(\"a\")))",
+   "powerbi": "1",
+   "now": "LOCAL-REJECT:FILTER is supported only as the sole table-valued CALCULATE filter argument."
+  },
+  {
+   "part": "A",
+   "expr": "MEDIANX(Facts,IF(1=1,CURRENCY(3),Facts[Region]))",
+   "powerbi": "3",
+   "now": "LOCAL-REJECT:MEDIANX over a Currency in a conditional is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "MEDIANX(Facts,IF.EAGER(TRUE(),Facts[Quantity],CURRENCY(3)))",
+   "powerbi": "2.5",
+   "now": "LOCAL-REJECT:MEDIANX over a Currency in a conditional is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "MEDIANX(Facts,IF(TRUE(),Facts[Quantity],CURRENCY(3)))",
+   "powerbi": "2.5",
+   "now": "LOCAL-REJECT:MEDIANX over a Currency in a conditional is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "MEDIANX(Facts,IF(TRUE(),Facts[Region],CURRENCY(3)))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:MEDIANX over a Currency in a conditional is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "MEDIANX(Facts,IF(1=1,Facts[Region],CURRENCY(3)))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:MEDIANX over a Currency in a conditional is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "MEDIANX(Facts,IF.EAGER(1=1,CURRENCY(3),Facts[Region]))",
+   "powerbi": "3",
+   "now": "LOCAL-REJECT:MEDIANX over a Currency in a conditional is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "MEDIANX(Facts,IF(TRUE(),CURRENCY(3),Facts[Sales]))",
+   "powerbi": "3",
+   "now": "LOCAL-REJECT:MEDIANX over a Currency in a conditional is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "MEDIANX(Facts,IF.EAGER(FALSE(),Facts[Region],CURRENCY(3)))",
+   "powerbi": "3",
+   "now": "LOCAL-REJECT:MEDIANX over a Currency in a conditional is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "MEDIANX(Facts,IF(FALSE(),Facts[Region],CURRENCY(3)))",
+   "powerbi": "3",
+   "now": "LOCAL-REJECT:MEDIANX over a Currency in a conditional is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "MEDIANX(TOPN(2,Facts,Facts[Quantity]),IF(Facts[Quantity]>2,Facts[Quantity]&\"\",CURRENCY(1.23456)))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:MEDIANX over a Currency in a conditional is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "MEDIANX(Facts,IFERROR(CURRENCY(3),INT(2.5)))",
+   "powerbi": "3",
+   "now": "LOCAL-REJECT:MEDIANX over a Currency in a conditional is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "MEDIANX(Facts,COALESCE(2.5,CURRENCY(1.23456)))",
+   "powerbi": "2.5",
+   "now": "LOCAL-REJECT:MEDIANX over a Currency in a conditional is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "MEDIANX(Facts,IF(DATE(2020,1,1),CURRENCY(3),\"5\"))",
+   "powerbi": "3",
+   "now": "LOCAL-REJECT:MEDIANX over a Currency in a conditional is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "MEDIANX(Facts,IF(FALSE(),CURRENCY(1.23456)))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:MEDIANX over a Currency in a conditional is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "MEDIANX(FILTER(Facts,Facts[Region]=\"East\"),VAR x=Facts[Quantity]&\"\" RETURN IF(\"TRUE\",x,CURRENCY(1.23456)))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:MEDIANX over a Currency in a conditional is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "MEDIANX(CROSSJOIN(VALUES(Facts[Region]),VALUES(Facts[Note])),IFERROR(CURRENCY(3),BLANK()))",
+   "powerbi": "3",
+   "now": "LOCAL-REJECT:MEDIANX over a Currency in a conditional is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "MEDIANX(VALUES(Facts[Region]),IF(\"TRUE\",\"5\",CURRENCY(3)))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:MEDIANX over a Currency in a conditional is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "MEDIANX(VALUES(Facts[Region]),IFERROR(CURRENCY(1.23456),MAX(Facts[Region])))",
+   "powerbi": "1.2346",
+   "now": "LOCAL-REJECT:MEDIANX over a Currency in a conditional is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "MEDIANX(FILTER(Facts,Facts[Quantity]>2),IF(FALSE(),CURRENCY(3),Facts[Region]))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:MEDIANX over a Currency in a conditional is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "MEDIANX(Facts,COALESCE(BLANK(),CURRENCY(1.23456),-Facts[Quantity]))",
+   "powerbi": "1.2346",
+   "now": "LOCAL-REJECT:MEDIANX over a Currency in a conditional is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "MEDIANX(ALL(Facts),IF(\"TRUE\",CURRENCY(1.23456),NOT(TRUE())))",
+   "powerbi": "1.2346",
+   "now": "LOCAL-REJECT:MEDIANX over a Currency in a conditional is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "MEDIANX(FILTER(Facts,Facts[Quantity]>2),IF(0/0,-Facts[Quantity],CURRENCY(1.23456)))",
+   "powerbi": "-4",
+   "now": "LOCAL-REJECT:MEDIANX over a Currency in a conditional is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "MEDIANX(SELECTCOLUMNS(Facts,\"z\",Facts[Quantity]),IF(\"TRUE\",CURRENCY(3),1))",
+   "powerbi": "3",
+   "now": "LOCAL-REJECT:MEDIANX over a Currency in a conditional is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "MEDIANX(SUMMARIZE(Facts,Facts[Region]),COALESCE(CURRENCY(1.23456),1+1))",
+   "powerbi": "1.2346",
+   "now": "LOCAL-REJECT:MEDIANX over a Currency in a conditional is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "MEDIANX(DISTINCT(Facts),IF(1=2,CURRENCY(1.23456)))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:MEDIANX over a Currency in a conditional is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "MEDIANX(Facts,IF(TRUE(),UPPER(Facts[Region]),CURRENCY(1.23456)))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:MEDIANX over a Currency in a conditional is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "MEDIANX(ALL(Facts),IF(1=2,TRUE(),CURRENCY(1.23456)))",
+   "powerbi": "1.2346",
+   "now": "LOCAL-REJECT:MEDIANX over a Currency in a conditional is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "MEDIANX(TOPN(2,Facts,Facts[Quantity]),IF(0/0,CURRENCY(3),TRUE()))",
+   "powerbi": "3",
+   "now": "LOCAL-REJECT:MEDIANX over a Currency in a conditional is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "MEDIANX(ALL(Facts),IF(DATE(2020,1,1),Facts[Region],CURRENCY(1.23456)))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:MEDIANX over a Currency in a conditional is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "MEDIANX(VALUES(Facts[Region]),IF(TRUE(),CONVERT(CURRENCY(1.5),DOUBLE)))",
+   "powerbi": "1.5",
+   "now": "LOCAL-REJECT:MEDIANX over a Currency in a conditional is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "MEDIANX({TRUE()},IF(TRUE(),CONVERT(CURRENCY(1.5),CURRENCY)))",
+   "powerbi": "1.5",
+   "now": "LOCAL-REJECT:MEDIANX over a Currency in a conditional is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "MEDIANX(ROW(\"Value\",1),IF(TRUE(),CONVERT(CURRENCY(1.5),INTEGER)))",
+   "powerbi": "2",
+   "now": "LOCAL-REJECT:MEDIANX over a Currency in a conditional is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "MEDIANX({1&&\"\"},IF(TRUE(),CONVERT(CURRENCY(1.5),DOUBLE)))",
+   "powerbi": "1.5",
+   "now": "LOCAL-REJECT:MEDIANX over a Currency in a conditional is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "MEDIANX({1,2},IF(TRUE(),CONVERT(CURRENCY(1.5),DOUBLE)))",
+   "powerbi": "1.5",
+   "now": "LOCAL-REJECT:MEDIANX over a Currency in a conditional is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "MEDIANX({TRUE()},IF(TRUE(),CONVERT(CURRENCY(1.5),INTEGER)))",
+   "powerbi": "2",
+   "now": "LOCAL-REJECT:MEDIANX over a Currency in a conditional is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "MEDIANX(VALUES(Facts[Region]),IF(TRUE(),CONVERT(CURRENCY(1.5),CURRENCY)))",
+   "powerbi": "1.5",
+   "now": "LOCAL-REJECT:MEDIANX over a Currency in a conditional is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "MEDIANX({1&&\"\"},IF(TRUE(),CONVERT(CURRENCY(1.5),CURRENCY)))",
+   "powerbi": "1.5",
+   "now": "LOCAL-REJECT:MEDIANX over a Currency in a conditional is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "MEDIANX({\"a\"},COALESCE(CONVERT(CURRENCY(1.5),INTEGER),CONVERT(CURRENCY(1.5),INTEGER)))",
+   "powerbi": "2",
+   "now": "LOCAL-REJECT:MEDIANX over a Currency in a conditional is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "MEDIANX(VALUES(Facts[Region]),IF(FALSE(),CONVERT(CURRENCY(1.5),CURRENCY)))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:MEDIANX over a Currency in a conditional is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "MEDIANX(ROW(\"Value\",1),IF(FALSE(),CONVERT(CURRENCY(1.5),INTEGER)))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:MEDIANX over a Currency in a conditional is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "MEDIANX({1,2},COALESCE(CONVERT(CURRENCY(1.5),INTEGER),CONVERT(CURRENCY(1.5),INTEGER)))",
+   "powerbi": "2",
+   "now": "LOCAL-REJECT:MEDIANX over a Currency in a conditional is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "MEDIANX(Facts,COALESCE(CONVERT(CURRENCY(1.5),DOUBLE),CONVERT(CURRENCY(1.5),DOUBLE)))",
+   "powerbi": "1.5",
+   "now": "LOCAL-REJECT:MEDIANX over a Currency in a conditional is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "MEDIANX(VALUES(Facts[Region]),IFERROR(CONVERT(CURRENCY(1.5),CURRENCY),CONVERT(CURRENCY(1.5),CURRENCY)))",
+   "powerbi": "1.5",
+   "now": "LOCAL-REJECT:MEDIANX over a Currency in a conditional is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "MAXX(VALUES(Facts[Note]),MAXX(UNION(Facts,Facts),IF(TRUE(),Facts[Region],1)))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:Iterator MAXX expression needs a numeric result."
+  },
+  {
+   "part": "A",
+   "expr": "MAXX(VALUES(Facts[Note]),MAXX(CALCULATETABLE(Facts,Facts[Region]=\"West\"),IF(TRUE(),Facts[Region],1)))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:Iterator MAXX expression needs a numeric result."
+  },
+  {
+   "part": "A",
+   "expr": "MAXX(VALUES(Facts[Note]),MAXX(SUMMARIZECOLUMNS(Facts[Region]),IF(TRUE(),Facts[Region],1)))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:Iterator MAXX expression needs a numeric result."
+  },
+  {
+   "part": "A",
+   "expr": "MAXX(VALUES(Facts[Note]),MAXX(GENERATE(VALUES(Facts[Note]),VALUES(Facts[Region])),IF(TRUE(),Facts[Region],1)))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:Iterator MAXX expression needs a numeric result."
+  },
+  {
+   "part": "A",
+   "expr": "MAXX(VALUES(Facts[Note]),MAXX(CROSSJOIN(VALUES(Facts[Region]),VALUES(Facts[Note])),IF(TRUE(),Facts[Region],1)))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:Iterator MAXX expression needs a numeric result."
+  },
+  {
+   "part": "A",
+   "expr": "MAXX(VALUES(Facts[Note]),MAXX(CALCULATETABLE(VALUES(Facts[Region]),Facts[Quantity]>2),IF(TRUE(),Facts[Region],1)))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:Iterator MAXX expression needs a numeric result."
+  },
+  {
+   "part": "A",
+   "expr": "MAXX(VALUES(Facts[Note]),MAXX(ADDCOLUMNS(Facts,\"w\",1),IF(TRUE(),Facts[Region],1)))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:Iterator MAXX expression needs a numeric result."
+  },
+  {
+   "part": "A",
+   "expr": "MAXX(VALUES(Facts[Note]),MAXX(EXCEPT(Facts,FILTER(Facts,FALSE())),IF(TRUE(),Facts[Region],1)))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:Iterator MAXX expression needs a numeric result."
+  },
+  {
+   "part": "A",
+   "expr": "MAXX(VALUES(Facts[Note]),MAXX(FILTER(Facts,Facts[Quantity]>2),IF(TRUE(),Facts[Region],1)))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:Iterator MAXX expression needs a numeric result."
+  },
+  {
+   "part": "A",
+   "expr": "MAXX(VALUES(Facts[Note]),MAXX(TOPN(1,Facts),IF(TRUE(),Facts[Region],1)))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:Iterator MAXX expression needs a numeric result."
+  },
+  {
+   "part": "A",
+   "expr": "MAXX(VALUES(Facts[Note]),MAXX(INTERSECT(Facts,Facts),IF(TRUE(),Facts[Region],1)))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:Iterator MAXX expression needs a numeric result."
+  },
+  {
+   "part": "A",
+   "expr": "MAXX(VALUES(Facts[Note]),MAXX(TOPN(3,Facts,Facts[Quantity]),IF(TRUE(),Facts[Region],1)))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:Iterator MAXX expression needs a numeric result."
+  },
+  {
+   "part": "A",
+   "expr": "(MAXX(Facts,ERROR(\"x\")))*BLANK()",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:Iterator MAXX expression needs a numeric result."
+  },
+  {
+   "part": "A",
+   "expr": "(BLANK())*(MAXX(Facts,ERROR(\"x\")))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:Iterator MAXX expression needs a numeric result."
+  },
+  {
+   "part": "A",
+   "expr": "IFERROR((MAXX(Facts,ERROR(\"x\")))*BLANK(),\"e\")",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:Iterator MAXX expression needs a numeric result."
+  },
+  {
+   "part": "A",
+   "expr": "IFERROR((BLANK())*(MAXX(Facts,ERROR(\"x\"))),\"e\")",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:Iterator MAXX expression needs a numeric result."
+  },
+  {
+   "part": "A",
+   "expr": "ISERROR((MAXX(Facts,ERROR(\"x\")))*BLANK())",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:Iterator MAXX expression needs a numeric result."
+  },
+  {
+   "part": "A",
+   "expr": "ISERROR((BLANK())*(MAXX(Facts,ERROR(\"x\"))))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:Iterator MAXX expression needs a numeric result."
+  },
+  {
+   "part": "A",
+   "expr": "(BLANK())/(MAXX(Facts,ERROR(\"x\")))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:Iterator MAXX expression needs a numeric result."
+  },
+  {
+   "part": "A",
+   "expr": "IFERROR((BLANK())/(MAXX(Facts,ERROR(\"x\"))),\"e\")",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:Iterator MAXX expression needs a numeric result."
+  },
+  {
+   "part": "A",
+   "expr": "ISERROR((BLANK())/(MAXX(Facts,ERROR(\"x\"))))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:Iterator MAXX expression needs a numeric result."
+  },
+  {
+   "part": "A",
+   "expr": "(MAXX(Facts,ERROR(\"x\")))*VAR y=BLANK() RETURN y",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:Iterator MAXX expression needs a numeric result."
+  },
+  {
+   "part": "A",
+   "expr": "(VAR y=BLANK() RETURN y)*(MAXX(Facts,ERROR(\"x\")))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:Iterator MAXX expression needs a numeric result."
+  },
+  {
+   "part": "A",
+   "expr": "IFERROR((MAXX(Facts,ERROR(\"x\")))*VAR y=BLANK() RETURN y,\"e\")",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:Iterator MAXX expression needs a numeric result."
+  },
+  {
+   "part": "A",
+   "expr": "IFERROR((VAR y=BLANK() RETURN y)*(MAXX(Facts,ERROR(\"x\"))),\"e\")",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:Iterator MAXX expression needs a numeric result."
+  },
+  {
+   "part": "A",
+   "expr": "ISERROR((MAXX(Facts,ERROR(\"x\")))*VAR y=BLANK() RETURN y)",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:Iterator MAXX expression needs a numeric result."
+  },
+  {
+   "part": "A",
+   "expr": "ISERROR((VAR y=BLANK() RETURN y)*(MAXX(Facts,ERROR(\"x\"))))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:Iterator MAXX expression needs a numeric result."
+  },
+  {
+   "part": "A",
+   "expr": "(VAR y=BLANK() RETURN y)/(MAXX(Facts,ERROR(\"x\")))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:Iterator MAXX expression needs a numeric result."
+  },
+  {
+   "part": "A",
+   "expr": "IFERROR((VAR y=BLANK() RETURN y)/(MAXX(Facts,ERROR(\"x\"))),\"e\")",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:Iterator MAXX expression needs a numeric result."
+  },
+  {
+   "part": "A",
+   "expr": "ISERROR((VAR y=BLANK() RETURN y)/(MAXX(Facts,ERROR(\"x\"))))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:Iterator MAXX expression needs a numeric result."
+  },
+  {
+   "part": "A",
+   "expr": "(MAXX(Facts,ERROR(\"x\")))*IF(FALSE(),1)",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:Iterator MAXX expression needs a numeric result."
+  },
+  {
+   "part": "A",
+   "expr": "(IF(FALSE(),1))*(MAXX(Facts,ERROR(\"x\")))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:Iterator MAXX expression needs a numeric result."
+  },
+  {
+   "part": "A",
+   "expr": "IFERROR((MAXX(Facts,ERROR(\"x\")))*IF(FALSE(),1),\"e\")",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:Iterator MAXX expression needs a numeric result."
+  },
+  {
+   "part": "A",
+   "expr": "IFERROR((IF(FALSE(),1))*(MAXX(Facts,ERROR(\"x\"))),\"e\")",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:Iterator MAXX expression needs a numeric result."
+  },
+  {
+   "part": "A",
+   "expr": "ISERROR((MAXX(Facts,ERROR(\"x\")))*IF(FALSE(),1))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:Iterator MAXX expression needs a numeric result."
+  },
+  {
+   "part": "A",
+   "expr": "ISERROR((IF(FALSE(),1))*(MAXX(Facts,ERROR(\"x\"))))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:Iterator MAXX expression needs a numeric result."
+  },
+  {
+   "part": "A",
+   "expr": "(IF(FALSE(),1))/(MAXX(Facts,ERROR(\"x\")))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:Iterator MAXX expression needs a numeric result."
+  },
+  {
+   "part": "A",
+   "expr": "IFERROR((IF(FALSE(),1))/(MAXX(Facts,ERROR(\"x\"))),\"e\")",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:Iterator MAXX expression needs a numeric result."
+  },
+  {
+   "part": "A",
+   "expr": "ISERROR((IF(FALSE(),1))/(MAXX(Facts,ERROR(\"x\"))))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:Iterator MAXX expression needs a numeric result."
+  },
+  {
+   "part": "A",
+   "expr": "STDEVX.S(FILTER(Facts,Facts[Region]=\"East\"),COALESCE(BLANK(),1+1,CURRENCY(1.23456)))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:STDEVX.S over a Currency in a conditional is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "STDEVX.S(CROSSJOIN(VALUES(Facts[Region]),VALUES(Facts[Note])),VAR x=CURRENCY(1.23456) RETURN IF(\"\",x,\"a\"))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:STDEVX.S over a Currency in a conditional is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "STDEVX.S(ALL(Facts),IF(COUNTROWS(Facts)>3,CURRENCY(3),FORMAT(1,\"0\")))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:STDEVX.S over a Currency in a conditional is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "STDEVX.S(DISTINCT(Facts),COALESCE(CURRENCY(3),Facts[Sales]/0))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:STDEVX.S over a Currency in a conditional is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "STDEVX.S(ALL(Facts),IF(NOT(TRUE()),CURRENCY(1.23456)))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:STDEVX.S over a Currency in a conditional is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "STDEVX.S(DISTINCT(Facts),VAR x=CURRENCY(3) RETURN IF(TRUE(),x,Facts[Region]))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:STDEVX.S over a Currency in a conditional is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "STDEVX.S(ADDCOLUMNS(Facts,\"z\",1),IF(NOT(TRUE()),CURRENCY(1.23456)))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:STDEVX.S over a Currency in a conditional is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "STDEVX.S(Facts,IF.EAGER(TRUE()&&FALSE(),CURRENCY(1.23456),UPPER(Facts[Region])))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:STDEVX.S over a Currency in a conditional is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "STDEVX.S(CALCULATETABLE(Facts,Facts[Region]=\"East\"),IF(1=1,CURRENCY(3),-Facts[Quantity]))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:STDEVX.S over a Currency in a conditional is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "STDEVX.S(FILTER(Facts,Facts[Region]=\"East\"),IF.EAGER(TRUE(),Facts[Region],CURRENCY(3)))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:STDEVX.S over a Currency in a conditional is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "STDEVX.S(FILTER(Facts,Facts[Quantity]>2),COALESCE(CURRENCY(3),2.5))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:STDEVX.S over a Currency in a conditional is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "STDEVX.S(ADDCOLUMNS(Facts,\"z\",1),IF(0,CURRENCY(1.23456),DATE(2020,1,1)+Facts[Quantity]))",
+   "powerbi": "1.87082869338697",
+   "now": "LOCAL-REJECT:STDEVX.S over a Currency in a conditional is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "STDEVX.S(ALL(Facts),IF.EAGER(1=1,CURRENCY(3),CURRENCY(1.23456)))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:STDEVX.S over a Currency in a conditional is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "STDEVX.S(VALUES(Facts[Region]),COALESCE(CONVERT(CURRENCY(1.5),INTEGER),CONVERT(CURRENCY(1.5),INTEGER)))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:STDEVX.S over a Currency in a conditional is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "STDEVX.S(ROW(\"Value\",1),IFERROR(CONVERT(CURRENCY(1.5),DATETIME),CONVERT(CURRENCY(1.5),DATETIME)))",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:STDEVX.S over a Currency in a conditional is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "STDEVX.S(Facts,IF(TRUE(),CONVERT(CURRENCY(1.5),INTEGER)))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:STDEVX.S over a Currency in a conditional is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "STDEVX.S(Facts,COALESCE(CONVERT(CURRENCY(1.5),DOUBLE),CONVERT(CURRENCY(1.5),DOUBLE)))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:STDEVX.S over a Currency in a conditional is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "STDEVX.S({1,2},IF(TRUE(),CONVERT(CURRENCY(1.5),DOUBLE)))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:STDEVX.S over a Currency in a conditional is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "STDEVX.S({1,2},IFERROR(CONVERT(CURRENCY(1.5),DATETIME),CONVERT(CURRENCY(1.5),DATETIME)))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:STDEVX.S over a Currency in a conditional is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "STDEVX.S(VALUES(Facts[Region]),COALESCE(CONVERT(CURRENCY(1.5),DATETIME),CONVERT(CURRENCY(1.5),DATETIME)))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:STDEVX.S over a Currency in a conditional is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "STDEVX.S({1},COALESCE(CONVERT(CURRENCY(1.5),DOUBLE),CONVERT(CURRENCY(1.5),DOUBLE)))",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:STDEVX.S over a Currency in a conditional is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "STDEVX.S({1,2},IFERROR(CONVERT(CURRENCY(1.5),DOUBLE),CONVERT(CURRENCY(1.5),DOUBLE)))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:STDEVX.S over a Currency in a conditional is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "STDEVX.S(Facts,IF(TRUE(),IF(TRUE(),CONVERT(CURRENCY(1.5),DATETIME))))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:STDEVX.S over a Currency in a conditional is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "STDEVX.S(Facts,COALESCE(CONVERT(CURRENCY(1.5),DATETIME),0))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:STDEVX.S over a Currency in a conditional is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "STDEVX.S(Facts,IF(1=2,1,CONVERT(CURRENCY(1.5),DATETIME)))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:STDEVX.S over a Currency in a conditional is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "STDEVX.S(Facts,SWITCH(1,1,CONVERT(CURRENCY(1.5),DATETIME)))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:STDEVX.S over a Currency in a conditional is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "STDEVX.S(Facts,IF(TRUE(),CONVERT(CURRENCY(1.5),DATETIME)))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:STDEVX.S over a Currency in a conditional is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "STDEVX.S(Facts,IF(1=1,CONVERT(CURRENCY(1.5),DATETIME),DATE(2020,1,1)))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:STDEVX.S over a Currency in a conditional is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "STDEVX.S(Facts,IF(1=1,CONVERT(CURRENCY(1.5),DATETIME),BLANK()))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:STDEVX.S over a Currency in a conditional is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "STDEVX.S(Facts,IFERROR(CONVERT(CURRENCY(1.5),DATETIME),0))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:STDEVX.S over a Currency in a conditional is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "STDEVX.S(Facts,IF(1=1,CONVERT(CURRENCY(1.5),DATETIME),1))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:STDEVX.S over a Currency in a conditional is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "STDEVX.S(Facts,IF(FALSE(),CONVERT(CURRENCY(1.5),DATETIME)))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:STDEVX.S over a Currency in a conditional is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "VARX.P(FILTER(Facts,Facts[Quantity]>2),IF(Facts[Quantity]>2,BLANK(),CURRENCY(3)))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:VARX.P over a Currency in a conditional is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "VARX.P(TOPN(2,Facts,Facts[Quantity]),IF(NOT(TRUE()),CURRENCY(3),MAX(Facts[Quantity])))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:VARX.P over a Currency in a conditional is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "VARX.P(Facts,VAR x=CURRENCY(1.23456) RETURN IF(BLANK(),x,Facts[Quantity]))",
+   "powerbi": "2.91666666666667",
+   "now": "LOCAL-REJECT:VARX.P over a Currency in a conditional is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "VARX.P(DISTINCT(Facts),IFERROR(NOT(TRUE()),CURRENCY(1.23456)))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:VARX.P over a Currency in a conditional is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "VARX.P(SELECTCOLUMNS(Facts,\"z\",Facts[Quantity]),COALESCE(BLANK(),INT(2.5),CURRENCY(1.23456)))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:VARX.P over a Currency in a conditional is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "VARX.P(ALL(Facts),IF.EAGER(Facts[Quantity]>2,MAX(Facts[Region]),CURRENCY(3)))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:VARX.P over a Currency in a conditional is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "VARX.P(FILTER(Facts,Facts[Region]=\"East\"),SWITCH(TRUE(),ISBLANK(Facts[Sales]),CURRENCY(3),1=1))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:VARX.P over a Currency in a conditional is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "VARX.P(CROSSJOIN(VALUES(Facts[Region]),VALUES(Facts[Note])),IF(INT(1.5),CURRENCY(3),FORMAT(1,\"0\")))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:VARX.P over a Currency in a conditional is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "VARX.P(CALCULATETABLE(Facts,Facts[Region]=\"East\"),VAR x=CURRENCY(3) RETURN IF(\"\",x,\"5\"))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:VARX.P over a Currency in a conditional is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "VARX.P(CALCULATETABLE(Facts,Facts[Region]=\"East\"),VAR x=CURRENCY(1.23456) RETURN IF(1=2,x,BLANK()))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:VARX.P over a Currency in a conditional is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "VARX.P(Facts,IF.EAGER(1=1,UPPER(Facts[Region]),CURRENCY(1.23456)))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:VARX.P over a Currency in a conditional is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "VARX.P(ROW(\"Value\",1),COALESCE(CONVERT(CURRENCY(1.5),DATETIME),CONVERT(CURRENCY(1.5),DATETIME)))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:VARX.P over a Currency in a conditional is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "VARX.P({\"a\"},IF(TRUE(),CONVERT(CURRENCY(1.5),DOUBLE)))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:VARX.P over a Currency in a conditional is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "VARX.P(Facts,COALESCE(CONVERT(CURRENCY(1.5),DATETIME),CONVERT(CURRENCY(1.5),DATETIME)))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:VARX.P over a Currency in a conditional is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "VARX.P({\"a\"},IF(FALSE(),CONVERT(CURRENCY(1.5),INTEGER)))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:VARX.P over a Currency in a conditional is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "VARX.P({1,2},IF(FALSE(),CONVERT(CURRENCY(1.5),INTEGER)))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:VARX.P over a Currency in a conditional is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "VARX.P({1,2},IF(TRUE(),CONVERT(CURRENCY(1.5),DATETIME)))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:VARX.P over a Currency in a conditional is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "VARX.P({1},IF(TRUE(),CONVERT(CURRENCY(1.5),DOUBLE)))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:VARX.P over a Currency in a conditional is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "VARX.P(VALUES(Facts[Region]),IF(TRUE(),CONVERT(CURRENCY(1.5),CURRENCY)))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:VARX.P over a Currency in a conditional is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "VARX.P(Facts,IF(1=1,CONVERT(CURRENCY(1.5),DATETIME),1))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:VARX.P over a Currency in a conditional is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "VARX.P(Facts,IF(1=1,CONVERT(CURRENCY(1.5),DATETIME),DATE(2020,1,1)))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:VARX.P over a Currency in a conditional is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "VARX.P(Facts,IF(1=2,1,CONVERT(CURRENCY(1.5),DATETIME)))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:VARX.P over a Currency in a conditional is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "VARX.P(Facts,IF(FALSE(),CONVERT(CURRENCY(1.5),DATETIME)))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:VARX.P over a Currency in a conditional is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "VARX.P(Facts,COALESCE(CONVERT(CURRENCY(1.5),DATETIME),0))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:VARX.P over a Currency in a conditional is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "VARX.P(Facts,IF(1=1,CONVERT(CURRENCY(1.5),DATETIME),BLANK()))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:VARX.P over a Currency in a conditional is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "VARX.P(Facts,IF(TRUE(),CONVERT(CURRENCY(1.5),DATETIME)))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:VARX.P over a Currency in a conditional is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "VARX.P(Facts,SWITCH(1,1,CONVERT(CURRENCY(1.5),DATETIME)))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:VARX.P over a Currency in a conditional is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "VARX.P(Facts,IF(TRUE(),IF(TRUE(),CONVERT(CURRENCY(1.5),DATETIME))))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:VARX.P over a Currency in a conditional is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "VARX.P(Facts,IFERROR(CONVERT(CURRENCY(1.5),DATETIME),0))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:VARX.P over a Currency in a conditional is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "VARX.S(VALUES(Facts[Region]),COALESCE(BLANK(),MAX(Facts[Quantity]),CURRENCY(1.23456)))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:VARX.S over a Currency in a conditional is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "VARX.S(ALL(Facts),IF(TRUE()&&FALSE(),CURRENCY(3),\"\"))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:VARX.S over a Currency in a conditional is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "VARX.S(DISTINCT(Facts),VAR x=UPPER(Facts[Region]) RETURN IF(0/0,x,CURRENCY(3)))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:VARX.S over a Currency in a conditional is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "VARX.S(DISTINCT(Facts),IFERROR(\"5\",CURRENCY(1.23456)))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:VARX.S over a Currency in a conditional is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "VARX.S(ADDCOLUMNS(Facts,\"z\",1),IF(BLANK(),CURRENCY(3),-Facts[Quantity]))",
+   "powerbi": "3.5",
+   "now": "LOCAL-REJECT:VARX.S over a Currency in a conditional is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "VARX.S(ALL(Facts),IF(Facts[Region]=\"East\",\"a\",CURRENCY(3)))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:VARX.S over a Currency in a conditional is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "VARX.S(FILTER(Facts,Facts[Quantity]>2),IF(TRUE()&&FALSE(),MAX(Facts[Region]),CURRENCY(3)))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:VARX.S over a Currency in a conditional is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "VARX.S(Facts,VAR x=CURRENCY(3) RETURN IF(LEN(\"a\"),x,1+1))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:VARX.S over a Currency in a conditional is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "VARX.S({1&&\"\"},IF(TRUE(),CONVERT(CURRENCY(1.5),DATETIME)))",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:VARX.S over a Currency in a conditional is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "VARX.S({1,2},IF(TRUE(),CONVERT(CURRENCY(1.5),DATETIME)))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:VARX.S over a Currency in a conditional is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "VARX.S({TRUE()},IF(TRUE(),CONVERT(CURRENCY(1.5),DATETIME)))",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:VARX.S over a Currency in a conditional is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "VARX.S(Facts,IF(FALSE(),CONVERT(CURRENCY(1.5),CURRENCY)))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:VARX.S over a Currency in a conditional is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "VARX.S(Facts,IFERROR(CONVERT(CURRENCY(1.5),DATETIME),CONVERT(CURRENCY(1.5),DATETIME)))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:VARX.S over a Currency in a conditional is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "VARX.S({1,2},IFERROR(CONVERT(CURRENCY(1.5),DOUBLE),CONVERT(CURRENCY(1.5),DOUBLE)))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:VARX.S over a Currency in a conditional is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "VARX.S(VALUES(Facts[Region]),IFERROR(CONVERT(CURRENCY(1.5),INTEGER),CONVERT(CURRENCY(1.5),INTEGER)))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:VARX.S over a Currency in a conditional is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "VARX.S(VALUES(Facts[Region]),IF(FALSE(),CONVERT(CURRENCY(1.5),CURRENCY)))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:VARX.S over a Currency in a conditional is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "VARX.S({1},IFERROR(CONVERT(CURRENCY(1.5),INTEGER),CONVERT(CURRENCY(1.5),INTEGER)))",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:VARX.S over a Currency in a conditional is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "VARX.S(ROW(\"Value\",1),IFERROR(CONVERT(CURRENCY(1.5),DATETIME),CONVERT(CURRENCY(1.5),DATETIME)))",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:VARX.S over a Currency in a conditional is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "VARX.S({1},IF(FALSE(),CONVERT(CURRENCY(1.5),INTEGER)))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:VARX.S over a Currency in a conditional is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "VARX.S(Facts,IFERROR(CONVERT(CURRENCY(1.5),CURRENCY),CONVERT(CURRENCY(1.5),CURRENCY)))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:VARX.S over a Currency in a conditional is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "VARX.S(Facts,IF(TRUE(),CONVERT(CURRENCY(1.5),CURRENCY)))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:VARX.S over a Currency in a conditional is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "VARX.S({1,2},IF(FALSE(),CONVERT(CURRENCY(1.5),DATETIME)))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:VARX.S over a Currency in a conditional is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "VARX.S({1},IF(TRUE(),CONVERT(CURRENCY(1.5),DATETIME)))",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:VARX.S over a Currency in a conditional is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "VARX.S({1,2},IF(TRUE(),CONVERT(CURRENCY(1.5),CURRENCY)))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:VARX.S over a Currency in a conditional is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "VARX.S({1,2},IF(TRUE(),CONVERT(CURRENCY(1.5),INTEGER)))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:VARX.S over a Currency in a conditional is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "VARX.S(VALUES(Facts[Region]),COALESCE(CONVERT(CURRENCY(1.5),DOUBLE),CONVERT(CURRENCY(1.5),DOUBLE)))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:VARX.S over a Currency in a conditional is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "GEOMEANX(Facts,IF.EAGER(\"FALSE\",1=1,CURRENCY(1.23456)))",
+   "powerbi": "6.09924039791019E-320",
+   "now": "LOCAL-REJECT:GEOMEANX over a Currency in a conditional is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "GEOMEANX(TOPN(2,Facts,Facts[Quantity]),IF.EAGER(\"FALSE\",Facts[Sales],CURRENCY(3)))",
+   "powerbi": "3",
+   "now": "LOCAL-REJECT:GEOMEANX over a Currency in a conditional is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "GEOMEANX(DISTINCT(Facts),IF.EAGER(UPPER(\"true\"),\"5\",CURRENCY(3)))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:GEOMEANX over a Currency in a conditional is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "GEOMEANX(DISTINCT(Facts),IF.EAGER(DATE(2020,1,1),-Facts[Quantity],CURRENCY(3)))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:GEOMEANX over a Currency in a conditional is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "GEOMEANX(Facts,IF(COUNTROWS(Facts)>3,MAX(Facts[Quantity]),CURRENCY(3)))",
+   "powerbi": "5",
+   "now": "LOCAL-REJECT:GEOMEANX over a Currency in a conditional is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "GEOMEANX(Facts,VAR x=1 RETURN IF(MAX(Facts[Quantity])>3,x,CURRENCY(1.23456)))",
+   "powerbi": "1",
+   "now": "LOCAL-REJECT:GEOMEANX over a Currency in a conditional is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "GEOMEANX(FILTER(Facts,Facts[Quantity]>2),IF(NOT(TRUE()),0/0,CURRENCY(1.23456)))",
+   "powerbi": "1.2346",
+   "now": "LOCAL-REJECT:GEOMEANX over a Currency in a conditional is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "GEOMEANX(VALUES(Facts[Region]),IF(0/0,BLANK(),CURRENCY(1.23456)))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:GEOMEANX over a Currency in a conditional is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "GEOMEANX(CROSSJOIN(VALUES(Facts[Region]),VALUES(Facts[Note])),COALESCE(CURRENCY(3),UPPER(Facts[Region])))",
+   "powerbi": "30000",
+   "now": "LOCAL-REJECT:GEOMEANX over a Currency in a conditional is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "GEOMEANX(SUMMARIZE(Facts,Facts[Region]),IF(SELECTEDVALUE(Facts[Region])=\"East\",CURRENCY(3),UPPER(Facts[Region])))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:GEOMEANX over a Currency in a conditional is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "GEOMEANX(CALCULATETABLE(Facts,Facts[Region]=\"East\"),IF.EAGER(\"\",Facts[Quantity]>2,CURRENCY(3)))",
+   "powerbi": "30000",
+   "now": "LOCAL-REJECT:GEOMEANX over a Currency in a conditional is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "GEOMEANX(Facts,IF(0/0,BLANK(),CURRENCY(1.23456)))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:GEOMEANX over a Currency in a conditional is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "GEOMEANX(SELECTCOLUMNS(Facts,\"z\",Facts[Quantity]),IF(1/0,CURRENCY(3)))",
+   "powerbi": "3",
+   "now": "LOCAL-REJECT:GEOMEANX over a Currency in a conditional is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "GEOMEANX(ALL(Facts),IF(COUNTROWS(Facts)>3,CURRENCY(3),1=1))",
+   "powerbi": "1.48219693752374E-319",
+   "now": "LOCAL-REJECT:GEOMEANX over a Currency in a conditional is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "GEOMEANX(TOPN(2,Facts,Facts[Quantity]),VAR x=Facts[Sales]/0 RETURN IF(1=2,x,CURRENCY(1.23456)))",
+   "powerbi": "1.2346",
+   "now": "LOCAL-REJECT:GEOMEANX over a Currency in a conditional is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "GEOMEANX({1&&\"\"},IF(TRUE(),CONVERT(CURRENCY(1.5),DOUBLE)))",
+   "powerbi": "1.5",
+   "now": "LOCAL-REJECT:GEOMEANX over a Currency in a conditional is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "GEOMEANX({TRUE()},IF(TRUE(),CONVERT(CURRENCY(1.5),INTEGER)))",
+   "powerbi": "2",
+   "now": "LOCAL-REJECT:GEOMEANX over a Currency in a conditional is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "GEOMEANX({\"a\"},IF(TRUE(),CONVERT(CURRENCY(1.5),DOUBLE)))",
+   "powerbi": "1.5",
+   "now": "LOCAL-REJECT:GEOMEANX over a Currency in a conditional is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "GEOMEANX({1},IF(TRUE(),CONVERT(CURRENCY(1.5),DOUBLE)))",
+   "powerbi": "1.5",
+   "now": "LOCAL-REJECT:GEOMEANX over a Currency in a conditional is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "GEOMEANX({1&&\"\"},IF(TRUE(),CONVERT(CURRENCY(1.5),INTEGER)))",
+   "powerbi": "2",
+   "now": "LOCAL-REJECT:GEOMEANX over a Currency in a conditional is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "GEOMEANX(ROW(\"Value\",1),IF(FALSE(),CONVERT(CURRENCY(1.5),INTEGER)))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:GEOMEANX over a Currency in a conditional is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "GEOMEANX({1},IF(FALSE(),CONVERT(CURRENCY(1.5),DOUBLE)))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:GEOMEANX over a Currency in a conditional is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "GEOMEANX(VALUES(Facts[Region]),COALESCE(CONVERT(CURRENCY(1.5),INTEGER),CONVERT(CURRENCY(1.5),INTEGER)))",
+   "powerbi": "2",
+   "now": "LOCAL-REJECT:GEOMEANX over a Currency in a conditional is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "GEOMEANX({1,2},IFERROR(CONVERT(CURRENCY(1.5),DOUBLE),CONVERT(CURRENCY(1.5),DOUBLE)))",
+   "powerbi": "1.5",
+   "now": "LOCAL-REJECT:GEOMEANX over a Currency in a conditional is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "PRODUCTX(Facts,IF.EAGER(FALSE(),Facts[Region],CURRENCY(3)))",
+   "powerbi": "728.999999999995",
+   "now": "LOCAL-REJECT:PRODUCTX over a Currency in a conditional is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "PRODUCTX(Facts,IF(1=1,CURRENCY(3),Facts[Region]))",
+   "powerbi": "728.999999999995",
+   "now": "LOCAL-REJECT:PRODUCTX over a Currency in a conditional is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "PRODUCTX(Facts,IF.EAGER(1=1,CURRENCY(3),Facts[Region]))",
+   "powerbi": "728.999999999995",
+   "now": "LOCAL-REJECT:PRODUCTX over a Currency in a conditional is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "PRODUCTX(CALCULATETABLE(Facts,Facts[Region]=\"East\"),IF(INT(1.5),CURRENCY(3)))",
+   "powerbi": "26.9999999999999",
+   "now": "LOCAL-REJECT:PRODUCTX over a Currency in a conditional is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "PRODUCTX(ADDCOLUMNS(Facts,\"z\",1),IF.EAGER(1=1,Facts[Sales],CURRENCY(3)))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:PRODUCTX over a Currency in a conditional is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "PRODUCTX(TOPN(2,Facts,Facts[Quantity]),IF(TRUE()&&FALSE(),CURRENCY(1.23456)))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:PRODUCTX over a Currency in a conditional is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "PRODUCTX(Facts,IFERROR(Facts[Quantity]&\"\",CURRENCY(1.23456)))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:PRODUCTX over a Currency in a conditional is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "PRODUCTX(TOPN(2,Facts,Facts[Quantity]),IF(NOT(TRUE()),CURRENCY(3)))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:PRODUCTX over a Currency in a conditional is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "PRODUCTX(ALL(Facts),COALESCE(-Facts[Quantity],CURRENCY(1.23456)))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:PRODUCTX over a Currency in a conditional is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "PRODUCTX(Facts,IF.EAGER(MAX(Facts[Quantity])>3,Facts[Quantity],CURRENCY(3)))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:PRODUCTX over a Currency in a conditional is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "PRODUCTX(Facts,VAR x=CURRENCY(3) RETURN IF(Facts[Quantity],x,Facts[Quantity]>2))",
+   "powerbi": "243",
+   "now": "LOCAL-REJECT:PRODUCTX over a Currency in a conditional is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "PRODUCTX(ALL(Facts),IF.EAGER(Facts[Region]=\"East\",CURRENCY(3),1+1))",
+   "powerbi": "216",
+   "now": "LOCAL-REJECT:PRODUCTX over a Currency in a conditional is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "PRODUCTX(Facts,IF(UPPER(\"true\"),CURRENCY(3),Facts[Quantity]>2))",
+   "powerbi": "728.999999999995",
+   "now": "LOCAL-REJECT:PRODUCTX over a Currency in a conditional is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "PRODUCTX(DISTINCT(Facts),IF(SELECTEDVALUE(Facts[Region])=\"East\",CURRENCY(1.23456)))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:PRODUCTX over a Currency in a conditional is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "PRODUCTX(VALUES(Facts[Region]),IF.EAGER(0,CURRENCY(3),Facts[Region]))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:PRODUCTX over a Currency in a conditional is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "PRODUCTX(FILTER(Facts,Facts[Quantity]>2),IF.EAGER(SELECTEDVALUE(Facts[Region])=\"East\",1=1,CURRENCY(3)))",
+   "powerbi": "26.9999999999999",
+   "now": "LOCAL-REJECT:PRODUCTX over a Currency in a conditional is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "PRODUCTX(VALUES(Facts[Region]),IF(TRUE(),CONVERT(CURRENCY(1.5),INTEGER)))",
+   "powerbi": "8",
+   "now": "LOCAL-REJECT:PRODUCTX over a Currency in a conditional is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "PRODUCTX({TRUE()},IF(TRUE(),CONVERT(CURRENCY(1.5),INTEGER)))",
+   "powerbi": "2",
+   "now": "LOCAL-REJECT:PRODUCTX over a Currency in a conditional is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "PRODUCTX(ROW(\"Value\",1),IF(TRUE(),CONVERT(CURRENCY(1.5),CURRENCY)))",
+   "powerbi": "1.5",
+   "now": "LOCAL-REJECT:PRODUCTX over a Currency in a conditional is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "PRODUCTX(ROW(\"Value\",1),COALESCE(CONVERT(CURRENCY(1.5),INTEGER),CONVERT(CURRENCY(1.5),INTEGER)))",
+   "powerbi": "2",
+   "now": "LOCAL-REJECT:PRODUCTX over a Currency in a conditional is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "PRODUCTX(Facts,COALESCE(CONVERT(CURRENCY(1.5),DOUBLE),CONVERT(CURRENCY(1.5),DOUBLE)))",
+   "powerbi": "11.390625",
+   "now": "LOCAL-REJECT:PRODUCTX over a Currency in a conditional is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "PRODUCTX({\"a\"},IF(TRUE(),CONVERT(CURRENCY(1.5),DOUBLE)))",
+   "powerbi": "1.5",
+   "now": "LOCAL-REJECT:PRODUCTX over a Currency in a conditional is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "PERCENTILEX.INC(ADDCOLUMNS(Facts,\"z\",1),IF(MAX(Facts[Quantity])>3,Facts[Note],CURRENCY(3)),0.5)",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:PERCENTILEX.INC over a Currency in a conditional is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "PERCENTILEX.INC(Facts,SWITCH(TRUE(),Facts[Quantity]>2,CURRENCY(3),Facts[Note]),0.5)",
+   "powerbi": "3",
+   "now": "LOCAL-REJECT:PERCENTILEX.INC over a Currency in a conditional is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "PERCENTILEX.INC(Facts,IF(INT(1.5),Facts[Sales],CURRENCY(3)),0.5)",
+   "powerbi": "1.25",
+   "now": "LOCAL-REJECT:PERCENTILEX.INC over a Currency in a conditional is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "PERCENTILEX.INC(SUMMARIZE(Facts,Facts[Region]),IF(FALSE(),FORMAT(1,\"0\"),CURRENCY(3)),0.5)",
+   "powerbi": "3",
+   "now": "LOCAL-REJECT:PERCENTILEX.INC over a Currency in a conditional is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "PERCENTILEX.INC(Facts,IF.EAGER(MAX(Facts[Quantity])>3,CURRENCY(3),BLANK()),0.5)",
+   "powerbi": "3",
+   "now": "LOCAL-REJECT:PERCENTILEX.INC over a Currency in a conditional is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "PERCENTILEX.INC(CALCULATETABLE(Facts,Facts[Region]=\"East\"),IFERROR(CURRENCY(1.23456),FORMAT(1,\"0\")),0.5)",
+   "powerbi": "1.2346",
+   "now": "LOCAL-REJECT:PERCENTILEX.INC over a Currency in a conditional is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "PERCENTILEX.INC(ADDCOLUMNS(Facts,\"z\",1),IF(ISBLANK(Facts[Sales]),CURRENCY(1.23456),BLANK()),0.5)",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:PERCENTILEX.INC over a Currency in a conditional is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "PERCENTILEX.INC(DISTINCT(Facts),IF(\"TRUE\",CURRENCY(3)),0.5)",
+   "powerbi": "3",
+   "now": "LOCAL-REJECT:PERCENTILEX.INC over a Currency in a conditional is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "PERCENTILEX.INC(CALCULATETABLE(Facts,Facts[Region]=\"East\"),COALESCE(CURRENCY(1.23456),1=1),0.5)",
+   "powerbi": "1.2346",
+   "now": "LOCAL-REJECT:PERCENTILEX.INC over a Currency in a conditional is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "PERCENTILEX.INC(TOPN(2,Facts,Facts[Quantity]),IF(COUNTROWS(Facts)>3,CURRENCY(3)),0.5)",
+   "powerbi": "3",
+   "now": "LOCAL-REJECT:PERCENTILEX.INC over a Currency in a conditional is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "PERCENTILEX.INC(Facts,IF.EAGER(\"FALSE\",CURRENCY(3),CURRENCY(1.23456)),0.5)",
+   "powerbi": "1.2346",
+   "now": "LOCAL-REJECT:PERCENTILEX.INC over a Currency in a conditional is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "PERCENTILEX.INC(FILTER(Facts,Facts[Quantity]>2),VAR x=INT(2.5) RETURN IF(TRUE()&&FALSE(),x,CURRENCY(3)),0.5)",
+   "powerbi": "3",
+   "now": "LOCAL-REJECT:PERCENTILEX.INC over a Currency in a conditional is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "PERCENTILEX.INC(CALCULATETABLE(Facts,Facts[Region]=\"East\"),IF.EAGER(TRUE()&&FALSE(),Facts[Quantity],CURRENCY(1.23456)),0.5)",
+   "powerbi": "1.2346",
+   "now": "LOCAL-REJECT:PERCENTILEX.INC over a Currency in a conditional is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "PERCENTILEX.INC(FILTER(Facts,Facts[Region]=\"East\"),IF(Facts[Region]=\"East\",CURRENCY(3),2.5),0.5)",
+   "powerbi": "3",
+   "now": "LOCAL-REJECT:PERCENTILEX.INC over a Currency in a conditional is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "PERCENTILEX.INC(Facts,IFERROR(0/0,CURRENCY(3)),0.5)",
+   "powerbi": "3",
+   "now": "LOCAL-REJECT:PERCENTILEX.INC over a Currency in a conditional is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "PERCENTILEX.INC(CALCULATETABLE(Facts,Facts[Region]=\"East\"),IF.EAGER(ISBLANK(Facts[Sales]),2.5,CURRENCY(3)),0.5)",
+   "powerbi": "3",
+   "now": "LOCAL-REJECT:PERCENTILEX.INC over a Currency in a conditional is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "PERCENTILEX.INC(Facts,VAR x=NOT(TRUE()) RETURN IF(\"\",x,CURRENCY(1.23456)),0.5)",
+   "powerbi": "1.2346",
+   "now": "LOCAL-REJECT:PERCENTILEX.INC over a Currency in a conditional is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "PERCENTILEX.INC(Facts,IF.EAGER(BLANK(),CURRENCY(1.23456),DATE(2020,1,1)),0.5)",
+   "powerbi": "43831",
+   "now": "LOCAL-REJECT:PERCENTILEX.INC over a Currency in a conditional is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "PERCENTILEX.INC(TOPN(2,Facts,Facts[Quantity]),SWITCH(TRUE(),MAX(Facts[Quantity])>3,CURRENCY(1.23456),\"a\"),0.5)",
+   "powerbi": "1.2346",
+   "now": "LOCAL-REJECT:PERCENTILEX.INC over a Currency in a conditional is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "PERCENTILEX.INC(VALUES(Facts[Region]),VAR x=CURRENCY(3) RETURN IF(1,x,0/0),0.5)",
+   "powerbi": "3",
+   "now": "LOCAL-REJECT:PERCENTILEX.INC over a Currency in a conditional is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "STDEVX.P(ALL(Facts),IF(0,-Facts[Quantity],CURRENCY(3)))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:STDEVX.P over a Currency in a conditional is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "STDEVX.P(ADDCOLUMNS(Facts,\"z\",1),IF(1=2,CURRENCY(1.23456),\"\"))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:STDEVX.P over a Currency in a conditional is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "STDEVX.P(CROSSJOIN(VALUES(Facts[Region]),VALUES(Facts[Note])),IF(1=2,BLANK(),CURRENCY(3)))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:STDEVX.P over a Currency in a conditional is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "STDEVX.P(FILTER(Facts,Facts[Quantity]>2),VAR x=CURRENCY(1.23456) RETURN IF(TRUE()&&FALSE(),x,DATE(2020,1,1)+Facts[Quantity]))",
+   "powerbi": "0.816496629594713",
+   "now": "LOCAL-REJECT:STDEVX.P over a Currency in a conditional is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "STDEVX.P(CALCULATETABLE(Facts,Facts[Region]=\"East\"),IFERROR(CURRENCY(3),1=1))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:STDEVX.P over a Currency in a conditional is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "STDEVX.P(Facts,IF.EAGER(ISBLANK(Facts[Sales]),1+1,CURRENCY(1.23456)))",
+   "powerbi": "0.2852",
+   "now": "LOCAL-REJECT:STDEVX.P over a Currency in a conditional is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "STDEVX.P(ADDCOLUMNS(Facts,\"z\",1),IF(\"\",CURRENCY(3)))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:STDEVX.P over a Currency in a conditional is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "STDEVX.P({1,2},IF(TRUE(),CONVERT(CURRENCY(1.5),CURRENCY)))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:STDEVX.P over a Currency in a conditional is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "STDEVX.P({1},IF(TRUE(),CONVERT(CURRENCY(1.5),DOUBLE)))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:STDEVX.P over a Currency in a conditional is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "STDEVX.P(VALUES(Facts[Region]),IF(TRUE(),CONVERT(CURRENCY(1.5),CURRENCY)))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:STDEVX.P over a Currency in a conditional is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "STDEVX.P(Facts,IF(TRUE(),CONVERT(CURRENCY(1.5),DOUBLE)))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:STDEVX.P over a Currency in a conditional is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "STDEVX.P({\"a\"},IF(TRUE(),CONVERT(CURRENCY(1.5),CURRENCY)))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:STDEVX.P over a Currency in a conditional is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "STDEVX.P(Facts,COALESCE(CONVERT(CURRENCY(1.5),CURRENCY),CONVERT(CURRENCY(1.5),CURRENCY)))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:STDEVX.P over a Currency in a conditional is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "STDEVX.P({\"a\"},IF(TRUE(),CONVERT(CURRENCY(1.5),DATETIME)))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:STDEVX.P over a Currency in a conditional is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "STDEVX.P({1,2},IF(TRUE(),CONVERT(CURRENCY(1.5),DOUBLE)))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:STDEVX.P over a Currency in a conditional is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "STDEVX.P(VALUES(Facts[Region]),IF(TRUE(),CONVERT(CURRENCY(1.5),INTEGER)))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:STDEVX.P over a Currency in a conditional is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "STDEVX.P({\"a\"},IFERROR(CONVERT(CURRENCY(1.5),DOUBLE),CONVERT(CURRENCY(1.5),DOUBLE)))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:STDEVX.P over a Currency in a conditional is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "STDEVX.P(Facts,IF(FALSE(),CONVERT(CURRENCY(1.5),INTEGER)))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:STDEVX.P over a Currency in a conditional is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "STDEVX.P(Facts,IF(TRUE(),CONVERT(CURRENCY(1.5),INTEGER)))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:STDEVX.P over a Currency in a conditional is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "PERCENTILEX.EXC(CALCULATETABLE(Facts,Facts[Region]=\"East\"),IF.EAGER(1/0,INT(2.5),CURRENCY(3)),0.5)",
+   "powerbi": "2",
+   "now": "LOCAL-REJECT:PERCENTILEX.EXC over a Currency in a conditional is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "PERCENTILEX.EXC(Facts,IF(FALSE(),CURRENCY(3),BLANK()),0.5)",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:PERCENTILEX.EXC over a Currency in a conditional is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "PERCENTILEX.EXC(TOPN(2,Facts,Facts[Quantity]),VAR x=TRUE() RETURN IF(0/0,x,CURRENCY(3)),0.5)",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:PERCENTILEX.EXC over a Currency in a conditional is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "PERCENTILEX.EXC(SUMMARIZE(Facts,Facts[Region]),IF(LEN(\"a\"),CURRENCY(3),\"\"),0.5)",
+   "powerbi": "3",
+   "now": "LOCAL-REJECT:PERCENTILEX.EXC over a Currency in a conditional is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "PERCENTILEX.EXC(DISTINCT(Facts),VAR x=CURRENCY(1.23456) RETURN IF(LEN(\"a\"),x,TIME(6,0,0)),0.5)",
+   "powerbi": "1.2346",
+   "now": "LOCAL-REJECT:PERCENTILEX.EXC over a Currency in a conditional is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "PERCENTILEX.EXC(Facts,IF(MAX(Facts[Quantity])>3,CURRENCY(1.23456),-1/0),0.5)",
+   "powerbi": "1.2346",
+   "now": "LOCAL-REJECT:PERCENTILEX.EXC over a Currency in a conditional is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "PERCENTILEX.EXC(Facts,SWITCH(TRUE(),NOT(TRUE()),DATE(2020,1,1)+Facts[Quantity],CURRENCY(3)),0.5)",
+   "powerbi": "3",
+   "now": "LOCAL-REJECT:PERCENTILEX.EXC over a Currency in a conditional is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "PERCENTILEX.EXC(Facts,IF.EAGER(MAX(Facts[Quantity])>3,Facts[Quantity]>2,CURRENCY(1.23456)),0.5)",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:PERCENTILEX.EXC over a Currency in a conditional is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "PERCENTILEX.EXC(ADDCOLUMNS(Facts,\"z\",1),IF.EAGER(0/0,CURRENCY(3),DATE(2020,1,1)),0.5)",
+   "powerbi": "3",
+   "now": "LOCAL-REJECT:PERCENTILEX.EXC over a Currency in a conditional is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "PERCENTILEX.EXC(Facts,IF.EAGER(1=2,INT(2.5),CURRENCY(3)),0.5)",
+   "powerbi": "3",
+   "now": "LOCAL-REJECT:PERCENTILEX.EXC over a Currency in a conditional is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "PERCENTILEX.EXC(SUMMARIZE(Facts,Facts[Region]),IFERROR(CURRENCY(1.23456),BLANK()),0.5)",
+   "powerbi": "1.2346",
+   "now": "LOCAL-REJECT:PERCENTILEX.EXC over a Currency in a conditional is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "PERCENTILEX.EXC(FILTER(Facts,Facts[Quantity]>2),IF.EAGER(INT(1.5),CURRENCY(3),DATE(2020,1,1)),0.5)",
+   "powerbi": "3",
+   "now": "LOCAL-REJECT:PERCENTILEX.EXC over a Currency in a conditional is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "PERCENTILEX.EXC(FILTER(Facts,Facts[Quantity]>2),IFERROR(CURRENCY(3),1+1),0.5)",
+   "powerbi": "3",
+   "now": "LOCAL-REJECT:PERCENTILEX.EXC over a Currency in a conditional is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "PERCENTILEX.EXC(Facts,COALESCE(BLANK(),CURRENCY(1.23456),0/0),0.5)",
+   "powerbi": "1.2346",
+   "now": "LOCAL-REJECT:PERCENTILEX.EXC over a Currency in a conditional is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "PERCENTILEX.EXC(ADDCOLUMNS(Facts,\"z\",1),IFERROR(UPPER(Facts[Region]),CURRENCY(3)),0.5)",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:PERCENTILEX.EXC over a Currency in a conditional is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "PERCENTILEX.EXC(TOPN(2,Facts,Facts[Quantity]),IF(FALSE(),CURRENCY(1.23456),BLANK()),0.5)",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:PERCENTILEX.EXC over a Currency in a conditional is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "PERCENTILEX.EXC(Facts,IF.EAGER(SELECTEDVALUE(Facts[Region])=\"East\",CURRENCY(3),Facts[Quantity]),0.5)",
+   "powerbi": "2.5",
+   "now": "LOCAL-REJECT:PERCENTILEX.EXC over a Currency in a conditional is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "MINX(Facts,(SUMX(Facts,ERROR(\"x\")))*(VAR y=BLANK() RETURN y)+(0))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:Iterator SUMX expression needs a numeric result."
+  },
+  {
+   "part": "A",
+   "expr": "MAXX({1,2},(SUMX(Facts,ERROR(\"x\")))*(SELECTEDVALUE(Facts[Quantity])))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:Iterator SUMX expression needs a numeric result."
+  },
+  {
+   "part": "A",
+   "expr": "COUNTX(Facts,(BLANK())/(1/0*0)*(SUMX(Facts,ERROR(\"x\"))))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:Iterator SUMX expression needs a numeric result."
+  },
+  {
+   "part": "A",
+   "expr": "MAXX({1,2},(DIVIDE(1,0))*(SUMX(Facts,ERROR(\"x\"))))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:Iterator SUMX expression needs a numeric result."
+  },
+  {
+   "part": "A",
+   "expr": "MINX(Facts,(DIVIDE(1,BLANK()))/(SUMX(Facts,ERROR(\"x\"))))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:Iterator SUMX expression needs a numeric result."
+  },
+  {
+   "part": "A",
+   "expr": "COUNTX(Facts,(1/0)*(SUMX(Facts,ERROR(\"x\")))*(DIVIDE(1,BLANK())))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:Iterator SUMX expression needs a numeric result."
+  },
+  {
+   "part": "A",
+   "expr": "MAXX({1,2},(2.5&&\"\")*(SUMX(Facts,ERROR(\"x\"))))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:Iterator SUMX expression needs a numeric result."
+  },
+  {
+   "part": "A",
+   "expr": "MAXX(Facts,(2.5&&\"\")/(SUMX(Facts,ERROR(\"x\"))))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:Iterator SUMX expression needs a numeric result."
+  },
+  {
+   "part": "A",
+   "expr": "MAXX(Facts,(DIVIDE(1,BLANK()))/(SUMX(Facts,ERROR(\"x\"))))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:Iterator SUMX expression needs a numeric result."
+  },
+  {
+   "part": "A",
+   "expr": "COUNTX(Facts,(DIVIDE(1,BLANK()))*(SUMX(Facts,ERROR(\"x\"))))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:Iterator SUMX expression needs a numeric result."
+  },
+  {
+   "part": "A",
+   "expr": "MAXX({1,2},(-1)*(SUMX(Facts,ERROR(\"x\")))*(IF(FALSE(),1)))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:Iterator SUMX expression needs a numeric result."
+  },
+  {
+   "part": "A",
+   "expr": "MAXX(Facts,(2.5&&\"\")*(SUMX(Facts,ERROR(\"x\"))))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:Iterator SUMX expression needs a numeric result."
+  },
+  {
+   "part": "A",
+   "expr": "COUNTX(Facts,(2.5&&\"\")/(SUMX(Facts,ERROR(\"x\"))))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:Iterator SUMX expression needs a numeric result."
+  },
+  {
+   "part": "A",
+   "expr": "COUNTX(Facts,(DIVIDE(1,0))/(SUMX(Facts,ERROR(\"x\"))))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:Iterator SUMX expression needs a numeric result."
+  },
+  {
+   "part": "A",
+   "expr": "MINX(Facts,(SUMX(Facts,ERROR(\"x\")))*(SELECTEDVALUE(Facts[Quantity])))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:Iterator SUMX expression needs a numeric result."
+  },
+  {
+   "part": "A",
+   "expr": "COUNTROWS(FILTER(COLUMNSTATISTICS(),[Min]=BLANK()))",
+   "powerbi": "2",
+   "now": "LOCAL-REJECT:A comparison with a column whose branches have different types is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "COUNTROWS(FILTER(COLUMNSTATISTICS(),[Max]=BLANK()))",
+   "powerbi": "1",
+   "now": "LOCAL-REJECT:A comparison with a column whose branches have different types is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "COUNTROWS(FILTER(COLUMNSTATISTICS(),[Min]<0))",
+   "powerbi": "1",
+   "now": "LOCAL-REJECT:A comparison with a column whose branches have different types is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "COUNTROWS(FILTER(COLUMNSTATISTICS(),[Max]>10))",
+   "powerbi": "3",
+   "now": "LOCAL-REJECT:A comparison with a column whose branches have different types is not supported in the local engine."
+  }
+ ]
+}

@@ -2,9 +2,9 @@
 
 Rules and roles are in `AGENTS.md`. Read it first. Keep this file short and current.
 
-**Active agent:** Antigravity codes Task 42 row-order-32 in `/Users/armaan/Power BI tool-task42`; Task 41 type-tests-errors-31 waits for Claude Opus 5.5 review in `/Users/armaan/Power BI tool-task41`
-**Branch in use:** antigravity/row-order-32 (worktree `/Users/armaan/Power BI tool-task42`), antigravity/type-tests-errors-31 (worktree `/Users/armaan/Power BI tool-task41`)
-**Working tree clean:** main yes; Task 41 and Task 42 worktrees have Antigravity's uncommitted work
+**Active agent:** Antigravity fixes Task 45 review findings in its worktree; Claude Opus 5.5 reviews Task 45 next (Tasks 42-44 shipped as Iterations 132-134)
+**Branch in use:** antigravity/xnpv-blank-swi-35 (worktree `Power BI tool-task45`)
+**Working tree clean:** main yes; the Task 45 worktree has Antigravity's uncommitted work
 
 ## Status values
 `PLANNED` > `BUILDING` > `READY FOR REVIEW` > `REVIEWING` > `FIXING` > `GATE PASSED` > `DONE`
@@ -53,8 +53,11 @@ Rules and roles are in `AGENTS.md`. Read it first. Keep this file short and curr
 | 38 | coalesce-big-order-28: COALESCE evaluation order, rounding of huge numbers, CONCATENATEX row order (972 saved answers the engine refuses) | `docs/plans/2026-11-03-coalesce-big-order-28.md` | DONE (coded by Antigravity, fixed by Sonnet 5.5, reviewed, locked 456,084, merged 2026-11-03) | Claude |
 | 39 | nan-inf-iterators-29: Infinity and NaN inside statistical iterators (652 saved answers the engine refuses) | `docs/plans/2026-11-03-nan-inf-iterators-29.md` | DONE (coded by Antigravity, fixed by Sonnet 5.5, reviewed, locked 457,448, merged 2026-11-03) | Claude |
 | 40 | date-stats-30: dates inside statistical iterators (376 saved answers the engine refuses) | `docs/plans/2026-11-03-date-stats-30.md` | DONE (coded by Antigravity, fixed by Sonnet 5.5, reviewed, locked 459,999, merged 2026-11-03) | Claude |
-| 41 | type-tests-errors-31: type tests and errors Power BI does not raise (893 saved answers the engine refuses) | `docs/plans/2026-11-03-type-tests-errors-31.md` | IN REVIEW (worktree `Power BI tool-task41`) | Claude |
-| 42 | row-order-32: the row order of tables (640 saved answers the engine refuses) | `docs/plans/2026-11-03-row-order-32.md` | IN PROGRESS (Antigravity coding in worktree `Power BI tool-task42`) | Antigravity |
+| 41 | type-tests-errors-31: type tests and errors Power BI does not raise (893 saved answers the engine refuses) | `docs/plans/2026-11-03-type-tests-errors-31.md` | DONE (coded by Antigravity, fixed by Sonnet 5.5, reviewed, locked 462,852, merged 2026-11-04) | Claude |
+| 42 | row-order-32: the row order of tables (640 saved answers the engine refuses) | `docs/plans/2026-11-03-row-order-32.md` | DONE (coded by Antigravity, fixed by Sonnet 5.5, reviewed, locked 463,719, merged 2026-11-04) | Claude |
+| 43 | mixed-bodies-tables-33: mixed-type iterator bodies and table-valued results (557 saved answers) | `docs/plans/2026-11-04-mixed-bodies-tables-33.md` | DONE (coded by Antigravity, fixed by Sonnet 5.5, reviewed, locked 467,289, merged 2026-11-04) | Claude |
+| 44 | count-text-compare-34: COUNTX of True/False, date/time text, strict comparisons | `docs/plans/2026-11-04-count-text-compare-34.md` | DONE (coded by Antigravity, fixed by Sonnet 5.5, reviewed, locked 467,289, merged 2026-11-04) | Claude |
+| 45 | xnpv-blank-swi-35: XNPV Currency, BLANK beside failing iterators, FIRSTNONBLANK/SWI of derived tables (190 saved answers) | `docs/plans/2026-11-04-xnpv-blank-swi-35.md` | Antigravity fixing review findings | Antigravity |
 
 ## Current task
 Task 33 xirr-oddfyield-23, on branch `antigravity/xirr-oddfyield-23` in the worktree `/Users/armaan/Power BI tool-task33`.
