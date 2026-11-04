@@ -1,0 +1,5590 @@
+{
+ "powerbi_version": "2.157.879.0 (26.08)+da30fe74eb0b8a8786ab7326b69c400a0e951831",
+ "frozen": "2026-11-04",
+ "items": [
+  {
+   "expr": "AVERAGEX(ALL(Facts[Region]),((2.5&&\"\"))*((2.5&&\"\")))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "AVERAGEX(ALL(Facts[Region]),((2.5&&\"\"))*(MAXX({1},ERROR(\"y\"))))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "AVERAGEX(ALL(Facts[Region]),((2.5&&\"\"))*(SQRT(-1)))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "AVERAGEX(ALL(Facts[Region]),(0/0)-(0/0))",
+   "powerbi": "NaN"
+  },
+  {
+   "expr": "AVERAGEX(ALL(Facts[Region]),MAXX(Facts,0/0))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "AVERAGEX(DATATABLE(\"a\",INTEGER,{{1},{2}}),((2.5&&\"\"))-(IFERROR(1/0,BLANK())))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "AVERAGEX(DATATABLE(\"a\",INTEGER,{{1},{2}}),((2.5&&\"\"))/(1/0*0))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "AVERAGEX(DATATABLE(\"a\",INTEGER,{{1},{2}}),(1/0*0)-(0/0))",
+   "powerbi": "NaN"
+  },
+  {
+   "expr": "AVERAGEX(DATATABLE(\"a\",INTEGER,{{1},{2}}),(1/0*0)/(IFERROR(1/0,BLANK())))",
+   "powerbi": "NaN"
+  },
+  {
+   "expr": "AVERAGEX(DATATABLE(\"a\",INTEGER,{{1},{2}}),(COUNTROWS(FILTER(Facts,FALSE())))*(IFERROR(1/0,BLANK())))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "AVERAGEX(DATATABLE(\"a\",INTEGER,{{1},{2}}),(COUNTROWS(FILTER(Facts,FALSE())))+(IFERROR(1/0,BLANK())))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "AVERAGEX(DATATABLE(\"a\",INTEGER,{{1},{2}}),(COUNTROWS(FILTER(Facts,FALSE())))/(IFERROR(1/0,BLANK())))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "AVERAGEX(DATATABLE(\"a\",INTEGER,{{1},{2}}),(IFERROR(1/0,BLANK()))*(COUNTROWS(FILTER(Facts,FALSE()))))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "AVERAGEX(DATATABLE(\"a\",INTEGER,{{1},{2}}),(IFERROR(1/0,BLANK()))+((2.5&&\"\")))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "AVERAGEX(DATATABLE(\"a\",INTEGER,{{1},{2}}),(IFERROR(1/0,BLANK()))+(IFERROR(1/0,BLANK())))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "AVERAGEX(DATATABLE(\"a\",INTEGER,{{1},{2}}),(IFERROR(1/0,BLANK()))/(ERROR(\"x\")))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "AVERAGEX(DATATABLE(\"a\",INTEGER,{{1},{2}}),(MAXX({1},ERROR(\"y\")))*(IFERROR(1/0,BLANK())))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "AVERAGEX(DATATABLE(\"a\",INTEGER,{{1},{2}}),MAXX(Facts,0/0))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "AVERAGEX(DATATABLE(\"a\",INTEGER,{{1},{2}}),MAXX(Facts,1/0*0))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "AVERAGEX(DATATABLE(\"a\",INTEGER,{{1},{2}}),MAXX(Facts,IF(Facts[Quantity]>2,\"a\",1)))",
+   "powerbi": "1"
+  },
+  {
+   "expr": "AVERAGEX(DATATABLE(\"a\",INTEGER,{{1},{2}}),MAXX(Facts,IFERROR(1/0,BLANK())))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "AVERAGEX(DATATABLE(\"a\",INTEGER,{{1},{2}}),MAXX(TOPN(1,Facts,Facts[Sales]),1/0*0))",
+   "powerbi": "NaN"
+  },
+  {
+   "expr": "AVERAGEX(DATATABLE(\"a\",INTEGER,{{1},{2}}),MAXX(TOPN(1,Facts,Facts[Sales]),IF(TRUE(),Facts[Region],1)))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "AVERAGEX(DATATABLE(\"a\",INTEGER,{{1},{2}}),MAXX({1,2},1/0*0))",
+   "powerbi": "NaN"
+  },
+  {
+   "expr": "AVERAGEX(DATATABLE(\"a\",INTEGER,{{1},{2}}),MAXX({1,2},COUNTROWS(FILTER(Facts,FALSE()))))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "AVERAGEX(FILTER(Facts,FALSE()),((2.5&&\"\"))*((2.5&&\"\")))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "AVERAGEX(FILTER(Facts,FALSE()),((2.5&&\"\"))+(COUNTROWS(FILTER(Facts,FALSE()))))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "AVERAGEX(FILTER(Facts,FALSE()),((2.5&&\"\"))+(IF(TRUE(),Facts[Region],1)))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "AVERAGEX(FILTER(Facts,FALSE()),((2.5&&\"\"))+(IFERROR(1/0,BLANK())))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "AVERAGEX(FILTER(Facts,FALSE()),((2.5&&\"\"))-(COUNTROWS(FILTER(Facts,FALSE()))))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "AVERAGEX(FILTER(Facts,FALSE()),((2.5&&\"\"))-(LOG(-1)))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "AVERAGEX(FILTER(Facts,FALSE()),(0/0)+(1/0*0))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "AVERAGEX(FILTER(Facts,FALSE()),(1/0*0)*(1/0*0))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "AVERAGEX(FILTER(Facts,FALSE()),(1/0*0)+(IFERROR(1/0,BLANK())))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "AVERAGEX(FILTER(Facts,FALSE()),(1/0*0)-(IF(TRUE(),Facts[Region],1)))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "AVERAGEX(FILTER(Facts,FALSE()),(1/0*0)-(LOG(-1)))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "AVERAGEX(FILTER(Facts,FALSE()),(1/0*0)/(IFERROR(1/0,BLANK())))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "AVERAGEX(FILTER(Facts,FALSE()),(COUNTROWS(FILTER(Facts,FALSE())))*(IF(Facts[Quantity]>2,\"a\",1)))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "AVERAGEX(FILTER(Facts,FALSE()),(COUNTROWS(FILTER(Facts,FALSE())))-((2.5&&\"\")))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "AVERAGEX(FILTER(Facts,FALSE()),(COUNTROWS(FILTER(Facts,FALSE())))/(1/0*0))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "AVERAGEX(FILTER(Facts,FALSE()),(COUNTROWS(FILTER(Facts,FALSE())))/(IF(Facts[Quantity]>2,\"a\",1)))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "AVERAGEX(FILTER(Facts,FALSE()),(COUNTROWS(FILTER(Facts,FALSE())))/(IF(TRUE(),Facts[Region],1)))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "AVERAGEX(FILTER(Facts,FALSE()),(ERROR(\"x\"))*(COUNTROWS(FILTER(Facts,FALSE()))))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "AVERAGEX(FILTER(Facts,FALSE()),(ERROR(\"x\"))*(ERROR(\"x\")))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "AVERAGEX(FILTER(Facts,FALSE()),(ERROR(\"x\"))*(IF(TRUE(),Facts[Region],1)))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "AVERAGEX(FILTER(Facts,FALSE()),(ERROR(\"x\"))-(IF(TRUE(),Facts[Region],1)))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "AVERAGEX(FILTER(Facts,FALSE()),(ERROR(\"x\"))-(IFERROR(1/0,BLANK())))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "AVERAGEX(FILTER(Facts,FALSE()),(ERROR(\"x\"))/(1/0*0))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "AVERAGEX(FILTER(Facts,FALSE()),(ERROR(\"x\"))/(ERROR(\"x\")))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "AVERAGEX(FILTER(Facts,FALSE()),(IF(Facts[Quantity]>2,\"a\",1))*(COUNTROWS(FILTER(Facts,FALSE()))))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "AVERAGEX(FILTER(Facts,FALSE()),(IF(Facts[Quantity]>2,\"a\",1))+(1/0*0))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "AVERAGEX(FILTER(Facts,FALSE()),(IF(Facts[Quantity]>2,\"a\",1))-(IF(TRUE(),Facts[Region],1)))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "AVERAGEX(FILTER(Facts,FALSE()),(IF(Facts[Quantity]>2,\"a\",1))/(IFERROR(1/0,BLANK())))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "AVERAGEX(FILTER(Facts,FALSE()),(IF(TRUE(),Facts[Region],1))*(0/0))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "AVERAGEX(FILTER(Facts,FALSE()),(IF(TRUE(),Facts[Region],1))*(ERROR(\"x\")))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "AVERAGEX(FILTER(Facts,FALSE()),(IF(TRUE(),Facts[Region],1))+(ERROR(\"x\")))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "AVERAGEX(FILTER(Facts,FALSE()),(IF(TRUE(),Facts[Region],1))+(IF(Facts[Quantity]>2,\"a\",1)))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "AVERAGEX(FILTER(Facts,FALSE()),(IF(TRUE(),Facts[Region],1))+(SUMX(Facts,ERROR(\"x\"))))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 91) x\""
+  },
+  {
+   "expr": "AVERAGEX(FILTER(Facts,FALSE()),(IFERROR(1/0,BLANK()))*(ERROR(\"x\")))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "AVERAGEX(FILTER(Facts,FALSE()),(IFERROR(1/0,BLANK()))+(COUNTROWS(FILTER(Facts,FALSE()))))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "AVERAGEX(FILTER(Facts,FALSE()),(IFERROR(1/0,BLANK()))/(IF(Facts[Quantity]>2,\"a\",1)))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "AVERAGEX(FILTER(Facts,FALSE()),(IFERROR(1/0,BLANK()))/(IFERROR(1/0,BLANK())))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "AVERAGEX(FILTER(Facts,FALSE()),(LOG(-1))*(0/0))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "AVERAGEX(FILTER(Facts,FALSE()),(SQRT(-1))*(LOG(-1)))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "AVERAGEX(FILTER(Facts,FALSE()),(SQRT(-1))-(SQRT(-1)))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "AVERAGEX(FILTER(Facts,FALSE()),(SQRT(-1))/(IF(Facts[Quantity]>2,\"a\",1)))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "AVERAGEX(FILTER(Facts,FALSE()),(SUMX(Facts,ERROR(\"x\")))/(IF(TRUE(),Facts[Region],1)))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 62) x\""
+  },
+  {
+   "expr": "AVERAGEX(FILTER(Facts,FALSE()),MAXX(ALL(Facts[Region]),IF(Facts[Quantity]>2,\"a\",1)))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "AVERAGEX(FILTER(Facts,FALSE()),MAXX(DATATABLE(\"a\",INTEGER,{{1},{2}}),COUNTROWS(FILTER(Facts,FALSE()))))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "AVERAGEX(FILTER(Facts,FALSE()),MAXX(DATATABLE(\"a\",INTEGER,{{1},{2}}),IF(TRUE(),Facts[Region],1)))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "AVERAGEX(FILTER(Facts,FALSE()),MAXX(FILTER(Facts,FALSE()),ERROR(\"x\")))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "AVERAGEX(FILTER(Facts,FALSE()),MAXX(Facts,1/0*0))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "AVERAGEX(FILTER(Facts,FALSE()),MAXX(Facts,COUNTROWS(FILTER(Facts,FALSE()))))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "AVERAGEX(FILTER(Facts,FALSE()),MAXX(ROW(\"a\",1),1/0*0))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "AVERAGEX(FILTER(Facts,FALSE()),MAXX(ROW(\"a\",1),IF(TRUE(),Facts[Region],1)))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "AVERAGEX(FILTER(Facts,FALSE()),MAXX(ROW(\"a\",1),SUMX(Facts,ERROR(\"x\"))))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 77) x\""
+  },
+  {
+   "expr": "AVERAGEX(FILTER(Facts,FALSE()),MAXX(TOPN(1,Facts,Facts[Sales]),IFERROR(1/0,BLANK())))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "AVERAGEX(FILTER(Facts,FALSE()),MAXX(UNION(Facts,Facts),COUNTROWS(FILTER(Facts,FALSE()))))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "AVERAGEX(FILTER(Facts,FALSE()),MAXX(VALUES(Facts[Note]),1/0*0))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "AVERAGEX(FILTER(Facts,FALSE()),MAXX({1,2},1/0*0))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "AVERAGEX(Facts,((2.5&&\"\"))*((2.5&&\"\")))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "AVERAGEX(Facts,((2.5&&\"\"))*(COUNTROWS(FILTER(Facts,FALSE()))))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "AVERAGEX(Facts,((2.5&&\"\"))*(ERROR(\"x\")))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "AVERAGEX(Facts,((2.5&&\"\"))*(IFERROR(1/0,BLANK())))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "AVERAGEX(Facts,((2.5&&\"\"))*(MAXX({1},ERROR(\"y\"))))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "AVERAGEX(Facts,((2.5&&\"\"))+(1/0*0))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "AVERAGEX(Facts,((2.5&&\"\"))-(1/0*0))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "AVERAGEX(Facts,((2.5&&\"\"))/(COUNTROWS(FILTER(Facts,FALSE()))))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "AVERAGEX(Facts,((2.5&&\"\"))/(ERROR(\"x\")))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "AVERAGEX(Facts,(1/0*0)*((2.5&&\"\")))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "AVERAGEX(Facts,(1/0*0)*(COUNTROWS(FILTER(Facts,FALSE()))))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "AVERAGEX(Facts,(1/0*0)-((2.5&&\"\")))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "AVERAGEX(Facts,(1/0*0)-(IFERROR(1/0,BLANK())))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "AVERAGEX(Facts,(COUNTROWS(FILTER(Facts,FALSE())))-(0/0))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "AVERAGEX(Facts,(COUNTROWS(FILTER(Facts,FALSE())))-(1/0*0))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "AVERAGEX(Facts,(COUNTROWS(FILTER(Facts,FALSE())))-(IFERROR(1/0,BLANK())))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "AVERAGEX(Facts,(COUNTROWS(FILTER(Facts,FALSE())))/(1/0*0))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "AVERAGEX(Facts,(IFERROR(1/0,BLANK()))*(1/0*0))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "AVERAGEX(Facts,(IFERROR(1/0,BLANK()))*(SUMX(Facts,ERROR(\"x\"))))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "AVERAGEX(Facts,(IFERROR(1/0,BLANK()))/(IF(TRUE(),Facts[Region],1)))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "AVERAGEX(Facts,(SUMX(Facts,ERROR(\"x\")))*((2.5&&\"\")))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "AVERAGEX(Facts,(SUMX(Facts,ERROR(\"x\")))*(IFERROR(1/0,BLANK())))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "AVERAGEX(Facts,MAXX(ALL(Facts[Region]),0/0))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "AVERAGEX(Facts,MAXX(FILTER(Facts,FALSE()),1/0*0))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "AVERAGEX(Facts,MAXX(FILTER(Facts,FALSE()),ERROR(\"x\")))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "AVERAGEX(Facts,MAXX(FILTER(Facts,FALSE()),IF(Facts[Quantity]>2,\"a\",1)))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "AVERAGEX(Facts,MAXX(Facts,COUNTROWS(FILTER(Facts,FALSE()))))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "AVERAGEX(Facts,MAXX(Facts,IFERROR(1/0,BLANK())))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "AVERAGEX(Facts,MAXX(ROW(\"a\",1),COUNTROWS(FILTER(Facts,FALSE()))))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "AVERAGEX(Facts,MAXX(ROW(\"a\",1),IF(Facts[Quantity]>2,\"a\",1)))",
+   "powerbi": "1"
+  },
+  {
+   "expr": "AVERAGEX(Facts,MAXX(UNION(Facts,Facts),1/0*0))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "AVERAGEX(Facts,MAXX(UNION(Facts,Facts),IF(Facts[Quantity]>2,\"a\",1)))",
+   "powerbi": "1"
+  },
+  {
+   "expr": "AVERAGEX(Facts,MAXX(VALUES(Facts[Note]),IF(Facts[Quantity]>2,\"a\",1)))",
+   "powerbi": "1"
+  },
+  {
+   "expr": "AVERAGEX(Facts,MAXX({1,2},1/0*0))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "AVERAGEX(ROW(\"a\",1),((2.5&&\"\"))/(1/0*0))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "AVERAGEX(ROW(\"a\",1),(0/0)+(COUNTROWS(FILTER(Facts,FALSE()))))",
+   "powerbi": "NaN"
+  },
+  {
+   "expr": "AVERAGEX(ROW(\"a\",1),(1/0*0)*(IFERROR(1/0,BLANK())))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "AVERAGEX(ROW(\"a\",1),(1/0*0)+((2.5&&\"\")))",
+   "powerbi": "NaN"
+  },
+  {
+   "expr": "AVERAGEX(ROW(\"a\",1),(COUNTROWS(FILTER(Facts,FALSE())))*((2.5&&\"\")))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "AVERAGEX(ROW(\"a\",1),(COUNTROWS(FILTER(Facts,FALSE())))*(1/0*0))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "AVERAGEX(ROW(\"a\",1),(COUNTROWS(FILTER(Facts,FALSE())))+((2.5&&\"\")))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "AVERAGEX(ROW(\"a\",1),(IFERROR(1/0,BLANK()))*((2.5&&\"\")))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "AVERAGEX(ROW(\"a\",1),(IFERROR(1/0,BLANK()))*(IFERROR(1/0,BLANK())))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "AVERAGEX(ROW(\"a\",1),(IFERROR(1/0,BLANK()))/((2.5&&\"\")))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "AVERAGEX(ROW(\"a\",1),(IFERROR(1/0,BLANK()))/(MAXX({1},ERROR(\"y\"))))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "AVERAGEX(ROW(\"a\",1),MAXX(ALL(Facts[Region]),0/0))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "AVERAGEX(ROW(\"a\",1),MAXX(DATATABLE(\"a\",INTEGER,{{1},{2}}),1/0*0))",
+   "powerbi": "NaN"
+  },
+  {
+   "expr": "AVERAGEX(ROW(\"a\",1),MAXX(DATATABLE(\"a\",INTEGER,{{1},{2}}),IFERROR(1/0,BLANK())))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "AVERAGEX(ROW(\"a\",1),MAXX(ROW(\"a\",1),COUNTROWS(FILTER(Facts,FALSE()))))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "AVERAGEX(ROW(\"a\",1),MAXX(UNION(Facts,Facts),1/0*0))",
+   "powerbi": "NaN"
+  },
+  {
+   "expr": "AVERAGEX(ROW(\"a\",1),MAXX(UNION(Facts,Facts),IFERROR(1/0,BLANK())))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "AVERAGEX(ROW(\"a\",1),MAXX(VALUES(Facts[Note]),0/0))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "AVERAGEX(ROW(\"a\",1),MAXX(VALUES(Facts[Note]),1/0*0))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "AVERAGEX(ROW(\"a\",1),MAXX(VALUES(Facts[Note]),COUNTROWS(FILTER(Facts,FALSE()))))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "AVERAGEX(ROW(\"a\",1),MAXX({1,2},COUNTROWS(FILTER(Facts,FALSE()))))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "AVERAGEX(TOPN(1,Facts,Facts[Sales]),((2.5&&\"\"))*(SQRT(-1)))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "AVERAGEX(TOPN(1,Facts,Facts[Sales]),(1/0*0)*((2.5&&\"\")))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "AVERAGEX(TOPN(1,Facts,Facts[Sales]),(1/0*0)-(0/0))",
+   "powerbi": "NaN"
+  },
+  {
+   "expr": "AVERAGEX(TOPN(1,Facts,Facts[Sales]),(IFERROR(1/0,BLANK()))*(LOG(-1)))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "AVERAGEX(TOPN(1,Facts,Facts[Sales]),(IFERROR(1/0,BLANK()))+((2.5&&\"\")))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "AVERAGEX(TOPN(1,Facts,Facts[Sales]),(IFERROR(1/0,BLANK()))-(COUNTROWS(FILTER(Facts,FALSE()))))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "AVERAGEX(TOPN(1,Facts,Facts[Sales]),(IFERROR(1/0,BLANK()))/((2.5&&\"\")))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "AVERAGEX(TOPN(1,Facts,Facts[Sales]),(SUMX(Facts,ERROR(\"x\")))*(IFERROR(1/0,BLANK())))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "AVERAGEX(TOPN(1,Facts,Facts[Sales]),MAXX(ALL(Facts[Region]),0/0))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "AVERAGEX(TOPN(1,Facts,Facts[Sales]),MAXX(VALUES(Facts[Note]),IF(Facts[Quantity]>2,\"a\",1)))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "AVERAGEX(TOPN(1,Facts,Facts[Sales]),MAXX({1,2},IFERROR(1/0,BLANK())))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "AVERAGEX(UNION(Facts,Facts),((2.5&&\"\"))*(IFERROR(1/0,BLANK())))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "AVERAGEX(UNION(Facts,Facts),((2.5&&\"\"))+(0/0))",
+   "powerbi": "NaN"
+  },
+  {
+   "expr": "AVERAGEX(UNION(Facts,Facts),((2.5&&\"\"))-(COUNTROWS(FILTER(Facts,FALSE()))))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "AVERAGEX(UNION(Facts,Facts),(0/0)+(IFERROR(1/0,BLANK())))",
+   "powerbi": "NaN"
+  },
+  {
+   "expr": "AVERAGEX(UNION(Facts,Facts),(0/0)/((2.5&&\"\")))",
+   "powerbi": "NaN"
+  },
+  {
+   "expr": "AVERAGEX(UNION(Facts,Facts),(1/0*0)-(COUNTROWS(FILTER(Facts,FALSE()))))",
+   "powerbi": "NaN"
+  },
+  {
+   "expr": "AVERAGEX(UNION(Facts,Facts),(ERROR(\"x\"))*((2.5&&\"\")))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "AVERAGEX(UNION(Facts,Facts),(ERROR(\"x\"))*(IFERROR(1/0,BLANK())))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "AVERAGEX(UNION(Facts,Facts),(IFERROR(1/0,BLANK()))/(SUMX(Facts,ERROR(\"x\"))))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "AVERAGEX(UNION(Facts,Facts),(LOG(-1))*(IFERROR(1/0,BLANK())))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "AVERAGEX(UNION(Facts,Facts),MAXX(ALL(Facts[Region]),0/0))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "AVERAGEX(UNION(Facts,Facts),MAXX(FILTER(Facts,FALSE()),IF(Facts[Quantity]>2,\"a\",1)))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "AVERAGEX(UNION(Facts,Facts),MAXX(FILTER(Facts,FALSE()),SUMX(Facts,ERROR(\"x\"))))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 85) x\""
+  },
+  {
+   "expr": "AVERAGEX(UNION(Facts,Facts),MAXX(ROW(\"a\",1),COUNTROWS(FILTER(Facts,FALSE()))))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "AVERAGEX(UNION(Facts,Facts),MAXX(TOPN(1,Facts,Facts[Sales]),IF(Facts[Quantity]>2,\"a\",1)))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "AVERAGEX(UNION(Facts,Facts),MAXX(UNION(Facts,Facts),1/0*0))",
+   "powerbi": "NaN"
+  },
+  {
+   "expr": "AVERAGEX(UNION(Facts,Facts),MAXX(UNION(Facts,Facts),IF(Facts[Quantity]>2,\"a\",1)))",
+   "powerbi": "1"
+  },
+  {
+   "expr": "AVERAGEX(UNION(Facts,Facts),MAXX(VALUES(Facts[Note]),0/0))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "AVERAGEX(UNION(Facts,Facts),MAXX({1,2},COUNTROWS(FILTER(Facts,FALSE()))))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "AVERAGEX(VALUES(Facts[Note]),((2.5&&\"\"))/(SQRT(-1)))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "AVERAGEX(VALUES(Facts[Note]),(0/0)*(0/0))",
+   "powerbi": "NaN"
+  },
+  {
+   "expr": "AVERAGEX(VALUES(Facts[Note]),(0/0)/(IFERROR(1/0,BLANK())))",
+   "powerbi": "NaN"
+  },
+  {
+   "expr": "AVERAGEX(VALUES(Facts[Note]),(1/0*0)*((2.5&&\"\")))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "AVERAGEX(VALUES(Facts[Note]),(1/0*0)*(1/0*0))",
+   "powerbi": "NaN"
+  },
+  {
+   "expr": "AVERAGEX(VALUES(Facts[Note]),(1/0*0)*(COUNTROWS(FILTER(Facts,FALSE()))))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "AVERAGEX(VALUES(Facts[Note]),(1/0*0)/(COUNTROWS(FILTER(Facts,FALSE()))))",
+   "powerbi": "NaN"
+  },
+  {
+   "expr": "AVERAGEX(VALUES(Facts[Note]),(COUNTROWS(FILTER(Facts,FALSE())))/(COUNTROWS(FILTER(Facts,FALSE()))))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "AVERAGEX(VALUES(Facts[Note]),(IFERROR(1/0,BLANK()))*(LOG(-1)))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "AVERAGEX(VALUES(Facts[Note]),(IFERROR(1/0,BLANK()))+(COUNTROWS(FILTER(Facts,FALSE()))))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "AVERAGEX(VALUES(Facts[Note]),(IFERROR(1/0,BLANK()))-(1/0*0))",
+   "powerbi": "NaN"
+  },
+  {
+   "expr": "AVERAGEX(VALUES(Facts[Note]),(IFERROR(1/0,BLANK()))/(SQRT(-1)))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "AVERAGEX(VALUES(Facts[Note]),MAXX(DATATABLE(\"a\",INTEGER,{{1},{2}}),IFERROR(1/0,BLANK())))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "AVERAGEX(VALUES(Facts[Note]),MAXX(Facts,IFERROR(1/0,BLANK())))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "AVERAGEX(VALUES(Facts[Note]),MAXX(ROW(\"a\",1),COUNTROWS(FILTER(Facts,FALSE()))))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "AVERAGEX(VALUES(Facts[Note]),MAXX(UNION(Facts,Facts),IF(Facts[Quantity]>2,\"a\",1)))",
+   "powerbi": "1"
+  },
+  {
+   "expr": "AVERAGEX({1,2},((2.5&&\"\"))*(IFERROR(1/0,BLANK())))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "AVERAGEX({1,2},((2.5&&\"\"))+(COUNTROWS(FILTER(Facts,FALSE()))))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "AVERAGEX({1,2},((2.5&&\"\"))/(SUMX(Facts,ERROR(\"x\"))))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "AVERAGEX({1,2},(1/0*0)*((2.5&&\"\")))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "AVERAGEX({1,2},(1/0*0)/(COUNTROWS(FILTER(Facts,FALSE()))))",
+   "powerbi": "NaN"
+  },
+  {
+   "expr": "AVERAGEX({1,2},(COUNTROWS(FILTER(Facts,FALSE())))*(COUNTROWS(FILTER(Facts,FALSE()))))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "AVERAGEX({1,2},(COUNTROWS(FILTER(Facts,FALSE())))+(1/0*0))",
+   "powerbi": "NaN"
+  },
+  {
+   "expr": "AVERAGEX({1,2},(IFERROR(1/0,BLANK()))*(SQRT(-1)))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "AVERAGEX({1,2},(IFERROR(1/0,BLANK()))-(IFERROR(1/0,BLANK())))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "AVERAGEX({1,2},(IFERROR(1/0,BLANK()))/(1/0*0))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "AVERAGEX({1,2},(IFERROR(1/0,BLANK()))/(MAXX({1},ERROR(\"y\"))))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "AVERAGEX({1,2},(IFERROR(1/0,BLANK()))/(SQRT(-1)))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "AVERAGEX({1,2},MAXX(FILTER(Facts,FALSE()),LOG(-1)))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "AVERAGEX({1,2},MAXX(Facts,1/0*0))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "AVERAGEX({1,2},MAXX(Facts,IFERROR(1/0,BLANK())))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "AVERAGEX({1,2},MAXX(UNION(Facts,Facts),IF(Facts[Quantity]>2,\"a\",1)))",
+   "powerbi": "1"
+  },
+  {
+   "expr": "AVERAGEX({1,2},MAXX(VALUES(Facts[Note]),COUNTROWS(FILTER(Facts,FALSE()))))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTROWS(SUBSTITUTEWITHINDEX(DATATABLE(\"Region\",STRING,{{\"East\"},{\"North\"}}),\"i\",DATATABLE(\"Region\",STRING,{{\"East\"},{\"West\"}}),[Region],ASC))",
+   "powerbi": "1"
+  },
+  {
+   "expr": "COUNTROWS(SUBSTITUTEWITHINDEX(DATATABLE(\"Region\",STRING,{{\"East\"},{\"North\"}}),\"i\",ROW(\"Region\",\"East\"),[Region],ASC))",
+   "powerbi": "1"
+  },
+  {
+   "expr": "COUNTROWS(SUBSTITUTEWITHINDEX(SELECTCOLUMNS(Facts,\"'Facts'[Region]\",Facts[Region],\"q\",Facts[Quantity]),\"i\",SUMMARIZE(Facts,Facts[Region]),[Region],ASC))",
+   "powerbi": "6"
+  },
+  {
+   "expr": "COUNTROWS(SUBSTITUTEWITHINDEX(SELECTCOLUMNS(Facts,\"'Facts'[Region]\",Facts[Region],\"q\",Facts[Quantity]),\"i\",VALUES(Facts[Region]),[Region],ASC))",
+   "powerbi": "6"
+  },
+  {
+   "expr": "COUNTROWS(SUBSTITUTEWITHINDEX(SELECTCOLUMNS(Facts,\"Facts[Region]\",Facts[Region]),\"i\",SUMMARIZE(Facts,Facts[Region]),[Region],ASC))",
+   "powerbi": "6"
+  },
+  {
+   "expr": "COUNTROWS(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region]),\"i\",SUMMARIZE(Facts,Facts[Region]),[Region],ASC))",
+   "powerbi": "3"
+  },
+  {
+   "expr": "COUNTROWS(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Region]),\"i\",VALUES(Facts[Region]),[Region],ASC))",
+   "powerbi": "3"
+  },
+  {
+   "expr": "COUNTROWS(SUBSTITUTEWITHINDEX(VALUES(Facts[Region]),\"i\",SUMMARIZE(Facts,Facts[Region]),[Region],ASC))",
+   "powerbi": "3"
+  },
+  {
+   "expr": "COUNTROWS(SUBSTITUTEWITHINDEX(VALUES(Facts[Region]),\"i\",VALUES(Facts[Region]),[Region],ASC))",
+   "powerbi": "3"
+  },
+  {
+   "expr": "COUNTX(ALL(Facts[Region]),((2.5&&\"\"))&(0/0))",
+   "powerbi": "3"
+  },
+  {
+   "expr": "COUNTX(ALL(Facts[Region]),((2.5&&\"\"))-((2.5&&\"\")))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTX(ALL(Facts[Region]),((2.5&&\"\"))/(SQRT(-1)))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTX(ALL(Facts[Region]),(0/0)-(COUNTROWS(FILTER(Facts,FALSE()))))",
+   "powerbi": "3"
+  },
+  {
+   "expr": "COUNTX(ALL(Facts[Region]),(COUNTROWS(FILTER(Facts,FALSE())))*(IFERROR(1/0,BLANK())))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTX(ALL(Facts[Region]),(COUNTROWS(FILTER(Facts,FALSE())))+((2.5&&\"\")))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTX(ALL(Facts[Region]),(IFERROR(1/0,BLANK()))*(0/0))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTX(ALL(Facts[Region]),(IFERROR(1/0,BLANK()))+(1/0*0))",
+   "powerbi": "3"
+  },
+  {
+   "expr": "COUNTX(ALL(Facts[Region]),(MAXX({1},ERROR(\"y\")))*(IFERROR(1/0,BLANK())))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTX(ALL(Facts[Region]),MAXX(FILTER(Facts,FALSE()),IF(Facts[Quantity]>2,\"a\",1)))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTX(ALL(Facts[Region]),MAXX(FILTER(Facts,FALSE()),SQRT(-1)))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTX(ALL(Facts[Region]),MAXX(TOPN(1,Facts,Facts[Sales]),IF(TRUE(),Facts[Region],1)))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTX(ALL(Facts[Region]),MAXX(UNION(Facts,Facts),IFERROR(1/0,BLANK())))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTX(ALL(Facts[Region]),MAXX({1,2},IFERROR(1/0,BLANK())))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTX(DATATABLE(\"a\",INTEGER,{{1},{2}}),((2.5&&\"\"))*(ERROR(\"x\")))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTX(DATATABLE(\"a\",INTEGER,{{1},{2}}),((2.5&&\"\"))/(IFERROR(1/0,BLANK())))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTX(DATATABLE(\"a\",INTEGER,{{1},{2}}),((2.5&&\"\"))/(SUMX(Facts,ERROR(\"x\"))))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTX(DATATABLE(\"a\",INTEGER,{{1},{2}}),(1/0*0)&(IFERROR(1/0,BLANK())))",
+   "powerbi": "2"
+  },
+  {
+   "expr": "COUNTX(DATATABLE(\"a\",INTEGER,{{1},{2}}),(1/0*0)*(IFERROR(1/0,BLANK())))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTX(DATATABLE(\"a\",INTEGER,{{1},{2}}),(COUNTROWS(FILTER(Facts,FALSE())))&(COUNTROWS(FILTER(Facts,FALSE()))))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTX(DATATABLE(\"a\",INTEGER,{{1},{2}}),(COUNTROWS(FILTER(Facts,FALSE())))*(1/0*0))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTX(DATATABLE(\"a\",INTEGER,{{1},{2}}),(COUNTROWS(FILTER(Facts,FALSE())))+(COUNTROWS(FILTER(Facts,FALSE()))))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTX(DATATABLE(\"a\",INTEGER,{{1},{2}}),(COUNTROWS(FILTER(Facts,FALSE())))/(1/0*0))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTX(DATATABLE(\"a\",INTEGER,{{1},{2}}),(IFERROR(1/0,BLANK()))&((2.5&&\"\")))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTX(DATATABLE(\"a\",INTEGER,{{1},{2}}),(IFERROR(1/0,BLANK()))*(ERROR(\"x\")))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTX(DATATABLE(\"a\",INTEGER,{{1},{2}}),(IFERROR(1/0,BLANK()))/(ERROR(\"x\")))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTX(DATATABLE(\"a\",INTEGER,{{1},{2}}),MAXX(FILTER(Facts,FALSE()),IFERROR(1/0,BLANK())))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTX(DATATABLE(\"a\",INTEGER,{{1},{2}}),MAXX(FILTER(Facts,FALSE()),SUMX(Facts,ERROR(\"x\"))))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 97) x\""
+  },
+  {
+   "expr": "COUNTX(DATATABLE(\"a\",INTEGER,{{1},{2}}),MAXX(Facts,1/0*0))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTX(DATATABLE(\"a\",INTEGER,{{1},{2}}),MAXX(VALUES(Facts[Note]),IFERROR(1/0,BLANK())))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTX(DATATABLE(\"a\",INTEGER,{{1},{2}}),MAXX({1,2},COUNTROWS(FILTER(Facts,FALSE()))))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTX(FILTER(Facts,FALSE()),((2.5&&\"\"))&(ERROR(\"x\")))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTX(FILTER(Facts,FALSE()),((2.5&&\"\"))&(IF(Facts[Quantity]>2,\"a\",1)))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTX(FILTER(Facts,FALSE()),((2.5&&\"\"))*(IFERROR(1/0,BLANK())))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTX(FILTER(Facts,FALSE()),((2.5&&\"\"))+(1/0*0))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTX(FILTER(Facts,FALSE()),((2.5&&\"\"))+(ERROR(\"x\")))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTX(FILTER(Facts,FALSE()),((2.5&&\"\"))-(1/0*0))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTX(FILTER(Facts,FALSE()),((2.5&&\"\"))/(COUNTROWS(FILTER(Facts,FALSE()))))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTX(FILTER(Facts,FALSE()),(0/0)+(IFERROR(1/0,BLANK())))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTX(FILTER(Facts,FALSE()),(0/0)-(IFERROR(1/0,BLANK())))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTX(FILTER(Facts,FALSE()),(1/0*0)&(SUMX(Facts,ERROR(\"x\"))))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 68) x\""
+  },
+  {
+   "expr": "COUNTX(FILTER(Facts,FALSE()),(1/0*0)*(SUMX(Facts,ERROR(\"x\"))))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 68) x\""
+  },
+  {
+   "expr": "COUNTX(FILTER(Facts,FALSE()),(1/0*0)+(IFERROR(1/0,BLANK())))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTX(FILTER(Facts,FALSE()),(1/0*0)-(1/0*0))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTX(FILTER(Facts,FALSE()),(1/0*0)-(COUNTROWS(FILTER(Facts,FALSE()))))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTX(FILTER(Facts,FALSE()),(1/0*0)-(LOG(-1)))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTX(FILTER(Facts,FALSE()),(1/0*0)/(SUMX(Facts,ERROR(\"x\"))))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 68) x\""
+  },
+  {
+   "expr": "COUNTX(FILTER(Facts,FALSE()),(COUNTROWS(FILTER(Facts,FALSE())))&(0/0))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTX(FILTER(Facts,FALSE()),(COUNTROWS(FILTER(Facts,FALSE())))&(IF(TRUE(),Facts[Region],1)))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTX(FILTER(Facts,FALSE()),(COUNTROWS(FILTER(Facts,FALSE())))+(COUNTROWS(FILTER(Facts,FALSE()))))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTX(FILTER(Facts,FALSE()),(COUNTROWS(FILTER(Facts,FALSE())))+(IF(TRUE(),Facts[Region],1)))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTX(FILTER(Facts,FALSE()),(COUNTROWS(FILTER(Facts,FALSE())))-((2.5&&\"\")))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTX(FILTER(Facts,FALSE()),(COUNTROWS(FILTER(Facts,FALSE())))/(1/0*0))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTX(FILTER(Facts,FALSE()),(COUNTROWS(FILTER(Facts,FALSE())))/(COUNTROWS(FILTER(Facts,FALSE()))))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTX(FILTER(Facts,FALSE()),(COUNTROWS(FILTER(Facts,FALSE())))/(SUMX(Facts,ERROR(\"x\"))))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 95) x\""
+  },
+  {
+   "expr": "COUNTX(FILTER(Facts,FALSE()),(ERROR(\"x\"))*(1/0*0))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTX(FILTER(Facts,FALSE()),(ERROR(\"x\"))+(LOG(-1)))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTX(FILTER(Facts,FALSE()),(ERROR(\"x\"))-(1/0*0))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTX(FILTER(Facts,FALSE()),(ERROR(\"x\"))-(ERROR(\"x\")))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTX(FILTER(Facts,FALSE()),(ERROR(\"x\"))/(1/0*0))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTX(FILTER(Facts,FALSE()),(IF(Facts[Quantity]>2,\"a\",1))&(IF(Facts[Quantity]>2,\"a\",1)))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTX(FILTER(Facts,FALSE()),(IF(Facts[Quantity]>2,\"a\",1))*(IF(TRUE(),Facts[Region],1)))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTX(FILTER(Facts,FALSE()),(IF(Facts[Quantity]>2,\"a\",1))+(IF(TRUE(),Facts[Region],1)))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTX(FILTER(Facts,FALSE()),(IF(Facts[Quantity]>2,\"a\",1))+(IFERROR(1/0,BLANK())))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTX(FILTER(Facts,FALSE()),(IF(Facts[Quantity]>2,\"a\",1))-(0/0))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTX(FILTER(Facts,FALSE()),(IF(Facts[Quantity]>2,\"a\",1))-(1/0*0))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTX(FILTER(Facts,FALSE()),(IF(Facts[Quantity]>2,\"a\",1))/((2.5&&\"\")))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTX(FILTER(Facts,FALSE()),(IF(Facts[Quantity]>2,\"a\",1))/(COUNTROWS(FILTER(Facts,FALSE()))))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTX(FILTER(Facts,FALSE()),(IF(Facts[Quantity]>2,\"a\",1))/(LOG(-1)))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTX(FILTER(Facts,FALSE()),(IF(TRUE(),Facts[Region],1))&((2.5&&\"\")))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTX(FILTER(Facts,FALSE()),(IF(TRUE(),Facts[Region],1))&(IFERROR(1/0,BLANK())))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTX(FILTER(Facts,FALSE()),(IF(TRUE(),Facts[Region],1))*(1/0*0))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTX(FILTER(Facts,FALSE()),(IF(TRUE(),Facts[Region],1))*(SUMX(Facts,ERROR(\"x\"))))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 89) x\""
+  },
+  {
+   "expr": "COUNTX(FILTER(Facts,FALSE()),(IF(TRUE(),Facts[Region],1))+(IF(Facts[Quantity]>2,\"a\",1)))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTX(FILTER(Facts,FALSE()),(IF(TRUE(),Facts[Region],1))-((2.5&&\"\")))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTX(FILTER(Facts,FALSE()),(IF(TRUE(),Facts[Region],1))/(IF(Facts[Quantity]>2,\"a\",1)))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTX(FILTER(Facts,FALSE()),(IFERROR(1/0,BLANK()))+(COUNTROWS(FILTER(Facts,FALSE()))))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTX(FILTER(Facts,FALSE()),(IFERROR(1/0,BLANK()))+(IF(TRUE(),Facts[Region],1)))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTX(FILTER(Facts,FALSE()),(LOG(-1))&(COUNTROWS(FILTER(Facts,FALSE()))))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTX(FILTER(Facts,FALSE()),(LOG(-1))*(IF(Facts[Quantity]>2,\"a\",1)))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTX(FILTER(Facts,FALSE()),(LOG(-1))-((2.5&&\"\")))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTX(FILTER(Facts,FALSE()),(SQRT(-1))+(IF(TRUE(),Facts[Region],1)))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTX(FILTER(Facts,FALSE()),(SUMX(Facts,ERROR(\"x\")))*((2.5&&\"\")))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTX(FILTER(Facts,FALSE()),(SUMX(Facts,ERROR(\"x\")))*(1/0*0))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 60) x\""
+  },
+  {
+   "expr": "COUNTX(FILTER(Facts,FALSE()),(SUMX(Facts,ERROR(\"x\")))*(IFERROR(1/0,BLANK())))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTX(FILTER(Facts,FALSE()),(SUMX(Facts,ERROR(\"x\")))+(IF(Facts[Quantity]>2,\"a\",1)))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 60) x\""
+  },
+  {
+   "expr": "COUNTX(FILTER(Facts,FALSE()),(SUMX(Facts,ERROR(\"x\")))-(1/0*0))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 60) x\""
+  },
+  {
+   "expr": "COUNTX(FILTER(Facts,FALSE()),(SUMX(Facts,ERROR(\"x\")))-(COUNTROWS(FILTER(Facts,FALSE()))))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 60) x\""
+  },
+  {
+   "expr": "COUNTX(FILTER(Facts,FALSE()),(SUMX(Facts,ERROR(\"x\")))/((2.5&&\"\")))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 60) x\""
+  },
+  {
+   "expr": "COUNTX(FILTER(Facts,FALSE()),MAXX(DATATABLE(\"a\",INTEGER,{{1},{2}}),SUMX(Facts,ERROR(\"x\"))))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 97) x\""
+  },
+  {
+   "expr": "COUNTX(FILTER(Facts,FALSE()),MAXX(FILTER(Facts,FALSE()),COUNTROWS(FILTER(Facts,FALSE()))))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTX(FILTER(Facts,FALSE()),MAXX(FILTER(Facts,FALSE()),IFERROR(1/0,BLANK())))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTX(FILTER(Facts,FALSE()),MAXX(Facts,ERROR(\"x\")))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 59) x\""
+  },
+  {
+   "expr": "COUNTX(FILTER(Facts,FALSE()),MAXX(Facts,IFERROR(1/0,BLANK())))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTX(FILTER(Facts,FALSE()),MAXX(VALUES(Facts[Note]),IFERROR(1/0,BLANK())))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTX(FILTER(Facts,FALSE()),MAXX({1,2},IFERROR(1/0,BLANK())))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTX(Facts,((2.5&&\"\"))*(IF(Facts[Quantity]>2,\"a\",1)))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTX(Facts,((2.5&&\"\"))*(SUMX(Facts,ERROR(\"x\"))))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTX(Facts,((2.5&&\"\"))-((2.5&&\"\")))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTX(Facts,((2.5&&\"\"))-(1/0*0))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "COUNTX(Facts,((2.5&&\"\"))/(1/0*0))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTX(Facts,((2.5&&\"\"))/(COUNTROWS(FILTER(Facts,FALSE()))))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTX(Facts,(1/0*0)&(1/0*0))",
+   "powerbi": "6"
+  },
+  {
+   "expr": "COUNTX(Facts,(1/0*0)&(IFERROR(1/0,BLANK())))",
+   "powerbi": "6"
+  },
+  {
+   "expr": "COUNTX(Facts,(1/0*0)*(IFERROR(1/0,BLANK())))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTX(Facts,(1/0*0)+((2.5&&\"\")))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "COUNTX(Facts,(COUNTROWS(FILTER(Facts,FALSE())))&(COUNTROWS(FILTER(Facts,FALSE()))))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTX(Facts,(COUNTROWS(FILTER(Facts,FALSE())))*(IFERROR(1/0,BLANK())))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTX(Facts,(COUNTROWS(FILTER(Facts,FALSE())))+(IFERROR(1/0,BLANK())))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTX(Facts,(ERROR(\"x\"))*((2.5&&\"\")))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTX(Facts,(IF(Facts[Quantity]>2,\"a\",1))*(IFERROR(1/0,BLANK())))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTX(Facts,(IF(TRUE(),Facts[Region],1))&(IF(Facts[Quantity]>2,\"a\",1)))",
+   "powerbi": "6"
+  },
+  {
+   "expr": "COUNTX(Facts,(IF(TRUE(),Facts[Region],1))&(IF(TRUE(),Facts[Region],1)))",
+   "powerbi": "6"
+  },
+  {
+   "expr": "COUNTX(Facts,(IFERROR(1/0,BLANK()))&((2.5&&\"\")))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTX(Facts,(IFERROR(1/0,BLANK()))/((2.5&&\"\")))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTX(Facts,(IFERROR(1/0,BLANK()))/(1/0*0))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTX(Facts,(IFERROR(1/0,BLANK()))/(IFERROR(1/0,BLANK())))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTX(Facts,(MAXX({1},ERROR(\"y\")))*(IFERROR(1/0,BLANK())))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTX(Facts,MAXX(ALL(Facts[Region]),IF(Facts[Quantity]>2,\"a\",1)))",
+   "powerbi": "3"
+  },
+  {
+   "expr": "COUNTX(Facts,MAXX(DATATABLE(\"a\",INTEGER,{{1},{2}}),IFERROR(1/0,BLANK())))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTX(Facts,MAXX(FILTER(Facts,FALSE()),ERROR(\"x\")))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTX(Facts,MAXX(FILTER(Facts,FALSE()),IF(Facts[Quantity]>2,\"a\",1)))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTX(Facts,MAXX(FILTER(Facts,FALSE()),SUMX(Facts,ERROR(\"x\"))))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 70) x\""
+  },
+  {
+   "expr": "COUNTX(Facts,MAXX(Facts,IF(Facts[Quantity]>2,\"a\",1)))",
+   "powerbi": "6"
+  },
+  {
+   "expr": "COUNTX(Facts,MAXX(ROW(\"a\",1),IFERROR(1/0,BLANK())))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTX(Facts,MAXX(TOPN(1,Facts,Facts[Sales]),1/0*0))",
+   "powerbi": "0"
+  },
+  {
+   "expr": "COUNTX(Facts,MAXX(UNION(Facts,Facts),IF(TRUE(),Facts[Region],1)))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTX(ROW(\"a\",1),((2.5&&\"\"))&(1/0*0))",
+   "powerbi": "1"
+  },
+  {
+   "expr": "COUNTX(ROW(\"a\",1),((2.5&&\"\"))-(COUNTROWS(FILTER(Facts,FALSE()))))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTX(ROW(\"a\",1),((2.5&&\"\"))/(MAXX({1},ERROR(\"y\"))))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTX(ROW(\"a\",1),(1/0*0)&((2.5&&\"\")))",
+   "powerbi": "1"
+  },
+  {
+   "expr": "COUNTX(ROW(\"a\",1),(1/0*0)*(IFERROR(1/0,BLANK())))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTX(ROW(\"a\",1),(IFERROR(1/0,BLANK()))+((2.5&&\"\")))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTX(ROW(\"a\",1),(IFERROR(1/0,BLANK()))-((2.5&&\"\")))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTX(ROW(\"a\",1),(IFERROR(1/0,BLANK()))/(SQRT(-1)))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTX(ROW(\"a\",1),(SUMX(Facts,ERROR(\"x\")))*(IFERROR(1/0,BLANK())))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTX(ROW(\"a\",1),MAXX(DATATABLE(\"a\",INTEGER,{{1},{2}}),COUNTROWS(FILTER(Facts,FALSE()))))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTX(ROW(\"a\",1),MAXX(FILTER(Facts,FALSE()),COUNTROWS(FILTER(Facts,FALSE()))))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTX(ROW(\"a\",1),MAXX(FILTER(Facts,FALSE()),IF(Facts[Quantity]>2,\"a\",1)))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTX(ROW(\"a\",1),MAXX(Facts,COUNTROWS(FILTER(Facts,FALSE()))))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTX(ROW(\"a\",1),MAXX(Facts,IFERROR(1/0,BLANK())))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTX(ROW(\"a\",1),MAXX(ROW(\"a\",1),COUNTROWS(FILTER(Facts,FALSE()))))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTX(ROW(\"a\",1),MAXX(UNION(Facts,Facts),IF(Facts[Quantity]>2,\"a\",1)))",
+   "powerbi": "1"
+  },
+  {
+   "expr": "COUNTX(ROW(\"a\",1),MAXX(UNION(Facts,Facts),IF(TRUE(),Facts[Region],1)))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTX(ROW(\"a\",1),MAXX(VALUES(Facts[Note]),1/0*0))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTX(TOPN(1,Facts,Facts[Sales]),(1/0*0)-(COUNTROWS(FILTER(Facts,FALSE()))))",
+   "powerbi": "1"
+  },
+  {
+   "expr": "COUNTX(TOPN(1,Facts,Facts[Sales]),(IFERROR(1/0,BLANK()))&(IF(Facts[Quantity]>2,\"a\",1)))",
+   "powerbi": "1"
+  },
+  {
+   "expr": "COUNTX(TOPN(1,Facts,Facts[Sales]),(IFERROR(1/0,BLANK()))&(IF(TRUE(),Facts[Region],1)))",
+   "powerbi": "1"
+  },
+  {
+   "expr": "COUNTX(TOPN(1,Facts,Facts[Sales]),(IFERROR(1/0,BLANK()))/((2.5&&\"\")))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTX(TOPN(1,Facts,Facts[Sales]),MAXX(FILTER(Facts,FALSE()),1/0*0))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTX(TOPN(1,Facts,Facts[Sales]),MAXX(UNION(Facts,Facts),IF(TRUE(),Facts[Region],1)))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTX(TOPN(1,Facts,Facts[Sales]),MAXX({1,2},1/0*0))",
+   "powerbi": "1"
+  },
+  {
+   "expr": "COUNTX(TOPN(1,Facts,Facts[Sales]),MAXX({1,2},IFERROR(1/0,BLANK())))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTX(UNION(Facts,Facts),((2.5&&\"\"))*(IF(TRUE(),Facts[Region],1)))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTX(UNION(Facts,Facts),((2.5&&\"\"))-(COUNTROWS(FILTER(Facts,FALSE()))))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTX(UNION(Facts,Facts),((2.5&&\"\"))/((2.5&&\"\")))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTX(UNION(Facts,Facts),((2.5&&\"\"))/(1/0*0))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTX(UNION(Facts,Facts),((2.5&&\"\"))/(IF(TRUE(),Facts[Region],1)))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTX(UNION(Facts,Facts),(0/0)&(IF(Facts[Quantity]>2,\"a\",1)))",
+   "powerbi": "12"
+  },
+  {
+   "expr": "COUNTX(UNION(Facts,Facts),(0/0)+(1/0*0))",
+   "powerbi": "12"
+  },
+  {
+   "expr": "COUNTX(UNION(Facts,Facts),(1/0*0)*(COUNTROWS(FILTER(Facts,FALSE()))))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTX(UNION(Facts,Facts),(1/0*0)+(1/0*0))",
+   "powerbi": "12"
+  },
+  {
+   "expr": "COUNTX(UNION(Facts,Facts),(1/0*0)+(COUNTROWS(FILTER(Facts,FALSE()))))",
+   "powerbi": "12"
+  },
+  {
+   "expr": "COUNTX(UNION(Facts,Facts),(1/0*0)+(IFERROR(1/0,BLANK())))",
+   "powerbi": "12"
+  },
+  {
+   "expr": "COUNTX(UNION(Facts,Facts),(COUNTROWS(FILTER(Facts,FALSE())))+((2.5&&\"\")))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTX(UNION(Facts,Facts),(COUNTROWS(FILTER(Facts,FALSE())))-(1/0*0))",
+   "powerbi": "12"
+  },
+  {
+   "expr": "COUNTX(UNION(Facts,Facts),(IF(Facts[Quantity]>2,\"a\",1))&(IF(TRUE(),Facts[Region],1)))",
+   "powerbi": "12"
+  },
+  {
+   "expr": "COUNTX(UNION(Facts,Facts),(IF(Facts[Quantity]>2,\"a\",1))*(IFERROR(1/0,BLANK())))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTX(UNION(Facts,Facts),(IF(TRUE(),Facts[Region],1))&((2.5&&\"\")))",
+   "powerbi": "12"
+  },
+  {
+   "expr": "COUNTX(UNION(Facts,Facts),(IF(TRUE(),Facts[Region],1))&(0/0))",
+   "powerbi": "12"
+  },
+  {
+   "expr": "COUNTX(UNION(Facts,Facts),(IFERROR(1/0,BLANK()))/(1/0*0))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTX(UNION(Facts,Facts),(IFERROR(1/0,BLANK()))/(IFERROR(1/0,BLANK())))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTX(UNION(Facts,Facts),(IFERROR(1/0,BLANK()))/(SQRT(-1)))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTX(UNION(Facts,Facts),MAXX(Facts,IF(Facts[Quantity]>2,\"a\",1)))",
+   "powerbi": "12"
+  },
+  {
+   "expr": "COUNTX(UNION(Facts,Facts),MAXX(UNION(Facts,Facts),COUNTROWS(FILTER(Facts,FALSE()))))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTX(UNION(Facts,Facts),MAXX(UNION(Facts,Facts),IF(TRUE(),Facts[Region],1)))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTX(VALUES(Facts[Note]),((2.5&&\"\"))&(0/0))",
+   "powerbi": "3"
+  },
+  {
+   "expr": "COUNTX(VALUES(Facts[Note]),((2.5&&\"\"))*(1/0*0))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTX(VALUES(Facts[Note]),((2.5&&\"\"))+((2.5&&\"\")))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTX(VALUES(Facts[Note]),((2.5&&\"\"))/((2.5&&\"\")))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTX(VALUES(Facts[Note]),((2.5&&\"\"))/(IFERROR(1/0,BLANK())))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTX(VALUES(Facts[Note]),((2.5&&\"\"))/(SUMX(Facts,ERROR(\"x\"))))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTX(VALUES(Facts[Note]),(1/0*0)*(COUNTROWS(FILTER(Facts,FALSE()))))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTX(VALUES(Facts[Note]),(COUNTROWS(FILTER(Facts,FALSE())))/((2.5&&\"\")))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTX(VALUES(Facts[Note]),(COUNTROWS(FILTER(Facts,FALSE())))/(1/0*0))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTX(VALUES(Facts[Note]),(IFERROR(1/0,BLANK()))*(1/0*0))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTX(VALUES(Facts[Note]),(IFERROR(1/0,BLANK()))+((2.5&&\"\")))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTX(VALUES(Facts[Note]),(IFERROR(1/0,BLANK()))/(1/0*0))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTX(VALUES(Facts[Note]),(IFERROR(1/0,BLANK()))/(SUMX(Facts,ERROR(\"x\"))))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTX(VALUES(Facts[Note]),MAXX(FILTER(Facts,FALSE()),1/0*0))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTX(VALUES(Facts[Note]),MAXX(Facts,IF(Facts[Quantity]>2,\"a\",1)))",
+   "powerbi": "3"
+  },
+  {
+   "expr": "COUNTX(VALUES(Facts[Note]),MAXX(Facts,IF(TRUE(),Facts[Region],1)))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTX(VALUES(Facts[Note]),MAXX(UNION(Facts,Facts),IFERROR(1/0,BLANK())))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTX(VALUES(Facts[Note]),MAXX(VALUES(Facts[Note]),0/0))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTX(VALUES(Facts[Note]),MAXX(VALUES(Facts[Note]),COUNTROWS(FILTER(Facts,FALSE()))))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTX({1,2},((2.5&&\"\"))&(1/0*0))",
+   "powerbi": "2"
+  },
+  {
+   "expr": "COUNTX({1,2},(COUNTROWS(FILTER(Facts,FALSE())))-((2.5&&\"\")))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTX({1,2},(IFERROR(1/0,BLANK()))*(SUMX(Facts,ERROR(\"x\"))))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTX({1,2},(IFERROR(1/0,BLANK()))-(COUNTROWS(FILTER(Facts,FALSE()))))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTX({1,2},(SUMX(Facts,ERROR(\"x\")))*(IFERROR(1/0,BLANK())))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTX({1,2},MAXX(ALL(Facts[Region]),IFERROR(1/0,BLANK())))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTX({1,2},MAXX(DATATABLE(\"a\",INTEGER,{{1},{2}}),1/0*0))",
+   "powerbi": "2"
+  },
+  {
+   "expr": "COUNTX({1,2},MAXX(DATATABLE(\"a\",INTEGER,{{1},{2}}),IFERROR(1/0,BLANK())))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTX({1,2},MAXX(FILTER(Facts,FALSE()),ERROR(\"x\")))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTX({1,2},MAXX(FILTER(Facts,FALSE()),IFERROR(1/0,BLANK())))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTX({1,2},MAXX(FILTER(Facts,FALSE()),SQRT(-1)))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTX({1,2},MAXX(ROW(\"a\",1),COUNTROWS(FILTER(Facts,FALSE()))))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTX({1,2},MAXX(UNION(Facts,Facts),COUNTROWS(FILTER(Facts,FALSE()))))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTX({1,2},MAXX(UNION(Facts,Facts),IF(TRUE(),Facts[Region],1)))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTX({1,2},MAXX(VALUES(Facts[Note]),IFERROR(1/0,BLANK())))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "COUNTX({1,2},MAXX({1,2},COUNTROWS(FILTER(Facts,FALSE()))))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "FIRSTNONBLANK(DATATABLE(\"a\",STRING,{{\"x\"},{\"y\"}}),BLANK())",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "FIRSTNONBLANK(DATATABLE(\"a\",STRING,{{\"x\"},{\"y\"}}),[a])",
+   "powerbi": "x"
+  },
+  {
+   "expr": "FIRSTNONBLANK(ROW(\"a\",2.5),1)",
+   "powerbi": "2.5"
+  },
+  {
+   "expr": "FIRSTNONBLANK(ROW(\"a\",2.5),BLANK())",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "FIRSTNONBLANK(ROW(\"a\",COALESCE(1E15,1)&\"\"),1)",
+   "powerbi": "1E+15"
+  },
+  {
+   "expr": "FIRSTNONBLANK(ROW(\"a\",COALESCE(1E15,1)&\"\"),BLANK())",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "FIRSTNONBLANK(ROW(\"a\",COALESCE(1E15,1)&\"\"),[a])",
+   "powerbi": "1E+15"
+  },
+  {
+   "expr": "FIRSTNONBLANK(SELECTCOLUMNS(Facts,\"r\",Facts[Region]),1)",
+   "powerbi": "East"
+  },
+  {
+   "expr": "FIRSTNONBLANK(SELECTCOLUMNS(Facts,\"r\",Facts[Region]),BLANK())",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "FIRSTNONBLANK(VALUES(Facts[Region]),1)",
+   "powerbi": "East"
+  },
+  {
+   "expr": "FIRSTNONBLANK({1,2,3},1)",
+   "powerbi": "1"
+  },
+  {
+   "expr": "FIRSTNONBLANK({1,2,3},BLANK())",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "FIRSTNONBLANK({1,2,3},[Value])",
+   "powerbi": "1"
+  },
+  {
+   "expr": "LASTNONBLANK(DATATABLE(\"a\",STRING,{{\"x\"},{\"y\"}}),1)",
+   "powerbi": "y"
+  },
+  {
+   "expr": "LASTNONBLANK(DATATABLE(\"a\",STRING,{{\"x\"},{\"y\"}}),BLANK())",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "LASTNONBLANK(ROW(\"a\",2.5),1)",
+   "powerbi": "2.5"
+  },
+  {
+   "expr": "LASTNONBLANK(ROW(\"a\",2.5),BLANK())",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "LASTNONBLANK(ROW(\"a\",2.5),[a])",
+   "powerbi": "2.5"
+  },
+  {
+   "expr": "LASTNONBLANK(ROW(\"a\",COALESCE(1E15,1)&\"\"),BLANK())",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "LASTNONBLANK(ROW(\"a\",COALESCE(1E15,1)&\"\"),[a])",
+   "powerbi": "1E+15"
+  },
+  {
+   "expr": "LASTNONBLANK(SELECTCOLUMNS(Facts,\"r\",Facts[Region]),BLANK())",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "LASTNONBLANK(VALUES(Facts[Region]),BLANK())",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "LASTNONBLANK({1,2,3},1)",
+   "powerbi": "3"
+  },
+  {
+   "expr": "LASTNONBLANK({1,2,3},BLANK())",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "LASTNONBLANK({1,2,3},[Value])",
+   "powerbi": "3"
+  },
+  {
+   "expr": "MAXX(ALL(Facts[Region]),((2.5&&\"\"))+(1/0*0))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MAXX(ALL(Facts[Region]),((2.5&&\"\"))-((2.5&&\"\")))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MAXX(ALL(Facts[Region]),(COUNTROWS(FILTER(Facts,FALSE())))/(IFERROR(1/0,BLANK())))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MAXX(ALL(Facts[Region]),(IFERROR(1/0,BLANK()))*(IF(TRUE(),Facts[Region],1)))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MAXX(ALL(Facts[Region]),(IFERROR(1/0,BLANK()))+(0/0))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MAXX(ALL(Facts[Region]),(LOG(-1))*((2.5&&\"\")))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MAXX(ALL(Facts[Region]),MAXX(Facts,1/0*0))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MAXX(ALL(Facts[Region]),MAXX(VALUES(Facts[Note]),IF(TRUE(),Facts[Region],1)))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MAXX(DATATABLE(\"a\",INTEGER,{{1},{2}}),((2.5&&\"\"))+(1/0*0))",
+   "powerbi": "NaN"
+  },
+  {
+   "expr": "MAXX(DATATABLE(\"a\",INTEGER,{{1},{2}}),((2.5&&\"\"))+(COUNTROWS(FILTER(Facts,FALSE()))))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MAXX(DATATABLE(\"a\",INTEGER,{{1},{2}}),((2.5&&\"\"))+(IFERROR(1/0,BLANK())))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MAXX(DATATABLE(\"a\",INTEGER,{{1},{2}}),((2.5&&\"\"))-(IFERROR(1/0,BLANK())))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MAXX(DATATABLE(\"a\",INTEGER,{{1},{2}}),((2.5&&\"\"))/(SUMX(Facts,ERROR(\"x\"))))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MAXX(DATATABLE(\"a\",INTEGER,{{1},{2}}),(1/0*0)-(IFERROR(1/0,BLANK())))",
+   "powerbi": "NaN"
+  },
+  {
+   "expr": "MAXX(DATATABLE(\"a\",INTEGER,{{1},{2}}),(COUNTROWS(FILTER(Facts,FALSE())))&(IFERROR(1/0,BLANK())))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MAXX(DATATABLE(\"a\",INTEGER,{{1},{2}}),(COUNTROWS(FILTER(Facts,FALSE())))*(1/0*0))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MAXX(DATATABLE(\"a\",INTEGER,{{1},{2}}),(IFERROR(1/0,BLANK()))&(1/0*0))",
+   "powerbi": "-nan(ind)"
+  },
+  {
+   "expr": "MAXX(DATATABLE(\"a\",INTEGER,{{1},{2}}),(IFERROR(1/0,BLANK()))*(0/0))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MAXX(DATATABLE(\"a\",INTEGER,{{1},{2}}),(IFERROR(1/0,BLANK()))*(ERROR(\"x\")))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MAXX(DATATABLE(\"a\",INTEGER,{{1},{2}}),(IFERROR(1/0,BLANK()))-((2.5&&\"\")))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MAXX(DATATABLE(\"a\",INTEGER,{{1},{2}}),(IFERROR(1/0,BLANK()))/(1/0*0))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MAXX(DATATABLE(\"a\",INTEGER,{{1},{2}}),(IFERROR(1/0,BLANK()))/(SUMX(Facts,ERROR(\"x\"))))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MAXX(DATATABLE(\"a\",INTEGER,{{1},{2}}),MAXX(FILTER(Facts,FALSE()),IF(Facts[Quantity]>2,\"a\",1)))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MAXX(DATATABLE(\"a\",INTEGER,{{1},{2}}),MAXX(UNION(Facts,Facts),COUNTROWS(FILTER(Facts,FALSE()))))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MAXX(DATATABLE(\"a\",INTEGER,{{1},{2}}),MAXX(UNION(Facts,Facts),IFERROR(1/0,BLANK())))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MAXX(FILTER(Facts,FALSE()),((2.5&&\"\"))&(LOG(-1)))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MAXX(FILTER(Facts,FALSE()),((2.5&&\"\"))+(SQRT(-1)))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MAXX(FILTER(Facts,FALSE()),((2.5&&\"\"))-(1/0*0))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MAXX(FILTER(Facts,FALSE()),((2.5&&\"\"))-(IF(TRUE(),Facts[Region],1)))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MAXX(FILTER(Facts,FALSE()),((2.5&&\"\"))/(IF(TRUE(),Facts[Region],1)))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MAXX(FILTER(Facts,FALSE()),(1/0*0)&(LOG(-1)))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MAXX(FILTER(Facts,FALSE()),(1/0*0)*((2.5&&\"\")))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MAXX(FILTER(Facts,FALSE()),(1/0*0)+(ERROR(\"x\")))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MAXX(FILTER(Facts,FALSE()),(1/0*0)-((2.5&&\"\")))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MAXX(FILTER(Facts,FALSE()),(1/0*0)/(1/0*0))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MAXX(FILTER(Facts,FALSE()),(1/0*0)/(COUNTROWS(FILTER(Facts,FALSE()))))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MAXX(FILTER(Facts,FALSE()),(1/0*0)/(LOG(-1)))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MAXX(FILTER(Facts,FALSE()),(COUNTROWS(FILTER(Facts,FALSE())))&(ERROR(\"x\")))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MAXX(FILTER(Facts,FALSE()),(COUNTROWS(FILTER(Facts,FALSE())))*((2.5&&\"\")))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MAXX(FILTER(Facts,FALSE()),(COUNTROWS(FILTER(Facts,FALSE())))*(IFERROR(1/0,BLANK())))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MAXX(FILTER(Facts,FALSE()),(ERROR(\"x\"))&(COUNTROWS(FILTER(Facts,FALSE()))))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MAXX(FILTER(Facts,FALSE()),(ERROR(\"x\"))&(ERROR(\"x\")))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MAXX(FILTER(Facts,FALSE()),(ERROR(\"x\"))+(1/0*0))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MAXX(FILTER(Facts,FALSE()),(ERROR(\"x\"))-(0/0))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MAXX(FILTER(Facts,FALSE()),(ERROR(\"x\"))-(ERROR(\"x\")))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MAXX(FILTER(Facts,FALSE()),(ERROR(\"x\"))-(SUMX(Facts,ERROR(\"x\"))))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 71) x\""
+  },
+  {
+   "expr": "MAXX(FILTER(Facts,FALSE()),(ERROR(\"x\"))/(ERROR(\"x\")))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MAXX(FILTER(Facts,FALSE()),(IF(Facts[Quantity]>2,\"a\",1))&((2.5&&\"\")))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MAXX(FILTER(Facts,FALSE()),(IF(Facts[Quantity]>2,\"a\",1))*(IF(Facts[Quantity]>2,\"a\",1)))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MAXX(FILTER(Facts,FALSE()),(IF(Facts[Quantity]>2,\"a\",1))+(ERROR(\"x\")))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MAXX(FILTER(Facts,FALSE()),(IF(Facts[Quantity]>2,\"a\",1))/(IF(TRUE(),Facts[Region],1)))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MAXX(FILTER(Facts,FALSE()),(IF(Facts[Quantity]>2,\"a\",1))/(IFERROR(1/0,BLANK())))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MAXX(FILTER(Facts,FALSE()),(IF(Facts[Quantity]>2,\"a\",1))/(SUMX(Facts,ERROR(\"x\"))))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 88) x\""
+  },
+  {
+   "expr": "MAXX(FILTER(Facts,FALSE()),(IF(TRUE(),Facts[Region],1))&(SUMX(Facts,ERROR(\"x\"))))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 87) x\""
+  },
+  {
+   "expr": "MAXX(FILTER(Facts,FALSE()),(IF(TRUE(),Facts[Region],1))+(COUNTROWS(FILTER(Facts,FALSE()))))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MAXX(FILTER(Facts,FALSE()),(IF(TRUE(),Facts[Region],1))+(ERROR(\"x\")))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MAXX(FILTER(Facts,FALSE()),(IF(TRUE(),Facts[Region],1))+(IF(TRUE(),Facts[Region],1)))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MAXX(FILTER(Facts,FALSE()),(IF(TRUE(),Facts[Region],1))/(1/0*0))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MAXX(FILTER(Facts,FALSE()),(IF(TRUE(),Facts[Region],1))/(IF(Facts[Quantity]>2,\"a\",1)))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MAXX(FILTER(Facts,FALSE()),(IFERROR(1/0,BLANK()))&(1/0*0))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MAXX(FILTER(Facts,FALSE()),(IFERROR(1/0,BLANK()))*(ERROR(\"x\")))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MAXX(FILTER(Facts,FALSE()),(IFERROR(1/0,BLANK()))*(SUMX(Facts,ERROR(\"x\"))))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MAXX(FILTER(Facts,FALSE()),(IFERROR(1/0,BLANK()))+(IFERROR(1/0,BLANK())))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MAXX(FILTER(Facts,FALSE()),(IFERROR(1/0,BLANK()))-(COUNTROWS(FILTER(Facts,FALSE()))))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MAXX(FILTER(Facts,FALSE()),(IFERROR(1/0,BLANK()))-(IF(TRUE(),Facts[Region],1)))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MAXX(FILTER(Facts,FALSE()),(IFERROR(1/0,BLANK()))/(COUNTROWS(FILTER(Facts,FALSE()))))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MAXX(FILTER(Facts,FALSE()),(IFERROR(1/0,BLANK()))/(SUMX(Facts,ERROR(\"x\"))))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MAXX(FILTER(Facts,FALSE()),(LOG(-1))+(IF(TRUE(),Facts[Region],1)))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MAXX(FILTER(Facts,FALSE()),(LOG(-1))-(COUNTROWS(FILTER(Facts,FALSE()))))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MAXX(FILTER(Facts,FALSE()),(SQRT(-1))*(IF(TRUE(),Facts[Region],1)))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MAXX(FILTER(Facts,FALSE()),(SQRT(-1))-(COUNTROWS(FILTER(Facts,FALSE()))))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MAXX(FILTER(Facts,FALSE()),(SUMX(Facts,ERROR(\"x\")))&(SUMX(Facts,ERROR(\"x\"))))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 58) x\""
+  },
+  {
+   "expr": "MAXX(FILTER(Facts,FALSE()),(SUMX(Facts,ERROR(\"x\")))*(IF(Facts[Quantity]>2,\"a\",1)))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 58) x\""
+  },
+  {
+   "expr": "MAXX(FILTER(Facts,FALSE()),(SUMX(Facts,ERROR(\"x\")))+((2.5&&\"\")))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 58) x\""
+  },
+  {
+   "expr": "MAXX(FILTER(Facts,FALSE()),(SUMX(Facts,ERROR(\"x\")))-(IF(TRUE(),Facts[Region],1)))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 58) x\""
+  },
+  {
+   "expr": "MAXX(FILTER(Facts,FALSE()),(SUMX(Facts,ERROR(\"x\")))/(COUNTROWS(FILTER(Facts,FALSE()))))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 58) x\""
+  },
+  {
+   "expr": "MAXX(FILTER(Facts,FALSE()),MAXX(Facts,SUMX(Facts,ERROR(\"x\"))))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 68) x\""
+  },
+  {
+   "expr": "MAXX(FILTER(Facts,FALSE()),MAXX(ROW(\"a\",1),0/0))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MAXX(FILTER(Facts,FALSE()),MAXX(ROW(\"a\",1),1/0*0))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MAXX(FILTER(Facts,FALSE()),MAXX(ROW(\"a\",1),IFERROR(1/0,BLANK())))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MAXX(FILTER(Facts,FALSE()),MAXX(TOPN(1,Facts,Facts[Sales]),1/0*0))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MAXX(FILTER(Facts,FALSE()),MAXX(UNION(Facts,Facts),1/0*0))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MAXX(FILTER(Facts,FALSE()),MAXX(VALUES(Facts[Note]),ERROR(\"x\")))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 71) x\""
+  },
+  {
+   "expr": "MAXX(FILTER(Facts,FALSE()),MAXX(VALUES(Facts[Note]),IFERROR(1/0,BLANK())))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MAXX(FILTER(Facts,FALSE()),MAXX({1,2},1/0*0))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MAXX(FILTER(Facts,FALSE()),MAXX({1,2},ERROR(\"x\")))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 57) x\""
+  },
+  {
+   "expr": "MAXX(Facts,(1/0*0)&(IF(TRUE(),Facts[Region],1)))",
+   "powerbi": "-nan(ind)West"
+  },
+  {
+   "expr": "MAXX(Facts,(COUNTROWS(FILTER(Facts,FALSE())))&(IF(TRUE(),Facts[Region],1)))",
+   "powerbi": "West"
+  },
+  {
+   "expr": "MAXX(Facts,(COUNTROWS(FILTER(Facts,FALSE())))-(1/0*0))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MAXX(Facts,(IFERROR(1/0,BLANK()))&(IF(Facts[Quantity]>2,\"a\",1)))",
+   "powerbi": "a"
+  },
+  {
+   "expr": "MAXX(Facts,(IFERROR(1/0,BLANK()))&(IF(TRUE(),Facts[Region],1)))",
+   "powerbi": "West"
+  },
+  {
+   "expr": "MAXX(Facts,MAXX(DATATABLE(\"a\",INTEGER,{{1},{2}}),COUNTROWS(FILTER(Facts,FALSE()))))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MAXX(Facts,MAXX(DATATABLE(\"a\",INTEGER,{{1},{2}}),IFERROR(1/0,BLANK())))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MAXX(Facts,MAXX(UNION(Facts,Facts),IF(TRUE(),Facts[Region],1)))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MAXX(Facts,MAXX(VALUES(Facts[Note]),COUNTROWS(FILTER(Facts,FALSE()))))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MAXX(ROW(\"a\",1),((2.5&&\"\"))&(IFERROR(1/0,BLANK())))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MAXX(ROW(\"a\",1),((2.5&&\"\"))+((2.5&&\"\")))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MAXX(ROW(\"a\",1),((2.5&&\"\"))+(IFERROR(1/0,BLANK())))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MAXX(ROW(\"a\",1),((2.5&&\"\"))/(SUMX(Facts,ERROR(\"x\"))))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MAXX(ROW(\"a\",1),(1/0*0)-(1/0*0))",
+   "powerbi": "NaN"
+  },
+  {
+   "expr": "MAXX(ROW(\"a\",1),(1/0*0)/(IFERROR(1/0,BLANK())))",
+   "powerbi": "NaN"
+  },
+  {
+   "expr": "MAXX(ROW(\"a\",1),(IFERROR(1/0,BLANK()))*(IFERROR(1/0,BLANK())))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MAXX(ROW(\"a\",1),(IFERROR(1/0,BLANK()))/(LOG(-1)))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MAXX(ROW(\"a\",1),(MAXX({1},ERROR(\"y\")))*((2.5&&\"\")))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MAXX(ROW(\"a\",1),MAXX(ALL(Facts[Region]),IF(TRUE(),Facts[Region],1)))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MAXX(ROW(\"a\",1),MAXX(FILTER(Facts,FALSE()),IFERROR(1/0,BLANK())))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MAXX(ROW(\"a\",1),MAXX(Facts,IFERROR(1/0,BLANK())))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MAXX(ROW(\"a\",1),MAXX(ROW(\"a\",1),IFERROR(1/0,BLANK())))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MAXX(ROW(\"a\",1),MAXX(TOPN(1,Facts,Facts[Sales]),IF(Facts[Quantity]>2,\"a\",1)))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MAXX(ROW(\"a\",1),MAXX(UNION(Facts,Facts),COUNTROWS(FILTER(Facts,FALSE()))))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MAXX(ROW(\"a\",1),MAXX({1,2},1/0*0))",
+   "powerbi": "NaN"
+  },
+  {
+   "expr": "MAXX(TOPN(1,Facts,Facts[Sales]),((2.5&&\"\"))/(LOG(-1)))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MAXX(TOPN(1,Facts,Facts[Sales]),(0/0)*(0/0))",
+   "powerbi": "NaN"
+  },
+  {
+   "expr": "MAXX(TOPN(1,Facts,Facts[Sales]),(1/0*0)&(IF(TRUE(),Facts[Region],1)))",
+   "powerbi": "-nan(ind)West"
+  },
+  {
+   "expr": "MAXX(TOPN(1,Facts,Facts[Sales]),(COUNTROWS(FILTER(Facts,FALSE())))-(1/0*0))",
+   "powerbi": "NaN"
+  },
+  {
+   "expr": "MAXX(TOPN(1,Facts,Facts[Sales]),(IFERROR(1/0,BLANK()))&(0/0))",
+   "powerbi": "-nan(ind)"
+  },
+  {
+   "expr": "MAXX(TOPN(1,Facts,Facts[Sales]),(IFERROR(1/0,BLANK()))*(LOG(-1)))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MAXX(TOPN(1,Facts,Facts[Sales]),(IFERROR(1/0,BLANK()))/(IFERROR(1/0,BLANK())))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MAXX(TOPN(1,Facts,Facts[Sales]),MAXX(FILTER(Facts,FALSE()),COUNTROWS(FILTER(Facts,FALSE()))))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MAXX(TOPN(1,Facts,Facts[Sales]),MAXX(Facts,1/0*0))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MAXX(TOPN(1,Facts,Facts[Sales]),MAXX(Facts,IF(TRUE(),Facts[Region],1)))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MAXX(UNION(Facts,Facts),((2.5&&\"\"))&((2.5&&\"\")))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MAXX(UNION(Facts,Facts),((2.5&&\"\"))+(IFERROR(1/0,BLANK())))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MAXX(UNION(Facts,Facts),((2.5&&\"\"))/(IF(TRUE(),Facts[Region],1)))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MAXX(UNION(Facts,Facts),((2.5&&\"\"))/(LOG(-1)))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MAXX(UNION(Facts,Facts),(1/0*0)&(IF(TRUE(),Facts[Region],1)))",
+   "powerbi": "-nan(ind)West"
+  },
+  {
+   "expr": "MAXX(UNION(Facts,Facts),(1/0*0)&(IFERROR(1/0,BLANK())))",
+   "powerbi": "-nan(ind)"
+  },
+  {
+   "expr": "MAXX(UNION(Facts,Facts),(1/0*0)*(1/0*0))",
+   "powerbi": "NaN"
+  },
+  {
+   "expr": "MAXX(UNION(Facts,Facts),(1/0*0)/(COUNTROWS(FILTER(Facts,FALSE()))))",
+   "powerbi": "NaN"
+  },
+  {
+   "expr": "MAXX(UNION(Facts,Facts),(1/0*0)/(IFERROR(1/0,BLANK())))",
+   "powerbi": "NaN"
+  },
+  {
+   "expr": "MAXX(UNION(Facts,Facts),(COUNTROWS(FILTER(Facts,FALSE())))&(COUNTROWS(FILTER(Facts,FALSE()))))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MAXX(UNION(Facts,Facts),(COUNTROWS(FILTER(Facts,FALSE())))/(IFERROR(1/0,BLANK())))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MAXX(UNION(Facts,Facts),(IF(Facts[Quantity]>2,\"a\",1))&(IF(Facts[Quantity]>2,\"a\",1)))",
+   "powerbi": "aa"
+  },
+  {
+   "expr": "MAXX(UNION(Facts,Facts),(IF(TRUE(),Facts[Region],1))&(COUNTROWS(FILTER(Facts,FALSE()))))",
+   "powerbi": "West"
+  },
+  {
+   "expr": "MAXX(UNION(Facts,Facts),(IFERROR(1/0,BLANK()))&(1/0*0))",
+   "powerbi": "-nan(ind)"
+  },
+  {
+   "expr": "MAXX(UNION(Facts,Facts),MAXX(ALL(Facts[Region]),0/0))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MAXX(UNION(Facts,Facts),MAXX(DATATABLE(\"a\",INTEGER,{{1},{2}}),1/0*0))",
+   "powerbi": "NaN"
+  },
+  {
+   "expr": "MAXX(UNION(Facts,Facts),MAXX(Facts,IF(Facts[Quantity]>2,\"a\",1)))",
+   "powerbi": "1"
+  },
+  {
+   "expr": "MAXX(UNION(Facts,Facts),MAXX(TOPN(1,Facts,Facts[Sales]),0/0))",
+   "powerbi": "NaN"
+  },
+  {
+   "expr": "MAXX(UNION(Facts,Facts),MAXX(UNION(Facts,Facts),COUNTROWS(FILTER(Facts,FALSE()))))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MAXX(UNION(Facts,Facts),MAXX(VALUES(Facts[Note]),1/0*0))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MAXX(UNION(Facts,Facts),MAXX(VALUES(Facts[Note]),COUNTROWS(FILTER(Facts,FALSE()))))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MAXX(VALUES(Facts[Note]),(0/0)&(0/0))",
+   "powerbi": "-nan(ind)-nan(ind)"
+  },
+  {
+   "expr": "MAXX(VALUES(Facts[Note]),(1/0*0)&(0/0))",
+   "powerbi": "-nan(ind)-nan(ind)"
+  },
+  {
+   "expr": "MAXX(VALUES(Facts[Note]),(1/0*0)&(IFERROR(1/0,BLANK())))",
+   "powerbi": "-nan(ind)"
+  },
+  {
+   "expr": "MAXX(VALUES(Facts[Note]),(1/0*0)+(IFERROR(1/0,BLANK())))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MAXX(VALUES(Facts[Note]),(COUNTROWS(FILTER(Facts,FALSE())))-(COUNTROWS(FILTER(Facts,FALSE()))))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MAXX(VALUES(Facts[Note]),(COUNTROWS(FILTER(Facts,FALSE())))/(COUNTROWS(FILTER(Facts,FALSE()))))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MAXX(VALUES(Facts[Note]),(IFERROR(1/0,BLANK()))&(1/0*0))",
+   "powerbi": "-nan(ind)"
+  },
+  {
+   "expr": "MAXX(VALUES(Facts[Note]),(IFERROR(1/0,BLANK()))*(COUNTROWS(FILTER(Facts,FALSE()))))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MAXX(VALUES(Facts[Note]),(IFERROR(1/0,BLANK()))-(1/0*0))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MAXX(VALUES(Facts[Note]),(SUMX(Facts,ERROR(\"x\")))*((2.5&&\"\")))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MAXX(VALUES(Facts[Note]),MAXX(FILTER(Facts,FALSE()),COUNTROWS(FILTER(Facts,FALSE()))))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MAXX(VALUES(Facts[Note]),MAXX(FILTER(Facts,FALSE()),ERROR(\"x\")))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MAXX(VALUES(Facts[Note]),MAXX(FILTER(Facts,FALSE()),SUMX(Facts,ERROR(\"x\"))))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 82) x\""
+  },
+  {
+   "expr": "MAXX(VALUES(Facts[Note]),MAXX(Facts,COUNTROWS(FILTER(Facts,FALSE()))))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MAXX(VALUES(Facts[Note]),MAXX(Facts,IF(TRUE(),Facts[Region],1)))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MAXX(VALUES(Facts[Note]),MAXX(TOPN(1,Facts,Facts[Sales]),IF(Facts[Quantity]>2,\"a\",1)))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MAXX(VALUES(Facts[Note]),MAXX(TOPN(1,Facts,Facts[Sales]),IF(TRUE(),Facts[Region],1)))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MAXX(VALUES(Facts[Note]),MAXX(UNION(Facts,Facts),COUNTROWS(FILTER(Facts,FALSE()))))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MAXX(VALUES(Facts[Note]),MAXX(UNION(Facts,Facts),IFERROR(1/0,BLANK())))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MAXX(VALUES(Facts[Note]),MAXX({1,2},1/0*0))",
+   "powerbi": "NaN"
+  },
+  {
+   "expr": "MAXX({1,2},((2.5&&\"\"))*(ERROR(\"x\")))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MAXX({1,2},((2.5&&\"\"))*(SQRT(-1)))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MAXX({1,2},((2.5&&\"\"))*(SUMX(Facts,ERROR(\"x\"))))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MAXX({1,2},((2.5&&\"\"))-(IFERROR(1/0,BLANK())))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MAXX({1,2},((2.5&&\"\"))/(1/0*0))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MAXX({1,2},(0/0)-(COUNTROWS(FILTER(Facts,FALSE()))))",
+   "powerbi": "NaN"
+  },
+  {
+   "expr": "MAXX({1,2},(1/0*0)*((2.5&&\"\")))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MAXX({1,2},(1/0*0)+(COUNTROWS(FILTER(Facts,FALSE()))))",
+   "powerbi": "NaN"
+  },
+  {
+   "expr": "MAXX({1,2},(COUNTROWS(FILTER(Facts,FALSE())))*(COUNTROWS(FILTER(Facts,FALSE()))))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MAXX({1,2},(COUNTROWS(FILTER(Facts,FALSE())))-(1/0*0))",
+   "powerbi": "NaN"
+  },
+  {
+   "expr": "MAXX({1,2},(COUNTROWS(FILTER(Facts,FALSE())))-(IFERROR(1/0,BLANK())))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MAXX({1,2},(COUNTROWS(FILTER(Facts,FALSE())))/(IFERROR(1/0,BLANK())))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MAXX({1,2},(IFERROR(1/0,BLANK()))&(COUNTROWS(FILTER(Facts,FALSE()))))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MAXX({1,2},(IFERROR(1/0,BLANK()))-(COUNTROWS(FILTER(Facts,FALSE()))))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MAXX({1,2},(IFERROR(1/0,BLANK()))/(IFERROR(1/0,BLANK())))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MAXX({1,2},MAXX(Facts,IF(TRUE(),Facts[Region],1)))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MAXX({1,2},MAXX(UNION(Facts,Facts),1/0*0))",
+   "powerbi": "NaN"
+  },
+  {
+   "expr": "MAXX({1,2},MAXX(UNION(Facts,Facts),IF(TRUE(),Facts[Region],1)))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MAXX({1,2},MAXX(VALUES(Facts[Note]),1/0*0))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MAXX({1,2},MAXX(VALUES(Facts[Note]),IFERROR(1/0,BLANK())))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MAXX({1,2},MAXX({1,2},IFERROR(1/0,BLANK())))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MINX(ALL(Facts[Region]),((2.5&&\"\"))*(IFERROR(1/0,BLANK())))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MINX(ALL(Facts[Region]),((2.5&&\"\"))+((2.5&&\"\")))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MINX(ALL(Facts[Region]),((2.5&&\"\"))-(COUNTROWS(FILTER(Facts,FALSE()))))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MINX(ALL(Facts[Region]),((2.5&&\"\"))/((2.5&&\"\")))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MINX(ALL(Facts[Region]),(COUNTROWS(FILTER(Facts,FALSE())))/(0/0))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MINX(ALL(Facts[Region]),(IF(TRUE(),Facts[Region],1))&(IFERROR(1/0,BLANK())))",
+   "powerbi": "East"
+  },
+  {
+   "expr": "MINX(ALL(Facts[Region]),(IFERROR(1/0,BLANK()))*(SQRT(-1)))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MINX(ALL(Facts[Region]),(IFERROR(1/0,BLANK()))/(COUNTROWS(FILTER(Facts,FALSE()))))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MINX(ALL(Facts[Region]),MAXX(DATATABLE(\"a\",INTEGER,{{1},{2}}),COUNTROWS(FILTER(Facts,FALSE()))))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MINX(ALL(Facts[Region]),MAXX(FILTER(Facts,FALSE()),1/0*0))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MINX(ALL(Facts[Region]),MAXX(FILTER(Facts,FALSE()),ERROR(\"x\")))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MINX(ALL(Facts[Region]),MAXX(TOPN(1,Facts,Facts[Sales]),IF(TRUE(),Facts[Region],1)))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MINX(DATATABLE(\"a\",INTEGER,{{1},{2}}),((2.5&&\"\"))&(IFERROR(1/0,BLANK())))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MINX(DATATABLE(\"a\",INTEGER,{{1},{2}}),((2.5&&\"\"))-((2.5&&\"\")))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MINX(DATATABLE(\"a\",INTEGER,{{1},{2}}),((2.5&&\"\"))/(COUNTROWS(FILTER(Facts,FALSE()))))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MINX(DATATABLE(\"a\",INTEGER,{{1},{2}}),((2.5&&\"\"))/(SUMX(Facts,ERROR(\"x\"))))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MINX(DATATABLE(\"a\",INTEGER,{{1},{2}}),(1/0*0)*(COUNTROWS(FILTER(Facts,FALSE()))))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MINX(DATATABLE(\"a\",INTEGER,{{1},{2}}),(COUNTROWS(FILTER(Facts,FALSE())))&(COUNTROWS(FILTER(Facts,FALSE()))))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MINX(DATATABLE(\"a\",INTEGER,{{1},{2}}),(COUNTROWS(FILTER(Facts,FALSE())))+(IFERROR(1/0,BLANK())))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MINX(DATATABLE(\"a\",INTEGER,{{1},{2}}),MAXX(FILTER(Facts,FALSE()),1/0*0))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MINX(DATATABLE(\"a\",INTEGER,{{1},{2}}),MAXX(FILTER(Facts,FALSE()),IFERROR(1/0,BLANK())))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MINX(DATATABLE(\"a\",INTEGER,{{1},{2}}),MAXX(ROW(\"a\",1),1/0*0))",
+   "powerbi": "NaN"
+  },
+  {
+   "expr": "MINX(DATATABLE(\"a\",INTEGER,{{1},{2}}),MAXX(TOPN(1,Facts,Facts[Sales]),IF(TRUE(),Facts[Region],1)))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MINX(DATATABLE(\"a\",INTEGER,{{1},{2}}),MAXX(UNION(Facts,Facts),IF(Facts[Quantity]>2,\"a\",1)))",
+   "powerbi": "1"
+  },
+  {
+   "expr": "MINX(DATATABLE(\"a\",INTEGER,{{1},{2}}),MAXX(VALUES(Facts[Note]),1/0*0))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MINX(DATATABLE(\"a\",INTEGER,{{1},{2}}),MAXX({1,2},IFERROR(1/0,BLANK())))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MINX(FILTER(Facts,FALSE()),((2.5&&\"\"))&(1/0*0))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MINX(FILTER(Facts,FALSE()),((2.5&&\"\"))&(COUNTROWS(FILTER(Facts,FALSE()))))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MINX(FILTER(Facts,FALSE()),((2.5&&\"\"))-(IF(Facts[Quantity]>2,\"a\",1)))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MINX(FILTER(Facts,FALSE()),((2.5&&\"\"))/(IFERROR(1/0,BLANK())))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MINX(FILTER(Facts,FALSE()),((2.5&&\"\"))/(SUMX(Facts,ERROR(\"x\"))))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MINX(FILTER(Facts,FALSE()),(0/0)&(LOG(-1)))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MINX(FILTER(Facts,FALSE()),(0/0)*(1/0*0))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MINX(FILTER(Facts,FALSE()),(1/0*0)&(LOG(-1)))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MINX(FILTER(Facts,FALSE()),(1/0*0)*(IFERROR(1/0,BLANK())))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MINX(FILTER(Facts,FALSE()),(1/0*0)*(LOG(-1)))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MINX(FILTER(Facts,FALSE()),(COUNTROWS(FILTER(Facts,FALSE())))&(1/0*0))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MINX(FILTER(Facts,FALSE()),(COUNTROWS(FILTER(Facts,FALSE())))&(IF(TRUE(),Facts[Region],1)))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MINX(FILTER(Facts,FALSE()),(COUNTROWS(FILTER(Facts,FALSE())))&(SUMX(Facts,ERROR(\"x\"))))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 93) x\""
+  },
+  {
+   "expr": "MINX(FILTER(Facts,FALSE()),(COUNTROWS(FILTER(Facts,FALSE())))*(0/0))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MINX(FILTER(Facts,FALSE()),(COUNTROWS(FILTER(Facts,FALSE())))+(IF(TRUE(),Facts[Region],1)))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MINX(FILTER(Facts,FALSE()),(COUNTROWS(FILTER(Facts,FALSE())))-(IF(TRUE(),Facts[Region],1)))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MINX(FILTER(Facts,FALSE()),(COUNTROWS(FILTER(Facts,FALSE())))-(IFERROR(1/0,BLANK())))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MINX(FILTER(Facts,FALSE()),(ERROR(\"x\"))&((2.5&&\"\")))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MINX(FILTER(Facts,FALSE()),(ERROR(\"x\"))*(IF(Facts[Quantity]>2,\"a\",1)))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MINX(FILTER(Facts,FALSE()),(ERROR(\"x\"))+(IFERROR(1/0,BLANK())))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MINX(FILTER(Facts,FALSE()),(ERROR(\"x\"))-(SUMX(Facts,ERROR(\"x\"))))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 71) x\""
+  },
+  {
+   "expr": "MINX(FILTER(Facts,FALSE()),(ERROR(\"x\"))/(IF(Facts[Quantity]>2,\"a\",1)))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MINX(FILTER(Facts,FALSE()),(IF(Facts[Quantity]>2,\"a\",1))*(SUMX(Facts,ERROR(\"x\"))))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 88) x\""
+  },
+  {
+   "expr": "MINX(FILTER(Facts,FALSE()),(IF(Facts[Quantity]>2,\"a\",1))+(1/0*0))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MINX(FILTER(Facts,FALSE()),(IF(Facts[Quantity]>2,\"a\",1))+(ERROR(\"x\")))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MINX(FILTER(Facts,FALSE()),(IF(Facts[Quantity]>2,\"a\",1))+(SUMX(Facts,ERROR(\"x\"))))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 88) x\""
+  },
+  {
+   "expr": "MINX(FILTER(Facts,FALSE()),(IF(Facts[Quantity]>2,\"a\",1))-(ERROR(\"x\")))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MINX(FILTER(Facts,FALSE()),(IF(TRUE(),Facts[Region],1))&(SUMX(Facts,ERROR(\"x\"))))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 87) x\""
+  },
+  {
+   "expr": "MINX(FILTER(Facts,FALSE()),(IF(TRUE(),Facts[Region],1))+((2.5&&\"\")))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MINX(FILTER(Facts,FALSE()),(IF(TRUE(),Facts[Region],1))-(IF(Facts[Quantity]>2,\"a\",1)))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MINX(FILTER(Facts,FALSE()),(IF(TRUE(),Facts[Region],1))/(COUNTROWS(FILTER(Facts,FALSE()))))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MINX(FILTER(Facts,FALSE()),(IFERROR(1/0,BLANK()))&((2.5&&\"\")))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MINX(FILTER(Facts,FALSE()),(IFERROR(1/0,BLANK()))*((2.5&&\"\")))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MINX(FILTER(Facts,FALSE()),(IFERROR(1/0,BLANK()))*(ERROR(\"x\")))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MINX(FILTER(Facts,FALSE()),(IFERROR(1/0,BLANK()))+(COUNTROWS(FILTER(Facts,FALSE()))))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MINX(FILTER(Facts,FALSE()),(IFERROR(1/0,BLANK()))+(IF(TRUE(),Facts[Region],1)))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MINX(FILTER(Facts,FALSE()),(IFERROR(1/0,BLANK()))-(COUNTROWS(FILTER(Facts,FALSE()))))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MINX(FILTER(Facts,FALSE()),(IFERROR(1/0,BLANK()))-(IF(Facts[Quantity]>2,\"a\",1)))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MINX(FILTER(Facts,FALSE()),(IFERROR(1/0,BLANK()))-(SUMX(Facts,ERROR(\"x\"))))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 81) x\""
+  },
+  {
+   "expr": "MINX(FILTER(Facts,FALSE()),(IFERROR(1/0,BLANK()))/(IF(TRUE(),Facts[Region],1)))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MINX(FILTER(Facts,FALSE()),(LOG(-1))&((2.5&&\"\")))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MINX(FILTER(Facts,FALSE()),(LOG(-1))-(IF(Facts[Quantity]>2,\"a\",1)))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MINX(FILTER(Facts,FALSE()),(SQRT(-1))*(0/0))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MINX(FILTER(Facts,FALSE()),(SQRT(-1))-((2.5&&\"\")))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MINX(FILTER(Facts,FALSE()),(SQRT(-1))/(0/0))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MINX(FILTER(Facts,FALSE()),MAXX(ALL(Facts[Region]),COUNTROWS(FILTER(Facts,FALSE()))))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MINX(FILTER(Facts,FALSE()),MAXX(DATATABLE(\"a\",INTEGER,{{1},{2}}),COUNTROWS(FILTER(Facts,FALSE()))))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MINX(FILTER(Facts,FALSE()),MAXX(DATATABLE(\"a\",INTEGER,{{1},{2}}),IFERROR(1/0,BLANK())))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MINX(FILTER(Facts,FALSE()),MAXX(FILTER(Facts,FALSE()),1/0*0))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MINX(FILTER(Facts,FALSE()),MAXX(Facts,1/0*0))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MINX(FILTER(Facts,FALSE()),MAXX(Facts,ERROR(\"x\")))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 57) x\""
+  },
+  {
+   "expr": "MINX(FILTER(Facts,FALSE()),MAXX(Facts,IF(Facts[Quantity]>2,\"a\",1)))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MINX(FILTER(Facts,FALSE()),MAXX(UNION(Facts,Facts),ERROR(\"x\")))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 70) x\""
+  },
+  {
+   "expr": "MINX(FILTER(Facts,FALSE()),MAXX(VALUES(Facts[Note]),IFERROR(1/0,BLANK())))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MINX(Facts,((2.5&&\"\"))-((2.5&&\"\")))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MINX(Facts,((2.5&&\"\"))/((2.5&&\"\")))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MINX(Facts,(1/0*0)+(1/0*0))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MINX(Facts,(1/0*0)-((2.5&&\"\")))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MINX(Facts,(1/0*0)-(COUNTROWS(FILTER(Facts,FALSE()))))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MINX(Facts,(ERROR(\"x\"))*((2.5&&\"\")))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MINX(Facts,(IFERROR(1/0,BLANK()))&(1/0*0))",
+   "powerbi": "-nan(ind)"
+  },
+  {
+   "expr": "MINX(Facts,(IFERROR(1/0,BLANK()))*((2.5&&\"\")))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MINX(Facts,(IFERROR(1/0,BLANK()))*(ERROR(\"x\")))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MINX(Facts,(IFERROR(1/0,BLANK()))/(1/0*0))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MINX(Facts,MAXX(DATATABLE(\"a\",INTEGER,{{1},{2}}),COUNTROWS(FILTER(Facts,FALSE()))))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MINX(Facts,MAXX(FILTER(Facts,FALSE()),SUMX(Facts,ERROR(\"x\"))))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 68) x\""
+  },
+  {
+   "expr": "MINX(Facts,MAXX(Facts,COUNTROWS(FILTER(Facts,FALSE()))))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MINX(Facts,MAXX(UNION(Facts,Facts),1/0*0))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MINX(Facts,MAXX(UNION(Facts,Facts),COUNTROWS(FILTER(Facts,FALSE()))))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MINX(Facts,MAXX(VALUES(Facts[Note]),1/0*0))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MINX(Facts,MAXX({1,2},COUNTROWS(FILTER(Facts,FALSE()))))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MINX(ROW(\"a\",1),((2.5&&\"\"))&(COUNTROWS(FILTER(Facts,FALSE()))))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MINX(ROW(\"a\",1),((2.5&&\"\"))*(IFERROR(1/0,BLANK())))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MINX(ROW(\"a\",1),((2.5&&\"\"))/(COUNTROWS(FILTER(Facts,FALSE()))))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MINX(ROW(\"a\",1),((2.5&&\"\"))/(LOG(-1)))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MINX(ROW(\"a\",1),((2.5&&\"\"))/(SUMX(Facts,ERROR(\"x\"))))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MINX(ROW(\"a\",1),(0/0)*(0/0))",
+   "powerbi": "NaN"
+  },
+  {
+   "expr": "MINX(ROW(\"a\",1),(0/0)-(0/0))",
+   "powerbi": "NaN"
+  },
+  {
+   "expr": "MINX(ROW(\"a\",1),(1/0*0)/((2.5&&\"\")))",
+   "powerbi": "NaN"
+  },
+  {
+   "expr": "MINX(ROW(\"a\",1),(COUNTROWS(FILTER(Facts,FALSE())))*((2.5&&\"\")))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MINX(ROW(\"a\",1),(COUNTROWS(FILTER(Facts,FALSE())))-(IFERROR(1/0,BLANK())))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MINX(ROW(\"a\",1),(IFERROR(1/0,BLANK()))*(ERROR(\"x\")))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MINX(ROW(\"a\",1),(IFERROR(1/0,BLANK()))+(1/0*0))",
+   "powerbi": "NaN"
+  },
+  {
+   "expr": "MINX(ROW(\"a\",1),(IFERROR(1/0,BLANK()))/(IFERROR(1/0,BLANK())))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MINX(ROW(\"a\",1),(IFERROR(1/0,BLANK()))/(SUMX(Facts,ERROR(\"x\"))))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MINX(ROW(\"a\",1),(LOG(-1))*((2.5&&\"\")))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MINX(ROW(\"a\",1),MAXX(DATATABLE(\"a\",INTEGER,{{1},{2}}),1/0*0))",
+   "powerbi": "NaN"
+  },
+  {
+   "expr": "MINX(ROW(\"a\",1),MAXX(DATATABLE(\"a\",INTEGER,{{1},{2}}),IFERROR(1/0,BLANK())))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MINX(ROW(\"a\",1),MAXX(FILTER(Facts,FALSE()),IF(Facts[Quantity]>2,\"a\",1)))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MINX(ROW(\"a\",1),MAXX(FILTER(Facts,FALSE()),SUMX(Facts,ERROR(\"x\"))))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 73) x\""
+  },
+  {
+   "expr": "MINX(ROW(\"a\",1),MAXX(Facts,IF(Facts[Quantity]>2,\"a\",1)))",
+   "powerbi": "1"
+  },
+  {
+   "expr": "MINX(ROW(\"a\",1),MAXX(UNION(Facts,Facts),IFERROR(1/0,BLANK())))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MINX(ROW(\"a\",1),MAXX({1,2},COUNTROWS(FILTER(Facts,FALSE()))))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MINX(TOPN(1,Facts,Facts[Sales]),((2.5&&\"\"))&(1/0*0))",
+   "powerbi": "-nan(ind)"
+  },
+  {
+   "expr": "MINX(TOPN(1,Facts,Facts[Sales]),((2.5&&\"\"))&(IFERROR(1/0,BLANK())))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MINX(TOPN(1,Facts,Facts[Sales]),(1/0*0)/(IFERROR(1/0,BLANK())))",
+   "powerbi": "NaN"
+  },
+  {
+   "expr": "MINX(TOPN(1,Facts,Facts[Sales]),(IFERROR(1/0,BLANK()))*(ERROR(\"x\")))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MINX(TOPN(1,Facts,Facts[Sales]),(MAXX({1},ERROR(\"y\")))*((2.5&&\"\")))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MINX(TOPN(1,Facts,Facts[Sales]),MAXX(FILTER(Facts,FALSE()),IFERROR(1/0,BLANK())))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MINX(UNION(Facts,Facts),((2.5&&\"\"))-((2.5&&\"\")))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MINX(UNION(Facts,Facts),(1/0*0)&(0/0))",
+   "powerbi": "-nan(ind)-nan(ind)"
+  },
+  {
+   "expr": "MINX(UNION(Facts,Facts),(1/0*0)&(COUNTROWS(FILTER(Facts,FALSE()))))",
+   "powerbi": "-nan(ind)"
+  },
+  {
+   "expr": "MINX(UNION(Facts,Facts),(1/0*0)*((2.5&&\"\")))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MINX(UNION(Facts,Facts),(1/0*0)+(0/0))",
+   "powerbi": "NaN"
+  },
+  {
+   "expr": "MINX(UNION(Facts,Facts),(COUNTROWS(FILTER(Facts,FALSE())))&(COUNTROWS(FILTER(Facts,FALSE()))))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MINX(UNION(Facts,Facts),(COUNTROWS(FILTER(Facts,FALSE())))-((2.5&&\"\")))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MINX(UNION(Facts,Facts),(COUNTROWS(FILTER(Facts,FALSE())))-(COUNTROWS(FILTER(Facts,FALSE()))))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MINX(UNION(Facts,Facts),(COUNTROWS(FILTER(Facts,FALSE())))/(1/0*0))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MINX(UNION(Facts,Facts),(IF(Facts[Quantity]>2,\"a\",1))&(IF(Facts[Quantity]>2,\"a\",1)))",
+   "powerbi": "11"
+  },
+  {
+   "expr": "MINX(UNION(Facts,Facts),(IF(TRUE(),Facts[Region],1))&(IF(TRUE(),Facts[Region],1)))",
+   "powerbi": "EastEast"
+  },
+  {
+   "expr": "MINX(UNION(Facts,Facts),(IFERROR(1/0,BLANK()))&((2.5&&\"\")))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MINX(UNION(Facts,Facts),(IFERROR(1/0,BLANK()))&(IF(Facts[Quantity]>2,\"a\",1)))",
+   "powerbi": "1"
+  },
+  {
+   "expr": "MINX(UNION(Facts,Facts),(IFERROR(1/0,BLANK()))*(IF(Facts[Quantity]>2,\"a\",1)))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MINX(UNION(Facts,Facts),(IFERROR(1/0,BLANK()))-((2.5&&\"\")))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MINX(UNION(Facts,Facts),(IFERROR(1/0,BLANK()))-(1/0*0))",
+   "powerbi": "NaN"
+  },
+  {
+   "expr": "MINX(UNION(Facts,Facts),(SUMX(Facts,ERROR(\"x\")))*(IFERROR(1/0,BLANK())))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MINX(UNION(Facts,Facts),MAXX(FILTER(Facts,FALSE()),ERROR(\"x\")))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MINX(UNION(Facts,Facts),MAXX(FILTER(Facts,FALSE()),IF(Facts[Quantity]>2,\"a\",1)))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MINX(UNION(Facts,Facts),MAXX(FILTER(Facts,FALSE()),IFERROR(1/0,BLANK())))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MINX(UNION(Facts,Facts),MAXX(Facts,IF(Facts[Quantity]>2,\"a\",1)))",
+   "powerbi": "1"
+  },
+  {
+   "expr": "MINX(UNION(Facts,Facts),MAXX(ROW(\"a\",1),IFERROR(1/0,BLANK())))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MINX(UNION(Facts,Facts),MAXX(UNION(Facts,Facts),IFERROR(1/0,BLANK())))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MINX(UNION(Facts,Facts),MAXX(VALUES(Facts[Note]),1/0*0))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MINX(UNION(Facts,Facts),MAXX({1,2},1/0*0))",
+   "powerbi": "NaN"
+  },
+  {
+   "expr": "MINX(VALUES(Facts[Note]),((2.5&&\"\"))*((2.5&&\"\")))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MINX(VALUES(Facts[Note]),((2.5&&\"\"))*(ERROR(\"x\")))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MINX(VALUES(Facts[Note]),((2.5&&\"\"))*(SUMX(Facts,ERROR(\"x\"))))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MINX(VALUES(Facts[Note]),(0/0)-((2.5&&\"\")))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MINX(VALUES(Facts[Note]),(1/0*0)/(1/0*0))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MINX(VALUES(Facts[Note]),(COUNTROWS(FILTER(Facts,FALSE())))&((2.5&&\"\")))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MINX(VALUES(Facts[Note]),(ERROR(\"x\"))*(IFERROR(1/0,BLANK())))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MINX(VALUES(Facts[Note]),(IFERROR(1/0,BLANK()))+(1/0*0))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MINX(VALUES(Facts[Note]),(IFERROR(1/0,BLANK()))-(COUNTROWS(FILTER(Facts,FALSE()))))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MINX(VALUES(Facts[Note]),(IFERROR(1/0,BLANK()))/((2.5&&\"\")))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MINX(VALUES(Facts[Note]),(IFERROR(1/0,BLANK()))/(IFERROR(1/0,BLANK())))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MINX(VALUES(Facts[Note]),(IFERROR(1/0,BLANK()))/(SUMX(Facts,ERROR(\"x\"))))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MINX(VALUES(Facts[Note]),MAXX(ALL(Facts[Region]),IFERROR(1/0,BLANK())))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MINX(VALUES(Facts[Note]),MAXX(FILTER(Facts,FALSE()),IFERROR(1/0,BLANK())))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MINX(VALUES(Facts[Note]),MAXX(FILTER(Facts,FALSE()),SQRT(-1)))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MINX(VALUES(Facts[Note]),MAXX(FILTER(Facts,FALSE()),SUMX(Facts,ERROR(\"x\"))))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 82) x\""
+  },
+  {
+   "expr": "MINX(VALUES(Facts[Note]),MAXX(Facts,COUNTROWS(FILTER(Facts,FALSE()))))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MINX(VALUES(Facts[Note]),MAXX(ROW(\"a\",1),IFERROR(1/0,BLANK())))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MINX(VALUES(Facts[Note]),MAXX(UNION(Facts,Facts),COUNTROWS(FILTER(Facts,FALSE()))))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MINX(VALUES(Facts[Note]),MAXX(VALUES(Facts[Note]),COUNTROWS(FILTER(Facts,FALSE()))))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MINX({1,2},((2.5&&\"\"))&((2.5&&\"\")))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MINX({1,2},((2.5&&\"\"))&(COUNTROWS(FILTER(Facts,FALSE()))))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MINX({1,2},((2.5&&\"\"))*(COUNTROWS(FILTER(Facts,FALSE()))))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MINX({1,2},((2.5&&\"\"))+((2.5&&\"\")))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MINX({1,2},((2.5&&\"\"))/(SUMX(Facts,ERROR(\"x\"))))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MINX({1,2},(1/0*0)&((2.5&&\"\")))",
+   "powerbi": "-nan(ind)"
+  },
+  {
+   "expr": "MINX({1,2},(1/0*0)*(IFERROR(1/0,BLANK())))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MINX({1,2},(1/0*0)-(COUNTROWS(FILTER(Facts,FALSE()))))",
+   "powerbi": "NaN"
+  },
+  {
+   "expr": "MINX({1,2},(1/0*0)-(IFERROR(1/0,BLANK())))",
+   "powerbi": "NaN"
+  },
+  {
+   "expr": "MINX({1,2},(ERROR(\"x\"))*((2.5&&\"\")))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MINX({1,2},(IFERROR(1/0,BLANK()))*(0/0))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MINX({1,2},(IFERROR(1/0,BLANK()))+(1/0*0))",
+   "powerbi": "NaN"
+  },
+  {
+   "expr": "MINX({1,2},(IFERROR(1/0,BLANK()))/((2.5&&\"\")))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MINX({1,2},(IFERROR(1/0,BLANK()))/(COUNTROWS(FILTER(Facts,FALSE()))))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MINX({1,2},(IFERROR(1/0,BLANK()))/(LOG(-1)))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MINX({1,2},(MAXX({1},ERROR(\"y\")))*(IFERROR(1/0,BLANK())))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MINX({1,2},(SUMX(Facts,ERROR(\"x\")))*((2.5&&\"\")))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MINX({1,2},MAXX(DATATABLE(\"a\",INTEGER,{{1},{2}}),IFERROR(1/0,BLANK())))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MINX({1,2},MAXX(FILTER(Facts,FALSE()),IFERROR(1/0,BLANK())))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MINX({1,2},MAXX(FILTER(Facts,FALSE()),SQRT(-1)))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MINX({1,2},MAXX(Facts,0/0))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MINX({1,2},MAXX(Facts,IF(TRUE(),Facts[Region],1)))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MINX({1,2},MAXX(ROW(\"a\",1),1/0*0))",
+   "powerbi": "NaN"
+  },
+  {
+   "expr": "MINX({1,2},MAXX(VALUES(Facts[Note]),0/0))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MINX({1,2},MAXX({1,2},COUNTROWS(FILTER(Facts,FALSE()))))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "MINX({1,2},MAXX({1,2},IFERROR(1/0,BLANK())))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "PRODUCTX(ALL(Facts[Region]),((2.5&&\"\"))+((2.5&&\"\")))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "PRODUCTX(ALL(Facts[Region]),(0/0)/(1/0*0))",
+   "powerbi": "NaN"
+  },
+  {
+   "expr": "PRODUCTX(ALL(Facts[Region]),(0/0)/(COUNTROWS(FILTER(Facts,FALSE()))))",
+   "powerbi": "NaN"
+  },
+  {
+   "expr": "PRODUCTX(ALL(Facts[Region]),(1/0*0)+(IFERROR(1/0,BLANK())))",
+   "powerbi": "NaN"
+  },
+  {
+   "expr": "PRODUCTX(ALL(Facts[Region]),(1/0*0)-(0/0))",
+   "powerbi": "NaN"
+  },
+  {
+   "expr": "PRODUCTX(ALL(Facts[Region]),(1/0*0)/((2.5&&\"\")))",
+   "powerbi": "NaN"
+  },
+  {
+   "expr": "PRODUCTX(ALL(Facts[Region]),(COUNTROWS(FILTER(Facts,FALSE())))*(COUNTROWS(FILTER(Facts,FALSE()))))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "PRODUCTX(DATATABLE(\"a\",INTEGER,{{1},{2}}),((2.5&&\"\"))*(COUNTROWS(FILTER(Facts,FALSE()))))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "PRODUCTX(DATATABLE(\"a\",INTEGER,{{1},{2}}),((2.5&&\"\"))-(COUNTROWS(FILTER(Facts,FALSE()))))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "PRODUCTX(DATATABLE(\"a\",INTEGER,{{1},{2}}),((2.5&&\"\"))-(IFERROR(1/0,BLANK())))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "PRODUCTX(DATATABLE(\"a\",INTEGER,{{1},{2}}),(1/0*0)*(1/0*0))",
+   "powerbi": "NaN"
+  },
+  {
+   "expr": "PRODUCTX(DATATABLE(\"a\",INTEGER,{{1},{2}}),(1/0*0)+(IFERROR(1/0,BLANK())))",
+   "powerbi": "NaN"
+  },
+  {
+   "expr": "PRODUCTX(DATATABLE(\"a\",INTEGER,{{1},{2}}),(1/0*0)-((2.5&&\"\")))",
+   "powerbi": "NaN"
+  },
+  {
+   "expr": "PRODUCTX(DATATABLE(\"a\",INTEGER,{{1},{2}}),(1/0*0)-(IFERROR(1/0,BLANK())))",
+   "powerbi": "NaN"
+  },
+  {
+   "expr": "PRODUCTX(DATATABLE(\"a\",INTEGER,{{1},{2}}),(ERROR(\"x\"))*(IFERROR(1/0,BLANK())))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "PRODUCTX(DATATABLE(\"a\",INTEGER,{{1},{2}}),(IFERROR(1/0,BLANK()))*(ERROR(\"x\")))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "PRODUCTX(DATATABLE(\"a\",INTEGER,{{1},{2}}),(IFERROR(1/0,BLANK()))+(COUNTROWS(FILTER(Facts,FALSE()))))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "PRODUCTX(DATATABLE(\"a\",INTEGER,{{1},{2}}),(IFERROR(1/0,BLANK()))-(IFERROR(1/0,BLANK())))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "PRODUCTX(DATATABLE(\"a\",INTEGER,{{1},{2}}),MAXX(DATATABLE(\"a\",INTEGER,{{1},{2}}),IFERROR(1/0,BLANK())))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "PRODUCTX(DATATABLE(\"a\",INTEGER,{{1},{2}}),MAXX(FILTER(Facts,FALSE()),SUMX(Facts,ERROR(\"x\"))))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 99) x\""
+  },
+  {
+   "expr": "PRODUCTX(DATATABLE(\"a\",INTEGER,{{1},{2}}),MAXX(VALUES(Facts[Note]),COUNTROWS(FILTER(Facts,FALSE()))))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "PRODUCTX(DATATABLE(\"a\",INTEGER,{{1},{2}}),MAXX(VALUES(Facts[Note]),IFERROR(1/0,BLANK())))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "PRODUCTX(DATATABLE(\"a\",INTEGER,{{1},{2}}),MAXX({1,2},1/0*0))",
+   "powerbi": "NaN"
+  },
+  {
+   "expr": "PRODUCTX(DATATABLE(\"a\",INTEGER,{{1},{2}}),MAXX({1,2},IFERROR(1/0,BLANK())))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "PRODUCTX(FILTER(Facts,FALSE()),((2.5&&\"\"))*(IF(TRUE(),Facts[Region],1)))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "PRODUCTX(FILTER(Facts,FALSE()),((2.5&&\"\"))/(COUNTROWS(FILTER(Facts,FALSE()))))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "PRODUCTX(FILTER(Facts,FALSE()),(0/0)+(IFERROR(1/0,BLANK())))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "PRODUCTX(FILTER(Facts,FALSE()),(1/0*0)*((2.5&&\"\")))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "PRODUCTX(FILTER(Facts,FALSE()),(1/0*0)*(SUMX(Facts,ERROR(\"x\"))))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 70) x\""
+  },
+  {
+   "expr": "PRODUCTX(FILTER(Facts,FALSE()),(1/0*0)+(1/0*0))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "PRODUCTX(FILTER(Facts,FALSE()),(1/0*0)-((2.5&&\"\")))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "PRODUCTX(FILTER(Facts,FALSE()),(1/0*0)-(COUNTROWS(FILTER(Facts,FALSE()))))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "PRODUCTX(FILTER(Facts,FALSE()),(1/0*0)-(LOG(-1)))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "PRODUCTX(FILTER(Facts,FALSE()),(1/0*0)/((2.5&&\"\")))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "PRODUCTX(FILTER(Facts,FALSE()),(COUNTROWS(FILTER(Facts,FALSE())))*(SUMX(Facts,ERROR(\"x\"))))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 97) x\""
+  },
+  {
+   "expr": "PRODUCTX(FILTER(Facts,FALSE()),(COUNTROWS(FILTER(Facts,FALSE())))+(COUNTROWS(FILTER(Facts,FALSE()))))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "PRODUCTX(FILTER(Facts,FALSE()),(COUNTROWS(FILTER(Facts,FALSE())))-(1/0*0))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "PRODUCTX(FILTER(Facts,FALSE()),(ERROR(\"x\"))+(COUNTROWS(FILTER(Facts,FALSE()))))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "PRODUCTX(FILTER(Facts,FALSE()),(ERROR(\"x\"))+(SUMX(Facts,ERROR(\"x\"))))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 75) x\""
+  },
+  {
+   "expr": "PRODUCTX(FILTER(Facts,FALSE()),(IF(Facts[Quantity]>2,\"a\",1))*(1/0*0))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "PRODUCTX(FILTER(Facts,FALSE()),(IF(Facts[Quantity]>2,\"a\",1))+(COUNTROWS(FILTER(Facts,FALSE()))))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "PRODUCTX(FILTER(Facts,FALSE()),(IF(Facts[Quantity]>2,\"a\",1))-(SUMX(Facts,ERROR(\"x\"))))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 92) x\""
+  },
+  {
+   "expr": "PRODUCTX(FILTER(Facts,FALSE()),(IF(TRUE(),Facts[Region],1))*((2.5&&\"\")))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "PRODUCTX(FILTER(Facts,FALSE()),(IF(TRUE(),Facts[Region],1))*(ERROR(\"x\")))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "PRODUCTX(FILTER(Facts,FALSE()),(IF(TRUE(),Facts[Region],1))+(ERROR(\"x\")))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "PRODUCTX(FILTER(Facts,FALSE()),(IF(TRUE(),Facts[Region],1))-(IFERROR(1/0,BLANK())))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "PRODUCTX(FILTER(Facts,FALSE()),(IFERROR(1/0,BLANK()))*(SUMX(Facts,ERROR(\"x\"))))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "PRODUCTX(FILTER(Facts,FALSE()),(IFERROR(1/0,BLANK()))-(IF(Facts[Quantity]>2,\"a\",1)))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "PRODUCTX(FILTER(Facts,FALSE()),(IFERROR(1/0,BLANK()))/(COUNTROWS(FILTER(Facts,FALSE()))))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "PRODUCTX(FILTER(Facts,FALSE()),(IFERROR(1/0,BLANK()))/(SUMX(Facts,ERROR(\"x\"))))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "PRODUCTX(FILTER(Facts,FALSE()),(LOG(-1))/(ERROR(\"x\")))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "PRODUCTX(FILTER(Facts,FALSE()),(SQRT(-1))*(0/0))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "PRODUCTX(FILTER(Facts,FALSE()),(SQRT(-1))/(IFERROR(1/0,BLANK())))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "PRODUCTX(FILTER(Facts,FALSE()),(SUMX(Facts,ERROR(\"x\")))*((2.5&&\"\")))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "PRODUCTX(FILTER(Facts,FALSE()),MAXX(DATATABLE(\"a\",INTEGER,{{1},{2}}),COUNTROWS(FILTER(Facts,FALSE()))))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "PRODUCTX(FILTER(Facts,FALSE()),MAXX(DATATABLE(\"a\",INTEGER,{{1},{2}}),IF(Facts[Quantity]>2,\"a\",1)))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "PRODUCTX(FILTER(Facts,FALSE()),MAXX(FILTER(Facts,FALSE()),ERROR(\"x\")))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "PRODUCTX(FILTER(Facts,FALSE()),MAXX(FILTER(Facts,FALSE()),SUMX(Facts,ERROR(\"x\"))))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 88) x\""
+  },
+  {
+   "expr": "PRODUCTX(FILTER(Facts,FALSE()),MAXX(TOPN(1,Facts,Facts[Sales]),0/0))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "PRODUCTX(FILTER(Facts,FALSE()),MAXX(TOPN(1,Facts,Facts[Sales]),IF(Facts[Quantity]>2,\"a\",1)))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "PRODUCTX(FILTER(Facts,FALSE()),MAXX(TOPN(1,Facts,Facts[Sales]),IFERROR(1/0,BLANK())))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "PRODUCTX(FILTER(Facts,FALSE()),MAXX(UNION(Facts,Facts),0/0))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "PRODUCTX(FILTER(Facts,FALSE()),MAXX(UNION(Facts,Facts),1/0*0))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "PRODUCTX(FILTER(Facts,FALSE()),MAXX(UNION(Facts,Facts),SUMX(Facts,ERROR(\"x\"))))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 85) x\""
+  },
+  {
+   "expr": "PRODUCTX(FILTER(Facts,FALSE()),MAXX(VALUES(Facts[Note]),1/0*0))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "PRODUCTX(FILTER(Facts,FALSE()),MAXX(VALUES(Facts[Note]),IFERROR(1/0,BLANK())))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "PRODUCTX(FILTER(Facts,FALSE()),MAXX({1,2},IF(TRUE(),Facts[Region],1)))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "PRODUCTX(FILTER(Facts,FALSE()),MAXX({1,2},SUMX(Facts,ERROR(\"x\"))))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 72) x\""
+  },
+  {
+   "expr": "PRODUCTX(Facts,((2.5&&\"\"))/(IFERROR(1/0,BLANK())))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "PRODUCTX(Facts,(1/0*0)+(1/0*0))",
+   "powerbi": "NaN"
+  },
+  {
+   "expr": "PRODUCTX(Facts,(1/0*0)+(COUNTROWS(FILTER(Facts,FALSE()))))",
+   "powerbi": "NaN"
+  },
+  {
+   "expr": "PRODUCTX(Facts,(1/0*0)/((2.5&&\"\")))",
+   "powerbi": "NaN"
+  },
+  {
+   "expr": "PRODUCTX(Facts,(COUNTROWS(FILTER(Facts,FALSE())))-(IFERROR(1/0,BLANK())))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "PRODUCTX(Facts,(COUNTROWS(FILTER(Facts,FALSE())))/(COUNTROWS(FILTER(Facts,FALSE()))))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "PRODUCTX(Facts,(IF(TRUE(),Facts[Region],1))*(IFERROR(1/0,BLANK())))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "PRODUCTX(Facts,(IFERROR(1/0,BLANK()))*((2.5&&\"\")))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "PRODUCTX(Facts,(IFERROR(1/0,BLANK()))*(SUMX(Facts,ERROR(\"x\"))))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "PRODUCTX(Facts,(IFERROR(1/0,BLANK()))+(COUNTROWS(FILTER(Facts,FALSE()))))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "PRODUCTX(Facts,(IFERROR(1/0,BLANK()))-(1/0*0))",
+   "powerbi": "NaN"
+  },
+  {
+   "expr": "PRODUCTX(Facts,(IFERROR(1/0,BLANK()))-(IFERROR(1/0,BLANK())))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "PRODUCTX(Facts,(SUMX(Facts,ERROR(\"x\")))*((2.5&&\"\")))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "PRODUCTX(Facts,MAXX(FILTER(Facts,FALSE()),1/0*0))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "PRODUCTX(Facts,MAXX(FILTER(Facts,FALSE()),IF(Facts[Quantity]>2,\"a\",1)))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "PRODUCTX(Facts,MAXX(FILTER(Facts,FALSE()),SUMX(Facts,ERROR(\"x\"))))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 72) x\""
+  },
+  {
+   "expr": "PRODUCTX(Facts,MAXX(Facts,COUNTROWS(FILTER(Facts,FALSE()))))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "PRODUCTX(Facts,MAXX(UNION(Facts,Facts),IF(Facts[Quantity]>2,\"a\",1)))",
+   "powerbi": "1"
+  },
+  {
+   "expr": "PRODUCTX(Facts,MAXX(VALUES(Facts[Note]),1/0*0))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "PRODUCTX(Facts,MAXX(VALUES(Facts[Note]),IF(Facts[Quantity]>2,\"a\",1)))",
+   "powerbi": "1"
+  },
+  {
+   "expr": "PRODUCTX(Facts,MAXX({1,2},IFERROR(1/0,BLANK())))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "PRODUCTX(ROW(\"a\",1),((2.5&&\"\"))*(IFERROR(1/0,BLANK())))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "PRODUCTX(ROW(\"a\",1),((2.5&&\"\"))-(1/0*0))",
+   "powerbi": "NaN"
+  },
+  {
+   "expr": "PRODUCTX(ROW(\"a\",1),((2.5&&\"\"))/(COUNTROWS(FILTER(Facts,FALSE()))))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "PRODUCTX(ROW(\"a\",1),((2.5&&\"\"))/(MAXX({1},ERROR(\"y\"))))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "PRODUCTX(ROW(\"a\",1),(1/0*0)-((2.5&&\"\")))",
+   "powerbi": "NaN"
+  },
+  {
+   "expr": "PRODUCTX(ROW(\"a\",1),(1/0*0)/(1/0*0))",
+   "powerbi": "NaN"
+  },
+  {
+   "expr": "PRODUCTX(ROW(\"a\",1),(COUNTROWS(FILTER(Facts,FALSE())))+((2.5&&\"\")))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "PRODUCTX(ROW(\"a\",1),(COUNTROWS(FILTER(Facts,FALSE())))+(IFERROR(1/0,BLANK())))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "PRODUCTX(ROW(\"a\",1),(COUNTROWS(FILTER(Facts,FALSE())))/(1/0*0))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "PRODUCTX(ROW(\"a\",1),(COUNTROWS(FILTER(Facts,FALSE())))/(IFERROR(1/0,BLANK())))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "PRODUCTX(ROW(\"a\",1),(ERROR(\"x\"))*((2.5&&\"\")))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "PRODUCTX(ROW(\"a\",1),(IFERROR(1/0,BLANK()))*((2.5&&\"\")))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "PRODUCTX(ROW(\"a\",1),(IFERROR(1/0,BLANK()))+(1/0*0))",
+   "powerbi": "NaN"
+  },
+  {
+   "expr": "PRODUCTX(ROW(\"a\",1),(IFERROR(1/0,BLANK()))-(1/0*0))",
+   "powerbi": "NaN"
+  },
+  {
+   "expr": "PRODUCTX(ROW(\"a\",1),MAXX(DATATABLE(\"a\",INTEGER,{{1},{2}}),IFERROR(1/0,BLANK())))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "PRODUCTX(ROW(\"a\",1),MAXX(ROW(\"a\",1),IFERROR(1/0,BLANK())))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "PRODUCTX(ROW(\"a\",1),MAXX(UNION(Facts,Facts),COUNTROWS(FILTER(Facts,FALSE()))))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "PRODUCTX(ROW(\"a\",1),MAXX({1,2},COUNTROWS(FILTER(Facts,FALSE()))))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "PRODUCTX(TOPN(1,Facts,Facts[Sales]),((2.5&&\"\"))*(COUNTROWS(FILTER(Facts,FALSE()))))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "PRODUCTX(TOPN(1,Facts,Facts[Sales]),((2.5&&\"\"))*(IF(Facts[Quantity]>2,\"a\",1)))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "PRODUCTX(TOPN(1,Facts,Facts[Sales]),((2.5&&\"\"))+(IFERROR(1/0,BLANK())))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "PRODUCTX(TOPN(1,Facts,Facts[Sales]),((2.5&&\"\"))-(1/0*0))",
+   "powerbi": "NaN"
+  },
+  {
+   "expr": "PRODUCTX(TOPN(1,Facts,Facts[Sales]),(1/0*0)/((2.5&&\"\")))",
+   "powerbi": "NaN"
+  },
+  {
+   "expr": "PRODUCTX(TOPN(1,Facts,Facts[Sales]),(1/0*0)/(0/0))",
+   "powerbi": "NaN"
+  },
+  {
+   "expr": "PRODUCTX(TOPN(1,Facts,Facts[Sales]),(COUNTROWS(FILTER(Facts,FALSE())))/(IFERROR(1/0,BLANK())))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "PRODUCTX(TOPN(1,Facts,Facts[Sales]),(IFERROR(1/0,BLANK()))-(COUNTROWS(FILTER(Facts,FALSE()))))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "PRODUCTX(TOPN(1,Facts,Facts[Sales]),MAXX(Facts,0/0))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "PRODUCTX(TOPN(1,Facts,Facts[Sales]),MAXX(Facts,IF(Facts[Quantity]>2,\"a\",1)))",
+   "powerbi": "1"
+  },
+  {
+   "expr": "PRODUCTX(TOPN(1,Facts,Facts[Sales]),MAXX(VALUES(Facts[Note]),COUNTROWS(FILTER(Facts,FALSE()))))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "PRODUCTX(UNION(Facts,Facts),((2.5&&\"\"))*(IFERROR(1/0,BLANK())))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "PRODUCTX(UNION(Facts,Facts),((2.5&&\"\"))+(0/0))",
+   "powerbi": "NaN"
+  },
+  {
+   "expr": "PRODUCTX(UNION(Facts,Facts),((2.5&&\"\"))+(1/0*0))",
+   "powerbi": "NaN"
+  },
+  {
+   "expr": "PRODUCTX(UNION(Facts,Facts),((2.5&&\"\"))/(ERROR(\"x\")))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "PRODUCTX(UNION(Facts,Facts),(1/0*0)+(1/0*0))",
+   "powerbi": "NaN"
+  },
+  {
+   "expr": "PRODUCTX(UNION(Facts,Facts),(1/0*0)/((2.5&&\"\")))",
+   "powerbi": "NaN"
+  },
+  {
+   "expr": "PRODUCTX(UNION(Facts,Facts),(COUNTROWS(FILTER(Facts,FALSE())))-((2.5&&\"\")))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "PRODUCTX(UNION(Facts,Facts),(COUNTROWS(FILTER(Facts,FALSE())))/(IFERROR(1/0,BLANK())))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "PRODUCTX(UNION(Facts,Facts),(IF(TRUE(),Facts[Region],1))*((2.5&&\"\")))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "PRODUCTX(UNION(Facts,Facts),(IFERROR(1/0,BLANK()))+(1/0*0))",
+   "powerbi": "NaN"
+  },
+  {
+   "expr": "PRODUCTX(UNION(Facts,Facts),(IFERROR(1/0,BLANK()))+(COUNTROWS(FILTER(Facts,FALSE()))))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "PRODUCTX(UNION(Facts,Facts),(IFERROR(1/0,BLANK()))/(0/0))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "PRODUCTX(UNION(Facts,Facts),(IFERROR(1/0,BLANK()))/(IFERROR(1/0,BLANK())))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "PRODUCTX(UNION(Facts,Facts),(MAXX({1},ERROR(\"y\")))*((2.5&&\"\")))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "PRODUCTX(UNION(Facts,Facts),MAXX(ALL(Facts[Region]),IF(Facts[Quantity]>2,\"a\",1)))",
+   "powerbi": "1"
+  },
+  {
+   "expr": "PRODUCTX(UNION(Facts,Facts),MAXX(FILTER(Facts,FALSE()),0/0))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "PRODUCTX(UNION(Facts,Facts),MAXX(FILTER(Facts,FALSE()),COUNTROWS(FILTER(Facts,FALSE()))))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "PRODUCTX(UNION(Facts,Facts),MAXX(FILTER(Facts,FALSE()),LOG(-1)))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "PRODUCTX(UNION(Facts,Facts),MAXX(Facts,IFERROR(1/0,BLANK())))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "PRODUCTX(UNION(Facts,Facts),MAXX(ROW(\"a\",1),COUNTROWS(FILTER(Facts,FALSE()))))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "PRODUCTX(UNION(Facts,Facts),MAXX(TOPN(1,Facts,Facts[Sales]),0/0))",
+   "powerbi": "NaN"
+  },
+  {
+   "expr": "PRODUCTX(UNION(Facts,Facts),MAXX(VALUES(Facts[Note]),0/0))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "PRODUCTX(VALUES(Facts[Note]),((2.5&&\"\"))*(ERROR(\"x\")))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "PRODUCTX(VALUES(Facts[Note]),((2.5&&\"\"))+(1/0*0))",
+   "powerbi": "NaN"
+  },
+  {
+   "expr": "PRODUCTX(VALUES(Facts[Note]),((2.5&&\"\"))+(COUNTROWS(FILTER(Facts,FALSE()))))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "PRODUCTX(VALUES(Facts[Note]),(0/0)-(IFERROR(1/0,BLANK())))",
+   "powerbi": "NaN"
+  },
+  {
+   "expr": "PRODUCTX(VALUES(Facts[Note]),(1/0*0)-(IFERROR(1/0,BLANK())))",
+   "powerbi": "NaN"
+  },
+  {
+   "expr": "PRODUCTX(VALUES(Facts[Note]),(1/0*0)/(COUNTROWS(FILTER(Facts,FALSE()))))",
+   "powerbi": "NaN"
+  },
+  {
+   "expr": "PRODUCTX(VALUES(Facts[Note]),(COUNTROWS(FILTER(Facts,FALSE())))*(COUNTROWS(FILTER(Facts,FALSE()))))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "PRODUCTX(VALUES(Facts[Note]),(COUNTROWS(FILTER(Facts,FALSE())))+(IFERROR(1/0,BLANK())))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "PRODUCTX(VALUES(Facts[Note]),(IFERROR(1/0,BLANK()))*(1/0*0))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "PRODUCTX(VALUES(Facts[Note]),(IFERROR(1/0,BLANK()))/((2.5&&\"\")))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "PRODUCTX(VALUES(Facts[Note]),(SQRT(-1))*((2.5&&\"\")))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "PRODUCTX(VALUES(Facts[Note]),(SUMX(Facts,ERROR(\"x\")))*(IFERROR(1/0,BLANK())))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "PRODUCTX(VALUES(Facts[Note]),MAXX(ALL(Facts[Region]),COUNTROWS(FILTER(Facts,FALSE()))))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "PRODUCTX(VALUES(Facts[Note]),MAXX(DATATABLE(\"a\",INTEGER,{{1},{2}}),1/0*0))",
+   "powerbi": "NaN"
+  },
+  {
+   "expr": "PRODUCTX(VALUES(Facts[Note]),MAXX(FILTER(Facts,FALSE()),ERROR(\"x\")))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "PRODUCTX(VALUES(Facts[Note]),MAXX(ROW(\"a\",1),IFERROR(1/0,BLANK())))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "PRODUCTX(VALUES(Facts[Note]),MAXX(UNION(Facts,Facts),COUNTROWS(FILTER(Facts,FALSE()))))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "PRODUCTX(VALUES(Facts[Note]),MAXX(UNION(Facts,Facts),IF(Facts[Quantity]>2,\"a\",1)))",
+   "powerbi": "1"
+  },
+  {
+   "expr": "PRODUCTX(VALUES(Facts[Note]),MAXX(UNION(Facts,Facts),IF(TRUE(),Facts[Region],1)))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "PRODUCTX(VALUES(Facts[Note]),MAXX(VALUES(Facts[Note]),IFERROR(1/0,BLANK())))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "PRODUCTX({1,2},((2.5&&\"\"))*(IFERROR(1/0,BLANK())))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "PRODUCTX({1,2},((2.5&&\"\"))-(1/0*0))",
+   "powerbi": "NaN"
+  },
+  {
+   "expr": "PRODUCTX({1,2},(COUNTROWS(FILTER(Facts,FALSE())))-(1/0*0))",
+   "powerbi": "NaN"
+  },
+  {
+   "expr": "PRODUCTX({1,2},(COUNTROWS(FILTER(Facts,FALSE())))-(IFERROR(1/0,BLANK())))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "PRODUCTX({1,2},(COUNTROWS(FILTER(Facts,FALSE())))/(IFERROR(1/0,BLANK())))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "PRODUCTX({1,2},(IFERROR(1/0,BLANK()))*(1/0*0))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "PRODUCTX({1,2},(IFERROR(1/0,BLANK()))+(1/0*0))",
+   "powerbi": "NaN"
+  },
+  {
+   "expr": "PRODUCTX({1,2},(SQRT(-1))*(IFERROR(1/0,BLANK())))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "PRODUCTX({1,2},MAXX(FILTER(Facts,FALSE()),COUNTROWS(FILTER(Facts,FALSE()))))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "PRODUCTX({1,2},MAXX(UNION(Facts,Facts),1/0*0))",
+   "powerbi": "NaN"
+  },
+  {
+   "expr": "PRODUCTX({1,2},MAXX(UNION(Facts,Facts),IF(Facts[Quantity]>2,\"a\",1)))",
+   "powerbi": "1"
+  },
+  {
+   "expr": "PRODUCTX({1,2},MAXX(UNION(Facts,Facts),IF(TRUE(),Facts[Region],1)))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "PRODUCTX({1,2},MAXX(VALUES(Facts[Note]),COUNTROWS(FILTER(Facts,FALSE()))))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "SUMX(ALL(Facts[Region]),((2.5&&\"\"))+(0/0))",
+   "powerbi": "NaN"
+  },
+  {
+   "expr": "SUMX(ALL(Facts[Region]),((2.5&&\"\"))/(MAXX({1},ERROR(\"y\"))))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "SUMX(ALL(Facts[Region]),(1/0*0)-((2.5&&\"\")))",
+   "powerbi": "NaN"
+  },
+  {
+   "expr": "SUMX(ALL(Facts[Region]),(COUNTROWS(FILTER(Facts,FALSE())))+(COUNTROWS(FILTER(Facts,FALSE()))))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "SUMX(ALL(Facts[Region]),(COUNTROWS(FILTER(Facts,FALSE())))+(IFERROR(1/0,BLANK())))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "SUMX(ALL(Facts[Region]),(ERROR(\"x\"))*((2.5&&\"\")))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "SUMX(ALL(Facts[Region]),(IFERROR(1/0,BLANK()))/(COUNTROWS(FILTER(Facts,FALSE()))))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "SUMX(DATATABLE(\"a\",INTEGER,{{1},{2}}),((2.5&&\"\"))*(COUNTROWS(FILTER(Facts,FALSE()))))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "SUMX(DATATABLE(\"a\",INTEGER,{{1},{2}}),((2.5&&\"\"))*(LOG(-1)))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "SUMX(DATATABLE(\"a\",INTEGER,{{1},{2}}),((2.5&&\"\"))*(SUMX(Facts,ERROR(\"x\"))))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "SUMX(DATATABLE(\"a\",INTEGER,{{1},{2}}),((2.5&&\"\"))+((2.5&&\"\")))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "SUMX(DATATABLE(\"a\",INTEGER,{{1},{2}}),((2.5&&\"\"))+(COUNTROWS(FILTER(Facts,FALSE()))))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "SUMX(DATATABLE(\"a\",INTEGER,{{1},{2}}),(1/0*0)+((2.5&&\"\")))",
+   "powerbi": "NaN"
+  },
+  {
+   "expr": "SUMX(DATATABLE(\"a\",INTEGER,{{1},{2}}),(1/0*0)+(1/0*0))",
+   "powerbi": "NaN"
+  },
+  {
+   "expr": "SUMX(DATATABLE(\"a\",INTEGER,{{1},{2}}),(1/0*0)/(COUNTROWS(FILTER(Facts,FALSE()))))",
+   "powerbi": "NaN"
+  },
+  {
+   "expr": "SUMX(DATATABLE(\"a\",INTEGER,{{1},{2}}),(COUNTROWS(FILTER(Facts,FALSE())))*((2.5&&\"\")))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "SUMX(DATATABLE(\"a\",INTEGER,{{1},{2}}),(IFERROR(1/0,BLANK()))*((2.5&&\"\")))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "SUMX(DATATABLE(\"a\",INTEGER,{{1},{2}}),(IFERROR(1/0,BLANK()))*(ERROR(\"x\")))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "SUMX(DATATABLE(\"a\",INTEGER,{{1},{2}}),(IFERROR(1/0,BLANK()))*(LOG(-1)))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "SUMX(DATATABLE(\"a\",INTEGER,{{1},{2}}),(IFERROR(1/0,BLANK()))*(SUMX(Facts,ERROR(\"x\"))))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "SUMX(DATATABLE(\"a\",INTEGER,{{1},{2}}),(IFERROR(1/0,BLANK()))-((2.5&&\"\")))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "SUMX(DATATABLE(\"a\",INTEGER,{{1},{2}}),(IFERROR(1/0,BLANK()))-(IFERROR(1/0,BLANK())))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "SUMX(DATATABLE(\"a\",INTEGER,{{1},{2}}),(IFERROR(1/0,BLANK()))/((2.5&&\"\")))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "SUMX(DATATABLE(\"a\",INTEGER,{{1},{2}}),(IFERROR(1/0,BLANK()))/(0/0))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "SUMX(DATATABLE(\"a\",INTEGER,{{1},{2}}),MAXX(DATATABLE(\"a\",INTEGER,{{1},{2}}),IFERROR(1/0,BLANK())))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "SUMX(DATATABLE(\"a\",INTEGER,{{1},{2}}),MAXX(FILTER(Facts,FALSE()),COUNTROWS(FILTER(Facts,FALSE()))))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "SUMX(DATATABLE(\"a\",INTEGER,{{1},{2}}),MAXX(UNION(Facts,Facts),IF(Facts[Quantity]>2,\"a\",1)))",
+   "powerbi": "2"
+  },
+  {
+   "expr": "SUMX(DATATABLE(\"a\",INTEGER,{{1},{2}}),MAXX(UNION(Facts,Facts),IFERROR(1/0,BLANK())))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "SUMX(DATATABLE(\"a\",INTEGER,{{1},{2}}),MAXX(VALUES(Facts[Note]),1/0*0))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "SUMX(DATATABLE(\"a\",INTEGER,{{1},{2}}),MAXX(VALUES(Facts[Note]),COUNTROWS(FILTER(Facts,FALSE()))))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "SUMX(DATATABLE(\"a\",INTEGER,{{1},{2}}),MAXX({1,2},1/0*0))",
+   "powerbi": "NaN"
+  },
+  {
+   "expr": "SUMX(DATATABLE(\"a\",INTEGER,{{1},{2}}),MAXX({1,2},IFERROR(1/0,BLANK())))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "SUMX(FILTER(Facts,FALSE()),((2.5&&\"\"))-(IF(TRUE(),Facts[Region],1)))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "SUMX(FILTER(Facts,FALSE()),((2.5&&\"\"))/(COUNTROWS(FILTER(Facts,FALSE()))))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "SUMX(FILTER(Facts,FALSE()),((2.5&&\"\"))/(ERROR(\"x\")))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "SUMX(FILTER(Facts,FALSE()),(1/0*0)+(IFERROR(1/0,BLANK())))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "SUMX(FILTER(Facts,FALSE()),(1/0*0)-(COUNTROWS(FILTER(Facts,FALSE()))))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "SUMX(FILTER(Facts,FALSE()),(1/0*0)/(SUMX(Facts,ERROR(\"x\"))))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 66) x\""
+  },
+  {
+   "expr": "SUMX(FILTER(Facts,FALSE()),(COUNTROWS(FILTER(Facts,FALSE())))+(ERROR(\"x\")))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "SUMX(FILTER(Facts,FALSE()),(COUNTROWS(FILTER(Facts,FALSE())))-(1/0*0))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "SUMX(FILTER(Facts,FALSE()),(COUNTROWS(FILTER(Facts,FALSE())))-(ERROR(\"x\")))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "SUMX(FILTER(Facts,FALSE()),(COUNTROWS(FILTER(Facts,FALSE())))-(IFERROR(1/0,BLANK())))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "SUMX(FILTER(Facts,FALSE()),(COUNTROWS(FILTER(Facts,FALSE())))/(SUMX(Facts,ERROR(\"x\"))))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 93) x\""
+  },
+  {
+   "expr": "SUMX(FILTER(Facts,FALSE()),(ERROR(\"x\"))*(SUMX(Facts,ERROR(\"x\"))))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 71) x\""
+  },
+  {
+   "expr": "SUMX(FILTER(Facts,FALSE()),(ERROR(\"x\"))+(COUNTROWS(FILTER(Facts,FALSE()))))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "SUMX(FILTER(Facts,FALSE()),(ERROR(\"x\"))-(IF(TRUE(),Facts[Region],1)))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "SUMX(FILTER(Facts,FALSE()),(ERROR(\"x\"))/(ERROR(\"x\")))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "SUMX(FILTER(Facts,FALSE()),(IF(Facts[Quantity]>2,\"a\",1))*((2.5&&\"\")))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "SUMX(FILTER(Facts,FALSE()),(IF(Facts[Quantity]>2,\"a\",1))*(ERROR(\"x\")))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "SUMX(FILTER(Facts,FALSE()),(IF(Facts[Quantity]>2,\"a\",1))*(IF(TRUE(),Facts[Region],1)))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "SUMX(FILTER(Facts,FALSE()),(IF(Facts[Quantity]>2,\"a\",1))+(COUNTROWS(FILTER(Facts,FALSE()))))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "SUMX(FILTER(Facts,FALSE()),(IF(Facts[Quantity]>2,\"a\",1))+(ERROR(\"x\")))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "SUMX(FILTER(Facts,FALSE()),(IF(Facts[Quantity]>2,\"a\",1))/(IFERROR(1/0,BLANK())))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "SUMX(FILTER(Facts,FALSE()),(IF(TRUE(),Facts[Region],1))+(1/0*0))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "SUMX(FILTER(Facts,FALSE()),(IF(TRUE(),Facts[Region],1))+(SUMX(Facts,ERROR(\"x\"))))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 87) x\""
+  },
+  {
+   "expr": "SUMX(FILTER(Facts,FALSE()),(IFERROR(1/0,BLANK()))*((2.5&&\"\")))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "SUMX(FILTER(Facts,FALSE()),(IFERROR(1/0,BLANK()))+(IF(TRUE(),Facts[Region],1)))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "SUMX(FILTER(Facts,FALSE()),(IFERROR(1/0,BLANK()))-(1/0*0))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "SUMX(FILTER(Facts,FALSE()),(IFERROR(1/0,BLANK()))-(IFERROR(1/0,BLANK())))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "SUMX(FILTER(Facts,FALSE()),(IFERROR(1/0,BLANK()))/(ERROR(\"x\")))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "SUMX(FILTER(Facts,FALSE()),(LOG(-1))-(SQRT(-1)))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "SUMX(FILTER(Facts,FALSE()),(LOG(-1))/(LOG(-1)))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "SUMX(FILTER(Facts,FALSE()),(SUMX(Facts,ERROR(\"x\")))+(1/0*0))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 58) x\""
+  },
+  {
+   "expr": "SUMX(FILTER(Facts,FALSE()),(SUMX(Facts,ERROR(\"x\")))/(1/0*0))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 58) x\""
+  },
+  {
+   "expr": "SUMX(FILTER(Facts,FALSE()),MAXX(DATATABLE(\"a\",INTEGER,{{1},{2}}),0/0))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "SUMX(FILTER(Facts,FALSE()),MAXX(DATATABLE(\"a\",INTEGER,{{1},{2}}),IF(TRUE(),Facts[Region],1)))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "SUMX(FILTER(Facts,FALSE()),MAXX(FILTER(Facts,FALSE()),1/0*0))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "SUMX(FILTER(Facts,FALSE()),MAXX(FILTER(Facts,FALSE()),IF(Facts[Quantity]>2,\"a\",1)))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "SUMX(FILTER(Facts,FALSE()),MAXX(Facts,IF(Facts[Quantity]>2,\"a\",1)))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "SUMX(FILTER(Facts,FALSE()),MAXX(ROW(\"a\",1),SUMX(Facts,ERROR(\"x\"))))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 73) x\""
+  },
+  {
+   "expr": "SUMX(FILTER(Facts,FALSE()),MAXX(VALUES(Facts[Note]),IF(Facts[Quantity]>2,\"a\",1)))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "SUMX(FILTER(Facts,FALSE()),MAXX(VALUES(Facts[Note]),IFERROR(1/0,BLANK())))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "SUMX(FILTER(Facts,FALSE()),MAXX({1,2},IFERROR(1/0,BLANK())))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "SUMX(Facts,((2.5&&\"\"))/(1/0*0))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "SUMX(Facts,(0/0)*(IFERROR(1/0,BLANK())))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "SUMX(Facts,(0/0)-(1/0*0))",
+   "powerbi": "NaN"
+  },
+  {
+   "expr": "SUMX(Facts,(1/0*0)-(1/0*0))",
+   "powerbi": "NaN"
+  },
+  {
+   "expr": "SUMX(Facts,(1/0*0)-(IFERROR(1/0,BLANK())))",
+   "powerbi": "NaN"
+  },
+  {
+   "expr": "SUMX(Facts,(1/0*0)/(IFERROR(1/0,BLANK())))",
+   "powerbi": "NaN"
+  },
+  {
+   "expr": "SUMX(Facts,(COUNTROWS(FILTER(Facts,FALSE())))/((2.5&&\"\")))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "SUMX(Facts,(COUNTROWS(FILTER(Facts,FALSE())))/(COUNTROWS(FILTER(Facts,FALSE()))))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "SUMX(Facts,(IF(TRUE(),Facts[Region],1))*(IFERROR(1/0,BLANK())))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "SUMX(Facts,(IFERROR(1/0,BLANK()))*(1/0*0))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "SUMX(Facts,(IFERROR(1/0,BLANK()))*(COUNTROWS(FILTER(Facts,FALSE()))))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "SUMX(Facts,(IFERROR(1/0,BLANK()))*(IF(Facts[Quantity]>2,\"a\",1)))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "SUMX(Facts,(IFERROR(1/0,BLANK()))*(SUMX(Facts,ERROR(\"x\"))))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "SUMX(Facts,(IFERROR(1/0,BLANK()))-(0/0))",
+   "powerbi": "NaN"
+  },
+  {
+   "expr": "SUMX(Facts,(IFERROR(1/0,BLANK()))-(1/0*0))",
+   "powerbi": "NaN"
+  },
+  {
+   "expr": "SUMX(Facts,(IFERROR(1/0,BLANK()))-(COUNTROWS(FILTER(Facts,FALSE()))))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "SUMX(Facts,MAXX(Facts,COUNTROWS(FILTER(Facts,FALSE()))))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "SUMX(Facts,MAXX(ROW(\"a\",1),COUNTROWS(FILTER(Facts,FALSE()))))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "SUMX(Facts,MAXX(UNION(Facts,Facts),COUNTROWS(FILTER(Facts,FALSE()))))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "SUMX(Facts,MAXX({1,2},IFERROR(1/0,BLANK())))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "SUMX(ROW(\"a\",1),((2.5&&\"\"))*(0/0))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "SUMX(ROW(\"a\",1),((2.5&&\"\"))-(IFERROR(1/0,BLANK())))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "SUMX(ROW(\"a\",1),((2.5&&\"\"))/(0/0))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "SUMX(ROW(\"a\",1),(1/0*0)/(1/0*0))",
+   "powerbi": "NaN"
+  },
+  {
+   "expr": "SUMX(ROW(\"a\",1),(COUNTROWS(FILTER(Facts,FALSE())))*(COUNTROWS(FILTER(Facts,FALSE()))))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "SUMX(ROW(\"a\",1),(COUNTROWS(FILTER(Facts,FALSE())))/((2.5&&\"\")))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "SUMX(ROW(\"a\",1),(COUNTROWS(FILTER(Facts,FALSE())))/(COUNTROWS(FILTER(Facts,FALSE()))))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "SUMX(ROW(\"a\",1),(IFERROR(1/0,BLANK()))*(ERROR(\"x\")))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "SUMX(ROW(\"a\",1),(IFERROR(1/0,BLANK()))/(ERROR(\"x\")))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "SUMX(ROW(\"a\",1),(LOG(-1))*((2.5&&\"\")))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "SUMX(ROW(\"a\",1),(LOG(-1))*(IFERROR(1/0,BLANK())))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "SUMX(ROW(\"a\",1),MAXX(Facts,IFERROR(1/0,BLANK())))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "SUMX(ROW(\"a\",1),MAXX(TOPN(1,Facts,Facts[Sales]),IFERROR(1/0,BLANK())))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "SUMX(ROW(\"a\",1),MAXX(UNION(Facts,Facts),IF(Facts[Quantity]>2,\"a\",1)))",
+   "powerbi": "1"
+  },
+  {
+   "expr": "SUMX(ROW(\"a\",1),MAXX(UNION(Facts,Facts),IF(TRUE(),Facts[Region],1)))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "SUMX(ROW(\"a\",1),MAXX(VALUES(Facts[Note]),COUNTROWS(FILTER(Facts,FALSE()))))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "SUMX(TOPN(1,Facts,Facts[Sales]),(1/0*0)/(0/0))",
+   "powerbi": "NaN"
+  },
+  {
+   "expr": "SUMX(TOPN(1,Facts,Facts[Sales]),(COUNTROWS(FILTER(Facts,FALSE())))*(0/0))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "SUMX(TOPN(1,Facts,Facts[Sales]),(COUNTROWS(FILTER(Facts,FALSE())))+(COUNTROWS(FILTER(Facts,FALSE()))))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "SUMX(TOPN(1,Facts,Facts[Sales]),(ERROR(\"x\"))*((2.5&&\"\")))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "SUMX(TOPN(1,Facts,Facts[Sales]),MAXX(Facts,COUNTROWS(FILTER(Facts,FALSE()))))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "SUMX(TOPN(1,Facts,Facts[Sales]),MAXX(UNION(Facts,Facts),IFERROR(1/0,BLANK())))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "SUMX(UNION(Facts,Facts),((2.5&&\"\"))*(IF(TRUE(),Facts[Region],1)))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "SUMX(UNION(Facts,Facts),((2.5&&\"\"))-(1/0*0))",
+   "powerbi": "NaN"
+  },
+  {
+   "expr": "SUMX(UNION(Facts,Facts),((2.5&&\"\"))/(IF(Facts[Quantity]>2,\"a\",1)))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "SUMX(UNION(Facts,Facts),(1/0*0)-(1/0*0))",
+   "powerbi": "NaN"
+  },
+  {
+   "expr": "SUMX(UNION(Facts,Facts),(1/0*0)-(COUNTROWS(FILTER(Facts,FALSE()))))",
+   "powerbi": "NaN"
+  },
+  {
+   "expr": "SUMX(UNION(Facts,Facts),(1/0*0)/(1/0*0))",
+   "powerbi": "NaN"
+  },
+  {
+   "expr": "SUMX(UNION(Facts,Facts),(COUNTROWS(FILTER(Facts,FALSE())))-(0/0))",
+   "powerbi": "NaN"
+  },
+  {
+   "expr": "SUMX(UNION(Facts,Facts),(IF(TRUE(),Facts[Region],1))*((2.5&&\"\")))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "SUMX(UNION(Facts,Facts),(IFERROR(1/0,BLANK()))*(ERROR(\"x\")))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "SUMX(UNION(Facts,Facts),(IFERROR(1/0,BLANK()))*(SQRT(-1)))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "SUMX(UNION(Facts,Facts),(IFERROR(1/0,BLANK()))+(0/0))",
+   "powerbi": "NaN"
+  },
+  {
+   "expr": "SUMX(UNION(Facts,Facts),MAXX(DATATABLE(\"a\",INTEGER,{{1},{2}}),COUNTROWS(FILTER(Facts,FALSE()))))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "SUMX(UNION(Facts,Facts),MAXX(FILTER(Facts,FALSE()),1/0*0))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "SUMX(UNION(Facts,Facts),MAXX(FILTER(Facts,FALSE()),IF(Facts[Quantity]>2,\"a\",1)))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "SUMX(UNION(Facts,Facts),MAXX(FILTER(Facts,FALSE()),SUMX(Facts,ERROR(\"x\"))))",
+   "powerbi": "ERR:Exception calling \"ExecuteReader\" with \"0\" argument(s): \"Query (1, 81) x\""
+  },
+  {
+   "expr": "SUMX(UNION(Facts,Facts),MAXX(ROW(\"a\",1),IF(Facts[Quantity]>2,\"a\",1)))",
+   "powerbi": "6"
+  },
+  {
+   "expr": "SUMX(UNION(Facts,Facts),MAXX(TOPN(1,Facts,Facts[Sales]),1/0*0))",
+   "powerbi": "NaN"
+  },
+  {
+   "expr": "SUMX(UNION(Facts,Facts),MAXX(VALUES(Facts[Note]),IF(Facts[Quantity]>2,\"a\",1)))",
+   "powerbi": "6"
+  },
+  {
+   "expr": "SUMX(UNION(Facts,Facts),MAXX(VALUES(Facts[Note]),IFERROR(1/0,BLANK())))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "SUMX(VALUES(Facts[Note]),((2.5&&\"\"))+(1/0*0))",
+   "powerbi": "NaN"
+  },
+  {
+   "expr": "SUMX(VALUES(Facts[Note]),((2.5&&\"\"))/(COUNTROWS(FILTER(Facts,FALSE()))))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "SUMX(VALUES(Facts[Note]),(0/0)*(0/0))",
+   "powerbi": "NaN"
+  },
+  {
+   "expr": "SUMX(VALUES(Facts[Note]),(0/0)*(1/0*0))",
+   "powerbi": "NaN"
+  },
+  {
+   "expr": "SUMX(VALUES(Facts[Note]),(0/0)+(IFERROR(1/0,BLANK())))",
+   "powerbi": "NaN"
+  },
+  {
+   "expr": "SUMX(VALUES(Facts[Note]),(1/0*0)-(1/0*0))",
+   "powerbi": "NaN"
+  },
+  {
+   "expr": "SUMX(VALUES(Facts[Note]),(COUNTROWS(FILTER(Facts,FALSE())))*(COUNTROWS(FILTER(Facts,FALSE()))))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "SUMX(VALUES(Facts[Note]),(COUNTROWS(FILTER(Facts,FALSE())))-(COUNTROWS(FILTER(Facts,FALSE()))))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "SUMX(VALUES(Facts[Note]),(ERROR(\"x\"))*(IFERROR(1/0,BLANK())))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "SUMX(VALUES(Facts[Note]),(IFERROR(1/0,BLANK()))-(IFERROR(1/0,BLANK())))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "SUMX(VALUES(Facts[Note]),(IFERROR(1/0,BLANK()))/(IFERROR(1/0,BLANK())))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "SUMX(VALUES(Facts[Note]),MAXX(DATATABLE(\"a\",INTEGER,{{1},{2}}),COUNTROWS(FILTER(Facts,FALSE()))))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "SUMX(VALUES(Facts[Note]),MAXX(FILTER(Facts,FALSE()),COUNTROWS(FILTER(Facts,FALSE()))))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "SUMX(VALUES(Facts[Note]),MAXX(FILTER(Facts,FALSE()),ERROR(\"x\")))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "SUMX(VALUES(Facts[Note]),MAXX(FILTER(Facts,FALSE()),IF(Facts[Quantity]>2,\"a\",1)))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "SUMX(VALUES(Facts[Note]),MAXX(Facts,COUNTROWS(FILTER(Facts,FALSE()))))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "SUMX(VALUES(Facts[Note]),MAXX(ROW(\"a\",1),COUNTROWS(FILTER(Facts,FALSE()))))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "SUMX(VALUES(Facts[Note]),MAXX({1,2},1/0*0))",
+   "powerbi": "NaN"
+  },
+  {
+   "expr": "SUMX({1,2},((2.5&&\"\"))/(IFERROR(1/0,BLANK())))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "SUMX({1,2},((2.5&&\"\"))/(SUMX(Facts,ERROR(\"x\"))))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "SUMX({1,2},(0/0)*(COUNTROWS(FILTER(Facts,FALSE()))))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "SUMX({1,2},(1/0*0)+(COUNTROWS(FILTER(Facts,FALSE()))))",
+   "powerbi": "NaN"
+  },
+  {
+   "expr": "SUMX({1,2},(1/0*0)-(IFERROR(1/0,BLANK())))",
+   "powerbi": "NaN"
+  },
+  {
+   "expr": "SUMX({1,2},(1/0*0)/(1/0*0))",
+   "powerbi": "NaN"
+  },
+  {
+   "expr": "SUMX({1,2},(COUNTROWS(FILTER(Facts,FALSE())))*((2.5&&\"\")))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "SUMX({1,2},(COUNTROWS(FILTER(Facts,FALSE())))*(IFERROR(1/0,BLANK())))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "SUMX({1,2},(COUNTROWS(FILTER(Facts,FALSE())))-(COUNTROWS(FILTER(Facts,FALSE()))))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "SUMX({1,2},(IFERROR(1/0,BLANK()))*(0/0))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "SUMX({1,2},(IFERROR(1/0,BLANK()))+(COUNTROWS(FILTER(Facts,FALSE()))))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "SUMX({1,2},(IFERROR(1/0,BLANK()))/((2.5&&\"\")))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "SUMX({1,2},(IFERROR(1/0,BLANK()))/(ERROR(\"x\")))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "SUMX({1,2},(SUMX(Facts,ERROR(\"x\")))*(IFERROR(1/0,BLANK())))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "SUMX({1,2},MAXX(FILTER(Facts,FALSE()),IFERROR(1/0,BLANK())))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "SUMX({1,2},MAXX(Facts,IF(Facts[Quantity]>2,\"a\",1)))",
+   "powerbi": "2"
+  },
+  {
+   "expr": "SUMX({1,2},MAXX(ROW(\"a\",1),1/0*0))",
+   "powerbi": "NaN"
+  },
+  {
+   "expr": "SUMX({1,2},MAXX(ROW(\"a\",1),IFERROR(1/0,BLANK())))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "SUMX({1,2},MAXX(TOPN(1,Facts,Facts[Sales]),0/0))",
+   "powerbi": "NaN"
+  },
+  {
+   "expr": "SUMX({1,2},MAXX(TOPN(1,Facts,Facts[Sales]),COUNTROWS(FILTER(Facts,FALSE()))))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "SUMX({1,2},MAXX(TOPN(1,Facts,Facts[Sales]),IF(TRUE(),Facts[Region],1)))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "SUMX({1,2},MAXX(TOPN(1,Facts,Facts[Sales]),IFERROR(1/0,BLANK())))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "SUMX({1,2},MAXX(UNION(Facts,Facts),IF(TRUE(),Facts[Region],1)))",
+   "powerbi": "BLANK"
+  },
+  {
+   "expr": "SUMX({1,2},MAXX({1,2},1/0*0))",
+   "powerbi": "NaN"
+  },
+  {
+   "expr": "XIRR(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-100,0},{BLANK(),50},{120,300}}),\"d\",DATE(2020,1,1)+[n]),CONVERT([v],CURRENCY),[d])",
+   "powerbi": "0.248352353274822"
+  },
+  {
+   "expr": "XIRR(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-100,0},{BLANK(),50},{120,300}}),\"d\",DATE(2020,1,1)+[n]),CURRENCY([v])+0.5,[d])",
+   "powerbi": "0.269868748635054"
+  },
+  {
+   "expr": "XIRR(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-100,0},{BLANK(),50},{120,300}}),\"d\",DATE(2020,1,1)+[n]),CURRENCY([v])+0.5,[d],0.1)",
+   "powerbi": "0.269868748635054"
+  },
+  {
+   "expr": "XIRR(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-100,0},{BLANK(),50},{120,300}}),\"d\",DATE(2020,1,1)+[n]),CURRENCY([v]),[d])",
+   "powerbi": "0.248352353274822"
+  },
+  {
+   "expr": "XIRR(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-100,0},{BLANK(),50},{120,300}}),\"d\",DATE(2020,1,1)+[n]),CURRENCY([v]),[d],0.1)",
+   "powerbi": "0.248352353274822"
+  },
+  {
+   "expr": "XIRR(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-100,0},{BLANK(),50},{120,300}}),\"d\",DATE(2020,1,1)+[n]),CURRENCY([v])/CURRENCY(2),[d])",
+   "powerbi": "0.248352353274822"
+  },
+  {
+   "expr": "XIRR(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-100,0},{BLANK(),50},{120,300}}),\"d\",DATE(2020,1,1)+[n]),CURRENCY([v])/CURRENCY(2),[d],0.1)",
+   "powerbi": "0.248352353274822"
+  },
+  {
+   "expr": "XIRR(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-100,0},{BLANK(),50},{120,300}}),\"d\",DATE(2020,1,1)+[n]),IF([n]=0,CURRENCY([v]),[v]),[d],0.1)",
+   "powerbi": "0.248352353274822"
+  },
+  {
+   "expr": "XIRR(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-100,0},{BLANK(),50},{120,300}}),\"d\",DATE(2020,1,1)+[n]),[v]*1.0001,[d])",
+   "powerbi": "0.248352353274822"
+  },
+  {
+   "expr": "XIRR(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-100,0},{BLANK(),50},{120,300}}),\"d\",DATE(2020,1,1)+[n]),[v]*1.0001,[d],0.1)",
+   "powerbi": "0.248352353274822"
+  },
+  {
+   "expr": "XIRR(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-100,0},{BLANK(),50},{120,300}}),\"d\",DATE(2020,1,1)+[n]),[v],[d],0.1)",
+   "powerbi": "0.248352353274822"
+  },
+  {
+   "expr": "XIRR(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-1000,0},{300,365},{400,730},{500,1095}}),\"d\",DATE(2020,1,1)+[n]),CONVERT([v],CURRENCY),[d])",
+   "powerbi": "0.0889633923768998"
+  },
+  {
+   "expr": "XIRR(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-1000,0},{300,365},{400,730},{500,1095}}),\"d\",DATE(2020,1,1)+[n]),CONVERT([v],CURRENCY),[d],0.1)",
+   "powerbi": "0.0889633923768998"
+  },
+  {
+   "expr": "XIRR(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-1000,0},{300,365},{400,730},{500,1095}}),\"d\",DATE(2020,1,1)+[n]),CURRENCY([v])+0.5,[d],0.1)",
+   "powerbi": "0.0898753497749571"
+  },
+  {
+   "expr": "XIRR(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-1000,0},{300,365},{400,730},{500,1095}}),\"d\",DATE(2020,1,1)+[n]),CURRENCY([v]),[d])",
+   "powerbi": "0.0889633923768998"
+  },
+  {
+   "expr": "XIRR(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-1000,0},{300,365},{400,730},{500,1095}}),\"d\",DATE(2020,1,1)+[n]),CURRENCY([v]),[d],0.1)",
+   "powerbi": "0.0889633923768998"
+  },
+  {
+   "expr": "XIRR(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-1000,0},{300,365},{400,730},{500,1095}}),\"d\",DATE(2020,1,1)+[n]),CURRENCY([v])/CURRENCY(2),[d])",
+   "powerbi": "0.0889633923768998"
+  },
+  {
+   "expr": "XIRR(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-1000,0},{300,365},{400,730},{500,1095}}),\"d\",DATE(2020,1,1)+[n]),CURRENCY([v])/CURRENCY(2),[d],0.1)",
+   "powerbi": "0.0889633923768998"
+  },
+  {
+   "expr": "XIRR(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-1000,0},{300,365},{400,730},{500,1095}}),\"d\",DATE(2020,1,1)+[n]),IF([n]=0,CURRENCY([v]),[v]),[d])",
+   "powerbi": "0.0889633923768998"
+  },
+  {
+   "expr": "XIRR(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-1000,0},{300,365},{400,730},{500,1095}}),\"d\",DATE(2020,1,1)+[n]),[v]*1.0001,[d])",
+   "powerbi": "0.0889633923768998"
+  },
+  {
+   "expr": "XIRR(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-1000,0},{300,365},{400,730},{500,1095}}),\"d\",DATE(2020,1,1)+[n]),[v]*1.0001,[d],0.1)",
+   "powerbi": "0.0889633923768998"
+  },
+  {
+   "expr": "XIRR(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-200,0},{BLANK(),90},{80,180},{150,400}}),\"d\",DATE(2020,1,1)+[n]),CONVERT([v],CURRENCY),[d])",
+   "powerbi": "0.172205068171025"
+  },
+  {
+   "expr": "XIRR(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-200,0},{BLANK(),90},{80,180},{150,400}}),\"d\",DATE(2020,1,1)+[n]),CONVERT([v],CURRENCY),[d],0.1)",
+   "powerbi": "0.172205068171025"
+  },
+  {
+   "expr": "XIRR(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-200,0},{BLANK(),90},{80,180},{150,400}}),\"d\",DATE(2020,1,1)+[n]),CURRENCY(IF([n]>200,BLANK(),[v])),[d])",
+   "powerbi": "-0.844021014869213"
+  },
+  {
+   "expr": "XIRR(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-200,0},{BLANK(),90},{80,180},{150,400}}),\"d\",DATE(2020,1,1)+[n]),CURRENCY(IF([n]>200,BLANK(),[v])),[d],0.1)",
+   "powerbi": "-0.844021014869213"
+  },
+  {
+   "expr": "XIRR(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-200,0},{BLANK(),90},{80,180},{150,400}}),\"d\",DATE(2020,1,1)+[n]),CURRENCY([v])+0.5,[d])",
+   "powerbi": "0.184788537025452"
+  },
+  {
+   "expr": "XIRR(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-200,0},{BLANK(),90},{80,180},{150,400}}),\"d\",DATE(2020,1,1)+[n]),CURRENCY([v])+0.5,[d],0.1)",
+   "powerbi": "0.184788537025452"
+  },
+  {
+   "expr": "XIRR(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-200,0},{BLANK(),90},{80,180},{150,400}}),\"d\",DATE(2020,1,1)+[n]),CURRENCY([v]),[d])",
+   "powerbi": "0.172205068171025"
+  },
+  {
+   "expr": "XIRR(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-200,0},{BLANK(),90},{80,180},{150,400}}),\"d\",DATE(2020,1,1)+[n]),CURRENCY([v]),[d],0.1)",
+   "powerbi": "0.172205068171025"
+  },
+  {
+   "expr": "XIRR(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-200,0},{BLANK(),90},{80,180},{150,400}}),\"d\",DATE(2020,1,1)+[n]),CURRENCY([v])/CURRENCY(2),[d])",
+   "powerbi": "0.172205068171025"
+  },
+  {
+   "expr": "XIRR(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-200,0},{BLANK(),90},{80,180},{150,400}}),\"d\",DATE(2020,1,1)+[n]),CURRENCY([v])/CURRENCY(2),[d],0.1)",
+   "powerbi": "0.172205068171025"
+  },
+  {
+   "expr": "XIRR(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-200,0},{BLANK(),90},{80,180},{150,400}}),\"d\",DATE(2020,1,1)+[n]),CURRENCY([v]*1.5),[d])",
+   "powerbi": "0.172205068171025"
+  },
+  {
+   "expr": "XIRR(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-200,0},{BLANK(),90},{80,180},{150,400}}),\"d\",DATE(2020,1,1)+[n]),CURRENCY([v]*1.5),[d],0.1)",
+   "powerbi": "0.172205068171025"
+  },
+  {
+   "expr": "XIRR(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-200,0},{BLANK(),90},{80,180},{150,400}}),\"d\",DATE(2020,1,1)+[n]),IF([n]<300,CURRENCY([v]),BLANK()),[d])",
+   "powerbi": "-0.844021014869213"
+  },
+  {
+   "expr": "XIRR(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-200,0},{BLANK(),90},{80,180},{150,400}}),\"d\",DATE(2020,1,1)+[n]),IF([n]<300,CURRENCY([v]),BLANK()),[d],0.1)",
+   "powerbi": "-0.844021014869213"
+  },
+  {
+   "expr": "XIRR(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-200,0},{BLANK(),90},{80,180},{150,400}}),\"d\",DATE(2020,1,1)+[n]),IF([n]=0,CURRENCY([v]),[v]),[d])",
+   "powerbi": "0.172205068171025"
+  },
+  {
+   "expr": "XIRR(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-200,0},{BLANK(),90},{80,180},{150,400}}),\"d\",DATE(2020,1,1)+[n]),IF([n]=0,CURRENCY([v]),[v]),[d],0.1)",
+   "powerbi": "0.172205068171025"
+  },
+  {
+   "expr": "XIRR(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-200,0},{BLANK(),90},{80,180},{150,400}}),\"d\",DATE(2020,1,1)+[n]),IF([n]>200,BLANK(),[v]),[d])",
+   "powerbi": "-0.844021014869213"
+  },
+  {
+   "expr": "XIRR(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-200,0},{BLANK(),90},{80,180},{150,400}}),\"d\",DATE(2020,1,1)+[n]),IF([n]>200,BLANK(),[v]),[d],0.1)",
+   "powerbi": "-0.844021014869213"
+  },
+  {
+   "expr": "XIRR(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-200,0},{BLANK(),90},{80,180},{150,400}}),\"d\",DATE(2020,1,1)+[n]),[v]*2,[d])",
+   "powerbi": "0.172205068171025"
+  },
+  {
+   "expr": "XIRR(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-200,0},{BLANK(),90},{80,180},{150,400}}),\"d\",DATE(2020,1,1)+[n]),[v]*2,[d],0.1)",
+   "powerbi": "0.172205068171025"
+  },
+  {
+   "expr": "XIRR(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-200,0},{BLANK(),90},{80,180},{150,400}}),\"d\",DATE(2020,1,1)+[n]),[v],[d])",
+   "powerbi": "0.172205068171025"
+  },
+  {
+   "expr": "XIRR(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-200,0},{BLANK(),90},{80,180},{150,400}}),\"d\",DATE(2020,1,1)+[n]),[v],[d],0.1)",
+   "powerbi": "0.172205068171025"
+  },
+  {
+   "expr": "XIRR(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-500,0},{200,100},{350,400}}),\"d\",DATE(2020,1,1)+[n]),CONVERT([v],CURRENCY),[d])",
+   "powerbi": "0.128662893921137"
+  },
+  {
+   "expr": "XIRR(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-500,0},{200,100},{350,400}}),\"d\",DATE(2020,1,1)+[n]),CONVERT([v],CURRENCY),[d],0.1)",
+   "powerbi": "0.128662893921137"
+  },
+  {
+   "expr": "XIRR(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-500,0},{200,100},{350,400}}),\"d\",DATE(2020,1,1)+[n]),CURRENCY(IF([n]>200,BLANK(),[v])),[d])",
+   "powerbi": "-0.964720781333745"
+  },
+  {
+   "expr": "XIRR(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-500,0},{200,100},{350,400}}),\"d\",DATE(2020,1,1)+[n]),CURRENCY(IF([n]>200,BLANK(),[v])),[d],0.1)",
+   "powerbi": "-0.964720781333745"
+  },
+  {
+   "expr": "XIRR(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-500,0},{200,100},{350,400}}),\"d\",DATE(2020,1,1)+[n]),CURRENCY([v])+0.5,[d])",
+   "powerbi": "0.132796831429005"
+  },
+  {
+   "expr": "XIRR(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-500,0},{200,100},{350,400}}),\"d\",DATE(2020,1,1)+[n]),CURRENCY([v])+0.5,[d],0.1)",
+   "powerbi": "0.132796831429005"
+  },
+  {
+   "expr": "XIRR(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-500,0},{200,100},{350,400}}),\"d\",DATE(2020,1,1)+[n]),CURRENCY([v]),[d])",
+   "powerbi": "0.128662893921137"
+  },
+  {
+   "expr": "XIRR(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-500,0},{200,100},{350,400}}),\"d\",DATE(2020,1,1)+[n]),CURRENCY([v])/CURRENCY(2),[d])",
+   "powerbi": "0.128662893921137"
+  },
+  {
+   "expr": "XIRR(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-500,0},{200,100},{350,400}}),\"d\",DATE(2020,1,1)+[n]),CURRENCY([v])/CURRENCY(2),[d],0.1)",
+   "powerbi": "0.128662893921137"
+  },
+  {
+   "expr": "XIRR(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-500,0},{200,100},{350,400}}),\"d\",DATE(2020,1,1)+[n]),CURRENCY([v]*1.5),[d])",
+   "powerbi": "0.128662893921137"
+  },
+  {
+   "expr": "XIRR(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-500,0},{200,100},{350,400}}),\"d\",DATE(2020,1,1)+[n]),CURRENCY([v]*1.5),[d],0.1)",
+   "powerbi": "0.128662893921137"
+  },
+  {
+   "expr": "XIRR(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-500,0},{200,100},{350,400}}),\"d\",DATE(2020,1,1)+[n]),IF([n]<300,CURRENCY([v]),BLANK()),[d])",
+   "powerbi": "-0.964720781333745"
+  },
+  {
+   "expr": "XIRR(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-500,0},{200,100},{350,400}}),\"d\",DATE(2020,1,1)+[n]),IF([n]<300,CURRENCY([v]),BLANK()),[d],0.1)",
+   "powerbi": "-0.964720781333745"
+  },
+  {
+   "expr": "XIRR(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-500,0},{200,100},{350,400}}),\"d\",DATE(2020,1,1)+[n]),IF([n]=0,CURRENCY([v]),[v]),[d],0.1)",
+   "powerbi": "0.128662893921137"
+  },
+  {
+   "expr": "XIRR(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-500,0},{200,100},{350,400}}),\"d\",DATE(2020,1,1)+[n]),IF([n]>200,BLANK(),[v]),[d])",
+   "powerbi": "-0.964720781333745"
+  },
+  {
+   "expr": "XIRR(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-500,0},{200,100},{350,400}}),\"d\",DATE(2020,1,1)+[n]),IF([n]>200,BLANK(),[v]),[d],0.1)",
+   "powerbi": "-0.964720781333745"
+  },
+  {
+   "expr": "XIRR(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-500,0},{200,100},{350,400}}),\"d\",DATE(2020,1,1)+[n]),[v]*1.0001,[d])",
+   "powerbi": "0.128662893921137"
+  },
+  {
+   "expr": "XIRR(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-500,0},{200,100},{350,400}}),\"d\",DATE(2020,1,1)+[n]),[v]*1.0001,[d],0.1)",
+   "powerbi": "0.128662893921137"
+  },
+  {
+   "expr": "XIRR(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-500,0},{200,100},{350,400}}),\"d\",DATE(2020,1,1)+[n]),[v]*2,[d])",
+   "powerbi": "0.128662893921137"
+  },
+  {
+   "expr": "XIRR(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-500,0},{200,100},{350,400}}),\"d\",DATE(2020,1,1)+[n]),[v]*2,[d],0.1)",
+   "powerbi": "0.128662893921137"
+  },
+  {
+   "expr": "XIRR(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-500,0},{200,100},{350,400}}),\"d\",DATE(2020,1,1)+[n]),[v],[d])",
+   "powerbi": "0.128662893921137"
+  },
+  {
+   "expr": "XIRR(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-500,0},{200,100},{350,400}}),\"d\",DATE(2020,1,1)+[n]),[v],[d],0.1)",
+   "powerbi": "0.128662893921137"
+  },
+  {
+   "expr": "XIRR(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-800,0},{250,200},{450,600},{300,900}}),\"d\",DATE(2020,1,1)+[n]),CONVERT([v],CURRENCY),[d])",
+   "powerbi": "0.151625475287438"
+  },
+  {
+   "expr": "XIRR(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-800,0},{250,200},{450,600},{300,900}}),\"d\",DATE(2020,1,1)+[n]),CONVERT([v],CURRENCY),[d],0.1)",
+   "powerbi": "0.151625475287438"
+  },
+  {
+   "expr": "XIRR(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-800,0},{250,200},{450,600},{300,900}}),\"d\",DATE(2020,1,1)+[n]),CURRENCY(IF([n]>200,BLANK(),[v])),[d])",
+   "powerbi": "-0.880298034101725"
+  },
+  {
+   "expr": "XIRR(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-800,0},{250,200},{450,600},{300,900}}),\"d\",DATE(2020,1,1)+[n]),CURRENCY(IF([n]>200,BLANK(),[v])),[d],0.1)",
+   "powerbi": "-0.880298034101725"
+  },
+  {
+   "expr": "XIRR(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-800,0},{250,200},{450,600},{300,900}}),\"d\",DATE(2020,1,1)+[n]),CURRENCY([v])+0.5,[d])",
+   "powerbi": "0.153222264349461"
+  },
+  {
+   "expr": "XIRR(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-800,0},{250,200},{450,600},{300,900}}),\"d\",DATE(2020,1,1)+[n]),CURRENCY([v])+0.5,[d],0.1)",
+   "powerbi": "0.153222264349461"
+  },
+  {
+   "expr": "XIRR(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-800,0},{250,200},{450,600},{300,900}}),\"d\",DATE(2020,1,1)+[n]),CURRENCY([v]),[d])",
+   "powerbi": "0.151625475287438"
+  },
+  {
+   "expr": "XIRR(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-800,0},{250,200},{450,600},{300,900}}),\"d\",DATE(2020,1,1)+[n]),CURRENCY([v]),[d],0.1)",
+   "powerbi": "0.151625475287438"
+  },
+  {
+   "expr": "XIRR(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-800,0},{250,200},{450,600},{300,900}}),\"d\",DATE(2020,1,1)+[n]),CURRENCY([v])/CURRENCY(2),[d])",
+   "powerbi": "0.151625475287438"
+  },
+  {
+   "expr": "XIRR(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-800,0},{250,200},{450,600},{300,900}}),\"d\",DATE(2020,1,1)+[n]),CURRENCY([v])/CURRENCY(2),[d],0.1)",
+   "powerbi": "0.151625475287438"
+  },
+  {
+   "expr": "XIRR(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-800,0},{250,200},{450,600},{300,900}}),\"d\",DATE(2020,1,1)+[n]),CURRENCY([v]*1.5),[d])",
+   "powerbi": "0.151625475287438"
+  },
+  {
+   "expr": "XIRR(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-800,0},{250,200},{450,600},{300,900}}),\"d\",DATE(2020,1,1)+[n]),CURRENCY([v]*1.5),[d],0.1)",
+   "powerbi": "0.151625475287438"
+  },
+  {
+   "expr": "XIRR(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-800,0},{250,200},{450,600},{300,900}}),\"d\",DATE(2020,1,1)+[n]),IF([n]<300,CURRENCY([v]),BLANK()),[d])",
+   "powerbi": "-0.880298034101725"
+  },
+  {
+   "expr": "XIRR(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-800,0},{250,200},{450,600},{300,900}}),\"d\",DATE(2020,1,1)+[n]),IF([n]<300,CURRENCY([v]),BLANK()),[d],0.1)",
+   "powerbi": "-0.880298034101725"
+  },
+  {
+   "expr": "XIRR(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-800,0},{250,200},{450,600},{300,900}}),\"d\",DATE(2020,1,1)+[n]),IF([n]=0,CURRENCY([v]),[v]),[d])",
+   "powerbi": "0.151625475287438"
+  },
+  {
+   "expr": "XIRR(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-800,0},{250,200},{450,600},{300,900}}),\"d\",DATE(2020,1,1)+[n]),IF([n]=0,CURRENCY([v]),[v]),[d],0.1)",
+   "powerbi": "0.151625475287438"
+  },
+  {
+   "expr": "XIRR(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-800,0},{250,200},{450,600},{300,900}}),\"d\",DATE(2020,1,1)+[n]),IF([n]>200,BLANK(),[v]),[d])",
+   "powerbi": "-0.880298034101725"
+  },
+  {
+   "expr": "XIRR(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-800,0},{250,200},{450,600},{300,900}}),\"d\",DATE(2020,1,1)+[n]),IF([n]>200,BLANK(),[v]),[d],0.1)",
+   "powerbi": "-0.880298034101725"
+  },
+  {
+   "expr": "XIRR(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-800,0},{250,200},{450,600},{300,900}}),\"d\",DATE(2020,1,1)+[n]),[v]*2,[d])",
+   "powerbi": "0.151625475287438"
+  },
+  {
+   "expr": "XIRR(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-800,0},{250,200},{450,600},{300,900}}),\"d\",DATE(2020,1,1)+[n]),[v]*2,[d],0.1)",
+   "powerbi": "0.151625475287438"
+  },
+  {
+   "expr": "XIRR(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-800,0},{250,200},{450,600},{300,900}}),\"d\",DATE(2020,1,1)+[n]),[v],[d])",
+   "powerbi": "0.151625475287438"
+  },
+  {
+   "expr": "XIRR(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-800,0},{250,200},{450,600},{300,900}}),\"d\",DATE(2020,1,1)+[n]),[v],[d],0.1)",
+   "powerbi": "0.151625475287438"
+  },
+  {
+   "expr": "XNPV(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-100,0},{BLANK(),50},{120,300}}),\"d\",DATE(2020,1,1)+[n]),CONVERT([v],CURRENCY),[d],0.05)",
+   "powerbi": "15.283"
+  },
+  {
+   "expr": "XNPV(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-100,0},{BLANK(),50},{120,300}}),\"d\",DATE(2020,1,1)+[n]),CONVERT([v],CURRENCY),[d],0.1)",
+   "powerbi": "10.9583"
+  },
+  {
+   "expr": "XNPV(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-100,0},{BLANK(),50},{120,300}}),\"d\",DATE(2020,1,1)+[n]),CONVERT([v],CURRENCY),[d],0.2)",
+   "powerbi": "3.3001"
+  },
+  {
+   "expr": "XNPV(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-100,0},{BLANK(),50},{120,300}}),\"d\",DATE(2020,1,1)+[n]),CURRENCY(IF([n]>200,BLANK(),[v])),[d],0.05)",
+   "powerbi": "-100"
+  },
+  {
+   "expr": "XNPV(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-100,0},{BLANK(),50},{120,300}}),\"d\",DATE(2020,1,1)+[n]),CURRENCY(IF([n]>200,BLANK(),[v])),[d],0.1)",
+   "powerbi": "-100"
+  },
+  {
+   "expr": "XNPV(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-100,0},{BLANK(),50},{120,300}}),\"d\",DATE(2020,1,1)+[n]),CURRENCY(IF([n]>200,BLANK(),[v])),[d],0.2)",
+   "powerbi": "-100"
+  },
+  {
+   "expr": "XNPV(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-100,0},{BLANK(),50},{120,300}}),\"d\",DATE(2020,1,1)+[n]),CURRENCY([v])+0.5,[d],0.05)",
+   "powerbi": "16.7600456341505"
+  },
+  {
+   "expr": "XNPV(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-100,0},{BLANK(),50},{120,300}}),\"d\",DATE(2020,1,1)+[n]),CURRENCY([v])+0.5,[d],0.1)",
+   "powerbi": "12.414157705695"
+  },
+  {
+   "expr": "XNPV(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-100,0},{BLANK(),50},{120,300}}),\"d\",DATE(2020,1,1)+[n]),CURRENCY([v])+0.5,[d],0.2)",
+   "powerbi": "4.71819062470806"
+  },
+  {
+   "expr": "XNPV(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-100,0},{BLANK(),50},{120,300}}),\"d\",DATE(2020,1,1)+[n]),CURRENCY([v]),[d],0.05)",
+   "powerbi": "15.283"
+  },
+  {
+   "expr": "XNPV(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-100,0},{BLANK(),50},{120,300}}),\"d\",DATE(2020,1,1)+[n]),CURRENCY([v]),[d],0.1)",
+   "powerbi": "10.9583"
+  },
+  {
+   "expr": "XNPV(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-100,0},{BLANK(),50},{120,300}}),\"d\",DATE(2020,1,1)+[n]),CURRENCY([v]),[d],0.2)",
+   "powerbi": "3.3001"
+  },
+  {
+   "expr": "XNPV(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-100,0},{BLANK(),50},{120,300}}),\"d\",DATE(2020,1,1)+[n]),CURRENCY([v])/CURRENCY(2),[d],0.05)",
+   "powerbi": "7.64151516189925"
+  },
+  {
+   "expr": "XNPV(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-100,0},{BLANK(),50},{120,300}}),\"d\",DATE(2020,1,1)+[n]),CURRENCY([v])/CURRENCY(2),[d],0.1)",
+   "powerbi": "5.47915852400733"
+  },
+  {
+   "expr": "XNPV(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-100,0},{BLANK(),50},{120,300}}),\"d\",DATE(2020,1,1)+[n]),CURRENCY([v])/CURRENCY(2),[d],0.2)",
+   "powerbi": "1.65005331859408"
+  },
+  {
+   "expr": "XNPV(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-100,0},{BLANK(),50},{120,300}}),\"d\",DATE(2020,1,1)+[n]),IF([n]=0,CURRENCY([v]),[v]),[d],0.05)",
+   "powerbi": "15.2830303237985"
+  },
+  {
+   "expr": "XNPV(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-100,0},{BLANK(),50},{120,300}}),\"d\",DATE(2020,1,1)+[n]),IF([n]=0,CURRENCY([v]),[v]),[d],0.2)",
+   "powerbi": "3.30010663718815"
+  },
+  {
+   "expr": "XNPV(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-100,0},{BLANK(),50},{120,300}}),\"d\",DATE(2020,1,1)+[n]),IF([n]>0,CURRENCY([v])),[d],0.05)",
+   "powerbi": "463781273900575.1146"
+  },
+  {
+   "expr": "XNPV(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-100,0},{BLANK(),50},{120,300}}),\"d\",DATE(2020,1,1)+[n]),IF([n]>0,CURRENCY([v])),[d],0.1)",
+   "powerbi": "463750841436360.5766"
+  },
+  {
+   "expr": "XNPV(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-100,0},{BLANK(),50},{120,300}}),\"d\",DATE(2020,1,1)+[n]),IF([n]>0,CURRENCY([v])),[d],0.2)",
+   "powerbi": "463696951571434.7592"
+  },
+  {
+   "expr": "XNPV(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-100,0},{BLANK(),50},{120,300}}),\"d\",DATE(2020,1,1)+[n]),IF([n]>200,BLANK(),[v]),[d],0.05)",
+   "powerbi": "-100"
+  },
+  {
+   "expr": "XNPV(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-100,0},{BLANK(),50},{120,300}}),\"d\",DATE(2020,1,1)+[n]),IF([n]>200,BLANK(),[v]),[d],0.1)",
+   "powerbi": "-100"
+  },
+  {
+   "expr": "XNPV(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-100,0},{BLANK(),50},{120,300}}),\"d\",DATE(2020,1,1)+[n]),IF([n]>200,BLANK(),[v]),[d],0.2)",
+   "powerbi": "-100"
+  },
+  {
+   "expr": "XNPV(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-100,0},{BLANK(),50},{120,300}}),\"d\",DATE(2020,1,1)+[n]),[v]*1.0001,[d],0.05)",
+   "powerbi": "15.2845586268309"
+  },
+  {
+   "expr": "XNPV(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-100,0},{BLANK(),50},{120,300}}),\"d\",DATE(2020,1,1)+[n]),[v]*1.0001,[d],0.1)",
+   "powerbi": "10.9594128797195"
+  },
+  {
+   "expr": "XNPV(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-100,0},{BLANK(),50},{120,300}}),\"d\",DATE(2020,1,1)+[n]),[v]*1.0001,[d],0.2)",
+   "powerbi": "3.30043664785187"
+  },
+  {
+   "expr": "XNPV(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-100,0},{BLANK(),50},{120,300}}),\"d\",DATE(2020,1,1)+[n]),[v],[d],0.05)",
+   "powerbi": "15.2830303237985"
+  },
+  {
+   "expr": "XNPV(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-100,0},{BLANK(),50},{120,300}}),\"d\",DATE(2020,1,1)+[n]),[v],[d],0.1)",
+   "powerbi": "10.9583170480147"
+  },
+  {
+   "expr": "XNPV(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-100,0},{BLANK(),50},{120,300}}),\"d\",DATE(2020,1,1)+[n]),[v],[d],0.2)",
+   "powerbi": "3.30010663718815"
+  },
+  {
+   "expr": "XNPV(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-1000,0},{300,365},{400,730},{500,1095}}),\"d\",DATE(2020,1,1)+[n]),CONVERT([v],CURRENCY),[d],0.05)",
+   "powerbi": "80.4449"
+  },
+  {
+   "expr": "XNPV(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-1000,0},{300,365},{400,730},{500,1095}}),\"d\",DATE(2020,1,1)+[n]),CONVERT([v],CURRENCY),[d],0.1)",
+   "powerbi": "-21.0368"
+  },
+  {
+   "expr": "XNPV(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-1000,0},{300,365},{400,730},{500,1095}}),\"d\",DATE(2020,1,1)+[n]),CURRENCY(IF([n]>200,BLANK(),[v])),[d],0.1)",
+   "powerbi": "-1000"
+  },
+  {
+   "expr": "XNPV(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-1000,0},{300,365},{400,730},{500,1095}}),\"d\",DATE(2020,1,1)+[n]),CURRENCY([v])+0.5,[d],0.1)",
+   "powerbi": "-19.2933884297522"
+  },
+  {
+   "expr": "XNPV(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-1000,0},{300,365},{400,730},{500,1095}}),\"d\",DATE(2020,1,1)+[n]),CURRENCY([v]),[d],0.05)",
+   "powerbi": "80.4449"
+  },
+  {
+   "expr": "XNPV(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-1000,0},{300,365},{400,730},{500,1095}}),\"d\",DATE(2020,1,1)+[n]),CURRENCY([v]),[d],0.1)",
+   "powerbi": "-21.0368"
+  },
+  {
+   "expr": "XNPV(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-1000,0},{300,365},{400,730},{500,1095}}),\"d\",DATE(2020,1,1)+[n]),CURRENCY([v]),[d],0.2)",
+   "powerbi": "-182.8704"
+  },
+  {
+   "expr": "XNPV(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-1000,0},{300,365},{400,730},{500,1095}}),\"d\",DATE(2020,1,1)+[n]),CURRENCY([v])/CURRENCY(2),[d],0.05)",
+   "powerbi": "40.2224381816219"
+  },
+  {
+   "expr": "XNPV(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-1000,0},{300,365},{400,730},{500,1095}}),\"d\",DATE(2020,1,1)+[n]),CURRENCY([v])/CURRENCY(2),[d],0.1)",
+   "powerbi": "-10.5184072126222"
+  },
+  {
+   "expr": "XNPV(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-1000,0},{300,365},{400,730},{500,1095}}),\"d\",DATE(2020,1,1)+[n]),CURRENCY([v])/CURRENCY(2),[d],0.2)",
+   "powerbi": "-91.4351851851852"
+  },
+  {
+   "expr": "XNPV(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-1000,0},{300,365},{400,730},{500,1095}}),\"d\",DATE(2020,1,1)+[n]),IF([n]=0,CURRENCY([v]),[v]),[d],0.05)",
+   "powerbi": "80.4448763632437"
+  },
+  {
+   "expr": "XNPV(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-1000,0},{300,365},{400,730},{500,1095}}),\"d\",DATE(2020,1,1)+[n]),IF([n]=0,CURRENCY([v]),[v]),[d],0.1)",
+   "powerbi": "-21.0368144252443"
+  },
+  {
+   "expr": "XNPV(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-1000,0},{300,365},{400,730},{500,1095}}),\"d\",DATE(2020,1,1)+[n]),IF([n]=0,CURRENCY([v]),[v]),[d],0.2)",
+   "powerbi": "-182.87037037037"
+  },
+  {
+   "expr": "XNPV(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-1000,0},{300,365},{400,730},{500,1095}}),\"d\",DATE(2020,1,1)+[n]),IF([n]>0,CURRENCY([v])),[d],0.05)",
+   "powerbi": "465246666226528.1428"
+  },
+  {
+   "expr": "XNPV(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-1000,0},{300,365},{400,730},{500,1095}}),\"d\",DATE(2020,1,1)+[n]),IF([n]>0,CURRENCY([v])),[d],0.1)",
+   "powerbi": "465182226706461.4"
+  },
+  {
+   "expr": "XNPV(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-1000,0},{300,365},{400,730},{500,1095}}),\"d\",DATE(2020,1,1)+[n]),IF([n]>0,CURRENCY([v])),[d],0.2)",
+   "powerbi": "465039876405240.597"
+  },
+  {
+   "expr": "XNPV(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-1000,0},{300,365},{400,730},{500,1095}}),\"d\",DATE(2020,1,1)+[n]),IF([n]>200,BLANK(),[v]),[d],0.05)",
+   "powerbi": "-1000"
+  },
+  {
+   "expr": "XNPV(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-1000,0},{300,365},{400,730},{500,1095}}),\"d\",DATE(2020,1,1)+[n]),IF([n]>200,BLANK(),[v]),[d],0.1)",
+   "powerbi": "-1000"
+  },
+  {
+   "expr": "XNPV(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-1000,0},{300,365},{400,730},{500,1095}}),\"d\",DATE(2020,1,1)+[n]),[v]*1.0001,[d],0.05)",
+   "powerbi": "80.45292085088"
+  },
+  {
+   "expr": "XNPV(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-1000,0},{300,365},{400,730},{500,1095}}),\"d\",DATE(2020,1,1)+[n]),[v]*1.0001,[d],0.1)",
+   "powerbi": "-21.038918106687"
+  },
+  {
+   "expr": "XNPV(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-1000,0},{300,365},{400,730},{500,1095}}),\"d\",DATE(2020,1,1)+[n]),[v],[d],0.05)",
+   "powerbi": "80.4448763632437"
+  },
+  {
+   "expr": "XNPV(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-1000,0},{300,365},{400,730},{500,1095}}),\"d\",DATE(2020,1,1)+[n]),[v],[d],0.1)",
+   "powerbi": "-21.0368144252443"
+  },
+  {
+   "expr": "XNPV(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-1000,0},{300,365},{400,730},{500,1095}}),\"d\",DATE(2020,1,1)+[n]),[v],[d],0.2)",
+   "powerbi": "-182.87037037037"
+  },
+  {
+   "expr": "XNPV(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-200,0},{BLANK(),90},{80,180},{150,400}}),\"d\",DATE(2020,1,1)+[n]),CONVERT([v],CURRENCY),[d],0.05)",
+   "powerbi": "20.2884"
+  },
+  {
+   "expr": "XNPV(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-200,0},{BLANK(),90},{80,180},{150,400}}),\"d\",DATE(2020,1,1)+[n]),CONVERT([v],CURRENCY),[d],0.1)",
+   "powerbi": "11.4499"
+  },
+  {
+   "expr": "XNPV(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-200,0},{BLANK(),90},{80,180},{150,400}}),\"d\",DATE(2020,1,1)+[n]),CONVERT([v],CURRENCY),[d],0.2)",
+   "powerbi": "-4.0454"
+  },
+  {
+   "expr": "XNPV(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-200,0},{BLANK(),90},{80,180},{150,400}}),\"d\",DATE(2020,1,1)+[n]),CURRENCY([v])+0.5,[d],0.05)",
+   "powerbi": "22.2445474628613"
+  },
+  {
+   "expr": "XNPV(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-200,0},{BLANK(),90},{80,180},{150,400}}),\"d\",DATE(2020,1,1)+[n]),CURRENCY([v])+0.5,[d],0.1)",
+   "powerbi": "13.3656984426898"
+  },
+  {
+   "expr": "XNPV(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-200,0},{BLANK(),90},{80,180},{150,400}}),\"d\",DATE(2020,1,1)+[n]),CURRENCY([v])+0.5,[d],0.2)",
+   "powerbi": "-2.20096860106699"
+  },
+  {
+   "expr": "XNPV(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-200,0},{BLANK(),90},{80,180},{150,400}}),\"d\",DATE(2020,1,1)+[n]),CURRENCY([v]),[d],0.05)",
+   "powerbi": "20.2884"
+  },
+  {
+   "expr": "XNPV(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-200,0},{BLANK(),90},{80,180},{150,400}}),\"d\",DATE(2020,1,1)+[n]),CURRENCY([v]),[d],0.1)",
+   "powerbi": "11.4499"
+  },
+  {
+   "expr": "XNPV(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-200,0},{BLANK(),90},{80,180},{150,400}}),\"d\",DATE(2020,1,1)+[n]),CURRENCY([v]),[d],0.2)",
+   "powerbi": "-4.0454"
+  },
+  {
+   "expr": "XNPV(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-200,0},{BLANK(),90},{80,180},{150,400}}),\"d\",DATE(2020,1,1)+[n]),CURRENCY([v])/CURRENCY(2),[d],0.05)",
+   "powerbi": "10.1442228527975"
+  },
+  {
+   "expr": "XNPV(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-200,0},{BLANK(),90},{80,180},{150,400}}),\"d\",DATE(2020,1,1)+[n]),CURRENCY([v])/CURRENCY(2),[d],0.1)",
+   "powerbi": "5.72492963146001"
+  },
+  {
+   "expr": "XNPV(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-200,0},{BLANK(),90},{80,180},{150,400}}),\"d\",DATE(2020,1,1)+[n]),CURRENCY([v])/CURRENCY(2),[d],0.2)",
+   "powerbi": "-2.02271980941394"
+  },
+  {
+   "expr": "XNPV(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-200,0},{BLANK(),90},{80,180},{150,400}}),\"d\",DATE(2020,1,1)+[n]),CURRENCY([v]*1.5),[d],0.05)",
+   "powerbi": "30.4327"
+  },
+  {
+   "expr": "XNPV(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-200,0},{BLANK(),90},{80,180},{150,400}}),\"d\",DATE(2020,1,1)+[n]),CURRENCY([v]*1.5),[d],0.1)",
+   "powerbi": "17.1748"
+  },
+  {
+   "expr": "XNPV(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-200,0},{BLANK(),90},{80,180},{150,400}}),\"d\",DATE(2020,1,1)+[n]),CURRENCY([v]*1.5),[d],0.2)",
+   "powerbi": "-6.0682"
+  },
+  {
+   "expr": "XNPV(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-200,0},{BLANK(),90},{80,180},{150,400}}),\"d\",DATE(2020,1,1)+[n]),IF([n]=0,CURRENCY([v]),[v]),[d],0.05)",
+   "powerbi": "20.288445705595"
+  },
+  {
+   "expr": "XNPV(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-200,0},{BLANK(),90},{80,180},{150,400}}),\"d\",DATE(2020,1,1)+[n]),IF([n]=0,CURRENCY([v]),[v]),[d],0.1)",
+   "powerbi": "11.44985926292"
+  },
+  {
+   "expr": "XNPV(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-200,0},{BLANK(),90},{80,180},{150,400}}),\"d\",DATE(2020,1,1)+[n]),IF([n]=0,CURRENCY([v]),[v]),[d],0.2)",
+   "powerbi": "-4.04543961882788"
+  },
+  {
+   "expr": "XNPV(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-200,0},{BLANK(),90},{80,180},{150,400}}),\"d\",DATE(2020,1,1)+[n]),IF([n]>200,BLANK(),[v]),[d],0.05)",
+   "powerbi": "-121.901899763286"
+  },
+  {
+   "expr": "XNPV(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-200,0},{BLANK(),90},{80,180},{150,400}}),\"d\",DATE(2020,1,1)+[n]),IF([n]>200,BLANK(),[v]),[d],0.1)",
+   "powerbi": "-123.673182252571"
+  },
+  {
+   "expr": "XNPV(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-200,0},{BLANK(),90},{80,180},{150,400}}),\"d\",DATE(2020,1,1)+[n]),IF([n]>200,BLANK(),[v]),[d],0.2)",
+   "powerbi": "-126.879070864306"
+  },
+  {
+   "expr": "XNPV(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-200,0},{BLANK(),90},{80,180},{150,400}}),\"d\",DATE(2020,1,1)+[n]),[v]*2,[d],0.05)",
+   "powerbi": "40.57689141119"
+  },
+  {
+   "expr": "XNPV(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-200,0},{BLANK(),90},{80,180},{150,400}}),\"d\",DATE(2020,1,1)+[n]),[v]*2,[d],0.1)",
+   "powerbi": "22.8997185258401"
+  },
+  {
+   "expr": "XNPV(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-200,0},{BLANK(),90},{80,180},{150,400}}),\"d\",DATE(2020,1,1)+[n]),[v]*2,[d],0.2)",
+   "powerbi": "-8.09087923765577"
+  },
+  {
+   "expr": "XNPV(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-200,0},{BLANK(),90},{80,180},{150,400}}),\"d\",DATE(2020,1,1)+[n]),[v],[d],0.05)",
+   "powerbi": "20.288445705595"
+  },
+  {
+   "expr": "XNPV(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-200,0},{BLANK(),90},{80,180},{150,400}}),\"d\",DATE(2020,1,1)+[n]),[v],[d],0.1)",
+   "powerbi": "11.44985926292"
+  },
+  {
+   "expr": "XNPV(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-200,0},{BLANK(),90},{80,180},{150,400}}),\"d\",DATE(2020,1,1)+[n]),[v],[d],0.2)",
+   "powerbi": "-4.04543961882788"
+  },
+  {
+   "expr": "XNPV(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-500,0},{200,100},{350,400}}),\"d\",DATE(2020,1,1)+[n]),CONVERT([v],CURRENCY),[d],0.2)",
+   "powerbi": "-23.133"
+  },
+  {
+   "expr": "XNPV(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-500,0},{200,100},{350,400}}),\"d\",DATE(2020,1,1)+[n]),CURRENCY(IF([n]>200,BLANK(),[v])),[d],0.05)",
+   "powerbi": "-302.6556"
+  },
+  {
+   "expr": "XNPV(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-500,0},{200,100},{350,400}}),\"d\",DATE(2020,1,1)+[n]),CURRENCY(IF([n]>200,BLANK(),[v])),[d],0.1)",
+   "powerbi": "-305.1549"
+  },
+  {
+   "expr": "XNPV(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-500,0},{200,100},{350,400}}),\"d\",DATE(2020,1,1)+[n]),CURRENCY(IF([n]>200,BLANK(),[v])),[d],0.2)",
+   "powerbi": "-309.7448"
+  },
+  {
+   "expr": "XNPV(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-500,0},{200,100},{350,400}}),\"d\",DATE(2020,1,1)+[n]),CURRENCY([v])+0.5,[d],0.05)",
+   "powerbi": "30.5891565823307"
+  },
+  {
+   "expr": "XNPV(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-500,0},{200,100},{350,400}}),\"d\",DATE(2020,1,1)+[n]),CURRENCY([v])+0.5,[d],0.1)",
+   "powerbi": "11.5697401896802"
+  },
+  {
+   "expr": "XNPV(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-500,0},{200,100},{350,400}}),\"d\",DATE(2020,1,1)+[n]),CURRENCY([v])+0.5,[d],0.2)",
+   "powerbi": "-21.7479243852545"
+  },
+  {
+   "expr": "XNPV(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-500,0},{200,100},{350,400}}),\"d\",DATE(2020,1,1)+[n]),CURRENCY([v]),[d],0.05)",
+   "powerbi": "29.1218"
+  },
+  {
+   "expr": "XNPV(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-500,0},{200,100},{350,400}}),\"d\",DATE(2020,1,1)+[n]),CURRENCY([v]),[d],0.1)",
+   "powerbi": "10.1322"
+  },
+  {
+   "expr": "XNPV(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-500,0},{200,100},{350,400}}),\"d\",DATE(2020,1,1)+[n]),CURRENCY([v]),[d],0.2)",
+   "powerbi": "-23.133"
+  },
+  {
+   "expr": "XNPV(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-500,0},{200,100},{350,400}}),\"d\",DATE(2020,1,1)+[n]),CURRENCY([v])/CURRENCY(2),[d],0.05)",
+   "powerbi": "14.5609139381561"
+  },
+  {
+   "expr": "XNPV(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-500,0},{200,100},{350,400}}),\"d\",DATE(2020,1,1)+[n]),CURRENCY([v])/CURRENCY(2),[d],0.1)",
+   "powerbi": "5.06610862517152"
+  },
+  {
+   "expr": "XNPV(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-500,0},{200,100},{350,400}}),\"d\",DATE(2020,1,1)+[n]),CURRENCY([v])/CURRENCY(2),[d],0.2)",
+   "powerbi": "-11.5665038938359"
+  },
+  {
+   "expr": "XNPV(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-500,0},{200,100},{350,400}}),\"d\",DATE(2020,1,1)+[n]),CURRENCY([v]*1.5),[d],0.05)",
+   "powerbi": "43.6827"
+  },
+  {
+   "expr": "XNPV(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-500,0},{200,100},{350,400}}),\"d\",DATE(2020,1,1)+[n]),CURRENCY([v]*1.5),[d],0.1)",
+   "powerbi": "15.1983"
+  },
+  {
+   "expr": "XNPV(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-500,0},{200,100},{350,400}}),\"d\",DATE(2020,1,1)+[n]),CURRENCY([v]*1.5),[d],0.2)",
+   "powerbi": "-34.6995"
+  },
+  {
+   "expr": "XNPV(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-500,0},{200,100},{350,400}}),\"d\",DATE(2020,1,1)+[n]),IF([n]=0,CURRENCY([v]),[v]),[d],0.05)",
+   "powerbi": "29.1218278763121"
+  },
+  {
+   "expr": "XNPV(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-500,0},{200,100},{350,400}}),\"d\",DATE(2020,1,1)+[n]),IF([n]=0,CURRENCY([v]),[v]),[d],0.2)",
+   "powerbi": "-23.1330077876717"
+  },
+  {
+   "expr": "XNPV(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-500,0},{200,100},{350,400}}),\"d\",DATE(2020,1,1)+[n]),IF([n]>0,CURRENCY([v])),[d],0.05)",
+   "powerbi": "464786542063706.2148"
+  },
+  {
+   "expr": "XNPV(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-500,0},{200,100},{350,400}}),\"d\",DATE(2020,1,1)+[n]),IF([n]>0,CURRENCY([v])),[d],0.1)",
+   "powerbi": "464768195706472.9356"
+  },
+  {
+   "expr": "XNPV(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-500,0},{200,100},{350,400}}),\"d\",DATE(2020,1,1)+[n]),IF([n]>0,CURRENCY([v])),[d],0.2)",
+   "powerbi": "464709674903705.1236"
+  },
+  {
+   "expr": "XNPV(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-500,0},{200,100},{350,400}}),\"d\",DATE(2020,1,1)+[n]),IF([n]>200,BLANK(),[v]),[d],0.05)",
+   "powerbi": "-302.65564488441"
+  },
+  {
+   "expr": "XNPV(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-500,0},{200,100},{350,400}}),\"d\",DATE(2020,1,1)+[n]),IF([n]>200,BLANK(),[v]),[d],0.1)",
+   "powerbi": "-305.154879619136"
+  },
+  {
+   "expr": "XNPV(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-500,0},{200,100},{350,400}}),\"d\",DATE(2020,1,1)+[n]),[v]*1.0001,[d],0.05)",
+   "powerbi": "29.1247400590997"
+  },
+  {
+   "expr": "XNPV(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-500,0},{200,100},{350,400}}),\"d\",DATE(2020,1,1)+[n]),[v]*1.0001,[d],0.1)",
+   "powerbi": "10.133230472068"
+  },
+  {
+   "expr": "XNPV(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-500,0},{200,100},{350,400}}),\"d\",DATE(2020,1,1)+[n]),[v]*1.0001,[d],0.2)",
+   "powerbi": "-23.1353210884505"
+  },
+  {
+   "expr": "XNPV(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-500,0},{200,100},{350,400}}),\"d\",DATE(2020,1,1)+[n]),[v]*2,[d],0.05)",
+   "powerbi": "58.2436557526242"
+  },
+  {
+   "expr": "XNPV(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-500,0},{200,100},{350,400}}),\"d\",DATE(2020,1,1)+[n]),[v]*2,[d],0.1)",
+   "powerbi": "20.2644345006861"
+  },
+  {
+   "expr": "XNPV(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-500,0},{200,100},{350,400}}),\"d\",DATE(2020,1,1)+[n]),[v]*2,[d],0.2)",
+   "powerbi": "-46.2660155753434"
+  },
+  {
+   "expr": "XNPV(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-500,0},{200,100},{350,400}}),\"d\",DATE(2020,1,1)+[n]),[v],[d],0.05)",
+   "powerbi": "29.1218278763121"
+  },
+  {
+   "expr": "XNPV(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-500,0},{200,100},{350,400}}),\"d\",DATE(2020,1,1)+[n]),[v],[d],0.1)",
+   "powerbi": "10.132217250343"
+  },
+  {
+   "expr": "XNPV(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-500,0},{200,100},{350,400}}),\"d\",DATE(2020,1,1)+[n]),[v],[d],0.2)",
+   "powerbi": "-23.1330077876717"
+  },
+  {
+   "expr": "XNPV(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-800,0},{250,200},{450,600},{300,900}}),\"d\",DATE(2020,1,1)+[n]),CONVERT([v],CURRENCY),[d],0.05)",
+   "powerbi": "124.7181"
+  },
+  {
+   "expr": "XNPV(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-800,0},{250,200},{450,600},{300,900}}),\"d\",DATE(2020,1,1)+[n]),CONVERT([v],CURRENCY),[d],0.1)",
+   "powerbi": "59.1896"
+  },
+  {
+   "expr": "XNPV(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-800,0},{250,200},{450,600},{300,900}}),\"d\",DATE(2020,1,1)+[n]),CONVERT([v],CURRENCY),[d],0.2)",
+   "powerbi": "-48.9299"
+  },
+  {
+   "expr": "XNPV(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-800,0},{250,200},{450,600},{300,900}}),\"d\",DATE(2020,1,1)+[n]),CURRENCY([v])+0.5,[d],0.05)",
+   "powerbi": "126.609718321476"
+  },
+  {
+   "expr": "XNPV(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-800,0},{250,200},{450,600},{300,900}}),\"d\",DATE(2020,1,1)+[n]),CURRENCY([v])+0.5,[d],0.1)",
+   "powerbi": "60.9868902179691"
+  },
+  {
+   "expr": "XNPV(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-800,0},{250,200},{450,600},{300,900}}),\"d\",DATE(2020,1,1)+[n]),CURRENCY([v])+0.5,[d],0.2)",
+   "powerbi": "-47.287959890716"
+  },
+  {
+   "expr": "XNPV(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-800,0},{250,200},{450,600},{300,900}}),\"d\",DATE(2020,1,1)+[n]),CURRENCY([v]),[d],0.05)",
+   "powerbi": "124.7181"
+  },
+  {
+   "expr": "XNPV(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-800,0},{250,200},{450,600},{300,900}}),\"d\",DATE(2020,1,1)+[n]),CURRENCY([v]),[d],0.1)",
+   "powerbi": "59.1896"
+  },
+  {
+   "expr": "XNPV(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-800,0},{250,200},{450,600},{300,900}}),\"d\",DATE(2020,1,1)+[n]),CURRENCY([v]),[d],0.2)",
+   "powerbi": "-48.9299"
+  },
+  {
+   "expr": "XNPV(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-800,0},{250,200},{450,600},{300,900}}),\"d\",DATE(2020,1,1)+[n]),CURRENCY([v])/CURRENCY(2),[d],0.05)",
+   "powerbi": "62.3590593547051"
+  },
+  {
+   "expr": "XNPV(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-800,0},{250,200},{450,600},{300,900}}),\"d\",DATE(2020,1,1)+[n]),CURRENCY([v])/CURRENCY(2),[d],0.1)",
+   "powerbi": "29.5947801421658"
+  },
+  {
+   "expr": "XNPV(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-800,0},{250,200},{450,600},{300,900}}),\"d\",DATE(2020,1,1)+[n]),CURRENCY([v])/CURRENCY(2),[d],0.2)",
+   "powerbi": "-24.4649475004224"
+  },
+  {
+   "expr": "XNPV(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-800,0},{250,200},{450,600},{300,900}}),\"d\",DATE(2020,1,1)+[n]),CURRENCY([v]*1.5),[d],0.05)",
+   "powerbi": "187.0772"
+  },
+  {
+   "expr": "XNPV(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-800,0},{250,200},{450,600},{300,900}}),\"d\",DATE(2020,1,1)+[n]),CURRENCY([v]*1.5),[d],0.1)",
+   "powerbi": "88.7843"
+  },
+  {
+   "expr": "XNPV(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-800,0},{250,200},{450,600},{300,900}}),\"d\",DATE(2020,1,1)+[n]),CURRENCY([v]*1.5),[d],0.2)",
+   "powerbi": "-73.3948"
+  },
+  {
+   "expr": "XNPV(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-800,0},{250,200},{450,600},{300,900}}),\"d\",DATE(2020,1,1)+[n]),IF([n]=0,CURRENCY([v]),[v]),[d],0.05)",
+   "powerbi": "124.71811870941"
+  },
+  {
+   "expr": "XNPV(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-800,0},{250,200},{450,600},{300,900}}),\"d\",DATE(2020,1,1)+[n]),IF([n]=0,CURRENCY([v]),[v]),[d],0.1)",
+   "powerbi": "59.1895602843316"
+  },
+  {
+   "expr": "XNPV(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-800,0},{250,200},{450,600},{300,900}}),\"d\",DATE(2020,1,1)+[n]),IF([n]=0,CURRENCY([v]),[v]),[d],0.2)",
+   "powerbi": "-48.9298950008447"
+  },
+  {
+   "expr": "XNPV(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-800,0},{250,200},{450,600},{300,900}}),\"d\",DATE(2020,1,1)+[n]),IF([n]>200,BLANK(),[v]),[d],0.05)",
+   "powerbi": "-556.595034400075"
+  },
+  {
+   "expr": "XNPV(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-800,0},{250,200},{450,600},{300,900}}),\"d\",DATE(2020,1,1)+[n]),IF([n]>200,BLANK(),[v]),[d],0.1)",
+   "powerbi": "-562.72111914854"
+  },
+  {
+   "expr": "XNPV(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-800,0},{250,200},{450,600},{300,900}}),\"d\",DATE(2020,1,1)+[n]),IF([n]>200,BLANK(),[v]),[d],0.2)",
+   "powerbi": "-573.768526315157"
+  },
+  {
+   "expr": "XNPV(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-800,0},{250,200},{450,600},{300,900}}),\"d\",DATE(2020,1,1)+[n]),[v]*2,[d],0.05)",
+   "powerbi": "249.43623741882"
+  },
+  {
+   "expr": "XNPV(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-800,0},{250,200},{450,600},{300,900}}),\"d\",DATE(2020,1,1)+[n]),[v]*2,[d],0.1)",
+   "powerbi": "118.379120568663"
+  },
+  {
+   "expr": "XNPV(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-800,0},{250,200},{450,600},{300,900}}),\"d\",DATE(2020,1,1)+[n]),[v]*2,[d],0.2)",
+   "powerbi": "-97.8597900016894"
+  },
+  {
+   "expr": "XNPV(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-800,0},{250,200},{450,600},{300,900}}),\"d\",DATE(2020,1,1)+[n]),[v],[d],0.05)",
+   "powerbi": "124.71811870941"
+  },
+  {
+   "expr": "XNPV(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-800,0},{250,200},{450,600},{300,900}}),\"d\",DATE(2020,1,1)+[n]),[v],[d],0.1)",
+   "powerbi": "59.1895602843316"
+  },
+  {
+   "expr": "XNPV(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-800,0},{250,200},{450,600},{300,900}}),\"d\",DATE(2020,1,1)+[n]),[v],[d],0.2)",
+   "powerbi": "-48.9298950008447"
+  }
+ ]
+}
