@@ -7206,6 +7206,82 @@ _STATIC_DATE_REFUSING_ITERATORS = frozenset({"PRODUCTX", "MEDIANX", "GEOMEANX", 
 _STATIC_DATE_FUNCTIONS = frozenset({"DATE", "TIME", "DATEVALUE", "TIMEVALUE", "EDATE", "EOMONTH", "NOW", "TODAY", "UTCNOW", "UTCTODAY"})
 
 
+
+_TEXT_MAKING_CALLS = frozenset({
+    "FORMAT", "FIXED", "CONCATENATE", "CONCATENATEX", "LEN", "LEFT", "RIGHT", "MID", "SUBSTITUTE", "REPLACE", "UPPER", "LOWER", "TRIM", "REPT",
+    "SEARCH", "FIND", "EXACT", "UNICODE", "TOCSV", "TOJSON", "CONTAINSSTRING", "CONTAINSSTRINGEXACT", "COMBINEVALUES", "VALUE",
+})
+
+
+def _mark_calls(node: Any, name: str, found: set[int], variable_nodes: dict[str, Any] | None = None, seen: set[int] | None = None) -> None:
+    """Add the id of every call to `name` inside the expression (and inside the VAR it reads) to `found`."""
+    seen = set() if seen is None else seen
+    if isinstance(node, (tuple, list)) and id(node) not in seen:
+        seen.add(id(node))
+        if isinstance(node, tuple) and len(node) > 1 and node[0] == "call" and node[1] == name:
+            found.add(id(node))
+        if isinstance(node, tuple) and len(node) > 1 and node[0] == "var" and variable_nodes and node[1] in variable_nodes:
+            _mark_calls(variable_nodes[node[1]], name, found, variable_nodes, seen)
+        for part in node:
+            _mark_calls(part, name, found, variable_nodes, seen)
+
+
+def _mark_calls_under_concat(node: Any, name: str, found: set[int], variable_nodes: dict[str, Any]) -> None:
+    """Add the id of every call to `name` that feeds a text join (&) or a text function in the expression, also through the VARs it reads."""
+    if isinstance(node, (tuple, list)):
+        if isinstance(node, tuple) and node and (
+            node[0] == "concat"
+            or (node[0] == "call" and (node[1] in _TEXT_MAKING_CALLS or (node[1] == "CONVERT" and len(node[2]) == 2 and node[2][1][-1] == "STRING")))
+        ):
+            _mark_calls(node, name, found, variable_nodes)
+        for part in node:
+            _mark_calls_under_concat(part, name, found, variable_nodes)
+
+
+def _product_depends_on_multiplication_order(values: list[Decimal]) -> bool:
+    """True when the exact product, the double product in row order and the product by logarithms differ at 15 significant digits."""
+    if len(values) < 2 or any(v == 0 for v in values):
+        return False
+    exact = Decimal(1)
+    for value in values:
+        exact *= value
+    running = 1.0
+    for value in values:
+        running *= float(value)
+    if not math.isfinite(running):
+        return False
+    try:
+        logged = math.exp(math.fsum(math.log(abs(float(v))) for v in values))
+    except (OverflowError, ValueError):
+        return False
+    if sum(1 for v in values if v < 0) % 2:
+        logged = -logged
+    shown = {f"{float(exact):.14e}", f"{running:.14e}", f"{logged:.14e}"}
+    # exp of a plain running sum of logarithms (the rows in stored order, smallest first, largest first): the evidence cannot say which order Power BI sums in (live: the
+    # EDATE(DATE(2010,7,7)+0.25,2) product is 4.36269736004559E+27, which only the smallest-first sum gives)
+    sign = -1.0 if sum(1 for v in values if v < 0) % 2 else 1.0
+    magnitudes = [abs(float(v)) for v in values]
+    for ordered in ((magnitudes, sorted(magnitudes), sorted(magnitudes, reverse=True)) if len(set(values)) > 1 else ()):  # a body that is the same on every row was measured exact
+        total = 0.0
+        for magnitude in ordered:
+            total += math.log(magnitude)
+        try:
+            shown.add(f"{sign * math.exp(total):.14e}")
+        except OverflowError:
+            return False
+    return len(shown) > 1
+
+def _mentions_date(node: Any, columns: dict[str, dict[str, str]]) -> bool:
+    """True when any part of the expression is a date function or a date column (the type a date body takes through arithmetic is not tracked)."""
+    if isinstance(node, tuple):
+        if node and _static_date(node, columns) and node[0] in {"call", "reference"}:
+            return True
+        return any(_mentions_date(part, columns) for part in node)
+    if isinstance(node, list):
+        return any(_mentions_date(part, columns) for part in node)
+    return False
+
+
 def _static_date(node: Any, columns: dict[str, dict[str, str]]) -> bool:
     """True when the expression is typed as a date whatever the data: a date function, a date column, a date plus or minus a number."""
     if not isinstance(node, tuple) or not node:
@@ -12757,8 +12833,12 @@ def evaluate_measures(
                 raise MeasureError(
                     "Iterator arithmetic comparisons need numeric operands."
                 )
-            if "date/time" in operand_categories and kind == "binary" and expression[1] in {"+", "-"}:
-                return "date/time"
+            if kind == "binary" and expression[1] == "+":
+                if "date/time" in operand_categories:
+                    return "date/time"
+            elif kind == "binary" and expression[1] == "-":
+                if operand_categories[0] == "date/time":
+                    return "date/time"
             return "numeric"
         if kind == "logical":
             operand_categories = (
@@ -13177,7 +13257,7 @@ def evaluate_measures(
         result_spine = expression
         while result_spine[0] == "let":
             result_spine = result_spine[2]
-        if result_spine[0] != "call" or result_spine[1] not in {"IF", "IF.EAGER", "SWITCH", "IFERROR", "COALESCE"}:
+        if result_spine[0] != "call" or (result_spine[1] not in {"IF", "IF.EAGER", "SWITCH", "IFERROR", "COALESCE"} and not (result_spine[1] in {"MIN", "MAX"} and len(result_spine[2]) == 2)):
             return None
         numdate_nodes.clear()
         variant_coalesce_arguments.clear()
@@ -15973,6 +16053,9 @@ def evaluate_measures(
         allow_boolean: bool,
     ) -> Any:
         """VAR name = value ... RETURN body: each value is computed once, where the VAR is declared."""
+        if id(node) not in text_context_walked:
+            text_context_walked.add(id(node))
+            _mark_calls_under_concat(node[2], "PRODUCTX", text_context_products, dict(node[1]))  # Task 40: a VAR's product the RETURN shows as text
         saved = dict(variables)
         saved_kinds = dict(variable_kinds)
         saved_nodes = dict(variable_nodes)
@@ -17666,6 +17749,9 @@ def evaluate_measures(
             return bool(dax_typed.compare("=", left, right))
         return left == right
 
+    text_context_walked: set[int] = set()
+    text_context_products: set[int] = set()
+
     def evaluate(
         node: tuple[Any, ...],
         row_context: tuple[dict[str, Any], dict[str, Any], int] | None = None,
@@ -17712,6 +17798,9 @@ def evaluate_measures(
             return left_error if left_error is not None else error
 
         if kind == "concat":
+            if id(node) not in text_context_walked:
+                text_context_walked.add(id(node))
+                _mark_calls(node, "PRODUCTX", text_context_products, variable_nodes)  # Task 40: a product shown (or about to be shown) as text
             try:
                 left = evaluate(node[1], row_context, allow_text=True)
             except (MeasureRuntimeError, _HardError) as left_failure:
@@ -18076,6 +18165,9 @@ def evaluate_measures(
         if node[0] == "table_call" or (node[0] == "call" and node[1] in {"ALL", "ALLSELECTED", "ALLNOBLANKROW"}):
             return single_value_of(table_argument_value(node))
         _, function, arguments = node
+        if (function in _TEXT_MAKING_CALLS or (function == "CONVERT" and len(arguments) == 2 and arguments[1][-1] == "STRING")) and id(node) not in text_context_walked:
+            text_context_walked.add(id(node))
+            _mark_calls(node, "PRODUCTX", text_context_products, variable_nodes)  # Task 40: a product turned into text by a text function
         if function == "RELATED":
             if row_context is None and row_stack and row_stack[-1][0].get("derived") and not row_stack[-1][0]["headers"]:
                 # a scalar hoisted out of a CALCULATE filter (see filter_constant) reads the row of the enclosing iterator
@@ -18176,12 +18268,17 @@ def evaluate_measures(
                     raise MeasureError(f"{function} does not support expressions of type date.")
             values: list[Decimal] = []
             blank_results = 0
+            product_has_dates = function == "PRODUCTX" and _mentions_date(arguments[1], static_scope()[0])
             for frame in iterate_rows(context, iteration_rows, "install"):
                 result = in_row_expression(lambda frame=frame: evaluate(arguments[1], frame, allow_text=text_extreme or variant_body))
                 if variant_body and isinstance(result, (bool, str)):
                     continue
-                if number_dates and isinstance(result, dax_dates.DaxDateTime):
+                if isinstance(result, dax_dates.DaxDateTime):
+                    product_has_dates = True
+                if (number_dates or (variant_body and function == "PRODUCTX")) and isinstance(result, dax_dates.DaxDateTime):
                     result = Decimal(result)
+                elif variant_body and function == "MEDIANX" and isinstance(result, dax_dates.DaxDateTime):
+                    continue
                 if isinstance(result, bool) and function not in {"MAXX", "MINX"}:
                     raise MeasureError(f"The function {function} cannot work with values of type Boolean.")
                 if isinstance(result, str) and arguments[1][0] == "reference" and function not in {"MAXX", "MINX"}:
@@ -18206,8 +18303,9 @@ def evaluate_measures(
                     exact_dates = bool(values) and dates_only_from_numbers(arguments[1], frame)  # Task 19 Part A: dates made from numbers spread as the numbers do
                     if len(set(non_blank_vals)) > 1 and not exact_dates and (body_kind in {"numdate", "date", "variant_dates"} or has_dates):
                         raise MeasureError(f"{function} over a date in a conditional is not exact in the local engine.")
-                    # live Power BI (Task 15 review): VARX.P(Facts,DATE(2020,1,1)+0.5) is 0: one repeated date has no spread
-                    values = [Decimal(v) if exact_dates and len(set(non_blank_vals)) > 1 else Decimal(0) if has_dates else v for v in values]
+                    else:
+                        # live Power BI (Task 15 review): VARX.P(Facts,DATE(2020,1,1)+0.5) is 0: one repeated date has no spread
+                        values = [Decimal(v) if exact_dates and len(set(non_blank_vals)) > 1 else Decimal(0) if has_dates else v for v in values]
                 elif function in _EMPTY_BODY_NOT_DATE and any(isinstance(value, dax_dates.DaxDateTime) for value in values):
                     # live Power BI (iteration 84, critic): "MEDIANX does not support expressions of type string/Boolean/date"
                     raise MeasureError(f"{function} does not support expressions of type date.")
@@ -18223,6 +18321,10 @@ def evaluate_measures(
                     if function in {"PERCENTILEX.INC", "PERCENTILEX.EXC"} and "percentile value should be" in str(error):
                         raise _HardError(str(error)) from error  # live Power BI (Task 39 review): an out-of-range PERCENTILEX is thrown, IFERROR does not catch it
                     raise
+                if function == "PRODUCTX" and product_has_dates and id(node) in text_context_products and isinstance(answer, Decimal) and answer.is_finite() and _product_depends_on_multiplication_order([v for v in values if v.is_finite()]):
+                    # live Power BI (Task 40 review): the product of a date body is neither the exact product nor the row-order double product; the digits past the 14th
+                    # follow no rule the local engine reproduces, and arithmetic or IF around the product can hide it from a text conversion, so it is refused outright
+                    raise MeasureError("PRODUCTX over a date body whose product depends on the multiplication order is not modelled by the local engine.")
                 if currency_body and function == "STDEVX.S" and isinstance(answer, Decimal) and answer.is_finite():
                     answer = answer.quantize(Decimal("0.0001"), rounding=ROUND_HALF_UP)  # Task 19 Part A: a Currency result has four decimals
                 if blank_results and function in {"MEDIANX", "PERCENTILEX.INC", "PERCENTILEX.EXC"} and answer == 0 and arguments[1][0] != "reference":
@@ -19810,6 +19912,8 @@ def evaluate_measures(
             outer_reads_before = outer_row_reads[0]
             for inner in iterate_rows(context, iteration_rows, "clear"):
                 body_value = evaluate(arguments[1], inner, allow_text=True)
+                if isinstance(body_value, dax_dates.DaxDateTime) and body_value < 0 and body_value != body_value.to_integral_value():
+                    raise MeasureError("CONCATENATEX over date/time before December 30, 1899 is not supported in the local engine.")
                 if dax_dates.is_date(body_value) and body_value.is_finite() and body_value >= _XNPV_LAST_DAY:
                     # a date on the last day of the range or later: the one measured text of this kind (Task 38) is cut short by Power BI, as XNPV answers erratically there
                     raise MeasureError("A CONCATENATEX of dates on 9999-12-31 or later is not modelled by the local engine.")

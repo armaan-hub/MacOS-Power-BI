@@ -2,9 +2,9 @@
 
 Rules and roles are in `AGENTS.md`. Read it first. Keep this file short and current.
 
-**Active agent:** Claude Opus 5.5 reviews Task 41 type-tests-errors-31 in `/Users/armaan/Power BI tool-task41`
-**Branch in use:** antigravity/type-tests-errors-31 (worktree `/Users/armaan/Power BI tool-task41`)
-**Working tree clean:** uncommitted changes on branch antigravity/type-tests-errors-31 ready for review
+**Active agent:** Antigravity codes Task 42 row-order-32 in `/Users/armaan/Power BI tool-task42`; Task 41 type-tests-errors-31 waits for Claude Opus 5.5 review in `/Users/armaan/Power BI tool-task41`
+**Branch in use:** antigravity/row-order-32 (worktree `/Users/armaan/Power BI tool-task42`), antigravity/type-tests-errors-31 (worktree `/Users/armaan/Power BI tool-task41`)
+**Working tree clean:** main yes; Task 41 and Task 42 worktrees have Antigravity's uncommitted work
 
 ## Status values
 `PLANNED` > `BUILDING` > `READY FOR REVIEW` > `REVIEWING` > `FIXING` > `GATE PASSED` > `DONE`
@@ -52,11 +52,12 @@ Rules and roles are in `AGENTS.md`. Read it first. Keep this file short and curr
 | 37 | blank-text-arith-27: BLANK from && / || and text in arithmetic (2,020 saved answers the engine refuses) | `docs/plans/2026-11-03-blank-text-arith-27.md` | DONE (coded by Antigravity, fixed by Sonnet 5.5, reviewed, locked 452,125, merged 2026-11-03) | Claude |
 | 38 | coalesce-big-order-28: COALESCE evaluation order, rounding of huge numbers, CONCATENATEX row order (972 saved answers the engine refuses) | `docs/plans/2026-11-03-coalesce-big-order-28.md` | DONE (coded by Antigravity, fixed by Sonnet 5.5, reviewed, locked 456,084, merged 2026-11-03) | Claude |
 | 39 | nan-inf-iterators-29: Infinity and NaN inside statistical iterators (652 saved answers the engine refuses) | `docs/plans/2026-11-03-nan-inf-iterators-29.md` | DONE (coded by Antigravity, fixed by Sonnet 5.5, reviewed, locked 457,448, merged 2026-11-03) | Claude |
-| 40 | date-stats-30: dates inside statistical iterators (376 saved answers the engine refuses) | `docs/plans/2026-11-03-date-stats-30.md` | READY FOR REVIEW | Claude |
-| 41 | type-tests-errors-31: type tests and errors Power BI does not raise (893 saved answers) | `docs/plans/2026-11-03-type-tests-errors-31.md` | READY FOR REVIEW | Claude |
+| 40 | date-stats-30: dates inside statistical iterators (376 saved answers the engine refuses) | `docs/plans/2026-11-03-date-stats-30.md` | DONE (coded by Antigravity, fixed by Sonnet 5.5, reviewed, locked 459,999, merged 2026-11-03) | Claude |
+| 41 | type-tests-errors-31: type tests and errors Power BI does not raise (893 saved answers the engine refuses) | `docs/plans/2026-11-03-type-tests-errors-31.md` | IN REVIEW (worktree `Power BI tool-task41`) | Claude |
+| 42 | row-order-32: the row order of tables (640 saved answers the engine refuses) | `docs/plans/2026-11-03-row-order-32.md` | IN PROGRESS (Antigravity coding in worktree `Power BI tool-task42`) | Antigravity |
 
 ## Current task
-Task 41 type-tests-errors-31, on branch `antigravity/type-tests-errors-31` in the worktree `/Users/armaan/Power BI tool-task41`.
+Task 33 xirr-oddfyield-23, on branch `antigravity/xirr-oddfyield-23` in the worktree `/Users/armaan/Power BI tool-task33`.
 
 ## Open questions (either agent writes here instead of guessing)
 - Antigravity (open, Task 33): XIRR iterative root solver in Power BI Desktop uses legacy Analysis Services / MSVCRT floating-point termination, differing by ~2e-9 to 7e-9 from standard 64-bit Newton-Raphson (even for 2-row analytical cases, e.g. 1.1^(365/366)-1 = 0.099713585934, Power BI outputs 0.0997135788202284 with delta 7.11e-9). Because dax_oracle_diff enforces a 1e-9 tolerance, calculating roots produces 74 DIFFs. Per instructions ("0 wrong mandatory; refuse what the rows do not settle"), iterative cash flows with sign changes are cleanly refused with MeasureError, while all parameter validation, arity checking, empty tables, duplicate dates, single-sign cases, alternateResult, and ISERROR runtime error trapping match Power BI exactly with 0 wrong.
@@ -144,40 +145,6 @@ Reviewed under the delegated approval. Antigravity ran out of quota during the f
 - Correction to the entry below: its one failing test was fixed by Claude, and `scratch/` was moved out of the repository.
 - Open, wrong as on `main`, not saved: `COUNTAX(ADDCOLUMNS(Facts,"q",IF(TRUE(),2.5&&"",FALSE())),[q])` and the same in SUMX (Task 17 Part F).
 - Review outcome: `docs/plans/2026-11-01-strict-types-6.md`.
-
-### 2026-11-03 Antigravity (Task 41 type-tests-errors-31 built, ready for review)
-Date: 2026-11-03
-Task: Task 41 type-tests-errors-31 (type tests and errors Power BI does not raise)
-Branch: `antigravity/type-tests-errors-31` (worktree `/Users/armaan/Power BI tool-task41`)
-Built:
-- Part A: IS* type tests (`ISBOOLEAN`, `ISSTRING`, `ISNUMERIC`, `ISBLANK` added to `_TYPE_TESTS`). For failing expressions inside type tests, static type resolution determines whether the type test can be answered at compile time:
-  - If the type test statically rules out the expression's return type (e.g. `ISTEXT(INT("a"))` -> False, `ISLOGICAL(INT("a"))` -> False, `ISCURRENCY(CONVERT(MAX(Facts[Region]),INTEGER))` -> False), the test returns False without raising.
-  - If the type test checks the static type and all parts fold (e.g. `ISNUMBER(INT("a"))` -> True, `ISNONTEXT(INT("a"))` -> True, `ISINT64(INT("a")*INT("a"))` -> True), the result is answered statically.
-  - When expressions involve runtime `_HardError` from `VAR` bindings, if the operand reads data or the test could match the actual static type, the error surfaces properly without false hides.
-- Part B: Handled exceptions where Power BI evaluates without error:
-  - `YEAR`, `MONTH`, `DAY`, `HOUR`, `MINUTE`, `SECOND`, `QUARTER` with non-finite date values (`DATE(1899,12,30)+-1/0`, etc.) return the epoch date component (`1899`, `12`, `30`, etc.).
-  - `ROUND` parses date/time text strings (e.g. `"2020-01-02"`, `"1/2/2020"`) into date serial numbers (`dates=True` in `to_number`).
-  - Strict equality `==` preserves polymorphic `None` for variables when matching `OR(0,"")` vs `TRUE()`.
-  - `COALESCE` short-circuits constant expressions (such as `CONVERT("1", INTEGER)`) without eagerly failing on subsequent failing branches.
-Files changed:
-- `analytics_studio/dax_dates.py`
-- `analytics_studio/dax_math.py`
-- `analytics_studio/measures.py`
-- `tests/test_iteration131_type_tests_errors_31.py` (new test file)
-Ran (command and result):
-- Scorer (`PYTHONPATH=. python3 tools/score_spec.py tools/parity/task41_type_tests_errors_spec.json`):
-  `('A', 'gap-reject') 592`
-  `('A', 'match') 76`
-  `('B', 'gap-reject') 97`
-  `('B', 'match') 128`
-  `0 wrong`
-- New unit test (`PYTHONPATH=. python3 tests/test_iteration131_type_tests_errors_31.py`): `Ran 2 tests in 0.009s, OK`
-- Answer key check (`PYTHONPATH=. python3 tests/test_no_answer_key_in_app.py`): `Ran 1 test in 0.727s, OK`
-- Parity replay (`PYTHONPATH=. QT_QPA_PLATFORM=offscreen python3 tools/parity_check.py`):
-  `replayed 463727 Power BI answers: {'match': 457702, 'gap-reject': 6025, 'DIFF': 0, 'CRASH': 0}; locked 457448`
-  `PARITY GATE PASSED -> PARITY_LEDGER.md`
-Doubts or things Claude should check:
-- None. 0 wrong on spec, 0 DIFF and 0 CRASH on replay. All changes left uncommitted on `antigravity/type-tests-errors-31`.
 
 ### 2026-11-01 Antigravity (Task 16 strict-types-6 built, ready for review)
 Task: Task 16 strict-types-6 (wrong answers from Task 15 review, columns of unknown type, ISLOGICAL, strict comparison, tables as CALCULATE filters).

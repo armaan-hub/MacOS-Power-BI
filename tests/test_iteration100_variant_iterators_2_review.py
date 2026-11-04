@@ -151,16 +151,25 @@ class TypingTest(unittest.TestCase):
 
     def test_a_date_past_the_display_range_is_refused_by_the_evaluator(self) -> None:
         # raised while a card formatted the value, it broke every later measure in the real app
-        for expression in ("TIME(6,0,0)-1", "MAXX(Facts,TIME(6,0,0)-1)", "DATE(2020,1,1)+3000000"):
-            with self.assertRaises(MeasureError, msg=expression):
-                evaluate_measures(
-                    [{"name": "Probe__", "expression": expression}], dax.LOCAL_ROWS, dax.HEADERS, "Facts", measure_names=["Probe__"],
-                    table_context=[{
-                        "id": "facts", "name": "Facts", "headers": dax.HEADERS, "rows": dax.LOCAL_ROWS,
-                        "column_types": {"Sales": "decimal_number", "Quantity": "whole_number", "Region": "text", "Note": "text"},
-                    }],
-                    active_table_id="facts",
-                )
+        def evaluate(expression: str):
+            return evaluate_measures(
+                [{"name": "Probe__", "expression": expression}], dax.LOCAL_ROWS, dax.HEADERS, "Facts", measure_names=["Probe__"],
+                table_context=[{
+                    "id": "facts", "name": "Facts", "headers": dax.HEADERS, "rows": dax.LOCAL_ROWS,
+                    "column_types": {"Sales": "decimal_number", "Quantity": "whole_number", "Region": "text", "Note": "text"},
+                }],
+                active_table_id="facts",
+            )["Probe__"]
+
+        # Task 40 (2026-11-03): Power BI Desktop measured both as 12/30/1899 18:00:00 (and (TIME(6,0,0)-1)&"z" as 6:00:00 PMz), so they are
+        # answered now; the card's formatter must show them without raising, and a later measure must still evaluate
+        from analytics_studio.controller import _format_report_number
+        for expression in ("TIME(6,0,0)-1", "MAXX(Facts,TIME(6,0,0)-1)"):
+            self.assertEqual("12/30/1899 18:00:00", dax.local(expression), expression)
+            self.assertEqual("6:00:00 PM", _format_report_number(evaluate(expression)), expression)
+            self.assertEqual("15", _format_report_number(evaluate("SUM(Facts[Quantity])")), expression)
+        with self.assertRaises(MeasureError, msg="DATE(2020,1,1)+3000000"):
+            evaluate("DATE(2020,1,1)+3000000")
 
     def test_concatenatex_walks_in_an_unmodelled_order_are_refused(self) -> None:
         _refused(self, [
