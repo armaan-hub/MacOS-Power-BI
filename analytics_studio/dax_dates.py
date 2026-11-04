@@ -9,7 +9,7 @@ from __future__ import annotations
 
 from calendar import monthrange
 from datetime import date, datetime, timedelta, timezone
-from decimal import Decimal, ROUND_DOWN, ROUND_FLOOR, ROUND_HALF_UP
+from decimal import Decimal, ROUND_CEILING, ROUND_DOWN, ROUND_FLOOR, ROUND_HALF_UP
 import re
 
 from analytics_studio import dax_typed
@@ -36,18 +36,27 @@ def from_datetime(moment: datetime | date) -> DaxDateTime:
     return DaxDateTime(Decimal(delta.days) + seconds / _SECONDS_PER_DAY)
 
 
-def to_datetime(serial: Decimal, rounding: str = ROUND_HALF_UP) -> datetime:
+def to_datetime(serial: Decimal, rounding: str = ROUND_HALF_UP, shown: bool = False) -> datetime:
     if not serial.is_finite():
         raise dax_typed._error("An argument has the wrong data type or the result is too large or too small.")
-    days = serial.to_integral_value(rounding=ROUND_FLOOR)
-    if serial < 0 and serial != days:
+    if serial < 0 and serial != serial.to_integral_value() and not shown:
         # live Power BI counts the time of day of a serial before day zero forward from the day it follows (OLE) and rounds it in a
-        # way that is not modelled here (iteration 84, 800 probes): refused rather than guessed
+        # way that is not modelled for the date functions (iteration 84, 800 probes): refused rather than guessed. Only the display of
+        # such a value (shown=True, Task 40 Part C) is measured.
         raise dax_typed._error("A time of day before December 30, 1899 is not supported in the local engine.")
-    scaled = (serial - days) * _SECONDS_PER_DAY
+    if serial < 0:
+        days = serial.to_integral_value(rounding=ROUND_CEILING)
+        scaled = (abs(serial) - abs(days)) * _SECONDS_PER_DAY
+    else:
+        days = serial.to_integral_value(rounding=ROUND_FLOOR)
+        scaled = (serial - days) * _SECONDS_PER_DAY
     if rounding == ROUND_DOWN:
         seconds = scaled.quantize(Decimal(1), rounding=ROUND_DOWN)
     elif rounding == NEAREST_SECOND:  # live Power BI: WEEKDAY / WEEKNUM take the day of the time of day rounded to the nearest second
+        if 0 < serial < 1 and abs(scaled - scaled.quantize(Decimal(1), rounding=ROUND_FLOOR) - Decimal("0.5")) < Decimal("0.000000001"):
+            # a time of day that is an exact half second (FORMAT(1.5/86400,"hh:nn:ss") is 00:00:02 in Power BI): the Decimal here has
+            # lost the last digits of 1.5/86400 and would round it down, the double there is a tie that rounds up
+            scaled = scaled.quantize(Decimal(1), rounding=ROUND_FLOOR) + Decimal("0.5")
         seconds = scaled.quantize(Decimal(1), rounding=ROUND_HALF_UP)
     else:
         if serial >= 1_000_000 and abs(scaled - scaled.quantize(Decimal(1), rounding=ROUND_HALF_UP)) > Decimal("0.0001"):
@@ -85,7 +94,23 @@ def _shown_moment(value: Decimal, rounding: str = ROUND_HALF_UP) -> datetime:
         if value.is_nan():
             return EPOCH
         return datetime(9999, 12, 31, 23, 59, 59) if value > 0 else datetime(100, 1, 1)
-    return to_datetime(value, rounding)
+    return to_datetime(value, rounding, shown=True)
+
+
+def _half_second_before_zero(value: Decimal) -> bool:
+    """A serial below zero (this includes the days between -1 and 0) whose time of day is an exact half second. Power BI rounds such a
+    time up or down by the last digit of its double, differently from one date to the next (DATE(1800,1,1)+1.5/86400 shows 11:59:58 PM,
+    DATE(1850,7,4)+1.5/86400 shows 11:59:59 PM, Task 40 t40h, 1,458 probes, 16 wrong): it has no rule that is reproduced here, so the
+    text and FORMAT of such a value are refused."""
+    if not value.is_finite() or value >= 0 or value == value.to_integral_value():
+        return False
+    scaled = (abs(value) - abs(value.to_integral_value(rounding=ROUND_CEILING))) * _SECONDS_PER_DAY
+    return abs(scaled - scaled.quantize(Decimal(1), rounding=ROUND_FLOOR) - Decimal("0.5")) < Decimal("0.001")
+
+
+def _refuse_half_second(value: Decimal) -> None:
+    if _half_second_before_zero(value):
+        raise dax_typed._error("A time of day before December 30, 1899 on an exact half second is not supported in the local engine.")
 
 
 def date_text(value: Decimal, pad_year: bool = False) -> str:
@@ -93,6 +118,7 @@ def date_text(value: Decimal, pad_year: bool = False) -> str:
     year to four digits, a concatenation does not: live Power BI, 1/1/0100 and 1/1/100)."""
     if value.is_infinite():
         raise dax_typed._error("The parameter is incorrect.")  # Task 21 Part D: a date beside +Infinity or -Infinity has no text (NaN is day zero, as the text of a time)
+    _refuse_half_second(value)
     moment = _shown_moment(value, NEAREST_SECOND)  # live Power BI: the text of a date shows the time of day rounded to the nearest second
     time_text = f"{moment.hour % 12 or 12}:{moment.minute:02d}:{moment.second:02d} {'AM' if moment.hour < 12 else 'PM'}"
     if (moment.year, moment.month, moment.day) == (1899, 12, 30):
@@ -136,7 +162,18 @@ def parse_date_text(text: str) -> DaxDateTime:
     raise dax_typed._error(f"Cannot convert value '{text}' of type Text to type Date.")
 
 
-def _moment(value: object, rounding: str = ROUND_HALF_UP) -> datetime | None:
+def _settled_before_zero(value: object) -> bool:
+    """A serial before day zero with a time of day at least a second from either end of the day: the components of such a value
+    (YEAR, MONTH, DAY, HOUR, MINUTE, SECOND, WEEKDAY, FORMAT) were measured in live Power BI (Task 40, 1,700 probes). A time within a
+    second of midnight (DAY(DATE(1800,1,1)+0.000001) is 1 there, 2 by the conversion) and every other date function (DATEDIFF, WEEKNUM,
+    iteration 84) are not settled and stay refused."""
+    if not isinstance(value, Decimal) or not value.is_finite() or value >= 0 or value == value.to_integral_value():
+        return False
+    fraction = abs(value) - abs(value.to_integral_value(rounding=ROUND_CEILING))
+    return Decimal(1) / _SECONDS_PER_DAY <= fraction <= 1 - Decimal(1) / _SECONDS_PER_DAY
+
+
+def _moment(value: object, rounding: str = ROUND_HALF_UP, shown: bool = False) -> datetime | None:
     """A date argument: a DateTime or number, or text that reads as a date; blank gives None."""
     if value is None:
         return None
@@ -144,7 +181,7 @@ def _moment(value: object, rounding: str = ROUND_HALF_UP) -> datetime | None:
         return to_datetime(parse_date_text(value), rounding)
     if isinstance(value, bool):
         return to_datetime(Decimal(int(value)), rounding)
-    return to_datetime(value, rounding)  # type: ignore[arg-type]
+    return to_datetime(value, rounding, shown=shown)  # type: ignore[arg-type]
 
 
 _MONTH_DAY_TEXT = re.compile(r"(\d{1,2})[/-](\d{1,2})")  # live Power BI: "1/2" and "1-2" are month and day of the current year
@@ -369,7 +406,26 @@ def date_function(function: str, args: list[object], interval: str | None = None
         clock = _clock_text(args[0])
         if clock is not None:
             return Decimal(clock[("HOUR", "MINUTE", "SECOND").index(function)])
-    moment = _moment(args[0], ROUND_FLOOR if function in {"HOUR", "MINUTE", "SECOND"} else NEAREST_SECOND if function in {"WEEKDAY", "WEEKNUM"} else ROUND_HALF_UP)
+    if function in {"HOUR", "MINUTE", "SECOND"} and isinstance(args[0], Decimal) and args[0].is_finite() and args[0] < 0:
+        # live Power BI (Task 40 review): SECOND(-3+0.999) is 27, where the same value shown as a date and time ends in :26 (the time of day, 1:26.4, is
+        # rounded up there and down there). Only the one value 0.999 was measured, so a whole-second time answers as always, and a time with a fraction
+        # of a second is refused for SECOND and, for HOUR and MINUTE, wherever rounding up would change the answer.
+        fraction_ticks = ((abs(args[0]) - abs(args[0].to_integral_value(rounding=ROUND_CEILING))) * _SECONDS_PER_DAY * 300).quantize(Decimal(1), rounding=ROUND_HALF_UP)
+        if fraction_ticks % 300:
+            unit = {"HOUR": 3600, "MINUTE": 60, "SECOND": 1}[function]
+            whole_seconds = int(fraction_ticks) // 300
+            if function == "SECOND" or (whole_seconds + 1) // unit != whole_seconds // unit:
+                raise dax_typed._error(f"{function} of a time before December 30, 1899 with a fraction of a second is not supported in the local engine.")
+    if function in {"YEAR", "MONTH", "DAY", "HOUR", "MINUTE", "SECOND", "QUARTER"} and isinstance(args[0], Decimal) and not args[0].is_finite():
+        moment = EPOCH
+    elif function in {"EDATE", "EOMONTH"} and args[0] is not None and not isinstance(args[0], str):
+        if not Decimal(args[0]).is_finite():
+            raise dax_typed._error("An argument has the wrong data type or the result is too large or too small.")
+        int_day = Decimal(args[0]).to_integral_value(rounding=ROUND_FLOOR)
+        moment = EPOCH + timedelta(days=int(int_day))
+    else:
+        moment = _moment(args[0], ROUND_FLOOR if function in {"HOUR", "MINUTE", "SECOND"} else NEAREST_SECOND if function in {"WEEKDAY", "WEEKNUM"} else ROUND_HALF_UP,
+                         shown=function in {"YEAR", "MONTH", "DAY", "HOUR", "MINUTE", "SECOND", "WEEKDAY"} and _settled_before_zero(args[0]))
     if moment is None:
         if function in {"EDATE", "EOMONTH"} and args[1] is not None:
             dax_typed.whole(args[1], function)  # Task 20 F4: a BLANK date still reads the months; an Infinity, a NaN or a text there is the error
@@ -414,7 +470,8 @@ def format_date(value: Decimal, pattern: str) -> str:
     key = pattern.strip().casefold()
     if key in {"", "general date"}:
         return date_text(value, pad_year=key == "general date")
-    moment = to_datetime(value, NEAREST_SECOND)
+    _refuse_half_second(value)
+    moment = to_datetime(value, NEAREST_SECOND, shown=_settled_before_zero(value))
     named = _NAMED_DATE_FORMATS.get(key)
     if named is not None:
         if key == "long time":

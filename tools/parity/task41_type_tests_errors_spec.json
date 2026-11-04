@@ -1,0 +1,5362 @@
+{
+ "items": [
+  {
+   "part": "B",
+   "expr": "COUNTX(Facts,COALESCE(Facts[Region]&\"\",VALUE(\"x\")))",
+   "powerbi": "BLANK",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISTEXT(INT(\"a\"))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISNUMBER(INT(\"a\"))",
+   "powerbi": "True",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISLOGICAL(INT(\"a\"))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISNONTEXT(INT(\"a\"))",
+   "powerbi": "True",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISTEXT(CURRENCY(\"a\"))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISNUMBER(CURRENCY(\"a\"))",
+   "powerbi": "True",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISLOGICAL(CURRENCY(\"a\"))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISNONTEXT(CURRENCY(\"a\"))",
+   "powerbi": "True",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISTEXT(VAR y=VALUE(\"x\") RETURN y)",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISLOGICAL(VAR y=VALUE(\"x\") RETURN y)",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISNONTEXT(VAR y=VALUE(\"x\") RETURN y)",
+   "powerbi": "True",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISTEXT(ABS(\"a\"))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISNUMBER(ABS(\"a\"))",
+   "powerbi": "True",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISLOGICAL(ABS(\"a\"))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISNONTEXT(ABS(\"a\"))",
+   "powerbi": "True",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISTEXT(ROUND(\"a\",0))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISNUMBER(ROUND(\"a\",0))",
+   "powerbi": "True",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISLOGICAL(ROUND(\"a\",0))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISNONTEXT(ROUND(\"a\",0))",
+   "powerbi": "True",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISTEXT(EXP(\"a\"))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISNUMBER(EXP(\"a\"))",
+   "powerbi": "True",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISLOGICAL(EXP(\"a\"))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISNONTEXT(EXP(\"a\"))",
+   "powerbi": "True",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISDOUBLE((INT(\"a\"))*(\"a\"*2))",
+   "powerbi": "True",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "SWITCH((SUMX(FILTER(Facts,FALSE()),1))/(MAXX(Facts,1/0))*(VAR y=\"b\" RETURN y),1,\"a\",\"b\")",
+   "powerbi": "b",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISDATETIME((\"a\")*(COUNTROWS(FILTER(Facts,FALSE()))))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "VAR q=(SUMX(FILTER(Facts,FALSE()),1))/(VALUE(\"x\")) RETURN q",
+   "powerbi": "BLANK",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "MAXX({1,2},(\"a\"*2)*(COUNTROWS(FILTER(Facts,FALSE()))))",
+   "powerbi": "BLANK",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISDATETIME(1*-(VAR y=VALUE(\"x\") RETURN y))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "MAXX({1,2},(\"a\"*2)*(SUMX(FILTER(Facts,FALSE()),1)))",
+   "powerbi": "BLANK",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISINT64((MAXX({BLANK()},[Value]))*(MAX(Facts[Note])))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISDATETIME(1*-(VAR y=\"b\" RETURN y))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISCURRENCY((BLANK()&&BLANK())*(VAR y=\"b\" RETURN y))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "COALESCE((INT(\"a\"))*(SUMX(FILTER(Facts,FALSE()),1))+(FORMAT(1,\"0\")),5)",
+   "powerbi": "1",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISINT64((INT(\"a\"))*(INT(\"a\")))",
+   "powerbi": "True",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "VAR q=(SUMX(FILTER(Facts,FALSE()),1))*(MAXX(Facts,1/0))*(VAR y=\"b\" RETURN y) RETURN ISBLANK(q)",
+   "powerbi": "True",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISINT64((MAX(Facts[Note]))*(\"2\"))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISDATETIME((\"a\")*(1)*(CALCULATE(SUM(Facts[Quantity]),Facts[Region]=\"Nope\")))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "COALESCE((CALCULATE(SUM(Facts[Quantity]),Facts[Region]=\"Nope\"))*(UPPER(\"a\")),5)",
+   "powerbi": "5",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "VAR q=(VAR y=\"b\" RETURN y)*(CALCULATE(SUM(Facts[Quantity]),Facts[Region]=\"Nope\")) RETURN ISBLANK(q)",
+   "powerbi": "True",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "MAXX({1,2},(\"a\")*(MAXX({BLANK()},[Value])))",
+   "powerbi": "BLANK",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISINT64((INT(\"a\"))*(CURRENCY(0)))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "COALESCE((LEFT(\"a\",0))*(COUNTROWS(FILTER(Facts,FALSE()))),5)",
+   "powerbi": "5",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISCURRENCY((UPPER(\"a\"))*(INT(\"a\")))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "VAR q=(UPPER(\"a\"))*(MAXX({BLANK()},[Value])) RETURN ISBLANK(q)",
+   "powerbi": "True",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISDATETIME((INT(\"a\"))*(INT(\"a\")))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "VAR q=(MAXX({BLANK()},[Value]))/(VALUE(\"x\")) RETURN q",
+   "powerbi": "BLANK",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISTEXT((MAXX({BLANK()},[Value]))*(\"a\")+(VAR y=1/0 RETURN y))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISNUMBER((INT(\"a\"))*(0))",
+   "powerbi": "True",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "VAR q=(INT(\"a\"))*(MAXX({BLANK()},[Value])) RETURN q",
+   "powerbi": "BLANK",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISINT64((\"a\")*(CALCULATE(SUM(Facts[Quantity]),Facts[Region]=\"Nope\")))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISINT64((MAX(Facts[Note]))*(TRUE()))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISTEXT((2.5)*(VAR y=VALUE(\"x\") RETURN y))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "SUMX({BLANK(),1},(COUNTROWS(FILTER(Facts,FALSE())))/(INT(\"a\")))",
+   "powerbi": "BLANK",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISTEXT(1*-(VAR y=VALUE(\"x\") RETURN y))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISTEXT((\"a\"*2)*(COUNTROWS(FILTER(Facts,FALSE()))))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISINT64((VAR y=VALUE(\"x\") RETURN y)*(MAX(Facts[Sales])))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "SWITCH((\"a\")*(MAXX({BLANK()},[Value])),1,\"a\",\"b\")",
+   "powerbi": "b",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "COALESCE((INT(\"a\"))*(SUMX(FILTER(Facts,FALSE()),1))*(FORMAT(1,\"0\")),5)",
+   "powerbi": "5",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "COALESCE((SELECTEDVALUE(Facts[Quantity]))/(DIVIDE(1,BLANK()))*(\"a\"),5)",
+   "powerbi": "5",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISINT64((VAR y=VALUE(\"x\") RETURN y)*(INT(\"a\")))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISCURRENCY((SUM(Facts[Sales]))*(VAR y=\"b\" RETURN y))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "MAXX(ADDCOLUMNS(Facts,\"q\",(SELECTEDVALUE(Facts[Quantity]))*(Facts[Note])*(VALUE(\"x\"))),[q])",
+   "powerbi": "BLANK",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISCURRENCY((MAX(Facts[Note]))*(-1))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "VAR q=(COUNTROWS(FILTER(Facts,FALSE())))/(INT(\"a\")) RETURN ISBLANK(q)",
+   "powerbi": "True",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISTEXT(1*-(\"\"))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "VAR q=(SUMX(FILTER(Facts,FALSE()),1))/(MAX(Facts[Note])) RETURN q",
+   "powerbi": "BLANK",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISNUMBER((INT(\"a\"))*(-1))",
+   "powerbi": "True",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "(SELECTEDVALUE(Facts[Quantity]))*(DIVIDE(1,BLANK()))*(\"a\")",
+   "powerbi": "BLANK",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "VAR q=(MAX(Facts[Note]))*(SUMX(FILTER(Facts,FALSE()),1)) RETURN ISBLANK(q)",
+   "powerbi": "True",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISINT64((VAR y=1/0 RETURN y)*(\"a\"*2))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISCURRENCY((MAX(Facts[Note]))*(MAXX({BLANK()},[Value])))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISINT64((MAX(Facts[Note]))*(\"a\"))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "COALESCE((COUNTROWS(FILTER(Facts,FALSE())))*(MAX(Facts[Note])),5)",
+   "powerbi": "5",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISINT64((\"a\"*2)*(COUNTROWS(FILTER(Facts,FALSE()))))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "CONCATENATEX(Facts,(SELECTEDVALUE(Facts[Quantity]))/(DIVIDE(1,BLANK()))*(\"a\"),\"|\",Facts[Quantity],ASC,Facts[Sales],ASC)",
+   "powerbi": "|||||",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISNUMBER((INT(\"a\"))*(INT(\"a\")))",
+   "powerbi": "True",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISDATETIME((VAR y=1/0 RETURN y)*(UPPER(\"a\")))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "SUMX({BLANK(),1},(\"a\")*(CALCULATE(SUM(Facts[Quantity]),Facts[Region]=\"Nope\")))",
+   "powerbi": "BLANK",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISDATETIME((\"a\")*(VAR y=1/0 RETURN y))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISCURRENCY((\"a\")*(CALCULATE(SUM(Facts[Quantity]),Facts[Region]=\"Nope\")))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISTEXT((VAR y=\"b\" RETURN y)*(VAR y=VALUE(\"x\") RETURN y))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISINT64((DIVIDE(1,BLANK()))*(VAR y=BLANK() RETURN y)+(\"a\"+1))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISTEXT((MAX(Facts[Note]))*(-1))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISDATETIME((UPPER(\"a\"))*(INT(\"a\")))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISINT64((\"\")*(COUNTROWS(FILTER(Facts,FALSE()))))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "IF((SELECTEDVALUE(Facts[Quantity]))/(DIVIDE(1,BLANK()))*(\"a\"),1,2)",
+   "powerbi": "2",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISDATETIME((DATE(2020,1,1))*(VAR y=VALUE(\"x\") RETURN y))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISTEXT((MAX(Facts[Note]))*(\"a\"))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "SUMX({BLANK(),1},(LEFT(\"a\",0))*(COUNTROWS(FILTER(Facts,FALSE()))))",
+   "powerbi": "BLANK",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISCURRENCY((\"a\")*(VAR y=1/0 RETURN y))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISCURRENCY((CALCULATE(SUM(Facts[Quantity]),Facts[Region]=\"Nope\"))*(UPPER(\"a\")))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "SWITCH((VAR y=\"b\" RETURN y)*(CALCULATE(SUM(Facts[Quantity]),Facts[Region]=\"Nope\")),1,\"a\",\"b\")",
+   "powerbi": "b",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "(SELECTEDVALUE(Facts[Quantity]))/(DIVIDE(1,BLANK()))*(\"a\")",
+   "powerbi": "BLANK",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "COALESCE((\"a\"*2)*(SUMX(FILTER(Facts,FALSE()),1)),5)",
+   "powerbi": "5",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "MAXX({1,2},(SUMX(FILTER(Facts,FALSE()),1))*(MAXX(Facts,1/0))*(VAR y=\"b\" RETURN y))",
+   "powerbi": "BLANK",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISTEXT((1)*(\"\")+(COUNTROWS(FILTER(Facts,FALSE()))))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISCURRENCY((SELECTEDVALUE(Facts[Quantity]))*(DIVIDE(1,BLANK()))*(\"a\"))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "VAR q=(SUMX(FILTER(Facts,FALSE()),1))*(MAX(Facts[Note])) RETURN q",
+   "powerbi": "BLANK",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISCURRENCY((\"a\")*(1)+(CALCULATE(SUM(Facts[Quantity]),Facts[Region]=\"Nope\")))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISDATETIME((2.5)*(VAR y=VALUE(\"x\") RETURN y))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "VAR q=(CALCULATE(SUM(Facts[Quantity]),Facts[Region]=\"Nope\"))/(UPPER(\"a\")) RETURN ISBLANK(q)",
+   "powerbi": "True",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISDATETIME((DIVIDE(1,BLANK()))*(VAR y=BLANK() RETURN y)+(\"a\"+1))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISDOUBLE((CURRENCY(0))*(INT(\"a\")))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "SUMX(Facts,(SELECTEDVALUE(Facts[Quantity]))*(DIVIDE(1,BLANK()))*(\"a\"))",
+   "powerbi": "BLANK",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISCURRENCY((\"\")*(MAX(Facts[Note]))*(SUM(Facts[Sales])))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISCURRENCY((CALCULATE(SUM(Facts[Quantity]),Facts[Region]=\"Nope\"))*(\"a\"+1))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISDATETIME((INT(\"a\"))*(MAXX({BLANK()},[Value])))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "SWITCH((COUNTROWS(FILTER(Facts,FALSE())))/(MAX(Facts[Note])),1,\"a\",\"b\")",
+   "powerbi": "b",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "NOT((SELECTEDVALUE(Facts[Quantity]))*(DIVIDE(1,BLANK()))*(\"a\"))",
+   "powerbi": "True",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "SUMX({BLANK(),1},(SUMX(FILTER(Facts,FALSE()),1))*(MAX(Facts[Note])))",
+   "powerbi": "BLANK",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISDATETIME((VAR y=VALUE(\"x\") RETURN y)*(MAX(Facts[Sales])))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "SWITCH((TRUE())*(SUMX(FILTER(Facts,FALSE()),1))*(\"a\"*2),1,\"a\",\"b\")",
+   "powerbi": "b",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISTEXT((SUMX(FILTER(Facts,FALSE()),1))*(VAR y=VALUE(\"x\") RETURN y))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISDATETIME((INT(\"a\"))*(SUM(Facts[Sales])))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "STDEVX.P(Facts,(SELECTEDVALUE(Facts[Quantity]))/(Facts[Note])*(VALUE(\"x\")))",
+   "powerbi": "BLANK",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISDATETIME((COUNTROWS(FILTER(Facts,FALSE())))*(MAX(Facts[Note])))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISTEXT((MAXX({BLANK()},[Value]))*(MAX(Facts[Note])))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISDATETIME((VAR y=\"b\" RETURN y)*(INT(\"a\")))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISTEXT((\"a\"*2)*(VAR y=VALUE(\"x\") RETURN y))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISNUMBER(-(INT(\"a\"))*1)",
+   "powerbi": "True",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISDATETIME(-(VAR y=\"b\" RETURN y)*1)",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "VAR q=(\"a\")/(1)*(CALCULATE(SUM(Facts[Quantity]),Facts[Region]=\"Nope\")) RETURN q",
+   "powerbi": "BLANK",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "SUMX({BLANK(),1},(CALCULATE(SUM(Facts[Quantity]),Facts[Region]=\"Nope\"))*(UPPER(\"a\")))",
+   "powerbi": "BLANK",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISINT64((COUNTROWS(FILTER(Facts,FALSE())))*(MAX(Facts[Note])))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "VAR q=(MAXX({BLANK()},[Value]))*(MAX(Facts[Note])) RETURN q",
+   "powerbi": "BLANK",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISTEXT(CONVERT(MAX(Facts[Region]),INTEGER))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISLOGICAL(CONVERT(MAX(Facts[Region]),INTEGER))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISDATETIME(CONVERT(MAX(Facts[Region]),INTEGER))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISCURRENCY(CONVERT(MAX(Facts[Region]),INTEGER))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISDOUBLE(CONVERT(MAX(Facts[Region]),INTEGER))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISTEXT(CONVERT(MAX(Facts[Region]),DOUBLE))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISLOGICAL(CONVERT(MAX(Facts[Region]),DOUBLE))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISDATETIME(CONVERT(MAX(Facts[Region]),DOUBLE))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISCURRENCY(CONVERT(MAX(Facts[Region]),DOUBLE))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISINTEGER(CONVERT(MAX(Facts[Region]),DOUBLE))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISTEXT(CONVERT(MAX(Facts[Region]),CURRENCY))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISLOGICAL(CONVERT(MAX(Facts[Region]),CURRENCY))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISDATETIME(CONVERT(MAX(Facts[Region]),CURRENCY))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISDOUBLE(CONVERT(MAX(Facts[Region]),CURRENCY))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISINTEGER(CONVERT(MAX(Facts[Region]),CURRENCY))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISNONTEXT((MAX(Facts[Sales]))+(VAR y=\"b\" RETURN y))",
+   "powerbi": "True",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISNONTEXT((\"b\")*(VAR y=VALUE(\"x\") RETURN y))",
+   "powerbi": "True",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISTEXT((CALCULATE(SUM(Facts[Quantity]),Facts[Region]=\"Nope\"))*(\"a\"+1))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISTEXT((VAR y=\"b\" RETURN y)*(MAX(Facts[Sales])))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISNONTEXT((IF(SUM(Facts[Sales])>0,1,2))*(VAR y=\"b\" RETURN y))",
+   "powerbi": "True",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISLOGICAL((VAR y=VALUE(\"x\") RETURN y)+(\"\"))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISNONTEXT((CALCULATE(SUM(Facts[Quantity]),Facts[Region]=\"Nope\"))+(VAR y=VALUE(\"x\") RETURN y))",
+   "powerbi": "True",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISNONTEXT((IF(SUM(Facts[Sales])>0,1,2))*(\"a\"+1))",
+   "powerbi": "True",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISNONTEXT((\"a\"+1)&(SUM(Facts[Sales])))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISNUMBER((\"a\"*2)&(VAR y=1 RETURN y))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISNONTEXT((VAR y=\"b\" RETURN y)+(DATE(2020,1,1)))",
+   "powerbi": "True",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISNONTEXT((VAR y=\"b\" RETURN y)+(VAR y=1 RETURN y))",
+   "powerbi": "True",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISTEXT((VAR y=VALUE(\"x\") RETURN y)*(DATE(2020,1,1)))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISLOGICAL((\"a\"+1)*(IF(SUM(Facts[Sales])>0,1,2)))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISNONTEXT((MAX(Facts[Sales]))+(\"a\"+1))",
+   "powerbi": "True",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISNONTEXT((VAR y=VALUE(\"x\") RETURN y)*(1))",
+   "powerbi": "True",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISTEXT((CALCULATE(SUM(Facts[Quantity]),Facts[Region]=\"Nope\"))*(VAR y=VALUE(\"x\") RETURN y))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISNUMBER((MAX(Facts[Note]))+(\"a\"+1))",
+   "powerbi": "True",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISTEXT((TRUE())+(VAR y=VALUE(\"x\") RETURN y))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISNUMBER((\"a\"*2)&(COUNTROWS(FILTER(Facts,FALSE()))))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISNUMBER((\"a\"*2)+(SUMX(FILTER(Facts,FALSE()),1)))",
+   "powerbi": "True",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISNONTEXT((VAR y=\"b\" RETURN y)*(CALCULATE(SUM(Facts[Quantity]),Facts[Region]=\"Nope\")))",
+   "powerbi": "True",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISTEXT((VAR y=\"b\" RETURN y)+(SUMX(FILTER(Facts,FALSE()),1)))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISLOGICAL((\"a\"+1)+(MAX(Facts[Sales])))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISNONTEXT((VAR y=\"b\" RETURN y)*(DATE(2020,1,1)))",
+   "powerbi": "True",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISLOGICAL((VAR y=\"b\" RETURN y)*(2.5))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISTEXT((VAR y=VALUE(\"x\") RETURN y)+(DATE(2020,1,1)))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISLOGICAL((\"a\"+1)+(MAX(Facts[Note])))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISNONTEXT((SUMX(FILTER(Facts,FALSE()),1))+(\"a\"*2))",
+   "powerbi": "True",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISLOGICAL((VAR y=VALUE(\"x\") RETURN y)&(\"b\"))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISLOGICAL((COUNTROWS(FILTER(Facts,FALSE())))+(VAR y=\"b\" RETURN y))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISTEXT((CALCULATE(SUM(Facts[Quantity]),Facts[Region]=\"Nope\"))+(VAR y=VALUE(\"x\") RETURN y))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISTEXT((\"a\"*2)*(SUM(Facts[Sales])))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISNONTEXT((\"a\"+1)*(CALCULATE(SUM(Facts[Quantity]),Facts[Region]=\"Nope\")))",
+   "powerbi": "True",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISLOGICAL((MAX(Facts[Note]))+(VAR y=VALUE(\"x\") RETURN y))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISNONTEXT((VAR y=\"b\" RETURN y)*(IF(SUM(Facts[Sales])>0,1,2)))",
+   "powerbi": "True",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISTEXT((VAR y=1 RETURN y)+(\"a\"+1))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISLOGICAL((VAR y=VALUE(\"x\") RETURN y)&(BLANK()))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISTEXT((\"b\")+(VAR y=VALUE(\"x\") RETURN y))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISLOGICAL((\"\")*(VAR y=VALUE(\"x\") RETURN y))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISNUMBER((CALCULATE(SUM(Facts[Quantity]),Facts[Region]=\"Nope\"))+(\"a\"*2))",
+   "powerbi": "True",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISNUMBER((VAR y=VALUE(\"x\") RETURN y)+(\"b\"))",
+   "powerbi": "True",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISLOGICAL((MAX(Facts[Note]))*(VAR y=\"b\" RETURN y))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISNUMBER((\"a\"+1)&(MAX(Facts[Note])))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISNONTEXT((MAX(Facts[Note]))*(\"a\"*2))",
+   "powerbi": "True",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISLOGICAL((IF(SUM(Facts[Sales])>0,1,2))*(VAR y=VALUE(\"x\") RETURN y))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISLOGICAL((SUMX(FILTER(Facts,FALSE()),1))+(\"a\"*2))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISNUMBER((\"a\"*2)+(COUNTROWS(FILTER(Facts,FALSE()))))",
+   "powerbi": "True",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISNUMBER((IF(SUM(Facts[Sales])>0,1,2))*(\"a\"*2))",
+   "powerbi": "True",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISTEXT((SUMX(FILTER(Facts,FALSE()),1))*(\"a\"+1))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISLOGICAL((\"b\")*(VAR y=\"b\" RETURN y))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISTEXT((\"a\"+1)*(IF(SUM(Facts[Sales])>0,1,2)))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISNONTEXT((SUMX(FILTER(Facts,FALSE()),1))*(VAR y=VALUE(\"x\") RETURN y))",
+   "powerbi": "True",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISNUMBER((IF(SUM(Facts[Sales])>0,1,2))+(\"a\"*2))",
+   "powerbi": "True",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISLOGICAL((VAR y=VALUE(\"x\") RETURN y)&(1))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISNONTEXT((VAR y=\"b\" RETURN y)*(\"b\"))",
+   "powerbi": "True",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISTEXT((VAR y=\"b\" RETURN y)*(VAR y=1 RETURN y))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISLOGICAL((VAR y=VALUE(\"x\") RETURN y)+(MAX(Facts[Note])))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISLOGICAL((\"\")+(VAR y=\"b\" RETURN y))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISNUMBER((\"a\"+1)+(SUMX(FILTER(Facts,FALSE()),1)))",
+   "powerbi": "True",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISTEXT((VAR y=\"b\" RETURN y)+(MAX(Facts[Sales])))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISTEXT((VAR y=VALUE(\"x\") RETURN y)+(BLANK()))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISTEXT((VAR y=VALUE(\"x\") RETURN y)&(\"b\"))",
+   "powerbi": "True",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISNUMBER((VAR y=\"b\" RETURN y)+(2.5))",
+   "powerbi": "True",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISLOGICAL((VAR y=VALUE(\"x\") RETURN y)+(VAR y=1 RETURN y))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISTEXT((COUNTROWS(FILTER(Facts,FALSE())))+(VAR y=\"b\" RETURN y))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISLOGICAL((DATE(2020,1,1))+(VAR y=\"b\" RETURN y))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISLOGICAL((IF(SUM(Facts[Sales])>0,1,2))*(\"a\"*2))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISNONTEXT((1)+(VAR y=\"b\" RETURN y))",
+   "powerbi": "True",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISNONTEXT((VAR y=VALUE(\"x\") RETURN y)+(SUMX(FILTER(Facts,FALSE()),1)))",
+   "powerbi": "True",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISNONTEXT((MAX(Facts[Sales]))+(\"a\"*2))",
+   "powerbi": "True",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISNONTEXT((2.5)+(VAR y=VALUE(\"x\") RETURN y))",
+   "powerbi": "True",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISLOGICAL((\"a\"+1)&(COUNTROWS(FILTER(Facts,FALSE()))))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISNONTEXT((VAR y=\"b\" RETURN y)*(1))",
+   "powerbi": "True",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISNUMBER((SUM(Facts[Sales]))+(\"a\"*2))",
+   "powerbi": "True",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISLOGICAL((\"a\"*2)&(SUM(Facts[Sales])))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISNONTEXT((VAR y=\"b\" RETURN y)+(COUNTROWS(FILTER(Facts,FALSE()))))",
+   "powerbi": "True",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISNONTEXT((SUM(Facts[Sales]))*(VAR y=\"b\" RETURN y))",
+   "powerbi": "True",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISNUMBER((CALCULATE(SUM(Facts[Quantity]),Facts[Region]=\"Nope\"))+(\"a\"+1))",
+   "powerbi": "True",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISTEXT((\"a\"+1)*(MAX(Facts[Sales])))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISNONTEXT((\"a\"+1)*(VAR y=1 RETURN y))",
+   "powerbi": "True",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISNUMBER((SUM(Facts[Sales]))+(\"a\"+1))",
+   "powerbi": "True",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISNUMBER((\"a\"*2)*(IF(SUM(Facts[Sales])>0,1,2)))",
+   "powerbi": "True",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISTEXT((MAX(Facts[Note]))+(VAR y=\"b\" RETURN y))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISNUMBER((\"a\"+1)&(SUMX(FILTER(Facts,FALSE()),1)))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISNONTEXT((VAR y=VALUE(\"x\") RETURN y)+(MAX(Facts[Note])))",
+   "powerbi": "True",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISNUMBER((\"a\"*2)+(CALCULATE(SUM(Facts[Quantity]),Facts[Region]=\"Nope\")))",
+   "powerbi": "True",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISLOGICAL((VAR y=VALUE(\"x\") RETURN y)&(IF(SUM(Facts[Sales])>0,1,2)))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISNUMBER((VAR y=VALUE(\"x\") RETURN y)+(2.5))",
+   "powerbi": "True",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISNONTEXT((COUNTROWS(FILTER(Facts,FALSE())))+(\"a\"*2))",
+   "powerbi": "True",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISTEXT((1)*(VAR y=VALUE(\"x\") RETURN y))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISLOGICAL((VAR y=\"b\" RETURN y)+(1))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISLOGICAL((VAR y=VALUE(\"x\") RETURN y)*(MAX(Facts[Sales])))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISNUMBER((\"a\"*2)+(IF(SUM(Facts[Sales])>0,1,2)))",
+   "powerbi": "True",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISTEXT((VAR y=VALUE(\"x\") RETURN y)+(\"\"))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISNUMBER((\"a\"+1)+(COUNTROWS(FILTER(Facts,FALSE()))))",
+   "powerbi": "True",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISTEXT((1)+(VAR y=\"b\" RETURN y))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISLOGICAL((VAR y=VALUE(\"x\") RETURN y)+(IF(SUM(Facts[Sales])>0,1,2)))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISLOGICAL((\"a\"+1)*(SUMX(FILTER(Facts,FALSE()),1)))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISNONTEXT((\"a\"*2)*(VAR y=1 RETURN y))",
+   "powerbi": "True",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISNONTEXT((VAR y=\"b\" RETURN y)+(BLANK()))",
+   "powerbi": "True",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "ROUND(\"2020-01-02\",0)",
+   "powerbi": "43832",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "ROUND(\"1/2/2020\",0)",
+   "powerbi": "43832",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "ROUND(\"01/02/2020\",0)",
+   "powerbi": "43832",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "ROUND(\"2020/01/02\",0)",
+   "powerbi": "43832",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "ROUND(\"2-Jan-2020\",0)",
+   "powerbi": "43832",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "ROUND(\"Jan 2, 2020\",0)",
+   "powerbi": "43832",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "ROUND(\"January 2 2020\",0)",
+   "powerbi": "43832",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "ROUND(\"12:30\",0)",
+   "powerbi": "1",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "ROUND(\"12:30:15\",0)",
+   "powerbi": "1",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "ROUND(\"1:30 PM\",0)",
+   "powerbi": "1",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "ROUND(\"2020-01-02 03:04\",0)",
+   "powerbi": "43832",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "ROUND(\"13/1/2020\",0)",
+   "powerbi": "43843",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "ROUND(\"1 1/2\",0)",
+   "powerbi": "37257",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISDOUBLE((MAX(Facts[Note]))-(BLANK()&&BLANK()))",
+   "powerbi": "True",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISTEXT((MAX(Facts[Note]))-(1&&BLANK()))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISLOGICAL((1&&TRIM(\"\"))^(MAX(Facts[Note])))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISDATETIME((BLANK()||BLANK())^(MAX(Facts[Note])))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISDATETIME((0||\"\")-(MAX(Facts[Note])))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISINTEGER((MAX(Facts[Note]))+(OR(0,\"\")))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISDOUBLE((MAX(Facts[Note]))-(0||BLANK()))",
+   "powerbi": "True",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISCURRENCY((2.5&&\"\")-(MAX(Facts[Note])))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISDATETIME((OR(0,\"\"))^(MAX(Facts[Note])))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISCURRENCY((2.5&&\"\")+(MAX(Facts[Note])))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISCURRENCY((MAX(Facts[Note]))+(1&&TRIM(\"\")))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISLOGICAL((1&&TRIM(\"\"))+(MAX(Facts[Note])))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISDOUBLE((BLANK()||BLANK())+(MAX(Facts[Note])))",
+   "powerbi": "True",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISDOUBLE((MAX(Facts[Note]))+(FALSE()||\"\"))",
+   "powerbi": "True",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISINTEGER((MAX(Facts[Note]))+(BLANK()&&BLANK()))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISDATETIME((MAX(Facts[Note]))-(BLANK()&&BLANK()))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISDOUBLE((2.5&&\"\")-(MAX(Facts[Note])))",
+   "powerbi": "True",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISTEXT((0||BLANK())^(MAX(Facts[Note])))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISDATETIME((MAX(Facts[Note]))*(0||BLANK()))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISCURRENCY((MAX(Facts[Note]))+(BLANK()||BLANK()))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISDATETIME((VAR y=1&&\"\" RETURN y)-(\"\"))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISLOGICAL((1&&BLANK())-(MAX(Facts[Note])))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISNUMBER((MAX(Facts[Note]))+(BLANK()&&BLANK()))",
+   "powerbi": "True",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISDATETIME((VAR y=1&&\"\" RETURN y)-(\"a\"))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISDATETIME((AND(1,\"\"))+(MAX(Facts[Note])))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISDATETIME((0||BLANK())^(MAX(Facts[Note])))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISNUMBER((0||BLANK())+(MAX(Facts[Note])))",
+   "powerbi": "True",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "SUMX(Facts,IF(ISNUMBER(Facts[Quantity]&\"\"+0),1,2))",
+   "powerbi": "12",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISDATETIME(MAX(Facts[Note])+0)",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "SUMX(Facts,IF(ISNUMBER(Facts[Quantity]&\"/2/2020\"+0),1,2))",
+   "powerbi": "12",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISNUMBER(MAX(Facts[Note])+0)",
+   "powerbi": "True",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISDATETIME(MIN(Facts[Region])+0)",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISNUMBER(MIN(Facts[Region])+0)",
+   "powerbi": "True",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "SUMX(Facts,IF(ISNUMBER(Facts[Sales]&\"\"+0),1,2))",
+   "powerbi": "12",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "SUMX(Facts,IF(VAR q=(LOOKUPVALUE(Facts[Quantity],Facts[Region],\"Nope\"))/(VALUE(\"x\")) RETURN ISBLANK(q),1,2))",
+   "powerbi": "6",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "COALESCE((LOOKUPVALUE(Facts[Quantity],Facts[Region],\"Nope\"))/(SIN(\"a\")),5)",
+   "powerbi": "5",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "SUMX(Facts,IF(VAR q=(\"a\")*(LOOKUPVALUE(Facts[Quantity],Facts[Region],\"Nope\")) RETURN ISBLANK(q),1,2))",
+   "powerbi": "6",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "COALESCE((LOOKUPVALUE(Facts[Quantity],Facts[Region],\"Nope\"))/(VALUE(\"x\")),5)",
+   "powerbi": "5",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "VAR q=(LOOKUPVALUE(Facts[Quantity],Facts[Region],\"Nope\"))/(SIN(\"a\")) RETURN COALESCE(q,5)",
+   "powerbi": "5",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "SUMX(Facts,IF(ISBLANK(COALESCE((LOOKUPVALUE(Facts[Quantity],Facts[Region],\"Nope\"))*(\"a\"*2),1)),1,2))",
+   "powerbi": "12",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "SUMX(Facts,IF(ISBLANK(COALESCE((\"a\")*(LOOKUPVALUE(Facts[Quantity],Facts[Region],\"Nope\")),1)),1,2))",
+   "powerbi": "12",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "SUMX(Facts,IF(ISBLANK(COALESCE((VALUE(\"x\"))*(LOOKUPVALUE(Facts[Quantity],Facts[Region],\"Nope\")),1)),1,2))",
+   "powerbi": "12",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "VAR q=(SIN(\"a\"))*(COUNTROWS(FILTER(Facts,FALSE()))) RETURN ISBLANK(q)",
+   "powerbi": "True",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISDOUBLE(MAX(Facts[Sales])-\"abc\")",
+   "powerbi": "True",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISCURRENCY(\"abc\"+MAX(Facts[Sales]))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISCURRENCY(MAX(Facts[Sales])-\"abc\")",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISCURRENCY(\"abc\"+CURRENCY(MAX(Facts[Sales])))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISDOUBLE(\"abc\"-MAX(Facts[Sales]))",
+   "powerbi": "True",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISINT64(MAX(Facts[Sales])*\"\")",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISDATETIME(MAX(Facts[Sales])+\"TRUE\")",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISDOUBLE(CURRENCY(MAX(Facts[Sales]))*\"\")",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISINT64(\"\"-CURRENCY(MAX(Facts[Sales])))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISDATETIME(\"TRUE\"-CURRENCY(MAX(Facts[Sales])))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISINT64(CURRENCY(MAX(Facts[Sales]))-\"abc\")",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISDOUBLE(\"\"*CURRENCY(MAX(Facts[Sales])))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISCURRENCY(\"TRUE\"*MAX(Facts[Sales]))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISCURRENCY(MAX(Facts[Sales])+\"\")",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISINT64(\"abc\"*MAX(Facts[Sales]))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISDATETIME(MAX(Facts[Sales])+\"\")",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISDOUBLE(\"\"+CURRENCY(MAX(Facts[Sales])))",
+   "powerbi": "True",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISDATETIME(\"abc\"*MAX(Facts[Sales]))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISDOUBLE(MAX(Facts[Sales])-\"TRUE\")",
+   "powerbi": "True",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISINT64(\"\"+MAX(Facts[Sales]))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISDOUBLE(CURRENCY(MAX(Facts[Sales]))*\"TRUE\")",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISDATETIME(MAX(Facts[Sales])*\"abc\")",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISINT64(MAX(Facts[Sales])+\"\")",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISCURRENCY(\"abc\"-MAX(Facts[Sales]))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISINT64(CURRENCY(MAX(Facts[Sales]))+\"abc\")",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISDATETIME(CURRENCY(MAX(Facts[Sales]))-\"abc\")",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISDATETIME(\"TRUE\"-MAX(Facts[Sales]))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISCURRENCY(MAX(Facts[Sales])-\"\")",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISCURRENCY(\"\"+CURRENCY(MAX(Facts[Sales])))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISDOUBLE(CURRENCY(MAX(Facts[Sales]))-\"TRUE\")",
+   "powerbi": "True",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISDATETIME(\"TRUE\"*MAX(Facts[Sales]))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISDOUBLE(CURRENCY(MAX(Facts[Sales]))+\"\")",
+   "powerbi": "True",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISDOUBLE((((2.5&&\"\"))+(MAX(Facts[Note])))*(\"a\"))",
+   "powerbi": "True",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISLOGICAL((((OR(0,\"\")))&(BLANK()))+(MAX(Facts[Note])))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISLOGICAL(((AND(1,\"\")))+(MAX(Facts[Note])))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISNONTEXT(((COUNTROWS(Facts)&&\"\"))+(\"TRUE\"))",
+   "powerbi": "True",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISNONTEXT(((COUNTROWS(Facts)&&\"\"))^(\"TRUE\"))",
+   "powerbi": "True",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "AVERAGEX(FILTER(Facts,Facts[Quantity]>2),COALESCE(LOOKUPVALUE(Facts[Quantity],Facts[Region],\"Nope\"),\"a\",VALUE(\"x\")))",
+   "powerbi": "BLANK",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "IFERROR(MAXX(FILTER(Facts,Facts[Quantity]>2),COALESCE(CONVERT(\"3\",DOUBLE),0||\"\",INT(\"a\"))),7)",
+   "powerbi": "3",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "AVERAGEX(FILTER(Facts,Facts[Quantity]>2),COALESCE(CONVERT(\"3\",DOUBLE),Facts[Note],INT(\"a\")))",
+   "powerbi": "3",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "AVERAGEX(Facts,COALESCE(CONVERT(\"1\",INTEGER),LASTNONBLANK(Facts[Region],1),VALUE(\"x\")))",
+   "powerbi": "1",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "COUNTX({1,2},COALESCE(CONVERT(\"1\",INTEGER),VALUE(\"East\")))",
+   "powerbi": "2",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "COUNTX({1,2},COALESCE(CONVERT(\"3\",DOUBLE),VALUE(\"x\")))",
+   "powerbi": "2",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "IFERROR(SUMX({1,2},COALESCE(CONVERT(\"1\",INTEGER),CONVERT(\"a\",DOUBLE),TIME(6,0,0))),7)",
+   "powerbi": "2",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "IFERROR(SUMX({1,2},COALESCE(CONVERT(\"1\",INTEGER),SUMX(Facts,Facts[Quantity]),VALUE(\"East\"))),7)",
+   "powerbi": "2",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "ISERROR(MINX(FILTER(Facts,Facts[Quantity]>2),COALESCE(CONVERT(\"3\",DOUBLE),CONVERT(0||\"\",DATETIME),INT(\"a\"))))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "MAXX({1,2},COALESCE(PERCENTILEX.EXC(Facts,Facts[Quantity],0.5),CONVERT(\"3\",DOUBLE),VALUE(\"x\")))",
+   "powerbi": "2.5",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "SUMX(Facts,COALESCE(CONVERT(\"1\",INTEGER),INT(\"a\"),Facts[Quantity]/0))",
+   "powerbi": "6",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISTEXT(BLANK()^BLANK())",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISLOGICAL(BLANK()^BLANK())",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISNONTEXT(BLANK()^BLANK())",
+   "powerbi": "True",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISTEXT(FACT(-1))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISLOGICAL(FACT(-1))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISNONTEXT(FACT(-1))",
+   "powerbi": "True",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "VAR q=(COUNTROWS(FILTER(Facts,FALSE())))/(LOG10(0))*(SUM(Facts[Sales])) RETURN ISBLANK(q)",
+   "powerbi": "True",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "VAR q=(COUNTROWS(FILTER(Facts,FALSE())))*(LOG10(0))+(SUM(Facts[Sales])) RETURN ISBLANK(q)",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISTEXT((CALCULATE(SUM(Facts[Quantity]),Facts[Region]=\"Nope\"))+(BLANK()^BLANK()))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISLOGICAL((SUM(Facts[Sales]))*(FACT(-1)))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISTEXT((BLANK()^BLANK())+(MAX(Facts[Sales])))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISTEXT((DATE(2020,1,1))*(BLANK()^BLANK()))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISNUMBER((FACT(-1))&(VAR y=1 RETURN y))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISNONTEXT((FACT(-1))&(TRUE()))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISTEXT((1)+(FACT(-1)))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISLOGICAL((BLANK()^BLANK())&(IF(SUM(Facts[Sales])>0,1,2)))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISNONTEXT((MAX(Facts[Sales]))*(BLANK()^BLANK()))",
+   "powerbi": "True",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISTEXT((TRUE())+(BLANK()^BLANK()))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISTEXT((TRUE())*(FACT(-1)))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISLOGICAL((FACT(-1))+(\"b\"))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISNONTEXT((CALCULATE(SUM(Facts[Quantity]),Facts[Region]=\"Nope\"))+(BLANK()^BLANK()))",
+   "powerbi": "True",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISLOGICAL((BLANK()^BLANK())&(CALCULATE(SUM(Facts[Quantity]),Facts[Region]=\"Nope\")))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISLOGICAL((FACT(-1))&(COUNTROWS(FILTER(Facts,FALSE()))))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISTEXT((MAX(Facts[Sales]))+(FACT(-1)))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISNUMBER((FACT(-1))&(BLANK()))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISLOGICAL((BLANK()^BLANK())*(IF(SUM(Facts[Sales])>0,1,2)))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISTEXT((COUNTROWS(FILTER(Facts,FALSE())))*(FACT(-1)))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISNUMBER((BLANK()^BLANK())+(\"b\"))",
+   "powerbi": "True",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISNONTEXT((BLANK())+(FACT(-1)))",
+   "powerbi": "True",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISNONTEXT((\"\")*(FACT(-1)))",
+   "powerbi": "True",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISTEXT((FACT(-1))+(TRUE()))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISLOGICAL((FACT(-1))*(\"\"))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISNUMBER((FACT(-1))+(DATE(2020,1,1)))",
+   "powerbi": "True",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISTEXT((COUNTROWS(FILTER(Facts,FALSE())))*(BLANK()^BLANK()))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISLOGICAL((FACT(-1))&(VAR y=1 RETURN y))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISNONTEXT((BLANK()^BLANK())&(DATE(2020,1,1)))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISLOGICAL((SUMX(FILTER(Facts,FALSE()),1))+(BLANK()^BLANK()))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISTEXT((BLANK()^BLANK())*(MAX(Facts[Note])))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISNONTEXT((BLANK()^BLANK())*(DATE(2020,1,1)))",
+   "powerbi": "True",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISTEXT((2.5)+(BLANK()^BLANK()))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISLOGICAL((TRUE())*(BLANK()^BLANK()))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISLOGICAL((FACT(-1))+(\"\"))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISNONTEXT((BLANK()^BLANK())+(DATE(2020,1,1)))",
+   "powerbi": "True",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISLOGICAL((FACT(-1))+(SUM(Facts[Sales])))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISNONTEXT((FACT(-1))*(CALCULATE(SUM(Facts[Quantity]),Facts[Region]=\"Nope\")))",
+   "powerbi": "True",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISLOGICAL((FACT(-1))*(2.5))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISLOGICAL((BLANK()^BLANK())*(MAX(Facts[Note])))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISNONTEXT((SUMX(FILTER(Facts,FALSE()),1))+(FACT(-1)))",
+   "powerbi": "True",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISTEXT((BLANK()^BLANK())+(SUMX(FILTER(Facts,FALSE()),1)))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISTEXT((FACT(-1))*(MAX(Facts[Note])))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISLOGICAL((FACT(-1))*(DATE(2020,1,1)))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISLOGICAL((FACT(-1))*(MAX(Facts[Sales])))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISTEXT((FACT(-1))+(CALCULATE(SUM(Facts[Quantity]),Facts[Region]=\"Nope\")))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISLOGICAL((VAR y=1 RETURN y)*(FACT(-1)))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISLOGICAL((BLANK()^BLANK())*(COUNTROWS(FILTER(Facts,FALSE()))))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISNONTEXT((BLANK()^BLANK())+(MAX(Facts[Note])))",
+   "powerbi": "True",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISNONTEXT((FACT(-1))*(\"\"))",
+   "powerbi": "True",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISNONTEXT((FACT(-1))*(MAX(Facts[Note])))",
+   "powerbi": "True",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISNUMBER((FACT(-1))&(TRUE()))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISNONTEXT((BLANK()^BLANK())+(CALCULATE(SUM(Facts[Quantity]),Facts[Region]=\"Nope\")))",
+   "powerbi": "True",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISLOGICAL((TRUE())*(FACT(-1)))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISTEXT((BLANK())+(BLANK()^BLANK()))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISNONTEXT((FACT(-1))+(2.5))",
+   "powerbi": "True",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISNONTEXT((FACT(-1))*(COUNTROWS(FILTER(Facts,FALSE()))))",
+   "powerbi": "True",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISTEXT((BLANK()^BLANK())*(COUNTROWS(FILTER(Facts,FALSE()))))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISTEXT((MAX(Facts[Sales]))*(FACT(-1)))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISLOGICAL((FACT(-1))*(1))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISLOGICAL((BLANK()^BLANK())+(\"b\"))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISNONTEXT((BLANK()^BLANK())+(MAX(Facts[Sales])))",
+   "powerbi": "True",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISNONTEXT((\"b\")+(FACT(-1)))",
+   "powerbi": "True",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISLOGICAL((FACT(-1))&(\"\"))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISTEXT((COUNTROWS(FILTER(Facts,FALSE())))+(FACT(-1)))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISLOGICAL((1)*(FACT(-1)))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISNUMBER((BLANK()^BLANK())&(VAR y=1 RETURN y))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISTEXT((BLANK()^BLANK())*(SUMX(FILTER(Facts,FALSE()),1)))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISTEXT((\"\")+(BLANK()^BLANK()))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISTEXT((FACT(-1))+(1))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISLOGICAL((MAX(Facts[Sales]))*(BLANK()^BLANK()))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISNUMBER((BLANK()^BLANK())&(\"b\"))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISTEXT((IF(SUM(Facts[Sales])>0,1,2))*(BLANK()^BLANK()))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISNONTEXT((BLANK()^BLANK())*(TRUE()))",
+   "powerbi": "True",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISNUMBER((BLANK()^BLANK())&(SUMX(FILTER(Facts,FALSE()),1)))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISNUMBER((DATE(2020,1,1))+(BLANK()^BLANK()))",
+   "powerbi": "True",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISINTEGER((1&&TRIM(\"\"))^(BLANK()))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISTEXT((AND(1,\"\"))^(0||\"\"))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISINTEGER((2.5&&\"\")^(BLANK()))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISCURRENCY((0||\"\")^(BLANK()))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISTEXT((AND(1,\"\"))^(BLANK()))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISNUMBER((AND(1,\"\"))^(0||\"\"))",
+   "powerbi": "True",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISDATETIME((2.5&&\"\")^(BLANK()))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISINTEGER((1&&\"\")^(1&&\"\"))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISLOGICAL((0||\"\")^(0||\"\"))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISINTEGER((1&&\"\")^(BLANK()))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "SUMX(Facts,IFERROR((COALESCE(DATE(2020,1,Facts[Sales]),5))+0,7))",
+   "powerbi": "175366",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "SUMX(Facts,IFERROR((COALESCE(DATE(2020,1,Facts[Quantity]),5))+0,7))",
+   "powerbi": "219172",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "COALESCE((LOOKUPVALUE(Facts[Quantity],Facts[Region],\"Nope\"))*(FACT(-1)),5)",
+   "powerbi": "5",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "VAR q=(COUNTROWS(FILTER(Facts,FALSE())))*(FACT(-1)) RETURN ISBLANK(q)",
+   "powerbi": "True",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "VAR q=(COUNTROWS(FILTER(Facts,FALSE())))/(FACT(-1)) RETURN ISBLANK(q)",
+   "powerbi": "True",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "COALESCE(CEILING(1/0,SELECTEDVALUE(Facts[Region])),5)",
+   "powerbi": "0",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "COALESCE(CEILING(1/0,IF(1=2,1)),5)",
+   "powerbi": "0",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISBLANK(IF(TRUE(),CEILING(1/0,0)))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISBLANK(IF(TRUE(),CEILING(0/0,SELECTEDVALUE(Facts[Region]))))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "COALESCE(CEILING(1/0,BLANK()),5)",
+   "powerbi": "0",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "MAXX(Facts,+MIN(Facts[Sales])*BLANK()/(-1/0)^- 1E-200)",
+   "powerbi": "BLANK",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "SUMX(FILTER(Facts,Facts[Quantity]>2),COALESCE(CONVERT(\"3\",DOUBLE),LOG(-1)))",
+   "powerbi": "9",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "IFERROR(MINX({1,2},COALESCE(CONVERT(\"1\",INTEGER),LOG(-1))),7)",
+   "powerbi": "1",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "MINX(FILTER(Facts,Facts[Quantity]>2),COALESCE(CONVERT(\"1\",INTEGER),LOG(-1)))",
+   "powerbi": "1",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "\"a\"||VAR y=1 RETURN COUNTROWS(FILTER(Facts,y=1))",
+   "powerbi": "True",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISLOGICAL(1&&MIN(Facts[Note])&\"\")",
+   "powerbi": "True",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISTEXT(1&&MIN(Facts[Note])&\"\")",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISNONTEXT(1&&MIN(Facts[Note])&\"\")",
+   "powerbi": "True",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISNUMBER(1&&MIN(Facts[Note])&\"\")",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISINT64(1&&MIN(Facts[Note])&\"\")",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISDOUBLE(1&&MIN(Facts[Note])&\"\")",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISSTRING(1&&MIN(Facts[Note])&\"\")",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISLOGICAL(\"1\"&&MIN(Facts[Note])&\"\")",
+   "powerbi": "True",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISLOGICAL(\"TRUE\"&&MIN(Facts[Note])&\"\")",
+   "powerbi": "True",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISLOGICAL(\"-1\"&&MIN(Facts[Note])&\"\")",
+   "powerbi": "True",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISLOGICAL(\"2.5\"&&MIN(Facts[Note])&\"\")",
+   "powerbi": "True",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISLOGICAL(2.5&&MIN(Facts[Note])&\"\")",
+   "powerbi": "True",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISLOGICAL(TRUE()&&MIN(Facts[Note])&\"\")",
+   "powerbi": "True",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISLOGICAL(\"0\"||MIN(Facts[Note])&\"\")",
+   "powerbi": "True",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISLOGICAL(\"false\"||MIN(Facts[Note])&\"\")",
+   "powerbi": "True",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISLOGICAL(0||MIN(Facts[Note])&\"\")",
+   "powerbi": "True",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISLOGICAL(FALSE()||MIN(Facts[Note])&\"\")",
+   "powerbi": "True",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISLOGICAL(BLANK()||MIN(Facts[Note])&\"\")",
+   "powerbi": "True",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISLOGICAL(\"\"||MIN(Facts[Note])&\"\")",
+   "powerbi": "True",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISLOGICAL(AND(\"1\",MIN(Facts[Note])&\"\"))",
+   "powerbi": "True",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISLOGICAL(AND(\"TRUE\",MIN(Facts[Note])&\"\"))",
+   "powerbi": "True",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISLOGICAL(AND(\"-1\",MIN(Facts[Note])&\"\"))",
+   "powerbi": "True",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISLOGICAL(AND(\"2.5\",MIN(Facts[Note])&\"\"))",
+   "powerbi": "True",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISLOGICAL(AND(1,MIN(Facts[Note])&\"\"))",
+   "powerbi": "True",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISLOGICAL(AND(2.5,MIN(Facts[Note])&\"\"))",
+   "powerbi": "True",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISLOGICAL(AND(TRUE(),MIN(Facts[Note])&\"\"))",
+   "powerbi": "True",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISLOGICAL(OR(\"0\",MIN(Facts[Note])&\"\"))",
+   "powerbi": "True",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISLOGICAL(OR(\"false\",MIN(Facts[Note])&\"\"))",
+   "powerbi": "True",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISLOGICAL(OR(0,MIN(Facts[Note])&\"\"))",
+   "powerbi": "True",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISLOGICAL(OR(FALSE(),MIN(Facts[Note])&\"\"))",
+   "powerbi": "True",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISLOGICAL(OR(BLANK(),MIN(Facts[Note])&\"\"))",
+   "powerbi": "True",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISLOGICAL(OR(\"\",MIN(Facts[Note])&\"\"))",
+   "powerbi": "True",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISLOGICAL(\"a\"&&VAR y=\"b\" RETURN y)",
+   "powerbi": "True",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISLOGICAL(\"a\"||VAR y=\"b\" RETURN y)",
+   "powerbi": "True",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISLOGICAL(AND(\"a\",VAR y=\"b\" RETURN y))",
+   "powerbi": "True",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISLOGICAL(OR(\"a\",VAR y=\"b\" RETURN y))",
+   "powerbi": "True",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISLOGICAL(AND(MAX(Facts[Region]),VAR y=\"b\" RETURN y))",
+   "powerbi": "True",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISLOGICAL(OR(MAX(Facts[Region]),VAR y=\"b\" RETURN y))",
+   "powerbi": "True",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISLOGICAL(MAX(Facts[Region])&&VAR y=\"b\" RETURN y)",
+   "powerbi": "True",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISLOGICAL(\"a\"&&(VAR y=\"b\" RETURN y))",
+   "powerbi": "True",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "COUNTROWS(FILTER({1&&MIN(Facts[Note])&\"\"},ISBLANK([Value])))",
+   "powerbi": "BLANK",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "SUMX({1&&MIN(Facts[Note])&\"\",1&&MIN(Facts[Note])&\"\"},IF(ISBLANK([Value]),1,2))",
+   "powerbi": "4",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "SUMX({1&&MIN(Facts[Note])&\"\",1&&MIN(Facts[Note])&\"\"},IF(ISLOGICAL([Value]),1,2))",
+   "powerbi": "2",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "COUNTROWS({1&&MIN(Facts[Note])&\"\",1&&MIN(Facts[Note])&\"\"})",
+   "powerbi": "2",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "COUNTROWS(FILTER({1&&MIN(Facts[Note])&\"\",1&&MIN(Facts[Note])&\"\"},ISBLANK([Value])))",
+   "powerbi": "BLANK",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "CONCATENATEX({1&&MIN(Facts[Note])&\"\",1&&MIN(Facts[Note])&\"\"},IF(ISBLANK([Value]),\"b\",\"n\"),\"|\")",
+   "powerbi": "n|n",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "SUMX({1&&MIN(Facts[Note])&\"\",1&&MIN(Facts[Note])&\"\"},IF(ISNUMBER([Value]),1,2))",
+   "powerbi": "4",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "SUMX({1&&MIN(Facts[Note])&\"\",1&&MIN(Facts[Note])&\"\"},IF(ISTEXT([Value]),1,2))",
+   "powerbi": "4",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "SUMX({1&&MIN(Facts[Note])&\"\",1&&MIN(Facts[Note])&\"\"},IF(ISNONTEXT([Value]),1,2))",
+   "powerbi": "2",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "COUNTROWS(FILTER(VAR t={1&&MIN(Facts[Note])&\"\"} RETURN t,ISBLANK([Value])))",
+   "powerbi": "BLANK",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "COUNTROWS(FILTER(UNION({1&&MIN(Facts[Note])&\"\"},{1&&MIN(Facts[Note])&\"\"}),ISBLANK([Value])))",
+   "powerbi": "BLANK",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "COUNTROWS(FILTER({(1&&MIN(Facts[Note])&\"\")},ISBLANK([Value])))",
+   "powerbi": "BLANK",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "SUMX(Facts,IF(ISLOGICAL(1&&Facts[Note]&\"\"),1,0))",
+   "powerbi": "6",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "SUMX(Facts,IF(ISLOGICAL(1&&Facts[Note]),1,0))",
+   "powerbi": "6",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISLOGICAL(2.5&&\"a\"&\"\")",
+   "powerbi": "True",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISLOGICAL(\"0\"||\"a\"&\"\")",
+   "powerbi": "True",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISLOGICAL(\"a\"&\"\"&&1)",
+   "powerbi": "True",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISLOGICAL(\"a\"&\"\"||0)",
+   "powerbi": "True",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISLOGICAL(AND(1,\"a\"&\"\"))",
+   "powerbi": "True",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISLOGICAL(OR(\"a\"&\"\",0))",
+   "powerbi": "True",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISLOGICAL(\"a\"&\"\"&&\"a\"&\"\")",
+   "powerbi": "True",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISLOGICAL(2.5&&MAX(Facts[Note])&\"\")",
+   "powerbi": "True",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISLOGICAL(\"0\"||MAX(Facts[Note])&\"\")",
+   "powerbi": "True",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISLOGICAL(MAX(Facts[Note])&\"\"&&1)",
+   "powerbi": "True",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISLOGICAL(MAX(Facts[Note])&\"\"||0)",
+   "powerbi": "True",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISLOGICAL(AND(1,MAX(Facts[Note])&\"\"))",
+   "powerbi": "True",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISLOGICAL(OR(MAX(Facts[Note])&\"\",0))",
+   "powerbi": "True",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISLOGICAL(MAX(Facts[Note])&\"\"&&MAX(Facts[Note])&\"\")",
+   "powerbi": "True",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISLOGICAL(2.5&&MIN(Facts[Note])&\"\")",
+   "powerbi": "True",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISLOGICAL(\"0\"||MIN(Facts[Note])&\"\")",
+   "powerbi": "True",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISLOGICAL(MIN(Facts[Note])&\"\"&&1)",
+   "powerbi": "True",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISLOGICAL(MIN(Facts[Note])&\"\"||0)",
+   "powerbi": "True",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISLOGICAL(AND(1,MIN(Facts[Note])&\"\"))",
+   "powerbi": "True",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISLOGICAL(OR(MIN(Facts[Note])&\"\",0))",
+   "powerbi": "True",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISLOGICAL(MIN(Facts[Note])&\"\"&&MIN(Facts[Note])&\"\")",
+   "powerbi": "True",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISTEXT(NOT(\"a\"))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISNUMBER(NOT(\"a\"))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISLOGICAL(NOT(\"a\"))",
+   "powerbi": "True",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISNONTEXT(NOT(\"a\"))",
+   "powerbi": "True",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISNUMBER(CONVERT(\"a\",BOOLEAN))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISNUMBER(CONVERT(\"1/2/2020\",BOOLEAN))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISNUMBER(CONVERT(MAX(Facts[Region]),BOOLEAN))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISTEXT(CONVERT(MAX(Facts[Region]),BOOLEAN))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISDATETIME(CONVERT(MAX(Facts[Region]),BOOLEAN))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISCURRENCY(CONVERT(MAX(Facts[Region]),BOOLEAN))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISDOUBLE(CONVERT(MAX(Facts[Region]),BOOLEAN))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISINTEGER(CONVERT(MAX(Facts[Region]),BOOLEAN))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISBLANK(((SUM(Facts[Sales])*CURRENCY(1))/(COUNTROWS(FILTER(Facts,FALSE()))))+1)",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISBLANK(((SUM(Facts[Sales])*CURRENCY(1))/(VAR y=BLANK() RETURN y))+1)",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISBLANK(((CURRENCY(MAX(Facts[Quantity])))/(BLANK()))&\"z\")",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISCURRENCY((MAX(Facts[Note]))*(VAR y=BLANK() RETURN y)*(CURRENCY(1)/0))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "VAR q=(MAXX({BLANK()},[Value]))*(CURRENCY(1)/BLANK()) RETURN q",
+   "powerbi": "BLANK",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISBLANK(((SUM(Facts[Sales])*CURRENCY(1))/(BLANK()))&\"z\")",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISBLANK(2/((SUM(Facts[Sales])*CURRENCY(1))/(CALCULATE(SUM(Facts[Quantity]),Facts[Region]=\"Nope\"))))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISBLANK(2/((CURRENCY(MAX(Facts[Quantity])))/(VAR z=0 RETURN z)))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISBLANK(((SUM(Facts[Sales])*CURRENCY(1))/(CALCULATE(SUM(Facts[Quantity]),Facts[Region]=\"Nope\")))&\"z\")",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISBLANK(((SUM(Facts[Sales])*CURRENCY(1))/(BLANK()))+1)",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISBLANK(2/((SUM(Facts[Sales])*CURRENCY(1))/(SUM(Facts[Quantity])*0)))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISBLANK(2/((CURRENCY(MAX(Facts[Quantity])))/(SUM(Facts[Quantity])*0)))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISBLANK(((CURRENCY(MAX(Facts[Quantity])))/(\"0\"))&\"z\")",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISBLANK(((SUM(Facts[Sales])*CURRENCY(1))/(\"0\"))+1)",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISBLANK(((SUM(Facts[Sales])*CURRENCY(1))/(COUNTROWS(FILTER(Facts,FALSE()))))&\"z\")",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISBLANK(2/((CURRENCY(MAX(Facts[Quantity])))/(CALCULATE(SUM(Facts[Quantity]),Facts[Region]=\"Nope\"))))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISBLANK(((CURRENCY(MAX(Facts[Quantity])))/(1-1))+1)",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISBLANK(((SUM(Facts[Sales])*CURRENCY(1))/(VAR z=0 RETURN z))+1)",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "VAR q=(CURRENCY(1)/0)*(MAXX({BLANK()},[Value])) RETURN q",
+   "powerbi": "BLANK",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISBLANK(2/((CURRENCY(MAX(Facts[Quantity])))/(0)))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISBLANK(2/((CURRENCY(MAX(Facts[Quantity])))/(FALSE())))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISBLANK(2/((CURRENCY(MAX(Facts[Quantity])))/(\"0\")))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISBLANK(2/((CURRENCY(MAX(Facts[Quantity])))/(COUNTROWS(FILTER(Facts,FALSE())))))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISBLANK(((CURRENCY(MAX(Facts[Quantity])))/(0))&\"z\")",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISBLANK(((CURRENCY(MAX(Facts[Quantity])))/(VAR z=0 RETURN z))&\"z\")",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISBLANK(((CURRENCY(MAX(Facts[Quantity])))/(0))+1)",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISBLANK(((CURRENCY(MAX(Facts[Quantity])))/(0.0))&\"z\")",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISBLANK(((SUM(Facts[Sales])*CURRENCY(1))/(0.0))+1)",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISBLANK(((SUM(Facts[Sales])*CURRENCY(1))/(SUM(Facts[Quantity])*0))+1)",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISBLANK(((SUM(Facts[Sales])*CURRENCY(1))/(IF(FALSE(),1)))&\"z\")",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISBLANK(2/((CURRENCY(MAX(Facts[Quantity])))/(VAR y=BLANK() RETURN y)))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISBLANK(((SUM(Facts[Sales])*CURRENCY(1))/(FALSE()))+1)",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISBLANK(2/((CURRENCY(MAX(Facts[Quantity])))/(BLANK())))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISBLANK(((SUM(Facts[Sales])*CURRENCY(1))/(VAR y=BLANK() RETURN y))&\"z\")",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISBLANK(((CURRENCY(MAX(Facts[Quantity])))/(BLANK()))+1)",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "(MAX(Facts[Note]))*(VAR y=BLANK() RETURN y)*(CURRENCY(1)/0)",
+   "powerbi": "BLANK",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISBLANK(((CURRENCY(MAX(Facts[Quantity])))/(0.0))+1)",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISBLANK(((CURRENCY(MAX(Facts[Quantity])))/(SUM(Facts[Quantity])*0))&\"z\")",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISBLANK(((CURRENCY(MAX(Facts[Quantity])))/(VAR z=0 RETURN z))+1)",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISBLANK(2/((CURRENCY(MAX(Facts[Quantity])))/(0.0)))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISBLANK(2/((SUM(Facts[Sales])*CURRENCY(1))/(IF(FALSE(),1))))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISBLANK(((CURRENCY(MAX(Facts[Quantity])))/(\"0\"))+1)",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISBLANK(2/((CURRENCY(MAX(Facts[Quantity])))/(IF(FALSE(),1))))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISBLANK(2/((SUM(Facts[Sales])*CURRENCY(1))/(\"0\")))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISBLANK(((SUM(Facts[Sales])*CURRENCY(1))/(CALCULATE(SUM(Facts[Quantity]),Facts[Region]=\"Nope\")))+1)",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISBLANK(((SUM(Facts[Sales])*CURRENCY(1))/(SUM(Facts[Quantity])*0))&\"z\")",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISBLANK(2/((SUM(Facts[Sales])*CURRENCY(1))/(VAR y=BLANK() RETURN y)))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "MAXX({1,2},(MAX(Facts[Note]))*(VAR y=BLANK() RETURN y)*(CURRENCY(1)/0))",
+   "powerbi": "BLANK",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISBLANK(((CURRENCY(MAX(Facts[Quantity])))/(VAR y=BLANK() RETURN y))+1)",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISBLANK(((CURRENCY(MAX(Facts[Quantity])))/(VAR y=BLANK() RETURN y))&\"z\")",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISBLANK(((CURRENCY(MAX(Facts[Quantity])))/(SUM(Facts[Quantity])*0))+1)",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISBLANK(((CURRENCY(MAX(Facts[Quantity])))/(COUNTROWS(FILTER(Facts,FALSE()))))+1)",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISBLANK(((CURRENCY(MAX(Facts[Quantity])))/(FALSE()))&\"z\")",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISBLANK(((SUM(Facts[Sales])*CURRENCY(1))/(IF(FALSE(),1)))+1)",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISBLANK(((SUM(Facts[Sales])*CURRENCY(1))/(1-1))&\"z\")",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISBLANK(2/((SUM(Facts[Sales])*CURRENCY(1))/(COUNTROWS(FILTER(Facts,FALSE())))))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISBLANK(((SUM(Facts[Sales])*CURRENCY(1))/(0))+1)",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISBLANK(2/((SUM(Facts[Sales])*CURRENCY(1))/(1-1)))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "COALESCE((SUMX(FILTER(Facts,FALSE()),1))*(CURRENCY(1)/BLANK())+(1/0),5)",
+   "powerbi": "Infinity",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISBLANK(2/((SUM(Facts[Sales])*CURRENCY(1))/(0.0)))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISBLANK(((SUM(Facts[Sales])*CURRENCY(1))/(1-1))+1)",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISBLANK(((SUM(Facts[Sales])*CURRENCY(1))/(0.0))&\"z\")",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISBLANK(((SUM(Facts[Sales])*CURRENCY(1))/(0))&\"z\")",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISBLANK(2/((CURRENCY(MAX(Facts[Quantity])))/(1-1)))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISBLANK(((CURRENCY(MAX(Facts[Quantity])))/(COUNTROWS(FILTER(Facts,FALSE()))))&\"z\")",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISBLANK(((CURRENCY(MAX(Facts[Quantity])))/(CALCULATE(SUM(Facts[Quantity]),Facts[Region]=\"Nope\")))+1)",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISBLANK(((CURRENCY(MAX(Facts[Quantity])))/(IF(FALSE(),1)))+1)",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISBLANK(2/((SUM(Facts[Sales])*CURRENCY(1))/(BLANK())))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISBLANK(((SUM(Facts[Sales])*CURRENCY(1))/(VAR z=0 RETURN z))&\"z\")",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISBLANK(((CURRENCY(MAX(Facts[Quantity])))/(FALSE()))+1)",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISBLANK(2/((SUM(Facts[Sales])*CURRENCY(1))/(FALSE())))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISBLANK(2/((SUM(Facts[Sales])*CURRENCY(1))/(VAR z=0 RETURN z)))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISBLANK(((SUM(Facts[Sales])*CURRENCY(1))/(\"0\"))&\"z\")",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISBLANK(((CURRENCY(MAX(Facts[Quantity])))/(1-1))&\"z\")",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISBLANK(2/((SUM(Facts[Sales])*CURRENCY(1))/(0)))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISBLANK(((CURRENCY(MAX(Facts[Quantity])))/(IF(FALSE(),1)))&\"z\")",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISBLANK(((CURRENCY(MAX(Facts[Quantity])))/(CALCULATE(SUM(Facts[Quantity]),Facts[Region]=\"Nope\")))&\"z\")",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISBLANK(((SUM(Facts[Sales])*CURRENCY(1))/(FALSE()))&\"z\")",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "COALESCE(DAY(1/0),5)",
+   "powerbi": "30",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "YEAR(TIME(6,0,0)+-1/0)",
+   "powerbi": "1899",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "YEAR(DATE(2000,2,29)+0/0)",
+   "powerbi": "1899",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "YEAR(TODAY()*0-0/0)",
+   "powerbi": "1899",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "YEAR(DATE(1899,12,30)-(0/0)*MAX(Facts[Sales]))",
+   "powerbi": "1899",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "YEAR(DATE(2000,2,29)*(0/0)*MAX(Facts[Sales]))",
+   "powerbi": "1899",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "YEAR(DATE(2020,1,1)+(0/0)*MAX(Facts[Sales]))",
+   "powerbi": "1899",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "YEAR(TODAY()*0*0/0)",
+   "powerbi": "1899",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "YEAR(TIME(6,0,0)+(0/0)*MAX(Facts[Sales]))",
+   "powerbi": "1899",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "YEAR(TIME(6,0,0)*0/0)",
+   "powerbi": "1899",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "YEAR(TODAY()*0/MAX(Facts[Sales])/0)",
+   "powerbi": "1899",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "YEAR(DATE(2000,2,29)+-MAX(Facts[Sales])/0)",
+   "powerbi": "1899",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "YEAR(DATE(2000,2,29)*MAX(Facts[Sales])/0)",
+   "powerbi": "1899",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "YEAR(TODAY()*0-1/0)",
+   "powerbi": "1899",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "YEAR(DATE(2000,2,29)+1/0)",
+   "powerbi": "1899",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "YEAR(DATE(2020,1,1)+-MAX(Facts[Sales])/0)",
+   "powerbi": "1899",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "YEAR(TODAY()*0+MAX(Facts[Sales])/0)",
+   "powerbi": "1899",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "YEAR(TIME(6,0,0)/1/0)",
+   "powerbi": "1899",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "YEAR(TODAY()*0+(0/0)*MAX(Facts[Sales]))",
+   "powerbi": "1899",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "YEAR(TIME(6,0,0)*MAX(Facts[Sales])/0)",
+   "powerbi": "1899",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "YEAR(DATE(2000,2,29)-(0/0)*MAX(Facts[Sales]))",
+   "powerbi": "1899",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "YEAR(DATE(2020,1,1)/1/0)",
+   "powerbi": "1899",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "YEAR(DATE(2020,1,1)*MAX(Facts[Sales])/0)",
+   "powerbi": "1899",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "YEAR(DATE(2000,2,29)/0/0)",
+   "powerbi": "1899",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "YEAR(DATE(2000,2,29)-0/0)",
+   "powerbi": "1899",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "YEAR(DATE(2020,1,1)+0/0)",
+   "powerbi": "1899",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "YEAR(DATE(1899,12,30)*MAX(Facts[Sales])/0)",
+   "powerbi": "1899",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "YEAR(DATE(1899,12,30)+MAX(Facts[Sales])/0)",
+   "powerbi": "1899",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "YEAR(DATE(2000,2,29)*-MAX(Facts[Sales])/0)",
+   "powerbi": "1899",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "YEAR(DATE(1899,12,30)/(0/0)*MAX(Facts[Sales]))",
+   "powerbi": "1899",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "YEAR(TIME(6,0,0)+1/0)",
+   "powerbi": "1899",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "YEAR(DATE(1899,12,30)+(0/0)*MAX(Facts[Sales]))",
+   "powerbi": "1899",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "YEAR(TIME(6,0,0)+MAX(Facts[Sales])/0)",
+   "powerbi": "1899",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "YEAR(TODAY()*0/(0/0)*MAX(Facts[Sales]))",
+   "powerbi": "1899",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "YEAR(TIME(6,0,0)-(0/0)*MAX(Facts[Sales]))",
+   "powerbi": "1899",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "YEAR(TIME(6,0,0)+0/0)",
+   "powerbi": "1899",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "YEAR(DATE(2000,2,29)+-1/0)",
+   "powerbi": "1899",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "YEAR(DATE(2020,1,1)*1/0)",
+   "powerbi": "1899",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "YEAR(TIME(6,0,0)-1/0)",
+   "powerbi": "1899",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "YEAR(DATE(2020,1,1)+1/0)",
+   "powerbi": "1899",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "YEAR(TODAY()*0+1/0)",
+   "powerbi": "1899",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "YEAR(DATE(2000,2,29)-MAX(Facts[Sales])/0)",
+   "powerbi": "1899",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "YEAR(DATE(2020,1,1)-MAX(Facts[Sales])/0)",
+   "powerbi": "1899",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "YEAR(DATE(2020,1,1)/(0/0)*MAX(Facts[Sales]))",
+   "powerbi": "1899",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "YEAR(DATE(2020,1,1)/0/0)",
+   "powerbi": "1899",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "YEAR(TIME(6,0,0)/(0/0)*MAX(Facts[Sales]))",
+   "powerbi": "1899",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "YEAR(DATE(1899,12,30)*1/0)",
+   "powerbi": "1899",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "YEAR(DATE(2000,2,29)/1/0)",
+   "powerbi": "1899",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "YEAR(DATE(2020,1,1)-1/0)",
+   "powerbi": "1899",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "YEAR(TODAY()*0*1/0)",
+   "powerbi": "1899",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "YEAR(DATE(2000,2,29)*0/0)",
+   "powerbi": "1899",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "YEAR(TODAY()*0*-1/0)",
+   "powerbi": "1899",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "YEAR(DATE(1899,12,30)+-1/0)",
+   "powerbi": "1899",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "YEAR(DATE(2000,2,29)/MAX(Facts[Sales])/0)",
+   "powerbi": "1899",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "YEAR(DATE(1899,12,30)-1/0)",
+   "powerbi": "1899",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "YEAR(DATE(1899,12,30)/MAX(Facts[Sales])/0)",
+   "powerbi": "1899",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "YEAR(TODAY()*0+-MAX(Facts[Sales])/0)",
+   "powerbi": "1899",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "YEAR(TIME(6,0,0)/MAX(Facts[Sales])/0)",
+   "powerbi": "1899",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "YEAR(DATE(1899,12,30)+-MAX(Facts[Sales])/0)",
+   "powerbi": "1899",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "YEAR(DATE(2000,2,29)*1/0)",
+   "powerbi": "1899",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "YEAR(DATE(2000,2,29)*-1/0)",
+   "powerbi": "1899",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "YEAR(DATE(1899,12,30)/1/0)",
+   "powerbi": "1899",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "YEAR(DATE(1899,12,30)-0/0)",
+   "powerbi": "1899",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "YEAR(TODAY()*0+0/0)",
+   "powerbi": "1899",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "YEAR(TIME(6,0,0)*(0/0)*MAX(Facts[Sales]))",
+   "powerbi": "1899",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "YEAR(TODAY()*0+-1/0)",
+   "powerbi": "1899",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "YEAR(DATE(2000,2,29)+(0/0)*MAX(Facts[Sales]))",
+   "powerbi": "1899",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "YEAR(DATE(1899,12,30)*(0/0)*MAX(Facts[Sales]))",
+   "powerbi": "1899",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "YEAR(TODAY()*0-MAX(Facts[Sales])/0)",
+   "powerbi": "1899",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "YEAR(TIME(6,0,0)/0/0)",
+   "powerbi": "1899",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "YEAR(DATE(1899,12,30)*-MAX(Facts[Sales])/0)",
+   "powerbi": "1899",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "YEAR(DATE(2020,1,1)*-1/0)",
+   "powerbi": "1899",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "YEAR(TIME(6,0,0)*-1/0)",
+   "powerbi": "1899",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "YEAR(TODAY()*0-(0/0)*MAX(Facts[Sales]))",
+   "powerbi": "1899",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "YEAR(DATE(2000,2,29)+MAX(Facts[Sales])/0)",
+   "powerbi": "1899",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "YEAR(TIME(6,0,0)+-MAX(Facts[Sales])/0)",
+   "powerbi": "1899",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "YEAR(DATE(2000,2,29)/(0/0)*MAX(Facts[Sales]))",
+   "powerbi": "1899",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "YEAR(TIME(6,0,0)-MAX(Facts[Sales])/0)",
+   "powerbi": "1899",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISTEXT(VAR y=ERROR(\"x\") RETURN y)",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISLOGICAL(VAR y=ERROR(\"x\") RETURN y)",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISNONTEXT(VAR y=ERROR(\"x\") RETURN y)",
+   "powerbi": "True",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "SWITCH((MAX(1,ERROR(\"x\")))*(CALCULATE(SUM(Facts[Quantity]),Facts[Region]=\"Nope\")),1,\"a\",\"b\")",
+   "powerbi": "b",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISDOUBLE((BLANK()&&BLANK())*(VAR y=ERROR(\"x\") RETURN y))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISCURRENCY((SELECTEDVALUE(Facts[Quantity]))*(VAR y=ERROR(\"x\") RETURN y)*(MAX(1,ERROR(\"x\"))))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISTEXT((BLANK()&&BLANK())*(MAX(Facts[Sales]))+(VAR y=ERROR(\"x\") RETURN y))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISDOUBLE((FALSE())*(VAR y=ERROR(\"x\") RETURN y))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISCURRENCY((BLANK()&&BLANK())*(MAX(Facts[Sales]))+(VAR y=ERROR(\"x\") RETURN y))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "VAR q=(MAX(1,ERROR(\"x\")))*(CALCULATE(SUM(Facts[Quantity]),Facts[Region]=\"Nope\")) RETURN ISBLANK(q)",
+   "powerbi": "True",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "VAR q=(ERROR(\"x\"))*(COUNTROWS(FILTER(Facts,FALSE()))) RETURN ISBLANK(q)",
+   "powerbi": "True",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "(SELECTEDVALUE(Facts[Quantity]))/(VAR y=ERROR(\"x\") RETURN y)*(MAX(1,ERROR(\"x\")))",
+   "powerbi": "BLANK",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "SUMX(ADDCOLUMNS(Facts,\"q\",(CURRENCY(1)/0)*(SELECTEDVALUE(Facts[Quantity]))*(MAX(1,ERROR(\"x\")))),[q])",
+   "powerbi": "BLANK",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "(SELECTEDVALUE(Facts[Quantity]))*(VAR y=ERROR(\"x\") RETURN y)*(MAX(1,ERROR(\"x\")))",
+   "powerbi": "BLANK",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISCURRENCY((VAR y=ERROR(\"x\") RETURN y)*(BLANK()&&BLANK()))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "INT((SELECTEDVALUE(Facts[Quantity]))*(VAR y=ERROR(\"x\") RETURN y)*(MAX(1,ERROR(\"x\"))))",
+   "powerbi": "BLANK",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "COALESCE((2.5)/(ERROR(\"x\"))*(SUMX(FILTER(Facts,FALSE()),1)),5)",
+   "powerbi": "5",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISINT64((VAR y=\"b\" RETURN y)*(VAR y=ERROR(\"x\") RETURN y))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISBLANK((CURRENCY(1)/0)*(SELECTEDVALUE(Facts[Quantity]))*(MAX(1,ERROR(\"x\"))))",
+   "powerbi": "True",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "INT((SELECTEDVALUE(Facts[Quantity]))/(VAR y=ERROR(\"x\") RETURN y)*(MAX(1,ERROR(\"x\"))))",
+   "powerbi": "BLANK",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISTEXT((VAR y=ERROR(\"x\") RETURN y)*(TRUE())*(MAX(Facts[Sales])))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISTEXT((VAR y=ERROR(\"x\") RETURN y)*(BLANK()&&BLANK()))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "VAR q=(MAXX({BLANK()},[Value]))+(COUNTROWS(FILTER(Facts,FALSE())))/(ERROR(\"x\")) RETURN ISBLANK(q)",
+   "powerbi": "True",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "SUMX({BLANK(),1},(MAX(1,ERROR(\"x\")))*(CALCULATE(SUM(Facts[Quantity]),Facts[Region]=\"Nope\")))",
+   "powerbi": "BLANK",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "COALESCE((MAXX({BLANK()},[Value]))*(ERROR(\"x\")),5)",
+   "powerbi": "5",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISDOUBLE((VAR y=ERROR(\"x\") RETURN y)*(BLANK()&&BLANK()))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISDOUBLE(1*-(VAR y=ERROR(\"x\") RETURN y))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISDATETIME((BLANK()&&BLANK())*(VAR y=ERROR(\"x\") RETURN y))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISTEXT((VAR y=ERROR(\"x\") RETURN y)*(TRUE())+(MAX(Facts[Sales])))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISINT64((VAR y=ERROR(\"x\") RETURN y)*(MAX(Facts[Note])))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISDOUBLE((CURRENCY(0))*(2.5)+(VAR y=ERROR(\"x\") RETURN y))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "(CURRENCY(1)/0)*(SELECTEDVALUE(Facts[Quantity]))*(MAX(1,ERROR(\"x\")))",
+   "powerbi": "BLANK",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "SWITCH((CURRENCY(1)/0)*(SELECTEDVALUE(Facts[Quantity]))*(MAX(1,ERROR(\"x\"))),1,\"a\",\"b\")",
+   "powerbi": "b",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "COALESCE((COUNTROWS(FILTER(Facts,FALSE())))*(MAX(1,ERROR(\"x\"))),5)",
+   "powerbi": "5",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISBLANK((SELECTEDVALUE(Facts[Quantity]))/(VAR y=ERROR(\"x\") RETURN y)*(MAX(1,ERROR(\"x\"))))",
+   "powerbi": "True",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISCURRENCY((FALSE())*(VAR y=ERROR(\"x\") RETURN y))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISCURRENCY((VAR y=ERROR(\"x\") RETURN y)*(FALSE()))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISTEXT((TRUE())+(VAR y=ERROR(\"x\") RETURN y))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISTEXT((VAR y=ERROR(\"x\") RETURN y)+(DATE(2020,1,1)))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISTEXT((BLANK())+(VAR y=ERROR(\"x\") RETURN y))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISNONTEXT((VAR y=ERROR(\"x\") RETURN y)*(DATE(2020,1,1)))",
+   "powerbi": "True",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISTEXT((SUMX(FILTER(Facts,FALSE()),1))*(VAR y=ERROR(\"x\") RETURN y))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISLOGICAL((VAR y=ERROR(\"x\") RETURN y)+(DATE(2020,1,1)))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISTEXT((CALCULATE(SUM(Facts[Quantity]),Facts[Region]=\"Nope\"))*(VAR y=ERROR(\"x\") RETURN y))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISLOGICAL((VAR y=ERROR(\"x\") RETURN y)*(VAR y=1 RETURN y))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISLOGICAL((VAR y=ERROR(\"x\") RETURN y)&(\"b\"))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISLOGICAL((VAR y=ERROR(\"x\") RETURN y)+(CALCULATE(SUM(Facts[Quantity]),Facts[Region]=\"Nope\")))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISTEXT((VAR y=ERROR(\"x\") RETURN y)*(2.5))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISLOGICAL((1)+(VAR y=ERROR(\"x\") RETURN y))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISLOGICAL((VAR y=ERROR(\"x\") RETURN y)*(MAX(Facts[Sales])))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISTEXT((SUM(Facts[Sales]))*(VAR y=ERROR(\"x\") RETURN y))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISNONTEXT((\"b\")+(VAR y=ERROR(\"x\") RETURN y))",
+   "powerbi": "True",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISLOGICAL((VAR y=ERROR(\"x\") RETURN y)*(COUNTROWS(FILTER(Facts,FALSE()))))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISLOGICAL((\"\")+(VAR y=ERROR(\"x\") RETURN y))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISTEXT((VAR y=ERROR(\"x\") RETURN y)+(\"b\"))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISLOGICAL((VAR y=ERROR(\"x\") RETURN y)+(\"\"))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISNONTEXT((VAR y=ERROR(\"x\") RETURN y)+(1))",
+   "powerbi": "True",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISNONTEXT((TRUE())+(VAR y=ERROR(\"x\") RETURN y))",
+   "powerbi": "True",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISNONTEXT((COUNTROWS(FILTER(Facts,FALSE())))*(VAR y=ERROR(\"x\") RETURN y))",
+   "powerbi": "True",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISLOGICAL((MAX(Facts[Note]))+(VAR y=ERROR(\"x\") RETURN y))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISTEXT((VAR y=ERROR(\"x\") RETURN y)*(SUMX(FILTER(Facts,FALSE()),1)))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISNUMBER((VAR y=ERROR(\"x\") RETURN y)&(IF(SUM(Facts[Sales])>0,1,2)))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISTEXT((VAR y=ERROR(\"x\") RETURN y)+(TRUE()))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISTEXT((VAR y=ERROR(\"x\") RETURN y)*(IF(SUM(Facts[Sales])>0,1,2)))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISLOGICAL((VAR y=ERROR(\"x\") RETURN y)&(1))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISNONTEXT((\"b\")*(VAR y=ERROR(\"x\") RETURN y))",
+   "powerbi": "True",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISNONTEXT((VAR y=ERROR(\"x\") RETURN y)+(COUNTROWS(FILTER(Facts,FALSE()))))",
+   "powerbi": "True",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISNONTEXT((2.5)*((-1)^0.5))",
+   "powerbi": "True",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISNUMBER(((-1)^0.5)&(BLANK()))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISLOGICAL(((-1)^0.5)*(DATE(2020,1,1)))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISLOGICAL(((-1)^0.5)*(VAR y=1 RETURN y))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISNONTEXT(((-1)^0.5)*(2.5))",
+   "powerbi": "True",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISNUMBER((1)+((-1)^0.5))",
+   "powerbi": "True",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISTEXT((MAX(Facts[Note]))*((-1)^0.5))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISLOGICAL((MAX(Facts[Sales]))+((-1)^0.5))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISLOGICAL(((-1)^0.5)*(CALCULATE(SUM(Facts[Quantity]),Facts[Region]=\"Nope\")))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISTEXT((DATE(2020,1,1))*((-1)^0.5))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISNONTEXT((IF(SUM(Facts[Sales])>0,1,2))+((-1)^0.5))",
+   "powerbi": "True",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISNUMBER((2.5)+((-1)^0.5))",
+   "powerbi": "True",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISNUMBER(((-1)^0.5)&(TRUE()))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISLOGICAL(((-1)^0.5)+(BLANK()))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISNONTEXT(((-1)^0.5)+(COUNTROWS(FILTER(Facts,FALSE()))))",
+   "powerbi": "True",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISNUMBER(((-1)^0.5)&(COUNTROWS(FILTER(Facts,FALSE()))))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISNONTEXT((CALCULATE(SUM(Facts[Quantity]),Facts[Region]=\"Nope\"))*((-1)^0.5))",
+   "powerbi": "True",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISLOGICAL(((-1)^0.5)&(SUMX(FILTER(Facts,FALSE()),1)))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISLOGICAL(((-1)^0.5)&(IF(SUM(Facts[Sales])>0,1,2)))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISNONTEXT((SUM(Facts[Sales]))*((-1)^0.5))",
+   "powerbi": "True",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISTEXT(((-1)^0.5)*(\"\"))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISLOGICAL(((-1)^0.5)&(MAX(Facts[Note])))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISLOGICAL(((-1)^0.5)*(COUNTROWS(FILTER(Facts,FALSE()))))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISNONTEXT(((-1)^0.5)&(COUNTROWS(FILTER(Facts,FALSE()))))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISNUMBER(((-1)^0.5)*(\"b\"))",
+   "powerbi": "True",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISTEXT((DATE(2020,1,1))+((-1)^0.5))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISLOGICAL((MAX(Facts[Note]))*((-1)^0.5))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISNONTEXT(((-1)^0.5)&(\"b\"))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISLOGICAL((2.5)+((-1)^0.5))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISTEXT(((-1)^0.5)*(IF(SUM(Facts[Sales])>0,1,2)))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISNUMBER((2.5)*((-1)^0.5))",
+   "powerbi": "True",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISLOGICAL((1)+((-1)^0.5))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISNUMBER(((-1)^0.5)+(1))",
+   "powerbi": "True",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISNONTEXT(((-1)^0.5)*(COUNTROWS(FILTER(Facts,FALSE()))))",
+   "powerbi": "True",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISLOGICAL(((-1)^0.5)&(\"\"))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISTEXT(((-1)^0.5)+(COUNTROWS(FILTER(Facts,FALSE()))))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISNONTEXT((MAX(Facts[Note]))+((-1)^0.5))",
+   "powerbi": "True",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISLOGICAL((TRUE())+((-1)^0.5))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISNUMBER((IF(SUM(Facts[Sales])>0,1,2))*((-1)^0.5))",
+   "powerbi": "True",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISNUMBER(((-1)^0.5)+(SUM(Facts[Sales])))",
+   "powerbi": "True",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISTEXT(((-1)^0.5)&(SUMX(FILTER(Facts,FALSE()),1)))",
+   "powerbi": "True",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISLOGICAL(((-1)^0.5)+(CALCULATE(SUM(Facts[Quantity]),Facts[Region]=\"Nope\")))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISLOGICAL((MAX(Facts[Note]))+((-1)^0.5))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISTEXT(((-1)^0.5)+(VAR y=1 RETURN y))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISNONTEXT((SUM(Facts[Sales]))+((-1)^0.5))",
+   "powerbi": "True",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISNUMBER(- DATE(2020,1,1)*(1-1)^-MAX(Facts[Quantity])*\"2\")",
+   "powerbi": "True",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISNUMBER(2^0^- 0.5+0.5)",
+   "powerbi": "True",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISNUMBER(-CURRENCY(2)-0^+1.5*0.0^-1E-200)",
+   "powerbi": "True",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISNUMBER(+(1-1)^(0*-1)^- (0*-1))",
+   "powerbi": "True",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISNUMBER(MIN(Facts[Sales])^-1E15^-CURRENCY(2)+-\"2\")",
+   "powerbi": "True",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISNUMBER((0.0*-1)^SUM(Facts[Sales])^1E15)",
+   "powerbi": "True",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISNUMBER(1.5^1E15*3-1E-200)",
+   "powerbi": "True",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISNUMBER(0.5*- 0^- CURRENCY(2))",
+   "powerbi": "True",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISNUMBER(1.5^+MIN(Facts[Sales])^MIN(Facts[Sales])+-DATE(2020,1,1))",
+   "powerbi": "True",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISNUMBER(+1.5+0^+COUNTROWS(Facts)^1*-0)",
+   "powerbi": "True",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISNUMBER(- (1-1)^BLANK()*-(0.0*-1)-1)",
+   "powerbi": "True",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISNUMBER(MIN(Facts[Sales])^+1E-200*2*COUNTROWS(Facts)-+(0*-1))",
+   "powerbi": "True",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISNUMBER((1-1)^(0.0*-1)-+1.5)",
+   "powerbi": "True",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISTEXT(MOD(1,0))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISNUMBER(MOD(1,0))",
+   "powerbi": "True",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISLOGICAL(MOD(1,0))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISNONTEXT(MOD(1,0))",
+   "powerbi": "True",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISTEXT((MOD(1,0))&(\"\"))",
+   "powerbi": "True",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISTEXT((MOD(1,0))*(1))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISTEXT((MOD(1,0))*(SUMX(FILTER(Facts,FALSE()),1)))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISTEXT((MOD(1,0))+(COUNTROWS(FILTER(Facts,FALSE()))))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISTEXT((TRUE())*(MOD(1,0)))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISLOGICAL((\"\")+(MOD(1,0)))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISLOGICAL((\"b\")*(MOD(1,0)))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISLOGICAL((MOD(1,0))+(CALCULATE(SUM(Facts[Quantity]),Facts[Region]=\"Nope\")))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISNONTEXT((SUM(Facts[Sales]))*(MOD(1,0)))",
+   "powerbi": "True",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISTEXT((MOD(1,0))*(COUNTROWS(FILTER(Facts,FALSE()))))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISLOGICAL((MOD(1,0))*(SUMX(FILTER(Facts,FALSE()),1)))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISTEXT((SUMX(FILTER(Facts,FALSE()),1))+(MOD(1,0)))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISNONTEXT((MOD(1,0))+(VAR y=1 RETURN y))",
+   "powerbi": "True",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISTEXT((MOD(1,0))*(\"\"))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISNUMBER((\"\")*(MOD(1,0)))",
+   "powerbi": "True",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISNONTEXT((MOD(1,0))&(IF(SUM(Facts[Sales])>0,1,2)))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISTEXT((MOD(1,0))&(IF(SUM(Facts[Sales])>0,1,2)))",
+   "powerbi": "True",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISTEXT((MOD(1,0))&(CALCULATE(SUM(Facts[Quantity]),Facts[Region]=\"Nope\")))",
+   "powerbi": "True",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISLOGICAL((COUNTROWS(FILTER(Facts,FALSE())))*(MOD(1,0)))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISTEXT((MOD(1,0))&(DATE(2020,1,1)))",
+   "powerbi": "True",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISNONTEXT((MOD(1,0))*(\"b\"))",
+   "powerbi": "True",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISNUMBER((MOD(1,0))+(SUM(Facts[Sales])))",
+   "powerbi": "True",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISNUMBER((MOD(1,0))+(\"\"))",
+   "powerbi": "True",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISNUMBER((BLANK())+(MOD(1,0)))",
+   "powerbi": "True",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISLOGICAL((SUM(Facts[Sales]))+(MOD(1,0)))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISNONTEXT((TRUE())+(MOD(1,0)))",
+   "powerbi": "True",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISTEXT((SUM(Facts[Sales]))+(MOD(1,0)))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISNONTEXT((MAX(Facts[Note]))*(MOD(1,0)))",
+   "powerbi": "True",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISNONTEXT((COUNTROWS(FILTER(Facts,FALSE())))*(MOD(1,0)))",
+   "powerbi": "True",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISLOGICAL((VAR y=1 RETURN y)+(MOD(1,0)))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISTEXT((MAX(Facts[Note]))+(MOD(1,0)))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISNONTEXT((MOD(1,0))*(CALCULATE(SUM(Facts[Quantity]),Facts[Region]=\"Nope\")))",
+   "powerbi": "True",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISNONTEXT((MOD(1,0))&(\"\"))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISLOGICAL((MOD(1,0))&(CALCULATE(SUM(Facts[Quantity]),Facts[Region]=\"Nope\")))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISTEXT((MOD(1,0))&(MAX(Facts[Note])))",
+   "powerbi": "True",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISTEXT((BLANK())+(MOD(1,0)))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISNUMBER((\"b\")*(MOD(1,0)))",
+   "powerbi": "True",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISTEXT((MOD(1,0))&(VAR y=1 RETURN y))",
+   "powerbi": "True",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISNONTEXT((MOD(1,0))*(MAX(Facts[Note])))",
+   "powerbi": "True",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISTEXT((MOD(1,0))*(DATE(2020,1,1)))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISTEXT((CALCULATE(SUM(Facts[Quantity]),Facts[Region]=\"Nope\"))*(MOD(1,0)))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISLOGICAL((MOD(1,0))&(MAX(Facts[Note])))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISNONTEXT((MOD(1,0))&(TRUE()))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISNUMBER((1)*(MOD(1,0)))",
+   "powerbi": "True",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISNONTEXT((MOD(1,0))*(2.5))",
+   "powerbi": "True",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISNUMBER((MOD(1,0))&(MAX(Facts[Note])))",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "A",
+   "expr": "ISTEXT((MOD(1,0))&(BLANK()))",
+   "powerbi": "True",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "SUMX({TRUE(),FALSE()},IF(VAR y=BLANK() RETURN y==[Value],1,2))",
+   "powerbi": "4",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "COUNTROWS(FILTER({TRUE(),FALSE()},VAR y=BLANK() RETURN y==[Value]))",
+   "powerbi": "BLANK",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "SUMX({BLANK(),TRUE()},IF(VAR y=BLANK() RETURN y==[Value],1,2))",
+   "powerbi": "3",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "COUNTROWS(FILTER({BLANK(),TRUE()},VAR y=BLANK() RETURN y==[Value]))",
+   "powerbi": "1",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "SUMX(SELECTCOLUMNS(Facts,\"Value\",Facts[Quantity]>1),IF(VAR y=BLANK() RETURN y==[Value],1,2))",
+   "powerbi": "12",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "COUNTROWS(FILTER(SELECTCOLUMNS(Facts,\"Value\",Facts[Quantity]>1),VAR y=BLANK() RETURN y==[Value]))",
+   "powerbi": "BLANK",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "SUMX(Facts,IF(VAR y=BLANK() RETURN y==TRUE(),1,2))",
+   "powerbi": "12",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "SUMX(Facts,IF(VAR y=BLANK() RETURN y==FALSE(),1,2))",
+   "powerbi": "12",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "SUMX(Facts,IF(VAR y=BLANK() RETURN y==OR(0,\"\"),1,2))",
+   "powerbi": "6",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "COUNTROWS(FILTER(Facts,VAR y=BLANK() RETURN y==TRUE()))",
+   "powerbi": "BLANK",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "COUNTROWS(FILTER(Facts,VAR y=BLANK() RETURN y==FALSE()))",
+   "powerbi": "BLANK",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "COUNTROWS(FILTER(Facts,VAR y=BLANK() RETURN y==OR(0,\"\")))",
+   "powerbi": "6",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "VAR y=BLANK() RETURN y==TRUE()",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "VAR y=BLANK() RETURN y==FALSE()",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "VAR y=BLANK() RETURN y==OR(0,\"\")",
+   "powerbi": "True",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "IFERROR(VAR y=BLANK() RETURN y==TRUE(),7)",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "IFERROR(VAR y=BLANK() RETURN y==FALSE(),7)",
+   "powerbi": "False",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "IFERROR(VAR y=BLANK() RETURN y==OR(0,\"\"),7)",
+   "powerbi": "True",
+   "now": ""
+  },
+  {
+   "part": "B",
+   "expr": "VAR b=BLANK() RETURN b==TRUE()",
+   "powerbi": "False",
+   "now": ""
+  }
+ ]
+}
