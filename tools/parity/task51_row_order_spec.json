@@ -1,0 +1,3328 @@
+{
+ "items": [
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(ADDCOLUMNS(ALL(Facts[Quantity]),\"n\",INDEX(1,ALL(Facts[Quantity]),ORDERBY(Facts[Quantity]))),[n],\",\",Facts[Quantity])",
+   "powerbi": "0,0,0,0,0,0",
+   "now": "LOCAL-REJECT:INDEX returns a table; use it inside COUNTROWS, SUMX, CONCATENATEX or another table argument."
+  },
+  {
+   "part": "B",
+   "expr": "TOCSV(LINESTX(DATATABLE(\"x\",DOUBLE,\"y\",DOUBLE,\"z\",DOUBLE,{{1,2,1},{2,4.1,3},{3,5.9,2},{4,8.2,5},{5,9.8,4}}),[y],[x]))",
+   "powerbi": "[Slope1],[Intercept],[StandardErrorSlope1],[StandardErrorIntercept],[CoefficientOfDetermination],[StandardError],[FStatistic],[DegreesOfFreedom],[RegressionSumOfSquares],[ResidualSumOfSquares]\n1.97,8.99999999999999E-02,5.50757054728609E-02,0.182665450117603,0.997660668380463,0.174164673034841,1279.41758241759,3,38.809,9.09999999999994E-02",
+   "now": "LOCAL-REJECT:The row order of this table expression is not modelled in the local engine, so TOCSV / TOJSON refuse it."
+  },
+  {
+   "part": "B",
+   "expr": "TOCSV(LINESTX(DATATABLE(\"x\",DOUBLE,\"y\",DOUBLE,\"z\",DOUBLE,{{1,2,1},{2,4.1,3},{3,5.9,2},{4,8.2,5},{5,9.8,4}}),[y],[x],[z]))",
+   "powerbi": "[Slope1],[Slope2],[Intercept],[StandardErrorSlope1],[StandardErrorSlope2],[StandardErrorIntercept],[CoefficientOfDetermination],[StandardError],[FStatistic],[DegreesOfFreedom],[RegressionSumOfSquares],[ResidualSumOfSquares]\n1.85,0.15,4.44089209850063E-16,3.72677996249961E-02,3.72677996249961E-02,7.74596669241475E-02,0.99974293059126,0.070710678118654,3889.00000000008,2,38.89,9.9999999999998E-03",
+   "now": "LOCAL-REJECT:The row order of this table expression is not modelled in the local engine, so TOCSV / TOJSON refuse it."
+  },
+  {
+   "part": "B",
+   "expr": "TOCSV(LINESTX(DATATABLE(\"x\",DOUBLE,\"y\",DOUBLE,\"z\",DOUBLE,{{1,2,1},{2,4.1,3},{3,5.9,2},{4,8.2,5},{5,9.8,4}}),[y],[x],FALSE()))",
+   "powerbi": "[Slope1],[StandardErrorSlope1],[CoefficientOfDetermination],[StandardError],[FStatistic],[DegreesOfFreedom],[RegressionSumOfSquares],[ResidualSumOfSquares]\n1.99454545454545,2.11449151811145E-02,0.999550645790938,0.156814887975947,8897.66358595201,4,218.801636363636,9.83636363636356E-02",
+   "now": "LOCAL-REJECT:The row order of this table expression is not modelled in the local engine, so TOCSV / TOJSON refuse it."
+  },
+  {
+   "part": "B",
+   "expr": "TOCSV(LINESTX(DATATABLE(\"x\",DOUBLE,\"y\",DOUBLE,\"z\",DOUBLE,{{1,2,1},{2,4.1,3},{3,5.9,2},{4,8.2,5},{5,9.8,4}}),[y],[x],[z],FALSE()))",
+   "powerbi": "[Slope1],[Slope2],[StandardErrorSlope1],[StandardErrorSlope2],[CoefficientOfDetermination],[StandardError],[FStatistic],[DegreesOfFreedom],[RegressionSumOfSquares],[ResidualSumOfSquares]\n1.85,0.149999999999999,2.91335791158374E-02,2.91335791158374E-02,0.999954317039744,5.77350269189622E-02,32833.5000000004,3,218.89,9.99999999999989E-03",
+   "now": "LOCAL-REJECT:The row order of this table expression is not modelled in the local engine, so TOCSV / TOJSON refuse it."
+  },
+  {
+   "part": "B",
+   "expr": "TOCSV(LINESTX(DATATABLE(\"x\",DOUBLE,\"y\",DOUBLE,\"z\",DOUBLE,{{1,2,1},{2,4.1,3},{3,5.9,2},{4,8.2,5},{5,9.8,4}}),[y],[x],TRUE()))",
+   "powerbi": "[Slope1],[Intercept],[StandardErrorSlope1],[StandardErrorIntercept],[CoefficientOfDetermination],[StandardError],[FStatistic],[DegreesOfFreedom],[RegressionSumOfSquares],[ResidualSumOfSquares]\n1.97,8.99999999999999E-02,5.50757054728609E-02,0.182665450117603,0.997660668380463,0.174164673034841,1279.41758241759,3,38.809,9.09999999999994E-02",
+   "now": "LOCAL-REJECT:The row order of this table expression is not modelled in the local engine, so TOCSV / TOJSON refuse it."
+  },
+  {
+   "part": "B",
+   "expr": "TOCSV(LINESTX(DATATABLE(\"x\",DOUBLE,\"y\",DOUBLE,\"z\",DOUBLE,\"w\",DOUBLE,{{1,3,1,7},{2,5.2,3,1},{3,6.9,2,8},{4,9.1,5,3},{5,11.2,4,9},{6,12.8,7,2},{7,15.3,6,5}}),[y],[x]))",
+   "powerbi": "[Slope1],[Intercept],[StandardErrorSlope1],[StandardErrorIntercept],[CoefficientOfDetermination],[StandardError],[FStatistic],[DegreesOfFreedom],[RegressionSumOfSquares],[ResidualSumOfSquares]\n2.01428571428571,1.01428571428571,3.67006645104718E-02,0.164130361329658,0.998342874359747,0.194201662491045,3012.27272727273,5,113.605714285714,0.188571428571429",
+   "now": "LOCAL-REJECT:The row order of this table expression is not modelled in the local engine, so TOCSV / TOJSON refuse it."
+  },
+  {
+   "part": "B",
+   "expr": "TOCSV(LINESTX(DATATABLE(\"x\",DOUBLE,\"y\",DOUBLE,\"z\",DOUBLE,\"w\",DOUBLE,{{1,3,1,7},{2,5.2,3,1},{3,6.9,2,8},{4,9.1,5,3},{5,11.2,4,9},{6,12.8,7,2},{7,15.3,6,5}}),[y],[x],[z]))",
+   "powerbi": "[Slope1],[Slope2],[Intercept],[StandardErrorSlope1],[StandardErrorSlope2],[StandardErrorIntercept],[CoefficientOfDetermination],[StandardError],[FStatistic],[DegreesOfFreedom],[RegressionSumOfSquares],[ResidualSumOfSquares]\n2.05471698113208,-4.52830188679243E-02,1.03369272237197,8.82567212341623E-02,8.82567212341623E-02,0.181727338206772,0.99844520115743,0.210313589503672,1284.34003656307,4,113.617358490566,0.176927223719677",
+   "now": "LOCAL-REJECT:The row order of this table expression is not modelled in the local engine, so TOCSV / TOJSON refuse it."
+  },
+  {
+   "part": "B",
+   "expr": "TOCSV(LINESTX(DATATABLE(\"x\",DOUBLE,\"y\",DOUBLE,\"z\",DOUBLE,\"w\",DOUBLE,{{1,3,1,7},{2,5.2,3,1},{3,6.9,2,8},{4,9.1,5,3},{5,11.2,4,9},{6,12.8,7,2},{7,15.3,6,5}}),[y],[x],FALSE()))",
+   "powerbi": "[Slope1],[StandardErrorSlope1],[CoefficientOfDetermination],[StandardError],[FStatistic],[DegreesOfFreedom],[RegressionSumOfSquares],[ResidualSumOfSquares]\n2.21714285714286,0.044035390838035,0.997638755718283,0.521033770955578,2535.03315207859,6,688.201142857143,1.62885714285714",
+   "now": "LOCAL-REJECT:The row order of this table expression is not modelled in the local engine, so TOCSV / TOJSON refuse it."
+  },
+  {
+   "part": "B",
+   "expr": "TOCSV(LINESTX(DATATABLE(\"x\",DOUBLE,\"y\",DOUBLE,\"z\",DOUBLE,\"w\",DOUBLE,{{1,3,1,7},{2,5.2,3,1},{3,6.9,2,8},{4,9.1,5,3},{5,11.2,4,9},{6,12.8,7,2},{7,15.3,6,5}}),[y],[x],[z],FALSE()))",
+   "powerbi": "[Slope1],[Slope2],[StandardErrorSlope1],[StandardErrorSlope2],[CoefficientOfDetermination],[StandardError],[FStatistic],[DegreesOfFreedom],[RegressionSumOfSquares],[ResidualSumOfSquares]\n2.15920577617328,5.92057761732855E-02,0.232770720620969,0.232770720620969,0.997668917644179,0.567106787389508,1069.9631816447,5,688.221949458484,1.60805054151624",
+   "now": "LOCAL-REJECT:The row order of this table expression is not modelled in the local engine, so TOCSV / TOJSON refuse it."
+  },
+  {
+   "part": "B",
+   "expr": "TOCSV(LINESTX(DATATABLE(\"x\",DOUBLE,\"y\",DOUBLE,\"z\",DOUBLE,\"w\",DOUBLE,{{1,3,1,7},{2,5.2,3,1},{3,6.9,2,8},{4,9.1,5,3},{5,11.2,4,9},{6,12.8,7,2},{7,15.3,6,5}}),[y],[x],TRUE()))",
+   "powerbi": "[Slope1],[Intercept],[StandardErrorSlope1],[StandardErrorIntercept],[CoefficientOfDetermination],[StandardError],[FStatistic],[DegreesOfFreedom],[RegressionSumOfSquares],[ResidualSumOfSquares]\n2.01428571428571,1.01428571428571,3.67006645104718E-02,0.164130361329658,0.998342874359747,0.194201662491045,3012.27272727273,5,113.605714285714,0.188571428571429",
+   "now": "LOCAL-REJECT:The row order of this table expression is not modelled in the local engine, so TOCSV / TOJSON refuse it."
+  },
+  {
+   "part": "B",
+   "expr": "TOCSV(LINESTX(DATATABLE(\"x\",DOUBLE,\"y\",DOUBLE,\"z\",DOUBLE,\"w\",DOUBLE,{{1,3,1,7},{2,5.2,3,1},{3,6.9,2,8},{4,9.1,5,3},{5,11.2,4,9},{6,12.8,7,2},{7,15.3,6,5}}),[y],[x],[z],[w]))",
+   "powerbi": "[Slope1],[Slope2],[Slope3],[Intercept],[StandardErrorSlope1],[StandardErrorSlope2],[StandardErrorSlope3],[StandardErrorIntercept],[CoefficientOfDetermination],[StandardError],[FStatistic],[DegreesOfFreedom],[RegressionSumOfSquares],[ResidualSumOfSquares]\n2.19088785046729,-0.204439252336448,-5.53738317757009E-02,1.40250333778371,0.188121093645157,0.212726739146336,6.67474043609174E-02,0.483169242855444,0.998735332959764,0.219021979498264,789.721959365431,3,113.650373831776,0.143911882510014",
+   "now": "LOCAL-REJECT:The row order of this table expression is not modelled in the local engine, so TOCSV / TOJSON refuse it."
+  },
+  {
+   "part": "B",
+   "expr": "TOCSV(LINEST(Facts[Quantity],Facts[Sales]))",
+   "powerbi": "[Slope1],[Intercept],[StandardErrorSlope1],[StandardErrorIntercept],[CoefficientOfDetermination],[StandardError],[FStatistic],[DegreesOfFreedom],[RegressionSumOfSquares],[ResidualSumOfSquares]\n3.74955783516095E-02,2.30314821365405,0.109677417431646,1.01981323823361,2.83895093233614E-02,2.06174583707844,0.116876092202713,4,0.496816413158825,17.0031835868412",
+   "now": "LOCAL-REJECT:The row order of this table expression is not modelled in the local engine, so TOCSV / TOJSON refuse it."
+  },
+  {
+   "part": "B",
+   "expr": "TOCSV(LINEST(Facts[Quantity],Facts[Sales],Facts[Quantity]))",
+   "powerbi": "[Slope1],[Slope2],[Intercept],[StandardErrorSlope1],[StandardErrorSlope2],[StandardErrorIntercept],[CoefficientOfDetermination],[StandardError],[FStatistic],[DegreesOfFreedom],[RegressionSumOfSquares],[ResidualSumOfSquares]\n5.90598472053105E-18,1,4.44089209850063E-16,2.39665881415884E-17,1.07697370321686E-16,3.31325981971234E-16,1,4.44089209850063E-16,4.4367771007988E+31,3,17.5,5.91645678915759E-31",
+   "now": "LOCAL-REJECT:The row order of this table expression is not modelled in the local engine, so TOCSV / TOJSON refuse it."
+  },
+  {
+   "part": "B",
+   "expr": "TOCSV(LINEST(Facts[Quantity],Facts[Sales],FALSE()))",
+   "powerbi": "[Slope1],[StandardErrorSlope1],[CoefficientOfDetermination],[StandardError],[FStatistic],[DegreesOfFreedom],[RegressionSumOfSquares],[ResidualSumOfSquares]\n0.177349397590361,0.122123943237907,0.29665717415115,2.78150518323036,2.10890879417957,5,16.3161445783133,38.6838554216867",
+   "now": "LOCAL-REJECT:The row order of this table expression is not modelled in the local engine, so TOCSV / TOJSON refuse it."
+  },
+  {
+   "part": "B",
+   "expr": "TOCSV(LINEST(Facts[Quantity],Facts[Quantity]))",
+   "powerbi": "[Slope1],[Intercept],[StandardErrorSlope1],[StandardErrorIntercept],[CoefficientOfDetermination],[StandardError],[FStatistic],[DegreesOfFreedom],[RegressionSumOfSquares],[ResidualSumOfSquares]\n1,-4.44089209850063E-16,1.21799684846742E-16,3.68766858955201E-16,1,5.09524637778586E-16,6.74074147064981E+31,4,17.5,1.0384614260136E-30",
+   "now": "LOCAL-REJECT:The row order of this table expression is not modelled in the local engine, so TOCSV / TOJSON refuse it."
+  },
+  {
+   "part": "B",
+   "expr": "TOCSV(LINEST(Facts[Sales],Facts[Quantity]))",
+   "powerbi": "[Slope1],[Intercept],[StandardErrorSlope1],[StandardErrorIntercept],[CoefficientOfDetermination],[StandardError],[FStatistic],[DegreesOfFreedom],[RegressionSumOfSquares],[ResidualSumOfSquares]\n0.757142857142857,3.35714285714286,2.21470042199474,6.70533851687223,2.83895093233617E-02,9.26475656915573,0.116876092202714,4,10.032142857143,343.342857142857",
+   "now": "LOCAL-REJECT:The row order of this table expression is not modelled in the local engine, so TOCSV / TOJSON refuse it."
+  },
+  {
+   "part": "B",
+   "expr": "TOCSV(LINEST(Facts[Quantity],Facts[Sales],TRUE()))",
+   "powerbi": "[Slope1],[Intercept],[StandardErrorSlope1],[StandardErrorIntercept],[CoefficientOfDetermination],[StandardError],[FStatistic],[DegreesOfFreedom],[RegressionSumOfSquares],[ResidualSumOfSquares]\n3.74955783516095E-02,2.30314821365405,0.109677417431646,1.01981323823361,2.83895093233614E-02,2.06174583707844,0.116876092202713,4,0.496816413158825,17.0031835868412",
+   "now": "LOCAL-REJECT:The row order of this table expression is not modelled in the local engine, so TOCSV / TOJSON refuse it."
+  },
+  {
+   "part": "B",
+   "expr": "TOCSV(LINEST(Facts[Quantity],Facts[Sales],Facts[Quantity],FALSE()))",
+   "powerbi": "[Slope1],[Slope2],[StandardErrorSlope1],[StandardErrorSlope2],[CoefficientOfDetermination],[StandardError],[FStatistic],[DegreesOfFreedom],[RegressionSumOfSquares],[ResidualSumOfSquares]\n7.79921975817575E-17,1,3.33890923927598E-17,1.02542127560854E-16,1,6.37774571658814E-16,6.76080320121722E+31,4,55,1.62702561701834E-30",
+   "now": "LOCAL-REJECT:The row order of this table expression is not modelled in the local engine, so TOCSV / TOJSON refuse it."
+  },
+  {
+   "part": "B",
+   "expr": "TOCSV(LINESTX(DATATABLE(\"x\",DOUBLE,\"y\",DOUBLE,{{1,2},{2,4},{3,6}}),[y],[x]))",
+   "powerbi": "[Slope1],[Intercept],[StandardErrorSlope1],[StandardErrorIntercept],[CoefficientOfDetermination],[StandardError],[FStatistic],[DegreesOfFreedom],[RegressionSumOfSquares],[ResidualSumOfSquares]\n2,0,0,0,1,0,inf,1,8,0",
+   "now": "LOCAL-REJECT:The row order of this table expression is not modelled in the local engine, so TOCSV / TOJSON refuse it."
+  },
+  {
+   "part": "B",
+   "expr": "TOCSV(LINESTX(DATATABLE(\"x\",DOUBLE,\"y\",DOUBLE,{{1,2},{2,4},{3,6}}),[y],[x],FALSE()))",
+   "powerbi": "[Slope1],[StandardErrorSlope1],[CoefficientOfDetermination],[StandardError],[FStatistic],[DegreesOfFreedom],[RegressionSumOfSquares],[ResidualSumOfSquares]\n2,3.75323885183806E-16,1,1.40433338743068E-15,2.83953734451123E+31,2,56,3.94430452610506E-30",
+   "now": "LOCAL-REJECT:The row order of this table expression is not modelled in the local engine, so TOCSV / TOJSON refuse it."
+  },
+  {
+   "part": "B",
+   "expr": "TOCSV(LINESTX(DATATABLE(\"x\",DOUBLE,\"y\",DOUBLE,{{1,2}}),[y],[x]))",
+   "powerbi": "[Slope1],[Intercept],[StandardErrorSlope1],[StandardErrorIntercept],[CoefficientOfDetermination],[StandardError],[FStatistic],[DegreesOfFreedom],[RegressionSumOfSquares],[ResidualSumOfSquares]\n0,2,0,0,1,0,inf,0,0,0",
+   "now": "LOCAL-REJECT:The row order of this table expression is not modelled in the local engine, so TOCSV / TOJSON refuse it."
+  },
+  {
+   "part": "B",
+   "expr": "TOCSV(LINESTX(DATATABLE(\"x\",DOUBLE,\"y\",DOUBLE,{{1,2}}),[y],[x],FALSE()))",
+   "powerbi": "[Slope1],[StandardErrorSlope1],[CoefficientOfDetermination],[StandardError],[FStatistic],[DegreesOfFreedom],[RegressionSumOfSquares],[ResidualSumOfSquares]\n2,0,1,0,inf,0,4,0",
+   "now": "LOCAL-REJECT:The row order of this table expression is not modelled in the local engine, so TOCSV / TOJSON refuse it."
+  },
+  {
+   "part": "B",
+   "expr": "TOCSV(LINESTX(DATATABLE(\"x\",DOUBLE,\"y\",DOUBLE,{{1,2},{1,3}}),[y],[x]))",
+   "powerbi": "[Slope1],[Intercept],[StandardErrorSlope1],[StandardErrorIntercept],[CoefficientOfDetermination],[StandardError],[FStatistic],[DegreesOfFreedom],[RegressionSumOfSquares],[ResidualSumOfSquares]\n0,2.5,0,0.5,2.22044604925031E-16,0.707106781186547,0,1,1.11022302462516E-16,0.5",
+   "now": "LOCAL-REJECT:The row order of this table expression is not modelled in the local engine, so TOCSV / TOJSON refuse it."
+  },
+  {
+   "part": "B",
+   "expr": "TOCSV(LINESTX(DATATABLE(\"x\",DOUBLE,\"y\",DOUBLE,{{1,2},{1,3}}),[y],[x],FALSE()))",
+   "powerbi": "[Slope1],[StandardErrorSlope1],[CoefficientOfDetermination],[StandardError],[FStatistic],[DegreesOfFreedom],[RegressionSumOfSquares],[ResidualSumOfSquares]\n2.5,0.5,0.961538461538462,0.707106781186547,25,1,12.5,0.5",
+   "now": "LOCAL-REJECT:The row order of this table expression is not modelled in the local engine, so TOCSV / TOJSON refuse it."
+  },
+  {
+   "part": "B",
+   "expr": "TOCSV(LINESTX(DATATABLE(\"x\",DOUBLE,\"y\",DOUBLE,{{1,2},{2,3}}),[y],[x]))",
+   "powerbi": "[Slope1],[Intercept],[StandardErrorSlope1],[StandardErrorIntercept],[CoefficientOfDetermination],[StandardError],[FStatistic],[DegreesOfFreedom],[RegressionSumOfSquares],[ResidualSumOfSquares]\n1,1,0,0,1,0,inf,0,0.5,0",
+   "now": "LOCAL-REJECT:The row order of this table expression is not modelled in the local engine, so TOCSV / TOJSON refuse it."
+  },
+  {
+   "part": "B",
+   "expr": "TOCSV(LINESTX(DATATABLE(\"x\",DOUBLE,\"y\",DOUBLE,{{1,2},{2,3}}),[y],[x],FALSE()))",
+   "powerbi": "[Slope1],[StandardErrorSlope1],[CoefficientOfDetermination],[StandardError],[FStatistic],[DegreesOfFreedom],[RegressionSumOfSquares],[ResidualSumOfSquares]\n1.6,0.2,0.984615384615385,0.447213595499958,64,1,12.8,0.2",
+   "now": "LOCAL-REJECT:The row order of this table expression is not modelled in the local engine, so TOCSV / TOJSON refuse it."
+  },
+  {
+   "part": "B",
+   "expr": "TOCSV(LINESTX(DATATABLE(\"x\",DOUBLE,\"y\",DOUBLE,{{1,5},{2,5},{3,5}}),[y],[x]))",
+   "powerbi": "[Slope1],[Intercept],[StandardErrorSlope1],[StandardErrorIntercept],[CoefficientOfDetermination],[StandardError],[FStatistic],[DegreesOfFreedom],[RegressionSumOfSquares],[ResidualSumOfSquares]\n-0,5,0,0,1,0,inf,1,0,0",
+   "now": "LOCAL-REJECT:The row order of this table expression is not modelled in the local engine, so TOCSV / TOJSON refuse it."
+  },
+  {
+   "part": "B",
+   "expr": "TOCSV(LINESTX(DATATABLE(\"x\",DOUBLE,\"y\",DOUBLE,{{1,5},{2,5},{3,5}}),[y],[x],FALSE()))",
+   "powerbi": "[Slope1],[StandardErrorSlope1],[CoefficientOfDetermination],[StandardError],[FStatistic],[DegreesOfFreedom],[RegressionSumOfSquares],[ResidualSumOfSquares]\n2.14285714285714,0.618589574131742,0.857142857142857,2.31455024943138,12,2,64.2857142857143,10.7142857142857",
+   "now": "LOCAL-REJECT:The row order of this table expression is not modelled in the local engine, so TOCSV / TOJSON refuse it."
+  },
+  {
+   "part": "B",
+   "expr": "TOCSV(LINESTX(DATATABLE(\"x\",DOUBLE,\"y\",DOUBLE,{{1,2},{2,4},{3,7},{4,8}}),[y],[x]))",
+   "powerbi": "[Slope1],[Intercept],[StandardErrorSlope1],[StandardErrorIntercept],[CoefficientOfDetermination],[StandardError],[FStatistic],[DegreesOfFreedom],[RegressionSumOfSquares],[ResidualSumOfSquares]\n2.1,8.88178419700125E-16,0.264575131106459,0.724568837309472,0.969230769230769,0.591607978309961,63,2,22.05,0.7",
+   "now": "LOCAL-REJECT:The row order of this table expression is not modelled in the local engine, so TOCSV / TOJSON refuse it."
+  },
+  {
+   "part": "B",
+   "expr": "TOCSV(LINESTX(DATATABLE(\"x\",DOUBLE,\"y\",DOUBLE,{{1,2},{2,4},{3,7},{4,8}}),[y],[x],FALSE()))",
+   "powerbi": "[Slope1],[StandardErrorSlope1],[CoefficientOfDetermination],[StandardError],[FStatistic],[DegreesOfFreedom],[RegressionSumOfSquares],[ResidualSumOfSquares]\n2.1,8.81917103688197E-02,0.994736842105263,0.483045891539648,567,3,132.3,0.7",
+   "now": "LOCAL-REJECT:The row order of this table expression is not modelled in the local engine, so TOCSV / TOJSON refuse it."
+  },
+  {
+   "part": "B",
+   "expr": "TOCSV(LINESTX(DATATABLE(\"x\",DOUBLE,\"y\",DOUBLE,{{1,2},{2,4},{3,6},{4,8.0000001}}),[y],[x]))",
+   "powerbi": "[Slope1],[Intercept],[StandardErrorSlope1],[StandardErrorIntercept],[CoefficientOfDetermination],[StandardError],[FStatistic],[DegreesOfFreedom],[RegressionSumOfSquares],[ResidualSumOfSquares]\n2.00000003,-5.00000005843049E-08,1.73205079857408E-08,4.74341646561931E-08,1,3.87298332609445E-08,1.33333338718173E+16,2,20.0000006,2.99999996884112E-15",
+   "now": "LOCAL-REJECT:The row order of this table expression is not modelled in the local engine, so TOCSV / TOJSON refuse it."
+  },
+  {
+   "part": "B",
+   "expr": "TOCSV(LINESTX(DATATABLE(\"x\",DOUBLE,\"y\",DOUBLE,{{1,2},{2,4},{3,6},{4,8.0000001}}),[y],[x],FALSE()))",
+   "powerbi": "[Slope1],[StandardErrorSlope1],[CoefficientOfDetermination],[StandardError],[FStatistic],[DegreesOfFreedom],[RegressionSumOfSquares],[ResidualSumOfSquares]\n2.00000001333333,7.20082294401187E-09,1,3.94405315903606E-08,7.71428593331334E+16,3,120.0000016,4.6666665963907E-15",
+   "now": "LOCAL-REJECT:The row order of this table expression is not modelled in the local engine, so TOCSV / TOJSON refuse it."
+  },
+  {
+   "part": "B",
+   "expr": "TOCSV(LINESTX(FILTER(DATATABLE(\"x\",DOUBLE,\"y\",DOUBLE,\"z\",DOUBLE,{{1,2,1},{2,4.1,3},{3,5.9,2},{4,8.2,5},{5,9.8,4}}),[x]>10),[y],[x]))",
+   "powerbi": "[Slope1],[Intercept],[StandardErrorSlope1],[StandardErrorIntercept],[CoefficientOfDetermination],[StandardError],[FStatistic],[DegreesOfFreedom],[RegressionSumOfSquares],[ResidualSumOfSquares]\n",
+   "now": "LOCAL-REJECT:The row order of this table expression is not modelled in the local engine, so TOCSV / TOJSON refuse it."
+  },
+  {
+   "part": "B",
+   "expr": "TOCSV(LINESTX(Facts,Facts[Quantity],Facts[Sales]))",
+   "powerbi": "[Slope1],[Intercept],[StandardErrorSlope1],[StandardErrorIntercept],[CoefficientOfDetermination],[StandardError],[FStatistic],[DegreesOfFreedom],[RegressionSumOfSquares],[ResidualSumOfSquares]\n3.74955783516095E-02,2.30314821365405,0.109677417431646,1.01981323823361,2.83895093233614E-02,2.06174583707844,0.116876092202713,4,0.496816413158825,17.0031835868412",
+   "now": "LOCAL-REJECT:The row order of this table expression is not modelled in the local engine, so TOCSV / TOJSON refuse it."
+  },
+  {
+   "part": "B",
+   "expr": "TOCSV(LINESTX(Facts,Facts[Quantity],Facts[Sales],Facts[Quantity]*2))",
+   "powerbi": "[Slope1],[Slope2],[Intercept],[StandardErrorSlope1],[StandardErrorSlope2],[StandardErrorIntercept],[CoefficientOfDetermination],[StandardError],[FStatistic],[DegreesOfFreedom],[RegressionSumOfSquares],[ResidualSumOfSquares]\n5.90598472053105E-18,0.5,4.44089209850063E-16,2.39665881415884E-17,5.38486851608429E-17,3.31325981971234E-16,1,4.44089209850063E-16,4.4367771007988E+31,3,17.5,5.91645678915759E-31",
+   "now": "LOCAL-REJECT:The row order of this table expression is not modelled in the local engine, so TOCSV / TOJSON refuse it."
+  },
+  {
+   "part": "B",
+   "expr": "TOCSV(LINESTX(Facts,Facts[Quantity],Facts[Sales]),1,\";\",FALSE())",
+   "powerbi": "3.74955783516095E-02;2.30314821365405;0.109677417431646;1.01981323823361;2.83895093233614E-02;2.06174583707844;0.116876092202713;4;0.496816413158825;17.0031835868412",
+   "now": "LOCAL-REJECT:The row order of this table expression is not modelled in the local engine, so TOCSV / TOJSON refuse it."
+  },
+  {
+   "part": "B",
+   "expr": "LEN(TOCSV(LINESTX(Facts,Facts[Quantity],Facts[Sales])))",
+   "powerbi": "358",
+   "now": "LOCAL-REJECT:The row order of this table expression is not modelled in the local engine, so TOCSV / TOJSON refuse it."
+  },
+  {
+   "part": "B",
+   "expr": "TOCSV(ADDMISSINGITEMS(Facts[Quantity],Facts,Facts[Quantity],Facts[Region],CALCULATETABLE(Facts,Facts[Quantity]>1)))",
+   "powerbi": "'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Note]\n10.5,2,East,Paid\n20,3,West,\n-1.5,1,East,Paid\n,4,North,Late\n0,0,West,Paid\n2.5,5,East,",
+   "now": "LOCAL-REJECT:The row order of this table expression is not modelled in the local engine, so TOCSV / TOJSON refuse it."
+  },
+  {
+   "part": "B",
+   "expr": "TOCSV(ADDMISSINGITEMS(Facts[Note],Facts,Facts[Note],FILTER(Facts,Facts[Quantity]>3),FILTER(Facts,Facts[Region]<>\"West\")))",
+   "powerbi": "'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Note]\n10.5,2,East,Paid\n20,3,West,\n-1.5,1,East,Paid\n,4,North,Late\n0,0,West,Paid\n2.5,5,East,",
+   "now": "LOCAL-REJECT:The row order of this table expression is not modelled in the local engine, so TOCSV / TOJSON refuse it."
+  },
+  {
+   "part": "B",
+   "expr": "TOCSV(ADDMISSINGITEMS(Facts[Quantity],TOPN(2,Facts,Facts[Quantity],DESC),Facts[Quantity]))",
+   "powerbi": "'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Note]\n,4,North,Late\n2.5,5,East,\n,0,,\n,1,,\n,2,,\n,3,,",
+   "now": "LOCAL-REJECT:The row order of this table expression is not modelled in the local engine, so TOCSV / TOJSON refuse it."
+  },
+  {
+   "part": "B",
+   "expr": "TOCSV(ADDMISSINGITEMS(Facts[Quantity],Facts[Note],Facts,Facts[Note],Facts[Quantity],FILTER(Facts,Facts[Quantity]>3)))",
+   "powerbi": "'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Note]\n10.5,2,East,Paid\n20,3,West,\n-1.5,1,East,Paid\n,4,North,Late\n0,0,West,Paid\n2.5,5,East,",
+   "now": "LOCAL-REJECT:The row order of this table expression is not modelled in the local engine, so TOCSV / TOJSON refuse it."
+  },
+  {
+   "part": "B",
+   "expr": "TOCSV(ADDMISSINGITEMS(Facts[Note],Facts[Region],Facts,Facts[Note],Facts[Region]))",
+   "powerbi": "'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Note]\n10.5,2,East,Paid\n20,3,West,\n-1.5,1,East,Paid\n,4,North,Late\n0,0,West,Paid\n2.5,5,East,",
+   "now": "LOCAL-REJECT:The row order of this table expression is not modelled in the local engine, so TOCSV / TOJSON refuse it."
+  },
+  {
+   "part": "B",
+   "expr": "TOCSV(ADDMISSINGITEMS(Facts[Note],TOPN(2,Facts,Facts[Quantity],DESC),Facts[Note],FILTER(VALUES(Facts[Note]),Facts[Note]=\"Paid\")))",
+   "powerbi": "'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Note]\n,4,North,Late\n2.5,5,East,\n,,,Paid",
+   "now": "LOCAL-REJECT:The row order of this table expression is not modelled in the local engine, so TOCSV / TOJSON refuse it."
+  },
+  {
+   "part": "B",
+   "expr": "TOCSV(ADDMISSINGITEMS(Facts[Sales],Facts,Facts[Sales]))",
+   "powerbi": "'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Note]\n10.5,2,East,Paid\n20,3,West,\n-1.5,1,East,Paid\n,4,North,Late\n0,0,West,Paid\n2.5,5,East,",
+   "now": "LOCAL-REJECT:The row order of this table expression is not modelled in the local engine, so TOCSV / TOJSON refuse it."
+  },
+  {
+   "part": "B",
+   "expr": "TOCSV(ADDMISSINGITEMS(Facts[Sales],FILTER(Facts,Facts[Region]=\"East\"),Facts[Sales],FILTER(Facts,Facts[Quantity]>3)))",
+   "powerbi": "'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Note]\n10.5,2,East,Paid\n-1.5,1,East,Paid\n2.5,5,East,\n,,,",
+   "now": "LOCAL-REJECT:The row order of this table expression is not modelled in the local engine, so TOCSV / TOJSON refuse it."
+  },
+  {
+   "part": "B",
+   "expr": "TOCSV(ADDMISSINGITEMS(Facts[Sales],Facts,Facts[Sales],Facts))",
+   "powerbi": "'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Note]\n10.5,2,East,Paid\n20,3,West,\n-1.5,1,East,Paid\n,4,North,Late\n0,0,West,Paid\n2.5,5,East,",
+   "now": "LOCAL-REJECT:The row order of this table expression is not modelled in the local engine, so TOCSV / TOJSON refuse it."
+  },
+  {
+   "part": "B",
+   "expr": "TOCSV(ADDMISSINGITEMS(Facts[Note],FILTER(Facts,Facts[Quantity]>2),Facts[Note],Facts[Quantity]))",
+   "powerbi": "'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Note]\n20,3,West,\n,4,North,Late\n2.5,5,East,\n,,,Paid",
+   "now": "LOCAL-REJECT:The row order of this table expression is not modelled in the local engine, so TOCSV / TOJSON refuse it."
+  },
+  {
+   "part": "B",
+   "expr": "TOCSV(ADDMISSINGITEMS(Facts[Quantity],Facts[Region],FILTER(Facts,Facts[Region]=\"East\"),Facts[Quantity],Facts[Region],ALL(Facts)))",
+   "powerbi": "'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Note]\n10.5,2,East,Paid\n-1.5,1,East,Paid\n2.5,5,East,\n,0,West,\n,3,West,\n,4,North,",
+   "now": "LOCAL-REJECT:The row order of this table expression is not modelled in the local engine, so TOCSV / TOJSON refuse it."
+  },
+  {
+   "part": "B",
+   "expr": "TOCSV(ADDMISSINGITEMS(Facts[Sales],TOPN(2,Facts,Facts[Quantity],DESC),Facts[Sales],Facts))",
+   "powerbi": "'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Note]\n,4,North,Late\n2.5,5,East,\n-1.5,,,\n0,,,\n10.5,,,\n20,,,",
+   "now": "LOCAL-REJECT:The row order of this table expression is not modelled in the local engine, so TOCSV / TOJSON refuse it."
+  },
+  {
+   "part": "B",
+   "expr": "TOCSV(ADDMISSINGITEMS(Facts[Quantity],FILTER(Facts,Facts[Region]=\"East\"),Facts[Quantity],FILTER(Facts,FALSE())))",
+   "powerbi": "'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Note]\n10.5,2,East,Paid\n-1.5,1,East,Paid\n2.5,5,East,",
+   "now": "LOCAL-REJECT:The row order of this table expression is not modelled in the local engine, so TOCSV / TOJSON refuse it."
+  },
+  {
+   "part": "B",
+   "expr": "TOCSV(ADDMISSINGITEMS(Facts[Region],Facts,Facts[Region],Facts[Quantity],Facts[Sales],FILTER(Facts,Facts[Quantity]>3)))",
+   "powerbi": "'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Note]\n10.5,2,East,Paid\n20,3,West,\n-1.5,1,East,Paid\n,4,North,Late\n0,0,West,Paid\n2.5,5,East,",
+   "now": "LOCAL-REJECT:The row order of this table expression is not modelled in the local engine, so TOCSV / TOJSON refuse it."
+  },
+  {
+   "part": "B",
+   "expr": "TOCSV(ADDMISSINGITEMS(Facts[Region],FILTER(Facts,Facts[Region]=\"East\"),Facts[Note],Facts[Region],FILTER(Facts,Facts[Quantity]>3),FILTER(Facts,Facts[Region]<>\"West\")))",
+   "powerbi": "'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Note]\n10.5,2,East,Paid\n-1.5,1,East,Paid\n2.5,5,East,",
+   "now": "LOCAL-REJECT:The row order of this table expression is not modelled in the local engine, so TOCSV / TOJSON refuse it."
+  },
+  {
+   "part": "B",
+   "expr": "TOCSV(ADDMISSINGITEMS(Facts[Region],Facts[Quantity],FILTER(Facts,Facts[Region]=\"East\"),Facts[Region],Facts[Quantity],FILTER(ALL(Facts),Facts[Quantity]>3)))",
+   "powerbi": "'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Note]\n10.5,2,East,Paid\n-1.5,1,East,Paid\n2.5,5,East,\n,4,North,",
+   "now": "LOCAL-REJECT:The row order of this table expression is not modelled in the local engine, so TOCSV / TOJSON refuse it."
+  },
+  {
+   "part": "B",
+   "expr": "TOCSV(ADDMISSINGITEMS(Facts[Region],TOPN(2,Facts,Facts[Quantity],DESC),Facts[Region],ALL(Facts[Region])))",
+   "powerbi": "'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Note]\n,4,North,Late\n2.5,5,East,\n,,West,",
+   "now": "LOCAL-REJECT:The row order of this table expression is not modelled in the local engine, so TOCSV / TOJSON refuse it."
+  },
+  {
+   "part": "B",
+   "expr": "TOCSV(ADDMISSINGITEMS(Facts[Quantity],Facts[Note],Facts[Region],FILTER(Facts,Facts[Region]=\"East\"),Facts[Region],Facts[Note],Facts[Quantity],FILTER(Facts,FALSE())))",
+   "powerbi": "'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Note]\n10.5,2,East,Paid\n-1.5,1,East,Paid\n2.5,5,East,",
+   "now": "LOCAL-REJECT:The row order of this table expression is not modelled in the local engine, so TOCSV / TOJSON refuse it."
+  },
+  {
+   "part": "B",
+   "expr": "TOCSV(ADDMISSINGITEMS(Facts[Note],FILTER(Facts,Facts[Region]=\"East\"),Facts[Note],Facts[Quantity],FILTER(Facts,Facts[Quantity]>3)))",
+   "powerbi": "'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Note]\n10.5,2,East,Paid\n-1.5,1,East,Paid\n2.5,5,East,\n,,,Late",
+   "now": "LOCAL-REJECT:The row order of this table expression is not modelled in the local engine, so TOCSV / TOJSON refuse it."
+  },
+  {
+   "part": "B",
+   "expr": "TOCSV(ADDMISSINGITEMS(Facts[Quantity],Facts[Note],Facts[Region],Facts,Facts[Region],Facts[Note],Facts[Quantity],ALL(Facts)))",
+   "powerbi": "'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Note]\n10.5,2,East,Paid\n20,3,West,\n-1.5,1,East,Paid\n,4,North,Late\n0,0,West,Paid\n2.5,5,East,",
+   "now": "LOCAL-REJECT:The row order of this table expression is not modelled in the local engine, so TOCSV / TOJSON refuse it."
+  },
+  {
+   "part": "B",
+   "expr": "TOCSV(ADDMISSINGITEMS(Facts[Region],Facts,Facts[Region],Facts[Quantity],FILTER(Facts,Facts[Quantity]>3)))",
+   "powerbi": "'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Note]\n10.5,2,East,Paid\n20,3,West,\n-1.5,1,East,Paid\n,4,North,Late\n0,0,West,Paid\n2.5,5,East,",
+   "now": "LOCAL-REJECT:The row order of this table expression is not modelled in the local engine, so TOCSV / TOJSON refuse it."
+  },
+  {
+   "part": "B",
+   "expr": "TOCSV(ADDMISSINGITEMS(Facts[Region],Facts,Facts[Region],Facts))",
+   "powerbi": "'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Note]\n10.5,2,East,Paid\n20,3,West,\n-1.5,1,East,Paid\n,4,North,Late\n0,0,West,Paid\n2.5,5,East,",
+   "now": "LOCAL-REJECT:The row order of this table expression is not modelled in the local engine, so TOCSV / TOJSON refuse it."
+  },
+  {
+   "part": "B",
+   "expr": "TOCSV(ADDMISSINGITEMS(Facts[Region],Facts[Quantity],FILTER(Facts,Facts[Quantity]>2),Facts[Region],Facts[Quantity]))",
+   "powerbi": "'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Note]\n20,3,West,\n,4,North,Late\n2.5,5,East,\n,1,East,\n,2,East,\n,0,West,",
+   "now": "LOCAL-REJECT:The row order of this table expression is not modelled in the local engine, so TOCSV / TOJSON refuse it."
+  },
+  {
+   "part": "B",
+   "expr": "TOCSV(ADDMISSINGITEMS(Facts[Region],Facts[Quantity],FILTER(Facts,Facts[Quantity]>2),Facts[Region],Facts[Quantity],ALL(Facts[Region])))",
+   "powerbi": "'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Note]\n20,3,West,\n,4,North,Late\n2.5,5,East,\n,1,East,\n,2,East,\n,0,West,",
+   "now": "LOCAL-REJECT:The row order of this table expression is not modelled in the local engine, so TOCSV / TOJSON refuse it."
+  },
+  {
+   "part": "B",
+   "expr": "TOCSV(ADDMISSINGITEMS(Facts[Note],FILTER(Facts,Facts[Quantity]>2),Facts[Note],CALCULATETABLE(Facts,Facts[Quantity]>1)))",
+   "powerbi": "'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Note]\n20,3,West,\n,4,North,Late\n2.5,5,East,\n,,,Paid",
+   "now": "LOCAL-REJECT:The row order of this table expression is not modelled in the local engine, so TOCSV / TOJSON refuse it."
+  },
+  {
+   "part": "B",
+   "expr": "TOCSV(ADDMISSINGITEMS(Facts[Note],Facts[Region],Facts,Facts[Region],Facts[Note],ALL(Facts[Region])))",
+   "powerbi": "'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Note]\n10.5,2,East,Paid\n20,3,West,\n-1.5,1,East,Paid\n,4,North,Late\n0,0,West,Paid\n2.5,5,East,",
+   "now": "LOCAL-REJECT:The row order of this table expression is not modelled in the local engine, so TOCSV / TOJSON refuse it."
+  },
+  {
+   "part": "B",
+   "expr": "TOCSV(ADDMISSINGITEMS(Facts[Note],Facts,Facts[Note],Facts[Region],ALL(Facts)))",
+   "powerbi": "'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Note]\n10.5,2,East,Paid\n20,3,West,\n-1.5,1,East,Paid\n,4,North,Late\n0,0,West,Paid\n2.5,5,East,",
+   "now": "LOCAL-REJECT:The row order of this table expression is not modelled in the local engine, so TOCSV / TOJSON refuse it."
+  },
+  {
+   "part": "B",
+   "expr": "TOCSV(ADDMISSINGITEMS(Facts[Region],Facts[Quantity],FILTER(Facts,Facts[Region]=\"East\"),Facts[Quantity],Facts[Region],FILTER(ALL(Facts),Facts[Note]=\"Paid\")))",
+   "powerbi": "'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Note]\n10.5,2,East,Paid\n-1.5,1,East,Paid\n2.5,5,East,\n,0,West,",
+   "now": "LOCAL-REJECT:The row order of this table expression is not modelled in the local engine, so TOCSV / TOJSON refuse it."
+  },
+  {
+   "part": "B",
+   "expr": "TOCSV(ADDMISSINGITEMS(Facts[Region],TOPN(2,Facts,Facts[Quantity],DESC),Facts[Region],Facts[Quantity],Facts[Note]))",
+   "powerbi": "'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Note]\n,4,North,Late\n2.5,5,East,\n,,West,",
+   "now": "LOCAL-REJECT:The row order of this table expression is not modelled in the local engine, so TOCSV / TOJSON refuse it."
+  },
+  {
+   "part": "B",
+   "expr": "TOCSV(ADDMISSINGITEMS(Facts[Note],Facts[Region],TOPN(2,Facts,Facts[Quantity],DESC),Facts[Note],Facts[Region],FILTER(Facts,Facts[Region]=\"East\")))",
+   "powerbi": "'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Note]\n,4,North,Late\n2.5,5,East,\n,,East,Paid",
+   "now": "LOCAL-REJECT:The row order of this table expression is not modelled in the local engine, so TOCSV / TOJSON refuse it."
+  },
+  {
+   "part": "B",
+   "expr": "TOCSV(ADDMISSINGITEMS(Facts[Region],Facts[Note],FILTER(Facts,Facts[Region]=\"East\"),Facts[Note],Facts[Region],Facts))",
+   "powerbi": "'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Note]\n10.5,2,East,Paid\n-1.5,1,East,Paid\n2.5,5,East,\n,,West,\n,,West,Paid\n,,North,Late",
+   "now": "LOCAL-REJECT:The row order of this table expression is not modelled in the local engine, so TOCSV / TOJSON refuse it."
+  },
+  {
+   "part": "B",
+   "expr": "TOCSV(ADDMISSINGITEMS(Facts[Region],Facts[Note],FILTER(Facts,Facts[Quantity]>2),Facts[Note],Facts[Region],FILTER(VALUES(Facts[Note]),Facts[Note]=\"Paid\")))",
+   "powerbi": "'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Note]\n20,3,West,\n,4,North,Late\n2.5,5,East,\n,,East,Paid\n,,West,Paid",
+   "now": "LOCAL-REJECT:The row order of this table expression is not modelled in the local engine, so TOCSV / TOJSON refuse it."
+  },
+  {
+   "part": "B",
+   "expr": "TOCSV(ADDMISSINGITEMS(Facts[Region],Facts,Facts[Region],CALCULATETABLE(Facts,Facts[Quantity]>1)))",
+   "powerbi": "'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Note]\n10.5,2,East,Paid\n20,3,West,\n-1.5,1,East,Paid\n,4,North,Late\n0,0,West,Paid\n2.5,5,East,",
+   "now": "LOCAL-REJECT:The row order of this table expression is not modelled in the local engine, so TOCSV / TOJSON refuse it."
+  },
+  {
+   "part": "B",
+   "expr": "TOCSV(ADDMISSINGITEMS(Facts[Quantity],FILTER(Facts,Facts[Quantity]>2),Facts[Quantity]))",
+   "powerbi": "'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Note]\n20,3,West,\n,4,North,Late\n2.5,5,East,\n,0,,\n,1,,\n,2,,",
+   "now": "LOCAL-REJECT:The row order of this table expression is not modelled in the local engine, so TOCSV / TOJSON refuse it."
+  },
+  {
+   "part": "B",
+   "expr": "TOCSV(ADDMISSINGITEMS(Facts[Region],Facts,Facts[Region],FILTER(Facts,Facts[Quantity]>3),FILTER(Facts,Facts[Region]<>\"West\")))",
+   "powerbi": "'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Note]\n10.5,2,East,Paid\n20,3,West,\n-1.5,1,East,Paid\n,4,North,Late\n0,0,West,Paid\n2.5,5,East,",
+   "now": "LOCAL-REJECT:The row order of this table expression is not modelled in the local engine, so TOCSV / TOJSON refuse it."
+  },
+  {
+   "part": "B",
+   "expr": "TOCSV(ADDMISSINGITEMS(Facts[Quantity],Facts[Note],Facts[Region],TOPN(2,Facts,Facts[Quantity],DESC),Facts[Quantity],Facts[Note],Facts[Region],FILTER(Facts,FALSE())))",
+   "powerbi": "'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Note]\n,4,North,Late\n2.5,5,East,",
+   "now": "LOCAL-REJECT:The row order of this table expression is not modelled in the local engine, so TOCSV / TOJSON refuse it."
+  },
+  {
+   "part": "B",
+   "expr": "TOCSV(ADDMISSINGITEMS(Facts[Note],FILTER(Facts,Facts[Quantity]>2),Facts[Region],Facts[Note],VALUES(Facts[Region])))",
+   "powerbi": "'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Note]\n20,3,West,\n,4,North,Late\n2.5,5,East,\n,,East,Paid\n,,West,Paid",
+   "now": "LOCAL-REJECT:The row order of this table expression is not modelled in the local engine, so TOCSV / TOJSON refuse it."
+  },
+  {
+   "part": "B",
+   "expr": "TOCSV(ADDMISSINGITEMS(Facts[Quantity],FILTER(Facts,Facts[Region]=\"East\"),Facts[Quantity],Facts[Region],FILTER(Facts,Facts[Quantity]>3),FILTER(Facts,Facts[Region]<>\"West\")))",
+   "powerbi": "'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Note]\n10.5,2,East,Paid\n-1.5,1,East,Paid\n2.5,5,East,\n,4,,",
+   "now": "LOCAL-REJECT:The row order of this table expression is not modelled in the local engine, so TOCSV / TOJSON refuse it."
+  },
+  {
+   "part": "B",
+   "expr": "TOCSV(ADDMISSINGITEMS(Facts[Region],Facts[Note],Facts[Quantity],TOPN(2,Facts,Facts[Quantity],DESC),Facts[Region],Facts[Note],Facts[Quantity],FILTER(VALUES(Facts[Note]),Facts[Note]=\"Paid\")))",
+   "powerbi": "'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Note]\n,4,North,Late\n2.5,5,East,\n,1,East,Paid\n,2,East,Paid\n,0,West,Paid",
+   "now": "LOCAL-REJECT:The row order of this table expression is not modelled in the local engine, so TOCSV / TOJSON refuse it."
+  },
+  {
+   "part": "B",
+   "expr": "TOCSV(ADDMISSINGITEMS(Facts[Quantity],FILTER(Facts,Facts[Quantity]>2),Facts[Quantity],ALL(Facts)))",
+   "powerbi": "'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Note]\n20,3,West,\n,4,North,Late\n2.5,5,East,\n,0,,\n,1,,\n,2,,",
+   "now": "LOCAL-REJECT:The row order of this table expression is not modelled in the local engine, so TOCSV / TOJSON refuse it."
+  },
+  {
+   "part": "B",
+   "expr": "TOCSV(ADDMISSINGITEMS(Facts[Quantity],Facts[Note],FILTER(Facts,Facts[Quantity]>2),Facts[Note],Facts[Quantity]))",
+   "powerbi": "'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Note]\n20,3,West,\n,4,North,Late\n2.5,5,East,\n,0,,Paid\n,1,,Paid\n,2,,Paid",
+   "now": "LOCAL-REJECT:The row order of this table expression is not modelled in the local engine, so TOCSV / TOJSON refuse it."
+  },
+  {
+   "part": "B",
+   "expr": "TOCSV(ADDMISSINGITEMS(Facts[Note],FILTER(Facts,Facts[Quantity]>2),Facts[Note],ALL(Facts)))",
+   "powerbi": "'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Note]\n20,3,West,\n,4,North,Late\n2.5,5,East,\n,,,Paid",
+   "now": "LOCAL-REJECT:The row order of this table expression is not modelled in the local engine, so TOCSV / TOJSON refuse it."
+  },
+  {
+   "part": "B",
+   "expr": "TOCSV(ADDMISSINGITEMS(Facts[Sales],TOPN(2,Facts,Facts[Quantity],DESC),Facts[Sales],FILTER(Facts,Facts[Region]=\"East\")))",
+   "powerbi": "'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Note]\n,4,North,Late\n2.5,5,East,\n-1.5,,,\n10.5,,,",
+   "now": "LOCAL-REJECT:The row order of this table expression is not modelled in the local engine, so TOCSV / TOJSON refuse it."
+  },
+  {
+   "part": "B",
+   "expr": "TOCSV(ADDMISSINGITEMS(Facts[Region],Facts[Note],FILTER(Facts,Facts[Quantity]>2),Facts[Note],Facts[Region],FILTER(ALL(Facts),Facts[Quantity]>3)))",
+   "powerbi": "'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Note]\n20,3,West,\n,4,North,Late\n2.5,5,East,",
+   "now": "LOCAL-REJECT:The row order of this table expression is not modelled in the local engine, so TOCSV / TOJSON refuse it."
+  },
+  {
+   "part": "B",
+   "expr": "TOCSV(ADDMISSINGITEMS(Facts[Note],Facts[Region],FILTER(Facts,Facts[Region]=\"East\"),Facts[Note],Facts[Region],CALCULATETABLE(Facts,Facts[Quantity]>1)))",
+   "powerbi": "'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Note]\n10.5,2,East,Paid\n-1.5,1,East,Paid\n2.5,5,East,\n,,West,\n,,North,Late",
+   "now": "LOCAL-REJECT:The row order of this table expression is not modelled in the local engine, so TOCSV / TOJSON refuse it."
+  },
+  {
+   "part": "B",
+   "expr": "TOCSV(ADDMISSINGITEMS(Facts[Region],Facts[Note],FILTER(Facts,Facts[Region]=\"East\"),Facts[Region],Facts[Note],Facts))",
+   "powerbi": "'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Note]\n10.5,2,East,Paid\n-1.5,1,East,Paid\n2.5,5,East,\n,,West,\n,,West,Paid\n,,North,Late",
+   "now": "LOCAL-REJECT:The row order of this table expression is not modelled in the local engine, so TOCSV / TOJSON refuse it."
+  },
+  {
+   "part": "B",
+   "expr": "TOCSV(ADDMISSINGITEMS(Facts[Region],FILTER(Facts,Facts[Region]=\"East\"),Facts[Region],ALL(Facts)))",
+   "powerbi": "'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Note]\n10.5,2,East,Paid\n-1.5,1,East,Paid\n2.5,5,East,\n,,West,\n,,North,",
+   "now": "LOCAL-REJECT:The row order of this table expression is not modelled in the local engine, so TOCSV / TOJSON refuse it."
+  },
+  {
+   "part": "B",
+   "expr": "TOCSV(ADDMISSINGITEMS(Facts[Region],FILTER(Facts,Facts[Quantity]>2),Facts[Region]))",
+   "powerbi": "'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Note]\n20,3,West,\n,4,North,Late\n2.5,5,East,",
+   "now": "LOCAL-REJECT:The row order of this table expression is not modelled in the local engine, so TOCSV / TOJSON refuse it."
+  },
+  {
+   "part": "B",
+   "expr": "TOCSV(ADDMISSINGITEMS(Facts[Sales],FILTER(Facts,Facts[Region]=\"East\"),Facts[Sales],CALCULATETABLE(Facts,Facts[Quantity]>1)))",
+   "powerbi": "'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Note]\n10.5,2,East,Paid\n-1.5,1,East,Paid\n2.5,5,East,\n,,,\n20,,,",
+   "now": "LOCAL-REJECT:The row order of this table expression is not modelled in the local engine, so TOCSV / TOJSON refuse it."
+  },
+  {
+   "part": "B",
+   "expr": "TOCSV(ADDMISSINGITEMS(Facts[Quantity],FILTER(Facts,Facts[Region]=\"East\"),Facts[Quantity]))",
+   "powerbi": "'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Note]\n10.5,2,East,Paid\n-1.5,1,East,Paid\n2.5,5,East,\n,0,,\n,3,,\n,4,,",
+   "now": "LOCAL-REJECT:The row order of this table expression is not modelled in the local engine, so TOCSV / TOJSON refuse it."
+  },
+  {
+   "part": "B",
+   "expr": "TOCSV(ADDMISSINGITEMS(Facts[Sales],FILTER(Facts,Facts[Quantity]>2),Facts[Sales]))",
+   "powerbi": "'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Note]\n20,3,West,\n,4,North,Late\n2.5,5,East,\n-1.5,,,\n0,,,\n10.5,,,",
+   "now": "LOCAL-REJECT:The row order of this table expression is not modelled in the local engine, so TOCSV / TOJSON refuse it."
+  },
+  {
+   "part": "B",
+   "expr": "TOCSV(ADDMISSINGITEMS(Facts[Note],Facts[Quantity],Facts,Facts[Note],Facts[Quantity]))",
+   "powerbi": "'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Note]\n10.5,2,East,Paid\n20,3,West,\n-1.5,1,East,Paid\n,4,North,Late\n0,0,West,Paid\n2.5,5,East,",
+   "now": "LOCAL-REJECT:The row order of this table expression is not modelled in the local engine, so TOCSV / TOJSON refuse it."
+  },
+  {
+   "part": "B",
+   "expr": "TOCSV(ADDMISSINGITEMS(Facts[Quantity],Facts[Region],TOPN(2,Facts,Facts[Quantity],DESC),Facts[Quantity],Facts[Region],Facts[Note],FILTER(Facts,Facts[Quantity]>3)))",
+   "powerbi": "'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Note]\n,4,North,Late\n2.5,5,East,",
+   "now": "LOCAL-REJECT:The row order of this table expression is not modelled in the local engine, so TOCSV / TOJSON refuse it."
+  },
+  {
+   "part": "B",
+   "expr": "TOCSV(ADDMISSINGITEMS(Facts[Quantity],FILTER(Facts,Facts[Region]=\"East\"),Facts[Quantity],FILTER(Facts,Facts[Quantity]>3)))",
+   "powerbi": "'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Note]\n10.5,2,East,Paid\n-1.5,1,East,Paid\n2.5,5,East,\n,4,,",
+   "now": "LOCAL-REJECT:The row order of this table expression is not modelled in the local engine, so TOCSV / TOJSON refuse it."
+  },
+  {
+   "part": "A",
+   "expr": "VAR t=TOPN(3,Facts,Facts[Quantity]) RETURN CONCATENATEX(t,Facts[Region],\"|\")",
+   "powerbi": "West|North|East",
+   "now": "LOCAL-REJECT:CONCATENATEX over a TOPN held in a variable is walked in an order the local engine does not reproduce."
+  },
+  {
+   "part": "A",
+   "expr": "EVALUATEANDLOG(ROW(\"a\",1))+1",
+   "powerbi": "2",
+   "now": "LOCAL-REJECT:ROW returns a table; use it inside COUNTROWS, SUMX, CONCATENATEX or another table argument."
+  },
+  {
+   "part": "A",
+   "expr": "SUMX(Facts,EVALUATEANDLOG(ROW(\"a\",1)))",
+   "powerbi": "6",
+   "now": "LOCAL-REJECT:ROW returns a table; use it inside COUNTROWS, SUMX, CONCATENATEX or another table argument."
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(UNION(TABLEOF(Facts[Region]),TABLEOF(Facts[Region])),Facts[Region],\",\")",
+   "powerbi": "East,East,East,West,West,North,East,East,East,West,West,North",
+   "now": "LOCAL-REJECT:CONCATENATEX over rows built from TABLEOF depends on the row order, which is not modelled in the local engine"
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(DISTINCT(TABLEOF(Facts[Region])),Facts[Region],\",\")",
+   "powerbi": "East,West,East,North,West,East",
+   "now": "LOCAL-REJECT:CONCATENATEX over rows built from TABLEOF depends on the row order, which is not modelled in the local engine"
+  },
+  {
+   "part": "B",
+   "expr": "TOCSV(TABLEOF(Facts[Region]),100)",
+   "powerbi": "'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Note]\n10.5,2,East,Paid\n20,3,West,\n-1.5,1,East,Paid\n,4,North,Late\n0,0,West,Paid\n2.5,5,East,",
+   "now": "LOCAL-REJECT:TOCSV over TABLEOF depends on the row order, which is not modelled in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(UNION(TABLEOF(Facts[Quantity]),TABLEOF(Facts[Quantity])),Facts[Quantity],\",\")",
+   "powerbi": "0,1,2,3,4,5,0,1,2,3,4,5",
+   "now": "LOCAL-REJECT:CONCATENATEX over rows built from TABLEOF depends on the row order, which is not modelled in the local engine"
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(DISTINCT(TABLEOF(Facts[Quantity])),Facts[Quantity],\",\")",
+   "powerbi": "2,3,1,4,0,5",
+   "now": "LOCAL-REJECT:CONCATENATEX over rows built from TABLEOF depends on the row order, which is not modelled in the local engine"
+  },
+  {
+   "part": "B",
+   "expr": "TOCSV(TABLEOF(Facts[Quantity]),100)",
+   "powerbi": "'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Note]\n10.5,2,East,Paid\n20,3,West,\n-1.5,1,East,Paid\n,4,North,Late\n0,0,West,Paid\n2.5,5,East,",
+   "now": "LOCAL-REJECT:TOCSV over TABLEOF depends on the row order, which is not modelled in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(UNION(TABLEOF(Facts[Note]),TABLEOF(Facts[Note])),Facts[Note],\",\")",
+   "powerbi": ",,Paid,Paid,Paid,Late,,,Paid,Paid,Paid,Late",
+   "now": "LOCAL-REJECT:CONCATENATEX over rows built from TABLEOF depends on the row order, which is not modelled in the local engine"
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(DISTINCT(TABLEOF(Facts[Note])),Facts[Note],\",\")",
+   "powerbi": "Paid,,Paid,Late,Paid,",
+   "now": "LOCAL-REJECT:CONCATENATEX over rows built from TABLEOF depends on the row order, which is not modelled in the local engine"
+  },
+  {
+   "part": "B",
+   "expr": "TOCSV(TABLEOF(Facts[Note]),100)",
+   "powerbi": "'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Note]\n10.5,2,East,Paid\n20,3,West,\n-1.5,1,East,Paid\n,4,North,Late\n0,0,West,Paid\n2.5,5,East,",
+   "now": "LOCAL-REJECT:TOCSV over TABLEOF depends on the row order, which is not modelled in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(UNION(TABLEOF(Facts[Sales]),TABLEOF(Facts[Sales])),Facts[Sales],\",\")",
+   "powerbi": ",-1.5,0,2.5,10.5,20,,-1.5,0,2.5,10.5,20",
+   "now": "LOCAL-REJECT:CONCATENATEX over rows built from TABLEOF depends on the row order, which is not modelled in the local engine"
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(DISTINCT(TABLEOF(Facts[Sales])),Facts[Sales],\",\")",
+   "powerbi": "10.5,20,-1.5,,0,2.5",
+   "now": "LOCAL-REJECT:CONCATENATEX over rows built from TABLEOF depends on the row order, which is not modelled in the local engine"
+  },
+  {
+   "part": "B",
+   "expr": "TOCSV(TABLEOF(Facts[Sales]),100)",
+   "powerbi": "'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Note]\n10.5,2,East,Paid\n20,3,West,\n-1.5,1,East,Paid\n,4,North,Late\n0,0,West,Paid\n2.5,5,East,",
+   "now": "LOCAL-REJECT:TOCSV over TABLEOF depends on the row order, which is not modelled in the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "MAXX(Facts,IF.EAGER(TRUE(),-Facts[Quantity]/0,\"a\"))",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:MAXX over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine d"
+  },
+  {
+   "part": "C",
+   "expr": "MAXX(Facts,IF(FALSE(),TRUE(),Facts[Sales]/Facts[Quantity]))",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:MAXX over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine d"
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(FILTER(VALUES(Facts[Region]),TRUE()),IF(TRUE(),Facts[Region],1))",
+   "powerbi": "EastWestNorth",
+   "now": "LOCAL-REJECT:CONCATENATEX of this expression without an order walks the rows in an order the local engine does not model."
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(ALL(Facts[Region]),IF(TRUE(),Facts[Region],1))",
+   "powerbi": "EastWestNorth",
+   "now": "LOCAL-REJECT:CONCATENATEX of this expression without an order walks the rows in an order the local engine does not model."
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(VALUES(Facts[Region]),IF(TRUE(),Facts[Region],1))",
+   "powerbi": "EastWestNorth",
+   "now": "LOCAL-REJECT:CONCATENATEX of this expression without an order walks the rows in an order the local engine does not model."
+  },
+  {
+   "part": "C",
+   "expr": "MAXX(Facts,IF.EAGER(TRUE(),Facts[Sales]/Facts[Quantity],\"5\"))",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:MAXX over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine d"
+  },
+  {
+   "part": "C",
+   "expr": "MINX(Facts,IF.EAGER(Facts[Quantity]>2,Facts[Region],Facts[Sales]/Facts[Quantity]))",
+   "powerbi": "-1.5",
+   "now": "LOCAL-REJECT:MINX over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine d"
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(ALL(Facts),IF(TRUE(),Facts[Region],1))",
+   "powerbi": "EastEastEastWestWestNorth",
+   "now": "LOCAL-REJECT:CONCATENATEX of this expression without an order walks the rows in an order the local engine does not model."
+  },
+  {
+   "part": "C",
+   "expr": "MINX(Facts,IF.EAGER(FALSE(),\"5\",Facts[Quantity]/0))",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:MINX over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine d"
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(Facts,MAXX(FILTER(VALUES(Facts[Region]),FALSE()),COALESCE(Facts[Note],\"a\")),\",\")",
+   "powerbi": ",,,,,",
+   "now": "LOCAL-REJECT:The order of a CONCATENATEX whose expression reads an enclosing row context is not modelled in the local engi"
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(SUMMARIZE(Facts,Facts[Region]),FIRSTNONBLANKVALUE(Facts[Region],MAX(Facts[Note])))",
+   "powerbi": "PaidPaidLate",
+   "now": "LOCAL-REJECT:CONCATENATEX of this expression without an order walks the rows in an order the local engine does not model."
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(SUMMARIZE(Facts,Facts[Region]),FIRSTNONBLANK(Facts[Region],1))",
+   "powerbi": "EastWestNorth",
+   "now": "LOCAL-REJECT:CONCATENATEX of this expression without an order walks the rows in an order the local engine does not model."
+  },
+  {
+   "part": "C",
+   "expr": "MINX(Facts,IF(TRUE(),-Facts[Quantity]/0,Facts[Region]))",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:MINX over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine d"
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(CALCULATETABLE(Facts,Facts[Region]=\"West\"),IF(TRUE(),Facts[Region],1))",
+   "powerbi": "WestWest",
+   "now": "LOCAL-REJECT:CONCATENATEX of this expression without an order walks the rows in an order the local engine does not model."
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(CROSSJOIN(VALUES(Facts[Region]),VALUES(Facts[Note])),FIRSTNONBLANKVALUE(Facts[Region],MAX(Facts[Note])))",
+   "powerbi": "PaidPaidPaidPaidLate",
+   "now": "LOCAL-REJECT:CONCATENATEX of this expression without an order walks the rows in an order the local engine does not model."
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(VALUES(Facts),IF(TRUE(),Facts[Region],1))",
+   "powerbi": "EastEastEastWestWestNorth",
+   "now": "LOCAL-REJECT:CONCATENATEX of this expression without an order walks the rows in an order the local engine does not model."
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(FILTER(Facts,Facts[Quantity]>2),IF(TRUE(),Facts[Region],1))",
+   "powerbi": "EastWestNorth",
+   "now": "LOCAL-REJECT:CONCATENATEX of this expression without an order walks the rows in an order the local engine does not model."
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(FILTER(Facts,FALSE()),FIRSTNONBLANK(Facts[Region],1))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:CONCATENATEX of this expression without an order walks the rows in an order the local engine does not model."
+  },
+  {
+   "part": "C",
+   "expr": "MAXX(Facts,IF.EAGER(FALSE(),\"a\",Facts[Sales]/Facts[Quantity]))",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:MAXX over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine d"
+  },
+  {
+   "part": "C",
+   "expr": "MINX(Facts,IF.EAGER(FALSE(),TRUE(),Facts[Sales]/Facts[Quantity]))",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:MINX over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine d"
+  },
+  {
+   "part": "C",
+   "expr": "MAXX(Facts,IF(TRUE(),-Facts[Quantity]/0,\"a\"))",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:MAXX over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine d"
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(CALCULATETABLE(Facts,Facts[Region]=\"West\"),MIN(\"a\",Facts[Region]))",
+   "powerbi": "aa",
+   "now": "LOCAL-REJECT:CONCATENATEX of this expression without an order walks the rows in an order the local engine does not model."
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(GENERATE(VALUES(Facts[Note]),VALUES(Facts[Region])),IF(TRUE(),Facts[Region],1))",
+   "powerbi": "EastEastEastWestWestWestNorthNorthNorth",
+   "now": "LOCAL-REJECT:CONCATENATEX of this expression without an order walks the rows in an order the local engine does not model."
+  },
+  {
+   "part": "C",
+   "expr": "MINX(Facts,IF.EAGER(TRUE(),-Facts[Quantity]/0,\"5\"))",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:MINX over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine d"
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(Facts,IF(FALSE(),Facts[Region],TIME(1,0,0)))",
+   "powerbi": "1:00:00 AM1:00:00 AM1:00:00 AM1:00:00 AM1:00:00 AM1:00:00 AM",
+   "now": "LOCAL-REJECT:CONCATENATEX of this expression without an order walks the rows in an order the local engine does not model."
+  },
+  {
+   "part": "C",
+   "expr": "MINX(Facts,IF.EAGER(FALSE(),\"5\",Facts[Sales]/Facts[Quantity]))",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:MINX over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine d"
+  },
+  {
+   "part": "C",
+   "expr": "MINX(Facts,IF(TRUE(),Facts[Quantity]/Facts[Sales],TRUE()))",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:MINX over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine d"
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(SUMMARIZECOLUMNS(Facts[Region]),IF(TRUE(),Facts[Region],1))",
+   "powerbi": "EastWestNorth",
+   "now": "LOCAL-REJECT:CONCATENATEX of this expression without an order walks the rows in an order the local engine does not model."
+  },
+  {
+   "part": "C",
+   "expr": "MAXX(Facts,IF(Facts[Quantity]>2,Facts[Region],Facts[Quantity]/0))",
+   "powerbi": "Infinity",
+   "now": "LOCAL-REJECT:MAXX over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine d"
+  },
+  {
+   "part": "C",
+   "expr": "MAXX(Facts,IF(Facts[Quantity]>2,\"a\",Facts[Quantity]/Facts[Sales]))",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:MAXX over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine d"
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(ALLEXCEPT(Facts,Facts[Note]),IF(TRUE(),Facts[Region],1))",
+   "powerbi": "EastWestEastNorthWestEast",
+   "now": "LOCAL-REJECT:CONCATENATEX of this expression without an order walks the rows in an order the local engine does not model."
+  },
+  {
+   "part": "C",
+   "expr": "MAXX(Facts,IF.EAGER(Facts[Quantity]>2,\"5\",Facts[Sales]/Facts[Quantity]))",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:MAXX over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine d"
+  },
+  {
+   "part": "C",
+   "expr": "MINX(Facts,IF.EAGER(TRUE(),Facts[Sales]/Facts[Quantity],\"a\"))",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:MINX over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine d"
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(Facts,IF(TRUE(),TIME(1,0,0),Facts[Sales]))",
+   "powerbi": "4.16666666666667E-024.16666666666667E-024.16666666666667E-024.16666666666667E-024.16666666666667E-024.16666666666667E-02",
+   "now": "LOCAL-REJECT:CONCATENATEX of this expression without an order walks the rows in an order the local engine does not model."
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(SUMMARIZE(Facts,Facts[Region]),MAX(\"a\",\"b\"))",
+   "powerbi": "bbb",
+   "now": "LOCAL-REJECT:CONCATENATEX of this expression without an order walks the rows in an order the local engine does not model."
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(CALCULATETABLE(Facts),IF(TRUE(),Facts[Region],1))",
+   "powerbi": "EastEastEastWestWestNorth",
+   "now": "LOCAL-REJECT:CONCATENATEX of this expression without an order walks the rows in an order the local engine does not model."
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(CROSSJOIN(VALUES(Facts[Region]),VALUES(Facts[Note])),IF(TRUE(),Facts[Region],1))",
+   "powerbi": "EastWestNorthEastWestNorthEastWestNorth",
+   "now": "LOCAL-REJECT:CONCATENATEX of this expression without an order walks the rows in an order the local engine does not model."
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(CALCULATETABLE(Facts,Facts[Region]=\"West\"),LASTNONBLANK(Facts[Note],1))",
+   "powerbi": "Paid",
+   "now": "LOCAL-REJECT:CONCATENATEX of this expression without an order walks the rows in an order the local engine does not model."
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(SUMMARIZE(Facts,Facts[Region]),IF(TRUE(),Facts[Region],1))",
+   "powerbi": "EastWestNorth",
+   "now": "LOCAL-REJECT:CONCATENATEX of this expression without an order walks the rows in an order the local engine does not model."
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(FILTER(Facts,TRUE()),IF(TRUE(),Facts[Region],1))",
+   "powerbi": "EastEastEastWestWestNorth",
+   "now": "LOCAL-REJECT:CONCATENATEX of this expression without an order walks the rows in an order the local engine does not model."
+  },
+  {
+   "part": "C",
+   "expr": "MINX(Facts,IF.EAGER(FALSE(),TRUE(),-Facts[Quantity]/0))",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:MINX over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine d"
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(Facts,MAX(\"a\",\"b\"))",
+   "powerbi": "bbbbbb",
+   "now": "LOCAL-REJECT:CONCATENATEX of this expression without an order walks the rows in an order the local engine does not model."
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(FILTER(ALL(Facts),TRUE()),IF(TRUE(),Facts[Region],1))",
+   "powerbi": "EastEastEastWestWestNorth",
+   "now": "LOCAL-REJECT:CONCATENATEX of this expression without an order walks the rows in an order the local engine does not model."
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(EXCEPT(Facts,FILTER(Facts,FALSE())),IF(TRUE(),Facts[Region],1))",
+   "powerbi": "EastWestEastNorthWestEast",
+   "now": "LOCAL-REJECT:CONCATENATEX of this expression without an order walks the rows in an order the local engine does not model."
+  },
+  {
+   "part": "C",
+   "expr": "MINX(Facts,IF.EAGER(FALSE(),Facts[Region],Facts[Quantity]/Facts[Sales]))",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:MINX over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine d"
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(UNION(Facts,Facts),IF(TRUE(),Facts[Region],1))",
+   "powerbi": "EastEastEastWestWestNorthEastEastEastWestWestNorth",
+   "now": "LOCAL-REJECT:CONCATENATEX of this expression without an order walks the rows in an order the local engine does not model."
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(Facts,MIN(\"a\",Facts[Region]))",
+   "powerbi": "aaaaaa",
+   "now": "LOCAL-REJECT:CONCATENATEX of this expression without an order walks the rows in an order the local engine does not model."
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(VALUES(Facts[Region]),FIRSTNONBLANK(Facts[Region],1))",
+   "powerbi": "EastWestNorth",
+   "now": "LOCAL-REJECT:CONCATENATEX of this expression without an order walks the rows in an order the local engine does not model."
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(TOPN(3,Facts,Facts[Quantity]),IF(TRUE(),Facts[Region],1))",
+   "powerbi": "WestNorthEast",
+   "now": "LOCAL-REJECT:CONCATENATEX of this expression without an order walks the rows in an order the local engine does not model."
+  },
+  {
+   "part": "C",
+   "expr": "MAXX(Facts,IF(TRUE(),-Facts[Quantity]/0,Facts[Region]))",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:MAXX over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine d"
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(ALL(Facts[Region],Facts[Note]),IF(TRUE(),Facts[Region],1))",
+   "powerbi": "EastWestEastWestNorth",
+   "now": "LOCAL-REJECT:CONCATENATEX of this expression without an order walks the rows in an order the local engine does not model."
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(CALCULATETABLE(VALUES(Facts[Region]),Facts[Quantity]>2),IF(TRUE(),Facts[Region],1))",
+   "powerbi": "EastWestNorth",
+   "now": "LOCAL-REJECT:CONCATENATEX of this expression without an order walks the rows in an order the local engine does not model."
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(TOPN(1,Facts),IF(TRUE(),Facts[Region],1))",
+   "powerbi": "East",
+   "now": "LOCAL-REJECT:CONCATENATEX of this expression without an order walks the rows in an order the local engine does not model."
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(ADDCOLUMNS(Facts,\"w\",1),IF(TRUE(),Facts[Region],1))",
+   "powerbi": "EastEastEastWestWestNorth",
+   "now": "LOCAL-REJECT:CONCATENATEX of this expression without an order walks the rows in an order the local engine does not model."
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(Facts,MAX(Facts[Region],\"a\"))",
+   "powerbi": "EastEastEastWestWestNorth",
+   "now": "LOCAL-REJECT:CONCATENATEX of this expression without an order walks the rows in an order the local engine does not model."
+  },
+  {
+   "part": "C",
+   "expr": "MAXX(Facts,IF.EAGER(TRUE(),Facts[Quantity]/Facts[Sales],\"a\"))",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:MAXX over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine d"
+  },
+  {
+   "part": "C",
+   "expr": "MAXX(Facts,IF(Facts[Quantity]>2,\"a\",-Facts[Quantity]/0))",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:MAXX over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine d"
+  },
+  {
+   "part": "C",
+   "expr": "MINX(Facts,IF.EAGER(FALSE(),\"5\",Facts[Quantity]/Facts[Sales]))",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:MINX over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine d"
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(ALLNOBLANKROW(Facts),IF(TRUE(),Facts[Region],1))",
+   "powerbi": "EastEastEastWestWestNorth",
+   "now": "LOCAL-REJECT:CONCATENATEX of this expression without an order walks the rows in an order the local engine does not model."
+  },
+  {
+   "part": "C",
+   "expr": "MAXX(Facts,IF.EAGER(FALSE(),\"a\",Facts[Quantity]/0))",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:MAXX over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine d"
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(CALCULATETABLE(Facts,Facts[Region]=\"East\"),MAX(\"a\",\"b\"))",
+   "powerbi": "bbb",
+   "now": "LOCAL-REJECT:CONCATENATEX of this expression without an order walks the rows in an order the local engine does not model."
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(CROSSJOIN(VALUES(Facts[Region]),VALUES(Facts[Note])),MAX(Facts[Region],\"a\"))",
+   "powerbi": "EastWestNorthEastWestNorthEastWestNorth",
+   "now": "LOCAL-REJECT:CONCATENATEX of this expression without an order walks the rows in an order the local engine does not model."
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(DISTINCT(Facts),IF(TRUE(),Facts[Region],1))",
+   "powerbi": "EastWestEastNorthWestEast",
+   "now": "LOCAL-REJECT:CONCATENATEX of this expression without an order walks the rows in an order the local engine does not model."
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(Facts,IF(TRUE(),DATE(2020,1,1),Facts[Sales]))",
+   "powerbi": "438314383143831438314383143831",
+   "now": "LOCAL-REJECT:CONCATENATEX of this expression without an order walks the rows in an order the local engine does not model."
+  },
+  {
+   "part": "C",
+   "expr": "MAXX(Facts,IF(Facts[Quantity]>2,\"5\",Facts[Quantity]/0))",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:MAXX over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine d"
+  },
+  {
+   "part": "C",
+   "expr": "MAXX(Facts,IF.EAGER(Facts[Quantity]>2,\"a\",-Facts[Quantity]/0))",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:MAXX over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine d"
+  },
+  {
+   "part": "C",
+   "expr": "MINX(Facts,IF(FALSE(),TRUE(),-Facts[Quantity]/0))",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:MINX over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine d"
+  },
+  {
+   "part": "C",
+   "expr": "MINX(Facts,IF(TRUE(),Facts[Sales]/Facts[Quantity],\"5\"))",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:MINX over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine d"
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(ALLSELECTED(Facts),IF(TRUE(),Facts[Region],1))",
+   "powerbi": "EastEastEastWestWestNorth",
+   "now": "LOCAL-REJECT:CONCATENATEX of this expression without an order walks the rows in an order the local engine does not model."
+  },
+  {
+   "part": "C",
+   "expr": "MINX(Facts,IF.EAGER(Facts[Quantity]>2,\"5\",Facts[Quantity]/0))",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:MINX over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine d"
+  },
+  {
+   "part": "C",
+   "expr": "MAXX(Facts,IF(Facts[Quantity]>2,\"5\",-Facts[Quantity]/0))",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:MAXX over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine d"
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(Facts,FIRSTNONBLANKVALUE(Facts[Region],MAX(Facts[Note])))",
+   "powerbi": "PaidPaidPaidPaidPaidLate",
+   "now": "LOCAL-REJECT:CONCATENATEX of this expression without an order walks the rows in an order the local engine does not model."
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(DISTINCT(Facts[Region]),IF(TRUE(),Facts[Region],1))",
+   "powerbi": "EastWestNorth",
+   "now": "LOCAL-REJECT:CONCATENATEX of this expression without an order walks the rows in an order the local engine does not model."
+  },
+  {
+   "part": "C",
+   "expr": "MAXX(Facts,IF(TRUE(),Facts[Quantity]/Facts[Sales],TRUE()))",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:MAXX over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine d"
+  },
+  {
+   "part": "C",
+   "expr": "MINX(Facts,IF.EAGER(Facts[Quantity]>2,\"a\",-Facts[Quantity]/0))",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:MINX over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine d"
+  },
+  {
+   "part": "C",
+   "expr": "MINX(Facts,IF.EAGER(FALSE(),Facts[Region],Facts[Sales]/Facts[Quantity]))",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:MINX over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine d"
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(Facts,IF(TRUE(),DATE(2020,1,1),Facts[Region]))",
+   "powerbi": "1/1/20201/1/20201/1/20201/1/20201/1/20201/1/2020",
+   "now": "LOCAL-REJECT:CONCATENATEX of this expression without an order walks the rows in an order the local engine does not model."
+  },
+  {
+   "part": "C",
+   "expr": "MAXX(Facts,IF(FALSE(),\"5\",Facts[Quantity]/Facts[Sales]))",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:MAXX over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine d"
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(INTERSECT(Facts,Facts),IF(TRUE(),Facts[Region],1))",
+   "powerbi": "EastWestEastNorthWestEast",
+   "now": "LOCAL-REJECT:CONCATENATEX of this expression without an order walks the rows in an order the local engine does not model."
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(SUMMARIZE(Facts,Facts[Region],Facts[Note]),IF(TRUE(),Facts[Region],1))",
+   "powerbi": "EastWestEastWestNorth",
+   "now": "LOCAL-REJECT:CONCATENATEX of this expression without an order walks the rows in an order the local engine does not model."
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(ALL(Facts),LASTNONBLANK(Facts[Note],1))",
+   "powerbi": "PaidPaidPaidLate",
+   "now": "LOCAL-REJECT:CONCATENATEX of this expression without an order walks the rows in an order the local engine does not model."
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(Facts,IF(1=1,DATE(2020,1,1),Facts[Sales]))",
+   "powerbi": "438314383143831438314383143831",
+   "now": "LOCAL-REJECT:CONCATENATEX of this expression without an order walks the rows in an order the local engine does not model."
+  },
+  {
+   "part": "C",
+   "expr": "MINX(Facts,IF(TRUE(),Facts[Quantity]/Facts[Sales],\"a\"))",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:MINX over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine d"
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(TOPN(2,Facts,Facts[Quantity]),COALESCE(BLANK(),DATE(2020,1,1)+Facts[Quantity],\"a\"),\"|\")",
+   "powerbi": "1/5/2020|1/6/2020",
+   "now": "LOCAL-REJECT:CONCATENATEX of this expression without an order walks the rows in an order the local engine does not model."
+  },
+  {
+   "part": "C",
+   "expr": "MINX(ADDCOLUMNS(Facts,\"z\",1),IF(\"\",Facts[Quantity]/0,Facts[Quantity]/0))",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:MINX over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine d"
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(TOPN(2,Facts,Facts[Quantity]),VAR x=INT(2.5) RETURN IF(BLANK(),x,-Facts[Quantity]),\"|\")",
+   "powerbi": "-4|-5",
+   "now": "LOCAL-REJECT:CONCATENATEX of this expression without an order walks the rows in an order the local engine does not model."
+  },
+  {
+   "part": "C",
+   "expr": "MAXX(ADDCOLUMNS(Facts,\"z\",1),IFERROR(-1/0,Facts[Quantity]/0))",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:MAXX over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine d"
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(FILTER(Facts,Facts[Quantity]>2),IF.EAGER(1/0,UPPER(Facts[Region]),0/0),\"|\")",
+   "powerbi": "EAST|WEST|NORTH",
+   "now": "LOCAL-REJECT:CONCATENATEX of this expression without an order walks the rows in an order the local engine does not model."
+  },
+  {
+   "part": "C",
+   "expr": "MAXX(INTERSECT(Facts,Facts),IF(1,Facts[Quantity]/0,\"a\"))",
+   "powerbi": "Infinity",
+   "now": "LOCAL-REJECT:MAXX over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine d"
+  },
+  {
+   "part": "C",
+   "expr": "MAXX(TOPN(100,Facts,Facts[Quantity]),IF(1,Facts[Quantity]/0,\"a\"))",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:MAXX over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine d"
+  },
+  {
+   "part": "C",
+   "expr": "MAXX(INTERSECT(Facts,Facts),IF(\"\",Facts[Quantity]/0,Facts[Quantity]/0))",
+   "powerbi": "Infinity",
+   "now": "LOCAL-REJECT:MAXX over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine d"
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(Facts,IF(\"TRUE\",\"\",Facts[Quantity]),\"|\")",
+   "powerbi": "|||||",
+   "now": "LOCAL-REJECT:CONCATENATEX of this expression without an order walks the rows in an order the local engine does not model."
+  },
+  {
+   "part": "C",
+   "expr": "MINX(EXCEPT(Facts,FILTER(Facts,FALSE())),IF(1,Facts[Quantity]/0,\"a\"))",
+   "powerbi": "Infinity",
+   "now": "LOCAL-REJECT:MINX over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine d"
+  },
+  {
+   "part": "C",
+   "expr": "MINX(UNION(Facts,Facts),Facts[Sales]/0)",
+   "powerbi": "-Infinity",
+   "now": "LOCAL-REJECT:MINX over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine d"
+  },
+  {
+   "part": "C",
+   "expr": "MAXX(CALCULATETABLE(Facts),IF(1,Facts[Quantity]/0,\"a\"))",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:MAXX over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine d"
+  },
+  {
+   "part": "C",
+   "expr": "MINX(TOPN(100,Facts,Facts[Quantity]),IFERROR(-1/0,Facts[Quantity]/0))",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:MINX over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine d"
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(CALCULATETABLE(Facts,Facts[Region]=\"East\"),COALESCE(TIME(6,0,0),Facts[Region]),\"|\")",
+   "powerbi": "6:00:00 AM|6:00:00 AM|6:00:00 AM",
+   "now": "LOCAL-REJECT:CONCATENATEX of this expression without an order walks the rows in an order the local engine does not model."
+  },
+  {
+   "part": "C",
+   "expr": "MINX(FILTER(Facts,TRUE()),IF(1,Facts[Quantity]/0,\"a\"))",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:MINX over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine d"
+  },
+  {
+   "part": "C",
+   "expr": "MAXX(EXCEPT(Facts,FILTER(Facts,FALSE())),IF(1,Facts[Quantity]/0,\"a\"))",
+   "powerbi": "Infinity",
+   "now": "LOCAL-REJECT:MAXX over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine d"
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(Facts,COALESCE(BLANK(),NOT(TRUE()),Facts[Quantity]/0),\"|\")",
+   "powerbi": "FALSE|FALSE|FALSE|FALSE|FALSE|FALSE",
+   "now": "LOCAL-REJECT:CONCATENATEX of this expression without an order walks the rows in an order the local engine does not model."
+  },
+  {
+   "part": "C",
+   "expr": "MINX(ADDCOLUMNS(Facts,\"z\",1),Facts[Sales]/0)",
+   "powerbi": "-Infinity",
+   "now": "LOCAL-REJECT:MINX over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine d"
+  },
+  {
+   "part": "C",
+   "expr": "MINX(TOPN(100,Facts,Facts[Quantity]),Facts[Quantity]/0)",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:MINX over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine d"
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(DISTINCT(Facts),VAR x=-1/0 RETURN IF(TRUE()&&FALSE(),x,Facts[Quantity]),\"|\")",
+   "powerbi": "2|3|1|4|0|5",
+   "now": "LOCAL-REJECT:CONCATENATEX of this expression without an order walks the rows in an order the local engine does not model."
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(CALCULATETABLE(Facts,Facts[Region]=\"East\"),COALESCE(BLANK(),TIME(6,0,0),MAX(Facts[Quantity])),\"|\")",
+   "powerbi": "0.25|0.25|0.25",
+   "now": "LOCAL-REJECT:CONCATENATEX of this expression without an order walks the rows in an order the local engine does not model."
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(TOPN(2,Facts,Facts[Quantity]),IF.EAGER(\"\",CURRENCY(3),Facts[Note]),\"|\")",
+   "powerbi": "Late|",
+   "now": "LOCAL-REJECT:CONCATENATEX of this expression without an order walks the rows in an order the local engine does not model."
+  },
+  {
+   "part": "C",
+   "expr": "MINX(EXCEPT(Facts,FILTER(Facts,FALSE())),IF(Facts[Quantity]>2,0/0,2))",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:MINX over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine d"
+  },
+  {
+   "part": "C",
+   "expr": "MAXX(EXCEPT(Facts,FILTER(Facts,FALSE())),IF(\"\",Facts[Quantity]/0,Facts[Quantity]/0))",
+   "powerbi": "Infinity",
+   "now": "LOCAL-REJECT:MAXX over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine d"
+  },
+  {
+   "part": "C",
+   "expr": "MINX(UNION(Facts,Facts),IFERROR(-1/0,Facts[Quantity]/0))",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:MINX over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine d"
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(Facts,IF(LEN(\"a\"),FALSE(),Facts[Sales]/0),\"|\")",
+   "powerbi": "FALSE|FALSE|FALSE|FALSE|FALSE|FALSE",
+   "now": "LOCAL-REJECT:CONCATENATEX of this expression without an order walks the rows in an order the local engine does not model."
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(ALL(Facts),IF.EAGER(1/0,2.5,UPPER(Facts[Region])),\"|\")",
+   "powerbi": "2.5|2.5|2.5|2.5|2.5|2.5",
+   "now": "LOCAL-REJECT:CONCATENATEX of this expression without an order walks the rows in an order the local engine does not model."
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(FILTER(Facts,Facts[Region]=\"East\"),COALESCE(MAX(Facts[Region]),Facts[Quantity]/0),\"|\")",
+   "powerbi": "West|West|West",
+   "now": "LOCAL-REJECT:CONCATENATEX of this expression without an order walks the rows in an order the local engine does not model."
+  },
+  {
+   "part": "C",
+   "expr": "MINX(INTERSECT(Facts,Facts),IF(\"\",Facts[Quantity]/0,Facts[Quantity]/0))",
+   "powerbi": "Infinity",
+   "now": "LOCAL-REJECT:MINX over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine d"
+  },
+  {
+   "part": "C",
+   "expr": "MINX(INTERSECT(Facts,Facts),IF(1,Facts[Quantity]/0,\"a\"))",
+   "powerbi": "Infinity",
+   "now": "LOCAL-REJECT:MINX over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine d"
+  },
+  {
+   "part": "C",
+   "expr": "MAXX(TOPN(100,Facts,Facts[Quantity]),IFERROR(-1/0,Facts[Quantity]/0))",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:MAXX over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine d"
+  },
+  {
+   "part": "C",
+   "expr": "MAXX(UNION(Facts,Facts),IF(\"\",Facts[Quantity]/0,Facts[Quantity]/0))",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:MAXX over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine d"
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(Facts,COALESCE(BLANK(),TIME(6,0,0)+TRUE(),SUM(Facts[Quantity])),\"|\")",
+   "powerbi": "1.25|1.25|1.25|1.25|1.25|1.25",
+   "now": "LOCAL-REJECT:CONCATENATEX of this expression without an order walks the rows in an order the local engine does not model."
+  },
+  {
+   "part": "C",
+   "expr": "MINX(TOPN(100,Facts,Facts[Quantity]),Facts[Sales]/0)",
+   "powerbi": "-Infinity",
+   "now": "LOCAL-REJECT:MINX over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine d"
+  },
+  {
+   "part": "C",
+   "expr": "MINX(ADDCOLUMNS(Facts,\"z\",1),Facts[Quantity]/0)",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:MINX over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine d"
+  },
+  {
+   "part": "C",
+   "expr": "MAXX(UNION(Facts,Facts),Facts[Sales]/0)",
+   "powerbi": "Infinity",
+   "now": "LOCAL-REJECT:MAXX over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine d"
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(DISTINCT(Facts),IF.EAGER(COUNTROWS(Facts)>3,DATE(2020,1,1)+Facts[Quantity],Facts[Quantity]/0),\"|\")",
+   "powerbi": "43833|43834|43832|43835|43831|43836",
+   "now": "LOCAL-REJECT:CONCATENATEX of this expression without an order walks the rows in an order the local engine does not model."
+  },
+  {
+   "part": "C",
+   "expr": "MINX(EXCEPT(Facts,FILTER(Facts,FALSE())),Facts[Sales]/0)",
+   "powerbi": "-Infinity",
+   "now": "LOCAL-REJECT:MINX over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine d"
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(TOPN(2,Facts,Facts[Quantity]),IF.EAGER(COUNTROWS(Facts)>3,\"a\",-Facts[Quantity]),\"|\")",
+   "powerbi": "a|a",
+   "now": "LOCAL-REJECT:CONCATENATEX of this expression without an order walks the rows in an order the local engine does not model."
+  },
+  {
+   "part": "C",
+   "expr": "MINX(VALUES(Facts),IF(1,Facts[Quantity]/0,\"a\"))",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:MINX over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine d"
+  },
+  {
+   "part": "C",
+   "expr": "MINX(INTERSECT(Facts,Facts),IFERROR(-1/0,Facts[Quantity]/0))",
+   "powerbi": "Infinity",
+   "now": "LOCAL-REJECT:MINX over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine d"
+  },
+  {
+   "part": "C",
+   "expr": "MAXX(ALL(Facts),IF(1,Facts[Quantity]/0,\"a\"))",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:MAXX over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine d"
+  },
+  {
+   "part": "C",
+   "expr": "MINX(UNION(Facts,Facts),IF(\"\",Facts[Quantity]/0,Facts[Quantity]/0))",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:MINX over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine d"
+  },
+  {
+   "part": "C",
+   "expr": "MAXX(INTERSECT(Facts,Facts),Facts[Sales]/0)",
+   "powerbi": "Infinity",
+   "now": "LOCAL-REJECT:MAXX over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine d"
+  },
+  {
+   "part": "C",
+   "expr": "MINX(INTERSECT(Facts,Facts),Facts[Quantity]/0)",
+   "powerbi": "Infinity",
+   "now": "LOCAL-REJECT:MINX over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine d"
+  },
+  {
+   "part": "C",
+   "expr": "MAXX(UNION(Facts,Facts),IF(Facts[Quantity]>2,0/0,2))",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:MAXX over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine d"
+  },
+  {
+   "part": "C",
+   "expr": "MAXX(SUMMARIZE(Facts,Facts[Region],Facts[Quantity]),IF(1,Facts[Quantity]/0,\"a\"))",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:MAXX over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine d"
+  },
+  {
+   "part": "C",
+   "expr": "MINX(TOPN(100,Facts,Facts[Quantity]),IF(\"\",Facts[Quantity]/0,Facts[Quantity]/0))",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:MINX over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine d"
+  },
+  {
+   "part": "C",
+   "expr": "MAXX(ADDCOLUMNS(Facts,\"z\",1),IF(Facts[Quantity]>2,0/0,2))",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:MAXX over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine d"
+  },
+  {
+   "part": "C",
+   "expr": "MAXX(FILTER(Facts,TRUE()),IF(1,Facts[Quantity]/0,\"a\"))",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:MAXX over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine d"
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(CROSSJOIN(VALUES(Facts[Region]),VALUES(Facts[Note])),SWITCH(TRUE(),TRUE(),Facts[Note],TRUE()),\"|\")",
+   "powerbi": "|||Paid|Paid|Paid|Late|Late|Late",
+   "now": "LOCAL-REJECT:CONCATENATEX of this expression without an order walks the rows in an order the local engine does not model."
+  },
+  {
+   "part": "C",
+   "expr": "MINX(TOPN(100,Facts,Facts[Quantity]),IF(1,Facts[Quantity]/0,\"a\"))",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:MINX over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine d"
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(TOPN(2,Facts,Facts[Quantity]),IF(MAX(Facts[Quantity])>3,-Facts[Quantity],UPPER(Facts[Region])),\"|\")",
+   "powerbi": "-4|-5",
+   "now": "LOCAL-REJECT:CONCATENATEX of this expression without an order walks the rows in an order the local engine does not model."
+  },
+  {
+   "part": "C",
+   "expr": "MAXX(ALLNOBLANKROW(Facts),IF(1,Facts[Quantity]/0,\"a\"))",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:MAXX over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine d"
+  },
+  {
+   "part": "C",
+   "expr": "MAXX(TOPN(100,Facts,Facts[Quantity]),IF(Facts[Quantity]>2,0/0,2))",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:MAXX over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine d"
+  },
+  {
+   "part": "C",
+   "expr": "MINX(ALL(Facts),IF(1,Facts[Quantity]/0,\"a\"))",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:MINX over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine d"
+  },
+  {
+   "part": "C",
+   "expr": "MAXX(EXCEPT(Facts,FILTER(Facts,FALSE())),Facts[Quantity]/0)",
+   "powerbi": "Infinity",
+   "now": "LOCAL-REJECT:MAXX over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine d"
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(DISTINCT(Facts),IFERROR(Facts[Quantity],-Facts[Quantity]),\"|\")",
+   "powerbi": "2|3|1|4|0|5",
+   "now": "LOCAL-REJECT:CONCATENATEX of this expression without an order walks the rows in an order the local engine does not model."
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(CROSSJOIN(VALUES(Facts[Region]),VALUES(Facts[Note])),IF(0/0,Facts[Region],1=1),\"|\")",
+   "powerbi": "East|West|North|East|West|North|East|West|North",
+   "now": "LOCAL-REJECT:CONCATENATEX of this expression without an order walks the rows in an order the local engine does not model."
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(DISTINCT(Facts),IF(ISBLANK(Facts[Sales]),1+1,TIME(6,0,0)),\"|\")",
+   "powerbi": "0.25|0.25|0.25|2|0.25|0.25",
+   "now": "LOCAL-REJECT:CONCATENATEX of this expression without an order walks the rows in an order the local engine does not model."
+  },
+  {
+   "part": "C",
+   "expr": "MINX(Facts,IF(1,Facts[Quantity]/0,\"a\"))",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:MINX over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine d"
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(FILTER(Facts,Facts[Region]=\"East\"),IF.EAGER(UPPER(\"true\"),DATE(2020,1,1)+Facts[Quantity],Facts[Note]),\"|\")",
+   "powerbi": "1/2/2020|1/3/2020|1/6/2020",
+   "now": "LOCAL-REJECT:CONCATENATEX of this expression without an order walks the rows in an order the local engine does not model."
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(TOPN(2,Facts,Facts[Quantity]),COALESCE(BLANK(),CURRENCY(3),Facts[Quantity]>2),\"|\")",
+   "powerbi": "3|3",
+   "now": "LOCAL-REJECT:CONCATENATEX of this expression without an order walks the rows in an order the local engine does not model."
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(TOPN(2,Facts,Facts[Quantity]),IF.EAGER(Facts[Region]=\"East\",Facts[Region],\"5\"),\"|\")",
+   "powerbi": "5|East",
+   "now": "LOCAL-REJECT:CONCATENATEX of this expression without an order walks the rows in an order the local engine does not model."
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(TOPN(2,Facts,Facts[Quantity]),SWITCH(TRUE(),Facts[Region]=\"East\",-Facts[Quantity],TRUE()),\"|\")",
+   "powerbi": "TRUE|-5",
+   "now": "LOCAL-REJECT:CONCATENATEX of this expression without an order walks the rows in an order the local engine does not model."
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(TOPN(2,Facts,Facts[Quantity]),COALESCE(Facts[Sales],DATE(2020,1,1)),\"|\")",
+   "powerbi": "43831|2.5",
+   "now": "LOCAL-REJECT:CONCATENATEX of this expression without an order walks the rows in an order the local engine does not model."
+  },
+  {
+   "part": "C",
+   "expr": "MINX(EXCEPT(Facts,FILTER(Facts,FALSE())),IF(\"\",Facts[Quantity]/0,Facts[Quantity]/0))",
+   "powerbi": "Infinity",
+   "now": "LOCAL-REJECT:MINX over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine d"
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(TOPN(2,Facts,Facts[Quantity]),COALESCE(UPPER(Facts[Region]),1=1),\"|\")",
+   "powerbi": "NORTH|EAST",
+   "now": "LOCAL-REJECT:CONCATENATEX of this expression without an order walks the rows in an order the local engine does not model."
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(ALL(Facts),IF(INT(1.5),Facts[Sales]/0,DATE(2020,1,1)+Facts[Quantity]),\"|\")",
+   "powerbi": "|-inf|-nan(ind)|inf|inf|inf",
+   "now": "LOCAL-REJECT:CONCATENATEX of this expression without an order walks the rows in an order the local engine does not model."
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(Facts,COALESCE(BLANK(),DATE(2020,1,1)+Facts[Quantity],Facts[Region]),\"|\")",
+   "powerbi": "1/1/2020|1/2/2020|1/3/2020|1/4/2020|1/5/2020|1/6/2020",
+   "now": "LOCAL-REJECT:CONCATENATEX of this expression without an order walks the rows in an order the local engine does not model."
+  },
+  {
+   "part": "C",
+   "expr": "MAXX(EXCEPT(Facts,FILTER(Facts,FALSE())),IFERROR(-1/0,Facts[Quantity]/0))",
+   "powerbi": "Infinity",
+   "now": "LOCAL-REJECT:MAXX over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine d"
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(Facts,SWITCH(TRUE(),FALSE(),-Facts[Quantity],Facts[Quantity]>2),\"|\")",
+   "powerbi": "FALSE|FALSE|FALSE|TRUE|TRUE|TRUE",
+   "now": "LOCAL-REJECT:CONCATENATEX of this expression without an order walks the rows in an order the local engine does not model."
+  },
+  {
+   "part": "C",
+   "expr": "MINX(CALCULATETABLE(Facts),IF(1,Facts[Quantity]/0,\"a\"))",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:MINX over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine d"
+  },
+  {
+   "part": "C",
+   "expr": "MAXX(ADDCOLUMNS(Facts,\"z\",1),IF(1,Facts[Quantity]/0,\"a\"))",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:MAXX over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine d"
+  },
+  {
+   "part": "C",
+   "expr": "MINX(EXCEPT(Facts,FILTER(Facts,FALSE())),IFERROR(-1/0,Facts[Quantity]/0))",
+   "powerbi": "Infinity",
+   "now": "LOCAL-REJECT:MINX over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine d"
+  },
+  {
+   "part": "C",
+   "expr": "MAXX(INTERSECT(Facts,Facts),IFERROR(-1/0,Facts[Quantity]/0))",
+   "powerbi": "Infinity",
+   "now": "LOCAL-REJECT:MAXX over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine d"
+  },
+  {
+   "part": "C",
+   "expr": "MINX(ALLEXCEPT(Facts,Facts[Region]),IF(1,Facts[Quantity]/0,\"a\"))",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:MINX over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine d"
+  },
+  {
+   "part": "C",
+   "expr": "MAXX(VALUES(Facts),IF(1,Facts[Quantity]/0,\"a\"))",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:MAXX over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine d"
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(FILTER(Facts,Facts[Quantity]>2),IF.EAGER(UPPER(\"true\"),Facts[Quantity]>2,\"a\"),\"|\")",
+   "powerbi": "TRUE|TRUE|TRUE",
+   "now": "LOCAL-REJECT:CONCATENATEX of this expression without an order walks the rows in an order the local engine does not model."
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(CALCULATETABLE(Facts,Facts[Region]=\"East\"),SWITCH(TRUE(),COUNTROWS(Facts)>3,-Facts[Quantity],\"5\"),\"|\")",
+   "powerbi": "-1|-2|-5",
+   "now": "LOCAL-REJECT:CONCATENATEX of this expression without an order walks the rows in an order the local engine does not model."
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(FILTER(Facts,Facts[Region]=\"East\"),VAR x=UPPER(Facts[Region]) RETURN IF(1/0,x,-Facts[Quantity]),\"|\")",
+   "powerbi": "EAST|EAST|EAST",
+   "now": "LOCAL-REJECT:CONCATENATEX of this expression without an order walks the rows in an order the local engine does not model."
+  },
+  {
+   "part": "C",
+   "expr": "MAXX(ALLEXCEPT(Facts,Facts[Region]),IF(1,Facts[Quantity]/0,\"a\"))",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:MAXX over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine d"
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(TOPN(2,Facts,Facts[Quantity]),VAR x=Facts[Region] RETURN IF(1=1,x,Facts[Note]),\"|\")",
+   "powerbi": "North|East",
+   "now": "LOCAL-REJECT:CONCATENATEX of this expression without an order walks the rows in an order the local engine does not model."
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(DISTINCT(Facts),SWITCH(TRUE(),Facts[Quantity]>2,-1/0,TRUE()),\"|\")",
+   "powerbi": "TRUE|-inf|TRUE|-inf|TRUE|-inf",
+   "now": "LOCAL-REJECT:CONCATENATEX of this expression without an order walks the rows in an order the local engine does not model."
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(TOPN(2,Facts,Facts[Quantity]),IF(1/0,NOT(TRUE()),Facts[Sales]),\"|\")",
+   "powerbi": "FALSE|FALSE",
+   "now": "LOCAL-REJECT:CONCATENATEX of this expression without an order walks the rows in an order the local engine does not model."
+  },
+  {
+   "part": "C",
+   "expr": "MAXX(ALLSELECTED(Facts),IF(1,Facts[Quantity]/0,\"a\"))",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:MAXX over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine d"
+  },
+  {
+   "part": "C",
+   "expr": "MAXX(EXCEPT(Facts,FILTER(Facts,FALSE())),IF(Facts[Quantity]>2,0/0,2))",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:MAXX over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine d"
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(SUMMARIZE(Facts,Facts[Region]),IF(\"\",UPPER(Facts[Region]),1+1),\"|\")",
+   "powerbi": "2|2|2",
+   "now": "LOCAL-REJECT:CONCATENATEX of this expression without an order walks the rows in an order the local engine does not model."
+  },
+  {
+   "part": "C",
+   "expr": "MINX(SUMMARIZE(Facts,Facts[Region],Facts[Quantity]),IF(1,Facts[Quantity]/0,\"a\"))",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:MINX over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine d"
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(Facts,COALESCE(BLANK(),CURRENCY(3),Facts[Region]),\"|\")",
+   "powerbi": "3|3|3|3|3|3",
+   "now": "LOCAL-REJECT:CONCATENATEX of this expression without an order walks the rows in an order the local engine does not model."
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(Facts,COALESCE(BLANK(),UPPER(Facts[Region]),CURRENCY(1.23456)),\"|\")",
+   "powerbi": "EAST|EAST|EAST|WEST|WEST|NORTH",
+   "now": "LOCAL-REJECT:CONCATENATEX of this expression without an order walks the rows in an order the local engine does not model."
+  },
+  {
+   "part": "C",
+   "expr": "MAXX(TOPN(100,Facts,Facts[Quantity]),Facts[Quantity]/0)",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:MAXX over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine d"
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(CROSSJOIN(VALUES(Facts[Region]),VALUES(Facts[Note])),IF(UPPER(\"true\"),MAX(Facts[Quantity]),Facts[Region]),\"|\")",
+   "powerbi": "5|5|5|5|5|5|5|5|5",
+   "now": "LOCAL-REJECT:CONCATENATEX of this expression without an order walks the rows in an order the local engine does not model."
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(Facts,COALESCE(BLANK(),DATE(9999,12,31),\"a\"),\"|\")",
+   "powerbi": "12/31/9999|12/31/9999|12/31/9999|12/31/9999|12/31/9999|12/31/9999",
+   "now": "LOCAL-REJECT:A CONCATENATEX of dates on #-#-# or later is not modelled by the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "MINX(UNION(Facts,Facts),IF(1,Facts[Quantity]/0,\"a\"))",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:MINX over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine d"
+  },
+  {
+   "part": "C",
+   "expr": "MAXX(UNION(Facts,Facts),IF(1,Facts[Quantity]/0,\"a\"))",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:MAXX over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine d"
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(FILTER(Facts,Facts[Quantity]>2),IF(COUNTROWS(Facts)>3,Facts[Quantity]/0,MAX(Facts[Region])),\"|\")",
+   "powerbi": "inf|inf|inf",
+   "now": "LOCAL-REJECT:CONCATENATEX of this expression without an order walks the rows in an order the local engine does not model."
+  },
+  {
+   "part": "C",
+   "expr": "MINX(ALLSELECTED(Facts),IF(1,Facts[Quantity]/0,\"a\"))",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:MINX over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine d"
+  },
+  {
+   "part": "C",
+   "expr": "MAXX(TOPN(100,Facts,Facts[Quantity]),IF(\"\",Facts[Quantity]/0,Facts[Quantity]/0))",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:MAXX over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine d"
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(TOPN(2,Facts,Facts[Quantity]),IF(UPPER(\"true\"),Facts[Quantity]/0),\"|\")",
+   "powerbi": "inf|inf",
+   "now": "LOCAL-REJECT:CONCATENATEX of this expression without an order walks the rows in an order the local engine does not model."
+  },
+  {
+   "part": "C",
+   "expr": "MINX(TOPN(100,Facts,Facts[Quantity]),IF(Facts[Quantity]>2,0/0,2))",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:MINX over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine d"
+  },
+  {
+   "part": "C",
+   "expr": "MINX(INTERSECT(Facts,Facts),IF(Facts[Quantity]>2,0/0,2))",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:MINX over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine d"
+  },
+  {
+   "part": "C",
+   "expr": "MAXX(UNION(Facts,Facts),IFERROR(-1/0,Facts[Quantity]/0))",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:MAXX over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine d"
+  },
+  {
+   "part": "C",
+   "expr": "MAXX(ALL(Facts[Region],Facts[Quantity]),IF(1,Facts[Quantity]/0,\"a\"))",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:MAXX over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine d"
+  },
+  {
+   "part": "C",
+   "expr": "MINX(ADDCOLUMNS(Facts,\"z\",1),IFERROR(-1/0,Facts[Quantity]/0))",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:MINX over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine d"
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(DISTINCT(Facts),IFERROR(Facts[Sales]/0,Facts[Sales]/0),\"|\")",
+   "powerbi": "inf|inf|-inf||-nan(ind)|inf",
+   "now": "LOCAL-REJECT:CONCATENATEX of this expression without an order walks the rows in an order the local engine does not model."
+  },
+  {
+   "part": "C",
+   "expr": "MAXX(UNION(Facts,Facts),Facts[Quantity]/0)",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:MAXX over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine d"
+  },
+  {
+   "part": "C",
+   "expr": "MINX(ADDCOLUMNS(Facts,\"z\",1),VAR x=1+1 RETURN IF(BLANK(),x,Facts[Sales]/0))",
+   "powerbi": "-Infinity",
+   "now": "LOCAL-REJECT:MINX over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine d"
+  },
+  {
+   "part": "C",
+   "expr": "MAXX(ADDCOLUMNS(Facts,\"z\",1),Facts[Sales]/0)",
+   "powerbi": "Infinity",
+   "now": "LOCAL-REJECT:MAXX over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine d"
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(Facts,IF.EAGER(MAX(Facts[Quantity])>3,Facts[Sales],\"5\"),\"|\")",
+   "powerbi": "|-1.5|0|2.5|10.5|20",
+   "now": "LOCAL-REJECT:CONCATENATEX of this expression without an order walks the rows in an order the local engine does not model."
+  },
+  {
+   "part": "C",
+   "expr": "MINX(UNION(Facts,Facts),IF(Facts[Quantity]>2,0/0,2))",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:MINX over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine d"
+  },
+  {
+   "part": "C",
+   "expr": "MINX(DISTINCT(Facts),IF(1,Facts[Quantity]/0,\"a\"))",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:MINX over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine d"
+  },
+  {
+   "part": "C",
+   "expr": "MAXX(TOPN(100,Facts,Facts[Quantity]),Facts[Sales]/0)",
+   "powerbi": "Infinity",
+   "now": "LOCAL-REJECT:MAXX over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine d"
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(FILTER(Facts,FALSE()),SWITCH(TRUE(),1=1,\"\",Facts[Sales]),\"|\")",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:CONCATENATEX of this expression without an order walks the rows in an order the local engine does not model."
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(TOPN(2,Facts,Facts[Quantity]),IFERROR(1=1,-Facts[Quantity]),\"|\")",
+   "powerbi": "TRUE|TRUE",
+   "now": "LOCAL-REJECT:CONCATENATEX of this expression without an order walks the rows in an order the local engine does not model."
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(Facts,COALESCE(BLANK(),TIME(6,0,0)+TRUE(),BLANK()),\"|\")",
+   "powerbi": "12/31/1899 6:00:00 AM|12/31/1899 6:00:00 AM|12/31/1899 6:00:00 AM|12/31/1899 6:00:00 AM|12/31/1899 6:00:00 AM|12/31/1899 6:00:00 AM",
+   "now": "LOCAL-REJECT:CONCATENATEX of this expression without an order walks the rows in an order the local engine does not model."
+  },
+  {
+   "part": "C",
+   "expr": "MAXX(EXCEPT(Facts,FILTER(Facts,FALSE())),Facts[Sales]/0)",
+   "powerbi": "Infinity",
+   "now": "LOCAL-REJECT:MAXX over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine d"
+  },
+  {
+   "part": "C",
+   "expr": "MINX(ADDCOLUMNS(Facts,\"z\",1),IF(Facts[Quantity]>2,0/0,2))",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:MINX over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine d"
+  },
+  {
+   "part": "C",
+   "expr": "MINX(INTERSECT(Facts,Facts),Facts[Sales]/0)",
+   "powerbi": "-Infinity",
+   "now": "LOCAL-REJECT:MINX over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine d"
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(ADDCOLUMNS(Facts,\"z\",1),VAR x=1/0 RETURN IF(BLANK(),x,-Facts[Quantity]),\"|\")",
+   "powerbi": "0|-1|-2|-3|-4|-5",
+   "now": "LOCAL-REJECT:CONCATENATEX of this expression without an order walks the rows in an order the local engine does not model."
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(DISTINCT(Facts),SWITCH(TRUE(),ISBLANK(Facts[Sales]),-Facts[Quantity],Facts[Note]),\"|\")",
+   "powerbi": "Paid||Paid|-4|Paid|",
+   "now": "LOCAL-REJECT:CONCATENATEX of this expression without an order walks the rows in an order the local engine does not model."
+  },
+  {
+   "part": "C",
+   "expr": "MINX(ALLNOBLANKROW(Facts),IF(1,Facts[Quantity]/0,\"a\"))",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:MINX over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine d"
+  },
+  {
+   "part": "C",
+   "expr": "MAXX(Facts,IF(1,Facts[Quantity]/0,\"a\"))",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:MAXX over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine d"
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(EXCEPT(Facts,Facts),IF.EAGER(INT(1.5),Facts[Sales],1=1),\"|\")",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:CONCATENATEX of this expression without an order walks the rows in an order the local engine does not model."
+  },
+  {
+   "part": "C",
+   "expr": "MAXX(DISTINCT(Facts),IF(1,Facts[Quantity]/0,\"a\"))",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:MAXX over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine d"
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(ALL(Facts),IF(1/0,Facts[Quantity]&\"\",-1/0),\"|\")",
+   "powerbi": "0|1|2|3|4|5",
+   "now": "LOCAL-REJECT:CONCATENATEX of this expression without an order walks the rows in an order the local engine does not model."
+  },
+  {
+   "part": "C",
+   "expr": "MAXX(INTERSECT(Facts,Facts),IF(Facts[Quantity]>2,0/0,2))",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:MAXX over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine d"
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(ADDCOLUMNS(Facts,\"z\",1),VAR x=TIME(6,0,0) RETURN IF(BLANK(),x,Facts[Region]),\"|\")",
+   "powerbi": "East|East|East|West|West|North",
+   "now": "LOCAL-REJECT:CONCATENATEX of this expression without an order walks the rows in an order the local engine does not model."
+  },
+  {
+   "part": "C",
+   "expr": "MAXX(ADDCOLUMNS(Facts,\"z\",1),Facts[Quantity]/0)",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:MAXX over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine d"
+  },
+  {
+   "part": "C",
+   "expr": "MINX(EXCEPT(Facts,FILTER(Facts,FALSE())),Facts[Quantity]/0)",
+   "powerbi": "Infinity",
+   "now": "LOCAL-REJECT:MINX over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine d"
+  },
+  {
+   "part": "C",
+   "expr": "MAXX(ADDCOLUMNS(Facts,\"z\",1),IF(\"\",Facts[Quantity]/0,Facts[Quantity]/0))",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:MAXX over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine d"
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(DISTINCT(Facts),IF(ISBLANK(Facts[Sales]),Facts[Sales]/0,-1/0),\"|\")",
+   "powerbi": "-inf|-inf|-inf||-inf|-inf",
+   "now": "LOCAL-REJECT:CONCATENATEX of this expression without an order walks the rows in an order the local engine does not model."
+  },
+  {
+   "part": "C",
+   "expr": "MINX(ADDCOLUMNS(Facts,\"z\",1),IF(1,Facts[Quantity]/0,\"a\"))",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:MINX over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine d"
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(CALCULATETABLE(Facts,Facts[Region]=\"East\"),IF(MAX(Facts[Quantity])>3,\"a\",Facts[Quantity]),\"|\")",
+   "powerbi": "a|a|a",
+   "now": "LOCAL-REJECT:CONCATENATEX of this expression without an order walks the rows in an order the local engine does not model."
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(Facts,COALESCE(BLANK(),\"a\",UPPER(Facts[Region])),\"|\")",
+   "powerbi": "a|a|a|a|a|a",
+   "now": "LOCAL-REJECT:CONCATENATEX of this expression without an order walks the rows in an order the local engine does not model."
+  },
+  {
+   "part": "C",
+   "expr": "MAXX(INTERSECT(Facts,Facts),Facts[Quantity]/0)",
+   "powerbi": "Infinity",
+   "now": "LOCAL-REJECT:MAXX over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine d"
+  },
+  {
+   "part": "C",
+   "expr": "MINX(UNION(Facts,Facts),Facts[Quantity]/0)",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:MINX over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine d"
+  },
+  {
+   "part": "C",
+   "expr": "MINX(ALL(Facts[Region],Facts[Quantity]),IF(1,Facts[Quantity]/0,\"a\"))",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:MINX over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine d"
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(Facts,IF(INT(1.5),Facts[Region],NOT(TRUE())),\"|\")",
+   "powerbi": "East|East|East|West|West|North",
+   "now": "LOCAL-REJECT:CONCATENATEX of this expression without an order walks the rows in an order the local engine does not model."
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(FILTER(Facts,FALSE()),IF.EAGER(UPPER(\"true\"),Facts[Note],1=1),\"|\")",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:CONCATENATEX of this expression without an order walks the rows in an order the local engine does not model."
+  },
+  {
+   "part": "B",
+   "expr": "TOCSV(VAR t=FILTER(Facts,Facts[Quantity]>2) RETURN t)",
+   "powerbi": "'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Note]\n20,3,West,\n,4,North,Late\n2.5,5,East,",
+   "now": "LOCAL-REJECT:The row order of this table expression is not modelled in the local engine, so TOCSV / TOJSON refuse it."
+  },
+  {
+   "part": "B",
+   "expr": "TOCSV(VAR t=Facts RETURN t)",
+   "powerbi": "'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Note]\n10.5,2,East,Paid\n20,3,West,\n-1.5,1,East,Paid\n,4,North,Late\n0,0,West,Paid\n2.5,5,East,",
+   "now": "LOCAL-REJECT:The row order of this table expression is not modelled in the local engine, so TOCSV / TOJSON refuse it."
+  },
+  {
+   "part": "B",
+   "expr": "TOCSV(VAR t=TOPN(2,Facts,Facts[Quantity],DESC,Facts[Sales],ASC,Facts[Region],ASC) RETURN t)",
+   "powerbi": "'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Note]\n,4,North,Late\n2.5,5,East,",
+   "now": "LOCAL-REJECT:The row order of this table expression is not modelled in the local engine, so TOCSV / TOJSON refuse it."
+  },
+  {
+   "part": "B",
+   "expr": "TOCSV(VAR t=ALL(Facts) RETURN t)",
+   "powerbi": "'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Note]\n10.5,2,East,Paid\n20,3,West,\n-1.5,1,East,Paid\n,4,North,Late\n0,0,West,Paid\n2.5,5,East,",
+   "now": "LOCAL-REJECT:The row order of this table expression is not modelled in the local engine, so TOCSV / TOJSON refuse it."
+  },
+  {
+   "part": "B",
+   "expr": "TOCSV(VAR t=ADDCOLUMNS(Facts,\"q\",Facts[Quantity]*2) RETURN t)",
+   "powerbi": "'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Note],[q]\n10.5,2,East,Paid,4\n20,3,West,,6\n-1.5,1,East,Paid,2\n,4,North,Late,8\n0,0,West,Paid,0\n2.5,5,East,,10",
+   "now": "LOCAL-REJECT:The row order of this table expression is not modelled in the local engine, so TOCSV / TOJSON refuse it."
+  },
+  {
+   "part": "B",
+   "expr": "TOCSV(VAR a=1 VAR t=FILTER(Facts,Facts[Quantity]>a) RETURN t)",
+   "powerbi": "'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Note]\n10.5,2,East,Paid\n20,3,West,\n,4,North,Late\n2.5,5,East,",
+   "now": "LOCAL-REJECT:The row order of this table expression is not modelled in the local engine, so TOCSV / TOJSON refuse it."
+  },
+  {
+   "part": "B",
+   "expr": "TOCSV(VAR t=FILTER(Facts,Facts[Quantity]>2) VAR u=t RETURN u)",
+   "powerbi": "'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Note]\n20,3,West,\n,4,North,Late\n2.5,5,East,",
+   "now": "LOCAL-REJECT:The row order of this table expression is not modelled in the local engine, so TOCSV / TOJSON refuse it."
+  },
+  {
+   "part": "B",
+   "expr": "TOCSV(VAR t=FILTER(Facts,Facts[Quantity]>2) RETURN FILTER(t,Facts[Region]<>\"West\"))",
+   "powerbi": "'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Note]\n,4,North,Late\n2.5,5,East,",
+   "now": "LOCAL-REJECT:The row order of this table expression is not modelled in the local engine, so TOCSV / TOJSON refuse it."
+  },
+  {
+   "part": "B",
+   "expr": "TOCSV(VAR n=2 RETURN TOPN(n,Facts,Facts[Quantity],DESC,Facts[Sales],ASC,Facts[Region],ASC))",
+   "powerbi": "'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Note]\n,4,North,Late\n2.5,5,East,",
+   "now": "LOCAL-REJECT:The row order of this table expression is not modelled in the local engine, so TOCSV / TOJSON refuse it."
+  },
+  {
+   "part": "B",
+   "expr": "TOCSV(VAR t=Facts RETURN CALCULATETABLE(t,Facts[Region]=\"West\"))",
+   "powerbi": "'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Note]\n10.5,2,East,Paid\n20,3,West,\n-1.5,1,East,Paid\n,4,North,Late\n0,0,West,Paid\n2.5,5,East,",
+   "now": "LOCAL-REJECT:The row order of this table expression is not modelled in the local engine, so TOCSV / TOJSON refuse it."
+  },
+  {
+   "part": "B",
+   "expr": "TOCSV(VAR a=2 RETURN FILTER(Facts,Facts[Quantity]>a))",
+   "powerbi": "'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Note]\n20,3,West,\n,4,North,Late\n2.5,5,East,",
+   "now": "LOCAL-REJECT:The row order of this table expression is not modelled in the local engine, so TOCSV / TOJSON refuse it."
+  },
+  {
+   "part": "B",
+   "expr": "TOCSV(VAR t=CALCULATETABLE(Facts,Facts[Region]=\"West\") RETURN t)",
+   "powerbi": "'Facts'[Sales],'Facts'[Quantity],'Facts'[Region],'Facts'[Note]\n20,3,West,\n0,0,West,Paid",
+   "now": "LOCAL-REJECT:The row order of this table expression is not modelled in the local engine, so TOCSV / TOJSON refuse it."
+  },
+  {
+   "part": "B",
+   "expr": "LEN(TOJSON(VAR t=TOPN(2,Facts,Facts[Quantity],DESC,Facts[Sales],ASC,Facts[Region],ASC) RETURN t))",
+   "powerbi": "176",
+   "now": "LOCAL-REJECT:The row order of this table expression is not modelled in the local engine, so TOCSV / TOJSON refuse it."
+  },
+  {
+   "part": "B",
+   "expr": "LEN(TOJSON(VAR t=ADDCOLUMNS(Facts,\"q\",Facts[Quantity]*2) RETURN t))",
+   "powerbi": "315",
+   "now": "LOCAL-REJECT:The row order of a VAR-held table of this kind is not modelled in the local engine, so TOCSV / TOJSON refuse "
+  },
+  {
+   "part": "B",
+   "expr": "LEN(TOJSON(VAR n=2 RETURN TOPN(n,Facts,Facts[Quantity],DESC,Facts[Sales],ASC,Facts[Region],ASC)))",
+   "powerbi": "176",
+   "now": "LOCAL-REJECT:The row order of this table expression is not modelled in the local engine, so TOCSV / TOJSON refuse it."
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(TOPN(2,ADDCOLUMNS(Facts,\"Value\",2.5&&\"\"),Facts[Quantity],ASC,Facts[Sales],ASC,Facts[Region],ASC),IF(ISBLANK([Value]),\"b\",\"n\"),\"|\")",
+   "powerbi": "b|b",
+   "now": "LOCAL-REJECT:CONCATENATEX of this expression without an order walks the rows in an order the local engine does not model."
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(TOPN(2,ADDCOLUMNS(Facts,\"Value\",\"0\"||LEFT(\"a\",0)),Facts[Quantity],ASC,Facts[Sales],ASC,Facts[Region],ASC),IF(ISBLANK([Value]),\"b\",\"n\"),\"|\")",
+   "powerbi": "b|b",
+   "now": "LOCAL-REJECT:CONCATENATEX of this expression without an order walks the rows in an order the local engine does not model."
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(TOPN(2,ADDCOLUMNS(Facts,\"Value\",TRUE()&&VAR y=\"\" RETURN y),Facts[Quantity],ASC,Facts[Sales],ASC,Facts[Region],ASC),IF(ISBLANK([Value]),\"b\",\"n\"),\"|\")",
+   "powerbi": "b|b",
+   "now": "LOCAL-REJECT:CONCATENATEX of this expression without an order walks the rows in an order the local engine does not model."
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(TOPN(2,ADDCOLUMNS(Facts,\"Value\",OR(0,\"\")),Facts[Quantity],ASC,Facts[Sales],ASC,Facts[Region],ASC),IF(ISBLANK([Value]),\"b\",\"n\"),\"|\")",
+   "powerbi": "b|b",
+   "now": "LOCAL-REJECT:CONCATENATEX of this expression without an order walks the rows in an order the local engine does not model."
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(TOPN(2,ADDCOLUMNS(Facts,\"Value\",AND(\"-1\",\"\")),Facts[Quantity],ASC,Facts[Sales],ASC,Facts[Region],ASC),IF(ISBLANK([Value]),\"b\",\"n\"),\"|\")",
+   "powerbi": "b|b",
+   "now": "LOCAL-REJECT:CONCATENATEX of this expression without an order walks the rows in an order the local engine does not model."
+  },
+  {
+   "part": "C",
+   "expr": "MAXX(ADDCOLUMNS(Facts,\"q\",(Facts[Quantity])*(MAXX(Facts,1/0))),[q])",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:MAXX over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine d"
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(Facts,(-1)+(TIME(6,0,0)),\"|\",Facts[Quantity],ASC,Facts[Sales],ASC)",
+   "powerbi": "6:00:00 PM|6:00:00 PM|6:00:00 PM|6:00:00 PM|6:00:00 PM|6:00:00 PM",
+   "now": "LOCAL-REJECT:CONCATENATEX over date/time before December #, # is not supported in the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "MAXX(ADDCOLUMNS(Facts,\"q\",(Facts[Quantity])/(2.5&&\"\")),[q])",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:MAXX over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine d"
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(Facts,IFERROR((TIME(1,0,0))-(MAXX({DATE(2020,1,1)},[Value])),\"e\"),\"|\",Facts[Quantity],ASC,Facts[Sales],ASC)",
+   "powerbi": "12/29/1779 11:00:00 PM|12/29/1779 11:00:00 PM|12/29/1779 11:00:00 PM|12/29/1779 11:00:00 PM|12/29/1779 11:00:00 PM|12/29/1779 11:00:00 PM",
+   "now": "LOCAL-REJECT:CONCATENATEX over date/time before December #, # is not supported in the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "MAXX(ADDCOLUMNS(Facts,\"q\",(Facts[Quantity])/(DIVIDE(1,0))),[q])",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:MAXX over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine d"
+  },
+  {
+   "part": "C",
+   "expr": "MAXX(ADDCOLUMNS(Facts,\"q\",(Facts[Quantity])/(0||\"\")),[q])",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:MAXX over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine d"
+  },
+  {
+   "part": "C",
+   "expr": "MEDIANX(Facts,(0)/(IF(Facts[Quantity]>2,BLANK(),1)))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:MEDIANX with NaN beside other numbers depends on the order the engine sorts them in, which the local engine d"
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(Facts,(TIME(1,0,0))-(MAXX({DATE(2020,1,1)},[Value])),\"|\",Facts[Quantity],ASC,Facts[Sales],ASC)",
+   "powerbi": "12/29/1779 11:00:00 PM|12/29/1779 11:00:00 PM|12/29/1779 11:00:00 PM|12/29/1779 11:00:00 PM|12/29/1779 11:00:00 PM|12/29/1779 11:00:00 PM",
+   "now": "LOCAL-REJECT:CONCATENATEX over date/time before December #, # is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(Facts,(TIME(1,0,0)+1)-(DATE(2020,1,1)),\"|\",Facts[Quantity],ASC,Facts[Sales],ASC)",
+   "powerbi": "12/30/1779 11:00:00 PM|12/30/1779 11:00:00 PM|12/30/1779 11:00:00 PM|12/30/1779 11:00:00 PM|12/30/1779 11:00:00 PM|12/30/1779 11:00:00 PM",
+   "now": "LOCAL-REJECT:CONCATENATEX over date/time before December #, # is not supported in the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "MEDIANX(Facts,(Facts[Sales])/(BLANK()&&BLANK()))",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:MEDIANX with NaN beside other numbers depends on the order the engine sorts them in, which the local engine d"
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(Facts,(TIME(1,0,0))-(MAXX(Facts,DATE(2020,1,1))),\"|\",Facts[Quantity],ASC,Facts[Sales],ASC)",
+   "powerbi": "12/29/1779 11:00:00 PM|12/29/1779 11:00:00 PM|12/29/1779 11:00:00 PM|12/29/1779 11:00:00 PM|12/29/1779 11:00:00 PM|12/29/1779 11:00:00 PM",
+   "now": "LOCAL-REJECT:CONCATENATEX over date/time before December #, # is not supported in the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "MAXX(ADDCOLUMNS(Facts,\"c\",CURRENCY(Facts[Sales])),(Facts[Sales]*0)/([c]*2))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:MAXX over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine d"
+  },
+  {
+   "part": "C",
+   "expr": "MEDIANX(Facts,CONVERT(Facts[Sales]/0,DOUBLE))",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:MEDIANX with NaN beside other numbers depends on the order the engine sorts them in, which the local engine d"
+  },
+  {
+   "part": "C",
+   "expr": "MAXX(ADDCOLUMNS(Facts,\"c\",CURRENCY(Facts[Sales])),(Facts[Sales]*0)/(CURRENCY(Facts[Sales])))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:MAXX over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine d"
+  },
+  {
+   "part": "C",
+   "expr": "MAXX(ADDCOLUMNS(Facts,\"q\",CONVERT(Facts[Sales]/0,DOUBLE)),[q])",
+   "powerbi": "Infinity",
+   "now": "LOCAL-REJECT:MAXX over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine d"
+  },
+  {
+   "part": "C",
+   "expr": "MAXX(ADDCOLUMNS(Facts,\"c\",CURRENCY(Facts[Sales])),(Facts[Sales]/0)/([c]*2))",
+   "powerbi": "Infinity",
+   "now": "LOCAL-REJECT:MAXX over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine d"
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(Facts,CONVERT(Facts[Sales],DATETIME),\"|\",Facts[Quantity],ASC,Facts[Sales],ASC)",
+   "powerbi": "12:00:00 AM|12/29/1899 12:00:00 PM|1/9/1900 12:00:00 PM|1/19/1900||1/1/1900 12:00:00 PM",
+   "now": "LOCAL-REJECT:CONCATENATEX over date/time before December #, # is not supported in the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "MAXX(ADDCOLUMNS(Facts,\"c\",CURRENCY(Facts[Sales])),(0)/([c]))",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:MAXX over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine d"
+  },
+  {
+   "part": "C",
+   "expr": "MAXX(ADDCOLUMNS(Facts,\"c\",CURRENCY(Facts[Sales])),(Facts[Sales]*0)/([c]))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:MAXX over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine d"
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX({1},MAX(1E15,1))",
+   "powerbi": "1E+15",
+   "now": "LOCAL-REJECT:CONCATENATEX of this expression without an order walks the rows in an order the local engine does not model."
+  },
+  {
+   "part": "C",
+   "expr": "MAXX(ADDCOLUMNS(Facts,\"c\",CURRENCY(Facts[Sales])),(Facts[Sales])/([c]))",
+   "powerbi": "1",
+   "now": "LOCAL-REJECT:MAXX over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine d"
+  },
+  {
+   "part": "C",
+   "expr": "MAXX(ADDCOLUMNS(Facts,\"c\",CURRENCY(Facts[Sales])),(0.0)/(CURRENCY(Facts[Quantity])))",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:MAXX over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine d"
+  },
+  {
+   "part": "C",
+   "expr": "MAXX(ADDCOLUMNS(Facts,\"c\",CURRENCY(Facts[Sales])),(SUM(Facts[Quantity])*CURRENCY(1))+(Facts[Sales]/0))",
+   "powerbi": "Infinity",
+   "now": "LOCAL-REJECT:MAXX over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine d"
+  },
+  {
+   "part": "A",
+   "expr": "MAXX(Facts,CONCATENATEX({1},1E15*Facts[Quantity]))",
+   "powerbi": "5E+15",
+   "now": "LOCAL-REJECT:The order of a CONCATENATEX whose expression reads an enclosing row context is not modelled in the local engi"
+  },
+  {
+   "part": "C",
+   "expr": "MAXX(ADDCOLUMNS(Facts,\"c\",CURRENCY(Facts[Sales])),(0)/([c]*2))",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:MAXX over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine d"
+  },
+  {
+   "part": "C",
+   "expr": "MEDIANX(Facts,CONVERT(Facts[Quantity]/0,DOUBLE))",
+   "powerbi": "Infinity",
+   "now": "LOCAL-REJECT:MEDIANX with NaN beside other numbers depends on the order the engine sorts them in, which the local engine d"
+  },
+  {
+   "part": "C",
+   "expr": "MAXX(ADDCOLUMNS(Facts,\"q\",CONVERT(Facts[Quantity]/0,DOUBLE)),[q])",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:MAXX over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine d"
+  },
+  {
+   "part": "C",
+   "expr": "MAXX(ADDCOLUMNS(Facts,\"c\",CURRENCY(Facts[Sales])),(CURRENCY(Facts[Sales]))+(Facts[Sales]/0))",
+   "powerbi": "Infinity",
+   "now": "LOCAL-REJECT:MAXX over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine d"
+  },
+  {
+   "part": "C",
+   "expr": "MAXX(ADDCOLUMNS(Facts,\"q\",CONVERT(Facts[Quantity]/0,DATETIME)),[q])",
+   "powerbi": "12/30/1899 00:00:00",
+   "now": "LOCAL-REJECT:MAXX over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine d"
+  },
+  {
+   "part": "C",
+   "expr": "MAXX(ADDCOLUMNS(Facts,\"c\",CURRENCY(Facts[Sales])),(0.0)/(CURRENCY(Facts[Sales])))",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:MAXX over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine d"
+  },
+  {
+   "part": "C",
+   "expr": "MAXX(ADDCOLUMNS(Facts,\"c\",CURRENCY(Facts[Sales])),(Facts[Sales]/0)/([c]+1))",
+   "powerbi": "Infinity",
+   "now": "LOCAL-REJECT:MAXX over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine d"
+  },
+  {
+   "part": "C",
+   "expr": "MAXX(ADDCOLUMNS(Facts,\"q\",CONVERT(Facts[Sales]/0,DATETIME)),[q])",
+   "powerbi": "12/31/9999 23:59:59",
+   "now": "LOCAL-REJECT:MAXX over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine d"
+  },
+  {
+   "part": "C",
+   "expr": "MAXX(ADDCOLUMNS(Facts,\"c\",CURRENCY(Facts[Sales])),(Facts[Sales])/([c]*2))",
+   "powerbi": "0.5",
+   "now": "LOCAL-REJECT:MAXX over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine d"
+  },
+  {
+   "part": "C",
+   "expr": "MAXX(ADDCOLUMNS(Facts,\"c\",CURRENCY(Facts[Sales])),(Facts[Sales]/0)/(CURRENCY(Facts[Quantity])))",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:MAXX over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine d"
+  },
+  {
+   "part": "C",
+   "expr": "MAXX(ADDCOLUMNS(Facts,\"c\",CURRENCY(Facts[Sales])),(CURRENCY(Facts[Quantity]))+(Facts[Sales]/0))",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:MAXX over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine d"
+  },
+  {
+   "part": "C",
+   "expr": "MAXX(ADDCOLUMNS(Facts,\"c\",CURRENCY(Facts[Sales])),(0.0)/([c]))",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:MAXX over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine d"
+  },
+  {
+   "part": "A",
+   "expr": "MAXX(Facts,CONCATENATEX({1},Facts[Quantity]*1E15))",
+   "powerbi": "5E+15",
+   "now": "LOCAL-REJECT:The order of a CONCATENATEX whose expression reads an enclosing row context is not modelled in the local engi"
+  },
+  {
+   "part": "C",
+   "expr": "MAXX(ADDCOLUMNS(Facts,\"c\",CURRENCY(Facts[Sales])),([c]*2)+(Facts[Sales]/0))",
+   "powerbi": "Infinity",
+   "now": "LOCAL-REJECT:MAXX over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine d"
+  },
+  {
+   "part": "C",
+   "expr": "MAXX(ADDCOLUMNS(Facts,\"q\",COALESCE((Facts[Sales]&&\"\")/Facts[Quantity],5)),[q])",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:MAXX over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine d"
+  },
+  {
+   "part": "C",
+   "expr": "MAXX(ADDCOLUMNS(Facts,\"c\",CURRENCY(Facts[Sales])),([c])+(Facts[Sales]/0))",
+   "powerbi": "Infinity",
+   "now": "LOCAL-REJECT:MAXX over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine d"
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(ADDCOLUMNS(Facts,\"q\",CONVERT(Facts[Sales],DATETIME)),[q],\"|\",Facts[Quantity],ASC,Facts[Sales],ASC)",
+   "powerbi": "12:00:00 AM|12/29/1899 12:00:00 PM|1/9/1900 12:00:00 PM|1/19/1900||1/1/1900 12:00:00 PM",
+   "now": "LOCAL-REJECT:CONCATENATEX over date/time before December #, # is not supported in the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "MAXX(ADDCOLUMNS(Facts,\"c\",CURRENCY(Facts[Sales])),(Facts[Sales]/0)/([c]))",
+   "powerbi": "Infinity",
+   "now": "LOCAL-REJECT:MAXX over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine d"
+  },
+  {
+   "part": "C",
+   "expr": "MAXX(ADDCOLUMNS(Facts,\"c\",CURRENCY(Facts[Sales])),(Facts[Sales]*0)/(CURRENCY(Facts[Quantity])))",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:MAXX over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine d"
+  },
+  {
+   "part": "C",
+   "expr": "MAXX(ADDCOLUMNS(Facts,\"c\",CURRENCY(Facts[Sales])),(Facts[Sales])/(CURRENCY(Facts[Quantity])))",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:MAXX over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine d"
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX({1},MIN(1E15,2E15))",
+   "powerbi": "1E+15",
+   "now": "LOCAL-REJECT:CONCATENATEX of this expression without an order walks the rows in an order the local engine does not model."
+  },
+  {
+   "part": "C",
+   "expr": "MAXX(ADDCOLUMNS(Facts,\"c\",CURRENCY(Facts[Sales])),(0)/(CURRENCY(Facts[Sales])))",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:MAXX over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine d"
+  },
+  {
+   "part": "C",
+   "expr": "MAXX(ADDCOLUMNS(Facts,\"c\",CURRENCY(Facts[Sales])),([c]+1)+(Facts[Sales]/0))",
+   "powerbi": "Infinity",
+   "now": "LOCAL-REJECT:MAXX over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine d"
+  },
+  {
+   "part": "C",
+   "expr": "MAXX(ADDCOLUMNS(Facts,\"c\",CURRENCY(Facts[Sales])),(Facts[Sales])/(CURRENCY(Facts[Sales])))",
+   "powerbi": "1",
+   "now": "LOCAL-REJECT:MAXX over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine d"
+  },
+  {
+   "part": "C",
+   "expr": "MAXX(ADDCOLUMNS(Facts,\"c\",CURRENCY(Facts[Sales])),(0.0)/([c]*2))",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:MAXX over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine d"
+  },
+  {
+   "part": "C",
+   "expr": "MAXX(ADDCOLUMNS(Facts,\"c\",CURRENCY(Facts[Sales])),(Facts[Sales]/0)/(CURRENCY(Facts[Sales])))",
+   "powerbi": "Infinity",
+   "now": "LOCAL-REJECT:MAXX over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine d"
+  },
+  {
+   "part": "C",
+   "expr": "MAXX(ADDCOLUMNS(Facts,\"c\",CURRENCY(Facts[Sales])),(Facts[Sales]/0)/(SUM(Facts[Quantity])*CURRENCY(1)))",
+   "powerbi": "Infinity",
+   "now": "LOCAL-REJECT:MAXX over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine d"
+  },
+  {
+   "part": "C",
+   "expr": "MAXX(ADDCOLUMNS(Facts,\"c\",CURRENCY(Facts[Sales])),(0)/(CURRENCY(Facts[Quantity])))",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:MAXX over a Variant with NaN beside other numbers depends on the engine's row order, which the local engine d"
+  },
+  {
+   "part": "A",
+   "expr": "SELECTCOLUMNS({1},\"a\",FACT(20))",
+   "powerbi": "2.43290200817664E+18",
+   "now": "LOCAL-REJECT:SELECTCOLUMNS returns a table; use it inside COUNTROWS, SUMX, CONCATENATEX or another table argument."
+  },
+  {
+   "part": "A",
+   "expr": "SELECTCOLUMNS({1},\"a\",2^50)",
+   "powerbi": "1.12589990684262E+15",
+   "now": "LOCAL-REJECT:SELECTCOLUMNS returns a table; use it inside COUNTROWS, SUMX, CONCATENATEX or another table argument."
+  },
+  {
+   "part": "A",
+   "expr": "MAXX(Facts,CONCATENATEX({1,2},1E15*Facts[Quantity],\",\"))",
+   "powerbi": "5E+15,5E+15",
+   "now": "LOCAL-REJECT:The order of a CONCATENATEX whose expression reads an enclosing row context is not modelled in the local engi"
+  },
+  {
+   "part": "A",
+   "expr": "SELECTCOLUMNS({1},\"a\",SUMX(Facts,1E15))",
+   "powerbi": "6E+15",
+   "now": "LOCAL-REJECT:SELECTCOLUMNS returns a table; use it inside COUNTROWS, SUMX, CONCATENATEX or another table argument."
+  },
+  {
+   "part": "A",
+   "expr": "SELECTCOLUMNS({1},\"a\",CONVERT(1E15,INTEGER))",
+   "powerbi": "1000000000000000",
+   "now": "LOCAL-REJECT:SELECTCOLUMNS returns a table; use it inside COUNTROWS, SUMX, CONCATENATEX or another table argument."
+  },
+  {
+   "part": "A",
+   "expr": "SELECTCOLUMNS({1},\"a\",1E15)",
+   "powerbi": "1E+15",
+   "now": "LOCAL-REJECT:SELECTCOLUMNS returns a table; use it inside COUNTROWS, SUMX, CONCATENATEX or another table argument."
+  },
+  {
+   "part": "A",
+   "expr": "SELECTCOLUMNS({1},\"a\",FACT(18))",
+   "powerbi": "6.402373705728E+15",
+   "now": "LOCAL-REJECT:SELECTCOLUMNS returns a table; use it inside COUNTROWS, SUMX, CONCATENATEX or another table argument."
+  },
+  {
+   "part": "A",
+   "expr": "SELECTCOLUMNS({1},\"a\",-1E15)",
+   "powerbi": "-1E+15",
+   "now": "LOCAL-REJECT:SELECTCOLUMNS returns a table; use it inside COUNTROWS, SUMX, CONCATENATEX or another table argument."
+  },
+  {
+   "part": "A",
+   "expr": "SELECTCOLUMNS({1},\"a\",1E15/3)",
+   "powerbi": "333333333333333",
+   "now": "LOCAL-REJECT:SELECTCOLUMNS returns a table; use it inside COUNTROWS, SUMX, CONCATENATEX or another table argument."
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX({1,2},MAX(1E15,1),\",\")",
+   "powerbi": "1E+15,1E+15",
+   "now": "LOCAL-REJECT:CONCATENATEX of this expression without an order walks the rows in an order the local engine does not model."
+  },
+  {
+   "part": "A",
+   "expr": "SELECTCOLUMNS({1},\"a\",COALESCE(1E15,1))",
+   "powerbi": "1E+15",
+   "now": "LOCAL-REJECT:SELECTCOLUMNS returns a table; use it inside COUNTROWS, SUMX, CONCATENATEX or another table argument."
+  },
+  {
+   "part": "A",
+   "expr": "SELECTCOLUMNS({1},\"a\",IF(TRUE(),1E15))",
+   "powerbi": "1E+15",
+   "now": "LOCAL-REJECT:SELECTCOLUMNS returns a table; use it inside COUNTROWS, SUMX, CONCATENATEX or another table argument."
+  },
+  {
+   "part": "A",
+   "expr": "SELECTCOLUMNS({1},\"a\",MAXX(Facts,1E15))",
+   "powerbi": "1E+15",
+   "now": "LOCAL-REJECT:SELECTCOLUMNS returns a table; use it inside COUNTROWS, SUMX, CONCATENATEX or another table argument."
+  },
+  {
+   "part": "A",
+   "expr": "SELECTCOLUMNS({1},\"a\",ROUND(1E15,0))",
+   "powerbi": "1E+15",
+   "now": "LOCAL-REJECT:SELECTCOLUMNS returns a table; use it inside COUNTROWS, SUMX, CONCATENATEX or another table argument."
+  },
+  {
+   "part": "A",
+   "expr": "SELECTCOLUMNS({1},\"a\",1000000000000000)",
+   "powerbi": "1000000000000000",
+   "now": "LOCAL-REJECT:SELECTCOLUMNS returns a table; use it inside COUNTROWS, SUMX, CONCATENATEX or another table argument."
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX({1,2},IF(1=1,CONVERT(DATE(2020,1,1),DATETIME),1))",
+   "powerbi": "4383143831",
+   "now": "LOCAL-REJECT:CONCATENATEX of this expression without an order walks the rows in an order the local engine does not model."
+  },
+  {
+   "part": "A",
+   "expr": "SELECTCOLUMNS({1},\"a\",EXP(40))",
+   "powerbi": "2.3538526683702E+17",
+   "now": "LOCAL-REJECT:SELECTCOLUMNS returns a table; use it inside COUNTROWS, SUMX, CONCATENATEX or another table argument."
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX({1,2},IF(1=1,CONVERT(DATE(2020,1,1),DATETIME),BLANK()))",
+   "powerbi": "1/1/20201/1/2020",
+   "now": "LOCAL-REJECT:CONCATENATEX of this expression without an order walks the rows in an order the local engine does not model."
+  },
+  {
+   "part": "A",
+   "expr": "SELECTCOLUMNS({1},\"a\",VAR v=1E15 RETURN v)",
+   "powerbi": "1E+15",
+   "now": "LOCAL-REJECT:SELECTCOLUMNS returns a table; use it inside COUNTROWS, SUMX, CONCATENATEX or another table argument."
+  },
+  {
+   "part": "A",
+   "expr": "SELECTCOLUMNS({1},\"a\",INT(1E15))",
+   "powerbi": "1000000000000000",
+   "now": "LOCAL-REJECT:SELECTCOLUMNS returns a table; use it inside COUNTROWS, SUMX, CONCATENATEX or another table argument."
+  },
+  {
+   "part": "A",
+   "expr": "SELECTCOLUMNS({1},\"a\",1E100)",
+   "powerbi": "1E+100",
+   "now": "LOCAL-REJECT:SELECTCOLUMNS returns a table; use it inside COUNTROWS, SUMX, CONCATENATEX or another table argument."
+  },
+  {
+   "part": "A",
+   "expr": "SELECTCOLUMNS({1},\"a\",1E15+1)",
+   "powerbi": "1E+15",
+   "now": "LOCAL-REJECT:SELECTCOLUMNS returns a table; use it inside COUNTROWS, SUMX, CONCATENATEX or another table argument."
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX({1,2},IF(1=2,1,CONVERT(DATE(2020,1,1),DATETIME)))",
+   "powerbi": "4383143831",
+   "now": "LOCAL-REJECT:CONCATENATEX of this expression without an order walks the rows in an order the local engine does not model."
+  },
+  {
+   "part": "A",
+   "expr": "SELECTCOLUMNS({1},\"a\",1E16)",
+   "powerbi": "1E+16",
+   "now": "LOCAL-REJECT:SELECTCOLUMNS returns a table; use it inside COUNTROWS, SUMX, CONCATENATEX or another table argument."
+  },
+  {
+   "part": "A",
+   "expr": "SELECTCOLUMNS({1},\"a\",CONVERT(1000000000000000,DOUBLE))",
+   "powerbi": "1E+15",
+   "now": "LOCAL-REJECT:SELECTCOLUMNS returns a table; use it inside COUNTROWS, SUMX, CONCATENATEX or another table argument."
+  },
+  {
+   "part": "A",
+   "expr": "SELECTCOLUMNS({1},\"a\",MAX(1E15,1))",
+   "powerbi": "1E+15",
+   "now": "LOCAL-REJECT:SELECTCOLUMNS returns a table; use it inside COUNTROWS, SUMX, CONCATENATEX or another table argument."
+  },
+  {
+   "part": "B",
+   "expr": "TOCSV(SELECTCOLUMNS(COLUMNSTATISTICS(),\"c\",[Column Name],\"k\",[Cardinality]),10,\",\",TRUE)",
+   "powerbi": "[c],[k]",
+   "now": "LOCAL-REJECT:The row order of this table expression is not modelled in the local engine, so TOCSV / TOJSON refuse it."
+  },
+  {
+   "part": "B",
+   "expr": "TOJSON(SELECTCOLUMNS(FILTER(COLUMNSTATISTICS(),[Column Name]=\"Region\"),\"c\",[Column Name],\"k\",[Cardinality],\"m\",[Max Length]))",
+   "powerbi": "{",
+   "now": "LOCAL-REJECT:The row order of this table expression is not modelled in the local engine, so TOCSV / TOJSON refuse it."
+  },
+  {
+   "part": "C",
+   "expr": "(PERCENTILEX.EXC(CALCULATETABLE(Facts,Facts[Region]=\"East\"),(Facts[Quantity]-1)/0,0.75))&\"z\"",
+   "powerbi": "infz",
+   "now": "LOCAL-REJECT:PERCENTILEX.EXC with NaN beside other numbers depends on the order the engine sorts them in, which the local "
+  },
+  {
+   "part": "C",
+   "expr": "(PERCENTILEX.INC(Facts,IF(Facts[Quantity]>2,0/0,1/0),0.5))&\"z\"",
+   "powerbi": "-nan(ind)z",
+   "now": "LOCAL-REJECT:PERCENTILEX.INC with NaN beside other numbers depends on the order the engine sorts them in, which the local "
+  },
+  {
+   "part": "C",
+   "expr": "(PERCENTILEX.INC({1,2},([Value]-1)/0,0.25))&\"z\"",
+   "powerbi": "-nan(ind)z",
+   "now": "LOCAL-REJECT:PERCENTILEX.INC with NaN beside other numbers depends on the order the engine sorts them in, which the local "
+  },
+  {
+   "part": "C",
+   "expr": "(STDEVX.S({1,2,3},IF([Value]>1,0/0,[Value])))&\"z\"",
+   "powerbi": "0z",
+   "now": "LOCAL-REJECT:STDEVX.S with NaN beside other numbers is not modelled by the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "(VARX.S(FILTER(Facts,Facts[Quantity]>2),IF(Facts[Sales]>2,0/0,1/0)))&\"z\"",
+   "powerbi": "-nan(ind)z",
+   "now": "LOCAL-REJECT:VARX.S with NaN beside other numbers is not modelled by the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "IFERROR(MEDIANX(Facts,(Facts[Quantity]-1)/0),7)",
+   "powerbi": "7",
+   "now": "LOCAL-REJECT:MEDIANX with NaN beside other numbers depends on the order the engine sorts them in, which the local engine d"
+  },
+  {
+   "part": "C",
+   "expr": "IFERROR(MEDIANX({1,2},([Value]-1)/0),7)",
+   "powerbi": "7",
+   "now": "LOCAL-REJECT:MEDIANX with NaN beside other numbers depends on the order the engine sorts them in, which the local engine d"
+  },
+  {
+   "part": "C",
+   "expr": "IFERROR(PERCENTILEX.INC({1,2},([Value]-1)/0,0.75),7)",
+   "powerbi": "7",
+   "now": "LOCAL-REJECT:PERCENTILEX.INC with NaN beside other numbers depends on the order the engine sorts them in, which the local "
+  },
+  {
+   "part": "C",
+   "expr": "IFERROR(STDEVX.S({-1,2,5,0},IF([Value]>1,0/0,[Value])),7)",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:STDEVX.S with NaN beside other numbers is not modelled by the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "ISBLANK(PERCENTILEX.INC({1,2},([Value]-1)/0,0.25))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:PERCENTILEX.INC with NaN beside other numbers depends on the order the engine sorts them in, which the local "
+  },
+  {
+   "part": "C",
+   "expr": "ISBLANK(PERCENTILEX.INC({BLANK(),1},([Value]-1)/0,0.75))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:PERCENTILEX.INC with NaN beside other numbers depends on the order the engine sorts them in, which the local "
+  },
+  {
+   "part": "C",
+   "expr": "MEDIANX({-1,2,5,0},IF([Value]>2,0/0,1/0))",
+   "powerbi": "Infinity",
+   "now": "LOCAL-REJECT:MEDIANX with NaN beside other numbers depends on the order the engine sorts them in, which the local engine d"
+  },
+  {
+   "part": "C",
+   "expr": "MEDIANX({0,1},([Value]-1)/0)",
+   "powerbi": "-Infinity",
+   "now": "LOCAL-REJECT:MEDIANX with NaN beside other numbers depends on the order the engine sorts them in, which the local engine d"
+  },
+  {
+   "part": "C",
+   "expr": "MEDIANX({0,1},[Value]/0)",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:MEDIANX with NaN beside other numbers depends on the order the engine sorts them in, which the local engine d"
+  },
+  {
+   "part": "C",
+   "expr": "MEDIANX({1,2,3},([Value]-1)/0)",
+   "powerbi": "Infinity",
+   "now": "LOCAL-REJECT:MEDIANX with NaN beside other numbers depends on the order the engine sorts them in, which the local engine d"
+  },
+  {
+   "part": "C",
+   "expr": "MEDIANX({1,2,3},IF([Value]>1,0/0,[Value]))",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:MEDIANX with NaN beside other numbers depends on the order the engine sorts them in, which the local engine d"
+  },
+  {
+   "part": "C",
+   "expr": "MEDIANX({1,2,3},IF([Value]>2,0/0,1/0))",
+   "powerbi": "Infinity",
+   "now": "LOCAL-REJECT:MEDIANX with NaN beside other numbers depends on the order the engine sorts them in, which the local engine d"
+  },
+  {
+   "part": "C",
+   "expr": "MEDIANX({BLANK(),1},([Value]/0)*0)",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:MEDIANX with NaN beside other numbers depends on the order the engine sorts them in, which the local engine d"
+  },
+  {
+   "part": "C",
+   "expr": "MEDIANX({BLANK(),1},[Value]*(1/0*0))",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:MEDIANX with NaN beside other numbers depends on the order the engine sorts them in, which the local engine d"
+  },
+  {
+   "part": "C",
+   "expr": "PERCENTILEX.EXC(FILTER(Facts,Facts[Quantity]>2),Facts[Sales]*(1/0*0),0.25)",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:PERCENTILEX.EXC with NaN beside other numbers depends on the order the engine sorts them in, which the local "
+  },
+  {
+   "part": "C",
+   "expr": "PERCENTILEX.EXC({1,2},([Value]-1)/0,0.5)",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:PERCENTILEX.EXC with NaN beside other numbers depends on the order the engine sorts them in, which the local "
+  },
+  {
+   "part": "C",
+   "expr": "PERCENTILEX.INC(FILTER(Facts,Facts[Quantity]>2),IF(Facts[Sales]>2,0/0,1/0),0.75)",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:PERCENTILEX.INC with NaN beside other numbers depends on the order the engine sorts them in, which the local "
+  },
+  {
+   "part": "C",
+   "expr": "PERCENTILEX.INC(Facts,IF(Facts[Quantity]>2,0/0,1/0),0)",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:PERCENTILEX.INC with NaN beside other numbers depends on the order the engine sorts them in, which the local "
+  },
+  {
+   "part": "C",
+   "expr": "PERCENTILEX.INC({-1,2,5,0},IF([Value]>1,0/0,[Value]),0.75)",
+   "powerbi": "-0.75",
+   "now": "LOCAL-REJECT:PERCENTILEX.INC with NaN beside other numbers depends on the order the engine sorts them in, which the local "
+  },
+  {
+   "part": "C",
+   "expr": "PERCENTILEX.INC({-1,2,5,0},IF([Value]>2,0/0,1/0),0.25)",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:PERCENTILEX.INC with NaN beside other numbers depends on the order the engine sorts them in, which the local "
+  },
+  {
+   "part": "C",
+   "expr": "PERCENTILEX.INC({1,2,3},([Value]-1)/0,0)",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:PERCENTILEX.INC with NaN beside other numbers depends on the order the engine sorts them in, which the local "
+  },
+  {
+   "part": "C",
+   "expr": "PERCENTILEX.INC({1,2,3},IF([Value]>2,0/0,1/0),0.5)",
+   "powerbi": "Infinity",
+   "now": "LOCAL-REJECT:PERCENTILEX.INC with NaN beside other numbers depends on the order the engine sorts them in, which the local "
+  },
+  {
+   "part": "C",
+   "expr": "PERCENTILEX.INC({1,2},([Value]-1)/0,0.25)",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:PERCENTILEX.INC with NaN beside other numbers depends on the order the engine sorts them in, which the local "
+  },
+  {
+   "part": "C",
+   "expr": "PERCENTILEX.INC({BLANK(),1},([Value]/0)*0,0)",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:PERCENTILEX.INC with NaN beside other numbers depends on the order the engine sorts them in, which the local "
+  },
+  {
+   "part": "C",
+   "expr": "PERCENTILEX.INC({BLANK(),1},([Value]/0)*0,0.25)",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:PERCENTILEX.INC with NaN beside other numbers depends on the order the engine sorts them in, which the local "
+  },
+  {
+   "part": "C",
+   "expr": "PERCENTILEX.INC({BLANK(),1},[Value]*(1/0*0),0)",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:PERCENTILEX.INC with NaN beside other numbers depends on the order the engine sorts them in, which the local "
+  },
+  {
+   "part": "C",
+   "expr": "PERCENTILEX.INC({BLANK(),1},[Value]*(1/0*0),1)",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:PERCENTILEX.INC with NaN beside other numbers depends on the order the engine sorts them in, which the local "
+  },
+  {
+   "part": "C",
+   "expr": "STDEVX.S(FILTER(Facts,Facts[Quantity]>2),IF(Facts[Sales]>2,0/0,1/0))",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:STDEVX.S with NaN beside other numbers is not modelled by the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "STDEVX.S({-1,2,5,0},IF([Value]>1,0/0,[Value]))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:STDEVX.S with NaN beside other numbers is not modelled by the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "VARX.S(CALCULATETABLE(Facts,Facts[Region]=\"East\"),IF(Facts[Quantity]>1,0/0,Facts[Quantity]))",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:VARX.S with NaN beside other numbers is not modelled by the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "VARX.S(Facts,IF(Facts[Quantity]>1,0/0,Facts[Quantity]))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:VARX.S with NaN beside other numbers is not modelled by the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "VARX.S({1,2,3},IF([Value]>1,0/0,[Value]))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:VARX.S with NaN beside other numbers is not modelled by the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "(MEDIANX({-1,-2,4},IF([Value]>3,0/0,IF([Value]<2,1/0,[Value]))))&\"z\"",
+   "powerbi": "infz",
+   "now": "LOCAL-REJECT:MEDIANX with NaN beside other numbers depends on the order the engine sorts them in, which the local engine d"
+  },
+  {
+   "part": "C",
+   "expr": "(MEDIANX({0,3,7},IF([Value]=3,0/0,[Value])))&\"z\"",
+   "powerbi": "0z",
+   "now": "LOCAL-REJECT:MEDIANX with NaN beside other numbers depends on the order the engine sorts them in, which the local engine d"
+  },
+  {
+   "part": "C",
+   "expr": "(MEDIANX({1,2,3,4},IF([Value]=3,0/0,[Value])))&\"z\"",
+   "powerbi": "1.5z",
+   "now": "LOCAL-REJECT:MEDIANX with NaN beside other numbers depends on the order the engine sorts them in, which the local engine d"
+  },
+  {
+   "part": "C",
+   "expr": "(PERCENTILEX.INC(GENERATESERIES(1,5),([Value]-2)/([Value]-2),0.4))&\"z\"",
+   "powerbi": "-nan(ind)z",
+   "now": "LOCAL-REJECT:PERCENTILEX.INC with NaN beside other numbers depends on the order the engine sorts them in, which the local "
+  },
+  {
+   "part": "C",
+   "expr": "(PERCENTILEX.INC({0,3,7},IF([Value]>1,1/0-1/0,[Value]),0.5))&\"z\"",
+   "powerbi": "-nan(ind)z",
+   "now": "LOCAL-REJECT:PERCENTILEX.INC with NaN beside other numbers depends on the order the engine sorts them in, which the local "
+  },
+  {
+   "part": "C",
+   "expr": "(PERCENTILEX.INC({1,2,3,4},IF([Value]>1,1/0-1/0,[Value]),0.6))&\"z\"",
+   "powerbi": "-nan(ind)z",
+   "now": "LOCAL-REJECT:PERCENTILEX.INC with NaN beside other numbers depends on the order the engine sorts them in, which the local "
+  },
+  {
+   "part": "C",
+   "expr": "(PERCENTILEX.INC({1,2},([Value]-1)/0,0.5))&\"z\"",
+   "powerbi": "-nan(ind)z",
+   "now": "LOCAL-REJECT:PERCENTILEX.INC with NaN beside other numbers depends on the order the engine sorts them in, which the local "
+  },
+  {
+   "part": "C",
+   "expr": "(STDEVX.S({0,3,7},IF([Value]>3,0/0,IF([Value]<2,1/0,[Value]))))&\"z\"",
+   "powerbi": "0z",
+   "now": "LOCAL-REJECT:STDEVX.S with NaN beside other numbers is not modelled by the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "(VARX.S({BLANK(),2,3},([Value]-2)/([Value]-2)))&\"z\"",
+   "powerbi": "0z",
+   "now": "LOCAL-REJECT:VARX.S with NaN beside other numbers is not modelled by the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "IFERROR(MEDIANX(FILTER(Facts,Facts[Region]=\"West\"),IF(Facts[Quantity]=3,0/0,Facts[Quantity])),7)",
+   "powerbi": "7",
+   "now": "LOCAL-REJECT:MEDIANX with NaN beside other numbers depends on the order the engine sorts them in, which the local engine d"
+  },
+  {
+   "part": "C",
+   "expr": "IFERROR(MEDIANX({-2,3},IF([Value]>1,1/0-1/0,[Value])),7)",
+   "powerbi": "7",
+   "now": "LOCAL-REJECT:MEDIANX with NaN beside other numbers depends on the order the engine sorts them in, which the local engine d"
+  },
+  {
+   "part": "C",
+   "expr": "IFERROR(PERCENTILEX.EXC(GENERATESERIES(1,5),IF([Value]>1,1/0-1/0,[Value]),0.4),7)",
+   "powerbi": "7",
+   "now": "LOCAL-REJECT:PERCENTILEX.EXC with NaN beside other numbers depends on the order the engine sorts them in, which the local "
+  },
+  {
+   "part": "C",
+   "expr": "IFERROR(PERCENTILEX.EXC(TOPN(4,Facts,Facts[Quantity],ASC),IF(Facts[Sales]>3,0/0,IF(Facts[Sales]<2,1/0,Facts[Sales])),0.4),7)",
+   "powerbi": "7",
+   "now": "LOCAL-REJECT:PERCENTILEX.EXC with NaN beside other numbers depends on the order the engine sorts them in, which the local "
+  },
+  {
+   "part": "C",
+   "expr": "IFERROR(PERCENTILEX.INC(FILTER(Facts,Facts[Region]=\"West\"),IF(Facts[Quantity]=3,0/0,Facts[Quantity]),0.8),7)",
+   "powerbi": "7",
+   "now": "LOCAL-REJECT:PERCENTILEX.INC with NaN beside other numbers depends on the order the engine sorts them in, which the local "
+  },
+  {
+   "part": "C",
+   "expr": "IFERROR(PERCENTILEX.INC({0,3,7},IF([Value]>1,1/0-1/0,[Value]),0.6),7)",
+   "powerbi": "7",
+   "now": "LOCAL-REJECT:PERCENTILEX.INC with NaN beside other numbers depends on the order the engine sorts them in, which the local "
+  },
+  {
+   "part": "C",
+   "expr": "IFERROR(PERCENTILEX.INC({1,2,3,4},IF([Value]>3,0/0,IF([Value]<2,1/0,[Value])),0.6),7)",
+   "powerbi": "2.8",
+   "now": "LOCAL-REJECT:PERCENTILEX.INC with NaN beside other numbers depends on the order the engine sorts them in, which the local "
+  },
+  {
+   "part": "C",
+   "expr": "IFERROR(STDEVX.S({-1,-2,4},IF([Value]>1,1/0-1/0,[Value])),7)",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:STDEVX.S with NaN beside other numbers is not modelled by the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "ISBLANK(MEDIANX(GENERATESERIES(1,5),([Value]-2)/([Value]-2)))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:MEDIANX with NaN beside other numbers depends on the order the engine sorts them in, which the local engine d"
+  },
+  {
+   "part": "C",
+   "expr": "ISBLANK(MEDIANX({BLANK(),2,3},[Value]*(1/0*0)))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:MEDIANX with NaN beside other numbers depends on the order the engine sorts them in, which the local engine d"
+  },
+  {
+   "part": "C",
+   "expr": "ISBLANK(PERCENTILEX.EXC(GENERATESERIES(1,5),IF([Value]>1,1/0-1/0,[Value]),0.6))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:PERCENTILEX.EXC with NaN beside other numbers depends on the order the engine sorts them in, which the local "
+  },
+  {
+   "part": "C",
+   "expr": "ISBLANK(PERCENTILEX.EXC({-1,-2,4},IF([Value]>1,1/0-1/0,[Value]),0.6))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:PERCENTILEX.EXC with NaN beside other numbers depends on the order the engine sorts them in, which the local "
+  },
+  {
+   "part": "C",
+   "expr": "ISBLANK(PERCENTILEX.EXC({0,3,7},IF([Value]>3,0/0,IF([Value]<2,1/0,[Value])),0.4))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:PERCENTILEX.EXC with NaN beside other numbers depends on the order the engine sorts them in, which the local "
+  },
+  {
+   "part": "C",
+   "expr": "ISBLANK(PERCENTILEX.INC({0,3,7},IF([Value]=3,0/0,[Value]),0.2))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:PERCENTILEX.INC with NaN beside other numbers depends on the order the engine sorts them in, which the local "
+  },
+  {
+   "part": "C",
+   "expr": "ISBLANK(STDEVX.S({-2,3},IF([Value]>1,1/0-1/0,[Value])))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:STDEVX.S with NaN beside other numbers is not modelled by the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "ISBLANK(STDEVX.S({1,2,3,4},IF([Value]>1,1/0-1/0,[Value])))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:STDEVX.S with NaN beside other numbers is not modelled by the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "ISBLANK(VARX.S(TOPN(4,Facts,Facts[Quantity],ASC),IF(Facts[Sales]>1,1/0-1/0,Facts[Sales])))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:VARX.S with NaN beside other numbers is not modelled by the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "ISBLANK(VARX.S({BLANK(),2,3},IF(ISBLANK([Value]),0/0,[Value])))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:VARX.S with NaN beside other numbers is not modelled by the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "MEDIANX(FILTER(Facts,Facts[Region]=\"West\"),IF(Facts[Quantity]=3,0/0,Facts[Quantity]))",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:MEDIANX with NaN beside other numbers depends on the order the engine sorts them in, which the local engine d"
+  },
+  {
+   "part": "C",
+   "expr": "MEDIANX(GENERATESERIES(1,5),IF([Value]=3,0/0,[Value]))",
+   "powerbi": "2",
+   "now": "LOCAL-REJECT:MEDIANX with NaN beside other numbers depends on the order the engine sorts them in, which the local engine d"
+  },
+  {
+   "part": "C",
+   "expr": "MEDIANX({-1,-2,4},IF([Value]>1,1/0-1/0,[Value]))",
+   "powerbi": "-2",
+   "now": "LOCAL-REJECT:MEDIANX with NaN beside other numbers depends on the order the engine sorts them in, which the local engine d"
+  },
+  {
+   "part": "C",
+   "expr": "MEDIANX({-1,-2,4},IF([Value]>3,0/0,IF([Value]<2,1/0,[Value])))",
+   "powerbi": "Infinity",
+   "now": "LOCAL-REJECT:MEDIANX with NaN beside other numbers depends on the order the engine sorts them in, which the local engine d"
+  },
+  {
+   "part": "C",
+   "expr": "MEDIANX({-2,3},IF([Value]=3,0/0,[Value]))",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:MEDIANX with NaN beside other numbers depends on the order the engine sorts them in, which the local engine d"
+  },
+  {
+   "part": "C",
+   "expr": "MEDIANX({-2,3},IF([Value]>1,1/0-1/0,[Value]))",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:MEDIANX with NaN beside other numbers depends on the order the engine sorts them in, which the local engine d"
+  },
+  {
+   "part": "C",
+   "expr": "MEDIANX({BLANK(),2,3},IF([Value]=3,0/0,[Value]))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:MEDIANX with NaN beside other numbers depends on the order the engine sorts them in, which the local engine d"
+  },
+  {
+   "part": "C",
+   "expr": "MEDIANX({BLANK(),2,3},IF([Value]>1,1/0-1/0,[Value]))",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:MEDIANX with NaN beside other numbers depends on the order the engine sorts them in, which the local engine d"
+  },
+  {
+   "part": "C",
+   "expr": "PERCENTILEX.EXC(TOPN(4,Facts,Facts[Quantity],ASC),IF(Facts[Sales]>1,1/0-1/0,Facts[Sales]),0.5)",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:PERCENTILEX.EXC with NaN beside other numbers depends on the order the engine sorts them in, which the local "
+  },
+  {
+   "part": "C",
+   "expr": "PERCENTILEX.EXC({BLANK(),2,3},([Value]*0)*(1/0),0.5)",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:PERCENTILEX.EXC with NaN beside other numbers depends on the order the engine sorts them in, which the local "
+  },
+  {
+   "part": "C",
+   "expr": "PERCENTILEX.INC(FILTER(Facts,Facts[Region]=\"West\"),IF(Facts[Quantity]>1,1/0-1/0,Facts[Quantity]),0.6)",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:PERCENTILEX.INC with NaN beside other numbers depends on the order the engine sorts them in, which the local "
+  },
+  {
+   "part": "C",
+   "expr": "PERCENTILEX.INC(GENERATESERIES(1,5),([Value]-2)/([Value]-2),0.2)",
+   "powerbi": "1",
+   "now": "LOCAL-REJECT:PERCENTILEX.INC with NaN beside other numbers depends on the order the engine sorts them in, which the local "
+  },
+  {
+   "part": "C",
+   "expr": "PERCENTILEX.INC(GENERATESERIES(1,5),IF([Value]>3,0/0,IF([Value]<2,1/0,[Value])),0.8)",
+   "powerbi": "Infinity",
+   "now": "LOCAL-REJECT:PERCENTILEX.INC with NaN beside other numbers depends on the order the engine sorts them in, which the local "
+  },
+  {
+   "part": "C",
+   "expr": "PERCENTILEX.INC(TOPN(4,Facts,Facts[Quantity],ASC),IF(Facts[Sales]>3,0/0,IF(Facts[Sales]<2,1/0,Facts[Sales])),0.5)",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:PERCENTILEX.INC with NaN beside other numbers depends on the order the engine sorts them in, which the local "
+  },
+  {
+   "part": "C",
+   "expr": "PERCENTILEX.INC({0,3,7},IF([Value]=3,0/0,[Value]),0.4)",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:PERCENTILEX.INC with NaN beside other numbers depends on the order the engine sorts them in, which the local "
+  },
+  {
+   "part": "C",
+   "expr": "PERCENTILEX.INC({0,3,7},IF([Value]>1,1/0-1/0,[Value]),0.8)",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:PERCENTILEX.INC with NaN beside other numbers depends on the order the engine sorts them in, which the local "
+  },
+  {
+   "part": "C",
+   "expr": "PERCENTILEX.INC({1,2,3,4},([Value]-2)/([Value]-2),0.4)",
+   "powerbi": "NaN",
+   "now": "LOCAL-REJECT:PERCENTILEX.INC with NaN beside other numbers depends on the order the engine sorts them in, which the local "
+  },
+  {
+   "part": "C",
+   "expr": "STDEVX.S(GENERATESERIES(1,5),IF([Value]>1,1/0-1/0,[Value]))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:STDEVX.S with NaN beside other numbers is not modelled by the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "STDEVX.S({-1,-2,4},IF([Value]>1,1/0-1/0,[Value]))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:STDEVX.S with NaN beside other numbers is not modelled by the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "STDEVX.S({0,3,7},IF([Value]>1,1/0-1/0,[Value]))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:STDEVX.S with NaN beside other numbers is not modelled by the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "STDEVX.S({0,3,7},IF([Value]>3,0/0,IF([Value]<2,1/0,[Value])))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:STDEVX.S with NaN beside other numbers is not modelled by the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "STDEVX.S({1,2,3,4},([Value]-2)/([Value]-2))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:STDEVX.S with NaN beside other numbers is not modelled by the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "STDEVX.S({1,2,3,4},IF([Value]>3,0/0,IF([Value]<2,1/0,[Value])))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:STDEVX.S with NaN beside other numbers is not modelled by the local engine."
+  },
+  {
+   "part": "C",
+   "expr": "VARX.S(GENERATESERIES(1,5),IF([Value]>1,1/0-1/0,[Value]))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:VARX.S with NaN beside other numbers is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX({1},(TIME(0,0,1))-(DATE(1899,12,31)))",
+   "powerbi": "11:59:59 PM",
+   "now": "LOCAL-REJECT:CONCATENATEX over date/time before December #, # is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX({1},(TIME(0,0,1))-(DATE(1900,1,1)))",
+   "powerbi": "12/29/1899 11:59:59 PM",
+   "now": "LOCAL-REJECT:CONCATENATEX over date/time before December #, # is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX({1},(TIME(1,30,0))-(2.5))",
+   "powerbi": "12/28/1899 10:30:00 AM",
+   "now": "LOCAL-REJECT:CONCATENATEX over date/time before December #, # is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX({1},(TIME(1,30,0))-(DATE(1899,12,31)))",
+   "powerbi": "10:30:00 PM",
+   "now": "LOCAL-REJECT:CONCATENATEX over date/time before December #, # is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX({1},(TIME(12,0,0))-(1))",
+   "powerbi": "12:00:00 PM",
+   "now": "LOCAL-REJECT:CONCATENATEX over date/time before December #, # is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX({1},(TIME(12,0,0))-(100))",
+   "powerbi": "9/22/1899 12:00:00 PM",
+   "now": "LOCAL-REJECT:CONCATENATEX over date/time before December #, # is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX({1},(TIME(12,0,0))-(DATE(1900,1,1)))",
+   "powerbi": "12/29/1899 12:00:00 PM",
+   "now": "LOCAL-REJECT:CONCATENATEX over date/time before December #, # is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX({1},(TIME(23,59,59))-(2.5))",
+   "powerbi": "12/29/1899 12:00:01 PM",
+   "now": "LOCAL-REJECT:CONCATENATEX over date/time before December #, # is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX({1},(TIME(23,59,59))-(DATE(1899,12,31)))",
+   "powerbi": "12:00:01 AM",
+   "now": "LOCAL-REJECT:CONCATENATEX over date/time before December #, # is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX({1},(TIME(23,59,59))-(DATE(1900,1,1)))",
+   "powerbi": "12/29/1899 12:00:01 AM",
+   "now": "LOCAL-REJECT:CONCATENATEX over date/time before December #, # is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX({1},(TIME(6,0,0))-(1))",
+   "powerbi": "6:00:00 PM",
+   "now": "LOCAL-REJECT:CONCATENATEX over date/time before December #, # is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX({1},(TIME(6,0,0))-(100))",
+   "powerbi": "9/22/1899 6:00:00 PM",
+   "now": "LOCAL-REJECT:CONCATENATEX over date/time before December #, # is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX({1},(TIME(6,0,0))-(DATE(2020,1,1)))",
+   "powerbi": "12/29/1779 6:00:00 PM",
+   "now": "LOCAL-REJECT:CONCATENATEX over date/time before December #, # is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX({1},(TIME(6,0,0))-(EDATE(DATE(2020,1,1),1)))",
+   "powerbi": "11/28/1779 6:00:00 PM",
+   "now": "LOCAL-REJECT:CONCATENATEX over date/time before December #, # is not supported in the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(ADDCOLUMNS(FILTER(TABLEOF(Facts[Note]),NOT(ISBLANK(Facts[Note]))),\"k\",Facts[Quantity]),Facts[Note],\",\")",
+   "powerbi": "Paid,Paid,Paid,Late",
+   "now": "LOCAL-REJECT:CONCATENATEX without an ORDER BY over a table built around TABLEOF depends on the row order, which is not mod"
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(ADDCOLUMNS(FILTER(TABLEOF(Facts[Note]),NOT(ISBLANK(Facts[Note]))),\"k\",Facts[Quantity]),Facts[Note],\"|\")",
+   "powerbi": "Paid|Paid|Paid|Late",
+   "now": "LOCAL-REJECT:CONCATENATEX without an ORDER BY over a table built around TABLEOF depends on the row order, which is not mod"
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(ADDCOLUMNS(FILTER(TABLEOF(Facts[Quantity]),Facts[Quantity]>1),\"k\",Facts[Quantity]),Facts[Quantity],\",\")",
+   "powerbi": "2,3,4,5",
+   "now": "LOCAL-REJECT:CONCATENATEX without an ORDER BY over a table built around TABLEOF depends on the row order, which is not mod"
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(ADDCOLUMNS(FILTER(TABLEOF(Facts[Quantity]),Facts[Quantity]>1),\"k\",Facts[Quantity]),Facts[Quantity],\"|\")",
+   "powerbi": "2|3|4|5",
+   "now": "LOCAL-REJECT:CONCATENATEX without an ORDER BY over a table built around TABLEOF depends on the row order, which is not mod"
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(ADDCOLUMNS(FILTER(TABLEOF(Facts[Region]),Facts[Region]<>\"West\"),\"k\",Facts[Quantity]),Facts[Region],\",\")",
+   "powerbi": "East,East,East,North",
+   "now": "LOCAL-REJECT:CONCATENATEX without an ORDER BY over a table built around TABLEOF depends on the row order, which is not mod"
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(ADDCOLUMNS(FILTER(TABLEOF(Facts[Region]),Facts[Region]<>\"West\"),\"k\",Facts[Quantity]),Facts[Region],\"|\")",
+   "powerbi": "East|East|East|North",
+   "now": "LOCAL-REJECT:CONCATENATEX without an ORDER BY over a table built around TABLEOF depends on the row order, which is not mod"
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(ADDCOLUMNS(FILTER(TABLEOF(Facts[Sales]),Facts[Sales]>0),\"k\",Facts[Quantity]),Facts[Sales],\",\")",
+   "powerbi": "10.5,20,2.5",
+   "now": "LOCAL-REJECT:CONCATENATEX without an ORDER BY over a table built around TABLEOF depends on the row order, which is not mod"
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(ADDCOLUMNS(FILTER(TABLEOF(Facts[Sales]),Facts[Sales]>0),\"k\",Facts[Quantity]),Facts[Sales],\"|\")",
+   "powerbi": "10.5|20|2.5",
+   "now": "LOCAL-REJECT:CONCATENATEX without an ORDER BY over a table built around TABLEOF depends on the row order, which is not mod"
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(FILTER(TOPN(4,TABLEOF(Facts[Note]),Facts[Note]),NOT(ISBLANK(Facts[Note]))),Facts[Note],\",\")",
+   "powerbi": "Late,Paid,Paid,Paid",
+   "now": "LOCAL-REJECT:CONCATENATEX without an ORDER BY over a table built around TABLEOF depends on the row order, which is not mod"
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(FILTER(TOPN(4,TABLEOF(Facts[Note]),Facts[Note]),NOT(ISBLANK(Facts[Note]))),Facts[Note],\"|\")",
+   "powerbi": "Late|Paid|Paid|Paid",
+   "now": "LOCAL-REJECT:CONCATENATEX without an ORDER BY over a table built around TABLEOF depends on the row order, which is not mod"
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(FILTER(TOPN(4,TABLEOF(Facts[Quantity]),Facts[Quantity]),Facts[Quantity]>1),Facts[Quantity],\",\")",
+   "powerbi": "2,3,5,4",
+   "now": "LOCAL-REJECT:CONCATENATEX without an ORDER BY over a table built around TABLEOF depends on the row order, which is not mod"
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(FILTER(TOPN(4,TABLEOF(Facts[Quantity]),Facts[Quantity]),Facts[Quantity]>1),Facts[Quantity],\"|\")",
+   "powerbi": "2|3|5|4",
+   "now": "LOCAL-REJECT:CONCATENATEX without an ORDER BY over a table built around TABLEOF depends on the row order, which is not mod"
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(FILTER(TOPN(4,TABLEOF(Facts[Region]),Facts[Region]),Facts[Region]<>\"West\"),Facts[Region],\",\")",
+   "powerbi": "East,East,East,North",
+   "now": "LOCAL-REJECT:CONCATENATEX without an ORDER BY over a table built around TABLEOF depends on the row order, which is not mod"
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(FILTER(TOPN(4,TABLEOF(Facts[Region]),Facts[Region]),Facts[Region]<>\"West\"),Facts[Region],\"|\")",
+   "powerbi": "East|East|East|North",
+   "now": "LOCAL-REJECT:CONCATENATEX without an ORDER BY over a table built around TABLEOF depends on the row order, which is not mod"
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(FILTER(TOPN(4,TABLEOF(Facts[Sales]),Facts[Sales]),Facts[Sales]>0),Facts[Sales],\",\")",
+   "powerbi": "2.5,20,10.5",
+   "now": "LOCAL-REJECT:CONCATENATEX without an ORDER BY over a table built around TABLEOF depends on the row order, which is not mod"
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(FILTER(TOPN(4,TABLEOF(Facts[Sales]),Facts[Sales]),Facts[Sales]>0),Facts[Sales],\"|\")",
+   "powerbi": "2.5|20|10.5",
+   "now": "LOCAL-REJECT:CONCATENATEX without an ORDER BY over a table built around TABLEOF depends on the row order, which is not mod"
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(TOPN(3,TABLEOF(Facts[Note]),Facts[Quantity]),Facts[Note],\",\")",
+   "powerbi": ",,Late",
+   "now": "LOCAL-REJECT:CONCATENATEX without an ORDER BY over a table built around TABLEOF depends on the row order, which is not mod"
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(TOPN(3,TABLEOF(Facts[Note]),Facts[Quantity]),Facts[Note],\"|\")",
+   "powerbi": "||Late",
+   "now": "LOCAL-REJECT:CONCATENATEX without an ORDER BY over a table built around TABLEOF depends on the row order, which is not mod"
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(TOPN(3,TABLEOF(Facts[Region]),Facts[Quantity]),Facts[Region],\",\")",
+   "powerbi": "West,North,East",
+   "now": "LOCAL-REJECT:CONCATENATEX without an ORDER BY over a table built around TABLEOF depends on the row order, which is not mod"
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(TOPN(3,TABLEOF(Facts[Region]),Facts[Quantity]),Facts[Region],\"|\")",
+   "powerbi": "West|North|East",
+   "now": "LOCAL-REJECT:CONCATENATEX without an ORDER BY over a table built around TABLEOF depends on the row order, which is not mod"
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(TOPN(3,TABLEOF(Facts[Sales]),Facts[Quantity]),Facts[Sales],\",\")",
+   "powerbi": "20,2.5,",
+   "now": "LOCAL-REJECT:CONCATENATEX without an ORDER BY over a table built around TABLEOF depends on the row order, which is not mod"
+  },
+  {
+   "part": "A",
+   "expr": "CONCATENATEX(TOPN(3,TABLEOF(Facts[Sales]),Facts[Quantity]),Facts[Sales],\"|\")",
+   "powerbi": "20|2.5|",
+   "now": "LOCAL-REJECT:CONCATENATEX without an ORDER BY over a table built around TABLEOF depends on the row order, which is not mod"
+  }
+ ]
+}
