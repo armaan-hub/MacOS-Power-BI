@@ -1,0 +1,1144 @@
+{
+ "items": [
+  {
+   "part": "B",
+   "expr": "MAXX(VALUES(Facts[Note]),MAXX(UNION(Facts,Facts),IF(TRUE(),Facts[Region],1)))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:Iterator MAXX expression needs a numeric result."
+  },
+  {
+   "part": "B",
+   "expr": "MAXX(VALUES(Facts[Note]),MAXX(CALCULATETABLE(Facts,Facts[Region]=\"West\"),IF(TRUE(),Facts[Region],1)))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:Iterator MAXX expression needs a numeric result."
+  },
+  {
+   "part": "B",
+   "expr": "MAXX(VALUES(Facts[Note]),MAXX(SUMMARIZECOLUMNS(Facts[Region]),IF(TRUE(),Facts[Region],1)))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:Iterator MAXX expression needs a numeric result."
+  },
+  {
+   "part": "B",
+   "expr": "MAXX(VALUES(Facts[Note]),MAXX(GENERATE(VALUES(Facts[Note]),VALUES(Facts[Region])),IF(TRUE(),Facts[Region],1)))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:Iterator MAXX expression needs a numeric result."
+  },
+  {
+   "part": "B",
+   "expr": "MAXX(VALUES(Facts[Note]),MAXX(CROSSJOIN(VALUES(Facts[Region]),VALUES(Facts[Note])),IF(TRUE(),Facts[Region],1)))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:Iterator MAXX expression needs a numeric result."
+  },
+  {
+   "part": "B",
+   "expr": "MAXX(VALUES(Facts[Note]),MAXX(CALCULATETABLE(VALUES(Facts[Region]),Facts[Quantity]>2),IF(TRUE(),Facts[Region],1)))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:Iterator MAXX expression needs a numeric result."
+  },
+  {
+   "part": "B",
+   "expr": "MAXX(VALUES(Facts[Note]),MAXX(ADDCOLUMNS(Facts,\"w\",1),IF(TRUE(),Facts[Region],1)))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:Iterator MAXX expression needs a numeric result."
+  },
+  {
+   "part": "B",
+   "expr": "MAXX(VALUES(Facts[Note]),MAXX(EXCEPT(Facts,FILTER(Facts,FALSE())),IF(TRUE(),Facts[Region],1)))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:Iterator MAXX expression needs a numeric result."
+  },
+  {
+   "part": "B",
+   "expr": "MAXX(VALUES(Facts[Note]),MAXX(FILTER(Facts,Facts[Quantity]>2),IF(TRUE(),Facts[Region],1)))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:Iterator MAXX expression needs a numeric result."
+  },
+  {
+   "part": "B",
+   "expr": "MAXX(VALUES(Facts[Note]),MAXX(TOPN(1,Facts),IF(TRUE(),Facts[Region],1)))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:Iterator MAXX expression needs a numeric result."
+  },
+  {
+   "part": "B",
+   "expr": "MAXX(VALUES(Facts[Note]),MAXX(INTERSECT(Facts,Facts),IF(TRUE(),Facts[Region],1)))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:Iterator MAXX expression needs a numeric result."
+  },
+  {
+   "part": "B",
+   "expr": "MAXX(VALUES(Facts[Note]),MAXX(TOPN(3,Facts,Facts[Quantity]),IF(TRUE(),Facts[Region],1)))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:Iterator MAXX expression needs a numeric result."
+  },
+  {
+   "part": "B",
+   "expr": "(MAXX(Facts,ERROR(\"x\")))*BLANK()",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:Iterator MAXX expression needs a numeric result."
+  },
+  {
+   "part": "B",
+   "expr": "(BLANK())*(MAXX(Facts,ERROR(\"x\")))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:Iterator MAXX expression needs a numeric result."
+  },
+  {
+   "part": "B",
+   "expr": "IFERROR((MAXX(Facts,ERROR(\"x\")))*BLANK(),\"e\")",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:Iterator MAXX expression needs a numeric result."
+  },
+  {
+   "part": "B",
+   "expr": "IFERROR((BLANK())*(MAXX(Facts,ERROR(\"x\"))),\"e\")",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:Iterator MAXX expression needs a numeric result."
+  },
+  {
+   "part": "B",
+   "expr": "ISERROR((MAXX(Facts,ERROR(\"x\")))*BLANK())",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:Iterator MAXX expression needs a numeric result."
+  },
+  {
+   "part": "B",
+   "expr": "ISERROR((BLANK())*(MAXX(Facts,ERROR(\"x\"))))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:Iterator MAXX expression needs a numeric result."
+  },
+  {
+   "part": "B",
+   "expr": "(BLANK())/(MAXX(Facts,ERROR(\"x\")))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:Iterator MAXX expression needs a numeric result."
+  },
+  {
+   "part": "B",
+   "expr": "IFERROR((BLANK())/(MAXX(Facts,ERROR(\"x\"))),\"e\")",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:Iterator MAXX expression needs a numeric result."
+  },
+  {
+   "part": "B",
+   "expr": "ISERROR((BLANK())/(MAXX(Facts,ERROR(\"x\"))))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:Iterator MAXX expression needs a numeric result."
+  },
+  {
+   "part": "B",
+   "expr": "(MAXX(Facts,ERROR(\"x\")))*VAR y=BLANK() RETURN y",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:Iterator MAXX expression needs a numeric result."
+  },
+  {
+   "part": "B",
+   "expr": "(VAR y=BLANK() RETURN y)*(MAXX(Facts,ERROR(\"x\")))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:Iterator MAXX expression needs a numeric result."
+  },
+  {
+   "part": "B",
+   "expr": "IFERROR((MAXX(Facts,ERROR(\"x\")))*VAR y=BLANK() RETURN y,\"e\")",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:Iterator MAXX expression needs a numeric result."
+  },
+  {
+   "part": "B",
+   "expr": "IFERROR((VAR y=BLANK() RETURN y)*(MAXX(Facts,ERROR(\"x\"))),\"e\")",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:Iterator MAXX expression needs a numeric result."
+  },
+  {
+   "part": "B",
+   "expr": "ISERROR((MAXX(Facts,ERROR(\"x\")))*VAR y=BLANK() RETURN y)",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:Iterator MAXX expression needs a numeric result."
+  },
+  {
+   "part": "B",
+   "expr": "ISERROR((VAR y=BLANK() RETURN y)*(MAXX(Facts,ERROR(\"x\"))))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:Iterator MAXX expression needs a numeric result."
+  },
+  {
+   "part": "B",
+   "expr": "(VAR y=BLANK() RETURN y)/(MAXX(Facts,ERROR(\"x\")))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:Iterator MAXX expression needs a numeric result."
+  },
+  {
+   "part": "B",
+   "expr": "IFERROR((VAR y=BLANK() RETURN y)/(MAXX(Facts,ERROR(\"x\"))),\"e\")",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:Iterator MAXX expression needs a numeric result."
+  },
+  {
+   "part": "B",
+   "expr": "ISERROR((VAR y=BLANK() RETURN y)/(MAXX(Facts,ERROR(\"x\"))))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:Iterator MAXX expression needs a numeric result."
+  },
+  {
+   "part": "B",
+   "expr": "(MAXX(Facts,ERROR(\"x\")))*IF(FALSE(),1)",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:Iterator MAXX expression needs a numeric result."
+  },
+  {
+   "part": "B",
+   "expr": "(IF(FALSE(),1))*(MAXX(Facts,ERROR(\"x\")))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:Iterator MAXX expression needs a numeric result."
+  },
+  {
+   "part": "B",
+   "expr": "IFERROR((MAXX(Facts,ERROR(\"x\")))*IF(FALSE(),1),\"e\")",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:Iterator MAXX expression needs a numeric result."
+  },
+  {
+   "part": "B",
+   "expr": "IFERROR((IF(FALSE(),1))*(MAXX(Facts,ERROR(\"x\"))),\"e\")",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:Iterator MAXX expression needs a numeric result."
+  },
+  {
+   "part": "B",
+   "expr": "ISERROR((MAXX(Facts,ERROR(\"x\")))*IF(FALSE(),1))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:Iterator MAXX expression needs a numeric result."
+  },
+  {
+   "part": "B",
+   "expr": "ISERROR((IF(FALSE(),1))*(MAXX(Facts,ERROR(\"x\"))))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:Iterator MAXX expression needs a numeric result."
+  },
+  {
+   "part": "B",
+   "expr": "(IF(FALSE(),1))/(MAXX(Facts,ERROR(\"x\")))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:Iterator MAXX expression needs a numeric result."
+  },
+  {
+   "part": "B",
+   "expr": "IFERROR((IF(FALSE(),1))/(MAXX(Facts,ERROR(\"x\"))),\"e\")",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:Iterator MAXX expression needs a numeric result."
+  },
+  {
+   "part": "B",
+   "expr": "ISERROR((IF(FALSE(),1))/(MAXX(Facts,ERROR(\"x\"))))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:Iterator MAXX expression needs a numeric result."
+  },
+  {
+   "part": "B",
+   "expr": "COUNTX(Facts,BLANK()*ERROR(\"x\"))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:Iterator arithmetic comparisons need numeric operands."
+  },
+  {
+   "part": "B",
+   "expr": "COUNTX(Facts,(ERROR(\"x\"))*BLANK())",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:Iterator arithmetic comparisons need numeric operands."
+  },
+  {
+   "part": "B",
+   "expr": "MAXX(Facts,BLANK()*ERROR(\"x\"))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:Iterator arithmetic comparisons need numeric operands."
+  },
+  {
+   "part": "B",
+   "expr": "MAXX(Facts,(ERROR(\"x\"))*BLANK())",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:Iterator arithmetic comparisons need numeric operands."
+  },
+  {
+   "part": "B",
+   "expr": "COUNTX(Facts,BLANK()/ERROR(\"x\"))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:Iterator arithmetic comparisons need numeric operands."
+  },
+  {
+   "part": "B",
+   "expr": "MAXX(Facts,BLANK()/ERROR(\"x\"))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:Iterator arithmetic comparisons need numeric operands."
+  },
+  {
+   "part": "B",
+   "expr": "MAXX({1,2},(ERROR(\"x\"))*(COUNTROWS(FILTER(Facts,FALSE()))))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:Iterator arithmetic comparisons need numeric operands."
+  },
+  {
+   "part": "B",
+   "expr": "MINX(Facts,(ERROR(\"x\"))*(VAR y=BLANK() RETURN y)+(1&&\"\"))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:Iterator arithmetic comparisons need numeric operands."
+  },
+  {
+   "part": "B",
+   "expr": "MAXX({1,2},(ERROR(\"x\"))*(CALCULATE(SUM(Facts[Quantity]),Facts[Region]=\"Nope\")))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:Iterator arithmetic comparisons need numeric operands."
+  },
+  {
+   "part": "B",
+   "expr": "COUNTX(Facts,(IF(TRUE(),\"3\",1))-(MAXX(Facts,DATE(2020,1,1))))",
+   "powerbi": "6",
+   "now": "LOCAL-REJECT:Iterator arithmetic comparisons need numeric operands."
+  },
+  {
+   "part": "B",
+   "expr": "COUNTX(Facts,(0||\"\")*(ERROR(\"x\")))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:Iterator arithmetic comparisons need numeric operands."
+  },
+  {
+   "part": "B",
+   "expr": "MAXX(Facts,(BLANK())*(0/0)*(ERROR(\"x\")))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:Iterator arithmetic comparisons need numeric operands."
+  },
+  {
+   "part": "B",
+   "expr": "COUNTX(Facts,(IF(TRUE(),\"3\",1))-(MAXX({DATE(2020,1,1)},[Value])))",
+   "powerbi": "6",
+   "now": "LOCAL-REJECT:Iterator arithmetic comparisons need numeric operands."
+  },
+  {
+   "part": "B",
+   "expr": "MAXX(Facts,(IF(TRUE(),\"3\",1))-(MAXX({DATE(2020,1,1)},[Value])))",
+   "powerbi": "-43828",
+   "now": "LOCAL-REJECT:Iterator arithmetic comparisons need numeric operands."
+  },
+  {
+   "part": "B",
+   "expr": "COUNTX(Facts,(ERROR(\"x\"))/(VAR y=BLANK() RETURN y)*(1&&\"\"))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:Iterator arithmetic comparisons need numeric operands."
+  },
+  {
+   "part": "B",
+   "expr": "MAXX({1,2},(2.5)*(ERROR(\"x\"))*(SUMX(FILTER(Facts,FALSE()),1)))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:Iterator arithmetic comparisons need numeric operands."
+  },
+  {
+   "part": "B",
+   "expr": "MINX(Facts,(2.5&&\"\")*(BLANK())*(ERROR(\"x\")))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:Iterator arithmetic comparisons need numeric operands."
+  },
+  {
+   "part": "B",
+   "expr": "MAXX(Facts,(ERROR(\"x\"))*(DIVIDE(1,BLANK())))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:Iterator arithmetic comparisons need numeric operands."
+  },
+  {
+   "part": "B",
+   "expr": "MAXX(VALUES(Facts[Note]),IFERROR((VAR s=SELECTEDVALUE(Facts[Quantity]) RETURN s)/(ERROR(\"x\")),7))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:Iterator arithmetic comparisons need numeric operands."
+  },
+  {
+   "part": "B",
+   "expr": "COUNTX(Facts,IFERROR((IF(ISFILTERED(Facts[Region]),1))/(ERROR(\"x\")),7))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:Iterator arithmetic comparisons need numeric operands."
+  },
+  {
+   "part": "B",
+   "expr": "COUNTX(Facts,IFERROR((ERROR(\"x\"))*(IF(HASONEVALUE(Facts[Region]),1)),7))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:Iterator arithmetic comparisons need numeric operands."
+  },
+  {
+   "part": "B",
+   "expr": "COUNTX(Facts,IFERROR((VAR s=SELECTEDVALUE(Facts[Quantity]) RETURN s)*(ERROR(\"x\")),7))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:Iterator arithmetic comparisons need numeric operands."
+  },
+  {
+   "part": "B",
+   "expr": "COUNTX(Facts,IFERROR((IF(ISINSCOPE(Facts[Region]),1))/(ERROR(\"x\")),7))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:Iterator arithmetic comparisons need numeric operands."
+  },
+  {
+   "part": "B",
+   "expr": "MAXX(VALUES(Facts[Note]),IFERROR((ERROR(\"x\"))*(VAR s=SELECTEDVALUE(Facts[Quantity]) RETURN s),7))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:Iterator arithmetic comparisons need numeric operands."
+  },
+  {
+   "part": "B",
+   "expr": "MAXX(VALUES(Facts[Note]),(SELECTEDVALUE(Facts[Quantity]))/(ERROR(\"x\")))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:Iterator arithmetic comparisons need numeric operands."
+  },
+  {
+   "part": "B",
+   "expr": "MAXX(VALUES(Facts[Note]),(ERROR(\"x\"))*(IF(ISINSCOPE(Facts[Region]),1)))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:Iterator arithmetic comparisons need numeric operands."
+  },
+  {
+   "part": "B",
+   "expr": "COUNTX(Facts,(IF(HASONEVALUE(Facts[Region]),1))/(ERROR(\"x\")))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:Iterator arithmetic comparisons need numeric operands."
+  },
+  {
+   "part": "B",
+   "expr": "COUNTX(Facts,(IF(ISFILTERED(Facts[Region]),1))/(ERROR(\"x\")))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:Iterator arithmetic comparisons need numeric operands."
+  },
+  {
+   "part": "B",
+   "expr": "MAXX(VALUES(Facts[Note]),(IF(ISFILTERED(Facts[Region]),1))/(ERROR(\"x\")))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:Iterator arithmetic comparisons need numeric operands."
+  },
+  {
+   "part": "B",
+   "expr": "MAXX(VALUES(Facts[Note]),(IF(COUNTROWS(Facts)=0,1))/(ERROR(\"x\")))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:Iterator arithmetic comparisons need numeric operands."
+  },
+  {
+   "part": "B",
+   "expr": "MAXX(VALUES(Facts[Note]),IFERROR((ERROR(\"x\"))*(SELECTEDVALUE(Facts[Quantity])),7))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:Iterator arithmetic comparisons need numeric operands."
+  },
+  {
+   "part": "B",
+   "expr": "MAXX(VALUES(Facts[Note]),(ERROR(\"x\"))*(COALESCE(SELECTEDVALUE(Facts[Quantity]),BLANK())))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:Iterator arithmetic comparisons need numeric operands."
+  },
+  {
+   "part": "B",
+   "expr": "COUNTX(Facts,IFERROR((IF(COUNTROWS(Facts)=0,1))/(ERROR(\"x\")),7))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:Iterator arithmetic comparisons need numeric operands."
+  },
+  {
+   "part": "B",
+   "expr": "COUNTX(Facts,(COALESCE(SELECTEDVALUE(Facts[Quantity]),BLANK()))/(ERROR(\"x\")))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:Iterator arithmetic comparisons need numeric operands."
+  },
+  {
+   "part": "B",
+   "expr": "COUNTX(Facts,IFERROR((SELECTEDVALUE(Facts[Region]))*(ERROR(\"x\")),7))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:Iterator arithmetic comparisons need numeric operands."
+  },
+  {
+   "part": "B",
+   "expr": "MAXX(VALUES(Facts[Note]),IFERROR((ERROR(\"x\"))*(IF(ISINSCOPE(Facts[Region]),1)),7))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:Iterator arithmetic comparisons need numeric operands."
+  },
+  {
+   "part": "A",
+   "expr": "XNPV(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-1000,0},{300,365},{400,730},{500,1095}}),\"d\",DATE(2020,1,1)+[n]),IF([n]>0,CURRENCY([v])/3,[v]),[d],0.1)",
+   "powerbi": "-673.678940646131",
+   "now": "LOCAL-REJECT:XNPV over a Currency beside a column of unknown type is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "XNPV(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-1000,0},{300,365},{400,730},{500,1095}}),\"d\",DATE(2020,1,1)+[n]),IF([n]>0,CURRENCY([v])/3,[v]),[d],0)",
+   "powerbi": "-600",
+   "now": "LOCAL-REJECT:XNPV over a Currency beside a column of unknown type is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "XNPV(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-1000,0},{300,365},{400,730},{500,1095}}),\"d\",DATE(2020,1,1)+[n]),IF([n]>0,CURRENCY([v])/3,[v]),[d],-0.5)",
+   "powerbi": "1066.6668",
+   "now": "LOCAL-REJECT:XNPV over a Currency beside a column of unknown type is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "XNPV(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-1000,0},{300,365},{400,730},{500,1095}}),\"d\",DATE(2020,1,1)+[n]),IF([n]>0,CURRENCY([v])/3,[v]),[d],1)",
+   "powerbi": "-895.8333375",
+   "now": "LOCAL-REJECT:XNPV over a Currency beside a column of unknown type is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "XNPV(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-1000,0},{300,365},{400,730},{500,1095}}),\"d\",DATE(2020,1,1)+[n]),IF([n]>0,[v]/3,CURRENCY([v])),[d],0.1)",
+   "powerbi": "-673.678938141748",
+   "now": "LOCAL-REJECT:XNPV over a Currency beside a column of unknown type is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "XNPV(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-1000,0},{300,365},{400,730},{500,1095}}),\"d\",DATE(2020,1,1)+[n]),IF([n]>0,[v]/3,CURRENCY([v])),[d],0)",
+   "powerbi": "-600",
+   "now": "LOCAL-REJECT:XNPV over a Currency beside a column of unknown type is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "XNPV(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-1000,0},{300,365},{400,730},{500,1095}}),\"d\",DATE(2020,1,1)+[n]),IF([n]>0,[v]/3,CURRENCY([v])),[d],-0.5)",
+   "powerbi": "1066.66666666667",
+   "now": "LOCAL-REJECT:XNPV over a Currency beside a column of unknown type is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "XNPV(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-1000,0},{300,365},{400,730},{500,1095}}),\"d\",DATE(2020,1,1)+[n]),IF([n]>0,[v]/3,CURRENCY([v])),[d],1)",
+   "powerbi": "-895.833333333333",
+   "now": "LOCAL-REJECT:XNPV over a Currency beside a column of unknown type is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "XNPV(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-1000,0},{300,365},{400,730},{500,1095}}),\"d\",DATE(2020,1,1)+[n]),CURRENCY([v])/3+[v],[d],0.1)",
+   "powerbi": "-28.0490550713751",
+   "now": "LOCAL-REJECT:XNPV over a Currency beside a column of unknown type is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "XNPV(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-1000,0},{300,365},{400,730},{500,1095}}),\"d\",DATE(2020,1,1)+[n]),CURRENCY([v])/3+[v],[d],0)",
+   "powerbi": "266.6667",
+   "now": "LOCAL-REJECT:XNPV over a Currency beside a column of unknown type is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "XNPV(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-1000,0},{300,365},{400,730},{500,1095}}),\"d\",DATE(2020,1,1)+[n]),CURRENCY([v])/3+[v],[d],-0.5)",
+   "powerbi": "6933.3335",
+   "now": "LOCAL-REJECT:XNPV over a Currency beside a column of unknown type is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "XNPV(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-1000,0},{300,365},{400,730},{500,1095}}),\"d\",DATE(2020,1,1)+[n]),CURRENCY([v])/3+[v],[d],1)",
+   "powerbi": "-916.6666375",
+   "now": "LOCAL-REJECT:XNPV over a Currency beside a column of unknown type is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "XNPV(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-1000,0},{300,365},{400,730},{500,1095}}),\"d\",DATE(2020,1,1)+[n]),CURRENCY(1)/3*[v],[d],0.1)",
+   "powerbi": "-7.0116",
+   "now": "LOCAL-REJECT:XNPV over a Currency beside a column of unknown type is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "XNPV(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-1000,0},{300,365},{400,730},{500,1095}}),\"d\",DATE(2020,1,1)+[n]),CURRENCY(1)/3*[v],[d],0)",
+   "powerbi": "66.66",
+   "now": "LOCAL-REJECT:XNPV over a Currency beside a column of unknown type is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "XNPV(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-1000,0},{300,365},{400,730},{500,1095}}),\"d\",DATE(2020,1,1)+[n]),CURRENCY(1)/3*[v],[d],-0.5)",
+   "powerbi": "1733.16",
+   "now": "LOCAL-REJECT:XNPV over a Currency beside a column of unknown type is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "XNPV(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{-1000,0},{300,365},{400,730},{500,1095}}),\"d\",DATE(2020,1,1)+[n]),CURRENCY(1)/3*[v],[d],1)",
+   "powerbi": "-229.1438",
+   "now": "LOCAL-REJECT:XNPV over a Currency beside a column of unknown type is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "XNPV(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{10.00005,0},{0.00015,365},{0.00025,730},{-0.00035,1095},{20.12345,1460},{-7.77775,1825}}),\"d\",DATE(2020,1,1)+[n]),IF([n]>0,CURRENCY([v])/3,[v]),[d],0.1)",
+   "powerbi": "12.9717745468827",
+   "now": "LOCAL-REJECT:XNPV over a Currency beside a column of unknown type is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "XNPV(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{10.00005,0},{0.00015,365},{0.00025,730},{-0.00035,1095},{20.12345,1460},{-7.77775,1825}}),\"d\",DATE(2020,1,1)+[n]),IF([n]>0,CURRENCY([v])/3,[v]),[d],0)",
+   "powerbi": "14.11525",
+   "now": "LOCAL-REJECT:XNPV over a Currency beside a column of unknown type is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "XNPV(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{10.00005,0},{0.00015,365},{0.00025,730},{-0.00035,1095},{20.12345,1460},{-7.77775,1825}}),\"d\",DATE(2020,1,1)+[n]),IF([n]>0,CURRENCY([v])/3,[v]),[d],-0.5)",
+   "powerbi": "34.36125",
+   "now": "LOCAL-REJECT:XNPV over a Currency beside a column of unknown type is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "XNPV(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{10.00005,0},{0.00015,365},{0.00025,730},{-0.00035,1095},{20.12345,1460},{-7.77775,1825}}),\"d\",DATE(2020,1,1)+[n]),IF([n]>0,CURRENCY([v])/3,[v]),[d],1)",
+   "powerbi": "10.33828125",
+   "now": "LOCAL-REJECT:XNPV over a Currency beside a column of unknown type is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "XNPV(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{10.00005,0},{0.00015,365},{0.00025,730},{-0.00035,1095},{20.12345,1460},{-7.77775,1825}}),\"d\",DATE(2020,1,1)+[n]),IF([n]>0,[v]/3,CURRENCY([v])),[d],0.1)",
+   "powerbi": "12.9718654376564",
+   "now": "LOCAL-REJECT:XNPV over a Currency beside a column of unknown type is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "XNPV(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{10.00005,0},{0.00015,365},{0.00025,730},{-0.00035,1095},{20.12345,1460},{-7.77775,1825}}),\"d\",DATE(2020,1,1)+[n]),IF([n]>0,[v]/3,CURRENCY([v])),[d],0)",
+   "powerbi": "14.11535",
+   "now": "LOCAL-REJECT:XNPV over a Currency beside a column of unknown type is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "XNPV(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{10.00005,0},{0.00015,365},{0.00025,730},{-0.00035,1095},{20.12345,1460},{-7.77775,1825}}),\"d\",DATE(2020,1,1)+[n]),IF([n]>0,[v]/3,CURRENCY([v])),[d],-0.5)",
+   "powerbi": "34.362",
+   "now": "LOCAL-REJECT:XNPV over a Currency beside a column of unknown type is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "XNPV(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{10.00005,0},{0.00015,365},{0.00025,730},{-0.00035,1095},{20.12345,1460},{-7.77775,1825}}),\"d\",DATE(2020,1,1)+[n]),IF([n]>0,[v]/3,CURRENCY([v])),[d],1)",
+   "powerbi": "10.3383515625",
+   "now": "LOCAL-REJECT:XNPV over a Currency beside a column of unknown type is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "XNPV(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{10.00005,0},{0.00015,365},{0.00025,730},{-0.00035,1095},{20.12345,1460},{-7.77775,1825}}),\"d\",DATE(2020,1,1)+[n]),CURRENCY([v])/3+[v],[d],0.1)",
+   "powerbi": "25.2204708598518",
+   "now": "LOCAL-REJECT:XNPV over a Currency beside a column of unknown type is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "XNPV(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{10.00005,0},{0.00015,365},{0.00025,730},{-0.00035,1095},{20.12345,1460},{-7.77775,1825}}),\"d\",DATE(2020,1,1)+[n]),CURRENCY([v])/3+[v],[d],0)",
+   "powerbi": "29.7944",
+   "now": "LOCAL-REJECT:XNPV over a Currency beside a column of unknown type is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "XNPV(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{10.00005,0},{0.00015,365},{0.00025,730},{-0.00035,1095},{20.12345,1460},{-7.77775,1825}}),\"d\",DATE(2020,1,1)+[n]),CURRENCY([v])/3+[v],[d],-0.5)",
+   "powerbi": "110.78035",
+   "now": "LOCAL-REJECT:XNPV over a Currency beside a column of unknown type is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "XNPV(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{10.00005,0},{0.00015,365},{0.00025,730},{-0.00035,1095},{20.12345,1460},{-7.77775,1825}}),\"d\",DATE(2020,1,1)+[n]),CURRENCY([v])/3+[v],[d],1)",
+   "powerbi": "14.6864359375",
+   "now": "LOCAL-REJECT:XNPV over a Currency beside a column of unknown type is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "XNPV(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{10.00005,0},{0.00015,365},{0.00025,730},{-0.00035,1095},{20.12345,1460},{-7.77775,1825}}),\"d\",DATE(2020,1,1)+[n]),CURRENCY(1)/3*[v],[d],0.1)",
+   "powerbi": "6.3044",
+   "now": "LOCAL-REJECT:XNPV over a Currency beside a column of unknown type is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "XNPV(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{10.00005,0},{0.00015,365},{0.00025,730},{-0.00035,1095},{20.12345,1460},{-7.77775,1825}}),\"d\",DATE(2020,1,1)+[n]),CURRENCY(1)/3*[v],[d],0)",
+   "powerbi": "7.4478",
+   "now": "LOCAL-REJECT:XNPV over a Currency beside a column of unknown type is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "XNPV(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{10.00005,0},{0.00015,365},{0.00025,730},{-0.00035,1095},{20.12345,1460},{-7.77775,1825}}),\"d\",DATE(2020,1,1)+[n]),CURRENCY(1)/3*[v],[d],-0.5)",
+   "powerbi": "27.6926",
+   "now": "LOCAL-REJECT:XNPV over a Currency beside a column of unknown type is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "XNPV(ADDCOLUMNS(DATATABLE(\"v\",DOUBLE,\"n\",INTEGER,{{10.00005,0},{0.00015,365},{0.00025,730},{-0.00035,1095},{20.12345,1460},{-7.77775,1825}}),\"d\",DATE(2020,1,1)+[n]),CURRENCY(1)/3*[v],[d],1)",
+   "powerbi": "3.6712",
+   "now": "LOCAL-REJECT:XNPV over a Currency beside a column of unknown type is not modelled by the local engine."
+  },
+  {
+   "part": "B",
+   "expr": "PRODUCTX(Facts,(Facts[Region])*(Facts[Quantity])*(COUNTROWS(FILTER(Facts,FALSE()))))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:Column 'Region' contains a non-numeric value at row 1; convert it to a number first."
+  },
+  {
+   "part": "B",
+   "expr": "COUNTX(Facts,(SUMX(FILTER(Facts,FALSE()),1))*(Facts[Region]))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:Column 'Region' contains a non-numeric value at row 1; convert it to a number first."
+  },
+  {
+   "part": "B",
+   "expr": "MINX(Facts,(1/0*0)/(Facts[Note])*(MAXX({BLANK()},[Value])))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:Column 'Note' contains a non-numeric value at row 1; convert it to a number first."
+  },
+  {
+   "part": "B",
+   "expr": "STDEVX.P(Facts,(Facts[Region])*(SUMX(FILTER(Facts,FALSE()),1)))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:Column 'Region' contains a non-numeric value at row 1; convert it to a number first."
+  },
+  {
+   "part": "B",
+   "expr": "COUNTX(Facts,(COUNTROWS(FILTER(Facts,FALSE())))/(Facts[Note]))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:Column 'Note' contains a non-numeric value at row 1; convert it to a number first."
+  },
+  {
+   "part": "B",
+   "expr": "CALCULATE(SUMX(Facts,(MAXX({BLANK()},[Value]))*(Facts[Region])),Facts[Region]<>\"x\")",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:Column 'Region' contains a non-numeric value at row 1; convert it to a number first."
+  },
+  {
+   "part": "B",
+   "expr": "SUMX(FILTER(Facts,Facts[Quantity]>2),(COUNTROWS(FILTER(Facts,FALSE())))*(Facts[Note]))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:Column 'Note' contains a non-numeric value at row 2; convert it to a number first."
+  },
+  {
+   "part": "B",
+   "expr": "STDEVX.P(Facts,(Facts[Region])*(COUNTROWS(FILTER(Facts,FALSE()))))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:Column 'Region' contains a non-numeric value at row 1; convert it to a number first."
+  },
+  {
+   "part": "B",
+   "expr": "MINX(Facts,(SUMX(FILTER(Facts,FALSE()),1))/(Facts[Region]))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:Column 'Region' contains a non-numeric value at row 1; convert it to a number first."
+  },
+  {
+   "part": "B",
+   "expr": "STDEVX.P(Facts,(1/0*0)*(Facts[Note])*(MAXX({BLANK()},[Value])))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:Column 'Note' contains a non-numeric value at row 1; convert it to a number first."
+  },
+  {
+   "part": "B",
+   "expr": "COUNTROWS(FILTER(Facts,(Facts[Region])*(COUNTROWS(FILTER(Facts,FALSE())))))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:Column 'Region' contains a non-numeric value at row 1; convert it to a number first."
+  },
+  {
+   "part": "B",
+   "expr": "COUNTX(Facts,(Facts[Note])*(MAXX({BLANK()},[Value])))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:Column 'Note' contains a non-numeric value at row 1; convert it to a number first."
+  },
+  {
+   "part": "B",
+   "expr": "COUNTROWS(FILTER(Facts,(SUMX(FILTER(Facts,FALSE()),1))/(Facts[Region])))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:Column 'Region' contains a non-numeric value at row 1; convert it to a number first."
+  },
+  {
+   "part": "B",
+   "expr": "AVERAGEX(Facts,(Facts[Region])/(Facts[Quantity])*(COUNTROWS(FILTER(Facts,FALSE()))))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:Column 'Region' contains a non-numeric value at row 1; convert it to a number first."
+  },
+  {
+   "part": "B",
+   "expr": "COUNTAX(Facts,(MAXX({BLANK()},[Value]))*(Facts[Region]))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:Column 'Region' contains a non-numeric value at row 1; convert it to a number first."
+  },
+  {
+   "part": "B",
+   "expr": "ISINT64(MAXX(Facts,Facts[Note]-DATE(2020,1,1)))",
+   "powerbi": "False",
+   "now": "LOCAL-REJECT:Column 'Note' contains a non-numeric value at row 1; convert it to a number first."
+  },
+  {
+   "part": "B",
+   "expr": "SUMX(Facts,(Facts[Region])*(SUMX(FILTER(Facts,FALSE()),1)))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:Column 'Region' contains a non-numeric value at row 1; convert it to a number first."
+  },
+  {
+   "part": "B",
+   "expr": "MINX(Facts,(MAXX({BLANK()},[Value]))/(Facts[Region]))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:Column 'Region' contains a non-numeric value at row 1; convert it to a number first."
+  },
+  {
+   "part": "B",
+   "expr": "PRODUCTX(Facts,(COUNTROWS(FILTER(Facts,FALSE())))/(Facts[Note]))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:Column 'Note' contains a non-numeric value at row 1; convert it to a number first."
+  },
+  {
+   "part": "B",
+   "expr": "MINX(Facts,(COUNTROWS(FILTER(Facts,FALSE())))*(Facts[Note]))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:Column 'Note' contains a non-numeric value at row 1; convert it to a number first."
+  },
+  {
+   "part": "B",
+   "expr": "MINX(Facts,(Facts[Note])*(MAXX({BLANK()},[Value])))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:Column 'Note' contains a non-numeric value at row 1; convert it to a number first."
+  },
+  {
+   "part": "B",
+   "expr": "SUMX(Facts,IF(ISNUMBER(Facts[Note]+0),1,2))",
+   "powerbi": "6",
+   "now": "LOCAL-REJECT:Column 'Note' contains a non-numeric value at row 1; convert it to a number first."
+  },
+  {
+   "part": "B",
+   "expr": "SUMX(Facts,IF(ISNUMBER(Facts[Region]+0),1,2))",
+   "powerbi": "6",
+   "now": "LOCAL-REJECT:Column 'Region' contains a non-numeric value at row 1; convert it to a number first."
+  },
+  {
+   "part": "C",
+   "expr": "FIRSTNONBLANK(ROW(\"a\",1E15&\"\"),1)",
+   "powerbi": "1E+15",
+   "now": "LOCAL-REJECT:FIRSTNONBLANK needs values that come from a column of the model."
+  },
+  {
+   "part": "C",
+   "expr": "FIRSTNONBLANK(ROW(\"a\",CONVERT(1E15,INTEGER)&\"\"),1)",
+   "powerbi": "1000000000000000",
+   "now": "LOCAL-REJECT:FIRSTNONBLANK needs values that come from a column of the model."
+  },
+  {
+   "part": "C",
+   "expr": "FIRSTNONBLANK(ROW(\"a\",CONVERT(1000000000000000,DOUBLE)&\"\"),1)",
+   "powerbi": "1E+15",
+   "now": "LOCAL-REJECT:FIRSTNONBLANK needs values that come from a column of the model."
+  },
+  {
+   "part": "C",
+   "expr": "FIRSTNONBLANK(ROW(\"a\",1E100&\"\"),1)",
+   "powerbi": "1E+100",
+   "now": "LOCAL-REJECT:FIRSTNONBLANK needs values that come from a column of the model."
+  },
+  {
+   "part": "C",
+   "expr": "FIRSTNONBLANK(ROW(\"a\",IF(TRUE(),1E15)&\"\"),1)",
+   "powerbi": "1E+15",
+   "now": "LOCAL-REJECT:FIRSTNONBLANK needs values that come from a column of the model."
+  },
+  {
+   "part": "C",
+   "expr": "FIRSTNONBLANK(ROW(\"a\",COALESCE(1E15,1)&\"\"),1)",
+   "powerbi": "1E+15",
+   "now": "LOCAL-REJECT:FIRSTNONBLANK needs values that come from a column of the model."
+  },
+  {
+   "part": "C",
+   "expr": "FIRSTNONBLANK(ROW(\"a\",FACT(20)&\"\"),1)",
+   "powerbi": "2.43290200817664E+18",
+   "now": "LOCAL-REJECT:FIRSTNONBLANK needs values that come from a column of the model."
+  },
+  {
+   "part": "C",
+   "expr": "FIRSTNONBLANK(ROW(\"a\",ROUND(1E15,0)&\"\"),1)",
+   "powerbi": "1E+15",
+   "now": "LOCAL-REJECT:FIRSTNONBLANK needs values that come from a column of the model."
+  },
+  {
+   "part": "C",
+   "expr": "FIRSTNONBLANK(ROW(\"a\",MAXX(Facts,1E15)&\"\"),1)",
+   "powerbi": "1E+15",
+   "now": "LOCAL-REJECT:FIRSTNONBLANK needs values that come from a column of the model."
+  },
+  {
+   "part": "C",
+   "expr": "FIRSTNONBLANK(ROW(\"a\",MAX(1E15,1)&\"\"),1)",
+   "powerbi": "1E+15",
+   "now": "LOCAL-REJECT:FIRSTNONBLANK needs values that come from a column of the model."
+  },
+  {
+   "part": "C",
+   "expr": "FIRSTNONBLANK(ROW(\"a\",2^50&\"\"),1)",
+   "powerbi": "1.12589990684262E+15",
+   "now": "LOCAL-REJECT:FIRSTNONBLANK needs values that come from a column of the model."
+  },
+  {
+   "part": "C",
+   "expr": "FIRSTNONBLANK(ROW(\"a\",SUMX(Facts,1E15)&\"\"),1)",
+   "powerbi": "6E+15",
+   "now": "LOCAL-REJECT:FIRSTNONBLANK needs values that come from a column of the model."
+  },
+  {
+   "part": "C",
+   "expr": "FIRSTNONBLANK(ROW(\"a\",1000000000000000&\"\"),1)",
+   "powerbi": "1000000000000000",
+   "now": "LOCAL-REJECT:FIRSTNONBLANK needs values that come from a column of the model."
+  },
+  {
+   "part": "C",
+   "expr": "FIRSTNONBLANK(ROW(\"a\",1E15+1&\"\"),1)",
+   "powerbi": "1E+15",
+   "now": "LOCAL-REJECT:FIRSTNONBLANK needs values that come from a column of the model."
+  },
+  {
+   "part": "C",
+   "expr": "FIRSTNONBLANK(ROW(\"a\",VAR v=1E15 RETURN v&\"\"),1)",
+   "powerbi": "1E+15",
+   "now": "LOCAL-REJECT:FIRSTNONBLANK needs values that come from a column of the model."
+  },
+  {
+   "part": "C",
+   "expr": "FIRSTNONBLANK(ROW(\"a\",1E16&\"\"),1)",
+   "powerbi": "1E+16",
+   "now": "LOCAL-REJECT:FIRSTNONBLANK needs values that come from a column of the model."
+  },
+  {
+   "part": "C",
+   "expr": "FIRSTNONBLANK(ROW(\"a\",FACT(18)&\"\"),1)",
+   "powerbi": "6.402373705728E+15",
+   "now": "LOCAL-REJECT:FIRSTNONBLANK needs values that come from a column of the model."
+  },
+  {
+   "part": "C",
+   "expr": "FIRSTNONBLANK(ROW(\"a\",INT(1E15)&\"\"),1)",
+   "powerbi": "1000000000000000",
+   "now": "LOCAL-REJECT:FIRSTNONBLANK needs values that come from a column of the model."
+  },
+  {
+   "part": "C",
+   "expr": "FIRSTNONBLANK(ROW(\"a\",-1E15&\"\"),1)",
+   "powerbi": "-1E+15",
+   "now": "LOCAL-REJECT:FIRSTNONBLANK needs values that come from a column of the model."
+  },
+  {
+   "part": "C",
+   "expr": "FIRSTNONBLANK(ROW(\"a\",EXP(40)&\"\"),1)",
+   "powerbi": "2.3538526683702E+17",
+   "now": "LOCAL-REJECT:FIRSTNONBLANK needs values that come from a column of the model."
+  },
+  {
+   "part": "C",
+   "expr": "FIRSTNONBLANK(ROW(\"a\",0.1+1E15&\"\"),1)",
+   "powerbi": "1E+15",
+   "now": "LOCAL-REJECT:FIRSTNONBLANK needs values that come from a column of the model."
+  },
+  {
+   "part": "C",
+   "expr": "FIRSTNONBLANK(ROW(\"a\",1E15/3&\"\"),1)",
+   "powerbi": "333333333333333",
+   "now": "LOCAL-REJECT:FIRSTNONBLANK needs values that come from a column of the model."
+  },
+  {
+   "part": "C",
+   "expr": "MINX(SUBSTITUTEWITHINDEX(DATATABLE(\"Region\",STRING,{{\"East\"},{\"North\"},{\"Zed\"}}),\"i\",DATATABLE(\"Region\",STRING,{{\"West\"},{\"East\"},{\"North\"}}),BLANK()),[i])",
+   "powerbi": "1",
+   "now": "LOCAL-REJECT:Function SubstituteWithIndex() is not able to detect common columns between its operands that could be used for join."
+  },
+  {
+   "part": "C",
+   "expr": "SUMX(SUBSTITUTEWITHINDEX(DATATABLE(\"Region\",STRING,{{\"East\"},{\"North\"},{\"Zed\"}}),\"i\",DATATABLE(\"Region\",STRING,{{\"West\"},{\"East\"},{\"North\"}}),BLANK()),[i]*[i])",
+   "powerbi": "5",
+   "now": "LOCAL-REJECT:Function SubstituteWithIndex() is not able to detect common columns between its operands that could be used for join."
+  },
+  {
+   "part": "C",
+   "expr": "COUNTROWS(FILTER(SUBSTITUTEWITHINDEX(DATATABLE(\"Region\",STRING,{{\"East\"},{\"North\"},{\"Zed\"}}),\"i\",DATATABLE(\"Region\",STRING,{{\"West\"},{\"East\"},{\"North\"}}),CALCULATE(SUM(Facts[Quantity])),ASC),[i]>0))",
+   "powerbi": "2",
+   "now": "LOCAL-REJECT:Function SubstituteWithIndex() is not able to detect common columns between its operands that could be used for join."
+  },
+  {
+   "part": "C",
+   "expr": "SUMX(SUBSTITUTEWITHINDEX(DATATABLE(\"Region\",STRING,{{\"East\"},{\"North\"},{\"Zed\"}}),\"i\",DATATABLE(\"Region\",STRING,{{\"West\"},{\"East\"},{\"North\"}}),CALCULATE(SUM(Facts[Quantity])),ASC),[i])",
+   "powerbi": "3",
+   "now": "LOCAL-REJECT:Function SubstituteWithIndex() is not able to detect common columns between its operands that could be used for join."
+  },
+  {
+   "part": "C",
+   "expr": "COUNTROWS(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Note],\"cnt\",COUNTROWS(Facts)),\"i\",SUMMARIZE(Facts,Facts[Region],\"cnt\",COUNTROWS(Facts)),Facts[Region]))",
+   "powerbi": "3",
+   "now": "LOCAL-REJECT:Function SubstituteWithIndex() is not able to detect common columns between its operands that could be used for join."
+  },
+  {
+   "part": "C",
+   "expr": "MAXX(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Sales],\"tot\",SUM(Facts[Quantity])),\"i\",SUMMARIZE(Facts,Facts[Note],\"tot\",SUM(Facts[Quantity])),CALCULATE(COUNTROWS(Facts)),DESC),[i])",
+   "powerbi": "2",
+   "now": "LOCAL-REJECT:Function SubstituteWithIndex() is not able to detect common columns between its operands that could be used for join."
+  },
+  {
+   "part": "C",
+   "expr": "MAXX(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Note],\"cnt\",COUNTROWS(Facts)),\"i\",SUMMARIZE(Facts,Facts[Region],\"cnt\",COUNTROWS(Facts)),Facts[Region]),[i])",
+   "powerbi": "2",
+   "now": "LOCAL-REJECT:Function SubstituteWithIndex() is not able to detect common columns between its operands that could be used for join."
+  },
+  {
+   "part": "C",
+   "expr": "CONCATENATEX(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Sales],\"tot\",SUM(Facts[Quantity])),\"i\",SUMMARIZE(Facts,Facts[Note],\"tot\",SUM(Facts[Quantity])),CALCULATE(COUNTROWS(Facts)),DESC),[i],\"|\",[i])",
+   "powerbi": "0|2",
+   "now": "LOCAL-REJECT:Function SubstituteWithIndex() is not able to detect common columns between its operands that could be used for join."
+  },
+  {
+   "part": "C",
+   "expr": "MAXX(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Sales],\"tot\",SUM(Facts[Quantity])),\"i\",SUMMARIZE(Facts,Facts[Note],\"tot\",SUM(Facts[Quantity])),CALCULATE(SUM(Facts[Quantity])),ASC),[i])",
+   "powerbi": "1",
+   "now": "LOCAL-REJECT:Function SubstituteWithIndex() is not able to detect common columns between its operands that could be used for join."
+  },
+  {
+   "part": "C",
+   "expr": "COUNTROWS(DISTINCT(SELECTCOLUMNS(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Quantity],\"tot\",SUM(Facts[Quantity])),\"i\",SUMMARIZE(Facts,Facts[Sales],\"tot\",SUM(Facts[Quantity])),0,DESC),\"v\",[i])))",
+   "powerbi": "6",
+   "now": "LOCAL-REJECT:Function SubstituteWithIndex() is not able to detect common columns between its operands that could be used for join."
+  },
+  {
+   "part": "C",
+   "expr": "COUNTROWS(DISTINCT(SELECTCOLUMNS(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Sales],\"tot\",SUM(Facts[Quantity])),\"i\",SUMMARIZE(Facts,Facts[Note],\"tot\",SUM(Facts[Quantity])),CALCULATE(COUNTROWS(Facts)),DESC),\"v\",[i])))",
+   "powerbi": "2",
+   "now": "LOCAL-REJECT:Function SubstituteWithIndex() is not able to detect common columns between its operands that could be used for join."
+  },
+  {
+   "part": "C",
+   "expr": "SUMX(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Sales],\"tot\",SUM(Facts[Quantity])),\"i\",SUMMARIZE(Facts,Facts[Note],\"tot\",SUM(Facts[Quantity])),CALCULATE(SUM(Facts[Quantity])),ASC),[i])",
+   "powerbi": "1",
+   "now": "LOCAL-REJECT:Function SubstituteWithIndex() is not able to detect common columns between its operands that could be used for join."
+  },
+  {
+   "part": "C",
+   "expr": "SUMX(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Sales],\"tot\",SUM(Facts[Quantity])),\"i\",SUMMARIZE(Facts,Facts[Note],\"tot\",SUM(Facts[Quantity])),CALCULATE(COUNTROWS(Facts)),DESC,Facts[Note],ASC),[i]*[i])",
+   "powerbi": "4",
+   "now": "LOCAL-REJECT:Function SubstituteWithIndex() is not able to detect common columns between its operands that could be used for join."
+  },
+  {
+   "part": "C",
+   "expr": "COUNTROWS(DISTINCT(SELECTCOLUMNS(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Sales],\"tot\",SUM(Facts[Quantity])),\"i\",SUMMARIZE(Facts,Facts[Note],\"tot\",SUM(Facts[Quantity])),CALCULATE(SUM(Facts[Quantity])),ASC),\"v\",[i])))",
+   "powerbi": "2",
+   "now": "LOCAL-REJECT:Function SubstituteWithIndex() is not able to detect common columns between its operands that could be used for join."
+  },
+  {
+   "part": "C",
+   "expr": "COUNTROWS(FILTER(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Quantity],\"tot\",SUM(Facts[Quantity])),\"i\",SUMMARIZE(Facts,Facts[Sales],\"tot\",SUM(Facts[Quantity])),0,DESC),[i]>=1))",
+   "powerbi": "5",
+   "now": "LOCAL-REJECT:Function SubstituteWithIndex() is not able to detect common columns between its operands that could be used for join."
+  },
+  {
+   "part": "C",
+   "expr": "COUNTROWS(FILTER(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Sales],\"tot\",SUM(Facts[Quantity])),\"i\",SUMMARIZE(Facts,Facts[Note],\"tot\",SUM(Facts[Quantity])),CALCULATE(COUNTROWS(Facts)),DESC,Facts[Note],ASC),[i]>=1))",
+   "powerbi": "1",
+   "now": "LOCAL-REJECT:Function SubstituteWithIndex() is not able to detect common columns between its operands that could be used for join."
+  },
+  {
+   "part": "C",
+   "expr": "AVERAGEX(SUBSTITUTEWITHINDEX(SUMMARIZE(Facts,Facts[Note],\"cnt\",COUNTROWS(Facts)),\"i\",SUMMARIZE(Facts,Facts[Region],\"cnt\",COUNTROWS(Facts)),Facts[Region]),[i])",
+   "powerbi": "1",
+   "now": "LOCAL-REJECT:Function SubstituteWithIndex() is not able to detect common columns between its operands that could be used for join."
+  },
+  {
+   "part": "C",
+   "expr": "COUNTROWS(SUBSTITUTEWITHINDEX(SELECTCOLUMNS(Facts,\"Facts[Region]\",Facts[Region]),\"i\",VALUES(Facts[Region]),Facts[Region]))",
+   "powerbi": "6",
+   "now": "LOCAL-REJECT:Function SubstituteWithIndex() is not able to detect common columns between its operands that could be used for join."
+  },
+  {
+   "part": "C",
+   "expr": "COUNTROWS(SUBSTITUTEWITHINDEX(SELECTCOLUMNS(Facts,\"Facts[Region]\",Facts[Region]),\"i\",VALUES(Facts[Region]),Facts[Region],DESC))",
+   "powerbi": "6",
+   "now": "LOCAL-REJECT:Function SubstituteWithIndex() is not able to detect common columns between its operands that could be used for join."
+  },
+  {
+   "part": "C",
+   "expr": "MAXX(SUBSTITUTEWITHINDEX(SELECTCOLUMNS(Facts,\"Facts[Region]\",Facts[Region]),\"i\",VALUES(Facts[Region]),Facts[Region]),[i])",
+   "powerbi": "2",
+   "now": "LOCAL-REJECT:Function SubstituteWithIndex() is not able to detect common columns between its operands that could be used for join."
+  },
+  {
+   "part": "C",
+   "expr": "MAXX(SUBSTITUTEWITHINDEX(SELECTCOLUMNS(Facts,\"Facts[Region]\",Facts[Region]),\"i\",VALUES(Facts[Region]),Facts[Region],DESC),[i])",
+   "powerbi": "2",
+   "now": "LOCAL-REJECT:Function SubstituteWithIndex() is not able to detect common columns between its operands that could be used for join."
+  },
+  {
+   "part": "B",
+   "expr": "MINX(Facts,(SUMX(Facts,ERROR(\"x\")))*(VAR y=BLANK() RETURN y)+(0))",
+   "powerbi": "0",
+   "now": "LOCAL-REJECT:Iterator SUMX expression needs a numeric result."
+  },
+  {
+   "part": "B",
+   "expr": "MAXX({1,2},(SUMX(Facts,ERROR(\"x\")))*(SELECTEDVALUE(Facts[Quantity])))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:Iterator SUMX expression needs a numeric result."
+  },
+  {
+   "part": "B",
+   "expr": "COUNTX(Facts,(BLANK())/(1/0*0)*(SUMX(Facts,ERROR(\"x\"))))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:Iterator SUMX expression needs a numeric result."
+  },
+  {
+   "part": "B",
+   "expr": "MAXX({1,2},(DIVIDE(1,0))*(SUMX(Facts,ERROR(\"x\"))))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:Iterator SUMX expression needs a numeric result."
+  },
+  {
+   "part": "B",
+   "expr": "MINX(Facts,(DIVIDE(1,BLANK()))/(SUMX(Facts,ERROR(\"x\"))))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:Iterator SUMX expression needs a numeric result."
+  },
+  {
+   "part": "B",
+   "expr": "COUNTX(Facts,(1/0)*(SUMX(Facts,ERROR(\"x\")))*(DIVIDE(1,BLANK())))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:Iterator SUMX expression needs a numeric result."
+  },
+  {
+   "part": "B",
+   "expr": "MAXX({1,2},(2.5&&\"\")*(SUMX(Facts,ERROR(\"x\"))))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:Iterator SUMX expression needs a numeric result."
+  },
+  {
+   "part": "B",
+   "expr": "MAXX(Facts,(2.5&&\"\")/(SUMX(Facts,ERROR(\"x\"))))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:Iterator SUMX expression needs a numeric result."
+  },
+  {
+   "part": "B",
+   "expr": "MAXX(Facts,(DIVIDE(1,BLANK()))/(SUMX(Facts,ERROR(\"x\"))))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:Iterator SUMX expression needs a numeric result."
+  },
+  {
+   "part": "B",
+   "expr": "COUNTX(Facts,(DIVIDE(1,BLANK()))*(SUMX(Facts,ERROR(\"x\"))))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:Iterator SUMX expression needs a numeric result."
+  },
+  {
+   "part": "B",
+   "expr": "MAXX({1,2},(-1)*(SUMX(Facts,ERROR(\"x\")))*(IF(FALSE(),1)))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:Iterator SUMX expression needs a numeric result."
+  },
+  {
+   "part": "B",
+   "expr": "MAXX(Facts,(2.5&&\"\")*(SUMX(Facts,ERROR(\"x\"))))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:Iterator SUMX expression needs a numeric result."
+  },
+  {
+   "part": "B",
+   "expr": "COUNTX(Facts,(2.5&&\"\")/(SUMX(Facts,ERROR(\"x\"))))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:Iterator SUMX expression needs a numeric result."
+  },
+  {
+   "part": "B",
+   "expr": "COUNTX(Facts,(DIVIDE(1,0))/(SUMX(Facts,ERROR(\"x\"))))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:Iterator SUMX expression needs a numeric result."
+  },
+  {
+   "part": "B",
+   "expr": "MINX(Facts,(SUMX(Facts,ERROR(\"x\")))*(SELECTEDVALUE(Facts[Quantity])))",
+   "powerbi": "BLANK",
+   "now": "LOCAL-REJECT:Iterator SUMX expression needs a numeric result."
+  },
+  {
+   "part": "A",
+   "expr": "XNPV(ADDCOLUMNS(Facts,\"d\",DATE(2020,1,1)+Facts[Quantity]),CURRENCY(Facts[Sales])/3,[d],0.1)",
+   "powerbi": "10.492",
+   "now": "LOCAL-REJECT:XNPV over a Currency that is BLANK is not modelled by the local engine."
+  },
+  {
+   "part": "A",
+   "expr": "XNPV(ADDCOLUMNS(Facts,\"d\",DATE(2020,1,1)+Facts[Quantity]),CURRENCY(Facts[Sales])*1.00005,[d],0)",
+   "powerbi": "31.5015",
+   "now": "LOCAL-REJECT:XNPV over a Currency that is BLANK is not modelled by the local engine."
+  }
+ ]
+}
