@@ -23,3 +23,6 @@ The scorer prints 0 wrong with as many matches as possible, `tools/parity_check.
 - **Pytest (full suite, 45 min):** 2652 passed, 4 failed, 1 xfailed. The 4 failures are existing refusal guards that assert the refusals Task 47 turns into values (not edited, per rules): `tests/test_iteration99_gaps_2_review.py::Gaps2ReviewTest::test_statistical_iterators_with_rows` (STDEVX.S East AVERAGE(Sales), a Part B row); `tests/test_iteration130_date_stats_30.py::DateStats30Tests::test_part_a_varx_p_over_dates_in_conditionals` (a Part A row); `tests/test_iteration108_convert_currency_9.py::SecondReviewCorrectionsTests::test_date_made_from_numbers_keeps_variance_numeric_over_a_column` (VARX.S date body now 3.5); `tests/test_iteration104_typed_columns_5_review.py::OneRepeatedDateHasNoSpreadTest::test_a_refusal_is_not_an_error_for_iferror` (IFERROR(VARX.P(Facts,0.5),7) now a value).
 - **Status:** NOT yet ready to lock. The four guard tests need an owner decision (supersede or keep the refusals) before the gate's pytest step can pass.
 - **Files:** `analytics_studio/dax_math.py` (double_statistic, repeated-fraction branch of statistic), `analytics_studio/measures.py` (date refusal branch, `_has_division`, `double_dates` switch), `tests/test_iteration137_date_variance_37.py` (new).
+
+## Review outcome (2026-11-04)
+Shipped as Iteration 137. Locked 473309.

@@ -8,7 +8,7 @@
 
 ## Latest status
 
-**Latest status (2026-11-04, after Iteration 136 / Task 46 big-rounding-36, rounding functions over very large numbers: whole-number powers by square-and-multiply in doubles, powers of 10 exact, one IEEE double per operation around a power, mix workflow: Antigravity coded, Sonnet 5.5 fixed, Claude Opus 5.5 planned, reviewed and shipped under the user's delegated approval):** pytest 2652 passed (fast gate), real app 575/575 and 1,500 fresh probes with 0 wrong, replay 476791 answers with 471889 match, 4902 refused, 0 DIFF, 0 CRASH, locked 471869. Next: Task 47 date-variance-37 (VARX/STDEVX over dates in single precision), coded by Haiku
+**Latest status (2026-11-04, after Iteration 137 / Task 47 date-variance-37, VARX/STDEVX over dates and over one repeated fraction, Power BI's one-pass double variance, mix workflow: Antigravity coded, Sonnet 5.5 fixed, Claude Opus 5.5 planned, reviewed and shipped under the user's delegated approval):** pytest 2658 passed (fast gate), real app 575/575 and 1,500 fresh probes with 0 wrong, replay 477694 answers with 473329 match, 4365 refused, 0 DIFF, 0 CRASH, locked 473309. Next: Task 48 old-times-38 (date/time before 30 December 1899, OLE date rule), coded by Haiku
 
 **Previous status (2026-11-01, after Iteration 103 / Task 14 logic-tables-4, empty text in logical operators, a VAR block as an iterator table, FILTER over no rows, Currency arithmetic, review done, gate passed, locked 246,907, committed, merged and pushed; 246,927 of 253,237 saved answers match, 0 differ; next: Task 15 typed-columns-5, 1,836 items).**
 
