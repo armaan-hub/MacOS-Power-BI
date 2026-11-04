@@ -16428,7 +16428,7 @@ def evaluate_measures(
             return None
         kinds = {"int64": "num", "double": "num", "currency": "num", "decimal": "num", "number": "num", "datetime": "date", "text": "text", "bool": "bool", "blank": "blank"}
         branching = {"IF", "IF.EAGER", "SWITCH", "IFERROR", "COALESCE"}
-        measured_calls = {"ABS", "CONVERT", "DATEVALUE", "EXP", "INT", "LN", "LOG", "MOD", "POWER", "ROUND", "SIGN", "TRUNC", "VALUE"}  # failing calls with five or more measured rows
+        measured_calls = {"ABS", "CONVERT", "CURRENCY", "DATEVALUE", "EXP", "INT", "LN", "LOG", "MOD", "POWER", "ROUND", "SIGN", "TRUNC", "VALUE"}  # failing calls with five or more measured rows
 
         def branch_class(part: Any, defs: dict[str, Any]) -> str:
             while isinstance(part, tuple) and part and part[0] in {"let", "var"}:
@@ -16513,10 +16513,12 @@ def evaluate_measures(
                 chain = [name for name in path if name != "let"]
                 if "FORMAT" in chain:
                     return "error"
+                if leaf[:2] == ("call", "CURRENCY") and all(name in {"ABS", "ROUND", "INT", "NOT", "binary", "unary"} for name in chain):
+                    chain = ["ABS"]  # a Currency out of range under arithmetic / ABS / ROUND: answered by its type (locked Task 21 rows)
                 if chain not in (["ABS"], ["ROUND"], ["NOT"], ["INT"], ["INT", "INT"], ["NOT", "ISBLANK"]):
                     return "refuse"
                 if leaf[0] == "call":
-                    if leaf[1] in {"ABS", "ROUND", "EXP", "INT", "SIGN", "TRUNC", "CONVERT", "VALUE"}:
+                    if leaf[1] in {"CURRENCY", "ABS", "ROUND", "EXP", "INT", "SIGN", "TRUNC", "CONVERT", "VALUE"}:
                         pass  # a failing text-to-number conversion: the static type answers
                     elif leaf[1] in {"DATEVALUE", "TIME", "EDATE", "CEILING", "WEEKDAY", "FACT"} and set(chain) == {"INT"}:
                         return "error"  # INT of any other failing call raised in every measured row
