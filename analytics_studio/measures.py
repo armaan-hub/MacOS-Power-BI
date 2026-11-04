@@ -3059,6 +3059,16 @@ def _calls_function(node: Any, name: str) -> bool:
     return any(_calls_function(child, name) for child in children if isinstance(child, tuple))
 
 
+def _divides_by_number(node: Any) -> bool:
+    """Whether a / appears in the expression (a Currency divided by a number is still Currency-built for XNPV's BLANK rule)."""
+    if not isinstance(node, tuple) or not node:
+        return False
+    if node[0] == "binary" and node[1] == "/":
+        return True
+    children = node if isinstance(node[0], tuple) else node[1:]
+    return any(_divides_by_number(child) for child in children if isinstance(child, tuple))
+
+
 def _has_constant_zero_division(node: Any) -> bool:
     """Whether a division by the constant 0 (1/0, x/0) appears anywhere in the expression tree."""
     if not isinstance(node, tuple) or not node:
@@ -3084,14 +3094,14 @@ def _nested_nan_extreme(node: Any) -> bool:
     return any(_nested_nan_extreme(child) for child in children if isinstance(child, tuple))
 
 
-def _constant_number(node: Any) -> Any:
+def _literal_number(node: Any) -> Any:
     """The Decimal value of a number literal, optionally signed, else None."""
     if not isinstance(node, tuple) or not node:
         return None
     if node[0] == "number":
         return node[1]
     if node[0] == "unary" and node[1] in {"-", "+"} and len(node) == 3:
-        inner = _constant_number(node[2])
+        inner = _literal_number(node[2])
         if inner is None:
             return None
         return -inner if node[1] == "-" else inner
@@ -3102,7 +3112,7 @@ def _statically_failing_call(node: Any) -> bool:
     """Task 45 Part B: a call of SQRT / LOG / LN / LOG10 / POWER whose constant arguments lie outside its domain (SQRT(-1), LOG(0), POWER(0, -1)), which raises in Power BI whatever the row."""
     if not isinstance(node, tuple) or len(node) != 3 or node[0] != "call" or not isinstance(node[2], tuple):
         return False
-    name, arguments = node[1], [_constant_number(argument) for argument in node[2]]
+    name, arguments = node[1], [_literal_number(argument) for argument in node[2]]
     if name == "SQRT":
         return len(arguments) == 1 and arguments[0] is not None and arguments[0] < 0
     if name in {"LN", "LOG10", "LOG"} and arguments and arguments[0] is not None and arguments[0] <= 0:
@@ -10579,7 +10589,7 @@ def evaluate_measures(
             return any(contains_call(child, names, seen) for child in node if isinstance(child, (tuple, list)))
         return False
 
-    def drops_join_lineage(node: Any) -> bool:
+    def drops_join_lineage(node: Any, spelled_names: bool = False) -> bool:
         """SELECTCOLUMNS (also under ADDCOLUMNS / FILTER / TOPN or in a VAR) hands Power BI's join no data lineage."""
         def selectcolumns_calls(part: Any) -> list[Any]:
             if not isinstance(part, tuple) or not part:
@@ -10600,6 +10610,8 @@ def evaluate_measures(
 
         if not contains_call(node, frozenset({"SELECTCOLUMNS"})):
             return False
+        if not spelled_names:
+            return True  # only SUBSTITUTEWITHINDEX matches a SELECTCOLUMNS column by the column reference its name spells (measured in Task 45); ADDMISSINGITEMS and the others do not
         found = selectcolumns_calls(node)
         if not found:
             return True  # a SELECTCOLUMNS held by a VAR: as before, it drops the lineage
@@ -10615,7 +10627,7 @@ def evaluate_measures(
             raise MeasureError("Function SUBSTITUTEWITHINDEX expects a column name as argument number 2.")
         index_col_name = index_col_val
 
-        if drops_join_lineage(arguments[0]) or drops_join_lineage(arguments[2]):
+        if drops_join_lineage(arguments[0], True) or drops_join_lineage(arguments[2], True):
             raise MeasureError("Function SubstituteWithIndex() is not able to detect common columns between its operands that could be used for join.")
         left_context, left_rows = table_argument_value(arguments[0])
         right_context, right_rows = table_argument_value(arguments[2])
@@ -19860,7 +19872,7 @@ def evaluate_measures(
                 all_dates: list[float] = []
                 for frame in iterate_rows(context, iteration_rows, "install"):
                     val = in_row_expression(lambda frame=frame: evaluate(arguments[1], frame, allow_text=True, allow_boolean=True))
-                    if val is None and currency_values and (_calls_function(arguments[1], "IF") or _calls_function(arguments[1], "IF.EAGER") or _calls_function(arguments[1], "SWITCH")):
+                    if val is None and currency_values and (_calls_function(arguments[1], "IF") or _calls_function(arguments[1], "IF.EAGER") or _calls_function(arguments[1], "SWITCH") or _divides_by_number(arguments[1])):
                         raise MeasureError("XNPV over a Currency that is BLANK is not modelled by the local engine.")  # live Power BI (Task 14 review): a value of 4.6E14 from six small rows
                     if val is None:
                         v = None
